@@ -95,6 +95,29 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6611] By: jhi                                   on 2000/08/13  16:21:45
+        Log: Upgrade to CGI 2.71, from Lincoln Stein.
+     Branch: perl
+	   ! lib/CGI.pm lib/CGI/Cookie.pm t/lib/cgi-function.t
+____________________________________________________________________________
+[  6610] By: jhi                                   on 2000/08/13  15:09:16
+        Log: Subject: [PATCH] t/op/regmesg.t fails if REG_INFTY set
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Sun, 13 Aug 2000 13:45:51 +0100
+             Message-Id: <E13Nx9D-00027M-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! t/op/regmesg.t
+____________________________________________________________________________
+[  6609] By: jhi                                   on 2000/08/13  14:31:26
+        Log: Andreas says that 1.56 is fine, so reverting back to it.
+     Branch: perl
+	   ! lib/CPAN.pm
+____________________________________________________________________________
+[  6608] By: jhi                                   on 2000/08/13  05:34:20
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  6607] By: jhi                                   on 2000/08/13  05:32:01
         Log: Put back the \z changes of #5406 to CPAN.pm.
      Branch: perl
