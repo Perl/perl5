@@ -310,6 +310,40 @@ unchanged but will trigger a warning (with C<-w>) to avoid misspelt tags
 names being silently added to @EXPORT or @EXPORT_OK. Future versions
 may make this a fatal error.
 
+=head2 Generating combined tags
+
+If several symbol categories exist in %EXPORT_TAGS, it's usually
+useful to create the utility ":all" to simplify "use" statements.
+
+The simplest way to do this is:
+
+  %EXPORT_TAGS = (foo => [qw(aa bb cc)], bar => [qw(aa cc dd)]);
+
+  # add all the other ":class" tags to the ":all" class,
+  # deleting duplicates
+  {
+    my %seen;
+
+    push @{$EXPORT_TAGS{all}},
+      grep {!$seen{$_}++} @{$EXPORT_TAGS{$_}} foreach keys %EXPORT_TAGS;
+  }
+
+CGI.pm creates an ":all" tag which contains some (but not really
+all) of its categories.  That could be done with one small
+change:
+
+  # add some of the other ":class" tags to the ":all" class,
+  # deleting duplicates
+  {
+    my %seen;
+
+    push @{$EXPORT_TAGS{all}},
+      grep {!$seen{$_}++} @{$EXPORT_TAGS{$_}}
+        foreach qw/html2 html3 netscape form cgi internal/;
+  }
+
+Note that the tag names in %EXPORT_TAGS don't have the leading ':'.
+
 =head2 C<AUTOLOAD>ed Constants
 
 Many modules make use of C<AUTOLOAD>ing for constant subroutines to
