@@ -31,6 +31,10 @@ BEGIN
   plan tests => 8;
   }
 
+# The tests below test that cos(BigInt) = cos(Scalar) which is DWIM, but not
+# exactly right, ideally cos(BigInt) should truncate to int() and cos(BigFLoat)
+# should calculate the result to X digits accuracy. For now, this is better
+# than die()ing...
 
 use Math::BigInt;
 use Math::BigFloat;
