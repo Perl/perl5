@@ -437,6 +437,8 @@ Main: {
 #
 sub settime {
   my( $runtime, $hz ) = @_;
+
+  $hz ||= 1;
   
   if( $opt_r ){
     $$runtime = ($rrun_rtime - $overhead - $over_rtime * $total_marks/$over_tests/2)/$hz;

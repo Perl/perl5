@@ -4823,7 +4823,7 @@ See L<perlmod> for a list of standard modules and pragmas.
 Changes the access and modification times on each file of a list of
 files.  The first two elements of the list must be the NUMERICAL access
 and modification times, in that order.  Returns the number of files
-successfully changed.  The inode modification time of each file is set
+successfully changed.  The inode change time of each file is set
 to the current time.  This code has the same effect as the C<touch>
 command if the files already exist:
 
