@@ -172,8 +172,14 @@ PP(pp_concat)
 		/* Take a copy since we're about to overwrite TARG */
 		olds = s = (U8*)savepvn((char*)s, len);
 	    }
-	    if (!SvOK(left) && SvTYPE(left) <= SVt_PVMG)
-		sv_setpv(left, "");	/* Suppress warning. */
+	    if (!SvOK(left) && SvTYPE(left) <= SVt_PVMG) {
+	        if (SvREADONLY(left)) {
+		    left = sv_2mortal(newSVpvn("", 0));
+		    left_utf = FALSE;
+		}
+		else
+		    sv_setpv(left, "");	/* Suppress warning. */
+	    }
             l = (U8*)SvPV(left, targlen);
 	    left_utf |= DO_UTF8(left);
             if (TARG != left)

@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..99\n";
+print "1..101\n";
 
 my $test = 1;
 
@@ -524,4 +524,23 @@ sub nok_bytes {
 	print "ok $test\n";
 	$test++;
     }
+}
+
+{
+    # ID 20001020.006
+
+    "x" =~ /(.)/; # unset $2
+
+    # Without the fix this will croak:
+    # Modification of a read-only value attempted at ...
+    "$2\x{1234}";
+
+    print "ok $test\n";
+    $test++;
+
+    # For symmetry with the above.
+    "\x{1234}$2";
+
+    print "ok $test\n";
+    $test++;
 }
