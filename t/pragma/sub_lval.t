@@ -239,7 +239,7 @@ eval <<'EOE' or $_ = $@;
 EOE
 
 print "# '$_', '$x0', '$x1'.\nnot "
-  unless /Can\'t modify non-lvalue indirect subroutine call/;
+  unless /Can\'t modify non-lvalue subroutine call/;
 print "ok 30\n";
 
 sub lv0 {use attrs 'lvalue';}		# Converted to lv10 in scalar context
