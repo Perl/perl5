@@ -42,7 +42,6 @@
 #    endif
 #    ifdef OEMVS
 #      define pthread_addr_t void *
-#      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
 #      define pthread_create(t,a,s,d)        pthread_create(t,&(a),s,d)
 #      define pthread_keycreate              pthread_key_create
 #    endif

@@ -59,7 +59,7 @@ foreach my $file (@w_files) {
 
 undef $/;
 
-print "1..", scalar(@prgs)-$files, "\n";
+print "1.." . (scalar(@prgs)-$files) . "\n";
 
 
 for (@prgs){
@@ -182,7 +182,7 @@ for (@prgs){
         print STDERR "GOT:\n$results\n";
         print "not ";
     }
-    print "ok ", ++$i, "\n";
+    print "ok " . ++$i . "\n";
     foreach (@temps)
 	{ unlink $_ if $_ }
     foreach (@temp_path)

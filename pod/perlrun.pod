@@ -14,7 +14,8 @@ B<perl>	S<[ B<-sTtuUWX> ]>
 	S<[ B<-x>[I<dir>] ]>
 	S<[ B<-i>[I<extension>] ]>
 	S<[ B<-e> I<'command'> ] [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
-	S<[ B<-C [I<number/list>] >]> ]>
+	S<[ B<-A [I<assertions>] >]>
+	S<[ B<-C [I<number/list>] >]>
 
 =head1 DESCRIPTION
 
@@ -252,6 +253,12 @@ If you want to specify any Unicode character, use the hexadecimal
 format: C<-0xHHH...>, where the C<H> are valid hexadecimal digits.
 (This means that you cannot use the C<-x> with a directory name that
 consists of hexadecimal digits.)
+
+=item B<-A [I<assertions>]>
+
+Activates the assertions given after the switch as a comma-separated
+list of assertion names. If no assertion name is given, activates all
+assertions. See L<assertions>.
 
 =item B<-a>
 
@@ -932,8 +939,9 @@ variable are summarised below. For more details see L<PerlIO>.
 
 =item :bytes
 
-Turns I<off> the C<:utf8> flag for the layer below.
-Unlikely to be useful in global PERLIO environment variable.
+A pseudolayer that turns I<off> the C<:utf8> flag for the layer below.
+Unlikely to be useful on its own in the global PERLIO environment variable.
+You perhaps were thinking of C<:crlf:bytes> or C<:perlio:bytes>.
 
 =item :crlf
 
@@ -964,12 +972,17 @@ and in general attempts to minimize data copying.
 
 C<:perlio> will insert a C<:unix> layer below itself to do low level IO.
 
+=item :pop
+
+An experimental pseudolayer that removes the topmost layer.
+Use with the same care as is reserved for nitroglyserin.
+
 =item :raw
 
-Applying the <:raw> layer is equivalent to calling C<binmode($fh)>.
-It makes the stream pass each byte as-is without any translation.
-In particular CRLF translation, and/or :utf8 intuited from locale
-are disabled.
+A pseudolayer that manipulates other layers.  Applying the <:raw>
+layer is equivalent to calling C<binmode($fh)>.  It makes the stream
+pass each byte as-is without any translation.  In particular CRLF
+translation, and/or :utf8 intuited from locale are disabled.
 
 Arranges for all accesses go straight to the lowest buffered layer provided
 by the configration. That is it strips off any layers above that layer.
@@ -998,12 +1011,13 @@ C<open(), read(), write(), lseek(), close()>
 
 =item :utf8
 
-Turns on a flag on the layer below to tell perl that data sent to the
-stream should be converted to perl internal "utf8" form and that data from the
-stream should be considered as so encoded. On ASCII based platforms the
-encoding is UTF-8 and on EBCDIC platforms UTF-EBCDIC.
-May be useful in PERLIO environment variable to make UTF-8 the
-default. (To turn off that behaviour use C<:bytes> layer.)
+A pseudolayer that turns on a flag on the layer below to tell perl
+that data sent to the stream should be converted to perl internal
+"utf8" form and that data from the stream should be considered as so
+encoded. On ASCII based platforms the encoding is UTF-8 and on EBCDIC
+platforms UTF-EBCDIC.  May be useful in PERLIO environment variable to
+make UTF-8 the default. (To turn off that behaviour use C<:bytes>
+layer.)
 
 =item :win32
 
@@ -1091,6 +1105,30 @@ references.  See L<perlhack/PERL_DESTRUCT_LEVEL> for more information.
 
 If using the C<encoding> pragma without an explicit encoding name, the
 PERL_ENCODING environment variable is consulted for an encoding name.
+
+=item PERL_HASH_SEED
+
+(Since Perl 5.8.1.)
+
+Used to randomise Perl's internal hash function.  To emulate the
+pre-5.8.1 behaviour, set to an integer (zero means exactly the same
+order as 5.8.0).  "Pre-5.8.1" means, among other things, that hash
+keys will be ordered the same between different runs of Perl.
+
+The default behaviour is to randomise unless the PERL_HASH_SEED is set.
+If Perl has been compiled with the -DUSE_HASH_SEED_EXPLICIT the default
+behaviour is B<not> to randomise unless the PERL_HASH_SEED is set.
+
+If PERL_HASH_SEED is unset or set to a non-numeric string, Perl uses
+the pseudorandom seed supplied by the operating system and libraries.
+If unset, each different run of Perl will have different ordering of
+the outputs of keys(), values, and each().
+
+See L<perlsec/"Algorithmic Complexity Attacks"> for more information.
+
+=item PERL_HASH_SEED_DEBUG
+
+Set to (anything) to display the value of the hash seed.
 
 =item PERL_ROOT (specific to the VMS port)
 

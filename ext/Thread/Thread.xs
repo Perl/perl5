@@ -75,8 +75,11 @@ new(classname, startsv, ...)
 void
 join(t)
 	Thread	t
-	AV *	av = NO_INIT
-	int	i = NO_INIT
+    PREINIT:
+#ifdef USE_5005THREADS
+	AV *	av;
+	int	i;
+#endif
     PPCODE:
 
 void
@@ -105,7 +108,9 @@ void
 self(classname)
 	char *	classname
     PREINIT:
+#ifdef USE_5005THREADS
 	SV *sv;
+#endif
     PPCODE:        
 
 U32

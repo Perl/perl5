@@ -18,7 +18,7 @@ sub ok {
     return $ok;
 }
 
-print "1..18\n";
+print "1..19\n";
 
 ($a, $b, $c) = qw(foo bar);
 
@@ -103,4 +103,9 @@ sub beq { use bytes; $_[0] eq $_[1]; }
     ok(beq($l.$r, $c), "concat byte and utf8");
     ok(beq($l, "\x{fe}"), "right not changed after concat b+u");
     ok(beq($r, "\x{101}"), "left not changed after concat b+u");
+}
+
+{
+    my $a; ($a .= 5) . 6;
+    ok($a == 5, "($a .= 5) . 6 - present since 5.000");
 }

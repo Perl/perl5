@@ -892,8 +892,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	(void)SvIOK_on(sv);	/* what a wonderful hack! */
 	break;
-    case '*':
-	break;
 #ifndef MACOS_TRADITIONAL
     case '0':
 	break;
@@ -2142,10 +2140,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		}
 	    }
 	}
-	break;
-    case '*':
-	i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
-	PL_multiline = (i != 0);
 	break;
     case '/':
 	SvREFCNT_dec(PL_rs);

@@ -1,8 +1,30 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.95 2003/05/21 08:41:11 dankogai Exp $
+# $Id: Changes,v 1.96 2003/06/18 09:29:02 dankogai Exp $
 #
-$Revision: 1.95 $ $Date: 2003/05/21 08:41:11 $
+$Revision: 1.96 $ $Date: 2003/06/18 09:29:02 $
+! lib/Encode/JP/JP.pm t/guess.t
+  m/(...)/ in void context then $1 is considered a Bad Thing
+  Message-Id: <B5AB34D0-A019-11D7-AF03-000393AE4244@dan.co.jp>
+! Encode.pm
+  Mentions in POD that as of perl 5.8.1 utf8::is_utf8() is
+  also available.
+! encengine.c
+  More typecast from maintperl@19739
+  Message-Id: <200306110645.h5B6j5D2009640@smtp3.ActiveState.com>
+! t/perlio.t
+  Tests 37 & 38 failed on Win32 -- yet another CRLF issue
+  Message-Id: <200306090733.h597XQPA031646@smtp3.ActiveState.com>
+! t/Encode.t
+  Now skips for EBCDIC platform.
+  Message-Id: <OF44B38062.A3998148-ON80256D27.004CF379@portsmouth.uk.ibm.com>
+! t/perlio.t
+  Craig's patch applied that addresses "Many systems (DOS, VMS) cannot
+  have more than one C<.> in their filenames." -- perlport.
+  Message-Id: <3ED79E01.8050401@mac.com>
+! bin/piconv
+  Found and fixed the back that -p,--perlqq does not work.
+  Induced by the change from Getopt::Std to Getopt::Long.
 ! encoding.pm
   Addressed [cpan #2629] Wrong assumption in numeric comparison
   Message-Id: <rt-2629-7326.19.5700583232515@cpan.org>

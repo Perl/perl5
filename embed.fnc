@@ -45,6 +45,7 @@ Anod	|void	|perl_free	|PerlInterpreter* interp
 Anod	|int	|perl_run	|PerlInterpreter* interp
 Anod	|int	|perl_parse	|PerlInterpreter* interp|XSINIT_t xsinit \
 				|int argc|char** argv|char** env
+np	|bool	|doing_taint	|int argc|char** argv|char** env
 #if defined(USE_ITHREADS)
 Anod	|PerlInterpreter*|perl_clone|PerlInterpreter* interp, UV flags
 #  if defined(PERL_IMPLICIT_SYS)
@@ -836,6 +837,7 @@ p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
 p	|U32	|parse_unicode_opts|char **popt
+p	|U32	|seed
 p	|void	|report_evil_fh	|GV *gv|IO *io|I32 op
 pd	|void	|report_uninit
 Afpd	|void	|warn		|const char* pat|...
@@ -844,6 +846,7 @@ Afp	|void	|warner		|U32 err|const char* pat|...
 Ap	|void	|vwarner	|U32 err|const char* pat|va_list* args
 p	|void	|watch		|char** addr
 Ap	|I32	|whichsig	|char* sig
+p	|void	|write_to_stderr|const char* message|int msglen
 p	|int	|yyerror	|char* s
 #ifdef USE_PURE_BISON
 p	|int	|yylex_r	|YYSTYPE *lvalp|int *lcharp
@@ -1059,7 +1062,6 @@ s	|void*	|vcall_list_body|va_list args
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 s	|SV*	|refto		|SV* sv
-s	|U32	|seed
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)

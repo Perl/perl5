@@ -2727,87 +2727,6 @@ PP(pp_srand)
     RETPUSHYES;
 }
 
-STATIC U32
-S_seed(pTHX)
-{
-    /*
-     * This is really just a quick hack which grabs various garbage
-     * values.  It really should be a real hash algorithm which
-     * spreads the effect of every input bit onto every output bit,
-     * if someone who knows about such things would bother to write it.
-     * Might be a good idea to add that function to CORE as well.
-     * No numbers below come from careful analysis or anything here,
-     * except they are primes and SEED_C1 > 1E6 to get a full-width
-     * value from (tv_sec * SEED_C1 + tv_usec).  The multipliers should
-     * probably be bigger too.
-     */
-#if RANDBITS > 16
-#  define SEED_C1	1000003
-#define   SEED_C4	73819
-#else
-#  define SEED_C1	25747
-#define   SEED_C4	20639
-#endif
-#define   SEED_C2	3
-#define   SEED_C3	269
-#define   SEED_C5	26107
-
-#ifndef PERL_NO_DEV_RANDOM
-    int fd;
-#endif
-    U32 u;
-#ifdef VMS
-#  include <starlet.h>
-    /* when[] = (low 32 bits, high 32 bits) of time since epoch
-     * in 100-ns units, typically incremented ever 10 ms.        */
-    unsigned int when[2];
-#else
-#  ifdef HAS_GETTIMEOFDAY
-    struct timeval when;
-#  else
-    Time_t when;
-#  endif
-#endif
-
-/* This test is an escape hatch, this symbol isn't set by Configure. */
-#ifndef PERL_NO_DEV_RANDOM
-#ifndef PERL_RANDOM_DEVICE
-   /* /dev/random isn't used by default because reads from it will block
-    * if there isn't enough entropy available.  You can compile with
-    * PERL_RANDOM_DEVICE to it if you'd prefer Perl to block until there
-    * is enough real entropy to fill the seed. */
-#  define PERL_RANDOM_DEVICE "/dev/urandom"
-#endif
-    fd = PerlLIO_open(PERL_RANDOM_DEVICE, 0);
-    if (fd != -1) {
-    	if (PerlLIO_read(fd, &u, sizeof u) != sizeof u)
-	    u = 0;
-	PerlLIO_close(fd);
-	if (u)
-	    return u;
-    }
-#endif
-
-#ifdef VMS
-    _ckvmssts(sys$gettim(when));
-    u = (U32)SEED_C1 * when[0] + (U32)SEED_C2 * when[1];
-#else
-#  ifdef HAS_GETTIMEOFDAY
-    PerlProc_gettimeofday(&when,NULL);
-    u = (U32)SEED_C1 * when.tv_sec + (U32)SEED_C2 * when.tv_usec;
-#  else
-    (void)time(&when);
-    u = (U32)SEED_C1 * when;
-#  endif
-#endif
-    u += SEED_C3 * (U32)PerlProc_getpid();
-    u += SEED_C4 * (U32)PTR2UV(PL_stack_sp);
-#ifndef PLAN9           /* XXX Plan9 assembler chokes on this; fix needed  */
-    u += SEED_C5 * (U32)PTR2UV(&when);
-#endif
-    return u;
-}
-
 PP(pp_exp)
 {
     dSP; dTARGET; tryAMAGICun(exp);
@@ -4553,7 +4472,7 @@ PP(pp_split)
 		s++;
 	}
     }
-    if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
+    if ((pm->op_pmflags & PMf_MULTILINE) != PL_multiline) {
 	SAVEINT(PL_multiline);
 	PL_multiline = pm->op_pmflags & PMf_MULTILINE;
     }
@@ -4658,13 +4577,13 @@ PP(pp_split)
     }
     else {
 	maxiters += slen * rx->nparens;
-	while (s < strend && --limit
-/*	       && (!rx->check_substr
-		   || ((s = CALLREG_INTUIT_START(aTHX_ rx, sv, s, strend,
-						 0, NULL))))
-*/	       && CALLREGEXEC(aTHX_ rx, s, strend, orig,
-			      1 /* minend */, sv, NULL, 0))
+	while (s < strend && --limit)
 	{
+	    PUTBACK;
+	    i = CALLREGEXEC(aTHX_ rx, s, strend, orig, 1 , sv, NULL, 0);
+	    SPAGAIN;
+	    if (i == 0)
+		break;
 	    TAINT_IF(RX_MATCH_TAINTED(rx));
 	    if (RX_MATCH_COPIED(rx) && rx->subbeg != orig) {
 		m = s;
@@ -4703,7 +4622,6 @@ PP(pp_split)
 		}
 	    }
 	    s = rx->endp[0] + orig;
-	    PUTBACK;
 	}
     }
 

@@ -523,6 +523,8 @@ PERLVARI(Irunops_dbg,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_debug))
 PERLVARI(Ippid,		IV,		0)
 #endif
 
+PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
+
 PERLVAR(IDBassertion,   SV *)
 
 PERLVARI(Icv_has_eval, I32, 0) /* PL_compcv includes an entereval or similar */

@@ -160,7 +160,7 @@ sub SWASHNEW {
     }
 
     my $extras;
-    my $bits;
+    my $bits = 0;
 
     my $ORIG = $list;
     if ($list) {

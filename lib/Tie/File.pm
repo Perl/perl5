@@ -7,14 +7,14 @@ use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'LOCK_SH', 'O_WRONLY', 'O_RDONLY';
 sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
 
-$VERSION = "0.96";
+$VERSION = "0.97";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
 my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
 
 my %good_opt = map {$_ => 1, "-$_" => 1}
                  qw(memory dw_size mode recsep discipline 
-                    autodefer autochomp autodefer_threshhold);
+                    autodefer autochomp autodefer_threshhold concurrent);
 
 sub TIEARRAY {
   if (@_ % 2 != 0) {
@@ -31,6 +31,10 @@ sub TIEARRAY {
     if ($key =~ s/^-+//) {
       $opts{$key} = delete $opts{$okey};
     }
+  }
+
+  if ($opts{concurrent}) {
+    croak("$pack: concurrent access not supported yet\n");
   }
 
   unless (defined $opts{memory}) {
@@ -697,6 +701,8 @@ sub _upcopy {
 # moving everything in the block forwards to make room.
 # Instead of writing the last length($data) bytes from the block
 # (because there isn't room for them any longer) return them.
+#
+# Undefined $len means 'until the end of the file'
 sub _downcopy {
   my $blocksize = 8192;
   my ($self, $data, $pos, $len) = @_;
@@ -707,11 +713,21 @@ sub _downcopy {
       : $len > $blocksize? $blocksize : $len;
     $self->_seekb($pos);
     read $fh, my($old), $readsize;
+    my $last_read_was_short = length($old) < $readsize;
     $data .= $old;
-    $self->_seekb($pos);
-    my $writable = substr($data, 0, $readsize, "");
+    my $writable;
+    if ($last_read_was_short) {
+      # If last read was short, then $data now contains the entire rest
+      # of the file, so there's no need to write only one block of it
+      $writable = $data;
+      $data = "";
+    } else {
+      $writable = substr($data, 0, $readsize, "");
+    }
     last if $writable eq "";
+    $self->_seekb($pos);
     $self->_write_record($writable);
+    last if $last_read_was_short && $data eq "";
     $len -= $readsize if defined $len;
     $pos += $readsize;
   }
@@ -1993,7 +2009,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.96
+	# This file documents Tie::File version 0.97
 	use Tie::File;
 
 	tie @array, 'Tie::File', filename or die ...;
@@ -2411,14 +2427,14 @@ C<-E<gt>autodefer()> recovers the current value of the autodefer setting.
 =head1 CONCURRENT ACCESS TO FILES
 
 Caching and deferred writing are inappropriate if you want the same
-file to be accessed simultaneously from more than one process.  You
-will want to disable these features.  You should do that by including
-the C<memory =E<gt> 0> option in your C<tie> calls; this will inhibit
-caching and deferred writing.
+file to be accessed simultaneously from more than one process.  Other
+optimizations performed internally by this module are also
+incompatible with concurrent access.  A future version of this module will
+support a C<concurrent =E<gt> 1> option that enables safe concurrent access.
 
-You will also want to lock the file while reading or writing it.  You
-can use the C<-E<gt>flock> method for this.  A future version of this
-module may provide an 'autolocking' mode.
+Previous versions of this documentation suggested using C<memory
+=E<gt> 0> for safe concurrent access.  This was mistaken.  Tie::File
+will not support safe concurrent access before version 0.98.
 
 =head1 CAVEATS
 
@@ -2516,7 +2532,7 @@ any news of importance, will be available at
 
 =head1 LICENSE
 
-C<Tie::File> version 0.96 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.97 is copyright (C) 2003 Mark Jason Dominus.
 
 This library is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -2544,7 +2560,7 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.96 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.97 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 THANKS

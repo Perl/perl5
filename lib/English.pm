@@ -224,7 +224,6 @@ sub import {
 
 #	*ARRAY_BASE				= *[	;
 #	*OFMT					= *#	;
-#	*MULTILINE_MATCHING			= **	;
 #	*OLD_PERL_VERSION			= *]	;
 
 1;

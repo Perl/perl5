@@ -5,7 +5,7 @@ perlguts - Introduction to the Perl API
 =head1 DESCRIPTION
 
 This document attempts to describe how to use the Perl API, as well as
-containing some info on the basic workings of the Perl core. It is far
+to provide some info on the basic workings of the Perl core. It is far
 from complete and probably contains many errors. Please refer any
 questions or comments to the author below.
 
@@ -43,26 +43,31 @@ The seven routines are:
     SV*  newSViv(IV);
     SV*  newSVuv(UV);
     SV*  newSVnv(double);
-    SV*  newSVpv(const char*, int);
-    SV*  newSVpvn(const char*, int);
+    SV*  newSVpv(const char*, STRLEN);
+    SV*  newSVpvn(const char*, STRLEN);
     SV*  newSVpvf(const char*, ...);
     SV*  newSVsv(SV*);
 
-If you require more complex initialisation you can create an empty SV with
-newSV(len).  If C<len> is 0 an empty SV of type NULL is returned, else an
-SV of type PV is returned with len + 1 (for the NUL) bytes of storage
-allocated, accessible via SvPVX.  In both cases the SV has value undef.
+C<STRLEN> is an integer type (Size_t, usually defined as size_t in
+F<config.h>) guaranteed to be large enough to represent the size of
+any string that perl can handle.
 
-    SV*  newSV(0);   /* no storage allocated  */
-    SV*  newSV(10);  /* 10 (+1) bytes of uninitialised storage allocated  */
+In the unlikely case of a SV requiring more complex initialisation, you
+can create an empty SV with newSV(len).  If C<len> is 0 an empty SV of
+type NULL is returned, else an SV of type PV is returned with len + 1 (for
+the NUL) bytes of storage allocated, accessible via SvPVX.  In both cases
+the SV has value undef.
 
-To change the value of an *already-existing* SV, there are eight routines:
+    SV *sv = newSV(0);   /* no storage allocated  */
+    SV *sv = newSV(10);  /* 10 (+1) bytes of uninitialised storage allocated  */
+
+To change the value of an I<already-existing> SV, there are eight routines:
 
     void  sv_setiv(SV*, IV);
     void  sv_setuv(SV*, UV);
     void  sv_setnv(SV*, double);
     void  sv_setpv(SV*, const char*);
-    void  sv_setpvn(SV*, const char*, int)
+    void  sv_setpvn(SV*, const char*, STRLEN)
     void  sv_setpvf(SV*, const char*, ...);
     void  sv_vsetpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool *);
     void  sv_setsv(SV*, SV*);
@@ -85,10 +90,6 @@ the string, and the string's contents are therefore untrustworthy (see
 L<perlsec>).  This pointer may be NULL if that information is not
 important.  Note that this function requires you to specify the length of
 the format.
-
-STRLEN is an integer type (Size_t, usually defined as size_t in
-config.h) guaranteed to be large enough to represent the size of
-any string that perl can handle.
 
 The C<sv_set*()> functions are not generic enough to operate on values
 that have "magic".  See L<Magic Virtual Tables> later in this document.
@@ -199,12 +200,12 @@ you can call:
 
     SvOK(SV*)
 
-The scalar C<undef> value is stored in an SV instance called C<PL_sv_undef>.  Its
-address can be used whenever an C<SV*> is needed.
+The scalar C<undef> value is stored in an SV instance called C<PL_sv_undef>.
+Its address can be used whenever an C<SV*> is needed.
 
-There are also the two values C<PL_sv_yes> and C<PL_sv_no>, which contain Boolean
-TRUE and FALSE values, respectively.  Like C<PL_sv_undef>, their addresses can
-be used whenever an C<SV*> is needed.
+There are also the two values C<PL_sv_yes> and C<PL_sv_no>, which contain
+boolean TRUE and FALSE values, respectively.  Like C<PL_sv_undef>, their
+addresses can be used whenever an C<SV*> is needed.
 
 Do not be fooled into thinking that C<(SV *) 0> is the same as C<&PL_sv_undef>.
 Take this code:
@@ -218,8 +219,8 @@ Take this code:
 This code tries to return a new SV (which contains the value 42) if it should
 return a real value, or undef otherwise.  Instead it has returned a NULL
 pointer which, somewhere down the line, will cause a segmentation violation,
-bus error, or just weird results.  Change the zero to C<&PL_sv_undef> in the first
-line and all will be well.
+bus error, or just weird results.  Change the zero to C<&PL_sv_undef> in the
+first line and all will be well.
 
 To free an SV that you've created, call C<SvREFCNT_dec(SV*)>.  Normally this
 call is not necessary (see L<Reference Counts and Mortality>).
@@ -536,7 +537,7 @@ The most useful types that will be returned are:
 
 =head2 Blessed References and Class Objects
 
-References are also used to support object-oriented programming.  In the
+References are also used to support object-oriented programming.  In perl's
 OO lexicon, an object is simply a reference that has been blessed into a
 package (or class).  Once blessed, the programmer may now use the reference
 to access the various methods in the class.
@@ -545,8 +546,8 @@ A reference can be blessed into a package with the following function:
 
     SV* sv_bless(SV* sv, HV* stash);
 
-The C<sv> argument must be a reference.  The C<stash> argument specifies
-which class the reference will belong to.  See
+The C<sv> argument must be a reference value.  The C<stash> argument
+specifies which class the reference will belong to.  See
 L<Stashes and Globs> for information on converting class names into stashes.
 
 /* Still under construction */
@@ -685,9 +686,9 @@ later be decremented twice.
 
 "Mortal" SVs are mainly used for SVs that are placed on perl's stack.
 For example an SV which is created just to pass a number to a called sub
-is made mortal to have it cleaned up automatically when stack is popped.
-Similarly results returned by XSUBs (which go in the stack) are often
-made mortal.
+is made mortal to have it cleaned up automatically when it's popped off
+the stack. Similarly, results returned by XSUBs (which are pushed on the
+stack) are often made mortal.
 
 To create a mortal variable, use the functions:
 
@@ -724,8 +725,8 @@ C<sv_2mortal> or C<sv_mortalcopy> routines.
 
 =head2 Stashes and Globs
 
-A "stash" is a hash that contains all of the different objects that
-are contained within a package.  Each key of the stash is a symbol
+A B<stash> is a hash that contains all variables that are defined
+within a package.  Each key of the stash is a symbol
 name (shared by all the different types of objects that have the same
 name), and each value in the hash table is a GV (Glob Value).  This GV
 in turn contains references to the various objects of that name,
@@ -738,11 +739,11 @@ including (but not limited to) the following:
     Format
     Subroutine
 
-There is a single stash called "PL_defstash" that holds the items that exist
-in the "main" package.  To get at the items in other packages, append the
-string "::" to the package name.  The items in the "Foo" package are in
-the stash "Foo::" in PL_defstash.  The items in the "Bar::Baz" package are
-in the stash "Baz::" in "Bar::"'s stash.
+There is a single stash called C<PL_defstash> that holds the items that exist
+in the C<main> package.  To get at the items in other packages, append the
+string "::" to the package name.  The items in the C<Foo> package are in
+the stash C<Foo::> in PL_defstash.  The items in the C<Bar::Baz> package are
+in the stash C<Baz::> in C<Bar::>'s stash.
 
 To get the stash pointer for a particular package, use the function:
 
@@ -863,9 +864,9 @@ copy of the name is stored in C<mg_ptr> field.
 
 The sv_magic function uses C<how> to determine which, if any, predefined
 "Magic Virtual Table" should be assigned to the C<mg_virtual> field.
-See the "Magic Virtual Table" section below.  The C<how> argument is also
+See the L<Magic Virtual Tables> section below.  The C<how> argument is also
 stored in the C<mg_type> field. The value of C<how> should be chosen
-from the set of macros C<PERL_MAGIC_foo> found perl.h. Note that before
+from the set of macros C<PERL_MAGIC_foo> found in F<perl.h>. Note that before
 these macros were added, Perl internals used to directly use character
 literals, so you may occasionally come across old code or documentation
 referring to 'U' magic rather than C<PERL_MAGIC_uvar> for example.
@@ -904,7 +905,7 @@ The C<MGVTBL> has five pointers to the following routine types:
     int  (*svt_clear)(SV* sv, MAGIC* mg);
     int  (*svt_free)(SV* sv, MAGIC* mg);
 
-This MGVTBL structure is set at compile-time in C<perl.h> and there are
+This MGVTBL structure is set at compile-time in F<perl.h> and there are
 currently 19 types (or 21 with overloading turned on).  These different
 structures contain pointers to various routines that perform additional
 actions depending on which function is being called.
@@ -1324,7 +1325,8 @@ where C<SP> is the macro that represents the local copy of the stack pointer,
 and C<num> is the number of elements the stack should be extended by.
 
 Now that there is room on the stack, values can be pushed on it using C<PUSHs>
-macro. The values pushed will often need to be "mortal" (See L</Reference Counts and Mortality>).
+macro. The pushed values will often need to be "mortal" (See
+L</Reference Counts and Mortality>).
 
     PUSHs(sv_2mortal(newSViv(an_integer)))
     PUSHs(sv_2mortal(newSVpv("Some String",0)))
@@ -1394,6 +1396,8 @@ consult L<perlcall>.
 
 =head2 Memory Allocation
 
+=head3 Allocation
+
 All memory meant to be used with the Perl API functions should be manipulated
 using the macros described in this section.  The macros provide the necessary
 transparency between differences in the actual malloc implementation that is
@@ -1404,11 +1408,11 @@ with Perl.  It keeps pools of various sizes of unallocated memory in
 order to satisfy allocation requests more quickly.  However, on some
 platforms, it may cause spurious malloc or free errors.
 
+The following three macros are used to initially allocate memory :
+
     New(x, pointer, number, type);
     Newc(x, pointer, number, type, cast);
     Newz(x, pointer, number, type);
-
-These three macros are used to initially allocate memory.
 
 The first argument C<x> was a "magic cookie" that was used to keep track
 of who called the macro, to help when debugging memory problems.  However,
@@ -1427,6 +1431,8 @@ argument.
 Unlike the C<New> and C<Newc> macros, the C<Newz> macro calls C<memzero>
 to zero out all the newly allocated memory.
 
+=head3 Reallocation
+
     Renew(pointer, number, type);
     Renewc(pointer, number, type, cast);
     Safefree(pointer)
@@ -1435,6 +1441,8 @@ These three macros are used to change a memory buffer size or to free a
 piece of memory no longer needed.  The arguments to C<Renew> and C<Renewc>
 match those of C<New> and C<Newc> with the exception of not needing the
 "magic cookie" argument.
+
+=head3 Moving
 
     Move(source, dest, number, type);
     Copy(source, dest, number, type);
@@ -1564,8 +1572,8 @@ is the same as in our example.
 
 =head2 Examining the tree
 
-If you have your perl compiled for debugging (usually done with C<-D
-optimize=-g> on C<Configure> command line), you may examine the
+If you have your perl compiled for debugging (usually done with
+C<-DDEBUGGING> on the C<Configure> command line), you may examine the
 compiled tree by specifying C<-Dx> on the Perl command line.  The
 output takes several lines per node, and for C<$b+$c> it looks like
 this:
@@ -1633,6 +1641,9 @@ C<op_children> field is non-zero, it behaves like a C<LISTOP>. To
 complicate matters, if a C<UNOP> is actually a C<null> op after
 optimization (see L</Compile pass 2: context propagation>) it will still
 have children in accordance with its former type.
+
+Another way to examine the tree is to use a compiler back-end module, such
+as L<B::Concise>.
 
 =head2 Compile pass 1: check routines
 
@@ -2012,10 +2023,10 @@ more "hosts", with free association between them.
 =head1 Internal Functions
 
 All of Perl's internal functions which will be exposed to the outside
-world are be prefixed by C<Perl_> so that they will not conflict with XS
+world are prefixed by C<Perl_> so that they will not conflict with XS
 functions or functions used in a program in which Perl is embedded.
 Similarly, all global variables begin with C<PL_>. (By convention,
-static functions start with C<S_>)
+static functions start with C<S_>.)
 
 Inside the Perl core, you can get at the functions either with or
 without the C<Perl_> prefix, thanks to a bunch of defines that live in

@@ -29,6 +29,9 @@
 
 #if defined(PERL_IMPLICIT_SYS)
 #endif
+#ifdef PERL_CORE
+#define doing_taint		Perl_doing_taint
+#endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
 #  endif
@@ -1110,6 +1113,9 @@
 #define parse_unicode_opts	Perl_parse_unicode_opts
 #endif
 #ifdef PERL_CORE
+#define seed			Perl_seed
+#endif
+#ifdef PERL_CORE
 #define report_evil_fh		Perl_report_evil_fh
 #endif
 #ifdef PERL_CORE
@@ -1123,6 +1129,9 @@
 #define watch			Perl_watch
 #endif
 #define whichsig		Perl_whichsig
+#ifdef PERL_CORE
+#define write_to_stderr		Perl_write_to_stderr
+#endif
 #ifdef PERL_CORE
 #define yyerror			Perl_yyerror
 #endif
@@ -1466,9 +1475,6 @@
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define refto			S_refto
-#endif
-#ifdef PERL_CORE
-#define seed			S_seed
 #endif
 #endif
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
@@ -2527,6 +2533,9 @@
 #else	/* PERL_IMPLICIT_CONTEXT */
 
 #if defined(PERL_IMPLICIT_SYS)
+#endif
+#ifdef PERL_CORE
+#define doing_taint		Perl_doing_taint
 #endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
@@ -3588,6 +3597,9 @@
 #define parse_unicode_opts(a)	Perl_parse_unicode_opts(aTHX_ a)
 #endif
 #ifdef PERL_CORE
+#define seed()			Perl_seed(aTHX)
+#endif
+#ifdef PERL_CORE
 #define report_evil_fh(a,b,c)	Perl_report_evil_fh(aTHX_ a,b,c)
 #endif
 #ifdef PERL_CORE
@@ -3599,6 +3611,9 @@
 #define watch(a)		Perl_watch(aTHX_ a)
 #endif
 #define whichsig(a)		Perl_whichsig(aTHX_ a)
+#ifdef PERL_CORE
+#define write_to_stderr(a,b)	Perl_write_to_stderr(aTHX_ a,b)
+#endif
 #ifdef PERL_CORE
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
 #endif
@@ -3938,9 +3953,6 @@
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define refto(a)		S_refto(aTHX_ a)
-#endif
-#ifdef PERL_CORE
-#define seed()			S_seed(aTHX)
 #endif
 #endif
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)

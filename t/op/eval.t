@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..88\n";
+print "1..91\n";
 
 eval 'print "ok 1\n";';
 
@@ -422,3 +422,19 @@ $test++;
 
 sub Foo {} print Foo(eval {});
 print "ok ",$test++," - #20798 (used to dump core)\n";
+
+# check for context in string eval
+{
+  my(@r,$r,$c);
+  sub context { defined(wantarray) ? (wantarray ? ($c='A') : ($c='S')) : ($c='V') }
+
+  my $code = q{ context() };
+  @r = qw( a b );
+  $r = 'ab';
+  @r = eval $code;
+  print "@r$c" eq 'AA' ? "ok " : "# '@r$c' ne 'AA'\nnot ok ", $test++, "\n";
+  $r = eval $code;
+  print "$r$c" eq 'SS' ? "ok " : "# '$r$c' ne 'SS'\nnot ok ", $test++, "\n";
+  eval $code;
+  print   $c   eq 'V'  ? "ok " : "# '$c' ne 'V'\nnot ok ", $test++, "\n";
+}

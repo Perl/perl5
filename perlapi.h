@@ -266,6 +266,8 @@ END_EXTERN_C
 #define PL_glob_index		(*Perl_Iglob_index_ptr(aTHX))
 #undef  PL_globalstash
 #define PL_globalstash		(*Perl_Iglobalstash_ptr(aTHX))
+#undef  PL_hash_seed
+#define PL_hash_seed		(*Perl_Ihash_seed_ptr(aTHX))
 #undef  PL_he_arenaroot
 #define PL_he_arenaroot		(*Perl_Ihe_arenaroot_ptr(aTHX))
 #undef  PL_he_root
@@ -932,6 +934,8 @@ END_EXTERN_C
 #define PL_do_undump		(*Perl_Gdo_undump_ptr(NULL))
 #undef  PL_dollarzero_mutex
 #define PL_dollarzero_mutex	(*Perl_Gdollarzero_mutex_ptr(NULL))
+#undef  PL_earlytaint
+#define PL_earlytaint		(*Perl_Gearlytaint_ptr(NULL))
 #undef  PL_hexdigit
 #define PL_hexdigit		(*Perl_Ghexdigit_ptr(NULL))
 #undef  PL_malloc_mutex

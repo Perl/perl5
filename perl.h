@@ -73,11 +73,22 @@
 
 /* Use the reentrant APIs like localtime_r and getpwent_r */
 /* Win32 has naturally threadsafe libraries, no need to use any _r variants. */
-#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(NETWARE) && !defined(WIN32) && !defined(__APPLE__)
+#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(NETWARE) && !defined(WIN32) && !defined(DARWIN)
 #   define USE_REENTRANT_API
 #endif
 
 /* <--- here ends the logic shared by perl.h and makedef.pl */
+
+/*
+ * DARWIN for MacOSX (__APPLE__ exists but is not officially sanctioned)
+ * (The -DDARWIN comes from the hints/darwin.sh.)
+ * __bsdi__ for BSD/OS
+ */
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(DARWIN) || defined(__bsdi__) || defined(BSD41) || defined(BSD42) || defined(BSD43) || defined(BSD44)
+#   ifndef BSDish
+#       define BSDish
+#   endif
+#endif
 
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifndef MULTIPLICITY
@@ -470,27 +481,41 @@ int usleep(unsigned int);
 #  else
 #    define EMBEDMYMALLOC	/* for compatibility */
 #  endif
-START_EXTERN_C
-Malloc_t Perl_malloc (MEM_SIZE nbytes);
-Malloc_t Perl_calloc (MEM_SIZE elements, MEM_SIZE size);
-Malloc_t Perl_realloc (Malloc_t where, MEM_SIZE nbytes);
-/* 'mfree' rather than 'free', since there is already a 'perl_free'
- * that causes clashes with case-insensitive linkers */
-Free_t   Perl_mfree (Malloc_t where);
-END_EXTERN_C
-
-typedef struct perl_mstats perl_mstats_t;
 
 #  define safemalloc  Perl_malloc
 #  define safecalloc  Perl_calloc
 #  define saferealloc Perl_realloc
 #  define safefree    Perl_mfree
+#  define CHECK_MALLOC_TOO_LATE_FOR_(code)	STMT_START {		\
+	if (!PL_tainting && MallocCfg_ptr[MallocCfg_cfg_env_read])	\
+		code;							\
+    } STMT_END
+#  define CHECK_MALLOC_TOO_LATE_FOR(ch)				\
+	CHECK_MALLOC_TOO_LATE_FOR_(MALLOC_TOO_LATE_FOR(ch))
+#  define panic_write2(s)		write(2, s, strlen(s))
+#  define CHECK_MALLOC_TAINT(newval)				\
+	CHECK_MALLOC_TOO_LATE_FOR_(				\
+		if (newval) {					\
+		  panic_write2("panic: tainting with $ENV{PERL_MALLOC_OPT}\n");\
+		  exit(1); })
+#  define MALLOC_CHECK_TAINT(argc,argv,env)	STMT_START {	\
+	if (PL_earlytaint)) {					\
+		MallocCfg_ptr[MallocCfg_skip_cfg_env] = 1;	\
+    }} STMT_END;
 #else  /* MYMALLOC */
 #  define safemalloc  safesysmalloc
 #  define safecalloc  safesyscalloc
 #  define saferealloc safesysrealloc
 #  define safefree    safesysfree
+#  define CHECK_MALLOC_TOO_LATE_FOR(ch)		((void)0)
+#  define CHECK_MALLOC_TAINT(newval)		((void)0)
+#  define MALLOC_CHECK_TAINT(argc,argv,env)
 #endif /* MYMALLOC */
+
+#define TOO_LATE_FOR_(ch,s)	Perl_croak(aTHX_ "Too late for \"-%c\" option%s", (char)(ch), s)
+#define TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, "")
+#define MALLOC_TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, " with $ENV{PERL_MALLOC_OPT}")
+#define MALLOC_CHECK_TAINT2(argc,argv)	MALLOC_CHECK_TAINT(argc,argv,NULL)
 
 #if !defined(HAS_STRCHR) && defined(HAS_INDEX) && !defined(strchr)
 #define strchr index
@@ -1665,17 +1690,10 @@ int isnan(double d);
 
 #endif
 
-struct perl_mstats {
-    UV *nfree;
-    UV *ntotal;
-    IV topbucket, topbucket_ev, topbucket_odd, totfree, total, total_chain;
-    IV total_sbrk, sbrks, sbrk_good, sbrk_slack, start_slack, sbrked_remains;
-    IV minbucket;
-    /* Level 1 info */
-    UV *bucket_mem_size;
-    UV *bucket_available_size;
-    UV nbuckets;
-};
+#ifdef MYMALLOC
+#  include "malloc_ctl.h"
+#endif
+
 struct RExC_state_t;
 
 typedef MEM_SIZE STRLEN;
@@ -2231,6 +2249,12 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #if !defined(OS2) && !defined(MACOS_TRADITIONAL)
 #  include "iperlsys.h"
 #endif
+
+/* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0 */
+#if !defined(NO_HASH_SEED) && !defined(USE_HASH_SEED) && !defined(USE_HASH_SEED_EXPLICIT)
+#  define USE_HASH_SEED
+#endif
+
 #include "regexp.h"
 #include "sv.h"
 #include "util.h"
@@ -2902,13 +2926,13 @@ typedef OP* (CPERLscope(*PPADDR_t)[]) (pTHX);
 
 /* NeXT has problems with crt0.o globals */
 #if defined(__DYNAMIC__) && \
-    (defined(NeXT) || defined(__NeXT__) || defined(__APPLE__))
+    (defined(NeXT) || defined(__NeXT__) || defined(DARWIN))
 #  if defined(NeXT) || defined(__NeXT)
 #    include <mach-o/dyld.h>
 #    define environ (*environ_pointer)
 EXT char *** environ_pointer;
 #  else
-#    if defined(__APPLE__) && defined(PERL_CORE)
+#    if defined(DARWIN) && defined(PERL_CORE)
 #      include <crt_externs.h>	/* for the env array */
 #      define environ (*_NSGetEnviron())
 #    endif

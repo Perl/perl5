@@ -9,6 +9,11 @@ the 5.9.0 release.
 
 =head1 Incompatible Changes
 
+=head2 The C<$*> variable has been removed
+
+C<$*>, which was deprecated in favor of the C</s> and C</m> regexp
+modifiers, has been removed.
+
 =head1 Core Enhancements
 
 =head2 Tied Arrays with Negative Array Indices
@@ -48,8 +53,8 @@ C<EXISTS>, and C<DELETE> unchanged.
 
 If you find what you think is a bug, you might check the articles
 recently posted to the comp.lang.perl.misc newsgroup and the perl
-bug database at http://bugs.perl.org/ .  There may also be
-information at http://www.perl.com/ , the Perl Home Page.
+bug database at F<http://bugs.perl.org/>.  There may also be
+information at F<http://www.perl.com/>, the Perl Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
 program included with your release.  Be sure to trim your bug down

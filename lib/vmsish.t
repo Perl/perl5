@@ -112,6 +112,19 @@ is($?,0,"outer lex scope of vmsish [POSIX status]");
     eval "END { \$ENV{'SYS\$TIMEZONE_DIFFERENTIAL'} = $oldtz; }";
     gmtime(0); # Force reset of tz offset
   }
+  # This test script might have been invoked in at least one of four different ways:
+  #     perl lib/vmsish.t
+  #     perl [.lib]vmsish.t
+  #     set def [.t] && perl ../lib/vmsish.t
+  #     set def [.t] && perl [-.lib]vmsish.t
+  # In the following we attempt to find ourselves without resorting to VMS::Filespec.
+  # Note that the chdir in the BEGIN block above complicates matters.
+  my $self = $0;
+  if ( ! -e $self && -e "../$0" ) { $self = "../$0"; }
+  if ( ! -e $self ) {
+      $self =~ s/\[//;
+      $self = "[-$self";
+  }
   {
      use_ok('vmsish qw(time)');
 
@@ -121,12 +134,12 @@ is($?,0,"outer lex scope of vmsish [POSIX status]");
      $vmstime   = time;
      @vmslocal  = localtime($vmstime);
      @vmsgmtime = gmtime($vmstime);
-     $vmsmtime  = (stat $0)[9];
+     $vmsmtime  = (stat $self)[9];
   }
   $utctime   = time;
   @utclocal  = localtime($vmstime);
   @utcgmtime = gmtime($vmstime);
-  $utcmtime  = (stat $0)[9];
+  $utcmtime  = (stat $self)[9];
   
   $offset = $ENV{'SYS$TIMEZONE_DIFFERENTIAL'};
 

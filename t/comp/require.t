@@ -11,7 +11,7 @@ $i = 1;
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 29;
+my $total_tests = 30;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests = 26; }
 print "1..$total_tests\n";
 
@@ -142,6 +142,7 @@ print "ok $i - require() context\n";
 $foo = eval q{require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 @foo = eval q{require bleah}; delete $INC{"bleah.pm"}; ++$::i;
        eval q{require bleah}; delete $INC{"bleah.pm"}; ++$::i;
+       eval q{$_=$_+2;require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 $foo = eval  {require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 @foo = eval  {require bleah}; delete $INC{"bleah.pm"}; ++$::i;
        eval  {require bleah};

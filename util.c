@@ -977,6 +977,52 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
     return sv;
 }
 
+void
+Perl_write_to_stderr(pTHX_ const char* message, int msglen)
+{
+    IO *io;
+    MAGIC *mg;
+
+    if (PL_stderrgv && SvREFCNT(PL_stderrgv) 
+	&& (io = GvIO(PL_stderrgv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) 
+    {
+	dSP;
+	ENTER;
+	SAVETMPS;
+
+	save_re_context();
+	SAVESPTR(PL_stderrgv);
+	PL_stderrgv = Nullgv;
+
+	PUSHSTACKi(PERLSI_MAGIC);
+
+	PUSHMARK(SP);
+	EXTEND(SP,2);
+	PUSHs(SvTIED_obj((SV*)io, mg));
+	PUSHs(sv_2mortal(newSVpvn(message, msglen)));
+	PUTBACK;
+	call_method("PRINT", G_SCALAR);
+
+	POPSTACK;
+	FREETMPS;
+	LEAVE;
+    }
+    else {
+#ifdef USE_SFIO
+	/* SFIO can really mess with your errno */
+	int e = errno;
+#endif
+	PerlIO *serr = Perl_error_log;
+
+	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
+	(void)PerlIO_flush(serr);
+#ifdef USE_SFIO
+	errno = e;
+#endif
+    }
+}
+
 OP *
 Perl_vdie(pTHX_ const char* pat, va_list *args)
 {
@@ -1144,19 +1190,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
     else if (!message)
 	message = SvPVx(ERRSV, msglen);
 
-    {
-#ifdef USE_SFIO
-	/* SFIO can really mess with your errno */
-	int e = errno;
-#endif
-	PerlIO *serr = Perl_error_log;
-
-	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-	(void)PerlIO_flush(serr);
-#ifdef USE_SFIO
-	errno = e;
-#endif
-    }
+    write_to_stderr(message, msglen);
     my_failure_exit();
 }
 
@@ -1211,8 +1245,6 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
     CV *cv;
     SV *msv;
     STRLEN msglen;
-    IO *io;
-    MAGIC *mg;
 
     msv = vmess(pat, args);
     message = SvPV(msv, msglen);
@@ -1246,25 +1278,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 	}
     }
 
-    /* if STDERR is tied, use it instead */
-    if (PL_stderrgv && SvREFCNT(PL_stderrgv) && (io = GvIO(PL_stderrgv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
-	dSP; ENTER;
-	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)io, mg));
-	XPUSHs(sv_2mortal(newSVpvn(message, msglen)));
-	PUTBACK;
-	call_method("PRINT", G_SCALAR);
-	LEAVE;
-	return;
-    }
-
-    {
-	PerlIO *serr = Perl_error_log;
-
-	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-	(void)PerlIO_flush(serr);
-    }
+    write_to_stderr(message, msglen);
 }
 
 #if defined(PERL_IMPLICIT_CONTEXT)
@@ -1364,11 +1378,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 	    PL_restartop = die_where(message, msglen);
 	    JMPENV_JUMP(3);
 	}
-	{
-	    PerlIO *serr = Perl_error_log;
-	    PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-	    (void)PerlIO_flush(serr);
-	}
+	write_to_stderr(message, msglen);
 	my_failure_exit();
     }
     else {
@@ -1400,11 +1410,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 		return;
 	    }
 	}
-	{
-	    PerlIO *serr = Perl_error_log;
-	    PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-	    (void)PerlIO_flush(serr);
-	}
+	write_to_stderr(message, msglen);
     }
 }
 
@@ -2200,7 +2206,7 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
     if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
         act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
 #endif
-#ifdef SA_NOCLDWAIT
+#if defined(SA_NOCLDWAIT) && !defined(BSDish) /* See [perl #18849] */
     if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
 	act.sa_flags |= SA_NOCLDWAIT;
 #endif
@@ -2239,7 +2245,7 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
     if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
         act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
 #endif
-#ifdef SA_NOCLDWAIT
+#if defined(SA_NOCLDWAIT) && !defined(BSDish) /* See [perl #18849] */
     if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
 	act.sa_flags |= SA_NOCLDWAIT;
 #endif
@@ -4367,5 +4373,86 @@ Perl_parse_unicode_opts(pTHX_ char **popt)
   *popt = p;
 
   return opt;
+}
+
+U32
+Perl_seed(pTHX)
+{
+    /*
+     * This is really just a quick hack which grabs various garbage
+     * values.  It really should be a real hash algorithm which
+     * spreads the effect of every input bit onto every output bit,
+     * if someone who knows about such things would bother to write it.
+     * Might be a good idea to add that function to CORE as well.
+     * No numbers below come from careful analysis or anything here,
+     * except they are primes and SEED_C1 > 1E6 to get a full-width
+     * value from (tv_sec * SEED_C1 + tv_usec).  The multipliers should
+     * probably be bigger too.
+     */
+#if RANDBITS > 16
+#  define SEED_C1	1000003
+#define   SEED_C4	73819
+#else
+#  define SEED_C1	25747
+#define   SEED_C4	20639
+#endif
+#define   SEED_C2	3
+#define   SEED_C3	269
+#define   SEED_C5	26107
+
+#ifndef PERL_NO_DEV_RANDOM
+    int fd;
+#endif
+    U32 u;
+#ifdef VMS
+#  include <starlet.h>
+    /* when[] = (low 32 bits, high 32 bits) of time since epoch
+     * in 100-ns units, typically incremented ever 10 ms.        */
+    unsigned int when[2];
+#else
+#  ifdef HAS_GETTIMEOFDAY
+    struct timeval when;
+#  else
+    Time_t when;
+#  endif
+#endif
+
+/* This test is an escape hatch, this symbol isn't set by Configure. */
+#ifndef PERL_NO_DEV_RANDOM
+#ifndef PERL_RANDOM_DEVICE
+   /* /dev/random isn't used by default because reads from it will block
+    * if there isn't enough entropy available.  You can compile with
+    * PERL_RANDOM_DEVICE to it if you'd prefer Perl to block until there
+    * is enough real entropy to fill the seed. */
+#  define PERL_RANDOM_DEVICE "/dev/urandom"
+#endif
+    fd = PerlLIO_open(PERL_RANDOM_DEVICE, 0);
+    if (fd != -1) {
+    	if (PerlLIO_read(fd, &u, sizeof u) != sizeof u)
+	    u = 0;
+	PerlLIO_close(fd);
+	if (u)
+	    return u;
+    }
+#endif
+
+#ifdef VMS
+    _ckvmssts(sys$gettim(when));
+    u = (U32)SEED_C1 * when[0] + (U32)SEED_C2 * when[1];
+#else
+#  ifdef HAS_GETTIMEOFDAY
+    PerlProc_gettimeofday(&when,NULL);
+    u = (U32)SEED_C1 * when.tv_sec + (U32)SEED_C2 * when.tv_usec;
+#  else
+    (void)time(&when);
+    u = (U32)SEED_C1 * when;
+#  endif
+#endif
+    u += SEED_C3 * (U32)PerlProc_getpid();
+    u += SEED_C4 * (U32)PTR2UV(PL_stack_sp);
+#ifndef PLAN9           /* XXX Plan9 assembler chokes on this; fix needed  */
+    u += SEED_C5 * (U32)PTR2UV(&when);
+#endif
+    return u;
 }
 

@@ -41,11 +41,7 @@ line anywhere within the string.
 Treat string as single line.  That is, change "." to match any character
 whatsoever, even a newline, which normally it would not match.
 
-The C</s> and C</m> modifiers both override the C<$*> setting.  That
-is, no matter what C<$*> contains, C</s> without C</m> will force
-"^" to match only at the beginning of the string and "$" to match
-only at the end (or just before a newline at the end) of the string.
-Together, as /ms, they let the "." match any character whatsoever,
+Used together, as /ms, they let the "." match any character whatsoever,
 while still allowing "^" and "$" to match, respectively, just after
 and just before newlines within the string.
 
@@ -103,13 +99,11 @@ string as a multi-line buffer, such that the "^" will match after any
 newline within the string, and "$" will match before any newline.  At the
 cost of a little more overhead, you can do this by using the /m modifier
 on the pattern match operator.  (Older programs did this by setting C<$*>,
-but this practice is now deprecated.)
+but this practice has been removed in perl 5.9.)
 
 To simplify multi-line substitutions, the "." character never matches a
 newline unless you use the C</s> modifier, which in effect tells Perl to pretend
-the string is a single line--even if it isn't.  The C</s> modifier also
-overrides the setting of C<$*>, in case you have some (badly behaved) older
-code that sets it in another module.
+the string is a single line--even if it isn't.
 
 The following standard quantifiers are recognized:
 
@@ -400,10 +394,14 @@ the most-recently closed group (submatch). C<$^N> can be used in
 extended patterns (see below), for example to assign a submatch to a
 variable. 
 
-The numbered variables ($1, $2, $3, etc.) and the related punctuation
+The numbered match variables ($1, $2, $3, etc.) and the related punctuation
 set (C<$+>, C<$&>, C<$`>, C<$'>, and C<$^N>) are all dynamically scoped
 until the end of the enclosing block or until the next successful
 match, whichever comes first.  (See L<perlsyn/"Compound Statements">.)
+
+B<NOTE>: failed matches in Perl do not reset the match variables,
+which makes easier to write code that tests for a series of more
+specific cases and remembers the best match.
 
 B<WARNING>: Once Perl sees that you need one of C<$&>, C<$`>, or
 C<$'> anywhere in the program, it has to provide them for every

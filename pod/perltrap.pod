@@ -1224,6 +1224,10 @@ repeatedly, like C</x/> or C<m!x!>.
     # perl4 prints: perl4
     # perl5 prints: perl5
 
+=item * Regular Expression
+
+Unlike in Ruby, failed matches in Perl do not reset the match variables
+($1, $2, ..., C<$`>, ...).
 
 =back
 

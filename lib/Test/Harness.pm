@@ -918,13 +918,23 @@ sub canonfailed ($@) {
     }
 
     push @result, "\tFailed $failed/$max tests, ";
-    push @result, sprintf("%.2f",100*(1-$failed/$max)), "% okay";
+    if ($max) {
+	push @result, sprintf("%.2f",100*(1-$failed/$max)), "% okay";
+    } else {
+	push @result, "?% okay";
+    }
     my $ender = 's' x ($skipped > 1);
     my $good = $max - $failed - $skipped;
-    my $goodper = sprintf("%.2f",100*($good/$max));
-    push @result, " (less $skipped skipped test$ender: $good okay, ".
-                  "$goodper%)"
-         if $skipped;
+    if ($skipped) {
+	my $skipmsg = " (less $skipped skipped test$ender: $good okay, ";
+	if ($max) {
+	    my $goodper = sprintf("%.2f",100*($good/$max));
+	    $skipmsg .= "$goodper%)";
+	} else {
+	    $skipmsg .= "?%)";
+	}
+	push @result, $skipmsg;
+    }
     push @result, "\n";
     my $txt = join "", @result;
     ($txt, $canon);

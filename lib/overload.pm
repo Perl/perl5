@@ -84,10 +84,13 @@ sub Method {
 sub AddrRef {
   my $package = ref $_[0];
   return "$_[0]" unless $package;
-  bless $_[0], overload::Fake;	# Non-overloaded package
-  my $str = "$_[0]";
-  bless $_[0], $package;	# Back
-  $package . substr $str, index $str, '=';
+
+	require Scalar::Util;
+	my $class = Scalar::Util::blessed($_[0]);
+	my $class_prefix = defined($class) ? "$class=" : "";
+	my $type = Scalar::Util::reftype($_[0]);
+	my $addr = Scalar::Util::refaddr($_[0]);
+	return sprintf("$class_prefix$type(0x%x)", $addr);
 }
 
 sub StrVal {

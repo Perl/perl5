@@ -36,7 +36,7 @@ foreach (sort glob($^O eq 'MacOS' ? ":lib:strict:*" : "lib/strict/*")) {
 
 undef $/;
 
-print "1..", @prgs + 4, "\n";
+print "1.." . (@prgs + 4) . "\n";
  
  
 for (@prgs){
@@ -94,7 +94,7 @@ for (@prgs){
         print STDERR "GOT:\n$results\n";
         print "not ";
     }
-    print "ok ", ++$i, "\n";
+    print "ok " . ++$i . "\n";
     foreach (@temps) 
 	{ unlink $_ if $_ } 
 }

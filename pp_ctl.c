@@ -1329,8 +1329,6 @@ OP *
 Perl_die_where(pTHX_ char *message, STRLEN msglen)
 {
     STRLEN n_a;
-    IO *io;
-    MAGIC *mg;
 
     if (PL_in_eval) {
 	I32 cxix;
@@ -1365,8 +1363,6 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		sv_setpvn(ERRSV, message, msglen);
 	    }
 	}
-	else
-	    message = SvPVx(ERRSV, msglen);
 
 	while ((cxix = dopoptoeval(cxstack_ix)) < 0
 	       && PL_curstackinfo->si_prev)
@@ -1383,6 +1379,8 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	    POPBLOCK(cx,PL_curpm);
 	    if (CxTYPE(cx) != CXt_EVAL) {
+		if (!message)
+		    message = SvPVx(ERRSV, msglen);
 		PerlIO_write(Perl_error_log, "panic: die ", 11);
 		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
@@ -1412,30 +1410,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
     if (!message)
 	message = SvPVx(ERRSV, msglen);
 
-    /* if STDERR is tied, print to it instead */
-    if (PL_stderrgv && (io = GvIOp(PL_stderrgv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
-	dSP; ENTER;
-	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)io, mg));
-	XPUSHs(sv_2mortal(newSVpvn(message, msglen)));
-	PUTBACK;
-	call_method("PRINT", G_SCALAR);
-	LEAVE;
-    }
-    else {
-#ifdef USE_SFIO
-	/* SFIO can really mess with your errno */
-	int e = errno;
-#endif
-	PerlIO *serr = Perl_error_log;
-
-	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-	(void)PerlIO_flush(serr);
-#ifdef USE_SFIO
-	errno = e;
-#endif
-    }
+    write_to_stderr(message, msglen);
     my_failure_exit();
     /* NOTREACHED */
     return 0;
@@ -2853,8 +2828,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     else
 	sv_setpv(ERRSV,"");
     if (yyparse() || PL_error_count || !PL_eval_root) {
-	SV **newsp;
-	I32 gimme;
+	SV **newsp;			/* Used by POPBLOCK. */
 	PERL_CONTEXT *cx;
 	I32 optype = 0;			/* Might be reset by POPEVAL. */
 	STRLEN n_a;
@@ -2898,13 +2872,16 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	*startop = PL_eval_root;
     } else
 	SAVEFREEOP(PL_eval_root);
-    if (gimme & G_VOID && ! PL_in_eval & EVAL_INREQUIRE)
-	/*
-	 * EVAL_INREQUIRE (the code is being required) is special-cased :
-	 * in this case we want scalar context to be forced, instead
-	 * of void context, so a proper return value is returned from
-	 * C<require> via this leaveeval op.
-	 */
+
+    /* Set the context for this new optree.
+     * If the last op is an OP_REQUIRE, force scalar context.
+     * Otherwise, propagate the context from the eval(). */
+    if (PL_eval_root->op_type == OP_LEAVEEVAL
+	    && cUNOPx(PL_eval_root)->op_first->op_type == OP_LINESEQ
+	    && cLISTOPx(cUNOPx(PL_eval_root)->op_first)->op_last->op_type
+	    == OP_REQUIRE)
+	scalar(PL_eval_root);
+    else if (gimme & G_VOID)
 	scalarvoid(PL_eval_root);
     else if (gimme & G_ARRAY)
 	list(PL_eval_root);

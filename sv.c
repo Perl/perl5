@@ -3673,7 +3673,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	if (dtype < SVt_RV)
 	    sv_upgrade(dstr, SVt_RV);
 	else if (dtype == SVt_PVGV &&
-		 SvTYPE(SvRV(sstr)) == SVt_PVGV) {
+		 SvROK(sstr) && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
 	    sstr = SvRV(sstr);
 	    if (sstr == dstr) {
 		if (GvIMPORTED(dstr) != GVf_IMPORTED
@@ -5918,13 +5918,13 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 	    mg = mg_find(sv, PERL_MAGIC_utf8);
 	    if (mg && mg->mg_ptr) {
 		cache = (STRLEN *) mg->mg_ptr;
-		if (cache[1] == *offsetp) {
+		if (cache[1] == (STRLEN)*offsetp) {
                     /* An exact match. */
                     *offsetp = cache[0];
 
 		    return;
 		}
-		else if (cache[1] < *offsetp) {
+		else if (cache[1] < (STRLEN)*offsetp) {
 		    /* We already know part of the way. */
 		    len = cache[0];
 		    s  += cache[1];
@@ -9329,6 +9329,13 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	     p = SvEND(sv);
 	     *p = '\0';
 	}
+	/* Use memchr() instead of strchr(), as eptr is not guaranteed */
+	/* to point to a null-terminated string.                       */
+	if (left && ckWARN(WARN_PRINTF) && memchr(eptr, '\n', elen) && 
+	    (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) 
+	    Perl_warner(aTHX_ packWARN(WARN_PRINTF),
+		"Newline in left-justified string for %sprintf",
+			(PL_op->op_type == OP_PRTF) ? "" : "s");
 	
 	have = esignlen + zeros + elen;
 	need = (have > width ? have : width);
@@ -10740,6 +10747,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
+    PL_savestack_ix = 0;
+    PL_savestack_max = -1;
     PL_retstack = 0;
     PL_sig_pending = 0;
     Zero(&PL_debug_pad, 1, struct perl_debug_pad);
@@ -10771,6 +10780,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
+    PL_savestack_ix = 0;
+    PL_savestack_max = -1;
     PL_retstack = 0;
     PL_sig_pending = 0;
     Zero(&PL_debug_pad, 1, struct perl_debug_pad);
@@ -11258,6 +11269,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_glob_index	= proto_perl->Iglob_index;
     PL_srand_called	= proto_perl->Isrand_called;
+    PL_hash_seed	= proto_perl->Ihash_seed;
     PL_uudmap['M']	= 0;		/* reinits on demand */
     PL_bitcount		= Nullch;	/* reinits on demand */
 

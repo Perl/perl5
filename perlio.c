@@ -3520,13 +3520,12 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
     if (PerlIOValid(f)) {
 	PerlIO *next = PerlIONext(f);
 	PerlIO_funcs *tab =
-	    PerlIO_layer_fetch(aTHX_ layers, n - 1, PerlIOBase(next)->tab);
-	next =
-	    (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
-			  next, narg, args);
-	if (!next
-	    || (*PerlIOBase(f)->tab->Pushed) (aTHX_ f, mode, PerlIOArg,
-					      self) != 0) {
+	     PerlIO_layer_fetch(aTHX_ layers, n - 1, PerlIOBase(next)->tab);
+	if (tab && tab->Open)
+	     next =
+		  (*tab->Open)(aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
+			       next, narg, args);
+	if (!next || (*PerlIOBase(f)->tab->Pushed) (aTHX_ f, mode, PerlIOArg, self) != 0) {
 	    return NULL;
 	}
     }
@@ -3540,8 +3539,11 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	     * mode++;
 	     */
 	}
-	f = (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
-			  f, narg, args);
+	if (tab && tab->Open)
+	     f = (*tab->Open)(aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
+			      f, narg, args);
+	else
+	     SETERRNO(EINVAL, LIB_INVARG);
 	if (f) {
 	    if (PerlIO_push(aTHX_ f, self, mode, PerlIOArg) == 0) {
 		/*

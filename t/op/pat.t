@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..998\n";
+print "1..1006\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -20,9 +20,8 @@ $x = "abc\ndef\n";
 if ($x =~ /^abc/) {print "ok 1\n";} else {print "not ok 1\n";}
 if ($x !~ /^def/) {print "ok 2\n";} else {print "not ok 2\n";}
 
-$* = 1;
-if ($x =~ /^def/) {print "ok 3\n";} else {print "not ok 3\n";}
-$* = 0;
+# used to be a test for $*
+if ($x =~ /^def/m) {print "ok 3\n";} else {print "not ok 3\n";}
 
 $_ = '123';
 if (/^([0-9][0-9]*)/) {print "ok 4\n";} else {print "not ok 4\n";}
@@ -69,9 +68,8 @@ if (m|bc/*d|) {print "ok 22\n";} else {print "not ok 22\n";}
 
 if (/^$_$/) {print "ok 23\n";} else {print "not ok 23\n";}
 
-$* = 1;		# test 3 only tested the optimized version--this one is for real
-if ("ab\ncd\n" =~ /^cd/) {print "ok 24\n";} else {print "not ok 24\n";}
-$* = 0;
+# used to be a test for $*
+if ("ab\ncd\n" =~ /^cd/m) {print "ok 24\n";} else {print "not ok 24\n";}
 
 $XXX{123} = 123;
 $XXX{234} = 234;
@@ -3142,7 +3140,15 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
 {
     my $i;
     ok('-1-3-5-' eq join('', split /((??{$i++}))/, '-1-3-5-'),
-	"[perl #21411] (??{ .. }) corrupts split's stack")
+	"[perl #21411] (??{ .. }) corrupts split's stack");
+    split /(?{'WOW'})/, 'abc';
+    ok('a|b|c' eq join ('|', @_),
+       "[perl #21411] (?{ .. }) version of the above");
+}
+
+{
+    split /(?{ split "" })/, "abc";
+    ok(1,'cache_re & "(?{": it dumps core in 5.6.1 & 5.8.0');
 }
 
 {
@@ -3172,4 +3178,15 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
     ok("\x{100}X" =~ /$re/, "S_cl_and ANYOF_UNICODE & ANYOF_INVERTED");
 }
 
-# last test 998
+# bug #22354
+sub func ($) {
+    ok( "a\nb" !~ /^b/, $_[0] );
+    ok( "a\nb" =~ /^b/m, "$_[0] - with /m" );
+}
+func "standalone";
+$_ = "x"; s/x/func "in subst"/e;
+$_ = "x"; s/x/func "in multiline subst"/em;
+#$_ = "x"; /x(?{func "in regexp"})/;
+#$_ = "x"; /x(?{func "in multiline regexp"})/m;
+
+# last test 1004

@@ -1192,7 +1192,11 @@ lib/File/Temp/t/posix.t		See if File::Temp works
 lib/File/Temp/t/security.t	See if File::Temp works
 lib/File/Temp/t/tempfile.t	See if File::Temp works
 lib/FileCache.pm		Keep more files open than the system permits
-lib/FileCache.t			See if FileCache works
+lib/FileCache/t/01open.t	See if FileCache works
+lib/FileCache/t/02maxopen.t	See if FileCache works
+lib/FileCache/t/03append.t	See if FileCache works
+lib/FileCache/t/04twoarg.t	See if FileCache works
+lib/FileCache/t/05override.t	See if FileCache works
 lib/FileHandle.pm		Backward-compatible front end to IO extension
 lib/FileHandle.t		See if FileHandle works
 lib/filetest.pm			For "use filetest"
@@ -2081,6 +2085,7 @@ makedir.SH			Precursor to makedir
 Makefile.micro			microperl Makefile
 Makefile.SH			A script that generates Makefile
 malloc.c			A version of malloc you might not want
+malloc_ctl.h			A version of malloc you might not want
 MANIFEST			This list of files
 mg.c				Magic code
 mg.h				Magic header
@@ -2182,7 +2187,6 @@ os2/OS2/PrfDB/MANIFEST		System database access module
 os2/OS2/PrfDB/PrfDB.pm		System database access module
 os2/OS2/PrfDB/PrfDB.xs		System database access module
 os2/OS2/PrfDB/t/os2_prfdb.t	System database access module
-os2/OS2/PrfDB/typemap		System database access module
 os2/OS2/Process/Makefile.PL	system() constants in a module
 os2/OS2/Process/MANIFEST	system() constants in a module
 os2/OS2/Process/Process.pm	system() constants in a module
@@ -2210,12 +2214,14 @@ os2/OS2/REXX/t/rx_tievar.t	DLL access module
 os2/OS2/REXX/t/rx_tieydb.t	DLL access module
 os2/OS2/REXX/t/rx_varset.t	DLL access module
 os2/OS2/REXX/t/rx_vrexx.t	DLL access module
+os2/OS2/typemap			Common typemap for OS/2 types
 os2/os2add.sym			Overriding symbols to export
 os2/os2ish.h			Header for OS/2
 os2/os2thread.h			pthread-like typedefs
 os2/os2_base.t			Additional tests for builtin methods
 os2/perl2cmd.pl			Corrects installed binaries under OS/2
 os2/perlrexx.c			Support perl interpreter embedded in REXX
+os2/perlrexx.cmd		Test perl interpreter embedded in REXX
 pad.c				Scratchpad functions
 pad.h				Scratchpad headers
 patchlevel.h			The current patch level of perl

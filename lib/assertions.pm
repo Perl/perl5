@@ -118,9 +118,6 @@ sub import {
     $^H |= $hint|$seen_hint;
 }
 
-
-
-
 sub unimport {
     $^H &= ~$hint;
 }
@@ -131,7 +128,7 @@ __END__
 
 =head1 NAME
 
-assertions - selects assertions
+assertions - select assertions in blocks of code
 
 =head1 SYNOPSIS
 
@@ -142,12 +139,12 @@ assertions - selects assertions
 
   {
       use assertions qw( foo bar );
-      assert { print "asserting 'foo' & 'bar'\n" };
+      assert { print "asserting 'foo' and 'bar'\n" };
   }
 
   {
       use assertions qw( bar );
-      assert { print "asserting 'bar'\n" };
+      assert { print "asserting only 'bar'\n" };
   }
 
   {
@@ -157,24 +154,23 @@ assertions - selects assertions
 
   assert { print "asserting 'foo' again\n" };
 
-
-=head1 ABSTRACT
-
-C<assertions> pragma selects the tags used to control assertion
-execution.
-
 =head1 DESCRIPTION
 
+The C<assertions> pragma specifies the tags used to enable and disable
+the execution of assertion subroutines.
 
+An assertion subroutine is declared with the C<:assertion> attribute.
+This subroutine is not normally executed : it's optimized away by perl
+at compile-time.
 
-
-=head2 EXPORT
-
-None by default.
+The C<assertion> pragma associates to its lexical scope one or several
+assertion tags. Then, to activate the execution of the assertions
+subroutines in this scope, these tags must be given to perl via the
+B<-A> command-line option.
 
 =head1 SEE ALSO
 
-
+L<perlrun>.
 
 =head1 AUTHOR
 
@@ -188,3 +184,5 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
+
+TODO : Some more docs are to be added about assertion expressions.

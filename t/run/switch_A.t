@@ -3,7 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib';
-    require './test.pl';	# for which_perl() etc
+    require './test.pl';
 }
 
 BEGIN {
@@ -13,7 +13,7 @@ BEGIN {
 #1
 fresh_perl_is('sub cm : assertion { "ok" }; use assertions Hello; print cm()',
 	      'ok',
-	      { switches => ['-AHello'] }, '-A');
+	      { switches => ['-AHello'] }, '-AHello');
 
 #2
 fresh_perl_is('sub cm : assertion { "ok" }; use assertions SDFJKS; print cm()',

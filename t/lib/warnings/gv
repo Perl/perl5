@@ -9,7 +9,7 @@
 	fred() ;
 
      Use of $# is deprecated
-     Use of $* is deprecated
+     $* is no longer supported
 
 	$a = ${"#"} ;
  	$a = ${"*"} ;
@@ -51,4 +51,4 @@ $a = ${"#"};
 $a = ${"*"};
 EXPECT
 Use of $# is deprecated at - line 3.
-Use of $* is deprecated at - line 4.
+$* is no longer supported at - line 4.

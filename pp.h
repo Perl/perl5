@@ -205,12 +205,12 @@ See C<PUSHu>.
 =cut
 */
 
-#define EXTEND(p,n)	STMT_START { if (PL_stack_max - p < (n)) {		\
+#define EXTEND(p,n)	STMT_START { if (PL_stack_max - p < (int)(n)) {		\
 			    sp = stack_grow(sp,p, (int) (n));		\
 			} } STMT_END
 
 /* Same thing, but update mark register too. */
-#define MEXTEND(p,n)	STMT_START {if (PL_stack_max - p < (n)) {		\
+#define MEXTEND(p,n)	STMT_START {if (PL_stack_max - p < (int)(n)) {		\
 			    int markoff = mark - PL_stack_base;		\
 			    sp = stack_grow(sp,p,(int) (n));		\
 			    mark = PL_stack_base + markoff;		\

@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib);
 }
 
-print "1..67\n";
+print "1..68\n";
 
 require 'test.pl';
 
@@ -349,6 +349,14 @@ print "ok ",++$test," - UNIVERSAL::AUTOLOAD called when freeing qr//\n";
 runperl(prog => 'sub UNIVERSAL::DESTROY { warn } bless \$a, A', stderr => 1);
 if ($? != 0) { print "not " };
 print "ok ",++$test," - warn called inside UNIVERSAL::DESTROY\n";
+
+
+# bug #22719
+
+runperl(prog => 'sub f { my $x = shift; *z = $x; } f({}); f();');
+if ($? != 0) { print "not " };
+print "ok ",++$test," - coredump on typeglob = (SvRV && !SvROK)\n";
+
 
 # test global destruction
 

@@ -194,7 +194,7 @@ Perl_allocmy(pTHX_ char *name)
 
     /* check for duplicate declaration */
     pad_check_dup(name,
-		PL_in_my == KEY_our,
+		(bool)(PL_in_my == KEY_our),
 		(PL_curstash ? PL_curstash : PL_defstash)
     );
 
@@ -3744,7 +3744,7 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
     assert(!loop->op_next);
     /* for my  $x () sets OPpLVAL_INTRO;
      * for our $x () sets OPpOUR_INTRO; both only used by Deparse.pm */
-    loop->op_private = iterpflags;
+    loop->op_private = (U8)iterpflags;
 #ifdef PL_OP_SLAB_ALLOC
     {
 	LOOP *tmp;
@@ -4701,8 +4701,9 @@ Perl_ck_bitop(pTHX_ OP *o)
 OP *
 Perl_ck_concat(pTHX_ OP *o)
 {
-    if (cUNOPo->op_first->op_type == OP_CONCAT)
-	o->op_flags |= OPf_STACKED;
+    OP *kid = cUNOPo->op_first;
+    if (kid->op_type == OP_CONCAT && !(kUNOP->op_first->op_flags & OPf_MOD))
+        o->op_flags |= OPf_STACKED;
     return o;
 }
 

@@ -21,7 +21,7 @@ use File::Spec;
 use Encode qw(decode encode find_encoding _utf8_off);
 
 #use Test::More qw(no_plan);
-use Test::More tests => 23;
+use Test::More tests => 29;
 use_ok("Encode::Guess");
 {
     no warnings;
@@ -99,4 +99,19 @@ for my $bl (qw/BE LE/){
     my $result = guess_encoding($test);
     ok(! ref($result), "UTF-16$bl:$result");
 }
+
+
+
+Encode::Guess->set_suspects();
+for my $jp (@jp){
+    # intentionally set $1 a priori -- see Changes
+    my $test = "English";
+    '$1' =~ m/^(.*)/o;
+    is(guess_encoding($test, ($jp))->name, 'ascii', 
+       "ascii vs $jp (\$1 messed)");
+    $test = encode($jp, $test . "\n\x{65e5}\x{672c}\x{8a9e}");
+    is(guess_encoding($test, ($jp))->name, 
+       $jp, "$jp vs ascii (\$1 messed)");
+}
+
 __END__;

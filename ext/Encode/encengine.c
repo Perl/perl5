@@ -133,7 +133,7 @@ do_encode(encpage_t * enc, const U8 * src, STRLEN * slen, U8 * dst,
 		    if (approx && (e->slen & 0x80))
 			code = ENCODE_FALLBACK;
 		    last = s;
-		    if (term && d-dlast == tlen && memEQ(dlast, term, tlen)) {
+		    if (term && (STRLEN)(d-dlast) == tlen && memEQ(dlast, term, tlen)) {
 		      code = ENCODE_FOUND_TERM;
 		      break;
 		    }

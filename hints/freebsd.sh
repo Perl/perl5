@@ -92,10 +92,17 @@ case "$osvers" in
 	d_setegid='undef'
 	d_seteuid='undef'
 	;;
+4.*)	# In FreeBSD 4 and 5 the system malloc is performance-wise
+	# VERY bad for Perl-- we are talking of differences of not
+	# one, but TWO magnitudes.
+	usemymalloc=y
+	;;
+5.*)	usemymalloc=y
+	;;
 *)	usevfork='true'
 	case "$usemymalloc" in
-	    "") usemymalloc='n'
-	        ;;
+	"") usemymalloc='y'
+	    ;;
 	esac
 	libswanted=`echo $libswanted | sed 's/ malloc / /'`
 	;;
@@ -250,7 +257,7 @@ EOM
 
 	# Even with the malloc mutexes the Perl malloc does not
 	# seem to be threadsafe in FreeBSD?
-	usemymalloc=n
+	usemymalloc=y
 
 esac
 EOCBU

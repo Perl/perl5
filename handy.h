@@ -619,6 +619,8 @@ hopefully catches attempts to access uninitialized memory.
 #define StructCopy(s,d,t) Copy(s,d,1,t)
 #endif
 
+#define C_ARRAY_LENGTH(a)	(sizeof(a)/sizeof((a)[0]))
+
 #ifdef NEED_VA_COPY
 # ifdef va_copy
 #  define Perl_va_copy(s, d) va_copy(d, s)

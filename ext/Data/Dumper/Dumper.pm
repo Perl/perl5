@@ -1193,6 +1193,17 @@ XSUB implementation does not support them.
 
 SCALAR objects have the weirdest looking C<bless> workaround.
 
+=head2 NOTE
+
+Starting from Perl 5.8.1 different runs of Perl will have different
+ordering of hash keys.  The change was done for greater security,
+see L<perlsec/"Algorithmic Complexity Attacks">.  This means that
+different runs of Perl will have different Data::Dumper outputs if
+the data contains hashes.  If you need to have identical Data::Dumper
+outputs from different runs of Perl, use the environment variable
+PERL_HASH_SEED, see L<perlrun/PERL_HASH_SEED>.  Using this restores
+the old (platform-specific) ordering: an even prettier solution might
+be to use the C<Sortkeys> filter of Data::Dumper.
 
 =head1 AUTHOR
 
@@ -1201,7 +1212,6 @@ Gurusamy Sarathy        gsar@activestate.com
 Copyright (c) 1996-98 Gurusamy Sarathy. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
-
 
 =head1 VERSION
 

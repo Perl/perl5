@@ -26,6 +26,7 @@ PERL_CALLCONV int	perl_destruct(PerlInterpreter* interp);
 PERL_CALLCONV void	perl_free(PerlInterpreter* interp);
 PERL_CALLCONV int	perl_run(PerlInterpreter* interp);
 PERL_CALLCONV int	perl_parse(PerlInterpreter* interp, XSINIT_t xsinit, int argc, char** argv, char** env);
+PERL_CALLCONV bool	Perl_doing_taint(int argc, char** argv, char** env);
 #if defined(USE_ITHREADS)
 PERL_CALLCONV PerlInterpreter*	perl_clone(PerlInterpreter* interp, UV flags);
 #  if defined(PERL_IMPLICIT_SYS)
@@ -796,6 +797,7 @@ PERL_CALLCONV void	Perl_vivify_defelem(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_vivify_ref(pTHX_ SV* sv, U32 to_what);
 PERL_CALLCONV I32	Perl_wait4pid(pTHX_ Pid_t pid, int* statusp, int flags);
 PERL_CALLCONV U32	Perl_parse_unicode_opts(pTHX_ char **popt);
+PERL_CALLCONV U32	Perl_seed(pTHX);
 PERL_CALLCONV void	Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op);
 PERL_CALLCONV void	Perl_report_uninit(pTHX);
 PERL_CALLCONV void	Perl_warn(pTHX_ const char* pat, ...)
@@ -806,6 +808,7 @@ PERL_CALLCONV void	Perl_warner(pTHX_ U32 err, const char* pat, ...)
 PERL_CALLCONV void	Perl_vwarner(pTHX_ U32 err, const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_watch(pTHX_ char** addr);
 PERL_CALLCONV I32	Perl_whichsig(pTHX_ char* sig);
+PERL_CALLCONV void	Perl_write_to_stderr(pTHX_ const char* message, int msglen);
 PERL_CALLCONV int	Perl_yyerror(pTHX_ char* s);
 #ifdef USE_PURE_BISON
 PERL_CALLCONV int	Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp);
@@ -1015,7 +1018,6 @@ STATIC void*	S_vcall_list_body(pTHX_ va_list args);
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 STATIC SV*	S_refto(pTHX_ SV* sv);
-STATIC U32	S_seed(pTHX);
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)

@@ -1212,10 +1212,26 @@ sigaction(sig, optaction, oldaction = 0)
 	    sigset_t osset;
 	    POSIX__SigSet sigset;
 	    SV** svp;
-	    SV** sigsvp = hv_fetch(GvHVn(siggv),
-				 PL_sig_name[sig],
-				 strlen(PL_sig_name[sig]),
-				 TRUE);
+	    SV** sigsvp;
+	    if (sig == 0 && SvPOK(ST(0))) {
+	        char *s = SvPVX(ST(0));
+		int i = whichsig(s);
+
+	        if (i < 0 && memEQ(s, "SIG", 3))
+		    i = whichsig(s + 3);
+	        if (i < 0) {
+	            if (ckWARN(WARN_SIGNAL))
+		        Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
+                                    "No such signal: SIG%s", s);
+	            XSRETURN_UNDEF;
+		}
+	        else
+		    sig = i;
+            }
+	    sigsvp = hv_fetch(GvHVn(siggv),
+			      PL_sig_name[sig],
+			      strlen(PL_sig_name[sig]),
+			      TRUE);
 
 	    /* Check optaction and set action */
 	    if(SvTRUE(optaction)) {
@@ -1386,7 +1402,7 @@ lseek(fd, offset, whence)
     OUTPUT:
 	RETVAL
 
-SV *
+void
 nice(incr)
 	int		incr
     PPCODE:

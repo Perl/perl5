@@ -18,7 +18,7 @@ BEGIN {
         plan skip_all => 'Non-Unix platform';
     }
     else {
-        plan tests => 115;
+        plan tests => 116;
     }
 }
 
@@ -167,7 +167,8 @@ is ($t->libscan('foo/RCS/bar'),     '', 'libscan on RCS');
 is ($t->libscan('CVS/bar/car'),     '', 'libscan on CVS');
 is ($t->libscan('SCCS'),            '', 'libscan on SCCS');
 is ($t->libscan('.svn/something'),  '', 'libscan on Subversion');
-is ($t->libscan('foo/b~r'),         'foo/b~r', 'libscan on file with ~');
+is ($t->libscan('foo/b~r'),         'foo/b~r',    'libscan on file with ~');
+is ($t->libscan('foo/RCS.pm'),      'foo/RCS.pm', 'libscan on file with RCS');
 
 is ($t->libscan('Fatty'), 'Fatty', 'libscan on something not a VC file' );
 

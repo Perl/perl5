@@ -925,10 +925,15 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    SvREADONLY_on(av);
         }
 	goto magicalize;
-    case '#':
     case '*':
-	if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX) && len == 1 && sv_type == SVt_PV)
-	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX), "Use of $%s is deprecated", name);
+	if (len == 1 && sv_type == SVt_PV && ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
+	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+		    "$* is no longer supported");
+	break;
+    case '#':
+	if (len == 1 && sv_type == SVt_PV && ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
+	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+		    "Use of $# is deprecated");
 	/* FALL THROUGH */
     case '[':
     case '^':
@@ -1837,7 +1842,6 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
     case '!':
     case '-':
     case '#':
-    case '*':
     case '[':
     case '^':
     case '~':

@@ -1123,9 +1123,11 @@ manpage for details.
 
 Synopsis:
 
-	sigaction(sig, action, oldaction = 0)
+	sigaction(signal, action, oldaction = 0)
 
-Returns C<undef> on failure.
+Returns C<undef> on failure.  The C<signal> must be a number (like
+SIGHUP), not a string (like "SIGHUP"), though Perl does try hard
+to understand you.
 
 =item siglongjmp
 

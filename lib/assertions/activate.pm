@@ -2,13 +2,10 @@ package assertions::activate;
 
 our $VERSION = '0.01';
 
-# use strict;
-# use warnings;
-
 sub import {
     shift;
-    @_='.*' unless @_;
-    push @{^ASSERTING}, ( map { qr/^(?:$_)$/ } @_) ;
+    @_ = '.*' unless @_;
+    push @{^ASSERTING}, map { qr/^(?:$_)\z/ } @_;
 }
 
 1;
@@ -16,28 +13,27 @@ __END__
 
 =head1 NAME
 
-assertions::activate - assertions activation
+assertions::activate - activate assertions
 
 =head1 SYNOPSIS
 
-  use assertions::activate 'Foo', 'bar', 'Foo::boz::.*' ;
+  use assertions::activate 'Foo', 'bar', 'Foo::boz::.*';
 
-=head1 ABSTRACT
-
-C<assertions::activate> module is used to configure assertion
-execution.
+  # activate all assertions
+  use assertions::activate;
 
 =head1 DESCRIPTION
 
+This module is used internally by perl (and its C<-A> command-line switch) to
+enable and disable assertions. It can also be used directly.
 
-
-=head2 EXPORT
-
-None by default.
+The import parameters are a list of strings or of regular expressions. The
+assertion tags that match those regexps are enabled. If no parameter is
+given, all assertions are activated.
 
 =head1 SEE ALSO
 
-L<assertions>
+L<assertions>, L<perlrun>.
 
 =head1 AUTHOR
 

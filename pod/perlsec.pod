@@ -386,6 +386,75 @@ certain security pitfalls.  See L<perluniintro> for an overview and
 L<perlunicode> for details, and L<perlunicode/"Security Implications
 of Unicode"> for security implications in particular.
 
+=head2 Algorithmic Complexity Attacks
+
+Certain internal algorithms used in the implementation of Perl can
+be attacked by choosing the input carefully to consume large amounts
+of either time or space or both.  This can lead into the so-called
+I<Denial of Service> (DoS) attacks.
+
+=over 4
+
+=item *
+
+Hash Function - the algorithm used to "order" hash elements has been
+changed several times during the development of Perl, mainly to be
+reasonably fast.  In Perl 5.8.1 also the security aspect was taken
+into account.
+
+In Perls before 5.8.1 one could rather easily generate data that as
+hash keys would cause Perl to consume large amounts of time because
+internal structure of hashes would badly degenerate.  In Perl 5.8.1
+the hash function is randomly perturbed by a pseudorandom seed which
+makes generating such naughty hash keys harder.
+See L<perlrun/PERL_HASH_SEED> for more information.
+
+The random perturbation is done by default but if one wants for some
+reason emulate the old behaviour one can set the environment variable
+PERL_HASH_SEED to zero (or any other integer).  One possible reason
+for wanting to emulate the old behaviour is that in the new behaviour
+consecutive runs of Perl will order hash keys differently, which may
+confuse some applications (like Data::Dumper: the outputs of two
+different runs are no more identical).
+
+B<Perl has never guaranteed any ordering of the hash keys>, and the
+ordering has already changed several times during the lifetime of
+Perl 5.  Also, the ordering of hash keys has always been, and
+continues to be, affected by the insertion order.
+
+Also note that while the order of the hash elements might be
+randomised, this "pseudoordering" should B<not> be used for
+applications like shuffling a list randomly (use List::Util::shuffle()
+for that, see L<List::Util>, a standard core module since Perl 5.8.0;
+or the CPAN module Algorithm::Numerical::Shuffle), or for generating
+permutations (use e.g. the CPAN modules Algorithm::Permute or
+Algorithm::FastPermute), or for any cryptographic applications.
+
+=item *
+
+Regular expressions - Perl's regular expression engine is so called
+NFA (Non-Finite Automaton), which among other things means that it can
+rather easily consume large amounts of both time and space if the
+regular expression may match in several ways.  Careful crafting of the
+regular expressions can help but quite often there really isn't much
+one can do (the book "Mastering Regular Expressions" is required
+reading, see L<perlfaq2>).  Running out of space manifests itself by
+Perl running out of memory.
+
+=item *
+
+Sorting - the quicksort algorithm used in Perls before 5.8.0 to
+implement the sort() function is very easy to trick into misbehaving
+so that it consumes a lot of time.  Nothing more is required than
+resorting a list already sorted.  Starting from Perl 5.8.0 a different
+sorting algorithm, mergesort, is used.  Mergesort is insensitive to
+its input data, so it cannot be similarly fooled.
+
+=back
+
+See L<http://www.cs.rice.edu/~scrosby/hash/> for more information,
+and any computer science text book on the algorithmic complexity.
+
 =head1 SEE ALSO
 
 L<perlrun> for its description of cleaning up environment variables.
