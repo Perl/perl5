@@ -7,7 +7,7 @@ BEGIN {
 
 # don't make this lexical
 $i = 1;
-print "1..16\n";
+print "1..20\n";
 
 sub do_require {
     %INC = ();
@@ -22,6 +22,24 @@ sub write_file {
     print REQ @_;
     close REQ;
 }
+
+eval {require 5.005};
+print "# $@\nnot " if $@;
+print "ok ",$i++,"\n";
+
+eval { require 5.005 };
+print "# $@\nnot " if $@;
+print "ok ",$i++,"\n";
+
+eval { require 5.005; };
+print "# $@\nnot " if $@;
+print "ok ",$i++,"\n";
+
+eval {
+    require 5.005
+};
+print "# $@\nnot " if $@;
+print "ok ",$i++,"\n";
 
 # new style version numbers
 
