@@ -229,6 +229,13 @@ was attempted.  This mostly eliminates confusing
 buffering mishaps suffered by users unaware of how Perl internally
 handles I/O.
 
+=head2 Better diagnostics on meaningless filehandle operations
+
+Constructs such as C<open(E<lt>FHE<gt>)> and C<close(E<lt>FHE<gt>)>
+are compile time errors.  Attempting to read from filehandles that
+were opened only for writing will now produce warnings (just as
+writing to read-only filehandles does).
+
 =head1 Supported Platforms
 
 =over 4
@@ -467,15 +474,23 @@ A tutorial on managing class data for object modules.
 by Perl.  This combination appears in an interpolated variable or a
 C<'>-delimited regular expression.
 
-=item Unrecognized escape \\%c passed through
+=item Filehandle %s opened only for output
 
-(W) You used a backslash-character combination which is not recognized
-by Perl.
+(W) You tried to read from a filehandle opened only for writing.  If you
+intended it to be a read-write filehandle, you needed to open it with
+"+E<lt>" or "+E<gt>" or "+E<gt>E<gt>" instead of with "E<lt>" or nothing.  If
+you intended only to read from the file, use "E<lt>".  See
+L<perlfunc/open>.
 
 =item Missing command in piped open
 
 (W) You used the C<open(FH, "| command")> or C<open(FH, "command |")>
 construction, but the command was missing or blank.
+
+=item Unrecognized escape \\%c passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl.
 
 =item defined(@array) is deprecated
 

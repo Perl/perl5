@@ -706,6 +706,15 @@ Perl_do_eof(pTHX_ GV *gv)
 
     if (!io)
 	return TRUE;
+    else if (ckWARN(WARN_IO)
+	     && (IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
+		 || IoIFP(io) == PerlIO_stderr()))
+    {
+	SV* sv = sv_newmortal();
+	gv_efullname3(sv, gv, Nullch);
+	Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
+		    SvPV_nolen(sv));
+    }
 
     while (IoIFP(io)) {
 

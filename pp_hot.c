@@ -350,23 +350,24 @@ PP(pp_print)
     if (!(io = GvIO(gv))) {
 	if (ckWARN(WARN_UNOPENED)) {
 	    SV* sv = sv_newmortal();
-            gv_fullname3(sv, gv, Nullch);
-            Perl_warner(aTHX_ WARN_UNOPENED, "Filehandle %s never opened", SvPV(sv,n_a));
+	    gv_efullname3(sv, gv, Nullch);
+            Perl_warner(aTHX_ WARN_UNOPENED, "Filehandle %s never opened",
+			SvPV(sv,n_a));
         }
-
 	SETERRNO(EBADF,RMS$_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED, WARN_IO))  {
 	    SV* sv = sv_newmortal();
-            gv_fullname3(sv, gv, Nullch);
+	    gv_efullname3(sv, gv, Nullch);
 	    if (IoIFP(io))
-		Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for input", 
-				SvPV(sv,n_a));
+		Perl_warner(aTHX_ WARN_IO,
+			    "Filehandle %s opened only for input",
+			    SvPV(sv,n_a));
 	    else if (ckWARN(WARN_CLOSED))
-		Perl_warner(aTHX_ WARN_CLOSED, "print on closed filehandle %s", 
-				SvPV(sv,n_a));
+		Perl_warner(aTHX_ WARN_CLOSED,
+			    "print on closed filehandle %s", SvPV(sv,n_a));
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -1228,15 +1229,29 @@ Perl_do_readline(pTHX)
 	}
 	else if (type == OP_GLOB)
 	    SP--;
+	else if (ckWARN(WARN_IO)	/* stdout/stderr or other write fh */
+		 && (IoTYPE(io) == '>' || fp == PerlIO_stdout()
+		     || fp == PerlIO_stderr()))
+	{
+	    SV* sv = sv_newmortal();
+	    gv_efullname3(sv, PL_last_in_gv, Nullch);
+	    Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
+			SvPV_nolen(sv));
+	}
     }
     if (!fp) {
 	if (ckWARN(WARN_CLOSED) && io && !(IoFLAGS(io) & IOf_START)) {
 	    if (type == OP_GLOB)
-		Perl_warner(aTHX_ WARN_CLOSED, "glob failed (can't start child: %s)",
-		       Strerror(errno));
-	    else
-		Perl_warner(aTHX_ WARN_CLOSED, "Read on closed filehandle <%s>",
-		       GvENAME(PL_last_in_gv));
+		Perl_warner(aTHX_ WARN_CLOSED,
+			    "glob failed (can't start child: %s)",
+			    Strerror(errno));
+	    else {
+		SV* sv = sv_newmortal();
+		gv_efullname3(sv, PL_last_in_gv, Nullch);
+		Perl_warner(aTHX_ WARN_CLOSED,
+			    "Read on closed filehandle %s",
+			    SvPV_nolen(sv));
+	    }
 	}
 	if (gimme == G_SCALAR) {
 	    (void)SvOK_off(TARG);

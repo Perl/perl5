@@ -1265,7 +1265,7 @@ PDP-11 or something?
 You need to do an open() or a socket() call, or call a constructor from
 the FileHandle package.
 
-=item Filehandle %s opened for only input
+=item Filehandle %s opened only for input
 
 (W) You tried to write on a read-only filehandle.  If you
 intended it to be a read-write filehandle, you needed to open it with
@@ -1273,12 +1273,12 @@ intended it to be a read-write filehandle, you needed to open it with
 you intended only to write the file, use "E<gt>" or "E<gt>E<gt>".  See
 L<perlfunc/open>.
 
-=item Filehandle opened for only input
+=item Filehandle %s opened only for output
 
-(W) You tried to write on a read-only filehandle.  If you
+(W) You tried to read from a filehandle opened only for writing.  If you
 intended it to be a read-write filehandle, you needed to open it with
 "+E<lt>" or "+E<gt>" or "+E<gt>E<gt>" instead of with "E<lt>" or nothing.  If
-you intended only to write the file, use "E<gt>" or "E<gt>E<gt>".  See
+you intended only to read from the file, use "E<lt>".  See
 L<perlfunc/open>.
 
 =item Final $ should be \$ or $name
@@ -2274,7 +2274,7 @@ are outside the range which can be represented by integers internally.
 One possible workaround is to force Perl to use magical string
 increment by prepending "0" to your numbers.
 
-=item Read on closed filehandle E<lt>%sE<gt>
+=item Read on closed filehandle %s
 
 (W) The filehandle you're reading from got itself closed sometime before now.
 Check your logic flow.
@@ -3169,7 +3169,7 @@ but in actual fact, you got
 
 So put in parentheses to say what you really mean.
 
-=item Write on closed filehandle
+=item Write on closed filehandle %s
 
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.

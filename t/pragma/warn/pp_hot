@@ -6,6 +6,8 @@
   Filehandle %s opened only for input
     print STDIN "abc" ;
 
+  Filehandle %s opened only for output
+    print <STDOUT> ;
 
   print on closed filehandle %s
     close STDIN ; print STDIN "abc" ;
@@ -22,7 +24,7 @@
   Reference found where even-sized list expected 
 	$X = [ 1 ..3 ];
 
-  Read on closed filehandle <%s>
+  Read on closed filehandle %s
     close STDIN ; $a = <STDIN>;
 
   Deep recursion on subroutine \"%s\"
@@ -42,8 +44,20 @@ Filehandle main::abc never opened at - line 4.
 # pp_hot.c
 use warning 'io' ;
 print STDIN "anc";
+print <STDOUT>;
+print <STDERR>;
+open(FOO, ">&STDOUT") and print <FOO>;
+print getc(STDERR);
+print getc(FOO);
+read(FOO,$_,1);
 EXPECT
 Filehandle main::STDIN opened only for input at - line 3.
+Filehandle main::STDOUT opened only for output at - line 4.
+Filehandle main::STDERR opened only for output at - line 5.
+Filehandle main::FOO opened only for output at - line 6.
+Filehandle main::STDERR opened only for output at - line 7.
+Filehandle main::FOO opened only for output at - line 8.
+Filehandle main::FOO opened only for output at - line 9.
 ########
 # pp_hot.c
 use warning 'closed' ;
@@ -82,7 +96,7 @@ Reference found where even-sized list expected at - line 3.
 use warning 'closed' ;
 close STDIN ; $a = <STDIN> ;
 EXPECT
-Read on closed filehandle <STDIN> at - line 3.
+Read on closed filehandle main::STDIN at - line 3.
 ########
 # pp_hot.c
 use warning 'recursion' ;

@@ -2604,29 +2604,33 @@ S_init_predump_symbols(pTHX)
     dTHR;
     GV *tmpgv;
     GV *othergv;
+    IO *io;
 
     sv_setpvn(get_sv("\"", TRUE), " ", 1);
     PL_stdingv = gv_fetchpv("STDIN",TRUE, SVt_PVIO);
     GvMULTI_on(PL_stdingv);
-    IoIFP(GvIOp(PL_stdingv)) = PerlIO_stdin();
+    io = GvIOp(PL_stdingv);
+    IoIFP(io) = PerlIO_stdin();
     tmpgv = gv_fetchpv("stdin",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
-    GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(PL_stdingv));
+    GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
 
     tmpgv = gv_fetchpv("STDOUT",TRUE, SVt_PVIO);
     GvMULTI_on(tmpgv);
-    IoOFP(GvIOp(tmpgv)) = IoIFP(GvIOp(tmpgv)) = PerlIO_stdout();
+    io = GvIOp(tmpgv);
+    IoOFP(io) = IoIFP(io) = PerlIO_stdout();
     setdefout(tmpgv);
     tmpgv = gv_fetchpv("stdout",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
-    GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(PL_defoutgv));
+    GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
 
     othergv = gv_fetchpv("STDERR",TRUE, SVt_PVIO);
     GvMULTI_on(othergv);
-    IoOFP(GvIOp(othergv)) = IoIFP(GvIOp(othergv)) = PerlIO_stderr();
+    io = GvIOp(othergv);
+    IoOFP(io) = IoIFP(io) = PerlIO_stderr();
     tmpgv = gv_fetchpv("stderr",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
-    GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(othergv));
+    GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
 
     PL_statname = NEWSV(66,0);		/* last filename we did stat on */
 

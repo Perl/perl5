@@ -1272,10 +1272,15 @@ PP(pp_leavewrite)
     fp = IoOFP(io);
     if (!fp) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO)) {
+	    SV* sv = sv_newmortal();
+	    gv_efullname3(sv, gv, Nullch);
 	    if (IoIFP(io))
-		Perl_warner(aTHX_ WARN_IO, "Filehandle only opened for input");
+		Perl_warner(aTHX_ WARN_IO,
+			    "Filehandle %s opened only for input",
+			    SvPV_nolen(sv));
 	    else if (ckWARN(WARN_CLOSED))
-		Perl_warner(aTHX_ WARN_CLOSED, "Write on closed filehandle");
+		Perl_warner(aTHX_ WARN_CLOSED,
+			    "Write on closed filehandle %s", SvPV_nolen(sv));
 	}
 	PUSHs(&PL_sv_no);
     }
@@ -1339,21 +1344,23 @@ PP(pp_prtf)
     sv = NEWSV(0,0);
     if (!(io = GvIO(gv))) {
 	if (ckWARN(WARN_UNOPENED)) {
-	    gv_fullname3(sv, gv, Nullch);
-	    Perl_warner(aTHX_ WARN_UNOPENED, "Filehandle %s never opened", SvPV(sv,n_a));
+	    gv_efullname3(sv, gv, Nullch);
+	    Perl_warner(aTHX_ WARN_UNOPENED,
+			"Filehandle %s never opened", SvPV(sv,n_a));
 	}
 	SETERRNO(EBADF,RMS$_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO))  {
-	    gv_fullname3(sv, gv, Nullch);
+	    gv_efullname3(sv, gv, Nullch);
 	    if (IoIFP(io))
-		Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for input",
-			SvPV(sv,n_a));
+		Perl_warner(aTHX_ WARN_IO,
+			    "Filehandle %s opened only for input",
+			    SvPV(sv,n_a));
 	    else if (ckWARN(WARN_CLOSED))
-		Perl_warner(aTHX_ WARN_CLOSED, "printf on closed filehandle %s",
-			SvPV(sv,n_a));
+		Perl_warner(aTHX_ WARN_CLOSED,
+			    "printf on closed filehandle %s", SvPV(sv,n_a));
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -1538,8 +1545,17 @@ PP(pp_sysread)
 	if (length == 0 && PerlIO_error(IoIFP(io)))
 	    length = -1;
     }
-    if (length < 0)
+    if (length < 0) {
+	if (IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
+	    || IoIFP(io) == PerlIO_stderr())
+	{
+	    SV* sv = sv_newmortal();
+	    gv_efullname3(sv, gv, Nullch);
+	    Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
+			SvPV_nolen(sv));
+	}
 	goto say_undef;
+    }
     SvCUR_set(bufsv, length+offset);
     *SvEND(bufsv) = '\0';
     (void)SvPOK_only(bufsv);
