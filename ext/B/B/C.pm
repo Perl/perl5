@@ -609,8 +609,9 @@ sub B::CV::save {
            warn "Bootstrap $stashname $file\n";
            $xsub{$stashname}='Dynamic'; 
 	   # $xsub{$stashname}='Static' unless  $xsub{$stashname};
-           # return qq/NULL/;
+           return qq/NULL/;
           }                                   
+        warn sprintf("stub for XSUB $cvstashname\:\:$cvname CV 0x%x\n", $$cv) if $debug_cv;
 	return qq/(perl_get_cv("$stashname\:\:$cvname",TRUE))/;
     }
     if ($cvxsub && $cvname eq "INIT") {
@@ -623,7 +624,7 @@ sub B::CV::save {
     $xpvcvsect->add("xpvcvix$xpvcv_ix");
     # Save symbol now so that GvCV() doesn't recurse back to us via CvGV()
     $sym = savesym($cv, "&sv_list[$sv_ix]");
-    warn sprintf("saving CV 0x%x as $sym\n", $$cv) if $debug_cv;
+    warn sprintf("saving $cvstashname\:\:$cvname CV 0x%x as $sym\n", $$cv) if $debug_cv;
     if (!$$root && !$cvxsub) {
 	if (try_autoload($cvstashname, $cvname)) {
 	    # Recalculate root and xsub
@@ -1139,21 +1140,30 @@ EOT
     print "\n#ifdef USE_DYNAMIC_LOADING";
     print qq/\n\tnewXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);/;
     print "\n#endif\n" ;
-    delete $xsub{'DynaLoader'}; 
+    # delete $xsub{'DynaLoader'}; 
     delete $xsub{'UNIVERSAL'}; 
     print("/* bootstrapping code*/\n\tSAVETMPS;\n");
     print("\ttarg=sv_newmortal();\n");
-    foreach my $stashname (keys %xsub ){
+    print "#ifdef DYNALOADER_BOOTSTRAP\n";
+    print "\tPUSHMARK(sp);\n";
+    print qq/\tXPUSHp("DynaLoader",strlen("DynaLoader"));\n/;
+    print qq/\tPUTBACK;\n/;
+    print "\tboot_DynaLoader(NULL);\n";
+    print qq/\tSPAGAIN;\n/;
+    print "#endif\n";
+    foreach my $stashname (keys %xsub){
 	if ($xsub{$stashname} ne 'Dynamic') {
 	   my $stashxsub=$stashname;
 	   $stashxsub  =~ s/::/__/g; 
 	   print "\tPUSHMARK(sp);\n";
-	   print qq/\tXPUSHp("$stashname",strlen("$stashname")+1);\n/;
+	   print qq/\tXPUSHp("$stashname",strlen("$stashname"));\n/;
+	   print qq/\tPUTBACK;\n/;
 	   print "\tboot_$stashxsub(NULL);\n";
+	   print qq/\tSPAGAIN;\n/;
 	}   
     }
     print("\tFREETMPS;\n/* end bootstrapping code */\n");
-    print "\n}";
+    print "}\n";
     
 print <<'EOT';
 static void
@@ -1171,7 +1181,7 @@ EOT
   	   my $stashxsub=$stashname;
 	   $stashxsub  =~ s/::/__/g; 
    	   print "\tPUSHMARK(sp);\n";
-   	   print qq/\tXPUSHp("$stashname",/,length($stashname)+1,qq/);\n/;
+   	   print qq/\tXPUSHp("$stashname",/,length($stashname),qq/);\n/;
 	   print qq/\tPUTBACK;\n/;
            print "#ifdef DYNALOADER_BOOTSTRAP\n";
 	   warn "bootstrapping $stashname added to xs_init\n";
@@ -1183,7 +1193,7 @@ EOT
 	}   
     }
     print("\tFREETMPS;\n/* end Dynamic bootstrapping code */\n");
-    print "\n}";
+    print "}\n";
 }
 sub dump_symtable {
     # For debugging
@@ -1242,7 +1252,7 @@ sub mark_package
            eval { $package->bootstrap }; 
           }
         }
-       else
+#      else
         {
          unless ($unused_sub_packages{$isa})
           {
