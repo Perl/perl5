@@ -538,6 +538,24 @@ mini_mktime(struct tm *ptm)
 	ptm->tm_wday = (jday + WEEKDAY_BIAS) % 7;
 }
 
+#ifdef HAS_LONG_DOUBLE
+#  if LONG_DOUBLESIZE > DOUBLESIZE
+#    undef HAS_LONG_DOUBLE  /* XXX until we figure out how to use them */
+#  endif
+#endif
+
+#ifndef HAS_LONG_DOUBLE
+#ifdef LDBL_MAX
+#undef LDBL_MAX
+#endif
+#ifdef LDBL_MIN
+#undef LDBL_MIN
+#endif
+#ifdef LDBL_EPSILON
+#undef LDBL_EPSILON
+#endif
+#endif
+
 static int
 not_here(char *s)
 {
