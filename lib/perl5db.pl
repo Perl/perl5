@@ -296,6 +296,10 @@ if ($notty) {
     $console = "sys\$command";
   }
 
+  if (($^O eq 'MSWin32') and ($emacs or defined $ENV{EMACS})) {
+    $console = undef;
+  }
+
   # Around a bug:
   if (defined $ENV{OS2_SHELL} and ($emacs or $ENV{WINDOWID})) { # In OS/2
     $console = undef;
