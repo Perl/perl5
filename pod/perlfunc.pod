@@ -3087,10 +3087,12 @@ sanity checks in the interest of speed.
 =item splice ARRAY,OFFSET
 
 Removes the elements designated by OFFSET and LENGTH from an array, and
-replaces them with the elements of LIST, if any.  Returns the elements
-removed from the array.  The array grows or shrinks as necessary.  If
-LENGTH is omitted, removes everything from OFFSET onward.  The
-following equivalences hold (assuming C<$[ == 0>):
+replaces them with the elements of LIST, if any.  In a list context,
+returns the elements removed from the array.  In a scalar context,
+returns the last element removed, or C<undef> if no elements are
+removed.  The array grows or shrinks as necessary.  If LENGTH is
+omitted, removes everything from OFFSET onward.  The following
+equivalences hold (assuming C<$[ == 0>):
 
     push(@a,$x,$y)	splice(@a,$#a+1,0,$x,$y)
     pop(@a)		splice(@a,-1)

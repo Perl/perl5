@@ -32,7 +32,7 @@ sub AUTOLOAD {
     if ($constname =~ /^O_/) {
       my($val) = constant($constname);
       defined $val or croak("Unknown VMS::Stdio constant $constname");
-      *$AUTOLOAD = sub { val; }
+      *$AUTOLOAD = sub { $val; }
     }
     else { # We don't know about it; hand off to IO::File
       require IO::File;
