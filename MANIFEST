@@ -2235,8 +2235,8 @@ win32/perlhost.h		Perl "host" implementation
 win32/perllib.c			Win32 port
 win32/pod.mak			Win32 port
 win32/runperl.c			Win32 port
-win32/sncfnmcs.pl		Win32 port
 win32/splittree.pl		Win32 port
+win32/sync_ext.pl		Win32 port
 win32/vdir.h			Perl "host" virtual directory manager
 win32/vmem.h			Perl "host" memory manager
 win32/win32.c			Win32 port

@@ -85,7 +85,7 @@ with all lowercase letters, and every time dmake is invoked
 to bring files up to date, it will try to recompile such files again.
 For example, Tk distribution has a lot of such files, resulting in
 needless recompiles everytime dmake is invoked.  To avoid this, you
-may use the script "sncfnmcs.pl" after a successful build.  It is
+may use the script "sync_ext.pl" after a successful build.  It is
 available in the win32 subdirectory of the Perl source distribution.
 
 =item Command Shell
