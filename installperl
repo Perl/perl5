@@ -372,8 +372,8 @@ if ($d_dosuid) {
     # give it a different name for maintenance releases, as there are too many
     # entrenched scripts which call sperl directly. So the suid backend is
     # suidperl
-    copy("suidperl$exe_ext", "$installbin/setuid$perl_verbase$ver$exe_ext");
-    chmod(04711, "$installbin/setuid$perl_verbase$ver$exe_ext");
+    copy("suidperl$exe_ext", "$installbin/suid$perl_verbase$ver$exe_ext");
+    chmod(04711, "$installbin/suid$perl_verbase$ver$exe_ext");
     # and we provide a "sperl" which will keep on working the way these scripts
     # expect.
     link("$installbin/$perl_verbase$ver$exe_ext",

@@ -25,6 +25,9 @@ such as newline and backspace are output in C<\x> notation, rather than
 octal. This might just confuse non-robust tools which parse the output of
 modules such as Devel::Peek.
 
+You may no longer invoke suidperl directly; any script which uses
+#!/usr/bin/suidperl should be changed to use #!/usr/bin/perl.
+
 =head1 Core Enhancements
 
 =head2 Malloc wrapping
@@ -48,14 +51,7 @@ been updated to 4.0.1 from 4.0.0.
 Paul Szabo has analysed and patched C<suidperl> to remove existing known
 insecurities. Currently there are no known holes in C<suidperl>, but
 previous experience shows that we cannot be confident that these were the
-last.  You may no longer invoke the set uid perl directly, so to preserve
-backwards compatibility with scripts that invoke #!/usr/bin/suidperl
-the set uid binary is now called C<setuidperl>, with C<suidperl> installed
-as a hard link to C<perl>. Both C<suidperl> and C<perl> will invoke
-C<setuidperl> automatically on a set uid script, so this change should be
-completely transparent.
-
-For new projects the core perl team would strongly recommend that you
+last. For new projects the core perl team would strongly recommend that you
 use dedicated, single purpose security tools such as C<sudo> in preference
 to C<suidperl>.
 

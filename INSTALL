@@ -1504,9 +1504,9 @@ library installed for the Compress::Zlib, or the Foo database specific
 headers and libraries installed for the DBD::Foo module.  The Configure
 process or the Perl build process will not help you with these.
 
-=head1 setuidperl
+=head1 suidperl
 
-setuidperl is an optional component, which is built or installed by default.
+suidperl is an optional component, which is built or installed by default.
 From perlfaq1:
 
 	On some systems, setuid and setgid scripts (scripts written
@@ -1514,13 +1514,13 @@ From perlfaq1:
         set user or group ID permissions enabled) are insecure due to
         a race condition in the kernel. For those systems, Perl versions
         5 and 4 attempt to work around this vulnerability with an optional
-        component, a special program named setuidperl, also known as sperl.
+        component, a special program named suidperl, also known as sperl.
         This program attempts to emulate the set-user-ID and set-group-ID
         features of the kernel.
 
-Because of the buggy history of setuidperl, and the difficulty
+Because of the buggy history of suidperl, and the difficulty
 of properly security auditing as large and complex piece of
-software as Perl, we cannot recommend using setuidperl and the feature
+software as Perl, we cannot recommend using suidperl and the feature
 should be considered deprecated.
 Instead use for example 'sudo': http://www.courtesan.com/sudo/
 
@@ -2137,11 +2137,8 @@ make install will install the following:
 	perl,
 	    perl5.nnn	where nnn is the current release number.  This
 			will be a link to perl.
-	setuidperl5.nnn	If you requested setuid emulation.
-	    suidperl	A link to perl, for backwards compatibility with setuid
-			scripts which expect to call the setuid emulation perl
-			directly.
-	    sperl5.nnn	A link to perl, for the same reasons as suidperl
+	suidperl,
+	    sperl5.nnn	If you requested setuid emulation.
 	a2p          	awk-to-perl translator
 
     scripts

@@ -610,15 +610,15 @@ regular expression about where the problem was discovered. See L<perlre>.
 =item Can't do setegid!
 
 (P) The setegid() call failed for some reason in the setuid emulator of
-setuidperl.
+suidperl.
 
 =item Can't do seteuid!
 
-(P) The setuid emulator of setuidperl failed for some reason.
+(P) The setuid emulator of suidperl failed for some reason.
 
 =item Can't do setuid
 
-(F) This typically means that ordinary perl tried to exec setuidperl to do
+(F) This typically means that ordinary perl tried to exec suidperl to do
 setuid emulation, but couldn't exec it.  It looks for a name of the form
 sperl5.000 in the same directory that the perl executable resides under
 the name perl5.000, typically /usr/local/bin on Unix machines.  If the
@@ -973,7 +973,7 @@ method name is C<???>, this is an internal error.
 =item Can't reswap uid and euid
 
 (P) The setreuid() call failed for some reason in the setuid emulator of
-setuidperl.
+suidperl.
 
 =item Can't return %s from lvalue subroutine
 
@@ -1002,7 +1002,7 @@ open already.  Bizarre.
 =item Can't swap uid and euid
 
 (P) The setreuid() call failed for some reason in the setuid emulator of
-setuidperl.
+suidperl.
 
 =item Can't take log of %g
 
@@ -2914,7 +2914,7 @@ L<perllocale> section B<LOCALE PROBLEMS>.
 
 =item Permission denied
 
-(F) The setuid emulator in setuidperl decided you were up to no good.
+(F) The setuid emulator in suidperl decided you were up to no good.
 
 =item pid %x not a child
 
@@ -3285,9 +3285,9 @@ as a list, you need to look into how references work, because Perl will
 not magically convert between scalars and lists for you.  See
 L<perlref>.
 
-=item Script is not setuid/setgid in setuidperl
+=item Script is not setuid/setgid in suidperl
 
-(F) Oddly, the setuidperl program was invoked on a script without a setuid
+(F) Oddly, the suidperl program was invoked on a script without a setuid
 or setgid bit set.  This doesn't make much sense.
 
 =item Search pattern not terminated
@@ -3546,7 +3546,7 @@ length of the string.  See L<perlfunc/substr>.  This warning is fatal if
 substr is used in an lvalue context (as the left hand side of an
 assignment or as a subroutine argument for example).
 
-=item setuidperl is no longer needed since %s
+=item suidperl is no longer needed since %s
 
 (F) Your Perl was compiled with B<-D>SETUID_SCRIPTS_ARE_SECURE_NOW, but
 a version of the setuid emulator somehow got run anyway.
