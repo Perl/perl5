@@ -733,6 +733,10 @@ Something like this will reproduce the error:
     process $BADREF 1,2,3;
     $BADREF->process(1,2,3);
 
+=item Can't check filesystem of script "%s" for nosuid
+
+(P) For some reason you can't check the filesystem of the script for nosuid.
+
 =item Can't coerce array into hash
 
 (F) You used an array where a hash was expected, but the array has no

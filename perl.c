@@ -2076,8 +2076,7 @@ static int
 fd_on_nosuid_fs(int fd)
 {
     int on_nosuid  = 0;
-    int check_okay = 1;
-
+    int check_okay = 0;
 /*
  * Preferred order: fstatvfs(), fstatfs(), getmntent().
  * fstatvfs() is UNIX98.
@@ -2107,29 +2106,32 @@ fd_on_nosuid_fs(int fd)
     on_nosuid  = check_okay && (stfs.f_flags & PERL_MOUNT_NOSUID);
 #           endif
 #       else
-#           if defined(HAS_GETMNENT) && defined(HAS_HASMNTOPT) && defined(MNTOPT_NOSUID)
+#           if defined(HAS_GETMNTENT) && defined(HAS_HASMNTOPT) && defined(MNTOPT_NOSUID)
     FILE		*mtab = fopen("/etc/mtab", "r");
     struct mntent	*entry;
     struct stat		stb, fsb;
 
-    if (mtab && (fstat(PerlIO_fileno(mtab), &stb) == 0)) {
+    if (mtab && (fstat(fd, &stb) == 0)) {
 	while (entry = getmntent(mtab)) {
-	    if (stat(entry->mnt_dir, &fsb) == 0 &&
-		fsb.st_dev == stb.st_dev        &&
-		hasmntopt(entry, MNTOPT_NOSUID)) {
-		on_nosuid = 1;
+	    if (stat(entry->mnt_dir, &fsb) == 0
+		&& fsb.st_dev == stb.st_dev)
+	    {
+		/* found the filesystem */
+		check_okay = 1;
+		if (hasmntopt(entry, MNTOPT_NOSUID))
+		    on_nosuid = 1;
 		break;
 	    } /* A single fs may well fail its stat(). */
 	}
-    } else
-	check_okay = 0;
+    }
     if (mtab)
 	fclose(mtab);
 #           endif /* mntent */
 #       endif /* statfs */
 #   endif /* statvfs */
     if (!check_okay) 
-	croak("Can't check filesystem of script \"%s\"", PL_origfilename);
+	croak("Can't check filesystem of script \"%s\" for nosuid",
+	      PL_origfilename);
     return on_nosuid;
 }
 #endif /* IAMSUID */
@@ -2202,8 +2204,8 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
 		croak("Can't swap uid and euid");	/* really paranoid */
 	    if (PerlLIO_stat(SvPVX(GvSV(PL_curcop->cop_filegv)),&tmpstatbuf) < 0)
 		croak("Permission denied");	/* testing full pathname here */
-#ifdef IAMSUID
-	    if (fd_on_nosuid_fs(PerlIO_fileno(rsfp)))
+#if defined(IAMSUID) && !defined(NO_NOSUID_CHECK)
+	    if (fd_on_nosuid_fs(PerlIO_fileno(PL_rsfp)))
 		croak("Permission denied");
 #endif
 	    if (tmpstatbuf.st_dev != PL_statbuf.st_dev ||

@@ -267,13 +267,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that the fstatvfs routine is
  *	available to stat the filesystem of a file descriptor.
  */
-#$d_fstatfs HAS_FSTATFS	/**/
+#$d_fstatvfs HAS_FSTATVFS	/**/
 
 /* I_MNTENT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <mntent.h>.
  */
-#$i_mntent I_MATH		/**/
+#$i_mntent I_MNTENT		/**/
 
 /* HAS_GETMNTENT:
  *	This symbol, if defined, indicates that the getmntent routine is

@@ -2538,15 +2538,13 @@ enum {
 #ifdef IAMSUID
 
 #ifdef I_SYS_STATVFS
-#   include <sys/statvfs.h>
-#else
-#   ifdef I_SYS_MOUNT
-#       include <sys/mount.h>
-#   else
-#       ifdef I_MNTENT
-#           include <mntent.h>
-#       endif
-#   endif
+#   include <sys/statvfs.h>     /* for f?statvfs() */
+#endif
+#ifdef I_SYS_MOUNT
+#   include <sys/mount.h>       /* for *BSD f?statfs() */
+#endif
+#ifdef I_MNTENT
+#   include <mntent.h>          /* for getmntent() */
 #endif
 
 #endif /* IAMSUID */

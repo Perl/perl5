@@ -7232,6 +7232,10 @@ eval $inlibc
 set gethostbyname d_gethbyname
 eval $inlibc
 
+: see if this is a sys/param system
+set sys/param.h i_sysparam
+eval $inhdr
+
 : see if this is a sys/mount.h system
 set sys/mount.h i_sysmount
 eval $inhdr
@@ -7242,7 +7246,7 @@ eval $inlibc
 
 : see if statfs knows about mount flags
 echo " "
-set d_statfsflags statfs f_flags $i_sysmount sys/mount.h
+set d_statfsflags statfs f_flags $i_sysparam sys/param.h $i_sysmount sys/mount.h
 eval $hasfield
 
 : see if this is a sysstatvfs.h system
@@ -11289,10 +11293,6 @@ echo "No <sys/ioctl.h> found, assuming ioctl args are defined in <$xxx>." >&4
 fi
 set i_sysioctl
 eval $setvar
-
-: see if this is a sys/param system
-set sys/param.h i_sysparam
-eval $inhdr
 
 : see if sys/resource.h has to be included
 set sys/resource.h i_sysresrc
