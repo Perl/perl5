@@ -764,10 +764,15 @@ tryagain:
 	croak("internal urp in regexp at /%s/", regparse);
 				/* Supposed to be caught earlier. */
 	break;
+    case '{':
+	if (!regcurly(regparse)) {
+	    regparse++;
+	    goto defchar;
+	}
+	/* FALL THROUGH */
     case '?':
     case '+':
     case '*':
-    case '{':
 	FAIL("?+*{} follows nothing in regexp");
 	break;
     case '\\':
