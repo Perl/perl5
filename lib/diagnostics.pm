@@ -181,10 +181,10 @@ if ($^O eq 'VMS') {
 }
 @trypod = (
 	   "$archlib/pod/perldiag.pod",
-	   "$privlib/pod/perldiag-$].pod",
+	   "$privlib/pod/perldiag-$Config{version}.pod",
 	   "$privlib/pod/perldiag.pod",
 	   "$archlib/pods/perldiag.pod",
-	   "$privlib/pods/perldiag-$].pod",
+	   "$privlib/pods/perldiag-$Config{version}.pod",
 	   "$privlib/pods/perldiag.pod",
 	  );
 # handy for development testing of new warnings etc

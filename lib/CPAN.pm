@@ -3325,7 +3325,8 @@ sub perl {
     $perl ||= $candidate if MM->maybe_command($candidate);
     unless ($perl) {
 	my ($component,$perl_name);
-      DIST_PERLNAME: foreach $perl_name ($^X, 'perl', 'perl5', "perl$]") {
+      DIST_PERLNAME:
+	foreach $perl_name ($^X, 'perl', 'perl5', "perl$Config::Config{version}") {
 	    PATH_COMPONENT: foreach $component (MM->path(),
 						$Config::Config{'binexp'}) {
 		  next unless defined($component) && $component;
