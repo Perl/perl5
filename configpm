@@ -26,7 +26,7 @@ use Exporter ();
 \@EXPORT_OK = qw(myconfig config_sh config_vars);
 
 \$] == $myver
-  or die "Perl lib version ($myver) doesn't match executable version (\$])\\n";
+  or die "Perl lib version ($myver) doesn't match executable version (\$])";
 
 # This file was created by configpm when Perl was built. Any changes
 # made to this file will be lost the next time perl is built.
@@ -85,8 +85,6 @@ EOT
 
 print CONFIG <<'ENDOFEND';
 
-tie %Config, Config;
-sub TIEHASH { bless {} }
 sub FETCH { 
     # check for cached value (which maybe undef so we use exists not defined)
     return $_[0]->{$_[1]} if (exists $_[0]->{$_[1]});
@@ -126,13 +124,45 @@ sub CLEAR  { &STORE }
 sub config_sh {
     $config_sh
 }
+
+sub config_re {
+    my $re = shift;
+    my @matches = ($config_sh =~ /^$re=.*\n/mg);
+    @matches ? (print @matches) : print "$re: not found\n";
+}
+
 sub config_vars {
     foreach(@_){
+	config_re($_), next if /\W/;
 	my $v=(exists $Config{$_}) ? $Config{$_} : 'UNKNOWN';
 	$v='undef' unless defined $v;
 	print "$_='$v';\n";
     }
 }
+
+ENDOFEND
+
+if ($^O eq 'os2') {
+  print CONFIG <<'ENDOFSET';
+my %preconfig;
+if ($OS2::is_aout) {
+    my ($value, $v) = $config_sh =~ m/^used_aout='(.*)'\s*$/m;
+    for (split ' ', $value) {
+        ($v) = $config_sh =~ m/^aout_$_='(.*)'\s*$/m;
+        $preconfig{$_} = $v eq 'undef' ? undef : $v;
+    }
+}
+sub TIEHASH { bless {%preconfig} }
+ENDOFSET
+} else {
+  print CONFIG <<'ENDOFSET';
+sub TIEHASH { bless {} }
+ENDOFSET
+}
+
+print CONFIG <<'ENDOFTAIL';
+
+tie %Config, 'Config';
 
 1;
 __END__
@@ -229,7 +259,7 @@ outside of it.
 
 =cut
 
-ENDOFEND
+ENDOFTAIL
 
 close(CONFIG);
 
