@@ -101,6 +101,9 @@ ok 3, ref $y eq 'ROOT';
 
 $Storable::canonical = 1;		# Prevent "used once" warning
 $Storable::canonical = 1;
+# Allow for long double string conversions.
+$y->{num}->[3] += 0;
+$r->{num}->[3] += 0;
 ok 4, nfreeze($y) eq nfreeze($r);
 
 ok 5, $y->ref->{key1} eq 'val1';
