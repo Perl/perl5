@@ -275,12 +275,12 @@ ok($casespec->{code} eq '00DF' &&
    $casespec->{lower} eq '00DF'  &&
    $casespec->{title} eq '0053 0073'  &&
    $casespec->{upper} eq '0053 0053' &&
-   $casespec->{condition} eq undef, 'casespec 0xDF');
+   !defined $casespec->{condition}, 'casespec 0xDF');
 
 $casespec = casespec(0x307);
 
 ok($casespec->{az}->{code} eq '0307' &&
-   $casespec->{az}->{lower} eq ''  &&
+   !defined $casespec->{az}->{lower} &&
    $casespec->{az}->{title} eq '0307'  &&
    $casespec->{az}->{upper} eq '0307' &&
    $casespec->{az}->{condition} eq 'az After_I',
@@ -288,7 +288,7 @@ ok($casespec->{az}->{code} eq '0307' &&
 
 # perl #7305 UnicodeCD::compexcl is weird
 
-for (1) {$a=compexcl $_}
+for (1) {my $a=compexcl $_}
 ok(1, 'compexcl read-only $_: perl #7305');
 grep {compexcl $_} %{{1=>2}};
 ok(1, 'compexcl read-only hash: perl #7305');
