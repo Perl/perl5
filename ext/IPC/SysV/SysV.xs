@@ -22,6 +22,13 @@
 #endif
 #endif
 
+/* Required in BSDI to get PAGE_SIZE definition for SHMLBA.
+ * Ugly.  More beautiful solutions welcome.
+ * Shouting at BSDI sounds quite beautiful. */
+#ifdef __bsdi__
+#   include <vm/vm_param.h>
+#endif
+
 #ifndef newCONSTSUB
 static void
 newCONSTSUB(stash,name,sv)
