@@ -4,6 +4,7 @@ require 5.001;
 
 $ExportLevel = 0;
 $Verbose ||= 0;
+$VERSION = '5.562';
 
 sub export_to_level {
   require Exporter::Heavy;
