@@ -11,7 +11,7 @@
 # newly built perl.
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl\perl5004.5X
-BUILDOPT=-DUSE_THREADS 
+BUILDOPT=-DUSE_THREADS -P
 
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
 
@@ -63,7 +63,7 @@ IMPLIB = implib
 RUNTIME  = -D_RTLDLL
 INCLUDES = -I.\include -I. -I.. -I$(CCINCDIR)
 #PCHFLAGS = -H -H$(INTDIR)\bcmoduls.pch 
-DEFINES  = -DWIN32 $(BUILDOPT) -D_WIN32_WINNT=0x400
+DEFINES  = -DWIN32 $(BUILDOPT) 
 LOCDEFS  = -DPERLDLL
 SUBSYS   = console
 LIBC = cw32mti.lib

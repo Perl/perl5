@@ -523,7 +523,7 @@ find_thread_magical(char *name)
 	    sv_setpv(sv, "\034");
 	    break;
 	}
-	sv_magic(sv, 0, 0, name, 1); 
+	sv_magic(sv, 0, 0, name, 1);
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			      "find_thread_magical: new SV %p for $%s%c\n",
 			      sv, (*name < 32) ? "^" : "",
@@ -1147,7 +1147,7 @@ mod(OP *o, I32 type)
     case OP_RV2SV:
 	if (!type && cUNOPo->op_first->op_type != OP_GV)
 	    croak("Can't localize through a reference");
-	ref(cUNOPo->op_first, o->op_type); 
+	ref(cUNOPo->op_first, o->op_type);
 	/* FALL THROUGH */
     case OP_GV:
     case OP_AV2ARYLEN:
@@ -1175,7 +1175,7 @@ mod(OP *o, I32 type)
     case OP_SPECIFIC:
 	modcount++;	/* XXX ??? */
 #if 0
-	if (!type) 
+	if (!type)
 	    croak("Can't localize thread-specific variable");
 #endif
 	break;
@@ -1314,7 +1314,7 @@ ref(OP *o, I32 type)
 	    o->op_flags |= OPf_SPECIAL;
 	}
 	break;
-      
+
     case OP_COND_EXPR:
 	for (kid = cUNOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
 	    ref(kid, type);
@@ -1330,10 +1330,14 @@ ref(OP *o, I32 type)
 	    o->op_flags |= OPf_MOD;
 	}
 	break;
-      
+
+    case OP_SPECIFIC:
+	o->op_flags |= OPf_MOD;		/* XXX ??? */
+	break;
+
     case OP_RV2AV:
     case OP_RV2HV:
-	o->op_flags |= OPf_REF; 
+	o->op_flags |= OPf_REF;
 	/* FALL THROUGH */
     case OP_RV2GV:
 	ref(cUNOPo->op_first, o->op_type);
@@ -1341,9 +1345,9 @@ ref(OP *o, I32 type)
 
     case OP_PADAV:
     case OP_PADHV:
-	o->op_flags |= OPf_REF; 
+	o->op_flags |= OPf_REF;
 	break;
-      
+
     case OP_SCALAR:
     case OP_NULL:
 	if (!(o->op_flags & OPf_KIDS))
@@ -1664,7 +1668,7 @@ fold_constants(register OP *o)
 	}
 	return newSVOP(OP_CONST, 0, sv);
     }
-    
+
   nope:
     if (!(opargs[type] & OA_OTHERINT))
 	return o;
@@ -1904,7 +1908,7 @@ newUNOP(I32 type, I32 flags, OP *first)
     UNOP *unop;
 
     if (!first)
-	first = newOP(OP_STUB, 0); 
+	first = newOP(OP_STUB, 0);
     if (opargs[type] & OA_MARK)
 	first = force_list(first);
 
@@ -2063,7 +2067,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 	    pm->op_pmflags |= PMf_SKIPWHITE;
 	}
 	pm->op_pmregexp = pregcomp(p, p + plen, pm);
-	if (strEQ("\\s+", pm->op_pmregexp->precomp)) 
+	if (strEQ("\\s+", pm->op_pmregexp->precomp))
 	    pm->op_pmflags |= PMf_WHITE;
 	hoistmust(pm);
 	op_free(expr);
@@ -2287,7 +2291,7 @@ utilize(int aver, I32 floor, OP *version, OP *id, OP *arg)
 			    newUNOP(OP_METHOD, 0, meth)));
 	}
     }
-     
+
     /* Fake up an import/unimport */
     if (arg && arg->op_type == OP_STUB)
 	imop = arg;		/* no import on explicit () */
@@ -2845,7 +2849,7 @@ newWHILEOP(I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *expr, OP *b
 	    op_free((OP*)loop);
 	    return Nullop;		/* (listop already freed by newLOGOP) */
 	}
-	((LISTOP*)listop)->op_last->op_next = condop = 
+	((LISTOP*)listop)->op_last->op_next = condop =
 	    (o == listop ? redo : LINKLIST(o));
 	if (!next)
 	    next = condop;
@@ -3218,7 +3222,7 @@ cv_const_sv(CV *cv)
 {
     OP *o;
     SV *sv;
-    
+
     if (!cv || !SvPOK(cv) || SvCUR(cv))
 	return Nullsv;
 
@@ -3334,8 +3338,8 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 		    croak(not_safe);
 		else {
 		    /* force display of errors found but not reported */
-		    sv_catpv(GvSV(errgv), not_safe);
-		    croak("%s", SvPVx(GvSV(errgv), na));
+		    sv_catpv(errsv, not_safe);
+		    croak("%s", SvPV(errsv, na));
 		}
 	    }
 	}
@@ -3462,8 +3466,9 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
     return cv;
 }
 
+
 CV *
-newXS(char *name, void (*subaddr) _((CV *)), char *filename)
+newXS(char *name, void (*subaddr) (CV *), char *filename)
 {
     dTHR;
     GV *gv = gv_fetchpv(name ? name : "__ANON__", GV_ADDMULTI, SVt_PVCV);
@@ -3702,6 +3707,8 @@ newSVREF(OP *o)
 	o->op_ppaddr = ppaddr[OP_PADSV];
 	return o;
     }
+    else if (o->op_type == OP_SPECIFIC)
+	return o;
     return newUNOP(OP_RV2SV, 0, scalar(o));
 }
 
@@ -3757,7 +3764,7 @@ ck_spair(OP *o)
 	     !(opargs[newop->op_type] & OA_RETSCALAR) ||
 	     newop->op_type == OP_PADAV || newop->op_type == OP_PADHV ||
 	     newop->op_type == OP_RV2AV || newop->op_type == OP_RV2HV)) {
-	    
+	
 	    return o;
 	}
 	op_free(kUNOP->op_first);
@@ -3978,7 +3985,7 @@ ck_fun(OP *o)
     I32 numargs = 0;
     int type = o->op_type;
     register I32 oa = opargs[type] >> OASHIFT;
-    
+
     if (o->op_flags & OPf_STACKED) {
 	if ((oa & OA_OPTIONAL) && (oa >> 4) && !((oa >> 4) & OA_OPTIONAL))
 	    oa &= ~OA_OPTIONAL;
@@ -4127,7 +4134,7 @@ ck_glob(OP *o)
 	cLISTOPo->op_first->op_type = OP_PUSHMARK;
 	cLISTOPo->op_first->op_ppaddr = ppaddr[OP_PUSHMARK];
 	o = newUNOP(OP_ENTERSUB, OPf_STACKED,
-		    append_elem(OP_LIST, o, 
+		    append_elem(OP_LIST, o,
 				scalar(newUNOP(OP_RV2CV, 0,
 					       newGVOP(OP_GV, 0, gv)))));
 	o = newUNOP(OP_NULL, 0, ck_subr(o));
@@ -4150,7 +4157,7 @@ ck_grep(OP *o)
 
     o->op_ppaddr = ppaddr[OP_GREPSTART];
     Newz(1101, gwop, 1, LOGOP);
-    
+
     if (o->op_flags & OPf_STACKED) {
 	OP* k;
 	o = ck_sort(o);
@@ -4169,7 +4176,7 @@ ck_grep(OP *o)
     o = ck_fun(o);
     if (error_count)
 	return o;
-    kid = cLISTOPo->op_first->op_sibling; 
+    kid = cLISTOPo->op_first->op_sibling;
     if (kid->op_type != OP_NULL)
 	croak("panic: ck_grep");
     kid = kUNOP->op_first;
@@ -4228,7 +4235,7 @@ OP *
 ck_listiob(OP *o)
 {
     register OP *kid;
-    
+
     kid = cLISTOPo->op_first;
     if (!kid) {
 	o = force_list(o);
@@ -4445,7 +4452,7 @@ ck_split(OP *o)
 {
     register OP *kid;
     PMOP* pm;
-    
+
     if (o->op_flags & OPf_STACKED)
 	return no_fh_allowed(o);
 
@@ -4747,7 +4754,7 @@ peep(register OP *o)
 	       	o->op_next = o->op_next->op_next;
 	    }
 	    break;
-	    
+	
 	case OP_PADHV:
 	    if (o->op_next->op_type == OP_RV2HV
 		&& (o->op_next->op_flags && OPf_REF))
@@ -4798,7 +4805,7 @@ peep(register OP *o)
 		}
 	    }
 	    break;
-	    
+	
 	case OP_HELEM: {
 	    UNOP *rop;
 	    SV *lexname;
@@ -4807,7 +4814,7 @@ peep(register OP *o)
 	    I32 ind;
 	    char *key;
 	    STRLEN keylen;
-	    
+	
 	    if (o->op_private & (OPpDEREF_HV|OPpDEREF_AV|OPpLVAL_INTRO)
 		|| ((BINOP*)o)->op_last->op_type != OP_CONST)
 		break;

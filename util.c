@@ -56,6 +56,10 @@
 static void xstat _((void));
 #endif
 
+#ifdef USE_THREADS
+static U32 threadnum = 0;
+#endif /* USE_THREADS */
+
 #ifndef MYMALLOC
 
 /* paranoid version of malloc */
@@ -2397,8 +2401,7 @@ condpair_magic(SV *sv)
  * thread calling new_struct_thread) clearly satisfies this constraint.
  */
 struct thread *
-new_struct_thread(t)
-struct thread *t;
+new_struct_thread(struct thread *t)
 {
     struct thread *thr;
     SV *sv;

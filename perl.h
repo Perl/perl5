@@ -1367,6 +1367,7 @@ EXT struct thread *	eval_owner;	/* Owner thread for doeval */
 EXT int			nthreads;	/* Number of threads currently */
 EXT perl_mutex		threads_mutex;	/* Mutex for nthreads and thread list */
 EXT perl_cond		nthreads_cond;	/* Condition variable for nthreads */
+EXT char *		per_thread_magicals INIT(PER_THREAD_MAGICALS);
 #ifdef FAKE_THREADS
 EXT struct thread *	thr;		/* Currently executing (fake) thread */
 #endif
@@ -1869,7 +1870,8 @@ IEXT I32	Imaxscream IINIT(-1);
 IEXT SV *	Ilastscream;
 
 /* shortcuts to misc objects */
-IEXT GV *	Ierrgv;
+IEXT HV *	Ierrhv;
+IEXT SV *	Ierrsv;
 
 /* shortcuts to debugging objects */
 IEXT GV *	IDBgv;

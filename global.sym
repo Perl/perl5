@@ -120,6 +120,7 @@ na
 ncmp_amg
 ne_amg
 neg_amg
+new_struct_thread
 nexttoke
 nexttype
 nextval
@@ -162,6 +163,7 @@ pad_reset_pending
 padix
 padix_floor
 patleave
+per_thread_magicals
 pidstatus
 pow_amg
 pow_ass_amg
@@ -956,6 +958,7 @@ pp_snetent
 pp_socket
 pp_sockpair
 pp_sort
+pp_specific
 pp_splice
 pp_split
 pp_sprintf

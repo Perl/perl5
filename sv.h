@@ -70,6 +70,7 @@ struct io {
 
 #define SvANY(sv)	(sv)->sv_any
 #define SvFLAGS(sv)	(sv)->sv_flags
+#define SvREFCNT(sv)	(sv)->sv_refcnt
 
 #ifdef __GNUC__
 #  define SvREFCNT_inc(sv) ({SV* nsv=(SV*)(sv); if(nsv) ++SvREFCNT(nsv); nsv;})
@@ -82,7 +83,6 @@ struct io {
 #endif
 
 #define SvREFCNT_dec(sv)	sv_free((SV*)sv)
-#endif
 
 #define SVTYPEMASK	0xff
 #define SvTYPE(sv)	((sv)->sv_flags & SVTYPEMASK)
@@ -546,19 +546,33 @@ struct xpvio {
 		? SvNVX(sv) != 0.0				\
 		: sv_2bool(sv) )
 
-#define SvIVx(sv) ((Sv = (sv)), SvIV(Sv))
-#define SvUVx(sv) ((Sv = (sv)), SvUV(Sv))
-#define SvNVx(sv) ((Sv = (sv)), SvNV(Sv))
-#define SvPVx(sv, lp) ((Sv = (sv)), SvPV(Sv, lp))
+#ifdef __GNUC__
+#  define SvIVx(sv) ({SV *nsv = (SV*)(sv); SvIV(nsv); })
+#  define SvUVx(sv) ({SV *nsv = (SV*)(sv); SvUV(nsv); })
+#  define SvNVx(sv) ({SV *nsv = (SV*)(sv); SvNV(nsv); })
+#  define SvPVx(sv, lp) ({SV *nsv = (sv); SvPV(nsv, lp); })
+#else
+#  define SvIVx(sv) ((Sv = (sv)), SvIV(Sv))
+#  define SvUVx(sv) ((Sv = (sv)), SvUV(Sv))
+#  define SvNVx(sv) ((Sv = (sv)), SvNV(Sv))
+#  define SvPVx(sv, lp) ((Sv = (sv)), SvPV(Sv, lp))
+#endif /* __GNUC__ */
+
 #define SvTRUEx(sv) ((Sv = (sv)), SvTRUE(Sv))
 
 #endif /* CRIPPLED_CC */
 
 #define newRV_inc(sv)	newRV(sv)
-#ifndef CRIPPLED_CC
-#undef newRV_noinc
-#define newRV_noinc(sv)	((Sv = newRV(sv)), --SvREFCNT(SvRV(Sv)), Sv)
-#endif
+#ifdef __GNUC__
+#  undef newRV_noinc
+#  define newRV_noinc(sv) ({SV *nsv=newRV((sv)); --SvREFCNT(SvRV(nsv)); nsv;})
+#else
+#  if defined(CRIPPLED_CC) || defined(USE_THREADS)
+#  else
+#    undef newRV_noinc
+#    define newRV_noinc(sv)	((Sv = newRV(sv)), --SvREFCNT(SvRV(Sv)), Sv)
+#  endif
+#endif /* __GNUC__ */
 
 /* the following macro updates any magic values this sv is associated with */
 

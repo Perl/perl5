@@ -284,11 +284,10 @@ PP(pp_warn)
 	tmps = SvPV(TOPs, na);
     }
     if (!tmps || !*tmps) {
-	SV *error = GvSV(errgv);
-	(void)SvUPGRADE(error, SVt_PV);
-	if (SvPOK(error) && SvCUR(error))
-	    sv_catpv(error, "\t...caught");
-	tmps = SvPV(error, na);
+	(void)SvUPGRADE(errsv, SVt_PV);
+	if (SvPOK(errsv) && SvCUR(errsv))
+	    sv_catpv(errsv, "\t...caught");
+	tmps = SvPV(errsv, na);
     }
     if (!tmps || !*tmps)
 	tmps = "Warning: something's wrong";
@@ -310,11 +309,10 @@ PP(pp_die)
 	tmps = SvPV(TOPs, na);
     }
     if (!tmps || !*tmps) {
-	SV *error = GvSV(errgv);
-	(void)SvUPGRADE(error, SVt_PV);
-	if (SvPOK(error) && SvCUR(error))
-	    sv_catpv(error, "\t...propagated");
-	tmps = SvPV(error, na);
+	(void)SvUPGRADE(errsv, SVt_PV);
+	if (SvPOK(errsv) && SvCUR(errsv))
+	    sv_catpv(errsv, "\t...propagated");
+	tmps = SvPV(errsv, na);
     }
     if (!tmps || !*tmps)
 	tmps = "Died";

@@ -4,7 +4,7 @@
 #undef  __attribute__
 #endif
 #define __attribute__(attr)
-#endif 
+#endif
 #endif
 #ifdef OVERLOAD
 SV*	amagic_call _((SV* left,SV* right,int method,int dir));
@@ -134,6 +134,9 @@ void	dump_packsubs _((HV* stash));
 void	dump_sub _((GV* gv));
 void	fbm_compile _((SV* sv));
 char*	fbm_instr _((unsigned char* big, unsigned char* bigend, SV* littlesv));
+#ifdef USE_THREADS
+PADOFFSET	find_thread_magical _((char *name));
+#endif
 OP*	force_list _((OP* arg));
 OP*	fold_constants _((OP* arg));
 char*	form _((const char* pat, ...));
@@ -336,6 +339,9 @@ SV*	newSVsv _((SV* old));
 OP*	newUNOP _((I32 type, I32 flags, OP* first));
 OP*	newWHILEOP _((I32 flags, I32 debuggable, LOOP* loop,
 		      I32 whileline, OP* expr, OP* block, OP* cont));
+#ifdef USE_THREADS
+struct thread *	new_struct_thread _((struct thread *t));
+#endif
 PerlIO*	nextargv _((GV* gv));
 char*	ninstr _((char* big, char* bigend, char* little, char* lend));
 OP*	oopsCV _((OP* o));

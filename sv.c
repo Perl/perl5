@@ -1084,6 +1084,7 @@ sv_grow(SV* sv, unsigned long newlen)
 void
 sv_setiv(register SV *sv, IV i)
 {
+    dTHR;	/* just for taint */
     sv_check_thinkfirst(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
@@ -1131,6 +1132,7 @@ sv_setuv(register SV *sv, UV u)
 void
 sv_setnv(register SV *sv, double num)
 {
+    dTHR;	/* just for taint */
     sv_check_thinkfirst(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
@@ -2146,6 +2148,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 void
 sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
 {
+    dTHR;	/* just for taint */
     assert(len >= 0);  /* STRLEN is probably unsigned, so this may
 			  elicit a warning, but it won't hurt. */
     sv_check_thinkfirst(sv);
@@ -2170,6 +2173,7 @@ sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
 void
 sv_setpv(register SV *sv, register const char *ptr)
 {
+    dTHR;	/* just for taint */
     register STRLEN len;
 
     sv_check_thinkfirst(sv);
@@ -2194,6 +2198,7 @@ sv_setpv(register SV *sv, register const char *ptr)
 void
 sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 {
+    dTHR;	/* just for taint */
     sv_check_thinkfirst(sv);
     if (!SvUPGRADE(sv, SVt_PV))
 	return;
@@ -2254,6 +2259,7 @@ sv_chop(register SV *sv, register char *ptr)	/* like set but assuming ptr is in 
 void
 sv_catpvn(register SV *sv, register char *ptr, register STRLEN len)
 {
+    dTHR;	/* just for taint */
     STRLEN tlen;
     char *junk;
 
@@ -2282,6 +2288,7 @@ sv_catsv(SV *dstr, register SV *sstr)
 void
 sv_catpv(register SV *sv, register char *ptr)
 {
+    dTHR;	/* just for taint */
     register STRLEN len;
     STRLEN tlen;
     char *junk;
@@ -2977,6 +2984,7 @@ sv_collxfrm(SV *sv, STRLEN *nxp)
 char *
 sv_gets(register SV *sv, register FILE *fp, I32 append)
 {
+    dTHR;
     char *rsptr;
     STRLEN rslen;
     register STDCHAR rslast;
@@ -3490,8 +3498,9 @@ newRV(SV *ref)
 }
 
 
+
 SV *
-newRV_noinc(SV *ref)
+Perl_newRV_noinc(SV *ref)
 {
     register SV *sv;
 
@@ -3570,6 +3579,7 @@ sv_reset(register char *s, HV *stash)
 		sv = GvSV(gv);
 		(void)SvOK_off(sv);
 		if (SvTYPE(sv) >= SVt_PV) {
+		    dTHR;	/* just for taint */
 		    SvCUR_set(sv, 0);
 		    if (SvPVX(sv) != Nullch)
 			*SvPVX(sv) = '\0';
@@ -3788,6 +3798,7 @@ sv_pvn_force(SV *sv, STRLEN *lp)
 	    *SvEND(sv) = '\0';
 	}
 	if (!SvPOK(sv)) {
+	    dTHR;	/* just for taint */
 	    SvPOK_on(sv);		/* validate pointer */
 	    SvTAINT(sv);
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2pv(%s)\n",

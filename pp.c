@@ -403,7 +403,6 @@ refto(SV *sv)
     else if (SvPADTMP(sv))
 	sv = newSVsv(sv);
     else {
-	dTHR;			/* just for SvREFCNT_inc */
 	SvTEMP_off(sv);
 	(void)SvREFCNT_inc(sv);
     }
@@ -4313,3 +4312,5 @@ PP(pp_specific)
 #endif /* USE_THREADS */
     RETURN;
 }
+
+

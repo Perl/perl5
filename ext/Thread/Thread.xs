@@ -225,23 +225,6 @@ newthread (SV *startsv, AV *initargs, char *Class)
     savethread = thr;
     thr = new_struct_thread(thr);
     SPAGAIN;
-    defstash = savethread->Tdefstash;	/* XXX maybe these should */
-    curstash = savethread->Tcurstash;	/* always be set to main? */
-    /* top_env? */
-    /* runlevel */
-    cvcache = newHV();
-    thr->flags = THRf_R_JOINABLE;
-    MUTEX_INIT(&thr->mutex);
-    thr->tid = ++threadnum;
-    /* Insert new thread into the circular linked list and bump nthreads */
-    MUTEX_LOCK(&threads_mutex);
-    thr->next = savethread->next;
-    thr->prev = savethread;
-    savethread->next = thr;
-    thr->next->prev = thr;
-    nthreads++;
-    MUTEX_UNLOCK(&threads_mutex);
-
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "%p: newthread, tid is %u, preparing stack\n",
 			  savethread, thr->tid));

@@ -77,6 +77,8 @@ print <<END;
 };
 #endif
 
+START_EXTERN_C
+
 END
 
 # Emit function declarations.
@@ -95,10 +97,12 @@ for (@ops) {
 
 print <<END;
 
+END_EXTERN_C
+
 #ifndef DOINIT
-EXT OP * (*ppaddr[])();
+EXT OP * (*ppaddr[])(ARGSproto);
 #else
-EXT OP * (*ppaddr[])() = {
+EXT OP * (*ppaddr[])(ARGSproto) = {
 END
 
 for (@ops) {
@@ -180,8 +184,6 @@ for (@ops) {
     $argsum |= 128 if $flags =~ /u/;		# defaults to $_
 
     $flags =~ /([^a-zA-Z])/ or die qq[Opcode "$_" has no class indicator];
-    printf STDERR "op $_, class $1 => 0x%x, argsum 0x%x",
-	$opclass{$1}, $argsum; # debug
     $argsum |= $opclass{$1} << 8;
     $mul = 4096;				# 2 ^ OASHIFT
     for $arg (split(' ',$args{$_})) {
@@ -190,7 +192,6 @@ for (@ops) {
 	$argsum += $argnum * $mul;
 	$mul <<= 4;
     }
-    printf STDERR ", argsum now 0x%x\n", $argsum; # debug
     $argsum = sprintf("0x%08x", $argsum);
     print "\t", &tab(3, "$argsum,"), "/* $_ */\n";
 }
@@ -680,3 +681,4 @@ syscall		syscall			ck_fun		imst@	S L
 
 # For multi-threading
 lock		lock			ck_rfun		s%	S
+specific	thread-specific		ck_null		ds0

@@ -47,7 +47,8 @@ e_fp
 e_tmpname
 endav
 envgv
-errgv
+errhv
+errsv
 eval_root
 eval_start
 fdpid

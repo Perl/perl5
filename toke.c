@@ -1243,16 +1243,21 @@ yylex(void)
 		    (tokenbuf[1] == 'a' || tokenbuf[1] == 'b')
 		    && !tokenbuf[2])
 		{
-		    if (strnEQ(d,"<=>",3) || strnEQ(d,"cmp",3)) {
-			croak("Can't use \"my %s\" in sort comparison",
-			      tokenbuf);
+		    for (d = in_eval ? oldoldbufptr : linestart;
+			 d < bufend && *d != '\n';
+			 d++)
+		    {
+			if (strnEQ(d,"<=>",3) || strnEQ(d,"cmp",3)) {
+			    croak("Can't use \"my %s\" in sort comparison",
+				  tokenbuf);
+			}
 		    }
 		}
-	    }
 
-	    yylval.opval = newOP(OP_PADANY, 0);
-	    yylval.opval->op_targ = tmp;
-	    return PRIVATEREF;
+		yylval.opval = newOP(OP_PADANY, 0);
+		yylval.opval->op_targ = tmp;
+		return PRIVATEREF;
+	    }
 	}
 
 	/* Force them to make up their mind on "@foo". */
@@ -5365,7 +5370,7 @@ yyerror(char *s)
     if (in_eval & 2)
 	warn("%_", msg);
     else if (in_eval)
-	sv_catsv(GvSV(errgv), msg);
+	sv_catsv(errsv, msg);
     else
 	PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
     if (++error_count >= 10)

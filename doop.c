@@ -244,6 +244,7 @@ do_chop(register SV *astr, register SV *sv)
 I32
 do_chomp(register SV *sv)
 {
+    dTHR;
     register I32 count;
     STRLEN len;
     char *s;
@@ -317,6 +318,7 @@ do_chomp(register SV *sv)
 void
 do_vop(I32 optype, SV *sv, SV *left, SV *right)
 {
+    dTHR;	/* just for taint */
 #ifdef LIBERAL
     register long *dl;
     register long *ll;

@@ -460,6 +460,7 @@
 #define newWHILEOP		Perl_newWHILEOP
 #define newXS			Perl_newXS
 #define newXSUB			Perl_newXSUB
+#define new_struct_thread	Perl_new_struct_thread
 #define nextargv		Perl_nextargv
 #define nexttoke		Perl_nexttoke
 #define nexttype		Perl_nexttype
@@ -514,6 +515,7 @@
 #define padix			Perl_padix
 #define patleave		Perl_patleave
 #define peep			Perl_peep
+#define per_thread_magicals	Perl_per_thread_magicals
 #define pidgone			Perl_pidgone
 #define pidstatus		Perl_pidstatus
 #define pmflag			Perl_pmflag
@@ -1265,7 +1267,8 @@
 #define e_tmpname		(curinterp->Ie_tmpname)
 #define endav			(curinterp->Iendav)
 #define envgv			(curinterp->Ienvgv)
-#define errgv			(curinterp->Ierrgv)
+#define errhv			(curinterp->Ierrhv)
+#define errsv			(curinterp->Ierrsv)
 #define eval_root		(curinterp->Ieval_root)
 #define eval_start		(curinterp->Ieval_start)
 #define fdpid			(curinterp->Ifdpid)
@@ -1417,7 +1420,8 @@
 #define Ie_tmpname		e_tmpname
 #define Iendav			endav
 #define Ienvgv			envgv
-#define Ierrgv			errgv
+#define Ierrhv			errhv
+#define Ierrsv			errsv
 #define Ieval_root		eval_root
 #define Ieval_start		eval_start
 #define Ifdpid			fdpid
@@ -1578,7 +1582,8 @@
 #define e_fp			Perl_e_fp
 #define e_tmpname		Perl_e_tmpname
 #define endav			Perl_endav
-#define errgv			Perl_errgv
+#define errhv			Perl_errhv
+#define errsv			Perl_errsv
 #define eval_root		Perl_eval_root
 #define eval_start		Perl_eval_start
 #define fdpid			Perl_fdpid
