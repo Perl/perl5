@@ -31,6 +31,253 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10721] By: jhi                                   on 2001/06/19  11:29:34
+        Log: The existence shall be MANIFESted.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10720] By: jhi                                   on 2001/06/19  10:58:09
+        Log: The old libnet.cfg is first searched from the current directory,
+             only then from the module path.
+     Branch: perl
+	   ! utils/libnetcfg.PL
+____________________________________________________________________________
+[ 10719] By: jhi                                   on 2001/06/19  10:55:59
+        Log: NetWare tweaks from Guruprasad.
+     Branch: perl
+	   ! NetWare/Makefile NetWare/config.wc
+____________________________________________________________________________
+[ 10718] By: jhi                                   on 2001/06/19  10:54:22
+        Log: Subject: [PATCH] djgpp updates
+             From: Laszlo Molnar <laszlo.molnar@eth.ericsson.se>
+             Date: Tue, 19 Jun 2001 10:59:06 +0200
+             Message-ID: <20010619105906.C5600@libra.eth.ericsson.se>
+     Branch: perl
+	   ! djgpp/config.over djgpp/fixpmain
+____________________________________________________________________________
+[ 10717] By: jhi                                   on 2001/06/19  10:53:20
+        Log: Subject: [PATCH: perl@10689]let MS VC 5 resolve _PerlIO_win32
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Mon, 18 Jun 2001 23:48:52 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0106182345100.17670-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! win32/Makefile
+____________________________________________________________________________
+[ 10716] By: jhi                                   on 2001/06/19  10:52:25
+        Log: The INT32_MIN_BROKEN and INT64_MIN_BROKEN tweaks needs
+             to happen right after the inclusion of <inttypes.h>,
+             from Edward Moy.
+     Branch: perl
+	   ! handy.h perl.h
+____________________________________________________________________________
+[ 10715] By: jhi                                   on 2001/06/19  10:49:21
+        Log: Subject: [patch] preserve @DynaLoader::dl_{librefs,modules}
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Mon, 18 Jun 2001 22:13:38 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106182210570.22114-100000@mako.covalent.net>
+     Branch: perl
+	   ! ext/DynaLoader/DynaLoader_pm.PL
+____________________________________________________________________________
+[ 10714] By: jhi                                   on 2001/06/19  10:48:19
+        Log: Revert #10656 for perfomance reasons but leave in the
+             use of Hv*() macros -- in comments, so that grepping the
+             source is easier, from Abhijit.  (Also add the ENV_HV_NAME speedup
+             suggested by Sarathy, also by Abhijit.)
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 10713] By: jhi                                   on 2001/06/19  10:46:08
+        Log: Subject: [patch] .s MakeMaker suffix
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Mon, 18 Jun 2001 21:23:11 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106182120250.22114-100000@mako.covalent.net>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 10712] By: jhi                                   on 2001/06/19  10:34:35
+        Log: One test lost in the big shuffle restored.
+     Branch: perl
+	   + ext/IPC/SysV/ipcsysv.t
+	   ! MANIFEST ext/IPC/SysV/t/msg.t ext/IPC/SysV/t/sem.t
+____________________________________________________________________________
+[ 10711] By: jhi                                   on 2001/06/19  10:25:46
+        Log: Rename the old non-standard threads tests so that
+             they won't be invoked.
+     Branch: perl
+	   + ext/Thread/create.tx ext/Thread/die.tx ext/Thread/die2.tx
+	   + ext/Thread/io.tx ext/Thread/join.tx ext/Thread/join2.tx
+	   + ext/Thread/list.tx ext/Thread/lock.tx ext/Thread/queue.tx
+	   + ext/Thread/specific.tx ext/Thread/sync.tx ext/Thread/sync2.tx
+	   + ext/Thread/unsync.tx ext/Thread/unsync2.tx
+	   + ext/Thread/unsync3.tx ext/Thread/unsync4.tx
+	   - ext/Thread/create.t ext/Thread/die.t ext/Thread/die2.t
+	   - ext/Thread/io.t ext/Thread/join.t ext/Thread/join2.t
+	   - ext/Thread/list.t ext/Thread/lock.t ext/Thread/queue.t
+	   - ext/Thread/specific.t ext/Thread/sync.t ext/Thread/sync2.t
+	   - ext/Thread/unsync.t ext/Thread/unsync2.t ext/Thread/unsync3.t
+	   - ext/Thread/unsync4.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10710] By: jhi                                   on 2001/06/19  10:18:41
+        Log: Integrate perlio.
+     Branch: perl
+	  !> win32/config_sh.PL
+____________________________________________________________________________
+[ 10709] By: nick                                  on 2001/06/19  08:18:18
+        Log: Integrate mainline
+     Branch: perlio
+	  +> (branch 40 files)
+	   - lib/locale/latin1 lib/locale/utf8 lib/strict/refs
+	   - lib/strict/subs lib/strict/vars lib/warnings/1global
+	   - lib/warnings/2use lib/warnings/3both lib/warnings/4lint
+	   - lib/warnings/5nolint lib/warnings/6default lib/warnings/7fatal
+	   - lib/warnings/8signal lib/warnings/9enabled lib/warnings/av
+	   - lib/warnings/doio lib/warnings/doop lib/warnings/gv
+	   - lib/warnings/hv lib/warnings/malloc lib/warnings/mg
+	   - lib/warnings/op lib/warnings/perl lib/warnings/perlio
+	   - lib/warnings/perly lib/warnings/pp lib/warnings/pp_ctl
+	   - lib/warnings/pp_hot lib/warnings/pp_sys lib/warnings/regcomp
+	   - lib/warnings/regexec lib/warnings/run lib/warnings/sv
+	   - lib/warnings/taint lib/warnings/toke lib/warnings/universal
+	   - lib/warnings/utf8 lib/warnings/util
+	  !> (integrate 57 files)
+____________________________________________________________________________
+[ 10708] By: nick                                  on 2001/06/19  07:57:10
+        Log: Get Win32 known_extensions and extensions right in config.sh and hence Config.pm
+     Branch: perlio
+	   ! win32/config_sh.PL
+____________________________________________________________________________
+[ 10707] By: nick                                  on 2001/06/19  07:05:07
+        Log: Perly.y and related file fixes to keep mainframe yacc (and bison) happy.
+     Branch: perl
+	   ! perly.c perly.y perly_c.diff vms/perly_c.vms
+____________________________________________________________________________
+[ 10706] By: jhi                                   on 2001/06/19  02:58:26
+        Log: More perl572delta tweaks.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 10705] By: jhi                                   on 2001/06/19  01:53:40
+        Log: Update perl572delta.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 10704] By: jhi                                   on 2001/06/19  01:28:40
+        Log: VOS updates from Paul Green.
+     Branch: perl
+	   ! vos/Changes vos/build.cm vos/perl.bind
+____________________________________________________________________________
+[ 10703] By: jhi                                   on 2001/06/19  01:03:53
+        Log: Update the vos/config.*.* files.
+     Branch: perl
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h
+____________________________________________________________________________
+[ 10702] By: jhi                                   on 2001/06/19  01:03:32
+        Log: Add a makefile for more painless adding of symbols to the
+             VOS headers while in UNIX (in VOS the vos/configure_perl.cm
+             takes care of the adding)
+     Branch: perl
+	   + vos/Makefile
+____________________________________________________________________________
+[ 10701] By: jhi                                   on 2001/06/19  00:51:44
+        Log: Make libnetcfg by default display the libnet configuration,
+             -c to change, add -i for old config, document all options,
+             regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod pod/perlutil.pod utils/libnetcfg.PL
+____________________________________________________________________________
+[ 10700] By: jhi                                   on 2001/06/18  23:45:12
+        Log: gcc -Wall sweep.
+     Branch: perl
+	   ! ext/IO/IO.xs ext/Time/Piece/Piece.xs
+____________________________________________________________________________
+[ 10699] By: jhi                                   on 2001/06/18  23:19:53
+        Log: So there.
+     Branch: perl
+	   ! universal.c
+____________________________________________________________________________
+[ 10698] By: jhi                                   on 2001/06/18  23:10:22
+        Log: Document the need for sv_printify().
+             
+             Document that 'use utf8' has been considered.
+             
+             (An unfinished, gcc 3.0 -Wall nit fix also slipped in, gack.)
+     Branch: perl
+	   ! pod/perltodo.pod universal.c
+____________________________________________________________________________
+[ 10697] By: jhi                                   on 2001/06/18  22:50:53
+        Log: Subject: Re: [PATCH] Re: [PATCH] Re: perl@10611
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 18 Jun 2001 23:29:23 +0100
+             Message-ID: <20010618232923.I98663@plum.flirble.org>
+     Branch: perl
+	   ! ext/POSIX/Makefile.PL ext/Socket/Makefile.PL
+	   ! ext/Sys/Syslog/Makefile.PL
+____________________________________________________________________________
+[ 10696] By: jhi                                   on 2001/06/18  22:39:32
+        Log: Subject: [PATCH: 5.6.1] perl5db.pl v1.07 + docs
+             From: Scott.L.Miller@Compaq.com
+             Date: Mon, 18 Jun 2001 10:12:27 -0500
+             Message-ID: <86256A6F.00538A54.00@omacmta01.custom-edge.com>
+     Branch: perl
+	   ! lib/perl5db.pl pod/perldebug.pod
+____________________________________________________________________________
+[ 10695] By: jhi                                   on 2001/06/18  22:35:13
+        Log: Subject: [PATCH lib/Carp/Heavy.pm] malformed POSIX negation
+             From: "Jeff 'japhy' Pinyan" <jeffp@crusoe.net>
+             Date: Mon, 18 Jun 2001 16:52:24 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0106181650590.17386-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! lib/Carp/Heavy.pm
+____________________________________________________________________________
+[ 10694] By: jhi                                   on 2001/06/18  22:34:06
+        Log: Subject: [PATCH] Documentation changes for CLONE
+             From: Artur Bergman <artur@contiller.se>
+             Date: Mon, 18 Jun 2001 22:06:37 +0200
+             Message-ID: <B7542BEC.1719%artur@contiller.se>
+     Branch: perl
+	   ! pod/perlmod.pod pod/perlsub.pod
+____________________________________________________________________________
+[ 10693] By: jhi                                   on 2001/06/18  22:31:38
+        Log: Subject: Re: configure.com
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 18 Jun 2001 16:04:38 -0500
+             Message-Id: <5.1.0.14.0.20010618154549.0318c090@mail.mac.com>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 10692] By: jhi                                   on 2001/06/18  22:30:43
+        Log: Subject: PL_nullstash + perl_clone()
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Mon, 18 Jun 2001 16:24:22 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106181621040.11974-100000@mako.covalent.net>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 10691] By: jhi                                   on 2001/06/18  22:26:20
+        Log: Subject: Re: [PATCH 5.7.1] sv.c documentation
+             From: davem@fdgroup.co.uk
+             Date: Mon, 18 Jun 2001 21:29:45 +0100 (BST)
+             Message-Id: <200106182029.VAA06503@gizmo.fdgroup.co.uk>
+     Branch: perl
+	   ! embed.pl pod/perlapi.pod
+____________________________________________________________________________
+[ 10690] By: jhi                                   on 2001/06/18  22:17:05
+        Log: More cross-compilation defaults gleaned from -Dcc
+             if it is CPU-OS-gcc.
+     Branch: metaconfig
+	   ! U/modified/libc.U
+     Branch: metaconfig/U/perl
+	   ! Cross.U
+     Branch: perl
+	   ! Configure INSTALL
+____________________________________________________________________________
+[ 10689] By: jhi                                   on 2001/06/18  13:59:47
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10688] By: jhi                                   on 2001/06/18  13:44:18
         Log: Subject: [PATCH 5.7.1] sv.c documentation
              From: davem@fdgroup.co.uk
