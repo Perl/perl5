@@ -335,7 +335,7 @@ CRTLOPTS =,$(CRTL)/Options
 # Modules which must be installed before we can build extensions
 LIBPREREQ = $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib]vmsish.pm [.lib.VMS]Filespec.pm [.lib.ExtUtils]XSSymSet.pm
 
-utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com [.utils]h2xs.com [.lib]perlbug.com
+utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com [.utils]h2xs.com [.lib]perlbug.com [.lib]perlcc.com
 utils2 = [.lib]splain.com [.utils]pl2pm.com
 
 .ifdef NOX2P
@@ -879,6 +879,10 @@ B : [.lib]B.pm [.lib]O.pm [.lib.B]Asmdata.pm [.lib.B]Assembler.pm [.lib.B]Bblock
 [.lib]perlbug.com : [.utils]perlbug.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 	Copy/Log [.utils]perlbug.com $(MMS$TARGET)
+
+[.lib]perlcc.com : [.utils]perlcc.PL $(ARCHDIR)Config.pm
+	$(MINIPERL) $(MMS$SOURCE)
+	Copy/Log [.utils]perlcc.com $(MMS$TARGET)
 
 [.utils]pl2pm.com : [.utils]pl2pm.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
