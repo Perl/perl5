@@ -440,7 +440,7 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
 	    SHARED_CONTEXT;
 	    /* #24255: sv_setsv() (via sv_unref_flags()) may cause a
 	     * deferred free with sv_2mortal(). Ensure that the free_tmps
-	     * is done within this inpterpreter. DAPM.
+	     * is done within this interpreter. DAPM.
 	     */
 	    ENTER;
 	    SAVETMPS;
