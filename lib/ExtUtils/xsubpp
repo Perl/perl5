@@ -76,7 +76,7 @@ perl(1), perlxs(1), perlxstut(1), perlapi(1)
 =cut
 
 # Global Constants
-$XSUBPP_version = "1.932";
+$XSUBPP_version = "1.933";
 require 5.002;
 
 sub Q ;
@@ -404,11 +404,14 @@ sub VERSIONCHECK_handler ()
 
 sub PROTOTYPE_handler ()
 {
+    my $specified ;
+
     death("Error: Only 1 PROTOTYPE definition allowed per xsub") 
         if $proto_in_this_xsub ++ ;
 
     for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
 	next unless /\S/;
+	$specified = 1 ;
 	TrimWhitespace($_) ;
         if ($_ eq 'DISABLE') {
 	   $ProtoThisXSUB = 0 
@@ -424,6 +427,9 @@ sub PROTOTYPE_handler ()
             $ProtoThisXSUB = C_string($_) ;
         }
     }
+
+    # If no prototype specified, then assume empty prototype ""
+    $ProtoThisXSUB = 2 unless $specified ;
 
     $ProtoUsed = 1 ;
 
@@ -934,7 +940,12 @@ EOF
 
     # Build the prototype string for the xsub
     if ($ProtoThisXSUB) {
-        if ($ProtoThisXSUB != 1) {
+        if ($ProtoThisXSUB == 2) {
+            # User has specified empty prototype
+            $ProtoXSUB{$pname} = '""'
+        }
+        elsif ($ProtoThisXSUB != 1) {
+            # User has specified a prototype
             $ProtoXSUB{$pname} = '"' . $ProtoThisXSUB . '"'
         }
         else {
