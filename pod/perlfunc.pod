@@ -2851,16 +2851,22 @@ all circumstances.
 =item *
 
 Likewise, the C<"b"> and C<"B"> fields pack a string that many bits long.
-Each byte of the input field generates 1 bit of the result basing on
-the least-signifant bit of each input byte, i.e., on C<ord($byte)%2>.
-In particular, bytes C<"0"> and C<"1"> generate bits 0 and 1.
+Each byte of the input field of pack() generates 1 bit of the result.
+Each result bit is based on the least-significant bit of the corresponding
+input byte, i.e., on C<ord($byte)%2>.  In particular, bytes C<"0"> and
+C<"1"> generate bits 0 and 1, as do bytes C<"\0"> and C<"\1">.
 
-Starting from the beginning of the input string, each 8-tuple of bytes
-is converted to 1 byte of output.  If the length of the input string
-is not divisible by 8, the remainder is packed as if padded by 0s.
-Similarly, during unpack()ing the "extra" bits are ignored.
+Starting from the beginning of the input string of pack(), each 8-tuple
+of bytes is converted to 1 byte of output.  With format C<"b">
+the first byte of the 8-tuple determines the least-significant bit of a
+byte, and with format C<"B"> it determines the most-significant bit of
+a byte.
 
-If the input string is longer than needed, extra bytes are ignored.
+If the length of the input string is not exactly divisible by 8, the
+remainder is packed as if the input string were padded by null bytes
+at the end.  Similarly, during unpack()ing the "extra" bits are ignored.
+
+If the input string of pack() is longer than needed, extra bytes are ignored.
 A C<*> for the repeat count of pack() means to use all the bytes of
 the input field.  On unpack()ing the bits are converted to a string
 of C<"0">s and C<"1">s.
@@ -2869,6 +2875,30 @@ of C<"0">s and C<"1">s.
 
 The C<"h"> and C<"H"> fields pack a string that many nybbles (4-bit groups,
 representable as hexadecimal digits, 0-9a-f) long.
+
+Each byte of the input field of pack() generates 4 bits of the result.
+For non-alphabetical bytes the result is based on the 4 least-significant
+bits of the input byte, i.e., on C<ord($byte)%16>.  In particular,
+bytes C<"0"> and C<"1"> generate nybbles 0 and 1, as do bytes
+C<"\0"> and C<"\1">.  For bytes C<"a".."f"> and C<"A".."F"> the result
+is compatible with the usual hexadecimal digits, so that C<"a"> and
+C<"A"> both generate the nybble C<0xa==10>.  The result for bytes
+C<"g".."z"> and C<"G".."Z"> is not well-defined.
+
+Starting from the beginning of the input string of pack(), each pair
+of bytes is converted to 1 byte of output.  With format C<"h"> the
+first byte of the pair determines the least-significant nybble of the
+output byte, and with format C<"H"> it determines the most-significant
+nybble.
+
+If the length of the input string is not even, it behaves as if padded
+by a null byte at the end.  Similarly, during unpack()ing the "extra"
+nybbles are ignored.
+
+If the input string of pack() is longer than needed, extra bytes are ignored.
+A C<*> for the repeat count of pack() means to use all the bytes of
+the input field.  On unpack()ing the bits are converted to a string
+of hexadecimal digits.
 
 =item *
 
@@ -5108,6 +5138,20 @@ as an unsigned integer.  BITS therefore specifies the number of bits
 that are reserved for each element in the bit vector.  This must
 be a power of two from 1 to 32 (or 64, if your platform supports
 that).
+
+If BITS is 8, "elements" coincide with bytes of the input string.  
+
+If BITS is 16 or more, bytes of the input string are grouped into chunks
+of size BITS/8, and each group is converted to a number as with
+pack()/unpack() with big-endian formats C<n>/C<N> (and analoguously
+for BITS==64).  See L<"pack"> for details.
+
+If bits is 4 or less, the string is broken into bytes, then the bits
+of each byte are broken into 8/BITS groups.  Bits of a byte are
+numbered in a little-endian-ish way, as in C<0x01>, C<0x02>,
+C<0x04>, C<0x08>, C<0x10>, C<0x20>, C<0x40>, C<0x80>.  For example,
+breaking the single input byte C<chr(0x36)> into two groups gives a list
+C<(0x6, 0x3)>; breaking it into 4 groups gives C<(0x2, 0x1, 0x3, 0x0)>.
 
 C<vec> may also be assigned to, in which case parentheses are needed
 to give the expression the correct precedence as in
