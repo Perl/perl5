@@ -188,6 +188,13 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	if (*name == '|') {
 	    /*SUPPRESS 530*/
 	    for (name++; isSPACE(*name); name++) ;
+	    if (*name == '\0') { /* command is missing 19990114 */
+		dTHR;
+		if (ckWARN(WARN_PIPE))
+		    warner(WARN_PIPE, "Missing command in piped open");
+		errno = EPIPE;
+		goto say_false;
+	    }
 	    if (strNE(name,"-"))
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
@@ -285,6 +292,13 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 		name[--len] = '\0';
 	    /*SUPPRESS 530*/
 	    for (; isSPACE(*name); name++) ;
+	    if (*name == '\0') { /* command is missing 19990114 */
+		dTHR;
+		if (ckWARN(WARN_PIPE))
+		    warner(WARN_PIPE, "Missing command in piped open");
+		errno = EPIPE;
+		goto say_false;
+	    }
 	    if (strNE(name,"-"))
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");

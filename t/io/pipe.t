@@ -13,7 +13,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..12\n";
+print "1..14\n";
 
 # External program 'tr' assumed.
 open(PIPE, "|-") || (exec 'tr', 'YX', 'ko');
@@ -150,4 +150,11 @@ if ($? == 37*256 && $wait == $zombie && ! $!) {
     print "ok 12\n";
 } else {
     print "not ok 12\n# pid=$wait first=$pid pipe=$pipe zombie=$zombie me=$$ \$?=$?   \$!=", $!+0, ":$!\n";
+}
+
+# Test new semantics for missing command in piped open
+# 19990114 M-J. Dominus mjd@plover.com
+{ local *P;
+  print (((open P, "|    " ) ? "not " : ""), "ok 13\n");
+  print (((open P, "     |" ) ? "not " : ""), "ok 14\n");
 }

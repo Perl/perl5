@@ -3,6 +3,12 @@
   Can't do bidirectional pipe
     open(F, "| true |");
 
+  Missing command in piped open
+    open(F, "| ");
+
+  Missing command in piped open
+    open(F, " |");
+
   warn(warn_nl, "open");
     open(F, "true\ncd")
 
@@ -41,6 +47,18 @@ use warning 'io' ;
 open(F, "|$^X -e 1|")
 EXPECT
 Can't do bidirectional pipe at - line 3.
+########
+# doio.c
+use warning 'io' ;
+open(F, "|      ")
+EXPECT
+Missing command in piped open at - line 3.
+########
+# doio.c
+use warning 'io' ;
+open(F, "      |")
+EXPECT
+Missing command in piped open at - line 3.
 ########
 # doio.c
 use warning 'io' ;

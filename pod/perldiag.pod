@@ -1546,6 +1546,11 @@ one line to the next.
 (F) While certain functions allow you to specify a filehandle or an
 "indirect object" before the argument list, this ain't one of them.
 
+=item Missing command in piped open
+
+(W) You used the C<open(FH, "| command")> or C<open(FH, "command |")>
+construction, but the command was missing or blank.
+
 =item Missing operator before %s?
 
 (S) This is an educated guess made in conjunction with the message "%s
