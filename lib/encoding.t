@@ -1,4 +1,4 @@
-print "1..15\n";
+print "1..19\n";
 
 use encoding "latin1"; # ignored (overwritten by the next line)
 use encoding "greek";  # iso 8859-7 (no "latin" alias, surprise...)
@@ -67,4 +67,18 @@ print "ok 14\n";
 
 print "not " unless ord(substr($c, 2, 1)) == 0x3af;
 print "ok 15\n";
+
+# regex literals
+
+print "not " unless "\xDF"    =~ /\x{3AF}/;
+print "ok 16\n";
+
+print "not " unless "\x{3AF}" =~ /\xDF/;
+print "ok 17\n";
+
+print "not " unless "\xDF"    =~ /\xDF/;
+print "ok 18\n";
+
+print "not " unless "\x{3AF}" =~ /\x{3AF}/;
+print "ok 19\n";
 

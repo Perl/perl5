@@ -408,7 +408,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	PL_reg_flags |= RF_utf8;
 
     if (prog->minlen > CHR_DIST((U8*)strend, (U8*)strpos)) {
-	DEBUG_r(PerlIO_printf(Perl_debug_log, "String too short...\n"));
+	DEBUG_r(PerlIO_printf(Perl_debug_log,
+			      "String too short... [re_intuit_start]\n"));
 	goto fail;
     }
     strbeg = (sv && SvPOK(sv)) ? strend - SvCUR(sv) : strpos;
@@ -1474,19 +1475,10 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
 
     minlen = prog->minlen;
-    if (do_utf8 && !(prog->reganch & ROPT_CANY_SEEN)) {
-        if (utf8_distance((U8*)strend, (U8*)startpos) < minlen) {
-	    DEBUG_r(PerlIO_printf(Perl_debug_log,
-				  "Too short (in characters)...\n"));
-	    goto phooey;
-	}
-    }
-    else {
-        if (strend - startpos < minlen) {
-	    DEBUG_r(PerlIO_printf(Perl_debug_log,
-				  "Too short (in bytes)...\n"));
-	    goto phooey;
-	}
+    if (strend - startpos < minlen) {
+        DEBUG_r(PerlIO_printf(Perl_debug_log,
+			      "String too short [regexec_flags]...\n"));
+	goto phooey;
     }
 
     /* Check validity of program. */
@@ -2215,14 +2207,26 @@ S_regmatch(pTHX_ regnode *prog)
 		char *l = locinput;
 		char *e = s + ln;
 		STRLEN len;
+
 		if (do_utf8)
 		    while (s < e) {
+			UV uv;
+
 			if (l >= PL_regeol)
 			    sayNO;
-			if (*((U8*)s) != utf8_to_uvchr((U8*)l, &len))
-			    sayNO;
-			s += len;
-			l += len;
+			uv = NATIVE_TO_UNI(*(U8*)s);
+			if (UTF8_IS_START(uv)) {
+			     len = UTF8SKIP(s);
+			     if (memNE(s, l, len))
+				  sayNO;
+			     l += len;
+			     s += len;
+			} else {
+			     if (uv != utf8_to_uvchr((U8*)l, &len))
+				  sayNO;
+			     l += len;
+			     s ++;
+			}
 		    }
 		else
 		    while (s < e) {
@@ -2230,8 +2234,8 @@ S_regmatch(pTHX_ regnode *prog)
 			    sayNO;
 			if (*((U8*)l) != utf8_to_uvchr((U8*)s, &len))
 			    sayNO;
-			s+=len;
-			l++;
+			s += len;
+			l ++;
 		    }
 		locinput = l;
 		nextchr = UCHARAT(locinput);
