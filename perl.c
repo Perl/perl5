@@ -952,26 +952,27 @@ setuid perl scripts securely.\n");
 	  * PTRSIZE bytes.  As long as no system has something bizarre
 	  * like the argv[] interleaved with some other data, we are
 	  * fine.  (Did I just evoke Murphy's Law?)  --jhi */
-	 s = PL_origargv[0];
-	 while (*s) s++;
-	 for (i = 1; i < PL_origargc; i++) {
-	      if ((PL_origargv[i] == s + 1
+	 if (PL_origargv && PL_origargc >= 1 && (s = PL_origargv[0])) {
+	      while (*s) s++;
+	      for (i = 1; i < PL_origargc; i++) {
+		   if ((PL_origargv[i] == s + 1
 #ifdef OS2
-		   || PL_origargv[i] == s + 2
+			|| PL_origargv[i] == s + 2
 #endif 
-		  )
-		  ||
-		  (aligned &&
-		   (PL_origargv[i] >  s &&
-		    PL_origargv[i] <=
-		    INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)))
-		 )
-	      {
-		   s = PL_origargv[i];
-		   while (*s) s++;
+			    )
+		       ||
+		       (aligned &&
+			(PL_origargv[i] >  s &&
+			 PL_origargv[i] <=
+			 INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)))
+			)
+		   {
+			s = PL_origargv[i];
+			while (*s) s++;
+		   }
+		   else
+			break;
 	      }
-	      else
-		   break;
 	 }
 	 /* Can we grab env area too to be used as the area for $0? */
 	 if (PL_origenviron) {
