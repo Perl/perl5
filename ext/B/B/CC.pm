@@ -1105,6 +1105,7 @@ sub doeval {
     write_back_stack();
     my $sym = loadop($op);
     my $ppaddr = $op->ppaddr;
+    #runtime(qq/printf("$ppaddr type eval\n");/);
     runtime("PP_EVAL($ppaddr, ($sym)->op_next);");
     $know_op = 1;
     invalidate_lexicals(REGISTER|TEMPORARY);
@@ -1112,8 +1113,23 @@ sub doeval {
 }
 
 sub pp_entereval { doeval(@_) }
-sub pp_require { doeval(@_) }
 sub pp_dofile { doeval(@_) }
+
+#pp_require is protected by pp_entertry, so no protection for it.
+sub pp_require {
+    my $op = shift;
+    $curcop->write_back;
+    write_back_lexicals(REGISTER|TEMPORARY);
+    write_back_stack();
+    my $sym = doop($op);
+    runtime("while (PL_op != ($sym)->op_next && PL_op != (OP*)0 ){");
+    runtime("PL_op = (*PL_op->op_ppaddr)(ARGS);");
+    runtime("SPAGAIN;}");
+    $know_op = 1;
+    invalidate_lexicals(REGISTER|TEMPORARY);
+    return $op->next;
+}
+
 
 sub pp_entertry {
     my $op = shift;
