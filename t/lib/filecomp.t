@@ -97,8 +97,16 @@ print "# problems when testing with a tempory file\n" if $@;
 if (@donetests == 2) {
   print "not " unless $donetests[0] == 0;
   print "ok 11\n";
-  print "not " unless $donetests[1] == 0;
-  print "ok 12\n";
+  if ($^O eq 'VMS') {
+    # The open attempt on FROM in File::Compare::compare should fail
+    # on this OS since files are not shared by default.
+    print "not " unless $donetests[1] == -1;
+    print "ok 12\n";
+  }
+  else {
+    print "not " unless $donetests[1] == 0;
+    print "ok 12\n";
+  }
 }
 else {
   print "ok 11# Skip\nok 12 # Skip Likely due to File::Temp\n";
