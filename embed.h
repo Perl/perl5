@@ -1179,7 +1179,6 @@
 #define group_end		S_group_end
 #define get_num			S_get_num
 #define next_symbol		S_next_symbol
-#define doencodes		S_doencodes
 #define is_an_int		S_is_an_int
 #define div128			S_div128
 #endif
@@ -3206,7 +3205,6 @@
 #define group_end(a,b,c)	S_group_end(aTHX_ a,b,c)
 #define get_num(a,b)		S_get_num(aTHX_ a,b)
 #define next_symbol(a)		S_next_symbol(aTHX_ a)
-#define doencodes(a,b,c)	S_doencodes(aTHX_ a,b,c)
 #define is_an_int(a,b)		S_is_an_int(aTHX_ a,b)
 #define div128(a,b)		S_div128(aTHX_ a,b)
 #endif

@@ -579,9 +579,8 @@ and operators dealing with filenames.
 
 =item *
 
-The C<pack()>/C<unpack()> letters C<c> and C<C> do I<not> change,
-since they are often used for byte-oriented formats.  Again, think
-C<char> in the C language.
+The C<pack()>/C<unpack()> letter C<C> does I<not> change, since it is often 
+used for byte-oriented formats.  Again, think C<char> in the C language.
 
 There is a new C<U> specifier that converts between Unicode characters
 and code points.

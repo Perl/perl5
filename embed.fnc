@@ -1144,7 +1144,6 @@ s	|I32	|measure_struct	|NN tempsym_t* symptr
 s	|const char *	|group_end	|NN const char *pat|NN const char *patend|char ender
 s	|const char *	|get_num	|NN const char *ppat|NN I32 *
 s	|bool	|next_symbol	|NN tempsym_t* symptr
-s	|void	|doencodes	|NN SV* sv|NN char* s|I32 len
 sR	|SV*	|is_an_int	|NN const char *s|STRLEN l
 s	|int	|div128		|NN SV *pnum|NN bool *done
 #endif

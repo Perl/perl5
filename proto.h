@@ -1689,7 +1689,6 @@ STATIC I32	S_measure_struct(pTHX_ tempsym_t* symptr);
 STATIC const char *	S_group_end(pTHX_ const char *pat, const char *patend, char ender);
 STATIC const char *	S_get_num(pTHX_ const char *ppat, I32 *);
 STATIC bool	S_next_symbol(pTHX_ tempsym_t* symptr);
-STATIC void	S_doencodes(pTHX_ SV* sv, char* s, I32 len);
 STATIC SV*	S_is_an_int(pTHX_ const char *s, STRLEN l)
 			__attribute__warn_unused_result__;
 

@@ -61,7 +61,7 @@ else { # EBCDIC where UTF-EBCDIC may be used (this may be 1047 specific since
 }
 
 sub to_bytes {
-    pack"a*", shift;
+    unpack"U0a*", shift;
 }
 
 {
