@@ -17,7 +17,7 @@ use vars qw(@ISA @EXPORT $VERSION
 	    );
 use strict;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.22 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.2201 $ =~ /(\d+)\.(\d+)/);
 #for the namespace change
 $Devel::embed::VERSION = "99.99";
 
@@ -199,9 +199,11 @@ sub ldopts {
     }
     #print STDERR "\@potential_libs = @potential_libs\n";
 
+    my $libperl = (grep(/^(-l\w+perl)$/, @link_args))[0] || "-lperl";
+
     my($extralibs, $bsloadlibs, $ldloadlibs, $ld_run_path) =
 	$MM->ext(join ' ', 
-		 $MM->catdir("-L$Config{archlibexp}", "CORE"), " -lperl", 
+		 $MM->catdir("-L$Config{archlibexp}", "CORE"), " $libperl", 
 		 @potential_libs);
 
     my $ld_or_bs = $bsloadlibs || $ldloadlibs;
