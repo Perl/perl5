@@ -650,21 +650,19 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 #endif
 		    n = regnext(n);
 		}
-		else {
+		else if (stringok) {
 		    int oldl = STR_LEN(scan);
 		    regnode *nnext = regnext(n);
-		
+
 		    if (oldl + STR_LEN(n) > U8_MAX)
 			break;
 		    NEXT_OFF(scan) += NEXT_OFF(n);
 		    STR_LEN(scan) += STR_LEN(n);
 		    next = n + NODE_SZ_STR(n);
 		    /* Now we can overwrite *n : */
-		    Move(STRING(n), STRING(scan) + oldl,
-			 STR_LEN(n), char);
+		    Move(STRING(n), STRING(scan) + oldl, STR_LEN(n), char);
 #ifdef DEBUGGING
-		    if (stringok)
-			stop = next - 1;
+		    stop = next - 1;
 #endif
 		    n = nnext;
 		}
