@@ -82,6 +82,7 @@ Static_Ext_Mac	= 	\
 #	Mac:Menus:Menus				\
 #	Mac:MoreFiles:MoreFiles			\
 #	Mac:Movies:Movies			\
+#	Mac:Navigation:Navigation		\
 #	Mac:Notification:Notification		\
 #	Mac:OSA:OSA				\
 #	Mac:Processes:Processes			\

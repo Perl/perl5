@@ -19,7 +19,32 @@
 #include "XSUB.h"
 #include <Types.h>
 #include <Navigation.h>
-#include <TFileSpec.h>
+#include <GUSIFileSpec.h>
+
+typedef struct {
+	Boolean                         locked;             /* file is locked */
+	Boolean                         resourceOpen;       /* resource fork is opened */
+	Boolean                         dataOpen;           /* data fork is opened */
+	Boolean                         reserved1;
+	UInt32                          dataSize;           /* size of the data fork */
+	UInt32                          resourceSize;       /* size of the resource fork */
+	FInfo                           finderInfo;         /* more file info: */
+	FXInfo                          finderXInfo;
+}                                 NavFileInfo;
+typedef struct {
+	Boolean                         shareable;
+	Boolean                         sharePoint;
+	Boolean                         mounted;
+	Boolean                         readable;
+	Boolean                         writeable;
+	Boolean                         reserved2;
+	UInt32                          numberOfFiles;
+	DInfo                           finderDInfo;
+	DXInfo                          finderDXInfo;
+	OSType                          folderType;
+	OSType                          folderCreator;
+	char                            reserved3[206];
+}                                 NavFolderInfo;
 
 typedef struct {
 	SV *	eventProc;
@@ -43,7 +68,7 @@ static OSErr Path2AEDesc(const char * path, AEDesc * desc)
 	OSErr	err;
 	FSSpec 	spec;
 	
-	if (err = Path2FSSpec(path, &spec))
+	if (err = GUSIPath2FSp(path, &spec))
 		return err;
 	else
 		return AECreateDesc(typeFSS, &spec, sizeof(FSSpec), desc);
@@ -160,10 +185,10 @@ STRUCT * NavFileOrFolderInfo
 		READ_ONLY
 	NavFileInfo		fileInfo;
 		READ_ONLY
-		ALIAS &STRUCT->fileAndFolder.fileInfo
+		ALIAS (NavFileInfo) &STRUCT->fileAndFolder.fileInfo
 	NavFolderInfo	folderInfo;
 		READ_ONLY
-		ALIAS &STRUCT->fileAndFolder.folderInfo
+		ALIAS (NavFolderInfo) &STRUCT->fileAndFolder.folderInfo
 
 =item NavFileInfo
 
@@ -172,7 +197,6 @@ The file specific part of the above structure. All fields are readonly.
 	Boolean 	locked;						/* file is locked */
 	Boolean 	resourceOpen;				/* resource fork is opened */
 	Boolean 	dataOpen;					/* data fork is opened */
-	Boolean 	reserved;
 	U32 		dataSize;					/* size of the data fork */
 	U32 		resourceSize;				/* size of the resource fork */
 	FInfo 		finderInfo;					/* more file info: */
@@ -186,16 +210,17 @@ STRUCT * NavFileInfo
 		READ_ONLY
 	Boolean 	dataOpen;					/* data fork is opened */
 		READ_ONLY
-	Boolean 	reserved;
-		READ_ONLY
 	U32 		dataSize;					/* size of the data fork */
 		READ_ONLY
 	U32 		resourceSize;				/* size of the resource fork */
 		READ_ONLY
 	FInfo 		finderInfo;					/* more file info: */
 		READ_ONLY
+	FXInfo		finderXInfo
+		READ_ONLY
 	FXInfo 		moreFinderInfo;
 		READ_ONLY
+		ALIAS STRUCT->finderXInfo
 
 =item NavFolderInfo
 
@@ -224,10 +249,16 @@ STRUCT * NavFolderInfo
 		READ_ONLY
 	U32 		numberOfFiles;
 		READ_ONLY
+	DInfo 		finderDInfo;
+		READ_ONLY
+	DXInfo 		finderDXInfo;
+		READ_ONLY
 	DInfo 		finderInfo;
 		READ_ONLY
+		ALIAS	STRUCT->finderDInfo
 	DXInfo 		moreFinderInfo;
 		READ_ONLY
+		ALIAS 	STRUCT->finderDXInfo
 
 =item NavCBRec
 
@@ -250,7 +281,7 @@ STRUCT * NavCBRec
 	EventRecord 	event;
 		READ_ONLY
 		OUTPUT:
-		XS_OUTPUT(ToolboxEvent, &STRUCT->eventData.event, $arg);
+		XS_OUTPUT(ToolboxEvent, &STRUCT->eventData.eventDataParms.event, $arg);
 
 =item NavDialogOptions
 
@@ -266,7 +297,6 @@ Options for a Navigation dialog. Fields are:
 	Str255 			savedFileName;				/* default name for text box in NavPutFile (or null string for default) */
 	Str255 			message;					/* custom message prompt (or null string for default) */
 	U32 			preferenceKey;				/* a key for to managing preferences for using multiple utility dialogs */
-	Handle 			popupExtension;				/* extended popup menu items, an array of NavMenuItemSpecs */
 
 =cut
 STRUCT NavDialogOptions
@@ -280,7 +310,6 @@ STRUCT NavDialogOptions
 	Str255 			savedFileName;				/* default name for text box in NavPutFile (or null string for default) */
 	Str255 			message;					/* custom message prompt (or null string for default) */
 	U32 			preferenceKey;				/* a key for to managing preferences for using multiple utility dialogs */
-	Handle 			popupExtension;				/* extended popup menu items, an array of NavMenuItemSpecs */
 
 MODULE = Mac::QuickDraw	PACKAGE = NavReplyRecord
 

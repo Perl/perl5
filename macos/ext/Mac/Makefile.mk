@@ -5,7 +5,6 @@ MACPERL_SRC	=	:::
 
 COpt += -i :::
 
-# Navigation:Navigation
 # DCon:DCon
 # SAT:SAT
 # ImageCompression:ImageCompression
@@ -25,6 +24,7 @@ dirs = 	\
 	Menus:Menus				\
 	MoreFiles:MoreFiles			\
 	Movies:Movies				\
+	Navigation:Navigation			\
 	Notification:Notification		\
 	OSA:OSA					\
 	Processes:Processes			\
