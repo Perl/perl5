@@ -62,6 +62,7 @@ SKIP: {
     SKIP: {
         skip("no kill() support on Mac OS", 4) if $Is_MacOS;
 
+       print "# warning, darwin seems to loose blocked signals (failing test 10)\n" if($^O eq 'darwin');
 	my $mask   = new POSIX::SigSet &SIGINT;
 	my $action = new POSIX::SigAction 'main::SigHUP', $mask, 0;
 	sigaction(&SIGHUP, $action);
