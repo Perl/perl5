@@ -132,12 +132,19 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define ARG_VALUE(arg) (arg)
 #define ARG__SET(arg,val) ((arg) = (val))
 
+#undef ARG
+#undef ARG1
+#undef ARG2
+
 #define ARG(p) ARG_VALUE(ARG_LOC(p))
 #define ARG1(p) ARG_VALUE(ARG1_LOC(p))
 #define ARG2(p) ARG_VALUE(ARG2_LOC(p))
 #define ARG_SET(p, val) ARG__SET(ARG_LOC(p), (val))
 #define ARG1_SET(p, val) ARG__SET(ARG1_LOC(p), (val))
 #define ARG2_SET(p, val) ARG__SET(ARG2_LOC(p), (val))
+
+#undef NEXT_OFF
+#undef NODE_ALIGN
 
 #ifndef lint
 #  define NEXT_OFF(p) ((p)->next_off)
@@ -151,6 +158,11 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 
 #define SIZE_ALIGN NODE_ALIGN
 
+#undef OP
+#undef OPERAND
+#undef MASK
+#undef STRING
+
 #define	OP(p)		((p)->type)
 #define	OPERAND(p)	(((struct regnode_string *)p)->string)
 #define MASK(p)		((char*)OPERAND(p))
@@ -158,6 +170,11 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define	STRING(p)	(((struct regnode_string *)p)->string)
 #define STR_SZ(l)	((l + sizeof(regnode) - 1) / sizeof(regnode))
 #define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p))+1)
+
+#undef NODE_ALIGN
+#undef ARG_LOC
+#undef NEXTOPER
+#undef PREVOPER
 
 #define	NODE_ALIGN(node)
 #define	ARG_LOC(p)	(((struct regnode_1 *)p)->arg1)
