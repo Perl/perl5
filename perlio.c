@@ -3123,6 +3123,9 @@ PerlIOBuf_flush(pTHX_ PerlIO *f)
 		/* Reload n as some layers may pop themselves on seek */
 		b->posn = PerlIO_tell(n = PerlIONext(f));
 	    }
+	    else {
+		return code;
+	    }
 	}
     }
     b->ptr = b->end = b->buf;
