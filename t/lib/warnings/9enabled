@@ -198,7 +198,9 @@ sub check {
 --FILE-- 
 use warnings 'syntax' ;
 use abc ;
-eval { abc::check() ; };
+eval { 
+  abc::check() ; 
+};
 print $@ ;
 EXPECT
 ok1
@@ -217,7 +219,9 @@ sub check {
 --FILE-- 
 use warnings 'syntax' ;
 use abc ;
-eval { abc::check() ; } ;
+eval { 
+  abc::check() ; 
+  } ;
 print $@ ;
 EXPECT
 ok1
@@ -236,7 +240,9 @@ sub check {
 --FILE-- 
 use warnings 'syntax' ;
 require "abc" ;
-eval { abc::check() ; } ;
+eval { 
+  abc::check() ; 
+  } ;
 print $@ ;
 EXPECT
 ok1
@@ -255,7 +261,10 @@ sub check {
 --FILE-- 
 use warnings 'syntax' ;
 require "abc" ;
-eval { use warnings 'io' ; abc::check() ; };
+eval { 
+  use warnings 'io' ; 
+  abc::check() ; 
+};
 abc::check() ; 
 print $@ ;
 EXPECT
@@ -326,24 +335,32 @@ ok4
 
 # check warnings::warn
 use warnings ;
-eval { warnings::warn() } ;
+eval { 
+    warnings::warn() 
+  } ;
 print $@ ;
-eval { warnings::warn("fred", "joe") } ;
+eval { 
+  warnings::warn("fred", "joe") 
+  } ;
 print $@ ;
 EXPECT
-Usage: warnings::warn([category,] 'message') at - line 4
-Unknown warnings category 'fred' at - line 6
+Usage: warnings::warn([category,] 'message') at - line 5
+Unknown warnings category 'fred' at - line 9
 ########
 
 # check warnings::warnif
 use warnings ;
-eval { warnings::warnif() } ;
+eval { 
+  warnings::warnif() 
+} ;
 print $@ ;
-eval { warnings::warnif("fred", "joe") } ;
+eval { 
+  warnings::warnif("fred", "joe") 
+} ;
 print $@ ;
 EXPECT
-Usage: warnings::warnif([category,] 'message') at - line 4
-Unknown warnings category 'fred' at - line 6
+Usage: warnings::warnif([category,] 'message') at - line 5
+Unknown warnings category 'fred' at - line 9
 ########
 
 --FILE-- abc.pm
@@ -380,11 +397,12 @@ sub check { warnings::warn("io", "hello") }
 --FILE--
 use warnings qw( FATAL deprecated ) ;
 use abc;
-eval { abc::check() ; } ;
+eval { 
+    abc::check() ; 
+  } ;
 print "[[$@]]\n";
 EXPECT
-hello at - line 3
-	eval {...} called at - line 3
+hello at - line 4
 [[]]
 ########
 
@@ -396,11 +414,12 @@ sub check { warnings::warn("io", "hello") }
 --FILE--
 use warnings qw( FATAL io ) ;
 use abc;
-eval { abc::check() ; } ;
+eval { 
+  abc::check() ; 
+} ;
 print "[[$@]]\n";
 EXPECT
-[[hello at - line 3
-	eval {...} called at - line 3
+[[hello at - line 4
 ]]
 ########
 -W
@@ -656,11 +675,12 @@ sub check { warnings::warn("hello") }
 --FILE--
 use abc;
 use warnings qw( FATAL deprecated ) ;
-eval { abc::check() ; } ;
+eval {
+    abc::check() ; 
+  } ;
 print "[[$@]]\n";
 EXPECT
-hello at - line 3
-	eval {...} called at - line 3
+hello at - line 4
 [[]]
 ########
 
@@ -672,11 +692,12 @@ sub check { warnings::warn("hello") }
 --FILE--
 use abc;
 use warnings qw( FATAL abc ) ;
-eval { abc::check() ; } ;
+eval { 
+  abc::check() ; 
+  } ;
 print "[[$@]]\n";
 EXPECT
-[[hello at - line 3
-	eval {...} called at - line 3
+[[hello at - line 4
 ]]
 ########
 -W
@@ -1024,11 +1045,8 @@ ok2
 ok3
 ok4
 my message 1 at abc.pm line 5
-	abc::in1() called at - line 3
 my message 2 at abc.pm line 5
-	abc::in1() called at - line 3
 my message 3 at abc.pm line 5
-	abc::in1() called at - line 3
 ########
 
 --FILE-- def.pm

@@ -522,6 +522,12 @@ KEYWORDS
 
 $All = "" ; vec($All, $Offsets{'all'}, 2) = 3 ;
 
+sub Croaker
+{
+    delete $Carp::CarpInternal{'warnings'};
+    croak @_ ;
+}
+
 sub bits {
     my $mask ;
     my $catmask ;
@@ -535,7 +541,7 @@ sub bits {
 	    $mask |= $DeadBits{$word} if $fatal ;
 	}
 	else
-          { croak("Unknown warnings category '$word'")}
+          { Croaker("Unknown warnings category '$word'")}
     }
 
     return $mask ;
@@ -571,19 +577,19 @@ sub __chk
         # check the category supplied.
         $category = shift ;
         if (ref $category) {
-            croak ("not an object")
+            Croaker ("not an object")
                 if $category !~ /^([^=]+)=/ ;
 	    $category = $1 ;
             $isobj = 1 ;
         }
         $offset = $Offsets{$category};
-        croak("Unknown warnings category '$category'")
+        Croaker("Unknown warnings category '$category'")
 	    unless defined $offset;
     }
     else {
         $category = (caller(1))[0] ;
         $offset = $Offsets{$category};
-        croak("package '$category' not registered for warnings")
+        Croaker("package '$category' not registered for warnings")
 	    unless defined $offset ;
     }
 
@@ -611,7 +617,7 @@ sub __chk
 
 sub enabled
 {
-    croak("Usage: warnings::enabled([category])")
+    Croaker("Usage: warnings::enabled([category])")
 	unless @_ == 1 || @_ == 0 ;
 
     my ($callers_bitmask, $offset, $i) = __chk(@_) ;
@@ -624,12 +630,11 @@ sub enabled
 
 sub warn
 {
-    croak("Usage: warnings::warn([category,] 'message')")
+    Croaker("Usage: warnings::warn([category,] 'message')")
 	unless @_ == 2 || @_ == 1 ;
 
     my $message = pop ;
     my ($callers_bitmask, $offset, $i) = __chk(@_) ;
-    local $Carp::CarpLevel = $i ;
     croak($message)
 	if vec($callers_bitmask, $offset+1, 1) ||
 	   vec($callers_bitmask, $Offsets{'all'}+1, 1) ;
@@ -638,12 +643,11 @@ sub warn
 
 sub warnif
 {
-    croak("Usage: warnings::warnif([category,] 'message')")
+    Croaker("Usage: warnings::warnif([category,] 'message')")
 	unless @_ == 2 || @_ == 1 ;
 
     my $message = pop ;
     my ($callers_bitmask, $offset, $i) = __chk(@_) ;
-    local $Carp::CarpLevel = $i ;
 
     return
         unless defined $callers_bitmask &&

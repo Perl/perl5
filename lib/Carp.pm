@@ -119,6 +119,7 @@ call die() or warn(), as appropriate.
 # text and function arguments should be formatted when printed.
 
 $CarpInternal{Carp}++;
+$CarpInternal{warnings}++;
 $CarpLevel = 0;		# How many extra package levels to skip on carp.
                         # How many calls to skip on confess.
                         # Reconciling these notions is hard, use
