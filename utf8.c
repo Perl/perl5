@@ -1089,7 +1089,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 	    Copy(ptr, PL_last_swash_key, klen, U8);
     }
 
-    switch ((slen << 3) / needents) {
+    switch ((int)((slen << 3) / needents)) {
     case 1:
 	bit = 1 << (off & 7);
 	off >>= 3;
