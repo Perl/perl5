@@ -2954,7 +2954,7 @@ static int store_other(stcxt_t *cxt, SV *sv)
 
 	len = strlen(buf);
 	STORE_SCALAR(buf, len);
-	TRACEME(("ok (dummy \"%s\", length = %"IVdf")", buf, len));
+	TRACEME(("ok (dummy \"%s\", length = %"IVdf")", buf, (IV) len));
 
 	return 0;
 }
@@ -3784,7 +3784,7 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname)
 	 */
 
 	TRACEME(("calling STORABLE_thaw on %s at 0x%"UVxf" (%"IVdf" args)",
-		 class, PTR2UV(sv), AvFILLp(av) + 1));
+		 class, PTR2UV(sv), (IV) AvFILLp(av) + 1));
 
 	rv = newRV(sv);
 	(void) scalar_call(rv, hook, clone, av, G_SCALAR|G_DISCARD);
@@ -4125,7 +4125,7 @@ static SV *retrieve_lscalar(stcxt_t *cxt, char *cname)
 	SV *sv;
 
 	RLEN(len);
-	TRACEME(("retrieve_lscalar (#%d), len = %"IVdf, cxt->tagnum, len));
+	TRACEME(("retrieve_lscalar (#%d), len = %"IVdf, cxt->tagnum, (IV) len));
 
 	/*
 	 * Allocate an empty scalar of the suitable length.
@@ -4150,7 +4150,7 @@ static SV *retrieve_lscalar(stcxt_t *cxt, char *cname)
 	if (cxt->s_tainted)				/* Is input source tainted? */
 		SvTAINT(sv);				/* External data cannot be trusted */
 
-	TRACEME(("large scalar len %"IVdf" '%s'", len, SvPVX(sv)));
+	TRACEME(("large scalar len %"IVdf" '%s'", (IV) len, SvPVX(sv)));
 	TRACEME(("ok (retrieve_lscalar at 0x%"UVxf")", PTR2UV(sv)));
 
 	return sv;
