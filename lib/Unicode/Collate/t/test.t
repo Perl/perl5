@@ -11,11 +11,16 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 156 };
+BEGIN { plan tests => 160 };
 use Unicode::Collate;
 ok(1); # If we made it this far, we're ok.
 
 #########################
+
+my $UCA_Version = "8.0";
+
+ok(Unicode::Collate::UCA_Version, $UCA_Version);
+ok(Unicode::Collate->UCA_Version, $UCA_Version);
 
 my $Collator = Unicode::Collate->new(
   table => 'keys.txt',
@@ -23,6 +28,9 @@ my $Collator = Unicode::Collate->new(
 );
 
 ok(ref $Collator, "Unicode::Collate");
+
+ok($Collator->UCA_Version,   $UCA_Version);
+ok($Collator->UCA_Version(), $UCA_Version);
 
 ok(
   join(':', $Collator->sort( 
@@ -585,8 +593,8 @@ ok($Collator  ->lt("Ca\x{300}ca\x{302}", "ca\x{302}ca\x{300}"));
 ok($Collator  ->lt("ca\x{300}ca\x{302}", "Ca\x{302}ca\x{300}"));
 
 
-# HIRAGANA and KATAKANA are undefined via ignoreName.
-# So they are after CJK Ideographs.
+# HIRAGANA and KATAKANA are made undefined via undefName.
+# So they are after CJK Unified Ideographs.
 
 ok($backLevel2->lt("\x{4E00}", $hiragana));
 ok($backLevel2->lt("\x{4E03}", $katakana));
