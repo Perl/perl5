@@ -290,9 +290,14 @@ END
    }
   close(D);
   close(H);
+
+  my $perc_saved    = $strings/($strings + $saved) * 100;
+  my $perc_subsaved = $strings/($strings + $subsave) * 100;
   printf STDERR "%d bytes in string tables\n",$strings;
-  printf STDERR "%d bytes (%.3g%%) saved spotting duplicates\n",$saved,100*$saved/$strings if $saved;
-  printf STDERR "%d bytes (%.3g%%) saved using substrings\n",$subsave,100*$subsave/$strings if $subsave;
+  printf STDERR "%d bytes (%.3g%%) saved spotting duplicates\n",
+    $saved, $perc_saved              if $saved;
+  printf STDERR "%d bytes (%.3g%%) saved using substrings\n",
+    $subsave, $perc_subsaved         if $subsave;
  }
 elsif ($doEnc)
  {
