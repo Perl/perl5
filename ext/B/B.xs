@@ -883,11 +883,11 @@ packiv(sv)
 
 MODULE = B	PACKAGE = B::NV		PREFIX = Sv
 
-double
+NV
 SvNV(sv)
 	B::NV	sv
 
-double
+NV
 SvNVX(sv)
 	B::NV	sv
 
