@@ -1078,8 +1078,8 @@ in effect.  See L<perlre/(?{ code })>.
 =item %s: Eval-group not allowed at run time
 
 (F) Perl tried to compile a regular expression containing the C<(?{ ... })>
-zero-width assertion at run time, at it would when the pattern contains
-interpolated values.  Since this is a risk to security, it is not allowed.
+zero-width assertion at run time, as it would when the pattern contains
+interpolated values.  Since that is a security risk, it is not allowed.
 If you insist, you may still do this by explicitly building the pattern
 from an interpolated string at run time and using that in an eval().
 See L<perlre/(?{ code })>.

@@ -69,6 +69,123 @@ Version 5.004_70        Developer release working toward 5.005
 ----------------
 
 ____________________________________________________________________________
+[  1334] By: gsar                                  on 1998/07/06  06:41:17
+        Log: allow eval-groups in patterns only if they C<use re 'eval';>
+     Branch: perl
+	   ! lib/re.pm perl.h pod/perldiag.pod pod/perlre.pod regcomp.c
+           ! t/op/misc.t t/op/pat.t t/op/regexp.t t/op/subst.t
+____________________________________________________________________________
+[  1333] By: gsar                                  on 1998/07/06  03:22:52
+        Log: From: Hans Mulder <hansm@icgroup.nl>
+             Date: Mon,  6 Jul 98 02:11:32 +0200
+             Message-Id: <9807060021.AA29027@icgned.icgroup.nl>
+             Subject: [PATCH 5.00469] corrupt malloc ptr on NeXT
+     Branch: perl
+           ! malloc.c
+____________________________________________________________________________
+[  1332] By: gsar                                  on 1998/07/06  03:18:34
+        Log: added Errno-1.09 from CPAN
+     Branch: perl
+           ! ext/Errno/ChangeLog ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  1331] By: gsar                                  on 1998/07/06  02:59:09
+        Log: fix small memleak on -e, don't try to find_script() when e_script
+     Branch: perl
+           ! perl.c
+____________________________________________________________________________
+[  1330] By: gsar                                  on 1998/07/06  00:40:24
+        Log: add Symbol::delete_package()
+     Branch: perl
+           ! lib/Symbol.pm pod/perlembed.pod
+____________________________________________________________________________
+[  1329] By: gsar                                  on 1998/07/05  23:05:40
+        Log: patch to remove assumptions about offset of IV being == sizeof(XPV)
+             From: Stephen McCamant <alias@mcs.com>
+             Date: Sun,  5 Jul 1998 17:36:14 -0500 (CDT)
+             Message-ID: <13727.63831.95324.696098@alias-2.pr.mcs.net>
+             Subject: [PATCH] alignment in X[IN]V allocation
+     Branch: perl
+           ! sv.c
+____________________________________________________________________________
+[  1328] By: gsar                                  on 1998/07/05  22:47:57
+        Log: make read() return undef on errors as documented, and clarify docs
+     Branch: perl
+           ! pod/perlfunc.pod pp_sys.c
+____________________________________________________________________________
+[  1327] By: gsar                                  on 1998/07/05  22:11:21
+        Log: fix getc() to return empty string instead of undef on eof, as it was
+             documented to behave; still returns undef on error
+     Branch: perl
+           ! pp_sys.c
+____________________________________________________________________________
+[  1326] By: gsar                                  on 1998/07/05  21:53:30
+        Log: patch whitespace-mutiliated; applied manually
+             From: Hans Mulder <hansm@icgroup.nl>
+             Date: Sun,  5 Jul 98 23:23:20 +0200
+             Message-Id: <9807052133.AA28626@icgned.icgroup.nl>
+             Subject: [PATCH 5.004_69] building Errno.pm still fails on NeXT
+     Branch: perl
+           ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  1325] By: gsar                                  on 1998/07/05  21:38:39
+        Log: applied patch (via private mail), modulo retrohunks in pod/perlfaq2.pod
+             From: Tom Christiansen <tchrist@jhereg.perl.com>
+             Date: Sun, 05 Jul 1998 09:15:22 -0500
+             Subject: Re: docpatch 
+             Message-Id: <199807051515.JAA03644@jhereg.perl.com>
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	   ! pod/perlfaq6.pod pod/perlfaq7.pod pod/perlfaq8.pod
+	   ! pod/perlfaq9.pod pod/perlfunc.pod pod/perlipc.pod
+           ! pod/perlrun.pod
+____________________________________________________________________________
+[  1324] By: gsar                                  on 1998/07/05  21:06:56
+        Log: applied patch, and undid change#1302 which it made unnecessary
+             From: Billy <wdconsta@cs.adelaide.edu.au>
+             Date: Sun, 5 Jul 1998 23:05:52 +0930 (CST)
+             Subject: [PATCH] utils/h2ph.PL and t/lib/h2ph.t
+             Message-ID: <Pine.SV4.3.93.980705230337.27658A-100000@xenon.teaching.cs.adelaide.edu.au>
+     Branch: perl
+           ! t/lib/h2ph.t utils/h2ph.PL
+____________________________________________________________________________
+[  1323] By: gsar                                  on 1998/07/05  20:56:39
+        Log: fix t/lib/fields.t's @INC so make test runs
+     Branch: perl
+           ! t/lib/fields.t
+____________________________________________________________________________
+[  1322] By: gsar                                  on 1998/07/05  20:26:43
+        Log: add comments on GV_FOO constants, s/8/GV_ADDINEVAL/
+     Branch: perl
+           ! gv.c gv.h toke.c
+____________________________________________________________________________
+[  1321] By: gsar                                  on 1998/07/05  07:41:50
+        Log: sundry win32 config tweaks
+     Branch: perl
+	   ! Todo.5.005 t/op/stat.t win32/Makefile win32/config.bc
+	   ! win32/config.gc win32/config.vc win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/config_h.PL
+           ! win32/config_sh.PL win32/makefile.mk
+____________________________________________________________________________
+[  1320] By: gsar                                  on 1998/07/05  06:30:35
+        Log: update Changes
+     Branch: perl
+           ! Changes
+____________________________________________________________________________
+[  1319] By: gsar                                  on 1998/07/05  06:27:37
+        Log: add ck_sysread() for better sysread/read/recv sanity
+     Branch: perl
+	   ! ObjXSub.h embed.h global.sym globals.c objpp.h op.c opcode.h
+           ! opcode.pl proto.h
+____________________________________________________________________________
+[  1318] By: gsar                                  on 1998/07/05  04:34:05
+        Log: From: Stephen McCamant <alias@mcs.com>
+             Date: Sat,  4 Jul 1998 23:24:47 -0500 (CDT)
+             Subject: [PATCH] Document B::Deparse, add pp_threadsv
+             Message-ID: <13726.65230.19324.216849@alias-2.pr.mcs.net>
+     Branch: perl
+           ! ext/B/B/Deparse.pm
+____________________________________________________________________________
 [  1317] By: gsar                                  on 1998/07/05  04:15:25
         Log: added patch with tweak to doc
              From: Chip Salzenberg <chip@perl.org>
