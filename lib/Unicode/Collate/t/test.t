@@ -1,7 +1,8 @@
 
 BEGIN {
-    if (ord("A") == 193) {
-	print "1..0 # Unicode::Collate not ported to EBCDIC\n";
+    unless ("A" eq pack('U', 0x41) || "A" eq pack('U', ord("A"))) {
+	print "1..0 # Unicode::Collate " .
+	    "cannot stringify a Unicode code point\n";
 	exit 0;
     }
 }
@@ -53,10 +54,12 @@ ok($Collator->cmp("", "perl"), -1);
 
 ##############
 
-# Use pack('U'), not chr(), for Perl 5.6.1.
-my $A_acute = pack('U', $IsEBCDIC ? 0x65 : 0xC1);
-my $a_acute = pack('U', $IsEBCDIC ? 0x45 : 0xE1);
-my $acute   = pack('U', 0x0301);
+sub _pack_U   { Unicode::Collate::pack_U(@_) }
+sub _unpack_U { Unicode::Collate::unpack_U(@_) }
+
+my $A_acute = _pack_U(0xC1);
+my $a_acute = _pack_U(0xE1);
+my $acute   = _pack_U(0x0301);
 
 ok($Collator->cmp("A$acute", $A_acute), 0); # @version 3.1.1 (prev: -1)
 ok($Collator->cmp($a_acute, $A_acute), -1);

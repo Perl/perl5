@@ -1,5 +1,8 @@
 Revision history for Perl extension Unicode::Normalize.
 
+0.21  Thu Apr 02 23:12:54 2003
+	- internal tweak: for (?un)pack 'U'.
+
 0.20  Sun Mar 02 13:29:25 2003
 	- decompose Hangul syllables in a decomposition mapping.
 

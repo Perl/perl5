@@ -1,8 +1,8 @@
 package Unicode::Collate;
 
 BEGIN {
-    if (ord("A") == 193) {
-	die "Unicode::Collate not ported to EBCDIC\n";
+    unless ("A" eq pack('U', 0x41) || "A" eq pack('U', ord("A"))) {
+	die "Unicode::Collate cannot stringify a Unicode code point\n";
     }
 }
 
@@ -14,11 +14,7 @@ use File::Spec;
 
 require Exporter;
 
-# Supporting on EBCDIC platform is not tested.
-# Tester(s) welcome!
-our $IsEBCDIC = ord("A") != 0x41;
-
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 our $PACKAGE = __PACKAGE__;
 
 our @ISA = qw(Exporter);
@@ -37,7 +33,7 @@ eval { require Unicode::UCD };
 unless ($@) {
     $UNICODE_VERSION = Unicode::UCD::UnicodeVersion();
 }
-else { # XXX, Perl 5.6.1
+else { # Perl 5.6.1
     my($f, $fh);
     foreach my $d (@INC) {
 	$f = File::Spec->catfile($d, "unicode", "Unicode.301");
@@ -59,17 +55,21 @@ use constant NOMATCHPOS => -1;
 # This is also used as a HAS_UNICODE_NORMALIZE flag.
 our $getCombinClass;
 
+# Supported Levels
+use constant MinLevel => 1;
+use constant MaxLevel => 4;
+
 # Minimum weights at level 2 and 3, respectively
-use constant Min2   => 0x20;
-use constant Min3   => 0x02;
+use constant Min2Wt => 0x20;
+use constant Min3Wt => 0x02;
 
 # Shifted weight at 4th level
-use constant Shift4 => 0xFFFF;
+use constant Shift4Wt => 0xFFFF;
 
 # Variable weight at 1st level.
 # This is a negative value but should be regarded as zero on collation.
 # This is for distinction of variable chars from level 3 ignorable chars.
-use constant Var1 => -1;
+use constant Var1Wt => -1;
 
 
 # A boolean for Variable and 16-bit weights at 4 levels of Collation Element
@@ -78,10 +78,6 @@ use constant Var1 => -1;
 # The tie-breaking in the variable weights
 # other than "shift" (as well as "shift-trimmed") is unreliable.
 use constant VCE_TEMPLATE => 'Cn4';
-
-# Unicode encoding of strings to be collated
-# TODO: 'N*' for UTF-32BE, 'V*' for UTF-32LE.
-use constant UTF_TEMPLATE => 'U*';
 
 # A sort key: 16-bit weights
 # See also the PROBLEM on VCE_TEMPLATE above.
@@ -113,6 +109,33 @@ sub UCA_Version { "9" }
 
 sub Base_Unicode_Version { $UNICODE_VERSION || 'unknown' }
 
+######
+
+use constant UNICODE_FOR_PACK => ("A" eq pack('U', 0x41));
+use constant NATIVE_FOR_PACK  => ("A" eq pack('U', ord("A")));
+
+use constant UNICODE_FOR_UNPACK => (0x41 == unpack('U', "A"));
+use constant NATIVE_FOR_UNPACK  => (ord("A") == unpack('U', "A"));
+
+sub pack_U {
+    return UNICODE_FOR_PACK
+	? pack('U*', @_)
+	: NATIVE_FOR_PACK
+	    ? pack('U*', map utf8::unicode_to_native($_), @_)
+	    : die "$PACKAGE, a Unicode code point cannot be stringified.\n";
+}
+
+sub unpack_U {
+    return UNICODE_FOR_UNPACK
+	? unpack('U*', shift)
+	: NATIVE_FOR_UNPACK
+	    ? map(utf8::native_to_unicode($_), unpack 'U*', shift)
+	    : die "$PACKAGE, a code point returned from unpack U " .
+		"cannot be converted into Unicode.\n";
+}
+
+######
+
 my (%AlternateOK);
 @AlternateOK{ qw/
     blanked  non-ignorable  shifted  shift-trimmed
@@ -125,13 +148,15 @@ our @ChangeOK = qw/
   /;
 
 our @ChangeNG = qw/
-    entry entries table combining maxlength
+    entry entries table maxlength
     ignoreChar ignoreName undefChar undefName
     versionTable alternateTable backwardsTable forwardsTable rearrangeTable
     derivCode normCode rearrangeHash L3_ignorable
+    backwardsFlag
   /;
-# The hash key 'ignored' is deleted at VERSION 0.21.
-# The hash key 'isShift' are deleted at VERSION 0.23.
+# The hash key 'ignored' is deleted at v 0.21.
+# The hash key 'isShift' is deleted at v 0.23.
+# The hash key 'combining' is deleted at v 0.24.
 
 my (%ChangeOK, %ChangeNG);
 @ChangeOK{ @ChangeOK } = ();
@@ -155,12 +180,18 @@ sub change {
     return wantarray ? %old : $self;
 }
 
+sub _checkLevel {
+    my $level = shift;
+    my $key   = shift;
+    croak sprintf "Illegal level %d (in \$self->{%s}) lower than %d.",
+	$level, $key, MinLevel if MinLevel > $level;
+    croak sprintf "Unsupported level %d (in \$self->{%s}) higher than %d ",
+	$level, $key, MaxLevel if MaxLevel < $level;
+}
+
 sub checkCollator {
     my $self = shift;
-    croak "Illegal level lower than 1 (passed $self->{level})."
-	if $self->{level} < 1;
-    croak "A level higher than 4 (passed $self->{level}) is not supported."
-	if 4 < $self->{level};
+    _checkLevel($self->{level}, "level");
 
     $self->{derivCode} =
 	$self->{UCA_Version} ==  8 ? \&_derivCE_8 :
@@ -171,10 +202,24 @@ sub checkCollator {
     croak "$PACKAGE unknown alternate tag name: $self->{alternate}"
 	unless exists $AlternateOK{ $self->{alternate} };
 
-    $self->{backwards} = []
-	if ! defined $self->{backwards};
-    $self->{backwards} = [ $self->{backwards} ]
-	if ! ref $self->{backwards};
+    if (! defined $self->{backwards}) {
+	$self->{backwardsFlag} = 0;
+    }
+    elsif (! ref $self->{backwards}) {
+	_checkLevel($self->{backwards}, "backwards");
+	$self->{backwardsFlag} = 1 << $self->{backwards};
+    }
+    else {
+	my %level;
+	$self->{backwardsFlag} = 0;
+	for my $b (@{ $self->{backwards} }) {
+	    _checkLevel($b, "backwards");
+	    $level{$b} = 1;
+	}
+	for my $v (sort keys %level) {
+	    $self->{backwardsFlag} += 1 << $v;
+	}
+    }
 
     $self->{rearrange} = []
 	if ! defined $self->{rearrange};
@@ -223,7 +268,7 @@ sub new
 	$self->parseEntry($_) foreach split /\n/, $self->{entry};
     }
 
-    $self->{level} ||= 4;
+    $self->{level} ||= MaxLevel;
     $self->{UCA_Version} ||= UCA_Version();
 
     $self->{overrideHangul} = ''
@@ -305,10 +350,7 @@ sub parseEntry
     $entry = join(CODE_SEP, @uv); # in JCPS
 
     if (defined $self->{undefChar} || defined $self->{ignoreChar}) {
-	# Do not use UTF_TEMPLATE; Perl' RE is only for utf8.
-	my $ele = $IsEBCDIC
-	    ? pack('U*', map utf8::unicode_to_native($_), @uv)
-	    : pack('U*', @uv);
+	my $ele = pack_U(@uv);
 
 	# regarded as if it were not entried in the table
 	return
@@ -323,15 +365,12 @@ sub parseEntry
     $k = '[.0000.0000.0000.0000]'
 	if defined $self->{ignoreName} && $name =~ /$self->{ignoreName}/;
 
-    my $combining = TRUE; # primary = 0, secondary != 0;
     my $is_L3_ignorable;
 
     foreach my $arr ($k =~ /\[([^\[\]]+)\]/g) { # SPACEs allowed
 	my $var = $arr =~ /\*/; # exactly /^\*/ but be lenient.
 	my @wt = _getHexArray($arr);
 	push @key, pack(VCE_TEMPLATE, $var, @wt);
-	$combining = FALSE
-	    unless $wt[0] == 0 && $wt[1] != 0;
 	$is_L3_ignorable = TRUE
 	    if $wt[0] + $wt[1] + $wt[2] == 0;
 	  # if $arr !~ /[1-9A-Fa-f]/; NG
@@ -339,11 +378,6 @@ sub parseEntry
     }
 
     $self->{entries}{$entry} = \@key;
-
-    $self->{combining}{$entry} = TRUE
-	if $combining;
-
-    # The key is a string representing a numeral code point.
 
     $self->{L3_ignorable}{$uv[0]} = TRUE
 	if @uv == 1 && $is_L3_ignorable;
@@ -353,8 +387,9 @@ sub parseEntry
 	if @uv > 1;
 }
 
+
 ##
-## arrayref[weights] = altCE(bool variable?, list[num] weights)
+## arrayref[weights] = altCE(VCE)
 ##
 sub altCE
 {
@@ -362,26 +397,29 @@ sub altCE
     my($var, @wt) = unpack(VCE_TEMPLATE, shift);
 
     $self->{alternate} eq 'blanked' ?
-	$var ? [Var1, 0, 0, $wt[3]] : \@wt :
+	$var ? [Var1Wt, 0, 0, $wt[3]] : \@wt :
     $self->{alternate} eq 'non-ignorable' ?
 	\@wt :
     $self->{alternate} eq 'shifted' ?
-	$var ? [Var1, 0, 0, $wt[0] ]
-	     : [ @wt[0..2], $wt[0]+$wt[1]+$wt[2] ? Shift4 : 0 ] :
+	$var ? [Var1Wt, 0, 0, $wt[0] ]
+	     : [ @wt[0..2], $wt[0]+$wt[1]+$wt[2] ? Shift4Wt : 0 ] :
     $self->{alternate} eq 'shift-trimmed' ?
-	$var ? [Var1, 0, 0, $wt[0] ] : [ @wt[0..2], 0 ] :
+	$var ? [Var1Wt, 0, 0, $wt[0] ] : [ @wt[0..2], 0 ] :
         croak "$PACKAGE unknown alternate name: $self->{alternate}";
 }
 
 sub viewSortKey
 {
     my $self = shift;
-    my $ver = $self->{UCA_Version};
+    $self->visualizeSortKey($self->getSortKey(@_));
+}
 
-    my $key  = $self->getSortKey(@_);
-    my $view = join " ", map sprintf("%04X", $_), unpack(KEY_TEMPLATE, $key);
+sub visualizeSortKey
+{
+    my $self = shift;
+    my $view = join " ", map sprintf("%04X", $_), unpack(KEY_TEMPLATE, shift);
 
-    if ($ver <= 8) {
+    if ($self->{UCA_Version} <= 8) {
 	$view =~ s/ ?0000 ?/|/g;
     } else {
 	$view =~ s/\b0000\b/|/g;
@@ -423,9 +461,7 @@ sub splitCE
     }
 
     # get array of Unicode code point of string.
-    my @src = $IsEBCDIC
-	? map(utf8::native_to_unicode($_), unpack UTF_TEMPLATE, $str)
-	: unpack(UTF_TEMPLATE, $str);
+    my @src = unpack_U($str);
 
     # rearrangement:
     # Character positions are not kept if rearranged,
@@ -529,7 +565,7 @@ sub getWt
 	    $cjk
 		? map(pack(VCE_TEMPLATE, NON_VAR, @$_), &$cjk($u))
 		: defined $cjk && $self->{UCA_Version} <= 8 && $u < 0x10000
-		    ? pack(VCE_TEMPLATE, NON_VAR, $u, Min2, Min3, $u)
+		    ? pack(VCE_TEMPLATE, NON_VAR, $u, Min2Wt, Min3Wt, $u)
 		    : $der->($u);
     }
     else {
@@ -557,7 +593,7 @@ sub getSortKey
 	    if ($wt->[0] == 0) { # ignorable
 		next if $last_is_variable;
 	    } else {
-		$last_is_variable = ($wt->[0] == Var1);
+		$last_is_variable = ($wt->[0] == Var1Wt);
 	    }
 	}
 	push @buf, $wt;
@@ -570,10 +606,6 @@ sub getSortKey
 	    push @{ $ret[$v] }, $b->[$v]
 		if 0 < $b->[$v];
 	}
-    }
-    foreach (@{ $self->{backwards} }) {
-	my $v = $_ - 1;
-	@{ $ret[$v] } = reverse @{ $ret[$v] };
     }
 
     # modification of tertiary weights
@@ -591,6 +623,15 @@ sub getSortKey
 	    elsif (0x0D <= $_ && $_ <= 0x0E) { $_ += 5 } # hiragana
 	}
     }
+
+    if ($self->{backwardsFlag}) {
+	for (my $v = MinLevel; $v <= MaxLevel; $v++) {
+	    if ($self->{backwardsFlag} & (1 << $v)) {
+		@{ $ret[$v-1] } = reverse @{ $ret[$v-1] };
+	    }
+	}
+    }
+
     join LEVEL_SEP, map pack(KEY_TEMPLATE, @$_), @ret;
 }
 
@@ -630,8 +671,8 @@ sub _derivCE_9 {
     my $aaaa = $base + ($u >> 15);
     my $bbbb = ($u & 0x7FFF) | 0x8000;
     return
-	pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2, Min3, $u),
-	pack(VCE_TEMPLATE, NON_VAR, $bbbb,    0,    0, $u);
+	pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2Wt, Min3Wt, $u),
+	pack(VCE_TEMPLATE, NON_VAR, $bbbb,      0,      0, $u);
 }
 
 sub _derivCE_8 {
@@ -684,7 +725,7 @@ sub _nonIgnorAtLevel($$)
     my $wt = shift;
     return if ! defined $wt;
     my $lv = shift;
-    return grep($wt->[$_] != 0, 0..$lv-1) ? TRUE : FALSE;
+    return grep($wt->[$_-1] != 0, MinLevel..$lv) ? TRUE : FALSE;
 }
 
 ##
@@ -731,7 +772,6 @@ sub index
        $pos   = 0 if $pos < 0;
     my $grob  = shift;
 
-    my $comb  = $self->{combining};
     my $lev   = $self->{level};
     my $ver9  = $self->{UCA_Version} > 8;
     my $v2i   = $self->{alternate} ne 'non-ignorable';
@@ -760,14 +800,14 @@ sub index
 	    if ($wt->[0] == 0) {
 		$to_be_pushed = FALSE if $last_is_variable;
 	    } else {
-		$last_is_variable = ($wt->[0] == Var1);
+		$last_is_variable = ($wt->[0] == Var1Wt);
 	    }
 	}
 
 	if (@subWt && $wt->[0] == 0) {
 	    push @{ $subWt[-1] }, $wt if $to_be_pushed;
 	} else {
-	    $wt->[0] = 0 if $wt->[0] == Var1;
+	    $wt->[0] = 0 if $wt->[0] == Var1Wt;
 	    push @subWt, [ $wt ];
 	}
     }
@@ -789,7 +829,7 @@ sub index
 		    if ($wt->[0] == 0) {
 			$to_be_pushed = FALSE if $last_is_variable;
 		    } else {
-			$last_is_variable = ($wt->[0] == Var1);
+			$last_is_variable = ($wt->[0] == Var1Wt);
 		    }
 		}
 
@@ -797,7 +837,7 @@ sub index
 		    push @{ $strWt[-1] }, $wt if $to_be_pushed;
 		    $finPos[-1] = $strCE->[$i][2];
 		} elsif ($to_be_pushed) {
-		    $wt->[0] = 0 if $wt->[0] == Var1;
+		    $wt->[0] = 0 if $wt->[0] == Var1Wt;
 		    push @strWt,  [ $wt ];
 		    push @iniPos, $found_base ? NOMATCHPOS : $strCE->[$i][1];
 		    $finPos[-1] = NOMATCHPOS if $found_base;
@@ -1217,9 +1257,9 @@ If the tag is made true, this is reversed.
 
 B<NOTE>: These tags simplemindedly assume
 any lowercase/uppercase or hiragana/katakana distinctions
-should occur in level 3, and their weights at level 3
-should be same as those mentioned in 7.3.1, UTS #10.
-If you define your collation elements which violates this,
+must occur in level 3, and their weights at level 3
+must be same as those mentioned in 7.3.1, UTS #10.
+If you define your collation elements which violate this requirement,
 these tags don't work validly.
 
 =back
