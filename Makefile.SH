@@ -204,11 +204,12 @@ SHELL = $sh
 # how to tr(anslate) newlines
 TRNL = '$trnl'
 
-# not used by Makefile but by installperl;
-# mentioned here so that metaconfig picks it up
-INSTALL_USR_BIN_PERL = $installusrbinperl
-
 !GROK!THIS!
+# not used by Makefile but by installperl;
+# mentioned here so that metaconfig picks these up
+# $installusrbinperl
+# $versiononly
+
 
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>Makefile <<'!NO!SUBS!'

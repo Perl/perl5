@@ -3686,6 +3686,18 @@ version (patchlevel.U):
 	This is suitable for use as a directory name, and hence is
 	filesystem dependent.
 
+versiononly (versiononly.U):
+	If set, this symbol indicates that only the version-specific
+	components of a perl installation should be installed.
+	This may be useful for making a test installation of a new
+	version without disturbing the existing installation.
+	Setting versiononly is equivalent to setting installperl's -v option.
+	In particular, the non-versioned scripts and programs such as
+	a2p, c2ph, h2xs, pod2*, and perldoc are not installed
+	(see INSTALL for a more complete list).  Nor are the man
+	pages installed.
+	Usually, this is undef.
+
 vi (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.

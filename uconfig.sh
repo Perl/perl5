@@ -529,6 +529,7 @@ uvsize='4'
 uvtype='unsigned long'
 uvuformat='"lu"'
 uvxformat='"lx"'
+versiononly='undef'
 voidflags=1
 xs_apiversion='5.005'
 d_getfsstat='undef'

@@ -60,6 +60,8 @@ while (@ARGV) {
     shift;
 }
 
+$versiononly = 1 if $Config{versiononly};
+
 my @scripts = qw(utils/c2ph utils/h2ph utils/h2xs utils/perlbug utils/perldoc
 		utils/pl2pm utils/splain utils/perlcc utils/dprofpp
 		x2p/s2p x2p/find2perl 
@@ -364,26 +366,25 @@ if (! $versiononly && (-f 'cppstdin') && (! samepath($installbin, '.'))) {
     chmod(0755, "$installbin/cppstdin");
 }
 
-# Install scripts.
-
-mkpath($installscript, $verbose, 0777);
-
 if (! $versiononly) {
+    # Install scripts.
+
+    mkpath($installscript, $verbose, 0777);
+
     for (@scripts) {
 	(my $base = $_) =~ s#.*/##;
 	copy($_, "$installscript/$base");
 	chmod(0755, "$installscript/$base");
     }
-}
 
-# pstruct should be a link to c2ph
-
-if (! $versiononly) {
+    # pstruct should be a link to c2ph
     safe_unlink("$installscript/pstruct$scr_ext");
     if ($^O eq 'dos' or $Is_VMS or $^O eq 'transit') {
-        copy("$installscript/c2ph$scr_ext", "$installscript/pstruct$scr_ext"); 
+	copy("$installscript/c2ph$scr_ext",
+	     "$installscript/pstruct$scr_ext"); 
     } else {
-        link("$installscript/c2ph$scr_ext", "$installscript/pstruct$scr_ext");
+	link("$installscript/c2ph$scr_ext",
+	     "$installscript/pstruct$scr_ext");
     }
 }
 
@@ -391,7 +392,7 @@ if (! $versiononly) {
 # ($installprivlib/pods for cygwin).
 
 my $pod = $Is_Cygwin ? 'pods' : 'pod';
-unless ( $versiononly && !($installprivlib =~ m/\Q$ver/)) {
+if ( !$versiononly || ($installprivlib =~ m/\Q$ver/)) {
     mkpath("${installprivlib}/$pod", $verbose, 0777);
 
     # If Perl 5.003's perldiag.pod is there, rename it.

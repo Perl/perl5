@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Oct 11 00:00:47 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Oct 11 00:32:36 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -944,6 +944,7 @@ vendorlibexp=''
 usevendorprefix=''
 vendorprefix=''
 vendorprefixexp=''
+versiononly=''
 defvoidused=''
 voidflags=''
 pm_apiversion=''
@@ -7442,6 +7443,25 @@ if $test X"$prefix" != X"$installprefix"; then
 else
 	installvendorbin="$vendorbinexp"
 fi
+
+: determine whether to only install version-specific parts.
+echo " "
+$cat <<EOM
+Do you want to install only the version-specific parts of the perl
+distribution?  Usually you do *not* want to do this.
+EOM
+case "$versiononly" in
+"$define"|[Yy]*|true) dflt='y' ;;
+*) dflt='n';
+esac
+rp="Do you want to install only the version-specific parts of perl?"
+. ./myread
+case "$ans" in
+[yY]*)	val="$define";;
+*)	val="$undef" ;;
+esac
+set versiononly
+eval $setvar
 
 : see if qgcvt exists
 set qgcvt d_qgcvt
@@ -16010,6 +16030,7 @@ vendorlibexp='$vendorlibexp'
 vendorprefix='$vendorprefix'
 vendorprefixexp='$vendorprefixexp'
 version='$version'
+versiononly='$versiononly'
 vi='$vi'
 voidflags='$voidflags'
 xlibpth='$xlibpth'

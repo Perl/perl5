@@ -85,7 +85,7 @@ extensions that have not been updated for the new naming convention
 with:
 
 	perl Makefile.PL POLLUTE=1
-	
+
 Alternatively, you can enable CPP symbol pollution wholesale by
 building perl itself with:
 
@@ -1831,12 +1831,17 @@ anything, you can run
 
 make install will install the following:
 
+    binaries
+
 	perl,
 	    perl5.nnn	where nnn is the current release number.  This
 			will be a link to perl.
 	suidperl,
 	    sperl5.nnn	If you requested setuid emulation.
 	a2p          	awk-to-perl translator
+
+    scripts
+
 	cppstdin	This is used by perl -P, if your cc -E can't
 			read from stdin.
 	c2ph, pstruct	Scripts for handling C structures in header files.
@@ -1849,13 +1854,21 @@ make install will install the following:
 	pl2pm		Convert Perl 4 .pl files to Perl 5 .pm modules
 	pod2html,	Converters from perl's pod documentation format
 	pod2latex, 	to other useful formats.
-	pod2man, and
-	pod2text
+	pod2man,
+	pod2text,
+	pod2checker,
+	pod2select,
+	pod2usage
 	splain		Describe Perl warnings and errors
 	dprofpp		Perl code profile post-processor
 
-	library files	in $privlib and $archlib specified to
+    library files
+
+			in $privlib and $archlib specified to
 			Configure, usually under /usr/local/lib/perl5/.
+
+    documentation
+
 	man pages	in $man1dir, usually /usr/local/man/man1.
 	module man
 	pages		in $man3dir, usually /usr/local/man/man3.
@@ -1864,10 +1877,27 @@ make install will install the following:
 Installperl will also create the directories listed above
 in L<"Installation Directories">.
 
-Perl's *.h header files and the libperl.a library are also installed
+Perl's *.h header files and the libperl library are also installed
 under $archlib so that any user may later build new modules, run the
 optional Perl compiler, or embed the perl interpreter into another
 program even if the Perl source is no longer available.
+
+Sometimes you only want to install the version-specific parts of the perl
+installation.  For example, you may wish to install a newer version of
+perl alongside an already installed production version of perl without
+disabling installation of new modules for the production version.
+To only install the version-specific parts of the perl installation, run
+
+	Configure -Dversiononly
+
+or answer 'y' to the appropriate Configure prompt.  Alternatively,
+you can just manually run
+
+	./perl installperl -v
+
+and skip installman altogether.
+See also L<"Maintaining completely separate versions"> for another
+approach.
 
 =head1 Coexistence with earlier versions of perl5
 
