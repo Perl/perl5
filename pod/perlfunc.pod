@@ -563,9 +563,12 @@ omitted, does a chroot to $_.
 
 =item close FILEHANDLE
 
+=item close
+
 Closes the file or pipe associated with the file handle, returning TRUE
 only if stdio successfully flushes buffers and closes the system file
-descriptor.
+descriptor. Closes the currently selected filehandle if the argument
+is omitted.
 
 You don't have to close FILEHANDLE if you are immediately going to do
 another open() on it, because open() will close it for you.  (See
