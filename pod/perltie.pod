@@ -258,7 +258,9 @@ index whose value we're trying to fetch.
 
 If a negative array index is used to read from an array, the index
 will be translated to a positive one internally by calling FETCHSIZE
-before being passed to FETCH.
+before being passed to FETCH.  You may disable this feature by
+assigning a true value to the variable C<$NEGATIVE_INDICES> in the
+tied array class.
 
 As you may have noticed, the name of the FETCH method (et al.) is the same
 for all accesses, even though the constructors differ in names (TIESCALAR
