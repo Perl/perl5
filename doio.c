@@ -1308,13 +1308,22 @@ Perl_my_lstat(pTHX)
 		Perl_croak(aTHX_ "The stat preceding -l _ wasn't an lstat");
 	    return PL_laststatval;
 	}
-	Perl_croak(aTHX_ "You can't use -l on a filehandle");
+	if (ckWARN(WARN_IO)) {
+	    Perl_warner(aTHX_ WARN_IO, "Use of -l on filehandle %s",
+		    GvENAME(cGVOP_gv));
+	    return (PL_laststatval = -1);
+	}
     }
 
     PL_laststype = OP_LSTAT;
     PL_statgv = Nullgv;
     sv = POPs;
     PUTBACK;
+    if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV && ckWARN(WARN_IO)) {
+	Perl_warner(aTHX_ WARN_IO, "Use of -l on filehandle %s",
+		GvENAME((GV*) SvRV(sv)));
+	return (PL_laststatval = -1);
+    }
     sv_setpv(PL_statname,SvPV(sv, n_a));
     PL_laststatval = PerlLIO_lstat(SvPV(sv, n_a),&PL_statcache);
     if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, n_a), '\n'))

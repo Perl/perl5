@@ -2332,7 +2332,7 @@ S_regmatch(pTHX_ regnode *prog)
 			if (l >= PL_regeol)
 			     sayNO;
 			if (NATIVE_TO_UNI(*(U8*)s) !=
-			    utf8_to_uvchr((U8*)l, &ulen))
+			    utf8_to_uvuni((U8*)l, &ulen))
 			     sayNO;
 			l += ulen;
 			s ++;
@@ -2344,7 +2344,7 @@ S_regmatch(pTHX_ regnode *prog)
 			if (l >= PL_regeol)
 			    sayNO;
 			if (NATIVE_TO_UNI(*((U8*)l)) !=
-			    utf8_to_uvchr((U8*)s, &ulen))
+			    utf8_to_uvuni((U8*)s, &ulen))
 			    sayNO;
 			s += ulen;
 			l ++;

@@ -272,7 +272,7 @@ doesn't work, you should use -B/usr/ccs/bin/ instead.
 
 END
 		ccdlflags="$ccdlflags -Wl,-E"
-		lddlflags="$lddlflags -W,l-E -G"
+		lddlflags="$lddlflags -Wl,-E -G"
 	    fi
 	fi
 

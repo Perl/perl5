@@ -4065,9 +4065,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			 STRLEN foldlen;
 			 UV f;
 
-			 uvchr_to_utf8(tmpbuf, value);
+			 uvchr_to_utf8(tmpbuf, NATIVE_TO_UNI(value));
 			 to_utf8_fold(tmpbuf, foldbuf, &foldlen);
-			 f = utf8_to_uvchr(foldbuf, 0);
+			 f = UNI_TO_NATIVE(utf8_to_uvchr(foldbuf, 0));
 
 			 /* If folding and foldable and a single
 			  * character, insert also the folded version

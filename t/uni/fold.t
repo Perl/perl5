@@ -9,12 +9,15 @@ my $CF = File::Spec->catfile(File::Spec->catdir(File::Spec->updir,
 					       "lib", "unicore"),
 			    "CaseFolding.txt");
 
+use constant EBCDIC => ord 'A' == 193;
+
 if (open(CF, $CF)) {
     my @CF;
 
     while (<CF>) {
         if (/^([0-9A-F]+); ([CFSI]); ((?:[0-9A-F]+)(?: [0-9A-F]+)*); \# (.+)/) {
             next if $2 eq 'S'; # we are going for 'F'ull case folding
+	    next if EBCDIC && hex $1 < 0x100;
 	    push @CF, [$1, $2, $3, $4];
 	}
     }

@@ -83,7 +83,8 @@ the POD template.
 =item B<-F>, B<--cpp-flags>=I<addflags>
 
 Additional flags to specify to C preprocessor when scanning header for
-function declarations.  Should not be used without B<-x>.
+function declarations.  Writes these options in the generated F<Makefile.PL>
+too.
 
 =item B<-M>, B<--func-mask>=I<regular expression>
 
@@ -213,6 +214,27 @@ C<Makefile.PL>.
 =item B<--use-old-tests>
 
 Will force the generation of test code that uses the older C<Test> module.
+
+=item B<--skip-exporter>
+
+Do not use C<Exporter> and/or export any symbol.
+
+=item B<--skip-ppport>
+
+Do not use C<Devel::PPPort>: no portability to older version.
+
+=item B<--skip-autoloader>
+
+Do not use the module C<AutoLoader>; but keep the constant() function
+and C<sub AUTOLOAD> for constants.
+
+=item B<--skip-strict>
+
+Do not use the pragma C<strict>.
+
+=item B<--skip-warnings>
+
+Do not use the pragma C<warnings>.
 
 =item B<-v>, B<--version>=I<version>
 
@@ -447,7 +469,6 @@ $Text::Wrap::huge = 'overflow';
 $Text::Wrap::columns = 80;
 use ExtUtils::Constant qw (WriteConstants WriteMakefileSnippet autoload);
 use File::Compare;
-use Devel::PPPort;
 
 sub usage {
     warn "@_\n" if @_;
@@ -458,7 +479,7 @@ OPTIONS:
     -A, --omit-autoload   Omit all autoloading facilities (implies -c).
     -C, --omit-changes    Omit creating the Changes file, add HISTORY heading
                           to stub POD.
-    -F, --cpp-flags       Additional flags for C preprocessor (used with -x).
+    -F, --cpp-flags       Additional flags for C preprocessor/compile.
     -M, --func-mask       Mask to select C functions/macros
                           (default is select all).
     -O, --overwrite-ok    Allow overwriting of a pre-existing extension directory.
@@ -485,6 +506,11 @@ OPTIONS:
     -t, --default-type    Default type for autoloaded constants (default is IV)
         --use-new-tests   Use Test::More in backward compatible modules
         --use-old-tests   Use the module Test rather than Test::More
+        --skip-exporter   Do not export symbols
+        --skip-ppport     Do not use portability layer
+        --skip-autoloader Do not use the module C<AutoLoader>
+        --skip-strict     Do not use the pragma C<strict>
+        --skip-warnings   Do not use the pragma C<warnings>
     -v, --version         Specify a version number for this extension.
     -x, --autogen-xsubs   Autogenerate XSUBs using C::Scan.
 
@@ -518,7 +544,12 @@ my ($opt_A,
     $opt_b,
     $opt_t,
     $new_test,
-    $old_test
+    $old_test,
+    $skip_exporter,
+    $skip_ppport,
+    $skip_autoloader,
+    $skip_strict,
+    $skip_warnings,
    );
 
 Getopt::Long::Configure('bundling');
@@ -548,7 +579,12 @@ my %options = (
                 'version|v=s'        => \$opt_v,
                 'autogen-xsubs|x'    => \$opt_x,
                 'use-new-tests'      => \$new_test,
-                'use-old-tests'      => \$old_test
+                'use-old-tests'      => \$old_test,
+                'skip-exporter'      => \$skip_exporter,
+                'skip-ppport'        => \$skip_ppport,
+                'skip-autoloader'    => \$skip_autoloader,
+                'skip-warnings'      => \$skip_warnings,
+                'skip-strict'        => \$skip_strict,
               );
 
 GetOptions(%options) || usage;
@@ -581,7 +617,7 @@ if( $opt_v ){
 }
 
 # -A implies -c.
-$opt_c = 1 if $opt_A;
+$skip_autoloader = $opt_c = 1 if $opt_A;
 
 # -X implies -c and -f
 $opt_c = $opt_f = 1 if $opt_X;
@@ -638,8 +674,11 @@ EOD
   }
 }
 elsif ($opt_o or $opt_F) {
-  warn <<EOD;
-Options -o and -F do not make sense without -x.
+  warn <<EOD if $opt_o;
+Option -o does not make sense without -x.
+EOD
+  warn <<EOD if $opt_F and $opt_X ;
+Option -F does not make sense with -X.
 EOD
 }
 
@@ -820,10 +859,12 @@ my %vdecl_hash;
 my @vdecls;
 
 if( ! $opt_X ){  # use XS, unless it was disabled
-  warn "Writing $ext$modpname/ppport.h\n";
-  Devel::PPPort::WriteFile('ppport.h')
-      || die "Can't create $ext$modpname/ppport.h: $!\n";
-
+  unless ($skip_ppport) {
+    require Devel::PPPort;
+    warn "Writing $ext$modpname/ppport.h\n";
+    Devel::PPPort::WriteFile('ppport.h')
+        || die "Can't create $ext$modpname/ppport.h: $!\n";
+  }
   open(XS, ">$modfname.xs") || die "Can't create $ext$modpname/$modfname.xs: $!\n";
   if ($opt_x) {
     require Config;		# Run-time directive
@@ -942,9 +983,13 @@ print PM <<"END";
 package $module;
 
 use $compat_version;
+END
+
+print PM <<"END" unless $skip_strict;
 use strict;
 END
-print PM "use warnings;\n" unless $compat_version < 5.006;
+
+print PM "use warnings;\n" unless $skip_warnings or $compat_version < 5.006;
 
 unless( $opt_X || $opt_c || $opt_A ){
 	# we'll have an AUTOLOAD(), and it will have $AUTOLOAD and
@@ -954,18 +999,19 @@ use Carp;
 END
 }
 
-print PM <<'END';
+print PM <<'END' unless $skip_exporter;
 
 require Exporter;
 END
 
-print PM <<"END" if ! $opt_X;  # use DynaLoader, unless XS was disabled
+my $use_Dyna = (not $opt_X and $compat_version < 5.006);
+print PM <<"END" if $use_Dyna;  # use DynaLoader, unless XS was disabled
 require DynaLoader;
 END
 
 
 # Are we using AutoLoader or not?
-unless ($opt_A) { # no autoloader whatsoever.
+unless ($skip_autoloader) { # no autoloader whatsoever.
 	unless ($opt_c) { # we're doing the AUTOLOAD
 		print PM "use AutoLoader;\n";
 	}
@@ -976,23 +1022,33 @@ unless ($opt_A) { # no autoloader whatsoever.
 
 if ( $compat_version < 5.006 ) {
     if ( $opt_X || $opt_c || $opt_A ) {
-	print PM 'use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);';
+	if ($skip_exporter) {
+	  print PM 'use vars qw($VERSION @ISA);';
+	} else {
+	  print PM 'use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);';
+	}
     } else {
-	print PM 'use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);';
+	if ($skip_exporter) {
+	  print PM 'use vars qw($VERSION @ISA $AUTOLOAD);';
+	} else {
+	  print PM 'use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);';
+	}
     }
 }
 
 # Determine @ISA.
-my $myISA = 'our @ISA = qw(Exporter';	# We seem to always want this.
-$myISA .= ' DynaLoader' 	unless $opt_X;  # no XS
-$myISA .= ');';
+my @modISA;
+push @modISA, 'Exporter'	unless $skip_exporter; 
+push @modISA, 'DynaLoader' 	if $use_Dyna;  # no XS
+my $myISA = "our \@ISA = qw(@modISA);";
 $myISA =~ s/^our // if $compat_version < 5.006;
 
 print PM "\n$myISA\n\n";
 
 my @exported_names = (@const_names, @fnames_no_prefix, map '$'.$_, @vdecls);
 
-my $tmp=<<"END";
+my $tmp='';
+$tmp .= <<"END" unless $skip_exporter;
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
@@ -1009,6 +1065,10 @@ our \@EXPORT_OK = ( \@{ \$EXPORT_TAGS{'all'} } );
 our \@EXPORT = qw(
 	@const_names
 );
+
+END
+
+$tmp .= <<"END";
 our \$VERSION = '$TEMPLATE_VERSION';
 
 END
@@ -1024,9 +1084,16 @@ if (@vdecls) {
 print PM autoload ($module, $compat_version) unless $opt_c or $opt_X;
 
 if( ! $opt_X ){ # print bootstrap, unless XS is disabled
+  if ($use_Dyna) {
 	print PM <<"END";
 bootstrap $module \$VERSION;
 END
+  } else {
+	print PM <<"END";
+require XSLoader;
+XSLoader::load('$module', \$VERSION);
+END
+  }
 }
 
 # tying the variables can happen only after bootstrap
@@ -1096,7 +1163,7 @@ $revhist = <<EOT if $opt_C;
 #
 EOT
 
-my $exp_doc = <<EOD;
+my $exp_doc = $skip_exporter ? '' : <<EOD;
 #
 #=head2 EXPORT
 #
@@ -1105,7 +1172,7 @@ my $exp_doc = <<EOD;
 EOD
 
 if (@const_names and not $opt_P) {
-  $exp_doc .= <<EOD;
+  $exp_doc .= <<EOD unless $skip_exporter;
 #=head2 Exportable constants
 #
 #  @{[join "\n  ", @const_names]}
@@ -1114,7 +1181,7 @@ EOD
 }
 
 if (defined $fdecls and @$fdecls and not $opt_P) {
-  $exp_doc .= <<EOD;
+  $exp_doc .= <<EOD unless $skip_exporter;
 #=head2 Exportable functions
 #
 EOD
@@ -1123,7 +1190,7 @@ EOD
 #When accessing these functions from Perl, prefix C<$opt_p> should be removed.
 #
 #EOD
-  $exp_doc .= <<EOD;
+  $exp_doc .= <<EOD unless $skip_exporter;
 #  @{[join "\n  ", @known_fnames{@fnames}]}
 #
 EOD
@@ -1203,9 +1270,14 @@ print XS <<"END";
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+
+END
+
+print XS <<"END" unless $skip_ppport;
 #include "ppport.h"
 
 END
+
 if( @path_h ){
     foreach my $path_h (@path_h_ini) {
 	my($h) = $path_h;

@@ -1557,6 +1557,19 @@ S_scan_const(pTHX_ char *start)
 		    if (has_utf8)
 			sv_utf8_upgrade(res);
 		    str = SvPV(res,len);
+#ifdef EBCDIC
+		    {
+			 UV uv = utf8_to_uvchr((U8*)str, 0);
+
+			 if (uv < 0x100) {
+			      U8 tmpbuf[UTF8_MAXLEN+1], *d;
+
+			      d = uvchr_to_utf8(tmpbuf, UNI_TO_NATIVE(uv));
+			      sv_setpvn(res, (char *)tmpbuf, d - tmpbuf);
+			      str = SvPV(res, len);
+			 }
+		    }
+#endif
 		    if (!has_utf8 && SvUTF8(res)) {
 			char *ostart = SvPVX(sv);
 			SvCUR_set(sv, d - ostart);

@@ -72,6 +72,7 @@ sub copy {
 
     if ($Config{d_symlink} && $Config{d_readlink} &&
 	!($^O eq 'Win32' || $^O eq 'os2' || $^O eq 'vms')) {
+	no warnings 'io'; # don't warn if -l on filehandle
 	if ((-e $from && -l $from) || (-e $to && -l $to)) {
 	    my @fs = stat($from);
 	    my @ts = stat($to);

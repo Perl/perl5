@@ -96,8 +96,8 @@
 	my $file = "./xcv" ;
 	open(F, ">$file") ; 
 	my $a = sysread(F, $a,10) ;
-  
-  
+
+   lstat on filehandle %s			[pp_lstat]
 
 __END__
 # pp_sys.c [pp_untie]
@@ -396,3 +396,16 @@ $a = "BLERG";binmode($a);
 EXPECT
 binmode() on unopened filehandle BLARG at - line 3.
 binmode() on unopened filehandle at - line 4.
+########
+# pp_sys.c [pp_lstat]
+use warnings 'io';
+lstat STDIN;
+open my $fh, $0 or die "# $!";
+lstat $fh;
+no warnings 'io';
+lstat STDIN;
+lstat $fh;
+close $fh;
+EXPECT
+lstat() on filehandle STDIN at - line 3.
+lstat() on filehandle $fh at - line 5.

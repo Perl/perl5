@@ -36,6 +36,8 @@
   warn(warn_nl, "lstat");		[Perl_my_lstat]
     lstat "ab\ncd"
 
+  Use of -l on filehandle %s		[Perl_my_lstat]
+
   Can't exec \"%s\": %s 		[Perl_do_aexec5]
 
   Can't exec \"%s\": %s 		[Perl_do_exec3]
@@ -153,6 +155,20 @@ lstat "ab\ncd";
 EXPECT
 Unsuccessful stat on filename containing newline at - line 3.
 Unsuccessful stat on filename containing newline at - line 4.
+########
+# doio.c [Perl_my_stat]
+use warnings 'io';
+-l STDIN;
+-l $fh;
+open $fh, $0 or die "# $!";
+-l $fh;
+no warnings 'io';
+-l STDIN;
+-l $fh;
+close $fh;
+EXPECT
+Use of -l on filehandle STDIN at - line 3.
+Use of -l on filehandle $fh at - line 6.
 ########
 # doio.c [Perl_do_aexec5]
 use warnings 'io' ;

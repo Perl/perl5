@@ -134,7 +134,7 @@ README
 compile
 encengine.c
 encode.h
-lib/Encode.pm
+Encode.pm
 lib/Encode/Encoding.pm
 lib/Encode/Internal.pm
 lib/Encode/Tcl.pm

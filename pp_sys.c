@@ -2726,9 +2726,11 @@ PP(pp_stat)
     if (PL_op->op_flags & OPf_REF) {
 	gv = cGVOP_gv;
 	if (PL_op->op_type == OP_LSTAT) {
-	    if (gv != PL_defgv)
-		Perl_croak(aTHX_ "You can't use lstat() on a filehandle");
-	    if (PL_laststype != OP_LSTAT)
+	    if (gv != PL_defgv) {
+		if (ckWARN(WARN_IO))
+		    Perl_warner(aTHX_ WARN_IO,
+			"lstat() on filehandle %s", GvENAME(gv));
+	    } else if (PL_laststype != OP_LSTAT)
 		Perl_croak(aTHX_ "The stat preceding lstat() wasn't an lstat");
 	}
 
@@ -2754,6 +2756,9 @@ PP(pp_stat)
 	}
 	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
 	    gv = (GV*)SvRV(sv);
+	    if (PL_op->op_type == OP_LSTAT && ckWARN(WARN_IO))
+		Perl_warner(aTHX_ WARN_IO,
+			"lstat() on filehandle %s", GvENAME(gv));
 	    goto do_fstat;
 	}
 	sv_setpv(PL_statname, SvPV(sv,n_a));

@@ -1,12 +1,11 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.12 $, $Date: 2002/01/28 04:17:26 $)
+perlfaq4 - Data Manipulation ($Revision: 1.13 $, $Date: 2002/01/31 04:27:54 $)
 
 =head1 DESCRIPTION
 
-The section of the FAQ answers questions related to the manipulation
-of data as numbers, dates, strings, arrays, hashes, and miscellaneous
-data issues.
+This section of the FAQ answers questions related to manipulating
+numbers, dates, strings, arrays, hashes, and miscellaneous data issues.
 
 =head1 Data: Numbers
 
@@ -123,7 +122,7 @@ Perl numbers whose absolute values are integers under 2**31 (on 32 bit
 machines) will work pretty much like mathematical integers.  Other numbers
 are not guaranteed.
 
-=head2 How do I convert between numeric representations:
+=head2 How do I convert between numeric representations?
 
 As always with Perl there is more than one way to do it.  Below
 are a few examples of approaches to making common conversions
