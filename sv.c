@@ -96,17 +96,17 @@ typedef void (*SVFUNC) _((SV*));
     } while (0)
 
 static SV **registry;
-static I32 regsize;
+static I32 registry_size;
 
 #define REGHASH(sv,size)  ((((U32)(sv)) >> 2) % (size))
 
 #define REG_REPLACE(sv,a,b) \
     do {				\
 	void* p = sv->sv_any;		\
-	I32 h = REGHASH(sv, regsize);	\
+	I32 h = REGHASH(sv, registry_size);	\
 	I32 i = h;			\
 	while (registry[i] != (a)) {	\
-	    if (++i >= regsize)		\
+	    if (++i >= registry_size)	\
 		i = 0;			\
 	    if (i == h)			\
 		die("SV registry bug");	\
@@ -121,13 +121,13 @@ static void
 reg_add(sv)
 SV* sv;
 {
-    if (sv_count >= (regsize >> 1))
+    if (sv_count >= (registry_size >> 1))
     {
 	SV **oldreg = registry;
-	I32 oldsize = regsize;
+	I32 oldsize = registry_size;
 
-	regsize = regsize ? ((regsize << 2) + 1) : 2037;
-	Newz(707, registry, regsize, SV*);
+	registry_size = registry_size ? ((registry_size << 2) + 1) : 2037;
+	Newz(707, registry, registry_size, SV*);
 
 	if (oldreg) {
 	    I32 i;
@@ -159,9 +159,9 @@ SVFUNC f;
 {
     I32 i;
 
-    for (i = 0; i < regsize; ++i) {
+    for (i = 0; i < registry_size; ++i) {
 	SV* sv = registry[i];
-	if (sv)
+	if (sv && SvTYPE(sv) != SVTYPEMASK)
 	    (*f)(sv);
     }
 }

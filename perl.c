@@ -551,8 +551,11 @@ perl_destruct(register PerlInterpreter *sv_interp)
     /* No SVs have survived, need to clean out */
     linestr = NULL;
     pidstatus = Nullhv;
-    if (origfilename)
-    	Safefree(origfilename);
+    Safefree(origfilename);
+    Safefree(archpat_auto);
+    Safefree(reg_start_tmp);
+    Safefree(HeKEY_hek(&hv_fetch_ent_mh));
+    Safefree(op_mask);
     nuke_stacks();
     hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
     
@@ -2351,6 +2354,12 @@ nuke_stacks(void)
 	curstackinfo = p;
     }
     Safefree(tmps_stack);
+    /*  XXX refcount interpreters to determine when to free global data
+    Safefree(markstack);
+    Safefree(scopestack);
+    Safefree(savestack);
+    Safefree(retstack);
+    */
     DEBUG( {
 	Safefree(debname);
 	Safefree(debdelim);
@@ -2578,7 +2587,7 @@ incpush(char *p, int addsubdirs)
 	return;
 
     if (addsubdirs) {
-	subdir = NEWSV(55,0);
+	subdir = sv_newmortal();
 	if (!archpat_auto) {
 	    STRLEN len = (sizeof(ARCHNAME) + strlen(patchlevel)
 			  + sizeof("//auto"));
@@ -2654,8 +2663,6 @@ incpush(char *p, int addsubdirs)
 	/* finally push this lib directory on the end of @INC */
 	av_push(GvAVn(incgv), libdir);
     }
-
-    SvREFCNT_dec(subdir);
 }
 
 #ifdef USE_THREADS

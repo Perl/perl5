@@ -1258,7 +1258,7 @@ regmatch(regnode *prog)
 	    break;
 	case CURLYM:
 	{
-	    I32 l;
+	    I32 l = 0;
 	    CHECKPOINT lastcp;
 	    
 	    /* We suppose that the next guy does not need

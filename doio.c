@@ -258,7 +258,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    else
 		fp = PerlIO_open(name,mode);
 	}
-	else if (name[len-1] == '|') {
+	else if (len > 1 && name[len-1] == '|') {
 	    name[--len] = '\0';
 	    while (len && isSPACE(name[len-1]))
 		name[--len] = '\0';
