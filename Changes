@@ -103,6 +103,82 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6907] By: jhi                                   on 2000/08/30  00:57:22
+        Log: Introduce ccname to keep track of what compiler kind of we have.
+     Branch: metaconfig/U/perl
+	   ! Checkcc.U gccvers.U
+     Branch: perl
+	   ! Configure config_h.SH hints/solaris_2.sh
+____________________________________________________________________________
+[  6906] By: jhi                                   on 2000/08/30  00:25:47
+        Log: Put back the flags dump as reasoned in
+             
+             Subject: Re: [PATCH] Glob dumping
+             From: Mike Guy <mjtg@cam.ac.uk> 
+             Date: Tue, 29 Aug 2000 21:41:32 +0100
+             Message-Id: <E13TsCK-0007iL-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! dump.c t/lib/peek.t
+____________________________________________________________________________
+[  6905] By: jhi                                   on 2000/08/30  00:16:17
+        Log: Make the epsilon to be relative, not absolute.
+             
+             Subject: Re: [ID 20000829.039] Not OK: perl v5.7.0 +DEVEL6899 +[ID on alpha-dec_osf-ld 5.1 (UNINSTALLED)
+             From: Spider Boardman <spider-perl@orb.nashua.nh.us>
+             Date: Tue, 29 Aug 2000 19:58:56 -0400
+             Message-Id: <200008292358.TAA31114@leggy.zk3.dec.com>
+     Branch: perl
+	   ! t/lib/trig.t
+____________________________________________________________________________
+[  6904] By: jhi                                   on 2000/08/30  00:13:09
+        Log: From now on, Gisle is on my list of usual suspects :-)
+             Retract #6902.
+     Branch: perl
+	   ! ext/Opcode/Safe.pm
+____________________________________________________________________________
+[  6903] By: jhi                                   on 2000/08/29  23:51:20
+        Log: Subject: [PATCH perl@6889] Chuck Lane's OpenVMS piping improvements
+             From: "Craig A. Berry" <craig.berry@psinetcs.com>
+             Date: Tue, 29 Aug 2000 18:43:26 -0500
+             Message-Id: <4.3.2.7.2.20000829180705.01b005b8@exchi01>
+     Branch: perl
+	   + vms/vmspipe.com
+	   ! MANIFEST t/io/openpid.t vms/descrip_mms.template vms/test.com
+	   ! vms/vms.c
+____________________________________________________________________________
+[  6902] By: jhi                                   on 2000/08/29  23:44:14
+        Log: Retry what #6882 attempted.
+             
+             Subject: Re: [ID 20000829.004] Sharing leak root name into safe compartment
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 30 Aug 2000 00:33:09 +0200
+             Message-ID: <m3pumry9y2.fsf@eik.g.aas.no>
+     Branch: perl
+	   ! ext/Opcode/Safe.pm
+____________________________________________________________________________
+[  6901] By: jhi                                   on 2000/08/29  22:59:32
+        Log: Subject: [PATCH 5.6.0] [ID 20000608.006] panic: magic_killbackrefs with blessed global weakrefs
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Mon, 12 Jun 2000 19:36:08 +0100
+             Message-Id: <200006121836.TAA16977@crypt.compulink.co.uk>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  6900] By: jhi                                   on 2000/08/29  22:58:35
+        Log: Admit that we are leaking scalars.
+             
+             Subject: [ID 20000829.037] Not OK: perl v5.7.0 +DEVEL6899 on alpha-dec_osf 4.0f (UNINSTALLED)
+             From: Spider Boardman <spider@leggy.zk3.dec.com>
+             Date: Tue, 29 Aug 2000 18:48:29 -0400
+             Message-Id: <200008292248.SAA31507@leggy.zk3.dec.com>
+     Branch: perl
+	   ! t/pragma/warnings.t
+____________________________________________________________________________
+[  6899] By: jhi                                   on 2000/08/29  20:53:13
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6898] By: jhi                                   on 2000/08/29  20:46:21
         Log: Undo namespace pollution of #6878.
              
