@@ -17,7 +17,7 @@ sub STORESIZE { $#{$_[0]} = $_[1]+1 }
 
 package main;
 
-print "1..10\n";
+print "1..12\n";
 
 $sch = {
     'abc' => 1,
@@ -96,3 +96,15 @@ print "ok 9\n";
 $avhv = [{foo=>1, bar=>2}];
 print "not " unless %$avhv =~ m,^\d+/\d+,;
 print "ok 10\n";
+
+# check if defelem magic works
+sub f {
+    print "not " unless $_[0] eq 'a';
+    $_[0] = 'b';
+    print "ok 11\n";
+}
+$a = [{key => 1}, 'a'];
+f($a->{key});
+print "not " unless $a->[1] eq 'b';
+print "ok 12\n";
+

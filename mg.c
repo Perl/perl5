@@ -1340,10 +1340,17 @@ magic_getdefelem(SV *sv, MAGIC *mg)
     SV *targ = Nullsv;
     if (LvTARGLEN(sv)) {
 	if (mg->mg_obj) {
-	    HV* hv = (HV*)LvTARG(sv);
-	    HE* he = hv_fetch_ent(hv, mg->mg_obj, FALSE, 0);
-	    if (he)
-		targ = HeVAL(he);
+	    SV *ahv = LvTARG(sv);
+	    if (SvTYPE(ahv) == SVt_PVHV) {
+		HE *he = hv_fetch_ent((HV*)ahv, mg->mg_obj, FALSE, 0);
+		if (he)
+		    targ = HeVAL(he);
+	    }
+	    else {
+		SV **svp = avhv_fetch_ent((AV*)ahv, mg->mg_obj, FALSE, 0);
+		if (svp)
+		    targ = *svp;
+	    }
 	}
 	else {
 	    AV* av = (AV*)LvTARG(sv);
@@ -1390,15 +1397,24 @@ void
 vivify_defelem(SV *sv)
 {
     dTHR;			/* just for SvREFCNT_inc and SvREFCNT_dec*/
-    MAGIC* mg;
-    SV* value;
+    MAGIC *mg;
+    SV *value = Nullsv;
 
     if (!LvTARGLEN(sv) || !(mg = mg_find(sv, 'y')))
 	return;
     if (mg->mg_obj) {
-	HV* hv = (HV*)LvTARG(sv);
-	HE* he = hv_fetch_ent(hv, mg->mg_obj, TRUE, 0);
-	if (!he || (value = HeVAL(he)) == &sv_undef)
+	SV *ahv = LvTARG(sv);
+	if (SvTYPE(ahv) == SVt_PVHV) {
+	    HE *he = hv_fetch_ent((HV*)ahv, mg->mg_obj, FALSE, 0);
+	    if (he)
+		value = HeVAL(he);
+	}
+	else {
+	    SV **svp = avhv_fetch_ent((AV*)ahv, mg->mg_obj, FALSE, 0);
+	    if (svp)
+		value = *svp;
+	}
+	if (!value || value == &sv_undef)
 	    croak(no_helem, SvPV(mg->mg_obj, na));
     }
     else {
