@@ -4,6 +4,8 @@ use Encode::JP::JIS;
 use Encode::JP::H2Z;
 use base 'Encode::Encoding';
 
+use vars qw($VERSION);
+$VERSION = 0.01;
 
 my $canon = 'iso-2022-jp';
 my $obj = bless {name => $canon}, __PACKAGE__;

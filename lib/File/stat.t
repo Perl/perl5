@@ -67,9 +67,15 @@ SKIP: {
 		'... and filehandle in another package' );
 	close STAT;
 
+#	VOS open() updates atime; ignore this error (posix-975).
+	my $stat3 = $stat2;
+	if ($^O eq 'vos') {
+		$$stat3[8] = $$stat[8];
+	}
+
 	main::skip("Win32: different stat-info on filehandle", 1) if $^O eq 'MSWin32';
 
-	main::is( "@$stat", "@$stat2", '... and must match normal stat' );
+	main::is( "@$stat", "@$stat3", '... and must match normal stat' );
 }
 
 local $!;

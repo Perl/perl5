@@ -66,7 +66,7 @@ print "# got = @got\n";
 
 $got = "@got";
 
-my $expected = "attributes Carp Carp::Heavy DB Exporter Exporter::Heavy main utf8 warnings";
+my $expected = "attributes Carp Carp::Heavy DB Exporter Exporter::Heavy Internals main utf8 warnings";
 
 {
     no strict 'vars';

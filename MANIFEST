@@ -127,13 +127,6 @@ ext/Data/Dumper/Makefile.PL	Data pretty printer, makefile writer
 ext/Data/Dumper/t/dumper.t	See if Data::Dumper works
 ext/Data/Dumper/t/overload.t	See if Data::Dumper works for overloaded data
 ext/Data/Dumper/Todo		Data pretty printer, futures
-ext/Data/Util/Changes           Data/Hash::Util, Change log
-ext/Data/Util/Makefile.PL       Data/Hash::Util, Makefile.PL
-ext/Data/Util/Util.xs           Data/Hash::Util, Data::Util XS code
-ext/Data/Util/lib/Data/Util.pm  Data/Hash::Util, Data::Util
-ext/Data/Util/lib/Hash/Util.pm  Data/Hash::Util, Hash::Util
-ext/Data/Util/t/Data.t          Data/Hash::Util, Data::Util test
-ext/Data/Util/t/Hash.t          Data/Hash::Util, Hash::Util test
 ext/DB_File/Changes	Berkeley DB extension change log
 ext/DB_File/dbinfo	Berkeley DB database version checker
 ext/DB_File/DB_File.pm	Berkeley DB extension Perl module
@@ -1087,6 +1080,8 @@ lib/Getopt/Std.t		See if Getopt::Std and Getopt::Long work
 lib/getopts.pl			Perl library supporting option parsing
 lib/h2ph.t			See if h2ph works like it should
 lib/h2xs.t			See if h2xs produces expected lists of files
+lib/Hash/Util.pm		Hash::Util
+lib/Hash/Util.t			See if Hash::Util works
 lib/hostname.pl			Old hostname code
 lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 lib/I18N/Collate.t		See if I18N::Collate works
@@ -1100,6 +1095,7 @@ lib/if.t			Tests for "use if"
 lib/importenv.pl		Perl routine to get environment into variables
 lib/integer.pm			For "use integer"
 lib/integer.t			For "use integer" testing
+lib/Internals.t			For Internals::* testing
 lib/IPC/Open2.pm		Open a two-ended pipe
 lib/IPC/Open2.t			See if IPC::Open2 works
 lib/IPC/Open3.pm		Open a three-ended pipe!
@@ -2064,8 +2060,8 @@ Porting/checkVERSION.pl	Check whether we have $VERSIONs
 Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
 Porting/Contract	Social contract for contributed modules in Perl core
-Porting/findvars	Find occurrences of words
 Porting/findrfuncs	Find reentrant variants of functions used in an executable
+Porting/findvars	Find occurrences of words
 Porting/fixCORE		Find and fix modules that generate warnings
 Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d

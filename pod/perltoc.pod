@@ -101,8 +101,8 @@ Parentheses for capturing, Other regexp features
 
 =back
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 2002/01/31
-04:27:54 $)
+=head2 perlfaq - frequently asked questions about Perl ($Date: 2002/03/11
+21:32:23 $)
 
 =over 4
 
@@ -908,257 +908,258 @@ middle of a foreach loop, Can't "goto" out of a pseudo block, Can't goto
 subroutine from an eval-string, Can't goto subroutine outside a subroutine,
 Can't ignore signal CHLD, forcing to default, Can't "last" outside a loop
 block, Can't localize lexical variable %s, Can't localize pseudo-hash
-element, Can't localize through a reference, Can't locate %s, Can't locate
-auto/%s.al in @INC, Can't locate object method "%s" via package "%s",
-(perhaps you forgot to load "%s"?), Can't locate package %s for @%s::ISA,
-Can't make list assignment to \%ENV on this system, Can't modify %s in %s,
-Can't modify nonexistent substring, Can't modify non-lvalue subroutine
-call, Can't msgrcv to read-only var, Can't "next" outside a loop block,
-Can't open %s: %s, Can't open bidirectional pipe, Can't open error file %s
-as stderr, Can't open input file %s as stdin, Can't open output file %s as
-stdout, Can't open output pipe (name: %s), Can't open perl script%s: %s,
-Can't read CRTL environ, Can't redefine active sort subroutine %s, Can't
-"redo" outside a loop block, Can't remove %s: %s, skipping file, Can't
-rename %s to %s: %s, skipping file, Can't reopen input pipe (name: %s) in
-binary mode, Can't resolve method `%s' overloading `%s' in package `%s',
-Can't reswap uid and euid, Can't return %s from lvalue subroutine, Can't
-return %s to lvalue scalar context, Can't return outside a subroutine,
-Can't stat script "%s", Can't swap uid and euid, Can't take log of %g,
-Can't take sqrt of %g, Can't undef active subroutine, Can't unshift, Can't
-upgrade that kind of scalar, Can't upgrade to undef, Can't use an undefined
-value as %s reference, Can't use anonymous symbol table for method lookup,
-Can't use bareword ("%s") as %s ref while "strict refs" in use, Can't use
-%! because Errno.pm is not available, Can't use %s for loop variable, Can't
-use global %s in "my", Can't use "my %s" in sort comparison, Can't use %s
-ref as %s ref, Can't use string ("%s") as %s ref while "strict refs" in
-use, Can't use subscript on %s, Can't use \%c to mean $%c in expression,
-Can't weaken a nonreference, Can't x= to read-only value, Character in "C"
-format wrapped, Character in "c" format wrapped, close() on unopened
-filehandle %s, %s: Command not found, Compilation failed in require,
-Complex regular subexpression recursion limit (%d) exceeded, connect() on
-closed socket %s, Constant(%s)%s: %s, Constant is not %s reference,
-Constant subroutine %s redefined, Constant subroutine %s undefined, Copy
-method did not return a reference, CORE::%s is not a keyword, corrupted
-regexp pointers, corrupted regexp program, Corrupt malloc ptr 0x%lx at
-0x%lx, C<-p> destination: %s, C<-T> and C<-B> not implemented on
-filehandles, Deep recursion on subroutine "%s", defined(@array) is
-deprecated, defined(%hash) is deprecated, %s defines neither package nor
-VERSION--version check failed, Delimiter for here document is too long, Did
-not produce a valid header, %s did not return a true value, (Did you mean
-&%s instead?), (Did you mean "local" instead of "our"?), (Did you mean $ or
-@ instead of %?), Died, Document contains no data, %s does not define
-%s::VERSION--version check failed, Don't know how to handle magic of type
-'%s', do_study: out of memory, (Do you need to predeclare %s?), dump()
-better written as CORE::dump(), Duplicate free() ignored, elseif should be
-elsif, Empty %s, entering effective %s failed, Error converting file
-specification %s, %s: Eval-group in insecure regular expression, %s:
-Eval-group not allowed at run time, %s: Eval-group not allowed, use re
-'eval', Excessively long <> operator, exec? I'm not *that* kind of
-operating system, Execution of %s aborted due to compilation errors,
-Exiting eval via %s, Exiting format via %s, Exiting pseudo-block via %s,
-Exiting subroutine via %s, Exiting substitution via %s, Explicit blessing
-to '' (assuming package main), %s: Expression syntax, %s failed--call queue
-aborted, False [] range "%s" in regex; marked by <-- HERE in m/%s/, Fatal
-VMS error at %s, line %d, fcntl is not implemented, Filehandle %s opened
-only for input, Filehandle %s opened only for output, Final $ should be \$
-or $name, Final @ should be \@ or @name, flock() on closed filehandle %s,
-Quantifier follows nothing in regex;, Format not terminated, Format %s
-redefined, Found = in conditional, should be ==, %s found where operator
-expected, gdbm store returned %d, errno %d, key "%s", gethostent not
-implemented, get%sname() on closed socket %s, getpwnam returned invalid UIC
-%#o for user "%s", getsockopt() on closed socket %s, Global symbol "%s"
-requires explicit package name, glob failed (%s), Glob not terminated, Got
-an error from DosAllocMem, goto must have label, %s-group starts with a
-count, %s had compilation errors, Had to create %s unexpectedly, Hash %%s
-missing the % in argument %d of %s(), %s has too many errors, Hexadecimal
-number > 0xffffffff non-portable, Identifier too long, Illegal binary digit
-%s, Illegal binary digit %s ignored, Illegal character %s (carriage
-return), Illegal character in prototype for %s : %s, Illegal division by
-zero, Illegal hexadecimal digit %s ignored, Illegal modulus zero, Illegal
-number of bits in vec, Illegal octal digit %s, Illegal octal digit %s
-ignored, Illegal switch in PERL5OPT: %s, Ill-formed CRTL environ value
-"%s", Ill-formed message in prime_env_iter: |%s|, (in cleanup) %s, In
-EBCDIC the v-string components cannot exceed 2147483647, Insecure
-dependency in %s, Insecure directory in %s, Insecure $ENV{%s} while running
-%s, Integer overflow in %s number, Internal disaster in regex; marked by
-<-- HERE in m/%s/, Internal inconsistency in tracking vforks, Internal urp
-in regex; marked by <-- HERE in m/%s/, %s (...) interpreted as function,
-Invalid %s attribute: %s, Invalid %s attributes: %s, Invalid conversion in
-%s: "%s", Invalid [] range "%s" in regex; marked by <-- HERE in m/%s/,
-Invalid [] range "%s" in transliteration operator, Invalid separator
-character %s in attribute list, Invalid type in pack: '%s', Invalid type in
-unpack: '%s', ioctl is not implemented, ioctl() on unopened %s,
-IO::Socket::atmark not implemented on this architecture, `%s' is not a code
-reference, `%s' is not an overloadable type, junk on end of regexp, Label
-not found for "last %s", Label not found for "next %s", Label not found for
-"redo %s", leaving effective %s failed, listen() on closed socket %s,
-lstat() on filehandle %s, Lvalue subs returning %s not implemented yet,
-Lookbehind longer than %d not implemented in regex;, Malformed
-PERLLIB_PREFIX, Malformed prototype for %s: %s, Malformed UTF-8 character
-(%s), Malformed UTF-16 surrogate, %s matches null string many times in
-regex;, "%s" may clash with future reserved word, % may only be used in
-unpack, Method for operation %s not found in package %s during blessing,
-Method %s not permitted, Might be a runaway multi-line %s string starting
-on line %d, Misplaced _ in number, Missing %sbrace%s on \N{}, Missing comma
-after first argument to %s function, Missing command in piped open, Missing
-name in "my sub", Missing $ on loop variable, (Missing operator before
-%s?), Missing right brace on %s, Missing right curly or square bracket,
-(Missing semicolon on previous line?), Modification of a read-only value
-attempted, Modification of non-creatable array value attempted, %s,
-Modification of non-creatable hash value attempted, %s, Module name must be
-constant, Module name required with -%c option, More than one argument to
-open, msg%s not implemented, Multidimensional syntax %s not supported, /
-must be followed by a*, A* or Z*, / must be followed by a, A or Z, / must
-follow a numeric type, "my sub" not yet implemented, "my" variable %s can't
-be in a package, Name "%s::%s" used only once: possible typo, Negative
-length, Negative offset to vec in lvalue context, Nested quantifiers in
-regex; marked by <-- HERE in m/%s/, %s never introduced, No %s allowed
-while running setuid, No B<-e> allowed in setuid scripts, No comma allowed
-after %s, No command into which to pipe on command line, No DB::DB routine
-defined, No dbm on this machine, No DBsub routine, No error file after 2>
-or 2>> on command line, No input file after < on command line, No #! line,
-"no" not allowed in expression, No output file after > on command line, No
-output file after > or >> on command line, No package name allowed for
-variable %s in "our", No Perl script found in input, No setregid available,
-No setreuid available, No space allowed after -%c, No %s specified for -%c,
-No such class %s, No such pipe open, No such pseudo-hash field "%s", No
-such pseudo-hash field "%s" in variable %s of type %s, No such signal:
-SIG%s, Not a CODE reference, Not a format reference, Not a GLOB reference,
-Not a HASH reference, Not an ARRAY reference, Not a perl script, Not a
-SCALAR reference, Not a subroutine reference, Not a subroutine reference in
-overload table, Not enough arguments for %s, Not enough format arguments,
-%s: not found, %s not allowed in length fields, no UTC offset information;
-assuming local time is UTC, Null filename used, NULL OP IN RUN, Null
-picture in formline, Null realloc, NULL regexp argument, NULL regexp
-parameter, Number too long, Octal number in vector unsupported, Octal
-number > 037777777777 non-portable, Odd number of arguments for
-overload::constant, Odd number of elements in anonymous hash, Odd number of
-elements in hash assignment, Offset outside string, -%s on unopened
-filehandle %s, %s() on unopened %s, oops: oopsAV, oops: oopsHV, Operation
-`%s': no method found, %s, Operator or semicolon missing before %s, "our"
-variable %s redeclared, Out of memory!, Out of memory during "large"
-request for %s, Out of memory during request for %s, Out of memory during
-ridiculously large request, Out of memory for yacc stack, @ outside of
-string, %s package attribute may clash with future reserved word: %s, page
-overflow, panic: %s, panic: ck_grep, panic: ck_split, panic: corrupt saved
-stack index, panic: del_backref, panic: die %s, panic: pp_match%s, panic:
-do_subst, panic: do_trans_%s, panic: frexp, panic: goto, panic:
-INTERPCASEMOD, panic: INTERPCONCAT, panic: kid popen errno read, panic:
-last, panic: leave_scope clearsv, panic: leave_scope inconsistency, panic:
-magic_killbackrefs, panic: malloc, panic: mapstart, panic: null array,
-panic: pad_alloc, panic: pad_free curpad, panic: pad_free po, panic:
-pad_reset curpad, panic: pad_sv po, panic: pad_swipe curpad, panic:
-pad_swipe po, panic: pp_iter, panic: pp_split, panic: realloc, panic:
-restartop, panic: return, panic: scan_num, panic: sv_insert, panic:
-top_env, panic: yylex, panic: utf16_to_utf8: odd bytelen, Parentheses
-missing around "%s" list, Perl %s required--this is only version %s,
-stopped, PERL_SH_DIR too long, perl: warning: Setting locale failed,
-perlio: argument list not closed for layer "%s", perlio: invalid separator
-character %s in attribute list, perlio: unknown layer "%s", Permission
-denied, pid %x not a child, P must have an explicit size, POSIX syntax [%s]
-belongs inside character classes in regex;, POSIX syntax [. .] is reserved
-for future extensions in regex;, POSIX syntax [= =] is reserved for future
-extensions in regex;, POSIX class [:%s:] unknown in regex;, POSIX getpgrp
-can't take an argument, Possible attempt to put comments in qw() list,
-Possible attempt to separate words with commas, Possible memory corruption:
-%s overflowed 3rd argument, Possible unintended interpolation of %s in
-string, Possible Y2K bug: %s, pragma "attrs" is deprecated, use "sub NAME :
-ATTRS" instead, Precedence problem: open %s should be open(%s), Premature
-end of script headers, printf() on closed filehandle %s, print() on closed
-filehandle %s, Process terminated by SIG%s, Prototype mismatch: %s vs %s,
-Prototype not terminated, Quantifier in {,} bigger than %d in regex;,
-Quantifier unexpected on zero-length expression;, Range iterator outside
-integer range, readline() on closed filehandle %s, Reallocation too large:
-%lx, realloc() of freed memory ignored, Recompile perl with B<-D>DEBUGGING
-to use B<-D> switch, Recursive inheritance detected in package '%s',
-Recursive inheritance detected while looking for method %s, Reference found
-where even-sized list expected, Reference is already weak, Reference
-miscount in sv_replace(), Reference to nonexistent group in regex;, regexp
-memory corruption, Regexp out of space, Repeat count in pack overflows,
-Repeat count in unpack overflows, Reversed %s= operator, Runaway format,
-Scalar value @%s[%s] better written as $%s[%s], Scalar value @%s{%s} better
-written as $%s{%s}, Scalars leaked: %d, Script is not setuid/setgid in
-suidperl, Search pattern not terminated, %sseek() on unopened filehandle,
-select not implemented, Self-ties of arrays and hashes are not supported,
-Semicolon seems to be missing, semi-panic: attempt to dup freed string,
-sem%s not implemented, send() on closed socket %s, Sequence (? incomplete
-in regex; marked by <-- HERE in m/%s/, Sequence (?{...}) not terminated or
-not {}-balanced in regex;, Sequence (?%s...) not implemented in regex;,
-Sequence (?%s...) not recognized in regex;, Sequence (?#... not terminated
-in regex;, 500 Server error, Server error, setegid() not implemented,
-seteuid() not implemented, setpgrp can't take arguments, setrgid() not
-implemented, setruid() not implemented, setsockopt() on closed socket %s,
-Setuid/gid script is writable by world, shm%s not implemented, <> should be
-quotes, /%s/ should probably be written as "%s", shutdown() on closed
-socket %s, SIG%s handler "%s" not defined, sort is now a reserved word,
-Sort subroutine didn't return a numeric value, Sort subroutine didn't
-return single value, splice() offset past end of array, Split loop,
-Statement unlikely to be reached, stat() on unopened filehandle %s, Stub
-found while resolving method `%s' overloading %s, Subroutine %s redefined,
-Substitution loop, Substitution pattern not terminated, Substitution
-replacement not terminated, substr outside of string, suidperl is no longer
-needed since %s, Switch (?(condition)... contains too many branches in
-regex;, Switch condition not recognized in regex;, switching effective %s
-is not implemented, syntax error, syntax error at line %d: `%s' unexpected,
-syntax error in file %s at line %d, next 2 tokens "%s", %s syntax OK,
-System V %s is not implemented on this machine, syswrite() on closed
-filehandle %s, Target of goto is too deeply nested, tell() on unopened
-filehandle, That use of $[ is unsupported, The crypt() function is
-unimplemented due to excessive paranoia, The %s function is unimplemented,
-The stat preceding %s wasn't an lstat, This Perl can't reset CRTL environ
-elements (%s), This Perl can't set CRTL environ elements (%s=%s), times not
-implemented, Too few args to syscall, Too late for "B<-T>" option, Too late
-for "-%s" option, Too late to run %s block, Too many args to syscall, Too
-many arguments for %s, Too many )'s, Too many ('s, Trailing \ in regex
-m/%s/, Transliteration pattern not terminated, Transliteration replacement
-not terminated, truncate not implemented, Type of arg %d to %s must be %s
-(not %s), umask not implemented, Unable to create sub named "%s",
-Unbalanced context: %d more PUSHes than POPs, Unbalanced saves: %d more
-saves than restores, Unbalanced scopes: %d more ENTERs than LEAVEs,
-Unbalanced tmps: %d more allocs than frees, Undefined format "%s" called,
-Undefined sort subroutine "%s" called, Undefined subroutine &%s called,
-Undefined subroutine called, Undefined subroutine in sort, Undefined top
-format "%s" called, Undefined value assigned to typeglob, %s: Undefined
-variable, unexec of %s into %s failed!, Unicode character %s is illegal,
-Unknown BYTEORDER, Unknown "re" subpragma '%s' (known ones are: %s),
-Unknown switch condition (?(%.2s in regex;, Unknown open() mode '%s',
-Unknown process %x sent message to prime_env_iter: %s, Unknown warnings
-category '%s', unmatched [ in regex; marked by <-- HERE in m/%s/, unmatched
-( in regex; marked by <-- HERE in m/%s/, Unmatched right %s bracket,
-Unquoted string "%s" may clash with future reserved word, Unrecognized
-character %s, /%s/: Unrecognized escape \\%c in character class passed
-through, Unrecognized escape \\%c passed through in regex;, Unrecognized
-escape \\%c passed through, Unrecognized signal name "%s", Unrecognized
-switch: -%s  (-h will show valid options), Unsuccessful %s on filename
-containing newline, Unsupported directory function "%s" called, Unsupported
-function %s, Unsupported function fork, Unsupported script encoding,
-Unsupported socket function "%s" called, Unterminated attribute list,
-Unterminated attribute parameter in attribute list, Unterminated compressed
-integer, Unterminated <> operator, untie attempted while %d inner
-references still exist, Useless (?%s) - use /%s modifier in regex;, Useless
-(?-%s) - don't use /%s modifier in regex;, Useless use of %s in void
-context, Useless use of "re" pragma, Useless use of sort in scalar context,
-Useless use of %s with no values, "use" not allowed in expression, Use of
-bare << to mean <<"" is deprecated, Use of *glob{FILEHANDLE} is deprecated,
-Use of chdir('') or chdir(undef) as chdir() deprecated, Use of implicit
-split to @_ is deprecated, Use of inherited AUTOLOAD for non-method %s() is
-deprecated, Use of -l on filehandle %s, Use of "package" with no arguments
-is deprecated, Use of %s in printf format not supported, Use of $* is
-deprecated, Use of %s is deprecated, Use of $# is deprecated, Use of
-reference "%s" as array index, Use of reserved word "%s" is deprecated, Use
-of tainted arguments in %s is deprecated, Use of uninitialized value%s,
-Using a hash as a reference is deprecated, Using an array as a reference is
-deprecated, UTF-16 surrogate %s, Value of %s can be "0"; test with
-defined(), Value of CLI symbol "%s" too long, Variable "%s" is not
-imported%s, "%s" variable %s masks earlier declaration in same %s, Variable
-"%s" may be unavailable, Variable syntax, Variable "%s" will not stay
-shared, Variable length lookbehind not implemented in regex;, Version
-number must be a constant number, v-string in use/require is non-portable,
-Warning: something's wrong, Warning: unable to close filehandle %s
-properly, Warning: Use of "%s" without parentheses is ambiguous, Wide
-character in %s, write() on closed filehandle %s, X outside of string, x
-outside of string, Xsub "%s" called in sort, Xsub called in sort, YOU
-HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!, You need to quote "%s"
+element, Can't localize through a reference, Can't locate file %s, Can't
+locate auto/%s.al in @INC, Can't locate object method "%s" via package
+"%s", (perhaps you forgot to load "%s"?), Can't locate package %s for
+@%s::ISA, Can't make list assignment to \%ENV on this system, Can't modify
+%s in %s, Can't modify nonexistent substring, Can't modify non-lvalue
+subroutine call, Can't msgrcv to read-only var, Can't "next" outside a loop
+block, Can't open %s: %s, Can't open bidirectional pipe, Can't open error
+file %s as stderr, Can't open input file %s as stdin, Can't open output
+file %s as stdout, Can't open output pipe (name: %s), Can't open perl
+script%s: %s, Can't read CRTL environ, Can't redefine active sort
+subroutine %s, Can't "redo" outside a loop block, Can't remove %s: %s,
+skipping file, Can't rename %s to %s: %s, skipping file, Can't reopen input
+pipe (name: %s) in binary mode, Can't resolve method `%s' overloading `%s'
+in package `%s', Can't reswap uid and euid, Can't return %s from lvalue
+subroutine, Can't return %s to lvalue scalar context, Can't return outside
+a subroutine, Can't stat script "%s", Can't swap uid and euid, Can't take
+log of %g, Can't take sqrt of %g, Can't undef active subroutine, Can't
+unshift, Can't upgrade that kind of scalar, Can't upgrade to undef, Can't
+use an undefined value as %s reference, Can't use anonymous symbol table
+for method lookup, Can't use bareword ("%s") as %s ref while "strict refs"
+in use, Can't use %! because Errno.pm is not available, Can't use %s for
+loop variable, Can't use global %s in "my", Can't use "my %s" in sort
+comparison, Can't use %s ref as %s ref, Can't use string ("%s") as %s ref
+while "strict refs" in use, Can't use subscript on %s, Can't use \%c to
+mean $%c in expression, Can't weaken a nonreference, Can't x= to read-only
+value, Character in "C" format wrapped, Character in "c" format wrapped,
+close() on unopened filehandle %s, %s: Command not found, Compilation
+failed in require, Complex regular subexpression recursion limit (%d)
+exceeded, connect() on closed socket %s, Constant(%s)%s: %s, Constant is
+not %s reference, Constant subroutine %s redefined, Constant subroutine %s
+undefined, Copy method did not return a reference, CORE::%s is not a
+keyword, corrupted regexp pointers, corrupted regexp program, Corrupt
+malloc ptr 0x%lx at 0x%lx, C<-p> destination: %s, C<-T> and C<-B> not
+implemented on filehandles, Deep recursion on subroutine "%s",
+defined(@array) is deprecated, defined(%hash) is deprecated, %s defines
+neither package nor VERSION--version check failed, Delimiter for here
+document is too long, Did not produce a valid header, %s did not return a
+true value, (Did you mean &%s instead?), (Did you mean "local" instead of
+"our"?), (Did you mean $ or @ instead of %?), Died, Document contains no
+data, %s does not define %s::VERSION--version check failed, Don't know how
+to handle magic of type '%s', do_study: out of memory, (Do you need to
+predeclare %s?), dump() better written as CORE::dump(), Duplicate free()
+ignored, elseif should be elsif, Empty %s, entering effective %s failed,
+Error converting file specification %s, %s: Eval-group in insecure regular
+expression, %s: Eval-group not allowed at run time, %s: Eval-group not
+allowed, use re 'eval', Excessively long <> operator, exec? I'm not *that*
+kind of operating system, Execution of %s aborted due to compilation
+errors, Exiting eval via %s, Exiting format via %s, Exiting pseudo-block
+via %s, Exiting subroutine via %s, Exiting substitution via %s, Explicit
+blessing to '' (assuming package main), %s: Expression syntax, %s
+failed--call queue aborted, False [] range "%s" in regex; marked by <--
+HERE in m/%s/, Fatal VMS error at %s, line %d, fcntl is not implemented,
+Filehandle %s opened only for input, Filehandle %s opened only for output,
+Final $ should be \$ or $name, Final @ should be \@ or @name, flock() on
+closed filehandle %s, Quantifier follows nothing in regex;, Format not
+terminated, Format %s redefined, Found = in conditional, should be ==, %s
+found where operator expected, gdbm store returned %d, errno %d, key "%s",
+gethostent not implemented, get%sname() on closed socket %s, getpwnam
+returned invalid UIC %#o for user "%s", getsockopt() on closed socket %s,
+Global symbol "%s" requires explicit package name, glob failed (%s), Glob
+not terminated, Got an error from DosAllocMem, goto must have label,
+%s-group starts with a count, %s had compilation errors, Had to create %s
+unexpectedly, Hash %%s missing the % in argument %d of %s(), %s has too
+many errors, Hexadecimal number > 0xffffffff non-portable, Identifier too
+long, Illegal binary digit %s, Illegal binary digit %s ignored, Illegal
+character %s (carriage return), Illegal character in prototype for %s : %s,
+Illegal division by zero, Illegal hexadecimal digit %s ignored, Illegal
+modulus zero, Illegal number of bits in vec, Illegal octal digit %s,
+Illegal octal digit %s ignored, Illegal switch in PERL5OPT: %s, Ill-formed
+CRTL environ value "%s", Ill-formed message in prime_env_iter: |%s|, (in
+cleanup) %s, In EBCDIC the v-string components cannot exceed 2147483647,
+Insecure dependency in %s, Insecure directory in %s, Insecure $ENV{%s}
+while running %s, Integer overflow in %s number, Internal disaster in
+regex; marked by <-- HERE in m/%s/, Internal inconsistency in tracking
+vforks, Internal urp in regex; marked by <-- HERE in m/%s/, %s (...)
+interpreted as function, Invalid %s attribute: %s, Invalid %s attributes:
+%s, Invalid conversion in %s: "%s", Invalid [] range "%s" in regex; marked
+by <-- HERE in m/%s/, Invalid [] range "%s" in transliteration operator,
+Invalid separator character %s in attribute list, Invalid type in pack:
+'%s', Invalid type in unpack: '%s', ioctl is not implemented, ioctl() on
+unopened %s, IO::Socket::atmark not implemented on this architecture, `%s'
+is not a code reference, `%s' is not an overloadable type, junk on end of
+regexp, Label not found for "last %s", Label not found for "next %s", Label
+not found for "redo %s", leaving effective %s failed, listen() on closed
+socket %s, lstat() on filehandle %s, Lvalue subs returning %s not
+implemented yet, Lookbehind longer than %d not implemented in regex;,
+Malformed PERLLIB_PREFIX, Malformed prototype for %s: %s, Malformed UTF-8
+character (%s), Malformed UTF-16 surrogate, %s matches null string many
+times in regex;, "%s" may clash with future reserved word, % may only be
+used in unpack, Method for operation %s not found in package %s during
+blessing, Method %s not permitted, Might be a runaway multi-line %s string
+starting on line %d, Misplaced _ in number, Missing %sbrace%s on \N{},
+Missing comma after first argument to %s function, Missing command in piped
+open, Missing name in "my sub", Missing $ on loop variable, (Missing
+operator before %s?), Missing right brace on %s, Missing right curly or
+square bracket, (Missing semicolon on previous line?), Modification of a
+read-only value attempted, Modification of non-creatable array value
+attempted, %s, Modification of non-creatable hash value attempted, %s,
+Module name must be constant, Module name required with -%c option, More
+than one argument to open, msg%s not implemented, Multidimensional syntax
+%s not supported, / must be followed by a*, A* or Z*, / must be followed by
+a, A or Z, / must follow a numeric type, "my sub" not yet implemented, "my"
+variable %s can't be in a package, Name "%s::%s" used only once: possible
+typo, Negative length, Negative offset to vec in lvalue context, Nested
+quantifiers in regex; marked by <-- HERE in m/%s/, %s never introduced, No
+%s allowed while running setuid, No B<-e> allowed in setuid scripts, No
+comma allowed after %s, No command into which to pipe on command line, No
+DB::DB routine defined, No dbm on this machine, No DBsub routine, No error
+file after 2> or 2>> on command line, No input file after < on command
+line, No #! line, "no" not allowed in expression, No output file after > on
+command line, No output file after > or >> on command line, No package name
+allowed for variable %s in "our", No Perl script found in input, No
+setregid available, No setreuid available, No space allowed after -%c, No
+%s specified for -%c, No such class %s, No such pipe open, No such
+pseudo-hash field "%s", No such pseudo-hash field "%s" in variable %s of
+type %s, No such signal: SIG%s, Not a CODE reference, Not a format
+reference, Not a GLOB reference, Not a HASH reference, Not an ARRAY
+reference, Not a perl script, Not a SCALAR reference, Not a subroutine
+reference, Not a subroutine reference in overload table, Not enough
+arguments for %s, Not enough format arguments, %s: not found, %s not
+allowed in length fields, no UTC offset information; assuming local time is
+UTC, Null filename used, NULL OP IN RUN, Null picture in formline, Null
+realloc, NULL regexp argument, NULL regexp parameter, Number too long,
+Octal number in vector unsupported, Octal number > 037777777777
+non-portable, Odd number of arguments for overload::constant, Odd number of
+elements in anonymous hash, Odd number of elements in hash assignment,
+Offset outside string, -%s on unopened filehandle %s, %s() on unopened %s,
+oops: oopsAV, oops: oopsHV, Operation `%s': no method found, %s, Operator
+or semicolon missing before %s, "our" variable %s redeclared, Out of
+memory!, Out of memory during "large" request for %s, Out of memory during
+request for %s, Out of memory during ridiculously large request, Out of
+memory for yacc stack, @ outside of string, %s package attribute may clash
+with future reserved word: %s, page overflow, panic: %s, panic: ck_grep,
+panic: ck_split, panic: corrupt saved stack index, panic: del_backref,
+panic: die %s, panic: pp_match%s, panic: do_subst, panic: do_trans_%s,
+panic: frexp, panic: goto, panic: INTERPCASEMOD, panic: INTERPCONCAT,
+panic: kid popen errno read, panic: last, panic: leave_scope clearsv,
+panic: leave_scope inconsistency, panic: magic_killbackrefs, panic: malloc,
+panic: mapstart, panic: null array, panic: pad_alloc, panic: pad_free
+curpad, panic: pad_free po, panic: pad_reset curpad, panic: pad_sv po,
+panic: pad_swipe curpad, panic: pad_swipe po, panic: pp_iter, panic:
+pp_split, panic: realloc, panic: restartop, panic: return, panic: scan_num,
+panic: sv_insert, panic: top_env, panic: yylex, panic: utf16_to_utf8: odd
+bytelen, Parentheses missing around "%s" list, Perl %s required--this is
+only version %s, stopped, PERL_SH_DIR too long, perl: warning: Setting
+locale failed, perlio: argument list not closed for layer "%s", perlio:
+invalid separator character %s in attribute list, perlio: unknown layer
+"%s", Permission denied, pid %x not a child, P must have an explicit size,
+POSIX syntax [%s] belongs inside character classes in regex;, POSIX syntax
+[. .] is reserved for future extensions in regex;, POSIX syntax [= =] is
+reserved for future extensions in regex;, POSIX class [:%s:] unknown in
+regex;, POSIX getpgrp can't take an argument, Possible attempt to put
+comments in qw() list, Possible attempt to separate words with commas,
+Possible memory corruption: %s overflowed 3rd argument, Possible unintended
+interpolation of %s in string, Possible Y2K bug: %s, pragma "attrs" is
+deprecated, use "sub NAME : ATTRS" instead, Precedence problem: open %s
+should be open(%s), Premature end of script headers, printf() on closed
+filehandle %s, print() on closed filehandle %s, Process terminated by
+SIG%s, Prototype mismatch: %s vs %s, Prototype not terminated, Quantifier
+in {,} bigger than %d in regex;, Quantifier unexpected on zero-length
+expression;, Range iterator outside integer range, readline() on closed
+filehandle %s, Reallocation too large: %lx, realloc() of freed memory
+ignored, Recompile perl with B<-D>DEBUGGING to use B<-D> switch, Recursive
+inheritance detected in package '%s', Recursive inheritance detected while
+looking for method %s, Reference found where even-sized list expected,
+Reference is already weak, Reference miscount in sv_replace(), Reference to
+nonexistent group in regex;, regexp memory corruption, Regexp out of space,
+Repeat count in pack overflows, Repeat count in unpack overflows, Reversed
+%s= operator, Runaway format, Scalar value @%s[%s] better written as
+$%s[%s], Scalar value @%s{%s} better written as $%s{%s}, Scalars leaked:
+%d, Script is not setuid/setgid in suidperl, Search pattern not terminated,
+%sseek() on unopened filehandle, select not implemented, Self-ties of
+arrays and hashes are not supported, Semicolon seems to be missing,
+semi-panic: attempt to dup freed string, sem%s not implemented, send() on
+closed socket %s, Sequence (? incomplete in regex; marked by <-- HERE in
+m/%s/, Sequence (?{...}) not terminated or not {}-balanced in regex;,
+Sequence (?%s...) not implemented in regex;, Sequence (?%s...) not
+recognized in regex;, Sequence (?#... not terminated in regex;, 500 Server
+error, Server error, setegid() not implemented, seteuid() not implemented,
+setpgrp can't take arguments, setrgid() not implemented, setruid() not
+implemented, setsockopt() on closed socket %s, Setuid/gid script is
+writable by world, shm%s not implemented, <> should be quotes, /%s/ should
+probably be written as "%s", shutdown() on closed socket %s, SIG%s handler
+"%s" not defined, sort is now a reserved word, Sort subroutine didn't
+return a numeric value, Sort subroutine didn't return single value,
+splice() offset past end of array, Split loop, Statement unlikely to be
+reached, stat() on unopened filehandle %s, Stub found while resolving
+method `%s' overloading %s, Subroutine %s redefined, Substitution loop,
+Substitution pattern not terminated, Substitution replacement not
+terminated, substr outside of string, suidperl is no longer needed since
+%s, Switch (?(condition)... contains too many branches in regex;, Switch
+condition not recognized in regex;, switching effective %s is not
+implemented, syntax error, syntax error at line %d: `%s' unexpected, syntax
+error in file %s at line %d, next 2 tokens "%s", %s syntax OK, System V %s
+is not implemented on this machine, syswrite() on closed filehandle %s,
+Target of goto is too deeply nested, tell() on unopened filehandle, That
+use of $[ is unsupported, The crypt() function is unimplemented due to
+excessive paranoia, The %s function is unimplemented, The stat preceding %s
+wasn't an lstat, This Perl can't reset CRTL environ elements (%s), This
+Perl can't set CRTL environ elements (%s=%s), times not implemented, Too
+few args to syscall, Too late for "B<-T>" option, Too late for "-%s"
+option, Too late to run %s block, Too many args to syscall, Too many
+arguments for %s, Too many )'s, Too many ('s, Trailing \ in regex m/%s/,
+Transliteration pattern not terminated, Transliteration replacement not
+terminated, truncate not implemented, Type of arg %d to %s must be %s (not
+%s), umask not implemented, Unable to create sub named "%s", Unbalanced
+context: %d more PUSHes than POPs, Unbalanced saves: %d more saves than
+restores, Unbalanced scopes: %d more ENTERs than LEAVEs, Unbalanced tmps:
+%d more allocs than frees, Undefined format "%s" called, Undefined sort
+subroutine "%s" called, Undefined subroutine &%s called, Undefined
+subroutine called, Undefined subroutine in sort, Undefined top format "%s"
+called, Undefined value assigned to typeglob, %s: Undefined variable,
+unexec of %s into %s failed!, Unicode character %s is illegal, Unknown
+BYTEORDER, Unknown "re" subpragma '%s' (known ones are: %s), Unknown switch
+condition (?(%.2s in regex;, Unknown open() mode '%s', Unknown process %x
+sent message to prime_env_iter: %s, Unknown warnings category '%s',
+unmatched [ in regex; marked by <-- HERE in m/%s/, unmatched ( in regex;
+marked by <-- HERE in m/%s/, Unmatched right %s bracket, Unquoted string
+"%s" may clash with future reserved word, Unrecognized character %s, /%s/:
+Unrecognized escape \\%c in character class passed through, Unrecognized
+escape \\%c passed through in regex;, Unrecognized escape \\%c passed
+through, Unrecognized signal name "%s", Unrecognized switch: -%s  (-h will
+show valid options), Unsuccessful %s on filename containing newline,
+Unsupported directory function "%s" called, Unsupported function %s,
+Unsupported function fork, Unsupported script encoding, Unsupported socket
+function "%s" called, Unterminated attribute list, Unterminated attribute
+parameter in attribute list, Unterminated compressed integer, Unterminated
+<> operator, untie attempted while %d inner references still exist, Useless
+(?%s) - use /%s modifier in regex;, Useless (?-%s) - don't use /%s modifier
+in regex;, Useless use of %s in void context, Useless use of "re" pragma,
+Useless use of sort in scalar context, Useless use of %s with no values,
+"use" not allowed in expression, Use of bare << to mean <<"" is deprecated,
+Use of *glob{FILEHANDLE} is deprecated, Use of chdir('') or chdir(undef) as
+chdir() deprecated, Use of implicit split to @_ is deprecated, Use of
+inherited AUTOLOAD for non-method %s() is deprecated, Use of -l on
+filehandle %s, Use of "package" with no arguments is deprecated, Use of %s
+in printf format not supported, Use of $* is deprecated, Use of %s is
+deprecated, Use of $# is deprecated, Use of reference "%s" as array index,
+Use of reserved word "%s" is deprecated, Use of tainted arguments in %s is
+deprecated, Use of uninitialized value%s, Using a hash as a reference is
+deprecated, Using an array as a reference is deprecated, UTF-16 surrogate
+%s, Value of %s can be "0"; test with defined(), Value of CLI symbol "%s"
+too long, Variable "%s" is not imported%s, "%s" variable %s masks earlier
+declaration in same %s, Variable "%s" may be unavailable, Variable syntax,
+Variable "%s" will not stay shared, Variable length lookbehind not
+implemented in regex;, Version number must be a constant number, v-string
+in use/require is non-portable, Warning: something's wrong, Warning: unable
+to close filehandle %s properly, Warning: Use of "%s" without parentheses
+is ambiguous, Wide character in %s, write() on closed filehandle %s, X
+outside of string, x outside of string, Xsub "%s" called in sort, Xsub
+called in sort, YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!, You
+need to quote "%s"
 
 =back
 
@@ -3000,8 +3001,8 @@ tarball, Announce to the modules list, Announce to clpa, Fix bugs!
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.6 $, $Date:
-2002/01/31 01:46:23 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.7 $, $Date:
+2002/02/21 14:49:15 $)
 
 =over 4
 
@@ -3047,8 +3048,8 @@ Scheme, or Tcl?
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.8 $,
-$Date: 2002/02/08 22:31:57 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.9 $,
+$Date: 2002/03/09 21:01:13 $)
 
 =over 4
 
@@ -3188,8 +3189,8 @@ my C program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.14 $, $Date: 2002/02/08
-22:30:23 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.19 $, $Date: 2002/03/11
+22:15:19 $)
 
 =over 4
 
@@ -3223,6 +3224,8 @@ decimal:>, B<How do I convert from decimal to binary:>
 =item How can I output Roman numerals?
 
 =item Why aren't my random numbers random?
+
+=item How do I get a random number between X and Y?
 
 =back
 
@@ -3403,8 +3406,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.9 $, $Date: 2002/02/11
-19:30:21 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.12 $, $Date: 2002/03/11
+22:25:25 $)
 
 =over 4
 
@@ -3478,7 +3481,7 @@ file.  Do I still have to use locking?
 
 =item How do I close a file descriptor by number?
 
-=item Why can't I use "C:\temp\foo" in DOS paths?  What doesn't
+=item Why can't I use "C:\temp\foo" in DOS paths?  Why doesn't
 `C:\temp\foo.exe` work?
 
 =item Why doesn't glob("*.*") get all the files?
@@ -7325,6 +7328,50 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
+=head2 perldos - Perl under DOS, W31, W95.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Prerequisites for Compiling Perl on DOS
+
+DJGPP, Pthreads
+
+=item Shortcomings of Perl under DOS
+
+=item Building Perl on DOS
+
+=item Testing Perl on DOS
+
+=item Installation of Perl on DOS
+
+=back
+
+=item BUILDING AND INSTALLING MODULES ON DOS
+
+=over 4
+
+=item Building Prerequisites for Perl on DOS
+
+=item Unpacking CPAN Modules on DOS
+
+=item Building Non-XS Modules on DOS
+
+=item Building XS Modules on DOS
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -8905,7 +8952,7 @@ code
 =item Utility functions
 
 $num_octets = utf8::upgrade($string);, utf8::downgrade($string[, CHECK]),
-utf8::encode($string)
+utf8::encode($string), $flag = utf8::decode($string)
 
 =back
 
@@ -10830,70 +10877,6 @@ Dumper
 =item AUTHOR
 
 =item VERSION
-
-=item SEE ALSO
-
-=back
-
-=head2 Data::Util - A selection of general-utility data subroutines
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-sv_readonly_flag
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
-=head2 Data::Utilib::Data::Util, Data::Util - A selection of
-general-utility data subroutines
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-sv_readonly_flag
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
-=head2 Data::Utilib::Hash::Util, Hash::Util - A selection of
-general-utility hash subroutines
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Restricted hashes
-
-lock_keys, unlock_keys
-
-=back
-
-=back
-
-lock_value, unlock_value
-
-B<lock_hash>, B<unlock_hash>
-
-=over 4
-
-=item AUTHOR
 
 =item SEE ALSO
 

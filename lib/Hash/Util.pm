@@ -2,7 +2,6 @@ package Hash::Util;
 
 require 5.007003;
 use strict;
-use Data::Util qw(sv_readonly_flag);
 use Carp;
 
 require Exporter;
@@ -12,7 +11,6 @@ our @EXPORT_OK  = qw(lock_keys unlock_keys lock_value unlock_value
                     );
 our $VERSION    = 0.04;
 
-
 =head1 NAME
 
 Hash::Util - A selection of general-utility hash subroutines
@@ -21,8 +19,7 @@ Hash::Util - A selection of general-utility hash subroutines
 
   use Hash::Util qw(lock_keys   unlock_keys 
                     lock_value  unlock_value
-                    lock_hash   unlock_hash
-                   );
+                    lock_hash   unlock_hash);
 
   %hash = (foo => 42, bar => 23);
   lock_keys(%hash);
@@ -34,7 +31,6 @@ Hash::Util - A selection of general-utility hash subroutines
 
   lock_hash  (%hash);
   unlock_hash(%hash);
-
 
 =head1 DESCRIPTION
 
@@ -61,12 +57,12 @@ This is intended to largely replace the deprecated pseudo-hashes.
   lock_keys(%hash);
   lock_keys(%hash, @keys);
 
-  unlock_keys(%hash;)
-
 Restricts the given %hash's set of keys to @keys.  If @keys is not
 given it restricts it to its current keyset.  No more keys can be
 added.  delete() and exists() will still work, but it does not effect
 the set of allowed keys.
+
+  unlock_keys(%hash;)
 
 Removes the restriction on the %hash's keyset.
 
@@ -87,14 +83,14 @@ sub lock_keys (\%;@) {
         foreach my $k (@keys) {
             $hash->{$k} = undef unless exists $hash->{$k};
         }
-        sv_readonly_flag %$hash, 1;
+        Internals::SvREADONLY %$hash, 1;
 
         foreach my $k (@keys) {
             delete $hash->{$k} unless $original_keys{$k};
         }
     }
     else {
-        sv_readonly_flag %$hash, 1;
+        Internals::SvREADONLY %$hash, 1;
     }
 
     return undef;
@@ -103,7 +99,7 @@ sub lock_keys (\%;@) {
 sub unlock_keys (\%) {
     my($hash) = shift;
 
-    sv_readonly_flag %$hash, 0;
+    Internals::SvREADONLY %$hash, 0;
     return undef;
 }
 
@@ -124,13 +120,13 @@ key cannot be changed.
 sub lock_value (\%$) {
     my($hash, $key) = @_;
     carp "Cannot usefully lock values in an unlocked hash" 
-      unless sv_readonly_flag %$hash;
-    sv_readonly_flag $hash->{$key}, 1;
+      unless Internals::SvREADONLY %$hash;
+    Internals::SvREADONLY $hash->{$key}, 1;
 }
 
 sub unlock_value (\%$) {
     my($hash, $key) = @_;
-    sv_readonly_flag $hash->{$key}, 0;
+    Internals::SvREADONLY $hash->{$key}, 0;
 }
 
 
@@ -139,14 +135,15 @@ sub unlock_value (\%$) {
 =item B<unlock_hash>
 
     lock_hash(%hash);
-    unlock_hash(%hash);
 
 lock_hash() locks an entire hash, making all keys and values readonly.
 No value can be changed, no keys can be added or deleted.
 
-unlock_hash() does the opposite.  All keys and values are made
-read/write.  All values can be changed and keys can be added and
-deleted.
+    unlock_hash(%hash);
+
+unlock_hash() does the opposite of lock_hash().  All keys and values
+are made read/write.  All values can be changed and keys can be added
+and deleted.
 
 =cut
 
