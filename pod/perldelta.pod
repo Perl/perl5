@@ -250,11 +250,23 @@ change#3386, also needs perlguts documentation
 
 =head2 Binary Incompatibilities
 
-The default build of this release is binary compatible with the 5.005
-release or its maintenance versions.
+In general, the default build of this release is expected to be binary
+compatible for extensions built with the 5.005 release or its maintenance
+versions.  However, specific platforms may have broken binary compatibility
+due to changes in the defaults used in hints files.  Therefore, please be
+sure to always check the platform-specific README files for any notes to
+the contrary.
 
 The usethreads or usemultiplicity builds are B<not> binary compatible
 with the corresponding builds in 5.005.
+
+On platforms that require an explicit list of exports (AIX, OS/2 and Windows,
+among others), purely internal symbols such as parser functions and the
+run time opcodes are not exported by default.  Perl 5.005 used to export
+all functions irrespective of whether they were considered part of the
+public API or not.
+
+For the full list of public API functions, see L<perlapi>.
 
 =head1 Installation and Configuration Improvements
 
