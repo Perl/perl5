@@ -349,7 +349,7 @@ sub _find_opt {
 
         unless ($Is_Dir) {
 	    unless (($_,$dir) = File::Basename::fileparse($abs_dir)) {
-		($dir,$_) = ('.', $top_item);
+		($dir,$_) = ('./', $top_item);
 	    }
 
             $abs_dir = $dir;
@@ -370,9 +370,9 @@ sub _find_opt {
                 warn "Couldn't chdir $abs_dir: $!\n";
                 next Proc_Top_Item;
             }
-            
-            $name = $abs_dir;
-            
+
+            $name = $abs_dir . $_;
+
             &$wanted_callback;
 
         }
