@@ -485,12 +485,14 @@ int usleep(unsigned int);
 #  else
 #    define EMBEDMYMALLOC	/* for compatibility */
 #  endif
+START_EXTERN_C
 Malloc_t Perl_malloc (MEM_SIZE nbytes);
 Malloc_t Perl_calloc (MEM_SIZE elements, MEM_SIZE size);
 Malloc_t Perl_realloc (Malloc_t where, MEM_SIZE nbytes);
 /* 'mfree' rather than 'free', since there is already a 'perl_free'
  * that causes clashes with case-insensitive linkers */
 Free_t   Perl_mfree (Malloc_t where);
+END_EXTERN_C
 
 typedef struct perl_mstats perl_mstats_t;
 
