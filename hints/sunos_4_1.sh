@@ -88,3 +88,8 @@ fi
 # from many extensions, like B and Data::Dumper.
 ld=/usr/bin/ld
 
+# As of Perl 5.8.1 it seems that dynaloading is broken in SunOS 4.x, sniff.
+case "$usedl" in
+'') usedl=undef ;;
+esac
+
