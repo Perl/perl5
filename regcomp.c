@@ -5045,7 +5045,7 @@ S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
     if (l1 > 512)
 	l1 = 512;
     Copy(message, buf, l1 , char);
-    buf[l1] = '\0';			/* Overwrite \n */
+    buf[l1-1] = '\0';			/* Overwrite \n */
     Perl_croak(aTHX_ "%s", buf);
 }
 
