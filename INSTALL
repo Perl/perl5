@@ -713,7 +713,7 @@ or you can answer 'n' at the appropriate interactive Configure prompt.
 =head2 Malloc Performance Flags
 
 If you are using Perl's malloc, you may add one or more of the following
-items to your cflags config.sh variable to change its behavior.  You can
+items to your ccflags config.sh variable to change its behavior.  You can
 find out more about these and other flags by reading the commentary near
 the top of the malloc.c source.
 
