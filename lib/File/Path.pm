@@ -92,7 +92,7 @@ Charles Bailey <F<bailey@genetics.upenn.edu>>
 
 =head1 REVISION
 
-Current $VERSION is 1.04.
+Current $VERSION is 1.0401.
 
 =cut
 
@@ -103,7 +103,7 @@ use Exporter ();
 use strict;
 
 use vars qw( $VERSION @ISA @EXPORT );
-$VERSION = "1.04";
+$VERSION = "1.0401";
 @ISA = qw( Exporter );
 @EXPORT = qw( mkpath rmtree );
 
@@ -202,18 +202,18 @@ sub rmtree {
 		if $force_writeable;
 	    print "unlink $root\n" if $verbose;
 	    # delete all versions under VMS
-	    while (-e $root || -l $root) {
-		if (unlink $root) {
-		    ++$count;
-		}
-		else {
+	    for (;;) {
+		unless (unlink $root) {
 		    carp "Can't unlink file $root: $!";
 		    if ($force_writeable) {
 			chmod $rp, $root
 			    or carp("and can't restore permissions to "
 			            . sprintf("0%o",$rp) . "\n");
 		    }
+		    last;
 		}
+		++$count;
+		last unless $Is_VMS && lstat $root;
 	    }
 	}
     }
