@@ -99,10 +99,12 @@
     if (hints & HINT_LOCALIZE_HH)	\
 	save_hints();			\
     else {				\
+	SSCHECK(2);			\
 	SSPUSHINT(hints);		\
 	SSPUSHINT(SAVEt_NOHINTS);	\
     }					\
  } STMT_END
+
 /* A jmpenv packages the state required to perform a proper non-local jump.
  * Note that there is a start_env initialized when perl starts, and top_env
  * points to this initially, so top_env should always be non-null.
