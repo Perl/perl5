@@ -12,7 +12,7 @@ BEGIN {
 
 $| = 1;
 
-print "1..69\n";
+print "1..73\n";
 
 use charnames ':full';
 
@@ -95,7 +95,7 @@ sub to_bytes {
 {
    use charnames qw(:full);
    use utf8;
-   
+
     my $x = "\x{221b}";
     my $named = "\N{CUBE ROOT}";
 
@@ -119,7 +119,7 @@ sub to_bytes {
 }
 
 {
-  # 20001114.001	
+  # 20001114.001
 
   no utf8; # naked Latin-1
 
@@ -328,17 +328,29 @@ for (@prgs) {
     }
 
 __END__
+# unsupported pragma
+use charnames ":scoobydoo";
+"Here: \N{e_ACUTE}!\n";
+EXPECT
+unsupported special ':scoobydoo' in charnames at
+########
 # wrong type of alias (missing colon)
 use charnames "alias";
 "Here: \N{e_ACUTE}!\n";
 EXPECT
-Unknown charname 'e_ACUTE' at 
+Unknown charname 'e_ACUTE' at
 ########
 # alias without an argument
 use charnames ":alias";
 "Here: \N{e_ACUTE}!\n";
 EXPECT
-Unknown charname 'e_ACUTE' at 
+:alias needs an argument in charnames at
+########
+# reversed sequence
+use charnames ":alias" => ":full";
+"Here: \N{e_ACUTE}!\n";
+EXPECT
+:alias cannot use existing pragma :full \(reversed order\?\) at
 ########
 # alias with hashref but no :full
 use charnames ":alias" => { e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE" };
@@ -374,7 +386,7 @@ $
 use charnames ":short", ":alias" => "e_ACUTE";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-Odd number of elements in anonymous hash at
+unicore/e_ACUTE_alias.pl cannot be used as alias file for charnames at
 ########
 # alias with arrayref
 use charnames ":short", ":alias" => [ e_ACUTE => "LATIN:e WITH ACUTE" ];
@@ -437,7 +449,19 @@ Unknown charname 'LATIN:e WITH ACUTE' at
 use charnames ":full", ":alias" => "xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-Odd number of elements in anonymous hash at
+unicore/xyzzy_alias.pl cannot be used as alias file for charnames at
+########
+# alias with bad file name
+use charnames ":full", ":alias" => "xy 7-";
+"Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
+EXPECT
+Charnames alias files can only have identifier characters at
+########
+# alias with non_absolute (existing) file name (which it should /not/ use)
+use charnames ":full", ":alias" => "perl";
+"Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
+EXPECT
+unicore/perl_alias.pl cannot be used as alias file for charnames at
 ########
 # alias with bad file
 use charnames ":full", ":alias" => "xyzzy";
@@ -446,7 +470,7 @@ FILE
 #!perl
 0;
 EXPECT
-Odd number of elements in anonymous hash at
+unicore/xyzzy_alias.pl did not return a \(valid\) list of alias pairs at
 ########
 # alias with file with empty list
 use charnames ":full", ":alias" => "xyzzy";
