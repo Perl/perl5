@@ -2548,8 +2548,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, contains the string used by stdio to
  *	format long doubles (format 'g') for output.
  */
+/* PERL_PRIeldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'e') for output.
+ */
 #$d_PRIfldbl PERL_PRIfldbl	$sPRIfldbl	/**/
 #$d_PRIgldbl PERL_PRIgldbl	$sPRIgldbl	/**/
+#$d_PRIeldbl PERL_PRIeldbl	$sPRIeldbl	/**/
 
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.
