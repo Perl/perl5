@@ -2338,12 +2338,22 @@ yylex()
 	if (*s == ':' && s[1] == ':' && strNE(tokenbuf, "CORE"))
 	    goto just_a_word;
 
+	d = s;
+	while (d < bufend && isSPACE(*d))
+		d++;	/* no comments skipped here, or s### is misparsed */
+
+	/* Is this a label? */
+	if (expect == XSTATE && d < bufend && *d == ':' && *(d + 1) != ':') {
+	    s = d + 1;
+	    yylval.pval = savepv(tokenbuf);
+	    CLINE;
+	    TOKEN(LABEL);
+	}
+
+	/* Check for keywords */
 	tmp = keyword(tokenbuf, len);
 
 	/* Is this a word before a => operator? */
-	d = s;
-	while (d < bufend && (*d == ' ' || *d == '\t'))
-		d++;	/* no comments skipped here, or s### is misparsed */
 	if (strnEQ(d,"=>",2)) {
 	    CLINE;
 	    if (dowarn && (tmp || perl_get_cv(tokenbuf, FALSE)))
@@ -2383,18 +2393,7 @@ yylex()
 			croak("Bad name after %s::", tokenbuf);
 		}
 
-		/* Do special processing at start of statement. */
-
-		if (expect == XSTATE) {
-		    while (isSPACE(*s)) s++;
-		    if (*s == ':') {	/* It's a label. */
-			yylval.pval = savepv(tokenbuf);
-			s++;
-			CLINE;
-			TOKEN(LABEL);
-		    }
-		}
-		else if (expect == XOPERATOR) {
+		if (expect == XOPERATOR) {
 		    if (bufptr == linestart) {
 			curcop->cop_line--;
 			warn(warn_nosemi);
@@ -2909,7 +2908,7 @@ yylex()
 
 	case KEY_if:
 	    yylval.ival = curcop->cop_line;
-	    OPERATOR(IF);
+	    PRETERMBLOCK(IF);
 
 	case KEY_index:
 	    LOP(OP_INDEX,XTERM);
@@ -3424,11 +3423,11 @@ yylex()
 
 	case KEY_until:
 	    yylval.ival = curcop->cop_line;
-	    OPERATOR(UNTIL);
+	    PRETERMBLOCK(UNTIL);
 
 	case KEY_unless:
 	    yylval.ival = curcop->cop_line;
-	    OPERATOR(UNLESS);
+	    PRETERMBLOCK(UNLESS);
 
 	case KEY_unlink:
 	    LOP(OP_UNLINK,XTERM);
@@ -3480,7 +3479,7 @@ yylex()
 
 	case KEY_while:
 	    yylval.ival = curcop->cop_line;
-	    OPERATOR(WHILE);
+	    PRETERMBLOCK(WHILE);
 
 	case KEY_warn:
 	    hints |= HINT_BLOCK_SCOPE;
