@@ -220,8 +220,10 @@ to change that.  An explicit close on a filehandle resets the line
 number.  Because C<E<lt>E<gt>> never does an explicit close, line
 numbers increase across ARGV files (but see examples in L<perlfunc/eof>).
 Consider this variable read-only: setting it does not reposition
-the seek pointer; you'll have to do that on your own.  (Mnemonic:
-many programs use "." to mean the current line number.)  
+the seek pointer; you'll have to do that on your own.  Localizing C<$.>
+has the effect of also localizing Perl's notion of "the last read
+filehandle".  (Mnemonic: many programs use "." to mean the current line
+number.)
 
 =item input_record_separator HANDLE EXPR
 
