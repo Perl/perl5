@@ -30,7 +30,7 @@ $usage =
 	man3ext = $Config{'man3ext'};
 	--notify (or -n) just lists commands that would be executed.\n";
 
-GetOptions( qw( man1dir=s man1ext=s man3dir=s man3ext=s notify n help)) 
+GetOptions( qw( man1dir=s man1ext=s man3dir=s man3ext=s notify n help S)) 
 	|| die $usage;
 die $usage if $opt_help;
 
