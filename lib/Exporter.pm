@@ -209,6 +209,15 @@ You can say C<BEGIN { $Exporter::Verbose=1 }> to see how the
 specifications are being processed and what is actually being imported
 into modules.
 
+=head2 Constants can be inlined
+
+AUTOLOADed constants can be inlined by prefixing them with a C<+>:
+
+   use Socket qw(+AF_INET);
+
+Thusly prefixed constants are defined during the symbol import phase of
+compilation, which means that by runtime they are true inlined constants.
+
 =head2 Exporting without using Export's import method
 
 Exporter has a special method, 'export_to_level' which is used in situations
