@@ -502,8 +502,10 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, U32 klen, I32 flags)
 	    xhv->xhv_fill--;
 	if (flags & G_DISCARD)
 	    sv = Nullsv;
-	else
-	    sv = sv_mortalcopy(HeVAL(entry));
+	else {
+	    sv = HeVAL(entry);
+	    HeVAL(entry) = &PL_sv_undef;
+	}
 	if (entry == xhv->xhv_eiter)
 	    HvLAZYDEL_on(hv);
 	else
@@ -576,8 +578,10 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	    xhv->xhv_fill--;
 	if (flags & G_DISCARD)
 	    sv = Nullsv;
-	else
-	    sv = sv_mortalcopy(HeVAL(entry));
+	else {
+	    sv = HeVAL(entry);
+	    HeVAL(entry) = &PL_sv_undef;
+	}
 	if (entry == xhv->xhv_eiter)
 	    HvLAZYDEL_on(hv);
 	else

@@ -95,9 +95,9 @@ but still allowed it.
 
 In Perl 5.6 and later, C<"$$1"> always means C<"${$1}">.
 
-=item values(%h) and C<\(%h)> operate on aliases to values, not copies
+=item delete(), values() and C<\(%h)> operate on aliases to values, not copies
 
-each(), values() and hashes in a list context return the actual
+delete(), each(), values() and hashes in a list context return the actual
 values in the hash, instead of copies (as they used to in earlier
 versions).  Typical idioms for using these constructs copy the
 returned values, but this can make a significant difference when
