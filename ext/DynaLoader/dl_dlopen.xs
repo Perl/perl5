@@ -112,7 +112,7 @@
 	    SaveError("%s",dlerror()) ;
 
    Note that SaveError() takes a printf format string. Use a "%s" as
-   the first parameter if the error may contain and % characters.
+   the first parameter if the error may contain any % characters.
 
 */
 

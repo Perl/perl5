@@ -3,7 +3,8 @@
 # OS/390 hints by David J. Fiander <davidf@mks.com>
 #
 # OS/390 OpenEdition Release 3 Mon Sep 22 1997 thanks to:
-#     
+# 
+#     John Goodyear <johngood@us.ibm.com>
 #     John Pfuntner <pfuntner@vnet.ibm.com>
 #     Len Johnson <lenjay@ibm.net>
 #     Bud Huff  <BAHUFF@us.oracle.com>
@@ -42,26 +43,11 @@ case "$optimize" in
 '') optimize='none' ;;
 esac
 
-# ccdlflags have yet to be determined.
-#case "$ccdlflags" in
-#'') ccdlflags='-c' ;;
-#esac
-
 # To link via definition side decks we need the dll option
 # You can override this with Configure -Ucccdlflags or somesuch.
 case "$cccdlflags" in
-'') cccdlflags='-W 0,dll,"langlvl(extended)"' ;;
+'') cccdlflags='-W 0,dll' ;;
 esac
-
-# ldflags have yet to be determined.
-#case "$ldflags" in
-#'') ldflags='' ;;
-#esac
-
-# lddlflags have yet to be determined.
-#case "$lddlflags" in
-#'') lddlflags='' ;;
-#esac
 
 case "$so" in
 '') so='a' ;;
@@ -83,17 +69,41 @@ case "$usenm" in
 esac
 
 # Dynamic loading doesn't work on OS/390 quite yet.
-# You can override this with 
-#  Configure -Dusedl -Ddlext=.so -Ddlsrc=dl_dllload.xs.
+# However the easiest way to experiment with dynamic loading is with:
+#  Configure -Dusedl
+# You can even override some of this with things like:
+#  Configure -Dusedl -Ddlext=so -Ddlsrc=dl_dllload.xs.
 case "$usedl" in
-'') usedl='n' ;;
+'')
+    usedl='n' 
+    case "$dlext" in
+    '') dlext='none' ;;
+    esac
+    ;;
+define)
+    case "$useshrplib" in
+    '') useshrplib='true' ;;
+    esac
+    case "$dlext" in
+    '') dlext='dll' ;;
+    esac
+    case "$dlsrc" in
+    '') dlsrc='dl_dllload.xs' ;;
+    esac
+    so='dll'
+    libperl='libperl.dll'
+    ccflags="$ccflags -D_SHR_ENVIRON -DPERL_EXTERNAL_GLOB -Wc,dll"
+    cccdlflags='-c -Wc,dll,EXPORTALL'
+    # You might add '-Wl,EDIT=NO' to get rid of the symbol
+    # information at the end of the executable.
+    #
+    # The following will need to be modified for the installed libperl.x
+    ccdlflags="-W l,dll `pwd`/libperl.x"
+    ldflags=''
+    lddlflags='-W l,dll'
+    ;;
 esac
-case "$dlext" in
-'') dlext='none' ;;
-esac
-#case "$dlsrc" in
-#'') dlsrc='none' ;;
-#esac
+# even on static builds using LIBPATH should be OK.
 case "$ldlibpthname" in
 '') ldlibpthname=LIBPATH ;;
 esac

@@ -278,6 +278,40 @@ If you are running V2R6 or earlier then see:
 for an example of how to use the "eval exec" trick to ask the shell to
 have Perl run your scripts on those older releases of Unix System Services.
 
+=head2 Floating point anomalies
+
+There appears to be a bug in the floating point implementation on S/390 
+systems such that calling int() on the product of a number and a small 
+magnitude number is not the same as calling int() on the quotient of 
+that number and a large magnitude number.  For example, in the following 
+Perl code:
+
+    my $x = 100000.0;
+    my $y = int($x * 1e-5) * 1e5; # '0'
+    my $z = int($x / 1e+5) * 1e5;  # '100000'
+    print "\$y is $y and \$z is $z\n"; # $y is 0 and $z is 100000
+
+Although one would expect the quantities $y and $z to be the same and equal 
+to 100000 they will differ and instead will be 0 and 100000 respectively.
+
+The problem can be further examined in a roughly equivalent C program:
+
+    #include <stdio.h>
+    #include <math.h>
+    main()
+    {
+    double r1,r2;
+    double x = 100000.0;
+    double y = 0.0;
+    double z = 0.0;
+    x = 100000.0 * 1e-5;
+    r1 = modf (x,&y);
+    x = 100000.0 / 1e+5;
+    r2 = modf (x,&z);
+    printf("y is %e and z is %e\n",y*1e5,z*1e5);
+    /* y is 0.000000e+00 and z is 1.000000e+05 (with c89) */
+    }
+
 =head2 Modules and Extensions
 
 Pure pure (that is non xs) modules may be installed via the usual:
@@ -308,6 +342,7 @@ xs based extensions.
 David Fiander and Peter Prymmer with thanks to Dennis Longnecker
 and William Raffloer for valuable reports, LPAR and PTF feedback.
 Thanks to Mike MacIsaac and Egon Terwedow for SG24-5944-00.
+Thanks to Ignasi Roca for pointing out the floating point problems.
 
 =head1 SEE ALSO
 
@@ -332,9 +367,14 @@ To subscribe, send a message of:
 
     subscribe perl-mvs
 
-to majordomo@perl.org.  There is a web archive of the mailing list at:
+to majordomo@perl.org.   See also:
+
+    http://lists.perl.org/showlist.cgi?name=perl-mvs
+
+There are web archives of the mailing list at:
 
     http://www.xray.mpe.mpg.de/mailing-lists/perl-mvs/
+    http://archive.develooper.com/perl-mvs@perl.org/
 
 =head1 HISTORY
 
@@ -344,6 +384,8 @@ release of Perl.
 This document was podified for the 5.005_03 release of Perl 11 March 1999.
 
 Updated 12 November 2000 for the 5.7.1 release of Perl.
+
+Updated 15 January 2001 for the 5.7.1 release of Perl.
 
 =cut
 

@@ -1357,17 +1357,27 @@ function).
 Here is a handy table of equivalents between ordinary C and Perl's
 memory abstraction layer:
 
-    Instead Of:                Use:
+    Instead Of:			Use:
 
-    malloc                     New
-    calloc                     Newz
-    realloc                    Renew
-    memcopy                    Copy
-    memmove                    Move
-    free                       Safefree
-    strdup                     savepv
-    strndup                    savepvn (Hey, strndup doesn't exist!)
-    memcpy/*(struct foo *)    StructCopy
+    t* p = malloc(n)		New(id, p, n, t)
+    t* p = calloc(n, s)		Newz(id, p, n, t)
+    p = realloc(p, n)		Renew(p, n, t)
+    memcpy(dst, src, n)		Copy(src, dst, n, t)
+    memmove(dst, src, n)	Move(src, dst, n, t)
+    free(p)			Safefree(p)
+    strdup(p)			savepv(p)
+    strndup(p, n)		savepvn(p, n) (Hey, strndup doesn't exist!)
+    memcpy/*(struct foo *)	StructCopy(src, dst, t)
+
+    t	type
+    p	pointer
+    ck	cookie for the memory region (now unused)
+    n	number of elements
+    src source pointer
+    dst destination pointer
+
+Notice the different order of arguments to C<Copy> and C<Move> than used
+in C<memcpy> and C<memmove>.
 
 =head2 PerlIO
 

@@ -1016,13 +1016,19 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\utils
 	$(MAKE) PERL=$(MINIPERL)
 	cd ..\pod
+	copy ..\README.aix .\perlaix.pod
 	copy ..\README.amiga .\perlamiga.pod
 	copy ..\README.cygwin .\perlcygwin.pod
 	copy ..\README.dos .\perldos.pod
+	copy ..\README.epoc .\perlepoc.pod
 	copy ..\README.hpux .\perlhpux.pod
 	copy ..\README.machten .\perlmachten.pod
 	copy ..\README.os2 .\perlos2.pod
+	copy ..\README.os390 .\perlos390.pod
+	copy ..\README.posix .\perlposix.pod
+	copy ..\README.solaris .\perlsolaris.pod
 	copy ..\vms\perlvms.pod .\perlvms.pod
+	copy ..\README.vos .\perlvos.pod
 	copy ..\README.win32 .\perlwin32.pod
 	$(MAKE) -f ..\win32\pod.mak converters
 	cd ..\lib

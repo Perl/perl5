@@ -1231,14 +1231,20 @@ doc: $(PERLEXE)
 
 utils: $(PERLEXE) $(X2P)
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
+	copy ..\README.aix ..\pod\perlaix.pod
 	copy ..\README.amiga ..\pod\perlamiga.pod
 	copy ..\README.cygwin ..\pod\perlcygwin.pod
 	copy ..\README.dos ..\pod\perldos.pod
+	copy ..\README.epoc ..\pod\perlepoc.pod
 	copy ..\README.hpux ..\pod\perlhpux.pod
 	copy ..\README.machten ..\pod\perlmachten.pod
 	copy ..\README.os2 ..\pod\perlos2.pod
-	copy ..\README.os2 ..\pod\perlos2.pod
+	copy ..\README.os390 ..\pod\perlos390.pod
+	copy ..\README.posix-bc ..\pod\perlposix-bc.pod
+	copy ..\README.solaris ..\pod\perlsolaris.pod
 	copy ..\vms\perlvms.pod ..\pod\perlvms.pod
+	copy ..\README.vos ..\pod\perlvos.pod
+	copy ..\README.win32 ..\pod\perlwin32.pod
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
 	cd ..\lib && $(PERLEXE) lib_pm.PL
 	$(PERLEXE) $(PL2BAT) $(UTILS)
