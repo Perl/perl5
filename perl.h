@@ -1548,8 +1548,11 @@ typedef struct pvop PVOP;
 typedef struct loop LOOP;
 
 typedef struct interpreter PerlInterpreter;
-#ifdef UTS
-#   define STRUCT_SV perl_sv /* Amdahl's <ksync.h> has struct sv */
+
+/* Amdahl's <ksync.h> has struct sv */
+/* SGI's <sys/sema.h> has struct sv */
+#if defined(UTS) || defined(__sgi)
+#   define STRUCT_SV perl_sv
 #else
 #   define STRUCT_SV sv
 #endif
@@ -2209,10 +2212,12 @@ struct ptr_tbl {
 #endif
 
 #ifndef __cplusplus
+#ifndef UNDER_CE
 Uid_t getuid (void);
 Uid_t geteuid (void);
 Gid_t getgid (void);
 Gid_t getegid (void);
+#endif
 #endif
 
 #ifndef Perl_debug_log
@@ -3019,6 +3024,7 @@ enum {		/* pass one of these to get_vtbl */
 #define RsRECORD(sv)  (SvROK(sv) && (SvIV(SvRV(sv)) > 0))
 
 /* Enable variables which are pointers to functions */
+typedef void (CPERLscope(*peep_t))(pTHX_ OP* o);
 typedef regexp*(CPERLscope(*regcomp_t)) (pTHX_ char* exp, char* xend, PMOP* pm);
 typedef I32 (CPERLscope(*regexec_t)) (pTHX_ regexp* prog, char* stringarg,
 				      char* strend, char* strbeg, I32 minend,
@@ -3883,5 +3889,9 @@ extern void moncontrol(int);
    HAS_NL_LANGINFO
 
    so that Configure picks them up. */
+
+#ifdef UNDER_CE
+#include "wince.h"
+#endif
 
 #endif /* Include guard */

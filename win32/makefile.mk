@@ -593,6 +593,7 @@ UTILS		=			\
 		..\utils\h2xs		\
 		..\utils\perldoc	\
 		..\utils\perlcc		\
+		..\utils\libnetcfg	\
 		..\pod\checkpods	\
 		..\pod\pod2html		\
 		..\pod\pod2latex	\
@@ -603,6 +604,7 @@ UTILS		=			\
 		..\pod\podselect	\
 		..\x2p\find2perl	\
 		..\x2p\s2p		\
+		..\lib\ExtUtils\xsubpp	\
 		bin\exetype.pl		\
 		bin\runperl.pl		\
 		bin\pl2bat.pl		\
@@ -1093,6 +1095,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.apollo	..\pod\perlapollo.pod
 	copy ..\README.beos	..\pod\perlbeos.pod
 	copy ..\README.bs2000	..\pod\perlbs2000.pod
+	copy ..\README.ce	..\pod\perlce.pod
 	copy ..\README.cygwin	..\pod\perlcygwin.pod
 	copy ..\README.dgux	..\pod\perldgux.pod
 	copy ..\README.dos	..\pod\perldos.pod
@@ -1155,7 +1158,7 @@ distclean: clean
 	-if exist $(LIBDIR)\Scalar rmdir /s /q $(LIBDIR)\Scalar || rmdir /s $(LIBDIR)\Scalar
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlapollo.pod \
-	    perlbeos.pod perlbs2000.pod perlcygwin.pod perldgux.pod \
+	    perlbeos.pod perlbs2000.pod perlce.pod perlcygwin.pod perldgux.pod \
 	    perldos.pod perlepoc.pod perlhpux.pod perlhurd.pod \
 	    perlmachten.pod perlmint.pod \
 	    perlmacos.pod perlmpeix.pod perlnetware.pod \

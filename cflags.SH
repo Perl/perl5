@@ -138,9 +138,25 @@ for file do
 		optimize="$optdebug"
 	fi
 
+# Add -Wall for the core and core modules iff gcc and not already -Wall
+warn=''
+case "$gccversion" in
+'') ;;
+*)  case "$ccflags" in
+    *-Wall*) ;;
+# Can't add -ansi here because it will fail e.g. in Solaris.
+# Off_t/off_t is a struct in Solaris with largefiles, and with -ansi
+# that struct cannot be compared with a flat integer, such as a STRLEN.
+# The -ansi will also cause a lot of noise in Solaris because of:
+# /usr/include/sys/resource.h:148: warning: `struct rlimit64' declared inside parameter list
+    *) warn='-Wall' ;;
+    esac
+    ;;
+esac
+
     : Can we perhaps use $ansi2knr here
-    echo "$cc -c -DPERL_CORE $ccflags $optimize $perltype"
-    eval "$also "'"$cc -DPERL_CORE -c $ccflags $optimize $perltype"'
+    echo "$cc -c -DPERL_CORE $ccflags $optimize $warn $perltype"
+    eval "$also "'"$cc -DPERL_CORE -c $ccflags $optimize $warn $perltype"'
 
     . $TOP/config.sh
 

@@ -564,7 +564,7 @@ Found in file op.h
 Recognise (or not) a number.  The type of the number is returned
 (0 if unrecognised), otherwise it is a bit-ORed combination of
 IS_NUMBER_IN_UV, IS_NUMBER_GREATER_THAN_UV_MAX, IS_NUMBER_NOT_INT,
-IS_NUMBER_NEG, IS_NUMBER_INFINITY (defined in perl.h).
+IS_NUMBER_NEG, IS_NUMBER_INFINITY, IS_NUMBER_NAN (defined in perl.h).
 
 If the value of the number can fit an in UV, it is returned in the *valuep
 IS_NUMBER_IN_UV will be set to indicate that *valuep is valid, IS_NUMBER_IN_UV
@@ -1344,6 +1344,17 @@ SV is B<not> incremented.
 =for hackers
 Found in file sv.c
 
+=item newSV
+
+Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
+with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
+macro.
+
+	SV*	newSV(STRLEN len)
+
+=for hackers
+Found in file sv.c
+
 =item NEWSV
 
 Creates a new SV.  A non-zero C<len> parameter indicates the number of
@@ -1356,17 +1367,6 @@ C<id> is an integer id between 0 and 1299 (used to identify leaks).
 
 =for hackers
 Found in file handy.h
-
-=item newSV
-
-Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
-with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
-macro.
-
-	SV*	newSV(STRLEN len)
-
-=for hackers
-Found in file sv.c
 
 =item newSViv
 
@@ -2119,22 +2119,22 @@ version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvIVx
-
-Coerces the given SV to an integer and returns it. Guarantees to evaluate
-sv only once. Use the more efficent C<SvIV> otherwise.
-
-	IV	SvIVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvIVX
 
 Returns the raw value in the SV's IV slot, without checks or conversions.
 Only use when you are sure SvIOK is true. See also C<SvIV()>.
 
 	IV	SvIVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVx
+
+Coerces the given SV to an integer and returns it. Guarantees to evaluate
+sv only once. Use the more efficent C<SvIV> otherwise.
+
+	IV	SvIVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2850,8 +2850,9 @@ Found in file sv.c
 
 =item sv_2mortal
 
-Marks an existing SV as mortal.  The SV will be destroyed when the current
-context ends. See also C<sv_newmortal> and C<sv_mortalcopy>.
+Marks an existing SV as mortal.  The SV will be destroyed "soon", either
+by an explicit call to FREETMPS, or by an implicit call at places such as
+statement boundaries.  See also C<sv_newmortal> and C<sv_mortalcopy>.
 
 	SV*	sv_2mortal(SV* sv)
 
@@ -3322,8 +3323,9 @@ Found in file sv.c
 =item sv_mortalcopy
 
 Creates a new SV which is a copy of the original SV (using C<sv_setsv>).
-The new SV is marked as mortal. It will be destroyed when the current
-context ends.  See also C<sv_newmortal> and C<sv_2mortal>.
+The new SV is marked as mortal. It will be destroyed "soon", either by an
+explicit call to FREETMPS, or by an implicit call at places such as
+statement boundaries.  See also C<sv_newmortal> and C<sv_2mortal>.
 
 	SV*	sv_mortalcopy(SV* oldsv)
 
@@ -3333,8 +3335,9 @@ Found in file sv.c
 =item sv_newmortal
 
 Creates a new null SV which is mortal.  The reference count of the SV is
-set to 1. It will be destroyed when the current context ends.  See
-also C<sv_mortalcopy> and C<sv_2mortal>.
+set to 1. It will be destroyed "soon", either by an explicit call to
+FREETMPS, or by an implicit call at places such as statement boundaries.
+See also C<sv_mortalcopy> and C<sv_2mortal>.
 
 	SV*	sv_newmortal()
 

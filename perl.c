@@ -2396,6 +2396,11 @@ Perl_moreswitches(pTHX_ char *s)
 	PerlIO_printf(PerlIO_stdout(),
 		      "EPOC port by Olaf Flebbe, 1999-2000\n");
 #endif
+#ifdef UNDER_CE
+	printf("WINCE port by Rainer Keuchel, 2001\n");
+	printf("Built on " __DATE__ " " __TIME__ "\n\n");
+	wce_hitreturn();
+#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif
@@ -3782,6 +3787,7 @@ S_init_main_thread(pTHX)
     (void) find_threadsv("@");	/* Ensure $@ is initialised early */
 
     PL_maxscream = -1;
+    PL_peepp = MEMBER_TO_FPTR(Perl_peep);
     PL_regcompp = MEMBER_TO_FPTR(Perl_pregcomp);
     PL_regexecp = MEMBER_TO_FPTR(Perl_regexec_flags);
     PL_regint_start = MEMBER_TO_FPTR(Perl_re_intuit_start);

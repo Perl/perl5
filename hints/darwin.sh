@@ -51,8 +51,12 @@ if [ "x$optimize" = 'x' ]; then
     optimize='-O3'
 fi
 
-# XXX Unclear why we require -pipe and -fno-common here. --Andy Dougherty
-# We don't like commons. --Fred Sánchez
+# -pipe: makes compilation go faster.
+# -fno-common: we don't like commons.  Common symbols are not allowed
+# in MH_DYLIB binaries, which is what libperl.dylib is.  You will fail
+# to link without that option, unless you otherwise eliminate all commons
+# by, for example, initializing all globals.
+# --Fred Sánchez
 ccflags="${ccflags} -pipe -fno-common"
 
 # At least on Darwin 1.3.x:

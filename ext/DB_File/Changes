@@ -355,3 +355,14 @@
 
    * Modified Makefile.PL to only enable the warnings pragma if using perl
      5.6.1 or better.    
+
+1.78 30th July 2001
+
+   * the test in Makefile.PL for AIX used -plthreads. Should have been
+     -lpthreads
+
+   * merged Core patches 
+        10372, 10335, 10372, 10534, 10549, 10643, 11051, 11194, 11432
+
+   * added documentation patch regarding duplicate keys from Andrew Johnson
+

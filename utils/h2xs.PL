@@ -808,8 +808,9 @@ if( ! $opt_X ){  # use XS, unless it was disabled
 	$filter = $';
       }
       warn "Scanning $filename for functions...\n";
+      my @styles = $Config{gccversion} ? qw(C++ C9X GNU) : qw(C++ C9X);
       $c = new C::Scan 'filename' => $filename, 'filename_filter' => $filter,
-	'add_cppflags' => $addflags, 'c_styles' => [qw(C++ C9X)];
+	'add_cppflags' => $addflags, 'c_styles' => \@styles;
       $c->set('includeDirs' => ["$Config::Config{archlib}/CORE"]);
 
       push @$fdecls_parsed, @{ $c->get('parsed_fdecls') };
@@ -1586,6 +1587,8 @@ sub assign_typemap_entry {
     print "Type mutation via typedefs: $otype ==> $type\n" if $opt_d;
     $entry = assign_typemap_entry($type);
   }
+  # XXX good do better if our UV happens to be long long
+  return "T_NV" if $type =~ /^(unsigned\s+)?long\s+(long|double)\z/;
   $entry ||= $typemap{$otype}
     || (td_is_struct($type) ? "T_OPAQUE_STRUCT" : "T_PTROBJ");
   $typemap{$otype} = $entry;

@@ -1,7 +1,4 @@
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
+#! /usr/local/bin/perl -w
 
 use Carp;
 use Switch qw(__ fallthrough);

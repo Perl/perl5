@@ -3,8 +3,8 @@
  version.c -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 16th January 2000
- version 1.73
+ last modified 30th July 2001
+ version 1.78
 
  All comments/suggestions/problems are welcome
 

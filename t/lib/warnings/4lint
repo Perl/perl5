@@ -57,6 +57,7 @@ print() on closed filehandle STDIN at - line 5.
 ########
 -W
 --FILE-- abc.pm
+package abc;
 no warnings 'syntax' ;
 my $a = 0;
 $a =+ 1 ;
@@ -66,11 +67,12 @@ no warnings 'uninitialized' ;
 use abc;
 my $a ; chop $a ;
 EXPECT
-Reversed += operator at abc.pm line 3.
+Reversed += operator at abc.pm line 4.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
 --FILE-- abc
+package abc;
 no warnings 'syntax' ;
 my $a = 0;
 $a =+ 1 ;
@@ -80,11 +82,12 @@ no warnings 'uninitialized' ;
 require "./abc";
 my $a ; chop $a ;
 EXPECT
-Reversed += operator at ./abc line 3.
+Reversed += operator at ./abc line 4.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
 --FILE-- abc.pm
+package abc;
 BEGIN {$^W = 0}
 my $a = 0 ;
 $a =+ 1 ;
@@ -94,7 +97,7 @@ $^W = 0 ;
 use abc;
 my $a ; chop $a ;
 EXPECT
-Reversed += operator at abc.pm line 3.
+Reversed += operator at abc.pm line 4.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 -W

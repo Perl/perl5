@@ -559,7 +559,7 @@ breaks the circularities in the self-referential structure.
 =head1 SEE ALSO
 
 A kinder, gentler tutorial on object-oriented programming in Perl can
-be found in L<perltoot>, L<perlbootc> and L<perltootc>.  You should
+be found in L<perltoot>, L<perlboot> and L<perltootc>.  You should
 also check out L<perlbot> for other object tricks, traps, and tips, as
 well as L<perlmodlib> for some style guides on constructing both
 modules and classes.

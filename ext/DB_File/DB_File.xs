@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 26th April 2001
- version 1.77
+ last modified 30th July 2001
+ version 1.78
 
  All comments/suggestions/problems are welcome
 
@@ -92,6 +92,7 @@
 		needed to be changed.
         1.76 -  No change to DB_File.xs
         1.77 -  Tidied up a few types used in calling newSVpvn.
+        1.78 -  Core patch 10335, 10372, 10534, 10549, 11051 included.
 
 */
 
@@ -126,28 +127,12 @@
  * shortly #included by the <db.h>) __attribute__ to the possibly
  * already defined __attribute__, for example by GNUC or by Perl. */
 
-#if DB_VERSION_MAJOR_CFG < 2
-
-#undef __attribute__
-
-/* Since we dropped the gccish definition of __attribute__ we will want
- * to redefine dNOOP, however (so that dTHX continues to work).  Yes,
- * all this means that we can't do attribute checking on the DB_File,
- * boo, hiss. */
-#undef  dNOOP
-#define dNOOP extern int Perl___notused
-/* Ditto for dXSARGS. */
-#undef  dXSARGS
-#define dXSARGS				\
-	dSP; dMARK;			\
-	I32 ax = mark - PL_stack_base + 1;	\
-	I32 items = sp - mark
-
+/* #if DB_VERSION_MAJOR_CFG < 2  */
+#ifndef DB_VERSION_MAJOR
+#    undef __attribute__
 #endif
 
-/* avoid -Wall; DB_File xsubs never make use of `ix' setup for ALIASes */
-#undef dXSI32
-#define dXSI32 dNOOP
+
 
 /* If Perl has been compiled with Threads support,the symbol op will
    be defined here. This clashes with a field name in db.h, so get rid of it.
@@ -162,9 +147,33 @@
 #    include <db.h>
 #endif
 
-#ifdef CAN_PROTOTYPE
-extern void __getBerkeleyDBInfo(void);
-#endif
+/* Wall starts with 5.7.x */
+
+#if PERL_REVISION > 5 || (PERL_REVISION == 5 && PERL_VERSION >= 7)
+
+/* Since we dropped the gccish definition of __attribute__ we will want
+ * to redefine dNOOP, however (so that dTHX continues to work).  Yes,
+ * all this means that we can't do attribute checking on the DB_File,
+ * boo, hiss. */
+#  ifndef DB_VERSION_MAJOR
+
+#    undef  dNOOP
+#    define dNOOP extern int Perl___notused
+
+    /* Ditto for dXSARGS. */
+#    undef  dXSARGS
+#    define dXSARGS				\
+	dSP; dMARK;			\
+	I32 ax = mark - PL_stack_base + 1;	\
+	I32 items = sp - mark
+
+#  endif
+
+/* avoid -Wall; DB_File xsubs never make use of `ix' setup for ALIASes */
+#  undef dXSI32
+#  define dXSI32 dNOOP
+
+#endif /* Perl >= 5.7 */
 
 #ifndef pTHX
 #    define pTHX
@@ -445,6 +454,10 @@ typedef DBT DBTKEY ;
 	  } 								\
 	}
 
+
+#ifdef CAN_PROTOTYPE
+extern void __getBerkeleyDBInfo(void);
+#endif
 
 /* Internal Global Data */
 static recno_t Value ; 

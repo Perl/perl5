@@ -73,6 +73,7 @@
 #define PL_ofs_sv		(vTHX->Tofs_sv)
 #define PL_op			(vTHX->Top)
 #define PL_opsave		(vTHX->Topsave)
+#define PL_peepp		(vTHX->Tpeepp)
 #define PL_protect		(vTHX->Tprotect)
 #define PL_reg_call_cc		(vTHX->Treg_call_cc)
 #define PL_reg_curpm		(vTHX->Treg_curpm)
@@ -788,6 +789,7 @@
 #define PL_ofs_sv		(aTHXo->interp.Tofs_sv)
 #define PL_op			(aTHXo->interp.Top)
 #define PL_opsave		(aTHXo->interp.Topsave)
+#define PL_peepp		(aTHXo->interp.Tpeepp)
 #define PL_protect		(aTHXo->interp.Tprotect)
 #define PL_reg_call_cc		(aTHXo->interp.Treg_call_cc)
 #define PL_reg_curpm		(aTHXo->interp.Treg_curpm)
@@ -1492,6 +1494,7 @@
 #define PL_ofs_sv		(aTHX->Tofs_sv)
 #define PL_op			(aTHX->Top)
 #define PL_opsave		(aTHX->Topsave)
+#define PL_peepp		(aTHX->Tpeepp)
 #define PL_protect		(aTHX->Tprotect)
 #define PL_reg_call_cc		(aTHX->Treg_call_cc)
 #define PL_reg_curpm		(aTHX->Treg_curpm)
@@ -1629,6 +1632,7 @@
 #define PL_Tofs_sv		PL_ofs_sv
 #define PL_Top			PL_op
 #define PL_Topsave		PL_opsave
+#define PL_Tpeepp		PL_peepp
 #define PL_Tprotect		PL_protect
 #define PL_Treg_call_cc		PL_reg_call_cc
 #define PL_Treg_curpm		PL_reg_curpm

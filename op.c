@@ -20,6 +20,8 @@
 #include "perl.h"
 #include "keywords.h"
 
+#define CALL_PEEP(o) CALL_FPTR(PL_peepp)(aTHX_ o)
+
 /* #define PL_OP_SLAB_ALLOC */
 
 #ifdef PL_OP_SLAB_ALLOC
@@ -2174,7 +2176,7 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_eval_root->op_private |= OPpREFCOUNTED;
 	OpREFCNT_set(PL_eval_root, 1);
 	PL_eval_root->op_next = 0;
-	peep(PL_eval_start);
+	CALL_PEEP(PL_eval_start);
     }
     else {
 	if (!o)
@@ -2185,7 +2187,7 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_main_root->op_private |= OPpREFCOUNTED;
 	OpREFCNT_set(PL_main_root, 1);
 	PL_main_root->op_next = 0;
-	peep(PL_main_start);
+	CALL_PEEP(PL_main_start);
 	PL_compcv = 0;
 
 	/* Register with debugger */
@@ -2208,9 +2210,14 @@ Perl_localize(pTHX_ OP *o, I32 lex)
     if (o->op_flags & OPf_PARENS)
 	list(o);
     else {
-	if (ckWARN(WARN_PARENTHESIS) && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',') {
-	    char *s;
-	    for (s = PL_bufptr; *s && (isALNUM(*s) || UTF8_IS_CONTINUED(*s) || strchr("@$%, ",*s)); s++) ;
+	if (ckWARN(WARN_PARENTHESIS)
+	    && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',')
+	{
+	    char *s = PL_bufptr;
+
+	    while (*s && (isALNUM(*s) || UTF8_IS_CONTINUED(*s) || strchr("@$%, ", *s)))
+		s++;
+
 	    if (*s == ';' || *s == '=')
 		Perl_warner(aTHX_ WARN_PARENTHESIS,
 			    "Parentheses missing around \"%s\" list",
@@ -2369,7 +2376,7 @@ Perl_gen_constant_list(pTHX_ register OP *o)
 
     PL_op = curop = LINKLIST(o);
     o->op_next = 0;
-    peep(curop);
+    CALL_PEEP(curop);
     pp_pushmark();
     CALLRUNOPS(aTHX);
     PL_op = curop;
@@ -3217,6 +3224,9 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
     OP *pack;
     OP *imop;
     OP *veop;
+    char *packname = Nullch;
+    STRLEN packlen = 0;
+    SV *packsv;
 
     if (id->op_type != OP_CONST)
 	Perl_croak(aTHX_ "Module name must be constant");
@@ -3274,6 +3284,15 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 				   newSVOP(OP_METHOD_NAMED, 0, meth)));
     }
 
+    if (ckWARN(WARN_MISC) &&
+        imop && (imop != arg) && /* no warning on use 5.0; or explicit () */
+        SvPOK(packsv = ((SVOP*)id)->op_sv))
+    {
+        /* BEGIN will free the ops, so we need to make a copy */
+        packlen = SvCUR(packsv);
+        packname = savepvn(SvPVX(packsv), packlen);
+    }
+
     /* Fake up the BEGIN {}, which does its thing immediately. */
     newATTRSUB(floor,
 	newSVOP(OP_CONST, 0, newSVpvn("BEGIN", 5)),
@@ -3284,6 +3303,15 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	        newSTATEOP(0, Nullch, newUNOP(OP_REQUIRE, 0, id)),
 	        newSTATEOP(0, Nullch, veop)),
 	    newSTATEOP(0, Nullch, imop) ));
+
+    if (packname) {
+        if (ckWARN(WARN_MISC) && !gv_stashpvn(packname, packlen, FALSE)) {
+            Perl_warner(aTHX_ WARN_MISC,
+                        "Package `%s' not found "
+                        "(did you use the incorrect case?)", packname);
+        }
+        safefree(packname);
+    }
 
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_copline = NOLINE;
@@ -4811,7 +4839,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     OpREFCNT_set(CvROOT(cv), 1);
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
-    peep(CvSTART(cv));
+    CALL_PEEP(CvSTART(cv));
 
     /* now that optimizer has done its work, adjust pad values */
     if (CvCLONE(cv)) {
@@ -5152,7 +5180,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     OpREFCNT_set(CvROOT(cv), 1);
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
-    peep(CvSTART(cv));
+    CALL_PEEP(CvSTART(cv));
     op_free(o);
     PL_copline = NOLINE;
     LEAVE_SCOPE(floor);
@@ -6325,7 +6353,7 @@ Perl_ck_sort(pTHX_ OP *o)
 		    kid->op_next = 0;		/* just disconnect the leave */
 		k = kLISTOP->op_first;
 	    }
-	    peep(k);
+	    CALL_PEEP(k);
 
 	    kid = firstkid;
 	    if (o->op_type == OP_SORT) {
@@ -6863,7 +6891,7 @@ Perl_peep(pTHX_ register OP *o)
 	    o->op_seq = PL_op_seqmax++;
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
-	    peep(cLOGOP->op_other);
+	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
 	    break;
 
 	case OP_ENTERLOOP:

@@ -2037,7 +2037,7 @@ http://www.perl.com/CPAN/ports/index.html for binary distributions.
 =head1 SEE ALSO
 
 L<perlaix>, L<perlapollo>, L<perlamiga>, L<perlbeos>, L<perlbs200>,
-L<perlcygwin>, L<perldgux>, L<perldos>, L<perlepoc>, L<perlebcdic>,
+L<perlce>, L<perlcygwin>, L<perldgux>, L<perldos>, L<perlepoc>, L<perlebcdic>,
 L<perlhurd>, L<perlhpux>, L<perlmachten>, L<perlmacos>, L<perlmint>,
 L<perlmpeix>, L<perlnetware>, L<perlos2>, L<perlos390>, L<perlplan9>,
 L<perlqnx>, L<perlsolaris>, L<perltru64>, L<perlunicode>,

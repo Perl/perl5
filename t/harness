@@ -5,10 +5,9 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';              # pick up only this build's lib
     $ENV{PERL5LIB} = '../lib';    # so children will see it too
 }
-use lib '../lib';
 
 use Test::Harness;
 
@@ -35,18 +34,26 @@ foreach (keys %datahandle) {
      unlink "$_.t";
 }
 
+my @tests = ();
+
 if (@ARGV) {
     @tests = @ARGV;
 } else {
     unless (@tests) {
-	@tests = <base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t lib/*.t>;
+	push @tests, <base/*.t>;
+        push @tests, <comp/*.t>;
+        push @tests, <cmd/*.t>;
+        push @tests, <run/*.t>;
+        push @tests, <io/*.t>;
+        push @tests, <op/*.t>;
+        push @tests, <lib/*.t>;
 	use File::Spec;
 	my $updir = File::Spec->updir;
-	my $mani  = File::Spec->catdir(File::Spec->updir, "MANIFEST");
+	my $mani  = File::Spec->catfile(File::Spec->updir, "MANIFEST");
 	if (open(MANI, $mani)) {
 	    while (<MANI>) { # similar code in t/TEST
 	    if (m!^(ext/\S+/([^/]+\.t|test\.pl)|lib/\S+?(\.t|test\.pl))\s!) {
-		    push @tests, File::Spec->catdir($updir, $1);
+		    push @tests, File::Spec->catfile($updir, $1);
 		}
 	    }
 	} else {

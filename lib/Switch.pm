@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = '2.03';
+$VERSION = '2.04';
 
 
 # LOAD FILTERING MODULE...
@@ -14,10 +14,11 @@ sub __();
 
 # CATCH ATTEMPTS TO CALL case OUTSIDE THE SCOPE OF ANY switch
 
-$::_S_W_I_T_C_H = sub { croak "case statement not in switch block" };
+$::_S_W_I_T_C_H = sub { croak "case/when statement not in switch/given block" };
 
 my $offset;
 my $fallthrough;
+my ($Perl5, $Perl6) = (0,0);
 
 sub import
 {
@@ -32,6 +33,8 @@ sub import
 		*{"${pkg}::$_"} = \&$_;
 	}
 	*{"${pkg}::__"} = \&__ if grep /__/, @_;
+	$Perl6 = 1 if grep(/Perl\s*6/i, @_);
+	$Perl5 = 1 if grep(/Perl\s*5/i, @_) || !grep(/Perl\s*6/i, @_);
 	1;
 }
 
@@ -59,7 +62,7 @@ use Text::Balanced ':ALL';
 sub line
 {
 	my ($pretext,$offset) = @_;
-	($pretext=~tr/\n/\n/)+$offset,
+	($pretext=~tr/\n/\n/)+($offset||0);
 }
 
 sub is_block
@@ -75,7 +78,8 @@ my $casecounter = 1;
 sub filter_blocks
 {
 	my ($source, $line) = @_;
-	return $source unless $source =~ /case|switch/;
+	return $source unless $Perl5 && $source =~ /case|switch/
+			   || $Perl6 && $source =~ /when|given/;
 	pos $source = 0;
 	my $text = "";
 	component: while (pos $source < length $source)
@@ -98,12 +102,14 @@ sub filter_blocks
 			next component;
 		}
 
-		if ($source =~ m/\G(\n*)(\s*)switch\b(?=\s*[(])/gc)
+		if ($Perl5 && $source =~ m/\G(\n*)(\s*)(switch)\b(?=\s*[(])/gc
+		 || $Perl6 && $source =~ m/\G(\n*)(\s*)(given)\b(?=\s*[(])/gc)
 		{
+			my $keyword = $3;
 			$text .= $1.$2.'S_W_I_T_C_H: while (1) ';
 			@pos = Text::Balanced::_match_codeblock(\$source,qr/\s*/,qr/\(/,qr/\)/,qr/[[{(<]/,qr/[]})>]/,undef) 
 			or do {
-				die "Bad switch statement (problem in the parentheses?) near $Switch::file line ", line(substr($source,0,pos $source),$line), "\n";
+				die "Bad $keyword statement (problem in the parentheses?) near $Switch::file line ", line(substr($source,0,pos $source),$line), "\n";
 			};
 			my $arg = filter_blocks(substr($source,$pos[0],$pos[4]-$pos[0]),line(substr($source,0,$pos[0]),$line));
 			$arg =~ s {^\s*[(]\s*%}   { ( \\\%}	||
@@ -112,15 +118,17 @@ sub filter_blocks
 			$arg =~ s {^\s*[(]\s*qw}  { ( \\qw};
 			@pos = Text::Balanced::_match_codeblock(\$source,qr/\s*/,qr/\{/,qr/\}/,qr/\{/,qr/\}/,undef)
 			or do {
-				die "Bad switch statement (problem in the code block?) near $Switch::file line ", line(substr($source,0, pos $source), $line), "\n";
+				die "Bad $keyword statement (problem in the code block?) near $Switch::file line ", line(substr($source,0, pos $source), $line), "\n";
 			};
 			my $code = filter_blocks(substr($source,$pos[0],$pos[4]-$pos[0]),line(substr($source,0,$pos[0]),$line));
 			$code =~ s/{/{ local \$::_S_W_I_T_C_H; Switch::switch $arg;/;
 			$text .= $code . 'continue {last}';
 			next component;
 		}
-		elsif ($source =~ m/\G(\s*)(case\b)(?!\s*=>)/gc)
+		elsif ($Perl5 && $source =~ m/\G(\s*)(case\b)(?!\s*=>)/gc
+		    || $Perl6 && $source =~ m/\G(\s*)(when\b)(?!\s*=>)/gc)
 		{
+			my $keyword = $2;
 			$text .= $1."if (Switch::case";
 			if (@pos = Text::Balanced::_match_codeblock(\$source,qr/\s*/,qr/\{/,qr/\}/,qr/\{/,qr/\}/,undef)) {
 				my $code = substr($source,$pos[0],$pos[4]-$pos[0]);
@@ -135,6 +143,12 @@ sub filter_blocks
 				$code =~ s {^\s*[(]\s*qw}  { ( \\qw};
 				$text .= " $code)";
 			}
+			elsif ($Perl6 && do{@pos = Text::Balanced::_match_variable(\$source,qr/\s*/)}) {
+				my $code = filter_blocks(substr($source,$pos[0],$pos[4]-$pos[0]),line(substr($source,0,$pos[0]),$line));
+				$code =~ s {^\s*%}  { \%}	||
+				$code =~ s {^\s*@}  { \@};
+				$text .= " $code)";
+			}
 			elsif ( @pos = Text::Balanced::_match_quotelike(\$source,qr/\s*/,1,1)) {
 				my $code = substr($source,$pos[2],$pos[18]-$pos[2]);
 				$code = filter_blocks($code,line(substr($source,0,$pos[2]),$line));
@@ -143,22 +157,26 @@ sub filter_blocks
 				$code =~ s {^\s*qw} { \\qw};
 				$text .= " $code)";
 			}
-			elsif ($source =~ m/\G\s*(([^\$\@{])[^\$\@{]*)(?=\s*{)/gc) {
+			elsif ($Perl5 && $source =~ m/\G\s*(([^\$\@{])[^\$\@{]*)(?=\s*{)/gc
+			   ||  $Perl6 && $source =~ m/\G\s*([^:;]*)()/gc) {
 				my $code = filter_blocks($1,line(substr($source,0,pos $source),$line));
 				$text .= ' \\' if $2 eq '%';
 				$text .= " $code)";
 			}
 			else {
-				die "Bad case statement (invalid case value?) near $Switch::file line ", line(substr($source,0,pos $source), $line), "\n";
+				die "Bad $keyword statement (invalid $keyword value?) near $Switch::file line ", line(substr($source,0,pos $source), $line), "\n";
 			}
 
-			@pos = Text::Balanced::_match_codeblock(\$source,qr/\s*/,qr/\{/,qr/\}/,qr/\{/,qr/\}/,undef)
+		        die "Missing colon or semi-colon after 'when' value near $Switch::file line ", line(substr($source,0,pos $source), $line), "\n"
+				unless !$Perl6 || $source =~ m/\G(\s*)(:|(?=;))/gc;
+
+			do{@pos = Text::Balanced::_match_codeblock(\$source,qr/\s*/,qr/\{/,qr/\}/,qr/\{/,qr/\}/,undef)}
 			or do {
 				if ($source =~ m/\G\s*(?=([};]|\Z))/gc) {
 					$casecounter++;
 					next component;
 				}
-				die "Bad case statement (problem in the code block?) near $Switch::file line ", line(substr($source,0,pos $source),$line), "\n";
+				die "Bad $keyword statement (problem in the code block?) near $Switch::file line ", line(substr($source,0,pos $source),$line), "\n";
 			};
 			my $code = filter_blocks(substr($source,$pos[0],$pos[4]-$pos[0]),line(substr($source,0,$pos[0]),$line));
 			$code =~ s/}(?=\s*\Z)/;last S_W_I_T_C_H }/
@@ -455,8 +473,8 @@ Switch - A switch statement for Perl
 
 =head1 VERSION
 
-This document describes version 2.03 of Switch,
-released May 15, 2001.
+This document describes version 2.04 of Switch,
+released July 30, 2001.
 
 =head1 SYNOPSIS
 
@@ -593,9 +611,9 @@ mechanism:
         while (<>) {
             switch ($_) {
 
-                case %special  { print "homer\n"; }       # if $special{$_}
-                case /a-z/i    { print "alpha\n"; }       # if $_ =~ /a-z/i
-                case [1..9]    { print "small num\n"; }   # if $_ in [1..9]
+                case (%special) { print "homer\n"; }      # if $special{$_}
+                case /a-z/i     { print "alpha\n"; }      # if $_ =~ /a-z/i
+                case [1..9]     { print "small num\n"; }  # if $_ in [1..9]
 
                 case { $_[0] >= 10 } {                    # if $_ >= 10
                     my $age = <>;
@@ -699,6 +717,34 @@ following code is equivalent to the first example in L<"Allowing fall-through">:
 Note the explicit use of a C<last> to preserve the non-fall-through
 behaviour of the third case.
 
+
+
+=head2 Alternative syntax
+
+Perl 6 will provide a built-in switch statement with essentially the
+same semantics as those offered by Switch.pm, but with a different
+pair of keywords. In Perl 6 C<switch> with be spelled C<given>, and
+C<case> will be pronounced C<when>. In addition, the C<when> statement
+will use a colon between its case value and its block (removing the
+need to parenthesize variables.
+
+This future syntax is also available via the Switch.pm module, by
+importing it with the argument C<"Perl6">.  For example:
+
+        use Switch 'Perl6';
+
+        given ($val) {
+                when 1 :      { handle_num_1(); }
+                when $str1 :  { handle_str_1(); }
+                when [0..9] : { handle_num_any(); last }
+                when /\d/ :   { handle_dig_any(); }
+                when /.*/ :   { handle_str_any(); }
+        }
+
+Note that you can mix and match both syntaxes by importing the module
+with:
+
+	use Switch 'Perl5', 'Perl6';
 
 
 =head2 Higher-order Operations
