@@ -1,6 +1,6 @@
 /*    perl.c
  *
- *    Copyright (c) 1987-1995 Larry Wall
+ *    Copyright (c) 1987-1996 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -99,6 +99,7 @@ register PerlInterpreter *sv_interp;
     chopset	= " \n-";
     copline	= NOLINE;
     curcop	= &compiling;
+    dbargs	= 0;
     dlmax	= 128;
     laststatval	= -1;
     laststype	= OP_STAT;
@@ -227,7 +228,7 @@ char **env;
 {
     register SV *sv;
     register char *s;
-    char *scriptname;
+    char *scriptname = NULL;
     VOL bool dosearch = FALSE;
     char *validarg = "";
     AV* comppadlist;
@@ -307,6 +308,8 @@ setuid perl scripts securely.\n");
 	case 'h':
 	case 'i':
 	case 'l':
+	case 'M':
+	case 'm':
 	case 'n':
 	case 'p':
 	case 's':
@@ -362,6 +365,22 @@ setuid perl scripts securely.\n");
 	    dosearch = TRUE;
 	    s++;
 	    goto reswitch;
+	case 'V':
+	    if (!preambleav)
+		preambleav = newAV();
+	    av_push(preambleav, newSVpv("use Config qw(myconfig config_vars)",0));
+	    if (*++s != ':')  {
+		Sv = newSVpv("print myconfig(),'@INC: '.\"@INC\\n\"",0);
+	    }
+	    else {
+		Sv = newSVpv("config_vars(qw(",0);
+		sv_catpv(Sv, ++s);
+		sv_catpv(Sv, "))");
+		s += strlen(s);
+	    }
+	    av_push(preambleav, Sv);
+	    scriptname = "/dev/null";	/* don't look for script or read stdin */
+	    goto reswitch;
 	case 'x':
 	    doextract = TRUE;
 	    s++;
@@ -378,7 +397,8 @@ setuid perl scripts securely.\n");
 	}
     }
   switch_end:
-    scriptname = argv[0];
+    if (!scriptname)
+	scriptname = argv[0];
     if (e_fp) {
 	if (fflush(e_fp) || ferror(e_fp) || fclose(e_fp))
 	    croak("Can't write to temp file for -e: %s", Strerror(errno));
@@ -927,14 +947,14 @@ char *p;
 }
 
 void
-usage(name)
+usage(name)		/* XXX move this out into a module ? */
 char *name;
 {
     printf("\nUsage: %s [switches] [filename] [arguments]\n",name);
     printf("\n  -0[octal]       specify record separator (\\0, if no argument)");
     printf("\n  -a              autosplit mode with -n or -p");
     printf("\n  -c              check syntax only (runs BEGIN and END blocks)");
-    printf("\n  -d              run scripts under debugger");
+    printf("\n  -d[:debugger]   run scripts under debugger");
     printf("\n  -D[number/list] set debugging flags (argument is a bit mask or flags)");
     printf("\n  -e command      one line of script, multiple -e options are allowed");
     printf("\n                  [filename] can be ommitted when -e is used");
@@ -954,6 +974,7 @@ char *name;
     printf("\n  -u              dump core after parsing script");
     printf("\n  -U              allow unsafe operations");
     printf("\n  -v              print version number and patchlevel of perl");
+    printf("\n  -V[:variable]   print perl configuration information");
     printf("\n  -w              turn warnings on for compilation of your script");
     printf("\n  -x[directory]   strip off text before #!perl line and perhaps cd to directory\n");
 }
@@ -1067,6 +1088,26 @@ char *s;
 	    orslen = nrslen;
 	}
 	return s;
+    case 'M':
+	taint_not("-M");	/* XXX ? */
+	/* FALL THROUGH */
+    case 'm':
+	taint_not("-m");	/* XXX ? */
+	if (*++s) {
+	    char tmpbuf[90];
+	    if (preambleav == NULL)
+		preambleav = newAV();
+	    /* We allow -M'Module qw(Foo Bar)'	*/
+	    if (*(s-1) == 'M')
+		sprintf(tmpbuf, "use %s;", s);
+	    else
+		sprintf(tmpbuf, "use %s ();", s);
+	    av_push(preambleav, newSVpv(tmpbuf,0));
+	    s += strlen(s);
+	}
+	else
+	    croak("No space allowed after -%c", *(s-1));
+	return s;
     case 'n':
 	minus_n = TRUE;
 	s++;
@@ -1093,23 +1134,36 @@ char *s;
 	s++;
 	return s;
     case 'v':
-	printf("\nThis is perl, version %s beta1h\n\n",patchlevel);
-	fputs("\nCopyright 1987-1995, Larry Wall\n",stdout);
+	printf("\nThis is perl, version %s beta2",patchlevel);
+
+#if defined(DEBUGGING) || defined(EMBED) || defined(MULTIPLICITY)
+	fputs(" with", stdout);
+#ifdef DEBUGGING
+	fputs(" DEBUGGING", stdout);
+#endif
+#ifdef EMBED
+	fputs(" EMBED", stdout);
+#endif
+#ifdef MULTIPLICITY
+	fputs(" MULTIPLICITY", stdout);
+#endif
+#endif
+
+	fputs("\n\nCopyright 1987-1996, Larry Wall\n",stdout);
 #ifdef MSDOS
 	fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",
 	stdout);
 #endif
 #ifdef OS2
-        fputs("OS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
-        	"Version 5 port Copyright (c) 1994-1995, Andreas Kaiser\n",
-        stdout);
+	fputs("OS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
+	    "Version 5 port Copyright (c) 1994-1995, Andreas Kaiser\n", stdout);
 #endif
 #ifdef atarist
-        fputs("atariST series port, ++jrb  bammi@cadence.com\n", stdout);
+	fputs("atariST series port, ++jrb  bammi@cadence.com\n", stdout);
 #endif
 	fputs("\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
-GNU General Public License, which may be found in the Perl 5.0 source kit.\n",stdout);
+GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n",stdout);
 #ifdef MSDOS
         usage(origargv[0]);
 #endif
