@@ -111,6 +111,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perlepoc		Perl notes for EPOC
     perlhpux		Perl notes for HP-UX
     perlmachten		Perl notes for Power MachTen
+    perlmpeix		Perl notes for MPE/iX
     perlos2		Perl notes for OS/2
     perlos390		Perl notes for OS/390
     perlposix-bc	Perl notes for POSIX-BC
