@@ -2,7 +2,7 @@
 
 # $RCSfile: pack.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:11 $
 
-print "1..30\n";
+print "1..56\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -106,3 +106,51 @@ print((pack("p", undef) =~ /^\0+/ ? "ok " : "not ok "),$test++,"\n");
 # Test 30:
 print( ((unpack("i",pack("i",-1))) == -1 ? "ok " : "not ok "),$test++,"\n");
 
+# 31..36: test the pack lengths of s S i I l L
+print "not " unless length(pack("s", 0)) == 2;
+print "ok ", $test++, "\n";
+ 
+print "not " unless length(pack("S", 0)) == 2;
+print "ok ", $test++, "\n";
+ 
+print "not " unless length(pack("i", 0)) >= 4;
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("I", 0)) >= 4;
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("l", 0)) == 4;
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("L", 0)) == 4;
+print "ok ", $test++, "\n";
+
+# 37..40: test the pack lengths of n N v V
+
+print "not " unless length(pack("n", 0)) == 2;
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("N", 0)) == 4;
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("v", 0)) == 2;
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("V", 0)) == 4;
+print "ok ", $test++, "\n";
+
+# 41..56: test unpack-pack lengths
+
+my @templates = qw(c C i I s S l L n N v V f d);
+
+# quads not supported everywhere: if not, retest floats/doubles
+# to preserve the test count...
+eval { my $q = pack("q",0) };
+push @templates, $@ !~ /Invalid type in pack/ ? qw(q Q) : qw(f d);
+
+foreach my $t (@templates) {
+    my @t = unpack("$t*", pack("$t*", 12, 34));
+    print "not "
+      unless @t == 2 and (($t[0] == 12 and $t[1] == 34) or ($t =~ /[nv]/i));
+    print "ok ", $test++, "\n";
+}

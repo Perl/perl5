@@ -3448,6 +3448,9 @@ PP(pp_unpack)
 	    break;
 #ifdef HAS_QUAD
 	case 'q':
+	    along = (strend - s) / sizeof(Quad_t);
+	    if (len > along)
+		len = along;
 	    EXTEND(SP, len);
 	    EXTEND_MORTAL(len);
 	    while (len-- > 0) {
@@ -3466,6 +3469,9 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 'Q':
+	    along = (strend - s) / sizeof(Quad_t);
+	    if (len > along)
+		len = along;
 	    EXTEND(SP, len);
 	    EXTEND_MORTAL(len);
 	    while (len-- > 0) {
