@@ -3386,25 +3386,46 @@ tests have been added.
  ---------------------------------------------------------------------------
  ../ext/Data/Dumper/t/dumper.t              357    8   2.24%  311 314 325 327
                                                               331 333 337 339
+ ../ext/IO/lib/IO/t/io_pipe.t                10    2  20.00%  1 3
  ../ext/IO/lib/IO/t/io_unix.t                 5    4  80.00%  2-5
  ../ext/Storable/t/downgrade.t   12  3072   169   12   7.10%  14-15 46-47 78-79
                                                               110-111 150 161
  ../lib/ExtUtils/t/Constant.t   121 30976    48   48 100.00%  1-48
  ../lib/ExtUtils/t/Embed.t                    9    9 100.00%  1-9
- op/pat.t                                   910    7   0.77%  665 776 785 832-
-                                                              834 845
+ ../lib/strict.t                             97   67  69.07%  2-10 15-17 20-21
+                                                              ...
+ ../lib/warnings.t                          478  404  84.52%  1-11 13-20 22 24-
+                                                              ...
+ op/anonsub.t                                 5    5 100.00%  1-5
+ op/closure.t                               171  150  87.72%  22-171
+ op/fork.t                                   18   18 100.00%  1-18
+ op/goto.t                                   22    1   4.55%  3
+ op/magic.t                       0    13    46   44  95.65%  3-46
+ op/pat.t                         0    11   922  283  30.69%  640-922
+ op/runlevel.t                               21   20  95.24%  1-14 16-21
+ op/split.t                                  46    1   2.17%  11
  op/sprintf.t                               224    3   1.34%  98 100 136
+ op/stat.t                                   73    2   2.74%  41-42
+ op/subst.t                                 122    2   1.64%  91-92
+ op/subst_wamp.t                            122    2   1.64%  91-92
+ op/taint.t                                 203    4   1.97%  1 3 31 37
  op/tr.t                                     97    5   5.15%  63 71-74
+ run/fresh_perl.t                            97    1   1.03%  11
+ run/runenv.t                                11   11 100.00%  1-11
  uni/fold.t                                 780    6   0.77%  61 169 196 661
                                                               710-711
 
 The failures in dumper.t and downgrade.t are problems in the tests,
-those in io_unix and sprintf are problems in the USS (UDP sockets
-and printf formats).  The pat, tr, and fold failures are genuine Perl
+those in io_unix and sprintf are problems in the USS (UDP sockets and
+printf formats).  The pat, tr, and fold failures are genuine Perl
 problems caused by EBCDIC (and in the pat and fold cases, combining
-that with Unicode).  The Constant and Embed are probably problems
-in the tests (since they test Perl's ability to build extensions,
-and that seems to be working reasonably well.)
+that with Unicode).  The Constant and Embed are probably problems in
+the tests (since they test Perl's ability to build extensions, and
+that seems to be working reasonably well.)  The rest of the failures
+are mostly problems in Perl trying to show a warning through STDERR
+but the test harness for some as of yet unknown reason failing to see
+the warning (especially the numerous warnings.t failures are of this
+kind).
 
 =head2 Localising Tied Arrays and Hashes Is Broken
 
