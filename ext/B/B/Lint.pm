@@ -118,7 +118,7 @@ Malcolm Beattie, mbeattie@sable.ox.ac.uk.
 =cut
 
 use strict;
-use B qw(walkoptree main_root walksymtable svref_2object parents
+use B qw(walkoptree_slow main_root walksymtable svref_2object parents
          OPf_WANT_LIST OPf_WANT OPf_STACKED G_ARRAY
         );
 
@@ -279,12 +279,12 @@ sub B::GV::lintcv {
     return if !$$cv || $done_cv{$$cv}++;
     my $root = $cv->ROOT;
     #warn "    root = $root (0x$$root)\n";#debug
-    walkoptree($root, "lint") if $$root;
+    walkoptree_slow($root, "lint") if $$root;
 }
 
 sub do_lint {
     my %search_pack;
-    walkoptree(main_root, "lint") if ${main_root()};
+    walkoptree_slow(main_root, "lint") if ${main_root()};
     
     # Now do subs in main
     no strict qw(vars refs);
