@@ -1339,9 +1339,6 @@
 #define share_hek_flags		S_share_hek_flags
 #endif
 #ifdef PERL_CORE
-#define hv_fetch_flags		S_hv_fetch_flags
-#endif
-#ifdef PERL_CORE
 #define hv_notallowed		S_hv_notallowed
 #endif
 #endif
@@ -2173,6 +2170,14 @@
 #endif
 #endif
 #define hv_clear_placeholders	Perl_hv_clear_placeholders
+#if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define hv_delete_common	S_hv_delete_common
+#endif
+#ifdef PERL_CORE
+#define hv_fetch_common		S_hv_fetch_common
+#endif
+#endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -3845,9 +3850,6 @@
 #define share_hek_flags(a,b,c,d)	S_share_hek_flags(aTHX_ a,b,c,d)
 #endif
 #ifdef PERL_CORE
-#define hv_fetch_flags(a,b,c,d,e)	S_hv_fetch_flags(aTHX_ a,b,c,d,e)
-#endif
-#ifdef PERL_CORE
 #define hv_notallowed(a,b,c,d)	S_hv_notallowed(aTHX_ a,b,c,d)
 #endif
 #endif
@@ -4678,6 +4680,14 @@
 #endif
 #endif
 #define hv_clear_placeholders(a)	Perl_hv_clear_placeholders(aTHX_ a)
+#if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define hv_delete_common(a,b,c,d,e,f,g)	S_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
+#endif
+#ifdef PERL_CORE
+#define hv_fetch_common(a,b,c,d,e,f,g,h)	S_hv_fetch_common(aTHX_ a,b,c,d,e,f,g,h)
+#endif
+#endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)

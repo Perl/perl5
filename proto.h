@@ -971,7 +971,6 @@ STATIC HEK*	S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags
 STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store);
 STATIC void	S_unshare_hek_or_pvn(pTHX_ HEK* hek, const char* sv, I32 len, U32 hash);
 STATIC HEK*	S_share_hek_flags(pTHX_ const char* sv, I32 len, U32 hash, int flags);
-STATIC SV**	S_hv_fetch_flags(pTHX_ HV* tb, const char* key, I32 klen, I32 lval, int flags);
 STATIC void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const char *msg);
 #endif
 
@@ -1356,4 +1355,8 @@ PERL_CALLCONV int	Perl_get_debug_opts(pTHX_ char **s);
 
 PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV* hb);
 
+#if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
+STATIC SV*	S_hv_delete_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
+STATIC HE*	S_hv_fetch_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int flags, int action, SV* val, U32 hash);
+#endif
 END_EXTERN_C
