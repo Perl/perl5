@@ -328,8 +328,16 @@ PerlIOEncode_tell(PerlIO *f)
 PerlIO *
 PerlIOEncode_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *params)
 {
- /* FIXME - Almost certainly needs more work */
- return PerlIOBase_dup(aTHX_ f, o, params);
+ if ((f = PerlIOBase_dup(aTHX_ f, o, params)))
+  {
+   PerlIOEncode *fe = PerlIOSelf(f,PerlIOEncode);
+   PerlIOEncode *oe = PerlIOSelf(o,PerlIOEncode);
+   if (oe->enc)
+    {
+     fe->enc = PerlIO_sv_dup(aTHX_ oe->enc, params);
+    }
+  }
+ return f;
 }
 
 PerlIO_funcs PerlIO_encode = {

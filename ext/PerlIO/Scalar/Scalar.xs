@@ -239,8 +239,14 @@ PerlIOScalar_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const c
 PerlIO *
 PerlIOScalar_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
 {
- /* FIXME - Needs more work */
- return PerlIOBase_dup(aTHX_ f, o, param);
+ if ((f = PerlIOBase_dup(aTHX_ f, o, param)))
+  {
+   PerlIOScalar *fs = PerlIOSelf(f,PerlIOScalar);
+   PerlIOScalar *os = PerlIOSelf(o,PerlIOScalar);
+   /* var has been set by implicit push */
+   fs->posn = os->posn;
+  }
+ return f;
 }
 
 PerlIO_funcs PerlIO_scalar = {
