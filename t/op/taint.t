@@ -24,6 +24,11 @@ BEGIN {
       $ENV{PATH} = $ENV{PATH};
       $ENV{TERM} = $ENV{TERM} ne ''? $ENV{TERM} : 'dummy';
   }
+  if ($Config{d_shm} || $Config{d_msg}) {
+     require IPC::SysV;
+     IPC::SysV->import(qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU
+			 S_IRWXG S_IRWXO));
+  }
 }
 
 my $Is_VMS = $^O eq 'VMS';
@@ -609,8 +614,7 @@ else {
 # test shmread
 {
     if ($Config{d_shm}) {
-	use IPC::SysV qw(IPC_PRIVATE IPC_RMID S_IRWXU S_IRWXG S_IRWXO);
-
+	no strict 'subs';
 	my $sent = "foobar";
 	my $rcvd;
 	my $size = 2000;
@@ -644,8 +648,7 @@ else {
 # test msgrcv
 {
     if ($Config{d_msg}) {
-	use IPC::SysV qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU);
-
+	no strict 'subs';
 	my $id = msgget(IPC_PRIVATE, IPC_CREAT | S_IRWXU);
 
 	my $sent      = "message";
