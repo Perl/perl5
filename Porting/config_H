@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Tue Mar 18 09:54:47 EET 2003
+ * Configuration time: Thu Apr 17 19:11:54 EET DST 2003
  * Configured by     : jhi
  * Target system     : osf1 kosh.hut.fi v5.1 2650 alpha 
  */
@@ -2282,6 +2282,12 @@
  */
 /*#define HAS__FWALK		/ **/
 
+/* HAS_AINTL:
+ *	This symbol, if defined, indicates that the aintl routine is
+ *	available.  If copysignl is also present we can emulate modfl.
+ */
+/*#define HAS_AINTL		/ **/
+
 /* HAS_CLASS:
  *	This symbol, if defined, indicates that the class routine is
  *	available to classify doubles.  Available for example in AIX.
@@ -2305,6 +2311,12 @@
  *	is supported.
  */
 #define HAS_STRUCT_CMSGHDR	/**/
+
+/* HAS_COPYSIGNL:
+ *	This symbol, if defined, indicates that the copysignl routine is
+ *	available.  If aintl is also present we can emulate modfl.
+ */
+#define HAS_COPYSIGNL		/**/
 
 /* HAS_DBMINIT_PROTO:
  *	This symbol, if defined, indicates that the system provides
@@ -2527,6 +2539,12 @@
  */
 /*#define HAS_HASMNTOPT		/ **/
 
+/* HAS_ILOGBL:
+ *	This symbol, if defined, indicates that the ilogbl routine is
+ *	available.  If scalbnl is also present we can emulate frexpl.
+ */
+#define HAS_ILOGBL		/**/
+
 /* HAS_INT64_T:
  *     This symbol will defined if the C compiler supports int64_t.
  *     Usually the <inttypes.h> needs to be included, but sometimes
@@ -2671,6 +2689,12 @@
  *		extern void* sbrk(size_t);
  */
 #define	HAS_SBRK_PROTO	/**/
+
+/* HAS_SCALBNL:
+ *	This symbol, if defined, indicates that the scalbnl routine is
+ *	available.  If ilogbl is also present we can emulate frexpl.
+ */
+#define HAS_SCALBNL		/**/
 
 /* HAS_SENDMSG:
  *	This symbol, if defined, indicates that the sendmsg routine is

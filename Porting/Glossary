@@ -480,6 +480,11 @@ d_accessx (d_accessx.U):
 	This variable conditionally defines the HAS_ACCESSX symbol, which
 	indicates to the C program that the accessx() routine is available.
 
+d_aintl (d_aintl.U):
+	This variable conditionally defines the HAS_AINTL symbol, which
+	indicates to the C program that the aintl() routine is available.
+	If copysignl is also present we can emulate modfl.
+
 d_alarm (d_alarm.U):
 	This variable conditionally defines the HAS_ALARM symbol, which
 	indicates to the C program that the alarm() routine is available.
@@ -574,6 +579,11 @@ d_const (d_const.U):
 	This variable conditionally defines the HASCONST symbol, which
 	indicates to the C program that this C compiler knows about the
 	const type.
+
+d_copysignl (d_copysignl.U):
+	This variable conditionally defines the HAS_COPYSIGNL symbol, which
+	indicates to the C program that the copysignl() routine is available.
+	If aintl is also present we can emulate modfl.
 
 d_crypt (d_crypt.U):
 	This variable conditionally defines the CRYPT symbol, which
@@ -1157,6 +1167,11 @@ d_htonl (d_htonl.U):
 	This variable conditionally defines HAS_HTONL if htonl() and its
 	friends are available to do network order byte swapping.
 
+d_ilogbl (d_ilogbl.U):
+	This variable conditionally defines the HAS_ILOGBL symbol, which
+	indicates to the C program that the ilogbl() routine is available.
+	If scalbnl is also present we can emulate frexpl.
+
 d_index (d_strchr.U):
 	This variable conditionally defines HAS_INDEX if index() and
 	rindex() are available for string searching.
@@ -1592,6 +1607,11 @@ d_sbrkproto (d_sbrkproto.U):
 	which indicates to the C program that the system provides
 	a prototype for the sbrk() function.  Otherwise, it is
 	up to the program to supply one.
+
+d_scalbnl (d_scalbnl.U):
+	This variable conditionally defines the HAS_SCALBNL symbol, which
+	indicates to the C program that the scalbnl() routine is available.
+	If ilogbl is also present we can emulate frexpl.
 
 d_sched_yield (d_pthread_y.U):
 	This variable conditionally defines the HAS_SCHED_YIELD
