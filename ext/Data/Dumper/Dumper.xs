@@ -260,20 +260,20 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
         mg_get(val);
     if (SvROK(val)) {
 
+        /* If a freeze method is provided and the object has it, call
+           it.  Warn on errors. */
 	if (SvOBJECT(SvRV(val)) && freezer &&
-	    SvPOK(freezer) && SvCUR(freezer))
+	    SvPOK(freezer) && SvCUR(freezer) &&
+            gv_fetchmeth(SvSTASH(SvRV(val)), SvPVX(freezer), 
+                         SvCUR(freezer), -1) != NULL)
 	{
 	    dSP; ENTER; SAVETMPS; PUSHMARK(sp);
 	    XPUSHs(val); PUTBACK;
-	    i = perl_call_method(SvPVX(freezer), G_EVAL|G_SCALAR);
+	    i = perl_call_method(SvPVX(freezer), G_EVAL|G_VOID);
 	    SPAGAIN;
 	    if (SvTRUE(ERRSV))
 		warn("WARNING(Freezer method call failed): %"SVf"", ERRSV);
-	    else if (i)
-		val = newSVsv(POPs);
 	    PUTBACK; FREETMPS; LEAVE;
-	    if (i)
-		(void)sv_2mortal(val);
 	}
 	
 	ival = SvRV(val);

@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_02';
+$VERSION = '2.121_03';
 
 #$| = 1;
 
@@ -231,9 +231,13 @@ sub _dump {
 
   if ($type) {
 
-    # prep it, if it looks like an object
-    if (my $freezer = $s->{freezer}) {
-      $val->$freezer() if UNIVERSAL::can($val, $freezer);
+    # Call the freezer method if it's specified and the object has the
+    # method.  Trap errors and warn() instead of die()ing, like the XS
+    # implementation.
+    my $freezer = $s->{freezer};
+    if ($freezer and UNIVERSAL::can($val, $freezer)) {
+      eval { $val->$freezer() };
+      warn "WARNING(Freezer method call failed): $@" if $@;
     }
 
     ($realpack, $realtype, $id) =
@@ -886,6 +890,10 @@ different package.  The client is responsible for making sure the specified
 method can be called via the object, and that the object ends up containing
 only perl data types after the method has been called.  Defaults to an empty
 string.
+
+If an object does not support the method specified (determined using
+UNIVERSAL::can()) then the call will be skipped.  If the method dies a
+warning will be generated.
 
 =item *
 
