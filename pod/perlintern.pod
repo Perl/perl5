@@ -118,6 +118,15 @@ The input record separator - C<$/> in Perl space.
 =for hackers
 Found in file thrdvar.h
 
+=item report_uninit
+
+Print appropriate "Use of uninitialized variable" warning
+
+	void	report_uninit()
+
+=for hackers
+Found in file sv.c
+
 =item start_glob
 
 Function called by C<do_readline> to spawn a glob (or do the glob inside
@@ -129,6 +138,46 @@ Moving it away shrinks pp_hot.c; shrinking pp_hot.c helps speed perl up.
 
 =for hackers
 Found in file doio.c
+
+=item sv_add_arena
+
+Given a chunk of memory, link it to the head of the list of arenas,
+and split it into a list of free SVs.
+
+	void	sv_add_arena(char* ptr, U32 size, U32 flags)
+
+=for hackers
+Found in file sv.c
+
+=item sv_clean_all
+
+Decrement the refcnt of each remaining SV, possibly triggering a
+cleanup. This function may have to be called multiple times to free
+SVs which are in complex self-referential heirarchies.
+
+	I32	sv_clean_all()
+
+=for hackers
+Found in file sv.c
+
+=item sv_clean_objs
+
+Attempt to destroy all objects not yet freed
+
+	void	sv_clean_objs()
+
+=for hackers
+Found in file sv.c
+
+=item sv_free_arenas
+
+Deallocate the memory used by all arenas. Note that all the individual SV
+heads and bodies within the arenas must already have been freed.
+
+	void	sv_free_arenas()
+
+=for hackers
+Found in file sv.c
 
 =back
 

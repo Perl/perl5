@@ -1348,8 +1348,7 @@ Ajnod	|int	|perl_run	|PerlInterpreter* interp
 Ajnod	|int	|perl_parse	|PerlInterpreter* interp|XSINIT_t xsinit \
 				|int argc|char** argv|char** env
 #if defined(USE_ITHREADS)
-: XXX: perl_clone needs docs
-Ajno	|PerlInterpreter*|perl_clone|PerlInterpreter* interp, UV flags
+Ajnod	|PerlInterpreter*|perl_clone|PerlInterpreter* interp, UV flags
 #  if defined(PERL_IMPLICIT_SYS)
 Ajno	|PerlInterpreter*|perl_clone_using|PerlInterpreter *interp|UV flags \
 				|struct IPerlMem* m|struct IPerlMem* ms \
@@ -1997,25 +1996,25 @@ np	|Signal_t |sighandler	|int sig
 Ap	|SV**	|stack_grow	|SV** sp|SV**p|int n
 Ap	|I32	|start_subparse	|I32 is_format|U32 flags
 p	|void	|sub_crush_depth|CV* cv
-Ap	|bool	|sv_2bool	|SV* sv
-Ap	|CV*	|sv_2cv		|SV* sv|HV** st|GV** gvp|I32 lref
-Ap	|IO*	|sv_2io		|SV* sv
-Ap	|IV	|sv_2iv		|SV* sv
+Apd	|bool	|sv_2bool	|SV* sv
+Apd	|CV*	|sv_2cv		|SV* sv|HV** st|GV** gvp|I32 lref
+Apd	|IO*	|sv_2io		|SV* sv
+Apd	|IV	|sv_2iv		|SV* sv
 Apd	|SV*	|sv_2mortal	|SV* sv
-Ap	|NV	|sv_2nv		|SV* sv
+Apd	|NV	|sv_2nv		|SV* sv
 Aop	|char*	|sv_2pv		|SV* sv|STRLEN* lp
 Ap	|char*	|sv_2pvutf8	|SV* sv|STRLEN* lp
 Ap	|char*	|sv_2pvbyte	|SV* sv|STRLEN* lp
-Ap	|UV	|sv_2uv		|SV* sv
-Ap	|IV	|sv_iv		|SV* sv
-Ap	|UV	|sv_uv		|SV* sv
-Ap	|NV	|sv_nv		|SV* sv
+Apd	|UV	|sv_2uv		|SV* sv
+Apd	|IV	|sv_iv		|SV* sv
+Apd	|UV	|sv_uv		|SV* sv
+Apd	|NV	|sv_nv		|SV* sv
 Ap	|char*	|sv_pvn		|SV *sv|STRLEN *len
-Ap	|char*	|sv_pvutf8n	|SV *sv|STRLEN *len
-Ap	|char*	|sv_pvbyten	|SV *sv|STRLEN *len
+Apd	|char*	|sv_pvutf8n	|SV *sv|STRLEN *len
+Apd	|char*	|sv_pvbyten	|SV *sv|STRLEN *len
 Apd	|I32	|sv_true	|SV *sv
-p	|void	|sv_add_arena	|char* ptr|U32 size|U32 flags
-Ap	|int	|sv_backoff	|SV* sv
+pd	|void	|sv_add_arena	|char* ptr|U32 size|U32 flags
+Apd	|int	|sv_backoff	|SV* sv
 Apd	|SV*	|sv_bless	|SV* sv|HV* stash
 Afpd	|void	|sv_catpvf	|SV* sv|const char* pat|...
 Ap	|void	|sv_vcatpvf	|SV* sv|const char* pat|va_list* args
@@ -2023,13 +2022,13 @@ Apd	|void	|sv_catpv	|SV* sv|const char* ptr
 Aopd	|void	|sv_catpvn	|SV* sv|const char* ptr|STRLEN len
 Aopd	|void	|sv_catsv	|SV* dsv|SV* ssv
 Apd	|void	|sv_chop	|SV* sv|char* ptr
-p	|I32	|sv_clean_all
-p	|void	|sv_clean_objs
+pd	|I32	|sv_clean_all
+pd	|void	|sv_clean_objs
 Apd	|void	|sv_clear	|SV* sv
 Apd	|I32	|sv_cmp		|SV* sv1|SV* sv2
 Apd	|I32	|sv_cmp_locale	|SV* sv1|SV* sv2
 #if defined(USE_LOCALE_COLLATE)
-Ap	|char*	|sv_collxfrm	|SV* sv|STRLEN* nxp
+Apd	|char*	|sv_collxfrm	|SV* sv|STRLEN* nxp
 #endif
 Ap	|OP*	|sv_compile_2op	|SV* sv|OP** startp|char* code|AV** avp
 Apd	|int	|sv_getcwd	|SV* sv
@@ -2038,7 +2037,7 @@ Ap	|void	|sv_dump	|SV* sv
 Apd	|bool	|sv_derived_from|SV* sv|const char* name
 Apd	|I32	|sv_eq		|SV* sv1|SV* sv2
 Apd	|void	|sv_free	|SV* sv
-p	|void	|sv_free_arenas
+pd	|void	|sv_free_arenas
 Apd	|char*	|sv_gets	|SV* sv|PerlIO* fp|I32 append
 Apd	|char*	|sv_grow	|SV* sv|STRLEN newlen
 Apd	|void	|sv_inc		|SV* sv
@@ -2052,17 +2051,17 @@ Apd	|void	|sv_magic	|SV* sv|SV* obj|int how|const char* name \
 				|I32 namlen
 Apd	|SV*	|sv_mortalcopy	|SV* oldsv
 Apd	|SV*	|sv_newmortal
-Ap	|SV*	|sv_newref	|SV* sv
+Apd	|SV*	|sv_newref	|SV* sv
 Ap	|char*	|sv_peek	|SV* sv
-Ap	|void	|sv_pos_u2b	|SV* sv|I32* offsetp|I32* lenp
-Ap	|void	|sv_pos_b2u	|SV* sv|I32* offsetp
+Apd	|void	|sv_pos_u2b	|SV* sv|I32* offsetp|I32* lenp
+Apd	|void	|sv_pos_b2u	|SV* sv|I32* offsetp
 Aopd	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
 Apd	|char*	|sv_pvutf8n_force|SV* sv|STRLEN* lp
-Ap	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
+Apd	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
 Apd	|int	|sv_realpath	|SV* sv|char *path|STRLEN len
 Apd	|char*	|sv_reftype	|SV* sv|int ob
 Apd	|void	|sv_replace	|SV* sv|SV* nsv
-Ap	|void	|sv_report_used
+Apd	|void	|sv_report_used
 Ap	|void	|sv_reset	|char* s|HV* stash
 Afpd	|void	|sv_setpvf	|SV* sv|const char* pat|...
 Ap	|void	|sv_vsetpvf	|SV* sv|const char* pat|va_list* args
@@ -2079,7 +2078,7 @@ Apd	|SV*	|sv_setref_pvn	|SV* rv|const char* classname|char* pv \
 Apd	|void	|sv_setpv	|SV* sv|const char* ptr
 Apd	|void	|sv_setpvn	|SV* sv|const char* ptr|STRLEN len
 Aopd	|void	|sv_setsv	|SV* dsv|SV* ssv
-Ap	|void	|sv_taint	|SV* sv
+Apd	|void	|sv_taint	|SV* sv
 Ap	|bool	|sv_tainted	|SV* sv
 Apd	|int	|sv_unmagic	|SV* sv|int type
 Apd	|void	|sv_unref	|SV* sv
@@ -2129,7 +2128,7 @@ p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
 p	|void	|report_evil_fh	|GV *gv|IO *io|I32 op
-p	|void	|report_uninit
+pd	|void	|report_uninit
 Afpd	|void	|warn		|const char* pat|...
 Ap	|void	|vwarn		|const char* pat|va_list* args
 Afp	|void	|warner		|U32 err|const char* pat|...
@@ -2203,18 +2202,18 @@ Ap	|void*	|vdefault_protect|volatile JMPENV *je|int *excpt \
 				|protect_body_t body|va_list *args
 #endif
 Ap	|void	|reginitcolors
-Ap	|char*	|sv_2pv_nolen	|SV* sv
-Ap	|char*	|sv_2pvutf8_nolen|SV* sv
-Ap	|char*	|sv_2pvbyte_nolen|SV* sv
+Apd	|char*	|sv_2pv_nolen	|SV* sv
+Apd	|char*	|sv_2pvutf8_nolen|SV* sv
+Apd	|char*	|sv_2pvbyte_nolen|SV* sv
 Ap	|char*	|sv_pv		|SV *sv
-Ap	|char*	|sv_pvutf8	|SV *sv
-Ap	|char*	|sv_pvbyte	|SV *sv
+Apd	|char*	|sv_pvutf8	|SV *sv
+Apd	|char*	|sv_pvbyte	|SV *sv
 Aopd	|STRLEN	|sv_utf8_upgrade|SV *sv
 ApdM	|bool	|sv_utf8_downgrade|SV *sv|bool fail_ok
 Apd	|void	|sv_utf8_encode |SV *sv
 ApdM	|bool	|sv_utf8_decode |SV *sv
-Ap	|void	|sv_force_normal|SV *sv
-Ap	|void	|sv_force_normal_flags|SV *sv|U32 flags
+Apd	|void	|sv_force_normal|SV *sv
+Apd	|void	|sv_force_normal_flags|SV *sv|U32 flags
 Ap	|void	|tmps_grow	|I32 n
 Apd	|SV*	|sv_rvweaken	|SV *sv
 p	|int	|magic_killbackrefs|SV *sv|MAGIC *mg
@@ -2607,5 +2606,5 @@ Apd	|void	|sv_catpvn_flags|SV* sv|const char* ptr|STRLEN len|I32 flags
 Apd	|void	|sv_catsv_flags	|SV* dsv|SV* ssv|I32 flags
 Apd	|STRLEN	|sv_utf8_upgrade_flags|SV *sv|I32 flags
 Apd	|char*	|sv_pvn_force_flags|SV* sv|STRLEN* lp|I32 flags
-Ap	|char*	|sv_2pv_flags	|SV* sv|STRLEN* lp|I32 flags
+Apd	|char*	|sv_2pv_flags	|SV* sv|STRLEN* lp|I32 flags
 Ap	|char*	|my_atof2	|const char *s|NV* value

@@ -1157,9 +1157,9 @@ Found in file op.c
 
 =item looks_like_number
 
-Test if an the content of an SV looks like a number (or is a
-number). C<Inf> and C<Infinity> are treated as numbers (so will not
-issue a non-numeric warning), even if your atof() doesn't grok them.
+Test if the content of an SV looks like a number (or is a number).
+C<Inf> and C<Infinity> are treated as numbers (so will not issue a
+non-numeric warning), even if your atof() doesn't grok them.
 
 	I32	looks_like_number(SV* sv)
 
@@ -1369,7 +1369,7 @@ Found in file sv.c
 
 =item newSVpvf
 
-Creates a new SV an initialize it with the string formatted like
+Creates a new SV and initializes it with the string formatted like
 C<sprintf>.
 
 	SV*	newSVpvf(const char* pat, ...)
@@ -1391,11 +1391,13 @@ Found in file sv.c
 
 =item newSVpvn_share
 
-Creates a new SV and populates it with a string from
-the string table. Turns on READONLY and FAKE.
-The idea here is that as string table is used for shared hash
-keys these strings will have SvPVX == HeKEY and hash lookup
-will avoid string compare.
+Creates a new SV with its SvPVX pointing to a shared string in the string
+table. If the string does not already exist in the table, it is created
+first.  Turns on READONLY and FAKE.  The string's hash is stored in the UV
+slot of the SV; if the C<hash> parameter is non-zero, that value is used;
+otherwise the hash is computed.  The idea here is that as the string table
+is used for shared hash keys these strings will have SvPVX == HeKEY and
+hash lookup will avoid string compare.
 
 	SV*	newSVpvn_share(const char* s, I32 len, U32 hash)
 
@@ -1417,6 +1419,7 @@ Found in file sv.c
 =item newSVsv
 
 Creates a new SV which is an exact duplicate of the original SV.
+(Uses C<sv_setsv>).
 
 	SV*	newSVsv(SV* old)
 
@@ -1508,6 +1511,15 @@ Allocates a new Perl interpreter.  See L<perlembed>.
 
 =for hackers
 Found in file perl.c
+
+=item perl_clone
+
+Create and return a new interpreter by cloning the current one.
+
+	PerlInterpreter*	perl_clone(PerlInterpreter* interp, UV flags)
+
+=for hackers
+Found in file sv.c
 
 =item perl_construct
 
@@ -2067,7 +2079,8 @@ Found in file sv.h
 
 =item SvIV
 
-Coerces the given SV to an integer and returns it.
+Coerces the given SV to an integer and returns it. See  C<SvIVx> for a
+version which guarantees to evaluate sv only once.
 
 	IV	SvIV(SV* sv)
 
@@ -2076,10 +2089,20 @@ Found in file sv.h
 
 =item SvIVX
 
-Returns the integer which is stored in the SV, assuming SvIOK is
-true.
+Returns the raw value in the SV's IV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvIV()>.
 
 	IV	SvIVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVx
+
+Coerces the given SV to an integer and returns it. Guarantees to evaluate
+sv only once. Use the more efficent C<SvIV> otherwise.
+
+	IV	SvIVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2171,17 +2194,28 @@ Found in file sv.h
 
 =item SvNV
 
-Coerce the given SV to a double and return it.
+Coerce the given SV to a double and return it. See  C<SvNVx> for a version
+which guarantees to evaluate sv only once.
 
 	NV	SvNV(SV* sv)
 
 =for hackers
 Found in file sv.h
 
+=item SvNVx
+
+Coerces the given SV to a double and returns it. Guarantees to evaluate
+sv only once. Use the more efficent C<SvNV> otherwise.
+
+	NV	SvNVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvNVX
 
-Returns the double which is stored in the SV, assuming SvNOK is
-true.
+Returns the raw value in the SV's NV slot, without checks or conversions.
+Only use when you are sure SvNOK is true. See also C<SvNV()>.
 
 	NV	SvNVX(SV* sv)
 
@@ -2270,16 +2304,125 @@ Found in file sv.h
 =item SvPV
 
 Returns a pointer to the string in the SV, or a stringified form of the SV
-if the SV does not contain a string.  Handles 'get' magic.
+if the SV does not contain a string.  Handles 'get' magic. See also
+C<SvPVx> for a version which guarantees to evaluate sv only once.
 
 	char*	SvPV(SV* sv, STRLEN len)
 
 =for hackers
 Found in file sv.h
 
+=item SvPVbyte
+
+Like C<SvPV>, but converts sv to byte representation first if necessary.
+
+	char*	SvPVbyte(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVbytex
+
+Like C<SvPV>, but converts sv to byte representation first if necessary.
+Guarantees to evalute sv only once; use the more efficient C<SvPVbyte>
+otherwise.
+
+
+	char*	SvPVbytex(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVbytex_force
+
+Like C<SvPV_force>, but converts sv to byte representation first if necessary.
+Guarantees to evalute sv only once; use the more efficient C<SvPVbyte_force>
+otherwise.
+
+	char*	SvPVbytex_force(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVbyte_force
+
+Like C<SvPV_force>, but converts sv to byte representation first if necessary.
+
+	char*	SvPVbyte_force(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVbyte_nolen
+
+Like C<SvPV_nolen>, but converts sv to byte representation first if necessary.
+
+	char*	SvPVbyte_nolen(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVutf8
+
+Like C<SvPV>, but converts sv to uft8 first if necessary.
+
+	char*	SvPVutf8(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVutf8x
+
+Like C<SvPV>, but converts sv to uft8 first if necessary.
+Guarantees to evalute sv only once; use the more efficient C<SvPVutf8>
+otherwise.
+
+	char*	SvPVutf8x(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVutf8x_force
+
+Like C<SvPV_force>, but converts sv to uft8 first if necessary.
+Guarantees to evalute sv only once; use the more efficient C<SvPVutf8_force>
+otherwise.
+
+	char*	SvPVutf8x_force(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVutf8_force
+
+Like C<SvPV_force>, but converts sv to uft8 first if necessary.
+
+	char*	SvPVutf8_force(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVutf8_nolen
+
+Like C<SvPV_nolen>, but converts sv to uft8 first if necessary.
+
+	char*	SvPVutf8_nolen(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVx
+
+A version of C<SvPV> which guarantees to evaluate sv only once.
+
+	char*	SvPVx(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
 =item SvPVX
 
-Returns a pointer to the string in the SV.  The SV must contain a
+Returns a pointer to the physical string in the SV.  The SV must contain a
 string.
 
 	char*	SvPVX(SV* sv)
@@ -2293,6 +2436,16 @@ Like <SvPV> but will force the SV into becoming a string (SvPOK).  You want
 force if you are going to update the SvPVX directly.
 
 	char*	SvPV_force(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item SvPV_force_nomg
+
+Like <SvPV> but will force the SV into becoming a string (SvPOK).  You want
+force if you are going to update the SvPVX directly. Doesn't process magic.
+
+	char*	SvPV_force_nomg(SV* sv, STRLEN len)
 
 =for hackers
 Found in file sv.h
@@ -2380,6 +2533,24 @@ argument more than once.
 =for hackers
 Found in file sv.h
 
+=item SvSetMagicSV
+
+Like C<SvSetSV>, but does any set magic required afterwards.
+
+	void	SvSetMagicSV(SV* dsb, SV* ssv)
+
+=for hackers
+Found in file sv.h
+
+=item SvSetMagicSV_nosteal
+
+Like C<SvSetMagicSV>, but does any set magic required afterwards.
+
+	void	SvSetMagicSV_nosteal(SV* dsv, SV* ssv)
+
+=for hackers
+Found in file sv.h
+
 =item SvSetSV
 
 Calls C<sv_setsv> if dsv is not the same as ssv.  May evaluate arguments
@@ -2461,19 +2632,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
-
-=for hackers
-Found in file sv.h
-
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
@@ -2576,7 +2747,8 @@ Found in file sv.h
 
 =item SvUV
 
-Coerces the given SV to an unsigned integer and returns it.
+Coerces the given SV to an unsigned integer and returns it.  See C<SvUVx>
+for a version which guarantees to evaluate sv only once.
 
 	UV	SvUV(SV* sv)
 
@@ -2585,20 +2757,149 @@ Found in file sv.h
 
 =item SvUVX
 
-Returns the unsigned integer which is stored in the SV, assuming SvIOK is
-true.
+Returns the raw value in the SV's UV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvUV()>.
 
 	UV	SvUVX(SV* sv)
 
 =for hackers
 Found in file sv.h
 
+=item SvUVx
+
+Coerces the given SV to an unsigned integer and returns it. Guarantees to
+evaluate sv only once. Use the more efficent C<SvUV> otherwise.
+
+	UV	SvUVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item sv_2bool
+
+This function is only called on magical items, and is only used by
+sv_true() or its macro equivalent. 
+
+	bool	sv_2bool(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_2cv
+
+Using various gambits, try to get a CV from an SV; in addition, try if
+possible to set C<*st> and C<*gvp> to the stash and GV associated with it.
+
+	CV*	sv_2cv(SV* sv, HV** st, GV** gvp, I32 lref)
+
+=for hackers
+Found in file sv.c
+
+=item sv_2io
+
+Using various gambits, try to get an IO from an SV: the IO slot if its a
+GV; or the recursive result if we're an RV; or the IO slot of the symbol
+named after the PV if we're a string.
+
+	IO*	sv_2io(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_2iv
+
+Return the integer value of an SV, doing any necessary string conversion,
+magic etc. Normally used via the C<SvIV(sv)> and C<SvIVx(sv)> macros.
+
+	IV	sv_2iv(SV* sv)
+
+=for hackers
+Found in file sv.c
+
 =item sv_2mortal
 
-Marks an SV as mortal.  The SV will be destroyed when the current context
-ends.
+Marks an existing SV as mortal.  The SV will be destroyed when the current
+context ends. See also C<sv_newmortal> and C<sv_mortalcopy>.
 
 	SV*	sv_2mortal(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_2nv
+
+Return the num value of an SV, doing any necessary string or integer
+conversion, magic etc. Normally used via the C<SvNV(sv)> and C<SvNVx(sv)>
+macros.
+
+	NV	sv_2nv(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_2pvbyte_nolen
+
+Return a pointer to the byte-encoded representation of the SV.
+May cause the SV to be downgraded from UTF8 as a side-effect.
+
+Usually accessed via the C<SvPVbyte_nolen> macro.
+
+	char*	sv_2pvbyte_nolen(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_2pvutf8_nolen
+
+Return a pointer to the UTF8-encoded representation of the SV.
+May cause the SV to be upgraded to UTF8 as a side-effect.
+
+Usually accessed via the C<SvPVutf8_nolen> macro.
+
+	char*	sv_2pvutf8_nolen(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_2pv_flags
+
+Returns pointer to the string value of an SV, and sets *lp to its length.
+If flags includes SV_GMAGIC, does an mg_get() first. Coerces sv to a string
+if necessary.
+Normally invoked via the C<SvPV_flags> macro. C<sv_2pv()> and C<sv_2pv_nomg>
+usually end up here too.
+
+	char*	sv_2pv_flags(SV* sv, STRLEN* lp, I32 flags)
+
+=for hackers
+Found in file sv.c
+
+=item sv_2pv_nolen
+
+Like C<sv_2pv()>, but doesn't return the length too. You should usually
+use the macro wrapper C<SvPV_nolen(sv)> instead.
+	char*	sv_2pv_nolen(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_2uv
+
+Return the unsigned integer value of an SV, doing any necessary string
+conversion, magic etc. Normally used via the C<SvUV(sv)> and C<SvUVx(sv)>
+macros.
+
+	UV	sv_2uv(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_backoff
+
+Remove any string offset. You should normally use the C<SvOOK_off> macro
+wrapper instead.
+
+	int	sv_backoff(SV* sv)
 
 =for hackers
 Found in file sv.c
@@ -2730,7 +3031,7 @@ Found in file sv.c
 Efficient removal of characters from the beginning of the string buffer.
 SvPOK(sv) must be true and the C<ptr> must be a pointer to somewhere inside
 the string buffer.  The C<ptr> becomes the first character of the adjusted
-string.
+string. Uses the "OOK hack".
 
 	void	sv_chop(SV* sv, char* ptr)
 
@@ -2739,8 +3040,13 @@ Found in file sv.c
 
 =item sv_clear
 
-Clear an SV, making it empty. Does not free the memory used by the SV
-itself.
+Clear an SV: call any destructors, free up any memory used by the body,
+and free the body itself. The SV's head is I<not> freed, although
+its type is set to all 1's so that it won't inadvertently be assumed
+to be live during global destruction etc.
+This function should only be called when REFCNT is zero. Most of the time
+you'll want to call C<sv_free()> (or its macro wrapper C<SvREFCNT_dec>)
+instead.
 
 	void	sv_clear(SV* sv)
 
@@ -2751,7 +3057,8 @@ Found in file sv.c
 
 Compares the strings in two SVs.  Returns -1, 0, or 1 indicating whether the
 string in C<sv1> is less than, equal to, or greater than the string in
-C<sv2>.
+C<sv2>. Is UTF-8 and 'use bytes' aware, handles get magic, and will
+coerce its args to strings if necessary.  See also C<sv_cmp_locale>.
 
 	I32	sv_cmp(SV* sv1, SV* sv2)
 
@@ -2760,17 +3067,33 @@ Found in file sv.c
 
 =item sv_cmp_locale
 
-Compares the strings in two SVs in a locale-aware manner. See
-L</sv_cmp_locale>
+Compares the strings in two SVs in a locale-aware manner. Is UTF-8 and
+'use bytes' aware, handles get magic, and will coerce its args to strings
+if necessary.  See also C<sv_cmp_locale>.  See also C<sv_cmp>.
 
 	I32	sv_cmp_locale(SV* sv1, SV* sv2)
 
 =for hackers
 Found in file sv.c
 
+=item sv_collxfrm
+
+Add Collate Transform magic to an SV if it doesn't already have it.
+
+Any scalar variable may carry PERL_MAGIC_collxfrm magic that contains the
+scalar data of the variable, but transformed to such a format that a normal
+memory comparison can be used to compare the data according to the locale
+settings.
+
+	char*	sv_collxfrm(SV* sv, STRLEN* nxp)
+
+=for hackers
+Found in file sv.c
+
 =item sv_dec
 
-Auto-decrement of the value in the SV.
+Auto-decrement of the value in the SV, doing string to numeric conversion
+if necessary. Handles 'get' magic.
 
 	void	sv_dec(SV* sv)
 
@@ -2791,16 +3114,43 @@ Found in file universal.c
 =item sv_eq
 
 Returns a boolean indicating whether the strings in the two SVs are
-identical.
+identical. Is UTF-8 and 'use bytes' aware, handles get magic, and will
+coerce its args to strings if necessary.
 
 	I32	sv_eq(SV* sv1, SV* sv2)
 
 =for hackers
 Found in file sv.c
 
+=item sv_force_normal
+
+Undo various types of fakery on an SV: if the PV is a shared string, make
+a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
+an xpvmg. See also C<sv_force_normal_flags>.
+
+	void	sv_force_normal(SV *sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_force_normal_flags
+
+Undo various types of fakery on an SV: if the PV is a shared string, make
+a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
+an xpvmg. The C<flags> parameter gets passed to  C<sv_unref_flags()>
+when unrefing. C<sv_force_normal> calls this function with flags set to 0.
+
+	void	sv_force_normal_flags(SV *sv, U32 flags)
+
+=for hackers
+Found in file sv.c
+
 =item sv_free
 
-Free the memory used by an SV.
+Decrement an SV's reference count, and if it drops to zero, call
+C<sv_clear> to invoke destructors and free up any memory used by
+the body; finally, deallocate the SV's head itself.
+Normally called via a wrapper macro C<SvREFCNT_dec>.
 
 	void	sv_free(SV* sv)
 
@@ -2828,9 +3178,9 @@ Found in file sv.c
 
 =item sv_grow
 
-Expands the character buffer in the SV.  This will use C<sv_unref> and will
-upgrade the SV to C<SVt_PV>.  Returns a pointer to the character buffer.
-Use C<SvGROW>.
+Expands the character buffer in the SV.  If necessary, uses C<sv_unref> and
+upgrades the SV to C<SVt_PV>.  Returns a pointer to the character buffer.
+Use the C<SvGROW> wrapper instead.
 
 	char*	sv_grow(SV* sv, STRLEN newlen)
 
@@ -2839,7 +3189,8 @@ Found in file sv.c
 
 =item sv_inc
 
-Auto-increment of the value in the SV.
+Auto-increment of the value in the SV, doing string to numeric conversion
+if necessary. Handles 'get' magic.
 
 	void	sv_inc(SV* sv)
 
@@ -2878,9 +3229,20 @@ will return false.
 =for hackers
 Found in file sv.c
 
+=item sv_iv
+
+A private implementation of the C<SvIVx> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+	IV	sv_iv(SV* sv)
+
+=for hackers
+Found in file sv.c
+
 =item sv_len
 
-Returns the length of the string in the SV.  See also C<SvCUR>.
+Returns the length of the string in the SV. Handles magic and type
+coercion.  See also C<SvCUR>, which gives raw access to the xpv_cur slot.
 
 	STRLEN	sv_len(SV* sv)
 
@@ -2890,7 +3252,7 @@ Found in file sv.c
 =item sv_len_utf8
 
 Returns the number of characters in the string in an SV, counting wide
-UTF8 bytes as a single character.
+UTF8 bytes as a single character. Handles magic and type coercion.
 
 	STRLEN	sv_len_utf8(SV* sv)
 
@@ -2899,7 +3261,10 @@ Found in file sv.c
 
 =item sv_magic
 
-Adds magic to an SV.
+Adds magic to an SV. First upgrades C<sv> to type C<SVt_PVMG> if necessary,
+then adds a new magic item of type C<how> to the head of the magic list.
+
+C<name> is assumed to contain an C<SV*> if C<(name && namelen == HEf_SVKEY)>
 
 	void	sv_magic(SV* sv, SV* obj, int how, const char* name, I32 namlen)
 
@@ -2908,8 +3273,9 @@ Found in file sv.c
 
 =item sv_mortalcopy
 
-Creates a new SV which is a copy of the original SV.  The new SV is marked
-as mortal.
+Creates a new SV which is a copy of the original SV (using C<sv_setsv>).
+The new SV is marked as mortal. It will be destroyed when the current
+context ends.  See also C<sv_newmortal> and C<sv_2mortal>.
 
 	SV*	sv_mortalcopy(SV* oldsv)
 
@@ -2918,9 +3284,88 @@ Found in file sv.c
 
 =item sv_newmortal
 
-Creates a new SV which is mortal.  The reference count of the SV is set to 1.
+Creates a new null SV which is mortal.  The reference count of the SV is
+set to 1. It will be destroyed when the current context ends.  See
+also C<sv_mortalcopy> and C<sv_2mortal>.
 
 	SV*	sv_newmortal()
+
+=for hackers
+Found in file sv.c
+
+=item sv_newref
+
+Increment an SV's reference count. Use the C<SvREFCNT_inc()> wrapper
+instead.
+
+	SV*	sv_newref(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_nv
+
+A private implementation of the C<SvNVx> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+	NV	sv_nv(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_pos_b2u
+
+Converts the value pointed to by offsetp from a count of bytes from the
+start of the string, to a count of the equivalent number of UTF8 chars.
+Handles magic and type coercion.
+
+	void	sv_pos_b2u(SV* sv, I32* offsetp)
+
+=for hackers
+Found in file sv.c
+
+=item sv_pos_u2b
+
+Converts the value pointed to by offsetp from a count of UTF8 chars from
+the start of the string, to a count of the equivalent number of bytes; if
+lenp is non-zero, it does the same to lenp, but this time starting from
+the offset, rather than from the start of the string. Handles magic and
+type coercion.
+
+	void	sv_pos_u2b(SV* sv, I32* offsetp, I32* lenp)
+
+=for hackers
+Found in file sv.c
+
+=item sv_pvbyte
+
+A private implementation of the C<SvPVbyte_nolen> macro for compilers
+which can't cope with complex macro expressions. Always use the macro
+instead.
+
+	char*	sv_pvbyte(SV *sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_pvbyten
+
+A private implementation of the C<SvPVbyte> macro for compilers
+which can't cope with complex macro expressions. Always use the macro
+instead.
+
+	char*	sv_pvbyten(SV *sv, STRLEN *len)
+
+=for hackers
+Found in file sv.c
+
+=item sv_pvbyten_force
+
+A private implementation of the C<SvPVbytex_force> macro for compilers
+which can't cope with complex macro expressions. Always use the macro
+instead.
+
+	char*	sv_pvbyten_force(SV* sv, STRLEN* lp)
 
 =for hackers
 Found in file sv.c
@@ -2928,6 +3373,8 @@ Found in file sv.c
 =item sv_pvn_force
 
 Get a sensible string out of the SV somehow.
+A private implementation of the C<SvPV_force> macro for compilers which
+can't cope with complex macro expressions. Always use the macro instead.
 
 	char*	sv_pvn_force(SV* sv, STRLEN* lp)
 
@@ -2940,16 +3387,41 @@ Get a sensible string out of the SV somehow.
 If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<sv> if
 appropriate, else not. C<sv_pvn_force> and C<sv_pvn_force_nomg> are
 implemented in terms of this function.
+You normally want to use the various wrapper macros instead: see
+C<SvPV_force> and C<SvPV_force_nomg>
 
 	char*	sv_pvn_force_flags(SV* sv, STRLEN* lp, I32 flags)
 
 =for hackers
 Found in file sv.c
 
+=item sv_pvutf8
+
+A private implementation of the C<SvPVutf8_nolen> macro for compilers
+which can't cope with complex macro expressions. Always use the macro
+instead.
+
+	char*	sv_pvutf8(SV *sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_pvutf8n
+
+A private implementation of the C<SvPVutf8> macro for compilers
+which can't cope with complex macro expressions. Always use the macro
+instead.
+
+	char*	sv_pvutf8n(SV *sv, STRLEN *len)
+
+=for hackers
+Found in file sv.c
+
 =item sv_pvutf8n_force
 
-Get a sensible UTF8-encoded string out of the SV somehow. See
-L</sv_pvn_force>.
+A private implementation of the C<SvPVutf8_force> macro for compilers
+which can't cope with complex macro expressions. Always use the macro
+instead.
 
 	char*	sv_pvutf8n_force(SV* sv, STRLEN* lp)
 
@@ -2977,15 +3449,32 @@ Found in file sv.c
 =item sv_replace
 
 Make the first argument a copy of the second, then delete the original.
+The target SV physically takes over ownership of the body of the source SV
+and inherits its flags; however, the target keeps any magic it owns,
+and any magic in the source is discarded.
+Note that this a rather specialist SV copying operation; most of the
+time you'll want to use C<sv_setsv> or one of its many macro front-ends.
 
 	void	sv_replace(SV* sv, SV* nsv)
 
 =for hackers
 Found in file sv.c
 
+=item sv_report_used
+
+Dump the contents of all SVs not yet freed. (Debugging aid).
+
+	void	sv_report_used()
+
+=for hackers
+Found in file sv.c
+
 =item sv_rvweaken
 
-Weaken a reference.
+Weaken a reference: set the C<SvWEAKREF> flag on this RV; give the
+referred-to SV C<PERL_MAGIC_backref> magic if it hasn't already; and
+push a back-reference to this RV onto the array of backreferences
+associated with that magic.
 
 	SV*	sv_rvweaken(SV *sv)
 
@@ -2994,8 +3483,8 @@ Found in file sv.c
 
 =item sv_setiv
 
-Copies an integer into the given SV.  Does not handle 'set' magic.  See
-C<sv_setiv_mg>.
+Copies an integer into the given SV, upgrading first if necessary.
+Does not handle 'set' magic.  See also C<sv_setiv_mg>.
 
 	void	sv_setiv(SV* sv, IV num)
 
@@ -3013,8 +3502,8 @@ Found in file sv.c
 
 =item sv_setnv
 
-Copies a double into the given SV.  Does not handle 'set' magic.  See
-C<sv_setnv_mg>.
+Copies a double into the given SV, upgrading first if necessary.
+Does not handle 'set' magic.  See also C<sv_setnv_mg>.
 
 	void	sv_setnv(SV* sv, NV num)
 
@@ -3182,10 +3671,16 @@ Found in file sv.c
 
 =item sv_setsv
 
-Copies the contents of the source SV C<ssv> into the destination SV C<dsv>.
-The source SV may be destroyed if it is mortal.  Does not handle 'set'
-magic.  See the macro forms C<SvSetSV>, C<SvSetSV_nosteal> and
-C<sv_setsv_mg>.
+Copies the contents of the source SV C<ssv> into the destination SV
+C<dsv>.  The source SV may be destroyed if it is mortal, so don't use this
+function if the source SV needs to be reused. Does not handle 'set' magic.
+Loosely speaking, it performs a copy-by-value, obliterating any previous
+content of the destination.
+
+You probably want to use one of the assortment of wrappers, such as
+C<SvSetSV>, C<SvSetSV_nosteal>, C<SvSetMagicSV> and
+C<SvSetMagicSV_nosteal>.
+
 
 	void	sv_setsv(SV* dsv, SV* ssv)
 
@@ -3194,11 +3689,21 @@ Found in file sv.c
 
 =item sv_setsv_flags
 
-Copies the contents of the source SV C<ssv> into the destination SV C<dsv>.
-The source SV may be destroyed if it is mortal.  Does not handle 'set'
-magic.  If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<ssv> if
-appropriate, else not. C<sv_setsv> and C<sv_setsv_nomg> are implemented
-in terms of this function.
+Copies the contents of the source SV C<ssv> into the destination SV
+C<dsv>.  The source SV may be destroyed if it is mortal, so don't use this
+function if the source SV needs to be reused. Does not handle 'set' magic.
+Loosely speaking, it performs a copy-by-value, obliterating any previous
+content of the destination.
+If the C<flags> parameter has the C<SV_GMAGIC> bit set, will C<mg_get> on
+C<ssv> if appropriate, else not. C<sv_setsv> and C<sv_setsv_nomg> are
+implemented in terms of this function.
+
+You probably want to use one of the assortment of wrappers, such as
+C<SvSetSV>, C<SvSetSV_nosteal>, C<SvSetMagicSV> and
+C<SvSetMagicSV_nosteal>.
+
+This is the primary function for copying scalars, and most other
+copy-ish functions and macros use this underneath.
 
 	void	sv_setsv_flags(SV* dsv, SV* ssv, I32 flags)
 
@@ -3216,8 +3721,8 @@ Found in file sv.c
 
 =item sv_setuv
 
-Copies an unsigned integer into the given SV.  Does not handle 'set' magic.
-See C<sv_setuv_mg>.
+Copies an unsigned integer into the given SV, upgrading first if necessary.
+Does not handle 'set' magic.  See also C<sv_setuv_mg>.
 
 	void	sv_setuv(SV* sv, UV num)
 
@@ -3233,9 +3738,19 @@ Like C<sv_setuv>, but also handles 'set' magic.
 =for hackers
 Found in file sv.c
 
+=item sv_taint
+
+Taint an SV. Use C<SvTAINTED_on> instead.
+	void	sv_taint(SV* sv)
+
+=for hackers
+Found in file sv.c
+
 =item sv_true
 
 Returns true if the SV has a true value by Perl's rules.
+Use the C<SvTRUE> macro instead, which may call C<sv_true()> or may
+instead use an in-line version.
 
 	I32	sv_true(SV *sv)
 
@@ -3244,7 +3759,7 @@ Found in file sv.c
 
 =item sv_unmagic
 
-Removes magic from an SV.
+Removes all magic of type C<type> from an SV.
 
 	int	sv_unmagic(SV* sv, int type)
 
@@ -3280,8 +3795,9 @@ Found in file sv.c
 
 =item sv_upgrade
 
-Upgrade an SV to a more complex form.  Use C<SvUPGRADE>.  See
-C<svtype>.
+Upgrade an SV to a more complex form.  Gnenerally adds a new body type to the
+SV, then copies across as much information as possible from the old body.
+You genrally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 
 	bool	sv_upgrade(SV* sv, U32 mt)
 
@@ -3315,7 +3831,7 @@ Found in file sv.c
 =item sv_utf8_decode
 
 Convert the octets in the PV from UTF-8 to chars. Scan for validity and then
-turn of SvUTF8 if needed so that we see characters. Used as a building block
+turn off SvUTF8 if needed so that we see characters. Used as a building block
 for decode_utf8 in Encode.xs
 
 NOTE: this function is experimental and may change or be
@@ -3355,7 +3871,7 @@ Found in file sv.c
 =item sv_utf8_upgrade
 
 Convert the PV of an SV to its UTF8-encoded form.
-Forces the SV to string form it it is not already.
+Forces the SV to string form if it is not already.
 Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear.
 
@@ -3367,13 +3883,23 @@ Found in file sv.c
 =item sv_utf8_upgrade_flags
 
 Convert the PV of an SV to its UTF8-encoded form.
-Forces the SV to string form it it is not already.
+Forces the SV to string form if it is not already.
 Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear. If C<flags> has C<SV_GMAGIC> bit set,
 will C<mg_get> on C<sv> if appropriate, else not. C<sv_utf8_upgrade> and
 C<sv_utf8_upgrade_nomg> are implemented in terms of this function.
 
 	STRLEN	sv_utf8_upgrade_flags(SV *sv, I32 flags)
+
+=for hackers
+Found in file sv.c
+
+=item sv_uv
+
+A private implementation of the C<SvUVx> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+	UV	sv_uv(SV* sv)
 
 =for hackers
 Found in file sv.c
@@ -3386,6 +3912,8 @@ missing (NULL).  When running with taint checks enabled, indicates via
 C<maybe_tainted> if results are untrustworthy (often due to the use of
 locales).
 
+Usually used via one of its frontends C<sv_catpvf> and C<sv_catpvf_mg>.
+
 	void	sv_vcatpvfn(SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted)
 
 =for hackers
@@ -3395,6 +3923,8 @@ Found in file sv.c
 
 Works like C<vcatpvfn> but copies the text into the SV instead of
 appending it.
+
+Usually used via one of its frontends C<sv_setpvf> and C<sv_setpvf_mg>.
 
 	void	sv_vsetpvfn(SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted)
 

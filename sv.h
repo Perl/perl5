@@ -193,7 +193,8 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SVf_FAKE	0x00100000	/* glob or lexical is just a copy */
 #define SVf_OOK		0x00200000	/* has valid offset value */
-#define SVf_BREAK	0x00400000	/* refcnt is artificially low */
+#define SVf_BREAK	0x00400000	/* refcnt is artificially low - used
+					 * by SV's in final arena  cleanup */
 #define SVf_READONLY	0x00800000	/* may not be modified */
 
 
@@ -500,19 +501,19 @@ Unsets the RV status of an SV.
 Dereferences an RV to return the SV.
 
 =for apidoc Am|IV|SvIVX|SV* sv
-Returns the integer which is stored in the SV, assuming SvIOK is
-true.
+Returns the raw value in the SV's IV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvIV()>.
 
 =for apidoc Am|UV|SvUVX|SV* sv
-Returns the unsigned integer which is stored in the SV, assuming SvIOK is
-true.
+Returns the raw value in the SV's UV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvUV()>.
 
 =for apidoc Am|NV|SvNVX|SV* sv
-Returns the double which is stored in the SV, assuming SvNOK is
-true.
+Returns the raw value in the SV's NV slot, without checks or conversions.
+Only use when you are sure SvNOK is true. See also C<SvNV()>.
 
 =for apidoc Am|char*|SvPVX|SV* sv
-Returns a pointer to the string in the SV.  The SV must contain a
+Returns a pointer to the physical string in the SV.  The SV must contain a
 string.
 
 =for apidoc Am|STRLEN|SvCUR|SV* sv
@@ -824,26 +825,88 @@ Taints an SV if tainting is enabled
 Like <SvPV> but will force the SV into becoming a string (SvPOK).  You want
 force if you are going to update the SvPVX directly.
 
+=for apidoc Am|char*|SvPV_force_nomg|SV* sv|STRLEN len
+Like <SvPV> but will force the SV into becoming a string (SvPOK).  You want
+force if you are going to update the SvPVX directly. Doesn't process magic.
+
 =for apidoc Am|char*|SvPV|SV* sv|STRLEN len
 Returns a pointer to the string in the SV, or a stringified form of the SV
-if the SV does not contain a string.  Handles 'get' magic.
+if the SV does not contain a string.  Handles 'get' magic. See also
+C<SvPVx> for a version which guarantees to evaluate sv only once.
+
+=for apidoc Am|char*|SvPVx|SV* sv|STRLEN len
+A version of C<SvPV> which guarantees to evaluate sv only once.
 
 =for apidoc Am|char*|SvPV_nolen|SV* sv
 Returns a pointer to the string in the SV, or a stringified form of the SV
 if the SV does not contain a string.  Handles 'get' magic.
 
 =for apidoc Am|IV|SvIV|SV* sv
-Coerces the given SV to an integer and returns it.
+Coerces the given SV to an integer and returns it. See  C<SvIVx> for a
+version which guarantees to evaluate sv only once.
+
+=for apidoc Am|IV|SvIVx|SV* sv
+Coerces the given SV to an integer and returns it. Guarantees to evaluate
+sv only once. Use the more efficent C<SvIV> otherwise.
 
 =for apidoc Am|NV|SvNV|SV* sv
-Coerce the given SV to a double and return it.
+Coerce the given SV to a double and return it. See  C<SvNVx> for a version
+which guarantees to evaluate sv only once.
+
+=for apidoc Am|NV|SvNVx|SV* sv
+Coerces the given SV to a double and returns it. Guarantees to evaluate
+sv only once. Use the more efficent C<SvNV> otherwise.
 
 =for apidoc Am|UV|SvUV|SV* sv
-Coerces the given SV to an unsigned integer and returns it.
+Coerces the given SV to an unsigned integer and returns it.  See C<SvUVx>
+for a version which guarantees to evaluate sv only once.
+
+=for apidoc Am|UV|SvUVx|SV* sv
+Coerces the given SV to an unsigned integer and returns it. Guarantees to
+evaluate sv only once. Use the more efficent C<SvUV> otherwise.
 
 =for apidoc Am|bool|SvTRUE|SV* sv
 Returns a boolean indicating whether Perl would evaluate the SV as true or
 false, defined or undefined.  Does not handle 'get' magic.
+
+=for apidoc Am|char*|SvPVutf8_force|SV* sv|STRLEN len
+Like C<SvPV_force>, but converts sv to uft8 first if necessary.
+
+=for apidoc Am|char*|SvPVutf8|SV* sv|STRLEN len
+Like C<SvPV>, but converts sv to uft8 first if necessary.
+
+=for apidoc Am|char*|SvPVutf8_nolen|SV* sv|STRLEN len
+Like C<SvPV_nolen>, but converts sv to uft8 first if necessary.
+
+=for apidoc Am|char*|SvPVbyte_force|SV* sv|STRLEN len
+Like C<SvPV_force>, but converts sv to byte representation first if necessary.
+
+=for apidoc Am|char*|SvPVbyte|SV* sv|STRLEN len
+Like C<SvPV>, but converts sv to byte representation first if necessary.
+
+=for apidoc Am|char*|SvPVbyte_nolen|SV* sv|STRLEN len
+Like C<SvPV_nolen>, but converts sv to byte representation first if necessary.
+
+=for apidoc Am|char*|SvPVutf8x_force|SV* sv|STRLEN len
+Like C<SvPV_force>, but converts sv to uft8 first if necessary.
+Guarantees to evalute sv only once; use the more efficient C<SvPVutf8_force>
+otherwise.
+
+=for apidoc Am|char*|SvPVutf8x|SV* sv|STRLEN len
+Like C<SvPV>, but converts sv to uft8 first if necessary.
+Guarantees to evalute sv only once; use the more efficient C<SvPVutf8>
+otherwise.
+
+=for apidoc Am|char*|SvPVbytex_force|SV* sv|STRLEN len
+Like C<SvPV_force>, but converts sv to byte representation first if necessary.
+Guarantees to evalute sv only once; use the more efficient C<SvPVbyte_force>
+otherwise.
+
+=for apidoc Am|char*|SvPVbytex|SV* sv|STRLEN len
+Like C<SvPV>, but converts sv to byte representation first if necessary.
+Guarantees to evalute sv only once; use the more efficient C<SvPVbyte>
+otherwise.
+
 
 =cut
 */
@@ -1088,6 +1151,12 @@ more than once.
 =for apidoc Am|void|SvSetSV_nosteal|SV* dsv|SV* ssv
 Calls a non-destructive version of C<sv_setsv> if dsv is not the same as
 ssv. May evaluate arguments more than once.
+
+=for apidoc Am|void|SvSetMagicSV|SV* dsb|SV* ssv
+Like C<SvSetSV>, but does any set magic required afterwards.
+
+=for apidoc Am|void|SvSetMagicSV_nosteal|SV* dsv|SV* ssv
+Like C<SvSetMagicSV>, but does any set magic required afterwards.
 
 =for apidoc Am|char *|SvGROW|SV* sv|STRLEN len
 Expands the character buffer in the SV so that it has room for the
