@@ -50,7 +50,7 @@ use strict;
 sub paraprint;
 
 
-my($Version) = "1.13";
+my($Version) = "1.14";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -64,12 +64,14 @@ my($Version) = "1.13";
 #                 clearer and add $ENV{REPLYTO}.
 # Changed in 1.13 to hopefully make it more difficult to accidentally
 #                 send mail
+# Changed in 1.14 to make the prompts a little more clear on providing
+#                 helpful information. Also let file read fail gracefully.
 
 # TODO: Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is 
 #       accounted for.
 
-my( $file, $cc, $address, $perlbug, $testaddress, $filename,
+my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
     $subject, $from, $verbose, $ed, 
     $fh, $me, $Is_VMS, $msg, $body, $andcc );
 
@@ -88,7 +90,7 @@ EOF
 if($::opt_d or !-t STDOUT) { Dump(*STDOUT); exit; }
 
 Query();
-Edit();
+Edit() unless $usefile;
 NowWhat();
 Send();
 
@@ -134,6 +136,9 @@ sub Init {
 	# Subject of bug-report message
 	$subject = $::opt_s || "";
 
+	# Send a file
+	$usefile = ($::opt_f || 0);
+	
 	# File to send as report
 	$file = $::opt_f || "";
 
@@ -141,10 +146,10 @@ sub Init {
 	$body = $::opt_b || "";
 
 	# Editor
-	$ed = ($::opt_f ? "file" : (
-			$::opt_e || $ENV{VISUAL} || $ENV{EDITOR} || $ENV{EDIT} || 
+	$ed = (	$::opt_e || $ENV{VISUAL} || $ENV{EDITOR} || $ENV{EDIT} || 
 		      ($Is_VMS ? "edit/tpu" : "vi")
-	      ));
+	      );
+	      
       
 	# My username
 	$me = getpwuid($<);
@@ -157,9 +162,8 @@ sub Query {
 	# Explain what perlbug is
 	
 	paraprint <<EOF;
-This program allows you to create a bug report,
-which will be sent as an e-mail message to $address
-once you have filled in the report.
+This program provides an easy way to create a message reporting a bug in
+perl, and e-mail it to $address.
 
 EOF
 
@@ -168,8 +172,8 @@ EOF
 	if(! $subject) {
 		paraprint <<EOF;
 First of all, please provide a subject for the 
-message. It should be as a concise description of 
-the bug as is possible.
+message. It should be a concise description of 
+the bug or problem.
 
 EOF
 		print "Subject: ";
@@ -209,7 +213,7 @@ EOF
 	                     
 	        if( !$domain) {
 	        	$guess = "";
-	        } elsif ($Is_VMS && !$::Config{'d_has_sockets'}) { 
+	        } elsif ($Is_VMS && !$::Config{'has_sockets'}) { 
 	        	$guess = "$domain\:\:$me";
 	        } else {
 		    	$guess = "$me\@$domain" if $domain;
@@ -283,7 +287,8 @@ EOF
 
 	$andcc = " and $cc" if $cc;
 
-
+editor:
+	
 	# Prompt for editor, if no override is given
 	if(! $::opt_e and ! $::opt_f and ! $::opt_b) {
 		paraprint <<EOF;
@@ -291,9 +296,16 @@ EOF
 
 Now you need to supply the bug report. Try to make
 the report concise but descriptive. Include any 
-relevant detail. Some information about your local
+relevant detail. If you are reporting something
+that does not work as you think it should, please
+try to include example of both the actual 
+result, and what you expected.
+
+Some information about your local
 perl configuration will automatically be included 
-at the end of the report. 
+at the end of the report. If you are using any
+unusual version of perl, please try and confirm
+exactly which versions are relevant.
 
 You will probably want to use an editor to enter
 the report. If "$ed" is the editor you want
@@ -309,8 +321,11 @@ EOF
 	
 		my($entry) =scalar(<>);
 		chop $entry;
-	
-		if($entry ne "") {
+		
+		$usefile = 0;
+		if($entry eq "file") {
+			$usefile = 1;
+		} elsif($entry ne "") {
 			$ed = $entry;
 		} 
 	}
@@ -328,9 +343,9 @@ EOF
 	
 	# Prompt for file to read report from, if needed
 	
-	if( $ed eq "file" and ! $file) {
+	if( $usefile and ! $file) {
+filename:
 		paraprint <<EOF;
-
 
 What is the name of the file that contains your report?
 
@@ -341,9 +356,24 @@ EOF
 		my($entry) = scalar(<>);
 		chop($entry);
 
+		if($entry eq "") {
+			paraprint <<EOF;
+			
+No filename? I'll let you go back and choose an editor again.			
+
+EOF
+			goto editor;
+		}
+		
 		if(!-f $entry or !-r $entry) {
-			print "\n\nUnable to read from `$entry'.\nExiting.\n";
-			exit;
+			paraprint <<EOF;
+			
+I'm sorry, but I can't read from `$entry'. Maybe you mistyped the name of
+the file? If you don't want to send a file, just enter a blank line and you
+can get back to the editor selection.
+
+EOF
+			goto filename;
 		}
 		$file = $entry;
 
@@ -362,8 +392,8 @@ EOF
 
 	if($body) {
 		print REP $body;
-	} elsif($file) {
-		open(F,"<$file") or die "Unable to read report file: $!\n";
+	} elsif($usefile) {
+		open(F,"<$file") or die "Unable to read report file from `$file': $!\n";
 		while(<F>) {
 		print REP $_
 		}
@@ -407,9 +437,26 @@ EOF
 
 sub Edit {
 	# Edit the report
+
+	if($usefile) {
+		$usefile = 0;
+		paraprint <<EOF;
+
+Please make sure that the name of the editor you want to use is correct.
+
+EOF
+		print "Editor [$ed]: ";
+		
+		my($entry) =scalar(<>);
+		chop $entry;
 	
-tryagain:	
-	if(!$file and !$body) {
+		if($entry ne "") {
+			$ed = $entry;
+		} 
+	}
+	
+tryagain:
+	if(!$usefile and !$body) {
 		my($sts) = system("$ed $filename");
 		if( $Is_VMS ? !($sts & 1) : $sts ) {
 			#print "\nUnable to run editor!\n";
@@ -493,6 +540,15 @@ Please type \"yes\" if you are: ";
 				chop($reply);
 				if( $reply eq "yes" ) {
 					last;
+				} else {
+					paraprint <<EOF;
+
+That wasn't a clear "yes", so I won't send your message. If you are sure
+your message should be sent, type in "yes" (without the quotes) at the
+confirmation prompt.
+
+EOF
+					
 				}
 			} elsif( $action =~ /^[er]/i ) { # <E>dit, <R>e-edit
 				# edit the message
