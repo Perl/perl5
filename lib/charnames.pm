@@ -268,11 +268,11 @@ charnames - define character names for C<\N{named}> string literal escapes
 
 Pragma C<use charnames> supports arguments C<:full>, C<:short> and
 script names.  If C<:full> is present, for expansion of
-C<\N{CHARNAME}}> string C<CHARNAME> is first looked in the list of
+C<\N{CHARNAME}> string C<CHARNAME> is first looked in the list of
 standard Unicode names of chars.  If C<:short> is present, and
 C<CHARNAME> has the form C<SCRIPT:CNAME>, then C<CNAME> is looked up
 as a letter in script C<SCRIPT>.  If pragma C<use charnames> is used
-with script name arguments, then for C<\N{CHARNAME}}> the name
+with script name arguments, then for C<\N{CHARNAME}> the name
 C<CHARNAME> is looked up as a letter in the given scripts (in the
 specified order).
 
