@@ -3069,6 +3069,23 @@ needed.  If you really wanted to do so, however, you could use
 the construction C<@{[ (some expression) ]}>, but usually a simple
 C<(some expression)> suffices.
 
+Though C<scalar> can be considered in general to be a unary operator,
+EXPR is also allowed to be a parenthesized list.  The list in fact
+behaves as a scalar comma expression, evaluating all but the last
+element in void context and returning the final element evaluated in
+a scalar context.
+
+The following single statement:
+
+	print uc(scalar(&foo,$bar)),$baz;
+
+is the moral equivalent of these two:
+
+	&foo;
+	print(uc($bar),$baz);
+
+See L<perlop> for more details on unary operators and the comma operator.
+
 =item seek FILEHANDLE,POSITION,WHENCE
 
 Sets FILEHANDLE's position, just like the C<fseek()> call of C<stdio()>.

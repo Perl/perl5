@@ -44,7 +44,7 @@ Many operators can be overloaded for objects.  See L<overload>.
 
 =head2 Terms and List Operators (Leftward)
 
-A TERM has the highest precedence in Perl.  They includes variables,
+A TERM has the highest precedence in Perl.  They include variables,
 quote and quote-like operators, any expression in parentheses,
 and any function whose arguments are parenthesized.  Actually, there
 aren't really functions in this sense, just list operators and unary
