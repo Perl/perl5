@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.56";
+our $VERSION   = "0.58";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(set_style set_style_standard add_callback
 		    concise_subref concise_cv concise_main);
@@ -382,7 +382,7 @@ $priv{$_}{128} = "LVINTRO"
        "padav", "padhv", "enteriter");
 $priv{$_}{64} = "REFC" for ("leave", "leavesub", "leavesublv", "leavewrite");
 $priv{"aassign"}{64} = "COMMON";
-$priv{"aassign"}{32} = "PHASH";
+$priv{"aassign"}{32} = "PHASH" if $] < 5.009;
 $priv{"sassign"}{64} = "BKWARD";
 $priv{$_}{64} = "RTIME" for ("match", "subst", "substcont");
 @{$priv{"trans"}}{1,2,4,8,16,64} = ("<UTF", ">UTF", "IDENT", "SQUASH", "DEL",
@@ -425,6 +425,18 @@ $priv{"threadsv"}{64} = "SVREFd";
 $priv{"exit"}{128} = "VMS";
 $priv{$_}{2} = "FTACCESS"
   for ("ftrread", "ftrwrite", "ftrexec", "fteread", "ftewrite", "fteexec");
+if ($] >= 5.009) {
+  # Stacked filetests are post 5.8.x
+  $priv{$_}{4} = "FTSTACKED"
+    for ("ftrread", "ftrwrite", "ftrexec", "fteread", "ftewrite", "fteexec",
+         "ftis", "fteowned", "ftrowned", "ftzero", "ftsize", "ftmtime",
+	 "ftatime", "ftctime", "ftsock", "ftchr", "ftblk", "ftfile", "ftdir",
+	 "ftpipe", "ftlink", "ftsuid", "ftsgid", "ftsvtx", "fttty", "fttext",
+	 "ftbinary");
+  # Lexical $_ is post 5.8.x
+  $priv{$_}{2} = "GREPLEX"
+    for ("mapwhile", "mapstart", "grepwhile", "grepstart");
+}
 
 sub private_flags {
     my($name, $x) = @_;
@@ -498,7 +510,17 @@ sub concise_op {
 	if (defined $padname and class($padname) ne "SPECIAL") {
 	    $h{targarg}  = $padname->PVX;
 	    if ($padname->FLAGS & SVf_FAKE) {
-		$h{targarglife} = "$h{targarg}:FAKE";
+		if ($] < 5.009) {
+		    $h{targarglife} = "$h{targarg}:FAKE";
+		} else {
+		    # These changes relate to the jumbo closure fix.
+		    # See changes 19939 and 20005
+		    my $fake = '';
+		    $fake .= 'a' if $padname->IVX & 1; # PAD_FAKELEX_ANON
+		    $fake .= 'm' if $padname->IVX & 2; # PAD_FAKELEX_MULTI
+		    $fake .= ':' . $padname->NVX if $curcv->CvFLAGS & CVf_ANON;
+		    $h{targarglife} = "$h{targarg}:FAKE:$fake";
+		}
 	    }
 	    else {
 		my $intro = $padname->NVX - $cop_seq_base;
