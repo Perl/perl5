@@ -115,7 +115,16 @@ Todo.
 
 =head1 New Diagnostics
 
-Todo.
+=item /%s/: Unrecognized escape \\%c passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl.  This combination appears in an interpolated variable or a 
+C<'>-delimited regular expression.
+
+=item Unrecognized escape \\%c passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl.
 
 =head1 Obsolete Diagnostics
 
