@@ -74,9 +74,30 @@ indicator:
 
 
 ----------------
-Version 5.005_04        Fourth maintenance release of 5.005
+Version 5.005_04-tobe        Fourth maintenance release of 5.005
 ----------------
 
+____________________________________________________________________________
+[ 21792] By: acme                                  on 2003/11/28  11:47:18
+        Log: Merge in DB_File-1.807 from CPAN
+             Also, alphabetically sort MANIFEST
+     Branch: maint-5.005/perl
+           + ext/DB_File/MANIFEST ext/DB_File/META.yml
+           + ext/DB_File/Makefile.old ext/DB_File/README
+           + ext/DB_File/config.in ext/DB_File/fallback.h
+           + ext/DB_File/fallback.xs ext/DB_File/hints/sco.pl
+           + ext/DB_File/patches/5.004 ext/DB_File/patches/5.004_01
+           + ext/DB_File/patches/5.004_02 ext/DB_File/patches/5.004_03
+           + ext/DB_File/patches/5.004_04 ext/DB_File/patches/5.004_05
+           + ext/DB_File/patches/5.005 ext/DB_File/patches/5.005_01
+           + ext/DB_File/patches/5.005_02 ext/DB_File/patches/5.005_03
+           + ext/DB_File/patches/5.6.0 ext/DB_File/ppport.h
+           + ext/DB_File/version.c
+           ! MANIFEST ext/DB_File/Changes ext/DB_File/DB_File.pm
+           ! ext/DB_File/DB_File.xs ext/DB_File/DB_File_BS
+           ! ext/DB_File/Makefile.PL ext/DB_File/dbinfo
+           ! ext/DB_File/hints/dynixptx.pl ext/DB_File/typemap
+           ! t/lib/db-btree.t t/lib/db-hash.t t/lib/db-recno.t
 ____________________________________________________________________________
 [ 21790] By: acme                                  on 2003/11/28  08:41:42
         Log: Subject: [PATCH perl5.005_03] low hanging fruit.  bring
