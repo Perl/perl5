@@ -338,7 +338,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
 
     if (grows) {
 	/* d needs to be bigger than s, in case e.g. upgrading is required */
-	New(0, d, len*3+UTF8_MAXLEN, U8);
+	New(0, d, len * 3 + UTF8_MAXBYTES, U8);
 	dend = d + len * 3;
 	dstart = d;
     }
@@ -370,10 +370,10 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
 
 	if (d > dend) {
 	    STRLEN clen = d - dstart;
-	    STRLEN nlen = dend - dstart + len + UTF8_MAXLEN;
+	    STRLEN nlen = dend - dstart + len + UTF8_MAXBYTES;
 	    if (!grows)
 		Perl_croak(aTHX_ "panic: do_trans_simple_utf8 line %d",__LINE__);
-	    Renew(dstart, nlen+UTF8_MAXLEN, U8);
+	    Renew(dstart, nlen + UTF8_MAXBYTES, U8);
 	    d = dstart + clen;
 	    dend = dstart + nlen;
 	}
@@ -480,7 +480,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv)
 
     if (grows) {
 	/* d needs to be bigger than s, in case e.g. upgrading is required */
-	New(0, d, len*3+UTF8_MAXLEN, U8);
+	New(0, d, len * 3 + UTF8_MAXBYTES, U8);
 	dend = d + len * 3;
 	dstart = d;
     }
@@ -496,10 +496,10 @@ S_do_trans_complex_utf8(pTHX_ SV *sv)
 	
 	    if (d > dend) {
 	        STRLEN clen = d - dstart;
-		STRLEN nlen = dend - dstart + len + UTF8_MAXLEN;
+		STRLEN nlen = dend - dstart + len + UTF8_MAXBYTES;
 		if (!grows)
 		    Perl_croak(aTHX_ "panic: do_trans_complex_utf8 line %d",__LINE__);
-		Renew(dstart, nlen+UTF8_MAXLEN, U8);
+		Renew(dstart, nlen + UTF8_MAXBYTES, U8);
 		d = dstart + clen;
 		dend = dstart + nlen;
 	    }
@@ -550,10 +550,10 @@ S_do_trans_complex_utf8(pTHX_ SV *sv)
 	    uv = swash_fetch(rv, s, TRUE);
 	    if (d > dend) {
 	        STRLEN clen = d - dstart;
-		STRLEN nlen = dend - dstart + len + UTF8_MAXLEN;
+		STRLEN nlen = dend - dstart + len + UTF8_MAXBYTES;
 		if (!grows)
 		    Perl_croak(aTHX_ "panic: do_trans_complex_utf8 line %d",__LINE__);
-		Renew(dstart, nlen+UTF8_MAXLEN, U8);
+		Renew(dstart, nlen + UTF8_MAXBYTES, U8);
 		d = dstart + clen;
 		dend = dstart + nlen;
 	    }

@@ -111,8 +111,8 @@ is("\u\x{587}" , "\x{535}\x{582}", "ligature titlecase");
 is("\U\x{587}" , "\x{535}\x{552}", "ligature uppercase");
 
 # mktables had problems where many-to-one case mappings didn't work right.
-# The lib/unifold.t should give the fourth folding, "casefolding", a good
-# workout. 
+# The lib/uni/fold.t should give the fourth folding, "casefolding", a good
+# workout (one cannot directly get that from Perl). 
 # \x{01C4} is LATIN CAPITAL LETTER DZ WITH CARON
 # \x{01C5} is LATIN CAPITAL LETTER D WITH SMALL LETTER Z WITH CARON
 # \x{01C6} is LATIN SMALL LETTER DZ WITH CARON
@@ -161,6 +161,5 @@ for my $a (0,1) {
 	chop $a;
 	$a =~ s/^(\s*)(\w*)/$1\u$2/;
 	is($a, v10, "[perl #18857]");
-	$test++;
     } 
 }
