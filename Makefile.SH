@@ -490,7 +490,7 @@ preplibrary: miniperl lib/Config.pm
 # Take care to avoid modifying lib/Config.pm without reason
 # (If trying to create a new port and having problems with the configpm script, 
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
-lib/Config.pm: config.sh miniperl configpm
+lib/Config.pm: config.sh miniperl configpm lib/re.pm
 	$(LDLIBPTH) ./miniperl configpm configpm.tmp
 	sh mv-if-diff configpm.tmp $@
 
@@ -502,7 +502,7 @@ lib/re.pm: ext/re/re.pm
 	rm -f $@
 	cat ext/re/re.pm > $@
 
-$(plextract):	miniperl lib/Config.pm lib/re.pm
+$(plextract):	miniperl lib/Config.pm
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
 
 extra.pods: miniperl
