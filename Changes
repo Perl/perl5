@@ -31,6 +31,594 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9358] By: jhi                                   on 2001/03/26  02:05:32
+        Log: Document the most common pixie options.
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[  9357] By: jhi                                   on 2001/03/26  01:25:28
+        Log: For perl.pixie check *before* compiling that optimize is -g,
+             as for perl.third.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9356] By: jhi                                   on 2001/03/26  01:13:41
+        Log: rmdir lib/Digest, lib/MIME, and lib/PerlIO.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9355] By: jhi                                   on 2001/03/26  01:11:19
+        Log: Remove t/perl.third.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9354] By: jhi                                   on 2001/03/26  00:23:38
+        Log: Implement IO::Socket::atmark(), inspired by Lincoln Stein's
+             IO::Sockatmark().
+             
+             TODO:
+             - have a IO::Sockatmark wrapper for backward compatibility?
+             (need to check Lincoln's book)
+             - add HAS_SOCKATMARK, I_SYS_SOCKIO, and I_SYS_SOCKIOS probes
+             (now uses only the SIOCATMARK ioctl, if available)
+     Branch: perl
+	   ! ext/IO/IO.xs ext/IO/lib/IO/Socket.pm
+____________________________________________________________________________
+[  9353] By: jhi                                   on 2001/03/25  22:25:04
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Encode.pm ext/Encode/Encode.xs
+	  !> ext/PerlIO/Scalar/Scalar.xs perl.c perlio.c perlio.h perliol.h
+	  !> pp_hot.c win32/makefile.mk
+____________________________________________________________________________
+[  9352] By: jhi                                   on 2001/03/25  22:21:41
+        Log: Subject: Re: [ID 20010215.006] Bad arg length for Socket::unpack_sockaddr_un, length is 14 ...
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Fri, 23 Mar 2001 21:14:59 +0200 (EET)
+             Message-ID: <15035.41139.646781.478457@ix.netsoft.ro>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  9351] By: nick                                  on 2001/03/25  22:15:02
+        Log: Fix readline in list mode to tell rest of world that it has
+             things on the stack. Otherwise if perl code gets invoked
+             underneath it it scribbles over results-so-far.
+             (Why TIEHANDLE has not tripped on this is a mystery.)
+     Branch: perlio
+	   ! pp_hot.c
+____________________________________________________________________________
+[  9350] By: nick                                  on 2001/03/25  22:10:13
+        Log: win32/makefile.mk typos
+     Branch: perlio
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9349] By: nick                                  on 2001/03/25  21:31:14
+        Log: Integrate now-non-binary file.
+     Branch: perlio
+	  !> t/lib/mimeqp.t
+____________________________________________________________________________
+[  9348] By: nick                                  on 2001/03/25  21:27:24
+        Log: Make it text
+     Branch: perlio
+	   ! t/lib/mimeqp.t
+____________________________________________________________________________
+[  9347] By: nick                                  on 2001/03/25  21:25:37
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> ext/Digest/MD5/MD5.pm ext/MIME/Base64/Base64.pm
+	  !> lib/Term/ReadLine.pm t/lib/md5-file.t
+____________________________________________________________________________
+[  9346] By: nick                                  on 2001/03/25  20:58:15
+        Log: Add destruct time hook to PerlIO (for work-in-process implementing
+             layers in perl code. In such cases layers need to be popped before
+             we loose the ability to run perl code.)
+             Also back-out "PerlIO::object" hook - it isn't going to work like that...
+     Branch: perlio
+	   ! perl.c perlio.c perlio.h perliol.h
+____________________________________________________________________________
+[  9345] By: nick                                  on 2001/03/25  20:49:11
+        Log: Avoid at leasy one of undefined warnings in Encode.
+     Branch: perlio
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs
+____________________________________________________________________________
+[  9344] By: jhi                                   on 2001/03/25  20:37:43
+        Log: A workaround for using Term::ReadLine in emacs minibuffer
+             from Wybo Dekker <wybo@servalys.nl> and Johan Vromans;
+             additional tweaks from Ilya Zakharevich.
+     Branch: perl
+	   ! lib/Term/ReadLine.pm
+____________________________________________________________________________
+[  9343] By: nick                                  on 2001/03/25  20:21:14
+        Log: Missing return value.
+     Branch: perlio
+	   ! ext/PerlIO/Scalar/Scalar.xs
+____________________________________________________________________________
+[  9342] By: jhi                                   on 2001/03/25  16:21:00
+        Log: Roll back the version numbers of Digest::MD5 and MIME::Base64
+             to equal the CPAN versions since no code changes have been made.
+     Branch: perl
+	   ! ext/Digest/MD5/MD5.pm ext/MIME/Base64/Base64.pm
+	   ! t/lib/md5-file.t
+____________________________________________________________________________
+[  9341] By: jhi                                   on 2001/03/25  16:01:48
+        Log: Escape 8-bit characters.
+     Branch: perl
+	   ! t/lib/mimeqp.t
+____________________________________________________________________________
+[  9340] By: gsar                                  on 2001/03/25  15:50:53
+        Log: readd mimeqp.t as xtext (used to be binary because of the literal 8-bit
+             chars)
+     Branch: perl
+	   + t/lib/mimeqp.t
+____________________________________________________________________________
+[  9339] By: gsar                                  on 2001/03/25  15:48:50
+        Log: delete mimeqp.t for later with text mode set
+     Branch: perl
+	   - t/lib/mimeqp.t
+____________________________________________________________________________
+[  9338] By: nick                                  on 2001/03/25  09:01:57
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> ext/MIME/Base64/Base64.pm ext/MIME/Base64/Base64.xs
+	  +> ext/MIME/Base64/Changes ext/MIME/Base64/Makefile.PL
+	  +> ext/MIME/Base64/QuotedPrint.pm t/lib/mimeb64.t
+	  +> t/lib/mimeb64u.t t/lib/mimeqp.t
+	  !> MANIFEST configure.com djgpp/config.over epoc/config.sh
+	  !> hints/uts.sh hints/uwin.sh hints/vmesa.sh t/lib/md5-file.t
+	  !> utils/h2xs.PL win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9337] By: jhi                                   on 2001/03/25  04:23:24
+        Log: Add MIME::Base64 here and there.  Again, a lot of
+             optimism is in the air.
+     Branch: perl
+	   ! configure.com djgpp/config.over epoc/config.sh hints/uts.sh
+	   ! hints/uwin.sh hints/vmesa.sh win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9336] By: jhi                                   on 2001/03/25  04:12:43
+        Log: Add PerlIO::Scalar to win32/Makefile. (I'm doing
+             this by ear as I do not do Win32 programming.)
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9335] By: jhi                                   on 2001/03/25  04:03:50
+        Log: Put back the MD5-Base64 tests now that we have MIME::Base64.
+     Branch: perl
+	   ! t/lib/md5-file.t
+____________________________________________________________________________
+[  9334] By: jhi                                   on 2001/03/25  03:58:53
+        Log: Add MIME::Base 2.12 from Gisle Aas, version number bumped to 2.13.
+     Branch: perl
+	   + ext/MIME/Base64/Base64.pm ext/MIME/Base64/Base64.xs
+	   + ext/MIME/Base64/Changes ext/MIME/Base64/Makefile.PL
+	   + ext/MIME/Base64/QuotedPrint.pm t/lib/mimeb64.t
+	   + t/lib/mimeb64u.t t/lib/mimeqp.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9333] By: jhi                                   on 2001/03/24  20:14:37
+        Log: Integrate perlio.
+     Branch: perl
+	  !> doio.c pod/perlfunc.pod pod/perliol.pod win32/makefile.mk
+____________________________________________________________________________
+[  9332] By: nick                                  on 2001/03/24  19:40:34
+        Log: Fix un-init variable leading to spurious "Out of Memory!"
+     Branch: perlio
+	   ! doio.c
+____________________________________________________________________________
+[  9331] By: nick                                  on 2001/03/24  19:09:59
+        Log: Tweak docs for C<open> (boy does that need wholesale revision...)
+             and update layers internals doc.
+     Branch: perlio
+	   ! pod/perlfunc.pod pod/perliol.pod
+____________________________________________________________________________
+[  9330] By: jhi                                   on 2001/03/24  18:42:11
+        Log: The length might be uninitialized garbage if the *svp is the undef.
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[  9329] By: jhi                                   on 2001/03/24  18:26:57
+        Log: Subject: [PATCH h2xs] $!{EINVAL} requires "use Errno"
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Sat, 24 Mar 2001 17:13:17 +0000
+             Message-ID: <20010324171317.A13406@netthink.co.uk>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  9328] By: nick                                  on 2001/03/24  17:22:02
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> lib/unicode/Names.txt lib/unicode/ReadMe.txt
+	  !> lib/unicode/version
+____________________________________________________________________________
+[  9327] By: nick                                  on 2001/03/24  17:16:02
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> ext/Digest/MD5/Changes ext/Digest/MD5/MD5.pm
+	  +> ext/Digest/MD5/MD5.xs ext/Digest/MD5/Makefile.PL
+	  +> ext/Digest/MD5/hints/irix_6.pl ext/Digest/MD5/typemap
+	  +> lib/Digest.pm t/lib/digest.t t/lib/md5-aaa.t t/lib/md5-badf.t
+	  +> t/lib/md5-file.t
+	  !> MANIFEST Makefile.SH configure.com djgpp/config.over
+	  !> epoc/config.sh ext/DynaLoader/hints/aix.pl hints/aix.sh
+	  !> hints/uts.sh hints/uwin.sh hints/vmesa.sh lib/Net/Ping.pm op.c
+	  !> pp.c t/lib/b.t t/op/re_tests t/op/repeat.t win32/Makefile
+	  !> win32/makefile.mk
+____________________________________________________________________________
+[  9326] By: jhi                                   on 2001/03/24  17:00:42
+        Log: Upgrade to Unicode 3.1 beta 2001-03-23.
+     Branch: perl
+	   ! lib/unicode/Names.txt lib/unicode/ReadMe.txt
+	   ! lib/unicode/version
+____________________________________________________________________________
+[  9325] By: jhi                                   on 2001/03/24  16:22:33
+        Log: Subject: Re: B::Deparse bug (5.6.0)
+             From: Robin Houston <robin@kitsite.com>
+             Date: Sat, 24 Mar 2001 14:33:09 +0000
+             Message-ID: <20010324143309.B17734@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! op.c pp.c t/lib/b.t t/op/repeat.t
+____________________________________________________________________________
+[  9324] By: jhi                                   on 2001/03/24  16:21:56
+        Log: Boldly add extensions to be built to VMS, EPOC, UTS,
+             U/WIN, and VM/ESA (and fixups for DJGPP).  Some of
+             these additions may be too optimistic.
+     Branch: perl
+	   ! configure.com djgpp/config.over epoc/config.sh hints/uts.sh
+	   ! hints/uwin.sh hints/vmesa.sh
+____________________________________________________________________________
+[  9323] By: jhi                                   on 2001/03/24  16:06:01
+        Log: Integrate perlio.
+     Branch: perl
+	  +> ext/PerlIO/Scalar/Makefile.PL ext/PerlIO/Scalar/Scalar.pm
+	  +> ext/PerlIO/Scalar/Scalar.xs t/lib/io_scalar.t
+	   ! Makefile.SH
+	  !> MANIFEST doio.c embed.h ext/Encode/Encode.xs
+	  !> ext/POSIX/POSIX.xs global.sym iperlsys.h makedef.pl objXSUB.h
+	  !> perlapi.c perlio.c perliol.h proto.h t/io/open.t t/io/utf8.t
+	  !> win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	  !> win32/makefile.mk win32/perlhost.h win32/win32.c
+	  !> win32/win32iop.h
+____________________________________________________________________________
+[  9322] By: nick                                  on 2001/03/24  14:39:12
+        Log: Routine Win32 regen_config_h - no real changes.
+     Branch: perlio
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  9321] By: nick                                  on 2001/03/24  14:31:49
+        Log: PerlIO fixups for Win32:
+             - provide win33_popenlist() - non-functional as yet.
+             - avoid need for aTHX in PerlIO_debug calls - even if not 
+             enabled args are still evaluated so Win32 has trouble during fork().
+             - Add PerlIO/Scalar to list of extensions in win32/makefile.mk
+             - Fixup makedef.pl for latest set of symbols.
+     Branch: perlio
+	   ! iperlsys.h makedef.pl perlio.c win32/makefile.mk
+	   ! win32/perlhost.h win32/win32.c win32/win32iop.h
+____________________________________________________________________________
+[  9320] By: nick                                  on 2001/03/24  14:26:58
+        Log: POSIX::getcwd XS code to call Cwd::cwd when HAS_GETCWD not defined
+             was gibberish - broke it on WIn32 at least.
+     Branch: perlio
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  9319] By: nick                                  on 2001/03/24  11:29:41
+        Log: Generated files.
+     Branch: perlio
+	   ! embed.h global.sym objXSUB.h perlapi.c proto.h
+____________________________________________________________________________
+[  9318] By: nick                                  on 2001/03/24  10:29:37
+        Log: Implement:
+             1.  open($fh,"+<",undef);  # add test to t/io/open.t
+             2.  open($fh,"+<",\$var);  # New test t/lib/io_scalar.t
+     Branch: perlio
+	   + ext/PerlIO/Scalar/Makefile.PL ext/PerlIO/Scalar/Scalar.pm
+	   + ext/PerlIO/Scalar/Scalar.xs t/lib/io_scalar.t
+	   ! MANIFEST doio.c ext/Encode/Encode.xs perlio.c perliol.h
+	   ! t/io/open.t t/io/utf8.t
+____________________________________________________________________________
+[  9317] By: jhi                                   on 2001/03/23  23:41:25
+        Log: AIX does seems to have optimization problems with its C compilers.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[  9316] By: jhi                                   on 2001/03/23  23:40:46
+        Log: Integrate perlio.
+     Branch: perl
+	  +> lib/PerlIO.pm
+	  !> MANIFEST doio.c ext/Encode/Encode.xs perlio.c perlio.h
+	  !> perliol.h
+____________________________________________________________________________
+[  9315] By: jhi                                   on 2001/03/23  22:16:30
+        Log: Fix the EBCDIC MD5.pm checksum, from Pter Prymmer.
+     Branch: perl
+	   ! t/lib/md5-file.t
+____________________________________________________________________________
+[  9314] By: nick                                  on 2001/03/23  20:49:02
+        Log: Perlio internals re-organized.
+             - open process creates AV of layer/arg pairs
+             (appends layers from open() or open.pm to default list).
+             - push arg is now an SV.
+             - layer ->Open get passed the AV
+             - open is no longer mandatory method.
+             - topmost layer that has ->Open method does the open
+             - any layers above are pushed once that returns.
+             - vtable re-ordered so dummy layers need only provide push/pop methods.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs perlio.c perlio.h perliol.h
+____________________________________________________________________________
+[  9313] By: nick                                  on 2001/03/23  16:27:41
+        Log: Check in a stable (working) version before next round of tweaks.
+             Changes include:
+             - Move default layers code out of doio.c and into perlio.c
+             - Single routine for parsing layer specification strings.
+             - Skeleton support for demand loading of layers
+             - Core-dump avoidance if PERLIO environment specifies loadable layer
+             (does not _work_ as need IO to load and need load to do IO ...)
+     Branch: perlio
+	   + lib/PerlIO.pm
+	   ! MANIFEST doio.c perlio.c
+____________________________________________________________________________
+[  9312] By: gsar                                  on 2001/03/23  16:25:25
+        Log: add execute bit to files with shebang lines in the repository;
+             avoid clobbering execute bit in Porting/makerel 
+     Branch: maint-5.6/perl
+	   ! (edit 144 files)
+____________________________________________________________________________
+[  9311] By: jhi                                   on 2001/03/23  14:25:35
+        Log: Forgot the unneeded hints/dec_osf.pl into MANIFEST in #9308.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  9310] By: jhi                                   on 2001/03/23  13:45:04
+        Log: Subject: [PATCH] Net::Ping
+             From: Colin McMillen <mcmi0037@tc.umn.edu>
+             Date: Thu, 22 Mar 2001 19:30:31 -0600
+             Message-ID: <20010322193031.A18814@strago.jenovaproject.org>
+     Branch: perl
+	   ! lib/Net/Ping.pm
+____________________________________________________________________________
+[  9309] By: jhi                                   on 2001/03/23  13:39:13
+        Log: EBCDIC patches for Digest::MD5 tests from Peter Prymmer.
+     Branch: perl
+	   ! t/lib/md5-aaa.t t/lib/md5-file.t
+____________________________________________________________________________
+[  9308] By: jhi                                   on 2001/03/23  13:20:34
+        Log: Integrate Digest-1.00 and Digest-MD5-2.13, from Gisle Aas.
+             - bump the version to 2.14
+             - drop the base64 tests since they require MIME::Base64
+             - drop the rfc1321.txt
+             - drop the hints/dec_osf.pl since it's only needed for
+             pre-5.005_03 Perls
+             Todo:
+             - the U32 alignment testing is now removed; it needs to
+             be reintroduced as as a Config variable (meaning also
+             as a Configure test)
+             - get the new EBCDIC md5sum for MD5.pm
+             - test in Win32 to see how badly I botched the makefiles
+     Branch: perl
+	   + ext/Digest/MD5/Changes ext/Digest/MD5/MD5.pm
+	   + ext/Digest/MD5/MD5.xs ext/Digest/MD5/Makefile.PL
+	   + ext/Digest/MD5/hints/irix_6.pl ext/Digest/MD5/typemap
+	   + lib/Digest.pm t/lib/digest.t t/lib/md5-aaa.t t/lib/md5-badf.t
+	   + t/lib/md5-file.t
+	   ! MANIFEST configure.com hints/uwin.sh hints/vmesa.sh
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9307] By: jhi                                   on 2001/03/23  12:56:14
+        Log: Integrate change #9306 from maintperl into mainline,
+             AIX dynaloader for AIXes without <load.h>.
+     Branch: perl
+	  !> ext/DynaLoader/hints/aix.pl
+____________________________________________________________________________
+[  9306] By: jhi                                   on 2001/03/23  12:51:36
+        Log: There are AIXes without /usr/include/load.h,
+             patch from H.Merijn Brand.
+     Branch: maint-5.6/perl
+	   ! ext/DynaLoader/hints/aix.pl
+____________________________________________________________________________
+[  9305] By: nick                                  on 2001/03/23  11:00:42
+        Log: Add pTHX_ to -Duseperlio API where it does not conflict with legacy stuff.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs perlio.c perlio.h
+____________________________________________________________________________
+[  9304] By: nick                                  on 2001/03/23  10:20:46
+        Log: Render -Duseperlio functional again.
+             - this is "quick fix" which calls PerlIO_apply_layers after opening,
+             which is what old scheme did. New scheme needs to change that
+             to make open(...,\$scalar) etc. work but this will do for now.
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[  9303] By: nick                                  on 2001/03/23  09:53:20
+        Log: Avoid "reopen" semantics for time being. Fix bug in dup logic.
+             -Uuseperlio now works again.
+             -Duseperlio is still poorly. Don't merge yet...
+     Branch: perlio
+	   ! doio.c perlio.h
+____________________________________________________________________________
+[  9302] By: nick                                  on 2001/03/22  22:26:51
+        Log: Snapshot of new PerlIO open scheme. Still buggy - mainly in open($fh,">&STDOUT!")
+             type code.
+             - Invent PerlIO_openn() - which has "lots" of args a bit like do_openn() which
+             is its main caller. In particular now has access to "extra" args, and
+             can tell when an open handle is "reopened" (or duped?).
+             - In -Duseperlio PerlIO_open() et. al. are now wrappers on PerlIO_openn().
+             - In -Uuseperlio (untested as yet) PerlIO_openn() is a wrapper on
+             PerlIO_open() et. al. (i.e. other way round).
+             - Collapse "vtable" entries for layers - was fdopen/open/reopen now just open
+             with args close to PerlIO_openn().
+     Branch: perlio
+	   ! doio.c ext/Encode/Encode.xs perlio.c perlio.h perliol.h
+____________________________________________________________________________
+[  9301] By: jhi                                   on 2001/03/22  20:58:04
+        Log: Integrate perlio.
+     Branch: perl
+	  !> doio.c embed.pl iperlsys.h perl.c perlio.c pp_hot.c pp_sys.c
+	  !> t/io/open.t util.c
+____________________________________________________________________________
+[  9300] By: nick                                  on 2001/03/22  17:36:32
+        Log: Don't include $@ in not ok message.
+     Branch: perlio
+	   ! t/io/open.t
+____________________________________________________________________________
+[  9299] By: gsar                                  on 2001/03/22  16:53:45
+        Log: back out changes#7532,7521 for now (appears to have problems
+             on IRIX)
+     Branch: maint-5.6/perl
+	   ! ext/POSIX/POSIX.pm ext/POSIX/POSIX.pod ext/POSIX/POSIX.xs
+	   ! ext/POSIX/typemap pod/perlvar.pod
+____________________________________________________________________________
+[  9298] By: nick                                  on 2001/03/22  14:35:46
+        Log: Give a meaning to '&' in n-arg open case:
+             open($fh,"<&",$scalar);
+             $scalar can be:
+             - an integer which does "fdopen"
+             open($fh,"<&",2); # like open($fh,"<&2")
+             - something that will yield a file handle via sv_2io()
+             useful for dup'ing anonymous handles.
+             e.g.:
+             open(my $fh,"<&",\*STDIN);
+             open(my $dup,"<&",$fh);
+     Branch: perlio
+	   ! doio.c t/io/open.t
+____________________________________________________________________________
+[  9297] By: nick                                  on 2001/03/22  13:34:35
+        Log: Implement open($fh,"-|",prog,args...) for HAS_FORK cases.
+     Branch: perlio
+	   ! util.c
+____________________________________________________________________________
+[  9296] By: nick                                  on 2001/03/22  12:51:20
+        Log: Re-instate warnings for 'eof STDOUT' etc. by marking STD* as appropriate IoTYPE.
+     Branch: perlio
+	   ! perl.c
+____________________________________________________________________________
+[  9295] By: nick                                  on 2001/03/22  11:59:44
+        Log: If stdin, stdout or stderr get opened in unexpected read/write state
+             then warn at time of open not at time of use.
+     Branch: perlio
+	   ! doio.c pp_hot.c pp_sys.c
+____________________________________________________________________________
+[  9294] By: nick                                  on 2001/03/22  10:54:35
+        Log: Die on n-arg open(...,"",xxx,yyy,...)
+             - redirect pipe cases to PerlProc_popen_list() (which just croaks for now)
+             - die on read/write cases so we can decide what it means later.
+     Branch: perlio
+	   ! doio.c embed.pl iperlsys.h util.c
+____________________________________________________________________________
+[  9293] By: nick                                  on 2001/03/22  09:02:45
+        Log: perlio tweaks (reported by Nick Clark)
+             Line buffer ttys, PerlIOBuf_tell() on unseekable off-by one,
+             error check in Pendinf_read().
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[  9292] By: gsar                                  on 2001/03/22  07:12:00
+        Log: integrate changes#8306,8532 from mainline (missing USE_PURE_BISON
+             fixes)
+     Branch: maint-5.6/perl
+	  !> embed.h embed.pl objXSUB.h perlapi.c perly.y proto.h toke.c
+____________________________________________________________________________
+[  9291] By: jhi                                   on 2001/03/22  06:06:44
+        Log: Regex tests from Chicheng Zhang.  (Already fixed.)
+     Branch: perl
+	   ! t/op/re_tests
+____________________________________________________________________________
+[  9290] By: jhi                                   on 2001/03/22  05:57:01
+        Log: Move MacOS Classic higher in the list of supported platforms.
+     Branch: maint-5.6/perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  9289] By: gsar                                  on 2001/03/22  05:35:04
+        Log: revert part of change#6438 for compatibility (av_reify()
+             appears to be needed to implement av_splice()ish things
+             in XS)
+     Branch: maint-5.6/perl
+	   ! embed.pl global.sym objXSUB.h perlapi.c
+____________________________________________________________________________
+[  9288] By: gsar                                  on 2001/03/22  03:09:19
+        Log: update copyright year
+     Branch: maint-5.6/perl
+	   ! EXTERN.h INTERN.h README av.c av.h cop.h cv.h deb.c doio.c
+	   ! doop.c dump.c form.h gv.c gv.h handy.h hv.c hv.h mg.c mg.h
+	   ! op.c op.h perl.c perl.h perlio.c perly.y pp.c pp.h pp_ctl.c
+	   ! pp_hot.c pp_sys.c regcomp.c regexec.c run.c scope.c sv.c sv.h
+	   ! toke.c utf8.c utf8.h util.c util.h x2p/EXTERN.h x2p/INTERN.h
+	   ! x2p/a2p.c x2p/a2p.h x2p/a2p.y x2p/a2py.c x2p/hash.c x2p/hash.h
+	   ! x2p/proto.h x2p/str.c x2p/str.h x2p/util.c x2p/util.h
+	   ! x2p/walk.c
+____________________________________________________________________________
+[  9287] By: jhi                                   on 2001/03/21  20:30:54
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Data/Dumper/Dumper.xs
+____________________________________________________________________________
+[  9286] By: gsar                                  on 2001/03/21  19:49:54
+        Log: makefile.mk tweak
+     Branch: maint-5.6/perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9285] By: nick                                  on 2001/03/21  19:07:13
+        Log: Multiplicity fix for Dumper.
+     Branch: perlio
+	   ! ext/Data/Dumper/Dumper.xs
+____________________________________________________________________________
+[  9284] By: nick                                  on 2001/03/21  19:01:07
+        Log: Integrate mainline - (does not build xTHX issue in Dumper).
+     Branch: perlio
+	  !> (integrate 27 files)
+____________________________________________________________________________
+[  9283] By: jhi                                   on 2001/03/21  17:17:35
+        Log: Integrate change #9282 from mainline into maintperl,
+             4-arg UTF-8 substr().
+     Branch: maint-5.6/perl
+	  !> pp.c
+____________________________________________________________________________
+[  9282] By: jhi                                   on 2001/03/21  17:15:43
+        Log: The #9270 would have leaked a scalar if pp_substr()
+             returned early.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  9281] By: gsar                                  on 2001/03/21  17:03:14
+        Log: makefile.mk defaults to GCC, not BORLAND (as mentioned in README.win32)
+     Branch: maint-5.6/perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9280] By: gsar                                  on 2001/03/21  17:01:20
+        Log: some tweaks to change#9278 (fork() emulation should be enabled
+             by setting BUILD_FLAVOR instead of changing the defaults)
+     Branch: maint-5.6/perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9279] By: gsar                                  on 2001/03/21  16:47:19
+        Log: integrate change#9271 from mainline; a tweak to Glob.pm docs
+     Branch: maint-5.6/perl
+	   ! ext/File/Glob/Glob.pm
+	  !> lib/Cwd.pm
+____________________________________________________________________________
+[  9278] By: jhi                                   on 2001/03/21  14:35:10
+        Log: Subject: [PATCH: 5.6.1-trial3] Borland C++ for Win32 fixes
+             From: "Vadim Konovalov" <watman@inbox.ru>
+             Date: Wed, 21 Mar 2001 01:53:51 +0300
+             Message-ID: <004101c0b190$a749ea20$f7c030d4@vad>
+     Branch: maint-5.6/perl
+	   ! win32/makefile.mk win32/win32sck.c
+____________________________________________________________________________
+[  9277] By: jhi                                   on 2001/03/21  13:58:28
+        Log: Integrate change #9270 from mainline to maintperl:
+             continued 4-arg UTF-8 substr() fixing.
+     Branch: maint-5.6/perl
+	  !> pp.c t/op/substr.t
+____________________________________________________________________________
+[  9276] By: jhi                                   on 2001/03/21  13:33:00
+        Log: More pixie cleaning.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9275] By: jhi                                   on 2001/03/21  03:54:17
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9274] By: jhi                                   on 2001/03/21  03:48:24
         Log: First stab at making Data::Dumper to grok Unicode.
              
@@ -1529,8 +2117,7 @@ ____________________________________________________________________________
 	   ! Makefile.SH
 ____________________________________________________________________________
 [  9077] By: jhi                                   on 2001/03/08  01:06:13
-        Log: Upgrade to Unicode 3.1 beta 2001-03-01.  The 3.1 final
-             should come out March 14.
+        Log: Upgrade to Unicode 3.1 beta 2001-03-01.
      Branch: perl
 	   + lib/unicode/Scripts.txt
 	   ! MANIFEST lib/unicode/Category.pl lib/unicode/Decomposition.pl
