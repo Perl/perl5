@@ -84,6 +84,17 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 -x 't/TEST'		|| warn "WARNING: You've never run 'make test'!!!",
 	"  (Installing anyway.)\n";
 
+if ($^O eq 'MSWin32') {
+
+-f 'perl.' . $dlext || die "No perl DLL built\n";
+
+# Install the DLL
+
+safe_unlink("$installbin/perl.$dlext");
+copy("perl.$dlext", "$installbin/perl.$dlext");
+chmod(0755, "$installbin/perl.$dlext");
+}
+
 # First we install the version-numbered executables.
 
 safe_unlink("$installbin/perl$ver$exe_ext");
@@ -256,7 +267,7 @@ if (! $versiononly || !($installprivlib =~ m/\Q$]/)) {
 
 if (!$versiononly) {
 
-    $dirsep = ($^O eq 'os2') ? ';' : ':' ;
+    $dirsep = ($^O eq 'os2' || $^O eq 'MSWin32') ? ';' : ':' ;
     ($path = $ENV{"PATH"}) =~ s:\\:/:g ;
     @path = split(/$dirsep/, $path);
     @otherperls = ();
@@ -302,7 +313,7 @@ sub unlink {
 
     foreach $name (@names) {
 	next unless -e $name;
-	chmod 0777, $name if $^O eq 'os2';
+	chmod 0777, $name if ($^O eq 'os2' || $^O eq 'MSWin32');
 	print STDERR "  unlink $name\n";
 	( CORE::unlink($name) and ++$cnt 
 	  or warn "Couldn't unlink $name: $!\n" ) unless $nonono;
@@ -315,7 +326,7 @@ sub safe_unlink {
     local @names = @_;
     foreach $name (@names) {
 	next unless -e $name;
-	chmod 0777, $name if $^O eq 'os2';
+	chmod 0777, $name if ($^O eq 'os2' || $^O eq 'MSWin32');
 	print STDERR "  unlink $name\n";
 	next if CORE::unlink($name);
 	warn "Couldn't unlink $name: $!\n";
@@ -383,9 +394,11 @@ sub copy {
 
 sub samepath {
     local($p1, $p2) = @_;
-    local($dev1, $ino1, $dev2, $ino2);
+
+    return (lc($p1) eq lc($p2)) if ($^O eq 'MSWin32');
 
     if ($p1 ne $p2) {
+	local($dev1, $ino1, $dev2, $ino2);
 	($dev1, $ino1) = stat($p1);
 	($dev2, $ino2) = stat($p2);
 	($dev1 == $dev2 && $ino1 == $ino2);
@@ -414,7 +427,9 @@ sub installlib {
 
     my $installlib = $installprivlib;
     if ($dir =~ /^auto/ ||
-	  ($name =~ /^(.*)\.(?:pm|pod)$/ && $archpms{$1})) {
+	  ($name =~ /^(.*)\.(?:pm|pod)$/ && $archpms{$1}) ||
+	  ($name =~ /^(.*)\.(?:h|lib)$/i && $^O eq 'MSWin32')
+       ) {
         $installlib = $installarchlib;
 	return unless $do_installarchlib;
     } else {
