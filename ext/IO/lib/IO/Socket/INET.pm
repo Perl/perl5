@@ -149,6 +149,9 @@ sub configure {
 
         $raddr = shift @raddr;
 
+	# don't connect unless we're given a port or address
+	last unless defined($rport) || defined($raddr);
+
 	return _error($sock,'Cannot determine remote port')
 		unless($rport || $type == SOCK_DGRAM || $type == SOCK_RAW);
 

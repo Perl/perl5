@@ -417,13 +417,15 @@ sub sysread {
 }
 
 sub write {
-    @_ == 3 || @_ == 4 or croak 'usage: $io->write(BUF, LEN [, OFFSET])';
+    @_ >= 2 && @_ <= 4 or croak 'usage: $io->write(BUF [, LEN [, OFFSET]])';
     local($\) = "";
+    $_[2] = length($_[1]) unless defined $_[2];
     print { $_[0] } substr($_[1], $_[3] || 0, $_[2]);
 }
 
 sub syswrite {
-    @_ == 3 || @_ == 4 or croak 'usage: $io->syswrite(BUF, LEN [, OFFSET])';
+    @_ >= 2 && @_ <= 4 or croak 'usage: $io->syswrite(BUF [, LEN [, OFFSET]])';
+    $_[2] = length($_[1]) unless defined $_[2];
     syswrite($_[0], $_[1], $_[2], $_[3] || 0);
 }
 
