@@ -5,7 +5,7 @@
 # that does fit that format, add it to op/re_tests, not here.
 
 $| = 1;
-print "1..581\n";
+print "1..586\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1546,4 +1546,29 @@ print "ok 247\n";
     $a =~ m/\w/; # used to core dump
 
     print "ok 581\n";
+}
+
+{
+    # bugid 20010410.006
+    for my $rx (
+		'/(.*?)\{(.*?)\}/csg',
+		'/(.*?)\{(.*?)\}/cg',
+		'/(.*?)\{(.*?)\}/sg',
+		'/(.*?)\{(.*?)\}/g',
+		'/(.+?)\{(.+?)\}/csg',
+	       )
+    {
+	my($input, $i);
+
+	$i = 0;
+	$input = "a{b}c{d}";
+        eval <<EOT;
+	while (eval \$input =~ $rx) {
+	    print "# \\\$1 = '\$1' \\\$2 = '\$2'\n";
+	    ++\$i;
+	}
+EOT
+	print "not " unless $i == 2;
+	print "ok " . $test++ . "\n";
+    }
 }

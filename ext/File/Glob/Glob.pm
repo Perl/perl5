@@ -22,6 +22,7 @@ use XSLoader ();
     GLOB_CSH
     GLOB_ERR
     GLOB_ERROR
+    GLOB_LIMIT
     GLOB_MARK
     GLOB_NOCASE
     GLOB_NOCHECK
@@ -41,6 +42,7 @@ use XSLoader ();
         GLOB_CSH
         GLOB_ERR
         GLOB_ERROR
+        GLOB_LIMIT
         GLOB_MARK
         GLOB_NOCASE
         GLOB_NOCHECK
@@ -241,6 +243,15 @@ The POSIX defined flags for bsd_glob() are:
 
 Force bsd_glob() to return an error when it encounters a directory it
 cannot open or read.  Ordinarily bsd_glob() continues to find matches.
+
+=item C<GLOB_LIMIT>
+
+Make bsd_glob() return an error (GLOB_NOSPACE) when the pattern expands
+to a size bigger than the system constant C<ARG_MAX> (usually found in
+limits.h).  If your system does not define this constant, bsd_glob() uses
+C<sysconf(_SC_ARG_MAX)> or C<_POSIX_ARG_MAX> where available (in that
+order).  You can inspect these values using the standard C<POSIX>
+extension.
 
 =item C<GLOB_MARK>
 

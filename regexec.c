@@ -391,19 +391,18 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		     || ( (prog->reganch & ROPT_ANCH_BOL)
 			  && !PL_multiline ) );	/* Check after \n? */
 
-	if (!ml_anch) {
-	  if ( !(prog->reganch & ROPT_ANCH_GPOS) /* Checked by the caller */
-	       /* SvCUR is not set on references: SvRV and SvPVX overlap */
-	       && sv && !SvROK(sv)
-	       && (strpos != strbeg)) {
-	      DEBUG_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
-	      goto fail;
-	  }
-	  if (prog->check_offset_min == prog->check_offset_max &&
-	      !(prog->reganch & ROPT_SANY_SEEN)) {
+	if ((prog->check_offset_min == prog->check_offset_max) && !ml_anch) {
 	    /* Substring at constant offset from beg-of-str... */
 	    I32 slen;
 
+	    if ( !(prog->reganch & ROPT_ANCH_GPOS) /* Checked by the caller */
+		 /* SvCUR is not set on references: SvRV and SvPVX overlap */
+		 && sv && !SvROK(sv)
+		 && (strpos != strbeg)) {
+		DEBUG_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
+		goto fail;
+	    }
+	    PL_regeol = strend;			/* Used in HOP() */
 	    s = HOP3c(strpos, prog->check_offset_min, strend);
 	    if (SvTAIL(check)) {
 		slen = SvCUR(check);	/* >= 1 */
@@ -428,7 +427,6 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			 && memNE(SvPVX(check), s, slen)))
 		goto report_neq;
 	    goto success_at_start;
-	  }
 	}
 	/* Match is anchored, but substr is not anchored wrt beg-of-str. */
 	s = strpos;
