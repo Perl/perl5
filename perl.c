@@ -611,7 +611,8 @@ perl_destruct(pTHXx)
     SvFLAGS(PL_strtab) &= ~SVTYPEMASK;
     SvFLAGS(PL_strtab) |= SVt_PVHV;
 
-    SvREFCNT_dec(PL_fdpid);	/* needed in io_close() */
+    AvREAL_off(PL_fdpid);		/* no surviving entries */
+    SvREFCNT_dec(PL_fdpid);		/* needed in io_close() */
     PL_fdpid = Nullav;
 
     /* Destruct the global string table. */
