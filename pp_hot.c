@@ -2315,18 +2315,16 @@ PP(pp_leavesublv)
 	else if (gimme == G_ARRAY) {
 	    EXTEND_MORTAL(SP - newsp);
 	    for (mark = newsp + 1; mark <= SP; mark++) {
-		if (SvFLAGS(*mark) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
+		if (*mark != &PL_sv_undef
+		    && SvFLAGS(*mark) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
 		    /* Might be flattened array after $#array =  */
 		    PUTBACK;
 		    POPSUB(cx,sv);
 		    PL_curpm = newpm;
 		    LEAVE;
 		    LEAVESUB(sv);
-		    DIE(aTHX_ "Can't return %s from lvalue subroutine",
-			(*mark != &PL_sv_undef)
-			? (SvREADONLY(TOPs)
-			    ? "a readonly value" : "a temporary")
-			: "an uninitialized value");
+		    DIE(aTHX_ "Can't return a %s from lvalue subroutine",
+			SvREADONLY(TOPs) ? "readonly value" : "temporary");
 		}
 		else {
 		    /* Can be a localized value subject to deletion. */
