@@ -191,33 +191,33 @@ located in the subroutine C<code()>, which simply prints some debug
 info to show that it works and should be replaced with the real code.
 
   #!/usr/bin/perl -w
-  
+
   use POSIX ();
   use FindBin ();
   use File::Basename ();
   use File::Spec::Functions;
-  
+
   $|=1;
-  
+
   # make the daemon cross-platform, so exec always calls the script
   # itself with the right path, no matter how the script was invoked.
   my $script = File::Basename::basename($0);
   my $SELF = catfile $FindBin::Bin, $script;
-  
+
   # POSIX unmasks the sigprocmask properly
   my $sigset = POSIX::SigSet->new();
   my $action = POSIX::SigAction->new('sigHUP_handler',
                                      $sigset,
                                      &POSIX::SA_NODEFER);
   POSIX::sigaction(&POSIX::SIGHUP, $action);
-  
+
   sub sigHUP_handler {
       print "got SIGHUP\n";
       exec($SELF, @ARGV) or die "Couldn't restart: $!\n";
   }
-  
+
   code();
-  
+
   sub code {
       print "PID: $$\n";
       print "ARGV: @ARGV\n";

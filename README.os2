@@ -1706,7 +1706,7 @@ modules for the details on usage of these functions.
 
 Some of these functions also combine dynaloading semantic with the
 error-propagation semantic discussed above.
-  
+
 =back
 
 =head1 Perl flavors
