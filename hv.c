@@ -1935,6 +1935,7 @@ Perl_hv_iterkeysv(pTHX_ register HE *entry)
 
             sv = newSVpvn ((char*)as_utf8, utf8_len);
             SvUTF8_on (sv);
+	    Safefree (as_utf8); /* bytes_to_utf8() allocates a new string */
         } else {
             sv = newSVpvn_share(HEK_KEY(hek),
                                 (HEK_UTF8(hek) ? -HEK_LEN(hek) : HEK_LEN(hek)),
