@@ -102,7 +102,7 @@ all: $(public) $(private) $(util)
 	@echo " "
 
 compile: all
-	$(REALPERL) -I../lib ../utils/perlcc -regex 's/$$/.exe/' $(plextract) -prog -verbose dcf -log ../compilelog;  
+	$(REALPERL) -I../lib ../utils/perlcc -I .. -L .. $(plextract) -v -log ../compilelog;  
 
 a2p: $(obj) a2p$(OBJ_EXT)
 	$(CC) -o a2p $(LDFLAGS) $(obj) a2p$(OBJ_EXT) $(libs)

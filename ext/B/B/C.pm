@@ -362,7 +362,7 @@ sub B::PMOP::save {
     if (defined($re)) {
 	my $resym = sprintf("re%d", $re_index++);
 	$decl->add(sprintf("static char *$resym = %s;", cstring($re)));
-	$init->add(sprintf("PM_SETRE($pm,pregcomp($resym, $resym + %u, &$pm));",
+	$init->add(sprintf("PM_SETRE(&$pm,pregcomp($resym, $resym + %u, &$pm));",
 			   length($re)));
     }
     if ($gvsym) {
