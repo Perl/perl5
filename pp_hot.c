@@ -819,7 +819,7 @@ PP(pp_qr)
     djSP;
     register PMOP *pm = cPMOP;
     SV *rv = sv_newmortal();
-    SV *sv = newSVrv(rv, "re");
+    SV *sv = newSVrv(rv, "Regexp");
     sv_magic(sv,(SV*)ReREFCNT_inc(pm->op_pmregexp),'r',0,0);
     RETURNX(PUSHs(rv));
 }

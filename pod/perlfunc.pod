@@ -454,9 +454,10 @@ Always use the two-argument version if the function doing the blessing
 might be inherited by a derived class.  See L<perltoot> and L<perlobj>
 for more about the blessing (and blessings) of objects.
 
-Creating objects in lowercased CLASSNAMEs should be avoided.  Such 
-namespaces should be considered reserved for Perl pragmata and objects
-that may be created to implement internal operations.
+Consider always blessing objects in CLASSNAMEs that are mixed case.
+Namespaces with all lowercase names are considered reserved for Perl
+pragmata.  Builtin types have all uppercase names, so to prevent confusion,
+it is best to avoid such package names as well.
 
 See L<perlmod/"Perl Modules">.
 
