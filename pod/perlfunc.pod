@@ -612,6 +612,8 @@ If VARIABLE is omitted, it chomps C<$_>.  Example:
 	# ...
     }
 
+If VARIABLE is a hash, it chomps the hash's values, but not its keys.
+
 You can actually chomp anything that's an lvalue, including an assignment:
 
     chomp($cwd = `pwd`);
@@ -637,6 +639,8 @@ Example:
 	@array = split(/:/);
 	#...
     }
+
+If VARIABLE is a hash, it chops the hash's values, but not its keys.
 
 You can actually chop anything that's an lvalue, including an assignment:
 
