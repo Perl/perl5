@@ -1,7 +1,7 @@
 package Encode::Alias;
 use strict;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.34 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.35 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 use base qw(Exporter);
@@ -20,38 +20,38 @@ our %Alias;  # cached known aliases
 sub find_alias
 {
     my $class = shift;
-    local $_ = shift;
-    unless (exists $Alias{$_})
+    my $find = shift;
+    unless (exists $Alias{$find})
     {
-        $Alias{$_} = undef; # Recursion guard
+        $Alias{$find} = undef; # Recursion guard
 	for (my $i=0; $i < @Alias; $i += 2)
 	{
 	    my $alias = $Alias[$i];
 	    my $val   = $Alias[$i+1];
 	    my $new;
-	    if (ref($alias) eq 'Regexp' && $_ =~ $alias)
+	    if (ref($alias) eq 'Regexp' && $find =~ $alias)
 	    {
 		$DEBUG and warn "eval $val";
 		$new = eval $val;
-		# $@ and warn "$val, $@";
+		$DEBUG and $@ and warn "$val, $@";
 	    }
 	    elsif (ref($alias) eq 'CODE')
 	    {
-		$DEBUG and warn "$alias", "->", "($val)";
-		$new = $alias->($val);
+		$DEBUG and warn "$alias", "->", "($find)";
+		$new = $alias->($find);
 	    }
-	    elsif (lc($_) eq lc($alias))
+	    elsif (lc($find) eq lc($alias))
 	    {
 		$new = $val;
 	    }
 	    if (defined($new))
 	    {
-		next if $new eq $_; # avoid (direct) recursion on bugs
+		next if $new eq $find; # avoid (direct) recursion on bugs
 		$DEBUG and warn "$alias, $new";
 		my $enc = (ref($new)) ? $new : Encode::find_encoding($new);
 		if ($enc)
 		{
-		    $Alias{$_} = $enc;
+		    $Alias{$find} = $enc;
 		    last;
 		}
 	    }
@@ -59,14 +59,14 @@ sub find_alias
     }
     if ($DEBUG){
 	my $name;
-	if (my $e = $Alias{$_}){
+	if (my $e = $Alias{$find}){
 	    $name = $e->name;
 	}else{
 	    $name = "";
 	}
-	warn "find_alias($class, $_)->name = $name";
+	warn "find_alias($class, $find)->name = $name";
     }
-    return $Alias{$_};
+    return $Alias{$find};
 }
 
 sub define_alias
@@ -277,20 +277,42 @@ in order to allow C<$1> etc. to be substituted.  The example is one
 way to alias names as used in X11 fonts to the MIME names for the
 iso-8859-* family.  Note the double quotes inside the single quotes.
 
+(or, you don't have to do this yourself because this example is predefined)
+
 If you are using a regex here, you have to use the quotes as shown or
 it won't work.  Also note that regex handling is tricky even for the
-experienced.  Use it with caution.
+experienced.  Use this feature with caution.
 
 =item As a code reference, e.g.:
 
-  define_alias( sub { return /^iso8859-(\d+)$/i ? "iso-8859-$1" : undef } , '');
+  define_alias( sub {shift =~ /^iso8859-(\d+)$/i ? "iso-8859-$1" : undef } );
 
-In this case, C<$_> will be set to the name that is being looked up and
-I<ENCODING> is passed to the sub as its first argument.  The example
-is another way to alias names as used in X11 fonts to the MIME names
-for the iso-8859-* family.
+The same effect as the example above in a different way.  The coderef
+takes the alias name as an argument and returns a canonical name on
+success or undef if not.  Note the second argument is not required.
+Use this with even more caution than the regex version.
 
 =back
+
+=head3 Changes in code reference aliasing
+
+As of Encode 1.87, the older form
+
+  define_alias( sub { return  /^iso8859-(\d+)$/i ? "iso-8859-$1" : undef } );
+
+no longer works. 
+
+Encode up to 1.86 internally used "local $_" to implement ths older
+form.  But consider the code below;
+
+  use Encode;
+  $_ = "eeeee" ;
+  while (/(e)/g) {
+    my $utf = decode('aliased-encoding-name', $1);
+    print "position:",pos,"\n";
+  }
+
+Prior to Encode 1.86 this fails because of "local $_".
 
 =head2 Alias overloading
 

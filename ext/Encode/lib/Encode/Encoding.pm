@@ -1,7 +1,7 @@
 package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.31 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require Encode;
 
@@ -136,6 +136,8 @@ MUST decode I<$octets> with I<$offset> and concatenate it to I<$destination>.
 Decoding will terminate when $terminator (a string) appears in output.
 I<$offset> will be modified to the last $octets position at end of decode.
 Returns true if $terminator appears output, else returns false.
+
+=back
 
 =head2 Other methods defined in Encode::Encodings
 
