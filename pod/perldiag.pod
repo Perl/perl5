@@ -2352,6 +2352,10 @@ was string.
 
 (P) The lexer got into a bad state while processing a case modifier.
 
+=item panic: %s
+
+(P) An internal error.
+
 =item Parentheses missing around "%s" list
 
 (W) You said something like

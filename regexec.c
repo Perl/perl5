@@ -918,6 +918,11 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     else if (c = prog->regstclass) {
 	I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
 	char *cc;
+	char *m;
+	int ln;
+	int c1;
+	int c2;
+	char *e;
 
 	if (minlen)
 	    dontbother = minlen - 1;
@@ -951,6 +956,43 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		else
 		    tmp = 1;
 		s++;
+	    }
+	    break;
+	case EXACTF:
+	    m = STRING(c);
+	    ln = STR_LEN(c);
+	    c1 = *m;
+	    c2 = PL_fold[c1];
+	    goto do_exactf;
+	case EXACTFL:
+	    m = STRING(c);
+	    ln = STR_LEN(c);
+	    c1 = *m;
+	    c2 = PL_fold_locale[c1];
+	  do_exactf:
+	    e = strend - ln;
+
+	    /* Here it is NOT UTF!  */
+	    if (c1 == c2) {
+		while (s <= e) {
+		    if ( *s == c1
+			 && (ln == 1 || (OP(c) == EXACTF
+					 ? ibcmp(s, m, ln)
+					 : ibcmp_locale(s, m, ln)))
+			 && regtry(prog, s) )
+			goto got_it;
+		    s++;
+		}
+	    } else {
+		while (s <= e) {
+		    if ( (*s == c1 || *s == c2)
+			 && (ln == 1 || (OP(c) == EXACTF
+					 ? ibcmp(s, m, ln)
+					 : ibcmp_locale(s, m, ln)))
+			 && regtry(prog, s) )
+			goto got_it;
+		    s++;
+		}
 	    }
 	    break;
 	case BOUNDL:
@@ -1363,6 +1405,9 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		    tmp = 1;
 		s += UTF8SKIP(s);
 	    }
+	    break;
+	default:
+	    croak("panic: unknown regstclass %d", (int)OP(c));
 	    break;
 	}
     }
