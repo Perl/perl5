@@ -1620,6 +1620,9 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	      return SvUV(tmpstr);
 	  return PTR2UV(SvRV(sv));
 	}
+	if (SvREADONLY(sv) && SvFAKE(sv)) {
+	    sv_force_normal(sv);
+	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
 		report_uninit();
@@ -1781,6 +1784,9 @@ Perl_sv_2nv(pTHX_ register SV *sv)
                   (SvRV(tmpstr) != SvRV(sv)))
 	      return SvNV(tmpstr);
 	  return PTR2NV(SvRV(sv));
+	}
+	if (SvREADONLY(sv) && SvFAKE(sv)) {
+	    sv_force_normal(sv);
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
@@ -2403,16 +2409,17 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
     if (hibit) {
 	STRLEN len;
 	if (SvREADONLY(sv) && SvFAKE(sv)) {
+	    Perl_warn(aTHX_ "%d s=%p t=%p e=%p",(int)hibit,s,t,SvEND(sv));
+	    sv_dump(sv);
 	    sv_force_normal(sv);
 	    s = SvPVX(sv);
 	}
 	len = SvCUR(sv) + 1; /* Plus the \0 */
 	SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
 	SvCUR(sv) = len - 1;
-	if (SvLEN(sv) != 0)
-	    Safefree(s); /* No longer using what was there before. */
 	SvLEN(sv) = len; /* No longer know the real size. */
 	SvUTF8_on(sv);
+	Safefree(s); /* No longer using what was there before. */
     }
 }
 
