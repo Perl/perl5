@@ -670,6 +670,13 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     SV* retval;
     char tmpbuf[256];
     dSP;    
+
+    if (!gv_stashpv(pkg, 0)) {	/* demand load utf8 */
+	ENTER;
+	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpv(pkg,0), Nullsv);
+	LEAVE;
+    }
+    SPAGAIN;
     PUSHSTACKi(PERLSI_MAGIC);
     PUSHMARK(SP);
     EXTEND(SP,5);

@@ -5862,7 +5862,13 @@ Perl_ck_require(pTHX_ OP *o)
 		    --SvCUR(kid->op_sv);
 		}
 	    }
-	    sv_catpvn(kid->op_sv, ".pm", 3);
+	    if (SvREADONLY(kid->op_sv)) {
+		SvREADONLY_off(kid->op_sv);
+		sv_catpvn(kid->op_sv, ".pm", 3);
+		SvREADONLY_on(kid->op_sv);
+	    }
+	    else
+		sv_catpvn(kid->op_sv, ".pm", 3);
 	}
     }
     return ck_fun(o);
