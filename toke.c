@@ -678,8 +678,8 @@ char *start;
 		SvGROW(sv, SvLEN(sv) + 256);
 		d = SvPVX(sv) + i;
 		d -= 2;
-		max = d[1] & 0377;
-		for (i = (*d & 0377); i <= max; i++)
+		max = (U8)d[1];
+		for (i = (U8)*d; i <= max; i++)
 		    *d++ = i;
 		dorange = FALSE;
 		continue;
@@ -1332,8 +1332,18 @@ yylex()
 	if (!in_eval && !preambled) {
 	    preambled = TRUE;
 	    sv_setpv(linestr,incl_perldb());
-	    if (autoboot_preamble)
-		sv_catpv(linestr, autoboot_preamble);
+	    if (SvCUR(linestr))
+		sv_catpv(linestr,";");
+	    if (preambleav){
+		while(AvFILL(preambleav) >= 0) {
+		    SV *tmpsv = av_shift(preambleav);
+		    sv_catsv(linestr, tmpsv);
+		    sv_catpv(linestr, ";");
+		    sv_free(tmpsv);
+		}
+		sv_free((SV*)preambleav);
+		preambleav = NULL;
+	    }
 	    if (minus_n || minus_p) {
 		sv_catpv(linestr, "LINE: while (<>) {");
 		if (minus_l)
