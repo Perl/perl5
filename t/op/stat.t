@@ -9,7 +9,7 @@ BEGIN {
 use Config;
 use File::Spec;
 
-plan tests => 73;
+plan tests => 69;
 
 $Is_Amiga   = $^O eq 'amigaos';
 $Is_Cygwin  = $^O eq 'cygwin';
@@ -185,29 +185,34 @@ unlink($tmpfile_link);
 ok(! -e $tmpfile_link,  '   -e on unlinked file');
 
 SKIP: {
-    skip "No character, socket or block special files", 7
+    skip "No character, socket or block special files", 3
       if $Is_MSWin32 || $Is_NetWare || $Is_Dos;
-    skip "/dev/ isn't available to test against", 7
+    skip "/dev/ isn't available to test against", 3
       unless -d '/dev/' && -r '/dev/' && -x '/dev/';
 
-    opendir DEV, "/dev/" or BAILOUT("Can't open /dev/: $!");
-    my($cnt, $char, $sock, $block);
-    $cnt = $char = $sock = $block = 0;
-    foreach (readdir DEV) {
-        my $file = "/dev/$_";
-        $cnt++;
-        $char++  if -c $file;
-        $sock++  if -S $file;
-        $block++ if -b $file;
-    }
+    my $LS  = $Config{d_readlink} ? "ls -lL" : "ls -l"; 
+    my $CMD = "$LS /dev";
+    my $DEV = qx($CMD);
 
-    isnt( $cnt,   0,  'Found some files in /dev/ to test against' );
-    isnt( $char,  0,  '    and some character special files' );
-    isnt( $sock,  0,  '    and some socket files' );
-    isnt( $block, 0,  '    and some block special files' );
-    ok( $char  < $cnt,   "   they're not all character special" );
-    ok( $sock  < $cnt,   "   they're not all sockets" );
-    ok( $block < $cnt,   "   they're not all block special" );
+    skip "$CMD failed", 3 if $DEV eq '';
+
+    my $type;
+
+    my $skip = sub { ok(1, "Skip: no $_[0]s in /dev") };
+    my $ok   = sub { ok(1, "$_[0] /dev/$1") };
+    my $fail = sub { ok(0, "ls -l thinks /dev/$1 is $_[0] but $_[1] says not") };
+    
+    if ($DEV !~ /\nb.* (\S+)\n/) { $skip->("block special") }
+    elsif (-b "/dev/$1")         { $ok->  ("block special") }
+    else { $fail->("block special", "-b") }
+    
+    if ($DEV !~ /\nc.* (\S+)\n/) { $skip->("character special") }
+    elsif (-c "/dev/$1")         { $ok->  ("character special") }
+    else { $fail->("character special", "-c") }
+    
+    if ($DEV !~ /\ns.* (\S+)\n/) { $skip->("socket") }
+    elsif (-S "/dev/$1")         { $ok->  ("socket") }
+    else { $fail->("socket", "-S") }
 }
 
 ok(! -c $Curdir,    '!-c cwd');
