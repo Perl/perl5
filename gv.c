@@ -952,8 +952,9 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    }
 	    }
 	}
-    } else if (len == 1) {
-	/* Names of length 1.  */
+    } else {
+	/* Names of length 1.  (Or 0. But name is NUL terminated, so that will
+	   be case '\0' in this switch statement (ie a default case)  */
 	switch (*name) {
 	case '&':
 	case '`':
