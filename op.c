@@ -661,6 +661,15 @@ Perl_scalarvoid(pTHX_ OP *o)
 	    useless = OP_DESC(o);
 	break;
 
+    case OP_NOT:
+       kid = cUNOPo->op_first;
+       if (kid->op_type != OP_MATCH && kid->op_type != OP_SUBST &&
+           kid->op_type != OP_TRANS) {
+	        goto func_ops;
+       }
+       useless = "negative pattern binding (!~)";
+       break;
+
     case OP_RV2GV:
     case OP_RV2SV:
     case OP_RV2AV:
