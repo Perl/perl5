@@ -26,6 +26,7 @@ my $exename = "showav";
 my $plxname = "showargv";
 rmtree($testdir);
 mkdir($testdir);
+die "Could not create '$testdir':$!" unless -d $testdir;
 
 open(my $F, ">$testdir/$exename.c")
     or die "Can't create $testdir/$exename.c: $!";
@@ -75,8 +76,8 @@ close $F;
 # build the executable
 chdir($testdir);
 END {
-    chdir($cwd);
-    rmtree($testdir);
+#    chdir($cwd);
+#    rmtree($testdir);
 }
 if (open(my $EIN, "$cwd/op/${exename}_exe.uu")) {
     print "# Unpacking $exename.exe\n";
@@ -92,15 +93,37 @@ if (open(my $EIN, "$cwd/op/${exename}_exe.uu")) {
     close $EOUT;
 }
 else {
-    print "# Compiling $exename.c\n";
-    if (system("$Config{cc} $Config{ccflags} $exename.c 2>&1 >nul") != 0) {
+    my $minus_o = '';
+    if ($Config{cc} eq 'gcc')
+     {
+      $minus_o = "-o $exename.exe";
+     }
+    print "# Compiling $exename.c\n# $Config{cc} $Config{ccflags} $exename.c\n";
+    if (system("$Config{cc} $Config{ccflags} $minus_o $exename.c >log 2>&1") != 0) {
 	print "# Could not compile $exename.c, status $?\n"
 	     ."# Where is your C compiler?\n"
 	     ."1..0 # skipped: can't build test executable\n";
+	exit(0);
+    }
+    unless (-f "$exename.exe") {
+	if (open(LOG,'<log'))
+         {
+          while(<LOG>) {
+	     print "# ",$_;
+          } 
+         }
+        else {
+	  warn "Cannot open log (in $testdir):$!";
+        }
     }
 }
 copy("$plxname.bat","$plxname.cmd");
 chdir($cwd);
+unless (-x "$testdir/$exename.exe") {
+    print "# Could not build $exename.exe\n"
+	 ."1..0 # skipped: can't build test executable\n";
+    exit(0);
+}
 
 open my $T, "$^X -I../lib -w op/system_tests |"
     or die "Can't spawn op/system_tests: $!";
