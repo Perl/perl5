@@ -721,6 +721,7 @@ MICROCORE_SRC	=		\
 		..\regexec.c	\
 		..\run.c	\
 		..\scope.c	\
+		..\sharedsv.c	\
 		..\sv.c		\
 		..\taint.c	\
 		..\toke.c	\
@@ -776,6 +777,7 @@ CORE_NOCFG_H	=		\
 		..\proto.h	\
 		..\regexp.h	\
 		..\scope.h	\
+		..\sharedsv.h	\
 		..\sv.h		\
 		..\thread.h	\
 		..\unixish.h	\
@@ -786,8 +788,8 @@ CORE_NOCFG_H	=		\
 		..\EXTERN.h	\
 		..\perlvars.h	\
 		..\intrpvar.h	\
-		..\thrdvar.h	\
-		
+		..\thrdvar.h
+
 CORE_H		= $(CORE_NOCFG_H) .\config.h
 
 DLL_OBJ		= $(DLL_SRC:.c=.obj)
