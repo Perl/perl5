@@ -10,7 +10,7 @@ sub output ($);
 	   perlsyn perlop perlre perlrun perlfunc perlvar perlsub
 	   perlmod perlmodlib perlmodinstall perlfork perlform perllocale 
 	   perlref perlreftut perldsc
-	   perllol perltoot perltootc perlobj perltie perlbot perlipc
+	   perllol perlboot perltoot perltootc perlobj perltie perlbot perlipc
 	   perldbmfilter perldebug
 	   perldiag perlsec perltrap perlport perlstyle perlpod perlbook
 	   perlembed perlapio perlxs perlxstut perlguts perlcall perlcompile

@@ -1840,6 +1840,10 @@ A tutorial on using open() effectively.
 
 A tutorial that introduces the essentials of references.
 
+=item perlboot.pod
+
+A tutorial for beginners on object-oriented Perl.
+
 =item perltootc.pod
 
 A tutorial on managing class data for object modules.
