@@ -312,13 +312,13 @@ with explicit layers in open() and with binmode() one can manipulate
 streams as usual.
 
 C<-C> on its own (not followed by any number or option list), or the
-empty string C<""> for the C<$ENV{PERL_UNICODE}, has the same effect
-as C<-CSDL>.  In other words, the standard I/O handles and the default
-C<open()> layer are UTF-8-fied B<but> only if the locale environment
-variables indicate a UTF-8 locale.  This behaviour follows the
-I<implicit> (and problematic) UTF-8 behaviour of Perl 5.8.0.
+empty string C<""> for the C<PERL_UNICODE> environment variable, has the
+same effect as C<-CSDL>.  In other words, the standard I/O handles and
+the default C<open()> layer are UTF-8-fied B<but> only if the locale
+environment variables indicate a UTF-8 locale.  This behaviour follows
+the I<implicit> (and problematic) UTF-8 behaviour of Perl 5.8.0.
 
-You can use C<-C0> (or C<"0"> for $ENV{PERL_UNICODE}) to explicitly
+You can use C<-C0> (or C<"0"> for C<PERL_UNICODE>) to explicitly
 disable all the above Unicode features.
 
 The read-only magic variable C<${^UNICODE}> reflects the numeric value
