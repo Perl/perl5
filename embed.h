@@ -1555,6 +1555,9 @@
 #define doparseform		S_doparseform
 #endif
 #ifdef PERL_CORE
+#define num_overflow		S_num_overflow
+#endif
+#ifdef PERL_CORE
 #define dopoptoeval		S_dopoptoeval
 #endif
 #ifdef PERL_CORE
@@ -4068,6 +4071,9 @@
 #endif
 #ifdef PERL_CORE
 #define doparseform(a)		S_doparseform(aTHX_ a)
+#endif
+#ifdef PERL_CORE
+#define num_overflow		S_num_overflow
 #endif
 #ifdef PERL_CORE
 #define dopoptoeval(a)		S_dopoptoeval(aTHX_ a)

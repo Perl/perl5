@@ -3210,6 +3210,12 @@ expression compiler gave it.
 (P) A "can't happen" error, because safemalloc() should have caught it
 earlier.
 
+=item Repeated format line will never terminate (~~ and @# incompatible)
+
+(F) Your format containes the ~~ repeat-until-blank sequence and a
+numeric field that will never go blank so that the repetition never
+terminates. You might use ^# instead.  See L<perlform>.
+
 =item Reversed %s= operator
 
 (W syntax) You wrote your assignment operator backwards.  The = must

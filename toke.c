@@ -7595,7 +7595,7 @@ S_scan_formline(pTHX_ register char *s)
     bool eofmt = FALSE;
 
     while (!needargs) {
-	if (*s == '.' || *s == /*{*/'}') {
+	if (*s == '.') {
 	    /*SUPPRESS 530*/
 #ifdef PERL_STRICT_CR
 	    for (t = s+1;SPACE_OR_TAB(*t); t++) ;
@@ -7608,7 +7608,7 @@ S_scan_formline(pTHX_ register char *s)
             }
 	}
 	if (PL_in_eval && !PL_rsfp) {
-	    eol = strchr(s,'\n');
+	    eol = memchr(s,'\n',PL_bufend-s);
 	    if (!eol++)
 		eol = PL_bufend;
 	}

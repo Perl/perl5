@@ -5,11 +5,60 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..50\n";
+#-- testing numeric fields in all variants (WL)
+
+sub swrite {
+    my $format = shift;
+    local $^A = ""; # don't litter, use a local bin
+    formline( $format, @_ );
+    return $^A;
+}
+
+my @NumTests = (
+    # [ format, value1, expected1, value2, expected2, .... ]
+    [ '@###',           0,   '   0',         1, '   1',     9999.5, '####',
+		9999.4999,   '9999',    -999.5, '####',     1e+100, '####' ],
+
+    [ '@0##',           0,   '0000',         1, '0001',     9999.5, '####',
+		-999.4999,   '-999',    -999.5, '####',     1e+100, '####' ],
+
+    [ '^###',           0,   '   0',     undef, '    ' ],
+
+    [ '^0##',           0,   '0000',     undef, '    ' ],
+
+    [ '@###.',          0,  '   0.',         1, '   1.',    9999.5, '#####',
+                9999.4999,  '9999.',    -999.5, '#####' ],
+
+    [ '@##.##',         0, '  0.00',         1, '  1.00',  999.995, '######',
+                999.99499, '999.99',      -100, '######' ],
+
+    [ '@0#.##',         0, '000.00',         1, '001.00',       10, '010.00',
+                  -0.0001, '-00.00' ],
+
+);
+
+
+my $num_tests = 0;
+for my $tref ( @NumTests ){
+    $num_tests += (@$tref - 1)/2;
+}
+#---------------------------------------------------------
+
+# number of tests in section 1
+my $bas_tests = 20;
+
+# number of tests in section 3
+my $hmb_tests = 36;
+
+printf "1..%d\n", $bas_tests + $num_tests + $hmb_tests;
 
 my $CAT = ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') ? 'type'
 	: ($^O eq 'MacOS') ? 'catenate'
         : 'cat';
+
+############
+## Section 1
+############
 
 format OUT =
 the quick brown @<<
@@ -274,14 +323,19 @@ else
 
 {
     our $el;
-    format STDOUT =
+    format OUT12 =
 ok ^<<<<<<<<<<<<<<~~ # sv_chop() naze
 $el
 .
     my %hash = (12 => 3);
+    open(OUT12, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+
     for $el (keys %hash) {
-	write;
+	write(OUT12);
     }
+    close OUT12 or die "Could not close: $!";
+    print `$CAT Op_write.tmp`;
+
 }
 
 {
@@ -300,24 +354,155 @@ $v
     print `$CAT Op_write.tmp`;
 }
 
-{
-    # Bug #24774 format without trailing \n failed assertion
-    # but this must not compile because we'd get a ';' into the format
-
+{   # test 14
+    # Bug #24774 format without trailing \n failed assertion, but this
+    # must fail since we have a trailing ; in the eval'ed string (WL)
     my @v = ('k');
     eval "format OUT14 = \n@\n\@v";
     print $@ ? "ok 14\n" : "not ok 14\n";
 
 }
 
-#######################################
-# Easiest to add new tests above here #
+{   # test 15
+    # text lost in ^<<< field with \r in value (WL)
+    my $txt = "line 1\rline 2";
+    format OUT15 =
+^<<<<<<<<<<<<<<<<<<
+$txt
+^<<<<<<<<<<<<<<<<<<
+$txt
+.
+    open(OUT15, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+    write(OUT15);
+    close OUT15 or die "Could not close: $!";
+    my $res = `$CAT Op_write.tmp`;
+    print $res eq "line 1\nline 2\n" ? "ok 15\n" : "not ok 15\n";
+}
+
+{   # test 16: multiple use of a variable in same line with ^<
+    my $txt = "this_is_block_1 this_is_block_2 this_is_block_3 this_is_block_4";
+    format OUT16 =
+^<<<<<<<<<<<<<<<< ^<<<<<<<<<<<<<<<<
+$txt,             $txt
+^<<<<<<<<<<<<<<<< ^<<<<<<<<<<<<<<<<
+$txt,             $txt
+.
+    open(OUT16, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+    write(OUT16);
+    close OUT16 or die "Could not close: $!";
+    my $res = `$CAT Op_write.tmp`;
+    print $res eq <<EOD ? "ok 16\n" : "not ok 16\n";
+this_is_block_1   this_is_block_2
+this_is_block_3   this_is_block_4
+EOD
+}
+
+{   # test 17: @* "should be on a line of its own", but it should work
+    # cleanly with literals before and after. (WL)
+
+    my $txt = "This is line 1.\nThis is the second line.\nThird and last.\n";
+    format OUT17 =
+Here we go: @* That's all, folks!
+            $txt
+.
+    open(OUT17, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+    write(OUT17);
+    close OUT17 or die "Could not close: $!";
+    my $res = `$CAT Op_write.tmp`;
+    chomp( $txt );
+    my $exp = <<EOD;
+Here we go: $txt That's all, folks!
+EOD
+    print $res eq $exp ? "ok 17\n" : "not ok 17\n";
+}
+
+{   # test 18: @# and ~~ would cause runaway format, but we now
+    # catch this while compiling (WL)
+
+    format OUT18 =
+@######## ~~
+10
+.
+    open(OUT18, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+    eval { write(OUT18); };
+    print $@ ? "ok 18\n" : "not ok 18\n";
+    close OUT18 or die "Could not close: $!";
+}
+
+{   # test 19: \0 in an evel'ed format, doesn't cause empty lines (WL)
+    my $v = 'gaga';
+    eval "format OUT19 = \n" .
+         '@<<<' . "\0\n" .
+         '$v' .   "\n" .
+         '@<<<' . "\0\n" .
+         '$v' . "\n.\n";
+    open(OUT19, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+    write(OUT19);
+    my $res = `$CAT Op_write.tmp`;
+    print $res eq <<EOD ? "ok 19\n" : "not ok 19\n";
+gaga\0
+gaga\0
+EOD
+}
+
+{   # test 20: hash accesses; single '}' must not terminate format '}' (WL)
+    my %h = ( xkey => 'xval', ykey => 'yval' );
+    format OUT20 =
+@>>>> @<<<< ~~
+each %h
+@>>>> @<<<<
+$h{xkey}, $h{ykey}
+@>>>> @<<<<
+{ $h{xkey}, $h{ykey}
+}
+}
+.
+    my $exp = '';
+    while( my( $k, $v ) = each( %h ) ){
+	$exp .= sprintf( "%5s %s\n", $k, $v );
+    }
+    $exp .= sprintf( "%5s %s\n", $h{xkey}, $h{ykey} );
+    $exp .= sprintf( "%5s %s\n", $h{xkey}, $h{ykey} );
+    $exp .= "}\n";
+    open(OUT20, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+    write(OUT20);
+    my $res = `$CAT Op_write.tmp`;
+    print $res eq $exp ? "ok 20\n" : "not ok 20 res=[$res]exp=[$exp]\n";
+
+EOD
+}
+
+
+#####################
+## Section 2
+## numeric formatting
+#####################
+
+my $nt = $bas_tests;
+for my $tref ( @NumTests ){
+    my $writefmt = shift( @$tref );
+    while (@$tref) {
+	my $val      = shift @$tref;
+	my $expected = shift @$tref;
+        my $writeres = swrite( $writefmt, $val );
+        $nt++;
+
+        print $expected eq $writeres
+	    ? "ok $nt\n"
+	    : "not ok $nt\n# f=[$writefmt] exp=[$expected] got=[$writeres]\n";
+    }
+}
+
+
+#####################################
+## Section 3
+## Easiest to add new tests above here
 #######################################
 
-# 15..50: scary format testing from Merijn H. Brand
+# scary format testing from H.Merijn Brand
 
-my $test = 15;
-my $tests = 50;
+my $test = $bas_tests + $num_tests + 1;
+my $tests = $bas_tests + $num_tests + $hmb_tests;
 
 if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'MacOS' ||
     ($^O eq 'os2' and not eval '$OS2::can_fork')) {
@@ -341,23 +526,27 @@ ok @<<<<<
 $test
 .
 
-$= = 10;
 
 # [ID 20020227.005] format bug with undefined _TOP
+
+open STDOUT_DUP, ">&STDOUT";
+my $oldfh = select STDOUT_DUP;
+$= = 10;
 {   local $~ = "Comment";
     write;
     $test++;
     print $- == 9
 	? "ok $test # TODO\n" : "not ok $test # TODO \$- = $- instead of 9\n";
     $test++;
-    print $^ ne "Comment_TOP"
-	? "ok $test\n" : "not ok $test\n# \$^ = $^ instead of 'STDOUT_TOP'\n";
+    print $^ eq "STDOUT_DUP_TOP"
+	? "ok $test\n" : "not ok $test\n# \$^ = $^ instead of 'STDOUT_DUP_TOP'\n";
     $test++;
-    }
+}
+select $oldfh;
 
-   $^  = "STDOUT_TOP";
-   $=  =  7;		# Page length
-   $-  =  0;		# Lines left
+$^  = "STDOUT_TOP";
+$=  =  7;		# Page length
+$-  =  0;		# Lines left
 my $ps = $^L; $^L = "";	# Catch the page separator
 my $tm =  1;		# Top margin (empty lines before first output)
 my $bm =  2;		# Bottom marging (empty lines between last text and footer)
