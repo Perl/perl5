@@ -263,7 +263,7 @@ tryeq_sloppy 130, 18446744073709551616/9223372036854775808, 2;
   my $n = 1127;
 
   my $float = ($n % 1000) * 167772160.0;
-  tryeq 131_sloppy, $float, 21307064320;
+  tryeq_sloppy 131, $float, 21307064320;
 
   # On a 32 bit machine, if the i_multiply op is used, you will probably get
   # -167772160. It's actually undefined behaviour, so anything may happen.
