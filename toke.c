@@ -1324,7 +1324,7 @@ S_scan_const(pTHX_ char *start)
 	   except for the last char, which will be done separately. */
 	else if (*s == '(' && PL_lex_inpat && s[1] == '?') {
 	    if (s[2] == '#') {
-		while (s < send && *s != ')')
+		while (s+1 < send && *s != ')')
 		    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
 	    }
 	    else if (s[2] == '{' /* This should match regcomp.c */
@@ -1343,10 +1343,8 @@ S_scan_const(pTHX_ char *start)
 			count--;
 		    regparse++;
 		}
-		if (*regparse != ')') {
+		if (*regparse != ')')
 		    regparse--;		/* Leave one char for continuation. */
-		    yyerror("Sequence (?{...}) not terminated or not {}-balanced");
-		}
 		while (s < regparse)
 		    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
 	    }
