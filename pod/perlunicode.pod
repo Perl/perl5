@@ -198,6 +198,18 @@ byte-oriented C<chr()> and C<ord()> under utf8.
 
 =item *
 
+The bit string operators C<& | ^ ~> can operate on character data.
+However, for backward compatibility reasons (bit string operations
+when the characters all are less than 256 in ordinal value) one cannot
+mix C<~> (the bit complement) and characters both less than 256 and
+equal or greater than 256.  Most importantly, the DeMorgan's laws
+(C<~($x|$y) eq ~$x&~$y>, C<~($x&$y) eq ~$x|~$y>) won't hold.
+Another way to look at this is that the complement cannot return
+B<both> the 8-bit (byte) wide bit complement, and the full character
+wide bit complement.
+
+=item *
+
 And finally, C<scalar reverse()> reverses by character rather than by byte.
 
 =back

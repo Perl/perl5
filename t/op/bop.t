@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..38\n";
+print "1..40\n";
 
 # numerics
 print ((0xdead & 0xbeef) == 0x9ead ? "ok 1\n" : "not ok 1\n");
@@ -107,7 +107,7 @@ for (0x100...0xFFF) {
       if $a ne chr(~$_) or length($a) != 1 or ~$a ne chr($_);
 }
 if (@not36) {
-    print "# test 36 failed: @not36\n";
+    print "# test 36 failed\n";
     print "not ";
 }
 print "ok 36\n";
@@ -120,14 +120,42 @@ for my $i (0xEEE...0xF00) {
     push @not37, sprintf("%#03X %#03X", $i, $j)
 	if $a ne chr(~$i).chr(~$j) or
 	   length($a) != 2 or 
-	   ~$a ne chr($i).chr($j);
+           ~$a ne chr($i).chr($j);
   }
 }
 if (@not37) {
-    print "# test 37 failed: @not37\n";
+    print "# test 37 failed\n";
     print "not ";
 }
 print "ok 37\n";
 
 print "not " unless ~chr(~0) eq "\0";
 print "ok 38\n";
+
+my @not39;
+
+for my $i (0x100..0x120) {
+    for my $j (0x100...0x120) {
+	push @not39, sprintf("%#03X %#03X", $i, $j)
+	    if ~(chr($i)|chr($j)) ne (~chr($i)&~chr($j));
+    }
+}
+if (@not39) {
+    print "# test 39 failed\n";
+    print "not ";
+}
+print "ok 39\n";
+
+my @not40;
+
+for my $i (0x100..0x120) {
+    for my $j (0x100...0x120) {
+	push @not40, sprintf("%#03X %#03X", $i, $j)
+	    if ~(chr($i)&chr($j)) ne (~chr($i)|~chr($j));
+    }
+}
+if (@not40) {
+    print "# test 40 failed\n";
+    print "not ";
+}
+print "ok 40\n";

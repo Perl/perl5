@@ -926,7 +926,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 
     if (left_utf && !right_utf)
 	sv_utf8_upgrade(right);
-    if (!left_utf && right_utf)
+    else if (!left_utf && right_utf)
 	sv_utf8_upgrade(left);
 
     if (sv != left || (optype != OP_BIT_AND && !SvOK(sv) && !SvGMAGICAL(sv)))
