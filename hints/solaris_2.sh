@@ -1,37 +1,48 @@
 # hints/solaris_2.sh
-# Last modified:  Thu Nov  9 14:21:02 EST 2000
+# Last modified: Tue Jan  2 10:16:35 2001
+# Lupe Christoph <lupe@lupe-christoph.de>
+# Based on version by:
 # Andy Dougherty  <doughera@lafayette.edu>
-# Based on input from lots of folks, especially
+# Which was based on input from lots of folks, especially
 # Dean Roehrich <roehrich@ironwood-fddi.cray.com>
+# Additional input from Alan Burlison, Jarkko Hietaniemi,
+# and Richard Soderberg.
 #
 # See README.solaris for additional information.
 #
+# For consistency with gcc, we do not adopt Sun Marketing's
+# removal of the '2.' prefix from the Solaris version number.
+# (Configure tries to detect an old fixincludes and needs
+# this information.)
+
 # If perl fails tests that involve dynamic loading of extensions, and
 # you are using gcc, be sure that you are NOT using GNU as and ld.  One
 # way to do that is to invoke Configure with
-# 
+#
 #     sh Configure -Dcc='gcc -B/usr/ccs/bin/'
 #
 #  (Note that the trailing slash is *required*.)
 #  gcc will occasionally emit warnings about "unused prefix", but
 #  these ought to be harmless.  See below for more details.
- 
+
 # See man vfork.
 usevfork=false
 
 d_suidsafe=define
 
 # Avoid all libraries in /usr/ucblib.
-set `echo $glibpth | sed -e 's@/usr/ucblib@@'`
+# /lib is just a symlink to /usr/lib
+set `echo $glibpth | sed -e 's@/usr/ucblib@@' -e 's@ /lib @ @'`
 glibpth="$*"
 
-# Remove bad libraries.  -lucb contains incompatible routines.
-# -lld doesn't do anything useful.
+# Remove unwanted libraries.  -lucb contains incompatible routines.
+# -lld and -lsec don't do anything useful. -lcrypt does not
+# really provide anything we need over -lc, so we drop it, too.
 # -lmalloc can cause a problem with GNU CC & Solaris.  Specifically,
 # libmalloc.a may allocate memory that is only 4 byte aligned, but
 # GNU CC on the Sparc assumes that doubles are 8 byte aligned.
 # Thanks to  Hallvard B. Furuseth <h.b.furuseth@usit.uio.no>
-set `echo " $libswanted " | sed -e 's@ ld @ @' -e 's@ malloc @ @' -e 's@ ucb @ @'`
+set `echo " $libswanted " | sed -e 's@ ld @ @' -e 's@ malloc @ @' -e 's@ ucb @ @' -e 's@ sec @ @' -e 's@ crypt @ @'`
 libswanted="$*"
 
 # Look for architecture name.  We want to suggest a useful default.
@@ -47,46 +58,34 @@ case "$archname" in
     ;;
 esac
 
-cc=${cc:-cc}
-
-ccversion="`$cc -V 2>&1|head -1|sed 's/^cc: //'`"
-case "$ccversion" in
-*WorkShop*) ccname=workshop ;;
-*) ccversion='' ;;
-esac
-
-cat >UU/workshoplibpth.cbu<<'EOCBU'
+cat > UU/workshoplibpth.cbu << 'EOCBU'
+# This script UU/workshoplibpth.cbu will get 'called-back'
+# by other CBUs this script creates.
 case "$workshoplibpth_done" in
-'')	case "$use64bitall" in
-	"$define"|true|[yY]*)
-            loclibpth="$loclibpth /usr/lib/sparcv9"
-            if test -n "$workshoplibs"; then
-                loclibpth=`echo $loclibpth | sed -e "s% $workshoplibs%%" `
-                for lib in $workshoplibs; do
-                    # Logically, it should be sparcv9.
-                    # But the reality fights back, it's v9.
-                    loclibpth="$loclibpth $lib/sparcv9 $lib/v9"
-                done
-            fi 
+    '')	if test `uname -p` = "sparc"; then
+	case "$use64bitall" in
+	    "$define"|true|[yY]*)
+		# add SPARC-specific 64 bit libraries
+		loclibpth="$loclibpth /usr/lib/sparcv9"
+		if test -n "$workshoplibs"; then
+		    loclibpth=`echo $loclibpth | sed -e "s% $workshoplibs%%" `
+		    for lib in $workshoplibs; do
+			# Logically, it should be sparcv9.
+			# But the reality fights back, it's v9.
+			loclibpth="$loclibpth $lib/sparcv9 $lib/v9"
+		    done
+		fi
 	    ;;
-	*)  loclibpth="$loclibpth $workshoplibs"  
+	*)  loclibpth="$loclibpth $workshoplibs"
 	    ;;
 	esac
+	else
+	    loclibpth="$loclibpth $workshoplibs"
+	fi
 	workshoplibpth_done="$define"
 	;;
 esac
 EOCBU
-
-case "$ccname" in
-workshop)
-	cat >try.c <<EOF
-#include <sunmath.h>
-int main() { return(0); }
-EOF
-	workshoplibs=`cc -### try.c -lsunmath -o try 2>&1|grep " -Y "|sed 's%.* -Y "P,\(.*\)".*%\1%'|tr ':' '\n'|grep '/SUNWspro/'`
-	. ./UU/workshoplibpth.cbu
-	;;
-esac
 
 ######################################################
 # General sanity testing.  See below for excerpts from the Solaris FAQ.
@@ -97,12 +96,12 @@ esac
 # To: perl5-porters@africa.nicoh.com
 # Subject: Re: On perl5/solaris/gcc
 #
-# Here's another draft of the perl5/solaris/gcc sanity-checker. 
+# Here's another draft of the perl5/solaris/gcc sanity-checker.
 
 case `type ${cc:-cc}` in
 */usr/ucb/cc*) cat <<END >&4
 
-NOTE:  Some people have reported problems with /usr/ucb/cc.  
+NOTE:  Some people have reported problems with /usr/ucb/cc.
 If you have difficulties, please make sure the directory
 containing your C compiler is before /usr/ucb in your PATH.
 
@@ -160,7 +159,7 @@ if grep GNU make.vers > /dev/null 2>&1; then
     case "`/usr/bin/ls -lL $tmp`" in
     ??????s*)
 	    cat <<END >&2
-	
+
 NOTE: Your PATH points to GNU make, and your GNU make has the set-group-id
 bit set.  You must either rearrange your PATH to put /usr/ccs/bin before the
 GNU utilities or you must ask your system administrator to disable the
@@ -172,31 +171,33 @@ END
 fi
 rm -f make.vers
 
-# XXX EXPERIMENTAL  A.D.  2/27/1998
-# XXX This script UU/cc.cbu will get 'called-back' by Configure after it
-# XXX has prompted the user for the C compiler to use.
-cat > UU/cc.cbu <<'EOSH'
+cat > UU/cc.cbu <<'EOCBU'
+# This script UU/cc.cbu will get 'called-back' by Configure after it
+# has prompted the user for the C compiler to use.
+
 # If the C compiler is gcc:
 #   - check the fixed-includes
 #   - check as(1) and ld(1), they should not be GNU
 #	(GNU as and ld 2.8.1 and later are reportedly ok, however.)
 # If the C compiler is not gcc:
+#   - Check if it is the Workshop/Forte compiler.
+#     If it is, prepare for 64 bit and long doubles.
 #   - check as(1) and ld(1), they should not be GNU
 #	(GNU as and ld 2.8.1 and later are reportedly ok, however.)
 #
 # Watch out in case they have not set $cc.
 
-# Perl compiled with some combinations of GNU as and ld may not 
+# Perl compiled with some combinations of GNU as and ld may not
 # be able to perform dynamic loading of extensions.  If you have a
 # problem with dynamic loading, be sure that you are using the Solaris
 # /usr/ccs/bin/as and /usr/ccs/bin/ld.  You can do that with
 #  		sh Configure -Dcc='gcc -B/usr/ccs/bin/'
-# (note the trailing slash is required). 
+# (note the trailing slash is required).
 # Combinations that are known to work with the following hints:
 #
 #  gcc-2.7.2, GNU as 2.7, GNU ld 2.7
 #  egcs-1.0.3, GNU as 2.9.1 and GNU ld 2.9.1
-#	--Andy Dougherty  <doughera@lafayette.edu>  
+#	--Andy Dougherty  <doughera@lafayette.edu>
 #	Tue Apr 13 17:19:43 EDT 1999
 
 # Get gcc to share its secrets.
@@ -279,6 +280,23 @@ else
 	# Not using gcc.
 	#
 
+	ccversion="`${cc:-cc} -V 2>&1|sed -n -e '1s/^cc: //p'`"
+	case "$ccversion" in
+	*WorkShop*) ccname=workshop ;;
+	*) ccversion='' ;;
+	esac
+
+	case "$ccname" in
+	workshop)
+		cat >try.c <<EOM
+#include <sunmath.h>
+int main() { return(0); }
+EOM
+		workshoplibs=`cc -### try.c -lsunmath -o try 2>&1|sed -n '/ -Y /s%.* -Y "P,\(.*\)".*%\1%p'|tr ':' '\n'|grep '/SUNWspro/'`
+		. ./workshoplibpth.cbu
+	;;
+	esac
+
 	# See if as(1) is GNU as(1).  GNU might not work for this job.
 	case `as --version < /dev/null 2>&1` in
 	*GNU*)
@@ -326,16 +344,16 @@ rm -f try try.c
 rm -f core
 
 # XXX
-EOSH
+EOCBU
 
 cat > UU/usethreads.cbu <<'EOCBU'
-# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# This script UU/usethreads.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use threads.
 case "$usethreads" in
 $define|true|[yY]*)
         ccflags="-D_REENTRANT $ccflags"
 
-        # sched_yield is in -lposix4 up to Solaris 2.6, in -lrt starting with Solaris 7
+        # sched_yield is in -lposix4 up to Solaris 2.6, in -lrt starting with Solaris 2.7
 	case `uname -r` in
 	5.[0-6] | 5.5.1) sched_yield_lib="posix4" ;;
 	*) sched_yield_lib="rt";
@@ -354,12 +372,12 @@ $define|true|[yY]*)
         cat >try.c <<'EOM'
 	/* Test for sig(set|long)jmp bug. */
 	#include <setjmp.h>
-	 
+
 	main()
 	{
 	    sigjmp_buf env;
 	    int ret;
-	
+
 	    ret = sigsetjmp(env, 1);
 	    if (ret) { return ret == 2; }
 	    siglongjmp(env, 2);
@@ -381,7 +399,7 @@ esac
 EOCBU
 
 cat > UU/uselargefiles.cbu <<'EOCBU'
-# This script UU/uselargefiles.cbu will get 'called-back' by Configure 
+# This script UU/uselargefiles.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use large files.
 case "$uselargefiles" in
 ''|$define|true|[yY]*)
@@ -401,21 +419,40 @@ EOCBU
 # This is truly a mess.
 case "$usemorebits" in
 "$define"|true|[yY]*)
-	use64bitint="$define"    
-	uselongdouble="$define"    
+	use64bitint="$define"
+	uselongdouble="$define"
 	;;
 esac
 
-cat > UU/use64bitall.cbu <<'EOCBU'
-# This script UU/use64bitall.cbu will get 'called-back' by Configure 
+if test `uname -p` = "sparc"; then
+    cat > UU/use64bitint.cbu <<'EOCBU'
+# This script UU/use64bitint.cbu will get 'called-back' by Configure
+# after it has prompted the user for whether to use 64 bit integers.
+case "$use64bitint" in
+"$define"|true|[yY]*)
+	    case "`uname -r`" in
+	    5.[0-4])
+		cat >&4 <<EOM
+Solaris `uname -r|sed -e 's/^5\./2./'` does not support 64-bit integers.
+You should upgrade to at least Solaris 2.5.
+EOM
+		exit 1
+		;;
+	    esac
+	    ;;
+esac
+EOCBU
+
+    cat > UU/use64bitall.cbu <<'EOCBU'
+# This script UU/use64bitall.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to be maximally 64 bitty.
 case "$use64bitall-$use64bitall_done" in
 "$define-"|true-|[yY]*-)
 	    case "`uname -r`" in
-	    5.[1-6])
+	    5.[0-6])
 		cat >&4 <<EOM
-Solaris `uname -r|sed -e 's/^5\.\([789]\)$/\1/'` does not support 64-bit pointers.
-You should upgrade to at least Solaris 7.
+Solaris `uname -r|sed -e 's/^5\./2./'` does not support 64-bit pointers.
+You should upgrade to at least Solaris 2.7.
 EOM
 		exit 1
 		;;
@@ -425,21 +462,12 @@ EOM
 		cat >&4 <<EOM
 
 I do not see the 64-bit libc, $libc.
-(You are either in an old Sparc or in an x86.)
 Cannot continue, aborting.
 
 EOM
 		exit 1
-	    fi 
-
-	    if test -f UU/workshoplibpth.cbu; then
-		. ./UU/workshoplibpth.cbu
-	    else
-		if test -f workshoplibpth.cbu; then
-			. ./workshoplibpth.cbu
-		fi
 	    fi
-
+	    . ./workshoplibpth.cbu
 	    case "$cc -v 2>/dev/null" in
 	    *gcc*)
 		echo 'main() { return 0; }' > try.c
@@ -456,7 +484,7 @@ Cannot continue, aborting.
 EOM
 		    exit 1
 		    ;;
-		esac    
+		esac
 		ccflags="$ccflags -mcpu=v9 -m64"
 		if test X`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null` != X; then
 		    ccflags="$ccflags -Wa,`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
@@ -473,8 +501,7 @@ EOM
 		ldflags="$ldflags `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
 		lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
 		;;
-	    esac	
-
+	    esac
 	    libscheck='case "`/usr/bin/file $xxx`" in
 *64-bit*|*SPARCV9*) ;;
 *) xxx=/no/64-bit$xxx ;;
@@ -484,59 +511,37 @@ esac'
 	    ;;
 esac
 EOCBU
- 
-# Actually, we want to run this already now, if so requested,
-# because we need to fix up things right now.
-case "$use64bitall" in
-"$define"|true|[yY]*)
-        # Need to be double smart because we can be either here or there.
-	if test -f UU/use64bitall.cbu; then
-		. ./UU/use64bitall.cbu
-	else
-		if test -f use64bitall.cbu; then
-			. ./use64bitall.cbu
-		fi
-	fi
+
+    # Actually, we want to run this already now, if so requested,
+    # because we need to fix up things right now.
+    case "$use64bitall" in
+    "$define"|true|[yY]*)
+	# CBUs expect to be run in UU
+	cd UU; . ./use64bitall.cbu; cd ..
 	;;
-esac
+    esac
+fi
 
 cat > UU/uselongdouble.cbu <<'EOCBU'
-# This script UU/uselongdouble.cbu will get 'called-back' by Configure 
+# This script UU/uselongdouble.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use long doubles.
-case "$uselongdouble-$uselongdouble_done" in
-"$define-"|true-|[yY]*-)
-	case "$ccname" in
-	workshop)
-		libswanted="$libswanted sunmath"
-		loclibpth="$loclibpth /opt/SUNWspro/lib"
-		;;
-	*)	cat >&4 <<EOM
+case "$uselongdouble" in
+"$define"|true|[yY]*)
+	if test -f /opt/SUNWspro/lib/libsunmath.so; then
+		libs="$libs -lsunmath"
+		ldflags="$ldflags -L/opt/SUNWspro/lib -R/opt/SUNWspro/lib"
+		d_sqrtl=define
+	else
+		cat >&4 <<EOM
 
-The Sun Workshop compiler is not being used; therefore I do not see
-the libsunmath; therefore I do not know how to do long doubles, sorry.
-I'm disabling the use of long doubles.
+The Sun Workshop math library is not installed; therefore I do not
+know how to do long doubles, sorry.  I'm disabling the use of long
+doubles.
 EOM
 		uselongdouble="$undef"
-		;;
-	esac
-	uselongdouble_done=yes
+	fi
 	;;
 esac
 EOCBU
 
-# Actually, we want to run this already now, if so requested,
-# because we need to fix up things right now.
-case "$uselongdouble" in
-"$define"|true|[yY]*)
-        # Need to be double smart because we can be either here or there.
-	if test -f UU/uselongdouble.cbu; then
-		. ./UU/uselongdouble.cbu
-	else
-		if test -f uselongdouble.cbu; then
-			. ./uselongdouble.cbu
-		fi
-	fi
-	;;
-esac
-
-rm -f try.c try.o try
+rm -f try.c try.o try a.out
