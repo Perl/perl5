@@ -31,6 +31,233 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10085] By: jhi                                   on 2001/05/11  14:08:20
+        Log: Remove the 'asciir' re subpragma.  Should instead implement
+             the 'physical vs logical' range scheme:
+             
+             \xAA-\xCC is a native physical range, you want that range of
+             codepoints in your native encoding.  In EBCDIC the codepoints
+             in the gaps (between i-j and r-s) should be included.
+             
+             \x{AA}-\x{CC} is a physical Unicode range, you want that range of
+             codepoints in Unicode.
+             
+             a-z is a logical range, you want that range of 'logical' codepoints
+             in your native encoding.  In EBCDIC the codepoints in the gaps
+             (between i-j and r-s) should not be included.
+             
+             Mixed cases (a-\xAA, etc) should either be errors, or maybe
+             the 'logical' endpoints should be converted to native/Unicode
+             codepoints, and the range handled as a physical range.
+             
+             'Logical endpoints' are to be recognized only in the A-Z, a-z,
+             and 0-9 ranges.  Probably a warning should be given for mixed
+             cases like A-z or a-9 (since such expressions are encoding
+             dependent), with a recommendation to use physical ranges.
+     Branch: perl
+	   ! ext/re/re.pm perl.h regcomp.c regcomp.h t/op/pat.t
+	   ! t/op/regexp.t
+____________________________________________________________________________
+[ 10084] By: jhi                                   on 2001/05/11  13:56:16
+        Log: Make the test to cleanup the test directory tree
+             both before and after the testing so that we always
+             have a clean slate to work with.
+     Branch: perl
+	   ! t/lib/filefind.t
+____________________________________________________________________________
+[ 10083] By: jhi                                   on 2001/05/11  13:46:30
+        Log: Subject: Re: [PATCH perlfunc.pod] split on an empty string
+             From: Jon Eveland <jweveland@yahoo.com>
+             Date: Fri, 11 May 2001 07:36:28 -0700 (PDT)
+             Message-ID: <20010511143628.24225.qmail@web10402.mail.yahoo.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 10082] By: jhi                                   on 2001/05/11  13:45:06
+        Log: Merge the camel-III/vstring.t with op/ver.t.
+     Branch: perl
+	   - t/camel-III/vstring.t
+	   ! MANIFEST t/TEST t/harness t/op/ver.t
+____________________________________________________________________________
+[ 10081] By: jhi                                   on 2001/05/11  13:15:55
+        Log: Add test.deparse make target.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 10080] By: jhi                                   on 2001/05/11  12:52:49
+        Log: Subject: [PATCH B::Deparse] $foo->bar(0)
+             From: Robin Houston <robin@kitsite.com>
+             Date: Fri, 11 May 2001 12:02:22 +0100
+             Message-ID: <20010511120222.A11529@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm t/op/method.t
+____________________________________________________________________________
+[ 10079] By: jhi                                   on 2001/05/11  01:59:06
+        Log: A nicely working combination for UTS from Hal Morris.
+     Branch: perl
+	   + ext/POSIX/hints/uts.pl
+	   ! MANIFEST hints/uts.sh
+____________________________________________________________________________
+[ 10078] By: jhi                                   on 2001/05/11  01:15:04
+        Log: i_ieeefp=undef for UTS.
+     Branch: perl
+	   ! hints/uts.sh
+____________________________________________________________________________
+[ 10077] By: jhi                                   on 2001/05/10  22:42:35
+        Log: Subject: RE: rand(0) is rand(1)
+             From: Larry Shatzer <lshatzer@islanddata.com>
+             Date: Thu, 10 May 2001 11:09:27 -0700
+             Message-ID: <95CD90709D74D4118F4600D0B79E8BC9995027@mail.islanddata.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 10076] By: jhi                                   on 2001/05/10  22:36:50
+        Log: Subject: [patch] make op_{clear,null} public
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Thu, 10 May 2001 15:54:09 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0105101546510.2962-100000@mako.covalent.net>
+     Branch: perl
+	   ! embed.h embed.pl op.c proto.h
+____________________________________________________________________________
+[ 10075] By: jhi                                   on 2001/05/10  22:28:36
+        Log: Subject: [PATCH B.xs] Extend tr/\0-\377/blah/c support
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 10 May 2001 18:54:59 +0100
+             Message-ID: <20010510185459.A5995@penderel>
+     Branch: perl
+	   ! ext/B/B.xs ext/B/B/Deparse.pm t/op/tr.t
+____________________________________________________________________________
+[ 10074] By: jhi                                   on 2001/05/10  22:23:41
+        Log: Subject: [PATCH B::Deparse] t/op/64bitint.t
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 10 May 2001 12:56:39 +0100
+             Message-ID: <20010510125639.A2119@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10073] By: jhi                                   on 2001/05/10  14:26:01
+        Log: Retract #10070, not ready yet.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10072] By: jhi                                   on 2001/05/10  13:40:24
+        Log: The metaconfig unit change for #10071.
+     Branch: metaconfig
+	   ! U/modified/mallocsrc.U
+____________________________________________________________________________
+[ 10071] By: jhi                                   on 2001/05/10  13:39:57
+        Log: The #9525+#9526 didn't allow for overriding usemymalloc.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10070] By: jhi                                   on 2001/05/10  13:18:42
+        Log: (Retracted by #10073)
+             
+             Subject: Re: [PATCH t/TEST] B::Deparse tester 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 10 May 2001 05:48:09 +0100
+             Message-Id: <200105100448.FAA13584@crypt.compulink.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10069] By: jhi                                   on 2001/05/10  12:24:06
+        Log: Add a for(func()) test.
+     Branch: perl
+	   ! t/cmd/for.t
+____________________________________________________________________________
+[ 10068] By: jhi                                   on 2001/05/10  12:16:00
+        Log: Subject: [PATCH B::Deparse] our() lists and foreach loops
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 10 May 2001 13:50:08 +0100
+             Message-ID: <20010510135008.A2454@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10067] By: jhi                                   on 2001/05/10  01:45:03
+        Log: A thinko in #10065.
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 10066] By: jhi                                   on 2001/05/10  01:33:12
+        Log: Subject: [PATCH B::Deparse] Fix tr///ansliteration
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 10 May 2001 02:10:34 +0100
+             Message-ID: <20010510021034.A19421@penderel>
+     Branch: perl
+	   ! ext/B/B.xs ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10065] By: jhi                                   on 2001/05/10  01:30:43
+        Log: Subject: [patch] make hv_fetch{_ent} SvGMAGICAL aware
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Mon, 7 May 2001 09:50:58 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0105070947060.23808-100000@mako.covalent.net>
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 10064] By: jhi                                   on 2001/05/09  23:13:29
+        Log: One more workaround for the UTS compiler from Hal Morris.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 10063] By: jhi                                   on 2001/05/09  23:09:53
+        Log: Subject: [PATCH B::Debug] Show string for PVOP, and referent for RV
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 10 May 2001 01:02:08 +0100
+             Message-ID: <20010510010208.A18200@penderel>
+     Branch: perl
+	   ! ext/B/B/Debug.pm
+____________________________________________________________________________
+[ 10062] By: jhi                                   on 2001/05/09  23:06:25
+        Log: Subject: [PATCH] Simplify deb_curcv() a bit
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Wed, 9 May 2001 18:14:34 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105091811340.1160-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! run.c
+____________________________________________________________________________
+[ 10061] By: jhi                                   on 2001/05/09  23:05:28
+        Log: Subject: [PATCH] Additional test case for PerlIO::Scalar
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Wed, 9 May 2001 18:03:45 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105091758220.1160-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! t/lib/io_scalar.t
+____________________________________________________________________________
+[ 10060] By: jhi                                   on 2001/05/09  23:04:38
+        Log: Subject: [PATCH: perl@10022] update md5sum for MD5.xs on IBM-1047
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 9 May 2001 12:08:02 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10105091205250.455254-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/md5-file.t
+____________________________________________________________________________
+[ 10059] By: jhi                                   on 2001/05/09  23:03:52
+        Log: Subject: [PATCH t/TEST] B::Deparse tester
+             From: Robin Houston <robin@kitsite.com>
+             Date: Wed, 9 May 2001 19:17:50 +0100
+             Message-ID: <20010509191750.A16940@penderel>
+     Branch: perl
+	   ! ext/B/O.pm t/TEST
+____________________________________________________________________________
+[ 10058] By: jhi                                   on 2001/05/09  23:02:56
+        Log: Subject: [PATCH] Pod::Html -- fixes extra gaps in raw text
+             From: Jeff Pinyan <jeffp@crusoe.net>
+             Date: Wed, 9 May 2001 14:36:25 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0105091430420.357-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[ 10057] By: nick                                  on 2001/05/09  18:37:56
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> Changes epoc/epocish.h ext/PerlIO/Scalar/Scalar.xs
+	  !> hints/hpux.sh lib/Pod/Html.pm patchlevel.h perlio.c
+____________________________________________________________________________
+[ 10056] By: jhi                                   on 2001/05/09  16:44:44
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10055] By: jhi                                   on 2001/05/09  16:26:47
         Log: Integrate perlio.
      Branch: perl
