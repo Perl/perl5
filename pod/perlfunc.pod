@@ -3526,13 +3526,16 @@ for this.  Other restrictions include whether it works on directories,
 open files, or pre-existing files.  Check L<perlport> and either the
 rename(2) manpage or equivalent system documentation for details.
 
+=item require VERSION
+
 =item require EXPR
 
 =item require
 
 Demands some semantics specified by EXPR, or by C<$_> if EXPR is not
-supplied.  If EXPR is numeric, demands that the current version of Perl
-(C<$]> or $PERL_VERSION) be equal or greater than EXPR.
+supplied.  If a version number or tuple is specified, or if EXPR is
+numeric, demands that the current version of Perl
+(C<$^V> or C<$]> or $PERL_VERSION) be equal or greater than EXPR.
 
 Otherwise, demands that a library file be included if it hasn't already
 been included.  The file is included via the do-FILE mechanism, which is
@@ -5143,13 +5146,17 @@ package.  It is exactly equivalent to
 
 except that Module I<must> be a bareword.
 
-If the first argument to C<use> is a number, it is treated as a version
-number instead of a module name.  If the version of the Perl interpreter
-is less than VERSION, then an error message is printed and Perl exits
-immediately.  This is often useful if you need to check the current
-Perl version before C<use>ing library modules that have changed in
-incompatible ways from older versions of Perl.  (We try not to do
-this more than we have to.)
+If the first argument to C<use> is a number or a version tuple, it is
+treated as a version instead of a module name.  If the version
+of the Perl interpreter is less than VERSION, then an error message
+is printed and Perl exits immediately.
+
+    use 5.005_03;	# version number
+    use v5.6.0;		# version tuple
+
+This is often useful if you need to check the current Perl version before
+C<use>ing library modules that have changed in incompatible ways from
+older versions of Perl.  (We try not to do this more than we have to.)
 
 The C<BEGIN> forces the C<require> and C<import> to happen at compile time.  The
 C<require> makes sure the module is loaded into memory if it hasn't been

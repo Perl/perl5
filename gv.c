@@ -829,20 +829,20 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '\\':
     case '/':
     case '|':
-    case '\001':
-    case '\003':
-    case '\004':
-    case '\005':
-    case '\006':
-    case '\010':
-    case '\011':	/* NOT \t in EBCDIC */
-    case '\017':
-    case '\020':
-    case '\024':
+    case '\001':	/* $^A */
+    case '\003':	/* $^C */
+    case '\004':	/* $^D */
+    case '\005':	/* $^E */
+    case '\006':	/* $^F */
+    case '\010':	/* $^H */
+    case '\011':	/* $^I, NOT \t in EBCDIC */
+    case '\017':	/* $^O */
+    case '\020':	/* $^P */
+    case '\024':	/* $^T */
 	if (len > 1)
 	    break;
 	goto magicalize;
-    case '\023':
+    case '\023':	/* $^S */
 	if (len > 1)
 	    break;
 	goto ro_magicalize;
@@ -874,7 +874,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	sv_magic(GvSV(gv), (SV*)gv, 0, name, len);
 	break;
 
-    case '\014':
+    case '\014':	/* $^L */
 	if (len > 1)
 	    break;
 	sv_setpv(GvSV(gv),"\f");
@@ -893,6 +893,13 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    SvNOK_on(sv);
 	    (void)SvPV_nolen(sv);
 	    SvREADONLY_on(sv);
+	}
+	break;
+    case '\026':	/* $^V */
+	if (len == 1) {
+	    SV *sv = GvSV(gv);
+	    GvSV(gv) = SvREFCNT_inc(PL_patchlevel);
+	    SvREFCNT_dec(sv);
 	}
 	break;
     }

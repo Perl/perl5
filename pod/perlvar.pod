@@ -686,6 +686,8 @@ of perl in the right bracket?)  Example:
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
+See C<$^V> for a more modern representation of the Perl version.
+
 =item $COMPILING
 
 =item $^C
@@ -853,6 +855,26 @@ $SIG{__WARN__} handlers).  True if inside an eval(), otherwise false.
 The time at which the program began running, in seconds since the
 epoch (beginning of 1970).  The values returned by the B<-M>, B<-A>,
 and B<-C> filetests are based on this value.
+
+=item $^V
+
+The revision, version, and subversion of the Perl interpreter, represented
+as a "version tuple".  Version tuples have both a numeric value and a
+string value.  The numeric value is a floating point number that amounts
+to revision + version/1000 + subversion/1000000, and the string value
+is made of utf8 characters:
+C<chr($revision) . chr($version) . chr($subversion)>.
+
+This can be used to determine whether the Perl interpreter executing a
+script is in the right range of versions.  (Mnemonic: use ^V for Version
+control.)  Example:
+
+    warn "No "our" declarations!\n" if $^V and $^V lt v5.6;
+
+See also the documentation of C<use VERSION> and C<require VERSION>
+for a convenient way to fail if the running Perl interpreter is too old.
+
+See also C<$]> for an older representation of the Perl version.
 
 =item $WARNING
 

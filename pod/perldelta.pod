@@ -270,12 +270,50 @@ For the full list of public API functions, see L<perlapi>.
 
 =head1 Installation and Configuration Improvements
 
+=head2 -Dusethreads means something different
+
+WARNING: Support for threads continues to be an experimental feature.
+Interfaces and implementation are subject to sudden and drastic changes.
+
+The -Dusethreads flag now enables the experimental interpreter-based thread
+support by default.  To get the flavor of experimental threads that was in
+5.005 instead, you need to ask for -Duse5005threads.
+
+As of v5.5.640, interpreter-threads support is still lacking a way to
+create new threads from Perl (i.e., C<use Thread;> will not work with
+interpreter threads).  C<use Thread;> continues to be available when you
+ask for -Duse5005threads, bugs and all.
+
+=head2 Perl's version numbering has changed
+
+Beginning with Perl version 5.6, the version number convention has been
+changed to a "dotted tuple" scheme that is more commonly found in open
+source projects.
+
+Maintenance versions of v5.6.0 will be released as v5.6.1, v5.6.2 etc.
+The next development series following v5.6 will be numbered v5.7.x,
+beginning with v5.7.0, and the next major production release following
+v5.6 will be v5.8.
+
+The v1.2.3 syntax is also now legal in Perl.  See L<Support for version tuples>
+for more on that.
+
+To cope with the new versioning system's use of at least three significant
+digits for each version component, the method used for incrementing the
+subversion number has also changed slightly.  We assume that versions older
+than v5.6 have been incrementing the subversion component in multiples of
+10.  Versions after v5.6 will increment them by 1.  Thus, using the new
+notation, 5.005_03 is the same as v5.5.30, and the first maintenance
+version following v5.6 will be v5.6.1, which amounts to a floating point
+value of 5.006_001).
+
 =head2 New Configure flags
 
 The following new flags may be enabled on the Configure command line
 by running Configure with C<-Dflag>.
 
     usemultiplicity
+    use5005threads
 
     uselongdouble
     usemorebits
@@ -343,7 +381,7 @@ Perl can optionally use UTF-8 as its internal representation for character
 strings.  The C<utf8> pragma enables this support in the current lexical
 scope.  See L<utf8> for more information.
 
-=head2 Interpreter threads
+=head2 Interpreter cloning, threads, and concurrency
 
 WARNING: This is an experimental feature in a pre-alpha state.  Use
 at your own risk.
@@ -367,24 +405,24 @@ interpreters, little or no locking will be needed (unless parts of
 the symbol table are explicitly shared).  This is obviously intended
 to be an easy-to-use replacement for the existing threads support.
 
-Support for cloning interpreters must currently be manually enabled
-by defining the cpp macro USE_ITHREADS on non-Windows platforms.
-(See win32/Makefile for how to enable it on Windows.)  The resulting
-perl executable will be functionally identical to one that was built
-without USE_ITHREADS, but the perl_clone() API call will only be
-available in the former.
+Support for cloning interpreters and interpreter concurrency can be
+enabled using the -Dusethreads Configure option (see win32/Makefile for
+how to enable it on Windows.)  The resulting perl executable will be
+functionally identical to one that was built with -Dmultiplicity, but
+the perl_clone() API call will only be available in the former.
 
-USE_ITHREADS enables Perl source code changes that provide a clear
-separation between the op tree and the data it operates with.  The
-former is considered immutable, and can therefore be shared between
-an interpreter and all of its clones, while the latter is considered
-local to each interpreter, and is therefore copied for each clone.
+-Dusethreads enables, the cpp macros USE_ITHREADS by default, which enables
+Perl source code changes that provide a clear separation between the op tree
+and the data it operates with.  The former is considered immutable, and can
+therefore be shared between an interpreter and all of its clones, while the
+latter is considered local to each interpreter, and is therefore copied for
+each clone.
 
 Note that building Perl with the -Dusemultiplicity Configure option
 is adequate if you wish to run multiple B<independent> interpreters
-concurrently in different threads.  USE_ITHREADS only needs to be
-enabled if you wish to obtain access to perl_clone() and cloned
-interpreters.
+concurrently in different threads.  -Dusethreads only provides the
+additional functionality of the perl_clone() API call and other
+support for running B<cloned> interpreters concurrently.
 
 [XXX TODO - the Compiler backends may be broken when USE_ITHREADS is
 enabled.]
@@ -407,9 +445,36 @@ Tuomas Lukka <lukka@fas.harvard.edu>)]
 
 An "our" declaration introduces a value that can be best understood
 as a lexically scoped symbolic alias to a global variable in the
-current package.  This is mostly useful as an alternative to the
-C<vars> pragma, but also provides the opportunity to introduce
-typing and other attributes for such variables.  See L<perlfunc/our>.
+package that was current where the variable was declared.  This is
+mostly useful as an alternative to the C<vars> pragma, but also provides
+the opportunity to introduce typing and other attributes for such
+variables.  See L<perlfunc/our>.
+
+=head2 Support for version tuples
+
+Literals of the form v1.2.3.4 are now parsed as the utf8 string
+C<"\x{1}\x{2}\x{3}\x{4}">.  This allows comparing version numbers using
+regular string comparison operators C<eq>, C<ne>, C<lt>, C<gt> etc.
+
+These "dotted tuples" are dual-valued.  They are both strings of utf8
+characters, and floating point numbers.  Thus v1.2.3.4 has the string
+value C<"\x{1}\x{2}\x{3}\x{4}"> and the numeric value 1.002_003_004.
+As another example, v5.5.640 has the string value C<"\x{5}\x{5}\x{280}">
+(remember 280 hexadecimal is 640 decimal) and the numeric value
+5.005_64.
+
+In conjunction with the new C<$^V> magic variable (which contains
+the perl version in this format), such literals can be used to
+check if you're running a particular version of Perl.
+
+    if ($^V and $^V gt v5.5.640) {
+        # new style version numbers are supported
+    }
+
+C<require> and C<use> also support such literals:
+
+    require v5.6.0;	# croak if $^V lt v5.6.0
+    use v5.6.0;		# same, but croaks at compile-time
 
 =head2 Weak references
 
@@ -689,13 +754,23 @@ acquire special meaning in any future version of Perl.
 Formerly, if you wanted to mark a subroutine as being a method call or
 as requiring an automatic lock() when it is entered, you had to declare
 that with a C<use attrs> pragma in the body of the subroutine.
-That can now be accomplished with a declaration syntax, like this:
+That can now be accomplished with declaration syntax, like this:
 
     sub mymethod : locked method ;
     ...
-    sub mymethod : locked :method {
+    sub mymethod : locked method {
 	...
     }
+
+    sub othermethod :locked :method ;
+    ...
+    sub othermethod :locked :method {
+	...
+    }
+
+
+(Note how only the first C<:> is mandatory, and whitespace surrounding
+the C<:> is optional.)
 
 F<AutoSplit.pm> and F<SelfLoader.pm> have been updated to keep the attributes
 with the stubs they provide.  See L<attributes>.
@@ -739,6 +814,12 @@ in compile-only mode (i.e. via the C<-c> switch).  Since
 BEGIN blocks are executed under such conditions, this variable
 enables perl code to determine whether actions that make sense
 only during normal running are warranted.  See L<perlvar>.
+
+=head2 New variable $^V contains Perl version in v5.6.0 format
+
+C<$^V> contains the Perl version number as a version tuple that
+can be used in string or numeric comparisons.  See
+C<Support for version tuples> for an example.
 
 =head2 Optional Y2K warnings
 
@@ -1101,6 +1182,14 @@ the DATA filehandle will be set to text mode if a carriage return is
 detected at the end of the line containing the __END__ or __DATA__
 token; if not, the DATA filehandle will be left open in binary mode.
 Earlier versions always opened the DATA filehandle in text mode.
+
+The glob() operator is implemented via the L<File::Glob> extension,
+which supports glob syntax of the C<csh>.  This increases the flexibility
+of the glob() operator, but there may be compatibility issues for
+programs that relied on the older globbing syntax.  If you want to
+preserve compatibility with the older syntax, you might want to put
+a C<use File::DosGlob;> in your program.  For details and compatibility
+information, see L<File::Glob>.
 
 [TODO - GSAR]
 

@@ -1802,6 +1802,17 @@ operation you intend by using C<""> or C<0+>, as in the examples below.
 See L<perlfunc/vec> for information on how to manipulate individual bits
 in a bit vector.
 
+=head2 Version tuples
+
+A version number of the form C<v1.2.3.4> is parsed as a dual-valued literal.
+It has the string value of C<"\x{1}\x{2}\x{3}\x{4}"> (i.e., a utf8 string)
+and a numeric value of C<1 + 2/1000 + 3/1000000 + 4/1000000000>.  This is
+useful for representing and comparing version numbers.
+
+Version tuples are accepted by both C<require> and C<use>.  The C<$^V> variable
+contains the running Perl interpreter's version in this format.
+See L<perlvar/$^V>.
+
 =head2 Integer Arithmetic
 
 By default, Perl assumes that it must do most of its arithmetic in
@@ -1889,3 +1900,5 @@ limited-precision representations.
 The non-standard modules SSLeay::BN and Math::Pari provide
 equivalent functionality (and much more) with a substantial
 performance savings.
+
+=cut
