@@ -31,7 +31,6 @@ sub post_constants {
 sub postamble {
 '
 B.o : defsubs.h 
-defsubs.h : defsubs.h.PL ../../op.h
 '
 }
 
