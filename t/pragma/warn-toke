@@ -149,6 +149,10 @@ EXPECT
 Semicolon seems to be missing at - line 3.
 ########
 # toke.c
+BEGIN {
+    # Scalars leaked: due to syntax errors
+    $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
+}
 use warning 'syntax' ;
 my $a =+ 2 ;
 $a =- 2 ;
@@ -161,19 +165,19 @@ $a =| 2 ;
 $a =< 2 ;
 $a =/ 2 ;
 EXPECT
-Reversed += operator at - line 3.
-Reversed -= operator at - line 4.
-Reversed *= operator at - line 5.
-Reversed %= operator at - line 6.
-Reversed &= operator at - line 7.
-Reversed .= operator at - line 8.
-syntax error at - line 8, near "=."
-Reversed ^= operator at - line 9.
-syntax error at - line 9, near "=^"
-Reversed |= operator at - line 10.
-syntax error at - line 10, near "=|"
-Reversed <= operator at - line 11.
-Unterminated <> operator at - line 11.
+Reversed += operator at - line 7.
+Reversed -= operator at - line 8.
+Reversed *= operator at - line 9.
+Reversed %= operator at - line 10.
+Reversed &= operator at - line 11.
+Reversed .= operator at - line 12.
+syntax error at - line 12, near "=."
+Reversed ^= operator at - line 13.
+syntax error at - line 13, near "=^"
+Reversed |= operator at - line 14.
+syntax error at - line 14, near "=|"
+Reversed <= operator at - line 15.
+Unterminated <> operator at - line 15.
 ########
 # toke.c
 use warning 'syntax' ;
