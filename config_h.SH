@@ -1087,22 +1087,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define MEM_ALIGNBYTES $alignbytes
 #endif
 
-/* INTSIZE:
- *	This symbol contains the value of sizeof(int) so that the C
- *	preprocessor can make decisions based on it.
- */
-/* LONGSIZE:
- *	This symbol contains the value of sizeof(long) so that the C
- *	preprocessor can make decisions based on it.
- */
-/* SHORTSIZE:
- *	This symbol contains the value of sizeof(short) so that the C
- *	preprocessor can make decisions based on it.
- */
-#define INTSIZE $intsize		/**/
-#define LONGSIZE $longsize		/**/
-#define SHORTSIZE $shortsize		/**/
-
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
  *	i.e. 0x1234 or 0x4321, etc...
