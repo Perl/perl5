@@ -1926,6 +1926,13 @@
  */
 #define HAS_SIGACTION	/**/
 
+/* HAS_SIGPROCMASK:
+ *	This symbol, if defined, indicates that sigprocmask
+ *	system call is available to examine or change the signal mask
+ *	of the calling process.
+ */
+#define HAS_SIGPROCMASK	/**/
+
 /* HAS_SIGSETJMP:
  *	This variable indicates to the C program that the sigsetjmp()
  *	routine is available to save the calling process's registers
@@ -2788,6 +2795,10 @@
  *	This symbol defines the format string used for printing a Perl UV
  *	as an unsigned hexadecimal integer in lowercase abcdef.
  */
+/* UVXf:
+ *     This symbol defines the format string used for printing a Perl UV
+ *     as an unsigned hexadecimal integer in uppercase ABCDEF.
+ */
 /* NVef:
  *	This symbol defines the format string used for printing a Perl NV
  *	using %e-ish floating point format.
@@ -2804,6 +2815,7 @@
 #define	UVuf		"u"		/**/
 #define	UVof		"o"		/**/
 #define	UVxf		"x"		/**/
+#define	UVXf		"X"		/**/
 #define	NVef		"e"		/**/
 #define	NVff		"f"		/**/
 #define	NVgf		"g"		/**/

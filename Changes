@@ -32,6 +32,184 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8428] By: jhi                                   on 2001/01/13  02:08:50
+        Log: Subject: Re: [PATCH: perl@8342]  lib/bigfloat.t FAILED at test 351
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 12 Jan 2001 16:27:36 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10101121623130.478096-100000@aspara.forte.com>
+             
+             Add a BEGIN guard for sloppy floating point division.
+     Branch: perl
+	   ! lib/Math/BigInt.pm lib/bigint.pl
+____________________________________________________________________________
+[  8427] By: jhi                                   on 2001/01/13  01:47:16
+        Log: The B::Terse drop-in replacement wasn't quite drop-in.
+     Branch: perl
+	   ! ext/B/B/Terse.pm
+____________________________________________________________________________
+[  8426] By: jhi                                   on 2001/01/12  21:20:43
+        Log: Use UVXf.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh sv.c uconfig.h
+	   ! uconfig.sh vos/config.alpha.def vos/config.alpha.h
+	   ! vos/config.ga.def vos/config.ga.h win32/config.bc
+	   ! win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  8425] By: jhi                                   on 2001/01/12  20:20:14
+        Log: Subject: [PATCH perl@8342] -Wformat
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 12 Jan 2001 20:03:14 GMT
+             Message-Id: <200101122003.UAA29599@tempest.npl.co.uk>
+     Branch: perl
+	   ! ext/Encode/Encode.xs mg.c sv.c toke.c
+____________________________________________________________________________
+[  8424] By: jhi                                   on 2001/01/12  20:01:48
+        Log: Subject: B::Concise -- an improved replacement for B::Terse 
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Date: Sat,  6 Jan 2001 20:18:05 -0800 (PST)
+             Message-ID: <14935.43597.962940.803717@soda.csua.berkeley.edu>
+     Branch: perl
+	   + ext/B/B/Concise.pm
+	   ! MANIFEST ext/B/B/Terse.pm
+____________________________________________________________________________
+[  8423] By: jhi                                   on 2001/01/12  19:24:02
+        Log: The new metaconfig unit from the #8421.
+     Branch: metaconfig/U/perl
+	   + d_sigprocmask.U
+____________________________________________________________________________
+[  8422] By: jhi                                   on 2001/01/12  19:23:43
+        Log: Forgot the microperl config from the #8421.
+     Branch: perl
+	   ! uconfig.h uconfig.sh
+____________________________________________________________________________
+[  8421] By: jhi                                   on 2001/01/12  19:05:27
+        Log: Add sigprocmask() probe, regen Configure, regen toc.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh mg.c pod/perltoc.pod
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h win32/config.bc win32/config.gc
+	   ! win32/config.vc
+____________________________________________________________________________
+[  8420] By: jhi                                   on 2001/01/12  18:34:31
+        Log: Add sockatmark() to the todo list.
+     Branch: perl
+	   ! Todo-5.6
+____________________________________________________________________________
+[  8419] By: jhi                                   on 2001/01/12  18:09:46
+        Log: Rename RETVAL_MAX to RETURN_UNLIMITED_NUMBER.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  8418] By: jhi                                   on 2001/01/12  18:05:30
+        Log: Subject: Re: [PATCH] [ID 20001223.002] lvalues in list context
+             From: Radu Greab <radu@netsoft.ro>
+             Message-ID: <14943.15321.515713.119805@ix.netsoft.ro>
+             Date: Fri, 12 Jan 2001 19:16:09 +0200 (EET)
+     Branch: perl
+	   ! op.c t/pragma/sub_lval.t
+____________________________________________________________________________
+[  8417] By: jhi                                   on 2001/01/12  16:09:09
+        Log: Subject: [PATCH @8404] Consolidated lvalue sub changes
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU> 
+             Date: Wed, 10 Jan 2001 21:36:51 -0800 (PST)
+             Message-ID: <14941.16925.736415.785818@soda.csua.berkeley.edu>
+     Branch: perl
+	   ! doop.c embed.h embed.pl op.c op.h opcode.h opcode.pl
+	   ! pod/perldiag.pod pod/perlintern.pod pod/perlsub.pod pp.c pp.h
+	   ! pp.sym pp_ctl.c pp_hot.c pp_proto.h proto.h t/lib/b.t
+	   ! t/pragma/sub_lval.t toke.c
+____________________________________________________________________________
+[  8416] By: jhi                                   on 2001/01/12  15:42:06
+        Log: Subject: RE: [PATCH] [ID 20001223.002] lvalues in list context
+             From: "Richard Soderberg" <rs@crystalflame.net>
+             Date: Fri, 12 Jan 2001 04:49:35 -0800
+             Message-ID: <NAEKLNAAHLMBPMPNBMLEAELDCKAA.rs@crystalflame.net>
+             
+             Replace 10000 with RETVAL_MAX, and compute RETVAL_MAX
+             according to the platform.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  8415] By: jhi                                   on 2001/01/12  15:33:41
+        Log: One more UTF-8 fix from Inaba Hiroto.
+     Branch: perl
+	   ! pp.c regexec.c t/pragma/utf8.t
+____________________________________________________________________________
+[  8414] By: jhi                                   on 2001/01/12  15:30:18
+        Log: Mea culpa: I botched up Hugo's "Tw" bug fix when applying it.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[  8413] By: jhi                                   on 2001/01/12  15:22:10
+        Log: Subject: [Patch perl@8375] pragma/subs.t ......FAILED tests 1-2 using Bison's parser
+             From: "Roca, Ignasi" <ignasi.roca@fujitsu.siemens.es>
+             Date: Thu, 11 Jan 2001 12:53:36 +0100
+             Message-ID: <5930DC161690D2119667009027157547038123E1@madt009a.siemens.es>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  8412] By: jhi                                   on 2001/01/12  15:20:25
+        Log: Subject: [PATCH: perl@8342] updates to posix-bc hints file
+             From: "Roca, Ignasi" <ignasi.roca@fujitsu.siemens.es>
+             Date: Fri, 12 Jan 2001 14:37:55 +0100
+             Message-ID: <5930DC161690D21196670090271575470384E3FC@madt009a.siemens.es>
+     Branch: perl
+	   ! hints/posix-bc.sh
+____________________________________________________________________________
+[  8411] By: jhi                                   on 2001/01/12  15:14:14
+        Log: Subject: [PATCH: perl@8342]  op/regmesg FAILED at test 33 on EBCDIC machines
+             From: "Roca, Ignasi" <ignasi.roca@fujitsu.siemens.es>
+             Date: Fri, 12 Jan 2001 10:42:21 +0100
+             Message-ID: <5930DC161690D211966700902715754703812F33@madt009a.siemens.es>
+     Branch: perl
+	   ! t/op/regmesg.t
+____________________________________________________________________________
+[  8410] By: jhi                                   on 2001/01/12  05:48:55
+        Log: Subject: Re: [ID 20010101.004] Not OK: perl v5.7.0 +DEVEL8268 on i586-linux-64int-ld 2.2.17-21mdk (UNINSTALLED)
+             From: Nicholas Clark <nick@ccl4.org> 
+             Date: Sun, 7 Jan 2001 19:47:14 +0000
+             Message-ID: <20010107194714.B1048@plum.flirble.org>
+     Branch: perl
+	   ! t/op/numconvert.t
+____________________________________________________________________________
+[  8409] By: jhi                                   on 2001/01/12  05:41:28
+        Log: Integrate perlio.
+     Branch: perl
+	  !> mg.c scope.h
+____________________________________________________________________________
+[  8408] By: nick                                  on 2001/01/11  22:43:28
+        Log: Remove variables that were used in experiments.
+     Branch: perlio
+	   ! mg.c
+____________________________________________________________________________
+[  8407] By: nick                                  on 2001/01/11  20:57:44
+        Log: Catch die in %SIG handler and unblock the signal before re-dying.
+             This make Linux work _without_ sigsetjmp().
+             Turn off sigsetjmp() to see what else it does.
+             May need Configure probe for sigprocmask() if anything has sigaction()
+             but not sigprocmask().
+     Branch: perlio
+	   ! mg.c scope.h
+____________________________________________________________________________
+[  8406] By: nick                                  on 2001/01/11  19:32:07
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes ext/IO/lib/IO/Socket/INET.pm ext/Socket/Socket.pm mg.c
+	  !> patchlevel.h perl.h regexec.c t/op/re_tests t/op/split.t
+	  !> t/op/substr.t
+____________________________________________________________________________
+[  8405] By: jhi                                   on 2001/01/11  17:11:01
+        Log: Fix UTF-8 lval substr().
+     Branch: perl
+	   ! mg.c t/op/substr.t
+____________________________________________________________________________
+[  8404] By: jhi                                   on 2001/01/11  05:13:58
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8403] By: jhi                                   on 2001/01/11  04:38:24
         Log: Subject: Re: [ID 20001029.005] Regex error: "cd. (A. Tw)" !~ /\((\w\. \w+)\)/
              From: Hugo <hv@crypt.compulink.co.uk>

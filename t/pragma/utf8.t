@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..105\n";
+print "1..106\n";
 
 my $test = 1;
 
@@ -553,4 +553,14 @@ sub nok_bytes {
     print "not " unless $x eq "\x{100}B" && length($x) == 2;
     print "ok $test\n";
     $test++;					# 105
+}
+
+{
+    use utf8;
+
+    my @a = split(/\xFE/, "\xFF\xFE\xFD");
+
+    print "not " unless @a == 2 && $a[0] eq "\xFF" && $a[1] eq "\xFD";
+    print "ok $test\n";
+    $test++;					# 106
 }

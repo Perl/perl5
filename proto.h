@@ -332,6 +332,7 @@ PERL_CALLCONV char*	Perl_instr(pTHX_ const char* big, const char* little);
 PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit);
 PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd);
 PERL_CALLCONV bool	Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags);
+PERL_CALLCONV I32	Perl_is_lvalue_sub(pTHX);
 PERL_CALLCONV bool	Perl_is_uni_alnum(pTHX_ U32 c);
 PERL_CALLCONV bool	Perl_is_uni_alnumc(pTHX_ U32 c);
 PERL_CALLCONV bool	Perl_is_uni_idfirst(pTHX_ U32 c);

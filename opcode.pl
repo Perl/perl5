@@ -599,7 +599,7 @@ orassign	logical or assignment (||=)	ck_null		s|
 method		method lookup		ck_method	d1
 entersub	subroutine entry	ck_subr		dmt1	L
 leavesub	subroutine exit		ck_null		1	
-leavesublv	lvalue subroutine exit	ck_null		1	
+leavesublv	lvalue subroutine return	ck_null		1	
 caller		caller			ck_fun		t%	S?
 warn		warn			ck_fun		imst@	L
 die		die			ck_fun		dimst@	L
@@ -616,7 +616,7 @@ enteriter	foreach loop entry	ck_null		d{
 iter		foreach loop iterator	ck_null		0	
 enterloop	loop entry		ck_null		d{	
 leaveloop	loop exit		ck_null		2	
-return		return			ck_null		dm@	L
+return		return			ck_return	dm@	L
 last		last			ck_null		ds}	
 next		next			ck_null		ds}	
 redo		redo			ck_null		ds}	

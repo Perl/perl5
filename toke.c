@@ -2090,7 +2090,8 @@ Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp)
 
     r = Perl_yylex(aTHX);
 
-    yyactlevel--;
+    if (yyactlevel > 0)
+       yyactlevel--;
 
     return r;
 }
@@ -2860,7 +2861,7 @@ Perl_yylex(pTHX)
 	    if (ftst) {
 		PL_last_lop_op = ftst;
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### Saw file test %c\n", ftst);
+                        "### Saw file test %c\n", (int)ftst);
 		} )
 		FTST(ftst);
 	    }
@@ -2868,7 +2869,8 @@ Perl_yylex(pTHX)
 		/* Assume it was a minus followed by a one-letter named
 		 * subroutine call (or a -bareword), then. */
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### %c looked like a file test but was not\n", ftst);
+			"### %c looked like a file test but was not\n",
+			(int)ftst);
 		} )
 		s -= 2;
 	    }
@@ -3023,9 +3025,21 @@ Perl_yylex(pTHX)
 		    PL_lex_stuff = Nullsv;
 		}
 		else {
-		    attrs = append_elem(OP_LIST, attrs,
-					newSVOP(OP_CONST, 0,
-						newSVpvn(s, len)));
+		    if (!PL_in_my && len == 6 && strnEQ(s, "lvalue", len))
+			CvLVALUE_on(PL_compcv);
+		    else if (!PL_in_my && len == 6 && strnEQ(s, "locked", len))
+			CvLOCKED_on(PL_compcv);
+		    else if (!PL_in_my && len == 6 && strnEQ(s, "method", len))
+			CvMETHOD_on(PL_compcv);
+		    /* After we've set the flags, it could be argued that
+		       we don't need to do the attributes.pm-based setting
+		       process, and shouldn't bother appending recognized
+		       flags. To experiment with that, uncomment the
+		       following "else": */
+		    /* else */
+		        attrs = append_elem(OP_LIST, attrs,
+					    newSVOP(OP_CONST, 0,
+					      	    newSVpvn(s, len)));
 		}
 		s = skipspace(d);
 		if (*s == ':' && s[1] != ':')

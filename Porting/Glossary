@@ -1449,6 +1449,11 @@ d_sigaction (d_sigaction.U):
 	This variable conditionally defines the HAS_SIGACTION symbol, which
 	indicates that the Vr4 sigaction() routine is available.
 
+d_sigprocmask (d_sigprocmask.U):
+	This variable conditionally defines HAS_SIGPROCMASK
+	if sigprocmask() is available to examine or change the signal mask
+	of the calling process.
+
 d_sigsetjmp (d_sigsetjmp.U):
 	This variable conditionally defines the HAS_SIGSETJMP symbol,
 	which indicates that the sigsetjmp() routine is available to
@@ -2444,9 +2449,9 @@ intsize (intsize.U):
 	indicates to the C program how many bytes there are in an int.
 
 issymlink (issymlink.U):
-	This variable holds the switch of the test command to test
-	for a symbolic link (if they are supported).  Typical values
-	include '-h' and '-L'.
+	This variable holds the test command to test for a symbolic link
+	(if they are supported).  Typical values include 'test -h' and
+	'test -L'.
 
 ivdformat (perlxvf.U):
 	This variable contains the format string used for printing

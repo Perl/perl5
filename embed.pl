@@ -1593,6 +1593,7 @@ Ap	|char*	|instr		|const char* big|const char* little
 p	|bool	|io_close	|IO* io|bool not_implicit
 p	|OP*	|invert		|OP* cmd
 dp	|bool	|is_gv_magical	|char *name|STRLEN len|U32 flags
+p	|I32	|is_lvalue_sub
 Ap	|bool	|is_uni_alnum	|U32 c
 Ap	|bool	|is_uni_alnumc	|U32 c
 Ap	|bool	|is_uni_idfirst	|U32 c

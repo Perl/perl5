@@ -1206,7 +1206,7 @@ Perl_do_kv(pTHX)
 	dokeys = dovalues = TRUE;
 
     if (!hv) {
-	if (PL_op->op_flags & OPf_MOD) {	/* lvalue */
+	if (PL_op->op_flags & OPf_MOD || LVRET) {	/* lvalue */
 	    dTARGET;		/* make sure to clear its target here */
 	    if (SvTYPE(TARG) == SVt_PVLV)
 		LvTARG(TARG) = Nullsv;
@@ -1225,7 +1225,7 @@ Perl_do_kv(pTHX)
 	IV i;
 	dTARGET;
 
-	if (PL_op->op_flags & OPf_MOD) {	/* lvalue */
+	if (PL_op->op_flags & OPf_MOD || LVRET) {	/* lvalue */
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
 		sv_magic(TARG, Nullsv, 'k', Nullch, 0);

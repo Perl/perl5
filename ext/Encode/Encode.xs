@@ -368,7 +368,7 @@ encode_method(pTHX_ encode_t *enc, encpage_t *dir, SV *src, int check)
            {
             STRLEN clen;
             UV ch = utf8_to_uv(s+slen,(SvCUR(src)-slen),&clen,0);
-            Perl_warner(aTHX_ WARN_UTF8, "\"\\x{%x}\" does not map to %s", ch, enc->name);
+            Perl_warner(aTHX_ WARN_UTF8, "\"\\x{%"UVxf"}\" does not map to %s", ch, enc->name);
             /* FIXME: Skip over the character, copy in replacement and continue
              * but that is messy so for now just fail.
              */
@@ -383,7 +383,7 @@ encode_method(pTHX_ encode_t *enc, encpage_t *dir, SV *src, int check)
          {
           /* UTF-8 is supposed to be "Universal" so should not happen */
           Perl_croak(aTHX_ "%s '%.*s' does not map to UTF-8",
-                 enc->name, (SvCUR(src)-slen),s+slen);
+                 enc->name, (int)(SvCUR(src)-slen),s+slen);
          }
         break;
 

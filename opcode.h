@@ -541,7 +541,7 @@ EXT char *PL_op_desc[] = {
 	"method lookup",
 	"subroutine entry",
 	"subroutine exit",
-	"lvalue subroutine exit",
+	"lvalue subroutine return",
 	"caller",
 	"warn",
 	"die",
@@ -1278,7 +1278,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_null),	/* iter */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* enterloop */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* leaveloop */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* return */
+	MEMBER_TO_FPTR(Perl_ck_return),	/* return */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* last */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* next */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* redo */

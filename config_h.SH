@@ -2834,6 +2834,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol defines the format string used for printing a Perl UV
  *	as an unsigned hexadecimal integer in lowercase abcdef.
  */
+/* UVXf:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned hexadecimal integer in uppercase ABCDEF.
+ */
 /* NVef:
  *	This symbol defines the format string used for printing a Perl NV
  *	using %e-ish floating point format.
@@ -2850,6 +2854,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define	UVuf		$uvuformat		/**/
 #define	UVof		$uvoformat		/**/
 #define	UVxf		$uvxformat		/**/
+#define	UVXf		$uvXUformat		/**/
 #define	NVef		$nveformat		/**/
 #define	NVff		$nvfformat		/**/
 #define	NVgf		$nvgformat		/**/
@@ -3256,6 +3261,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
+
+/* HAS_SIGPROCMASK:
+ *	This symbol, if defined, indicates that the sigprocmask
+ *	system call is available to examine or change the signal mask
+ *	of the calling process.
+ */
+#$d_sigprocmask HAS_SIGPROCMASK		/**/
 
 #endif
 !GROK!THIS!

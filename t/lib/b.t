@@ -34,21 +34,21 @@ ok;
 my $a = <<'EOF';
 {
     $test = sub : lvalue {
-        1;
+        my $x;
     }
     ;
 }
 EOF
 chomp $a;
-print "not " if $deparse->coderef2text(sub{$test = sub : lvalue { 1 }}) ne $a;
+print "not " if $deparse->coderef2text(sub{$test = sub : lvalue{my $x}}) ne $a;
 ok;
 
 $a =~ s/lvalue/method/;
-print "not " if $deparse->coderef2text(sub{$test = sub : method { 1 }}) ne $a;
+print "not " if $deparse->coderef2text(sub{$test = sub : method{my $x}}) ne $a;
 ok;
 
 $a =~ s/method/locked method/;
-print "not " if $deparse->coderef2text(sub{$test = sub : method locked { 1 }})
+print "not " if $deparse->coderef2text(sub{$test = sub : method locked {my $x}})
                                      ne $a;
 ok;
 }

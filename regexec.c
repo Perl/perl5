@@ -443,8 +443,6 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 #endif
 
   restart:
-    other_last = Nullch;
-
     /* Find a possible match in the region s..strend by looking for
        the "check" substring in the region corrected by start/end_shift. */
     if (flags & REXEC_SCREAM) {
@@ -597,14 +595,14 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    DEBUG_r(PerlIO_printf(Perl_debug_log,
 			", trying anchored starting at offset %ld...\n",
 			(long)(s1 + 1 - i_strpos)));
-		    other_last = last; /* Fix this later. --Hugo */
+		    other_last = last;
 		    s = HOP3c(t, 1, strend);
 		    goto restart;
 		}
 		else {
 		    DEBUG_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
 			  (long)(s - i_strpos)));
-		    other_last = s + 1;
+		    other_last = s; /* Fix this later. --Hugo */
 		    s = s1;
 		    if (t == strpos)
 			goto try_at_start;
@@ -1462,7 +1460,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    PL_reg_ganch = strbeg;
     }
 
-    if (!(flags & REXEC_CHECKED) && prog->check_substr != Nullsv) {
+    if (do_utf8 == (UTF!=0) &&
+	!(flags & REXEC_CHECKED) && prog->check_substr != Nullsv) {
 	re_scream_pos_data d;
 
 	d.scream_olds = &scream_olds;

@@ -103,7 +103,7 @@ my $total = (@death + @warning)/2;
 my $Is_EBCDIC = (ord('A') == 193);
 if ($Is_EBCDIC) {
     my @utf8_death = grep(/utf8/, @death); 
-    $total = $total - $#utf8_death;
+    $total = $total - @utf8_death;
 }
 
 print "1..$total\n";

@@ -415,7 +415,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 		    i = Perl_utf8_length(aTHX_ (U8*)s, (U8*)send);
 		}
 		if (i < 0)
-		    Perl_croak(aTHX_ "panic: magic_len: %d", i);
+		    Perl_croak(aTHX_ "panic: magic_len: %"IVdf, (IV)i);
 		return i;
 	    }
 	}
@@ -2227,7 +2227,7 @@ Perl_sighandler(int sig)
 
     POPSTACK;
     if (SvTRUE(ERRSV)) {
-#ifdef HAS_SIGACTION
+#ifdef HAS_SIGPROCMASK
 	/* Handler "died", for example to get out of a restart-able read().
 	 * Before we re-do that on its behalf re-enable the signal which was
 	 * blocked by the system when we entered.

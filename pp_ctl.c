@@ -1240,6 +1240,20 @@ Perl_block_gimme(pTHX)
     }
 }
 
+I32
+Perl_is_lvalue_sub(pTHX)
+{
+    I32 cxix;
+
+    cxix = dopoptosub(cxstack_ix);
+    assert(cxix >= 0);  /* We should only be called from inside subs */
+
+    if (cxstack[cxix].blk_sub.lval && CvLVALUE(cxstack[cxix].blk_sub.cv))
+	return cxstack[cxix].blk_sub.lval;
+    else
+	return 0;
+}
+
 STATIC I32
 S_dopoptosub(pTHX_ I32 startingblock)
 {
