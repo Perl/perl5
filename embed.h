@@ -167,6 +167,7 @@
 #define get_op_names		Perl_get_op_names
 #define get_opargs		Perl_get_opargs
 #define get_specialsv_list	Perl_get_specialsv_list
+#define get_vtbl		Perl_get_vtbl
 #define gp_free			Perl_gp_free
 #define gp_ref			Perl_gp_ref
 #define gv_AVadd		Perl_gv_AVadd
@@ -1197,6 +1198,7 @@
 #define get_op_names		CPerlObj::Perl_get_op_names
 #define get_opargs		CPerlObj::Perl_get_opargs
 #define get_specialsv_list	CPerlObj::Perl_get_specialsv_list
+#define get_vtbl		CPerlObj::Perl_get_vtbl
 #define gp_free			CPerlObj::Perl_gp_free
 #define gp_ref			CPerlObj::Perl_gp_ref
 #define gv_AVadd		CPerlObj::Perl_gv_AVadd

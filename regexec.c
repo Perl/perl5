@@ -2267,7 +2267,7 @@ regmatch(regnode *prog)
 	    n = 1;
 	    if (scan->flags) {
 		s = HOPMAYBEc(locinput, -scan->flags);
-		if (!s)
+		if (!s || s < PL_bostr)
 		    goto say_no;
 		PL_reginput = s;
 	    }

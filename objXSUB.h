@@ -977,6 +977,8 @@
 #define get_opargs	        pPerl->Perl_get_opargs
 #undef  get_specialsv_list
 #define get_specialsv_list  pPerl->Perl_get_specialsv_list
+#undef  get_vtbl
+#define get_vtbl            pPerl->Perl_get_vtbl
 #undef  gp_free
 #define gp_free             pPerl->Perl_gp_free
 #undef  gp_ref

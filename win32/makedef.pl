@@ -79,7 +79,6 @@ PL_pending_ident
 PL_sortcxix
 PL_sublex_info
 PL_timesbuf
-Perl_block_type
 Perl_additem
 Perl_cast_ulong
 Perl_check_uni
@@ -281,6 +280,7 @@ unless ($define{'DEBUGGING'})
     Perl_debstackptrs
     Perl_runops_debug
     Perl_sv_peek
+    PL_block_type
     PL_watchaddr
     PL_watchok)];
  }

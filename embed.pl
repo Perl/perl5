@@ -519,7 +519,7 @@ END
 
 print EM <<'END';
 
-#if 0 /* ndef MIN_PERL_DEFINE */	/* unsupported in 5.006 */
+#ifdef PERL_POLLUTE		/* unsupported in 5.006 */
 
 END
 

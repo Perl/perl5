@@ -829,7 +829,7 @@ setuid perl scripts securely.\n");
 		    sv_catpv(PL_Sv,"\"  Locally applied patches:\\n\",");
 		    for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
 			if (PL_localpatches[i])
-			    sv_catpvf(PL_Sv,"\"  \\t%s\\n\",",PL_localpatches[i]);
+			    sv_catpvf(PL_Sv,"q\"  \t%s\n\",",PL_localpatches[i]);
 		    }
 		}
 #endif
