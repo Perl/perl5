@@ -428,6 +428,7 @@ Converts the specified character to lowercase.
 #define toUPPER_uni(c,s,l)	to_uni_upper(c,s,l)
 #define toTITLE_uni(c,s,l)	to_uni_title(c,s,l)
 #define toLOWER_uni(c,s,l)	to_uni_lower(c,s,l)
+#define toFOLD_uni(c,s,l)	to_uni_fold(c,s,l)
 
 #define isPSXSPC_uni(c)		(isSPACE_uni(c) ||(c) == '\f')
 #define isBLANK_uni(c)		isBLANK(c) /* could be wrong */

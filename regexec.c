@@ -393,11 +393,22 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     SV *dsv = PERL_DEBUG_PAD_ZERO(0);
 #endif
 
+    if (prog->reganch & ROPT_UTF8) {
+	DEBUG_r(PerlIO_printf(Perl_debug_log,
+			      "UTF-8 regex...\n"));
+	PL_reg_flags |= RF_utf8;
+    }
+
     DEBUG_r({
-	 char*s   = UTF ? sv_uni_display(dsv, sv, 60, 0) : strpos;
-	 int  len = UTF ? strlen(s) : strend - strpos;
+	 char *s   = PL_reg_match_utf8 ?
+	                 sv_uni_display(dsv, sv, 60, 0) : strpos;
+	 int   len = PL_reg_match_utf8 ?
+	                 strlen(s) : strend - strpos;
 	 if (!PL_colorset)
 	      reginitcolors();
+	 if (PL_reg_match_utf8)
+	     DEBUG_r(PerlIO_printf(Perl_debug_log,
+				   "UTF-8 target...\n"));
 	 PerlIO_printf(Perl_debug_log,
 		       "%sGuessing start of match, REx%s `%s%.60s%s%s' against `%s%.*s%s%s'...\n",
 		       PL_colors[4],PL_colors[5],PL_colors[0],
@@ -410,9 +421,6 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		       (len > 60 ? "..." : "")
 	      );
     });
-
-    if (prog->reganch & ROPT_UTF8)
-	PL_reg_flags |= RF_utf8;
 
     if (prog->minlen > CHR_DIST((U8*)strend, (U8*)strpos)) {
 	DEBUG_r(PerlIO_printf(Perl_debug_log,
