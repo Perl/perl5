@@ -19,7 +19,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber cstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.60;
+$VERSION = 0.61;
 use strict;
 use warnings ();
 
@@ -92,6 +92,19 @@ use warnings ();
 # - separate recognition of constant subs
 # - rewrote continue block handling, now recoginizing for loops
 # - added more control of expanding control structures
+# Changes between 0.60 and 0.61 (mostly by Robin Houston)
+# - many bug-fixes
+# - support for pragmas and 'use'
+# - support for the little-used $[ variable
+# - support for __DATA__ sections
+# - UTF8 support
+# - BEGIN, CHECK, INIT and END blocks
+# - scoping of subroutine declarations fixed
+# - compile-time output from the input program can be suppressed, so that the
+#   output is just the deparsed code. (a change to O.pm in fact)
+# - our() declarations
+# - *all* the known bugs are now listed in the BUGS section
+# - comprehensive test mechanism (TEST -deparse)
 
 # Todo:
 #  (See also BUGS section at the end of this file)
@@ -4100,9 +4113,22 @@ than in the input file.
 
 =item *
 
+In fact, the above is a specific instance of a more general problem:
+we can't guarantee to produce BEGIN blocks or C<use> declarations in
+exactly the right place. So if you use a module which affects compilation
+(such as by over-riding keywords, overloading constants or whatever)
+then the output code might not work as intended.
+
+This is the most serious outstanding problem, and will be very hard
+to fix.
+
+=item *
+
 If a keyword is over-ridden, and your program explicitly calls
 the built-in version by using CORE::keyword, the output of B::Deparse
-will not reflect this.
+will not reflect this. If you run the resulting code, it will call
+the over-ridden version rather than the built-in one. (Maybe there
+should be an option to B<always> print keyword calls as C<CORE::name>.)
 
 =item *
 
