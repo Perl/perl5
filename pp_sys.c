@@ -3078,9 +3078,26 @@ PP(pp_fttext)
 #else
 	else if (*s & 128) {
 #ifdef USE_LOCALE
-	    if (!(PL_op->op_private & OPpLOCALE) || !isALPHA_LC(*s))
+	    if ((PL_op->op_private & OPpLOCALE) && isALPHA_LC(*s))
+		continue;
 #endif
-		odd++;
+	    /* utf8 characters don't count as odd */
+	    if (*s & 0x40) {
+		int ulen = UTF8SKIP(s);
+		if (ulen < len - i) {
+		    int j;
+		    for (j = 1; j < ulen; j++) {
+			if ((s[j] & 0xc0) != 0x80)
+			    goto not_utf8;
+		    }
+		    --ulen;	/* loop does extra increment */
+		    s += ulen;
+		    i += ulen;
+		    continue;
+		}
+	    }
+	  not_utf8:
+	    odd++;
 	}
 	else if (*s < 32 &&
 	  *s != '\n' && *s != '\r' && *s != '\b' &&
