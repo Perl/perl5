@@ -62,6 +62,8 @@ $ myname = myhostname
 $ if "''myname'" .eqs. "" THEN myname = f$trnlnm("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_multiarch="undef"
+$ perl_crosscompile="undef"
 $ perl_d_madvise="undef"
 $ perl_d_msync="undef"
 $ perl_d_mprotect="undef"
@@ -3082,6 +3084,8 @@ $ WC "d_mprotect='" + perl_d_mprotect + "'"
 $ WC "d_munmap='" + perl_d_munmap + "'"
 $ WC "d_mmap='" + perl_d_mmap + "'"
 $ WC "i_sysmman='" + perl_i_sysmman + "'"
+$ WC "multiarch='" + perl_multiarch + "'"
+$ WC "crosscompile='" + perl_crosscompile + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!

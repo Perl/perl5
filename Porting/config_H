@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Feb 12 13:48:44 EET 1999
+ * Configuration time: Sat Feb 20 15:45:59 EET 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2025,8 +2025,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.00554/alpha-dec_osf-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.00554/alpha-dec_osf-thread"		/**/
+#define ARCHLIB "/opt/perl/lib/5.00555/alpha-dec_osf-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.00555/alpha-dec_osf-thread"		/**/
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
@@ -2047,6 +2047,18 @@
  *	available to ftell from beyond 32 bits (useful for ILP32 hosts).
  */
 /*#define HAS_FTELLO		/ **/
+
+/* HAS_GETMNTENT:
+ *	This symbol, if defined, indicates that the getmntent routine is
+ *	available to iterate through mounted file systems.
+ */
+/*#define HAS_GETMNTENT		/ **/
+
+/* HAS_HASMNTOPT:
+ *	This symbol, if defined, indicates that the hasmntopt routine is
+ *	available to query the mount options of file systems.
+ */
+/*#define HAS_HASMNTOPT		/ **/
 
 /* HAS_MADVISE:
  *	This symbol, if defined, indicates that the madvise system call is
@@ -2075,21 +2087,21 @@
 
 /* HAS_FSTATFS:
  *	This symbol, if defined, indicates that the fstatfs routine is
- *	available to do stat filesystems of file descriptors.
+ *	available to stat filesystems of file descriptors.
  */
 /* HAS_STRUCT_STATFS_FLAGS:
  *	This symbol, if defined, indicates that the struct statfs
  *	does have the f_flags member containing the mount flags of
  *	the filesystem holding the file.
- *	This kind of struct statfs is coming from sys/mount.h (BSD)
- *	and not from sys/statfs.h (SYSV).
+ *	This kind of struct statfs is coming from sys/mount.h (BSD),
+ *	not from sys/statfs.h (SYSV).
  */
 #define HAS_FSTATFS		/**/
 #define HAS_STRUCT_STATFS_FLAGS		/**/
 
 /* HAS_FSTATVFS:
  *	This symbol, if defined, indicates that the fstatvfs routine is
- *	available to do stat filesystems of file descriptors.
+ *	available to stat filesystems of file descriptors.
  */
 #define HAS_FSTATVFS		/**/
 
@@ -2284,8 +2296,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.00554"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.00554"		/**/
+#define PRIVLIB "/opt/perl/lib/5.00555"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.00555"		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -2309,8 +2321,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.00554/alpha-dec_osf-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00554/alpha-dec_osf-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.00555/alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00555/alpha-dec_osf-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2325,8 +2337,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.00554"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.00554"		/**/
+#define SITELIB "/opt/perl/lib/site_perl/5.00555"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl/5.00555"		/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl

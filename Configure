@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Feb 12 13:46:36 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Feb 22 11:28:58 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -236,6 +236,7 @@ uuname=''
 vi=''
 zcat=''
 zip=''
+full_ar=''
 full_sed=''
 libswanted=''
 hint=''
@@ -292,6 +293,7 @@ cpplast=''
 cppminus=''
 cpprun=''
 cppstdin=''
+crosscompile=''
 d_access=''
 d_accessx=''
 d_alarm=''
@@ -356,6 +358,7 @@ d_phostname=''
 d_uname=''
 d_gethostprotos=''
 d_getlogin=''
+d_getmntent=''
 d_getnbyaddr=''
 d_getnbyname=''
 d_getnent=''
@@ -376,6 +379,7 @@ d_getservprotos=''
 d_getsbyname=''
 d_getsbyport=''
 d_gnulibc=''
+d_hasmntopt=''
 d_htonl=''
 d_inetaton=''
 d_isascii=''
@@ -704,6 +708,7 @@ models=''
 small=''
 split=''
 modetype=''
+multiarch=''
 mydomain=''
 myhostname=''
 phostname=''
@@ -815,24 +820,6 @@ if test -f /etc/unixtovms.exe; then
 fi
 
 i_whoami=''
-: change the next line if compiling for Xenix/286 on Xenix/386
-xlibpth='/usr/lib/386 /lib/386'
-
-: Possible local library directories to search.
-loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
-loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
-
-: general looking path for locating libraries
-glibpth="/shlib /usr/shlib /lib/pa1.1 /usr/lib/large"
-glibpth="$glibpth /lib /usr/lib $xlibpth"
-glibpth="$glibpth /lib/large /usr/lib/small /lib/small"
-glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
-
-: Private path used by Configure to find libraries.  Its value
-: is prepended to libpth. This variable takes care of special
-: machines, like the mips.  Usually, it should be empty.
-plibpth=''
-
 : Possible local include directories to search.
 : Set locincpth to "" in a hint file to defeat local include searches.
 locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
@@ -911,6 +898,24 @@ _exe=''
 : Extra object files, if any, needed on this platform.
 archobjs=''
 groupstype=''
+: change the next line if compiling for Xenix/286 on Xenix/386
+xlibpth='/usr/lib/386 /lib/386'
+
+: Possible local library directories to search.
+loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
+loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
+
+: general looking path for locating libraries
+glibpth="/shlib /usr/shlib /lib/pa1.1 /usr/lib/large"
+glibpth="$glibpth /lib /usr/lib $xlibpth"
+glibpth="$glibpth /lib/large /usr/lib/small /lib/small"
+glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
+
+: Private path used by Configure to find libraries.  Its value
+: is prepended to libpth. This variable takes care of special
+: machines, like the mips.  Usually, it should be empty.
+plibpth=''
+
 : default library list
 libswanted=''
 : some systems want to use only the non-versioned libso:s
@@ -2075,8 +2080,8 @@ EOM
 		[23]100) osname=mips ;;
 		next*) osname=next ;;
 		i386*)
-			tmp=`/bin/uname -X 2>/dev/null|awk -e '/3\.2v[45]/{ print $(NF) }'`
-			if $test "$tmp" != "" -a "$3" = "3.2" -a test -e '/etc/systemid'; then
+			tmp=`/bin/uname -X 2>/dev/null|awk '/3\.2v[45]/{ print $(NF) }'`
+			if $test "$tmp" != "" -a "$3" = "3.2" -a -f '/etc/systemid'; then
 				osname='sco'
 				osvers=$tmp
 			elif $test -f /etc/kconfig; then
@@ -2525,7 +2530,7 @@ case "$usethreads" in
 		. ./usethreads.cbu
 	fi
 	case "$osname" in
-	aix|dec_osf|dos_djgpp|freebsd|hpux|irix|linux|openbsd|os2|solaris|vmesa)
+	aix|dec_osf|dos_djgpp|freebsd|hpux|irix|linux|next|openbsd|os2|solaris|vmesa)
 		# Known thread-capable platforms.
 		;;
 	*)
@@ -4076,11 +4081,7 @@ if $xxx; then
 	esac;
 fi'
 
-if ./osf1; then
-	set signal.h __LANGUAGE_C__; eval $inctest
-else
-	set signal.h LANGUAGE_C; eval $inctest
-fi
+set signal.h LANGUAGE_C; eval $inctest
 
 case "$hint" in
 none|recommended) dflt="$ccflags $dflt" ;;
@@ -4540,6 +4541,10 @@ else
 	installbin="$binexp"
 fi
 
+case "$crosscompile" in
+''|[nN]*) crosscompile="$undef" ;;
+esac
+
 : determine whether to install perl also as /usr/bin/perl
 
 echo " "
@@ -4965,7 +4970,7 @@ nm_extract="$com"
 if $test -f /lib/syscalls.exp; then
 	echo " "
 	echo "Also extracting names from /lib/syscalls.exp for good ole AIX..." >&4
-	$sed -n 's/^\([^ 	]*\)[ 	]*syscall$/\1/p' /lib/syscalls.exp >>libc.list
+	$sed -n 's/^\([^ 	]*\)[ 	]*syscall[0-9]*$/\1/p' /lib/syscalls.exp >>libc.list
 fi
 ;;
 esac
@@ -5720,6 +5725,13 @@ case "$man3dir" in
 	;;
 esac
 
+case "$osname" in
+next) multiarch="$define" ;;
+esac
+case "$multiarch" in
+''|[nN]*) multiarch="$undef" ;;
+esac
+
 : see if we have to deal with yellow pages, now NIS.
 if $test -d /usr/etc/yp || $test -d /etc/yp; then
 	if $test -f /usr/etc/nibindd; then
@@ -6147,8 +6159,8 @@ $cat <<EOM
 
 The installation process will also create a directory for
 site-specific extensions and modules.  Some users find it convenient
-to place all local files in this directory rather than in the main
-distribution directory.
+to place all site-specific files in this directory rather than in the
+main distribution directory.
 
 EOM
 fn=d~+
@@ -8150,6 +8162,10 @@ eval $hasproto
 set getlogin d_getlogin
 eval $inlibc
 
+: see if getmntent exists
+set getmntent d_getmntent
+eval $inlibc
+
 : see if getnetbyaddr exists
 set getnetbyaddr d_getnbyaddr
 eval $inlibc
@@ -8266,6 +8282,10 @@ $define)
 	set d_grpasswd; eval $setvar
 	;;
 esac
+
+: see if hasmntopt exists
+set hasmntopt d_hasmntopt
+eval $inlibc
 
 : see if this is a netinet/in.h or sys/in.h system
 set netinet/in.h i_niin sys/in.h i_sysin
@@ -8770,7 +8790,7 @@ int main() {
 EOCP
 	set try -DJOINABLE=PTHREAD_CREATE_JOINABLE
 	if eval $compile; then
-		echo "You seem to use PTHREAD_CREATE_JOINABLE." >&2
+		echo "You seem to use PTHREAD_CREATE_JOINABLE." >&4
 		val="$undef" # Yes, undef.
 		set d_old_pthread_create_joinable
 		eval $setvar
@@ -8780,7 +8800,7 @@ EOCP
 	else
 		set try -DJOINABLE=PTHREAD_CREATE_UNDETACHED
 		if eval $compile; then
-			echo "You seem to use PTHREAD_CREATE_UNDETACHED." >&2
+			echo "You seem to use PTHREAD_CREATE_UNDETACHED." >&4
 			val="$define"
 			set d_old_pthread_create_joinable
 			eval $setvar
@@ -8790,7 +8810,7 @@ EOCP
 		else		
 			set try -DJOINABLE=__UNDETACHED
 			if eval $compile; then
-				echo "You seem to use __UNDETACHED." >&2
+				echo "You seem to use __UNDETACHED." >&4
 				val="$define"
 				set d_old_pthread_create_joinable
 				eval $setvar
@@ -8798,7 +8818,7 @@ EOCP
 				set old_pthread_create_joinable
 				eval $setvar
 			else
-				echo "Egads, nothing obvious found.  Guessing that you use 0." >&2
+				echo "Egads, nothing obvious found.  Guessing that you use 0." >&4
 				val="$define"
 				set d_old_pthread_create_joinable
 				eval $setvar
@@ -10276,39 +10296,60 @@ Revision='$Revision'
 
 : check for alignment requirements
 echo " "
-case "$alignbytes" in
-'') echo "Checking alignment constraints..." >&4
-	$cat >try.c <<'EOCP'
+case "$crosscompile$multiarch" in
+*$define*)
+You seem to be cross-compiling, skipping the memory alignment check.
+
+EOM
+	case "$alignbytes" in
+	'') alignbytes=8 ;;
+	esac
+	;;
+*)
+	case "$alignbytes" in
+	'') echo "Checking alignment constraints..." >&4
+		$cat >try.c <<'EOCP'
 struct foobar {
 	char foo;
 	double bar;
-} try;
+} try_algn;
 int main()
 {
-	printf("%d\n", (char *)&try.bar - (char *)&try.foo);
+	printf("%d\n", (char *)&try_algn.bar - (char *)&try_algn.foo);
 }
 EOCP
-	set try
-	if eval $compile_ok; then
-		dflt=`./try`
-	else
-		dflt='8'
-		echo "(I can't seem to compile the test program...)"
-	fi
-	;;
-*) dflt="$alignbytes"
+		set try
+		if eval $compile_ok; then
+			dflt=`./try`
+		else
+			dflt='8'
+			echo "(I can't seem to compile the test program...)"
+		fi
+		;;
+	*) dflt="$alignbytes"
+		;;
+	esac
+	rp="Doubles must be aligned on a how-many-byte boundary?"
+	. ./myread
+	alignbytes="$ans"
+	$rm -f try.c try
 	;;
 esac
-rp="Doubles must be aligned on a how-many-byte boundary?"
-. ./myread
-alignbytes="$ans"
-$rm -f try.c try
+
 
 : check for ordering of bytes in a long
-case "$byteorder" in
-'')
-	$cat <<'EOM'
-  
+echo " "
+case "$crosscompile$multiarch" in
+*$define*)
+	$cat <<EOM
+You seem to be cross-compiling, I'm skipping the byteorder check.
+
+EOM
+	;;
+*)
+	case "$byteorder" in
+	'')
+		$cat <<'EOM'
 In the following, larger digits indicate more significance.  A big-endian
 machine like a Pyramid or a Motorola 680?0 chip will come out to 4321. A
 little-endian machine like a Vax or an Intel 80?86 chip would be 1234. Other
@@ -10316,7 +10357,7 @@ machines may have weird orders like 3412.  A Cray will report 87654321. If
 the test program works the default is probably right.
 I'm now running the test program...
 EOM
-	$cat >try.c <<'EOCP'
+		$cat >try.c <<'EOCP'
 #include <stdio.h>
 int main()
 {
@@ -10336,37 +10377,40 @@ int main()
 	exit(0);
 }
 EOCP
-	xxx_prompt=y
-	set try
-	if eval $compile && ./try > /dev/null; then
-		dflt=`./try`
-		case "$dflt" in
-		[1-4][1-4][1-4][1-4]|12345678|87654321)
-			echo "(The test program ran ok.)"
-			echo "byteorder=$dflt"
-			xxx_prompt=n
+		xxx_prompt=y
+		set try
+		if eval $compile && ./try > /dev/null; then
+			dflt=`./try`
+			case "$dflt" in
+			[1-4][1-4][1-4][1-4]|12345678|87654321)
+				echo "(The test program ran ok.)"
+				echo "byteorder=$dflt"
+				xxx_prompt=n
 			;;
-		????|????????) echo "(The test program ran ok.)" ;;
-		*) echo "(The test program didn't run right for some reason.)" ;;
-		esac
-	else
-		dflt='4321'
-		cat <<'EOM'
+			????|????????) echo "(The test program ran ok.)" ;;
+			*) echo "(The test program didn't run right for some reason.)" ;;
+			esac
+		else
+			dflt='4321'
+			cat <<'EOM'
 (I can't seem to compile the test program.  Guessing big-endian...)
 EOM
-	fi
-	case "$xxx_prompt" in
-	y)
-		rp="What is the order of bytes in a long?"
-		. ./myread
-		byteorder="$ans"
-		;;
-	*)	byteorder=$dflt
+		fi
+		case "$xxx_prompt" in
+		y)
+			rp="What is the order of bytes in a long?"
+			. ./myread
+			byteorder="$ans"
+			;;
+		*)	byteorder=$dflt
+			;;
+		esac
 		;;
 	esac
+	$rm -f try.c try
 	;;
 esac
-$rm -f try.c try
+
 
 : how do we catenate cpp tokens here?
 echo " "
@@ -10821,6 +10865,12 @@ eval $setvar
 rp="What is the type for file position used by fsetpos()?"
 set fpos_t fpostype long stdio.h sys/types.h
 eval $typedef_ask
+
+: Store the full pathname to the ar program for use in the C program
+: Respect a hint or command line value for full_ar.
+case "$full_ar" in
+'') full_ar=$ar ;;
+esac
 
 : Store the full pathname to the sed program for use in the C program
 full_sed=$sed
@@ -12574,6 +12624,7 @@ cppminus='$cppminus'
 cpprun='$cpprun'
 cppstdin='$cppstdin'
 cppsymbols='$cppsymbols'
+crosscompile='$crosscompile'
 cryptlib='$cryptlib'
 csh='$csh'
 d_Gconvert='$d_Gconvert'
@@ -12660,6 +12711,7 @@ d_gethent='$d_gethent'
 d_gethname='$d_gethname'
 d_gethostprotos='$d_gethostprotos'
 d_getlogin='$d_getlogin'
+d_getmntent='$d_getmntent'
 d_getnbyaddr='$d_getnbyaddr'
 d_getnbyname='$d_getnbyname'
 d_getnent='$d_getnent'
@@ -12681,6 +12733,7 @@ d_getservprotos='$d_getservprotos'
 d_gettimeod='$d_gettimeod'
 d_gnulibc='$d_gnulibc'
 d_grpasswd='$d_grpasswd'
+d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
@@ -12883,6 +12936,7 @@ firstmakefile='$firstmakefile'
 flex='$flex'
 fpostype='$fpostype'
 freetype='$freetype'
+full_ar='$full_ar'
 full_csh='$full_csh'
 full_sed='$full_sed'
 gccversion='$gccversion'
@@ -13023,6 +13077,7 @@ mmaptype='$mmaptype'
 models='$models'
 modetype='$modetype'
 more='$more'
+multiarch='$multiarch'
 mv='$mv'
 myarchname='$myarchname'
 mydomain='$mydomain'

@@ -3,12 +3,12 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 19th November 1998
- version 1.63
+ last modified 21st February 1999
+ version 1.64
 
  All comments/suggestions/problems are welcome
 
-     Copyright (c) 1995, 1996, 1997, 1998 Paul Marquess. All rights reserved.
+     Copyright (c) 1995-9 Paul Marquess. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 
@@ -60,7 +60,9 @@
 		fixed typo in O_RDONLY test.
         1.62 -  No change to DB_File.xs
         1.63 -  Fix to alllow DB 2.6.x to build.
-
+        1.64 -  Tidied up the 1.x to 2.x flags mapping code.
+		Added a patch from Mark Kettenis <kettenis@wins.uva.nl>
+		to fix a flag mapping problem with O_RDONLY on the Hurd
 
 
 
@@ -72,7 +74,16 @@
 
 #ifndef PERL_VERSION
 #include "patchlevel.h"
-#define PERL_VERSION PATCHLEVEL
+#define PERL_REVISION	5
+#define PERL_VERSION	PATCHLEVEL
+#define PERL_SUBVERSION	SUBVERSION
+#endif
+
+#if PERL_REVISION == 5 && (PERL_VERSION < 4 || (PERL_VERSION == 4 && PERL_SUBVERSION <= 75 ))
+
+#    define PL_sv_undef		sv_undef
+#    define PL_na		na
+
 #endif
 
 /* Being the Berkeley DB we prefer the <sys/cdefs.h> (which will be
@@ -825,19 +836,14 @@ SV *   sv ;
         if ((flags & O_CREAT) == O_CREAT)
             Flags |= DB_CREATE ;
 
-#ifdef O_NONBLOCK
-        if ((flags & O_NONBLOCK) == O_NONBLOCK)
-            Flags |= DB_EXCL ;
-#endif
-
 #if O_RDONLY == 0
         if (flags == O_RDONLY)
 #else
-        if ((flags & O_RDONLY) == O_RDONLY)
+        if ((flags & O_RDONLY) == O_RDONLY && (flags & O_RDWR) != O_RDWR)
 #endif
             Flags |= DB_RDONLY ;
 
-#ifdef O_NONBLOCK
+#ifdef O_TRUNC
         if ((flags & O_TRUNC) == O_TRUNC)
             Flags |= DB_TRUNCATE ;
 #endif

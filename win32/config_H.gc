@@ -2056,6 +2056,18 @@
  */
 /*#define HAS_MPROTECT		/**/
 
+/* MULTIARCH:
+ *	This symbol, if defined, indicates that we have a multiarchitecture
+ *	build.
+ */
+/*#define MULTIARCH		/**/
+
+/* CROSSCOMPILE:
+ *	This symbol, if defined, indicates that we have a cross-compile
+ *	build.
+ */
+/*#define MULTIARCH		/**/
+
 /* HAS_READV:
  *	This symbol, if defined, indicates that the readv routine is
  *	available to do gather reads.  You will also need <sys/uio.h>

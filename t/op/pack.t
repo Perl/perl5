@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..98\n";
+print "1..142\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -266,145 +266,90 @@ print "ok ", $test++, "\n";
 print "not " unless length(pack("i_", 0)) == length(pack("i", 0));
 print "ok ", $test++, "\n";
 
-# 79..94: test the limits
+# 79..138: pack <-> unpack bijectionism
 
-# Some possibilities for $Config{byteorder} and $Config{.*size}.
-# Note that CPUs can feature at several places.
-#
-# Config
-#
-# byteorder
-#
-# 1234		x86, vax, (DEC) mips
-# 12345678	alpha
-# 4321		sparc, ppc, hppa, (IRIX) mips, motorola
-# 87654321	sparc, mips, hppa, cray
-#
-#		x86	alpha	sparc	cray
-# shortsize	2	2	2	8
-# intsize	4	4	4	8
-# longsize	4	8	8	8
-#
-
-print "not " unless unpack("c", pack("c",  127)) ==  127;
-print "ok ", $test++, "\n";
-
-print "not " unless unpack("c", pack("c", -128)) == -128;
-print "ok ", $test++, "\n";
-
-print "not " unless unpack("C", pack("C",  255)) ==  255;
-print "ok ", $test++, "\n";
-
-print "not " unless unpack("s", pack("s",  32767)) ==  32767;
-print "ok ", $test++, "\n";
-
-if ($Config{shortsize} == 2) {
-    print "not " unless unpack("s", pack("s", -32768)) == -32768;
+#  79.. 83 c
+foreach my $c (-128, -1, 0, 1, 127) {
+    print "not " unless unpack("c", pack("c", $c)) == $c;
     print "ok ", $test++, "\n";
-} else {
-    if ($Config{shortsize} == 8 && $Config{byteorder} eq '87654321') {
-        print "not " unless unpack("s_", pack("s_", -32768)) == -32768;
-        print "ok ", $test++, "\n";
-    } else {
-        print "ok ", $test++, " # skipped\n";
-    }
 }
 
-print "not " unless unpack("S", pack("S",  65535)) ==  65535;
-print "ok ", $test++, "\n";
-
-print "not " unless unpack("i", pack("i",  2147483647)) ==  2147483647;
-print "ok ", $test++, "\n";
-
-print "not " unless unpack("i", pack("i", -2147483648)) == -2147483648;
-print "ok ", $test++, "\n";
-
-print "not " unless unpack("I", pack("I",  4294967295)) ==  4294967295;
-print "ok ", $test++, "\n";
-
-print "not " unless unpack("l", pack("l",  2147483647)) ==  2147483647;
-print "ok ", $test++, "\n";
-
-if ($Config{longsize} == 4 || $Config{byteorder} eq '12345678') {
-    print "not " unless unpack("l", pack("l", -2147483648)) == -2147483648;
+#  84.. 88: C
+foreach my $C (0, 1, 127, 128, 255) {
+    print "not " unless unpack("C", pack("C", $C)) == $C;
     print "ok ", $test++, "\n";
-} else {
-    if ($Config{shortsize} == 8 && $Config{byteorder} eq '87654321') {
-        print "not "
-            unless unpack("l_", pack("l_", -2147483648)) == -2147483648;
-        print "ok ", $test++, "\n";
-    } else {
-        print "ok ", $test++, " # skipped\n";
-    }
 }
 
-print "not " unless unpack("L", pack("L",  4294967295)) ==  4294967295;
-print "ok ", $test++, "\n";
-
-print "not " unless unpack("n", pack("n",  65535)) == 65535;
-print "ok ", $test++, "\n";
-
-if ($Config{shortsize} == 2) {
-    print "not " unless unpack("v", pack("v",  65535)) == 65535;
+#  89.. 93: s
+foreach my $s (-32768, -1, 0, 1, 32767) {
+    print "not " unless unpack("s", pack("s", $s)) == $s;
     print "ok ", $test++, "\n";
-} else {
-    print "ok ", $test++, " # skipped\n";
 }
 
-print "not " unless unpack("N", pack("N",  4294967295)) ==  4294967295;
+#  94.. 98: S
+foreach my $S (0, 1, 32767, 32768, 65535) {
+    print "not " unless unpack("S", pack("S", $S)) == $S;
+    print "ok ", $test++, "\n";
+}
+
+#  99..103: i
+foreach my $i (-2147483648, -1, 0, 1, 2147483647) {
+    print "not " unless unpack("i", pack("i", $i)) == $i;
+    print "ok ", $test++, "\n";
+}
+
+# 104..108: I
+foreach my $I (0, 1, 2147483647, 2147483648, 4294967295) {
+    print "not " unless unpack("I", pack("I", $I)) == $I;
+    print "ok ", $test++, "\n";
+}
+
+# 109..113: l
+foreach my $l (-2147483648, -1, 0, 1, 2147483647) {
+    print "not " unless unpack("l", pack("l", $l)) == $l;
+    print "ok ", $test++, "\n";
+}
+
+# 114..118: L
+foreach my $L (0, 1, 2147483647, 2147483648, 4294967295) {
+    print "not " unless unpack("L", pack("L", $L)) == $L;
+    print "ok ", $test++, "\n";
+}
+
+# 119..123: n
+foreach my $n (0, 1, 32767, 32768, 65535) {
+    print "not " unless unpack("n", pack("n", $n)) == $n;
+    print "ok ", $test++, "\n";
+}
+
+# 124..128: v
+foreach my $v (0, 1, 32767, 32768, 65535) {
+    print "not " unless unpack("v", pack("v", $v)) == $v;
+    print "ok ", $test++, "\n";
+}
+
+# 129..133: N
+foreach my $N (0, 1, 2147483647, 2147483648, 4294967295) {
+    print "not " unless unpack("N", pack("N", $N)) == $N;
+    print "ok ", $test++, "\n";
+}
+
+# 134..138: V
+foreach my $V (0, 1, 2147483647, 2147483648, 4294967295) {
+    print "not " unless unpack("V", pack("V", $V)) == $V;
+    print "ok ", $test++, "\n";
+}
+
+# 139..142: pack nvNV byteorders
+
+print "not " unless pack("n", 0xdead) eq "\xde\xad";
 print "ok ", $test++, "\n";
 
-if ($Config{longsize} == 4 || $Config{byteorder} eq '12345678') {
-    print "not " unless unpack("V", pack("V",  4294967295)) ==  4294967295;
-    print "ok ", $test++, "\n";
-} else {
-    print "ok ", $test++, " # skipped\n";
-}
+print "not " unless pack("v", 0xdead) eq "\xad\xde";
+print "ok ", $test++, "\n";
 
-# 95..98 test the n/v/N/V byteorder
+print "not " unless pack("N", 0xdeadbeef) eq "\xde\xad\xbe\xef";
+print "ok ", $test++, "\n";
 
-if ($Config{byteorder} =~ /^1234(5678)?$/ ||
-    $Config{byteorder} =~ /^(8765)?4321$/) {
-
-    if ($Config{shortsize} == 2 ||
-        $Config{byteorder} eq '87654321') {
-        print "not " unless pack("n", 0xdead) eq "\xde\xad";
-        print "ok ", $test++, "\n";
-
-        if ($Config{byteorder} ne '87654321') {
-            print "not " unless pack("v", 0xdead) eq "\xad\xde";
-            print "ok ", $test++, "\n";
-        } else {
-            print "ok ", $test++, " # skipped\n";
-        }
-    } else {
-        # shortsize != 2 systems require more thought
-        foreach (95..96) {
-            print "ok ", $test++, " # skipped\n";
-        }
-    }
-
-    if ($Config{longsize} == 4 ||
-        $Config{byteorder} eq '12345678' ||
-        $Config{byteorder} eq '87654321') {
-        print "not " unless pack("N", 0xdeadbeef) eq "\xde\xad\xbe\xef";
-        print "ok ", $test++, "\n";
-
-        if ($Config{byteorder} ne '87654321') {
-            print "not " unless pack("V", 0xdeadbeef) eq "\xef\xbe\xad\xde";
-            print "ok ", $test++, "\n";
-        } else {
-            print "ok ", $test++, " # skipped\n";
-        }
-    } else {
-        # exotic longsize != 2 systems require more thought
-        foreach (97..98) {
-            print "ok ", $test++, " # skipped\n";
-        }
-    }
-} else {
-   # exotic byteorder system require more thought 
-   foreach (95..98) {
-       print "ok ", $test++, " # skipped\n";
-   }
-}
+print "not " unless pack("V", 0xdeadbeef) eq "\xef\xbe\xad\xde";
+print "ok ", $test++, "\n";

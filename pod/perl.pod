@@ -265,7 +265,7 @@ F<http://www.perl.com/CPAN/src/index.html>
         DYNIX/ptx       OpenSTEP        Windows 3.1     1)
         FreeBSD         OS/2            Windows 95      1) 3)
         HP-UX           OS390   2)      Windows 98      1) 3)
-	Hurd		PowerUX         Windows NT      1) 3)
+	Hurd		PowerMAX        Windows NT      1) 3)
 			QNX             VOS
 
         1) in DOS mode either the DOS or OS/2 ports can be used
@@ -275,7 +275,7 @@ F<http://www.perl.com/CPAN/src/index.html>
 The following platforms have been known to build Perl from the source
 but for the Perl release 5.005_03 we haven't been able to verify them,
 either because the hardware/software platforms are rather rare or
-because we don't have an active champion on these platforms.
+because we don't have an active champion on these platforms, or both.
 					
         3b1             FPS             Plan 9
         AmigaOS         GENIX           RISC/os
@@ -290,7 +290,7 @@ because we don't have an active champion on these platforms.
         ESIX
 
 The following platforms are planned to be supported in the standard
-source distribution of the Perl release 5.006 but are not
+source code distribution of the Perl release 5.006 but are not
 supported in the Perl release 5.005_03:
 
         BS2000
@@ -302,7 +302,7 @@ binaries available via F<http://www.perl.com/CPAN/ports/index.html>.
 				Perl release
 
 	AS/400			5.003
-	MacOS			5.004_04
+	MacOS			5.004
 	Tandem Guardian		5.004
 
 The following platforms have only binaries available via
@@ -310,7 +310,7 @@ F<http://www.perl.com/CPAN/ports/index.html>.
 
 				Perl release
 
-	Acorn RISCOS		5.001
+	Acorn RISCOS		5.005_02
 	AOS			5.002
 	LynxOS			5.004_02
 	Netware			5.003_07

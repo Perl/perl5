@@ -166,7 +166,7 @@ shellflags = $shellflags
 $make_set_make
 
 # These variables may need to be manually set for non-Unix systems.
-AR = $ar
+AR = $full_ar
 EXE_EXT = $_exe
 LIB_EXT = $_a
 OBJ_EXT = $_o

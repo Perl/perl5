@@ -1072,19 +1072,22 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$i_syssecrt   I_SYS_SECURITY	/**/
 
 /* MEM_ALIGNBYTES:
- *	 This symbol contains the number of bytes required to align a
- *	 double. Usual values are 2, 4 and 8.
- *	 On NeXT starting with 3.2, you can build "Fat" Multiple Architecture
- *	 Binaries (MAB) for targets with varying alignment.  This only matters
- *	 for perl, where the config.h can be generated and installed on one
- *	 system, and used by a different architecture to build an extension.
- *	 The default is eight, for safety.
+ *	This symbol contains the number of bytes required to align a
+ *	double. Usual values are 2, 4 and 8. The default is eight,
+ *	for safety.
  */
-#define MEM_ALIGNBYTES $alignbytes	/**/
+#if defined(CROSSCOMPILE) || defined(MULTIARCH)
+#  define MEM_ALIGNBYTES 8
+#else
+#define MEM_ALIGNBYTES $alignbytes
+#endif
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
  *	i.e. 0x1234 or 0x4321, etc...
+ *	If the compiler supports cross-compiling or multiple-architecture
+ *	binaries (eg. on NeXT systems), use compiler-defined macros to
+ *	determine the byte order.
  *	On NeXT 3.2 (and greater), you can build "Fat" Multiple Architecture
  *	Binaries (MAB) on either big endian or little endian machines.
  *	The endian-ness is available at compile-time.  This only matters
@@ -1095,14 +1098,31 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	so the default case (for NeXT) is big endian to catch them. 
  *	This might matter for NeXT 3.0.
  */
-#ifndef NeXT
+#if defined(CROSSCOMPILE) || defined(MULTIARCH)
+#  ifdef __LITTLE_ENDIAN__
+#    if LONGSIZE == 4
+#      define BYTEORDER 0x1234
+#    else
+#      if LONGSIZE == 8
+#        define BYTEORDER 0x12345678
+#      endif
+#    endif
+#  else
+#    ifdef __BIG_ENDIAN__
+#      if LONGSIZE == 4
+#        define BYTEORDER 0x4321
+#      else
+#        if LONGSIZE == 8
+#          define BYTEORDER 0x87654321
+#        endif
+#      endif
+#    endif
+#  endif
+#  if !defined(BYTEORDER) && (defined(NeXT) || defined(__NeXT__))
+#    define BYTEORDER 0x4321
+#  endif
+#else
 #define BYTEORDER 0x$byteorder	/* large digits for MSB */
-#else  /* NeXT */
-#ifdef __LITTLE_ENDIAN__
-#define BYTEORDER 0x1234
-#else /* __BIG_ENDIAN__ */
-#define BYTEORDER 0x4321
-#endif /* ENDIAN CHECK */
 #endif /* NeXT */
 
 /* CASTI32:
@@ -2042,6 +2062,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_archlib ARCHLIB "$archlib"		/**/
 #$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
 
+/* CROSSCOMPILE:
+ *	This symbol, if defined, signifies that we our
+ *	build process is a cross-compilation.
+ */
+#$crosscompile CROSSCOMPILE		/**/
+
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
  *	underscore to the symbol name before calling dlsym().  This only
@@ -2061,6 +2087,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to ftell from beyond 32 bits (useful for ILP32 hosts).
  */
 #$d_ftello HAS_FTELLO		/**/
+
+/* HAS_GETMNTENT:
+ *	This symbol, if defined, indicates that the getmntent routine is
+ *	available to iterate through mounted file systems.
+ */
+#$d_getmntent HAS_GETMNTENT		/**/
+
+/* HAS_HASMNTOPT:
+ *	This symbol, if defined, indicates that the hasmntopt routine is
+ *	available to query the mount options of file systems.
+ */
+#$d_hasmntopt HAS_HASMNTOPT		/**/
 
 /* HAS_MADVISE:
  *	This symbol, if defined, indicates that the madvise system call is
@@ -2089,21 +2127,21 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 /* HAS_FSTATFS:
  *	This symbol, if defined, indicates that the fstatfs routine is
- *	available to do stat filesystems of file descriptors.
+ *	available to stat filesystems of file descriptors.
  */
 /* HAS_STRUCT_STATFS_FLAGS:
  *	This symbol, if defined, indicates that the struct statfs
  *	does have the f_flags member containing the mount flags of
  *	the filesystem holding the file.
- *	This kind of struct statfs is coming from sys/mount.h (BSD)
- *	and not from sys/statfs.h (SYSV).
+ *	This kind of struct statfs is coming from sys/mount.h (BSD),
+ *	not from sys/statfs.h (SYSV).
  */
 #$d_fstatfs HAS_FSTATFS		/**/
 #$d_statfsflags HAS_STRUCT_STATFS_FLAGS		/**/
 
 /* HAS_FSTATVFS:
  *	This symbol, if defined, indicates that the fstatvfs routine is
- *	available to do stat filesystems of file descriptors.
+ *	available to stat filesystems of file descriptors.
  */
 #$d_fstatvfs HAS_FSTATVFS		/**/
 
@@ -2287,6 +2325,15 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_truncate64  HAS_TRUNCATE64	/**/
 #$d_off64t      HAS_OFF64_T    	/**/
 #$d_dirent64_s   HAS_STRUCT_DIRENT64 	/**/
+
+/* MULTIARCH:
+ *	This symbol, if defined, signifies that the build
+ *	process will produce some binary files that are going to be
+ *	used in a cross-platform environment.  This is the case for
+ *	example with the NeXT "fat" binaries that contain executables
+ *	for several CPUs.
+ */
+#$multiarch MULTIARCH		/**/
 
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.

@@ -116,15 +116,15 @@ byteorder (byteorder.U):
 c (n.U):
 	This variable contains the \c string if that is what causes the echo
 	command to suppress newline.  Otherwise it is null.  Correct usage is
-	    $echo $n "prompt for a question: $c".
+	$echo $n "prompt for a question: $c".
 
 castflags (d_castneg.U):
 	This variable contains a flag that precise difficulties the
 	compiler has casting odd floating values to unsigned long:
-		0 = ok
-		1 = couldn't cast < 0
-		2 = couldn't cast >= 0x80000000
-		4 = couldn't cast in argument expression list
+	0 = ok
+	1 = couldn't cast < 0
+	2 = couldn't cast >= 0x80000000
+	4 = couldn't cast in argument expression list
 
 cat (Loc.U):
 	This variable is be used internally by Configure to determine the
@@ -151,6 +151,12 @@ ccdlflags (dlsrc.U):
 ccflags (ccflags.U):
 	This variable contains any additional C compiler flags desired by
 	the user.  It is up to the Makefile to use this.
+
+ccsymbols (Cppsym.U):
+	The variable contains the symbols defined by the C compiler alone.
+	The symbols defined by cpp or by cc when it calls cpp are not in
+	this list, see cppsymbols and cppccsymbols.
+	The list is a space-separated list of symbol=value tokens.
 
 cf_by (cf_who.U):
 	Login name of the person who ran the Configure script and answered the
@@ -214,6 +220,12 @@ cpp_stuff (cpp_stuff.U):
 	This variable contains an identification of the catenation mechanism
 	used by the C preprocessor.
 
+cppccsymbols (Cppsym.U):
+	The variable contains the symbols defined by the C compiler when
+	when it calls cpp.  The symbols defined by the cc alone or cpp
+	alone are not in this list, see ccsymbols and cppsymbols.
+	The list is a space-separated list of symbol=value tokens.
+
 cppflags (ccflags.U):
 	This variable holds the flags that will be passed to the C pre-
 	processor. It is up to the Makefile to use it.
@@ -241,6 +253,12 @@ cppstdin (cppstdin.U):
 	preprocessor on standard input and put the output to stdout.
 	It is primarily used by other Configure units that ask about
 	preprocessor symbols.
+
+cppsymbols (Cppsym.U):
+	The variable contains the symbols defined by the C preprocessor
+	alone.  The symbols defined by cc or by cc when it calls cpp are
+	not in this list, see ccsymbols and cppccsymbols.
+	The list is a space-separated list of symbol=value tokens.
 
 cryptlib (d_crypt.U):
 	This variable holds -lcrypt or the path to a libcrypt.a archive if
@@ -546,6 +564,14 @@ d_fstat64 (io64.U):
 	This variable conditionally defines the HAS_FSTAT64 symbol, which
 	indicates to the C program that the fstat64() routine is available.
 
+d_fstatfs (d_statfs.U):
+	This variable conditionally defines the HAS_FSTATFS symbol, which
+	indicates to the C program that the fstatfs() routine is available.
+
+d_fstatvfs (d_statvfs.U):
+	This variable conditionally defines the HAS_FSTATVFS symbol, which
+	indicates to the C program that the fstatvfs() routine is available.
+
 d_ftell64 (stdio64.U):
 	This variable conditionally defines the HAS_FTELL64 symbol, which
 	indicates to the C program that the ftell64() routine is available.
@@ -572,9 +598,9 @@ d_Gconvert (d_gconvert.U):
 	floating point numbers into strings. It could be 'gconvert'
 	or a more complex macro emulating gconvert with gcvt() or sprintf.
 	Possible values are:
-		d_Gconvert='gconvert((x),(n),(t),(b))'
-		d_Gconvert='gcvt((x),(n),(b))'
-		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
+	d_Gconvert='gconvert((x),(n),(t),(b))'
+	d_Gconvert='gcvt((x),(n),(b))'
+	d_Gconvert='sprintf((b),"%.*g",(n),(x))'
 
 d_getgrent (d_getgrent.U):
 	This variable conditionally defines the HAS_GETGRENT symbol, which
@@ -615,6 +641,11 @@ d_getlogin (d_getlogin.U):
 	This variable conditionally defines the HAS_GETLOGIN symbol, which
 	indicates to the C program that the getlogin() routine is available
 	to get the login name.
+
+d_getmntent (d_getmntent.U):
+	This variable conditionally defines the HAS_GETMNTENT symbol, which
+	indicates to the C program that the getmntent() routine is available
+	to iterate through mounted files.
 
 d_getnbyaddr (d_getnbyad.U):
 	This variable conditionally defines the HAS_GETNETBYADDR symbol, which
@@ -720,6 +751,11 @@ d_grpasswd (i_grp.U):
 	This variable conditionally defines GRPASSWD, which indicates
 	that struct group in <grp.h> contains gr_passwd.
 
+d_hasmntopt (d_hasmntopt.U):
+	This variable conditionally defines the HAS_HASMNTOPT symbol, which
+	indicates to the C program that the hasmntopt() routine is available
+	to query the mount options of file systems.
+
 d_htonl (d_htonl.U):
 	This variable conditionally defines HAS_HTONL if htonl() and its
 	friends are available to do network order byte swapping.
@@ -737,7 +773,7 @@ d_ino64t (io64.U):
 	This symbol will be defined if the C compiler supports ino64_t.
 
 d_int64t (i_inttypes.U):
-	    This symbol will be defined if the C compiler supports int64_t.
+	This symbol will be defined if the C compiler supports int64_t.
 
 d_iovec_s (i_sysuio.U):
 	This variable conditionally defines the HAS_STRUCT_IOVEC symbol,
@@ -793,6 +829,10 @@ d_lstat (d_lstat.U):
 	This variable conditionally defines HAS_LSTAT if lstat() is
 	available to do file stats on symbolic links.
 
+d_madvise (d_madvise.U):
+	This variable conditionally defines HAS_MADVISE if madvise() is
+	available to map a file into memory.
+
 d_mblen (d_mblen.U):
 	This variable conditionally defines the HAS_MBLEN symbol, which
 	indicates to the C program that the mblen() routine is available
@@ -840,6 +880,14 @@ d_mkfifo (d_mkfifo.U):
 d_mktime (d_mktime.U):
 	This variable conditionally defines the HAS_MKTIME symbol, which
 	indicates to the C program that the mktime() routine is available.
+
+d_mmap (d_mmap.U):
+	This variable conditionally defines HAS_MMAP if mmap() is
+	available to map a file into memory.
+
+d_mprotect (d_mprotect.U):
+	This variable conditionally defines HAS_MPROTECT if mprotect() is
+	available to modify the access protection of a memory mapped file.
 
 d_msg (d_msg.U):
 	This variable conditionally defines the HAS_MSG symbol, which
@@ -889,6 +937,14 @@ d_msgrcv (d_msgrcv.U):
 d_msgsnd (d_msgsnd.U):
 	This variable conditionally defines the HAS_MSGSND symbol, which
 	indicates to the C program that the msgsnd() routine is available.
+
+d_msync (d_msync.U):
+	This variable conditionally defines HAS_MSYNC if msync() is
+	available to synchronize a mapped file.
+
+d_munmap (d_munmap.U):
+	This variable conditionally defines HAS_MUNMAP if munmap() is
+	available to unmap a region mapped by mmap().
 
 d_mymalloc (mallocsrc.U):
 	This variable conditionally defines MYMALLOC in case other parts
@@ -1261,6 +1317,20 @@ d_statblks (d_statblks.U):
 	if this system has a stat structure declaring
 	st_blksize and st_blocks.
 
+d_statfs (d_statfs.U):
+	This variable conditionally defines the HAS_STATFS symbol, which
+	indicates to the C program that the statfs() routine is available.
+
+d_statfsflags (d_statfs.U):
+	This variable conditionally defines the HAS_STRUCT_STATFS_FLAGS
+	symbol, which indicates to struct statfs from has f_flags member.
+	This kind of struct statfs is coming from sys/mount.h (BSD),
+	not from sys/statfs.h (SYSV).
+
+d_statvfs (d_statvfs.U):
+	This variable conditionally defines the HAS_STATVFS symbol, which
+	indicates to the C program that the statvfs() routine is available.
+
 d_stdio_cnt_lval (d_stdstdio.U):
 	This variable conditionally defines STDIO_CNT_LVALUE if the
 	FILE_cnt macro can be used as an lvalue.
@@ -1373,6 +1443,12 @@ d_telldir (d_readdir.U):
 	This variable conditionally defines HAS_TELLDIR if telldir() is
 	available.
 
+d_telldirproto (d_telldirproto.U):
+	This variable conditionally defines the HAS_TELLDIR_PROTO symbol,
+	which indicates to the C program that the system provides
+	a prototype for the telldir() function.  Otherwise, it is
+	up to the program to supply one.
+
 d_time (d_time.U):
 	This variable conditionally defines the HAS_TIME symbol, which indicates
 	that the time() routine exists.  The time() routine is normaly
@@ -1483,6 +1559,9 @@ db_prefixtype (i_db.U):
 	in the <db.h> header file.  In older versions of DB, it was
 	int, while in newer ones it is size_t.
 
+defvoidused (voidflags.U):
+	This variable contains the default value of the VOIDUSED symbol (15).
+
 direntrytype (i_dirent.U):
 	This symbol is set to 'struct direct' or 'struct dirent' depending on
 	whether dirent is available or not. You should use this pseudo type to
@@ -1577,6 +1656,11 @@ freetype (mallocsrc.U):
 	This variable contains the return type of free().  It is usually
 	void, but occasionally int.
 
+full_ar (Loc_ar.U):
+	This variable contains the full pathname to 'ar', whether or
+	not the user has specified 'portability'.  This is only used
+	in the Makefile.SH.
+
 full_csh (d_csh.U):
 	This variable contains the full pathname to 'csh', whether or
 	not the user has specified 'portability'.  This is only used
@@ -1600,6 +1684,11 @@ gidtype (gidtype.U):
 	This variable defines Gid_t to be something like gid_t, int,
 	ushort, or whatever type is used to declare the return type
 	of getgid().  Typically, it is the type of group ids in the kernel.
+
+glibpth (libpth.U):
+	This variable holds the general path (space-separated) used to
+	find libraries.  It may contain directories that do not exist on
+	this platform, libpth is the cleaned-up version.
 
 grep (Loc.U):
 	This variable is be used internally by Configure to determine the
@@ -1696,8 +1785,8 @@ i_grp (i_grp.U):
 	whether a C program should include <grp.h>.
 
 i_inttypes (i_inttypes.U):
-	    This variable conditionally defines the I_INTTYPES symbol,
-	    and indicates whether a C program should include <inttypes.h>.
+	This variable conditionally defines the I_INTTYPES symbol,
+	and indicates whether a C program should include <inttypes.h>.
 
 i_limits (i_limits.U):
 	This variable conditionally defines the I_LIMITS symbol, and indicates
@@ -1709,8 +1798,8 @@ i_locale (i_locale.U):
 	and indicates whether a C program should include <locale.h>.
 
 i_machcthr (i_machcthr.U):
-	    This variable conditionally defines the I_MACH_CTHREADS symbol,
-	    and indicates whether a C program should include <mach/cthreads.h>.
+	This variable conditionally defines the I_MACH_CTHREADS symbol,
+	and indicates whether a C program should include <mach/cthreads.h>.
 
 i_malloc (i_malloc.U):
 	This variable conditionally defines the I_MALLOC symbol, and indicates
@@ -1723,6 +1812,10 @@ i_math (i_math.U):
 i_memory (i_memory.U):
 	This variable conditionally defines the I_MEMORY symbol, and indicates
 	whether a C program should include <memory.h>.
+
+i_mntent (i_mntent.U):
+	This variable conditionally defines the I_MNTENT symbol, and indicates
+	whether a C program should include <mntent.h>.
 
 i_ndbm (i_ndbm.U):
 	This variable conditionally defines the I_NDBM symbol, which
@@ -1785,8 +1878,8 @@ i_string (i_string.U):
 	indicates that <string.h> should be included rather than <strings.h>.
 
 i_sysaccess (i_sysaccess.U):
-	    This variable conditionally defines the I_SYS_ACCESS symbol,
-	    and indicates whether a C program should include <sys/access.h>.
+	This variable conditionally defines the I_SYS_ACCESS symbol,
+	and indicates whether a C program should include <sys/access.h>.
 
 i_sysdir (i_sysdir.U):
 	This variable conditionally defines the I_SYS_DIR symbol, and indicates
@@ -1811,6 +1904,14 @@ i_sysioctl (i_sysioctl.U):
 	indicates to the C program that <sys/ioctl.h> exists and should
 	be included.
 
+i_sysmman (i_sysmman.U):
+	This variable conditionally defines the I_SYS_MMAN symbol, and
+	indicates whether a C program should include <sys/mman.h>.
+
+i_sysmount (i_sysmount.U):
+	This variable conditionally defines the I_SYSMOUNT symbol,
+	and indicates whether a C program should include <sys/mount.h>.
+
 i_sysndir (i_sysndir.U):
 	This variable conditionally defines the I_SYS_NDIR symbol, and indicates
 	whether a C program should include <sys/ndir.h>.
@@ -1824,8 +1925,8 @@ i_sysresrc (i_sysresrc.U):
 	and indicates whether a C program should include <sys/resource.h>.
 
 i_syssecrt (i_syssecrt.U):
-	    This variable conditionally defines the I_SYS_SECURITY symbol,
-	    and indicates whether a C program should include <sys/security.h>.
+	This variable conditionally defines the I_SYS_SECURITY symbol,
+	and indicates whether a C program should include <sys/security.h>.
 
 i_sysselct (i_sysselct.U):
 	This variable conditionally defines I_SYS_SELECT, which indicates
@@ -1840,6 +1941,10 @@ i_syssockio (i_sysioctl.U):
 i_sysstat (i_sysstat.U):
 	This variable conditionally defines the I_SYS_STAT symbol,
 	and indicates whether a C program should include <sys/stat.h>.
+
+i_sysstatvfs (i_sysstatvfs.U):
+	This variable conditionally defines the I_SYSSTATVFS symbol,
+	and indicates whether a C program should include <sys/statvfs.h>.
 
 i_systime (i_time.U):
 	This variable conditionally defines I_SYS_TIME, which indicates
@@ -1966,6 +2071,11 @@ installsitelib (sitelib.U):
 	those systems using AFS. For extra portability, only this variable
 	should be used in makefiles.
 
+installusrbinperl (instubperl.U):
+	This variable tells whether Perl should be installed also as
+	/usr/bin/perl in addition to
+	$installbin/perl
+
 intsize (intsize.U):
 	This variable contains the value of the INTSIZE symbol, which
 	indicates to the C program how many bytes there are in an int.
@@ -2019,8 +2129,8 @@ libperl (libperl.U):
 	library.
 
 libpth (libpth.U):
-	This variable holds the general path used to find libraries. It is
-	intended to be used by other units.
+	This variable holds the general path (space-separated) used to find
+	libraries. It is intended to be used by other units.
 
 libs (libs.U):
 	This variable holds the additional libraries we want to use.
@@ -2061,9 +2171,9 @@ locincpth (ccflags.U):
 	It's not much, but it parallels the loclibpth stuff in libpth.U.
 
 loclibpth (libpth.U):
-	This variable holds the paths used to find local libraries.  It is
-	prepended to libpth, and is intended to be easily set from the
-	command line.
+	This variable holds the paths (space-separated) used to find local
+	libraries.  It is prepended to libpth, and is intended to be easily
+	set from the command line.
 
 longdblsize (d_longdbl.U):
 	This variable contains the value of the LONG_DOUBLESIZE symbol, which
@@ -2123,7 +2233,7 @@ make_set_make (make.U):
 	make_set_make='#'		# If your make program handles this for you,
 	make_set_make="MAKE=$make"	# if it doesn't.
 	I used a comment character so that we can distinguish a
-	'set' value (from a previous config.sh or Configure '-D' option)
+	'set' value (from a previous config.sh or Configure -D option)
 	from an uncomputed value.
 
 mallocobj (mallocsrc.U):
@@ -2191,6 +2301,11 @@ mkdir (Loc.U):
 	full pathname (if any) of the mkdir program.  After Configure runs,
 	the value is reset to a plain "mkdir" and is not useful.
 
+mmaptype (d_mmap.U):
+	This symbol contains the type of pointer returned by mmap()
+	(and simultaneously the type of the first argument).
+	It can be 'void *' or 'caddr_t'.
+
 models (models.U):
 	This variable contains the list of memory models supported by this
 	system.  Possible component values are none, split, unsplit, small,
@@ -2233,9 +2348,9 @@ myuname (Oldconfig.U):
 	whole thing is then lower-cased.
 
 n (n.U):
-	This variable contains the '-n' flag if that is what causes the echo
+	This variable contains the -n flag if that is what causes the echo
 	command to suppress newline.  Otherwise it is null.  Correct usage is
-	    $echo $n "prompt for a question: $c".
+	$echo $n "prompt for a question: $c".
 
 netdb_hlen_type (netdbtype.U):
 	This variable holds the type used for the 2nd argument to
@@ -2498,9 +2613,9 @@ sh (sh.U):
 	/bin/sh, though it's possible that some systems will have /bin/ksh,
 	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
 	D:/bin/sh.exe.
-	This unit comes before Options.U, so you can't set sh with a '-D'
+	This unit comes before Options.U, so you can't set sh with a -D
 	option, though you can override this (and startsh)
-	with '-O -Dsh=/bin/whatever -Dstartsh=whatever'
+	with -O -Dsh=/bin/whatever -Dstartsh=whatever
 
 shar (Loc.U):
 	This variable is defined but not used by Configure.
@@ -2524,11 +2639,11 @@ shrpenv (libperl.U):
 	One way to do this on some systems is to set the environment variable
 	LD_RUN_PATH to the directory that will be the final location of the
 	shared libperl.so.  The makefile can use this with something like
-		$shrpenv $(CC) -o perl perlmain.o $libperl $libs
+	$shrpenv $(CC) -o perl perlmain.o $libperl $libs
 	Typical values are
-		shrpenv="env LD_RUN_PATH=$archlibexp/CORE"
+	shrpenv="env LD_RUN_PATH=$archlibexp/CORE"
 	or
-		shrpenv=''
+	shrpenv=''
 	See the main perl Makefile.SH for actual working usage.
 	Alternatively, we might be able to use a command line option such
 	as -R $archlibexp/CORE (Solaris, NetBSD) or -Wl,-rpath
@@ -2626,7 +2741,7 @@ spackage (package.U):
 
 spitshell (spitshell.U):
 	This variable contains the command necessary to spit out a runnable
-	shell on this system.  It is either cat or a grep '-v' for # comments.
+	shell on this system.  It is either cat or a grep -v for # comments.
 
 split (models.U):
 	This variable contains a flag which will tell the C compiler and loader
@@ -2650,8 +2765,8 @@ startperl (startperl.U):
 	script to make sure (hopefully) that it runs with perl and not some
 	shell. Of course, that leading line must be followed by the classical
 	perl idiom:
-		eval 'exec perl -S $0 ${1+"$@"}'
-			if $running_under_some_shell;
+	eval 'exec perl -S $0 ${1+"$@"}'
+	if $running_under_some_shell;
 	to guarantee perl startup should the shell execute the script. Note
 	that this magic incatation is not understood by csh.
 
@@ -2863,6 +2978,11 @@ voidflags (voidflags.U):
 	This variable contains the eventual value of the VOIDFLAGS symbol,
 	which indicates how much support of the void type is given by this
 	compiler.  See VOIDFLAGS for more info.
+
+xlibpth (libpth.U):
+	This variable holds extra path (space-separated) used to find
+	libraries on this platform, for example CPU-specific libraries
+	(on multi-CPU platforms) may be listed here.
 
 zcat (Loc.U):
 	This variable is defined but not used by Configure.

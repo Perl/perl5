@@ -78,6 +78,9 @@ typedef unsigned UBW;
 #define SIZE16 2
 #define SIZE32 4
 
+/* CROSSCOMPILE and MULTIARCH are going to affect pp_pack() and pp_unpack().
+   --jhi Feb 1999 */
+
 #if SHORTSIZE != SIZE16 || LONGSIZE != SIZE32
 #   define PERL_NATINT_PACK
 #endif
@@ -3549,6 +3552,10 @@ PP(pp_unpack)
                 {
 		    while (len-- > 0) {
 			COPY16(s, &ashort);
+#if SHORTSIZE > SIZE16
+			if (ashort > 32767)
+			  ashort -= 65536;
+#endif
 			s += SIZE16;
 			culong += ashort;
 		    }
@@ -3572,6 +3579,10 @@ PP(pp_unpack)
                 {
 		    while (len-- > 0) {
 			COPY16(s, &ashort);
+#if SHORTSIZE > SIZE16
+			if (ashort > 32767)
+			  ashort -= 65536;
+#endif
 			s += SIZE16;
 			sv = NEWSV(38, 0);
 			sv_setiv(sv, (IV)ashort);
@@ -3747,6 +3758,10 @@ PP(pp_unpack)
                 {
 		    while (len-- > 0) {
 			COPY32(s, &along);
+#if LONGSIZE > SIZE32
+			if (along > 2147483647)
+			  along -= 4294967296;
+#endif
 			s += SIZE32;
 			if (checksum > 32)
 			    cdouble += (double)along;
@@ -3773,6 +3788,10 @@ PP(pp_unpack)
                 {
 		    while (len-- > 0) {
 			COPY32(s, &along);
+#if LONGSIZE > SIZE32
+			if (along > 2147483647)
+			  along -= 4294967296;
+#endif
 			s += SIZE32;
 			sv = NEWSV(42, 0);
 			sv_setiv(sv, (IV)along);
@@ -4555,7 +4574,7 @@ PP(pp_pack)
 	    }
 	    break;
 	case 's':
-#if SHORTSIZE != 2
+#if SHORTSIZE != SIZE16
 	    if (natint) {
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;

@@ -156,6 +156,11 @@ now correctly prints "3|a", instead of "2|a".
 The new format type 'Z' is useful for packing and unpacking null-terminated
 strings.  See L<perlfunc/"pack">.
 
+=head2 pack() format modifier '_' supported
+
+The new format type modifer '_' is useful for packing and unpacking
+native shorts, ints, and longs.  See L<perlfunc/"pack">.
+
 =head1 Significant bug fixes
 
 =head2 E<lt>HANDLEE<gt> on empty files
@@ -175,11 +180,6 @@ Note that the behavior of:
 
 is unchanged (it continues to leave the file empty).
 
-=head2 pack() format modifier '_' supported
-
-The new format type modifer '_' is useful for packing and unpacking
-native shorts, ints, and longs.  See L<perlfunc/"pack">.
-
 =head1 Supported Platforms
 
 =over 4
@@ -190,11 +190,15 @@ VM/ESA is now supported.
 
 =item *
 
-Siemens BS200 is now supported.
+Siemens BS2000 is now supported under the POSIX Shell.
 
 =item *
 
-The Mach CThreads (NeXTstep) are now supported by the Thread extension.
+The Mach CThreads (NEXTSTEP, OPENSTEP) are now supported by the Thread extension.
+
+=item *
+
+GNU/Hurd is now supported.
 
 =back
 
