@@ -58,7 +58,7 @@
 #include <patchlevel.h>		/* Perl's one, needed since 5.6 */
 #include <XSUB.h>
 
-#if 1
+#if 0
 #define DEBUGME /* Debug mode, turns assertions on as well */
 #define DASSERT /* Assertion mode */
 #endif
