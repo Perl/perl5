@@ -156,14 +156,13 @@ unless (defined &Time::HiRes::gettimeofday
 
     my ($f, $r, $i);
 
-    print "# time...";
     $f = time; 
-    print "$f\nok 15\n";
+    print "# time...$f\n";
+    print "ok 15\n";
 
-    print "# sleep...";
     $r = [Time::HiRes::gettimeofday()];
     sleep (0.5);
-    print Time::HiRes::tv_interval($r), "\nok 16\n";
+    print "# sleep...", Time::HiRes::tv_interval($r), "\nok 16\n";
 
     $r = [Time::HiRes::gettimeofday()];
     $i = 5;
