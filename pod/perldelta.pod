@@ -2329,6 +2329,13 @@ See L<perldebug>
 
 =item *
 
+The debugger has a new C<dumpDepth> option to control the maximum
+depth to which nested structures are dumped.  The C<x> command has
+been extended so that C<x N EXPR> dumps out the value of I<EXPR> to a
+depth of at most I<N> levels.
+
+=item *
+
 If an attempt to use a (non-blessed) reference as an array index
 is made, a warning is given.
 
