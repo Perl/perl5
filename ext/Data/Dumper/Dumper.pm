@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_05';
+$VERSION = '2.121_06';
 
 #$| = 1;
 
@@ -101,6 +101,18 @@ sub new {
   return bless($s, $c);
 }
 
+sub init_refaddr_format {
+  require Config;
+  my $f = $Config::Config{uvxformat};
+  $f =~ tr/"//d;
+  our $refaddr_format = "0x%" . $f;
+}
+
+sub format_refaddr {
+  require Scalar::Util;
+  sprintf our $refaddr_format, Scalar::Util::refaddr(shift);
+}
+
 #
 # add-to or query the table of already seen references
 #
@@ -110,7 +122,7 @@ sub Seen {
     my($k, $v, $id);
     while (($k, $v) = each %$g) {
       if (defined $v and ref $v) {
-	($id) = (overload::StrVal($v) =~ /\((.*)\)$/);
+	$id = format_refaddr($v);
 	if ($k =~ /^[*](.*)$/) {
 	  $k = (ref $v eq 'ARRAY') ? ( "\\\@" . $1 ) :
 	       (ref $v eq 'HASH')  ? ( "\\\%" . $1 ) :
@@ -180,6 +192,7 @@ sub Dumpperl {
   my(@out, $val, $name);
   my($i) = 0;
   local(@post);
+  init_refaddr_format();
 
   $s = $s->new(@_) unless ref $s;
 
@@ -249,8 +262,10 @@ sub _dump {
       warn "WARNING(Freezer method call failed): $@" if $@;
     }
 
-    ($realpack, $realtype, $id) =
-      (overload::StrVal($val) =~ /^(?:(.*)\=)?([^=]*)\(([^\(]*)\)$/);
+    require Scalar::Util;
+    $realpack = Scalar::Util::blessed($val);
+    $realtype = $realpack ? Scalar::Util::reftype($val) : ref $val;
+    $id = format_refaddr($val);
 
     # if it has a name, we need to either look it up, or keep a tab
     # on it so we know when we hit it later
@@ -419,7 +434,7 @@ sub _dump {
     my $ref = \$_[1];
     # first, catalog the scalar
     if ($name ne '') {
-      ($id) = ("$ref" =~ /\(([^\(]*)\)$/);
+      $id = format_refaddr($ref);
       if (exists $s->{seen}{$id}) {
         if ($s->{seen}{$id}[2]) {
 	  $out = $s->{seen}{$id}[0];
