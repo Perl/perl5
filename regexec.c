@@ -387,8 +387,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 #endif
 
     DEBUG_r({
-	 char   *s   = UTF ? sv_uni_display(dsv, sv, 60, 0) : strpos;
-	 STRLEN  len = UTF ? strlen(s) : strend - strpos;
+	 char*s   = UTF ? sv_uni_display(dsv, sv, 60, 0) : strpos;
+	 int  len = UTF ? strlen(s) : strend - strpos;
 	 if (!PL_colorset)
 	      reginitcolors();
 	 PerlIO_printf(Perl_debug_log,
@@ -1542,8 +1542,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
 
     DEBUG_r({
-	 char   *s   = UTF ? sv_uni_display(dsv, sv, 60, 0) : startpos;
-	 STRLEN  len = UTF ? strlen(s) : strend - startpos;
+	 char *s   = UTF ? sv_uni_display(dsv, sv, 60, 0) : startpos;
+	 int   len = UTF ? strlen(s) : strend - startpos;
 	 if (!PL_colorset)
 	     reginitcolors();
 	 PerlIO_printf(Perl_debug_log,
@@ -2089,17 +2089,17 @@ S_regmatch(pTHX_ regnode *prog)
 		pv_uni_display(dsv0, (U8*)(locinput - pref_len),
 			       pref0_len, 60, 0) :
 		locinput - pref_len;
-	      STRLEN len0 = UTF ? strlen(s0) : pref0_len;
+	      int len0 = UTF ? strlen(s0) : pref0_len;
 	      char *s1 = UTF ?
 		pv_uni_display(dsv1, (U8*)(locinput - pref_len + pref0_len),
 			       pref_len - pref0_len, 60, 0) :
 		locinput - pref_len + pref0_len;
-	      STRLEN len1 = UTF ? strlen(s1) : pref_len - pref0_len;
+	      int len1 = UTF ? strlen(s1) : pref_len - pref0_len;
 	      char *s2 = UTF ?
 		pv_uni_display(dsv2, (U8*)locinput,
 			       PL_regeol - locinput, 60, 0) :
 		locinput;
-	      STRLEN len2 = UTF ? strlen(s2) : l;
+	      int len2 = UTF ? strlen(s2) : l;
 	      PerlIO_printf(Perl_debug_log,
 			    "%4"IVdf" <%s%.*s%s%s%.*s%s%s%s%.*s%s>%*s|%3"IVdf":%*s%s\n",
 			    (IV)(locinput - PL_bostr),

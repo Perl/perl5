@@ -4415,7 +4415,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	char *s    = do_utf8 ?
 	  pv_uni_display(dsv, (U8*)STRING(o), STR_LEN(o), 60, 0) :
 	  STRING(o);
-	STRLEN len = do_utf8 ?
+	int len = do_utf8 ?
 	  strlen(s) :
 	  STR_LEN(o);
 	Perl_sv_catpvf(aTHX_ sv, " <%s%.*s%s>",
