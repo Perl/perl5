@@ -94,7 +94,7 @@ In Perl 5.6 and later, C<"$$1"> always means C<"${$1}">.
 each(), values() and hashes in a list context return the actual
 values in the hash, instead of copies (as they used to in earlier
 versions).  Typical idioms for using these constructs copy the
-returned values, but this is can make a significant difference when
+returned values, but this can make a significant difference when
 creating references to the returned values.
 
 Keys in the hash are still returned as copies when iterating on
@@ -181,14 +181,6 @@ the default.
 
 Note that these functions do B<not> constitute Perl's memory allocation API.
 See L<perlguts/"Memory Allocation"> for further information about that.
-
-=item C<PL_na> and C<dTHR> Issues
-
-The C<PL_na> global is now thread local, so a C<dTHR> declaration is needed
-in the scope in which the global appears.  XSUBs should handle this automatically,
-but if you have used C<PL_na> in support functions, you either need to
-change the C<PL_na> to a local variable (which is recommended), or put in
-a C<dTHR>.
 
 =back
 
@@ -830,7 +822,7 @@ used to truncate the message in prior versions.
 $foo::a and $foo::b are now exempt from "possible typo" warnings only
 if sort() is encountered in package foo.
 
-Unrecognized alphabetic escapes encountered when parsing quoting
+Unrecognized alphabetic escapes encountered when parsing quote
 constructs now generate a warning, since they may take on new
 semantics in later versions of Perl.
 
@@ -997,6 +989,9 @@ See L<attributes>.
 
 =item B
 
+The Perl Compiler suite has been extensively reworked for this
+release.
+
 [TODO - Vishal Bhatia <vishal@gol.com>,
 Nick Ing-Simmons <nick@ni-s.u-net.com>]
 
@@ -1004,11 +999,6 @@ Nick Ing-Simmons <nick@ni-s.u-net.com>]
 
 The ByteLoader is a dedicated extension to generate and run
 Perl bytecode.  See L<ByteLoader>.
-
-=item B
-
-The Perl Compiler suite has been extensively reworked for this
-release.
 
 =item constant
 
@@ -1022,8 +1012,7 @@ change#4052
 =item Data::Dumper
 
 A C<Maxdepth> setting can be specified to avoid venturing
-too deeply into data structures that may be very deep.
-See L<Data::Dumper>.
+too deeply into depp data structures.  See L<Data::Dumper>.
 
 Dumping C<qr//> objects works correctly.
 
@@ -1267,7 +1256,7 @@ to the Win32::GetLastError() function.
 The new Win32::GetFullPathName(FILENAME) returns the full absolute
 pathname for FILENAME in scalar context.  In list context it returns
 a two-element list containing the fully qualified directory name and
-the filename.
+the filename.  See L<Win32>.
 
 =item DBM Filters
 
