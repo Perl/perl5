@@ -808,7 +808,15 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd, int imode, int 
  PerlIO_funcs *tab = (f && *f) ? PerlIOBase(f)->tab : PerlIO_top_layer(aTHX_ layers);
  if (!_perlio)
   PerlIO_stdstreams();
- return (*tab->Open)(aTHX_ tab,mode,fd,imode,perm,f,narg,args);
+ PerlIO_debug("openn(%s,'%s','%s',%d,%x,%o,%p,%d,%p)\n",
+              tab->name,layers,mode,fd,imode,perm,f,narg,args);
+ f = (*tab->Open)(aTHX_ tab,mode,fd,imode,perm,f,narg,args);
+ if (f)
+  {
+   if (layers && *layers)
+    PerlIO_apply_layers(aTHX_ f,mode,layers);
+  }
+ return f;
 }
 
 
