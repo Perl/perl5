@@ -8,6 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require "./test.pl";
+    require Config;
 }
 
 # Tests don't have names yet.
@@ -323,5 +324,8 @@ $a = ~$a;
 is($a, "\xFF", "~ works with utf-8");
 
 # [rt.perl.org 33003]
-# This would cause a segfault
-like( runperl(prog => 'eval q($#a>>=1); print 1'), "^1\n?" );
+# This would cause a segfault without malloc wrap
+SKIP: {
+  skip "No malloc wrap checks" unless $Config::Config{usemallocwrap};
+  like( runperl(prog => 'eval q($#a>>=1); print 1'), "^1\n?" );
+}
