@@ -1070,7 +1070,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	double. Usual values are 2, 4 and 8. The default is eight,
  *	for safety.
  */
-#if defined(CROSSCOMPILE) || defined(MULTIARCH) || defined(NeXT) || defined(__NeXT__)
+#if defined(CROSSCOMPILE) || defined(MULTIARCH)
 #  define MEM_ALIGNBYTES 8
 #else
 #define MEM_ALIGNBYTES $alignbytes
@@ -1092,7 +1092,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	so the default case (for NeXT) is big endian to catch them. 
  *	This might matter for NeXT 3.0.
  */
-#if defined(CROSSCOMPILE) || defined(MULTIARCH) || defined(NeXT) || defined(__NeXT__)
+#if defined(CROSSCOMPILE) || defined(MULTIARCH)
 #  ifdef __LITTLE_ENDIAN__
 #    if LONGSIZE == 4
 #      define BYTEORDER 0x1234
@@ -1581,18 +1581,17 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	and PHOSTNAME.
  */
 /* PHOSTNAME:
- *	This symbol, if defined, indicates that the C program may use the
- *	contents of PHOSTNAME as a command to feed to the popen() routine
- *	to derive the host name.  See also HAS_GETHOSTNAME and HAS_UNAME.
- *	Note that the command uses a fully qualified path, so that it is safe
- *	even if used by a process with super-user privileges.
+ *	This symbol, if defined, indicates the command to feed to the
+ *	popen() routine to derive the host name.  See also HAS_GETHOSTNAME
+ *	and HAS_UNAME.	Note that the command uses a fully qualified path,
+ *	so that it is safe even if used by a process with super-user
+ *	privileges.
  */
 #$d_gethname HAS_GETHOSTNAME	/**/
 #$d_uname HAS_UNAME		/**/
-#$d_phostname PHOSTNAME
-#ifdef $d_phostname
-#undef $d_phostname
-#$d_phostname PHOSTNAME "$aphostname"	/* How to get the host name */
+#$d_phostname HAS_PHOSTNAME
+#ifdef HAS_PHOSTNAME
+#define PHOSTNAME "$aphostname"	/* How to get the host name */
 #endif
 
 /* HAS_GETNETBYADDR:
