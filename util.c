@@ -2349,6 +2349,12 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {
     struct sigaction act, oact;
 
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return SIG_ERR;
+#endif
+
     act.sa_handler = handler;
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
@@ -2383,6 +2389,12 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 {
     struct sigaction act;
 
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return -1;
+#endif
+
     act.sa_handler = handler;
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
@@ -2401,6 +2413,12 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 int
 Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return -1;
+#endif
+
     return sigaction(signo, save, (struct sigaction *)NULL);
 }
 
@@ -2409,6 +2427,12 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 Sighandler_t
 Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return SIG_ERR;
+#endif
+
     return PerlProc_signal(signo, handler);
 }
 
@@ -2427,6 +2451,12 @@ Perl_rsignal_state(pTHX_ int signo)
 {
     Sighandler_t oldsig;
 
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return SIG_ERR;
+#endif
+
     sig_trapped = 0;
     oldsig = PerlProc_signal(signo, sig_trap);
     PerlProc_signal(signo, oldsig);
@@ -2438,6 +2468,11 @@ Perl_rsignal_state(pTHX_ int signo)
 int
 Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 {
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return -1;
+#endif
     *save = PerlProc_signal(signo, handler);
     return (*save == SIG_ERR) ? -1 : 0;
 }
@@ -2445,6 +2480,11 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 int
 Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return -1;
+#endif
     return (PerlProc_signal(signo, *save) == SIG_ERR) ? -1 : 0;
 }
 
