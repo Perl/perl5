@@ -1846,12 +1846,6 @@ effective uids or gids failed.
 to check the return value of your socket() call?  See
 L<perlfunc/listen>.
 
-=item lstat() on filehandle %s
-
-(W io) You tried to do an lstat on a filehandle.  What did you mean
-by that?  lstat() makes sense only on filenames.  (Perl did a fstat()
-instead on the filehandle.)
-
 =item Lvalue subs returning %s not implemented yet
 
 (F) Due to limitations in the current implementation, array and hash
@@ -4219,6 +4213,11 @@ supported.
 (F) A filehandle represents an opened file, and when you opened the file
 it already went past any symlink you are presumably trying to look for.
 Use a filename instead.
+
+=item You can't use lstat() on a filehandle
+
+(F) You tried to do an lstat on a filehandle. lstat() makes sense only
+on filenames.
 
 =item YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!
 

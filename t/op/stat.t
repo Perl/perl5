@@ -9,7 +9,7 @@ BEGIN {
 use Config;
 use File::Spec;
 
-plan tests => 74;
+plan tests => 75;
 
 my $Perl = which_perl();
 
@@ -384,15 +384,18 @@ SKIP: {
 
     stat $0;
     eval { lstat _ };
-    ok( $@ =~ /^The stat preceding lstat\(\) wasn't an lstat/,
+    like( $@, qr/^The stat preceding lstat\(\) wasn't an lstat/,
 	'lstat _ croaks after stat' );
     eval { -l _ };
-    ok( $@ =~ /^The stat preceding -l _ wasn't an lstat/,
+    like( $@, qr/^The stat preceding -l _ wasn't an lstat/,
 	'-l _ croaks after stat' );
 
     eval { lstat STDIN };
-    ok( $@ =~ /^The stat preceding lstat\(\) wasn't an lstat/,
+    like( $@, qr/^You can't use lstat\(\) on a filehandle/,
 	'lstat FILEHANDLE croaks' );
+    eval { -l STDIN };
+    like( $@, qr/^You can't use -l on a filehandle/,
+	'-l FILEHANDLE croaks' );
 
     # bug id 20020124.004
     # If we have d_lstat, we should have symlink()
@@ -401,10 +404,10 @@ SKIP: {
     lstat $linkname;
     -T _;
     eval { lstat _ };
-    ok( $@ =~ /^The stat preceding lstat\(\) wasn't an lstat/,
+    like( $@, qr/^The stat preceding lstat\(\) wasn't an lstat/,
 	'lstat croaks after -T _' );
     eval { -l _ };
-    ok( $@ =~ /^The stat preceding -l _ wasn't an lstat/,
+    like( $@, qr/^The stat preceding -l _ wasn't an lstat/,
 	'-l _ croaks after -T _' );
     unlink $linkname or print "# unlink $linkname failed: $!\n";
 }
