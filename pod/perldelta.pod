@@ -321,6 +321,13 @@ B<any subsequent file open>, is UTF-8.
 
 =back
 
+=head2 Restricted Hashes
+
+A restricted hash is restricted to a certain set of keys, no keys
+outside the set can be added.  Also individual keys can be restricted
+so that the key cannot be deleted and the value cannot be changed.
+No new syntax is involved: the Hash::Util module is the interface.
+
 =head2 Safe Signals
 
 Perl used to be fragile in that signals arriving at inopportune moments
@@ -657,10 +664,7 @@ Any encoding supported by Encode module is also available to the
 =item *
 
 C<Hash::Util> is the interface to the new I<restricted hashes>
-feature.  A restricted hash is restricted to a certain set of keys,
-no keys outside the set can be added.  Also individual keys can be
-restricted so that the key cannot be deleted and the value cannot be
-changed.  (Implemented by Jeffrey Friedl, Nick Ing-Simmons, and
+feature.  (Implemented by Jeffrey Friedl, Nick Ing-Simmons, and
 Michael Schwern.)
 
 =item *
