@@ -987,7 +987,10 @@ pipe_exit_routine()
     info = open_pipes;
 
     while (info) {
-      if (info->mode != 'r' && !info->done) {
+      _ckvmssts(SYS$SETAST(0));
+      need_eof = info->mode != 'r' && !info->done;
+      _ckvmssts(SYS$SETAST(1));
+      if (need_eof) {
         if (pipe_eof(info->fp, 1) & 1) did_stuff = 1;
       }
       info = info->next;
@@ -997,22 +1000,26 @@ pipe_exit_routine()
     did_stuff = 0;
     info = open_pipes;
     while (info) {
+      _ckvmssts(SYS$SETAST(0));
       if (!info->done) { /* Tap them gently on the shoulder . . .*/
         sts = sys$forcex(&info->pid,0,&abort);
         if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts(sts); 
         did_stuff = 1;
       }
+      _ckvmssts(SYS$SETAST(1));
       info = info->next;
     }
     if (did_stuff) sleep(1);    /* wait for them to respond */
 
     info = open_pipes;
     while (info) {
+      _ckvmssts(SYS$SETAST(0));
       if (!info->done) {  /* We tried to be nice . . . */
         sts = sys$delprc(&info->pid,0);
         if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts(sts); 
         info->done = 1; /* so my_pclose doesn't try to write EOF */
       }
+      _ckvmssts(SYS$SETAST(1));
       info = info->next;
     }
 
@@ -1116,6 +1123,7 @@ I32 Perl_my_pclose(pTHX_ FILE *fp)
 {
     struct pipe_details *info, *last = NULL;
     unsigned long int retsts;
+    int need_eof;
     
     for (info = open_pipes; info != NULL; last = info, info = info->next)
         if (info->fp == fp) break;
@@ -1129,15 +1137,20 @@ I32 Perl_my_pclose(pTHX_ FILE *fp)
     /* If we were writing to a subprocess, insure that someone reading from
      * the mailbox gets an EOF.  It looks like a simple fclose() doesn't
      * produce an EOF record in the mailbox.  */
-    if (info->mode != 'r' && !info->done) pipe_eof(info->fp,1);
+    _ckvmssts(SYS$SETAST(0));
+    need_eof = info->mode != 'r' && !info->done;
+    _ckvmssts(SYS$SETAST(1));
+    if (need_eof) pipe_eof(info->fp,0);
     PerlIO_close(info->fp);
 
     if (info->done) retsts = info->completion;
     else waitpid(info->pid,(int *) &retsts,0);
 
     /* remove from list of open pipes */
+    _ckvmssts(SYS$SETAST(0));
     if (last) last->next = info->next;
     else open_pipes = info->next;
+    _ckvmssts(SYS$SETAST(1));
     Safefree(info);
 
     return retsts;
