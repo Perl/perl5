@@ -64,91 +64,92 @@ print "ok 13\n";
 close(F);
 
 {
-$a = chr(300); # This *is* UTF-encoded
-$b = chr(130); # This is not.
-
-open F, ">:utf8", 'a' or die $!;
-print F $a,"\n";
-close F;
-
-open F, "<:utf8", 'a' or die $!;
-$x = <F>;
-chomp($x);
-print "not " unless $x eq chr(300);
-print "ok 14\n";
-
-open F, "a" or die $!; # Not UTF
-binmode(F, ":bytes");
-$x = <F>;
-chomp($x);
-$chr = chr(196).chr(172);
-if (ord('A') == 193) { $chr = chr(141).chr(83); } # EBCDIC
-print "not " unless $x eq $chr;
-print "ok 15\n";
-close F;
-
-open F, ">:utf8", 'a' or die $!;
-binmode(F);  # we write a "\n" and then tell() - avoid CRLF issues.
-print F $a;
-my $y;
-{ my $x = tell(F);
-    { use bytes; $y = length($a);}
-    print "not " unless $x == $y;
-    print "ok 16\n";
-}
-
-{ # Check byte length of $b
-use bytes; my $y = length($b);
-print "not " unless $y == 1;
-print "ok 17\n";
-}
-
-print F $b,"\n"; # Don't upgrades $b
-
-{ # Check byte length of $b
-use bytes; my $y = length($b);
-print "not ($y) " unless $y == 1;
-print "ok 18\n";
-}
-
-{ my $x = tell(F);
-    { use bytes; if (ord('A')==193){$y += 2;}else{$y += 3;}} # EBCDIC ASCII
-    print "not ($x,$y) " unless $x == $y;
-    print "ok 19\n";
-}
-
-close F;
-
-open F, "a" or die $!; # Not UTF
-binmode(F, ":bytes");
-$x = <F>;
-chomp($x);
-$chr = v196.172.194.130;
-if (ord('A') == 193) { $chr = v141.83.130; } # EBCDIC
-printf "not (%vd) ", $x unless $x eq $chr;
-print "ok 20\n";
-
-open F, "<:utf8", "a" or die $!;
-$x = <F>;
-chomp($x);
-close F;
-printf "not (%vd) ", $x unless $x eq chr(300).chr(130);
-print "ok 21\n";
-
-if (${^OPEN} =~ /:utf8/) {
+    $a = chr(300); # This *is* UTF-encoded
+    $b = chr(130); # This is not.
     
-} else {
-    # Now let's make it suffer.
+    open F, ">:utf8", 'a' or die $!;
+    print F $a,"\n";
+    close F;
+    
+    open F, "<:utf8", 'a' or die $!;
+    $x = <F>;
+    chomp($x);
+    print "not " unless $x eq chr(300);
+    print "ok 14\n";
+    
+    open F, "a" or die $!; # Not UTF
+    binmode(F, ":bytes");
+    $x = <F>;
+    chomp($x);
+    $chr = chr(196).chr(172);
+    if (ord('A') == 193) { $chr = chr(141).chr(83); } # EBCDIC
+    print "not " unless $x eq $chr;
+    print "ok 15\n";
+    close F;
+    
+    open F, ">:utf8", 'a' or die $!;
+    binmode(F);  # we write a "\n" and then tell() - avoid CRLF issues.
+    print F $a;
+    my $y;
+    { my $x = tell(F);
+      { use bytes; $y = length($a);}
+      print "not " unless $x == $y;
+      print "ok 16\n";
+  }
+    
+    { # Check byte length of $b
+	use bytes; my $y = length($b);
+	print "not " unless $y == 1;
+	print "ok 17\n";
+    }
+    
+    print F $b,"\n"; # Don't upgrades $b
+    
+    { # Check byte length of $b
+	use bytes; my $y = length($b);
+	print "not ($y) " unless $y == 1;
+	print "ok 18\n";
+    }
+    
+    {
+	my $x = tell(F);
+	{ use bytes; if (ord('A')==193){$y += 2;}else{$y += 3;}} # EBCDIC ASCII
+	print "not ($x,$y) " unless $x == $y;
+	print "ok 19\n";
+    }
+    
+    close F;
+    
+    open F, "a" or die $!; # Not UTF
+    binmode(F, ":bytes");
+    $x = <F>;
+    chomp($x);
+    $chr = v196.172.194.130;
+    if (ord('A') == 193) { $chr = v141.83.130; } # EBCDIC
+    printf "not (%vd) ", $x unless $x eq $chr;
+    print "ok 20\n";
+    
+    open F, "<:utf8", "a" or die $!;
+    $x = <F>;
+    chomp($x);
+    close F;
+    printf "not (%vd) ", $x unless $x eq chr(300).chr(130);
+    print "ok 21\n";
+    
     open F, ">", "a" or die $!;
+    if (${^OPEN} =~ /:utf8/) {
+        binmode(F, ":bytes:");
+    }
+
+    # Now let's make it suffer.
     my $w;
     {
 	use warnings 'utf8';
 	local $SIG{__WARN__} = sub { $w = $_[0] };
 	print F $a;
+	print "not " if ($@ || $w !~ /Wide character in print/i);
     }
-    print "not " if ($@ || $w !~ /Wide character in print/i);
     print "ok 22\n";
-}
 }
 
 # Hm. Time to get more evil.
