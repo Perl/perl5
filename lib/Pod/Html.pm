@@ -1427,7 +1427,7 @@ sub process_C {
 	$s1 =~ s,(perl\w+/(\S+)\.html)#item_\2\b,$1,; 
 	confess "s1 has space: $s1" if $s1 =~ /HREF="[^"]*\s[^"]*"/;
     } else {
-	$s1 = "<CODE>$str</CODE>";
+	$s1 = "<CODE>" . html_escape($str) . "</CODE>";
 	# warn "$0: $podfile: cannot resolve C<$str> in paragraph $paragraph\n" if $verbose
     }
 
