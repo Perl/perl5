@@ -159,7 +159,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 	    }
 	}
 	if (PL_in_my == KEY_our) {
-	    while (off <= top) {
+	    do {
 		if ((sv = svp[off])
 		    && sv != &PL_sv_undef
 		    && ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash)
@@ -171,8 +171,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 			"(Did you mean \"local\" instead of \"our\"?)\n");
 		    break;
 		}
-		--off;
-	    }
+	    } while ( off-- > 0 );
 	}
     }
     off = pad_alloc(OP_PADSV, SVs_PADMY);
