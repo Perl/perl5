@@ -311,9 +311,9 @@ if ($^O eq 'os390') {
 sub in_utf8 () { $^H & 0x08 }
 
 if (in_utf8) {
-    require "locale/utf8";
+    require "lib/locale/utf8";
 } else {
-    require "locale/latin1";
+    require "lib/locale/latin1";
 }
 
 my @Locale;

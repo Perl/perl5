@@ -18,7 +18,7 @@ END { if ($tmpfile) { 1 while unlink $tmpfile; } }
 
 my @prgs = () ;
 
-foreach (sort glob($^O eq 'MacOS' ? ":pragma:strict-*" : "pragma/strict-*")) {
+foreach (sort glob($^O eq 'MacOS' ? ":lib::strict:*" : "lib/strict/*")) {
 
     next if /(~|\.orig|,v)$/;
 

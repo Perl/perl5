@@ -1216,8 +1216,6 @@ lib/less.pm			For "use less"
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
-lib/locale/latin1		Part of locale.t in Latin 1
-lib/locale/utf8			Part of locale.t in UTF8
 lib/look.pl			A "look" equivalent
 lib/newgetopt.pl		A perl library supporting long option parsing
 lib/open.pm			Pragma to specify default I/O disciplines
@@ -1233,9 +1231,6 @@ lib/sigtrap.pm			For trapping an abort and giving traceback
 lib/stat.pl			Perl library supporting stat function
 lib/strict.pm			For "use strict"
 lib/strict.t			See if strictures work
-lib/strict/refs			Tests of "use strict 'refs'" for strict.t
-lib/strict/subs			Tests of "use strict 'subs'" for strict.t
-lib/strict/vars			Tests of "use strict 'vars'" for strict.t
 lib/subs.pm			Declare overriding subs
 lib/subs.t			See if subroutine pseudo-importation works
 lib/syslog.pl			Perl library supporting syslogging
@@ -1531,41 +1526,8 @@ lib/validate.pl			Perl library supporting wholesale file mode validation
 lib/vars.pm			Declare pseudo-imported global variables
 lib/vars.t			See if "use vars" work
 lib/warnings.pm			For "use warnings"
-lib/warnings.t		See if warning controls work
-lib/warnings/1global		Tests of global warnings for warnings.t
-lib/warnings/2use		Tests for "use warnings" for warnings.t
-lib/warnings/3both		Tests for interaction of $^W and "use warnings"
-lib/warnings/4lint		Tests for -W switch
-lib/warnings/5nolint		Tests for -X switch
-lib/warnings/6default		Tests default warnings
-lib/warnings/7fatal		Tests fatal warnings
-lib/warnings/8signal		Tests warnings + __WARN__ and __DIE__
-lib/warnings/9enabled		Tests warnings
-lib/warnings/av			Tests for av.c for warnings.t
-lib/warnings/doio		Tests for doio.c for warnings.t
-lib/warnings/doop		Tests for doop.c for warnings.t
-lib/warnings/gv			Tests for gv.c for warnings.t
-lib/warnings/hv			Tests for hv.c for warnings.t
-lib/warnings/malloc		Tests for malloc.c for warnings.t
-lib/warnings/mg			Tests for mg.c for warnings.t
-lib/warnings/op			Tests for op.c for warnings.t
-lib/warnings/perl		Tests for perl.c for warnings.t
-lib/warnings/perlio		Tests for perlio.c for warnings.t
-lib/warnings/perly		Tests for perly.y for warnings.t
-lib/warnings/pp			Tests for pp.c for warnings.t
-lib/warnings/pp_ctl		Tests for pp_ctl.c for warnings.t
-lib/warnings/pp_hot		Tests for pp_hot.c for warnings.t
-lib/warnings/pp_sys		Tests for pp_sys.c for warnings.t
-lib/warnings/regcomp		Tests for regcomp.c for warnings.t
-lib/warnings/regexec		Tests for regexec.c for warnings.t
+lib/warnings.t			See if warning controls work
 lib/warnings/register.pm	For "use warnings::register"
-lib/warnings/run		Tests for run.c for warnings.t
-lib/warnings/sv			Tests for sv.c for warnings.t
-lib/warnings/taint		Tests for taint.c for warnings.t
-lib/warnings/toke		Tests for toke.c for warnings.t
-lib/warnings/universal		Tests for universal.c for warnings.t
-lib/warnings/utf8		Tests for utf8.c for warnings.t
-lib/warnings/util		Tests for util.c for warnings.t
 locale.c			locale-specific utility functions
 makeaperl.SH			perl script that produces a new perl binary
 makedef.pl			Create symbol export lists for linking
@@ -1860,6 +1822,8 @@ t/lib/dprof/test6_v		Perl code profiler tests
 t/lib/filter-util.pl		See if Filter::Util::Call works
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
+t/lib/locale/latin1		Part of locale.t in Latin 1
+t/lib/locale/utf8		Part of locale.t in UTF8
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness
@@ -1873,6 +1837,42 @@ t/lib/sample-tests/skip_all		Test data for Test::Harness
 t/lib/sample-tests/todo			Test data for Test::Harness
 t/lib/sample-tests/with_comments	Test data for Test::Harness
 t/lib/st-dump.pl		See if Storable works
+t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
+t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
+t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
+t/lib/warnings/1global		Tests of global warnings for warnings.t
+t/lib/warnings/2use		Tests for "use warnings" for warnings.t
+t/lib/warnings/3both		Tests for interaction of $^W and "use warnings"
+t/lib/warnings/4lint		Tests for -W switch
+t/lib/warnings/5nolint		Tests for -X switch
+t/lib/warnings/6default		Tests default warnings
+t/lib/warnings/7fatal		Tests fatal warnings
+t/lib/warnings/8signal		Tests warnings + __WARN__ and __DIE__
+t/lib/warnings/9enabled		Tests warnings
+t/lib/warnings/av		Tests for av.c for warnings.t
+t/lib/warnings/doio		Tests for doio.c for warnings.t
+t/lib/warnings/doop		Tests for doop.c for warnings.t
+t/lib/warnings/gv		Tests for gv.c for warnings.t
+t/lib/warnings/hv		Tests for hv.c for warnings.t
+t/lib/warnings/malloc		Tests for malloc.c for warnings.t
+t/lib/warnings/mg		Tests for mg.c for warnings.t
+t/lib/warnings/op		Tests for op.c for warnings.t
+t/lib/warnings/perl		Tests for perl.c for warnings.t
+t/lib/warnings/perlio		Tests for perlio.c for warnings.t
+t/lib/warnings/perly		Tests for perly.y for warnings.t
+t/lib/warnings/pp		Tests for pp.c for warnings.t
+t/lib/warnings/pp_ctl		Tests for pp_ctl.c for warnings.t
+t/lib/warnings/pp_hot		Tests for pp_hot.c for warnings.t
+t/lib/warnings/pp_sys		Tests for pp_sys.c for warnings.t
+t/lib/warnings/regcomp		Tests for regcomp.c for warnings.t
+t/lib/warnings/regexec		Tests for regexec.c for warnings.t
+t/lib/warnings/run		Tests for run.c for warnings.t
+t/lib/warnings/sv		Tests for sv.c for warnings.t
+t/lib/warnings/taint		Tests for taint.c for warnings.t
+t/lib/warnings/toke		Tests for toke.c for warnings.t
+t/lib/warnings/universal	Tests for universal.c for warnings.t
+t/lib/warnings/utf8		Tests for utf8.c for warnings.t
+t/lib/warnings/util		Tests for util.c for warnings.t
 t/op/64bitint.t			See if 64 bit integers work
 t/op/anonsub.t			See if anonymous subroutines work
 t/op/append.t			See if . works

@@ -697,9 +697,6 @@ sub installlib {
     # .exists files, .PL files, and .t files.
     return if $name =~ m{\.orig$|~$|^#.+#$|,v$|^\.exists|\.PL$|\.t$};
 
-    # ignore locale, strict, and warnings test data files
-    return if $name =~ m{^lib/(locale|strict|warnings)/\w+$};
-
     $name = "$dir/$name" if $dir ne '';
 
     my $installlib = $installprivlib;
