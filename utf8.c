@@ -1725,7 +1725,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 	     }
 	     /* isPRINT() is the locale-blind version. */
 	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(u & 0xFF)) {
-	         Perl_sv_catpvf(aTHX_ dsv, "%c", u);
+	         Perl_sv_catpvf(aTHX_ dsv, "%c", (char)(u & 0xFF));
 		 ok = TRUE;
 	     }
 	 }
