@@ -80,6 +80,10 @@ sub B::IV::int_value {
   return (($self->FLAGS() & SVf_IVisUV()) ? $self->UVX : $self->IV);
 }
 
+sub B::NULL::as_string() {""}
+sub B::IV::as_string()   {goto &B::IV::int_value}
+sub B::PV::as_string()   {goto &B::PV::PV}
+
 my $debug;
 my $op_count = 0;
 my @parents = ();
