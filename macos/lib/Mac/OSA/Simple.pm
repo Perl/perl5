@@ -17,7 +17,8 @@ use Carp;
     load_osa_script %ScriptComponents);
 @EXPORT_OK = @Mac::OSA::EXPORT;
 %EXPORT_TAGS = (all => [@EXPORT, @EXPORT_OK]);
-$VERSION = '0.51';
+$REVISION = '$Id: Simple.pm,v 1.2 2002/01/23 05:45:12 pudge Exp $';
+$VERSION = '1.00';
 
 tie %ScriptComponents, 'Mac::OSA::Simple::Components';
 
@@ -233,6 +234,7 @@ sub FETCH {
 package Mac::OSA::Simple;  # odd "fix" for AutoSplit
 
 1;
+
 __END__
 
 =head1 NAME
@@ -316,12 +318,6 @@ In the second form, with FROMFILE true, gets
 script from FILE using RESOURCEID (which is 128 by default).  Returns
 Mac::OSA::Simple object.
 
-    **NOTE**
-    This function uses FSpOpenResFile, which has a bug in it
-    that causes it to treat $ENV{MACPERL} as the current
-    directory.  For safety, always pass FILE as an absolute
-    path, for now.
-
 Example:
 
     use Mac::OSA::Simple qw(:all);
@@ -380,20 +376,8 @@ Saves script in FILE with ID and NAME.  ID defaults to 128, NAME
 defaults to "MacPerl Script".  DANGEROUS!  Will overwrite
 existing resource!
 
-    **NOTE**
-    This function uses FSpOpenResFile, which has a bug in it
-    that causes it to treat $ENV{MACPERL} as the current
-    directory.  For safety, always pass FILE as an absolute
-    path, for now.
-
-
 =back
 
-
-=head1 BUGS
-
-C<load_osa_script> function and C<save> method require absolute
-paths.  Problem in Mac::Resources itself.
 
 =head1 TODO
 
@@ -415,12 +399,16 @@ Should C<run_osa_script> and C<execute> take arguments?  If so, how?
 
 =over 4
 
+=item v1.00, Tuesday, January 22, 2002
+
 Changed TEXT to SOURCE in internal hash storing text source of script.
 
 Added C<source> method (finish adding docs).
 
 Made calls for generic scripting component to C<%ScriptComponents>
 make new call to OpenComponent each time.
+
+Bump version info.
 
 =item v0.51, Saturday, March 20, 1999
 
@@ -453,9 +441,9 @@ Here goes ...
 
 Chris Nandor E<lt>pudge@pobox.comE<gt>, http://pudge.net/
 
-Copyright (c) 1999 Chris Nandor.  All rights reserved.  This program is
-free software; you can redistribute it and/or modify it under the terms
-of the Artistic License, distributed with Perl.
+Copyright (c) 1998-2002 Chris Nandor.  All rights reserved.  This program
+is free software; you can redistribute it and/or modify it under the same
+terms as Perl itself.
 
 =head1 SEE ALSO
 
@@ -463,6 +451,6 @@ Mac::OSA, Mac::AppleEvents, Mac::AppleEvents::Simple, macperlcat.
 
 =head1 VERSION
 
-Version 0.51 (Saturday, March 20, 1999)
+v1.00, Tuesday, January 22, 2002
 
 =cut

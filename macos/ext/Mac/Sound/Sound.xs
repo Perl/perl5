@@ -54,6 +54,8 @@ MODULE = Mac::Sound	PACKAGE = Mac::Sound
 
 =head2 Structures
 
+Not yet documented.
+
 =over 4
 
 =cut
@@ -99,6 +101,8 @@ STRUCT SPB
 =back
 
 =head2 Functions
+
+Not yet documented.
 
 =over 4
 
@@ -621,6 +625,7 @@ SPBSetDeviceInfo(inRefNum, infoType, infoData)
 
 =end ignore
 
+=cut
 long
 SPBMillisecondsToBytes(inRefNum)
 	long	inRefNum

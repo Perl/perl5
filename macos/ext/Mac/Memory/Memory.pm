@@ -14,9 +14,9 @@ your machine, including corruption of data. B<You have been warned.>
 The Memory module defines Ptr and Handle classes, and function interfaces to the 
 memory management.
 
-	use Mac::Memory;
-	$handle = new Handle;
-	$handle2 = NewHandle;
+    use Mac::Memory;
+    $handle = new Handle;
+    $handle2 = NewHandle;
 
 =head1 DESCRIPTION
 

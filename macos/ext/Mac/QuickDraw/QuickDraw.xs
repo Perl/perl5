@@ -1,4 +1,4 @@
-/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/QuickDraw/QuickDraw.xs,v 1.2 2000/09/09 22:18:28 neeri Exp $
+/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/QuickDraw/QuickDraw.xs,v 1.3 2002/01/23 05:44:42 pudge Exp $
  *
  *    Copyright (c) 1996 Matthias Neeracher
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file.
  *
  * $Log: QuickDraw.xs,v $
+ * Revision 1.3  2002/01/23 05:44:42  pudge
+ * Update whitespace etc., from Thomas
+ *
  * Revision 1.2  2000/09/09 22:18:28  neeri
  * Dynamic libraries compile under 5.6
  *
@@ -33,7 +36,7 @@
  * Revision 1.1  1997/04/07 20:50:36  neeri
  * Synchronized with MacPerl 5.1.4a1
  *
- */
+ */ 
 
 #define MAC_CONTEXT
 
@@ -75,37 +78,37 @@ MODULE = Mac::QuickDraw	PACKAGE = Mac::QuickDraw
 
 A QuickDraw graphics port. Fields are:
 
-	short							device;
-	BitMap							portBits;
-	PixMapHandle					portPixMap;					/*For color ports only*/
-	RGBColor						rgbOpColor;					/*color for addPin  subPin and average*/
-	RGBColor						rgbHiliteColor;				/*color for hiliting*/
-	Fixed412						chExtra;
-	Fixed016						pnLocHFrac;
-	Rect							portRect;
-	RgnHandle						visRgn;
-	RgnHandle						clipRgn;
-	Pattern							bkPat;
-	Pattern							fillPat;
-	RGBColor						rgbFgColor;
-	RGBColor						rgbBkColor;
-	Point							pnLoc;
-	Point							pnSize;
-	short							pnMode;
-	Pattern							pnPat;
-	short							pnVis;
-	short							txFont;
-	U8								txFace;				
-	short							txMode;
-	short							txSize;
-	Fixed							spExtra;
-	long							fgColor;
-	long							bkColor;
-	short							colrBit;
+    short           device;
+    BitMap          portBits;
+    PixMapHandle    portPixMap;     /* For color ports only */
+    RGBColor        rgbOpColor;     /* color for addPin  subPin and average */
+    RGBColor        rgbHiliteColor; /* color for hiliting */
+    Fixed412        chExtra;
+    Fixed016        pnLocHFrac;
+    Rect            portRect;
+    RgnHandle       visRgn;
+    RgnHandle       clipRgn;
+    Pattern         bkPat;
+    Pattern         fillPat;
+    RGBColor        rgbFgColor;
+    RGBColor        rgbBkColor;
+    Point           pnLoc;
+    Point           pnSize;
+    short           pnMode;
+    Pattern         pnPat;
+    short           pnVis;
+    short           txFont;
+    U8              txFace;
+    short           txMode;
+    short           txSize;
+    Fixed           spExtra;
+    long            fgColor;
+    long            bkColor;
+    short           colrBit;
 
 =cut
 STRUCT * GrafPtr
-	short							device;
+ short								device;
 	BitMap							portBits;
 	PixMapHandle					portPixMap;
 		READ_ONLY
@@ -115,7 +118,7 @@ STRUCT * GrafPtr
 		} else {
 			XS_OUTPUT(SV *, &PL_sv_undef, $arg);
 		}
-	RGBColor						rgbOpColor;					/*color for addPin  subPin and average*/
+	RGBColor						rgbOpColor;					/* color for addPin  subPin and average */
 		READ_ONLY
 		OUTPUT:
 		if (COLORPORT(STRUCT)) {
@@ -124,7 +127,7 @@ STRUCT * GrafPtr
 		} else {
 			XS_OUTPUT(SV *, &PL_sv_undef, $arg);
 		}
-	RGBColor						rgbHiliteColor;				/*color for hiliting*/
+	RGBColor						rgbHiliteColor;				/* color for hiliting */
 		READ_ONLY
 		OUTPUT:
 		if (COLORPORT(STRUCT)) {
@@ -218,8 +221,8 @@ STRUCT * GrafPtr
 
 A bitmap. All accessible fields are read-only:
 
-	short	rowBytes;
-	Rect	bounds;
+    short    rowBytes;
+    Rect     bounds;
 
 =cut
 STRUCT BitMap
@@ -232,8 +235,8 @@ STRUCT BitMap
 
 A region. All accessible fields are read-only:
 
-	short	rgnSize;					
-	Rect	rgnBBox;
+    short    rgnSize;
+    Rect     rgnBBox;
 
 =over 4
 
@@ -245,7 +248,7 @@ Create a new region.
 
 =cut
 STRUCT ** RgnHandle
-	short	rgnSize;					
+	short	rgnSize;
 		READ_ONLY
 	Rect	rgnBBox;
 		READ_ONLY
@@ -254,8 +257,8 @@ STRUCT ** RgnHandle
 
 A QuickDraw picture. All accessible fields are read-only:
 
-	short	picSize
-	Rect	picFrame
+    short    picSize
+    Rect     picFrame
 
 =over 4
 
@@ -278,8 +281,8 @@ STRUCT ** PicHandle
 
 A polygon. All accessible fields are read-only:
 
-	short	polySize;
-	Rect	polyBBox;
+    short    polySize;
+    Rect     polyBBox;
 
 =cut
 STRUCT ** PolyHandle
@@ -292,15 +295,15 @@ STRUCT ** PolyHandle
 
 A RGB color value. The color components are accessible
 
-	U16		red;						
-	U16		green;						
-	U16		blue;					
+    U16    red;
+    U16    green;
+    U16    blue;
 
 =cut
 STRUCT RGBColor
-	U16		red;						
-	U16		green;						
-	U16		blue;					
+	U16		red;
+	U16		green;
+	U16		blue;
 
 =over 4
 
@@ -314,10 +317,10 @@ Create a new RGBColor.
 
 A structure with the following members:
 
-	Point		pnLoc;
-	Point		pnSize;
-	short		pnMode;
-	Pattern		pnPat;
+    Point      pnLoc;
+    Point      pnSize;
+    short      pnMode;
+    Pattern    pnPat;
 
 =cut
 STRUCT PenState
@@ -332,8 +335,8 @@ MODULE = Mac::QuickDraw	PACKAGE = Point
 
 A point, featuring the following fields
 
-	short	h;
-	short	v;
+    short    h;
+    short    v;
 
 =cut
 STRUCT Point
@@ -366,12 +369,12 @@ MODULE = Mac::QuickDraw	PACKAGE = Rect
 
 A rectangle, featuring the following fields
 
-	short	top
-	short	left
-	short	bottom
-	short	right
-	Point	topLeft
-	Point	botRight
+    short    top
+    short    left
+    short    bottom
+    short    right
+    Point    topLeft
+    Point    botRight
 
 =cut
 STRUCT Rect
@@ -413,176 +416,176 @@ _new(left=0, top=0, right=0, bottom=0)
 
 A pixel map, the color equivalent to a bitmap.
 
-	short			rowBytes;		/*offset to next line*/
-	Rect			bounds;			/*encloses bitmap*/
-	short			pmVersion;		/*pixMap version number*/
-	short			packType;		/*defines packing format*/
-	long			packSize;		/*length of pixel data*/
-	Fixed			hRes;			/*horiz. resolution (ppi)*/
-	Fixed			vRes;			/*vert. resolution (ppi)*/
-	short			pixelType;		/*defines pixel type*/
-	short			pixelSize;		/*# bits in pixel*/
-	short			cmpCount;		/*# components in pixel*/
-	short			cmpSize;		/*# bits per component*/
-	long			planeBytes;		/*offset to next plane*/
-	CTabHandle		pmTable;		/*color map for this pixMap*/
+    short         rowBytes;      /* offset to next line */ 
+    Rect          bounds;        /* encloses bitmap */ 
+    short         pmVersion;     /* pixMap version number */ 
+    short         packType;      /* defines packing format */ 
+    long          packSize;      /* length of pixel data */ 
+    Fixed         hRes;          /* horiz. resolution (ppi) */ 
+    Fixed         vRes;          /* vert. resolution (ppi) */ 
+    short         pixelType;     /* defines pixel type */ 
+    short         pixelSize;     /* bits in pixel */ 
+    short         cmpCount;      /* components in pixel */ 
+    short         cmpSize;       /* bits per component */ 
+    long          planeBytes;    /* offset to next plane */ 
+    CTabHandle    pmTable;       /* color map for this pixMap */ 
 
 =cut
 STRUCT PixMap
-	short			rowBytes;					/*offset to next line*/
-	Rect			bounds;						/*encloses bitmap*/
-	short			pmVersion;					/*pixMap version number*/
-	short			packType;					/*defines packing format*/
-	long			packSize;					/*length of pixel data*/
-	Fixed			hRes;						/*horiz. resolution (ppi)*/
-	Fixed			vRes;						/*vert. resolution (ppi)*/
-	short			pixelType;					/*defines pixel type*/
-	short			pixelSize;					/*# bits in pixel*/
-	short			cmpCount;					/*# components in pixel*/
-	short			cmpSize;					/*# bits per component*/
-	long			planeBytes;					/*offset to next plane*/
-	CTabHandle		pmTable;					/*color map for this pixMap*/
+    short			rowBytes;					/* offset to next line */
+	Rect			bounds;						/* encloses bitmap */
+	short			pmVersion;					/* pixMap version number */
+	short			packType;					/* defines packing format */
+	long			packSize;					/* length of pixel data */
+	Fixed			hRes;						/* horiz. resolution (ppi) */
+	Fixed			vRes;						/* vert. resolution (ppi) */
+	short			pixelType;					/* defines pixel type */
+	short			pixelSize;					/* # bits in pixel */
+	short			cmpCount;					/* # components in pixel */
+	short			cmpSize;					/* # bits per component */
+	long			planeBytes;					/* offset to next plane */
+	CTabHandle		pmTable;					/* color map for this pixMap */
 
 =item PixMapHandle
 
 A pixel map, the color equivalent to a bitmap.
 
-	short			rowBytes;		/*offset to next line*/
-	Rect			bounds;			/*encloses bitmap*/
-	short			pmVersion;		/*pixMap version number*/
-	short			packType;		/*defines packing format*/
-	long			packSize;		/*length of pixel data*/
-	Fixed			hRes;			/*horiz. resolution (ppi)*/
-	Fixed			vRes;			/*vert. resolution (ppi)*/
-	short			pixelType;		/*defines pixel type*/
-	short			pixelSize;		/*# bits in pixel*/
-	short			cmpCount;		/*# components in pixel*/
-	short			cmpSize;		/*# bits per component*/
-	long			planeBytes;		/*offset to next plane*/
-	CTabHandle		pmTable;		/*color map for this pixMap*/
+    short         rowBytes;      /* offset to next line */
+    Rect          bounds;        /* encloses bitmap */
+    short         pmVersion;     /* pixMap version number */
+    short         packType;      /* defines packing format */
+    long          packSize;      /* length of pixel data */
+    Fixed         hRes;          /* horiz. resolution (ppi) */
+    Fixed         vRes;          /* vert. resolution (ppi) */
+    short         pixelType;     /* defines pixel type */
+    short         pixelSize;     /* bits in pixel */
+    short         cmpCount;      /* components in pixel */
+    short         cmpSize;       /* bits per component */
+    long          planeBytes;    /* offset to next plane */
+    CTabHandle    pmTable;       /* color map for this pixMap */
 
 =cut
 STRUCT ** PixMapHandle
-	short			rowBytes;					/*offset to next line*/
-	Rect			bounds;						/*encloses bitmap*/
-	short			pmVersion;					/*pixMap version number*/
-	short			packType;					/*defines packing format*/
-	long			packSize;					/*length of pixel data*/
-	Fixed			hRes;						/*horiz. resolution (ppi)*/
-	Fixed			vRes;						/*vert. resolution (ppi)*/
-	short			pixelType;					/*defines pixel type*/
-	short			pixelSize;					/*# bits in pixel*/
-	short			cmpCount;					/*# components in pixel*/
-	short			cmpSize;					/*# bits per component*/
-	long			planeBytes;					/*offset to next plane*/
-	CTabHandle		pmTable;					/*color map for this pixMap*/
+	short			rowBytes;					/* offset to next line */
+	Rect			bounds;						/* encloses bitmap */
+	short			pmVersion;					/* pixMap version number */
+	short			packType;					/* defines packing format */
+	long			packSize;					/* length of pixel data */
+	Fixed			hRes;						/* horiz. resolution (ppi) */
+	Fixed			vRes;						/* vert. resolution (ppi) */
+	short			pixelType;					/* defines pixel type */
+	short			pixelSize;					/* # bits in pixel */
+	short			cmpCount;					/* # components in pixel */
+	short			cmpSize;					/* # bits per component */
+	long			planeBytes;					/* offset to next plane */
+	CTabHandle		pmTable;					/* color map for this pixMap */
 
 =item PixPatHandle
 
 A pixel pattern.
 
-	short			patType;	/*type of pattern*/
-	PixMapHandle	patMap;		/*the pattern's pixMap*/
-	Handle			patData;	/*pixmap's data*/
-	Handle			patXData;	/*expanded Pattern data*/
-	short			patXValid;	/*flags whether expanded Pattern valid*/
-	Handle			patXMap;	/*Handle to expanded Pattern data*/
-	Pattern			pat1Data;	/*old-Style pattern/RGB color*/
+    short           patType;     /* type of pattern */
+    PixMapHandle    patMap;       /* the pattern's pixMap */
+    Handle          patData;      /* pixmap's data */
+    Handle          patXData;     /* expanded Pattern data */
+    short           patXValid;    /* flags whether expanded Pattern valid */
+    Handle          patXMap;      /* Handle to expanded Pattern data */
+    Pattern         pat1Data;     /* old-Style pattern/RGB color */
 
 =cut
 STRUCT ** PixPatHandle
-	short							patType;					/*type of pattern*/
-	PixMapHandle					patMap;						/*the pattern's pixMap*/
-	Handle							patData;					/*pixmap's data*/
-	Handle							patXData;					/*expanded Pattern data*/
-	short							patXValid;					/*flags whether expanded Pattern valid*/
-	Handle							patXMap;					/*Handle to expanded Pattern data*/
-	Pattern							pat1Data;					/*old-Style pattern/RGB color*/
+	short							patType;					/* type of pattern */
+	PixMapHandle					patMap;						/* the pattern's pixMap */
+	Handle							patData;					/* pixmap's data */
+	Handle							patXData;					/* expanded Pattern data */
+	short							patXValid;					/* flags whether expanded Pattern valid */
+	Handle							patXMap;					/* Handle to expanded Pattern data */
+	Pattern							pat1Data;					/* old-Style pattern/RGB color */
 
 =item CTabHandle
 
 A color table. Currently, the colors are not yet accessible, but the following are:
 
-	long	ctSeed;		/*unique identifier for table*/
-	short	ctFlags;	/*high bit: 0 = PixMap; 1 = device*/
-	short	ctSize;		/*number of entries in CTTable*/
+    long     ctSeed;     /* unique identifier for table */
+    short    ctFlags;    /* high bit: 0 = PixMap; 1 = device */
+    short    ctSize;     /* number of entries in CTTable */
 
 =cut
 STRUCT ** CTabHandle
-	long	ctSeed;		/*unique identifier for table*/
-	short	ctFlags;	/*high bit: 0 = PixMap; 1 = device*/
-	short	ctSize;		/*number of entries in CTTable*/
+	long	ctSeed;		/* unique identifier for table */
+	short	ctFlags;	/* high bit: 0 = PixMap; 1 = device */
+	short	ctSize;		/* number of entries in CTTable */
 
 =item CCrsrHandle
 
 A color cursor.
 
-	short			crsrType;					/*type of cursor*/
-	PixMapHandle	crsrMap;					/*the cursor's pixmap*/
-	Handle			crsrData;					/*cursor's data*/
-	Handle			crsrXData;					/*expanded cursor data*/
-	short			crsrXValid;					/*depth of expanded data (0 if none)*/
-	Cursor			crsr1;						/*one-bit cursor and hotspot*/
+    short           crsrType;      /* type of cursor */
+    PixMapHandle    crsrMap;       /* the cursor's pixmap */
+    Handle          crsrData;      /* cursor's data */
+    Handle          crsrXData;     /* expanded cursor data */
+    short           crsrXValid;    /* depth of expanded data (0 if none) */
+    Cursor          crsr1;         /* one-bit cursor and hotspot */
 
 =cut
 STRUCT ** CCrsrHandle
-	short			crsrType;					/*type of cursor*/
-	PixMapHandle	crsrMap;					/*the cursor's pixmap*/
-	Handle			crsrData;					/*cursor's data*/
-	Handle			crsrXData;					/*expanded cursor data*/
-	short			crsrXValid;					/*depth of expanded data (0 if none)*/
-	Cursor			crsr1;						/*one-bit cursor and hotspot*/
+	short			crsrType;					/* type of cursor */
+	PixMapHandle	crsrMap;					/* the cursor's pixmap */
+	Handle			crsrData;					/* cursor's data */
+	Handle			crsrXData;					/* expanded cursor data */
+	short			crsrXValid;					/* depth of expanded data (0 if none) */
+	Cursor			crsr1;						/* one-bit cursor and hotspot */
 		ALIAS *(Cursor *)&STRUCT[0]->crsr1Data
 
 =item CIconHandle
 
 A color icon
 
-	PixMap			iconPMap;					/*the icon's pixMap*/
-	BitMap			iconMask;					/*the icon's mask*/
-	BitMap			iconBMap;					/*the icon's bitMap*/
-	Handle			iconData;					/*the icon's data*/
+    PixMap    iconPMap;    /* the icon's pixMap */
+    BitMap    iconMask;    /* the icon's mask */
+    BitMap    iconBMap;    /* the icon's bitMap */
+    Handle    iconData;    /* the icon's data */
 
 =cut
 STRUCT ** CIconHandle
-	PixMap			iconPMap;					/*the icon's pixMap*/
-	BitMap			iconMask;					/*the icon's mask*/
-	BitMap			iconBMap;					/*the icon's bitMap*/
-	Handle			iconData;					/*the icon's data*/
+	PixMap			iconPMap;					/* the icon's pixMap */
+	BitMap			iconMask;					/* the icon's mask */
+	BitMap			iconBMap;					/* the icon's bitMap */
+	Handle			iconData;					/* the icon's data */
 
 =item GDHandle
 
 A graphics device
 
-	short			gdRefNum;					/*driver's unit number*/
-	short			gdID;						/*client ID for search procs*/
-	short			gdType;						/*fixed/CLUT/direct*/
-	short			gdResPref;					/*preferred resolution of GDITable*/
-	short			gdFlags;					/*grafDevice flags word*/
-	PixMapHandle	gdPMap;						/*describing pixMap*/
-	long			gdRefCon;					/*reference value*/
-	GDHandle		gdNextGD;					/*GDHandle Handle of next gDevice*/
-	Rect			gdRect;						/* device's bounds in global coordinates*/
-	long			gdMode;						/*device's current mode*/
-	short			gdCCBytes;					/*depth of expanded cursor data*/
-	short			gdCCDepth;					/*depth of expanded cursor data*/
+    short           gdRefNum;     /* driver's unit number */
+    short           gdID;         /* client ID for search procs */
+    short           gdType;       /* fixed/CLUT/direct */
+    short           gdResPref;    /* preferred resolution of GDITable */
+    short           gdFlags;      /* grafDevice flags word */
+    PixMapHandle    gdPMap;       /* describing pixMap */
+    long            gdRefCon;     /* reference value */
+    GDHandle        gdNextGD;     /* GDHandle Handle of next gDevice */
+    Rect            gdRect;       /* device's bounds in global coordinates */
+    long            gdMode;       /* device's current mode */
+    short           gdCCBytes;    /* depth of expanded cursor data */
+    short           gdCCDepth;    /* depth of expanded cursor data */
 
 =cut
 STRUCT ** GDHandle
-	short			gdRefNum;					/*driver's unit number*/
-	short			gdID;						/*client ID for search procs*/
-	short			gdType;						/*fixed/CLUT/direct*/
-	short			gdResPref;					/*preferred resolution of GDITable*/
-	short			gdFlags;					/*grafDevice flags word*/
-	PixMapHandle	gdPMap;						/*describing pixMap*/
-	long			gdRefCon;					/*reference value*/
-	GDHandle		gdNextGD;					/*Handle of next gDevice*/
+	short			gdRefNum;					/* driver's unit number */
+	short			gdID;						/* client ID for search procs */
+	short			gdType;						/* fixed/CLUT/direct */
+	short			gdResPref;					/* preferred resolution of GDITable */
+	short			gdFlags;					/* grafDevice flags word */
+	PixMapHandle	gdPMap;						/* describing pixMap */
+	long			gdRefCon;					/* reference value */
+	GDHandle		gdNextGD;					/* Handle of next gDevice */
 		INPUT:
 		XS_INPUT(GDHandle, *(GDHandle *)&STRUCT[0]->gdNextGD, $arg);
-	Rect			gdRect;						/* device's bounds in global coordinates*/
-	long			gdMode;						/*device's current mode*/
-	short			gdCCBytes;					/*depth of expanded cursor data*/
-	short			gdCCDepth;					/*depth of expanded cursor data*/
+	Rect			gdRect;						/* device's bounds in global coordinates */
+	long			gdMode;						/* device's current mode */
+	short			gdCCBytes;					/* depth of expanded cursor data */
+	short			gdCCDepth;					/* depth of expanded cursor data */
 
 =back
 
@@ -2301,7 +2304,7 @@ ShieldCursor(shieldRect, pt=sZeroPoint)
 
 Return the resolution of the screen.
 
-   ($hres, $vres) = ScreenRes;
+    ($hres, $vres) = ScreenRes;
 
 =cut
 void
@@ -2336,8 +2339,8 @@ GetIndPattern(patternListID, index)
 
 Map a pixel position into a character position.
 
-	($characterPosition, $leadingEdge, $widthRemaining) =
-		PixelToChar("Hello, World", 0, 35, smMiddleStyleRun);
+    ($characterPosition, $leadingEdge, $widthRemaining) =
+        PixelToChar("Hello, World", 0, 35, smMiddleStyleRun);
 
 =cut
 void
@@ -2524,7 +2527,7 @@ StringWidth(s)
 
 Get measurements for a font.
 
-   ($ascent, $descend, $maxWidth, $leading) = GetFontInfo();
+    ($ascent, $descend, $maxWidth, $leading) = GetFontInfo();
 
 =cut
 void

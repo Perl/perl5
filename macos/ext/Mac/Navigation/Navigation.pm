@@ -357,8 +357,6 @@ sub kNavTranslateCopy ()           {          1; }
 
 =head2 Types
 
-=over 4
-
 =cut
 package NavTypeListHandle;
 
@@ -396,6 +394,7 @@ sub new {
 }
 
 =back
+
 
 =include Navigation.xs
 

@@ -1,4 +1,4 @@
-/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Files/Files.xs,v 1.3 2000/09/12 20:18:57 pudge Exp $
+/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Files/Files.xs,v 1.4 2002/01/23 05:44:42 pudge Exp $
  *
  *    Copyright (c) 1996 Matthias Neeracher
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file.
  *
  * $Log: Files.xs,v $
+ * Revision 1.4  2002/01/23 05:44:42  pudge
+ * Update whitespace etc., from Thomas
+ *
  * Revision 1.3  2000/09/12 20:18:57  pudge
  * Added all the new constants for FindFolder
  * Make FSMakeFSSpec return FSSpec even if file does not exist
@@ -67,10 +70,10 @@ MODULE = Mac::Files	PACKAGE = Mac::Files
 
 Information for a file, including:
 
-	OSType			fdType			the type of the file
-	OSType			fdCreator		file's creator
-	U16				fdFlags			flags ex. hasbundle,invisible,locked, etc.
-	Point			fdLocation		file's location in folder
+    OSType     fdType            the type of the file
+    OSType     fdCreator         file's creator
+    U16        fdFlags           flags ex. hasbundle,invisible,locked, etc.
+    Point      fdLocation        file's location in folder
 
 =cut
 STRUCT FInfo
@@ -83,11 +86,11 @@ STRUCT FInfo
 
 Further information for a file, including:
 
-	short			fdIconID		Icon ID
-	I8				fdScript		Script flag and number
-	I8				fdXFlags		More flag bits
-	short			fdComment		Comment ID
-	long			fdPutAway		Home Dir ID
+    short      fdIconID          Icon ID
+    I8         fdScript          Script flag and number
+    I8         fdXFlags          More flag bits
+    short      fdComment         Comment ID
+    long       fdPutAway         Home Dir ID
 
 =cut
 STRUCT FXInfo
@@ -101,10 +104,10 @@ STRUCT FXInfo
 
 Information for a directory, including:
 
-	Rect			frRect			folder rect
-	U16				frFlags			Flags
-	Point			frLocation		folder location
-	short			frView			folder view
+    Rect       frRect            folder rect
+    U16        frFlags           Flags
+    Point      frLocation        folder location
+    short      frView            folder view
 
 =cut
 STRUCT DInfo
@@ -117,12 +120,12 @@ STRUCT DInfo
 
 Further information for a directory, including:
 
-	Point			frScroll		scroll position
-	long			frOpenChain		DirID chain of open folders
-	I8				frScript		Script flag and number
-	I8				frXFlags;		More flag bits
-	short			frComment		comment
-	long			frPutAway;		DirID
+    Point      frScroll          scroll position
+    long       frOpenChain       DirID chain of open folders
+    I8         frScript          Script flag and number
+    I8         frXFlags;         More flag bits
+    short      frComment         comment
+    long       frPutAway;        DirID
 
 =cut
 STRUCT DXInfo

@@ -1,4 +1,4 @@
-/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Processes/Processes.xs,v 1.3 2000/09/12 19:42:21 pudge Exp $
+/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Processes/Processes.xs,v 1.4 2002/01/23 05:44:42 pudge Exp $
  *
  *    Copyright (c) 1996 Matthias Neeracher
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file.
  *
  * $Log: Processes.xs,v $
+ * Revision 1.4  2002/01/23 05:44:42  pudge
+ * Update whitespace etc., from Thomas
+ *
  * Revision 1.3  2000/09/12 19:42:21  pudge
  * Make LaunchApplication return PSN on success, undef on failure
  *
@@ -51,18 +54,17 @@ MODULE = Mac::Processes	PACKAGE = LaunchParam
 
 =head2 LaunchParam
 
-This Perl hash maps onto the fields of a Launch Parameter Block 
-I<(Consult the manual)>.
+This Perl hash maps onto the fields of a Launch Parameter Block.
 
 The fields are: 
 
-	launchFileFlags
-	launchControlFlags
-	launchAppSpec
-	launchAvailableSize
-	launchProcessSN
-	launchPreferredSize
-	launchMinimumSize
+    launchFileFlags
+    launchControlFlags
+    launchAppSpec
+    launchAvailableSize
+    launchProcessSN
+    launchPreferredSize
+    launchMinimumSize
 
 =cut
 
@@ -79,9 +81,8 @@ STRUCT * LaunchParam
 
 Returns LaunchParam.
 
-	$launch = 
-		new LaunchParam(
-			launchAppSpec => "volume:apps:myapp", launchMinimumSize => 32000);
+    $launch = 
+        new LaunchParam(launchAppSpec => "hd:apps:myapp", launchMinimumSize => 32000);
 
 =cut
 LaunchParam
@@ -110,21 +111,20 @@ MODULE = Mac::Processes	PACKAGE = ProcessInfo
 =head2 ProcessInfo
 
 This Perl hash allows access to the C<ProcessInfo> structure.
-B<(Consult your manual)>.
 
 The field names are: 
 
-	processName
-	processNumber
-	processType
-	processSignature
-	processSize
-	processMode
-	processLocation
-	processLauncher
-	processLaunchDate
-	processActiveTime
-	processAppSpec
+    processName
+    processNumber
+    processType
+    processSignature
+    processSize
+    processMode
+    processLocation
+    processLauncher
+    processLaunchDate
+    processActiveTime
+    processAppSpec
 
 =cut
 

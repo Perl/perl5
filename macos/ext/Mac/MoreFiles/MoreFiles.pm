@@ -4,9 +4,9 @@ Mac::MoreFiles - Sophisticated file management routines
 
 =head1 SYNOPSIS
 
-	use Mac::MoreFiles;
-	
-	$application = $Application{"MrPL"};
+    use Mac::MoreFiles;
+
+    $application = $Application{"MrPL"};
 
 =head1 DESCRIPTION
 

@@ -26,6 +26,10 @@ MODULE = Mac::ImageCompression	PACKAGE = Mac::ImageCompression
 
 =over 4
 
+=item Not yet documented. Please take a look at the code section(s).
+
+=cut
+
 long
 CodecManagerVersion()
 	CODE:

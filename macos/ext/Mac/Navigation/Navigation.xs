@@ -163,13 +163,13 @@ MODULE = Mac::Navigation	PACKAGE = Mac::Navigation
 
 The file information passed to your filter functions. All fields are readonly.
 
-	U16 		version;
-	Boolean 	isFolder;
-	Boolean 	visible;
-	U32 		creationDate;
-	U32 		modificationDate;
-	NavFileInfo		fileInfo;
-	NavFolderInfo	folderInfo;
+    U16              version;
+    Boolean          isFolder;
+    Boolean          visible;
+    U32              creationDate;
+    U32              modificationDate;
+    NavFileInfo      fileInfo;
+    NavFolderInfo    folderInfo;
 
 =cut
 STRUCT * NavFileOrFolderInfo
@@ -194,13 +194,13 @@ STRUCT * NavFileOrFolderInfo
 
 The file specific part of the above structure. All fields are readonly.
 
-	Boolean 	locked;						/* file is locked */
-	Boolean 	resourceOpen;				/* resource fork is opened */
-	Boolean 	dataOpen;					/* data fork is opened */
-	U32 		dataSize;					/* size of the data fork */
-	U32 		resourceSize;				/* size of the resource fork */
-	FInfo 		finderInfo;					/* more file info: */
-	FXInfo 		moreFinderInfo;
+    Boolean    locked;         /* file is locked */
+    Boolean    resourceOpen;   /* resource fork is opened */
+    Boolean    dataOpen;       /* data fork is opened */
+    U32        dataSize;       /* size of the data fork */
+    U32        resourceSize;   /* size of the resource fork */
+    FInfo      finderInfo;     /* more file info: */
+    FXInfo     moreFinderInfo;
 
 =cut
 STRUCT * NavFileInfo 
@@ -226,14 +226,14 @@ STRUCT * NavFileInfo
 
 The folder specific part of the above structure. All fields are readonly.
 
-	Boolean 	shareable;
-	Boolean 	sharePoint;
-	Boolean 	mounted;
-	Boolean 	readable;
-	Boolean 	writeable;
-	U32 		numberOfFiles;
-	DInfo 		finderInfo;
-	DXInfo 		moreFinderInfo;
+    Boolean    shareable;
+    Boolean    sharePoint;
+    Boolean    mounted;
+    Boolean    readable;
+    Boolean    writeable;
+    U32        numberOfFiles;
+    DInfo      finderInfo;
+    DXInfo     moreFinderInfo;
 
 =cut
 STRUCT * NavFolderInfo 
@@ -264,12 +264,12 @@ STRUCT * NavFolderInfo
 
 The structure passed to your event procedure. Fields are
 
-	U16 			version;
-	U32		 		context;					/* used by customization code to call Navigation Services */
-	GrafPtr 		window;						/* the dialog */
-	Rect 			customRect;					/* local coordinate rectangle of customization area */
-	Rect 			previewRect;				/* local coordinate rectangle of the preview area */
-	EventRecord 	event;
+    U16            version;
+    U32            context;     /* used by customization code to call Nav. Services */
+    GrafPtr        window;      /* the dialog */
+    Rect           customRect;  /* local coordinate rectangle of customization area */
+    Rect           previewRect; /* local coordinate rectangle of the preview area */
+    EventRecord    event;
 
 =cut
 
@@ -305,16 +305,21 @@ STRUCT * NavCBRec
 
 Options for a Navigation dialog. Fields are:
 
-	U16 			version;
-	U32	 			dialogOptionFlags;			/* option flags for affecting the dialog's behavior */
-	Point 			location;					/* top-left location of the dialog, or {-1,-1} for default position */
-	Str255 			clientName;
-	Str255 			windowTitle;
-	Str255 			actionButtonLabel;			/* label of the default button (or null string for default) */
-	Str255 			cancelButtonLabel;			/* label of the cancel button (or null string for default) */
-	Str255 			savedFileName;				/* default name for text box in NavPutFile (or null string for default) */
-	Str255 			message;					/* custom message prompt (or null string for default) */
-	U32 			preferenceKey;				/* a key for to managing preferences for using multiple utility dialogs */
+    U16       version;
+    U32       dialogOptionFlags; /* option flags for affecting the dialog's behavior */
+    Point     location;          /* top-left location of the dialog, or {-1,-1} for 
+                                    default position */
+    Str255    clientName;
+    Str255    windowTitle;
+    Str255    actionButtonLabel; /* label of the default button (or null string for 
+                                    default) */
+    Str255    cancelButtonLabel; /* label of the cancel button (or null string for 
+                                    default) */
+    Str255    savedFileName;     /* default name for text box in NavPutFile (or null 
+                                    string for default) */
+    Str255    message;           /* custom message prompt (or null string for default) */
+    U32       preferenceKey;     /* a key for to managing preferences for using multiple 
+                                    utility dialogs */
 
 =cut
 STRUCT NavDialogOptions
@@ -334,13 +339,18 @@ MODULE = Mac::QuickDraw	PACKAGE = NavReplyRecord
 =item NavReplyRecord
 
 The reply from a navigation dialog. Fields are:
-	
-	U16 					version;
-	Boolean 				validRecord;				/* open/save: true if the user confirmed a selection, false on cancel */
-	Boolean 				replacing;					/* save: true if the user is overwriting an existing object for save */
-	Boolean 				isStationery;				/* save: true if the user wants to save an object as stationery */
-	Boolean 				translationNeeded;			/* save: translation is 'needed', open: translation 'has taken place' */
-	U16		 				keyScript;					/* open/save: script in which the name of each item in 'selection' is to be displayed */
+
+    U16        version;
+    Boolean    validRecord;       /* open/save: true if the user confirmed a selection, 
+                                     false on cancel */
+    Boolean    replacing;         /* save: true if the user is overwriting an existing 
+                                     object for save */
+    Boolean    isStationery;      /* save: true if the user wants to save an object as 
+                                     stationery */
+    Boolean    translationNeeded; /* save: translation is 'needed', open: translation 
+                                     'has taken place' */
+    U16        keyScript;         /* open/save: script in which the name of each item in 
+                                     'selection' is to be displayed */
 
 =cut
 STRUCT * NavReplyRecord
@@ -369,7 +379,7 @@ DESTROY(reply)
 
 Counts the number of objects chosen.
 
-   $count = $reply->count;
+    $count = $reply->count;
 
 =cut
 long

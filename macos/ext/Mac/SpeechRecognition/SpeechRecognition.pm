@@ -4,7 +4,7 @@ Mac::SpeechRecognition - Provide interface to Speech Recognition Manager
 
 =head1 SYNOPSIS
 
-	use Mac::SpeechRecognition;
+    use Mac::SpeechRecognition;
 
 =head1 DESCRIPTION
 

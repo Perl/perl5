@@ -1741,6 +1741,8 @@ sub gestaltROMVersion ()           {     'romv'; }
 
 =item gestaltResourceMgrAttr
 
+=cut
+
 =item gestaltPartialRsrcs
 
 Resource manager.
@@ -1790,7 +1792,7 @@ sub gestaltScrapMgrTranslationAware () {          0; }
 
 =item gestaltScriptMgrVersion
 
-Script manager/
+Script manager.
 
 =cut
 sub gestaltScriptMgrVersion ()     {     'scri'; }

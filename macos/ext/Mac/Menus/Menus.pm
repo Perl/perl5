@@ -372,8 +372,6 @@ The C<MacHierMenu> class provides a convenient way of handling hierarchical menu
 everything works identically to C<MacMenu>, except that C<insert> always inserts
 hierachically.
 
-=over 4
-
 =cut
 package MacHierMenu;
 

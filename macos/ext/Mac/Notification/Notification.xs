@@ -48,11 +48,11 @@ MODULE = Mac::Notification	PACKAGE = Mac::Notification
 
 The notification record. Fields are:
 
-	short 		nmMark;						/* item to mark in Apple menu*/
-	Handle 		nmIcon;						/* handle to small icon*/
-	Handle 		nmSound;					/* handle to sound record*/
-	Str255	 	nmStr;						/* string to appear in alert*/
-	long 		nmRefCon;					/* for application use*/
+    short     nmMark;      /* item to mark in Apple menu*/
+    Handle    nmIcon;      /* handle to small icon*/
+    Handle    nmSound;     /* handle to sound record*/
+    Str255    nmStr;       /* string to appear in alert*/
+    long      nmRefCon;    /* for application use*/
 
 =cut
 STRUCT * NMRec

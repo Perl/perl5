@@ -5,9 +5,9 @@ Mac::OSA - Provide interface to Open Scripting Architecture
 =head1 SYNOPSIS
 
 
-	use Mac::OSA;
-	
-	use Mac::OSA qw(OSALoad OSAStore OSAExecute);
+    use Mac::OSA;
+
+    use Mac::OSA qw(OSALoad OSAStore OSAExecute);
 
 =head1 DESCRIPTION
 

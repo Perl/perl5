@@ -38,7 +38,7 @@ use vars qw(
 );
 
 #=============================================================================#
-# $Id: Glue.pm,v 1.5 2002/01/15 14:12:43 pudge Exp $
+# $Id: Glue.pm,v 1.5 2002/01/15 05:16:59 pudge Exp $
 ($REVISION) 	= ' $Revision: 1.5 $ ' =~ /\$Revision:\s+([^\s]+)/;
 $VERSION	= '1.01';
 @ISA		= 'Exporter';

@@ -727,13 +727,13 @@ Access the Internet Config file map to:
 
 Determine the file type and creator for a newly created file:
 
-	$map = $InternetConfigMap{"output.html"};	
-	
+    $map = $InternetConfigMap{"output.html"};	
+
 =item
 
 Determine the extension to use for some type/creator combination:
 
-	$map = $InternetConfigMap{["WDBN", "MSWD"]};
+    $map = $InternetConfigMap{["WDBN", "MSWD"]};
 
 =back
 

@@ -172,7 +172,7 @@ QDDone(port)
 long
 OffscreenVersion()
 
-=item 32BIT = PixMap32Bit PIXMAP
+=item IS_32BIT = PixMap32Bit PIXMAP
 
 =cut
 Boolean

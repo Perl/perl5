@@ -4,7 +4,7 @@ Mac::Speech - Provide interface to PlainTalk (Speech Manager)
 
 =head1 SYNOPSIS
 
-	use Mac::Speech;
+    use Mac::Speech;
 
 =head1 DESCRIPTION
 
@@ -45,7 +45,7 @@ BEGIN {
 		SetSpeechRate
 		GetSpeechRate
 		GetSpeechPitch
-	 	SetSpeechPitch
+		SetSpeechPitch
 		TextToPhonemes
 		
 		kTextToSpeechSynthType
@@ -62,7 +62,7 @@ BEGIN {
 		kMale
 		kFemale
 
-      %Voice
+		%Voice
 	);
 }
 

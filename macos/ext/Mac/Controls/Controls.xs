@@ -1,4 +1,4 @@
-/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Controls/Controls.xs,v 1.1 2000/08/14 03:39:29 neeri Exp $
+/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Controls/Controls.xs,v 1.2 2002/01/23 05:44:42 pudge Exp $
  *
  *    Copyright (c) 1997 Matthias Neeracher
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file.
  *
  * $Log: Controls.xs,v $
+ * Revision 1.2  2002/01/23 05:44:42  pudge
+ * Update whitespace etc., from Thomas
+ *
  * Revision 1.1  2000/08/14 03:39:29  neeri
  * Checked into Sourceforge
  *
@@ -75,16 +78,16 @@ MODULE = Mac::Controls	PACKAGE = Mac::Controls
 
 A Control structure. Fields are:
 
-	ControlHandle		nextControl;
-	GrafPtr				contrlOwner;
-	Rect				contrlRect;
-	UInt8				contrlVis;
-	UInt8				contrlHilite;
-	SInt16				contrlValue;
-	SInt16				contrlMin;
-	SInt16				contrlMax;
-	SInt32				contrlRfCon;
-	Str255				contrlTitle;
+    ControlHandle        nextControl;
+    GrafPtr              contrlOwner;
+    Rect                 contrlRect;
+    UInt8                contrlVis;
+    UInt8                contrlHilite;
+    SInt16               contrlValue;
+    SInt16               contrlMin;
+    SInt16               contrlMax;
+    SInt32               contrlRfCon;
+    Str255               contrlTitle;
 
 =back
 
@@ -117,7 +120,7 @@ STRUCT ** ControlHandle
 
 =item NewControl THEWINDOW, BOUNDSRECT, TITLE, VISIBLE, VALUE, MIN, MAX, PROC [, REFCON ]
 
-Create a new control and return it..
+Create a new control and return it.
 
 =cut
 ControlHandle

@@ -5,20 +5,21 @@ Mac::Processes - Macintosh Toolbox Interface to Process Manager
 
 =head1 SYNOPSIS
 
-	use Mac::Processes;
-	
+    use Mac::Processes;
+
     while ( ($psn, $psi) = each(%Process) ) {
-        print "$psn\t", $psi->processName, 
-        " ", $psi->processNumber,
-        " ", $psi->processType,
-        " ", $psi->processSignature,
-        " ", $psi->processSize,
-        " ", $psi->processMode,
-        " ", $psi->processLocation,
-        " ", $psi->processLauncher,
-        " ", $psi->processLaunchDate,
-        " ", $psi->processActiveTime,
-        " ", $psi->processAppSpec, "\n";
+        print "$psn\t", 
+               $psi->processName,       " ", 
+               $psi->processNumber,     " ", 
+               $psi->processType,       " ", 
+               $psi->processSignature,  " ", 
+               $psi->processSize,       " ", 
+               $psi->processMode,       " ", 
+               $psi->processLocation,   " ", 
+               $psi->processLauncher,   " ", 
+               $psi->processLaunchDate, " ", 
+               $psi->processActiveTime, " ", 
+               $psi->processAppSpec,    "\n";
     }
 
 =head1 DESCRIPTION

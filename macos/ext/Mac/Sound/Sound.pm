@@ -349,6 +349,8 @@ bootstrap Mac::Sound;
 
 =head2 Constants
 
+Not yet documented.
+
 =over 4
 
 =cut

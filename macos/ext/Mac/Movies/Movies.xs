@@ -403,6 +403,7 @@ GetMovieGWorld(theMovie)
 Set the graphics world for a movie.
 
 =cut
+
 void
 SetMovieGWorld(theMovie, port=nil, gdh=nil)
 	Movie		theMovie
@@ -421,9 +422,9 @@ SetMovieDrawingCompleteProc(theMovie, flags, proc, refCon)
 
 =end ignore
 
-=cut
-
 =item GetMovieNaturalBoundsRect MOVIE
+
+=cut
 
 Rect
 GetMovieNaturalBoundsRect(theMovie)

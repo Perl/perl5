@@ -783,7 +783,7 @@ QTVRGetAngularUnits(qtvr)
 
 =item QTVRPtToAngles QTVR, PT 
 
-	($panAngle, $tiltAngle) = QTVRPtToAngles($qtvr, $pt);
+    ($panAngle, $tiltAngle) = QTVRPtToAngles($qtvr, $pt);
 
 =cut
 void
@@ -805,7 +805,7 @@ QTVRPtToAngles(qtvr, pt)
 
 =item QTVRCoordToAngles QTVR, COORD 
 
-	($panAngle, $tiltAngle) = QTVRCoordToAngles($qtvr, $coord);
+    ($panAngle, $tiltAngle) = QTVRCoordToAngles($qtvr, $coord);
 
 =cut
 void
@@ -1001,7 +1001,7 @@ QTVRReplaceCursor(qtvr, cursRecord)
 
 =item QTVRGetViewingLimits QTVR, KIND 
 
-	($minValue, $maxValue) = QTVRGetViewingLimits($qtvr, $kind);
+    ($minValue, $maxValue) = QTVRGetViewingLimits($qtvr, $kind);
 
 =cut
 void
@@ -1031,7 +1031,7 @@ QTVRGetConstraintStatus(qtvr)
 
 =item QTVRGetConstraints QTVR, KIND 
 
-	($minValue, $maxValue) = QTVRGetConstraints($qtvr, $kind);
+    ($minValue, $maxValue) = QTVRGetConstraints($qtvr, $kind);
 
 =cut
 void
@@ -1078,7 +1078,7 @@ QTVRGetAvailableResolutions(qtvr)
 
 =item QTVRGetCacheMemInfo QTVR, RESOLUTION, CACHEDEPTH 
 
-	($minCache, $suggestedCache, $maxCache) = QTVRGetCacheMemInfo($qtvr, $res, $depth);
+    ($minCache, $suggestedCache, $maxCache) = QTVRGetCacheMemInfo($qtvr, $res, $depth);
 
 =cut
 void
@@ -1103,7 +1103,7 @@ QTVRGetCacheMemInfo(qtvr, resolution, cacheDepth)
 
 =item QTVRGetCacheSettings QTVR
 
-	($resolution, $cacheDepth, $cacheSize) = QTVRGetCacheSettings($qtvr);
+    ($resolution, $cacheDepth, $cacheSize) = QTVRGetCacheSettings($qtvr);
 
 =cut
 void

@@ -4,8 +4,8 @@ Mac::Resources - Macintosh Toolbox Interface to the Resource Manager
 
 =head1 SYNOPSIS
 
-	use Mac::Memory;
-	use Mac::Resources;
+    use Mac::Memory;
+    use Mac::Resources;
 
 =head1 DESCRIPTION
 
@@ -131,7 +131,7 @@ sub mapChanged ()                  {         32; }
 
 =item kResFileNotOpened
 
-Returned after an unsuccessful call to C<OpenResFile()>
+Returned after an unsuccessful call to C<OpenResFile()>.
 
 =cut
 sub kResFileNotOpened ()           {         -1; }

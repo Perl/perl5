@@ -131,7 +131,7 @@ bootstrap Mac::SAT;
 
 =head2 Constants
 
-=over 4
+Not yet documented.
 
 =cut
 
@@ -152,8 +152,9 @@ sub kForwardOneCollision()	{ 4; }
 
 =head1 AUTHOR(S)
 
-Sprite Animation Toolkit 	by Ingemar Ragnemalm <ingemar@lysator.liu.se>
-MacPerl SAT glue 			by Matthias Ulrich Neeracher <neeracher@mac.com> 
+Sprite Animation Toolkit by Ingemar Ragnemalm <ingemar@lysator.liu.se>
+
+MacPerl SAT glue by Matthias Ulrich Neeracher <neeracher@mac.com> 
 
 =cut
 

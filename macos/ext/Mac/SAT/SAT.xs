@@ -183,6 +183,8 @@ MODULE = Mac::SAT	PACKAGE = Mac::SAT
 
 =head2 Functions
 
+Not yet documented.
+
 =over 4
 
 =cut
