@@ -876,11 +876,11 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		}
 	    }
 	    else {
+		short ashort;
                 if (len && unpack_only_one)
                     len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
-		short ashort;
 		while (len-- > 0) {
 		    COPYNN(s, &ashort, sizeof(short));
 		    s += sizeof(short);
