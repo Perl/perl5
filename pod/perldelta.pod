@@ -750,22 +750,6 @@ one can (or, if one can, whether it's a good idea) link together at
 all binaries with different ideas about file offsets, all this is
 platform-dependent.
 
-=over 4
-
-=item In string, @%s now must be written as \@%s
-
-(F) It used to be that Perl would try to guess whether you wanted an
-array interpolated or a literal @.  It did this when the string was
-first used at runtime.  Now strings are parsed at compile time, and
-ambiguous instances of @ must be disambiguated, either by prepending a
-backslash to indicate a literal, or by declaring (or using) the array
-within the program before the string (lexically).  (I<Someday it will
-simply assume that an unbackslashed @ interpolates an array.>)
-
-=back
-
-That day has arrived.
-
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the articles
