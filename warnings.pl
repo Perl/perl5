@@ -373,9 +373,9 @@ warnings - Perl pragma to control optional warnings
         warnings::warn($object, "some warning");
     }
 
-    warnif("some warning");
-    warnif("void", "some warning");
-    warnif($object, "some warning");
+    warnings::warnif("some warning");
+    warnings::warnif("void", "some warning");
+    warnings::warnif($object, "some warning");
 
 =head1 DESCRIPTION
 
