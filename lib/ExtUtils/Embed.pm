@@ -199,7 +199,7 @@ sub ldopts {
     }
     #print STDERR "\@potential_libs = @potential_libs\n";
 
-    my $libperl = (grep(/^(-l\w+perl)$/, @link_args))[0] || "-lperl";
+    my $libperl = (grep(/^-l\w*perl\w*$/, @link_args))[0] || "-lperl";
 
     my($extralibs, $bsloadlibs, $ldloadlibs, $ld_run_path) =
 	$MM->ext(join ' ', 
