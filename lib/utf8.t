@@ -28,7 +28,7 @@ BEGIN {
 #
 #
 
-plan tests => 31;
+plan tests => 94;
 
 {
     # bug id 20001009.001
@@ -103,6 +103,18 @@ plan tests => 31;
 
 {
     use warnings;
+    use strict;
+
+    my $show = q(
+                 sub show {
+                   my $result;
+                   $result .= '>' . join (',', map {ord} split //, $_) . '<'
+                     foreach @_;
+                   $result;
+                 }
+                 1;
+                );
+    eval $show or die $@; # We don't expect this sub definition to fail.
     my $progfile = 'utf' . $$;
     END {unlink_all $progfile}
 
@@ -117,23 +129,27 @@ plan tests => 31;
       my $charsubst = $char;
       $charsubst =~ s/(.)/ord ($1) . ','/ge;
       chop $charsubst;
-      push @char, [$_, $char, $charsubst];
+      # Not testing this one against map {ord}
+      my $char_as_ord
+          = join " . ", map {sprintf 'chr (%d)', ord $_} split //, $char;
+      push @char, [$_, $char, $charsubst, $char_as_ord];
     }
-    foreach (
+    # Now we've done all the UTF8 munching hopefully we're safe
+    my @tests = (
              ['check our detection program works',
-              '@a = ("'.chr(60).'\x2A", ""); display @a', qr/^>60,42<><$/],
+              'my @a = ("'.chr(60).'\x2A", ""); $b = show @a', qr/^>60,42<><$/],
              ['check literal 8 bit input',
-              '$a = "' . chr (173) . '"; display $a', qr/^>173<$/],
+              '$a = "' . chr (173) . '"; $b = show $a', qr/^>173<$/],
              ['check no utf8; makes no change',
-              'no utf8; $a = "' . chr (173) . '"; display $a', qr/^>173<$/],
+              'no utf8; $a = "' . chr (173) . '"; $b = show $a', qr/^>173<$/],
              # Now we do the real byte sequences that are valid UTF8
              (map {
                ["the utf8 sequence for chr $_->[0]",
-                qq(\$a = "$_->[1]"; display \$a), qr/^>$_->[2]<$/],
+                qq(\$a = "$_->[1]"; \$b = show \$a), qr/^>$_->[2]<$/],
                ["no utf8; for the utf8 sequence for chr $_->[0]",
-                qq(no utf8; \$a = "$_->[1]"; display \$a), qr/^>$_->[2]<$/],
+                qq(no utf8; \$a = "$_->[1]"; \$b = show \$a), qr/^>$_->[2]<$/],
                ["use utf8; for the utf8 sequence for chr $_->[0]",
-                qq(use utf8; \$a = "$_->[1]"; display \$a), qr/^>$_->[0]<$/],
+                qq(use utf8; \$a = "$_->[1]"; \$b = show \$a), qr/^>$_->[0]<$/],
               } @char),
              # Interpolation of hex characters needs to take place now, as we're
              # testing feeding malformed utf8 into perl. Bug now fixed was an
@@ -145,16 +161,12 @@ plan tests => 31;
 BANG
 	      qr/^Malformed UTF-8 character \(2 bytes, need 3\).*start\d+,end$/s
 	     ],
-            ) {
+            );
+    foreach (@tests) {
         my ($why, $prog, $expect) = @$_;
         open P, ">$progfile" or die "Can't open '$progfile': $!";
-        print P q(
-                  sub display {
-                    print '>' . join (',', map {ord} split //, $_) . '<'
-                    foreach @_;
-                  }
-                 );
-	print P $prog;
+	print P $show, $prog, '; print $b'
+            or die "Print to 'progfile' failed: $!";
         close P or die "Can't close '$progfile': $!";
         if ($why =~ s/^!//) {
             print "# Possible delay...\n";
@@ -162,6 +174,84 @@ BANG
             print "# $prog\n";
         }
         my $result = runperl ( stderr => 1, progfile => $progfile );
+        like ($result, $expect, $why);
+    }
+    print
+        "# Again! Again! [but this time as eval, and not the explosive one]\n";
+    # and now we've safely done them all as separate files, check that the
+    # evals do the same thing. Hopefully doing it later sucessfully decouples
+    # the previous tests from anything messy that may go wrong with the evals.
+    foreach (@tests) {
+        my ($why, $prog, $expect) = @$_;
+        next if $why =~ m/^!/; # Goes bang.
+        my $result = eval $prog;
+        if ($@) {
+            print "# prog is $prog\n";
+            print "# \$\@=", _qq($@), "\n";
+        }
+        like ($result, $expect, $why);
+    }
+
+    # See what the tokeniser does with hash keys.
+    print "# What does the tokeniser do with utf8 hash keys?\n";
+    @tests = (map {
+        # This is the control - I don't expect it to fail
+        ["assign utf8 for chr $_->[0] to a hash",
+         qq(my \$a = "$_->[1]"; my %h; \$h{\$a} = 1;
+            my \$b = show keys %h; \$b .= 'F' unless \$h{$_->[3]}; \$b),
+         qr/^>$_->[2]<$/],
+        ["no utf8; assign utf8 for chr $_->[0] to a hash",
+         qq(no utf8; my \$a = "$_->[1]"; my %h; \$h{\$a} = 1;
+            my \$b = show keys %h; \$b .= 'F' unless \$h{$_->[3]}; \$b),
+         qr/^>$_->[2]<$/],
+        ["use utf8; assign utf8 for chr $_->[0] to a hash",
+         qq(use utf8; my \$a = "$_->[1]"; my %h; \$h{\$a} = 1;
+            my \$b = show keys %h; \$b .= 'F' unless \$h{chr $_->[0]}; \$b),
+         qr/^>$_->[0]<$/],
+        # Now check literal $h{"x"} constructions.
+        ["\$h{\"x\"} construction, where x is utf8 for chr $_->[0]",
+         qq(my \$a = "$_->[1]"; my %h; \$h{"$_->[1]"} = 1;
+            my \$b = show keys %h; \$b .= 'F' unless \$h{$_->[3]}; \$b),
+         qr/^>$_->[2]<$/],
+        ["no utf8; \$h{\"x\"} construction, where x is utf8 for chr $_->[0]",
+         qq(no utf8; my \$a = "$_->[1]"; my %h; \$h{"$_->[1]"} = 1;
+            my \$b = show keys %h; \$b .= 'F' unless \$h{$_->[3]}; \$b),
+         qr/^>$_->[2]<$/],
+        ["use utf8; \$h{\"x\"} construction, where x is utf8 for chr $_->[0]",
+         qq(use utf8; my \$a = "$_->[1]"; my %h; \$h{"$_->[1]"} = 1;
+            my \$b = show keys %h; \$b .= 'F' unless \$h{chr $_->[0]}; \$b),
+         qr/^>$_->[0]<$/],
+        # Now check "x" => constructions.
+        ["assign \"x\"=>1 to a hash, where x is utf8 for chr $_->[0]",
+         qq(my \$a = "$_->[1]"; my %h; %h = ("$_->[1]" => 1);
+            my \$b = show keys %h; \$b .= 'F' unless \$h{$_->[3]}; \$b),
+         qr/^>$_->[2]<$/],
+        ["no utf8; assign \"x\"=>1 to a hash, where x is utf8 for chr $_->[0]",
+         qq(no utf8; my \$a = "$_->[1]"; my %h; %h = ("$_->[1]" => 1);
+            my \$b = show keys %h; \$b .= 'F' unless \$h{$_->[3]}; \$b),
+         qr/^>$_->[2]<$/],
+        ["use utf8; assign \"x\"=>1 to a hash, where x is utf8 for chr $_->[0]",
+         qq(use utf8; my \$a = "$_->[1]"; my %h; %h = ("$_->[1]" => 1);
+            my \$b = show keys %h; \$b .= 'F' unless \$h{chr $_->[0]}; \$b),
+         qr/^>$_->[0]<$/],
+        # Check copies of hashes made from literal utf8 keys
+        ["assign utf8 for chr $_->[0] to a hash, then copy it",
+         qq(my \$a = "$_->[1]"; my %i; \$i{\$a} = 1; my %h = %i;
+            my \$b = show keys %h; \$b .= 'F' unless \$h{$_->[3]}; \$b),
+         qr/^>$_->[2]<$/],
+        ["no utf8; assign utf8 for chr $_->[0] to a hash, then copy it",
+         qq(no utf8; my \$a = "$_->[1]"; my %i; \$i{\$a} = 1;; my %h = %i;
+            my \$b = show keys %h; \$b .= 'F' unless \$h{$_->[3]}; \$b),
+         qr/^>$_->[2]<$/],
+        ["use utf8; assign utf8 for chr $_->[0] to a hash, then copy it",
+         qq(use utf8; my \$a = "$_->[1]"; my %i; \$i{\$a} = 1; my %h = %i;
+            my \$b = show keys %h; \$b .= 'F' unless \$h{chr $_->[0]}; \$b),
+         qr/^>$_->[0]<$/],
+     } @char);
+    foreach (@tests) {
+        my ($why, $prog, $expect) = @$_;
+        # print "# $prog\n";
+        my $result = eval $prog;
         like ($result, $expect, $why);
     }
 }
