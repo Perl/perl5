@@ -111,13 +111,15 @@ David Schooley <F<dcschooley@mediaone.net>>
 
 
 use strict;
+use File::Basename;
+use File::Spec::Functions qw(catfile);
 use Mac::AETE::Parser;
 use Mac::AppleEvents;
 use Mac::Files;
 use Mac::Memory;
 use Mac::Processes;
 use Mac::Resources;
-use File::Basename;
+use Symbol;
 
 use Carp;
 
@@ -128,13 +130,14 @@ sub new {
     my $self = {};
     my $aete_handle;
     
-    my($name, $running) = &get_app_status_and_launch($target);
+    my($name, $running, $sign) = &get_app_status_and_launch($target);
     return unless $name;
 
     $self->{_target} = $name;
+    $self->{ID} = $sign;
 
     if ($running) {
-        unless ($aete_handle = get_aete_via_event($target)) {
+        unless ($aete_handle = get_aete_via_event($target, $sign)) {
             carp("The application is not scriptable");
             return;
         }
@@ -164,53 +167,81 @@ sub get_app_status_and_launch
 {
     my ($app_path) = @_;
     my ($name, $path, $suffix, $running, $ok_to_launch, $pname, $launch);
-    my ($psn, $psi);
-    
+    my ($psn, $psi, $sign);
+
     $running = 0;
-    fileparse_set_fstype("MacOS");
-    ($name,$path,$suffix) = fileparse($app_path, "");
-    for $psn (keys %Process) {
-        $pname = $Process{$psn}->processName;
-#        print "$pname", "   $name\n";
-        $running = 1, last if $pname eq $name;
+    
+    # test for package, works under Mac OS X/Classic too
+    my $pkginfo = catfile($app_path, 'Contents', 'PkgInfo');
+    if (-d $app_path && -f $pkginfo) {
+        my $fh = gensym();
+        open $fh, "<" . $pkginfo or croak "Can't open $pkginfo: $!";
+        (my($type), $sign) = (<$fh> =~ /^(.{4})(.{4})$/);
+        for $psn (keys %Process) {
+            $pname = $Process{$psn}->processName;
+            $running = 1, $name = $pname, last
+                if $sign eq $Process{$psn}->processSignature;
+        }
+        $ok_to_launch = !$running;
+
+    } else {
+        fileparse_set_fstype("MacOS");
+        ($name,$path,$suffix) = fileparse($app_path, "");
+        for $psn (keys %Process) {
+            $pname = $Process{$psn}->processName;
+#            print "$pname", "   $name\n";
+            $running = 1, last if $pname eq $name;
+        }
     }
+
     if (!$running) {
-        my $RF = OpenResFile($app_path);
-        if (!defined($RF) || $RF == 0) {
-            carp("No Resource Fork available for '$app_path': $^E");
-            return;
+        unless (-d $app_path && -f $pkginfo) {
+            my $RF = OpenResFile($app_path);
+            if (!defined($RF) || $RF == 0) {
+                carp("No Resource Fork available for '$app_path': $^E");
+                return;
+            }
+            my $check_resource =  Get1Resource('scsz', 0);
+            if (!defined($check_resource) || $check_resource == 0) {
+                $check_resource = Get1Resource('scsz', 128);
+            }
+            $ok_to_launch = defined($check_resource) && $check_resource;
+            CloseResFile($RF); # don't do anything with the resource now!
         }
-        my $check_resource =  Get1Resource('scsz', 0);
-        if (!defined($check_resource) || $check_resource == 0) {
-            $check_resource = Get1Resource('scsz', 128);
-        }
-        $ok_to_launch = defined($check_resource) && $check_resource;
-        CloseResFile($RF); # don't do anything with the resource now!
-        if ($ok_to_launch) {            
+        if ($ok_to_launch) {
             $launch = new LaunchParam(
                 launchControlFlags => eval(launchContinue + launchNoFileFlags + launchDontSwitch),
                 launchAppSpec => $app_path
                 );
             LaunchApplication $launch;
             $running = 1;
+            sleep 10;
         }
     }
-    
+
     while (($psn, $psi) = each(%Process)) {
-        $pname = $psi->processName;
-        $running = 1, last if $pname eq $name;
+        if (defined $sign) {
+            $running = 1, $name = $psi->processName,
+                last if $sign eq $psi->processSignature;
+        } else {
+            $running = 1, $sign = $psi->processSignature,
+                last if $name eq $psi->processName;
+        }
     }
     $name = $app_path if $name !~ /:/;
-    ($name, $running);
+    ($name, $running, $sign);
 }
 
 sub get_aete_via_event
 {
-    my($target) = @_;
-    my $info = FSpGetFInfo($target);
-    
-    my $addr_desc = AECreateDesc(typeApplSignature, $info->fdCreator);        
-    my $event = AEBuildAppleEvent('ascr', 'gdte', 'sign', $info->fdCreator, 0, 0, , "'----':0");
+    my($target, $sign) = @_;
+    if (!$sign) {
+        my $info = FSpGetFInfo($target);
+        $sign = $info->fdCreator;
+    }
+
+    my $addr_desc = AECreateDesc(typeApplSignature, $sign);        
+    my $event = AEBuildAppleEvent('ascr', 'gdte', 'sign', $sign, 0, 0, , "'----':0");
     my $reply = AESend($event, kAEWaitReply);
     my @handles;
     if ($reply) {

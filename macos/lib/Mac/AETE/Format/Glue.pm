@@ -1,11 +1,14 @@
 package Mac::AETE::Format::Glue;
+use Carp;
 use Data::Dumper;
 use Fcntl;
 use File::Basename;
 use File::Path;
+use File::Spec::Functions qw(catfile);
 use Mac::AETE::Parser;
 use Mac::Glue;
 use MLDBM ('DB_File', $Mac::Glue::SERIALIZER);
+use Symbol;
 
 use strict;
 use vars qw(@ISA $VERSION $TYPE);
@@ -205,7 +208,19 @@ sub new {
 
 sub write_title {
     my($self, $title) = @_;
-    $self->{ID} = (MacPerl::GetFileInfo($title))[0];
+
+    my $pkginfo = catfile($title, 'Contents', 'PkgInfo');
+    if (-d $title && -f $pkginfo) {
+        my $fh = gensym();
+        open $fh, "<" . $pkginfo or croak "Can't open $pkginfo: $!";
+        my($type, $sign) = (<$fh> =~ /^(.{4})(.{4})$/);
+        $self->{ID} = $sign;
+    } else {
+        $self->{ID} = (MacPerl::GetFileInfo($title))[0];
+    }
+    croak("Can't get application signature for $title")
+        if !$self->{ID};
+
     $self->{TITLE} = basename($self->{OUTPUT});
 }
 

@@ -475,9 +475,16 @@ Handle a mouse click and return 1 if the click was handled.
 
 =cut
 sub click {
-    my($handled);
-    defined($handled = $_[0]->callhook("click", @_)) and return 1;
-    _dialogselect(@_);
+	my($self, $pt) = @_;
+	for my $pane (@{$self->{panes}}) { 
+		if ($pane->click($self, $pt)) {
+			$self->advance_focus($pane);
+			return 1; 
+		}
+	};
+	my($handled);
+	defined($handled = $self->callhook("click", @_)) and return 1;
+	_dialogselect(@_);
 }
 
 =item modal [FILTER]
@@ -523,7 +530,7 @@ sub idle {
 	$CurrentEvent->what(0);
 	&_dialogselect;
 	$CurrentEvent->what($savedwhat);
-    &MacWindow::idle;
+	&MacWindow::idle;
 }
 
 =item KIND = item_kind ITEM

@@ -18,6 +18,7 @@ foreach my $drop (@ARGV) {
     $drop = readlink $drop while -l $drop;
 
     # initialize
+    $drop =~ s/:$//;  # is dir/package ?
     ($file, $dir) = fileparse($drop, '');
     $fixed = Mac::AETE::Format::Glue::fixname($file);
     $fixed = MacPerl::Ask('What is the glue name?', $fixed);

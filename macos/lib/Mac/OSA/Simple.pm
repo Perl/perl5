@@ -17,7 +17,7 @@ use Carp;
     load_osa_script %ScriptComponents);
 @EXPORT_OK = @Mac::OSA::EXPORT;
 %EXPORT_TAGS = (all => [@EXPORT, @EXPORT_OK]);
-$REVISION = '$Id: Simple.pm,v 1.2 2002/01/23 05:45:12 pudge Exp $';
+$REVISION = '$Id: Simple.pm,v 1.3 2002/05/08 03:59:30 pudge Exp $';
 $VERSION = '1.00';
 
 tie %ScriptComponents, 'Mac::OSA::Simple::Components';
