@@ -1277,7 +1277,7 @@ die(const char* pat, ...)
 	    SV *msg;
 
 	    ENTER;
-	    if(message) {
+	    if (message) {
 		msg = newSVpv(message, 0);
 		SvREADONLY_on(msg);
 		SAVEFREESV(msg);
@@ -2840,7 +2840,7 @@ new_struct_thread(struct perl_thread *t)
     SV **svp;
     I32 i;
 
-    sv = newSVpv("", 0);
+    sv = newSVpvn("", 0);
     SvGROW(sv, sizeof(struct perl_thread) + 1);
     SvCUR_set(sv, sizeof(struct perl_thread));
     thr = (Thread) SvPVX(sv);
@@ -2864,7 +2864,7 @@ new_struct_thread(struct perl_thread *t)
     thr->cvcache = newHV();
     thr->threadsv = newAV();
     thr->specific = newAV();
-    thr->errsv = newSVpv("", 0);
+    thr->errsv = newSVpvn("", 0);
     thr->errhv = newHV();
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);

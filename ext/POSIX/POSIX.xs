@@ -3662,10 +3662,10 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 		    Renew(buf, bufsize, char);
 		}
 		if ( buf ) {
-		    ST(0) = sv_2mortal(newSVpv(buf, buflen));
+		    ST(0) = sv_2mortal(newSVpvn(buf, buflen));
 		    Safefree(buf);
 		} else {
-		    ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
+		    ST(0) = sv_2mortal(newSVpvn(tmpbuf, len));
 		}
 	    }
 	}
@@ -3677,8 +3677,8 @@ void
 tzname()
     PPCODE:
 	EXTEND(SP,2);
-	PUSHs(sv_2mortal(newSVpv(tzname[0],strlen(tzname[0]))));
-	PUSHs(sv_2mortal(newSVpv(tzname[1],strlen(tzname[1]))));
+	PUSHs(sv_2mortal(newSVpvn(tzname[0],strlen(tzname[0]))));
+	PUSHs(sv_2mortal(newSVpvn(tzname[1],strlen(tzname[1]))));
 
 SysRet
 access(filename, mode)

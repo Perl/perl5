@@ -1093,7 +1093,7 @@ magic_methcall(SV *sv, MAGIC *mg, char *meth, I32 flags, int n, SV *val)
     if (n > 1) { 
 	if (mg->mg_ptr) {
 	    if (mg->mg_len >= 0)
-		PUSHs(sv_2mortal(newSVpv(mg->mg_ptr, mg->mg_len)));
+		PUSHs(sv_2mortal(newSVpvn(mg->mg_ptr, mg->mg_len)));
 	    else if (mg->mg_len == HEf_SVKEY)
 		PUSHs((SV*)mg->mg_ptr);
 	}

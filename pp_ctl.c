@@ -1489,7 +1489,8 @@ PP(pp_caller)
 	PUSHs(&PL_sv_undef);
     else
 	PUSHs(sv_2mortal(newSVpv(HvNAME(hv), 0)));
-    PUSHs(sv_2mortal(newSVpv(SvPVX(GvSV(cx->blk_oldcop->cop_filegv)), 0)));
+    PUSHs(sv_2mortal(newSVpvn(SvPVX(GvSV(cx->blk_oldcop->cop_filegv)),
+			      SvCUR(GvSV(cx->blk_oldcop->cop_filegv)))));
     PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->cop_line)));
     if (!MAXARG)
 	RETURN;
@@ -1500,7 +1501,7 @@ PP(pp_caller)
 	PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
     }
     else {
-	PUSHs(sv_2mortal(newSVpv("(eval)",0)));
+	PUSHs(sv_2mortal(newSVpvn("(eval)",6)));
 	PUSHs(sv_2mortal(newSViv(0)));
     }
     gimme = (I32)cx->blk_gimme;
@@ -2637,7 +2638,7 @@ doeval(int gimme, OP** startop)
     PL_min_intro_pending = 0;
     PL_padix = 0;
 #ifdef USE_THREADS
-    av_store(PL_comppad_name, 0, newSVpv("@_", 2));
+    av_store(PL_comppad_name, 0, newSVpvn("@_", 2));
     PL_curpad[0] = (SV*)newAV();
     SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
 #endif /* USE_THREADS */
@@ -2671,7 +2672,7 @@ doeval(int gimme, OP** startop)
     PL_curcop = &PL_compiling;
     PL_curcop->cop_arybase = 0;
     SvREFCNT_dec(PL_rs);
-    PL_rs = newSVpv("\n", 1);
+    PL_rs = newSVpvn("\n", 1);
     if (saveop && saveop->op_flags & OPf_SPECIAL)
 	PL_in_eval |= 4;
     else
@@ -2879,7 +2880,7 @@ PP(pp_require)
 
     ENTER;
     SAVETMPS;
-    lex_start(sv_2mortal(newSVpv("",0)));
+    lex_start(sv_2mortal(newSVpvn("",0)));
     SAVEGENERICSV(PL_rsfp_filters);
     PL_rsfp_filters = Nullav;
 

@@ -114,7 +114,7 @@ hv_fetch(HV *hv, const char *key, U32 klen, I32 lval)
 	    U32 i;
 	    for (i = 0; i < klen; ++i)
 		if (isLOWER(key[i])) {
-		    char *nkey = strupr(SvPVX(sv_2mortal(newSVpv(key,klen))));
+		    char *nkey = strupr(SvPVX(sv_2mortal(newSVpvn(key,klen))));
 		    SV **ret = hv_fetch(hv, nkey, klen, 0);
 		    if (!ret && lval)
 			ret = hv_store(hv, key, klen, NEWSV(61,0), 0);
@@ -153,7 +153,7 @@ hv_fetch(HV *hv, const char *key, U32 klen, I32 lval)
       char *gotenv;
 
       if ((gotenv = PerlEnv_getenv(key)) != Nullch) {
-        sv = newSVpv(gotenv,strlen(gotenv));
+        sv = newSVpvn(gotenv,strlen(gotenv));
         SvTAINTED_on(sv);
         return hv_store(hv,key,klen,sv,hash);
       }
@@ -201,7 +201,7 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
 	    key = SvPV(keysv, klen);
 	    for (i = 0; i < klen; ++i)
 		if (isLOWER(key[i])) {
-		    SV *nkeysv = sv_2mortal(newSVpv(key,klen));
+		    SV *nkeysv = sv_2mortal(newSVpvn(key,klen));
 		    (void)strupr(SvPVX(nkeysv));
 		    entry = hv_fetch_ent(hv, nkeysv, 0, 0);
 		    if (!entry && lval)
@@ -244,7 +244,7 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
       char *gotenv;
 
       if ((gotenv = PerlEnv_getenv(key)) != Nullch) {
-        sv = newSVpv(gotenv,strlen(gotenv));
+        sv = newSVpvn(gotenv,strlen(gotenv));
         SvTAINTED_on(sv);
         return hv_store_ent(hv,keysv,sv,hash);
       }
@@ -298,7 +298,7 @@ hv_store(HV *hv, const char *key, U32 klen, SV *val, register U32 hash)
 		return 0;
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv,'E')) {
-		SV *sv = sv_2mortal(newSVpv(key,klen));
+		SV *sv = sv_2mortal(newSVpvn(key,klen));
 		key = strupr(SvPVX(sv));
 		hash = 0;
 	    }
@@ -376,7 +376,7 @@ hv_store_ent(HV *hv, SV *keysv, SV *val, register U32 hash)
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv,'E')) {
 		key = SvPV(keysv, klen);
-		keysv = sv_2mortal(newSVpv(key,klen));
+		keysv = sv_2mortal(newSVpvn(key,klen));
 		(void)strupr(SvPVX(keysv));
 		hash = 0;
 	    }
@@ -456,7 +456,7 @@ hv_delete(HV *hv, const char *key, U32 klen, I32 flags)
 	    }
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv,'E')) {
-		sv = sv_2mortal(newSVpv(key,klen));
+		sv = sv_2mortal(newSVpvn(key,klen));
 		key = strupr(SvPVX(sv));
 	    }
 #endif
@@ -526,7 +526,7 @@ hv_delete_ent(HV *hv, SV *keysv, I32 flags, U32 hash)
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv,'E')) {
 		key = SvPV(keysv, klen);
-		keysv = sv_2mortal(newSVpv(key,klen));
+		keysv = sv_2mortal(newSVpvn(key,klen));
 		(void)strupr(SvPVX(keysv));
 		hash = 0; 
 	    }
@@ -590,7 +590,7 @@ hv_exists(HV *hv, const char *key, U32 klen)
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {
-	    sv = sv_2mortal(newSVpv(key,klen));
+	    sv = sv_2mortal(newSVpvn(key,klen));
 	    key = strupr(SvPVX(sv));
 	}
 #endif
@@ -640,7 +640,7 @@ hv_exists_ent(HV *hv, SV *keysv, U32 hash)
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {
 	    key = SvPV(keysv, klen);
-	    keysv = sv_2mortal(newSVpv(key,klen));
+	    keysv = sv_2mortal(newSVpvn(key,klen));
 	    (void)strupr(SvPVX(keysv));
 	    hash = 0; 
 	}
@@ -1091,7 +1091,7 @@ hv_iterkeysv(register HE *entry)
     if (HeKLEN(entry) == HEf_SVKEY)
 	return sv_mortalcopy(HeKEY_sv(entry));
     else
-	return sv_2mortal(newSVpv((HeKLEN(entry) ? HeKEY(entry) : ""),
+	return sv_2mortal(newSVpvn((HeKLEN(entry) ? HeKEY(entry) : ""),
 				  HeKLEN(entry)));
 }
 

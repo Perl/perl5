@@ -104,7 +104,7 @@ struct xpvhv {
 #define HeSVKEY_force(he)	(HeKEY(he) ?				\
 				 ((HeKLEN(he) == HEf_SVKEY) ?		\
 				  HeKEY_sv(he) :			\
-				  sv_2mortal(newSVpv(HeKEY(he),		\
+				  sv_2mortal(newSVpvn(HeKEY(he),	\
 						     HeKLEN(he)))) :	\
 				 &PL_sv_undef)
 #define HeSVKEY_set(he,sv)	((HeKLEN(he) = HEf_SVKEY), (HeKEY_sv(he) = sv))

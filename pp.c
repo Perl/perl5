@@ -448,7 +448,7 @@ PP(pp_prototype)
 		    oa = oa >> 4;
 		}
 		str[n++] = '\0';
-		ret = sv_2mortal(newSVpv(str, n - 1));
+		ret = sv_2mortal(newSVpvn(str, n - 1));
 	    }
 	    else if (code)		/* Non-Overridable */
 		goto set;
@@ -460,7 +460,7 @@ PP(pp_prototype)
     }
     cv = sv_2cv(TOPs, &stash, &gv, FALSE);
     if (cv && SvPOK(cv))
-	ret = sv_2mortal(newSVpv(SvPVX(cv), SvCUR(cv)));
+	ret = sv_2mortal(newSVpvn(SvPVX(cv), SvCUR(cv)));
   set:
     SETs(ret);
     RETURN;
@@ -609,7 +609,7 @@ PP(pp_gelem)
 	break;
     case 'N':
 	if (strEQ(elem, "NAME"))
-	    sv = newSVpv(GvNAME(gv), GvNAMELEN(gv));
+	    sv = newSVpvn(GvNAME(gv), GvNAMELEN(gv));
 	break;
     case 'P':
 	if (strEQ(elem, "PACKAGE"))
@@ -3171,7 +3171,7 @@ mul128(SV *sv, U8 m)
   U32             i = 0;
 
   if (!strnEQ(s, "0000", 4)) {  /* need to grow sv */
-    SV             *tmpNew = newSVpv("0000000000", 10);
+    SV             *tmpNew = newSVpvn("0000000000", 10);
 
     sv_catsv(tmpNew, sv);
     SvREFCNT_dec(sv);		/* free old sv */
@@ -4161,11 +4161,11 @@ doencodes(register SV *sv, register char *s, register I32 len)
     sv_catpvn(sv, "\n", 1);
 }
 
-STATIC SV      *
+STATIC SV *
 is_an_int(char *s, STRLEN l)
 {
   STRLEN	 n_a;
-  SV             *result = newSVpv("", l);
+  SV             *result = newSVpvn(s, l);
   char           *result_c = SvPV(result, n_a);	/* convenience */
   char           *out = result_c;
   bool            skip = 1;

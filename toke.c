@@ -363,7 +363,7 @@ lex_start(SV *line)
     PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = SvPVX(PL_linestr);
     PL_bufend = PL_bufptr + SvCUR(PL_linestr);
     SvREFCNT_dec(PL_rs);
-    PL_rs = newSVpv("\n", 1);
+    PL_rs = newSVpvn("\n", 1);
     PL_rsfp = 0;
 }
 
@@ -683,7 +683,7 @@ tokeq(SV *sv)
 	goto finish;
     d = s;
     if ( PL_hints & HINT_NEW_STRING )
-	pv = sv_2mortal(newSVpv(SvPVX(pv), len));
+	pv = sv_2mortal(newSVpvn(SvPVX(pv), len));
     while (s < send) {
 	if (*s == '\\') {
 	    if (s + 1 < send && (s[1] == '\\'))
@@ -719,7 +719,7 @@ sublex_start(void)
 	    SV *nsv;
 
 	    p = SvPV(sv, len);
-	    nsv = newSVpv(p, len);
+	    nsv = newSVpvn(p, len);
 	    SvREFCNT_dec(sv);
 	    sv = nsv;
 	} 
@@ -801,7 +801,7 @@ sublex_done(void)
 {
     if (!PL_lex_starts++) {
 	PL_expect = XOPERATOR;
-	yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv("",0));
+	yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpvn("",0));
 	return THING;
     }
 
@@ -1411,7 +1411,7 @@ intuit_method(char *start, GV *gv)
 		return 0;	/* no assumptions -- "=>" quotes bearword */
       bare_package:
 	    PL_nextval[PL_nexttoke].opval = (OP*)newSVOP(OP_CONST, 0,
-						   newSVpv(tmpbuf,0));
+						   newSVpvn(tmpbuf,len));
 	    PL_nextval[PL_nexttoke].opval->op_private = OPpCONST_BARE;
 	    PL_expect = XTERM;
 	    force_next(WORD);
@@ -3129,7 +3129,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		/* if we saw a global override before, get the right name */
 
 		if (gvp) {
-		    sv = newSVpv("CORE::GLOBAL::",14);
+		    sv = newSVpvn("CORE::GLOBAL::",14);
 		    sv_catpv(sv,PL_tokenbuf);
 		}
 		else
@@ -5011,7 +5011,7 @@ new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type)
     sv_2mortal(sv);			/* Parent created it permanently */
     cv = *cvp;
     if (!pv)
-	pv = sv_2mortal(newSVpv(s, len));
+	pv = sv_2mortal(newSVpvn(s, len));
     if (type)
 	typesv = sv_2mortal(newSVpv(type, 0));
     else
@@ -5356,7 +5356,7 @@ scan_subst(char *start)
 	PL_sublex_info.super_bufend = PL_bufend;
 	PL_multi_end = 0;
 	pm->op_pmflags |= PMf_EVAL;
-	repl = newSVpv("",0);
+	repl = newSVpvn("",0);
 	while (es-- > 0)
 	    sv_catpv(repl, es ? "eval " : "do ");
 	sv_catpvn(repl, "{ ", 2);
@@ -5524,9 +5524,9 @@ scan_heredoc(register char *s)
 #endif
     d = "\n";
     if (outer || !(d=ninstr(s,PL_bufend,d,d+1)))
-	herewas = newSVpv(s,PL_bufend-s);
+	herewas = newSVpvn(s,PL_bufend-s);
     else
-	s--, herewas = newSVpv(s,d-s);
+	s--, herewas = newSVpvn(s,d-s);
     s += SvCUR(herewas);
 
     tmpstr = NEWSV(87,79);
@@ -6233,7 +6233,7 @@ scan_formline(register char *s)
     dTHR;
     register char *eol;
     register char *t;
-    SV *stuff = newSVpv("",0);
+    SV *stuff = newSVpvn("",0);
     bool needargs = FALSE;
 
     while (!needargs) {
@@ -6346,7 +6346,7 @@ start_subparse(I32 is_format, U32 flags)
     PL_padix = 0;
     PL_subline = PL_curcop->cop_line;
 #ifdef USE_THREADS
-    av_store(PL_comppad_name, 0, newSVpv("@_", 2));
+    av_store(PL_comppad_name, 0, newSVpvn("@_", 2));
     PL_curpad[0] = (SV*)newAV();
     SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
 #endif /* USE_THREADS */
@@ -6415,7 +6415,7 @@ yyerror(char *s)
 	    where = "within string";
     }
     else {
-	SV *where_sv = sv_2mortal(newSVpv("next char ", 0));
+	SV *where_sv = sv_2mortal(newSVpvn("next char ", 10));
 	if (yychar < 32)
 	    sv_catpvf(where_sv, "^%c", toCTRL(yychar));
 	else if (isPRINT_LC(yychar))
