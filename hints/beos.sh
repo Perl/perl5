@@ -1,7 +1,7 @@
 # BeOS hints file
 # $Id: beos.sh,v 1.1 1998/02/16 03:51:45 dogcow Exp $
 
-if [ ! -f ../beos/nm ]; then mwcc -w all -o ../beos/nm ../beos/nm.c; fi
+if [ ! -f beos/nm ]; then mwcc -w all -o beos/nm beos/nm.c; fi
 
 prefix="/boot/home/config"
 
