@@ -33,6 +33,9 @@ AV* av;
 	if (sv != &sv_undef)
 	    (void)SvREFCNT_inc(sv);
     }
+    key = AvARRAY(av) - AvALLOC(av);
+    while (key)
+	AvALLOC(av)[--key] = &sv_undef;
     AvREAL_on(av);
 }
 
@@ -197,10 +200,10 @@ SV *val;
     }
     if (SvREADONLY(av) && key >= AvFILL(av))
 	croak(no_modify);
-    if (key > AvMAX(av))
-	av_extend(av,key);
     if (!AvREAL(av) && AvREIFY(av))
 	av_reify(av);
+    if (key > AvMAX(av))
+	av_extend(av,key);
     ary = AvARRAY(av);
     if (AvFILL(av) < key) {
 	if (!AvREAL(av)) {
