@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..944\n";
+print "1..942\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2996,7 +2996,8 @@ print "\x{0712}" =~ /\p{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 
 {
-    # Change #18179: previously failed with "panic: end_shift"
+    print "# Change #18179\n";
+    # previously failed with "panic: end_shift
     my $s = "\x{100}" x 5;
     my $ok = $s =~ /(\x{100}{4})/;
     my($ord, $len) = (ord $1, length $1);
@@ -3005,15 +3006,4 @@ print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
     ++$test;
 }
 
-{
-    print "# [perl #18857]\n";
-    foreach (0, 1) {
-	$a = v10.v257;
-	chop $a;
-	$a =~ s/^(\s*)(\w*)/$1\u$2/;
-	print $a eq v10 ? "ok $test\n" : "not ok $test\n";
-	$test++;
-    } 
-}
-
-# last test 944
+# last test 942

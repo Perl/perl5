@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 57;
+plan tests => 59;
 
 $a = "HELLO.* world";
 $b = "hello.* WORLD";
@@ -147,5 +147,15 @@ for my $a (0,1) {
     chop;
     /(.*)/;
     is(uc($1), "ABCDEFGH", "[perl #18931]");
+}
+
+{
+    foreach (0, 1) {
+	$a = v10.v257;
+	chop $a;
+	$a =~ s/^(\s*)(\w*)/$1\u$2/;
+	is($a, v10, "[perl #18857]");
+	$test++;
+    } 
 }
 
