@@ -4037,27 +4037,28 @@ PP(pp_waitpid)
 {
 #if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL)
     dSP; dTARGET;
-    Pid_t childpid;
+    Pid_t pid;
+    Pid_t result;
     int optype;
     int argflags;
 
     optype = POPi;
-    childpid = TOPi;
+    pid = TOPi;
     if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
-        childpid = wait4pid(childpid, &argflags, optype);
+        result = wait4pid(pid, &argflags, optype);
     else {
-        while ((childpid = wait4pid(childpid, &argflags, optype)) == -1 &&
+        while ((result = wait4pid(pid, &argflags, optype)) == -1 &&
 	       errno == EINTR) {
 	  PERL_ASYNC_CHECK();
 	}
     }
 #  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
     /* 0 and -1 are both error returns (the former applies to WNOHANG case) */
-    STATUS_NATIVE_SET((childpid && childpid != -1) ? argflags : -1);
+    STATUS_NATIVE_SET((result && result != -1) ? argflags : -1);
 #  else
-    STATUS_NATIVE_SET((childpid > 0) ? argflags : -1);
+    STATUS_NATIVE_SET((result > 0) ? argflags : -1);
 #  endif
-    SETi(childpid);
+    SETi(result);
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "waitpid");
