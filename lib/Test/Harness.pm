@@ -121,7 +121,7 @@ sub runtests {
 			$ok++;
 			$totok++;
 		    }
-		} elsif (/^ok\s*(\d*)(\s*\#\s*[Ss]kip\S*(?:(?>\s+)(.+))?)?$/) {
+		} elsif (/^ok\s*(\d*) *(\s*\#\s*[Ss]kip\S*(?:(?>\s+)(.+))?)?$/) {
 		    $this = $1 if $1 > 0;
 		    print "${ml}ok $this/$max" if $ml;
 		    $ok++;
@@ -138,8 +138,13 @@ sub runtests {
 		      $skip_reason = $reason;
 		    }
 		    $bonus++, $totbonus++ if $todo{$this};
+		} elsif (/^ok\s*(\d*)\s*\#([^\r]*)$/) {
+		    $this = $1 if $1 > 0;
+		    print "${ml}ok $this/$max" if $ml;
+		    $ok++;
+		    $totok++;
 		} else {
-		    # an ok or not ok not matching the 2 cases above...
+		    # an ok or not ok not matching the 3 cases above...
 		    # just ignore it for compatibility with TEST
 		    next;
 		}
