@@ -2564,8 +2564,11 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 			s->stdio = stdio;
 			PerlIOUnix_refcnt_inc(fileno(s->stdio));
 		    }
+		    return f;
 		}
-		return f;
+		else {
+		    return NULL;
+		}
 	    }
 	}
 	if (fd >= 0) {
@@ -4630,6 +4633,7 @@ PerlIO_sprintf(char *s, int n, const char *fmt, ...)
     return result;
 }
 #endif
+
 
 
 
