@@ -2584,8 +2584,11 @@ s	|I32	|cr_textfilter	|int idx|SV *sv|int maxlen
 s	|SV*|isa_lookup	|HV *stash|const char *name|int len|int level
 #endif
 
-#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+#if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
 s	|char*	|stdize_locale	|char* locs
+#endif
+
+#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 s	|SV*	|mess_alloc
 #  if defined(LEAKTEST)
 s	|void	|xstat		|int

@@ -31,6 +31,265 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10575] By: jhi                                   on 2001/06/13  18:05:09
+        Log: Subject: Re: [PATCH perl@10538] make ext/re play nice with DEBUGGING override
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 13 Jun 2001 13:24:28 -0500
+             Message-Id: <5.1.0.14.0.20010613131907.01bbc210@mail.mac.com>
+     Branch: perl
+	   ! ext/re/Makefile.PL
+____________________________________________________________________________
+[ 10574] By: jhi                                   on 2001/06/13  17:34:36
+        Log: Mc.u.c. for #10573.
+     Branch: metaconfig
+	   ! U/threads/usethreads.U
+____________________________________________________________________________
+[ 10573] By: jhi                                   on 2001/06/13  17:34:00
+        Log: It would be also be good if I could type.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10572] By: jhi                                   on 2001/06/13  17:26:29
+        Log: Metaconfig unit change for #10571.
+     Branch: metaconfig
+	   ! U/threads/usethreads.U
+____________________________________________________________________________
+[ 10571] By: jhi                                   on 2001/06/13  17:26:05
+        Log: A non-empty default is a good thing.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10570] By: jhi                                   on 2001/06/13  17:15:16
+        Log: Metaconfig unit change for #10569.
+     Branch: metaconfig
+	   ! U/threads/usethreads.U
+____________________________________________________________________________
+[ 10569] By: jhi                                   on 2001/06/13  17:14:17
+        Log: Add Configure directive -Dusereentrant for Artur's ithreads work,
+             extremely experimental, not even prompted for.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh perl.h uconfig.h
+	   ! uconfig.sh vos/config.alpha.def vos/config.ga.def
+	   ! win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[ 10568] By: jhi                                   on 2001/06/13  16:22:27
+        Log: FAQ tweak for Vanina Arca <varca@baufest.com>.
+     Branch: perl
+	   ! pod/perlfaq6.pod
+____________________________________________________________________________
+[ 10567] By: jhi                                   on 2001/06/13  16:20:23
+        Log: Integrate perlio; conflicts, accept Nick's versions.
+     Branch: perl
+	  !> ext/Encode/Encode.xs ext/PerlIO/Scalar/Scalar.xs
+	  !> ext/PerlIO/Via/Via.xs perlio.c perlio.h perliol.h
+____________________________________________________________________________
+[ 10566] By: jhi                                   on 2001/06/13  16:17:42
+        Log: Subject: Re: ext/ + -Wall
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Wed, 13 Jun 2001 10:02:16 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106130959050.24181-100000@mako.covalent.net>
+     Branch: perl
+	   ! XSUB.h lib/ExtUtils/xsubpp perl.h
+____________________________________________________________________________
+[ 10565] By: jhi                                   on 2001/06/13  16:16:07
+        Log: Similar logic as DB_File.xs, using the modern macros and
+             defines them to older ones for older Perls where PERL_VERSION
+             is not defined, from Doug MacEachern.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[ 10564] By: nick                                  on 2001/06/13  15:22:01
+        Log: Avoid AV and HV in perlio.c by inventing PerlIO_list_t which is AV-ish
+             and using that instead (name lookups are sequential search for now).
+     Branch: perlio
+	   ! ext/Encode/Encode.xs ext/PerlIO/Scalar/Scalar.xs
+	   ! ext/PerlIO/Via/Via.xs perlio.c perlio.h perliol.h
+____________________________________________________________________________
+[ 10563] By: jhi                                   on 2001/06/13  14:07:43
+        Log: Subject: [PATCH] Re: [ID 20010526.001] localized glob loses value when assigned to
+             From: "Richard Soderberg" <rs@crystalflame.net>
+             Date: Sat, 26 May 2001 06:44:20 -0700
+             Message-ID: <NAEKLNAAHLMBPMPNBMLECECHDFAA.rs@crystalflame.net>
+     Branch: perl
+	   ! sv.c t/op/glob.t
+____________________________________________________________________________
+[ 10562] By: jhi                                   on 2001/06/13  13:55:10
+        Log: Subject: [PATCH perl@10538] make ext/re play nice with DEBUGGING override
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 12 Jun 2001 23:55:26 -0500
+             Message-Id: <a05101002b74ca0013cf5@[192.168.56.160]>
+     Branch: perl
+	   ! ext/re/Makefile.PL ext/re/re.xs
+____________________________________________________________________________
+[ 10561] By: jhi                                   on 2001/06/13  13:44:58
+        Log: Hide __attribute__((unused)) behind PERL_UNUSED_DECL as
+             suggested by NI-S.
+     Branch: perl
+	   ! XSUB.h malloc.c perl.h
+____________________________________________________________________________
+[ 10560] By: jhi                                   on 2001/06/13  13:35:42
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 10559] By: jhi                                   on 2001/06/13  12:53:18
+        Log: Subject: [patch] perl.gprof control
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Tue, 12 Jun 2001 23:05:44 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106122247380.24181-100000@mako.covalent.net>
+     Branch: perl
+	   ! miniperlmain.c perl.h
+____________________________________________________________________________
+[ 10558] By: jhi                                   on 2001/06/13  12:51:47
+        Log: Subject: Re: ext/ + -Wall
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Tue, 12 Jun 2001 22:04:50 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106122151180.24181-100000@mako.covalent.net>
+             
+             Document ax and break up dXSARGS.
+     Branch: perl
+	   ! XSUB.h pod/perlapi.pod
+____________________________________________________________________________
+[ 10557] By: jhi                                   on 2001/06/13  12:39:55
+        Log: More AIX tweakage from Merijn.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 10556] By: jhi                                   on 2001/06/13  03:26:58
+        Log: Subject: [PATCH perl@10538] make VMS autosplit earlier in build
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 12 Jun 2001 22:57:45 -0500
+             Message-Id: <a05101001b74c943d7af4@[192.168.56.160]>
+     Branch: perl
+	   ! vms/descrip_mms.template
+____________________________________________________________________________
+[ 10555] By: jhi                                   on 2001/06/13  02:50:43
+        Log: Subject: Re: hacking util.c, attrs.xs, and re.xs to compile on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 12 Jun 2001 22:21:39 -0500
+             Message-Id: <a05101000b74c8698483b@[172.16.52.1]>
+     Branch: perl
+	   ! configure.com util.c
+____________________________________________________________________________
+[ 10554] By: jhi                                   on 2001/06/13  02:23:16
+        Log: New AIX dynaloading code from Jens-Uwe Mager.
+             Does break binary compatibility.
+     Branch: perl
+	   ! ext/DynaLoader/dl_aix.xs hints/aix.sh makedef.pl
+____________________________________________________________________________
+[ 10553] By: jhi                                   on 2001/06/13  02:10:16
+        Log: VMS DEC C compiler found nits by Peter Prymmer.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 10552] By: jhi                                   on 2001/06/13  01:36:12
+        Log: Subject: [PATCH: perl@10538] fix for file locking and filecomp test
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 12 Jun 2001 19:34:08 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10106121927580.15174-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/filecomp.t
+____________________________________________________________________________
+[ 10551] By: jhi                                   on 2001/06/13  01:26:53
+        Log: I wonder how many $CONFIGs still lurk in the shadows.
+     Branch: perl
+	   ! pod/Makefile.SH x2p/cflags.SH
+____________________________________________________________________________
+[ 10550] By: jhi                                   on 2001/06/13  01:25:12
+        Log: Grok three kinds of line endings, should fix [ID 20010612.003]
+     Branch: perl
+	   ! pod/checkpods.PL
+____________________________________________________________________________
+[ 10549] By: jhi                                   on 2001/06/13  01:05:28
+        Log: Use __attribute__((unused)) to silence -Wall on unused ax.
+     Branch: perl
+	   ! XSUB.h ext/DB_File/DB_File.xs lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[ 10548] By: jhi                                   on 2001/06/13  00:41:28
+        Log: Subject: [patch] rid local_patches warnings
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Tue, 12 Jun 2001 10:26:34 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106121024470.24181-100000@mako.covalent.net>
+     Branch: perl
+	   ! ext/List/Util/Util.xs ext/Storable/Storable.xs
+____________________________________________________________________________
+[ 10547] By: jhi                                   on 2001/06/13  00:40:29
+        Log: Subject: Re: ext/ + -Wall
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Tue, 12 Jun 2001 09:38:09 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106120927100.24181-100000@mako.covalent.net>
+     Branch: perl
+	   ! ext/attrs/attrs.xs
+____________________________________________________________________________
+[ 10546] By: jhi                                   on 2001/06/13  00:39:06
+        Log: Subject: [PATCH] perlretut.pod: unterminated C<>
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Tue, 12 Jun 2001 14:36:20 -0400
+             Message-ID: <20010612143619.A37113@linguist.thayer.dartmouth.edu>
+     Branch: perl
+	   ! pod/perlretut.pod
+____________________________________________________________________________
+[ 10545] By: jhi                                   on 2001/06/13  00:38:02
+        Log: Subject: Re: [ID 20010612.001] out of memory during regex compilation
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 12 Jun 2001 19:10:31 +0100
+             Message-Id: <E159scZ-0000r2-00@draco.cus.cam.ac.uk>
+             
+             Subject: Re: [ID 20010612.001] out of memory during regex compilation
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 12 Jun 2001 19:21:01 +0100
+             Message-Id: <E159smj-0000wY-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[ 10544] By: jhi                                   on 2001/06/13  00:34:39
+        Log: AIX tweaks from Merijn H. Brand.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 10543] By: jhi                                   on 2001/06/13  00:11:42
+        Log: Subject: [PATCH] 5.6.1 -- add LC_MESSAGES constant to POSIX module
+             From: "Brendan O'Dea" <bod@compusol.com.au>
+             Date: Wed, 13 Jun 2001 05:16:47 +1000
+             Message-ID: <20010613051647.A8945@compusol.com.au>
+     Branch: maint-5.6/perl
+	   ! ext/POSIX/POSIX.pm ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[ 10542] By: jhi                                   on 2001/06/13  00:07:50
+        Log: Subject: Small bcopy cleanup
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Tue, 12 Jun 2001 17:11:52 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10106121706360.11034-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! embed.h embed.pl objXSUB.h perlapi.c proto.h util.c x2p/a2p.h
+____________________________________________________________________________
+[ 10541] By: jhi                                   on 2001/06/13  00:05:18
+        Log: Subject: [PATCH] Re: ext/ + -Wall
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 13 Jun 2001 00:04:30 +0100
+             Message-ID: <20010613000430.M5901@plum.flirble.org>
+     Branch: perl
+	   ! ext/POSIX/POSIX.pm ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[ 10540] By: jhi                                   on 2001/06/13  00:02:25
+        Log: Subject: [PATCH] Re: [PATCH] ExtUtils::Constant
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 12 Jun 2001 23:53:07 +0100
+             Message-ID: <20010612235307.L5901@plum.flirble.org>
+     Branch: perl
+	   ! lib/ExtUtils/Constant.pm t/lib/extutils.t
+____________________________________________________________________________
+[ 10539] By: jhi                                   on 2001/06/12  23:59:10
+        Log: MPE/iX tweaks from Mark Bixby.
+     Branch: perl
+	   ! hints/mpeix.sh mpeix/mpeixish.h util.c
+____________________________________________________________________________
+[ 10538] By: jhi                                   on 2001/06/12  14:16:15
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10537] By: jhi                                   on 2001/06/12  14:11:26
         Log: One less -Wall whine (found under DEBUGGING).
      Branch: perl
