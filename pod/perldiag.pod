@@ -1453,7 +1453,7 @@ Interpretation of the binary number stopped before the offending digit.
 (W) You may have tried to use an 8 or 9 in a octal number.  Interpretation
 of the octal number stopped before the 8 or 9.
 
-=item Illegal hex digit %s ignored
+=item Illegal hexadecimal digit %s ignored
 
 (W) You may have tried to use a character other than 0 - 9 or A - F in a
 hexadecimal number.  Interpretation of the hexadecimal number stopped
@@ -1500,8 +1500,8 @@ known value, using trustworthy data.  See L<perlsec>.
 
 =item Integer overflow in %s number
 
-(S) The literal hex, octal or binary number you have specified is
-too big for your architecture. On a 32-bit architecture the largest
+(S) The literal hexadecimal, octal or binary number you have specified
+is too big for your architecture. On a 32-bit architecture the largest
 literal hex, octal or binary number representable without overflow
 is 0xFFFFFFFF, 037777777777, or 0b11111111111111111111111111111111
 respectively.  Note that Perl transparently promotes decimal literals
