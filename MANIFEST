@@ -1229,6 +1229,7 @@ pod/perlbook.pod	Perl book information
 pod/perlboot.pod	Beginner's Object-oriented Tutorial
 pod/perlbot.pod		Object-oriented Bag o' Tricks
 pod/perlcall.pod	Callback info
+pod/perlclib.pod	Internal replacements for standard C library functions
 pod/perlcompile.pod	Info on using the Compiler suite
 pod/perldata.pod	Data structure info
 pod/perldbmfilter.pod	Info about DBM Filters
