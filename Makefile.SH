@@ -492,7 +492,7 @@ miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 	$spitshell >>Makefile <<'!NO!SUBS!'
 
 perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl$(PERL_SUFFIX) $(PERL_PROFILING) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 # Purify/Quantify Perls.
 
@@ -508,19 +508,20 @@ quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 # Third Degree Perl (Tru64 only)
 
 perl.config.dashg:
-	@echo "Checking optimize='-g'..."
-	@grep "^optimize=" config.sh
-	@grep -q "^optimize='-g'" config.sh || exit 1
+	@echo "Checking optimize='-g' in config.sh..."
+	@grep "^optimize="     config.sh
+	@grep "^optimize='-g'" config.sh >/dev/null || exit 1
 
 perl.third.config: config.sh
 	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
 	@$(MAKE) perl.config.dashg
-	@echo "Checking usemymalloc='n'..."
-	@grep "^usemymalloc=" config.sh
-	@grep -q "^usemymalloc='n'" config.sh || exit 1
+	@echo "Checking usemymalloc='n' in config.sh..."
+	@grep "^usemymalloc="    config.sh
+	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
 
 perl.third: /usr/bin/atom perl.third.config perl
 	atom -tool third -L. -all -gp -toolargs="-quiet -invalid -uninit heap+stack+partword+copy -min 0" perl
+	@echo "Now you may run perl.third and then study perl.3log."
 
 # Pixie Perls (Tru64 and IRIX only)
 
@@ -540,6 +541,22 @@ perl.pixie: /usr/bin/pixie perl.pixie.config perl
 	else \
 	  $(MAKE) perl.pixie.irix; \
 	fi
+	@echo "Now you may run perl.pixie and then run pixie."
+
+# Gprof Perl
+
+perl.config.dashpg:
+	@echo "Checking optimize='-pg' in config.sh..."
+	@grep "^optimize="      config.sh
+	@grep "^optimize='-pg'" config.sh >/dev/null || exit 1
+
+perl.gprof.config: config.sh
+	@echo "To build perl.gprof you must Configure -Doptimize=-pg, checking..."
+	@$(MAKE) perl.config.dashpg
+
+perl.gprof: /usr/bin/gprof perl.gprof.config
+	$(MAKE) PERL_SUFFIX=.gprof PERL_PROFILING=-pg perl
+	@echo "Now you may run perl.gprof and then run gprof perl.gprof."
 
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
@@ -902,7 +919,7 @@ test_tty: test_prep
 test_notty: test_prep
 	PERL=./perl $(MAKE) _test_notty
 
-utest ucheck: test_prep
+utest ucheck test.utf8 check.utf8: test_prep
 	PERL=./perl TEST_ARGS=-utf8 $(MAKE) _test
 
 test-prep:	test_prep
