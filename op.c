@@ -6277,6 +6277,10 @@ Perl_peep(pTHX_ register OP *o)
 	    o->op_seq = PL_op_seqmax++;
 	    break;
 	case OP_STUB:
+	    /* XXX This makes sub {}; work as expected.
+	       ie {return;} not {return @_;}
+	       When optimiser is properly split into fixups and
+	       optimisations, this needs to stay in the fixups.  */
 	    if(!oldop &&
 	       o->op_next &&
 	       o->op_next->op_type == OP_LEAVESUB) {
