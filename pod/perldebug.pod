@@ -298,14 +298,6 @@ Add a global watch-expression.
 
 Delete all watch-expressions.
 
-=item W [expr]
-
-Add a global watch-expression.
-
-=item W
-
-Delete all watch-expressions.
-
 =item O [opt[=val]] [opt"val"] [opt?]...
 
 Set or query values of options.  val defaults to 1.  opt can

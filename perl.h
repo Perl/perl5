@@ -710,15 +710,6 @@ Free_t   Perl_free _((Malloc_t where));
 #  endif
 #endif
 
-/* XXX Experimental set-up for long long.  Just add -DUSE_LONG_LONG
-   to your ccflags.  --Andy Dougherty   4/1998
-*/
-#ifdef USE_LONG_LONG
-#  if defined(HAS_LONG_LONG) && LONGLONGSIZE == 8
-#    define Quad_t long long
-#  endif
-#endif
-
 #ifdef Quad_t
 #   define HAS_QUAD
     typedef Quad_t IV;

@@ -81,7 +81,7 @@ BEGIN {
 		    ? $define{$define{$d}} : undef;
 	}
 	unless(defined $define{$d}) {
-	    print "0..0\n";
+	    print "1..0\n";
 	    exit;
 	};
 	${ $d } = eval $define{$d};
