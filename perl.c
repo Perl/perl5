@@ -25,17 +25,17 @@
  * insecure: see perlsec(1) for many problems with this approach.
  * 
  * The "correct" flow should be: perl starts, opens script and notices it is
- * suid, checks many things, execs suidperl with similar arguments but with
- * script on /dev/fd/xxx; suidperl checks script and /dev/fd/xxx object are
+ * suid, checks many things, execs setuidperl with similar arguments but with
+ * script on /dev/fd/xxx; setuidperl checks script and /dev/fd/xxx object are
  * same, checks arguments match #! line, sets itself with right UID, execs
  * perl with same arguments; perl checks many things and does work.
  * 
- * (Opening the script in perl instead of suidperl, we "lose" scripts that
+ * (Opening the script in perl instead of setuidperl, we "lose" scripts that
  * are readable to the target UID but not to the invoker. Where did
  * unreadable scripts work anyway?)
  * 
- * For now, suidperl and perl are pretty much the same large and cumbersome
- * program, so suidperl can check its argument list (see comments elsewhere).
+ * For now, setuidperl and perl are pretty much the same large and cumbersome
+ * program, so setuidperl can check its argument list (see comments elsewhere).
  * 
  * References:
  * Original bug report:
@@ -1119,7 +1119,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef IAMSUID
 #undef IAMSUID
-    Perl_croak(aTHX_ "suidperl is no longer needed since the kernel can now execute\n\
+    Perl_croak(aTHX_ "setuidperl is no longer needed since the kernel can now execute\n\
 setuid perl scripts securely.\n");
 #endif /* IAMSUID */
 #endif
@@ -3074,10 +3074,10 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
 		 * Tell apart "normal" usage of fdscript, e.g.
 		 * with bash on FreeBSD:
 		 *   perl <( echo '#!perl -DA'; echo 'print "$0\n"')
-		 * from usage in suidperl.
+		 * from usage in setuidperl.
 		 * Does any "normal" usage leave garbage after the number???
 		 * Is it a mistake to use a similar /dev/fd/ construct for
-		 * suidperl?
+		 * setuidperl?
 		 */
 		PL_suidscript = 1;
 		/* PSz 20 Feb 04  
@@ -3111,18 +3111,18 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
     }
 #ifdef IAMSUID
     else {
-	Perl_croak(aTHX_ "suidperl needs fd script\n"
-		   "You should not call suidperl directly; do you need to "
-		   "change a #! line\nfrom suidperl to perl?\n");
+	Perl_croak(aTHX_ "setuidperl needs fd script\n"
+		   "You should not call setuidperl directly; do you need to "
+		   "change a #! line\nfrom setuidperl to perl?\n");
 /* PSz 11 Nov 03
  * Do not open (or do other fancy stuff) while setuid.
- * Perl does the open, and hands script to suidperl on a fd;
- * suidperl only does some checks, sets up UIDs and re-execs
+ * Perl does the open, and hands script to setuidperl on a fd;
+ * setuidperl only does some checks, sets up UIDs and re-execs
  * perl with that fd as it has always done.
  */
     }
     if (PL_suidscript != 1) {
-	Perl_croak(aTHX_ "suidperl needs (suid) fd script\n");
+	Perl_croak(aTHX_ "setuidperl needs (suid) fd script\n");
     }
 #else /* IAMSUID */
     else if (PL_preprocess) {
@@ -3366,16 +3366,17 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname)
      * uid.  We don't just make perl setuid root because that loses the
      * effective uid we had before invoking perl, if it was different from the
      * uid.
+
      * PSz 27 Feb 04
      * Description/comments above do not match current workings:
-     *   suidperl must be hardlinked to suidperlN.NNN (that is what we exec);
-     *   suidperl called with script open and name changed to /dev/fd/N/X;
-     *   suidperl croaks if script is not setuid;
+     *   setuidperl must be hardlinked to setuidperlN.NNN (that is what we exec);
+     *   setuidperl called with script open and name changed to /dev/fd/N/X;
+     *   setuidperl croaks if script is not setuid;
      *   making perl setuid would be a huge security risk (and yes, that
      *     would lose any euid we might have had).
      *
-     * DOSUID must be defined in both perl and suidperl, and IAMSUID must
-     * be defined in suidperl only.  suidperl must be setuid root.  The
+     * DOSUID must be defined in both perl and setuidperl, and IAMSUID must
+     * be defined in setuidperl only.  setuidperl must be setuid root.  The
      * Configure script will set this up for you if you want it.
      */
 
@@ -3390,11 +3391,11 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname)
 
 #ifdef IAMSUID
 	if (PL_fdscript < 0 || PL_suidscript != 1) {
-	    Perl_croak(aTHX_ "Need (suid) fdscript in suidperl\n");
+	    Perl_croak(aTHX_ "Need (suid) fdscript in setuidperl\n");
 	    /* We already checked this */
 	}
 	/* PSz 11 Nov 03
-	 * Since the script is opened by perl, not suidperl, some of these
+	 * Since the script is opened by perl, not setuidperl, some of these
 	 * checks are superfluous. Leaving them in probably does not lower
 	 * security(?!).
 	 */
@@ -3433,12 +3434,12 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname)
 	 * Then we just have to make sure he or she can execute it.
 	 * 
 	 * PSz 24 Feb 04
-	 * As the script is opened by perl, not suidperl, we do not need to
+	 * As the script is opened by perl, not setuidperl, we do not need to
 	 * care much about access rights.
 	 * 
 	 * The 'script changed' check is needed, or we can get lied to
 	 * about $0 with e.g.
-	 *  suidperl /dev/fd/4//bin/x 4<setuidscript
+	 *  setuidperl /dev/fd/4//bin/x 4<setuidscript
 	 * Without HAS_SETREUID, is it safe to stat() as root?
 	 * 
 	 * Are there any operating systems that pass /dev/fd/xxx for setuid
@@ -3507,8 +3508,8 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname)
 	while (*s == ' ' || *s == '\t') s++;
 	/*
 	 * #! arg must be what we saw above.  They can invoke it by
-	 * mentioning suidperl explicitly, but they may not add any strange
-	 * arguments beyond what #! says if they do invoke suidperl that way.
+	 * mentioning setuidperl explicitly, but they may not add any strange
+	 * arguments beyond what #! says if they do invoke setuidperl that way.
 	 */
 	/*
 	 * The way validarg was set up, we rely on the kernel to start
@@ -3520,7 +3521,7 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname)
 	 * just that there are no extraneous arguments). Might not matter
 	 * much, as switches from #! line seem to be acted upon (also), and
 	 * so may be checked and trapped in perl. But, security checks must
-	 * be done in suidperl and not deferred to perl. Note that suidperl
+	 * be done in setuidperl and not deferred to perl. Note that setuidperl
 	 * does not get around to parsing (and checking) the switches on
 	 * the #! line (but execs perl sooner).
 	 * Allow (require) a trailing newline (which may be of two
@@ -3546,7 +3547,7 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	    PL_euid) {	/* oops, we're not the setuid root perl */
 	    /* PSz 18 Feb 04
 	     * When root runs a setuid script, we do not go through the same
-	     * steps of execing suidperl and then perl with fd scripts, but
+	     * steps of execing setuidperl and then perl with fd scripts, but
 	     * simply set up UIDs within the same perl invocation; so do
 	     * not have the same checks (on options, whatever) that we have
 	     * for plain users. No problem really: would have to be a script
@@ -3561,8 +3562,8 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 #ifndef IAMSUID
 	    int which;
 	    /* PSz 11 Nov 03
-	     * Pass fd script to suidperl.
-	     * Exec suidperl, substituting fd script for scriptname.
+	     * Pass fd script to setuidperl.
+	     * Exec setuidperl, substituting fd script for scriptname.
 	     * Pass script name as "subdir" of fd, which perl will grok;
 	     * in fact will use that to distinguish this from "normal"
 	     * usage, see comments above.
@@ -3590,13 +3591,13 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	    fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #endif
 	    PERL_FPU_PRE_EXEC
-	    PerlProc_execv(Perl_form(aTHX_ "%s/suidperl"PERL_FS_VER_FMT,
+	    PerlProc_execv(Perl_form(aTHX_ "%s/setuidperl"PERL_FS_VER_FMT,
 				     BIN_EXP, (int)PERL_REVISION,
 				     (int)PERL_VERSION, (int)PERL_SUBVERSION),
 			   PL_origargv);
 	    PERL_FPU_POST_EXEC
 #endif /* IAMSUID */
-	    Perl_croak(aTHX_ "Can't do setuid (cannot exec suidperl)\n");
+	    Perl_croak(aTHX_ "Can't do setuid (cannot exec setuidperl)\n");
 	}
 
 	if (PL_statbuf.st_mode & S_ISGID && PL_statbuf.st_gid != PL_egid) {
@@ -3666,10 +3667,10 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	Perl_croak(aTHX_ "-P not allowed for setuid/setgid script\n");
     else if (PL_fdscript < 0 || PL_suidscript != 1)
 	/* PSz 13 Nov 03  Caught elsewhere, useless(?!) here */
-	Perl_croak(aTHX_ "(suid) fdscript needed in suidperl\n");
+	Perl_croak(aTHX_ "(suid) fdscript needed in setuidperl\n");
     else {
 /* PSz 16 Sep 03  Keep neat error message */
-	Perl_croak(aTHX_ "Script is not setuid/setgid in suidperl\n");
+	Perl_croak(aTHX_ "Script is not setuid/setgid in setuidperl\n");
     }
 
     /* We absolutely must clear out any saved ids here, so we */
@@ -3681,34 +3682,34 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
      * go on to "do the perl thing".
      * 
      * Is there such a thing as "saved GID", and is that set for setuid (but
-     * not setgid) execution like suidperl? Without exec, it would not be
+     * not setgid) execution like setuidperl? Without exec, it would not be
      * cleared for setuid (but not setgid) scripts (or might need a dummy
      * setresgid).
      * 
-     * We need suidperl to do the exact same argument checking that perl
+     * We need setuidperl to do the exact same argument checking that perl
      * does. Thus it cannot be very small; while it could be significantly
      * smaller, it is safer (simpler?) to make it essentially the same
      * binary as perl (but they are not identical). - Maybe could defer that
-     * check to the invoked perl, and suidperl be a tiny wrapper instead;
-     * but prefer to do thorough checks in suidperl itself. Such deferral
-     * would make suidperl security rely on perl, a design no-no.
+     * check to the invoked perl, and setuidperl be a tiny wrapper instead;
+     * but prefer to do thorough checks in setuidperl itself. Such deferral
+     * would make setuidperl security rely on perl, a design no-no.
      * 
      * Setuid things should be short and simple, thus easy to understand and
      * verify. They should do their "own thing", without influence by
      * attackers. It may help if their internal execution flow is fixed,
      * regardless of platform: it may be best to exec anyway.
      * 
-     * Suidperl should at least be conceptually simple: a wrapper only,
+     * Setuidperl should at least be conceptually simple: a wrapper only,
      * never to do any real perl. Maybe we should put
      * #ifdef IAMSUID
-     *         Perl_croak(aTHX_ "Suidperl should never do real perl\n");
+     *         Perl_croak(aTHX_ "Setuidperl should never do real perl\n");
      * #endif
      * into the perly bits.
      */
     PerlIO_rewind(PL_rsfp);
     PerlLIO_lseek(PerlIO_fileno(PL_rsfp),(Off_t)0,0);  /* just in case rewind didn't */
     /* PSz 11 Nov 03
-     * Keep original arguments: suidperl already has fd script.
+     * Keep original arguments: setuidperl already has fd script.
      */
 /*  for (which = 1; PL_origargv[which] && PL_origargv[which] != scriptname; which++) ;	*/
 /*  if (!PL_origargv[which]) {						*/
@@ -3725,10 +3726,10 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 			     (int)PERL_REVISION, (int)PERL_VERSION,
 			     (int)PERL_SUBVERSION), PL_origargv);/* try again */
     PERL_FPU_POST_EXEC
-    Perl_croak(aTHX_ "Can't do setuid (suidperl cannot exec perl)\n");
+    Perl_croak(aTHX_ "Can't do setuid (setuidperl cannot exec perl)\n");
 #endif /* IAMSUID */
 #else /* !DOSUID */
-    if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
+    if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (setuidperl doesn't exist, in fact) */
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 	PerlLIO_fstat(PerlIO_fileno(PL_rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
 	if ((PL_euid != PL_uid && PL_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
@@ -3890,7 +3891,7 @@ S_forbid_setid(pTHX_ char *s)
      * 
      * This may be too late for command-line switches. Will catch those on
      * the #! line, after finding the script name and setting up
-     * fdscript/suidscript. Note that suidperl does not get around to
+     * fdscript/suidscript. Note that setuidperl does not get around to
      * parsing (and checking) the switches on the #! line, but checks that
      * the two sets are identical.
      * 
@@ -3898,8 +3899,8 @@ S_forbid_setid(pTHX_ char *s)
      * instead, or would that be "too late"? (We never have suidscript, can
      * we be sure to have fdscript?)
      * 
-     * Catch things with suidscript (in descendant of suidperl), even with
-     * right UID/GID. Was already checked in suidperl, with #ifdef IAMSUID,
+     * Catch things with suidscript (in descendant of setuidperl), even with
+     * right UID/GID. Was already checked in setuidperl, with #ifdef IAMSUID,
      * below; but I am paranoid.
      * 
      * Also see comments about root running a setuid script, elsewhere.
@@ -3907,8 +3908,8 @@ S_forbid_setid(pTHX_ char *s)
     if (PL_suidscript >= 0)
         Perl_croak(aTHX_ "No %s allowed with (suid) fdscript", s);
 #ifdef IAMSUID
-    /* PSz 11 Nov 03  Catch it in suidperl, always! */
-    Perl_croak(aTHX_ "No %s allowed in suidperl", s);
+    /* PSz 11 Nov 03  Catch it in setuidperl, always! */
+    Perl_croak(aTHX_ "No %s allowed in setuidperl", s);
 #endif /* IAMSUID */
 }
 
