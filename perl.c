@@ -202,16 +202,6 @@ perl_construct(pTHXx)
 
 	PL_sighandlerp = Perl_sighandler;
 	PL_pidstatus = newHV();
-
-#ifdef MSDOS
-	/*
-	 * There is no way we can refer to them from Perl so close them to save
-	 * space.  The other alternative would be to provide STDAUX and STDPRN
-	 * filehandles.
-	 */
-	(void)PerlIO_close(PerlIO_importFILE(stdaux, 0));
-	(void)PerlIO_close(PerlIO_importFILE(stdprn, 0));
-#endif
     }
 
     PL_rs = newSVpvn("\n", 1);
