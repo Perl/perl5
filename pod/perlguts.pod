@@ -103,6 +103,15 @@ be accessed in thread-local storage in threaded Perl.  In any case, remember
 that Perl allows arbitrary strings of data that may both contain NULs and
 might not be terminated by a NUL.
 
+Also remember that C doesn't allow you to safely say C<foo(SvPV(s, len),
+len);>. It might work with your compiler, but it won't work for everyone.
+Break this sort of statement up into separate assignments:
+
+	STRLEN len;
+	char * ptr;
+	ptr = SvPV(len);
+	foo(ptr, len);
+
 If you want to know if the scalar value is TRUE, you can use:
 
     SvTRUE(SV*)
