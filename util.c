@@ -3968,9 +3968,10 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
         Perl_croak(aTHX_ "Unstable directory path, "
                    "current directory changed unexpectedly");
     }
-#endif
 
     return TRUE;
+#endif
+
 #else
     return FALSE;
 #endif
