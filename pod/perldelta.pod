@@ -2600,19 +2600,20 @@ One cannot call Perl using the C<volume:> syntax, that is, C<perl -v>
 works, but for example C<bin:perl -v> doesn't.  The exact reason isn't
 known but the current suspect is the F<ixemul> library.
 
-=head2 mod_perl 1.3 Doesn't Build With -D_GNU_SOURCE
+=head2 mod_perl 1.26 Doesn't Build With -D_GNU_SOURCE
 
 In Linux, building mod_perl with B<threaded> Perl 5.8.0 does not work
 because starting from 5.8.0 building a threaded Perl uses the
--D_GNU_SOURCE flag.  The Apache 1.3 sources that are built alongside
-the mod_perl don't like that flag and the compilation dies because of
-function prototype conflicts.  This may or may not get fixed in later
-releases of mod_perl 1.3 or Apache 1.3 (fixing the problem in Perl is
-less likely since threaded Perl now needs the -D_GNU_SOURCE>).
-Workarounds include using non-threaded Perl and using Apache 2.0.
+-D_GNU_SOURCE flag.  The Apache 1.3.23 sources that are built
+alongside mod_perl don't like that flag and the compilation dies
+because of function prototype conflicts.  This may or may not get
+fixed in later releases of mod_perl than the current 1.26 or in later
+releases of Apache than the current 1.3.23 (fixing the problem in Perl
+is less likely since threaded Perl in Linux now needs the -D_GNU_SOURCE>).
+Workarounds include using non-threaded Perl and using Apache 2.0. 
 An obvious workaround would be to stop the -D_GNU_SOURCE from reaching
-the Apache 1.3 sources, but as of Perl 5.8.0, the complex build system
-of mod_perl has foiled this idea.
+the Apache 1.3.23 sources, but as of Perl 5.8.0, the complex build
+system of mod_perl has foiled this idea.
 
 =head2 lib/ftmp-security tests warn 'system possibly insecure'
 
