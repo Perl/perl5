@@ -12,7 +12,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 146;
+use Test::More tests => 147;
 
 
 use_ok('Test::Harness::Straps');
@@ -72,7 +72,9 @@ my @attribs = qw(max skip_all todo);
 my %headers = (
    '1..2'                               => { max => 2 },
    '1..1'                               => { max => 1 },
-   '1..0'                               => { max => 0 },
+   '1..0'                               => { max => 0,
+                                             skip_all => '',
+                                           },
    '1..0 # Skipped: no leverage found'  => { max      => 0,
                                              skip_all => 'no leverage found',
                                            },
@@ -84,17 +86,17 @@ my %headers = (
                                            },
    '1..10 todo 2 4 10'                  => { max        => 10,
                                              'todo'       => { 2  => 1,
-                                                             4  => 1,
-                                                             10 => 1,
+                                                               4  => 1,
+                                                               10 => 1,
                                                            },
                                            },
    '1..10 todo'                         => { max        => 10 },
    '1..192 todo 4 2 13 192 # Skip skip skip because'   => 
                                            { max     => 192,
                                              'todo'    => { 4   => 1, 
-                                                          2   => 1, 
-                                                          13  => 1, 
-                                                          192 => 1,
+                                                            2   => 1, 
+                                                            13  => 1, 
+                                                            192 => 1,
                                                         },
                                              skip_all => 'skip skip because'
                                            }

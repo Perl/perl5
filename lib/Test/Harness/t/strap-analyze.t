@@ -20,11 +20,11 @@ my $SAMPLE_TESTS = $ENV{PERL_CORE}
                     : File::Spec->catdir($Curdir, 't',   'sample-tests');
 
 
-my $IsMacOS   = $^O eq 'MacOS';
+my $IsMacPerl = $^O eq 'MacOS';
 my $IsVMS     = $^O eq 'VMS';
 
 # VMS uses native, not POSIX, exit codes.
-my $die_exit = $IsVMS ? 44 : $IsMacOS ? 0 : 1;
+my $die_exit = $IsVMS ? 44 : 1;
 
 # We can only predict that the wait status should be zero or not.
 my $wait_non_zero = 1;
@@ -174,6 +174,23 @@ my %samples = (
                                        ],
                           },
 
+   no_output        => {
+                        passing     => 0,
+
+                        'exit'      => 0,
+                        'wait'      => 0,
+
+                        max         => 0,
+                        seen        => 0,
+
+                        'ok'        => 0,
+                        'todo'      => 0,
+                        'skip'      => 0,
+                        bonus       => 0,
+
+                        details     => [],
+                       },
+
    simple           => {
                         passing     => 1,
 
@@ -284,6 +301,7 @@ my %samples = (
 
                           max       => 0,
                           seen      => 0,
+                          skip_all  => '',
 
                           'ok'      => 0,
                           'todo'    => 0,
@@ -470,7 +488,7 @@ while( my($test, $expect) = each %samples ) {
     delete $results{details};
 
     SKIP: {
-        skip '$? unreliable in MacPerl', 2 if $IsMacOS;
+        skip '$? unreliable in MacPerl', 2 if $IsMacPerl;
 
         # We can only check if it's zero or non-zero.
         is( !!$results{'wait'}, !!$expect->{'wait'}, 'wait status' );

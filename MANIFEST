@@ -2487,17 +2487,20 @@ t/lib/sample-tests/head_end		Test data for Test::Harness
 t/lib/sample-tests/head_fail		Test data for Test::Harness
 t/lib/sample-tests/lone_not_bug		Test data for Test::Harness
 t/lib/sample-tests/no_nums		Test data for Test::Harness
+t/lib/sample-tests/no_output		Test data for Test::Harness
 t/lib/sample-tests/out_of_order		Test data for Test::Harness
+t/lib/sample-tests/segfault		Test data for Test::Harness
 t/lib/sample-tests/shbang_misparse	Test data for Test::Harness
 t/lib/sample-tests/simple		Test data for Test::Harness
 t/lib/sample-tests/simple_fail		Test data for Test::Harness
 t/lib/sample-tests/skip			Test data for Test::Harness
-t/lib/sample-tests/skipall	Test data for Test::Harness
+t/lib/sample-tests/skip_nomsg		Test data for Test::Harness
+t/lib/sample-tests/skipall		Test data for Test::Harness
 t/lib/sample-tests/skipall_nomsg	Test data for Test::Harness
-t/lib/sample-tests/skip_nomsg	Test data for Test::Harness
 t/lib/sample-tests/taint		Test data for Test::Harness
 t/lib/sample-tests/todo			Test data for Test::Harness
 t/lib/sample-tests/todo_inline		Test data for Test::Harness
+t/lib/sample-tests/too_many		Test data for Test::Harness
 t/lib/sample-tests/vms_nit		Test data for Test::Harness
 t/lib/sample-tests/with_comments	Test data for Test::Harness
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
