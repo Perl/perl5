@@ -140,16 +140,20 @@ sub strip_comments {
     return $stmt;
 }
 
-sub gen_header { # create the ByteCode header
+sub gen_header {	# create the ByteCode header: magic, archname, ivsize, ptrsize, 
+			# byteorder
+			# nvtype irrelevant (floats are stored as strings)
     my $header = B::Asmdata::PUT_U32(0x43424c50);	# 'PLBC'
-    $header .= B::Asmdata::PUT_strconst($Config{archname});
+    $header .= B::Asmdata::PUT_strconst(qq["$Config{archname}"]);
     $header .= B::Asmdata::PUT_U32($Config{ivsize});
-    $header .= B::Asmdata::PUT_U32($Config{nvsize});
     $header .= B::Asmdata::PUT_U32($Config{ptrsize});
-    $header .= B::Asmdata::PUT_strconst($Config{byteorder});	# PV not U32 because
-								# of varying size
+    $header .= B::Asmdata::PUT_strconst(sprintf(qq["0x%s"], $Config{byteorder}));
+							# PV not U32 because 
+							# of varying size
+
     $header;
 }
+
 sub parse_statement {
     my $stmt = shift;
     my ($insn, $arg) = $stmt =~ m{

@@ -300,8 +300,7 @@ sub B::COP::bytecode {
     }
     my $stashpv = $op->stashpv;
     my $warnings = $op->warnings;
-    my $warningsix;
-    $warningsix = $warnings->objix;
+    my $warningsix = $warnings->objix;
     $warnings->bytecode;
     $op->B::OP::bytecode;
     printf <<"EOT", pvstring($op->label), pvstring($stashpv), $op->cop_seq, pvstring($file), $op->arybase;
@@ -532,7 +531,6 @@ sub B::HV::bytecode {
     mark_saved($hv);
     my $name = $hv->NAME;
     my $ix = $hv->objix;
-    printf "sv_refcnt %d\nsv_flags 0x%x\n", $hv->REFCNT, $hv->FLAGS;
     if (!$name) {
 	# It's an ordinary HV. Stashes have NAME set and need no further
 	# saving beyond the gv_stashpv that $hv->objix already ensures.
@@ -549,6 +547,7 @@ sub B::HV::bytecode {
 	    printf("newpv %s\nhv_store %d\n",
 		   pvstring($contents[$i]), $ixes[$i / 2]);
 	}
+	printf "sv_refcnt %d\nsv_flags 0x%x\n", $hv->REFCNT, $hv->FLAGS;
     }
 }
 
