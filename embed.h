@@ -731,6 +731,7 @@
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #define list_assignment		S_list_assignment
 #define bad_type		S_bad_type
+#define cop_free		S_cop_free
 #define modkids			S_modkids
 #define no_bareword_allowed	S_no_bareword_allowed
 #define no_fh_allowed		S_no_fh_allowed
@@ -986,6 +987,7 @@
 #define ck_require		Perl_ck_require
 #define ck_rfun			Perl_ck_rfun
 #define ck_rvconst		Perl_ck_rvconst
+#define ck_sassign		Perl_ck_sassign
 #define ck_scmp			Perl_ck_scmp
 #define ck_select		Perl_ck_select
 #define ck_shift		Perl_ck_shift
@@ -2039,6 +2041,7 @@
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #define list_assignment(a)	S_list_assignment(aTHX_ a)
 #define bad_type(a,b,c,d)	S_bad_type(aTHX_ a,b,c,d)
+#define cop_free(a)		S_cop_free(aTHX_ a)
 #define modkids(a,b)		S_modkids(aTHX_ a,b)
 #define no_bareword_allowed(a)	S_no_bareword_allowed(aTHX_ a)
 #define no_fh_allowed(a)	S_no_fh_allowed(aTHX_ a)
@@ -2293,6 +2296,7 @@
 #define ck_require(a)		Perl_ck_require(aTHX_ a)
 #define ck_rfun(a)		Perl_ck_rfun(aTHX_ a)
 #define ck_rvconst(a)		Perl_ck_rvconst(aTHX_ a)
+#define ck_sassign(a)		Perl_ck_sassign(aTHX_ a)
 #define ck_scmp(a)		Perl_ck_scmp(aTHX_ a)
 #define ck_select(a)		Perl_ck_select(aTHX_ a)
 #define ck_shift(a)		Perl_ck_shift(aTHX_ a)
@@ -4027,6 +4031,8 @@
 #define list_assignment		S_list_assignment
 #define S_bad_type		CPerlObj::S_bad_type
 #define bad_type		S_bad_type
+#define S_cop_free		CPerlObj::S_cop_free
+#define cop_free		S_cop_free
 #define S_modkids		CPerlObj::S_modkids
 #define modkids			S_modkids
 #define S_no_bareword_allowed	CPerlObj::S_no_bareword_allowed
@@ -4489,6 +4495,8 @@
 #define ck_rfun			Perl_ck_rfun
 #define Perl_ck_rvconst		CPerlObj::Perl_ck_rvconst
 #define ck_rvconst		Perl_ck_rvconst
+#define Perl_ck_sassign		CPerlObj::Perl_ck_sassign
+#define ck_sassign		Perl_ck_sassign
 #define Perl_ck_scmp		CPerlObj::Perl_ck_scmp
 #define ck_scmp			Perl_ck_scmp
 #define Perl_ck_select		CPerlObj::Perl_ck_select

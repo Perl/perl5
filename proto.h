@@ -740,6 +740,7 @@ STATIC void	S_restore_magic(pTHX_ void *p);
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 STATIC I32	S_list_assignment(pTHX_ OP *o);
 STATIC void	S_bad_type(pTHX_ I32 n, char *t, char *name, OP *kid);
+STATIC void	S_cop_free(pTHX_ COP *cop);
 STATIC OP*	S_modkids(pTHX_ OP *o, I32 type);
 STATIC void	S_no_bareword_allowed(pTHX_ OP *o);
 STATIC OP*	S_no_fh_allowed(pTHX_ OP *o);

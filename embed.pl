@@ -1523,6 +1523,7 @@ s	|void	|restore_magic	|void *p
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 s	|I32	|list_assignment|OP *o
 s	|void	|bad_type	|I32 n|char *t|char *name|OP *kid
+s	|void	|cop_free	|COP *cop
 s	|OP*	|modkids	|OP *o|I32 type
 s	|void	|no_bareword_allowed|OP *o
 s	|OP*	|no_fh_allowed	|OP *o

@@ -3509,6 +3509,10 @@
 #define Perl_ck_rvconst		pPerl->Perl_ck_rvconst
 #undef  ck_rvconst
 #define ck_rvconst		Perl_ck_rvconst
+#undef  Perl_ck_sassign
+#define Perl_ck_sassign		pPerl->Perl_ck_sassign
+#undef  ck_sassign
+#define ck_sassign		Perl_ck_sassign
 #undef  Perl_ck_scmp
 #define Perl_ck_scmp		pPerl->Perl_ck_scmp
 #undef  ck_scmp
