@@ -1,3 +1,25 @@
+____________________________________________________________________________
+[ 21379] By: chip                                  on 2003/09/25  18:10:01
+        Log: Relocate the mention of safe signals with POSIX::SigAction.
+     Branch: maint-5.8/perl
+	   ! pod/perl581delta.pod
+____________________________________________________________________________
+[ 21378] By: jhi                                   on 2003/09/25  12:42:00
+        Log: perldelta turnover.
+     Branch: maint-5.8/perl
+	   + pod/perl581delta.pod
+	   ! MANIFEST pod.lst pod/perl.pod pod/perldelta.pod
+	   ! pod/perltoc.pod vms/descrip_mms.template win32/pod.mak
+____________________________________________________________________________
+[ 21377] By: jhi                                   on 2003/09/25  09:58:50
+        Log: Here goes nothing.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 21376] By: jhi                                   on 2003/09/25  09:55:52
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
 Please note: This file provides a complete, temporally ordered log of
 changes that went into every version of Perl.  If you'd like more
 detailed information, please consult the comments in the individual
