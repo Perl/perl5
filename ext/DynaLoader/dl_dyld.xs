@@ -1,6 +1,7 @@
-/* dl_rhapsody.xs
+/* dl_dyld.xs
  *
- * Platform:	Apple Rhapsody 5.0
+ * Platform:	Darwin (Mac OS)
+ * Author:	Wilfredo Sanchez <wsanchez@apple.com>
  * Based on:	dl_next.xs by Paul Marquess
  * Based on:	dl_dlopen.xs by Anno Siegel
  * Created:	Aug 15th, 1994
@@ -16,18 +17,23 @@
 
 /* Porting notes:
 
-dl_next.xs is itself a port from dl_dlopen.xs by Paul Marquess.  It
+dl_dyld.xs is based on dl_next.xs by Anno Siegel.
+
+dl_next.xs is in turn a port from dl_dlopen.xs by Paul Marquess.  It
 should not be used as a base for further ports though it may be used
 as an example for how dl_dlopen.xs can be ported to other platforms.
 
 The method used here is just to supply the sun style dlopen etc.
-functions in terms of NeXTs rld_*.  The xs code proper is unchanged
-from Paul's original.
+functions in terms of NeXT's/Apple's dyld.  The xs code proper is
+unchanged from Paul's original.
 
 The port could use some streamlining.  For one, error handling could
 be simplified.
 
-Anno Siegel
+This should be useable as a replacement for dl_next.xs, but it has not
+been tested on NeXT platforms.
+
+  Wilfredo Sanchez
 
 */
 
@@ -40,6 +46,7 @@ Anno Siegel
 #include "dlutils.c"	/* SaveError() etc	*/
 
 #undef environ
+#undef bool
 #import <mach-o/dyld.h>
 
 static char * dl_last_error = (char *) 0;
@@ -216,4 +223,4 @@ dl_error()
     OUTPUT:
     RETVAL
 
-+# end.
+# end.

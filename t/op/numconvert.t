@@ -50,6 +50,7 @@ my $max_uv2 = sprintf "%u", $max_uv1 ** 6; # 6 is an arbitrary number here
 my $big_iv = do {use integer; $max_uv1 * 16}; # 16 is an arbitrary number here
 
 if ($max_uv1 ne $max_uv2 or $big_iv > $max_uv1) {
+  # see perldelta.pod section 64-bit support
   print "1..0\n# Unsigned arithmetic is not sane\n";
   exit 0;
 }

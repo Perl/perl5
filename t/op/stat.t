@@ -32,17 +32,22 @@ if (open(FOO, ">Op.stat.tmp")) {
   else {
     print "# res=$res, nlink=$nlink.\nnot ok 1\n";
   }
-  if ($Is_MSWin32 || ($mtime && $mtime == $ctime)) {
+  if ($Is_MSWin32 or $Is_Cygwin || ($mtime && $mtime == $ctime)) {
     print "ok 2\n";
   }
   else {
     print "# |$mtime| vs |$ctime|\nnot ok 2\n";
   }
 
+  my $funky_FAT_timestamps = $Is_Cygwin;
+
+  sleep 3 if $funky_FAT_timestamps;
+
   print FOO "Now is the time for all good men to come to.\n";
   close(FOO);
 
-  sleep 2;
+  sleep 2 unless $funky_FAT_timestamps;
+
 } else {
   print "# open failed: $!\nnot ok 1\nnot ok 2\n";
 }
@@ -62,7 +67,8 @@ elsif ($nlink == 2)
 else {print "# \$nlink is |$nlink|\nnot ok 3\n";}
 
 if (   $Is_Dosish
-	|| ($cwd =~ m#^/tmp# and $mtime && $mtime==$ctime) # Solaris tmpfs bug
+        # Solaris tmpfs bug
+	|| ($cwd =~ m#^/tmp# and $mtime && $mtime==$ctime && $^O eq 'solaris')
 	|| $cwd =~ m#/afs/#
 	|| $^O eq 'amigaos') {
     print "ok 4 # skipped: different semantic of mtime/ctime\n";
@@ -164,7 +170,7 @@ else
     {print "not ok 33\n";}
 if (! -b '.') {print "ok 34\n";} else {print "not ok 34\n";}
 
-if ($^O eq 'amigaos' or $Is_Dosish or $Is_Cygwin) {
+if ($^O eq 'mpeix' or $^O eq 'amigaos' or $Is_Dosish or $Is_Cygwin) {
   print "ok 35 # skipped: no -u\n"; goto tty_test;
 }
 

@@ -634,18 +634,11 @@ require 5.005_62;
 use strict;
 END
 
-if( $opt_X || $opt_c || $opt_A ){
-	# we won't have our own AUTOLOAD(), so won't have $AUTOLOAD
-	print PM <<'END';
-our @EXPORT_OK;
-END
-}
-else{
+unless( $opt_X || $opt_c || $opt_A ){
 	# we'll have an AUTOLOAD(), and it will have $AUTOLOAD and
 	# will want Carp.
 	print PM <<'END';
 use Carp;
-our @EXPORT_OK;
 END
 }
 

@@ -101,15 +101,6 @@ EOM
     ;;
 esac
 
-# Backward compatibility (uselonglong is deprecated).
-case "$uselonglolong" in
-"$define"|true|[yY]*)
-	case "$use64bits" in
-	'') use64bits="$define" ;;
-	esac
-	;;
-esac                          
-
 # Determine the architecture type of this system.
 # Keep leading tab below -- Configure Black Magic -- RAM, 03/02/97
 	xxOsRevMajor=`uname -r | sed -e 's/^[^0-9]*//' | cut -d. -f1`;
@@ -142,7 +133,7 @@ else
 	selecttype='int *'
 fi
 
-case "$use64bits" in
+case "$use64bitint" in
 $define|true|[yY]*)
     if [ "$xxOsRevMajor" -lt 11 ]; then
 		cat <<EOM >&4
@@ -358,7 +349,7 @@ EOCBU
 # after it has prompted the user for whether to use 64 bits.
 cat > UU/uselfs.cbu <<'EOCBU'
 case "$uselargefiles" in
-$define|true|[yY]*)
+''|$define|true|[yY]*)
 	# there are largefile flags available via getconf(1)
 	# but we cheat for now.
 	ccflags="$ccflags -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"

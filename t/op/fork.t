@@ -16,6 +16,11 @@ BEGIN {
     $ENV{PERL5LIB} = "../lib";
 }
 
+if ($^O eq 'mpeix') {
+    print "1..0 # Skip: fork/status problems on MPE/iX\n";
+    exit 0;
+}
+
 $|=1;
 
 undef $/;

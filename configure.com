@@ -41,7 +41,7 @@ $ ans = ""
 $ macros = ""
 $ use_vmsdebug_perl = "N"
 $ use_debugging_perl = "Y"
-$ use_64bit = "n"
+$ use_64bitint = "n"
 $ C_Compiler_Replace = "CC="
 $ Thread_Live_Dangerously = "MT="
 $ use_two_pot_malloc = "N"
@@ -1746,15 +1746,15 @@ $   echo "64 bit integers and 128 bit floating point variables. This gives
 $   echo "a much larger range for perl's mathematical operations. (Note that
 $   echo "does *not* enable 64-bit fileops at the moment, as Dec C doesn't
 $   echo "do that yet)"
-$   dflt = use_64bit
-$   rp = "Build with 64 bits? [''dflt'] "
+$   dflt = use_64bitint
+$   rp = "Build with 64 bit integers and 128 bit floating point variable? [''dflt'] "
 $   GOSUB myread
 $   if ans.eqs."" then ans = dflt
 $   if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
 $   THEN
-$     use_64bit="Y"
+$     use_64bitint="Y"
 $   ELSE
-$     use_64bit="N"
+$     use_64bitint="N"
 $   ENDIF
 $ ENDIF
 $!
@@ -1898,6 +1898,7 @@ $ rp = "[''dflt'] "
 $ GOSUB myread
 $ if ans.eqs."" then ans = "''dflt'"
 $ extensions = "''ans'"
+$ perl_known_extensions = "''dflt'"
 $!
 $! %Config-I-VMS, determine build/make utility here (make gmake mmk mms)
 $ echo ""

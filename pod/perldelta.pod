@@ -333,11 +333,15 @@ by running Configure with C<-Dflag>.
     usemultiplicity
     use5005threads
 
+    use64bitint		(equal to now deprecated 'use64bits')
+    use64bitall
+
     uselongdouble
     usemorebits
     uselargefiles
+    usesocks		(only SOCKS v5 supported)
 
-=head2 -Dusethreads and -Duse64bits now more daring
+=head2 Threadedness and 64-bitness now more daring
 
 The Configure options enabling the use of threads and the use of
 64-bitness are now more daring in the sense that they no more have an
@@ -345,7 +349,7 @@ explicit list of operating systems of known threads/64-bit
 capabilities.  In other words: if your operating system has the
 necessary APIs and datatypes, you should be able just to go ahead and
 use them, for threads by Configure -Dusethreads, and for 64 bits
-either explicitly by Configure -Duse64bits or implicitly if your
+either explicitly by Configure -Duse64bitint or implicitly if your
 system has 64 bit wide datatypes.  See also L<"64-bit support">.
 
 =head2 Long Doubles
@@ -356,7 +360,7 @@ Perl's scalars, use -Duselongdouble.
 
 =head2 -Dusemorebits
 
-You can enable both -Duse64bits and -Dlongdouble by -Dusemorebits.
+You can enable both -Duse64bitint and -Dlongdouble by -Dusemorebits.
 See also L<"64-bit support">.
 
 =head2 -Duselargefiles
@@ -386,12 +390,20 @@ process starts.  Run C<Configure -h> to find out the full C<-A> syntax.
 
 =head2 Enhanced Installation Directories
 
-The installation structure has been enriched to improve the support for 
-maintaining multiple versions of perl, to provide locations for
-vendor-supplied modules and scripts, and to ease maintenance of
-locally-added modules and scripts.  See the section on Installation 
-Directories in the INSTALL file for complete details.  For most users
-building and installing from source, the defaults should be fine.
+The installation structure has been enriched to improve the support
+for maintaining multiple versions of perl, to provide locations for
+vendor-supplied modules, scripts, and manpages, and to ease maintenance
+of locally-added modules, scripts, and manpages.  See the section on
+Installation Directories in the INSTALL file for complete details.
+For most users building and installing from source, the defaults should
+be fine.
+
+If you previously used C<Configure -Dsitelib> or C<-Dsitearch> to set
+special values for library directories, you might wish to consider using
+the new C<-Dsiteprefix> setting instead.  Also, if you wish to re-use a
+config.sh file from an earlier version of perl, you should be sure to
+check that Configure makes sensible choices for the new directories.
+See INSTALL for complete details.
 
 =head1 Core Changes
 
@@ -626,8 +638,11 @@ filehandles that must be passed around, as in the following example:
 
 =head2 64-bit support
 
-All platforms that have 64-bit integers either (a) natively as longs
-or ints (b) via special compiler flags (c) using long long are able to
+	NOTE:	The Configure flags -Duselonglong and -Duse64bits
+		have been deprecated.  Use -Duse64bitint instead.
+
+Any platform that has 64-bit integers either (a) natively as longs or
+ints (b) via special compiler flags (c) using long long are able to
 use "quads" (64-integers) as follows:
 
 =over 4
@@ -663,7 +678,7 @@ vec() (but see the below note about bit arithmetics)
 =back
 
 Note that unless you have the case (a) you will have to configure
-and compile Perl using the -Duse64bits Configure flag.
+and compile Perl using the -Duse64bitint Configure flag.
 
 Unfortunately bit arithmetics (&, |, ^, ~, <<, >>) for numbers are not
 64-bit clean, they are explictly forced to be 32-bit because of
@@ -671,6 +686,22 @@ tangled backward compatibility issues.  This limitation is subject to
 change.  Bit arithmetics for bit vector scalars (created by vec()) are
 not limited in their width, you can use the & | ^ ~ operators on such
 scalars.
+
+There are actually two modes of 64-bitness: the first one is achieved
+using Configure -Duse64bitint and the second one using Configure
+-Duse64bitall.  The difference is that the first one is minimal and
+the second one maximal.  The first one does only as much as is
+required to get 64-bit integers into Perl (this may mean, for example,
+using "long longs") while your memory may still be limited to 2
+gigabytes (because your pointers most likely are 32-bit); the second
+one goes all the way by attempting to switch also longs (and pointers)
+being 64-bit.  This may create an even more binary incompatible Perl
+than -Duse64bitint: the resulting executable may not run at all in a
+CPU-bit box, or you may have to reboot/reconfigure/rebuild your
+operating system to be 64-bit aware.
+
+Natively 64-bit systems like Alpha and Cray need neither -Duse64bitint
+nor -Duse64bitall.
 
 Last but not least: note that due to Perl's habit of always using
 floating point numbers the quads are still not true integers.

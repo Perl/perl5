@@ -45,6 +45,14 @@ true)
 		-compatibility_version 1 -current_version $patchlevel \
 		-prebind -seg1addr 0x27000000 -install_name \$(shrpdir)/\$@"
 		;;
+	rhapsody*|darwin*)
+		shrpldflags="${ldflags} -dynamiclib \
+			     -compatibility_version 1 \
+			     -current_version \
+				${api_version}.${api_subversion} \
+			     -image_base 0x4be00000 \
+			     -install_name \$(shrpdir)/\$@"
+		;;
 	cygwin*)
 		linklibperl="-lperl"
 		;;
@@ -76,9 +84,6 @@ true)
 	    os2)
 	        ldlibpth=''
 	        ;;
-	    rhapsody)
-		eval "ldlibpth=\"$ldlibpthname=`pwd`/Perl:\$$ldlibpthname\""
-		;;
 	    *)
 		eval "ldlibpth=\"$ldlibpthname=`pwd`:\$$ldlibpthname\""
 		;;
@@ -320,9 +325,6 @@ ext.libs: $(static_ext)
 # How to build libperl.  This is still rather convoluted.
 # Load up custom Makefile.SH fragment for shared loading and executables:
 case "$osname" in
-cygwin*)
-	Makefile_s="cygwin/Makefile.SHs"
-	;;
 *)
 	Makefile_s="$osname/Makefile.SHs"
 	;;
@@ -535,6 +537,9 @@ extra.pods: miniperl
 	-@test -f README.vms && $(LNS) ../README.vms pod/README_vms.pod && echo "pod/README_vms.pod" >> extra.pods
 	-@test -f vms/perlvms.pod && $(LNS) ../vms/perlvms.pod pod/perlvms.pod && echo "pod/perlvms.pod" >> extra.pods
 
+install-strip:
+	$(MAKE) STRIPFLAGS=-s install
+
 install: all install.perl install.man
 
 install.perl:	all installperl
@@ -545,7 +550,7 @@ install.perl:	all installperl
 		cd ../pod; $(MAKE) compile; \
 	else :; \
 	fi
-	$(LDLIBPTH) ./perl installperl
+	$(LDLIBPTH) ./perl installperl $(STRIPFLAGS)
 
 install.man:	all installman
 	$(LDLIBPTH) ./perl installman
@@ -693,7 +698,7 @@ _cleaner:
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(LDLIBPTH) sh ext/util/make_ext realclean $$x MAKE=$(MAKE) ; \
 	done
-	rm -f *.orig */*.orig *~ */*~ core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/tmp* t/c t/perl so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
+	rm -f *.orig */*.orig *~ */*~ core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/tmp* t/c t/perl so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR) .nfs* .*.c
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
 	rm -f $(private)

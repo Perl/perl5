@@ -1,5 +1,5 @@
 ##
-# Rhapsody (Mac OS X Server) hints
+# Darwin (Mac OS) hints
 # Wilfredo Sanchez <wsanchez@apple.com>
 ##
 
@@ -27,11 +27,11 @@ vendorlib='/Network/Library/Perl';
 ##
 
 # Since we can build fat, the archname doesn't need the processor type
-archname='rhapsody';
+archname='darwin';
 
 # nm works.
 usenm='true';
-  
+
 # Libc is in libsystem.
 libc='/System/Library/Frameworks/System.framework/System';
 
@@ -46,22 +46,18 @@ ccflags="${ccflags} -pipe -fno-common -DHAS_TELLDIR_PROTOTYPE";
 ld='cc';
 so='dylib';
 dlext='bundle';
-dlsrc='dl_dyld.xs';
-usedl='define';
+dlsrc='dl_dyld.xs'; usedl='define';
 cccdlflags='';
 lddlflags="${ldflags} -bundle -undefined suppress";
 ldlibpthname='DYLD_LIBRARY_PATH';
 useshrplib='true';
-base_address='0x4be00000';
 
 ##
 # System libraries
 ##
-  
+
 # vfork works
 usevfork='true';
 
 # malloc works
 usemymalloc='n';
-
-

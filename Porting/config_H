@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Tue Feb 22 23:57:36 EET 2000
+ * Configuration time: Sat Feb 26 03:04:10 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1342,6 +1342,11 @@
  */
 #define HAS_FD_SET	/**/
 
+/* HAS_FPOS64_T:
+ *	This symbol will be defined if the C compiler supports fpos64_t.
+ */
+/*#define	HAS_FPOS64_T    	/ **/
+
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data
  *	to do statfs() is supported.
@@ -1359,6 +1364,7 @@
  *	available to stat filesystems by file descriptors.
  */
 #define HAS_FSTATFS		/**/
+
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
@@ -1706,6 +1712,11 @@
  */
 #define HAS_MSG		/**/
 
+/* HAS_OFF64_T:
+ *	This symbol will be defined if the C compiler supports off64_t.
+ */
+/*#define	HAS_OFF64_T    		/ **/
+
 /* HAS_OPEN3:
  *	This manifest constant lets the C program know that the three
  *	argument form of open(2) is available.
@@ -1921,12 +1932,6 @@
 #define	HAS_MSG_PEEK	/**/
 /*#define	HAS_MSG_PROXY	/ **/
 #define	HAS_SCM_RIGHTS	/**/
-
-/* HAS_SOCKLEN_T:
- *     This symbol will defined if the C compiler supports socklen_t.
- *     Usually the <sys/socket.h> needs to be included.
- */
-/*#define     HAS_SOCKLEN_T               / **/
 
 /* HAS_SQRTL:
  *	This symbol, if defined, indicates that the sqrtl routine is
@@ -2429,15 +2434,6 @@
  */
 #define INSTALL_USR_BIN_PERL	/**/
 
-/* HAS_OFF64_T:
- *	This symbol will be defined if the C compiler supports off64_t.
- */
-/* HAS_FPOS64_T:
- *	This symbol will be defined if the C compiler supports fpos64_t.
- */
-/*#define	HAS_OFF64_T    		/ **/
-/*#define	HAS_FPOS64_T    	/ **/
-
 /* PERL_PRIfldbl:
  *	This symbol, if defined, contains the string used by stdio to
  *	format long doubles (format 'f') for output.
@@ -2840,19 +2836,35 @@
  */
 #define Uid_t uid_t		/* UID type */
 
-/* USE_64_BITS:
+/* USE_64_BIT_INT:
  *	This symbol, if defined, indicates that 64-bit integers should
  *	be used when available.  If not defined, the native integers
- *	will be used (be they 32 or 64 bits).
+ *	will be employed (be they 32 or 64 bits).  The minimal possible
+ *	64-bitness is used, just enough to get 64-bit integers into Perl.
+ *	This may mean using for example "long longs", while your memory
+ *	may still be limited to 2 gigabytes.
  */
-#ifndef USE_64_BITS
-#define	USE_64_BITS		/**/
+/* USE_64_BIT_ALL:
+ *	This symbol, if defined, indicates that 64-bit integers should
+ *	be used when available.  If not defined, the native integers
+ *	will be used (be they 32 or 64 bits).  The maximal possible
+ *	64-bitness is employed: LP64 or ILP64, meaning that you will
+ *	be able to use more than 2 gigabytes of memory.  This mode is
+ *	even more binary incompatible than USE_64_BIT_INT. You may not
+ *	be able to run the resulting executable in a 32-bit CPU at all or
+ *	you may need at least to reboot your OS to 64-bit mode.
+ */
+#ifndef USE_64_BIT_INT
+#define	USE_64_BIT_INT		/**/
+#endif
+
+#ifndef USE_64_BIT_ALL
+#define	USE_64_BIT_ALL		/**/
 #endif
 
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
- *	should be used when available.  The USE_64_BITS symbol will
- *	also be turned on if necessary.
+ *	should be used when available.
  */
 #ifndef USE_LARGE_FILES
 #define	USE_LARGE_FILES		/**/
@@ -2983,5 +2995,25 @@
  */
 #define PERL_XS_APIVERSION "5.5.660"
 #define PERL_PM_APIVERSION "5.005"
+
+/* HAS_GETFSSTAT:
+ *	This symbol, if defined, indicates that the getfsstat routine is
+ *	available to stat filesystems in bulk.
+ */
+#define HAS_GETFSSTAT		/**/
+
+/* HAS_LSEEK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the lseek() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern off_t lseek(int, off_t, int);
+ */
+#define	HAS_LSEEK_PROTO	/**/
+
+/* Sock_size_t:
+ *	This symbol holds the type used for the size argument of
+ *	various socket calls (just the base type, not the pointer-to).
+ */
+#define Sock_size_t		int /**/
 
 #endif

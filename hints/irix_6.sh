@@ -47,6 +47,11 @@ esac
 case "$cc" in
 *"cc -n32"*)
 
+	libscheck='case "`file $xxx`" in
+*N32*) ;;
+*) xxx=/no/n32$xxx ;;
+esac'
+
 	# Perl 5.004_57 introduced new qsort code into pp_ctl.c that
 	# makes IRIX  cc prior to 7.2.1 to emit bad code.
 	# so some serious hackery follows to set pp_ctl flags correctly.
@@ -233,10 +238,10 @@ EOCBU
 
 # The -n32 makes off_t to be 8 bytes, so we should have largefileness.
 
-# This script UU/use64bits.cbu will get 'called-back' by Configure 
+# This script UU/use64bitint.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
-cat > UU/use64bits.cbu <<'EOCBU'
-case "$use64bits" in
+cat > UU/use64bitint.cbu <<'EOCBU'
+case "$use64bitint" in
 $define|true|[yY]*)
 	    case "`uname -r`" in
 	    [1-5]*|6.[01])
@@ -248,15 +253,25 @@ EOM
 		exit 1
 		;;
 	    esac
-	    case "$cc $ccflags" in
-	    *-n32*)
-		case "$ccflags" in
-		*-DUSE_64_BITS*) ;;
-		*) ccflags="$ccflags -DUSE_64_BITS" ;;
-		esac
-		archname64="-n32"
-		;;
-	    esac
 	    ;;
 esac
 EOCBU
+
+# This script UU/use64bitall.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bits.
+cat > UU/use64bitall.cbu <<'EOCBU'
+case "$use64bitall" in
+$define|true|[yY]*)
+	ccflags="`echo $ccflags|sed -e 's%-n32%%'` -64"
+	ldflags="`echo $ldflags|sed -e 's%-n32%%'` -64"
+	lddlflags="`echo $ldfdllags|sed -e 's%-n32%%'` -64"
+	loclibpth="$loclibpth /usr/lib64"
+	libscheck='case "`file $xxx`" in
+*64-bit*) ;;
+*) xxx=/no/64-bit$xxx ;;
+esac'
+	;;
+esac
+EOCBU
+
+
