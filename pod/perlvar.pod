@@ -902,7 +902,8 @@ C<$^C = 1> is similar to calling C<B::minus_c>.
 =item $^D
 
 The current value of the debugging flags.  (Mnemonic: value of B<-D>
-switch.)
+switch.) May be read or set. Like its command-line equivalent, you can use
+numeric or symbolic values, eg C<$^D = 10> or C<$^D = "st">.
 
 =item $SYSTEM_FD_MAX
 

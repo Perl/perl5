@@ -1326,6 +1326,9 @@ STATIC void	S_cv_dump(pTHX_ CV *cv, char *title);
 #endif
 PERL_CALLCONV CV*	Perl_find_runcv(pTHX_ U32 *db_seqp);
 PERL_CALLCONV void	Perl_free_tied_hv_pool(pTHX);
+#if defined(DEBUGGING)
+PERL_CALLCONV int	Perl_get_debug_opts(pTHX_ char **s);
+#endif
 
 
 

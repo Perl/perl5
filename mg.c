@@ -1975,8 +1975,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
 
     case '\004':	/* ^D */
-	PL_debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | DEBUG_TOP_FLAG;
+#ifdef DEBUGGING
+	s = SvPV_nolen(sv);
+	PL_debug = get_debug_opts(&s) | DEBUG_TOP_FLAG;
 	DEBUG_x(dump_all());
+#else
+	PL_debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | DEBUG_TOP_FLAG;
+#endif
 	break;
     case '\005':  /* ^E */
 	if (*(mg->mg_ptr+1) == '\0') {

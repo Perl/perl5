@@ -2196,6 +2196,40 @@ NULL
 	PerlIO_printf(PerlIO_stdout(), "\n  %s", *p++);
 }
 
+/* convert a string of -D options (or digits) into an int.
+ * sets *s to point to the char after the options */
+
+#ifdef DEBUGGING
+int
+Perl_get_debug_opts(pTHX_ char **s)
+{
+    int i = 0;
+    if (isALPHA(**s)) {
+	/* if adding extra options, remember to update DEBUG_MASK */
+	static char debopts[] = "psltocPmfrxu HXDSTRJvC";
+
+	for (; isALNUM(**s); (*s)++) {
+	    char *d = strchr(debopts,**s);
+	    if (d)
+		i |= 1 << (d - debopts);
+	    else if (ckWARN_d(WARN_DEBUGGING))
+		Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
+		    "invalid option -D%c\n", **s);
+	}
+    }
+    else {
+	i = atoi(*s);
+	for (; isALNUM(**s); (*s)++) ;
+    }
+#  ifdef EBCDIC
+    if ((i & DEBUG_p_FLAG) && ckWARN_d(WARN_DEBUGGING))
+	Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
+		"-Dp not implemented on this platform\n");
+#  endif
+    return i;
+}
+#endif
+
 /* This routine handles any switches that can be given during run */
 
 char *
@@ -2295,24 +2329,8 @@ Perl_moreswitches(pTHX_ char *s)
     {	
 #ifdef DEBUGGING
 	forbid_setid("-D");
-	if (isALPHA(s[1])) {
-	    /* if adding extra options, remember to update DEBUG_MASK */
-	    static char debopts[] = "psltocPmfrxu HXDSTRJvC";
-	    char *d;
-
-	    for (s++; *s && (d = strchr(debopts,*s)); s++)
-		PL_debug |= 1 << (d - debopts);
-	}
-	else {
-	    PL_debug = atoi(s+1);
-	    for (s++; isDIGIT(*s); s++) ;
-	}
-#ifdef EBCDIC
-	if (DEBUG_p_TEST_ && ckWARN_d(WARN_DEBUGGING))
-	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
-		    "-Dp not implemented on this platform\n");
-#endif
-	PL_debug |= DEBUG_TOP_FLAG;
+	s++;
+	PL_debug = get_debug_opts(&s) | DEBUG_TOP_FLAG;
 #else /* !DEBUGGING */
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),

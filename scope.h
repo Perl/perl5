@@ -96,13 +96,11 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define ENTER							\
     STMT_START {						\
 	push_scope();						\
-	DEBUG_l(WITH_THR(Perl_deb(aTHX_ "ENTER scope %ld at %s:%d\n",	\
-		    PL_scopestack_ix, __FILE__, __LINE__)));	\
+	DEBUG_SCOPE("ENTER")					\
     } STMT_END
 #define LEAVE							\
     STMT_START {						\
-	DEBUG_l(WITH_THR(Perl_deb(aTHX_ "LEAVE scope %ld at %s:%d\n",	\
-		    PL_scopestack_ix, __FILE__, __LINE__)));	\
+	DEBUG_SCOPE("LEAVE")					\
 	pop_scope();						\
     } STMT_END
 #else

@@ -2628,6 +2628,13 @@ Gid_t getegid (void);
 #endif /* DEBUGGING */
 
 
+#define DEBUG_SCOPE(where) \
+    DEBUG_l(WITH_THR(Perl_deb(aTHX_ "%s scope %ld at %s:%d\n",	\
+		    where, PL_scopestack_ix, __FILE__, __LINE__)));
+
+
+
+
 /* These constants should be used in preference to raw characters
  * when using magic. Note that some perl guts still assume
  * certain character properties of these constants, namely that
