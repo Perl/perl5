@@ -672,21 +672,21 @@ I32 sv_type;
 	if (len > 1)
 	    break;
 	ampergv = gv;
-	sawampersand = TRUE;
+	sawampersand |= 1;
 	goto ro_magicalize;
 
     case '`':
 	if (len > 1)
 	    break;
 	leftgv = gv;
-	sawampersand = TRUE;
+	sawampersand |= 2;
 	goto ro_magicalize;
 
     case '\'':
 	if (len > 1)
 	    break;
 	rightgv = gv;
-	sawampersand = TRUE;
+	sawampersand |= 4;
 	goto ro_magicalize;
 
     case ':':

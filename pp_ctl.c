@@ -123,8 +123,8 @@ PP(pp_substcont)
 	sv_catsv(dstr, POPs);
 
 	/* Are we done */
-	if (cx->sb_once || !pregexec(rx, s, cx->sb_strend, orig,
-				s == m, Nullsv, cx->sb_safebase))
+	if (cx->sb_once ||
+	    !pregexec(rx, s, cx->sb_strend, orig, s == m, Nullsv, 0))
 	{
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
@@ -172,7 +172,7 @@ REGEXP *rx;
     U32 i;
 
     if (!p || p[1] < rx->nparens) {
-	i = 6 + rx->nparens * 2;
+	i = 7 + rx->nparens * 2;
 	if (!p)
 	    New(501, p, i, UV);
 	else
@@ -185,6 +185,7 @@ REGEXP *rx;
 
     *p++ = rx->nparens;
 
+    *p++ = rx->subskip;
     *p++ = (UV)rx->subbeg;
     *p++ = (UV)rx->subend;
     for (i = 0; i <= rx->nparens; ++i) {
@@ -207,6 +208,7 @@ REGEXP *rx;
 
     rx->nparens = *p++;
 
+    rx->subskip = *p++;
     rx->subbeg = (char*)(*p++);
     rx->subend = (char*)(*p++);
     for (i = 0; i <= rx->nparens; ++i) {
