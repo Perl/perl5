@@ -1270,7 +1270,7 @@ S_scan_const(pTHX_ char *start)
 		while (s < send && *s != ')')
 		    *d++ = *s++;
 	    } else if (s[2] == '{'
-		       || s[2] == 'p' && s[3] == '{') {	/* This should march regcomp.c */
+		       || s[2] == '?' && s[3] == '{') {	/* This should march regcomp.c */
 		I32 count = 1;
 		char *regparse = s + (s[2] == '{' ? 3 : 4);
 		char c;

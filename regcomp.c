@@ -1734,7 +1734,7 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 		nextchar();
 		*flagp = TRYAGAIN;
 		return NULL;
-	    case 'p':
+	    case '?':
 		logical = 1;
 		paren = *PL_regcomp_parse++;
 		/* FALL THROUGH */

@@ -249,9 +249,9 @@ foreach $key (keys %input_expr) {
     $input_expr{$key} =~ s/\n+$//;
 }
 
-$bal = qr[(?:(?>[^()]+)|\((?p{ $bal })\))*];	# ()-balanced
+$bal = qr[(?:(?>[^()]+)|\((??{ $bal })\))*];	# ()-balanced
 $cast = qr[(?:\(\s*SV\s*\*\s*\)\s*)?];		# Optional (SV*) cast
-$size = qr[,\s* (?p{ $bal }) ]x;		# Third arg (to setpvn)
+$size = qr[,\s* (??{ $bal }) ]x;		# Third arg (to setpvn)
 
 foreach $key (keys %output_expr) {
     use re 'eval';
@@ -260,8 +260,8 @@ foreach $key (keys %output_expr) {
       ($output_expr{$key} =~
 	 m[^ \s+ sv_set ( [iunp] ) v (n)? 	# Type, is_setpvn
 	     \s* \( \s* $cast \$arg \s* ,
-	     \s* ( (?p{ $bal }) )		# Set from
-	     ( (?p{ $size }) )?			# Possible sizeof set-from
+	     \s* ( (??{ $bal }) )		# Set from
+	     ( (??{ $size }) )?			# Possible sizeof set-from
 	     \) \s* ; \s* $
 	  ]x);
     $targetable{$key} = [$t, $with_size, $arg, $sarg] if $t;
@@ -287,11 +287,11 @@ sub check_keyword {
 my ($C_group_rex, $C_arg);
 # Group in C (no support for comments or literals)
 $C_group_rex = qr/ [({\[]
-		   (?: (?> [^()\[\]{}]+ ) | (?p{ $C_group_rex }) )*
+		   (?: (?> [^()\[\]{}]+ ) | (??{ $C_group_rex }) )*
 		   [)}\]] /x ;
 # Chunk in C without comma at toplevel (no comments):
 $C_arg = qr/ (?: (?> [^()\[\]{},"']+ )
-	     |   (?p{ $C_group_rex })
+	     |   (??{ $C_group_rex })
 	     |   " (?: (?> [^\\"]+ )
 		   |   \\.
 		   )* "		# String literal
@@ -1029,8 +1029,8 @@ while (fetch_para()) {
     my %out_vars;
     if ($process_argtypes and $orig_args =~ /\S/) {
 	my $args = "$orig_args ,";
-	if ($args =~ /^( (?p{ $C_arg }) , )* $ /x) {
-	    @args = ($args =~ /\G ( (?p{ $C_arg }) ) , /xg);
+	if ($args =~ /^( (??{ $C_arg }) , )* $ /x) {
+	    @args = ($args =~ /\G ( (??{ $C_arg }) ) , /xg);
 	    for ( @args ) {
 		s/^\s+//;
 		s/\s+$//;

@@ -570,7 +570,7 @@ so you should only do so if you are also using taint checking.
 Better yet, use the carefully constrained evaluation within a Safe
 module.  See L<perlsec> for details about both these mechanisms.
 
-=item C<(?p{ code })>
+=item C<(??{ code })>
 
 B<WARNING>: This extended regular expression feature is considered
 highly experimental, and may be changed or deleted without notice.
@@ -592,7 +592,7 @@ The following pattern matches a parenthesized group:
 	     (?:
 		(?> [^()]+ )	# Non-parens without backtracking
 	      |
-		(?p{ $re })	# Group with matching parens
+		(??{ $re })	# Group with matching parens
 	     )*
 	     \)
 	  }x;
@@ -1175,7 +1175,7 @@ else in the whole regular expression.)
 For this grouping operator there is no need to describe the ordering, since
 only whether or not C<S> can match is important.
 
-=item C<(?p{ EXPR })>
+=item C<(??{ EXPR })>
 
 The ordering is the same as for the regular expression which is
 the result of EXPR.

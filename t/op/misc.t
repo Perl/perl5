@@ -482,7 +482,7 @@ new1new22DESTROY2new33DESTROY31DESTROY1
 ########
 re();
 sub re {
-    my $re = join '', eval 'qr/(?p{ $obj->method })/';
+    my $re = join '', eval 'qr/(??{ $obj->method })/';
     $re;
 }
 EXPECT

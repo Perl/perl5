@@ -11,7 +11,7 @@ my %Cache;      # private cache for all SelfLoader's client packages
 
 # allow checking for valid ': attrlist' attachments
 my $nested;
-$nested = qr{ \( (?: (?> [^()]+ ) | (?p{ $nested }) )* \) }x;
+$nested = qr{ \( (?: (?> [^()]+ ) | (??{ $nested }) )* \) }x;
 my $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) (?:\s*\:\s*|\s+(?!\:)) }x;
 my $attr_list = qr{ \s* : \s* (?: $one_attr )* }x;
 
