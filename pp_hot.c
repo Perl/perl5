@@ -1021,7 +1021,8 @@ play_it_again:
 	     && !PL_sawampersand 
 	     && ((rx->reganch & ROPT_NOSCAN)
 		 || !((rx->reganch & RE_INTUIT_TAIL)
-		      && (r_flags & REXEC_SCREAM))))
+		      && (r_flags & REXEC_SCREAM)))
+	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
     }
     if (CALLREGEXEC(aTHX_ rx, s, strend, truebase, minmatch, TARG, NULL, r_flags))
