@@ -104,6 +104,7 @@ PERLVAR(Ibeginav,	AV *)		/* names of BEGIN subroutines */
 PERLVAR(Iendav,		AV *)		/* names of END subroutines */
 PERLVAR(Iinitav,	AV *)		/* names of INIT subroutines */
 PERLVAR(Istrtab,	HV *)		/* shared string table */
+PERLVARI(Isub_generation,U32,1)		/* incr to invalidate method cache */
 
 /* memory management */
 PERLVAR(Isv_count,	I32)		/* how many SV* are currently allocated */
