@@ -36,7 +36,7 @@ static void
 dl_private_init(pTHX)
 {
     (void)dl_generic_private_init(aTHX);
-    dl_resolve_using = get_av("DynaLoader::dl_resolve_using", 0x4);
+    dl_resolve_using = get_av("DynaLoader::dl_resolve_using", GV_ADDMULTI);
 }
 
 MODULE = DynaLoader     PACKAGE = DynaLoader
