@@ -14,6 +14,7 @@ BEGIN {
 
 use I18N::Langinfo qw(langinfo ABDAY_1 DAY_1 ABMON_1 MON_1 RADIXCHAR);
 use POSIX qw(setlocale LC_ALL);
+use Config;
 
 setlocale(LC_ALL, "C");
 
@@ -31,6 +32,18 @@ print "ok 3\n";
 print "not " unless langinfo(MON_1)     eq "January";
 print "ok 4\n";
 
-print "not " unless langinfo(RADIXCHAR) eq ".";
-print "ok 5\n";
+unless (langinfo(RADIXCHAR) eq ".") {
+    print "not ok 5 - RADIXCHAR undefined\n";
+    if ($Config{d_gnulibc} || $Config{cppsymbols} =~ /GLIBC/) {
+	print <<EOM;
+#
+# You are probably using GNU libc. The RADIXCHAR not getting defined
+# by I18N::Langinfo is a known problem in some older versions of the
+# GNU libc.
+#
+EOM
+    }
+} else {
+    print "ok 5\n";
+}
 
