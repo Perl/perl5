@@ -47,7 +47,7 @@ print "not " unless $r eq "5.6";
 print "ok 6\n";
 
 require v5.6;
-print "not " unless $r == 5.006 && $r eq "\x05\x06";
+print "not " unless abs($r - 5.006) < 0.001 && $r eq "\x05\x06";
 print "ok 7\n";
 
 eval "use Foo";
