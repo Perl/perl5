@@ -8,7 +8,7 @@
  */
 
 #ifdef DOINIT
-EXTCONST unsigned char utf8skip[] = {
+EXTCONST unsigned char PL_utf8skip[] = {
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ascii */
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ascii */
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ascii */
@@ -19,9 +19,9 @@ EXTCONST unsigned char utf8skip[] = {
 3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,6,6,7,8, /* cjk etc. */
 };
 #else
-EXTCONST unsigned char utf8skip[];
+EXTCONST unsigned char PL_utf8skip[];
 #endif
 
 #define IN_UTF8 (PL_curcop->op_private & HINT_UTF8)
 
-#define UTF8SKIP(s) utf8skip[*(U8*)s]
+#define UTF8SKIP(s) PL_utf8skip[*(U8*)s]

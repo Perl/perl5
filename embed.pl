@@ -365,17 +365,7 @@ my @extras = qw(
     fprintf
 );
 
-my %skip;
-
-for $sym (qw[
-    utf8skip
-	  ])
-{
-    $skip{$sym}++;
-}
-
 for $sym (sort(keys(%global),@extras)) {
-    next if exists $skip{$sym};
     print EM embedobj($sym);
 }
 
