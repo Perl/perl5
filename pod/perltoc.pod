@@ -3663,7 +3663,7 @@ South Africa
 =item Asia
 
 China, Indonesia, Israel, Japan, Malaysia, Russian Federation, Saudi
-Arabia, Singapore, South Korea, Taiwan
+Arabia, Singapore, South Korea, Taiwan, Thailand
 
 =item Central America
 
@@ -3671,19 +3671,19 @@ Costa Rica
 
 =item Europe
 
-Austria, Belgium, Bulgaria, Croatia, Czech Republic, Denmark, Estonia,
-Finland, France, Germany, Greece, Hungary, Iceland, Ireland, Italy, Latvia,
-Lithuania, Netherlands, Norway, Poland, Portugal, Romania, Russia,
-Slovakia, Slovenia, Spain, Sweden, Switzerland, Turkey, Ukraine, United
-Kingdom
+Austria, Belgium, Bosnia and Herzegovina, Bulgaria, Croatia, Czech
+Republic, Denmark, Estonia, Finland, France, Germany, Greece, Hungary,
+Iceland, Ireland, Italy, Latvia, Lithuania, Netherlands, Norway, Poland,
+Portugal, Romania, Russia, Slovakia, Slovenia, Spain, Sweden, Switzerland,
+Turkey, Ukraine, United Kingdom
 
 =item North America
 
 Canada, Alberta, Manitoba, Nova Scotia, Ontario, Mexico, United States,
 Alabama, California, Colorado, Delaware, District of Columbia, Florida,
-Illinois, Indiana, Kentucky, Massachusetts, Michigan, Nevada, New Jersey,
-New York, North Carolina, Oklahoma, Oregon, Pennsylvania, Tennessee, Texas,
-Utah, Virginia, Washington, Wisconsin
+Indiana, Kentucky, Massachusetts, Michigan, Nevada, New Jersey, New York,
+North Carolina, Oklahoma, Oregon, Pennsylvania, Tennessee, Texas, Utah,
+Virginia, Washington, Wisconsin
 
 =item Oceania
 
@@ -5596,7 +5596,7 @@ iterated array within the loop?)"
 
 =item EBCDIC Platforms
 
-=item Cygwin 1.5 problems
+=item Cygwin 1.5 sysio.t
 
 =item FreeBSD: malloc dilemma
 
@@ -8932,7 +8932,7 @@ inf(), NaN(), upgrade()
 
 =back
 
-=head2 bigrat - Transparent BigNumber/BigRationale support for Perl
+=head2 bigrat - Transparent BigNumber/BigRational support for Perl
 
 =over 4
 
@@ -13800,18 +13800,6 @@ B<PERL_MM_MANIFEST_DEBUG>
 
 =back
 
-=head2 ExtUtils::Miniperl, writemain - write the C code for perlmain.c
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item SEE ALSO
-
-=back
-
 =head2 ExtUtils::Mkbootstrap - make a bootstrap file for use by DynaLoader
 
 =over 4
@@ -14358,6 +14346,18 @@ catpath
 
 =over 4
 
+=item OO INTERFACE
+
+B<new>
+
+=back
+
+B<filename>
+
+B<DESTROY>
+
+=over 4
+
 =item FUNCTIONS
 
 B<tempfile>
@@ -14405,6 +14405,10 @@ B<tempnam>
 B<unlink0>
 
 =back
+
+B<cmpstat>
+
+B<unlink1>
 
 =over 4
 
@@ -16290,7 +16294,7 @@ the same terms as Perl itself.
 
 =back
 
-=head2 Math::BigRat - arbitrarily big rationales
+=head2 Math::BigRat - arbitrarily big rationals
 
 =over 4
 
