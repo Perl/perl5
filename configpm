@@ -406,7 +406,7 @@ EOT
 }
 
 my $fast_config = join '', map { "    $_,\n" }
-    values (%v_fast), 'byteorder => $value' ;
+    sort values (%v_fast), 'byteorder => $value' ;
 
 print CONFIG sprintf <<'ENDOFTIE', $byteorder_code, $fast_config;
 
