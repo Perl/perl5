@@ -420,6 +420,7 @@ ext/I18N/Langinfo/Langinfo.t	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.xs	I18N::Langinfo
 ext/I18N/Langinfo/Makefile.PL	I18N::Langinfo
 ext/IO/ChangeLog		IO perl module change log
+ext/IO/hints/sco.pl		Hint for IO for named architecture
 ext/IO/IO.pm			Top-level interface to IO::* classes
 ext/IO/IO.xs			IO extension external subroutines
 ext/IO/lib/IO/Dir.pm		IO directory reading package
