@@ -1656,7 +1656,7 @@ PP(pp_leavesub)
     register CONTEXT *cx;
 
     POPBLOCK(cx,newpm);
-    POPSUB(cx);
+    /* Delay POPSUB until stack values are safe */
 
     if (gimme == G_SCALAR) {
 	MARK = newsp + 1;
@@ -1677,6 +1677,9 @@ PP(pp_leavesub)
 		*mark = sv_mortalcopy(*mark);
 		/* in case LEAVE wipes old return values */
     }
+
+    /* Now that stack values are safe, release CV and @_ */
+    POPSUB(cx);
 
     curpm = newpm;	/* Don't pop $1 et al till now */
 

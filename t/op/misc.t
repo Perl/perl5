@@ -289,3 +289,7 @@ $s = 0;
 map {#this newline here tickles the bug
 $s += $_} (1,2,4);
 print "eat flaming death\n" unless ($s == 7);
+########
+sub foo { local $_ = shift; split; @_ }
+@x = foo(' x  y  z ');
+print "you die joe!\n" unless "@x" eq 'x y z';
