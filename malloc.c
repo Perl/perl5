@@ -1752,8 +1752,7 @@ Perl_realloc(void *mp, size_t nbytes)
 		nmalloc[bucket]--;
 		nmalloc[pow * BUCKETS_PER_POW2]++;
 #endif 	    
-		((union overhead *)(cp - M_OVERHEAD))->ov_index
-		  = pow * BUCKETS_PER_POW2; /* Fill index. */
+		*(cp - M_OVERHEAD) = pow * BUCKETS_PER_POW2; /* Fill index. */
 		MALLOC_UNLOCK;
 		goto inplace_label;
 	    } else {
