@@ -979,10 +979,7 @@ I32 flags;		/* See G_* flags in cop.h */
     }
 
     Zero(&myop, 1, LOGOP);
-    if (flags & G_NOARGS) {
-	PUSHMARK(sp);
-    }
-    else
+    if (!(flags & G_NOARGS))
 	myop.op_flags |= OPf_STACKED;
     myop.op_next = Nullop;
     myop.op_flags |= OPf_KNOW;
