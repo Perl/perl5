@@ -48,7 +48,7 @@ if(@ARGV<1) {
 	$me = $0;		# Editing $0 is unportable
 	$me =~ s,.*/,,;
 	die <<EOF;
-Usage: $me [-h] [-v] [-t] [-u] [-m] [-l] [-F] [-X] PageName|ModuleName|ProgramName
+Usage: $me [-h] [-r] [-i] [-v] [-t] [-u] [-m] [-l] [-F] [-X] PageName|ModuleName|ProgramName
        $me -f PerlFunc
 
 The -h option prints more help.  Also try "perldoc perldoc" to get
@@ -76,6 +76,8 @@ perldoc [options] -f BuiltinFunction
 
 Options:
     -h   Display this help message
+    -r   Recursive search (slow)
+    -i   Ignore case 
     -t   Display pod using pod2text instead of pod2man and nroff
              (-t is the default on win32)
     -u	 Display unformatted pod text
@@ -108,7 +110,7 @@ use Text::ParseWords;
 
 unshift(@ARGV,shellwords($ENV{"PERLDOC"}));
 
-getopts("mhtluvFf:X") || usage;
+getopts("mhtluvriFf:X") || usage;
 
 usage if $opt_h || $opt_h; # avoid -w warning
 
@@ -155,18 +157,22 @@ sub containspod {
 }
 
 sub minus_f_nocase {
-     my($file) = @_;
-     # on a case-forgiving file system we can simply use -f $file
-     if ($Is_VMS or $Is_MSWin32 or $Is_Dos or $^O eq 'os2') {
-        return $file if -f $file and -r _;
+     my($dir,$file) = @_;
+     my $path = join('/',$dir,$file);
+     return $path if -f $path and -r _;
+     if (!$opt_i or $Is_VMS or $Is_MSWin32 or $Is_Dos or $^O eq 'os2') {
+        # on a case-forgiving file system or if case is important 
+	# that is it all we can do
 	warn "Ignored $file: unreadable\n" if -f _;
 	return '';
      }
      local *DIR;
      local($")="/";
-     my(@p,$p,$cip);
+     my @p = ($dir);
+     my($p,$cip);
      foreach $p (split(/\//, $file)){
 	my $try = "@p/$p";
+	warn "$try\n";
 	stat $try;
  	if (-d _){
  	    push @p, $p;
@@ -200,17 +206,19 @@ sub minus_f_nocase {
 	    warn "Ignored $file: unreadable\n" if -f _;
  	}
      }
-     return; # is not a file
+     return "";
 }
  
 
 sub check_file {
-    my($file) = @_;
+    my($dir,$file) = @_;
     if ($opt_m) {
-	return minus_f_nocase($file) ? $file : "";
+	return minus_f_nocase($dir,$file);
     } else {
-	return minus_f_nocase($file) && containspod($file) ? $file : "";
+	my $path = minus_f_nocase($dir,$file);
+        return $path if containspod($path);
     }
+    return "";
 }
 
 
@@ -227,17 +235,17 @@ sub searchfor {
     for ($i=0; $i<@dirs; $i++) {
 	$dir = $dirs[$i];
 	($dir = VMS::Filespec::unixpath($dir)) =~ s!/$!! if $Is_VMS;
-	if (       ( $ret = check_file "$dir/$s.pod")
-		or ( $ret = check_file "$dir/$s.pm")
-		or ( $ret = check_file "$dir/$s")
+	if (       ( $ret = check_file $dir,"$s.pod")
+		or ( $ret = check_file $dir,"$s.pm")
+		or ( $ret = check_file $dir,$s)
 		or ( $Is_VMS and
-		     $ret = check_file "$dir/$s.com")
+		     $ret = check_file $dir,"$s.com")
 		or ( $^O eq 'os2' and 
-		     $ret = check_file "$dir/$s.cmd")
+		     $ret = check_file $dir,"$s.cmd")
 		or ( ($Is_MSWin32 or $Is_Dos or $^O eq 'os2') and
-		     $ret = check_file "$dir/$s.bat")
-		or ( $ret = check_file "$dir/pod/$s.pod")
-		or ( $ret = check_file "$dir/pod/$s")
+		     $ret = check_file $dir,"$s.bat")
+		or ( $ret = check_file "$dir/pod","$s.pod")
+		or ( $ret = check_file "$dir/pod",$s)
 	) {
 	    return $ret;
 	}
@@ -302,7 +310,7 @@ foreach (@pages) {
 		
 		@searchdirs = grep(!/^\.$/,@INC);
 		
-		@files= searchfor(1,$_,@searchdirs);
+		@files= searchfor(1,$_,@searchdirs) if $opt_r;
 		if( @files ) {
 			print STDERR "Loosely found as @files\n" if $opt_v;
 		} else {
