@@ -167,6 +167,7 @@ sub fileparse {
   }
   elsif ($fstype =~ /^AmigaOS/i) {
     ($dirpath,$basename) = ($fullname =~ /(.*[:\/])?(.*)/);
+    $dirpath = './' unless $dirpath;
   }
   elsif ($fstype !~ /^VMS/i) {  # default to Unix
     ($dirpath,$basename) = ($fullname =~ m#^(.*/)?(.*)#);

@@ -9,10 +9,6 @@ firstmakefile='GNUmakefile'
 ccflags='-DAMIGAOS -mstackextend'
 optimize='-O2 -fomit-frame-pointer'
 
-cppminus=' '
-cpprun='cpp'
-cppstdin='cpp'
-
 usenm='y'
 usemymalloc='n'
 usevfork='true'
