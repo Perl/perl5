@@ -444,14 +444,12 @@ sub output_record_separator {
 }
 
 sub input_record_separator {
-    my $old = new SelectSaver qualify($_[0], caller);
     my $prev = $/;
     $/ = $_[1] if @_ > 1;
     $prev;
 }
 
 sub input_line_number {
-    my $old = new SelectSaver qualify($_[0], caller);
     my $prev = $.;
     $. = $_[1] if @_ > 1;
     $prev;
