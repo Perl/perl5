@@ -291,13 +291,17 @@ locatelocale(\$Spanish, \@Spanish,
 ($Locale, @Locale) = ($Spanish, @Spanish)
     if (@Spanish > @Locale);
 
-print "# Locale = $Locale\n";
-print "# Alnum_ = @Locale\n";
-
 {
     local $^W = 0;
     setlocale(&LC_ALL, $Locale);
 }
+
+# Sort it now that LC_ALL has been set.
+
+@Locale = sort @Locale;
+
+print "# Locale = $Locale\n";
+print "# Alnum_ = @Locale\n";
 
 {
     my $i = 0;

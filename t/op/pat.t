@@ -2,7 +2,7 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..101\n";
+print "1..104\n";
 
 $x = "abc\ndef\n";
 
@@ -354,3 +354,28 @@ $x =~ /.a/g;
 print "not " unless f(pos($x)) == 4;
 print "ok $test\n";
 $test++;
+
+sub must_warn_pat {
+    my $warn_pat = shift;
+    return sub { print "not " unless $_[0] =~ /$warn_pat/ }
+}
+
+sub must_warn {
+    my ($warn_pat, $code) = @_;
+    local $^W; local %SIG;
+    eval 'BEGIN { $^W = 1; $SIG{__WARN__} = $warn_pat };' . $code;
+    print "ok $test\n";
+    $test++;
+}
+
+
+sub make_must_warn {
+    my $warn_pat = shift;
+    return sub { must_warn(must_warn_pat($warn_pat)) }
+}
+
+my $for_future = make_must_warn('reserved for future extensions');
+
+&$for_future('q(a:[b]:) =~ /[x[:foo:]]/');
+&$for_future('q(a=[b]=) =~ /[x[=foo=]]/');
+&$for_future('q(a.[b].) =~ /[x[.foo.]]/');

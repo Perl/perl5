@@ -3579,8 +3579,8 @@ PP(pp_ghostent)
     register char **elem;
     register SV *sv;
 #if defined(HAS_GETHOSTENT) && !defined(DONT_DECLARE_STD)
-    struct hostent *PerlSock_gethostbyname(const char *);
-    struct hostent *PerlSock_gethostbyaddr(const Gethbadd_addr_t, Gethbadd_alen_t, int);
+    struct hostent *PerlSock_gethostbyaddr(Netdb_host_t, Netdb_hlen_t, int);
+    struct hostent *PerlSock_gethostbyname(Netdb_name_t);
 #ifndef PerlSock_gethostent
     struct hostent *PerlSock_gethostent(void);
 #endif
@@ -3596,9 +3596,9 @@ PP(pp_ghostent)
 	int addrtype = POPi;
 	SV *addrsv = POPs;
 	STRLEN addrlen;
-	Gethbadd_addr_t addr = (Gethbadd_addr_t) SvPV(addrsv, addrlen);
+	Netdb_host_t addr = (Netdb_host_t) SvPV(addrsv, addrlen);
 
-	hent = PerlSock_gethostbyaddr(addr, (Gethbadd_alen_t) addrlen, addrtype);
+	hent = PerlSock_gethostbyaddr(addr, (Netdb_hlen_t) addrlen, addrtype);
     }
     else
 #ifdef HAS_GETHOSTENT
@@ -3682,12 +3682,8 @@ PP(pp_gnetent)
     register char **elem;
     register SV *sv;
 #ifdef NETDB_H_OMITS_GETNET
-    struct netent *getnetbyname(const char *);
-    /*
-     * long is wrong for getnetbyadddr (e.g. on Alpha). POSIX.1g says
-     * in_addr_t but then such systems don't have broken netdb.h anyway.
-     */
-    struct netent *getnetbyaddr(Getnbadd_net_t, int);
+    struct netent *getnetbyaddr(Netdb_net_t, int);
+    struct netent *getnetbyname(Netdb_name_t);
     struct netent *getnetent(void);
 #endif
     struct netent *nent;
@@ -3696,7 +3692,7 @@ PP(pp_gnetent)
 	nent = getnetbyname(POPp);
     else if (which == OP_GNBYADDR) {
 	int addrtype = POPi;
-	Getnbadd_net_t addr = (Getnbadd_net_t) U_L(POPn);
+	Netdb_net_t addr = (Netdb_net_t) U_L(POPn);
 	nent = getnetbyaddr(addr, addrtype);
     }
     else
@@ -3761,7 +3757,7 @@ PP(pp_gprotoent)
     register char **elem;
     register SV *sv;  
 #ifndef DONT_DECLARE_STD
-    struct protoent *PerlSock_getprotobyname(const char *);
+    struct protoent *PerlSock_getprotobyname(Netdb_name_t);
     struct protoent *PerlSock_getprotobynumber(int);
 #ifndef PerlSock_getprotoent
     struct protoent *PerlSock_getprotoent(void);
@@ -3833,8 +3829,8 @@ PP(pp_gservent)
     register char **elem;
     register SV *sv;
 #ifndef DONT_DECLARE_STD
-    struct servent *PerlSock_getservbyname(const char *, const char *);
-    struct servent *PerlSock_getservbynumber();
+    struct servent *PerlSock_getservbyname(Netdb_name_t, Netdb_name_t);
+    struct servent *PerlSock_getservbyport(int, Netdb_name_t);
 #ifndef PerlSock_getservent
     struct servent *PerlSock_getservent(void);
 #endif

@@ -322,9 +322,9 @@ a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
 ^(a\1?){4}$	aaaaaaaaaa	y	$1	aaaa
 ^(a\1?){4}$	aaaaaaaaa	n	-	-
 ^(a\1?){4}$	aaaaaaaaaaa	n	-	-
-^(a\1){4}$	aaaaaaaaaa	y	$1	aaaa
-^(a\1){4}$	aaaaaaaaa	n	-	-
-^(a\1){4}$	aaaaaaaaaaa	n	-	-
+^(a(?(1)\1)){4}$	aaaaaaaaaa	y	$1	aaaa
+^(a(?(1)\1)){4}$	aaaaaaaaa	n	-	-
+^(a(?(1)\1)){4}$	aaaaaaaaaaa	n	-	-
 (?:(f)(o)(o)|(b)(a)(r))*	foobar	y	$1:$2:$3:$4:$5:$6	f:o:o:b:a:r
 (?<=a)b	ab	y	$&	b
 (?<=a)b	cb	n	-	-
@@ -431,6 +431,12 @@ $(?<=^(a))	a	y	$1	a
 (?{$a=2})(a(?{local$a=$a+1}))*aak*c(?{$b=$a})	yaaxxaaaacd	y	$b	4
 (>a+)ab	aaab	n	-	-
 (?>a+)b	aaab	y	-	-
+([[:]+)	a:[b]:	y	$1	:[
+([[=]+)	a=[b]=	y	$1	=[
+([[.]+)	a.[b].	y	$1	.[
+[a[:xyz:	-	c	-	/[a[:xyz:/: unmatched [] in regexp
+[a[:xyz:]	-	c	-	/[a[:xyz:]/: unmatched [] in regexp
+([a[:xyz:]b]+)	pbaq	y	$1	ba
 ((?>a+)b)	aaab	y	$1	aaab
 (?>(a+))b	aaab	y	$1	aaa
 ((?>[^()]+)|\([^()]*\))+	((abc(ade)ufh()()x	y	$&	abc(ade)ufh()()x

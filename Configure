@@ -317,13 +317,20 @@ d_Gconvert=''
 d_getgrps=''
 d_setgrps=''
 d_gethent=''
-d_gethbadd=''
-gethbadd_addr_type=''
-gethbadd_alen_type=''
-d_getnbadd=''
-getnbadd_net_type=''
+d_gethbyaddr=''
+netdb_host_type=''
+netdb_hlen_type=''
+d_gethbyname=''
+netdb_name_type=''
+d_getnbyaddr=''
+d_getnbyname=''
+netdb_net_type=''
 aphostname=''
 d_gethname=''
+d_getpbyname=''
+d_getpbynumber=''
+d_getsbyname=''
+d_getsbyport=''
 d_phostname=''
 d_uname=''
 d_getlogin=''
@@ -6624,7 +6631,11 @@ set fsetpos d_fsetpos
 eval $inlibc
 
 : see if gethostbyaddr exists
-set gethostbyaddr d_gethbadd
+set gethostbyaddr d_gethbyaddr
+eval $inlibc
+
+: see if gethostbyname exists
+set gethostbyname d_gethbyname
 eval $inlibc
 
 : see if gethostent exists
@@ -6636,7 +6647,11 @@ set getlogin d_getlogin
 eval $inlibc
 
 : see if getnetbyaddr exists
-set getnetbyaddr d_getnbadd
+set getnetbyaddr d_getnbyaddr
+eval $inlibc
+
+: see if getnetbyname exists
+set getnetbyname d_getnbyname
 eval $inlibc
 
 : see if getpgid exists
@@ -6653,6 +6668,22 @@ eval $inlibc
 
 : see if getpriority exists
 set getpriority d_getprior
+eval $inlibc
+
+: see if getprotobyname exists
+set getprotobyname d_getpbyname
+eval $inlibc
+
+: see if getprotobynumber exists
+set getprotobynumber d_getpbynumber
+eval $inlibc
+
+: see if getservbyname exists
+set getservbyname d_getsbyname
+eval $inlibc
+
+: see if getservbyport exists
+set getservbyport d_getsbyport
 eval $inlibc
 
 : see if gettimeofday or ftime exists
@@ -9262,10 +9293,10 @@ eval $inhdr
 
 : check for type of arguments to gethostbyaddr.  This will only really
 : work if the system supports prototypes and provides one for
-: gethostbyaddr.
-case "$d_gethbadd" in
+: gethostbyaddr.  The netdb_host_type and netdb_hlen_type get defined.
+case "$d_gethbyaddr" in
 $define)
-        if test "X$gethbadd_addr_type" = X -o "X$gethbadd_alen_type" = X; then
+        if test "X$netdb_host_type" = X -o "X$netdb_hlen_type" = X; then
 	    $cat <<EOM
 
 Checking to see what type of arguments are expected by gethostbyaddr().
@@ -9292,72 +9323,70 @@ EOM
 #define Size_t $sizetype
 main()
 {
-	Gethbadd_addr_t	addr;
-        Gethbadd_alen_t	alen;
+        Netdb_alen_t	alen = sizeof(struct in_addr);
+	Netdb_addr_t	addr = (Netdb_addr_t)malloc(alen);
 	struct hostent*	hent;
 
-	extern struct hostent *gethostbyaddr(const Gethbadd_addr_t, Gethbadd_alen_t, int);
+	extern struct hostent *gethostbyaddr(Netdb_addr_t, Netdb_alen_t, int);
 
-	alen = sizeof(struct in_addr);
-	addr = (Gethbadd_addr_t)malloc(alen);
-	/* We do not execute this so the contents of the addr matter not. */
+	/* We do not execute this so the arguments matter not. */
 	hent = gethostbyaddr(addr, alen, AF_INET);
 
 	exit(0);
 }
 EOCP
-	    for xxx in "void *" "char *"; do
-		    for yyy in Size_t int; do
-			    if $cc $ccflags -c -DGethbadd_addr_t="$xxx" -DGethbadd_alen_t="$yyy" try.c >/dev/null 2>&1 ; then
-				gethbadd_addr_type="$xxx"
-				gethbadd_alen_type="$yyy"
+	    for xxx in in_addr_t "const void *" "const char *" "void *" "char *"; do
+		    for yyy in Size_t long int; do
+			    if $cc $ccflags -c -DNetdb_addr_t="$xxx" -DNetdb_alen_t="$yyy" try.c >/dev/null 2>&1 ; then
+				netdb_host_type="$xxx"
+				netdb_hlen_type="$yyy"
 				$cat >&4 <<EOM
-Your system uses $xxx for the 1st argument to gethostbyaddr.
-and the 2nd argument to gethostbyaddr is $yyy.
+Your system accepts $xxx for the 1st argument to gethostbyaddr.
+and the 2nd argument to gethostbyaddr can be $yyy.
 EOM
 				break
 			    fi
 		    done
-		    test "X$gethbadd_addr_type" != X && break
+		    test "X$netdb_host_type" != X && break
 	    done
-	    if test "X$gethbadd_addr_type" = X; then
+	    if test "X$netdb_host_type" = X; then
 		    rp='What is the type for the 1st argument to gethostbyaddr?'
 		    dflt="void *"
 		    . ./myread
-		    gethbadd_addr_type="$ans"
+		    netdb_host_type="$ans"
 
 		    # Remove the "const" if needed.
-		    gethbadd_addr_type=`echo "$gethbadd_addr_type" | sed 's/^const //'`
+		    netdb_host_type=`echo "$netdb_host_type" | sed 's/^const //'`
 
 		    rp='What is the type for the 2nd argument to gethostbyaddr ?'
 		    dflt="Size_t"
 		    . ./myread
-		    gethbadd_alen_type="$ans"
+		    netdb_hlen_type="$ans"
 	    fi
 	    $rm -f try.[co]
 	 else
 	    $cat >&4 <<EOM
-Your system uses $gethbadd_addr_type for the 1st argument to gethostbyaddr.
-and the 2nd argument to gethostbyaddr is $gethbadd_alen_type.
+Your system accepts $netdb_host_type for the 1st argument to gethostbyaddr.
+and the 2nd argument to gethostbyaddr can be $netdb_hlen_type.
 EOM
 	fi
 	;;
-*)	gethbadd_addr_type='void *'
-	gethbadd_alen_type='Size_t'
+*)	netdb_host_type='void *'
+	netdb_hlen_type='Size_t'
 	;;
 esac
 
-: check for type of arguments to getnetbyaddr.  This will only really
+: check for type of arguments to gethostbyname.  This will only really
 : work if the system supports prototypes and provides one for
-: getnetbyaddr.
-case "$d_getnbadd" in
+: gethostbyname.  The netdb_name_type gets defined.
+case "$d_gethbyname" in
 $define)
-        if test "X$getnbadd_net_type" = X; then
-	    $cat <<EOM
+        if test "X$netdb_name_type" = X; then
+            $cat <<EOM
 
-Checking to see what type of arguments are expected by getnetbyaddr().
+Checking to see what type of arguments are expected by gethostbyname().
 EOM
-	$cat >try.c <<EOCP
+        $cat >try.c <<EOCP
 #$i_niin I_NIIN
 #$i_netdb I_NETDB
 #$d_socket HAS_SOCKET
@@ -9374,37 +9403,97 @@ EOM
 #endif
 main()
 {
-	Getnbadd_net_t	net;
-	struct netent*	nent;
+        char*  host = "localhost";
+        struct hostent*  hent;
 
-	extern struct netent *getnetbyaddr(Getnbadd_net_t, int);
+        extern struct hostent *gethostbyname(Netdb_name_t);
 
-	/* We do not execute this so the contents of the net matter not. */
-	nent = getnetbyaddr(net, AF_INET);
+        /* We do not execute this so the arguments matter not. */
+        hent = gethostbyname(host);
 
-	exit(0);
+        exit(0);
 }
 EOCP
-	    for xxx in in_addr_t long int; do
-		    if $cc $ccflags -c -DGetnbadd_net_t="$xxx" try.c >/dev/null 2>&1 ; then
-			getnbadd_net_type="$xxx"
-			echo "Your system uses $xxx for the 1st argument to getnetbyaddr." >&4
-			break
-		    fi
-	    done
-	    if test "X$getnbadd_net_type" = X; then
-		    rp='What is the type for the 1st argument to getnetbyaddr?'
-		    dflt="long"
-		    . ./myread
-		    getnbadd_net_type="$ans"
-	    fi
-	    $rm -f try.[co]
-	else
-	    echo "Your system uses $getnbadd_net_type for the 1st argument to getnetbyaddr." >&4
-	fi
-	;;
-*)	getnbadd_net_type='long'
-	;;
+            for xxx in "const char *" "char *"; do
+                    if $cc $ccflags -c -DNetdb_name_t="$xxx" try.c >/dev/null 2>&1 ; then
+                        netdb_name_type="$xxx"
+                        echo "Your system accepts $xxx for the 1st argument to gethostbyname." >&4
+                        break
+                    fi
+            done
+            if test "X$netdb_name_type" = X; then
+                    rp='What is the type for the 1st argument to gethostbyname?'
+                    dflt="char *"
+                    . ./myread
+                    netdb_name_type="$ans"
+            fi
+            $rm -f try.[co]
+        else
+            echo "Your system accepts $netdb_name_type for the 1st argument to gethostbyname." >&4
+        fi
+        ;;
+*)      netdb_name_type='char *'
+        ;;
+esac
+
+: check for type of arguments to getnetbyaddr.  This will only really
+: work if the system supports prototypes and provides one for
+: getnetbyaddr.  The netdb_net_type gets defined.
+case "$d_getnbyaddr" in
+$define)
+        if test "X$netdb_net_type" = X; then
+            $cat <<EOM
+
+Checking to see what type of arguments are expected by getnetbyaddr().
+EOM
+        $cat >try.c <<EOCP
+#$i_niin I_NIIN
+#$i_netdb I_NETDB
+#$d_socket HAS_SOCKET
+#$d_socket HAS_SOCKET
+#include <sys/types.h>
+#ifdef HAS_SOCKET
+#include <sys/socket.h> /* Might include <sys/bsdtypes.h> */
+#endif
+#ifdef I_NIIN
+#include <netinet/in.h>
+#endif
+#ifdef I_NETDB
+#include <netdb.h>
+#endif
+main()
+{
+        Netdb_net_t  net;
+        struct netent*  nent;
+
+        extern struct netent *getnetbyaddr(Netdb_net_t, int);
+
+        /* We do not execute this so the arguments matter not. */
+        nent = getnetbyaddr(net, 2);
+
+        exit(0);
+}
+EOCP
+            for xxx in in_addr_t "unsigned long" long "unsigned int" int; do
+                    if $cc $ccflags -c -DNetdb_net_t="$xxx" try.c >/dev/null 2>&1 ; then
+                        netdb_net_type="$xxx"
+                        echo "Your system accepts $xxx for the 1st argument to getnetbyaddr." >&4
+                        break
+                    fi
+            done
+            if test "X$netdb_net_type" = X; then
+                    rp='What is the type for the 1st argument to getnetbyaddr?'
+                    dflt="long"
+                    . ./myread
+                    netdb_net_type="$ans"
+            fi
+            $rm -f try.[co]
+        else
+            echo "Your system accepts $netdb_net_type for the 1st argument to getnetbyaddr." >&4
+        fi
+        ;;
+*)      netdb_net_type='long'
+        ;;
 esac
 
 : see what type of char stdio uses.
@@ -10356,19 +10445,26 @@ d_fsetpos='$d_fsetpos'
 d_ftime='$d_ftime'
 d_getgrps='$d_getgrps'
 d_setgrps='$d_setgrps'
-d_gethbadd='$d_gethbadd'
-gethbadd_addr_type='$gethbadd_addr_type'
-gethbadd_alen_type='$gethbadd_alen_type'
+d_gethbyaddr='$d_gethbyaddr'
+netdb_host_type='$netdb_host_type'
+netdb_hlen_type='$netdb_hlen_type'
+d_gethbynam='$d_gethbynam'
+netdb_name_type='$netdb_name_type'
 d_gethent='$d_gethent'
 d_gethname='$d_gethname'
 d_getlogin='$d_getlogin'
-d_getnbadd='$d_getnbadd'
-getnbadd_net_type='$getnbadd_net_type'
+d_getnbyaddr='$d_getnbyaddr'
+d_getnbyname='$d_getnbyname'
+netdb_net_type='$netdb_net_type'
 d_getpgid='$d_getpgid'
 d_getpgrp2='$d_getpgrp2'
 d_getpgrp='$d_getpgrp'
 d_getppid='$d_getppid'
 d_getprior='$d_getprior'
+d_getpbyname='$d_getpbyname'
+d_getpbynumber='$d_getpbynumber'
+d_getsbyname='$d_getsbyname'
+d_getsbyport='$d_getsbyport'
 d_gettimeod='$d_gettimeod'
 d_gnulibc='$d_gnulibc'
 d_htonl='$d_htonl'

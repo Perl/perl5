@@ -43,13 +43,13 @@
 #define ENTER							\
     STMT_START {						\
 	push_scope();						\
-	DEBUG_l(deb("ENTER scope %ld at %s:%d\n",		\
-		    scopestack_ix, __FILE__, __LINE__));	\
+	DEBUG_l(WITH_THR(deb("ENTER scope %ld at %s:%d\n",	\
+		    scopestack_ix, __FILE__, __LINE__)));	\
     } STMT_END
 #define LEAVE							\
     STMT_START {						\
-	DEBUG_l(deb("LEAVE scope %ld at %s:%d\n",		\
-		    scopestack_ix, __FILE__, __LINE__));	\
+	DEBUG_l(WITH_THR(deb("LEAVE scope %ld at %s:%d\n",	\
+		    scopestack_ix, __FILE__, __LINE__)));	\
 	pop_scope();						\
     } STMT_END
 #else
