@@ -2913,13 +2913,13 @@ static const char uuemap[] =
 static char uudmap[256];        /* Initialised on first use */
 #if 'I' == 73 && 'J' == 74
 /* On an ASCII/ISO kind of system */
-#define ISUUCHAR(ch)    ((ch) > ' ' && (ch) < 'a')
+#define ISUUCHAR(ch)    ((ch) >= ' ' && (ch) < 'a')
 #else
 /*
   Some other sort of character set - use memchr() so we don't match
   the null byte.
  */
-#define ISUUCHAR(ch)    (memchr(uuemap, (ch), sizeof(uuemap)-1))
+#define ISUUCHAR(ch)    (memchr(uuemap, (ch), sizeof(uuemap)-1) || (ch) == ' ')
 #endif
 
 PP(pp_unpack)
