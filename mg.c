@@ -129,7 +129,21 @@ Perl_mg_get(pTHX_ SV *sv)
     int new = 0;
     MAGIC *newmg, *head, *cur, *mg;
     I32 mgs_ix = SSNEW(sizeof(MGS));
-
+    /* guard against sv having being freed midway by holding a private
+       reference. It's not possible to make this sv mortal without failing
+       several tests -
+       looks like it's important that it can get DESTROYed before the next
+       FREETMPS
+       Also it's not possible to wrap this function in a SAVETMPS/FREETMPS
+       pair. We need drop our reference if croak() is called, but we also
+       can't simply make it mortal and wait for the next FREETMPS, because
+       other tests rely on the sv being freed earlier. Hence this hack.
+       We create an extra reference on the caller's sv, owned by the rv,
+       which is mortal. If croak is called the RV cleans up for us.
+       If we reach the end of the function we change it to point at
+       PL_sv_undef, and clean up manually.  */
+    SV *temp_rv = sv_2mortal(newRV_inc(sv));
+       
     save_magic(mgs_ix, sv);
 
     /* We must call svt_get(sv, mg) for each valid entry in the linked
@@ -143,10 +157,6 @@ Perl_mg_get(pTHX_ SV *sv)
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 	    CALL_FPTR(vtbl->svt_get)(aTHX_ sv, mg);
 
-	    /* guard against sv having been freed */
-	    if (SvTYPE(sv) == SVTYPEMASK) {
-		Perl_croak(aTHX_ "Tied variable freed while still in use");
-	    }
 	    /* guard against magic having been deleted - eg FETCH calling
 	     * untie */
 	    if (!SvMAGIC(sv))
@@ -178,6 +188,8 @@ Perl_mg_get(pTHX_ SV *sv)
     }
 
     restore_magic(aTHX_ INT2PTR(void *, (IV)mgs_ix));
+    SvRV(temp_rv) = &PL_sv_undef;
+    SvREFCNT_dec(sv);
     return 0;
 }
 

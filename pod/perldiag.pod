@@ -3736,12 +3736,6 @@ target of the change to
 
 (F) The entry point function of threads->create() failed for some reason.
 
-=item Tied variable freed while still in use
-
-(F) An access method for a tied variable (e.g. FETCH) did something to
-free the variable.  Since continuing the current operation is likely
-to result in a coredump, Perl is bailing out instead.
-
 =item times not implemented
 
 (F) Your version of the C library apparently doesn't do times().  I
