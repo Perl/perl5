@@ -2,7 +2,9 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include <sys/syslog.h>
+#ifdef I_SYSLOG
+#include <syslog.h>
+#endif
 
 static double
 constant_LOG_NO(char *name, int len, int arg)
