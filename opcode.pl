@@ -470,7 +470,7 @@ reset		reset			ck_fun		is%	S?
 lineseq		line sequence		ck_null		@	
 nextstate	next statement		ck_null		s;	
 dbstate		debug next statement	ck_null		s;	
-unstack		unstack			ck_null		s0
+unstack		iteration finalizer	ck_null		s0
 enter		block entry		ck_null		0	
 leave		block exit		ck_null		@	
 scope		block			ck_null		@	
