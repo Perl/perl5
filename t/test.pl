@@ -401,6 +401,7 @@ sub runperl {
     return $result;
 }
 
+*run_perl = \&runperl; # Nice alias.
 
 sub DIE {
     print STDERR "# @_\n";

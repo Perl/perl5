@@ -369,6 +369,25 @@ sub pod2html {
     $/ = "";
     my @poddata  = <POD>;
     close(POD);
+
+    # be eol agnostic
+    for (@poddata) {
+	if (/\x0D/) {
+	    if (/\x0D\x0A/) {
+		@poddata = map { s/\x0D\x0A/\n/g;
+				 /\n\n/ ?
+				     map { "$_\n\n" } split /\n\n/ :
+				     $_ } @poddata;
+	    } else {
+		@poddata = map { s/\x0D/\n/g;
+				 /\n\n/ ?
+				     map { "$_\n\n" } split /\n\n/ :
+				     $_ } @poddata;
+	    }
+	    last;
+	}
+    }
+
     clean_data( \@poddata );
 
     # scan the pod for =head[1-6] directives and build an index
@@ -1694,7 +1713,8 @@ sub html_escape {
     $rest   =~ s/</&lt;/g;
     $rest   =~ s/>/&gt;/g;
     $rest   =~ s/"/&quot;/g;
-    $rest   =~ s/'/&apos;/g;
+    # &apos; is only in XHTML, not HTML4.  Be conservative
+    #$rest   =~ s/'/&apos;/g;
     return $rest;
 }
 

@@ -50,5 +50,6 @@ no warnings 'layer';
 open(F, ">:xyz", "bb");
 use warnings 'layer';
 open(F, ">:xyz", "bb");
+END { 1 while unlink "bb" } # KEEP THIS WITH THE LAST TEST.
 EXPECT
 perlio: unknown layer "xyz".

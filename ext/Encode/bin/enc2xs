@@ -1,21 +1,19 @@
 #!./perl
 BEGIN {
-    # fiddle with @INC iff I am a part of perl dist
-    if ($^X =~ m/\bminiperl$/o){
-       warn "Fixing \@INC for perl core.\n";
-       unshift @INC, qw(../../lib ../../../lib ../../../../lib);
-       $ENV{PATH} .= ';../..;../../..;../../../..' if $^O eq 'MSWin32';
-    }
+    # @INC poking  no longer needed w/ new MakeMaker and Makefile.PL's
+    # with $ENV{PERL_CORE} set
+    # In case we need it in future...
+    require Config; import Config;
 }
 use strict;
 use Getopt::Std;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 1.10 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-
+our $VERSION  = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
 # AGG is an aggreagated do_now, as built up by &process
+
 use constant {
   RAW_NEXT => 0,
   RAW_IN_LEN => 1,
@@ -30,6 +28,7 @@ use constant {
   AGG_OUT_LEN => 5,
   AGG_FALLBACK => 6,
 };
+
 # (See the algorithm in encengine.c - we're building structures for it)
 
 # There are two sorts of structures.
@@ -161,7 +160,7 @@ my ($doC,$doEnc,$doUcm,$doPet);
 if ($cname =~ /\.(c|xs)$/)
  {
   $doC = 1;
-  $dname =~ s/(\.[^\.]*)?$/_def.h/;
+  $dname =~ s/(\.[^\.]*)?$/.exh/;
   chmod(0666,$dname) if -f $cname && !-w $dname;
   open(D,">$dname") || die "Cannot open $dname:$!";
   $hname =~ s/(\.[^\.]*)?$/.h/;
@@ -381,16 +380,18 @@ sub compile_ucm
    s/#.*$//;
    last if /^\s*END\s+CHARMAP\s*$/i;
    next if /^\s*$/;
-   my ($u,@byte);
-   my $fb = '';
-   $u = $1 if (/^<U([0-9a-f]+)>\s+/igc);
-   push(@byte,$1) while /\G\\x([0-9a-f]+)/igc;
-   $fb = $1 if /\G\s*(\|[0-3])/gc;
-   # warn "$_: $u @byte | $fb\n";
-   die "Bad line:$_" unless /\G\s*(#.*)?$/gc;
-   if (defined($u))
+   my (@uni, @byte) = ();
+   my ($uni, $byte, $fb) = m/^(\S+)\s+(\S+)\s+(\S+)\s+/o
+       or die "Bad line: $_";
+   while ($uni =~  m/\G<([U0-9a-fA-F\+]+)>/g){
+       push @uni, map { substr($_, 1) } split(/\+/, $1);
+   }
+   while ($byte =~ m/\G\\x([0-9a-fA-F]+)/g){
+       push @byte, $1;
+   }
+   if (@uni)
     {
-     my $uch = encode_U(hex($u));
+     my $uch =  join('', map { encode_U(hex($_)) } @uni );
      my $ech = join('',map(chr(hex($_)),@byte));
      my $el  = length($ech);
      $max_el = $el if (!defined($max_el) || $el > $max_el);

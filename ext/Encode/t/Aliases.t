@@ -18,13 +18,13 @@ use Encode::Alias;
 my %a2c;
 my $ON_EBCDIC;
 
-BEGIN{
-    $ON_EBCDIC = ord("A") == 193;
-    @ARGV and $ON_EBCDIC = $ARGV[0] eq 'EBCDIC';
-    $Encode::ON_EBCDIC = $ON_EBCDIC;
-
+sub init_a2c{
     %a2c = (
-	    'ascii'    => 'US-ascii',
+	    'US-ascii' => 'ascii',
+	    'UTF-8'    => 'utf8',
+	    'UTF-16BE' => 'UCS-2',
+	    'ucs-2le'  => 'UTF-16LE',
+	    'ucs2-le'  => 'UTF-16LE',
 	    'cyrillic' => 'iso-8859-5',
 	    'arabic'   => 'iso-8859-6',
 	    'greek'    => 'iso-8859-7',
@@ -71,43 +71,51 @@ BEGIN{
 	$a2c{"Win" . ucfirst($k)} = "cp" . $v;
 	$a2c{"IBM-$v"} = $a2c{"MS-$v"} = "cp" . $v;
     }
+    my @a2c = keys %a2c;
+    for my $k (@a2c){
+	$a2c{uc($k)} = $a2c{$k};
+	$a2c{lc($k)} = $a2c{$k};
+	$a2c{lcfirst($k)} = $a2c{$k};
+	$a2c{ucfirst($k)} = $a2c{$k};
+    }
+}
+
+BEGIN{
+    $ON_EBCDIC = ord("A") == 193;
+    @ARGV and $ON_EBCDIC = $ARGV[0] eq 'EBCDIC';
+    $Encode::ON_EBCDIC = $ON_EBCDIC;
+    init_a2c();
 }
 
 if ($ON_EBCDIC){
     delete @Encode::ExtModule{
-	qw(euc-cn gb2312 gb12345 gbk cp936 iso-ir-165
+	qw(euc-cn gb2312 gb12345 gbk cp936 iso-ir-165 MacChineseSimp
 	   euc-jp iso-2022-jp 7bit-jis shiftjis MacJapanese cp932
-	   euc-kr ksc5601 cp949
-	   big5	big5-hkscs cp950
+	   euc-kr ksc5601 cp949 MacKorean
+	   big5	big5-hkscs cp950 MacChineseTrad
 	   gb18030 big5plus euc-tw)
 	};
 }
 
-use Test::More tests => (scalar keys %a2c) * 3;
+use Test::More tests => (scalar keys %a2c) * 4;
 
 print "# alias test;  \$ON_EBCDIC == $ON_EBCDIC\n";
 
 foreach my $a (keys %a2c){	     
     my $e = Encode::find_encoding($a);
-    is((defined($e) and $e->name), $a2c{$a});
+    is((defined($e) and $e->name), $a2c{$a})
+	or warn "alias was $a";;
 }
 
 # now we override some of the aliases and see if it works fine
 
-define_alias(ascii    => 'WinLatin1',
-	     cyrillic => 'WinCyrillic',
-	     arabic   => 'WinArabic',
-	     greek    => 'WinGreek',
-	     hebrew   => 'WinHebrew');
-
-@a2c{qw(ascii cyrillic arabic greek hebrew)} =
-    qw(cp1252 cp1251 cp1256 cp1253 cp1255);
-
-unless ($ON_EBCDIC){
-    define_alias( qr/shift.*jis$/i  => '"MacJapanese"',
-		  qr/sjis$/i        => '"cp932"' );
-    @a2c{qw(Shift_JIS x-sjis)} = qw(MacJapanese cp932);
-}
+define_alias(
+	     qr/ascii/i    => 'WinLatin1',
+	     qr/cyrillic/i => 'WinCyrillic',
+	     qr/arabic/i   => 'WinArabic',
+	     qr/greek/i    => 'WinGreek',
+	     qr/hebrew/i   => 'WinHebrew'
+	    );
 
 print "# alias test with alias overrides\n";
 
@@ -122,13 +130,24 @@ print "# alias undef test\n";
 Encode::Alias->undef_aliases;
 foreach my $a (keys %a2c){	     
     my $e = Encode::find_encoding($a);
-    ok(!defined($e) || $e->name =~ /-raw$/o);
+    ok(!defined($e) || $e->name =~ /-raw$/o)
+	or warn "alias was $a";
 }
 
-__END__
-for (my $i = 0; $i < @Encode::Alias::Alias; $i+=2){
-    my ($k, $v) = @Encode::Alias::Alias[$i, $i+1];
-    print "$k => $v\n";
+print "# alias reinit test\n";
+
+Encode::Alias->init_aliases;
+init_a2c();
+foreach my $a (keys %a2c){	     
+    my $e = Encode::find_encoding($a);
+    is((defined($e) and $e->name), $a2c{$a})
+	or warn "alias was $a";
 }
+__END__
+for my $k (keys %a2c){
+    $k =~ /[A-Z]/ and next;
+    print "$k => $a2c{$k}\n";
+}
+
 
 

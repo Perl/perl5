@@ -422,9 +422,17 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvNAME(stash), name) );
 	}
-	else
+	else {
             /* don't autovifify if ->NoSuchStash::method */
             stash = gv_stashpvn(origname, nsplit - origname, FALSE);
+
+	    /* however, explicit calls to Pkg::SUPER::method may
+	       happen, and may require autovivification to work */
+	    if (!stash && (nsplit - origname) >= 7 &&
+		strnEQ(nsplit - 7, "::SUPER", 7) &&
+		gv_stashpvn(origname, nsplit - origname - 7, FALSE))
+	      stash = gv_stashpvn(origname, nsplit - origname, TRUE);
+	}
     }
 
     gv = gv_fetchmeth(stash, name, nend - name, 0);

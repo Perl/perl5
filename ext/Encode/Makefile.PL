@@ -1,6 +1,11 @@
 use 5.007003;
 use ExtUtils::MakeMaker;
 
+# Just for sure :)
+unless($ENV{PERL_CORE}) {
+    $ENV{PERL_CORE} = 1 if ($^X =~ m{\bminiperl[^/\\\]>:]*$}o);
+}
+
 my %tables = 
     (
      def_t => ['ascii.ucm',
@@ -12,7 +17,7 @@ my @exe_files = qw(bin/enc2xs
 		   bin/piconv
 		   );
 my @more_exe_files = qw(
-			ucm2table
+			unidump
 			);
 my @pmlibdirs = qw(lib Encode);
 for my $arg (@ARGV){
@@ -65,7 +70,7 @@ sub post_initialize
     my @files;
     foreach my $table (keys %tables)
     {
-	foreach my $ext (qw($(OBJ_EXT) .c .h _def.h .fnm))
+	foreach my $ext (qw($(OBJ_EXT) .c .h .exh .fnm))
     {
 	push (@files,$table.$ext);
     }
@@ -78,7 +83,7 @@ sub postamble
 {
     my $self = shift;
     my $dir  = $self->catdir($self->curdir,'ucm');
-    my $str  = "# Encode\$(OBJ_EXT) depends on .h and _def.h files not .c files - but all written by enc2xs\n";
+    my $str  = "# Encode\$(OBJ_EXT) depends on .h and .exh files not .c files - but all written by enc2xs\n";
     $str  .= 'Encode$(OBJ_EXT) :';
     foreach my $table (keys %tables)
     {
@@ -103,9 +108,10 @@ sub postamble
 		$continuator = '';
 	    }
 	}
-        $str .= $^O eq 'VMS' # In VMS quote to preserve case
-            ? qq{\n\t\$(PERL) $enc2xs -"Q" -"O" -o \$\@ -f $table.fnm\n\n}
-            : qq{\n\t\$(PERL) $enc2xs -Q -O -o \$\@ -f $table.fnm\n\n};
+	my $plib   = $ENV{PERL_CORE} ? '-I$(PERL_LIB)' : '';
+	my $ucopts = ($^O eq 'VMS')  ? '-"Q" -"O"' : '-Q -O'; 
+	$str .=  
+	    qq{\n\t\$(PERL) $plib $enc2xs $ucopts -o \$\@ -f $table.fnm\n\n};
 	open (FILELIST, ">$table.fnm")
 	    || die "Could not open $table.fnm: $!";
 	foreach my $file (@{$tables{$table}})

@@ -1,9 +1,16 @@
 #!./perl 
 
+my $has_perlio;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
+    unless ($has_perlio = find PerlIO::Layer 'perlio') {
+	print <<EOF;
+# Since you don't have perlio you might get failures with UTF-8 locales.
+EOF
+    }
 }
 
 # NOTE!
@@ -165,7 +172,7 @@ BANG
     foreach (@tests) {
         my ($why, $prog, $expect) = @$_;
         open P, ">$progfile" or die "Can't open '$progfile': $!";
-        binmode(P, ":bytes");
+        binmode(P, ":bytes") if $has_perlio;
 	print P $show, $prog, '; print $b'
             or die "Print to 'progfile' failed: $!";
         close P or die "Can't close '$progfile': $!";

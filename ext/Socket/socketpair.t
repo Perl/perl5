@@ -2,6 +2,7 @@
 
 my $child;
 my $can_fork;
+my $has_perlio;
 
 BEGIN {
     chdir 't' if -d 't';
@@ -40,6 +41,11 @@ BEGIN {
         exit 1;
       }
     }
+    unless ($has_perlio = find PerlIO::Layer 'perlio') {
+	print <<EOF;
+# Since you don't have perlio you might get failures with UTF-8 locales.
+EOF
+    }
 }
 
 use Socket;
@@ -77,8 +83,10 @@ ok (socketpair (LEFT, RIGHT, AF_UNIX, SOCK_STREAM, PF_UNSPEC),
     "socketpair (LEFT, RIGHT, AF_UNIX, SOCK_STREAM, PF_UNSPEC)")
   or print "# \$\! = $!\n";
 
-binmode(LEFT,  ":bytes");
-binmode(RIGHT, ":bytes");
+if ($has_perlio) {
+    binmode(LEFT,  ":bytes");
+    binmode(RIGHT, ":bytes");
+}
 
 my @left = ("hello ", "world\n");
 my @right = ("perl ", "rules!"); # Not like I'm trying to bias any survey here.
@@ -166,8 +174,10 @@ ok (socketpair (LEFT, RIGHT, AF_UNIX, SOCK_DGRAM, PF_UNSPEC),
     "socketpair (LEFT, RIGHT, AF_UNIX, SOCK_DGRAM, PF_UNSPEC)")
   or print "# \$\! = $!\n";
 
-binmode(LEFT,  ":bytes");
-binmode(RIGHT, ":bytes");
+if ($has_perlio) {
+    binmode(LEFT,  ":bytes");
+    binmode(RIGHT, ":bytes");
+}
 
 foreach (@left) {
   # is (syswrite (LEFT, $_), length $_, "write " . _qq ($_) . " to left");

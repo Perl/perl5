@@ -3,9 +3,6 @@
 # This tests the behavior of sort() under the different 'use sort' forms.
 # Algorithm by John P. Linderman.
 
-use strict;
-use warnings;
-
 my ($BigWidth, $BigEnough, $RootWidth, $ItemFormat, @TestSizes, $WellSoaked);
 
 BEGIN {
@@ -24,6 +21,9 @@ BEGIN {
 	push(@TestSizes, int($ts));		# about 3 per decade
     }
 }
+
+use strict;
+use warnings;
 
 use Test::More tests => @TestSizes * 2	# sort() tests
 			* 4		# number of pragmas to test

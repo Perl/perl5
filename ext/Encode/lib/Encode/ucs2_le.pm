@@ -4,7 +4,7 @@ our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" 
 
 use base 'Encode::Encoding';
 
-__PACKAGE__->Define(qw(UCS-2le UCS-2LE ucs-2le));
+__PACKAGE__->Define(qw(UTF-16LE UCS-2LE ucs2-le));
 
 sub decode
 {

@@ -4,39 +4,51 @@ use ExtUtils::MakeMaker;
 
 my $name = 'Byte';
 my %tables = (
-	      misc_t => 
+	      byte_t => 
 	      [
+	       # misc. vendors
 	       'gsm0338.ucm',
 	       'nextstep.ucm',
 	       'hp-roman8.ucm',
 	       'viscii.ucm',
-	       ],
-	      koi8_t => [ 'koi8-f.ucm', 'koi8-r.ucm', 'koi8-u.ucm', ],
-	      mac_t => 
-	      [
+	       'adobeStdenc.ucm',
+	       # koi8
+	       'koi8-f.ucm', 'koi8-r.ucm', 'koi8-u.ucm', 
+	       # Mac
 	       qw(
-		  macCentEuro.ucm 
-		  macSami.ucm
-		  macUkraine.ucm
+		  macArabic.ucm
+		  macCentEuro.ucm
 		  macCroatian.ucm
-		  macGreek.ucm
-		  macRoman.ucm
-		  macThai.ucm
 		  macCyrillic.ucm
+		  macFarsi.ucm
+		  macGreek.ucm
+		  macHebrew.ucm
 		  macIceland.ucm
-		  macRumanian.ucm 
+		  macRoman.ucm
+		  macROMnn.ucm
+		  macRUMnn.ucm
+		  macSami.ucm
+		  macThai.ucm
 		  macTurkish.ucm
+		  macUkraine.ucm
 		  ),
 	      ],
              );
 
+my %not_here = 
+    map {$_ => 1} 
+(
+ '8859-1.ucm', # default
+ qw(cp037.ucm cp1026.ucm cp1047.ucm cp500.ucm cp875.ucm), # EBCDIC
+ qw(cp932.ucm cp936.ucm cp949.ucm cp950.ucm),  # CJK
+ );
+
 opendir(ENC,'../ucm');
 while (defined(my $file = readdir(ENC)))
 {
-    if ($file =~ /(8859|ibm).*\.ucm/io)
-    {
-	push(@{$tables{$1."_t"}},$file) unless $file eq '8859-1.ucm';
-    }
+    $file =~ /^(8859|cp).*\.ucm$/io or next;
+    $not_here{$file} and next;
+    push(@{$tables{byte_t}},$file);
 }
 closedir(ENC);
 
@@ -77,7 +89,7 @@ sub post_initialize
 	push (@{$self->{'C'}},"$table.c");
 	# Do NOT add $table.h etc. to H_FILES unless we own up as to how they
 	# get built.
-	foreach my $ext (qw($(OBJ_EXT) .c .h _def.h .fnm)) {
+	foreach my $ext (qw($(OBJ_EXT) .c .h .exh .fnm)) {
 	    push (@files,$table.$ext);
 	}
     }
@@ -121,7 +133,7 @@ BOOT:
 {
 END
     foreach my $table (keys %tables) {
-	print XS qq[#include "${table}_def.h"\n];
+	print XS qq[#include "${table}.exh"\n];
     }
     print XS "}\n";
     close(XS);
@@ -132,7 +144,7 @@ sub postamble
 {
     my $self = shift;
     my $dir  = $self->catdir($self->updir,'ucm');
-    my $str  = "# $name\$(OBJ_EXT) depends on .h and _def.h files not .c files - but all written by enc2xs\n";
+    my $str  = "# $name\$(OBJ_EXT) depends on .h and .exh files not .c files - but all written by enc2xs\n";
     $str    .= "$name.c : $name.xs ";
     foreach my $table (keys %tables)
     {
@@ -159,9 +171,10 @@ sub postamble
 		$continuator = '';
 	    }
 	}
-        $str .= $^O eq 'VMS' # In VMS quote to preserve case
-            ? qq{\n\t\$(PERL) $enc2xs -"Q" -o \$\@ -f $table.fnm\n\n}
-            : qq{\n\t\$(PERL) $enc2xs -Q -o \$\@ -f $table.fnm\n\n};
+	my $plib   = $ENV{PERL_CORE} ? '-I$(PERL_LIB)' : '';
+	my $ucopts = ($^O eq 'VMS')  ? '-"Q" -"O"' : '-Q -O'; 
+	$str .=  
+	    qq{\n\t\$(PERL) $plib $enc2xs $ucopts -o \$\@ -f $table.fnm\n\n};
 	open (FILELIST, ">$table.fnm")
 	    || die "Could not open $table.fnm: $!";
 	foreach my $file (@{$tables{$table}})

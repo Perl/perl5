@@ -1,6 +1,6 @@
 package threads;
 
-use 5.7.2;
+use 5.007_002;
 use strict;
 use warnings;
 

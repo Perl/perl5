@@ -645,7 +645,7 @@ C<use_ok> and C<require_ok>.
    BEGIN { use_ok($module, @imports); }
 
 These simply use the given $module and test to make sure the load
-happened ok.  Its recommended that you run use_ok() inside a BEGIN
+happened ok.  It is recommended that you run use_ok() inside a BEGIN
 block so its functions are exported at compile-time and prototypes are
 properly honored.
 
@@ -764,12 +764,12 @@ easiest way to illustrate:
 
 If pigs cannot fly, the whole block of tests will be skipped
 completely.  Test::More will output special ok's which Test::Harness
-interprets as skipped tests.  Its important to include $how_many tests
+interprets as skipped tests.  It is important to include $how_many tests
 are in the block so the total number of tests comes out right (unless
 you're using C<no_plan>, in which case you can leave $how_many off if
 you like).
 
-Its perfectly safe to nest SKIP blocks.
+It is perfectly safe to nest SKIP blocks.
 
 Tests are skipped when you B<never> expect them to B<ever> pass.  Like
 an optional module is not installed or the operating system doesn't
@@ -849,7 +849,7 @@ When the block is empty, delete it.
         ...normal testing code...
     }
 
-With todo tests, its best to have the tests actually run.  That way
+With todo tests, it is best to have the tests actually run.  That way
 you'll know when they start passing.  Sometimes this isn't possible.
 Often a failing test will cause the whole program to die or hang, even
 inside an C<eval BLOCK> with and using C<alarm>.  In these extreme
@@ -1181,7 +1181,7 @@ magic side-effects are kept to a minimum.  WYSIWYG.
 =head1 SEE ALSO
 
 L<Test::Simple> if all this confuses you and you just want to write
-some tests.  You can upgrade to Test::More later (its forward
+some tests.  You can upgrade to Test::More later (it is forward
 compatible).
 
 L<Test::Differences> for more ways to test complex data structures.

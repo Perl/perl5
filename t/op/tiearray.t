@@ -224,7 +224,7 @@ untie @ary;
 }
 
 # 20020401 mjd-perl-patch+@plover.com
-# Thanks to Dave Mitchell for the small test case
+# Thanks to Dave Mitchell for the small test case and the fix
 {
   my @a;
   
@@ -243,6 +243,4 @@ untie @ary;
                            
 print "not " unless $seen{'DESTROY'} == 2;
 print "ok ", $test++,"\n";         
-
-
 

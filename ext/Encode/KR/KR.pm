@@ -4,7 +4,7 @@ BEGIN {
 	die "Encode::KR not supported on EBCDIC\n";
     }
 }
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use XSLoader;
@@ -32,11 +32,15 @@ are as follows.
   --------------------------------------------------------------------
   euc-kr      /\beuc.*kr$/i	EUC (Extended Unix Character)
 	      /\bkr.*euc$/i
-  ksc5601			Korean standard code set
-  cp949				Code Page 949 (EUC-KR + 8,822 
+  ksc5601-raw			Korean standard code set (as is)
+  cp949	      /(?:x-)?uhc$/i
+              /(?:x-)?windows-949$/i
+              /\bks_c_5601-1987$/i
+                                Code Page 949 (EUC-KR + 8,822 
                                 (additional Hangul syllables)
+  MacKorean			EUC-KR + Apple Vendor Mappings
   johab       JOHAB             A supplementary encoding defined in 
-                                Annex 3 of KS X 1001:1998
+                                             Annex 3 of KS X 1001:1998
   iso-2022-kr                   iso-2022-kr                  [RFC1557]
   --------------------------------------------------------------------
   

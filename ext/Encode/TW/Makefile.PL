@@ -4,6 +4,7 @@ use ExtUtils::MakeMaker;
 
 my %tables = (big5_t	=> ['big5.ucm',
 			    'big5-hkscs.ucm',
+			    'macChintrad.ucm',
 			    'cp950.ucm'],
              );
 
@@ -46,7 +47,7 @@ sub post_initialize
 	push (@{$self->{'C'}},"$table.c");
 	# Do NOT add $table.h etc. to H_FILES unless we own up as to how they
 	# get built.
-	foreach my $ext (qw($(OBJ_EXT) .c .h _def.h .fnm)) {
+	foreach my $ext (qw($(OBJ_EXT) .c .h .exh .fnm)) {
 	    push (@files,$table.$ext);
 	}
     }
@@ -90,7 +91,7 @@ BOOT:
 {
 END
     foreach my $table (keys %tables) {
-	print XS qq[#include "${table}_def.h"\n];
+	print XS qq[#include "${table}.exh"\n];
     }
     print XS "}\n";
     close(XS);
@@ -101,7 +102,7 @@ sub postamble
 {
     my $self = shift;
     my $dir  = $self->catdir($self->updir,'ucm');
-    my $str  = "# $name\$(OBJ_EXT) depends on .h and _def.h files not .c files - but all written by enc2xs\n";
+    my $str  = "# $name\$(OBJ_EXT) depends on .h and .exh files not .c files - but all written by enc2xs\n";
     $str    .= "$name.c : $name.xs ";
     foreach my $table (keys %tables)
     {
@@ -128,9 +129,10 @@ sub postamble
 		$continuator = '';
 	    }
 	}
-        $str .= $^O eq 'VMS' # In VMS quote to preserve case
-            ? qq{\n\t\$(PERL) $enc2xs -"Q" -o \$\@ -f $table.fnm\n\n}
-            : qq{\n\t\$(PERL) $enc2xs -Q -o \$\@ -f $table.fnm\n\n};
+	my $plib   = $ENV{PERL_CORE} ? '-I$(PERL_LIB)' : '';
+	my $ucopts = ($^O eq 'VMS')  ? '-"Q"' : '-Q'; # VMS tweaks
+	$str .=  
+	    qq{\n\t\$(PERL) $plib $enc2xs $ucopts -o \$\@ -f $table.fnm\n\n};
 	open (FILELIST, ">$table.fnm")
 	    || die "Could not open $table.fnm: $!";
 	foreach my $file (@{$tables{$table}})

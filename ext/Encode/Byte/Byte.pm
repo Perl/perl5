@@ -1,6 +1,6 @@
 package Encode::Byte;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load('Encode::Byte',$VERSION);
@@ -15,8 +15,8 @@ Encode::Byte - Single Byte Encodings
 =head1 SYNOPSIS
 
     use Encode qw/encode decode/; 
-    $latin1 = encode("iso-8859-1", $utf8);   # loads Encode::Byte implicitly
-    $utf8  = decode("iso-8859-1", $latin1);  # ditto
+    $greek = encode("iso-885-7", $utf8);   # loads Encode::Byte implicitly
+    $utf8  = decode("iso-8859-7", $greek); # ditto
 
 =head1 ABSTRACT
 
@@ -24,7 +24,7 @@ This module implements various single byte encodings.  For most cases it uses
 \x80-\xff (upper half) to map non-ASCII characters.  Encodings
 supported are as follows.   
 
-  Canonical   Alias		Description
+  Canonical      Alias		                      Description
   --------------------------------------------------------------------
   # ISO 8859 series
   (iso-8859-1	is in built-in)
@@ -46,7 +46,7 @@ supported are as follows.
 
   # Cyrillic
   koi8-f					
-  koi8-r						 [RFC1489]
+  koi8-r        cp878					 [RFC1489]
   koi8-u						 [RFC2319]
 
   # Vietnamese
@@ -54,6 +54,26 @@ supported are as follows.
   
   # all cp* are also available as ibm-*, ms-*, and windows-*
   # also see L<http://msdn.microsoft.com/workshop/author/dhtml/reference/charsets/charset4.asp>
+
+  cp424  
+  cp437  
+  cp737  
+  cp775  
+  cp850  
+  cp852  
+  cp855  
+  cp856  
+  cp857  
+  cp860  
+  cp861  
+  cp862  
+  cp863  
+  cp864  
+  cp865  
+  cp866  
+  cp869  
+  cp874  
+  cp1006  
   cp1250	WinLatin2
   cp1251	WinCyrillic
   cp1252	WinLatin1
@@ -66,19 +86,24 @@ supported are as follows.
 
   # Macintosh
   # Also see L<http://developer.apple.com/technotes/tn/tn1150.html>
-  MacCentralEurRoman
-  MacCroatian
-  MacRoman
-  MacCyrillic
-  MacRomanian
-  MacSami
-  MacGreek 
-  MacThai
-  MacIceland
-  MacTurkish
-  MacUkrainian
+  MacArabic  
+  MacCentralEurRoman  
+  MacCroatian  
+  MacCyrillic  
+  MacFarsi  
+  MacGreek  
+  MacHebrew  
+  MacIcelandic  
+  MacRoman  
+  MacRomanian  
+  MacRumanian  
+  MacSami  
+  MacThai  
+  MacTurkish  
+  MacUkrainian  
 
   # More vendor encodings
+  AdobeStandardEncoding
   nextstep
   gsm0338	# used in GSM handsets
   hp-roman8
