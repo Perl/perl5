@@ -3608,6 +3608,7 @@ PP(pp_unpack)
 	    if (checksum) {
 #if SHORTSIZE != SIZE16
 		if (natint) {
+		    short ashort;
 		    while (len-- > 0) {
 			COPYNN(s, &ashort, sizeof(short));
 			s += sizeof(short);
@@ -3634,6 +3635,7 @@ PP(pp_unpack)
 		EXTEND_MORTAL(len);
 #if SHORTSIZE != SIZE16
 		if (natint) {
+		    short ashort;
 		    while (len-- > 0) {
 			COPYNN(s, &ashort, sizeof(short));
 			s += sizeof(short);
@@ -3673,6 +3675,7 @@ PP(pp_unpack)
 	    if (checksum) {
 #if SHORTSIZE != SIZE16
 		if (unatint) {
+		    unsigned short aushort;
 		    while (len-- > 0) {
 			COPYNN(s, &aushort, sizeof(unsigned short));
 			s += sizeof(unsigned short);
@@ -3702,6 +3705,7 @@ PP(pp_unpack)
 		EXTEND_MORTAL(len);
 #if SHORTSIZE != SIZE16
 		if (unatint) {
+		    unsigned short aushort;
 		    while (len-- > 0) {
 			COPYNN(s, &aushort, sizeof(unsigned short));
 			s += sizeof(unsigned short);
@@ -3826,6 +3830,7 @@ PP(pp_unpack)
 	    if (checksum) {
 #if LONGSIZE != SIZE32
 		if (natint) {
+		    long along;
 		    while (len-- > 0) {
 			COPYNN(s, &along, sizeof(long));
 			s += sizeof(long);
@@ -3857,6 +3862,7 @@ PP(pp_unpack)
 		EXTEND_MORTAL(len);
 #if LONGSIZE != SIZE32
 		if (natint) {
+		    long along;
 		    while (len-- > 0) {
 			COPYNN(s, &along, sizeof(long));
 			s += sizeof(long);
@@ -3896,6 +3902,7 @@ PP(pp_unpack)
 	    if (checksum) {
 #if LONGSIZE != SIZE32
 		if (unatint) {
+		    unsigned long aulong;
 		    while (len-- > 0) {
 			COPYNN(s, &aulong, sizeof(unsigned long));
 			s += sizeof(unsigned long);
@@ -3931,6 +3938,7 @@ PP(pp_unpack)
 		EXTEND_MORTAL(len);
 #if LONGSIZE != SIZE32
 		if (unatint) {
+		    unsigned long aulong;
 		    while (len-- > 0) {
 			COPYNN(s, &aulong, sizeof(unsigned long));
 			s += sizeof(unsigned long);
@@ -4666,6 +4674,8 @@ PP(pp_pack)
 	case 's':
 #if SHORTSIZE != SIZE16
 	    if (natint) {
+		short ashort;
+
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    ashort = SvIV(fromstr);
@@ -4789,6 +4799,8 @@ PP(pp_pack)
 	case 'L':
 #if LONGSIZE != SIZE32
 	    if (natint) {
+		unsigned long aulong;
+
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    aulong = SvUV(fromstr);
@@ -4808,6 +4820,8 @@ PP(pp_pack)
 	case 'l':
 #if LONGSIZE != SIZE32
 	    if (natint) {
+		long along;
+
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    along = SvIV(fromstr);
@@ -4828,7 +4842,7 @@ PP(pp_pack)
 	case 'Q':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		auquad = (Uquad_t)SvIV(fromstr);
+		auquad = (Uquad_t)SvUV(fromstr);
 		sv_catpvn(cat, (char*)&auquad, sizeof(Uquad_t));
 	    }
 	    break;
