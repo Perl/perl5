@@ -340,7 +340,7 @@ sub _qnx_cwd {
 }
 
 sub _qnx_abs_path {
-    my $path = @_ ? shift '.';
+    my $path = @_ ? shift : '.';
     my $realpath=`/usr/bin/fullpath -t $path`;
     chop $realpath;
     return $realpath;
