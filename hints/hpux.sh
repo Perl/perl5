@@ -31,6 +31,11 @@ else
 	sed -e 's/HP-//' -e 1q`;
     selecttype='int *'
     fi
+    # For some strange reason under the smoke harness the alignment
+    # test hangs in HP-UX 10.20.  So hint it to avoid the test.
+    if [ "$xxOsRevMajor" -le 10 ]; then
+	d_u32align=$define
+    fi
 
 echo "Archname is $archname"
 

@@ -2282,7 +2282,7 @@ PP(pp_socket)
 
 PP(pp_sockpair)
 {
-#if defined (HAS_SOCKETPAIR) || defined (HAS_SOCKET)
+#if defined (HAS_SOCKETPAIR) || (defined (HAS_SOCKET) && defined(SOCK_DGRAM))
     dSP;
     GV *gv1;
     GV *gv2;

@@ -297,7 +297,7 @@ cchar(pTHX_ SV *sv)
     else if (*s == '\\')
 	sv_catpv(sstr, "\\\\");
 #ifdef EBCDIC
-    else if (isPRINT(8s))
+    else if (isPRINT(*s))
 #else
     else if (*s >= ' ' && *s < 127)
 #endif /* EBCDIC */

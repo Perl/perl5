@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jan 28 01:36:10 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Mon Jan 28 16:54:53 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -13493,6 +13493,8 @@ $cat <<EOM
 
 Checking to see whether you can access character data unalignedly...
 EOM
+case "$d_u32align" in
+'')   $cat >try.c <<EOCP
 $cat >try.c <<EOCP
 #include <stdio.h>
 #define U32 $u32type
@@ -13575,6 +13577,8 @@ else
 	esac
 fi
 $rm -f core core.try.* try.core
+;;
+esac
 
 : see if ualarm exists
 set ualarm d_ualarm
