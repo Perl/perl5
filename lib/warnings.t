@@ -119,17 +119,28 @@ for (@prgs){
     my $prefix = ($results =~ s#^PREFIX(\n|$)##) ;
     # any special options? (OPTIONS foo bar zap)
     my $option_regex = 0;
+    my $option_random = 0;
     if ($expected =~ s/^OPTIONS? (.+)\n//) {
 	foreach my $option (split(' ', $1)) {
 	    if ($option eq 'regex') { # allow regular expressions
 		$option_regex = 1;
-	    } else {
+	    } 
+	    elsif ($option eq 'random') { # all lines match, but in any order
+		$option_random = 1;
+	    }
+	    else {
 		die "$0: Unknown OPTION '$option'\n";
 	    }
 	}
     }
+    die "$0: can't have OPTION regex and random\n"
+        if $option_regex + option_random > 1;
     if ( $results =~ s/^SKIPPED\n//) {
 	print "$results\n" ;
+    }
+    elsif ($option_random)
+    {
+        print "not " if !randomMatch($results, $expected);
     }
     elsif (($prefix  && (( $option_regex && $results !~ /^$expected/) ||
 			 (!$option_regex && $results !~ /^\Q$expected/))) or
@@ -143,4 +154,16 @@ for (@prgs){
     print "ok ", ++$i, "\n";
     foreach (@temps)
 	{ unlink $_ if $_ }
+}
+
+sub randomMatch
+{
+    my $got = shift ;
+    my $expected = shift;
+
+    my @got = sort split "\n", $got ;
+    my @expected = sort split "\n", $expected ;
+
+   return "@got" eq "@expected";
+
 }
