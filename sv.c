@@ -3906,8 +3906,10 @@ newSVrv(SV *rv, char *classname)
 SV*
 sv_setref_pv(SV *rv, char *classname, void *pv)
 {
-    if (!pv)
+    if (!pv) {
 	sv_setsv(rv, &sv_undef);
+	SvSETMAGIC(rv);
+    }
     else
 	sv_setiv(newSVrv(rv,classname), (IV)pv);
     return rv;
