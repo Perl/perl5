@@ -179,7 +179,8 @@ foreach $file (@corefiles) {
 
 $mainperl_is_instperl = 0;
 
-if (-w $mainperldir && ! &samepath($mainperldir, $installbin) && !$nonono) {
+if (!$nonono && -t STDIN && -t STDERR
+	&& -w $mainperldir && ! &samepath($mainperldir, $installbin)) {
     local($usrbinperl)	= "$mainperldir/perl$exe_ext";
     local($instperl)	= "$installbin/perl$exe_ext";
     local($expinstperl)	= "$binexp/perl$exe_ext";
