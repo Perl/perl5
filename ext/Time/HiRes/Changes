@@ -1,5 +1,13 @@
 Revision history for Perl extension Time::HiRes.
 
+1.40
+	- Nick Clark noticed that the my_catdir() emulation function
+	  was broken (which means that we didn't really work for Perls
+	  5.002 and 5.003)
+	- inspired by fixing the above made the whole Makefile.PL -w
+	  and strict clean
+	- tightened up the Makefile.PL output, less whitespace
+
 1.39
 	- fix from Craig Berry for better building in VMS with PERL_CORE
 

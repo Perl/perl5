@@ -7,10 +7,14 @@ require 5.002;
 
 use Config;
 use ExtUtils::MakeMaker;
-
-# Perls 5.002 and 5.003 did not have File::Spec, fake what we need.
+use strict;
 
 my $VERBOSE = $ENV{VERBOSE};
+my $DEFINE;
+my $LIBS;
+my $XSOPT;
+
+# Perls 5.002 and 5.003 did not have File::Spec, fake what we need.
 
 sub my_dirsep {
     $^O eq 'VMS' ? '.' :
@@ -22,7 +26,7 @@ sub my_dirsep {
 sub my_catdir {
     shift;
     my $catdir = join(my_dirsep, @_);
-    $^O eq 'VMS' ? "[$dirsep]" : $dirsep;
+    $^O eq 'VMS' ? "[$catdir]" : $catdir;
 }
 
 sub my_updir {
@@ -38,6 +42,10 @@ BEGIN {
     }
 }
 
+# Avoid 'used only once' warnings.
+my $nop1 = *File::Spec::catdir;
+my $nop2 = *File::Spec::updir;
+
 # if you have 5.004_03 (and some slightly older versions?), xsubpp
 # tries to generate line numbers in the C code generated from the .xs.
 # unfortunately, it is a little buggy around #ifdef'd code.
@@ -50,8 +58,7 @@ sub TMPDIR {
     my $TMPDIR =
 	(grep(defined $_ && -d $_ && -w _,
 	      ((defined $ENV{'TMPDIR'} ? $ENV{'TMPDIR'} : undef),
-	       qw(/var/tmp /usr/tmp /tmp))))[0]
-		   unless defined $TMPDIR;
+	       qw(/var/tmp /usr/tmp /tmp))))[0];
     $TMPDIR || die "Cannot find writable temporary directory.\n";
 }
 
@@ -59,7 +66,7 @@ sub try_compile_and_link {
     my ($c, %args) = @_;
 
     my ($ok) = 0;
-    my ($tmp) = (($^O eq 'VMS') ? "sys\$scratch:tmp$$" : TMPDIR . '/' . "tmp$$");
+    my ($tmp) = (($^O eq 'VMS') ? "sys\$scratch:tmp$$" : TMPDIR() . '/' . "tmp$$");
     local(*TMPC);
 
     my $obj_ext = $Config{obj_ext} || ".o";
@@ -69,7 +76,7 @@ sub try_compile_and_link {
 	print TMPC $c;
 	close(TMPC);
 
-	$cccmd = $args{cccmd};
+	my $cccmd = $args{cccmd};
 
 	my $errornull;
 
@@ -89,7 +96,7 @@ sub try_compile_and_link {
 	    } else {
 		my $perl_core = $Config{'installarchlib'};
 		$perl_core =~ s/\]$/.CORE]/;
-                $cccmd = "$Config{'cc'} /include=(perl_root:[000000],$perl_core) $tmp.c"; 
+                $cccmd = "$Config{'cc'} /include=(perl_root:[000000],$perl_core) $tmp.c";
 	    }
         }
 
@@ -105,12 +112,12 @@ sub try_compile_and_link {
 	    open( CMDFILE, ">$tmp.com" );
 	    print CMDFILE "\$ SET MESSAGE/NOFACILITY/NOSEVERITY/NOIDENT/NOTEXT\n";
 	    print CMDFILE "\$ $cccmd\n";
-	    print CMDFILE "\$ IF \$SEVERITY .NE. 1 THEN EXIT 44\n";  # escalate
+	    print CMDFILE "\$ IF \$SEVERITY .NE. 1 THEN EXIT 44\n"; # escalate
 	    close CMDFILE;
 	    system("\@ $tmp.com");
 	    $ok = $?==0;
 	    for ("$tmp.c", "$tmp$obj_ext", "$tmp.com", "$tmp$Config{exe_ext}") { 
-		1 while unlink $_; 
+		1 while unlink $_;
 	    }
         }
         else
@@ -128,7 +135,7 @@ sub try_compile_and_link {
 sub has_gettimeofday {
     # confusing but true (if condition true ==> -DHAS_GETTIMEOFDAY already)
     return 0 if $Config{'d_gettimeod'} eq 'define';
-    return 1 if try_compile_and_link(<<EOM); 
+    return 1 if try_compile_and_link(<<EOM);
 #include "EXTERN.h" 
 #include "perl.h" 
 #include "XSUB.h" 
@@ -157,7 +164,7 @@ EOM
 }
 
 sub has_x {
-    my ($x, %args) = @_; 
+    my ($x, %args) = @_;
 
     return 1 if
     try_compile_and_link(<<EOM, %args);
@@ -206,7 +213,8 @@ sub unixinit {
 
     my @goodlibs;
 
-    select(STDOUT); $| = 1;
+    select(STDOUT);
+    $| = 1;
 
     print "Checking for libraries...\n";
     my $lib;
@@ -221,9 +229,8 @@ sub unixinit {
     print @$LIBS ?
 	  "You have extra libraries: @$LIBS.\n" :
           "You have no applicable extra libraries.\n";
-    print "\n";
 
-    print "Looking for gettimeofday()...\n";
+    print "Looking for gettimeofday()... ";
     my $has_gettimeofday;
     if ($Config{'d_gettimeod'}) {
 	$has_gettimeofday++;
@@ -233,7 +240,7 @@ sub unixinit {
     }
 
     if ($has_gettimeofday) {
-	print "You have gettimeofday().\n\n";
+	print "found.\n";
     } else {
 	die <<EOD
 Your operating system does not seem to have the gettimeofday() function.
@@ -248,7 +255,7 @@ Aborting configuration.
 EOD
     }
 
-    print "Looking for setitimer()...\n";
+    print "Looking for setitimer()... ";
     my $has_setitimer;
     if ($Config{d_setitimer}) {
         $has_setitimer++;
@@ -258,12 +265,12 @@ EOD
     }
 
     if ($has_setitimer) {
-        print "You have setitimer().\n\n";
+        print "found.\n";
     } else {
-	print "No setitimer().\n\n";
+	print "NOT found.\n";
     }
 
-    print "Looking for getitimer()...\n";
+    print "Looking for getitimer()... ";
     my $has_getitimer;
     if ($Config{d_getitimer}) {
         $has_getitimer++;
@@ -273,19 +280,19 @@ EOD
     }
 
     if ($has_getitimer) {
-        print "You have getitimer().\n\n";
+        print "found.\n";
     } else {
-	print "No getitimer().\n\n";
+	print "NOT found.\n";
     }
 
     if ($has_setitimer && $has_getitimer) {
-	print "You have interval timers (both setitimer and setitimer).\n\n";
+	print "You have interval timers (both setitimer and setitimer).\n";
     } else {
-	print "You do not have interval timers.\n\n";
+	print "You do not have interval timers.\n";
     }
 
-    print "Looking for ualarm()...\n";
-    my $has_ualarm; 
+    print "Looking for ualarm()... ";
+    my $has_ualarm;
     if ($Config{d_ualarm}) {
         $has_ualarm++;
     } elsif (has_x ("ualarm (0, 0)")) {
@@ -294,17 +301,16 @@ EOD
     }
 
     if ($has_ualarm) {
-        print "You have ualarm().\n\n";
+        print "found.\n";
     } else {
-	print "Whoops! No ualarm()!\n";
-	if ($setitimer) {
-	    print "You have setitimer(); we can make a Time::HiRes::ualarm()\n\n";
-	} else {
-	     print "We'll manage.\n\n";
+	print "NOT found.\n";
+	if ($has_setitimer) {
+	    print "But you have setitimer().\n";
+	    print "We can make a Time::HiRes::ualarm().\n";
 	}
     }
 
-    print "Looking for usleep()...\n";
+    print "Looking for usleep()... ";
     my $has_usleep;
     if ($Config{d_usleep}) {
 	$has_usleep++;
@@ -314,17 +320,20 @@ EOD
     }
 
     if ($has_usleep) {
-	print "You have usleep().\n\n";
+	print "found.\n";
     } else {
-	print "Whoops! No usleep()! Let's see if you have select().\n";
+	print "NOT found.\n";
+        print "Let's see if you have select()... ";
         if ($Config{'d_select'} eq 'define') {
-	    print "You have select(); we can make a Time::HiRes::usleep()\n\n";
+	    print "found.\n";
+	    print "We can make a Time::HiRes::usleep().\n";
 	} else {
-	    print "No select(); you won't have a Time::HiRes::usleep()\n\n";
+	    print "NOT found.\n";
+	    print "You won't have a Time::HiRes::usleep().\n";
 	}
     }
 
-    print "Looking for nanosleep()...\n";
+    print "Looking for nanosleep()... ";
     my $has_nanosleep;
     if ($Config{d_nanosleep}) {
 	$has_nanosleep++;
@@ -334,9 +343,11 @@ EOD
     }
 
     if ($has_nanosleep) {
-	print "You have nanosleep().  You can mix subsecond sleeps with signals.\n\n";
+	print "found.\n";
+        print "You can mix subsecond sleeps with signals.\n";
     } else {
-	print "Whoops! No nanosleep()!  You cannot mix subsecond sleeps with signals.\n";
+	print "NOT found.\n";
+        print "You cannot mix subsecond sleeps with signals.\n";
     }
 
     if ($DEFINE) {
@@ -349,7 +360,7 @@ EOD
 }
 
 sub doMakefile {
-    @makefileopts = ();
+    my @makefileopts = ();
 
     if ($] >= 5.005) {
 	push (@makefileopts,
@@ -380,11 +391,7 @@ sub doMakefile {
 }
 
 sub main {
-    print <<EOM;
-
-Configuring Time::HiRes...
-
-EOM
+    print "Configuring Time::HiRes...\n";
 
     if ($^O =~ /Win32/i) {
       $DEFINE = '-DSELECT_IS_BROKEN';
@@ -392,16 +399,11 @@ EOM
     } else {
       unixinit();
     }
-    configure;
     doMakefile;
     my $make = $Config{'make'} || "make";
     unless ($ENV{PERL_CORE}) {
 	print  <<EOM;
-
-Done configuring.
-
 Now you may issue '$make'.  Do not forget also '$make test'.
-
 EOM
     }
 }
