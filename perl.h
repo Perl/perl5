@@ -2326,30 +2326,50 @@ Gid_t getegid (void);
 #define DEBUG_TOP_FLAG		0x80000000 /* XXX what's this for ??? */
 
 
+#  define DEBUG_p_TEST_ (PL_debug & DEBUG_p_FLAG)
+#  define DEBUG_s_TEST_ (PL_debug & DEBUG_s_FLAG)
+#  define DEBUG_l_TEST_ (PL_debug & DEBUG_l_FLAG)
+#  define DEBUG_t_TEST_ (PL_debug & DEBUG_t_FLAG)
+#  define DEBUG_o_TEST_ (PL_debug & DEBUG_o_FLAG)
+#  define DEBUG_c_TEST_ (PL_debug & DEBUG_c_FLAG)
+#  define DEBUG_P_TEST_ (PL_debug & DEBUG_P_FLAG)
+#  define DEBUG_m_TEST_ (PL_debug & DEBUG_m_FLAG)
+#  define DEBUG_f_TEST_ (PL_debug & DEBUG_f_FLAG)
+#  define DEBUG_r_TEST_ (PL_debug & DEBUG_r_FLAG)
+#  define DEBUG_x_TEST_ (PL_debug & DEBUG_x_FLAG)
+#  define DEBUG_u_TEST_ (PL_debug & DEBUG_u_FLAG)
+#  define DEBUG_L_TEST_ (PL_debug & DEBUG_L_FLAG)
+#  define DEBUG_H_TEST_ (PL_debug & DEBUG_H_FLAG)
+#  define DEBUG_X_TEST_ (PL_debug & DEBUG_X_FLAG)
+#  define DEBUG_D_TEST_ (PL_debug & DEBUG_D_FLAG)
+#  define DEBUG_S_TEST_ (PL_debug & DEBUG_S_FLAG)
+#  define DEBUG_T_TEST_ (PL_debug & DEBUG_T_FLAG)
+#  define DEBUG_R_TEST_ (PL_debug & DEBUG_R_FLAG)
+
 #ifdef DEBUGGING
 
 #  undef  YYDEBUG
 #  define YYDEBUG 1
 
-#  define DEBUG_p_TEST (PL_debug & DEBUG_p_FLAG)
-#  define DEBUG_s_TEST (PL_debug & DEBUG_s_FLAG)
-#  define DEBUG_l_TEST (PL_debug & DEBUG_l_FLAG)
-#  define DEBUG_t_TEST (PL_debug & DEBUG_t_FLAG)
-#  define DEBUG_o_TEST (PL_debug & DEBUG_o_FLAG)
-#  define DEBUG_c_TEST (PL_debug & DEBUG_c_FLAG)
-#  define DEBUG_P_TEST (PL_debug & DEBUG_P_FLAG)
-#  define DEBUG_m_TEST (PL_debug & DEBUG_m_FLAG)
-#  define DEBUG_f_TEST (PL_debug & DEBUG_f_FLAG)
-#  define DEBUG_r_TEST (PL_debug & DEBUG_r_FLAG)
-#  define DEBUG_x_TEST (PL_debug & DEBUG_x_FLAG)
-#  define DEBUG_u_TEST (PL_debug & DEBUG_u_FLAG)
-#  define DEBUG_L_TEST (PL_debug & DEBUG_L_FLAG)
-#  define DEBUG_H_TEST (PL_debug & DEBUG_H_FLAG)
-#  define DEBUG_X_TEST (PL_debug & DEBUG_X_FLAG)
-#  define DEBUG_D_TEST (PL_debug & DEBUG_D_FLAG)
-#  define DEBUG_S_TEST (PL_debug & DEBUG_S_FLAG)
-#  define DEBUG_T_TEST (PL_debug & DEBUG_T_FLAG)
-#  define DEBUG_R_TEST (PL_debug & DEBUG_R_FLAG)
+#  define DEBUG_p_TEST DEBUG_p_TEST_
+#  define DEBUG_s_TEST DEBUG_s_TEST_
+#  define DEBUG_l_TEST DEBUG_l_TEST_
+#  define DEBUG_t_TEST DEBUG_t_TEST_
+#  define DEBUG_o_TEST DEBUG_o_TEST_
+#  define DEBUG_c_TEST DEBUG_c_TEST_
+#  define DEBUG_P_TEST DEBUG_P_TEST_
+#  define DEBUG_m_TEST DEBUG_m_TEST_
+#  define DEBUG_f_TEST DEBUG_f_TEST_
+#  define DEBUG_r_TEST DEBUG_r_TEST_
+#  define DEBUG_x_TEST DEBUG_x_TEST_
+#  define DEBUG_u_TEST DEBUG_u_TEST_
+#  define DEBUG_L_TEST DEBUG_L_TEST_
+#  define DEBUG_H_TEST DEBUG_H_TEST_
+#  define DEBUG_X_TEST DEBUG_X_TEST_
+#  define DEBUG_D_TEST DEBUG_D_TEST_
+#  define DEBUG_S_TEST DEBUG_S_TEST_
+#  define DEBUG_T_TEST DEBUG_T_TEST_
+#  define DEBUG_R_TEST DEBUG_R_TEST_
 
 #  define DEB(a)     a
 #  define DEBUG(a)   if (PL_debug)   a

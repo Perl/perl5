@@ -2187,11 +2187,9 @@ s	|U8*	|reghopmaybe3	|U8 *pos|I32 off|U8 *lim
 s	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *startpos|I32 norun
 #endif
 
-#if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
-#   ifdef DEBUGGING
+#if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 s	|CV*	|deb_curcv	|I32 ix
 s	|void	|debprof	|OP *o
-#   endif
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)

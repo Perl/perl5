@@ -1052,11 +1052,9 @@
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass		S_find_byclass
 #endif
-#if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
-#   ifdef DEBUGGING
+#if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 #define deb_curcv		S_deb_curcv
 #define debprof			S_debprof
-#   endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define save_scalar_at		S_save_scalar_at
@@ -2561,11 +2559,9 @@
 #define reghopmaybe3(a,b,c)	S_reghopmaybe3(aTHX_ a,b,c)
 #define find_byclass(a,b,c,d,e,f)	S_find_byclass(aTHX_ a,b,c,d,e,f)
 #endif
-#if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
-#   ifdef DEBUGGING
+#if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 #define deb_curcv(a)		S_deb_curcv(aTHX_ a)
 #define debprof(a)		S_debprof(aTHX_ a)
-#   endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define save_scalar_at(a)	S_save_scalar_at(aTHX_ a)

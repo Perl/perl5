@@ -1169,11 +1169,9 @@ STATIC U8*	S_reghopmaybe3(pTHX_ U8 *pos, I32 off, U8 *lim);
 STATIC char*	S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *startpos, I32 norun);
 #endif
 
-#if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
-#   ifdef DEBUGGING
+#if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 STATIC CV*	S_deb_curcv(pTHX_ I32 ix);
 STATIC void	S_debprof(pTHX_ OP *o);
-#   endif
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)

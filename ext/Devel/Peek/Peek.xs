@@ -3,6 +3,18 @@
 #include "perl.h"
 #include "XSUB.h"
 
+bool
+_runops_debug(int flag)
+{
+    dTHX;
+    bool d = PL_runops == MEMBER_TO_FPTR(Perl_runops_debug);
+
+    if (flag >= 0)
+	PL_runops 
+	    = MEMBER_TO_FPTR(flag ? Perl_runops_debug : Perl_runops_standard);
+    return d;
+}
+
 SV *
 DeadCode(pTHX)
 {
@@ -400,3 +412,6 @@ MODULE = Devel::Peek		PACKAGE = Devel::Peek	PREFIX = _
 SV *
 _CvGV(cv)
     SV *cv
+
+bool
+_runops_debug(int flag = -1)

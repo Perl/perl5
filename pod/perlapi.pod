@@ -1998,7 +1998,7 @@ Found in file sharedsv.c
 =item sharedsv_lock
 
 Recursive locks on a sharedsv.
-Locks are dynamicly scoped at the level of the first lock.
+Locks are dynamically scoped at the level of the first lock.
 	void	sharedsv_lock(shared_sv* ssv)
 
 =for hackers
