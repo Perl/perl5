@@ -1008,6 +1008,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
     STRLEN len;
     STRLEN n_a;
     char *s;
+    char *temp_buffer = NULL;
 
     if (RsSNARF(PL_rs))
 	return 0;
@@ -1059,6 +1060,27 @@ Perl_do_chomp(pTHX_ register SV *sv)
 	else {
 	    STRLEN rslen;
 	    char *rsptr = SvPV(PL_rs, rslen);
+	    if (SvUTF8(PL_rs) != SvUTF8(sv)) {
+		/* Assumption is that rs is shorter than the scalar.  */
+		if (SvUTF8(PL_rs)) {
+		    /* RS is utf8, scalar is 8 bit.  */
+		    bool is_utf8 = TRUE;
+		    temp_buffer = (char*)bytes_from_utf8((U8*)rsptr,
+							 &rslen, &is_utf8);
+		    if (is_utf8) {
+			/* Cannot downgrade, therefore cannot possibly match
+			 */
+			assert (temp_buffer == rsptr);
+			temp_buffer = NULL;
+			goto nope;
+		    }
+		    rsptr = temp_buffer;
+		} else {
+		    /* RS is 8 bit, scalar is utf8.  */
+		    temp_buffer = (char*)bytes_to_utf8((U8*)rsptr, &rslen);
+		    rsptr = temp_buffer;
+		}
+	    }
 	    if (rslen == 1) {
 		if (*s != *rsptr)
 		    goto nope;
@@ -1081,6 +1103,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
 	SvSETMAGIC(sv);
     }
   nope:
+    Safefree(temp_buffer);
     return count;
 }
 

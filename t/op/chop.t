@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 51;
+plan tests => 91;
 
 $_ = 'abc';
 $c = do foo();
@@ -183,3 +183,29 @@ ok($@ =~ /Can\'t modify.*chop.*in.*assignment/);
 eval 'chomp($x, $y) = (1, 2);';
 ok($@ =~ /Can\'t modify.*chom?p.*in.*assignment/);
 
+my @chars = ("N", "\xd3", substr ("\xd4\x{100}", 0, 1), chr 1296);
+foreach my $start (@chars) {
+  foreach my $end (@chars) {
+    local $/ = $end;
+    my $message = "start=" . ord ($start) . " end=" . ord $end;
+    my $string = $start . $end;
+    chomp $string;
+    is ($string, $start, $message);
+
+    my $end_utf8 = $end;
+    utf8::encode ($end_utf8);
+    next if $end_utf8 eq $end;
+
+    # $end ne $end_utf8, so these should not chomp.
+    $string = $start . $end_utf8;
+    my $chomped = $string;
+    chomp $chomped;
+    is ($chomped, $string, "$message (end as bytes)");
+
+    $/ = $end_utf8;
+    $string = $start . $end;
+    $chomped = $string;
+    chomp $chomped;
+    is ($chomped, $string, "$message (\$/ as bytes)");
+  }
+}
