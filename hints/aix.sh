@@ -138,8 +138,25 @@ case "$cc" in
 	optimize='none'
 	;;
      4.4.0.0|4.4.0.1|4.4.0.2)
-	echo >&4 "*** This C compiler ($ccversion) is outdated."
-	echo >&4 "*** Please upgrade to at least 4.4.0.3."
+	cat >&4 <<EOF
+***
+*** This C compiler ($ccversion) is outdated.
+***
+*** Please upgrade to at least 4.4.0.3.
+***
+EOF
+	;;
+     5.0.1.0)
+	cat >&4 <<EOF
+***
+*** This C compiler ($ccversion) is known to have optimizer problems
+*** when compiling regcomp.c.
+***
+*** Disabling optimization for that file but consider upgrading
+*** your C compiler.
+***
+EOF
+regcomp_cflags='optimize='
 	;;
      esac
 esac

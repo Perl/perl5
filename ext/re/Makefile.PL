@@ -39,3 +39,22 @@ re_exec\$(OBJ_EXT) : re_exec.c
 
 EOF
 }
+
+sub MY::c_o {
+    my($self) = @_;
+    package MY; # so that "SUPER" works right
+    my $inh = $self->SUPER::c_o(@_);
+    use Config;
+    if ($Config{osname} eq 'aix' && $Config{ccversion} eq '5.0.1.0') {
+	# Known buggy optimizer.
+	my $cccmd = $self->const_cccmd;
+	$cccmd =~ s/^CCCMD\s*=\s*//;
+	$cccmd =~ s/\s\$\(OPTIMIZE\)\s/ /;
+	$inh .= qq{
+
+re_comp\$\(OBJ_EXT\): re_comp.c
+\t$cccmd \$(CCCDLFLAGS) -I\$(PERL_INC) \$(DEFINE) \$*.c
+};
+    }
+    $inh;
+}
