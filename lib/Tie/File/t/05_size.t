@@ -10,7 +10,7 @@ my $file = "tf$$.txt";
 my $data = "rec0$/rec1$/rec2$/";
 my ($o, $n);
 
-print "1..10\n";
+print "1..15\n";
 
 my $N = 1;
 use Tie::File;
@@ -44,26 +44,39 @@ print $n == 3 ? "ok $N\n" : "not ok $N # $n, s/b 0\n";
 $N++;
 
 # STORESIZE
-# 6 Make it longer:
+# (6-7) Make it longer:
+populate();
 $#a = 4;
 check_contents("$data$/$/");
 
-# 7 Make it longer again:
+# (8-9) Make it longer again:
+populate();
 $#a = 6;
 check_contents("$data$/$/$/$/");
 
-# 8 Make it shorter:
+# (10-11) Make it shorter:
+populate();
 $#a = 4;
 check_contents("$data$/$/");
 
-# 9 Make it shorter again:
+# (12-13) Make it shorter again:
+populate();
 $#a = 2;
 check_contents($data);
 
-# 10 Get rid of it completely:
+# (14-15) Get rid of it completely:
+populate();
 $#a = -1;
 check_contents('');
 
+# In the past, there was a bug in STORESIZE that it didn't correctly
+# remove deleted records from the the cache.  This wasn't detected
+# because these tests were all done with an empty cache.  populate()
+# will ensure that the cache is fully populated.
+sub populate {
+  my $z;
+  $z = $a[$_] for 0 .. $#a;
+}
 
 sub check_contents {
   my $x = shift;
@@ -78,6 +91,9 @@ sub check_contents {
     s{$/}{\\n}g for $a, $x;
     print "not ok $N\n# expected <$x>, got <$a>\n";
   }
+  $N++;
+  my $integrity = $o->_check_integrity($file, $ENV{INTEGRITY});
+  print $integrity ? "ok $N\n" : "not ok $N \# integrity\n";
   $N++;
 }
 

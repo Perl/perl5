@@ -5,6 +5,11 @@
 
 my $file = "tf$$.txt";
 
+if ($^O =~ /vms/i) {
+  print "1..0\n";
+  exit;
+}
+
 print "1..39\n";
 
 my $N = 1;

@@ -5,7 +5,7 @@ use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX';
 require 5.005;
 
-$VERSION = "0.16";
+$VERSION = "0.17";
 
 # Idea: The object will always contain an array of byte offsets
 # this will be filled in as is necessary and convenient.
@@ -153,9 +153,9 @@ sub STORESIZE {
   # file gets shorter
   $self->_seek($len);
   $self->_chop_file;
-  $#{$self->{offsets}} = $len-1;
-  my @cached = grep $_ > $len, keys %{$self->{cache}};
-  delete @{$self->{cache}}{@cached} if @cached;
+  $#{$self->{offsets}} = $len;
+  my @cached = grep $_ >= $len, keys %{$self->{cache}};
+  $self->_uncache(@cached);
 }
 
 sub PUSH {
@@ -208,8 +208,7 @@ sub DELETE {
     $self->_seek($n);
     $self->_chop_file;
     $#{$self->{offsets}}--;
-    delete $self->{cached}{$n};
-    @{$self->{lru}} = grep $_ != $n, @{$self->{lru}};
+    $self->_uncache($n);
     # perhaps in this case I should also remove trailing null records?
   } else {
     $self->STORE($n, "");
@@ -302,8 +301,7 @@ sub SPLICE {
       $self->{cached} += length($new) - length($cached);
       $self->{cache}{$_} = $new;
     } else {
-      delete $self->{cache}{$_};
-      $self->{cached} -= length($cached);
+      $self->_uncache($_);
     }
   }
   # update the read cache, part 2
@@ -471,6 +469,16 @@ sub _cache_insert {
   $self->_cache_flush if $self->{cached} > $self->{cachesize};
 }
 
+sub _uncache {
+  my $self = shift;
+  for my $n (@_) {
+    my $cached = delete $self->{cache}{$n};
+    next unless defined $cached;
+    @{$self->{lru}} = grep $_ != $n, @{$self->{lru}};
+    $self->{cached} -= length($cached);
+  }
+}
+
 sub _check_cache {
   my ($self, $n) = @_;
   my $rec;
@@ -549,7 +557,12 @@ sub _check_integrity {
   my ($self, $file, $warn) = @_;
   my $good = 1; 
 
-  unless ($self->{offsets}[0] == 0) {
+
+  if (not defined $self->{offsets}[0]) {
+    $warn && print STDERR "# offset 0 is missing!\n";
+    $good = 0;
+  } elsif ($self->{offsets}[0] != 0) {
+    $warn && print STDERR "# offset 0 is missing!\n";
     $warn && print STDERR "# rec 0: offset <$self->{offsets}[0]> s/b 0!\n";
     $good = 0;
   }
@@ -605,7 +618,7 @@ sub _check_integrity {
   }
   for (keys %{$self->{cache}}) {
     unless (exists $seen{$_}) {
-      print "# $record $_ is in the cache but not the LRU queue\n";
+      print "# record $_ is in the cache but not the LRU queue\n";
       $good = 0;
     }
   }
@@ -621,7 +634,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.16
+	# This file documents Tie::File version 0.17
 
 	tie @array, 'Tie::File', filename or die ...;
 
@@ -801,7 +814,8 @@ Handles that were opened write-only won't work.  Handles that were
 opened read-only will work as long as you don't try to write to them.
 Handles must be attached to seekable sources of data---that means no
 pipes or sockets.  If you try to supply a non-seekable handle, the
-C<tie> call will abort your program.
+C<tie> call will try to abort your program.  This feature is not yet
+supported under VMS.
 
 =head1 CAVEATS
 
@@ -825,9 +839,9 @@ lines 1 through 999,999; the second iteration must relocate lines 2
 through 999,999, and so on.  The relocation is done using block
 writes, however, so it's not as slow as it might be.
 
-A future version of this module will provide a mechanism for getting
-better performance in such cases, by deferring the writing until it
-can be done all at once.
+A soon-to-be-released version of this module will provide a mechanism
+for getting better performance in such cases, by deferring the writing
+until it can be done all at once.
 
 =head2 Efficiency Note 2
 
@@ -876,7 +890,7 @@ C<mjd-perl-tiefile-subscribe@plover.com>.
 
 =head1 LICENSE
 
-C<Tie::File> version 0.16 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.17 is copyright (C) 2002 Mark Jason Dominus.
 
 This library is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -904,7 +918,7 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.16 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.17 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 THANKS
@@ -920,6 +934,7 @@ testing).
 
 More thanks to:
 Gerrit Haase /
+Nick Ing-Simmons /
 Tassilo von Parseval /
 H. Dieter Pearcey /
 Peter Somu /
