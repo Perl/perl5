@@ -37,7 +37,7 @@ extern int errno;
 #endif
 
 extern Malloc_t malloc proto((MEM_SIZE));
-extern Free_t free proto((void *));
+extern Free_t free proto((Malloc_t));
 extern Off_t lseek();
 
 /*
