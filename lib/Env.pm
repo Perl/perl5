@@ -47,7 +47,11 @@ sub import {
     my ($callpack) = caller(0);
     my $pack = shift;
     my @vars = @_ ? @_ : keys(%ENV);
+    return unless @vars;
 
+    eval "package $callpack; use vars qw("
+	 . join(' ', map { '$'.$_ } @vars) . ")";
+    die $@ if $@;
     foreach (@vars) {
 	tie ${"${callpack}::$_"}, Env, $_ if /^[A-Za-z_]\w*$/;
     }

@@ -35,7 +35,7 @@ sub stub {
     $fh = "${module}::DATA";
 
     open($fh,$mod_file) || die "Unable to open $mod_file";
-    while($line = <$fh> and $line !~ m/^__DATA__/) {
+    while(defined ($line = <$fh>) and $line !~ m/^__DATA__/) {
 	push(@BEFORE_DATA,$line);
 	$line =~ /use\s+SelfLoader/ && $found_selfloader++;
     }
@@ -45,7 +45,7 @@ sub stub {
     $self->_load_stubs($module);
     if ( fileno($fh) ) {
 	$end = 1;
-	while($line = <$fh>) {
+	while(defined($line = <$fh>)) {
 	    push(@AFTER_DATA,$line);
 	}
     }

@@ -255,7 +255,7 @@ sub autosplit_file{
 	if (/^sub\s+([\w:]+)(\s*\(.*?\))?/) {
 	    print OUT "1;\n";
 	    my $subname = $1;
-	    $proto{$1} = $2 or '';
+	    $proto{$1} = $2 || '';
 	    if ($subname =~ m/::/){
 		warn "subs with package names not currently supported in AutoSplit section";
 	    }

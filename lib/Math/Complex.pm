@@ -56,7 +56,7 @@ $display = 'cartesian';			# Default display format
 sub make {
 	my $self = bless {}, shift;
 	my ($re, $im) = @_;
-	$self->{cartesian} = [$re, $im];
+	$self->{'cartesian'} = [$re, $im];
 	$self->{c_dirty} = 0;
 	$self->{p_dirty} = 1;
 	return $self;
@@ -71,7 +71,7 @@ sub emake {
 	my $self = bless {}, shift;
 	my ($rho, $theta) = @_;
 	$theta += pi() if $rho < 0;
-	$self->{polar} = [abs($rho), $theta];
+	$self->{'polar'} = [abs($rho), $theta];
 	$self->{p_dirty} = 0;
 	$self->{c_dirty} = 1;
 	return $self;
@@ -118,8 +118,8 @@ sub pi () {
 #
 sub i () {
 	$i = bless {} unless $i;		# There can be only one i
-	$i->{cartesian} = [0, 1];
-	$i->{polar} = [1, pi/2];
+	$i->{'cartesian'} = [0, 1];
+	$i->{'polar'} = [1, pi/2];
 	$i->{c_dirty} = 0;
 	$i->{p_dirty} = 0;
 	return $i;
@@ -129,11 +129,11 @@ sub i () {
 # Attribute access/set routines
 #
 
-sub cartesian {$_[0]->{c_dirty} ? $_[0]->update_cartesian : $_[0]->{cartesian}}
-sub polar     {$_[0]->{p_dirty} ? $_[0]->update_polar : $_[0]->{polar}}
+sub cartesian {$_[0]->{c_dirty} ? $_[0]->update_cartesian : $_[0]->{'cartesian'}}
+sub polar     {$_[0]->{p_dirty} ? $_[0]->update_polar : $_[0]->{'polar'}}
 
-sub set_cartesian { $_[0]->{p_dirty}++; $_[0]->{cartesian} = $_[1] }
-sub set_polar     { $_[0]->{c_dirty}++; $_[0]->{polar} = $_[1] }
+sub set_cartesian { $_[0]->{p_dirty}++; $_[0]->{'cartesian'} = $_[1] }
+sub set_polar     { $_[0]->{c_dirty}++; $_[0]->{'polar'} = $_[1] }
 
 #
 # ->update_cartesian
@@ -142,9 +142,9 @@ sub set_polar     { $_[0]->{c_dirty}++; $_[0]->{polar} = $_[1] }
 #
 sub update_cartesian {
 	my $self = shift;
-	my ($r, $t) = @{$self->{polar}};
+	my ($r, $t) = @{$self->{'polar'}};
 	$self->{c_dirty} = 0;
-	return $self->{cartesian} = [$r * cos $t, $r * sin $t];
+	return $self->{'cartesian'} = [$r * cos $t, $r * sin $t];
 }
 
 #
@@ -155,10 +155,10 @@ sub update_cartesian {
 #
 sub update_polar {
 	my $self = shift;
-	my ($x, $y) = @{$self->{cartesian}};
+	my ($x, $y) = @{$self->{'cartesian'}};
 	$self->{p_dirty} = 0;
-	return $self->{polar} = [0, 0] if $x == 0 && $y == 0;
-	return $self->{polar} = [sqrt($x*$x + $y*$y), atan2($y, $x)];
+	return $self->{'polar'} = [0, 0] if $x == 0 && $y == 0;
+	return $self->{'polar'} = [sqrt($x*$x + $y*$y), atan2($y, $x)];
 }
 
 #
@@ -707,7 +707,7 @@ sub stringify_cartesian {
 	$re = "$x" if abs($x) >= 1e-14;
 	if ($y == 1)				{ $im = 'i' }
 	elsif ($y == -1)			{ $im = '-i' }
-	elsif (abs($y) >= 1e-14)	{ $im = "${y}i" }
+	elsif (abs($y) >= 1e-14)	{ $im = $y . "i" }
 
 	my $str;
 	$str = $re if defined $re;

@@ -140,7 +140,7 @@ $real_site = "";
 $ftp_show = 0;
 sub ftp'debug
 {
-	$ftp_show = @_[0];
+	$ftp_show = $_[0];
 #	if( $ftp_show ){
 #		print STDERR "ftp debugging on\n";
 #	}
@@ -148,7 +148,7 @@ sub ftp'debug
 
 sub ftp'set_timeout
 {
-	$timeout = @_[0];
+	$timeout = $_[0];
 	$timeout_open = $timeout;
 	$timeout_read = 20 * $timeout;
 	if( $ftp_show ){

@@ -44,7 +44,7 @@ sub _load_stubs {
         unless fileno($fh);
     $Cache{"${currpack}::<DATA"} = 1;   # indicate package is cached
 
-    while($line = <$fh> and $line !~ m/^__END__/) {
+    while(defined($line = <$fh>) and $line !~ m/^__END__/) {
         if ($line =~ m/^sub\s+([\w:]+)\s*(\([\$\@\;\%\\]*\))?/) {       # A sub declared
             push(@stubs, $self->_add_to_cache($name, $currpack, \@lines, $protoype));
             $protoype = $2;

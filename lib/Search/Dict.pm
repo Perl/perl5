@@ -61,7 +61,7 @@ sub look {
     <FH> if $min;
     for (;;) {
 	$min = tell(FH);
-	$_ = <FH>
+	defined($_ = <FH>)
 	    or last;
 	chop;
 	s/[^\w\s]//g if $dict;

@@ -5,7 +5,7 @@ package Pod::Functions;
 require Exporter;
 
 @ISA = qw(Exporter);
-@EXPORT = qw(%Kinds %Type %Flavor %Type_Descriptions @Type_Order);
+@EXPORT = qw(%Kinds %Type %Flavor %Type_Description @Type_Order);
 
 %Type_Description = (
     'ARRAY'	=> 'Functions for real @ARRAYs',

@@ -75,7 +75,8 @@ sub Complete {
                 # (^U) kill
                 $_ eq $kill && do {
                     if ($r) {
-                        undef($r, $return);
+                        undef $r;
+			undef $return;
                         print("\r\n");
                         redo LOOP;
                     }
