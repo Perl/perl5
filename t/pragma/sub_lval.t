@@ -1,4 +1,4 @@
-print "1..63\n";
+print "1..64\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -527,3 +527,11 @@ while (/f/g) {
 }
 print "# @p\nnot " unless "@p" eq "1 8";
 print "ok 63\n";
+
+# Bug 20001223.002: split thought that the list had only one element
+@ary = qw(4 5 6);
+sub lval1 : lvalue { $ary[0]; }
+sub lval2 : lvalue { $ary[1]; }
+(lval1(), lval2()) = split ' ', "1 2 3 4";
+print "not " unless join(':', @ary) eq "1:2:6";
+print "ok 64\n";
