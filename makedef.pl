@@ -377,6 +377,8 @@ elsif ($PLATFORM eq 'os2') {
 		    dlsym
 		    dlerror
 		    dlclose
+		    dup2
+		    dup
 		    my_tmpfile
 		    my_tmpnam
 		    my_flock
@@ -1340,7 +1342,10 @@ foreach my $symbol (sort keys %export) {
 }
 
 if ($PLATFORM eq 'os2') {
-	print "; LAST_ORDINAL=$sym_ord\n";
+	print <<EOP;
+    dll_perlmain=main
+; LAST_ORDINAL=$sym_ord
+EOP
 }
 
 sub emit_symbol {

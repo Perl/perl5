@@ -620,6 +620,8 @@ static const struct {
   {&pmwin_handle, NULL, 780},		/* WinLoadPointer */
   {&pmwin_handle, NULL, 828},		/* WinQuerySysPointer */
   {&doscalls_handle, NULL, 417},	/* DosReplaceModule */
+  {&doscalls_handle, NULL, 976},	/* DosPerfSysCall */
+  {&rexxapi_handle, "RexxRegisterSubcomExe", 0},
 };
 
 HMODULE
@@ -759,15 +761,17 @@ get_sysinfo(ULONG pid, ULONG flags)
     ULONG rc, buf_len = QSS_INI_BUFFER;
     PQTOPLEVEL psi;
 
-    if (!pidtid_lookup) {
-	pidtid_lookup = 1;
-	*(PFN*)&pDosVerifyPidTid = loadByOrdinal(ORD_DosVerifyPidTid, 0);
-    }
-    if (pDosVerifyPidTid) {	/* Warp3 or later */
-	/* Up to some fixpak QuerySysState() kills the system if a non-existent
-	   pid is used. */
-	if (CheckOSError(pDosVerifyPidTid(pid, 1)))
-	    return 0;
+    if (pid) {
+	if (!pidtid_lookup) {
+	    pidtid_lookup = 1;
+	    *(PFN*)&pDosVerifyPidTid = loadByOrdinal(ORD_DosVerifyPidTid, 0);
+	}
+	if (pDosVerifyPidTid) {	/* Warp3 or later */
+	    /* Up to some fixpak QuerySysState() kills the system if a non-existent
+	       pid is used. */
+	    if (CheckOSError(pDosVerifyPidTid(pid, 1)))
+		return 0;
+        }
     }
     New(1322, pbuffer, buf_len, char);
     /* QSS_PROCESS | QSS_MODULE | QSS_SEMAPHORES | QSS_SHARED */
@@ -1127,7 +1131,7 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 			   does not append ".exe", so we could have
 			   reached this place). */
 			sv_catpv(scrsv, ".exe");
-	                scr = SvPV(scrsv, n_a);	/* Reload */
+	                PL_Argv[0] = scr = SvPV(scrsv, n_a);	/* Reload */
 			if (PerlLIO_stat(scr,&PL_statbuf) >= 0
 			    && !S_ISDIR(PL_statbuf.st_mode)) {	/* Found */
 				real_name = scr;
@@ -1851,6 +1855,109 @@ XS(XS_OS2_replaceModule)
     XSRETURN_EMPTY;
 }
 
+/* APIRET APIENTRY DosPerfSysCall(ULONG ulCommand, ULONG ulParm1,
+                                  ULONG ulParm2, ULONG ulParm3); */
+
+DeclOSFuncByORD(ULONG,perfSysCall,ORD_DosPerfSysCall,
+		(ULONG ulCommand, ULONG ulParm1, ULONG ulParm2, ULONG ulParm3),
+		(ulCommand, ulParm1, ulParm2, ulParm3))
+
+#ifndef CMD_KI_RDCNT
+#  define CMD_KI_RDCNT	0x63
+#endif
+#ifndef CMD_KI_GETQTY
+#  define CMD_KI_GETQTY 0x41
+#endif
+#ifndef QSV_NUMPROCESSORS
+#  define QSV_NUMPROCESSORS         26
+#endif
+
+typedef unsigned long long myCPUUTIL[4];	/* time/idle/busy/intr */
+
+/*
+NO_OUTPUT ULONG
+perfSysCall(ULONG ulCommand, ULONG ulParm1, ULONG ulParm2, ULONG ulParm3)
+    PREINIT:
+	ULONG rc;
+    POSTCALL:
+	if (!RETVAL)
+	    croak_with_os2error("perfSysCall() error");
+ */
+
+static int
+numprocessors(void)
+{
+    ULONG res;
+
+    if (DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, (PVOID)&res, sizeof(res)))
+	return 1;			/* Old system? */
+    return res;
+}
+
+XS(XS_OS2_perfSysCall); /* prototype to pass -Wmissing-prototypes */
+XS(XS_OS2_perfSysCall)
+{
+    dXSARGS;
+    if (items < 0 || items > 4)
+	Perl_croak(aTHX_ "Usage: OS2::perfSysCall(ulCommand = CMD_KI_RDCNT, ulParm1= 0, ulParm2= 0, ulParm3= 0)");
+    SP -= items;
+    {
+	dXSTARG;
+	ULONG RETVAL, ulCommand, ulParm1, ulParm2, ulParm3, res;
+	myCPUUTIL u[64];
+	int total = 0, tot2 = 0;
+
+	if (items < 1)
+	    ulCommand = CMD_KI_RDCNT;
+	else {
+	    ulCommand = (ULONG)SvUV(ST(0));
+	}
+
+	if (items < 2) {
+	    total = (ulCommand == CMD_KI_RDCNT ? numprocessors() : 0);
+	    ulParm1 = (total ? (ULONG)u : 0);
+
+	    if (total > C_ARRAY_LENGTH(u))
+		croak("Unexpected number of processors: %d", total);
+	} else {
+	    ulParm1 = (ULONG)SvUV(ST(1));
+	}
+
+	if (items < 3) {
+	    tot2 = (ulCommand == CMD_KI_GETQTY);
+	    ulParm2 = (tot2 ? (ULONG)&res : 0);
+	} else {
+	    ulParm2 = (ULONG)SvUV(ST(2));
+	}
+
+	if (items < 4)
+	    ulParm3 = 0;
+	else {
+	    ulParm3 = (ULONG)SvUV(ST(3));
+	}
+
+	RETVAL = perfSysCall(ulCommand, ulParm1, ulParm2, ulParm3);
+	if (!RETVAL)
+	    croak_with_os2error("perfSysCall() error");
+	if (total) {
+	    int i,j;
+
+	    if (GIMME_V != G_ARRAY) {
+		PUSHn(u[0][0]);		/* Total ticks on the first processor */
+		XSRETURN(1);
+	    }
+	    for (i=0; i < total; i++)
+		for (j=0; j < 4; j++)
+		    PUSHs(sv_2mortal(newSVnv(u[i][j])));
+	    XSRETURN(4*total);
+	}
+	if (tot2) {
+	    PUSHu(res);
+	    XSRETURN(1);
+	}
+    }
+    XSRETURN_EMPTY;
+}
 
 #define PERL_PATCHLEVEL_H_IMPLICIT	/* Do not init local_patches. */
 #include "patchlevel.h"
@@ -3503,6 +3610,7 @@ Xs_OS2_init(pTHX)
         newXS("Cwd::sys_cwd", XS_Cwd_sys_cwd, file);
         newXS("Cwd::sys_abspath", XS_Cwd_sys_abspath, file);
         newXS("OS2::replaceModule", XS_OS2_replaceModule, file);
+        newXS("OS2::perfSysCall", XS_OS2_perfSysCall, file);
         newXSproto("OS2::_control87", XS_OS2__control87, file, "$$");
         newXSproto("OS2::get_control87", XS_OS2_get_control87, file, "");
         newXSproto("OS2::set_control87", XS_OS2_set_control87, file, ";$$");
@@ -3517,6 +3625,11 @@ Xs_OS2_init(pTHX)
         newXSproto("OS2::SysValues_set", XS_OS2_SysValues_set, file, "$$;$");
         newXSproto("OS2::Beep", XS_OS2_Beep, file, ";$$");
 	gv = gv_fetchpv("OS2::is_aout", TRUE, SVt_PV);
+	GvMULTI_on(gv);
+#ifdef PERL_IS_AOUT
+	sv_setiv(GvSV(gv), 1);
+#endif
+	gv = gv_fetchpv("OS2::is_static", TRUE, SVt_PV);
 	GvMULTI_on(gv);
 #ifdef PERL_IS_AOUT
 	sv_setiv(GvSV(gv), 1);
@@ -3921,6 +4034,40 @@ Perl_OS2_init3(char **env, void **preg, int flags)
     Perl_os2_initial_mode = -1;		/* Uninit */
     /* Some DLLs reset FP flags on load.  We may have been linked with them */
     _control87(MCW_EM, MCW_EM);
+}
+
+int
+fd_ok(int fd)
+{
+    static ULONG max_fh = 0;
+
+    if (!(_emx_env & 0x200)) return 1;		/* not OS/2. */
+    if (fd >= max_fh) {				/* Renew */
+	LONG delta = 0;
+
+	if (DosSetRelMaxFH(&delta, &max_fh))	/* Assume it OK??? */
+	    return 1;
+    }
+    return fd < max_fh;
+}
+
+/* Kernels up to Oct 2003 trap on (invalid) dup(max_fh); [off-by-one + double fault].  */
+int
+dup2(int from, int to)
+{
+    if (fd_ok(from < to ? to : from))
+	return _dup2(from, to);
+    errno = EBADF;
+    return -1;
+}
+
+int
+dup(int from)
+{
+    if (fd_ok(from))
+	return _dup(from);
+    errno = EBADF;
+    return -1;
 }
 
 #undef tmpnam

@@ -52,6 +52,8 @@ static LONG    APIENTRY (*pRexxStart) (LONG, PRXSTRING, PSZ, PRXSTRING,
 				    PSZ, LONG, PRXSYSEXIT, PSHORT, PRXSTRING);
 static APIRET  APIENTRY (*pRexxRegisterFunctionExe) (PSZ,
 						  RexxFunctionHandler *);
+static APIRET  APIENTRY (*pRexxRegisterSubcomExe)  (PCSZ pszEnvName, PFN pfnEntryPoint,
+    PUCHAR pUserArea);
 static APIRET  APIENTRY (*pRexxDeregisterFunction) (PSZ);
 
 static ULONG (*pRexxVariablePool) (PSHVBLOCK pRequest);
@@ -313,11 +315,13 @@ initialize(void)
     *(PFN *)&pRexxDeregisterFunction
 	= loadByOrdinal(ORD_RexxDeregisterFunction, 1);
     *(PFN *)&pRexxVariablePool = loadByOrdinal(ORD_RexxVariablePool, 1);
+    *(PFN *)&pRexxRegisterSubcomExe
+	= loadByOrdinal(ORD_RexxRegisterSubcomExe, 1);
     needstrs(8);
     needvars(8);
     trace = getenv("PERL_REXX_DEBUG");
      
-    rc = RexxRegisterSubcomExe("PERLEVAL", (PFN)&SubCommandPerlEval, NULL);
+    rc = pRexxRegisterSubcomExe("PERLEVAL", (PFN)&SubCommandPerlEval, NULL);
 }
 
 static int

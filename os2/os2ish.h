@@ -687,6 +687,8 @@ enum entries_ordinals {
     ORD_WinLoadPointer,
     ORD_WinQuerySysPointer,
     ORD_DosReplaceModule,
+    ORD_DosPerfSysCall,
+    ORD_RexxRegisterSubcomExe,
     ORD_NENTRIES
 };
 
