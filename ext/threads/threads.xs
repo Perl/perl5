@@ -69,7 +69,7 @@ ithread *threads;
 #define ithread_detach(thread)		Perl_ithread_detach(aTHX_ thread)
 #define ithread_tid(thread)		((thread)->tid)
 
-static perl_mutex create_mutex;  /* protects the creation of threads ??? */
+static perl_mutex create_destruct_mutex;  /* protects the creation and destruction of threads*/
 
 I32 tid_counter = 0;
 I32 active_threads = 0;
@@ -86,7 +86,7 @@ Perl_ithread_destruct (pTHX_ ithread* thread)
 		MUTEX_UNLOCK(&thread->mutex);
 		return;
 	}
-	MUTEX_LOCK(&create_mutex);
+	MUTEX_LOCK(&create_destruct_mutex);
 	/* Remove from circular list of threads */
 	if (thread->next == thread) {
 	    /* last one should never get here ? */
@@ -100,7 +100,7 @@ Perl_ithread_destruct (pTHX_ ithread* thread)
 	    }
 	}
 	active_threads--;
-	MUTEX_UNLOCK(&create_mutex);
+	MUTEX_UNLOCK(&create_destruct_mutex);
 	/* Thread is now disowned */
 #if 0
         Perl_warn(aTHX_ "destruct %d @ %p by %p",
@@ -283,7 +283,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	ithread*	thread;
 	CLONE_PARAMS	clone_param;
 
-	MUTEX_LOCK(&create_mutex);
+	MUTEX_LOCK(&create_destruct_mutex);
 	thread = PerlMemShared_malloc(sizeof(ithread));
 	Zero(thread,1,ithread);
 	thread->next = threads;
@@ -369,7 +369,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	}
 #endif
 	active_threads++;
-	MUTEX_UNLOCK(&create_mutex);
+	MUTEX_UNLOCK(&create_destruct_mutex);
 	return ithread_to_SV(aTHX_ obj, thread, classname, FALSE);
 }
 
@@ -532,8 +532,8 @@ BOOT:
 	ithread* thread;
 	PL_perl_destruct_level = 2;
 	PERL_THREAD_ALLOC_SPECIFIC(self_key);
-	MUTEX_INIT(&create_mutex);
-	MUTEX_LOCK(&create_mutex);
+	MUTEX_INIT(&create_destruct_mutex);
+	MUTEX_LOCK(&create_destruct_mutex);
 	thread  = PerlMemShared_malloc(sizeof(ithread));
 	Zero(thread,1,ithread);
 	PL_perl_destruct_level = 2;
@@ -552,6 +552,6 @@ BOOT:
 	thread->thr = pthread_self();
 #endif
 	PERL_THREAD_SETSPECIFIC(self_key,thread);
-	MUTEX_UNLOCK(&create_mutex);
+	MUTEX_UNLOCK(&create_destruct_mutex);
 }
 
