@@ -70,11 +70,12 @@ cat << 'EOP'
 static void
 xs_init()
 {
-  dXSUB_SYS;
 EOP
 
 if test X"$args" != "X" ; then
     echo "    char *file = __FILE__;"
+    echo "    dXSUB_SYS;"
+
     ai=''
 
     for ext in $args ; do

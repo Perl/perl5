@@ -17,7 +17,7 @@ use vars qw(@ISA @EXPORT $VERSION
 	    );
 use strict;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.2201 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.2202 $ =~ /(\d+)\.(\d+)/);
 #for the namespace change
 $Devel::embed::VERSION = "99.99";
 
@@ -114,8 +114,9 @@ sub xsi_body {
     my(@exts) = @_;
     my($pname,@retval,%seen);
     my($dl) = canon('/','DynaLoader');
+    push(@retval, "\tchar *file = __FILE__;\n");
     push(@retval, "\tdXSUB_SYS;\n") if $] > 5.002;
-    push(@retval, "\tchar *file = __FILE__;\n\n");
+    push(@retval, "\n");
 
     foreach $_ (@exts){
         my($pname) = canon('/', $_);

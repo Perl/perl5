@@ -114,4 +114,4 @@
 
 #define BIT_BUCKET "/dev/null"
 
-#define dXSUB_SYS int dummy
+#define dXSUB_SYS
