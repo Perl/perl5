@@ -7,7 +7,7 @@ BEGIN {
 	@INC = '../lib';
 }
 
-use Test::More 'no_plan';
+use Test::More tests => 13;
 require_ok( 're' );
 
 # setcolor
