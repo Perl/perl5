@@ -2348,6 +2348,7 @@ PP(pp_require)
     register PERL_CONTEXT *cx;
     SV *sv;
     char *name;
+    STRLEN len;
     char *tryname;
     SV *namesv = Nullsv;
     SV** svp;
@@ -2362,12 +2363,12 @@ PP(pp_require)
 		SvPV(sv,na),patchlevel);
 	RETPUSHYES;
     }
-    name = SvPV(sv, na);
-    if (!*name)
+    name = SvPV(sv, len);
+    if (!(name && len > 0 && *name))
 	DIE("Null filename used");
     TAINT_PROPER("require");
     if (op->op_type == OP_REQUIRE &&
-      (svp = hv_fetch(GvHVn(incgv), name, SvCUR(sv), 0)) &&
+      (svp = hv_fetch(GvHVn(incgv), name, len, 0)) &&
       *svp != &sv_undef)
 	RETPUSHYES;
 
