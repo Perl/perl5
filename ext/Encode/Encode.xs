@@ -214,7 +214,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	    if (use + SvCUR(e->dataSV) > e->base.bufsiz) {
 	       use = e->base.bufsiz - SvCUR(e->dataSV);
 	    }
-	    sv_catpvn(e->dataSV,ptr,use);
+	    sv_catpvn(e->dataSV,(char*)ptr,use);
 	}
 	else {
 	    /* Create a "dummy" SV to represent the available data from layer below */
@@ -255,7 +255,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	       (The copy is a pain - need a put-it-here option for decode.)
 	     */
 	    sv_setpvn(e->bufsv,s,len);
-	    e->base.ptr = e->base.buf = SvPVX(e->bufsv);
+	    e->base.ptr = e->base.buf = (U8*)SvPVX(e->bufsv);
 	    e->base.end = e->base.ptr + SvCUR(e->bufsv);
 	    PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
 	    SvUTF8_on(e->bufsv);
@@ -348,7 +348,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		SAVETMPS;
 		str = sv_newmortal();
 		sv_upgrade(str, SVt_PV);
-		SvPVX(str) = e->base.ptr;
+		SvPVX(str) = (char*)e->base.ptr;
 		SvLEN(str) = 0;
 		SvCUR_set(str, e->base.end - e->base.ptr);
 		SvUTF8_on(str);
