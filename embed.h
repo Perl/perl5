@@ -534,7 +534,9 @@
 #define new_struct_thread	Perl_new_struct_thread
 #endif
 #if defined(USE_REENTRANT_API)
+#define reentrant_size		Perl_reentrant_size
 #define reentrant_init		Perl_reentrant_init
+#define reentrant_free		Perl_reentrant_free
 #endif
 #define call_atexit		Perl_call_atexit
 #define call_argv		Perl_call_argv
@@ -2093,7 +2095,9 @@
 #define new_struct_thread(a)	Perl_new_struct_thread(aTHX_ a)
 #endif
 #if defined(USE_REENTRANT_API)
+#define reentrant_size()	Perl_reentrant_size(aTHX)
 #define reentrant_init()	Perl_reentrant_init(aTHX)
+#define reentrant_free()	Perl_reentrant_free(aTHX)
 #endif
 #define call_atexit(a,b)	Perl_call_atexit(aTHX_ a,b)
 #define call_argv(a,b,c)	Perl_call_argv(aTHX_ a,b,c)

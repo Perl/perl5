@@ -174,7 +174,11 @@ typedef U64TYPE U64;
 
 #define I32_MAX INT32_MAX
 #define I32_MIN INT32_MIN
-#define U32_MAX UINT32_MAX
+#ifndef UINT32_MAX_BROKEN /* e.g. HP-UX with gcc messes this up */
+#  define U32_MAX UINT32_MAX
+#else
+#  define U32_MAX 4294967295U
+#endif
 #define U32_MIN UINT32_MIN
 
 #else

@@ -691,6 +691,7 @@ MICROCORE_SRC	=		\
 		..\pp_pack.c	\
 		..\pp_sort.c	\
 		..\pp_sys.c	\
+		..\reentr.c	\
 		..\regcomp.c	\
 		..\regexec.c	\
 		..\run.c	\
@@ -1068,9 +1069,9 @@ Import @perl.imp
 
 !if "$(MAKE_TYPE)"=="Debug"
 !ifdef NLM_NAME8
- 	.\bat\cvpack $(BLDDIR)\$(NLM_NAME8).sym
+	.\bat\cvpack $(BLDDIR)\$(NLM_NAME8).sym
 !else
- 	.\bat\cvpack $(BLDDIR)\$(NLM_NAME).sym
+	.\bat\cvpack $(BLDDIR)\$(NLM_NAME).sym
 !endif
 !endif
 

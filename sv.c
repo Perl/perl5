@@ -1226,13 +1226,13 @@ You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 bool
 Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 {
-    char*	pv;
-    U32		cur;
-    U32		len;
-    IV		iv;
-    NV		nv;
-    MAGIC*	magic;
-    HV*		stash;
+    char*	pv = NULL;
+    U32		cur = 0;
+    U32		len = 0;
+    IV		iv = 0;
+    NV		nv = 0.0;
+    MAGIC*	magic = NULL;
+    HV*		stash = Nullhv;
 
     if (mt != SVt_PV && SvREADONLY(sv) && SvFAKE(sv)) {
 	sv_force_normal(sv);
@@ -4780,7 +4780,7 @@ S_sv_del_backref(pTHX_ SV *sv)
     SV **svp;
     I32 i;
     SV *tsv = SvRV(sv);
-    MAGIC *mg;
+    MAGIC *mg = NULL;
     if (!SvMAGICAL(tsv) || !(mg = mg_find(tsv, PERL_MAGIC_backref)))
 	Perl_croak(aTHX_ "panic: del_backref");
     av = (AV *)mg->mg_obj;
@@ -6680,8 +6680,8 @@ possible to set C<*st> and C<*gvp> to the stash and GV associated with it.
 CV *
 Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 {
-    GV *gv;
-    CV *cv;
+    GV *gv = Nullgv;
+    CV *cv = Nullcv;
     STRLEN n_a;
 
     if (!sv)
@@ -6926,7 +6926,7 @@ C<SvPV_force> and C<SvPV_force_nomg>
 char *
 Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 {
-    char *s;
+    char *s = NULL;
 
     if (SvTHINKFIRST(sv) && !SvROK(sv))
 	sv_force_normal(sv);

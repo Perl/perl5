@@ -835,8 +835,7 @@ perl_destruct(pTHXx)
 #endif /* USE_5005THREADS */
 
 #ifdef USE_REENTRANT_API
-    Safefree(PL_reentrant_buffer->tmbuf);
-    Safefree(PL_reentrant_buffer);
+    Perl_reentrant_free(aTHX);
 #endif
 
     sv_free_arenas();

@@ -673,9 +673,25 @@ see L<encode>.  An opaque C<Encode::XS> object.
 =item $!
 
 If used numerically, yields the current value of the C C<errno>
-variable, with all the usual caveats.  (This means that you shouldn't
-depend on the value of C<$!> to be anything in particular unless
-you've gotten a specific error return indicating a system error.)
+variable, or in other words, if a system or library call fails, it
+sets this variable.  This means that the value of C<$!> is meaningful
+only I<immediately> after a B<failure>:
+
+    if (open(FH, $filename)) {
+	# Here $! is meaningless.
+	...
+    } else {
+	# ONLY here is $! meaningful.
+	...
+	# Already here $! might be meaningless.
+    }
+    # Since here we might have either success or failure,
+    # here $! is meaningless.
+
+In the above I<meaningless> stands for anything: zero, non-zero,
+C<undef>.  A successful system or library call does B<not> set
+the variable to zero.
+
 If used an a string, yields the corresponding system error string.
 You can assign a number to C<$!> to set I<errno> if, for instance,
 you want C<"$!"> to return the string for error I<n>, or you want

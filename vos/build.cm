@@ -182,6 +182,8 @@
 &if (command_status) ^= 0 &then &return
 !&compiler& <<pp_sys.c &diag& &cpu& &cflags& -o pp_sys&s&
 &if (command_status) ^= 0 &then &return
+!&compiler& <<reentr.c &diag& &cpu& &cflags& -o reentr&s&
+&if (command_status) ^= 0 &then &return
 !&compiler& <<regcomp.c &diag& &cpu& &cflags& -o regcomp&s&
 &if (command_status) ^= 0 &then &return
 !&compiler& <<regexec.c &diag& &cpu& &cflags& -o regexec&s&
@@ -215,8 +217,8 @@
  !delete_file perl.a
  !ar rc perl.a av.o deb.o doio.o doop.o dump.o globals.o gv.o hv.o locale.o &+
  mg.o numeric.o op.o perl.o perlapi.o perlio.o perly.o pp.o pp_ctl.o &+
- pp_hot.o pp_pack.o pp_sort.o pp_sys.o regcomp.o regexec.o run.o scope.o &+
- sv.o taint.o toke.o universal.o utf8.o util.o xsutils.o
+ pp_hot.o pp_pack.o pp_sort.o pp_sys.o reentr.o regcomp.o regexec.o run.o &+
+ scope.o sv.o taint.o toke.o universal.o utf8.o util.o xsutils.o
  !delete_file *.o -no_ask -brief
 &end
 &else &do

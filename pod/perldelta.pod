@@ -1120,6 +1120,12 @@ The Test module has been significantly enhanced.
 
 =item *
 
+Time::Local::timelocal() does not handle fractional seconds anymore.
+The rationale is that neither does localtime(), and timelocal() and
+localtime() are supposed to be inverses of each other.
+
+=item *
+
 The vars pragma now supports declaring fully qualified variables.
 (Something that C<our()> does not and will not support.)
 
@@ -2396,11 +2402,12 @@ for the C<"c"> format and a number less than -128 or more than 127.
 =item *
 
 Certain regex modifiers such as C<(?o)> make sense only if applied to
-the entire regex.  You will an optional warning if you try to do otherwise.
+the entire regex.  You will get an optional warning if you try to do
+otherwise. 
 
 =item *
 
-Using arrays or hashes as references (e.g. C<< %foo-&gt;{bar} >>
+Using arrays or hashes as references (e.g. C<< %foo->{bar} >>
 has been deprecated for a while.  Now you will get an optional warning.
 
 =item *

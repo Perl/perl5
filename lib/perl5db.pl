@@ -794,7 +794,11 @@ EOP
 						next CMD;
 					} 
 		    }
-        $cmd =~ /^q$/ && ($fall_off_end = 1) && clean_ENV() && exit $?;
+                    $cmd =~ /^q$/ && do {
+                        $fall_off_end = 1;
+                        clean_ENV();
+                        exit $?;
+                    };
 		    $cmd =~ /^t$/ && do {
 			$trace ^= 1;
 			local $\ = '';

@@ -1412,6 +1412,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 {
     MAGIC *mg;
     AMT *amtp;
+    CV *ret;
 
     if (!stash)
         return Nullcv;
@@ -1425,8 +1426,21 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
     if ( amtp->was_ok_am != PL_amagic_generation
 	 || amtp->was_ok_sub != PL_sub_generation )
 	goto do_update;
-    if (AMT_AMAGIC(amtp))
-	return amtp->table[id];
+    if (AMT_AMAGIC(amtp)) {
+	ret = amtp->table[id];
+	if (ret && isGV(ret)) {		/* Autoloading stab */
+	    /* Passing it through may have resulted in a warning
+	       "Inherited AUTOLOAD for a non-method deprecated", since
+	       our caller is going through a function call, not a method call.
+	       So return the CV for AUTOLOAD, setting $AUTOLOAD. */
+	    GV *gv = gv_fetchmethod(stash, (char*)PL_AMG_names[id]);
+
+	    if (gv && GvCV(gv))
+		return GvCV(gv);
+	}
+	return ret;
+    }
+    
     return Nullcv;
 }
 

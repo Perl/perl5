@@ -7,7 +7,6 @@
 use POSIX 'SEEK_SET';
 
 my $file = "tf$$.txt";
-my $data = "rec0$/rec1$/rec2$/";
 my ($o, $n);
 
 print "1..15\n";
@@ -23,6 +22,9 @@ close F;
 $o = tie @a, 'Tie::File', $file;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
+
+$: = $o->{recsep};
+
 $n = @a;
 print $n == 0 ? "ok $N\n" : "not ok $N # $n, s/b 0\n";
 $N++;
@@ -31,14 +33,17 @@ $N++;
 undef $o;
 untie @a;
 
-# 4-5 FETCHSIZE positive-length file
+my $data = "rec0$:rec1$:rec2$:";
 open F, "> $file" or die $!;
 binmode F;
 print F $data;
 close F;
+
 $o = tie @a, 'Tie::File', $file;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
+
+# 4-5 FETCHSIZE positive-length file
 $n = @a;
 print $n == 3 ? "ok $N\n" : "not ok $N # $n, s/b 0\n";
 $N++;
@@ -47,17 +52,17 @@ $N++;
 # (6-7) Make it longer:
 populate();
 $#a = 4;
-check_contents("$data$/$/");
+check_contents("$data$:$:");
 
 # (8-9) Make it longer again:
 populate();
 $#a = 6;
-check_contents("$data$/$/$/$/");
+check_contents("$data$:$:$:$:");
 
 # (10-11) Make it shorter:
 populate();
 $#a = 4;
-check_contents("$data$/$/");
+check_contents("$data$:$:");
 
 # (12-13) Make it shorter again:
 populate();
@@ -88,7 +93,7 @@ sub check_contents {
   if ($a eq $x) {
     print "ok $N\n";
   } else {
-    s{$/}{\\n}g for $a, $x;
+    ctrlfix($a, $x);
     print "not ok $N\n# expected <$x>, got <$a>\n";
   }
   $N++;
@@ -97,6 +102,13 @@ sub check_contents {
   $N++;
 }
 
+
+sub ctrlfix {
+  for (@_) {
+    s/\n/\\n/g;
+    s/\r/\\r/g;
+  }
+}
 
 END {
   undef $o;

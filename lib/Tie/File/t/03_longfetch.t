@@ -7,7 +7,8 @@
 #
 
 my $file = "tf$$.txt";
-my $data = "rec0$/rec1$/rec2$/";
+$: = Tie::File::_default_recsep();
+my $data = "rec0$:rec1$:rec2$:";
 
 print "1..5\n";
 
@@ -25,11 +26,13 @@ my $o = tie @a, 'Tie::File', $file;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
 
+$: = $o->{recsep};
+
 my $n;
 
 # 3-5
 for (2, 1, 0) {
-  print $a[$_] eq "rec$_$/" ? "ok $N\n" : "not ok $N # rec=$a[$_] ?\n";
+  print $a[$_] eq "rec$_$:" ? "ok $N\n" : "not ok $N # rec=$a[$_] ?\n";
   $N++;
 }
 

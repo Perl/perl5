@@ -77,8 +77,9 @@ sub check_contents {
   if ($a eq $x) {
     print "ok $N\n";
   } else {
-    s{$/}{\\n}g for $a, $x;
-    print "not ok $N\n# expected <$x>, got <$a>\n";
+    my $msg = "# expected <$x>, got <$a>";
+    ctrlfix($msg);
+    print "not ok $N $msg\n";
   }
   $N++;
 
@@ -87,13 +88,22 @@ sub check_contents {
   for (0.. $#c) {
     unless ($a[$_] eq "$c[$_]blah") {
       $msg = "expected $c[$_]blah, got $a[$_]";
-      $msg =~ s{$/}{\\n}g;
+      ctrlfix($msg);
       $good = 0;
     }
   }
   print $good ? "ok $N\n" : "not ok $N # fetch @c\n";
   $N++;
 }
+
+
+sub ctrlfix {
+  for (@_) {
+    s/\n/\\n/g;
+    s/\r/\\r/g;
+  }
+}
+
 
 END {
   undef $o;

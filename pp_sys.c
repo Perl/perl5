@@ -80,7 +80,9 @@ extern int h_errno;
 #  endif
 # endif
 # ifdef HAS_GETPWENT
+#ifndef getpwent
   struct passwd *getpwent (void);
+#endif
 # endif
 #endif
 
@@ -92,7 +94,9 @@ extern int h_errno;
     struct group *getgrgid (Gid_t);
 # endif
 # ifdef HAS_GETGRENT
+#ifndef getgrent
     struct group *getgrent (void);
+#endif
 # endif
 #endif
 
@@ -4653,8 +4657,14 @@ PP(pp_ghostent)
 #endif
 
 #ifdef HOST_NOT_FOUND
-    if (!hent)
-	STATUS_NATIVE_SET(h_errno);
+	if (!hent) {
+#ifdef USE_REENTRANT_API
+#   ifdef USE_GETHOSTENT_ERRNO
+	    h_errno = PL_reentrant_buffer->_gethostent_errno;
+#   endif
+#endif
+	    STATUS_NATIVE_SET(h_errno);
+	}
 #endif
 
     if (GIMME != G_ARRAY) {
@@ -4754,6 +4764,17 @@ PP(pp_gnetent)
 	nent = PerlSock_getnetent();
 #else
         DIE(aTHX_ PL_no_sock_func, "getnetent");
+#endif
+
+#ifdef HOST_NOT_FOUND
+	if (!nent) {
+#ifdef USE_REENTRANT_API
+#   ifdef USE_GETNETENT_ERRNO
+	     h_errno = PL_reentrant_buffer->_getnetent_errno;
+#   endif
+#endif
+	    STATUS_NATIVE_SET(h_errno);
+	}
 #endif
 
     EXTEND(SP, 4);

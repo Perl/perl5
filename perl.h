@@ -77,6 +77,12 @@
 #  endif
 #endif
 
+/* Use the reentrant APIs like localtime_r and getpwent_r */
+/* Win32 has naturally threadsafe libraries, no need to use any _r variants. */
+#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(WIN32) && !defined(__APPLE__)
+#   define USE_REENTRANT_API
+#endif
+
 /* <--- here ends the logic shared by perl.h and makedef.pl */
 
 #ifdef PERL_IMPLICIT_CONTEXT
@@ -336,12 +342,6 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  ifndef USE_BSDPGRP
 #    define USE_BSDPGRP
 #  endif
-#endif
-
-/* Use the reentrant APIs like localtime_r and getpwent_r */
-/* Win32 has naturally threadsafe libraries, no need to use any _r variants. */
-#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(WIN32) && !defined(__APPLE__)
-#   define USE_REENTRANT_API
 #endif
 
 /* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
@@ -2694,7 +2694,9 @@ END_EXTERN_C
 char *crypt ();       /* Maybe more hosts will need the unprototyped version */
 #  else
 #    if !defined(WIN32) && !defined(VMS)
+#ifndef crypt
 char *crypt (const char*, const char*);
+#endif
 #    endif /* !WIN32 */
 #  endif /* !NeXT && !__NeXT__ */
 #  ifndef DONT_DECLARE_STD
@@ -2709,7 +2711,9 @@ Off_t lseek (int,Off_t,int);
 #      endif
 #    endif
 #  endif /* !DONT_DECLARE_STD */
+#ifndef getlogin
 char *getlogin (void);
+#endif
 #endif /* !__cplusplus */
 
 #ifdef UNLINK_ALL_VERSIONS /* Currently only makes sense for VMS */

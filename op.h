@@ -477,25 +477,6 @@ struct loop {
 #define PERL_LOADMOD_IMPORT_OPS		0x4
 
 #ifdef USE_REENTRANT_API
-
-typedef struct {
-  struct tm* tmbuf;
-} REENTBUF;
-
-#define localtime(a)       (localtime_r((a),PL_reentrant_buffer->tmbuf) ? PL_reentrant_buffer->tmbuf : NULL)
-#define gmtime(a)          (gmtime_r((a),PL_reentrant_buffer->tmbuf) ?  PL_reentrant_buffer->tmbuf : NULL)
-
-#ifdef OLD_PTHREADS_API
-
-/* HP-UX 10.20 returns 0 on success, what it returns on failure is hidden
-   in the fog somewhere, possibly -1 which means the following should do 
-   the right thing - 20010816 sky */
-
-#undef localtime
-#undef gmtime
-#define localtime(a)       ((localtime_r((a),PL_reentrant_buffer->tmbuf) == 0) ? PL_reentrant_buffer->tmbuf : NULL)
-#define gmtime(a)          ((gmtime_r((a),PL_reentrant_buffer->tmbuf) == 0) ? PL_reentrant_buffer->tmbuf : NULL)
-#endif /* HP-UX 10.20 */
-
+#include "reentr.h"
 #endif
 

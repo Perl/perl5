@@ -28,6 +28,711 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.7.X		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 15243] By: jhi                                   on 2002/03/15  16:18:16
+        Log: Forgot from #15241.
+     Branch: perl
+	   ! win32/config_sh.PL
+____________________________________________________________________________
+[ 15242] By: jhi                                   on 2002/03/15  16:15:52
+        Log: Subject: patch pod/perltodo.pod
+             From: mjd@plover.com
+             Date: 15 Mar 2002 15:42:18 -0000
+             Message-ID: <20020315154218.10163.qmail@plover.com>
+             
+             (With s/WANT/Want/)
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 15241] By: jhi                                   on 2002/03/15  16:14:25
+        Log: Subject: [PATCH bleadperl] (revision 5 undef)
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Fri, 15 Mar 2002 00:39:48 +0100
+             Message-ID: <116078615.20020315003948@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/config.win64
+____________________________________________________________________________
+[ 15240] By: jhi                                   on 2002/03/15  16:12:25
+        Log: Subject: [BUG & PATCH] can't quit the debugger after run completes
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 14 Mar 2002 16:39:29 -0500
+             Message-ID: <20020314213929.GA2912@blackrider>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 15239] By: jhi                                   on 2002/03/15  16:11:17
+        Log: Integrate perlio.
+     Branch: perl
+	  !> embed.fnc ext/Encode/t/JP.t
+____________________________________________________________________________
+[ 15238] By: jhi                                   on 2002/03/15  16:07:58
+        Log: Monster _r patch: try to scan for all known _r variants,
+             and then use them (under ithreads).  May fail in HP-UX,
+             and the op/groups is known to be fickle everywhere.  Known
+             to work in Solaris, Linux, Tru64, IRIX, AIX.  (Some compiler
+             warnings in AIX since the first arguments of getnetbyaddr
+             and getnetbyadd_r are of different types.  Thanks, IBM.)
+             
+             In non-Configure platforms deny the existence of any
+             of the _r thingies.  (Also add the recently introduced
+             d_tm_* to places it wasn't already in.)
+             
+             TODO: the suggested glibc buffer growth retry loop in case
+             some entries (at least for: gr*, host*) are big.
+             Forgot win32/config.win64.
+     Branch: perl
+	   + reentr.c reentr.h reentr.pl
+	   ! Configure MANIFEST Makefile.SH NetWare/Makefile
+	   ! NetWare/config.wc Porting/Glossary Porting/config.sh
+	   ! Porting/config_H Porting/findrfuncs config_h.SH configure.com
+	   ! embed.fnc embed.h epoc/config.sh global.sym hints/hpux.sh
+	   ! intrpvar.h makedef.pl op.h perl.c perl.h plan9/mkfile pp_sys.c
+	   ! proto.h uconfig.h uconfig.sh util.c vms/descrip_mms.template
+	   ! vos/build.cm vos/config.alpha.def vos/config.alpha.h
+	   ! vos/config.ga.def vos/config.ga.h vos/perl.bind win32/Makefile
+	   ! win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/makefile.mk wince/Makefile.ce wince/config.ce
+____________________________________________________________________________
+[ 15237] By: jhi                                   on 2002/03/15  15:18:46
+        Log: Be more explicit on when is the $! worth anything.
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 15236] By: jhi                                   on 2002/03/15  14:44:09
+        Log: metaconfig: _r _r we go.
+     Branch: metaconfig
+	   ! U/threads/d_asctime_r.U U/threads/d_crypt_r.U
+	   ! U/threads/d_ctermid_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_drand48_r.U U/threads/d_endgrent_r.U
+	   ! U/threads/d_endhostent_r.U U/threads/d_endnetent_r.U
+	   ! U/threads/d_endprotoent_r.U U/threads/d_endpwent_r.U
+	   ! U/threads/d_endservent_r.U U/threads/d_getgrent_r.U
+	   ! U/threads/d_getgrgid_r.U U/threads/d_getgrnam_r.U
+	   ! U/threads/d_gethostbyaddr_r.U U/threads/d_gethostbyname_r.U
+	   ! U/threads/d_gethostent_r.U U/threads/d_getlogin_r.U
+	   ! U/threads/d_getnetbyaddr_r.U U/threads/d_getnetbyname_r.U
+	   ! U/threads/d_getnetent_r.U U/threads/d_getprotobyname_r.U
+	   ! U/threads/d_getprotobynumber_r.U U/threads/d_getprotoent_r.U
+	   ! U/threads/d_getpwent_r.U U/threads/d_getpwnam_r.U
+	   ! U/threads/d_getpwuid_r.U U/threads/d_getservbyname_r.U
+	   ! U/threads/d_getservbyport_r.U U/threads/d_getservent_r.U
+	   ! U/threads/d_getspnam_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_random_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_sethostent_r.U
+	   ! U/threads/d_setlocale_r.U U/threads/d_setnetent_r.U
+	   ! U/threads/d_setprotoent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_setservent_r.U U/threads/d_srand48_r.U
+	   ! U/threads/d_srandom_r.U U/threads/d_strerror_r.U
+	   ! U/threads/d_tmpnam_r.U U/threads/d_ttyname_r.U
+____________________________________________________________________________
+[ 15235] By: nick                                  on 2002/03/15  07:31:54
+        Log: Add the binmode()s to make JP.t pass on Win32
+     Branch: perlio
+	   ! ext/Encode/t/JP.t
+____________________________________________________________________________
+[ 15234] By: nick                                  on 2002/03/15  07:20:49
+        Log: Integrate perlio
+     Branch: perl
+	  !> ext/Encode/t/table.euc ext/Encode/t/table.ref
+____________________________________________________________________________
+[ 15233] By: nick                                  on 2002/03/15  07:18:02
+        Log: Mark JP.t's data files as binary
+     Branch: perlio
+	   ! ext/Encode/t/table.euc ext/Encode/t/table.ref
+____________________________________________________________________________
+[ 15232] By: nick                                  on 2002/03/15  07:13:38
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/B/t/xref.t
+	  !> MANIFEST Makefile.SH ext/B/B/Xref.pm ext/Safe/safe2.t
+	  !> lib/Benchmark.t lib/Exporter.pm lib/Pod/Html.pm makedepend.SH
+	  !> perl.c t/op/arith.t
+____________________________________________________________________________
+[ 15231] By: jhi                                   on 2002/03/15  04:49:10
+        Log: The section needs to be in the makedepend script
+             (from Jan-Erik Karlsson).
+     Branch: perl
+	   ! makedepend.SH
+____________________________________________________________________________
+[ 15230] By: jhi                                   on 2002/03/15  02:59:46
+        Log: Subject: Re: Réf. : Re: PATCH proposal for ext/Safe/safe2.t
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Thu, 14 Mar 2002 23:05:23 +0000
+             Message-ID: <20020314230522.GG363@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/Safe/safe2.t
+____________________________________________________________________________
+[ 15229] By: jhi                                   on 2002/03/15  02:55:34
+        Log: Subject: RE: [PATCH] Get rid of bad error message formatting in Pod::Html
+             From: "Brent Dax" <brentdax@cpan.org>
+             Date: Thu, 14 Mar 2002 09:08:41 -0800
+             Message-ID: <FJELLKOPEAGHOOODKEDPOEIBDFAA.brentdax@cpan.org>
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[ 15228] By: jhi                                   on 2002/03/15  02:00:23
+        Log: metaconfig: one round again for the _r.
+     Branch: metaconfig
+	   ! U/threads/d_asctime_r.U U/threads/d_crypt_r.U
+	   ! U/threads/d_ctermid_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_drand48_r.U U/threads/d_endgrent_r.U
+	   ! U/threads/d_endhostent_r.U U/threads/d_endnetent_r.U
+	   ! U/threads/d_endprotoent_r.U U/threads/d_endpwent_r.U
+	   ! U/threads/d_endservent_r.U U/threads/d_getgrent_r.U
+	   ! U/threads/d_getgrgid_r.U U/threads/d_getgrnam_r.U
+	   ! U/threads/d_gethostbyaddr_r.U U/threads/d_gethostbyname_r.U
+	   ! U/threads/d_gethostent_r.U U/threads/d_getlogin_r.U
+	   ! U/threads/d_getnetbyaddr_r.U U/threads/d_getnetbyname_r.U
+	   ! U/threads/d_getnetent_r.U U/threads/d_getprotobyname_r.U
+	   ! U/threads/d_getprotobynumber_r.U U/threads/d_getprotoent_r.U
+	   ! U/threads/d_getpwent_r.U U/threads/d_getpwnam_r.U
+	   ! U/threads/d_getpwuid_r.U U/threads/d_getservbyname_r.U
+	   ! U/threads/d_getservbyport_r.U U/threads/d_getservent_r.U
+	   ! U/threads/d_getspnam_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_random_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_sethostent_r.U
+	   ! U/threads/d_setlocale_r.U U/threads/d_setnetent_r.U
+	   ! U/threads/d_setprotoent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_setservent_r.U U/threads/d_srand48_r.U
+	   ! U/threads/d_srandom_r.U U/threads/d_strerror_r.U
+	   ! U/threads/d_tmpnam_r.U U/threads/d_ttyname_r.U
+____________________________________________________________________________
+[ 15227] By: jhi                                   on 2002/03/14  17:46:43
+        Log: metaconfig: new round of the _r units.
+     Branch: metaconfig
+	   ! U/threads/d_asctime_r.U U/threads/d_crypt_r.U
+	   ! U/threads/d_ctermid_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_drand48_r.U U/threads/d_endgrent_r.U
+	   ! U/threads/d_endhostent_r.U U/threads/d_endnetent_r.U
+	   ! U/threads/d_endprotoent_r.U U/threads/d_endpwent_r.U
+	   ! U/threads/d_endservent_r.U U/threads/d_getgrent_r.U
+	   ! U/threads/d_getgrgid_r.U U/threads/d_getgrnam_r.U
+	   ! U/threads/d_gethostbyaddr_r.U U/threads/d_gethostbyname_r.U
+	   ! U/threads/d_gethostent_r.U U/threads/d_getlogin_r.U
+	   ! U/threads/d_getnetbyaddr_r.U U/threads/d_getnetbyname_r.U
+	   ! U/threads/d_getnetent_r.U U/threads/d_getprotobyname_r.U
+	   ! U/threads/d_getprotobynumber_r.U U/threads/d_getprotoent_r.U
+	   ! U/threads/d_getpwent_r.U U/threads/d_getpwnam_r.U
+	   ! U/threads/d_getpwuid_r.U U/threads/d_getservbyname_r.U
+	   ! U/threads/d_getservbyport_r.U U/threads/d_getservent_r.U
+	   ! U/threads/d_getspnam_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_random_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_sethostent_r.U
+	   ! U/threads/d_setlocale_r.U U/threads/d_setnetent_r.U
+	   ! U/threads/d_setprotoent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_setservent_r.U U/threads/d_srand48_r.U
+	   ! U/threads/d_srandom_r.U U/threads/d_strerror_r.U
+	   ! U/threads/d_tmpnam_r.U U/threads/d_ttyname_r.U
+     Branch: metaconfig/U/perl
+	   + i_crypt.U
+____________________________________________________________________________
+[ 15226] By: jhi                                   on 2002/03/14  15:12:19
+        Log: Subject: [PATCH] Better patch for Benchmark.t and arith.t
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Tue, 12 Mar 02 19:22 est   
+             Message-Id: <200203130025.TAA20113@mailhub1.stratus.com>
+     Branch: perl
+	   ! lib/Benchmark.t t/op/arith.t
+____________________________________________________________________________
+[ 15225] By: jhi                                   on 2002/03/14  14:31:30
+        Log: Subject: Re: Win32: C:\Program Files
+             From: "Ken Williams" <ken@mathforum.org>
+             Date: Wed, 13 Mar 2002 17:50:59 -0600
+             Message-Id: <2B174669-36DD-11D6-87FA-003065F6D85A@mathforum.org>
+             
+             Add -t to perl -h.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 15224] By: jhi                                   on 2002/03/14  14:24:44
+        Log: Extra paranoia from Nick Clark.
+     Branch: perl
+	   ! ext/Safe/safe2.t
+____________________________________________________________________________
+[ 15223] By: jhi                                   on 2002/03/14  14:19:41
+        Log: Subject: Re: PATCH proposal for ext/Safe/safe2.t
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 13 Mar 2002 14:22:50 +0000
+             Message-ID: <20020313142250.G92566@plum.flirble.org>
+     Branch: perl
+	   ! ext/Safe/safe2.t
+____________________________________________________________________________
+[ 15222] By: jhi                                   on 2002/03/14  14:00:36
+        Log: Subject: Re: [PATCH] really protect spaces in Makefile.SH
+             From: <slaven.rezic@berlin.de>
+             Date: Tue, 12 Mar 2002 13:03:41 +0100      
+             Message-Id: <20020312120547.JGIP27460.mailoutvl21@[192.168.139.30]>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 15221] By: jhi                                   on 2002/03/14  13:51:17
+        Log: Subject: [PATCH] a test for B::Xref
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Wed, 13 Mar 2002 17:18:57 +0100
+             Message-ID: <20020313171857.F1144@rafael>
+     Branch: perl
+	   + ext/B/t/xref.t
+	   ! MANIFEST ext/B/B/Xref.pm
+____________________________________________________________________________
+[ 15220] By: jhi                                   on 2002/03/14  13:48:46
+        Log: Subject: [PATCH] Exporter.pm POD fixups
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Wed, 13 Mar 2002 16:21:42 +0100
+             Message-ID: <20020313162142.A1144@rafael>
+     Branch: perl
+	   ! lib/Exporter.pm
+____________________________________________________________________________
+[ 15219] By: nick                                  on 2002/03/14  07:00:16
+        Log: Integrate mainline
+     Branch: perlio
+	  !> lib/ExtUtils/MM_VMS.pm lib/open.pm vms/descrip_mms.template
+____________________________________________________________________________
+[ 15218] By: jhi                                   on 2002/03/13  22:15:00
+        Log: Subject: [PATCH lib/ExtUtils/MM_VMS.pm] Re: [PATCH] 'all ::' for one and one for 'all ::'
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 13 Mar 2002 17:43:00 -0500
+             Message-ID: <20020313224300.GG3311@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/MM_VMS.pm
+____________________________________________________________________________
+[ 15217] By: jhi                                   on 2002/03/13  17:28:36
+        Log: Pod tweak.
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 15216] By: jhi                                   on 2002/03/13  17:14:51
+        Log: Subject: [PATCH] 'all ::' for one and one for 'all ::'
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 13 Mar 2002 01:44:01 -0600
+             Message-Id: <a05101501b8b4ad54a28f@[172.16.52.1]>
+     Branch: perl
+	   ! vms/descrip_mms.template
+____________________________________________________________________________
+[ 15215] By: nick                                  on 2002/03/13  08:08:36
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> lib/Hash/Util.pm lib/Hash/Util.t lib/Internals.t
+	   - ext/Data/Util/Changes ext/Data/Util/Makefile.PL
+	   - ext/Data/Util/Util.xs ext/Data/Util/lib/Data/Util.pm
+	   - ext/Data/Util/lib/Hash/Util.pm ext/Data/Util/t/Data.t
+	   - ext/Data/Util/t/Hash.t
+	  !> MANIFEST Porting/findrfuncs ext/B/t/stash.t
+	  !> ext/Encode/lib/Encode/CN/HZ.pm
+	  !> ext/Encode/lib/Encode/JP/ISO_2022_JP.pm
+	  !> ext/Encode/lib/Encode/JP/JIS.pm lib/AutoSplit.t
+	  !> lib/File/stat.t lib/Test/Simple/t/fail-more.t
+	  !> pod/perldelta.pod pod/perldiag.pod pod/perlfunc.pod
+	  !> pod/perlhack.pod pod/perlmodlib.pod pod/perltoc.pod pp_ctl.c
+	  !> t/op/override.t toke.c universal.c
+____________________________________________________________________________
+[ 15214] By: jhi                                   on 2002/03/13  04:38:41
+        Log: metaconfig: three guesses.
+     Branch: metaconfig
+	   ! U/threads/d_asctime_r.U U/threads/d_crypt_r.U
+	   ! U/threads/d_ctermid_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_drand48_r.U U/threads/d_endgrent_r.U
+	   ! U/threads/d_endhostent_r.U U/threads/d_endnetent_r.U
+	   ! U/threads/d_endprotoent_r.U U/threads/d_endpwent_r.U
+	   ! U/threads/d_endservent_r.U U/threads/d_getgrent_r.U
+	   ! U/threads/d_getgrgid_r.U U/threads/d_getgrnam_r.U
+	   ! U/threads/d_gethostbyaddr_r.U U/threads/d_gethostbyname_r.U
+	   ! U/threads/d_gethostent_r.U U/threads/d_getlogin_r.U
+	   ! U/threads/d_getnetbyaddr_r.U U/threads/d_getnetbyname_r.U
+	   ! U/threads/d_getnetent_r.U U/threads/d_getprotobyname_r.U
+	   ! U/threads/d_getprotobynumber_r.U U/threads/d_getprotoent_r.U
+	   ! U/threads/d_getpwent_r.U U/threads/d_getpwnam_r.U
+	   ! U/threads/d_getpwuid_r.U U/threads/d_getservbyname_r.U
+	   ! U/threads/d_getservbyport_r.U U/threads/d_getservent_r.U
+	   ! U/threads/d_getspnam_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_random_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_sethostent_r.U
+	   ! U/threads/d_setlocale_r.U U/threads/d_setnetent_r.U
+	   ! U/threads/d_setprotoent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_setservent_r.U U/threads/d_srand48_r.U
+	   ! U/threads/d_srandom_r.U U/threads/d_strerror_r.U
+	   ! U/threads/d_tmpnam_r.U U/threads/d_ttyname_r.U
+____________________________________________________________________________
+[ 15213] By: jhi                                   on 2002/03/13  04:05:27
+        Log: metaconfig: regen _r units again.
+     Branch: metaconfig
+	   ! U/threads/d_asctime_r.U U/threads/d_crypt_r.U
+	   ! U/threads/d_ctermid_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_drand48_r.U U/threads/d_endgrent_r.U
+	   ! U/threads/d_endhostent_r.U U/threads/d_endnetent_r.U
+	   ! U/threads/d_endprotoent_r.U U/threads/d_endpwent_r.U
+	   ! U/threads/d_endservent_r.U U/threads/d_getgrent_r.U
+	   ! U/threads/d_getgrgid_r.U U/threads/d_getgrnam_r.U
+	   ! U/threads/d_gethostbyaddr_r.U U/threads/d_gethostbyname_r.U
+	   ! U/threads/d_gethostent_r.U U/threads/d_getlogin_r.U
+	   ! U/threads/d_getnetbyaddr_r.U U/threads/d_getnetbyname_r.U
+	   ! U/threads/d_getnetent_r.U U/threads/d_getprotobyname_r.U
+	   ! U/threads/d_getprotobynumber_r.U U/threads/d_getprotoent_r.U
+	   ! U/threads/d_getpwent_r.U U/threads/d_getpwnam_r.U
+	   ! U/threads/d_getpwuid_r.U U/threads/d_getservbyname_r.U
+	   ! U/threads/d_getservbyport_r.U U/threads/d_getservent_r.U
+	   ! U/threads/d_getspnam_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_random_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_sethostent_r.U
+	   ! U/threads/d_setlocale_r.U U/threads/d_setnetent_r.U
+	   ! U/threads/d_setprotoent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_setservent_r.U U/threads/d_srand48_r.U
+	   ! U/threads/d_srandom_r.U U/threads/d_strerror_r.U
+	   ! U/threads/d_tmpnam_r.U U/threads/d_ttyname_r.U
+____________________________________________________________________________
+[ 15212] By: jhi                                   on 2002/03/13  03:14:23
+        Log: metaconfig: regen _r units.
+     Branch: metaconfig
+	   - U/threads/d_gethbyaddr_r.U U/threads/d_gethbyname_r.U
+	   ! U/threads/d_asctime_r.U U/threads/d_crypt_r.U
+	   ! U/threads/d_ctermid_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_drand48_r.U U/threads/d_endgrent_r.U
+	   ! U/threads/d_endhostent_r.U U/threads/d_endnetent_r.U
+	   ! U/threads/d_endprotoent_r.U U/threads/d_endpwent_r.U
+	   ! U/threads/d_endservent_r.U U/threads/d_getgrent_r.U
+	   ! U/threads/d_getgrgid_r.U U/threads/d_getgrnam_r.U
+	   ! U/threads/d_gethostbyaddr_r.U U/threads/d_gethostbyname_r.U
+	   ! U/threads/d_gethostent_r.U U/threads/d_getlogin_r.U
+	   ! U/threads/d_getnetbyaddr_r.U U/threads/d_getnetbyname_r.U
+	   ! U/threads/d_getnetent_r.U U/threads/d_getprotobyname_r.U
+	   ! U/threads/d_getprotobynumber_r.U U/threads/d_getprotoent_r.U
+	   ! U/threads/d_getpwent_r.U U/threads/d_getpwnam_r.U
+	   ! U/threads/d_getpwuid_r.U U/threads/d_getservbyname_r.U
+	   ! U/threads/d_getservbyport_r.U U/threads/d_getservent_r.U
+	   ! U/threads/d_getspnam_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_random_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_sethostent_r.U
+	   ! U/threads/d_setlocale_r.U U/threads/d_setnetent_r.U
+	   ! U/threads/d_setprotoent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_setservent_r.U U/threads/d_srand48_r.U
+	   ! U/threads/d_srandom_r.U U/threads/d_strerror_r.U
+	   ! U/threads/d_tmpnam_r.U U/threads/d_ttyname_r.U
+____________________________________________________________________________
+[ 15211] By: jhi                                   on 2002/03/13  01:11:36
+        Log: metaconfig unit tweaks.
+     Branch: metaconfig
+	   + U/threads/d_setprotoent_r.U
+	   ! U/threads/d_crypt_r.U U/threads/d_ctermid_r.U
+	   ! U/threads/d_tmpnam_r.U
+____________________________________________________________________________
+[ 15210] By: jhi                                   on 2002/03/13  00:12:13
+        Log: metaconfig: replace the _r units with autogenerated ones.
+     Branch: metaconfig
+	   + U/threads/d_endhostent_r.U U/threads/d_endnetent_r.U
+	   + U/threads/d_endprotoent_r.U U/threads/d_endservent_r.U
+	   + U/threads/d_gethostbyaddr_r.U U/threads/d_gethostbyname_r.U
+	   + U/threads/d_gethostent_r.U U/threads/d_getnetbyaddr_r.U
+	   + U/threads/d_getnetbyname_r.U U/threads/d_getnetent_r.U
+	   + U/threads/d_getprotobyname_r.U
+	   + U/threads/d_getprotobynumber_r.U U/threads/d_getprotoent_r.U
+	   + U/threads/d_getservbyname_r.U U/threads/d_getservbyport_r.U
+	   + U/threads/d_getservent_r.U U/threads/d_sethostent_r.U
+	   + U/threads/d_setlocale_r.U U/threads/d_setnetent_r.U
+	   + U/threads/d_setservent_r.U
+	   - U/threads/d_endhent_r.U U/threads/d_endnent_r.U
+	   - U/threads/d_endpent_r.U U/threads/d_endsent_r.U
+	   - U/threads/d_gethent_r.U U/threads/d_getnbyaddr_r.U
+	   - U/threads/d_getnbyname_r.U U/threads/d_getnent_r.U
+	   - U/threads/d_getpbyname_r.U U/threads/d_getpbynumber_r.U
+	   - U/threads/d_getpent_r.U U/threads/d_getsbyname_r.U
+	   - U/threads/d_getsbyport_r.U U/threads/d_getsent_r.U
+	   - U/threads/d_sethent_r.U U/threads/d_setnent_r.U
+	   - U/threads/d_setpent_r.U U/threads/d_setsent_r.U
+	   ! U/threads/d_asctime_r.U U/threads/d_crypt_r.U
+	   ! U/threads/d_ctermid_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_drand48_r.U U/threads/d_endgrent_r.U
+	   ! U/threads/d_endpwent_r.U U/threads/d_getgrent_r.U
+	   ! U/threads/d_getgrgid_r.U U/threads/d_getgrnam_r.U
+	   ! U/threads/d_getlogin_r.U U/threads/d_getpwent_r.U
+	   ! U/threads/d_getpwnam_r.U U/threads/d_getpwuid_r.U
+	   ! U/threads/d_getspnam_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_random_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_srand48_r.U U/threads/d_srandom_r.U
+	   ! U/threads/d_strerror_r.U U/threads/d_tmpnam_r.U
+	   ! U/threads/d_ttyname_r.U
+____________________________________________________________________________
+[ 15209] By: jhi                                   on 2002/03/12  23:24:59
+        Log: More known threadsafings.
+     Branch: perl
+	   ! Porting/findrfuncs
+____________________________________________________________________________
+[ 15208] By: jhi                                   on 2002/03/12  20:43:46
+        Log: Small tweaks.
+     Branch: perl
+	   ! lib/Internals.t universal.c
+____________________________________________________________________________
+[ 15207] By: jhi                                   on 2002/03/12  17:38:46
+        Log: VERSIONize.
+     Branch: perl
+	   ! ext/Encode/lib/Encode/CN/HZ.pm
+	   ! ext/Encode/lib/Encode/JP/ISO_2022_JP.pm
+	   ! ext/Encode/lib/Encode/JP/JIS.pm
+____________________________________________________________________________
+[ 15206] By: jhi                                   on 2002/03/12  17:22:49
+        Log: Subject: perl datastructure conversion shortcuts for DDD
+             From: Stas Bekman <stas@stason.org>
+             Date: Mon, 11 Mar 2002 14:54:31 +0800
+             Message-ID: <3C8C54A7.5020502@stason.org>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 15205] By: jhi                                   on 2002/03/12  17:09:50
+        Log: Regen modlib.
+     Branch: perl
+	   ! pod/perlmodlib.pod
+____________________________________________________________________________
+[ 15204] By: jhi                                   on 2002/03/12  17:07:57
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 15203] By: jhi                                   on 2002/03/12  16:45:32
+        Log: Tiny pod tweaks.
+     Branch: perl
+	   ! lib/Hash/Util.pm
+____________________________________________________________________________
+[ 15202] By: jhi                                   on 2002/03/12  16:06:04
+        Log: perldeltaize Hash::Util.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15201] By: jhi                                   on 2002/03/12  15:41:23
+        Log: Move the readonly interface back to universal.c,
+             (new name: Internals::SvREADONLY), remove Data::Util,
+             move Hash::Util to lib, also introduce refcnt interface
+             (Internals::SvREFCNT).	Make both the new interfaces
+             to be more sane so that if they set the value, they return
+             the new value, not the old one.
+     Branch: perl
+	   + lib/Hash/Util.pm lib/Hash/Util.t lib/Internals.t
+	   - ext/Data/Util/Changes ext/Data/Util/Makefile.PL
+	   - ext/Data/Util/Util.xs ext/Data/Util/lib/Data/Util.pm
+	   - ext/Data/Util/lib/Hash/Util.pm ext/Data/Util/t/Data.t
+	   - ext/Data/Util/t/Hash.t
+	   ! MANIFEST ext/B/t/stash.t universal.c
+____________________________________________________________________________
+[ 15200] By: ams                                   on 2002/03/12  15:16:05
+        Log: Subject: Disambiguate "Can't locate"
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 12 Mar 2002 16:04:23 +0000
+             Message-Id: <E16kolD-0002S0-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! lib/AutoSplit.t lib/Test/Simple/t/fail-more.t pod/perldiag.pod
+	   ! pp_ctl.c t/op/override.t
+____________________________________________________________________________
+[ 15199] By: ams                                   on 2002/03/12  15:04:43
+        Log: Subject: [PATCH] perl/lib/File/stat.t
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Tue, 12 Mar 02 11:00 est
+             Message-Id: <200203121602.LAA29760@mailhub1.stratus.com>
+     Branch: perl
+	   ! lib/File/stat.t
+____________________________________________________________________________
+[ 15198] By: ams                                   on 2002/03/12  15:00:44
+        Log: Subject: [PATCH perlfunc.pod] Re[2]: Related issues? [ID 20020222.011]
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Tue, 12 Mar 2002 13:31:58 GMT
+             Message-Id: <200203121331.NAA21278@tempest.npl.co.uk>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 15197] By: ams                                   on 2002/03/12  14:57:34
+        Log: Subject: [PATCH toke.c] Inappropriate termination of POD
+             From: "Clinton A. Pierce" <clintp@geeksalad.org>
+             Date: Tue, 12 Mar 2002 10:11:53 -0500
+             Message-Id: <5.1.0.14.2.20020312095400.00aed218@www.geeksalad.org>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 15196] By: nick                                  on 2002/03/12  13:40:35
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Data/Util/Changes ext/Data/Util/Makefile.PL
+	  +> ext/Data/Util/Util.xs ext/Data/Util/lib/Data/Util.pm
+	  +> ext/Data/Util/lib/Hash/Util.pm ext/Data/Util/t/Data.t
+	  +> ext/Data/Util/t/Hash.t lib/Locale/Codes/t/rename.t
+	   - t/lib/access.t
+	  !> (integrate 96 files)
+____________________________________________________________________________
+[ 15195] By: nick                                  on 2002/03/12  06:08:24
+        Log: Integrate mainline (a while ago)
+     Branch: perlio
+	  +> Porting/findrfuncs ext/B/t/lint.t ext/Encode/t/CN.t
+	  +> ext/Encode/t/TW.t
+	   - ext/Encode/Encode/7bit-kr.enc ext/Encode/lib/Encode/JP/Tr.pm
+	   - ext/Encode/lib/Encode/Tcl/HanZi.pm
+	   - ext/I18N/Langinfo/fallback.c
+	  !> (integrate 80 files)
+____________________________________________________________________________
+[ 15194] By: ams                                   on 2002/03/12  06:02:20
+        Log: Subject: [PATCH ext/Encode/CN/Makefile.PL] Prototyping ...
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Mon, 11 Mar 2002 08:12:15 +0000 (GMT)
+             Message-Id: <Pine.LNX.4.44.0203110808140.4580-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! ext/Encode/CN/Makefile.PL
+____________________________________________________________________________
+[ 15193] By: ams                                   on 2002/03/12  05:55:07
+        Log: Subject: [PATCH: pod/perlguts.pod] get magic typo
+             From: Dave Mitchell <davem@fdgroup.co.uk>
+             Date: Fri, 8 Mar 2002 17:08:45 +0000 (GMT)
+             Message-Id: <200203081708.RAA29941@gizmo.fdgroup.co.uk>
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 15192] By: ams                                   on 2002/03/12  05:50:08
+        Log: Subject: [PATCH] fix format in lib/utf8.pm and polish the meaning
+             From: Anton Tagunov <tagunov@motor.ru>
+             Date: Tue, 12 Mar 2002 01:40:58 +0300
+             Message-Id: <1194068830.20020312014058@motor.ru>
+             (Applied with tweaks.)
+     Branch: perl
+	   ! lib/utf8.pm
+____________________________________________________________________________
+[ 15191] By: ams                                   on 2002/03/12  05:42:21
+        Log: Subject: [PATCH] alarm(), Win32, no PERL_IMPLICIT_SYS
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Sun, 10 Mar 2002 22:10:15 +0100
+             Message-Id: <3C8BD9C7.13988.73992D@localhost>
+     Branch: perl
+	   ! iperlsys.h
+____________________________________________________________________________
+[ 15190] By: ams                                   on 2002/03/12  05:38:08
+        Log: Subject: Re[2]: [Patch docs] perlsub. Re: [ID 20020227.012], [ID 20020227.018]
+             From: Anton Tagunov <tagunov@motor.ru>
+             Date: Mon, 11 Mar 2002 23:27:47 +0300
+             Message-Id: <19414222180.20020311232747@motor.ru>
+     Branch: perl
+	   ! pod/perlsub.pod
+____________________________________________________________________________
+[ 15189] By: ams                                   on 2002/03/12  05:34:49
+        Log: Subject: minor patch for comment in utfebcdic.h
+             From: Anton Tagunov <tagunov@motor.ru>
+             Date: Tue, 12 Mar 2002 00:20:21 +0300
+             Message-Id: <13817376786.20020312002021@motor.ru>
+     Branch: perl
+	   ! utfebcdic.h
+____________________________________________________________________________
+[ 15188] By: ams                                   on 2002/03/12  05:32:30
+        Log: Subject: [PATCH ?] B::Xref improvements
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 11 Mar 2002 23:32:20 +0100
+             Message-Id: <20020311233220.A12677@rafael>
+     Branch: perl
+	   ! ext/B/B/Xref.pm
+____________________________________________________________________________
+[ 15187] By: ams                                   on 2002/03/12  05:30:02
+        Log: Subject: [PATCH] lib/ExtUtils/MM_Unix.pm
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Mon, 11 Mar 02 17:23 est
+             Message-Id: <200203112225.RAA27594@mailhub1.stratus.com>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 15186] By: ams                                   on 2002/03/12  05:27:06
+        Log: Subject: [PATCH] installperl - minor untangle for VOS
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Mon, 11 Mar 02 17:05 est
+             Message-Id: <200203112203.RAA21987@mailhub2.stratus.com>
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 15185] By: ams                                   on 2002/03/12  05:25:59
+        Log: Subject: [PATCH B::Deparse] fix to deparse ${^WARNINGS_BITS}
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 11 Mar 2002 22:37:39 +0100
+             Message-Id: <20020311223739.A691@rafael>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 15184] By: ams                                   on 2002/03/12  05:20:54
+        Log: Subject: [PATCH hints/netbsd.sh] Stray whitespace mucking here-doc
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 12 Mar 2002 01:12:08 -0500
+             Message-Id: <20020312061208.GD904@blackrider>
+     Branch: perl
+	   ! hints/netbsd.sh
+____________________________________________________________________________
+[ 15183] By: ams                                   on 2002/03/12  04:12:30
+        Log: Subject: Re: ext/Encode/t/Tcl.t on VMS @15173
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Tue, 12 Mar 2002 13:05:53 +0800
+             Message-Id: <20020312050553.GA7864@not.autrijus.org>
+             (Only doc hunk applied, supplementing #15182.)
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 15182] By: ams                                   on 2002/03/12  04:04:34
+        Log: Subject: Re: ext/Encode/t/Tcl.t on VMS @15173
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Tue, 12 Mar 2002 12:56:46 +0800
+             Message-Id: <20020312045646.GA7689@not.autrijus.org>
+             (Private mail.)
+     Branch: perl
+	   ! ext/Encode/Encode.pm ext/Encode/lib/Encode/Tcl.pm
+____________________________________________________________________________
+[ 15181] By: ams                                   on 2002/03/12  03:09:20
+        Log: Subject: Re: ext/Encode/t/Tcl.t on VMS @15173
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Tue, 12 Mar 2002 11:55:06 +0800
+             Message-Id: <20020312035506.GA6946@not.autrijus.org>
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 15180] By: jhi                                   on 2002/03/11  22:32:10
+        Log: Deypo.
+     Branch: metaconfig
+	   ! U/threads/d_asctime_r.U
+____________________________________________________________________________
+[ 15179] By: jhi                                   on 2002/03/11  21:42:58
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq4.pod pod/perlfaq5.pod
+____________________________________________________________________________
+[ 15178] By: jhi                                   on 2002/03/11  17:34:34
+        Log: The test needs perlio.
+     Branch: perl
+	   ! lib/open.t
+____________________________________________________________________________
+[ 15177] By: ams                                   on 2002/03/11  15:41:08
+        Log: Subject: perlreftut update
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Mon, 11 Mar 2002 11:36:27 -0500
+             Message-Id: <20020311163627.31020.qmail@plover.com>
+     Branch: perl
+	   ! pod/perlreftut.pod
+____________________________________________________________________________
+[ 15176] By: ams                                   on 2002/03/11  15:35:24
+        Log: Subject: Minor correction in perlfaq5
+             From: mjd@plover.com
+             Date: 11 Mar 2002 16:34:22 -0000
+             Message-Id: <20020311163422.30963.qmail@plover.com>
+     Branch: perl
+	   ! pod/perlfaq5.pod
+____________________________________________________________________________
+[ 15175] By: gsar                                  on 2002/03/11  15:11:42
+        Log: number of skipped tests was incorrect
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 15174] By: gsar                                  on 2002/03/11  14:39:11
+        Log: remove doubled CRs
+     Branch: perl
+	   ! win32/Makefile
+____________________________________________________________________________
+[ 15173] By: jhi                                   on 2002/03/11  14:07:01
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 15172] By: jhi                                   on 2002/03/11  13:54:49
         Log: Regen toc.
      Branch: perl

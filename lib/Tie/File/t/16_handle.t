@@ -4,6 +4,7 @@
 # instead of from a filename
 
 my $file = "tf$$.txt";
+$: = Tie::File::_default_recsep();
 
 if ($^O =~ /vms/i) {
   print "1..0\n";
@@ -19,7 +20,7 @@ print "ok $N\n"; $N++;
 use Fcntl 'O_CREAT', 'O_RDWR';
 sysopen F, $file, O_CREAT | O_RDWR 
   or die "Couldn't create temp file $file: $!; aborting";
-binmode(F);
+binmode F;
 
 my $o = tie @a, 'Tie::File', \*F;
 print $o ? "ok $N\n" : "not ok $N\n";
@@ -78,42 +79,38 @@ undef $o;
 untie @a;
 
 # Does it correctly detect a non-seekable handle?
-
-{
-  if ($^O =~ /^(MSWin32|dos)$/) {
-    print "ok $N \# skipped ($^O has broken pipe semantics)\n";
-    last;
-  }
-  my $pipe_succeeded = eval {pipe *R, *W};
-  if ($@) {
-    chomp $@;
-    print "ok $N \# skipped (no pipes: $@)\n";
-        last;
-  } elsif (! $pipe_succeeded) {
-    print "ok $N \# skipped (pipe call failed: $!)\n";
-    last;
-  }
-  close R;
-  $o = eval {tie @a, 'Tie::File', \*W};
-  if ($@) {
-    if ($@ =~ /filehandle does not appear to be seekable/) {
-      print "ok $N\n";
-    } else {
-      chomp $@;
-      print "not ok $N \# \$\@ is $@\n";
-    }
-  } else {
-    print "not ok $N \# passing pipe to TIEARRAY didn't abort program\n";
-  }
-  $N++;
+{  if ($^O =~ /^(MSWin32|dos)$/) {
+     print "ok $N # skipped ($^O has broken pipe semantics)\n";
+     last;
+   }
+   my $pipe_succeeded = eval {pipe *R, *W};
+   if ($@) {
+     chomp $@;
+     print "ok $N # skipped (no pipes: $@)\n";
+     last;
+   } elsif (! $pipe_succeeded) {
+     print "ok $N # skipped (pipe call failed: $!)\n";
+     last;
+   }
+   close R;
+   $o = eval {tie @a, 'Tie::File', \*W};
+   if ($@) {
+     if ($@ =~ /filehandle does not appear to be seekable/) {
+       print "ok $N\n";
+     } else {
+       chomp $@;
+       print "not ok $N \# \$\@ is $@\n";
+     }
+   } else {
+       print "not ok $N \# passing pipe to TIEARRAY didn't abort program\n";
+   }
+   $N++;
 }
-
-# try inserting a record into the middle of an empty file
 
 use POSIX 'SEEK_SET';
 sub check_contents {
   my @c = @_;
-  my $x = join $/, @c, '';
+  my $x = join $:, @c, '';
   local *FH = $o->{fh};
   seek FH, 0, SEEK_SET;
 #  my $open = open FH, "< $file";
@@ -123,8 +120,8 @@ sub check_contents {
   if ($a eq $x) {
     print "ok $N\n";
   } else {
-    s{$/}{\\n}g for $a, $x;
-    print "not ok $N\n# expected <$x>, got <$a>\n";
+    ctrlfix(my $msg = "# expected <$x>, got <$a>");
+    print "not ok $N\n$msg\n";
   }
   $N++;
 
@@ -132,14 +129,22 @@ sub check_contents {
   my $good = 1;
   my $msg;
   for (0.. $#c) {
-    unless ($a[$_] eq "$c[$_]$/") {
-      $msg = "expected $c[$_]$/, got $a[$_]";
-      $msg =~ s{$/}{\\n}g;
+    unless ($a[$_] eq "$c[$_]$:") {
+      $msg = "expected $c[$_]$:, got $a[$_]";
+      ctrlfix($msg);
       $good = 0;
     }
   }
   print $good ? "ok $N\n" : "not ok $N # $msg\n";
   $N++;
+}
+
+
+sub ctrlfix {
+  for (@_) {
+    s/\n/\\n/g;
+    s/\r/\\r/g;
+  }
 }
 
 END {
