@@ -34,15 +34,15 @@ ok(!access::readonly($hash{two},1));
 
 eval { $hash{'three'} = 3 };
 #warn "$@";
-ok($@ =~ /^Attempt to access to key 'three' in fixed hash/);
+ok($@ =~ /^Attempt to access key 'three' in fixed hash/);
 
 eval { print "# oops"  if $hash{'four'}};
 #warn "$@";
-ok($@ =~ /^Attempt to access to key 'four' in fixed hash/);
+ok($@ =~ /^Attempt to access key 'four' in fixed hash/);
 
 eval { $hash{"\x{2323}"} = 3 };
 #warn "$@";
-ok($@ =~ /^Attempt to access to key '(.*)' in fixed hash/);
+ok($@ =~ /^Attempt to access key '(.*)' in fixed hash/);
 #ok(ord($1) == 0x2323);
 
 eval { delete $hash{'two'}};
@@ -56,7 +56,7 @@ ok($hash{two} == 2);
 
 eval { delete $hash{'four'}};
 #warn "$@";
-ok($@ =~ /^Attempt to access to key 'four' in fixed hash/);
+ok($@ =~ /^Attempt to access key 'four' in fixed hash/);
 
 ok(not exists $hash{'one'});
 
