@@ -14,9 +14,12 @@ case "$0" in
 esac
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 1.0.1.1 88/01/24 03:55:18 root Exp $
+# $Header: Makefile.SH,v 1.0.1.2 88/01/26 08:46:04 root Exp $
 #
 # $Log:	Makefile.SH,v $
+# Revision 1.0.1.2  88/01/26  08:46:04  root
+# patch 4: make depend didn't work right if . wasn't in PATH.
+# 
 # Revision 1.0.1.1  88/01/24  03:55:18  root
 # patch 2: remove extra Log lines.
 # 
@@ -137,7 +140,7 @@ lint:
 	lint $(lintflags) $(defs) $(c) > perl.fuzz
 
 depend: makedepend
-	makedepend
+	./makedepend
 
 test: perl
 	chmod 755 t/TEST t/base.* t/comp.* t/cmd.* t/io.* t/op.*
