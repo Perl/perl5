@@ -4,8 +4,8 @@ BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib';
     require Config; import Config;
-    if (! $Config{'usethreads'}) {
-	print "1..0 # Skip: this perl is not threaded\n";
+    if (! $Config{'use5005threads'}) {
+	print "1..0 # Skip: not use5005threads\n";
 	exit 0;
     }
 
