@@ -1099,7 +1099,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		      && !deltanext && minnext == 1 ) {
 		    /* Try to optimize to CURLYN.  */
 		    regnode *nxt = NEXTOPER(oscan) + EXTRA_STEP_2ARGS;
-		    regnode *nxt1 = nxt, *nxt2;
+		    regnode *nxt1 = nxt;
+#ifdef DEBUGGING
+		    regnode *nxt2;
+#endif
 
 		    /* Skip open. */
 		    nxt = regnext(nxt);
@@ -1107,7 +1110,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			&& !(PL_regkind[(U8)OP(nxt)] == EXACT
 			     && STR_LEN(nxt) == 1))
 			goto nogo;
+#ifdef DEBUGGING
 		    nxt2 = nxt;
+#endif
 		    nxt = regnext(nxt);
 		    if (OP(nxt) != CLOSE)
 			goto nogo;

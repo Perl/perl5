@@ -5102,7 +5102,6 @@ coercion.  See also C<SvCUR>, which gives raw access to the xpv_cur slot.
 STRLEN
 Perl_sv_len(pTHX_ register SV *sv)
 {
-    char *junk;
     STRLEN len;
 
     if (!sv)
@@ -5111,7 +5110,7 @@ Perl_sv_len(pTHX_ register SV *sv)
     if (SvGMAGICAL(sv))
 	len = mg_length(sv);
     else
-	junk = SvPV(sv, len);
+        (void)SvPV(sv, len);
     return len;
 }
 
@@ -7782,7 +7781,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    q++;
 	    if (*q == '*') {
 		q++;
-		if (EXPECT_NUMBER(q, epix) && *q++ != '$')
+		if (EXPECT_NUMBER(q, epix) && *q++ != '$') /* epix currently unused */
 		    goto unknown;
 		if (args)
 		    i = va_arg(*args, int);
