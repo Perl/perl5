@@ -191,6 +191,7 @@ emergency_sbrk(size)
     }
 
     if (!emergency_buffer) {		
+	dTHR;
 	/* First offense, give a possibility to recover by dieing. */
 	/* No malloc involved here: */
 	GV **gvp = (GV**)hv_fetch(defstash, "^M", 2, 0);

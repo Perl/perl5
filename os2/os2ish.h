@@ -74,7 +74,7 @@ void Perl_OS2_init(char **);
     _wildcard(argcp, argvp);			\
     Perl_OS2_init(env);	} STMT_END
 
-#define PERL_SYS_TERM()
+#define PERL_SYS_TERM()		MALLOC_TERM
 
 /* #define PERL_SYS_TERM() STMT_START {	\
     if (Perl_HAB_set) WinTerminate(Perl_hab);	} STMT_END */

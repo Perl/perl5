@@ -1343,6 +1343,14 @@ typedef Sighandler_t Sigsave_t;
 # define RUNOPS_DEFAULT runops_standard
 #endif
 
+#ifdef MYMALLOC
+#  define MALLOC_INIT MUTEX_INIT(&malloc_mutex)
+#  define MALLOC_TERM MUTEX_DESTROY(&malloc_mutex)
+#else
+#  define MALLOC_INIT
+#  define MALLOC_TERM
+#endif
+
 /*
  * These need prototyping here because <proto.h> isn't
  * included until after runops is initialised.

@@ -134,7 +134,6 @@ perl_construct(register PerlInterpreter *sv_interp)
 	if (pthread_key_create(&thr_key, 0))
 	    croak("panic: pthread_key_create");
 #endif
-	MUTEX_INIT(&malloc_mutex);
 	MUTEX_INIT(&sv_mutex);
 	/*
 	 * Safe to use basic SV functions from now on (though
@@ -529,7 +528,6 @@ perl_destruct(register PerlInterpreter *sv_interp)
     DEBUG_P(debprofdump());
 #ifdef USE_THREADS
     MUTEX_DESTROY(&sv_mutex);
-    MUTEX_DESTROY(&malloc_mutex);
     MUTEX_DESTROY(&eval_mutex);
     COND_DESTROY(&eval_cond);
 
