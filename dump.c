@@ -67,7 +67,7 @@ GV* gv;
 {
     SV *sv = sv_newmortal();
 
-    gv_fullname(sv, gv, Nullch);
+    gv_fullname3(sv, gv, Nullch);
     dump("\nSUB %s = ", SvPVX(sv));
     if (CvXSUB(GvCV(gv)))
 	dump("(xsub 0x%x %d)\n",
@@ -85,7 +85,7 @@ GV* gv;
 {
     SV *sv = sv_newmortal();
 
-    gv_fullname(sv, gv, Nullch);
+    gv_fullname3(sv, gv, Nullch);
     dump("\nFORMAT %s = ", SvPVX(sv));
     if (CvROOT(GvFORM(gv)))
 	dump_op(CvROOT(GvFORM(gv)));
@@ -223,7 +223,7 @@ register OP *op;
 	    ENTER;
 	    tmpsv = NEWSV(0,0);
 	    SAVEFREESV(tmpsv);
-	    gv_fullname(tmpsv, cGVOP->op_gv, Nullch);
+	    gv_fullname3(tmpsv, cGVOP->op_gv, Nullch);
 	    dump("GV = %s\n", SvPV(tmpsv, na));
 	    LEAVE;
 	}
@@ -309,10 +309,10 @@ register GV *gv;
     sv = sv_newmortal();
     dumplvl++;
     PerlIO_printf(Perl_debug_log, "{\n");
-    gv_fullname(sv, gv, Nullch);
+    gv_fullname3(sv, gv, Nullch);
     dump("GV_NAME = %s", SvPVX(sv));
     if (gv != GvEGV(gv)) {
-	gv_efullname(sv, GvEGV(gv), Nullch);
+	gv_efullname3(sv, GvEGV(gv), Nullch);
 	dump("-> %s", SvPVX(sv));
     }
     dump("\n");

@@ -687,7 +687,7 @@ I32 sv_type;
 }
 
 void
-gv_fullname(sv, gv, prefix)
+gv_fullname3(sv, gv, prefix)
 SV *sv;
 GV *gv;
 char *prefix;
@@ -704,7 +704,7 @@ char *prefix;
 }
 
 void
-gv_efullname(sv, gv, prefix)
+gv_efullname3(sv, gv, prefix)
 SV *sv;
 GV *gv;
 char *prefix;
@@ -712,7 +712,25 @@ char *prefix;
     GV *egv = GvEGV(gv);
     if (!egv)
 	egv = gv;
-    gv_fullname(sv, egv, prefix);
+    gv_fullname3(sv, egv, prefix);
+}
+
+/* XXX compatibility with versions <= 5.003. */
+void
+gv_fullname(sv,gv)
+SV *sv;
+GV *gv;
+{
+    gv_fullname3(sv, gv, sv == (SV*)gv ? "*" : "");
+}
+
+/* XXX compatibility with versions <= 5.003. */
+void
+gv_efullname(sv,gv)
+SV *sv;
+GV *gv;
+{
+    gv_efullname3(sv, gv, sv == (SV*)gv ? "*" : "");
 }
 
 IO *

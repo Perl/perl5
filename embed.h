@@ -261,6 +261,7 @@
 #define vtbl_isa	Perl_vtbl_isa
 #define vtbl_isaelem	Perl_vtbl_isaelem
 #define vtbl_mglob	Perl_vtbl_mglob
+#define vtbl_nkeys	Perl_vtbl_nkeys
 #define vtbl_pack	Perl_vtbl_pack
 #define vtbl_packelem	Perl_vtbl_packelem
 #define vtbl_pos	Perl_vtbl_pos
@@ -428,11 +429,13 @@
 #define gv_IOadd	Perl_gv_IOadd
 #define gv_check	Perl_gv_check
 #define gv_efullname	Perl_gv_efullname
+#define gv_efullname3	Perl_gv_efullname3
 #define gv_fetchfile	Perl_gv_fetchfile
 #define gv_fetchmeth	Perl_gv_fetchmeth
 #define gv_fetchmethod	Perl_gv_fetchmethod
 #define gv_fetchpv	Perl_gv_fetchpv
 #define gv_fullname	Perl_gv_fullname
+#define gv_fullname3	Perl_gv_fullname3
 #define gv_init		Perl_gv_init
 #define gv_stashpv	Perl_gv_stashpv
 #define gv_stashpvn	Perl_gv_stashpvn
@@ -454,6 +457,7 @@
 #define hv_iternext	Perl_hv_iternext
 #define hv_iternextsv	Perl_hv_iternextsv
 #define hv_iterval	Perl_hv_iterval
+#define hv_ksplit	Perl_hv_ksplit
 #define hv_magic	Perl_hv_magic
 #define hv_stashpv	Perl_hv_stashpv
 #define hv_store	Perl_hv_store
@@ -497,6 +501,7 @@
 #define magic_setglob	Perl_magic_setglob
 #define magic_setisa	Perl_magic_setisa
 #define magic_setmglob	Perl_magic_setmglob
+#define magic_setnkeys	Perl_magic_setnkeys
 #define magic_setpack	Perl_magic_setpack
 #define magic_setpos	Perl_magic_setpos
 #define magic_setsig	Perl_magic_setsig
