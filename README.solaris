@@ -365,6 +365,9 @@ this with
 
 	sh Configure -Uusemymalloc
 
+Note that this will break binary compatibility with any version that
+was not compiled with -Uusemymalloc.
+
 =head3 Long Doubles.
 
 As of 5.6.0, long doubles are not working.
@@ -393,7 +396,8 @@ You can avoid perl's malloc by Configuring with
 
 	sh Configure -Uusemymalloc
 
-[XXX Update hints file.]
+See the note about binary compatibility above.  This option will be
+enabled by default beginning with 5.7.1.
 
 =head1 MAKE PROBLEMS.
 
