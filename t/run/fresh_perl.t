@@ -824,11 +824,12 @@ EXPECT
 foo at - line 1.
 ######## glob() bug Mon, 01 Sep 2003 02:25:41 -0700 <200309010925.h819Pf0X011457@smtp3.ActiveState.com>
 -lw
+BEGIN {
+  eval 'require Fcntl';
+  if ($@) { print qq[./"TEST"\n./"TEST"\n]; exit 0 } # running minitest?
+}
 if ($^O eq 'VMS') { # VMS is not *that* kind of a glob.
-print <<__EOF__;
-./"TEST"
-./"TEST"
-__EOF__
+print qq[./"TEST"\n./"TEST"\n];
 } else {
 print glob(q(./"TEST"));
 use File::Glob;
@@ -839,11 +840,12 @@ EXPECT
 ./"TEST"
 ######## glob() bug Mon, 01 Sep 2003 02:25:41 -0700 <200309010925.h819Pf0X011457@smtp3.ActiveState.com>
 -lw
+BEGIN {
+  eval 'require Fcntl';
+  if ($@) { print qq[./"TEST"\n./"TEST"\n]; exit 0 } # running minitest?
+}
 if ($^O eq 'VMS') { # VMS is not *that* kind of a glob.
-print <<__EOF__;
-./"TEST"
-./"TEST"
-__EOF__
+print qq[./"TEST"\n./"TEST"\n];
 } else {
 use File::Glob;
 print glob(q(./"TEST"));
