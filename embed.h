@@ -29,7 +29,6 @@
 #  define  Perl_safesysrealloc		Perl_saferealloc
 #  define  Perl_set_numeric_local	perl_set_numeric_local
 #  define  Perl_set_numeric_standard	perl_set_numeric_standard
-#  define  PERL_POLLUTE
 /* malloc() pollution was the default in earlier versions, so enable
  * it for bincompat; but not for systems that used to do prevent that,
  * or when they ask for {HIDE,EMBED}MYMALLOC */
