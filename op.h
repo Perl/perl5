@@ -181,6 +181,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpTARGET_MY		16	/* Target is PADMY. */
 
 /* Private for OP_CONST */
+#define	OPpCONST_SHORTCIRCUIT	4	/* eg the constant 5 in (5 || foo) */
 #define	OPpCONST_STRICT		8	/* bearword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
 #define OPpCONST_ARYBASE	32	/* Was a $[ translated to constant. */

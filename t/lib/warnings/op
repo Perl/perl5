@@ -525,6 +525,9 @@ Useless use of a variable in void context at - line 6.
 use warnings 'void' ;
 "abc"; # OP_CONST
 7 ; # OP_CONST
+5 || print "bad\n";	# test OPpCONST_SHORTCIRCUIT
+use constant U => undef;
+print "boo\n" if U;	# test OPpCONST_SHORTCIRCUIT
 no warnings 'void' ;
 "abc"; # OP_CONST
 7 ; # OP_CONST
