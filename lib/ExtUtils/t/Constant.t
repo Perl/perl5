@@ -648,11 +648,12 @@ $test++;
 
 sub check_for_bonus_files {
   my $dir = shift;
-  my %expect = map {$_, 1} @_;
+  my %expect = map {($^O eq 'VMS' ? lc($_) : $_), 1} @_;
 
   my $fail;
   opendir DIR, $dir or die "opendir '$dir': $!";
   while (defined (my $entry = readdir DIR)) {
+    $entry =~ s/\.$// if $^O eq 'VMS';  # delete trailing dot that indicates no extension
     next if $expect{$entry};
     print "# Extra file '$entry'\n";
     $fail = 1;
