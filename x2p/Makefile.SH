@@ -151,6 +151,7 @@ $(plextract):
 malloc.c: ../malloc.c
 	rm -f malloc.c
 	sed <../malloc.c >malloc.c \
+	    -e 's/"EXTERN.h"/"..\/EXTERN.h"/' \
 	    -e 's/"perl.h"/"..\/perl.h"/' \
 	    -e 's/my_exit/exit/'
 
