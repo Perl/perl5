@@ -189,6 +189,13 @@ STORE(self, index, value)
         shared_sv* slot;
         SV* aentry;
 	SV** aentry_;
+	if(SvROK(value)) {
+	    shared_sv* target = Perl_sharedsv_find(aTHX_ SvRV(value));
+	    if(!target) {
+	         Perl_croak(aTHX_ "You cannot assign a non shared reference to an shared array");
+	    }
+            value = newRV_noinc(newSViv((IV)target));
+        }
 	SHAREDSvLOCK(shared);
 	aentry_ = av_fetch((AV*) SHAREDSvGET(shared), SvIV(index), 0);
 	if(aentry_ && SvIV((*aentry_))) {
@@ -207,6 +214,9 @@ STORE(self, index, value)
             av_store((AV*) SHAREDSvGET(shared), SvIV(index), aentry);
             SHAREDSvRELEASE(shared);
 	}
+        if(SvROK(SHAREDSvGET(slot)))
+            Perl_sharedsv_thrcnt_inc(aTHX_ (shared_sv*) SvIV(SvRV(SHAREDSvGET(slot))));
+
         SHAREDSvUNLOCK(shared);
 
 SV*
@@ -227,7 +237,12 @@ FETCH(self, index)
 	        retval = &PL_sv_undef;
 	    } else {
 	        slot = (shared_sv*) SvIV(aentry);
-                retval = newSVsv(SHAREDSvGET(slot));
+		if(SvROK(SHAREDSvGET(slot))) {
+		     shared_sv* target = (shared_sv*) SvIV(SvRV(SHAREDSvGET(slot)));
+		     retval = shared_sv_attach_sv(NULL,target);
+		} else {
+	             retval = newSVsv(SHAREDSvGET(slot));
+		}
             }
 	} else {
 	    retval = &PL_sv_undef;
@@ -247,10 +262,19 @@ PUSH(self, ...)
 	for(i = 1; i < items; i++) {
     	    shared_sv* slot = Perl_sharedsv_new(aTHX);
 	    SV* tmp = ST(i);
+	    if(SvROK(tmp)) {
+                 shared_sv* target = Perl_sharedsv_find(aTHX_ SvRV(tmp));
+                 if(!target) {
+                     Perl_croak(aTHX_ "You cannot assign a non shared reference to an shared array");
+                 }
+                 tmp = newRV_noinc(newSViv((IV)target));
+            }
             SHAREDSvEDIT(slot);
 	    SHAREDSvGET(slot) = newSVsv(tmp);
 	    av_push((AV*) SHAREDSvGET(shared), newSViv((IV)slot));	    
 	    SHAREDSvRELEASE(slot);
+	    if(SvROK(SHAREDSvGET(slot)))
+                Perl_sharedsv_thrcnt_inc(aTHX_ (shared_sv*) SvIV(SvRV(SHAREDSvGET(slot))));
 	}
         SHAREDSvUNLOCK(shared);
 
@@ -267,10 +291,19 @@ UNSHIFT(self, ...)
 	for(i = 1; i < items; i++) {
     	    shared_sv* slot = Perl_sharedsv_new(aTHX);
 	    SV* tmp = ST(i);
+	    if(SvROK(tmp)) {
+                 shared_sv* target = Perl_sharedsv_find(aTHX_ SvRV(tmp));
+                 if(!target) {
+                     Perl_croak(aTHX_ "You cannot assign a non shared reference to an shared array");
+                 }
+                 tmp = newRV_noinc(newSViv((IV)target));
+            }
             SHAREDSvEDIT(slot);
 	    SHAREDSvGET(slot) = newSVsv(tmp);
 	    av_store((AV*) SHAREDSvGET(shared), i - 1, newSViv((IV)slot));
 	    SHAREDSvRELEASE(slot);
+	    if(SvROK(SHAREDSvGET(slot)))
+                Perl_sharedsv_thrcnt_inc(aTHX_ (shared_sv*) SvIV(SvRV(SHAREDSvGET(slot))));
 	}
         SHAREDSvUNLOCK(shared);
 
@@ -287,7 +320,12 @@ POP(self)
 	SHAREDSvRELEASE(shared);
 	if(retval && SvIV(retval)) {
 	    slot = (shared_sv*) SvIV(retval);
-	    retval = newSVsv(SHAREDSvGET(slot));
+	    if(SvROK(SHAREDSvGET(slot))) {
+		 shared_sv* target = (shared_sv*) SvIV(SvRV(SHAREDSvGET(slot)));
+		 retval = shared_sv_attach_sv(NULL,target);
+	    } else {
+	         retval = newSVsv(SHAREDSvGET(slot));
+            }
             Perl_sharedsv_thrcnt_dec(aTHX_ slot);
 	} else {
             retval = &PL_sv_undef;
@@ -311,7 +349,12 @@ SHIFT(self)
 	SHAREDSvRELEASE(shared);
 	if(retval && SvIV(retval)) {
 	    slot = (shared_sv*) SvIV(retval);
-	    retval = newSVsv(SHAREDSvGET(slot));
+            if(SvROK(SHAREDSvGET(slot))) {
+                 shared_sv* target = (shared_sv*) SvIV(SvRV(SHAREDSvGET(slot)));
+                 retval = shared_sv_attach_sv(NULL,target);
+            } else {
+                 retval = newSVsv(SHAREDSvGET(slot));
+            }
             Perl_sharedsv_thrcnt_dec(aTHX_ slot);
 	} else {
             retval = &PL_sv_undef;
@@ -408,7 +451,12 @@ DELETE(self,index)
 	    SHAREDSvRELEASE(shared);
 	    if(SvIV(tmp)) {
 		slot = (shared_sv*) SvIV(tmp);
-		RETVAL = newSVsv(SHAREDSvGET(slot));
+                if(SvROK(SHAREDSvGET(slot))) {
+                   shared_sv* target = (shared_sv*) SvIV(SvRV(SHAREDSvGET(slot)));
+                   RETVAL = shared_sv_attach_sv(NULL,target);
+                } else {
+                   RETVAL = newSVsv(SHAREDSvGET(slot));
+                }
                 Perl_sharedsv_thrcnt_dec(aTHX_ slot);               
 	    } else {
                 RETVAL = &PL_sv_undef;
