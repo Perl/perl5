@@ -509,9 +509,12 @@ is("<$_> <$s>", "<> <4>", "[perl #7806]");
 }
 
 # [perl #17757] interaction between saw_ampersand and study
-# Patch (change #18533) retracted because of Parse::RecDescent infinite loop.
 {
-    ok(1, "fake success [perl #17757]");
+    my $f = eval q{ $& };
+    $f = "xx";
+    study $f;
+    $f =~ s/x/y/g;
+    is($f, "yy", "[perl #17757]");
 }
 
 # [perl #20684] returned a zero count
