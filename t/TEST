@@ -1,15 +1,18 @@
 #!./perl
 
-# Last change: Fri May 28 03:16:57 BST 1999
-
 # This is written in a peculiar style, since we're trying to avoid
 # most of the constructs we'll be testing for.
 
 $| = 1;
 
-if ($#ARGV >= 0 && $ARGV[0] eq '-v') {
-    $verbose = 1;
-    shift;
+# Cheesy version of Getopt::Std.  Maybe we should replace it with that.
+if ($#ARGV >= 0) {
+    foreach my $idx (0..$#ARGV) {
+	next unless $ARGV[$idx] =~ /^-(\w+)$/;
+	$verbose = 1 if $1 eq 'v';
+	$with_utf= 1 if $1 eq 'utf8';
+	splice(@ARGV, $idx, 1);
+    }
 }
 
 chdir 't' if -f 't/TEST';
@@ -86,13 +89,15 @@ EOT
 	    $switch = '';
 	}
 
+	my $utf = $with_utf ? '-I../lib -Mutf8'
+	                    : '';
 	if ($type eq 'perl') {
-	    my $run = "./perl$switch $test |"; 
+	    my $run = "./perl$switch $utf $test |"; 
 	    open(RESULTS,$run) or print "can't run '$run': $!.\n";
 	}
 	else {
 	    my $compile =
-		"./perl -I../lib ../utils/perlcc -o ./$test.plc ./$test "
+		"./perl -I../lib ../utils/perlcc -o ./$test.plc $utf ./$test "
 		." && ./$test.plc |";
 	    open(RESULTS, $compile)
 		or print "can't compile '$compile': $!.\n";

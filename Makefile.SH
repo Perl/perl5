@@ -844,9 +844,9 @@ test check: test-prep
 
 utest ucheck: test-prep
 	if (true </dev/tty) >/dev/null 2>&1; then \
-	  cd t && $(LDLIBPTH) ./perl UTEST </dev/tty; \
+	  cd t && $(LDLIBPTH) ./perl TEST -utf8 </dev/tty; \
 	else \
-	  cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl UTEST; \
+	  cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl TEST -utf8; \
 	fi
 
 # For testing without a tty or controling terminal. See t/op/stat.t

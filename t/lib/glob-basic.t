@@ -101,6 +101,11 @@ print "ok 7\n";
     '{TES*,doesntexist*,a,b}',
     GLOB_BRACE | GLOB_NOMAGIC | ($^O eq 'VMS' ? GLOB_NOCASE : 0)
 );
+
+# Working on t/TEST often causes this test to fail because it sees temp
+# and RCS files.  Filter them out.
+@a = grep !/(,v$|~$)/, @a;
+
 unless (@a == 3
         and $a[0] eq ($^O eq 'VMS'? 'test.' : 'TEST')
         and $a[1] eq 'a'
