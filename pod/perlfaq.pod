@@ -117,7 +117,7 @@ in respect of this information or its use.
 
 =over 4
 
-=head 22/June/98
+=item 22/June/98
 
 Significant changes throughout in preparation for the 5.005
 release.
