@@ -19,6 +19,8 @@ use Config;
 # just because Errno possibly failing.
 eval { require Errno; import Errno };
 
+use vars qw($ipcsysv); # did we manage to load IPC::SysV?
+
 BEGIN {
   if ($^O eq 'VMS' && !defined($Config{d_setenv})) {
       $ENV{PATH} = $ENV{PATH};
@@ -26,8 +28,11 @@ BEGIN {
   }
   if ($Config{'extensions'} =~ /\bIPC\/SysV\b/
       && ($Config{d_shm} || $Config{d_msg})) {
-     require IPC::SysV;
-     IPC::SysV->import(qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU));
+      eval { require IPC::SysV };
+      unless ($@) {
+	  $ipcsysv++;
+	  IPC::SysV->import(qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU));
+      }
   }
 }
 
@@ -613,6 +618,10 @@ else {
 
 # test shmread
 {
+    unless ($ipcsysv) {
+	print "ok 150 # skipped: no IPC::SysV\n";
+	last;
+    }
     if ($Config{'extensions'} =~ /\bIPC\/SysV\b/ && $Config{d_shm}) {
 	no strict 'subs';
 	my $sent = "foobar";
@@ -647,6 +656,10 @@ else {
 
 # test msgrcv
 {
+    unless ($ipcsysv) {
+	print "ok 151 # skipped: no IPC::SysV\n";
+	last;
+    }
     if ($Config{'extensions'} =~ /\bIPC\/SysV\b/ && $Config{d_msg}) {
 	no strict 'subs';
 	my $id = msgget(IPC_PRIVATE, IPC_CREAT | S_IRWXU);
