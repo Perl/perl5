@@ -295,7 +295,6 @@ if ($PLATFORM eq 'wince') {
 		     Perl_sv_collxfrm
 		     setgid
 		     setuid
-		     win32_async_check
 		     win32_free_childdir
 		     win32_free_childenv
 		     win32_get_childdir

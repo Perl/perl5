@@ -47,7 +47,9 @@ enum {
 
   MallocCfg_last
 };
+START_EXTERN_C
 extern IV *MallocCfg_ptr;
+END_EXTERN_C
 
 #endif
 
