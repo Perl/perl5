@@ -183,6 +183,31 @@ and these
 When open() is given an explicit list of layers they are appended to
 the list declared using this pragma.
 
+The logic of C<:locale> is as follows:
+
+=over 4
+
+=item 1.
+
+If the platform supports the langinfo(CODESET) interface, the codeset
+returned is used as the default encoding for the open pragma.
+
+=item 2.
+
+If 1. didn't work but we are under the locale pragma, the environment
+variables LC_ALL and LANG (in that order) are matched for encodings
+(the part after C<.>, if any), and if any found, that is used 
+as the default encoding for the open pragma.
+
+=item 3.
+
+If 1. and 2. didn't work, the environment variables LC_ALL and LANG
+(in that order) are matched for anything looking like UTF-8, and if
+any found, C<:utf8> is used as the default encoding for the open
+pragma.
+
+=back
+
 Directory handles may also support disciplines in future.
 
 =head1 NONPERLIO FUNCTIONALITY
