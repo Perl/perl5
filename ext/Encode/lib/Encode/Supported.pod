@@ -87,10 +87,14 @@ Encode::Unicode, which will be autoloaded on demand.
   UTF-32                                                      [UC]
   UTF-32BE	UCS-4                                         [UC]
   UTF-32LE                                                    [UC]
+  UTF-7                                                  [RFC2152]
   ----------------------------------------------------------------
 
 To find how (UCS-2|UTF-(16|32))(LE|BE)? differ from one another,
 see L<Encode::Unicode>. 
+
+UTF-7 is a special encoding which "re-encodes" UTF-16BE into a 7-bit
+encoding.  It is implemeneted seperately by Encode::Unicode::UTF7.
 
 =head2 Encode::Byte -- Extended ASCII
 

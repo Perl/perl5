@@ -1,3 +1,66 @@
+Changes in version 2.33
+-----------------------
+
+**************** WARNING -- EXPERIMENTAL CODE AHEAD ****************
+
+* Getopt::Long can automatically handle --version and --help options
+  if the calling program did not specify a handler explicitly.
+
+  Two configuration parameters have been added: 'auto_help' (or
+  'help') and 'auto_version' (or 'version'). If set, Getopt::Long will
+  itself take care of --help and --version options. Otherwise,
+  everything is exactly as it was before.
+
+  The new features will be enabled by default for programs that
+  explicitly require version 2.3203 or later.
+
+  Getopt::Long uses module Pod::Usage to produce the help message from
+  the SYNOPSIS section of the program's POD.
+
+  Using a --help (or -?) command line option will write the SYNOPSIS
+  section of the program's POD to STDOUT, and exit with status 0.
+  However, an illegal option will produce the help text to STDERR,
+  and exit with status 2. This is in accordance with current
+  conventions.
+
+* Two subroutines can be exported on demand:
+
+  - VersionMessage
+
+    This subroutine prints the standard version message.
+
+  - HelpMessage
+
+    This subroutine prints the standard help message.
+
+  Both subroutines take the same arguments as Pod::Usage::pod2usage,
+  see its documentation for details.  
+
+  Example:
+
+    use Getopt::Long 2.3203 qw(GetOptions HelpMessage);
+    GetOptions(...) or HelpMessage(2);
+
+**************** END EXPERIMENTAL CODE ****************
+
+* Subroutine Configure can now be exported on demand.
+
+* Negatable options (with "!") now also support the "no-" prefix.
+  On request of Ed Avis <eavis@amadeus.net>.
+
+* Some fixes with hashes and bundling.
+  Thanks to Anders Johnson <anders@wis-tech.com> and Andrei Gnepp <>.
+  Mandatory/optional status for hash values is now effective.
+  String valued options with no value now default to the empty string
+  instead of 1 (one).
+  NOTE: The hash options still remain more or less experimental.
+
+* Fix a pass_through bug where the options terminator (normally "--")
+  was not passed through in @ARGV.
+  Thanks to Philippe Verdret <philippe.verdret@xps-pro.com>.
+
+* Add FAQ: I "use GetOpt::Long;" (Windows) and now it doesn't work.
+
 Changes in version 2.32
 -----------------------
 
@@ -6,6 +69,21 @@ was not used for value of a hash option.
 
 * Remove 5.005 thread safety code. Getopt::Long is completely thread
 safe when using the 5.8 ithreads.
+
+Changes in version 2.31
+-----------------------
+
+* Fix a bug where calling the configure method on a
+Getopt::Long::Parser object would bail out with 
+Undefined subroutine &Getopt::Long::Parser::Configure called at
+Getopt/Long.pm line 186.
+
+Changes in version 2.30
+-----------------------
+
+* Fix a problem where a 'die' from a 'warn' via a localized
+  $SIG{__WARN__} was not properly propagated from a callback.
+  Thanks to Diab Jerius <dj@head-cfa.harvard.edu>.
 
 Changes in version 2.29
 -----------------------
@@ -66,17 +144,6 @@ Changes in version 2.27
 
 * Enhance the documentation to prevent common misunderstandings about
   single character options.
-
-Changes in version 2.26
------------------------
-
-* New option type: 'o'. It accepts all kinds of integral numbers in
-  Perl style, including decimal (24), octal (012), hexadecimal (0x2f)
-  and binary (0b1001).
-
-* Fix problem with getopt_compat not matching +foo=bar.
-
-* Remove $VERSION_STRING for production versions.
 
 Changes in version 2.26
 -----------------------

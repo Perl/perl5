@@ -105,13 +105,13 @@ true)
 	case "$osname" in
 	linux)
 		rm -f preload
-		cat <<-'EOT' > preload
-		#! /bin/sh
-		lib=$1
-		shift
-		test -r $lib && export LD_PRELOAD="$lib $LD_PRELOAD"
-		exec "$@"
-		EOT
+		cat <<'EOT' > preload
+#! /bin/sh
+lib=$1
+shift
+test -r $lib && export LD_PRELOAD="$lib $LD_PRELOAD"
+exec "$@"
+EOT
 		chmod 755 preload
 		ldlibpth="$ldlibpth `pwd`/preload `pwd`/$libperl"
 		;;
