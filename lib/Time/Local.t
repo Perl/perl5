@@ -9,6 +9,7 @@ BEGIN {
 
 use strict;
 
+use Config;
 use Test;
 use Time::Local;
 
@@ -98,11 +99,15 @@ ok(timegm(0,0,0, 1, 2, 80) - timegm(0,0,0, 1, 0, 80), 60 * 24 * 3600,
 }
 
 # round trip was broken for edge cases
+if ($^O eq "aix" && $Config{osvers} =~ m/^4\.3\./) {
+skip ("No fix expected for edge case test for $_ on AIX 4.3") for qw( timegm timelocal );
+} else {
 ok(sprintf('%x', timegm(gmtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
    '0x7fffffff round trip through gmtime then timegm');
 
 ok(sprintf('%x', timelocal(localtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
    '0x7fffffff round trip through localtime then timelocal');
+}
 
 if ($ENV{MAINTAINER}) {
     eval { require POSIX; POSIX::tzset() };
