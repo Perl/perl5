@@ -435,3 +435,5 @@ EOCBU
 # keep that leading tab.
 	ccisgcc=''
 
+# Until we figure out what to be probe for in Configure (ditto for irix_6.sh)
+d_casti32='undef'

@@ -334,3 +334,6 @@ EOCBU
 
 # The -n32 makes off_t to be 8 bytes, so we should have largefileness.
 
+# Until we figure out what to be probe for in Configure (ditto for hpux.sh)
+d_casti32='undef'
+
