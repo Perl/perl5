@@ -159,14 +159,14 @@ DB<1>h
   f filename  View source in file         <CR/Enter>  Repeat last n or s
   /pattern/ ?patt?   Search forw/backw    r           Return from subroutine
   M           Show module versions        c [ln|sub]  Continue until position
- Debugger controls:                        L           List break/watch/actions
+ Debugger controls:                       L           List break/watch/actions
   o [...]     Set debugger options        t [expr]    Toggle trace [trace expr]
   <[<]|{[{]|>[>] [cmd] Do pre/post-prompt b [ln|event|sub] [cnd] Set breakpoint
   ! [N|pat]   Redo a previous command     B ln|*      Delete a/all breakpoints
   H [-num]    Display last num commands   a [ln] cmd  Do cmd before line
   = [a val]   Define/list an alias        A ln|*      Delete a/all actions
   h [db_cmd]  Get help on command         w expr      Add a watch expression
-  h h         Complete help page          W expr|*    Delete a/all watch expressions
+  h h         Complete help page          W expr|*    Delete a/all watch exprs
   |[|]db_cmd  Send output to pager        ![!] syscmd Run cmd in a subprocess
   q or ^D     Quit                        R           Attempt a restart
  Data Examination:     expr     Execute perl code, also see: s,n,t expr
@@ -175,6 +175,7 @@ DB<1>h
   S [[!]pat]     List subroutine names [not] matching pattern
   V [Pk [Vars]]  List Variables in Package.  Vars can be ~pattern or !pattern.
   X [Vars]       Same as "V current_package [Vars]".
+  y [n [Vars]]   List lexicals in higher scope <n>.  Vars same as V.
  For more help, type h cmd_letter, or run man perldebug for all docs. 
 
 More confusing options than you can shake a big stick at!  It's not as bad as
