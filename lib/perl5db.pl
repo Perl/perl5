@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 1.13;
+$VERSION = 1.14;
 $header = "perl5db.pl version $VERSION";
 
 #
