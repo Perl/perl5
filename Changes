@@ -31,6 +31,353 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11146] By: jhi                                   on 2001/07/04  16:36:31
+        Log: Somehow the #ifdefs of the added code (in #11093) made
+             HP-UX to fail the fcntl locking test, without the ifdefs
+             the test seems to be working again.  Reason unknown:
+             HP-UX cc doesn't complain either way.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11145] By: jhi                                   on 2001/07/04  16:08:00
+        Log: PERLRUNINST needed in some spots.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 11144] By: jhi                                   on 2001/07/04  16:07:35
+        Log: gcc -Wall nit.
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 11143] By: jhi                                   on 2001/07/04  15:08:26
+        Log: When removing tests updating the test count is a good idea, too.
+     Branch: perl
+	   ! lib/Net/t/require.t
+____________________________________________________________________________
+[ 11142] By: jhi                                   on 2001/07/04  14:57:51
+        Log: Document #11134 and add the new symbols to the list of
+             of MakeMaker known ones.
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 11141] By: jhi                                   on 2001/07/04  14:34:11
+        Log: Microperl update.
+     Branch: perl
+	   ! uconfig.h
+____________________________________________________________________________
+[ 11140] By: jhi                                   on 2001/07/04  14:32:27
+        Log: Update the libnet tests as per #11138.
+     Branch: perl
+	   - lib/Net/t/ph.t
+	   ! MANIFEST lib/Net/t/require.t
+____________________________________________________________________________
+[ 11139] By: jhi                                   on 2001/07/04  14:14:33
+        Log: Regen toc and modlib.
+     Branch: perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 11138] By: jhi                                   on 2001/07/04  14:10:38
+        Log: Remove DummyInetd, PH, and SNPP from the libnet, as per
+             Graham's request.
+     Branch: perl
+	   - lib/Net/DummyInetd.pm lib/Net/PH.pm lib/Net/SNPP.pm
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11137] By: jhi                                   on 2001/07/04  14:06:35
+        Log: Add the OS/390 harness results to the delta.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 11136] By: jhi                                   on 2001/07/04  13:59:01
+        Log: Avoid the two study tests in OS/390 until the bug has been solved.
+     Branch: perl
+	   ! t/op/study.t
+____________________________________________________________________________
+[ 11135] By: jhi                                   on 2001/07/04  13:49:08
+        Log: DOS/DJGPP tweaks from Laszlo Molnar.
+     Branch: perl
+	   ! AUTHORS djgpp/djgppsed.sh hints/dos_djgpp.sh t/op/write.t
+____________________________________________________________________________
+[ 11134] By: jhi                                   on 2001/07/04  13:47:46
+        Log: Subject: [PATCH lib/ExtUtils/MM_Unix.pm and others] Fixing extra -I's with PERL_CORE
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 4 Jul 2001 00:01:16 -0400
+             Message-ID: <20010704000116.C591@blackrider>
+     Branch: perl
+	   ! ext/util/make_ext lib/ExtUtils.t lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 11133] By: jhi                                   on 2001/07/04  01:55:20
+        Log: The #11132 missed singleton characters (not part
+             of a unilo..unihi range) in Unicode scripts.
+     Branch: perl
+	   ! lib/unicode/In/0.pl lib/unicode/In/1.pl lib/unicode/In/10.pl
+	   ! lib/unicode/In/11.pl lib/unicode/In/12.pl lib/unicode/In/13.pl
+	   ! lib/unicode/In/15.pl lib/unicode/In/16.pl lib/unicode/In/17.pl
+	   ! lib/unicode/In/18.pl lib/unicode/In/19.pl lib/unicode/In/20.pl
+	   ! lib/unicode/In/21.pl lib/unicode/In/24.pl lib/unicode/In/29.pl
+	   ! lib/unicode/In/3.pl lib/unicode/In/30.pl lib/unicode/In/34.pl
+	   ! lib/unicode/In/35.pl lib/unicode/In/37.pl lib/unicode/In/39.pl
+	   ! lib/unicode/In/4.pl lib/unicode/In/5.pl lib/unicode/In/6.pl
+	   ! lib/unicode/In/8.pl lib/unicode/In/9.pl lib/unicode/Scripts.pl
+	   ! lib/unicode/mktables.PL t/op/pat.t
+____________________________________________________________________________
+[ 11132] By: jhi                                   on 2001/07/04  01:32:11
+        Log: Support preferentially the Unicode 'scripts' definition
+             in the \p{In...} notation since according to Unicode the
+             scripts concept is more natural for matching than using
+             the somewhat artificial block names.  The block names are
+             still available, though, and if there's a name conflict,
+             the scripts one wins and the blocks one has to do with
+             'Block' appended to its name.  For more information see
+             
+             http://www.unicode.org/unicode/reports/tr24/
+     Branch: perl
+	   + lib/unicode/In/100.pl lib/unicode/In/101.pl
+	   + lib/unicode/In/102.pl lib/unicode/In/103.pl
+	   + lib/unicode/In/104.pl lib/unicode/In/105.pl
+	   + lib/unicode/In/106.pl lib/unicode/In/107.pl
+	   + lib/unicode/In/108.pl lib/unicode/In/109.pl
+	   + lib/unicode/In/110.pl lib/unicode/In/111.pl
+	   + lib/unicode/In/112.pl lib/unicode/In/113.pl
+	   + lib/unicode/In/114.pl lib/unicode/In/115.pl
+	   + lib/unicode/In/116.pl lib/unicode/In/117.pl
+	   + lib/unicode/In/118.pl lib/unicode/In/119.pl
+	   + lib/unicode/In/120.pl lib/unicode/In/121.pl
+	   + lib/unicode/In/122.pl lib/unicode/In/123.pl
+	   + lib/unicode/In/124.pl lib/unicode/In/125.pl
+	   + lib/unicode/In/126.pl lib/unicode/In/127.pl
+	   + lib/unicode/In/128.pl lib/unicode/In/129.pl
+	   + lib/unicode/In/130.pl lib/unicode/In/131.pl
+	   + lib/unicode/In/132.pl lib/unicode/In/133.pl
+	   + lib/unicode/In/134.pl lib/unicode/In/135.pl
+	   + lib/unicode/In/96.pl lib/unicode/In/97.pl lib/unicode/In/98.pl
+	   + lib/unicode/In/99.pl lib/unicode/Scripts.pl
+	   ! (edit 106 files)
+____________________________________________________________________________
+[ 11131] By: jhi                                   on 2001/07/03  23:02:02
+        Log: Better document the difference between a block and a script.
+     Branch: perl
+	   ! lib/Unicode/UCD.pm
+____________________________________________________________________________
+[ 11130] By: jhi                                   on 2001/07/03  22:49:15
+        Log: Subject: [ perl 5.6.1 ] CPAN.pm doc patch
+             From: Elaine -HFB- Ashton <elaine@chaos.wustl.edu>
+             Date: Tue, 3 Jul 2001 15:04:23 -0500
+             Message-ID: <20010703150423.C9787@chaos.wustl.edu>
+     Branch: perl
+	   ! lib/CPAN.pm
+____________________________________________________________________________
+[ 11129] By: jhi                                   on 2001/07/03  22:45:41
+        Log: Add tests for charscript().
+     Branch: perl
+	   ! lib/Unicode/UCD.pm lib/Unicode/UCD.t
+____________________________________________________________________________
+[ 11128] By: jhi                                   on 2001/07/03  20:41:54
+        Log: Add charscript() to get the UTR#24 script names of characters.
+     Branch: perl
+	   ! lib/Unicode/UCD.pm
+____________________________________________________________________________
+[ 11127] By: jhi                                   on 2001/07/03  19:53:29
+        Log: Todo updates.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 11126] By: jhi                                   on 2001/07/03  19:45:30
+        Log: Unicode::UCD updates.
+     Branch: perl
+	   ! lib/Unicode/UCD.pm
+____________________________________________________________________________
+[ 11125] By: jhi                                   on 2001/07/03  16:12:20
+        Log: Subject: MakeMaker should pass through DEFINE and INC to subdirs
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Date: Tue, 03 Jul 2001 15:20:13 +0100
+             Message-ID: <3B41D49D.A923D4F9@sun.com>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 11124] By: jhi                                   on 2001/07/03  16:06:53
+        Log: Subject: Patch needed for UTS
+             From: hom00@utsglobal.com (Hal Morris)
+             Date: Tue, 3 Jul 2001 09:38:22 -0700 (PDT)
+             Message-Id: <200107031638.JAA11998@cepheus.utsglobal.com>
+             
+             Replace #11113 with a better version.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 11123] By: jhi                                   on 2001/07/03  16:04:49
+        Log: Subject: Re: POINTERRIGOR
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Tue, 3 Jul 2001 11:49:28 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10107031040030.1982-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 11122] By: jhi                                   on 2001/07/03  16:03:31
+        Log: Subject: Re: [PATCH @11016] Fixes compile errors in four files
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Tue, 3 Jul 2001 17:03:34 +0200
+             Message-ID: <3B41FAE6.29564.660E117@localhost>
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 11121] By: jhi                                   on 2001/07/03  13:26:08
+        Log: Typos.
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[ 11120] By: jhi                                   on 2001/07/03  11:34:47
+        Log: Subject: [PATCH 5.6.1] debugger fixes
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 3 Jul 2001 03:38:18 -0400
+             Message-ID: <20010703033818.A16788@math.ohio-state.edu>
+             
+             The $^S is working again.
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 11119] By: jhi                                   on 2001/07/03  11:33:27
+        Log: Subject: Re: [PATCH 5.6.1] OS/2 improvements
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 3 Jul 2001 03:34:06 -0400
+             Message-ID: <20010703033406.A16776@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/OS2/Process/Process.pm
+____________________________________________________________________________
+[ 11118] By: jhi                                   on 2001/07/03  11:29:54
+        Log: Subject: [PATCH bleadperl] Bad lishp in change 11084
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Tue, 3 Jul 2001 09:11:27 +0200
+             Message-Id: <200107030706.KAA04596@taas.iki.fi>
+     Branch: perl
+	   ! lib/FindBin.pm
+____________________________________________________________________________
+[ 11117] By: jhi                                   on 2001/07/03  11:25:14
+        Log: Delta delta.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 11116] By: jhi                                   on 2001/07/02  23:06:50
+        Log: Metaconfig unit change for 11115.
+     Branch: metaconfig
+	   ! U/modified/libc.U
+____________________________________________________________________________
+[ 11115] By: jhi                                   on 2001/07/02  23:06:27
+        Log: Whitespace allowed at the ends of /lib/syscalls.exp lines
+             (from Richard Hatch) (this was the cause of pipes() and
+             times() myeteriously not being found)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11114] By: jhi                                   on 2001/07/02  22:58:41
+        Log: Retract #10142, the real culprit found by Richard Hatch,
+             coming soon to Configure near you.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 11113] By: jhi                                   on 2001/07/02  22:56:09
+        Log: (Replaced by #11124) UTS workaround from Hal Morris.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 11112] By: jhi                                   on 2001/07/02  22:53:29
+        Log: Subject: [PATCH] grok not grocking correctly
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 3 Jul 2001 00:19:08 +0100
+             Message-ID: <20010703001908.H59620@plum.flirble.org>
+     Branch: perl
+	   ! numeric.c
+____________________________________________________________________________
+[ 11111] By: jhi                                   on 2001/07/02  22:48:42
+        Log: Subject: [PATCH Deparse.t] test just-posted patches
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 2 Jul 2001 23:46:15 +0100
+             Message-Id: <E15HCUN-0000Rh-00.2001-07-02-23-48-19@mail18.svr.pol.co.uk>
+     Branch: perl
+	   ! ext/B/Deparse.t
+____________________________________________________________________________
+[ 11110] By: jhi                                   on 2001/07/02  22:27:10
+        Log: Subject: [PATCH toke.c] autosplit into @F
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 2 Jul 2001 23:18:20 +0100
+             Message-Id: <E15HC3M-0007jL-00.2001-07-02-23-20-24@mail18.svr.pol.co.uk>
+     Branch: perl
+	   ! perl.c toke.c
+____________________________________________________________________________
+[ 11109] By: jhi                                   on 2001/07/02  22:25:03
+        Log: Subject: [PATCH B::Deparse] hash key auto-quoting
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 2 Jul 2001 23:00:48 +0100
+             Message-Id: <E15HBmR-0006mc-00.2001-07-02-23-02-55@mail18.svr.pol.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 11108] By: jhi                                   on 2001/07/02  19:21:18
+        Log: Subject: Re: [PATCH perlsnap] '-' !~ /\w/
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Mon, 2 Jul 2001 22:06:22 +0200
+             (no Message-Id)
+     Branch: perl
+	   ! ext/NDBM_File/hints/linux.pl
+____________________________________________________________________________
+[ 11107] By: jhi                                   on 2001/07/02  19:19:25
+        Log: Subject: Re: Fixed pack problem - sort of
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 2 Jul 2001 20:59:20 +0100
+             Message-ID: <20010702205919.F59620@plum.flirble.org>
+     Branch: perl
+	   ! pp_pack.c t/op/pack.t
+____________________________________________________________________________
+[ 11106] By: jhi                                   on 2001/07/02  19:18:28
+        Log: Subject: Re: [PATCH 5.6.1] OS/2 cwd
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 2 Jul 2001 15:45:41 -0400
+             Message-ID: <20010702154541.B24295@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/os2.c
+____________________________________________________________________________
+[ 11105] By: jhi                                   on 2001/07/02  19:17:27
+        Log: Subject: Re: [PATCH 2 pl2pm.PL] (was Re: [PATCH pl2pm.PL] Make pl2pm be nice with 'strict' and 'warnings')
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Mon, 2 Jul 2001 20:45:53 +0100 (BST)
+             Message-ID: <Pine.LNX.4.33.0107022042570.8640-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! utils/pl2pm.PL
+____________________________________________________________________________
+[ 11104] By: jhi                                   on 2001/07/02  18:56:15
+        Log: Detypo in #11103.
+     Branch: perl
+	   ! utils/pl2pm.PL
+____________________________________________________________________________
+[ 11103] By: jhi                                   on 2001/07/02  18:54:53
+        Log: Subject: [PATCH 2 pl2pm.PL] (was Re: [PATCH pl2pm.PL] Make pl2pm be nice with 'strict' and 'warnings')
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Mon, 2 Jul 2001 19:17:21 +0100 (BST)
+             Message-ID: <Pine.LNX.4.33.0107021904530.7401-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! utils/pl2pm.PL
+____________________________________________________________________________
+[ 11102] By: jhi                                   on 2001/07/02  18:16:09
+        Log: Subject: [PATCH perl@11059] UCD.pm: if at first you don't succeed, croak?
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 02 Jul 2001 14:11:23 -0500
+             Message-Id: <5.1.0.14.0.20010702140058.01b6c9c0@exchi01>
+     Branch: perl
+	   ! lib/Unicode/UCD.pm
+____________________________________________________________________________
+[ 11101] By: jhi                                   on 2001/07/02  18:14:51
+        Log: Subject: [PATCH] Re: op/numconvert.t failures
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 2 Jul 2001 20:10:48 +0100
+             Message-ID: <20010702201048.E59620@plum.flirble.org>
+     Branch: perl
+	   ! t/op/numconvert.t
+____________________________________________________________________________
+[ 11100] By: jhi                                   on 2001/07/02  17:51:44
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11099] By: jhi                                   on 2001/07/02  17:46:31
         Log: Retract #11055, didn't help much (2736 bytes vs 2725 bytes leaked).
              The real fix must be more involved.  The line of code all the leaky
