@@ -143,7 +143,7 @@ struct block_loop {
 #define POPLOOP2()							\
 	SvREFCNT_dec(cxloop.iterlval);					\
 	if (cxloop.itervar) {						\
-	    SvREFCNT_dec(*cxloop.itervar);				\
+	    sv_2mortal(*cxloop.itervar);				\
 	    *cxloop.itervar = cxloop.itersave;				\
 	}								\
 	if (cxloop.iterary && cxloop.iterary != PL_curstack)		\
