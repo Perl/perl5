@@ -312,9 +312,6 @@ Perl_reentrant_retry(const char *f, ...)
 #  if defined(USE_HOSTENT_BUFFER) || defined(USE_NETENT_BUFFER) || defined(USE_PROTOENT_BUFFER) || defined(USE_SERVENT_BUFFER)
     int anint;
 #  endif
-#ifdef PERL_REENTRANT_MAXSIZE
-    static const char larger[] = "Result from %s larger than %d bytes";
-#endif
     va_list ap;
 
     va_start(ap, f);
@@ -348,6 +345,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    break;
 	        }
 	    }
+	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -378,6 +376,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    break;
 	        }
 	    }
+	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -409,11 +408,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    break;
 	        }
 	    }
-#ifdef PERL_REENTRANT_MAXSIZE
-	    else if (ckWARN(WARN_MISC))
-		Perl_warner(aTHX_ packWARN(WARN_MISC),
-			    larger, OP_NAME(PL_op), PERL_REENTRANT_MAXSIZE);
-#endif
+	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -444,11 +439,6 @@ Perl_reentrant_retry(const char *f, ...)
 		    break;
 	        }
 	    }
-#ifdef PERL_REENTRANT_MAXSIZE
-	    else if (ckWARN(WARN_MISC))
-		Perl_warner(aTHX_ packWARN(WARN_MISC),
-			    larger, OP_NAME(PL_op), PERL_REENTRANT_MAXSIZE);
-#endif
 	}
 	break;
 #endif
@@ -478,11 +468,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    break;
 	        }
 	    }
-#ifdef PERL_REENTRANT_MAXSIZE
-	    else if (ckWARN(WARN_MISC))
-		Perl_warner(aTHX_ packWARN(WARN_MISC),
-			    larger, OP_NAME(PL_op), PERL_REENTRANT_MAXSIZE);
-#endif
+	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -514,11 +500,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    break;
 	        }
 	    }
-#ifdef PERL_REENTRANT_MAXSIZE
-	    else if (ckWARN(WARN_MISC))
-		Perl_warner(aTHX_ packWARN(WARN_MISC),
-			    larger, OP_NAME(PL_op), PERL_REENTRANT_MAXSIZE);
-#endif
+	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif

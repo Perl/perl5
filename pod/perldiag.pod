@@ -3135,14 +3135,6 @@ signed integers.  See L<perlfunc/pack>.
 (F) You can't specify a repeat count so large that it overflows your
 signed integers.  See L<perlfunc/unpack>.
 
-=item Result from %s larger than %d bytes
-
-(W misc) A library call like getgrent() tried to return more results
-than Perl was willing to accept.  This happens only when Perl has been
-compiled to have threads and to have an upper limit on such calls
-(the default is to keep regrowing the result buffer until the result fits).
-However, now the results were truncated.
-
 =item Reversed %s= operator
 
 (W syntax) You wrote your assignment operator backwards.  The = must
