@@ -1636,4 +1636,4 @@ This document covers features supported by C<xsubpp> 1.935.
 
 Originally written by Dean Roehrich <F<roehrich@cray.com>>.
 
-Maintained since 1996 by The Perl Porters <F<perlbug@perl.com>>.
+Maintained since 1996 by The Perl Porters <F<perlbug@perl.org>>.

@@ -168,7 +168,7 @@ run, you may have to run it on a platform where GCC is available, and move
 the sources back to the platform without GCC.
 
 If you succeed in automatically converting the sources to a K&R compatible
-form, be sure to email perlbug@perl.com to let us know the steps you
+form, be sure to email perlbug@perl.org to let us know the steps you
 followed.  This will enable us to officially support this option.
 
 =back
@@ -2010,7 +2010,7 @@ available in TeX format.  Type
 If you have difficulty building perl, and none of the advice in this file
 helps, and careful reading of the error message and the relevant manual
 pages on your system doesn't help either, then you should send a message
-to either the comp.lang.perl.misc newsgroup or to perlbug@perl.com with
+to either the comp.lang.perl.misc newsgroup or to perlbug@perl.org with
 an accurate description of your problem.
 
 Please include the output of the ./myconfig shell script that comes with

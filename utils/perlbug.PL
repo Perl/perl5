@@ -135,7 +135,7 @@ my $Version = "1.32";
 #       - Test -b option
 
 my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
-    $subject, $from, $verbose, $ed, $outfile, $Is_MacOS, $category, $severity, 
+    $subject, $from, $verbose, $ed, $outfile, $Is_MacOS, $category, $severity,
     $fh, $me, $Is_MSWin32, $Is_VMS, $msg, $body, $andcc, %REP, $ok);
 
 my $perl_version = $^V ? sprintf("v%vd", $^V) : $];
@@ -174,9 +174,9 @@ sub ask_for_alternatives { # (category|severity)
 	    'default' => 'low',
 	    'ok'      => 'none',
 	    'opts'    => [qw(critical high medium low wishlist none)], # zero
-	}, 	
+	},
     );
-    die "Invalid alternative($name) requested\n" unless grep(/^$name$/, keys %alts); 
+    die "Invalid alternative($name) requested\n" unless grep(/^$name$/, keys %alts);
     my $alt = "";
     if ($ok) {
 	$alt = $alts{$name}{'ok'};
@@ -960,7 +960,7 @@ will be needed.  Simply run it, and follow the prompts.
 
 If you are unable to run B<perlbug> (most likely because you don't have
 a working setup to send mail that perlbug recognizes), you may have to
-compose your own report, and email it to B<perlbug@perl.com>.  You might
+compose your own report, and email it to B<perlbug@perl.org>.  You might
 find the B<-d> option useful to get summary information in that case.
 
 In any case, when reporting a bug, please make sure you have run through
@@ -1038,7 +1038,7 @@ definitely be fixed.  Use the C<diff> program to generate your patches
 (C<diff> is being maintained by the GNU folks as part of the B<diffutils>
 package, so you should be able to get it from any of the GNU software
 repositories).  If you do submit a patch, the cool-dude counter at
-perlbug@perl.com will register you as a savior of the world.  Your
+perlbug@perl.org will register you as a savior of the world.  Your
 patch may be returned with requests for changes, or requests for more
 detailed explanations about your fix.
 
@@ -1058,7 +1058,7 @@ B<perlbug> will, amongst other things, ensure your report includes
 crucial information about your version of perl.  If C<perlbug> is unable
 to mail your report after you have typed it in, you may have to compose
 the message yourself, add the output produced by C<perlbug -d> and email
-it to B<perlbug@perl.com>.  If, for some reason, you cannot run
+it to B<perlbug@perl.org>.  If, for some reason, you cannot run
 C<perlbug> at all on your system, be sure to include the entire output
 produced by running C<perl -V> (note the uppercase V).
 
@@ -1085,7 +1085,7 @@ version of perl comes out and your bug is still present.
 
 =item B<-a>
 
-Address to send the report to.  Defaults to `perlbug@perl.com'.
+Address to send the report to.  Defaults to `perlbug@perl.org'.
 
 =item B<-b>
 
