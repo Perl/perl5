@@ -250,10 +250,10 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  * of t/op/regmesg.t, the tests in t/op/re_tests, and those in
  * op/pragma/warn/regcomp.
  */
-#define MARKER1 "HERE"      /* marker as it appears in the description */
-#define MARKER2 " << HERE "  /* marker as it appears within the regex */
+#define MARKER1 "<-- HERE"    /* marker as it appears in the description */
+#define MARKER2 " <-- HERE "  /* marker as it appears within the regex */
 
-#define REPORT_LOCATION " before " MARKER1 " mark in regex m/%.*s" MARKER2 "%s/"
+#define REPORT_LOCATION " in regex; marked by " MARKER1 " in m/%.*s" MARKER2 "%s/"
 
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then calls Perl_croak with the given

@@ -41,7 +41,8 @@ README.apollo		Notes about Apollo DomainOS port
 README.beos		Notes about BeOS port
 README.bs2000		Notes about BS2000 POSIX port
 README.cygwin		Notes about Cygwin port
-README.dos		Notes about dos/djgpp port
+README.dgux		Notes about DG/UX port
+README.dos		Notes about DOS/DJGPP port
 README.epoc		Notes about EPOC port
 README.hpux		Notes about HP-UX port
 README.hurd		Notes about GNU/Hurd port
@@ -1534,6 +1535,7 @@ t/lib/h2ph.h		Test header file for h2ph
 t/lib/h2ph.pht		Generated output from h2ph.h by h2ph, for comparison
 t/lib/h2ph.t		See if h2ph works like it should
 t/lib/hostname.t	See if Sys::Hostname works
+t/lib/i18n-collate.t	See if I18N::Collate works
 t/lib/io_const.t	See if constants from IO work
 t/lib/io_dir.t		See if directory-related methods from IO work
 t/lib/io_dup.t		See if dup()-related methods from IO work
@@ -1857,6 +1859,7 @@ utf8.h			Unicode header
 utfebcdic.h		Unicode on EBCDIC (UTF-EBCDIC, tr16) header
 util.c			Utility routines
 util.h			Dummy header
+utils.lst		Lists utilities bundled with Perl
 utils/Makefile		Extract the utility scripts
 utils/c2ph.PL		program to translate dbx stabs to perl
 utils/dprofpp.PL	Perl code profile post-processor

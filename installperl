@@ -63,12 +63,20 @@ while (@ARGV) {
 }
 
 $versiononly = 1 if $Config{versiononly} && !defined $versiononly;
-
-my @scripts = qw(utils/c2ph utils/h2ph utils/h2xs utils/perlbug utils/perldoc
-		utils/pl2pm utils/splain utils/perlcc utils/dprofpp
-		x2p/s2p x2p/find2perl 
-		pod/pod2man pod/pod2html pod/pod2latex pod/pod2text
-		pod/pod2usage pod/podchecker pod/podselect);
+my (@scripts, @tolink);
+open SCRIPTS, "utils.lst" or die "Can't open utils.lst: $!";
+while (<SCRIPTS>) {
+    next if /^#/;
+    next if /#\s*pod\s*=/; # Binary programs need separate treatment
+    chomp;
+    if (/(\S*)\s*#\s*link\s*=\s*(\S*)/) {
+        push @scripts, $1;
+        push @tolink, [$1, $2];
+    } else {
+        push @scripts, $_;
+    }
+}
+close SCRIPTS;
 
 if ($scr_ext) { @scripts = map { "$_$scr_ext" } @scripts; }
 
@@ -417,11 +425,12 @@ if (! $versiononly) {
 	chmod(0755, "$installscript/$base");
     }
 
-    # pstruct should be a link to c2ph
-    script_alias($installscript, 'c2ph', 'pstruct', $scr_ext);
-
-    # psed should be a link to s2p
-    script_alias($installscript, 's2p', 'psed',     $scr_ext);
+    for (@tolink) { 
+        my ($from, $to)= @$_;
+        (my $frbase = $from) =~ s#.*/##;
+        (my $tobase = $to) =~ s#.*/##;
+        script_alias($installscript, $frbase, $tobase, $scr_ext);
+    }
 }
 
 # Install pod pages.  Where? I guess in $installprivlib/pod

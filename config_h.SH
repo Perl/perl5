@@ -4,7 +4,7 @@ esac
 case "$CONFIG_H" in
 '') CONFIG_H=config.h ;;
 esac
-case $CONFIG in
+case $PERL_CONFIG_SH in
 '')
 	if test -f $CONFIG_SH; then TOP=.;
 	elif test -f ../$CONFIG_SH; then TOP=..;
@@ -1062,7 +1062,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	by Configure.  You shouldn't rely on it too much; the specific
  *	feature tests from Configure are generally more reliable.
  */
+/* OSVERS:
+ *	This symbol contains the version of the operating system, as determined
+ *	by Configure.  You shouldn't rely on it too much; the specific
+ *	feature tests from Configure are generally more reliable.
+ */
 #define OSNAME "$osname"		/**/
+#define OSVERS "$osvers"		/**/
 
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a

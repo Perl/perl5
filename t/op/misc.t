@@ -358,7 +358,7 @@ print "you die joe!\n" unless "@x" eq 'x y z';
 /(?{"{"})/	# Check it outside of eval too
 EXPECT
 Sequence (?{...}) not terminated or not {}-balanced at - line 1, within pattern
-Sequence (?{...}) not terminated or not {}-balanced before HERE mark in regex m/(?{ << HERE "{"})/ at - line 1.
+Sequence (?{...}) not terminated or not {}-balanced in regex; marked by <-- HERE in m/(?{ <-- HERE "{"})/ at - line 1.
 ########
 /(?{"{"}})/	# Check it outside of eval too
 EXPECT
@@ -660,3 +660,15 @@ new_pmop "abcdef"; reset;
 # coredump in 5.7.1
 close STDERR; die;
 EXPECT
+########
+# Bug 20010515.004
+my @h = 1 .. 10;
+bad(@h);
+sub bad {
+   undef @h;
+   print "O";
+   print for @_;
+   print "K";
+}
+EXPECT
+OK

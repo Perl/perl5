@@ -747,7 +747,7 @@ Suggesting this on P5P B<will> cause a boring and interminable flamewar.
 
 =head2 "class"-based lexicals
 
-Use flyweight objects, secure hashes or, dare I say it, pseudohashes instead.
+Use flyweight objects, secure hashes or, dare I say it, pseudo-hashes instead.
 
 =head2 byteperl
 

@@ -538,6 +538,13 @@ string is effectively quoted.
 B<WARNING>:  This section describes an experimental feature.  Details may
 change without notice in future versions.
 
+B<NOTE>: The current user-visible implementation of pseudo-hashes
+(the weird use of the first array element) is deprecated starting from
+Perl 5.8.0 and will be removed in Perl 5.10.0, and the feature will be
+implemented differently.  Not only is the current interface rather ugly,
+but the current implementation slows down normal array and hash use quite
+noticeably.  The 'fields' pragma interface will remain available.
+
 Beginning with release 5.005 of Perl, you may use an array reference
 in some contexts that would normally require a hash reference.  This
 allows you to access array elements using symbolic names, as if they

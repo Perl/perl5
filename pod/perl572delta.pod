@@ -27,6 +27,15 @@ for more information.
 
 =head1 Incompatible Changes
 
+=head1 Future Deprecations
+
+The current user-visible implementation of pseudo-hashes (the weird
+use of the first array element) is deprecated starting from Perl 5.8.0
+and will be removed in Perl 5.10.0, and the feature will be implemented
+differently.  Not only is the current interface rather ugly, but the
+current implementation slows down normal array and hash use quite
+noticeably. The 'fields' pragma interface will remain available.
+
 =head1 Core Enhancements
 
 =head1 Modules and Pragmata

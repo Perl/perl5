@@ -118,9 +118,10 @@ unless (@a == 3
         and $a[1] eq 'a'
         and $a[2] eq 'b')
 {
-    print "not ";
+    print "not ok 8 # @a";
+} else {
+    print "ok 8\n";
 }
-print "ok 8\n";
 
 # "~" should expand to $ENV{HOME}
 $ENV{HOME} = "sweet home";

@@ -3489,11 +3489,11 @@ Perl_get_context(void)
 	Perl_croak_nocontext("panic: pthread_getspecific");
     return (void*)t;
 #  else
-#  ifdef I_MACH_CTHREADS
+#    ifdef I_MACH_CTHREADS
     return (void*)cthread_data(cthread_self());
-#  else
-    return (void*)pthread_getspecific(PL_thr_key);
-#  endif
+#    else
+    return (void*)PTHREAD_GETSPECIFIC(PL_thr_key);
+#    endif
 #  endif
 #else
     return (void*)NULL;
