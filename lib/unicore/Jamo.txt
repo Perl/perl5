@@ -1,4 +1,4 @@
-# Jamo-3.txt
+# Jamo-3.2.0.txt
 #
 # This file is a normative contributory data file in the
 # Unicode Character Database.

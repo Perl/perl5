@@ -4,12 +4,10 @@
 
 #
 # This file supports:
-# 	\p{InPrivateUse} (and fuzzy permutations)
+# 	\p{InPrivateUseArea} (and fuzzy permutations)
 # 
-# Meaning: Block 'Private Use'
+# Meaning: Block 'Private Use Area'
 #
 return <<'END';
-E000	F8FF	Private Use
-F0000	FFFFD	Private Use
-100000	10FFFD	Private Use
+E000	F8FF	Private Use Area
 END

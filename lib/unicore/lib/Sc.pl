@@ -15,7 +15,8 @@ return <<'END';
 09F2	09F3	
 0E3F		
 17DB		
-20A0	20AF	
+20A0	20B1	
+FDFC		
 FE69		
 FF04		
 FFE0	FFE1	

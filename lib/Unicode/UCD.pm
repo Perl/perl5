@@ -494,7 +494,7 @@ sub _compexcl {
     unless (%COMPEXCL) {
 	if (openunicode(\$COMPEXCLFH, "CompositionExclusions.txt")) {
 	    while (<$COMPEXCLFH>) {
-		if (/^([0-9A-F]+) \# /) {
+		if (/^([0-9A-F]+)\s+\#\s+/) {
 		    my $code = hex($1);
 		    $COMPEXCL{$code} = undef;
 		}
@@ -658,9 +658,9 @@ sub _casespec {
 							   title
 							   upper
 							   condition)};
-			    my ($oldlocale) =
+			    if (defined $oldcondition) {
+				my ($oldlocale) =
 				($oldcondition =~ /^([a-z][a-z](?:_\S+)?)/);
-			    if (defined $oldlocale) {
 				delete $CASESPEC{$code};
 				$CASESPEC{$code}->{$oldlocale} =
 				{ code      => $hexcode,
@@ -668,8 +668,6 @@ sub _casespec {
 				  title     => $oldtitle,
 				  upper     => $oldupper,
 				  condition => $oldcondition };
-			    } else {
-				warn __PACKAGE__, ": SpecialCasing.txt:", $., ": No oldlocale for 0x$hexcode\n"
 			    }
 			}
 			my ($locale) =

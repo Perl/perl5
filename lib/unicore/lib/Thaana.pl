@@ -9,5 +9,5 @@
 # Meaning: Script 'THAANA'
 #
 return <<'END';
-0780	07B0	THAANA
+0780	07B1	THAANA
 END

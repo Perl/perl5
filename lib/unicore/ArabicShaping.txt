@@ -1,4 +1,4 @@
-# ArabicShaping-4.txt
+# ArabicShaping-3.2.0.txt
 #
 # This file is a normative contributory data file in the
 # Unicode Character Database.
@@ -6,7 +6,8 @@
 # This file defines the shaping classes for Arabic and Syriac
 # positional shaping, repeating in machine readable form the
 # information printed in Tables 8-6, 8-7, 8-8, 8-10, 8-11, and
-# 8-13 of The Unicode Standard, Version 3.0.
+# 8-13 of The Unicode Standard, Version 3.0, plus additions
+# for Unicode 3.1 and Unicode 3.2.
 #
 # See sections 8.2 and 8.3 of The Unicode Standard, Version 3.0
 # for more information.
@@ -83,6 +84,8 @@
 0648; WAW; R; WAW
 0649; ALEF MAKSURA; D; YEH
 064A; YEH; D; YEH
+066E; DOTLESS BEH; D; BEH
+066F; DOTLESS QAF; D; QAF
 0671; HAMZAT WASL ON ALEF; R; ALEF
 0672; WAVY HAMZA ON ALEF; R; ALEF
 0673; WAVY HAMZA UNDER ALEF; R; ALEF
@@ -196,7 +199,7 @@
 0715; DALATH; R; DALATH RISH
 0716; DOTLESS DALATH RISH; R; DALATH RISH
 0717; HE; R; HE
-0718; WAW; R; WAW
+0718; WAW; R; SYRIAC WAW
 0719; ZAIN; R; ZAIN
 071A; HETH; D; HETH
 071B; TETH; D; TETH

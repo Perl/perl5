@@ -38,7 +38,8 @@
   \p{BidiWS}                                 Bi-directional category 'WS'
   \p{Blank}                                  [[:Blank:]]
 * \p{Bopomofo}                               Script 'BOPOMOFO'
-* \p{CanadianAboriginal}                     Script 'CANADIAN-ABORIGINAL'
+* \p{Buhid}                                  Script 'BUHID'
+* \p{CanadianAboriginal}                     Script 'CANADIAN_ABORIGINAL'
   \p{Canon}                                  Decomposes to multiple characters
 * \p{Cc}                                     Alias for \p{Cc} (General Category 'Cc')
   \p{Cc}                                     General Category 'Cc'
@@ -74,6 +75,7 @@
   \p{DCvertical}                             Compatible with 'vertical'
   \p{DCwide}                                 Compatible with 'wide'
 * \p{Dash}                                   Extended property 'Dash'
+* \p{Deprecated}                             Extended property 'Deprecated'
 * \p{Deseret}                                Script 'DESERET'
 * \p{Devanagari}                             Script 'DEVANAGARI'
 * \p{Diacritic}                              Extended property 'Diacritic'
@@ -82,11 +84,13 @@
 * \p{Extender}                               Extended property 'Extender'
 * \p{Georgian}                               Script 'GEORGIAN'
 * \p{Gothic}                                 Script 'GOTHIC'
+* \p{GraphemeLink}                           Extended property 'Grapheme_Link'
   \p{Graph}                                  [[:Graph:]]
 * \p{Greek}                                  Script 'GREEK'
 * \p{Gujarati}                               Script 'GUJARATI'
 * \p{Gurmukhi}                               Script 'GURMUKHI'
 * \p{Hangul}                                 Script 'HANGUL'
+* \p{Hanunoo}                                Script 'HANUNOO'
 * \p{Han}                                    Script 'HAN'
 * \p{Hebrew}                                 Script 'HEBREW'
 * \p{HexDigit}                               Extended property 'Hex_Digit'
@@ -95,6 +99,8 @@
 * \p{IdContinue}                             [\p{ID_Start}\p{Mn}\p{Mc}\p{Nd}\p{Pc}]
 * \p{IdStart}                                [\p{Ll}\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{Nl}]
 * \p{Ideographic}                            Extended property 'Ideographic'
+* \p{IdsBinaryOperator}                      Extended property 'IDS_Binary_Operator'
+* \p{IdsTrinaryOperator}                     Extended property 'IDS_Trinary_Operator'
 * \p{InAlphabeticPresentationForms}          Block 'Alphabetic Presentation Forms'
 * \p{InArabicPresentationFormsA}             Block 'Arabic Presentation Forms-A'
 * \p{InArabicPresentationFormsB}             Block 'Arabic Presentation Forms-B'
@@ -108,6 +114,7 @@
 * \p{InBopomofo}                             Block 'Bopomofo'
 * \p{InBoxDrawing}                           Block 'Box Drawing'
 * \p{InBraillePatterns}                      Block 'Braille Patterns'
+* \p{InBuhid}                                Block 'Buhid'
 * \p{InByzantineMusicalSymbols}              Block 'Byzantine Musical Symbols'
 * \p{InCherokee}                             Block 'Cherokee'
 * \p{InCjkCompatibilityForms}                Block 'CJK Compatibility Forms'
@@ -119,11 +126,12 @@
 * \p{InCjkUnifiedIdeographsExtensionA}       Block 'CJK Unified Ideographs Extension A'
 * \p{InCjkUnifiedIdeographsExtensionB}       Block 'CJK Unified Ideographs Extension B'
 * \p{InCjkUnifiedIdeographs}                 Block 'CJK Unified Ideographs'
+* \p{InCombiningDiacriticalMarksForSymbols}  Block 'Combining Diacritical Marks for Symbols'
 * \p{InCombiningDiacriticalMarks}            Block 'Combining Diacritical Marks'
 * \p{InCombiningHalfMarks}                   Block 'Combining Half Marks'
-* \p{InCombiningMarksForSymbols}             Block 'Combining Marks for Symbols'
 * \p{InControlPictures}                      Block 'Control Pictures'
 * \p{InCurrencySymbols}                      Block 'Currency Symbols'
+* \p{InCyrillicSupplementary}                Block 'Cyrillic Supplementary'
 * \p{InCyrillic}                             Block 'Cyrillic'
 * \p{InDeseret}                              Block 'Deseret'
 * \p{InDevanagari}                           Block 'Devanagari'
@@ -135,14 +143,15 @@
 * \p{InGeometricShapes}                      Block 'Geometric Shapes'
 * \p{InGeorgian}                             Block 'Georgian'
 * \p{InGothic}                               Block 'Gothic'
+* \p{InGreekAndCoptic}                       Block 'Greek and Coptic'
 * \p{InGreekExtended}                        Block 'Greek Extended'
-* \p{InGreek}                                Block 'Greek'
 * \p{InGujarati}                             Block 'Gujarati'
 * \p{InGurmukhi}                             Block 'Gurmukhi'
 * \p{InHalfwidthAndFullwidthForms}           Block 'Halfwidth and Fullwidth Forms'
 * \p{InHangulCompatibilityJamo}              Block 'Hangul Compatibility Jamo'
 * \p{InHangulJamo}                           Block 'Hangul Jamo'
 * \p{InHangulSyllables}                      Block 'Hangul Syllables'
+* \p{InHanunoo}                              Block 'Hanunoo'
 * \p{InHebrew}                               Block 'Hebrew'
 * \p{InHighPrivateUseSurrogates}             Block 'High Private Use Surrogates'
 * \p{InHighSurrogates}                       Block 'High Surrogates'
@@ -152,6 +161,7 @@
 * \p{InKanbun}                               Block 'Kanbun'
 * \p{InKangxiRadicals}                       Block 'Kangxi Radicals'
 * \p{InKannada}                              Block 'Kannada'
+* \p{InKatakanaPhoneticExtensions}           Block 'Katakana Phonetic Extensions'
 * \p{InKatakana}                             Block 'Katakana'
 * \p{InKhmer}                                Block 'Khmer'
 * \p{InLao}                                  Block 'Lao'
@@ -164,6 +174,8 @@
 * \p{InMalayalam}                            Block 'Malayalam'
 * \p{InMathematicalAlphanumericSymbols}      Block 'Mathematical Alphanumeric Symbols'
 * \p{InMathematicalOperators}                Block 'Mathematical Operators'
+* \p{InMiscellaneousMathematicalSymbolsA}    Block 'Miscellaneous Mathematical Symbols-A'
+* \p{InMiscellaneousMathematicalSymbolsB}    Block 'Miscellaneous Mathematical Symbols-B'
 * \p{InMiscellaneousSymbols}                 Block 'Miscellaneous Symbols'
 * \p{InMiscellaneousTechnical}               Block 'Miscellaneous Technical'
 * \p{InMongolian}                            Block 'Mongolian'
@@ -174,14 +186,21 @@
 * \p{InOldItalic}                            Block 'Old Italic'
 * \p{InOpticalCharacterRecognition}          Block 'Optical Character Recognition'
 * \p{InOriya}                                Block 'Oriya'
-* \p{InPrivateUse}                           Block 'Private Use'
+* \p{InPrivateUseArea}                       Block 'Private Use Area'
 * \p{InRunic}                                Block 'Runic'
 * \p{InSinhala}                              Block 'Sinhala'
 * \p{InSmallFormVariants}                    Block 'Small Form Variants'
 * \p{InSpacingModifierLetters}               Block 'Spacing Modifier Letters'
 * \p{InSpecials}                             Block 'Specials'
 * \p{InSuperscriptsAndSubscripts}            Block 'Superscripts and Subscripts'
+* \p{InSupplementalArrowsA}                  Block 'Supplemental Arrows-A'
+* \p{InSupplementalArrowsB}                  Block 'Supplemental Arrows-B'
+* \p{InSupplementalMathematicalOperators}    Block 'Supplemental Mathematical Operators'
+* \p{InSupplementaryPrivateUseAreaA}         Block 'Supplementary Private Use Area-A'
+* \p{InSupplementaryPrivateUseAreaB}         Block 'Supplementary Private Use Area-B'
 * \p{InSyriac}                               Block 'Syriac'
+* \p{InTagalog}                              Block 'Tagalog'
+* \p{InTagbanwa}                             Block 'Tagbanwa'
 * \p{InTags}                                 Block 'Tags'
 * \p{InTamil}                                Block 'Tamil'
 * \p{InTelugu}                               Block 'Telugu'
@@ -189,6 +208,7 @@
 * \p{InThai}                                 Block 'Thai'
 * \p{InTibetan}                              Block 'Tibetan'
 * \p{InUnifiedCanadianAboriginalSyllabics}   Block 'Unified Canadian Aboriginal Syllabics'
+* \p{InVariationSelectors}                   Block 'Variation Selectors'
 * \p{InYiRadicals}                           Block 'Yi Radicals'
 * \p{InYiSyllables}                          Block 'Yi Syllables'
 * \p{Inherited}                              Script 'INHERITED'
@@ -203,6 +223,7 @@
   \p{Ll}                                     General Category 'Ll'
 * \p{Lm}                                     Alias for \p{Lm} (General Category 'Lm')
   \p{Lm}                                     General Category 'Lm'
+* \p{LogicalOrderException}                  Extended property 'Logical_Order_Exception'
 * \p{Lowercase}                              [\p{Ll}\p{OtherLowercase}]
   \p{Lower}                                  [[:Lower:]]
 * \p{Lo}                                     Alias for \p{Lo} (General Category 'Lo')
@@ -236,9 +257,11 @@
 * \p{N}                                      Alias for \p{N} (Major Category 'N')
   \p{N}                                      Major Category 'N'
 * \p{Ogham}                                  Script 'OGHAM'
-* \p{OldItalic}                              Script 'OLD-ITALIC'
+* \p{OldItalic}                              Script 'OLD_ITALIC'
 * \p{Oriya}                                  Script 'ORIYA'
 * \p{OtherAlphabetic}                        Extended property 'Other_Alphabetic'
+* \p{OtherDefaultIgnorableCodePoint}         Extended property 'Other_Default_Ignorable_Code_Point'
+* \p{OtherGraphemeExtend}                    Extended property 'Other_Grapheme_Extend'
 * \p{OtherLowercase}                         Extended property 'Other_Lowercase'
 * \p{OtherMath}                              Extended property 'Other_Math'
 * \p{OtherUppercase}                         Extended property 'Other_Uppercase'
@@ -261,6 +284,7 @@
 * \p{P}                                      Alias for \p{P} (Major Category 'P')
   \p{P}                                      Major Category 'P'
 * \p{QuotationMark}                          Extended property 'Quotation_Mark'
+* \p{Radical}                                Extended property 'Radical'
 * \p{Runic}                                  Script 'RUNIC'
 * \p{Sc}                                     Alias for \p{Sc} (General Category 'Sc')
   \p{Sc}                                     General Category 'Sc'
@@ -269,6 +293,7 @@
   \p{Sk}                                     General Category 'Sk'
 * \p{Sm}                                     Alias for \p{Sm} (General Category 'Sm')
   \p{Sm}                                     General Category 'Sm'
+* \p{SoftDotted}                             Extended property 'Soft_Dotted'
 * \p{So}                                     Alias for \p{So} (General Category 'So')
   \p{So}                                     General Category 'So'
   \p{SpacePerl}                              \s
@@ -276,6 +301,8 @@
 * \p{Syriac}                                 Script 'SYRIAC'
 * \p{S}                                      Alias for \p{S} (Major Category 'S')
   \p{S}                                      Major Category 'S'
+* \p{Tagalog}                                Script 'TAGALOG'
+* \p{Tagbanwa}                               Script 'TAGBANWA'
 * \p{Tamil}                                  Script 'TAMIL'
 * \p{Telugu}                                 Script 'TELUGU'
 * \p{TerminalPunctuation}                    Extended property 'Terminal_Punctuation'
@@ -283,9 +310,10 @@
 * \p{Thai}                                   Script 'THAI'
 * \p{Tibetan}                                Script 'TIBETAN'
   \p{Title}                                  [[:Title:]]
+* \p{UnifiedIdeograph}                       Extended property 'Unified_Ideograph'
 * \p{Uppercase}                              [\p{Lu}\p{Other_Uppercase}]
   \p{Upper}                                  [[:Upper:]]
-* \p{WhiteSpace}                             Extended property 'White_space'
+* \p{WhiteSpace}                             Extended property 'White_Space'
   \p{Word}                                   [[:Word:]]
   \p{XDigit}                                 [[:XDigit:]]
 * \p{Yi}                                     Script 'YI'

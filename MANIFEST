@@ -1457,6 +1457,8 @@ lib/Unicode/Collate/t/test.t	Unicode::Collate
 lib/Unicode/README		Explanation what happened to lib/unicode.
 lib/Unicode/UCD.pm		Unicode character database
 lib/Unicode/UCD.t		See if Unicode character database works
+lib/unicore/PropertyAliases.txt	Unicode character database
+lib/unicore/PropertyValueAliases.txt	Unicode character database
 lib/unicore/ArabicShaping.txt	Unicode character database
 lib/unicore/ArabLink.pl		Unicode character database
 lib/unicore/ArabLnkGrp.pl	Unicode character database
