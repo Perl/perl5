@@ -1,8 +1,13 @@
 #!perl
 
 BEGIN {
-    chdir 't';
-    @INC = ('../lib', '../ext/B/t');
+    if ($ENV{PERL_CORE}){
+	chdir('t') if -d 't';
+	@INC = ('.', '../lib', '../ext/B/t');
+    } else {
+	unshift @INC, 't';
+	push @INC, "../../t";
+    }
     require Config;
     if (($Config::Config{'extensions'} !~ /\bB\b/) ){
         print "1..0 # Skip -- Perl configured without B module\n";
@@ -13,7 +18,7 @@ BEGIN {
 	    "1..0 # Skip: Data::Dumper was not built, needed by OptreeCheck\n";
 	exit 0;
     }
-    require './test.pl';
+    require 'test.pl';
 }
 
 use OptreeCheck;
