@@ -163,6 +163,12 @@ Thread creation time could vary wildly between identical runs. This was caused
 by a poor hashing algorithm in the thread cloning routines, which has now
 been fixed.
 
+=item *
+
+The internals of the ithreads implementation were not checking if OS-level
+thread creation had failed. threads->create() now returns C<undef> in if
+thead creation fails instead of crashing perl.
+
 =back
 
 =head1 New or Changed Diagnostics
