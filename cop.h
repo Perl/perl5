@@ -107,8 +107,13 @@ struct block_sub {
 #endif /* USE_THREADS */
 
 /* junk in @_ spells trouble when cloning CVs and in pp_caller(), so don't
- * leave any */
-#define CLEAR_ARGARRAY()	av_clear(cx->blk_sub.argarray)
+ * leave any (a fast av_clear(ary), basically) */
+#define CLEAR_ARGARRAY(ary) \
+    STMT_START {							\
+	AvMAX(ary) += AvARRAY(ary) - AvALLOC(ary);			\
+	SvPVX(ary) = (char*)AvALLOC(ary);				\
+	AvFILLp(ary) = -1;						\
+    } STMT_END
 
 #define POPSUB(cx,sv)							\
     STMT_START {							\
@@ -124,7 +129,7 @@ struct block_sub {
 		PL_curpad[0] = (SV*)cx->blk_sub.argarray;		\
 	    }								\
 	    else {							\
-		CLEAR_ARGARRAY();					\
+		CLEAR_ARGARRAY(cx->blk_sub.argarray);			\
 	    }								\
 	}								\
 	sv = (SV*)cx->blk_sub.cv;					\
