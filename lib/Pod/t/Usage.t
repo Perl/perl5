@@ -48,16 +48,21 @@ SKIP: {
 }
 
 { # Test exit status from pod2usage()
-    my $exit = 42;
+    my $exit = ($^O eq 'VMS' ? 2 : 42);
     my $dev_null = File::Spec->devnull;
     my $args = join ", ", (
         "-verbose => 0", 
         "-exit    => $exit",
-        "-output  => q[$dev_null]",
-        "-input   => q[$0]",
+        "-output  => q{$dev_null}",
+        "-input   => q{$0}",
     );
-    my $prg = qq[pod2usage({ $args })];
-    my @cmd = ( $^X, '-I../lib',  '-MPod::Usage', '-e',  $prg );
+    my $cq = (($^O eq 'MSWin32'
+               || $^O eq 'NetWare'
+               || $^O eq 'VMS') ? '"'
+              : "'");
+    my @params = ( "${cq}-I../lib$cq",  "${cq}-MPod::Usage$cq", '-e' );
+    my $prg = qq[${cq}pod2usage({ $args })$cq];
+    my @cmd = ( $^X, @params, $prg );
 
     is( system( @cmd ) >> 8, $exit, 'Exit status of pod2usage()' );
 }
