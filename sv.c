@@ -2206,11 +2206,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	    return "";
 	}
     }
-    if (SvPOK(sv)) {
-	*lp = SvCUR(sv);
-	return SvPVX(sv);
-    }
-    else if (SvNOKp(sv)) {			/* See note in sv_2uv() */
+    if (SvNOKp(sv)) {			/* See note in sv_2uv() */
 	/* XXXX 64-bit?  IV may have better precision... */
 	/* I tried changing this to be 64-bit-aware and
 	 * the t/op/numconvert.t became very, very, angry.
