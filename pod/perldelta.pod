@@ -144,6 +144,13 @@ to escape the laboratory has been decommissioned.
 
 =item *
 
+The builtin dump() function has probably outlived most of its
+usefulness.  The core-dumping functionality will remain in future
+available as an explicit call to C<CORE::dump()>, but in future
+releases the behaviour of an unqualified C<dump()> call may change.
+
+=item *
+
 The very dusty examples in the eg/ directory have been removed.
 Suggestions for new shiny examples welcome but the main issue is that
 the examples need to be documented, tested and (most importantly)
@@ -339,7 +346,7 @@ to Unicode 3.1.1.  For more information, see http://www.unicode.org/.
 
 For developers interested in enhancing Perl's Unicode capabilities:
 almost all the UCD files are included with the Perl distribution in
-the lib/unicore subdirectory.  The most notable omission, for space
+the F<lib/unicore subdirectory>.  The most notable omission, for space
 considerations, is the Unihan database.
 
 =item *
@@ -368,7 +375,7 @@ This change leads to often slightly faster and always less lossy
 arithmetics. (Previously Perl always preferred floating point numbers
 in its math.)
 
-=head2 Miscellaneous Enhancements
+=head2 Miscellaneous Changes
 
 =over 4
 
@@ -381,6 +388,23 @@ to AUTOLOAD subroutines and you can assign to the AUTOLOAD return value.
 
 C<perl -d:Module=arg,arg,arg> now works (previously one couldn't pass
 in multiple arguments.)
+
+=item *
+
+The builtin dump() now gives an optional warning
+C<Ambiguous call resolved as CORE::dump(), qualify as such or use &>
+meaning that by default C<dump(...)> is resolved as the builtin 
+dump() which dumps core and aborts, not as (possibly) user-defined
+C<sub dump>.  To call the latter, qualify the call as C<&dump(...)>.
+(The whole dump() feature is to considered deprecated, and possibly
+removed/changed in future releases.)
+
+=item *
+
+chomp() and chop() have been demoted back to I<not> being overrideable
+because they cannot really be overridden-- the problem is that their
+prototype cannot be expressed and therefore one really cannot write
+replacements to override these builtins.
 
 =item *
 
@@ -398,6 +422,11 @@ Formats now support zero-padded decimal fields.
 
 Lvalue subroutines can now return C<undef> in list context.
 However, the lvalue subroutine feature still remains experimental.
+
+=item *
+
+A lost warning "Can't declare ... dereference in my" has been
+restored (Perl had it earlier but it became lost in later releases.)
 
 =item *
 
@@ -445,6 +474,19 @@ prototype(\&) is now available.
 
 prototype(\[$@%&]) is now available to implicitly create references
 (useful for example if you want to emulate the tie() interface).
+
+=item *
+
+A new command-line option, C<-t> is available.  It is the
+little brother of C<-T>: instead of dieing on taint violations,
+lexical warnings are given.  B<This is only meant as a temporary
+debugging aid while securing the code of old legacy applications.
+This is not a substitute for -T.>
+
+=item *
+
+If tr/// is just counting characters, it doesn't attempt to
+modify its target.
 
 =item *
 
@@ -955,6 +997,11 @@ with 'no lib' now works.
 
 =item *
 
+ExtUtils::MakeMaker now uses File::Spec internally, which hopefully
+leads into better portability.
+
+=item *
+
 Math::BigFloat and Math::BigInt have undergone a full rewrite.
 They are now magnitudes faster, and they support various
 bignum libraries such as GMP and PARI as their backends.
@@ -965,9 +1012,10 @@ Math::Complex handles inf, NaN etc., better.
 
 =item *
 
-Net::Ping has been enhanced.  There is now "external" protocol which
-uses Net::Ping::External module which runs external ping(1) and parses
-the output.  A version of Net::Ping::External is available in CPAN.
+Net::Ping has been muchly enhanced.  Multihoming is now supported.
+There is now "external" protocol which uses Net::Ping::External module
+which runs external ping(1) and parses the output.  A version of
+Net::Ping::External is available in CPAN.
 
 =item *
 
@@ -1006,7 +1054,7 @@ The vars pragma now supports declaring fully qualified variables.
 
 =item *
 
-The utf8:: name space (as in the pragma) provides various
+The C<utf8::> name space (as in the pragma) provides various
 Perl-callable functions to provide low level access to Perl's
 internal Unicode representation.  At the moment only length()
 has been implemented.
@@ -1165,8 +1213,9 @@ with perltoot in filesystems restricted to "8.3" names)
 
 =item *
 
-perluniintro is an introduction to using Unicode in Perl
-(perlunicode is more of a reference)
+perluniintro is an introduction to using Unicode in Perl.
+(perlunicode is more of a detailed reference and background
+information)
 
 =item *
 
@@ -1511,6 +1560,10 @@ AtheOS (http://www.atheos.cx/) is a new platform.
 
 =item *
 
+BeOS has been reclaimed.
+
+=item *
+
 DG/UX platform now supports the 5.005-style threads.  See L<perldgux>.
 
 =item *
@@ -1548,6 +1601,11 @@ NCR MP-RAS is now supported.
 
 =item *
 
+All the NetBSD specific patches (except for the installation
+specific ones) have been merged back to the main distribution.
+
+=item *
+
 NetWare from Novell is now supported.  See L<perlnetware>.
 
 =item *
@@ -1557,6 +1615,18 @@ NonStop-UX is now supported.
 =item *
 
 NEC SUPER-UX is now supported.
+
+=item *
+
+All the OpenBSD specific patches (except for the installation
+specific ones) have been merged back to the main distribution.
+
+=item *
+
+Perl has been tested with the GNU pth userlevel thread package
+( http://www.gnu.org/software/pth/pth.html ) . All but one thread
+test worked, and that one failure was because of test results arriving
+in unexpected order.
 
 =item *
 
@@ -1873,7 +1943,14 @@ The character tables have been updated to Unicode 3.1.1.
 =item *
 
 Comparing with utf8 data does not magically upgrade non-utf8 data
-into utf8.
+into utf8.  (This was a problem for example if you were mixing data
+from I/O and Unicode data: your output might have got magically encoded
+as UTF-8.)
+
+=item *
+
+Generating illegal Unicode code points like U+FFFE, or the UTF-16
+surrogates, now also generates an optional warning.
 
 =item *
 
@@ -2576,26 +2653,10 @@ libraries).
 
 =head2 Seen In Perl 5.7 But Gone Now
 
-Some modules were seen in the Perl 5.7 development releases
-but are not present in 5.8.0.
-
-=over 4
-
-=item *
-
-C<Attribute::Handlers> was removed because the implementation of C<my>
-variable attributes changed so much that the Attribute::Handlers will
-require a major rewrite.  (This means that you can't use
-Attribute::Handler 0.76 with Perl 5.8.0.)
-
-=item *
-
 C<Time::Piece> (previously known as C<Time::Object>) was removed
 because it was felt that it didn't have enough value in it to be a
 core module.  It is still a useful module, though, and is available
 from the CPAN.
-
-=back
 
 =head1 Reporting Bugs
 

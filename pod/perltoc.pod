@@ -2270,7 +2270,7 @@ to enable UTF-8/UTF-EBCDIC in scripts
 
 =item Unicode Encodings
 
-UTF-8, UTF-EBDIC, UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte
+UTF-8, UTF-EBCDIC, UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte
 Order Marks), UTF-32, UTF-32BE, UTF32-LE, UCS-2, UCS-4, UTF-7
 
 =item Security Implications of Malformed UTF-8
@@ -2494,47 +2494,43 @@ module (sometimes unnecessary), B<INSTALL> the module
 
 =item Pragmatic Modules
 
-attributes, attrs, autouse, base, blib, bytes, charnames, constant,
-diagnostics, encoding, fields, filetest, integer, less, locale, open, ops,
-overload, re, sigtrap, sort, strict, subs, utf8, vars, vmsish, warnings,
-warnings::register
+attributes, autouse, base, blib, bytes, charnames, constant, diagnostics,
+encoding, fields, filetest, integer, less, locale, open, overload, sigtrap,
+sort, strict, subs, utf8, vars, vmsish, warnings, warnings::register
 
 =item Standard Modules
 
-AnyDBM_File, AutoLoader, AutoSplit, B, B::Asmdata, B::Assembler, B::Bblock,
-B::Bytecode, B::C, B::CC, B::Concise, B::Debug, B::Deparse,
-B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash, B::Terse,
-B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie,
-CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CPAN,
-CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA, Class::Struct,
-Cwd, DB, DB_File, Devel::SelfStubber, Digest, DirHandle, Dumpvalue, Encode,
-Encode::EncodeFormat, Encode::Tcl, English, Env, Exporter, Exporter::Heavy,
+AnyDBM_File, Attribute::Handlers, AutoLoader, AutoSplit, Benchmark, CGI,
+CGI::Apache, CGI::Carp, CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push,
+CGI::Switch, CGI::Util, CPAN, CPAN::FirstTime, CPAN::Nox, Carp,
+Carp::Heavy, Class::ISA, Class::Struct, Cwd, DB, Devel::SelfStubber,
+Digest, DirHandle, Dumpvalue, English, Env, Exporter, Exporter::Heavy,
 ExtUtils::Command, ExtUtils::Constant, ExtUtils::Embed, ExtUtils::Install,
 ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM_Cygwin,
 ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_Unix, ExtUtils::MM_VMS,
 ExtUtils::MM_Win32, ExtUtils::MakeMaker, ExtUtils::Manifest,
 ExtUtils::Mkbootstrap, ExtUtils::Mksymlists, ExtUtils::Packlist,
-ExtUtils::testlib, Fatal, Fcntl, File::Basename, File::CheckTree,
-File::Compare, File::Copy, File::DosGlob, File::Find, File::Path,
-File::Spec, File::Spec::Epoc, File::Spec::Functions, File::Spec::Mac,
-File::Spec::OS2, File::Spec::Unix, File::Spec::VMS, File::Spec::Win32,
-File::Temp, File::stat, FileCache, FileHandle, Filter::Simple, FindBin,
-Getopt::Long, Getopt::Std, I18N::Collate, I18N::LangTags,
-I18N::LangTags::List, IO, IPC::Open2, IPC::Open3, Locale::Constants,
-Locale::Country, Locale::Currency, Locale::Language, Locale::Maketext,
-Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt, Math::BigInt::Calc,
-Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File, Memoize::Expire,
-Memoize::ExpireFile, Memoize::ExpireTest, Memoize::NDBM_File,
-Memoize::SDBM_File, Memoize::Storable, NDBM_File, NEXT, Net::Cmd,
-Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc, Net::POP3,
-Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ, Net::netent,
-Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX, PerlIO,
-Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
-Pod::Man, Pod::ParseLink, Pod::ParseUtils, Pod::Parser, Pod::Plainer,
-Pod::Select, Pod::Text, Pod::Text::Color, Pod::Text::Overstrike,
-Pod::Text::Termcap, Pod::Usage, Pod::t::basic, SDBM_File, Safe,
-Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable, Switch,
-Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
+ExtUtils::testlib, Fatal, File::Basename, File::CheckTree, File::Compare,
+File::Copy, File::DosGlob, File::Find, File::Path, File::Spec,
+File::Spec::Cygwin, File::Spec::Epoc, File::Spec::Functions,
+File::Spec::Mac, File::Spec::OS2, File::Spec::Unix, File::Spec::VMS,
+File::Spec::Win32, File::Temp, File::stat, FileCache, FileHandle,
+Filter::Simple, FindBin, Getopt::Long, Getopt::Std, I18N::Collate,
+I18N::LangTags, I18N::LangTags::List, IPC::Open2, IPC::Open3,
+Locale::Constants, Locale::Country, Locale::Currency, Locale::Language,
+Locale::Maketext, Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt,
+Math::BigInt::Calc, Math::Complex, Math::Trig, Memoize,
+Memoize::AnyDBM_File, Memoize::Expire, Memoize::ExpireFile,
+Memoize::ExpireTest, Memoize::NDBM_File, Memoize::SDBM_File,
+Memoize::Storable, NEXT, Net::Cmd, Net::Config, Net::Domain, Net::FTP,
+Net::NNTP, Net::Netrc, Net::POP3, Net::Ping, Net::SMTP, Net::Time,
+Net::hostent, Net::libnetFAQ, Net::netent, Net::protoent, Net::servent,
+PerlIO, Pod::Checker, Pod::Find, Pod::Functions, Pod::Html,
+Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseLink, Pod::ParseUtils,
+Pod::Parser, Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
+Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, Pod::t::basic,
+Search::Dict, SelectSaver, SelfLoader, Shell, Switch, Symbol,
+Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
 Test::Builder, Test::Harness, Test::More, Test::Simple, Test::Tutorial,
 Text::Abbrev, Text::Balanced, Text::ParseWords, Text::Soundex, Text::Tabs,
 Text::Wrap, Thread, Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash,
@@ -2813,7 +2809,7 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =item Where do I send bug reports?
 
-=item What is perl.com? Perl Mongers? pm.org? perl.org?
+=item What is perl.com? Perl Mongers? pm.org? perl.org? cpan.org?
 
 =back
 
@@ -2907,8 +2903,8 @@ mean?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.9 $, $Date: 2001/12/07
-21:17:58 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.10 $, $Date: 2002/01/01
+22:26:45 $)
 
 =over 4
 
@@ -3122,8 +3118,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.5 $, $Date: 2001/12/18
-09:01:14 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.6 $, $Date: 2001/12/19
+18:17:00 $)
 
 =over 4
 
@@ -3215,7 +3211,7 @@ protected files?  Isn't this a bug in Perl?
 
 =back
 
-=head2 perlfaq6 - Regexes ($Revision: 1.5 $, $Date: 2001/12/02 01:55:12 $)
+=head2 perlfaq6 - Regexes ($Revision: 1.6 $, $Date: 2002/01/01 22:26:45 $)
 
 =over 4
 
@@ -3281,8 +3277,8 @@ file?
 
 =back
 
-=head2 perlfaq7 - Perl Language Issues ($Revision: 1.4 $, $Date: 2001/11/07
-02:27:50 $)
+=head2 perlfaq7 - Perl Language Issues ($Revision: 1.5 $, $Date: 2002/01/01
+22:26:45 $)
 
 =over 4
 
@@ -4281,51 +4277,118 @@ B<filter_fetch_value>
 
 =item DESCRIPTION
 
+=item "Gimme" Values
+
+GIMME, GIMME_V, G_ARRAY, G_DISCARD, G_EVAL, G_NOARGS, G_SCALAR, G_VOID
+
+=item Array Manipulation Functions
+
 AvFILL, av_clear, av_delete, av_exists, av_extend, av_fetch, av_fill,
 av_len, av_make, av_pop, av_push, av_shift, av_store, av_undef, av_unshift,
-ax, bytes_from_utf8, bytes_to_utf8, call_argv, call_method, call_pv,
-call_sv, CLASS, Copy, croak, CvSTASH, cv_const_sv, dAX, dITEMS, dMARK,
-dORIGMARK, dSP, dXSARGS, dXSI32, ENTER, eval_pv, eval_sv, EXTEND,
-fbm_compile, fbm_instr, FREETMPS, getcwd_sv, get_av, get_cv, get_hv,
-get_sv, GIMME, GIMME_V, grok_bin, grok_hex, grok_number,
-grok_numeric_radix, grok_oct, GvSV, gv_fetchmeth, gv_fetchmethod,
-gv_fetchmethod_autoload, gv_stashpv, gv_stashsv, G_ARRAY, G_DISCARD,
-G_EVAL, G_NOARGS, G_SCALAR, G_VOID, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV,
-HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, HvNAME, hv_clear, hv_delete,
-hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
-hv_iterinit, hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv,
-hv_iterval, hv_magic, hv_store, hv_store_ent, hv_undef, ibcmp_utf8,
-isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE, isUPPER, is_utf8_char,
-is_utf8_string, items, ix, LEAVE, load_module, looks_like_number, MARK,
+get_av, newAV, Nullav, sortsv
+
+=item Callback Functions
+
+call_argv, call_method, call_pv, call_sv, ENTER, eval_pv, eval_sv,
+FREETMPS, LEAVE, SAVETMPS
+
+=item Character classes
+
+isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE, isUPPER, toLOWER, toUPPER
+
+=item Cloning an interpreter
+
+perl_clone
+
+=item CV Manipulation Functions
+
+CvSTASH, get_cv, Nullcv
+
+=item Embedding Functions
+
+load_module, perl_alloc, perl_construct, perl_destruct, perl_free,
+perl_parse, perl_run, require_pv
+
+=item Global Variables
+
+PL_modglobal, PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes
+
+=item GV Functions
+
+GvSV, gv_fetchmeth, gv_fetchmethod, gv_fetchmethod_autoload, gv_stashpv,
+gv_stashsv
+
+=item Handy Values
+
+HEf_SVKEY, Nullch, Nullsv
+
+=item Hash Manipulation Functions
+
+get_hv, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force, HeSVKEY_set,
+HeVAL, HvNAME, hv_clear, hv_delete, hv_delete_ent, hv_exists,
+hv_exists_ent, hv_fetch, hv_fetch_ent, hv_iterinit, hv_iterkey,
+hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iterval, hv_magic, hv_store,
+hv_store_ent, hv_undef, newHV, Nullhv
+
+=item Magical Functions
+
 mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_length, mg_magical, mg_set,
-Move, New, newAV, Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc, newSV,
-NEWSV, newSViv, newSVnv, newSVpv, newSVpvf, newSVpvn, newSVpvn_share,
-newSVrv, newSVsv, newSVuv, newXS, newXSproto, Newz, new_vstring, Nullav,
-Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc, perl_clone,
-perl_construct, perl_destruct, perl_free, perl_parse, perl_run,
-PL_modglobal, PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn,
-POPp, POPpbytex, POPpx, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu,
-PUTBACK, pv_uni_display, Renew, Renewc, require_pv, RETVAL, Safefree,
-savepv, savepvn, SAVETMPS, scan_bin, scan_hex, scan_oct, sharedsv_find,
-sharedsv_init, sharedsv_lock, sharedsv_new, sharedsv_thrcnt_dec,
-sharedsv_thrcnt_inc, sharedsv_unlock, sortsv, SP, SPAGAIN, ST, strEQ,
-strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE, StructCopy, SvCUR,
-SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_notUV,
+SvGETMAGIC, SvSETMAGIC, SvSetMagicSV, SvSetSV, SvSetSV_nosteal
+
+=item Memory Management
+
+Copy, Move, New, Newc, NEWSV, Newz, Renew, Renewc, Safefree, savepv,
+savepvn, StructCopy, Zero
+
+=item Miscellaneous Functions
+
+fbm_compile, fbm_instr, form, getcwd_sv, strEQ, strGE, strGT, strLE, strLT,
+strNE, strnEQ, strnNE
+
+=item Numeric functions
+
+grok_bin, grok_hex, grok_number, grok_numeric_radix, grok_oct, scan_bin,
+scan_hex, scan_oct
+
+=item Optree Manipulation Functions
+
+cv_const_sv, newCONSTSUB, newXS
+
+=item Shared SV Functions
+
+sharedsv_find, sharedsv_init, sharedsv_lock, sharedsv_new,
+sharedsv_thrcnt_dec, sharedsv_thrcnt_inc, sharedsv_unlock
+
+=item Stack Manipulation Macros
+
+dMARK, dORIGMARK, dSP, EXTEND, MARK, ORIGMARK, POPi, POPl, POPn, POPp,
+POPpbytex, POPpx, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu,
+PUTBACK, SP, SPAGAIN, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XPUSHu, XSRETURN,
+XSRETURN_IV, XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF,
+XSRETURN_YES, XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES
+
+=item SV Flags
+
+svtype, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG
+
+=item SV Manipulation Functions
+
+get_sv, looks_like_number, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv,
+newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv,
+new_vstring, SvCUR, SvCUR_set, SvEND, SvGROW, SvIOK, SvIOKp, SvIOK_notUV,
 SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVx,
 SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off,
-SvNOK_on, SvNOK_only, SvNV, SvNVx, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp,
+SvNOK_on, SvNOK_only, SvNV, SvNVX, SvNVx, SvOK, SvOOK, SvPOK, SvPOKp,
 SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVbyte,
 SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen, SvPVutf8,
 SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx,
 SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT, SvREFCNT_dec,
-SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC, SvSetMagicSV,
-SvSetMagicSV_nosteal, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
-SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV,
-SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE,
-SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVx, SvUVX, sv_2bool, sv_2cv,
-sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
-sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags, sv_2pv_nolen, sv_2uv,
-sv_backoff, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
+SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSetMagicSV_nosteal,
+SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE,
+SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVx, SvUVX,
+sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte,
+sv_2pvbyte_nolen, sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags, sv_2pv_nolen,
+sv_2uv, sv_backoff, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
 sv_catpvn_flags, sv_catpvn_mg, sv_catpv_mg, sv_catsv, sv_catsv_flags,
 sv_catsv_mg, sv_chop, sv_clear, sv_cmp, sv_cmp_locale, sv_collxfrm, sv_dec,
 sv_derived_from, sv_eq, sv_force_normal, sv_force_normal_flags, sv_free,
@@ -4333,22 +4396,32 @@ sv_gets, sv_grow, sv_inc, sv_insert, sv_isa, sv_isobject, sv_iv, sv_len,
 sv_len_utf8, sv_magic, sv_mortalcopy, sv_newmortal, sv_newref, sv_nv,
 sv_pos_b2u, sv_pos_u2b, sv_pv, sv_pvbyte, sv_pvbyten, sv_pvbyten_force,
 sv_pvn, sv_pvn_force, sv_pvn_force_flags, sv_pvutf8, sv_pvutf8n,
-sv_pvutf8n_force, sv_recode_to_utf8, sv_reftype, sv_replace,
-sv_report_used, sv_reset, sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv,
-sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg,
-sv_setpvn, sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv,
-sv_setref_pv, sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_flags,
-sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_taint, sv_tainted, sv_true,
-sv_uni_display, sv_unmagic, sv_unref, sv_unref_flags, sv_untaint,
-sv_upgrade, sv_usepvn, sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade,
-sv_utf8_encode, sv_utf8_upgrade, sv_utf8_upgrade_flags, sv_uv, sv_vcatpvfn,
-sv_vsetpvfn, THIS, toLOWER, toUPPER, to_utf8_case, utf8n_to_uvchr,
+sv_pvutf8n_force, sv_reftype, sv_replace, sv_report_used, sv_reset,
+sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv,
+sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
+sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
+sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_flags, sv_setsv_mg,
+sv_setuv, sv_setuv_mg, sv_taint, sv_tainted, sv_true, sv_unmagic, sv_unref,
+sv_unref_flags, sv_untaint, sv_upgrade, sv_usepvn, sv_usepvn_mg,
+sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode, sv_utf8_upgrade,
+sv_utf8_upgrade_flags, sv_uv, sv_vcatpvfn, sv_vsetpvfn
+
+=item Unicode Support
+
+bytes_from_utf8, bytes_to_utf8, ibcmp_utf8, is_utf8_char, is_utf8_string,
+pv_uni_display, sv_recode_to_utf8, sv_uni_display, to_utf8_case,
+to_utf8_fold, to_utf8_lower, to_utf8_title, to_utf8_upper, utf8n_to_uvchr,
 utf8n_to_uvuni, utf8_distance, utf8_hop, utf8_length, utf8_to_bytes,
-utf8_to_uvchr, utf8_to_uvuni, uvchr_to_utf8, uvuni_to_utf8, warn, XPUSHi,
-XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV,
-XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES,
-XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION,
-XS_VERSION_BOOTCHECK, Zero
+utf8_to_uvchr, utf8_to_uvuni, uvchr_to_utf8, uvuni_to_utf8_flags
+
+=item Variables created by C<xsubpp> and C<xsubpp> internal functions
+
+ax, CLASS, dAX, dITEMS, dXSARGS, dXSI32, items, ix, newXSproto, RETVAL, ST,
+THIS, XS, XSRETURN_EMPTY, XS_VERSION, XS_VERSION_BOOTCHECK
+
+=item Warning and Dieing
+
+croak, warn
 
 =item AUTHORS
 
@@ -4363,9 +4436,26 @@ XS_VERSION_BOOTCHECK, Zero
 
 =item DESCRIPTION
 
-djSP, is_gv_magical, LVRET, PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn,
-PL_last_in_gv, PL_ofs_sv, PL_rs, report_uninit, start_glob, sv_add_arena,
-sv_clean_all, sv_clean_objs, sv_free_arenas
+=item Global Variables
+
+PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn, PL_last_in_gv, PL_ofs_sv,
+PL_rs
+
+=item GV Functions
+
+is_gv_magical
+
+=item IO Functions
+
+start_glob
+
+=item Stack Manipulation Macros
+
+djSP, LVRET
+
+=item SV Manipulation Functions
+
+report_uninit, sv_add_arena, sv_clean_all, sv_clean_objs, sv_free_arenas
 
 =item AUTHORS
 
@@ -4404,20 +4494,25 @@ PERLIO_F_TEMP, PERLIO_F_OPEN, PERLIO_F_FASTGETS
 
 =item Methods in Detail
 
- IV		(*Pushed)(PerlIO *f,const char *mode, SV *arg);,  IV	   
-    (*Popped)(PerlIO *f);,  PerlIO *	    (*Open)(...);, SV * 	   
-(*Getarg)(PerlIO *f);, IV	(*Fileno)(PerlIO *f);,	SSize_t
-(*Read)(PerlIO *f, void *vbuf, Size_t count);,	SSize_t (*Unread)(PerlIO
-*f, const void *vbuf, Size_t count);,  SSize_t (*Write)(PerlIO *f, const
-void *vbuf, Size_t count);,  IV 	      (*Seek)(PerlIO *f, Off_t
-offset, int whence);,  Off_t	       (*Tell)(PerlIO *f);,  IV 	   
-   (*Close)(PerlIO *f);,  IV		   (*Flush)(PerlIO *f);,  IV	   
-       (*Fill)(PerlIO *f);,  IV 	       (*Eof)(PerlIO *f);,  IV	   
-   (*Error)(PerlIO *f);,  void		   (*Clearerr)(PerlIO *f);,  void  
-       (*Setlinebuf)(PerlIO *f);,  STDCHAR *   (*Get_base)(PerlIO *f);, 
-Size_t		      (*Get_bufsiz)(PerlIO *f);,  STDCHAR *  
-(*Get_ptr)(PerlIO *f);,  SSize_t	(*Get_cnt)(PerlIO *f);,  void	   
-    (*Set_ptrcnt)(PerlIO *f,STDCHAR *ptr,SSize_t cnt);
+char * name;, Size_t size;, IV kind;, PERLIO_K_BUFFERED, PERLIO_K_CANCRLF,
+PERLIO_K_FASTGETS, PERLIO_K_MULTIARG, PERLIO_K_RAW, IV		    
+(*Pushed)(pTHX_ PerlIO *f,const char *mode, SV *arg);,	IV	       
+(*Popped)(pTHX_ PerlIO *f);,  PerlIO *	(*Open)(...);, SV *	
+(*Getarg)(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags), IV	     
+(*Fileno)(pTHX_ PerlIO *f);, PerlIO *  (*Dup)(pTHX_ PerlIO *f, PerlIO *o,
+CLONE_PARAMS *param, int flags),  SSize_t      (*Read)(pTHX_ PerlIO *f,
+void *vbuf, Size_t count);,  SSize_t   (*Unread)(pTHX_ PerlIO *f, const
+void *vbuf, Size_t count);,  SSize_t   (*Write)(PerlIO *f, const void
+*vbuf, Size_t count);,	IV		 (*Seek)(pTHX_ PerlIO *f, Off_t
+offset, int whence);,  Off_t		 (*Tell)(pTHX_ PerlIO *f);,  IV    
+     (*Close)(pTHX_ PerlIO *f);,  IV	     (*Flush)(pTHX_ PerlIO *f);, 
+IV	   (*Fill)(pTHX_ PerlIO *f);,  IV	   (*Eof)(pTHX_ PerlIO
+*f);,  IV	    (*Error)(pTHX_ PerlIO *f);,  void		   
+(*Clearerr)(pTHX_ PerlIO *f);,	void		(*Setlinebuf)(pTHX_ PerlIO
+*f);,  STDCHAR *     (*Get_base)(pTHX_ PerlIO *f);,  Size_t	    
+(*Get_bufsiz)(pTHX_ PerlIO *f);,  STDCHAR *	(*Get_ptr)(pTHX_ PerlIO
+*f);,  SSize_t	(*Get_cnt)(pTHX_ PerlIO *f);,  void	       
+(*Set_ptrcnt)(pTHX_ PerlIO *f,STDCHAR *ptr,SSize_t cnt);
 
 =item Core Layers
 
@@ -4428,6 +4523,8 @@ Size_t		      (*Get_bufsiz)(PerlIO *f);,  STDCHAR *
 ":encoding", ":Scalar", ":Object" or ":Perl"
 
 =back
+
+=item TODO
 
 =back
 
@@ -5101,6 +5198,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item VMS
 
+=item Win32
+
 =item Localising a Tied Variable Leaks Memory
 
 =item Localising Tied Arrays and Hashes Is Broken
@@ -5505,6 +5604,12 @@ Pod::Text, SDBM_File, Sys::Syslog, Tie::RefHash, Tie::SubstrHash
 =item Platform-specific improvements
 
 NCR MP-RAS, NonStop-UX
+
+=back
+
+=item Core Enhancements
+
+=over 4
 
 =item Interpreter cloning, threads, and concurrency
 
@@ -6761,6 +6866,8 @@ R4 x86, R4 PPC
 
 =item Contact Information
 
+=item Update 2001-12-26
+
 =back
 
 =back
@@ -7949,6 +8056,8 @@ data structures between threads
 share VARIABLE, lock VARIABLE, unlock VARIABLE, cond_wait VARIABLE,
 cond_signal VARIABLE, cond_broadcast VARIABLE
 
+=item NOTES
+
 =item BUGS
 
 =item AUTHOR
@@ -8260,6 +8369,8 @@ point
 
 =back
 
+=item CAVEATS
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -8473,6 +8584,60 @@ C<strict refs>, C<strict vars>, C<strict subs>
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=back
+
+=head2 threads - Perl extension allowing use of interpreter based threads
+from perl
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+$thread = new(function, LIST), $thread->join, $thread->detach,
+threads->self, $thread->tid
+
+=item TODO
+
+Fix so the return value is returned when you join, Add join_all, Fix memory
+leaks!
+
+=item AUTHOR and COPYRIGHT
+
+=item BUGS
+
+creating a thread from within a thread is unsafe under win32,
+PERL_OLD_SIGNALS are not threadsafe, will not be
+
+=item SEE ALSO
+
+=back
+
+=head2 threadshared, threads::shared - Perl extension for sharing data
+structures between threads
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXPORT
+
+=item FUNCTIONS
+
+share VARIABLE, lock VARIABLE, unlock VARIABLE, cond_wait VARIABLE,
+cond_signal VARIABLE, cond_broadcast VARIABLE
+
+=item NOTES
+
+=item BUGS
+
+=item AUTHOR
+
+=item SEE ALSO
 
 =back
 
@@ -8874,7 +9039,8 @@ B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-upackage>
 =item OPTIONS
 
 B<-ofilename>, B<-v>, B<-->, B<-uPackname>, B<-D>, B<-Do>, B<-Dc>, B<-DA>,
-B<-DC>, B<-DM>, B<-f>, B<-fcog>, B<-fno-cog>, B<-On>, B<-llimit>
+B<-DC>, B<-DM>, B<-f>, B<-fcog>, B<-fsave-data>, B<-fppaddr>, B<-fwarn-sv>,
+B<-fuse-script-name>, B<-fsave-sig-hash>, B<-On>, B<-llimit>
 
 =item EXAMPLES
 
@@ -10836,7 +11002,7 @@ arrays
 
 =over 4
 
-=item SYNOPIS
+=item SYNOPSIS
 
 =item DESCRIPTION
 
@@ -11836,6 +12002,16 @@ splitdir, catpath(), abs2rel, rel2abs()
 
 =back
 
+=head2 File::Spec::Cygwin - methods for Cygwin file specs
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
 =head2 File::Spec::Epoc - methods for Epoc file specs
 
 =over 4
@@ -11937,6 +12113,14 @@ rel2abs
 =item SEE ALSO
 
 =back
+
+canonpath
+
+splitpath
+
+splitdir
+
+catpath
 
 =head2 File::Spec::OS2 - methods for OS/2 file specs
 
@@ -14281,9 +14465,9 @@ MSGNUM ), reset (), quit ()
 
 =item Functions
 
-Net::Ping->new([$proto [, $def_timeout [, $bytes]]]);, $p->ping($host [,
-$timeout]);, $p->open($host);, $p->open($host);, $p->close();,
-pingecho($host [, $timeout]);
+Net::Ping->new([$proto [, $def_timeout [, $bytes]]]);,
+$p->bind($local_addr);, $p->ping($host [, $timeout]);, $p->open($host);,
+$p->open($host);, $p->close();, pingecho($host [, $timeout]);
 
 =back
 
@@ -14291,7 +14475,7 @@ pingecho($host [, $timeout]);
 
 =item NOTES
 
-=item AUTHOR(S)
+=item AUTHORS
 
 =item COPYRIGHT
 
@@ -14797,7 +14981,8 @@ Constants
 
 =item WAIT
 
-Constants, Macros
+Constants, WNOHANG, WUNTRACED, Macros, WIFEXITED, WEXITSTATUS, WIFSIGNALED,
+WTERMSIG, WIFSTOPPED, WSTOPSIG
 
 =back
 
@@ -15890,8 +16075,8 @@ alt, code, indent, loose, quotes, sentence, width
 =item DIAGNOSTICS
 
 Bizarre space in item, Item called without tag, Can't open %s for reading:
-%s, Invalid quote specification "%s", %s:%d: Unknown command paragraph
-"%s", %s:%d: Unknown escape: %s, %s:%d: Unknown formatting code: %s, %s:%d:
+%s, Invalid quote specification "%s", %s:%d: Unknown command paragraph: %s,
+%s:%d: Unknown escape: %s, %s:%d: Unknown formatting code: %s, %s:%d:
 Unmatched =back
 
 =item RESTRICTIONS
@@ -16027,6 +16212,8 @@ text
 E<amp>, E<apos>, E<lt>, E<gt>, E<quot>, E<sol>
 
 =item VERBATIM
+
+=item CONCLUSION
 
 =back
 

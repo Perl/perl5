@@ -455,7 +455,7 @@ When the last non-weak reference to an object is deleted, the object
 is destroyed and all the weak references to the object are
 automatically undef-ed.
 
-To use this feature, you need the WeakRef package from CPAN, which
+To use this feature, you need the Devel::WeakRef package from CPAN, which
 contains additional documentation.
 
     NOTE: This is an experimental feature.  Details are subject to change.  

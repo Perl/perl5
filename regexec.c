@@ -401,7 +401,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
     DEBUG_r({
 	 char *s   = PL_reg_match_utf8 ?
-	                 sv_uni_display(dsv, sv, 60, 0) : strpos;
+	                 sv_uni_display(dsv, sv, 60, UNI_DISPLAY_REGEX) :
+	                 strpos;
 	 int   len = PL_reg_match_utf8 ?
 	                 strlen(s) : strend - strpos;
 	 if (!PL_colorset)
@@ -1626,11 +1627,11 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     DEBUG_r({
 	 char *s0   = UTF ?
 	   pv_uni_display(dsv0, (U8*)prog->precomp, prog->prelen, 60,
-			  UNI_DISPLAY_ISPRINT) :
+			  UNI_DISPLAY_REGEX) :
 	   prog->precomp;
 	 int   len0 = UTF ? SvCUR(dsv0) : prog->prelen;
 	 char *s1   = do_utf8 ? sv_uni_display(dsv1, sv, 60,
-					       UNI_DISPLAY_ISPRINT) : startpos;
+					       UNI_DISPLAY_REGEX) : startpos;
 	 int   len1 = do_utf8 ? SvCUR(dsv1) : strend - startpos;
 	 if (!PL_colorset)
 	     reginitcolors();
@@ -1822,11 +1823,11 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    regprop(prop, c);
 	    s0 = UTF ?
 	      pv_uni_display(dsv0, (U8*)SvPVX(prop), SvCUR(prop), 60,
-			     UNI_DISPLAY_ISPRINT) :
+			     UNI_DISPLAY_REGEX) :
 	      SvPVX(prop);
 	    len0 = UTF ? SvCUR(dsv0) : SvCUR(prop);
 	    s1 = UTF ?
-	      sv_uni_display(dsv1, sv, 60, UNI_DISPLAY_ISPRINT) : s;
+	      sv_uni_display(dsv1, sv, 60, UNI_DISPLAY_REGEX) : s;
 	    len1 = UTF ? SvCUR(dsv1) : strend - s;
 	    PerlIO_printf(Perl_debug_log,
 			  "Matching stclass `%*.*s' against `%*.*s'\n",
@@ -2197,17 +2198,17 @@ S_regmatch(pTHX_ regnode *prog)
 	      char *s0 =
 		do_utf8 ?
 		pv_uni_display(dsv0, (U8*)(locinput - pref_len),
-			       pref0_len, 60, 0) :
+			       pref0_len, 60, UNI_DISPLAY_REGEX) :
 		locinput - pref_len;
 	      int len0 = do_utf8 ? strlen(s0) : pref0_len;
 	      char *s1 = do_utf8 ?
 		pv_uni_display(dsv1, (U8*)(locinput - pref_len + pref0_len),
-			       pref_len - pref0_len, 60, 0) :
+			       pref_len - pref0_len, 60, UNI_DISPLAY_REGEX) :
 		locinput - pref_len + pref0_len;
 	      int len1 = do_utf8 ? strlen(s1) : pref_len - pref0_len;
 	      char *s2 = do_utf8 ?
 		pv_uni_display(dsv2, (U8*)locinput,
-			       PL_regeol - locinput, 60, 0) :
+			       PL_regeol - locinput, 60, UNI_DISPLAY_REGEX) :
 		locinput;
 	      int len2 = do_utf8 ? strlen(s2) : l;
 	      PerlIO_printf(Perl_debug_log,

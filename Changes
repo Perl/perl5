@@ -31,6 +31,83 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14121] By: jhi                                   on 2002/01/07  16:03:34
+        Log: Subject: [PATCH] Correct module name in perldelta*                 
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Mon, 07 Jan 2002 17:02:43 +0000
+             Message-Id: <E16NdAZ-0001SW-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! pod/perl561delta.pod pod/perl56delta.pod
+____________________________________________________________________________
+[ 14120] By: jhi                                   on 2002/01/07  15:55:25
+        Log: AUTHORS update.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 14119] By: jhi                                   on 2002/01/07  15:52:34
+        Log: Add file magic for Storable, from Jim Cromie <jcromie@divsol.com>
+     Branch: perl
+	   ! ext/Storable/Storable.pm
+____________________________________________________________________________
+[ 14118] By: jhi                                   on 2002/01/07  15:06:25
+        Log: perldelta updates.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 14117] By: jhi                                   on 2002/01/07  13:52:30
+        Log: Document the flags of pv_uni_display().
+     Branch: perl
+	   ! pod/perlapi.pod utf8.c
+____________________________________________________________________________
+[ 14116] By: jhi                                   on 2002/01/07  13:49:17
+        Log: Forgot from #14115.
+     Branch: perl
+	   ! t/op/re_tests
+____________________________________________________________________________
+[ 14115] By: jhi                                   on 2002/01/07  13:48:06
+        Log: Subject: [PATCH regcomp.c] leading (.*) should not be implicitly ^'d  
+             From: "Jeff 'japhy' Pinyan" <jeffp@crusoe.net>
+             Date: Sun, 6 Jan 2002 15:36:21 -0500 (EST)
+             Message-ID: <Pine.GSO.4.21.0201061532400.27018-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14114] By: jhi                                   on 2002/01/07  04:44:05
+        Log: More regex and utf8 debug dumping.
+     Branch: perl
+	   ! dump.c regcomp.c regexec.c utf8.c utf8.h
+____________________________________________________________________________
+[ 14113] By: jhi                                   on 2002/01/07  01:05:01
+        Log: Unused variable.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14112] By: jhi                                   on 2002/01/07  00:52:46
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 14111] By: jhi                                   on 2002/01/07  00:03:57
+        Log: capitalize correctly, noticed by David Dyck.
+     Branch: perl
+	   ! lib/sort.pm
+____________________________________________________________________________
+[ 14109] By: jhi                                   on 2002/01/06  20:51:32
+        Log: No need to overqualify.
+     Branch: perl
+	   ! lib/sort.pm
+____________________________________________________________________________
+[ 14108] By: jhi                                   on 2002/01/06  20:38:34
+        Log: PL_debug_pad wasn't initialized to zeroes which broke
+             ithreads + DEBUGGING.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 14107] By: jhi                                   on 2002/01/06  15:39:31
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14106] By: jhi                                   on 2002/01/06  15:33:51
         Log: Subject: [PATCH pp_sys.c] Fix segfault in dbmclose in DESTROY (was Re: [ID 20020104.007] coredump on dbmclose)
              From: Jonathan Stowe <gellyfish@gellyfish.com>
