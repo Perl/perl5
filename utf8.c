@@ -232,7 +232,7 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
     U8* send;
     STRLEN c;
 
-    if (!len)
+    if (!len && s)
 	len = strlen((char *)s);
     send = s + len;
 
@@ -272,7 +272,7 @@ Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **p)
     U8* send;
     STRLEN c;
 
-    if (!len)
+    if (!len && s)
 	len = strlen((char *)s);
     send = s + len;
 
