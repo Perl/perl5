@@ -730,7 +730,7 @@ t/lib/symbol.t
 t/lib/texttabs.t		muir
 t/lib/textfill.t		muir
 t/lib/textwrap.t	
-t/lib/thread.t	
+t/lib/thr5005.t	
 t/lib/tie-push.t	
 t/lib/tie-stdarray.t	
 t/lib/tie-stdpush.t	
@@ -779,7 +779,7 @@ t/op/method.t
 t/op/misc.t	
 t/op/mkdir.t	
 t/op/my.t	
-t/op/nothread.t	
+t/op/nothr5005.t	
 t/op/oct.t	
 t/op/ord.t	
 t/op/pack.t	

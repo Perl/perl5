@@ -1562,7 +1562,6 @@ sub generate_init {
 	unless defined($type_kind{$type});
 
     ($ntype = $type) =~ s/\s*\*/Ptr/g;
-    $ntype =~ s/^\s*const\b\s*//;
     ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
     $tk = $type_kind{$type};
     $tk =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;

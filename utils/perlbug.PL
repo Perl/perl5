@@ -276,6 +276,8 @@ EOF
 	    $subject = ($::opt_n ? 'Not ' : '')
 		    . "OK: perl $perl_version ${patch_tags}on"
 		    ." $::Config{'archname'} $::Config{'osvers'} $subject";
+	    $category = "install";
+	    $severity = "none";
 	    $ok = 1;
 	} else {
 	    Help();

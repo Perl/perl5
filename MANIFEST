@@ -1297,14 +1297,14 @@ t/lib/syslfs.t		See if large files work for sysio
 t/lib/textfill.t	See if Text::Wrap::fill works
 t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap::wrap works
-t/lib/thread.t		Basic test of threading (skipped if no threads) 
+t/lib/thr5005.t		Test 5.005-style threading (skipped if no use5005threads) 
 t/lib/tie-push.t	Test for Tie::Array
 t/lib/tie-stdarray.t	Test for Tie::StdArray
 t/lib/tie-stdhandle.t	Test for Tie::StdHandle
 t/lib/tie-stdpush.t	Test for Tie::StdArray
 t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
-t/op/64bit.t		See if 64 bitness works
+t/op/64bitint.t		See if 64 bit integers work
 t/op/append.t		See if . works
 t/op/args.t		See if operations on @_ work
 t/op/arith.t		See if arithmetic works
@@ -1356,7 +1356,7 @@ t/op/method.t		See if method calls work
 t/op/misc.t		See if miscellaneous bugs have been fixed
 t/op/mkdir.t		See if mkdir works
 t/op/my.t		See if lexical scoping works
-t/op/nothread.t		local @_ test which does not work threaded 
+t/op/nothr5005.t	local @_ test which does not work under use5005threads
 t/op/numconvert.t	See if accessing fields does not change numeric values
 t/op/oct.t		See if oct and hex work
 t/op/ord.t		See if ord works
