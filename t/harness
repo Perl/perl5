@@ -41,7 +41,12 @@ foreach (keys %datahandle) {
 my @tests = ();
 
 if (@ARGV) {
-    @tests = @ARGV;
+    if ($^O eq 'MSWin32') {
+	@tests = map(glob($_),@ARGV);
+    }
+    else {
+	@tests = @ARGV;
+    }
 } else {
     unless (@tests) {
 	push @tests, <base/*.t>;
