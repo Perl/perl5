@@ -110,6 +110,7 @@ sub compile_module {
 # need not be test-compiled by 1_compile.t.
 __DATA__
 AnyDBM_File
+Attribute::Handlers
 AutoLoader
 B
 B::Debug

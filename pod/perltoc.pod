@@ -2195,39 +2195,40 @@ warnings::register
 
 =item Standard Modules
 
-AnyDBM_File, AutoLoader, AutoSplit, B, B::Asmdata, B::Assembler, B::Bblock,
-B::Bytecode, B::C, B::CC, B::Concise, B::Debug, B::Deparse,
-B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash, B::Terse,
-B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie,
-CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CPAN,
-CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA, Class::Struct,
-Cwd, DB, DB_File, Devel::SelfStubber, Digest, DirHandle, Dumpvalue, Encode,
-Encode::EncodeFormat, Encode::Tcl, English, Env, Exporter, Exporter::Heavy,
-ExtUtils::Command, ExtUtils::Constant, ExtUtils::Embed, ExtUtils::Install,
-ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM_Cygwin,
-ExtUtils::MM_OS2, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
-ExtUtils::MakeMaker, ExtUtils::Manifest, ExtUtils::Mkbootstrap,
-ExtUtils::Mksymlists, ExtUtils::Packlist, ExtUtils::testlib, Fatal, Fcntl,
-File::Basename, File::CheckTree, File::Compare, File::Copy, File::DosGlob,
-File::Find, File::Path, File::Spec, File::Spec::Epoc,
-File::Spec::Functions, File::Spec::Mac, File::Spec::OS2, File::Spec::Unix,
-File::Spec::VMS, File::Spec::Win32, File::Temp, File::stat, FileCache,
-FileHandle, Filter::Simple, FindBin, Getopt::Long, Getopt::Std,
-I18N::Collate, I18N::LangTags, I18N::LangTags::List, IO, IPC::Open2,
-IPC::Open3, Locale::Constants, Locale::Country, Locale::Currency,
-Locale::Language, Locale::Maketext, Locale::Maketext::TPJ13,
-Math::BigFloat, Math::BigInt, Math::Complex, Math::Trig, NDBM_File, NEXT,
-Net::Ping, Net::hostent, Net::netent, Net::protoent, Net::servent, O,
-ODBM_File, Opcode, POSIX, PerlIO, Pod::Checker, Pod::Find, Pod::Html,
-Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseUtils, Pod::Parser,
-Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
-Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe,
-Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable, Switch,
-Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
-Test::Harness, Text::Abbrev, Text::Balanced, Text::ParseWords,
-Text::Soundex, Text::Tabs, Text::Wrap, Tie::Array, Tie::Handle, Tie::Hash,
-Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local, Time::gmtime,
-Time::localtime, Time::tm, UNIVERSAL, User::grent, User::pwent, Win32
+AnyDBM_File, Attribute::Handlers, AutoLoader, AutoSplit, B, B::Asmdata,
+B::Assembler, B::Bblock, B::Bytecode, B::C, B::CC, B::Concise, B::Debug,
+B::Deparse, B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash,
+B::Terse, B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp,
+CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util,
+CPAN, CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA,
+Class::Struct, Cwd, DB, DB_File, Devel::SelfStubber, Digest, DirHandle,
+Dumpvalue, Encode, Encode::EncodeFormat, Encode::Tcl, English, Env,
+Exporter, Exporter::Heavy, ExtUtils::Command, ExtUtils::Constant,
+ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist,
+ExtUtils::MM_Cygwin, ExtUtils::MM_OS2, ExtUtils::MM_Unix, ExtUtils::MM_VMS,
+ExtUtils::MM_Win32, ExtUtils::MakeMaker, ExtUtils::Manifest,
+ExtUtils::Mkbootstrap, ExtUtils::Mksymlists, ExtUtils::Packlist,
+ExtUtils::testlib, Fatal, Fcntl, File::Basename, File::CheckTree,
+File::Compare, File::Copy, File::DosGlob, File::Find, File::Path,
+File::Spec, File::Spec::Epoc, File::Spec::Functions, File::Spec::Mac,
+File::Spec::OS2, File::Spec::Unix, File::Spec::VMS, File::Spec::Win32,
+File::Temp, File::stat, FileCache, FileHandle, Filter::Simple, FindBin,
+Getopt::Long, Getopt::Std, I18N::Collate, I18N::LangTags,
+I18N::LangTags::List, IO, IPC::Open2, IPC::Open3, Locale::Constants,
+Locale::Country, Locale::Currency, Locale::Language, Locale::Maketext,
+Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt, Math::Complex,
+Math::Trig, NDBM_File, NEXT, Net::Ping, Net::hostent, Net::netent,
+Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX, PerlIO,
+Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
+Pod::Man, Pod::ParseUtils, Pod::Parser, Pod::Plainer, Pod::Select,
+Pod::Text, Pod::Text::Color, Pod::Text::Overstrike, Pod::Text::Termcap,
+Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell,
+Socket, Storable, Switch, Symbol, Term::ANSIColor, Term::Cap,
+Term::Complete, Term::ReadLine, Test, Test::Harness, Text::Abbrev,
+Text::Balanced, Text::ParseWords, Text::Soundex, Text::Tabs, Text::Wrap,
+Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar,
+Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime, Time::tm,
+UNIVERSAL, User::grent, User::pwent, Win32
 
 =item Extension Modules
 
@@ -7146,6 +7147,46 @@ warnings::warnif($object, $message)
 =back
 
 =item SEE ALSO
+
+=back
+
+=head2 Attribute::Handlers - Simpler definition of attribute handlers
+
+=over 4
+
+=item VERSION
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+[0], [1], [2], [3], [4]
+
+=over 4
+
+=item Typed lexicals
+
+=item Type-specific attribute handlers
+
+=item Non-interpretive attribute handlers
+
+=item Attributes as C<tie> interfaces
+
+=back
+
+=item EXAMPLES
+
+=item DIAGNOSTICS
+
+C<Bad attribute type: ATTR(%s)>, C<Attribute handler %s doesn't handle %s
+attributes>, C<Declaration of %s attribute in package %s may clash with
+future reserved word>, C<Internal error: %s symbol went missing>
+
+=item AUTHOR
+
+=item BUGS
+
+=item COPYRIGHT
 
 =back
 

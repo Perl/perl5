@@ -166,6 +166,10 @@ Exporter module.  See their own documentation for details.
 
 Provide framework for multiple DBMs
 
+=item Attribute::Handlers
+
+Simpler definition of attribute handlers
+
 =item AutoLoader
 
 Load subroutines only on demand
