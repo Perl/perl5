@@ -609,9 +609,9 @@ hopefully catches attempts to access uninitialized memory.
 
 #else
 
-#define MEM_WRAP_CHECK(n,t) 0
-#define MEM_WRAP_CHECK_1(n,t,a) 0
-#define MEM_WRAP_CHECK_2(n,t,a,b) 0
+#define MEM_WRAP_CHECK(n,t)
+#define MEM_WRAP_CHECK_1(n,t,a)
+#define MEM_WRAP_CHECK_2(n,t,a,b)
 
 #define New(x,v,n,t)	(v = (t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))
 #define Newc(x,v,n,t,c)	(v = (c*)safemalloc((MEM_SIZE)((n)*sizeof(t))))
