@@ -257,13 +257,15 @@ my $safes = "1111111111111111111111101111111111111111111111111111111111111111"
 	  . "0000000000000111110000001111111110100000000000001111111111111111"
 	  . "11111111111111111110";
 
-my $default_root = 'Safe::Root000000000';
+my $default_root = 'Root000000000';
+
+my $default_mask;
 
 sub new {
     my($class, $root, $mask) = @_;
     my $obj = {};
     bless $obj, $class;
-    $obj->root(defined($root) ? $root : $default_root++);
+    $obj->root(defined($root) ? $root : ("Safe::".$default_root++));
     $obj->mask(defined($mask) ? $mask : $default_mask);
     # We must share $_ and @_ with the compartment or else ops such
     # as split, length and so on won't default to $_ properly, nor
@@ -273,6 +275,15 @@ sub new {
     # @_ in non default packages within the compartment don't work.
     *{$obj->root . "::_"} = *_;
     return $obj;
+}
+
+sub DESTROY {
+    my($obj) = @_;
+    my $root = $obj->root();
+    if ($root =~ /^Safe::(Root\d+)$/){
+	$root = $1;
+	delete $ {"Safe::"}{"$root\::"};
+    }
 }
 
 sub root {
