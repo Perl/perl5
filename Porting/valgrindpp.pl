@@ -10,14 +10,20 @@ use strict;
 
 my %opt = (
   frames  => 3,
+  lines   => 0,
+  tests   => 0,
+  top     => 0,
   verbose => 0,
 );
 
 GetOptions(\%opt, qw(
             dir=s
-            hide=s@
-            output-file=s
             frames=i
+            hide=s@
+            lines!
+            output-file=s
+            tests!
+            top=i
             verbose+
           )) or pod2usage(2);
 
@@ -69,38 +75,111 @@ my(%error, %leak);
 # Collect summary data
 find({wanted => \&filter, no_chdir => 1}, $opt{dir});
 
+# Format the output nicely
+$Text::Wrap::columns = 80;
+$Text::Wrap::unexpand = 0;
+
 # Write summary
-summary($fh);
+summary($fh, \%error, \%leak);
 
 exit 0;
 
 sub summary {
-  my $fh = shift;
+  my($fh, $error, $leak) = @_;
+  my(%ne, %nl, %top);
 
-  $Text::Wrap::columns = 80;
-  
+  # Prepare the data
+
+  for my $e (keys %$error) {
+    for my $f (keys %{$error->{$e}}) {
+      my($func, $file, $line) = split /:/, $f;
+      my $nf = $opt{lines} ? "$func ($file:$line)" : "$func ($file)";
+      $ne{$e}{$nf}{count}++;
+      while (my($k,$v) = each %{$error->{$e}{$f}}) {
+        $ne{$e}{$nf}{tests}{$k} += $v;
+        $top{$k}{error}++;
+      }
+    }
+  }
+
+  for my $l (keys %$leak) {
+    for my $s (keys %{$leak->{$l}}) {
+      my $ns = join '<', map {
+                 my($func, $file, $line) = split /:/;
+                 /:/ ? $opt{lines}
+                       ? "$func ($file:$line)" : "$func ($file)"
+                     : $_
+               } split /</, $s;
+      $nl{$l}{$ns}{count}++;
+      while (my($k,$v) = each %{$leak->{$l}{$s}}) {
+        $nl{$l}{$ns}{tests}{$k} += $v;
+        $top{$k}{leak}++;
+      }
+    }
+  }
+
+  # Print the Top N
+
+  if ($opt{top}) {
+    for my $what (qw(error leak)) {
+      my @t = sort { $top{$b}{$what} <=> $top{$a}{$what} or $a cmp $b }
+              grep $top{$_}{$what}, keys %top;
+      @t > $opt{top} and splice @t, $opt{top};
+      my $n = @t;
+      my $s = $n > 1 ? 's' : '';
+      my $prev = 0;
+      print $fh "Top $n test scripts for ${what}s:\n\n";
+      for my $i (1 .. $n) {
+        $n = $top{$t[$i-1]}{$what};
+        $s = $n > 1 ? 's' : '';
+        printf $fh "    %3s %-40s %3d $what$s\n",
+                   $n != $prev ? "$i." : '', $t[$i-1], $n;
+        $prev = $n;
+      }
+      print $fh "\n";
+    }
+  }
+
+  # Print the real summary
+
   print $fh "MEMORY ACCESS ERRORS\n\n";
-  
-  for my $e (sort keys %error) {
+
+  for my $e (sort keys %ne) {
     print $fh qq("$e"\n);
-    for my $frame (sort keys %{$error{$e}}) {
-      print $fh ' 'x4, "$frame\n",
-            wrap(' 'x8, ' 'x8, join ', ', sort keys %{$error{$e}{$frame}}),
-            "\n";
+    for my $frame (sort keys %{$ne{$e}}) {
+      my $data = $ne{$e}{$frame};
+      my $count = $data->{count} > 1 ? " [$data->{count} paths]" : '';
+      print $fh ' 'x4, "$frame$count\n",
+                format_tests($data->{tests}), "\n";
     }
     print $fh "\n";
   }
-  
+
   print $fh "\nMEMORY LEAKS\n\n";
-  
-  for my $l (sort keys %leak) {
+ 
+  for my $l (sort keys %nl) {
     print $fh qq("$l"\n);
-    for my $frames (sort keys %{$leak{$l}}) {
+    for my $frames (sort keys %{$nl{$l}}) {
+      my $data = $nl{$l}{$frames};
       my @stack = split /</, $frames;
+      $data->{count} > 1 and $stack[-1] .= " [$data->{count} paths]";
       print $fh join('', map { ' 'x4 . "$_:$stack[$_]\n" } 0 .. $#stack ),
-            wrap(' 'x8, ' 'x8, join ', ', sort keys %{$leak{$l}{$frames}}),
-            "\n\n";
+                format_tests($data->{tests}), "\n\n";
     }
+  }
+}
+
+sub format_tests {
+  my $tests = shift;
+  my $indent = ' 'x8;
+
+  if ($opt{tests}) {
+    return wrap($indent, $indent, join ', ', sort keys %$tests);
+  }
+  else {
+    my $count = keys %$tests;
+    my $s = $count > 1 ? 's' : '';
+    return $indent . "triggered by $count test$s";
   }
 }
 
@@ -139,18 +218,20 @@ sub filter {
       my $inperl = 0;      # Are we inside the perl source? (And how deep?)
       my @stack;           # Call stack
 
-      while ($l[$j++] =~ /^\s+(?:at|by) $hexaddr:\s+((\w+)\s+\((?:([^:]+:\d+)|[^)]+)\))/o) {
-        my($frame, $func, $loc) = ($1, $2, $3);
+      while ($l[$j++] =~ /^\s+(?:at|by) $hexaddr:\s+(\w+)\s+\((?:([^:]+):(\d+)|[^)]+)\)/o) {
+        my($func, $file, $lineno) = ($1, $2, $3);
 
         # If the stack frame is inside perl => increment $inperl
         # If we've already been inside perl, but are no longer => leave
-        defined $loc && ++$inperl or $inperl && last;
+        defined $file && ++$inperl or $inperl && last;
 
         # A function that should be hidden? => clear stack and leave
         $hidden && $func =~ $hidden and @stack = (), last;
 
         # Add stack frame if it's within our threshold
-        $inperl <= $opt{frames} and push @stack, $inperl ? $frame : $func;
+        if ($inperl <= $opt{frames}) {
+          push @stack, $inperl ? "$func:$file:$lineno" : $func;
+        }
       }
 
       # If there's something on the stack and we've seen perl code,
@@ -161,9 +242,9 @@ sub filter {
 
       # Simply find the topmost frame in the call stack within
       # the perl source code
-      while ($l[$j++] =~ /^\s+(?:at|by) $hexaddr:\s+(\w+\s+\([^:]+:\d+\))?/o) {
+      while ($l[$j++] =~ /^\s+(?:at|by) $hexaddr:\s+(?:(\w+)\s+\(([^:]+):(\d+)\))?/o) {
         if (defined $1) {
-          $error{$line}{$1}{$test}++;
+          $error{$line}{"$1:$2:$3"}{$test}++;
           last;
         }
       }
@@ -184,8 +265,10 @@ valgrindpp.pl - A post processor for make test.valgrind
 
 =head1 SYNOPSIS
 
-valgrindpp.pl [B<--dir>=I<dir>] [B<--output-file>=I<file>]
-[B<--frames>=I<number>] [B<--hide>=I<identifier>] [B<--verbose>]
+valgrindpp.pl [B<--dir>=I<dir>] [B<--frames>=I<number>]
+[B<--hide>=I<identifier>] [B<--lines>]
+[B<--output-file>=I<file>] [B<--tests>] 
+[B<--top>=I<number>] [B<--verbose>]
 
 =head1 DESCRIPTION
 
@@ -206,11 +289,6 @@ options is not given, B<valgrindpp.pl> must be run from
 either the perl source or the I<t> directory and will process
 all I<.valgrind> files within the distribution.
 
-=item B<--output-file>=I<file>
-
-Redirect the output into I<file>. If this option is not
-given, the output goes to I<stdout>.
-
 =item B<--frames>=I<number>
 
 Number of stack frames within the perl source code to 
@@ -226,6 +304,27 @@ Useful if you want to hide leaks from functions that are known to
 have lots of memory leaks. I<identifier> can also be a regular
 expression, in which case all leaks with symbols matching the
 expression are hidden. Can be given multiple times.
+
+=item B<--lines>
+
+Show line numbers for stack frames. This is useful for further
+increasing the error/leak resolution, but makes it harder to
+compare different reports using I<diff>.
+
+=item B<--output-file>=I<file>
+
+Redirect the output into I<file>. If this option is not
+given, the output goes to I<stdout>.
+
+=item B<--tests>
+
+List all tests that trigger memory access errors or memory
+leaks explicitly instead of only printing a count.
+
+=item B<--top>=I<number>
+
+List the top I<number> test scripts for memory access errors
+and memory leaks. Set to C<0> for no top-I<n> statistics.
 
 =item B<--verbose>
 

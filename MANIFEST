@@ -1726,6 +1726,7 @@ lib/Unicode/Collate/Changes	Unicode::Collate
 lib/Unicode/Collate/keys.txt	Unicode::Collate
 lib/Unicode/Collate.pm		Unicode::Collate
 lib/Unicode/Collate/README	Unicode::Collate
+lib/Unicode/Collate/t/hangul.t	Unicode::Collate
 lib/Unicode/Collate/t/index.t	Unicode::Collate
 lib/Unicode/Collate/t/test.t	Unicode::Collate
 lib/Unicode/README		Explanation what happened to lib/unicode.

@@ -209,6 +209,9 @@ you could retry with
 which makes Configure to use the C<nm> tool when scanning for library
 symbols, which usually is not done in AIX.
 
+Related to this, you probably should not use the C<-r> option of
+Configure in AIX, because that affects of how the C<nm> tool is used.
+
 =head2 Using GNU's gcc for building perl
 
 Using gcc-3.x (tested with 3.0.4, 3.1, and 3.2) now works out of the box,

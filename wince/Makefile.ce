@@ -772,9 +772,17 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	$(COPY) dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
 #----------------------------------------------------------------------------------
+NOT_COMPILE_EXT =
+!if "$(MACHINE)" == "wince-sh3-palm-wce211"
+NOT_COMPILE_EXT = $(NOT_COMPILE_EXT) !XS/Typemap
+!endif
+!if "$(MACHINE)" == "wince-mips-palm-wce211"
+NOT_COMPILE_EXT = $(NOT_COMPILE_EXT) !XS/Typemap
+!endif
+
 Extensions: ..\win32\buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(HPERL) -I..\lib -I..\win32 -MCross=$(CROSS_NAME) ..\win32\buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) \
-	!POSIX
+	!POSIX $(NOT_COMPILE_EXT)
 
 Extensions_clean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
