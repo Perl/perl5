@@ -198,7 +198,10 @@ PerlIOScalar_get_cnt(PerlIO *f)
  if (PerlIOBase(f)->flags & PERLIO_F_CANREAD)
   {
    PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
-   return SvCUR(s->var) - s->posn;
+   if (SvCUR(s->var) > s->posn)
+    return SvCUR(s->var) - s->posn;
+   else
+    return 0;
   }
  return 0;
 }
