@@ -19,6 +19,7 @@ sub do_require {
 sub write_file {
     my $f = shift;
     open(REQ,">$f") or die "Can't write '$f': $!";
+    binmode REQ;
     print REQ @_;
     close REQ;
 }
