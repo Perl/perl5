@@ -4144,8 +4144,12 @@ Perl_yylex(pTHX)
 		    sv = newSVpvn("CORE::GLOBAL::",14);
 		    sv_catpv(sv,PL_tokenbuf);
 		}
-		else
-		    sv = newSVpv(PL_tokenbuf,0);
+		else {
+		    /* If len is 0, newSVpv does strlen(), which is correct.
+		       If len is non-zero, then it will be the true length,
+		       and so the scalar will be created correctly.  */
+		    sv = newSVpv(PL_tokenbuf,len);
+		}
 
 		/* Presume this is going to be a bareword of some sort. */
 
