@@ -41,3 +41,26 @@ void setnetent() {
 void endnetent() {
   croak("Function \"endnetent\" not implemented in this version of perl");
 }
+
+/* Some TCP/IP implementations seem to return success, when getpeername()
+ * is called on a UDP socket, but the port and in_addr are all zeroes.
+ */
+
+int my_getpeername(int sock, struct sockaddr *addr, int *addrlen) {
+  static char nowhere[] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+  int rslt;
+
+  rslt = si_getpeername(sock, addr, addrlen);
+
+  /* Just pass an error back up the line */
+  if (rslt) return rslt;
+
+  /* If the call succeeded, make sure we don't have a zeroed port/addr */
+  if (addr->sa_family == AF_INET &&
+      !memcmp((char *)addr + sizeof(u_short), nowhere,
+              sizeof(u_short) + sizeof(struct in_addr))) {
+    rslt = -1;
+    SETERRNO(ENOTCONN,SS$_CLEARED);
+  }
+  return rslt;
+}
