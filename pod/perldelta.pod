@@ -2628,6 +2628,13 @@ One cannot call Perl using the C<volume:> syntax, that is, C<perl -v>
 works, but for example C<bin:perl -v> doesn't.  The exact reason isn't
 known but the current suspect is the F<ixemul> library.
 
+=head2 FreeBSD Failing locale Test 117 For ISO8859-15 Locales
+
+The ISO8859-15 locales may fail the locale test 117 in FreeBSD.
+This is caused by the characters \xFF (y with diaeresis) and \xBE
+(Y with diaeresis) not behaving correctly when being matched
+case-insensitively.
+
 =head2 mod_perl 1.26 Doesn't Build With Threaded Perl
 
 Use mod_perl 1.27 or higher.
