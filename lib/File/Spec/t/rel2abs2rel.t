@@ -27,7 +27,7 @@ is( `$perl -le "print 'ok'"`, "ok\n",   'rel2abs($^X)' );
 $perl = File::Spec->canonpath($perl);
 is( `$perl -le "print 'ok'"`, "ok\n",   'canonpath on abs executable' );
 
-$perl = safe_rel($perl);
+$perl = safe_rel(File::Spec->abs2rel($perl));
 is( `$perl -le "print 'ok'"`, "ok\n",   'abs2rel()' );
 
 $perl = File::Spec->canonpath($^X);
