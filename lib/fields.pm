@@ -11,7 +11,7 @@ unless( eval q{require warnings::register; warnings::register->import} ) {
 }
 use vars qw(%attr $VERSION);
 
-$VERSION = '2.0';
+$VERSION = '2.03';
 
 # constant.pm is slow
 sub PUBLIC     () { 2**0  }
@@ -37,6 +37,9 @@ sub import {
     my $fields = \%{"$package\::FIELDS"};
     my $fattr = ($attr{$package} ||= [1]);
     my $next = @$fattr;
+
+    # Quiet pseudo-hash deprecation warning for uses of fields::new.
+    bless \%{"$package\::FIELDS"}, 'pseudohash';
 
     if ($next > $fattr->[0]
 	and ($fields->{$_[0]} || 0) >= $fattr->[0])
@@ -99,7 +102,7 @@ sub _dump  # sometimes useful for debugging
 		my @a;
 		push(@a, "public")    if $fattr & PUBLIC;
 		push(@a, "private")   if $fattr & PRIVATE;
-		push(@a, "inherited") if $no < $attr{$pkg}[0];
+		push(@a, "inherited") if $fattr & INHERITED;
 		print "\t(", join(", ", @a), ")";
 	    }
 	    print "\n";
@@ -108,24 +111,22 @@ sub _dump  # sometimes useful for debugging
 }
 
 if ($] < 5.009) {
-  eval <<'EOC';
-  sub new {
+  *new = sub {
     my $class = shift;
     $class = ref $class if ref $class;
     return bless [\%{$class . "::FIELDS"}], $class;
   }
-EOC
 } else {
-  eval <<'EOC';
-  sub new {
+  *new = sub {
     my $class = shift;
     $class = ref $class if ref $class;
-    use Hash::Util;
+    require Hash::Util;
     my $self = bless {}, $class;
-    Hash::Util::lock_keys(%$self, keys %{$class.'::FIELDS'});
+
+    # The lock_keys() prototype won't work since we require Hash::Util :(
+    &Hash::Util::lock_keys(\%$self, keys %{$class.'::FIELDS'});
     return $self;
   }
-EOC
 }
 
 sub phash {
@@ -218,12 +219,12 @@ hash of the calling package, but this may change in future versions.
 Do B<not> update the %FIELDS hash directly, because it must be created
 at compile-time for it to be fully useful, as is done by this pragma.
 
-  Only valid for perl before 5.9.0:
+B<Only valid for perl before 5.9.0:>
 
-  If a typed lexical variable holding a reference is used to access a
-  hash element and a package with the same name as the type has
-  declared class fields using this pragma, then the operation is
-  turned into an array access at compile time.
+If a typed lexical variable holding a reference is used to access a
+hash element and a package with the same name as the type has
+declared class fields using this pragma, then the operation is
+turned into an array access at compile time.
 
 
 The related C<base> pragma will combine fields from base classes and any
@@ -235,19 +236,18 @@ the class and are not visible to subclasses.  Inherited fields can be
 overridden but will generate a warning if used together with the C<-w>
 switch.
 
-  Only valid for perls before 5.9.0:
+B<Only valid for perls before 5.9.0:>
 
-  The effect of all this is that you can have objects with named
-  fields which are as compact and as fast arrays to access. This only
-  works as long as the objects are accessed through properly typed
-  variables. If the objects are not typed, access is only checked at
-  run time.
-
+The effect of all this is that you can have objects with named
+fields which are as compact and as fast arrays to access. This only
+works as long as the objects are accessed through properly typed
+variables. If the objects are not typed, access is only checked at
+run time.
 
 
 The following functions are supported:
 
-=over 8
+=over 4
 
 =item new
 
@@ -259,6 +259,8 @@ B< perl 5.9.0 and higher: > fields::new() creates and blesses a
 restricted-hash comprised of the fields declared using the C<fields>
 pragma into the specified class.
 
+This function is usable with or without pseudo-hashes.  It is the
+recommended way to construct a fields-based object.
 
 This makes it possible to write a constructor like this:
 
@@ -277,40 +279,41 @@ This makes it possible to write a constructor like this:
 
 B< before perl 5.9.0: > 
 
-  fields::phash() can be used to create and initialize a plain (unblessed)
-  pseudo-hash.  This function should always be used instead of creating
-  pseudo-hashes directly.
+fields::phash() can be used to create and initialize a plain (unblessed)
+pseudo-hash.  This function should always be used instead of creating
+pseudo-hashes directly.
 
-  If the first argument is a reference to an array, the pseudo-hash will
-  be created with keys from that array.  If a second argument is supplied,
-  it must also be a reference to an array whose elements will be used as
-  the values.  If the second array contains less elements than the first,
-  the trailing elements of the pseudo-hash will not be initialized.
-  This makes it particularly useful for creating a pseudo-hash from
-  subroutine arguments:
+If the first argument is a reference to an array, the pseudo-hash will
+be created with keys from that array.  If a second argument is supplied,
+it must also be a reference to an array whose elements will be used as
+the values.  If the second array contains less elements than the first,
+the trailing elements of the pseudo-hash will not be initialized.
+This makes it particularly useful for creating a pseudo-hash from
+subroutine arguments:
 
-      sub dogtag {
-         my $tag = fields::phash([qw(name rank ser_num)], [@_]);
-      }
+    sub dogtag {
+       my $tag = fields::phash([qw(name rank ser_num)], [@_]);
+    }
 
-  fields::phash() also accepts a list of key-value pairs that will
-  be used to construct the pseudo hash.  Examples:
+fields::phash() also accepts a list of key-value pairs that will
+be used to construct the pseudo hash.  Examples:
 
-      my $tag = fields::phash(name => "Joe",
-                             rank => "captain",
-                             ser_num => 42);
+    my $tag = fields::phash(name => "Joe",
+                            rank => "captain",
+                            ser_num => 42);
 
-      my $pseudohash = fields::phash(%args);
+    my $pseudohash = fields::phash(%args);
 
 B< perl 5.9.0 and higher: >
 
 Pseudo-hashes have been removed from Perl as of 5.10.  Consider using
-restricted hashes instead.  Using fields::phash() will cause an error.
+restricted hashes or fields::new() instead.  Using fields::phash()
+will cause an error.
 
 =back
 
 =head1 SEE ALSO
 
-L<base>,
+L<base>
 
 =cut
