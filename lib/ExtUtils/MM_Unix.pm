@@ -1151,7 +1151,7 @@ sub fixin { # stolen from the pink Camel book, more or less
 	    }
 	    $shb .= qq{
 eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
-    if \$running_under_some_shell;
+    if 0; # not running under some shell
 };
 	} else {
 	    warn "Can't find $cmd in PATH, $file unchanged"

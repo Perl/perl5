@@ -136,7 +136,7 @@ also work:
     \L		lowercase till \E (think vi)
     \U		uppercase till \E (think vi)
     \E		end case modification (think vi)
-    \Q		quote regexp metacharacters till \E
+    \Q		quote (disable) regexp metacharacters till \E
 
 If C<use locale> is in effect, the case map used by C<\l>, C<\L>, C<\u>
 and <\U> is taken from the current locale.  See L<perllocale>.
@@ -226,19 +226,20 @@ you've used them once, use them at will, because you've already paid
 the price.
 
 You will note that all backslashed metacharacters in Perl are
-alphanumeric, such as C<\b>, C<\w>, C<\n>.  Unlike some other regular expression
-languages, there are no backslashed symbols that aren't alphanumeric.
-So anything that looks like \\, \(, \), \E<lt>, \E<gt>, \{, or \} is always
-interpreted as a literal character, not a metacharacter.  This makes it
-simple to quote a string that you want to use for a pattern but that
-you are afraid might contain metacharacters.  Quote simply all the
+alphanumeric, such as C<\b>, C<\w>, C<\n>.  Unlike some other regular
+expression languages, there are no backslashed symbols that aren't
+alphanumeric.  So anything that looks like \\, \(, \), \E<lt>, \E<gt>,
+\{, or \} is always interpreted as a literal character, not a
+metacharacter.  This was once used in a common idiom to disable or
+quote the special meanings of regular expression metacharacters in a
+string that you want to use for a pattern. Simply quote all the
 non-alphanumeric characters:
 
     $pattern =~ s/(\W)/\\$1/g;
 
-You can also use the builtin quotemeta() function to do this.
-An even easier way to quote metacharacters right in the match operator
-is to say
+Now it is much more common to see either the quotemeta() function or
+the \Q escape sequence used to disable the metacharacters special
+meanings like this:
 
     /$unquoted\Q$quoted\E$unquoted/
 

@@ -633,7 +633,7 @@ their own password:
 	print "ok\n";
     }
 
-Of course, typing in your own password to whomever asks you
+Of course, typing in your own password to whoever asks you
 for it is unwise.
 
 =item dbmclose HASH
@@ -2160,7 +2160,9 @@ string that many nybbles long.  The "p" type packs a pointer to a null-
 terminated string.  You are responsible for ensuring the string is not a
 temporary value (which can potentially get deallocated before you get
 around to using the packed result).  The "P" packs a pointer to a structure
-of the size indicated by the length.  Real numbers (floats and doubles) are
+of the size indicated by the length. A NULL pointer is created if the 
+corresponding value for "p" or "P" is C<undef>.
+Real numbers (floats and doubles) are
 in the native machine format only; due to the multiplicity of floating
 formats around, and the lack of a standard "network" representation, no
 facility for interchange has been made.  This means that packed floating

@@ -176,8 +176,8 @@ GLOBEXE=..\perlglob.exe
 CONFIGPM=..\lib\Config.pm
 MINIMOD=..\lib\ExtUtils\Miniperl.pm
 
-PL2BAT=bin\PL2BAT.BAT
-GLOBBAT = perlglob.bat
+PL2BAT=bin\pl2bat.pl
+GLOBBAT = bin\perlglob.bat
 
 .IF "$(CCTYPE)" == "BORLAND"
 
@@ -350,8 +350,8 @@ $(GLOBEXE): perlglob.obj
 	$(LINK32) $(LINK_FLAGS) -out:$@ -subsystem:$(SUBSYS) perlglob.obj setargv.obj 
 .ENDIF
 
-perlglob.bat : ..\lib\File\DosGlob.pm $(MINIPERL)
-	$(MINIPERL) $(PL2BAT) - < ..\lib\File\DosGlob.pm > $(*B).bat
+$(GLOBBAT) : ..\lib\File\DosGlob.pm $(MINIPERL)
+	$(MINIPERL) $(PL2BAT) - < ..\lib\File\DosGlob.pm > $(GLOBBAT)
 
 perlglob.obj  : perlglob.c
 
@@ -510,7 +510,9 @@ utils: $(PERLEXE)
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
 	cd ..\utils && $(PERLEXE) ..\win32\$(PL2BAT) h2ph splain perlbug \
 		pl2pm c2ph h2xs perldoc pstruct
-	cd ..\utils && $(XCOPY) *.bat ..\win32\bin\*.*
+	$(XCOPY) ..\utils\*.bat bin\*.*
+	$(PERLEXE) $(PL2BAT) bin\network.pl bin\www.pl bin\runperl.pl \
+			bin\pl2bat.pl
 
 distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
@@ -522,6 +524,11 @@ distclean: clean
 		$(DYNALOADER).c
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
+	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
+.IF "$(PERL95EXE)" != ""
+	-del /f perl95.c
+.ENDIF
+	-del /f bin\*.bat
 	-cd $(EXTDIR) && del /s *.lib *.def *.map *.bs Makefile *.obj pm_to_blib
 	-rmdir /s /q ..\lib\auto
 	-rmdir /s /q ..\lib\CORE
@@ -534,9 +541,8 @@ install : all doc utils
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
 .ENDIF
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
-	$(XCOPY) $(GLOBBAT) $(INST_BIN)\*.*
 	$(XCOPY) $(PERLDLL) $(INST_BIN)\*.*
-	$(XCOPY) bin\*.* $(INST_BIN)\*.*
+	$(XCOPY) bin\*.bat $(INST_BIN)\*.*
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 	$(XCOPY) ..\pod\*.bat $(INST_BIN)\*.*
 	$(XCOPY) ..\pod\*.pod $(INST_POD)\*.*
@@ -582,7 +588,8 @@ clean :
 	-@erase $(CORE_OBJ)
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
-	-@erase ..\*.obj *.obj ..\*.lib ..\*.exp
+	-@erase ..\*.obj ..\*.lib ..\*.exp *.obj *.lib *.exp
+	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
 	-@erase *.ilk
 	-@erase *.pdb
 

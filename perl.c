@@ -694,12 +694,23 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		cddir = savepv(s);
 	    break;
 	case '-':
+	    if (*++s) { /* catch use of gnu style long options */
+		if (strEQ(s, "version")) {
+		    s = "v";
+		    goto reswitch;
+		}
+		if (strEQ(s, "help")) {
+		    s = "h";
+		    goto reswitch;
+		}
+		croak("Unrecognized switch: --%s  (-h will show valid options)",s);
+	    }
 	    argc--,argv++;
 	    goto switch_end;
 	case 0:
 	    break;
 	default:
-	    croak("Unrecognized switch: -%s",s);
+	    croak("Unrecognized switch: -%s  (-h will show valid options)",s);
 	}
     }
   switch_end:
@@ -1297,10 +1308,10 @@ char *name;
     printf("\n  -e 'command'    one line of script. Several -e's allowed. Omit [programfile].");
     printf("\n  -F/pattern/     split() pattern for autosplit (-a). The //'s are optional.");
     printf("\n  -i[extension]   edit <> files in place (make backup if extension supplied)");
-    printf("\n  -Idirectory     specify @INC/#include directory (may be used more then once)");
-    printf("\n  -l[octal]       enable line ending processing, specifies line teminator");
+    printf("\n  -Idirectory     specify @INC/#include directory (may be used more than once)");
+    printf("\n  -l[octal]       enable line ending processing, specifies line terminator");
     printf("\n  -[mM][-]module.. executes `use/no module...' before executing your script.");
-    printf("\n  -n              assume 'while (<>) { ... }' loop arround your script");
+    printf("\n  -n              assume 'while (<>) { ... }' loop around your script");
     printf("\n  -p              assume loop like -n but print line also like sed");
     printf("\n  -P              run script through C preprocessor before compilation");
     printf("\n  -s              enable some switch parsing for switches after script name");
@@ -1310,7 +1321,7 @@ char *name;
     printf("\n  -U              allow unsafe operations");
     printf("\n  -v              print version number and patchlevel of perl");
     printf("\n  -V[:variable]   print perl configuration information");
-    printf("\n  -w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT.");
+    printf("\n  -w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT. Recommended.");
     printf("\n  -x[directory]   strip off text before #!perl line and perhaps cd to directory\n");
 }
 
@@ -1669,6 +1680,7 @@ SV *sv;
 #ifdef VMS
     if (dosearch) {
 	int hasdir, idx = 0, deftypes = 1;
+	bool seen_dot = 1;
 
 	hasdir = (strpbrk(scriptname,":[</") != Nullch) ;
 	/* The first time through, just add SEARCH_EXTS to whatever we
@@ -2322,6 +2334,7 @@ static void
 init_lexer()
 {
     tmpfp = rsfp;
+    rsfp = Nullfp;
     lex_start(linestr);
     rsfp = tmpfp;
     subname = newSVpv("main",4);

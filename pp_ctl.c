@@ -2412,11 +2412,11 @@ PP(pp_entereval)
 
     /* prepare to compile string */
 
-    if (perldb && curstash != debstash)
+    if (PERLDB_LINE && curstash != debstash)
 	save_lines(GvAV(compiling.cop_filegv), linestr);
     PUTBACK;
     ret = doeval(gimme);
-    if (perldb && was != sub_generation /* Some subs defined here. */
+    if (PERLDB_INTER && was != sub_generation /* Some subs defined here. */
 	&& ret != op->op_next) {	/* Successive compilation. */
 	strcpy(safestr, "_<(eval )");	/* Anything fake and short. */
     }

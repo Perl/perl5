@@ -402,6 +402,9 @@ provides seven bits of the total value, with the most significant
 first.  Bit eight of each byte is set, except for the last byte, in
 which bit eight is clear.
 
+If 'p' or 'P' are given undef as values, they now generate a NULL
+pointer.
+
 Both pack() and unpack() now fail when their templates contain invalid
 types.  (Invalid types used to be ignored.)
 

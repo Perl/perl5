@@ -41,6 +41,10 @@ while (<PATCH_LEVEL>) {
 
 close PATCH_LEVEL;
 
+# TO DO (prehaps): store/embed $Config::config_sh into perlbug. When perlbug is
+# used, compare $Config::config_sh with the stored version. If they differ then
+# append a list of individual differences to the bug report.
+
 
 print "Extracting $file (with variable substitutions)\n";
 
@@ -114,6 +118,8 @@ Init();
 
 if($::opt_h) { Help(); exit; }
 
+if($::opt_d) { Dump(*STDOUT); exit; }
+
 if(!-t STDIN) {
 	paraprint <<EOF;
 Please use perlbug interactively. If you want to 
@@ -122,7 +128,7 @@ EOF
 	die "\n";
 }
 
-if($::opt_d or !-t STDOUT) { Dump(*STDOUT); exit; }
+if(!-t STDOUT) { Dump(*STDOUT); exit; }
 
 Query();
 Edit() unless $usefile;

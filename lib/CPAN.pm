@@ -2039,6 +2039,7 @@ sub rd_modpacks {
     while (<$fh>) {
 	chomp;
 	my($mod,$version,$dist) = split;
+$dist = '' unless defined $dist;
 ###	$version =~ s/^\+//;
 
 	# if it as a bundle, instatiate a bundle object

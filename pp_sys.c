@@ -4381,7 +4381,8 @@ int operation;
     save_errno = errno;
     pos = lseek(fd, (Off_t)0, SEEK_CUR);    /* get pos to restore later */
     if (pos > 0)	/* is seekable and needs to be repositioned	*/
-	lseek(fd, (Off_t)0, SEEK_SET);
+	if (lseek(fd, (Off_t)0, SEEK_SET) < 0)
+	    pos = -1;	/* seek failed, so don't seek back afterwards	*/
     errno = save_errno;
 
     switch (operation) {
@@ -4417,8 +4418,7 @@ int operation;
     }
 
     if (pos > 0)      /* need to restore position of the handle	*/
-	if (lseek(fd, pos, SEEK_SET) == -1)
-	    i = -1;
+	lseek(fd, pos, SEEK_SET);	/* ignore error here	*/
 
     return (i);
 }

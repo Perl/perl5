@@ -35,6 +35,13 @@ print "Cross-checking the MANIFEST...\n";
 ($missfile, $missentry) = fullcheck();
 warn "Can't make a release with MANIFEST files missing.\n" if @$missfile;
 warn "Can't make a release with files not listed in MANIFEST.\n" if @$missentry;
+if ("@$missentry" =~ m/\.orig\b/) {
+    # Handy listing of find command and .orig files from patching work.
+    # I tend to run 'xargs rm' and copy and paste the file list.
+    my $cmd = "find . -name '*.orig' -print";
+    print "$cmd\n";
+    system($cmd);
+}
 die "Aborted.\n" if @$missentry or @$missfile;
 print "\n";
 

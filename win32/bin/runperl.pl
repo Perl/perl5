@@ -1,10 +1,4 @@
-@rem = '--*-Perl-*--
-@echo off
-perl -x -S %0 %*
-goto endofperl
-@rem ';
 #!perl -w
-#line 8
 $0 =~ s|\.bat||i;
 unless (-f $0) {
     $0 =~ s|.*[/\\]||;
@@ -20,7 +14,7 @@ __END__
 
 =head1 NAME
 
-runperl.bat - an "universal" batch file to run perl scripts
+runperl.bat - "universal" batch file to run perl scripts
 
 =head1 SYNOPSIS
 
@@ -70,7 +64,4 @@ the script.  This may have undesirable effects.
 perl, perlwin32, pl2bat.bat
 
 =cut
-
-__END__
-:endofperl
 
