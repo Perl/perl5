@@ -990,11 +990,21 @@ sub redirect {
     $url = $url || $self->self_url;
     my(@o);
     foreach (@other) { push(@o,split("=")); }
-    push(@o,
+    if($MOD_PERL or exists $self->{'.req'}) {
+	my $r = $self->{'.req'} || Apache->request;
+	$r->header_out(Location => $url);
+	$r->err_header_out(Location => $url);
+	$r->status(302);
+	return;
+    }
+    else {
+	push(@o,
 	 '-Status'=>'302 Found',
 	 '-Location'=>$url,
-	 '-URI'=>$url,
-	 '-nph'=>($nph||$NPH));
+	 '-nph'=>($nph||$NPH),
+	);
+    }
+    push(@o, '-URI'=>$url);
     push(@o,'-Target'=>$target) if $target;
     push(@o,'-Cookie'=>$cookie) if $cookie;
     return $self->header(@o);
