@@ -2083,6 +2083,9 @@ It can be used to go almost anywhere else within the dynamic scope,
 including out of subroutines, but it's usually better to use some other
 construct such as C<last> or C<die>.  The author of Perl has never felt the
 need to use this form of C<goto> (in Perl, that is--C is another matter).
+(The difference being that C does not offer named loops combined with
+loop control.  Perl does, and this replaces most structured uses of C<goto>
+in other languages.)
 
 The C<goto-EXPR> form expects a label name, whose scope will be resolved
 dynamically.  This allows for computed C<goto>s per FORTRAN, but isn't
@@ -2090,13 +2093,14 @@ necessarily recommended if you're optimizing for maintainability:
 
     goto ("FOO", "BAR", "GLARCH")[$i];
 
-The C<goto-&NAME> form is quite different from the other forms of C<goto>.
-In fact, it isn't a goto in the normal sense at all, and doesn't have
-the stigma associated with other gotos.  Instead, it
-substitutes a call to the named subroutine for the currently running
-subroutine.  This is used by C<AUTOLOAD> subroutines that wish to load
-another subroutine and then pretend that the other subroutine had been
-called in the first place (except that any modifications to C<@_>
+The C<goto-&NAME> form is quite different from the other forms of
+C<goto>.  In fact, it isn't a goto in the normal sense at all, and
+doesn't have the stigma associated with other gotos.  Instead, it
+exits the current subroutine (losing any changes set by local()) and
+immediately calls in its place the named subroutine using the current
+value of @_.  This is used by C<AUTOLOAD> subroutines that wish to
+load another subroutine and then pretend that the other subroutine had
+been called in the first place (except that any modifications to C<@_>
 in the current subroutine are propagated to the other subroutine.)
 After the C<goto>, not even C<caller> will be able to tell that this
 routine was called first.
