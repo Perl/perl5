@@ -395,3 +395,10 @@
 
    * Added "clean" attribute to Makefile.PL
  
+1.802 6th January 2001
+
+   * The message about some test failing in db-recno.t had the wrong test
+     numbers. Fixed.
+
+   * merged core patch 13942.
+

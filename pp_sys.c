@@ -838,24 +838,26 @@ PP(pp_untie)
 	SV *obj = SvRV(mg->mg_obj);
 	GV *gv;
 	CV *cv = NULL;
-	if ((gv = gv_fetchmethod_autoload(SvSTASH(obj), "UNTIE", FALSE)) &&
-            isGV(gv) && (cv = GvCV(gv))) {
-	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj((SV*)gv, mg));
-	    XPUSHs(sv_2mortal(newSViv(SvREFCNT(obj)-1)));
-	    PUTBACK;
-	    ENTER;
-	    call_sv((SV *)cv, G_VOID);
-	    LEAVE;
-	    SPAGAIN;
+        if (obj) {
+	    if ((gv = gv_fetchmethod_autoload(SvSTASH(obj), "UNTIE", FALSE)) &&
+               isGV(gv) && (cv = GvCV(gv))) {
+	       PUSHMARK(SP);
+	       XPUSHs(SvTIED_obj((SV*)gv, mg));
+	       XPUSHs(sv_2mortal(newSViv(SvREFCNT(obj)-1)));
+	       PUTBACK;
+	       ENTER;
+	       call_sv((SV *)cv, G_VOID);
+	       LEAVE;
+	       SPAGAIN;
+            }
+           else if (ckWARN(WARN_UNTIE)) {
+	       if (mg && SvREFCNT(obj) > 1)
+		  Perl_warner(aTHX_ WARN_UNTIE,
+		      "untie attempted while %"UVuf" inner references still exist",
+		       (UV)SvREFCNT(obj) - 1 ) ;
+           }
         }
-        else if (ckWARN(WARN_UNTIE)) {
-	    if (mg && SvREFCNT(obj) > 1)
-		Perl_warner(aTHX_ WARN_UNTIE,
-		    "untie attempted while %"UVuf" inner references still exist",
-		    (UV)SvREFCNT(obj) - 1 ) ;
-        }
-	sv_unmagic(sv, how);
+	sv_unmagic(sv, how) ;
     }
     RETPUSHYES;
 }

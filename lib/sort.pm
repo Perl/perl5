@@ -77,7 +77,7 @@ quicksort defends against quadratic behaviour by shuffling large
 arrays before sorting.
 
 A stable sort means that for records that compare equal, the original
-input ordering is preserved.  Perl's mergesort is stable, quicksort is not.
+input ordering is preserved.  mergesort is stable, quicksort is not.
 Stability will matter only if elements that compare equal can be
 distinguished in some other way.  That means that simple numerical
 and lexical sorts do not profit from stability, since equal elements
