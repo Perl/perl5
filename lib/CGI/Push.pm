@@ -16,8 +16,9 @@ package CGI::Push;
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::Push::VERSION='1.01';
+$CGI::Push::VERSION='1.02';
 use CGI;
+use CGI::Util 'rearrange';
 @ISA = ('CGI');
 
 $CGI::DefaultClass = 'CGI::Push';
@@ -37,7 +38,7 @@ sub do_push {
 
     my (@header);
     my ($type,$callback,$delay,$last_page,$cookie,$target,$expires,@other) =
-	$self->rearrange([TYPE,NEXT_PAGE,DELAY,LAST_PAGE,[COOKIE,COOKIES],TARGET,EXPIRES],@p);
+	rearrange([TYPE,NEXT_PAGE,DELAY,LAST_PAGE,[COOKIE,COOKIES],TARGET,EXPIRES],@p);
     $type = 'text/html' unless $type;
     $callback = \&simple_counter unless $callback && ref($callback) eq 'CODE';
     $delay = 1 unless defined($delay);
@@ -53,7 +54,7 @@ sub do_push {
     push(@o,'-nph'=>1);
     print $self->header(@o);
     print "${boundary}$CGI::CRLF";
-    
+
     # now we enter a little loop
     my @contents;
     while (1) {
@@ -142,6 +143,9 @@ page.  The contents of the page will be transmitted to the browser
 in such a way that it will replace what was there beforehand.  The
 technique will work with HTML pages as well as with graphics files, 
 allowing you to create animated GIFs.
+
+Only Netscape Navigator supports server push.  Internet Explorer
+browsers do not.
 
 =head1 USING CGI::Push
 

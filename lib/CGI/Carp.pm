@@ -194,14 +194,14 @@ use Carp;
 
 BEGIN {
   $] >= 5.005
-    ? eval q#sub ineval { $^S }#
-      : eval q#sub ineval { _longmess() =~ /eval [\{\']/m }#;
+    ? eval q#sub ineval { defined $^S ? $^S : _longmess() =~ /eval [\{\']/m }#
+    : eval q#sub ineval { _longmess() =~ /eval [\{\']/m }#;
   $@ and die;
 }
 
 $main::SIG{__WARN__}=\&CGI::Carp::warn;
 $main::SIG{__DIE__}=\&CGI::Carp::die;
-$CGI::Carp::VERSION = '1.14';
+$CGI::Carp::VERSION = '1.16';
 $CGI::Carp::CUSTOM_MSG = undef;
 
 # fancy import routine detects and handles 'errorWrap' specially.
@@ -335,8 +335,7 @@ $outer_message
 END
     ;
 
-    if ($mod_perl) {
-	my $r = Apache->request;
+    if ($mod_perl && (my $r = Apache->request)) {
 	# If bytes have already been sent, then
 	# we print the message out directly.
 	# Otherwise we make a custom error

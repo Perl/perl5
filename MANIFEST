@@ -568,6 +568,7 @@ lib/CGI/Fast.pm		Support for FastCGI (persistent server process)
 lib/CGI/Pretty.pm	Output nicely formatted HTML
 lib/CGI/Push.pm		Support for server push
 lib/CGI/Switch.pm	Simple interface for multiple server types
+lib/CGI/Util.pm		Utility functions
 lib/CPAN.pm		Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm	Utility for creating CPAN config files
 lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
@@ -1215,6 +1216,7 @@ t/lib/bigintpm.t	See if BigInt.pm works
 t/lib/cgi-form.t	See if CGI.pm works
 t/lib/cgi-function.t	See if CGI.pm works
 t/lib/cgi-html.t	See if CGI.pm works
+t/lib/cgi-pretty.t	See if CGI.pm works
 t/lib/cgi-request.t	See if CGI.pm works
 t/lib/charnames.t	See if character names work
 t/lib/checktree.t	See if File::CheckTree works
