@@ -8,6 +8,7 @@ BEGIN {
 }
 
 use warnings;
+use Config;
 
 my $test = 1;
 sub ok {
@@ -71,7 +72,7 @@ if ($Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE || $Is_MacOS) {
 else {
   # the next tests are done in a subprocess because sh spits out a
   # newline onto stderr when a child process kills itself with SIGINT.
-  # We use a pipe rather than system() because the VMS command buffer 
+  # We use a pipe rather than system() because the VMS command buffer
   # would overflow with a command that long.
 
     open( CMDPIPE, "| $PERL");
@@ -148,7 +149,7 @@ ok $$ > 0, $$;
     if ($^O eq 'qnx') {
 	chomp($wd = `/usr/bin/fullpath -t`);
     }
-    elsif($Is_Cygwin) {
+    elsif($Is_Cygwin || $Config{'d_procselfexe'}) {
        # Cygwin turns the symlink into the real file
        chomp($wd = `pwd`);
        $wd =~ s#/t$##;

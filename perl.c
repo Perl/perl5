@@ -2777,8 +2777,8 @@ sed %s -e \"/^[^#]/b\" \
 	}
 #endif /* IAMSUID */
 
-        DEBUG_P(PerlIO_printf(Perl_debug_log, 
-                              "PL_preprocess: cmd=\"%s\"\n", 
+        DEBUG_P(PerlIO_printf(Perl_debug_log,
+                              "PL_preprocess: cmd=\"%s\"\n",
                               SvPVX(cmd)));
 
 	PL_rsfp = PerlProc_popen(SvPVX(cmd), "r");
@@ -3419,6 +3419,24 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
     }
 }
 
+#ifdef HAS_PROCSELFEXE
+/* This is a function so that we don't hold on to MAXPATHLEN
+   bytes of stack longer than necessary
+ */
+STATIC void
+S_procself_val(pTHX_ SV *sv, char *arg0)
+{
+    char buf[MAXPATHLEN];
+    int len = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+    if (len > 0) {
+	sv_setpvn(sv,buf,len);
+    }
+    else {
+	sv_setpv(sv,arg0);
+    }
+}
+#endif /* HAS_PROCSELFEXE */
+
 STATIC void
 S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
 {
@@ -3451,12 +3469,17 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	magicname("0", "0", 1);
 #endif
     }
-    if ((tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))) /* $^X */
+    if ((tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))) {/* $^X */
+#ifdef HAS_PROCSELFEXE
+	S_procself_val(aTHX_ GvSV(tmpgv), PL_origargv[0]);
+#else
 #ifdef OS2
 	sv_setpv(GvSV(tmpgv), os2_execname(aTHX));
 #else
 	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
 #endif
+#endif
+    }
     if ((PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV))) {
 	HV *hv;
 	GvMULTI_on(PL_envgv);
