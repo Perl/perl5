@@ -32,13 +32,13 @@ esac
 
 case "$osvers" in
 3*) d_fchmod=undef
-    ccflags='-D_ALL_SOURCE'
+    ccflags="$ccflags -D_ALL_SOURCE"
     ;;
 *)  # These hints at least work for 4.x, possibly other systems too.
-    ccflags='-D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE'
+    ccflags="$ccflags -D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE"
     case "$cc" in
      *gcc*) ;;
-     *) ccflags="-qmaxmem=8192  $ccflags" ;;
+     *) ccflags="$ccflags -qmaxmem=8192" ;;
     esac
     nm_opt='-B'
     ;;
@@ -72,7 +72,7 @@ lddlflags='-bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noent
 esac
 
 if [ "X$usethreads" = "X$define" ]; then
-    ccflags="-DNEED_PTHREAD_INIT $ccflags"
+    ccflags="$ccflags -DNEED_PTHREAD_INIT"
     case "$cc" in
     xlc_r | cc_r)
 	;;
