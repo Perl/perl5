@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..979\n";
+print "1..983\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3075,4 +3075,11 @@ $x = "CD";
 $x =~ /(AB)*CD/;
 ok(!defined $1, "[perl #7471]");
 
-# last test 979
+$pattern = "^(b+?|a){1,2}c";
+ok("bac"    =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
+ok("bbac"   =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
+ok("bbbac"  =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
+ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
+
+# last test 983
+
