@@ -1610,7 +1610,7 @@ A small example demonstrating SysV message queues:
     my $id = msgget(IPC_PRIVATE, IPC_CREAT | S_IRWXU);
 
     my $sent = "message";
-    my $type = 1234;
+    my $type_sent = 1234;
     my $rcvd;
     my $type_rcvd;
 
