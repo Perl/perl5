@@ -505,8 +505,6 @@ $v = int($g1);
 $v = abs($g2);
 EXPECT
 Use of uninitialized value $g1 in int at - line 5.
-Use of uninitialized value $g1 in int at - line 5.
-Use of uninitialized value $g2 in abs at - line 6.
 Use of uninitialized value $g2 in abs at - line 6.
 ########
 use warnings 'uninitialized';
