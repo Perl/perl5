@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jan 21 21:08:33 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Sun Jan 21 21:30:32 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2931,6 +2931,19 @@ EOM
 	;;
 *)
 	useithreads="$undef"
+	use5005threads="$undef"
+	;;
+esac
+
+case "$useithreads$use5005threads" in
+"$define$define")
+	$cat >&4 <<EOM
+
+You cannot have both the ithreads and the 5.005 threads enabled
+at the same time.  Disabling the 5.005 threads since they are
+much less stable than the ithreads.
+
+EOM
 	use5005threads="$undef"
 	;;
 esac
