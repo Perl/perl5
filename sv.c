@@ -1517,7 +1517,7 @@ STRLEN *lp;
 	s = SvGROW(sv, len + 1);
 	SvCUR_set(sv, len);
 	(void)strcpy(s, tokenbuf);
-	/* NO SvPOK_on(sv) here! */
+	SvPOKp_on(sv);
 	return s;
     }
 }
