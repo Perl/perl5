@@ -42,7 +42,6 @@ Summary of my $package (revision $baserev $version_patchlevel_string) configurat
     optimize='$optimize',
     cppflags='$cppflags'
     ccversion='$ccversion', gccversion='$gccversion', gccosandvers='$gccosandvers'
-    gnulibc_version='$gnulibc_version'
     intsize=$intsize, longsize=$longsize, ptrsize=$ptrsize, doublesize=$doublesize, byteorder=$byteorder
     d_longlong=$d_longlong, longlongsize=$longlongsize, d_longdbl=$d_longdbl, longdblsize=$longdblsize
     ivtype='$ivtype', ivsize=$ivsize, nvtype='$nvtype', nvsize=$nvsize, Off_t='$lseektype', lseeksize=$lseeksize
@@ -53,6 +52,7 @@ Summary of my $package (revision $baserev $version_patchlevel_string) configurat
     libs=$libs
     perllibs=$perllibs
     libc=$libc, so=$so, useshrplib=$useshrplib, libperl=$libperl
+    gnulibc_version='$gnulibc_version'
   Dynamic Linking:
     dlsrc=$dlsrc, dlext=$dlext, d_dlsymun=$d_dlsymun, ccdlflags='$ccdlflags'
     cccdlflags='$cccdlflags', lddlflags='$lddlflags'
