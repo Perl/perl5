@@ -44,12 +44,7 @@ sub openunicode {
 	for my $d (@INC) {
 	    use File::Spec;
 	    $f = File::Spec->catfile($d, "unicode", @path);
-           next unless -f $f;
-	    if (open($$rfh, $f)) {
-		last;
-	    } else {
-		croak __PACKAGE__, ": open '$f' failed: $!\n";
-	    }
+	    last if open($$rfh, $f);
 	}
 	croak __PACKAGE__, ": failed to find ",join("/",@path)," in @INC\n"
 	    unless defined $rfh;
@@ -87,9 +82,16 @@ by the Unicode standard:
 
 If no match is found, an empty hash is returned.
 
-The C<block> property is the same as as returned by charinfo().
-(It is not defined in the Unicode Character Database proper but
-instead in an auxiliary database.)
+The C<block> property is the same as as returned by charinfo().  It is
+not defined in the Unicode Character Database proper (Chapter 4 of the
+Unicode 3.0 Standard) but instead in an auxiliary database (Chapter 14
+of TUS3).
+
+Note that you cannot do (de)composition and casing based solely on the
+above C<decomposition> and C<lower>, C<upper>, C<title>, properties,
+you will need also the I<Composition Exclusions> and I<SpecialCasing>
+tables, available as files F<CompExcl.txt> and F<SpecCase.txt> in the
+Perl distribution.
 
 =cut
 
@@ -174,6 +176,11 @@ sub charblock {
 
     _charblock($code, 0, $#BLOCKS);
 }
+
+=head1 NOTE
+
+The first use of L<charinfo> opens a read-only filehandle to the Unicode
+Character Database.  The filehandle is kept open for further queries.
 
 =head1 AUTHOR
 
