@@ -1,11 +1,9 @@
-Please note: This file provides a summary of significant changes
-between versions and sub-versions of Perl, not necessarily a complete
-list of each modification.  If you'd like more detailed information,
-please consult the comments in the patches on which the relevant
-release of Perl is based.  (Patches can be found on any CPAN
-site, in the .../src/5.0 directory for full version releases,
-or in the .../src/5/0/unsupported directory for sub-version
-releases.)
+Please note: This file provides a complete, temporally ordered log of
+changes that went into every version of Perl.  If you'd like more
+detailed information, please consult the comments in the individual
+patches posted to the perl5-porters mailing list.  Patches for each
+individual change may also be obtained through ftp and rsync--see
+perlhack.pod for the details.
 
 
 			   ---------------
@@ -94,6 +92,158 @@ indicator:
 Version v5.6.0
 --------------
 
+____________________________________________________________________________
+[  5855] By: gsar                                  on 2000/03/21  10:05:42
+        Log: clone awareness for change#5847
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  5854] By: gsar                                  on 2000/03/21  09:30:50
+        Log: regen win32/config*
+     Branch: perl
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  5853] By: gsar                                  on 2000/03/21  08:56:58
+        Log: integrate cfgperl and vmsperl contents into mainline
+     Branch: perl
+	  !> Configure Todo Todo-5.6 config_h.SH lib/File/Spec/VMS.pm
+	  !> pod/perldelta.pod t/op/taint.t
+____________________________________________________________________________
+[  5852] By: gsar                                  on 2000/03/21  06:08:20
+        Log: README.mint tweaks (from Guido Flohr <gufl0000@stud.uni-sb.de>)
+     Branch: perl
+	   ! Changes README.mint
+____________________________________________________________________________
+[  5851] By: gsar                                  on 2000/03/21  06:06:44
+        Log: make parenthetic warnings look consistent; make diagnostic on
+             "use 5.6" et al mention the alternate form; pod fixups
+     Branch: perl
+	   ! gv.c op.c pod/perldelta.pod pod/perldiag.pod pp_ctl.c
+	   ! t/comp/use.t t/pragma/strict-vars t/pragma/warn/op
+	   ! t/pragma/warn/pp_hot t/pragma/warn/pp_sys toke.c universal.c
+	   ! util.c
+____________________________________________________________________________
+[  5850] By: gsar                                  on 2000/03/21  04:05:00
+        Log: disable unused Windows code that won't run on Windows 95
+     Branch: perl
+	   ! win32/vmem.h
+____________________________________________________________________________
+[  5849] By: gsar                                  on 2000/03/21  03:34:39
+        Log: $File::Find::name doesn't reflect top level files
+             correctly (from Simon Cozens <simon@brecon.co.uk>)
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[  5848] By: gsar                                  on 2000/03/21  02:46:01
+        Log: test fails when sockets not available (from Yitzchak Scott-Thoennes)
+     Branch: perl
+	   ! t/lib/io_unix.t
+____________________________________________________________________________
+[  5847] By: gsar                                  on 2000/03/21  00:09:09
+        Log: under useithreads, PUSHLOOP must save PL_curpad for looking up
+             iterdata, since dounwind() may defer LEAVEs
+     Branch: perl
+	   ! cop.h
+____________________________________________________________________________
+[  5846] By: jhi                                   on 2000/03/20  23:54:37
+        Log: Document the lib/io_multihomedt hang in 64-bit HP-Ux.
+     Branch: cfgperl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  5845] By: jhi                                   on 2000/03/20  23:45:24
+        Log: detypo
+     Branch: cfgperl
+	   ! t/op/taint.t
+____________________________________________________________________________
+[  5844] By: jhi                                   on 2000/03/20  23:17:18
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> lib/Dumpvalue.pm lib/User/pwent.pm lib/dumpvar.pl
+	  !> lib/strict.pm op.c pod/perldata.pod pod/perldelta.pod
+	  !> pod/perlfunc.pod pp.c t/io/pipe.t t/lib/charnames.t toke.c
+	  !> utils/perlbug.PL
+____________________________________________________________________________
+[  5843] By: gsar                                  on 2000/03/20  22:14:35
+        Log: add note about symbolic filehandles (from Johan Vromans)
+     Branch: perl
+	   ! lib/strict.pm pod/perlfunc.pod
+____________________________________________________________________________
+[  5842] By: gsar                                  on 2000/03/20  21:59:51
+        Log: perlbugtron flags in perlbug (from Richard Foley); eliminate duplicate
+             code
+     Branch: perl
+	   ! utils/perlbug.PL
+____________________________________________________________________________
+[  5841] By: gsar                                  on 2000/03/20  21:06:01
+        Log: more sleep needed from slow systems (from Peter Haworth)
+     Branch: perl
+	   ! t/io/pipe.t
+____________________________________________________________________________
+[  5840] By: gsar                                  on 2000/03/20  21:04:42
+        Log: typo in change#5839
+     Branch: perl
+	   ! lib/Dumpvalue.pm
+____________________________________________________________________________
+[  5839] By: gsar                                  on 2000/03/20  21:03:14
+        Log: make dumpvar.pl recognize emptyness in arrays (from Matthias Urlichs
+             <smurf@noris.de>); fix up duplicate code in Dumpvalue.pm
+     Branch: perl
+	   ! lib/Dumpvalue.pm lib/dumpvar.pl
+____________________________________________________________________________
+[  5838] By: gsar                                  on 2000/03/20  20:53:25
+        Log: mention handle autovivification in perldata (from Johan Vromans)
+     Branch: perl
+	   ! lib/User/pwent.pm pod/perldata.pod
+____________________________________________________________________________
+[  5837] By: gsar                                  on 2000/03/20  20:37:42
+        Log: change#5797 didn't do the right thing for "\xff\N{WHITE SMILING FACE}"
+     Branch: perl
+	   ! t/lib/charnames.t toke.c
+____________________________________________________________________________
+[  5836] By: gsar                                  on 2000/03/20  16:27:13
+        Log: autovivify open($fh[0],...) properly
+     Branch: perl
+	   ! op.c pp.c
+____________________________________________________________________________
+[  5835] By: gsar                                  on 2000/03/19  18:51:24
+        Log: add @x->[2] bug to known issues (from Johan Vromans)
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  5834] By: jhi                                   on 2000/03/19  18:42:35
+        Log: Fix the socklen default type (from Laszlo Molnar;
+             though I prefer signed, not unsigned); move the cross-compialtion
+             wish item to Todo; drop excess permissions in taint.t.
+     Branch: cfgperl
+	   ! Configure Todo Todo-5.6 config_h.SH t/op/taint.t
+     Branch: metaconfig
+	   ! U/protos/socksizetype.U
+____________________________________________________________________________
+[  5833] By: jhi                                   on 2000/03/19  18:20:42
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> (integrate 42 files)
+____________________________________________________________________________
+[  5832] By: gsar                                  on 2000/03/19  18:01:28
+        Log: pwent.pm doc tweak (from Tom Christiansen)
+     Branch: perl
+	   ! lib/User/pwent.pm
+____________________________________________________________________________
+[  5831] By: gsar                                  on 2000/03/19  17:57:31
+        Log: unsigned is a more reasonable socksizetype default (from
+             Laszlo <ml1050@freemail.hu>)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  5830] By: gsar                                  on 2000/03/19  17:40:20
+        Log: taint.t shouldn't fail where IPC::SysV unavailable
+     Branch: perl
+	   ! t/op/taint.t
+____________________________________________________________________________
+[  5829] By: gsar                                  on 2000/03/19  17:19:46
+        Log: update Changes
+     Branch: perl
+	   ! Changes embed.h
 ____________________________________________________________________________
 [  5828] By: gsar                                  on 2000/03/19  16:47:14
         Log: squelch known scalar leak due to compile failure

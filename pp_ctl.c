@@ -2937,7 +2937,7 @@ PP(pp_require)
 			|| (PERL_VERSION == ver
 			    && PERL_SUBVERSION < sver))))
 	    {
-		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only version "
+		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only "
 		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
 		    PERL_VERSION, PERL_SUBVERSION);
 	    }
@@ -2954,9 +2954,20 @@ PP(pp_require)
 		NV nsver = (nver - ver) * 1000;
 		UV sver = (UV)(nsver + 0.0009);
 
-		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only version "
-		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
-		    PERL_VERSION, PERL_SUBVERSION);
+		/* help out with the "use 5.6" confusion */
+		if (sver == 0 && (rev > 5 || (rev == 5 && ver >= 100))) {
+		    DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--"
+			"this is only v%d.%d.%d, stopped"
+			" (did you mean v%"UVuf".%"UVuf".0?)",
+			rev, ver, sver, PERL_REVISION, PERL_VERSION,
+			PERL_SUBVERSION, rev, ver/100);
+		}
+		else {
+		    DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--"
+			"this is only v%d.%d.%d, stopped",
+			rev, ver, sver, PERL_REVISION, PERL_VERSION,
+			PERL_SUBVERSION);
+		}
 	    }
 	}
 	RETPUSHYES;

@@ -395,5 +395,5 @@ our $foo;
 }
 EXPECT
 "our" variable $foo redeclared at - line 7.
-(Did you mean "local" instead of "our"?)
+	(Did you mean "local" instead of "our"?)
 Name "Foo::foo" used only once: possible typo at - line 9.

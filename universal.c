@@ -246,8 +246,8 @@ XS(XS_UNIVERSAL_VERSION)
 		    /* they said C<use Foo v1.2.3> and $Foo::VERSION
 		     * doesn't look like a float: do string compare */
 		    if (sv_cmp(req,sv) == 1) {
-			Perl_croak(aTHX_ "%s version v%vd required--"
-				   "this is only version v%vd",
+			Perl_croak(aTHX_ "%s v%vd required--"
+				   "this is only v%vd",
 				   HvNAME(pkg), req, sv);
 		    }
 		    goto finish;

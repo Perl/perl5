@@ -248,7 +248,7 @@ Perl yourself.
 instead of Perl.  Check the #! line, or manually feed your script
 into Perl yourself.
 
-=item         (in cleanup) %s
+=item (in cleanup) %s
 
 (W misc) This prefix usually indicates that a DESTROY() method raised
 the indicated exception.  Since destructors are usually called by
@@ -260,7 +260,7 @@ repeated.
 Failure of user callbacks dispatched using the C<G_KEEPERR> flag
 could also result in this warning.  See L<perlcall/G_KEEPERR>.
 
-=item         (Missing semicolon on previous line?)
+=item (Missing semicolon on previous line?)
 
 (S) This is an educated guess made in conjunction with the message "%s
 found where operator expected".  Don't automatically put a semicolon on
@@ -1313,16 +1313,16 @@ twisted to write code that triggers this error.
 
 See Server error.
 
-=item Did you mean &%s instead?
+=item (Did you mean &%s instead?)
 
 (W) You probably referred to an imported subroutine &FOO as $FOO or some such.
 
-=item Did you mean "local" instead of "our"?
+=item (Did you mean "local" instead of "our"?)
 
 (W misc) Remember that "our" does not localize the declared global variable.
 You have declared it again in the same lexical scope, which seems superfluous.
 
-=item Did you mean $ or @ instead of %?
+=item (Did you mean $ or @ instead of %?)
 
 (W) You probably said %hash{$key} when you meant $hash{$key} or @hash{@keys}.
 On the other hand, maybe you just meant %hash and got carried away.
@@ -1332,7 +1332,7 @@ On the other hand, maybe you just meant %hash and got carried away.
 (F) You passed die() an empty string (the equivalent of C<die "">) or
 you called it with no args and both C<$@> and C<$_> were empty.
 
-=item Do you need to predeclare %s?
+=item (Do you need to predeclare %s?)
 
 (S) This is an educated guess made in conjunction with the message "%s
 found where operator expected".  It often means a subroutine or module
@@ -1867,7 +1867,7 @@ double-quotish context.
 (W pipe) You used the C<open(FH, "| command")> or C<open(FH, "command |")>
 construction, but the command was missing or blank.
 
-=item Missing operator before %s?
+=item (Missing operator before %s?)
 
 (S) This is an educated guess made in conjunction with the message "%s
 found where operator expected".  Often the missing operator is a comma.

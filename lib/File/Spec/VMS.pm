@@ -144,7 +144,7 @@ sub canonpath {
     else {
       $path =~ s-\]\[--g;  $path =~ s/><//g;            # foo.][bar       ==> foo.bar
       $path =~ s/([\[<])000000\./$1/;                   # [000000.foo     ==> foo
-      1 while $path =~ s{-\.-}{--};                     # -.-             ==> --
+      1 while $path =~ s{([\[<-])\.-}{$1-};             # [.-.-           ==> [--
       $path =~ s/\.[^\[<\.]+\.-([\]\>])/$1/;            # bar.foo.-]      ==> bar]
       $path =~ s/([\[<])(-+)/$1 . "\cx" x length($2)/e; # encode leading '-'s
       $path =~ s/([\[<\.])([^\[<\.\cx]+)\.-\.?/$1/g;    # bar.-.foo       ==> foo
@@ -184,7 +184,7 @@ sub catdir {
 	elsif ($dir =~ /^\$\([^\)]+\)\z/s)          { $rslt = $dir; }
 	else                                        { $rslt = vmspath($dir); }
     }
-    return $rslt;
+    return $self->canonpath($rslt);
 }
 
 =item catfile
@@ -212,7 +212,7 @@ sub catfile {
 	}
     }
     else { $rslt = (defined($file) && length($file)) ? vmsify($file) : ''; }
-    return $rslt;
+    return $self->canonpath($rslt);
 }
 
 

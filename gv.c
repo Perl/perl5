@@ -631,7 +631,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 			    sv_type == SVt_PVHV ? '%' : '$',
 			    name);
 			if (GvCVu(*gvp))
-			    Perl_warn(aTHX_ "(Did you mean &%s instead?)\n", name);
+			    Perl_warn(aTHX_ "\t(Did you mean &%s instead?)\n", name);
 			stash = 0;
 		    }
 		}

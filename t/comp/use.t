@@ -153,7 +153,7 @@ print "ok ",$i++,"\n";
     print "ok ",$i++,"\n";
 
     eval "use lib v100.105";
-    unless ($@ =~ /lib version v100\.105 required--this is only version v35\.36/) {
+    unless ($@ =~ /lib v100\.105 required--this is only v35\.36/) {
 	print "not ";
     }
     print "ok ",$i++,"\n";

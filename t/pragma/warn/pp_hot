@@ -92,7 +92,7 @@ print STDIN "anc";
 EXPECT
 print() on closed filehandle main::STDIN at - line 4.
 print() on closed filehandle main::STDIN at - line 6.
-(Are you trying to call print() on dirhandle main::STDIN?)
+	(Are you trying to call print() on dirhandle main::STDIN?)
 ########
 # pp_hot.c [pp_rv2av]
 use warnings 'uninitialized' ;
@@ -139,7 +139,7 @@ $a = <STDIN> ;
 EXPECT
 readline() on closed filehandle main::STDIN at - line 3.
 readline() on closed filehandle main::STDIN at - line 4.
-(Are you trying to call readline() on dirhandle main::STDIN?)
+	(Are you trying to call readline() on dirhandle main::STDIN?)
 ########
 # pp_hot.c [Perl_do_readline]
 use warnings 'io' ;

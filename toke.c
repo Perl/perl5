@@ -2647,7 +2647,7 @@ Perl_yylex(pTHX)
 #ifdef PERL_STRICT_CR
 	Perl_warn(aTHX_ "Illegal character \\%03o (carriage return)", '\r');
 	Perl_croak(aTHX_ 
-      "(Maybe you didn't strip carriage returns after a network transfer?)\n");
+      "\t(Maybe you didn't strip carriage returns after a network transfer?)\n");
 #endif
     case ' ': case '\t': case '\f': case 013:
 	s++;

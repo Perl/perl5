@@ -2079,7 +2079,7 @@ That name might have a meaning to Perl itself some day, even though it
 doesn't yet.  Perhaps you should use a mixed-case attribute name, instead.
 See L<attributes>.
 
-=item         (in cleanup) %s
+=item (in cleanup) %s
 
 (W misc) This prefix usually indicates that a DESTROY() method raised
 the indicated exception.  Since destructors are usually called by
@@ -2247,7 +2247,7 @@ just use C<if (%hash) { # not empty }> for example.
 
 See Server error.
 
-=item Did you mean "local" instead of "our"?
+=item (Did you mean "local" instead of "our"?)
 
 (W misc) Remember that "our" does not localize the declared global variable.
 You have declared it again in the same lexical scope, which seems superfluous.

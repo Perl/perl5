@@ -168,7 +168,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 		    Perl_warner(aTHX_ WARN_MISC,
 			"\"our\" variable %s redeclared", name);
 		    Perl_warner(aTHX_ WARN_MISC,
-			"(Did you mean \"local\" instead of \"our\"?)\n");
+			"\t(Did you mean \"local\" instead of \"our\"?)\n");
 		    break;
 		}
 	    } while ( off-- > 0 );
@@ -5711,7 +5711,7 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	    Perl_warner(aTHX_ WARN_DEPRECATED,
 			"defined(@array) is deprecated");
 	    Perl_warner(aTHX_ WARN_DEPRECATED,
-			"(Maybe you should just omit the defined()?)\n");
+			"\t(Maybe you should just omit the defined()?)\n");
 	break;
 	case OP_RV2HV:
 	    break;                      /* Globals via GV can be undef */ 
@@ -5719,7 +5719,7 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	    Perl_warner(aTHX_ WARN_DEPRECATED,
 			"defined(%%hash) is deprecated");
 	    Perl_warner(aTHX_ WARN_DEPRECATED,
-			"(Maybe you should just omit the defined()?)\n");
+			"\t(Maybe you should just omit the defined()?)\n");
 	    break;
 	default:
 	    /* no warning */
@@ -6562,7 +6562,7 @@ Perl_peep(pTHX_ register OP *o)
 		    Perl_warner(aTHX_ WARN_EXEC,
 				"Statement unlikely to be reached");
 		    Perl_warner(aTHX_ WARN_EXEC,
-				"(Maybe you meant system() when you said exec()?)\n");
+				"\t(Maybe you meant system() when you said exec()?)\n");
 		    CopLINE_set(PL_curcop, oldline);
 		}
 	    }
