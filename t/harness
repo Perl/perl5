@@ -67,6 +67,7 @@ if (@ARGV) {
 		    push @tests, File::Spec->catfile($updir, $1);
 		}
 	    }
+	    close MANI;
 	} else {
 	    warn "$0: cannot open $mani: $!\n";
 	}

@@ -89,6 +89,7 @@ unless (@ARGV) {
 		}
 	    }
 	}
+	close MANI;
     } else {
         warn "$0: cannot open $mani: $!\n";
     }
