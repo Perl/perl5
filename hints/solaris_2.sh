@@ -173,10 +173,28 @@ END
 
 	# See if ld(1) is GNU ld(1).  GNU ld(1) won't work for this job.
 	# Recompute $verbose since we may have just changed $cc.
-	verbose=`${cc:-cc} -v -o try try.c 2>&1`
+	verbose=`${cc:-cc} -v -o try try.c 2>&1 | grep ld 2>&1`
 	if echo "$verbose" | grep ' /usr/ccs/bin/ld ' >/dev/null 2>&1; then
 	    :
 	else
+        # It's not /usr/ccs/bin/ld - but it might be egcs's ld wrapper,
+        # which calls /usr/ccs/bin/ld in turn. Passing -V to it will
+        # make it show its true colors.
+
+	    myld=`echo $verbose| grep ld | awk '/\/ld/ {print $1}'`
+            # This assumes that gcc's output will not change, and that
+            # /full/path/to/ld will be the first word of the output.
+
+            # all Solaris versions of ld I've seen contain the magic
+            # string used in the grep below.
+            if $myld -V 2>&1 | grep "ld: Software Generation Utilities" >/dev/null 2>&1; then
+                cat <<END >&2
+
+Aha. You're using egcs and /usr/ccs/bin/ld.
+
+END
+
+            else
 	    cat <<END >&2
 
 NOTE: You are using GNU ld(1).  GNU ld(1) will not build Perl.
@@ -185,6 +203,7 @@ in your ${cc:-cc} command.  (Note that the trailing "/" is required.)
 
 END
 	    cc="${cc:-cc} -B/usr/ccs/bin/"
+            fi
 	fi
 
 else
