@@ -1,6 +1,9 @@
-/* $Header: str.c,v 2.0 88/06/05 00:11:07 root Exp $
+/* $Header: str.c,v 2.0.1.1 88/06/28 16:38:11 root Exp $
  *
  * $Log:	str.c,v $
+ * Revision 2.0.1.1  88/06/28  16:38:11  root
+ * patch1: autoincrement of '' didn't work right.
+ * 
  * Revision 2.0  88/06/05  00:11:07  root
  * Baseline version 2.0.
  * 
@@ -468,6 +471,7 @@ register STR *str;
     if (!str->str_pok || !*str->str_ptr) {
 	str->str_nval = 1.0;
 	str->str_nok = 1;
+	str->str_pok = 0;
 	return;
     }
     d = str->str_ptr;

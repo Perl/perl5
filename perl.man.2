@@ -1,7 +1,13 @@
 ''' Beginning of part 2
-''' $Header: perl.man.2,v 2.0 88/06/05 00:09:30 root Exp $
+''' $Header: perl.man.2,v 2.0.1.1 88/06/28 16:31:49 root Exp $
 '''
 ''' $Log:	perl.man.2,v $
+''' Revision 2.0.1.1  88/06/28  16:31:49  root
+''' patch1: fixed some quotes
+''' patch1: clarified semantics of study
+''' patch1: added example of y with short second string
+''' patch1: added example of unlink with <*>
+''' 
 ''' Revision 2.0  88/06/05  00:09:30  root
 ''' Baseline version 2.0.
 ''' 
@@ -99,7 +105,7 @@ Returns 1 for success, 0 otherwise.
 .Ip "local(LIST)" 8 4
 Declares the listed (scalar) variables to be local to the enclosing block,
 subroutine or eval.
-(The "do 'filename';" operator also counts as an eval.)
+(The \*(L"do 'filename';\*(R" operator also counts as an eval.)
 This operator works by saving the current values of those variables in LIST
 on a hidden stack and restoring them upon exiting the block, subroutine or eval.
 The LIST may be assigned to if desired, which allows you to initialize
@@ -226,7 +232,7 @@ Examples:
 
 .fi
 You may also, in the Bourne shell tradition, specify an EXPR beginning
-with ">&", in which case the rest of the string
+with \*(L">&\*(R", in which case the rest of the string
 is interpreted as the name of a filehandle
 (or file descriptor, if numeric) which is to be duped and opened.
 Here is a script that saves, redirects, and restores stdout and stdin:
@@ -256,7 +262,7 @@ Here is a script that saves, redirects, and restores stdout and stdin:
 	print stderr "stderr 2\en";
 
 .fi
-If you open a pipe on the command "-", i.e. either "|-" or "-|",
+If you open a pipe on the command \*(L"-\*(R", i.e. either \*(L"|-\*(R" or \*(L"-|\*(R",
 then there is an implicit fork done, and the return value of open
 is the pid of the child within the parent process, and 0 within the child
 process.
@@ -304,7 +310,7 @@ If LIST is also omitted, prints $_ to stdout.
 To set the default output channel to something other than stdout use the select operation.
 .Ip "printf FILEHANDLE LIST" 8 9
 .Ip "printf LIST" 8
-Equivalent to a "print FILEHANDLE sprintf(LIST)".
+Equivalent to a \*(L"print FILEHANDLE sprintf(LIST)\*(R".
 .Ip "push(ARRAY,LIST)" 8 7
 Treats ARRAY (@ is optional) as a stack, and pushes the values of LIST
 onto the end of ARRAY.
@@ -559,11 +565,19 @@ Typically used as follows:
 Takes extra time to study SCALAR ($_ if unspecified) in anticipation of
 doing many pattern matches on the string before it is next modified.
 This may or may not save time, depending on the nature and number of patterns
-you are searching on\*(--you probably want to compare runtimes with and
+you are searching on, and on the distribution of character frequencies in
+the string to be searched\*(--you probably want to compare runtimes with and
 without it to see which runs faster.
 Those loops which scan for many short constant strings (including the constant
 parts of more complex patterns) will benefit most.
-For example, a loop which inserts index producing entries before an line
+(The way study works is this: a linked list of every character in the string
+to be searched is made, so we know, for example, where all the `k' characters
+are.
+From each search string, the rarest character is selected, based on some
+static frequency tables constructed from some C programs and English text.
+Only those places that contain this \*(L"rarest\*(R" character are examined.)
+.Sp
+For example, here is a loop which inserts index producing entries before an line
 containing a certain pattern:
 .nf
 
@@ -575,6 +589,37 @@ containing a certain pattern:
 		print ".IX blurfl\en" if /\ebblurfl\eb/;
 		.\|.\|.
 		print;
+	}
+
+.fi
+In searching for /\ebfoo\eb/, only those locations in $_ that contain `f'
+will be looked at, because `f' is rarer than `o'.
+In general, this is a big win except in pathological cases.
+The only question is whether it saves you more time than it took to build
+the linked list in the first place.
+.Sp
+Note that if you have to look for strings that you don't know till runtime,
+you can build an entire loop as a string and eval that to avoid recompiling
+all your patterns all the time.
+Together with setting $/ to input entire files as one record, this can
+be very fast, often faster than specialized programs like fgrep.
+The following scans a list of files (@files)
+for a list of words (@words), and prints out the names of those files that
+contain a match:
+.nf
+
+.ne 12
+	$search = 'while (<>) { study;';
+	foreach $word (@words) {
+	    $search .= "\e++$seen{\e$ARGV} if /\eb$word\eb/;\en";
+	}
+	$search .= "}";
+	@ARGV = @files;
+	$/ = "\e177";		# something that doesn't occur
+	eval $search;		# this screams
+	$/ = "\en";		# put back to normal input delim
+	foreach $file (sort keys(seen)) {
+	    print $file,"\en";
 	}
 
 .fi
@@ -639,6 +684,8 @@ Examples:
 
     ($HOST = $host) =~ tr/a-z/A-Z/;
 
+    y/\e001-@[-_{-\e177/ /;	\h'|3i'# change non-alphas to space
+
 .fi
 .Ip "umask(EXPR)" 8 3
 Sets the umask for the process and returns the old one.
@@ -650,6 +697,7 @@ Returns the number of files successfully deleted.
 .ne 2
 	$cnt = unlink 'a','b','c';
 	unlink @goners;
+	unlink <*.bak>;
 
 .fi
 Note: unlink will not delete directories unless you are superuser and the \-U
@@ -671,7 +719,7 @@ The first two elements of the list must be the NUMERICAL access and
 modification times, in that order.
 Returns the number of files successfully changed.
 The inode modification time of each file is set to the current time.
-Example of a "touch" command:
+Example of a \*(L"touch\*(R" command:
 .nf
 
 .ne 3
@@ -769,7 +817,7 @@ Any arguments passed to the routine come in as array @_,
 that is ($_[0], $_[1], .\|.\|.).
 The return value of the subroutine is the value of the last expression
 evaluated.
-To create local variables see the "local" operator.
+To create local variables see the \*(L"local\*(R" operator.
 .PP
 A subroutine is called using the
 .I do
@@ -830,7 +878,7 @@ The patterns used in pattern matching are regular expressions such as
 those supplied in the Version 8 regexp routines.
 (In fact, the routines are derived from Henry Spencer's freely redistributable
 reimplementation of the V8 routines.)
-In addition, \ew matches an alphanumeric character (including "_") and \eW a nonalphanumeric.
+In addition, \ew matches an alphanumeric character (including \*(L"_\*(R") and \eW a nonalphanumeric.
 Word boundaries may be matched by \eb, and non-boundaries by \eB.
 A whitespace character is matched by \es, non-whitespace by \eS.
 A numeric character is matched by \ed, non-numeric by \eD.
@@ -1011,7 +1059,7 @@ field and forgetting to zero it.
 The following names have special meaning to
 .IR perl .
 I could have used alphabetic symbols for some of these, but I didn't want
-to take the chance that someone would say reset "a-zA-Z" and wipe them all
+to take the chance that someone would say reset \*(L"a-zA-Z\*(R" and wipe them all
 out.
 You'll just have to suffer along with these silly symbols.
 Most of them have reasonable mnemonics, or analogues in one of the shells.
@@ -1167,7 +1215,7 @@ to set the exit value for the die operator.
 .Ip $@ 8 2
 The error message from the last eval command.
 If null, the last eval parsed and executed correctly.
-(Mnemonic: Where was the syntax error "at"?)
+(Mnemonic: Where was the syntax error \*(L"at\*(R"?)
 .Ip $< 8 2
 The real uid of this process.
 (Mnemonic: it's the uid you came FROM, if you're running setuid.)
@@ -1206,9 +1254,9 @@ $ARGV[0] is the first argument, NOT the command name.
 See $0 for the command name.
 .Ip @INC 8 3
 The array INC contains the list of places to look for perl scripts to be
-evaluated by the "do EXPR" command.
+evaluated by the \*(L"do EXPR\*(R" command.
 It initially consists of the arguments to any -I command line switches, followed
-by the default perl library, probably "/usr/local/lib/perl".
+by the default perl library, probably \*(L"/usr/local/lib/perl\*(R".
 .Ip $ENV{expr} 8 2
 The associative array ENV contains your current environment.
 Setting a value in ENV changes the environment for child processes.

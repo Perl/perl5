@@ -1,7 +1,11 @@
 .rn '' }`
-''' $Header: perl.man.1,v 2.0 88/06/05 00:09:23 root Exp $
+''' $Header: perl.man.1,v 2.0.1.1 88/06/28 16:28:09 root Exp $
 ''' 
 ''' $Log:	perl.man.1,v $
+''' Revision 2.0.1.1  88/06/28  16:28:09  root
+''' patch1: fixed some quotes
+''' patch1: clarified syntax of LIST
+''' 
 ''' Revision 2.0  88/06/05  00:09:23  root
 ''' Baseline version 2.0.
 ''' 
@@ -292,7 +296,7 @@ the variable $running_under_some_shell is never true.
 .TP 5
 .B \-U
 allows perl to do unsafe operations.
-Currently the only "unsafe" operation is the unlinking of directories while
+Currently the only \*(L"unsafe\*(R" operation is the unlinking of directories while
 running as superuser.
 .TP 5
 .B \-v
@@ -731,8 +735,8 @@ is the same as
 .PP
 The foreach loop iterates over a normal array value and sets the variable
 VAR to be each element of the array in turn.
-The "foreach" keyword is actually identical to the "for" keyword,
-so you can use "foreach" for readability or "for" for brevity.
+The \*(L"foreach\*(R" keyword is actually identical to the \*(L"for\*(R" keyword,
+so you can use \*(L"foreach\*(R" for readability or \*(L"for\*(R" for brevity.
 If VAR is omitted, $_ is set to each value.
 If ARRAY is an actual array (as opposed to an expression returning an array
 value), you can modify each element of the array
@@ -909,8 +913,8 @@ AFTER which the range operator becomes false again.
 (It doesn't become false till the next time the range operator evaluated.
 It can become false on the same evaluation it became true, but it still returns
 true once.)
-The right operand is not evaluated while the operator is in the "false" state,
-and the left operand is not evaluated while the operator is in the "true" state.
+The right operand is not evaluated while the operator is in the \*(L"false\*(R" state,
+and the left operand is not evaluated while the operator is in the \*(L"true\*(R" state.
 The .. operator is primarily intended for doing line number ranges after
 the fashion of \fIsed\fR or \fIawk\fR.
 The precedence is a little lower than || and &&.
@@ -1057,6 +1061,7 @@ Some of these operations take a LIST as an argument.
 Such a list can consist of any combination of scalar arguments or arrays;
 the arrays will be included in the list as if each individual element were
 interpolated at that point in the list.
+Elements of the LIST should be separated by commas.
 .Ip "/PATTERN/i" 8 4
 Searches a string for a pattern, and returns true (1) or false ('').
 If no string is specified via the =~ or !~ operator,
@@ -1234,9 +1239,9 @@ Equivalent examples:
 If the value of EXPR does not end in a newline, the current script line
 number and input line number (if any) are also printed, and a newline is
 supplied.
-Hint: sometimes appending ", stopped" to your message will cause it to make
-better sense when the string "at foo line 123" is appended.
-Suppose you are running script "canasta".
+Hint: sometimes appending \*(L", stopped\*(R" to your message will cause it to make
+better sense when the string \*(L"at foo line 123\*(R" is appended.
+Suppose you are running script \*(L"canasta\*(R".
 .nf
 
 .ne 7
@@ -1267,7 +1272,7 @@ of the array in front of each array.
 (See the section on subroutines later on.)
 SUBROUTINE may be a scalar variable, in which case the variable contains
 the name of the subroutine to execute.
-The parentheses are required to avoid confusion with the next form of "do".
+The parentheses are required to avoid confusion with the next form of \*(L"do\*(R".
 .Ip "do EXPR" 8 3
 Uses the value of EXPR as a filename and executes the contents of the file
 as a perl script.
@@ -1287,7 +1292,7 @@ It's the same, however, in that it does reparse the file every time you
 call it, so if you are going to use the file inside a loop you might prefer
 to use #include, at the expense of a little more startup time.
 (The main problem with #include is that cpp doesn't grok # comments--a
-workaround is to use ";#" for standalone comments.)
+workaround is to use \*(L";#\*(R" for standalone comments.)
 Note that the following are NOT equivalent:
 .nf
 

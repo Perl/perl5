@@ -11,7 +11,7 @@ case $CONFIG in
     ;;
 esac
 echo "Extracting config.h (with variable substitutions)"
-cat <<!GROK!THIS! >config.h
+sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
 /* config.h
  * This file was produced by running the config.h.SH script, which
  * gets its values from config.sh, which is generally produced by
@@ -70,6 +70,21 @@ cat <<!GROK!THIS! >config.h
  *	to encrypt passwords and the like.
  */
 #$d_crypt	CRYPT		/**/
+
+/* DOSUID:
+ *	This symbol, if defined, indicates that the C program should
+ *	check the script that it is executing for setuid/setgid bits, and
+ *	attempt to emulate setuid/setgid on systems that have disabled
+ *	setuid #! scripts because the kernel can't do it securely.
+ *	It is up to the package designer to make sure that this emulation
+ *	is done securely.  Among other things, it should do an fstat on
+ *	the script it just opened to make sure it really is a setuid/setgid
+ *	script, it should make sure the arguments passed correspond exactly
+ *	to the argument on the #! line, and it should not trust any
+ *	subprocesses to which it must pass the filename rather than the
+ *	file descriptor of the script to be executed.
+ */
+#$d_dosuid DOSUID		/**/
 
 /* FCHMOD:
  *	This symbol, if defined, indicates that the fchmod routine is available

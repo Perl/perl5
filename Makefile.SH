@@ -18,11 +18,20 @@ case "$d_symlink" in
 *) sln='ln';;
 esac
 
+case "$d_dosuid" in
+*define*) suidperl='suidperl' ;;
+*) suidperl='';;
+esac
+
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 2.0 88/06/05 00:07:54 root Exp $
+# $Header: Makefile.SH,v 2.0.1.1 88/06/28 16:26:04 root Exp $
 #
 # $Log:	Makefile.SH,v $
+# Revision 2.0.1.1  88/06/28  16:26:04  root
+# patch1: support for DOSUID
+# patch1: realclean now knows about ~ extension
+# 
 # Revision 2.0  88/06/05  00:07:54  root
 # Baseline version 2.0.
 # 
@@ -42,12 +51,12 @@ mallocobj = $mallocobj
 SLN = $sln
 
 libs = $libnm -lm
+
+public = perl perldb $suidperl
+
 !GROK!THIS!
 
 cat >>Makefile <<'!NO!SUBS!'
-
-public = perl perldb
-
 private = 
 
 manpages = perl.man perldb.man
@@ -67,7 +76,7 @@ c2 = perly.c regexp.c stab.c str.c toke.c util.c version.c
 c = $(c1) $(c2)
 
 obj1 = arg.o array.o cmd.o dump.o eval.o form.o hash.o $(mallocobj)
-obj2 = perly.o regexp.o stab.o str.o toke.o util.o version.o
+obj2 = regexp.o stab.o str.o toke.o util.o version.o
 
 obj = $(obj1) $(obj2)
 
@@ -84,8 +93,28 @@ SHELL = /bin/sh
 all: $(public) $(private) $(util)
 	touch all
 
-perl: $(obj) perl.o
-	$(CC) $(LDFLAGS) $(LARGE) $(obj) perl.o $(libs) -o perl
+perl: perly.o $(obj) perl.o
+	$(CC) $(LDFLAGS) $(LARGE) perly.o $(obj) perl.o $(libs) -o perl
+
+!NO!SUBS!
+
+case "$d_dosuid" in
+*define*)
+    cat >>Makefile <<'!NO!SUBS!'
+
+suidperl: sperly.o $(obj) perl.o
+	$(CC) $(LDFLAGS) $(LARGE) sperly.o $(obj) perl.o $(libs) -o suidperl
+
+sperly.o: perly.c
+	/bin/rm -f sperly.c
+	ln perly.c sperly.c
+	$(CC) -c -DIAMSUID $(CFLAGS) $(LARGE) sperly.c
+	/bin/rm -f sperly.c
+!NO!SUBS!
+    ;;
+esac
+
+cat >>Makefile <<'!NO!SUBS!'
 
 perl.c perly.h: perl.y
 	@ echo Expect 37 shift/reduce errors...
@@ -108,10 +137,21 @@ install: perl perl.man
 	export PATH || exit 1
 	- mv $(bin)/perl $(bin)/perl.old 2>/dev/null
 	- if test `pwd` != $(bin); then cp $(public) $(bin); fi
-	cd $(bin); \
+	- cd $(bin); \
 for pub in $(public); do \
 chmod +x `basename $$pub`; \
 done
+!NO!SUBS!
+
+case "$d_dosuid" in
+*define*)
+    cat >>Makefile <<'!NO!SUBS!'
+	- chmod 4711 $(bin)/suidperl 2>/dev/null
+!NO!SUBS!
+    ;;
+esac
+
+cat >>Makefile <<'!NO!SUBS!'
 	- test $(bin) = /usr/bin || rm -f /usr/bin/perl
 	- test $(bin) = /usr/bin || $(SLN) $(bin)/perl /usr/bin || cp $(bin)/perl /usr/bin
 	chmod +x makedir
@@ -134,7 +174,7 @@ clean:
 	rm -f *.o
 
 realclean:
-	rm -f perl *.orig */*.orig *.o core $(addedbyconf)
+	rm -f perl *.orig */*.orig *~ */*~ *.o core $(addedbyconf)
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.
@@ -163,7 +203,7 @@ shlist:
 	echo $(sh) | tr ' ' '\012' >.shlist
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
-$(obj):
+perly.o $(obj):
 	@ echo "You haven't done a "'"make depend" yet!'; exit 1
 makedepend: makedepend.SH
 	/bin/sh makedepend.SH

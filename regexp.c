@@ -7,9 +7,12 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regexp.c,v 2.0 88/06/05 00:10:45 root Exp $
+/* $Header: regexp.c,v 2.0.1.1 88/06/28 16:37:19 root Exp $
  *
  * $Log:	regexp.c,v $
+ * Revision 2.0.1.1  88/06/28  16:37:19  root
+ * patch1: removed redundant debugging code
+ * 
  * Revision 2.0  88/06/05  00:10:45  root
  * Baseline version 2.0.
  * 
@@ -398,11 +401,6 @@ int rare;
 			if (len > !(sawstudy))
 				fbmcompile(r->regmust);
 			*(long*)&r->regmust->str_nval = 100;
-#ifdef DEBUGGING
-			if (debug & 512)
-			    fprintf(stderr,"must = '%s' back=%d\n",
-				longest,back);
-#endif
 		}
 		else
 			str_free(longest);

@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 2.0 88/06/05 00:07:37 root Exp $
+# $Header: Configure,v 2.0.1.1 88/06/28 16:24:02 root Exp $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -76,6 +76,7 @@ cppminus=''
 d_bcopy=''
 d_charsprf=''
 d_crypt=''
+d_dosuid=''
 d_fchmod=''
 d_fchown=''
 d_getgrps=''
@@ -124,7 +125,6 @@ voidflags=''
 defvoidused=''
 privlib=''
 CONFIG=''
-
 : set package name
 package=perl
 
@@ -134,7 +134,7 @@ echo "Beginning of configuration questions for $package kit."
 echo " "
 
 define='define'
-undef='/*undef'
+undef='undef'
 libpth='/usr/lib /usr/local/lib /lib'
 smallmach='pdp11 i8086 z8000 i80286 iAPX286'
 rmlist='kit[1-9]isdone kit[1-9][0-9]isdone'
@@ -480,11 +480,19 @@ else
 	echo " "
 	echo "nm didn't seem to work right."
 	echo "Trying ar instead..."
-	if ar t $libc | sed -e 's/\.o$//' > libc.list; then
+	rmlist="$rmlist libc.tmp"
+	if ar t $libc > libc.tmp; then
+	    sed -e 's/\.o$//' < libc.tmp > libc.list
 	    echo "Ok."
 	else
-	    echo "That didn't work either.  Giving up."
-	    exit 1
+	    echo "ar didn't seem to work right."
+	    echo "Maybe this is a Cray...trying bld instead..."
+	    if bld t $libc | sed -e 's/.*\///' -e 's/\.o:.*$//' > libc.list; then
+		echo "Ok."
+	    else
+	    	echo "That didn't work either.  Giving up."
+	    	exit 1
+	    fi
 	fi
     fi
 fi
@@ -621,42 +629,42 @@ ABC.XYZ
 EOT
 echo 'Maybe "'$cpp'" will work...'
 $cpp <testcpp.c >testcpp.out 2>&1
-if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
     echo "Yup, it does."
     cppstdin="$cpp"
     cppminus='';
 else
     echo 'Nope, maybe "'$cpp' -" will work...'
     $cpp - <testcpp.c >testcpp.out 2>&1
-    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+    if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 	echo "Yup, it does."
 	cppstdin="$cpp"
 	cppminus='-';
     else
 	echo 'No such luck...maybe "cc -E" will work...'
 	cc -E <testcpp.c >testcpp.out 2>&1
-	if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 	    echo "It works!"
 	    cppstdin='cc -E'
 	    cppminus='';
 	else
 	    echo 'Nixed again...maybe "cc -E -" will work...'
 	    cc -E - <testcpp.c >testcpp.out 2>&1
-	    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+	    if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 		echo "Hooray, it works!  I was beginning to wonder."
 		cppstdin='cc -E'
 		cppminus='-';
 	    else
 		echo 'Nope...maybe "cc -P" will work...'
 		cc -P <testcpp.c >testcpp.out 2>&1
-		if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+		if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 		    echo "Yup, that does."
 		    cppstdin='cc -P'
 		    cppminus='';
 		else
 		    echo 'Nope...maybe "cc -P -" will work...'
 		    cc -P - <testcpp.c >testcpp.out 2>&1
-		    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+		    if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 			echo "Yup, that does."
 			cppstdin='cc -P'
 			cppminus='-';
@@ -666,7 +674,7 @@ else
 			'') ;;
 			*) $cppstdin $cppminus <testcpp.c >testcpp.out 2>&1;;
 			esac
-			if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+			if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 			    echo "Hooray, you did!  I was beginning to wonder."
 			else
 			    echo 'Uh-uh.  Time to get fancy...'
@@ -674,7 +682,7 @@ else
 			    cppstdin='(cat >/tmp/$$.c; cc -E /tmp/$$.c; rm /tmp/$$.c)'
 			    cppminus='';
 			    $cppstdin <testcpp.c >testcpp.out 2>&1
-			    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+			    if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 				echo "Eureka!."
 			    else
 				dflt=blurfl
@@ -683,7 +691,7 @@ else
 				. myread
 				cppstdin="$ans"
 				$cppstdin <testcpp.c >testcpp.out 2>&1
-				if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+				if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 				    echo "OK, that will do."
 				else
 				    echo "Sorry, I can't get that to work.  Go find one."
@@ -732,6 +740,37 @@ else
     echo 'crypt() not found.'
     d_crypt="$undef"
 fi
+
+: now see if they want to do setuid emulation
+case "$d_dosuid" in
+'') if bsd; then
+	dflt=y
+    else
+	dflt=n
+    fi
+    ;;
+*undef*) dflt=n;;
+*) dflt=y;;
+esac
+cat <<EOM
+ 
+Some sites have disabled setuid #! scripts because of a bug in the kernel
+that prevents them from being secure.  If you are on such a system, the
+setuid/setgid bits on scripts are currently useless.  It is possible for
+$package to detect those bits and emulate setuid/setgid in a secure fashion
+until a better solution is devised for the kernel problem.
+
+EOM
+rp="Do you want to do setuid/setgid emulation? [$dflt]"
+echo $n "$rp $c"
+. myread
+case "$ans" in
+'') $ans="$dflt";;
+esac
+case "$ans" in
+y*)  d_dosuid="$define";;
+*) d_dosuid="$undef";;
+esac
 
 : see if fchmod exists
 echo " "
@@ -1334,8 +1373,8 @@ none)
 *split)
     case "$split" in
     '') 
-	if $contains '-i' $mansrc/ld.1 >/dev/null 2>&1 || \
-	   $contains '-i' $mansrc/cc.1 >/dev/null 2>&1; then
+	if $contains '\-i' $mansrc/ld.1 >/dev/null 2>&1 || \
+	   $contains '\-i' $mansrc/cc.1 >/dev/null 2>&1; then
 	    dflt='-i'
 	else
 	    dflt='none'
@@ -1594,6 +1633,7 @@ cppminus='$cppminus'
 d_bcopy='$d_bcopy'
 d_charsprf='$d_charsprf'
 d_crypt='$d_crypt'
+d_dosuid='$d_dosuid'
 d_fchmod='$d_fchmod'
 d_fchown='$d_fchown'
 d_getgrps='$d_getgrps'
@@ -1643,7 +1683,7 @@ defvoidused='$defvoidused'
 privlib='$privlib'
 CONFIG=true
 EOT
- 
+
 CONFIG=true
 
 echo " "
@@ -1716,5 +1756,8 @@ else
 fi
 
 $rm -f kit*isdone
+: the following is currently useless
 cd UU && $rm -f $rmlist
+: since this removes it all anyway
+cd .. && $rm -rf UU
 : end of Configure

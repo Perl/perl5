@@ -1,6 +1,9 @@
-char rcsid[] = "$Header: perly.c,v 2.0 88/06/05 00:09:56 root Exp $";
+char rcsid[] = "$Header: perly.c,v 2.0.1.1 88/06/28 16:36:49 root Exp $";
 /*
  * $Log:	perly.c,v $
+ * Revision 2.0.1.1  88/06/28  16:36:49  root
+ * patch1: added DOSUID code
+ * 
  * Revision 2.0  88/06/05  00:09:56  root
  * Baseline version 2.0.
  * 
@@ -26,6 +29,10 @@ register char **env;
     register char *s;
     char *index(), *strcpy(), *getenv();
     bool dosearch = FALSE;
+#ifdef DOSUID
+    char **origargv = argv;
+    char *validarg = "";
+#endif
 
     uid = (int)getuid();
     euid = (int)geteuid();
@@ -36,15 +43,22 @@ register char **env;
     for (argc--,argv++; argc; argc--,argv++) {
 	if (argv[0][0] != '-' || !argv[0][1])
 	    break;
+#ifdef DOSUID
+    if (*validarg)
+	validarg = " PHOOEY ";
+    else
+	validarg = argv[0];
+#endif
+	s = argv[0]+1;
       reswitch:
-	switch (argv[0][1]) {
+	switch (*s) {
 	case 'a':
 	    minus_a = TRUE;
-	    strcpy(argv[0], argv[0]+1);
+	    s++;
 	    goto reswitch;
 #ifdef DEBUGGING
 	case 'D':
-	    debug = atoi(argv[0]+2);
+	    debug = atoi(s+1);
 #ifdef YYDEBUG
 	    yydebug = (debug & 1);
 #endif
@@ -62,14 +76,15 @@ register char **env;
 	    argc--,argv++;
 	    break;
 	case 'i':
-	    inplace = savestr(argv[0]+2);
+	    inplace = savestr(s+1);
 	    argvoutstab = stabent("ARGVOUT",TRUE);
 	    break;
 	case 'I':
-	    str_cat(str,argv[0]);
+	    str_cat(str,"-");
+	    str_cat(str,s);
 	    str_cat(str," ");
-	    if (argv[0][2]) {
-		apush(incstab->stab_array,str_make(argv[0]+2));
+	    if (s[1]) {
+		apush(incstab->stab_array,str_make(s+1));
 	    }
 	    else {
 		apush(incstab->stab_array,str_make(argv[1]));
@@ -80,34 +95,34 @@ register char **env;
 	    break;
 	case 'n':
 	    minus_n = TRUE;
-	    strcpy(argv[0], argv[0]+1);
+	    s++;
 	    goto reswitch;
 	case 'p':
 	    minus_p = TRUE;
-	    strcpy(argv[0], argv[0]+1);
+	    s++;
 	    goto reswitch;
 	case 'P':
 	    preprocess = TRUE;
-	    strcpy(argv[0], argv[0]+1);
+	    s++;
 	    goto reswitch;
 	case 's':
 	    doswitches = TRUE;
-	    strcpy(argv[0], argv[0]+1);
+	    s++;
 	    goto reswitch;
 	case 'S':
 	    dosearch = TRUE;
-	    strcpy(argv[0], argv[0]+1);
+	    s++;
 	    goto reswitch;
 	case 'U':
 	    unsafe = TRUE;
-	    strcpy(argv[0], argv[0]+1);
+	    s++;
 	    goto reswitch;
 	case 'v':
 	    version();
 	    exit(0);
 	case 'w':
 	    dowarn = TRUE;
-	    strcpy(argv[0], argv[0]+1);
+	    s++;
 	    goto reswitch;
 	case '-':
 	    argc--,argv++;
@@ -115,7 +130,7 @@ register char **env;
 	case 0:
 	    break;
 	default:
-	    fatal("Unrecognized switch: %s",argv[0]);
+	    fatal("Unrecognized switch: -%s",s);
 	}
     }
   switch_end:
@@ -186,15 +201,102 @@ register char **env;
  -e 's/^#.*//' \
  %s | %s -C %s %s",
 	  argv[0], CPPSTDIN, str_get(str), CPPMINUS);
+#ifdef IAMSUID
+	if (euid != uid && !euid)	/* if running suidperl */
+	    seteuid(uid);		/* musn't stay setuid root */
+#endif
 	rsfp = popen(buf,"r");
     }
     else if (!*argv[0])
 	rsfp = stdin;
     else
 	rsfp = fopen(argv[0],"r");
-    if (rsfp == Nullfp)
+    if (rsfp == Nullfp) {
+#ifdef DOSUID
+#ifndef IAMSUID
+	if (euid && stat(filename,&statbuf) >= 0 &&
+	  statbuf.st_mode & (S_ISUID|S_ISGID)) {
+	    execvp("suidperl", origargv);	/* try again */
+	    fatal("Can't do setuid\n");
+	}
+#endif
+#endif
 	fatal("Perl script \"%s\" doesn't seem to exist",filename);
+    }
     str_free(str);		/* free -I directories */
+
+    /* do we need to emulate setuid on scripts? */
+
+    /* This code is for those BSD systems that have setuid #! scripts disabled
+     * in the kernel because of a security problem.  Merely defining DOSUID
+     * in perl will not fix that problem, but if you have disabled setuid
+     * scripts in the kernel, this will attempt to emulate setuid and setgid
+     * on scripts that have those now-otherwise-useless bits set.  The setuid
+     * root version must be called suidperl.  If regular perl discovers that
+     * it has opened a setuid script, it calls suidperl with the same argv
+     * that it had.  If suidperl finds that the script it has just opened
+     * is NOT setuid root, it sets the effective uid back to the uid.  We
+     * don't just make perl setuid root because that loses the effective
+     * uid we had before invoking perl, if it was different from the uid.
+     *
+     * DOSUID must be defined in both perl and suidperl, and IAMSUID must
+     * be defined in suidperl only.  suidperl must be setuid root.  The
+     * Configure script will set this up for you if you want it.
+     */
+#ifdef DOSUID
+    if (fstat(fileno(rsfp),&statbuf) < 0)	/* normal stat is insecure */
+	fatal("Can't stat script \"%s\"",filename);
+    if (statbuf.st_mode & (S_ISUID|S_ISGID)) {
+	int len;
+
+	if (access(filename,1))		/* as a double check */
+	    fatal("Permission denied");
+	if ((statbuf.st_mode & S_IFMT) != S_IFREG)
+	    fatal("Permission denied");
+	doswitches = FALSE;		/* -s is insecure in suid */
+	line++;
+	if (fgets(tokenbuf,sizeof tokenbuf, rsfp) == Nullch ||
+	  strnNE(tokenbuf,"#!",2) )	/* required even on Sys V */
+	    fatal("No #! line");
+	for (s = tokenbuf+2; !isspace(*s); s++) ;
+	if (strnNE(s-4,"perl",4))	/* sanity check */
+	    fatal("Not a perl script");
+	while (*s && isspace(*s)) s++;
+	/*
+	 * #! arg must be what we saw above.  They can invoke it by
+	 * mentioning suidperl explicitly, but they may not add any strange
+	 * arguments beyond what #! says if they do invoke suidperl that way.
+	 */
+	len = strlen(validarg);
+	if (strEQ(validarg," PHOOEY ") ||
+	    strnNE(s,validarg,len) || !isspace(s[len]))
+	    fatal("Arg must be \"%s\"\n",s);
+
+	if (euid) {	/* oops, we're not the setuid root perl */
+	    fclose(rsfp);
+#ifndef IAMSUID
+	    execvp("suidperl", origargv);	/* try again */
+#endif
+	    fatal("Can't do setuid\n");
+	}
+
+	if (statbuf.st_mode & S_ISUID && statbuf.st_uid != euid)
+	    seteuid(statbuf.st_uid);	/* all that for this */
+	else if (uid)			/* oops, mustn't run as root */
+	    seteuid(uid);
+	if (statbuf.st_mode & S_ISGID && statbuf.st_gid != getegid())
+	    setegid(statbuf.st_gid);
+	euid = (int)geteuid();
+	if (!cando(S_IEXEC,TRUE))
+	    fatal("Permission denied\n");	/* they can't do this */
+    }
+#ifdef IAMSUID
+    else if (preprocess)
+	fatal("-P not allowed for setuid/setgid script\n");
+    else
+	fatal("Script is not setuid/setgid in suidperl\n");
+#endif /* IAMSUID */
+#endif /* DOSUID */
 
     defstab = stabent("_",TRUE);
 

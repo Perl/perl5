@@ -1,6 +1,9 @@
-/* $Header: toke.c,v 2.0 88/06/05 00:11:16 root Exp $
+/* $Header: toke.c,v 2.0.1.1 88/06/28 16:39:50 root Exp $
  *
  * $Log:	toke.c,v $
+ * Revision 2.0.1.1  88/06/28  16:39:50  root
+ * patch1: tr/x/y/ can dump core if y is shorter than x
+ * 
  * Revision 2.0  88/06/05  00:11:16  root
  * Baseline version 2.0.
  * 
@@ -922,6 +925,7 @@ register char *s;
     register char *r;
     register char *tbl = safemalloc(256);
     register int i;
+    register int j;
 
     arg[2].arg_type = A_NULL;
     arg[2].arg_ptr.arg_cval = tbl;
@@ -942,10 +946,10 @@ register char *s;
 	safefree(r);
 	r = t;
     }
-    for (i = 0; t[i]; i++) {
-	if (!r[i])
-	    r[i] = r[i-1];
-	tbl[t[i] & 0377] = r[i];
+    for (i = 0, j = 0; t[i]; i++,j++) {
+	if (!r[j])
+	    --j;
+	tbl[t[i] & 0377] = r[j];
     }
     if (r != t)
 	safefree(r);
