@@ -1517,17 +1517,19 @@ PDP-11 or something?
 
 =item Filehandle %s opened only for input
 
-(W io) You tried to write on a read-only filehandle.  If you intended it
-to be a read-write filehandle, you needed to open it with "+<" or "+>"
-or "+>>" instead of with "<" or nothing.  If you intended only to write
-the file, use ">" or ">>".  See L<perlfunc/open>.
+(W io) You tried to write on a read-only filehandle.  If you intended
+it to be a read-write filehandle, you needed to open it with "+<" or
+"+>" or "+>>" instead of with "<" or nothing.  If you intended only to
+write the file, use ">" or ">>".  See L<perlfunc/open>.
 
 =item Filehandle %s opened only for output
 
-(W io) You tried to read from a filehandle opened only for writing.
-If you intended it to be a read/write filehandle, you needed to open it
+(W io) You tried to read from a filehandle opened only for writing, If
+you intended it to be a read/write filehandle, you needed to open it
 with "+<" or "+>" or "+>>" instead of with "<" or nothing.  If you
 intended only to read from the file, use "<".  See L<perlfunc/open>.
+Another possibility is that you attempted to open filedescriptor 0
+(also known as STDIN) for output (maybe you closed STDIN earlier?).
 
 =item Filehandle %s reopened as %s only for input
 
