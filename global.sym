@@ -262,6 +262,7 @@ magic_getsubstr
 magic_gettaint
 magic_getuvar
 magic_getvec
+magic_killbackrefs
 magic_len
 magic_mutexfree
 magic_nextpack
@@ -543,6 +544,7 @@ sv_reftype
 sv_replace
 sv_report_used
 sv_reset
+sv_rvweaken
 sv_setiv
 sv_setiv_mg
 sv_setnv

@@ -1489,6 +1489,8 @@
 #define magic_getuvar		pPerl->Perl_magic_getuvar
 #undef  magic_getvec
 #define magic_getvec		pPerl->Perl_magic_getvec
+#undef  magic_killbackrefs
+#define magic_killbackrefs	pPerl->Perl_magic_killbackrefs
 #undef  magic_len
 #define magic_len		pPerl->Perl_magic_len
 #undef  magic_methcall
@@ -2877,6 +2879,8 @@
 #define sv_2uv			pPerl->Perl_sv_2uv
 #undef  sv_add_arena
 #define sv_add_arena		pPerl->Perl_sv_add_arena
+#undef  sv_add_backref
+#define sv_add_backref		pPerl->Perl_sv_add_backref
 #undef  sv_backoff
 #define sv_backoff		pPerl->Perl_sv_backoff
 #undef  sv_bless
@@ -2915,6 +2919,8 @@
 #define sv_compile_2op		pPerl->Perl_sv_compile_2op
 #undef  sv_dec
 #define sv_dec			pPerl->Perl_sv_dec
+#undef  sv_del_backref
+#define sv_del_backref		pPerl->Perl_sv_del_backref
 #undef  sv_derived_from
 #define sv_derived_from		pPerl->Perl_sv_derived_from
 #undef  sv_dump
@@ -2979,6 +2985,8 @@
 #define sv_report_used		pPerl->Perl_sv_report_used
 #undef  sv_reset
 #define sv_reset		pPerl->Perl_sv_reset
+#undef  sv_rvweaken
+#define sv_rvweaken		pPerl->Perl_sv_rvweaken
 #undef  sv_setiv
 #define sv_setiv		pPerl->Perl_sv_setiv
 #undef  sv_setiv_mg

@@ -58,6 +58,8 @@ static void del_xnv _((XPVNV* p));
 static void del_xpv _((XPV* p));
 static void del_xrv _((XRV* p));
 static void sv_unglob _((SV* sv));
+static void sv_add_backref _((SV *tsv, SV *sv));
+static void sv_del_backref _((SV *sv));
 
 #ifndef PURIFY
 static void *my_safemalloc(MEM_SIZE size);
@@ -2769,6 +2771,9 @@ sv_magic(register SV *sv, SV *obj, int how, const char *name, I32 namlen)
     case '.':
 	mg->mg_virtual = &PL_vtbl_pos;
 	break;
+    case '<':
+	mg->mg_virtual = &PL_vtbl_backref;
+	break;
     case '~':	/* Reserved for use by extensions not perl internals.	*/
 	/* Useful for attaching extension internal data to perl vars.	*/
 	/* Note that multiple extensions may clash if magical scalars	*/
@@ -2815,6 +2820,63 @@ sv_unmagic(SV *sv, int type)
     }
 
     return 0;
+}
+
+SV *
+sv_rvweaken(SV *sv)
+{
+    SV *tsv;
+    if (!SvOK(sv))  /* let undefs pass */
+	return sv;
+    if (!SvROK(sv))
+	croak("Can't weaken a nonreference");
+    else if (SvWEAKREF(sv)) {
+	dTHR;
+	if (ckWARN(WARN_MISC))
+	    warner(WARN_MISC, "Reference is already weak");
+	return sv;
+    }
+    tsv = SvRV(sv);
+    sv_add_backref(tsv, sv);
+    SvWEAKREF_on(sv);
+    SvREFCNT_dec(tsv);              
+    return sv;
+}
+
+STATIC void
+sv_add_backref(SV *tsv, SV *sv)
+{
+    AV *av;
+    MAGIC *mg;
+    if (SvMAGICAL(tsv) && (mg = mg_find(tsv, '<')))
+	av = (AV*)mg->mg_obj;
+    else {
+	av = newAV();
+	sv_magic(tsv, (SV*)av, '<', NULL, 0);
+	SvREFCNT_dec(av);           /* for sv_magic */
+    }
+    av_push(av,sv);
+}
+
+STATIC void 
+sv_del_backref(SV *sv)
+{
+    AV *av;
+    SV **svp;
+    I32 i;
+    SV *tsv = SvRV(sv);
+    MAGIC *mg;
+    if (!SvMAGICAL(tsv) || !(mg = mg_find(tsv, '<')))
+	croak("panic: del_backref");
+    av = (AV *)mg->mg_obj;
+    svp = AvARRAY(av);
+    i = AvFILLp(av);
+    while (i >= 0) {
+	if (svp[i] == sv) {
+	    svp[i] = &PL_sv_undef; /* XXX */
+	}
+	i--;
+    }
 }
 
 void
@@ -3038,8 +3100,12 @@ sv_clear(register SV *sv)
 	/* FALL THROUGH */
     case SVt_PV:
     case SVt_RV:
-	if (SvROK(sv))
-	    SvREFCNT_dec(SvRV(sv));
+	if (SvROK(sv)) {
+	    if (SvWEAKREF(sv))
+	        sv_del_backref(sv);
+	    else
+	        SvREFCNT_dec(SvRV(sv));
+	}
 	else if (SvPVX(sv) && SvLEN(sv))
 	    Safefree(SvPVX(sv));
 	break;
@@ -4452,7 +4518,13 @@ void
 sv_unref(SV *sv)
 {
     SV* rv = SvRV(sv);
-    
+
+    if (SvWEAKREF(sv)) {
+    	sv_del_backref(sv);
+	SvWEAKREF_off(sv);
+	SvRV(sv) = 0;
+	return;
+    }
     SvRV(sv) = 0;
     SvROK_off(sv);
     if (SvREFCNT(rv) != 1 || SvREADONLY(rv))

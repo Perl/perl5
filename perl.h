@@ -2218,7 +2218,8 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_mutex,
 #endif
     want_vtbl_regdata,
-    want_vtbl_regdatum
+    want_vtbl_regdatum,
+    want_vtbl_backref
 };
 
 				/* Note: the lowest 8 bits are reserved for
@@ -2512,6 +2513,9 @@ EXT MGVTBL PL_vtbl_amagic =       {0,     magic_setamagic,
 EXT MGVTBL PL_vtbl_amagicelem =   {0,     magic_setamagic,
                                         0,      0,      magic_setamagic};
 
+EXT MGVTBL PL_vtbl_backref = 	  {0,	0,
+					0,	0,	magic_killbackrefs};
+
 #else /* !DOINIT */
 
 EXT MGVTBL PL_vtbl_sv;
@@ -2551,6 +2555,8 @@ EXT MGVTBL PL_vtbl_collxfrm;
 
 EXT MGVTBL PL_vtbl_amagic;
 EXT MGVTBL PL_vtbl_amagicelem;
+
+EXT MGVTBL PL_vtbl_backref;
 
 #endif /* !DOINIT */
 

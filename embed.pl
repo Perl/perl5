@@ -376,6 +376,8 @@ my @staticfuncs = qw(
     new_logop
     simplify_sort
     is_handle_constructor
+    sv_add_backref
+    sv_del_backref
     do_trans_CC_simple
     do_trans_CC_count
     do_trans_CC_complex

@@ -3188,6 +3188,9 @@ get_vtbl(int vtbl_id)
     case want_vtbl_amagicelem:
 	result = &PL_vtbl_amagicelem;
 	break;
+    case want_vtbl_backref:
+	result = &PL_vtbl_backref;
+	break;
     }
     return result;
 }

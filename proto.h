@@ -894,6 +894,8 @@ void *bset_obj_store _((void *obj, I32 ix));
 OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 void simplify_sort _((OP *o));
 bool is_handle_constructor _((OP *o, I32 argnum));
+void sv_add_backref _((SV *tsv, SV *sv));
+void sv_del_backref _((SV *sv));
 
 I32 do_trans_CC_simple _((SV *sv));
 I32 do_trans_CC_count _((SV *sv));
@@ -973,3 +975,5 @@ VIRTUAL char* sv_pv _((SV *sv));
 VIRTUAL void sv_force_normal _((SV *sv));
 VIRTUAL void tmps_grow _((I32 n));
 
+VIRTUAL SV* sv_rvweaken _((SV *));
+VIRTUAL int magic_killbackrefs _((SV *sv, MAGIC *mg));

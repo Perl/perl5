@@ -271,6 +271,7 @@
 #define magic_gettaint		Perl_magic_gettaint
 #define magic_getuvar		Perl_magic_getuvar
 #define magic_getvec		Perl_magic_getvec
+#define magic_killbackrefs	Perl_magic_killbackrefs
 #define magic_len		Perl_magic_len
 #define magic_mutexfree		Perl_magic_mutexfree
 #define magic_nextpack		Perl_magic_nextpack
@@ -896,6 +897,7 @@
 #define sv_replace		Perl_sv_replace
 #define sv_report_used		Perl_sv_report_used
 #define sv_reset		Perl_sv_reset
+#define sv_rvweaken		Perl_sv_rvweaken
 #define sv_setiv		Perl_sv_setiv
 #define sv_setiv_mg		Perl_sv_setiv_mg
 #define sv_setnv		Perl_sv_setnv
@@ -1314,6 +1316,7 @@
 #define magic_gettaint		CPerlObj::Perl_magic_gettaint
 #define magic_getuvar		CPerlObj::Perl_magic_getuvar
 #define magic_getvec		CPerlObj::Perl_magic_getvec
+#define magic_killbackrefs	CPerlObj::Perl_magic_killbackrefs
 #define magic_len		CPerlObj::Perl_magic_len
 #define magic_methcall		CPerlObj::Perl_magic_methcall
 #define magic_methcall		CPerlObj::Perl_magic_methcall
@@ -2008,6 +2011,7 @@
 #define sv_2pv_nolen		CPerlObj::Perl_sv_2pv_nolen
 #define sv_2uv			CPerlObj::Perl_sv_2uv
 #define sv_add_arena		CPerlObj::Perl_sv_add_arena
+#define sv_add_backref		CPerlObj::Perl_sv_add_backref
 #define sv_backoff		CPerlObj::Perl_sv_backoff
 #define sv_bless		CPerlObj::Perl_sv_bless
 #define sv_catpv		CPerlObj::Perl_sv_catpv
@@ -2027,6 +2031,7 @@
 #define sv_collxfrm		CPerlObj::Perl_sv_collxfrm
 #define sv_compile_2op		CPerlObj::Perl_sv_compile_2op
 #define sv_dec			CPerlObj::Perl_sv_dec
+#define sv_del_backref		CPerlObj::Perl_sv_del_backref
 #define sv_derived_from		CPerlObj::Perl_sv_derived_from
 #define sv_dump			CPerlObj::Perl_sv_dump
 #define sv_eq			CPerlObj::Perl_sv_eq
@@ -2059,6 +2064,7 @@
 #define sv_replace		CPerlObj::Perl_sv_replace
 #define sv_report_used		CPerlObj::Perl_sv_report_used
 #define sv_reset		CPerlObj::Perl_sv_reset
+#define sv_rvweaken		CPerlObj::Perl_sv_rvweaken
 #define sv_setiv		CPerlObj::Perl_sv_setiv
 #define sv_setiv_mg		CPerlObj::Perl_sv_setiv_mg
 #define sv_setnv		CPerlObj::Perl_sv_setnv

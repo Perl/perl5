@@ -165,6 +165,8 @@ struct io {
 #define SVphv_SHAREKEYS 0x20000000	/* keys live on shared string table */
 #define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
 
+#define SVprv_WEAKREF   0x80000000      /* Weak reference */
+
 struct xrv {
     SV *	xrv_rv;		/* pointer to another SV */
 };
@@ -409,6 +411,11 @@ struct xpvio {
          ((!HV_AMAGICbad(stash) && HV_AMAGIC(stash)) || Gv_AMupdate(stash)))
 */
 #define Gv_AMG(stash)           (PL_amagic_generation && Gv_AMupdate(stash))
+
+#define SvWEAKREF(sv)		((SvFLAGS(sv) & (SVf_ROK|SVprv_WEAKREF)) \
+				  == (SVf_ROK|SVprv_WEAKREF))
+#define SvWEAKREF_on(sv)	(SvFLAGS(sv) |=  (SVf_ROK|SVprv_WEAKREF))
+#define SvWEAKREF_off(sv)	(SvFLAGS(sv) &= ~(SVf_ROK|SVprv_WEAKREF))
 
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
 
