@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Jul 13 03:15:46 EET DST 2001
+ * Configuration time: Tue Jul 31 18:19:35 EET DST 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1037,8 +1037,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.7.2/alpha-dec_osf-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.7.2/alpha-dec_osf-thread"		/**/
+#define ARCHLIB "/opt/perl/lib/5.7.2/alpha-dec_osf"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.7.2/alpha-dec_osf"		/**/
 
 /* ARCHNAME:
  *	This symbol holds a string representing the architecture name.
@@ -1046,7 +1046,7 @@
  *	where library files may be held under a private library, for
  *	instance.
  */
-#define ARCHNAME "alpha-dec_osf-thread"		/**/
+#define ARCHNAME "alpha-dec_osf"		/**/
 
 /* HAS_ATOLF:
  *	This symbol, if defined, indicates that the atolf routine is
@@ -1077,7 +1077,7 @@
  *	that use features like threads and multiplicity it is always 
  *	for those versions.
  */
-/*#define PERL_BINCOMPAT_5005			/ **/
+#define PERL_BINCOMPAT_5005			/**/
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
@@ -3026,8 +3026,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.7.2/alpha-dec_osf-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.7.2/alpha-dec_osf-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.7.2/alpha-dec_osf"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.7.2/alpha-dec_osf"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -3221,7 +3221,7 @@
  *	try to use the various _r versions of library functions.
  *	This is extremely experimental.
  */
-#define	USE_5005THREADS		/**/
+/*#define	USE_5005THREADS		/ **/
 /*#define	USE_ITHREADS		/ **/
 #if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
 #define		USE_THREADS		/* until src is revised*/
@@ -3287,7 +3287,7 @@
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
  *	compatible with the present perl.  perl.c:incpush() and
- *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.7.2/alpha-dec_osf-thread for older
+ *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.7.2/alpha-dec_osf for older
  *	directories across major versions back to xs_apiversion.
  *	This is only useful if you have a perl library directory tree
  *	structured like the default one.
@@ -3316,7 +3316,7 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION "5.7.2"
+#define PERL_XS_APIVERSION "5.005"
 #define PERL_PM_APIVERSION "5.005"
 
 /* SETUID_SCRIPTS_ARE_SECURE_NOW:

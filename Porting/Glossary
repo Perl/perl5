@@ -1955,6 +1955,9 @@ extensions (Extensions.U):
 	and is typically used to test whether a particular extesion 
 	is available.
 
+extras (Extras.U):
+	This variable holds a list of extra modules to install.
+
 fflushall (fflushall.U):
 	This symbol, if defined, tells that to flush
 	all pending stdio output one must loop through all
