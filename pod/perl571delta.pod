@@ -153,7 +153,7 @@ arithmetics (previously Perl always preferred floating point numbers
 in its math)
 
 =item *
- 
+
 The printf() and sprintf() now support parameter reordering using the
 C<%\d+\$> and C<*\d+\$> syntaxes.  For example
 
@@ -191,7 +191,7 @@ C<\s> doesn't.)
 
 =back
 
-=head2 Modules and Pragmata
+=head1 Modules and Pragmata
 
 =head2 New Modules
 
@@ -225,6 +225,12 @@ from Gisle Aas, has been added.
 Digest::MD5 for calculating MD5 digests (checksums), from Gisle Aas,
 has been added.
 
+    use Digest::MD5 'md5_hex';
+
+    $digest = md5_hex("Thirsty Camel");
+
+    print $digest, "\n"; # 01d19d9d2045e005c3f1b80e8b164de1
+
 NOTE: the MD5 backward compatibility module is purposefully not
 included since its use is discouraged.
 
@@ -244,6 +250,29 @@ Any encoding supported by Encode module is also available to the
 Filter::Simple is an easy-to-use frontend to Filter::Util::Call,
 from Damian Conway.
 
+    # in MyFilter.pm:
+
+    package MyFilter;
+
+    use Filter::Simple sub {
+        while (my ($from, $to) = splice @_, 0, 2) {
+                s/$from/$to/g;
+        }
+    };
+
+    1;
+
+    # in user's code:
+
+    use MyFilter qr/red/ => 'green';
+
+    print "red\n";   # this code is filtered, will print "green\n"
+    print "bored\n"; # this code is filtered, will print "bogreen\n"
+
+    no MyFilter;
+
+    print "red\n";   # this code is not filtered, will print "red\n"
+
 =item *
 
 Filter::Util::Call, from Paul Marquess, provides you with the
@@ -257,31 +286,58 @@ from Neil Bowers, have been added.  They provide the codes for various
 locale standards, such as "fr" for France, "usd" for US Dollar, and
 "jp" for Japanese.
 
+    use Locale::Country;
+    
+    $country = code2country('jp');               # $country gets 'Japan'
+    $code    = country2code('Norway');           # $code gets 'no'
+
 =item *
 
 MIME::Base64, from Gisle Aas, allows you to encode data in base64.
+
+    use MIME::Base64;
+
+    $encoded = encode_base64('Aladdin:open sesame');
+    $decoded = decode_base64($encoded);
+
+    print $encoded, "\n"; # "QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
 
 =item *
 
 MIME::QuotedPrint, from Gisle Aas, allows you to encode data in
 quoted-printable encoding.
 
+    use MIME::QuotedPrint;
+
+    $encoded = encode_qp("Smiley in Unicode: \x{263a}");
+    $decoded = decode_qp($encoded);
+
+    print $encoded, "\n"; # "Smiley in Unicode: =263A"
+
 MIME::QuotedPrint has been enhanced to provide the basic methods
 necessary to use it with PerlIO::Via as in :
 
- use MIME::QuotedPrint;
- open($fh,">Via(MIME::QuotedPrint)",$path)
+    use MIME::QuotedPrint;
+    open($fh,">Via(MIME::QuotedPrint)",$path)
 
 =item *
 
-PerlIO::Scalar provides the IO to "in memory" perl scalars discussed
-above.  It also serves as an example of a loadable layer.
+PerlIO::Scalar provides the implementation of IO to "in memory" Perl
+scalars as discussed above.  It also serves as an example of
+a loadable layer.  Other future possibilities include PerlIO::Array
+and PerlIO::Code.
 
 =item *
 
 PerlIO::Via acts as a PerlIO layer and wraps PerlIO layer
 functionality provided by a class (typically implemented in
 perl code).
+
+    use MIME::QuotedPrint;
+    open($fh,">Via(MIME::QuotedPrint)",$path)
+
+This will automatically convert everything output to C<$fh>
+to Quoted-Printable.
 
 =item *
 
@@ -296,10 +352,37 @@ Switch from Damian Conway has been added.  Just by saying
 
 you have C<switch> and C<case> available in Perl.
 
+    use Switch;
+
+    switch ($val) {
+
+		case 1		{ print "number 1" }
+		case "a"	{ print "string a" }
+		case [1..10,42]	{ print "number in list" }
+		case (@array)	{ print "number in list" }
+		case /\w+/	{ print "pattern" }
+		case qr/\w+/	{ print "pattern" }
+		case (%hash)	{ print "entry in hash" }
+		case (\%hash)	{ print "entry in hash" }
+		case (\&sub)	{ print "arg to subroutine" }
+		else		{ print "previous case not true" }
+    }
+
 =item *
 
 Text::Balanced from Damian Conway has been added, for
 extracting delimited text sequences from strings.
+
+    use Text::Balanced 'extract_delimited';
+    
+    ($a, $b) = extract_delimited("'never say never', he never said", "'", '');
+
+C<$a> will be "'never say never'", C<$b> will be ', he never said'.
+
+In addition to extract_delimited() there are also extract_bracketed(),
+extract_quotelike(), extract_codeblock(), extract_variable(),
+extract_tagged(), extract_multiple(), gen_delimited_pat(), and
+gen_extract_tagged().
 
 =item *
 
@@ -320,18 +403,20 @@ worth studying.
 
 =item *
 
-B::Deparse should be now more robust (still far from providing a full
-round trip for any random piece of Perl code).
+B::Deparse should be now more robust.  It still far from providing a full
+round trip for any random piece of Perl code, though, and is unde active
+development: expect more robustness in 5.7.2.
 
 =item *
 
-Class::Struct has now compile-time features.
+Class::Struct can now define the classes in compile time.
 
 =item *
 
-Math::BigFloat has undergone much fixing.  (The fixed Math::BigFloat
-module is also available in CPAN for those who can't upgrade their Perl:
-http://www.cpan.org/authors/id/J/JP/JPEACOCK/)
+Math::BigFloat has undergone much fixing.
+
+(The fixed Math::BigFloat module is also available in CPAN for those
+who can't upgrade their Perl: http://www.cpan.org/authors/id/J/JP/JPEACOCK/)
 
 =item *
 
@@ -345,14 +430,18 @@ IO::Socket has now atmark() method, which returns true if the socket
 is positioned at the out-of-band mark.  The method is also exportable
 as a sockatmark() function.
 
-=item
+=item *
 
 IO::Socket::INET has support for ReusePort option (if your platform
-supports it).  The Reuse option has now an alias, ReuseAddr.
+supports it).  The Reuse option now has an alias, ReuseAddr.  For clarity
+you may want to prefer ReuseAddr.
 
 =item *
 
-Net::Ping has been greatly enhanced.
+Net::Ping has been enhanced.  There is now "external" protocol which
+uses Net::Ping::External module which runs external ping(1) and parses
+the output.  An alpha version of Net::Ping::External is available in
+CPAN and in 5.7.2 the Net::Ping::External may be integrated to Perl.
 
 =item *
 
@@ -362,6 +451,8 @@ using PerlIO.
 =item *
 
 POSIX::sigaction() is now much more flexible and robust.
+You can now install coderef handlers, 'DEFAULT', and 'IGNORE'
+handlers, installing new handlers was not atomic.
 
 =item *
 
@@ -378,8 +469,8 @@ has been implemented.
 =back
 
 The following modules have been upgraded from the versions at CPAN:
-CPAN, CGI, DB::File, Getopt::Long, Pod::Man, Pod::Text, Storable,
-Text-Tabs+Wrap.
+CPAN, CGI, DB::File, File::Temp, Getopt::Long, Pod::Man, Pod::Text,
+Storable, Text-Tabs+Wrap.
 
 =head1 Performance Enhancements
 
@@ -475,8 +566,6 @@ will be installed as L<perlvos>.
 
 Documentation on how to use the Perl source repository has been added.
 
-=head1 Performance Enhancements
-
 =head1 Installation and Configuration Improvements
 
 =over 4
@@ -491,8 +580,8 @@ line option -Uuseperlio), you will get "-stdio" appended.
 =item *
 
 Another change related to the architecture name is that "-64all"
-(-Duse64bitall, or "maximally 64-bit") is appended only if your pointers
-are 64 bits wide.
+(-Duse64bitall, or "maximally 64-bit") is appended only if your
+pointers are 64 bits wide.  (To be exact, the use64bitall is ignored.)
 
 =item *
 
@@ -508,7 +597,7 @@ has been documented in INSTALL.
 =item *
 
 If you are on IRIX or Tru64 platforms, new profiling/debugging options
-have been added, see L</perlhack> for more information about pixie and
+have been added, see L<perlhack> for more information about pixie and
 Third Degree.
 
 =back
@@ -645,7 +734,7 @@ SOCKS support is now much more robust.
 
 If your file system supports symbolic links you can build Perl outside
 of the source directory by
-	
+
 	mkdir /tmp/perl/build/directory
 	cd /tmp/perl/build/directory
 	sh /path/to/perl/source/Configure -Dmksymlinks ...
