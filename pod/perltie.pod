@@ -611,7 +611,7 @@ use the each() function to iterate over such.  Example:
 This is partially implemented now.
 
 A class implementing a tied filehandle should define the following
-methods: TIEHANDLE, at least one of PRINT, READLINE, GETC, or READ,
+methods: TIEHANDLE, at least one of PRINT, PRINTF, READLINE, GETC, or READ,
 and possibly DESTROY.
 
 It is especially useful when perl is embedded in some other program,
@@ -634,11 +634,25 @@ hold some internal information.
 
 =item PRINT this, LIST
 
-This method will be triggered every time the tied handle is printed to.
+This method will be triggered every time the tied handle is printed to
+with the C<print()> function.
 Beyond its self reference it also expects the list that was passed to
 the print function.
 
     sub PRINT { $r = shift; $$r++; print join($,,map(uc($_),@_)),$\ }
+
+=item PRINTF this, LIST
+
+This method will be triggered every time the tied handle is printed to
+with the C<printf()> function.
+Beyond its self reference it also expects the format and list that was
+passed to the printf function.
+
+    sub PRINTF {
+        shift;
+        my $fmt = shift;
+        print sprintf($fmt, @_)."\n";
+    }
 
 =item READ this LIST
 
@@ -832,4 +846,4 @@ source code to MLDBM.
 
 Tom Christiansen
 
-TIEHANDLE by Sven Verdoolaege <F<skimo@dns.ufsia.ac.be>>
+TIEHANDLE by Sven Verdoolaege <F<skimo@dns.ufsia.ac.be>> and Doug MacEachern <F<dougm@osf.org>>

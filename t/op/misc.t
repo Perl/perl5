@@ -196,6 +196,11 @@ BEGIN failed--compilation aborted at - line 1.
         shift;
         print join(' ', reverse @_)."\n";
     }
+    sub PRINTF {
+        shift;
+	  my $fmt = shift;
+        print sprintf($fmt, @_)."\n";
+    }
     sub TIEHANDLE {
         bless {}, shift;
     }
@@ -226,12 +231,14 @@ BEGIN failed--compilation aborted at - line 1.
     $len = 10; $offset = 1;
     read(FOO, $buf, $len, $offset) == 100 or die "foo->READ failed";
     getc(FOO) eq "a" or die "foo->GETC failed";
+    printf "%s is number %d\n", "Perl", 1;
 }
 EXPECT
 This is a reversed sentence.
 -- Out of inspiration --
 foo->can(READ)(string 10 1)
 Don't GETC, Get Perl
+Perl is number 1
 and destroyed as well
 ########
 my @a; $a[2] = 1; for (@a) { $_ = 2 } print "@a\n"

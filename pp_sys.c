@@ -1072,11 +1072,33 @@ PP(pp_prtf)
     IO *io;
     PerlIO *fp;
     SV *sv = NEWSV(0,0);
+    MAGIC *mg;
 
     if (op->op_flags & OPf_STACKED)
 	gv = (GV*)*++MARK;
     else
 	gv = defoutgv;
+
+    if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+	if (MARK == ORIGMARK) {
+	    EXTEND(SP, 1);
+	    ++MARK;
+	    Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
+	    ++SP;
+	}
+	PUSHMARK(MARK - 1);
+	*MARK = mg->mg_obj;
+	PUTBACK;
+	ENTER;
+	perl_call_method("PRINTF", G_SCALAR);
+	LEAVE;
+	SPAGAIN;
+	MARK = ORIGMARK + 1;
+	*MARK = *SP;
+	SP = MARK;
+	RETURN;
+    }
+
     if (!(io = GvIO(gv))) {
 	if (dowarn) {
 	    gv_fullname3(sv, gv, Nullch);

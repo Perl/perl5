@@ -490,6 +490,19 @@ the print function.
 	return print join( $, => map {uc} @_), $\;
     }
 
+=item PRINTF this, LIST
+
+This method will be triggered every time the tied handle is printed to
+with the C<printf()> function.
+Beyond its self reference it also expects the format and list that was
+passed to the printf function.
+
+    sub PRINTF {
+        shift;
+	  my $fmt = shift;
+        print sprintf($fmt, @_)."\n";
+    }
+
 =item READ this LIST
 
 This method will be called when the handle is read from via the C<read>
