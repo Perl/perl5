@@ -3,6 +3,8 @@
 # r	- top level READMEs to be copied/symlinked
 # a	- for auxiliary documentation
 # number - indent by
+# D	- this version's perldelta
+# d	- copied to this name
 
 h Overview
 

@@ -1103,49 +1103,53 @@ doc: $(PERLEXE)
 	    --podpath=pod:lib:ext:utils --htmlroot="file://$(INST_HTML:s,:,|,)"\
 	    --libpod=perlfunc:perlguts:perlvar:perlrun:perlop --recurse
 
+# Note that this next section is parsed (and regenerated) by pod/buildtoc
+# so please check that script before making structural changes here
 utils: $(PERLEXE) $(X2P)
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
-	cd ..\pod
-	copy ..\README.aix      .\perlaix.pod
-	copy ..\README.amiga    .\perlamiga.pod
-	copy ..\README.apollo   .\perlapollo.pod
-	copy ..\README.beos     .\perlbeos.pod
-	copy ..\README.bs2000   .\perlbs2000.pod
-	copy ..\README.ce       .\perlce.pod
-	copy ..\README.cn       .\perlcn.pod
-	copy ..\README.cygwin   .\perlcygwin.pod
-	copy ..\README.dgux     .\perldgux.pod
-	copy ..\README.dos      .\perldos.pod
-	copy ..\README.epoc     .\perlepoc.pod
-	copy ..\README.freebsd  .\perlfreebsd.pod
-	copy ..\README.hpux     .\perlhpux.pod
-	copy ..\README.hurd     .\perlhurd.pod
-	copy ..\README.irix     .\perlirix.pod
-	copy ..\README.jp       .\perljp.pod
-	copy ..\README.ko       .\perlko.pod
-	copy ..\README.machten  .\perlmachten.pod
-	copy ..\README.macos    .\perlmacos.pod
-	copy ..\README.macosx   .\perlmacosx.pod
-	copy ..\README.mint     .\perlmint.pod
-	copy ..\README.mpeix    .\perlmpeix.pod
-	copy ..\README.netware  .\perlnetware.pod
-	copy ..\README.os2      .\perlos2.pod
-	copy ..\README.os390    .\perlos390.pod
-	copy ..\README.os400    .\perlos400.pod
-	copy ..\README.plan9    .\perlplan9.pod
-	copy ..\README.qnx      .\perlqnx.pod
-	copy ..\README.solaris  .\perlsolaris.pod
-	copy ..\README.tru64    .\perltru64.pod
-	copy ..\README.tw       .\perltw.pod
-	copy ..\README.uts      .\perluts.pod
-	copy ..\README.vmesa    .\perlvmesa.pod
-	copy ..\README.vms      .\perlvms.pod
-	copy ..\README.vos      .\perlvos.pod
-	copy ..\README.win32    .\perlwin32.pod
 	copy ..\vms\perlvms.pod	..\pod\perlvms.pod
-	$(MAKE) -f ..\win32\pod.mak converters
+	copy ..\README.aix      ..\pod\perlaix.pod
+	copy ..\README.amiga    ..\pod\perlamiga.pod
+	copy ..\README.apollo   ..\pod\perlapollo.pod
+	copy ..\README.beos     ..\pod\perlbeos.pod
+	copy ..\README.bs2000   ..\pod\perlbs2000.pod
+	copy ..\README.ce       ..\pod\perlce.pod
+	copy ..\README.cn       ..\pod\perlcn.pod
+	copy ..\README.cygwin   ..\pod\perlcygwin.pod
+	copy ..\README.dgux     ..\pod\perldgux.pod
+	copy ..\README.dos      ..\pod\perldos.pod
+	copy ..\README.epoc     ..\pod\perlepoc.pod
+	copy ..\README.freebsd  ..\pod\perlfreebsd.pod
+	copy ..\README.hpux     ..\pod\perlhpux.pod
+	copy ..\README.hurd     ..\pod\perlhurd.pod
+	copy ..\README.irix     ..\pod\perlirix.pod
+	copy ..\README.jp       ..\pod\perljp.pod
+	copy ..\README.ko       ..\pod\perlko.pod
+	copy ..\README.machten  ..\pod\perlmachten.pod
+	copy ..\README.macos    ..\pod\perlmacos.pod
+	copy ..\README.macosx   ..\pod\perlmacosx.pod
+	copy ..\README.mint     ..\pod\perlmint.pod
+	copy ..\README.mpeix    ..\pod\perlmpeix.pod
+	copy ..\README.netware  ..\pod\perlnetware.pod
+	copy ..\README.os2      ..\pod\perlos2.pod
+	copy ..\README.os390    ..\pod\perlos390.pod
+	copy ..\README.os400    ..\pod\perlos400.pod
+	copy ..\README.plan9    ..\pod\perlplan9.pod
+	copy ..\README.qnx      ..\pod\perlqnx.pod
+	copy ..\README.solaris  ..\pod\perlsolaris.pod
+	copy ..\README.tru64    ..\pod\perltru64.pod
+	copy ..\README.tw       ..\pod\perltw.pod
+	copy ..\README.uts      ..\pod\perluts.pod
+	copy ..\README.vmesa    ..\pod\perlvmesa.pod
+	copy ..\README.vms      ..\pod\perlvms.pod
+	copy ..\README.vos      ..\pod\perlvos.pod
+	copy ..\README.win32    ..\pod\perlwin32.pod
+	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
 	cd ..\lib && $(PERLEXE) lib_pm.PL
 	$(PERLEXE) $(PL2BAT) $(UTILS)
+
+# Note that the pod cleanup in this next section is parsed (and regenerated
+# by pod/buildtoc so please check that script before making changes here
 
 distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
