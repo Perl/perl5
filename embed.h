@@ -151,7 +151,9 @@
 #define get_opargs		Perl_get_opargs
 #endif
 #define get_ppaddr		Perl_get_ppaddr
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cxinc			Perl_cxinc
+#endif
 #define deb			Perl_deb
 #define vdeb			Perl_vdeb
 #define debprofdump		Perl_debprofdump
@@ -2588,7 +2590,9 @@
 #define get_opargs()		Perl_get_opargs(aTHX)
 #endif
 #define get_ppaddr()		Perl_get_ppaddr(aTHX)
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define cxinc()			Perl_cxinc(aTHX)
+#endif
 #define vdeb(a,b)		Perl_vdeb(aTHX_ a,b)
 #define debprofdump()		Perl_debprofdump(aTHX)
 #define debop(a)		Perl_debop(aTHX_ a)

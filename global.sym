@@ -87,7 +87,6 @@ Perl_filter_read
 Perl_get_op_descs
 Perl_get_op_names
 Perl_get_ppaddr
-Perl_cxinc
 Perl_deb
 Perl_vdeb
 Perl_debprofdump

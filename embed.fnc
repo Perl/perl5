@@ -151,7 +151,7 @@ Ap	|char**	|get_op_names
 p	|char*	|get_no_modify
 p	|U32*	|get_opargs
 Ap	|PPADDR_t*|get_ppaddr
-Ap	|I32	|cxinc
+Ep	|I32	|cxinc
 Afp	|void	|deb		|const char* pat|...
 Ap	|void	|vdeb		|const char* pat|va_list* args
 Ap	|void	|debprofdump
