@@ -105,6 +105,312 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7126] By: jhi                                   on 2000/10/03  00:57:08
+        Log: Introduce NO_ENVIRON_ARRAY (and USE_ENVIRON_ARRAY) defines
+             as suggested by Olaf Flebbe and Nick Clark.
+     Branch: perl
+	   ! epoc/epocish.h perl.h sv.c unixish.h util.c vms/vmsish.h
+____________________________________________________________________________
+[  7125] By: jhi                                   on 2000/10/03  00:50:56
+        Log: Subject: [ID 20001002.001] Not OK: perl v5.7.0 +DEVEL7093 +...001 on i586-linux 2.2.16 (UNINSTALLED)
+             From: Nick Clark <nick@plum.flirble.org>
+             Date: Mon, 2 Oct 2000 11:03:24 +0100
+             Message-Id: <20001002110324.D20073@plum.flirble.org>
+     Branch: perl
+	   ! t/lib/encode.t
+____________________________________________________________________________
+[  7124] By: jhi                                   on 2000/10/03  00:34:59
+        Log: Subject: [PATCH 5.7.0] Epoc update
+             From: Olaf Flebbe <o.flebbe@gmx.de>
+             Date: Wed, 20 Sep 2000 23:16:26 +0200 (MEST)
+             Message-ID: <26423.969484586@www10.gmx.net>
+     Branch: perl
+	   ! README.epoc epoc/config.sh epoc/createpkg.pl epoc/epoc.c
+	   ! epoc/epoc_stubs.c epoc/epocish.h epoc/link.pl
+	   ! lib/AutoLoader.pm lib/Cwd.pm mg.c perl.c perl.h pp_sys.c sv.c
+	   ! util.c util.h
+____________________________________________________________________________
+[  7123] By: jhi                                   on 2000/10/03  00:30:07
+        Log: Regen headers.
+     Branch: perl
+	   ! embed.h opcode.h pod/perlapi.pod pp.sym pp_proto.h
+____________________________________________________________________________
+[  7122] By: jhi                                   on 2000/10/03  00:10:48
+        Log: OpenBSD flags tweak from Todd C. Miller, tweaked some more by Abigail.
+     Branch: perl
+	   ! hints/openbsd.sh
+____________________________________________________________________________
+[  7121] By: jhi                                   on 2000/10/03  00:05:06
+        Log: Subject: [PATCH pod/perlop.pod]  Documentation glitch in magic autoincrement.
+             From: <abigail@foad.org>
+             Date: Tue, 26 Sep 2000 13:36:14 -0400
+             Message-ID: <20000926173614.4356.qmail@foad.org>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  7120] By: jhi                                   on 2000/10/03  00:04:00
+        Log: Inside require() $^S was always left undefined.
+             
+             Subject: Re: Tiny 2-byte change to fix debugger's eval bug
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 27 Sep 2000 18:54:49 -0400
+             Message-ID: <20000927185449.A24927@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! cop.h mg.c pp_ctl.c util.c
+____________________________________________________________________________
+[  7119] By: jhi                                   on 2000/10/03  00:00:16
+        Log: Subject: [PATCH] DLL not restartabke with threaded perl
+             From: "Dave Hartnoll" <Dave_Hartnoll@3b2.com>
+             Date: Thu, 28 Sep 2000 09:20:46 +0100
+             Message-ID: <002101c02925$00aa8d80$7e0aa8c0@3b2.com>
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  7118] By: jhi                                   on 2000/10/02  23:59:20
+        Log: Subject: Re: [ID 20000828.017] bytecode fails with use subs;
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 28 Sep 2000 11:52:24 +0100
+             Message-ID: <20000928115224.D7924@plum.flirble.org>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  7117] By: jhi                                   on 2000/10/02  23:57:51
+        Log: Subject: [ID 20000928.002] perlcc & ByteCode.pm option mismatch
+             From: Nicholas Clark <nick@babyhippo.co.uk>
+             Date: Thu, 28 Sep 2000 12:18:10 +0100
+             Message-Id: <E13ebha-0004IV-00@fruitbat.babyhippo.co.uk>
+             
+             Did not apply cleanly, manual intervention was needed.
+     Branch: perl
+	   ! ext/B/B/Bytecode.pm utils/perlcc.PL
+____________________________________________________________________________
+[  7116] By: jhi                                   on 2000/10/02  23:50:40
+        Log: Document the issue (is not a syntax error, kind of)
+             
+             Subject: Re: [ID 20000901.011] the list (1,,3) ought to be a syntax error
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 28 Sep 2000 17:12:42 +0100
+             Message-ID: <20000928171242.K7924@plum.flirble.org>
+     Branch: perl
+	   ! pod/perldata.pod
+____________________________________________________________________________
+[  7115] By: jhi                                   on 2000/10/02  23:48:58
+        Log: Subject: [PATCH 5.7.0] Minor optimization in re_intuit_start
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 28 Sep 2000 21:55:31 -0400
+             Message-ID: <20000928215531.A4315@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[  7114] By: jhi                                   on 2000/10/02  23:47:57
+        Log: Subject: DOC PATCH 5.6.0
+             From: mjd@plover.com
+             Date: 30 Sep 2000 06:02:34 -0000
+             Message-ID: <20000930060234.4559.qmail@plover.com>
+     Branch: perl
+	   ! pod/perldebguts.pod
+____________________________________________________________________________
+[  7113] By: jhi                                   on 2000/10/02  23:46:43
+        Log: SOCK_DGRAM and listen() do not mix as reported in
+             
+             Subject: [ID 20000930.001] Bug in perl 5.00503 IO::Socket
+             From: Petter Reinholdtsen <pere@hungry.com>
+             Date: Sun, 1 Oct 2000 10:57:20 +0800
+             Message-Id: <200010010257.KAA05735@localhost.localdomain>
+             
+             The patch for 5.7.0+ had to be reengineered, though.
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/UNIX.pm
+____________________________________________________________________________
+[  7112] By: jhi                                   on 2000/10/02  23:36:57
+        Log: Subject: Re: [PATCH 5.005_64 missed]
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 1 Oct 2000 18:50:10 -0400
+             Message-ID: <20001001185010.A14152@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! pod/perlxs.pod
+____________________________________________________________________________
+[  7111] By: jhi                                   on 2000/10/02  23:35:40
+        Log: Subject: Re: [ID 20000912.008] substr replacement of tainted data (bug) 
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Mon, 2 Oct 2000 22:03:44 +0300 (EEST)
+             Message-ID: <14808.56336.594486.626712@busy.netsoft.ro>
+     Branch: perl
+	   ! op.c opcode.pl t/op/substr.t
+____________________________________________________________________________
+[  7110] By: jhi                                   on 2000/10/02  23:32:38
+        Log: Subject: [PATCH] Fix aliasing of tied filehandles
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Mon, 2 Oct 2000 14:53:27 -0700
+             Message-ID: <20001002145327.C1617@ilmd>
+     Branch: perl
+	   ! perl.h pp_hot.c t/op/tiehandle.t
+____________________________________________________________________________
+[  7109] By: jhi                                   on 2000/10/02  23:31:30
+        Log: s/Robin Parker/Robin Barker/
+     Branch: perl
+	   ! Changes5.6
+____________________________________________________________________________
+[  7108] By: jhi                                   on 2000/10/02  23:15:46
+        Log: Retract #7091 as suggested in
+             
+             From: Robin Barker <rmb1@cise.npl.co.uk> 
+             Subject: [PATCH-R]  was Re: SuSE's gcc-2.95.2 and //depot/perl
+             Date: Fri, 29 Sep 2000 13:10:22 +0100 (BST)
+             Message-Id: <200009291210.NAA17098@tempest.npl.co.uk>
+     Branch: perl
+	   ! embed.pl proto.h
+____________________________________________________________________________
+[  7107] By: nick                                  on 2000/10/02  18:23:14
+        Log: A few tweaks to get Tk803 to work with Encode scheme.
+     Branch: perl
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs t/lib/encode.t
+____________________________________________________________________________
+[  7106] By: nick                                  on 2000/10/01  21:34:14
+        Log: Add checking cases to Encode's toUnicode and fromUnicode.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  7105] By: nick                                  on 2000/10/01  17:18:01
+        Log: Add encoding tables from tcl8.3.2 and perl code in Encode.pm
+             To read and use them.
+             Add a lib/encode.t which checks a few things.
+     Branch: perl
+	   + ext/Encode/Encode/ascii.enc ext/Encode/Encode/big5.enc
+	   + ext/Encode/Encode/cp1250.enc ext/Encode/Encode/cp1251.enc
+	   + ext/Encode/Encode/cp1252.enc ext/Encode/Encode/cp1253.enc
+	   + ext/Encode/Encode/cp1254.enc ext/Encode/Encode/cp1255.enc
+	   + ext/Encode/Encode/cp1256.enc ext/Encode/Encode/cp1257.enc
+	   + ext/Encode/Encode/cp1258.enc ext/Encode/Encode/cp437.enc
+	   + ext/Encode/Encode/cp737.enc ext/Encode/Encode/cp775.enc
+	   + ext/Encode/Encode/cp850.enc ext/Encode/Encode/cp852.enc
+	   + ext/Encode/Encode/cp855.enc ext/Encode/Encode/cp857.enc
+	   + ext/Encode/Encode/cp860.enc ext/Encode/Encode/cp861.enc
+	   + ext/Encode/Encode/cp862.enc ext/Encode/Encode/cp863.enc
+	   + ext/Encode/Encode/cp864.enc ext/Encode/Encode/cp865.enc
+	   + ext/Encode/Encode/cp866.enc ext/Encode/Encode/cp869.enc
+	   + ext/Encode/Encode/cp874.enc ext/Encode/Encode/cp932.enc
+	   + ext/Encode/Encode/cp936.enc ext/Encode/Encode/cp949.enc
+	   + ext/Encode/Encode/cp950.enc ext/Encode/Encode/dingbats.enc
+	   + ext/Encode/Encode/euc-cn.enc ext/Encode/Encode/euc-jp.enc
+	   + ext/Encode/Encode/euc-kr.enc ext/Encode/Encode/gb12345.enc
+	   + ext/Encode/Encode/gb1988.enc ext/Encode/Encode/gb2312.enc
+	   + ext/Encode/Encode/iso2022-jp.enc
+	   + ext/Encode/Encode/iso2022-kr.enc ext/Encode/Encode/iso2022.enc
+	   + ext/Encode/Encode/iso8859-1.enc
+	   + ext/Encode/Encode/iso8859-2.enc
+	   + ext/Encode/Encode/iso8859-3.enc
+	   + ext/Encode/Encode/iso8859-4.enc
+	   + ext/Encode/Encode/iso8859-5.enc
+	   + ext/Encode/Encode/iso8859-6.enc
+	   + ext/Encode/Encode/iso8859-7.enc
+	   + ext/Encode/Encode/iso8859-8.enc
+	   + ext/Encode/Encode/iso8859-9.enc ext/Encode/Encode/jis0201.enc
+	   + ext/Encode/Encode/jis0208.enc ext/Encode/Encode/jis0212.enc
+	   + ext/Encode/Encode/koi8-r.enc ext/Encode/Encode/ksc5601.enc
+	   + ext/Encode/Encode/macCentEuro.enc
+	   + ext/Encode/Encode/macCroatian.enc
+	   + ext/Encode/Encode/macCyrillic.enc
+	   + ext/Encode/Encode/macDingbats.enc
+	   + ext/Encode/Encode/macGreek.enc
+	   + ext/Encode/Encode/macIceland.enc
+	   + ext/Encode/Encode/macJapan.enc ext/Encode/Encode/macRoman.enc
+	   + ext/Encode/Encode/macRomania.enc ext/Encode/Encode/macThai.enc
+	   + ext/Encode/Encode/macTurkish.enc
+	   + ext/Encode/Encode/macUkraine.enc
+	   + ext/Encode/Encode/shiftjis.enc ext/Encode/Encode/symbol.enc
+	   + t/lib/encode.t
+	   ! MANIFEST ext/Encode/Encode.pm
+____________________________________________________________________________
+[  7104] By: nick                                  on 2000/09/30  13:04:30
+        Log: Subject: [PATCH@blead] Fix some recursion in overload.pm
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Mon, 18 Sep 2000 05:05:40 -0700
+             Message-Id: <20000918050540.C652@ilmd>
+     Branch: perl
+	   ! lib/overload.pm sv.c t/pragma/overload.t
+____________________________________________________________________________
+[  7103] By: nick                                  on 2000/09/30  12:53:36
+        Log: Subject: [ID 20000917.002] 5.7.0 and blead@7095 make html makes man
+             From: Johan Vromans <jvromans@squirrel.nl>
+             Date: Sun, 17 Sep 2000 19:46:05 +0200 (CEST)
+             Message-Id: <14789.861.376723.870640@phoenix.squirrel.nl>
+     Branch: perl
+	   ! pod/Makefile.SH
+____________________________________________________________________________
+[  7102] By: nick                                  on 2000/09/30  12:52:31
+        Log: Subject: [PATCH] Re: [ID 20000915.010] Infinite loop with -MO=Deparse
+             From: Spider Boardman <spider@Orb.Nashua.NH.US>
+             Date: Sat, 16 Sep 2000 16:36:45 -0400
+             Message-Id: <200009162036.QAA11694@Orb.Nashua.NH.US>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  7101] By: nick                                  on 2000/09/30  12:51:41
+        Log: Subject: [PATCH perl@7065] another VMS my_fwrite() fix for Storable
+             From: Craig A. Berry <craig.berry@psinetcs.com>
+             Date: Sat, 16 Sep 2000 10:11:10 -0500
+             Message-Id: <4.3.2.7.2.20000916010548.01ce1b60@exchi01>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[  7100] By: nick                                  on 2000/09/30  12:50:33
+        Log: Subject: Re: unicode support and perl [ID 20000901.097]
+             From: Spider Boardman <spider@Orb.Nashua.NH.US>
+             Date: Fri, 15 Sep 2000 16:37:58 -0400
+             Message-Id: <200009152037.QAA19056@Orb.Nashua.NH.US>
+     Branch: perl
+	   ! t/op/append.t
+____________________________________________________________________________
+[  7099] By: nick                                  on 2000/09/30  12:49:35
+        Log: Subject: Re: unicode support and perl [ID 20000901.097]
+             From: Spider Boardman <spider@Orb.Nashua.NH.US>
+             Date: Fri, 15 Sep 2000 16:25:30 -0400
+             Message-Id: <200009152025.QAA18540@Orb.Nashua.NH.US>
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  7098] By: nick                                  on 2000/09/30  12:48:00
+        Log: Subject: Re: Trapping by opmask sets strange parser state [PATCH]
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 15 Sep 2000 16:23:41 +0200
+             Message-Id: <m3aed9ybrm.fsf@eik.g.aas.no>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  7097] By: nick                                  on 2000/09/30  12:45:16
+        Log: Subject: [PATCH] Nits in perlmod.pod
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Fri, 15 Sep 2000 02:04:09 -0700
+             Message-Id: <20000915020409.A2104@ilmd>
+     Branch: perl
+	   ! pod/perlmod.pod
+____________________________________________________________________________
+[  7096] By: nick                                  on 2000/09/30  12:18:00
+        Log: Re-instate Perl_utf8_to_uv without checking parameter - added in change 7075.
+             i.e. rename Simon's function to Perl_utf8_to_uv_chk, change all calls to it
+             to use new name and add Perl_utf8_to_uv() as a wrapper which calls it passing
+             0 to checking to get the warning.
+     Branch: perl
+	   ! doop.c embed.h embed.pl global.sym handy.h objXSUB.h op.c
+	   ! perlapi.c pod/perlapi.pod pp.c pp_ctl.c proto.h regcomp.c
+	   ! regexec.c sv.c toke.c utf8.c
+____________________________________________________________________________
+[  7095] By: nick                                  on 2000/09/15  16:55:59
+        Log: Mutliplicity & ithreads fix for sv.c/Encode.xs
+             
+             Subject: [ID 20000915.004] Not OK: perl v5.7.1 +devel-7094 on alpha-dec_osf-thread-multi 4.0f (UNINSTALLED)
+             From: Spider Boardman <spider@Orb.Nashua.NH.US>
+             Message-Id: <200009151037.GAA07447@Orb.Nashua.NH.US>
+             Date: Fri, 15 Sep 2000 06:37:30 -0400
+     Branch: perl
+	   ! ext/Encode/Encode.xs sv.c
+____________________________________________________________________________
+[  7094] By: jhi                                   on 2000/09/15  03:23:32
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7093] By: jhi                                   on 2000/09/15  03:11:44
         Log: Fix for the charnames.t failures from Spider Boardman.
      Branch: perl
