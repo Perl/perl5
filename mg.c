@@ -25,6 +25,11 @@
 #  endif
 #endif
 
+/* if you only have signal() and it resets on each signal, SIGNAL_FIX fixes */
+#if !defined(HAS_SIGACTION) && defined(VMS)
+#  define  SIGNAL_FIX
+#endif
+
 static void restore_magic(pTHX_ void *p);
 static void unwind_handler_stack(pTHX_ void *p);
 
@@ -985,6 +990,11 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+#ifdef SIGNAL_FIX   
+static int sig_ignoring_initted = 0;
+static int sig_ignoring[SIG_SIZE];      /* which signals we are ignoring */
+#endif
+
 #ifndef PERL_MICRO
 int
 Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
@@ -997,7 +1007,13 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
     	if(PL_psig_ptr[i])
     	    sv_setsv(sv,PL_psig_ptr[i]);
     	else {
-    	    Sighandler_t sigstate = rsignal_state(i);
+    	    Sighandler_t sigstate;
+#ifdef SIGNAL_FIX
+    	    if (sig_ignoring_initted && sig_ignoring[i]) 
+    	      sigstate = SIG_IGN;
+    	    else
+#endif
+    	    sigstate = rsignal_state(i);
 
     	    /* cache state so we don't fetch it again */
     	    if(sigstate == SIG_IGN)
@@ -1042,11 +1058,17 @@ Perl_raise_signal(pTHX_ int sig)
 Signal_t
 Perl_csighandler(int sig)
 {
+#ifndef PERL_OLD_SIGNALS
+    dTHX;
+#endif
+#ifdef SIGNAL_FIX
+    (void) rsignal(sig, &Perl_csighandler);
+    if (sig_ignoring[sig]) return;
+#endif
 #ifdef PERL_OLD_SIGNALS
     /* Call the perl level handler now with risk we may be in malloc() etc. */
     (*PL_sighandlerp)(sig);
 #else
-    dTHX;
     Perl_raise_signal(aTHX_ sig);
 #endif
 }
@@ -1093,6 +1115,14 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 		Perl_warner(aTHX_ WARN_SIGNAL, "No such signal: SIG%s", s);
 	    return 0;
 	}
+#ifdef SIGNAL_FIX
+	if (!sig_ignoring_initted) {
+	    int j;
+	    for (j = 0; j < SIG_SIZE; j++) sig_ignoring[j] = 0;
+	    sig_ignoring_initted = 1;
+	}
+	sig_ignoring[i] = 0;
+#endif
 	SvREFCNT_dec(PL_psig_name[i]);
 	SvREFCNT_dec(PL_psig_ptr[i]);
 	PL_psig_ptr[i] = SvREFCNT_inc(sv);
@@ -1109,9 +1139,14 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     }
     s = SvPV_force(sv,len);
     if (strEQ(s,"IGNORE")) {
-	if (i)
+	if (i) {
+#ifdef SIGNAL_FIX
+	    sig_ignoring[i] = 1;
+	    (void)rsignal(i, &Perl_csighandler);
+#else
 	    (void)rsignal(i, SIG_IGN);
-	else
+#endif
+	} else
 	    *svp = 0;
     }
     else if (strEQ(s,"DEFAULT") || !*s) {
