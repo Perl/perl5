@@ -71,6 +71,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perldebug		Perl debugging
     perlvar		Perl predefined variables
     perlre		Perl regular expressions, the rest of the story
+    perlreref		Perl regular expressions quick reference
     perlref		Perl references, the rest of the story
     perlform		Perl formats
     perlobj		Perl objects

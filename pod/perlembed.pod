@@ -1088,8 +1088,8 @@ each from the other, combine them as you wish.
 
 =head1 AUTHOR
 
-Jon Orwant <F<orwant@tpj.com>> and Doug MacEachern
-<F<dougm@osf.org>>, with small contributions from Tim Bunce, Tom
+Jon Orwant <F<orwant@media.mit.edu>> and Doug MacEachern
+<F<dougm@covalent.net>>, with small contributions from Tim Bunce, Tom
 Christiansen, Guy Decoux, Hallvard Furuseth, Dov Grobgeld, and Ilya
 Zakharevich.
 

@@ -1302,7 +1302,7 @@ sigaction(sig, optaction, oldaction = 0)
 		   (BTW, "csighandler" is very different from "sighandler".) */
 		svp = hv_fetch(action, "SAFE", 4, FALSE);
 		act.sa_handler = (*svp && SvTRUE(*svp))
-				 ? Perl_csighandler : PL_sighandlerp;
+				 ? PL_csighandlerp : PL_sighandlerp;
 
 		/* Vector new Perl handler through %SIG.
 		   (The core signal handlers read %SIG to dispatch.) */

@@ -2,11 +2,11 @@ package POSIX;
 
 our(@ISA, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD) = ();
 
+our $VERSION = "1.05" ;
+
 use AutoLoader;
 
 use XSLoader ();
-
-our $VERSION = "1.05" ;
 
 # Grandfather old foo_h form to new :foo_h form
 my $loaded;

@@ -2355,6 +2355,7 @@ pod/perlre.pod			Regular expression info
 pod/perlref.pod			References info
 pod/perlreftut.pod		Mark's references tutorial
 pod/perlrequick.pod		Quick start guide for Perl regular expressions
+pod/perlreref.pod		Perl regular expressions reference
 pod/perlretut.pod		Tutorial for Perl regular expressions
 pod/perlrun.pod			Execution info
 pod/perlsec.pod			Security info
