@@ -6,7 +6,7 @@ Install - Build and Installation guide for perl5.
 
 First, make sure you are installing an up-to-date version of Perl.   If
 you didn't get your Perl source from CPAN, check the latest version at
-<URL:http://www.perl.com/CPAN/src/>.
+<URL:http://www.cpan.org/src/>.
 
 The basic steps to build and install perl5 on a Unix system are:
 
@@ -82,7 +82,7 @@ run, you may have to run it on a platform where GCC is available, and move
 the sources back to the platform without GCC.
 
 If you succeed in automatically converting the sources to a K&R compatible
-form, be sure to email perlbug@perl.com to let us know the steps you
+form, be sure to email perlbug@perl.org to let us know the steps you
 followed.  This will enable us to officially support this option.
 
 =head1 Space Requirements
@@ -996,7 +996,7 @@ including a glossary of all those config.sh variables, is in the Porting
 subdirectory.
 
 Ports for other systems may also be available.  You should check out
-http://www.perl.com/CPAN/ports for current information on ports to
+http://www.cpan.org/ports for current information on ports to
 various other operating systems.
 
 =back
