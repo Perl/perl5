@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..242\n";
+print "1..244\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1183,23 +1183,49 @@ if (/(\C)/g) {
   }
 }
 
-# 241..242
+# Little background for 241..244 -- in EBCDIC:
 #
-# The tr is admittedly NOT a regular expression operator,
-# but this test is more of an EBCDIC test, the background is
-# that \x89 is 'i' and \x90 is 'j', and \x8e is not a letter,
-# not even a printable character.  Now for the trick:
-# if the range is specified using letters, the \x8e should most
-# probably not match, but if the range is specified using explicit
-# numeric endpoints, it probably should match.  The first case,
-# not matching if using letters, is already tested elsewhere,
-# here we test for the matching cases.
+# "\x89" eq 'i'
+# "\x91" eq 'i'
+# "\xc9" eq 'I'
+# "\xd1" eq 'J'
+#
+# If the character range is specified using explicit numeric endpoints,
+# non-characters (like \x8e and \xce) should match (241 and 242).
+#
+# If the character range is specified using alphabet endpoints,
+# non-characters (like \x8e and \xce) should not match (243 and 244).
 
-$_ = qq/\x8E/;
+if ("\x8e" =~ /[\x89-\x91]/) {
+  print "ok 241\n";
+} else {
+  print "not ok 241\n";
+}
 
-print "not " unless /[\x89-\x91]/;
-print "ok 241\n";
+if ("\xce" =~ /[\xc9-\xd1]/) {
+  print "ok 242\n";
+} else {
+  print "not ok 242\n";
+}
 
-print "not " unless tr/\x89-\x91//d == 1;
-print "ok 242\n";
+if (ord('i') == 0x89 && ord('j') == 0x91) { # EBCDIC
 
+if ("\x8e" !~ /[i-j]/) {
+  print "ok 243\n";
+} else {
+  print "not ok 243\n";
+}
+
+if ("\xce" !~ /[I-J]/) {
+  print "ok 244\n";
+} else {
+  print "not ok 244\n";
+}
+
+} else {
+
+for (243..244) {
+  print "ok $_ # Skip: not EBCDIC\n";
+}
+
+}
