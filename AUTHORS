@@ -1,6 +1,6 @@
-# To give due honor to those who have made Perl 5 what is is today,
+# To give due honour to those who have made Perl 5 what it is today,
 # here are easily-from-changelogs-extractable people and their
-# (hopefully) current and preferred email addresses (as of early 2001,
+# (hopefully) current and preferred email addresses (as of early 2002,
 # if known) from the Changes files.  These people have either submitted
 # patches or suggestions, or their bug reports or comments have inspired
 # the appropriate patches.  Corrections, additions, deletions welcome;
@@ -9,7 +9,7 @@
 #
 # The use of this database for anything else than Perl development
 # is strictly forbidden.  (Passive distribution with the Perl source
-# code kit is naturally allowed.)
+# code kit is, of course, allowed.)
 -- 
 A. C. Yardley                  <yardley@tanet.net>
 Aaron B. Dossett               <aaron@iglou.com>
