@@ -43,7 +43,7 @@ $Config{perlpath}
 
 print OUT <<'!NO!SUBS!';
 
-$0 =~ s/^.*?(\w+)$/$1/;
+$0 =~ s/^.*?(\w+)[\.\w]*$/$1/;
 
 # (p)sed - a stream editor
 # History:  Aug 12 2000: Original version.
@@ -1795,7 +1795,7 @@ if( $doGenerate ){
 #!$perlpath -w
 eval 'exec $perlpath -S \$0 \${1+"\$@"}'
   if 0;
-\$0 =~ s/^.*?(\\w+)\$/\$1/;
+\$0 =~ s/^.*?(\\w+)\[\\.\\w+\]*\$/\$1/;
 
 use strict;
 use Symbol;
