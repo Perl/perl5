@@ -20,6 +20,8 @@ of sections:
 
     perl		Perl overview (this section)
     perldelta		Perl changes since previous version
+    perl5005delta	Perl changes in version 5.005
+    perl5004delta	Perl changes in version 5.004
     perlfaq		Perl frequently asked questions
     perltoc		Perl documentation table of contents
 

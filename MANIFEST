@@ -873,6 +873,7 @@ pod/perlcall.pod	Callback info
 pod/perldata.pod	Data structure info
 pod/perldebug.pod	Debugger info
 pod/perldelta.pod	Changes since last version
+pod/perl5005delta.pod	Changes from 5.004 to 5.005
 pod/perl5004delta.pod	Changes from 5.003 to 5.004
 pod/perldiag.pod	Diagnostic info
 pod/perldsc.pod		Data Structures Cookbook
