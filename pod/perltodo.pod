@@ -94,12 +94,12 @@ to another single Unicode character.  See lib/unicore/SpecCase.txt
 
 =item *
 
-UTF-8 identifier names should probably be canonized: NFC?
+UTF-8 identifier names should probably be canonicalized: NFC?
 
 =item *
 
 UTF-8 in package names and sub names?  The first is problematic
-because of the mapping to pathnames, ditto for the second one is
+because of the mapping to pathnames, ditto for the second one if
 one does autosplitting, for example.
 
 =back
@@ -107,7 +107,7 @@ one does autosplitting, for example.
 See L<perlunicode/UNICODE REGULAR EXPRESSION SUPPORT LEVEL> for what's
 there and what's missing.  Almost all of Levels 2 and 3 is missing,
 and as of 5.8.0 not even all of Level 1 is there.
-They have some tricks Perl doesn't yet implement like character
+They have some tricks Perl doesn't yet implement, such as character
 class subtraction.
 
 	http://www.unicode.org/unicode/reports/tr18/
