@@ -262,7 +262,7 @@ XS(XS_UNIVERSAL_VERSION)
 		    break;
 	    }
 	    if (len) {
-		if (SvNIOKp(req) && SvPOK(req)) {
+		if (SvNOK(req) && SvPOK(req)) {
 		    /* they said C<use Foo v1.2.3> and $Foo::VERSION
 		     * doesn't look like a float: do string compare */
 		    if (sv_cmp(req,sv) == 1) {
@@ -283,7 +283,7 @@ XS(XS_UNIVERSAL_VERSION)
 	/* if we get here, we're looking for a numeric comparison,
 	 * so force the required version into a float, even if they
 	 * said C<use Foo v1.2.3> */
-	if (SvNIOKp(req) && SvPOK(req)) {
+	if (SvNOK(req) && SvPOK(req)) {
 	    NV n = SvNV(req);
 	    req = sv_newmortal();
 	    sv_setnv(req, n);
