@@ -702,7 +702,7 @@ each time it matches, and FALSE when it eventually runs out of matches.
 the search at that point.  You can actually find the current match
 position of a string or set it using the pos() function; see
 L<perlfunc/pos>.)  A failed match normally resets the search position to
-the beginning of the string, but you can avoid that by adding the C</c>
+the beginning of the string, but you can avoid that by adding the C<c>
 modifier (e.g. C<m//gc>).  Modifying the target string also resets the
 search position.
 
