@@ -209,7 +209,7 @@ sub full_setup {
     PERLRUN PERLRUNINST PERL_ARCHLIB PERL_CORE
     PERL_LIB PERL_SRC PERM_RW PERM_RWX
     PL_FILES PM PM_FILTER PMLIBDIRS POLLUTE PPM_INSTALL_EXEC
-    PPM_INSTALL_SCRIPT PREFIX
+    PPM_INSTALL_SCRIPT PREFIX PREREQ_FATAL
     PREREQ_PM SKIP TEST_LIBS TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
@@ -339,26 +339,26 @@ sub ExtUtils::MakeMaker::new {
     my %configure_att;         # record &{$self->{CONFIGURE}} attributes
     my(%initial_att) = %$self; # record initial attributes
 
+    my(%unsatisfied) = ();
     my($prereq);
     foreach $prereq (sort keys %{$self->{PREREQ_PM}}) {
 	my $eval = "require $prereq";
 	eval $eval;
 
 	if ($@) {
-       warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found. We have "
-               . ($prereq->VERSION || 'unknown version');
-	}
-	elsif ($prereq->VERSION < $self->{PREREQ_PM}->{$prereq} ){
-	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found";
-# Why is/was this 'delete' here?  We need PREREQ_PM later to make PPDs.
-#	} else {
-#	    delete $self->{PREREQ_PM}{$prereq};
+	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found.\n" unless $self->{PREREQ_FATAL};
+	    $unsatisfied{$prereq} = 'not installed';
+	} elsif ($prereq->VERSION < $self->{PREREQ_PM}->{$prereq} ){
+	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found. We have"
+               . ($prereq->VERSION || 'unknown version') unless $self->{PREREQ_FATAL};
+	    $unsatisfied{$prereq} = $self->{PREREQ_PM}->{$prereq} ? $self->{PREREQ_PM}->{$prereq} : 'unknown version' ;
 	}
     }
-#    if (@unsatisfied){
+    if (%unsatisfied && $self->{PREREQ_FATAL}){
 # 	  unless (defined $ExtUtils::MakeMaker::useCPAN) {
-# 	      print qq{MakeMaker WARNING: prerequisites not found (@unsatisfied)
-# Please install these modules first and rerun 'perl Makefile.PL'.\n};
+	my $failedprereqs = join ', ', map {"$_ $unsatisfied{$_}"} keys %unsatisfied;
+	die qq{MakeMaker FATAL: prerequisites not found ($failedprereqs)
+		 Please install these modules first and rerun 'perl Makefile.PL'.\n};
 # 	      if ($ExtUtils::MakeMaker::hasCPAN) {
 # 		  $ExtUtils::MakeMaker::useCPAN = prompt(qq{Should I try to use the CPAN module to fetch them for you?},"yes");
 # 	      } else {
@@ -370,10 +370,10 @@ sub ExtUtils::MakeMaker::new {
 # 	      require CPAN;
 # 	      CPAN->import(@unsatisfied);
 # 	  } else {
-# 	      die qq{prerequisites not found (@unsatisfied)};
+#	      die qq{prerequisites not found (@unsatisfied)};
 # 	  }
 #	warn qq{WARNING: prerequisites not found (@unsatisfied)};
-#    }
+    }
 
     if (defined $self->{CONFIGURE}) {
 	if (ref $self->{CONFIGURE} eq 'CODE') {
@@ -1780,6 +1780,12 @@ probably INSTALLMAN1DIR, if it is not below PREFIX according to
 branch from that node into lib/, lib/ARCHNAME or whatever Configure
 decided at the build time of your perl (unless you override one of
 them, of course).
+
+=item PREREQ_FATAL
+
+Bool. If this parameter is true, failing to have the prequired modules
+(or the right versions thereof) will be fatal. perl Makefile.PL will die
+with the proper message.
 
 =item PREREQ_PM
 
