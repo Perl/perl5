@@ -5849,7 +5849,7 @@ will return byte offsets, not character offsets (because implementing
 that would render sysseek() very slow).
 
 sysseek() bypasses normal buffered IO, so mixing this with reads (other
-than C<sysread>, for example &gt;&lt or read()) C<print>, C<write>,
+than C<sysread>, for example C<< <> >> or read()) C<print>, C<write>,
 C<seek>, C<tell>, or C<eof> may cause confusion.
 
 For WHENCE, you may also use the constants C<SEEK_SET>, C<SEEK_CUR>,
