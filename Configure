@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Sep  1 21:10:02 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Sep  2 18:40:07 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -1785,7 +1785,7 @@ $define|true|[yY]*) ;;
     This is an UNSTABLE DEVELOPMENT release.
     The version of this $package distribution is $xversion, that is, odd,
     (as opposed to even) and that signifies a development release.
-    If you want a maintenance release, you want an even-numbered version.)
+    If you want a maintenance release, you want an even-numbered version.
 
     Do ***NOT*** install this into production use.
     Data corruption and crashes are possible.
@@ -3112,12 +3112,15 @@ EOI
 	;;
 esac
 : Detect OS2.  The p_ variable is set above in the Head.U unit.
+: Note that this also -- wrongly -- detects e.g. dos-djgpp, which also uses
+: semicolon as a patch separator
 case "$p_" in
 :) ;;
 *)
 	$cat <<'EOI'
 I have the feeling something is not exactly right, however...don't tell me...
 lemme think...does HAL ring a bell?...no, of course, you're only running OS/2!
+(Or you may be running DOS with DJGPP.)
 EOI
 	echo exit 0 >os2
 	;;
@@ -12725,14 +12728,14 @@ val=$undef
 set tebcdic
 if eval $compile_ok; then
 	if ./tebcdic; then
-		echo "You have EBCDIC." >&4
+		echo "You seem to speak EBCDIC." >&4
 		val="$define"
 	else
-		echo "Nope, no EBCDIC, probably ASCII or some ISO Latin." >&4
+		echo "Nope, no EBCDIC, probably ASCII or some ISO Latin. Or UTF8." >&4
 	fi
 else
 	echo "I'm unable to compile the test program." >&4
-	echo "I'll assume ASCII or some ISO Latin." >&4
+	echo "I'll assume ASCII or some ISO Latin. Or UTF8." >&4
 fi
 $rm -f tebcdic.c tebcdic
 set ebcdic
@@ -13197,7 +13200,7 @@ if $test X"$sPRId64" = X -a X"$quadtype" = X"long long"; then
 #include <sys/types.h>
 #include <stdio.h>
 int main() {
-  long long q = 12345678901LL; /* AIX cc requires the LL prefix. */
+  long long q = 12345678901LL; /* AIX cc requires the LL suffix. */
   printf("%lld\n", q);
 }
 EOCP
@@ -13606,12 +13609,15 @@ case "$pager" in
 	dflt=''
 	case "$pg" in
 	/*) dflt=$pg;;
+	[a-zA-Z]:/*) dflt=$pg;;
 	esac
 	case "$more" in
 	/*) dflt=$more;;
+	[a-zA-Z]:/*) dflt=$more;;
 	esac
 	case "$less" in
 	/*) dflt=$less;;
+	[a-zA-Z]:/*) dflt=$less;;
 	esac
 	case "$dflt" in
 	'') dflt=/usr/ucb/more;;
@@ -16268,7 +16274,7 @@ EOM
 	. UU/myread
 	case "$ans" in
 	y*)
-		$make depend && echo "Now you must run a $make."
+		$make depend && echo "Now you must run '$make'."
 		;;
 	*)
 		echo "You must run '$make depend' then '$make'."
