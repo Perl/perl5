@@ -1488,7 +1488,8 @@ Perl_sv_2iv(pTHX_ register SV *sv)
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	  SV* tmpstr;
-	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
+          if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
+                  (SvRV(tmpstr) != SvRV(sv)))
 	      return SvIV(tmpstr);
 	  return PTR2IV(SvRV(sv));
 	}
@@ -1618,7 +1619,8 @@ Perl_sv_2uv(pTHX_ register SV *sv)
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	  SV* tmpstr;
-	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
+          if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
+                  (SvRV(tmpstr) != SvRV(sv)))
 	      return SvUV(tmpstr);
 	  return PTR2UV(SvRV(sv));
 	}
@@ -1785,7 +1787,8 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	  SV* tmpstr;
-	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)))
+          if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
+                  (SvRV(tmpstr) != SvRV(sv)))
 	      return SvNV(tmpstr);
 	  return PTR2NV(SvRV(sv));
 	}
@@ -2112,7 +2115,8 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	    SV* tmpstr;
-	    if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)))
+            if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
+                    (SvRV(tmpstr) != SvRV(sv)))
 		return SvPV(tmpstr,*lp);
 	    sv = (SV*)SvRV(sv);
 	    if (!sv)
@@ -2359,7 +2363,8 @@ Perl_sv_2bool(pTHX_ register SV *sv)
     if (SvROK(sv)) {
 	dTHR;
 	SV* tmpsv;
-	if (SvAMAGIC(sv) && (tmpsv = AMG_CALLun(sv,bool_)))
+        if (SvAMAGIC(sv) && (tmpsv=AMG_CALLun(sv,bool_)) &&
+                (SvRV(tmpsv) != SvRV(sv)))
 	    return SvTRUE(tmpsv);
       return SvRV(sv) != 0;
     }

@@ -969,5 +969,19 @@ unless ($aaa) {
     test($a =~ /^`1' is not a code reference at/); # 215
 }
 
+# make sure that we don't inifinitely recurse
+{
+  my $c = 0;
+  package Recurse;
+  use overload '""'    => sub { shift },
+               '0+'    => sub { shift },
+               'bool'  => sub { shift },
+               fallback => 1;
+  my $x = bless([]);
+  main::test("$x" =~ /Recurse=ARRAY/);		# 216
+  main::test($x);                               # 217
+  main::test($x+0 =~ /Recurse=ARRAY/);		# 218
+};
+
 # Last test is:
-sub last {215}
+sub last {218}
