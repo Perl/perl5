@@ -3467,7 +3467,7 @@ Perl_yylex(pTHX)
 	OPERATOR(REFGEN);
 
     case 'v':
-	if (isDIGIT(s[1]) && PL_expect == XTERM) {
+	if (isDIGIT(s[1]) && PL_expect != XOPERATOR) {
 	    char *start = s;
 	    start++;
 	    start++;
@@ -3476,6 +3476,18 @@ Perl_yylex(pTHX)
 	    if (*start == '.' && isDIGIT(start[1])) {
 		s = scan_num(s);
 		TERM(THING);
+	    }
+	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
+	    else if (!isALPHA(*start) && (PL_expect == XTERM || PL_expect == XREF)) {
+		char c = *start;
+		GV *gv;
+		*start = '\0';
+		gv = gv_fetchpv(s, FALSE, SVt_PVCV);
+		*start = c;
+		if (!gv) {
+		    s = scan_num(s);
+		    TERM(THING);
+		}
 	    }
 	}
 	goto keylookup;
@@ -6904,7 +6916,7 @@ Perl_scan_num(pTHX_ char *start)
 	    pos++;
 	    while (isDIGIT(*pos))
 		pos++;
-	    if (*pos == '.' && isDIGIT(pos[1])) {
+	    if (!isALPHA(*pos)) {
 		UV rev;
 		U8 tmpbuf[UTF8_MAXLEN];
 		U8 *tmpend;
@@ -6914,32 +6926,22 @@ Perl_scan_num(pTHX_ char *start)
 		sv = NEWSV(92,5);
 		sv_setpvn(sv, "", 0);
 
-		do {
+		for (;;) {
 		    if (*s == '0' && isDIGIT(s[1]))
 			yyerror("Octal number in vector unsupported");
 		    rev = atoi(s);
-		    s = ++pos;
+		    tmpend = uv_to_utf8(tmpbuf, rev);
+		    utf8 = utf8 || rev > 127;
+		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
+		    if (*pos == '.' && isDIGIT(pos[1]))
+			s = ++pos;
+		    else {
+			s = pos;
+			break;
+		    }
 		    while (isDIGIT(*pos))
 			pos++;
-
-		    if (rev > 127) {
-			tmpend = uv_to_utf8(tmpbuf, rev);
-			utf8 = TRUE;
-		    }
-		    else {
-			tmpbuf[0] = (U8)rev;
-			tmpend = &tmpbuf[1];
-		    }
-		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
-		} while (*pos == '.' && isDIGIT(pos[1]));
-
-		if (*s == '0' && isDIGIT(s[1]))
-		    yyerror("Octal number in vector unsupported");
-		rev = atoi(s);
-		s = pos;
-		tmpend = uv_to_utf8(tmpbuf, rev);
-		utf8 = utf8 || rev > 127;
-		sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
+		}
 
 		SvPOK_on(sv);
 		SvREADONLY_on(sv);

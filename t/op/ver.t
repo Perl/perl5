@@ -5,12 +5,31 @@ BEGIN {
     unshift @INC, "../lib";
 }
 
-print "1..14\n";
+print "1..18\n";
 
 my $test = 1;
 
 use v5.5.640;
 require v5.5.640;
+print "ok $test\n";  ++$test;
+
+# printing characters should work
+print v111;
+print v107.32;
+print "$test\n"; ++$test;
+
+# hash keys too
+$h{v111.107} = "ok";
+print "$h{ok} $test\n"; ++$test;
+
+# poetry optimization should also
+sub v77 { "ok" }
+$x = v77;
+print "$x $test\n"; ++$test;
+
+# but not when dots are involved
+$x = v77.78.79;
+print "not " unless $x eq "MNO";
 print "ok $test\n";  ++$test;
 
 print "not " unless v1.20.300.4000 eq "\x{1}\x{14}\x{12c}\x{fa0}";
