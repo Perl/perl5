@@ -148,6 +148,8 @@
 #define PL_eval_start		(*Perl_Ieval_start_ptr(aTHXo))
 #undef  PL_evalseq
 #define PL_evalseq		(*Perl_Ievalseq_ptr(aTHXo))
+#undef  PL_exit_flags
+#define PL_exit_flags		(*Perl_Iexit_flags_ptr(aTHXo))
 #undef  PL_exitlist
 #define PL_exitlist		(*Perl_Iexitlist_ptr(aTHXo))
 #undef  PL_exitlistlen

@@ -241,6 +241,7 @@
 #define PL_eval_root		(PERL_GET_INTERP->Ieval_root)
 #define PL_eval_start		(PERL_GET_INTERP->Ieval_start)
 #define PL_evalseq		(PERL_GET_INTERP->Ievalseq)
+#define PL_exit_flags		(PERL_GET_INTERP->Iexit_flags)
 #define PL_exitlist		(PERL_GET_INTERP->Iexitlist)
 #define PL_exitlistlen		(PERL_GET_INTERP->Iexitlistlen)
 #define PL_expect		(PERL_GET_INTERP->Iexpect)
@@ -506,6 +507,7 @@
 #define PL_eval_root		(vTHX->Ieval_root)
 #define PL_eval_start		(vTHX->Ieval_start)
 #define PL_evalseq		(vTHX->Ievalseq)
+#define PL_exit_flags		(vTHX->Iexit_flags)
 #define PL_exitlist		(vTHX->Iexitlist)
 #define PL_exitlistlen		(vTHX->Iexitlistlen)
 #define PL_expect		(vTHX->Iexpect)
@@ -908,6 +910,7 @@
 #define PL_eval_root		(aTHXo->interp.Ieval_root)
 #define PL_eval_start		(aTHXo->interp.Ieval_start)
 #define PL_evalseq		(aTHXo->interp.Ievalseq)
+#define PL_exit_flags		(aTHXo->interp.Iexit_flags)
 #define PL_exitlist		(aTHXo->interp.Iexitlist)
 #define PL_exitlistlen		(aTHXo->interp.Iexitlistlen)
 #define PL_expect		(aTHXo->interp.Iexpect)
@@ -1174,6 +1177,7 @@
 #define PL_Ieval_root		PL_eval_root
 #define PL_Ieval_start		PL_eval_start
 #define PL_Ievalseq		PL_evalseq
+#define PL_Iexit_flags		PL_exit_flags
 #define PL_Iexitlist		PL_exitlist
 #define PL_Iexitlistlen		PL_exitlistlen
 #define PL_Iexpect		PL_expect

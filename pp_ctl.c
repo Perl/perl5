@@ -2394,6 +2394,7 @@ PP(pp_exit)
 	    anum = 0;
 #endif
     }
+    PL_exit_flags |= PERL_EXIT_EXPECTED;
     my_exit(anum);
     PUSHs(&PL_sv_undef);
     RETURN;
