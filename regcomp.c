@@ -1715,9 +1715,9 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
       r->offsets[0] = RExC_size; 
     }
     DEBUG_r(PerlIO_printf(Perl_debug_log, 
-                          "%s %u bytes for offset annotations.\n", 
+                          "%s %"UVuf" bytes for offset annotations.\n", 
                           r->offsets ? "Got" : "Couldn't get", 
-                          (2*RExC_size+1) * sizeof(U32)));
+                          (UV)((2*RExC_size+1) * sizeof(U32))));
 
     RExC_rx = r;
 
@@ -4290,11 +4290,11 @@ Perl_regdump(pTHX_ regexp *r)
     if (r->offsets) {
       U32 i;
       U32 len = r->offsets[0];
-      PerlIO_printf(Perl_debug_log, "Offsets: [%u]\n\t", r->offsets[0]);
+      PerlIO_printf(Perl_debug_log, "Offsets: [%"UVuf"]\n\t", (UV)r->offsets[0]);
       for (i = 1; i <= len; i++)
-        PerlIO_printf(Perl_debug_log, "%u[%u] ", 
-                      r->offsets[i*2-1], 
-                      r->offsets[i*2]);
+        PerlIO_printf(Perl_debug_log, "%"UVuf"[%"UVuf"] ", 
+                      (UV)r->offsets[i*2-1], 
+                      (UV)r->offsets[i*2]);
       PerlIO_printf(Perl_debug_log, "\n");
     }
 #endif	/* DEBUGGING */
