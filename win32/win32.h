@@ -211,10 +211,6 @@ typedef long		gid_t;
 #define flushall	_flushall
 #define fcloseall	_fcloseall
 
-#ifndef CP_UTF8
-#  define CP_UTF8	65001
-#endif
-
 #ifdef PERL_OBJECT
 #  define MEMBER_TO_FPTR(name)	&(name)
 #endif
@@ -227,6 +223,11 @@ typedef long		gid_t;
 #endif
 
 #endif /* __MINGW32__ */
+
+/* both GCC/Mingw32 and MSVC++ 4.0 are missing this, so we put it here */
+#ifndef CP_UTF8
+#  define CP_UTF8	65001
+#endif
 
 /* compatibility stuff for other compilers goes here */
 

@@ -289,9 +289,8 @@ B<pod2man> for details).  Thus, you shouldn't write things like C<the
 LE<lt>fooE<gt> manpage>, if you want the translated document to read
 sensibly.
 
-If you don need or want total control of the text used for a
-link in the output use the form LE<lt>show this text|fooE<gt>
-instead.
+If you need total control of the text used for a link in the output
+use the form LE<lt>show this text|fooE<gt> instead.
 
 =item *
 

@@ -589,10 +589,7 @@ CORE_NOCFG_H	=		\
 		.\include\dirent.h	\
 		.\include\netdb.h	\
 		.\include\sys\socket.h	\
-		.\win32.h	\
-		.\perlhost.h	\
-		.\vdir.h	\
-		.\vmem.h
+		.\win32.h
 
 CORE_H		= $(CORE_NOCFG_H) .\config.h
 
@@ -798,8 +795,9 @@ $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ $(*F).c
 
 # -DPERL_IMPLICIT_SYS needs C++ for perllib.c
+# This is the only file that depends on perlhost.h, vmem.h, and vdir.h
 !IF "$(USE_IMP_SYS)$(USE_OBJECT)" == "defineundef"
-perllib$(o)	: perllib.c
+perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
 	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
 !ENDIF
 
@@ -1068,6 +1066,19 @@ test : test-prep
 
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1
+	cd ..\t
+	$(PERLEXE) -I..\lib harness
+	cd ..\win32
+
+test-wide : test-prep
+	set HARNESS_PERL_SWITCHES=-C
+	cd ..\t
+	$(PERLEXE) -I..\lib harness
+	cd ..\win32
+
+test-wide-notty : test-prep
+	set PERL_SKIP_TTY_TEST=1
+	set HARNESS_PERL_SWITCHES=-C
 	cd ..\t
 	$(PERLEXE) -I..\lib harness
 	cd ..\win32

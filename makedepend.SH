@@ -135,6 +135,7 @@ for file in `$cat .clist`; do
     fi
     $cppstdin $finc -I. $cppflags $cppminus <UU/$file.c |
     $sed \
+	-e '1d' \
 	-e '/^#.*<stdin>/d' \
 	-e '/^#.*"-"/d' \
 	-e 's#\.[0-9][0-9]*\.c#'"$file.c#" \

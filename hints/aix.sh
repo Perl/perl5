@@ -201,9 +201,9 @@ EOM
 esac
 EOCBU
 
-# This script UU/uselfs.cbu will get 'called-back' by Configure 
+# This script UU/uselargefiles.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use large files.
-cat > UU/uselfs.cbu <<'EOCBU'
+cat > UU/uselargefiles.cbu <<'EOCBU'
 case "$uselargefiles" in
 ''|$define|true|[yY]*)
 	lfcflags="`getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
@@ -311,7 +311,8 @@ EOM
 	    # do any harm, I didn't pursue it. -- sh
 	    lfldflags="`echo $lfldflags`"
 	    lflibs="`getconf XBS5_LP64_OFF64_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
-	    # -q32 and -b32 may have been set by uselfs or user.  Remove them.
+	    # -q32 and -b32 may have been set by uselargefiles or user.
+    	    # Remove them.
 	    ccflags="`echo $ccflags | sed -e 's@-q32@@'`"
 	    ldflags="`echo $ldflags | sed -e 's@-b32@@'`"
 	    # Tell archiver to use large format.  Unless we remove 'ar'

@@ -1735,6 +1735,9 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 		*flagp = TRYAGAIN;
 		return NULL;
 	    case 'p':
+		Perl_warner(aTHX_ WARN_REGEXP, "(?p{}) is deprecated - use (??{})");
+		/* FALL THROUGH*/
+	    case '?':
 		logical = 1;
 		paren = *PL_regcomp_parse++;
 		/* FALL THROUGH */

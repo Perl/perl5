@@ -56,6 +56,20 @@ esac
 
 # Here's another draft of the perl5/solaris/gcc sanity-checker. 
 
+test -z "`{$cc:-cc} -V 2>/dev/null|grep -i workshop`" || ccisworkshop="$define"
+test -z "`{$cc:-cc} -v 2>/dev/null|grep -i gcc`"      || ccisgcc="$define"
+
+case "$ccisworkshop" in
+"$define")
+	cat >try.c <<EOF
+#include <sunmath.h>
+int main() { return(0); }
+EOF
+	workshoplibs=`cc -### try.c -lsunmath -o try 2>&1|grep " -Y "|sed 's%.* -Y "P,\(.*\)".*%\1%'|tr ':' '\n'|grep '/SUNWspro/'|sort -u`
+	loclibpth="$loclibpth $workshoplibs"
+	;;
+esac
+
 case `type ${cc:-cc}` in
 */usr/ucb/cc*) cat <<END >&4
 
@@ -370,7 +384,7 @@ case "$use64bitall" in
 "$define"|true|[yY]*)
 	    libc='/usr/lib/sparcv9/libc.so'
 	    if test ! -f $libc; then
-		cat <<EOM
+		cat >&4 <<EOM
 
 I do not see the 64-bit libc, $libc.
 Cannot continue, aborting.
@@ -381,17 +395,32 @@ EOM
 	    loclibpth="$loclibpth /usr/lib/sparcv9"
 	    case "$cc -v 2>/dev/null" in
 	    *gcc*)
-		# I don't know what are the flags to make gcc sparcv9-aware,
-	        # I'm just guessing. --jhi
-		ccflags="$ccflags -mv9"
-		ldflags="$ldflags -mv9"
-		lddlflags="$lddlflags -G -mv9"
+		echo 'main() { return 0; }' > try.c
+		if ${cc:-cc} -mcpu=v9 -m64 -S try.c 2>&1 | grep -e \
+		    '-m64 is not supported by this configuration'; then
+		    cat >&4 <<EOM
+
+Full 64-bit build not supported by this configuration.
+Cannot continue, aborting.
+
+EOM
+		    exit 1
+		fi
+		ccflags="$ccflags -mcpu=v9 -m64"
+		if test X`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null` != X; then
+		    ccflags="$ccflags -Wa,`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
+		fi
+		# no changes to ld flags, as (according to man ld):
+		#
+   		# There is no specific option that tells ld to link 64-bit
+		# objects; the class of the first object that gets processed
+		# by ld determines whether it is to perform a 32-bit or a
+		# 64-bit link edit.
 		;;
 	    *)
 		ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
 		ldflags="$ldflags `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
 		lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
-		test -d /opt/SUNWspro/lib && loclibpth="$loclibpth /opt/SUNWspro/lib"
 		;;
 	    esac	
 	    libscheck='case "`/usr/bin/file $xxx`" in
@@ -415,20 +444,26 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 # after it has prompted the user for whether to use long doubles.
 case "$uselongdouble" in
 "$define"|true|[yY]*)
-	if test ! -f /opt/SUNWspro/lib/libsunmath.so; then
+	case "$ccisworkshop" in
+	'')
 		cat <<EOM
 
-I do not see the libsunmath.so in /opt/SUNWspro/lib;
-therefore I cannot do long doubles, sorry.
+I do not see the libsunmath.so; therefore I cannot do long doubles, sorry.
 
 EOM
 		exit 1
-	fi
+		;;
+	esac
 	libswanted="$libswanted sunmath"
 	loclibpth="$loclibpth /opt/SUNWspro/lib"
 	;;
 esac
 EOCBU
+
+rm -f try.c try.o try
+# keep that leading tab
+	ccisworkshop=''
+	ccisgcc=''
 
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'

@@ -13,9 +13,15 @@ BEGIN {
 	}
 }
 
-sub bye {
+sub zap {
     close(BIG);
-    unlink "big";
+    unlink("big");
+    unlink("big1");
+    unlink("big2");
+}
+
+sub bye {
+    zap();	
     exit(0);
 }
 
@@ -62,26 +68,42 @@ my ($SEEK_SET, $SEEK_CUR, $SEEK_END) = (0, 1, 2);
 # consume less blocks than one megabyte (assuming nobody has
 # one megabyte blocks...)
 
-open(BIG, ">big") or do { warn "open failed: $!\n"; bye };
-binmode BIG;
-seek(BIG, 1_000_000, $SEEK_SET);
-print BIG "big";
-close(BIG);
+open(BIG, ">big1") or
+    do { warn "open big1 failed: $!\n"; bye };
+binmode(BIG) or
+    do { warn "binmode big1 failed: $!\n"; bye };
+seek(BIG, 1_000_000, $SEEK_SET) or
+    do { warn "seek big1 failed: $!\n"; bye };
+print BIG "big" or
+    do { warn "print big1 failed: $!\n"; bye };
+close(BIG) or
+    do { warn "close big1 failed: $!\n"; bye };
 
-my @s;
+my @s1 = stat("big1");
 
-@s = stat("big");
+print "# s1 = @s1\n";
 
-print "# @s\n";
+open(BIG, ">big2") or
+    do { warn "open big2 failed: $!\n"; bye };
+binmode(BIG) or
+    do { warn "binmode big2 failed: $!\n"; bye };
+seek(BIG, 2_000_000, $SEEK_SET) or
+    do { warn "seek big2 failed; $!\n"; bye };
+print BIG "big" or
+    do { warn "print big2 failed; $!\n"; bye };
+close(BIG) or
+    do { warn "close big2 failed; $!\n"; bye };
 
-my $BLOCKSIZE = $s[11] || 512;
+my @s2 = stat("big2");
 
-unless (@s == 13 &&
-	$s[7] == 1_000_003 &&
-	defined $s[12] &&
-        $BLOCKSIZE * $s[12] < 1_000_003) {
-    print "1..0\n# no sparse files?\n";
-    bye();
+print "# s2 = @s2\n";
+
+zap();
+
+unless ($s1[7] == 1_000_003 && $s2[7] == 2_000_003 &&
+	$s1[11] == $s2[11] && $s1[12] == $s2[12]) {
+	print "1..0\n#no sparse files?\n";
+	bye;
 }
 
 print "# we seem to have sparse files...\n";

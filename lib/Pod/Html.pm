@@ -1,22 +1,20 @@
 package Pod::Html;
-
-use Pod::Functions;
-use Getopt::Long;	# package for handling command-line parameters
-use File::Spec::Unix;
+use strict;
 require Exporter;
-use vars qw($VERSION);
+
+use vars qw($VERSION @ISA @EXPORT);
 $VERSION = 1.03;
-@ISA = Exporter;
+@ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
-use Cwd;
 
 use Carp;
+use Config;
+use Cwd;
+use File::Spec::Unix;
+use Getopt::Long;
+use Pod::Functions;
 
 use locale;	# make \w work right in non-ASCII lands
-
-use strict;
-
-use Config;
 
 =head1 NAME
 
@@ -38,6 +36,33 @@ a cache of things it knows how to cross-reference.
 Pod::Html takes the following arguments:
 
 =over 4
+
+=item backlink
+
+    --backlink="Back to Top"
+
+Adds "Back to Top" links in front of every HEAD1 heading (except for
+the first).  By default, no backlink are being generated.
+
+=item css
+
+    --css=stylesheet
+
+Specify the URL of a cascading style sheet.
+
+=item flush
+
+    --flush
+
+Flushes the item and directory caches.
+
+=item header
+
+    --header
+    --noheader
+
+Creates header and footer blocks containing the text of the NAME
+section.  By default, no headers are being generated.
 
 =item help
 
@@ -61,32 +86,20 @@ Pod::Html the root of the documentation tree.
 Sets the base URL for the HTML files.  When cross-references are made,
 the HTML root is prepended to the URL.
 
+=item index
+
+    --index
+    --noindex
+
+Generate an index at the top of the HTML file.  This is the default
+behaviour.
+
 =item infile
 
     --infile=name
 
 Specify the pod file to convert.  Input is taken from STDIN if no
 infile is specified.
-
-=item outfile
-
-    --outfile=name
-
-Specify the HTML file to create.  Output goes to STDOUT if no outfile
-is specified.
-
-=item podroot
-
-    --podroot=name
-
-Specify the base directory for finding library pods.
-
-=item podpath
-
-    --podpath=name:...:name
-
-Specify which subdirectories of the podroot contain pod files whose
-HTML converted forms can be linked-to in cross-references.
 
 =item libpods
 
@@ -97,39 +110,46 @@ List of page names (eg, "perlfunc") which contain linkable C<=item>s.
 =item netscape
 
     --netscape
-
-Use Netscape HTML directives when applicable.
-
-=item nonetscape
-
     --nonetscape
 
-Do not use Netscape HTML directives (default).
+Use Netscape HTML directives when applicable.  By default, they will
+B<not> be used.
 
-=item index
+=item outfile
 
-    --index
+    --outfile=name
 
-Generate an index at the top of the HTML file (default behaviour).
+Specify the HTML file to create.  Output goes to STDOUT if no outfile
+is specified.
 
-=item noindex
+=item podpath
 
-    --noindex
+    --podpath=name:...:name
 
-Do not generate an index at the top of the HTML file.
+Specify which subdirectories of the podroot contain pod files whose
+HTML converted forms can be linked-to in cross-references.
 
+=item podroot
+
+    --podroot=name
+
+Specify the base directory for finding library pods.
+
+=item quiet
+
+    --quiet
+    --noquiet
+
+Don't display I<mostly harmless> warning messages.  These messages
+will be displayed by default.  But this is not the same as C<verbose>
+mode.
 
 =item recurse
 
     --recurse
-
-Recurse into subdirectories specified in podpath (default behaviour).
-
-=item norecurse
-
     --norecurse
 
-Do not recurse into subdirectories specified in podpath.
+Recurse into subdirectories specified in podpath (default behaviour).
 
 =item title
 
@@ -137,23 +157,12 @@ Do not recurse into subdirectories specified in podpath.
 
 Specify the title of the resulting HTML file.
 
-=item css
-
-    --css=stylesheet
-
-Specify the URL of a cascading style sheet.
-
 =item verbose
 
     --verbose
+    --noverbose
 
-Display progress messages.
-
-=item quiet
-
-    --quiet
-
-Don't display I<mostly harmless> warning messages.
+Display progress messages.  By default, they won't be displayed.
 
 =back
 
@@ -211,6 +220,7 @@ my $recurse = 1;		# recurse on subdirectories in $podpath.
 my $quiet = 0;			# not quiet by default
 my $verbose = 0;		# not verbose by default
 my $doindex = 1;   	    	# non-zero if we should generate an index
+my $backlink = '';              # text for "back to top" links
 my $listlevel = 0;		# current list depth
 my @listend = ();		# the text to use to end the list.
 my $after_lpar = 0;             # set to true after a par in an =item
@@ -257,6 +267,7 @@ $recurse = 1;		# recurse on subdirectories in $podpath.
 $quiet = 0;		# not quiet by default
 $verbose = 0;		# not verbose by default
 $doindex = 1;   	    	# non-zero if we should generate an index
+$backlink = '';		# text for "back to top" links
 $listlevel = 0;		# current list depth
 @listend = ();		# the text to use to end the list.
 $after_lpar = 0;        # set to true after a par in an =item
@@ -331,7 +342,7 @@ sub pod2html {
     } 
     $htmlfile = "-" unless $htmlfile;	# stdout
     $htmlroot = "" if $htmlroot eq "/";	# so we don't get a //
-    $htmldir =~ s#/$## ;                # so we don't get a //
+    $htmldir =~ s#/\z## ;               # so we don't get a //
     if (  $htmlroot eq ''
        && defined( $htmldir ) 
        && $htmldir ne ''
@@ -377,7 +388,7 @@ sub pod2html {
 	    } 
 	}
     }
-    if (!$title and $podfile =~ /\.pod$/) {
+    if (!$title and $podfile =~ /\.pod\z/) {
 	# probably a split pod so take first =head[12] as title
 	for (my $i = 0; $i < @poddata; $i++) { 
 	    last if ($title) = $poddata[$i] =~ /^=head[12]\s*(.*)/;
@@ -389,7 +400,7 @@ sub pod2html {
 	$title =~ s/\s*\(.*\)//;
     } else {
 	warn "$0: no title for $podfile" unless $quiet;
-	$podfile =~ /^(.*)(\.[^.\/]+)?$/;
+	$podfile =~ /^(.*)(\.[^.\/]+)?\z/s;
 	$title = ($podfile eq "-" ? 'No Title' : $1);
 	warn "using $title" if $verbose;
     }
@@ -526,8 +537,8 @@ END_OF_HEAD
     finish_list();
 
     # link to page index
-    print HTML "<P><A HREF=\"#__index__\"><SMALL>page index</SMALL></A></P>\n"
-	if $doindex and $index;
+    print HTML "<P><A HREF=\"#__index__\"><SMALL>$backlink</SMALL></A></P>\n"
+	if $doindex and $index and $backlink;
 
     print HTML <<END_OF_TAIL;
 $block
@@ -557,43 +568,50 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
            --libpods=<name>:...:<name> --recurse --verbose --index
            --netscape --norecurse --noindex
 
-  --flush      - flushes the item and directory caches.
-  --help       - prints this message.
-  --htmlroot   - http-server base directory from which all relative paths
-                 in podpath stem (default is /).
-  --index      - generate an index at the top of the resulting html
-                 (default).
-  --infile     - filename for the pod to convert (input taken from stdin
-                 by default).
-  --libpods    - colon-separated list of pages to search for =item pod
-                 directives in as targets of C<> and implicit links (empty
-                 by default).  note, these are not filenames, but rather
-                 page names like those that appear in L<> links.
-  --netscape   - will use netscape html directives when applicable.
-  --nonetscape - will not use netscape directives (default).
-  --outfile    - filename for the resulting html file (output sent to
-                 stdout by default).
-  --podpath    - colon-separated list of directories containing library
-                 pods.  empty by default.
-  --podroot    - filesystem base directory from which all relative paths
-                 in podpath stem (default is .).
-  --noindex    - don't generate an index at the top of the resulting html.
-  --norecurse  - don't recurse on those subdirectories listed in podpath.
-  --recurse    - recurse on those subdirectories listed in podpath
-                 (default behavior).
-  --title      - title that will appear in resulting html file.
-  --header     - produce block header/footer
-  --css        - stylesheet URL
-  --verbose    - self-explanatory
-  --quiet      - supress some benign warning messages
+  --backlink     - set text for "back to top" links (default: none).
+  --css          - stylesheet URL
+  --flush        - flushes the item and directory caches.
+  --[no]header   - produce block header/footer (default is no headers).
+  --help         - prints this message.
+  --htmldir      - directory for resulting HTML files.
+  --htmlroot     - http-server base directory from which all relative paths
+                   in podpath stem (default is /).
+  --[no]index    - generate an index at the top of the resulting html
+                   (default behaviour).
+  --infile       - filename for the pod to convert (input taken from stdin
+                   by default).
+  --libpods      - colon-separated list of pages to search for =item pod
+                   directives in as targets of C<> and implicit links (empty
+                   by default).  note, these are not filenames, but rather
+                   page names like those that appear in L<> links.
+  --[no]netscape - will use netscape html directives when applicable.
+                   (default is not to use them).
+  --outfile      - filename for the resulting html file (output sent to
+                   stdout by default).
+  --podpath      - colon-separated list of directories containing library
+                   pods (empty by default).
+  --podroot      - filesystem base directory from which all relative paths
+                   in podpath stem (default is .).
+  --[no]quiet    - supress some benign warning messages (default is off).
+  --[no]recurse  - recurse on those subdirectories listed in podpath
+                   (default behaviour).
+  --title        - title that will appear in resulting html file.
+  --[no]verbose  - self-explanatory (off by default).
 
 END_OF_USAGE
 
 sub parse_command_line {
-    my ($opt_flush,$opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,$opt_netscape,$opt_outfile,$opt_podpath,$opt_podroot,$opt_recurse,$opt_title,$opt_verbose,$opt_css,$opt_header,$opt_quiet);
+    my ($opt_backlink,$opt_css,$opt_flush,$opt_header,$opt_help,$opt_htmldir,
+	$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,$opt_netscape,
+	$opt_outfile,$opt_podpath,$opt_podroot,$opt_quiet,$opt_recurse,
+	$opt_title,$opt_verbose);
+
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
+			    'backlink=s' => \$opt_backlink,
+			    'css=s'      => \$opt_css,
 			    'flush'      => \$opt_flush,
+			    'header!'    => \$opt_header,
 			    'help'       => \$opt_help,
 			    'htmldir=s'  => \$opt_htmldir,
 			    'htmlroot=s' => \$opt_htmlroot,
@@ -604,40 +622,37 @@ sub parse_command_line {
 			    'outfile=s'  => \$opt_outfile,
 			    'podpath=s'  => \$opt_podpath,
 			    'podroot=s'  => \$opt_podroot,
+			    'quiet!'     => \$opt_quiet,
 			    'recurse!'   => \$opt_recurse,
 			    'title=s'    => \$opt_title,
-			    'header'     => \$opt_header,
-			    'css=s'      => \$opt_css,
-			    'verbose'    => \$opt_verbose,
-			    'quiet'      => \$opt_quiet,
+			    'verbose!'   => \$opt_verbose,
 			   );
     usage("-", "invalid parameters") if not $result;
 
     usage("-") if defined $opt_help;	# see if the user asked for help
     $opt_help = "";			# just to make -w shut-up.
 
-    $podfile  = $opt_infile if defined $opt_infile;
-    $htmlfile = $opt_outfile if defined $opt_outfile;
-    $htmldir  = $opt_htmldir if defined $opt_htmldir;
-
     @podpath  = split(":", $opt_podpath) if defined $opt_podpath;
     @libpods  = split(":", $opt_libpods) if defined $opt_libpods;
+
+    $backlink = $opt_backlink if defined $opt_backlink;
+    $css      = $opt_css      if defined $opt_css;
+    $header   = $opt_header   if defined $opt_header;
+    $htmldir  = $opt_htmldir  if defined $opt_htmldir;
+    $htmlroot = $opt_htmlroot if defined $opt_htmlroot;
+    $doindex  = $opt_index    if defined $opt_index;
+    $podfile  = $opt_infile   if defined $opt_infile;
+    $netscape = $opt_netscape if defined $opt_netscape;
+    $htmlfile = $opt_outfile  if defined $opt_outfile;
+    $podroot  = $opt_podroot  if defined $opt_podroot;
+    $quiet    = $opt_quiet    if defined $opt_quiet;
+    $recurse  = $opt_recurse  if defined $opt_recurse;
+    $title    = $opt_title    if defined $opt_title;
+    $verbose  = $opt_verbose  if defined $opt_verbose;
 
     warn "Flushing item and directory caches\n"
 	if $opt_verbose && defined $opt_flush;
     unlink($dircache, $itemcache) if defined $opt_flush;
-
-    $htmlroot = $opt_htmlroot if defined $opt_htmlroot;
-    $podroot  = $opt_podroot if defined $opt_podroot;
-
-    $doindex  = $opt_index if defined $opt_index;
-    $recurse  = $opt_recurse if defined $opt_recurse;
-    $title    = $opt_title if defined $opt_title;
-    $header   = defined $opt_header ? 1 : 0;
-    $css      = $opt_css if defined $opt_css;
-    $verbose  = defined $opt_verbose ? 1 : 0;
-    $quiet    = defined $opt_quiet ? 1 : 0;
-    $netscape = $opt_netscape if defined $opt_netscape;
 }
 
 
@@ -787,7 +802,7 @@ sub scan_podpath {
 	    $dirname = $1;
 	    opendir(DIR, $dirname) ||
 		die "$0: error opening directory $dirname: $!\n";
-	    @files = grep(/(\.pod|\.pm)$/ && ! -d $_, readdir(DIR));
+	    @files = grep(/(\.pod|\.pm)\z/ && ! -d $_, readdir(DIR));
 	    closedir(DIR);
 
 	    # scan each .pod and .pm file for =item directives
@@ -873,13 +888,13 @@ sub scan_dir {
 	    $pages{$_}  = "" unless defined $pages{$_};
 	    $pages{$_} .= "$dir/$_:";
 	    push(@subdirs, $_);
-	} elsif (/\.pod$/) {	    	    	    	    # .pod
-	    s/\.pod$//;
+	} elsif (/\.pod\z/) {	    	    	    	    # .pod
+	    s/\.pod\z//;
 	    $pages{$_}  = "" unless defined $pages{$_};
 	    $pages{$_} .= "$dir/$_.pod:";
 	    push(@pods, "$dir/$_.pod");
-	} elsif (/\.pm$/) { 	    	    	    	    # .pm
-	    s/\.pm$//;
+	} elsif (/\.pm\z/) { 	    	    	    	    # .pm
+	    s/\.pm\z//;
 	    $pages{$_}  = "" unless defined $pages{$_};
 	    $pages{$_} .= "$dir/$_.pm:";
 	    push(@pods, "$dir/$_.pm");
@@ -959,7 +974,7 @@ sub scan_items {
     my($i, $item);
     local $_;
 
-    $pod =~ s/\.pod$//;
+    $pod =~ s/\.pod\z//;
     $pod .= ".html" if $pod;
 
     foreach $i (0..$#poddata) {
@@ -1001,8 +1016,8 @@ sub process_head {
 
     print HTML "<P>\n";
     if( $level == 1 && ! $top ){
-	print HTML "<A HREF=\"#__index__\"><SMALL>page index</SMALL></A>\n"
-	    if $hasindex;
+	print HTML "<A HREF=\"#__index__\"><SMALL>$backlink</SMALL></A>\n"
+	    if $hasindex and $backlink;
 	print HTML "<HR>\n"
     }
 
@@ -1678,7 +1693,7 @@ sub page_sect($$) {
 	# this will only find one page. A better solution might be to produce
 	# an intermediate page that is an index to all such pages.
 	my $page_name = $page ;
-	$page_name =~ s,^.*/,, ;
+	$page_name =~ s,^.*/,,s ;
 	if ( defined( $pages{ $page_name } ) && 
 	     $pages{ $page_name } =~ /([^:]*$page)\.(?:pod|pm):/ 
 	   ) {
@@ -1737,7 +1752,7 @@ sub page_sect($$) {
 	# for other kinds of links, like file:, ftp:, etc.
         my $url ;
         if (  $htmlfileurl ne '' ) {
-            $link = "$htmldir$link" if $link =~ m{^/};
+            $link = "$htmldir$link" if $link =~ m{^/}s;
             $url = relativize_url( $link, $htmlfileurl );
 # print( "  b: [$link,$htmlfileurl,$url]\n" );
 	}

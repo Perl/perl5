@@ -83,7 +83,7 @@ sub runtests {
     while ($test = shift(@tests)) {
 	$te = $test;
 	chop($te);
-	if ($^O eq 'VMS') { $te =~ s/^.*\.t\./[.t./; }
+	if ($^O eq 'VMS') { $te =~ s/^.*\.t\./[.t./s; }
 	my $blank = (' ' x 77);
 	my $leader = "$te" . '.' x (20 - length($te));
 	my $ml = "";
@@ -94,6 +94,8 @@ sub runtests {
 	$fh->open($test) or print "can't open $test. $!\n";
 	my $first = <$fh>;
 	my $s = $switches;
+	$s .= " $ENV{'HARNESS_PERL_SWITCHES'}"
+	    if exists $ENV{'HARNESS_PERL_SWITCHES'};
 	$s .= join " ", q[ "-T"], map {qq["-I$_"]} @INC
 	    if $first =~ /^#!.*\bperl.*-\w*T/;
 	$fh->close or print "can't close $test. $!\n";
@@ -507,6 +509,11 @@ and report them as
 If relative, directory name is with respect to the current directory at
 the moment runtests() was called.  Putting absolute path into 
 C<HARNESS_FILELEAK_IN_DIR> may give more predicatable results.
+
+The value of C<HARNESS_PERL_SWITCHES> will be prepended to the
+switches used to invoke perl on each test.  For example, setting
+C<HARNESS_PERL_SWITCHES> to "-W" will run all tests with all
+warnings enabled.
 
 Harness sets C<HARNESS_ACTIVE> before executing the individual tests.
 This allows the tests to determine if they are being executed through the

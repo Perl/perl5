@@ -148,7 +148,7 @@ sub pod_find
         # * remove e.g. 5.00503
         # * remove pod/ if followed by *.pod (e.g. in pod/perlfunc.pod)
         $SIMPLIFY_RX =
-          qq!^(?i:site_perl/|\Q$Config::Config{archname}\E/|\\d+\\.\\d+([_.]?\\d+)?/|pod/(?=.*?\\.pod\$))*!;
+          qq!^(?i:site_perl/|\Q$Config::Config{archname}\E/|\\d+\\.\\d+([_.]?\\d+)?/|pod/(?=.*?\\.pod\\z))*!;
 
     }
 
@@ -158,11 +158,11 @@ sub pod_find
     my $pwd = cwd();
 
     foreach my $try (@search) {
-        unless($try =~ m:^/:) {
+        unless($try =~ m:^/:s) {
 	    # make path absolute
 	    $try = join('/',$pwd,$try);
 	}
-	$try =~ s:/\.?(?=/|$)::; # simplify path
+	$try =~ s:/\.?(?=/|\z)::; # simplify path
         my $name;
         if(-f $try) {
             if($name = _check_and_extract_name($try, $opts{-verbose})) {
@@ -183,7 +183,7 @@ sub pod_find
 		else {
 	            $dirs_visited{$item} = 1;
 		}
-		if($opts{-perl} && /^(\d+\.[\d_]+)$/ && eval "$1" != $]) {
+		if($opts{-perl} && /^(\d+\.[\d_]+)\z/s && eval "$1" != $]) {
                     $File::Find::prune = 1;
                     warn "Perl $] version mismatch on $_, skipping.\n"
 		        if($opts{-verbose});
@@ -216,7 +216,7 @@ sub _check_and_extract_name {
     my ($file, $verbose, $root_rx) = @_;
 
     # check extension or executable
-    unless($file =~ /\.(pod|pm|pl)$/i || (-f $file && -x _ && -T _)) {
+    unless($file =~ /\.(pod|pm|pl)\z/i || (-f $file && -x _ && -T _)) {
         return undef;
     }
 
@@ -239,13 +239,13 @@ sub _check_and_extract_name {
     # _TODO_ what happens on e.g. Win32?
     my $name = $file;
     if(defined $root_rx) {
-        $name =~ s!$root_rx!!;
-        $name =~ s!$SIMPLIFY_RX!!o if(defined $SIMPLIFY_RX);
+        $name =~ s!$root_rx!!s;
+        $name =~ s!$SIMPLIFY_RX!!os if(defined $SIMPLIFY_RX);
     }
     else {
-        $name =~ s:^.*/::;
+        $name =~ s:^.*/::s;
     }
-    $name =~ s/\.(pod|pm|pl)$//i;
+    $name =~ s/\.(pod|pm|pl)\z//i;
     $name =~ s!/+!::!g;
     $name;
 }
@@ -254,8 +254,8 @@ sub _check_and_extract_name {
 # basename & strip extension
 sub simplify_name {
     my ($str) = @_;
-    $str =~ s:^.*/::;
-    $str =~ s:\.p([lm]|od)$::i;
+    $str =~ s:^.*/::s;
+    $str =~ s:\.p([lm]|od)\z::i;
     $str;
 }
 
