@@ -2546,12 +2546,20 @@ PP(pp_stat)
 #if Uid_t_size > IVSIZE
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_uid)));
 #else
+#   if Uid_t_sign <= 0
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_uid)));
+#   else
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_uid)));
+#   endif
 #endif
 #if Gid_t_size > IVSIZE 
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_gid)));
 #else
+#   if Gid_t_sign <= 0
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_gid)));
+#   else
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_gid)));
+#   endif
 #endif
 #ifdef USE_STAT_RDEV
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_rdev)));
@@ -4801,7 +4809,11 @@ PP(pp_gpwent)
 	PUSHs(sv = sv_newmortal());
 	if (pwent) {
 	    if (which == OP_GPWNAM)
+#if Uid_t_sign <= 0
 		sv_setiv(sv, (IV)pwent->pw_uid);
+#else
+		sv_setuv(sv, (UV)pwent->pw_uid);
+#endif
 	    else
 		sv_setpv(sv, pwent->pw_name);
 	}
@@ -4825,11 +4837,18 @@ PP(pp_gpwent)
 #endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
+#if Uid_t_sign <= 0
 	sv_setiv(sv, (IV)pwent->pw_uid);
+#else
+	sv_setuv(sv, (UV)pwent->pw_uid);
+#endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
+#if Uid_t_sign <= 0
 	sv_setiv(sv, (IV)pwent->pw_gid);
-
+#else
+	sv_setuv(sv, (UV)pwent->pw_gid);
+#endif
 	/* pw_change, pw_quota, and pw_age are mutually exclusive. */
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef PWCHANGE
