@@ -25,12 +25,14 @@ INST_TOP	= $(INST_DRV)\perl5004.5x
 
 #
 # if you have the source for des_fcrypt(), uncomment this and make sure the
-# file exists (see README.win32)
+# file exists (see README.win32).  File should be located at the perl
+# top level directory.
 #CRYPT_SRC	= des_fcrypt.c
 
 #
 # if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
 # library, uncomment this, and make sure the library exists (see README.win32)
+# Specify the full pathname of the library.
 #CRYPT_LIB	= des_fcrypt.lib
 
 #
@@ -254,7 +256,9 @@ CORE_SRC	=		\
 		..\universal.c	\
 		..\util.c
 
-CORE_SRC	= $(CORE_SRC) $(CRYPT_SRC)
+!IF "$(CRYPT_SRC)" != ""
+CORE_SRC	= $(CORE_SRC) ..\$(CRYPT_SRC)
+!ENDIF
 
 !IF "$(PERL_MALLOC)" == "define"
 CORE_SRC	= $(CORE_SRC) ..\malloc.c
@@ -276,6 +280,10 @@ PERL95_SRC	=		\
 		perl95.c	\
 		win32mt.c	\
 		win32sckmt.c
+
+!IF "$(CRYPT_SRC)" != ""
+PERL95_SRC	= $(PERL95_SRC) ..\$(CRYPT_SRC)
+!ENDIF
 
 DLL_SRC		= $(DYNALOADER).c
 
@@ -550,6 +558,9 @@ $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 
 $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	if not exist $(AUTODIR) mkdir $(AUTODIR)
+	cd $(EXTDIR)\$(*B)
+	..\$(MINIPERL) -I..\..\lib $(*B).pm.PL
+	cd ..\..\win32
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	cd $(EXTDIR)\$(*B)
 	$(XSUBPP) dl_win32.xs > $(*B).c
