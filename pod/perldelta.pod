@@ -2913,6 +2913,8 @@ There are now several profiling make targets.
 =head1 Security Vulnerability Closed [561]
 
 (This change was already made in 5.7.0 but bears repeating here.)
+(5.7.0 came out before 5.6.1: the development branch 5.7 released
+sooner than the maintenance branch 5.6)
 
 A potential security vulnerability in the optional suidperl component
 of Perl was identified in August 2000.  suidperl is neither built nor
