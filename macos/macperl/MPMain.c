@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPMain.c,v $
+Revision 1.7  2002/01/07 08:09:36  neeri
+Eliminate nested calls to exit() (MacPerl bug #469132)
+
 Revision 1.6  2002/01/04 03:34:45  pudge
 Modifications for universal headers 3.4
 
@@ -1287,9 +1290,6 @@ void MainEvent(Boolean busy, long sleep, RgnHandle rgn)
 		;       /* Events are not opportune right now */
 	else
 		HandleEvent(&myEvent);
-		
-	if (gQuitting && gRunningPerl)
-		MacPerl_Exit(-128);
 }
 
 pascal long VoodooChile(Size cbNeeded)

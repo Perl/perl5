@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPFile.c,v $
+Revision 1.3  2002/01/07 08:09:35  neeri
+Eliminate nested calls to exit() (MacPerl bug #469132)
+
 Revision 1.2  2002/01/04 03:34:45  pudge
 Modifications for universal headers 3.4
 
@@ -186,6 +189,8 @@ pascal void DoQuit(DescType saveOpt)
 				CloseDeskAcc(theKind);
 		}
 	}
+	if (gQuitting && gRunningPerl)
+		gAborting = true;
 }
 
 pascal Boolean GetFileFilter(CInfoPBPtr pb)
