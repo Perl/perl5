@@ -31,6 +31,12 @@ The former is recommended, as not only can it compile Perl with no
 difficulty, but also can take advantage of features listed later that
 require the use of IBM compiler-specific command-line flags.
 
+The IBM's compiler patch levels 5.0.0.0 and 5.0.1.0 have compiler
+optimization bugs that affect compiling perl.c and regcomp.c,
+respectively.  If Perl's configuration detects those compiler patch
+levels, optimization is turned off for the said source code files.
+Upgrading to at least 5.0.2.0 is recommended.
+
 If you decide to use gcc, make sure your installation is recent and
 complete, and be sure to read the Perl README file for more gcc-specific
 details. Please report any hoops you had to jump through to the development
@@ -54,6 +60,14 @@ show the base, but is not always complete:
 AIX supports dynamically loadable libraries (shared libraries).
 Shared libraries end with the suffix .a, which is a bit misleading,
 because *all* libraries are shared ;-).
+
+Note that starting from Perl 5.7.2 (and consequently 5.8.0) and AIX
+4.3 or newer Perl uses the AIX native dynamic loading interface
+instead of the emulated interface that was used in Perl releases 5.6.1
+and earlier or, for AIX releases 4.2 and earlier.  This change will
+probably break backward compatibility with compiled modules.
+The change was made to make Perl more compliant with other applications
+like modperl which are using the AIX native interface.
 
 =head2 The IBM ANSI C Compiler
 
@@ -154,15 +168,18 @@ threads are used in combination with 64bit configurations.
 =head2 64-bit Perl
 
 If your AIX is installed with 64-bit support, you can expect 64bit
-configurations to work. In combination with threads some tests might still fail.
+configurations to work. In combination with threads some tests might
+still fail.
 
-=head2 GDBM and Threads
+=head2 AIX 4.2 and extensions using C++ with statics
 
-... ?
-
-=head2 NFS filesystems and utime(2)
-
-... ?
+In AIX 4.2 Perl extensions that use C++ functions that use statics
+may have problems in that the statics are not getting initialized.
+In newer AIX releases this has been solved by linking Perl with
+the libC_r library, but unfortunately in AIX 4.2 the said library
+has an obscure bug where the various functions related to time
+(such as time() and gettimeofday()) return broken values, and
+therefore in AIX 4.2 Perl is not linked against the libC_r.
 
 =head1 AUTHOR
 
@@ -172,6 +189,6 @@ Structure copied from README.hpux
 
 =head1 DATE
 
-Version 0.0.2: 12 Jul 2001
+Version 0.0.3: 12 Jul 2001
 
 =cut

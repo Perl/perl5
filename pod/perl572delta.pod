@@ -38,9 +38,11 @@ for such large memory models than the Perl malloc.
 
 =head2 AIX Dynaloading
 
-The AIX dynaloading now uses the native dlopen interface of AIX,
-(given the AIX is recent enough) instead of the old emulated interface.
-This will probably break backward compatibility with compiled modules.
+The AIX dynaloading now uses in AIX releases 4.3 and newer the native
+dlopen interface of AIX instead of the old emulated interface.  This
+change will probably break backward compatibility with compiled
+modules.  The change was made to make Perl more compliant with other
+applications like modperl which are using the AIX native interface.
 
 =head2 Socket Extension Dynamic in VMS
 
@@ -362,8 +364,8 @@ gprofiled Perl executable.
 
 =item *
 
-AIX should now work better with gcc.  Also longdouble support in AIX
-should be better now.  See L<perlaix>.
+AIX should now work better with gcc, threads, and 64-bitnes.  Also the
+long doubles support in AIX should be better now.  See L<perlaix>.
 
 =item *
 
