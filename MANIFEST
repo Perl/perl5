@@ -1523,6 +1523,7 @@ t/lib/filefunc.t	See if File::Spec::Functions works
 t/lib/filehand.t	See if FileHandle works
 t/lib/filepath.t	See if File::Path works
 t/lib/filespec.t	See if File::Spec works
+t/lib/filestat.t	See if File::stat works
 t/lib/filter-simple.t	See if Filter::Simple works
 t/lib/filter-util.pl	See if Filter::Util::Call works
 t/lib/filter-util.t	See if Filter::Util::Call works

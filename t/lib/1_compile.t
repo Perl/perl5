@@ -155,6 +155,7 @@ File::Path
 File::Spec
 File::Spec::Functions
 File::Temp
+File::stat
 FileCache
 FileHandle
 Filter::Simple
