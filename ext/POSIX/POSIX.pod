@@ -849,9 +849,29 @@ setjmp() is C-specific: use eval {} instead.
 
 Modifies and queries program's locale.
 
-The following will set the traditional UNIX system locale behavior.
+The following will set the traditional UNIX system locale behavior
+(the second argument C<"C">).
 
 	$loc = POSIX::setlocale( &POSIX::LC_ALL, "C" );
+
+The following will query (the missing second argument) the current
+LC_CTYPE category.
+
+	$loc = POSIX::setlocale( &POSIX::LC_CTYPE);
+
+The following will set the LC_CTYPE behaviour according to the locale
+environment variables (the second argument C<"">).
+Please see your systems L<setlocale(3)> documentation for the locale
+environment variables' meaning or consult L<perli18n>.
+
+	$loc = POSIX::setlocale( &POSIX::LC_CTYPE, "");
+
+The following will set the LC_COLLATE behaviour to Argentinian
+Spanish. B<NOTE>: The naming and availability of locales depends on
+your operating system. Please consult L<perli18n> for how to find
+out which locales are available in your system.
+
+	$loc = POSIX::setlocale( &POSIX::LC_ALL, "es_AR.ISO8859-1" );
 
 =item setpgid
 
