@@ -19,10 +19,14 @@ POSIX - Perl interface to IEEE Std 1003.1
 
 The POSIX module permits you to access all (or nearly all) the standard
 POSIX 1003.1 identifiers.  Many of these identifiers have been given Perl-ish
-interfaces.  Things which are C<#defines> in C, like EINTR or O_NDELAY, are
-automatically exported into your namespace.  All functions are only exported
-if you ask for them explicitly.  Most likely people will prefer to use the
-fully-qualified function names.
+interfaces.
+
+I<Everything is exported by default> with the exception of any POSIX
+functions with the same name as a built-in Perl function, such as
+C<abs>, C<alarm>, C<rmdir>, C<write>, etc.., which will be exported
+only if you ask for them explicitly.  This is an unfortunate backwards
+compatiblity feature.  You can stop the exporting by saying C<use
+POSIX ()> and then use the fully qualified names (ie. C<POSIX::SEEK_END>).
 
 This document gives a condensed list of the features available in the POSIX
 module.  Consult your operating system's manpages for general information on
