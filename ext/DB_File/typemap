@@ -15,7 +15,7 @@ DBTKEY			T_dbtkeydatum
 
 INPUT
 T_dbtkeydatum
-	ckFilter($arg, filter_store_key, \"filter_store_key\");
+	DBM_ckFilter($arg, filter_store_key, \"filter_store_key\");
 	DBT_clear($var) ;
 	if (db->type != DB_RECNO) {
 	    $var.data = SvPV($arg, PL_na);
@@ -27,7 +27,7 @@ T_dbtkeydatum
 	    $var.size = (int)sizeof(recno_t);
 	}
 T_dbtdatum
-	ckFilter($arg, filter_store_value, \"filter_store_value\");
+	DBM_ckFilter($arg, filter_store_value, \"filter_store_value\");
 	DBT_clear($var) ;
 	if (SvOK($arg)) {
 	    $var.data = SvPV($arg, PL_na);

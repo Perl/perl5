@@ -1,5 +1,8 @@
 Revision history for Perl extension Unicode::Collate.
 
+0.21  Sat Aug 03 10:24:00 2002
+    - upgrade keys.txt and t/test.t for UCA Version 9.
+
 0.20  Fri Jul 26 02:15:25 2002
     - now UCA Version 9.
     - U+FDD0..U+FDEF are new non-characters.

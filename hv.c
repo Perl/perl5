@@ -409,8 +409,13 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
             flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
     }
 
-    if (!hash)
-	PERL_HASH(hash, key, klen);
+    if (!hash) {
+        if SvIsCOW_shared_hash(keysv) {
+            hash = SvUVX(keysv);
+        } else {
+            PERL_HASH(hash, key, klen);
+        }
+    }
 
     /* entry = (HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
@@ -737,8 +742,13 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
         HvHASKFLAGS_on((SV*)hv);
     }
 
-    if (!hash)
-	PERL_HASH(hash, key, klen);
+    if (!hash) {
+        if SvIsCOW_shared_hash(keysv) {
+            hash = SvUVX(keysv);
+        } else {
+            PERL_HASH(hash, key, klen);
+        }
+    }
 
     if (!xhv->xhv_array /* !HvARRAY(hv) */)
 	Newz(505, xhv->xhv_array /* HvARRAY(hv) */,

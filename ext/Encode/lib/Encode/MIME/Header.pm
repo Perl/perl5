@@ -1,7 +1,7 @@
 package Encode::MIME::Header;
 use strict;
 # use warnings;
-our $VERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.6 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(find_encoding encode_utf8);
 use MIME::Base64;

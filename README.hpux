@@ -64,6 +64,17 @@ Motorola chipset.
 The most recent version of PA-RISC at the time of this document's last
 update is 2.0.
 
+A complete list of models at the time the OS was built is in the file
+/usr/sam/lib/mo/sched.models. The first column corresponds to the last
+part of the output of the "model" command.  The second column is the
+PA-RISC version and the third column is the exact chip type used.
+(Start browsing at the bottom to prevent confusion ;-)
+
+    # model
+    9000/800/L1000-44
+    # grep L1000-44 /usr/sam/lib/mo/sched.models
+    L1000-44        2.0     PA8500
+
 =head2 PA-RISC 1.0
 
 The original version of PA-RISC, HP no longer sells any system with this chip.
@@ -124,12 +135,6 @@ date of this document's last update, the following systems contain
 Itanium chips (this is very likely to be out of date):
 
     RX2600, RX4610, RX5670, RX9610
-
-A complete list of models at the time the OS was built is in the file
-/opt/langtools/lib/sched.models.  The first column corresponds to the
-output of the "uname -m" command (without the leading "9000/").  The
-second column is the PA-RISC version and the third column is the exact
-chip type used. (Start browsing at the bottom to prevent confusion ;-)
 
 =head2 Portability Between PA-RISC Versions
 

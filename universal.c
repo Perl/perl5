@@ -160,6 +160,12 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 void XS_UNIVERSAL_isa(pTHX_ CV *cv);
 void XS_UNIVERSAL_can(pTHX_ CV *cv);
 void XS_UNIVERSAL_VERSION(pTHX_ CV *cv);
+XS(XS_version_new);
+XS(XS_version_stringify);
+XS(XS_version_numify);
+XS(XS_version_vcmp);
+XS(XS_version_boolean);
+XS(XS_version_noop);
 XS(XS_utf8_valid);
 XS(XS_utf8_encode);
 XS(XS_utf8_decode);
@@ -179,6 +185,26 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         file);
     newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
     newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  file);
+    {
+	/* create the package stash for version objects */
+	HV *hv = get_hv("version::OVERLOAD",TRUE);
+	SV *sv = *hv_fetch(hv,"register",8,1);
+	sv_inc(sv);
+	SvSETMAGIC(sv);
+	/* Make it findable via fetchmethod */
+	newXS("version::new", XS_version_new, file);
+	newXS("version::(\"\"", XS_version_stringify, file);
+	newXS("version::stringify", XS_version_stringify, file);
+	newXS("version::(0+", XS_version_numify, file);
+	newXS("version::numify", XS_version_numify, file);
+	newXS("version::(cmp", XS_version_vcmp, file);
+	newXS("version::(<=>", XS_version_vcmp, file);
+	newXS("version::vcmp", XS_version_vcmp, file);
+	newXS("version::(bool", XS_version_boolean, file);
+	newXS("version::boolean", XS_version_boolean, file);
+	newXS("version::(nomethod", XS_version_noop, file);
+	newXS("version::noop", XS_version_noop, file);
+    }
     newXS("utf8::valid", XS_utf8_valid, file);
     newXS("utf8::encode", XS_utf8_encode, file);
     newXS("utf8::decode", XS_utf8_decode, file);
@@ -352,6 +378,177 @@ finish:
     ST(0) = sv;
 
     XSRETURN(1);
+}
+
+XS(XS_version_new)
+{
+    dXSARGS;
+    if (items != 2)
+	Perl_croak(aTHX_ "Usage: version::new(class, version)");
+    SP -= items;
+    {
+/*	char *	class = (char *)SvPV_nolen(ST(0)); */
+	SV *	version = ST(1);
+
+{
+    PUSHs(new_version(version));
+}
+
+	PUTBACK;
+	return;
+    }
+}
+
+XS(XS_version_stringify)
+{
+    dXSARGS;
+    if (items < 1)
+	Perl_croak(aTHX_ "Usage: version::stringify(lobj, ...)");
+    SP -= items;
+    {
+	SV *	lobj;
+
+        if (sv_derived_from(ST(0), "version")) {
+                SV *tmp = SvRV(ST(0));
+        	lobj = tmp;
+        }
+        else
+                Perl_croak(aTHX_ "lobj is not of type version");
+
+{
+    SV  *vs = NEWSV(92,5);
+    if ( lobj == SvRV(PL_patchlevel) )
+	sv_catsv(vs,lobj);
+    else
+	vstringify(vs,lobj);
+    PUSHs(vs);
+}
+
+	PUTBACK;
+	return;
+    }
+}
+
+XS(XS_version_numify)
+{
+    dXSARGS;
+    if (items < 1)
+	Perl_croak(aTHX_ "Usage: version::numify(lobj, ...)");
+    SP -= items;
+    {
+	SV *	lobj;
+
+        if (sv_derived_from(ST(0), "version")) {
+                SV *tmp = SvRV(ST(0));
+        	lobj = tmp;
+        }
+        else
+                Perl_croak(aTHX_ "lobj is not of type version");
+
+{
+    SV  *vs = NEWSV(92,5);
+    vnumify(vs,lobj);
+    PUSHs(vs);
+}
+
+	PUTBACK;
+	return;
+    }
+}
+
+XS(XS_version_vcmp)
+{
+    dXSARGS;
+    if (items < 1)
+	Perl_croak(aTHX_ "Usage: version::vcmp(lobj, ...)");
+    SP -= items;
+    {
+	SV *	lobj;
+
+        if (sv_derived_from(ST(0), "version")) {
+                SV *tmp = SvRV(ST(0));
+        	lobj = tmp;
+        }
+        else
+                Perl_croak(aTHX_ "lobj is not of type version");
+
+{
+    SV	*rs;
+    SV	*rvs;
+    SV * robj = ST(1);
+    IV	 swap = (IV)SvIV(ST(2));
+
+    if ( ! sv_derived_from(robj, "version") )
+    {
+	robj = new_version(robj);
+    }
+    rvs = SvRV(robj);
+
+    if ( swap )
+    {
+        rs = newSViv(sv_cmp(rvs,lobj));
+    }
+    else
+    {
+        rs = newSViv(sv_cmp(lobj,rvs));
+    }
+
+    PUSHs(rs);
+}
+
+	PUTBACK;
+	return;
+    }
+}
+
+XS(XS_version_boolean)
+{
+    dXSARGS;
+    if (items < 1)
+	Perl_croak(aTHX_ "Usage: version::boolean(lobj, ...)");
+    SP -= items;
+    {
+	SV *	lobj;
+
+        if (sv_derived_from(ST(0), "version")) {
+                SV *tmp = SvRV(ST(0));
+        	lobj = tmp;
+        }
+        else
+                Perl_croak(aTHX_ "lobj is not of type version");
+
+{
+    SV	*rs;
+    rs = newSViv(sv_cmp(lobj,Nullsv));
+    PUSHs(rs);
+}
+
+	PUTBACK;
+	return;
+    }
+}
+
+XS(XS_version_noop)
+{
+    dXSARGS;
+    if (items < 1)
+	Perl_croak(aTHX_ "Usage: version::noop(lobj, ...)");
+    {
+	SV *	lobj;
+
+        if (sv_derived_from(ST(0), "version")) {
+                SV *tmp = SvRV(ST(0));
+        	lobj = tmp;
+        }
+        else
+                Perl_croak(aTHX_ "lobj is not of type version");
+
+{
+    Perl_croak(aTHX_ "operation not supported with version object");
+}
+
+    }
+    XSRETURN_EMPTY;
 }
 
 XS(XS_utf8_valid)

@@ -14,7 +14,7 @@ use File::Spec;
 
 require Exporter;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 our $PACKAGE = __PACKAGE__;
 
 our @ISA = qw(Exporter);
@@ -75,11 +75,12 @@ our @ChangeOK = qw/
   /;
 
 our @ChangeNG = qw/
-    entry entries table ignored combining maxlength
+    entry entries table combining maxlength
     ignoreChar ignoreName undefChar undefName
     versionTable alternateTable backwardsTable forwardsTable rearrangeTable
     derivCode normCode rearrangeHash isShift L3ignorable
   /;
+# The hash key 'ignored' is deleted at VERSION 0.21.
 
 my (%ChangeOK, %ChangeNG);
 @ChangeOK{ @ChangeOK } = ();
@@ -257,31 +258,32 @@ sub parseEntry
     $ele = pack('U*', @e);
     return if defined $self->{undefChar} && $ele =~ /$self->{undefChar}/;
 
-    # get sort key
+    my $combining = 1; # primary = 0, secondary != 0;
+    my $level3ignore;
+
+    # replace with completely ignorable
     if (defined $self->{ignoreName} && $name =~ /$self->{ignoreName}/ ||
 	defined $self->{ignoreChar} && $ele  =~ /$self->{ignoreChar}/)
     {
-	$self->{entries}{$ele} = $self->{ignored}{$ele} = 1;
+	$k = '[.0000.0000.0000.0000]';
     }
-    else {
-	my $combining = 1; # primary = 0, secondary != 0;
-	my $level3ingore;
 
-	foreach my $arr ($k =~ /\[([^\[\]]+)\]/g) { # SPACEs allowed
-	    my $var = $arr =~ /\*/; # exactly /^\*/ but be lenient.
-	    my @arr = _getHexArray($arr);
-	    push @key, pack(VCE_FORMAT, $var, @arr);
-	    $combining = 0 unless $arr[0] == 0 && $arr[1] != 0;
-	    $level3ingore = 1 if $arr[0] == 0 && $arr[1] == 0 && $arr[2] == 0;
-	}
-	$self->{entries}{$ele} = \@key;
-
-	$self->{combining}{$ele} = 1
-	    if $combining;
-
-	$self->{L3ignorable}{$e[0]} = 1
-	    if @e == 1 && $level3ingore;
+    foreach my $arr ($k =~ /\[([^\[\]]+)\]/g) { # SPACEs allowed
+	my $var = $arr =~ /\*/; # exactly /^\*/ but be lenient.
+	my @arr = _getHexArray($arr);
+	push @key, pack(VCE_FORMAT, $var, @arr);
+	$combining = 0 unless $arr[0] == 0 && $arr[1] != 0;
+	$level3ignore = 1 if $arr[0] == 0 && $arr[1] == 0 && $arr[2] == 0;
     }
+
+    $self->{entries}{$ele} = \@key;
+
+    $self->{combining}{$ele} = 1
+	if $combining;
+
+    $self->{L3ignorable}{$e[0]} = 1
+	if @e == 1 && $level3ignore;
+
     $self->{maxlength}{ord $ele} = scalar @e if @e > 1;
 }
 
@@ -359,14 +361,12 @@ sub splitCE
 	my $u = $src[$i];
 
 	# non-characters
-	next unless defined $u;
-	next if $u < 0 || 0x10FFFF < $u    # out of range
+	next if ! defined $u
+	    || ($u < 0 || 0x10FFFF < $u)      # out of range
+	    || (($u & 0xFFFE) == 0xFFFE)      # ??FFFE or ??FFFF (cf. utf8.c)
 	    || (0xD800 <= $u && $u <= 0xDFFF) # unpaired surrogates
 	    || (0xFDD0 <= $u && $u <= 0xFDEF) # non-character
 	;
-
-	my $four = $u & 0xFFFF; 
-	next if $four == 0xFFFE || $four == 0xFFFF;
 
 	if ($max->{$u}) { # contract
 	    for (my $j = $max->{$u}; $j >= 1; $j--) {
@@ -403,12 +403,11 @@ sub getWt
     my $self = shift;
     my $ch   = shift;
     my $ent  = $self->{entries};
-    my $ign  = $self->{ignored};
     my $cjk  = $self->{overrideCJK};
     my $hang = $self->{overrideHangul};
     my $der  = $self->{derivCode};
 
-    return if !defined $ch || $ign->{$ch}; # ignored
+    return if !defined $ch;
     return map($self->altCE($_), @{ $ent->{$ch} })
 	if $ent->{$ch};
 
@@ -727,7 +726,9 @@ as switching the algorithm would affect the performance.>
 
 =item alternate
 
--- see 3.2.2 Alternate Weighting, UTR #10.
+-- see 3.2.2 Variable Weighting, UTR #10.
+
+(the title in UCA version 8: Alternate Weighting)
 
 This key allows to alternate weighting for variable collation elements,
 which are marked with an ASTERISK in the table
@@ -775,11 +776,10 @@ ENTRIES
 
 =item ignoreChar
 
--- see Completely Ignorable, 3.2.2 Alternate Weighting, UTR #10.
+-- see Completely Ignorable, 3.2.2 Variable Weighting, UTR #10.
 
-Makes the entry in the table ignorable.
-If a collation element is ignorable,
-it is ignored as if the element had been deleted from there.
+Makes the entry in the table completely ignorable;
+i.e. as if the weights were zero at all level.
 
 E.g. when 'a' and 'e' are ignorable,
 'element' is equal to 'lament' (or 'lmnt').

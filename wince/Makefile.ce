@@ -55,8 +55,8 @@ NOOP	   = @echo
 NULL	   =
 
 
-CFG=DEBUG
-#CFG=RELEASE
+#CFG=DEBUG
+CFG=RELEASE
 
 !if "$(MACHINE)" == ""
 MACHINE=wince-arm-hpc-wce300

@@ -35,8 +35,8 @@ $file_magic_str = 'pst0';
 $other_magic = 7 + length $byteorder;
 $network_magic = 2;
 $major = 2;
-$minor = 5;
-$minor_write = $] > 5.007 ? 5 : 4;
+$minor = 6;
+$minor_write = $] > 5.007 ? 6 : 4;
 
 use Test::More;
 
@@ -241,7 +241,7 @@ sub test_things {
   # local $Storable::DEBUGME = 1;
   # This is the delayed croak
   test_corrupt ($copy, $sub,
-                "/^Storable binary image v$header->{major}.$minor4 contains data of type 255. This Storable is v$header->{major}.$minor and can only handle data types up to 25/",
+                "/^Storable binary image v$header->{major}.$minor4 contains data of type 255. This Storable is v$header->{major}.$minor and can only handle data types up to 26/",
                 "bogus tag, minor plus 4");
   # And check again that this croak is not delayed:
   {

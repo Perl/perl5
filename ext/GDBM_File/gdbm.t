@@ -18,7 +18,7 @@ use warnings;
 
 use GDBM_File;
 
-print "1..74\n";
+print "1..80\n";
 
 unlink <Op.dbmx*>;
 
@@ -467,4 +467,47 @@ EOM
     unlink <Op.dbmx*>;
 }
 
+{
+   # Check that DBM Filter can cope with read-only $_
+
+   use warnings ;
+   use strict ;
+   my %h ;
+   unlink <Op.dbmx*>;
+
+   ok(75, my $db = tie(%h, 'GDBM_File','Op.dbmx', &GDBM_WRCREAT, 0640));
+
+   $db->filter_fetch_key   (sub { }) ;
+   $db->filter_store_key   (sub { }) ;
+   $db->filter_fetch_value (sub { }) ;
+   $db->filter_store_value (sub { }) ;
+
+   $_ = "original" ;
+
+   $h{"fred"} = "joe" ;
+   ok(76, $h{"fred"} eq "joe");
+
+   eval { grep { $h{$_} } (1, 2, 3) };
+   ok (77, ! $@);
+
+
+   # delete the filters
+   $db->filter_fetch_key   (undef);
+   $db->filter_store_key   (undef);
+   $db->filter_fetch_value (undef);
+   $db->filter_store_value (undef);
+
+   $h{"fred"} = "joe" ;
+
+   ok(78, $h{"fred"} eq "joe");
+
+   ok(79, $db->FIRSTKEY() eq "fred") ;
+   
+   eval { grep { $h{$_} } (1, 2, 3) };
+   ok (80, ! $@);
+
+   undef $db ;
+   untie %h;
+   unlink <Op.dbmx*>;
+}
 exit ;

@@ -1,17 +1,9 @@
-Unicode/Collate version 0.20
+Unicode/Collate version 0.21
 ===============================
 
-Unicode::Collate - Unicode Collation Algorithm
+NAME
 
-  UCA - Unicode TR #10.
-  http://www.unicode.org/unicode/reports/tr10/
-
-  Fetch the following file and put it into the Unicode/Collate directory.
-  http://www.unicode.org/unicode/reports/tr10/allkeys.txt
-
-  You can install this module using a subset "keys.txt"
-  contained in this distribution without the "allkeys.txt";
-  but "keys.txt" is small and not very useful.
+  Unicode::Collate - Unicode Collation Algorithm
 
 SYNOPSIS
 
@@ -38,6 +30,18 @@ To install this module type the following:
    make
    make test
    make install
+
+To use this module, it is better to install a table file in the UCA format,
+by copying it into the lib/Unicode/Collate directory.
+
+The most preferable one is "The Default Unicode Collation Element Table",
+available from the Unicode consortium's website:
+
+    http://www.unicode.org/reports/tr10/allkeys.txt
+
+Though this distribution contains a subset of allkeys.txt, named "keys.txt",
+this one is intended only for doing a test of this module
+and practically useless for any other purpose.
 
 DEPENDENCIES
 

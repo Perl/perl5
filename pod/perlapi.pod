@@ -2498,20 +2498,55 @@ The reference count for the SV is set to 1.
 =for hackers
 Found in file sv.c
 
-=item new_vstring
+=item new_version
+
+Returns a new version object based on the passed in SV:
+
+    SV *sv = new_version(SV *ver);
+
+Does not alter the passed in ver SV.  See "upg_version" if you
+want to upgrade the SV.
+
+	SV*	new_version(SV *ver)
+
+=for hackers
+Found in file util.c
+
+=item scan_version
+
+Returns a pointer to the next character after the parsed
+version string, as well as upgrading the passed in SV to
+an RV.
+
+Function must be called with an already existing SV like
+
+    sv = NEWSV(92,0);
+    s = scan_version(s,sv);
+
+Performs some preprocessing to the string to ensure that
+it has the correct characteristics of a version.  Flags the
+object if it contains an underscore (which denotes this
+is a beta version).
+
+	char*	scan_version(char *vstr, SV *sv)
+
+=for hackers
+Found in file util.c
+
+=item scan_vstring
 
 Returns a pointer to the next character after the parsed
 vstring, as well as updating the passed in sv.
 
 Function must be called like
 
-        sv = NEWSV(92,5);
-	s = new_vstring(s,sv);
+	sv = NEWSV(92,5);
+	s = scan_vstring(s,sv);
 
-The sv must already be large enough to store the vstring
-passed in.
+The sv should already be large enough to store the vstring
+passed in, for performance reasons.
 
-	char*	new_vstring(char *vstr, SV *sv)
+	char*	scan_vstring(char *vstr, SV *sv)
 
 =for hackers
 Found in file util.c
@@ -2964,21 +2999,21 @@ Like C<SvPV_nolen>, but converts sv to utf8 first if necessary.
 =for hackers
 Found in file sv.h
 
+=item SvPVx
+
+A version of C<SvPV> which guarantees to evaluate sv only once.
+
+	char*	SvPVx(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
 =item SvPVX
 
 Returns a pointer to the physical string in the SV.  The SV must contain a
 string.
 
 	char*	SvPVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item SvPVx
-
-A version of C<SvPV> which guarantees to evaluate sv only once.
-
-	char*	SvPVx(SV* sv, STRLEN len)
 
 =for hackers
 Found in file sv.h
@@ -3217,6 +3252,16 @@ for a version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
+=item SvUVX
+
+Returns the raw value in the SV's UV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvUV()>.
+
+	UV	SvUVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvUVx
 
 Coerces the given SV to an unsigned integer and returns it. Guarantees to
@@ -3227,12 +3272,11 @@ evaluate sv only once. Use the more efficient C<SvUV> otherwise.
 =for hackers
 Found in file sv.h
 
-=item SvUVX
+=item SvVOK
 
-Returns the raw value in the SV's UV slot, without checks or conversions.
-Only use when you are sure SvIOK is true. See also C<SvUV()>.
+Returns a boolean indicating whether the SV contains a v-string.
 
-	UV	SvUVX(SV* sv)
+	bool	SvVOK(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4504,6 +4548,49 @@ Usually used via one of its frontends C<sv_setpvf> and C<sv_setpvf_mg>.
 
 =for hackers
 Found in file sv.c
+
+=item upg_version
+
+In-place upgrade of the supplied SV to a version object.
+
+    SV *sv = upg_version(SV *sv);
+
+Returns a pointer to the upgraded SV.
+
+	SV*	upg_version(SV *ver)
+
+=for hackers
+Found in file util.c
+
+=item vnumify
+
+Accepts a version (or vstring) object and returns the
+normalized floating point representation.  Call like:
+
+    sv = vnumify(sv,SvRV(rv));
+
+NOTE: no checking is done to see if the object is of the
+correct type (for speed).
+
+	SV*	vnumify(SV *sv, SV *vs)
+
+=for hackers
+Found in file util.c
+
+=item vstringify
+
+Accepts a version (or vstring) object and returns the
+normalized representation.  Call like:
+
+    sv = vstringify(sv,SvRV(rv));
+
+NOTE: no checking is done to see if the object is of the
+correct type (for speed).
+
+	SV*	vstringify(SV *sv, SV *vs)
+
+=for hackers
+Found in file util.c
 
 
 =back

@@ -3930,11 +3930,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 #ifdef PERL_COPY_ON_WRITE
             /* Either it's a shared hash key, or it's suitable for
                copy-on-write or we can swipe the string.  */
-#ifdef DEBUG_COW
-            PerlIO_printf(PerlIO_stderr(),"sstr --> dstr\n");
+            if (DEBUG_C_TEST) {
+                PerlIO_printf(Perl_debug_log,
+                              "Copy on write: sstr --> dstr\n");
                 Perl_sv_dump(sstr);
                 Perl_sv_dump(dstr);
-#endif
+            }
             if (!isSwipe) {
                 /* I believe I should acquire a global SV mutex if
                    it's a COW sv (not a shared hash key) to stop
@@ -3977,9 +3978,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                 } else {
                     /* SvIsCOW_shared_hash */
                     UV hash = SvUVX(sstr);
-#ifdef DEBUG_COW
-                    PerlIO_printf(PerlIO_stderr(), "Sharing hash\n");
-#endif
+                    DEBUG_C(PerlIO_printf(Perl_debug_log,
+                                          "Copy on write: Sharing hash\n"));
                     SvPV_set(dstr,
                              sharepvn(SvPVX(sstr),
                                       (sflags & SVf_UTF8?-cur:cur), hash));
@@ -4023,6 +4023,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		SvIsUV_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
 	}
+	if (SvVOK(sstr)) {
+	    MAGIC *mg = SvMAGIC(sstr); 
+	    sv_magicext(dstr, NULL, PERL_MAGIC_vstring, NULL,
+			mg->mg_ptr, mg->mg_len);
+	    SvRMAGICAL_on(dstr);
+	} 
     }
     else if (sflags & SVp_IOK) {
 	if (sflags & SVf_IOK)
@@ -4298,10 +4304,12 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
             STRLEN cur = SvCUR(sv);
             U32 hash = SvUVX(sv);
             SV *next = SV_COW_NEXT_SV(sv);   /* next COW sv in the loop. */
-#ifdef DEBUG_COW
-        PerlIO_printf(PerlIO_stderr(), "Force normal %ld\n", flags);
-        Perl_sv_dump(sv);
-#endif
+            if (DEBUG_C_TEST) {
+                PerlIO_printf(Perl_debug_log,
+                              "Copy on write: Force normal %ld\n",
+                              (long) flags);
+                Perl_sv_dump(sv);
+            }
             SvFAKE_off(sv);
             SvREADONLY_off(sv);
             /* This SV doesn't own the buffer, so need to New() a new one:  */
@@ -4317,9 +4325,9 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
                 *SvEND(sv) = '\0';
             }
             S_sv_release_COW(sv, pvx, cur, len, hash, next);
-#ifdef DEBUG_COW
-        Perl_sv_dump(sv);
-#endif
+            if (DEBUG_C_TEST) {
+                Perl_sv_dump(sv);
+            }
 	}
 	else if (PL_curcop != &PL_compiling)
 	    Perl_croak(aTHX_ PL_no_modify);
@@ -5219,10 +5227,10 @@ Perl_sv_clear(pTHX_ register SV *sv)
             if (SvIsCOW(sv)) {
                 /* I believe I need to grab the global SV mutex here and
                    then recheck the COW status.  */
-#ifdef DEBUG_COW
-        PerlIO_printf(PerlIO_stderr(), "Clear\n");
-        Perl_sv_dump(sv);
-#endif
+                if (DEBUG_C_TEST) {
+                    PerlIO_printf(Perl_debug_log, "Copy on write: clear\n");
+                    Perl_sv_dump(sv);
+                }
                 S_sv_release_COW(sv, SvPVX(sv), SvCUR(sv), SvLEN(sv),
                                  SvUVX(sv), SV_COW_NEXT_SV(sv));
                 /* And drop it here.  */
@@ -7231,6 +7239,8 @@ Perl_sv_reftype(pTHX_ SV *sv, int ob)
 	case SVt_PVNV:
 	case SVt_PVMG:
 	case SVt_PVBM:
+	    			if (SvVOK(sv))
+				    return "VSTRING";
 				if (SvROK(sv))
 				    return "REF";
 				else

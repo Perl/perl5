@@ -3682,14 +3682,14 @@ S_regmatch(pTHX_ regnode *prog)
 			/* If it could work, try it. */
 		        if (c == (UV)c1 || c == (UV)c2)
 		        {
-			    TRYPAREN(paren, n, PL_reginput);
+			    TRYPAREN(paren, ln, PL_reginput);
 			    REGCP_UNWIND(lastcp);
 		        }
 		    }
 		    /* If it could work, try it. */
 		    else if (c1 == -1000)
 		    {
-			TRYPAREN(paren, n, PL_reginput);
+			TRYPAREN(paren, ln, PL_reginput);
 			REGCP_UNWIND(lastcp);
 		    }
 		    /* Couldn't or didn't -- move forward. */

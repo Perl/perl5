@@ -5217,6 +5217,9 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 			GV_ADDMULTI, SVt_PVCV);
     register CV *cv;
 
+    if (!subaddr)
+	Perl_croak(aTHX_ "panic: no address for '%s' in '%s'", name, filename);
+
     if ((cv = (name ? GvCV(gv) : Nullcv))) {
 	if (GvCVGEN(gv)) {
 	    /* just a cached method */

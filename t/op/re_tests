@@ -922,3 +922,4 @@ ab(?i)cd	abCd	y	-	-
 (.*?)(?<=[bc])c	abcd	y	$1	ab
 2(]*)?$\1	2	y	$&	2
 (??{})	x	y	-	-
+a(b)??	abc	y	<$1>	<>	# undef [perl #16773]

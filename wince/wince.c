@@ -995,15 +995,15 @@ win32_eof(int fd)
 DllExport int
 win32_dup(int fd)
 {
-  Perl_croak(aTHX_ PL_no_func, "dup");
-  return -1;
+  //vv Perl_croak(aTHX_ PL_no_func, "dup");
+  return xcedup(fd); // from celib/ceio.c; requires some more work on it.
 }
 
 DllExport int
 win32_dup2(int fd1,int fd2)
 {
-  Perl_croak(aTHX_ PL_no_func, "dup2");
-  return -1;
+  //Perl_croak(aTHX_ PL_no_func, "dup2");
+  return xcedup2(fd1,fd2);
 }
 
 DllExport int

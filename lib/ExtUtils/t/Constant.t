@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-print "1..51\n";
+print "1..52\n";
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -14,10 +14,18 @@ use strict;
 use ExtUtils::MakeMaker;
 use ExtUtils::Constant qw (constant_types C_constant XS_constant autoload);
 use Config;
-use File::Spec::Functions qw(catfile rel2abs);
+use File::Spec;
+
+my $do_utf_tests = $] > 5.006;
+my $better_than_56 = $] > 5.007;
+
 # Because were are going to be changing directory before running Makefile.PL
-my $perl;
-$perl = rel2abs( $^X ) unless $] < 5.006; # Hack. Until 5.00503 has rel2abs
+my $perl = $^X;
+# 5.005 doesn't have new enough File::Spec to have rel2abs. But actually we
+# only need it when $^X isn't absolute, which is going to be 5.8.0 or later
+# (where ExtUtils::Constant is in the core, and tests against the uninstalled
+# perl
+$perl = File::Spec->rel2abs ($perl) unless $] < 5.006;
 # ExtUtils::Constant::C_constant uses $^X inside a comment, and we want to
 # compare output to ensure that it is the same. We were probably run as ./perl
 # whereas we will run the child with the full path in $perl. So make $^X for
@@ -25,7 +33,9 @@ $perl = rel2abs( $^X ) unless $] < 5.006; # Hack. Until 5.00503 has rel2abs
 $^X = $perl;
 
 print "# perl=$perl\n";
-my $runperl = "$perl \"-I../../lib\"";
+
+my $lib = $ENV{PERL_CORE} ? '../../lib' : '../blib/lib';
+my $runperl = "$perl \"-I$lib\"";
 
 $| = 1;
 
@@ -62,11 +72,23 @@ if (ord('A') == 193) {  # EBCDIC platform
 } else { # ASCII platform
     $pound = chr 163; # A pound sign. (Currency)
 }
-my $inf = chr 0x221E;
-# Check that we can distiguish the pathological case of a string, and the
-# utf8 representation of that string.
-my $pound_bytes = my $pound_utf8 = $pound . '1';
-utf8::encode ($pound_bytes);
+
+my ($inf, $pound_bytes, $pound_utf8);
+if ($do_utf_tests) {
+  $inf = chr 0x221E;
+  # Check that we can distiguish the pathological case of a string, and the
+  # utf8 representation of that string.
+  $pound_utf8 = $pound . '1';
+  if ($better_than_56) {
+    $pound_bytes = $pound_utf8;
+    utf8::encode ($pound_bytes);
+  } else {
+    # Must have that "U*" to generate a zero length UTF string that forces
+    # top bit set chars (such as the pound sign) into UTF8, so that the
+    # unpack 'C*' then gets the byte form of the UTF8.
+    $pound_bytes =  pack 'C*', unpack 'C*', $pound_utf8 . pack "U*";
+  }
+}
 
 my @names = ("FIVE", {name=>"OK6", type=>"PV",},
              {name=>"OK7", type=>"PVN",
@@ -99,11 +121,15 @@ my @names_only = map {(ref $_) ? $_->{name} : $_} @names;
 push @names, ({name=>"*/", type=>"PV", value=>'"CLOSE"', macro=>1},
               {name=>"/*", type=>"PV", value=>'"OPEN"', macro=>1},
               {name=>$pound, type=>"PV", value=>'"Sterling"', macro=>1},
-              {name=>$inf, type=>"PV", value=>'"Infinity"', macro=>1},
-              {name=>$pound_utf8, type=>"PV", value=>'"1 Pound"', macro=>1},
-              {name=>$pound_bytes, type=>"PV", value=>'"1 Pound (as bytes)"',
-               macro=>1},
              );
+
+if ($do_utf_tests) {
+  push @names, ({name=>$inf, type=>"PV", value=>'"Infinity"', macro=>1},
+                {name=>$pound_utf8, type=>"PV", value=>'"1 Pound"', macro=>1},
+                {name=>$pound_bytes, type=>"PV", value=>'"1 Pound (as bytes)"',
+                 macro=>1},
+               );
+}
 
 =pod
 
@@ -125,6 +151,8 @@ ok 3
 
 =cut
 
+# Grr `
+
 my $types = {};
 my $constant_types = constant_types(); # macro defs
 my $C_constant = join "\n",
@@ -132,7 +160,7 @@ my $C_constant = join "\n",
 my $XS_constant = XS_constant ($package, $types); # XS for ExtTest::constant
 
 ################ Header
-my $header = catfile($dir, "test.h");
+my $header = File::Spec->catdir($dir, "test.h");
 push @files, "test.h";
 open FH, ">$header" or die "open >$header: $!\n";
 print FH <<"EOT";
@@ -155,7 +183,7 @@ while (my ($point, $bearing) = each %compass) {
 close FH or die "close $header: $!\n";
 
 ################ XS
-my $xs = catfile($dir, "$package.xs");
+my $xs = File::Spec->catdir($dir, "$package.xs");
 push @files, "$package.xs";
 open FH, ">$xs" or die "open >$xs: $!\n";
 
@@ -174,7 +202,7 @@ print FH $XS_constant;
 close FH or die "close $xs: $!\n";
 
 ################ PM
-my $pm = catfile($dir, "$package.pm");
+my $pm = File::Spec->catdir($dir, "$package.pm");
 push @files, "$package.pm";
 open FH, ">$pm" or die "open >$pm: $!\n";
 print FH "package $package;\n";
@@ -206,15 +234,16 @@ print FH "bootstrap $package \$VERSION;\n1;\n__END__\n";
 close FH or die "close $pm: $!\n";
 
 ################ test.pl
-my $testpl = catfile($dir, "test.pl");
+my $testpl = File::Spec->catdir($dir, "test.pl");
 push @files, "test.pl";
 open FH, ">$testpl" or die "open >$testpl: $!\n";
 
 print FH "use strict;\n";
-print FH "use $package qw(@names_only);\n";
-print FH <<"EOT";
+print FH "use $package qw(@names_only);\n\n";
 
-use utf8;
+print FH "use utf8\n\n" if $do_utf_tests;
+
+print FH <<"EOT";
 
 print "1..1\n";
 if (open OUTPUT, ">$output") {
@@ -227,6 +256,8 @@ if (open OUTPUT, ">$output") {
 EOT
 
 print FH << 'EOT';
+
+my $better_than_56 = $] > 5.007;
 
 # What follows goes to the temporary file.
 # IV
@@ -403,25 +434,26 @@ if ($open eq '/*') {
 }
 EOT
 
-# Do this in 7 bit in case someone is testing with some settings that cause
-# 8 bit files incapable of storing this character.
-my @values
- = map {"'" . join (",", unpack "U*", $_) . "'"}
- ($pound, $inf, $pound_bytes, $pound_utf8);
-# Values is a list of strings, such as ('194,163,49', '163,49')
+if ($do_utf_tests) {
+  # Do this in 7 bit in case someone is testing with some settings that cause
+  # 8 bit files incapable of storing this character.
+  my @values
+    = map {"'" . join (",", unpack "U*", $_ . pack "U*") . "'"}
+      ($pound, $inf, $pound_bytes, $pound_utf8);
+  # Values is a list of strings, such as ('194,163,49', '163,49')
 
-print FH <<'EOT';
+  print FH <<'EOT';
 
-# I can see that this child test program might be about to use parts of
-# Test::Builder
+  # I can see that this child test program might be about to use parts of
+  # Test::Builder
 
-my $test = 23;
-my ($pound, $inf, $pound_bytes, $pound_utf8) = map {eval "pack 'U*', $_"}
+  my $test = 23;
+  my ($pound, $inf, $pound_bytes, $pound_utf8) = map {eval "pack 'U*', $_"}
 EOT
 
-print FH join ",", @values;
+  print FH join ",", @values;
 
-print FH << 'EOT';
+  print FH << 'EOT';
 ;
 
 foreach (["perl", "rules", "rules"],
@@ -437,12 +469,19 @@ foreach (["perl", "rules", "rules"],
   (my $name = $string) =~ s/([^ -~])/sprintf '\x{%X}', ord $1/ges;
   print "# \"$name\" => \'$expect\'\n";
   # Try to force this to be bytes if possible.
-  utf8::downgrade ($string, 1);
+  if ($better_than_56) {
+    utf8::downgrade ($string, 1);
+  } else {
+    if ($string =~ tr/0-\377// == length $string) {
+      # No chars outside range 0-255
+      $string = pack 'C*', unpack 'U*', ($string . pack 'U*');
+    }
+  }
 EOT
 
-print FH  "my (\$error, \$got) = ${package}::constant (\$string);\n";
+  print FH  "my (\$error, \$got) = ${package}::constant (\$string);\n";
 
-print FH <<'EOT';
+  print FH <<'EOT';
   if ($error or $got ne $expect) {
     print "not ok $test # error '$error', got '$got'\n";
   } else {
@@ -450,12 +489,16 @@ print FH <<'EOT';
   }
   $test++;
   print "# Now upgrade '$name' to utf8\n";
-  utf8::upgrade ($string);
+  if ($better_than_56) {
+    utf8::upgrade ($string);
+  } else {
+    $string = pack ('U*') . $string;
+  }
 EOT
 
-print FH  "my (\$error, \$got) = ${package}::constant (\$string);\n";
+  print FH  "my (\$error, \$got) = ${package}::constant (\$string);\n";
 
-print FH <<'EOT';
+  print FH <<'EOT';
   if ($error or $got ne $expect) {
     print "not ok $test # error '$error', got '$got'\n";
   } else {
@@ -465,12 +508,16 @@ print FH <<'EOT';
   if (defined $expect_bytes) {
     print "# And now with the utf8 byte sequence for name\n";
     # Try the encoded bytes.
-    utf8::encode ($string);
+    if ($better_than_56) {
+      utf8::encode ($string);
+    } else {
+      $string = pack 'C*', unpack 'C*', $string . pack "U*";
+    }
 EOT
 
-print FH "my (\$error, \$got) = ${package}::constant (\$string);\n";
+    print FH "my (\$error, \$got) = ${package}::constant (\$string);\n";
 
-print FH <<'EOT';
+    print FH <<'EOT';
     if (ref $expect_bytes) {
       # Error expected.
       if ($error) {
@@ -487,6 +534,12 @@ print FH <<'EOT';
   }
 }
 EOT
+} else {
+  # Don't utf tests;
+  print FH <<'EOT';
+print "ok $_ # Skipped on non Unicode perl\n" foreach 23..43;
+EOT
+}
 
 close FH or die "close $testpl: $!\n";
 
@@ -497,7 +550,7 @@ my $test = 44;
 ################ Makefile.PL
 # We really need a Makefile.PL because make test for a no dynamic linking perl
 # will run Makefile.PL again as part of the "make perl" target.
-my $makefilePL = catfile($dir, "Makefile.PL");
+my $makefilePL = File::Spec->catdir($dir, "Makefile.PL");
 push @files, "Makefile.PL";
 open FH, ">$makefilePL" or die "open >$makefilePL: $!\n";
 print FH <<"EOT";
@@ -516,7 +569,7 @@ close FH or die "close $makefilePL: $!\n";
 
 ################ MANIFEST
 # We really need a MANIFEST because make distclean checks it.
-my $manifest = catfile($dir, "MANIFEST");
+my $manifest = File::Spec->catdir($dir, "MANIFEST");
 push @files, "MANIFEST";
 open FH, ">$manifest" or die "open >$manifest: $!\n";
 print FH "$_\n" foreach @files;
@@ -525,7 +578,8 @@ close FH or die "close $manifest: $!\n";
 chdir $dir or die $!; push @INC,  '../../lib';
 END {chdir ".." or warn $!};
 
-my @perlout = `$runperl Makefile.PL PERL_CORE=1`;
+my $core = $ENV{PERL_CORE} ? ' PERL_CORE=1' : '';
+my @perlout = `$runperl Makefile.PL $core`;
 if ($?) {
   print "not ok 1 # $runperl Makefile.PL failed: $?\n";
   print "# $_" foreach @perlout;
@@ -701,3 +755,8 @@ unless ($keep_files) {
 }
 
 check_for_bonus_files ('.', '.', '..');
+
+# This was causing an assertion failure (a C<confess>ion)
+C_constant ($package, undef, undef, undef, undef, undef, chr 255);
+
+print "ok $test\n"; $test++;

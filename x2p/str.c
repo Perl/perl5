@@ -299,7 +299,7 @@ str_gets(register STR *str, register FILE *fp)
 	FILE_ptr(fp) = (void*)ptr; /* LHS STDCHAR* cast non-portable */
 	i = getc(fp);		/* get more characters */
 	cnt = FILE_cnt(fp);
-	ptr = FILE_ptr(fp);		/* reregisterize cnt and ptr */
+	ptr = (STDCHAR*)FILE_ptr(fp);		/* reregisterize cnt and ptr */
 
 	bpx = bp - str->str_ptr;	/* prepare for possible relocation */
 	GROWSTR(&(str->str_ptr), &(str->str_len), str->str_cur + cnt + 1);
@@ -316,7 +316,7 @@ str_gets(register STR *str, register FILE *fp)
 
 thats_all_folks:
     FILE_cnt(fp) = cnt;			/* put these back or we're in trouble */
-    FILE_ptr(fp) = (STDCHAR*)ptr;
+    FILE_ptr(fp) = (void*)ptr; /* LHS STDCHAR* cast non-portable */
     *bp = '\0';
     str->str_cur = bp - str->str_ptr;	/* set length */
 

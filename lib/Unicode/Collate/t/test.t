@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 183};
+BEGIN { plan tests => 184 };
 use Unicode::Collate;
 
 #########################
@@ -55,8 +55,9 @@ my $A_acute = pack('U', 0x00C1);
 my $a_acute = pack('U', 0x00E1);
 my $acute   = pack('U', 0x0301);
 
-ok($Collator->cmp("A$acute", $A_acute), -1);
+ok($Collator->cmp("A$acute", $A_acute), 0); # @version 3.1.1 (prev: -1)
 ok($Collator->cmp($a_acute, $A_acute), -1);
+ok($Collator->eq("A\cA$acute", $A_acute)); # UCA v9
 
 my %old_level = $Collator->change(level => 1);
 ok($Collator->eq("A$acute", $A_acute));
@@ -76,44 +77,25 @@ eval { require Unicode::Normalize };
 
 if (!$@) {
   my $NFD = Unicode::Collate->new(
-    table => 'keys.txt',
+    table => undef,
     entry => <<'ENTRIES',
-0430 ; [.0B01.0020.0002.0430] # CYRILLIC SMALL LETTER A
-0410 ; [.0B01.0020.0008.0410] # CYRILLIC CAPITAL LETTER A
-04D3 ; [.0B09.0020.0002.04D3] # CYRILLIC SMALL LETTER A WITH DIAERESIS
-0430 0308 ; [.0B09.0020.0002.04D3] # CYRILLIC SMALL LETTER A WITH DIAERESIS
-04D3 ; [.0B09.0020.0002.04D3] # CYRILLIC SMALL LETTER A WITH DIAERESIS
-0430 0308 ; [.0B09.0020.0002.04D3] # CYRILLIC SMALL LETTER A WITH DIAERESIS
-04D2 ; [.0B09.0020.0008.04D2] # CYRILLIC CAPITAL LETTER A WITH DIAERESIS
-0410 0308 ; [.0B09.0020.0008.04D2] # CYRILLIC CAPITAL LETTER A WITH DIAERESIS
-0430 3099 ; [.0B10.0020.0002.04D3] # A WITH KATAKANA VOICED
-0430 3099 0308 ; [.0B11.0020.0002.04D3] # A WITH KATAKANA VOICED, DIAERESIS
+0430  ; [.0CB5.0020.0002.0430] # CYRILLIC SMALL LETTER A
+0410  ; [.0CB5.0020.0008.0410] # CYRILLIC CAPITAL LETTER A
+04D3  ; [.0CBD.0020.0002.04D3] # CYRILLIC SMALL LETTER A WITH DIAERESIS
+0430 0308 ; [.0CBD.0020.0002.04D3] # CYRILLIC SMALL LETTER A WITH DIAERESIS
+04D2  ; [.0CBD.0020.0008.04D2] # CYRILLIC CAPITAL LETTER A WITH DIAERESIS
+0410 0308 ; [.0CBD.0020.0008.04D2] # CYRILLIC CAPITAL LETTER A WITH DIAERESIS
+0430 3099 ; [.0CBE.0020.0002.04D3] # A WITH KATAKANA VOICED
+0430 3099 0308 ; [.0CBF.0020.0002.04D3] # A WITH KATAKANA VOICED, DIAERESIS
 ENTRIES
   );
-  ok($NFD->eq("A$acute", $A_acute));
   ok($NFD->eq("\x{4D3}\x{325}", "\x{430}\x{308}\x{325}"));
   ok($NFD->lt("\x{430}\x{308}A", "\x{430}\x{308}B"));
   ok($NFD->lt("\x{430}\x{3099}B", "\x{430}\x{308}\x{3099}A"));
   ok($NFD->eq("\x{0430}\x{3099}\x{309A}\x{0308}",
               "\x{0430}\x{309A}\x{3099}\x{0308}") );
-
-  my %old_norm = $NFD->change(normalization => undef);
-  ok($NFD->lt("A$acute", $A_acute));
-  ok($NFD->cmp("A$acute", $A_acute), $Collator->cmp("A$acute", $A_acute));
-
-  $NFD->change(%old_norm);
-  ok($NFD->eq("A$acute", $A_acute));
-  ok($NFD->change(normalization => undef)->lt("A$acute", $A_acute));
-  ok($NFD->change(level => 1)->eq("A$acute", $A_acute));
-
 }
 else {
-  ok(1);
-  ok(1);
-  ok(1);
-  ok(1);
-  ok(1);
-  ok(1);
   ok(1);
   ok(1);
   ok(1);
@@ -128,11 +110,14 @@ my $trad = Unicode::Collate->new(
   ignoreName => qr/HANGUL|HIRAGANA|KATAKANA|BOPOMOFO/,
   level => 4,
   entry => << 'ENTRIES',
- 0063 0068 ; [.0893.0020.0002.0063] % "ch" in traditional Spanish
- 0043 0068 ; [.0893.0020.0008.0043] # "Ch" in traditional Spanish
- 00DF ; [.09F3.0154.0004.00DF] [.09F3.0020.0004.00DF] # eszet in Germany
+ 0063 0068 ; [.0A3F.0020.0002.0063] % "ch" in traditional Spanish
+ 0043 0068 ; [.0A3F.0020.0008.0043] # "Ch" in traditional Spanish
+ 00DF ; [.0BA7.0020.0004.00DF][.0000.0153.0004.00DF][.0BA7.0020.001F.00DF] # sz
 ENTRIES
 );
+# 0063  ; [.0A3D.0020.0002.0063] # LATIN SMALL LETTER C
+# 0064  ; [.0A49.0020.0002.0064] # LATIN SMALL LETTER D
+# 0073  ; [.0BA7.0020.0002.0073] # LATIN SMALL LETTER S
 
 ok(
   join(':', $trad->sort( qw/ acha aca ada acia acka / ) ),
@@ -143,6 +128,8 @@ ok(
   join(':', $Collator->sort( qw/ acha aca ada acia acka / ) ),
   join(':',                  qw/ aca acha acia acka ada / ),
 );
+ok($trad->eq("ocho", "oc\cAho")); # UCA v9
+ok($trad->eq("ocho", "oc\000\cA\000\x7Fho")); # UCA v9
 
 my $hiragana = "\x{3042}\x{3044}";
 my $katakana = "\x{30A2}\x{30A4}";
@@ -439,7 +426,7 @@ ok($all_undef_9->lt("\x{4E00}", "\x{3402}"));
 ok($all_undef_9->lt("\x{3402}", "\x{20000}"));
 ok($all_undef_9->lt("\x{20000}", "\x{AC00}"));
 ok($all_undef_9->gt("\x{AC00}", "\x{1100}\x{1161}"));
-ok($all_undef_9->gt("\x{AC00}", "\x{ABFF}"));
+ok($all_undef_9->gt("\x{AC00}", "\x{ABFF}")); # U+ABFF: not assigned
 
 ##############
 
@@ -648,3 +635,15 @@ ok($Collator  ->gt("\x{4E00}", $hiragana));
 ok($Collator  ->gt("\x{4E03}", $katakana));
 
 ##############
+
+# Shifted; ignorable after variable
+
+ok($Collator->eq("?\x{300}!\x{301}\x{315}", "?!"));
+ok($Collator->eq("?\x{300}A\x{300}", "?A\x{300}"));
+ok($Collator->eq("?\x{300}", "?"));
+
+$Collator->change(alternate => 'Non-ignorable');
+
+ok($Collator->gt("?\x{300}", "?"));
+
+$Collator->change(alternate => 'Shifted');

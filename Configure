@@ -6318,6 +6318,9 @@ case "$prefix" in
 '')
 	dflt=`./loc . /usr/local /usr/local /local /opt /usr`
 	;;
+*?/)
+	dflt=`echo "$prefix" | sed 's/.$//'`
+	;;
 *)
 	dflt="$prefix"
 	;;

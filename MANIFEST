@@ -611,6 +611,7 @@ ext/Storable/Storable.pm	Storable extension
 ext/Storable/Storable.xs	Storable extension
 ext/Storable/t/blessed.t	See if Storable works
 ext/Storable/t/canonical.t	See if Storable works
+ext/Storable/t/code.t		See if Storable works
 ext/Storable/t/compat06.t	See if Storable works
 ext/Storable/t/croak.t		See if Storable works
 ext/Storable/t/dclone.t		See if Storable works
@@ -927,9 +928,15 @@ lib/bigint.pl			An arbitrary precision integer arithmetic package
 lib/bigint.pm			bignum
 lib/bigintpl.t			See if bigint.pl works
 lib/bignum.pm			bignum
+lib/bignum/t/bn_lite.t		See if bignum works
+lib/bignum/t/br_lite.t		See if bignum works
 lib/bignum/t/bigint.t		See if bignum works
 lib/bignum/t/bignum.t		See if bignum works
 lib/bignum/t/bigrat.t		See if bignum works
+lib/bignum/t/biinfnan.t		See if bignum works
+lib/bignum/t/bninfnan.t		See if bignum works
+lib/bignum/t/brinfnan.t		See if bignum works
+lib/bignum/t/infnan.inc		See if bignum works
 lib/bignum/t/option_a.t		See if bignum works
 lib/bignum/t/option_l.t		See if bignum works
 lib/bignum/t/option_p.t		See if bignum works
@@ -1219,6 +1226,7 @@ lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigFloat/Trace.pm	bignum tracing
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
+lib/Math/BigInt/Scalar.pm		Pure Perl module to support Math::BigInt
 lib/Math/BigInt/t/bare_mbf.t	Test MBF under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mbi.t	Test MBI under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mif.t	Rounding tests under BareCalc
@@ -1227,6 +1235,7 @@ lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
 lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
 lib/Math/BigInt/t/bigintpm.inc	Shared tests for bigintpm.t and sub_mbi.t
 lib/Math/BigInt/t/bigintpm.t	See if BigInt.pm works
+lib/Math/BigInt/t/bigints.t	See if BigInt.pm works
 lib/Math/BigInt/t/calling.t	Test calling conventions
 lib/Math/BigInt/t/config.t	Test Math::BigInt->config()
 lib/Math/BigInt/t/constant.t	Test Math::BigInt/BigFloat under :constant
@@ -1251,6 +1260,7 @@ lib/Math/BigInt/t/use_lib4.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/with_sub.t	Test use Math::BigFloat with => package
 lib/Math/BigInt/Trace.pm	bignum tracing
 lib/Math/BigRat.pm		Math::BigRat
+lib/Math/BigRat/t/big_ap.t		Math::BigRat test
 lib/Math/BigRat/t/bigfltpm.inc		Math::BigRat test
 lib/Math/BigRat/t/bigfltrt.t		Math::BigRat test
 lib/Math/BigRat/t/bigrat.t		Math::BigRat test
@@ -1394,6 +1404,7 @@ lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
 lib/Pod/t/Select.t		See if Pod::Select works
 lib/Pod/t/text-errors.t		podlators test
+lib/Pod/t/text-options.t		podlators test
 lib/Pod/t/text.t		podlators test
 lib/Pod/t/Usage.t		See if Pod::Usage works
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
@@ -1466,6 +1477,7 @@ lib/Test/Simple/t/bad_plan.t    Test::Builder plan() test
 lib/Test/Simple/t/buffer.t	Test::Builder buffering test
 lib/Test/Simple/t/Builder.t	Test::Builder tests
 lib/Test/Simple/t/curr_test.t	Test::Builder->curr_test tests
+lib/Test/Simple/t/details.t	Test::Builder tests
 lib/Test/Simple/t/diag.t	Test::More diag() test
 lib/Test/Simple/t/exit.t	Test::Simple test, exit codes
 lib/Test/Simple/t/extra.t	Test::Simple test
@@ -1473,8 +1485,12 @@ lib/Test/Simple/t/fail-like.t	Test::More test, like() failures
 lib/Test/Simple/t/fail-more.t	Test::More test, tests failing
 lib/Test/Simple/t/fail.t	Test::Simple test, test failures
 lib/Test/Simple/t/filehandles.t Test::Simple test, STDOUT can be played with
+lib/Test/Simple/t/fork.t	Test::More fork tests
+lib/Test/Simple/t/has_plan.t	Test::Builder->plan tests
+lib/Test/Simple/t/has_plan2.t	Test::More->plan tests
 lib/Test/Simple/t/import.t	Test::More test, importing functions
 lib/Test/Simple/t/is_deeply.t	Test::More test, is_deeply()
+lib/Test/Simple/t/ok_obj.t Test::Builder object tests
 lib/Test/Simple/t/maybe_regex.t Test::Builder->maybe_regex() tests
 lib/Test/Simple/t/missing.t	Test::Simple test, missing tests
 lib/Test/Simple/t/More.t	Test::More test, basic stuff
@@ -2416,6 +2432,7 @@ t/lib/Test/Simple/sample_tests/extras.plx		for exit.t
 t/lib/Test/Simple/sample_tests/five_fail.plx		for exit.t
 t/lib/Test/Simple/sample_tests/last_minute_death.plx	for exit.t
 t/lib/Test/Simple/sample_tests/one_fail.plx		for exit.t
+t/lib/Test/Simple/sample_tests/pre_plan_death.plx		for exit.t
 t/lib/Test/Simple/sample_tests/require.plx		for exit.t
 t/lib/Test/Simple/sample_tests/success.plx		for exit.t
 t/lib/Test/Simple/sample_tests/too_few.plx		for exit.t

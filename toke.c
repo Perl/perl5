@@ -149,7 +149,7 @@ int yyactlevel = -1;
 #define PREREF(retval) return (REPORT2("preref",retval) PL_expect = XREF,PL_bufptr = s,(int)retval)
 #define TERM(retval) return (CLINE, REPORT2("term",retval) PL_expect = XOPERATOR, PL_bufptr = s,(int)retval)
 #define LOOPX(f) return(yylval.ival=f, REPORT("loopx",f) PL_expect = XTERM,PL_bufptr = s,(int)LOOPEX)
-#define FTST(f) return(yylval.ival=f, REPORT("ftst",f) PL_expect = XTERM,PL_bufptr = s,(int)UNIOP)
+#define FTST(f) return(yylval.ival=f, REPORT("ftst",f) PL_expect = XTERMORDORDOR,PL_bufptr = s,(int)UNIOP)
 #define FUN0(f) return(yylval.ival = f, REPORT("fun0",f) PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC0)
 #define FUN1(f) return(yylval.ival = f, REPORT("fun1",f) PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC1)
 #define BOop(f) return ao((yylval.ival=f, REPORT("bitorop",f) PL_expect = XTERM,PL_bufptr = s,(int)BITOROP))
@@ -164,14 +164,18 @@ int yyactlevel = -1;
 
 /* This bit of chicanery makes a unary function followed by
  * a parenthesis into a function with one argument, highest precedence.
+ * The UNIDOR macro is for unary functions that can be followed by the //
+ * operator (such as C<shift // 0>).
  */
-#define UNI(f) return(yylval.ival = f, \
+#define UNI2(f,x) return(yylval.ival = f, \
 	REPORT("uni",f) \
-	PL_expect = XTERM, \
+	PL_expect = x, \
 	PL_bufptr = s, \
 	PL_last_uni = PL_oldbufptr, \
 	PL_last_lop_op = f, \
 	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC1 : (int)UNIOP) )
+#define UNI(f)    UNI2(f,XTERM)
+#define UNIDOR(f) UNI2(f,XTERMORDORDOR)
 
 #define UNIBRACK(f) return(yylval.ival = f, \
         REPORT("uni",f) \
@@ -997,6 +1001,9 @@ S_sublex_start(pTHX)
 	}
 	yylval.opval = (OP*)newSVOP(op_type, 0, sv);
 	PL_lex_stuff = Nullsv;
+	/* Allow <FH> // "foo" */
+	if (op_type == OP_READLINE)
+	    PL_expect = XTERMORDORDOR;
 	return THING;
     }
 
@@ -3597,6 +3604,10 @@ Perl_yylex(pTHX)
 	TERM('@');
 
      case '/':			/* may be division, defined-or, or pattern */
+	if (PL_expect == XTERMORDORDOR && s[1] == '/') {
+	    s += 2;
+	    AOPERATOR(DORDOR);
+	}
      case '?':			/* may either be conditional or pattern */
 	 if(PL_expect == XOPERATOR) {
 	     tmp = *s++;
@@ -3745,7 +3756,9 @@ Perl_yylex(pTHX)
 		TERM(THING);
 	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
-	    else if (!isALPHA(*start) && (PL_expect == XTERM || PL_expect == XREF || PL_expect == XSTATE)) {
+	    else if (!isALPHA(*start) && (PL_expect == XTERM
+			|| PL_expect == XREF || PL_expect == XSTATE
+			|| PL_expect == XTERMORDORDOR)) {
 		char c = *start;
 		GV *gv;
 		*start = '\0';
@@ -4427,7 +4440,7 @@ Perl_yylex(pTHX)
 	    UNI(OP_GMTIME);
 
 	case KEY_getc:
-	    UNI(OP_GETC);
+	    UNIDOR(OP_GETC);
 
 	case KEY_getppid:
 	    FUN0(OP_GETPPID);
@@ -4677,10 +4690,10 @@ Perl_yylex(pTHX)
 	    LOP(OP_PUSH,XTERM);
 
 	case KEY_pop:
-	    UNI(OP_POP);
+	    UNIDOR(OP_POP);
 
 	case KEY_pos:
-	    UNI(OP_POS);
+	    UNIDOR(OP_POS);
 	
 	case KEY_pack:
 	    LOP(OP_PACK,XTERM);
@@ -4820,7 +4833,7 @@ Perl_yylex(pTHX)
 
 	case KEY_readline:
 	    set_csh();
-	    UNI(OP_READLINE);
+	    UNIDOR(OP_READLINE);
 
 	case KEY_readpipe:
 	    set_csh();
@@ -4836,7 +4849,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_REVERSE,XTERM);
 
 	case KEY_readlink:
-	    UNI(OP_READLINK);
+	    UNIDOR(OP_READLINK);
 
 	case KEY_ref:
 	    UNI(OP_REF);
@@ -4903,7 +4916,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_SSOCKOPT,XTERM);
 
 	case KEY_shift:
-	    UNI(OP_SHIFT);
+	    UNIDOR(OP_SHIFT);
 
 	case KEY_shmctl:
 	    LOP(OP_SHMCTL,XTERM);
@@ -5133,7 +5146,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_UNLINK,XTERM);
 
 	case KEY_undef:
-	    UNI(OP_UNDEF);
+	    UNIDOR(OP_UNDEF);
 
 	case KEY_unpack:
 	    LOP(OP_UNPACK,XTERM);
@@ -5142,7 +5155,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_UTIME,XTERM);
 
 	case KEY_umask:
-	    UNI(OP_UMASK);
+	    UNIDOR(OP_UMASK);
 
 	case KEY_unshift:
 	    LOP(OP_UNSHIFT,XTERM);
@@ -7435,7 +7448,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
     case 'v':
 vstring:
 		sv = NEWSV(92,5); /* preallocate storage space */
-		s = new_vstring(s,sv);
+		s = scan_vstring(s,sv);
 	break;
     }
 

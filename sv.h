@@ -487,6 +487,9 @@ Unsets the PV status of an SV.
 Tells an SV that it is a string and disables all other OK bits.
 Will also turn off the UTF8 status.
 
+=for apidoc Am|bool|SvVOK|SV* sv
+Returns a boolean indicating whether the SV contains a v-string.
+
 =for apidoc Am|bool|SvOOK|SV* sv
 Returns a boolean indicating whether the SvIVX is a valid offset value for
 the SvPVX.  This hack is used internally to speed up removal of characters
@@ -556,27 +559,16 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
 #define SvIOKp(sv)		(SvFLAGS(sv) & SVp_IOK)
-#ifdef PERL_COPY_ON_WRITE
-#define SvRELEASE_IVX(sv)   ((SvFLAGS(sv) & (SVf_OOK|SVf_READONLY|SVf_FAKE)) \
-				&& sv_release_IVX(sv))
-#define SvIOKp_on(sv)		((void)sv_release_IVX(sv), \
+#define SvIOKp_on(sv)		(SvRELEASE_IVX(sv), \
 				    SvFLAGS(sv) |= SVp_IOK)
-#else
-#define SvIOKp_on(sv)		((void)SvOOK_off(sv), SvFLAGS(sv) |= SVp_IOK)
-#endif
 #define SvNOKp(sv)		(SvFLAGS(sv) & SVp_NOK)
 #define SvNOKp_on(sv)		(SvFLAGS(sv) |= SVp_NOK)
 #define SvPOKp(sv)		(SvFLAGS(sv) & SVp_POK)
 #define SvPOKp_on(sv)		(SvFLAGS(sv) |= SVp_POK)
 
 #define SvIOK(sv)		(SvFLAGS(sv) & SVf_IOK)
-#ifdef PERL_COPY_ON_WRITE
-#define SvIOK_on(sv)		((void)sv_release_IVX(sv), \
+#define SvIOK_on(sv)		(SvRELEASE_IVX(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
-#else
-#define SvIOK_on(sv)		((void)SvOOK_off(sv), \
-				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
-#endif
 #define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK|SVf_IVisUV))
 #define SvIOK_only(sv)		((void)SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
@@ -631,6 +623,7 @@ and leaves the UTF8 status as it was.
 						  SVf_IVisUV),		\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 
+#define SvVOK(sv)		(SvMAGICAL(sv) && mg_find(sv,'V'))
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		((void)SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)
 #define SvOOK_off(sv)		(SvOOK(sv) && sv_backoff(sv))
@@ -1077,23 +1070,30 @@ otherwise.
 
 #define SvIsCOW(sv)		((SvFLAGS(sv) & (SVf_FAKE | SVf_READONLY)) == \
 				    (SVf_FAKE | SVf_READONLY))
+#define SvIsCOW_shared_hash(sv)	(SvIsCOW(sv) && SvLEN(sv) == 0)
 
 /* flag values for sv_*_flags functions */
 #define SV_IMMEDIATE_UNREF	1
 #define SV_GMAGIC		2
-
-#ifdef PERL_COPY_ON_WRITE
 #define SV_COW_DROP_PV		4
 
-#define SvIsCOW_shared_hash(sv)	(SvIsCOW(sv) && SvLEN(sv) == 0)
-#define SvIsCOW_normal(sv)	(SvIsCOW(sv) && SvLEN(sv))
+/* We are about to replace the SV's current value. So if it's copy on write
+   we need to normalise it. Use the SV_COW_DROP_PV flag hint to say that
+   the value is about to get thrown away, so drop the PV rather than go to
+   the effort of making a read-write copy only for it to get immediately
+   discarded.  */
 
 #define SV_CHECK_THINKFIRST_COW_DROP(sv) if (SvTHINKFIRST(sv)) \
 				    sv_force_normal_flags(sv, SV_COW_DROP_PV)
+
+#ifdef PERL_COPY_ON_WRITE
+#  define SvRELEASE_IVX(sv)   ((void)((SvFLAGS(sv) & (SVf_OOK|SVf_READONLY|SVf_FAKE)) \
+				&& sv_release_IVX(sv)))
+#  define SvIsCOW_normal(sv)	(SvIsCOW(sv) && SvLEN(sv))
 #else
-#define SV_CHECK_THINKFIRST_COW_DROP(sv) if (SvTHINKFIRST(sv)) \
-				    sv_force_normal_flags(sv, 0)
+#  define SvRELEASE_IVX(sv)   ((void)SvOOK_off(sv))
 #endif /* PERL_COPY_ON_WRITE */
+
 #define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) \
 				    sv_force_normal_flags(sv, 0)
 

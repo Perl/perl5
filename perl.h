@@ -2430,7 +2430,8 @@ Gid_t getegid (void);
 #define DEBUG_R_FLAG		0x00040000 /* 262144 */
 #define DEBUG_J_FLAG		0x00080000 /* 524288 */
 #define DEBUG_v_FLAG		0x00100000 /*1048576 */
-#define DEBUG_MASK		0x001FFFFF /* mask of all the standard flags */
+#define DEBUG_C_FLAG		0x00200000 /*2097152 */
+#define DEBUG_MASK		0x003FFFFF /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG	0x40000000
 #define DEBUG_TOP_FLAG		0x80000000 /* XXX what's this for ??? Signal
@@ -2457,6 +2458,7 @@ Gid_t getegid (void);
 #  define DEBUG_R_TEST_ (PL_debug & DEBUG_R_FLAG)
 #  define DEBUG_J_TEST_ (PL_debug & DEBUG_J_FLAG)
 #  define DEBUG_v_TEST_ (PL_debug & DEBUG_v_FLAG)
+#  define DEBUG_C_TEST_ (PL_debug & DEBUG_C_FLAG)
 
 #ifdef DEBUGGING
 
@@ -2484,6 +2486,7 @@ Gid_t getegid (void);
 #  define DEBUG_R_TEST DEBUG_R_TEST_
 #  define DEBUG_J_TEST DEBUG_J_TEST_
 #  define DEBUG_v_TEST DEBUG_v_TEST_
+#  define DEBUG_C_TEST DEBUG_C_TEST_
 
 #  define DEB(a)     a
 #  define DEBUG(a)   if (PL_debug)   a
@@ -2525,6 +2528,7 @@ Gid_t getegid (void);
 #  define DEBUG_T(a) DEBUG__(DEBUG_T_TEST, a)
 #  define DEBUG_R(a) DEBUG__(DEBUG_R_TEST, a)
 #  define DEBUG_v(a) DEBUG__(DEBUG_v_TEST, a)
+#  define DEBUG_C(a) DEBUG__(DEBUG_C_TEST, a)
 
 #else /* DEBUGGING */
 
@@ -2549,6 +2553,7 @@ Gid_t getegid (void);
 #  define DEBUG_R_TEST (0)
 #  define DEBUG_J_TEST (0)
 #  define DEBUG_v_TEST (0)
+#  define DEBUG_C_TEST (0)
 
 #  define DEB(a)
 #  define DEBUG(a)
@@ -2572,6 +2577,7 @@ Gid_t getegid (void);
 #  define DEBUG_T(a)
 #  define DEBUG_R(a)
 #  define DEBUG_v(a)
+#  define DEBUG_C(a)
 #endif /* DEBUGGING */
 
 
@@ -2614,6 +2620,7 @@ Gid_t getegid (void);
 #define PERL_MAGIC_uvar		  'U' /* Available for use by extensions */
 #define PERL_MAGIC_uvar_elem	  'u' /* Reserved for use by extensions */
 #define PERL_MAGIC_vec		  'v' /* vec() lvalue */
+#define PERL_MAGIC_vstring	  'V' /* SV was vstring literal */
 #define PERL_MAGIC_substr	  'x' /* substr() lvalue */
 #define PERL_MAGIC_defelem	  'y' /* Shadow "foreach" iterator variable /
 					smart parameter vivification */
@@ -3171,7 +3178,8 @@ typedef enum {
     XBLOCK,
     XATTRBLOCK,
     XATTRTERM,
-    XTERMBLOCK
+    XTERMBLOCK,
+    XTERMORDORDOR /* evil hack */
 } expectation;
 
 enum {		/* pass one of these to get_vtbl */

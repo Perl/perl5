@@ -474,12 +474,14 @@ if ($Config{installusrbinperl} && $Config{installusrbinperl} eq 'define' &&
 
 # Make links to ordinary names if installbin directory isn't current directory.
 if (!$Is_NetWare) {
-	if (!$versiononly && ! samepath($installbin, 'x2p')) {
-		safe_unlink("$installbin/a2p$exe_ext");
-		copy("x2p/a2p$exe_ext", "$installbin/a2p$exe_ext");
-               strip("$installbin/a2p$exe_ext");
-		chmod(0755, "$installbin/a2p$exe_ext");
-	}
+    if (! samepath($installbin, 'x2p')) {
+	my $base = 'a2p';
+	$base .= $ver if $versiononly;
+	safe_unlink("$installbin/$base$exe_ext");
+	copy("x2p/a2p$exe_ext", "$installbin/$base$exe_ext");
+	strip("$installbin/$base$exe_ext");
+	chmod(0755, "$installbin/$base$exe_ext");
+    }
 }
 
 # cppstdin is just a script, but it is architecture-dependent, so
