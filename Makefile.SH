@@ -25,9 +25,12 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.5 90/03/12 16:15:17 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.6 90/03/27 15:27:15 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.6  90/03/27  15:27:15  lwall
+# patch16: MSDOS support
+# 
 # Revision 3.0.1.5  90/03/12  16:15:17  lwall
 # patch13: some dependencies missing on perly.h
 # patch13: some relief for buggy parallel makes
@@ -276,10 +279,10 @@ perl.c: perl.y
 perl.o: perl.c perly.h $(h)
 	$(CC) -c $(CFLAGS) $(LARGE) perl.c
 
-perl.man: perl.man.1 perl.man.2 perl.man.3 perl.man.4 patchlevel.h perl
+perl.man: perl_man.1 perl_man.2 perl_man.3 perl_man.4 patchlevel.h perl
 	./perl  -e '($$r,$$p)=$$]=~/(\d+\.\d+).*\n\D*(\d+)/;' \
 		-e 'print ".ds RP Release $$r Patchlevel $$p\n";' >perl.man
-	cat perl.man.[1-4] >>perl.man
+	cat perl_man.[1-4] >>perl.man
 
 install: all
 # won't work with csh

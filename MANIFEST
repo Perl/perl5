@@ -16,7 +16,7 @@ client			A client to test sockets
 cmd.c			Command interpreter
 cmd.h			Public declarations for the above
 config.H		Sample config.h
-config.h.SH		Produces config.h
+config_h.SH		Produces config.h
 cons.c			Routines to construct cmd nodes of a parse tree
 consarg.c		Routines to construct arg nodes of a parse tree
 doarg.c			Scalar expression evaluation
@@ -41,6 +41,7 @@ eg/muck.man		Manual page for muck
 eg/myrup		A program to find lightly loaded machines
 eg/nih			Script to insert #! workaround
 eg/rename		A program to rename files
+eg/relink		A program to change symbolic links
 eg/rmfrom		A program to feed doomed filenames to
 eg/scan/scan_df		Scan for filesystem anomalies
 eg/scan/scan_last	Scan for login anomalies
@@ -51,6 +52,7 @@ eg/scan/scan_sudo	Scan for sudo anomalies
 eg/scan/scan_suid	Scan for setuid anomalies
 eg/scan/scanner		An anomaly reporter
 eg/shmkill		A program to remove unused shared memory
+eg/travesty		A program to print travesties of its input text
 eg/van/empty		A program to empty the trashcan
 eg/van/unvanish		A program to undo what vanish does
 eg/van/vanexp		A program to expire vanished files
@@ -68,24 +70,39 @@ ioctl.pl		Sample ioctl.pl
 lib/abbrev.pl		An abbreviation table builder
 lib/look.pl		A "look" equivalent
 lib/complete.pl		A command completion subroutine
+lib/ctime.pl		A ctime workalike
 lib/dumpvar.pl		A variable dumper
 lib/getopt.pl		Perl library supporting option parsing
 lib/getopts.pl		Perl library supporting option parsing
 lib/importenv.pl	Perl routine to get environment into variables
 lib/perldb.pl		Perl debugging routines
 lib/stat.pl		Perl library supporting stat function
+lib/syslog.pl		Perl library supporting syslogging
 lib/termcap.pl		Perl library supporting termcap usage
 lib/validate.pl		Perl library supporting wholesale file mode validation
 makedepend.SH		Precursor to makedepend
 makedir.SH		Precursor to makedir
 makelib.SH		A thing to turn C .h file into perl .h files
 malloc.c		A version of malloc you might not want
+msdos/Changes.dds	Expanation of MS-DOS patches by Diomidis Spinellis
+msdos/Makefile		MS-DOS makefile
+msdos/README.msdos	Compiling and usage information
+msdos/Wishlist.dds	My wishlist
+msdos/config.h		Definitions for msdos
+msdos/dir.h		MS-DOS header for directory access functions
+msdos/directory.c	MS-DOS directory access functions.
+msdos/eg/crlf.bat	Convert files from unix to MS-DOS line termination
+msdos/eg/drives.bat	List the system drives and their characteristics
+msdos/eg/lf.bat		Convert files from MS-DOS to Unix line termination
+msdos/glob.c		A command equivalent to csh glob
+msdos/msdos.c		MS-DOS ioctl, sleep, gete?[gu]if, spawn, aspawn
+msdos/popen.c		My_popen and my_pclose for MS-DOS
 patchlevel.h		The current patch level of perl
 perl.h			Global declarations
-perl.man.1		The manual page(s), first fourth
-perl.man.2		The manual page(s), second fourth
-perl.man.3		The manual page(s), third fourth
-perl.man.4		The manual page(s), fourth fourth
+perl_man.1		The manual page(s), first fourth
+perl_man.2		The manual page(s), second fourth
+perl_man.3		The manual page(s), third fourth
+perl_man.4		The manual page(s), fourth fourth
 perl.y			Yacc grammar for perl
 perlsh			A poor man's perl shell
 perly.c			main()
@@ -164,7 +181,7 @@ t/op.split		See if split works
 t/op.sprintf		See if sprintf works
 t/op.stat		See if stat works
 t/op.study		See if study works
-t/op.subst		See if substitutions work
+t/op.s			See if substitutions work
 t/op.substr		See if substr works
 t/op.time		See if time functions work
 t/op.undef		See if undef works

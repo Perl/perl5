@@ -1,7 +1,7 @@
 
 			Perl Kit, Version 3.0
 
-		    Copyright (c) 1989, Larry Wall
+		 Copyright (c) 1989,1990, Larry Wall
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -76,6 +76,7 @@ Installation
 
     The 3b2 needs to turn off -O.
     AIX/RT may need a -a switch and -DCRIPPLED_CC.
+    SUNOS 4.0.[12] needs #define fputs(str,fp) fprintf(fp,"%s",str) in perl.h
     SGI machines may need -Ddouble="long float".
     Ultrix (2.3) may need to hand assemble teval.s with a -J switch.
     Ultrix on MIPS machines may need -DLANGUAGE_C.

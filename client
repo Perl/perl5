@@ -19,7 +19,7 @@ if (connect(S,$that)) { print "connect ok\n"; } else { die $!; }
 select(S); $| = 1; select(stdout);
 
 if ($child = fork) {
-    while (<>) {
+    while (<STDIN>) {
 	print S;
     }
     sleep 3;

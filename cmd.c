@@ -1,4 +1,4 @@
-/* $Header: cmd.c,v 3.0.1.6 90/03/12 16:21:09 lwall Locked $
+/* $Header: cmd.c,v 3.0.1.7 90/03/27 15:32:37 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.c,v $
+ * Revision 3.0.1.7  90/03/27  15:32:37  lwall
+ * patch16: non-terminal blocks should never have arrays requested of them
+ * 
  * Revision 3.0.1.6  90/03/12  16:21:09  lwall
  * patch13: fixed some backwards VOLATILE declarations
  * patch13: while (s/x//) {} still caused some anomolies
@@ -127,7 +130,7 @@ tail_recursion_entry:
 			    grow_dlevel();
 		    }
 #endif
-		    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme,sp);
+		    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme && (cmdflags & CF_TERM),sp);
 		    st = stack->ary_array;	/* possibly reallocated */
 		    retstr = st[newsp];
 		}
@@ -158,7 +161,7 @@ tail_recursion_entry:
 			    grow_dlevel();
 		    }
 #endif
-		    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme,sp);
+		    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme && (cmdflags & CF_TERM),sp);
 		    st = stack->ary_array;	/* possibly reallocated */
 		    retstr = st[newsp];
 		}
@@ -247,7 +250,7 @@ tail_recursion_entry:
 			    grow_dlevel();
 		    }
 #endif
-		    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme,sp);
+		    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme && (cmdflags & CF_TERM),sp);
 		    st = stack->ary_array;	/* possibly reallocated */
 		    retstr = st[newsp];
 		}
@@ -267,7 +270,7 @@ tail_recursion_entry:
 			    grow_dlevel();
 		    }
 #endif
-		    newsp = cmd_exec(cmd->ucmd.ccmd.cc_alt,gimme,sp);
+		    newsp = cmd_exec(cmd->ucmd.ccmd.cc_alt,gimme && (cmdflags & CF_TERM),sp);
 		    st = stack->ary_array;	/* possibly reallocated */
 		    retstr = st[newsp];
 		}
@@ -711,7 +714,7 @@ until_loop:
 		    grow_dlevel();
 	    }
 #endif
-	    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme,sp);
+	    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme && (cmdflags & CF_TERM),sp);
 	    st = stack->ary_array;	/* possibly reallocated */
 	    retstr = st[newsp];
 	}
@@ -740,7 +743,7 @@ until_loop:
 		    grow_dlevel();
 	    }
 #endif
-	    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme,sp);
+	    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme && (cmdflags & CF_TERM),sp);
 	    st = stack->ary_array;	/* possibly reallocated */
 	    retstr = st[newsp];
 	}
@@ -826,7 +829,7 @@ until_loop:
 		    grow_dlevel();
 	    }
 #endif
-	    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme,sp);
+	    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme && (cmdflags & CF_TERM),sp);
 	    st = stack->ary_array;	/* possibly reallocated */
 	    retstr = st[newsp];
 	}
@@ -846,7 +849,7 @@ until_loop:
 		    grow_dlevel();
 	    }
 #endif
-	    newsp = cmd_exec(cmd->ucmd.ccmd.cc_alt,gimme,sp);
+	    newsp = cmd_exec(cmd->ucmd.ccmd.cc_alt,gimme && (cmdflags & CF_TERM),sp);
 	    st = stack->ary_array;	/* possibly reallocated */
 	    retstr = st[newsp];
 	}
