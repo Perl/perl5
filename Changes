@@ -31,6 +31,42 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9668] By: jhi                                   on 2001/04/10  01:00:38
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  9667] By: jhi                                   on 2001/04/10  00:52:16
+        Log: Update perlhist.
+     Branch: perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[  9666] By: jhi                                   on 2001/04/09  23:38:59
+        Log: Slight wording tweaks from Damian to #9658.
+     Branch: perl
+	   ! pod/perlobj.pod
+____________________________________________________________________________
+[  9665] By: jhi                                   on 2001/04/09  19:56:06
+        Log: Subject: [PATCH perlutil.pod] Nit
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Mon, 9 Apr 2001 20:29:44 +0100
+             Message-ID: <20010409202944.A14796@the.earth.li>
+     Branch: perl
+	   ! pod/perlutil.pod
+____________________________________________________________________________
+[  9664] By: jhi                                   on 2001/04/09  19:54:42
+        Log: Subject: Re: perl571delta.pod@9631
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Mon, 09 Apr 2001 18:09:14 +0100
+             Message-Id: <E14mfAA-0006vi-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! pod/perl571delta.pod
+____________________________________________________________________________
+[  9663] By: jhi                                   on 2001/04/09  13:43:35
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9662] By: jhi                                   on 2001/04/09  13:24:46
         Log: tweak tweak.
      Branch: perl
