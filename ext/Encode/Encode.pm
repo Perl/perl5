@@ -662,7 +662,7 @@ flag on).
 
 Here is how Encode takes care of the utf8 flag.
 
-=over2
+=over 2
 
 =item *
 
