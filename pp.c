@@ -4329,7 +4329,6 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 'C':
-	case 'U':
 	    if (len > strend - s)
 		len = strend - s;
 	    if (checksum) {
@@ -4338,10 +4337,7 @@ PP(pp_unpack)
 			STRLEN l;
 			auv = utf8_to_uv((U8*)s, strend - s,
 					 &l, UTF8_ALLOW_ANYUV);
-			if (checksum > 32)
-			    cdouble += (NV)auv;
-			else
-			    culong += auv;
+			culong += auv;
 			s += l;
 			len -= l;
 		    }
@@ -4376,6 +4372,35 @@ PP(pp_unpack)
 			sv_setuv(sv, auint);
 			PUSHs(sv_2mortal(sv));
 		    }
+		}
+	    }
+	    break;
+	case 'U':
+	    if (len > strend - s)
+		len = strend - s;
+	    if (checksum) {
+		while (len-- > 0 && s < strend) {
+		    STRLEN alen;
+		    auint = utf8_to_uv((U8*)s, strend - s, &alen, 0);
+		    along = alen;
+		    s += along;
+		    if (checksum > 32)
+			cdouble += (NV)auint;
+		    else
+			culong += auint;
+		}
+	    }
+	    else {
+		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
+		while (len-- > 0 && s < strend) {
+		    STRLEN alen;
+		    auint = utf8_to_uv((U8*)s, strend - s, &alen, 0);
+		    along = alen;
+		    s += along;
+		    sv = NEWSV(37, 0);
+		    sv_setuv(sv, (UV)auint);
+		    PUSHs(sv_2mortal(sv));
 		}
 	    }
 	    break;
