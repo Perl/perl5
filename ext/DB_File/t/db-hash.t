@@ -582,8 +582,8 @@ EOM
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
    $k = 'Fred'; $v ='';
    ok(74, ! $db->seq($k, $v, R_FIRST) ) ;
-   ok(75, $k eq "Fred") ;
-    #print "k [$k]\n" ;
+   ok(75, $k eq "FRED") or 
+    print "# k [$k]\n" ;
    ok(76, $v eq "[Jxe]") ;
    #                   fk   sk     fv    sv
    ok(77, checkOutput( "FRED", "fred", "[Jxe]", "")) ;

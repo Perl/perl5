@@ -10,12 +10,12 @@ require DynaLoader;
 
 @EXPORT = qw( );
 @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
-		 getitimer setitimer
+		 getitimer setitimer nanosleep
 		 ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF ITIMER_REALPROF
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep);
 	
-$VERSION = '1.65';
+$VERSION = '1.66';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -54,9 +54,10 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 
 =head1 SYNOPSIS
 
-  use Time::HiRes qw( usleep ualarm gettimeofday tv_interval );
+  use Time::HiRes qw( usleep ualarm gettimeofday tv_interval nanosleep );
 
   usleep ($microseconds);
+  nanosleep ($nanoseconds);
 
   ualarm ($microseconds);
   ualarm ($microseconds, $interval_microseconds);
@@ -84,20 +85,20 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 =head1 DESCRIPTION
 
 The C<Time::HiRes> module implements a Perl interface to the
-C<usleep>, C<ualarm>, C<gettimeofday>, and C<setitimer>/C<getitimer>
-system calls, in other words, high resolution time and timers. See the
-L</EXAMPLES> section below and the test scripts for usage; see your
-system documentation for the description of the underlying
-C<nanosleep> or C<usleep>, C<ualarm>, C<gettimeofday>, and
-C<setitimer>/C<getitimer> calls.
+C<usleep>, C<nanosleep>, C<ualarm>, C<gettimeofday>, and
+C<setitimer>/C<getitimer> system calls, in other words, high
+resolution time and timers. See the L</EXAMPLES> section below and the
+test scripts for usage; see your system documentation for the
+description of the underlying C<nanosleep> or C<usleep>, C<ualarm>,
+C<gettimeofday>, and C<setitimer>/C<getitimer> calls.
 
 If your system lacks C<gettimeofday()> or an emulation of it you don't
 get C<gettimeofday()> or the one-argument form of C<tv_interval()>.
 If your system lacks all of C<nanosleep()>, C<usleep()>, and
-C<select()>, you don't get C<Time::HiRes::usleep()> or
-C<Time::HiRes::sleep()>.  If your system lacks both C<ualarm()> and
-C<setitimer()> you don't get C<Time::HiRes::ualarm()> or
-C<Time::HiRes::alarm()>.
+C<select()>, you don't get C<Time::HiRes::usleep()>,
+C<Time::HiRes::nanosleep()>, or C<Time::HiRes::sleep()>.  If your
+system lacks both C<ualarm()> and C<setitimer()> you don't get
+C<Time::HiRes::ualarm()> or C<Time::HiRes::alarm()>.
 
 If you try to import an unimplemented function in the C<use> statement
 it will fail at compile time.
@@ -108,9 +109,7 @@ C<nanosleep()> does not use signals.  This, however, is not portable,
 and you should first check for the truth value of
 C<&Time::HiRes::d_nanosleep> to see whether you have nanosleep, and
 then carefully read your C<nanosleep()> C API documentation for any
-peculiarities.  (There is no separate interface to call
-C<nanosleep()>; just use C<Time::HiRes::sleep()> or
-C<Time::HiRes::usleep()> with small enough values.)
+peculiarities.
 
 Unless using C<nanosleep> for mixing sleeping with signals, give
 some thought to whether Perl is the tool you should be using for
@@ -129,9 +128,23 @@ seconds like C<Time::HiRes::time()> (see below).
 
 =item usleep ( $useconds )
 
-Sleeps for the number of microseconds specified.  Returns the number
-of microseconds actually slept.  Can sleep for more than one second,
-unlike the C<usleep> system call. See also C<Time::HiRes::sleep()> below.
+Sleeps for the number of microseconds (millionths of a second)
+specified.  Returns the number of microseconds actually slept.  Can
+sleep for more than one second, unlike the C<usleep> system call. See
+also C<Time::HiRes::usleep()> and C<Time::HiRes::sleep()>.
+
+Do not expect usleep() to be exact down to one microsecond.
+
+=item nanosleep ( $nanoseconds )
+
+Sleeps for the number of nanoseconds (1e9ths of a second) specified.
+Returns the number of nanoseconds actually slept (accurate only to
+microseconds, the nearest thousand of them).  Can sleep for more than
+one second.  See also C<Time::HiRes::sleep()> and
+C<Time::HiRes::usleep()>.
+
+Do not expect nanosleep() to be exact down to one nanosecond.
+Getting even accuracy of one thousand nanoseconds is good.
 
 =item ualarm ( $useconds [, $interval_useconds ] )
 

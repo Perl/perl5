@@ -13,7 +13,7 @@ package CGI::Cookie;
 # wish, but if you redistribute a modified version, please attach a note
 # listing the modifications you have made.
 
-$CGI::Cookie::VERSION='1.24';
+$CGI::Cookie::VERSION='1.25';
 
 use CGI::Util qw(rearrange unescape escape);
 use overload '""' => \&as_string,
@@ -25,9 +25,12 @@ my $MOD_PERL = 0;
 if (exists $ENV{MOD_PERL}) {
   eval "require mod_perl";
   if (defined $mod_perl::VERSION) {
-    if ($mod_perl::VERSION >= 1.99) {
+    my $float = $mod_perl::VERSION;
+    $float += 0;
+    if ($float >= 1.99) {
       $MOD_PERL = 2;
       require Apache::RequestUtil;
+      eval "require APR::Table";  # Changing APIs? I hope not.
     } else {
       $MOD_PERL = 1;
       require Apache;
@@ -199,7 +202,7 @@ sub value {
 sub domain {
     my $self = shift;
     my $domain = shift;
-    $self->{'domain'} = $domain if defined $domain;
+    $self->{'domain'} = lc $domain if defined $domain;
     return $self->{'domain'};
 }
 

@@ -182,7 +182,7 @@ sub canonpath {
 	$path =~ s/\.[^\]\.]+\.-\./\./g;	# .foo.-.	==> .
 	$path =~ s/\[[^\]\.]+\.-\./\[/g;	# [foo.-.	==> [
 	$path =~ s/\.[^\]\.]+\.-\]/\]/g;	# .foo.-]	==> ]
-	$path =~ s/\[[^\]\.]+\.-\]/\[\]/g;	# [foo.-]	==> []
+	$path =~ s/\[[^\]\.]+\.-\]/\[000000\]/g;# [foo.-]       ==> [000000]
 	$path =~ s/\[\]//;			# []		==>
 	return $path;
     }
@@ -477,7 +477,11 @@ sub rel2abs {
     my $self = shift ;
     my ($path,$base ) = @_;
     return undef unless defined $path;
-    $path = vmsify($path) if $path =~ m/\//;
+    if ($path =~ m/\//) {
+	$path = ( -d $path || $path =~ m/\/\z/  # educated guessing about
+		   ? vmspath($path)             # whether it's a directory
+		   : vmsify($path) );
+    }
     $base = vmspath($base) if defined $base && $base =~ m/\//;
     # Clean up and split up $path
     if ( ! $self->file_name_is_absolute( $path ) ) {
@@ -517,6 +521,13 @@ sub rel2abs {
 
 
 =back
+
+=head1 COPYRIGHT
+
+Copyright (c) 2004 by the Perl 5 Porters.  All rights reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 

@@ -368,6 +368,13 @@ sub rel2abs {
 
 Novell NetWare inherits its File::Spec behaviour from File::Spec::Win32.
 
+=head1 COPYRIGHT
+
+Copyright (c) 2004 by the Perl 5 Porters.  All rights reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
 =head1 SEE ALSO
 
 See L<File::Spec> and L<File::Spec::Unix>.  This package overrides the

@@ -1,10 +1,16 @@
 
 
+1.811 12th March 2005
+
+   * Fixed DBM filter bug in seq
+
 1.810 7th August 2004
 
    * Fixed db-hash.t for Cygwin
 
    * Added substr tests to db-hast.t
+
+   * Documented AIX build problem in README.
 
 1.809 20th June 2004
 

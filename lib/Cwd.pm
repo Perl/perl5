@@ -1,5 +1,4 @@
 package Cwd;
-$VERSION = $VERSION = '3.01';
 
 =head1 NAME
 
@@ -148,6 +147,19 @@ Originally by the perl5-porters.
 
 Maintained by Ken Williams <KWILLIAMS@cpan.org>
 
+=head1 COPYRIGHT
+
+Copyright (c) 2004 by the Perl 5 Porters.  All rights reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Portions of the C code in this library are copyright (c) 1994 by the
+Regents of the University of California.  All rights reserved.  The
+license on this code is compatible with the licensing of the rest of
+the distribution - please see the source code in F<Cwd.xs> for the
+details.
+
 =head1 SEE ALSO
 
 L<File::chdir>
@@ -156,7 +168,9 @@ L<File::chdir>
 
 use strict;
 use Exporter;
-use vars qw(@ISA @EXPORT @EXPORT_OK);
+use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
+
+$VERSION = '3.05';
 
 @ISA = qw/ Exporter /;
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -185,11 +199,20 @@ if ($^O eq 'os2') {
     return 1;
 }
 
+# If loading the XS stuff doesn't work, we can fall back to pure perl
 eval {
+  if ( $] >= 5.006 ) {
     require XSLoader;
-    local $^W = 0;
-    XSLoader::load('Cwd');
+    XSLoader::load( __PACKAGE__, $VERSION );
+  } else {
+    require DynaLoader;
+    push @ISA, 'DynaLoader';
+    __PACKAGE__->bootstrap( $VERSION );
+  }
 };
+
+# Must be after the DynaLoader stuff:
+$VERSION = eval $VERSION;
 
 # Big nasty table of function aliases
 my %METHOD_MAP =
@@ -308,6 +331,7 @@ unless ($METHOD_MAP{$^O}{cwd} or defined &cwd) {
     # The pwd command is not available in some chroot(2)'ed environments
     my $sep = $Config::Config{path_sep} || ':';
     if( $^O eq 'MacOS' || (defined $ENV{PATH} &&
+			   $^O ne 'MSWin32' &&  # no pwd on Windows
 			   grep { -x "$_/pwd" } split($sep, $ENV{PATH})) )
     {
 	*cwd = \&_backtick_pwd;
@@ -338,7 +362,7 @@ sub getcwd
 # This is a faster version of getcwd.  It's also more dangerous because
 # you might chdir out of a directory that you can't chdir back into.
     
-sub fastcwd {
+sub fastcwd_ {
     my($odev, $oino, $cdev, $cino, $tdev, $tino);
     my(@path, $path);
     local(*DIR);
@@ -376,6 +400,7 @@ sub fastcwd {
 	if $cdev != $orig_cdev || $cino != $orig_cino;
     $path;
 }
+if (not defined &fastcwd) { *fastcwd = \&fastcwd_ }
 
 
 # Keeps track of current working directory in PWD environment var
@@ -449,9 +474,7 @@ sub chdir {
 }
 
 
-# In case the XS version doesn't load.
-*abs_path = \&_perl_abs_path unless defined &abs_path;
-sub _perl_abs_path(;$)
+sub _perl_abs_path
 {
     my $start = @_ ? shift : '.';
     my($dotdots, $cwd, @pst, @cst, $dir, @tst);
@@ -481,7 +504,7 @@ sub _perl_abs_path(;$)
 	    return abs_path($link_target);
 	}
 	
-	return abs_path($dir) . '/' . $file;
+	return $dir ? abs_path($dir) . "/$file" : "/$file";
     }
 
     $cwd = '';
@@ -529,12 +552,9 @@ sub _perl_abs_path(;$)
 }
 
 
-# added function alias for those of us more
-# used to the libc function.  --tchrist 27-Jan-00
-*realpath = \&abs_path;
-
 my $Curdir;
 sub fast_abs_path {
+    local $ENV{PWD} = $ENV{PWD} || ''; # Guard against clobberage
     my $cwd = getcwd();
     require File::Spec;
     my $path = @_ ? shift : ($Curdir ||= File::Spec->curdir);
@@ -564,7 +584,11 @@ sub fast_abs_path {
 	    return fast_abs_path($link_target);
 	}
 	
-	return fast_abs_path(File::Spec->catpath($vol, $dir, '')) . '/' . $file;
+	my $tdir = $dir;
+	$tdir =~ s!\\!/!g if $^O eq 'MSWin32';
+	return $tdir eq File::Spec->rootdir
+	  ? File::Spec->catpath($vol, $dir, $file)
+	  : fast_abs_path(File::Spec->catpath($vol, $dir, '')) . '/' . $file;
     }
 
     if (!CORE::chdir($path)) {
@@ -651,7 +675,7 @@ sub _qnx_abs_path {
     my $path = @_ ? shift : '.';
     local *REALPATH;
 
-    open(REALPATH, '-|', '/usr/bin/fullpath', '-t', $path) or
+    defined( open(REALPATH, '-|') || exec '/usr/bin/fullpath', '-t', $path ) or
       die "Can't open /usr/bin/fullpath: $!";
     my $realpath = <REALPATH>;
     close REALPATH;
@@ -671,11 +695,17 @@ sub _epoc_cwd {
 if (exists $METHOD_MAP{$^O}) {
   my $map = $METHOD_MAP{$^O};
   foreach my $name (keys %$map) {
-    no warnings;	# assignments trigger 'subroutine redefined' warning
+    local $^W = 0;  # assignments trigger 'subroutine redefined' warning
     no strict 'refs';
     *{$name} = \&{$map->{$name}};
   }
 }
 
+# In case the XS version doesn't load.
+*abs_path = \&_perl_abs_path unless defined &abs_path;
+
+# added function alias for those of us more
+# used to the libc function.  --tchrist 27-Jan-00
+*realpath = \&abs_path;
 
 1;

@@ -150,6 +150,7 @@ ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
 ext/Cwd/Changes			Cwd extension Changelog
 ext/Cwd/Cwd.xs			Cwd extension external subroutines
 ext/Cwd/Makefile.PL		Cwd extension makefile maker
+ext/Cwd/ppport.h		portability header for Cwd
 ext/Cwd/t/cwd.t			See if Cwd works
 ext/Cwd/t/taint.t		See if Cwd works with taint
 ext/Cwd/t/win32.t		See if Cwd works on Win32
@@ -1163,6 +1164,7 @@ lib/Carp.pm			Error message base class
 lib/Carp.t			See if Carp works
 lib/CGI/Apache.pm		Support for Apache's Perl module
 lib/CGI/Carp.pm			Log server errors with helpful context
+lib/CGI/Changes			Changelog for CGI.pm
 lib/CGI/Cookie.pm		Interface to Netscape Cookies
 lib/CGI/eg/caution.xbm		CGI example
 lib/CGI/eg/clickable_image.cgi	CGI example

@@ -1,16 +1,21 @@
 #!./perl -Tw
 # Testing Cwd under taint mode.
 
+use strict;
+
 BEGIN {
-    chdir 't' if -d 't';
     if ($ENV{PERL_CORE}) {
-	@INC = '../lib';
+        chdir 't';
+        @INC = '../lib';
     }
 }
 use Cwd;
+chdir 't';
 
-use strict;
+use File::Spec;
+use lib File::Spec->catdir('t', 'lib');
 use Test::More tests => 16;
+
 use Scalar::Util qw/tainted/;
 
 my @Functions = qw(getcwd cwd fastcwd fastgetcwd

@@ -3,12 +3,12 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <pmqs@cpan.org>
- last modified 7th August 2004
- version 1.810
+ last modified 12th March 2005
+ version 1.811
 
  All comments/suggestions/problems are welcome
 
-     Copyright (c) 1995-2004 Paul Marquess. All rights reserved.
+     Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 
@@ -110,6 +110,7 @@
         1.808 - leak fixed in ParseOpenInfo
         1.809 - no change
         1.810 - no change
+        1.811 - no change
 
 */
 

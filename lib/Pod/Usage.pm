@@ -10,7 +10,7 @@
 package Pod::Usage;
 
 use vars qw($VERSION);
-$VERSION = 1.16;  ## Current version of this package
+$VERSION = 1.30;  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 =head1 NAME
@@ -92,6 +92,14 @@ section of the pod documentation is printed. If the corresponding value
 is 1, then the "SYNOPSIS" section, along with any section entitled
 "OPTIONS", "ARGUMENTS", or "OPTIONS AND ARGUMENTS" is printed.  If the
 corresponding value is 2 or more then the entire manpage is printed.
+
+The special verbosity level 99 requires to also specify the -section
+parameter; then these sections are extracted and printed.
+
+=item C<-section>
+
+A string representing a selection list for sections to be printed
+when -verbose is set to 99, e.g. C<"NAME|SYNOPSIS|DESCRIPTION|VERSION">.
 
 =item C<-output>
 
@@ -467,7 +475,8 @@ sub pod2usage {
         $opts{"-exitval"} = ($opts{"-verbose"} > 0) ? 1 : 2;
     }
     elsif (! defined $opts{"-verbose"}) {
-        $opts{"-verbose"} = ($opts{"-exitval"} < 2);
+        $opts{"-verbose"} = (lc($opts{"-exitval"}) eq "noexit" ||
+                             $opts{"-exitval"} < 2);
     }
 
     ## Default the output file
@@ -502,6 +511,10 @@ sub pod2usage {
                      '(?:\s*(?:AND|\/)\s*(?:OPTIONS|ARGUMENTS))?';
         $parser->select( 'SYNOPSIS', $opt_re, "DESCRIPTION/$opt_re" );
     }
+    elsif ($opts{"-verbose"} == 99) {
+        $parser->select( $opts{"-sections"} );
+        $opts{"-verbose"} = 1;
+    }
 
     ## Now translate the pod document and then exit with the desired status
     if ( $opts{"-verbose"} >= 2 
@@ -531,8 +544,67 @@ sub new {
     my %params = @_;
     my $self = {%params};
     bless $self, $class;
-    $self->initialize();
+    if ($self->can('initialize')) {
+        $self->initialize();
+    } else {
+        $self = $self->SUPER::new();
+        %$self = (%$self, %params);
+    }
     return $self;
+}
+
+sub select {
+    my ($self, @res) = @_;
+    if ($ISA[0]->can('select')) {
+        $self->SUPER::select(@_);
+    } else {
+        $self->{USAGE_SELECT} = \@res;
+    }
+}
+
+# This overrides the Pod::Text method to do something very akin to what
+# Pod::Select did as well as the work done below by preprocess_paragraph.
+# Note that the below is very, very specific to Pod::Text.
+sub _handle_element_end {
+    my ($self, $element) = @_;
+    if ($element eq 'head1') {
+        $$self{USAGE_HEAD1} = $$self{PENDING}[-1][1];
+        $$self{PENDING}[-1][1] =~ s/^\s*SYNOPSIS\s*$/USAGE/;
+    } elsif ($element eq 'head2') {
+        $$self{USAGE_HEAD2} = $$self{PENDING}[-1][1];
+    }
+    if ($element eq 'head1' || $element eq 'head2') {
+        $$self{USAGE_SKIPPING} = 1;
+        my $heading = $$self{USAGE_HEAD1};
+        $heading .= '/' . $$self{USAGE_HEAD2} if defined $$self{USAGE_HEAD2};
+        for (@{ $$self{USAGE_SELECT} }) {
+            if ($heading =~ /^$_\s*$/) {
+                $$self{USAGE_SKIPPING} = 0;
+                last;
+            }
+        }
+
+        # Try to do some lowercasing instead of all-caps in headings, and use
+        # a colon to end all headings.
+        local $_ = $$self{PENDING}[-1][1];
+        s{([A-Z])([A-Z]+)}{((length($2) > 2) ? $1 : lc($1)) . lc($2)}ge;
+        s/\s*$/:/  unless (/:\s*$/);
+        $_ .= "\n";
+        $$self{PENDING}[-1][1] = $_;
+    }
+    if ($$self{USAGE_SKIPPING}) {
+        pop @{ $$self{PENDING} };
+    } else {
+        $self->SUPER::_handle_element_end($element);
+    }
+}
+
+sub start_document {
+    my $self = shift;
+    $self->SUPER::start_document();
+    my $msg = $self->{USAGE_OPTIONS}->{-message}  or  return 1;
+    my $out_fh = $self->output_fh();
+    print $out_fh "$msg\n";
 }
 
 sub begin_pod {
