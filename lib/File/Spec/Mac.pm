@@ -8,7 +8,6 @@ $VERSION = '1.3';
 
 @ISA = qw(File::Spec::Unix);
 
-use Cwd;
 my $macfiles;
 if ($^O eq 'MacOS') {
 	$macfiles = eval { require Mac::Files };
@@ -371,9 +370,7 @@ my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
     $tmpdir = $ENV{TMPDIR} if -d $ENV{TMPDIR};
-    unless (defined($tmpdir)) {
-   	$tmpdir = cwd();
-    }
+    $tmpdir = File::Spec->curdir unless defined $tmpdir;
     return $tmpdir;
 }
 

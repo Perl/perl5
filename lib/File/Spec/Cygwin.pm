@@ -36,7 +36,7 @@ sub tmpdir {
 	$tmpdir = $_;
 	last;
     }
-    $tmpdir = '' unless defined $tmpdir;
+    $tmpdir = File::Spec->curdir unless defined $tmpdir;
     return $tmpdir;
 }
 
