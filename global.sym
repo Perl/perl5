@@ -664,3 +664,4 @@ Perl_PerlIO_stdin
 Perl_PerlIO_stdout
 Perl_PerlIO_stderr
 Perl_save_set_svflags
+Perl_hv_assert
