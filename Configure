@@ -6778,7 +6778,7 @@ siteprefixexp="$ansexp"
 : XXX No longer works with Prefixit stuff.
 prog=`echo $package | $sed 's/-*[0-9.]*$//'`
 case "$installstyle" in
-*lib/perl5*) dflt=$siteprefix/lib/site_$prog ;;
+*lib/perl5*) dflt=$siteprefix/lib/$package/site_$prog ;;
 *)	 dflt=$siteprefix/lib/site_$prog ;;
 esac
 $cat <<EOM
