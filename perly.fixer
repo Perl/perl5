@@ -19,6 +19,17 @@ input=$1
 output=$2
 tmp=/tmp/f$$
 
+inputh=`echo $input|sed 's:\.c$:.h:'`
+if grep '^#ifdef PERL_CORE' $inputh; then
+	: never mind
+else
+	echo "#ifdef PERL_CORE"	> $tmp
+	sed -e 's:^typedef union {:#endif /* PERL_CORE */\
+\
+typedef union {:' $inputh		>> $tmp
+	mv -f $tmp $inputh
+fi
+
 if grep 'yaccpar 1.8 (Berkeley)' $input >/dev/null 2>&1; then
     cp $input $output
     # Don't expect the diff to do everything -- do some by hand

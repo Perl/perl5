@@ -177,6 +177,11 @@ PERL_CALLCONV int	Perl_fprintf_nocontext(PerlIO* stream, const char* fmt, ...)
  __attribute__((format(printf,2,3)))
 #endif
 ;
+PERL_CALLCONV int	Perl_printf_nocontext(const char* fmt, ...)
+#ifdef CHECK_FORMAT
+ __attribute__((format(printf,1,2)))
+#endif
+;
 #endif
 PERL_CALLCONV void	Perl_cv_ckproto(pTHX_ CV* cv, GV* gv, char* p);
 PERL_CALLCONV CV*	Perl_cv_clone(pTHX_ CV* proto);

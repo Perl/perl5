@@ -2454,6 +2454,8 @@ PP(pp_goto)
 
     if (label && *label) {
 	OP *gotoprobe = 0;
+	bool leaving_eval = FALSE;
+        PERL_CONTEXT *last_eval_cx = 0;
 
 	/* find label */
 
@@ -2463,8 +2465,15 @@ PP(pp_goto)
 	    cx = &cxstack[ix];
 	    switch (CxTYPE(cx)) {
 	    case CXt_EVAL:
-		gotoprobe = PL_eval_root; /* XXX not good for nested eval */
-		break;
+		leaving_eval = TRUE;
+                if (CxREALEVAL(cx)) {
+		    gotoprobe = (last_eval_cx ?
+				last_eval_cx->blk_eval.old_eval_root :
+				PL_eval_root);
+		    last_eval_cx = cx;
+		    break;
+                }
+                /* else fall through */
 	    case CXt_LOOP:
 		gotoprobe = cx->blk_oldcop->op_sibling;
 		break;
@@ -2501,6 +2510,17 @@ PP(pp_goto)
 	}
 	if (!retop)
 	    DIE(aTHX_ "Can't find label %s", label);
+
+	/* if we're leaving an eval, check before we pop any frames
+           that we're not going to punt, otherwise the error
+	   won't be caught */
+
+	if (leaving_eval && *enterops && enterops[1]) {
+	    I32 i;
+            for (i = 1; enterops[i]; i++)
+                if (enterops[i]->op_type == OP_ENTERITER)
+                    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop");
+	}
 
 	/* pop unwanted frames */
 
@@ -3506,7 +3526,6 @@ PP(pp_entertry)
     push_return(cLOGOP->op_other->op_next);
     PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), SP);
     PUSHEVAL(cx, 0, 0);
-    PL_eval_root = PL_op;		/* Only needed so that goto works right. */
 
     PL_in_eval = EVAL_INEVAL;
     sv_setpv(ERRSV,"");

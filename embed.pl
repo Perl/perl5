@@ -1073,6 +1073,16 @@ Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
     return (*PL_StdIO->pVprintf)(PL_StdIO, stream, format, arglist);
 }
 
+#undef Perl_printf_nocontext
+int
+Perl_printf_nocontext(const char *format, ...)
+{
+    dTHXo;
+    va_list(arglist);
+    va_start(arglist, format);
+    return (*PL_StdIO->pVprintf)(PL_StdIO, PerlIO_stdout(), format, arglist);
+}
+
 END_EXTERN_C
 
 #endif /* PERL_OBJECT */
@@ -1445,6 +1455,7 @@ Afnp	|void	|sv_setpvf_nocontext|SV* sv|const char* pat|...
 Afnp	|void	|sv_catpvf_mg_nocontext|SV* sv|const char* pat|...
 Afnp	|void	|sv_setpvf_mg_nocontext|SV* sv|const char* pat|...
 Afnp	|int	|fprintf_nocontext|PerlIO* stream|const char* fmt|...
+Afnp	|int	|printf_nocontext|const char* fmt|...
 #endif
 p	|void	|cv_ckproto	|CV* cv|GV* gv|char* p
 p	|CV*	|cv_clone	|CV* proto

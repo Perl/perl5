@@ -480,6 +480,8 @@ Perl_sv_setpvf_mg_nocontext(SV* sv, const char* pat, ...)
 }
 
 #undef  Perl_fprintf_nocontext
+
+#undef  Perl_printf_nocontext
 #endif
 
 #undef  Perl_cv_const_sv
@@ -4197,6 +4199,16 @@ Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
     va_list(arglist);
     va_start(arglist, format);
     return (*PL_StdIO->pVprintf)(PL_StdIO, stream, format, arglist);
+}
+
+#undef Perl_printf_nocontext
+int
+Perl_printf_nocontext(const char *format, ...)
+{
+    dTHXo;
+    va_list(arglist);
+    va_start(arglist, format);
+    return (*PL_StdIO->pVprintf)(PL_StdIO, PerlIO_stdout(), format, arglist);
 }
 
 END_EXTERN_C

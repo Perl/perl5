@@ -196,7 +196,7 @@ S_save_scalar_at(pTHX_ SV **sptr)
 	if (SvGMAGICAL(osv)) {
 	    MAGIC* mg;
 	    bool oldtainted = PL_tainted;
-	    mg_get(osv);
+	    mg_get(osv);		/* note, can croak! */
 	    if (PL_tainting && PL_tainted && (mg = mg_find(osv, 't'))) {
 		SAVESPTR(mg->mg_obj);
 		mg->mg_obj = osv;
@@ -678,13 +678,19 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvMAGICAL_off(sv);
 		SvMAGIC(sv) = 0;
 	    }
+	    /* XXX this branch is pretty bogus--note that we seem to
+	     * only get here if the mg_get() in save_scalar_at() ends
+	     * up croaking.  This code irretrievably clears(!) the magic
+	     * on the SV to avoid further croaking that might ensue
+	     * when the SvSETMAGIC() below is called.  This needs a
+	     * total rethink.  --GSAR */
 	    else if (SvTYPE(value) >= SVt_PVMG && SvMAGIC(value) &&
 		     SvTYPE(value) != SVt_PVGV)
 	    {
 		SvFLAGS(value) |= (SvFLAGS(value) &
 				   (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 		SvMAGICAL_off(value);
-		SvMAGIC(value) = 0;
+		mg_free(value);
 	    }
             SvREFCNT_dec(sv);
 	    *(SV**)ptr = value;

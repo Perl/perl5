@@ -2520,7 +2520,7 @@ S_regmatch(pTHX_ regnode *prog)
 			I32 osize = PL_regsize;
 			I32 onpar = PL_regnpar;
 
-			pm.op_pmflags = 0;
+			Zero(&pm, 1, PMOP);
 			re = CALLREGCOMP(aTHX_ t, t + len, &pm);
 			if (!(SvFLAGS(ret)
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)))
