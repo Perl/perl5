@@ -2329,11 +2329,13 @@ PP(pp_ftrread)
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    } else
+    }
+    else
 	result = my_stat(ARGS);
 #else
     result = my_stat(ARGS);
 #endif
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IRUSR, 0, &PL_statcache))
@@ -2353,11 +2355,13 @@ PP(pp_ftrwrite)
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    } else
+    }
+    else
 	result = my_stat(ARGS);
 #else
     result = my_stat(ARGS);
 #endif
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IWUSR, 0, &PL_statcache))
@@ -2377,11 +2381,13 @@ PP(pp_ftrexec)
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    } else
+    }
+    else
 	result = my_stat(ARGS);
 #else
     result = my_stat(ARGS);
 #endif
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IXUSR, 0, &PL_statcache))
@@ -2401,11 +2407,13 @@ PP(pp_fteread)
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    } else
+    }
+    else
 	result = my_stat(ARGS);
 #else
     result = my_stat(ARGS);
 #endif
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IRUSR, 1, &PL_statcache))
@@ -2425,11 +2433,13 @@ PP(pp_ftewrite)
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    } else
+    }
+    else
 	result = my_stat(ARGS);
 #else
     result = my_stat(ARGS);
 #endif
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IWUSR, 1, &PL_statcache))
@@ -2449,11 +2459,13 @@ PP(pp_fteexec)
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    } else
+    }
+    else
 	result = my_stat(ARGS);
 #else
     result = my_stat(ARGS);
 #endif
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IXUSR, 1, &PL_statcache))
