@@ -3045,8 +3045,14 @@ S_regmatch(pTHX_ regnode *prog)
 		n = regrepeat(scan, n);
 		locinput = PL_reginput;
 		if (ln < n && PL_regkind[(U8)OP(next)] == EOL &&
-		    (!PL_multiline  || OP(next) == SEOL))
+		    (!PL_multiline  || OP(next) == SEOL || OP(next) == EOS)) {
 		    ln = n;			/* why back off? */
+		    /* ...because $ and \Z can match before *and* after
+		       newline at the end.  Consider "\n\n" =~ /\n+\Z\n/.
+		       We should back off by one in this case. */
+		    if (UCHARAT(PL_reginput - 1) == '\n' && OP(next) != EOS)
+			ln--;
+		}
 		REGCP_SET;
 		if (paren) {
 		    while (n >= ln) {
