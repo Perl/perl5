@@ -571,10 +571,10 @@ static char bucket_of[] =
 #  endif 
 
 #ifdef I_MACH_CTHREADS
-#undef	MUTEX_LOCK
-#define MUTEX_LOCK(m)	STMT_START { if (*m) mutex_lock(*m); } STMT_END
-#undef	MUTEX_UNLOCK
-#define MUTEX_UNLOCK(m)	STMT_START { if (*m) mutex_unlock(*m); } STMT_END
+#  undef  MUTEX_LOCK
+#  define MUTEX_LOCK(m)   STMT_START { if (*m) mutex_lock(*m);   } STMT_END
+#  undef  MUTEX_UNLOCK
+#  define MUTEX_UNLOCK(m) STMT_START { if (*m) mutex_unlock(*m); } STMT_END
 #endif
 
 static char *emergency_buffer;

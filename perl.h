@@ -1372,6 +1372,9 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #      else
 #        ifdef I_MACH_CTHREADS
 #          include <mach/cthreads.h>
+#          ifdef NeXT
+#            define MUTEX_INIT_CALLS_MALLOC
+#          endif
 typedef cthread_t	perl_os_thread;
 typedef mutex_t		perl_mutex;
 typedef condition_t	perl_cond;
@@ -1816,7 +1819,7 @@ typedef Sighandler_t Sigsave_t;
 #endif
 
 #ifdef MYMALLOC
-#  ifdef I_MACH_CTHREADS
+#  ifdef MUTEX_INIT_CALLS_MALLOC
 #    define MALLOC_INIT					\
 	STMT_START {					\
 		PL_malloc_mutex = NULL;			\
