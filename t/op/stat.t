@@ -309,11 +309,6 @@ SKIP: {
 ok(-T 'op/stat.t',      '-T');
 ok(! -B 'op/stat.t',    '!-B');
 
-# Its like this.  stat on Cygwin treats 'perl' to mean 'perl.exe'.  So
-# all the file test operators work that way except -B and -T which
-# has to actually open the file.  open doesn't do the .exe magic.
-$Perl .= $Config{_exe} if $Is_Cygwin and $Perl !~ /$Config{_exe}$/;
-
 ok(-B $Perl,      '-B');
 ok(! -T $Perl,    '!-T');
 
