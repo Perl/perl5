@@ -2638,9 +2638,12 @@ but still allowed it.
 
 In Perl 5.6.0 and later, C<"$$1"> always means C<"${$1}">.
 
-=item delete(), values() and C<\(%h)> operate on aliases to values, not copies
+=item delete(), each(), values() and C<\(%h)>
 
-delete(), each(), values() and hashes in a list context return the actual
+operate on aliases to values, not copies
+
+delete(), each(), values() and hashes (e.g. C<\(%h)>)
+in a list context return the actual
 values in the hash, instead of copies (as they used to in earlier
 versions).  Typical idioms for using these constructs copy the
 returned values, but this can make a significant difference when
@@ -2920,7 +2923,9 @@ include the following:
 
 =item The DB module
 
-=item The regular expression constructs C<(?{ code })> and C<(??{ code })>
+=item The regular expression code constructs: 
+
+C<(?{ code })> and C<(??{ code })>
 
 =back
 

@@ -109,33 +109,39 @@ Some example section specifications follow.
 
 =over 4
 
-=item
+=item *
+
 Match the C<NAME> and C<SYNOPSIS> sections and all of their subsections:
 
 C<NAME|SYNOPSIS>
 
-=item
+=item *
+
 Match only the C<Question> and C<Answer> subsections of the C<DESCRIPTION>
 section:
 
 C<DESCRIPTION/Question|Answer>
 
-=item
+=item *
+
 Match the C<Comments> subsection of I<all> sections:
 
 C</Comments>
 
-=item
+=item *
+
 Match all subsections of C<DESCRIPTION> I<except> for C<Comments>:
 
 C<DESCRIPTION/!Comments>
 
-=item
+=item *
+
 Match the C<DESCRIPTION> section but do I<not> match any of its subsections:
 
 C<DESCRIPTION/!.+>
 
-=item
+=item *
+
 Match all top level sections but none of their subsections:
 
 C</!.+>

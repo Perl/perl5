@@ -948,7 +948,9 @@ ordered and whether you wish to preserve the ordering.
 
 =over 4
 
-=item a) If @in is sorted, and you want @out to be sorted:
+=item a)
+
+If @in is sorted, and you want @out to be sorted:
 (this assumes all true values in the array)
 
     $prev = 'nonesuch';
@@ -959,22 +961,30 @@ uniq(1)'s behavior of removing only adjacent duplicates.  The ", 1"
 guarantees that the expression is true (so that grep picks it up)
 even if the $_ is 0, "", or undef.
 
-=item b) If you don't know whether @in is sorted:
+=item b)
+
+If you don't know whether @in is sorted:
 
     undef %saw;
     @out = grep(!$saw{$_}++, @in);
 
-=item c) Like (b), but @in contains only small integers:
+=item c)
+
+Like (b), but @in contains only small integers:
 
     @out = grep(!$saw[$_]++, @in);
 
-=item d) A way to do (b) without any loops or greps:
+=item d)
+
+A way to do (b) without any loops or greps:
 
     undef %saw;
     @saw{@in} = ();
     @out = sort keys %saw;  # remove sort if undesired
 
-=item e) Like (d), but @in contains only small positive integers:
+=item e)
+
+Like (d), but @in contains only small positive integers:
 
     undef @ary;
     @ary[@in] = @in;
