@@ -44,5 +44,5 @@ struct xpvav {
 #define AvREUSED_on(av)	(AvFLAGS(av) |= AVf_REUSED)
 #define AvREUSED_off(av) (AvFLAGS(av) &= ~AVf_REUSED)
 
-#define AvREALISH(av)	AvFLAGS(av)	/* REAL or REIFY -- shortcut */
+#define AvREALISH(av)	(AvFLAGS(av) & (AVf_REAL|AVf_REIFY))
 
