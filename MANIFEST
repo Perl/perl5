@@ -1086,7 +1086,7 @@ lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
 lib/DB.pm			Debugger API (draft)
 lib/DB.t			See if DB works
 lib/DBM_Filter.pm		DBM Filter module
-lib/DBM_Filter/Changes    	DBM Filter Change history
+lib/DBM_Filter/Changes		DBM Filter Change history
 lib/DBM_Filter/compress.pm	DBM Filter to compress keys/values
 lib/DBM_Filter/encode.pm	DBM Filter for encoding
 lib/DBM_Filter/int32.pm		DBM Filter for creating int32 keys/values
@@ -1302,7 +1302,6 @@ lib/IPC/Open2.pm		Open a two-ended pipe
 lib/IPC/Open2.t			See if IPC::Open2 works
 lib/IPC/Open3.pm		Open a three-ended pipe!
 lib/IPC/Open3.t			See if IPC::Open3 works
-lib/IPC/SysV.t			See if IPC::SysV works
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
@@ -2470,6 +2469,7 @@ Porting/check83.pl	Check whether we are 8.3-friendly
 Porting/checkURL.pl	Check whether we have working URLs
 Porting/checkVERSION.pl	Check whether we have $VERSIONs
 Porting/cmpVERSION.pl	Compare whether two trees have changed modules
+Porting/corecpan.pl	Reports outdated dual-lived modules
 Porting/config_H	Sample config.h
 Porting/config.sh	Sample config.sh
 Porting/Contract	Social contract for contributed modules in Perl core

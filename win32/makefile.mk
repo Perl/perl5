@@ -573,7 +573,11 @@ $(o).dll:
 .ENDIF
 
 .rc.res:
-	$(RSC) -i $< -o $@
+.IF "$(CCTYPE)" == "GCC"
+	$(RSC) --use-temp-file -i $< -o $@
+.ELSE
+	$(RSC) -i.. $<
+.ENDIF
 
 #
 # various targets
