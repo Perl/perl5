@@ -3652,7 +3652,9 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	    mytm.tm_wday = wday;
 	    mytm.tm_yday = yday;
 	    mytm.tm_isdst = isdst;
+#if defined(HINT_STRFTIME_NEEDS_MKTIME)
 	    (void) mktime(&mytm);
+#endif
 	    len = strftime(tmpbuf, sizeof tmpbuf, fmt, &mytm);
 	    /*
 	    ** The following is needed to handle to the situation where 

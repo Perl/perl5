@@ -1236,6 +1236,7 @@ t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
 t/op/64bit.t		See if 64 bitness works
 t/op/append.t		See if . works
+t/op/args.t		See if operations on @_ work
 t/op/arith.t		See if arithmetic works
 t/op/array.t		See if array operations work
 t/op/assignwarn.t	See if OP= operators warn correctly for undef targets

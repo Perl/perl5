@@ -1379,8 +1379,33 @@ Perl_vform(pTHX_ const char *pat, va_list *args)
     return SvPVX(sv);
 }
 
+#if defined(PERL_IMPLICIT_CONTEXT)
 SV *
-Perl_mess(pTHX_ const char *pat, va_list *args)
+Perl_mess_nocontext(const char *pat, ...)
+{
+    dTHX;
+    SV *retval;
+    va_list args;
+    va_start(args, pat);
+    retval = vmess(pat, &args);
+    va_end(args);
+    return retval;
+}
+#endif /* PERL_IMPLICIT_CONTEXT */
+
+SV *
+Perl_mess(pTHX_ const char *pat, ...)
+{
+    SV *retval;
+    va_list args;
+    va_start(args, pat);
+    retval = vmess(pat, &args);
+    va_end(args);
+    return retval;
+}
+
+SV *
+Perl_vmess(pTHX_ const char *pat, va_list *args)
 {
     SV *sv = mess_alloc();
     static char dgd[] = " during global destruction.\n";
@@ -1438,8 +1463,14 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
 			  thr, PL_curstack, PL_mainstack));
 
     if (pat) {
-	msv = mess(pat, args);
-	message = SvPV(msv,msglen);
+	msv = vmess(pat, args);
+	if (PL_errors && SvCUR(PL_errors)) {
+	    sv_catsv(PL_errors, msv);
+	    message = SvPV(PL_errors, msglen);
+	    SvCUR_set(PL_errors, 0);
+	}
+	else
+	    message = SvPV(msv,msglen);
     }
     else {
 	message = Nullch;
@@ -1529,9 +1560,18 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
     SV *msv;
     STRLEN msglen;
 
-    msv = mess(pat, args);
-    message = SvPV(msv,msglen);
-    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s", (unsigned long) thr, message));
+    msv = vmess(pat, args);
+    if (PL_errors && SvCUR(PL_errors)) {
+	sv_catsv(PL_errors, msv);
+	message = SvPV(PL_errors, msglen);
+	SvCUR_set(PL_errors, 0);
+    }
+    else
+	message = SvPV(msv,msglen);
+
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s",
+			  (unsigned long) thr, message));
+
     if (PL_diehook) {
 	/* sv_2cv might call Perl_croak() */
 	SV *olddiehook = PL_diehook;
@@ -1609,7 +1649,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
     SV *msv;
     STRLEN msglen;
 
-    msv = mess(pat, args);
+    msv = vmess(pat, args);
     message = SvPV(msv, msglen);
 
     if (PL_warnhook) {
@@ -1705,7 +1745,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     SV *msv;
     STRLEN msglen;
 
-    msv = mess(pat, args);
+    msv = vmess(pat, args);
     message = SvPV(msv, msglen);
 
     if (ckDEAD(err)) {
@@ -3370,6 +3410,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_restartop = 0;
 
     PL_statname = NEWSV(66,0);
+    PL_errors = newSVpvn("", 0);
     PL_maxscream = -1;
     PL_regcompp = MEMBER_TO_FPTR(Perl_pregcomp);
     PL_regexecp = MEMBER_TO_FPTR(Perl_regexec_flags);

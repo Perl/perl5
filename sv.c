@@ -475,6 +475,321 @@ S_more_xpv(pTHX)
     xpv->xpv_pv = 0;
 }
 
+STATIC XPVIV*
+S_new_xpviv(pTHX)
+{
+    XPVIV* xpviv;
+    LOCK_SV_MUTEX;
+    if (!PL_xpviv_root)
+	more_xpviv();
+    xpviv = PL_xpviv_root;
+    PL_xpviv_root = (XPVIV*)xpviv->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpviv;
+}
+
+STATIC void
+S_del_xpviv(pTHX_ XPVIV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpviv_root;
+    PL_xpviv_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpviv(pTHX)
+{
+    register XPVIV* xpviv;
+    register XPVIV* xpvivend;
+    New(714, PL_xpviv_root, 1008/sizeof(XPVIV), XPVIV);
+    xpviv = PL_xpviv_root;
+    xpvivend = &xpviv[1008 / sizeof(XPVIV) - 1];
+    while (xpviv < xpvivend) {
+	xpviv->xpv_pv = (char*)(xpviv + 1);
+	xpviv++;
+    }
+    xpviv->xpv_pv = 0;
+}
+
+
+STATIC XPVNV*
+S_new_xpvnv(pTHX)
+{
+    XPVNV* xpvnv;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvnv_root)
+	more_xpvnv();
+    xpvnv = PL_xpvnv_root;
+    PL_xpvnv_root = (XPVNV*)xpvnv->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpvnv;
+}
+
+STATIC void
+S_del_xpvnv(pTHX_ XPVNV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpvnv_root;
+    PL_xpvnv_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvnv(pTHX)
+{
+    register XPVNV* xpvnv;
+    register XPVNV* xpvnvend;
+    New(715, PL_xpvnv_root, 1008/sizeof(XPVNV), XPVNV);
+    xpvnv = PL_xpvnv_root;
+    xpvnvend = &xpvnv[1008 / sizeof(XPVNV) - 1];
+    while (xpvnv < xpvnvend) {
+	xpvnv->xpv_pv = (char*)(xpvnv + 1);
+	xpvnv++;
+    }
+    xpvnv->xpv_pv = 0;
+}
+
+
+
+STATIC XPVCV*
+S_new_xpvcv(pTHX)
+{
+    XPVCV* xpvcv;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvcv_root)
+	more_xpvcv();
+    xpvcv = PL_xpvcv_root;
+    PL_xpvcv_root = (XPVCV*)xpvcv->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpvcv;
+}
+
+STATIC void
+S_del_xpvcv(pTHX_ XPVCV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpvcv_root;
+    PL_xpvcv_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvcv(pTHX)
+{
+    register XPVCV* xpvcv;
+    register XPVCV* xpvcvend;
+    New(716, PL_xpvcv_root, 1008/sizeof(XPVCV), XPVCV);
+    xpvcv = PL_xpvcv_root;
+    xpvcvend = &xpvcv[1008 / sizeof(XPVCV) - 1];
+    while (xpvcv < xpvcvend) {
+	xpvcv->xpv_pv = (char*)(xpvcv + 1);
+	xpvcv++;
+    }
+    xpvcv->xpv_pv = 0;
+}
+
+
+
+STATIC XPVAV*
+S_new_xpvav(pTHX)
+{
+    XPVAV* xpvav;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvav_root)
+	more_xpvav();
+    xpvav = PL_xpvav_root;
+    PL_xpvav_root = (XPVAV*)xpvav->xav_array;
+    UNLOCK_SV_MUTEX;
+    return xpvav;
+}
+
+STATIC void
+S_del_xpvav(pTHX_ XPVAV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xav_array = (char*)PL_xpvav_root;
+    PL_xpvav_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvav(pTHX)
+{
+    register XPVAV* xpvav;
+    register XPVAV* xpvavend;
+    New(717, PL_xpvav_root, 1008/sizeof(XPVAV), XPVAV);
+    xpvav = PL_xpvav_root;
+    xpvavend = &xpvav[1008 / sizeof(XPVAV) - 1];
+    while (xpvav < xpvavend) {
+	xpvav->xav_array = (char*)(xpvav + 1);
+	xpvav++;
+    }
+    xpvav->xav_array = 0;
+}
+
+
+
+STATIC XPVHV*
+S_new_xpvhv(pTHX)
+{
+    XPVHV* xpvhv;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvhv_root)
+	more_xpvhv();
+    xpvhv = PL_xpvhv_root;
+    PL_xpvhv_root = (XPVHV*)xpvhv->xhv_array;
+    UNLOCK_SV_MUTEX;
+    return xpvhv;
+}
+
+STATIC void
+S_del_xpvhv(pTHX_ XPVHV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xhv_array = (char*)PL_xpvhv_root;
+    PL_xpvhv_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvhv(pTHX)
+{
+    register XPVHV* xpvhv;
+    register XPVHV* xpvhvend;
+    New(718, PL_xpvhv_root, 1008/sizeof(XPVHV), XPVHV);
+    xpvhv = PL_xpvhv_root;
+    xpvhvend = &xpvhv[1008 / sizeof(XPVHV) - 1];
+    while (xpvhv < xpvhvend) {
+	xpvhv->xhv_array = (char*)(xpvhv + 1);
+	xpvhv++;
+    }
+    xpvhv->xhv_array = 0;
+}
+
+
+STATIC XPVMG*
+S_new_xpvmg(pTHX)
+{
+    XPVMG* xpvmg;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvmg_root)
+	more_xpvmg();
+    xpvmg = PL_xpvmg_root;
+    PL_xpvmg_root = (XPVMG*)xpvmg->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpvmg;
+}
+
+STATIC void
+S_del_xpvmg(pTHX_ XPVMG *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpvmg_root;
+    PL_xpvmg_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvmg(pTHX)
+{
+    register XPVMG* xpvmg;
+    register XPVMG* xpvmgend;
+    New(719, PL_xpvmg_root, 1008/sizeof(XPVMG), XPVMG);
+    xpvmg = PL_xpvmg_root;
+    xpvmgend = &xpvmg[1008 / sizeof(XPVMG) - 1];
+    while (xpvmg < xpvmgend) {
+	xpvmg->xpv_pv = (char*)(xpvmg + 1);
+	xpvmg++;
+    }
+    xpvmg->xpv_pv = 0;
+}
+
+
+
+STATIC XPVLV*
+S_new_xpvlv(pTHX)
+{
+    XPVLV* xpvlv;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvlv_root)
+	more_xpvlv();
+    xpvlv = PL_xpvlv_root;
+    PL_xpvlv_root = (XPVLV*)xpvlv->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpvlv;
+}
+
+STATIC void
+S_del_xpvlv(pTHX_ XPVLV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpvlv_root;
+    PL_xpvlv_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvlv(pTHX)
+{
+    register XPVLV* xpvlv;
+    register XPVLV* xpvlvend;
+    New(720, PL_xpvlv_root, 1008/sizeof(XPVLV), XPVLV);
+    xpvlv = PL_xpvlv_root;
+    xpvlvend = &xpvlv[1008 / sizeof(XPVLV) - 1];
+    while (xpvlv < xpvlvend) {
+	xpvlv->xpv_pv = (char*)(xpvlv + 1);
+	xpvlv++;
+    }
+    xpvlv->xpv_pv = 0;
+}
+
+
+STATIC XPVBM*
+S_new_xpvbm(pTHX)
+{
+    XPVBM* xpvbm;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvbm_root)
+	more_xpvbm();
+    xpvbm = PL_xpvbm_root;
+    PL_xpvbm_root = (XPVBM*)xpvbm->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpvbm;
+}
+
+STATIC void
+S_del_xpvbm(pTHX_ XPVBM *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpvbm_root;
+    PL_xpvbm_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
+
+STATIC void
+S_more_xpvbm(pTHX)
+{
+    register XPVBM* xpvbm;
+    register XPVBM* xpvbmend;
+    New(721, PL_xpvbm_root, 1008/sizeof(XPVBM), XPVBM);
+    xpvbm = PL_xpvbm_root;
+    xpvbmend = &xpvbm[1008 / sizeof(XPVBM) - 1];
+    while (xpvbm < xpvbmend) {
+	xpvbm->xpv_pv = (char*)(xpvbm + 1);
+	xpvbm++;
+    }
+    xpvbm->xpv_pv = 0;
+}
+
 #ifdef PURIFY
 #define new_XIV() (void*)safemalloc(sizeof(XPVIV))
 #define del_XIV(p) Safefree((char*)p)
@@ -521,32 +836,73 @@ S_my_safemalloc(MEM_SIZE size)
 #  define my_safefree(s) Safefree(s)
 #endif 
 
-#define new_XPVIV() (void*)my_safemalloc(sizeof(XPVIV))
-#define del_XPVIV(p) my_safefree((char*)p)
+#ifdef PURIFY
+#define new_XPVIV() (void*)safemalloc(sizeof(XPVIV))
+#define del_XPVIV(p) Safefree((char*)p)
+#else
+#define new_XPVIV() (void*)new_xpviv()
+#define del_XPVIV(p) del_xpviv((XPVIV *)p)
+#endif
   
-#define new_XPVNV() (void*)my_safemalloc(sizeof(XPVNV))
-#define del_XPVNV(p) my_safefree((char*)p)
+#ifdef PURIFY
+#define new_XPVNV() (void*)safemalloc(sizeof(XPVNV))
+#define del_XPVNV(p) Safefree((char*)p)
+#else
+#define new_XPVNV() (void*)new_xpvnv()
+#define del_XPVNV(p) del_xpvnv((XPVNV *)p)
+#endif
+
+
+#ifdef PURIFY
+#define new_XPVCV() (void*)safemalloc(sizeof(XPVCV))
+#define del_XPVCV(p) Safefree((char*)p)
+#else
+#define new_XPVCV() (void*)new_xpvcv()
+#define del_XPVCV(p) del_xpvcv((XPVCV *)p)
+#endif
+
+#ifdef PURIFY
+#define new_XPVAV() (void*)safemalloc(sizeof(XPVAV))
+#define del_XPVAV(p) Safefree((char*)p)
+#else
+#define new_XPVAV() (void*)new_xpvav()
+#define del_XPVAV(p) del_xpvav((XPVAV *)p)
+#endif
+
+#ifdef PURIFY
+#define new_XPVHV() (void*)safemalloc(sizeof(XPVHV))
+#define del_XPVHV(p) Safefree((char*)p)
+#else
+#define new_XPVHV() (void*)new_xpvhv()
+#define del_XPVHV(p) del_xpvhv((XPVHV *)p)
+#endif
   
-#define new_XPVMG() (void*)my_safemalloc(sizeof(XPVMG))
-#define del_XPVMG(p) my_safefree((char*)p)
+#ifdef PURIFY
+#define new_XPVMG() (void*)safemalloc(sizeof(XPVMG))
+#define del_XPVMG(p) Safefree((char*)p)
+#else
+#define new_XPVMG() (void*)new_xpvmg()
+#define del_XPVMG(p) del_xpvmg((XPVMG *)p)
+#endif
   
-#define new_XPVLV() (void*)my_safemalloc(sizeof(XPVLV))
-#define del_XPVLV(p) my_safefree((char*)p)
-  
-#define new_XPVAV() (void*)my_safemalloc(sizeof(XPVAV))
-#define del_XPVAV(p) my_safefree((char*)p)
-  
-#define new_XPVHV() (void*)my_safemalloc(sizeof(XPVHV))
-#define del_XPVHV(p) my_safefree((char*)p)
-  
-#define new_XPVCV() (void*)my_safemalloc(sizeof(XPVCV))
-#define del_XPVCV(p) my_safefree((char*)p)
+#ifdef PURIFY
+#define new_XPVLV() (void*)safemalloc(sizeof(XPVLV))
+#define del_XPVLV(p) Safefree((char*)p)
+#else
+#define new_XPVLV() (void*)new_xpvlv()
+#define del_XPVLV(p) del_xpvlv((XPVLV *)p)
+#endif
   
 #define new_XPVGV() (void*)my_safemalloc(sizeof(XPVGV))
 #define del_XPVGV(p) my_safefree((char*)p)
   
-#define new_XPVBM() (void*)my_safemalloc(sizeof(XPVBM))
-#define del_XPVBM(p) my_safefree((char*)p)
+#ifdef PURIFY
+#define new_XPVBM() (void*)safemalloc(sizeof(XPVBM))
+#define del_XPVBM(p) Safefree((char*)p)
+#else
+#define new_XPVBM() (void*)new_xpvbm()
+#define del_XPVBM(p) del_xpvbm((XPVBM *)p)
+#endif
   
 #define new_XPVFM() (void*)my_safemalloc(sizeof(XPVFM))
 #define del_XPVFM(p) my_safefree((char*)p)

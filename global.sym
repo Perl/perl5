@@ -48,6 +48,7 @@ Perl_croak_nocontext
 Perl_die_nocontext
 Perl_deb_nocontext
 Perl_form_nocontext
+Perl_mess_nocontext
 Perl_warn_nocontext
 Perl_warner_nocontext
 Perl_newSVpvf_nocontext
@@ -296,6 +297,8 @@ Perl_malloced_size
 Perl_markstack_grow
 Perl_mem_collxfrm
 Perl_mess
+Perl_vmess
+Perl_qerror
 Perl_mg_clear
 Perl_mg_copy
 Perl_mg_find

@@ -568,26 +568,15 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     /* By this point we should have a stash and a name */
 
     if (!stash) {
-	if (!add)
-	    return Nullgv;
-	{
-	    char sv_type_char = ((sv_type == SVt_PV) ? '$'
-				 : (sv_type == SVt_PVAV) ? '@'
-				 : (sv_type == SVt_PVHV) ? '%'
-				 : 0);
-	    if (sv_type_char) 
-		Perl_warn(aTHX_ "Global symbol \"%c%s\" requires explicit package name",
-		     sv_type_char, name);
-	    else
-		Perl_warn(aTHX_ "Global symbol \"%s\" requires explicit package name",
-		     name);
+	if (add) {
+	    qerror(Perl_mess(aTHX_
+		 "Global symbol \"%s%s\" requires explicit package name",
+		 (sv_type == SVt_PV ? "$"
+		  : sv_type == SVt_PVAV ? "@"
+		  : sv_type == SVt_PVHV ? "%"
+		  : ""), name));
 	}
-	++PL_error_count;
-	stash = PL_curstash ? PL_curstash : PL_defstash;	/* avoid core dumps */
-	add_gvflags = ((sv_type == SVt_PV) ? GVf_IMPORTED_SV
-		       : (sv_type == SVt_PVAV) ? GVf_IMPORTED_AV
-		       : (sv_type == SVt_PVHV) ? GVf_IMPORTED_HV
-		       : 0);
+	return Nullgv;
     }
 
     if (!SvREFCNT(stash))	/* symbol table under destruction */

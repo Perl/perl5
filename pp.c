@@ -530,6 +530,12 @@ S_refto(pTHX_ SV *sv)
 	else
 	    (void)SvREFCNT_inc(sv);
     }
+    else if (SvTYPE(sv) == SVt_PVAV) {
+	if (!AvREAL((AV*)sv) && AvREIFY((AV*)sv))
+	    av_reify((AV*)sv);
+	SvTEMP_off(sv);
+	(void)SvREFCNT_inc(sv);
+    }
     else if (SvPADTMP(sv))
 	sv = newSVsv(sv);
     else {
