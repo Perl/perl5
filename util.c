@@ -2970,29 +2970,6 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 	     * right amount of 16-tuples. */
 	    rnv += (NV)((hexdigit - PL_hexdigit) & 15);
 	}
-	if (!overflowed) {
-	    register UV xuv = ruv << 4;
-
-	    if ((xuv >> 4) != ruv) {
-		dTHR;
-		overflowed = TRUE;
-		rnv = (NV) ruv;
-		if (ckWARN_d(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,
-				"Integer overflow in hexadecimal number");
-	    } else
-		ruv = xuv | ((hexdigit - PL_hexdigit) & 15);
-	}
-	if (overflowed) {
-	    rnv *= 16.0;
-	    /* If an NV has not enough bits in its mantissa to
-	     * represent an UV this summing of small low-order numbers
-	     * is a waste of time (because the NV cannot preserve
-	     * the low-order bits anyway): we could just remember when
-	     * did we overflow and in the end just multiply rnv by the
-	     * right amount of 16-tuples. */
-	    rnv += (NV)((hexdigit - PL_hexdigit) & 15);
-	}
     }
     if (!overflowed)
 	rnv = (NV) ruv;
