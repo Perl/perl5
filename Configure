@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri May 14 10:24:50 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Thu May 20 10:07:46 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -10978,7 +10978,10 @@ $cat >try.c <<EOCP
 #include <unistd.h>
 #endif
 #$d_sysconf HAS_SYSCONF
-#$stdio_stream_array
+#$d_stdio_stream_array HAS_STDIO_STREAM_ARRAY
+#ifdef HAS_STDIO_STREAM_ARRAY
+# define STDIO_STREAM_ARRAY $stdio_stream_array
+#endif
 int main() {
   FILE* p = fopen("try.out", "w");
 #ifdef TRY_FPUTC
@@ -11050,6 +11053,9 @@ case "$fflushNULL" in
 '') 	set try -DTRY_FFLUSH_NULL $output
 	$rm -f try.out
 	if eval $compile; then
+	        $cat >&4 <<EOM
+(This test may fail, saying "Core dumped" or something equally evil.)
+EOM
 	    	./try$exe_ext 2>/dev/null
 		if $test -s try.out -a "X$?" = X42; then
 			fflushNULL="`$cat try.out`"
@@ -11087,6 +11093,9 @@ case "$fflushall" in
 '') 	set try -DTRY_FFLUSH_ALL $output
 	$rm -f try.out
 	if eval $compile; then
+	        $cat >&4 <<EOM
+(Also this test may fail.)
+EOM
 	    	./try$exe_ext 2>/dev/null
 		if $test -s try.out -a "X$?" = X42; then
 			fflushall="`$cat try.out`"

@@ -2226,7 +2226,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 /* FFLUSH_ALL:
  *	This symbol, if defined, tells that to flush
  *	all pending stdio output one must loop through all
- *	the stdio file handles and fflush them.
+ *	the stdio file handles stored in an array and fflush them.
  */
 #$fflushNULL	FFLUSH_NULL 		/**/
 #$fflushall	FFLUSH_ALL 		/**/
