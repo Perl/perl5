@@ -733,9 +733,12 @@ original name fails, and if the name does not already end in one
 of those suffixes.  If your Perl was compiled with DEBUGGING turned
 on, using the -Dp switch to Perl shows how the search progresses.
 
-Typically this is used to emulate #! startup on platforms that
-don't support #!.  This example works on many platforms that
-have a shell compatible with Bourne shell:
+Typically this is used to emulate #! startup on platforms that don't
+support #!.  Its also convenient when debugging a script that uses #!,
+and is thus normally found by the shell's $PATH search mechanism.
+
+This example works on many platforms that have a shell compatible with
+Bourne shell:
 
     #!/usr/bin/perl
     eval 'exec /usr/bin/perl -wS $0 ${1+"$@"}'

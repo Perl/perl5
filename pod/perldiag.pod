@@ -934,6 +934,10 @@ for stdout.
 
 (F) The script you specified can't be opened for the indicated reason.
 
+If you're debugging a script that uses #!, and normally relies on the
+shell's $PATH search, the -S option causes perl to do that search, so
+you don't have to type the path or C<`which $scriptname`>.
+
 =item Can't read CRTL environ
 
 (S) A warning peculiar to VMS.  Perl tried to read an element of %ENV
@@ -3690,6 +3694,22 @@ before now.  Check your control flow.
 (F) Perl can't peek at the stdio buffer of filehandles when it doesn't
 know about your kind of stdio.  You'll have to use a filename instead.
 
+=item "-T" is on the #! line, it must also be used on the command line
+
+(X) The #! line (or local equivalent) in a Perl script contains the
+B<-T> option, but Perl was not invoked with B<-T> in its command line.
+This is an error because, by the time Perl discovers a B<-T> in a
+script, it's too late to properly taint everything from the environment.
+So Perl gives up.
+
+If the Perl script is being executed as a command using the #!
+mechanism (or its local equivalent), this error can usually be fixed by
+editing the #! line so that the B<-T> option is a part of Perl's first
+argument: e.g. change C<perl -n -T> to C<perl -T -n>.
+
+If the Perl script is being executed as C<perl scriptname>, then the
+B<-T> option must appear on the command line: C<perl -T scriptname>.
+
 =item Target of goto is too deeply nested
 
 (F) You tried to use C<goto> to reach a label that was too deeply nested
@@ -3782,22 +3802,6 @@ system call to call, silly dilly.
 (X) The #! line (or local equivalent) in a Perl script contains the
 B<-M> or B<-m> option.  This is an error because B<-M> and B<-m> options
 are not intended for use inside scripts.  Use the C<use> pragma instead.
-
-=item Too late for "B<-T>" option
-
-(X) The #! line (or local equivalent) in a Perl script contains the
-B<-T> option, but Perl was not invoked with B<-T> in its command line.
-This is an error because, by the time Perl discovers a B<-T> in a
-script, it's too late to properly taint everything from the environment.
-So Perl gives up.
-
-If the Perl script is being executed as a command using the #!
-mechanism (or its local equivalent), this error can usually be fixed by
-editing the #! line so that the B<-T> option is a part of Perl's first
-argument: e.g. change C<perl -n -T> to C<perl -T -n>.
-
-If the Perl script is being executed as C<perl scriptname>, then the
-B<-T> option must appear on the command line: C<perl -T scriptname>.
 
 =item Too late to run %s block
 

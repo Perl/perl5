@@ -751,7 +751,7 @@ int usleep(unsigned int);
 #  define MALLOC_CHECK_TAINT(argc,argv,env)
 #endif /* MYMALLOC */
 
-#define TOO_LATE_FOR_(ch,s)	Perl_croak(aTHX_ "Too late for \"-%c\" option%s", (char)(ch), s)
+#define TOO_LATE_FOR_(ch,s)	Perl_croak(aTHX_ "\"-%c\" is on the #! line, it must also be used on the command line", (char)(ch), s)
 #define TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, "")
 #define MALLOC_TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, " with $ENV{PERL_MALLOC_OPT}")
 #define MALLOC_CHECK_TAINT2(argc,argv)	MALLOC_CHECK_TAINT(argc,argv,NULL)
