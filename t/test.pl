@@ -271,28 +271,43 @@ sub display {
 
 # A somewhat safer version of the sometimes wrong $^X.
 BEGIN: {
+    my $exe;
     eval {
-        require File::Spec;
         require Config;
         Config->import;
     };
-    warn "test.pl had problems loading other modules: $@" if $@;
-}
+    if ($@) {
+	warn "test.pl had problems loading Config: $@";
+	$exe = '';
+    } else {
+	$exe = $Config{_exe};
+    }
 
-# We do this at compile time before the test might have chdir'd around
-# and make sure its absolute in case they do later.
-my $Perl = $^X;
-$Perl =
-    File::Spec->rel2abs(File::Spec->catfile(File::Spec->curdir(),
-					    "perl$Config{_exe}"))
-        if $Perl =~ /^perl\Q$Config{_exe}\E$/i;
-warn "Can't generate which_perl from $^X" unless -f $Perl;
+    my $Perl = $^X;
 
-# For subcommands to use.
-$ENV{PERLEXE} = $Perl;
+    # This doesn't absolutize the path: beware of future chdirs().
+    # We could do File::Spec->abs2rel() but that does getcwd()s,
+    # which is a bit heavyweight to do here.
 
-sub which_perl {
-    return $Perl;
+    if ($Perl =~ /^perl\Q$exe\E$/i) {
+        eval {
+	    require File::Spec;
+	};
+	if ($@) {
+	    warn "test.pl had problems loading File::Spec: $@";
+	} else {
+	    $Perl = File::Spec->catfile(File::Spec->curdir(), "perl$exe");
+	}
+    }
+
+    warn "Can't generate which_perl from $^X" unless -f $Perl;
+
+    # For subcommands to use.
+    $ENV{PERLEXE} = $Perl;
+
+    sub which_perl {
+	return $Perl;
+    }
 }
 
 1;
