@@ -8,7 +8,7 @@ BEGIN
   $| = 1;
   chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 164;
+  plan tests => 170;
   }
 
 # testing of Math::BigRat
@@ -235,6 +235,26 @@ $x = $cr->new('-inf'); ok ($x->numify(), '-inf');
 $x = $cr->new('NaN'); ok ($x->numify(), 'NaN');
 
 $x = $cr->new('4/3'); ok ($x->numify(), 4/3);
+
+##############################################################################
+# broot(), bmodpow() and bmodinv()
+
+$x = $cr->new(2) ** 32;
+$y = $cr->new(4);
+$z = $cr->new(3);
+
+ok ($x->copy()->broot($y), 2 ** 8);
+ok (ref($x->copy()->broot($y)), $cr);
+
+ok ($x->copy()->bmodpow($y,$z), 1);
+ok (ref($x->copy()->bmodpow($y,$z)), $cr);
+
+$x = $cr->new(8);
+$y = $cr->new(5033);
+$z = $cr->new(4404);
+
+ok ($x->copy()->bmodinv($y), $z);
+ok (ref($x->copy()->bmodinv($y)), $cr);
 
 ##############################################################################
 # done
