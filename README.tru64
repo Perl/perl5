@@ -71,12 +71,11 @@ selecting long doubles.
 
 The DB_File tests (db-btree.t, db-hash.t, db-recno.t) may fail you
 have installed a newer version of Berkeley DB into the system and the
--I and -L compiler and linker flags (watch out for Configure options
--Dlocincpth and -Dloclibpth, and check your /usr/local/include and
-/usr/local/lib since they are included in Tru64 by default) introduce
-version conflicts with the DB 1.85 headers and libraries that came
-with the system (e.g. mixing a DB v2 library with the DB v1 headers
-is a bad idea).
+-I and -L compiler and linker flags introduce version conflicts with
+the DB 1.85 headers and libraries that came with the Tru64.  For example, 
+mixing a DB v2 library with the DB v1 headers is a bad idea.  Watch
+out for Configure options -Dlocincpth and -Dloclibpth, and check your
+/usr/local/include and /usr/local/lib since they are included by default.
 
 The second option is to explicitly instruct Configure to detect the
 newer Berkeley DB installation, by supplying the right directories with
@@ -85,8 +84,8 @@ running "make test" setting your LD_LIBRARY_PATH to F</some/lib>.
 
 The third option is to work around the problem by disabling the
 DB_File completely when build Perl by specifying -Ui_db to Configure,
-and then using the BerkeleyFile module from CPAN instead of DB_File.
-The BerkeleyFile works with Berkeley DB versions 2.* or greater.
+and then using the BerkeleyDB module from CPAN instead of DB_File.
+The BerkeleyDB works with Berkeley DB versions 2.* or greater.
 
 The Berkeley DB 4.1.25 has been tested with Tru64 V5.1A and found
 to work.  The latest Berkeley DB can be found from F<http://www.sleepycat.com>.
