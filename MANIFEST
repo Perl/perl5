@@ -188,6 +188,7 @@ ext/Digest/MD5/MD5.xs		Digest::MD5 extension
 ext/Digest/MD5/README		Digest::MD5 extension Readme
 ext/Digest/MD5/t/align.t	See if Digest::MD5 extension works
 ext/Digest/MD5/t/badfile.t	See if Digest::MD5 extension works
+ext/Digest/MD5/t/bits.t		See if Digest::MD5 extension works
 ext/Digest/MD5/t/clone.t	See if Digest::MD5 extension works
 ext/Digest/MD5/t/files.t	See if Digest::MD5 extension works
 ext/Digest/MD5/t/md5-aaa.t	See if Digest::MD5 extension works
