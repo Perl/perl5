@@ -44,8 +44,8 @@ packages, and called using the full package name.  So let's create
 an entire pasture:
 
     # Cow::speak, Horse::speak, Sheep::speak as before
-    @pasture = qw(Cow Cow Horse Sheep Sheep);
-    foreach $animal (@pasture) {
+    my @pasture = qw(Cow Cow Horse Sheep Sheep);
+    foreach my $animal (@pasture) {
       &{$animal."::speak"};
     }
 
@@ -58,10 +58,10 @@ This results in:
     a Sheep goes baaaah!
 
 Wow.  That symbolic coderef de-referencing there is pretty nasty.
-We're counting on C<no strict subs> mode, certainly not recommended
-for larger programs.  And why was that necessary?  Because the name of
-the package seems to be inseparable from the name of the subroutine we
-want to invoke within that package.
+We're counting on L<strict|C<no strict refs>> mode, certainly not
+recommended for larger programs.  And why was that necessary?  Because
+the name of the package seems to be inseparable from the name of the
+subroutine we want to invoke within that package.
 
 Or is it?
 
@@ -87,12 +87,13 @@ And once again, this results in:
 That's not fun yet.  Same number of characters, all constant, no
 variables.  But yet, the parts are separable now.  Watch:
 
-    $a = "Cow";
+    my $a = "Cow";
     $a->speak; # invokes Cow->speak
 
 Ahh!  Now that the package name has been parted from the subroutine
 name, we can use a variable package name.  And this time, we've got
-something that works even when C<use strict refs> is enabled.
+something that works even when L<strict|C<use strict refs>> is
+enabled.
 
 =head2 Invoking a barnyard
 
@@ -109,8 +110,8 @@ example:
       print "a Sheep goes baaaah!\n"
     }
 
-    @pasture = qw(Cow Cow Horse Sheep Sheep);
-    foreach $animal (@pasture) {
+    my @pasture = qw(Cow Cow Horse Sheep Sheep);
+    foreach my $animal (@pasture) {
       $animal->speak;
     }
 
@@ -168,11 +169,14 @@ the same class.
 Let's call out from C<speak> to a helper method called C<sound>.
 This method provides the constant text for the sound itself.
 
-    { package Cow;
+    {
+      package Cow;
+
       sub sound { "moooo" }
+
       sub speak {
-	my $class = shift;
-	print "a $class goes ", $class->sound, "!\n"
+        my $class = shift;
+        print "a $class goes ", $class->sound, "!\n"
       }
     }
 
@@ -180,8 +184,11 @@ Now, when we call C<< Cow->speak >>, we get a C<$class> of C<Cow> in
 C<speak>.  This in turn selects the C<< Cow->sound >> method, which
 returns C<moooo>.  But how different would this be for the C<Horse>?
 
-    { package Horse;
+    {
+      package Horse;
+
       sub sound { "neigh" }
+
       sub speak {
 	my $class = shift;
 	print "a $class goes ", $class->sound, "!\n"
@@ -197,7 +204,9 @@ Horse?  Yes, with inheritance!
 We'll define a common subroutine package called C<Animal>, with the
 definition for C<speak>:
 
-    { package Animal;
+    {
+      package Animal;
+
       sub speak {
 	my $class = shift;
 	print "a $class goes ", $class->sound, "!\n"
@@ -207,8 +216,12 @@ definition for C<speak>:
 Then, for each animal, we say it "inherits" from C<Animal>, along
 with the animal-specific sound:
 
-    { package Cow;
+    {
+      package Cow;
+
+      # Not safe under `use strict', see below
       @ISA = qw(Animal);
+
       sub sound { "moooo" }
     }
 
@@ -256,32 +269,34 @@ The easiest is to just spell the package name out:
 Or allow it as an implicitly named package variable:
 
     package Cow;
-    use vars qw(@ISA);
-    @ISA = qw(Animal);
+    our @ISA = qw(Animal);
 
 If you're bringing in the class from outside, via an object-oriented
 module, you change:
 
     package Cow;
     use Animal;
-    use vars qw(@ISA);
-    @ISA = qw(Animal);
+    our @ISA = qw(Animal);
 
 into just:
 
     package Cow;
     use base qw(Animal);
 
-And that's pretty darn compact.
+And that's pretty darn compact.  Read about the L<base|base> pragma.
 
 =head2 Overriding the methods
 
 Let's add a mouse, which can barely be heard:
 
-    # Animal package from before
-    { package Mouse;
-      @ISA = qw(Animal);
+    # Animal package that we wrote before, goes here
+    {
+      package Mouse;
+
+      our @ISA = qw(Animal);
+
       sub sound { "squeak" }
+
       sub speak {
         my $class = shift;
 	print "a $class goes ", $class->sound, "!\n";
@@ -309,10 +324,14 @@ C<Animal> does, but add in the extra comment?  Sure!
 
 First, we can invoke the C<Animal::speak> method directly:
 
-    # Animal package from before
-    { package Mouse;
-      @ISA = qw(Animal);
+    # Animal package that we wrote before, goes here
+    {
+      package Mouse;
+
+      our @ISA = qw(Animal);
+
       sub sound { "squeak" }
+
       sub speak {
         my $class = shift;
         Animal::speak($class);
@@ -345,8 +364,11 @@ A better solution is to tell Perl to search from a higher place
 in the inheritance chain:
 
     # same Animal as before
-    { package Mouse;
+    {
+       package Mouse;
+
       # same @ISA, &sound as before
+
       sub speak {
         my $class = shift;
         $class->Animal::speak;
@@ -372,8 +394,11 @@ invocation, we get a search of all of our super classes (classes
 listed in C<@ISA>) automatically:
 
     # same Animal as before
-    { package Mouse;
+    {
+      package Mouse;
+
       # same @ISA, &sound as before
+
       sub speak {
         my $class = shift;
         $class->SUPER::speak;
@@ -392,7 +417,7 @@ So far, we've seen the method arrow syntax:
 
 or the equivalent:
 
-  $a = "Class";
+  my $a = "Class";
   $a->method(@args);
 
 which constructs an argument list of:
@@ -419,14 +444,20 @@ haven't even begun to cover.
 Let's start with the code for the C<Animal> class
 and the C<Horse> class:
 
-  { package Animal;
+  {
+    package Animal;
+
     sub speak {
       my $class = shift;
       print "a $class goes ", $class->sound, "!\n"
     }
   }
-  { package Horse;
-    @ISA = qw(Animal);
+
+  {
+    package Horse;
+
+    our @ISA = qw(Animal);
+
     sub sound { "neigh" }
   }
 
@@ -448,7 +479,7 @@ An "instance" is generally created by a class.  In Perl, any reference
 can be an instance, so let's start with the simplest reference
 that can hold a horse's name: a scalar reference.
 
-  my $name = "Mr. Ed";
+  my $name    = "Mr. Ed";
   my $talking = \$name;
 
 So now C<$talking> is a reference to what will be the instance-specific
@@ -499,9 +530,13 @@ Because we get the instance as the first parameter, we can now access
 the instance-specific data.  In this case, let's add a way to get at
 the name:
 
-  { package Horse;
-    @ISA = qw(Animal);
+  {
+    package Horse;
+
+    our @ISA = qw(Animal);
+
     sub sound { "neigh" }
+
     sub name {
       my $self = shift;
       $$self;
@@ -530,16 +565,21 @@ guts" of a Horse are visible.  That's good if you're a veterinarian,
 but not if you just like to own horses.  So, let's let the Horse class
 build a new horse:
 
-  { package Horse;
-    @ISA = qw(Animal);
+  {
+    package Horse;
+
+    our @ISA = qw(Animal);
+
     sub sound { "neigh" }
+
     sub name {
       my $self = shift;
       $$self;
     }
+
     sub named {
       my $class = shift;
-      my $name = shift;
+      my $name  = shift;
       bless \$name, $class;
     }
   }
@@ -570,23 +610,31 @@ But was there anything specific to C<Horse> in that method?  No.  Therefore,
 it's also the same recipe for building anything else that inherited from
 C<Animal>, so let's put it there:
 
-  { package Animal;
+  {
+    package Animal;
+
     sub speak {
       my $class = shift;
       print "a $class goes ", $class->sound, "!\n"
     }
+
     sub name {
       my $self = shift;
       $$self;
     }
+
     sub named {
       my $class = shift;
-      my $name = shift;
+      my $name  = shift;
       bless \$name, $class;
     }
   }
-  { package Horse;
-    @ISA = qw(Animal);
+
+  {
+    package Horse;
+
+    our @ISA = qw(Animal);
+
     sub sound { "neigh" }
   }
 
@@ -615,7 +663,7 @@ classname).  Let's modify the C<name> method first to notice the change:
   sub name {
     my $either = shift;
     ref $either
-      ? $$either # it's an instance, return name
+      ? $$either              # it's an instance, return name
       : "an unnamed $either"; # it's a class, return generic
   }
 
@@ -625,7 +673,8 @@ instance or a class.  Note that I've changed the first parameter
 holder to C<$either> to show that this is intended:
 
   my $talking = Horse->named("Mr. Ed");
-  print Horse->name, "\n"; # prints "an unnamed Horse\n"
+
+  print Horse->name,    "\n"; # prints "an unnamed Horse\n"
   print $talking->name, "\n"; # prints "Mr Ed.\n"
 
 and now we'll fix C<speak> to use this:
@@ -642,34 +691,46 @@ we're done!
 
 Let's train our animals to eat:
 
-  { package Animal;
+  {
+    package Animal;
     sub named {
       my $class = shift;
-      my $name = shift;
+      my $name  = shift;
       bless \$name, $class;
     }
+
     sub name {
       my $either = shift;
       ref $either
-	? $$either # it's an instance, return name
+	? $$either              # it's an instance, return name
 	: "an unnamed $either"; # it's a class, return generic
     }
+
     sub speak {
       my $either = shift;
       print $either->name, " goes ", $either->sound, "\n";
     }
+
     sub eat {
       my $either = shift;
-      my $food = shift;
+      my $food   = shift;
       print $either->name, " eats $food.\n";
     }
   }
-  { package Horse;
-    @ISA = qw(Animal);
+
+  {
+    package Horse;
+
+    our @ISA = qw(Animal);
+
     sub sound { "neigh" }
   }
-  { package Sheep;
-    @ISA = qw(Animal);
+
+  {
+    package Sheep;
+
+    our @ISA = qw(Animal);
+
     sub sound { "baaaah" }
   }
 
@@ -677,6 +738,7 @@ And now try it out:
 
   my $talking = Horse->named("Mr. Ed");
   $talking->eat("hay");
+
   Sheep->eat("grass");
 
 which prints:
@@ -705,7 +767,8 @@ looks at the reference is changed accordingly.
 
 Let's make a sheep that has a name and a color:
 
-  my $bad = bless { Name => "Evil", Color => "black" }, Sheep;
+  my $data = { Name => "Evil", Color => "black" };
+  my $bad  = bless $data, Sheep;
 
 so C<< $bad->{Name} >> has C<Evil>, and C<< $bad->{Color} >> has
 C<black>.  But we want to make C<< $bad->name >> access the name, and
@@ -726,8 +789,9 @@ as well:
   ## in Animal
   sub named {
     my $class = shift;
-    my $name = shift;
-    my $self = { Name => $name, Color => $class->default_color };
+    my $name  = shift;
+    my $self  = { Name => $name, Color => $class->default_color };
+
     bless $self, $class;
   }
 
@@ -758,6 +822,7 @@ method or two to get and set the color.
   sub color {
     $_[0]->{Color}
   }
+
   sub set_color {
     $_[0]->{Color} = $_[1];
   }
