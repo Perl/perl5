@@ -253,13 +253,6 @@ the testsuite (many tests will be skipped).
 There should be no test failures when running under Windows NT/2000/XP.
 Many tests I<will> fail under Windows 9x due to the inferior command shell.
 
-The following known test failures under the 64-bit edition of Windows .NET
-Server beta 3 are expected to be fixed before the 5.8.0 release:
-
-    Failed Test              Stat Wstat Total Fail  Failed  List of Failed
-    ------------------------------------------------------------------------
-    op/fork.t                              18    3  16.67%  2 15 17
-
 Some test failures may occur if you use a command shell other than the
 native "cmd.exe", or if you are building from a path that contains
 spaces.  So don't do that.

@@ -10412,7 +10412,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_retstack_ix		= proto_perl->Tretstack_ix;
 	PL_retstack_max		= proto_perl->Tretstack_max;
 	Newz(54, PL_retstack, PL_retstack_max, OP*);
-	Copy(proto_perl->Tretstack, PL_retstack, PL_retstack_ix, I32);
+	Copy(proto_perl->Tretstack, PL_retstack, PL_retstack_ix, OP*);
 
 	/* NOTE: si_dup() looks at PL_markstack */
 	PL_curstackinfo		= si_dup(proto_perl->Tcurstackinfo, param);
