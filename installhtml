@@ -34,7 +34,7 @@ Displays the usage.
 
 =item B<--podpath> POD search path
 
-The list of diretories to search for .pod and .pm files to be converted.
+The list of directories to search for .pod and .pm files to be converted.
 Default is `podroot/.'.
 
 =item B<--podroot> POD search path base directory
@@ -59,19 +59,19 @@ too.  Default is to not recurse.
 
 =item B<--splithead> POD files to split on =head directive
 
-Colon-seperated list of pod files to split by the =head directive.  These
+Colon-separated list of pod files to split by the =head directive.  These
 files should have names specified relative to podroot.
 
 =item B<--splititem> POD files to split on =item directive
 
-Colon-seperated list of all pod files to split by the =item directive.
+Colon-separated list of all pod files to split by the =item directive.
 I<installhtml> does not do the actual split, rather it invokes I<splitpod>
 to do the dirty work.  As with --splithead, these files should have names
 specified relative to podroot.
 
 =item B<--libpods> library PODs for LE<lt>E<gt> links
 
-Colon-seperated list of "library" pod files.  This is the same list that
+Colon-separated list of "library" pod files.  This is the same list that
 will be passed to pod2html when any pod is converted.
 
 =item B<--verbose> verbose output
@@ -125,7 +125,7 @@ Usage: $0 --help --podpath=<name>:...:<name> --podroot=<name>
                   (default behavior).
     --recurse   - recurse on those subdirectories listed in podpath
     --splithead - comma-separated list of .pod or .pm files to split.  will
-                  split each file into several smaller files at every occurance
+                  split each file into several smaller files at every occurrence
                   of a pod =head[1-6] directive.
     --splititem - comma-separated list of .pod or .pm files to split using
                   splitpod.
@@ -364,7 +364,9 @@ sub split_on_item {
 	}
 	chdir("$podroot/$dirname") ||
 	    die "$0: error changing to directory $podroot/$dirname: $!\n";
-	system("./splitpod", "../$filename");
+	system("../splitpod", "../$filename") &&
+	    warn "$0: error running '../splitpod ../$filename'"
+		 ." from $podroot/$dirname";
     }
     chdir($pwd);
 }
