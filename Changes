@@ -31,6 +31,132 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14574] By: jhi                                   on 2002/02/06  15:11:05
+        Log: s/Netware/NetWare/
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14573] By: jhi                                   on 2002/02/06  15:10:00
+        Log: New Netware scripts.
+     Branch: perl
+	   + NetWare/bat/BldNWExt-Exist.bat NetWare/t/NWModify-Exist.pl
+	   + NetWare/t/NWScripts-Exist.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14572] By: jhi                                   on 2002/02/06  15:02:20
+        Log: EBCDIC: the encoding pragma would need some rethinking,
+             probably a pass of EBCDIC->Unicode mapping.  For now,
+             disable it on EBCDIC.
+     Branch: perl
+	   ! lib/encoding.pm lib/encoding.t
+____________________________________________________________________________
+[ 14571] By: jhi                                   on 2002/02/06  14:44:27
+        Log: EBCDIC: Unicode::Normalize NFC emits EBCDIC code points
+             for the low 256.  Now tweaked the tests, but maybe it's
+             the module that needs few NATIVE_TO_UNI()s somewhere?
+     Branch: perl
+	   ! ext/Unicode/Normalize/t/norm.t ext/Unicode/Normalize/t/test.t
+____________________________________________________________________________
+[ 14570] By: jhi                                   on 2002/02/06  13:59:19
+        Log: Subject: [PATCH utf8.c] format problem
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Wed, 6 Feb 2002 14:01:43 GMT
+             Message-Id: <200202061401.OAA25053@tempest.npl.co.uk>
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14568] By: jhi                                   on 2002/02/06  04:44:33
+        Log: EBCDIC: 0x41 is not cricket.
+     Branch: perl
+	   ! ext/Encode/t/Encode.t
+____________________________________________________________________________
+[ 14567] By: jhi                                   on 2002/02/05  23:12:19
+        Log: NetWare update from Ananth Kesari.
+     Branch: perl
+	   ! NetWare/Makefile NetWare/bat/BldNWExt.bat
+	   ! NetWare/dl_netware.xs NetWare/interface.c NetWare/interface.h
+	   ! NetWare/iperlhost.h NetWare/nw5.c NetWare/nw5sck.c
+	   ! NetWare/nw5sck.h NetWare/nw5thread.h NetWare/t/NWModify.pl
+	   ! NetWare/t/NWScripts.pl makedef.pl
+____________________________________________________________________________
+[ 14566] By: sky                                   on 2002/02/05  18:39:13
+        Log: Subject: Re: File::Spec::rel2abs2rel (?)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 5 Feb 2002 13:47:39 -0500
+             Message-ID: <20020205184739.GB17375@blackrider>
+     Branch: perl
+	   ! lib/File/Spec/t/rel2abs2rel.t
+____________________________________________________________________________
+[ 14564] By: jhi                                   on 2002/02/05  17:05:40
+        Log: Integrate perlio;
+             
+             More Encode tweaks:
+             - make expensive and marginal substring search optional (-O)
+             - enable -O for ASCII-oid encodings (search space is small)
+             - add ASCII-oid jis0201 to basic Encode.so
+             - add some other Japanese encodings to EUC_JP bundle (without -O)
+     Branch: perl
+	  +> ext/Encode/Encode/jis0201.ucm
+	  !> MANIFEST ext/Encode/EUC_JP/Makefile.PL ext/Encode/Makefile.PL
+	  !> ext/Encode/compile
+____________________________________________________________________________
+[ 14562] By: sky                                   on 2002/02/05  14:50:36
+        Log: Add in change for Apple/Darwin Bug: 2785519 to fix memory leaks.
+     Branch: perl
+	   ! ext/DynaLoader/dl_dyld.xs ext/POSIX/t/posix.t
+____________________________________________________________________________
+[ 14561] By: jhi                                   on 2002/02/05  14:25:36
+        Log: EBCDIC: SHARP S is different.
+     Branch: perl
+	   ! regexec.c utf8.h
+____________________________________________________________________________
+[ 14560] By: sky                                   on 2002/02/05  13:49:40
+        Log: Don't assume that we can chmod symlinks. It fails on MacOSX HFS+ when building using mksymlinks
+     Branch: perl
+	   ! t/op/filetest.t
+____________________________________________________________________________
+[ 14559] By: sky                                   on 2002/02/05  11:39:24
+        Log: Add . first to the PATH enviroment to test that we realy get ./perl and not some other older perl.
+     Branch: perl
+	   ! lib/File/Spec/t/rel2abs2rel.t
+____________________________________________________________________________
+[ 14558] By: sky                                   on 2002/02/05  11:20:21
+        Log: Change to check if _POSIX_OPEN_MAX is 16 or 20, however the entire test is kind of questionable since we are testing POSIX compliance...
+     Branch: perl
+	   ! ext/POSIX/t/posix.t
+____________________________________________________________________________
+[ 14557] By: sky                                   on 2002/02/05  10:30:58
+        Log: Enable building with threads under macosx, assume __APPLE__ means darwin and disable _r functions, since we don't have them.
+     Branch: perl
+	   ! hints/darwin.sh perl.h
+____________________________________________________________________________
+[ 14554] By: jhi                                   on 2002/02/04  23:22:28
+        Log: Subject: [PATCH] File::Find tests not cleaning up properly
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 4 Feb 2002 22:09:07 +0100
+             Message-ID: <20020204220907.A8288@rafael>
+     Branch: perl
+	   ! lib/File/Find/t/find.t lib/File/Find/t/taint.t
+____________________________________________________________________________
+[ 14553] By: jhi                                   on 2002/02/04  22:27:11
+        Log: Signedness mumblings from Tru64.
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 14552] By: jhi                                   on 2002/02/04  22:22:16
+        Log: Subject: [PATCH @14550] Encode build fix-ups for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 04 Feb 2002 17:16:00 -0600
+             Message-Id: <5.1.0.14.2.20020204161211.01c0a178@exchi01>
+     Branch: perl
+	   ! MANIFEST configure.com ext/Encode/EUC_JP/Makefile.PL
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 14550] By: jhi                                   on 2002/02/04  14:47:00
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14549] By: jhi                                   on 2002/02/04  13:57:42
         Log: Comment microtweaks.
      Branch: perl
