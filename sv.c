@@ -12283,8 +12283,9 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	FREETMPS;
 	LEAVE;
 	SvUTF8_on(sv);
+	return SvPVX(sv);
     }
-    return SvPVX(sv);
+    return SvPOKp(sv) ? SvPVX(sv) : NULL;
 }
 
 /*
