@@ -92,73 +92,62 @@ we add a flag to re-add the removed byte to the source we could handle
 #include "encode.h"
 
 int
-do_encode(encpage_t *enc, const U8 *src, STRLEN *slen, U8 *dst, STRLEN dlen, STRLEN *dout, int approx)
+do_encode(encpage_t * enc, const U8 * src, STRLEN * slen, U8 * dst,
+	  STRLEN dlen, STRLEN * dout, int approx)
 {
- const U8 *s    = src;
- const U8 *send = s+*slen;
- const U8 *last = s;
- U8 *d          = dst;
- U8 *dend       = d+dlen;
- int code       = 0;
- while (s < send)
-  {
-   encpage_t *e = enc;
-   U8 byte = *s;
-   while (byte > e->max)
-    e++;
-   if (byte >= e->min && e->slen && (approx || !(e->slen & 0x80)))
-    {
-     const U8 *cend = s + (e->slen & 0x7f);
-     if (cend <= send)
-      {
-       STRLEN n;
-       if ((n = e->dlen))
-        {
-         const U8 *out  = e->seq+n*(byte - e->min);
-         U8 *oend = d+n;
-         if (dst)
-          {
-           if (oend <= dend)
-            {
-             while (d < oend)
-              *d++ = *out++;
-            }
-           else
-            {
-             /* Out of space */
-             code = ENCODE_NOSPACE;
-             break;
-            }
-          }
-         else
-          d = oend;
-        }
-       enc = e->next;
-       s++;
-       if (s == cend)
-        {
-         if (approx && (e->slen & 0x80))
-          code = ENCODE_FALLBACK;
-         last = s;
-        }
-      }
-     else
-      {
-       /* partial source character */
-       code = ENCODE_PARTIAL;
-       break;
-      }
+    const U8 *s = src;
+    const U8 *send = s + *slen;
+    const U8 *last = s;
+    U8 *d = dst;
+    U8 *dend = d + dlen;
+    int code = 0;
+    while (s < send) {
+	encpage_t *e = enc;
+	U8 byte = *s;
+	while (byte > e->max)
+	    e++;
+	if (byte >= e->min && e->slen && (approx || !(e->slen & 0x80))) {
+	    const U8 *cend = s + (e->slen & 0x7f);
+	    if (cend <= send) {
+		STRLEN n;
+		if ((n = e->dlen)) {
+		    const U8 *out = e->seq + n * (byte - e->min);
+		    U8 *oend = d + n;
+		    if (dst) {
+			if (oend <= dend) {
+			    while (d < oend)
+				*d++ = *out++;
+			}
+			else {
+			    /* Out of space */
+			    code = ENCODE_NOSPACE;
+			    break;
+			}
+		    }
+		    else
+			d = oend;
+		}
+		enc = e->next;
+		s++;
+		if (s == cend) {
+		    if (approx && (e->slen & 0x80))
+			code = ENCODE_FALLBACK;
+		    last = s;
+		}
+	    }
+	    else {
+		/* partial source character */
+		code = ENCODE_PARTIAL;
+		break;
+	    }
+	}
+	else {
+	    /* Cannot represent */
+	    code = ENCODE_NOREP;
+	    break;
+	}
     }
-   else
-    {
-     /* Cannot represent */
-     code = ENCODE_NOREP;
-     break;
-    }
-  }
- *slen = last - src;
- *dout = d - dst;
- return code;
+    *slen = last - src;
+    *dout = d - dst;
+    return code;
 }
-
-
