@@ -535,7 +535,7 @@ my %Cat;
 ##
 ## Process UnicodeData.txt (Categories, etc.)
 ##
-sub Unicode_Txt()
+sub UnicodeData_Txt()
 {
     my $Bidi     = Table->New();
     my $Deco     = Table->New();
@@ -557,22 +557,38 @@ sub Unicode_Txt()
 
     ## Initialize Perl-generated categories
     ## (Categories from UnicodeData.txt are auto-initialized in gencat)
-    $Cat{Alnum}  = Table->New(Is => 'Alnum',  Desc => "[[:Alnum:]]",  Fuzzy => 0);
-    $Cat{Alpha}  = Table->New(Is => 'Alpha',  Desc => "[[:Alpha:]]",  Fuzzy => 0);
-    $Cat{ASCII}  = Table->New(Is => 'ASCII',  Desc => "[[:ASCII:]]",  Fuzzy => 0);
-    $Cat{Blank}  = Table->New(Is => 'Blank',  Desc => "[[:Blank:]]",  Fuzzy => 0);
-    $Cat{Cntrl}  = Table->New(Is => 'Cntrl',  Desc => "[[:Cntrl:]]",  Fuzzy => 0);
-    $Cat{Digit}  = Table->New(Is => 'Digit',  Desc => "[[:Digit:]]",  Fuzzy => 0);
-    $Cat{Graph}  = Table->New(Is => 'Graph',  Desc => "[[:Graph:]]",  Fuzzy => 0);
-    $Cat{Lower}  = Table->New(Is => 'Lower',  Desc => "[[:Lower:]]",  Fuzzy => 0);
-    $Cat{Print}  = Table->New(Is => 'Print',  Desc => "[[:Print:]]",  Fuzzy => 0);
-    $Cat{Punct}  = Table->New(Is => 'Punct',  Desc => "[[:Punct:]]",  Fuzzy => 0);
-    $Cat{Space}  = Table->New(Is => 'Space',  Desc => "[[:Space:]]",  Fuzzy => 0);
-    $Cat{Title}  = Table->New(Is => 'Title',  Desc => "[[:Title:]]",  Fuzzy => 0);
-    $Cat{Upper}  = Table->New(Is => 'Upper',  Desc => "[[:Upper:]]",  Fuzzy => 0);
-    $Cat{XDigit} = Table->New(Is => 'XDigit', Desc => "[[:XDigit:]]", Fuzzy => 0);
-    $Cat{Word}   = Table->New(Is => 'Word',   Desc => "[[:Word:]]",   Fuzzy => 0);
-    $Cat{SpacePerl} = Table->New(Is => 'SpacePerl', Desc => '\s', Fuzzy => 0);
+    $Cat{Alnum}  =
+	Table->New(Is => 'Alnum',  Desc => "[[:Alnum:]]",  Fuzzy => 0);
+    $Cat{Alpha}  =
+	Table->New(Is => 'Alpha',  Desc => "[[:Alpha:]]",  Fuzzy => 0);
+    $Cat{ASCII}  =
+	Table->New(Is => 'ASCII',  Desc => "[[:ASCII:]]",  Fuzzy => 0);
+    $Cat{Blank}  =
+	Table->New(Is => 'Blank',  Desc => "[[:Blank:]]",  Fuzzy => 0);
+    $Cat{Cntrl}  =
+	Table->New(Is => 'Cntrl',  Desc => "[[:Cntrl:]]",  Fuzzy => 0);
+    $Cat{Digit}  =
+	Table->New(Is => 'Digit',  Desc => "[[:Digit:]]",  Fuzzy => 0);
+    $Cat{Graph}  =
+	Table->New(Is => 'Graph',  Desc => "[[:Graph:]]",  Fuzzy => 0);
+    $Cat{Lower}  =
+	Table->New(Is => 'Lower',  Desc => "[[:Lower:]]",  Fuzzy => 0);
+    $Cat{Print}  =
+	Table->New(Is => 'Print',  Desc => "[[:Print:]]",  Fuzzy => 0);
+    $Cat{Punct}  =
+	Table->New(Is => 'Punct',  Desc => "[[:Punct:]]",  Fuzzy => 0);
+    $Cat{Space}  =
+	Table->New(Is => 'Space',  Desc => "[[:Space:]]",  Fuzzy => 0);
+    $Cat{Title}  =
+	Table->New(Is => 'Title',  Desc => "[[:Title:]]",  Fuzzy => 0);
+    $Cat{Upper}  =
+	Table->New(Is => 'Upper',  Desc => "[[:Upper:]]",  Fuzzy => 0);
+    $Cat{XDigit} =
+	Table->New(Is => 'XDigit', Desc => "[[:XDigit:]]", Fuzzy => 0);
+    $Cat{Word}   =
+	Table->New(Is => 'Word',   Desc => "[[:Word:]]",   Fuzzy => 0);
+    $Cat{SpacePerl} =
+	Table->New(Is => 'SpacePerl', Desc => '\s', Fuzzy => 0);
 
     my %To;
     $To{Upper} = Table->New();
@@ -1705,7 +1721,7 @@ sub CaseFolding_txt()
 
 ## Do it....
 
-Unicode_Txt();
+UnicodeData_Txt();
 Make_GC_Aliases();
 PropList_txt();
 
