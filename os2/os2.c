@@ -2009,21 +2009,31 @@ XS(XS_Cwd_sys_abspath)
 }
 typedef APIRET (*PELP)(PSZ path, ULONG type);
 
+/* Kernels after 2000/09/15 understand this too: */
+#ifndef LIBPATHSTRICT
+#  define LIBPATHSTRICT 3
+#endif
+
 APIRET
-ExtLIBPATH(ULONG ord, PSZ path, ULONG type)
+ExtLIBPATH(ULONG ord, PSZ path, IV type)
 {
+    ULONG what;
+
     loadByOrd("doscalls",ord);		/* Guarantied to load or die! */
-    return (*(PELP)ExtFCN[ord])(path, type);
+    if (type > 0)
+	what = END_LIBPATH;
+    else if (type == 0)
+	what = BEGIN_LIBPATH;
+    else
+	what = LIBPATHSTRICT;
+    return (*(PELP)ExtFCN[ord])(path, what);
 }
 
-#define extLibpath(type) 						\
-    (CheckOSError(ExtLIBPATH(ORD_QUERY_ELP, to, ((type) ? END_LIBPATH	\
-						 : BEGIN_LIBPATH)))	\
-     ? NULL : to )
+#define extLibpath(to,type) 						\
+    (CheckOSError(ExtLIBPATH(ORD_QUERY_ELP, (to), (type))) ? NULL : (to) )
 
 #define extLibpath_set(p,type) 					\
-    (!CheckOSError(ExtLIBPATH(ORD_SET_ELP, (p), ((type) ? END_LIBPATH	\
-						 : BEGIN_LIBPATH))))
+    (!CheckOSError(ExtLIBPATH(ORD_SET_ELP, (p), (type))))
 
 XS(XS_Cwd_extLibpath)
 {
@@ -2031,7 +2041,7 @@ XS(XS_Cwd_extLibpath)
     if (items < 0 || items > 1)
 	Perl_croak_nocontext("Usage: Cwd::extLibpath(type = 0)");
     {
-	bool	type;
+	IV	type;
 	char	to[1024];
 	U32	rc;
 	char *	RETVAL;
@@ -2039,10 +2049,13 @@ XS(XS_Cwd_extLibpath)
 	if (items < 1)
 	    type = 0;
 	else {
-	    type = (int)SvIV(ST(0));
+	    type = SvIV(ST(0));
 	}
 
-	RETVAL = extLibpath(type);
+	to[0] = 1; to[1] = 0;		/* Sometimes no error reported */
+	RETVAL = extLibpath(to, type);
+	if (RETVAL && RETVAL[0] == 1 && RETVAL[1] == 0)
+	    Perl_croak_nocontext("panic Cwd::extLibpath parameter");
 	ST(0) = sv_newmortal();
 	sv_setpv((SV*)ST(0), RETVAL);
     }
@@ -2057,14 +2070,14 @@ XS(XS_Cwd_extLibpath_set)
     {
 	STRLEN n_a;
 	char *	s = (char *)SvPV(ST(0),n_a);
-	bool	type;
+	IV	type;
 	U32	rc;
 	bool	RETVAL;
 
 	if (items < 2)
 	    type = 0;
 	else {
-	    type = (int)SvIV(ST(1));
+	    type = SvIV(ST(1));
 	}
 
 	RETVAL = extLibpath_set(s, type);
