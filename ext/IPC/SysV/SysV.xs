@@ -7,12 +7,11 @@
 #   include <asm/page.h>
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
+#ifndef HAS_SEM
 #   include <sys/ipc.h>
+#endif
 #   ifdef HAS_MSG
 #       include <sys/msg.h>
-#   endif
-#   ifdef HAS_SEM
-#       include <sys/sem.h>
 #   endif
 #   ifdef HAS_SHM
 #       if defined(PERL_SCO5) || defined(PERL_ISC)
@@ -27,6 +26,11 @@
 #          define SHMLBA getpagesize()
 #      endif
 #   endif
+#endif
+
+/* Required to get 'struct pte' for SHMLBA on ULTRIX. */
+#if defined(__ultrix) || defined(__ultrix__) || defined(ultrix)
+#include <machine/pte.h>
 #endif
 
 /* Required in BSDI to get PAGE_SIZE definition for SHMLBA.
