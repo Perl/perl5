@@ -364,43 +364,58 @@ compile time and run time.  It is not lexically scoped.
 
 The debugging output at compile time looks like this:
 
-  compiling RE `[bc]d(ef*g)+h[ij]k$'
-  size 43 first at 1
-     1: ANYOF(11)
-    11: EXACT <d>(13)
-    13: CURLYX {1,32767}(27)
-    15:   OPEN1(17)
-    17:     EXACT <e>(19)
-    19:     STAR(22)
-    20:       EXACT <f>(0)
-    22:     EXACT <g>(24)
-    24:   CLOSE1(26)
-    26:   WHILEM(0)
-    27: NOTHING(28)
-    28: EXACT <h>(30)
-    30: ANYOF(40)
-    40: EXACT <k>(42)
-    42: EOL(43)
-    43: END(0)
-  anchored `de' at 1 floating `gh' at 3..2147483647 (checking floating)
-				    stclass `ANYOF' minlen 7
+  Compiling REx `[bc]d(ef*g)+h[ij]k$'
+  size 45 Got 364 bytes for offset annotations.
+  first at 1
+  rarest char g at 0
+  rarest char d at 0
+     1: ANYOF[bc](12)
+    12: EXACT <d>(14)
+    14: CURLYX[0] {1,32767}(28)
+    16:   OPEN1(18)
+    18:     EXACT <e>(20)
+    20:     STAR(23)
+    21:       EXACT <f>(0)
+    23:     EXACT <g>(25)
+    25:   CLOSE1(27)
+    27:   WHILEM[1/1](0)
+    28: NOTHING(29)
+    29: EXACT <h>(31)
+    31: ANYOF[ij](42)
+    42: EXACT <k>(44)
+    44: EOL(45)
+    45: END(0)
+  anchored `de' at 1 floating `gh' at 3..2147483647 (checking floating) 
+        stclass `ANYOF[bc]' minlen 7 
+  Offsets: [45]
+  	1[4] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 5[1]
+  	0[0] 12[1] 0[0] 6[1] 0[0] 7[1] 0[0] 9[1] 8[1] 0[0] 10[1] 0[0]
+  	11[1] 0[0] 12[0] 12[0] 13[1] 0[0] 14[4] 0[0] 0[0] 0[0] 0[0]
+  	0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 18[1] 0[0] 19[1] 20[0]  
+  Omitting $` $& $' support.
 
 The first line shows the pre-compiled form of the regex.  The second
 shows the size of the compiled form (in arbitrary units, usually
-4-byte words) and the label I<id> of the first node that does a
-match.
+4-byte words) and the total number of bytes allocated for the
+offset/length table, usually 4+C<size>*8.  The next line shows the
+label I<id> of the first node that does a match.
 
-The last line (split into two lines above) contains optimizer
+The 
+
+  anchored `de' at 1 floating `gh' at 3..2147483647 (checking floating) 
+        stclass `ANYOF[bc]' minlen 7 
+
+line (split into two lines above) contains optimizer
 information.  In the example shown, the optimizer found that the match 
 should contain a substring C<de> at offset 1, plus substring C<gh>
 at some offset between 3 and infinity.  Moreover, when checking for
 these substrings (to abandon impossible matches quickly), Perl will check
 for the substring C<gh> before checking for the substring C<de>.  The
 optimizer may also use the knowledge that the match starts (at the
-C<first> I<id>) with a character class, and the match cannot be
-shorter than 7 chars.
+C<first> I<id>) with a character class, and no string 
+shorter than 7 characters can possibly match.
 
-The fields of interest which may appear in the last line are
+The fields of interest which may appear in this line are
 
 =over 4
 
@@ -428,7 +443,7 @@ Don't scan for the found substrings.
 
 =item C<isall>
 
-Means that the optimizer info is all that the regular
+Means that the optimizer information is all that the regular
 expression contains, and thus one does not need to enter the regex engine at
 all.
 
@@ -459,12 +474,12 @@ being C<BOL>, C<MBOL>, or C<GPOS>.  See the table below.
 If a substring is known to match at end-of-line only, it may be
 followed by C<$>, as in C<floating `k'$>.
 
-The optimizer-specific info is used to avoid entering (a slow) regex
-engine on strings that will not definitely match.  If C<isall> flag
+The optimizer-specific information is used to avoid entering (a slow) regex
+engine on strings that will not definitely match.  If the C<isall> flag
 is set, a call to the regex engine may be avoided even when the optimizer
 found an appropriate place for the match.
 
-The rest of the output contains the list of I<nodes> of the compiled
+Above the optimizer section is the list of I<nodes> of the compiled
 form of the regex.  Each line has format 
 
 C<   >I<id>: I<TYPE> I<OPTIONAL-INFO> (I<next-id>)
@@ -582,6 +597,36 @@ Here are the possible types, with short descriptions:
     # This is not really a node, but an optimized away piece of a "long" node.
     # To simplify debugging output, we mark it as if it were a node
     OPTIMIZED	off	Placeholder for dump.
+
+=for unprinted-credits
+Next section M-J. Dominus (mjd-perl-patch+@plover.com) 20010421
+
+Following the optimizer information is a dump of the offset/length
+table, here split across several lines:
+
+  Offsets: [45]
+  	1[4] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 5[1]
+  	0[0] 12[1] 0[0] 6[1] 0[0] 7[1] 0[0] 9[1] 8[1] 0[0] 10[1] 0[0]
+  	11[1] 0[0] 12[0] 12[0] 13[1] 0[0] 14[4] 0[0] 0[0] 0[0] 0[0]
+  	0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 18[1] 0[0] 19[1] 20[0]  
+
+The first line here indicates that the offset/length table contains 45
+entries.  Each entry is a pair of integers, denoted by C<offset[length]>.
+Entries are numbered starting with, so entry #1 here is C<1[4]> and
+entry #12 is C<5[1]>.  C<1[4]> indicates that the node labeled C<1:>
+(the C<1: ANYOF[bc]>) begins at character position 1 in the
+pre-compiled form of the regex, and has a length of 4 characters.
+C<5[1]> in position 12 
+indicates that the node labeled C<12:>
+(the C<< 12: EXACT <d> >>) begins at character position 5 in the
+pre-compiled form of the regex, and has a length of 1 character.
+C<12[1]> in position 14 
+indicates that the node labeled C<14:>
+(the C<< 14: CURLYX[0] {1,32767} >>) begins at character position 12 in the
+pre-compiled form of the regex, and has a length of 1 character---that
+is, it corresponds to the C<+> symbol in the precompiled regex.
+
+C<0[0]> items indicate that there is no corresponding node.
 
 =head2 Run-time output
 

@@ -2630,14 +2630,14 @@ sub const_sv {
 sub pp_const {
     my $self = shift;
     my($op, $cx) = @_;
+    if ($op->private & OPpCONST_ARYBASE) {
+        return '$[';
+    }
 #    if ($op->private & OPpCONST_BARE) { # trouble with `=>' autoquoting 
 #	return $self->const_sv($op)->PV;
 #    }
     my $sv = $self->const_sv($op);
 #    return const($sv);
-    if ($op->private & OPpCONST_ARYBASE) {
-	return '$[';
-    }
     my $c = const $sv; 
     return $c =~ /^-\d/ ? $self->maybe_parens($c, $cx, 21) : $c;
 }
@@ -2647,13 +2647,17 @@ sub dq {
     my $op = shift;
     my $type = $op->name;
     if ($type eq "const") {
-	return uninterp(escape_str(unback($self->const_sv($op)->PV)));
+	return '$[' if $op->private & OPpCONST_ARYBASE;
+	return uninterp(escape_str(unback($self->const_sv($op)->as_string)));
     } elsif ($type eq "concat") {
 	my $first = $self->dq($op->first);
 	my $last  = $self->dq($op->last);
 	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
-        if ($last =~ /^[{\[\w]/) {
-	    $first =~ s/([%\$@])([A-Za-z_]\w*)$/${1}{$2}/;
+	if ($last =~ /^[A-Z\\\^\[\]_?]/) {
+	    $first =~ s/([\$@])\^$/${1}{^}/;  # "${^}W" etc
+        }
+	elsif ($last =~ /^[{\[\w]/) {
+	    $first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/;
 	}
 	return $first . $last;
     } elsif ($type eq "uc") {
@@ -2942,13 +2946,17 @@ sub re_dq {
     my $op = shift;
     my $type = $op->name;
     if ($type eq "const") {
-	return re_uninterp(escape_str(re_unback($self->const_sv($op)->PV)));
+	return '$[' if $op->private & OPpCONST_ARYBASE;
+	return re_uninterp(escape_str(re_unback($self->const_sv($op)->as_string)));
     } elsif ($type eq "concat") {
 	my $first = $self->re_dq($op->first);
 	my $last  = $self->re_dq($op->last);
 	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
-	if ($last =~ /^[{\[\w]/) {
-	    $first =~ s/([%\$@])([A-Za-z_]\w*)$/${1}{$2}/;
+	if ($last =~ /^[A-Z\\\^\[\]_?]/) {
+	    $first =~ s/([\$@])\^$/${1}{^}/;
+	}
+	elsif ($last =~ /^[{\[\w]/) {
+	    $first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/;
 	}
 	return $first . $last;
     } elsif ($type eq "uc") {

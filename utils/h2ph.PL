@@ -370,8 +370,8 @@ sub expr {
 		$new .= '->' if /^[\[\{]/;
 	    } elsif ($id eq 'defined') {
 		$new .= 'defined';
-	    } elsif (/^\(/) {
-		s/^\((\w),/("$1",/ if $id =~ /^_IO[WR]*$/i;	# cheat
+	    } elsif (/^\s*\(/) {
+		s/^\s*\((\w),/("$1",/ if $id =~ /^_IO[WR]*$/i;	# cheat
 		$new .= " &$id";
 	    } elsif ($isatype{$id}) {
 		if ($new =~ /{\s*$/) {

@@ -259,10 +259,6 @@ http://www.perl.com/CPAN/misc/japh .
 Over a hundred quips by Larry, from postings of his or source code,
 can be found at http://www.perl.com/CPAN/misc/lwall-quotes.txt.gz .
 
-Newer examples can be found by perusing Larry's postings:
-
-    http://x1.dejanews.com/dnquery.xp?QRY=*&DBS=2&ST=PS&defaultOp=AND&LNG=ALL&format=terse&showsort=date&maxhits=100&subjects=&groups=&authors=larry@*wall.org&fromdate=&todate=
-
 =head2 How can I convince my sysadmin/supervisor/employees to use version 5/5.005/Perl instead of some other language?
 
 If your manager or employees are wary of unsupported software, or

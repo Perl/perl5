@@ -84,7 +84,8 @@ sub _error {
     my $err = shift;
     {
       local($!);
-      $@ = join("",ref($sock),": ",@_);
+      my $title = ref($sock).": ";
+      $@ = join("", $_[0] =~ /^$title/ ? "" : $title, @_);
       close($sock)
 	if(defined fileno($sock));
     }
@@ -189,12 +190,13 @@ sub configure {
 #        my $timeout = ${*$sock}{'io_socket_timeout'};
 #        my $before = time() if $timeout;
 
+	undef $@;
         if ($sock->connect(pack_sockaddr_in($rport, $raddr))) {
 #            ${*$sock}{'io_socket_timeout'} = $timeout;
             return $sock;
         }
 
-	return _error($sock, $!, "Timeout")
+	return _error($sock, $!, $@ || "Timeout")
 	    unless @raddr;
 
 #	if ($timeout) {

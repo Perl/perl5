@@ -1439,7 +1439,15 @@ t/lib/ansicolor.t	See if Term::ANSIColor works
 t/lib/anydbm.t		See if AnyDBM_File works
 t/lib/attrs.t		See if attrs works with C<sub : attrs>
 t/lib/autoloader.t	See if AutoLoader works
-t/lib/b.t		See if B backends work
+t/lib/b.t		See if B works
+t/lib/b-debug.t         See if B::Debug works
+t/lib/b-deparse.t       See if B::Deparse works
+t/lib/b-showlex.t       See if B::ShowLex works
+t/lib/b-stash.t         See if B::Stash works
+t/lib/b-debug.t         See if B::Debug works
+t/lib/b-deparse.t       See if B::Deparse works
+t/lib/b-showlex.t       See if B::ShowLex works
+t/lib/b-stash.t         See if B::Stash works
 t/lib/basename.t	See if File::Basename works
 t/lib/bigfloat.t	See if bigfloat.pl works
 t/lib/bigfltpm.t	See if BigFloat.pm works

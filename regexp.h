@@ -30,6 +30,7 @@ typedef struct regexp {
         struct reg_data *data;	/* Additional data. */
 	char *subbeg;		/* saved or original string 
 				   so \digit works forever. */
+        U32 *offsets;           /* offset annotations 20001228 MJD */
 	I32 sublen;		/* Length of string pointed by subbeg */
 	I32 refcnt;
 	I32 minlen;		/* mininum possible length of $& */

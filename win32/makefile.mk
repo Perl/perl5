@@ -1118,24 +1118,24 @@ distclean: clean
 	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm
-	-del /f $(LIBDIR)\Filter\Util\Call\Call.pm
+	-del /f $(LIBDIR)\Filter\Util\Call.pm
 	-del /f $(LIBDIR)\Digest\MD5.pm
-	-del /f $(LIBDIR)\MIME\Base64\Base64.pm
-	-del /f $(LIBDIR)\MIME\Base64\QuotedPrint.pm
-	-del /f $(LIBDIR)\Time\HiRes\HiRes.pm
-	-del /f $(LIBDIR)\Time\Piece\Piece.pm
+	-del /f $(LIBDIR)\MIME\Base64.pm
+	-del /f $(LIBDIR)\MIME\QuotedPrint.pm
+	-del /f $(LIBDIR)\Time\HiRes.pm
+	-del /f $(LIBDIR)\List\Util.pm
+	-del /f $(LIBDIR)\Scalar\Util.pm
+	-del /f $(LIBDIR)\Time\Piece.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data || rmdir /s $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Filter\Util\Call rmdir /s /q $(LIBDIR)\Filter\Util\Call || rmdir /s $(LIBDIR)\Filter
 	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util || rmdir /s $(LIBDIR)\Filter
-	-if exist $(LIBDIR)\Digest\MD5 rmdir /s /q $(LIBDIR)\Digest\MD5 || rmdir /s $(LIBDIR)\Digest\MD5
 	-if exist $(LIBDIR)\Digest rmdir /s /q $(LIBDIR)\Digest || rmdir /s $(LIBDIR)\Digest
-	-if exist $(LIBDIR)\MIME\Base64 rmdir /s /q $(LIBDIR)\MIME\Base64 || rmdir /s $(LIBDIR)\MIME\Base64
 	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME || rmdir /s $(LIBDIR)\MIME
-	-if exist $(LIBDIR)\Time\HiRes rmdir /s /q $(LIBDIR)\Time\HiRes || rmdir /s $(LIBDIR)\Time\HiRes
-	-if exist $(LIBDIR)\Time\Piece rmdir /s /q $(LIBDIR)\Time\Piece || rmdir /s $(LIBDIR)\Time\Piece
+	-if exist $(LIBDIR)\List rmdir /s /q $(LIBDIR)\List || rmdir /s $(LIBDIR)\List
+	-if exist $(LIBDIR)\Scalar rmdir /s /q $(LIBDIR)\Scalar || rmdir /s $(LIBDIR)\Scalar
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlbs2000.pod perlcygwin.pod \
 	    perldos.pod perlepoc.pod perlhpux.pod perlmachten.pod \

@@ -358,15 +358,15 @@ Encode - character encodings
 
 =head1 DESCRIPTION
 
-The C<Encode> module provides the interfaces between perl's strings
-and the rest of the system. Perl strings are sequences of B<characters>.
+The C<Encode> module provides the interfaces between Perl's strings
+and the rest of the system.  Perl strings are sequences of B<characters>.
 
 The repertoire of characters that Perl can represent is at least that
-defined by the Unicode Consortium. On most platforms the ordinal values
-of the  characters (as returned by C<ord(ch)>) is the "Unicode codepoint" for
-the character (the exceptions are those platforms where the legacy
-encoding is some variant of EBCDIC rather than a super-set of ASCII
-- see L<perlebcdic>).
+defined by the Unicode Consortium. On most platforms the ordinal
+values of the characters (as returned by C<ord(ch)>) is the "Unicode
+codepoint" for the character (the exceptions are those platforms where
+the legacy encoding is some variant of EBCDIC rather than a super-set
+of ASCII - see L<perlebcdic>).
 
 Traditionaly computer data has been moved around in 8-bit chunks
 often called "bytes". These chunks are also known as "octets" in
@@ -375,9 +375,9 @@ many types - not only strings of characters representing human or
 computer languages but also "binary" data being the machines representation
 of numbers, pixels in an image - or just about anything.
 
-When perl is processing "binary data" the programmer wants perl to process
-"sequences of bytes". This is not a problem for perl - as a byte has 256
-possible values it easily fits in perl's much larger "logical character".
+When Perl is processing "binary data" the programmer wants Perl to process
+"sequences of bytes". This is not a problem for Perl - as a byte has 256
+possible values it easily fits in Perl's much larger "logical character".
 
 =head2 TERMINOLOGY
 
@@ -386,17 +386,17 @@ possible values it easily fits in perl's much larger "logical character".
 =item *
 
 I<character>: a character in the range 0..(2**32-1) (or more).
-(What perl's strings are made of.)
+(What Perl's strings are made of.)
 
 =item *
 
 I<byte>: a character in the range 0..255
-(A special case of a perl character.)
+(A special case of a Perl character.)
 
 =item *
 
 I<octet>: 8 bits of data, with ordinal values 0..255
-(Term for bytes passed to or from a non-perl context, e.g. disk file.)
+(Term for bytes passed to or from a non-Perl context, e.g. disk file.)
 
 =back
 
@@ -426,7 +426,7 @@ Each character is a single octet so may have a repertoire of up to
 =item * Fixed length 16-bit encodings
 
 Each character is two octets so may have a repertoire of up to
-65,536 characters. Unicode's UCS-2 is an example. Also used for
+65 536 characters.  Unicode's UCS-2 is an example.  Also used for
 encodings for East Asian languages.
 
 =item * Fixed length 32-bit encodings.
@@ -456,8 +456,8 @@ of the above types) until another escape sequence switches to
 a different "embedded" encoding.
 
 These schemes are very flexible and can handle mixed languages but are
-very complex to process (and have state).
-No escape encodings are implemented for perl yet.
+very complex to process (and have state).  No escape encodings are
+implemented for Perl yet.
 
 =back
 
@@ -469,8 +469,8 @@ Encodings can be specified to the API described below in two ways:
 
 =item 1. By name
 
-Encoding names are strings with characters taken from a restricted repertoire.
-See L</"Encoding Names">.
+Encoding names are strings with characters taken from a restricted
+repertoire.  See L</"Encoding Names">.
 
 =item 2. As an object
 
@@ -481,9 +481,9 @@ Encoding objects are returned by C<find_encoding($name)>.
 =head2 Encoding Names
 
 Encoding names are case insensitive. White space in names is ignored.
-In addition an encoding may have aliases. Each encoding has one "canonical" name.
-The "canonical" name is chosen from the names of the encoding by picking
-the first in the following sequence:
+In addition an encoding may have aliases. Each encoding has one
+"canonical" name.  The "canonical" name is chosen from the names of
+the encoding by picking the first in the following sequence:
 
 =over 4
 
@@ -509,33 +509,41 @@ once an operation is in progress.
 
         $bytes  = encode(ENCODING, $string[, CHECK])
 
-Encodes string from perl's internal form into I<ENCODING> and returns a
-sequence of octets.
-See L</"Handling Malformed Data">.
+Encodes string from Perl's internal form into I<ENCODING> and returns
+a sequence of octets.  For CHECK see L</"Handling Malformed Data">.
 
 =item *
 
         $string = decode(ENCODING, $bytes[, CHECK])
 
-Decode sequence of octets assumed to be in I<ENCODING> into perls internal
-form and returns the resuting string.
-See L</"Handling Malformed Data">.
+Decode sequence of octets assumed to be in I<ENCODING> into Perl's
+internal form and returns the resulting string.  For CHECK see
+L</"Handling Malformed Data">.
+
+=item *
+
+	from_to($string, FROM_ENCODING, TO_ENCODING[, CHECK])
+
+Convert the data between two encodings.  How did the data in $string
+originally get to be in FROM_ENCODING?  Either using encode() or
+through PerlIO: See L</"Encode and PerlIO">.  For CHECK see
+L</"Handling Malformed Data">.
 
 =back
 
 =head2 Handling Malformed Data
 
 If CHECK is not set, C<undef> is returned.  If the data is supposed to
-be UTF-8, an optional lexical warning (category utf8) is given.
-If CHECK is true but not a code reference, dies.
+be UTF-8, an optional lexical warning (category utf8) is given.  If
+CHECK is true but not a code reference, dies.
 
-It would desirable to have a way to indicate that transform should use the
-encodings "replacement character" - no such mechanism is defined yet.
+It would desirable to have a way to indicate that transform should use
+the encodings "replacement character" - no such mechanism is defined yet.
 
 It is also planned to allow I<CHECK> to be a code reference.
 
-This is not yet implemented as there are design issues with what its arguments
-should be and how it returns its results.
+This is not yet implemented as there are design issues with what its
+arguments should be and how it returns its results.
 
 =over 4
 
@@ -556,11 +564,9 @@ the fixup routine very little context.
 
 =item Scheme 2
 
-Passed original string, and an index into it of the problem area,
-and output string so far.
-Appends what it will to output string and returns new index into
-original string.
-e.g.
+Passed original string, and an index into it of the problem area, and
+output string so far.  Appends what it will to output string and
+returns new index into original string.  For example:
 
  sub fixup {
    # my ($s,$i,$d) = @_;
@@ -569,9 +575,9 @@ e.g.
    return $_[1]+1;
  }
 
-This scheme gives maximal control to the fixup routine but is more complicated
-to code, and may need internals of Encode to be tweaked to keep original
-string intact.
+This scheme gives maximal control to the fixup routine but is more
+complicated to code, and may need internals of Encode to be tweaked to
+keep original string intact.
 
 =item Other Schemes
 
@@ -586,11 +592,11 @@ Index into the string could be pos($str) allowing s/\G...//.
 =head2 UTF-8 / utf8
 
 The Unicode consortium defines the UTF-8 standard as a way of encoding
-the entire Unicode repertiore as sequences of octets. This encoding
-is expected to become very widespread. Perl can use this form internaly
-to represent strings, so conversions to and from this form are particularly
-efficient (as octets in memory do not have to change, just the meta-data
-that tells perl how to treat them).
+the entire Unicode repertiore as sequences of octets.  This encoding is
+expected to become very widespread. Perl can use this form internaly
+to represent strings, so conversions to and from this form are
+particularly efficient (as octets in memory do not have to change,
+just the meta-data that tells Perl how to treat them).
 
 =over 4
 
@@ -598,7 +604,7 @@ that tells perl how to treat them).
 
         $bytes = encode_utf8($string);
 
-The characters that comprise string are encoded in perl's superset of UTF-8
+The characters that comprise string are encoded in Perl's superset of UTF-8
 and the resulting octets returned as a sequence of bytes. All possible
 characters have a UTF-8 representation so this function cannot fail.
 
@@ -606,25 +612,27 @@ characters have a UTF-8 representation so this function cannot fail.
 
         $string = decode_utf8($bytes [,CHECK]);
 
-The sequence of octets represented by $bytes is decoded from UTF-8 into
-a sequence of logical characters. Not all sequences of octets form valid
-UTF-8 encodings, so it is possible for this call to fail.
-See L</"Handling Malformed Data">.
+The sequence of octets represented by $bytes is decoded from UTF-8
+into a sequence of logical characters. Not all sequences of octets
+form valid UTF-8 encodings, so it is possible for this call to fail.
+For CHECK see L</"Handling Malformed Data">.
 
 =back
 
 =head2 Other Encodings of Unicode
 
-UTF-16 is similar to UCS-2, 16 bit or 2-byte chunks.
-UCS-2 can only represent 0..0xFFFF, while UTF-16 has a "surogate pair"
-scheme which allows it to cover the whole Unicode range.
+UTF-16 is similar to UCS-2, 16 bit or 2-byte chunks.  UCS-2 can only
+represent 0..0xFFFF, while UTF-16 has a "surrogate pair" scheme which
+allows it to cover the whole Unicode range.
 
 Encode implements big-endian UCS-2 aliased to "iso-10646-1" as that
-happens to be the name used by that representation when used with X11 fonts.
+happens to be the name used by that representation when used with X11
+fonts.
 
 UTF-32 or UCS-4 is 32-bit or 4-byte chunks.  Perl's logical characters
 can be considered as being in this form without encoding. An encoding
-to transfer strings in this form (e.g. to write them to a file) would need to
+to transfer strings in this form (e.g. to write them to a file) would
+need to
 
      pack('L',map(chr($_),split(//,$string)));   # native
   or
@@ -636,8 +644,8 @@ depending on the endian required.
 
 No UTF-32 encodings are implemented yet.
 
-Both UCS-2 and UCS-4 style encodings can have "byte order marks" by representing
-the code point 0xFFFE as the very first thing in a file.
+Both UCS-2 and UCS-4 style encodings can have "byte order marks" by
+representing the code point 0xFFFE as the very first thing in a file.
 
 =head2 Listing available encodings
 
@@ -651,8 +659,8 @@ Returns a list of the canonical names of the available encodings.
   use Encode qw(define_alias);
   define_alias( newName => ENCODING);
 
-Allows newName to be used as am alias for ENCODING. ENCODING may be either the
-name of an encoding or and encoding object (as above).
+Allows newName to be used as am alias for ENCODING. ENCODING may be
+either the name of an encoding or and encoding object (as above).
 
 Currently I<newName> can be specified in the following ways:
 
@@ -664,19 +672,19 @@ Currently I<newName> can be specified in the following ways:
 
   define_alias( qr/^iso8859-(\d+)$/i => '"iso-8859-$1"' );
 
-In this case if I<ENCODING> is not a reference it is C<eval>-ed to allow
-C<$1> etc. to be subsituted.
-The example is one way to names as used in X11 font names to alias the MIME names for the
-iso-8859-* family.
+In this case if I<ENCODING> is not a reference it is C<eval>-ed to
+allow C<$1> etc. to be subsituted.  The example is one way to names as
+used in X11 font names to alias the MIME names for the iso-8859-*
+family.
 
 =item As a code reference, e.g.:
 
   define_alias( sub { return /^iso8859-(\d+)$/i ? "iso-8859-$1" : undef } , '');
 
 In this case C<$_> will be set to the name that is being looked up and
-I<ENCODING> is passed to the sub as its first argument.
-The example is another way to names as used in X11 font names to alias the MIME names for
-the iso-8859-* family.
+I<ENCODING> is passed to the sub as its first argument.  The example
+is another way to names as used in X11 font names to alias the MIME
+names for the iso-8859-* family.
 
 =back
 
@@ -685,16 +693,16 @@ the iso-8859-* family.
   use Encode qw(define_alias);
   define_encoding( $object, 'canonicalName' [,alias...]);
 
-Causes I<canonicalName> to be associated with I<$object>.
-The object should provide the interface described in L</"IMPLEMENTATION CLASSES"> below.
-If more than two arguments are provided then additional arguments are taken
-as aliases for I<$object> as for C<define_alias>.
+Causes I<canonicalName> to be associated with I<$object>.  The object
+should provide the interface described in L</"IMPLEMENTATION CLASSES">
+below.  If more than two arguments are provided then additional
+arguments are taken as aliases for I<$object> as for C<define_alias>.
 
 =head1 Encoding and IO
 
 It is very common to want to do encoding transformations when
 reading or writing files, network connections, pipes etc.
-If perl is configured to use the new 'perlio' IO system then
+If Perl is configured to use the new 'perlio' IO system then
 C<Encode> provides a "layer" (See L<perliol>) which can transform
 data as it is read or written.
 
@@ -712,20 +720,46 @@ for a lexical scope with the C<use open ...> pragma. See L<open>.
 
 Once a handle is open is layers can be altered using C<binmode>.
 
-Without any such configuration, or if perl itself is built using
+Without any such configuration, or if Perl itself is built using
 system's own IO, then write operations assume that file handle accepts
 only I<bytes> and will C<die> if a character larger than 255 is
 written to the handle. When reading, each octet from the handle
 becomes a byte-in-a-character. Note that this default is the same
-behaviour as bytes-only languages (including perl before v5.6) would have,
-and is sufficient to handle native 8-bit encodings e.g. iso-8859-1,
-EBCDIC etc. and any legacy mechanisms for handling other encodings
-and binary data.
+behaviour as bytes-only languages (including Perl before v5.6) would
+have, and is sufficient to handle native 8-bit encodings
+e.g. iso-8859-1, EBCDIC etc. and any legacy mechanisms for handling
+other encodings and binary data.
 
-In other cases it is the programs responsibility
-to transform characters into bytes using the API above before
-doing writes, and to transform the bytes read from a handle into characters
-before doing "character operations" (e.g. C<lc>, C</\W+/>, ...).
+In other cases it is the programs responsibility to transform
+characters into bytes using the API above before doing writes, and to
+transform the bytes read from a handle into characters before doing
+"character operations" (e.g. C<lc>, C</\W+/>, ...).
+
+=head1 Encode and PerlIO
+
+The PerlIO layer (new since Perl 5.7) can be used to automatically
+convert the data being read in or written out to be converted from
+some encoding into Perl's internal encoding or from Perl's internal
+encoding into some other encoding.
+
+Examples:
+
+	open(my $f, "<:encoding(cp1252)")
+
+	open(my $g, ">:encoding(iso-8859-1)")
+
+You can also use PerlIO to convert larger amounts of data you don't
+want to bring into memory.  For example to convert between ISO 8859-1
+(Latin 1) and UTF-8 (or UTF-EBCDIC in EBCDIC machines):
+
+	open(F, "<:encoding(iso-8859-1)", "data.txt") or die $!;
+	open(G, ">:utf8",                 "data.utf") or die $!;
+	while (<F>) { print G }
+
+	# Could do "print G <F>" but that would pull
+	# the whole file into memory just to write it out again.
+
+See L<PerlIO> for more information.
 
 =head1 Encoding How to ...
 
@@ -739,30 +773,30 @@ To do:
 
 =item * UTF-8 strings in binary data.
 
-=item * perl/Encode wrappers on non-Unicode XS modules.
+=item * Perl/Encode wrappers on non-Unicode XS modules.
 
 =back
 
 =head1 Messing with Perl's Internals
 
-The following API uses parts of perl's internals in the current implementation.
-As such they are efficient, but may change.
+The following API uses parts of Perl's internals in the current
+implementation.  As such they are efficient, but may change.
 
 =over 4
 
 =item * is_utf8(STRING [, CHECK])
 
 [INTERNAL] Test whether the UTF-8 flag is turned on in the STRING.
-If CHECK is true, also checks the data in STRING for being
-well-formed UTF-8.  Returns true if successful, false otherwise.
+If CHECK is true, also checks the data in STRING for being well-formed
+UTF-8.  Returns true if successful, false otherwise.
 
 =item * valid_utf8(STRING)
 
-[INTERNAL] Test whether STRING is in a consistent state.
-Will return true if string is held as bytes, or is well-formed UTF-8
-and has the UTF-8 flag on.
-Main reason for this routine is to allow perl's testsuite to check
-that operations have left strings in a consistent state.
+[INTERNAL] Test whether STRING is in a consistent state.  Will return
+true if string is held as bytes, or is well-formed UTF-8 and has the
+UTF-8 flag on.  Main reason for this routine is to allow Perl's
+testsuite to check that operations have left strings in a consistent
+state.
 
 =item *
 
@@ -795,10 +829,11 @@ The values of the hash can currently be either strings or objects.
 The string form may go away in the future. The string form occurs
 when C<encodings()> has scanned C<@INC> for loadable encodings but has
 not actually loaded the encoding in question. This is because the
-current "loading" process is all perl and a bit slow.
+current "loading" process is all Perl and a bit slow.
 
-Once an encoding is loaded then value of the hash is object which implements
-the encoding. The object should provide the following interface:
+Once an encoding is loaded then value of the hash is object which
+implements the encoding. The object should provide the following
+interface:
 
 =over 4
 
@@ -808,82 +843,90 @@ Should return the string representing the canonical name of the encoding.
 
 =item -E<gt>new_sequence
 
-This is a placeholder for encodings with state. It should return an object
-which implements this interface, all current implementations return the
-original object.
+This is a placeholder for encodings with state. It should return an
+object which implements this interface, all current implementations
+return the original object.
 
 =item -E<gt>encode($string,$check)
 
-Should return the octet sequence representing I<$string>. If I<$check> is true
-it should modify I<$string> in place to remove the converted part (i.e.
-the whole string unless there is an error).
-If an error occurs it should return the octet sequence for the
-fragment of string that has been converted, and modify $string in-place
-to remove the converted part leaving it starting with the problem fragment.
+Should return the octet sequence representing I<$string>. If I<$check>
+is true it should modify I<$string> in place to remove the converted
+part (i.e.  the whole string unless there is an error).  If an error
+occurs it should return the octet sequence for the fragment of string
+that has been converted, and modify $string in-place to remove the
+converted part leaving it starting with the problem fragment.
 
-If check is is false then C<encode> should make a "best effort" to convert
-the string - for example by using a replacement character.
+If check is is false then C<encode> should make a "best effort" to
+convert the string - for example by using a replacement character.
 
 =item -E<gt>decode($octets,$check)
 
-Should return the string that I<$octets> represents. If I<$check> is true
-it should modify I<$octets> in place to remove the converted part (i.e.
-the whole sequence unless there is an error).
-If an error occurs it should return the fragment of string
-that has been converted, and modify $octets in-place to remove the converted part
+Should return the string that I<$octets> represents. If I<$check> is
+true it should modify I<$octets> in place to remove the converted part
+(i.e.  the whole sequence unless there is an error).  If an error
+occurs it should return the fragment of string that has been
+converted, and modify $octets in-place to remove the converted part
 leaving it starting with the problem fragment.
 
-If check is is false then C<decode> should make a "best effort" to convert
-the string - for example by using Unicode's "\x{FFFD}" as a replacement character.
+If check is is false then C<decode> should make a "best effort" to
+convert the string - for example by using Unicode's "\x{FFFD}" as a
+replacement character.
 
 =back
 
-It should be noted that the check behaviour is different from the outer
-public API. The logic is that the "unchecked" case is useful when
-encoding is part of a stream which may be reporting errors (e.g. STDERR).
-In such cases it is desirable to get everything through somehow without
-causing additional errors which obscure the original one. Also the encoding
-is best placed to know what the correct replacement character is, so if that
-is the desired behaviour then letting low level code do it is the most efficient.
+It should be noted that the check behaviour is different from the
+outer public API. The logic is that the "unchecked" case is useful
+when encoding is part of a stream which may be reporting errors
+(e.g. STDERR).  In such cases it is desirable to get everything
+through somehow without causing additional errors which obscure the
+original one. Also the encoding is best placed to know what the
+correct replacement character is, so if that is the desired behaviour
+then letting low level code do it is the most efficient.
 
-In contrast if check is true, the scheme above allows the encoding to do as
-much as it can and tell layer above how much that was. What is lacking
-at present is a mechanism to report what went wrong. The most likely interface
-will be an additional method call to the object, or perhaps
-(to avoid forcing per-stream objects on otherwise stateless encodings)
-and additional parameter.
+In contrast if check is true, the scheme above allows the encoding to
+do as much as it can and tell layer above how much that was. What is
+lacking at present is a mechanism to report what went wrong. The most
+likely interface will be an additional method call to the object, or
+perhaps (to avoid forcing per-stream objects on otherwise stateless
+encodings) and additional parameter.
 
-It is also highly desirable that encoding classes inherit from C<Encode::Encoding>
-as a base class. This allows that class to define additional behaviour for
-all encoding objects. For example built in Unicode, UCS-2 and UTF-8 classes
-use :
+It is also highly desirable that encoding classes inherit from
+C<Encode::Encoding> as a base class. This allows that class to define
+additional behaviour for all encoding objects. For example built in
+Unicode, UCS-2 and UTF-8 classes use :
 
   package Encode::MyEncoding;
   use base qw(Encode::Encoding);
 
   __PACKAGE__->Define(qw(myCanonical myAlias));
 
-To create an object with bless {Name => ...},$class, and call define_encoding.
-They inherit their C<name> method from C<Encode::Encoding>.
+To create an object with bless {Name => ...},$class, and call
+define_encoding.  They inherit their C<name> method from
+C<Encode::Encoding>.
 
 =head2 Compiled Encodings
 
-F<Encode.xs> provides a class C<Encode::XS> which provides the interface described
-above. It calls a generic octet-sequence to octet-sequence "engine" that is
-driven by tables (defined in F<encengine.c>). The same engine is used for both
-encode and decode. C<Encode:XS>'s C<encode> forces perl's characters to their UTF-8 form
-and then treats them as just another multibyte encoding. C<Encode:XS>'s C<decode> transforms
-the sequence and then turns the UTF-8-ness flag as that is the form that the tables
-are defined to produce. For details of the engine see the comments in F<encengine.c>.
+F<Encode.xs> provides a class C<Encode::XS> which provides the
+interface described above. It calls a generic octet-sequence to
+octet-sequence "engine" that is driven by tables (defined in
+F<encengine.c>). The same engine is used for both encode and
+decode. C<Encode:XS>'s C<encode> forces Perl's characters to their
+UTF-8 form and then treats them as just another multibyte
+encoding. C<Encode:XS>'s C<decode> transforms the sequence and then
+turns the UTF-8-ness flag as that is the form that the tables are
+defined to produce. For details of the engine see the comments in
+F<encengine.c>.
 
-The tables are produced by the perl script F<compile> (the name needs to change so
-we can eventually install it somewhere). F<compile> can currently read two formats:
+The tables are produced by the Perl script F<compile> (the name needs
+to change so we can eventually install it somewhere). F<compile> can
+currently read two formats:
 
 =over 4
 
 =item *.enc
 
-This is a coined format used by Tcl. It is documented in Encode/EncodeFormat.pod.
+This is a coined format used by Tcl. It is documented in
+Encode/EncodeFormat.pod.
 
 =item *.ucm
 
@@ -907,14 +950,14 @@ into F<Encode.so>/F<Encode.dll>.
 
 =item *.xs
 
-In theory this allows encodings to be stand-alone loadable perl extensions.
-The process has not yet been tested. The plan is to use this approach
-for large East Asian encodings.
+In theory this allows encodings to be stand-alone loadable Perl
+extensions.  The process has not yet been tested. The plan is to use
+this approach for large East Asian encodings.
 
 =back
 
-The set of encodings built-in to F<Encode.so>/F<Encode.dll> is determined by
-F<Makefile.PL>. The current set is as follows:
+The set of encodings built-in to F<Encode.so>/F<Encode.dll> is
+determined by F<Makefile.PL>.  The current set is as follows:
 
 =over 4
 
@@ -924,23 +967,23 @@ That is all the common 8-bit "western" encodings.
 
 =item IBM-1047 and two other variants of EBCDIC.
 
-These are the same variants that are supported by EBCDIC perl as "native" encodings.
-They are included to prove "reversibility" of some constructs in EBCDIC perl.
+These are the same variants that are supported by EBCDIC Perl as
+"native" encodings.  They are included to prove "reversibility" of
+some constructs in EBCDIC Perl.
 
 =item symbol and dingbats as used by Tk on X11.
 
-(The reason Encode got started was to support perl/Tk.)
+(The reason Encode got started was to support Perl/Tk.)
 
 =back
 
-That set is rather ad. hoc. and has been driven by the needs of the tests rather
-than the needs of typical applications. It is likely to be rationalized.
+That set is rather ad hoc and has been driven by the needs of the
+tests rather than the needs of typical applications. It is likely
+to be rationalized.
 
 =head1 SEE ALSO
 
-L<perlunicode>, L<perlebcdic>, L<perlfunc/open>
+L<perlunicode>, L<perlebcdic>, L<perlfunc/open>, L<PerlIO>
 
 =cut
-
-
 

@@ -83,7 +83,7 @@ libswanted=`echo " $libswanted " | sed -e 's/ malloc / /' -e 's/ c / /'`
 
 # remove /shlib and /lib from library search path as both symlink to /usr/lib
 # where runtime shared libc is 
-glibpth=`echo " $glibpth " | sed -e 's/ \/shlib / /' -e 's/ \/lib / /`
+glibpth=`echo " $glibpth " | sed -e 's/ \/shlib / /' -e 's/ \/lib / /'`
 
 # Don't use BSD emulation pieces (/usr/ucblib) regardless
 # these would probably be autonondetected anyway but ...
@@ -156,8 +156,10 @@ fi
 # cccdlflags: must tell the compiler to generate relocatable code
 # lddlflags : must tell the linker to output a shared library
 
-# use shared perl lib    
-useshrplib='true'
+# use shared perl lib if the user doesn't choose otherwise
+if test "x$useshrplib" == "x"; then
+    useshrplib='true'
+fi
 
 case "$cc" in
        *gcc*)
