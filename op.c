@@ -5719,7 +5719,9 @@ Perl_ck_sassign(pTHX_ OP *o)
     OP *kid = cLISTOPo->op_first;
     /* has a disposable target? */
     if ((PL_opargs[kid->op_type] & OA_TARGLEX)
-	&& !(kid->op_flags & OPf_STACKED))
+	&& !(kid->op_flags & OPf_STACKED)
+	/* Cannot steal the second time! */
+	&& !(kid->op_private & OPpTARGET_MY))
     {
 	OP *kkid = kid->op_sibling;
 
