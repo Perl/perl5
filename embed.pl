@@ -2514,7 +2514,6 @@ s	|void	|sv_del_backref	|SV *sv
 s	|void	|del_sv	|SV *p
 #  endif
 #  if !defined(NV_PRESERVES_UV)
-s      |int    |sv_2inuv_non_preserve  |SV *sv|I32 numtype
 s      |int    |sv_2iuv_non_preserve   |SV *sv|I32 numtype
 #  endif
 s	|I32	|expect_number	|char** pattern

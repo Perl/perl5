@@ -1238,7 +1238,6 @@ STATIC void	S_sv_del_backref(pTHX_ SV *sv);
 STATIC void	S_del_sv(pTHX_ SV *p);
 #  endif
 #  if !defined(NV_PRESERVES_UV)
-STATIC int	S_sv_2inuv_non_preserve(pTHX_ SV *sv, I32 numtype);
 STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *sv, I32 numtype);
 #  endif
 STATIC I32	S_expect_number(pTHX_ char** pattern);

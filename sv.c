@@ -1503,9 +1503,9 @@ S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
     const char max_mod_10 = UV_MAX % 10 + '0';
     int numtype = 0;
     int sawinf = 0;
-#ifdef USE_LOCALE_NUMERIC
-    bool specialradix = FALSE;
-#endif
+    char* radix = ".";
+    STRLEN radixlen = 1;
+	  
 
     while (isSPACE(*s))
 	s++;
@@ -1515,6 +1515,11 @@ S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
     }
     else if (*s == '+')
 	s++;
+
+#ifdef USE_LOCALE_NUMERIC
+    if (PL_numeric_radix_sv && IN_LOCALE)
+        radix = SvPV(PL_numeric_radix_sv, radixlen);
+#endif
 
     /* next must be digit or the radix separator or beginning of infinity */
     if (isDIGIT(*s)) {
@@ -1584,48 +1589,29 @@ S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 	    *valuep = value;
 
       skip_value:
-        if (
-#ifdef USE_LOCALE_NUMERIC
-            (specialradix = IS_NUMERIC_RADIX(s, send)) ||
-#endif
-	    *s == '.') {
-#ifdef USE_LOCALE_NUMERIC
-            if (specialradix)
-                s += SvCUR(PL_numeric_radix_sv);
-            else
-#endif
-                s++;
+	if (s + radixlen <= send && memEQ(s, radix, radixlen)) {
+	    s += radixlen;
 	    numtype |= IS_NUMBER_NOT_INT;
-            while (isDIGIT(*s))  /* optional digits after the radix */
-                s++;
-        }
-    }
-    else if (
-#ifdef USE_LOCALE_NUMERIC
-        (specialradix = IS_NUMERIC_RADIX(s, send)) ||
-#endif
-        *s == '.'
-        ) {
-#ifdef USE_LOCALE_NUMERIC
-	if (specialradix)
-	    s += SvCUR(PL_numeric_radix_sv);
-	else
-#endif
-            s++;
-	numtype |= IS_NUMBER_NOT_INT;
-        /* no digits before the radix means we need digits after it */
-        if (isDIGIT(*s)) {
-	    do {
+	    while (isDIGIT(*s))  /* optional digits after the radix */
 	        s++;
-            } while (isDIGIT(*s));
-	    numtype |= IS_NUMBER_IN_UV;
-	    if (valuep) {
-		/* integer approximation is valid - it's 0.  */
-		*valuep = 0;
-	    }
-        }
-        else
-	    return 0;
+	}
+    }
+    else if (s + radixlen <= send && memEQ(s, radix, radixlen)) {
+       s += radixlen;
+       numtype |= IS_NUMBER_NOT_INT;
+       /* no digits before the radix means we need digits after it */
+       if (isDIGIT(*s)) {
+	   do {
+	       s++;
+	   } while (isDIGIT(*s));
+	   numtype |= IS_NUMBER_IN_UV;
+	   if (valuep) {
+	       /* integer approximation is valid - it's 0.  */
+	       *valuep = 0;
+	   }
+       }
+       else
+	 return 0;
     }
     else if (*s == 'I' || *s == 'i') {
 	s++; if (*s != 'N' && *s != 'n') return 0;
@@ -2459,9 +2445,8 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     if (SvNOKp(sv) && !(SvIOK(sv) || SvPOK(sv))) {
 	SvNOK_on(sv);
     }
-    else     if (SvIOKp(sv) &&
-	    (!SvPOKp(sv) || !strchr(SvPVX(sv),'.') || /* XXX check this logic */
-	     !grok_number(SvPVX(sv), SvCUR(sv),NULL)))
+    else if (SvIOKp(sv) &&
+	     (!SvPOKp(sv) || !grok_number(SvPVX(sv), SvCUR(sv),NULL)))
     {
 	SvNVX(sv) = SvIsUV(sv) ? (NV)SvUVX(sv) : (NV)SvIVX(sv);
 #ifdef NV_PRESERVES_UV
