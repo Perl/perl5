@@ -117,11 +117,12 @@ ok (shutdown(LEFT, SHUT_WR), "shutdown left for writing");
 {
   local $SIG{ALRM} = sub { warn "EOF on right took over 3 seconds" };
   local $TODO = "Known problems with unix sockets on $^O"
-      if $^O eq 'hpux'   || $^O eq 'super-ux' ||
-         $^O eq 'unicos' || $^O eq 'unicosmk';
+      if $^O eq 'hpux'   || $^O eq 'super-ux';
   alarm 3;
   $! = 0;
   ok (eof RIGHT, "right is at EOF");
+  local $TODO = "Known problems with unix sockets on $^O"
+      if $^O eq 'unicos' || $^O eq 'unicosmk';
   is ($!, '', 'and $! should report no error');
   alarm 60;
 }
