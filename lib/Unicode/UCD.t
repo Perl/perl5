@@ -232,7 +232,7 @@ ok( charinrange($ranges, "13a0"));
 ok( charinrange($ranges, "13f4"));
 ok(!charinrange($ranges, "13f5"));
 
-is(Unicode::UCD::UnicodeVersion, '3.2.0', 'UnicodeVersion');
+is(Unicode::UCD::UnicodeVersion, '4.0.0', 'UnicodeVersion');
 
 use Unicode::UCD qw(compexcl);
 
