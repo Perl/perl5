@@ -105,7 +105,7 @@ if ($^O eq 'linux') { # We parse ps output so this is OS-dependent.
     while (<PS>) {
       s/\s+$//; # there seems to be extra whitespace at the end by ps(1)?
       print "# $_\n";
-      if (/^\S+\s+$$\s.+\sfoobar$/) {
+      if (/\b$$\b.+\bfoobar\b/) {
 	$ok++;
 	last;
       }
