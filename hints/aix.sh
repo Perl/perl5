@@ -318,7 +318,7 @@ EOM
 	    # from 'trylist', the Configure script will just reset it to 'ar'
 	    # immediately prior to writing config.sh.  This took me hours
 	    # to figure out.
-	    trylist="`echo $trylist | sed -e 's@^ar @@' -e 's@ ar @@g' -e 's@ ar$@@'`"
+	    trylist="`echo $trylist | sed -e 's@^ar @@' -e 's@ ar @ @g' -e 's@ ar$@@'`"
 	    ar="ar -X64"
 	    nm_opt="-X64 $nm_opt"
 	    # Note: Placing the 'lfcflags' variable into the 'ldflags' string

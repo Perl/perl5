@@ -54,11 +54,17 @@
  * of load() and unload() from libC and libC_r need to be used,
  * otherwise statics in the extensions won't get initialized right.
  * -- Stephanie Beals <bealzy@us.ibm.com> */
+
+/* Older AIX C compilers cannot deal with C++ double-slash comments in
+   the ibmcxx and/or xlC includes.  Since we only need a single file,
+   be more fine-grained about what's included <hirschs@btv.ibm.com> */
 #ifdef USE_libC /* The define comes, when it comes, from hints/aix.pl. */
 #   define LOAD   loadAndInit
 #   define UNLOAD terminateAndUnload
-#   ifdef USE_load_h
-#       include <load.h>
+#   if defined(USE_xlC_load_h)
+#       include "/usr/lpp/xlC/include/load.h"
+#   elif defined(USE_ibmcxx_load_h)
+#       include "/usr/ibmcxx/include/load.h"
 #   endif
 #else
 #   define LOAD   load

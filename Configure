@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Feb 28 19:17:18 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Feb 29 01:36:56 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -4561,7 +4561,7 @@ case "$use64bitall" in
       	   *) ccflags="$ccflags -DUSE_64_BIT_ALL";;
 	   esac
 	   case "$archname64" in
-	   ''|64) archname64=64all ;;
+	   ''|64int) archname64=64all ;;
 	   esac
 	   ;;
 	esac
