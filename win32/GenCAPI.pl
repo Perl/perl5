@@ -416,7 +416,6 @@ secondgv
 sortstack
 signalstack
 mystrk
-dumplvl
 oldlastpm
 gensym
 preambled
@@ -499,6 +498,8 @@ nthreads_cond
 eval_cond
 cryptseen
 cshlen
+watchaddr
+watchok
 )];
 
 sub readvars(\%$$) {

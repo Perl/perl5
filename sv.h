@@ -650,7 +650,11 @@ struct xpvio {
 #define SvSetMagicSV_nosteal(dst,src) \
 		SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
 
+#ifdef DEBUGGING
 #define SvPEEK(sv) sv_peek(sv)
+#else
+#define SvPEEK(sv) ""
+#endif
 
 #define SvIMMORTAL(sv) ((sv)==&PL_sv_undef || (sv)==&PL_sv_yes || (sv)==&PL_sv_no)
 

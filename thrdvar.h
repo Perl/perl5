@@ -102,6 +102,7 @@ PERLVAR(Thv_fetch_ent_mh, HE)		/* owned by hv_fetch_ent() */
 PERLVAR(Tmodcount,	I32)		/* how much mod()ification in assignment? */
 
 PERLVAR(Tlastgotoprobe,	OP*)		/* from pp_ctl.c */
+PERLVARI(Tdumpindent,	I32, 4)		/* # of blanks per dump indentation level */
 
 /* sort stuff */
 PERLVAR(Tsortcop,	OP *)		/* user defined sort routine */

@@ -1849,6 +1849,7 @@ init_interp(void)
     PL_curcopdb		= NULL;		\
     PL_dbargs		= 0;		\
     PL_dlmax		= 128;		\
+    PL_dumpindent	= 4;		\
     PL_laststatval	= -1;		\
     PL_laststype	= OP_STAT;	\
     PL_maxscream	= -1;		\
@@ -1886,7 +1887,7 @@ init_interp(void)
 #    undef PERLVAR
 #    undef PERLVARI
 #    undef PERLVARIC
-#    else
+#  else
 #    define PERLVAR(var,type)
 #    define PERLVARI(var,type,init)	PL_##var = init;
 #    define PERLVARIC(var,type,init)	PL_##var = init;
@@ -2810,6 +2811,7 @@ init_main_thread()
     *SvEND(PL_thrsv) = '\0';	/* in the trailing_nul field */
     thr->oursv = PL_thrsv;
     PL_chopset = " \n-";
+    PL_dumpindent = 4;
 
     MUTEX_LOCK(&PL_threads_mutex);
     PL_nthreads++;

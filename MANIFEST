@@ -196,6 +196,10 @@ ext/Data/Dumper/Dumper.pm	Data pretty printer, module
 ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
 ext/Data/Dumper/Makefile.PL	Data pretty printer, makefile writer
 ext/Data/Dumper/Todo		Data pretty printer, futures
+ext/Devel/Peek/Changes		Data debugging tool, changelog
+ext/Devel/Peek/Makefile.PL	Data debugging tool, makefile writer
+ext/Devel/Peek/Peek.pm		Data debugging tool, module and pod
+ext/Devel/Peek/Peek.xs		Data debugging tool, externals
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
