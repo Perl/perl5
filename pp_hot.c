@@ -1339,7 +1339,7 @@ Perl_do_readline(pTHX)
 		        }
 		        else {
 		           PerlIO_rewind(tmpfp);
-		           IoTYPE(io) = '<';
+		           IoTYPE(io) = IoTYPE_RDONLY;
 		           IoIFP(io) = fp = tmpfp;
 		           IoFLAGS(io) &= ~IOf_UNTAINT;  /* maybe redundant */
 		        }
@@ -1393,7 +1393,7 @@ Perl_do_readline(pTHX)
 	else if (type == OP_GLOB)
 	    SP--;
 	else if (ckWARN(WARN_IO)	/* stdout/stderr or other write fh */
-		 && (IoTYPE(io) == '>' || fp == PerlIO_stdout()
+		 && (IoTYPE(io) == IoTYPE_WRONLY || fp == PerlIO_stdout()
 		     || fp == PerlIO_stderr()))
 	{
 	    /* integrate with report_evil_fh()? */
