@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Tue Apr 25 00:14:34 EET DST 2000
+ * Configuration time: Fri Apr 28 23:34:47 EET DST 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2495,16 +2495,6 @@
  */
 #define INSTALL_USR_BIN_PERL	/**/
 
-/* PERL_OTHERLIBDIRS:
- *	This variable contains a colon-separated set of paths for the perl
- *	binary to search for additional library files or modules.
- *	These directories will be tacked to the end of @INC.
- *	Perl will automatically search below each path for version-
- *	and architecture-specific directories.  See PERL_INC_VERSION_LIST
- *	for more details.
- */
-/*#define PERL_OTHERLIBDIRS " "		/ **/
-
 /* PERL_PRIfldbl:
  *	This symbol, if defined, contains the string used by stdio to
  *	format long doubles (format 'f') for output.
@@ -2601,6 +2591,16 @@
 #define Netdb_hlen_t		int /**/
 #define Netdb_name_t		const char * /**/
 #define Netdb_net_t		int /**/
+
+/* PERL_OTHERLIBDIRS:
+ *	This variable contains a colon-separated set of paths for the perl
+ *	binary to search for additional library files or modules.
+ *	These directories will be tacked to the end of @INC.
+ *	Perl will automatically search below each path for version-
+ *	and architecture-specific directories.  See PERL_INC_VERSION_LIST
+ *	for more details.
+ */
+/*#define PERL_OTHERLIBDIRS " "		/ **/
 
 /* IVTYPE:
  *	This symbol defines the C type used for Perl's IV.
