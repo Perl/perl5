@@ -10,6 +10,7 @@ BEGIN {
 
 BEGIN {$| = 1; print "1..31\n"; }
 END {print "not ok 1\n" unless $loaded;}
+use Config;
 use CGI ();
 $loaded = 1;
 print "ok 1\n";
@@ -71,17 +72,22 @@ test(26,$q->param('foo') eq 'bar','CGI::param() redux');
 test(27,$q=new CGI({'foo'=>'bar','bar'=>'froz'}),"CGI::new() redux 2");
 test(28,$q->param('bar') eq 'froz',"CGI::param() redux 2");
 
-$q->_reset_globals;
-$test_string = 'game=soccer&game=baseball&weather=nice';
-$ENV{REQUEST_METHOD}='POST';
-$ENV{CONTENT_LENGTH}=length($test_string);
-$ENV{QUERY_STRING}='big_balls=basketball&small_balls=golf';
-if (open(CHILD,"|-")) {  # cparent
-    print CHILD $test_string;
-    close CHILD;
-    exit 0;
+if (!$Config{d_fork} or $^O eq 'MSWin32' or $^O eq 'VMS') {
+    for (29..31) { print "ok $_ # Skipped: fork n/a\n" }
 }
-# at this point, we're in a new (child) process
-test(29,$q=new CGI,"CGI::new() from POST");
-test(30,$q->param('weather') eq 'nice',"CGI::param() from POST");
-test(31,$q->url_param('big_balls') eq 'basketball',"CGI::url_param()");
+else {
+    $q->_reset_globals;
+    $test_string = 'game=soccer&game=baseball&weather=nice';
+    $ENV{REQUEST_METHOD}='POST';
+    $ENV{CONTENT_LENGTH}=length($test_string);
+    $ENV{QUERY_STRING}='big_balls=basketball&small_balls=golf';
+    if (open(CHILD,"|-")) {  # cparent
+	print CHILD $test_string;
+	close CHILD;
+	exit 0;
+    }
+    # at this point, we're in a new (child) process
+    test(29,$q=new CGI,"CGI::new() from POST");
+    test(30,$q->param('weather') eq 'nice',"CGI::param() from POST");
+    test(31,$q->url_param('big_balls') eq 'basketball',"CGI::url_param()");
+}

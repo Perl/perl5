@@ -4715,9 +4715,8 @@ checkcomma(register char *s, char *name, char *what)
 STATIC SV *
 new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type) 
 {
-    HV *table = perl_get_hv("\10", FALSE); /* ^H */
-    dTHR;
     dSP;
+    HV *table = perl_get_hv("\10", FALSE); /* ^H */
     BINOP myop;
     SV *res;
     bool oldcatch = CATCH_GET;

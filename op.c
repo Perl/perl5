@@ -3057,19 +3057,19 @@ newFOROP(I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *block,OP *cont
 	CONDOP* range = (CONDOP*) flip->op_first;
 	OP* left  = range->op_first;
 	OP* right = left->op_sibling;
-	LISTOP* list;
+	LISTOP* listop;
 
 	range->op_flags &= ~OPf_KIDS;
 	range->op_first = Nullop;
 
-	list = (LISTOP*)newLISTOP(OP_LIST, 0, left, right);
-	list->op_first->op_next = range->op_true;
+	listop = (LISTOP*)newLISTOP(OP_LIST, 0, left, right);
+	listop->op_first->op_next = range->op_true;
 	left->op_next = range->op_false;
-	right->op_next = (OP*)list;
-	list->op_next = list->op_first;
+	right->op_next = (OP*)listop;
+	listop->op_next = listop->op_first;
 
 	op_free(expr);
-	expr = (OP*)(list);
+	expr = (OP*)(listop);
         null(expr);
 	iterflags |= OPf_STACKED;
     }

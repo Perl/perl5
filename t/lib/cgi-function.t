@@ -10,6 +10,7 @@ BEGIN {
 
 BEGIN {$| = 1; print "1..24\n"; }
 END {print "not ok 1\n" unless $loaded;}
+use Config;
 use CGI (':standard','keywords');
 $loaded = 1;
 print "ok 1\n";
@@ -64,16 +65,21 @@ $ENV{QUERY_STRING}='mary+had+a+little+lamb';
 test(21,join(' ',keywords()) eq 'mary had a little lamb','CGI::keywords');
 test(22,join(' ',param('keywords')) eq 'mary had a little lamb','CGI::keywords');
 
-CGI::_reset_globals;
-$test_string = 'game=soccer&game=baseball&weather=nice';
-$ENV{REQUEST_METHOD}='POST';
-$ENV{CONTENT_LENGTH}=length($test_string);
-$ENV{QUERY_STRING}='big_balls=basketball&small_balls=golf';
-if (open(CHILD,"|-")) {  # cparent
-    print CHILD $test_string;
-    close CHILD;
-    exit 0;
+if (!$Config{d_fork} or $^O eq 'MSWin32' or $^O eq 'VMS') {
+    for (23,24) { print "ok $_ # Skipped: fork n/a\n" }
 }
-# at this point, we're in a new (child) process
-test(23,param('weather') eq 'nice',"CGI::param() from POST");
-test(24,url_param('big_balls') eq 'basketball',"CGI::url_param()");
+else {
+    CGI::_reset_globals;
+    $test_string = 'game=soccer&game=baseball&weather=nice';
+    $ENV{REQUEST_METHOD}='POST';
+    $ENV{CONTENT_LENGTH}=length($test_string);
+    $ENV{QUERY_STRING}='big_balls=basketball&small_balls=golf';
+    if (open(CHILD,"|-")) {  # cparent
+	print CHILD $test_string;
+	close CHILD;
+	exit 0;
+    }
+    # at this point, we're in a new (child) process
+    test(23,param('weather') eq 'nice',"CGI::param() from POST");
+    test(24,url_param('big_balls') eq 'basketball',"CGI::url_param()");
+}
