@@ -207,10 +207,10 @@ ERR
    my $more_err_re = <<ERR;
 #     Failed test \\($filename at line 84\\)
 #     Tried to use 'Hooble::mooble::yooble'.
-#     Error:  Can't locate file Hooble.* in \\\@INC .*
+#     Error:  Can't locate Hooble.* in \\\@INC .*
 #     Failed test \\($filename at line 85\\)
 #     Tried to require 'ALL::YOUR::BASE::ARE::BELONG::TO::US::wibble'.
-#     Error:  Can't locate file ALL.* in \\\@INC .*
+#     Error:  Can't locate ALL.* in \\\@INC .*
 # Looks like you failed $Total tests of $Total.
 ERR
 
