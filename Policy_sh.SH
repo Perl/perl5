@@ -134,11 +134,11 @@ do
 	;;
     sitelib)
 	case "$siteprefix" in
-	*perl*)	dflt=$prefix/lib/site_perl ;;
-	*)	dflt=$prefix/lib/$package/site_perl ;;
+	*perl*)	dflt=$prefix/lib/site_perl/$version ;;
+	*)	dflt=$prefix/lib/$package/site_perl/$version ;;
 	esac
 	;;
-    sitearch)	dflt="$sitelib/$apiversion/$archname" ;;
+    sitearch)	dflt="$sitelib/$archname" ;;
 
     siteman1dir)	dflt="$siteprefix/man/man1" ;;
     siteman3dir)	dflt="$siteprefix/man/man3" ;;
@@ -166,11 +166,11 @@ do
 		;;
 	    vendorlib)
 		case "$vendorprefix" in
-		*perl*)	dflt=$prefix/lib/vendor_perl ;;
-		*)	dflt=$prefix/lib/$package/vendor_perl ;;
+		*perl*)	dflt=$prefix/lib/vendor_perl/$version ;;
+		*)	dflt=$prefix/lib/$package/vendor_perl/$version ;;
 		esac
 		;;
-	    vendorarch)	dflt="$vendorlib/$apiversion/$archname" ;;
+	    vendorarch)	dflt="$vendorlib/$archname" ;;
 
 	    vendorman1dir)	dflt="$vendorprefix/man/man1" ;;
 	    vendorman3dir)	dflt="$vendorprefix/man/man3" ;;
