@@ -467,8 +467,8 @@ S_refto(pTHX_ SV *sv)
 	SvTEMP_off(sv);
 	(void)SvREFCNT_inc(sv);
     }
-    else if (SvPADTMP(sv) && !(isGV(sv) && GvIN_PAD(sv)))
-	sv = newSVsv(sv);
+    else if (SvPADTMP(sv) && !IS_PADGV(sv))
+        sv = newSVsv(sv);
     else {
 	SvTEMP_off(sv);
 	(void)SvREFCNT_inc(sv);
