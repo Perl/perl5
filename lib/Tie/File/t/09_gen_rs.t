@@ -1,6 +1,5 @@
 #!/usr/bin/perl
 
-use lib '/home/mjd/src/perl/Tie-File2/lib';
 my $file = "tf$$.txt";
 
 print "1..59\n";

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Unit tests of _twrite function
+# Unit tests of _downcopy function
 #
 # _downcopy($self, $data, $pos, $len)
 # Write $data into a block of length $len at position $pos,
@@ -235,8 +235,6 @@ try(35272,  6728,     0);  # old=x><x     , new=0        ; old > new
 try(32768,  9232,     0);  # old=<x><x    , new=0        ; old > new
 try(42000,     0,     0);  # old=0        , new=0        ; old = new
 
-
-
 sub try {
   my ($pos, $len, $newlen) = @_;
   open F, "> $file" or die "Couldn't open file $file: $!";
@@ -363,4 +361,3 @@ END {
   untie @a;
   1 while unlink $file;
 }
-

@@ -282,62 +282,6 @@ sub try_all_triples {
   }
 }
 
-# Each element of @TRIES has [start, oldlen, newlen]
-# Try them pairwise
-sub xxtry_all_doubles {
-  print "# Trying double regions.\n";
-  my %reg;                        # regions
-  for my $i (0 .. $#TRIES) {
-    $a = $TRIES[$i];
-    ($reg{a}{st}, $reg{a}{ol}, $reg{a}{nl}) =  @{$TRIES[$i]};
-    next if $reg{a}{st} + $reg{a}{ol} >= $FLEN;
-    next if $reg{a}{st} + $reg{a}{nl} >= $FLEN;
-    for my $j (0 .. $#TRIES){
-      $b = $TRIES[$j];
-      ($reg{b}{st}, $reg{b}{ol}, $reg{b}{nl}) =  @{$TRIES[$j]};
-      next if $reg{b}{st} + $reg{b}{ol} >= $FLEN;
-      next if $reg{b}{st} + $reg{b}{nl} >= $FLEN;
-
-      next if $reg{b}{st} < $reg{a}{st} + $reg{a}{ol};  # Overlapping regions
-#      $reg{b}{st} -= $reg{a}{ol} - $reg{a}{nl};
-
-      open F, "> $file" or die "Couldn't open file $file: $!";
-      binmode F;
-      print F $oldfile;
-      close F;
-      die "wrong length!" unless -s $file == $FLEN;
-
-      my $expected = $oldfile;
-      for ('b', 'a') {
-        $reg{$_}{nd} = $_ x $reg{$_}{nl};
-        substr($expected, $reg{$_}{st}, $reg{$_}{ol}, $reg{$_}{nd});
-      }
-
-      my $o = tie my @lines, 'Tie::File', $file or die $!;
-      $o->_mtwrite($reg{a}{nd}, $reg{a}{st}, $reg{a}{ol},
-                   $reg{b}{nd}, $reg{b}{st}, $reg{b}{ol},
-                  );
-      undef $o; untie @lines;
-
-      open F, "< $file" or die "Couldn't open file $file: $!";
-      binmode F;
-      my $actual;
-      { local $/;
-        $actual = <F>;
-      }
-      close F;
-
-      my ($alen, $xlen) = (length $actual, length $expected);
-      print "# try_all_doubles(@$a, @$b)\n";
-      unless ($alen == $xlen) {
-        print "# expected file length $xlen, actual $alen!\n";
-      }
-      print $actual eq $expected ? "ok $N\n" : "not ok $N\n";
-      $N++;
-    }
-  }
-}
-
 sub ctrlfix {
   for (@_) {
     s/\n/\\n/g;
