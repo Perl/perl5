@@ -41,7 +41,7 @@ where $term is a return value of Term::ReadLine-E<gt>Init.
 
 returns the actual package that executes the commands. Among possible
 values are C<Term::ReadLine::Gnu>, C<Term::ReadLine::Perl>,
-C<Term::ReadLine::Stub Exporter>.
+C<Term::ReadLine::Stub>.
 
 =item C<new>
 
@@ -311,6 +311,8 @@ if (defined &Term::ReadLine::Gnu::readline) {
   @ISA = qw(Term::ReadLine::Gnu Term::ReadLine::Stub);
 } elsif (defined &Term::ReadLine::Perl::readline) {
   @ISA = qw(Term::ReadLine::Perl Term::ReadLine::Stub);
+} elsif (defined $which && defined &{"Term::ReadLine::$which\::readline"}) {
+  @ISA = "Term::ReadLine::$which";
 } else {
   @ISA = qw(Term::ReadLine::Stub);
 }
