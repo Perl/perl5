@@ -1438,7 +1438,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 #endif
 	PerlIO *serr = Perl_error_log;
 
-	PerlIO_write(serr, message, msglen);
+	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
 	(void)PerlIO_flush(serr);
 #ifdef USE_SFIO
 	errno = e;

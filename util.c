@@ -1714,7 +1714,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 #endif
 	PerlIO *serr = Perl_error_log;
 
-	PerlIO_write(serr, message, msglen);
+	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
 	(void)PerlIO_flush(serr);
 #ifdef USE_SFIO
 	errno = e;
@@ -1807,7 +1807,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
     {
 	PerlIO *serr = Perl_error_log;
 
-	PerlIO_write(serr, message, msglen);
+	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
 #ifdef LEAKTEST
 	DEBUG_L(*message == '!' 
 		? (xstat(message[1]=='!'
@@ -1922,7 +1922,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
         }
 	{
 	    PerlIO *serr = Perl_error_log;
-	    PerlIO_write(serr, message, msglen);
+	    PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
 	    (void)PerlIO_flush(serr);
 	}
         my_failure_exit();
@@ -1959,7 +1959,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
         }
 	{
 	    PerlIO *serr = Perl_error_log;
-	    PerlIO_write(serr, message, msglen);
+	    PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
 #ifdef LEAKTEST
 	    DEBUG_L(*message == '!' 
 		? (xstat(message[1]=='!'
