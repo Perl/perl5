@@ -37,7 +37,7 @@
  * Trying to select a version that gives no warnings...
  */
 #if !(defined(STMT_START) && defined(STMT_END))
-# if defined(__GNUC__) && !defined(__STRICT_ANSI__)
+# if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(__cplusplus)
 #   define STMT_START	(void)(	/* gcc supports ``({ STATEMENTS; })'' */
 #   define STMT_END	)
 # else
