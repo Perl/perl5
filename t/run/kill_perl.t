@@ -89,7 +89,13 @@ foreach my $prog (@prgs) {
     # various yaccs may or may not capitalize 'syntax'.
     $results =~ s/^(syntax|parse) error/syntax error/mig;
 
-    $results =~ s/\n\n/\n/ if $^O eq 'VMS'; # pipes double these sometimes
+    if ($^O eq 'VMS') {
+        # some tests will trigger VMS messages that won't be expected
+        $results =~ s/\n?%[A-Z]+-[SIWEF]-[A-Z]+,.*//;
+
+        # pipes double these sometimes
+        $results =~ s/\n\n/\n/g;
+    }
 
     $expected =~ s/\n+$//;
     my $ok = $results eq $expected;
