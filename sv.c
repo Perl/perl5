@@ -2624,6 +2624,9 @@ register SV *sv;
 		sv_upgrade(&ref, SVt_RV);
 		SvRV(&ref) = SvREFCNT_inc(sv);
 		SvROK_on(&ref);
+		SvREFCNT(&ref) = 1;	/* Fake, but otherwise
+					   creating+destructing a ref
+					   leads to disaster. */
 
 		EXTEND(SP, 2);
 		PUSHMARK(SP);
