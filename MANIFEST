@@ -2492,7 +2492,6 @@ t/op/utfhash.t			See if utf8 keys in hashes behave
 t/op/vec.t			See if vectors work
 t/op/ver.t			See if v-strings and the %v format flag work
 t/op/wantarray.t		See if wantarray works
-t/op/winsystem.t		See if system works in Win*
 t/op/write.t			See if write works (formats work)
 t/pod/emptycmd.t		Test empty pod directives
 t/pod/emptycmd.xr		Expected results for emptycmd.t
@@ -2553,6 +2552,7 @@ t/uni/sprintf.t			See if Unicode sprintf works
 t/uni/title.t			See if Unicode casing works
 t/uni/upper.t			See if Unicode casing works
 t/win32/longpath.t		Test if Win32::GetLongPathName() works
+t/win32/winsystem.t		See if system works in Win*
 t/x2p/s2p.t			See if s2p/psed work
 taint.c				Tainting code
 thrdvar.h			Per-thread variables
