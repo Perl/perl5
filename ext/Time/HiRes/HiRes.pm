@@ -127,17 +127,18 @@ Returns a floating seconds since the epoch. This function can be imported,
 resulting in a nice drop-in replacement for the C<time> provided with perl,
 see the EXAMPLES below.
 
-B<NOTE>: Since Sunday, September 9th, 2001 at 01:46:40 AM GMT the
-default floating point format of Perl and the seconds since epoch
-have conspired to produce an apparent bug: if you print the value
-of Time::HiRes::time() you seem to be getting only five decimals,
-not six as promised (microseconds).  Not to worry, the microseconds
-are there (assuming your platform supports such granularity).
-What is going on is that the default floating point format of Perl
-only outputs 15 digits.  In this case that means ten digits before the
-decimal separator and five after.  To see the microseconds you can use
-either printf/sprintf with C<%.6f>, or the gettimeofday() function in
-list context, which will give you the seconds and microseconds as two
+B<NOTE>: Since Sunday, September 9th, 2001 at 01:46:40 AM GMT
+(when the time() seconds since epoch rolled over to 1_000_000_000),
+the default floating point format of Perl and the seconds since epoch
+have conspired to produce an apparent bug: if you print the value of
+Time::HiRes::time() you seem to be getting only five decimals, not six
+as promised (microseconds).  Not to worry, the microseconds are there
+(assuming your platform supports such granularity).  What is going on
+is that the default floating point format of Perl only outputs 15
+digits.  In this case that means ten digits before the decimal
+separator and five after.  To see the microseconds you can use either
+printf/sprintf with C<%.6f>, or the gettimeofday() function in list
+context, which will give you the seconds and microseconds as two
 separate values.
 
 =item sleep ( $floating_seconds )
