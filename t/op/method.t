@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..72\n";
+print "1..75\n";
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -21,7 +21,9 @@ my $cnt = 0;
 sub test {
   print "# got `$_[0]', expected `$_[1]'\nnot " unless $_[0] eq $_[1]; 
   # print "not " unless shift eq shift;
-  print "ok ", ++$cnt, "\n"
+  print "ok ", ++$cnt;
+  print " @_[2..$#_]" if @_ > 2;
+  print "\n";
 }
 
 # First, some basic checks of method-calling syntax:
@@ -231,6 +233,34 @@ test(do { eval 'Foo->boogie()';
 eval 'sub Foo::boogie { "yes, sir!" }';
 test( $::{"Foo::"} ? "ok" : "none", "ok");  # should exist now
 test( Foo->boogie(), "yes, sir!");
+
+# Some simpleminded tests for the SUPER:: pseudoclass. 
+# Note that, right now, SUPER:: seems to start looking in the package
+# it was compiled in, rather than in the class it was called in.
+# Which is wrong. Hence the two TODO tests.
+package Parent;
+
+sub foo { 1 };
+
+package Child;
+
+@Child::ISA = 'Parent';
+
+sub child_foo {
+    my $self = shift;
+    $self->SUPER::foo;
+}
+
+package main;
+
+sub Child::main_foo { $_[0]->SUPER::foo }
+
+*Child::late_foo = sub { $_[0]->SUPER::foo };
+
+
+test( scalar(eval {Child->child_foo}), 1 );
+test( scalar(eval {Child->main_foo}), 1, "# TODO SUPER:: non intuitive");
+test( scalar(eval {Child->late_foo}), 1, "# TODO SUPER:: non intuitive");
 
 # TODO: universal.t should test NoSuchPackage->isa()/can()
 
