@@ -12577,7 +12577,7 @@ main(int argc, char **argv)
         fprintf(stdout, "%s", buf);
         fflush(NULL);
         if (i == -1)
-    	return 0;
+	    return 0;
         bp = buf;
     }
 }
@@ -12599,7 +12599,7 @@ EOM
                         fflushNULL="$undef"
                     fi
                 fi
-	        $rm -f core tryp.core core.tryp.*
+	        $rm -f core tryp.c tryp.core core.tryp.*
 		;;
 	'')	$cat >&4 <<EOM
 Your fflush(NULL) isn't working (contrary to ANSI C).
@@ -12621,57 +12621,100 @@ $define|true|[yY]*)
 	fflushNULL="$undef"
 	;;
 esac
-: check explicit looping only if NULL did not work
+: check explicit looping only if NULL did not work, and if the pipe
+: bug does not show up on an explicit flush too
 case "$fflushNULL" in
 "$undef")
-	: check for fflush all behaviour
-	case "$fflushall" in
-	'') 	set try -DTRY_FFLUSH_ALL $output
-		if eval $compile; then
-		        $cat >&4 <<EOM
-(Now testing the other method--but note that also this may fail.)
+	$cat >tryp.c <<EOCP
+#include <stdio.h>
+int
+main(int argc, char **argv)
+{
+    char buf[1024];
+    int i;
+    char *bp = buf;
+    while (1) {
+	while ((i = getc(stdin)) != -1
+	       && (*bp++ = i) != '\n'
+	       && bp < &buf[1024])
+	/* DO NOTHING */ ;
+	*bp = '\0';
+	fprintf(stdout, "%s", buf);
+	fflush(stdin);
+	if (i == -1)
+	    return 0;
+	bp = buf;
+    }
+}
+EOCP
+	set tryp
+	if eval $compile; then
+	    $rm -f tryp.out
+	    $cat tryp.c | ./tryp$exe_ext 2>/dev/null > tryp.out
+	    if cmp tryp.c tryp.out >/dev/null 2>&1; then
+	       $cat >&4 <<EOM
+Good, at least fflush(stdin) seems to behave okay when stdin is a pipe.
 EOM
-			$rm -f try.out
-		    	./try$exe_ext 2>/dev/null
-			if $test -s try.out -a "X$?" = X42; then
-				fflushall="`$cat try.out`"
-			fi
-		fi
-		$rm -f core try.core core.try.*
+		: now check for fflushall behaviour
 		case "$fflushall" in
-		x)	$cat >&4 <<EOM
+		'') 	set try -DTRY_FFLUSH_ALL $output
+			if eval $compile; then
+				$cat >&4 <<EOM
+(Now testing the other method--but note that this also may fail.)
+EOM
+				$rm -f try.out
+				./try$exe_ext 2>/dev/null
+				if $test -s try.out -a "X$?" = X42; then
+					fflushall="`$cat try.out`"
+				fi
+			fi
+			$rm -f core try.core core.try.*
+			case "$fflushall" in
+			x)	$cat >&4 <<EOM
 Whew. Flushing explicitly all the stdio streams works.
 EOM
-			fflushall="$define"
-			;;
-		'')	$cat >&4 <<EOM
+				fflushall="$define"
+				;;
+			'')	$cat >&4 <<EOM
 Sigh. Flushing explicitly all the stdio streams doesn't work.
 EOM
-			fflushall="$undef"
-			;;
-		*)	$cat >&4 <<EOM
+				fflushall="$undef"
+				;;
+			*)	$cat >&4 <<EOM
 Cannot figure out whether flushing stdio streams explicitly works or not.
 I'm assuming it doesn't.
 EOM
+				fflushall="$undef"
+				;;
+			esac
+			;;
+		"$define"|true|[yY]*)
+			fflushall="$define"
+			;;
+		*)
 			fflushall="$undef"
 			;;
 		esac
-		;;
-	"$define"|true|[yY]*)
-		fflushall="$define"
-		;;
-	*)
+	    else
+		$cat >&4 <<EOM
+All is futile.  Even fflush(stdin) clobbers input pipes!
+EOM
 		fflushall="$undef"
-		;;
-	esac
+	    fi
+	else
+	    fflushall="$undef"
+	fi
+	$rm -f core tryp.c tryp.core core.tryp.*
 	;;
-*)	fflushall="$undef"	
+*)	fflushall="$undef"
 	;;
 esac
+
 case "$fflushNULL$fflushall" in
 undefundef)
 	$cat <<EOM
-I cannot figure out how to flush pending stdio output.
+OK, I give up.  I cannot figure out how to flush pending stdio output.
+We won't be flushing handles at all before fork/exec/popen.
 EOM
 	;;
 esac

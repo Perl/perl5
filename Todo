@@ -41,7 +41,7 @@ Would be nice to have
 	    an extension (Devel::MProf?) that would return the malloc
 	    stats in a nice Perl datastructure (also a simple interface
 	    to return just the grand total would be good)
-	a pragma to make << and >> to shit bitvectors instead of numbers
+	a way to make << and >> to shift bitvectors instead of numbers
 
 Possible pragmas
 	debugger
