@@ -2141,6 +2141,12 @@ to use an operator, but this is highly likely to be incorrect.
 For example, if you say "*foo *foo" it will be interpreted as
 if you said "*foo * 'foo'".
 
+=item Out of memory!
+
+(X) The malloc() function returned 0, indicating there was insufficient
+remaining memory (or virtual memory) to satisfy the request.  Perl
+has no option but to exit immediately.
+
 =item Out of memory for yacc stack
 
 (F) The yacc parser wanted to grow its stack so it could continue parsing,

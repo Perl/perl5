@@ -595,8 +595,11 @@ sub B::CV::save {
     }
     # Reserve a place in svsect and xpvcvsect and record indices
     my $gv = $cv->GV;
-    my $cvstashname = $gv->STASH->NAME;
-    my $cvname = $gv->NAME;
+    my ($cvname, $cvstashname);
+    if ($$gv){
+    	$cvname = $gv->NAME;
+    	$cvstashname = $gv->STASH->NAME;
+    }
     my $root = $cv->ROOT;
     my $cvxsub = $cv->XSUB;
     #INIT is removed from the symbol table, so this call must come
@@ -1243,7 +1246,7 @@ sub mark_package
   {    
    no strict 'refs';
    $unused_sub_packages{$package} = 1;
-   if (@{$package.'::ISA'})
+   if (defined @{$package.'::ISA'})
     {
      foreach my $isa (@{$package.'::ISA'}) 
       {
