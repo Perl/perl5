@@ -236,13 +236,18 @@ Llama book:
 If you're not an accidental programmer, but a more serious and
 possibly even degreed computer scientist who doesn't need as much
 hand-holding as we try to provide in the Llama, please check out the
-delightful book, I<Perl: The Programmer's Companion>, written by Nigel
-Chapman.
+delightful book
 
-If you are more at home in Windows, I<Learning Perl on Win32 Systems>
-(the "Gecko Book") is available (unfortunately rather dated).
+    Perl: The Programmer's Companion
+        by Nigel Chapman
+        ISBN 0-471-97563-X [1997, 3rd printing Spring 1998]
+        http://www.wiley.com/compbooks/catalog/97563-X.htm
+        http://www.wiley.com/compbooks/chapman/perl/perltpc.html (errata etc)
 
-    Learning Perl on Win32 Systems
+If you are more at home in Windows the following is available
+(though unfortunately rather dated).
+
+    Learning Perl on Win32 Systems (the "Gecko Book")
 	by Randal L. Schwartz, Erik Olson, and Tom Christiansen,
 	    with foreword by Larry Wall
 	ISBN 1-56592-324-3 [1st edition August 1997]
@@ -300,8 +305,9 @@ Recommended books on (or mostly on) Perl follow.
 
     Perl: The Programmer's Companion
 	by Nigel Chapman
-	ISBN 0-471-97563-X  [1st edition October 1997]
-	http://catalog.wiley.com/title.cgi?isbn=047197563X
+	ISBN 0-471-97563-X [1997, 3rd printing Spring 1998]
+        http://www.wiley.com/compbooks/catalog/97563-X.htm
+        http://www.wiley.com/compbooks/chapman/perl/perltpc.html (errata etc)
 
     Cross-Platform Perl
 	by Eric Foster-Johnson
