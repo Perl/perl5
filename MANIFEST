@@ -893,6 +893,7 @@ lib/ExtUtils/Command.pm		Utilities for Make on non-UNIX platforms
 lib/ExtUtils/Command.t		See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs
+lib/ExtUtils/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/inst		Give information about installed extensions
 lib/ExtUtils/Install.pm		Handles 'make install' on extensions
 lib/ExtUtils/Installed.pm	Information on installed extensions
