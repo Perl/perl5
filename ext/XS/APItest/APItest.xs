@@ -243,3 +243,92 @@ mxpushu()
 	mXPUSHu(2);
 	mXPUSHu(3);
 	XSRETURN(3);
+
+
+void
+call_sv(sv, flags, ...)
+    SV* sv
+    I32 flags
+    PREINIT:
+	I32 i;
+    PPCODE:
+	for (i=0; i<items-2; i++)
+	    ST(i) = ST(i+2); /* pop first two args */
+	PUSHMARK(SP);
+	SP += items - 2;
+	PUTBACK;
+	i = call_sv(sv, flags);
+	SPAGAIN;
+	EXTEND(SP, 1);
+	PUSHs(sv_2mortal(newSViv(i)));
+
+void
+call_pv(subname, flags, ...)
+    char* subname
+    I32 flags
+    PREINIT:
+	I32 i;
+    PPCODE:
+	for (i=0; i<items-2; i++)
+	    ST(i) = ST(i+2); /* pop first two args */
+	PUSHMARK(SP);
+	SP += items - 2;
+	PUTBACK;
+	i = call_pv(subname, flags);
+	SPAGAIN;
+	EXTEND(SP, 1);
+	PUSHs(sv_2mortal(newSViv(i)));
+
+void
+call_method(methname, flags, ...)
+    char* methname
+    I32 flags
+    PREINIT:
+	I32 i;
+    PPCODE:
+	for (i=0; i<items-2; i++)
+	    ST(i) = ST(i+2); /* pop first two args */
+	PUSHMARK(SP);
+	SP += items - 2;
+	PUTBACK;
+	i = call_method(methname, flags);
+	SPAGAIN;
+	EXTEND(SP, 1);
+	PUSHs(sv_2mortal(newSViv(i)));
+
+void
+eval_sv(sv, flags)
+    SV* sv
+    I32 flags
+    PREINIT:
+    	I32 i;
+    PPCODE:
+	PUTBACK;
+	i = eval_sv(sv, flags);
+	SPAGAIN;
+	EXTEND(SP, 1);
+	PUSHs(sv_2mortal(newSViv(i)));
+
+SV*
+eval_pv(p, croak_on_error)
+    const char* p
+    I32 croak_on_error
+    PREINIT:
+    	I32 i;
+    PPCODE:
+	PUTBACK;
+	EXTEND(SP, 1);
+	PUSHs(eval_pv(p, croak_on_error));
+
+void
+require_pv(pv)
+    const char* pv
+    PREINIT:
+    	I32 i;
+    PPCODE:
+	PUTBACK;
+	require_pv(pv);
+
+
+
+
