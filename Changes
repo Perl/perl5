@@ -12,10 +12,10 @@ perlhack.pod for the details.
 
 To give due honor to those who have made Perl what is is today,
 here are some of the more common names in the Changes file, and their
-current addresses (as of February 2000):
+current addresses (as of August 2000):
 
     Gisle Aas           <gisle@aas.no>
-    Abigail             <abigail@delanet.com>
+    Abigail             <abigail@foad.net>
     Kenneth Albanowski  <kjahds@kjahds.com>
     Russ Allbery        <rra@stanford.edu>
     Brad Appleton       <bradapp@enteract.com>
@@ -24,18 +24,18 @@ current addresses (as of February 2000):
     Vishal Bhatia       <vishal@gol.com>
     Spider Boardman     <spider@orb.nashua.nh.us>
     Tom Christiansen    <tchrist@perl.com>
+    Simon Cozens	<simob@brecon.co.uk>
     Mark-Jason Dominus  <mjd@plover.com>
     Jan Dubois          <jand@activestate.com>
     Dominic Dunlop      <domo@computer.org>
     Eric Fifer          <efifer@sanwaint.com>
     Hallvard B Furuseth <h.b.furuseth@usit.uio.no>
     M. J. T. Guy        <mjtg@cus.cam.ac.uk>
-    Jarkko Hietaniemi   <jhi@iki.fi>
     Tom Hughes          <tom@compton.nu>
     Nick Ing-Simmons    <nik@tiuk.ti.com>
     Andreas Koenig      <a.koenig@mind.de>
     Douglas Lankshear   <dougl@activestate.com>
-    Doug MacEachern     <dougm@opengroup.org>
+    Doug MacEachern     <dougm@covalent.net>
     Raphael Manfredi    <Raphael.Manfredi@st.com>
     Paul Marquess       <Paul.Marquess@btinternet.com>
     Stephen McCamant    <alias@mcs.com>
@@ -46,16 +46,17 @@ current addresses (as of February 2000):
     Jeff Okamoto        <okamoto@hpcc123.corp.hp.com>
     Ulrich Pfeifer      <pfeifer@charly.informatik.uni-dortmund.de>
     Tom Phoenix         <rootbeer@teleport.com>
+    Stephen Potter	<spp@ds.net>
     Joshua Pritikin     <joshua.pritikin@db.com>
     Peter Prymmer       <pvhp@forte.com>
     Norbert Pueschel    <pueschel@imsdd.meb.uni-bonn.de>
     Dean Roehrich       <roehrich@cray.com>
-    Hugo van der Sanden <hv@crypt0.demon.co.uk>
+    Hugo van der Sanden <hv@crypt.demon.co.uk>
     Michael G Schwern   <schwern@pobox.com>
     Roderick Schertler  <roderick@argon.org>
     Kurt D. Starsinic   <kstar@chapin.edu>
     Benjamin Stuhl      <sho_pi@hotmail.com>
-    Dan Sugalski        <sugalskd@osshe.edu>
+    Dan Sugalski        <dan@sidhe.org>
     Nathan Torkington   <gnat@frii.com>
     Larry W. Virden     <lvirden@cas.org>
     Johan Vromans       <jvromans@squirrel.nl>
@@ -68,6 +69,7 @@ And the Keepers of the Patch Pumpkin:
     Malcolm Beattie     <mbeattie@sable.ox.ac.uk>
     Tim Bunce           <Tim.Bunce@ig.co.uk>
     Andy Dougherty      <doughera@lafcol.lafayette.edu>
+    Jarkko Hietaniemi	<jhi@iki.fi>
     Gurusamy Sarathy    <gsar@activestate.com>
     Chip Salzenberg     <chip@perl.com>
 
