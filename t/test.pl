@@ -343,6 +343,7 @@ sub which_perl {
 	} else {
 	    $exe = $Config{_exe};
 	}
+       $exe = '' unless defined $exe;
 	
 	# This doesn't absolutize the path: beware of future chdirs().
 	# We could do File::Spec->abs2rel() but that does getcwd()s,

@@ -7,7 +7,7 @@ BEGIN {
 
 print "1..44\n";
 
-my $CAT = ($^O eq 'MSWin32' || $^O eq 'NetWare') ? 'type'
+my $CAT = ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') ? 'type'
 	: ($^O eq 'MacOS') ? 'catenate'
         : 'cat';
 
