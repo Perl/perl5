@@ -4252,6 +4252,7 @@ static void mp_expand_wild_cards(pTHX_ char *item,
 int expcount = 0;
 unsigned long int context = 0;
 int isunix = 0;
+int item_len = 0;
 char *had_version;
 char *had_device;
 int had_directory;
@@ -4271,6 +4272,20 @@ unsigned long int zero = 0, sts;
 	add_item(head, tail, item, count);
 	return;
 	}
+    else
+        {
+     /* "double quoted" wild card expressions pass as is */
+     /* From DCL that means using e.g.:                  */
+     /* perl program """perl.*"""                        */
+     item_len = strlen(item);
+     if ( '"' == *item && '"' == item[item_len-1] )
+       {
+       item++;
+       item[item_len-2] = '\0';
+       add_item(head, tail, item, count);
+       return;
+       }
+     }
     resultspec.dsc$b_dtype = DSC$K_DTYPE_T;
     resultspec.dsc$b_class = DSC$K_CLASS_D;
     resultspec.dsc$a_pointer = NULL;
