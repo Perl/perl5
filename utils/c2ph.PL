@@ -15,8 +15,7 @@ use File::Basename qw(&basename &dirname);
 chdir(dirname($0));
 ($file = basename($0)) =~ s/\.PL$//;
 $file =~ s/\.pl$//
-	if ($Config{'osname'} eq 'VMS' or
-	    $Config{'osname'} eq 'OS2');  # "case-forgiving"
+	if ($^O eq 'VMS' or $^O eq 'os2');  # "case-forgiving"
 
 open OUT,">$file" or die "Can't create $file: $!";
 
@@ -1392,5 +1391,11 @@ close OUT or die "Can't close $file: $!";
 chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
 unlink 'pstruct';
 print "Linking c2ph to pstruct.\n";
-link c2ph, pstruct unless $Config{'osname'} eq 'VMS';
+if (defined $Config{d_link}) {
+  link 'c2ph', 'pstruct';
+} else {
+  unshift @INC, '../lib';
+  require File::Copy;
+  File::Copy::syscopy('c2ph', 'pstruct');
+}
 exec("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';
