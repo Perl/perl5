@@ -36,11 +36,14 @@ eval{ import( 'IN', 'macguffin' ) };
 like( $warn, qr/Unknown discipline layer/, 
 	'should warn about unknown discipline with bad discipline provided' );
 
-# now load a real-looking locale
-$ENV{LC_ALL} = ' .utf8';
-import( 'IN', 'locale' );
-is( ${^OPEN}, ":utf8\0", 
-	'should set a valid locale layer' );
+SKIP: {
+    skip("no perlio, no :utf8", 1) unless $Config{useperlio};
+    # now load a real-looking locale
+    $ENV{LC_ALL} = ' .utf8';
+    import( 'IN', 'locale' );
+    is( ${^OPEN}, ":utf8\0", 
+        'should set a valid locale layer' );
+}
 
 # and see if it sets the magic variables appropriately
 import( 'IN', ':crlf' );
