@@ -357,6 +357,10 @@ listop	:	LSTOP indirob argexpr
 				append_elem(OP_LIST,
 				    prepend_elem(OP_LIST, scalar($1), $5),
 				    newUNOP(OP_METHOD, 0, $3))); }
+	|	term ARROW method
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
+				append_elem(OP_LIST, scalar($1),
+				    newUNOP(OP_METHOD, 0, $3))); }
 	|	METHOD indirob listexpr
 			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				append_elem(OP_LIST,
