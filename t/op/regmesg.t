@@ -134,7 +134,7 @@ while (@death)
     if ($@ !~ /^\Q$result/) {
 	print "# For $regex, expected:\n#  $result\n# Got:\n#  $@\n#\nnot ";
     }
-    print "ok $count\n";
+    print "ok $count - $regex\n";
 }
 
 
@@ -176,7 +176,7 @@ not ok $count
 EOM
 	next;
     }
-    print "ok $count\n";
+    print "ok $count - $regex\n";
 }
 
 
