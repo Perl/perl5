@@ -770,7 +770,7 @@ First build released to public
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sfio.h>.
  */
-#define	I_SFIO		/**/
+/*#define	I_SFIO		/ **/
 
 /* I_STDDEF:
  *	This symbol, if defined, indicates that <stddef.h> exists and should
@@ -2229,7 +2229,7 @@ First build released to public
  *	This symbol, if defined, indicates that sfio should
  *	be used.
  */
-#define USE_SFIO /**/
+/*#define USE_SFIO / **/
 
 /* HAS_SHM:
  *	This symbol, if defined, indicates that the entire shm*(2) library is

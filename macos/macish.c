@@ -20,6 +20,9 @@ Author	:	Matthias Neeracher
 #include <LowMem.h>
 #include <Timer.h>
 
+#undef FILE
+#define FILE	PerlIO
+
 char **environ;
 static  char ** gEnviron;
 static	char *	gEnvpool;
@@ -148,16 +151,17 @@ setup_argstr(SV *really, SV **mark, SV **sp)
 
 int do_spawn(char * command)
 {
-   dTHX;
-   Sfio_t * temp = my_popen(command, "r");
-    char *   data;
-    
-    while (data = sfreserve(temp, -1, 0))
-	write(1, data, sfslen());
-	
+    dTHX;
+    PerlIO * temp = my_popen(command, "r");
+    char *   buf;
+    SSize_t  len;
+
+    while (len = PerlIO_read(temp, buf, sizeof(buf)))
+	write(1, buf, len);
+
     my_pclose(temp);
-	
-	return 0;
+
+    return 0;
 }
 
 int do_aspawn(SV *really,SV **mark,SV **sp)
@@ -949,6 +953,7 @@ static const char * strnstr(const char * msg, const char * str, int len)
 
 static void WriteMsgLn(PerlIO * io, const char * msg, size_t len, Boolean start)
 {
+	dTHX;
 	if (start)
 		PerlIO_write(io, "# ", 2);
 	PerlIO_write(io, msg, len);
@@ -956,6 +961,7 @@ static void WriteMsgLn(PerlIO * io, const char * msg, size_t len, Boolean start)
 
 static void WriteMsg(PerlIO * io, const char * msg, size_t len, Boolean start)
 {
+	dTHX;
 	const char * nl;
 	
 	while (nl = (const char *)memchr(msg, '\n', len)) {
@@ -970,6 +976,7 @@ static void WriteMsg(PerlIO * io, const char * msg, size_t len, Boolean start)
 
 void MacPerl_WriteMsg(void * io, const char * msg, size_t len)
 {
+	dTHX;
 	const char * line= msg;
 	const char * at;
 
