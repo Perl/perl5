@@ -2090,12 +2090,13 @@ available at http://www.cpan.org/src/index.html
         POSIX-BC        (BS2000)
         QNX
         Solaris
+        SUPER-UX
         Tru64 UNIX      (DEC OSF/1, Digital UNIX)
         UNICOS
         UNICOS/mk
         UTS
         VOS
-        WinNT/2000/XP   2)
+        Win95/98/ME/2K/XP 2)
         WinCE
         z/OS            (OS/390)
         VM/ESA
@@ -2120,9 +2121,6 @@ broken for 5.8.0 is the AmigaOS.
         SVR4
         Unixware
         Windows 3.1
-        Windows 95
-        Windows 98
-        Windows Me
 
 The following platforms have been known to build Perl from source in
 the past (5.005_03 and earlier), but we haven't been able to verify
@@ -2165,7 +2163,6 @@ of any trouble.
         Ultrix
         Unisys Dynix
         Unixware
-        UTS
 
 The following platforms have their own source code distributions and
 binaries available via http://www.cpan.org/ports/
