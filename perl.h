@@ -3170,20 +3170,19 @@ typedef struct am_table_short AMTS;
 
 #ifdef I_FCNTL
 #  include <fcntl.h>
-#else
-#  ifndef O_RDONLY
-/* Assume UNIX defaults */
-#    define O_RDONLY	0000
-#    define O_WRONLY	0001
-#    define O_RDWR	0002
-#    define O_CREAT	0100
-#  endif
 #endif
 
 #ifdef I_SYS_FILE
 #  include <sys/file.h>
 #endif
 
+#ifndef O_RDONLY
+/* Assume UNIX defaults */
+#    define O_RDONLY	0000
+#    define O_WRONLY	0001
+#    define O_RDWR	0002
+#    define O_CREAT	0100
+#endif
 
 #ifdef IAMSUID
 
