@@ -3,6 +3,11 @@
 # country.t - tests for Locale::Country
 #
 
+BEGIN {
+        chdir 't' if -d 't';
+        @INC = '../lib';
+}
+
 use Locale::Country;
 
 #-----------------------------------------------------------------------

@@ -2,6 +2,12 @@
 #
 # language.t - tests for Locale::Language
 #
+
+BEGIN {
+	chdir 't' if -d 't';
+	@INC = '../lib';
+}
+
 use Locale::Language;
 
 #-----------------------------------------------------------------------

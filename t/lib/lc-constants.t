@@ -3,6 +3,11 @@
 # constants.t - tests for Locale::Constants
 #
 
+BEGIN {
+        chdir 't' if -d 't';
+        @INC = '../lib';
+}
+
 use Locale::Constants;
 
 print "1..3\n";

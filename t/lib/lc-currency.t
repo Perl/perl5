@@ -2,6 +2,12 @@
 #
 # currency.t - tests for Locale::Currency
 #
+
+BEGIN {
+        chdir 't' if -d 't';
+        @INC = '../lib';
+}
+
 use Locale::Currency;
 
 #-----------------------------------------------------------------------

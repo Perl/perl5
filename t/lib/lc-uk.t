@@ -3,6 +3,11 @@
 # uk.t - tests for Locale::Country with "uk" aliases to "gb"
 #
 
+BEGIN {
+	chdir 't' if -d 't';
+	@INC = '../lib';
+}
+
 use Locale::Country;
 
 Locale::Country::_alias_code('uk' => 'gb');
