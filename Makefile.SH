@@ -720,7 +720,7 @@ _cleaner1:
 	done
 
 _cleaner2:
-	rm -f core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/forktmp* t/tmp* t/c t/perl .?*.c so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
+	rm -f core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/forktmp* t/tmp* t/c t/perl t/ran_tests .?*.c so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
 	rm -f $(private)
@@ -783,6 +783,7 @@ test check: test-prep
 	else \
 	  cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl TEST; \
 	fi
+	@echo "Ran tests" > t/ran_tests
 
 utest ucheck: test-prep
 	if (true </dev/tty) >/dev/null 2>&1; then \
