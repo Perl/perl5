@@ -1585,8 +1585,15 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 	    newlen = 0xFFFF;
 #endif
     }
-    else
+    else {
+	/* This is annoying, because sv_force_normal_flags will fix the flags,
+	   recurse into sv_grow to malloc a buffer of SvCUR(sv) + 1, then
+	   return back to us, only for us to potentially realloc the buffer.
+	*/
+	if (SvIsCOW(sv))
+	    sv_force_normal_flags(sv, 0);
 	s = SvPVX(sv);
+    }
 
     if (newlen > SvLEN(sv)) {		/* need more room? */
 	if (SvLEN(sv) && s) {
@@ -4448,11 +4455,11 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    char *pvx = SvPVX(sv);
 	    STRLEN len = SvCUR(sv);
             U32 hash   = SvUVX(sv);
+	    SvFAKE_off(sv);
+	    SvREADONLY_off(sv);
 	    SvGROW(sv, len + 1);
 	    Move(pvx,SvPVX(sv),len,char);
 	    *SvEND(sv) = '\0';
-	    SvFAKE_off(sv);
-	    SvREADONLY_off(sv);
 	    unsharepvn(pvx, SvUTF8(sv) ? -(I32)len : len, hash);
 	}
 	else if (PL_curcop != &PL_compiling)
