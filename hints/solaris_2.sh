@@ -32,6 +32,11 @@ mistrustnm=${mistrustnm:-run}
 #     http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2001-01/msg00465.html
 usemymalloc=${usemymalloc:-false}
 
+# malloc wrap works
+case "$usemallocwrap" in
+'') usemallocwrap='define' ;;
+esac
+
 # Avoid all libraries in /usr/ucblib.
 # /lib is just a symlink to /usr/lib
 set `echo $glibpth | sed -e 's@/usr/ucblib@@' -e 's@ /lib @ @'`

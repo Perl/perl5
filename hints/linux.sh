@@ -60,6 +60,11 @@ fi
 # function in <sys/stat.h>.
 d_lstat=define
 
+# malloc wrap works
+case "$usemallocwrap" in
+'') usemallocwrap='define' ;;
+esac
+
 # The system malloc() is about as fast and as frugal as perl's.
 # Since the system malloc() has been the default since at least
 # 5.001, we might as well leave it that way.  --AD  10 Jan 2002
