@@ -1,4 +1,4 @@
-package MakeMaker::Test::Setup::Recurs;
+package MakeMaker::Test::Setup::Problem;
 
 @ISA = qw(Exporter);
 require Exporter;
@@ -9,24 +9,23 @@ use File::Path;
 use File::Basename;
 
 my %Files = (
-             'Recurs/Makefile.PL'          => <<'END',
+             'Problem-Module/Makefile.PL'   => <<'END',
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME          => 'Recurs',
-    VERSION       => 1.00,
+    NAME    => 'Problem::Module',
 );
 END
 
-             'Recurs/prj2/Makefile.PL'     => <<'END',
-use ExtUtils::MakeMaker;
+             'Problem-Module/subdir/Makefile.PL'    => <<'END',
+printf "\@INC %s .\n", (grep { $_ eq '.' } @INC) ? "has" : "doesn't have";
 
-WriteMakefile(
-    NAME => 'Recurs::prj2',
-    VERSION => 1.00,
-);
+warn "I think I'm going to be sick\n";
+die "YYYAaaaakkk\n";
 END
-            );
+
+);
+
 
 sub setup_recurs {
     while(my($file, $text) = each %Files) {

@@ -1136,7 +1136,6 @@ lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/PATCHING		Suggestions for patching MakeMaker
 lib/ExtUtils/README		MakeMaker README
 lib/ExtUtils/t/00compile.t	See if MakeMaker modules compile
-lib/ExtUtils/t/00setup_dummy.t	Setup MakeMaker test module
 lib/ExtUtils/t/backwards.t	Check MakeMaker's backwards compatibility
 lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
 lib/ExtUtils/t/bytes.t	Test ExtUtils::MakeMaker::bytes
@@ -1163,6 +1162,7 @@ lib/ExtUtils/t/MM_Win32.t	See if ExtUtils::MM_Win32 works
 lib/ExtUtils/TODO		Things TODO in MakeMaker
 lib/ExtUtils/t/oneliner.t	See if MM can generate perl one-liners
 lib/ExtUtils/t/Packlist.t	See if Packlist works
+lib/ExtUtils/t/parse_version.t	See if parse_version works
 lib/ExtUtils/t/postamble.t	See if postamble works
 lib/ExtUtils/t/prefixify.t	See if MakeMaker can apply a PREFIX
 lib/ExtUtils/t/prereq_print.t	See if PREREQ_PRINT works
@@ -1175,7 +1175,6 @@ lib/ExtUtils/t/VERSION_FROM.t	See if MakeMaker's VERSION_FROM works
 lib/ExtUtils/t/vmsish.t	Test ExtUtils::MakeMaker::vmsish
 lib/ExtUtils/t/writemakefile_args.t	See if WriteMakefile works
 lib/ExtUtils/typemap		Extension interface types
-lib/ExtUtils/t/zz_cleanup_dummy.t	Cleanup MakeMaker test module
 lib/ExtUtils/xsubpp		External subroutine preprocessor
 lib/fastcwd.pl			a faster but more dangerous getcwd
 lib/Fatal.pm			Make errors in functions/builtins fatal
@@ -2602,6 +2601,8 @@ t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
+t/lib/MakeMaker/Test/Setup/BFD.pm	MakeMaker test utilities
+t/lib/MakeMaker/Test/Setup/Problem.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Setup/Recurs.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Utils.pm	MakeMaker test utilities
 t/lib/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test

@@ -2,7 +2,7 @@ package ExtUtils::MM_Any;
 
 use strict;
 use vars qw($VERSION @ISA);
-$VERSION = 0.07;
+$VERSION = 0.08;
 @ISA = qw(File::Spec);
 
 use Config;
@@ -86,6 +86,34 @@ sub os_flavor_is {
     my %flavors = map { ($_ => 1) } $self->os_flavor;
     return (grep { $flavors{$_} } @_) ? 1 : 0;
 }
+
+=item blibdirs_target (o)
+
+    my $make_frag = $mm->blibdirs_target;
+
+Creates the blibdirs target which creates all the directories we use in
+blib/.
+
+=cut
+
+sub blibdirs_target {
+    my $self = shift;
+
+    my @dirs = map { uc "\$(INST_$_)" } qw(libdir
+                                       autodir archautodir
+                                       bin script
+                                       man1dir man3dir
+                                      );
+    my @mkpath = $self->split_command('$(NOECHO) $(MKPATH)', @dirs);
+    my @chmod  = $self->split_command('$(NOECHO) $(CHMOD) 755', @dirs);
+
+    my $make = "\nblibdirs : \n";
+    $make .= join "", map { "\t$_\n" } @mkpath, @chmod;
+    $make .= "\t\$(NOECHO) \$(TOUCH) blibdirs\n\n";
+
+    return $make;
+}
+
 
 =back
 
@@ -178,7 +206,7 @@ sub split_command {
         }
         chop $arg_str;
 
-        push @cmds, $self->escape_newlines("$cmd\n$arg_str");
+        push @cmds, $self->escape_newlines("$cmd \n$arg_str");
     } while @args;
 
     return @cmds;
@@ -584,7 +612,7 @@ MAKE_FRAG
         my $ver = $self->{PREREQ_PM}{$mod};
         $prereq_pm .= sprintf "    %-30s %s\n", "$mod:", $ver;
     }
-    
+
     my $meta = <<YAML;
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
@@ -598,10 +626,16 @@ distribution_type: module
 generated_by: ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION
 YAML
 
-    my @write_meta = $self->echo($meta, 'META.yml');
-    return sprintf <<'MAKE_FRAG', join "\n\t", @write_meta;
+    my @write_meta = $self->echo($meta, 'META_new.yml');
+    my $move = $self->oneliner(<<'CODE', ['-MExtUtils::Command', '-MFile::Compare']);
+compare(@ARGV) != 0 ? (mv or warn "Cannot move @ARGV: $!\n") : unlink(shift);
+CODE
+
+    return sprintf <<'MAKE_FRAG', join("\n\t", @write_meta), $move;
 metafile :
+	$(NOECHO) $(ECHO) Generating META.yml
 	%s
+	-$(NOECHO) %s META_new.yml META.yml
 MAKE_FRAG
 
 }
@@ -621,12 +655,12 @@ sub signature_target {
     my $self = shift;
 
     return <<'MAKE_FRAG' if !$self->{SIGN};
-signature:
+signature :
 	$(NOECHO) $(NOOP)
 MAKE_FRAG
 
     return <<'MAKE_FRAG';
-signature:
+signature :  signature_addtomanifest
 	cpansign -s
 MAKE_FRAG
 
@@ -656,6 +690,7 @@ CODE
 
     return sprintf <<'MAKE_FRAG', $add_meta;
 metafile_addtomanifest:
+	$(NOECHO) $(ECHO) Adding META.yml to MANIFEST
 	$(NOECHO) %s
 MAKE_FRAG
 
@@ -674,7 +709,7 @@ sub signature_addtomanifest_target {
     my $self = shift;
 
     return <<'MAKE_FRAG' if !$self->{SIGN};
-signature_addtomanifest:
+signature_addtomanifest :
 	$(NOECHO) $(NOOP)
 MAKE_FRAG
 
@@ -684,7 +719,8 @@ eval { maniadd({q{SIGNATURE} => q{Public-key signature (added by MakeMaker)}}) }
 CODE
 
     return sprintf <<'MAKE_FRAG', $add_sign;
-signature_addtomanifest:
+signature_addtomanifest :
+	$(NOECHO) $(ECHO) Adding SIGNATURE to MANIFEST
 	$(NOECHO) %s
 MAKE_FRAG
 

@@ -29,7 +29,7 @@ use vars qw(@ISA $VERSION $BORLAND $GCC $DMAKE $NMAKE);
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-$VERSION = '1.09';
+$VERSION = '1.10';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -269,7 +269,7 @@ sub static_lib {
 
     my(@m);
     push(@m, <<'END');
-$(INST_STATIC): $(OBJECT) $(MYEXTLIB) $(INST_ARCHAUTODIR)$(DIRFILESEP).exists
+$(INST_STATIC): $(OBJECT) $(MYEXTLIB) blibdirs
 	$(RM_RF) $@
 END
 
@@ -292,7 +292,6 @@ q{	$(AR) }.($BORLAND ? '$@ $(OBJECT:^"+")'
 	$(NOECHO) $(ECHO) "$(EXTRALIBS)" >> $(PERL_SRC)\ext.libs
 MAKE_FRAG
 
-    push @m, "\n", $self->dir_target('$(INST_ARCHAUTODIR)');
     join('', @m);
 }
 
@@ -331,7 +330,7 @@ sub dynamic_lib {
 OTHERLDFLAGS = '.$otherldflags.'
 INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 
-$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DIRFILESEP).exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
+$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) blibdirs $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
 ');
     if ($GCC) {
       push(@m,  
@@ -356,7 +355,6 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DIRFILE
 	$(CHMOD) $(PERM_RWX) $@
 ';
 
-    push @m, $self->dir_target('$(INST_ARCHAUTODIR)');
     join('',@m);
 }
 

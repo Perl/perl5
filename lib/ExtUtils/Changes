@@ -1,3 +1,46 @@
+6.19 Mon Nov  3 22:53:56 PST 2003
+    - Removed 00setup_dummy.t and zz_cleanup_dummy.t.  Tests now setup and
+      teardown the dummy modules as needed.
+    - Little test glitch on systems without $Config{usevendorprefix} set
+    - INSTALL(SITE|VENDOR)MAN*DIR now fall back to $(INSTALLMAN*DIR)
+      instead of copying its value.  This lets "perl Makefile.PL 
+      INSTALLMAN1DIR=/some/man/man1" work like expected.
+
+6.18 Mon Nov  3 20:09:51 PST 2003
+    - parse_version() was blowing over $_ (Ilya Zakharevich)
+    - 5.6.2 has the same Cygwin shared lib name fix as 5.7.0. (Gerrit Haase)
+    * When $Config{install(site|vendor)man*dir} aren't set it will now
+      fall back to $Config{installman*dir}.  Similar for 
+      $Config{install(site|vendor)bin}.  This preserves behavior for older
+      Perls.
+    * Eliminated the dependency on perl.h for pure-perl builds.
+    * Eliminated .exists files.  Added blibdirs target using MKPATH instead.
+    - Removed now unused dir_target() method.
+    - Added a little documentation to instmodsh.
+    * Made sure PREFIX always has something in it.  Module authors like to use
+      it when extending MakeMaker.  Currently using one of 
+      PERL/SITE/VENDORPREFIX based on the value of INSTALLDIRS.
+    * Added SIGN to generate module signatures with cpansign (Autrijus Tang)
+    - Slight tweaks to MAKEFILE_OLD and MAKE_APERL_FILE restoring a mistake
+      made around 6.06 to fix static builds on OS/2
+    - Added ExtUtils::Command::dos2unix()
+    * manicopy() would make the copied files read-only if 'cp' was used.
+    * Fixed prereq check for modules which are also keywords like if.pm and
+      open.pm (Autrijus Tang)
+    - Made ExtUtils::Command mv and cp return whether or not they succeeded.
+    * metafile_addtomanifest now mentions what its doing.
+    * metafile will not die if it can't write to META.yml, just emit a 
+      warning.  This lets 'make dist' continue with a read-only META.yml
+    - Small fix to identify UWIN on NT (Randy Sims)
+    * metafile will not touch the META.yml if it does not need to be changed
+      (Thanks to Tim Bunce for this idea)
+    * Fixed 'make uninstall' which looks like its been broken since last
+      November and nobody noticed.
+    - Fixing minor bug in VMS prefixification logic when PREFIX was not set
+      by the user.
+    - Fixing potential bug in prefixification for relative directories
+    * Documented UNINST=1
+
 6.17 Sun Sep 14 20:52:45 PDT 2003
     - Fixing LD so it can be set properly on Win32. (Orton Yves)
     * Fixing the init_PERL() "tack $Config{exe_ext} onto $^X" logic so 
