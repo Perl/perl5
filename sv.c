@@ -290,6 +290,7 @@ do_report_used(sv)
 SV* sv;
 {
     if (SvTYPE(sv) != SVTYPEMASK) {
+	/* XXX Perhaps this ought to go to Perl_debug_log, if DEBUGGING. */
 	PerlIO_printf(PerlIO_stderr(), "****\n");
 	sv_dump(sv);
     }
@@ -308,7 +309,7 @@ SV* sv;
     SV* rv;
 
     if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
-	DEBUG_D((PerlIO_printf(PerlIO_stderr(), "Cleaning object ref:\n "), sv_dump(sv));)
+	DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(sv));)
 	SvROK_off(sv);
 	SvRV(sv) = 0;
 	SvREFCNT_dec(rv);
@@ -340,7 +341,7 @@ static void
 do_clean_all(sv)
 SV* sv;
 {
-    DEBUG_D((PerlIO_printf(PerlIO_stderr(), "Cleaning loops:\n "), sv_dump(sv));)
+    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops:\n "), sv_dump(sv));)
     SvFLAGS(sv) |= SVf_BREAK;
     SvREFCNT_dec(sv);
 }
@@ -776,8 +777,8 @@ U32 mt;
 	if (pv)
 	    Safefree(pv);
 	SvPVX(sv)	= 0;
-	AvMAX(sv)	= 0;
-	AvFILL(sv)	= 0;
+	AvMAX(sv)	= -1;
+	AvFILL(sv)	= -1;
 	SvIVX(sv)	= 0;
 	SvNVX(sv)	= 0.0;
 	SvMAGIC(sv)	= magic;
@@ -1046,7 +1047,7 @@ unsigned long newlen;
 
 #ifdef MSDOS
     if (newlen >= 0x10000) {
-	PerlIO_printf(PerlIO_stderr(), "Allocation too large: %lx\n", newlen);
+	PerlIO_printf(Perl_debug_log, "Allocation too large: %lx\n", newlen);
 	my_exit(1);
     }
 #endif /* MSDOS */
@@ -2758,7 +2759,7 @@ I32 append;
 	    continue;
 	}
 
-	PerlIO_set_ptrcnt(fp,(char *) ptr, cnt); /* deregisterize cnt and ptr */
+	PerlIO_set_ptrcnt(fp, ptr, cnt); /* deregisterize cnt and ptr */
 	/* This used to call 'filbuf' in stdio form, but as that behaves like getc
 	   when cnt <= 0 we use PerlIO_getc here to avoid another abstraction.
 	   This may also avoid issues with different named 'filbuf' equivalents
@@ -2788,7 +2789,7 @@ thats_all_folks:
 thats_really_all_folks:
     if (shortbuffered)
 	cnt += shortbuffered;
-    PerlIO_set_ptrcnt(fp,(char *) ptr, cnt);	/* put these back or we're in trouble */
+    PerlIO_set_ptrcnt(fp, ptr, cnt);	/* put these back or we're in trouble */
     *bp = '\0';
     SvCUR_set(sv, bp - (STDCHAR*)SvPVX(sv));	/* set length */
     }
@@ -3725,11 +3726,11 @@ SV* sv;
 	PerlIO_printf(Perl_debug_log, "  ROOT = 0x%lx\n", (long)CvROOT(sv));
 	PerlIO_printf(Perl_debug_log, "  XSUB = 0x%lx\n", (long)CvXSUB(sv));
 	PerlIO_printf(Perl_debug_log, "  XSUBANY = %ld\n", (long)CvXSUBANY(sv).any_i32);
-	PerlIO_printf(PerlIO_stderr(), "  GV = 0x%lx", (long)CvGV(sv));
+	PerlIO_printf(Perl_debug_log, "  GV = 0x%lx", (long)CvGV(sv));
 	if (CvGV(sv) && GvNAME(CvGV(sv))) {
-	    PerlIO_printf(PerlIO_stderr(), "  \"%s\"\n", GvNAME(CvGV(sv)));
+	    PerlIO_printf(Perl_debug_log, "  \"%s\"\n", GvNAME(CvGV(sv)));
 	} else {
-	    PerlIO_printf(PerlIO_stderr(), "\n");
+	    PerlIO_printf(Perl_debug_log, "\n");
 	}
 	PerlIO_printf(Perl_debug_log, "  FILEGV = 0x%lx\n", (long)CvFILEGV(sv));
 	PerlIO_printf(Perl_debug_log, "  DEPTH = %ld\n", (long)CvDEPTH(sv));
