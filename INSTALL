@@ -56,7 +56,9 @@ provide additional or different instructions for building Perl.
 
 If there is a hint file for your system (in the hints/ directory) you
 should also read that hint file for specific information for your
-system.  (Unixware users should use the svr4.sh hint file.)
+system.  (Unixware users should use the svr4.sh hint file.)  If
+there is a README file for your platform, then you should read
+that too.  Additional information is in the Porting/ directory.
 
 =head1 WARNING:  This version is not binary compatible with Perl 5.004.
 
@@ -1641,8 +1643,16 @@ comes with the perl distribution, but you need to have perl compiled
 before you can use it.  (If you have not installed it yet, you need to
 run C<./perl -Ilib utils/perlbug> instead of a plain C<perlbug>.)
 
-You might also find helpful information in the Porting directory of the
-perl distribution.
+Please try to make your message brief but clear.  Trim out unnecessary
+information.  Do not include large files (such as config.sh or a complete
+Configure or make log) unless absolutely necessary.  Do not include a
+complete transcript of your build session.  Just include the failing
+commands, the relevant error messages, and whatever preceeding commands
+are necessary to give the appropriate context.  Plain text should
+usually be sufficient--fancy attachments or encodings may actually
+reduce the number of people who read your message.  Your message
+will get relayed to over 400 subscribers around the world so please
+try to keep it brief but clear.
 
 =head1 DOCUMENTATION
 
@@ -1687,4 +1697,4 @@ the contact information to match your distribution.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.48 1999/03/19 17:00:49 doughera Exp $
+$Id: INSTALL,v 1.49 1999/05/12 15:36:02 doughera Released $
