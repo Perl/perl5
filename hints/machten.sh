@@ -13,6 +13,9 @@
 #	Martijn Koster <m.koster@webcrawler.com>
 #	Richard Yeh <rcyeh@cco.caltech.edu>
 #
+# Disable shadow password file access: MT 4.1.1 has necessary library
+# functions, but not header file (or documentation)
+#                      -- Dominic Dunlop <domo@computer.org> 990804
 # For now, explicitly disable dynamic loading -- MT 4.1.1 has it,
 # but these hints do not yet support it.
 # Define NOTEDEF_MACHTEN to undo gratuitous Tenon hack to signal.h.
@@ -36,6 +39,13 @@
 #
 # Comments, questions, and improvements welcome!
 #
+# MachTen 4.1.1's support for shadow password file access is incomplete:
+# disable its use completely.
+d_endspent=${d_endspent:-undef}
+d_getspent=${d_getspent:-undef}
+d_getspnam=${d_getspnam:-undef}
+d_setspent=${d_setspent:-undef}
+
 # MachTen 4.1.1 does support dynamic loading, but perl doesn't
 # know how to use it yet.
 usedl=${usedl:-undef}
@@ -190,6 +200,11 @@ Similarly, when you see
 
 select the default answer: vfork() works, and avoids expensive data
 copying.
+
+You may also see "WHOA THERE!!!" messages concerning \$d_endspent,
+\$d_getspent, \$d_getspnam and \$d_setspent.  In all cases, select the
+default answer: MachTen's support for shadow password file access is
+incomplete, and should not be used.
 
 At the end of Configure, you will see a harmless message
 

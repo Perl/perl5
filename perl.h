@@ -470,6 +470,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  include "embed.h"
 #endif
 
+#if defined(NeXT) || defined(__NeXT) || defined (__MACHTEN__)
+#  undef PERL_POLLUTE_MALLOC
+#endif
+
 #define MEM_SIZE Size_t
 
 #if defined(STANDARD_C) && defined(I_STDDEF)
