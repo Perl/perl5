@@ -21,6 +21,12 @@ constant(char *name, int arg)
 #else
 	    goto not_there;
 #endif
+	if (strEQ(name, "GLOB_ALPHASORT"))
+#ifdef GLOB_ALPHASORT
+	    return GLOB_ALPHASORT;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "GLOB_ALTDIRFUNC"))
 #ifdef GLOB_ALTDIRFUNC
 	    return GLOB_ALTDIRFUNC;
