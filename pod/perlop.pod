@@ -1802,17 +1802,18 @@ operation you intend by using C<""> or C<0+>, as in the examples below.
 See L<perlfunc/vec> for information on how to manipulate individual bits
 in a bit vector.
 
-=head2 Version tuples
+=head2 Strings of Character
 
-A literal of the form C<v1.20.300.4000> is parsed as a dual-valued quantity.
-It has the string value of C<"\x{1}\x{14}\x{12c}\x{fa0}"> (i.e., a UTF-8
-string) and a numeric value of C<1 + 20/1000 + 300/1000000 + 4000/1000000000>.
-This is useful for representing Unicode strings, and for comparing version
-numbers using the string comparison operators, C<cmp>, C<gt>, C<lt> etc.
+A literal of the form C<v1.20.300.4000> is parsed as a string comprised
+of characters with the specified ordinals.  This provides an alternative,
+more readable way to construct strings, rather than use the somewhat less
+readable interpolation form C<"\x{1}\x{14}\x{12c}\x{fa0}">.  This is useful
+for representing Unicode strings, and for comparing version "numbers"
+using the string comparison operators, C<cmp>, C<gt>, C<lt> etc.
 
-Such "version tuples" or "vectors" are accepted by both C<require> and
-C<use>.  The C<$^V> variable contains the running Perl interpreter's
-version in this format.  See L<perlvar/$^V>.
+Such literals are accepted by both C<require> and C<use> for doing a version
+check.  The C<$^V> special variable also contains the running Perl
+interpreter's version in this form.  See L<perlvar/$^V>.
 
 =head2 Integer Arithmetic
 

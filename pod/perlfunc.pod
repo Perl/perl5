@@ -3549,9 +3549,17 @@ rename(2) manpage or equivalent system documentation for details.
 =item require
 
 Demands some semantics specified by EXPR, or by C<$_> if EXPR is not
-supplied.  If a version number or tuple is specified, or if EXPR is
-numeric, demands that the current version of Perl
-(C<$^V> or C<$]> or $PERL_VERSION) be equal or greater than EXPR.
+supplied.
+
+If a VERSION is specified as a literal of the form v5.6.0,
+demands that the current version of Perl (C<$^V> or $PERL_VERSION) be
+at least as recent as that version, at run time.  (For compatibility
+with older versions of Perl, a numeric argument will also be interpreted
+as VERSION.)  Compare with L</use>, which can do a similar check at
+compile time.
+
+    require v5.6.0;	# run time version check
+    require 5.005_03;	# same, number still supported for compatibility
 
 Otherwise, demands that a library file be included if it hasn't already
 been included.  The file is included via the do-FILE mechanism, which is
@@ -5247,13 +5255,17 @@ package.  It is exactly equivalent to
 
 except that Module I<must> be a bareword.
 
-If the first argument to C<use> is a number or a version tuple, it is
-treated as a version instead of a module name.  If the version
-of the Perl interpreter is less than VERSION, then an error message
-is printed and Perl exits immediately.
+VERSION, which can be specified as a literal of the form v5.6.0, demands
+that the current version of Perl (C<$^V> or $PERL_VERSION) be at least
+as recent as that version.  (For compatibility with older versions of Perl,
+a numeric literal will also be interpreted as VERSION.)  If the version
+of the running Perl interpreter is less than VERSION, then an error
+message is printed and Perl exits immediately without attempting to
+parse the rest of the file.  Compare with L</require>, which can do a
+similar check at run time.
 
-    use 5.005_03;	# version number
-    use v5.6.0;		# version tuple
+    use v5.6.0;		# compile time version check
+    use 5.005_03;	# same, number still supported for compatibility
 
 This is often useful if you need to check the current Perl version before
 C<use>ing library modules that have changed in incompatible ways from
@@ -5280,7 +5292,7 @@ That is exactly equivalent to
 If the VERSION argument is present between Module and LIST, then the
 C<use> will call the VERSION method in class Module with the given
 version as an argument.  The default VERSION method, inherited from
-the Universal class, croaks if the given version is larger than the
+the UNIVERSAL class, croaks if the given version is larger than the
 value of the variable C<$Module::VERSION>. 
 
 Again, there is a distinction between omitting LIST (C<import> called

@@ -3109,14 +3109,14 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
     if (version != Nullop) {
 	SV *vesv = ((SVOP*)version)->op_sv;
 
-	if (arg == Nullop && !SvNIOK(vesv)) {
+	if (arg == Nullop && !SvNIOKp(vesv)) {
 	    arg = version;
 	}
 	else {
 	    OP *pack;
 	    SV *meth;
 
-	    if (version->op_type != OP_CONST || !SvNIOK(vesv))
+	    if (version->op_type != OP_CONST || !SvNIOKp(vesv))
 		Perl_croak(aTHX_ "Version number must be constant number");
 
 	    /* Make copy of id so we don't free it twice */
@@ -3137,7 +3137,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
     /* Fake up an import/unimport */
     if (arg && arg->op_type == OP_STUB)
 	imop = arg;		/* no import on explicit () */
-    else if (SvNIOK(((SVOP*)id)->op_sv)) {
+    else if (SvNIOKp(((SVOP*)id)->op_sv)) {
 	imop = Nullop;		/* use 5.0; */
     }
     else {

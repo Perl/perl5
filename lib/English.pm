@@ -87,7 +87,6 @@ sub import {
 	*EGID
 	*PROGRAM_NAME
 	*PERL_VERSION
-	*PERL_VERSION_TUPLE
 	*ACCUMULATOR
 	*DEBUGGING
 	*SYSTEM_FD_MAX
@@ -167,8 +166,7 @@ sub import {
 
 # Internals.
 
-	*PERL_VERSION				= *]	;
-	*PERL_VERSION_TUPLE			= *^V	;
+	*PERL_VERSION				= *^V	;
 	*ACCUMULATOR				= *^A	;
 	*COMPILING				= *^C	;
 	*DEBUGGING				= *^D	;
@@ -187,5 +185,6 @@ sub import {
 #	*ARRAY_BASE				= *[	;
 #	*OFMT					= *#	;
 #	*MULTILINE_MATCHING			= **	;
+#	*OLD_PERL_VERSION			= *]	;
 
 1;

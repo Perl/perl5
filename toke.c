@@ -821,18 +821,27 @@ STATIC char *
 S_force_version(pTHX_ char *s)
 {
     OP *version = Nullop;
+    bool is_vstr = FALSE;
+    char *d;
 
     s = skipspace(s);
 
-    if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
-        char *d = s;
-	if (*d == 'v')
-	    d++;
+    d = s;
+    if (*d == 'v') {
+	is_vstr = TRUE;
+	d++;
+    }
+    if (isDIGIT(*d)) {
         for (; isDIGIT(*d) || *d == '_' || *d == '.'; d++);
         if (*d == ';' || isSPACE(*d) || *d == '}' || !*d) {
             s = scan_num(s);
             /* real VERSION number -- GBARR */
             version = yylval.opval;
+	    if (is_vstr) {
+		SV *ver = cSVOPx(version)->op_sv;
+		SvUPGRADE(ver, SVt_PVIV);
+		SvIOKp_on(ver);		/* hint that it is a version */
+	    }
         }
     }
 
@@ -6899,12 +6908,10 @@ Perl_scan_num(pTHX_ char *start)
 		UV rev;
 		U8 tmpbuf[UTF8_MAXLEN];
 		U8 *tmpend;
-		NV nshift = 1.0;
 		bool utf8 = FALSE;
 		s++;				/* get past 'v' */
 
 		sv = NEWSV(92,5);
-		SvUPGRADE(sv, SVt_PVNV);
 		sv_setpvn(sv, "", 0);
 
 		do {
@@ -6924,9 +6931,6 @@ Perl_scan_num(pTHX_ char *start)
 			tmpend = &tmpbuf[1];
 		    }
 		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
-		    if (rev > 0)
-			SvNVX(sv) += (NV)rev/nshift;
-		    nshift *= 1000;
 		} while (*pos == '.' && isDIGIT(pos[1]));
 
 		if (*s == '0' && isDIGIT(s[1]))
@@ -6936,11 +6940,8 @@ Perl_scan_num(pTHX_ char *start)
 		tmpend = uv_to_utf8(tmpbuf, rev);
 		utf8 = utf8 || rev > 127;
 		sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
-		if (rev > 0)
-		    SvNVX(sv) += (NV)rev/nshift;
 
 		SvPOK_on(sv);
-		SvNOK_on(sv);
 		SvREADONLY_on(sv);
 		if (utf8) {
 		    SvUTF8_on(sv);

@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, "../lib";
 }
 
-print "1..15\n";
+print "1..14\n";
 
 my $test = 1;
 
@@ -14,9 +14,6 @@ require v5.5.640;
 print "ok $test\n";  ++$test;
 
 print "not " unless v1.20.300.4000 eq "\x{1}\x{14}\x{12c}\x{fa0}";
-print "ok $test\n";  ++$test;
-
-print "not " unless v1.20.300.4000 > 1.0203039 and v1.20.300.4000 < 1.0203041;
 print "ok $test\n";  ++$test;
 
 print "not " unless sprintf("%vd", "Perl") eq '80.101.114.108';
