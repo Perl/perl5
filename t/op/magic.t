@@ -20,7 +20,7 @@ sub ok {
 
     unless( $ok ) {
         printf "# Failed test at line %d\n", (caller)[2];
-        print  "# $info" if defined $info;
+        print  "# $info\n" if defined $info;
     }
 
     $test++;
@@ -36,7 +36,7 @@ sub skip {
     return 1;
 }
 
-print "1..46\n";
+print "1..47\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
@@ -235,7 +235,7 @@ ok $^O;
 ok $^T > 850000000, $^T;
 
 if ($Is_VMS || $Is_Dos || $Is_MacOS) {
-    skip("%ENV manipulations fail or aren't safe on $^O") for 1..2;
+    skip("%ENV manipulations fail or aren't safe on $^O") for 1..3;
 }
 else {
 	$PATH = $ENV{PATH};
@@ -253,6 +253,15 @@ else {
 # -- Nikola Knezevic
        ok ($Is_MSWin32 ? (`set __NoNeSuCh` =~ /^(?:__NoNeSuCh=)?foo$/)
 			    : (`echo \$__NoNeSuCh` eq "foo\n") );
+	if ($^O =~ /^(linux|freebsd)$/ &&
+	    open CMDLINE, "/proc/$$/cmdline") {
+	    chomp(my $line = scalar <CMDLINE>);
+	    my $me = (split /\0/, $line)[0];
+	    ok($me eq $0, 'altering $0 is effective', 'PL_origarg{c,v} copy breaks this');
+	    close CMDLINE;
+	} else {
+	    skip("\$0 check only on Linux and FreeBSD with /proc");
+	}
 }
 
 {
