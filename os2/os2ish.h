@@ -382,6 +382,8 @@ void *emx_realloc (void *, size_t);
 # define HAS_BOOL 1
 #endif
 
+extern int* _fd_flags(int fd); /* where's the real prototype of this? */
+
 static inline bool
 _PERLIO_IS_BINMODE_FD(int fd)
 {
