@@ -1933,20 +1933,26 @@ print "ok 671\n";
 print "not " unless chr(0x38c) =~ /\p{IsGreek}/; # singleton
 print "ok 672\n";
 
+if (ord("A") == 65) {
 ##
 ## Test [:cntrl:]...
 ##
 ## Should probably put in tests for all the POSIX stuff, but not sure how to
 ## guarantee a specific locale......
 ##
-$AllBytes = join('', map { chr($_) } 0..255);
-($x = $AllBytes) =~ s/[[:cntrl:]]//g;
-if ($x ne join('', map { chr($_) } 0x20..0x7E, 0x80..0xFF)) { print "not " };
-print "ok 673\n";
+    $AllBytes = join('', map { chr($_) } 0..255);
+    ($x = $AllBytes) =~ s/[[:cntrl:]]//g;
+    if ($x ne join('', map { chr($_) } 0x20..0x7E, 0x80..0xFF)) {
+	print "not ";
+    }
+    print "ok 673\n";
 
-($x = $AllBytes) =~ s/[^[:cntrl:]]//g;
-if ($x ne join('', map { chr($_) } 0..0x1F, 0x7F)) { print "not " };
-print "ok 674\n";
+    ($x = $AllBytes) =~ s/[^[:cntrl:]]//g;
+    if ($x ne join('', map { chr($_) } 0..0x1F, 0x7F)) { print "not " }
+    print "ok 674\n";
+} else {
+    print "ok $_ # Skip: EBCDIC\n" for 673..674;
+}
 
 # With /s modifier UTF8 chars were interpreted as bytes
 {
