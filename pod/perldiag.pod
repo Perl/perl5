@@ -3500,6 +3500,11 @@ L<perlfunc/setsockopt>.
 (F) The setuid emulator won't run a script that is writable by the
 world, because the world might have written on it already.
 
+=item Setuid script not plain file
+
+(F) The setuid emulator won't run a script that isn't read from a file,
+but from a socket, a pipe or another device.
+
 =item shm%s not implemented
 
 (F) You don't have System V shared memory IPC on your system.
