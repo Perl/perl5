@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Jun 28 16:56:19 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Jun 28 18:02:13 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -466,6 +466,7 @@ d_msgsnd=''
 d_msync=''
 d_munmap=''
 d_nice=''
+d_nl_langinfo=''
 d_off64_t=''
 d_open3=''
 d_fpathconf=''
@@ -668,6 +669,7 @@ i_grp=''
 i_iconv=''
 i_ieeefp=''
 i_inttypes=''
+i_langinfo=''
 i_libutil=''
 i_limits=''
 i_locale=''
@@ -10898,6 +10900,14 @@ eval $inlibc
 set nice d_nice
 eval $inlibc
 
+: see if this is a langinfo.h system
+set langinfo.h i_langinfo
+eval $inhdr
+
+: see if nl_langinfo exists
+set nl_langinfo d_nl_langinfo
+eval $inlibc
+
 : check for length of character
 echo " "
 case "$charsize" in
@@ -16753,6 +16763,7 @@ d_msync='$d_msync'
 d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
 d_nice='$d_nice'
+d_nl_langinfo='$d_nl_langinfo'
 d_nv_preserves_uv='$d_nv_preserves_uv'
 d_nv_preserves_uv_bits='$d_nv_preserves_uv_bits'
 d_off64_t='$d_off64_t'
@@ -16980,6 +16991,7 @@ i_grp='$i_grp'
 i_iconv='$i_iconv'
 i_ieeefp='$i_ieeefp'
 i_inttypes='$i_inttypes'
+i_langinfo='$i_langinfo'
 i_libutil='$i_libutil'
 i_limits='$i_limits'
 i_locale='$i_locale'

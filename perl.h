@@ -3841,6 +3841,8 @@ extern void moncontrol(int);
 
    USE_REENTRANT_API
 
+   HAS_NL_LANGINFO
+
    so that Configure picks them up. */
 
 #endif /* Include guard */

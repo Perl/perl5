@@ -243,8 +243,9 @@ chgrp (Loc.U):
 	The value is a plain '' and is not useful.
 
 chmod (Loc.U):
-	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	This variable is used internally by Configure to determine the
+	full pathname (if any) of the chmod program.  After Configure runs,
+	the value is reset to a plain "chmod" and is not useful.
 
 chown (Loc.U):
 	This variable is defined but not used by Configure.
@@ -1080,6 +1081,10 @@ d_mymalloc (mallocsrc.U):
 d_nice (d_nice.U):
 	This variable conditionally defines the HAS_NICE symbol, which
 	indicates to the C program that the nice() routine is available.
+
+d_nl_langinfo (d_nl_langinfo.U):
+	This variable conditionally defines the HAS_NL_LANGINFO symbol, which
+	indicates to the C program that the nl_langinfo() routine is available.
 
 d_nv_preserves_uv (perlxv.U):
 	This variable indicates whether a variable of type nvtype
@@ -2163,6 +2168,10 @@ i_ieeefp (i_ieeefp.U):
 i_inttypes (i_inttypes.U):
 	This variable conditionally defines the I_INTTYPES symbol,
 	and indicates whether a C program should include <inttypes.h>.
+
+i_langinfo (i_langinfo.U):
+	This variable conditionally defines the I_LANGINFO symbol,
+	and indicates whether a C program should include <langinfo.h>.
 
 i_libutil (i_libutil.U):
 	This variable conditionally defines the I_LIBUTIL symbol, and indicates
