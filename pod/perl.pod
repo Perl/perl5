@@ -274,15 +274,15 @@ either because the hardware/software platforms are rather rare or
 because we don't have an active champion on these platforms, or both.
 					
         3b1             FPS             Plan 9
-        AmigaOS         GENIX           RISC/os
-        ConvexOS        Greenhills      Stellar
-        CX/UX           ISC             SVR2
-        DC/OSx          MachTen 68k     TI1500
-        DDE SMES        MiNT            TitanOS
-        DomainOS        MPC             UNICOS/mk
-        DOS EMX         NEWS-OS         Unisys Dynix
-        Dynix           Opus            Unixware
-        EP/IX
+        AmigaOS         GENIX           PowerUX
+        ConvexOS        Greenhills      RISC/os         
+        CX/UX           ISC             Stellar         
+        DC/OSx          MachTen 68k     SVR2            
+        DDE SMES        MiNT            TI1500          
+        DomainOS        MPC             TitanOS         
+        DOS EMX         NEWS-OS         UNICOS/mk       
+        Dynix           Opus            Unisys Dynix    
+        EP/IX				Unixware        
         ESIX
 
 The following platforms are planned to be supported in the standard
@@ -299,6 +299,7 @@ binaries available via F<http://www.perl.com/CPAN/ports/index.html>.
 
 	AS/400			5.003
 	MacOS			5.004
+	Netware			5.003_07
 	Tandem Guardian		5.004
 
 The following platforms have only binaries available via
@@ -309,7 +310,6 @@ F<http://www.perl.com/CPAN/ports/index.html>.
 	Acorn RISCOS		5.005_02
 	AOS			5.002
 	LynxOS			5.004_02
-	Netware			5.003_07
 
 =head1 ENVIRONMENT
 
