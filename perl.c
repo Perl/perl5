@@ -967,6 +967,23 @@ Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
     ++PL_exitlistlen;
 }
 
+
+STATIC void
+S_set_caret_X(pTHX) {
+    GV* tmpgv = gv_fetchpv("\030",TRUE, SVt_PV); /* $^X */
+    if (tmpgv) {
+#ifdef HAS_PROCSELFEXE
+	S_procself_val(aTHX_ GvSV(tmpgv), PL_origargv[0]);
+#else
+#ifdef OS2
+	sv_setpv(GvSV(tmpgv), os2_execname(aTHX));
+#else
+	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
+#endif
+#endif
+    }
+}
+
 /*
 =for apidoc perl_parse
 
@@ -1112,6 +1129,10 @@ setuid perl scripts securely.\n");
 	PL_do_undump = FALSE;
 	cxstack_ix = -1;		/* start label stack again */
 	init_ids();
+	assert (!PL_tainted);
+	TAINT;
+	S_set_caret_X(aTHX);
+	TAINT_NOT;
 	init_postdump_symbols(argc,argv,env);
 	return 0;
     }
@@ -1494,6 +1515,11 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	scriptname = "-";
     }
 
+    /* Set $^X early so that it can be used for relocatable paths in @INC  */
+    assert (!PL_tainted);
+    TAINT;
+    S_set_caret_X(aTHX);
+    TAINT_NOT;
     init_perllib();
 
     open_script(scriptname,dosearch,sv);
@@ -4052,22 +4078,6 @@ S_procself_val(pTHX_ SV *sv, char *arg0)
 #endif /* HAS_PROCSELFEXE */
 
 STATIC void
-S_set_caret_X(pTHX) {
-    GV* tmpgv = gv_fetchpv("\030",TRUE, SVt_PV); /* $^X */
-    if (tmpgv) {
-#ifdef HAS_PROCSELFEXE
-	S_procself_val(aTHX_ GvSV(tmpgv), PL_origargv[0]);
-#else
-#ifdef OS2
-	sv_setpv(GvSV(tmpgv), os2_execname(aTHX));
-#else
-	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
-#endif
-#endif
-    }
-}
-
-STATIC void
 S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
 {
     char *s;
@@ -4095,7 +4105,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	magicname("0", "0", 1);
 #endif
     }
-    S_set_caret_X(aTHX);
     if ((PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV))) {
 	HV *hv;
 	GvMULTI_on(PL_envgv);
