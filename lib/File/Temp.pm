@@ -175,7 +175,7 @@ Exporter::export_tags('POSIX','mktemp');
 
 # Version number
 
-$VERSION = '0.14';
+$VERSION = '0.14_01';
 
 # This is a list of characters that can be used in random filenames
 
@@ -2012,6 +2012,7 @@ The value is only relevant when C<safe_level> is set to MEDIUM or higher.
 
 {
   my $TopSystemUID = 10;
+  $TopSystemUID = 197108 if $^O eq 'interix'; # "Administrator"
   sub top_system_uid {
     my $self = shift;
     if (@_) {

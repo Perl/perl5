@@ -76,6 +76,10 @@ true)
 	netbsd*|freebsd[234]*|openbsd*)
 		linklibperl="-L. -lperl"
 		;;
+	interix*)
+		linklibperl="-L. -lperl"
+		shrpldflags="$shrpldflags -Wl,--image-base,0x57000000"
+		;;
 	aix*)
 		shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
 		case "$osvers" in
