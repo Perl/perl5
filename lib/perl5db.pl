@@ -4544,7 +4544,9 @@ later.
 =cut
 
 sub cmd_l {
-    my $current_line  = shift;
+    my $current_line  = $line;
+
+    my $cmd           = shift;
     my $line          = shift;
 
     # If this is '-something', delete any spaces after the dash.
