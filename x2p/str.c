@@ -216,7 +216,7 @@ str_grow(register STR *str, int len)
 void
 str_replace(register STR *str, register STR *nstr)
 {
-    Safefree(str->str_ptr);
+    safefree(str->str_ptr);
     str->str_ptr = nstr->str_ptr;
     str->str_len = nstr->str_len;
     str->str_cur = nstr->str_cur;
