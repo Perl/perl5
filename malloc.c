@@ -777,7 +777,7 @@ static long Perl_sbrk_oldsize;
 #   define PERLSBRK_32_K (1<<15)
 #   define PERLSBRK_64_K (1<<16)
 
-char *
+Malloc_t
 Perl_sbrk(size)
 int size;
 {

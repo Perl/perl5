@@ -4825,6 +4825,8 @@ peep(register OP *o)
 	case OP_AND:
 	case OP_OR:
 	    o->op_seq = op_seqmax++;
+	    while (cLOGOP->op_other->op_type == OP_NULL)
+		cLOGOP->op_other = cLOGOP->op_other->op_next;
 	    peep(cLOGOP->op_other);
 	    break;
 

@@ -1892,6 +1892,51 @@
  */
 #define HAS_GETHOSTENT		/**/      /* config-skip */
 
+/* HAS_GETHOSTBYADDR:
+ *	This symbol, if defined, indicates that the gethostbyaddr routine is
+ *	available to lookup hosts by their IP addresses.
+ */
+#define HAS_GETHOSTBYADDR		/**/
+
+/* Netdb_host_t:
+ *	This symbol holds the type used for the 1st argument
+ *	to gethostbyaddr().
+ */
+#define Netdb_host_t		char * /**/
+
+/* Netdb_hlen_t:
+ *	This symbol holds the type used for the 2nd argument
+ *	to gethostbyaddr().
+ */
+#define Netdb_hlen_t		int
+
+/* HAS_GETHOSTBYNAME:
+ *	This symbol, if defined, indicates that the gethostbyname routine is
+ *	available to lookup hosts by their DNS names.
+ */
+#define HAS_GETHOSTBYNAME		/**/
+
+/* Netdb_name_t:
+ *	This symbol holds the type used for the 1st argument
+ *	to gethostbyname(), the 1st argument to getnetbyname(),
+ *	the 1st argument to getprotobyname(), the 1st argument to
+ *	getservbyname(), the 2nd argument to getservbyname(),
+ *	and the 2nd argument to getservbyport().
+ */
+#define Netdb_name_t	long    /**/
+
+/* HAS_GETNETBYADD:
+ *	This symbol, if defined, indicates that the getnetbyaddr routine is
+ *	available to lookup networks by their IP addresses.
+ */
+#define HAS_GETNETBYADD		/**/
+
+/* Netdb_net_t:
+ *	This symbol holds the type used for the 1st argument
+ *	to getnetbyaddr().
+ */
+#define Netdb_net_t		long
+
 /* HAS_GETHBADD:
  *	This symbol, if defined, indicates that the gethostbyaddr routine is
  *	available to lookup host names by their IP addresses.

@@ -60,6 +60,8 @@ of sections:
     perlguts	Perl internal functions for those doing extensions
     perlcall	Perl calling conventions from C
 
+    perlhist	Perl history records
+
 (If you're intending to read these straight through for the first time,
 the suggested order will tend to reduce the number of forward references.)
 

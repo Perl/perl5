@@ -2802,6 +2802,27 @@ variables.
 of Perl.  Check the #! line, or manually feed your script into
 Perl yourself.
 
+=item perl: warning: Setting locale failed.
+
+(S) The whole warning message will look something like:
+
+	perl: warning: Setting locale failed.
+	perl: warning: Please check that your locale settings:
+	        LC_ALL = "En_US",
+	        LANG = (unset)
+	    are supported and installed on your system.
+	perl: warning: Falling back to the standard locale ("C").
+
+Exactly what were the failed locale settings varies.  In the above the
+settings were that the LC_ALL was "En_US" and the LANG had no value.
+This error means that Perl detected that you and/or your system
+administrator have set up the so-called variable system but Perl could
+not use those settings.  This was not dead serious, fortunately: there
+is a "default locale" called "C" that Perl can and will use, the
+script will be run.  Before you really fix the problem, however, you
+will get the same error message each time you run Perl.  How to really
+fix the problem can be found in L<perllocale> section B<LOCALE PROBLEMS>.
+
 =item Warning: something's wrong
 
 (W) You passed warn() an empty string (the equivalent of C<warn "">) or

@@ -182,6 +182,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 #define SF_HAS_PAR		0x80
 #define SF_IN_PAR		0x100
 #define SF_HAS_EVAL		0x200
+#define SCF_DO_SUBSTR		0x400
 
 static void
 scan_commit(scan_data_t *data)
@@ -214,8 +215,6 @@ scan_commit(scan_data_t *data)
     data->last_end = -1;
     data->flags &= ~SF_BEFORE_EOL;
 }
-
-#define SCF_DO_SUBSTR 1
 
 /* Stops at toplevel WHILEM as well as at `last'. At end *scanp is set
    to the position after last scanned or to NULL. */

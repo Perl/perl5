@@ -2,7 +2,7 @@
 
 # $RCSfile: each.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:47 $
 
-print "1..14\n";
+print "1..16\n";
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -107,3 +107,15 @@ print "ok 13\n";
 print "not " if keys(%hash) != 10;
 print "ok 14\n";
 
+print keys(hash) != 10 ? "not ok 15\n" : "ok 15\n";
+
+$i = 0;
+%h = (a => A, b => B, c=> C, d => D, abc => ABC);
+@keys = keys(h);
+@values = values(h);
+while (($key, $value) = each(h)) {
+	if ($key eq $keys[$i] && $value eq $values[$i] && $key eq lc($value)) {
+		$i++;
+	}
+}
+if ($i == 5) { print "ok 16\n" } else { print "not ok\n" }

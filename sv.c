@@ -59,6 +59,8 @@ static void sv_mortalgrow _((void));
 static void sv_unglob _((SV* sv));
 static void sv_check_thinkfirst _((SV *sv));
 
+#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_check_thinkfirst(sv)
+
 #ifndef PURIFY
 static void *my_safemalloc(MEM_SIZE size);
 #endif
@@ -1106,7 +1108,7 @@ sv_grow(SV* sv, unsigned long newlen)
 void
 sv_setiv(register SV *sv, IV i)
 {
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	sv_upgrade(sv, SVt_IV);
@@ -1167,7 +1169,7 @@ sv_setuv_mg(register SV *sv, UV u)
 void
 sv_setnv(register SV *sv, double num)
 {
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
     case SVt_IV:
@@ -1869,7 +1871,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 
     if (sstr == dstr)
 	return;
-    sv_check_thinkfirst(dstr);
+    SV_CHECK_THINKFIRST(dstr);
     if (!sstr)
 	sstr = &sv_undef;
     stype = SvTYPE(sstr);
@@ -2204,7 +2206,7 @@ sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
     register char *dptr;
     assert(len >= 0);  /* STRLEN is probably unsigned, so this may
 			  elicit a warning, but it won't hurt. */
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
@@ -2237,7 +2239,7 @@ sv_setpv(register SV *sv, register const char *ptr)
 {
     register STRLEN len;
 
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
@@ -2267,7 +2269,7 @@ sv_setpv_mg(register SV *sv, register const char *ptr)
 void
 sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 {
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     (void)SvUPGRADE(sv, SVt_PV);
     if (!ptr) {
 	(void)SvOK_off(sv);
@@ -2294,15 +2296,13 @@ sv_usepvn_mg(register SV *sv, register char *ptr, register STRLEN len)
 static void
 sv_check_thinkfirst(register SV *sv)
 {
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv)) {
-	    dTHR;
-	    if (curcop != &compiling)
-		croak(no_modify);
-	}
-	if (SvROK(sv))
-	    sv_unref(sv);
+    if (SvREADONLY(sv)) {
+	dTHR;
+	if (curcop != &compiling)
+	    croak(no_modify);
     }
+    if (SvROK(sv))
+	sv_unref(sv);
 }
     
 void
@@ -2314,7 +2314,7 @@ sv_chop(register SV *sv, register char *ptr)	/* like set but assuming ptr is in 
 
     if (!ptr || !SvPOKp(sv))
 	return;
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     if (SvTYPE(sv) < SVt_PVIV)
 	sv_upgrade(sv,SVt_PVIV);
 
@@ -2687,7 +2687,7 @@ void
 sv_replace(register SV *sv, register SV *nsv)
 {
     U32 refcnt = SvREFCNT(sv);
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     if (SvREFCNT(nsv) != 1)
 	warn("Reference miscount in sv_replace()");
     if (SvMAGICAL(sv)) {
@@ -3084,7 +3084,7 @@ sv_gets(register SV *sv, register PerlIO *fp, I32 append)
     register I32 cnt;
     I32 i;
 
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     (void)SvUPGRADE(sv, SVt_PV);
     SvSCREAM_off(sv);
 
@@ -3990,7 +3990,7 @@ newSVrv(SV *rv, char *classname)
     SvREFCNT(sv) = 0;
     SvFLAGS(sv) = 0;
 
-    sv_check_thinkfirst(rv);
+    SV_CHECK_THINKFIRST(rv);
 #ifdef OVERLOAD
     SvAMAGIC_off(rv);
 #endif /* OVERLOAD */

@@ -405,10 +405,13 @@ perly.c: perly.y
 perly.h: perly.y
 	-@sh -c true
 
-# The following three header files are generated automatically
+# The following files are generated automatically
 #	keywords.h:	keywords.pl
 #	opcode.h:	opcode.pl
 #	embed.h:  	embed.pl global.sym interp.sym
+#	byterun.h:	bytecode.pl
+#	byterun.c:	bytecode.pl
+#	lib/B/Asmdata.pm:	bytecode.pl
 # The correct versions should be already supplied with the perl kit,
 # in case you don't have perl available.
 # To force them to run, type
@@ -417,6 +420,7 @@ regen_headers:	FORCE
 	perl keywords.pl
 	perl opcode.pl
 	perl embed.pl
+	perl bytecode.pl
 
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) will automatically

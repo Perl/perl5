@@ -118,6 +118,10 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 # define DONT_DECLARE_STD 1
 #endif
 
+#if defined(NeXT) && !defined(_POSIX_SOURCE)
+#   define MISSING_PID_T
+#endif
+
 #if defined(HASVOLATILE) || defined(STANDARD_C)
 #   ifdef __cplusplus
 #	define VOL		// to temporarily suppress warnings
@@ -133,6 +137,10 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #define TAINT_IF(c)	if (c) { tainted = TRUE; }
 #define TAINT_ENV()	if (tainting) { taint_env(); }
 #define TAINT_PROPER(s)	if (tainting) { taint_proper(no_security, s); }
+
+#ifdef MISSING_PID_T
+typedef int pid_t;
+#endif
 
 /* XXX All process group stuff is handled in pp_sys.c.  Should these 
    defines move there?  If so, I could simplify this a lot. --AD  9/96.

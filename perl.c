@@ -1,6 +1,6 @@
 /*    perl.c
  *
- *    Copyright (c) 1987-1997 Larry Wall
+ *    Copyright (c) 1987-1998 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1652,7 +1652,7 @@ moreswitches(char *s)
 		LOCAL_PATCH_COUNT, (LOCAL_PATCH_COUNT!=1) ? "es" : "");
 #endif
 
-	printf("\n\nCopyright 1987-1997, Larry Wall\n");
+	printf("\n\nCopyright 1987-1998, Larry Wall\n");
 #ifdef MSDOS
 	printf("\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
 #endif
@@ -1662,7 +1662,7 @@ moreswitches(char *s)
 #endif
 #ifdef OS2
 	printf("\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
-	    "Version 5 port Copyright (c) 1994-1997, Andreas Kaiser, Ilya Zakharevich\n");
+	    "Version 5 port Copyright (c) 1994-1998, Andreas Kaiser, Ilya Zakharevich\n");
 #endif
 #ifdef atarist
 	printf("atariST series port, ++jrb  bammi@cadence.com\n");
@@ -2839,6 +2839,7 @@ init_main_thread()
     sv_setpvn(bodytarget, "", 0);
     formtarget = bodytarget;
     thr->errsv = newSVpv("", 0);
+    (void) find_threadsv("@");	/* Ensure $@ is initialised early */
     return thr;
 }
 #endif /* USE_THREADS */

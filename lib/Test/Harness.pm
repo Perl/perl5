@@ -11,7 +11,7 @@ use vars qw($VERSION $verbose $switches $have_devel_corestack $curtest
 	    @ISA @EXPORT @EXPORT_OK);
 $have_devel_corestack = 0;
 
-$VERSION = "1.1502";
+$VERSION = "1.1601";
 
 @ISA=('Exporter');
 @EXPORT= qw(&runtests);
@@ -43,7 +43,7 @@ $switches = "-w";
 sub runtests {
     my(@tests) = @_;
     local($|) = 1;
-    my($test,$te,$ok,$next,$max,$pct,$totok,@failed,%failedtests);
+    my($test,$te,$ok,$next,$max,$pct,$totok,$totbonus,@failed,%failedtests);
     my $totmax = 0;
     my $files = 0;
     my $bad = 0;
@@ -73,12 +73,20 @@ sub runtests {
 	$fh->open($cmd) or print "can't run $test. $!\n";
 	$ok = $next = $max = 0;
 	@failed = ();
+	my %todo = ();
+        my $bonus = 0;
 	my $skipped = 0;
 	while (<$fh>) {
 	    if( $verbose ){
 		print $_;
 	    }
-	    if (/^1\.\.([0-9]+)/) {
+	    if (/^1\.\.([0-9]+) todo([\d\s]+)\;/) {
+		$max = $1;
+		for (split(/\s+/, $2)) { $todo{$_} = 1; }
+		$totmax += $max;
+		$files++;
+		$next = 1;
+	    } elsif (/^1\.\.([0-9]+)/) {
 		$max = $1;
 		$totmax += $max;
 		$files++;
@@ -87,12 +95,18 @@ sub runtests {
 		my $this = $next;
 		if (/^not ok\s*(\d*)/){
 		    $this = $1 if $1 > 0;
-		    push @failed, $this;
+		    if (!$todo{$this}) {
+			push @failed, $this;
+		    } else {
+			$ok++;
+			$totok++;
+		    }
 		} elsif (/^ok\s*(\d*)(\s*\#\s*[Ss]kip)?/) {
 		    $this = $1 if $1 > 0;
 		    $ok++;
 		    $totok++;
 		    $skipped++ if defined $2;
+		    $bonus++, $totbonus++ if $todo{$this};
 		}
 		if ($this > $next) {
 		    # warn "Test output counter mismatch [test $this]\n";
@@ -144,9 +158,14 @@ sub runtests {
 				    estat => $estatus, wstat => $wstatus,
 				  };
 	} elsif ($ok == $max && $next == $max+1) {
-	    if ($max and $skipped) {
-	        my $ender = 's' x ($skipped > 1);
-		print "ok, $skipped subtest$ender skipped on this platform\n";
+	    if ($max and $skipped + $bonus) {
+		my @msg;
+		push(@msg, "$skipped subtest".($skipped>1?'s':'')." skipped")
+		    if $skipped;
+		push(@msg, "$bonus subtest".($bonus>1?'s':'').
+		     " unexpectedly succeeded")
+		    if $bonus;
+		print "ok, ".join(', ', @msg)."\n";
 	    } elsif ($max) {
 		print "ok\n";
 	    } else {
@@ -193,8 +212,12 @@ sub runtests {
 	    delete $ENV{PERL5LIB};
 	}
     }
+    my $bonusmsg = '';
+    $bonusmsg = (" ($totbonus subtest".($totbonus>1?'s':'').
+	       " UNEXPECTEDLY SUCCEEDED)")
+	if $totbonus;
     if ($bad == 0 && $totmax) {
-	    print "All tests successful.\n";
+	print "All tests successful$bonusmsg.\n";
     } elsif ($total==0){
 	die "FAILED--no tests were run for some reason.\n";
     } elsif ($totmax==0) {
@@ -289,6 +312,10 @@ runtests(@tests);
 
 =head1 DESCRIPTION
 
+(By using the L<Test> module, you can write test scripts without
+knowing the exact output this module expects.  However, if you need to
+know the specifics, read on!)
+
 Perl test scripts print to standard output C<"ok N"> for each single
 test, where C<N> is an increasing sequence of integers. The first line
 output by a standard test script is C<"1..M"> with C<M> being the
@@ -372,7 +399,8 @@ above messages.
 
 =head1 SEE ALSO
 
-See L<Benchmark> for the underlying timing routines.
+L<Test> for writing test scripts and also L<Benchmark> for the
+underlying timing routines.
 
 =head1 AUTHORS
 
