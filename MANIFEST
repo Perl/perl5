@@ -2034,6 +2034,7 @@ t/op/groups.t			See if $( works
 t/op/gv.t			See if typeglobs work
 t/op/hashwarn.t			See if warnings for bad hash assignments work
 t/op/inc.t			See if inc/dec of integers near 32 bit limit work
+t/op/inccode.t			See if coderefs work in @INC
 t/op/index.t			See if index works
 t/op/int.t			See if int works
 t/op/join.t			See if join works
