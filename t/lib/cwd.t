@@ -33,10 +33,14 @@ my $pwd_cmd =
     ($^O eq "MSWin32") ? "cd" : (grep { -x && -f } map { "$_/pwd" }
 			       split m/$Config{path_sep}/, $ENV{PATH})[0];
 
+if ($^O eq 'VMS') { $pwd_cmd = 'SHOW DEFAULT'; }
+
 if (defined $pwd_cmd) {
     chomp(my $start = `$pwd_cmd`);
     # Win32's cd returns native C:\ style
     $start =~ s,\\,/,g if $^O eq 'MSWin32';
+    # DCL SHOW DEFAULT has leading spaces
+    $start =~ s/^\s+// if $^O eq 'VMS';
     if ($?) {
 	for (3..6) {
 	    print "ok $_ # Skip: '$pwd_cmd' failed\n";
@@ -68,6 +72,8 @@ my $getcwd     = getcwd;
 my $fastcwd    = fastcwd;
 my $fastgetcwd = fastgetcwd;
 my $want = "t/pteerslt/path/to/a/dir";
+# This checked out OK on ODS-2 and ODS-5:
+$want = "T\.PTEERSLT\.PATH\.TO\.A\.DIR\]";
 print +($cwd        =~ m|$want$| ? "" : "not "), "ok 7\n";
 print +($getcwd     =~ m|$want$| ? "" : "not "), "ok 8\n";
 print +($fastcwd    =~ m|$want$| ? "" : "not "), "ok 9\n";
@@ -86,7 +92,13 @@ Cwd::chdir ".."; rmdir "path";
 print "#$ENV{PWD}\n";
 Cwd::chdir ".."; rmdir "pteerslt";
 print "#$ENV{PWD}\n";
-print +($ENV{PWD}  =~ m|\bt$| ? "" : "not "), "ok 12\n";
+if ($^O eq 'VMS') {
+    # This checked out OK on ODS-2 and ODS-5:
+    print +($ENV{PWD}  =~ m|\bT\]$| ? "" : "not "), "ok 12\n";
+}
+else {
+    print +($ENV{PWD}  =~ m|\bt$| ? "" : "not "), "ok 12\n";
+}
 
 if ($Config{d_symlink}) {
     my @dirs = split " " => $Config{libpth};
