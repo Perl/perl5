@@ -1278,6 +1278,21 @@ typedef NVTYPE NV;
 #   ifdef LDBL_MANT_DIG
 #       define NV_MANT_DIG LDBL_MANT_DIG
 #   endif
+#   ifdef LDBL_MIN
+#       define NV_MIN LDBL_MIN
+#   endif
+#   ifdef LDBL_MAX
+#       define NV_MAX LDBL_MAX
+#   endif
+#   ifdef LDBL_MIN_10_EXP
+#       define NV_MIN_10_EXP LDBL_MIN_10_EXP
+#   endif
+#   ifdef LDBL_MAX_10_EXP
+#       define NV_MAX_10_EXP LDBL_MAX_10_EXP
+#   endif
+#   ifdef LDBL_EPSILON
+#       define NV_EPSILON LDBL_EPSILON
+#   endif
 #   ifdef LDBL_MAX
 #       define NV_MAX LDBL_MAX
 #       define NV_MIN LDBL_MIN
@@ -1326,6 +1341,21 @@ typedef NVTYPE NV;
 #   define NV_DIG DBL_DIG
 #   ifdef DBL_MANT_DIG
 #       define NV_MANT_DIG DBL_MANT_DIG
+#   endif
+#   ifdef DBL_MIN
+#       define NV_MIN DBL_MIN
+#   endif
+#   ifdef DBL_MAX
+#       define NV_MAX DBL_MAX
+#   endif
+#   ifdef DBL_MIN_10_EXP
+#       define NV_MIN_10_EXP DBL_MIN_10_EXP
+#   endif
+#   ifdef DBL_MAX_10_EXP
+#       define NV_MAX_10_EXP DBL_MAX_10_EXP
+#   endif
+#   ifdef DBL_EPSILON
+#       define NV_EPSILON DBL_EPSILON
 #   endif
 #   ifdef DBL_MAX
 #       define NV_MAX DBL_MAX
