@@ -74,6 +74,7 @@ package FindBin;
 use Carp;
 require 5.000;
 require Exporter;
+use File::Spec qw(file_name_is_absolute);
 use Cwd qw(getcwd abs_path);
 use Config;
 use File::Basename;
@@ -82,26 +83,7 @@ use File::Basename;
 %EXPORT_TAGS = (ALL => [qw($Bin $Script $RealBin $RealScript $Dir $RealDir)]);
 @ISA = qw(Exporter);
 
-$VERSION = $VERSION = sprintf("%d.%02d", q$Revision: 1.41 $ =~ /(\d+)\.(\d+)/);
-
-sub is_abs_path
-{
- local $_ = shift if (@_);
- if ($^O eq 'MSWin32' || $^O eq 'dos')
-  {
-   return m#^([a-z]:[\\/]|\\\\)#i;
-  }
- elsif ($^O eq 'VMS')
-  {
-    # If it's a logical name, expand it.
-    $_ = $ENV{$_} while /^[\w\$\-]+$/ and $ENV{$_};
-    return m!^/! or m![<\[][^.\-\]>]! or /:[^<\[]/;
-  }
- else
-  {
-   return m#^/#;
-  }
-}
+$VERSION = $VERSION = sprintf("%d.%02d", q$Revision: 1.42 $ =~ /(\d+)\.(\d+)/);
 
 BEGIN
 {
@@ -160,7 +142,7 @@ BEGIN
 
      # Ensure $script contains the complete path incase we C<chdir>
 
-     $script = getcwd() . "/" . $script unless is_abs_path($script);
+     $script = getcwd() . "/" . $script unless file_name_is_absolute($script);
 
      ($Script,$Bin) = fileparse($script);
 
@@ -172,7 +154,7 @@ BEGIN
        ($RealScript,$RealBin) = fileparse($script);
        last unless defined $linktext;
 
-       $script = (is_abs_path($linktext))
+       $script = (file_name_is_absolute($linktext))
                   ? $linktext
                   : $RealBin . "/" . $linktext;
       }
