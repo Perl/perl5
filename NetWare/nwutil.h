@@ -83,16 +83,16 @@ void fnInternalPerlLaunchHandler(char* cmdLine);
 char* fnMy_MkTemp(char* templatestr);
 
 
-/* DEFPERLROOT:
+/* NWDEFPERLROOT:
  *  This symbol contains the name of the starting default directory to search
  *  for scripts to run.
  */
-#define DEFPERLROOT "sys:\\perl\\scripts"
+#define NWDEFPERLROOT "sys:\\perl\\scripts"
 
-/* DEFPERLTEMP:
+/* NWDEFPERLTEMP:
  *  This symbol contains the name of the default temp files directory.
  */
-#define DEFPERLTEMP "sys:\\perl\\temp"
+#define NWDEFPERLTEMP "sys:\\perl\\temp"
 
 
 #endif	// __NWUtil_H__

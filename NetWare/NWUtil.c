@@ -755,11 +755,16 @@ char* fnMy_MkTemp(char* templatestr)
 			pPid = numbuf;
 
 /**
-		Backtick operation uses temp files that are stored under DEFPERLTEMP directory.
-		They are temporarily used and then cleaned up after usage.
-		In the process of operation to allow for more temp files, the below logic is used.
-		This allows 26 files (like, pla00015.tmp through plz00015.tmp) plus
-		26x26=676 (like, plaa0015.tmp through plzz0015.tmp)
+		Backtick operation uses temp files that are stored under NWDEFPERLTEMP
+		directory. They are temporarily used and then cleaned up after usage.
+		In cases where multiple backtick operations are used that call some
+		complex scripts, new temp files will be created before the old ones are
+		deleted. So, we need to have a provision to create many temp files.
+		Hence the below logic. It is found that provision for 26 files may
+		not be enough in some cases.
+
+		This below logic allows 26 files (like, pla00015.tmp through plz00015.tmp)
+		plus 6x26=676 (like, plaa0015.tmp through plzz0015.tmp)
 **/
 
 		letter = 'a';

@@ -160,8 +160,8 @@ void main(int argc, char *argv[])
 
 //	Ensure that we have a "temp" directory
 	fnSetupNamespace();
-	if (access(DEFPERLTEMP, 0) != 0)
-		mkdir(DEFPERLTEMP);
+	if (access(NWDEFPERLTEMP, 0) != 0)
+		mkdir(NWDEFPERLTEMP);
 
 	// Create the file NUL if not present. This is done only once per NLM load.
 	// This is required for -e.
@@ -176,7 +176,7 @@ void main(int argc, char *argv[])
 	{
 		char sNUL[MAX_DN_BYTES] = {'\0'};
 
-		strcpy(sNUL, DEFPERLROOT);
+		strcpy(sNUL, NWDEFPERLROOT);
 		strcat(sNUL, "\\nul");
 		if (access((const char *)sNUL, 0) != 0)
 		{
@@ -308,7 +308,7 @@ void fnSigTermHandler(int sig)
 	{
 		char sNUL[MAX_DN_BYTES] = {'\0'};
 
-		strcpy(sNUL, DEFPERLROOT);
+		strcpy(sNUL, NWDEFPERLROOT);
 		strcat(sNUL, "\\nul");
 		if (access((const char *)sNUL, 0) == 0)
 		{
@@ -530,7 +530,7 @@ void fnLaunchPerl(void* context)
 	{
 		// get the default working directory name
 		//
-		defaultDir = fnNwGetEnvironmentStr("PERL_ROOT", DEFPERLROOT);
+		defaultDir = fnNwGetEnvironmentStr("PERL_ROOT", NWDEFPERLROOT);
 	}
 	else
 		defaultDir = getcwd(curdir, sizeof(curdir)-1);
