@@ -2,7 +2,29 @@ package Thread::Queue;
 
 our $VERSION = '1.00';
 
+our $ithreads;
+our $othreads;
+
 use Thread qw(cond_wait cond_broadcast);
+
+BEGIN {
+    use Config;
+    $ithreads = $Config{useithreads};
+    $othreads = $Config{use5005threads};
+    if($ithreads) {
+	require 'threads/shared/queue.pm';
+	for my $m (qw(new enqueue dequeue dequeue_nb pending)) {
+	    no strict 'refs';
+	    *{"Thread::Queue::$m"} = \&{"threads::shared::queue::${m}"};
+	}
+    } else {
+	for my $m (qw(new enqueue dequeue dequeue_nb pending)) {
+	    no strict 'refs';
+	    *{"Thread::Queue::$m"} = \&{"Thread::Queue::${m}_othread"};
+	}
+    }
+}
+
 
 =head1 NAME
 
@@ -65,18 +87,18 @@ L<Thread>
 
 =cut
 
-sub new {
+sub new_othread {
     my $class = shift;
     return bless [@_], $class;
 }
 
-sub dequeue : locked : method {
+sub dequeue_othread : locked : method {
     my $q = shift;
     cond_wait $q until @$q;
     return shift @$q;
 }
 
-sub dequeue_nb : locked : method {
+sub dequeue_nb_othread : locked : method {
   my $q = shift;
   if (@$q) {
     return shift @$q;
@@ -85,12 +107,12 @@ sub dequeue_nb : locked : method {
   }
 }
 
-sub enqueue : locked : method {
+sub enqueue_othread : locked : method {
     my $q = shift;
     push(@$q, @_) and cond_broadcast $q;
 }
 
-sub pending : locked : method {
+sub pending_othread : locked : method {
   my $q = shift;
   return scalar(@$q);
 }

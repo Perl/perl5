@@ -1854,6 +1854,8 @@ string
 
 =item DESCRIPTION
 
+=item Status
+
 =item What Is A Thread Anyway?
 
 =item Threaded Program Models
@@ -1870,7 +1872,7 @@ string
 
 =item Native threads
 
-=item What kind of threads are perl threads?
+=item What kind of threads are Perl threads?
 
 =item Threadsafe Modules
 
@@ -1898,21 +1900,25 @@ string
 
 =item Thread Pitfalls: Races
 
-=item Controlling access: lock()
-
-=item Thread Pitfall: Deadlocks
-
-=item Queues: Passing Data Around
-
 =back
 
-=item Threads And Code
+=item Synchronization and control
 
 =over 4
 
+=item Controlling access: lock()
+
+=item A Thread Pitfall: Deadlocks
+
+=item Queues: Passing Data Around
+
 =item Semaphores: Synchronizing Data Access
 
-Basic semaphores, Advanced Semaphores
+=item Basic semaphores
+
+=item Advanced Semaphores
+
+=item cond_wait() and cond_signal()
 
 =back
 
@@ -1931,6 +1937,8 @@ Basic semaphores, Advanced Semaphores
 =back
 
 =item A Complete Example
+
+=item Performance considerations
 
 =item Conclusion
 
@@ -2609,45 +2617,51 @@ module (sometimes unnecessary), B<INSTALL> the module
 
 =item Pragmatic Modules
 
-attributes, autouse, base, bigint, bignum, bigrat, blib, bytes, charnames,
-constant, diagnostics, encoding, fields, filetest, if, integer, less,
-locale, open, overload, re, sigtrap, sort, strict, subs, utf8, vars,
-vmsish, warnings, warnings::register
+attributes, attrs, autouse, base, bigint, bignum, bigrat, blib, bytes,
+charnames, constant, diagnostics, encoding, fields, filetest, if, integer,
+less, locale, open, ops, overload, re, sigtrap, sort, strict, subs,
+threads, utf8, vars, vmsish, warnings, warnings::register
 
 =item Standard Modules
 
-AnyDBM_File, Attribute::Handlers, AutoLoader, AutoSplit, Benchmark, CGI,
-CGI::Apache, CGI::Carp, CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push,
-CGI::Switch, CGI::Util, CPAN, CPAN::FirstTime, CPAN::Nox, Carp,
-Carp::Heavy, Class::ISA, Class::Struct, Cwd, DB, Devel::SelfStubber,
-Digest, DirHandle, Dumpvalue, English, Env, Exporter, Exporter::Heavy,
-ExtUtils::Command, ExtUtils::Constant, ExtUtils::Embed, ExtUtils::Install,
-ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM_BeOS,
-ExtUtils::MM_Cygwin, ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_Unix,
-ExtUtils::MM_VMS, ExtUtils::MM_Win32, ExtUtils::MakeMaker,
-ExtUtils::Manifest, ExtUtils::Mkbootstrap, ExtUtils::Mksymlists,
-ExtUtils::Packlist, ExtUtils::testlib, Fatal, File::Basename,
-File::CheckTree, File::Compare, File::Copy, File::DosGlob, File::Find,
-File::Path, File::Spec, File::Spec::Cygwin, File::Spec::Epoc,
-File::Spec::Functions, File::Spec::Mac, File::Spec::OS2, File::Spec::Unix,
-File::Spec::VMS, File::Spec::Win32, File::Temp, File::stat, FileCache,
-FileHandle, Filter::Simple, FindBin, Getopt::Long, Getopt::Std, Hash::Util,
-I18N::Collate, I18N::LangTags, I18N::LangTags::List, IPC::Open2,
+AnyDBM_File, Attribute::Handlers, AutoLoader, AutoSplit, B, B::Asmdata,
+B::Assembler, B::Bblock, B::Bytecode, B::C, B::CC, B::Concise, B::Debug,
+B::Deparse, B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash,
+B::Terse, B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp,
+CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util,
+CPAN, CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA,
+Class::Struct, Cwd, DB, DB_File, Devel::SelfStubber, Digest, DirHandle,
+Dumpvalue, Encode, English, Env, Exporter, Exporter::Heavy,
+ExtUtils::Command, ExtUtils::Command::MM, ExtUtils::Constant,
+ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist,
+ExtUtils::MM, ExtUtils::MM_Any, ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin,
+ExtUtils::MM_DOS, ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2,
+ExtUtils::MM_UWIN, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
+ExtUtils::MM_Win95, ExtUtils::MY, ExtUtils::MakeMaker, ExtUtils::Manifest,
+ExtUtils::Mkbootstrap, ExtUtils::Mksymlists, ExtUtils::Packlist,
+ExtUtils::testlib, Fatal, Fcntl, File::Basename, File::CheckTree,
+File::Compare, File::Copy, File::DosGlob, File::Find, File::Path,
+File::Spec, File::Spec::Cygwin, File::Spec::Epoc, File::Spec::Functions,
+File::Spec::Mac, File::Spec::OS2, File::Spec::Unix, File::Spec::VMS,
+File::Spec::Win32, File::Temp, File::stat, FileCache, FileHandle,
+Filter::Simple, FindBin, Getopt::Long, Getopt::Std, Hash::Util,
+I18N::Collate, I18N::LangTags, I18N::LangTags::List, IO, IPC::Open2,
 IPC::Open3, Locale::Constants, Locale::Country, Locale::Currency,
 Locale::Language, Locale::Maketext, Locale::Maketext::TPJ13,
 Locale::Script, Math::BigFloat, Math::BigInt, Math::BigInt::Calc,
 Math::BigRat, Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File,
 Memoize::Expire, Memoize::ExpireFile, Memoize::ExpireTest,
-Memoize::NDBM_File, Memoize::SDBM_File, Memoize::Storable, NEXT, Net::Cmd,
-Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc, Net::POP3,
-Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ, Net::netent,
-Net::protoent, Net::servent, PerlIO, Pod::Checker, Pod::Find,
-Pod::Functions, Pod::Html, Pod::InputObjects, Pod::LaTeX, Pod::Man,
-Pod::ParseLink, Pod::ParseUtils, Pod::Parser, Pod::Plainer, Pod::Select,
-Pod::Text, Pod::Text::Color, Pod::Text::Overstrike, Pod::Text::Termcap,
-Pod::Usage, Pod::t::basic, Search::Dict, SelectSaver, SelfLoader, Shell,
-Switch, Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine,
-Test, Test::Builder, Test::Harness, Test::Harness::Assert,
+Memoize::NDBM_File, Memoize::SDBM_File, Memoize::Storable, NDBM_File, NEXT,
+Net::Cmd, Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc,
+Net::POP3, Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ,
+Net::netent, Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX,
+PerlIO, Pod::Checker, Pod::Find, Pod::Functions, Pod::Html,
+Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseLink, Pod::ParseUtils,
+Pod::Parser, Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
+Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, Pod::t::basic,
+SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell, Socket,
+Storable, Switch, Symbol, Term::ANSIColor, Term::Cap, Term::Complete,
+Term::ReadLine, Test, Test::Builder, Test::Harness, Test::Harness::Assert,
 Test::Harness::Iterator, Test::Harness::Straps, Test::More, Test::Simple,
 Test::Tutorial, Text::Abbrev, Text::Balanced, Text::ParseWords,
 Text::Soundex, Text::Tabs, Text::Wrap, Thread, Tie::Array, Tie::File,
@@ -8166,7 +8180,7 @@ BLOCK;
 
 =item WARNINGS
 
-Cleanup skipped %d active threads
+A thread exited while %d other threads were still running
 
 =item BUGS / TODO
 
@@ -18213,7 +18227,7 @@ B<_leader_width>
 C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<FAILED tests
 %s\n\tFailed %d/%d tests, %.2f%% okay.>, C<Test returned status %d (wstat
 %d)>, C<Failed 1 test, %.2f%% okay. %s>, C<Failed %d/%d tests, %.2f%% okay.
-%s>, C<FAILED--Further testing stopped%s>
+%s>, C<FAILED--Further testing stopped: %s>
 
 =item ENVIRONMENT
 

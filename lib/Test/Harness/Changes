@@ -1,5 +1,20 @@
 Revision history for Perl extension Test::Harness
 
+2.21  Mon May  6 00:43:22 EDT 2002
+    - removed a bunch of dead code left over after 2.20's gutting.
+    - The fix for the $^X "bug" added in 2.02 has been removed.  It
+      caused more trouble than the old bug (I'd never seen a problem
+      before anyway)
+    - 2.20 broke $verbose
+
+2.20  Sat May  4 22:31:20 EDT 2002
+    * An almost complete conversion of the Test::Harness test parsing
+      to use Test::Harness::Straps.
+
+2.04  Tue Apr 30 00:54:49 EDT 2002
+    * Changing the output format of skips
+    - Taking into account VMS's special exit codes in the tests.
+
 2.03  Thu Apr 25 01:01:34 EDT 2002
     * $^X fix made safer.
     - Noise from loading wait.ph to analyze core files supressed

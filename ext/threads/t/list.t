@@ -47,6 +47,7 @@ $thread->join();
 ok(5, scalar @{[threads->list]} == 1);
 
 $thread = threads->create(sub { ok(6, threads->self == (threads->list)[1])});
+threads->yield; # help out non-preemptive thread implementations
 sleep 1;
 ok(7, $thread == (threads->list)[1]);
 $thread->join();

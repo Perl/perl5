@@ -3192,14 +3192,16 @@ would lose the UTF-8'ness of the PV.
 void
 Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 {
-    SV *tmpsv = sv_newmortal();
+    SV *tmpsv;
 
-    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) ) {
-	tmpsv = AMG_CALLun(ssv,string);
+    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) && 
+	 (tmpsv = AMG_CALLun(ssv,string))) {
 	if (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(ssv))) {
 	    SvSetSV(dsv,tmpsv);
 	    return;
 	}
+    } else {
+        tmpsv = sv_newmortal();
     }
     {
 	STRLEN len;
@@ -6336,7 +6338,7 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 	len = tmplen;
     }
     if (!hash)
-	PERL_HASH(hash, src, len);
+	PERL_HASH(hash, (U8*)src, len);
     new_SV(sv);
     sv_upgrade(sv, SVt_PVIV);
     SvPVX(sv) = sharepvn(src, is_utf8?-len:len, hash);

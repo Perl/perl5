@@ -2739,6 +2739,12 @@ One cannot call Perl using the C<volume:> syntax, that is, C<perl -v>
 works, but for example C<bin:perl -v> doesn't.  The exact reason isn't
 known but the current suspect is the F<ixemul> library.
 
+=head2 ext/threads/t/libc
+
+If this test fails, it indicates that your libc (C library) is not
+threadsafe.  This particular test stress tests the localtime() call to
+find out whether it is threadsafe.  See L<perlthrtut> for more information.
+
 =head2 FreeBSD Failing locale Test 117 For ISO8859-15 Locales
 
 The ISO8859-15 locales may fail the locale test 117 in FreeBSD.
@@ -2785,11 +2791,18 @@ The following tests are known to fail:
  -------------------------------------------------------------------------
  ../ext/DB_File/t/db-btree.t    0    11    ??   ??       %  ??
  ../ext/DB_File/t/db-recno.t              149    3   2.01%  61 63 65
- ../ext/POSIX/t/posix.t                    31    1   3.23%  10
 
 If you are building on a UFS partition, you will also probably see
 t/op/stat.t subtest #9 fail.  This is caused by Darwin's UFS not
 supporting inode change time.
+
+Also the ext/POSIX/t/posix.t subtest #10 fails but it is skipped for
+now because the failure is Apple's fault, not Perl's (blocked signals
+are lost).
+
+If you Configure with ithreads, ext/threads/t/libc.t will fail, again
+not Perl's fault-- the libc of Mac OS X is not threadsafe (in this
+particular test the localtime() call is found to be threadunsafe.)
 
 =head2 op/sprintf tests 91, 129, and 130
 
@@ -2907,21 +2920,17 @@ better than it was in 5.6.0, it's just that so many new modules and
 tests have been added.
 
  Failed Test                   Stat Wstat Total Fail  Failed  List of Failed
- -------------------------------------------------------------------------------
- ../ext/Data/Dumper/t/dumper.t              339    8   2.36%  311 314 325 327
+ ---------------------------------------------------------------------------
+ ../ext/Data/Dumper/t/dumper.t              357    8   2.24%  311 314 325 327
                                                               331 333 337 339
  ../ext/IO/lib/IO/t/io_unix.t                 5    4  80.00%  2-5
- ../ext/Storable/t/utf8hash.t    10  2560   148   10   6.76%  1 5 72 76 143-148
- ../lib/utf8.t                               94   13  13.83%  27 30-31 43 46 73
-                                                              76 79 82 85 88 91
-                                                              94
  ../lib/ExtUtils/t/Constant.t   121 30976    48   48 100.00%  1-48
  ../lib/ExtUtils/t/Embed.t                    9    9 100.00%  1-9
- op/pat.t                                   900    9   1.00%  242-243 665 776
-                                                              785 832-834 845
+ op/pat.t                                   910    9   0.99%  665 776 785
+                                                              832-834 845
  op/sprintf.t                               224    3   1.34%  98 100 136
  op/tr.t                                     97    5   5.15%  63 71-74
- run/fresh_perl.t                            94    3   3.19%  92-94
+ run/fresh_perl.t                            95    3   3.16%  92-94
  uni/fold.t                                 780    6   0.77%  61 169 196 661
                                                               710-711
 

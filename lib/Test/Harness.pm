@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.22 2002/04/30 04:55:27 schwern Exp $
+# $Id: Harness.pm,v 1.28 2002/05/06 04:44:29 schwern Exp $
 
 package Test::Harness;
 
@@ -12,7 +12,7 @@ use Config;
 use strict;
 
 use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
-            $Columns $verbose $switches
+            $Columns $verbose $switches $ML
             @ISA @EXPORT @EXPORT_OK
            );
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = '2.04';
+$VERSION = '2.21';
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -421,6 +421,7 @@ B<NOTE> Currently this function is still noisy.  I'm working on it.
 
 =cut
 
+#'#
 sub _run_all_tests {
     my(@tests) = @_;
     local($|) = 1;
@@ -441,64 +442,49 @@ sub _run_all_tests {
                 bench    => 0,
                );
 
-    local($ENV{'PERL5LIB'}) = $Strap->_INC2PERL5LIB;
-
     my @dir_files = _globdir $Files_In_Dir if defined $Files_In_Dir;
     my $t_start = new Benchmark;
 
     my $width = _leader_width(@tests);
     foreach my $tfile (@tests) {
-        $Strap->_reset_file_state;
 
         my($leader, $ml) = _mk_leader($tfile, $width);
+        local $ML = $ml;
         print $leader;
-
-        my $fh = _open_test($tfile);
 
         $tot{files}++;
 
+        $Strap->{_seen_header} = 0;
+        my %results = $Strap->analyze_file($tfile);
+
         # state of the current test.
+        my @failed = grep { !$results{details}[$_-1]{ok} }
+                     1..@{$results{details}};
         my %test = (
-                    ok          => 0,
-                    'next'      => 0,
-                    max         => 0,
-                    failed      => [],
-                    todo        => {},
-                    bonus       => 0,
-                    skipped     => 0,
-                    skip_reason => undef,
+                    ok          => $results{ok},
+                    'next'      => $Strap->{'next'},
+                    max         => $results{max},
+                    failed      => \@failed,
+                    bonus       => $results{bonus},
+                    skipped     => $results{skip},
+                    skip_reason => $Strap->{_skip_reason},
                     ml          => $ml,
                    );
 
-        my($seen_header, $tests_seen) = (0,0);
-        while (<$fh>) {
-            print if $Verbose;
+        $tot{bonus}       += $results{bonus};
+        $tot{max}         += $results{max};
+        $tot{ok}          += $results{ok};
+        $tot{todo}        += $results{todo};
+        $tot{sub_skipped} += $results{skip};
 
-            $Strap->{line}++;
-            if( _parse_header($_, \%test, \%tot) ) {
-                warn "Test header seen twice!\n" if $seen_header;
-
-                $seen_header = 1;
-
-                warn "1..M can only appear at the beginning or end of tests\n"
-                  if $tests_seen && $test{max} < $tests_seen;
-            }
-            elsif( _parse_test_line($_, \%test, \%tot) ) {
-                $tests_seen++;
-            }
-            # else, ignore it.
-        }
-
-        my($estatus, $wstatus) = _close_fh($fh);
-
-        my $allok = $test{ok} == $test{max} && $test{'next'} == $test{max}+1;
+        my($estatus, $wstatus) = @results{qw(exit wait)};
 
         if ($wstatus) {
             $failedtests{$tfile} = _dubious_return(\%test, \%tot, 
                                                   $estatus, $wstatus);
             $failedtests{$tfile}{name} = $tfile;
         }
-        elsif ($allok) {
+        elsif ($results{passing}) {
             if ($test{max} and $test{skipped} + $test{bonus}) {
                 my @msg;
                 push(@msg, "$test{skipped}/$test{max} skipped: $test{skip_reason}")
@@ -561,8 +547,6 @@ sub _run_all_tests {
             }
         }
 
-        $tot{sub_skipped} += $test{skipped};
-
         if (defined $Files_In_Dir) {
             my @new_dir_files = _globdir $Files_In_Dir;
             if (@new_dir_files != @dir_files) {
@@ -574,8 +558,6 @@ sub _run_all_tests {
                 @dir_files = @new_dir_files;
             }
         }
-
-        close $fh;
     }
     $tot{bench} = timediff(new Benchmark, $t_start);
 
@@ -678,131 +660,70 @@ sub _show_results {
 }
 
 
-sub _parse_header {
-    my($line, $test, $tot) = @_;
+my %Handlers = ();
+$Strap->{callback} = sub {
+    my($self, $line, $type, $totals) = @_;
+    print $line if $Verbose;
 
-    my $is_header = 0;
-
-    if( $Strap->_is_header($line) ) {
-        $is_header = 1;
-
-        $test->{max} = $Strap->{max};
-        for ( keys %{$Strap->{todo}} ) { $test->{todo}{$_} = 1; }
-
-        $test->{skip_reason} = $Strap->{skip_all} 
-          if not $test->{max} and defined $Strap->{skip_all};
-
-        $test->{'next'} = 1 unless $test->{'next'};
+    my $meth = $Handlers{$type};
+    $meth->($self, $line, $type, $totals) if $meth;
+};
 
 
-        $tot->{max} += $test->{max};
+$Handlers{header} = sub {
+    my($self, $line, $type, $totals) = @_;
+
+    warn "Test header seen more than once!\n" if $self->{_seen_header};
+
+    $self->{_seen_header}++;
+
+    warn "1..M can only appear at the beginning or end of tests\n"
+      if $totals->{seen} && 
+         $totals->{max}  < $totals->{seen};
+};
+
+$Handlers{test} = sub {
+    my($self, $line, $type, $totals) = @_;
+
+    my $curr = $totals->{seen};
+    my $next = $self->{'next'};
+    my $max  = $totals->{max};
+    my $detail = $totals->{details}[-1];
+
+    if( $detail->{ok} ) {
+        _print_ml("ok $curr/$max");
+
+        if( $detail->{type} eq 'skip' ) {
+            $self->{_skip_reason} = $detail->{reason}
+              unless defined $self->{_skip_reason};
+            $self->{_skip_reason} = 'various reasons'
+              if $self->{_skip_reason} ne $detail->{reason};
+        }
     }
     else {
-        $is_header = 0;
+        _print_ml("NOK $curr");
     }
 
-    return $is_header;
-}
-
-
-sub _open_test {
-    my($test) = shift;
-
-    my $s = _set_switches($test);
-
-    my $perl = -x $^X ? $^X : $Config{perlpath};
-
-    # XXX This is WAY too core specific!
-    my $cmd = ($ENV{'HARNESS_COMPILE_TEST'})
-                ? "./perl -I../lib ../utils/perlcc $test "
-                  . "-r 2>> ./compilelog |" 
-                : "$perl $s $test|";
-    $cmd = "MCR $cmd" if $^O eq 'VMS';
-
-    if( open(PERL, $cmd) ) {
-        return \*PERL;
+    if( $curr > $next ) {
+        print "Test output counter mismatch [test $curr]\n";
     }
-    else {
-        print "can't run $test. $!\n";
-        return;
+    elsif( $curr < $next ) {
+        print "Confused test output: test $curr answered after ".
+              "test ", $next - 1, "\n";
     }
-}
+
+};
+
+$Handlers{bailout} = sub {
+    my($self, $line, $type, $totals) = @_;
+
+    die "FAILED--Further testing stopped" .
+      ($self->{bailout_reason} ? ": $self->{bailout_reason}\n" : ".\n");
+};
 
 
-sub _parse_test_line {
-    my($line, $test, $tot) = @_;
-
-    my %result;
-    if ( $Strap->_is_test($line, \%result) ) {
-        $test->{'next'} ||= 1;
-        my $this = $test->{'next'};
-
-        my($not, $tnum) = (!$result{ok}, $result{number});
-
-        $this = $tnum if $tnum;
-
-        my($type, $reason) = ($result{type}, $result{reason});
-
-        my($istodo, $isskip);
-        if( defined $type ) {
-            $istodo = 1 if $type eq 'todo';
-            $isskip = 1 if $type eq 'skip';
-        }
-
-        $test->{todo}{$this} = 1 if $istodo;
-        if( $test->{todo}{$this} ) {
-            $tot->{todo}++;
-            $test->{bonus}++, $tot->{bonus}++ unless $not;
-        }
-
-        if( $not && !$test->{todo}{$this} ) {
-            print "$test->{ml}NOK $this" if $test->{ml};
-            push @{$test->{failed}}, $this;
-        }
-        else {
-            print "$test->{ml}ok $this/$test->{max}" if $test->{ml};
-            $test->{ok}++;
-            $tot->{ok}++;
-            $test->{skipped}++ if $isskip;
-
-            $reason = '[no reason given]'
-              if $isskip and not defined $reason;
-            if (defined $reason and defined $test->{skip_reason}) {
-                # print "was: '$skip_reason' new '$reason'\n";
-                $test->{skip_reason} = 'various reasons'
-                  if $test->{skip_reason} ne $reason;
-            } elsif (defined $reason) {
-                $test->{skip_reason} = $reason;
-            }
-        }
-
-        if ($this > $test->{'next'}) {
-            print "Test output counter mismatch [test $this]\n";
-
-            # Guard against resource starvation.
-            if( $this > 100000 ) {
-                print "Enourmous test number seen [test $this]\n";
-            }
-            else {
-                push @{$test->{failed}}, $test->{'next'}..$this-1;
-            }
-        }
-        elsif ($this < $test->{'next'}) {
-            #we have seen more "ok" lines than the number suggests
-            print "Confused test output: test $this answered after ".
-                  "test ", $test->{'next'}-1, "\n";
-            $test->{'next'} = $this;
-        }
-        $test->{'next'} = $this + 1;
-
-    }
-    else {
-        my $bail_reason;
-        if( $Strap->_is_bail_out($line, \$bail_reason) ) { # bail out!
-            die "FAILED--Further testing stopped" .
-              ($bail_reason ? ": $bail_reason\n" : ".\n");
-        }
-    }
+sub _print_ml {
+    print join '', $ML, @_ if $ML;
 }
 
 
@@ -831,33 +752,6 @@ sub _bonusmsg {
 
     return $bonusmsg;
 }
-
-# VMS has some subtle nastiness with closing the test files.
-sub _close_fh {
-    my($fh) = shift;
-
-    close($fh); # must close to reap child resource values
-
-    my $wstatus = $Ignore_Exitcode ? 0 : $?;    # Can trust $? ?
-    my $estatus;
-    $estatus = ($^O eq 'VMS'
-                  ? eval 'use vmsish "status"; $estatus = $?'
-                  : $wstatus >> 8);
-
-    return($estatus, $wstatus);
-}
-
-
-# Set up the command-line switches to run perl as.
-sub _set_switches {
-    my($test) = shift;
-
-    my $s = $Switches;
-    $s .= $Strap->_switches($test);
-
-    return $s;
-}
-
 
 # Test program go boom.
 sub _dubious_return {
@@ -899,12 +793,6 @@ sub _dubious_return {
              percent => $percent,
              estat => $estatus, wstat => $wstatus,
            };
-}
-
-
-sub _garbled_output {
-    my($gibberish) = shift;
-    warn "Confusing test output:  '$gibberish'\n";
 }
 
 
@@ -1068,7 +956,7 @@ and C<$?> are printed in a message similar to the above.
 If not all tests were successful, the script dies with one of the
 above messages.
 
-=item C<FAILED--Further testing stopped%s>
+=item C<FAILED--Further testing stopped: %s>
 
 If a single subtest decides that further testing will not make sense,
 the script dies with this message.
@@ -1179,6 +1067,7 @@ Fix HARNESS_COMPILE_TEST without breaking its core usage.
 Figure a way to report test names in the failure summary.
 
 Rework the test summary so long test names are not truncated as badly.
+(Partially done with new skip test styles)
 
 Deal with VMS's "not \nok 4\n" mistake.
 

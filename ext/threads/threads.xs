@@ -143,7 +143,7 @@ Perl_ithread_hook(pTHX)
     int veto_cleanup = 0;
     MUTEX_LOCK(&create_destruct_mutex);
     if (aTHX == PL_curinterp && active_threads != 1) {
-	Perl_warn(aTHX_ "Cleanup skipped %" IVdf " active threads",
+	Perl_warn(aTHX_ "A thread exited while %" IVdf " other threads were still running",
 						(IV)active_threads);
 	veto_cleanup = 1;
     }

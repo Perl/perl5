@@ -4,17 +4,18 @@ perlothrtut - old tutorial on threads in Perl
 
 =head1 DESCRIPTION
 
-B<WARNING>: Threading is an experimental feature.  Both the interface
-and implementation are subject to change drastically.  In fact, this
-documentation describes the flavor of threads that was in version
-5.005.  Perl 5.6.0 and later have the beginnings of support for
-interpreter threads, which (when finished) is expected to be
-significantly different from what is described here.  The information
-contained here may therefore soon be obsolete.  Use at your own risk!
+B<WARNING>:
+This tutorial describes the old-style thread model that was introduced in
+release 5.005. This model is now deprecated, and will be removed, probably
+in version 5.10. The interfaces described here were considered
+experimental, and are likely to be buggy.
 
-One of the most prominent new features of Perl 5.005 is the inclusion
-of threads.  Threads make a number of things a lot easier, and are a
-very useful addition to your bag of programming tricks.
+For information about the new interpreter threads ("ithreads") model, see
+the F<perlthrtut> tutorial, and the L<threads> and L<threads::shared>
+modules.
+
+You are strongly encouraged to migrate any existing threads code to the
+new model as soon as possible.
 
 =head1 What Is A Thread Anyway?
 

@@ -3523,6 +3523,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     UV n;
     bool optimize_invert   = TRUE;
     AV* unicode_alternate  = 0;
+#ifdef EBCDIC
+    UV literal_endpoint = 0;
+#endif
 
     ret = reganode(pRExC_state, ANYOF, 0);
 
@@ -3685,6 +3688,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		break;
 	    }
 	} /* end of \blah */
+#ifdef EBCDIC
+	else
+	    literal_endpoint++;
+#endif
 
 	if (namedclass > OOB_NAMEDCLASS) { /* this is a named class \blah */
 
@@ -4087,8 +4094,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	        IV ceilvalue = value < 256 ? value : 255;
 
 #ifdef EBCDIC
-		if ((isLOWER(prevvalue) && isLOWER(ceilvalue)) ||
-		    (isUPPER(prevvalue) && isUPPER(ceilvalue)))
+		/* In EBCDIC [\x89-\x91] should include
+		 * the \x8e but [i-j] should not. */
+		if (literal_endpoint == 2 &&
+		    ((isLOWER(prevvalue) && isLOWER(ceilvalue)) ||
+		     (isUPPER(prevvalue) && isUPPER(ceilvalue))))
 		{
 		    if (isLOWER(prevvalue)) {
 			for (i = prevvalue; i <= ceilvalue; i++)
@@ -4168,6 +4178,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		    }
 		}
 	    }
+#ifdef EBCDIC
+	    literal_endpoint = 0;
+#endif
         }
 
 	range = 0; /* this range (if it was one) is done now */

@@ -837,7 +837,11 @@ As of perl 5.005_03 the letter range regular expression such as
 [A-Z] and [a-z] have been especially coded to not pick up gap 
 characters.  For example, characters such as E<ocirc> C<o WITH CIRCUMFLEX> 
 that lie between I and J would not be matched by the 
-regular expression range C</[H-K]/>.  
+regular expression range C</[H-K]/>.  This works in
+the other direction, too, if either of the range end points is
+explicitly numeric: C<[\x89-\x91]> will match C<\x8e>, even
+though C<\x89> is C<i> and C<\x91 > is C<j>, and C<\x8e>
+is a gap character from the alphabetic viewpoint.
 
 If you do want to match the alphabet gap characters in a single octet 
 regular expression try matching the hex or octal code such 

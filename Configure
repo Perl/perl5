@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May  9 17:42:14 EET DST 2002 [metaconfig 3.0 PL70]
+# Generated on Sat May 11 22:27:01 EET DST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3435,11 +3435,10 @@ cat <<EOM
 Perl can be built to take advantage of threads on some systems.
 To do so, Configure can be run with -Dusethreads.
 
-Note that threading is a highly experimental feature, and
-some known race conditions still remain.  If you choose to try
-it, be very sure to not actually deploy it for production
-purposes.  README.threads has more details, and is required
-reading if you enable threads.
+Note that Perl built with threading support runs slightly slower
+and uses more memory than plain Perl. The current implementation
+is believed to be stable, but it is fairly new, and so should be
+treated with caution.
 
 If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
@@ -3456,11 +3455,13 @@ case "$usethreads" in
 $define)
 	$cat <<EOM
 
-As of release 5.6, Perl has two different threading implementations,
-an interpreter-based version (ithreads) with one interpreter per
-thread, and the 5.005 version (5005threads).  Both implementations
-are considered experimental, but since 5.8 ithreads somewhat less so.
-The 5005threads is effectively unmaintained.
+Since release 5.6, Perl has had two different threading implementations,
+the newer interpreter-based version (ithreads) with one interpreter per
+thread, and the older 5.005 version (5005threads).
+The 5005threads version is effectively unmaintained and will probably be
+removed in Perl 5.10, so there should be no need to build a Perl using it
+unless needed for backwards compatibility with some existing 5.005threads
+code.
 
 EOM
 	: Default to ithreads unless overridden on command line or with
@@ -3472,7 +3473,7 @@ EOM
 	case "$useithreads" in
 		$undef|false|[nN]*) dflt='n';;
 	esac
-	rp='Use interpreter-based ithreads?'
+	rp='Use the newer interpreter-based ithreads?'
 	. ./myread
 	case "$ans" in
 	y|Y)    val="$define" ;;

@@ -112,17 +112,31 @@ class subtraction.
 
 	http://www.unicode.org/unicode/reports/tr18/
 
-=head2 use Thread for iThreads
-
-Artur Bergman's C<iThreads> module is a start on this, but needs to
-be more mature.
-
-=head2 make perl_clone optionally clone ops
-
-So that pseudoforking, mod_perl, iThreads and nvi will work properly
-(but not as efficiently) until the regex engine is fixed to be threadsafe.
-
 =head2 Work out exit/die semantics for threads
+
+There are some suggestions to use for example something like this:
+default to "(thread exiting first will) wait for the other threads
+until up to 60 seconds".  Other possibilities:
+
+    use threads wait => 0;
+
+Do not wait.
+
+    use threads wait_for => 10;
+
+Wait up to 10 seconds.
+
+    use threads wait_for => -1;
+
+Wait for ever.
+
+http://archive.develooper.com/perl5-porters@perl.org/msg79618.html
+
+=head2 Better support for nonpreemptive threading systems like PTH
+
+Perhaps do yield() before blocking calls, exchange calls to non blocking
+calls specific for those libraries (for example GNUpth has a pth_sleep
+which is a non pth aware version of sleep).
 
 =head2 Typed lexicals for compiler
 
@@ -170,17 +184,13 @@ One possible solution would be to adopt/support ICU:
 
 	http://oss.software.ibm.com/developerworks/opensource/icu/project/
 
-=head2 Thread-safe regexes
-
-The regular expression engine is currently non-threadsafe.
-
 =head2 Arithmetic on non-Arabic numerals
 
 C<[1234567890]> aren't the only numerals any more.
 
 =head2 POSIX Unicode character classes
 
-(C<[=a=]> for equivalance classes, C<[.ch.]> for collation.)
+(C<[=a=]> for equivalence classes, C<[.ch.]> for collation.)
 These are dependent on Unicode normalization and collation.
 
 =head2 Factoring out common suffices/prefices in regexps (trie optimization)
@@ -247,7 +257,7 @@ C<&>, C<oct>, C<hex> and C<pack>.
 =head2 Replace pod2html with something using Pod::Parser
 
 The CPAN module C<Marek::Pod::Html> may be a more suitable basis for a
-C<pod2html> convertor; the current one duplicates the functionality
+C<pod2html> converter; the current one duplicates the functionality
 abstracted in C<Pod::Parser>, which makes updating the POD language
 difficult.
 

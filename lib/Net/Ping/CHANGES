@@ -1,6 +1,9 @@
 CHANGES
 -------
 
+2.18  May 06 12:00 2002
+	- More RPM spec generalizations.
+
 2.17  May 03 18:00 2002
 	- RPM spec generalizations.
 	  michael.mclagan@linux.org (Michael McLagan)
