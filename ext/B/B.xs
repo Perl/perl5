@@ -718,6 +718,7 @@ threadsv_names()
 #define OP_static(o)	o->op_static
 #define OP_flags(o)	o->op_flags
 #define OP_private(o)	o->op_private
+#define OP_spare(o)	o->op_spare
 
 MODULE = B	PACKAGE = B::OP		PREFIX = OP_
 
@@ -786,6 +787,10 @@ OP_flags(o)
 
 U8
 OP_private(o)
+	B::OP		o
+
+U8
+OP_spare(o)
 	B::OP		o
 
 void

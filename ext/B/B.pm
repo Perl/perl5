@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 use XSLoader ();
 require Exporter;
@@ -920,6 +920,9 @@ with the leading "class indication" prefix (C<"op_">) removed.
 
 =head2 B::OP Methods
 
+These methods get the values of similarly named fields within the OP
+data structure.  See top of C<op.h> for more info.
+
 =over 4
 
 =item next
@@ -944,11 +947,15 @@ This returns the op description from the global C PL_op_desc array
 
 =item type
 
-=item seq
+=item opt
+
+=item static
 
 =item flags
 
 =item private
+
+=item spare
 
 =back
 
