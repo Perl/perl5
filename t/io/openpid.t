@@ -1,4 +1,3 @@
-
 #!./perl
 
 #####################################################################
@@ -55,7 +54,7 @@ chomp($from_pid1 = scalar(<FH1>));
 print "# child1 returned [$from_pid1]\nnot "
     unless $from_pid1 eq 'first process';
 print "ok 5\n";
-$kill_cnt = kill STOP, $pid1;
+$kill_cnt = kill 'HUP', $pid1;
 print "not " unless $kill_cnt == 1;
 print "ok 6\n";
 
@@ -64,7 +63,7 @@ chomp($from_pid2 = scalar(<FH2>));
 print "# child2 returned [$from_pid2]\nnot "
     unless $from_pid2 eq 'second process';
 print "ok 7\n";
-$kill_cnt = kill STOP, $pid2, $pid3;
+$kill_cnt = kill 'HUP', $pid2, $pid3;
 print "not " unless $kill_cnt == 2;
 print "ok 8\n";
 
