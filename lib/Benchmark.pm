@@ -890,7 +890,7 @@ sub cmpthese{
     @vals = sort { $a->[7] <=> $b->[7] } @vals;
 
     # If more than half of the rates are greater than one...
-    my $display_as_rate = $vals[$#vals>>1]->[7] > 1;
+    my $display_as_rate = @vals ? ($vals[$#vals>>1]->[7] > 1) : 0;
 
     my @rows;
     my @col_widths;
