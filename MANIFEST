@@ -1778,6 +1778,7 @@ pp.h				Push/Pop code defs
 pp.sym				Push/Pop code symbols
 pp_ctl.c			Push/Pop code for control flow
 pp_hot.c			Push/Pop code for heavily used opcodes
+pp_pack.c			Push/Pop code for pack/unpack
 pp_proto.h			C++ definitions for Push/Pop code
 pp_sys.c			Push/Pop code for system interaction
 proto.h				Prototypes

@@ -2360,6 +2360,8 @@
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 #endif
+#if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
+#endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #if defined(PERL_FLEXIBLE_EXCEPTIONS)
 #endif

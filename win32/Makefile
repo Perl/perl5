@@ -511,6 +511,7 @@ MICROCORE_SRC	=		\
 		..\pp.c		\
 		..\pp_ctl.c	\
 		..\pp_hot.c	\
+		..\pp_pack.c	\
 		..\pp_sys.c	\
 		..\regcomp.c	\
 		..\regexec.c	\

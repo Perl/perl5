@@ -2359,9 +2359,12 @@ s	|struct perl_thread *	|init_main_thread
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
-s	|void	|doencodes	|SV* sv|char* s|I32 len
 s	|SV*	|refto		|SV* sv
 s	|U32	|seed
+#endif
+
+#if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
+s	|void	|doencodes	|SV* sv|char* s|I32 len
 s	|SV*	|mul128		|SV *sv|U8 m
 s	|SV*	|is_an_int	|char *s|STRLEN l
 s	|int	|div128		|SV *pnum|bool *done

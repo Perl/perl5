@@ -1387,6 +1387,9 @@ the C<pack> happens at runtime, so it's going to be in one of the F<pp>
 files. Sure enough, C<pp_pack> is in F<pp.c>. Since we're going to be
 altering this file, let's copy it to F<pp.c~>.
 
+[Well, it was in F<pp.c> when this tutorial was written. It has now been
+split off with C<pp_unpack> to its own file, F<pp_pack.c>]
+
 Now let's look over C<pp_pack>: we take a pattern into C<pat>, and then
 loop over the pattern, taking each format character in turn into
 C<datum_type>. Then for each possible format character, we swallow up

@@ -1089,9 +1089,12 @@ STATIC struct perl_thread *	S_init_main_thread(pTHX);
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
-STATIC void	S_doencodes(pTHX_ SV* sv, char* s, I32 len);
 STATIC SV*	S_refto(pTHX_ SV* sv);
 STATIC U32	S_seed(pTHX);
+#endif
+
+#if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
+STATIC void	S_doencodes(pTHX_ SV* sv, char* s, I32 len);
 STATIC SV*	S_mul128(pTHX_ SV *sv, U8 m);
 STATIC SV*	S_is_an_int(pTHX_ char *s, STRLEN l);
 STATIC int	S_div128(pTHX_ SV *pnum, bool *done);
