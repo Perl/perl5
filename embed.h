@@ -1164,9 +1164,6 @@
 #  if defined(LEAKTEST)
 #define xstat			S_xstat
 #  endif
-#  if defined(EBCDIC)
-#define ebcdic_control		Perl_ebcdic_control
-#  endif
 #endif
 #if defined(PERL_OBJECT)
 #endif
@@ -2645,9 +2642,6 @@
 #define mess_alloc()		S_mess_alloc(aTHX)
 #  if defined(LEAKTEST)
 #define xstat(a)		S_xstat(aTHX_ a)
-#  endif
-#  if defined(EBCDIC)
-#define ebcdic_control(a)	Perl_ebcdic_control(aTHX_ a)
 #  endif
 #endif
 #if defined(PERL_OBJECT)
@@ -5133,10 +5127,6 @@
 #  if defined(LEAKTEST)
 #define S_xstat			CPerlObj::S_xstat
 #define xstat			S_xstat
-#  endif
-#  if defined(EBCDIC)
-#define Perl_ebcdic_control	CPerlObj::Perl_ebcdic_control
-#define ebcdic_control		Perl_ebcdic_control
 #  endif
 #endif
 #if defined(PERL_OBJECT)
