@@ -19,7 +19,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.40';
+$VERSION = '1.41';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( bneg babs bcmp badd bmul bdiv bmod bnorm bsub
@@ -32,7 +32,6 @@ use Exporter;
 		 length as_number
 		 objectify _swap
                ); 
-
 #@EXPORT = qw( );
 use vars qw/$rnd_mode $accuracy $precision $div_scale/;
 use strict;
@@ -168,7 +167,7 @@ sub precision
   my $x = shift;
 
   die ("precision() needs reference to object as first parameter.")
-   unless ref $x;
+   if !ref $x;
 
   if (@_ > 0)
     {
@@ -486,15 +485,15 @@ sub round
   my $c = ref($args[0]); 			# find out class of argument
   unshift @args,$self;				# add 'first' argument
         
+  # leave bigfloat parts alone
+  return $self if exists $self->{_f} && $self->{_f} & MB_NEVER_ROUND != 0;
+
   no strict 'refs';
   my $z = "$c\::accuracy"; my $aa = $$z; my $ap = undef;
   if (!defined $aa)
     {
     $z = "$c\::precision"; $ap = $$z;
     }
-
-  # leave bigfloat parts alone
-  return $self if exists $self->{_f} && $self->{_f} & MB_NEVER_ROUND != 0;
 
   # now pick $a or $p, but only if we have got "arguments"
   if ((!defined $a) && (!defined $p) && (@args > 0))
@@ -531,7 +530,7 @@ sub round
   return $self->bnorm();
   }
 
-sub bnorm 
+sub bnorm
   { 
   # (num_str or BINT) return BINT
   # Normalize number -- no-op here
@@ -789,7 +788,8 @@ sub is_zero
   my $x = shift; $x = $class->new($x) unless ref $x;
   
   return 0 if $x->{sign} !~ /^\+$/;			# -, NaN & +-inf aren't
-  return $CALC->_is_zero($x->{value});
+  $CALC->_is_zero($x->{value});
+  #return $CALC->_is_zero($x->{value});
   }
 
 sub is_nan
@@ -1503,10 +1503,7 @@ sub _swap
     my $c = ref ($_[0]) || $class; 	# fallback $class should not happen
     return ( $c->new($_[1]), $_[0] );
     }
-  else
-    { 
-    return ( $_[0]->copy(), $_[1] );
-    }
+  return ( $_[0]->copy(), $_[1] );
   }
 
 sub objectify
@@ -1799,7 +1796,7 @@ sub as_number
   # it or override with their own integer conversion routine
   my $self = shift;
 
-  return $self->copy();
+  $self->copy();
   }
 
 ##############################################################################
@@ -1815,17 +1812,15 @@ sub cmp
   if ($sx eq '+') 
     {
     return 1 if $sy eq '-'; # 0 check handled above
-    #return acmp($cx,$cy);
     return $CALC->_acmp($cx,$cy);
     }
   else
     {
     # $sx eq '-'
     return -1 if $sy eq '+';
-    #return acmp($cy,$cx);
     return $CALC->_acmp($cy,$cx);
     }
-  return 0; # equal
+  0; # equal
   }
 
 sub _lcm 
@@ -2659,7 +2654,9 @@ Beware of:
 
 It will not do what you think, e.g. making a copy of $x. Instead it just makes
 a second reference to the B<same> object and stores it in $y. Thus anything
-that modifies $x will modify $y, and vice versa.
+that modifies $x (except overloaded operators) will modify $y, and vice versa.
+Or in other words, C<=> is only safe if you modify your BigInts only via
+overloaded math. As soon as you use a method call it breaks:
 
         $x->bmul(2);
         print "$x, $y\n";       # prints '10, 10'
@@ -2667,6 +2664,11 @@ that modifies $x will modify $y, and vice versa.
 If you want a true copy of $x, use:
 
         $y = $x->copy();
+
+You can also chain the calls like this, this will make first a copy and then
+multiply it by 2:
+
+        $y = $x->copy()->bmul(2);
 
 See also the documentation for overload.pm regarding C<=>.
 
