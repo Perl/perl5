@@ -583,6 +583,36 @@ hopefully catches attempts to access uninitialized memory.
 
 #define NEWSV(x,len)	newSV(len)
 
+#ifdef PERL_MALLOC_WRAP
+#define MEM_WRAP_CHECK(n,t) \
+	(void)((n)>((MEM_SIZE)~0)/sizeof(t)?(Perl_croak_nocontext(PL_memory_wrap),0):0)
+#define MEM_WRAP_CHECK_1(n,t,a) \
+	(void)((n)>((MEM_SIZE)~0)/sizeof(t)?(Perl_croak_nocontext(a),0):0)
+#define MEM_WRAP_CHECK_2(n,t,a,b) \
+	(void)((n)>((MEM_SIZE)~0)/sizeof(t)?(Perl_croak_nocontext(a,b),0):0)
+
+#define New(x,v,n,t)	(v = (MEM_WRAP_CHECK(n,t), (t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
+#define Newc(x,v,n,t,c)	(v = (MEM_WRAP_CHECK(n,t), (c*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
+#define Newz(x,v,n,t)	(v = (MEM_WRAP_CHECK(n,t), (t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))), \
+			memzero((char*)(v), (n)*sizeof(t))
+#define Renew(v,n,t) \
+	  (v = (MEM_WRAP_CHECK(n,t), (t*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t)))))
+#define Renewc(v,n,t,c) \
+	  (v = (MEM_WRAP_CHECK(n,t), (c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t)))))
+#define Safefree(d)	safefree((Malloc_t)(d))
+
+#define Move(s,d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memmove((char*)(d),(char*)(s), (n) * sizeof(t)))
+#define Copy(s,d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memcpy((char*)(d),(char*)(s), (n) * sizeof(t)))
+#define Zero(d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memzero((char*)(d), (n) * sizeof(t)))
+
+#define Poison(d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memset((char*)(d), 0xAB, (n) * sizeof(t)))
+
+#else
+
+#define MEM_WRAP_CHECK(n,t) 0
+#define MEM_WRAP_CHECK_1(n,t,a) 0
+#define MEM_WRAP_CHECK_2(n,t,a,b) 0
+
 #define New(x,v,n,t)	(v = (t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))
 #define Newc(x,v,n,t,c)	(v = (c*)safemalloc((MEM_SIZE)((n)*sizeof(t))))
 #define Newz(x,v,n,t)	(v = (t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))), \
@@ -598,6 +628,8 @@ hopefully catches attempts to access uninitialized memory.
 #define Zero(d,n,t)	(void)memzero((char*)(d), (n) * sizeof(t))
 
 #define Poison(d,n,t)	(void)memset((char*)(d), 0xAB, (n) * sizeof(t))
+
+#endif
 
 #else /* lint */
 

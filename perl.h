@@ -1767,6 +1767,9 @@ typedef struct ptr_tbl_ent PTR_TBL_ENT_t;
 typedef struct ptr_tbl PTR_TBL_t;
 typedef struct clone_params CLONE_PARAMS;
 
+#ifndef NO_PERL_MALLOC_WRAP
+#define PERL_MALLOC_WRAP	/* We'd like malloc wrap checks.  */
+#endif
 
 #include "handy.h"
 
@@ -3029,6 +3032,10 @@ EXTCONST char PL_no_myglob[]
   INIT("\"my\" variable %s can't be in a package");
 EXTCONST char PL_no_localize_ref[]
   INIT("Can't localize through a reference");
+#ifdef PERL_MALLOC_WRAP
+EXTCONST char PL_memory_wrap[]
+  INIT("panic: memory wrap");
+#endif
 
 EXTCONST char PL_uuemap[65]
   INIT("`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");
