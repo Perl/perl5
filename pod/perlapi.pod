@@ -186,10 +186,10 @@ Found in file av.c
 
 Converts a string C<s> of length C<len> from UTF8 into byte encoding.
 Unlike <utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
-the newly-created string, and updates C<len> to contain the new length.
-Returns the original string if no conversion occurs, C<len> and
-C<is_utf8> are unchanged. Do nothing if C<is_utf8> points to 0. Sets
-C<is_utf8> to 0 if C<s> is converted or malformed .
+the newly-created string, and updates C<len> to contain the new
+length.  Returns the original string if no conversion occurs, C<len>
+is unchanged. Do nothing if C<is_utf8> points to 0. Sets C<is_utf8> to
+0 if C<s> is converted or contains all 7bit characters.
 
 NOTE: this function is experimental and may change or be
 removed without notice.
