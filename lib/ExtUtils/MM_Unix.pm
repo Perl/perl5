@@ -3110,10 +3110,15 @@ sub top_targets {
     my(@m);
     push @m, '
 #all ::	config $(INST_PM) subdirs linkext manifypods
+';
 
+    push @m, '
 all :: pure_all manifypods
 	'.$self->{NOECHO}.'$(NOOP)
-
+' 
+	  unless $self->{SKIPHASH}{'all'};
+    
+    push @m, '
 pure_all :: config pm_to_blib subdirs linkext
 	'.$self->{NOECHO}.'$(NOOP)
 
