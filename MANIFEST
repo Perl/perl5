@@ -614,9 +614,8 @@ lib/Pod/Functions.pm	used by pod/splitpod
 lib/Pod/Html.pm		Convert POD data to HTML
 lib/Pod/InputObjects.pm	Pod-Parser - define objects for input streams
 lib/Pod/Parser.pm	Pod-Parser - define base class for parsing POD
-lib/Pod/PlainText.pm	Pod-Parser - convert POD data to formatted ASCII text
 lib/Pod/Select.pm	Pod-Parser - select portions of POD docs
-lib/Pod/Text.pm		Convert POD data to formatted ASCII text
+lib/Pod/Text.pm		Pod-Parser - convert POD data to formatted ASCII text
 lib/Pod/Text/Color.pm	Convert POD data to color ASCII text
 lib/Pod/Text/Termcap.pm	Convert POD data to ASCII text with format escapes
 lib/Pod/Usage.pm	Pod-Parser - print usage messages

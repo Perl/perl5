@@ -39,10 +39,7 @@ print OUT <<'!NO!SUBS!';
 #############################################################################
 # podselect -- command to invoke the podselect function in Pod::Select
 #
-# Derived from Tom Christiansen's pod2text script.
-# (with extensive modifications)
-#
-# Copyright (c) 1996 Bradford Appleton. All rights reserved.
+# Copyright (c) 1996-1999 by Bradford Appleton. All rights reserved.
 # This file is part of "PodParser". PodParser is free software;
 # you can redistribute it and/or modify it under the same terms
 # as Perl itself.

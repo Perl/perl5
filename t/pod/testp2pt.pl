@@ -45,7 +45,7 @@ $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'xtra');
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'pod');
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 't');
 my @PODINCDIRS = ( catfile($INSTDIR, 'lib', 'Pod'),
-                   catfile($INSTDIR, 'scripts'),
+                   catfile($INSTDIR, 'pod'),
                    catfile($INSTDIR, 't', 'pod'),
                    catfile($INSTDIR, 't', 'pod', 'xtra')
                  );
@@ -119,7 +119,7 @@ sub testpodinc2plaintext( @ ) {
       return  $msg;
    }
 
-   print "+ Running testpodinc2plaintext for '$testname'...\n";
+   print "# Running testpodinc2plaintext for '$testname'...\n";
    ## Compare the output against the expected result
    podinc2plaintext($infile, $outfile);
    if ( testcmp($outfile, $cmpfile) ) {
@@ -153,12 +153,12 @@ sub testpodplaintext( @ ) {
       if ($opts{'-xrgen'}) {
           if ($opts{'-force'} or ! -e $cmpfile) {
              ## Create the comparison file
-             print "+ Creating expected result for \"$testname\"" .
+             print "# Creating expected result for \"$testname\"" .
                    " pod2plaintext test ...\n";
              podinc2plaintext($podfile, $cmpfile);
           }
           else {
-             print "+ File $cmpfile already exists" .
+             print "# File $cmpfile already exists" .
                    " (use '-force' to regenerate it).\n";
           }
           next;
@@ -170,13 +170,13 @@ sub testpodplaintext( @ ) {
                         -Cmp => $cmpfile;
       if ($failmsg) {
           ++$failed;
-          print "+\tFAILED. ($failmsg)\n";
+          print "#\tFAILED. ($failmsg)\n";
 	  print "not ok ", $failed+$passes, "\n";
       }
       else {
           ++$passes;
           unlink($outfile);
-          print "+\tPASSED.\n";
+          print "#\tPASSED.\n";
 	  print "ok ", $failed+$passes, "\n";
       }
    }
