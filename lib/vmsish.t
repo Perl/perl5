@@ -1,10 +1,26 @@
+#!./perl
 
-BEGIN { unshift @INC, '[-.lib]'; }
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib'; 
+}
 
 my $Invoke_Perl = qq(MCR $^X "-I[-.lib]");
 
-require "test.pl";
-plan(tests => 24);
+require "./test.pl";
+plan(tests => 25);
+
+SKIP: {
+    skip("tests for non-VMS only", 1) if $^O eq 'VMS';
+
+    BEGIN { $Orig_Bits = $^H }
+
+    # make sure that all those 'use vmsish' calls didn't do anything.
+    is( $Orig_Bits, $^H,    'use vmsish a no-op' );
+}
+
+SKIP: {
+    skip("tests for VMS only", 24) unless $^O eq 'VMS';
 
 #========== vmsish status ==========
 `$Invoke_Perl -e 1`;  # Avoid system() from a pipe from harness.  Mutter.
@@ -127,6 +143,7 @@ is($?,0,"outer lex scope of vmsish [POSIX status]");
   ok($vmsval - $utcval + $offset <= 10, "(gmtime)\n# UTC: @utcgmtime\n# VMS: @vmsgmtime");
 
   ok($vmsmtime - $utcmtime + $offset <= 10,"(stat) UTC: $utcmtime  VMS: $vmsmtime");
+}
 }
 
 #====== need this to make sure error messages come out, even if

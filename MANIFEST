@@ -1633,6 +1633,8 @@ lib/utf8_heavy.pl		Support routines for utf8 pragma
 lib/validate.pl			Perl library supporting wholesale file mode validation
 lib/vars.pm			Declare pseudo-imported global variables
 lib/vars.t			See if "use vars" work
+lib/vmsish.pm		        Control VMS-specific behavior of Perl core
+lib/vmsish.t		        Tests for vmsish.pm
 lib/warnings.pm			For "use warnings"
 lib/warnings.t			See if warning controls work
 lib/warnings/register.pm	For "use warnings::register"
@@ -2317,8 +2319,6 @@ vms/ext/Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio
 vms/ext/Stdio/Stdio.pm		VMS options to stdio routines
 vms/ext/Stdio/Stdio.xs		VMS options to stdio routines
 vms/ext/Stdio/test.pl		regression tests for VMS::Stdio
-vms/ext/vmsish.pm		Control VMS-specific behavior of Perl core
-vms/ext/vmsish.t		Tests for vmsish.pm
 vms/ext/XSSymSet.pm		manage linker symbols when building extensions
 vms/genconfig.pl		retcon config.sh from config.h
 vms/genopt.com			hack to write options files in case of broken makes
