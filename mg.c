@@ -1813,13 +1813,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	if (PL_uid == PL_euid)		/* special case $< = $> */
 	    (void)PerlProc_setuid(PL_uid);
 	else {
-	    PL_uid = (I32)PerlProc_getuid();
+	    PL_uid = PerlProc_getuid();
 	    Perl_croak(aTHX_ "setruid() not implemented");
 	}
 #endif
 #endif
 #endif
-	PL_uid = (I32)PerlProc_getuid();
+	PL_uid = PerlProc_getuid();
 	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 	break;
     case '>':
@@ -1840,13 +1840,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	if (PL_euid == PL_uid)		/* special case $> = $< */
 	    PerlProc_setuid(PL_euid);
 	else {
-	    PL_euid = (I32)PerlProc_geteuid();
+	    PL_euid = rlProc_geteuid();
 	    Perl_croak(aTHX_ "seteuid() not implemented");
 	}
 #endif
 #endif
 #endif
-	PL_euid = (I32)PerlProc_geteuid();
+	PL_euid = PerlProc_geteuid();
 	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 	break;
     case '(':
@@ -1867,13 +1867,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	if (PL_gid == PL_egid)			/* special case $( = $) */
 	    (void)PerlProc_setgid(PL_gid);
 	else {
-	    PL_gid = (I32)PerlProc_getgid();
+	    PL_gid = PerlProc_getgid();
 	    Perl_croak(aTHX_ "setrgid() not implemented");
 	}
 #endif
 #endif
 #endif
-	PL_gid = (I32)PerlProc_getgid();
+	PL_gid = PerlProc_getgid();
 	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 	break;
     case ')':
@@ -1916,13 +1916,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	if (PL_egid == PL_gid)			/* special case $) = $( */
 	    (void)PerlProc_setgid(PL_egid);
 	else {
-	    PL_egid = (I32)PerlProc_getegid();
+	    PL_egid = PerlProc_getegid();
 	    Perl_croak(aTHX_ "setegid() not implemented");
 	}
 #endif
 #endif
 #endif
-	PL_egid = (I32)PerlProc_getegid();
+	PL_egid = PerlProc_getegid();
 	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 	break;
     case ':':

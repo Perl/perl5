@@ -254,7 +254,7 @@ Perl_call_list(pTHXo_ I32 oldscope, AV* av_list)
 
 #undef  Perl_cando
 I32
-Perl_cando(pTHXo_ I32 bit, I32 effective, Stat_t* statbufp)
+Perl_cando(pTHXo_ I32 bit, Uid_t effective, Stat_t* statbufp)
 {
     return ((CPerlObj*)pPerl)->Perl_cando(bit, effective, statbufp);
 }
@@ -1343,8 +1343,8 @@ Perl_ibcmp_locale(pTHXo_ const char* a, const char* b, I32 len)
 }
 
 #undef  Perl_ingroup
-I32
-Perl_ingroup(pTHXo_ I32 testgid, I32 effective)
+bool
+Perl_ingroup(pTHXo_ Gid_t testgid, Uid_t effective)
 {
     return ((CPerlObj*)pPerl)->Perl_ingroup(testgid, effective);
 }

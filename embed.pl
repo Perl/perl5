@@ -1051,7 +1051,7 @@ p	|I32	|block_gimme
 p	|int	|block_start	|int full
 p	|void	|boot_core_UNIVERSAL
 p	|void	|call_list	|I32 oldscope|AV* av_list
-p	|I32	|cando		|I32 bit|I32 effective|Stat_t* statbufp
+p	|I32	|cando		|I32 bit|Uid_t effective|Stat_t* statbufp
 p	|U32	|cast_ulong	|NV f
 p	|I32	|cast_i32	|NV f
 p	|IV	|cast_iv	|NV f
@@ -1222,7 +1222,7 @@ p	|HE*	|hv_store_ent	|HV* tb|SV* key|SV* val|U32 hash
 p	|void	|hv_undef	|HV* tb
 p	|I32	|ibcmp		|const char* a|const char* b|I32 len
 p	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
-p	|I32	|ingroup	|I32 testgid|I32 effective
+p	|bool	|ingroup	|Gid_t testgid|Uid_t effective
 p	|void	|init_debugger
 p	|void	|init_stacks
 p	|U32	|intro_my

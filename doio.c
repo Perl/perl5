@@ -1488,7 +1488,8 @@ nothing in the core.
 /* Do the permissions allow some operation?  Assumes statcache already set. */
 #ifndef VMS /* VMS' cando is in vms.c */
 I32
-Perl_cando(pTHX_ I32 bit, I32 effective, register struct stat *statbufp)
+Perl_cando(pTHX_ I32 bit, Uid_t effective, register struct stat *statbufp)
+/* Note: we use `effective' both for uids and gids. */
 {
 #ifdef DOSISH
     /* [Comments and code from Len Reed]
@@ -1528,7 +1529,7 @@ Perl_cando(pTHX_ I32 bit, I32 effective, register struct stat *statbufp)
 	if (statbufp->st_mode & bit)
 	    return TRUE;	/* ok as "user" */
     }
-    else if (ingroup((I32)statbufp->st_gid,effective)) {
+    else if (ingroup(statbufp->st_gid,effective)) {
 	if (statbufp->st_mode & bit >> 3)
 	    return TRUE;	/* ok as "group" */
     }
@@ -1539,8 +1540,8 @@ Perl_cando(pTHX_ I32 bit, I32 effective, register struct stat *statbufp)
 }
 #endif /* ! VMS */
 
-I32
-Perl_ingroup(pTHX_ I32 testgid, I32 effective)
+bool
+Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective)
 {
     if (testgid == (effective ? PL_egid : PL_gid))
 	return TRUE;
