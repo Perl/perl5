@@ -1843,7 +1843,7 @@ static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
 	 * Follow reference, and check if target is overloaded.
 	 */
 
-#ifdef SvWEAKREF;
+#ifdef SvWEAKREF
 	if (SvWEAKREF(sv))
 		is_weak = 1;
 	TRACEME(("ref (0x%"UVxf") is%s weak", PTR2UV(sv), is_weak ? "" : "n't"));
