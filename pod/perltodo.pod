@@ -67,6 +67,28 @@ B<\b> assertion wants to be overloaded by a function.
 
 =item *
 
+Allow for long form of the General Category Properties, e.g
+C<\p{IsOpenPunctuation}>, not just the abbreviated form, e.g.
+C<\p{IsPs}>.
+
+=item *
+
+Allow for the metaproperties C<Any> and C<Assigned>, and C<Common>;
+C<Alphabetic>, C<Ideographic>, C<Lowercase>, C<Uppercase> (note that
+are large classes than the general categories C<Lu> and C<Ll>),
+C<White Space>, C<Bidi Control>, C<Join Control>, C<ASCII Hex Digit>,
+C<Hex Digit>, <Noncharacter Code Point>, C<ID Start>, C<ID Continue>,
+C<XID Start>, C<XID Continue>, C<NF*_NO>, C<NF*_MAYBE>.
+
+There are also enumerated properties: C<Decomposition Type>,
+C<Numeric Type>, C<East Asian Width>, C<Line Break>.  These
+properties have multiple values: for uniqueness the property
+value should be appended.  For example, C<\p{IsAlphabetic}>
+wouldbe the binary property, while C<\p{AlphabeticLineBreak}>
+would mean the enumerated property.
+
+=item *
+
     Case Mappings? http://www.unicode.org/unicode/reports/tr21/
 
 lc(), uc(), lcfirst(), and ucfirst() work only for some of the
@@ -84,7 +106,8 @@ class subtraction.
 =back
 
 See L<perlunicode/UNICODE REGULAR EXPRESSION SUPPORT LEVEL> for what's
-there and what's missing.
+there and what's missing.  Almost all of Levels 2 and 3 is missing,
+and as of 5.8.0 not even all of Level 1 is there.
 
 =head2 use Thread for iThreads
 
