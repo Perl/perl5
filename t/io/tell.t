@@ -151,10 +151,10 @@ open($tst,">>$written")  || die "Cannot open $written:$!";
 # This test makes a questionable assumption that the file pointer will
 # be at eof after opening a file but before seeking, reading, or writing.
 # Only known failure is on cygwin.
-my $skip = $^O eq "cygwin" && &PerlIO::get_layers($tst) eq 'stdio'
-    && ' # skip: file pointer not at eof';
+my $todo = $^O eq "cygwin" && &PerlIO::get_layers($tst) eq 'stdio'
+    && ' # TODO: file pointer not at eof';
 
 if (tell($tst) == 6)
-{ print "ok 28$skip\n"; } else { print "not ok 28$skip\n"; }
+{ print "ok 28$todo\n"; } else { print "not ok 28$todo\n"; }
 close $tst;
 
