@@ -336,7 +336,7 @@ pushing a new :stdio "layer" onto the PerlIO *), which may affect future
 PerlIO operations on the original PerlIO *.
 You should not call C<fclose()> on the file unless you call
 C<PerlIO_releaseFILE()> to disassociate it from the PerlIO *.
-(And do not use PerlIO_importFILE() for doing to disassociation.)
+(Do not use PerlIO_importFILE() for doing the disassociation.)
 
 Calling this function repeatedly will create a FILE * on each call
 (and will push an :stdio layer each time as well).
