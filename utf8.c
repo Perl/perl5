@@ -551,9 +551,14 @@ Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN *len)
 
     d = s = save;
     while (s < send) {
-        STRLEN ulen;
-        *d++ = (U8)utf8_to_uv_simple(s, &ulen);
-        s += ulen;
+        if (UTF8_IS_ASCII(*s)) {
+	    *d++ = *s++;
+	}
+        else {
+            STRLEN ulen;
+            *d++ = (U8)utf8_to_uv_simple(s, &ulen);
+            s += ulen;
+        }
     }
     *d = '\0';
     *len = d - save;
