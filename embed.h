@@ -126,6 +126,7 @@
 #define comppad_name_fill	Perl_comppad_name_fill
 #define concat_amg		Perl_concat_amg
 #define concat_ass_amg		Perl_concat_ass_amg
+#define condpair_magic		Perl_condpair_magic
 #define convert			Perl_convert
 #define cop_seqmax		Perl_cop_seqmax
 #define cos_amg			Perl_cos_amg
@@ -279,6 +280,7 @@
 #define in_my_stash		Perl_in_my_stash
 #define inc_amg			Perl_inc_amg
 #define ingroup			Perl_ingroup
+#define init_stacks		Perl_init_stacks
 #define instr			Perl_instr
 #define intro_my		Perl_intro_my
 #define intuit_more		Perl_intuit_more
@@ -335,6 +337,7 @@
 #define magic_gettaint		Perl_magic_gettaint
 #define magic_getuvar		Perl_magic_getuvar
 #define magic_len		Perl_magic_len
+#define magic_mutexfree		Perl_magic_mutexfree
 #define magic_nextpack		Perl_magic_nextpack
 #define magic_set		Perl_magic_set
 #define magic_setamagic		Perl_magic_setamagic
@@ -1106,6 +1109,7 @@
 #define vtbl_isa		Perl_vtbl_isa
 #define vtbl_isaelem		Perl_vtbl_isaelem
 #define vtbl_mglob		Perl_vtbl_mglob
+#define vtbl_mutex		Perl_vtbl_mutex
 #define vtbl_nkeys		Perl_vtbl_nkeys
 #define vtbl_pack		Perl_vtbl_pack
 #define vtbl_packelem		Perl_vtbl_packelem

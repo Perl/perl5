@@ -55,7 +55,7 @@ no_fh_allowed(o)
 OP *o;
 {
     yyerror(form("Missing comma after first argument to %s function",
-		 op_desc[op->op_type]));
+		 op_desc[o->op_type]));
     return o;
 }
 
@@ -77,7 +77,7 @@ char* name;
     return o;
 }
 
-static void
+static OP *
 bad_type(n, t, name, kid)
 I32 n;
 char *t;
@@ -537,7 +537,7 @@ OP *o;
 	o->op_targ = 0;	/* Was holding hints. */
 	break;
     default:
-	if (!(op->op_flags & OPf_REF) || (check[op->op_type] != ck_ftst))
+	if (!(o->op_flags & OPf_REF) || (check[o->op_type] != ck_ftst))
 	    break;
 	/* FALL THROUGH */
     case OP_GVSV:
@@ -547,7 +547,7 @@ OP *o;
 	break;
     case OP_NEXTSTATE:
     case OP_DBSTATE:
-	Safefree(cCOP->cop_label);
+	Safefree(cCOPo->cop_label);
 	SvREFCNT_dec(cCOPo->cop_filegv);
 	break;
     case OP_CONST:
@@ -880,12 +880,12 @@ OP *o;
 	    scalarvoid(kid);
 	break;
     case OP_ENTEREVAL:
-	scalarkids(op);
+	scalarkids(o);
 	break;
     case OP_REQUIRE:
 	/* all requires must return a boolean value */
-	op->op_flags &= ~OPf_WANT;
-	return scalar(op);
+	o->op_flags &= ~OPf_WANT;
+	return scalar(o);
     case OP_SPLIT:
 	if ((kid = cLISTOPo->op_first) && kid->op_type == OP_PUSHRE) {
 	    if (!kPMOP->op_pmreplroot)
@@ -971,8 +971,8 @@ OP *o;
 	break;
     case OP_REQUIRE:
 	/* all requires must return a boolean value */
-	op->op_flags &= ~OPf_WANT;
-	return scalar(op);
+	o->op_flags &= ~OPf_WANT;
+	return scalar(o);
     }
     return o;
 }
@@ -1052,7 +1052,7 @@ I32 type;
 	    croak("That use of $[ is unsupported");
 	break;
     case OP_STUB:
-	if (op->op_flags & OPf_PARENS)
+	if (o->op_flags & OPf_PARENS)
 	    break;
 	goto nomod;
     case OP_ENTERSUB:
@@ -1141,9 +1141,9 @@ I32 type;
     case OP_PADAV:
     case OP_PADHV:
 	modcount = 10000;
-	if (type == OP_REFGEN && op->op_flags & OPf_PARENS)
-	    return op;		/* Treat \(@foo) like ordinary list. */
-	if (scalar_mod_type(op, type))
+	if (type == OP_REFGEN && o->op_flags & OPf_PARENS)
+	    return o;		/* Treat \(@foo) like ordinary list. */
+	if (scalar_mod_type(o, type))
 	    goto nomod;
 	/* FALL THROUGH */
     case OP_PADSV:
@@ -1213,13 +1213,13 @@ I32 type;
 }
 
 static bool
-scalar_mod_type(op, type)
-OP *op;
+scalar_mod_type(o, type)
+OP *o;
 I32 type;
 {
     switch (type) {
     case OP_SASSIGN:
-	if (op->op_type == OP_RV2GV)
+	if (o->op_type == OP_RV2GV)
 	    return FALSE;
 	/* FALL THROUGH */
     case OP_PREINC:
@@ -3572,7 +3572,7 @@ char *filename;
 	    sub_generation++;
 	}
     }
-    CvGV(cv) = SvREFCNT_inc(gv);
+    CvGV(cv) = (GV*)SvREFCNT_inc(gv);
 #ifdef USE_THREADS
     New(666, CvMUTEXP(cv), 1, pthread_mutex_t);
     MUTEX_INIT(CvMUTEXP(cv));
@@ -3958,17 +3958,17 @@ OP *o;
 }
 
 OP *
-ck_exists(op)
-OP *op;
+ck_exists(o)
+OP *o;
 {
-    op = ck_fun(op);
-    if (op->op_flags & OPf_KIDS) {
-	OP *kid = cUNOP->op_first;
+    o = ck_fun(o);
+    if (o->op_flags & OPf_KIDS) {
+	OP *kid = cUNOPo->op_first;
 	if (kid->op_type != OP_HELEM)
-	    croak("%s argument is not a HASH element", op_desc[op->op_type]);
+	    croak("%s argument is not a HASH element", op_desc[o->op_type]);
 	null(kid);
     }
-    return op;
+    return o;
 }
 
 OP *
@@ -4014,7 +4014,7 @@ register OP *o;
 		      name, badthing);
 	}
 	kid->op_type = OP_GV;
-	iscv = (op->op_type == OP_RV2CV) * 2;
+	iscv = (o->op_type == OP_RV2CV) * 2;
 	for (gv = 0; !gv; iscv++) {
 	    /*
 	     * This is a little tricky.  We only want to add the symbol if we
@@ -4221,20 +4221,20 @@ OP *o;
     if (gv && GvIMPORTED_CV(gv)) {
 	static int glob_index;
 
-	append_elem(OP_GLOB, op,
+	append_elem(OP_GLOB, o,
 		    newSVOP(OP_CONST, 0, newSViv(glob_index++)));
-	op->op_type = OP_LIST;
-	op->op_ppaddr = ppaddr[OP_LIST];
-	((LISTOP*)op)->op_first->op_type = OP_PUSHMARK;
-	((LISTOP*)op)->op_first->op_ppaddr = ppaddr[OP_PUSHMARK];
-	op = newUNOP(OP_ENTERSUB, OPf_STACKED,
-		     append_elem(OP_LIST, op, 
-				 scalar(newUNOP(OP_RV2CV, 0,
-						newGVOP(OP_GV, 0, gv)))));
-	return ck_subr(op);
+	o->op_type = OP_LIST;
+	o->op_ppaddr = ppaddr[OP_LIST];
+	cLISTOPo->op_first->op_type = OP_PUSHMARK;
+	cLISTOPo->op_first->op_ppaddr = ppaddr[OP_PUSHMARK];
+	o = newUNOP(OP_ENTERSUB, OPf_STACKED,
+		    append_elem(OP_LIST, o, 
+				scalar(newUNOP(OP_RV2CV, 0,
+					       newGVOP(OP_GV, 0, gv)))));
+	return ck_subr(o);
     }
-    if ((op->op_flags & OPf_KIDS) && !cLISTOP->op_first->op_sibling)
-	append_elem(OP_GLOB, op, newSVREF(newGVOP(OP_GV, 0, defgv)));
+    if ((o->op_flags & OPf_KIDS) && !cLISTOPo->op_first->op_sibling)
+	append_elem(OP_GLOB, o, newSVREF(newGVOP(OP_GV, 0, defgv)));
     gv = newGVgen("main");
     gv_IOadd(gv);
     append_elem(OP_GLOB, o, newGVOP(OP_GV, 0, gv));
@@ -4824,7 +4824,7 @@ register OP* o;
 		OP* pop = o->op_next->op_next;
 		IV i;
 		if (pop->op_type == OP_CONST &&
-		    (op = pop->op_next) &&
+		    (o = pop->op_next) &&
 		    pop->op_next->op_type == OP_AELEM &&
 		    !(pop->op_next->op_private &
 		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF)) &&
@@ -4907,7 +4907,7 @@ register OP* o;
 	    lexname = *av_fetch(comppad_name, rop->op_first->op_targ, TRUE);
 	    if (!SvOBJECT(lexname))
 		break;
-	    fields = hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
+	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
 	    if (!fields || !GvHV(*fields))
 		break;
 	    svp = &((SVOP*)((BINOP*)o)->op_last)->op_sv;

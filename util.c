@@ -1268,7 +1268,6 @@ croak(pat, va_alist)
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
-<<<<
 
 	    LEAVE;
 	}

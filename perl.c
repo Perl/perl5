@@ -2329,7 +2329,6 @@ nuke_stacks()
 	Safefree(debname);
 	Safefree(debdelim);
     } )
-<<<<
 }
 
 static PerlIO *tmpfp;  /* moved outside init_lexer() because of UNICOS bug */
