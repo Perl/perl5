@@ -194,8 +194,8 @@ LIBOUT_FLAG	=
 
 .ELIF "$(CCTYPE)" == "GCC"
 
-CC		= gcc -pipe
-LINK32		= gcc -pipe
+CC		= gcc
+LINK32		= gcc
 LIB32		= ar rc
 IMPLIB		= dlltool
 
