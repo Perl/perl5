@@ -106,6 +106,8 @@ my @exe = qw(
     Porting/*.pl
     mpeix/nm
     mpeix/relink
+    Cross/generate_config_sh
+    Cross/warp
 );
 system("chmod +x @exe") == 0
     or die "system: $!";
