@@ -31,6 +31,279 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13323] By: jhi                                   on 2001/11/27  15:51:08
+        Log: Subject: [PATCH] bring MM_VMS::perldepend into 21st century            
+             From: "Craig A. Berry" <craigberry@mac.com> 
+             Date: Tue, 27 Nov 2001 10:21:18 -0600
+             Message-Id: <5.1.0.14.2.20011126162504.01c77610@exchi01>
+     Branch: perl
+	   ! lib/ExtUtils/MM_VMS.pm
+____________________________________________________________________________
+[ 13322] By: jhi                                   on 2001/11/27  15:24:12
+        Log: Protect against accumulating -options -options -options.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 13321] By: jhi                                   on 2001/11/27  15:16:28
+        Log: Subject: [PATCH Benchmark.pm] add export tag :all and tweak SYNOPSIS   
+             From: Barrie Slaymaker <barries@slaysys.com>
+             Date: Tue, 27 Nov 2001 10:58:54 -0500
+             Message-ID: <20011127105850.B696@sizzle.whoville.com> 
+     Branch: perl
+	   ! lib/Benchmark.pm
+____________________________________________________________________________
+[ 13320] By: jhi                                   on 2001/11/27  15:05:33
+        Log: Tiny fix from John P. Linderman.
+     Branch: perl
+	   ! lib/sort.pm
+____________________________________________________________________________
+[ 13319] By: jhi                                   on 2001/11/27  15:04:37
+        Log: The Story of sort(), from John P. Linderman.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13318] By: jhi                                   on 2001/11/27  14:58:06
+        Log: Add information what to do if you are reading
+             perluniintro but using some older Perl.
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 13317] By: jhi                                   on 2001/11/27  14:51:42
+        Log: Update the 'wide characters' FAQ entry.
+     Branch: perl
+	   ! pod/perlfaq6.pod
+____________________________________________________________________________
+[ 13316] By: jhi                                   on 2001/11/27  14:26:25
+        Log: Fix for
+             
+             Subject: [ID 20011127.151] regex result vars no longer marked as utf8
+             From: Marc Lehmann <root@schmorp.de>
+             Date: Tue, 27 Nov 2001 14:27:14 +0100
+             Message-Id: <E168iGY-0002pi-00.pgcc-forever-2001-11-27-14-27-14@fuji.laendle>
+     Branch: perl
+	   ! ext/Encode.t ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 13315] By: jhi                                   on 2001/11/27  14:06:45
+        Log: Subject: [PATCH] DB_File 1.801
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Tue, 27 Nov 2001 15:06:45 -0000
+             Message-ID: <AIEAJICLCBDNAAOLLOKLEEEIDGAA.paul_marquess@yahoo.co.uk>
+     Branch: perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+	   ! ext/DB_File/DB_File.xs ext/DB_File/Makefile.PL
+____________________________________________________________________________
+[ 13314] By: jhi                                   on 2001/11/27  13:51:49
+        Log: Regen perlmodlib.  (TODO: why does Pod::t::basic get listed?)
+     Branch: perl
+	   ! pod/perlmodlib.pod
+____________________________________________________________________________
+[ 13313] By: jhi                                   on 2001/11/27  13:49:55
+        Log: sort() doc tweaks from John P. Linderman.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 13312] By: jhi                                   on 2001/11/27  13:36:44
+        Log: Subject: [PATCH] More perldelta.pod nits
+             From: Simon Glover <scog@roe.ac.uk>
+             Date: Tue, 27 Nov 2001 14:28:36 +0000 (GMT) 
+             Message-ID: <Pine.OSF.4.10.10111271421490.119807-100000@arran.roe.ac.uk>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13311] By: jhi                                   on 2001/11/27  13:26:38
+        Log: Subject: RE: [PATCH @ 13283] Devel::PPPort
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Tue, 27 Nov 2001 11:52:31 -0000
+             Message-ID: <AIEAJICLCBDNAAOLLOKLMEECDGAA.paul_marquess@yahoo.co.uk>
+     Branch: perl
+	   ! ext/Devel/PPPort/harness/Makefile.PL
+____________________________________________________________________________
+[ 13310] By: jhi                                   on 2001/11/27  13:23:28
+        Log: Subject: [PATCH t/TEST] Remove redundant #! parsing.  Deparse tests better.
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 27 Nov 2001 03:38:24 -0500
+             Message-ID: <20011127033824.A17775@blackrider>
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 13309] By: jhi                                   on 2001/11/27  13:16:44
+        Log: Subject: Re: perlcc very broken
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Tue, 27 Nov 2001 06:48:01 -0500
+             Message-ID: <3C037D71.4030508@rowman.com>
+     Branch: perl
+	   ! utils/perlcc.PL
+____________________________________________________________________________
+[ 13308] By: jhi                                   on 2001/11/27  12:57:49
+        Log: Subject: [ID 20011126.150] t/op/pack patch to fix Useless use of unpack in void context at op/pack.t line 704. 
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Mon, 26 Nov 2001 22:04:38 -0800
+             Message-Id: <200111270604.WAA20274@dd.tc.fluke.com>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 13307] By: jhi                                   on 2001/11/27  12:56:09
+        Log: Subject: [ID 20011126.149] t/op/split fails step 37
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Mon, 26 Nov 2001 21:52:35 -0800
+             Message-Id: <200111270552.VAA09394@dd.tc.fluke.com>
+     Branch: perl
+	   ! t/op/split.t
+____________________________________________________________________________
+[ 13306] By: gbarr                                 on 2001/11/27  12:19:40
+        Log: incorporate last minute change from libnet 1.0901-tobe
+     Branch: perl
+	   ! lib/Net/SMTP.pm
+____________________________________________________________________________
+[ 13305] By: jhi                                   on 2001/11/27  02:39:35
+        Log: Pass 7 at perldelta - random edits.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13304] By: jhi                                   on 2001/11/27  02:04:19
+        Log: Portability and skippage tweaks.
+     Branch: perl
+	   ! t/op/split.t
+____________________________________________________________________________
+[ 13303] By: jhi                                   on 2001/11/27  02:03:49
+        Log: Try to make Unicode casemapping to work for EBCDIC, too.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13302] By: jhi                                   on 2001/11/27  01:35:23
+        Log: Just printing 1..0 is not quite enough...
+     Branch: perl
+	   ! lib/Dumpvalue.t
+____________________________________________________________________________
+[ 13301] By: jhi                                   on 2001/11/27  01:22:22
+        Log: \141 is malformed "unexpected continuation byte" in UTF-EBCDIC.
+             Delay the match until runtime.
+     Branch: perl
+	   ! t/op/append.t
+____________________________________________________________________________
+[ 13300] By: jhi                                   on 2001/11/27  01:08:10
+        Log: UTF-EBCDIC.
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.t
+____________________________________________________________________________
+[ 13299] By: jhi                                   on 2001/11/27  01:02:21
+        Log: Be UTF-EBCDIC aware.
+     Branch: perl
+	   ! lib/bytes.t
+____________________________________________________________________________
+[ 13298] By: jhi                                   on 2001/11/27  00:59:44
+        Log: Bad assumption which way digits and letters sort.
+     Branch: perl
+	   ! lib/English.t
+____________________________________________________________________________
+[ 13297] By: jhi                                   on 2001/11/27  00:55:04
+        Log: If in EBCDIC but no Convert::EBCDIC
+             the libnet tests will all fail.
+     Branch: perl
+	   ! lib/Net/t/config.t lib/Net/t/ftp.t lib/Net/t/hostname.t
+	   ! lib/Net/t/netrc.t lib/Net/t/nntp.t lib/Net/t/require.t
+	   ! lib/Net/t/smtp.t lib/Net/t/time.t
+____________________________________________________________________________
+[ 13296] By: jhi                                   on 2001/11/27  00:45:55
+        Log: Just sorting to guarantee order is not enough.
+             (Think EBCDIC.) 
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.t
+____________________________________________________________________________
+[ 13295] By: jhi                                   on 2001/11/27  00:43:38
+        Log: OS/390 cleanable gunk.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 13294] By: jhi                                   on 2001/11/27  00:40:02
+        Log: Update the EBCDIC MD5 checksums.
+     Branch: perl
+	   ! ext/Digest/MD5/t/files.t
+____________________________________________________________________________
+[ 13293] By: jhi                                   on 2001/11/27  00:28:40
+        Log: Subject: [PATCH] Re: [PATCH] Re: [ID 20011118.128] installman chdir stuffs INC
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 26 Nov 2001 23:06:34 +0000
+             Message-ID: <20011126230633.Q37621@plum.flirble.org>
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[ 13292] By: jhi                                   on 2001/11/27  00:24:36
+        Log: sort tweaks from John P. Linderman.
+     Branch: perl
+	   ! lib/sort.pm lib/sort.t perl.h pp_sort.c
+____________________________________________________________________________
+[ 13291] By: jhi                                   on 2001/11/27  00:20:09
+        Log: Subject: [ID 20011126.148] Socket::inet_aton() incorrectly accepts null string
+             From: Bob Dalgleish <Robert.Dalgleish@sk.sympatico.ca>          
+             Date: Mon, 26 Nov 2001 18:47:25 -0600
+             Message-Id: <B8283EBD.8414%Robert.Dalgleish@sk.sympatico.ca>
+             
+             Craig Berry submitted half of this patch just yesterday.
+             Spooky cosmic resonance.
+     Branch: perl
+	   ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 13290] By: jhi                                   on 2001/11/27  00:15:07
+        Log: Subject: [PATCH] doio slightly smaller
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 27 Nov 2001 00:40:23 +0000      
+             Message-ID: <20011127004023.S37621@plum.flirble.org>                 
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 13289] By: jhi                                   on 2001/11/27  00:12:11
+        Log: perldelta nits from Autrijus Tang and Ron Kimball.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13288] By: jhi                                   on 2001/11/27  00:08:23
+        Log: Subject: [PATCH] unpack P* uses random length for item
+             From: "Wolfgang Laun" <wolfgang.laun@chello.at>               
+             Date: Mon, 26 Nov 2001 19:56:32 +0100
+             Message-ID: <200111261956320450.01E7217F@smtp.chello.at>
+     Branch: perl
+	   ! pod/perldiag.pod pp_pack.c t/op/pack.t
+____________________________________________________________________________
+[ 13287] By: jhi                                   on 2001/11/26  23:55:02
+        Log: Subject: [PATCH current] system and taintedness
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Mon, 26 Nov 2001 18:42:29 +0200
+             Message-ID: <15362.28917.697078.551412@ix.netsoft.ro>
+     Branch: perl
+	   ! pp_sys.c t/op/taint.t
+____________________________________________________________________________
+[ 13286] By: jhi                                   on 2001/11/26  23:53:21
+        Log: Subject: [PATCH @ 13283] Devel::PPPort
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Mon, 26 Nov 2001 14:37:17 -0000
+             Message-ID: <AIEAJICLCBDNAAOLLOKLCECEDGAA.paul_marquess@yahoo.co.uk>
+     Branch: perl
+	   + ext/Devel/PPPort/MANIFEST
+	   ! MANIFEST ext/Devel/PPPort/Makefile.PL
+	   ! ext/Devel/PPPort/PPPort.pm ext/Devel/PPPort/harness/Harness.pm
+	   ! ext/Devel/PPPort/harness/Harness.xs
+	   ! ext/Devel/PPPort/harness/Makefile.PL
+	   ! ext/Devel/PPPort/harness/module2.c
+	   ! ext/Devel/PPPort/harness/module3.c
+	   ! ext/Devel/PPPort/harness/t/test.t ext/Devel/PPPort/soak
+____________________________________________________________________________
+[ 13285] By: jhi                                   on 2001/11/26  14:08:36
+        Log: Update the test list.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 13284] By: gbarr                                 on 2001/11/26  12:41:45
+        Log: Sync-up tests with libnet distribution
+     Branch: perl
+	   + lib/Net/t/netrc.t
+	   ! MANIFEST lib/Net/t/config.t lib/Net/t/hostname.t
+____________________________________________________________________________
+[ 13283] By: jhi                                   on 2001/11/26  11:34:35
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13282] By: jhi                                   on 2001/11/26  11:28:18
         Log: Upgrade to podlators 1.16.
      Branch: perl
