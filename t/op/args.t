@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 20 );
+plan( tests => 23 );
 
 # test various operations on @_
 
@@ -86,3 +86,22 @@ for (1..3) {
     is(join('',bar('d')),'Dd');
     is(join('',baz('e')),'eE');
 } 
+
+# [perl #28032] delete $_[0] was freeing things too early
+
+{
+    my $flag = 0;
+    sub X::DESTROY { $flag = 1 }
+    sub f {
+	delete $_[0];
+	ok(!$flag, 'delete $_[0] : in f');
+    }
+    {
+	my $x = bless [], 'X';
+	f($x);
+	ok(!$flag, 'delete $_[0] : after f');
+    }
+    ok($flag, 'delete $_[0] : outside block');
+}
+
+	

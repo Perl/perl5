@@ -782,7 +782,8 @@ Perl_av_fill(pTHX_ register AV *av, I32 fill)
 =for apidoc av_delete
 
 Deletes the element indexed by C<key> from the array.  Returns the
-deleted element. C<flags> is currently ignored.
+deleted element. If C<flags> equals C<G_DISCARD>, the element is freed
+and null is returned.
 
 =cut
 */
@@ -840,6 +841,8 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
     if (key > AvFILLp(av))
 	return Nullsv;
     else {
+	if (!AvREAL(av) && AvREIFY(av))
+	    av_reify(av);
 	sv = AvARRAY(av)[key];
 	if (key == AvFILLp(av)) {
 	    AvARRAY(av)[key] = &PL_sv_undef;
