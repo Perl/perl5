@@ -45,7 +45,7 @@ $Core_Modules{'File::Spec::Functions'}++;	# put this back
 
 unless ($Config{extensions} =~ /\bThread\b/) {
     delete $Core_Modules{Thread};
-    delete_by_prefix('Thread::')++;
+    delete_by_prefix('Thread::');
 }
 
 delete_by_prefix('unicode::');
