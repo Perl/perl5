@@ -334,13 +334,18 @@ sub config_re {
 
 sub config_vars {
     foreach (@_) {
-	if (/\W/) {
-	    my @matches = config_re($_);
-	    print map "$_\n", @matches ? @matches : "$_: not found";
+	my ($notag,$qry,$lncont) = m/^(:)?(.*?)(:)?$/;	# flags fore and aft, 
+	my $prfx = $notag ? '': "$qry=";		# prefix for print
+	my $lnend = $lncont ? ' ' : ";\n";		# ending for print
+
+	if ($qry =~ /\W/) {
+	    my @matches = config_re($qry);
+	    print map "$_$lnend", @matches ? @matches : "$qry: not found"		if !$notag;
+	    print map { s/\w+=//; "$_$lnend" } @matches ? @matches : "$qry: not found"	if  $notag;
 	} else {
-	    my $v = (exists $Config{$_}) ? $Config{$_} : 'UNKNOWN';
+	    my $v = (exists $Config{$qry}) ? $Config{$qry} : 'UNKNOWN';
 	    $v = 'undef' unless defined $v;
-	    print "$_='$v';\n";
+	    print "${prfx}'${v}'$lnend";
 	}
     }
 }
