@@ -124,6 +124,9 @@ RMS = delete -y
 
 public		=	perl translators sitelib_install 
 Dynamic_Ext_Mac	=	Mac
+
+# Encode is huge, and didn't statically link properly, so we dynamically link it
+# XS::APITest is not part of the distribution, but used only for testing
 Dynamic_Ext_Std	=	\
 	Encode:Encode Encode:Byte:Byte Encode:CN:CN \
 	Encode:EBCDIC:EBCDIC Encode:JP:JP Encode:KR:KR \
@@ -225,22 +228,23 @@ plextract = "::pod:pod2html" "::pod:pod2latex" "::pod:pod2man" "::pod:pod2text" 
 addedbyconf = UU $(plextract) pstruct
 
 h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
-h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
-h3 = opcode.h patchlevel.h perl.h perly.h pp.h proto.h regcomp.h
-h4 = regexp.h scope.h sv.h unixish.h util.h
-h = $(h1) $(h2) $(h3) $(h4)
+h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h opcode.h
+h3 = pad.h patchlevel.h perl.h perlapi.h perly.h pp.h proto.h regcomp.h
+h4 = regexp.h scope.h sv.h unixish.h util.h iperlsys.h thread.h
+h5 = utf8.h warnings.h
+h = $(h1) $(h2) $(h3) $(h4) $(h5)
 
-c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c perlapi.c
-c2 = perl.c perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c xsutils.c
-c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c globals.c perlio.c utf8.c universal.c \
-	numeric.c locale.c pp_pack.c pp_sort.c reentr.c
+c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c reentr.c
+c2 = perl.c perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c utf8.c
+c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c universal.c xsutils.c pad.c
+c4 = globals.c perlio.c perlapi.c numeric.c locale.c pp_pack.c pp_sort.c
 
 cm = SubLaunch.c crypt.c
 # HandleSocket.cp 
 mf = DirectoryCopy.c FileCopy.c FSpCompat.c FullPath.c IterateDirectory.c MoreDesktopMgr.c \
 	MoreFiles.c MoreFilesExtras.c Search.c
 
-c = $(c1) $(c2) $(c3) $(cm)
+c = $(c1) $(c2) $(c3) $(c4) $(cm)
 cp= $(cpm)
 libc = macish.c icemalloc.c PerlGUSIConfig.cp $(mf)
 

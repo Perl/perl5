@@ -271,3 +271,5 @@ sfscanf
 printf
 scanf
 fscanf
+# another for sfio Tue, Mar 11, 2003 21:15:11
+_Sfstdout
