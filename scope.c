@@ -15,6 +15,12 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+/*
+ * This value determines how small an SV is "small enough" to keep
+ * in a lexical variable in anticipation of the next invocation.
+ */
+#define PADVAL_SMALL_ENOUGH 240
+
 SV**
 stack_grow(sp, p, n)
 SV** sp;
@@ -550,19 +556,33 @@ I32 base;
 		case SVt_NULL:
 		    break;
 		case SVt_PVAV:
-		    av_clear((AV*)sv);
+		    if (AvMAX(sv) < (PADVAL_SMALL_ENOUGH / sizeof(SV*)))
+			av_clear((AV*)sv);
+		    else
+			av_undef((AV*)sv);
 		    break;
 		case SVt_PVHV:
-		    hv_clear((HV*)sv);
+		    if (HvMAX(sv) < (PADVAL_SMALL_ENOUGH / sizeof(SV*)))
+			hv_clear((HV*)sv);
+		    else
+			hv_undef((HV*)sv);
 		    break;
 		case SVt_PVCV:
-		    sub_generation++;
-		    cv_undef((CV*)sv);
+		    croak("panic: leave_scope pad code");
+		case SVt_RV:
+		case SVt_IV:
+		case SVt_NV:
+		    (void)SvOK_off(sv);
 		    break;
 		default:
-		    if (SvPOK(sv) && SvLEN(sv))
-			(void)SvOOK_off(sv);
 		    (void)SvOK_off(sv);
+		    (void)SvOOK_off(sv);
+		    if (SvPVX(sv) && SvLEN(sv) > PADVAL_SMALL_ENOUGH) {
+			Safefree(SvPVX(sv));
+			SvPVX(sv) = Nullch;
+			SvLEN(sv) = 0;
+			SvCUR(sv) = 0;
+		    }
 		    break;
 		}
 	    }
