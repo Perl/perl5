@@ -68,11 +68,7 @@ my @s;
 
 print "# @s\n";
 
-# Is there a portable way to find out what's the unit of st_blocks?
-
-my $BLOCKSIZE = 512;
-
-$BLOCKSIZE = 4096 if $^O eq 'unicos';
+my $BLOCKSIZE = $s[11] || 512;
 
 unless (@s == 13 &&
 	$s[7] == 1_000_003 &&
