@@ -1391,34 +1391,51 @@ S_scan_const(pTHX_ char *start)
 
 	      NUM_ESCAPE_INSERT:
 		/* Insert oct or hex escaped character.
-		 * There will always enough room in sv since such escapes will
-		 * be longer than any utf8 sequence they can end up as
-		 */
+		 * There will always enough room in sv since such
+		 * escapes will be longer than any UT-F8 sequence
+		 * they can end up as. */
+
+		/* This spot is wrong for EBCDIC.  Characters like
+		 * the lowercase letters and digits are >127 in EBCDIC,
+		 * so here they would need to be mapped to the Unicode
+		 * repertoire.   --jhi */
+		
 		if (uv > 127) {
 		    if (!has_utf8 && (to_be_utf8 || uv > 255)) {
-		        /* might need to recode whatever we have accumulated so far
-			 * if it contains any hibit chars
+		        /* Might need to recode whatever we have
+			 * accumulated so far if it contains any
+			 * hibit chars.
+			 *
+			 * (Can't we keep track of that and avoid
+			 *  this rescan? --jhi)
 			 */
 		        int hicount = 0;
 			char *c;
+
 			for (c = SvPVX(sv); c < d; c++) {
-			    if (*c & 0x80)
+			    if (UTF8_IS_CONTINUED(*c))
 			        hicount++;
 			}
 			if (hicount) {
 			    char *old_pvx = SvPVX(sv);
 			    char *src, *dst;
-			    d = SvGROW(sv, SvCUR(sv) + hicount + 1) + (d - old_pvx);
+			    U8 tmpbuf[UTF8_MAXLEN+1];
+			    U8 *tmpend;
+			  
+			    d = SvGROW(sv,
+				       SvCUR(sv) + hicount + 1) +
+				         (d - old_pvx);
 
 			    src = d - 1;
 			    d += hicount;
 			    dst = d - 1;
 
 			    while (src < dst) {
-			        if (*src & 0x80) {
-				    dst--;
-				    uv_to_utf8((U8*)dst, (U8)*src--);
-				    dst--;
+			        if (UTF8_IS_CONTINUED(*src)) {
+				    tmpend = uv_to_utf8(tmpbuf, (U8)*src--);
+				    dst -= tmpend - tmpbuf;
+				    Copy((char *)tmpbuf, dst+1,
+					 tmpend - tmpbuf, char);
 			        }
 			        else {
 				    *dst-- = *src--;
@@ -1427,7 +1444,7 @@ S_scan_const(pTHX_ char *start)
                         }
                     }
 
-                    if (to_be_utf8 || uv > 255) {
+                    if (to_be_utf8 || (has_utf8 && uv > 127) || uv > 255) {
 		        d = (char*)uv_to_utf8((U8*)d, uv);
 			has_utf8 = TRUE;
                     }
@@ -1541,7 +1558,7 @@ S_scan_const(pTHX_ char *start)
 
        /* (now in tr/// code again) */
 
-       if (*s & 0x80 && (this_utf8 || has_utf8)) {
+       if (UTF8_IS_CONTINUED(*s) && (this_utf8 || has_utf8)) {
            STRLEN len = (STRLEN) -1;
            UV uv;
            if (this_utf8) {
@@ -2095,6 +2112,7 @@ Perl_yylex(pTHX)
     STRLEN len;
     GV *gv = Nullgv;
     GV **gvp = 0;
+    bool bof = FALSE;
 
     /* check if there's an identifier for us to look at */
     if (PL_pending_ident) {
@@ -2515,7 +2533,7 @@ Perl_yylex(pTHX)
 	    goto retry;
 	}
 	do {
-	    bool bof = PL_rsfp ? TRUE : FALSE;
+	    bof = PL_rsfp ? TRUE : FALSE;
 	    if (bof) {
 #ifdef PERLIO_IS_STDIO
 #  ifdef __GNU_LIBRARY__
@@ -3648,7 +3666,7 @@ Perl_yylex(pTHX)
 	    missingterm((char*)0);
 	yylval.ival = OP_CONST;
 	for (d = SvPV(PL_lex_stuff, len); len; len--, d++) {
-	    if (*d == '$' || *d == '@' || *d == '\\' || *d & 0x80) {
+	    if (*d == '$' || *d == '@' || *d == '\\' || UTF8_IS_CONTINUED(*d)) {
 		yylval.ival = OP_STRINGIFY;
 		break;
 	    }
@@ -5932,9 +5950,9 @@ S_scan_word(pTHX_ register char *s, char *dest, STRLEN destlen, int allow_packag
 	    *d++ = *s++;
 	    *d++ = *s++;
 	}
-	else if (UTF && *(U8*)s >= 0xc0 && isALNUM_utf8((U8*)s)) {
+	else if (UTF && UTF8_IS_START(*s) && isALNUM_utf8((U8*)s)) {
 	    char *t = s + UTF8SKIP(s);
-	    while (*t & 0x80 && is_utf8_mark((U8*)t))
+	    while (UTF8_IS_CONTINUED(*t) && is_utf8_mark((U8*)t))
 		t += UTF8SKIP(t);
 	    if (d + (t - s) > e)
 		Perl_croak(aTHX_ ident_too_long);
@@ -5984,9 +6002,9 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 		*d++ = *s++;
 		*d++ = *s++;
 	    }
-	    else if (UTF && *(U8*)s >= 0xc0 && isALNUM_utf8((U8*)s)) {
+	    else if (UTF && UTF8_IS_START(*s) && isALNUM_utf8((U8*)s)) {
 		char *t = s + UTF8SKIP(s);
-		while (*t & 0x80 && is_utf8_mark((U8*)t))
+		while (UTF8_IS_CONTINUED(*t) && is_utf8_mark((U8*)t))
 		    t += UTF8SKIP(t);
 		if (d + (t - s) > e)
 		    Perl_croak(aTHX_ ident_too_long);
@@ -6039,7 +6057,7 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 		e = s;
 		while ((e < send && isALNUM_lazy_if(e,UTF)) || *e == ':') {
 		    e += UTF8SKIP(e);
-		    while (e < send && *e & 0x80 && is_utf8_mark((U8*)e))
+		    while (e < send && UTF8_IS_CONTINUED(*e) && is_utf8_mark((U8*)e))
 			e += UTF8SKIP(e);
 		}
 		Copy(s, d, e - s, char);
@@ -6660,7 +6678,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     /* after skipping whitespace, the next character is the terminator */
     term = *s;
-    if ((term & 0x80) && UTF)
+    if (UTF8_IS_CONTINUED(term) && UTF)
 	has_utf8 = TRUE;
 
     /* mark where we are */
@@ -6707,7 +6725,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		   have found the terminator */
 		else if (*s == term)
 		    break;
-		else if (!has_utf8 && (*s & 0x80) && UTF)
+		else if (!has_utf8 && UTF8_IS_CONTINUED(*s) && UTF)
 		    has_utf8 = TRUE;
 		*to = *s;
 	    }
@@ -6736,7 +6754,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		    break;
 		else if (*s == PL_multi_open)
 		    brackets++;
-		else if (!has_utf8 && (*s & 0x80) && UTF)
+		else if (!has_utf8 && UTF8_IS_CONTINUED(*s) && UTF)
 		    has_utf8 = TRUE;
 		*to = *s;
 	    }

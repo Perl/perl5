@@ -65,7 +65,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 	c = utf8_to_uv(s, send - s, &ulen, 0);
         if (c < 0x100 && (ch = tbl[(short)c]) >= 0) {
             matches++;
-            if (ch < 0x80)
+            if (UTF8_IS_ASCII(ch))
                 *d++ = ch;
             else
                 d = uv_to_utf8(d,ch);
@@ -256,7 +256,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
     if (!isutf8) {
 	U8 *t = s, *e = s + len;
 	while (t < e)
-	    if ((hibit = *t++ & 0x80))
+	    if ((hibit = UTF8_IS_CONTINUED(*t++)))
 		break;
 	if (hibit)
 	    s = bytes_to_utf8(s, &len);
@@ -333,7 +333,7 @@ S_do_trans_count_utf8(pTHX_ SV *sv)/* SPC - OK */
     if (!SvUTF8(sv)) {
 	U8 *t = s, *e = s + len;
 	while (t < e)
-	    if ((hibit = *t++ & 0x80))
+	    if ((hibit = !UTF8_IS_ASCII(*t++)))
 		break;
 	if (hibit)
 	    start = s = bytes_to_utf8(s, &len);
@@ -378,7 +378,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
     if (!isutf8) {
 	U8 *t = s, *e = s + len;
 	while (t < e)
-	    if ((hibit = *t++ & 0x80))
+	    if ((hibit = !UTF8_IS_ASCII(*t++)))
 		break;
 	if (hibit)
 	    s = bytes_to_utf8(s, &len);

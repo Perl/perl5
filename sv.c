@@ -2416,7 +2416,7 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
     e = SvEND(sv);
     t = s;
     while (t < e) {
-	if ((hibit = *t++ & 0x80))
+	if ((hibit = UTF8_IS_CONTINUED(*t++)))
 	    break;
     }
 
@@ -2508,7 +2508,7 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
 	    return FALSE;
         e = SvEND(sv);
         while (c < e) {
-            if (*c++ & 0x80) {
+            if (UTF8_IS_CONTINUED(*c++)) {
 		SvUTF8_on(sv);
 		break;
 	    }

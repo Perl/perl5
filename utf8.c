@@ -1118,7 +1118,7 @@ SV*
 Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
 {
     SV* retval;
-    char tmpbuf[256];
+    SV* tokenbufsv = sv_2mortal(NEWSV(0,0));
     dSP;
 
     if (!gv_stashpv(pkg, 0)) {	/* demand load utf8 */
@@ -1140,8 +1140,9 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     SAVEI32(PL_hints);
     PL_hints = 0;
     save_re_context();
-    if (PL_curcop == &PL_compiling)	/* XXX ought to be handled by lex_start */
-	strncpy(tmpbuf, PL_tokenbuf, sizeof tmpbuf);
+    if (PL_curcop == &PL_compiling)
+	/* XXX ought to be handled by lex_start */
+	sv_setpv(tokenbufsv, PL_tokenbuf);
     if (call_method("SWASHNEW", G_SCALAR))
 	retval = newSVsv(*PL_stack_sp--);
     else
@@ -1149,7 +1150,10 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     LEAVE;
     POPSTACK;
     if (PL_curcop == &PL_compiling) {
-	strncpy(PL_tokenbuf, tmpbuf, sizeof tmpbuf);
+	STRLEN len;
+	char* pv = SvPV(tokenbufsv, len);
+
+	Copy(pv, PL_tokenbuf, len+1, char);
 	PL_curcop->op_private = PL_hints;
     }
     if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV)

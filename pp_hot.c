@@ -2872,8 +2872,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    !(iogv = gv_fetchpv(packname, FALSE, SVt_PVIO)) ||
 	    !(ob=(SV*)GvIO(iogv)))
 	{
-	    if (!packname || 
-		((*(U8*)packname >= 0xc0 && DO_UTF8(sv))
+	    if (!packname ||
+		((UTF8_IS_START(*packname) && DO_UTF8(sv))
 		    ? !isIDFIRST_utf8((U8*)packname)
 		    : !isIDFIRST(*packname)
 		))
