@@ -1251,6 +1251,12 @@ d_sanemcmp (d_sanemcmp.U):
 	the memcpy() routine is available and can be used to compare relative
 	magnitudes of chars with their high bits set.
 
+d_sbrkproto (d_sbrkproto.U):
+	This variable conditionally defines the HAS_SBRK_PROTO symbol,
+	which indicates to the C program that the system provides
+	a prototype for the sbrk() function.  Otherwise, it is
+	up to the program to supply one.
+
 d_sched_yield (d_pthread_y.U):
 	This variable conditionally defines the HAS_SCHED_YIELD
 	symbol if the sched_yield routine is available to yield
