@@ -84,10 +84,10 @@ sub canonpath {
     if ( $^O eq 'qnx' && $path =~ s|^(//\d+)/|/| ) {
       $node = $1;
     }
-    $path =~ s|/+|/|g ;                            # xx////xx  -> xx/xx
+    $path =~ s|(?<=[^/])/+|/|g ;                   # xx////xx  -> xx/xx
     $path =~ s|(/\.)+/|/|g ;                       # xx/././xx -> xx/xx
     $path =~ s|^(\./)+|| unless $path eq "./";     # ./xx      -> xx
-    $path =~ s|/$|| unless $path eq "/";           # xx/       -> xx
+    $path =~ s|(?<=[^/])/$|| ;                     # xx/       -> xx
     "$node$path";
 }
 
