@@ -23,7 +23,6 @@ void* Perl_thread_run(void * arg) {
 
 	SHAREDSvLOCK(threads);
 	SHAREDSvEDIT(threads);
-	PERL_THREAD_ALLOC_SPECIFIC(self_key);
 	PERL_THREAD_SETSPECIFIC(self_key,INT2PTR(void*,thread->tid));
 	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, thread->tid);	
 	thread_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(thread));
@@ -279,6 +278,7 @@ void Perl_thread_destruct (ithread* thread) {
 MODULE = threads		PACKAGE = threads		
 BOOT:
 	Perl_sharedsv_init(aTHX);
+	PERL_THREAD_ALLOC_SPECIFIC(self_key);
 	PL_perl_destruct_level = 2;
 	threads = Perl_sharedsv_new(aTHX);
 	SHAREDSvEDIT(threads);
