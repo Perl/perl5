@@ -3,10 +3,13 @@ package Digest;
 use strict;
 use vars qw($VERSION %MMAP $AUTOLOAD);
 
-$VERSION = "1.02";
+$VERSION = "1.03";
 
 %MMAP = (
-  "SHA-1"      => "Digest::SHA1",
+  "SHA-1"      => ["Digest::SHA1", ["Digest::SHA", 1], ["Digest::SHA2", 1]],
+  "SHA-256"    => [["Digest::SHA", 256], ["Digest::SHA2", 256]],
+  "SHA-384"    => [["Digest::SHA", 384], ["Digest::SHA2", 384]],
+  "SHA-512"    => [["Digest::SHA", 512], ["Digest::SHA2", 512]],
   "HMAC-MD5"   => "Digest::HMAC_MD5",
   "HMAC-SHA-1" => "Digest::HMAC_SHA1",
 );
@@ -15,13 +18,27 @@ sub new
 {
     shift;  # class ignored
     my $algorithm = shift;
-    my $class = $MMAP{$algorithm} || "Digest::$algorithm";
-    no strict 'refs';
-    unless (exists ${"$class\::"}{"VERSION"}) {
-	eval "require $class";
-	die $@ if $@;
+    my $impl = $MMAP{$algorithm} || do {
+	$algorithm =~ s/\W+//;
+	"Digest::$algorithm";
+    };
+    $impl = [$impl] unless ref($impl);
+    my $err;
+    for  (@$impl) {
+	my $class = $_;
+	my @args;
+	($class, @args) = @$class if ref($class);
+	no strict 'refs';
+	unless (exists ${"$class\::"}{"VERSION"}) {
+	    eval "require $class";
+	    if ($@) {
+		$err ||= $@;
+		next;
+	    }
+	}
+	return $class->new(@args, @_);
     }
-    $class->new(@_);
+    die $err;
 }
 
 sub AUTOLOAD
@@ -55,7 +72,7 @@ The C<Digest::> modules calculate digests, also called "fingerprints"
 or "hashes", of some data, called a message.  The digest is (usually)
 some small/fixed size string.  The actual size of the digest depend of
 the algorithm used.  The message is simply a sequence of arbitrary
-bytes.
+bytes or bits.
 
 An important property of the digest algorithms is that the digest is
 I<likely> to change if the message change in some way.  Another
@@ -148,6 +165,32 @@ calculate the digest for.  The return value is the $ctx object itself.
 The $io_handle is read until EOF and the content is appended to the
 message we calculate the digest for.  The return value is the $ctx
 object itself.
+
+=item $ctx->add_bits($data, $nbits)
+
+=item $ctx->add_bits($bitstring)
+
+The bits provided are appended to the message we calculate the digest
+for.  The return value is the $ctx object itself.
+
+The two argument form of add_bits() will add the first $nbits bits
+from data.  For the last potentially partial byte only the high order
+C<< $nbits % 8 >> bits are used.  If $nbits is greater than C<<
+length($data) * 8 >>, then this method would do the same as C<<
+$ctx->add($data) >>, i.e. $nbits is silently ignored.
+
+The one argument form of add_bits() takes a $bitstring of "1" and "0"
+chars as argument.  It's a shorthand for C<< $ctx->add_bits(pack("B*",
+$bitstring), length($bitstring)) >>.
+
+This example shows two calls that should have the same effect:
+
+   $ctx->add_bits("111100001010");
+   $ctx->add_bits("\xF0\xA0", 12);
+
+Most digest algorithms are byte based.  For those it is not possible
+to add bits that are not a multiple of 8, and the add_bits() method
+will croak if you try.
 
 =item $ctx->digest
 

@@ -1,3 +1,11 @@
+2003-11-28   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.31
+
+   Inherit add_bits() from Digest::base if available.
+
+
+
 2003-10-09   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.30
