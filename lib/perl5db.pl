@@ -2242,6 +2242,9 @@ sub os2_get_fork_TTY {
   $ENV{PERL5OPT} =~ s/(?:^|(?<=\s))-d\b//  if $ENV{PERL5OPT};
   $ENV{PERL5OPT} =~ s/(?:^|(?<=\s))-d\B/-/ if $ENV{PERL5OPT};
   print $OUT "Making kid PERL5OPT->`$ENV{PERL5OPT}'.\n" if $ENV{PERL5OPT};
+  local $ENV{PERL5LIB} = $ENV{PERL5LIB} ? $ENV{PERL5LIB} : $ENV{PERLLIB};
+  $ENV{PERL5LIB} = '' unless defined $ENV{PERL5LIB};
+  $ENV{PERL5LIB} = join ';', @ini_INC, split /;/, $ENV{PERL5LIB};
   (my $name = $0) =~ s,^.*[/\\],,s;
   my @args;
   if ( pipe $in1, $out1 and pipe $in2, $out2
@@ -2250,6 +2253,8 @@ sub os2_get_fork_TTY {
        and @args = ($rl, fileno $in1, fileno $out2,
 		    "Daughter Perl debugger $pids $name") and
        (($kpid = CORE::system 4, $^X, '-we', <<'ES', @args) >= 0 # P_SESSION
+END {sleep 5 unless $loaded}
+BEGIN {open STDIN,  '</dev/con' or warn "reopen stdin: $!"}
 use OS2::Process;
 
 my ($rl, $in) = (shift, shift);		# Read from $in and pass through
