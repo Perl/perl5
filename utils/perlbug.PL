@@ -91,7 +91,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.33";
+my $Version = "1.34";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -129,13 +129,14 @@ my $Version = "1.33";
 # Changed in 1.31 Add checks on close().Fix my $var unless. TJENNESS 26-07-2000
 # Changed in 1.32 Use File::Spec->tmpdir TJENNESS 20-08-2000
 # Changed in 1.33 Don't require -t STDOUT for -ok.
+# Changed in 1.34 Added Message-Id RFOLEY 18-06-2002 
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
 #       accounted for.
 #       - Test -b option
 
-my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
+my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename, $messageid, $domain,
     $subject, $from, $verbose, $ed, $outfile, $Is_MacOS, $category, $severity,
     $fh, $me, $Is_MSWin32, $Is_Linux, $Is_VMS, $msg, $body, $andcc, %REP, $ok);
 
@@ -252,7 +253,7 @@ sub Init {
 
     # Body of report
     $body = $::opt_b || "";
-
+	
     # Editor
     $ed = $::opt_e || $ENV{VISUAL} || $ENV{EDITOR} || $ENV{EDIT}
 	|| ($Is_VMS && "edit/tpu")
@@ -313,6 +314,18 @@ EOF
 	$::opt_c || $::Config{'perladmin'}
 	|| $::Config{'cf_email'} || $::Config{'cf_by'}
     );
+
+    if ($::HaveUtil) {
+		$domain = Mail::Util::maildomain();
+    } elsif ($Is_MSWin32) {
+		$domain = $ENV{'USERDOMAIN'};
+    } else {
+		require Sys::Hostname;
+		$domain = Sys::Hostname::hostname();
+    }
+
+    # Message-Id - rjsf
+    $messageid = "<$::Config{'version'}_${$}_".time."\@$domain>"; 
 
     # My username
     $me = $Is_MSWin32 ? $ENV{'USERNAME'}
@@ -381,16 +394,8 @@ EOF
         }
 
 	unless ($guess) {
-	    my $domain;
-	    if ($::HaveUtil) {
-		$domain = Mail::Util::maildomain();
-	    } elsif ($Is_MSWin32) {
-		$domain = $ENV{'USERDOMAIN'};
-	    } else {
-		require Sys::Hostname;
-		$domain = Sys::Hostname::hostname();
-	    }
-	    if ($domain) {
+		# move $domain to where we can use it elsewhere	
+        if ($domain) {
 		if ($Is_VMS && !$::Config{'d_socket'}) {
 		    $guess = "$domain\:\:$me";
 		} else {
@@ -750,6 +755,7 @@ EOF
 		print FILE "To: $address\nSubject: $subject\n";
 		print FILE "Cc: $cc\n" if $cc;
 		print FILE "Reply-To: $from\n" if $from;
+		print FILE "Message-Id: $messageid\n" if $messageid;
 		print FILE "\n";
 		while (<REP>) { print FILE }
 		close(REP) or die "Error closing report file `$filename': $!";
@@ -886,6 +892,7 @@ sendout:
 	print SENDMAIL "Subject: $subject\n";
 	print SENDMAIL "Cc: $cc\n" if $cc;
 	print SENDMAIL "Reply-To: $from\n" if $from;
+	print SENDMAIL "Message-Id: $messageid\n" if $messageid;
 	print SENDMAIL "\n\n";
 	open(REP, "<$filename") or die "Couldn't open `$filename': $!\n";
 	while (<REP>) { print SENDMAIL $_ }
