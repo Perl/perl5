@@ -41,12 +41,38 @@ dl_private_init(CPERLarg)
     (void)dl_generic_private_init(THIS);
 }
 
+/* 
+    This function assumes the list staticlinkmodules
+    will be formed from package names with '::' replaced
+    with '/'. Thus Win32::OLE is in the list as Win32/OLE
+*/
 static int
 dl_static_linked(char *filename)
 {
     char **p;
+    char* ptr;
+    static char subStr[] = "/auto/";
+    char szBuffer[MAX_PATH];
+
+    /* change all the '\\' to '/' */
+    strcpy(szBuffer, filename);
+    for(ptr = szBuffer; ptr = strchr(ptr, '\\'); ++ptr)
+	*ptr = '/';
+
+    /* delete the file name */
+    ptr = strrchr(szBuffer, '/');
+    if(ptr != NULL)
+	*ptr = '\0';
+
+    /* remove leading lib path */
+    ptr = strstr(szBuffer, subStr);
+    if(ptr != NULL)
+	ptr += sizeof(subStr)-1;
+    else
+	ptr = szBuffer;
+
     for (p = staticlinkmodules; *p;p++) {
-	if (strstr(filename, *p)) return 1;
+	if (strstr(ptr, *p)) return 1;
     };
     return 0;
 }
