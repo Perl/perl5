@@ -610,6 +610,9 @@ perl_destruct(pTHXx)
 #endif
 #endif /* !PERL_MICRO */
 
+    /* reset so print() ends up where we expect */
+    setdefout(Nullgv);
+
 #ifdef USE_ITHREADS
     /* the syntax tree is shared between clones
      * so op_free(PL_main_root) only ReREFCNT_dec's
@@ -749,9 +752,6 @@ perl_destruct(pTHXx)
     PL_DBcv = Nullcv;
     PL_dbargs = Nullav;
     PL_debstash = Nullhv;
-
-    /* reset so print() ends up where we expect */
-    setdefout(Nullgv);
 
     SvREFCNT_dec(PL_argvout_stack);
     PL_argvout_stack = Nullav;

@@ -341,7 +341,8 @@ PP(pp_formline)
     NV value;
     bool gotsome = FALSE;
     STRLEN len;
-    STRLEN fudge = SvCUR(tmpForm) * (IN_BYTES ? 1 : 3) + 1;
+    STRLEN fudge = SvPOK(tmpForm)
+			? (SvCUR(tmpForm) * (IN_BYTES ? 1 : 3) + 1) : 0;
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
     SV * nsv = Nullsv;
@@ -2155,16 +2156,13 @@ PP(pp_goto)
 	    TOPBLOCK(cx);
 	    if (CxREALEVAL(cx))
 		DIE(aTHX_ "Can't goto subroutine from an eval-string");
-	    mark = PL_stack_sp;
 	    if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs) {
 		/* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
 		
 		items = AvFILLp(av) + 1;
-		PL_stack_sp++;
-		EXTEND(PL_stack_sp, items); /* @_ could have been extended. */
-		Copy(AvARRAY(av), PL_stack_sp, items, SV*);
-		PL_stack_sp += items;
+		EXTEND(SP, items+1); /* @_ could have been extended. */
+		Copy(AvARRAY(av), SP + 1, items, SV*);
 #ifndef USE_5005THREADS
 		SvREFCNT_dec(GvAV(PL_defgv));
 		GvAV(PL_defgv) = cx->blk_sub.savearray;
@@ -2188,11 +2186,11 @@ PP(pp_goto)
 		av = GvAV(PL_defgv);
 #endif
 		items = AvFILLp(av) + 1;
-		PL_stack_sp++;
-		EXTEND(PL_stack_sp, items); /* @_ could have been extended. */
-		Copy(AvARRAY(av), PL_stack_sp, items, SV*);
-		PL_stack_sp += items;
+		EXTEND(SP, items+1); /* @_ could have been extended. */
+		Copy(AvARRAY(av), SP + 1, items, SV*);
 	    }
+	    mark = SP;
+	    SP += items;
 	    if (CxTYPE(cx) == CXt_SUB &&
 		!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))
 		SvREFCNT_dec(cx->blk_sub.cv);
@@ -2225,9 +2223,9 @@ PP(pp_goto)
 		    SV **newsp;
 		    I32 gimme;
 
-		    PL_stack_sp--;		/* There is no cv arg. */
 		    /* Push a mark for the start of arglist */
 		    PUSHMARK(mark);
+		    PUTBACK;
 		    (void)(*CvXSUB(cv))(aTHX_ cv);
 		    /* Pop the current context like a decent sub should */
 		    POPBLOCK(cx, PL_curpm);
@@ -2283,7 +2281,6 @@ PP(pp_goto)
 #endif /* USE_5005THREADS */
 		    CX_CURPAD_SAVE(cx->blk_sub);
 		    cx->blk_sub.argarray = av;
-		    ++mark;
 
 		    if (items >= AvMAX(av) + 1) {
 			ary = AvALLOC(av);
@@ -2298,6 +2295,7 @@ PP(pp_goto)
 			    SvPVX(av) = (char*)ary;
 			}
 		    }
+		    ++mark;
 		    Copy(mark,AvARRAY(av),items,SV*);
 		    AvFILLp(av) = items - 1;
 		    assert(!AvREAL(av));
