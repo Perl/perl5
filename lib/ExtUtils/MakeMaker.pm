@@ -2,7 +2,7 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$Version = $VERSION = "5.4301";
+$Version = $VERSION = "5.430101";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
 ($Revision = substr(q$Revision: 1.222 $, 10)) =~ s/\s+$//;
@@ -192,7 +192,7 @@ sub prompt ($;$) {
     } else {
 	print "$def\n";
     }
-    return $ans || $def;
+    return ($ans ne '') ? $ans : $def;
 }
 
 sub eval_in_subdirs {
