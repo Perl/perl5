@@ -931,7 +931,7 @@ EOP
 			next CMD; };
 		    $cmd =~ /^b\b\s*(\d*)\s*(.*)/ && do {
 			$i = $1 || $line;
-			$cond = defined $2 ? $2 : '1';
+			$cond = length $2 ? $2 : '1';
 			if ($dbline[$i] == 0) {
 			    print $OUT "Line $i not breakable.\n";
 			} else {
