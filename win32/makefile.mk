@@ -140,6 +140,7 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 
 .IF "$(OBJECT)" != ""
 PERL_MALLOC	!= undef
+USE_THREADS	!= undef
 .ENDIF
 
 PERL_MALLOC	*= undef
