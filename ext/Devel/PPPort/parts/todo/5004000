@@ -10,14 +10,12 @@ HeSVKEY                        # E
 HeSVKEY_force                  # E
 HeSVKEY_set                    # E
 HeVAL                          # E
-PUSHu                          # U
 SvSetMagicSV                   # U
 SvSetMagicSV_nosteal           # U
 SvSetSV_nosteal                # U
 SvTAINTED                      # U
 SvTAINTED_off                  # U
 SvTAINTED_on                   # U
-XPUSHu                         # U
 block_gimme                    # U
 call_list                      # U
 cv_const_sv                    # E
@@ -48,13 +46,20 @@ save_I16                       # U
 save_gp                        # U
 start_subparse                 # E (Perl_start_subparse)
 sv_catpvf                      # U
+sv_catpvf_mg                   # U
 sv_cmp_locale                  # U
 sv_derived_from                # U
 sv_gets                        # E (Perl_sv_gets)
 sv_setpvf                      # U
+sv_setpvf_mg                   # U
 sv_taint                       # U
 sv_tainted                     # U
 sv_untaint                     # U
+sv_vcatpvf                     # U
+sv_vcatpvf_mg                  # U
 sv_vcatpvfn                    # U
+sv_vsetpvf                     # U
+sv_vsetpvf_mg                  # U
 sv_vsetpvfn                    # U
 unsharepvn                     # U
+vnewSVpvf                      # E

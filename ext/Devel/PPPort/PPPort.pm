@@ -8,9 +8,9 @@
 #
 ################################################################################
 #
-#  $Revision: 28 $
+#  $Revision: 30 $
 #  $Author: mhx $
-#  $Date: 2004/08/13 12:49:22 +0200 $
+#  $Date: 2004/08/17 20:01:49 +0200 $
 #
 ################################################################################
 #
@@ -265,21 +265,33 @@ in older Perl releases:
     PL_copline
     PL_curcop
     PL_curstash
+    PL_DBsingle
+    PL_DBsub
+    PL_debstash
     PL_defgv
+    PL_diehook
     PL_dirty
     PL_dowarn
+    PL_errgv
     PL_hexdigit
     PL_hints
     PL_na
+    PL_no_modify
+    PL_perl_destruct_level
     PL_perldb
+    PL_ppaddr
     PL_rsfp
     PL_rsfp_filters
     PL_stack_base
+    PL_stack_sp
     PL_stdingv
     PL_Sv
+    PL_sv_arenaroot
     PL_sv_no
     PL_sv_undef
     PL_sv_yes
+    PL_tainted
+    PL_tainting
     pMY_CXT
     pMY_CXT_
     Poison
@@ -291,12 +303,15 @@ in older Perl releases:
     PTR2UV
     PTRV
     PUSHmortal
+    PUSHu
     SAVE_DEFSV
     START_MY_CXT
     sv_2pv_nolen
     sv_2pvbyte
     sv_2uv
     sv_catpv_mg
+    sv_catpvf_mg
+    sv_catpvf_mg_nocontext
     sv_catpvn_mg
     sv_catpvn_nomg
     sv_catsv_mg
@@ -307,6 +322,8 @@ in older Perl releases:
     sv_setiv_mg
     sv_setnv_mg
     sv_setpv_mg
+    sv_setpvf_mg
+    sv_setpvf_mg_nocontext
     sv_setpvn_mg
     sv_setsv_mg
     sv_setsv_nomg
@@ -314,6 +331,10 @@ in older Perl releases:
     sv_setuv_mg
     sv_usepvn_mg
     sv_uv
+    sv_vcatpvf
+    sv_vcatpvf_mg
+    sv_vsetpvf
+    sv_vsetpvf_mg
     SvGETMAGIC
     SvIV_nomg
     SvPV_force_nomg
@@ -332,7 +353,9 @@ in older Perl releases:
     UVuf
     UVXf
     UVxf
+    vnewSVpvf
     XPUSHmortal
+    XPUSHu
     XSRETURN_UV
     XST_mUV
     ZeroD
@@ -667,10 +690,6 @@ Perl below which it is unsupported:
   sv_utf8_decode
   sv_utf8_downgrade
   sv_utf8_encode
-  sv_vcatpvf
-  sv_vcatpvf_mg
-  sv_vsetpvf
-  sv_vsetpvf_mg
   swash_init
   tmps_grow
   to_uni_lower_lc
@@ -682,7 +701,6 @@ Perl below which it is unsupported:
   vform
   vload_module
   vmess
-  vnewSVpvf
   vwarn
   vwarner
   warner
@@ -727,8 +745,6 @@ Perl below which it is unsupported:
   do_binmode
   save_aelem
   save_helem
-  sv_catpvf_mg
-  sv_setpvf_mg
 
 =item perl 5.004_04
 
@@ -747,14 +763,12 @@ Perl below which it is unsupported:
   HeSVKEY_force
   HeSVKEY_set
   HeVAL
-  PUSHu
   SvSetMagicSV
   SvSetMagicSV_nosteal
   SvSetSV_nosteal
   SvTAINTED
   SvTAINTED_off
   SvTAINTED_on
-  XPUSHu
   block_gimme
   call_list
   cv_const_sv
@@ -785,16 +799,23 @@ Perl below which it is unsupported:
   save_gp
   start_subparse
   sv_catpvf
+  sv_catpvf_mg
   sv_cmp_locale
   sv_derived_from
   sv_gets
   sv_setpvf
+  sv_setpvf_mg
   sv_taint
   sv_tainted
   sv_untaint
+  sv_vcatpvf
+  sv_vcatpvf_mg
   sv_vcatpvfn
+  sv_vsetpvf
+  sv_vsetpvf_mg
   sv_vsetpvfn
   unsharepvn
+  vnewSVpvf
 
 =back
 
@@ -845,7 +866,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.00 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.00_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -1053,18 +1074,23 @@ POD
 POD Note that you mustn't have more than one global request for one
 POD function in your project.
 POD 
-POD     Function              Static Request           Global Request                
-POD     -----------------------------------------------------------------------------
-POD     eval_pv()             NEED_eval_pv             NEED_eval_pv_GLOBAL           
-POD     grok_bin()            NEED_grok_bin            NEED_grok_bin_GLOBAL          
-POD     grok_hex()            NEED_grok_hex            NEED_grok_hex_GLOBAL          
-POD     grok_number()         NEED_grok_number         NEED_grok_number_GLOBAL       
-POD     grok_numeric_radix()  NEED_grok_numeric_radix  NEED_grok_numeric_radix_GLOBAL
-POD     grok_oct()            NEED_grok_oct            NEED_grok_oct_GLOBAL          
-POD     newCONSTSUB()         NEED_newCONSTSUB         NEED_newCONSTSUB_GLOBAL       
-POD     newRV_noinc()         NEED_newRV_noinc         NEED_newRV_noinc_GLOBAL       
-POD     sv_2pv_nolen()        NEED_sv_2pv_nolen        NEED_sv_2pv_nolen_GLOBAL      
-POD     sv_2pvbyte()          NEED_sv_2pvbyte          NEED_sv_2pvbyte_GLOBAL        
+POD     Function                  Static Request               Global Request                    
+POD     -----------------------------------------------------------------------------------------
+POD     eval_pv()                 NEED_eval_pv                 NEED_eval_pv_GLOBAL               
+POD     grok_bin()                NEED_grok_bin                NEED_grok_bin_GLOBAL              
+POD     grok_hex()                NEED_grok_hex                NEED_grok_hex_GLOBAL              
+POD     grok_number()             NEED_grok_number             NEED_grok_number_GLOBAL           
+POD     grok_numeric_radix()      NEED_grok_numeric_radix      NEED_grok_numeric_radix_GLOBAL    
+POD     grok_oct()                NEED_grok_oct                NEED_grok_oct_GLOBAL              
+POD     newCONSTSUB()             NEED_newCONSTSUB             NEED_newCONSTSUB_GLOBAL           
+POD     newRV_noinc()             NEED_newRV_noinc             NEED_newRV_noinc_GLOBAL           
+POD     sv_2pv_nolen()            NEED_sv_2pv_nolen            NEED_sv_2pv_nolen_GLOBAL          
+POD     sv_2pvbyte()              NEED_sv_2pvbyte              NEED_sv_2pvbyte_GLOBAL            
+POD     sv_catpvf_mg()            NEED_sv_catpvf_mg            NEED_sv_catpvf_mg_GLOBAL          
+POD     sv_catpvf_mg_nocontext()  NEED_sv_catpvf_mg_nocontext  NEED_sv_catpvf_mg_nocontext_GLOBAL
+POD     sv_setpvf_mg()            NEED_sv_setpvf_mg            NEED_sv_setpvf_mg_GLOBAL          
+POD     sv_setpvf_mg_nocontext()  NEED_sv_setpvf_mg_nocontext  NEED_sv_setpvf_mg_nocontext_GLOBAL
+POD     vnewSVpvf()               NEED_vnewSVpvf               NEED_vnewSVpvf_GLOBAL             
 POD 
 POD To avoid namespace conflicts, you can change the namespace of the
 POD explicitly exported functions using the C<DPPP_NAMESPACE> macro.
@@ -1418,32 +1444,42 @@ PERL_UQUAD_MIN|5.004000||p
 PERL_USHORT_MAX|5.004000||p
 PERL_USHORT_MIN|5.004000||p
 PERL_VERSION|5.006000||p
-PL_DBsingle|||n
-PL_DBsub|||n
+PL_DBsingle|||pn
+PL_DBsub|||pn
 PL_DBtrace|||n
 PL_Sv|5.005000||p
 PL_compiling|5.004050||p
 PL_copline|5.005000||p
 PL_curcop|5.004050||p
 PL_curstash|5.004050||p
+PL_debstash|||p
 PL_defgv|5.004050||p
+PL_diehook|||p
 PL_dirty|5.004050||p
 PL_dowarn|||pn
+PL_errgv|||p
 PL_hexdigit|5.005000||p
 PL_hints|5.005000||p
 PL_last_in_gv|||n
 PL_modglobal||5.005000|n
 PL_na|5.004050||pn
+PL_no_modify|||p
 PL_ofs_sv|||n
+PL_perl_destruct_level|||p
 PL_perldb|5.004050||p
+PL_ppaddr|||p
 PL_rsfp_filters|5.004050||p
 PL_rsfp|5.004050||p
 PL_rs|||n
 PL_stack_base|||p
+PL_stack_sp|||p
 PL_stdingv|5.004050||p
+PL_sv_arenaroot|||p
 PL_sv_no|5.004050||pn
 PL_sv_undef|5.004050||pn
 PL_sv_yes|5.004050||pn
+PL_tainted|||p
+PL_tainting|||p
 POPi|||n
 POPl|||n
 POPn|||n
@@ -1462,7 +1498,7 @@ PUSHmortal|5.009002||p
 PUSHn|||
 PUSHp|||
 PUSHs|||
-PUSHu||5.004000|
+PUSHu|5.004000||p
 PUTBACK|||
 PerlIO_clearerr||5.007003|
 PerlIO_close||5.007003|
@@ -1612,7 +1648,7 @@ XPUSHmortal|5.009002||p
 XPUSHn|||
 XPUSHp|||
 XPUSHs|||
-XPUSHu||5.004000|
+XPUSHu|5.004000||p
 XSRETURN_EMPTY|||
 XSRETURN_IV|||
 XSRETURN_NO|||
@@ -2586,8 +2622,8 @@ sv_backoff|||
 sv_bless|||
 sv_cat_decode||5.008001|
 sv_catpv_mg|5.006000||p
-sv_catpvf_mg_nocontext|||vn
-sv_catpvf_mg||5.004050|v
+sv_catpvf_mg_nocontext|||pvn
+sv_catpvf_mg|5.006000|5.004000|pv
 sv_catpvf_nocontext|||vn
 sv_catpvf||5.004000|v
 sv_catpvn_flags||5.007002|
@@ -2664,8 +2700,8 @@ sv_setiv|||
 sv_setnv_mg|5.006000||p
 sv_setnv|||
 sv_setpv_mg|5.006000||p
-sv_setpvf_mg_nocontext|||vn
-sv_setpvf_mg||5.004050|v
+sv_setpvf_mg_nocontext|||pvn
+sv_setpvf_mg|5.006000|5.004000|pv
 sv_setpvf_nocontext|||vn
 sv_setpvf||5.004000|v
 sv_setpviv_mg||5.008001|
@@ -2703,12 +2739,12 @@ sv_utf8_encode||5.006000|
 sv_utf8_upgrade_flags||5.007002|
 sv_utf8_upgrade||5.007001|
 sv_uv|5.006000||p
-sv_vcatpvf_mg||5.006000|
+sv_vcatpvf_mg|5.006000|5.004000|p
 sv_vcatpvfn||5.004000|
-sv_vcatpvf||5.006000|
-sv_vsetpvf_mg||5.006000|
+sv_vcatpvf|5.006000|5.004000|p
+sv_vsetpvf_mg|5.006000|5.004000|p
 sv_vsetpvfn||5.004000|
-sv_vsetpvf||5.006000|
+sv_vsetpvf|5.006000|5.004000|p
 svtype|||
 swallow_bom|||
 swash_fetch||5.007002|
@@ -2782,7 +2818,7 @@ vivify_defelem|||
 vivify_ref|||
 vload_module||5.006000|
 vmess||5.006000|
-vnewSVpvf||5.006000|
+vnewSVpvf|5.006000|5.004000|p
 vnormal||5.009002|
 vnumify||5.009000|
 vparse_body|||
@@ -2911,19 +2947,16 @@ for $filename (@files) {
       if (exists $API{$func}{provided}) {
         if (!exists $API{$func}{base} || $API{$func}{base} > $opt{'compat-version'}) {
           $file{uses}{$func}++;
-          push @{$global{uses}{$func}}, $filename;
           my @deps = rec_depend($func);
           if (@deps) {
             $file{uses_deps}{$func} = \@deps;
             for (@deps) {
               $file{uses}{$_} = 0 unless exists $file{uses}{$_};
-              push @{$global{uses}{$_}}, $filename;
             }
           }
           for ($func, @deps) {
             if (exists $need{$_}) {
               $file{needs}{$_} = 'static';
-              push @{$global{needs}{$_}}, $filename;
             }
           }
         }
@@ -2931,7 +2964,6 @@ for $filename (@files) {
       if (exists $API{$func}{todo} && $API{$func}{todo} > $opt{'compat-version'}) {
         if ($c =~ /\b$func\b/) {
           $file{uses_todo}{$func}++;
-          push @{$global{uses_todo}{$func}}, $filename;
         }
       }
     }
@@ -2940,10 +2972,15 @@ for $filename (@files) {
   while ($c =~ /^$HS*#$HS*define$HS+(NEED_(\w+?)(_GLOBAL)?)\b/mg) {
     if (exists $need{$2}) {
       $file{defined $3 ? 'needed_global' : 'needed_static'}{$2}++;
-      push @{$global{defined $3 ? 'needed_global' : 'needed_static'}{$2}}, $filename;
     }
     else {
       warning("Possibly wrong #define $1 in $filename");
+    }
+  }
+
+  for (qw(uses needs uses_todo needed_global needed_static)) {
+    for $func (keys %{$file{$_}}) {
+      push @{$global{$_}{$func}}, $filename;
     }
   }
 
@@ -3245,8 +3282,9 @@ sub can_use
 sub rec_depend
 {
   my $func = shift;
+  my %seen;
   return () unless exists $depends{$func};
-  map { ($_, rec_depend($_)) } @{$depends{$func}};
+  grep !$seen{$_}++, map { ($_, rec_depend($_)) } @{$depends{$func}};
 }
 
 sub parse_version
@@ -3781,27 +3819,47 @@ __DATA__
 #ifndef XSRETURN_UV
 #  define XSRETURN_UV(v)                 STMT_START { XST_mUV(0,v);  XSRETURN(1); } STMT_END
 #endif
+#ifndef PUSHu
+#  define PUSHu(u)                       STMT_START { sv_setuv(TARG, (UV)(u)); PUSHTARG;  } STMT_END
+#endif
+
+#ifndef XPUSHu
+#  define XPUSHu(u)                      STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; } STMT_END
+#endif
 
 #if (PERL_VERSION < 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION <= 5))
 /* Replace: 1 */
-#  define PL_Sv              Sv
-#  define PL_compiling       compiling
-#  define PL_copline         copline
-#  define PL_curcop          curcop
-#  define PL_curstash        curstash
-#  define PL_defgv           defgv
-#  define PL_dirty           dirty
-#  define PL_dowarn          dowarn
-#  define PL_hints           hints
-#  define PL_na	             na
-#  define PL_perldb          perldb
-#  define PL_rsfp_filters    rsfp_filters
-#  define PL_rsfp            rsfp
-#  define PL_stdingv         stdingv
-#  define PL_sv_no           sv_no
-#  define PL_sv_undef        sv_undef
-#  define PL_sv_yes          sv_yes
-#  define PL_hexdigit        hexdigit
+#  define PL_DBsingle               DBsingle
+#  define PL_DBsub                  DBsub
+#  define PL_Sv                     Sv
+#  define PL_compiling              compiling
+#  define PL_copline                copline
+#  define PL_curcop                 curcop
+#  define PL_curstash               curstash
+#  define PL_debstash               debstash
+#  define PL_defgv                  defgv
+#  define PL_diehook                diehook
+#  define PL_dirty                  dirty
+#  define PL_dowarn                 dowarn
+#  define PL_errgv                  errgv
+#  define PL_hexdigit               hexdigit
+#  define PL_hints                  hints
+#  define PL_na	                    na
+#  define PL_no_modify              no_modify
+#  define PL_perl_destruct_level    perl_destruct_level
+#  define PL_perldb                 perldb
+#  define PL_ppaddr                 ppaddr
+#  define PL_rsfp_filters           rsfp_filters
+#  define PL_rsfp                   rsfp
+#  define PL_stack_base             stack_base
+#  define PL_stack_sp               stack_sp
+#  define PL_stdingv                stdingv
+#  define PL_sv_arenaroot           sv_arenaroot
+#  define PL_sv_no                  sv_no
+#  define PL_sv_undef               sv_undef
+#  define PL_sv_yes                 sv_yes
+#  define PL_tainted                tainted
+#  define PL_tainting               tainting
 /* Replace: 0 */
 #endif
 
@@ -4061,22 +4119,22 @@ typedef NVTYPE NV;
 
 #ifndef eval_pv
 #if defined(NEED_eval_pv)
-static SV* DPPP_(eval_pv)(char *p, I32 croak_on_error);
+static SV* DPPP_(my_eval_pv)(char *p, I32 croak_on_error);
 static
 #else
-extern SV* DPPP_(eval_pv)(char *p, I32 croak_on_error);
+extern SV* DPPP_(my_eval_pv)(char *p, I32 croak_on_error);
 #endif
 
 #ifdef eval_pv
 #  undef eval_pv
 #endif
-#define eval_pv(a,b) DPPP_(eval_pv)(aTHX_ a,b)
-#define Perl_eval_pv DPPP_(eval_pv)
+#define eval_pv(a,b) DPPP_(my_eval_pv)(aTHX_ a,b)
+#define Perl_eval_pv DPPP_(my_eval_pv)
 
 #if defined(NEED_eval_pv) || defined(NEED_eval_pv_GLOBAL)
 
 SV*
-DPPP_(eval_pv)(char *p, I32 croak_on_error)
+DPPP_(my_eval_pv)(char *p, I32 croak_on_error)
 {
     dSP;
     SV* sv = newSVpv(p, 0);
@@ -4103,21 +4161,21 @@ DPPP_(eval_pv)(char *p, I32 croak_on_error)
 
 #ifndef newRV_noinc
 #if defined(NEED_newRV_noinc)
-static SV * DPPP_(newRV_noinc)(SV *sv);
+static SV * DPPP_(my_newRV_noinc)(SV *sv);
 static
 #else
-extern SV * DPPP_(newRV_noinc)(SV *sv);
+extern SV * DPPP_(my_newRV_noinc)(SV *sv);
 #endif
 
 #ifdef newRV_noinc
 #  undef newRV_noinc
 #endif
-#define newRV_noinc(a) DPPP_(newRV_noinc)(aTHX_ a)
-#define Perl_newRV_noinc DPPP_(newRV_noinc)
+#define newRV_noinc(a) DPPP_(my_newRV_noinc)(aTHX_ a)
+#define Perl_newRV_noinc DPPP_(my_newRV_noinc)
 
 #if defined(NEED_newRV_noinc) || defined(NEED_newRV_noinc_GLOBAL)
 SV *
-DPPP_(newRV_noinc)(SV *sv)
+DPPP_(my_newRV_noinc)(SV *sv)
 {
   SV *rv = (SV *)newRV(sv);
   SvREFCNT_dec(sv);
@@ -4134,22 +4192,22 @@ DPPP_(newRV_noinc)(SV *sv)
 /* newCONSTSUB from IO.xs is in the core starting with 5.004_63 */
 #if ((PERL_VERSION < 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION < 63))) && ((PERL_VERSION != 4) || (PERL_SUBVERSION != 5))
 #if defined(NEED_newCONSTSUB)
-static void DPPP_(newCONSTSUB)(HV *stash, char *name, SV *sv);
+static void DPPP_(my_newCONSTSUB)(HV *stash, char *name, SV *sv);
 static
 #else
-extern void DPPP_(newCONSTSUB)(HV *stash, char *name, SV *sv);
+extern void DPPP_(my_newCONSTSUB)(HV *stash, char *name, SV *sv);
 #endif
 
 #ifdef newCONSTSUB
 #  undef newCONSTSUB
 #endif
-#define newCONSTSUB(a,b,c) DPPP_(newCONSTSUB)(aTHX_ a,b,c)
-#define Perl_newCONSTSUB DPPP_(newCONSTSUB)
+#define newCONSTSUB(a,b,c) DPPP_(my_newCONSTSUB)(aTHX_ a,b,c)
+#define Perl_newCONSTSUB DPPP_(my_newCONSTSUB)
 
 #if defined(NEED_newCONSTSUB) || defined(NEED_newCONSTSUB_GLOBAL)
 
 void
-DPPP_(newCONSTSUB)(HV *stash, char *name, SV *sv)
+DPPP_(my_newCONSTSUB)(HV *stash, char *name, SV *sv)
 {
 	U32 oldhints = PL_hints;
 	HV *old_cop_stash = PL_curcop->cop_stash;
@@ -4305,22 +4363,22 @@ DPPP_(newCONSTSUB)(HV *stash, char *name, SV *sv)
 #ifndef SvPV_nolen
 
 #if defined(NEED_sv_2pv_nolen)
-static char * DPPP_(sv_2pv_nolen)(pTHX_ register SV *sv);
+static char * DPPP_(my_sv_2pv_nolen)(pTHX_ register SV *sv);
 static
 #else
-extern char * DPPP_(sv_2pv_nolen)(pTHX_ register SV *sv);
+extern char * DPPP_(my_sv_2pv_nolen)(pTHX_ register SV *sv);
 #endif
 
 #ifdef sv_2pv_nolen
 #  undef sv_2pv_nolen
 #endif
-#define sv_2pv_nolen(a) DPPP_(sv_2pv_nolen)(aTHX_ a)
-#define Perl_sv_2pv_nolen DPPP_(sv_2pv_nolen)
+#define sv_2pv_nolen(a) DPPP_(my_sv_2pv_nolen)(aTHX_ a)
+#define Perl_sv_2pv_nolen DPPP_(my_sv_2pv_nolen)
 
 #if defined(NEED_sv_2pv_nolen) || defined(NEED_sv_2pv_nolen_GLOBAL)
 
 char *
-DPPP_(sv_2pv_nolen)(pTHX_ register SV *sv)
+DPPP_(my_sv_2pv_nolen)(pTHX_ register SV *sv)
 {   
   STRLEN n_a;
   return sv_2pv(sv, &n_a);
@@ -4349,22 +4407,22 @@ DPPP_(sv_2pv_nolen)(pTHX_ register SV *sv)
 #if ((PERL_VERSION < 7) || ((PERL_VERSION == 7) && (PERL_SUBVERSION < 0)))
 
 #if defined(NEED_sv_2pvbyte)
-static char * DPPP_(sv_2pvbyte)(pTHX_ register SV *sv, STRLEN *lp);
+static char * DPPP_(my_sv_2pvbyte)(pTHX_ register SV *sv, STRLEN *lp);
 static
 #else
-extern char * DPPP_(sv_2pvbyte)(pTHX_ register SV *sv, STRLEN *lp);
+extern char * DPPP_(my_sv_2pvbyte)(pTHX_ register SV *sv, STRLEN *lp);
 #endif
 
 #ifdef sv_2pvbyte
 #  undef sv_2pvbyte
 #endif
-#define sv_2pvbyte(a,b) DPPP_(sv_2pvbyte)(aTHX_ a,b)
-#define Perl_sv_2pvbyte DPPP_(sv_2pvbyte)
+#define sv_2pvbyte(a,b) DPPP_(my_sv_2pvbyte)(aTHX_ a,b)
+#define Perl_sv_2pvbyte DPPP_(my_sv_2pvbyte)
 
 #if defined(NEED_sv_2pvbyte) || defined(NEED_sv_2pvbyte_GLOBAL)
 
 char *
-DPPP_(sv_2pvbyte)(pTHX_ register SV *sv, STRLEN *lp)
+DPPP_(my_sv_2pvbyte)(pTHX_ register SV *sv, STRLEN *lp)
 {   
   sv_utf8_downgrade(sv,0);
   return SvPV(sv,*lp);
@@ -4409,6 +4467,189 @@ DPPP_(sv_2pvbyte)(pTHX_ register SV *sv, STRLEN *lp)
  */
 #ifndef sv_pvn_force
 #  define sv_pvn_force(sv, len)          SvPV_force(sv, len)
+#endif
+
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0))) && !defined(vnewSVpvf)
+#if defined(NEED_vnewSVpvf)
+static SV * DPPP_(my_vnewSVpvf)(pTHX_ const char * pat, va_list * args);
+static
+#else
+extern SV * DPPP_(my_vnewSVpvf)(pTHX_ const char * pat, va_list * args);
+#endif
+
+#ifdef vnewSVpvf
+#  undef vnewSVpvf
+#endif
+#define vnewSVpvf(a,b) DPPP_(my_vnewSVpvf)(aTHX_ a,b)
+#define Perl_vnewSVpvf DPPP_(my_vnewSVpvf)
+
+#if defined(NEED_vnewSVpvf) || defined(NEED_vnewSVpvf_GLOBAL)
+
+SV *
+DPPP_(my_vnewSVpvf)(pTHX_ const char *pat, va_list *args)
+{
+  register SV *sv = newSV(0);
+  sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+  return sv;
+}
+
+#endif
+#endif
+
+/* sv_vcatpvf depends on sv_vcatpvfn */
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0))) && !defined(sv_vcatpvf)
+#  define sv_vcatpvf(sv, pat, args)  sv_vcatpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*))
+#endif
+
+/* sv_vsetpvf depends on sv_vsetpvfn */
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0))) && !defined(sv_vsetpvf)
+#  define sv_vsetpvf(sv, pat, args)  sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*))
+#endif
+
+/* sv_catpvf_mg depends on sv_vcatpvfn, sv_catpvf_mg_nocontext */
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0))) && !defined(sv_catpvf_mg)
+#if defined(NEED_sv_catpvf_mg)
+static void DPPP_(my_sv_catpvf_mg)(pTHX_ SV * sv, const char * pat, ...);
+static
+#else
+extern void DPPP_(my_sv_catpvf_mg)(pTHX_ SV * sv, const char * pat, ...);
+#endif
+
+#define Perl_sv_catpvf_mg DPPP_(my_sv_catpvf_mg)
+
+#if defined(NEED_sv_catpvf_mg) || defined(NEED_sv_catpvf_mg_GLOBAL)
+
+void
+DPPP_(my_sv_catpvf_mg)(pTHX_ SV *sv, const char *pat, ...)
+{
+  va_list args;
+  va_start(args, pat);
+  sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+  SvSETMAGIC(sv);
+  va_end(args);
+}
+
+#endif
+#endif
+
+/* sv_catpvf_mg_nocontext depends on sv_vcatpvfn */
+#ifdef PERL_IMPLICIT_CONTEXT
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0))) && !defined(sv_catpvf_mg_nocontext)
+#if defined(NEED_sv_catpvf_mg_nocontext)
+static void DPPP_(my_sv_catpvf_mg_nocontext)(SV * sv, const char * pat, ...);
+static
+#else
+extern void DPPP_(my_sv_catpvf_mg_nocontext)(SV * sv, const char * pat, ...);
+#endif
+
+#define sv_catpvf_mg_nocontext DPPP_(my_sv_catpvf_mg_nocontext)
+#define Perl_sv_catpvf_mg_nocontext DPPP_(my_sv_catpvf_mg_nocontext)
+
+#if defined(NEED_sv_catpvf_mg_nocontext) || defined(NEED_sv_catpvf_mg_nocontext_GLOBAL)
+
+void
+DPPP_(my_sv_catpvf_mg_nocontext)(SV *sv, const char *pat, ...)
+{
+  dTHX;
+  va_list args;
+  va_start(args, pat);
+  sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+  SvSETMAGIC(sv);
+  va_end(args);
+}
+
+#endif
+#endif
+#endif
+
+#ifndef sv_catpvf_mg
+#  ifdef PERL_IMPLICIT_CONTEXT
+#    define sv_catpvf_mg   Perl_sv_catpvf_mg_nocontext
+#  else
+#    define sv_catpvf_mg   Perl_sv_catpvf_mg
+#  endif
+#endif
+
+/* sv_vcatpvf_mg depends on sv_vcatpvfn */
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0))) && !defined(sv_vcatpvf_mg)
+#  define sv_vcatpvf_mg(sv, pat, args)                                     \
+   STMT_START {                                                            \
+     sv_vcatpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));  \
+     SvSETMAGIC(sv);                                                       \
+   } STMT_END
+#endif
+
+/* sv_setpvf_mg depends on sv_vsetpvfn, sv_setpvf_mg_nocontext */
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0))) && !defined(sv_setpvf_mg)
+#if defined(NEED_sv_setpvf_mg)
+static void DPPP_(my_sv_setpvf_mg)(pTHX_ SV * sv, const char * pat, ...);
+static
+#else
+extern void DPPP_(my_sv_setpvf_mg)(pTHX_ SV * sv, const char * pat, ...);
+#endif
+
+#define Perl_sv_setpvf_mg DPPP_(my_sv_setpvf_mg)
+
+#if defined(NEED_sv_setpvf_mg) || defined(NEED_sv_setpvf_mg_GLOBAL)
+
+void
+DPPP_(my_sv_setpvf_mg)(pTHX_ SV *sv, const char *pat, ...)
+{
+  va_list args;
+  va_start(args, pat);
+  sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+  SvSETMAGIC(sv);
+  va_end(args);
+}
+
+#endif
+#endif
+
+/* sv_setpvf_mg_nocontext depends on sv_vsetpvfn */
+#ifdef PERL_IMPLICIT_CONTEXT
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0))) && !defined(sv_setpvf_mg_nocontext)
+#if defined(NEED_sv_setpvf_mg_nocontext)
+static void DPPP_(my_sv_setpvf_mg_nocontext)(SV * sv, const char * pat, ...);
+static
+#else
+extern void DPPP_(my_sv_setpvf_mg_nocontext)(SV * sv, const char * pat, ...);
+#endif
+
+#define sv_setpvf_mg_nocontext DPPP_(my_sv_setpvf_mg_nocontext)
+#define Perl_sv_setpvf_mg_nocontext DPPP_(my_sv_setpvf_mg_nocontext)
+
+#if defined(NEED_sv_setpvf_mg_nocontext) || defined(NEED_sv_setpvf_mg_nocontext_GLOBAL)
+
+void
+DPPP_(my_sv_setpvf_mg_nocontext)(SV *sv, const char *pat, ...)
+{
+  dTHX;
+  va_list args;
+  va_start(args, pat);
+  sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+  SvSETMAGIC(sv);
+  va_end(args);
+}
+
+#endif
+#endif
+#endif
+
+#ifndef sv_setpvf_mg
+#  ifdef PERL_IMPLICIT_CONTEXT
+#    define sv_setpvf_mg   Perl_sv_setpvf_mg_nocontext
+#  else
+#    define sv_setpvf_mg   Perl_sv_setpvf_mg
+#  endif
+#endif
+
+/* sv_vsetpvf_mg depends on sv_vsetpvfn */
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0))) && !defined(sv_vsetpvf_mg)
+#  define sv_vsetpvf_mg(sv, pat, args)                                     \
+   STMT_START {                                                            \
+     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));  \
+     SvSETMAGIC(sv);                                                       \
+   } STMT_END
 #endif
 #ifndef SvGETMAGIC
 #  define SvGETMAGIC(x)                  STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_END
@@ -4842,21 +5083,21 @@ DPPP_(sv_2pvbyte)(pTHX_ register SV *sv, STRLEN *lp)
 
 #ifndef grok_numeric_radix
 #if defined(NEED_grok_numeric_radix)
-static bool DPPP_(grok_numeric_radix)(pTHX_ const char ** sp, const char * send);
+static bool DPPP_(my_grok_numeric_radix)(pTHX_ const char ** sp, const char * send);
 static
 #else
-extern bool DPPP_(grok_numeric_radix)(pTHX_ const char ** sp, const char * send);
+extern bool DPPP_(my_grok_numeric_radix)(pTHX_ const char ** sp, const char * send);
 #endif
 
 #ifdef grok_numeric_radix
 #  undef grok_numeric_radix
 #endif
-#define grok_numeric_radix(a,b) DPPP_(grok_numeric_radix)(aTHX_ a,b)
-#define Perl_grok_numeric_radix DPPP_(grok_numeric_radix)
+#define grok_numeric_radix(a,b) DPPP_(my_grok_numeric_radix)(aTHX_ a,b)
+#define Perl_grok_numeric_radix DPPP_(my_grok_numeric_radix)
 
 #if defined(NEED_grok_numeric_radix) || defined(NEED_grok_numeric_radix_GLOBAL)
 bool
-DPPP_(grok_numeric_radix)(pTHX_ const char **sp, const char *send)
+DPPP_(my_grok_numeric_radix)(pTHX_ const char **sp, const char *send)
 {
 #ifdef USE_LOCALE_NUMERIC
 #ifdef PL_numeric_radix_sv
@@ -4900,21 +5141,21 @@ DPPP_(grok_numeric_radix)(pTHX_ const char **sp, const char *send)
 
 #ifndef grok_number
 #if defined(NEED_grok_number)
-static int DPPP_(grok_number)(pTHX_ const char * pv, STRLEN len, UV * valuep);
+static int DPPP_(my_grok_number)(pTHX_ const char * pv, STRLEN len, UV * valuep);
 static
 #else
-extern int DPPP_(grok_number)(pTHX_ const char * pv, STRLEN len, UV * valuep);
+extern int DPPP_(my_grok_number)(pTHX_ const char * pv, STRLEN len, UV * valuep);
 #endif
 
 #ifdef grok_number
 #  undef grok_number
 #endif
-#define grok_number(a,b,c) DPPP_(grok_number)(aTHX_ a,b,c)
-#define Perl_grok_number DPPP_(grok_number)
+#define grok_number(a,b,c) DPPP_(my_grok_number)(aTHX_ a,b,c)
+#define Perl_grok_number DPPP_(my_grok_number)
 
 #if defined(NEED_grok_number) || defined(NEED_grok_number_GLOBAL)
 int
-DPPP_(grok_number)(pTHX_ const char *pv, STRLEN len, UV *valuep)
+DPPP_(my_grok_number)(pTHX_ const char *pv, STRLEN len, UV *valuep)
 {
   const char *s = pv;
   const char *send = pv + len;
@@ -5114,21 +5355,21 @@ DPPP_(grok_number)(pTHX_ const char *pv, STRLEN len, UV *valuep)
 
 #ifndef grok_bin
 #if defined(NEED_grok_bin)
-static UV DPPP_(grok_bin)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result);
+static UV DPPP_(my_grok_bin)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result);
 static
 #else
-extern UV DPPP_(grok_bin)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result);
+extern UV DPPP_(my_grok_bin)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result);
 #endif
 
 #ifdef grok_bin
 #  undef grok_bin
 #endif
-#define grok_bin(a,b,c,d) DPPP_(grok_bin)(aTHX_ a,b,c,d)
-#define Perl_grok_bin DPPP_(grok_bin)
+#define grok_bin(a,b,c,d) DPPP_(my_grok_bin)(aTHX_ a,b,c,d)
+#define Perl_grok_bin DPPP_(my_grok_bin)
 
 #if defined(NEED_grok_bin) || defined(NEED_grok_bin_GLOBAL)
 UV
-DPPP_(grok_bin)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
+DPPP_(my_grok_bin)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     const char *s = start;
     STRLEN len = *len_p;
@@ -5216,21 +5457,21 @@ DPPP_(grok_bin)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
 
 #ifndef grok_hex
 #if defined(NEED_grok_hex)
-static UV DPPP_(grok_hex)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result);
+static UV DPPP_(my_grok_hex)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result);
 static
 #else
-extern UV DPPP_(grok_hex)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result);
+extern UV DPPP_(my_grok_hex)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result);
 #endif
 
 #ifdef grok_hex
 #  undef grok_hex
 #endif
-#define grok_hex(a,b,c,d) DPPP_(grok_hex)(aTHX_ a,b,c,d)
-#define Perl_grok_hex DPPP_(grok_hex)
+#define grok_hex(a,b,c,d) DPPP_(my_grok_hex)(aTHX_ a,b,c,d)
+#define Perl_grok_hex DPPP_(my_grok_hex)
 
 #if defined(NEED_grok_hex) || defined(NEED_grok_hex_GLOBAL)
 UV
-DPPP_(grok_hex)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
+DPPP_(my_grok_hex)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     const char *s = start;
     STRLEN len = *len_p;
@@ -5318,21 +5559,21 @@ DPPP_(grok_hex)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
 
 #ifndef grok_oct
 #if defined(NEED_grok_oct)
-static UV DPPP_(grok_oct)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result);
+static UV DPPP_(my_grok_oct)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result);
 static
 #else
-extern UV DPPP_(grok_oct)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result);
+extern UV DPPP_(my_grok_oct)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result);
 #endif
 
 #ifdef grok_oct
 #  undef grok_oct
 #endif
-#define grok_oct(a,b,c,d) DPPP_(grok_oct)(aTHX_ a,b,c,d)
-#define Perl_grok_oct DPPP_(grok_oct)
+#define grok_oct(a,b,c,d) DPPP_(my_grok_oct)(aTHX_ a,b,c,d)
+#define Perl_grok_oct DPPP_(my_grok_oct)
 
 #if defined(NEED_grok_oct) || defined(NEED_grok_oct_GLOBAL)
 UV
-DPPP_(grok_oct)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
+DPPP_(my_grok_oct)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     const char *s = start;
     STRLEN len = *len_p;

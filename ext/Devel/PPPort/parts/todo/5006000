@@ -140,10 +140,6 @@ sv_rvweaken                    # E
 sv_utf8_decode                 # U
 sv_utf8_downgrade              # U
 sv_utf8_encode                 # U
-sv_vcatpvf                     # U
-sv_vcatpvf_mg                  # U
-sv_vsetpvf                     # U
-sv_vsetpvf_mg                  # U
 swash_init                     # E
 tmps_grow                      # U
 to_uni_lower_lc                # U
@@ -155,7 +151,6 @@ vcroak                         # U
 vform                          # E
 vload_module                   # U
 vmess                          # E
-vnewSVpvf                      # E
 vwarn                          # U
 vwarner                        # U
 warner                         # U

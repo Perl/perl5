@@ -1,3 +1,34 @@
+3.00_01 - 2004-08-17
+
+    * fixed problems with $^X in t/ppphtest.t when building in
+      the core on OpenBSD
+    * fixed a "duplicate dependencies" bug that could lead to
+      global NEED_'s where static NEED_'s are sufficient
+    * added support for the following API:
+        PL_DBsingle
+        PL_DBsub
+        PL_debstash
+        PL_diehook
+        PL_errgv
+        PL_no_modify
+        PL_perl_destruct_level
+        PL_ppaddr
+        PL_stack_sp
+        PL_sv_arenaroot
+        PL_tainted
+        PL_tainting
+        PUSHu
+        sv_catpvf_mg
+        sv_catpvf_mg_nocontext
+        sv_setpvf_mg
+        sv_setpvf_mg_nocontext
+        sv_vcatpvf
+        sv_vcatpvf_mg
+        sv_vsetpvf
+        sv_vsetpvf_mg
+        vnewSVpvf
+        XPUSHu
+
 3.00 - 2004-08-16
 
     * added support for dAX and dITEMS, which got lost while

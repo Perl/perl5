@@ -24,10 +24,10 @@ BEGIN {
   eval "use Test";
   if ($@) {
     require 'testutil.pl';
-    print "1..131\n";
+    print "1..134\n";
   }
   else {
-    plan(tests => 131);
+    plan(tests => 134);
   }
 }
 
@@ -36,16 +36,21 @@ use strict;
 $^W = 1;
 
 use File::Path qw/rmtree mkpath/;
+use Config;
 
 my $tmp = 'ppptmp';
+my $inc = '';
+my $perl = find_perl();
 
 rmtree($tmp) if -d $tmp;
 mkpath($tmp) or die "mkpath $tmp: $!\n";
 chdir($tmp) or die "chdir $tmp: $!\n";
 
-my $inc = '';
 if ($ENV{'PERL_CORE'}) {
   $inc = '-I../../lib' if -d '../../lib';
+}
+if ($perl =~ m!^\./!) {
+  $perl = ".$perl";
 }
 
 END {
@@ -58,8 +63,8 @@ ok(&Devel::PPPort::WriteFile("ppport.h"));
 sub ppport
 {
   my @args = @_;
-  print "# *** running $^X $inc ppport.h @args ***\n";
-  my $out = join '', `$^X $inc ppport.h @args`;
+  print "# *** running $perl $inc ppport.h @args ***\n";
+  my $out = join '', `$perl $inc ppport.h @args`;
   my $copy = $out;
   $copy =~ s/^/# | /mg;
   print "$copy\n";
@@ -138,6 +143,33 @@ for $t (@tests) {
   for (keys %{$t->{files}}) {
     unlink $_ or die "unlink('$_'): $!\n";
   }
+}
+
+sub find_perl
+{
+  my $perl = $^X;
+  
+  return $perl if $^O eq 'VMS';
+  
+  my $exe = $Config{'_exe'} || '';
+  
+  if ($perl =~ /^perl\Q$exe\E$/i) {
+    $perl = "perl$exe";
+    eval "require File::Spec";
+    if ($@) {
+      $perl = "./$perl";
+    } else {
+      $perl = File::Spec->catfile(File::Spec->curdir(), $perl);
+    }
+  }
+  
+  if ($perl !~ /\Q$exe\E$/i) {
+    $perl .= $exe;
+  }
+  
+  warn "find_perl: cannot find $perl from $^X" unless -f $perl;
+  
+  return $perl;
 }
 
 __DATA__
@@ -535,4 +567,25 @@ ok($o !~ /Uses SvPVutf8_force/m);
 ---------------------------- FooBar.xs ----------------------------------------
 
 SvPVutf8_force();
+
+===============================================================================
+
+my $o = ppport(qw(--nochanges));
+ok($o !~ /potentially required change/);
+ok(matches($o, '^Looks good', 'mi'), 2);
+
+---------------------------- FooBar.xs ----------------------------------------
+
+#define NEED_grok_numeric_radix
+#define NEED_grok_number
+#include "ppport.h"
+
+GROK_NUMERIC_RADIX();
+grok_number();
+
+---------------------------- foo.c --------------------------------------------
+
+#include "ppport.h"
+
+call_pv();
 

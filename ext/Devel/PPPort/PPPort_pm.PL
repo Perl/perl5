@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 28 $
+#  $Revision: 30 $
 #  $Author: mhx $
-#  $Date: 2004/08/13 12:49:22 +0200 $
+#  $Date: 2004/08/17 20:01:49 +0200 $
 #
 ################################################################################
 #
@@ -69,8 +69,14 @@ for (keys %raw_todo) {
 # check consistency
 for (@api) {
   if (exists $raw_todo{$_}) {
-    warn "$INCLUDE/$provides{$_} provides $_, which is still marked "
-         . "todo for " . format_version($raw_todo{$_}) . "\n";
+    if ($raw_base{$_} eq $raw_todo{$_}) {
+      warn "$INCLUDE/$provides{$_} provides $_, which is still marked "
+           . "todo for " . format_version($raw_todo{$_}) . "\n";
+    }
+    else {
+      check(2, "$_ was ported back to " . format_version($raw_todo{$_}) .
+               " (baseline revision: " . format_version($raw_base{$_}) . ").");
+    }
   }
 }
 
@@ -148,7 +154,7 @@ sub include
 
   for (keys %{$data->{prototypes}}) {
     $prototypes{$_} = $data->{prototypes}{$_};
-    $data->{implementation} =~ s/^$_(?=\s*\()/$DPPP($_)/g;
+    $data->{implementation} =~ s/^$_(?=\s*\()/$DPPP(my_$_)/mg;
   }
 
   my $out = $data->{implementation};
@@ -213,15 +219,6 @@ sub expand_pp_expr
 {
   my $expr = shift;
 
-  if ($expr =~ /^\s*version\s*(<|>|==|!=|>=|<=)\s*([\d._]+)\s*$/i) {
-    my($op, $ver) = ($1, $2);
-    my($r, $v, $s) = parse_version($ver);
-    $r == 5 or die "only Perl revision 5 is supported\n";
-    $op eq '=='     and return "((PERL_VERSION == $v) && (PERL_SUBVERSION == $s))";
-    $op eq '!='     and return "((PERL_VERSION != $v) || (PERL_SUBVERSION != $s))";
-    $op =~ /([<>])/ and return "((PERL_VERSION $1 $v) || ((PERL_VERSION == $v) && (PERL_SUBVERSION $op $s)))";
-  }
-
   if ($expr =~ /^\s*need\s*(\w+)\s*$/i) {
     my $func = $1;
     my $e = $embed{$func} or die "unknown API function '$func' in NEED\n";
@@ -238,7 +235,7 @@ sub expand_pp_expr
 
     $explicit{$func} = 1;
 
-    $proto =~ s/\b$func(?=\s*\()/$DPPP($func)/;
+    $proto =~ s/\b$func(?=\s*\()/$DPPP(my_$func)/;
     my $embed = make_embed($e);
 
     return "defined(NEED_$func)\n"
@@ -250,9 +247,8 @@ sub expand_pp_expr
          . "\n"
          . "$embed\n"
          . "\n"
-         . "#if defined(NEED_$func) || defined(NEED_${func}_GLOBAL)"
+         . "#if defined(NEED_$func) || defined(NEED_${func}_GLOBAL)";
   }
-
 
   die "cannot expand preprocessor expression '$expr'\n";
 }
@@ -265,11 +261,11 @@ sub make_embed
 
   if ($f->{flags}{n}) {
     if ($f->{flags}{p}) {
-      return "#define $n $DPPP($n)\n" .
-             "#define Perl_$n $DPPP($n)";
+      return "#define $n $DPPP(my_$n)\n" .
+             "#define Perl_$n $DPPP(my_$n)";
     }
     else {
-      return "#define $n $DPPP($n)";
+      return "#define $n $DPPP(my_$n)";
     }
   }
   else {
@@ -279,11 +275,16 @@ sub make_embed
 #endif
 UNDEF
     if ($f->{flags}{p}) {
-      return $undef . "#define $n($a) $DPPP($n)(aTHX_ $a)\n" .
-                      "#define Perl_$n $DPPP($n)";
+      if ($f->{flags}{f}) {
+        return "#define Perl_$n $DPPP(my_$n)";
+      }
+      else {
+        return $undef . "#define $n($a) $DPPP(my_$n)(aTHX_ $a)\n" .
+                        "#define Perl_$n $DPPP(my_$n)";
+      }
     }
     else {
-      return $undef . "#define $n($a) $DPPP($n)(aTHX_ $a)";
+      return $undef . "#define $n($a) $DPPP(my_$n)(aTHX_ $a)";
     }
   }
 }
@@ -308,9 +309,9 @@ __DATA__
 #
 ################################################################################
 #
-#  $Revision: 28 $
+#  $Revision: 30 $
 #  $Author: mhx $
-#  $Date: 2004/08/13 12:49:22 +0200 $
+#  $Date: 2004/08/17 20:01:49 +0200 $
 #
 ################################################################################
 #
@@ -472,7 +473,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.00 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.00_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -565,6 +566,8 @@ __DATA__
 %include format
 
 %include SvPV
+
+%include sv_xpvf
 
 %include magic
 

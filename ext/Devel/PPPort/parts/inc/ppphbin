@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 19 $
+##  $Revision: 21 $
 ##  $Author: mhx $
-##  $Date: 2004/08/16 10:58:27 +0200 $
+##  $Date: 2004/08/17 20:00:22 +0200 $
 ##
 ################################################################################
 ##
@@ -213,19 +213,16 @@ for $filename (@files) {
       if (exists $API{$func}{provided}) {
         if (!exists $API{$func}{base} || $API{$func}{base} > $opt{'compat-version'}) {
           $file{uses}{$func}++;
-          push @{$global{uses}{$func}}, $filename;
           my @deps = rec_depend($func);
           if (@deps) {
             $file{uses_deps}{$func} = \@deps;
             for (@deps) {
               $file{uses}{$_} = 0 unless exists $file{uses}{$_};
-              push @{$global{uses}{$_}}, $filename;
             }
           }
           for ($func, @deps) {
             if (exists $need{$_}) {
               $file{needs}{$_} = 'static';
-              push @{$global{needs}{$_}}, $filename;
             }
           }
         }
@@ -233,7 +230,6 @@ for $filename (@files) {
       if (exists $API{$func}{todo} && $API{$func}{todo} > $opt{'compat-version'}) {
         if ($c =~ /\b$func\b/) {
           $file{uses_todo}{$func}++;
-          push @{$global{uses_todo}{$func}}, $filename;
         }
       }
     }
@@ -242,10 +238,15 @@ for $filename (@files) {
   while ($c =~ /^$HS*#$HS*define$HS+(NEED_(\w+?)(_GLOBAL)?)\b/mg) {
     if (exists $need{$2}) {
       $file{defined $3 ? 'needed_global' : 'needed_static'}{$2}++;
-      push @{$global{defined $3 ? 'needed_global' : 'needed_static'}{$2}}, $filename;
     }
     else {
       warning("Possibly wrong #define $1 in $filename");
+    }
+  }
+
+  for (qw(uses needs uses_todo needed_global needed_static)) {
+    for $func (keys %{$file{$_}}) {
+      push @{$global{$_}{$func}}, $filename;
     }
   }
 
@@ -548,8 +549,9 @@ sub can_use
 sub rec_depend
 {
   my $func = shift;
+  my %seen;
   return () unless exists $depends{$func};
-  map { ($_, rec_depend($_)) } @{$depends{$func}};
+  grep !$seen{$_}++, map { ($_, rec_depend($_)) } @{$depends{$func}};
 }
 
 sub parse_version
