@@ -98,7 +98,9 @@ sub get_files {
     } elsif ($Config{archname} eq 'epoc') {
 	# Watch out for cross compiling for EPOC (usually done on linux)
 	$file{'/usr/local/epoc/include/libc/sys/errno.h'} = 1;
-    } elsif ($^O eq 'linux') {
+    } elsif ($^O eq 'linux' &&
+	     $Config{gccversion} ne '' # might be using, say, Intel's icc
+	     ) {
 	# Some Linuxes have weird errno.hs which generate
 	# no #file or #line directives
 	$file{'/usr/include/errno.h'} = 1;
