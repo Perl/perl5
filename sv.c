@@ -2447,22 +2447,26 @@ bool
 Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 {
     if (SvPOK(sv) && SvUTF8(sv)) {
-        char *c = SvPVX(sv);
-	STRLEN len = SvCUR(sv) + 1;	/* include trailing NUL */
-        if (!utf8_to_bytes((U8*)c, &len)) {
-	    if (fail_ok)
-		return FALSE;
-	    else {
-		if (PL_op)
-		    Perl_croak(aTHX_ "Wide character in %s",
-			       PL_op_desc[PL_op->op_type]);
-		else
-		    Perl_croak(aTHX_ "Wide character");
+        if (SvCUR(sv)) {
+	    char *c = SvPVX(sv);
+	    STRLEN len = SvCUR(sv);
+
+	    if (!utf8_to_bytes((U8*)c, &len)) {
+	        if (fail_ok)
+		    return FALSE;
+		else {
+		    if (PL_op)
+		        Perl_croak(aTHX_ "Wide character in %s",
+				   PL_op_desc[PL_op->op_type]);
+		    else
+		        Perl_croak(aTHX_ "Wide character");
+		}
 	    }
+	    SvCUR(sv) = len;
 	}
-	SvCUR(sv) = len - 1;
 	SvUTF8_off(sv);
     }
+
     return TRUE;
 }
 
