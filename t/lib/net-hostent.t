@@ -1,8 +1,14 @@
 #!./perl -w
 
 BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
+    chdir 't' if -d 't';
+    @INC = '../lib';
+    require Config; import Config;
+    if ($Config{'extensions'} !~ /\bSocket\b/ && 
+        !(($^O eq 'VMS') && $Config{d_socket})) {
+	print "1..0 # Test uses Socket, Socket not built\n";
+	exit 0;
+    }
 }
 
 BEGIN { $| = 1; print "1..5\n"; }
@@ -18,13 +24,15 @@ print "ok 1\n";
 use Socket;
 
 my $h = gethost('localhost');
+print +(defined $h ? '' : 'not ') . "ok 2\n";
 my $i = gethostbyaddr(inet_aton("127.0.0.1"));
+print +(!defined $i ? 'not ' : '') . "ok 3\n";
 
 print "not " if inet_ntoa($h->addr) ne "127.0.0.1";
-print "ok 2\n";
+print "ok 4\n";
 
 print "not " if inet_ntoa($i->addr) ne "127.0.0.1";
-print "ok 3\n";
+print "ok 5\n";
 
 # need to skip the name comparisons on Win32 because windows will
 # return the name of the machine instead of "localhost" when resolving
@@ -34,11 +42,11 @@ print "ok 3\n";
 # OS/390 returns localhost.YADDA.YADDA
 
 if ($^O eq 'MSWin32') {
-  print "ok $_ # skipped on win32\n" for (4,5);
+  print "ok $_ # skipped on win32\n" for (6,7);
 } else {
   print "not " unless $h->name =~ /^localhost(?:\..+)?$/i;
-  print "ok 4 # ",$h->name,"\n";
+  print "ok 6 # ",$h->name,"\n";
 
   print "not " unless $i->name =~ /^localhost(?:\..+)?$/i;
-  print "ok 5 # ",$i->name,"\n";
+  print "ok 7 # ",$i->name,"\n";
 }
