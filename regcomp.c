@@ -925,8 +925,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		    MAGIC *mg = SvUTF8(sv) && SvMAGICAL(sv) ?
 			mg_find(sv, PERL_MAGIC_utf8) : NULL;
 		    if (mg && mg->mg_len >= 0)
-			mg->mg_len += utf8_length(STRING(scan),
-						  STRING(scan)+STR_LEN(scan));
+			mg->mg_len += utf8_length((U8*)STRING(scan),
+						  (U8*)STRING(scan)+STR_LEN(scan));
 		}
 		if (UTF)
 		    SvUTF8_on(data->last_found);
