@@ -2483,6 +2483,29 @@ Using a regular C<foreach> loop for this purpose would be clearer in
 most cases.  See also L</grep> for an array composed of those items of
 the original list for which the BLOCK or EXPR evaluates to true.
 
+C<{> starts both hash references and blocks, so C<map { ...> could be either
+the start of map BLOCK LIST or map EXPR, LIST. Because perl doesn't look
+ahead for the closing C<}> it has to take a guess at which its dealing with
+based what it finds just after the C<{>. Usually it gets it right, but if it
+doesn't it won't realize something is wrong until it gets to the C<}> and
+encounters the missing (or unexpected) comma. The syntax error will be
+reported close to the C<}> but you'll need to change something near the C<{>
+such as using a unary C<+> to give perl some help:
+
+    %hash = map {  "\L$_", 1  } @array  # perl guesses EXPR.  wrong
+    %hash = map { +"\L$_", 1  } @array  # perl guesses BLOCK. right
+    %hash = map { ("\L$_", 1) } @array  # this also works
+    %hash = map {  lc($_), 1  } @array  # as does this.
+    %hash = map +( lc($_), 1 ), @array  # this is EXPR and works!
+      
+    %hash = map  ( lc($_), 1 ), @array  # evaluates to (1, @array)
+
+or to force an anon hash constructor use C<+{>
+
+   @hashes = map +{ lc($_), 1 }, @array # EXPR, so needs , at end
+
+and you get list of anonymous hashes each with only 1 entry.
+
 =item mkdir FILENAME,MASK
 
 =item mkdir FILENAME
