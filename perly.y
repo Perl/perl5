@@ -404,8 +404,6 @@ subbody	:	block	{ $$ = $1; }
 
 package :	PACKAGE WORD ';'
 			{ package($2); }
-	|	PACKAGE ';'
-			{ package(Nullop); }
 	;
 
 use	:	USE startsub

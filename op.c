@@ -3353,24 +3353,17 @@ Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
 void
 Perl_package(pTHX_ OP *o)
 {
-    SV *sv;
+    char *name;
+    STRLEN len;
 
     save_hptr(&PL_curstash);
     save_item(PL_curstname);
-    if (o) {
-	STRLEN len;
-	char *name;
-	sv = cSVOPo->op_sv;
-	name = SvPV(sv, len);
-	PL_curstash = gv_stashpvn(name,len,TRUE);
-	sv_setpvn(PL_curstname, name, len);
-	op_free(o);
-    }
-    else {
-	deprecate("\"package\" with no arguments");
-	sv_setpv(PL_curstname,"<none>");
-	PL_curstash = Nullhv;
-    }
+
+    name = SvPV(cSVOPo->op_sv, len);
+    PL_curstash = gv_stashpvn(name, len, TRUE);
+    sv_setpvn(PL_curstname, name, len);
+    op_free(o);
+
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_copline = NOLINE;
     PL_expect = XSTATE;

@@ -3045,15 +3045,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		default:	s = "UNKNOWN";			break;
 		}
 		tsv = NEWSV(0,0);
-		if (SvOBJECT(sv)) {
-                    HV *svs = SvSTASH(sv);
-		    Perl_sv_setpvf(
-                        aTHX_ tsv, "%s=%s",
-                        /* [20011101.072] This bandaid for C<package;>
-                           should eventually be removed. AMS 20011103 */
-                        (svs ? HvNAME(svs) : "<none>"), s
-                    );
-                }
+		if (SvOBJECT(sv))
+		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
 		else
 		    sv_setpv(tsv, s);
 		Perl_sv_catpvf(aTHX_ tsv, "(0x%"UVxf")", PTR2UV(sv));
@@ -7244,10 +7237,7 @@ char *
 Perl_sv_reftype(pTHX_ SV *sv, int ob)
 {
     if (ob && SvOBJECT(sv)) {
-        HV *svs = SvSTASH(sv);
-        /* [20011101.072] This bandaid for C<package;> should eventually
-           be removed. AMS 20011103 */
-        return (svs ? HvNAME(svs) : "<none>");
+	return HvNAME(SvSTASH(sv));
     }
     else {
 	switch (SvTYPE(sv)) {
@@ -10325,7 +10315,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* symbol tables */
     PL_defstash		= hv_dup_inc(proto_perl->Tdefstash, param);
     PL_curstash		= hv_dup(proto_perl->Tcurstash, param);
-    PL_nullstash       = hv_dup(proto_perl->Inullstash, param);
     PL_debstash		= hv_dup(proto_perl->Idebstash, param);
     PL_globalstash	= hv_dup(proto_perl->Iglobalstash, param);
     PL_curstname	= sv_dup_inc(proto_perl->Icurstname, param);

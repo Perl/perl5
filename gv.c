@@ -766,10 +766,8 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		  : sv_type == SVt_PVAV ? "@"
 		  : sv_type == SVt_PVHV ? "%"
 		  : ""), name));
-	    stash = PL_nullstash;
 	}
-	else
-	    return Nullgv;
+	return Nullgv;
     }
 
     if (!SvREFCNT(stash))	/* symbol table under destruction */

@@ -456,8 +456,6 @@ PERLVAR(Ifdpid_mutex,	perl_mutex)	/* mutex for fdpid array */
 PERLVAR(Isv_lock_mutex,	perl_mutex)	/* mutex for SvLOCK macro */
 #endif
 
-PERLVAR(Inullstash,	HV *)		/* illegal symbols end up here */
-
 PERLVAR(Ixnv_arenaroot,	XPV*)		/* list of allocated xnv areas */
 PERLVAR(Ixrv_arenaroot,	XPV*)		/* list of allocated xrv areas */
 PERLVAR(Ixpv_arenaroot,	XPV*)		/* list of allocated xpv areas */

@@ -106,9 +106,6 @@
         fred() ; sub fred ($$) {}
 
 
-     Use of "package" with no arguments is deprecated
-	package;
-
     Package `%s' not found (did you use the incorrect case?)
 
     Use of /g modifier is meaningless in split
@@ -965,16 +962,6 @@ unshift(@x);
 EXPECT
 Useless use of push with no values at - line 4.
 Useless use of unshift with no values at - line 5.
-########
-# op.c
-use warnings 'deprecated' ;
-package;
-no warnings 'deprecated' ;
-package;
-EXPECT
-Use of "package" with no arguments is deprecated at - line 3.
-Global symbol "BEGIN" requires explicit package name at - line 4.
-BEGIN not safe after errors--compilation aborted at - line 4.
 ########
 # op.c
 # 20020401 mjd@plover.com at suggestion of jfriedl@yahoo.com
