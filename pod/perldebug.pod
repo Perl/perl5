@@ -955,7 +955,7 @@ You cannot get stack frame information or in any fashion debug functions
 that were not compiled by Perl, such as those from C or C++ extensions.
 
 If you alter your @_ arguments in a subroutine (such as with C<shift>
-or C<pop>, the stack backtrace will not show the original values.
+or C<pop>), the stack backtrace will not show the original values.
 
 The debugger does not currently work in conjunction with the B<-W>
 command-line switch, because it itself is not free of warnings.
