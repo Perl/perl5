@@ -1300,9 +1300,7 @@ PerlSockSetservent(struct IPerlSock* piPerl, int stayopen)
 int
 PerlSockSetsockopt(struct IPerlSock* piPerl, SOCKET s, int level, int optname, const char* optval, int optlen)
 {
-	dTHX;
-    Perl_croak(aTHX_ "setsockopt not implemented!\n");
-	return 0;
+	return nw_setsockopt(s, level, optname, optval, optlen);
 }
 
 int

@@ -1052,6 +1052,7 @@ foreach my $symbol (qw(
 			nw_setnetent
 			nw_setprotoent
 			nw_setservent
+			nw_setsockopt
 			nw_shutdown
 			nw_crypt
 			nw_execvp
