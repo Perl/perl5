@@ -337,13 +337,13 @@ of PerlIO on your architecture name.
 =item *
 
 If your platform supports fork(), you can use the list form of C<open>
-for pipes:
+for pipes.  For example:
 
     open KID_PS, "-|", "ps", "aux" or die $!;
 
 forks the ps(1) command (without spawning a shell, as there are more
 than three arguments to open()), and reads its standard output via the
-C<KID_PS> filehandle.
+C<KID_PS> filehandle.  See L<perlipc>.
 
 =item *
 
