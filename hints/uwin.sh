@@ -17,7 +17,7 @@
 #b #
 #b # for information about U/WIN see www.gtlinc.com
 #b #
-#b
+#b 
 #b #ccflags=-D_BSDCOMPAT
 #b # confusion in Configure over preprocessor
 #b cppstdin=`pwd`/cppstdin
@@ -48,12 +48,12 @@
 
 #dgk gcc on uwin also predefined _UWIN as does the borland and digital
 #dgk mars compiler.
-#dgk
+#dgk 
 #dgk Only ncc does not define _UWIN and this is intentional.  ncc is used
 #dgk to build binaries that do not require the uwin runtime.
 #dgk This could be used for building a native win32 perl using unix
 #dgk makefiles.  However, in this case you don't wan't _UWIN defined.
-#dgk
+#dgk 
 #dgk I have used _UWIN everywhere else in any uwin specific changes.
 #dgk and _WIN32 on windows specific changes, and _MSVC on any compiler
 #dgk Visual C specific changes.  We also define _WINIX for any unix
@@ -69,10 +69,10 @@ ccflags="$ccflags -D__UWIN__"
 #dgk Windows splits shared libraries into two parts; the part used
 #dgk for linking and the part that is used for running.
 #dgk Given a library foo, then the part you link with is named
-#dgk  foo.lib
+#dgk	foo.lib
 #dgk and is in the lib directory.  The part that you run with
 #dgk is named
-#dgk  foo.dll or foo#.dll
+#dgk	foo.dll or foo#.dll
 #dgk and is in the bin directory.  This way when you set you PATH
 #dgk variable, it automatically does the library search.
 #dgk
@@ -97,7 +97,8 @@ cpprun=`pwd`/cppstdin
 
 # lest it default to .exe, and then there's no perl in the test directory,
 # t, just a perl.exe, and make test promptly dies.  _exe gets set to .exe
-# by Configure (on 5/23/2003) if exe_ext is merely null, so clean it out, too.! exe_ext=''
+# by Configure (on 5/23/2003) if exe_ext is merely null, so clean it out, too.
+exe_ext=''
 _exe=''
 
 # work around case-insensitive file names
