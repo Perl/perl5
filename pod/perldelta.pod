@@ -535,7 +535,7 @@ See L<perldata/"Scalar value constructors"> for additional information.
 
 =head2 Weak references
 
-    WARNING: This is an experimental feature.
+    WARNING: This is an experimental feature.  Details are subject to change.  
 
 In previous versions of Perl, you couldn't cache objects so as
 to allow them to be deleted if the last reference from outside 
@@ -2624,6 +2624,63 @@ because at least two widely-used modules depend on the old meaning of
 "$$0" in a string.  So Perl 5.004 still interprets "$$<digit>" in the
 old (broken) way inside strings; but it generates this message as a
 warning.  And in Perl 5.005, this special treatment will cease.
+
+=back
+
+=head1 Known Problems
+
+=head2 Thread tests failing
+
+The subtests 19 and 20 of the lib/thread test are known to fail in
+many platforms.
+
+=head2 EBCDIC platforms not supported
+
+In earlier releases of Perl the EBCDIC environments like OS390 (also
+known as Open Edition MVS) and VM-ESA were supported.  Due to the
+changes required by the UTF-8 (Unicode) support in Perl 5.6 the EBCDIC
+platforms are not supported in Perl 5.6.0.
+
+=head2 UNICOS/mk CC failures during Configure run
+
+In UNICOS/mk the following errors may appear during the Configure run:
+
+	Guessing which symbols your C compiler and preprocessor define...
+	CC-20 cc: ERROR File = try.c, Line = 3
+	...
+	  bad switch yylook 79bad switch yylook 79bad switch yylook 79bad switch yylook 79#ifdef A29K
+	...
+	4 errors detected in the compilation of "try.c".
+
+The culprit is the broken awk of UNICOS/mk.  The effect is fortunately
+rather mild: Perl itself is not adversely affected by the error, only
+the h2ph utility coming with Perl, and that is rather rarely needed
+these days.
+
+=head2 Many features still experimental
+
+As discussed above, many features are still experimental, to a greater
+or lesser degree.  Interfaces and implementation are subject to
+change, in extreme cases even subject to removal in some future
+release of Perl.  These features include the following:
+
+=over 4
+
+=item Threads
+
+=item Unicode
+
+=item Lvalue subroutines
+
+=item Weak references
+
+=item File globbing now implemented internally
+
+=item The Compiler suite
+
+=item the DB module
+
+=item the regular expression constructs C<(?{ code })> and C<(??{ code })>
 
 =back
 
