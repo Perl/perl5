@@ -4704,7 +4704,7 @@ B<PerlIO_rewind(f)>, B<PerlIO_tmpfile()>, B<PerlIO_setlinebuf(f)>
 
 =item Co-existence with stdio
 
-B<PerlIO_importFILE(f,flags)>, B<PerlIO_exportFILE(f,flags)>,
+B<PerlIO_importFILE(f,mode)>, B<PerlIO_exportFILE(f,mode)>,
 B<PerlIO_releaseFILE(p,f)>, B<PerlIO_findFILE(f)>
 
 =item "Fast gets" Functions
@@ -5370,6 +5370,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item libwww-perl (LWP) fails base/date #51
 
 =item Mac OS X
+
+=item OS/2 Test Failures
 
 =item op/sprintf tests 91, 129, and 130
 
@@ -6990,6 +6992,8 @@ long, Process terminated by SIG%s
 
 =over 4
 
+=item NOTE
+
 =item SYNOPSIS
 
 =back
@@ -7041,6 +7045,8 @@ B<Unix emulation for AmigaOS: ixemul.library>, B<Version of Amiga OS>
 =item Installing the built Perl on AmigaOS
 
 =back
+
+=item PERL 5.8.0 BROKEN IN AMIGAOS
 
 =item AUTHORS
 
@@ -12980,7 +12986,7 @@ MYEXTLIB, NAME, NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE,
 PERL, PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK,
 PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW, PERM_RWX, PL_FILES, PM, PMLIBDIRS,
 PM_FILTER, POLLUTE, PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT, PREFIX,
-PREREQ_PM, PREREQ_FATAL, PREREQ_PRINT, PRINT_PREREQ, SITEPREFIX, SKIP,
+PREREQ_FATAL, PREREQ_PM, PREREQ_PRINT, PRINT_PREREQ, SITEPREFIX, SKIP,
 TYPEMAPS, VENDORPREFIX, VERBINST, VERSION, VERSION_FROM, XS, XSOPT,
 XSPROTOARG, XS_VERSION
 

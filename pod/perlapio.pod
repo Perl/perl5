@@ -56,7 +56,7 @@ perlapio - perl's IO abstraction interface.
     char   *PerlIO_get_base(PerlIO *f);
     int     PerlIO_get_bufsiz(PerlIO *f);
 
-    PerlIO *PerlIO_importFILE(FILE *stdio, int flags);
+    PerlIO *PerlIO_importFILE(FILE *stdio, const char *mode);
     FILE   *PerlIO_exportFILE(PerlIO *f, int flags);
     FILE   *PerlIO_findFILE(PerlIO *f);
     void    PerlIO_releaseFILE(PerlIO *f,FILE *stdio);
@@ -162,7 +162,7 @@ so it is (currently) legal to use C<printf(fmt,...)> in perl sources.
 
 These correspond to fread() and fwrite(). Note that arguments are
 different, there is only one "count" and order has "file"
-first. Returns a byte count if successful (which may be zero), returns
+first. Returns a byte count if successful (which may be zero or positive), returns
 negative value and sets C<errno> on error.  Depending on
 implementation C<errno> may be C<EINTR> if operation was interrupted
 by a signal.
@@ -220,9 +220,12 @@ This corresponds to clearerr(), i.e., clears 'error' and (usually)
 
 This corresponds to fflush().  Sends any buffered write data to the
 underlying file.  If called with C<NULL> this may flush all open
-streams (or core dump).  Calling on a handle open for read only, or on
-which last operation was a read of some kind may lead to undefined
-behaviour.
+streams (or core dump with some USE_STDIO implementattions).
+Calling on a handle open for read only, or on  which last operation was a read of some kind
+may lead to undefined behaviour on some USE_STDIO implementations.
+The USE_PERLIO (layers) implementation tries to behave better: it flushes all open streams
+when passed C<NULL>, and attempts to retain data on read streams either in the buffer
+or by seeking the handle to the current logical position.
 
 =item B<PerlIO_seek(f,offset,whence)>
 
@@ -303,14 +306,14 @@ changes in this area.
 
 =over 4
 
-=item B<PerlIO_importFILE(f,flags)>
+=item B<PerlIO_importFILE(f,mode)>
 
 Used to get a PerlIO * from a FILE *.
 
-The flags argument was meant to be used for read vs write vs
-read/write information. In hindsight it would have been better to make
-it a char *mode as in fopen/freopen. Flags are currently ignored, and
-code attempts to empirically determine the mode in which I<f> is open.
+The mode argument should be a string as would be passed to fopen/PerlIO_open.
+If it is NULL then - for legacy support - the code will (depending upon
+the platform and the implementation) either attempt to empirically determine the mode in
+which I<f> is open, or use "r+" to indicate a read/write stream.
 
 Once called the FILE * should I<ONLY> be closed by calling
 C<PerlIO_close()> on the returned PerlIO *.
@@ -318,14 +321,13 @@ C<PerlIO_close()> on the returned PerlIO *.
 The PerlIO is set to textmode. Use PerlIO_binmode if this is
 not the desired mode.
 
-=item B<PerlIO_exportFILE(f,flags)>
+=item B<PerlIO_exportFILE(f,mode)>
 
 Given a PerlIO * create a 'native' FILE * suitable for passing to code
 expecting to be compiled and linked with ANSI C I<stdio.h>.
-The flags argument was meant to be used for read vs write vs
-read/write information. In hindsight it would have been better to make
-it a char *mode as in fopen/freopen. Flags are ignored and the
-FILE * is opened in same mode as the PerlIO *.
+The mode argument should be a string as would be passed to fopen/PerlIO_open.
+If it is NULL then - for legacy support - the FILE * is opened
+in same mode as the PerlIO *.
 
 The fact that such a FILE * has been 'exported' is recorded, (normally by
 pushing a new :stdio "layer" onto the PerlIO *), which may affect future
@@ -445,8 +447,8 @@ happened to C<read()> (or whatever) last time IO was requested.
 
 The new interface to the USE_PERLIO implementation. The layers ":crlf"
 and ":raw" are only ones allowed for other implementations and those
-are silently ignored. Use PerlIO_binmode() below for the portable
-case.
+are silently ignored. (As of perl5.8 ":raw" is deprecated.)
+Use PerlIO_binmode() below for the portable case.
 
 =item PerlIO_binmode(f,ptype,imode,layers)
 
@@ -465,12 +467,12 @@ B<ptype> is perl's character for the kind of IO:
 
 B<imode> is C<O_BINARY> or C<O_TEXT>.
 
-B<layers> is a string of layers to apply, only ":raw" or :"crlf" make
-sense in the non USE_PERLIO case.
+B<layers> is a string of layers to apply, only ":crlf" makes sense in the non USE_PERLIO
+case. (As of perl5.8 ":raw" is deprecated in favour of passing NULL.)
 
 Portable cases are:
 
-    PerlIO_binmode(f,ptype,O_BINARY,":raw");
+    PerlIO_binmode(f,ptype,O_BINARY,Nullch);
 and
     PerlIO_binmode(f,ptype,O_TEXT,":crlf");
 
