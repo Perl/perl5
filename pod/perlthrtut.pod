@@ -5,12 +5,15 @@ perlthrtut - tutorial on threads in Perl
 =head1 DESCRIPTION
 
 B<NOTE>: this tutorial describes the new Perl threading flavour
-introduced in Perl 5.6.0 called interpreter threads, or ithreads
-for short.  There is another older Perl threading flavour called
-the 5.005 model, unsurprisingly for 5.005 versions of Perl.
-The old model is deprecated, and will probably be removed around release
-5.10. You are strongly encouraged to migrate any existing 5.005 threads
-code to the new model as soon as possible.
+introduced in Perl 5.6.0 called interpreter threads, or B<ithreads>
+for short.  In this model each thread runs in its own Perl interpreter,
+and any data sharing between threads must be explicit.
+
+There is another older Perl threading flavour called the 5.005 model,
+unsurprisingly for 5.005 versions of Perl.  The old model is known to
+have problems, deprecated, and will probably be removed around release
+5.10. You are strongly encouraged to migrate any existing 5.005
+threads code to the new model as soon as possible.
 
 You can see which (or neither) threading flavour you have by
 running C<perl -V> and looking at the C<Platform> section.
@@ -197,6 +200,8 @@ However it is important to remember that Perl threads cannot magically
 do things unless your operating systems threads allows it. So if your
 system blocks the entire process on sleep(), Perl usually will as well.
 
+Perl Threads Are Different.
+
 =head1 Threadsafe Modules
 
 The addition of threads has changed Perl's internals 
@@ -220,7 +225,9 @@ environment.
 If you're using a module that's not thread-safe for some reason, you
 can protect yourself by using semaphores and lots of programming
 discipline to control access to the module.  Semaphores are covered
-later in the article.  Perl Threads Are Different
+later in the article.
+
+See also L</"Threadsafety of System Libraries">.
 
 =head1 Thread Basics
 
@@ -241,7 +248,7 @@ Your programs can use the Config module to check whether threads are
 enabled. If your program can't run without them, you can say something
 like:
 
-  $Config{useithreads} or die "Recompile Perl with threads to run this program.";
+    $Config{useithreads} or die "Recompile Perl with threads to run this program.";
 
 A possibly-threaded program using a possibly-threaded module might
 have code like this:
@@ -249,13 +256,15 @@ have code like this:
     use Config; 
     use MyMod; 
 
-    if ($Config{useithreads}) { 
-        # We have threads 
-        require MyMod_threaded; 
-        import MyMod_threaded; 
-    } else { 
-        require MyMod_unthreaded; 
-        import MyMod_unthreaded; 
+    BEGIN {
+        if ($Config{useithreads}) { 
+            # We have threads 
+            require MyMod_threaded; 
+           import MyMod_threaded; 
+        } else { 
+           require MyMod_unthreaded; 
+           import MyMod_unthreaded; 
+        }
     } 
 
 Since code that runs both with and without threads is usually pretty
@@ -307,7 +316,7 @@ off several threads using the same subroutine.  Each thread executes
 the same subroutine, but in a separate thread with a separate
 environment and potentially separate arguments.
 
-C<create()> is a synonym for C<new()>
+C<create()> is a synonym for C<new()>.
 
 =head2 Giving up control
 
@@ -392,7 +401,6 @@ automatically.
             sleep 1; 
         } 
     }
-
 
 Once a thread is detached, it may not be joined, and any return data
 that it might have produced (if it was done and waiting for a join) is
@@ -1031,7 +1039,7 @@ of the prime number generator.
 
 =head1 AUTHOR
 
-Dan Sugalski E<lt>sugalskd@ous.eduE<gt>
+Dan Sugalski E<lt>dan@sidhe.org<gt>
 
 Slightly modified by Arthur Bergman to fit the new thread model/module.
 
