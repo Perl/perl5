@@ -2570,11 +2570,19 @@ tryagain:
 			p++;
 			break;
 		    case 'e':
-			ender = '\033';
+#ifdef ASCIIish
+			  ender = '\033';
+#else
+			  ender = '\047';
+#endif
 			p++;
 			break;
 		    case 'a':
-			ender = '\007';
+#ifdef ASCIIish
+			  ender = '\007';
+#else
+			  ender = '\057';
+#endif
 			p++;
 			break;
 		    case 'x':
@@ -2910,8 +2918,13 @@ S_regclass(pTHX)
 	    case 't':	value = '\t';			break;
 	    case 'f':	value = '\f';			break;
 	    case 'b':	value = '\b';			break;
+#ifdef ASCIIish
 	    case 'e':	value = '\033';			break;
 	    case 'a':	value = '\007';			break;
+#else
+	    case 'e':	value = '\047';			break;
+	    case 'a':	value = '\057';			break;
+#endif
 	    case 'x':
 		value = (UV)scan_hex(PL_regcomp_parse, 2, &numlen);
 		PL_regcomp_parse += numlen;
@@ -3372,8 +3385,13 @@ S_regclassutf8(pTHX)
 	    case 't':		value = '\t';		break;
 	    case 'f':		value = '\f';		break;
 	    case 'b':		value = '\b';		break;
+#ifdef ASCIIish
 	    case 'e':		value = '\033';		break;
 	    case 'a':		value = '\007';		break;
+#else
+	    case 'e':		value = '\047';		break;
+	    case 'a':		value = '\057';		break;
+#endif
 	    case 'x':
 		if (*PL_regcomp_parse == '{') {
 		    e = strchr(PL_regcomp_parse++, '}');
