@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Feb 13 08:17:38 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Fri Feb 15 01:22:14 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1043,6 +1043,10 @@ if test -f "/system/gnu_library/bin/ar.pm"; then
 fi
 : maybe dos djgpp
 if test -n "$DJGPP"; then
+    _exe=".exe"
+fi
+: maybe os/2
+if test -d c:/. ; then
     _exe=".exe"
 fi
 

@@ -97,7 +97,11 @@
 	open(F, ">$file") ; 
 	my $a = sysread(F, $a,10) ;
 
-   lstat on filehandle %s			[pp_lstat]
+  lstat on filehandle %s			[pp_lstat]
+
+  getc() on unopened filehandle			[pp_getc]
+
+  getc() on closed filehandle			[pp_getc]
 
 __END__
 # pp_sys.c [pp_untie]
@@ -409,3 +413,15 @@ close $fh;
 EXPECT
 lstat() on filehandle STDIN at - line 3.
 lstat() on filehandle $fh at - line 5.
+########
+# pp_sys.c [pp_getc]
+use warnings qw(unopened closed) ;
+getc FOO;
+close STDIN;
+getc STDIN;
+no warnings qw(unopened closed) ;
+getc FOO;
+getc STDIN;
+EXPECT
+getc() on unopened filehandle FOO at - line 3.
+getc() on closed filehandle STDIN at - line 5.

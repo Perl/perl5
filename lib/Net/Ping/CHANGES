@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+2.11  Feb 02 12:00 2002
+	- Test changes in case echo port is not available.
+	- Fix 110_icmp_inst.t to use icmp protocol
+	  Spotted by craigberry@mac.com (Craig Berry)
+
 2.10  Dec 26 12:00 2001
 	- Added bind() function useful for clients with multiple
 	  network interfaces performing the ping check thanks to

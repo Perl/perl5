@@ -15,5 +15,9 @@ plan tests => 2;
 # Everything loaded fine
 ok 1;
 
-my $p = new Net::Ping "tcp";
-ok !!$p;
+if ($> and $^O ne 'VMS') {
+  skip "icmp ping requires root privileges.", 1;
+} else {
+  my $p = new Net::Ping "icmp";
+  ok !!$p;
+}

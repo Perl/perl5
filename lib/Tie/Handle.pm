@@ -12,7 +12,7 @@ Tie::Handle, Tie::StdHandle  - base class definitions for tied handles
     package NewHandle;
     require Tie::Handle;
 
-    @ISA = (Tie::Handle);
+    @ISA = qw(Tie::Handle);
 
     sub READ { ... }		# Provide a needed method
     sub TIEHANDLE { ... }	# Overrides inherited method

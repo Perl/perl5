@@ -6,6 +6,10 @@ BEGIN {
     print "1..0 \# Skip: no Socket\n";
     exit;
   }
+  unless (getservbyname('echo', 'udp')) {
+    print "1..0 \# Skip: no echo port\n";
+    exit;
+  }
 }
 
 use Test;
