@@ -1843,7 +1843,7 @@ PP(pp_pack)
 	    fromstr = NEXTFROM;
 	    aptr = SvPV(fromstr, fromlen);
 	    SvGROW(cat, fromlen * 4 / 3);
-	    if (len <= 1)
+	    if (len <= 2)
 		len = 45;
 	    else
 		len = len / 3 * 3;
