@@ -223,6 +223,7 @@ if ($PLATFORM eq 'win32') {
 		     Perl_dump_fds
 		     Perl_init_thread_intern
 		     Perl_my_bzero
+		     Perl_my_bcopy
 		     Perl_my_htonl
 		     Perl_my_ntohl
 		     Perl_my_swap
