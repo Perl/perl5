@@ -1628,8 +1628,8 @@ Ap	|bool	|is_uni_xdigit_lc|U32 c
 Ap	|U32	|to_uni_upper_lc|U32 c
 Ap	|U32	|to_uni_title_lc|U32 c
 Ap	|U32	|to_uni_lower_lc|U32 c
-Ap	|STRLEN	|is_utf8_char	|U8 *p
-Ap	|bool	|is_utf8_string	|U8 *s|STRLEN len
+Apd	|STRLEN	|is_utf8_char	|U8 *p
+Apd	|bool	|is_utf8_string	|U8 *s|STRLEN len
 Ap	|bool	|is_utf8_alnum	|U8 *p
 Ap	|bool	|is_utf8_alnumc	|U8 *p
 Ap	|bool	|is_utf8_idfirst|U8 *p
@@ -2077,14 +2077,14 @@ p	|void	|unshare_hek	|HEK* hek
 p	|void	|utilize	|int aver|I32 floor|OP* version|OP* id|OP* arg
 Ap	|U8*	|utf16_to_utf8	|U8* p|U8 *d|I32 bytelen|I32 *newlen
 Ap	|U8*	|utf16_to_utf8_reversed|U8* p|U8 *d|I32 bytelen|I32 *newlen
-Ap	|STRLEN	|utf8_length	|U8* s|U8 *e
-Ap	|IV	|utf8_distance	|U8 *a|U8 *b
-Ap	|U8*	|utf8_hop	|U8 *s|I32 off
-ApM	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
-ApM	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
-Ap	|UV	|utf8_to_uv_simple|U8 *s|STRLEN* retlen
-Ap	|UV	|utf8_to_uv	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
-Ap	|U8*	|uv_to_utf8	|U8 *d|UV uv
+Adp	|STRLEN	|utf8_length	|U8* s|U8 *e
+Apd	|IV	|utf8_distance	|U8 *a|U8 *b
+Apd	|U8*	|utf8_hop	|U8 *s|I32 off
+ApMd	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
+ApMd	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
+Apd	|UV	|utf8_to_uv_simple|U8 *s|STRLEN* retlen
+Adp	|UV	|utf8_to_uv	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
+Apd	|U8*	|uv_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
