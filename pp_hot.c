@@ -725,8 +725,9 @@ PP(pp_aassign)
 	    SP = lastrelem;
 	else
 	    SP = firstrelem + (lastlelem - firstlelem);
+	lelem = firstlelem + (relem - firstrelem);
 	while (relem <= SP)
-	    *relem++ = &sv_undef;
+	    *relem++ = (lelem <= lastlelem) ? *lelem++ : &sv_undef;
 	RETURN;
     }
     else {
@@ -1905,7 +1906,7 @@ PP(pp_entersub)
 	    }
 	    cx->blk_sub.savearray = GvAV(defgv);
 	    cx->blk_sub.argarray = av;
-	    GvAV(defgv) = cx->blk_sub.argarray;
+	    GvAV(defgv) = (AV*)SvREFCNT_inc(av);
 	    ++MARK;
 
 	    if (items > AvMAX(av) + 1) {
