@@ -1340,8 +1340,7 @@ PerlIO_funcs PerlIO_stdio = {
 #ifdef USE_STDIO_PTR
  PerlIOStdio_get_ptr,
  PerlIOStdio_get_cnt,
-#if (defined(STDIO_PTR_LVALUE) && \
-    (defined(STDIO_CNT_LVALUE) || defined(STDIO_PTR_LVAL_SETS_CNT)))
+#if (defined(STDIO_PTR_LVALUE) && (defined(STDIO_CNT_LVALUE) || defined(STDIO_PTR_LVAL_SETS_CNT)))
  PerlIOStdio_set_ptrcnt
 #else  /* STDIO_PTR_LVALUE */
  NULL
