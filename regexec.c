@@ -1246,7 +1246,9 @@ regmatch(regnode *prog)
 		}
 		if (PL_dowarn && n >= REG_INFTY && !(PL_reg_flags & RF_warned)) {
 		    PL_reg_flags |= RF_warned;
-		    warn("count exceeded %d", REG_INFTY - 1);
+		    warn("%s limit (%d) exceeded",
+			 "Complex regular subexpression recursion",
+			 REG_INFTY - 1);
 		}
 
 		/* Failed deeper matches of scan, so see if this one works. */
