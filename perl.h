@@ -1091,7 +1091,7 @@ typedef NVTYPE NV;
 
 #if !defined(Perl_atof) && defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
 #   if !defined(Perl_atof) && defined(HAS_STRTOLD)
-#       define Perl_atof(s) strtold(s, (char*)0)
+#       define Perl_atof(s) strtold(s, (char**)NULL)
 #   endif
 #   if !defined(Perl_atof) && defined(HAS_ATOLF)
 #       define Perl_atof atolf
@@ -2987,7 +2987,7 @@ typedef struct am_table_short AMTS;
 
 #if !defined(Atol) && defined(USE_LONG_LONG) && defined(HAS_LONG_LONG)
 #   if !defined(Atol) && defined(HAS_STRTOLL)
-#       define Atol(s) strtoll(s, (char*)0, 10)
+#       define Atol(s) strtoll(s, (char**)NULL, 10)
 #   endif
 #   if !defined(Atol) && defined(HAS_ATOLL)
 #       define Atol atoll
