@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Mar  4 21:46:28 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Wed Mar  6 17:32:31 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -756,6 +756,8 @@ i_syswait=''
 i_sgtty=''
 i_termio=''
 i_termios=''
+d_tm_tm_gmtoff=''
+d_tm_tm_zone=''
 i_systime=''
 i_systimek=''
 i_time=''
@@ -10472,6 +10474,40 @@ EOCP
 	esac
 	$rm -f try.c try
 fi
+: see if struct tm knows about tm_zone
+case "$i_systime$i_time" in
+*$define*) 
+        echo " "
+        echo "Checking to see if your struct tm has tm_zone field..." >&4
+        set d_tm_tm_zone tm tm_zone $i_systime sys/time.h $i_time time.h
+        eval $hasfield
+        ;;
+*)      val="$undef"
+        set d_tm_tm_zone
+        eval $setvar
+        ;;
+esac
+case "$d_tm_tm_zone" in
+"$define")      echo "Yes, it does."   ;;
+*)              echo "No, it doesn't." ;;
+esac
+: see if struct tm knows about tm_gmtoff
+case "$i_systime$i_time" in
+*$define*) 
+        echo " "
+        echo "Checking to see if your struct tm has tm_gmtoff field..." >&4
+        set d_tm_tm_gmtoff tm tm_gmtoff $i_systime sys/time.h $i_time time.h
+        eval $hasfield
+        ;;
+*)      val="$undef"
+        set d_tm_tm_gmtoff
+        eval $setvar
+        ;;
+esac
+case "$d_tm_tm_gmtoff" in
+"$define")      echo "Yes, it does."   ;;
+*)              echo "No, it doesn't." ;;
+esac
 
 : check for fd_set items
 $cat <<EOM
@@ -17405,6 +17441,8 @@ d_telldir='$d_telldir'
 d_telldirproto='$d_telldirproto'
 d_time='$d_time'
 d_times='$d_times'
+d_tm_tm_gmtoff='$d_tm_tm_gmtoff'
+d_tm_tm_zone='$d_tm_tm_zone'
 d_truncate='$d_truncate'
 d_tzname='$d_tzname'
 d_u32align='$d_u32align'
