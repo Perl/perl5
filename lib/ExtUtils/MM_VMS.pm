@@ -1322,6 +1322,7 @@ sub dlsyms {
 
     my($funcs) = $attribs{DL_FUNCS} || $self->{DL_FUNCS} || {};
     my($vars)  = $attribs{DL_VARS}  || $self->{DL_VARS}  || [];
+    my($funclist)  = $attribs{FUNCLIST}  || $self->{FUNCLIST}  || [];
     my(@m);
 
     unless ($self->{SKIPHASH}{'dynamic'}) {
@@ -1343,7 +1344,8 @@ $(INST_ARCHAUTODIR)$(BASEEXT).opt : $(BASEEXT).opt
 $(BASEEXT).opt : Makefile.PL
 	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e "use ExtUtils::Mksymlists;" -
 	',qq[-e "Mksymlists('NAME' => '$self->{NAME}', 'DL_FUNCS' => ],
-	neatvalue($funcs),q[, 'DL_VARS' => ],neatvalue($vars),')"
+	neatvalue($funcs),q[, 'DL_VARS' => ],neatvalue($vars),
+	q[, 'FUNCLIST' => ],neatvalue($funclist),')"
 	$(PERL) -e "print ""$(INST_STATIC)/Include=$(BASEEXT)\n$(INST_STATIC)/Library\n"";" >>$(MMS$TARGET)
 ');
 

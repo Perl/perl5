@@ -41,6 +41,7 @@ sub dlsyms {
 
     my($funcs) = $attribs{DL_FUNCS} || $self->{DL_FUNCS} || {};
     my($vars)  = $attribs{DL_VARS} || $self->{DL_VARS} || [];
+    my($funclist) = $attribs{FUNCLIST} || $self->{FUNCLIST} || [];
     my($imports)  = $attribs{IMPORTS} || $self->{IMPORTS} || {};
     my(@m);
     (my $boot = $self->{NAME}) =~ s/:/_/g;
@@ -53,6 +54,7 @@ $self->{BASEEXT}.def: Makefile.PL
      -e "Mksymlists('NAME' => '!, $self->{NAME},
      q!', 'DLBASE' => '!,$self->{DLBASE},
      q!', 'DL_FUNCS' => !,neatvalue($funcs),
+     q!, 'FUNCLIST' => !,neatvalue($funclist),
      q!, 'IMPORTS' => !,neatvalue($imports),
      q!, 'DL_VARS' => !, neatvalue($vars), q!);"
 !);

@@ -241,20 +241,20 @@ sub full_setup {
 
     @Attrib_help = qw/
 
-    AUTHOR ABSTRACT ABSTRACT_FROM BINARY_LOCATION LICENSE_HREF CAPI
-    C CCFLAGS CONFIG CONFIGURE DEFINE DIR DISTNAME DL_FUNCS DL_VARS
-    EXE_FILES EXCLUDE_EXT INCLUDE_EXT NO_VC FIRST_MAKEFILE FULLPERL H
-    INC INSTALLARCHLIB INSTALLBIN INSTALLDIRS INSTALLMAN1DIR
+    AUTHOR ABSTRACT ABSTRACT_FROM BINARY_LOCATION
+    C CAPI CCFLAGS CONFIG CONFIGURE DEFINE DIR DISTNAME DL_FUNCS DL_VARS
+    EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE FULLPERL FUNCLIST H
+    INC INCLUDE_EXT INSTALLARCHLIB INSTALLBIN INSTALLDIRS INSTALLMAN1DIR
     INSTALLMAN3DIR INSTALLPRIVLIB INSTALLSCRIPT INSTALLSITEARCH
     INSTALLSITELIB INST_ARCHLIB INST_BIN INST_EXE INST_LIB
-    INST_MAN1DIR INST_MAN3DIR INST_SCRIPT LDFROM LIBPERL_A LIB LIBS
+    INST_MAN1DIR INST_MAN3DIR INST_SCRIPT LDFROM LIB LIBPERL_A LIBS LICENSE_HREF
     LINKTYPE MAKEAPERL MAKEFILE MAN1PODS MAN3PODS MAP_TARGET MYEXTLIB
-    NAME NEEDS_LINKING NOECHO NORECURS OBJECT OPTIMIZE PERL PERLMAINCC
+    NAME NEEDS_LINKING NOECHO NORECURS NO_VC OBJECT OPTIMIZE PERL PERLMAINCC
     PERL_ARCHLIB PERL_LIB PERL_SRC PERM_RW PERM_RWX
-    PL_FILES PM PMLIBDIRS PREFIX
+    PL_FILES PM PMLIBDIRS PPM_INSTALL_SCRIPT PPM_INSTALL_EXEC PREFIX
     PREREQ_PM SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
-    tool_autosplit PPM_INSTALL_SCRIPT PPM_INSTALL_EXEC
+    tool_autosplit
 
     IMPORTS
 
@@ -1273,13 +1273,6 @@ Ref to array of executable files. The files will be copied to the
 INST_SCRIPT directory. Make realclean will delete them from there
 again.
 
-=item NO_VC
-
-In general any generated Makefile checks for the current version of
-MakeMaker and the version the Makefile was built under. If NO_VC is
-set, the version check is neglected. Do not write this into your
-Makefile.PL, use it interactively instead.
-
 =item FIRST_MAKEFILE
 
 The name of the Makefile to be produced. Defaults to the contents of
@@ -1289,6 +1282,13 @@ that will be produced for the MAP_TARGET.
 =item FULLPERL
 
 Perl binary able to run this extension.
+
+=item FUNCLIST
+
+This provides an alternate means to specify function names to be
+exported from the extension.  Its value is a reference to an
+array of function names to be exported by the extension.  These
+names are passed through unaltered to the linker options file.
 
 =item H
 
@@ -1403,15 +1403,15 @@ defaults to "$(OBJECT)" and is used in the ld command to specify
 what files to link/load from (also see dynamic_lib below for how to
 specify ld flags)
 
-=item LIBPERL_A
-
-The filename of the perllibrary that will be used together with this
-extension. Defaults to libperl.a.
-
 =item LIB
 
 LIB can only be set at C<perl Makefile.PL> time. It has the effect of
 setting both INSTALLPRIVLIB and INSTALLSITELIB to that value regardless any
+
+=item LIBPERL_A
+
+The filename of the perllibrary that will be used together with this
+extension. Defaults to libperl.a.
 
 =item LIBS
 
@@ -1496,6 +1496,13 @@ itself.
 =item NORECURS
 
 Boolean.  Attribute to inhibit descending into subdirectories.
+
+=item NO_VC
+
+In general any generated Makefile checks for the current version of
+MakeMaker and the version the Makefile was built under. If NO_VC is
+set, the version check is neglected. Do not write this into your
+Makefile.PL, use it interactively instead.
 
 =item OBJECT
 
