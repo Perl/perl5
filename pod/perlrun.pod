@@ -730,7 +730,8 @@ if it is invoked with B<-xyz=abc>.
     if ($xyz) { print "$xyz\n" }
 
 Do note that B<--help> creates the variable ${-help}, which is not compliant
-with C<strict refs>.
+with C<strict refs>.  Also, when using this option on a script with
+warnings enabled you may get a lot of spurious "used only once" warnings.
 
 =item B<-S>
 
