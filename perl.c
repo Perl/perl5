@@ -2156,6 +2156,10 @@ Perl_moreswitches(pTHX_ char *s)
     case 'C':
         PL_wantutf8 = TRUE; /* Can be set earlier by $ENV{PERL_UTF8_LOCALE}. */
 	s++;
+	if (*s == ':') {
+	     PL_wantutf8 = (bool) atoi(s + 1);
+	     for (s++; isDIGIT(*s); s++) ;
+	}
 	return s;
     case 'F':
 	PL_minus_F = TRUE;
