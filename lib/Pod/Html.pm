@@ -300,18 +300,20 @@ sub pod2html {
     open(HTML, ">$htmlfile")
 	    || die "$0: cannot open $htmlfile file for output: $!\n";
 
-    # put a title in the HTML file
-    $title = '';
-    TITLE_SEARCH: {
-	for (my $i = 0; $i < @poddata; $i++) { 
-	    if ($poddata[$i] =~ /^=head1\s*NAME\b/m) {
-		for my $para ( @poddata[$i, $i+1] ) { 
-		    last TITLE_SEARCH if ($title) = $para =~ /(\S+\s+-+.*\S)/s;
-		}
-	    } 
+    # put a title in the HTML file if one wasn't specified
+    if ($title eq '') {
+	TITLE_SEARCH: {
+	    for (my $i = 0; $i < @poddata; $i++) { 
+		if ($poddata[$i] =~ /^=head1\s*NAME\b/m) {
+		    for my $para ( @poddata[$i, $i+1] ) { 
+			last TITLE_SEARCH
+			    if ($title) = $para =~ /(\S+\s+-+.*\S)/s;
+		    }
+		} 
 
-	} 
-    } 
+	    } 
+	}
+    }
     if (!$title and $podfile =~ /\.pod$/) {
 	# probably a split pod so take first =head[12] as title
 	for (my $i = 0; $i < @poddata; $i++) { 
