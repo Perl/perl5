@@ -1822,6 +1822,7 @@ yylex(void)
 		    else
 			(void)PerlIO_close(PL_rsfp);
 		    PL_rsfp = Nullfp;
+		    PL_doextract = FALSE;
 		}
 		if (!PL_in_eval && (PL_minus_n || PL_minus_p)) {
 		    sv_setpv(PL_linestr,PL_minus_p ? ";}continue{print" : "");
