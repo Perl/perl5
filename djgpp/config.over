@@ -45,7 +45,8 @@ repair()
      -e 's=list/util=List/Util=' \
      -e 's=cwd=Cwd=' \
      -e 's=perlio/via=PerlIO/Via=' \
-     -e 's=xs/typemap=XS/Typemap='
+     -e 's=xs/typemap=XS/Typemap=' \
+     -e 's=i18n/langinfo=I18N/Langinfo='
 }
 static_ext=$(repair "$static_ext")
 extensions=$(repair "$extensions")
