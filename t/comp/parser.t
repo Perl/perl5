@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 42 );
+plan( tests => 43 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -140,4 +140,10 @@ EOF
 {
     eval q{ *foo{CODE} ? 1 : 0 };
     is( $@, '', "glob subscript in conditional" );
+}
+
+# Bug #25824
+{
+    eval q{ sub f { @a=@b=@c;  {use} } };
+    like( $@, qr/syntax error/, "use without body" );
 }

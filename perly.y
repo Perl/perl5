@@ -40,7 +40,7 @@
 %token COLONATTR
 
 %type <ival> prog decl format startsub startanonsub startformsub
-%type <ival> progstart remember mremember '&'
+%type <ival> progstart remember mremember '&' savescope
 %type <opval> block mblock lineseq line loop cond else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> argexpr nexpr texpr iexpr mexpr mnexpr mtexpr miexpr
@@ -116,16 +116,20 @@ mremember:	/* NULL */	/* start a partial lexical scope */
 			{ $$ = block_start(FALSE); }
 	;
 
+savescope:	/* NULL */	/* remember stack pos in case of error */
+		{ $$ = PL_savestack_ix; }
+
 /* A collection of "lines" in the program */
 lineseq	:	/* NULL */
 			{ $$ = Nullop; }
 	|	lineseq decl
 			{ $$ = $1; }
-	|	lineseq line
-			{   $$ = append_list(OP_LINESEQ,
-				(LISTOP*)$1, (LISTOP*)$2);
+	|	lineseq savescope line
+			{   LEAVE_SCOPE($2);
+			    $$ = append_list(OP_LINESEQ,
+				(LISTOP*)$1, (LISTOP*)$3);
 			    PL_pad_reset_pending = TRUE;
-			    if ($1 && $2) PL_hints |= HINT_BLOCK_SCOPE; }
+			    if ($1 && $3) PL_hints |= HINT_BLOCK_SCOPE; }
 	;
 
 /* A "line" in the program */
