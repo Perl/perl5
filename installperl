@@ -2,6 +2,7 @@
 
 BEGIN {
     require 5.004;
+    chdir '..' if !-d 'lib' and -d '..\lib';
     @INC = 'lib';
     $ENV{PERL5LIB} = 'lib';
 }
@@ -87,8 +88,9 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 -x 'perl' . $exe_ext	|| die "perl isn't executable!\n";
 -x 'suidperl' . $exe_ext|| die "suidperl isn't executable!\n" if $d_dosuid;
 
--x 't/TEST'		|| warn "WARNING: You've never run 'make test'!!!",
-	"  (Installing anyway.)\n";
+-x 't/TEST'		|| $^O eq 'MSWin32'
+			|| warn "WARNING: You've never run 'make test'!!!",
+				"  (Installing anyway.)\n";
 
 if ($^O eq 'MSWin32') {
 
@@ -160,7 +162,7 @@ foreach $file (@corefiles) {
 
 $mainperl_is_instperl = 0;
 
-if (!$versiononly && !$nonono && -t STDIN && -t STDERR
+if (!$versiononly && !$nonono && $^O ne 'MSWin32' && -t STDIN && -t STDERR
 	&& -w $mainperldir && ! samepath($mainperldir, $installbin)) {
     local($usrbinperl)	= "$mainperldir/perl$exe_ext";
     local($instperl)	= "$installbin/perl$exe_ext";

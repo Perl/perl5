@@ -5,17 +5,6 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
   shift(@ARGV);
  }
 
-$opt{'archname'} = 'MSWin32';
-if (defined $ENV{'PROCESSOR_ARCHITECTURE'})
- {
-  $opt{'archname'} .= '-'.$ENV{'PROCESSOR_ARCHITECTURE'};
- }
-
-if ($opt{'ccflags'} =~ /USE_THREADS/)
- {
-  $opt{'archname'} .= '-thread';
- }
-
 if ($] =~ /\.(\d\d\d)?(\d\d)?$/) { # should always be true
   $opt{PATCHLEVEL} = int($1 || 0);
   $opt{SUBVERSION} = $2 || '00';
