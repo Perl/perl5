@@ -31,6 +31,292 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10475] By: jhi                                   on 2001/06/08  00:53:45
+        Log: Regen Glossary et alia.
+     Branch: perl
+	   ! Porting/Glossary Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[ 10474] By: jhi                                   on 2001/06/07  22:06:38
+        Log: Metaconfig unit changes for #10473.
+     Branch: metaconfig/U/perl
+	   ! d_modfl.U
+____________________________________________________________________________
+[ 10473] By: jhi                                   on 2001/06/07  22:06:16
+        Log: Harumph, also AIX will spill its guts (i.e. dump core)
+             if an executable contains modfl() but it hasn't been
+             compiled right (in the case of AIX, with cc -qlongdouble).
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10472] By: gsar                                  on 2001/06/07  20:04:28
+        Log: integrate change#10471 from mainline
+             
+             in change#10451, check that CvOUTSIDE is a CV before looking in
+             (it can apparently be SVt_NULL during global destruction)
+     Branch: maint-5.6/perl
+	  !> op.c
+____________________________________________________________________________
+[ 10471] By: gsar                                  on 2001/06/07  20:01:31
+        Log: in change#10451, check that CvOUTSIDE is a CV before looking in
+             (it can apparently be SVt_NULL during global destruction)
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 10470] By: jhi                                   on 2001/06/07  12:17:51
+        Log: Subject: Re: [PATCH perl@10439] diagnostics and long C<=item>s
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 7 Jun 2001 13:01:06 +0100 (BST)
+             Message-Id: <200106071201.NAA13627@tempest.npl.co.uk>
+     Branch: perl
+	   ! lib/diagnostics.pm pod/perldiag.pod
+____________________________________________________________________________
+[ 10469] By: jhi                                   on 2001/06/07  12:16:12
+        Log: Subject: [PATCH perl@10439] long =item
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 7 Jun 2001 12:34:08 +0100 (BST)
+             Message-Id: <200106071134.MAA10288@tempest.npl.co.uk>
+     Branch: perl
+	   ! README.amiga lib/Attribute/Handlers.pm
+	   ! lib/ExtUtils/Constant.pm lib/Locale/Maketext.pod
+____________________________________________________________________________
+[ 10468] By: jhi                                   on 2001/06/07  12:08:56
+        Log: Subject: [PATCH 5.7.1 pod/perlguts.pod] IOK vs pIOK docs
+             Date: Thu, 7 Jun 2001 10:09:59 +0100 (BST)
+             Reply-To: Dave Mitchell <davem@fdgroup.co.uk>
+             Message-Id: <200106070909.KAA25610@gizmo.fdgroup.co.uk>
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 10467] By: jhi                                   on 2001/06/07  12:04:26
+        Log: Integrate perlio.
+     Branch: perl
+	  !> sv.c
+____________________________________________________________________________
+[ 10466] By: nick                                  on 2001/06/07  10:25:40
+        Log: MULTIPLICITY fix for S_grok_number(), also a few gratuitious trailing
+             whitespace tweaks.
+             Still coredumps in pragma/overload.t - what a nice hard fail that is...
+     Branch: perlio
+	   ! sv.c
+____________________________________________________________________________
+[ 10465] By: nick                                  on 2001/06/07  08:41:58
+        Log: Raw integrate of mainline for S_grok_number debug
+             (sv.c has MULTIPLICITY issues as well as whatever else ...)
+     Branch: perlio
+	   - plan9/perlplan9.doc plan9/perlplan9.pod
+	  !> (integrate 46 files)
+____________________________________________________________________________
+[ 10464] By: jhi                                   on 2001/06/06  23:33:58
+        Log: The proper prototyping for #10463.
+     Branch: perl
+	   ! embed.h embed.pl proto.h sv.c
+____________________________________________________________________________
+[ 10463] By: jhi                                   on 2001/06/06  23:15:30
+        Log: Subject: Re: [PATCH] nuke strtol (was Re: One fix for strtoul not setting errno)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 7 Jun 2001 00:29:59 +0100
+             Message-ID: <20010607002959.Z76396@plum.flirble.org>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 10462] By: jhi                                   on 2001/06/06  23:13:19
+        Log: Subject: [PATCH perl@10439] fix old $^S description in perlvms.pod
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 06 Jun 2001 17:54:30 -0500
+             Message-Id: <5.1.0.14.0.20010606174814.03c2c880@exchi01>
+     Branch: perl
+	   ! vms/perlvms.pod
+____________________________________________________________________________
+[ 10461] By: jhi                                   on 2001/06/06  23:10:00
+        Log: Podify the remaining README.platform files;
+             merge README.plan9 and plan9/perlplan9.pod;
+             delete plan9/perlplan9.* (the perlplan.doc needs to
+             be regenerated in Plan 9); make the =head1 and =head2
+             in the README.platform to be a little more verbose
+             (skipped README.os2 not to anger Ilya) so that they
+             look better in the toc; regen toc.
+     Branch: perl
+	   - plan9/perlplan9.doc plan9/perlplan9.pod
+	   ! MANIFEST README.aix README.amiga README.apollo README.beos
+	   ! README.bs2000 README.cygwin README.dgux README.dos README.epoc
+	   ! README.hpux README.hurd README.machten README.macos
+	   ! README.micro README.mint README.mpeix README.os390
+	   ! README.plan9 README.qnx README.solaris README.threads
+	   ! README.tru64 README.vmesa README.vms README.vos README.win32
+	   ! plan9/mkfile pod/buildtoc.PL pod/perl.pod pod/perlport.pod
+	   ! pod/perltoc.pod win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 10460] By: jhi                                   on 2001/06/06  20:58:53
+        Log: Subject: [PATCH] Re: Bug in perlguts documentation?
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Reply-To: mjtg@cam.ac.uk
+             Message-Id: <E157fiS-0006Q7-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 10459] By: jhi                                   on 2001/06/06  20:58:15
+        Log: Subject: [PATCH] Re: [ID 20010604.015] taint + comma = false insecurity
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Reply-To: mjtg@cam.ac.uk
+             Message-Id: <E157flx-0006Uz-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! pod/perlsec.pod
+____________________________________________________________________________
+[ 10458] By: jhi                                   on 2001/06/06  20:56:04
+        Log: Disable long doubles from pre-5.0 Tru64s.
+     Branch: perl
+	   ! README.tru64 hints/dec_osf.sh
+____________________________________________________________________________
+[ 10457] By: jhi                                   on 2001/06/06  20:49:23
+        Log: The #10455 exposed that modfl() is fundamentally busted
+             (as in: dumps core) in pre-5.0 Tru64, so better avoid even
+             testing it.
+     Branch: perl
+	   ! hints/dec_osf.sh
+____________________________________________________________________________
+[ 10456] By: jhi                                   on 2001/06/06  20:48:35
+        Log: Metaconfig unit change for #10455.
+     Branch: metaconfig/U/perl
+	   ! d_modfl.U
+____________________________________________________________________________
+[ 10455] By: jhi                                   on 2001/06/06  20:48:09
+        Log: Configure check for geborken modfl(), inspired by
+             
+             Subject: Re: [20010118.017] op/int.t failure 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 05 Jun 2001 13:43:27 +0100
+             Message-Id: <200106051243.NAA15525@crypt.compulink.co.uk>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10454] By: jhi                                   on 2001/06/06  11:45:08
+        Log: Integrate changes #10450 and #10451 from maintperl:
+             
+             optimize change#10448 slightly (don't repeat search in eval""s lexical
+             scope, since that has already been searched)
+             
+             change#9108 needs subtler treatment for case of closures created
+             within eval""
+     Branch: perl
+	  !> op.c t/op/misc.t
+____________________________________________________________________________
+[ 10453] By: jhi                                   on 2001/06/06  11:42:10
+        Log: MakeMaker magic to compile (when no dynamic loading)
+             List/Util.xsc as (ListUtil.c and) ListUtil.o since
+             POSIX-BC (BS2000) linker has an evil limitation of
+             being unable to include in the same executable several
+             object files with the same name - case-insensitively -
+             because otherwise we conflict with util.c.
+             Strictly speaking currently required only in POSIX-BC
+             but probably will do no harm elsewhere where static
+             linking is required.
+     Branch: perl
+	   ! ext/List/Util/Makefile.PL
+____________________________________________________________________________
+[ 10452] By: nick                                  on 2001/06/06  08:59:51
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> lib/Attribute/Handlers/demo/Demo.pm
+	  +> lib/Attribute/Handlers/demo/Descriptions.pm
+	  +> lib/Attribute/Handlers/demo/MyClass.pm
+	  +> lib/Attribute/Handlers/demo/demo.pl
+	  +> lib/Attribute/Handlers/demo/demo2.pl
+	  +> lib/Attribute/Handlers/demo/demo3.pl
+	  +> lib/Attribute/Handlers/demo/demo4.pl
+	  +> lib/Attribute/Handlers/demo/demo_call.pl
+	  +> lib/Attribute/Handlers/demo/demo_chain.pl
+	  +> lib/Attribute/Handlers/demo/demo_cycle.pl
+	  +> lib/Attribute/Handlers/demo/demo_hashdir.pl
+	  +> lib/Attribute/Handlers/demo/demo_phases.pl
+	  +> lib/Attribute/Handlers/demo/demo_range.pl
+	  +> lib/Attribute/Handlers/demo/demo_rawdata.pl t/op/override.t
+	  +> uts/strtol_wrap.c
+	  !> (integrate 91 files)
+____________________________________________________________________________
+[ 10451] By: gsar                                  on 2001/06/06  07:11:36
+        Log: change#9108 needs subtler treatment for case of closures created
+             within eval""
+     Branch: maint-5.6/perl
+	   ! op.c t/op/misc.t
+____________________________________________________________________________
+[ 10450] By: gsar                                  on 2001/06/06  05:47:25
+        Log: optimize change#10448 slightly (don't repeat search in eval""s lexical
+             scope, since that has already been searched)
+     Branch: maint-5.6/perl
+	   ! op.c
+____________________________________________________________________________
+[ 10449] By: jhi                                   on 2001/06/06  01:33:31
+        Log: Integrate change #10448 from maintperl; lexicals
+             outside an eval"" weren't resolved correctly inside a subroutine
+             definition inside the eval"" if they were not already referenced
+             in the toplevel of the eval""-ed code
+     Branch: perl
+	  !> cop.h op.c pp_ctl.c t/op/misc.t
+____________________________________________________________________________
+[ 10448] By: gsar                                  on 2001/06/06  01:03:26
+        Log: fix yet another bug of hoary vintage found by change#10394: lexicals
+             outside an eval"" weren't resolved correctly inside a subroutine
+             definition inside the eval"" if they were not already referenced
+             in the toplevel of the eval""-ed code
+     Branch: maint-5.6/perl
+	   ! cop.h op.c pp_ctl.c t/op/misc.t
+____________________________________________________________________________
+[ 10447] By: jhi                                   on 2001/06/06  00:51:04
+        Log: Subject: [PATCH] perl570delta.pod
+             From: Peter Scott <Peter@PSDT.com> 
+             Date: Tue, 05 Jun 2001 18:51:02 -0700
+             Message-Id: <4.3.2.7.2.20010605183619.00a94400@psdt.com>
+     Branch: perl
+	   ! pod/perl570delta.pod
+____________________________________________________________________________
+[ 10446] By: jhi                                   on 2001/06/05  23:45:05
+        Log: The fudge factor is no more needed.  I hope.
+     Branch: perl
+	   ! t/lib/posix.t
+____________________________________________________________________________
+[ 10445] By: jhi                                   on 2001/06/05  23:19:19
+        Log: Subject: Re: [ID 20010529.006] String plus zero inconsistent across platforms 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 05 Jun 2001 12:58:19 +0100
+             Message-Id: <200106051158.MAA04605@crypt.compulink.co.uk>
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 10444] By: jhi                                   on 2001/06/05  11:09:01
+        Log: Make up prototypes only for those who have the functions
+             but not the prototypes.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 10443] By: jhi                                   on 2001/06/05  11:02:13
+        Log: Subject: Re: Not OK: perl@10439 on win32 
+             From: Prymmer/Kahn <pvhp@best.com> 
+             Date: Mon, 4 Jun 2001 22:11:02 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0106042136410.26316-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! perl.h util.c
+____________________________________________________________________________
+[ 10442] By: jhi                                   on 2001/06/05  00:55:46
+        Log: The metaconfig units changes for #10441.
+     Branch: metaconfig
+	   ! U/modified/Extract.U U/modified/Extractall.U
+	   ! U/modified/Finish.U
+____________________________________________________________________________
+[ 10441] By: jhi                                   on 2001/06/05  00:55:17
+        Log: Extraction of the *.SH wasn't quite working with -Dmksymlinks.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10440] By: jhi                                   on 2001/06/05  00:28:27
+        Log: Unnecessary fuzziness undone, noted by Mike Guy.
+     Branch: perl
+	   ! t/op/tr.t
+____________________________________________________________________________
+[ 10439] By: jhi                                   on 2001/06/04  17:14:31
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10438] By: jhi                                   on 2001/06/04  17:10:16
         Log: Test case for 'eval "a.b.c.d.e.f;sub"' save stack imbalance
              bug found by Ilmari Karonen; the bug fixed by Sarathy's lexical
