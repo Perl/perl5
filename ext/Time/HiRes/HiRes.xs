@@ -24,18 +24,6 @@ extern "C" {
 }
 #endif
 
-#ifdef START_MY_CXT
-#  ifndef MY_CXT_CLONE
-#    define MY_CXT_CLONE                                                \
-	dMY_CXT_SV;							\
-	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
-	Copy(INT2PTR(my_cxt_t*, SvUV(my_cxt_sv)), my_cxtp, 1, my_cxt_t); \
-	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
-#  endif
-#else
-#    define MY_CXT_CLONE NOOP
-#endif
-
 #ifndef PerlProc_pause
 #   define PerlProc_pause() Pause()
 #endif
@@ -43,7 +31,7 @@ extern "C" {
 #ifdef HAS_PAUSE
 #   define Pause   pause
 #else
-#   define Pause() sleep(~0)
+#   define Pause() sleep(~0) /* Zzz for a long time. */
 #endif
 
 /* Though the cpp define ITIMER_VIRTUAL is available the functionality

@@ -470,7 +470,6 @@ sub main {
     unless (exists $ENV{PERL_CORE} && $ENV{PERL_CORE}) {
 	print  <<EOM;
 Now you may issue '$make'.  Do not forget also '$make test'.
-
 EOM
        if ((exists $ENV{LC_ALL}   && $ENV{LC_ALL}   =~ /utf-?8/i) ||
            (exists $ENV{LC_CTYPE} && $ENV{LC_CTYPE} =~ /utf-?8/i) ||
@@ -480,7 +479,6 @@ NOTE: if you get an error like this (the line number may vary):
 Makefile:91: *** missing separator
 then set the environment variable LC_ALL to "C" and retry
 from scratch (re-run perl "Makefile.PL").
-
 EOM
         }
     }

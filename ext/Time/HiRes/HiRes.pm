@@ -15,7 +15,7 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep);
 	
-$VERSION = '1.63';
+$VERSION = '1.65';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -104,8 +104,8 @@ it will fail at compile time.
 
 If your subsecond sleeping is implemented with C<nanosleep()> instead
 of C<usleep()>, you can mix subsecond sleeping with signals since
-C<nanosleep()> does not use signals.  This, however is unportable, and
-you should first check for the truth value of
+C<nanosleep()> does not use signals.  This, however, is not portable,
+and you should first check for the truth value of
 C<&Time::HiRes::d_nanosleep> to see whether you have nanosleep, and
 then carefully read your C<nanosleep()> C API documentation for any
 peculiarities.  (There is no separate interface to call
@@ -138,6 +138,8 @@ unlike the C<usleep> system call. See also C<Time::HiRes::sleep()> below.
 Issues a C<ualarm> call; the C<$interval_useconds> is optional and
 will be zero if unspecified, resulting in C<alarm>-like behaviour.
 
+Note that the interaction between alarms and sleeps are unspecified.
+
 =item tv_interval 
 
 tv_interval ( $ref_to_gettimeofday [, $ref_to_later_gettimeofday] )
@@ -164,7 +166,7 @@ default floating point format of Perl and the seconds since epoch have
 conspired to produce an apparent bug: if you print the value of
 C<Time::HiRes::time()> you seem to be getting only five decimals, not
 six as promised (microseconds).  Not to worry, the microseconds are
-there (assuming your platform supports such granularity in first
+there (assuming your platform supports such granularity in the first
 place).  What is going on is that the default floating point format of
 Perl only outputs 15 digits.  In this case that means ten digits
 before the decimal separator and five after.  To see the microseconds
@@ -175,9 +177,11 @@ seconds and microseconds as two separate values.
 =item sleep ( $floating_seconds )
 
 Sleeps for the specified amount of seconds.  Returns the number of
-seconds actually slept (a floating point value).  This function can be
-imported, resulting in a nice drop-in replacement for the C<sleep>
+seconds actually slept (a floating point value).  This function can
+be imported, resulting in a nice drop-in replacement for the C<sleep>
 provided with perl, see the L</EXAMPLES> below.
+
+Note that the interaction between alarms and sleeps are unspecified.
 
 =item alarm ( $floating_seconds [, $interval_floating_seconds ] )
 
@@ -187,19 +191,21 @@ is optional and will be zero if unspecified, resulting in C<alarm()>-like
 behaviour.  This function can be imported, resulting in a nice drop-in
 replacement for the C<alarm> provided with perl, see the L</EXAMPLES> below.
 
-B<NOTE 1>: With some operating system and Perl release combinations
-C<SIGALRM> restarts C<select()>, instead of interuping it.  
-This means that an C<alarm()> followed by a C<select()>
-may together take the sum of the times specified for the the
-C<alarm()> and the C<select()>, not just the time of the C<alarm()>.
+B<NOTE 1>: With some combinations of operating systems and Perl
+releases C<SIGALRM> restarts C<select()>, instead of interrupting it.
+This means that an C<alarm()> followed by a C<select()> may together
+take the sum of the times specified for the the C<alarm()> and the
+C<select()>, not just the time of the C<alarm()>.
+
+Note that the interaction between alarms and sleeps are unspecified.
 
 =item setitimer ( $which, $floating_seconds [, $interval_floating_seconds ] )
 
 Start up an interval timer: after a certain time, a signal arrives,
-and more signals may keep arriving at certain intervals.  To disable a
-timer, use C<$floating_seconds> of zero.  If the C<$interval_floating_seconds>
-is set to zero (or unspecified), the timer is disabled B<after> the
-next delivered signal.
+and more signals may keep arriving at certain intervals.  To disable
+an "itimer", use C<$floating_seconds> of zero.  If the
+C<$interval_floating_seconds> is set to zero (or unspecified), the
+timer is disabled B<after> the next delivered signal.
 
 Use of interval timers may interfere with C<alarm()>, C<sleep()>,
 and C<usleep()>.  In standard-speak the "interaction is unspecified",

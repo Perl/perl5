@@ -1,5 +1,23 @@
 Revision history for Perl extension Time::HiRes.
 
+1.65
+	- one should not mix u?alarm and sleep (the tests modified
+	  by 1.65, #12 and #13, hung in Solaris), now we just busy
+	  loop executing an empty block
+	- in the documentation underline the unspecificity of mixing
+	  sleeps and alarms
+	- small spelling fixes
+
+1.64
+	- regenerate ppport.h with Devel::PPPort 3.03,
+	  now the MY_CXT_CLONE is defined in ppport.h,
+	  we no more need to do that.
+
+	- the test #12 would often hang in sigsuspend() (at least that's
+	  where Mac OS X' ktrace shows it hanging).  With the sleep()s
+	  changed to sleep(1)s, the tests still pass but no hang after
+	  a few hundred repeats.
+
 1.63
 	- Win32 and any ithread build: ppport.h didn't define
 	  MY_CXT_CLONE, which seems to be a Time-HiResism.
