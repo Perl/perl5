@@ -275,8 +275,9 @@ ok 125, $a eq 'xxxxefgh';
     ok 126, length($x) eq 3;
     $x = substr($x,1,1);
     ok 127, $x eq "\x{263a}";
-    ok 128, length($x) eq 1;
+    $x = $x x 2;
+    ok 128, length($x) eq 2;
     substr($x,0,1) = "abcd";
-    ok 129, $x eq "abcd";
-    ok 130, length($x) eq 4;
+    ok 129, $x eq "abcd\x{263a}";
+    ok 130, length($x) eq 5;
 }

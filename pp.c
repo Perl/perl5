@@ -1076,10 +1076,10 @@ PP(pp_repeat)
 	    SP -= items;
     }
     else {	/* Note: mark already snarfed by pp_list */
-	SV *tmpstr;
+	SV *tmpstr = POPs;
 	STRLEN len;
+	bool isutf = SvUTF8(tmpstr) ? TRUE : FALSE;
 
-	tmpstr = POPs;
 	SvSetSV(TARG, tmpstr);
 	SvPV_force(TARG, len);
 	if (count != 1) {
@@ -1092,7 +1092,10 @@ PP(pp_repeat)
 	    }
 	    *SvEND(TARG) = '\0';
 	}
-	(void)SvPOK_only(TARG);
+	if (isutf)
+	    (void)SvPOK_only_UTF8(TARG);
+	else
+	    (void)SvPOK_only(TARG);
 	PUSHTARG;
     }
     RETURN;
