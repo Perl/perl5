@@ -62,13 +62,18 @@
 /* Older AIX C compilers cannot deal with C++ double-slash comments in
    the ibmcxx and/or xlC includes.  Since we only need a single file,
    be more fine-grained about what's included <hirschs@btv.ibm.com> */
+
 #ifdef USE_libC /* The define comes, when it comes, from hints/aix.pl. */
 #   define LOAD   loadAndInit
 #   define UNLOAD terminateAndUnload
-#   if defined(USE_xlC_load_h)
-#       include "/usr/lpp/xlC/include/load.h"
+#   if defined(USE_vacpp_load_h)
+#       include "/usr/vacpp/include/load.h"
 #   elif defined(USE_ibmcxx_load_h)
 #       include "/usr/ibmcxx/include/load.h"
+#   elif defined(USE_xlC_load_h)
+#       include "/usr/lpp/xlC/include/load.h"
+#   else
+#       include "/usr/include/load.h"
 #   endif
 #else
 #   define LOAD   load
