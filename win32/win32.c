@@ -253,7 +253,8 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
 	dTHX;
 	if (!*prev_pathp)
 	    *prev_pathp = sv_2mortal(newSVpvn("",0));
-	sv_catpvn(*prev_pathp, ";", 1);
+	else if (SvPVX(*prev_pathp))
+	    sv_catpvn(*prev_pathp, ";", 1);
 	sv_catpv(*prev_pathp, mod_name);
 	return SvPVX(*prev_pathp);
     }
