@@ -528,7 +528,7 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvNIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK| \
 						  SVp_IOK|SVp_NOK|SVf_IVisUV))
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #define assert_not_ROK(sv)	({assert(!SvROK(sv) || !SvRV(sv))}),
 #else
 #define assert_not_ROK(sv)	
@@ -1001,7 +1001,7 @@ scalar.
 #define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
 #define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
 
-#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 
 #  define SvIVx(sv) ({SV *nsv = (SV*)(sv); SvIV(nsv); })
 #  define SvUVx(sv) ({SV *nsv = (SV*)(sv); SvUV(nsv); })
@@ -1227,7 +1227,7 @@ Returns a pointer to the character buffer.
 #define SvPEEK(sv) ""
 #endif
 
-#define SvIMMORTAL(sv) ((sv)==&PL_sv_undef || (sv)==&PL_sv_yes || (sv)==&PL_sv_no)
+#define SvIMMORTAL(sv) ((sv)==&PL_sv_undef || (sv)==&PL_sv_yes || (sv)==&PL_sv_no || (sv)==&PL_sv_placeholder)
 
 #define boolSV(b) ((b) ? &PL_sv_yes : &PL_sv_no)
 

@@ -207,6 +207,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  endif
 #endif
 
+#if defined(__STRICT_ANSI__) && defined(PERL_GCC_PEDANTIC)
+#   define PERL_GCC_BRACE_GROUPS_FORBIDDEN
+#endif
+
 /*
  * STMT_START { statements; } STMT_END;
  * can be used as a single statement, as in
@@ -215,7 +219,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  * Trying to select a version that gives no warnings...
  */
 #if !(defined(STMT_START) && defined(STMT_END))
-# if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC) && !defined(__cplusplus)
+# if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__cplusplus)
 #   define STMT_START	(void)(	/* gcc supports ``({ STATEMENTS; })'' */
 #   define STMT_END	)
 # else
