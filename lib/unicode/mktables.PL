@@ -152,6 +152,21 @@ mkdir "Eq", 0777;
 # Jamo
 
     ['JamoShort',	'1',		'$short'],
+
+# Syllables
+
+    ['IsSylV',	'$syl eq "V"',		''],
+    ['IsSylU',	'$syl eq "U"',		''],
+    ['IsSylI',	'$syl eq "I"',		''],
+    ['IsSylA',	'$syl eq "A"',		''],
+    ['IsSylE',	'$syl eq "E"',		''],
+    ['IsSylC',	'$syl eq "C"',		''],
+    ['IsSylO',	'$syl eq "O"',		''],
+    ['IsSylWV',	'$syl eq "V"',		''],
+    ['IsSylWI',	'$syl eq "I"',		''],
+    ['IsSylWA',	'$syl eq "A"',		''],
+    ['IsSylWE',	'$syl eq "E"',		''],
+    ['IsSylWC',	'$syl eq "C"',		''],
 );
 
 # This is not written for speed...
@@ -222,6 +237,11 @@ sub proplist {
 	open(UD, "jamo2.txt") or warn "Can't open $table: $!";
 
 	$split = '($code, $short, $name) = split(/; */); $code =~ s/^U\+//;';
+    }
+    elsif ($table =~ /^IsSyl/) {
+	open(UD, "syllables.txt") or warn "Can't open $table: $!";
+
+	$split = '($code, $short, $syl) = split(/; */); $code =~ s/^U\+//;';
     }
     else {
 	open(UD, $UnicodeData) or warn "Can't open $UnicodeData: $!";

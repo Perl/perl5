@@ -698,7 +698,6 @@ lib/unicode/CombiningClass.pl			Unicode character database
 lib/unicode/Decomposition.pl			Unicode character database
 lib/unicode/Eq/Latin1				Unicode character database
 lib/unicode/Eq/Unicode				Unicode character database
-lib/unicode/EthiopicSyllables.txt		Unicode character database
 lib/unicode/In/AlphabeticPresentationForms.pl	Unicode character database
 lib/unicode/In/Arabic.pl			Unicode character database
 lib/unicode/In/ArabicPresentationForms-A.pl	Unicode character database
@@ -841,7 +840,6 @@ lib/unicode/Is/Zl.pl				Unicode character database
 lib/unicode/Is/Zp.pl				Unicode character database
 lib/unicode/Is/Zs.pl				Unicode character database
 lib/unicode/JamoShort.pl			Unicode character database
-lib/unicode/MakeEthiopicSyllables.PL		Unicode character database
 lib/unicode/Makefile				Unicode character database
 lib/unicode/Name.pl				Unicode character database
 lib/unicode/Number.pl				Unicode character database
@@ -859,6 +857,7 @@ lib/unicode/mktables.PL				Unicode character database generator
 lib/unicode/names2.txt				Unicode character database
 lib/unicode/props2.txt				Unicode character database
 lib/unicode/readme.txt				Unicode character database info
+lib/unicode/syllables.txt			Unicode character database
 lib/utf8.pm					Pragma to control Unicode support
 lib/utf8_heavy.pl				Support routines for utf8 pragma
 lib/validate.pl		Perl library supporting wholesale file mode validation
