@@ -122,14 +122,14 @@ T_PTRREF
 T_REF_IV_REF
 	if (sv_isa($arg, \"${type}\")) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
-	    $var = *($type *) tmp;
+	    $var = *INT2PTR($type *, tmp);
 	}
 	else
 	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_REF_IV_PTR
 	if (sv_isa($arg, \"${ntype}\")) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
-	    $var = ($type) tmp;
+	    $var = INT2PTR($type, tmp);
 	}
 	else
 	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")

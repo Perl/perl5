@@ -31,6 +31,164 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9447] By: jhi                                   on 2001/03/29  15:39:34
+        Log: Integrate perlio.
+     Branch: perl
+	  !> win32/makefile.mk
+____________________________________________________________________________
+[  9446] By: nick                                  on 2001/03/29  15:30:03
+        Log: Integrate win32/makefile.mk with mainline.
+     Branch: perlio
+	  !> win32/makefile.mk
+____________________________________________________________________________
+[  9445] By: nick                                  on 2001/03/29  15:27:32
+        Log: Fix breakage ... 
+     Branch: perlio
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9444] By: jhi                                   on 2001/03/29  15:03:08
+        Log: Subject: RE: Borland C++ for Win32 fixes; perl@9359 (also perl@9424)
+             From: "Konovalov, Vadim" <vkonovalov@lucent.com>
+             Date: Thu, 29 Mar 2001 10:32:59 +0400
+             Message-ID: <402099F49BEED211999700805FC7359FA8442D@ru0028exch01.spb.lucent.com>
+     Branch: perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9443] By: jhi                                   on 2001/03/29  15:02:12
+        Log: Integrate perlio.
+     Branch: perl
+	  +> win32/buildext.pl
+	  !> MANIFEST ext/PerlIO/Via/Via.xs perlio.c perlio.h sv.c
+	  !> t/io/utf8.t t/lib/io_scalar.t win32/makefile.mk
+____________________________________________________________________________
+[  9442] By: nick                                  on 2001/03/29  14:59:11
+        Log: Work in progress - determine win32 extensions to build via script.
+     Branch: perlio
+	   + win32/buildext.pl
+	   ! MANIFEST win32/makefile.mk
+____________________________________________________________________________
+[  9441] By: jhi                                   on 2001/03/29  14:51:47
+        Log: Reintroduce the use of external pwd.
+     Branch: perl
+	   ! t/lib/cwd.t
+____________________________________________________________________________
+[  9440] By: jhi                                   on 2001/03/29  14:42:58
+        Log: use warnings instead of -w.
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  9439] By: jhi                                   on 2001/03/29  14:41:52
+        Log: Subject: [PATCH h2xs.PL perl@9423] h2xs -w nits
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Thu, 29 Mar 2001 09:34:12 +0100 (BST)
+             Message-ID: <Pine.LNX.4.30.0103290929130.19409-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  9438] By: jhi                                   on 2001/03/29  14:39:38
+        Log: Subject: [PATCH perl@9424] minor pod nits
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 29 Mar 2001 14:43:05 +0100 (BST)
+             Message-Id: <200103291343.OAA10827@tempest.npl.co.uk>
+     Branch: perl
+	   ! pod/perlhack.pod pod/perliol.pod
+____________________________________________________________________________
+[  9437] By: jhi                                   on 2001/03/29  14:29:16
+        Log: Subject: [PATCH perl@9424] typemap cast warning
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 29 Mar 2001 13:58:47 +0100 (BST)
+             Message-Id: <200103291258.NAA09360@tempest.npl.co.uk>
+     Branch: perl
+	   ! lib/ExtUtils/typemap
+____________________________________________________________________________
+[  9436] By: jhi                                   on 2001/03/29  14:26:03
+        Log: Subject: [PATCH perl@9424] printf warning
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 29 Mar 2001 13:29:21 +0100 (BST)
+             Message-Id: <200103291229.NAA03968@tempest.npl.co.uk>
+     Branch: perl
+	   ! dump.c ext/Data/Dumper/Dumper.xs ext/Encode/Encode.xs
+	   ! ext/Storable/Storable.xs toke.c
+____________________________________________________________________________
+[  9435] By: nick                                  on 2001/03/29  14:23:31
+        Log: Win32 has name conflict with ERROR
+     Branch: perlio
+	   ! ext/PerlIO/Via/Via.xs
+____________________________________________________________________________
+[  9434] By: jhi                                   on 2001/03/29  14:17:48
+        Log: Subject: [PATCH: 9424] some tests (was Re: Perl5.7.*  Unicode/EBCDIC status.)
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 28 Mar 2001 19:09:57 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10103281858520.314137-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/charnames.t t/op/bop.t t/op/vec.t t/op/ver.t
+____________________________________________________________________________
+[  9433] By: jhi                                   on 2001/03/29  13:52:44
+        Log: test-prep target was missing.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9432] By: nick                                  on 2001/03/29  12:40:03
+        Log: Make as-shipped compiler default to MSVC6 
+     Branch: perlio
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9431] By: nick                                  on 2001/03/29  12:12:16
+        Log: Allow someone to write PerlIO::Array, PerlIO::Code, ...
+             akin to PerlIO::Scalar.
+     Branch: perlio
+	   ! perlio.c perlio.h
+____________________________________________________________________________
+[  9430] By: nick                                  on 2001/03/29  10:56:35
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> lib/File/Basename.pm lib/File/CheckTree.pm lib/File/Compare.pm
+	  !> lib/File/Copy.pm lib/File/DosGlob.pm lib/File/Find.pm
+	  !> lib/File/Path.pm lib/File/stat.pm t/lib/filecopy.t
+	  !> win32/makefile.mk win32/win32sck.c
+____________________________________________________________________________
+[  9429] By: nick                                  on 2001/03/29  09:03:43
+        Log: Noticed that two tests were skipped as perlio:: package
+             isn't there any more. Changed the skip condition.
+             Avoid core-dump if sv_utf8_upgrade() called on something
+             that does not become SvPOK after SvPV() (e.g. a ref).
+     Branch: perlio
+	   ! sv.c t/io/utf8.t t/lib/io_scalar.t
+____________________________________________________________________________
+[  9428] By: jhi                                   on 2001/03/29  01:31:47
+        Log: Subject: [PATCH] Enable warnings in File::* (was: B::Terse and warnings)
+             From: Benjamin Sugars <bsugars@canoe.ca> 
+             Date: Tue, 27 Mar 2001 16:27:38 -0500 (EST)
+             Message-ID: <Pine.LNX.4.21.0103271612250.2007-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! lib/File/Basename.pm lib/File/CheckTree.pm lib/File/Compare.pm
+	   ! lib/File/Copy.pm lib/File/DosGlob.pm lib/File/Find.pm
+	   ! lib/File/Path.pm lib/File/stat.pm t/lib/filecopy.t
+____________________________________________________________________________
+[  9427] By: jhi                                   on 2001/03/29  00:49:30
+        Log: Subject: Borland C++ for Win32 fixes; perl@9359 (also perl@9424)
+             From: "Vadim Konovalov" <watman@inbox.ru>
+             Date: Thu, 29 Mar 2001 01:50:12 +0400
+             Message-ID: <001c01c0b7d1$463dd880$5742983e@vad>
+     Branch: perl
+	   ! win32/makefile.mk win32/win32sck.c
+____________________________________________________________________________
+[  9426] By: gsar                                  on 2001/03/29  00:28:04
+        Log: dmake can only handle == and != in comparisons; support building
+             with Borland's VCL libraries (from Vadim Konovalov)
+     Branch: maint-5.6/perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9425] By: nick                                  on 2001/03/28  19:29:56
+        Log: Integrate (@snapshot)
+     Branch: perlio
+	  !> Changes Makefile.SH patchlevel.h t/lib/cwd.t
+____________________________________________________________________________
+[  9424] By: jhi                                   on 2001/03/28  19:03:16
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9423] By: jhi                                   on 2001/03/28  18:52:09
         Log: Rmdir lib/XS on cleanup.
      Branch: perl

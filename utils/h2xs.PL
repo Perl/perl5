@@ -35,6 +35,8 @@ $Config{startperl}
 
 print OUT <<'!NO!SUBS!';
 
+use warnings;
+
 =head1 NAME
 
 h2xs - convert .h C header files to Perl extensions
@@ -471,7 +473,9 @@ $opt_c = 1 if $opt_A;
 $opt_c = $opt_f = 1 if $opt_X;
 
 my %const_xsub = map { $_,1 } split(/,+/, $opt_s) if $opt_s;
-my $extralibs;
+
+my $extralibs = '';
+
 my @path_h;
 
 while (my $arg = shift) {
@@ -635,7 +639,8 @@ if( @path_h ){
 
 
 my ($ext, $nested, @modparts, $modfname, $modpname);
-(chdir 'ext', $ext = 'ext/') if -d 'ext';
+
+$ext = chdir 'ext' ? 'ext/' : '';
 
 if( $module =~ /::/ ){
 	$nested = 1;
@@ -896,7 +901,7 @@ sub AUTOLOAD {
     my \$constname;
     $tmp
     (\$constname = \$AUTOLOAD) =~ s/.*:://;
-    croak "&$module::constant not defined" if \$constname eq 'constant';
+    croak "&${module}::constant not defined" if \$constname eq 'constant';
     my \$val = constant(\$constname, \@_ ? \$_[0] : 0);
     if (\$! != 0) {
 	if (\$! =~ /Invalid/ || \$!{EINVAL}) {
@@ -1196,7 +1201,7 @@ END
   for my $n (@$list) {
     my $c = substr $n, $off, 1;
     $leading{$c} = [] unless exists $leading{$c};
-    push @{$leading{$c}}, substr $n, $off + 1;
+    push @{$leading{$c}}, $off < length $n ? substr $n,  $off + 1 : $n
   }
 
   if (keys(%leading) == 1) {
@@ -1287,7 +1292,7 @@ if( ! $opt_c ) {
 static int
 not_here(char *s)
 {
-    croak("$module::%s not implemented on this architecture", s);
+    croak("${module}::%s not implemented on this architecture", s);
     return -1;
 }
 
@@ -1298,8 +1303,7 @@ END
 
 print_tievar_subs(\*XS, $_, $vdecl_hash{$_}) for @vdecls;
 
-my $prefix;
-$prefix = "PREFIX = $opt_p" if defined $opt_p;
+my $prefix = defined $opt_p ? "PREFIX = $opt_p" : '';
 
 # Now switch from C to XS by issuing the first MODULE declaration:
 print XS <<"END";
@@ -1634,7 +1638,7 @@ sub normalize_type {		# Second arg: do not strip const's before \*
   else {
     $type =~ s/$ignore_mods//go;
   }
-  $type =~ s/([^\s\w])/ \1 /g;
+  $type =~ s/([^\s\w])/ $1 /g;
   $type =~ s/\s+$//;
   $type =~ s/^\s+//;
   $type =~ s/\s+/ /g;
@@ -1745,7 +1749,7 @@ EOC
   print PL <<END;
     'LIBS'		=> ['$extralibs'], # e.g., '-lm'
     'DEFINE'		=> '$opt_F', # e.g., '-DHAVE_SOMETHING'
-$Icomment    'INC'		=> '$I', # e.g., '$Ihelp-I/usr/include/other'
+$Icomment    'INC'		=> '$I', # e.g., '${Ihelp}-I/usr/include/other'
 END
 
   my $C = grep $_ ne "$modfname.c", (glob '*.c'), (glob '*.cc'), (glob '*.C');

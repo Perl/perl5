@@ -903,7 +903,7 @@ test_notty: test_prep
 utest ucheck: test_prep
 	PERL=./perl UTF8=-utf8 $(MAKE) _test
 
-# Backward compat.
+test-prep:	test_prep
 
 test-tty:	test_tty
 

@@ -97,7 +97,7 @@ PerlIOEncode_pushed(PerlIO *f, const char *mode, SV *arg)
   {
    e->enc = Nullsv;
    errno  = EINVAL;
-   Perl_warner(aTHX_ WARN_IO, "Cannot find encoding \"%_\"", arg);
+   Perl_warner(aTHX_ WARN_IO, "Cannot find encoding \"%"SVf"\"", arg);
    return -1;
   }
  SvREFCNT_inc(e->enc);
