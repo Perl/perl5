@@ -2096,7 +2096,7 @@ UTF-16 (UCS-2) encoded Perl files should now be read correctly.
 
 =item *
 
-The character tables have been updated to Unicode 3.1.1.
+The character tables have been updated to Unicode 3.2.0.
 
 =item *
 
