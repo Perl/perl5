@@ -625,7 +625,6 @@ ext/Unicode/Normalize/Changes	Unicode::Normalize
 ext/Unicode/Normalize/Makefile.PL	Unicode::Normalize
 ext/Unicode/Normalize/mkheader	Unicode::Normalize
 ext/Unicode/Normalize/Normalize.pm	Unicode::Normalize
-ext/Unicode/Normalize/Normalize.pod	Unicode::Normalize
 ext/Unicode/Normalize/Normalize.xs	Unicode::Normalize
 ext/Unicode/Normalize/README	Unicode::Normalize
 ext/Unicode/Normalize/t/func.t	Unicode::Normalize

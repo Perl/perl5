@@ -111,7 +111,7 @@ sub _getHexArray {
 
 sub _U_stringify {
   sprintf '"%s"', join '',
-    map sprintf("\\x%2x", $_), unpack 'C*', pack 'U*', @_;
+    map sprintf("\\x%02x", $_), unpack 'C*', pack 'U*', @_;
 }
 
 foreach my $hash (\%Canon, \%Compat) {
@@ -120,34 +120,11 @@ foreach my $hash (\%Canon, \%Compat) {
   }
 }
 
-sub utf8len {
-  my $uv = shift;
-  return $uv < 0x80 ? 1 :
-        $uv < 0x800 ? 2 :
-      $uv < 0x10000 ? 3 :
-     $uv < 0x110000 ? 4 :
-  croak "$PACKAGE: illegal char in the composite. utf-8 max is 0x10ffff.";
-}
-
-sub utfebcdiclen {
-  my $uv = shift;
-  return $uv < 0xA0 ? 1 :
-        $uv < 0x400 ? 2 :
-       $uv < 0x4000 ? 3 :
-      $uv < 0x40000 ? 4 :
-     $uv < 0x110000 ? 5 :
-  croak "$PACKAGE: illegal char in the composite. utf-8 max is 0x10ffff.";
-}
-
 my $prefix = "UNF_";
 
 my $structname = "${prefix}complist";
 
 our (%Comp1st, %CompList);
-
-my $errExpand = "$PACKAGE: A composable pair in %s "
-	. "is longer than the composite in bytes!\n"
-	. "%d + %d => %d\nQuit. Please inform the author...";
 
 foreach(sort keys %Compos) {
   my @a = unpack('U*', $_);
@@ -155,13 +132,6 @@ foreach(sort keys %Compos) {
   my $name = sprintf "${structname}_%06x", $a[0];
   $Comp1st{ $a[0] } = $name;
   $CompList{ $name }{ $a[1] } = $val;
-
-  if( utf8len($a[0]) + utf8len($a[1]) < utf8len($val) ) {
-    croak sprintf($errExpand, "utf-8", $a[0], $a[1], $val);
-  }
-  if( utfebcdiclen($a[0]) + utfebcdiclen($a[1]) < utfebcdiclen($val)) {
-    croak sprintf($errExpand, "utf-ebcdic", $a[0], $a[1], $val);
-  }
 }
 
 my $compinit =
