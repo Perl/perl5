@@ -102,11 +102,18 @@
 #endif
 
 #include <stdio.h>
+
 #ifdef USE_NEXT_CTYPE
+
+#if NX_CURRENT_COMPILER_RELEASE >= 400
+#include <objc/NXCType.h>
+#else /*  NX_CURRENT_COMPILER_RELEASE < 400 */
 #include <appkit/NXCType.h>
-#else
+#endif /*  NX_CURRENT_COMPILER_RELEASE >= 400 */
+
+#else /* !USE_NEXT_CTYPE */
 #include <ctype.h>
-#endif
+#endif /* USE_NEXT_CTYPE */
 
 #ifdef I_LOCALE
 #include <locale.h>
@@ -136,14 +143,16 @@
    proto.h instead.  I guess.  The patch had no explanation.
 */
 #ifdef MYMALLOC
-#   ifdef HIDEMYMALLOC
+#   ifndef DONT_HIDEMYMALLOC
 #	define malloc Mymalloc
 #	define realloc Myremalloc
 #	define free Myfree
+#	define calloc Mycalloc
 #   endif
 #   define safemalloc malloc
 #   define saferealloc realloc
 #   define safefree free
+#   define safecalloc calloc
 #endif
 
 #define MEM_SIZE Size_t
@@ -493,7 +502,7 @@
 #   define SLOPPYDIVIDE
 #endif
 
-#if defined(cray) || defined(convex) || defined (uts) || BYTEORDER > 0xffff
+#if defined(cray) || defined(convex) || BYTEORDER > 0xffff
 #   define HAS_QUAD
 #endif
 
@@ -505,7 +514,7 @@
 #   ifdef cray
 #	define Quad_t int
 #   else
-#	if defined(convex) || defined (uts)
+#	if defined(convex)
 #	    define Quad_t long long
 #	else
 #	    define Quad_t long
@@ -542,7 +551,7 @@ typedef struct hv HV;
 typedef struct cv CV;
 typedef struct regexp REGEXP;
 typedef struct gp GP;
-typedef struct sv GV;
+typedef struct gv GV;
 typedef struct io IO;
 typedef struct context CONTEXT;
 typedef struct block BLOCK;
@@ -581,8 +590,16 @@ typedef I32 (*filter_t) _((int, SV *, int));
 # if defined(VMS)
 #   include "vmsish.h"
 # else
-#   include "unixish.h"
+#   if defined(PLAN9)
+#     include "./plan9/plan9ish.h"
+#   else
+#     include "unixish.h"
+#   endif
 # endif
+#endif
+
+#ifndef SH_PATH			/* May be a variable. */
+#   define SH_PATH BIN_SH
 #endif
 
 #ifndef HAS_PAUSE
@@ -730,6 +747,9 @@ Gid_t getegid _((void));
 #endif
 
 #ifdef DEBUGGING
+#ifndef Perl_debug_log
+#define Perl_debug_log	stderr
+#endif
 #define YYDEBUG 1
 #define DEB(a)     			a
 #define DEBUG(a)   if (debug)		a
@@ -740,7 +760,7 @@ Gid_t getegid _((void));
 #define DEBUG_o(a) if (debug & 16)	a
 #define DEBUG_c(a) if (debug & 32)	a
 #define DEBUG_P(a) if (debug & 64)	a
-#define DEBUG_m(a) if (debug & 128)	a
+#define DEBUG_m(a) if (curinterp && debug & 128)	a
 #define DEBUG_f(a) if (debug & 256)	a
 #define DEBUG_r(a) if (debug & 512)	a
 #define DEBUG_x(a) if (debug & 1024)	a
@@ -854,7 +874,9 @@ I32 unlnk _((char*));
 #  define register
 # endif
 # ifdef MYMALLOC
-# define DEBUGGING_MSTATS
+#  ifndef DEBUGGING_MSTATS
+#   define DEBUGGING_MSTATS
+#  endif
 # endif
 # define PAD_SV(po) pad_sv(po)
 #else
@@ -867,9 +889,18 @@ I32 unlnk _((char*));
 
 /* global state */
 EXT PerlInterpreter *	curinterp;	/* currently running interpreter */
-#ifndef VMS  /* VMS doesn't use environ array */
+/* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
+#if !defined(VMS) && !(defined(NeXT) && defined(__DYNAMIC__))
 extern char **	environ;	/* environment variables supplied via exec */
-#endif
+#else
+#  if defined(NeXT) && defined(__DYNAMIC__)
+
+#  include <mach-o/dyld.h>
+EXT char *** environ_pointer;
+#  define environ (*environ_pointer)
+#  endif
+#endif /* environ processing */
+
 EXT int		uid;		/* current real user id */
 EXT int		euid;		/* current effective user id */
 EXT int		gid;		/* current real group id */
@@ -989,9 +1020,13 @@ EXT SV		sv_yes;
 #ifdef DOINIT
 EXT char *sig_name[] = { SIG_NAME };
 EXT int   sig_num[]  = { SIG_NUM };
+EXT SV	* psig_ptr[sizeof(sig_num)/sizeof(*sig_num)];
+EXT SV  * psig_name[sizeof(sig_num)/sizeof(*sig_num)];
 #else
 EXT char *sig_name[];
 EXT int   sig_num[];
+EXT SV  * psig_ptr[];
+EXT SV  * psig_name[];
 #endif
 
 #ifdef DOINIT
@@ -1148,6 +1183,7 @@ EXT CV *	compcv;		/* currently compiling subroutine */
 EXT AV *	comppad;	/* storage for lexically scoped temporaries */
 EXT AV *	comppad_name;	/* variable names for "my" variables */
 EXT I32		comppad_name_fill;/* last "introduced" variable offset */
+EXT I32		comppad_name_floor;/* start of vars in innermost block */
 EXT I32		min_intro_pending;/* start of vars to introduce */
 EXT I32		max_intro_pending;/* end of vars to introduce */
 EXT I32		padix;		/* max used index in current "register" pad */
@@ -1174,6 +1210,7 @@ EXT U32		hints;		/* various compilation flags */
 #define HINT_BLOCK_SCOPE	0x00000100
 #define HINT_STRICT_SUBS	0x00000200
 #define HINT_STRICT_VARS	0x00000400
+#define HINT_STRICT_UNTIE	0x00000800
 
 /**************************************************************************/
 /* This regexp stuff is global since it always happens within 1 expr eval */
@@ -1313,8 +1350,7 @@ IEXT HV *	Idebstash;	/* symbol table for perldb package */
 IEXT SV *	Icurstname;	/* name of current package */
 IEXT AV *	Ibeginav;	/* names of BEGIN subroutines */
 IEXT AV *	Iendav;		/* names of END subroutines */
-IEXT AV *	Ipad;		/* storage for lexically scoped temporaries */
-IEXT AV *	Ipadname;	/* variable names for "my" variables */
+IEXT HV *	Istrtab;	/* shared string table */
 
 /* memory management */
 IEXT SV **	Itmps_stack;
@@ -1360,6 +1396,7 @@ IEXT OP *	Ieval_start;
 
 /* runtime control stuff */
 IEXT COP * VOL	Icurcop IINIT(&compiling);
+IEXT COP *	Icurcopdb IINIT(NULL);
 IEXT line_t	Icopline IINIT(NOLINE);
 IEXT CONTEXT *	Icxstack;
 IEXT I32	Icxstack_ix IINIT(-1);
@@ -1368,7 +1405,7 @@ IEXT Sigjmp_buf	Itop_env;
 IEXT I32	Irunlevel;
 
 /* stack stuff */
-IEXT AV *	Istack;		/* THE STACK */
+IEXT AV *	Icurstack;		/* THE STACK */
 IEXT AV *	Imainstack;	/* the stack when nothing funny is happening */
 IEXT SV **	Imystack_base;	/* stack->array_ary */
 IEXT SV **	Imystack_sp;	/* stack pointer now */
@@ -1458,8 +1495,10 @@ EXT MGVTBL vtbl_envelem =	{0,	magic_setenv,
 					0,	magic_clearenv,
 							0};
 EXT MGVTBL vtbl_sig =	{0,	0,		 0, 0, 0};
-EXT MGVTBL vtbl_sigelem =	{0,	magic_setsig,
-					0,	0,	0};
+EXT MGVTBL vtbl_sigelem =	{magic_getsig,
+					magic_setsig,
+					0,	magic_clearsig,
+							0};
 EXT MGVTBL vtbl_pack =	{0,	0,	0,	magic_wipepack,
 							0};
 EXT MGVTBL vtbl_packelem =	{magic_getpack,
