@@ -539,9 +539,18 @@ first alternative includes everything from the last pattern delimiter
 the last alternative contains everything from the last "|" to the next
 pattern delimiter.  For this reason, it's common practice to include
 alternatives in parentheses, to minimize confusion about where they
-start and end.  Note however that "|" is interpreted as a literal with
-square brackets, so if you write C<[fee|fie|foe]> you're really only
-matching C<[feio|]>.
+start and end.
+
+Note that alternatives are tried from left to right, so the first
+alternative found for which the entire expression matches, is the one that
+is chosen. This means that alternatives are not necessarily greedy. For
+example: when mathing C<foo|foot> against "barefoot", only the "foo"
+part will match, as that is the first alternative tried, and it successfully
+matches the target string. (This might not seem important, but it is
+important when you are capturing matched text using parentheses.)
+
+Also note that "|" is interpreted as a literal within square brackets,
+so if you write C<[fee|fie|foe]> you're really only matching C<[feio|]>.
 
 Within a pattern, you may designate subpatterns for later reference by
 enclosing them in parentheses, and you may refer back to the I<n>th
