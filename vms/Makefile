@@ -31,11 +31,8 @@ E = .exe
 ARCH = VMS_VAX
 OBJVAL = $@
 
-.first:
-	@ $$@[.vms]fndvers.com "" "" "[.vms]Makefile"
-
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_003  #
+PERL_VERSION = 5_00301#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -57,6 +54,7 @@ DBGSPECFLAGS = /Show=(Source,Include,Expansion)
 # off SYSNAM for the MM[SK] subprocess doesn't hurt anything, so we do it
 # just in case.
 .first:
+	@ $$@[.vms]fndvers.com "" "" "[.vms]Makefile"
 	@ If f$$TrnLnm("Sys").eqs."" .and. f$$TrnLnm("VAXC$Include").eqs."" Then Define/NoLog SYS sys$$Library
 	@ If f$$TrnLnm("Sys").eqs."" .and. f$$TrnLnm("VAXC$Include").nes."" Then Define/NoLog SYS VAXC$Include
 
@@ -119,7 +117,7 @@ h3 = opcode.h, patchlevel.h, perl.h, perly.h, pp.h, proto.h, regcomp.h
 h4 = regexp.h, scope.h, sv.h, vmsish.h, util.h
 h = $(h1), $(h2), $(h3), $(h4) $(SOCKHLIS)
 
-c1 = av.c, scope.c, op.c, doop.c, doio.c, dump.c, hv.c, mg.c
+c1 = av.c, scope.c, op.c, doop.c, doio.c, dump.c, hv.c, mg.c, universal.c
 c2 = perl.c, perly.c, pp.c, pp_hot.c, pp_ctl.c, pp_sys.c, regcomp.c, regexec.c
 c3 = gv.c, sv.c, taint.c, toke.c, util.c, deb.c, run.c, globals.c, vms.c $(SOCKCLIS)
 
@@ -127,7 +125,7 @@ c = $(c1), $(c2), $(c3), miniperlmain.c, perlmain.c
 
 obj1 = perl$(O), gv$(O), toke$(O), perly$(O), op$(O), regcomp$(O), dump$(O), util$(O), mg$(O)
 obj2 = hv$(O), av$(O), run$(O), pp_hot$(O), sv$(O), pp$(O), scope$(O), pp_ctl$(O), pp_sys$(O)
-obj3 = doop$(O), doio$(O), regexec$(O), taint$(O), deb$(O), globals$(O), vms$(O) $(SOCKOBJ)
+obj3 = doop$(O), doio$(O), regexec$(O), taint$(O), deb$(O), universal$(O), globals$(O), vms$(O) $(SOCKOBJ)
 
 obj = $(obj1), $(obj2), $(obj3)
 
@@ -161,11 +159,11 @@ CRTLOPTS =,$(CRTL)/Options
 	$(CC) $(CFLAGS) $(MMS$SOURCE_NAME).c
 
 
-all : base extras archcorefiles preplibrary perlpods
+all : base extras libmods utils podxform archcorefiles preplibrary perlpods
 	@ $(NOOP)
 base : miniperl perl
 	@ $(NOOP)
-extras : Fcntl FileHandle Safe libmods utils podxform
+extras : Fcntl FileHandle IO Opcode libmods utils podxform
 	@ $(NOOP)
 libmods : [.lib]Config.pm $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm 
 	@ $(NOOP)
@@ -193,7 +191,7 @@ miniperl : $(DBG)miniperl$(E)
 	@ Continue
 miniperl_objs = miniperlmain$(O), $(obj)
 $(MINIPERL_EXE) :  miniperlmain$(O), $(DBG)libperl$(OLB) $(CRTL)
-	Link $(LINKFLAGS)/NoDebug/Exe=$@ miniperlmain$(O), $(DBG)libperl$(OLB)/Library/Include=globals $(CRTLOPTS)
+	Link $(LINKFLAGS)/NoDebug/NoMap/NoFull/NoCross/Exe=$@ miniperlmain$(O), $(DBG)libperl$(OLB)/Library/Include=globals $(CRTLOPTS)
 $(DBG)miniperl$(E) :  $(miniperl_objs), $(DBG)libperl$(OLB) $(CRTL)
 	Link $(LINKFLAGS)/Exe=$@ miniperlmain$(O),$(DBG)libperl$(OLB)/Library/Include=globals  $(CRTLOPTS)
 
@@ -253,24 +251,36 @@ $(ARCHDIR)config.pm : [.lib]config.pm
 	@ If f$$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
 	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]DynaLoader.pm
 
-Safe : [.lib]Safe.pm [.lib.auto.Safe]Safe$(E)
+Opcode : [.lib]Opcode.pm [.lib]ops.pm [.lib]Safe.pm [.lib.auto.Opcode]Opcode$(E)
 	@ $(NOOP)
 
-[.lib]Safe.pm : [.ext.Safe]Makefile
+[.lib]Opcode.pm : [.ext.Opcode]Makefile
 	@ If f$$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
-	@ Set Default [.ext.Safe]
+	@ Set Default [.ext.Opcode]
 	$(MMS)
 	@ Set Default [--]
 
-[.lib.auto.Safe]Safe$(E) : [.ext.Safe]Makefile
-	@ Set Default [.ext.Safe]
+[.lib]ops.pm : [.ext.Opcode]Makefile
+	@ If f$$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.Opcode]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib]Safe.pm : [.ext.Opcode]Makefile
+	@ If f$$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.Opcode]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.auto.Opcode]Opcode$(E) : [.ext.Opcode]Makefile
+	@ Set Default [.ext.Opcode]
 	$(MMS)
 	@ Set Default [--]
 
 # Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
 # ${@} necessary to distract different versions of MM[SK]/make
-[.ext.Safe]Makefile : [.ext.Safe]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm perlshr$(E)
-	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Safe]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
+[.ext.Opcode]Makefile : [.ext.Opcode]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
+	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Opcode]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
 FileHandle : [.lib]FileHandle.pm [.lib.auto.FileHandle]FileHandle$(E)
 	@ $(NOOP)
@@ -288,7 +298,7 @@ FileHandle : [.lib]FileHandle.pm [.lib.auto.FileHandle]FileHandle$(E)
 
 # Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
 # ${@} necessary to distract different versions of MM[SK]/make
-[.ext.FileHandle]Makefile : [.ext.FileHandle]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm perlshr$(E)
+[.ext.FileHandle]Makefile : [.ext.FileHandle]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.FileHandle]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
 Fcntl : [.lib]Fcntl.pm [.lib.auto.Fcntl]Fcntl$(E)
@@ -307,8 +317,57 @@ Fcntl : [.lib]Fcntl.pm [.lib.auto.Fcntl]Fcntl$(E)
 
 # Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
 # ${@} necessary to distract different versions of MM[SK]/make
-[.ext.Fcntl]Makefile : [.ext.Fcntl]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm perlshr$(E)
+[.ext.Fcntl]Makefile : [.ext.Fcntl]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Fcntl]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
+
+IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]Seekable.pm [.lib.IO]Socket.pm [.lib.auto.IO]IO$(E)
+	@ $(NOOP)
+
+[.lib]IO.pm : [.ext.IO]Makefile
+	@ If f$$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.IO]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.IO]File.pm : [.ext.IO]Makefile
+	@ If f$$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.IO]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.IO]Handle.pm : [.ext.IO]Makefile
+	@ If f$$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.IO]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.IO]Pipe.pm : [.ext.IO]Makefile
+	@ If f$$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.IO]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.IO]Seekable.pm : [.ext.IO]Makefile
+	@ If f$$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.IO]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.IO]Socket.pm : [.ext.IO]Makefile
+	@ If f$$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.IO]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.auto.IO]IO$(E) : [.ext.IO]Makefile
+	@ Set Default [.ext.IO]
+	$(MMS)
+	@ Set Default [--]
+
+# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
+# ${@} necessary to distract different versions of MM[SK]/make
+[.ext.IO]Makefile : [.ext.IO]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
+	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.IO]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
 [.lib.VMS]Filespec.pm : [.vms.ext]Filespec.pm
 	@ If f$$Search("[.lib]VMS.Dir").eqs."" Then Create/Directory [.lib.VMS]
@@ -534,7 +593,7 @@ perly$(O) : perly.c, perly.h, $(h)
 	$(CC) $(CFLAGS) perly.c
 
 test : all
-	- @[.VMS]Test.Com
+	- @[.VMS]Test.Com "$(E)"
 
 # CORE subset for MakeMaker, so we can build Perl without sources
 # Should move to VMS installperl when we get one
@@ -817,6 +876,29 @@ mg$(O) : scope.h
 mg$(O) : sv.h
 mg$(O) : vmsish.h
 mg$(O) : util.h
+universal$(O) : EXTERN.h
+universal$(O) : av.h
+universal$(O) : config.h
+universal$(O) : cop.h
+universal$(O) : cv.h
+universal$(O) : embed.h
+universal$(O) : form.h
+universal$(O) : gv.h
+universal$(O) : handy.h
+universal$(O) : hv.h
+universal$(O) : mg.h
+universal$(O) : op.h
+universal$(O) : opcode.h
+universal$(O) : perl.h
+universal$(O) : perly.h
+universal$(O) : pp.h
+universal$(O) : proto.h
+universal$(O) : regexp.h
+universal$(O) : scope.h
+universal$(O) : sv.h
+universal$(O) : vmsish.h
+universal$(O) : util.h
+universal$(O) : universal.c
 perl$(O) : EXTERN.h
 perl$(O) : av.h
 perl$(O) : config.h
@@ -1291,7 +1373,7 @@ tidy : cleanlis
 	- If f$$Search("Perlshr_Gbl*.Mar;-1")   .nes."" Then Purge/NoConfirm/Log Perlshr_Gbl*.Mar
 	- If f$$Search("[.Ext.DynaLoader]DL_VMS$(O);-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O)
 	- If f$$Search("[.Ext.DynaLoader]DL_VMS.C;-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C
-	- If f$$Search("[.Ext.Safe...];-1").nes."" Then Purge/NoConfirm/Log [.Ext.Safe]
+	- If f$$Search("[.Ext.Opcode...];-1").nes."" Then Purge/NoConfirm/Log [.Ext.Opcode]
 	- If f$$Search("[.Ext.FileHandle...];-1").nes."" Then Purge/NoConfirm/Log [.Ext.FileHandle]
 	- If f$$Search("[.VMS.Ext...]*.C;-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*.C
 	- If f$$Search("[.VMS.Ext...]*$(O);-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*$(O)
@@ -1314,7 +1396,10 @@ clean : tidy
 	Set Default [.ext.FileHandle]
 	- $(MMS) clean
 	Set Default [--]
-	Set Default [.ext.Safe]
+	Set Default [.ext.IO]
+	- $(MMS) clean
+	Set Default [--]
+	Set Default [.ext.Opcode]
 	- $(MMS) clean
 	Set Default [--]
 	- If f$$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
@@ -1344,13 +1429,17 @@ realclean : clean
 	Set Default [.ext.FileHandle]
 	- $(MMS) realclean
 	Set Default [--]
-	Set Default [.ext.Safe]
+	Set Default [.ext.IO]
+	- $(MMS) realclean
+	Set Default [--]
+	Set Default [.ext.Opcode]
 	- $(MMS) realclean
 	Set Default [--]
 	- If f$$Search("*$(OLB)").nes."" Then Delete/NoConfirm/Log *$(OLB);*
 	- If f$$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"
 	- If f$$Search("[.Lib]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]DynaLoader.pm;*
+	- If f$$Search("[.Lib]Socket.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Socket.pm;*
 	- If f$$Search("[.Lib]Config.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Config.pm;*
 	- If f$$Search("[.Lib]perlbug.").nes."" Then Delete/NoConfirm/Log [.Lib]perlbug.;*
 	- If f$$Search("$(ARCHDIR)Config.pm").nes."" Then Delete/NoConfirm/Log $(ARCHDIR)Config.pm;*
