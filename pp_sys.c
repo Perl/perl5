@@ -448,7 +448,7 @@ PP(pp_die)
     }
     else {
 	tmpsv = TOPs;
-	tmps = SvROK(tmpsv) ? Nullch : SvPV(tmpsv, len);
+        tmps = (SvROK(tmpsv) && PL_in_eval) ? Nullch : SvPV(tmpsv, len);
     }
     if (!tmps || !len) {
   	SV *error = ERRSV;
