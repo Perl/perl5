@@ -459,6 +459,11 @@ perl_destruct(pTHXx)
 
 	DEBUG_P(debprofdump());
 
+#if defined(PERLIO_LAYERS)
+	/* No more IO - including error messages ! */
+	PerlIO_cleanup(aTHX);
+#endif
+
 	/* The exit() function will do everything that needs doing. */
         return STATUS_NATIVE_EXPORT;;
     }
@@ -800,7 +805,7 @@ perl_destruct(pTHXx)
     if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ WARN_INTERNAL,"Scalars leaked: %ld\n", (long)PL_sv_count);
 
-#if 1 && defined(PERLIO_LAYERS)
+#if defined(PERLIO_LAYERS)
     /* No more IO - including error messages ! */
     PerlIO_cleanup(aTHX);
 #endif
