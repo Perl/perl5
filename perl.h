@@ -1082,6 +1082,16 @@ int sockatmark(int);
 typedef IVTYPE IV;
 typedef UVTYPE UV;
 
+#ifdef INT32_MIN_BROKEN
+#  undef  INT32_MIN
+#  define INT32_MIN (-2147483647-1)
+#endif
+
+#ifdef INT64_MIN_BROKEN
+#  undef  INT64_MIN
+#  define INT64_MIN (-9223372036854775807LL-1)
+#endif
+
 #if defined(USE_64_BIT_INT) && defined(HAS_QUAD)
 #  if QUADKIND == QUAD_IS_INT64_T && defined(INT64_MAX)
 #    define IV_MAX INT64_MAX

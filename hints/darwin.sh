@@ -41,6 +41,25 @@ optimize='-O3';
 # We have a prototype for telldir.
 ccflags="${ccflags} -pipe -fno-common -DHAS_TELLDIR_PROTOTYPE";
 
+# At least OS X 10.0.3:
+#
+# # define INT32_MIN -2147483648
+# int main () {
+#  double a = INT32_MIN;
+#  printf ("INT32_MIN=%g\n", a);
+#  return 0;
+# }
+# will output:
+# INT32_MIN=2.14748e+09
+# Note that the INT32_MIN has become positive.
+# INT32_MIN is set in /usr/include/stdint.h by:
+# #define INT32_MIN        -2147483648
+# which seems to break the gcc.  Defining INT32_MIN as (-2147483647-1)
+# seems to work.  INT64_MIN seems to be similarly broken.
+# -- Nicholas Clark, Ken Williams, and Edward Moy
+#
+ccflags="${ccflags} -DINT32_MIN_BROKEN -DINT64_MIN_BROKEN"
+
 # For Errno.
 cppflags='-traditional-cpp';
 
