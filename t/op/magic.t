@@ -47,6 +47,7 @@ $Is_Cygwin   = $^O eq 'cygwin';
 $Is_MacOS    = $^O eq 'MacOS';
 $Is_MPE      = $^O eq 'mpeix';		
 $Is_miniperl = $ENV{PERL_CORE_MINITEST};
+$Is_BeOS     = $^O eq 'beos';
 
 $PERL = ($Is_NetWare            ? 'perl'   :
 	 ($Is_MacOS || $Is_VMS) ? $^X      :
@@ -249,12 +250,14 @@ EOF
     ok chmod(0755, $script), $!;
     $_ = ($Is_MacOS || $Is_VMS) ? `$perl $script` : `$script`;
     s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
+    s{./$script}{$script} if $Is_BeOS; # revert BeOS execvp() side-effect
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
     s{is perl}{is $perl}; # for systems where $^X is only a basename
     s{\\}{/}g;
     ok((($Is_MSWin32 || $Is_os2) ? uc($_) eq uc($s1) : $_ eq $s1), " :$_:!=:$s1:");
     $_ = `$perl $script`;
     s/\.exe//i if $Is_Dos or $Is_os2;
+    s{./$perl}{$perl} if $Is_BeOS; # revert BeOS execvp() side-effect
     s{\\}{/}g;
     ok((($Is_MSWin32 || $Is_os2) ? uc($_) eq uc($s1) : $_ eq $s1), " :$_:!=:$s1: after `$perl $script`");
     ok unlink($script), $!;

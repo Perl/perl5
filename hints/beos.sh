@@ -39,13 +39,36 @@ d_syserrlst='undef'
 # large negative numbers really kind of suck in arrays.
 
 # Sockets didn't use to be real sockets but BONE changes this.
-# How does one test for BONEness?
-if [ ! -f /some/bone/file.h ]; then
+if [ ! -f /boot/develop/headers/be/bone/sys/socket.h ]; then
     d_socket='undef'
     d_gethbyaddr='undef'
     d_gethbyname='undef'
     d_getsbyname='undef'
+
+	libs='-lnet'
 fi
+
+# There's a third party flock() emulation. Check, if it is available.
+echo "#include <flock.h>" > try.c
+if cc -E $CFLAGS try.c 2> /dev/null | grep "flock.*("; then
+    d_flock='define'
+    d_flockproto='define'
+    libs="$libs -lflock"
+    ldflags="$ldflags -L/boot/home/config/lib"
+else
+	cat << 'EOM' >&4
+
+I couldn't find a <flock.h> header defining a flock() prototype. That header
+comes with the flock server package (available on BeBits). You have to add
+the path to the directory containing the header via the environment variable
+CFLAGS (should contain -I</path/to/dir/of/flock/header>). Perl will be compiled
+without flock() support, if the flock server package is not installed or the
+header not found.
+
+EOM
+
+fi
+rm try.c
 
 ld='gcc'
 
@@ -55,8 +78,6 @@ case "$ldlibpthname" in
 '') ldlibpthname=LIBRARY_PATH ;;
 esac
 
-# the waitpid() wrapper
+# the waitpid() wrapper (among other things)
 archobjs="beos.o"
 test -f beos.c || cp beos/beos.c .
-
-

@@ -208,7 +208,7 @@ sub write_errno_pm {
 
     close(CPPI);
 
-    unless ($^O eq 'MacOS') {	# trust what we have
+    unless ($^O eq 'MacOS' || $^O eq 'beos') {	# trust what we have / get later
     # invoke CPP and read the output
 
 	if ($^O eq 'VMS') {
@@ -248,17 +248,19 @@ sub write_errno_pm {
     # Many of the E constants (including ENOENT, which is being
     # used in the Perl test suite a lot), are available only as
     # enums in BeOS, so compiling and executing some code is about
-    # only way to find out what the numeric Evalues are.
+    # only way to find out what the numeric Evalues are. In fact above, we
+    # didn't even bother to get the values of the ones that have numeric
+    # values, since we can get all of them here, anyway.
 
     if ($^O eq 'beos') {
 	if (open(C, ">errno.c")) {
-	    my @zero = grep { !$err{$_} } keys %err;
+	    my @allerrs = keys %err;
 	    print C <<EOF;
 #include <errno.h>
 #include <stdio.h>
 int main() {
 EOF
-            for (@zero) {
+            for (@allerrs) {
 		print C qq[printf("$_ %d\n", $_);]
 	    }
             print C "}\n";
