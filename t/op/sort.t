@@ -2,7 +2,7 @@
 
 # $RCSfile: sort.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:24 $
 
-print "1..10\n";
+print "1..14\n";
 
 sub backwards { $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 
@@ -49,3 +49,20 @@ $sub = 'backwards';
 $x = join('', sort $sub @harry);
 print ($x eq 'xdogcatCainAbel' ? "ok 10\n" : "not ok 10\n");
 
+# literals, combinations
+
+@b = sort (4,1,3,2);
+print ("@b" eq '1 2 3 4' ? "ok 11\n" : "not ok 11\n");
+print "# x = '@b'\n";
+
+@b = sort grep { $_ } (4,1,3,2);
+print ("@b" eq '1 2 3 4' ? "ok 12\n" : "not ok 12\n");
+print "# x = '@b'\n";
+
+@b = sort map { $_ } (4,1,3,2);
+print ("@b" eq '1 2 3 4' ? "ok 13\n" : "not ok 13\n");
+print "# x = '@b'\n";
+
+@b = sort reverse (4,1,3,2);
+print ("@b" eq '1 2 3 4' ? "ok 14\n" : "not ok 14\n");
+print "# x = '@b'\n";
