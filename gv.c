@@ -759,7 +759,7 @@ I32 sv_type;
 		SPAGAIN;
 		stash = gv_stashpvn("Errno",5,FALSE);
 		if (!stash || !(gv_fetchmethod(stash, "TIEHASH")))
-		    croak("Can't use %%! because Errno.pm is not avaliable");
+		    croak("Can't use %%! because Errno.pm is not available");
 	    }
 	}
 	goto magicalize;

@@ -59,6 +59,7 @@ close READER;
 $SIG{'PIPE'} = 'broken_pipe';
 
 sub broken_pipe {
+    $SIG{'PIPE'} = 'IGNORE';       # loop preventer
     print "ok 7\n";
 }
 

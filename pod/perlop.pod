@@ -601,10 +601,15 @@ a transliteration, the first ten of these sequences may be used.
     \L		lowercase till \E
     \U		uppercase till \E
     \E		end case modification
-    \Q		quote regexp metacharacters till \E
+    \Q		quote non-word characters till \E
 
 If C<use locale> is in effect, the case map used by C<\l>, C<\L>, C<\u>
 and C<\U> is taken from the current locale.  See L<perllocale>.
+
+You cannot include a literal C<$> or C<@> within a C<\Q> sequence. 
+An unescaped C<$> or C<@> interpolates the corresponding variable, 
+while escaping will cause the literal string C<\$> to be inserted.
+You'll need to write something like C<m/\Quser\E\@\Qhost/>. 
 
 Patterns are subject to an additional level of interpretation as a
 regular expression.  This is done as a second pass, after variables are
@@ -681,9 +686,9 @@ successfully matched regular expression is used instead.
 If used in a context that requires a list value, a pattern match returns a
 list consisting of the subexpressions matched by the parentheses in the
 pattern, i.e., (C<$1>, $2, $3...).  (Note that here $1 etc. are also set, and
-that this differs from Perl 4's behavior.)  If the match fails, a null
-array is returned.  If the match succeeds, but there were no parentheses,
-a list value of (1) is returned.
+that this differs from Perl 4's behavior.)  If there are no parentheses,
+the return value is the list C<(1)> for success or C<('')> upon failure.
+With parentheses, C<()> is returned upon failure.
 
 Examples:
 

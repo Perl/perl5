@@ -115,7 +115,9 @@ call
 
 	timethis(COUNT, VALUE, KEY, STYLE)
 
-The Count can be zero or negative, see timethis().
+The routines are called in string comparison order of KEY.
+
+The COUNT can be zero or negative, see timethis().
 
 =item timediff ( T1, T2 )
 
