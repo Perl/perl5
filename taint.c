@@ -80,9 +80,25 @@ Perl_taint_env(pTHX)
 	NULL
     };
 
-    /* Don't bother if there's no %ENV hash */
-    if (!PL_envgv || !GvHV(PL_envgv))
+    /* Don't bother if there's no *ENV glob */
+    if (!PL_envgv)
 	return;
+    /* If there's no %ENV hash of if it's not magical, croak, because
+     * it probably doesn't reflect the actual environment */
+    if (!GvHV(PL_envgv) || !(SvRMAGICAL(GvHV(PL_envgv))
+	    && mg_find((SV*)GvHV(PL_envgv), PERL_MAGIC_env))) {
+	bool was_tainted = PL_tainted;
+	char *name = GvENAME(PL_envgv);
+	PL_tainted = TRUE;
+	if (strEQ(name,"ENV"))
+	    /* hash alias */
+	    taint_proper("%%ENV is aliased to %s%s", "another variable");
+	else
+	    /* glob alias: report it in the error message */
+	    taint_proper("%%ENV is aliased to %%%s%s", name);
+	/* this statement is reached under -t or -U */
+	PL_tainted = was_tainted;
+    }
 
 #ifdef VMS
     {
@@ -99,9 +115,7 @@ Perl_taint_env(pTHX)
 	    TAINT;
 	    taint_proper("Insecure %s%s", "$ENV{DCL$PATH}");
 	}
-	if (SvMAGICAL(*svp)
-		&& (mg = mg_find(*svp, PERL_MAGIC_envelem))
-		&& MgTAINTEDDIR(mg)) {
+	if ((mg = mg_find(*svp, PERL_MAGIC_envelem)) && MgTAINTEDDIR(mg)) {
 	    TAINT;
 	    taint_proper("Insecure directory in %s%s", "$ENV{DCL$PATH}");
 	}
@@ -116,9 +130,7 @@ Perl_taint_env(pTHX)
 	    TAINT;
 	    taint_proper("Insecure %s%s", "$ENV{PATH}");
 	}
-	if (SvMAGICAL(*svp)
-		&& (mg = mg_find(*svp, PERL_MAGIC_envelem))
-		&& MgTAINTEDDIR(mg)) {
+	if ((mg = mg_find(*svp, PERL_MAGIC_envelem)) && MgTAINTEDDIR(mg)) {
 	    TAINT;
 	    taint_proper("Insecure directory in %s%s", "$ENV{PATH}");
 	}

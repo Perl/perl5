@@ -984,13 +984,12 @@ else
 }
 
 {
-    # test with a non-magical %ENV (and non-magical %ENV elements)
-    our %nonmagicalenv = ( PATH => $TAINT );
+    # [perl #24291] this used to dump core
+    our %nonmagicalenv = ( PATH => "util" );
     local *ENV = \%nonmagicalenv;
     eval { system("lskdfj"); };
-    test 207, $@ =~ /Insecure \$ENV{PATH} while running with -T switch/;
-    # [perl #24291] this used to dump core
-    %nonmagicalenv = ( PATH => "util" );
+    test 207, $@ =~ /^%ENV is aliased to another variable while running with -T switch/;
+    local *ENV = *nonmagicalenv;
     eval { system("lskdfj"); };
-    test 208, 1;
+    test 208, $@ =~ /^%ENV is aliased to %nonmagicalenv while running with -T switch/;
 }

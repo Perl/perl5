@@ -1387,6 +1387,12 @@ a regular expression without specifying the property name.
 (F) While under the C<use filetest> pragma, switching the real and
 effective uids or gids failed.
 
+=item %ENV is aliased to %s
+
+(F) You're running under taint mode, and the C<%ENV> variable has been
+aliased to another hash, so it doesn't reflect anymore the state of the
+program's environment. This is potentially insecure.
+
 =item Error converting file specification %s
 
 (F) An error peculiar to VMS.  Because Perl may have to deal with file
