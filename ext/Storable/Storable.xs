@@ -675,7 +675,7 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 #define GETMARK(x) do {							\
 	if (!cxt->fio)								\
 		MBUF_GETC(x);							\
-! 	else if ((int) (x = PerlIO_getc(cxt->fio)) == EOF)	\
+	else if ((int) (x = PerlIO_getc(cxt->fio)) == EOF)	\
 		return (SV *) 0;						\
 } while (0)
 
