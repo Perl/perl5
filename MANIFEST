@@ -32,6 +32,7 @@ Porting/p4desc		Smarter 'p4 describe', outputs diffs for new files
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
+Porting/repository.pod	How to use the Perl repository
 README			The Instructions
 README.Y2K		Notes about Year 2000 concerns
 README.aix		Notes about AIX port
