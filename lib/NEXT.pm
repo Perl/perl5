@@ -1,5 +1,5 @@
 package NEXT;
-$VERSION = '0.60';
+$VERSION = '0.60_01';
 use Carp;
 use strict;
 
@@ -32,7 +32,9 @@ sub NEXT::ELSEWHERE::ordered_ancestors
 sub AUTOLOAD
 {
 	my ($self) = @_;
-	my $caller = (caller(1))[3]; 
+	my $depth = 1;
+	until ((caller($depth))[3] !~ /^\(eval\)$/) { $depth++ }
+	my $caller = (caller($depth))[3];
 	my $wanted = $NEXT::AUTOLOAD || 'NEXT::AUTOLOAD';
 	undef $NEXT::AUTOLOAD;
 	my ($caller_class, $caller_method) = $caller =~ m{(.*)::(.*)}g;
@@ -94,7 +96,9 @@ package EVERY;			@ISA = 'NEXT';
 sub AUTOLOAD
 {
 	my ($self) = @_;
-	my $caller = (caller(1))[3]; 
+	my $depth = 1;
+	until ((caller($depth))[3] !~ /^\(eval\)$/) { $depth++ }
+	my $caller = (caller($depth))[3];
 	my $wanted = $EVERY::AUTOLOAD || 'EVERY::AUTOLOAD';
 	undef $EVERY::AUTOLOAD;
 	my ($wanted_class, $wanted_method) = $wanted =~ m{(.*)::(.*)}g;
