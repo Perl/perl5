@@ -2385,8 +2385,8 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, 0, PL_compiling.cop_filegv);
     rop = doeval(G_SCALAR, startop);
-    POPEVAL(cx);
     POPBLOCK(cx,PL_curpm);
+    POPEVAL(cx);
 
     (*startop)->op_type = OP_NULL;
     (*startop)->op_ppaddr = ppaddr[OP_NULL];
