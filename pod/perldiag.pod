@@ -1639,7 +1639,7 @@ Interpretation of the octal number stopped before the 8 or 9.
 =item Illegal switch in PERL5OPT: %s
 
 (X) The PERL5OPT environment variable may only be used to set the
-following switches: B<-[DIMUdmw]>.
+following switches: B<-[DIMUdmtw]>.
 
 =item Ill-formed CRTL environ value "%s"
 
