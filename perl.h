@@ -1455,7 +1455,9 @@ typedef pthread_key_t	perl_key;
  * XXX the default needs a Configure test, as it may not work everywhere.
  */
 #ifndef PERL_FLUSHALL_FOR_CHILD
-#define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
+# if (defined(USE_STDIO) && defined(FFLUSH_NULL)) || defined(USE_SFIO)
+#  define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
+# endif
 #endif
 
 /* Some unistd.h's give a prototype for pause() even though

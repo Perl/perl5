@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed May 12 01:15:37 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Wed May 12 12:24:25 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -572,6 +572,7 @@ lddlflags=''
 usedl=''
 doublesize=''
 ebcdic=''
+fflushNULL=''
 fpostype=''
 gidtype=''
 groupstype=''
@@ -10917,6 +10918,53 @@ $rm -f tebcdic.c tebcdic
 set ebcdic
 eval $setvar
 
+: check for fflush NULL behaviour
+case "$fflushNULL" in
+'') $cat <<EOM
+
+Checking to see whether fflush(NULL) flushes all pending stdio output...
+EOM
+	$cat >try.c <<EOCP
+#include <stdio.h>
+int main() {
+  FILE* p = fopen("try.out", "w");
+  fputc('x', p);
+  fflush(NULL);
+  _exit(0);
+}
+EOCP
+	set try
+	$rm -f try.out
+	if eval $compile_ok; then
+		case "`$cat try.out`" in
+		x)	cat >&4 <<EOM
+Your fflush(NULL) works okay.
+EOM
+			fflushNULL=undef
+			;;
+		'')	cat >&4 <<EOM
+Your fflush(NULL) isn't working (contrary to ANSI C).
+EOM
+			fflushNULL=undef
+			;;
+		*)	cat >&4 <<EOM
+Cannot figure out whether your fflush(NULL) works or not.
+I'm assuming it doesn't (contrary to ANSI C).
+EOM
+			fflushNULL=undef
+			;;
+		esac
+	fi
+	$rm -f try.* try
+	;;
+$define|true|[yY]*)
+	fflushNULL=define
+	;;
+*)
+	fflushNULL=undef
+	;;
+esac
+
 : see what type file positions are declared as in the library
 rp="What is the type for file position used by fsetpos()?"
 set fpos_t fpostype long stdio.h sys/types.h
@@ -13004,6 +13052,7 @@ eunicefix='$eunicefix'
 exe_ext='$exe_ext'
 expr='$expr'
 extensions='$extensions'
+fflushNULL='$fflushNULL'
 find='$find'
 firstmakefile='$firstmakefile'
 flex='$flex'
