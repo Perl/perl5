@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..176\n";
+print "1..177\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -689,6 +689,11 @@ $test++;
 
 print "not " 
    if defined $+[2] or defined $-[2] or defined $+[3] or defined $-[3];
+print "ok $test\n";
+$test++;
+
+/.(a)(ba*)?/;
+print "#$#-..$#+\nnot " if $#+ != 2 or $#- != 1;
 print "ok $test\n";
 $test++;
 

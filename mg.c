@@ -326,8 +326,13 @@ magic_regdata_cnt(SV *sv, MAGIC *mg)
     register REGEXP *rx;
     char *t;
 
-    if (PL_curpm && (rx = PL_curpm->op_pmregexp))
-	return rx->lastparen;
+    if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
+	if (mg->mg_obj)		/* @+ */
+	    return rx->nparens;
+	else			/* @- */
+	    return rx->lastparen;
+    }
+    
     return (U32)-1;
 }
 

@@ -189,13 +189,14 @@ This variable is read-only.
 
 $+[0] is the offset of the end of the last successfull match.
 C<$+[>I<n>C<]> is the offset of the end of the substring matched by
-I<n>-th subpattern.  
+I<n>-th subpattern, or undef if the subpattern did not match.
 
 Thus after a match against $_, $& coincides with C<substr $_, $-[0],
-$+[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
-$+[>I<0>C<]> if C<$-[>I<n>C<]> is defined, and $+ conincides with
-C<substr $_, $-[-1], $+[-1]>.  One can use C<$#+> to find the last
-matched subgroup in the last successful match.  Compare with L<"@-">.
+$+[0] - $-[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
+$+[>I<n>C<] - $-[>I<n>C<]> if C<$-[>I<n>C<]> is defined, and $+ coincides with
+C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#+> to find the number
+of subgroups in the last successful match.  Note the difference with
+C<$#->, which is the last I<matched> subgroup.  Compare with L<"@-">.
 
 =item $MULTILINE_MATCHING
 
@@ -410,13 +411,15 @@ channel.  (Mnemonic: lines_on_page - lines_printed.)
 
 $-[0] is the offset of the start of the last successfull match.
 C<$-[>I<n>C<]> is the offset of the start of the substring matched by
-I<n>-th subpattern.  
+I<n>-th subpattern, or undef if the subpattern did not match.
 
 Thus after a match against $_, $& coincides with C<substr $_, $-[0],
-$+[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
-$+[>I<0>C<]> if C<$-[>I<n>C<]> is defined, and $+ conincides with
-C<substr $_, $-[-1], $+[-1]>.  One can use C<$#-> to find the last
-matched subgroup in the last successful match.  Compare with L<"@+">.
+$+[0] - $-[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
+$+[>I<n>C<] - $-[>I<n>C<]> if C<$-[>I<n>C<]> is defined, and $+ coincides with
+C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#-> to find the last
+matched subgroup in the last successful match.  Note the difference with
+C<$#+>, which is the number of subgroups in the regular expression.  Compare
+with L<"@+">.
 
 =item format_name HANDLE EXPR
 
