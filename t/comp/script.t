@@ -3,10 +3,10 @@
 BEGIN {
     chdir 't';
     @INC = '../lib';
-    require './test.pl';
+    require './test.pl';	# for which_perl() etc
 }
 
-my $Perl = which_perl;
+my $Perl = which_perl();
 
 print "1..3\n";
 

@@ -3,7 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require './test.pl';
+    require './test.pl';	# for which_perl() etc
 }
 
 use Config;
@@ -11,7 +11,7 @@ use File::Spec;
 
 plan tests => 69;
 
-my $Perl = which_perl;
+my $Perl = which_perl();
 
 $Is_Amiga   = $^O eq 'amigaos';
 $Is_Cygwin  = $^O eq 'cygwin';

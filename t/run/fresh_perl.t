@@ -22,12 +22,12 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require './test.pl';
+    require './test.pl';	# for which_perl() etc
 }
 
 use strict;
 
-my $Perl = which_perl;
+my $Perl = which_perl();
 
 $|=1;
 
