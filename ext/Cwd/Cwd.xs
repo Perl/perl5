@@ -70,7 +70,8 @@ bsd_realpath(path, resolved)
 	char *resolved;
 {
 #ifdef VMS
-       return Perl_rmsexpand((char*)path, resolved, NULL, 0);
+       dTHX;
+       return Perl_rmsexpand(aTHX_ (char*)path, resolved, NULL, 0);
 #else
 	struct stat sb;
 	int n, rootd, serrno;

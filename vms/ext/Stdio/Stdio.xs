@@ -174,7 +174,7 @@ binmode(fh)
 	    }
            /* appearances to the contrary, this is an freopen substitute */
            name = sv_2mortal(newSVpvn(filespec,strlen(filespec)));
-           if (PerlIO_openn(Nullch,acmode,-1,0,0,fp,1,&name) == Nullfp) XSRETURN_UNDEF;
+           if (PerlIO_openn(aTHX_ Nullch,acmode,-1,0,0,fp,1,&name) == Nullfp) XSRETURN_UNDEF;
            if (iotype != '-' && ret != -1 && PerlIO_setpos(fp,&pos) == -1) XSRETURN_UNDEF;
 	    if (ret == -1) { set_errno(saverrno); set_vaxc_errno(savevmserrno); }
 	    XSRETURN_YES;

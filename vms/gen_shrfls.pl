@@ -167,9 +167,9 @@ if ($use_mymalloc) {
 }
 
 if ($use_perlio) {
-  $preprocess_list = "${dir}perl.h,${dir}perliol.h";
+  $preprocess_list = "${dir}perl.h+${dir}perlapi.h,${dir}perliol.h";
 } else {
-  $preprocess_list = "${dir}perl.h";
+  $preprocess_list = "${dir}perl.h+${dir}perlapi.h";
 }
 
 $used_expectation_enum = $used_opcode_enum = 0; # avoid warnings
@@ -180,7 +180,7 @@ if ($docc) {
 else {
   open(CPP,"$cpp_file") or die "$0: Can't read preprocessed file $cpp_file: $!\n";
 }
-%checkh = map { $_,1 } qw( thread bytecode byterun proto perlio );
+%checkh = map { $_,1 } qw( thread bytecode byterun proto perlio perlvars intrpvar thrdvar );
 $ckfunc = 0;
 LINE: while (<CPP>) {
   while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {

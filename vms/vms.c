@@ -5917,7 +5917,7 @@ Perl_my_localtime(pTHX_ const time_t *timep)
 # endif
   dst = -1;
 #ifndef RTL_USES_UTC
-  if (tz_parse(&when, &dst, 0, &offset)) {   /* truelocal determines DST*/
+  if (tz_parse(aTHX_ &when, &dst, 0, &offset)) {   /* truelocal determines DST*/
       when = whenutc - offset;                   /* pseudolocal time*/
   }
 # endif

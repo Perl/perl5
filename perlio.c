@@ -38,6 +38,11 @@
 #define PERL_IN_PERLIO_C
 #include "perl.h"
 
+#ifdef PERL_IMPLICIT_CONTEXT
+#undef dSYS
+#define dSYS dTHX
+#endif
+
 #include "XSUB.h"
 
 int
