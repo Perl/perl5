@@ -1499,6 +1499,7 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 #endif
 #ifdef HAS_SEM
     case OP_SEMCTL:
+#ifdef Semctl
 	if (cmd == IPC_STAT || cmd == IPC_SET)
 	    infosize = sizeof(struct semid_ds);
 	else if (cmd == GETALL || cmd == SETALL)
@@ -1514,6 +1515,9 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 		/* "short" is technically wrong but much more portable
 		   than guessing about u_?short(_t)? */
 	}
+#else
+	croak("%s not implemented", PL_op_desc[optype]);
+#endif
 	break;
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
@@ -1555,10 +1559,14 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 #endif
 #ifdef HAS_SEM
     case OP_SEMCTL: {
+#ifdef Semctl
             union semun unsemds;
 
             unsemds.buf = (struct semid_ds *)a;
 	    ret = Semctl(id, n, cmd, unsemds);
+#else
+	    croak("%s not implemented", PL_op_desc[optype]);
+#endif
         }
 	break;
 #endif
