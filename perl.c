@@ -2166,6 +2166,9 @@ Perl_moreswitches(pTHX_ char *s)
 #ifdef __MINT__
 	printf("MiNT port by Guido Flohr, 1997-1999\n");
 #endif
+#ifdef EPOC
+	printf("EPOC port by Olaf Flebbe, 1999-2000\n");
+#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif
