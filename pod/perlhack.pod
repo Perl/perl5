@@ -1624,7 +1624,7 @@ considerations.
 For most libraries and extensions, you'll want to use the Test::More
 library rather than rolling your own test functions.  If a module test
 doesn't use Test::More, consider rewriting it so it does.  For the
-rest its best to use a simple C<print "ok $test_num\n"> style to avoid
+rest it's best to use a simple C<print "ok $test_num\n"> style to avoid
 broken core functionality from causing the whole test to collapse.
 
 When you say "make test" Perl uses the F<t/TEST> program to run the
