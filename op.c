@@ -6511,15 +6511,21 @@ const_sv_xsub(pTHX_ CV* cv)
     XSRETURN(1);
 }
 
+/* XXX this belongs in doio.c, not here */
 PerlIO*
 Perl_my_tmpfp(pTHX)
 {
      PerlIO *f = NULL;
      int fd = -1;
-#ifdef PERL_EXTERNAL_GLOB
+#ifdef WIN32
+     fd = win32_tmpfd();
+     if (fd >= 0)
+	 f = PerlIO_fdopen(fd, "w+b");
+#else
+#  ifdef PERL_EXTERNAL_GLOB
      /* File::Temp pulls in Fcntl, which may not be available with
       *  e.g. miniperl, use mkstemp() or stdio tmpfile() instead. */
-#   if defined(WIN32) || !defined(HAS_MKSTEMP)
+#    if defined(WIN32) || !defined(HAS_MKSTEMP)
      FILE *stdio = PerlSIO_tmpfile();
 
      if (stdio) {
@@ -6531,7 +6537,7 @@ Perl_my_tmpfp(pTHX)
                     s->stdio = stdio;
           }
      }
-#   else /* !WIN32 && HAS_MKSTEMP */
+#    else /* !WIN32 && HAS_MKSTEMP */
      SV *sv = newSVpv("/tmp/PerlIO_XXXXXX", 0);
 
      if (sv) {
@@ -6544,8 +6550,8 @@ Perl_my_tmpfp(pTHX)
                }
           }
      }
-#   endif /* WIN32 || !HAS_MKSTEMP */
-#else
+#    endif /* !HAS_MKSTEMP */
+#  else
      /* We have internal glob, which probably also means that we 
       * can also use File::Temp (which uses Fcntl) with impunity. */
      GV *gv = gv_fetchpv("File::Temp::tempfile", FALSE, SVt_PVCV);
@@ -6582,8 +6588,8 @@ Perl_my_tmpfp(pTHX)
           FREETMPS;
           LEAVE;
      }
+#  endif
 #endif
 
      return f;
 }
-
