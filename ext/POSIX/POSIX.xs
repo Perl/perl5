@@ -2753,8 +2753,8 @@ sigaction(sig, action, oldaction = 0)
 	    POSIX__SigSet sigset;
 	    SV** svp;
 	    SV** sigsvp = hv_fetch(GvHVn(siggv),
-				 sig_name[sig],
-				 strlen(sig_name[sig]),
+				 whichsigname(sig),
+				 strlen(whichsigname(sig)),
 				 TRUE);
 
 	    /* Remember old handler name if desired. */

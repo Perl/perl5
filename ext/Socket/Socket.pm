@@ -2,14 +2,19 @@ package Socket;
 
 =head1 NAME
 
-Socket - load the C socket.h defines
+Socket - load the C socket.h defines and structure manipulators
 
 =head1 SYNOPSIS
 
     use Socket;
 
     $proto = (getprotobyname('udp'))[2];         
-    socket(Socket_Handle, PF_INET, SOCK_DGRAM, $proto); 
+    socket(Socket_Handle, PF_INET, SOCK_DGRAM, $proto);
+    $sockaddr_in = pack_sockaddr_in(AF_INET,7,inet_aton("localhost"));
+    $sockaddr_in = pack_sockaddr_in(AF_INET,7,INADDR_LOOPBACK);
+    connect(Socket_Handle,$sockaddr_in);
+    $peer = inet_ntoa((unpack_sockaddr_in(getpeername(Socket_Handle)))[2]);
+
 
 =head1 DESCRIPTION
 
@@ -19,10 +24,62 @@ file, this uses the B<h2xs> program (see the Perl source distribution)
 and your native C compiler.  This means that it has a 
 far more likely chance of getting the numbers right.
 
-=head1 NOTE
+In addition, some structure manipulation functions are available:
 
-Only C<#define> symbols get translated; you must still correctly
-pack up your own arguments to pass to bind(), etc.
+=item inet_aton HOSTNAME
+
+Takes a string giving the name of a host, and translates that
+to the 4-byte string (structure). Takes arguments of both
+the 'rtfm.mit.edu' type and '18.181.0.24'. If the host name
+cannot be resolved, returns undef.
+
+=item inet_ntoa IP_ADDRESS
+
+Takes a four byte ip address (as returned by inet_aton())
+and translates it into a string of the form 'd.d.d.d'
+where the 'd's are numbers less than 256 (the normal
+readable four dotted number notation for internet addresses).
+
+=item INADDR_ANY
+
+Note - does not return a number.
+
+Returns the 4-byte wildcard ip address which specifies any
+of the hosts ip addresses. (A particular machine can have
+more than one ip address, each address corresponding to
+a particular network interface. This wildcard address
+allows you to bind to all of them simultaneously.)
+Normally equivalent to inet_aton('0.0.0.0').
+
+=item INADDR_LOOPBACK
+
+Note - does not return a number.
+
+Returns the 4-byte loopback address. Normally equivalent
+to inet_aton('localhost').
+
+=item INADDR_NONE
+
+Note - does not return a number.
+
+Returns the 4-byte invalid ip address. Normally equivalent
+to inet_aton('255.255.255.255').
+
+=item pack_sockaddr_in FAMILY, PORT, IP_ADDRESS
+
+Takes three arguments, an address family (normally AF_INET),
+a port number, and a 4 byte IP_ADDRESS (as returned by
+inet_aton()). Returns the sockaddr_in structure with those
+arguments packed in. For internet domain sockets, this structure
+is normally what you need for the arguments in bind(), connect(),
+and send(), and is also returned by getpeername(), getsockname()
+and recv().
+
+=item unpack_sockaddr_in SOCKADDR_IN
+
+Takes a sockaddr_in structure (as returned by pack_sockaddr_in())
+and returns an array of three elements: the address family,
+the port, and the 4-byte ip-address.
 
 =cut
 
@@ -33,6 +90,8 @@ use AutoLoader;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(
+	inet_aton inet_ntoa pack_sockaddr_in unpack_sockaddr_in
+	INADDR_ANY INADDR_LOOPBACK INADDR_NONE
 	AF_802
 	AF_APPLETALK
 	AF_CCITT
@@ -129,16 +188,6 @@ sub AUTOLOAD {
     eval "sub $AUTOLOAD { $val }";
     goto &$AUTOLOAD;
 }
-
-
-# pack a sockaddr_in structure for use in bind() calls.
-# (here to hide the 'S n C4 x8' magic from applications)
-sub sockaddr_in{
-    my($af, $port, @quad) = @_;
-    my $pack = 'S n C4 x8'; # lookup $pack from hash using $af?
-    pack($pack, $af, $port, @quad);
-}
-
 
 bootstrap Socket;
 

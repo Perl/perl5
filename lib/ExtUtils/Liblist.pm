@@ -1,5 +1,4 @@
 package ExtUtils::Liblist;
-require ExtUtils::MakeMaker; # currently for MM_Unix::lsdir
 
 # Broken out of MakeMaker from version 4.11
 
@@ -10,7 +9,7 @@ use Cwd;
 sub ext {
     my($potential_libs, $Verbose) = @_;
     return ("", "", "") unless $potential_libs;
-    print STDOUT "Potential libraries are '$potential_libs':" if $Verbose;
+    print STDOUT "Potential libraries are '$potential_libs':\n" if $Verbose;
 
     my($so)   = $Config{'so'};
     my($libs) = $Config{'libs'};
@@ -62,7 +61,7 @@ sub ext {
 		# For gcc-2.6.2 on linux (March 1995), DLD can not load
 		# .sa libraries, with the exception of libm.sa, so we
 		# deliberately skip them.
-	    if (@fullname = MM_Unix::lsdir($thispth,"^lib$thislib\.$so\.[0-9]+")){
+	    if (@fullname = lsdir($thispth,"^lib$thislib\.$so\.[0-9]+")){
 		# Take care that libfoo.so.10 wins against libfoo.so.9.
 		# Compare two libraries to find the most recent version
 		# number.  E.g.  if you have libfoo.so.9.0.7 and
@@ -96,10 +95,10 @@ sub ext {
 	    } elsif (-f ($fullname="$thispth/lib$thislib.a")){
 	    } elsif (-f ($fullname="$thispth/Slib$thislib.a")){
 	    } else {
-		print STDOUT "$thislib not found in $thispth" if $Verbose;
+		print STDOUT "$thislib not found in $thispth\n" if $Verbose;
 		next;
 	    }
-	    print STDOUT "'-l$thislib' found at $fullname" if $Verbose;
+	    print STDOUT "'-l$thislib' found at $fullname\n" if $Verbose;
 	    $found++;
 	    $found_lib++;
 
@@ -140,12 +139,22 @@ sub ext {
 	    }
 	    last;	# found one here so don't bother looking further
 	}
-	print STDOUT "Warning (non-fatal): No library found for -l$thislib" 
+	print STDOUT "Warning (non-fatal): No library found for -l$thislib\n"
 	    unless $found_lib>0;
     }
     return ('','','') unless $found;
     ("@extralibs", "@bsloadlibs", "@ldloadlibs");
 }
 
+sub lsdir { #yes, duplicate code seems less hassle than having an
+            #extra file with only lsdir
+    my($dir, $regex) = @_;
+    local(*DIR, @ls);
+    opendir(DIR, $dir || ".") or return ();
+    @ls = readdir(DIR);
+    closedir(DIR);
+    @ls = grep(/$regex/, @ls) if $regex;
+    @ls;
+}
 
 1;

@@ -186,7 +186,7 @@ $module = $opt_n || do {
 	$name;
 };
 
-chdir 'ext' if -d 'ext';
+(chdir 'ext', $ext = 'ext/') if -d 'ext';
 
 if( $module =~ /::/ ){
 	$nested = 1;
@@ -201,17 +201,17 @@ else {
 }
 
 
-die "Won't overwrite existing ext/$modpname\n" if -e $modpname;
+die "Won't overwrite existing $ext$modpname\n" if -e $modpname;
 # quick hack, should really loop over @modparts
 mkdir($modparts[0], 0777) if $nested;
 mkdir($modpname, 0777);
-chdir($modpname) || die "Can't chdir ext/$modpname: $!\n";
+chdir($modpname) || die "Can't chdir $ext$modpname: $!\n";
 
-open(XS, ">$modfname.xs") || die "Can't create ext/$modpname/$modfname.xs: $!\n";
-open(PM, ">$modfname.pm") || die "Can't create ext/$modpname/$modfname.pm: $!\n";
+open(XS, ">$modfname.xs") || die "Can't create $ext$modpname/$modfname.xs: $!\n";
+open(PM, ">$modfname.pm") || die "Can't create $ext$modpname/$modfname.pm: $!\n";
 
 $" = "\n\t";
-warn "Writing ext/$modpname/$modfname.pm\n";
+warn "Writing $ext$modpname/$modfname.pm\n";
 
 print PM <<"END";
 package $module;
@@ -291,7 +291,7 @@ END
 close PM;
 
 
-warn "Writing ext/$modpname/$modfname.xs\n";
+warn "Writing $ext$modpname/$modfname.xs\n";
 
 print XS <<"END";
 #include "EXTERN.h"
@@ -390,8 +390,8 @@ END
 close XS;
 
 
-warn "Writing ext/$modpname/Makefile.PL\n";
-open(PL, ">Makefile.PL") || die "Can't create ext/$modpname/Makefile.PL: $!\n";
+warn "Writing $ext$modpname/Makefile.PL\n";
+open(PL, ">Makefile.PL") || die "Can't create $ext$modpname/Makefile.PL: $!\n";
 
 print PL <<'END';
 use ExtUtils::MakeMaker;

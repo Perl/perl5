@@ -808,6 +808,8 @@ PP(pp_leavewrite)
 	if (IoFLAGS(io) & IOf_DIDTOP) {	/* Oh dear.  It still doesn't fit. */
 	    I32 lines = IoLINES_LEFT(io);
 	    char *s = SvPVX(formtarget);
+	    if (lines <= 0)		/* Yow, header didn't even fit!!! */
+		goto forget_top;
 	    while (lines-- > 0) {
 		s = strchr(s, '\n');
 		if (!s)
@@ -1455,9 +1457,9 @@ nuts:
 
 PP(pp_accept)
 {
-    struct sockaddr_in saddr;	/* use a struct to avoid alignment problems */
     dSP; dTARGET;
 #ifdef HAS_SOCKET
+    struct sockaddr_in saddr;	/* use a struct to avoid alignment problems */
     GV *ngv;
     GV *ggv;
     register IO *nstio;

@@ -2327,8 +2327,9 @@ yylex()
 		    /* If not a declared subroutine, it's an indirect object. */
 		    /* (But it's an indir obj regardless for sort.) */
 
-		    if (last_lop_op == OP_SORT ||
-		      (!immediate_paren && (!gv || !GvCV(gv))) ) {
+		    if ((last_lop_op == OP_SORT ||
+                         (!immediate_paren && (!gv || !GvCV(gv))) ) &&
+                        (last_lop_op != OP_MAPSTART && last_lop_op != OP_GREPSTART)){
 			expect = (last_lop == oldoldbufptr) ? XTERM : XOPERATOR;
 			goto bareword;
 		    }
@@ -4775,9 +4776,7 @@ start_subparse()
     sv_upgrade((SV *)compcv, SVt_PVCV);
 
     comppad = newAV();
-    SAVEFREESV((SV*)comppad);
     comppad_name = newAV();
-    SAVEFREESV((SV*)comppad_name);
     comppad_name_fill = 0;
     min_intro_pending = 0;
     av_push(comppad, Nullsv);
@@ -4787,8 +4786,8 @@ start_subparse()
 
     comppadlist = newAV();
     AvREAL_off(comppadlist);
-    av_store(comppadlist, 0, SvREFCNT_inc((SV*)comppad_name));
-    av_store(comppadlist, 1, SvREFCNT_inc((SV*)comppad));
+    av_store(comppadlist, 0, (SV*)comppad_name);
+    av_store(comppadlist, 1, (SV*)comppad);
 
     CvPADLIST(compcv) = comppadlist;
     CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc((SV*)outsidecv);

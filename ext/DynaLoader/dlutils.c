@@ -9,12 +9,17 @@
 /* pointer to allocated memory for last error message */
 static char *LastError  = (char*)NULL;
 
+/* flag for immediate rather than lazy linking (spots unresolved symbol) */
+static int dl_nonlazy = 0;
+
+#ifdef DL_LOADONCEONLY
+static HV *dl_loaded_files = Nullhv;	/* only needed on a few systems */
+#endif
 
 
 #ifdef DEBUGGING
-/* currently not connected to $DynaLoader::dl_error but should be */
-static int dl_debug = 0;
-#define DLDEBUG(level,code)	if(dl_debug>=level){ code; }
+static int dl_debug = 0;	/* value copied from $DynaLoader::dl_error */
+#define DLDEBUG(level,code)	if (dl_debug>=level) { code; }
 #else
 #define DLDEBUG(level,code)
 #endif
@@ -23,10 +28,17 @@ static int dl_debug = 0;
 static void
 dl_generic_private_init()	/* called by dl_*.xs dl_private_init() */
 {
+    char *perl_dl_nonlazy;
 #ifdef DEBUGGING
-    char *perl_dl_debug = getenv("PERL_DL_DEBUG");
-    if (perl_dl_debug)
-	dl_debug = atoi(perl_dl_debug);
+    dl_debug = SvIV( perl_get_sv("DynaLoader::dl_debug", 0x04) );
+#endif
+    if ( (perl_dl_nonlazy = getenv("PERL_DL_NONLAZY")) != NULL )
+	dl_nonlazy = atoi(perl_dl_nonlazy);
+    if (dl_nonlazy)
+	DLDEBUG(1,fprintf(stderr,"DynaLoader bind mode is 'non-lazy'\n"));
+#ifdef DL_LOADONCEONLY
+    if (!dl_loaded_files)
+	dl_loaded_files = newHV(); /* provide cache for dl_*.xs if needed */
 #endif
 }
 
@@ -47,8 +59,7 @@ SaveError(pat, va_alist)
     char *message;
     int len;
 
-    /* This code is based on croak/warn but I'm not sure where mess() */
-    /* gets its buffer space from! */
+    /* This code is based on croak/warn, see mess() in util.c */
 
 #ifdef I_STDARG
     va_start(args, pat);

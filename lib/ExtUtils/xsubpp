@@ -6,7 +6,7 @@ xsubpp - compiler to convert Perl XS code into C code
 
 =head1 SYNOPSIS
 
-B<xsubpp> [B<-C++>] [B<-except>] [B<-typemap typemap>]... file.xs
+B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-typemap typemap>]... file.xs
 
 =head1 DESCRIPTION
 
@@ -40,6 +40,10 @@ Indicates that a user-supplied typemap should take precedence over the
 default typemaps.  This option may be used multiple times, with the last
 typemap having the highest precedence.
 
+=item B<-v>
+
+Prints the I<xsubpp> version number to standard output, then exits.
+
 =back
 
 =head1 ENVIRONMENT
@@ -52,149 +56,7 @@ Larry Wall
 
 =head1 MODIFICATION HISTORY
 
-=head2 1.0
-
-I<xsubpp> as released with Perl 5.000
-
-=head2 1.1
-
-I<xsubpp> as released with Perl 5.001
-
-=head2 1.2 
-
-Changes by Paul Marquess <pmarquess@bfsec.bt.co.uk>, 22 May 1995.
-
-=over 5
-
-=item 1.
-
-Added I<xsubpp> version number for the first time. As previous releases
-of I<xsubpp> did not have a formal version number, a numbering scheme
-has been applied retrospectively.
-
-=item 2.
-
-If OUTPUT: is being used to specify output parameters and RETVAL is
-also to be returned, it is now no longer necessary for the user to
-ensure that RETVAL is specified last.
-
-=item 3.
-
-The I<xsubpp> version number, the .xs filename and a time stamp are
-written to the generated .c file as a comment.
-
-=item 4.
-
-When I<xsubpp> is parsing the definition of both the input parameters
-and the OUTPUT parameters, any duplicate definitions will be noted and
-ignored.
-
-=item 5.
-
-I<xsubpp> is slightly more forgiving with extra whitespace.
-
-=back
-
-=head2 1.3 
-
-Changes by Paul Marquess <pmarquess@bfsec.bt.co.uk>, 23 May 1995.
-
-=over 5
-
-=item 1.
-
-More whitespace restrictions have been relaxed. In particular some
-cases where a tab character was used to delimit fields has been
-removed. In these cases any whitespace will now suffice.
-
-The specific places where changes have been made are in the TYPEMAP
-section of a typemap file and the input and OUTPUT: parameter
-declarations sections in a .xs file.
-
-=item 2.
-
-More error checking added.
-
-Before processing each typemap file I<xsubpp> now checks that it is a
-text file. If not an warning will be displayed. In addition, a warning
-will be displayed if it is not possible to open the typemap file.
-
-In the TYPEMAP section of a typemap file, an error will be raised if
-the line does not have 2 columns.
-
-When parsing input parameter declarations check that there is at least
-a type and name pair.
-
-=back
-
-=head2 1.4 
-
-When parsing the OUTPUT arguments check that they are all present in
-the corresponding input argument definitions.
-
-=head2 1.5 
-
-Changes by Paul Marquess <pmarquess@bfsec.bt.co.uk>, 1 June 1995.
-
-Started tidy up to allow clean run using C<-w> flag. 
-
-Added some more error checking.
-
-The CASE: functionality now works.
-
-=head2 1.6 
-
-Changes by Paul Marquess <pmarquess@bfsec.bt.co.uk>, 3 June 1995.
-
-Added some more error checking.
-
-=head2 1.7 
-
-Changes by Paul Marquess <pmarquess@bfsec.bt.co.uk>, 5 June 1995.
-
-When an error or warning message is printed C<xsubpp> will now attempt
-to identify the exact line in the C<.xs> file where the fault occurs.
-This can be achieved in the majority of cases.
-
-=head2 1.8 
-
-Changes by Hallvard B Furuseth <h.b.furuseth@usit.uio.no>, 6 June 1995.
-
-Accept backslash-newline as in C.  Allow preprocessor directives
-anywhere.  Ignore whitespace in front of comments and on blank lines.
-
-=head2 1.9 
-
-Changes by Paul Marquess <pmarquess@bfsec.bt.co.uk>, 21 June 1995.
-
-=over 5
-
-=item 1.
-
-Changed duplicate function error to a warning.
-
-=item 2.
-
-Changed the comment placed at the top of the C<.c> file to be more like
-the comment used by MakeMaker.
-
-=item 3.
-
-When parsing the type for an XSUB parameter I<xsubpp> can now accept
-definitions like this:
-
-    char *fred
-
-i.e. the '*' is recognised as part of the type, rather than the first
-character of the variable.
-
-=item 4.
-
-Fixed a problem with command line parsing - I<xsubpp> was not properly
-detecting the case where there was no filename present on the command
-line.
-
-=back
+See the file F<changes.pod>.
 
 =head1 SEE ALSO
 
@@ -203,17 +65,21 @@ perl(1), perlapi(1)
 =cut
 
 # Global Constants
-$XSUBPP_version = "1.9" ;
+$XSUBPP_version = "1.922";
+require 5.001;
 
-$usage = "Usage: xsubpp [-C++] [-except] [-typemap typemap] file.xs\n";
+$usage = "Usage: xsubpp [-v] [-C++] [-except] [-s pattern] [-typemap typemap]... file.xs\n";
 
-SWITCH: while ($ARGV[0] =~ /^-/) {
+$except = "";
+SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $flag = shift @ARGV;
     $flag =~ s/^-// ;
     $spat = shift,	next SWITCH	if $flag eq 's';
     $cplusplus = 1,	next SWITCH	if $flag eq 'C++';
-    $except = 1,	next SWITCH	if $flag eq 'except';
+    $except = " TRY",	next SWITCH	if $flag eq 'except';
     push(@tm,shift),	next SWITCH	if $flag eq 'typemap';
+    (print "xsubpp version $XSUBPP_version\n"), exit  	
+	if $flag eq 'v';
     die $usage;
 }
 @ARGV == 1 or die $usage;
@@ -266,41 +132,31 @@ foreach $typemap (@tm) {
     $current = \$junk;
     while (<TYPEMAP>) {
 	next if /^\s*#/;
-	if (/^INPUT\s*$/)   { $mode = 'Input';   next; }
-	if (/^OUTPUT\s*$/)  { $mode = 'Output';  next; }
-	if (/^TYPEMAP\s*$/) { $mode = 'Typemap'; next; }
+	if (/^INPUT\s*$/)   { $mode = 'Input';   $current = \$junk;  next; }
+	if (/^OUTPUT\s*$/)  { $mode = 'Output';  $current = \$junk;  next; }
+	if (/^TYPEMAP\s*$/) { $mode = 'Typemap'; $current = \$junk;  next; }
 	if ($mode eq 'Typemap') {
 	    chomp;
 	    my $line = $_ ;
             TrimWhitespace($_) ;
 	    # skip blank lines and comment lines
 	    next if /^$/ or /^#/ ;
-	    my @words = split (' ') ;
-	    warn("Warning: File '$typemap' Line $. '$line' TYPEMAP entry needs 2 columns\n"), next 
-		unless @words >= 2 ;
-	    my $kind = pop @words ;
-            TrimWhitespace($kind) ;
-	    $type_kind{TidyType("@words")} = $kind ;
+	    my($type,$kind) = /^\s*(.*?\S)\s+(\S+)\s*$/ or
+		warn("Warning: File '$typemap' Line $. '$line' TYPEMAP entry needs 2 columns\n"), next;
+	    $type_kind{TidyType($type)} = $kind ;
+	}
+	elsif (/^\s/) {
+	    $$current .= $_;
 	}
 	elsif ($mode eq 'Input') {
-	    if (/^\s/) {
-		$$current .= $_;
-	    }
-	    else {
-		s/\s*$//;
-		$input_expr{$_} = '';
-		$current = \$input_expr{$_};
-	    }
+	    s/\s+$//;
+	    $input_expr{$_} = '';
+	    $current = \$input_expr{$_};
 	}
 	else {
-	    if (/^\s/) {
-		$$current .= $_;
-	    }
-	    else {
-		s/\s*$//;
-		$output_expr{$_} = '';
-		$current = \$output_expr{$_};
-	    }
+	    s/\s+$//;
+	    $output_expr{$_} = '';
+	    $current = \$output_expr{$_};
 	}
     }
     close(TYPEMAP);
@@ -309,6 +165,187 @@ foreach $typemap (@tm) {
 foreach $key (keys %input_expr) {
     $input_expr{$key} =~ s/\n+$//;
 }
+
+$END = "!End!\n\n";		# "impossible" keyword (multiple newline)
+
+# Match an XS keyword
+$BLOCK_re= "\\s*(REQUIRE|BOOT|CASE|PREINIT|INPUT|INIT|CODE|PPCODE|OUTPUT|CLEANUP|ALIAS|$END)\\s*:";
+
+# Input:  ($_, @line) == unparsed input.
+# Output: ($_, @line) == (rest of line, following lines).
+# Return: the matched keyword if found, otherwise 0
+sub check_keyword {
+	$_ = shift(@line) while !/\S/ && @line;
+	s/^(\s*)($_[0])\s*:\s*(?:#.*)?/$1/s && $2;
+}
+
+
+sub print_section {
+    $_ = shift(@line) while !/\S/ && @line;
+    for (;  defined($_) && !/^$BLOCK_re/o;  $_ = shift(@line)) {
+	print "$_\n";
+    }
+}
+
+sub CASE_handler {
+    blurt ("Error: `CASE:' after unconditional `CASE:'")
+	if $condnum && $cond eq '';
+    $cond = $_;
+    TrimWhitespace($cond);
+    print "   ", ($condnum++ ? " else" : ""), ($cond ? " if ($cond)\n" : "\n");
+    $_ = '' ;
+}
+
+sub INPUT_handler {
+    for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
+	last if /^\s*NOT_IMPLEMENTED_YET/;
+	next unless /\S/;	# skip blank lines 
+
+	TrimWhitespace($_) ;
+	my $line = $_ ;
+
+	# remove trailing semicolon if no initialisation
+	s/\s*;$//g unless /=/ ;
+
+	# check for optional initialisation code
+	my $var_init = '' ;
+	$var_init = $1 if s/\s*(=.*)$//s ;
+	$var_init =~ s/"/\\"/g;
+
+	s/\s+/ /g;
+	my ($var_type, $var_addr, $var_name) = /^(.*?[^& ]) *(\&?) *\b(\w+)$/s
+	    or blurt("Error: invalid argument declaration '$line'"), next;
+
+	# Check for duplicate definitions
+	blurt ("Error: duplicate definition of argument '$var_name' ignored"), next
+	    if $arg_list{$var_name} ++  ;
+
+	$thisdone |= $var_name eq "THIS";
+	$retvaldone |= $var_name eq "RETVAL";
+	$var_types{$var_name} = $var_type;
+	print "\t" . &map_type($var_type);
+	$var_num = $args_match{$var_name};
+	if ($var_addr) {
+	    $var_addr{$var_name} = 1;
+	    $func_args =~ s/\b($var_name)\b/&$1/;
+	}
+	if ($var_init =~ /^=\s*NO_INIT\s*;?\s*$/) {
+	    print "\t$var_name;\n";
+	} elsif ($var_init =~ /\S/) {
+	    &output_init($var_type, $var_num, "$var_name $var_init");
+	} elsif ($var_num) {
+	    # generate initialization code
+	    &generate_init($var_type, $var_num, $var_name);
+	} else {
+	    print ";\n";
+	}
+    }
+}
+
+sub OUTPUT_handler {
+    for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
+	next unless /\S/;
+	my ($outarg, $outcode) = /^\s*(\S+)\s*(.*?)\s*$/s ;
+	blurt ("Error: duplicate OUTPUT argument '$outarg' ignored"), next
+	    if $outargs{$outarg} ++ ;
+	if (!$gotRETVAL and $outarg eq 'RETVAL') {
+	    # deal with RETVAL last
+	    $RETVAL_code = $outcode ;
+	    $gotRETVAL = 1 ;
+	    next ;
+	}
+	blurt ("Error: OUTPUT $outarg not an argument"), next
+	    unless defined($args_match{$outarg});
+	blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
+	    unless defined $var_types{$outarg} ;
+	if ($outcode) {
+	    print "\t$outcode\n";
+	} else {
+	    $var_num = $args_match{$outarg};
+	    &generate_output($var_types{$outarg}, $var_num, $outarg); 
+	}
+    }
+}
+
+sub GetAliases
+{
+    my ($line) = @_ ;
+    my ($orig) = $line ;
+    my ($alias) ;
+    my ($value) ;
+
+    # Parse alias definitions
+    # format is
+    #    alias = value alias = value ...
+
+    while ($line =~ s/^\s*([\w:]+)\s*=\s*(\w+)\s*//) {
+        $alias = $1 ;
+        $orig_alias = $alias ;
+        $value = $2 ;
+
+        # check for optional package definition in the alias
+	$alias = $Packprefix . $alias if $alias !~ /::/ ;
+        
+        # check for duplicate alias name & duplicate value
+	Warn("Warning: Ignoring duplicate alias '$orig_alias'")
+	    if defined $XsubAliases{$pname}{$alias} ;
+
+        Warn("Warning: Aliases '$orig_alias' and '$XsubAliasValues{$pname}{$value}' have identical values")
+	    if $XsubAliasValues{$pname}{$value} ;
+
+        $XsubAliases{$pname}{$alias} = $value ;
+        $XsubAliasValues{$pname}{$value} = $orig_alias ;
+    }
+
+    blurt("Error: Cannot parse ALIAS definitions from '$orig'")
+        if $line ;
+}
+
+sub ALIAS_handler
+{
+    for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
+	next unless /\S/;
+	TrimWhitespace($_) ;
+        GetAliases($_) if $_ ;
+    }
+}
+
+sub REQUIRE_handler
+{
+    # the rest of the current line should contain a version number
+    my ($Ver) = $_ ;
+
+    TrimWhitespace($Ver) ;
+
+    death ("Error: REQUIRE expects a version number")
+	unless $Ver ;
+
+    # check that the version number is of the form n.n
+    death ("Error: REQUIRE: expected a number, got '$Ver'")
+	unless $Ver =~ /^\d+(\.\d*)?/ ;
+
+    death ("Error: xsubpp $Ver (or better) required--this is only $XSUBPP_version.")
+        unless $XSUBPP_version >= $Ver ; 
+}
+
+sub check_cpp {
+    my @cpp = grep(/^\#\s*(?:if|e\w+)/, @line);
+    if (@cpp) {
+	my ($cpp, $cpplevel);
+	for $cpp (@cpp) {
+	    if ($cpp =~ /^\#\s*if/) {
+		$cpplevel++;
+	    } elsif (!$cpplevel) {
+		Warn("Warning: #else/elif/endif without #if in this function");
+		return;
+	    } elsif ($cpp =~ /^\#\s*endif/) {
+		$cpplevel--;
+	    }
+	}
+	Warn("Warning: #if without #endif in this function") if $cpplevel;
+    }
+}
+
 
 sub Q {
     my($text) = @_;
@@ -354,18 +391,18 @@ sub fetch_para {
     if ($lastline =~
 	/^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/) {
 	$Module = $1;
-	$Package = $2;
-	$Prefix = $3;
+	$Package = defined($2) ? $2 : '';	# keep -w happy
+	$Prefix  = defined($3) ? $3 : '';	# keep -w happy
 	($Module_cname = $Module) =~ s/\W/_/g;
-	($Packid = $Package) =~ s/:/_/g;
+	($Packid = $Package) =~ tr/:/_/;
 	$Packprefix = $Package;
-	$Packprefix .= "::" if defined $Packprefix && $Packprefix ne "";
+	$Packprefix .= "::" if $Packprefix ne "";
 	$lastline = "";
     }
 
     for(;;) {
 	if ($lastline !~ /^\s*#/ ||
-	    $lastline =~ /^#[ \t]*((if|ifn?def|else|elif|endif|define|undef|pragma)\b|include\s*["<].*[>"])/) {
+	    $lastline =~ /^#[ \t]*(?:(?:if|ifn?def|else|elif|endif|define|undef|pragma)\b|include\s*["<].*[>"])/) {
 	    last if $lastline =~ /^\S/ && @line && $line[-1] eq "";
 	    push(@line, $lastline);
 	    push(@line_no, $lastline_no) ;
@@ -376,18 +413,17 @@ sub fetch_para {
 	$lastline_no = $.;
 	my $tmp_line;
 	$lastline .= $tmp_line
-	    while ($lastline =~ /\\\n$/ && defined($tmp_line = <F>));
+	    while ($lastline =~ /\\$/ && defined($tmp_line = <F>));
 	    
-	# chomp $lastline;
+	chomp $lastline;
 	$lastline =~ s/^\s+$//;
     }
     pop(@line), pop(@line_no) while @line && $line[-1] eq "";
-    $PPCODE = grep(/^\s*PPCODE\s*:/, @line);
     1;
 }
 
 PARAGRAPH:
-while (&fetch_para) {
+while (fetch_para()) {
     # Print initial preprocessor statements and blank lines
     print shift(@line), "\n"
 	while @line && $line[0] !~ /^[^\#]/;
@@ -398,8 +434,6 @@ while (&fetch_para) {
 	if $line[0] =~ /^\s/;
 
     # initialize info arrays
-    # my(%args_match,%var_types,%var_addr);
-    # my($class,$static,$elipsis,$wantRETVAL,%arg_list);
     undef(%args_match);
     undef(%var_types);
     undef(%var_addr);
@@ -410,53 +444,51 @@ while (&fetch_para) {
     undef($wantRETVAL) ;
     undef(%arg_list) ;
 
-    # extract return type, function name and arguments
-    my($ret_type) = TidyType(shift(@line));
+    $_ = shift(@line);
+    if (check_keyword("REQUIRE")) {
+        REQUIRE_handler() ; 
+        next PARAGRAPH unless @line ;
+        $_ = shift(@line);
+    }
 
-    if ($ret_type =~ /^BOOT\s*:/) {
-        push (@BootCode, @line, "", "") ;
+    if (check_keyword("BOOT")) {
+	&check_cpp;
+        push (@BootCode, $_, @line, "") ;
         next PARAGRAPH ;
     }
+
+
+    # extract return type, function name and arguments
+    my($ret_type) = TidyType($_);
 
     # a function definition needs at least 2 lines
     blurt ("Error: Function definition too short '$ret_type'"), next PARAGRAPH
 	unless @line ;
 
-    if ($ret_type =~ /^static\s+(.*)$/) {
-	    $static = 1;
-	    $ret_type = $1;
-    }
+    $static = 1 if $ret_type =~ s/^static\s+//;
+
     $func_header = shift(@line);
     blurt ("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
-	unless $func_header =~ /^([\w:]+)\s*\((.*)\)$/;
+	unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*$/s;
 
-    ($func_name, $orig_args) =  ($1, $2) ;
-    if ($func_name =~ /(.*)::(.*)/) {
-	    $class = $1;
-	    $func_name = $2;
-    }
-    $Prefix = '' unless defined $Prefix ; # keep -w happy
+    ($class, $func_name, $orig_args) =  ($1, $2, $3) ;
     ($pname = $func_name) =~ s/^($Prefix)?/$Packprefix/;
 
     # Check for duplicate function definition
-    Warn("Warning: duplicate function definition '$func_name' detected")
-	if defined $Func_name{"${Packid}_$func_name"} ;
+    if (defined $Func_name{"${Packid}_$func_name"} ) {
+       Warn("Warning: duplicate function definition '$func_name' detected") 
+    }
+    else {
+        push(@Func_name, "${Packid}_$func_name");
+        push(@Func_pname, $pname);
+    }
     $Func_name{"${Packid}_$func_name"} ++ ;
 
-    push(@Func_name, "${Packid}_$func_name");
-    push(@Func_pname, $pname);
     @args = split(/\s*,\s*/, $orig_args);
     if (defined($class)) {
-	if (defined($static)) {
-	    unshift(@args, "CLASS");
-	    $orig_args = "CLASS, $orig_args";
-	    $orig_args =~ s/^CLASS, $/CLASS/;
-	}
-	else {
-	    unshift(@args, "THIS");
-	    $orig_args = "THIS, $orig_args";
-	    $orig_args =~ s/^THIS, $/THIS/;
-	}
+	my $arg0 = (defined($static) ? "CLASS" : "THIS");
+	unshift(@args, $arg0);
+	($orig_args = "$arg0, $orig_args") =~ s/^$arg0, $/$arg0/;
     }
     $orig_args =~ s/"/\\"/g;
     $min_args = $num_args = @args;
@@ -469,7 +501,7 @@ while (&fetch_para) {
 			last;
 		    }
 	    }
-	    if ($args[$i] =~ /([^=]*\S)\s*=\s*(.*)/) {
+	    if ($args[$i] =~ /^([^=]*[^\s=])\s*=\s*(.*)/s) {
 		    $min_args--;
 		    $args[$i] = $1;
 		    $defaults{$args[$i]} = $2;
@@ -483,14 +515,20 @@ while (&fetch_para) {
     }
     @args_match{@args} = 1..@args;
 
+    $PPCODE = grep(/^\s*PPCODE\s*:/, @line);
+    $ALIAS  = grep(/^\s*ALIAS\s*:/,  @line);
+
     # print function header
     print Q<<"EOF";
 #XS(XS_${Packid}_$func_name)
 #[[
 #    dXSARGS;
 EOF
+    print Q<<"EOF" if $ALIAS ;
+#    dXSI32;
+EOF
     if ($elipsis) {
-	$cond = qq(items < $min_args);
+	$cond = ($min_args ? qq(items < $min_args) : 0);
     }
     elsif ($min_args == $num_args) {
 	$cond = qq(items != $min_args);
@@ -504,10 +542,15 @@ EOF
 #    *errbuf = '\0';
 EOF
 
-    print Q<<"EOF";
-#    if ($cond) {
+    if ($ALIAS) 
+      { print Q<<"EOF" if $cond }
+#    if ($cond)
+#       croak("Usage: %s($orig_args)", GvNAME(CvGV(cv)));
+EOF
+    else 
+      { print Q<<"EOF" if $cond }
+#    if ($cond)
 #	croak("Usage: $pname($orig_args)");
-#    }
 EOF
 
     print Q<<"EOF" if $PPCODE;
@@ -517,43 +560,16 @@ EOF
     # Now do a block of some sort.
 
     $condnum = 0;
-    $else_cond = 0 ;
-    if (!@line) {
-	@line = "CLEANUP:";
-    }
+    $cond = '';			# last CASE: condidional
+    push(@line, "$END:");
+    push(@line_no, $line_no[-1]);
+    $_ = '';
+    &check_cpp;
     while (@line) {
-	if ($line[0] =~ s/^\s*CASE\s*:\s*//) {
-	    $cond = shift(@line);
-            TrimWhitespace($cond) ;
-	    if ($condnum == 0) {
-		# Check $cond is not blank
-		blurt("Error: First CASE: needs a condition") 
-		    if $cond eq '' ;
-		print "    if ($cond)\n"
-	    }
-	    elsif ($cond ne '') {
-		print "    else if ($cond)\n";
-	    }
-	    else {
-		blurt ("Error: Too many CASE: statements without a condition")
-		    unless $else_cond ;
-    	        ++ $else_cond  ;
-		print "    else\n";
-	    }
-	    $condnum++;
-            $_ = '' ;
-	}
-
-	if ($except) {
-	    print Q<<"EOF";
-#    TRY [[
+	&CASE_handler if check_keyword("CASE");
+	print Q<<"EOF";
+#   $except [[
 EOF
-	}
-	else {
-	    print Q<<"EOF";
-#    [[
-EOF
-	}
 
 	# do initialization of input variables
 	$thisdone = 0;
@@ -561,71 +577,11 @@ EOF
 	$deferred = "";
 	%arg_list = () ;
         $gotRETVAL = 0;
-	while (@line) {
-		$_ = shift(@line);
-		last if /^\s*NOT_IMPLEMENTED_YET/;
-		last if /^\s*(PPCODE|CODE|OUTPUT|CLEANUP|CASE)\s*:/;
 
-                TrimWhitespace($_) ;
-                # skip blank lines 
-                next if /^$/ ;
-		my $line = $_ ;
-
-                # remove trailing semicolon if no initialisation
-                s/\s*;+\s*$//g unless /=/ ;
-
-	  	# check for optional initialisation code
-		my $var_init = '' ;
-		$var_init = $1 if s/\s*(=.*)$// ;
-
-                my @words = split (' ') ;
-                blurt("Error: invalid argument declaration '$line'"), next
-                    unless @words >= 2 ;
-                my $var_name = pop @words ;
-
-		# move any *'s from the variable name to the type
-		push(@words, $1)
-		    if $var_name =~ s/^(\*+)// ;
-
-		# check that removing the *'s hasn't eaten the whole variable
-		blurt("Error: invalid argument declaration '$line'"), next
-		    if $var_name eq '' ;
-
-		my $var_type = "@words" ;
-
-		# catch many errors similar to: SV<tab>* name
-		blurt("Error: invalid $pname argument name '$var_name' (type '$var_type')\n")
-			unless ($var_name =~ m/^&?\w+$/);
-		if ($var_name =~ /^&/) {
-			$var_name =~ s/^&//;
-			$var_addr{$var_name} = 1;
-		}
-
-	        # Check for duplicate definitions
-	        blurt ("Error: duplicate definition of argument '$var_name' ignored"), next
-		    if $arg_list{$var_name} ++  ;
-
-		$thisdone |= $var_name eq "THIS";
-		$retvaldone |= $var_name eq "RETVAL";
-		$var_types{$var_name} = $var_type;
-		print "\t" . &map_type($var_type);
-		$var_num = $args_match{$var_name};
-		if ($var_addr{$var_name}) {
-			$func_args =~ s/\b($var_name)\b/&$1/;
-		}
-		if ($var_init !~ /^=\s*NO_INIT\s*$/) {
-			if ($var_init !~ /^\s*$/) {
-				&output_init($var_type, $var_num,
-				    "$var_name $var_init");
-			} elsif ($var_num) {
-				# generate initialization code
-				&generate_init($var_type, $var_num, $var_name);
-			} else {
-				print ";\n";
-			}
-		} else {
-			print "\t$var_name;\n";
-		}
+	&INPUT_handler;
+	my $kwd;
+	while ($kwd = check_keyword("INPUT|PREINIT")) {
+	    if ($kwd eq 'PREINIT') { &print_section; } else { &INPUT_handler; }
 	}
 	if (!$thisdone && defined($class)) {
 	    if (defined($static)) {
@@ -650,28 +606,26 @@ EOF
 			$args_match{"RETVAL"} = 0;
 			$var_types{"RETVAL"} = $ret_type;
 		}
-		if (/^\s*PPCODE\s*:/) {
-			print $deferred;
-			while (@line) {
-				$_ = shift(@line);
-				death ("PPCODE must be last thing")
-				    if /^\s*(OUTPUT|CLEANUP|CASE)\s*:/;
-				print "$_\n";
-			}
+		print $deferred;
+                while ($kwd = check_keyword("INIT|ALIAS")) {
+                    if ($kwd eq 'INIT') {
+                        &print_section
+                    }
+                    else {
+                        ALIAS_handler
+                    }
+                }
+
+		if (check_keyword("PPCODE")) {
+			&print_section;
+			death ("PPCODE must be last thing") if @line;
 			print "\tPUTBACK;\n\treturn;\n";
-		} elsif (/^\s*CODE\s*:/) {
-			print $deferred;
-			while (@line) {
-				$_ = shift(@line);
-				last if /^\s*(OUTPUT|CLEANUP|CASE)\s*:/;
-				print "$_\n";
-			}
+		} elsif (check_keyword("CODE")) {
+			&print_section;
 		} elsif ($func_name eq "DESTROY") {
-			print $deferred;
 			print "\n\t";
-			print "delete THIS;\n"
+			print "delete THIS;\n";
 		} else {
-			print $deferred;
 			print "\n\t";
 			if ($ret_type ne "void") {
 				print "RETVAL = ";
@@ -680,9 +634,8 @@ EOF
 			if (defined($static)) {
 			    if ($func_name =~ /^new/) {
 				$func_name = "$class";
-			    }
-			    else {
-				print "$class::";
+			    } else {
+				print "${class}::";
 			    }
 			} elsif (defined($class)) {
 				print "THIS->";
@@ -694,75 +647,39 @@ EOF
 	}
 
 	# do output variables
-	if (/^\s*OUTPUT\s*:/) {
-		$gotRETVAL = 0;
-		my $RETVAL_code ;
-		my %outargs ;
-		while (@line) {
-			$_ = shift(@line);
-			last if /^\s*(CLEANUP|CASE)\s*:/;
-			TrimWhitespace($_) ;
-			next if /^$/ ;
-			my ($outarg, $outcode) = /^(\S+)\s*(.*)/ ;
-			if (!$gotRETVAL and $outarg eq 'RETVAL') {
-			    # deal with RETVAL last
-			    $RETVAL_code = $outcode ;
-			    $gotRETVAL = 1 ;
-			    next ;
-			}
-			blurt ("Error: duplicate OUTPUT argument '$outarg' ignored"), next
-			    if $outargs{$outarg} ++ ;
-			blurt ("Error: OUTPUT $outarg not an argument"), next
-			    unless defined($args_match{$outarg});
-			blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
-			    unless defined $var_types{$outarg} ;
-			if ($outcode) {
-			    print "\t$outcode\n";
-			} else {
-				$var_num = $args_match{$outarg};
-				&generate_output($var_types{$outarg}, $var_num,
-				    $outarg); 
-			}
-		}
-
-		if ($gotRETVAL) {
-			if ($RETVAL_code) 
-                            { print "\t$RETVAL_code\n" }
-			else 
-			    { &generate_output($ret_type, 0, 'RETVAL') }
-		}
-	}
+	$gotRETVAL = 0;
+	undef $RETVAL_code ;
+	undef %outargs ;
+	&OUTPUT_handler while check_keyword("OUTPUT");
 
 	# all OUTPUT done, so now push the return value on the stack
-	&generate_output($ret_type, 0, "RETVAL")
-	     if $wantRETVAL and ! $gotRETVAL ;
+	if ($gotRETVAL && $RETVAL_code) {
+	    print "\t$RETVAL_code\n";
+	} elsif ($gotRETVAL || $wantRETVAL) {
+	    &generate_output($ret_type, 0, 'RETVAL');
+	}
 
 	# do cleanup
-	if (/^\s*CLEANUP\s*:/) {
-	    while (@line) {
-		    $_ = shift(@line);
-		    last if /^\s*CASE\s*:/;
-		    print "$_\n";
-	    }
-	}
+	&print_section while check_keyword("CLEANUP");
+
 	# print function trailer
-	if ($except) {
-	    print Q<<EOF;
+	print Q<<EOF;
 #    ]]
+EOF
+	print Q<<EOF if $except;
 #    BEGHANDLERS
 #    CATCHALL
 #	sprintf(errbuf, "%s: %s\\tpropagated", Xname, Xreason);
 #    ENDHANDLERS
 EOF
+	if (check_keyword("CASE")) {
+	    blurt ("Error: No `CASE:' at top of function")
+		unless $condnum;
+	    $_ = "CASE: $_";	# Restore CASE: label
+	    next;
 	}
-	else {
-	    print Q<<EOF;
-#    ]]
-EOF
-	}
-	if (/^\s*CASE\s*:/) {
-	    unshift(@line, $_);
-	}
+	last if $_ eq "$END:";
+	death(/^$BLOCK_re/o ? "Misplaced `$1:'" : "Junk at end of function");
     }
 
     print Q<<EOF if $except;
@@ -790,16 +707,39 @@ print Q<<"EOF";
 #
 EOF
 
+print Q<<"EOF" if defined %XsubAliases ;
+#    {
+#        CV * cv ;
+#
+EOF
+
 for (@Func_name) {
     $pname = shift(@Func_pname);
-    print "    newXS(\"$pname\", XS_$_, file);\n";
+
+    if ($XsubAliases{$pname}) {
+        $XsubAliases{$pname}{$pname} = 0 
+		unless defined $XsubAliases{$pname}{$pname} ;
+        while ( ($name, $value) = each %{$XsubAliases{$pname}}) {
+            print Q<<"EOF" ;
+#        cv = newXS(\"$name\", XS_$_, file);
+#        XSANY.any_i32 = $value ;
+EOF
+        }
+    }
+    else {
+        print "        newXS(\"$pname\", XS_$_, file);\n";
+    }
 }
+
+print Q<<"EOF" if defined %XsubAliases ;
+#    }
+EOF
 
 if (@BootCode)
 {
-    print "\n    /* Initialisation Section */\n\n" ;
+    print "\n    /* Initialisation Section */\n" ;
     print grep (s/$/\n/, @BootCode) ;
-    print "    /* End of Initialisation Section */\n\n" ;
+    print "\n    /* End of Initialisation Section */\n\n" ;
 }
 
 print Q<<"EOF";;
@@ -850,12 +790,10 @@ sub generate_init {
 	unless defined($type_kind{$type});
 
     ($ntype = $type) =~ s/\s*\*/Ptr/g;
-    $subtype = $ntype;
-    $subtype =~ s/Ptr$//;
-    $subtype =~ s/Array$//;
+    ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
     $tk = $type_kind{$type};
     $tk =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
-    $type =~ s/:/_/g;
+    $type =~ tr/:/_/;
     blurt("Error: No INPUT definition for type '$type' found"), return
         unless defined $input_expr{$tk} ;
     $expr = $input_expr{$tk};
@@ -901,9 +839,7 @@ sub generate_output {
                 unless defined $output_expr{$type_kind{$type}} ;
 	    ($ntype = $type) =~ s/\s*\*/Ptr/g;
 	    $ntype =~ s/\(\)//g;
-	    $subtype = $ntype;
-	    $subtype =~ s/Ptr$//;
-	    $subtype =~ s/Array$//;
+	    ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
 	    $expr = $output_expr{$type_kind{$type}};
 	    if ($expr =~ /DO_ARRAY_ELEM/) {
 	        blurt("Error: '$subtype' not in typemap"), return
@@ -937,12 +873,9 @@ sub generate_output {
 sub map_type {
     my($type) = @_;
 
-    $type =~ s/:/_/g;
-    if ($type =~ /^array\(([^,]*),(.*)\)/) {
-	    return "$1 *";
-    } else {
-	    return $type;
-    }
+    $type =~ tr/:/_/;
+    $type =~ s/^array\(([^,]*),(.*)\).*/$1 */s;
+    $type;
 }
 
 

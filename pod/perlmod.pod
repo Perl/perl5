@@ -223,7 +223,7 @@ arrange to autoload) any additional functionality.  The POSIX module
 happens to do both dynamic loading and autoloading, but the user can
 just say C<use POSIX> to get it all.
 
-For more information on writing extension modules, see L<perlapi>
+For more information on writing extension modules, see L<perlxs>
 and L<perlguts>.
 
 =head1 NOTE

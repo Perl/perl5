@@ -196,6 +196,7 @@
 #define sge_amg		Perl_sge_amg
 #define sgt_amg		Perl_sgt_amg
 #define sig_name	Perl_sig_name
+#define sig_num		Perl_sig_num
 #define siggv		Perl_siggv
 #define sighandler	Perl_sighandler
 #define simple		Perl_simple
@@ -974,6 +975,7 @@
 #define warn		Perl_warn
 #define watch		Perl_watch
 #define whichsig	Perl_whichsig
+#define whichsigname	Perl_whichsigname
 #define xiv_arenaroot	Perl_xiv_arenaroot
 #define xiv_root	Perl_xiv_root
 #define xnv_root	Perl_xnv_root

@@ -1410,6 +1410,12 @@ register SV *sstr;
     stype = SvTYPE(sstr);
     dtype = SvTYPE(dstr);
 
+    if (dtype == SVt_PVGV && (SvFLAGS(dstr) & SVf_FAKE)) {
+        sv_unglob(dstr);     /* so fake GLOB won't perpetuate */
+        SvPOK_only(dstr);
+        dtype = SvTYPE(dstr);
+    }
+
 #ifdef OVERLOAD
     SvAMAGIC_off(dstr);
 #endif /* OVERLOAD */
@@ -2987,13 +2993,17 @@ STRLEN *lp;
     }
     else {
 	if (SvTYPE(sv) > SVt_PVLV && SvTYPE(sv) != SVt_PVFM) {
-	    if (SvFAKE(sv))
+	    if (SvTYPE(sv) == SVt_PVGV && SvFAKE(sv)) {
 		sv_unglob(sv);
+                s = SvPVX(sv);
+                *lp = SvCUR(sv);
+            }
 	    else
 		croak("Can't coerce %s to string in %s", sv_reftype(sv,0),
 		    op_name[op->op_type]);
 	}
-	s = sv_2pv(sv, lp);
+        else 
+            s = sv_2pv(sv, lp);
 	if (s != SvPVX(sv)) {	/* Almost, but not quite, sv_setpvn() */
 	    STRLEN len = *lp;
 	    
@@ -3180,6 +3190,7 @@ SV* sv;
 	gp_free(sv);
     sv_unmagic(sv, '*');
     Safefree(GvNAME(sv));
+    SvMULTI_off(sv);
     SvFLAGS(sv) &= ~SVTYPEMASK;
     SvFLAGS(sv) |= SVt_PVMG;
 }
@@ -3192,7 +3203,10 @@ SV* sv;
     
     SvRV(sv) = 0;
     SvROK_off(sv);
-    SvREFCNT_dec(rv);
+    if (SvREFCNT(rv) == 1)
+        sv_2mortal(rv);
+    else
+        SvREFCNT_dec(rv);
 }
 
 #ifdef DEBUGGING

@@ -27,7 +27,7 @@ of sections:
     perlsec	Perl security
     perltrap	Perl traps for the unwary
     perlstyle	Perl style guide
-    perlapi	Perl application programming interface
+    perlxs	Perl XS application programming interface
     perlguts	Perl internal functions for those doing extensions 
     perlcall	Perl calling conventions from C
     perlovl	Perl overloading semantics

@@ -6,9 +6,6 @@ ccflags="$ccflags -X18"
 
 usemymalloc='y'
 
-# /usr/include/rpcsvc is for finding dbm.h
-inclwanted="$inclwanted /usr/include/rpcsvc"
-
 echo " "
 echo "NOTE: You may have to take out makefile dependencies on the files in"
 echo "/usr/include (i.e. /usr/include/ctype.h) or the make will fail.  A"

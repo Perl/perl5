@@ -176,6 +176,7 @@ sub STORE { &readonly }
 sub DELETE{ &readonly }
 sub CLEAR { &readonly }
 
+sub config_sh { $config_sh }
 
 1;
 ENDOFEND

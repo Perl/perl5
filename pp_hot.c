@@ -144,6 +144,8 @@ PP(pp_concat)
     dPOPTOPssrl;
     STRLEN len;
     char *s;
+    if (SvGMAGICAL(left))
+        mg_get(left);
     if (TARG != left) {
 	s = SvPV(left,len);
 	sv_setpvn(TARG,s,len);
@@ -519,6 +521,8 @@ PP(pp_aassign)
 		if (magic)
 		    mg_set(sv);
 	    }
+	    if (!i)
+		av_extend(ary, 0);
 	    break;
 	case SVt_PVHV: {
 		char *tmps;
@@ -530,9 +534,12 @@ PP(pp_aassign)
 
 		while (relem < lastrelem) {	/* gobble up all the rest */
 		    STRLEN len;
-		    if (*relem)
+		    if (*relem) {
 			sv = *(relem++);
-		    else
+                        if (dowarn && SvROK(sv))  /* Tom's gripe */
+                            warn("Attempt to use reference as hash key");
+                    }
+		    else 
 			sv = &sv_no, relem++;
 		    tmps = SvPV(sv, len);
 		    tmpstr = NEWSV(29,0);
@@ -542,6 +549,25 @@ PP(pp_aassign)
 		    (void)hv_store(hash,tmps,len,tmpstr,0);
 		    if (magic)
 			mg_set(tmpstr);
+		}
+		if (relem == lastrelem) {
+                    warn("Odd number of elements in hash list");
+		    if (*relem) {
+			STRLEN len;
+			sv = *relem;
+                        if (dowarn && SvROK(sv))  /* Tom's gripe */
+                            warn("Attempt to use reference as hash key");
+			tmps = SvPV(sv, len);
+			tmpstr = NEWSV(29,0);
+			(void) hv_store(hash, tmps, len, tmpstr, 0);
+			if (magic)
+			    mg_set(tmpstr);
+		    }
+		    relem++;	/* allow for (%a,%b) = 1; */
+		}
+		if (!HvARRAY(hash) && !magic) {
+		    Newz(42, hash->sv_any->xhv_array,
+			 sizeof(HE*) * (HvMAX(hash)+1), char);
 		}
 	    }
 	    break;
@@ -1250,7 +1276,7 @@ PP(pp_subst)
 	EXTEND(SP,1);
     }
     s = SvPV(TARG, len);
-    if (!SvPOKp(TARG) || SvREADONLY(TARG))
+    if (!SvPOKp(TARG) || SvREADONLY(TARG) || (SvTYPE(TARG) == SVt_PVGV))
 	force_on_match = 1;
 
   force_it:
@@ -1447,6 +1473,7 @@ PP(pp_subst)
 	    safebase));
 	sv_catpvn(dstr, s, strend - s);
 
+	SvOOK_off(TARG);
 	Safefree(SvPVX(TARG));
 	SvPVX(TARG) = SvPVX(dstr);
 	SvCUR_set(TARG, SvCUR(dstr));
@@ -1622,7 +1649,7 @@ PP(pp_entersub)
     if ((op->op_private & OPpDEREF_DB) && !CvXSUB(cv)) {
 	sv = GvSV(DBsub);
 	save_item(sv);
-	if (SvFLAGS(cv) & SVpcv_ANON)	/* Is GV potentially non-unique? */
+	if (SvFLAGS(cv) & (SVpcv_ANON | SVpcv_CLONED)) /* Is GV potentially non-unique? */
 	    sv_setsv(sv, newRV((SV*)cv));
 	else {
 	    gv = CvGV(cv);

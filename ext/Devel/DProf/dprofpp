@@ -1,0 +1,394 @@
+#!/usr/local/bin/perl
+
+require 5.000;
+
+
+# dprofpp - display perl profile data
+#  5apr95
+#  Dean Roehrich
+#
+# changes/bugs fixed since 10feb95 version:
+#  - summary info is printed by default, opt_c is gone.
+#  - fixed some doc bugs
+#  - changed name to dprofpp
+# changes/bugs fixed since 03feb95 version:
+#  - fixed division by zero.
+#  - replace many local()s with my().
+#  - now prints user+system times by default
+#     now -u prints user time, -U prints unsorted.
+#  - fixed documentation
+#  - fixed output, to clarify that times are given in seconds.
+#  - can now fake exit timestamps if the profile is garbled.
+# changes/bugs fixed since 17jun94 version:
+#  - podified.
+#  - correct old documentation flaws.
+#  - added Andy's patches.
+#
+ 
+
+=head1 NAME
+
+dprofpp - display perl profile data
+
+=head1 SYNOPSIS
+
+dprofpp [B<-a|-t|-l|-v|-U|-T>] [B<-s|-r|-u>] [B<-q>] [B<-F>] [B<-O cnt>] [profile]
+
+=head1 DESCRIPTION
+
+The I<dprofpp> command interprets a profile file produced by the Devel::DProf
+profiler.  By default dprofpp will read the file I<tmon.out> and will display
+the 15 subroutines which are using the most time.
+
+=head1 OPTIONS
+
+=over 5
+
+=item B<-a>
+
+Sort alphabetically by subroutine names.
+
+=item B<-t>
+
+(default) Sort by amount of user+system time used.  The first few lines
+should show you which subroutines are using the most time.
+
+=item B<-l>
+
+Sort by number of calls to the subroutines.  This may help identify
+candidates for inlining.
+
+=item B<-v>
+
+Sort by average time spent in subroutines during each call.  This may help
+identify candidates for inlining. 
+
+=item B<-U>
+
+Do not sort.  Display in the order found in the raw profile.
+
+=item B<-F>
+
+Force the generation of fake exit timestamps if dprofpp reports that the
+profile is garbled.  This is only useful if dprofpp determines that the
+profile is garbled due to missing exit timestamps.  You're on your own if
+you do this.  Consult the BUGS section.
+
+=item B<-T>
+
+Display subroutine call tree to stdout.  Subroutine statistics are
+not displayed.
+
+=item B<-q>
+
+Do not display column headers.  Does nothing if B<-T> is used.
+
+=item B<-O cnt>
+
+Show only I<cnt> subroutines.  The default is 15.  Does nothing if B<-T>
+is used.
+
+=item B<-r>
+
+Display elapsed real times rather than user+system times.
+
+=item B<-s>
+
+Display system times rather than user+system times.
+
+=item B<-u>
+
+Display user times rather than user+system times.
+
+=back
+
+=head1 BUGS
+
+Applications which call I<die> from within an eval for exception handling
+(catch/throw) or for setjmp/longjmp may not generate a readable profile.
+
+Applications which call I<exit> from within a subroutine will leave an
+incomplete profile.
+
+=head1 FILES
+
+	dprofpp		- profile processor
+	tmon.out	- raw profile
+
+=head1 SEE ALSO
+
+L<perl>, L<Devel::DProf>, times(2)
+
+=cut
+
+use Getopt::Std 'getopts';
+
+Setup: {
+	getopts('O:ltavuTqrsUF');
+
+# -O cnt	Specifies maximum number of subroutines to display.
+# -a		Sort by alphabetic name of subroutines.
+# -t		Sort by user+system time spent in subroutines. (default)
+# -l		Sort by number of calls to subroutines.
+# -v		Sort by average amount of time spent in subroutines.
+# -T		Show call tree.
+# -q		Do not print column headers.
+# -u		Use user time rather than user+system time.
+# -s		Use system time rather than user+system time.
+# -r		Use real elapsed time rather than user+system time.
+# -U		Do not sort subroutines.
+
+	$cnt = $opt_O || 15;
+	$sort = 'by_time';
+	$sort = 'by_calls' if defined $opt_l;
+	$sort = 'by_alpha' if defined $opt_a;
+	$sort = 'by_avgcpu' if defined $opt_v;
+	$whichtime = "User+System";
+	$whichtime = "System" if defined $opt_s;
+	$whichtime = "Real" if defined $opt_r;
+	$whichtime = "User" if defined $opt_u;
+}
+
+Main: {
+	my $monout = shift || "tmon.out";
+	my $fh = "main::fh";
+	local $names = {};
+	local $times = {};  # times in hz
+	local $calls = {};
+	local $persecs = {}; # times in seconds
+	local $idkeys = [];
+	local $runtime; # runtime in seconds
+	my @a = ();
+	my $a;
+	local $rrun_utime = 0;	# user time in hz
+	local $rrun_stime = 0;	# system time in hz
+	local $rrun_rtime = 0;	# elapsed run time in hz
+	local $rrun_ustime = 0;	# user+system time in hz
+	local $hz = 0;
+
+	open( $fh, "<$monout" ) || die "Unable to open $monout\n";
+
+	header($fh);
+
+	$rrun_ustime = $rrun_utime + $rrun_stime;
+
+	settime( \$runtime, $hz );
+
+	$~ = 'STAT';
+	if( ! $opt_q ){
+		$^ = 'CSTAT_top';
+	}
+
+	parsestack( $fh, $names, $calls, $times, $idkeys );
+
+	exit(0) if $opt_T;
+
+	if( $opt_v ){
+		percalc( $calls, $times, $persecs, $idkeys );
+	}
+	if( ! $opt_U ){
+		@a = sort $sort @$idkeys;
+		$a = \@a;
+	}
+	else {
+		$a = $idkeys;
+	}
+	display( $runtime, $hz, $names, $calls, $times, $cnt, $a );
+}
+
+
+# Sets $runtime to user, system, real, or user+system time.  The
+# result is given in seconds.
+#
+sub settime {
+	my( $runtime, $hz ) = @_;
+
+	if( $opt_r ){
+		$$runtime = $rrun_rtime/$hz;
+	}
+	elsif( $opt_s ){
+		$$runtime = $rrun_stime/$hz;
+	}
+	elsif( $opt_u ){
+		$$runtime = $rrun_utime/$hz;
+	}
+	else{
+		$$runtime = $rrun_ustime/$hz;
+	}
+}
+
+
+# Report the times in seconds.
+sub display {
+	my( $runtime, $hz, $names, $calls , $times, $cnt, $idkeys ) = @_;
+	my( $x, $key, $s );
+	#format: $ncalls, $name, $secs, $percall, $pcnt
+
+	for( $x = 0; $x < @$idkeys; ++$x ){
+		$key = $idkeys->[$x];
+		$ncalls = $calls->{$key};
+		$name = $names->{$key};
+		$s = $times->{$key}/$hz;
+		$secs = sprintf("%.3f", $s );
+		$percall = sprintf("%.4f", $s/$ncalls );
+		$pcnt = sprintf("%.2f",
+			$runtime ?
+				(($secs / $runtime) * 100.0) :
+				0 );
+		write;
+		$pcnt = $secs = $ncalls = $percall = "";
+		write while( length $name );
+		last unless --$cnt;
+	}
+}
+
+
+sub parsestack {
+	my( $fh, $names, $calls, $times, $idkeys ) = @_;
+	my( $dir, $name );
+	my( $t, $syst, $realt, $usert );
+	my( $x, $z, $c );
+	my @stack = ();
+	my @tstack = ();
+	my $tab = 3;
+	my $in = 0;
+
+	while(<$fh>){
+		next if /^#/o;
+		last if /^PART/o;
+		chop;
+		($dir, $usert, $syst, $realt, $name) = split;
+
+		if   ( $opt_u )	{	$t = $usert		}
+		elsif( $opt_s )	{	$t = $syst		}
+		elsif( $opt_r )	{	$t = $realt		}
+		else		{	$t = $usert + $syst	}
+
+		if( $dir eq '+' ){
+			if( $opt_T ){
+				print " " x $in, "$name\n";
+				$in += $tab;
+			}
+			if(! defined $names->{$name} ){
+				$names->{$name} = $name;
+				$times->{$name} = 0;
+				push( @$idkeys, $name );
+			}
+			$calls->{$name}++;
+			$x = [ $name, $t ];
+			push( @stack, $x );
+
+			# my children will put their time here
+			push( @tstack, 0 );
+
+			next;
+		}
+		if( $dir eq '-' ){
+			exitstamp( \@stack, \@tstack, $t, $times,
+				  $name, \$in, $tab );
+			next;
+		}
+		die "Bad profile: $_";
+	}
+	if( @stack ){
+		my @astack;
+
+		warn "Garbled profile is missing some exit time stamps:\n";
+		foreach (@stack) {
+			printf "${$_}[0]\n";
+			push( @astack, @stack );
+		}
+		if( ! $opt_F ){
+			die "Garbled profile";
+		}
+		else{
+			warn( "Faking " . scalar( @astack ) . " exit timestamp(s) . . .\n");
+
+			foreach $x ( @astack ){
+				$name = $x->[0];
+				exitstamp( \@stack, \@tstack, $t, $times,
+					  $name, \$in, $tab );
+			}
+		}
+	}
+}
+
+sub exitstamp {
+	my( $stack, $tstack, $t, $times, $name, $in, $tab ) = @_;
+
+	my( $x, $c, $z );
+
+	$x = pop( @$stack );
+	if( ! defined $x ){
+		die "Garbled profile, missing an enter time stamp";
+	}
+	if( $x->[0] ne $name ){
+		die "Garbled profile, unexpected exit time stamp";
+	}
+	if( $opt_T ){
+		$$in -= $tab;
+	}
+	# collect childtime
+	$c = pop( @$tstack );
+	# total time this func has been active
+	$z = $t - $x->[1];
+	# less time spent in child funcs.
+	#   prepare to accept that the children may account
+	#   for all my time.
+	$times->{$name} += ($z > $c)? $z - $c: $c - $z;
+
+	# pass my time to my parent
+	if( @$tstack ){
+		$c = pop( @$tstack );
+		push( @$tstack, $c + $z );
+	}
+}
+
+
+sub header {
+	my $fh = shift;
+	chop($_ = <$fh>);
+	if( ! /^#fOrTyTwO$/ ){
+		die "Not a perl profile";
+	}
+	while(<$fh>){
+		next if /^#/o;
+		last if /^PART/o;
+		eval;
+	}
+}
+
+
+# Report avg time-per-function in seconds
+sub percalc {
+	my( $calls, $times, $persecs, $idkeys ) = @_;
+	my( $x, $t, $n, $key );
+
+	for( $x = 0; $x < @$idkeys; ++$x ){
+		$key = $idkeys->[$x];
+		$n = $calls->{$key};
+		$t = $times->{$key} / $hz;
+		$persecs->{$key} = $t ? $t / $n : 0;
+	}
+}
+
+
+sub by_time { $times->{$b} <=> $times->{$a} }
+sub by_calls { $calls->{$b} <=> $calls->{$a} }
+sub by_alpha { $names->{$a} cmp $names->{$b} }
+sub by_avgcpu { $persecs->{$b} <=> $persecs->{$a} }
+
+
+format CSTAT_top =
+Total Elapsed Time = @>>>>>> Seconds
+($rrun_rtime / $hz)
+  @>>>>>>>>>> Time = @>>>>>> Seconds
+$whichtime, $runtime
+%Time Seconds     #Calls sec/call Name
+.
+
+format STAT =
+ ^>>>   ^>>>> ^>>>>>>>>>   ^>>>>> ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$pcnt, $secs, $ncalls, $percall, $name
+.
+

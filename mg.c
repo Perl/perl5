@@ -21,6 +21,7 @@
 #endif
 */
 
+
 void
 mg_magical(sv)
 SV* sv;
@@ -1227,7 +1228,7 @@ char *sig;
 
     for (sigv = sig_name+1; *sigv; sigv++)
 	if (strEQ(sig,*sigv))
-	    return sigv - sig_name;
+	    return sig_num[sigv - sig_name];
 #ifdef SIGCLD
     if (strEQ(sig,"CHLD"))
 	return SIGCLD;
@@ -1237,6 +1238,17 @@ char *sig;
 	return SIGCHLD;
 #endif
     return 0;
+}
+
+char *
+whichsigname(sig)
+int sig;
+{
+    register int i;
+    for (i = 1; sig_num[i]; i++)  /* sig_num[] is a 0-terminated list */
+	if (sig_num[i] == sig)
+	    return sig_name[i];
+    return Nullch;
 }
 
 Signal_t
@@ -1249,18 +1261,20 @@ int sig;
     SV *sv;
     CV *cv;
     AV *oldstack;
+    char *signame; 
 
 #ifdef OS2		/* or anybody else who requires SIG_ACK */
     signal(sig, SIG_ACK);
 #endif
 
-    cv = sv_2cv(*hv_fetch(GvHVn(siggv),sig_name[sig],strlen(sig_name[sig]),
+    signame = whichsigname(sig);
+    cv = sv_2cv(*hv_fetch(GvHVn(siggv),signame,strlen(signame),
 			  TRUE),
 		&st, &gv, TRUE);
     if (!cv || !CvROOT(cv) &&
-	*sig_name[sig] == 'C' && instr(sig_name[sig],"LD")) {
+	*signame == 'C' && instr(signame,"LD")) {
 	
-	if (sig_name[sig][1] == 'H')
+	if (signame[1] == 'H')
 	    cv = sv_2cv(*hv_fetch(GvHVn(siggv),"CLD",3,TRUE),
 			&st, &gv, TRUE);
 	else
@@ -1271,7 +1285,7 @@ int sig;
     if (!cv || !CvROOT(cv)) {
 	if (dowarn)
 	    warn("SIG%s handler \"%s\" not defined.\n",
-		sig_name[sig], GvENAME(gv) );
+		signame, GvENAME(gv) );
 	return;
     }
 
@@ -1281,7 +1295,7 @@ int sig;
     SWITCHSTACK(stack, signalstack);
 
     sv = sv_newmortal();
-    sv_setpv(sv,sig_name[sig]);
+    sv_setpv(sv,signame);
     PUSHMARK(sp);
     PUSHs(sv);
     PUTBACK;

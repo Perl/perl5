@@ -17,8 +17,6 @@ case "$cc" in
 	ldflags="$ldflags -Xp"
     	;;
 esac
-# Pick up dbm.h in <rpcsvc/dbm.h>
-ccflags="$ccflags -I/usr/include/rpcsvc"
 # Compensate for conflicts in <net/errno.h>
 doio_cflags='ccflags="$ccflags -DENOTSOCK=103"'
 pp_sys_cflags='ccflags="$ccflags -DENOTSOCK=103"'

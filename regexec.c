@@ -912,7 +912,7 @@ char *prog;
 		minmod = 0;
 		if (ln && regrepeat(scan, ln) < ln)
 		    return 0;
-		while (n >= ln) {
+		while (n >= ln || (n == 32767 && ln > 0)) { /* ln overflow ? */
 		    /* If it could work, try it. */
 		    if (nextchar == -1000 || *reginput == nextchar)
 			if (regmatch(next))

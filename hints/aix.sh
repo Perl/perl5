@@ -32,9 +32,13 @@ case "$osvers" in
     d_setreuid='undef'
     ccflags='-D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE'
     nm_opt='-B'
-    scope_cflags='optimize=" "'
     ;;
 esac
+
+# The optimizer in 4.1.1 apparently generates bad code for scope.c.
+# Configure doesn't offer an easy way to propagate extra variables
+# only for certain cases, so the following contortion is required:
+scope_cflags='case "$osvers" in 4.1*) optimize=" ";; esac'
 
 # Changes for dynamic linking by Wayne Scott <wscott@ichips.intel.com>
 #

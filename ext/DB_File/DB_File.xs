@@ -3,14 +3,17 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 19th May 1995
- version 0.2
+ last modified 7th October 1995
+ version 1.0
 
  All comments/suggestions/problems are welcome
 
  Changes:
 	0.1 - Initial Release
 	0.2 - No longer bombs out if dbopen returns an error.
+	0.3 - Added some support for multiple btree compares
+	1.0 - Complete support for multiple callbacks added.
+	      Fixed a problem with pushing a value onto an empty list.
 */
 
 #include "EXTERN.h"  
@@ -21,7 +24,15 @@
 
 #include <fcntl.h> 
 
-typedef DB * DB_File;
+typedef struct {
+	DBTYPE	type ;
+	DB * 	dbp ;
+	SV *	compare ;
+	SV *	prefix ;
+	SV *	hash ;
+	} DB_File_type;
+
+typedef DB_File_type * DB_File ;
 typedef DBT DBTKEY ;
 
 union INFO {
@@ -30,25 +41,21 @@ union INFO {
         BTREEINFO 	btree ;
       } ;
 
-typedef struct {
-	    SV *	sub ;
-	} CallBackInfo ;
-
 
 /* #define TRACE  */
 
-#define db_DESTROY(db)                  (db->close)(db)
-#define db_DELETE(db, key, flags)       (db->del)(db, &key, flags)
-#define db_STORE(db, key, value, flags) (db->put)(db, &key, &value, flags)
-#define db_FETCH(db, key, flags)        (db->get)(db, &key, &value, flags)
+#define db_DESTROY(db)                  (db->dbp->close)(db->dbp)
+#define db_DELETE(db, key, flags)       (db->dbp->del)(db->dbp, &key, flags)
+#define db_STORE(db, key, value, flags) (db->dbp->put)(db->dbp, &key, &value, flags)
+#define db_FETCH(db, key, flags)        (db->dbp->get)(db->dbp, &key, &value, flags)
 
-#define db_close(db)			(db->close)(db)
-#define db_del(db, key, flags)          (db->del)(db, &key, flags)
-#define db_fd(db)                       (db->fd)(db) 
-#define db_put(db, key, value, flags)   (db->put)(db, &key, &value, flags)
-#define db_get(db, key, value, flags)   (db->get)(db, &key, &value, flags)
-#define db_seq(db, key, value, flags)   (db->seq)(db, &key, &value, flags)
-#define db_sync(db, flags)              (db->sync)(db, flags)
+#define db_close(db)			(db->dbp->close)(db->dbp)
+#define db_del(db, key, flags)          (db->dbp->del)(db->dbp, &key, flags)
+#define db_fd(db)                       (db->dbp->fd)(db->dbp) 
+#define db_put(db, key, value, flags)   (db->dbp->put)(db->dbp, &key, &value, flags)
+#define db_get(db, key, value, flags)   (db->dbp->get)(db->dbp, &key, &value, flags)
+#define db_seq(db, key, value, flags)   (db->dbp->seq)(db->dbp, &key, &value, flags)
+#define db_sync(db, flags)              (db->dbp->sync)(db->dbp, flags)
 
 
 #define OutputValue(arg, name)  \
@@ -57,7 +64,7 @@ typedef struct {
 #define OutputKey(arg, name)	 				\
 	{ if (RETVAL == 0) \
 	  { 							\
-		if (db->close != DB_recno_close) 		\
+		if (db->type != DB_RECNO) 			\
 		    sv_setpvn(arg, name.data, name.size); 	\
 		else 						\
 		    sv_setiv(arg, (I32)*(I32*)name.data - 1); 	\
@@ -65,13 +72,10 @@ typedef struct {
 	}
 
 /* Internal Global Data */
-
-static recno_t Value ;
-static int (*DB_recno_close)() = NULL ;
-
-static CallBackInfo hash_callback 	= { 0 } ;
-static CallBackInfo compare_callback 	= { 0 } ;
-static CallBackInfo prefix_callback 	= { 0 } ;
+static recno_t Value ; 
+static DB_File CurrentDB ;
+static recno_t zero = 0 ;
+static DBTKEY empty = { &zero, sizeof(recno_t) } ;
 
 
 static int
@@ -105,7 +109,7 @@ const DBT * key2 ;
     PUSHs(sv_2mortal(newSVpv(data2,key2->size)));
     PUTBACK ;
 
-    count = perl_call_sv(compare_callback.sub, G_SCALAR); 
+    count = perl_call_sv(CurrentDB->compare, G_SCALAR); 
 
     SPAGAIN ;
 
@@ -152,7 +156,7 @@ const DBT * key2 ;
     PUSHs(sv_2mortal(newSVpv(data2,key2->size)));
     PUTBACK ;
 
-    count = perl_call_sv(prefix_callback.sub, G_SCALAR); 
+    count = perl_call_sv(CurrentDB->prefix, G_SCALAR); 
 
     SPAGAIN ;
 
@@ -184,7 +188,7 @@ size_t size ;
     XPUSHs(sv_2mortal(newSVpv((char*)data,size)));
     PUTBACK ;
 
-    count = perl_call_sv(hash_callback.sub, G_SCALAR); 
+    count = perl_call_sv(CurrentDB->hash, G_SCALAR); 
 
     SPAGAIN ;
 
@@ -256,7 +260,7 @@ BTREEINFO btree ;
 
 static I32
 GetArrayLength(db)
-DB_File db ;
+DB * db ;
 {
     DBT		key ;
     DBT		value ;
@@ -282,10 +286,12 @@ char * string ;
     SV **	svp;
     HV *	action ;
     union INFO	info ;
-    DB_File	RETVAL ;
+    DB_File	RETVAL = (DB_File)safemalloc(sizeof(DB_File_type)) ;
     void *	openinfo = NULL ;
-    DBTYPE	type = DB_HASH ;
+    /* DBTYPE	type = DB_HASH ; */
 
+    RETVAL->hash = RETVAL->compare = RETVAL->prefix = NULL ;
+    RETVAL->type = DB_HASH ;
 
     if (sv)
     {
@@ -295,7 +301,7 @@ char * string ;
         action = (HV*)SvRV(sv);
         if (sv_isa(sv, "DB_File::HASHINFO"))
         {
-            type = DB_HASH ;
+            RETVAL->type = DB_HASH ;
             openinfo = (void*)&info ;
   
             svp = hv_fetch(action, "hash", 4, FALSE); 
@@ -303,7 +309,7 @@ char * string ;
             if (svp && SvOK(*svp))
             {
                 info.hash.hash = hash_cb ;
-		hash_callback.sub = *svp ;
+		RETVAL->hash = newSVsv(*svp) ;
             }
             else
 	        info.hash.hash = NULL ;
@@ -327,14 +333,14 @@ char * string ;
         }
         else if (sv_isa(sv, "DB_File::BTREEINFO"))
         {
-            type = DB_BTREE ;
+            RETVAL->type = DB_BTREE ;
             openinfo = (void*)&info ;
    
             svp = hv_fetch(action, "compare", 7, FALSE);
             if (svp && SvOK(*svp))
             {
                 info.btree.compare = btree_compare ;
-                compare_callback.sub = *svp ;
+		RETVAL->compare = newSVsv(*svp) ;
             }
             else
                 info.btree.compare = NULL ;
@@ -343,7 +349,7 @@ char * string ;
             if (svp && SvOK(*svp))
             {
                 info.btree.prefix = btree_prefix ;
-                prefix_callback.sub = *svp ;
+		RETVAL->prefix = newSVsv(*svp) ;
             }
             else
                 info.btree.prefix = NULL ;
@@ -371,7 +377,7 @@ char * string ;
         }
         else if (sv_isa(sv, "DB_File::RECNOINFO"))
         {
-            type = DB_RECNO ;
+            RETVAL->type = DB_RECNO ;
             openinfo = (void *)&info ;
 
             svp = hv_fetch(action, "flags", 5, FALSE);
@@ -415,14 +421,16 @@ char * string ;
     }
 
 
-    RETVAL = dbopen(name, flags, mode, type, openinfo) ; 
+    RETVAL->dbp = dbopen(name, flags, mode, RETVAL->type, openinfo) ; 
 
+#if 0
     /* kludge mode on: RETVAL->type for DB_RECNO is set to DB_BTREE
 		       so remember a DB_RECNO by saving the address
 		       of one of it's internal routines
     */
-    if (RETVAL && type == DB_RECNO)
-        DB_recno_close = RETVAL->close ;
+    if (RETVAL->dbp && type == DB_RECNO)
+        DB_recno_close = RETVAL->dbp->close ;
+#endif
 
 
     return (RETVAL) ;
@@ -710,6 +718,16 @@ BOOT:
 int
 db_DESTROY(db)
 	DB_File		db
+	INIT:
+	  CurrentDB = db ;
+	CLEANUP:
+	  if (db->hash)
+	    SvREFCNT_dec(db->hash) ;
+	  if (db->compare)
+	    SvREFCNT_dec(db->compare) ;
+	  if (db->prefix)
+	    SvREFCNT_dec(db->prefix) ;
+	  Safefree(db) ;
 
 
 int
@@ -717,6 +735,8 @@ db_DELETE(db, key, flags=0)
 	DB_File		db
 	DBTKEY		key
 	u_int		flags
+	INIT:
+	  CurrentDB = db ;
 
 int
 db_FETCH(db, key, flags=0)
@@ -727,7 +747,8 @@ db_FETCH(db, key, flags=0)
 	{
 	    DBT		value  ;
 
-	    RETVAL = (db->get)(db, &key, &value, flags) ;
+	    CurrentDB = db ;
+	    RETVAL = (db->dbp->get)(db->dbp, &key, &value, flags) ;
 	    ST(0) = sv_newmortal();
 	    if (RETVAL == 0)
 	        sv_setpvn(ST(0), value.data, value.size);
@@ -739,6 +760,8 @@ db_STORE(db, key, value, flags=0)
 	DBTKEY		key
 	DBT		value
 	u_int		flags
+	INIT:
+	  CurrentDB = db ;
 
 
 int
@@ -749,11 +772,12 @@ db_FIRSTKEY(db)
 	    DBTKEY		key ;
 	    DBT		value ;
 
-	    RETVAL = (db->seq)(db, &key, &value, R_FIRST) ;
+	    CurrentDB = db ;
+	    RETVAL = (db->dbp->seq)(db->dbp, &key, &value, R_FIRST) ;
 	    ST(0) = sv_newmortal();
 	    if (RETVAL == 0)
 	    {
-	        if (db->type != DB_RECNO)
+	        if (db->dbp->type != DB_RECNO)
 	            sv_setpvn(ST(0), key.data, key.size);
 	        else
 	            sv_setiv(ST(0), (I32)*(I32*)key.data - 1);
@@ -768,11 +792,12 @@ db_NEXTKEY(db, key)
 	{
 	    DBT		value ;
 
-	    RETVAL = (db->seq)(db, &key, &value, R_NEXT) ;
+	    CurrentDB = db ;
+	    RETVAL = (db->dbp->seq)(db->dbp, &key, &value, R_NEXT) ;
 	    ST(0) = sv_newmortal();
 	    if (RETVAL == 0)
 	    {
-	        if (db->type != DB_RECNO)
+	        if (db->dbp->type != DB_RECNO)
 	            sv_setpvn(ST(0), key.data, key.size);
 	        else
 	            sv_setiv(ST(0), (I32)*(I32*)key.data - 1);
@@ -793,6 +818,7 @@ unshift(db, ...)
 	    int		i ;
 	    int		One ;
 
+	    CurrentDB = db ;
 	    RETVAL = -1 ;
 	    for (i = items-1 ; i > 0 ; --i)
 	    {
@@ -801,7 +827,7 @@ unshift(db, ...)
 	        One = 1 ;
 	        key.data = &One ;
 	        key.size = sizeof(int) ;
-	        RETVAL = (db->put)(db, &key, &value, R_IBEFORE) ;
+	        RETVAL = (db->dbp->put)(db->dbp, &key, &value, R_IBEFORE) ;
 	        if (RETVAL != 0)
 	            break;
 	    }
@@ -817,13 +843,14 @@ pop(db)
 	    DBTKEY	key ;
 	    DBT		value ;
 
+	    CurrentDB = db ;
 	    /* First get the final value */
-	    RETVAL = (db->seq)(db, &key, &value, R_LAST) ;	
+	    RETVAL = (db->dbp->seq)(db->dbp, &key, &value, R_LAST) ;	
 	    ST(0) = sv_newmortal();
 	    /* Now delete it */
 	    if (RETVAL == 0)
 	    {
-	        RETVAL = (db->del)(db, &key, R_CURSOR) ;
+	        RETVAL = (db->dbp->del)(db->dbp, &key, R_CURSOR) ;
 	        if (RETVAL == 0)
 	            sv_setpvn(ST(0), value.data, value.size);
 	    }
@@ -837,13 +864,14 @@ shift(db)
 	    DBTKEY	key ;
 	    DBT		value ;
 
+	    CurrentDB = db ;
 	    /* get the first value */
-	    RETVAL = (db->seq)(db, &key, &value, R_FIRST) ;	
+	    RETVAL = (db->dbp->seq)(db->dbp, &key, &value, R_FIRST) ;	
 	    ST(0) = sv_newmortal();
 	    /* Now delete it */
 	    if (RETVAL == 0)
 	    {
-	        RETVAL = (db->del)(db, &key, R_CURSOR) ;
+	        RETVAL = (db->dbp->del)(db->dbp, &key, R_CURSOR) ;
 	        if (RETVAL == 0)
 	            sv_setpvn(ST(0), value.data, value.size);
 	    }
@@ -856,22 +884,25 @@ push(db, ...)
 	CODE:
 	{
 	    DBTKEY	key ;
+	    DBTKEY *	keyptr = &key ; 
 	    DBT		value ;
 	    int		i ;
 
+	    CurrentDB = db ;
 	    /* Set the Cursor to the Last element */
-	    RETVAL = (db->seq)(db, &key, &value, R_LAST) ;
-	    if (RETVAL == 0)
+	    RETVAL = (db->dbp->seq)(db->dbp, &key, &value, R_LAST) ;
+	    if (RETVAL >= 0)
 	    {
-	    /* for (i = 1 ; i < items ; ++i) */
-	    for (i = items - 1 ; i > 0 ; --i)
-	    {
-	        value.data = SvPV(ST(i), na) ;
-	        value.size = na ;
-	        RETVAL = (db->put)(db, &key, &value, R_IAFTER) ;
-	        if (RETVAL != 0)
-	            break;
-	    }
+		if (RETVAL == 1)
+		    keyptr = &empty ;
+	        for (i = items - 1 ; i > 0 ; --i)
+	        {
+	            value.data = SvPV(ST(i), na) ;
+	            value.size = na ;
+	            RETVAL = (db->dbp->put)(db->dbp, keyptr, &value, R_IAFTER) ;
+	            if (RETVAL != 0)
+	                break;
+	        }
 	    }
 	}
 	OUTPUT:
@@ -882,7 +913,8 @@ I32
 length(db)
 	DB_File		db
 	CODE:
-	    RETVAL = GetArrayLength(db) ;
+	    CurrentDB = db ;
+	    RETVAL = GetArrayLength(db->dbp) ;
 	OUTPUT:
 	    RETVAL
 
@@ -896,6 +928,8 @@ db_del(db, key, flags=0)
 	DB_File		db
 	DBTKEY		key
 	u_int		flags
+	INIT:
+	  CurrentDB = db ;
 
 
 int
@@ -904,6 +938,8 @@ db_get(db, key, value, flags=0)
 	DBTKEY		key
 	DBT		value
 	u_int		flags
+	INIT:
+	  CurrentDB = db ;
 	OUTPUT:
 	  value
 
@@ -913,17 +949,23 @@ db_put(db, key, value, flags=0)
 	DBTKEY		key
 	DBT		value
 	u_int		flags
+	INIT:
+	  CurrentDB = db ;
 	OUTPUT:
 	  key		if (flags & (R_IAFTER|R_IBEFORE)) OutputKey(ST(1), key);
 
 int
 db_fd(db)
 	DB_File		db
+	INIT:
+	  CurrentDB = db ;
 
 int
 db_sync(db, flags=0)
 	DB_File		db
 	u_int		flags
+	INIT:
+	  CurrentDB = db ;
 
 
 int
@@ -932,6 +974,8 @@ db_seq(db, key, value, flags)
 	DBTKEY		key 
 	DBT		value
 	u_int		flags
+	INIT:
+	  CurrentDB = db ;
 	OUTPUT:
 	  key
 	  value

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlapi - Perl 5 application programming interface for C extensions
+perlxs - XS language reference manual
 
 =head1 DESCRIPTION
 
@@ -23,8 +23,43 @@ many common C types.  A supplement typemap must be created
 to handle special structures and types for the library being
 linked.
 
+=head2 Getting Started
+
+A new extension should begin with the B<h2xs> tool.  This will generate
+templates for the new Perl module (PM), the XS source file (XS), the MANIFEST
+file, and the Makefile.PL (PL) files.  The Makefile.PL file is a Perl script
+which will generate a Makefile.  This makefile knows how to find and run
+xsubpp for your extension.  When you type "make" your XS file will be run
+through xsubpp and a C file will be produced.  Then the C file will be
+compiled.  A simple example looks like this for an example module named
+B<Foo>:
+
+	$ h2xs -Afn Foo
+	$ cd ext/Foo
+	$ ls
+	Foo.pm Foo.xs MANIFEST Makefile.PL
+	$ perl5 Makefile.PL
+	$ ls
+	Foo.pm Foo.xs MANIFEST Makefile.PL Makefile
+	$ <edit Foo.pm and Foo.xs to add your stuff>
+	$ make
+	<you will see xsubpp run on Foo.xs and you'll see the C compiler
+	<run on Foo.c, and a bunch of other less-interesting things
+	<will happen.
+
+If your Perl was built with dynamic loading then the makefile will build a
+dynamically loadable extension.  If you don't have dynamic loading then the
+makefile will build a static extension and should create a new Perl binary.
+The default behavior depends on what is available.
+
+For more information about h2xs consult its manpage, embedded in the
+source.  For information about the Makefile.PL and Makefile consult the
+MakeMaker manpage.
+
+=head2 On The Road
+
 Many of the examples which follow will concentrate on creating an
-interface between Perl and the ONC+RPC bind library functions.
+interface between Perl and the ONC+ RPC bind library functions.
 Specifically, the rpcb_gettime() function will be used to demonstrate many
 features of the XS language.  This function has two parameters; the first
 is an input parameter and the second is an output parameter.  The function
@@ -66,8 +101,8 @@ expanded later in this document.
 
      bool_t
      rpcb_gettime(host,timep)
-          char *  host
-          time_t  &timep
+          char *host
+          time_t &timep
           OUTPUT:
           timep
 
@@ -100,37 +135,31 @@ function is called with the correct parameters.  This abstraction will
 allow the programmer to create a more Perl-like interface to the C
 function.
 
-It is recommended that the B<h2xs> tool be used when creating new
-extensions.  This tool will generate template source files and Makefiles.
-This is discussed in more detail in the section titled "Creating A New
-Extension" and in the B<h2xs> manpage.
-
 =head2 The Anatomy of an XSUB
 
-The following XSUB allows a Perl program to access a  C  library  function  called  sin().  The XSUB will imitate the C
-function which takes a single argument and returns a  single
-value.
+The following XSUB allows a Perl program to access a C library function
+called sin().  The XSUB will imitate the C function which takes a single
+argument and returns a single value.
 
      double
      sin(x)
-       double<tab>x
+       double x
 
-The compiler expects a tab between the parameter name and its type, and
-any or no whitespace before the type.  When using C pointers the
-indirection operator C<*> should be considered part of the type and the
-address operator C<&> should be considered part of the variable, as is
-demonstrated in the rpcb_gettime() function above.  See the section on
-typemaps for more about handling qualifiers and unary operators in C
-types.
+When using C pointers the indirection operator C<*> should be considered
+part of the type and the address operator C<&> should be considered part of
+the variable, as is demonstrated in the rpcb_gettime() function above.  See
+the section on typemaps for more about handling qualifiers and unary
+operators in C types.
 
-The parameter list of a function must not have whitespace
-after the open-parenthesis or before the close-parenthesis.
+The parameter list of a function must not have whitespace after the
+open-parenthesis or before the close-parenthesis.  (This restriction will be
+relaxed in later versions of B<xsubpp>.)
 
    INCORRECT                      CORRECT
 
    double                         double
    sin( x )                       sin(x)
-     double  x                      double  x
+     double x                      double x
 
 The function name and the return type must be placed on
 separate lines.
@@ -138,8 +167,8 @@ separate lines.
   INCORRECT                        CORRECT
 
   double sin(x)                    double
-    double  x                      sin(x)
-				     double  x
+    double x                       sin(x)
+				     double x
 
 =head2 The Argument Stack
 
@@ -151,8 +180,8 @@ own range of positions on the stack.  In this document the
 first position on that stack which belongs to the active
 function will be referred to as position 0 for that function.
 
-XSUBs refer to their stack arguments with the macro B<ST(x)>, where I<x> refers
-to a position in this XSUB's part of the stack.  Position 0 for that
+XSUBs refer to their stack arguments with the macro B<ST(x)>, where I<x>
+refers to a position in this XSUB's part of the stack.  Position 0 for that
 function would be known to the XSUB as ST(0).  The XSUB's incoming
 parameters and outgoing return values always begin at ST(0).  For many
 simple cases the B<xsubpp> compiler will generate the code necessary to
@@ -246,14 +275,12 @@ variable.
 The OUTPUT: keyword can also be used to indicate that function parameters
 are output variables.  This may be necessary when a parameter has been
 modified within the function and the programmer would like the update to
-be seen by Perl.  If function parameters are listed under OUTPUT: along
-with the RETVAL variable then the RETVAL variable must be the last one
-listed.
+be seen by Perl.
 
      bool_t
      rpcb_gettime(host,timep)
-          char *  host
-          time_t  &timep
+          char *host
+          time_t &timep
           OUTPUT:
           timep
 
@@ -263,10 +290,10 @@ typemap.
 
      bool_t
      rpcb_gettime(host,timep)
-          char *  host
-          time_t  &timep
+          char *host
+          time_t &timep
           OUTPUT:
-          timep<tab>sv_setnv(ST(1), (double)timep);
+          timep sv_setnv(ST(1), (double)timep);
 
 =head2 The CODE: Keyword
 
@@ -284,8 +311,8 @@ The XSUB follows.
 
      bool_t
      rpcb_gettime(host,timep)
-          char *  host
-          time_t  timep
+          char *host
+          time_t timep
           CODE:
                RETVAL = rpcb_gettime( host, &timep );
           OUTPUT:
@@ -314,8 +341,8 @@ not care about its initial contents.
 
      bool_t
      rpcb_gettime(host,timep)
-          char *  host
-          time_t  &timep = NO_INIT
+          char *host
+          time_t &timep = NO_INIT
           OUTPUT:
           timep
 
@@ -335,8 +362,8 @@ literally, such as double quotes, must be protected with backslashes.
 
      bool_t
      rpcb_gettime(host,timep)
-          char *  host = (char *)SvPV(ST(0),na);
-          time_t  &timep = 0;
+          char *host = (char *)SvPV(ST(0),na);
+          time_t &timep = 0;
           OUTPUT:
           timep
 
@@ -368,8 +395,8 @@ the parameters in the correct order for that function.
 
      bool_t
      rpcb_gettime(timep,host="localhost")
-          char *  host
-          time_t  timep = NO_INIT
+          char *host
+          time_t timep = NO_INIT
           CODE:
                RETVAL = rpcb_gettime( host, &timep );
           OUTPUT:
@@ -398,7 +425,7 @@ The XS code, with ellipsis, follows.
 
      bool_t
      rpcb_gettime(timep, ...)
-          time_t  timep = NO_INIT
+          time_t timep = NO_INIT
           CODE:
           {
           char *host = "localhost";
@@ -427,7 +454,7 @@ Perl as a single list.
 
      void
      rpcb_gettime(host)
-          char *  host
+          char *host
           PPCODE:
           {
           time_t  timep;
@@ -513,7 +540,7 @@ then not push return values on the stack.
 
      void
      rpcb_gettime(host)
-          char *  host
+          char *host
           PPCODE:
           {
           time_t  timep;
@@ -728,7 +755,7 @@ because the XSUB will attempt to verify that the Perl object
 is of the expected type.
 
 The following XS code shows the getnetconfigent() function which is used
-with ONC TIRPC.  The getnetconfigent() function will return a pointer to a
+with ONC+ TIRPC.  The getnetconfigent() function will return a pointer to a
 C structure and has the C prototype shown below.  The example will
 demonstrate how the C pointer will become a Perl reference.  Perl will
 consider this reference to be a pointer to a blessed object and will
@@ -754,13 +781,13 @@ trim the name to the word DESTROY as Perl will expect.
 
      Netconfig *
      getnetconfigent(netid)
-          char *  netid
+          char *netid
 
      MODULE = RPC  PACKAGE = NetconfigPtr  PREFIX = rpcb_
 
      void
      rpcb_DESTROY(netconf)
-          Netconfig *  netconf
+          Netconfig *netconf
           CODE:
           printf("Now in NetconfigPtr::DESTROY\n");
           free( netconf );
@@ -899,7 +926,7 @@ File C<RPC.xs>: Interface to some ONC+ RPC bind library functions.
 
      void
      rpcb_gettime(host="localhost")
-          char *  host
+          char *host
           CODE:
           {
           time_t  timep;
@@ -910,13 +937,13 @@ File C<RPC.xs>: Interface to some ONC+ RPC bind library functions.
 
      Netconfig *
      getnetconfigent(netid="udp")
-          char *  netid
+          char *netid
 
      MODULE = RPC  PACKAGE = NetconfigPtr  PREFIX = rpcb_
 
      void
      rpcb_DESTROY(netconf)
-          Netconfig *  netconf
+          Netconfig *netconf
           CODE:
           printf("NetconfigPtr::DESTROY\n");
           free( netconf );
@@ -956,4 +983,4 @@ File C<rpctest.pl>: Perl test program for the RPC extension.
 =head1 AUTHOR
 
 Dean Roehrich F<E<lt>roehrich@cray.comE<gt>>
-May 3, 1995
+Oct 12, 1995

@@ -12,7 +12,7 @@ BEGIN {
 use DB_File; 
 use Fcntl;
 
-print "1..73\n";
+print "1..76\n";
 
 $Dfile = "Op.db-btree";
 unlink $Dfile;
@@ -347,5 +347,58 @@ print ($status == -1 ? "ok 73\n" : "not ok 73\n") ;
 
 undef $Y ;
 untie %h ;
+
+# test multiple callbacks
+$Dfile1 = "btree1" ;
+$Dfile2 = "btree2" ;
+$Dfile3 = "btree3" ;
+ 
+$dbh1 = TIEHASH DB_File::BTREEINFO ;
+$dbh1->{compare} = sub { $_[0] <=> $_[1] } ;
+ 
+$dbh2 = TIEHASH DB_File::BTREEINFO ;
+$dbh2->{compare} = sub { $_[0] cmp $_[1] } ;
+ 
+$dbh3 = TIEHASH DB_File::BTREEINFO ;
+$dbh3->{compare} = sub { length $_[0] <=> length $_[1] } ;
+ 
+ 
+tie(%h, DB_File,$Dfile1, O_RDWR|O_CREAT, 0640, $dbh1 ) ;
+tie(%g, DB_File,$Dfile2, O_RDWR|O_CREAT, 0640, $dbh2 ) ;
+tie(%k, DB_File,$Dfile3, O_RDWR|O_CREAT, 0640, $dbh3 ) ;
+ 
+@Keys = qw( 0123 12 -1234 9 987654321 def  ) ;
+@srt_1 = sort { $a <=> $b } @Keys ;
+@srt_2 = sort { $a cmp $b } @Keys ;
+@srt_3 = sort { length $a <=> length $b } @Keys ;
+ 
+foreach (@Keys) {
+    $h{$_} = 1 ;
+    $g{$_} = 1 ;
+    $k{$_} = 1 ;
+}
+ 
+sub ArrayCompare
+{
+    my($a, $b) = @_ ;
+ 
+    return 0 if @$a != @$b ;
+ 
+    foreach (1 .. length @$a)
+    {
+        return 0 unless $$a[$_] eq $$b[$_] ;
+    }
+ 
+    1 ;
+}
+ 
+print ( ArrayCompare (\@srt_1, [keys %h]) ? "ok 74\n" : "not ok 74\n") ;
+print ( ArrayCompare (\@srt_2, [keys %g]) ? "ok 75\n" : "not ok 75\n") ;
+print ( ArrayCompare (\@srt_3, [keys %k]) ? "ok 76\n" : "not ok 76\n") ;
+
+untie %h ;
+untie %g ;
+untie %k ;
+unlink $Dfile1, $Dfile2, $Dfile3 ;
 
 exit ;

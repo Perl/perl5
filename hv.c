@@ -481,7 +481,8 @@ HV *hv;
     }
 
     if (!xhv->xhv_array)
-	Newz(506,xhv->xhv_array, sizeof(HE*) * (xhv->xhv_max + 1), char);
+	entry = Null(HE*);
+    else
     do {
 	if (entry)
 	    entry = entry->hent_next;

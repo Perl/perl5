@@ -8,6 +8,7 @@
  * $Log:	a2p.h,v $
  */
 
+#include "../embed.h"
 #define VOIDUSED 1
 #include "../config.h"
 

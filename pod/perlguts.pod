@@ -399,7 +399,7 @@ to use the macros:
 
 These macros automatically adjust the stack for you, if needed.
 
-For more information, consult L<perlapi>.
+For more information, consult L<perlxs>.
 
 =head1 Mortality
 

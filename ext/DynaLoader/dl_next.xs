@@ -31,17 +31,21 @@ Anno Siegel
 
 */
 
+/* include these before perl headers */
+#include <mach-o/rld.h>
+#include <streams/streams.h>
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 
+#define DL_LOADONCEONLY
+
 #include "dlutils.c"	/* SaveError() etc	*/
 
 
-#include <mach-o/rld.h>
-#include <streams/streams.h>
-
 static char * dl_last_error = (char *) 0;
+static AV *dl_resolve_using = Nullav;
 
 NXStream *
 OpenError()
@@ -84,19 +88,21 @@ char * path;
 int mode; /* mode is ignored */
 {
     int rld_success;
-    NXStream *nxerr = OpenError();
-    AV * av_resolve;
+    NXStream *nxerr;
     I32 i, psize;
     char *result;
     char **p;
+	
+    /* Do not load what is already loaded into this process */
+    if (hv_fetch(dl_loaded_files, path, strlen(path), 0))
+	return path;
 
-    av_resolve = GvAVn(gv_fetchpv(
-	"DynaLoader::dl_resolve_using", FALSE, SVt_PVAV));
-    psize = AvFILL(av_resolve) + 3;
+    nxerr = OpenError();
+    psize = AvFILL(dl_resolve_using) + 3;
     p = (char **) safemalloc(psize * sizeof(char*));
     p[0] = path;
     for(i=1; i<psize-1; i++) {
-	p[i] = SvPVx(*av_fetch(av_resolve, i-1, TRUE), na);
+	p[i] = SvPVx(*av_fetch(dl_resolve_using, i-1, TRUE), na);
     }
     p[psize-1] = 0;
     rld_success = rld_load(nxerr, (struct mach_header **)0, p,
@@ -104,6 +110,8 @@ int mode; /* mode is ignored */
     safefree((char*) p);
     if (rld_success) {
 	result = path;
+	/* prevent multiple loads of same file into same process */
+	hv_store(dl_loaded_files, path, strlen(path), &sv_yes, 0);
     } else {
 	TransferError(nxerr);
 	result = (char*) 0;
@@ -144,6 +152,7 @@ static void
 dl_private_init()
 {
     (void)dl_generic_private_init();
+    dl_resolve_using = perl_get_av("DynaLoader::dl_resolve_using", 0x4);
 }
  
 MODULE = DynaLoader     PACKAGE = DynaLoader

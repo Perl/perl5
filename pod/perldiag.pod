@@ -194,6 +194,13 @@ could indicate that SvREFCNT_dec() was called too many times, or that
 SvREFCNT_inc() was called too few times, or that the SV was mortalized
 when it shouldn't have been, or that memory has been corrupted.
 
+=item Attempt to use reference as hash key
+
+(W) References as not very meaningful as hash keys.  You probably forgot to 
+dereference the reference before using it in a hash list, or got mixed up 
+and used C<{}> or C<[]> instead of C<()>.  Or perhaps a missing key in the
+hash list is causing values to be treated as keys.
+
 =item Bad arg length for %s, is %d, should be %d
 
 (F) You passed a buffer of the wrong size to one of msgctl(), semctl() or

@@ -595,7 +595,10 @@ I32 base;
 	    (*SSPOPDPTR)(ptr);
 	    break;
 	case SAVEt_REGCONTEXT:
-	    savestack_ix -= SSPOPINT;	/* regexp must have croaked */
+	    {
+		I32 delta = SSPOPINT;
+		savestack_ix -= delta;	/* regexp must have croaked */
+	    }
 	    break;
 	default:
 	    croak("panic: leave_scope inconsistency");

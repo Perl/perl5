@@ -5,7 +5,13 @@
 #ifdef NULL
 #undef NULL
 #endif
-#include <dbm.h>
+#ifdef I_DBM
+#  include <dbm.h>
+#else
+#  ifdef I_RPCSVC_DBM
+#    include <rpcsvc/dbm.h>
+#  endif
+#endif
 
 #include <fcntl.h>
 

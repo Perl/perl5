@@ -1200,7 +1200,7 @@ PP(pp_dbstate)
 	if (!cv)
 	    DIE("No DB::DB routine defined");
 
-	if (CvDEPTH(cv) >= 1)		/* don't do recursive DB::DB call */
+	if (CvDEPTH(cv) >= 1 && !(debug & (1<<30)))		/* don't do recursive DB::DB call */
 	    return NORMAL;
 
 	SAVEI32(debug);
@@ -1900,9 +1900,10 @@ int gimme;
 
     comppadlist = newAV();
     AvREAL_off(comppadlist);
-    av_store(comppadlist, 0, SvREFCNT_inc((SV*)comppad_name));
-    av_store(comppadlist, 1, SvREFCNT_inc((SV*)comppad));
+    av_store(comppadlist, 0, (SV*)comppad_name);
+    av_store(comppadlist, 1, (SV*)comppad);
     CvPADLIST(compcv) = comppadlist;
+    SAVEFREESV(compcv);
 
     /* make sure we compile in the right package */
 
@@ -1955,7 +1956,6 @@ int gimme;
     rschar = nrschar;
     rspara = (nrslen == 2);
     compiling.cop_line = 0;
-    SAVEFREESV(compcv);
     SAVEFREEOP(eval_root);
     if (gimme & G_ARRAY)
 	list(eval_root);

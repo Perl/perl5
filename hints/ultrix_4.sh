@@ -24,6 +24,8 @@ case "$cc" in
     case "$osvers" in
     *4.1*)	ccflags="$ccflags -DLANGUAGE_C -Olimit 2900" ;;
     *4.2*)	ccflags="$ccflags -DLANGUAGE_C -Olimit 2900"
+		# Prototypes sometimes cause compilation errors in 4.2.
+		prototype=undef   
 		case "$myuname" in
 		*risc*)  d_volatile=undef ;;
 		esac

@@ -15,7 +15,7 @@ DBTKEY			T_dbtkeydatum
 
 INPUT
 T_dbtkeydatum
-	if (db->close != DB_recno_close)
+	if (db->type != DB_RECNO)
 	{
 	    $var.data = SvPV($arg, na);
 	    $var.size = (int)na;

@@ -1,10 +1,12 @@
 Artistic		The "Artistic License"
 Changes			Differences from previous versions.
 Changes.Conf		Recent changes in the Configure & build process
+configure		Crude emulation of GNU configure
 Configure		Portability tool
 Copying			The GNU General Public License
 Doc/perl5-notes		Samples of new functionality
 EXTERN.h		Included before foreign .h files
+INSTALL			Detailed installation instructions.
 INTERN.h		Included before domestic .h files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
@@ -20,7 +22,6 @@ cflags.SH		A script that emits C compilation flags per file
 config_H		Sample config.h
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
-configure		Crude emulation of GNU configure
 cop.h			Control operator header
 cv.h			Code value header
 deb.c			Debugging routines
@@ -85,6 +86,12 @@ ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 ext/DB_File/typemap		Berkeley DB extension interface types
+ext/Devel/DProf/DProf.pm	Perl Profiler extension Perl module
+ext/Devel/DProf/DProf.xs	Perl Profiler extension external subroutines
+ext/Devel/DProf/Makefile.PL	Perl Profiler extension makefile writer
+ext/Devel/DProf/README		Perl Profiler extension info
+ext/Devel/DProf/dprofpp		Perl Profiler extension utility
+ext/Devel/DProf/test.pl		Perl Profiler extension test
 ext/DynaLoader/DynaLoader.pm	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
@@ -195,7 +202,7 @@ hints/fps.sh		Hints for named architecture
 hints/freebsd.sh	Hints for named architecture
 hints/genix.sh		Hints for named architecture
 hints/greenhills.sh	Hints for named architecture
-hints/hpux_9.sh		Hints for named architecture
+hints/hpux.sh		Hints for named architecture
 hints/i386.sh		Hints for named architecture
 hints/irix_4.sh		Hints for named architecture
 hints/irix_5.sh		Hints for named architecture
@@ -352,7 +359,6 @@ perly.y			Yacc grammar for perl
 pl2pm			A pl to pm translator
 pod/Makefile		Make pods into something else
 pod/perl.pod		Top level perl man page
-pod/perlapi.pod		XS api info
 pod/perlbook.pod	Book info
 pod/perlbot.pod		Object-oriented Bag o' Tricks
 pod/perlcall.pod	Callback info
@@ -378,6 +384,7 @@ pod/perlsub.pod		Subroutine info
 pod/perlsyn.pod		Syntax info
 pod/perltrap.pod	Trap info
 pod/perlvar.pod		Variable info
+pod/perlxs.pod		XS api info
 pod/pod2html.SH		Precursor for translator to turn pod into HTML
 pod/pod2latex.SH	Precursor for translator to turn pod into LaTeX
 pod/pod2man.SH		Precursor for translator to turn pod into manpage
@@ -437,6 +444,7 @@ t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/posix.t		See if POSIX works
 t/lib/sdbm.t		See if SDBM_File works
+t/lib/socket.t		See if Socket works
 t/lib/soundex.t		See if Soundex works
 t/op/append.t		See if . works
 t/op/array.t		See if array operations work

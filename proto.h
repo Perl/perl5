@@ -459,6 +459,7 @@ I32	wait4pid _((int pid, int* statusp, int flags));
 void	warn _((char* pat,...)) __attribute__((format(printf,1,2)));
 void	watch _((char **addr));
 I32	whichsig _((char* sig));
+char* 	whichsigname _((int sig));
 int	yyerror _((char* s));
 int	yylex _((void));
 int	yyparse _((void));

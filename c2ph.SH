@@ -37,7 +37,7 @@ $spitshell >>c2ph <<'!NO!SUBS!'
 #   See the usage message for more.  If this isn't enough, read the code.
 #
 
-$RCSID = 'c2ph.SH';
+$RCSID = '$Id: c2ph,v 1.7 95/10/28 10:41:47 tchrist Exp Locker: tchrist $';
 
 
 ######################################################################
@@ -283,7 +283,18 @@ STAB: while (<>) {
 	next unless /^\s*\.stabs\s+/;
 	$line = $_;
 	s/^\s*\.stabs\s+//; 
+	if (s/\\\\"[d,]+$//) {
+	    $saveline .= $line;
+	    $savebar  = $_;
+	    next STAB;
+	} 
+	if ($saveline) {
+	    s/^"//;
+	    $_ = $savebar . $_;
+	    $line = $saveline;
+	} 
 	&stab; 
+	$savebar = $saveline = undef;
     }
     print STDERR "$.\n" if $trace;
     unlink $TMP if $TMP;
@@ -299,24 +310,31 @@ STAB: while (<>) {
     $pmask1 = "%-${type_width}s %-${member_width}s"; 
     $pmask2 = "%-${sum}s %${offset_width}${offset_fmt}%s %${size_width}${size_fmt}%s";
 
+
+
     if ($perl) {
 	# resolve template -- should be in stab define order, but even this isn't enough.
 	print STDERR "\nbuilding type templates: " if $trace;
 	for $i (reverse 0..$#type) {
 	    next unless defined($name = $type[$i]);
 	    next unless defined $struct{$name};
+	    ($iname = $name) =~ s/\..*//;
 	    $build_recursed = 0;
 	    &build_template($name) unless defined $template{&psou($name)} ||
-					$opt_s && !$interested{$name};
+					$opt_s && !$interested{$iname};
 	} 
 	print STDERR "\n\n" if $trace;
     }
 
     print STDERR "dumping structs: " if $trace;
 
+    local($iam);
+
+
 
     foreach $name (sort keys %struct) {
-	next if $opt_s && !$interested{$name};
+	($iname = $name) =~ s/\..*//;
+	next if $opt_s && !$interested{$iname};
 	print STDERR "$name " if $trace;
 
 	undef @sizeof;
@@ -324,6 +342,7 @@ STAB: while (<>) {
 	undef @offsetof;
 	undef @indices;
 	undef @typeof;
+	undef @fieldnames;
 
 	$mname = &munge($name);
 
@@ -379,6 +398,19 @@ sub ${mname}'typeof {
 }
 EOF
     
+	    print <<EOF;
+sub ${mname}'fieldnames { 
+    \@${mname}'fieldnames; 
+}
+EOF
+
+	$iam = ($isastruct{$name} && 's') || ($isaunion{$name} && 'u');
+    
+	    print <<EOF;
+sub ${mname}'isastruct { 
+    '$iam'; 
+}
+EOF
 
 	    print "\$${mname}'typedef = '" . &scrunch($template{$fname}) 
 		. "';\n";
@@ -398,6 +430,8 @@ EOF
 			join("\n\t", '', @offsetof), "\n    );\n\n";
 	    print "\@${mname}'typeof[\@${mname}'indices] = (",
 			join("\n\t", '', @typeof), "\n    );\n\n";
+	    print "\@${mname}'fieldnames[\@${mname}'indices] = (",
+			join("\n\t", '', @fieldnames), "\n    );\n\n";
 
 	    $template_printed{$fname}++;
 	    $size_printed{$fname}++;
@@ -408,7 +442,7 @@ EOF
     print STDERR "\n" if $trace;
 
     unless ($perl && $opt_a) { 
-	print "\n1;\n";
+	print "\n1;\n" if $perl;
 	exit;
     }
 
@@ -428,7 +462,7 @@ EOF
 	print '$',&munge($name),"'typedef = '", $template{$name}, "';\n";
     }
 
-    print "\n1;\n";
+    print "\n1;\n" if $perl;
 	
     exit;
 }
@@ -437,13 +471,22 @@ EOF
 
 
 sub stab {
-    next unless /:[\$\w]+(\(\d+,\d+\))?=[\*\$\w]+/;  # (\d+,\d+) is for sun
+    next unless $continued || /:[\$\w]+(\(\d+,\d+\))?=[\*\$\w]+/;  # (\d+,\d+) is for sun
     s/"// 						|| next;
     s/",([x\d]+),([x\d]+),([x\d]+),.*// 		|| next;
 
     next if /^\s*$/;
 
     $size = $3 if $3;
+    $_ = $continued . $_ if length($continued);
+    if (s/\\\\$//) {
+      # if last 2 chars of string are '\\' then stab is continued
+      # in next stab entry
+      chop;
+      $continued = $_;
+      next;
+    }
+    $continued = '';
 
 
     $line = $_;
@@ -518,7 +561,7 @@ sub stab {
 	$type[$typeno] = $2;
 	print STDERR "intrinsic $2 in new type $typeno\n" if $debug; 
     }
-    elsif (s/^=e//) { # blessed by thy compiler; mine won't do this
+    elsif (s/^=e//) { # blessed be thy compiler; mine won't do this
 	&edecl;
     } 
     else {
@@ -583,8 +626,8 @@ sub pstruct {
 		}
 	    }
 
-	    $template = &fetch_template($type) x 
-			    ($count ? &scripts2count($count) : 1);
+	    $template = &fetch_template($type);
+	    &repeat_template($template,$count);
 
 	    if (! $finished_template{$sname}) {
 		$template{$sname} .= $template;
@@ -610,16 +653,21 @@ sub pstruct {
 		    ($bits = $length % 8) ? ".$bits": ""
 			if !$perl || $verbose;
 
+	    if ($perl) {
+		$template = &fetch_template($type);
+		&repeat_template($template,$count);
+	    }
 
 	    if ($perl && $nesting == 1) {
-		$template = &scrunch(&fetch_template($type) x 
-				($count ? &scripts2count($count) : 1));
+
 		push(@sizeof, int($length/8) .",\t# $fieldname");
 		push(@offsetof, int($offset/8) .",\t# $fieldname");
-		push(@typedef, "'$template', \t# $fieldname");
+		local($little) = &scrunch($template);
+		push(@typedef, "'$little', \t# $fieldname");
 		$type =~ s/(struct|union) //;
-		push(@typeof, "'$type" . ($count ? $count : '') .
+		push(@typeof, "'$mytype" . ($count ? $count : '') .
 		    "',\t# $fieldname");
+		push(@fieldnames, "'$fieldname',");
 	    }
 
 	    print '  ', ' ' x $indent x $nesting, $template
@@ -705,8 +753,10 @@ sub adecl {
     # global $typeno, @type
     local($_, $typedef) = @_;
 
-    while (s/^((\d+)=)?ar(\d+);//) {
+    while (s/^((\d+|\(\d+,\d+\))=)?ar(\d+|\(\d+,\d+\));//) {
 	($arraytype, $unknown) = ($2, $3); 
+	$arraytype = &typeno($arraytype);
+	$unknown = &typeno($unknown);
 	if (s/^(\d+);(\d+);//) {
 	    ($lower, $upper) = ($1, $2); 
 	    $scripts .= '[' .  ($upper+1) . ']'; 
@@ -714,14 +764,14 @@ sub adecl {
 	    warn "can't find array bounds: $_"; 
 	} 
     }
-    if (s/^([\d*f=]*),(\d+),(\d+);//) {
+    if (s/^([(,)\d*f=]*),(\d+),(\d+);//) {
 	($start, $length) = ($2, $3); 
-	local($whatis) = $1;
-	if ($whatis =~ /^(\d+)=/) {
-	    $typeno = $1;
+	$whatis = $1;
+	if ($whatis =~ /^(\d+|\(\d+,\d+\))=/) {
+	    $typeno = &typeno($1);
 	    &pdecl($whatis);
 	} else {
-	    $typeno = $whatis;
+	    $typeno = &typeno($whatis);
 	}
     } elsif (s/^(\d+)(=[*suf]\d*)//) {
 	local($whatis) = $2; 
@@ -798,10 +848,15 @@ SFIELD:
 	    #$_ = &sdecl("$prefix.$fieldname", $_, $start+$offset);
 	}
 
-	if (/^\d+=ar/) {
+	if (/^(\d+|\(\d+,\d+\))=ar/) {
 	    $_ = &adecl($_);
 	}
 	elsif (s/^(\d+|\(\d+,\d+\))?,(\d+),(\d+);//) {
+          ($start, $length) =  ($2, $3);
+          &panic("no length?") unless $length;
+          $typeno = &typeno($1) if $1;
+        }
+        elsif (s/^(\d+)=xs\w+:,(\d+),(\d+);//) {
 	    ($start, $length) =  ($2, $3); 
 	    &panic("no length?") unless $length;
 	    $typeno = &typeno($1) if $1;
@@ -901,6 +956,8 @@ sub psou {
 sub scrunch {
     local($_) = @_;
 
+    return '' if $_ eq '';
+
     study;
 
     s/\$//g;
@@ -920,7 +977,7 @@ sub scrunch {
 sub buildscrunchlist {
     $scrunch_code = "sub quick_scrunch {\n";
     for (values %intrinsics) {
-        $scrunch_code .= "\ts/($_{2,})/'$_' . length(\$1)/ge;\n";
+        $scrunch_code .= "\ts/($_\{2,})/'$_' . length(\$1)/ge;\n";
     } 
     $scrunch_code .= "}\n";
     print "$scrunch_code" if $debug;
@@ -977,7 +1034,7 @@ main() {
 EOF
 
     for $type (@intrinsics) {
-	next if $type eq 'void';
+	next if !type || $type eq 'void' || $type =~ /complex/; # sun stuff
 	print <<"EOF";
     printf(mask,sizeof($type), "$type");
 EOF
@@ -1096,7 +1153,17 @@ sub squishseq {
     $string .= $last if $inseq && $last != -e18;
     $string;
 }
-!NO!SUBS!
-$eunicefix c2ph
-rm -f pstruct
-ln c2ph pstruct
+
+sub repeat_template {
+    #  local($template, $scripts) = @_;  have to change caller's values
+
+    if ( $_[1] ) { 
+	local($ncount) = &scripts2count($_[1]);
+	if ($_[0] =~ /^\s*c\s*$/i) {
+	    $_[0] = "A$ncount ";
+	    $_[1] = '';
+	} else {
+	    $_[0] = $template x $ncount;
+	}
+    }
+}

@@ -50,6 +50,9 @@
 #include "XSUB.h"
 
 #include "dlutils.c"    /* dl_debug, LastError; SaveError not used  */
+
+static AV *dl_require_symbols = Nullav;
+
 /* N.B.:
  * dl_debug and LastError are static vars; you'll need to deal
  * with them appropriately if you need context independence
@@ -117,6 +120,7 @@ static void
 dl_private_init()
 {
     dl_generic_private_init();
+    dl_require_symbols = perl_get_av("DynaLoader::dl_require_symbols", 0x4);
     /* Set up the static control blocks for dl_expand_filespec() */
     dlfab = cc$rms_fab;
     dlnam = cc$rms_nam;
@@ -195,7 +199,6 @@ dl_load_file(filespec)
     char *	filespec
     CODE:
     char vmsspec[NAM$C_MAXRSS];
-    AV *reqAV;
     SV *reqSV, **reqSVhndl;
     STRLEN deflen;
     struct dsc$descriptor_s
@@ -239,9 +242,7 @@ dl_load_file(filespec)
                         dlptr->name.dsc$a_pointer,
                         dlptr->defspec.dsc$w_length,
                         dlptr->defspec.dsc$a_pointer));
-      if (!(reqAV = GvAV(gv_fetchpv("DynaLoader::dl_require_symbols",
-                                     FALSE,SVt_PVAV)))
-          || !(reqSVhndl = av_fetch(reqAV,0,FALSE)) || !(reqSV = *reqSVhndl)) {
+      if (!(reqSVhndl = av_fetch(dl_require_symbols,0,FALSE)) || !(reqSV = *reqSVhndl)) {
         DLDEBUG(2,fprintf(stderr,"\t@dl_require_symbols empty, returning untested libref\n"));
       }
       else {

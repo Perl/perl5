@@ -33,5 +33,3 @@ esac
 # compilation "redefinition" warnings, but they appear harmless.
 # ccflags="$ccflags -D_SYSV3"
 
-# Pick up dbm.h in <rpcsvc/dbm.h>
-ccflags="$ccflags -I/usr/include/rpcsvc"

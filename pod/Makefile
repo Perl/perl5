@@ -4,7 +4,7 @@ PERL = ../miniperl
 
 POD = \
 	perl.pod	\
-	perlapi.pod	\
+	perlxs.pod	\
 	perlbook.pod	\
 	perlbot.pod	\
 	perlcall.pod	\
@@ -33,7 +33,7 @@ POD = \
 
 MAN = \
 	perl.man	\
-	perlapi.man	\
+	perlxs.man	\
 	perlbook.man	\
 	perlbot.man	\
 	perlcall.man	\
@@ -62,7 +62,7 @@ MAN = \
 
 HTML = \
 	perl.html	\
-	perlapi.html	\
+	perlxs.html	\
 	perlbook.html	\
 	perlbot.html	\
 	perlcall.html	\
@@ -91,7 +91,7 @@ HTML = \
 
 TEX = \
 	perl.tex	\
-	perlapi.tex	\
+	perlxs.tex	\
 	perlbook.tex	\
 	perlbot.tex	\
 	perlcall.tex	\

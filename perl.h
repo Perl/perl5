@@ -941,11 +941,11 @@ EXT SV		sv_yes;
 #endif
 
 #ifdef DOINIT
-EXT char *sig_name[] = {
-    SIG_NAME,0
-};
+EXT char *sig_name[] = { SIG_NAME };
+EXT int   sig_num[]  = { SIG_NUM };
 #else
 EXT char *sig_name[];
+EXT int   sig_num[];
 #endif
 
 #ifdef DOINIT

@@ -4,6 +4,20 @@
 
 #include <fcntl.h>
 
+/* This comment is a kludge to get metaconfig to see the symbols
+    VAL_O_NONBLOCK
+    VAL_EAGAIN
+    RD_NODATA
+    EOF_NONBLOCK
+   and include the appropriate metaconfig unit
+   so that Configure will test how to turn on non-blocking I/O
+   for a file descriptor.  See config.h for how to use these
+   in your extension. 
+   
+   While I'm at it, I'll have metaconfig look for HAS_POLL too.
+   --AD  October 16, 1995
+*/
+
 static int
 not_here(s)
 char *s;

@@ -2173,7 +2173,7 @@ OP *right;
 			     curop->op_type == OP_PADHV ||
 			     curop->op_type == OP_PADANY) {
 			SV **svp = AvARRAY(comppad_name);
-			SV *sv = svp[curop->op_targ];;
+			SV *sv = svp[curop->op_targ];
 			if (SvCUR(sv) == generation)
 			    break;
 			SvCUR(sv) = generation;	/* (SvCUR not used any more) */
@@ -2231,9 +2231,10 @@ OP *op;
 	I32 i;
 	SV *sv;
 	for (i = min_intro_pending; i <= max_intro_pending; i++) {
-	    if ((sv = svp[i]) && sv != &sv_undef)
+	    if ((sv = svp[i]) && sv != &sv_undef) {
 		SvIVX(sv) = 999999999;	/* Don't know scope end yet. */
 		SvNVX(sv) = (double)cop_seqmax;
+            }
 	}
 	min_intro_pending = 0;
 	comppad_name_fill = max_intro_pending;	/* Needn't search higher */
@@ -2642,21 +2643,21 @@ CV *cv;
 	if (!(SvFLAGS(cv) & SVpcv_CLONED))
 	    op_free(CvROOT(cv));
 	CvROOT(cv) = Nullop;
-	if (CvPADLIST(cv)) {
-	    I32 i = AvFILL(CvPADLIST(cv));
-	    while (i >= 0) {
-		SV** svp = av_fetch(CvPADLIST(cv), i--, FALSE);
-		if (svp)
-		    SvREFCNT_dec(*svp);
-	    }
-	    SvREFCNT_dec((SV*)CvPADLIST(cv));
-	    CvPADLIST(cv) = Nullav;
-	}
-	SvREFCNT_dec(CvGV(cv));
-	CvGV(cv) = Nullgv;
-	SvREFCNT_dec(CvOUTSIDE(cv));
-	CvOUTSIDE(cv) = Nullcv;
 	LEAVE;
+    }
+    SvREFCNT_dec(CvGV(cv));
+    CvGV(cv) = Nullgv;
+    SvREFCNT_dec(CvOUTSIDE(cv));
+    CvOUTSIDE(cv) = Nullcv;
+    if (CvPADLIST(cv)) {
+	I32 i = AvFILL(CvPADLIST(cv));
+	while (i >= 0) {
+	    SV** svp = av_fetch(CvPADLIST(cv), i--, FALSE);
+	    if (svp)
+		SvREFCNT_dec(*svp);
+	}
+	SvREFCNT_dec((SV*)CvPADLIST(cv));
+	CvPADLIST(cv) = Nullav;
     }
 }
 
@@ -2982,11 +2983,6 @@ OP *block;
 	if (!SvPADMY(curpad[ix]))
 	    SvPADTMP_on(curpad[ix]);
     }
-
-    CvPADLIST(cv) = av = newAV();
-    AvREAL_off(av);
-    av_store(av, 1, SvREFCNT_inc((SV*)comppad));
-    AvFILL(av) = 1;
 
     CvROOT(cv) = newUNOP(OP_LEAVEWRITE, 0, scalarseq(block));
     CvSTART(cv) = LINKLIST(CvROOT(cv));
@@ -3525,6 +3521,7 @@ OP *op;
     if (op->op_flags & OPf_STACKED) {
 	OP* k;
 	op = ck_sort(op);
+        kid = cLISTOP->op_first->op_sibling;
 	for (k = cLISTOP->op_first->op_sibling->op_next; k; k = k->op_next) {
 	    kid = k;
 	}

@@ -92,7 +92,7 @@ ranlib = $ranlib
 
 # The following are mentioned only to make metaconfig include the
 # appropriate questions in Configure.  If you want to change these,
-# edit config.sh instead, or specify --man1dir=/wherever on 
+# edit config.sh instead, or specify --man1dir=/wherever on
 # installman commandline.
 bin = $installbin
 scriptdir = $scriptdir
@@ -180,7 +180,7 @@ SHELL = /bin/sh
 
 all: makefile miniperl $(private) $(public) $(dynamic_ext)
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(MAKE) all
-	
+
 # This is now done by installman only if you actually want the man pages.
 #	@echo " "; echo "	Making docs"; cd pod; $(MAKE) all;
 
@@ -318,7 +318,7 @@ regen_headers:	FORCE
 	perl keywords.pl
 	perl opcode.pl
 	perl embed.pl
- 
+
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) will automatically
 # get built.  There should ordinarily be no need to change any of
@@ -351,7 +351,7 @@ clean:
 realclean: clean
 	-cd x2p; $(MAKE) realclean
 	-cd pod; $(MAKE) realclean
-	@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
+	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
 	sh ext/util/make_ext realclean $$x ; \
 	done
 	rm -f *.orig */*.orig *~ */*~ core t/core t/c t/perl

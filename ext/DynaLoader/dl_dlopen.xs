@@ -34,7 +34,7 @@
      error.
 
      The mode parameter must be set to 1 for Solaris 1 and to
-     RTLD_LAZY on Solaris 2.
+     RTLD_LAZY (==2) on Solaris 2.
 
 
    dlsym
@@ -114,6 +114,10 @@
 #include <link.h>
 #endif
 
+#ifndef RTLD_LAZY
+# define RTLD_LAZY 1	/* Solaris 1 */
+#endif
+
 #ifndef HAS_DLERROR
 # ifdef __NetBSD__
 #  define dlerror() strerror(errno)
@@ -142,9 +146,10 @@ void *
 dl_load_file(filename)
     char *		filename
     CODE:
-    int mode = 1;     /* Solaris 1 */
-#ifdef RTLD_LAZY
-    mode = RTLD_LAZY; /* Solaris 2 */
+    int mode = RTLD_LAZY;
+#ifdef RTLD_NOW
+    if (dl_nonlazy)
+	mode = RTLD_NOW;
 #endif
     DLDEBUG(1,fprintf(stderr,"dl_load_file(%s):\n", filename));
     RETVAL = dlopen(filename, mode) ;

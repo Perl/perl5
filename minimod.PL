@@ -56,17 +56,19 @@ sub writemain{
     print "	char *file = __FILE__;\n";
     foreach $_ (@exts){
 	my($pname) = canon('/', $_);
-	my($mname, $cname);
+	my($mname, $cname, $ccode);
 	($mname = $pname) =~ s!/!::!g;
 	($cname = $pname) =~ s!/!__!g;
 	print "\t{   extern void boot_${cname} _((CV* cv));\n";
 	if ($pname eq $dl){
 	    # Must NOT install 'DynaLoader::boot_DynaLoader' as 'bootstrap'!
 	    # boot_DynaLoader is called directly in DynaLoader.pm
-	    print "\t/* DynaLoader is a special case */\n";
-	    print "\tnewXS(\"${mname}::boot_${cname}\", boot_${cname}, file);\n"
+	    $ccode = "\t/* DynaLoader is a special case */\n
+\tnewXS(\"${mname}::boot_${cname}\", boot_${cname}, file);\n";
+	    print $ccode unless $SEEN{$ccode}++;
 	} else {
-	    print "\tnewXS(\"${mname}::bootstrap\", boot_${cname}, file);\n"
+	    $ccode = "\tnewXS(\"${mname}::bootstrap\", boot_${cname}, file);\n";
+	    print $ccode unless $SEEN{$ccode}++;
 	}
 	print "\t}\n";
     }

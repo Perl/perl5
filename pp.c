@@ -481,11 +481,11 @@ PP(pp_defined)
 	RETPUSHNO;
     switch (SvTYPE(sv)) {
     case SVt_PVAV:
-	if (AvMAX(sv) >= 0)
+	if (AvMAX(sv) >= 0 || SvRMAGICAL(sv))
 	    RETPUSHYES;
 	break;
     case SVt_PVHV:
-	if (HvARRAY(sv))
+	if (HvARRAY(sv) || SvRMAGICAL(sv))
 	    RETPUSHYES;
 	break;
     case SVt_PVCV:
@@ -533,6 +533,11 @@ PP(pp_undef)
 	cv_undef((CV*)sv);
 	sub_generation++;
 	break;
+    case SVt_PVGV:
+        if (SvFAKE(sv)) {
+            sv_setsv(sv, &sv_undef);
+            break;
+        }
     default:
 	if (sv != GvSV(defgv)) {
 	    if (SvPOK(sv) && SvLEN(sv)) {
@@ -1942,6 +1947,8 @@ PP(pp_anonhash)
 	SV* key = *++MARK;
 	char *tmps;
 	SV *val = NEWSV(46, 0);
+        if (dowarn && key && SvROK(key))  /* Tom's gripe */
+            warn("Attempt to use reference as hash key");
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
 	else

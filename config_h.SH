@@ -54,12 +54,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define BIN "$bin"	/**/
 
-/* BYTEORDER:
- *	This symbol hold the hexadecimal constant defined in byteorder,
- *	i.e. 0x1234 or 0x4321, etc...
- */
-#define BYTEORDER 0x$byteorder	/* large digits for MSB */
-
 /* CAT2:
  *	This macro catenates 2 tokens together.
  */
@@ -301,23 +295,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$d_fsetpos HAS_FSETPOS	/**/
 
-/* Gconvert:
- *	This preprocessor macro is defined to convert a floating point
- *	number to a string without a trailing decimal point.  This
- *	emulates the behavior of sprintf("%g"), but is sometimes much more
- *	efficient.  If gconvert() is not available, but gcvt() drops the
- *	trailing decimal point, then gcvt() is used.  If all else fails,
- *	a macro using sprintf("%g") is used. Arguments for the Gconvert
- *	macro are: value, number of digits, whether trailing zeros should
- *	be retained, and the output buffer.
- *	Possible values are:
- *		d_Gconvert='gconvert((x),(n),(t),(b))'
- *		d_Gconvert='gcvt((x),(n),(b))'
- *		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
- *	The last two assume trailing zeros should not be kept.
- */
-#define Gconvert(x,n,t,b) $d_Gconvert
-
 /* HAS_GETGROUPS:
  *	This symbol, if defined, indicates that the getgroups() routine is
  *	available to get the list of process groups.  If unavailable, multiple
@@ -537,6 +514,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	available to create an inter-process channel.
  */
 #$d_pipe HAS_PIPE		/**/
+
+/* HAS_POLL:
+ *	This symbol, if defined, indicates that the poll routine is
+ *	available to poll active file descriptors.
+ */
+#$d_poll HAS_POLL		/**/
 
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
@@ -1274,12 +1257,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$i_vfork I_VFORK	/**/
 
-/* INTSIZE:
- *	This symbol contains the size of an int, so that the C preprocessor
- *	can make decisions based on it.
- */
-#define INTSIZE $intsize		/**/
-
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.
  *	It can be int, long, off_t, etc... It may be necessary to include
@@ -1294,6 +1271,33 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	to get any typedef'ed information.
  */
 #define Mode_t $modetype	 /* file mode parameter for system calls */
+
+/* VAL_O_NONBLOCK:
+ *	This symbol is to be used during open() or fcntl(F_SETFL) to turn on
+ *	non-blocking I/O for the file descriptor. Note that there is no way
+ *	back, i.e. you cannot turn it blocking again this way. If you wish to
+ *	alternatively switch between blocking and non-blocking, use the
+ *	ioctl(FIOSNBIO) call instead, but that is not supported by all devices.
+ */
+/* VAL_EAGAIN:
+ *	This symbol holds the errno error code set by read() when no data was
+ *	present on the non-blocking file descriptor.
+ */
+/* RD_NODATA:
+ *	This symbol holds the return code from read() when no data is present
+ *	on the non-blocking file descriptor. Be careful! If EOF_NONBLOCK is
+ *	not defined, then you can't distinguish between no data and EOF by
+ *	issuing a read(). You'll have to find another way to tell for sure!
+ */
+/* EOF_NONBLOCK:
+ *	This symbol, if defined, indicates to the C program that a read() on
+ *	a non-blocking file descriptor will return 0 on EOF, and not the value
+ *	held in RD_NODATA (-1 usually, in that case!).
+ */
+#define VAL_O_NONBLOCK $o_nonblock
+#define VAL_EAGAIN $eagain
+#define RD_NODATA $rd_nodata
+#$d_eofnblk EOF_NONBLOCK
 
 /* PRIVLIB_EXP:
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
@@ -1341,16 +1345,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define Select_fd_set_t 	$selecttype	/**/
 
-/* SIG_NAME:
- *	This symbol contains a list of signal names in order. This is intended
- *	to be used as a static array initialization, like this:
- *		char *sig_name[] = { SIG_NAME };
- *	The signals in the list are separated with commas, and each signal
- *	is surrounded by double quotes. There is no leading SIG in the signal
- *	name, i.e. SIGQUIT is known as "QUIT".
- */
-#define SIG_NAME "`echo $sig_name | sed 's/ /","/g'`"	/**/
-
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
  *	for string functions.  It is usually size_t, but may be
@@ -1382,6 +1376,133 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define Uid_t $uidtype		/* UID type */
 
+/* VMS:
+ *	This symbol, if defined, indicates that the program is running under
+ *	VMS.  It is currently only set in conjunction with the EUNICE symbol.
+ */
+#$d_eunice VMS		/**/
+
+/* LOC_SED:
+ *	This symbol holds the complete pathname to the sed program.
+ */
+#define LOC_SED 	"$full_sed"	/**/
+
+/* BYTEORDER:
+ *	This symbol hold the hexadecimal constant defined in byteorder,
+ *	i.e. 0x1234 or 0x4321, etc...
+ */
+#define BYTEORDER 0x$byteorder	/* large digits for MSB */
+
+/* CSH:
+ *	This symbol, if defined, indicates that the C-shell exists.
+ *	If defined, contains the full pathname of csh.
+ */
+#$d_csh CSH "$full_csh"		/**/
+
+/* DLSYM_NEEDS_UNDERSCORE:
+ *	This symbol, if defined, indicates that we need to prepend an
+ *	underscore to the symbol name before calling dlsym().  This only
+ *	makes sense if you *have* dlsym, which we will presume is the
+ *	case if you're using dl_dlopen.xs.
+ */
+#$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/* */
+
+/* Gconvert:
+ *	This preprocessor macro is defined to convert a floating point
+ *	number to a string without a trailing decimal point.  This
+ *	emulates the behavior of sprintf("%g"), but is sometimes much more
+ *	efficient.  If gconvert() is not available, but gcvt() drops the
+ *	trailing decimal point, then gcvt() is used.  If all else fails,
+ *	a macro using sprintf("%g") is used. Arguments for the Gconvert
+ *	macro are: value, number of digits, whether trailing zeros should
+ *	be retained, and the output buffer.
+ *	Possible values are:
+ *		d_Gconvert='gconvert((x),(n),(t),(b))'
+ *		d_Gconvert='gcvt((x),(n),(b))'
+ *		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
+ *	The last two assume trailing zeros should not be kept.
+ */
+#define Gconvert(x,n,t,b) $d_Gconvert
+
+/* USE_DYNAMIC_LOADING:
+ *	This symbol, if defined, indicates that dynamic loading of
+ *	some sort is available.
+ */
+#$usedl USE_DYNAMIC_LOADING		/**/
+
+/* I_DBM:
+ *	This symbol, if defined, indicates that <dbm.h> exists and should
+ *	be included.
+ */
+/* I_RPCSVC_DBM:
+ *	This symbol, if defined, indicates that <rpcsvc/dbm.h> exists and
+ *	should be included.
+ */
+#$i_dbm I_DBM	/**/
+#$i_rpcsvcdbm I_RPCSVC_DBM	/**/
+
+/* I_SYS_STAT:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/stat.h>.
+ */
+#$i_sysstat	I_SYS_STAT		/**/
+
+/* INTSIZE:
+ *	This symbol contains the size of an int, so that the C preprocessor
+ *	can make decisions based on it.
+ */
+#define INTSIZE $intsize		/**/
+
+/* Free_t:
+ *	This variable contains the return type of free().  It is usually
+ * void, but occasionally int.
+ */
+/* Malloc_t:
+ *	This symbol is the type of pointer returned by malloc and realloc.
+ */
+#define Malloc_t $malloctype			/**/
+#define Free_t $freetype			/**/
+
+/* MYMALLOC:
+ *	This symbol, if defined, indicates that we're using our own malloc.
+ */
+#$d_mymalloc MYMALLOC			/**/
+
+/* SIG_NAME:
+ *	This symbol contains a list of signal names in order. This is intended
+ *	to be used as a static array initialization, like this:
+ *		char *sig_name[] = { SIG_NAME };
+ *	The signals in the list are separated with commas, and each signal
+ *	is surrounded by double quotes. There is no leading SIG in the signal
+ *	name, i.e. SIGQUIT is known as "QUIT". Duplicates are allowed.
+ *	The signal number for sig_name[i] is stored in sig_num[i].
+ *	The last element is 0 to terminate the list with a NULL.  This
+ *	corresponds to the 0 at the end of the sig_num list.
+ *	See SIG_NUM and SIG_MAX.
+ */
+#define SIG_NAME "`echo $sig_name | sed 's/ /","/g'`",0	/**/
+
+/* SIG_NUM:
+ *	This symbol contains a list of signal number, in the same order as the
+ *	SIG_NAME list. It is suitable for static array initialization, as in:
+ *		int sig_num[] = { SIG_NUM };
+ *	The signals in the list are separated with commas, and the indices
+ *	within that list and the SIG_NAME list match, so it's easy to compute
+ *	the signal name from a number or vice versa at the price of a small
+ *	dynamic linear lookup. Duplicates are allowed, so you can't assume
+ *	sig_num[i] == i.  Instead, the signal number corresponding to
+ * sig_name[i] is sig_number[i].
+ * The last element is 0, corresponding to the 0 at the end of
+ * the sig_name list.
+ */
+#define SIG_NUM `echo $sig_num 0 | sed 's/ /,/g'`	/**/
+
+/* SITELIB_EXP:
+ *	This symbol contains the ~name expanded version of SITELIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#$d_sitelib SITELIB_EXP "$sitelibexp"		/**/
+
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
  *	compiler.  What various bits mean:
@@ -1406,64 +1527,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #define void int		/* is void to be avoided? */
 #define M_VOID			/* Xenix strikes again */
 #endif
-
-/* VMS:
- *	This symbol, if defined, indicates that the program is running under
- *	VMS.  It is currently only set in conjunction with the EUNICE symbol.
- */
-#$d_eunice VMS		/**/
-
-/* LOC_SED:
- *	This symbol holds the complete pathname to the sed program.
- */
-#define LOC_SED 	"$full_sed"	/**/
-
-/* CSH:
- *	This symbol, if defined, indicates that the C-shell exists.
- *	If defined, contains the full pathname of csh.
- */
-#$d_csh CSH "$full_csh"		/**/
-
-/* DLSYM_NEEDS_UNDERSCORE:
- *	This symbol, if defined, indicates that we need to prepend an
- *	underscore to the symbol name before calling dlsym().  This only
- *	makes sense if you *have* dlsym, which we will presume is the
- *	case if you're using dl_dlopen.xs.
- */
-#$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/* */
-
-/* USE_DYNAMIC_LOADING:
- *	This symbol, if defined, indicates that dynamic loading of
- *	some sort is available.
- */
-#$usedl USE_DYNAMIC_LOADING		/**/
-
-/* I_SYS_STAT:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <sys/stat.h>.
- */
-#$i_sysstat	I_SYS_STAT		/**/
-
-/* Free_t:
- *	This variable contains the return type of free().  It is usually
- * void, but occasionally int.
- */
-/* Malloc_t:
- *	This symbol is the type of pointer returned by malloc and realloc.
- */
-#define Malloc_t $malloctype			/**/
-#define Free_t $freetype			/**/
-
-/* MYMALLOC:
- *	This symbol, if defined, indicates that we're using our own malloc.
- */
-#$d_mymalloc MYMALLOC			/**/
-
-/* SITELIB_EXP:
- *	This symbol contains the ~name expanded version of SITELIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#$d_sitelib SITELIB_EXP "$sitelibexp"		/**/
 
 #endif
 !GROK!THIS!

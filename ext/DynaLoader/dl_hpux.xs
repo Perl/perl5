@@ -21,11 +21,14 @@
 
 #include "dlutils.c"	/* for SaveError() etc */
 
+static AV *dl_resolve_using = Nullav;
+
 
 static void
 dl_private_init()
 {
     (void)dl_generic_private_init();
+    dl_resolve_using = perl_get_av("DynaLoader::dl_resolve_using", 0x4);
 }
 
 MODULE = DynaLoader     PACKAGE = DynaLoader
@@ -39,29 +42,25 @@ dl_load_file(filename)
     char *		filename
     CODE:
     shl_t obj = NULL;
-    int	i, max;
-    GV	*gv;
-    AV	*av;
+    int	i, max, bind_type;
 
-    gv = gv_fetchpv("DynaLoader::dl_resolve_using", FALSE, SVt_PVAV);
-    if (gv) {
-	av  = GvAV(gv);
-	max = AvFILL(av);
-	for (i = 0; i <= max; i++) {
-	    char *sym = SvPVX(*av_fetch(av, i, 0));
-	    DLDEBUG(1,fprintf(stderr, "dl_load_file(%s) (dependent)\n", sym));
-	    obj = shl_load(sym,
-		BIND_IMMEDIATE | BIND_NONFATAL | BIND_NOSTART | BIND_VERBOSE,
-		0L);
-	    if (obj == NULL) {
-		goto end;
-	    }
+    if (dl_nonlazy)
+	bind_type = BIND_IMMEDIATE;
+    else
+	bind_type = BIND_DEFERRED;
+
+    max = AvFILL(dl_resolve_using);
+    for (i = 0; i <= max; i++) {
+	char *sym = SvPVX(*av_fetch(dl_resolve_using, i, 0));
+	DLDEBUG(1,fprintf(stderr, "dl_load_file(%s) (dependent)\n", sym));
+	obj = shl_load(sym, bind_type | BIND_NOSTART, 0L);
+	if (obj == NULL) {
+	    goto end;
 	}
     }
 
     DLDEBUG(1,fprintf(stderr,"dl_load_file(%s): ", filename));
-    obj = shl_load(filename,
-	BIND_IMMEDIATE | BIND_NONFATAL | BIND_NOSTART | BIND_VERBOSE, 0L);
+    obj = shl_load(filename, bind_type | BIND_NOSTART, 0L);
 
     DLDEBUG(2,fprintf(stderr," libref=%x\n", obj));
 end:
@@ -86,27 +85,25 @@ dl_find_symbol(libhandle, symbolname)
 #endif
     DLDEBUG(2,fprintf(stderr,"dl_find_symbol(handle=%x, symbol=%s)\n",
 		libhandle, symbolname));
+    ST(0) = sv_newmortal() ;
+    errno = 0;
+
     status = shl_findsym(&obj, symbolname, TYPE_PROCEDURE, &symaddr);
     DLDEBUG(2,fprintf(stderr,"  symbolref(PROCEDURE) = %x\n", symaddr));
-    ST(0) = sv_newmortal() ;
+
+    if (status == -1 && errno == 0) {	/* try TYPE_DATA instead */
+	status = shl_findsym(&obj, symbolname, TYPE_DATA, &symaddr);
+	DLDEBUG(2,fprintf(stderr,"  symbolref(DATA) = %x\n", symaddr));
+    }
+
     if (status == -1) {
-	if (errno == 0) {
-	    status = shl_findsym(&obj, symbolname, TYPE_DATA, &symaddr);
-	    DLDEBUG(2,fprintf(stderr,"  symbolref(DATA) = %x\n", symaddr));
-	    if (status == -1) {
-		SaveError("%s",(errno) ? Strerror(errno) : "Symbol not found") ;
-	    } else {
-		sv_setiv( ST(0), (IV)symaddr);
-	    }
-	} else {
-	    SaveError("%s", Strerror(errno));
-	}
+	SaveError("%s",(errno) ? Strerror(errno) : "Symbol not found") ;
     } else {
 	sv_setiv( ST(0), (IV)symaddr);
     }
 
 
-int
+void
 dl_undef_symbols()
     PPCODE:
 

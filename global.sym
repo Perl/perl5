@@ -193,6 +193,7 @@ seq_amg
 sge_amg
 sgt_amg
 sig_name
+sig_num
 siggv
 sighandler
 simple
@@ -862,10 +863,10 @@ push_scope
 q
 ref
 refkids
-regcomp
+pregcomp
 regdump
-regexec
-regfree
+pregexec
+pregfree
 regnext
 regprop
 repeatcpy
@@ -974,6 +975,7 @@ wait4pid
 warn
 watch
 whichsig
+whichsigname
 xiv_arenaroot
 xiv_root
 xnv_root

@@ -1,2 +1,9 @@
 use ExtUtils::MakeMaker;
-WriteMakefile(LIBS => ["-L/usr/local/lib -ldb"]);
+
+WriteMakefile(
+	NAME 	=> 'DB_File',
+	LIBS 	=> ["-L/usr/local/lib -ldb"],
+	#INC	=> '-I/usr/local/include',
+	VERSION	=> 1.0,
+	);
+

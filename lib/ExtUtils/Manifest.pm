@@ -18,7 +18,7 @@ C<ExtUtils::Manifest::fullcheck;>
 
 C<ExtUtils::Manifest::maniread($file);>
 
-C<ExtUtils::Manifest::manicopy($read,$target);>
+C<ExtUtils::Manifest::manicopy($read,$target,$how);>
 
 =head1 DESCRIPTION
 
@@ -49,11 +49,13 @@ Maniread($file) reads a named C<MANIFEST> file (defaults to
 C<MANIFEST> in the current directory) and returns a HASH reference
 with files being the keys and comments being the values of the HASH.
 
-I<Manicopy($read,$target)> copies the files that are the keys in the
-HASH I<%$read> to the named target directory. The HASH reference
+I<Manicopy($read,$target,$how)> copies the files that are the keys in
+the HASH I<%$read> to the named target directory. The HASH reference
 I<$read> is typically returned by the maniread() function. This
 function is useful for producing a directory tree identical to the
-intended distribution tree.
+intended distribution tree. The third parameter $how can be used to
+specify a different system call to do the copying (eg. C<ln> instead
+of C<cp>, which is the default).
 
 =head1 MANIFEST.SKIP
 
@@ -80,20 +82,24 @@ C<&maniread>, and C<&manicopy> are exportable.
 All diagnostic output is sent to C<STDERR>.
 
 =over
-    
+
 =item C<Not in MANIFEST:> I<file>
+
 is reported if a file is found, that is missing in the C<MANIFEST>
 file which is excluded by a regular expression in the file
 C<MANIFEST.SKIP>.
 
 =item C<No such file:> I<file>
+
 is reported if a file mentioned in a C<MANIFEST> file does not
 exist.
 
 =item C<MANIFEST:> I<$!>
+
 is reported if C<MANIFEST> could not be opened.
 
 =item C<Added to MANIFEST:> I<file>
+
 is reported by mkmanifest() if $Verbose is set and a file is added
 to MANIFEST. $Verbose is set to 1 by default.
 
@@ -108,15 +114,17 @@ Andreas Koenig F<E<lt>koenig@franz.ww.TU-Berlin.DEE<gt>>
 require Exporter;
 @ISA=('Exporter');
 @EXPORT_OK = ('mkmanifest', 'manicheck', 'fullcheck', 'filecheck', 
-	      'maniread', 'manicopy');
+	      'skipcheck', 'maniread', 'manicopy');
 
+use Config;
 use File::Find;
 use Carp;
 
 $Debug = 0;
 $Verbose = 1;
+$Is_VMS = $Config{'osname'} eq 'VMS';
 
-($Version) = sprintf("%d.%02d", q$Revision: 1.4 $ =~ /(\d+)\.(\d+)/);
+($Version) = sprintf("%d.%02d", q$Revision: 1.11 $ =~ /(\d+)\.(\d+)/);
 $Version = $Version; #avoid warning
 
 $Quiet = 0;
@@ -137,19 +145,22 @@ sub mkmanifest {
 	if ($Verbose){
 	    warn "Added to MANIFEST: $file\n" unless exists $read->{$file};
 	}
+	my $text = $all{$file};
+	($file,$text) = split(/\s+/,$text,2) if $Is_VMS;
 	my $tabs = (5 - (length($file)+1)/8);
 	$tabs = 1 if $tabs < 1;
-	$tabs = 0 unless $all{$file};
-	print M $file, "\t" x $tabs, $all{$file}, "\n";
+	$tabs = 0 unless $text;
+	print M $file, "\t" x $tabs, $text, "\n";
     }
     close M;
 }
 
 sub manifind {
     local $found = {};
-    find(sub {return if -d $_;
+    find(sub {return if -d $File::Find::name;
 	      (my $name = $File::Find::name) =~ s|./||;
 	      warn "Debug: diskfile $name\n" if $Debug;
+	      $name  =~ s#(.*)\.$#\L$1# if $Is_VMS;
 	      $found->{$name} = "";}, ".");
     $found;
 }
@@ -166,6 +177,10 @@ sub filecheck {
     return @{(_manicheck(2))[1]};
 }
 
+sub skipcheck {
+    _manicheck(6);
+}
+
 sub _manicheck {
     my($arg) = @_;
     my $read = maniread();
@@ -176,8 +191,8 @@ sub _manicheck {
 	foreach $file (sort keys %$read){
 	    warn "Debug: manicheck checking from MANIFEST $file\n" if $Debug;
 	    unless ( exists $found->{$file} ) {
-	      warn "No such file: $file\n" unless $Quiet;
-	      push @missfile, $file;
+		warn "No such file: $file\n" unless $Quiet;
+		push @missfile, $file;
 	    }
 	}
     }
@@ -185,12 +200,16 @@ sub _manicheck {
 	$read ||= {};
 	my $matches = _maniskip();
 	my $found = manifind();
+	my $skipwarn = $arg & 4;
 	foreach $file (sort keys %$found){
-	    next if &$matches($file);
+	    if (&$matches($file)){
+		warn "Skipping $file\n" if $skipwarn;
+		next;
+	    }
 	    warn "Debug: manicheck checking from disk $file\n" if $Debug;
 	    unless ( exists $read->{$file} ) {
-	      warn "Not in MANIFEST: $file\n" unless $Quiet;
-	      push @missentry, $file;
+		warn "Not in MANIFEST: $file\n" unless $Quiet;
+		push @missentry, $file;
 	    }
 	}
     }
@@ -208,7 +227,8 @@ sub maniread {
     }
     while (<M>){
 	chomp;
-	/^(\S+)\s*(.*)/ and $read->{$1}=$2;
+	if ($Is_VMS) { /^(\S+)/ and $read->{"\L$1"}=$_; }
+	else         { /^(\S+)\s*(.*)/ and $read->{$1}=$2; }
     }
     close M;
     $read;
@@ -229,9 +249,10 @@ sub _maniskip {
 	push @skip, $_;
     }
     close M;
+    my $opts = $Is_VMS ? 'oi ' : 'o ';
     my $sub = "\$matches = "
 	. "sub { my(\$arg)=\@_; return 1 if "
-	. join (" || ",  (map {s!/!\\/!g; "\$arg =~ m/$_/o "} @skip), 0)
+	. join (" || ",  (map {s!/!\\/!g; "\$arg =~ m/$_/$opts"} @skip), 0)
 	. " }";
     eval $sub;
     print "Debug: $sub\n" if $Debug;
@@ -239,26 +260,83 @@ sub _maniskip {
 }
 
 sub manicopy {
-    my($read,$target)=@_;
+    my($read,$target,$how)=@_;
     croak "manicopy() called without target argument" unless defined $target;
+    $how = 'cp' unless defined $how && $how;
     require File::Path;
     require File::Basename;
     my(%dirs,$file);
+    $target = VMS::Filespec::unixify($target) if $Is_VMS;
+    umask 0;
     foreach $file (keys %$read){
+	$file = VMS::Filespec::unixify($file) if $Is_VMS;
 	my $dir = File::Basename::dirname($file);
-	File::Path::mkpath("$target/$dir");
-	cp_if_diff($file, "$target/$file");
+	File::Path::mkpath(["$target/$dir"],1,0755);
+	if ($Is_VMS) { vms_cp_if_diff($file,"$target/$file"); }
+	else         { cp_if_diff($file, "$target/$file", $how); }
     }
 }
 
 sub cp_if_diff {
-    my($from,$to)=@_;
+    my($from,$to, $how)=@_;
     -f $from || carp "$0: $from not found";
-    system "cmp", "-s", $from, $to;
-    if ($?) {
-	unlink($to);   # In case we don't have write permissions.
-	(system 'cp', $from, $to) == 0 or confess "system 'cp': $!";
+    my($diff) = 0;
+    local(*F,*T);
+    open(F,$from) or croak "Can't read $from: $!\n";
+    if (open(T,$to)) {
+	while (<F>) { $diff++,last if $_ ne <T>; }
+	$diff++ unless eof(T);
+	close T;
     }
+    else { $diff++; }
+    close F;
+    if ($diff) {
+	if (-e $to) {
+	    unlink($to) or confess "unlink $to: $!";
+	}
+	&$how($from, $to);
+    }
+}
+
+# Do the comparisons here rather than spawning off another process
+sub vms_cp_if_diff {
+    my($from,$to) = @_;
+    my($diff) = 0;
+    local(*F,*T);
+    open(F,$from) or croak "Can't read $from: $!\n";
+    if (open(T,$to)) {
+	while (<F>) { $diff++,last if $_ ne <T>; }
+	$diff++ unless eof(T);
+	close T;
+    }
+    else { $diff++; }
+    close F;
+    if ($diff) {
+	system('copy',vmsify($from),vmsify($to)) & 1
+	    or confess "Copy failed: $!";
+    }
+}
+
+sub cp {
+    my ($srcFile, $dstFile) = @_;
+    my $buf;
+    open (IN,"<$srcFile") or die "Can't open input $srcFile: $!\n";
+    open (OUT,">$dstFile") or die "Can't open output $dstFile: $!\n";
+    my ($perm,$access,$mod) = (stat IN)[2,8,9];
+    syswrite(OUT, $buf, $len) while $len = sysread(IN, $buf, 8192);
+    close IN;
+    close OUT;
+    utime $access, $mod, $dstFile;
+    # chmod a+rX-w,go-w
+    chmod(  0444 | ( $perm & 0111 ? 0111 : 0 ),  $dstFile );
+}
+
+sub ln {
+    my ($srcFile, $dstFile) = @_;
+    link($srcFile, $dstFile);
+    local($_) = $dstFile; # chmod a+r,go-w+X (except "X" only applies to u=x)
+    my $mode= 0444 | (stat)[2] & 0700;
+    chmod(  $mode | ( $mode & 0100 ? 0111 : 0 ),  $_  );
 }
 
 1;

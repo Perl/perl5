@@ -1,5 +1,73 @@
 package Net::Ping;
 
+# Authors: karrer@bernina.ethz.ch (Andreas Karrer)
+#          pmarquess@bfsec.bt.co.uk (Paul Marquess)
+
+require Exporter;
+
+@ISA = qw(Exporter);
+@EXPORT = qw(ping pingecho);
+$VERSION = 1.00;
+
+use Socket 'PF_INET', 'AF_INET', 'SOCK_STREAM';
+require Carp ;
+
+use strict ;
+
+$Net::Ping::tcp_proto = (getprotobyname('tcp'))[2];
+$Net::Ping::echo_port = (getservbyname('echo', 'tcp'))[2];
+
+# keep -w happy
+$Net::Ping::tcp_proto = $Net::Ping::tcp_proto ;
+$Net::Ping::echo_port = $Net::Ping::echo_port ;
+
+sub ping {
+    Carp::croak "ping not implemented yet. Use pingecho()";
+}
+
+
+sub pingecho {
+
+    Carp::croak "usage: pingecho host [timeout]" 
+        unless @_ == 1 || @_ == 2 ;
+
+    my ($host, $timeout) = @_;
+    my ($saddr, $ip);
+    my ($ret) ;
+    local (*PINGSOCK);
+
+    # check if $host is alive by connecting to its echo port, within $timeout
+    # (default 5) seconds. returns 1 if OK, 0 if no answer, 0 if host not found
+
+    $timeout = 5 unless $timeout;
+
+    if ($host =~ /^\s*((\d+\.){3}\d+)\s*$/)
+      { $ip = pack ('C4', split (/\./, $1)) }
+    else
+      { $ip = (gethostbyname($host))[4] }
+
+    return 0 unless $ip;		# "no such host"
+
+    $saddr = pack('S n a4 x8', AF_INET, $Net::Ping::echo_port, $ip);
+    $SIG{'ALRM'} = sub { die } ;
+    alarm($timeout);
+    
+    $ret = 0;
+    eval <<'EOM' ;
+    return unless socket(PINGSOCK, PF_INET, SOCK_STREAM, $Net::Ping::tcp_proto) ;
+    return unless connect(PINGSOCK, $saddr) ;
+    $ret=1 ;
+EOM
+    alarm(0);
+    close(PINGSOCK);
+    $ret;
+}   
+
+1;
+__END__
+
+=cut
+
 =head1 NAME
 
 Net::Ping, pingecho - check a host for upness
@@ -37,67 +105,4 @@ The timeout in seconds. If not specified it will default to 5 seconds.
 pingecho() uses alarm to implement the timeout, so don't set another alarm
 while you are using it.
 
-=cut
 
-# Authors: karrer@bernina.ethz.ch (Andreas Karrer)
-#          pmarquess@bfsec.bt.co.uk (Paul Marquess)
-
-require Exporter;
-
-@ISA = qw(Exporter);
-@EXPORT = qw(ping pingecho);
-
-use Socket;
-use Carp ;
-
-$tcp_proto = (getprotobyname('tcp'))[2];
-$echo_port = (getservbyname('echo', 'tcp'))[2];
-
-sub ping {
-    croak "ping not implemented yet. Use pingecho()";
-}
-
-
-sub pingecho {
-
-    croak "usage: pingecho host [timeout]" 
-        unless @_ == 1 || @_ == 2 ;
-
-    local ($host, $timeout) = @_;
-    local (*PINGSOCK);
-    local ($saddr, $ip);
-    local ($ret) ;
-
-    # check if $host is alive by connecting to its echo port, within $timeout
-    # (default 5) seconds. returns 1 if OK, 0 if no answer, 0 if host not found
-
-    $timeout = 5 unless $timeout;
-
-    if ($host =~ /^\s*((\d+\.){3}\d+)\s*$/)
-      { $ip = pack ('C4', split (/\./, $1)) }
-    else
-      { $ip = (gethostbyname($host))[4] }
-
-    return 0 unless $ip;		# "no such host"
-
-    $saddr = pack('S n a4 x8', AF_INET, $echo_port, $ip);
-    $SIG{'ALRM'} = sub { die } ;
-    alarm($timeout);
-
-    $ret = eval <<'EOM' ;
-
-        return 0 
-            unless socket(PINGSOCK, PF_INET, SOCK_STREAM, $tcp_proto) ;
-
-        return 0 
-            unless connect(PINGSOCK, $saddr) ;
-
-        return 1 ;
-EOM
-
-    alarm(0);
-    close(PINGSOCK);
-    $ret == 1 ? 1 : 0 ;
-}   
-
-1;

@@ -44,11 +44,16 @@
 
 #include "dlutils.c"	/* for SaveError() etc */
 
+static AV *dl_resolve_using   = Nullav;
+static AV *dl_require_symbols = Nullav;
+
 static void
 dl_private_init()
 {
     int dlderr;
     dl_generic_private_init();
+    dl_resolve_using   = perl_get_av("DynaLoader::dl_resolve_using",   0x4);
+    dl_require_symbols = perl_get_av("DynaLoader::dl_require_symbols", 0x4);
 #ifdef __linux__
     dlderr = dld_init("/proc/self/exe");
     if (dlderr) {
@@ -77,39 +82,33 @@ dl_load_file(filename)
     CODE:
     int dlderr,x,max;
     GV *gv;
-    AV *av;
     RETVAL = filename;
     DLDEBUG(1,fprintf(stderr,"dl_load_file(%s)\n", filename));
-    gv = gv_fetchpv("DynaLoader::dl_require_symbols", FALSE, SVt_PVAV);
-    if (gv) {
-	av  = GvAV(gv);
-	max = AvFILL(av);
-	for (x = 0; x <= max; x++) {
-	    char *sym = SvPVX(*av_fetch(av, x, 0));
-	    DLDEBUG(1,fprintf(stderr, "dld_create_ref(%s)\n", sym));
-	    if (dlderr = dld_create_reference(sym)) {
-		SaveError("dld_create_reference(%s): %s", sym,
-			  dld_strerror(dlderr));
-		goto haverror;
-	    }
+
+    max = AvFILL(dl_require_symbols);
+    for (x = 0; x <= max; x++) {
+	char *sym = SvPVX(*av_fetch(dl_require_symbols, x, 0));
+	DLDEBUG(1,fprintf(stderr, "dld_create_ref(%s)\n", sym));
+	if (dlderr = dld_create_reference(sym)) {
+	    SaveError("dld_create_reference(%s): %s", sym,
+		      dld_strerror(dlderr));
+	    goto haverror;
 	}
     }
+
     DLDEBUG(1,fprintf(stderr, "dld_link(%s)\n", filename));
     if (dlderr = dld_link(filename)) {
 	SaveError("dld_link(%s): %s", filename, dld_strerror(dlderr));
 	goto haverror;
     }
-    gv = gv_fetchpv("DynaLoader::dl_resolve_using", FALSE, SVt_PVAV);
-    if (gv) {
-	av  = GvAV(gv);
-	max = AvFILL(av);
-	for (x = 0; x <= max; x++) {
-	    char *sym = SvPVX(*av_fetch(av, x, 0));
-	    DLDEBUG(1,fprintf(stderr, "dld_link(%s)\n", sym));
-	    if (dlderr = dld_link(sym)) {
-		SaveError("dld_link(%s): %s", sym, dld_strerror(dlderr));
-		goto haverror;
-	    }
+
+    max = AvFILL(dl_resolve_using);
+    for (x = 0; x <= max; x++) {
+	char *sym = SvPVX(*av_fetch(dl_resolve_using, x, 0));
+	DLDEBUG(1,fprintf(stderr, "dld_link(%s)\n", sym));
+	if (dlderr = dld_link(sym)) {
+	    SaveError("dld_link(%s): %s", sym, dld_strerror(dlderr));
+	    goto haverror;
 	}
     }
     DLDEBUG(2,fprintf(stderr,"libref=%s\n", RETVAL));

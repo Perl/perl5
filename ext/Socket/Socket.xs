@@ -2,7 +2,19 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#ifndef VMS
+# ifdef I_SYS_TYPES
+#  include <sys/types.h>
+# endif
 #include <sys/socket.h>
+# ifdef I_NETINET_IN
+#  include <netinet/in.h>
+# endif
+#include <netdb.h>
+#include <arpa/inet.h>
+#else
+#include "sockadapt.h"
+#endif
 
 #ifndef AF_NBS
 #undef PF_NBS
@@ -11,6 +23,14 @@
 #ifndef AF_X25
 #undef PF_X25
 #endif
+
+#ifndef INADDR_NONE
+#define INADDR_NONE	0xffffffff
+#endif /* INADDR_NONE */
+#ifndef INADDR_LOOPBACK
+#define INADDR_LOOPBACK         0x7F000001
+#endif /* INADDR_LOOPBACK */
+
 
 static int
 not_here(s)
@@ -556,6 +576,7 @@ not_there:
     return 0;
 }
 
+
 MODULE = Socket		PACKAGE = Socket
 
 double
@@ -563,3 +584,116 @@ constant(name,arg)
 	char *		name
 	int		arg
 
+
+void
+inet_aton(host)
+	char *	host
+	CODE:
+	{
+	struct in_addr ip_address;
+	struct hostent * phe;
+
+	if (phe = gethostbyname(host)) {
+		Copy( phe->h_addr, &ip_address, phe->h_length, char );
+	} else {
+        	ip_address.s_addr = inet_addr(host);
+	}
+
+	ST(0) = sv_newmortal();
+	if(ip_address.s_addr != INADDR_NONE) {
+		sv_setpvn( ST(0), (char *)&ip_address, sizeof ip_address );
+	}
+	}
+
+void
+inet_ntoa(ip_address_sv)
+	SV *	ip_address_sv
+	CODE:
+	{
+	STRLEN addrlen;
+	struct in_addr addr;
+	char * addr_str;
+	char * ip_address = SvPV(ip_address_sv,addrlen);
+	if (addrlen != sizeof(addr)) {
+	    croak("Bad arg length for %s, length is %d, should be %d",
+			"Socket::inet_ntoa",
+			addrlen, sizeof(addr));
+	}
+
+	Copy( ip_address, &addr, sizeof addr, char );
+	addr_str = inet_ntoa(addr);
+
+	ST(0) = sv_2mortal(newSVpv(addr_str, strlen(addr_str)));
+	}
+
+void
+pack_sockaddr_in(family,port,ip_address)
+	short	family
+	short	port
+	char *	ip_address
+	CODE:
+	{
+	struct sockaddr_in sin;
+
+	Zero( &sin, sizeof sin, char );
+	sin.sin_family = family;
+	sin.sin_port = htons(port);
+	Copy( ip_address, &sin.sin_addr, sizeof sin.sin_addr, char );
+
+	ST(0) = sv_2mortal(newSVpv((char *)&sin, sizeof sin));
+	}
+
+void
+unpack_sockaddr_in(sin_sv)
+	SV *	sin_sv
+	PPCODE:
+	{
+	STRLEN sockaddrlen;
+	struct sockaddr_in addr;
+	short	family;
+	short	port;
+	struct in_addr	ip_address;
+	char *	sin = SvPV(sin_sv,sockaddrlen);
+	if (sockaddrlen != sizeof(addr)) {
+	    croak("Bad arg length for %s, length is %d, should be %d",
+			"Socket::unpack_sockaddr_in",
+			sockaddrlen, sizeof(addr));
+	}
+
+	Copy( sin, &addr,sizeof addr, char );
+	family = addr.sin_family;
+	port = ntohs(addr.sin_port);
+	ip_address = addr.sin_addr;
+
+	EXTEND(sp, 3);
+	PUSHs(sv_2mortal(newSViv(family)));
+	PUSHs(sv_2mortal(newSViv(port)));
+	PUSHs(sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address)));
+	}
+
+void
+INADDR_ANY()
+	CODE:
+	{
+	struct in_addr	ip_address;
+	ip_address.s_addr = htonl(INADDR_ANY);
+	ST(0) = sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address ));
+	}
+
+void
+INADDR_LOOPBACK()
+	CODE:
+	{
+	struct in_addr	ip_address;
+	ip_address.s_addr = htonl(INADDR_LOOPBACK);
+	ST(0) = sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address));
+	}
+
+void
+INADDR_NONE()
+	CODE:
+	{
+	struct in_addr	ip_address;
+	ip_address.s_addr = htonl(INADDR_NONE);
+	ST(0) = sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address));
+	}

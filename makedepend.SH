@@ -45,7 +45,9 @@ esac
 
 # We need .. when we are in the x2p directory if we are using the
 # cppstdin wrapper script.
-PATH="$PATH:.:.."
+# Put .. and . first so that we pick up the present cppstdin, not
+# an older one lying about in /usr/local/bin.
+PATH=".:..:$PATH"
 export PATH
 
 $cat /dev/null >.deptmp

@@ -43,7 +43,7 @@ L<perlembed>.
 
 Before you launch yourself head first into the rest of this document,
 it would be a good idea to have read the following two documents -
-L<perlapi> and L<perlguts>.
+L<perlxs> and L<perlguts>.
 
 =head1 THE PERL_CALL FUNCTIONS
 
@@ -1741,7 +1741,7 @@ A hash is an ideal mechanism to store the mapping between C and Perl.
 
 Although I have made use of only the C<POP*> macros to access values
 returned from Perl subroutines, it is also possible to bypass these
-macros and read the stack using the C<ST> macro (See L<perlapi> for a
+macros and read the stack using the C<ST> macro (See L<perlxs> for a
 full description of the C<ST> macro).
 
 Most of the time the C<POP*> macros should be adequate, the main
@@ -1820,7 +1820,7 @@ refers to the last.
 
 =head1 SEE ALSO
 
-L<perlapi>, L<perlguts>, L<perlembed>
+L<perlxs>, L<perlguts>, L<perlembed>
 
 =head1 AUTHOR
 
