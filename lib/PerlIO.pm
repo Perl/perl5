@@ -1,5 +1,7 @@
 package PerlIO;
 
+our $VERSION = '1.00';
+
 # Map layer name to package that defines it
 my %alias = (encoding => 'Encode');
 
