@@ -241,6 +241,46 @@ optimized C code.
 
 Okay, that's I<definitely> enough hype.
 
+=head1 AVAILABILITY
+
+Perl is available for the vast majority of operating system
+platforms. The following situation is as of February 1999 and Perl
+5.005_03.
+
+The following platforms are able to build Perl straight from the
+standard source code distribution at
+F<http://www.perl.com/CPAN/src/index.html>
+
+	Amiga
+	BeOS
+	DOS
+	MPE/iX
+	MiNT
+	OS/2
+	OS390 (aka MVS)
+	Plan9
+	QNX
+	Stratus VOS
+	UNIX
+	VMS
+	Windows
+
+The following platforms have separate source code distributions
+at F<http://www.perl.com/CPAN/src/index.html> and binaries at
+F<http://www.perl.com/CPAN/ports/index.html>.
+
+	AS/400
+	Mac
+
+The following platforms have only binaries available at
+F<http://www.perl.com/CPAN/ports/index.html>.
+
+	Acorn RISCOS
+	AOS
+	LynxOS
+	Netware
+	Tandem Guardian
+
 =head1 ENVIRONMENT
 
 See L<perlrun>.
