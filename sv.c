@@ -2154,6 +2154,9 @@ I32 namlen;
     case 'i':
 	mg->mg_virtual = &vtbl_isaelem;
 	break;
+    case 'k':
+	mg->mg_virtual = &vtbl_nkeys;
+	break;
     case 'L':
 	SvRMAGICAL_on(sv);
 	mg->mg_virtual = 0;
@@ -2611,39 +2614,91 @@ register SV *str2;
     char *pv2;
     STRLEN cur2;
 
+    if (lc_collate_active) {	/* NOTE: this is the LC_COLLATE branch */
+
     if (!str1) {
 	pv1 = "";
 	cur1 = 0;
-    }
-    else
+      } else {
 	pv1 = SvPV(str1, cur1);
+
+	{
+	  STRLEN cur1x;
+	  char * pv1x = mem_collxfrm(pv1, cur1, &cur1x);
+
+	  pv1 = pv1x;
+	  cur1 = cur1x;
+	}
+      }
 
     if (!str2) {
 	pv2 = "";
 	cur2 = 0;
+      } else {
+	pv2 = SvPV(str2, cur2);
+
+        {
+	  STRLEN cur2x;
+	  char * pv2x = mem_collxfrm(pv2, cur2, &cur2x);
+
+	  pv2 = pv2x;
+	  cur2 = cur2x;
+	}
     }
+
+      if (!cur1) {
+	Safefree(pv2);
+	return cur2 ? -1 : 0;
+      }
+
+      if (!cur2) {
+	Safefree(pv1);
+	return 1;
+      }
+
+      retval = memcmp((void*)pv1, (void*)pv2, cur1 < cur2 ? cur1 : cur2);
+
+      Safefree(pv1);
+      Safefree(pv2);
+
+      if (retval)
+	return retval < 0 ? -1 : 1;
+
+      if (cur1 == cur2)
+	return 0;
     else
+	return cur1 < cur2 ? -1 : 1;
+
+    } else {			/* NOTE: this is the non-LC_COLLATE branch */
+
+      if (!str1) {
+	pv1 = "";
+	cur1 = 0;
+      } else
+	pv1 = SvPV(str1, cur1);
+
+      if (!str2) {
+	pv2 = "";
+	cur2 = 0;
+      } else
 	pv2 = SvPV(str2, cur2);
 
     if (!cur1)
 	return cur2 ? -1 : 0;
+
     if (!cur2)
 	return 1;
 
-    if (cur1 < cur2) {
-	/*SUPPRESS 560*/
-	if (retval = memcmp((void*)pv1, (void*)pv2, cur1))
-	    return retval < 0 ? -1 : 1;
-	else
-	    return -1;
-    }
-    /*SUPPRESS 560*/
-    else if (retval = memcmp((void*)pv1, (void*)pv2, cur2))
+      retval = memcmp((void*)pv1, (void*)pv2, cur1 < cur2 ? cur1 : cur2);
+
+      if (retval)
 	return retval < 0 ? -1 : 1;
-    else if (cur1 == cur2)
+
+      if (cur1 == cur2)
 	return 0;
     else
-	return 1;
+	return cur1 < cur2 ? -1 : 1;
+    }
 }
 
 char *
@@ -2712,6 +2767,15 @@ I32 append;
     STRLEN bpx;
     I32 shortbuffered;
 
+#if defined(VMS) && defined(PERLIO_IS_STDIO)
+    /* An ungetc()d char is handled separately from the regular
+     * buffer, so we getc() it back out and stuff it in the buffer.
+     */
+    i = PerlIO_getc(fp);
+    if (i == EOF) return 0;
+    *(--((*fp)->_ptr)) = (unsigned char) i;
+    (*fp)->_cnt++;
+#endif
 
     /* Here is some breathtakingly efficient cheating */
 
@@ -2731,6 +2795,11 @@ I32 append;
 	shortbuffered = 0;
     bp = (STDCHAR*)SvPVX(sv) + append;  /* move these two too to registers */
     ptr = (STDCHAR*)PerlIO_get_ptr(fp);
+    DEBUG_P(PerlIO_printf(Perl_debug_log,
+	"Screamer: entering, ptr=%d, cnt=%d\n",ptr,cnt));
+    DEBUG_P(PerlIO_printf(Perl_debug_log,
+	"Screamer: entering: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
+	       PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), PerlIO_get_base(fp)));
     for (;;) {
       screamer:
 	if (cnt > 0) {
@@ -2759,14 +2828,26 @@ I32 append;
 	    continue;
 	}
 
+	DEBUG_P(PerlIO_printf(Perl_debug_log,
+	    "Screamer: going to getc, ptr=%d, cnt=%d\n",ptr,cnt));
 	PerlIO_set_ptrcnt(fp, ptr, cnt); /* deregisterize cnt and ptr */
-	/* This used to call 'filbuf' in stdio form, but as that behaves like getc
-	   when cnt <= 0 we use PerlIO_getc here to avoid another abstraction.
-	   This may also avoid issues with different named 'filbuf' equivalents
+	DEBUG_P(PerlIO_printf(Perl_debug_log,
+	    "Screamer: pre: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
+	    PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), PerlIO_get_base(fp)));
+	/* This used to call 'filbuf' in stdio form, but as that behaves like 
+	   getc when cnt <= 0 we use PerlIO_getc here to avoid another 
+	   abstraction.  This may also avoid issues with different named 
+	   'filbuf' equivalents, though Configure tries to handle them now
+	   anyway.
 	 */
 	i   = PerlIO_getc(fp);		/* get more characters */
+	DEBUG_P(PerlIO_printf(Perl_debug_log,
+	    "Screamer: post: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
+	    PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), PerlIO_get_base(fp)));
 	cnt = PerlIO_get_cnt(fp);
 	ptr = (STDCHAR*)PerlIO_get_ptr(fp);	/* reregisterize cnt and ptr */
+	DEBUG_P(PerlIO_printf(Perl_debug_log,
+	    "Screamer: after getc, ptr=%d, cnt=%d\n",ptr,cnt));
 
 	if (i == EOF)			/* all done for ever? */
 	    goto thats_really_all_folks;
@@ -2789,9 +2870,17 @@ thats_all_folks:
 thats_really_all_folks:
     if (shortbuffered)
 	cnt += shortbuffered;
+	DEBUG_P(PerlIO_printf(Perl_debug_log,
+	    "Screamer: quitting, ptr=%d, cnt=%d\n",ptr,cnt));
     PerlIO_set_ptrcnt(fp, ptr, cnt);	/* put these back or we're in trouble */
+    DEBUG_P(PerlIO_printf(Perl_debug_log,
+	"Screamer: end: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
+	PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), PerlIO_get_base(fp)));
     *bp = '\0';
     SvCUR_set(sv, bp - (STDCHAR*)SvPVX(sv));	/* set length */
+    DEBUG_P(PerlIO_printf(Perl_debug_log,
+	"Screamer: done, len=%d, string=|%.*s|\n",
+	SvCUR(sv),SvCUR(sv),SvPVX(sv)));
     }
    else
     {
@@ -2808,7 +2897,10 @@ screamer2:
 	}
 	else {
 	    cnt = PerlIO_read(fp,(char*)buf, sizeof(buf));
-	    i = cnt ? (U8)buf[cnt - 1] : EOF;
+	    /* Accomodate broken VAXC compiler, which applies U8 cast to
+	     * both args of ?: operator, causing EOF to change into 255
+	     */
+	    if (cnt) { i = (U8)buf[cnt - 1]; } else { i = EOF; }
 	}
 
 	if (append)
@@ -3222,7 +3314,7 @@ I32 lref;
 	    SV *tmpsv;
 	    ENTER;
 	    tmpsv = NEWSV(704,0);
-	    gv_efullname(tmpsv, gv, Nullch);
+	    gv_efullname3(tmpsv, gv, Nullch);
 	    newSUB(start_subparse(),
 		   newSVOP(OP_CONST, 0, tmpsv),
 		   Nullop,
