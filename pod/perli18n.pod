@@ -8,21 +8,24 @@ Perl supports the language-specific notions of data like
 "is this a letter" and "which letter comes first". These
 are very important issues especially for languages other
 than English -- but also for English: it would be very
-naive indeed to think that C<A-Za-z> defines all the letters.
+naïve indeed to think that C<A-Za-z> defines all the letters.
 
 Perl understands the language-specific data via the standardized
 (ISO C, XPG4, POSIX 1.c) method called "the locale system".
-The locale system is controlled per application using several
-environment variables.
+The locale system is controlled per application using one
+function call and several environment variables.
 
 =head1 USING LOCALES
 
 If your operating system supports the locale system and you have
 installed the locale system and you have set your locale environment
 variables correctly (please see below) before running Perl, Perl will
-understand your data correctly.
+understand your data correctly according to your locale settings.
 
 In runtime you can switch locales using the POSIX::setlocale().
+
+	# setlocale is the function call
+	# LC_CTYPE will be explained later
 
 	use POSIX qw(setlocale LC_CTYPE);
 
@@ -39,15 +42,17 @@ In runtime you can switch locales using the POSIX::setlocale().
 	# restore the old locale
 	setlocale(LC_CTYPE, $old_locale);
 
-The first argument of setlocale() is called the category and the
-second argument the locale. The category tells in what area of data
+The first argument of C<setlocale()> is called B<the category> and the
+second argument B<the locale>. The category tells in what aspect of data
 processing we want to apply language-specific rules, the locale tells
-in what language-country/territory-codeset. For further information
-about the categories, please consult your L<setlocale(3)> manual. For
-the locales available in your system, also consult the L<setlocale(3)>
-manual and see whether it leads you to the list of the available
-locales (search for the C<SEE ALSO> section). If that fails, try out
-in command line the following commands:
+in what language-country/territory-codeset - but read on for the naming
+of the locales: not all systems name locales as in the example.
+
+For further information about the categories, please consult your
+L<setlocale(3)> manual. For the locales available in your system, also
+consult the L<setlocale(3)> manual and see whether it leads you to the
+list of the available locales (search for the C<SEE ALSO> section). If
+that fails, try out in command line the following commands:
 
 =over 12
 
@@ -67,32 +72,49 @@ and see whether they list something resembling these
 
 	en_US.ISO8859-1		de_DE.ISO8859-1		ru_RU.ISO8859-5
 	en_US			de_DE			ru_RU
+	en			de			ru
 	english			german			russian
 	english.iso88591	german.iso88591		russian.iso88595
 
 Sadly enough even if the calling interface has been standardized
-the names of the locales are not.
+the names of the locales are not. The naming usually is
+language-country/territory-codeset but the latter parts may
+not be present. Two special locales are worth special mention:
 
-=head2 CHARACTER TYPES
+	"C"
 
-Starting from Perl version 5.002 perl has obeyed the LC_CTYPE
+and
+	"POSIX"
+
+Currently and effectively these are the same locale: the difference is
+mainly that the first one is defined by the C standard and the second
+one is defined by the POSIX standard. What they mean and define is the
+B<default locale> in which every program does start in.  The language
+is (American) English and the character codeset C<ASCII>.
+B<NOTE>: not all systems have the C<"POSIX"> locale (not all systems
+are POSIX): use the C<"C"> locale when you need the default locale.
+
+=head2 Category LC_CTYPE: CHARACTER TYPES
+
+Starting from Perl version 5.002 perl has obeyed the C<LC_CTYPE>
 environment variable which controls application's notions on
 which characters are alphabetic characters. This affects in
 Perl the regular expression metanotation
 
 	\w
 
-which stands for alphanumeric characters, that is, alphabetic
-and numeric characters. Depending on your locale settings,
-characters like C<F>, C<I>, C<_>, C<x>, can be understood
-as C<\w> characters.
+which stands for alphanumeric characters, that is, alphabetic and
+numeric characters (please consult L<perlre> for more information
+about regular expressions). Thanks to the C<LC_CTYPE>, depending on
+your locale settings, characters like C<Æ>, C<É>, C<ß>, C<ø>, can be
+understood as C<\w> characters.
 
-=head2 COLLATION
+=head2 Category LC_COLLATE: COLLATION
 
-Starting from Perl version 5.003_06 perl has obeyed the LC_COLLATE
+Starting from Perl version 5.003_06 perl has obeyed the B<LC_COLLATE>
 environment variable which controls application's notions on the
-ordering (collation) of the characters. C<B> does in most Latin
-alphabets follow the C<A> but where do the C<A> and C<D> belong?
+collation (ordering) of the characters. C<B> does in most Latin
+alphabets follow the C<A> but where do the C<Á> and C<Ä> belong?
 
 Here is a code snippet that will tell you what are the alphanumeric
 characters in the current locale, in the locale order:
@@ -115,9 +137,9 @@ references of C<I18N::Collate>.
 =item PERL_BADLANG
 
 A string that controls whether Perl warns in its startup about failed
-language-specific "locale" settings. This can happen if the locale
-support in the operating system is lacking is some way. If this string
-has an integer value differing from zero, Perl will not complain.
+locale settings. This can happen if the locale support in the
+operating system is lacking (broken) is some way. If this string has
+an integer value differing from zero, Perl will not complain.
 B<NOTE>: this is just hiding the warning message: the message tells
 about some problem in your system's locale support and you should
 investigate what the problem is.
@@ -164,6 +186,5 @@ category-specific C<LC_...> are set.
 =back
 
 There are further locale-controlling environment variables
-(C<LC_MESSAGES, LC_MONETARY, LC_NUMERIC, LC_TIME>) but
-Perl B<does not> currently obey them.
-
+(C<LC_MESSAGES, LC_MONETARY, LC_NUMERIC, LC_TIME>) but Perl
+B<does not> currently obey them.
