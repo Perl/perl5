@@ -1444,6 +1444,7 @@ t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap::wrap works
 t/lib/thr5005.t		Test 5.005-style threading (skipped if no use5005threads)
 t/lib/tie-push.t	Test for Tie::Array
+t/lib/tie-splice.t	Test for Tie::Array::SPLICE
 t/lib/tie-stdarray.t	Test for Tie::StdArray
 t/lib/tie-stdhandle.t	Test for Tie::StdHandle
 t/lib/tie-stdpush.t	Test for Tie::StdArray
