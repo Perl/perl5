@@ -161,7 +161,7 @@ Take this code:
     sv_setsv(ST(0), sv);
 
 This code tries to return a new SV (which contains the value 42) if it should
-return a real value, or undef otherwise.  Instead it has returned a null
+return a real value, or undef otherwise.  Instead it has returned a NULL
 pointer which, somewhere down the line, will cause a segmentation violation,
 bus error, or just weird results.  Change the zero to C<&sv_undef> in the first
 line and all will be well.
@@ -225,9 +225,12 @@ The C<av_len> function returns the highest index value in array (just
 like $#array in Perl).  If the array is empty, -1 is returned.  The
 C<av_fetch> function returns the value at index C<key>, but if C<lval>
 is non-zero, then C<av_fetch> will store an undef value at that index.
-The C<av_store> function stores the value C<val> at index C<key>.
-note that C<av_fetch> and C<av_store> both return C<SV**>'s, not C<SV*>'s
-as their return value.
+The C<av_store> function stores the value C<val> at index C<key>, and does
+not increment the reference count of C<val>.  Thus the caller is responsible
+for taking care of that, and if C<av_store> returns NULL, the caller will
+have to decrement the reference count to avoid a memory leak.  Note that
+C<av_fetch> and C<av_store> both return C<SV**>'s, not C<SV*>'s as their
+return value.
 
     void  av_clear(AV*);
     void  av_undef(AV*);
@@ -246,6 +249,9 @@ by using the following:
     AV*  perl_get_av("package::varname", FALSE);
 
 This returns NULL if the variable does not exist.
+
+See L<Understanding the Magic of Tied Hashes and Arrays> for more
+information on how to use the array access functions on tied arrays.
 
 =head2 Working with HVs
 
@@ -327,6 +333,9 @@ The hash algorithm is defined in the C<PERL_HASH(hash, key, klen)> macro:
     while (i--)
 	hash = hash * 33 + *s++;
 
+See L<Understanding the Magic of Tied Hashes and Arrays> for more
+information on how to use the hash access functions on tied hashes.
+
 =head2 Hash API Extensions
 
 Beginning with version 5.004, the following functions are also supported:
@@ -368,6 +377,10 @@ dealing with keys that are not C<SV*>s:
     HeKEY(HE* he)
     HeKLEN(HE* he)
 
+Note that both C<hv_store> and C<hv_store_ent> do not increment the
+reference count of the stored C<val>, which is the caller's responsibility.
+If these functions return a NULL value, the caller will usually have to
+decrement the reference count of C<val> to avoid a memory leak.
 
 =head2 References
 
@@ -697,7 +710,7 @@ stored in the C<mg_type> field.
 The C<obj> argument is stored in the C<mg_obj> field of the C<MAGIC>
 structure.  If it is not the same as the C<sv> argument, the reference
 count of the C<obj> object is incremented.  If it is the same, or if
-the C<how> argument is "#", or if it is a null pointer, then C<obj> is
+the C<how> argument is "#", or if it is a NULL pointer, then C<obj> is
 merely stored, without the reference count being incremented.
 
 There is also a function to add magic to an C<HV>:
@@ -752,52 +765,71 @@ the various routines for the various magical types begin with C<magic_>.
 
 The current kinds of Magic Virtual Tables are:
 
-    mg_type  MGVTBL              Type of magical
+    mg_type  MGVTBL              Type of magic
     -------  ------              ----------------------------
-    \0       vtbl_sv             Regexp???
-    A        vtbl_amagic         Operator Overloading
-    a        vtbl_amagicelem     Operator Overloading
-    c        0                   Used in Operator Overloading
-    B        vtbl_bm             Boyer-Moore???
+    \0       vtbl_sv             Special scalar variable
+    A        vtbl_amagic         %OVERLOAD hash
+    a        vtbl_amagicelem     %OVERLOAD hash element
+    c        (none)              Holds overload table (AMT) on stash
+    B        vtbl_bm             Boyer-Moore (fast string search)
     E        vtbl_env            %ENV hash
     e        vtbl_envelem        %ENV hash element
-    g        vtbl_mglob          Regexp /g flag???
+    f        vtbl_fm             Formline ('compiled' format)
+    g        vtbl_mglob          m//g target / study()ed string
     I        vtbl_isa            @ISA array
     i        vtbl_isaelem        @ISA array element
-    L        0 (but sets RMAGICAL)     Perl Module/Debugger???
-    l        vtbl_dbline         Debugger?
+    k        vtbl_nkeys          scalar(keys()) lvalue
+    L        (none)              Debugger %_<filename 
+    l        vtbl_dbline         Debugger %_<filename element
     o        vtbl_collxfrm       Locale transformation
-    P        vtbl_pack           Tied Array or Hash
-    p        vtbl_packelem       Tied Array or Hash element
-    q        vtbl_packelem       Tied Scalar or Handle
-    S        vtbl_sig            Signal Hash
-    s        vtbl_sigelem        Signal Hash element
+    P        vtbl_pack           Tied array or hash
+    p        vtbl_packelem       Tied array or hash element
+    q        vtbl_packelem       Tied scalar or handle
+    S        vtbl_sig            %SIG hash
+    s        vtbl_sigelem        %SIG hash element
     t        vtbl_taint          Taintedness
-    U        vtbl_uvar	         ???
-    v        vtbl_vec	         Vector
-    x        vtbl_substr         Substring???
-    y        vtbl_itervar        Shadow "foreach" iterator variable
-    *        vtbl_glob           GV???
-    #        vtbl_arylen         Array Length
-    .        vtbl_pos	         $. scalar variable
-    ~        None                Used by certain extensions
+    U        vtbl_uvar           Available for use by extensions
+    v        vtbl_vec            vec() lvalue
+    x        vtbl_substr         substr() lvalue
+    y        vtbl_defelem        Shadow "foreach" iterator variable /
+                                  smart parameter vivification
+    *        vtbl_glob           GV (typeglob)
+    #        vtbl_arylen         Array length ($#ary)
+    .        vtbl_pos            pos() lvalue
+    ~        (none)              Available for use by extensions
 
 When an uppercase and lowercase letter both exist in the table, then the
 uppercase letter is used to represent some kind of composite type (a list
 or a hash), and the lowercase letter is used to represent an element of
 that composite type.
 
-The '~' magic type is defined specifically for use by extensions and
-will not be used by perl itself. Extensions can use ~ magic to 'attach'
-private information to variables (typically objects).  This is especially
-useful because there is no way for normal perl code to corrupt this
-private information (unlike using extra elements of a hash object).
+The '~' and 'U' magic types are defined specifically for use by
+extensions and will not be used by perl itself.  Extensions can use
+'~' magic to 'attach' private information to variables (typically
+objects).  This is especially useful because there is no way for
+normal perl code to corrupt this private information (unlike using
+extra elements of a hash object).
 
-Note that because multiple extensions may be using ~ magic it is
-important for extensions to take extra care with it.  Typically only
-using it on objects blessed into the same class as the extension
-is sufficient.  It may also be appropriate to add an I32 'signature'
-at the top of the private data area and check that.
+Similarly, 'U' magic can be used much like tie() to call a C function
+any time a scalar's value is used or changed.  The C<MAGIC>'s
+C<mg_ptr> field points to a C<ufuncs> structure:
+
+    struct ufuncs {
+        I32 (*uf_val)(IV, SV*);
+        I32 (*uf_set)(IV, SV*);
+        IV uf_index;
+    };
+
+When the SV is read from or written to, the C<uf_val> or C<uf_set>
+function will be called with C<uf_index> as the first arg and a
+pointer to the SV as the second.
+
+Note that because multiple extensions may be using '~' or 'U' magic,
+it is important for extensions to take extra care to avoid conflict.
+Typically only using the magic on objects blessed into the same class
+as the extension is sufficient.  For '~' magic, it may also be
+appropriate to add an I32 'signature' at the top of the private data
+area and check that.
 
 =head2 Finding Magic
 
@@ -812,6 +844,209 @@ if the SV is not of type SVt_PVMG, Perl may core dump.
 This routine checks to see what types of magic C<sv> has.  If the mg_type
 field is an uppercase letter, then the mg_obj is copied to C<nsv>, but
 the mg_type field is changed to be the lowercase letter.
+
+=head2 Understanding the Magic of Tied Hashes and Arrays
+
+Tied hashes and arrays are magical beasts of the 'P' magic type.
+
+WARNING: As of the 5.004 release, proper usage of the array and hash
+access functions requires understanding a few caveats.  Some
+of these caveats are actually considered bugs in the API, to be fixed
+in later releases, and are bracketed with [MAYCHANGE] below. If
+you find yourself actually applying such information in this section, be
+aware that the behavior may change in the future, umm, without warning.
+
+The C<av_store> function, when given a tied array argument, merely
+copies the magic of the array onto the value to be "stored", using
+C<mg_copy>.  It may also return NULL, indicating that the value did not
+actually need to be stored in the array.  [MAYCHANGE] After a call to
+C<av_store> on a tied array, the caller will usually need to call
+C<mg_set(val)> to actually invoke the perl level "STORE" method on the
+TIEARRAY object.  If C<av_store> did return NULL, a call to
+C<SvREFCNT_dec(val)> will also be usually necessary to avoid a memory
+leak. [/MAYCHANGE]
+
+The previous paragraph is applicable verbatim to tied hash access using the
+C<hv_store> and C<hv_store_ent> functions as well.
+
+C<av_fetch> and the corresponding hash functions C<hv_fetch> and
+C<hv_fetch_ent> actually return an undefined mortal value whose magic
+has been initialized using C<mg_copy>.  Note the value so returned does not
+need to be deallocated, as it is already mortal.  [MAYCHANGE] But you will
+need to call C<mg_get()> on the returned value in order to actually invoke
+the perl level "FETCH" method on the underlying TIE object.  Similarly,
+you may also call C<mg_set()> on the return value after possibly assigning
+a suitable value to it using C<sv_setsv>,  which will invoke the "STORE"
+method on the TIE object. [/MAYCHANGE]
+
+[MAYCHANGE]
+In other words, the array or hash fetch/store functions don't really
+fetch and store actual values in the case of tied arrays and hashes.  They
+merely call C<mg_copy> to attach magic to the values that were meant to be
+"stored" or "fetched".  Later calls to C<mg_get> and C<mg_set> actually
+do the job of invoking the TIE methods on the underlying objects.  Thus
+the magic mechanism currently implements a kind of lazy access to arrays
+and hashes.
+
+Currently (as of perl version 5.004), use of the hash and array access
+functions requires the user to be aware of whether they are operating on
+"normal" hashes and arrays, or on their tied variants.  The API may be
+changed to provide more transparent access to both tied and normal data
+types in future versions.
+[/MAYCHANGE]
+
+You would do well to understand that the TIEARRAY and TIEHASH interfaces
+are mere sugar to invoke some perl method calls while using the uniform hash
+and array syntax.  The use of this sugar imposes some overhead (typically
+about two to four extra opcodes per FETCH/STORE operation, in addition to
+the creation of all the mortal variables required to invoke the methods).
+This overhead will be comparatively small if the TIE methods are themselves
+substantial, but if they are only a few statements long, the overhead
+will not be insignificant.
+
+=head2 Localizing changes
+
+Perl has a very handy construction
+
+  {
+    local $var = 2;
+    ...
+  }
+
+This construction is I<approximately> equivalent to
+
+  {
+    my $oldvar = $var;
+    $var = 2;
+    ...
+    $var = $oldvar;
+  }
+
+The biggest difference is that the first construction would
+reinstate the initial value of $var, irrespective of how control exits
+the block: C<goto>, C<return>, C<die>/C<eval> etc. It is a little bit
+more efficient as well.
+
+There is a way to achieve a similar task from C via Perl API: create a
+I<pseudo-block>, and arrange for some changes to be automatically
+undone at the end of it, either explicit, or via a non-local exit (via
+die()). A I<block>-like construct is created by a pair of
+C<ENTER>/C<LEAVE> macros (see L<perlcall/EXAMPLE/"Returning a
+Scalar">).  Such a construct may be created specially for some
+important localized task, or an existing one (like boundaries of
+enclosing Perl subroutine/block, or an existing pair for freeing TMPs)
+may be used. (In the second case the overhead of additional
+localization must be almost negligible.) Note that any XSUB is
+automatically enclosed in an C<ENTER>/C<LEAVE> pair.
+
+Inside such a I<pseudo-block> the following service is available:
+
+=over
+
+=item C<SAVEINT(int i)>
+
+=item C<SAVEIV(IV i)>
+
+=item C<SAVEI32(I32 i)>
+
+=item C<SAVELONG(long i)>
+
+These macros arrange things to restore the value of integer variable
+C<i> at the end of enclosing I<pseudo-block>.
+
+=item C<SAVESPTR(s)>
+
+=item C<SAVEPPTR(p)>
+
+These macros arrange things to restore the value of pointers C<s> and
+C<p>. C<s> must be a pointer of a type which survives conversion to
+C<SV*> and back, C<p> should be able to survive conversion to C<char*>
+and back.
+
+=item C<SAVEFREESV(SV *sv)>
+
+The refcount of C<sv> would be decremented at the end of
+I<pseudo-block>. This is similar to C<sv_2mortal>, which should (?) be
+used instead.
+
+=item C<SAVEFREEOP(OP *op)>
+
+The C<OP *> is op_free()ed at the end of I<pseudo-block>.
+
+=item C<SAVEFREEPV(p)>
+
+The chunk of memory which is pointed to by C<p> is Safefree()ed at the
+end of I<pseudo-block>.
+
+=item C<SAVECLEARSV(SV *sv)>
+
+Clears a slot in the current scratchpad which corresponds to C<sv> at
+the end of I<pseudo-block>.
+
+=item C<SAVEDELETE(HV *hv, char *key, I32 length)>
+
+The key C<key> of C<hv> is deleted at the end of I<pseudo-block>. The
+string pointed to by C<key> is Safefree()ed.  If one has a I<key> in
+short-lived storage, the corresponding string may be reallocated like
+this:
+
+  SAVEDELETE(defstash, savepv(tmpbuf), strlen(tmpbuf));
+
+=item C<SAVEDESTRUCTOR(f,p)>
+
+At the end of I<pseudo-block> the function C<f> is called with the
+only argument (of type C<void*>) C<p>.
+
+=item C<SAVESTACK_POS()>
+
+The current offset on the Perl internal stack (cf. C<SP>) is restored
+at the end of I<pseudo-block>.
+
+=back
+
+The following API list contains functions, thus one needs to
+provide pointers to the modifiable data explicitly (either C pointers,
+or Perlish C<GV *>s).  Where the above macros take C<int>, a similar 
+function takes C<int *>.
+
+=over
+
+=item C<SV* save_scalar(GV *gv)>
+
+Equivalent to Perl code C<local $gv>.
+
+=item C<AV* save_ary(GV *gv)>
+
+=item C<HV* save_hash(GV *gv)>
+
+Similar to C<save_scalar>, but localize C<@gv> and C<%gv>.
+
+=item C<void save_item(SV *item)>
+
+Duplicates the current value of C<SV>, on the exit from the current
+C<ENTER>/C<LEAVE> I<pseudo-block> will restore the value of C<SV>
+using the stored value.
+
+=item C<void save_list(SV **sarg, I32 maxsarg)>
+
+A variant of C<save_item> which takes multiple arguments via an array
+C<sarg> of C<SV*> of length C<maxsarg>.
+
+=item C<SV* save_svref(SV **sptr)>
+
+Similar to C<save_scalar>, but will reinstate a C<SV *>.
+
+=item C<void save_aptr(AV **aptr)>
+
+=item C<void save_hptr(HV **hptr)>
+
+Similar to C<save_svref>, but localize C<AV *> and C<HV *>.
+
+=back
+
+The C<Alias> module implements localization of the basic types within the
+I<caller's scope>.  People who are interested in how to localize things in
+the containing scope should take a look there too.
 
 =head1 Subroutines
 
@@ -1191,6 +1426,9 @@ Returns the SV at the specified index in the array.  The C<key> is the
 index.  If C<lval> is set then the fetch will be part of a store.  Check
 that the return value is non-null before dereferencing it to a C<SV*>.
 
+See L<Understanding the Magic of Tied Hashes and Arrays> for more
+information on how to use this function on tied arrays.
+
 	SV**	av_fetch _((AV* ar, I32 key, I32 lval));
 
 =item av_len
@@ -1230,8 +1468,14 @@ Shifts an SV off the beginning of the array.
 =item av_store
 
 Stores an SV in an array.  The array index is specified as C<key>.  The
-return value will be null if the operation failed, otherwise it can be
-dereferenced to get the original C<SV*>.
+return value will be NULL if the operation failed or if the value did not
+need to be actually stored within the array (as in the case of tied arrays).
+Otherwise it can be dereferenced to get the original C<SV*>.  Note that the
+caller is responsible for suitably incrementing the reference count of C<val>
+before the call, and decrementing it if the function returned NULL.
+
+See L<Understanding the Magic of Tied Hashes and Arrays> for more
+information on how to use this function on tied arrays.
 
 	SV**	av_store _((AV* ar, I32 key, SV* val));
 
@@ -1318,11 +1562,6 @@ Declares a stack pointer variable, C<sp>, for the XSUB.  See C<SP>.
 Sets up stack and mark pointers for an XSUB, calling dSP and dMARK.  This is
 usually handled automatically by C<xsubpp>.  Declares the C<items> variable
 to indicate the number of items on the stack.
-
-=item dXSI32
-
-Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
-handled automatically by C<xsubpp>.
 
 =item dXSI32
 
@@ -1544,7 +1783,7 @@ and C<hv_free_ent>.
 
 Deletes a key/value pair in the hash.  The value SV is removed from the hash
 and returned to the caller.  The C<klen> is the length of the key.  The
-C<flags> value will normally be zero; if set to G_DISCARD then null will be
+C<flags> value will normally be zero; if set to G_DISCARD then NULL will be
 returned.
 
 	SV*	hv_delete _((HV* tb, char* key, U32 klen, I32 flags));
@@ -1553,7 +1792,7 @@ returned.
 
 Deletes a key/value pair in the hash.  The value SV is removed from the hash
 and returned to the caller.  The C<flags> value will normally be zero; if set
-to G_DISCARD then null will be returned.  C<hash> can be a valid precomputed
+to G_DISCARD then NULL will be returned.  C<hash> can be a valid precomputed
 hash value, or 0 to ask for it to be computed.
 
 	SV*     hv_delete_ent _((HV* tb, SV* key, I32 flags, U32 hash));
@@ -1579,6 +1818,9 @@ C<klen> is the length of the key.  If C<lval> is set then the fetch will be
 part of a store.  Check that the return value is non-null before
 dereferencing it to a C<SV*>.
 
+See L<Understanding the Magic of Tied Hashes and Arrays> for more
+information on how to use this function on tied hashes.
+
 	SV**	hv_fetch _((HV* tb, char* key, U32 klen, I32 lval));
 
 =item hv_fetch_ent
@@ -1590,6 +1832,9 @@ fetch will be part of a store.  Make sure the return value is non-null
 before accessing it.  The return value when C<tb> is a tied hash
 is a pointer to a static location, so be sure to make a copy of the
 structure if you need to store it somewhere.
+
+See L<Understanding the Magic of Tied Hashes and Arrays> for more
+information on how to use this function on tied hashes.
 
 	HE*     hv_fetch_ent  _((HV* tb, SV* key, I32 lval, U32 hash));
 
@@ -1658,8 +1903,14 @@ Returns the package name of a stash.  See C<SvSTASH>, C<CvSTASH>.
 Stores an SV in a hash.  The hash key is specified as C<key> and C<klen> is
 the length of the key.  The C<hash> parameter is the precomputed hash
 value; if it is zero then Perl will compute it.  The return value will be
-null if the operation failed, otherwise it can be dereferenced to get the
-original C<SV*>.
+NULL if the operation failed or if the value did not need to be actually
+stored within the hash (as in the case of tied hashes).  Otherwise it can
+be dereferenced to get the original C<SV*>.  Note that the caller is
+responsible for suitably incrementing the reference count of C<val>
+before the call, and decrementing it if the function returned NULL.
+
+See L<Understanding the Magic of Tied Hashes and Arrays> for more
+information on how to use this function on tied hashes.
 
 	SV**	hv_store _((HV* tb, char* key, U32 klen, SV* val, U32 hash));
 
@@ -1668,9 +1919,15 @@ original C<SV*>.
 Stores C<val> in a hash.  The hash key is specified as C<key>.  The C<hash>
 parameter is the precomputed hash value; if it is zero then Perl will
 compute it.  The return value is the new hash entry so created.  It will be
-null if the operation failed or if the entry was stored in a tied hash.
-Otherwise the contents of the return value can be accessed using the
-C<He???> macros described here.
+NULL if the operation failed or if the value did not need to be actually
+stored within the hash (as in the case of tied hashes).  Otherwise the
+contents of the return value can be accessed using the C<He???> macros
+described here.  Note that the caller is responsible for suitably
+incrementing the reference count of C<val> before the call, and decrementing
+it if the function returned NULL.
+
+See L<Understanding the Magic of Tied Hashes and Arrays> for more
+information on how to use this function on tied hashes.
 
 	HE*     hv_store_ent  _((HV* tb, SV* key, SV* val, U32 hash));
 
@@ -1981,7 +2238,7 @@ Releases a Perl interpreter.  See L<perlembed>.
 
 Returns the AV of the specified Perl array.  If C<create> is set and the
 Perl variable does not exist then it will be created.  If C<create> is not
-set and the variable does not exist then null is returned.
+set and the variable does not exist then NULL is returned.
 
 	AV*	perl_get_av _((char* name, I32 create));
 
@@ -1989,7 +2246,7 @@ set and the variable does not exist then null is returned.
 
 Returns the CV of the specified Perl sub.  If C<create> is set and the Perl
 variable does not exist then it will be created.  If C<create> is not
-set and the variable does not exist then null is returned.
+set and the variable does not exist then NULL is returned.
 
 	CV*	perl_get_cv _((char* name, I32 create));
 
@@ -1997,7 +2254,7 @@ set and the variable does not exist then null is returned.
 
 Returns the HV of the specified Perl hash.  If C<create> is set and the Perl
 variable does not exist then it will be created.  If C<create> is not
-set and the variable does not exist then null is returned.
+set and the variable does not exist then NULL is returned.
 
 	HV*	perl_get_hv _((char* name, I32 create));
 
@@ -2005,7 +2262,7 @@ set and the variable does not exist then null is returned.
 
 Returns the SV of the specified Perl scalar.  If C<create> is set and the
 Perl variable does not exist then it will be created.  If C<create> is not
-set and the variable does not exist then null is returned.
+set and the variable does not exist then NULL is returned.
 
 	SV*	perl_get_sv _((char* name, I32 create));
 
@@ -2265,14 +2522,6 @@ C<sv2>.
 
 	I32	sv_cmp _((SV* sv1, SV* sv2));
 
-=item sv_cmp
-
-Compares the strings in two SVs.  Returns -1, 0, or 1 indicating whether the
-string in C<sv1> is less than, equal to, or greater than the string in
-C<sv2>.
-
-	I32	sv_cmp _((SV* sv1, SV* sv2));
-
 =item SvCUR
 
 Returns the length of the string which is in the SV.  See C<SvLEN>.
@@ -2284,12 +2533,6 @@ Returns the length of the string which is in the SV.  See C<SvLEN>.
 Set the length of the string which is in the SV.  See C<SvCUR>.
 
 	SvCUR_set (SV* sv, int val )
-
-=item sv_dec
-
-Auto-decrement of the value in the SV.
-
-	void	sv_dec _((SV* sv));
 
 =item sv_dec
 
@@ -2354,12 +2597,6 @@ Tells an SV that it is an integer and disables all other OK bits.
 
 	SvIOK_on (SV* sv)
 
-=item SvIOK_only
-
-Tells an SV that it is an integer and disables all other OK bits.
-
-	SvIOK_on (SV* sv)
-
 =item SvIOKp
 
 Returns a boolean indicating whether the SV contains an integer.  Checks the
@@ -2400,12 +2637,6 @@ Returns the integer which is stored in the SV.
 Returns the size of the string buffer in the SV.  See C<SvCUR>.
 
 	int SvLEN (SV* sv)
-
-=item sv_len
-
-Returns the length of the string in the SV.  Use C<SvCUR>.
-
-	STRLEN	sv_len _((SV* sv));
 
 =item sv_len
 
@@ -2486,12 +2717,6 @@ Tells an SV that it is a double and disables all other OK bits.
 
 	SvNOK_on (SV* sv)
 
-=item SvNOK_only
-
-Tells an SV that it is a double and disables all other OK bits.
-
-	SvNOK_on (SV* sv)
-
 =item SvNOKp
 
 Returns a boolean indicating whether the SV contains a double.  Checks the
@@ -2526,12 +2751,6 @@ Unsets the PV status of an SV.
 =item SvPOK_on
 
 Tells an SV that it is a string.
-
-	SvPOK_on (SV* sv)
-
-=item SvPOK_only
-
-Tells an SV that it is a string and disables all other OK bits.
 
 	SvPOK_on (SV* sv)
 
@@ -2951,10 +3170,11 @@ Jeff Okamoto <F<okamoto@corp.hp.com>>
 
 With lots of help and suggestions from Dean Roehrich, Malcolm Beattie,
 Andreas Koenig, Paul Hudson, Ilya Zakharevich, Paul Marquess, Neil
-Bowers, Matthew Green, Tim Bunce, Spider Boardman, and Ulrich Pfeifer.
+Bowers, Matthew Green, Tim Bunce, Spider Boardman, Ulrich Pfeifer, and
+Stephen McCamant.
 
 API Listing by Dean Roehrich <F<roehrich@cray.com>>.
 
 =head1 DATE
 
-Version 31.7: 1997/5/1
+Version 31.8: 1997/5/17

@@ -456,9 +456,9 @@ kill_file(char *name)
 /*}}}*/
 
 
-/*{{{int my_mkdir(char *,mode_t)*/
+/*{{{int my_mkdir(char *,Mode_t)*/
 int
-my_mkdir(char *dir, mode_t mode)
+my_mkdir(char *dir, Mode_t mode)
 {
   STRLEN dirlen = strlen(dir);
 
@@ -1759,7 +1759,7 @@ static int background_process(int argc, char **argv);
 static void pipe_and_fork(char **cmargv);
 
 /*{{{ void getredirection(int *ac, char ***av)*/
-void
+static void
 getredirection(int *ac, char ***av)
 /*
  * Process vms redirection arg's.  Exit if any error is seen.
@@ -2221,6 +2221,34 @@ unsigned long int flags = 17, one = 1, retsts;
 /*}}}*/
 /***** End of code taken from Mark Pizzolato's argproc.c package *****/
 
+
+/* OS-specific initialization at image activation (not thread startup) */
+/*{{{void vms_image_init(int *, char ***)*/
+void
+vms_image_init(int *argcp, char ***argvp)
+{
+  unsigned long int *mask, iosb[2], i;
+  unsigned short int dummy;
+  union prvdef iprv;
+  struct itmlst_3 jpilist[2] = { {sizeof iprv, JPI$_IMAGPRIV, &iprv, &dummy},
+                                 {          0,             0,     0,      0} };
+
+  _ckvmssts(sys$getjpiw(0,NULL,NULL,jpilist,iosb,NULL,NULL));
+  _ckvmssts(iosb[0]);
+  mask = (unsigned long int *) &iprv;  /* Quick change of view */;
+  for (i = 0; i < (sizeof iprv + sizeof(unsigned long int) - 1) / sizeof(unsigned long int); i++) {
+    if (mask[i]) {           /* Running image installed with privs? */
+      _ckvmssts(sys$setprv(0,&iprv,0,NULL));       /* Turn 'em off. */
+      tainting = TRUE;
+      break;
+    }
+  }
+  getredirection(argcp,argvp);
+  return;
+}
+/*}}}*/
+
+
 /* trim_unixpath()
  * Trim Unix-style prefix off filespec, so it looks like what a shell
  * glob expansion would return (i.e. from specified prefix on, not
@@ -2655,6 +2683,7 @@ vms_execfree() {
 static char *
 setup_argstr(SV *really, SV **mark, SV **sp)
 {
+  dTHR;
   char *junk, *tmps = Nullch;
   register size_t cmdlen = 0;
   size_t rlen;
@@ -3179,6 +3208,7 @@ static long int utc_offset_secs;
 /*{{{time_t my_time(time_t *timep)*/
 time_t my_time(time_t *timep)
 {
+  dTHR;
   time_t when;
 
   if (gmtime_emulation_type == 0) {
@@ -3226,6 +3256,7 @@ time_t my_time(time_t *timep)
 struct tm *
 my_gmtime(const time_t *timep)
 {
+  dTHR;
   char *p;
   time_t when;
 
@@ -3251,6 +3282,7 @@ my_gmtime(const time_t *timep)
 struct tm *
 my_localtime(const time_t *timep)
 {
+  dTHR;
   time_t when;
 
   if (timep == NULL) {
@@ -3296,6 +3328,7 @@ static const long int utime_baseadjust[2] = { 0x4beb4000, 0x7c9567 };
 /*{{{int my_utime(char *path, struct utimbuf *utimes)*/
 int my_utime(char *file, struct utimbuf *utimes)
 {
+  dTHR;
   register int i;
   long int bintime[2], len = 2, lowbit, unixtime,
            secscale = 10000000; /* seconds --> 100 ns intervals */
@@ -3680,6 +3713,8 @@ cando_by_name(I32 bit, I32 effective, char *fname)
 int
 flex_fstat(int fd, struct mystat *statbufp)
 {
+  dTHR;
+
   if (!fstat(fd,(stat_t *) statbufp)) {
     if (statbufp == (struct mystat *) &statcache) *namecache == '\0';
     statbufp->st_dev = encode_dev(statbufp->st_devnam);
@@ -3704,6 +3739,7 @@ flex_fstat(int fd, struct mystat *statbufp)
 int
 flex_stat(char *fspec, struct mystat *statbufp)
 {
+    dTHR;
     char fileified[NAM$C_MAXRSS+1];
     int retval = -1;
 

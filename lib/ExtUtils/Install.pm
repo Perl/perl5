@@ -1,14 +1,14 @@
 package ExtUtils::Install;
 
-$VERSION = substr q$Revision: 1.16 $, 10;
-# $Date: 1996/12/17 00:31:26 $
+$VERSION = substr q$Revision: 1.19 $, 10;
+# $Date: 1997/08/01 08:39:37 $
 
 use Exporter;
 use Carp ();
-use Config ();
+use Config qw(%Config);
 use vars qw(@ISA @EXPORT $VERSION);
 @ISA = ('Exporter');
-@EXPORT = ('install','uninstall','pm_to_blib');
+@EXPORT = ('install','uninstall','pm_to_blib', 'install_default');
 $Is_VMS = $^O eq 'VMS';
 
 my $splitchar = $^O eq 'VMS' ? '|' : $^O eq 'os2' ? ';' : ':';
@@ -37,6 +37,8 @@ sub install {
 
     my(%hash) = %$hash;
     my(%pack, %write, $dir, $warn_permissions);
+    # -w doesn't work reliably on FAT dirs
+    $warn_permissions++ if $^O eq 'MSWin32';
     local(*DIR, *P);
     for (qw/read write/) {
 	$pack{$_}=$hash{$_};
@@ -142,6 +144,28 @@ sub install {
     }
 }
 
+sub install_default {
+  @_ < 2 or die "install_default should be called with 0 or 1 argument";
+  my $FULLEXT = @_ ? shift : $ARGV[0];
+  defined $FULLEXT or die "Do not know to where to write install log";
+  my $INST_LIB = MM->catdir(MM->curdir,"blib","lib");
+  my $INST_ARCHLIB = MM->catdir(MM->curdir,"blib","arch");
+  my $INST_BIN = MM->catdir(MM->curdir,'blib','bin');
+  my $INST_SCRIPT = MM->catdir(MM->curdir,'blib','script');
+  my $INST_MAN1DIR = MM->catdir(MM->curdir,'blib','man1');
+  my $INST_MAN3DIR = MM->catdir(MM->curdir,'blib','man3');
+  install({
+	   read => "$Config{sitearchexp}/auto/$FULLEXT/.packlist",
+	   write => "$Config{installsitearch}/auto/$FULLEXT/.packlist",
+	   $INST_LIB => $Config{installsitelib},
+	   $INST_ARCHLIB => $Config{installsitearch},
+	   $INST_BIN => $Config{installbin} ,
+	   $INST_SCRIPT => $Config{installscript},
+	   $INST_MAN1DIR => $Config{installman1dir},
+	   $INST_MAN3DIR => $Config{installman3dir},
+	  },1,0,0);
+}
+
 sub my_cmp {
     my($one,$two) = @_;
     local(*F,*T);
@@ -190,7 +214,7 @@ sub inc_uninstall {
     my $MY = {};
     bless $MY, 'MY';
     my %seen_dir = ();
-    foreach $dir (@INC, @PERL_ENV_LIB, @Config::Config{qw/archlibexp privlibexp sitearchexp sitelibexp/}) {
+    foreach $dir (@INC, @PERL_ENV_LIB, @Config{qw/archlibexp privlibexp sitearchexp sitelibexp/}) {
 	next if $dir eq ".";
 	next if $seen_dir{$dir}++;
 	my($targetfile) = $MY->catfile($dir,$libdir,$file);
@@ -330,6 +354,20 @@ another file named by C<$hashref-E<gt>{read}>, the contents of this file will
 be merged into the written file. The read and the written file may be
 identical, but on AFS it is quite likely, people are installing to a
 different directory than the one where the files later appear.
+
+install_default() takes one or less arguments.  If no arguments are 
+specified, it takes $ARGV[0] as if it was specified as an argument.  
+The argument is the value of MakeMaker's C<FULLEXT> key, like F<Tk/Canvas>.  
+This function calls install() with the same arguments as the defaults 
+the MakeMaker would use.
+
+The argumement-less form is convenient for install scripts like
+
+  perl -MExtUtils::Install -e install_default Tk/Canvas
+
+Assuming this command is executed in a directory with populated F<blib> 
+directory, it will proceed as if the F<blib> was build by MakeMaker on 
+this machine.  This is useful for binary distributions.
 
 uninstall() takes as first argument a file containing filenames to be
 unlinked. The second argument is a verbose switch, the third is a

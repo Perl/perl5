@@ -30,31 +30,17 @@ void *cvarg;
     dTHR;
 #endif /* DEBUGGING */
 
-    DEBUG_L((fprintf(stderr, "0x%lx unsetting CvOWNER of 0x%lx:%s\n",
+    DEBUG_L((PerlIO_printf(PerlIO_stderr(), "0x%lx unsetting CvOWNER of 0x%lx:%s\n",
 		     (unsigned long)thr, (unsigned long)cv, SvPEEK((SV*)cv))));
     MUTEX_LOCK(CvMUTEXP(cv));
-    /* assert(CvDEPTH(cv) == 0); */
+    DEBUG_L(if (CvDEPTH(cv) != 0)
+		PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
+			      CvDEPTH(cv)););
     assert(thr == CvOWNER(cv));
     CvOWNER(cv) = 0;
-    if (CvCONDP(cv))
-	COND_SIGNAL(CvCONDP(cv)); /* next please */
     MUTEX_UNLOCK(CvMUTEXP(cv));
     SvREFCNT_dec(cv);
 }
-
-#if 0
-void
-mutex_unlock(m)
-void *m;
-{
-#ifdef DEBUGGING
-    dTHR;
-    DEBUG_L((fprintf(stderr, "0x%lx unlocking mutex 0x%lx\n",
-			 (unsigned long) thr, (unsigned long) m)));
-#endif /* DEBUGGING */
-    MUTEX_UNLOCK((pthread_mutex_t *) m);
-}
-#endif
 #endif /* USE_THREADS */
 
 PP(pp_const)
@@ -463,8 +449,6 @@ PP(pp_rv2av)
 	av = (AV*)SvRV(sv);
 	if (SvTYPE(av) != SVt_PVAV)
 	    DIE("Not an ARRAY reference");
-	if (op->op_private & OPpLVAL_INTRO)
-	    av = (AV*)save_svref((SV**)sv);
 	if (op->op_flags & OPf_REF) {
 	    PUSHs((SV*)av);
 	    RETURN;
@@ -540,8 +524,6 @@ PP(pp_rv2hv)
 	hv = (HV*)SvRV(sv);
 	if (SvTYPE(hv) != SVt_PVHV && SvTYPE(hv) != SVt_PVAV)
 	    DIE("Not a HASH reference");
-	if (op->op_private & OPpLVAL_INTRO)
-	    hv = (HV*)save_svref((SV**)sv);
 	if (op->op_flags & OPf_REF) {
 	    SETs((SV*)hv);
 	    RETURN;
@@ -664,13 +646,17 @@ PP(pp_aassign)
 	    av_extend(ary, lastrelem - relem);
 	    i = 0;
 	    while (relem <= lastrelem) {	/* gobble up all the rest */
+		SV **didstore;
 		sv = NEWSV(28,0);
 		assert(*relem);
 		sv_setsv(sv,*relem);
 		*(relem++) = sv;
-		(void)av_store(ary,i++,sv);
-		if (magic)
+		didstore = av_store(ary,i++,sv);
+		if (magic) {
 		    mg_set(sv);
+		    if (!didstore)
+			SvREFCNT_dec(sv);
+		}
 		TAINT_NOT;
 	    }
 	    break;
@@ -683,6 +669,7 @@ PP(pp_aassign)
 
 		while (relem < lastrelem) {	/* gobble up all the rest */
 		    STRLEN len;
+		    HE *didstore;
 		    if (*relem)
 			sv = *(relem++);
 		    else
@@ -691,9 +678,12 @@ PP(pp_aassign)
 		    if (*relem)
 			sv_setsv(tmpstr,*relem);	/* value */
 		    *(relem++) = tmpstr;
-		    (void)hv_store_ent(hash,sv,tmpstr,0);
-		    if (magic)
+		    didstore = hv_store_ent(hash,sv,tmpstr,0);
+		    if (magic) {
 			mg_set(tmpstr);
+			if (!didstore)
+			    SvREFCNT_dec(tmpstr);
+		    }
 		    TAINT_NOT;
 		}
 		if (relem == lastrelem)
@@ -1782,6 +1772,36 @@ PP(pp_leavesub)
     return pop_return();
 }
 
+static CV *
+get_db_sub(sv)
+SV *sv;
+{
+    dTHR;
+    SV *oldsv = sv;
+    GV *gv;
+    CV *cv;
+
+    sv = GvSV(DBsub);
+    save_item(sv);
+    gv = CvGV(cv);
+    if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
+	 || strEQ(GvNAME(gv), "END") 
+	 || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
+	     !( (SvTYPE(oldsv) == SVt_PVGV) && (GvCV((GV*)oldsv) == cv)
+    		&& (gv = (GV*)oldsv) ))) {
+	/* Use GV from the stack as a fallback. */
+	/* GV is potentially non-unique, or contain different CV. */
+	sv_setsv(sv, newRV((SV*)cv));
+    }
+    else {
+	gv_efullname3(sv, gv, Nullch);
+    }
+    cv = GvCV(DBsub);
+    if (CvXSUB(cv))
+	curcopdb = curcop;
+    return cv;
+}
+
 PP(pp_entersub)
 {
     dSP; dPOPss;
@@ -1863,137 +1883,141 @@ PP(pp_entersub)
     }
 
     gimme = GIMME_V;
-    if ((op->op_private & OPpENTERSUB_DB) && GvCV(DBsub) && !CvNODEBUG(cv)) {
-	SV *oldsv = sv;
-	sv = GvSV(DBsub);
-	save_item(sv);
-	gv = CvGV(cv);
-	if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
-	     || strEQ(GvNAME(gv), "END") 
-	     || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
-		 !( (SvTYPE(oldsv) == SVt_PVGV) && (GvCV((GV*)oldsv) == cv)
-		    && (gv = (GV*)oldsv) ))) { /* Use GV from the stack as a fallback. */
-	    /* GV is potentially non-unique, or contain different CV. */
-	    sv_setsv(sv, newRV((SV*)cv));
-	}
-	else {
-	    gv_efullname3(sv, gv, Nullch);
-	}
-	cv = GvCV(DBsub);
-	if (CvXSUB(cv)) curcopdb = curcop;
-	if (!cv)
-	    DIE("No DBsub routine");
-    }
+    if ((op->op_private & OPpENTERSUB_DB) && GvCV(DBsub) && !CvNODEBUG(cv))
+	cv = get_db_sub(sv);
+    if (!cv)
+	DIE("No DBsub routine");
 
 #ifdef USE_THREADS
+    /*
+     * First we need to check if the sub or method requires locking.
+     * If so, we gain a lock on the CV or the first argument, as
+     * appropriate. This has to be inline because for FAKE_THREADS,
+     * COND_WAIT inlines code to reschedule by returning a new op.
+     */
     MUTEX_LOCK(CvMUTEXP(cv));
-    if (!CvCONDP(cv)) {
-#ifdef DEBUGGING
-	DEBUG_L((fprintf(stderr, "0x%lx entering fast %s\n",
-				 (unsigned long)thr, SvPEEK((SV*)cv))));
-#endif /* DEBUGGING */
-	MUTEX_UNLOCK(CvMUTEXP(cv)); /* fast sub wants neither sync nor clone */
-    }
-    else if (SvFLAGS(cv) & SVp_SYNC) {
-	/*
-	 * It's a synchronised CV. Wait until it's free unless
-	 * we own it already (in which case we're recursing).
-	 */
-	if (CvOWNER(cv) && CvOWNER(cv) != thr) {
-	    do {
-		DEBUG_L((fprintf(stderr, "0x%lx wait for 0x%lx to leave %s\n",
-				 (unsigned long)thr,(unsigned long)CvOWNER(cv),
-				 SvPEEK((SV*)cv))));
-		COND_WAIT(CvCONDP(cv), CvMUTEXP(cv)); /* yawn */
-	    } while (CvOWNER(cv));
+    if (CvFLAGS(cv) & CVf_LOCKED) {
+	MAGIC *mg;	
+	if (CvFLAGS(cv) & CVf_METHOD) {
+	    if (SP > stack_base + TOPMARK)
+		sv = *(stack_base + TOPMARK + 1);
+	    else {
+		MUTEX_UNLOCK(CvMUTEXP(cv));
+		croak("no argument for locked method call");
+	    }
+	    if (SvROK(sv))
+		sv = SvRV(sv);
 	}
+	else {
+	    sv = (SV*)cv;
+	}
+	MUTEX_UNLOCK(CvMUTEXP(cv));
+	mg = condpair_magic(sv);
+	MUTEX_LOCK(MgMUTEXP(mg));
+	if (MgOWNER(mg) == thr)
+	    MUTEX_UNLOCK(MgMUTEXP(mg));
+	else {
+	    while (MgOWNER(mg))
+		COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
+	    MgOWNER(mg) = thr;
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "0x%lx: pp_entersub lock 0x%lx\n",
+				  (unsigned long)thr, (unsigned long)sv);)
+	    MUTEX_UNLOCK(MgMUTEXP(mg));
+	    save_destructor(unlock_condpair, sv);
+	}
+	MUTEX_LOCK(CvMUTEXP(cv));
+	assert(CvOWNER(cv) == 0);
 	CvOWNER(cv) = thr;	/* Assert ownership */
 	SvREFCNT_inc(cv);
 	MUTEX_UNLOCK(CvMUTEXP(cv));
 	if (CvDEPTH(cv) == 0)
 	    SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
     }
+    /*
+     * Now we have permission to enter the sub, we must distinguish
+     * four cases. (0) It's an XSUB (in which case we don't care
+     * about ownership); (1) it's ours already (and we're recursing);
+     * (2) it's free (but we may already be using a cached clone);
+     * (3) another thread owns it. Case (1) is easy: we just use it.
+     * Case (2) means we look for a clone--if we have one, use it
+     * otherwise grab ownership of cv. Case (3) means we look for a
+     * clone (for non-XSUBs) and have to create one if we don't
+     * already have one.
+     * Why look for a clone in case (2) when we could just grab
+     * ownership of cv straight away? Well, we could be recursing,
+     * i.e. we originally tried to enter cv while another thread
+     * owned it (hence we used a clone) but it has been freed up
+     * and we're now recursing into it. It may or may not be "better"
+     * to use the clone but at least CvDEPTH can be trusted.
+     */
+    if (CvOWNER(cv) == thr || CvXSUB(cv))
+	MUTEX_UNLOCK(CvMUTEXP(cv));
     else {
+	/* Case (2) or (3) */
+	SV **svp;
+	
 	/*
-	 * It's an ordinary unsynchronised CV so we must distinguish
-	 * three cases. (1) It's ours already (and we're recursing);
-	 * (2) it's free (but we may already be using a cached clone);
-	 * (3) another thread owns it. Case (1) is easy: we just use it.
-	 * Case (2) means we look for a clone--if we have one, use it
-	 * otherwise grab ownership of cv. Case (3) means look we for a
-	 * clone and have to create one if we don't already have one.
-	 * Why look for a clone in case (2) when we could just grab
-	 * ownership of cv straight away? Well, we could be recursing,
-	 * i.e. we originally tried to enter cv while another thread
-	 * owned it (hence we used a clone) but it has been freed up
-	 * and we're now recursing into it. It may or may not be "better"
-	 * to use the clone but at least CvDEPTH can be trusted.
-	 */
-	if (CvOWNER(cv) == thr)
+	 * XXX Might it be better to release CvMUTEXP(cv) while we
+     	 * do the hv_fetch? We might find someone has pinched it
+     	 * when we look again, in which case we would be in case
+     	 * (3) instead of (2) so we'd have to clone. Would the fact
+     	 * that we released the mutex more quickly make up for this?
+     	 */
+	svp = hv_fetch(cvcache, (char *)cv, sizeof(cv), FALSE);
+     	if (svp) {
+	    /* We already have a clone to use */
 	    MUTEX_UNLOCK(CvMUTEXP(cv));
+	    cv = *(CV**)svp;
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			    "entersub: 0x%lx already has clone 0x%lx:%s\n",
+			    (unsigned long) thr, (unsigned long) cv,
+			    SvPEEK((SV*)cv)));
+	    CvOWNER(cv) = thr;
+	    SvREFCNT_inc(cv);
+	    if (CvDEPTH(cv) == 0)
+		SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
+	}
 	else {
-	    /* Case (2) or (3) */
-	    SV **svp;
-	    
-	    /*
-	     * XXX Might it be better to release CvMUTEXP(cv) while we
-	     * do the hv_fetch? We might find someone has pinched it
-	     * when we look again, in which case we would be in case
-	     * (3) instead of (2) so we'd have to clone. Would the fact
-	     * that we released the mutex more quickly make up for this?
-	     */
-	    svp = hv_fetch(cvcache, (char *)cv, sizeof(cv), FALSE);
-	    if (svp) {
-		/* We already have a clone to use */
-		MUTEX_UNLOCK(CvMUTEXP(cv));
-		cv = *(CV**)svp;
-		DEBUG_L(fprintf(stderr,
-				"entersub: 0x%lx already has clone 0x%lx:%s\n",
-				(unsigned long) thr, (unsigned long) cv,
-				SvPEEK((SV*)cv)));
+	    /* (2) => grab ownership of cv. (3) => make clone */
+	    if (!CvOWNER(cv)) {
 		CvOWNER(cv) = thr;
 		SvREFCNT_inc(cv);
-		if (CvDEPTH(cv) == 0)
-		    SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
+		MUTEX_UNLOCK(CvMUTEXP(cv));
+		DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			    "entersub: 0x%lx grabbing 0x%lx:%s in stash %s\n",
+			    (unsigned long) thr, (unsigned long) cv,
+		    	    SvPEEK((SV*)cv), CvSTASH(cv) ?
+	    			HvNAME(CvSTASH(cv)) : "(none)"));
+	    } else {
+		/* Make a new clone. */
+		CV *clonecv;
+		SvREFCNT_inc(cv); /* don't let it vanish from under us */
+		MUTEX_UNLOCK(CvMUTEXP(cv));
+		DEBUG_L((PerlIO_printf(PerlIO_stderr(),
+				       "entersub: 0x%lx cloning 0x%lx:%s\n",
+				       (unsigned long) thr, (unsigned long) cv,
+				       SvPEEK((SV*)cv))));
+		/*
+	    	 * We're creating a new clone so there's no race
+		 * between the original MUTEX_UNLOCK and the
+		 * SvREFCNT_inc since no one will be trying to undef
+		 * it out from underneath us. At least, I don't think
+		 * there's a race...
+		 */
+	     	clonecv = cv_clone(cv);
+    		SvREFCNT_dec(cv); /* finished with this */
+		hv_store(cvcache, (char*)cv, sizeof(cv), (SV*)clonecv,0);
+		CvOWNER(clonecv) = thr;
+		cv = clonecv;
+		SvREFCNT_inc(cv);
 	    }
-	    else {
-		/* (2) => grab ownership of cv. (3) => make clone */
-		if (!CvOWNER(cv)) {
-		    CvOWNER(cv) = thr;
-		    SvREFCNT_inc(cv);
-		    MUTEX_UNLOCK(CvMUTEXP(cv));
-		    DEBUG_L(fprintf(stderr,
-				    "entersub: 0x%lx grabbing 0x%lx:%s\n",
-				    (unsigned long) thr, (unsigned long) cv,
-				    SvPEEK((SV*)cv)));
-		} else {
-		    /* Make a new clone. */
-		    CV *clonecv;
-		    SvREFCNT_inc(cv); /* don't let it vanish from under us */
-		    MUTEX_UNLOCK(CvMUTEXP(cv));
-		    DEBUG_L((fprintf(stderr,
-				     "entersub: 0x%lx cloning 0x%lx:%s\n",
-				     (unsigned long) thr, (unsigned long) cv,
-				     SvPEEK((SV*)cv))));
-		    /*
-		     * We're creating a new clone so there's no race
-		     * between the original MUTEX_UNLOCK and the
-		     * SvREFCNT_inc since no one will be trying to undef
-		     * it out from underneath us. At least, I don't think
-		     * there's a race...
-		     */
-		    clonecv = cv_clone(cv);
-		    SvREFCNT_dec(cv); /* finished with this */
-		    hv_store(cvcache, (char*)cv, sizeof(cv), (SV*)clonecv,0);
-		    CvOWNER(clonecv) = thr;
-		    cv = clonecv;
-		    SvREFCNT_inc(cv);
-		}
-		assert(CvDEPTH(cv) == 0);
-		SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
-	    }
+	    DEBUG_L(if (CvDEPTH(cv) != 0)
+			PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
+				      CvDEPTH(cv)););
+	    SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
 	}
-    }	
+    }
 #endif /* USE_THREADS */
 
     gimme = GIMME;
@@ -2024,8 +2048,14 @@ PP(pp_entersub)
 		/* Need to copy @_ to stack. Alternative may be to
 		 * switch stack to @_, and copy return values
 		 * back. This would allow popping @_ in XSUB, e.g.. XXXX */
-		AV* av = GvAV(defgv);
-		I32 items = AvFILL(av) + 1;
+		AV* av;
+		I32 items;
+#ifdef USE_THREADS
+		av = (AV*)curpad[0];
+#else
+		av = GvAV(defgv);
+#endif /* USE_THREADS */		
+		items = AvFILL(av) + 1;
 
 		if (items) {
 		    /* Mark is at the end of the stack. */
@@ -2070,7 +2100,7 @@ PP(pp_entersub)
 	    (void)SvREFCNT_inc(cv);
 	else {	/* save temporaries on recursion? */
 	    if (CvDEPTH(cv) == 100 && dowarn 
-		  && !(perldb && cv == GvCV(DBsub)))
+		  && !(PERLDB_SUB && cv == GvCV(DBsub)))
 		sub_crush_depth(cv);
 	    if (CvDEPTH(cv) > AvFILL(padlist)) {
 		AV *av;
@@ -2110,19 +2140,43 @@ PP(pp_entersub)
 		svp = AvARRAY(padlist);
 	    }
 	}
-	SAVESPTR(curpad);
-	curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
-	if (hasargs) {
+#ifdef USE_THREADS
+	if (!hasargs) {
 	    AV* av = (AV*)curpad[0];
+
+	    items = AvFILL(av) + 1;
+	    if (items) {
+		/* Mark is at the end of the stack. */
+		EXTEND(sp, items);
+		Copy(AvARRAY(av), sp + 1, items, SV*);
+		sp += items;
+		PUTBACK ;		    
+	    }
+	}
+#endif /* USE_THREADS */		
+	SAVESPTR(curpad);
+    	curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
+#ifndef USE_THREADS
+	if (hasargs)
+#endif /* USE_THREADS */
+	{
+	    AV* av;
 	    SV** ary;
 
+#if 0
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	    			  "%p entersub preparing @_\n", thr));
+#endif
+	    av = (AV*)curpad[0];
 	    if (AvREAL(av)) {
 		av_clear(av);
 		AvREAL_off(av);
 	    }
+#ifndef USE_THREADS
 	    cx->blk_sub.savearray = GvAV(defgv);
-	    cx->blk_sub.argarray = av;
 	    GvAV(defgv) = (AV*)SvREFCNT_inc(av);
+#endif /* USE_THREADS */
+	    cx->blk_sub.argarray = av;
 	    ++MARK;
 
 	    if (items > AvMAX(av) + 1) {
@@ -2147,6 +2201,10 @@ PP(pp_entersub)
 		MARK++;
 	    }
 	}
+#if 0
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "%p entersub returning %p\n", thr, CvSTART(cv)));
+#endif
 	RETURNOP(CvSTART(cv));
     }
 }

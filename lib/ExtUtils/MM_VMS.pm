@@ -96,7 +96,7 @@ sub fixpath {
     }
     my($fixedpath,$prefix,$name);
 
-    if ($path =~ m#^\$\(.+\)$# || $path =~ m#[/:>\]]#) { 
+    if ($path =~ m#^\$\([^\)]+\)$# || $path =~ m#[/:>\]]#) { 
         if ($force_path or $path =~ /(?:DIR\)|\])$/) {
             $fixedpath = vmspath($self->eliminate_macros($path));
         }
@@ -105,7 +105,9 @@ sub fixpath {
         }
     }
     elsif ((($prefix,$name) = ($path =~ m#^\$\(([^\)]+)\)(.+)#)) && $self->{$prefix}) {
-        my($vmspre) = vmspath($self->eliminate_macros("\$($prefix)")) || ''; # is it a dir or just a name?
+        my($vmspre) = $self->eliminate_macros("\$($prefix)");
+        # is it a dir or just a name?
+        $vmspre = ($vmspre =~ m|/| or $prefix =~ /DIR$/) ? vmspath($vmspre) : '';
         $fixedpath = ($vmspre ? $vmspre : $self->{$prefix}) . $name;
         $fixedpath = vmspath($fixedpath) if $force_path;
     }
@@ -1902,11 +1904,10 @@ pure_site_install ::
 # Ditto
 doc_perl_install ::
 	$(NOECHO) $(PERL) -e "print 'Module $(NAME)|installed into|$(INSTALLPRIVLIB)|'" >.MM_tmp
-	$(NOECHO) $(PERL) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|'" >>.MM_tmp
-	$(NOECHO) $(PERL) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|EXE_FILES|'" >>.MM_tmp
+	$(NOECHO) $(PERL) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|EXE_FILES|$(EXE_FILES)|'" >>.MM_tmp
 ],@docfiles,
 q%	$(NOECHO) $(PERL) -e "print q[@ARGV=split(/\\|/,<STDIN>);]" >.MM2_tmp
-	$(NOECHO) $(PERL) -e "print q[print '=head3 ',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];]" >>.MM2_tmp
+	$(NOECHO) $(PERL) -e "print q[print '=head2 ',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];]" >>.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[while(($key=shift) && ($val=shift)) ]" >>.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[{print qq[=item *\\n\\nC<$key: $val>\\n\\n];}print qq[=back\\n\\n];]" >>.MM2_tmp
 	$(NOECHO) $(PERL) .MM2_tmp <.MM_tmp >>%.$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q[
@@ -1915,11 +1916,10 @@ q%	$(NOECHO) $(PERL) -e "print q[@ARGV=split(/\\|/,<STDIN>);]" >.MM2_tmp
 # And again
 doc_site_install ::
 	$(NOECHO) $(PERL) -e "print 'Module $(NAME)|installed into|$(INSTALLSITELIB)|'" >.MM_tmp
-	$(NOECHO) $(PERL) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|'" >>.MM_tmp
-	$(NOECHO) $(PERL) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|EXE_FILES|'" >>.MM_tmp
+	$(NOECHO) $(PERL) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|EXE_FILES|$(EXE_FILES)|'" >>.MM_tmp
 ],@docfiles,
 q%	$(NOECHO) $(PERL) -e "print q[@ARGV=split(/\\|/,<STDIN>);]" >.MM2_tmp
-	$(NOECHO) $(PERL) -e "print q[print '=head3 ',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];]" >>.MM2_tmp
+	$(NOECHO) $(PERL) -e "print q[print '=head2 ',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];]" >>.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[while(($key=shift) && ($val=shift)) ]" >>.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[{print qq[=item *\\n\\nC<$key: $val>\\n\\n];}print qq[=back\\n\\n];]" >>.MM2_tmp
 	$(NOECHO) $(PERL) .MM2_tmp <.MM_tmp >>%.$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q[

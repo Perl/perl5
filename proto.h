@@ -198,6 +198,7 @@ OP*	listkids _((OP* o));
 OP*	localize _((OP* arg, I32 lexical));
 I32	looks_like_number _((SV* sv));
 int	magic_clearenv	_((SV* sv, MAGIC* mg));
+int	magic_clear_all_env _((SV* sv, MAGIC* mg));
 int	magic_clearpack	_((SV* sv, MAGIC* mg));
 int	magic_clearsig	_((SV* sv, MAGIC* mg));
 int	magic_existspack _((SV* sv, MAGIC* mg));
@@ -258,9 +259,6 @@ void	mg_magical _((SV* sv));
 int	mg_set _((SV* sv));
 OP*	mod _((OP* o, I32 type));
 char*	moreswitches _((char* s));
-#ifdef USE_THREADS
-void	mutex_unlock _((void *m));
-#endif /* USE_THREADS */
 OP*	my _((OP* o));
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 char*	my_bcopy _((char* from, char* to, I32 len));
@@ -401,7 +399,6 @@ Sighandler_t rsignal _((int, Sighandler_t));
 int	rsignal_restore _((int, Sigsave_t*));
 int	rsignal_save _((int, Sighandler_t, Sigsave_t*));
 Sighandler_t rsignal_state _((int));
-int	runops _((void));
 void	rxres_free _((void** rsp));
 void	rxres_restore _((void** rsp, REGEXP* rx));
 void	rxres_save _((void** rsp, REGEXP* rx));
@@ -510,6 +507,7 @@ void	sv_report_used _((void));
 void	sv_reset _((char* s, HV* stash));
 void	sv_setpvf _((SV* sv, const char* pat, ...));
 void	sv_setiv _((SV* sv, IV num));
+void	sv_setpviv _((SV* sv, IV num));
 void	sv_setuv _((SV* sv, UV num));
 void	sv_setnv _((SV* sv, double num));
 SV*	sv_setref_iv _((SV* rv, char* classname, IV iv));
@@ -536,6 +534,9 @@ void	taint_env _((void));
 void	taint_proper _((const char* f, char* s));
 #ifdef UNLINK_ALL_VERSIONS
 I32	unlnk _((char* f));
+#endif
+#ifdef USE_THREADS
+void	unlock_condpair _((void* svv));
 #endif
 void	unsharepvn _((char* sv, I32 len, U32 hash));
 void	unshare_hek _((HEK* hek));

@@ -25,7 +25,9 @@ d_tzname='undef'
 # The gcc fix-includes script exposes those incorrect prototypes.
 # There may be other examples as well.  Volunteers are welcome to
 # track them all down :-).  In the meantime, we'll just skip unistd.h
-# for SunOS.
+# for SunOS in most of the code. The POSIX extension is built with
+# unistd.h because, even though unistd.h has problems, if used with
+# care, it helps create a better POSIX extension.
 i_unistd='undef'
 
 cat << 'EOM' >&4
@@ -39,12 +41,31 @@ EOM
 # the problem.  Other BSD platforms may have similar problems.
 POSIX_cflags='ccflags="$ccflags -DSTRUCT_TM_HASZONE"'
 
-# check if user is in a bsd or system 5 type environment
+# The correct setting of groupstype depends on which version of the C
+# library is used.  If you are in the 'System V environment'
+# (i.e. you have /usr/5bin ahead of /usr/bin in your PATH), and
+# you use Sun's cc compiler, then you'll pick up /usr/5bin/cc, which
+# links against the C library in /usr/5lib.  This library has
+# groupstype='gid_t'.
+# If you are in the normal BSDish environment, then you'll pick up
+# /usr/ucb/cc, which links against the C library in /usr/lib.  That
+# library has groupstype='int'.
+#
+# If you are using gcc, it links against the C library in /usr/lib
+# independent of whether or not you are in the 'System V environment'.
+# If you want to use the System V libraries, then you need to 
+# manually set groupstype='gid_t' and add explicit references to 
+# /usr/5lib when Configure prompts you for where to look for libraries.
+#
+# Check if user is in a bsd or system 5 type environment
 if cat -b /dev/null 2>/dev/null
 then # bsd
       groupstype='int'
 else # sys5
-      groupstype='gid_t'
+    case "$cc" in
+	*gcc*) groupstype='int';; # gcc doesn't do anything special
+	*) groupstype='gid_t';; # /usr/5bin/cc pulls in /usr/5lib/ stuff.
+    esac
 fi
 
 # If you get the message "unresolved symbol '__lib_version' " while

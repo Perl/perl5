@@ -775,60 +775,7 @@ search path?
 
 =item AUTHOR AND COPYRIGHT
 
-=item DESCRIPTION
-
-=over
-
-=item My CGI script runs from the command line but not the browser.  Can
-you help me fix it?
-
-=item How do I remove HTML from a string?
-
-=item How do I extract URLs?
-
-=item How do I download a file from the user's machine?  How do I open a
-file on another machine?
-
-=item How do I make a pop-up menu in HTML?
-
-=item How do I fetch an HTML file?
-
-=item how do I decode or create those %-encodings on the web?
-
-=item How do I redirect to another page?
-
-=item How do I put a password on my web pages?
-
-=item How do I edit my .htpasswd and .htgroup files with Perl?
-
-=item How do I make sure users can't enter values into a form that cause my
-CGI script to do bad things?
-
-=item How do I parse an email header?
-
-=item How do I decode a CGI form?
-
-=item How do I check a valid email address?
-
-=item How do I decode a MIME/BASE64 string?
-
-=item How do I return the user's email address?
-
-=item How do I send/read mail?
-
-=item How do I find out my hostname/domainname/IP address?
-
-=item How do I fetch a news article or the active newsgroups?
-
-=item How do I fetch/put an FTP file?
-
-=item How can I do RPC in Perl?
-
-=back
-
-=item AUTHOR AND COPYRIGHT
-
-=head2 perlfaq9 - Networking ($Revision: 1.16 $, $Date: 1997/04/23 18:12:06
+=head2 perlfaq9 - Networking ($Revision: 1.17 $, $Date: 1997/04/24 22:44:29
 $)
 
 =item DESCRIPTION
@@ -894,6 +841,10 @@ CGI script to do bad things?
 
 =over
 
+=item List assignment to %ENV works
+
+=item "Can't locate Foo.pm in @INC" error now lists @INC
+
 =item Compilation option: Binary compatibility with 5.003
 
 =item $PERL5OPT environment variable
@@ -903,6 +854,8 @@ CGI script to do bad things?
 =item More precise warnings
 
 =item Deprecated: Inherited C<AUTOLOAD> for non-methods
+
+=item Previously deprecated %OVERLOAD is no longer usable
 
 =item Subroutine arguments created only when they're modified
 
@@ -958,7 +911,7 @@ LIST, READLINE this, GETC this, DESTROY this
 
 =item Malloc enhancements
 
--DDEBUGGING_MSTATS, -DEMERGENCY_SBRK, -DPACK_MALLOC, -DTWO_POT_OPTIMIZE
+-DDEBUGGING_MSTATS, -DPERL_EMERGENCY_SBRK, -DPACK_MALLOC, -DTWO_POT_OPTIMIZE
 
 =item Miscellaneous efficiency enhancements
 
@@ -1241,8 +1194,8 @@ B<-T>, B<-u>, B<-U>, B<-v>, B<-V>, B<-V:>I<name>, B<-w>, B<-x> I<directory>
 
 =item ENVIRONMENT
 
-HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLLIB, PERL5DB,
-PERL_DEBUG_MSTATS, PERL_DESTRUCT_LEVEL
+HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLLIB, PERL5DB, PERL5SHELL
+(specific to WIN32 port), PERL_DEBUG_MSTATS, PERL_DESTRUCT_LEVEL
 
 =head2 perlfunc - Perl builtin functions
 
@@ -2194,6 +2147,8 @@ program
 
 =back
 
+=item Embedding Perl under Win32
+
 =item MORAL
 
 =item AUTHOR
@@ -2407,6 +2362,8 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 =item Magic Virtual Tables
 
 =item Finding Magic
+
+=item Understanding the Magic of Tied Hashes and Arrays
 
 =back
 
@@ -3518,6 +3475,8 @@ For static extensions, For dynamic extensions, For dynamic extensions
 
 =item VMS implementation
 
+=item Win32 implementation
+
 =back
 
 =item SEE ALSO
@@ -3609,9 +3568,10 @@ ExtUtils::MakeMaker
 
 =item DESCRIPTION
 
-catfile, static_lib (o), dynamic_lib (o), canonpath, perl_script,
-pm_to_blib, test_via_harness (o), tool_autosplit (override), tools_other
-(o), manifypods (o), dist_ci (o), dist_core (o), pasthru (o)
+catfile, constants (o), static_lib (o), dynamic_bs (o), dynamic_lib (o),
+canonpath, perl_script, pm_to_blib, test_via_harness (o), tool_autosplit
+(override), tools_other (o), xs_o (o), top_targets (o), manifypods (o),
+dist_ci (o), dist_core (o), pasthru (o)
 
 =head2 ExtUtils::MakeMaker - create an extension Makefile
 
@@ -3785,6 +3745,22 @@ rmscopy($from,$to[,$date_flag])
 =item RETURN
 
 =item AUTHOR
+
+=head2 File::DosGlob - DOS like globbing and then some
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXPORTS (by request only)
+
+=item BUGS
+
+=item AUTHOR
+
+=item HISTORY
+
+=item SEE ALSO
 
 =head2 File::Find, find - traverse a file tree
 

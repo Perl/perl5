@@ -90,10 +90,8 @@ I32 key;
 		newmax = tmp - 1;
 		New(2,ary, newmax+1, SV*);
 		Copy(AvALLOC(av), ary, AvMAX(av)+1, SV*);
-		if (AvMAX(av) > 64 && !nice_chunk) {
-		    nice_chunk = (char*)AvALLOC(av);
-		    nice_chunk_size = (AvMAX(av) + 1) * sizeof(SV*);
-		}
+		if (AvMAX(av) > 64)
+		    offer_nice_chunk(AvALLOC(av), (AvMAX(av)+1) * sizeof(SV*));
 		else
 		    Safefree(AvALLOC(av));
 		AvALLOC(av) = ary;
@@ -258,17 +256,19 @@ register SV **strp;
 
     av = (AV*)NEWSV(8,0);
     sv_upgrade((SV *) av,SVt_PVAV);
-    New(4,ary,size+1,SV*);
-    AvALLOC(av) = ary;
     AvFLAGS(av) = AVf_REAL;
-    SvPVX(av) = (char*)ary;
-    AvFILL(av) = size - 1;
-    AvMAX(av) = size - 1;
-    for (i = 0; i < size; i++) {
-	assert (*strp);
-	ary[i] = NEWSV(7,0);
-	sv_setsv(ary[i], *strp);
-	strp++;
+    if (size) {		/* `defined' was returning undef for size==0 anyway. */
+	New(4,ary,size,SV*);
+	AvALLOC(av) = ary;
+	SvPVX(av) = (char*)ary;
+	AvFILL(av) = size - 1;
+	AvMAX(av) = size - 1;
+	for (i = 0; i < size; i++) {
+	    assert (*strp);
+	    ary[i] = NEWSV(7,0);
+	    sv_setsv(ary[i], *strp);
+	    strp++;
+	}
     }
     return av;
 }

@@ -20,6 +20,7 @@ IO::Handle - supply object methods for I/O handles
         $fh->print("Some text\n");
     }
 
+    use IO::Handle '_IOLBF';
     $fh->setvbuf($buffer_var, _IOLBF, 1024);
 
     undef $fh;       # automatically closes the file if it's open
@@ -151,7 +152,8 @@ C<_IOLBF>, and C<_IONBF> for setvbuf()--except that the buffer parameter
 specifies a scalar variable to use as a buffer.  WARNING: A variable
 used as a buffer by C<setbuf> or C<setvbuf> must not be modified in any
 way until the IO::Handle is closed or C<setbuf> or C<setvbuf> is called
-again, or memory corruption may result!
+again, or memory corruption may result!  Note that you need to import
+the constants C<_IOFBF>, C<_IOLBF>, and C<_IONBF> explicitly.
 
 Lastly, there is a special method for working under B<-T> and setuid/gid
 scripts:

@@ -1,6 +1,9 @@
 #!./perl
 
-if (! -x ($groups = '/usr/ucb/groups') && ! -x ($groups = '/usr/bin/groups')) {
+if (! -x ($groups = '/usr/ucb/groups') &&
+    ! -x ($groups = '/usr/bin/groups') &&
+    ! -x ($groups = '/bin/groups')
+) {
     print "1..0\n";
     exit 0;
 }

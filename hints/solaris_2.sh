@@ -223,6 +223,18 @@ esac
 # as --version or ld --version might dump core.
 rm -f core
 
+if [ "X$usethreads" != "X" ]; then
+    ccflags="-D_REENTRANT -DUSE_THREADS $ccflags"
+    cppflags="-D_REENTRANT -DUSE_THREADS $cppflags"
+    # -lpthread needs to come before -lc but after other libraries such
+    # as -lgdbm and such like. We assume here that -lc is present in
+    # libswanted. If that fails to be true in future, then this can be
+    # changed to add pthread to the very end of libswanted.
+    set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
+    shift
+    libswanted="$*"
+fi
+
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'
 

@@ -59,6 +59,7 @@ formtarget
 gensym
 in_eval
 incgv
+initav
 inplace
 last_in_gv
 lastfd
@@ -86,10 +87,6 @@ minus_l
 minus_n
 minus_p
 multiline
-mystack_base
-mystack_mark
-mystack_max
-mystack_sp
 mystrk
 nrs
 ofmt
@@ -110,7 +107,6 @@ perl_destruct_level
 preambled
 preambleav
 preprocess
-restartav
 restartop
 rightgv
 rs

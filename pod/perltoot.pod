@@ -89,7 +89,7 @@ the same name as the class as the constructor.
 =head2 Object Representation
 
 By far the most common mechanism used in Perl to represent a Pascal
-record, a C struct, or a C++ class an anonymous hash.  That's because a
+record, a C struct, or a C++ class is an anonymous hash.  That's because a
 hash has an arbitrary number of data fields, each conveniently accessed by
 an arbitrary name of your own devising.
 
@@ -799,7 +799,7 @@ base class.  If the original base class has been designed properly,
 then the new derived class can be used as a drop-in replacement for the
 old one.  This means you should be able to write a program like this:
 
-    use Employee
+    use Employee;
     my $empl = Employee->new();
     $empl->name("Jason");
     $empl->age(23);

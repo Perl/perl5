@@ -23,7 +23,7 @@ L<perlfunc/eval>.
 
 Some of these messages are generic.  Spots that vary are denoted with a %s,
 just as in a printf format.  Note that some messages start with a %s!
-The symbols C<"%-?@> sort before the letters, while C<[> and C<\> sort after.
+The symbols C<"%(-?@> sort before the letters, while C<[> and C<\> sort after.
 
 =over 4
 
@@ -143,6 +143,12 @@ Perl yourself.
 instead of Perl.  Check the #! line, or manually feed your script
 into Perl yourself.
 
+=item         (Missing semicolon on previous line?)
+
+(S) This is an educated guess made in conjunction with the message "%s
+found where operator expected".  Don't automatically put a semicolon on
+the previous line just because you saw this message.
+
 =item B<-P> not allowed for setuid/setgid script
 
 (F) The script would have to be opened by the C preprocessor by name,
@@ -152,6 +158,12 @@ which provides a race condition that breaks security.
 
 (F) Perl can't peek at the stdio buffer of filehandles when it doesn't
 know about your kind of stdio.  You'll have to use a filename instead.
+
+=item C<-p> destination: %s
+
+(F) An error occurred during the implicit output invoked by the C<-p>
+command-line switch.  (This output goes to STDOUT unless you've
+redirected it with select().)
 
 =item 500 Server error
 
@@ -265,6 +277,15 @@ could indicate that SvREFCNT_dec() was called too many times, or that
 SvREFCNT_inc() was called too few times, or that the SV was mortalized
 when it shouldn't have been, or that memory has been corrupted.
 
+=item Attempt to pack pointer to temporary value
+
+(W) You tried to pass a temporary value (like the result of a
+function, or a computed expression) to the "p" pack() template.  This
+means the result contains a pointer to a location that could become
+invalid anytime, even before the end of the current statement.  Use
+literals or global values as arguments to the "p" pack() template to
+avoid this warning.
+
 =item Attempt to use reference as lvalue in substr
 
 (W) You supplied a reference as the first argument to substr() used
@@ -373,6 +394,11 @@ exited by calling exit.
 like a block, except that it isn't a proper block.  This usually
 occurs if you tried to jump out of a sort() block or subroutine, which
 is a no-no.  See L<perlfunc/goto>.
+
+=item Can't "goto" into the middle of a foreach loop
+
+(F) A "goto" statement was executed to jump into the middle of a
+foreach loop.  You can't get there from here.  See L<perlfunc/goto>.
 
 =item Can't "last" outside a block
 
@@ -543,8 +569,19 @@ mention "perl" on the #! line somewhere.
 
 =item Can't execute %s
 
+(F) You used the B<-S> switch, but the copies of the script to execute found
+in the PATH did not have correct permissions.
+
+=item Can't find %s on PATH, '.' not in PATH
+
 (F) You used the B<-S> switch, but the script to execute could not be found
-in the PATH, or at least not with the correct permissions.
+in the PATH, or at least not with the correct permissions.  The script
+exists in the current directory, but PATH prohibits running it.
+
+=item Can't find %s on PATH
+
+(F) You used the B<-S> switch, but the script to execute could not be found
+in the PATH.
 
 =item Can't find label %s
 
@@ -597,12 +634,12 @@ call for another.  It can't manufacture one out of whole cloth.  In general
 you should be calling it out of only an AUTOLOAD routine anyway.  See
 L<perlfunc/goto>.
 
-=item Can't localize a reference
+=item Can't localize through a reference
 
-(F) You said something like C<local $$ref>, which is not allowed because
-the compiler can't determine whether $ref will end up pointing to anything
-with a symbol table entry, and a symbol table entry is necessary to
-do a local.
+(F) You said something like C<local $$ref>, which Perl can't currently
+handle, because when it goes to restore the old value of whatever $ref
+pointed to after the scope of the local() is finished, it can't be
+sure that $ref will still be a reference.  
 
 =item Can't localize lexical variable %s
 
@@ -610,6 +647,13 @@ do a local.
 lexical variable using "my".  This is not allowed.  If you want to
 localize a package variable of the same name, qualify it with the
 package name.
+
+=item Can't locate auto/%s.al in @INC
+
+(F) A function (or method) was called in a package which allows autoload,
+but there is no function to autoload.  Most probable causes are a misprint
+in a function/method name or a failure to C<AutoSplit> the file, say, by
+doing C<make install>.
 
 =item Can't locate %s in @INC
 
@@ -629,6 +673,10 @@ method, nor does any of its base classes.  See L<perlobj>.
 
 (W) The @ISA array contained the name of another package that doesn't seem
 to exist.
+
+=item Can't make list assignment to \%ENV on this system
+
+(F) List assignment to %ENV is not supported on some systems, notably VMS.
 
 =item Can't mktemp()
 
@@ -652,8 +700,11 @@ buffer.
 
 =item Can't open %s: %s
 
-(S) An inplace edit couldn't open the original file for the indicated reason.
-Usually this is because you don't have read permission for the file.
+(S) The implicit opening of a file through use of the C<E<lt>E<gt>>
+filehandle, either implicitly under the C<-n> or C<-p> command-line
+switches, or explicitly, failed for the indicated reason.  Usually this
+is because you don't have read permission for a file which you named
+on the command line.
 
 =item Can't open bidirectional pipe
 
@@ -893,7 +944,7 @@ a valid magic number.
 =item Deep recursion on subroutine "%s"
 
 (W) This subroutine has called itself (directly or indirectly) 100
-times than it has returned.  This probably indicates an infinite
+times more than it has returned.  This probably indicates an infinite
 recursion, unless you're writing strange benchmark programs, in which
 case it indicates something else.
 
@@ -1337,12 +1388,6 @@ found where operator expected".  Often the missing operator is a comma.
 (F) The lexer counted more opening curly brackets (braces) than closing ones.
 As a general rule, you'll find it's missing near the place you were last
 editing.
-
-=item Missing semicolon on previous line?
-
-(S) This is an educated guess made in conjunction with the message "%s
-found where operator expected".  Don't automatically put a semicolon on
-the previous line just because you saw this message.
 
 =item Modification of a read-only value attempted
 
@@ -2066,6 +2111,10 @@ or possibly some other missing operator, such as a comma.
 (W) The filehandle you're sending to got itself closed sometime before now.
 Check your logic flow.
 
+=item Sequence (? incomplete
+(F) A regular expression ended with an incomplete extension (?.
+See L<perlre>.
+
 =item Sequence (?#... not terminated
 
 (F) A regular expression comment must be terminated by a closing
@@ -2120,7 +2169,7 @@ think so.
 
 =item setruid() not implemented
 
-(F) You tried to assign to C<$<lt>>, and your operating system doesn't support
+(F) You tried to assign to C<$E<lt>>, and your operating system doesn't support
 the setruid() system call (or equivalent), or at least Configure didn't
 think so.
 
@@ -2211,9 +2260,11 @@ construct.  Remember that bracketing delimiters count nesting level.
 
 =item substr outside of string
 
-(W) You tried to reference a substr() that pointed outside of a string.
-That is, the absolute value of the offset was larger than the length of
-the string.  See L<perlfunc/substr>.
+(S),(W) You tried to reference a substr() that pointed outside of a
+string.  That is, the absolute value of the offset was larger than the
+length of the string.  See L<perlfunc/substr>.  This warning is
+mandatory if substr is used in an lvalue context (as the left hand side
+of an assignment or as a subroutine argument for example).
 
 =item suidperl is no longer needed since %s
 
@@ -2485,7 +2536,7 @@ script, a binary program, or a directory as a Perl program.
 (F) You specified a signal name to the kill() function that was not recognized.
 Say C<kill -l> in your shell to see the valid signal names on your system.
 
-=item Unrecognized switch: -%s
+=item Unrecognized switch: -%s  (-h will show valid options)
 
 (F) You specified an illegal option to Perl.  Don't do that.
 (If you think you didn't do that, check the #! line to see if it's

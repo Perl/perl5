@@ -2,10 +2,10 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$Version = $VERSION = "5.4002";
+$Version = $VERSION = "5.42";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.211 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.216 $, 10)) =~ s/\s+$//;
 
 
 
@@ -454,11 +454,17 @@ sub ExtUtils::MakeMaker::new {
 
     if (! $self->{PERL_SRC} ) {
 	my($pthinks) = $self->canonpath($INC{'Config.pm'});
+	my($cthinks) = $self->catfile($Config{'archlibexp'},'Config.pm');
 	$pthinks = VMS::Filespec::vmsify($pthinks) if $Is_VMS;
-	if ($pthinks ne $self->catfile($Config{archlibexp},'Config.pm')){
-            print "Have $pthinks expected ",$self->catfile($Config{archlibexp},'Config.pm'),"\n";
-	    $pthinks =~ s!/Config\.pm$!!;
-	    $pthinks =~ s!.*/!!;
+	if ($pthinks ne $cthinks &&
+	    !($Is_Win32 and lc($pthinks) eq lc($cthinks))) {
+            print "Have $pthinks expected $cthinks\n";
+	    if ($Is_Win32) {
+		$pthinks =~ s![/\\]Config\.pm$!!i; $pthinks =~ s!.*[/\\]!!;
+	    }
+	    else {
+		$pthinks =~ s!/Config\.pm$!!; $pthinks =~ s!.*/!!;
+	    }
 	    print STDOUT <<END;
 Your perl and your Config.pm seem to have different ideas about the architecture
 they are running on.
@@ -1151,6 +1157,11 @@ Ref to array of *.c file names. Initialised from a directory scan
 and the values portion of the XS attribute hash. This is not
 currently used by MakeMaker but may be handy in Makefile.PLs.
 
+=item CCFLAGS
+
+String that will be included in the compiler call command line between
+the arguments INC and OPTIMIZE.
+
 =item CONFIG
 
 Arrayref. E.g. [qw(archname manext)] defines ARCHNAME & MANEXT from
@@ -1250,6 +1261,10 @@ Perl binary able to run this extension.
 =item H
 
 Ref to array of *.h file names. Similar to C.
+
+=item IMPORTS
+
+IMPORTS is only used on OS/2.
 
 =item INC
 
@@ -1558,15 +1573,17 @@ routine requires that the file named by VERSION_FROM contains one
 single line to compute the version number. The first line in the file
 that contains the regular expression
 
-    /\$(([\w\:\']*)\bVERSION)\b.*\=/
+    /([\$*])(([\w\:\']*)\bVERSION)\b.*\=/
 
 will be evaluated with eval() and the value of the named variable
 B<after> the eval() will be assigned to the VERSION attribute of the
 MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
-    ( $VERSION ) = '$Revision: 1.211 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    *VERSION = \'1.01';
+    ( $VERSION ) = '$Revision: 1.216 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
+    *FOO::VERSION = \'1.11';
 
 but these will fail:
 
@@ -1574,9 +1591,16 @@ but these will fail:
     local $VERSION = '1.02';
     local $FOO::VERSION = '1.30';
 
-The file named in VERSION_FROM is added as a dependency to Makefile to
-guarantee, that the Makefile contains the correct VERSION macro after
-a change of the file.
+The file named in VERSION_FROM is not added as a dependency to
+Makefile. This is not really correct, but it would be a major pain
+during development to have to rewrite the Makefile for any smallish
+change in that file. If you want to make sure that the Makefile
+contains the correct VERSION macro after any change of the file, you
+would have to do something like
+
+    depend => { Makefile => '$(VERSION_FROM)' }
+
+See attribute C<depend> below.
 
 =item XS
 

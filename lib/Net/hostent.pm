@@ -76,9 +76,9 @@ This module's default exports override the core gethostbyname() and
 gethostbyaddr() functions, replacing them with versions that return
 "Net::hostent" objects.  This object has methods that return the similarly
 named structure field name from the C's hostent structure from F<netdb.h>;
-namely name, aliases, addrtype, length, and addresses.  The aliases and
-addresses methods return array reference, the rest scalars.  The addr
-method is equivalent to the zeroth element in the addresses array
+namely name, aliases, addrtype, length, and addr_list.  The aliases and
+addr_list methods return array reference, the rest scalars.  The addr
+method is equivalent to the zeroth element in the addr_list array
 reference.
 
 You may also import all the structure fields directly into your namespace

@@ -41,7 +41,14 @@ true)
 		;;
 	aix*)
 		shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
-		shrpldflags="$shrpldflags -b noentry $ldflags $libs $cryptlib"
+		case "$osvers" in
+		3*)
+			shrpldflags="$shrpldflags -e _nostart $ldflags $libs $cryptlib"
+			;;
+		*)
+			shrpldflags="$shrpldflags -b noentry $ldflags $libs $cryptlib"
+			;;
+		esac
 		aixinstdir=`pwd | sed 's/\/UU$//'`
 		linklibperl="-L $archlibexp/CORE -L $aixinstdir -lperl"
 		;;
@@ -176,7 +183,7 @@ addedbyconf = UU $(shextract) $(plextract) pstruct
 h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
 h3 = opcode.h patchlevel.h perl.h perly.h pp.h proto.h regcomp.h
-h4 = regexp.h scope.h sv.h unixish.h util.h perlio.h
+h4 = regexp.h scope.h sv.h unixish.h util.h perlio.h thread.h
 h = $(h1) $(h2) $(h3) $(h4)
 
 c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c
@@ -352,9 +359,18 @@ install.perl:	all installperl
 install.man:	all installman
 	./perl installman
 
-# Not implemented yet.
-#install.html:	all installhtml
-#	./perl installhtml
+# XXX Experimental. Hardwired values, but useful for testing.
+# Eventually Configure could ask for some of these values.
+install.html: all installhtml
+	./perl installhtml                   \
+      --podroot=. --podpath=. --recurse  \
+      --htmldir=$(privlib)/html     \
+      --htmlroot=$(privlib)/html    \
+      --splithead=pod/perlipc     \
+      --splititem=pod/perlfunc    \
+      --libpods=perlfunc:perlguts:perlvar:perlrun:perlop \
+      --verbose
+
 
 # I now supply perly.c with the kits, so the following section is
 # used only if you force byacc to run by saying
@@ -468,9 +484,9 @@ lint: perly.c $(c)
 
 # Need to unset during recursion to go out of loop
 
-MAKEDEPEND = makedepend
+MAKEDEPEND = Makefile makedepend
 
-$(FIRSTMAKEFILE):	Makefile $(MAKEDEPEND)
+$(FIRSTMAKEFILE):	$(MAKEDEPEND)
 	$(MAKE) depend MAKEDEPEND=
 
 config.h: config_h.SH config.sh
@@ -489,8 +505,15 @@ depend: makedepend
 makedepend: makedepend.SH config.sh
 	sh ./makedepend.SH
 
-check test: miniperl perl preplibrary $(dynamic_ext)
-	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT)) && ./perl TEST </dev/tty
+test-prep: miniperl perl preplibrary $(dynamic_ext)
+	cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT))
+
+test check: test-prep
+	cd t && ./perl TEST </dev/tty
+
+# For testing without a tty or controling terminal. See t/op/stat.t
+test-notty: test-prep
+	cd t && PERL_SKIP_TTY_TEST=1 ./perl TEST
 
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.
@@ -499,6 +522,11 @@ minitest: miniperl
 	@echo "to build lib/Config.pm."
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
 		&& ./perl TEST base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t </dev/tty
+
+# handy way to run perlbug -ok without having to install and run the
+# installed perlbug. We don't re-run the tests here - we trust the user.
+ok:
+	./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)'
 
 clist:	$(c)
 	echo $(c) | tr ' ' '\012' >.clist

@@ -9,12 +9,13 @@ perlwin32 - Perl under Win32
 =head1 SYNOPSIS
 
 These are instructions for building Perl under Windows NT (versions
-3.51 or 4.0), using Visual C++ (versions 2.0 through 5.0).  Currently,
-this port may also build under Windows95, but you can expect problems
-stemming from the unmentionable command shell that infests that
-platform.  Note this caveat is only about B<building> perl.  Once
-built, you should be able to B<use> it on either Win32 platform (modulo
-the problems arising from the inferior command shell).
+3.51 or 4.0), using Visual C++ (versions 2.0 through 5.0) or Borland
+C++ (version 5.x).  Currently, this port may also build under Windows95,
+but you can expect problems stemming from the unmentionable command
+shell that infests that platform.  Note this caveat is only about
+B<building> perl.  Once built, you should be able to B<use> it on
+either Win32 platform (modulo the problems arising from the inferior
+command shell).
 
 =head1 DESCRIPTION
 
@@ -23,7 +24,7 @@ found in the top-level directory where the Perl distribution
 was extracted.  Make sure you read and understand the terms under
 which this software is being distributed.
 
-Also make sure you read the L<BUGS AND CAVEATS> section below for the
+Also make sure you read L<BUGS AND CAVEATS> below for the
 known limitations of this port.
 
 The INSTALL file in the perl top-level has much information that is
@@ -33,8 +34,8 @@ particular, you can safely ignore any information that talks about
 
 You may also want to look at two other options for building
 a perl that will work on Windows NT:  the README.cygwin32 and
-README.os2 files, which give a different set of rules to build a
-Perl that will work on Win32 platforms.  Those two methods will
+README.os2 files, which each give a different set of rules to build
+a Perl that will work on Win32 platforms.  Those two methods will
 probably enable you to build a more Unix-compatible perl, but you
 will also need to download and use various other build-time and
 run-time support software described in those files.
@@ -42,9 +43,10 @@ run-time support software described in those files.
 This set of instructions is meant to describe a so-called "native"
 port of Perl to Win32 platforms.  The resulting Perl requires no
 additional software to run (other than what came with your operating
-system).  Currently, this port is only capable of using Microsoft's
-Visual C++ compiler.  The ultimate goal is to support the other major
-compilers that can generally be used to build Win32 applications.
+system).  Currently, this port is capable of using either the
+Microsoft Visual C++ compiler, or the Borland C++ compiler.  The
+ultimate goal is to support the other major compilers that can
+generally be used to build Win32 applications.
 
 This port currently supports MakeMaker (the set of modules that
 is used to build extensions to perl).  Therefore, you should be
@@ -55,7 +57,7 @@ See L<Usage Hints> below for general hints about this.
 
 =over 4
 
-=item *
+=item Command Shell
 
 Use the default "cmd" shell that comes with NT.  In particular, do
 *not* use the 4DOS/NT shell.  The Makefile has commands that are not
@@ -63,14 +65,38 @@ compatible with that shell.  The Makefile also has known
 incompatibilites with the default shell that comes with Windows95,
 so building under Windows95 should be considered "unsupported".
 
-=item *
+=item Borland C++
 
+If you are using the Borland compiler, you will need dmake, a freely
+available make that has very nice macro features and parallelability.
+(The make that Borland supplies is seriously crippled, and will not
+work for MakeMaker builds--if you *have* to bug someone about this,
+I suggest you bug Borland to fix their make :)
+
+A port of dmake for win32 platforms is available from
+"http://www-personal.umich.edu/~gsar/dmake-4.0-win32.tar.gz".
+Fetch and install dmake somewhere on your path.  Also make sure you
+copy the Borland dmake.ini file to some location where you keep
+*.ini files.  If you use the binary that comes with the above port, you
+will need to set INIT in your environment to the directory where you
+put the dmake.ini file.
+
+=item Microsoft Visual C++
+
+The NMAKE that comes with Visual C++ will suffice for building.
 If you did not choose to always initialize the Visual C++ compilation
 environment variables when you installed Visual C++ on your system, you
 will need to run the VCVARS32.BAT file usually found somewhere like
 C:\MSDEV4.2\BIN.  This will set your build environment.
 
-=item *
+You can also use dmake to build using Visual C++, provided: you
+copied the dmake.ini for Visual C++; set INIT to point to the
+directory where you put it, as above; and edit win32/config.vc
+and change "make=nmake" to "make=dmake".  The last step is only
+essential if you want to use dmake to be your default make for
+building extensions using MakeMaker.
+
+=item Permissions
 
 Depending on how you extracted the distribution, you have to make sure
 some of the files are writable by you.  The easiest way to make sure of
@@ -92,56 +118,76 @@ but it doesn't hurt to do so.
 
 Make sure you are in the "win32" subdirectory under the perl toplevel.
 This directory contains a "Makefile" that will work with
-versions of NMAKE that come with Visual C++ ver. 2.0 and above.
+versions of NMAKE that come with Visual C++ ver. 2.0 and above, and
+a dmake "makefile.mk" that will work for both Borland and Visual C++
+builds.  The defaults in the dmake makefile are setup to build using the
+Borland compiler.
 
 =item *
 
-Edit the Makefile and change the values of INST_DRV and INST_TOP
-if you want perl to be installed in a location other than "C:\PERL".
+Edit the Makefile (or makefile.mk, if using dmake) and change the values
+of INST_DRV and INST_TOP if you want perl to be installed in a location
+other than "C:\PERL".  If you are using Visual C++ ver. 2.0, uncomment
+the line that sets "CCTYPE=MSVC20".
 
-If you want to build a perl capable of running on the Windows95
-platform, you will have to uncomment the line that sets "RUNTIME=-MT".
-(The default settings use the Microsoft-recommended -MD option for
-compiling, which uses the DLL version of the C RunTime Library.  There
-currently exists a bug in the Microsoft CRTL that causes failure of
-the socket calls only on the Windows95 platform.  This bug cannot be
-worked around if the DLL version of the CRTL is used, which is why you
-need to enable the -MT flag.)  Perl compiled with -MT can be used on
-both Windows NT and Windows95.
-
-If you are using Visual C++ ver. 2.0, uncomment the line that
-sets "CCTYPE=MSVC20".
+You will also have to make sure CCHOME points to wherever you installed
+your compiler.
 
 =item *
 
-Type "nmake".
+Type "nmake" (or "dmake" if you are using that make).
 
 This should build everything.  Specifically, it will create perl.exe,
 perl.dll, and perlglob.exe at the perl toplevel, and various other
 extension dll's under the lib\auto directory.  If the build fails for
 any reason, make sure you have done the previous steps correctly.
 
+The build process may produce "harmless" compiler warnings (more or
+less copiously, depending on how picky your compiler gets).  The
+maintainers are aware of these warnings, thankyouverymuch. :)
+
+When building using Visual C++, a perl95.exe will also get built.  This
+executable is only needed on Windows95, and should be used instead of
+perl.exe, and then only if you want sockets to work properly on Windows95.
+This is necessitated by a bug in the Microsoft C Runtime that cannot be
+worked around in the "normal" perl.exe.  Again, if this bugs you, please
+bug Microsoft :). perl95.exe gets built with its own private copy of the
+C Runtime that is not accessible to extensions (which see the DLL version
+of the CRT).  Be aware, therefore, that this perl95.exe will have
+esoteric problems with extensions like perl/Tk that themselves use the C
+Runtime heavily, or want to free() pointers malloc()-ed by perl.
+
+You can avoid the perl95.exe problems completely if you use Borland
+C++ for building perl (perl95.exe is not needed and will not be built
+in that case).
+
 =back
 
 =head2 Testing
 
-Type "nmake test".  This will run most of the tests from the
-testsuite (many tests will be skipped, and but no test should fail).
+Type "nmake test" (or "dmake test").  This will run most of the tests from
+the testsuite (many tests will be skipped, and but no test should fail).
 
 If some tests do fail, it may be because you are using a different command
 shell than the native "cmd.exe".
 
-Please report any failures as described under L<BUGS AND CAVEATS>.
+If you used the Borland compiler, you may see a failure in op/taint.t
+arising from the inability to find the Borland Runtime DLLs on the system
+default path.  You will need to copy the DLLs reported by the messages
+from where Borland chose to install it, into the Windows system directory
+(usually somewhere like C:\WINNT\SYSTEM32), and rerun the test.
+
+Please report any other failures as described under L<BUGS AND CAVEATS>.
 
 =head2 Installation
 
-Type "nmake install".  This will put the newly built perl and the
-libraries under "C:\perl" (actually whatever you set C<INST_TOP> to
-in the Makefile).  It will also install the pod documentation under
-C<$INST_TOP\lib\pod> and HTML versions of the same under
-C<$INST_TOP\lib\pod\html>.  To use the Perl you just installed, set your
-PATH environment variable to "C:\perl\bin" (or C<$INST_TOP\bin>, if you
-changed the default as above).
+Type "nmake install" (or "dmake install").  This will put the newly
+built perl and the libraries under "C:\perl" (actually whatever you set
+C<INST_TOP> to in the Makefile).  It will also install the pod
+documentation under C<$INST_TOP\lib\pod> and HTML versions of the same
+under C<$INST_TOP\lib\pod\html>.  To use the Perl you just installed,
+set your PATH environment variable to "C:\perl\bin" (or C<$INST_TOP\bin>,
+if you changed the default as above).
 
 =head2 Usage Hints
 
@@ -160,6 +206,28 @@ variables you can set in the perlrun podpage.
 
 Sometime in the future, some of the configuration information
 for perl will be moved into the Windows registry.
+
+=item File Globbing
+
+By default, perl spawns an external program to do file globbing.
+The install process installs both a perlglob.exe and a perlglob.bat
+that perl can use for this purpose.  Note that with the default
+installation, perlglob.exe will be found by the system before
+perlglob.bat.
+
+perlglob.exe relies on the argv expansion done by the C Runtime of
+the particular compiler you used, and therefore behaves very
+differently depending on the Runtime used to build it.  To preserve
+compatiblity, perlglob.bat (a perl script/module that can be
+used portably) is installed.  Besides being portable, perlglob.bat
+also offers enhanced globbing functionality.
+
+If you want perl to use perlglob.bat instead of perlglob.exe, just
+delete perlglob.exe from the install location (or move it somewhere
+perl cannot find).  Using File::DosGlob.pm (which is the same
+as perlglob.bat) to override the internal CORE::glob() works about 10
+times faster than spawing perlglob.exe, and you should take this
+approach when writing new modules.  See File::DosGlob for details.
 
 =item Using perl from the command line
 
@@ -213,19 +281,11 @@ This prints "bar" and writes "foo" into the file "blurch":
 
     perl -e "print 'foo'; print STDERR 'bar'" 1> blurch
 
-This prints "foo" and writes "bar" to the file "blurch":
-
-    perl -e "print 'foo'; print STDERR 'bar'" 2> blurch
-
 This pipes "foo" to the "less" pager and prints "bar" on the console:
 
     perl -e "print 'foo'; print STDERR 'bar'" | less
 
 This pipes "foo\nbar\n" to the less pager:
-
-    perl -le "print 'foo'; print STDERR 'bar'" |& less
-
-This does the same thing as the above:
 
     perl -le "print 'foo'; print STDERR 'bar'" 2>&1 | less
 
@@ -234,7 +294,7 @@ This pipes "foo" to the pager and writes "bar" in the file "blurch":
     perl -e "print 'foo'; print STDERR 'bar'" 2> blurch | less
 
 
-Discovering the usage of the "command.com" shell on Windows95
+Discovering the usefulness of the "command.com" shell on Windows95
 is left as an exercise to the reader :)
 
 =item Building Extensions
@@ -247,20 +307,19 @@ Most extensions (whether they require a C compiler or not) can
 be built, tested and installed with the standard mantra:
 
     perl Makefile.PL
-    nmake
-    nmake test
-    nmake install
+    $MAKE
+    $MAKE test
+    $MAKE install
 
-Note the NMAKE that comes with Visual C++ is required.  Some
-extensions may not provide a testsuite (so "nmake test"
-may not do anything, or fail), but most serious ones do.
+where $MAKE stands for NMAKE or DMAKE.  Some extensions may not
+provide a testsuite (so "$MAKE test" may not do anything, or fail),
+but most serious ones do.
 
-If a module implements XSUBs, you will need a C compiler (Visual C++
-versions 2.0 and above are currently supported).  You must make sure
-you have set up the environment for the compiler for command-line
-compilation.
+If a module implements XSUBs, you will need one of the supported
+C compilers.  You must make sure you have set up the environment for
+the compiler for command-line compilation.
 
-If a module does not build for some reason, carefully look at
+If a module does not build for some reason, look carefully for
 why it failed, and report problems to the module author.  If
 it looks like the extension building support is at fault, report
 that with full details of how the build failed using the perlbug
@@ -282,7 +341,7 @@ all of the Activeware extensions and most other Win32 extensions from
 CPAN in source form, along with many added bugfixes, and with MakeMaker
 support.  This bundle is available at:
 
-   http://www.perl.com/CPAN/authors/id/GSAR/libwin32-0.06.tar.gz
+   http://www.perl.com/CPAN/authors/id/GSAR/libwin32-0.08.tar.gz
 
 See the README in that distribution for building and installation
 instructions.  Look for later versions that may be available at the
@@ -292,6 +351,76 @@ It is expected that authors of Win32 specific extensions will begin
 distributing their work in MakeMaker compatible form subsequent to
 the 5.004 release of perl, at which point the need for a dedicated
 bundle such as the above should diminish.
+
+=item Running Perl Scripts
+
+Perl scripts on UNIX use the "#!" (a.k.a "shebang") line to
+indicate to the OS that it should execute the file using perl.
+Win32 has no comparable means to indicate arbitrary files are
+executables.
+
+Instead, all available methods to execute plain text files on
+Win32 rely on the file "extension".  There are three methods
+to use this to execute perl scripts:
+
+=over 8
+
+=item 1
+
+There is a facility called "file extension associations" that will
+work in Windows NT 4.0.  This can be manipulated via the two
+commands "assoc" and "ftype" that come standard with Windows NT
+4.0.  Type "ftype /?" for a complete example of how to set this
+up for perl scripts (Say what?  You thought Windows NT wasn't
+perl-ready? :).
+
+=item 2
+
+Since file associations don't work everywhere, and there are
+reportedly bugs with file associations where it does work, the
+old method of wrapping the perl script to make it look like a
+regular batch file to the OS, may be used.  The install process
+makes available the "pl2bat.bat" script which can be used to wrap
+perl scripts into batch files.  For example:
+
+	pl2bat foo.pl
+
+will create the file "FOO.BAT".  Note "pl2bat" strips any
+.pl suffix and adds a .bat suffix to the generated file.
+
+If you use the 4DOS/NT or similar command shell, note that
+"pl2bat" uses the "%*" variable in the generated batch file to
+refer to all the command line arguments, so you may need to make
+sure that construct works in batch files.  As of this writing,
+4DOS/NT users will need a "ParameterChar = *" statement in their
+4NT.INI file, or will need to execute "setdos /p*" in the 4DOS/NT
+startup file to enable this to work.
+
+=item 3
+
+Using "pl2bat" has a few problems:  the file name gets changed,
+so scripts that rely on C<$0> to find what they must do may not
+run properly; running "pl2bat" replicates the contents of the
+original script, and so this process can be maintenance intensive
+if the originals get updated often.  A different approach that
+avoids both problems is possible.
+
+A script called "runperl.bat" is available that can be copied
+to any filename (along with the .bat suffix).  For example,
+if you call it "foo.bat", it will run the file "foo" when it is
+executed.  Since you can run batch files on Win32 platforms simply
+by typing the name (without the extension), this effectively
+runs the file "foo", when you type either "foo" or "foo.bat".
+With this method, "foo.bat" can even be in a different location
+than the file "foo", as long as "foo" is available somewhere on
+the PATH.  If your scripts are on a filesystem that allows symbolic
+links, you can even avoid copying "runperl.bat".
+
+Here's a diversion:  copy "runperl.bat" to "runperl", and type
+"runperl".  Explain the observed behavior, or lack thereof. :)
+Hint: .gnidnats llits er'uoy fi ,"lrepnur" eteled :tniH
+
+=back
 
 =item Miscellaneous Things
 
@@ -314,15 +443,25 @@ find a mailer on your system).
 
 =head1 BUGS AND CAVEATS
 
-This port has not been tested as extensively as we'd like, and
-therefore should be considered beta quality software.  You should
-expect changes in virtually all of these areas: build process,
-installation structure, supported utilities/modules, and supported
-perl functionality.  In particular, functionality specific to the
-Win32 environment may ultimately be supported as either core modules
-or extensions.  This means that you should be prepared to recompile
-extensions when binary incompatibilites arise due to changes in the
-internal structure of the code.
+This port should be considered beta quality software at the present
+time because some details are still in flux and there may be
+changes in any of these areas: build process, installation structure,
+supported utilities/modules, and supported perl functionality.
+In particular, functionality specific to the Win32 environment may
+ultimately be supported as either core modules or extensions.  The
+beta status implies, among other things, that you should be prepared
+to recompile extensions when binary incompatibilites arise due to
+changes in the internal structure of the code.
+
+An effort has been made to ensure that the DLLs produced by the two
+supported compilers are compatible with each other (despite the
+best efforts of the compiler vendors).  Extension binaries produced
+by one compiler should also coexist with a perl binary built by
+a different compiler.  In order to accomplish this, PERL.DLL provides
+a layer of runtime code that uses the C Runtime that perl was compiled
+with.  Extensions which include "perl.h" will transparently access
+the functions in this layer, thereby ensuring that both perl and
+extensions use the same runtime functions.
 
 If you have had prior exposure to Perl on Unix platforms, you will notice
 this port exhibits behavior different from what is documented.  Most of the
@@ -341,11 +480,16 @@ bogus.
 
 =item *
 
-The following functions are currently unavailable: C<fork()>, C<exec()>,
+The following functions are currently unavailable: C<fork()>,
 C<dump()>, C<chown()>, C<link()>, C<symlink()>, C<chroot()>,
 C<setpgrp()>, C<getpgrp()>, C<setpriority()>, C<getpriority()>,
-C<syscall()>, C<fcntl()>, C<flock()>.  This list is possibly very
-incomplete.
+C<syscall()>, C<fcntl()>.  This list is possibly very incomplete.
+
+=item *
+
+crypt() is not available due to silly export restrictions.  It may
+become available when the laws change.  Meanwhile, look in CPAN for
+extensions that provide it.
 
 =item *
 
@@ -377,16 +521,26 @@ returned values or effects may be bogus.
 
 =item *
 
-Signal handling may not behave as on Unix platforms.
+Signal handling may not behave as on Unix platforms (where it
+doesn't exactly "behave", either :).  For instance, calling C<die()>
+or C<exit()> from signal handlers will cause an exception, since most
+implementations of C<signal()> on Win32 are severely crippled.
+Thus, signals may work only for simple things like setting a flag
+variable in the handler.  Using signals under this port should
+currently be considered unsupported.
 
 =item *
 
 File globbing may not behave as on Unix platforms.  In particular,
-globbing does not understand wildcards in the pathname component,
-but only in the filename component.  In other words, something like
-"print <*/*.pl>" will not print all the perl scripts in all the
-subdirectories one level under the current one (like it does on
-UNIX platforms).
+if you don't use perlglob.bat for globbing, it will understand
+wildcards only in the filename component (and not in the pathname).
+In other words, something like "print <*/*.pl>" will not print all the
+perl scripts in all the subdirectories one level under the current one
+(like it does on UNIX platforms).  perlglob.exe is also dependent on
+the particular implementation of wildcard expansion in the vendor
+libraries used to build it (which varies wildly at the present time).
+Using perlglob.bat (or File::DosGlob) avoids these limitations, but
+still only provides DOS semantics (read "warts") for globbing.
 
 =back
 
@@ -398,13 +552,15 @@ by C<perl -V>.
 
 =over 4
 
-=item Gary Ng <F<71564.1743@CompuServe.COM>>
+Gary Ng E<lt>71564.1743@CompuServe.COME<gt>
 
-=item Gurusamy Sarathy <F<gsar@umich.edu>>
+Gurusamy Sarathy E<lt>gsar@umich.eduE<gt>
 
-=item Nick Ing-Simmons <F<nick@ni-s.u-net.com>>
+Nick Ing-Simmons E<lt>nick@ni-s.u-net.comE<gt>
 
 =back
+
+This document is maintained by Gurusamy Sarathy.
 
 =head1 SEE ALSO
 
@@ -419,6 +575,9 @@ at the time.
 Nick Ing-Simmons and Gurusamy Sarathy have made numerous and
 sundry hacks since then.
 
-Last updated: 15 May 1997
+Borland support was added in 5.004_01 (Gurusamy Sarathy).
+
+Last updated: 25 July 1997
 
 =cut
+

@@ -115,24 +115,17 @@ require DynaLoader;
 
 @ISA = qw(IO::Handle IO::Seekable Exporter DynaLoader);
 
-$VERSION = "1.0602";
+$VERSION = "1.06021";
 
 @EXPORT = @IO::Seekable::EXPORT;
 
-sub import {
-    my $pkg = shift;
-    my $callpkg = caller;
-    Exporter::export $pkg, $callpkg, @_;
-
-    #
-    # If the Fcntl extension is available,
-    #  export its constants for sysopen().
-    #
-    eval {
-	require Fcntl;
-	Exporter::export 'Fcntl', $callpkg, '/^O_/';
-    };
-}
+eval {
+    # Make all Fcntl O_XXX constants available for importing
+    require Fcntl;
+    my @O = grep /^O_/, @Fcntl::EXPORT;
+    Fcntl->import(@O);  # first we import what we want to export
+    push(@EXPORT, @O);
+};
 
 
 ################################################

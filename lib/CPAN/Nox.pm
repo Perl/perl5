@@ -2,8 +2,8 @@ BEGIN{$CPAN::Suppress_readline=1 unless defined $CPAN::term;}
 
 use CPAN;
 
-$CPAN::META->hasMD5(0);
-$CPAN::META->hasLWP(0);
+$CPAN::META->has_inst('MD5','no');
+$CPAN::META->has_inst('LWP','no');
 @EXPORT = @CPAN::EXPORT;
 
 *AUTOLOAD = \&CPAN::AUTOLOAD;

@@ -1,13 +1,25 @@
-#-----------------------------------------------------------------------#
-# NOTE! This module is deprecated (obsolete) after the Perl release     #
-# 5.003_06 as the functionality has been integrated into the Perl core. #
-#-----------------------------------------------------------------------#
-
 package I18N::Collate;
 
 =head1 NAME
 
 I18N::Collate - compare 8-bit scalar data according to the current locale
+
+  ***
+
+  WARNING: starting from the Perl version 5.003_06
+  the I18N::Collate interface for comparing 8-bit scalar data
+  according to the current locale
+
+	HAS BEEN DEPRECATED
+
+  That is, please do not use it anymore for any new applications
+  and please migrate the old applications away from it because its
+  functionality was integrated into the Perl core language in the
+  release 5.003_06.
+
+  See the perllocale manual page for further information.
+
+  ***
 
 =head1 SYNOPSIS
 
@@ -116,16 +128,18 @@ sub new {
       warn <<___EOD___;
 ***
 
-  WARNING: starting from the Perl version 5.003_06 the I18N::Collate
-  interface for comparing 8-bit scalar data according to the current locale
+  WARNING: starting from the Perl version 5.003_06
+  the I18N::Collate interface for comparing 8-bit scalar data
+  according to the current locale
 
 	HAS BEEN DEPRECATED
 
-  (that is, please do not use it anymore for any new applications and please
-  migrate the old applications away from it) because its functionality was
-  integrated into the Perl core language in the release 5.003_06.
+  That is, please do not use it anymore for any new applications
+  and please migrate the old applications away from it because its
+  functionality was integrated into the Perl core language in the
+  release 5.003_06.
 
-  See pod/perllocale.pod for further information.
+  See the perllocale manual page for further information.
 
 ***
 ___EOD___

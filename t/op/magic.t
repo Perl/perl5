@@ -19,10 +19,11 @@ sub ok {
     }
 }
 
-$Is_MSWin32 = ($^O eq 'MSWin32');
+$Is_MSWin32 = $^O eq 'MSWin32';
+$Is_VMS     = $^O eq 'VMS';
 $PERL = ($Is_MSWin32 ? '.\perl' : './perl');
 
-print "1..28\n";
+print "1..30\n";
 
 eval '$ENV{"foo"} = "hi there";';	# check that ENV is inited inside eval
 if ($Is_MSWin32) { ok 1, `cmd /x /c set foo` eq "foo=hi there\n"; }
@@ -45,9 +46,9 @@ else {
 
     $| = 1;		# command buffering
 
-    $SIG{"INT"} = "ok3"; kill "INT",$$;
-    $SIG{"INT"} = "IGNORE"; kill 2,$$; print "ok 4\n";
-    $SIG{"INT"} = "DEFAULT"; kill 2,$$; print "not ok\n";
+    $SIG{"INT"} = "ok3";     kill "INT",$$;
+    $SIG{"INT"} = "IGNORE";  kill "INT",$$; print "ok 4\n";
+    $SIG{"INT"} = "DEFAULT"; kill "INT",$$; print "not ok\n";
 
     sub ok3 {
 	if (($x = pop(@_)) eq "INT") {
@@ -105,24 +106,41 @@ ok 17, $@ eq "foo\n", $@;
 ok 18, $$ > 0, $$;
 
 # $^X and $0
-if ($Is_MSWin32) {
-    for (19 .. 25) { ok $_, 1 }
-}
-else {
-    if ($^O eq 'qnx' || $^O eq 'amigaos') {
+{
+    if ($^O eq 'qnx') {
 	chomp($wd = `pwd`);
     }
     else {
 	$wd = '.';
     }
+    my $perl = "$wd/perl";
+    my $headmaybe = '';
+    my $tailmaybe = '';
     $script = "$wd/show-shebang";
-    $s1 = $s2 = "\$^X is $wd/perl, \$0 is $script\n";
+    if ($Is_MSWin32) {
+	chomp($wd = `cd`);
+	$perl = "$wd\\perl.exe";
+	$script = "$wd\\show-shebang.bat";
+	$headmaybe = <<EOH ;
+\@rem ='
+\@echo off
+$perl -x \%0
+goto endofperl
+\@rem ';
+EOH
+	$tailmaybe = <<EOT ;
+
+__END__
+:endofperl
+EOT
+    }
+    $s1 = $s2 = "\$^X is $perl, \$0 is $script\n";
     if ($^O eq 'os2') {
 	# Started by ksh, which adds suffixes '.exe' and '.' to perl and script
 	$s2 = "\$^X is $wd/perl.exe, \$0 is $script.\n";
     }
     ok 19, open(SCRIPT, ">$script"), $!;
-    ok 20, print(SCRIPT <<EOB . <<'EOF'), $!;
+    ok 20, print(SCRIPT $headmaybe . <<EOB . <<'EOF' . $tailmaybe), $!;
 #!$wd/perl
 EOB
 print "\$^X is $^X, \$0 is $0\n";
@@ -131,10 +149,10 @@ EOF
     ok 22, chmod(0755, $script), $!;
     $_ = `$script`;
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
-    s{is perl}{is $wd/perl}; # for systems where $^X is only a basename
-    ok 23, $_ eq $s2, ":$_:!=:$s2:";
-    $_ = `$wd/perl $script`;
-    ok 24, $_ eq $s1, ":$_:!=:$s1: after `$wd/perl $script`";
+    s{is perl}{is $perl}; # for systems where $^X is only a basename
+    ok 23, ($Is_MSWin32 ? uc($_) eq uc($s2) : $_ eq $s2), ":$_:!=:$s2:";
+    $_ = `$perl $script`;
+    ok 24, ($Is_MSWin32 ? uc($_) eq uc($s1) : $_ eq $s1), ":$_:!=:$s1: after `$perl $script`";
     ok 25, unlink($script), $!;
 }
 
@@ -142,3 +160,22 @@ EOF
 ok 26, $] >= 5.00319, $];
 ok 27, $^O;
 ok 28, $^T > 850000000, $^T;
+
+if ($Is_VMS) {
+	ok 29, 1;
+	ok 30, 1;
+}
+else {
+	$PATH = $ENV{PATH};
+	$ENV{foo} = "bar";
+	%ENV = ();
+	$ENV{PATH} = $PATH;
+	ok 29, ($Is_MSWin32 ? (`cmd /x /c set foo 2>NUL` eq "")
+				: (`echo \$foo` eq "\n") );
+
+	$ENV{NoNeSuCh} = "foo";
+	$0 = "bar";
+	ok 30, ($Is_MSWin32 ? (`cmd /x /c set NoNeSuCh` eq "NoNeSuCh=foo\n")
+						: (`echo \$NoNeSuCh` eq "foo\n") );
+}
+

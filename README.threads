@@ -1,0 +1,181 @@
+Building
+
+Omit the -e from your ./Configure arguments. For example, use
+    ./Configure -drs
+When it offers to let you change config.sh, do so. If you already
+have a config.sh then you can edit it and do
+    ./Configure -S
+to propagate the required changes.
+In ccflags, insert -DUSE_THREADS (and probably -DDEBUGGING since
+that's what I've been building with). Also insert any other
+arguments in there that your compiler needs to use POSIX threads.
+Change optimize to -g to give you better debugging information.
+Include any necessary explicit libraries in libs and change
+ldflags if you need any linker flags instead or as well.
+
+More explicitly, for Linux (when using the standard kernel-threads
+based LinuxThreads library):
+    Add -DUSE_THREADS -D_REENTRANT -DDEBUGGING to ccflags and cppflags
+    Add -lpthread to libs
+    Change optimize to -g
+For Digital Unix 4.x:
+    Add -pthread -DUSE_THREADS -DDEBUGGING to ccflags
+    Add -DUSE_THREADS -DDEBUGGING to cppflags
+    Add -pthread to ldflags
+    Change optimize to -g
+    Maybe add -lpthread -lc_r to lddlflags
+    For some reason, the extra includes for pthreads make Digital UNIX
+    complain fatally about the sbrk() delcaration in perl's malloc.c
+    so use the native malloc as follows:
+    Change usemymalloc to n
+    Zap mallocobj and mallocsrc (foo='')
+    Change d_mymalloc to undef
+
+
+Now you can do a
+    make perl
+For Digital UNIX, it will get as far as building miniperl and then
+bomb out buidling DynaLoader when MakeMaker tries to find where
+perl is. This seems to be a problem with backticks/system when
+threading is in. A minimal failing example is
+    perl -e 'eval q($foo = 0); system("echo foo")'
+which doesn't echo anything. The resulting ext/DynaLoader/Makefile
+will have lines
+    PERL = 0
+    FULLPERL = 0
+Change them to be the pathnames of miniperl and perl respectively
+(the ones in your perl build directory). The resume the make with
+    make perl
+This time it should manage to build perl. If not, try some cutting
+and pasting to compile and link things manually. Be careful when
+building extensions that your ordinary perl doesn't end up making
+a Makefile without the correct pthreads compiler options.
+
+Building the Thread extension
+
+Build it away from the perl tree in the usual way. Set your PATH
+environment variable to have your perl build directory first and
+set PERL5LIB to be /your/perl/build/directory/lib (without those,
+I had problems where the config information from the ordinary perl
+on the system would end up in the Makefile). Then
+    perl Makefile.PL PERL_SRC=/your/perl/build/directory
+    make
+On Digital UNIX, you'll probably have to fix the "PERL = 0" and
+"FULLPERL = 0" lines in the generated Makefile as for DynaLoader.
+
+Then you can try some of the tests with
+    perl -Mblib create.t
+    perl -Mblib join.t
+    perl -Mblib lock.t
+    perl -Mblib unsync.t
+    perl -Mblib unsync2.t
+    perl -Mblib unsync3.t
+    perl -Mblib io.t
+The io one leaves a thread reading from the keyboard on stdin so
+as the ping messages appear you can type lines and see them echoed.
+
+Try running the main perl test suite too. There are known
+failures for po/misc test 45 (tries to do local(@_) but @_ is
+now lexical) and some tests involving backticks/system/fork
+may or may not work. Under Linux, many tests appear to fail
+when run under the test harness but work fine when invoked
+manually.
+
+
+Bugs
+
+* Thread states (DETACHED, JOINED etc.) and perl's idea of what's
+  in scope and out of scope aren't properly integrated. Expect
+  segaults and hangs when thread objects whose threads have ended
+  go out of scope (e.g. at program exit).
+
+* cond.t hasn't been redone since condition variable changed.
+
+* FAKE_THREADS should produce a working perl but the Thread
+extension won't build with it yet.
+
+* There's a known memory leak (curstack isn't freed at the end
+of each thread because it causes refcount problems that I
+haven't tracked down yet) and there are very probably others too.
+
+* There are still races where bugs show up under contention.
+
+* Need to document "lock", Thread.pm, Queue.pm, ...
+
+* Plenty of others
+
+
+Debugging
+
+Use the -DL command-line option to turn on debugging of the
+multi-threading code. Under Linux, that also turns on a quick
+hack I did to grab a bit of extra information from segfaults.
+If you have a fancier gdb/threads setup than I do then you'll
+have to delete the lines in perl.c which say
+    #if defined(DEBUGGING) && defined(USE_THREADS) && defined(__linux__)
+        DEBUG_L(signal(SIGSEGV, (void(*)(int))catch_sigsegv););
+    #endif
+
+
+Background
+
+Some old globals (e.g. stack_sp, op) and some old per-interpreter
+variables (e.g. tmps_stack, cxstack) move into struct thread.
+All fields of struct thread (apart from a few only applicable to
+FAKE_THREADS) are of the form Tfoo. For example, stack_sp becomes
+the field Tstack_sp of struct thread. For those fields which moved
+from original perl, thread.h does
+    #define foo (thr->Tfoo)
+This means that all functions in perl which need to use one of these
+fields need an (automatic) variable thr which points at the current
+thread's struct thread. For pp_foo functions, it is passed around as
+an argument, for other functions they do
+    dTHR;
+which declares and initialises thr from thread-specific data
+via pthread_getspecific. If a function fails to compile with an
+error about "no such variable thr", it probably just needs a dTHR
+at the top.
+
+
+Fake threads
+
+For FAKE_THREADS, thr is a global variable and perl schedules threads
+by altering thr in between appropriate ops. The next and prev fields
+of struct thread keep all fake threads on a doubly linked list and
+the next_run and prev_run fields keep all runnable threads on a
+doubly linked list. Mutexes are stubs for FAKE_THREADS. Condition
+variables are implemented as a list of waiting threads.
+
+
+Mutexes and condition variables
+
+The API is via macros MUTEX_{INIT,LOCK,UNLOCK,DESTROY} and
+COND_{INIT,WAIT,SIGNAL,BROADCAST,DESTROY}. For POSIX threads,
+perl mutexes and condition variables correspond to POSIX ones.
+For FAKE_THREADS, mutexes are stubs and condition variables are
+implmented as lists of waiting threads. For FAKE_THREADS, a thread
+waits on a condition variable by removing itself from the runnable
+list, calling SCHEDULE to change thr to the next appropriate
+runnable thread and returning op (i.e. the new threads next op).
+This means that fake threads can only block while in PP code.
+A PP function which contains a COND_WAIT must be prepared to
+handle such restarts and can use the field "private" of struct
+thread to record its state. For fake threads, COND_SIGNAL and
+COND_BROADCAST work by putting back all the threads on the
+condition variables list into the run queue. Note that a mutex
+must *not* be held while returning from a PP function.
+
+Perl locks are a condpair_t structure (a triple of a mutex, a
+condtion variable and an owner thread field) attached by 'm'
+magic to any SV. pp_lock locks such an object by waiting on the
+condition variable until the owner field is zero and then setting
+the owner field to its own thread pointer. The lock is recursive
+so if the owner field already matches the current thread then
+pp_lock returns straight away. If the owner field has to be filled
+in then unlock_condpair is queued as an end-of-block destructor and
+that function zeroes out the owner field, releasing the lock.
+
+
+Malcolm Beattie
+mbeattie@sable.ox.ac.uk
+9 September 1997

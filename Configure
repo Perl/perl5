@@ -209,6 +209,7 @@ tr=''
 troff=''
 uname=''
 uniq=''
+usethreads=''
 uuname=''
 vi=''
 zcat=''
@@ -739,7 +740,7 @@ loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
 loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
 
 : general looking path for locating libraries
-glibpth="/shlib /usr/shlib /lib/pa1.1 /usr/lib/large"
+glibpth="/shlib /usr/shlib /usr/lib/pa1.1 /usr/lib/large"
 glibpth="$glibpth /lib /usr/lib $xlibpth"
 glibpth="$glibpth /lib/large /usr/lib/small /lib/small"
 glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
@@ -1704,7 +1705,6 @@ EOM
 			esac;;
 		[23]100) osname=mips ;;
 		next*) osname=next ;;
-		news*) osname=news ;;
 		i386*)
 			if $test -f /etc/kconfig; then
 				osname=isc
@@ -1772,8 +1772,18 @@ EOM
 		netbsd*) osname=netbsd 
 			osvers="$3"
 			;;
+		news-os) osvers="$3"
+			case "$3" in
+			4*) osname=newsos4 ;;
+			*) osname=newsos ;;
+			esac
+			;;
 		bsd386) osname=bsd386
 			osvers=`$uname -r`
+			;;
+		powerux | power_ux | powermax_os | powermaxos | \
+		powerunix | power_unix) osname=powerux
+			osvers="$3"
 			;;
 		next*) osname=next ;;
 		solaris) osname=solaris
@@ -1872,10 +1882,10 @@ EOM
 			;;
 		esac
 	else
-		if test -f /vmunix -a -f news_os.sh; then
+		if test -f /vmunix -a -f newsos4.sh; then
 			(what /vmunix | ../UU/tr '[A-Z]' '[a-z]') > ../UU/kernel.what 2>&1
 			if $contains news-os ../UU/kernel.what >/dev/null 2>&1; then
-				osname=news_os
+				osname=newsos4
 			fi
 			$rm -f ../UU/kernel.what
 		elif test -d c:/.; then
@@ -2043,7 +2053,7 @@ esac
 
 
 : who configured the system
-cf_time=`$date 2>&1`
+cf_time=`LC_ALL=C; export LC_ALL; $date 2>&1`
 cf_by=`(logname) 2>/dev/null`
 case "$cf_by" in "")
 	cf_by=`(whoami) 2>/dev/null`
@@ -2080,7 +2090,12 @@ case "$archname" in
 esac
 rp='What is your architecture name'
 . ./myread
-archname="$ans"
+case "$usethreads" in
+$define)  archname="$ans-thread"
+          echo "usethreads selected... architecture name is now $archname." >&4
+          ;;
+*)        archname="$ans" ;;
+esac
 myarchname="$tarch"
 
 : is AFS running?
@@ -3804,17 +3819,17 @@ if sh -c "$cc $optimize $ccflags -o try try.c $ldflags $libs" >>try.msg 2>&1; th
 		dflt=n
 	else
 		echo "The program compiled OK, but exited with status $?." >>try.msg
-		rp="You have a problem.  Shall I abort Configure"
+		rp="You have a problem.  Shall I abort Configure (and explain the problem)"
 		dflt=y
 	fi
 else
 	echo "I can't compile the test program." >>try.msg
-	rp="You have a BIG problem.  Shall I abort Configure"
+	rp="You have a BIG problem.  Shall I abort Configure (and explain the problem)"
 	dflt=y
 fi
 case "$dflt" in
 y)
-	$cat try.msg
+	$cat try.msg >&4
 	case "$knowitall" in
 	'')
 		echo "(The supplied flags might be incorrect with this C compiler.)"
@@ -4574,30 +4589,30 @@ $undef)
 *)	case "$useshrplib" in
 	'')	case "$osname" in
 		svr4*|dgux|dynixptx|esix|powerux)
-			dflt='yes'
+			dflt=y
 			also='Building a shared libperl is required for dynamic loading to work on your system.'
 			;;
 		next*)
 			case "$osvers" in
-			4*)	dflt='yes'
+			4*)	dflt=y
 				also='Building a shared libperl is needed for MAB support.'
 				;;
-			*)	dflt='no'
+			*)	dflt=n
 				;;
 			esac
 			;;
 		sunos)
-			dflt='no'
+			dflt=n
 			also='Building a shared libperl will definitely not work on SunOS 4.'
 			;;
-		*)	dflt='no'
+		*)	dflt=n
 			;;
 		esac
 		;;
 	$define|true|[Yy]*)
-		dflt='yes'
+		dflt=y
 		;;
-	*)	dflt='no'
+	*)	dflt=n
 		;;
 	esac
 	$cat << EOM
@@ -5350,7 +5365,7 @@ EOH
 		case "$ans" in
 		none)	startperl=": # use perl";;
 		*)	startperl="#!$ans"
-			if $test 33 -lt `echo "$ans" | wc -c`; then
+			if $test 30 -lt `echo "$ans" | wc -c`; then
 				$cat >&4 <<EOM
 
 WARNING:  Some systems limit the #! command to 32 characters.
@@ -6372,7 +6387,7 @@ main() {
 EOCP
 : check sys/file.h first to get FREAD on Sun
 if $test `./findhdr sys/file.h` && \
-		$cc $cppflags "-DI_SYS_FILE" open3.c -o open3 >/dev/null 2>&1 ; then
+        $cc $ccflags "-DI_SYS_FILE" -o open3 $ldflags open3.c $libs >/dev/null 2>&1 ; then
 	h_sysfile=true;
 	echo "<sys/file.h> defines the O_* constants..." >&4
 	if ./open3; then
@@ -6383,7 +6398,7 @@ if $test `./findhdr sys/file.h` && \
 		val="$undef"
 	fi
 elif $test `./findhdr fcntl.h` && \
-		$cc "-DI_FCNTL" open3.c -o open3 >/dev/null 2>&1 ; then
+        $cc $ccflags "-DI_FCNTL" -o open3 $ldflags open3.c $libs >/dev/null 2>&1 ; then
 	h_fcntl=true;
 	echo "<fcntl.h> defines the O_* constants..." >&4
 	if ./open3; then
@@ -9097,7 +9112,7 @@ EOP
 $cat >signal_cmd <<EOS
 $startsh
 $test -s signal.lst && exit 0
-if $cc $ccflags signal.c -o signal $ldflags >/dev/null 2>&1; then
+if $cc $ccflags $ldflags signal.c -o signal >/dev/null 2>&1; then
 	./signal | $sort -n +1 | $uniq | $awk -f signal.awk >signal.lst
 else
 	echo "(I can't seem be able to compile the test program -- Guessing)"
@@ -9109,7 +9124,7 @@ else
 	0) set HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM;;
 	esac
 	echo \$@ | $tr ' ' '\012' | \
-		$awk '{ printf $1; printf " %d\n", ++s; }' >signal.lst
+		$awk '{ printf \$1; printf " %d\n", ++s; }' >signal.lst
 fi
 $rm -f signal.c signal signal.o
 EOS

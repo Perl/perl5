@@ -618,9 +618,9 @@ HV *hv;
     assert(tmp >= newsize);
     New(2,a, tmp, HE*);
     Copy(xhv->xhv_array, a, oldsize, HE*);
-    if (oldsize >= 64 && !nice_chunk) {
-	nice_chunk = (char*)xhv->xhv_array;
-	nice_chunk_size = oldsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD;
+    if (oldsize >= 64) {
+	offer_nice_chunk(xhv->xhv_array,
+			 oldsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD);
     }
     else
 	Safefree(xhv->xhv_array);
@@ -692,9 +692,9 @@ IV newmax;
 	assert(j >= newsize);
 	New(2, a, j, HE*);
 	Copy(xhv->xhv_array, a, oldsize, HE*);
-	if (oldsize >= 64 && !nice_chunk) {
-	    nice_chunk = (char*)xhv->xhv_array;
-	    nice_chunk_size = oldsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD;
+	if (oldsize >= 64) {
+	    offer_nice_chunk(xhv->xhv_array,
+			     oldsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD);
 	}
 	else
 	    Safefree(xhv->xhv_array);

@@ -74,7 +74,9 @@ if (!$> || ! -r 'Op.stat.tmp') {print "ok 9\n";} else {print "not ok 9\n";}
 if (!$> || ! -w 'Op.stat.tmp') {print "ok 10\n";} else {print "not ok 10\n";}
 eval '$> = $olduid;';		# switch uid back (may not be implemented)
 print "# olduid=$olduid, newuid=$>\n" unless ($> == $olduid);
-if (! -x 'Op.stat.tmp') {print "ok 11\n";} else {print "not ok 11\n";}
+
+if (! -x 'Op.stat.tmp') {print "ok 11\n";}
+else                    {print "not ok 11\n";}
 
 foreach ((12,13,14,15,16,17)) {
     print "ok $_\n";		#deleted tests
@@ -158,24 +160,35 @@ else
 
 tty_test:
 
-if ($Is_MSWin32) {
-    print "ok 36\n";
-    print "ok 37\n";
+# To assist in automated testing when a controlling terminal (/dev/tty)
+# may not be available (at, cron  rsh etc), the PERL_SKIP_TTY_TEST env var
+# can be set to skip the tests that need a tty.
+unless($ENV{PERL_SKIP_TTY_TEST}) {
+    if ($Is_MSWin32) {
+	print "ok 36\n";
+	print "ok 37\n";
+    }
+    else {
+	unless (open(tty,"/dev/tty")) {
+	    print STDERR "Can't open /dev/tty--run t/TEST outside of make.\n";
+	}
+	if (-t tty) {print "ok 36\n";} else {print "not ok 36\n";}
+	if (-c tty) {print "ok 37\n";} else {print "not ok 37\n";}
+	close(tty);
+    }
+    if (! -t tty) {print "ok 38\n";} else {print "not ok 38\n";}
+    if (-t)       {print "ok 39\n";} else {print "not ok 39\n";}
 }
 else {
-    unless (open(tty,"/dev/tty")) {
-	print STDERR "Can't open /dev/tty--run t/TEST outside of make.\n";
-    }
-    if (-t tty) {print "ok 36\n";} else {print "not ok 36\n";}
-    if (-c tty) {print "ok 37\n";} else {print "not ok 37\n";}
-    close(tty);
+    print "ok 36\n";
+    print "ok 37\n";
+    print "ok 38\n";
+    print "ok 39\n";
 }
-if (! -t tty) {print "ok 38\n";} else {print "not ok 38\n";}
 open(null,"/dev/null");
 if (! -t null || -e '/xenix' || $^O eq 'machten' || $Is_MSWin32)
-	{print "ok 39\n";} else {print "not ok 39\n";}
+	{print "ok 40\n";} else {print "not ok 40\n";}
 close(null);
-if (-t) {print "ok 40\n";} else {print "not ok 40\n";}
 
 # These aren't strictly "stat" calls, but so what?
 

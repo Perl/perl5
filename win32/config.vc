@@ -1,7 +1,7 @@
 #
 ## This file was hand coded and a lot of information is invalid
 #
-## Configured by: garyng
+## Configured by: ~cf_email~
 ## Target system: WIN32 
 #
 
@@ -45,7 +45,7 @@ State=''
 afs='false'
 alignbytes='8'
 aphostname=''
-ar='ar'
+ar='lib'
 archlib='~INST_TOP~\lib'
 archobjs=''
 awk='awk'

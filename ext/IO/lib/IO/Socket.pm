@@ -380,6 +380,7 @@ IO::Socket::INET->register_domain( AF_INET );
 
 my %socket_type = ( tcp => SOCK_STREAM,
 		    udp => SOCK_DGRAM,
+		    icmp => SOCK_RAW,
 		  );
 
 =head2 IO::Socket::INET
@@ -557,7 +558,7 @@ sub configure {
     }
     else {
 	return _error($fh,'Cannot determine remote port')
-		unless($rport || $type == SOCK_DGRAM);
+		unless($rport || $type == SOCK_DGRAM || $type == SOCK_RAW);
 
 	if($type == SOCK_STREAM || defined $raddr) {
 	    return _error($fh,'Bad peer address')

@@ -219,7 +219,8 @@ learned how to use yet.  Some of them may make this all a bit easier.
 
 Here are the steps I go through to prepare a patch & distribution.
 
-Lots of it could doubtless be automated but isn't.
+Lots of it could doubtless be automated but isn't.  The Porting/makerel
+(make release) perl script does now help automate some parts of it.
 
 =head2 Announce your intentions
 
@@ -244,6 +245,8 @@ directory.  Before you C<make spotless> (if you do), and if you have
 changed any documentation in any module or pod file, change to the
 F<pod> directory and run C<make toc>.
 
+=head2 run installhtml to check the validity of the pod files
+
 =head2 update patchlevel.h
 
 Don't be shy about using the subversion number, even for a relatively
@@ -264,7 +267,7 @@ will regenerate Configure and config_h.SH.  More information on
 obtaining and running metaconfig is in the F<U/README> file that comes
 with Perl's metaconfig units.  Perl's metaconfig units should be
 available the same place you found this file.  On CPAN, look under my
-directory F<id/ANDYD/> for a file such as F<5.003_07-02.U.tar.gz>.
+directory F<authors/id/ANDYD/> for a file such as F<5.003_07-02.U.tar.gz>.
 That file should be unpacked in your main perl source directory.  It
 contains the files needed to run B<metaconfig> to reproduce Perl's
 Configure script.  (Those units are for 5.003_07.  There have been
@@ -279,12 +282,10 @@ place for your changes.
 Make sure the MANIFEST is up-to-date.  You can use dist's B<manicheck>
 program for this.  You can also use
 
-    perl -MExtUtils::Manifest -e fullcheck
+    perl -w -MExtUtils::Manifest=fullcheck -e fullcheck
 
-to do half the job.  This will make sure everything listed in MANIFEST
-is included in the distribution.  dist's B<manicheck> command will
-also list extra files in the directory that are not listed in
-MANIFEST.
+Both commands will also list extra files in the directory that are not
+listed in MANIFEST.
 
 The MANIFEST is normally sorted, with one exception.  Perl includes
 both a F<Configure> script and a F<configure> script.  The
@@ -321,7 +322,6 @@ In all, the following files should probably be executable:
     installperl
     installman
     keywords.pl
-    lib/splain
     myconfig
     opcode.pl
     perly.fixer
@@ -425,7 +425,7 @@ and effort by manually running C<make regen_headers> myself rather
 than answering all the questions and complaints about the failing
 command.
 
-=head2 global.sym and interp.sym
+=head2 global.sym, interp.sym and perlio.sym
 
 Make sure these files are up-to-date.  Read the comments in these
 files and in perl_exp.SH to see what to do.
@@ -448,7 +448,7 @@ Let's not force people to keep changing it.
 
 Be sure to update the F<Changes> file.  Try to include both an overall
 summary as well as detailed descriptions of the changes.  Your
-audience will include bother developers and users, so describe
+audience will include other developers and users, so describe
 user-visible changes (if any) in terms they will understand, not in
 code like "initialize foo variable in bar function".
 
@@ -487,20 +487,28 @@ do something like the following
 	tar cf perl5.004_08.tar perl5.004_08
 	gzip --best perl5.004_08.tar
 
+These steps, with extra checks, are automated by the Porting/makerel
+script.
+
 =head2 Making a new patch
 
 I find the F<makepatch> utility quite handy for making patches.
 You can obtain it from any CPAN archive under
-http://www.perl.com/CPAN/authors/Johan_Vromans/ .  The only
-difference between my version and the standard one is that I have mine
-do a
+http://www.perl.com/CPAN/authors/Johan_Vromans/ .  There are a couple
+of differences between my version and the standard one. I have mine do
+a
 
 	# Print a reassuring "End of Patch" note so people won't
 	# wonder if their mailer truncated patches.
 	print "\n\nEnd of Patch.\n";
 
-at the end.  That's because I used to get questions from people asking if
-their mail was truncated.
+at the end.  That's because I used to get questions from people asking
+if their mail was truncated.
+
+It also writes Index: lines which include the new directory prefix
+(change Index: print, approx line 294 or 310 depending on the version,
+to read:  print PATCH ("Index: $newdir$new\n");).  That helps patches
+work with more POSIX conformant patch programs.
 
 Here's how I generate a new patch.  I'll use the hypothetical
 5.004_07 to 5.004_08 patch as an example.
@@ -1108,16 +1116,9 @@ a nice malloc that is well-tuned for the system.)
 
 =over 4
 
-=item Win95, WinNT, and Win32 support
-
-We need to get something into the distribution for 32-bit Windows.
-I'm tired of all the private e-mail questions I get, and I'm saddened
-that so many folks keep trying to reinvent the same wheel.
-
 =item MacPerl
 
-Get some of the Macintosh stuff folded back into the main
-distribution.
+Get some of the Macintosh stuff folded back into the main distribution.
 
 =item gconvert replacement
 
@@ -1166,4 +1167,4 @@ All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-$Id: pumpkin.pod,v 1.10 1997/04/16 20:46:47 doughera Released $
+$Id: pumpkin.pod,v 1.10.1.1 1997/06/10 20:46:47 timbo Exp $

@@ -96,7 +96,7 @@ print "1..135\n";
 
     test 1, eval { `$echo 1` } eq "1\n";
 
-    if ($Is_MSWin32) {
+    if ($Is_MSWin32 || $Is_VMS) {
 	print "# Environment tainting tests skipped\n";
 	for (2..5) { print "ok $_\n" }
     }

@@ -21,7 +21,6 @@ main(int argc, char *argv[])
     BOOL downcase = TRUE;
 
     /* check out the file system characteristics */
-
     if (GetFullPathName(".", MAX_PATH, root, &dummy)) {
 	if (dummy = strchr(root, '\\'))
 	    *++dummy = '\0';
@@ -31,7 +30,7 @@ main(int argc, char *argv[])
 	}
     }
 
-    _setmode(_fileno(stdout), _O_BINARY);
+    setmode(fileno(stdout), O_BINARY);
     for (i = 1; i < argc; i++) {
 	len = strlen(argv[i]);
 	if (downcase)

@@ -310,6 +310,7 @@ Tom Christiansen such that Larry probably doesn't recognize it anymore.
 
 $/ = "";
 $cutting = 1;
+@Indices = ();
 
 # We try first to get the version number from a local binary, in case we're
 # running an installed version of Perl to produce documentation from an
@@ -444,6 +445,7 @@ if ($name ne 'something') {
 		last FCHECK;
 	    }
 	    next if /^=cut\b/;	# DB_File and Net::Ping have =cut before NAME
+	    next if /^=pod\b/;  # It is OK to have =pod before NAME
 	    die "$0: Invalid man page - 1st pod line is not NAME in $ARGV[0]\n" unless $lax;
 	}
 	die "$0: Invalid man page - no documentation in $ARGV[0]\n" unless $lax;
@@ -499,16 +501,36 @@ print <<"END";
 .if (\\n(.H=4u)&(1m=20u) .ds -- \\(*W\\h'-12u'\\(*W\\h'-8u'-\\" diablo 12 pitch
 .ds L" ""
 .ds R" ""
+'''   \\*(M", \\*(S", \\*(N" and \\*(T" are the equivalent of
+'''   \\*(L" and \\*(R", except that they are used on ".xx" lines,
+'''   such as .IP and .SH, which do another additional levels of
+'''   double-quote interpretation
+.ds M" """
+.ds S" """
+.ds N" """""
+.ds T" """""
 .ds L' '
 .ds R' '
+.ds M' '
+.ds S' '
+.ds N' '
+.ds T' '
 'br\\}
 .el\\{\\
 .ds -- \\(em\\|
 .tr \\*(Tr
 .ds L" ``
 .ds R" ''
+.ds M" ``
+.ds S" ''
+.ds N" ``
+.ds T" ''
 .ds L' `
 .ds R' '
+.ds M' `
+.ds S' '
+.ds N' `
+.ds T' '
 .ds PI \\(*p
 'br\\}
 END
@@ -534,13 +556,14 @@ END
 
 print <<"END";
 .TH $name $section "$RP" "$date" "$center"
-.IX Title "$name $section"
 .UC
 END
 
+push(@Indices, qq{.IX Title "$name $section"});
+
 while (($name, $desc) = each %namedesc) {
     for ($name, $desc) { s/^\s+//; s/\s+$//; }
-    print qq(.IX Name "$name - $desc"\n);
+    push(@Indices, qq(.IX Name "$name - $desc"\n));
 }
 
 print <<'END';
@@ -706,6 +729,10 @@ while (<>) {
 	# trofficate backslashes; must do it before what happens below
 	s/\\/noremap('\\e')/ge;
 
+	# protect leading periods and quotes against *roff
+	# mistaking them for directives
+	s/^(?:[A-Z]<)?[.']/\\&$&/gm;
+
 	# first hide the escapes in case we need to
 	# intuit something and get it wrong due to fmting
 
@@ -833,8 +860,19 @@ while (<>) {
 
 	($Cmd, $_) = split(' ', $_, 2);
 
+	$dotlevel = 1;
+	if ($Cmd eq 'head1') {
+	   $dotlevel = 1;
+	}
+	elsif ($Cmd eq 'head2') {
+	   $dotlevel = 1;
+	}
+	elsif ($Cmd eq 'item') {
+	   $dotlevel = 2;
+	}
+
 	if (defined $_) {
-	    &escapes;
+	    &escapes($dotlevel);
 	    s/"/""/g;
 	}
 
@@ -847,11 +885,11 @@ while (<>) {
 	    s/\s+$//;
 	    delete $wanna_see{$_} if exists $wanna_see{$_};
 	    print qq{.SH "$_"\n};
-	    print qq{.IX Header "$_"\n};
+      push(@Indices, qq{.IX Header "$_"\n});
 	}
 	elsif ($Cmd eq 'head2') {
 	    print qq{.Sh "$_"\n};
-	    print qq{.IX Subsection "$_"\n};
+      push(@Indices, qq{.IX Subsection "$_"\n});
 	}
 	elsif ($Cmd eq 'over') {
 	    push(@indent,$indent);
@@ -870,7 +908,7 @@ while (<>) {
 	    s/[^"]""([^"]+?)""[^"]/'$1'/g;
 	    # here do something about the $" in perlvar?
 	    print STDOUT qq{.Ip "$_" $indent\n};
-	    print qq{.IX Item "$_"\n};
+      push(@Indices, qq{.IX Item "$_"\n});
 	}
 	elsif ($Cmd eq 'pod') {
 	    # this is just a comment
@@ -883,7 +921,7 @@ while (<>) {
 	if ($needspace) {
 	    &makespace;
 	}
-	&escapes;
+	&escapes(0);
 	clear_noremap(1);
 	print $_, "\n";
 	$needspace = 1;
@@ -903,6 +941,8 @@ if (%wanna_see && !$lax) {
     $oops++;
 }
 
+foreach (@Indices) { print "$_\n"; }
+
 exit;
 #exit ($oops != 0);
 
@@ -915,6 +955,7 @@ sub nobreak {
 }
 
 sub escapes {
+    my $indot = shift;
 
     s/X<(.*?)>/mkindex($1)/ge;
 
@@ -927,9 +968,19 @@ sub escapes {
     s/([^"])--"/$1\\*(--"/g;
 
     # fix up quotes; this is somewhat tricky
+    my $dotmacroL = 'L';
+    my $dotmacroR = 'R';
+    if ( $indot == 1 ) {
+	$dotmacroL = 'M';
+	$dotmacroR = 'S';
+    }  
+    elsif ( $indot >= 2 ) {
+	$dotmacroL = 'N';
+	$dotmacroR = 'T';
+    }  
     if (!/""/) {
-	s/(^|\s)(['"])/noremap("$1\\*(L$2")/ge;
-	s/(['"])($|[\-\s,;\\!?.])/noremap("\\*(R$1$2")/ge;
+	s/(^|\s)(['"])/noremap("$1\\*($dotmacroL$2")/ge;
+	s/(['"])($|[\-\s,;\\!?.])/noremap("\\*($dotmacroR$1$2")/ge;
     }
 
     #s/(?!")(?:.)--(?!")(?:.)/\\*(--/g;
@@ -995,7 +1046,7 @@ sub makespace {
 sub mkindex {
     my ($entry) = @_;
     my @entries = split m:\s*/\s*:, $entry;
-    print ".IX Xref ";
+    push @Indices, ".IX Xref " . join ' ', map {qq("$_")} @entries;
     for $entry (@entries) {
 	print qq("$entry" );
     }
@@ -1054,6 +1105,7 @@ sub clear_noremap {
 
 sub internal_lrefs {
     local($_) = shift;
+    local $trailing_and = s/and\s+$// ? "and " : "";
 
     s{L</([^>]+)>}{$1}g;
     my(@items) = split( /(?:,?\s+(?:and\s+)?)/ );
@@ -1067,6 +1119,7 @@ sub internal_lrefs {
 
     $retstr .= " entr" . ( @items > 1  ? "ies" : "y" )
 	    .  " elsewhere in this document "; # terminal space to avoid words running together (pattern used strips terminal spaces)
+    $retstr .=  $trailing_and;
 
     return $retstr;
 

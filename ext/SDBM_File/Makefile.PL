@@ -5,11 +5,11 @@ use ExtUtils::MakeMaker;
 #	config, all, clean, realclean and sdbm/Makefile
 # which perform the corresponding actions in the subdirectory.
 
-$define = ($^O eq 'MSWin32') ? '/D "MSDOS"' : '';
+$define = ($^O eq 'MSWin32') ? '-DMSDOS' : '';
 
 WriteMakefile(
     NAME	=> 'SDBM_File',
-    MYEXTLIB => 'sdbm/libsdbm$(LIB_EXT)',
+    MYEXTLIB => 'sdbm'.($^O eq 'MSWin32' ? '\\' : '/').'libsdbm$(LIB_EXT)',
     MAN3PODS 	=> ' ', 	# Pods will be built by installman.
     XSPROTOARG => '-noprototypes', 		# XXX remove later?
     VERSION_FROM => 'SDBM_File.pm',

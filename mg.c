@@ -454,11 +454,14 @@ MAGIC *mg;
 #endif
 	break;
     case '?':
-	sv_setiv(sv, (IV)STATUS_CURRENT);
+	{
+	    dTHR;
+	    sv_setiv(sv, (IV)STATUS_CURRENT);
 #ifdef COMPLEX_STATUS
-	LvTARGOFF(sv) = statusvalue;
-	LvTARGLEN(sv) = statusvalue_vms;
+	    LvTARGOFF(sv) = statusvalue;
+	    LvTARGLEN(sv) = statusvalue_vms;
 #endif
+	}
 	break;
     case '^':
 	s = IoTOP_NAME(GvIOp(defoutgv));
@@ -491,7 +494,7 @@ MAGIC *mg;
     case '/':
 	break;
     case '[':
-	sv_setiv(sv, (IV)curcop->cop_arybase);
+	WITH_THR(sv_setiv(sv, (IV)curcop->cop_arybase));
 	break;
     case '|':
 	sv_setiv(sv, (IV)(IoFLAGS(GvIOp(defoutgv)) & IOf_FLUSH) != 0 );
@@ -591,7 +594,7 @@ MAGIC* mg;
     }
 #endif
 
-#if !defined(OS2) && !defined(AMIGAOS) && !defined(_WIN32)
+#if !defined(OS2) && !defined(AMIGAOS) && !defined(WIN32)
 			    /* And you'll never guess what the dog had */
 			    /*   in its mouth... */
     if (tainting) {
@@ -626,20 +629,21 @@ MAGIC* mg;
 	    char *strend = s + len;
 
 	    while (s < strend) {
+		char tmpbuf[256];
 		struct stat st;
-		s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf,
+		s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf,
 			     s, strend, ':', &i);
 		s++;
-		if (i >= sizeof tokenbuf   /* too long -- assume the worst */
-		      || *tokenbuf != '/'
-		      || (Stat(tokenbuf, &st) == 0 && (st.st_mode & 2)) ) {
+		if (i >= sizeof tmpbuf   /* too long -- assume the worst */
+		      || *tmpbuf != '/'
+		      || (Stat(tmpbuf, &st) == 0 && (st.st_mode & 2)) ) {
 		    MgTAINTEDDIR_on(mg);
 		    return 0;
 		}
 	    }
 	}
     }
-#endif /* neither OS2 nor AMIGAOS nor _WIN32 */
+#endif /* neither OS2 nor AMIGAOS nor WIN32 */
 
     return 0;
 }
@@ -650,6 +654,45 @@ SV* sv;
 MAGIC* mg;
 {
     my_setenv(MgPV(mg,na),Nullch);
+    return 0;
+}
+
+int
+magic_clear_all_env(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+#if defined(VMS)
+    die("Can't make list assignment to %%ENV on this system");
+#else
+#ifdef WIN32
+    char *envv = GetEnvironmentStrings();
+    char *cur = envv;
+    STRLEN len;
+    while (*cur) {
+	char *end = strchr(cur,'=');
+	if (end && end != cur) {
+	    *end = '\0';
+	    my_setenv(cur,Nullch);
+	    *end = '=';
+	    cur += strlen(end+1)+1;
+	}
+	else if ((len = strlen(cur)))
+	    cur += len+1;
+    }
+    FreeEnvironmentStrings(envv);
+#else
+    I32 i;
+
+    if (environ == origenviron)
+	New(901, environ, 1, char*);
+    else
+	for (i = 0; environ[i]; i++)
+	    Safefree(environ[i]);
+    environ[0] = Nullch;
+
+#endif
+#endif
     return 0;
 }
 
@@ -742,7 +785,7 @@ MAGIC* mg;
     }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
 	if (i)
-	    (void)rsignal(i, sighandler);
+	    (void)rsignal(i, sighandlerp);
 	else
 	    *svp = SvREFCNT_inc(sv);
 	return 0;
@@ -769,7 +812,7 @@ MAGIC* mg;
 	if (!strchr(s,':') && !strchr(s,'\''))
 	    sv_setpv(sv, form("main::%s", s));
 	if (i)
-	    (void)rsignal(i, sighandler);
+	    (void)rsignal(i, sighandlerp);
 	else
 	    *svp = SvREFCNT_inc(sv);
     }
@@ -967,6 +1010,7 @@ magic_getarylen(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     sv_setiv(sv, AvFILL((AV*)mg->mg_obj) + curcop->cop_arybase);
     return 0;
 }
@@ -976,6 +1020,7 @@ magic_setarylen(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     av_fill((AV*)mg->mg_obj, SvIV(sv) - curcop->cop_arybase);
     return 0;
 }
@@ -990,6 +1035,7 @@ MAGIC* mg;
     if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv)) {
 	mg = mg_find(lsv, 'g');
 	if (mg && mg->mg_len >= 0) {
+	    dTHR;
 	    sv_setiv(sv, mg->mg_len + curcop->cop_arybase);
 	    return 0;
 	}
@@ -1023,7 +1069,7 @@ MAGIC* mg;
     }
     len = SvPOK(lsv) ? SvCUR(lsv) : sv_len(lsv);
 
-    pos = SvIV(sv) - curcop->cop_arybase;
+    WITH_THR(pos = SvIV(sv) - curcop->cop_arybase);
     if (pos < 0) {
 	pos += len;
 	if (pos < 0)
@@ -1207,7 +1253,7 @@ SV* sv;
 		croak(no_aelem, (I32)LvTARGOFF(sv));
 	}
     }
-    SvREFCNT_inc(value);
+    (void)SvREFCNT_inc(value);
     SvREFCNT_dec(LvTARG(sv));
     LvTARG(sv) = value;
     LvTARGLEN(sv) = 0;
@@ -1325,14 +1371,7 @@ MAGIC* mg;
 	    osname = Nullch;
 	break;
     case '\020':	/* ^P */
-	i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
-	if (i != perldb) {
-	    if (perldb)
-		oldlastpm = curpm;
-	    else
-		curpm = oldlastpm;
-	}
-	perldb = i;
+	perldb = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
     case '\024':	/* ^T */
 #ifdef BIG_TIME
@@ -1585,7 +1624,7 @@ MAGIC* mg;
 	    }
 	    /* can grab env area too? */
 	    if (origenviron && origenviron[0] == s + 1) {
-		my_setenv("NoNeSuCh", Nullch);
+		my_setenv("NoNe  SuCh", Nullch);
 					    /* force copy of environment */
 		for (i = 0; origenviron[i]; i++)
 		    if (origenviron[i] == s + 1)
@@ -1623,6 +1662,8 @@ SV *sv;
 MAGIC *mg;
 {
     dTHR;
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: magic_mutexfree 0x%lx\n",
+			  (unsigned long)thr, (unsigned long)sv);)
     if (MgOWNER(mg))
 	croak("panic: magic_mutexfree");
     MUTEX_DESTROY(MgMUTEXP(mg));
@@ -1651,6 +1692,22 @@ char *sig;
     return 0;
 }
 
+static SV* sig_sv;
+
+static void
+unwind_handler_stack(p)
+    void *p;
+{
+    dTHR;
+    U32 flags = *(U32*)p;
+
+    if (flags & 1)
+	savestack_ix -= 5; /* Unprotect save in progress. */
+    /* cxstack_ix-- Not needed, die already unwound it. */
+    if (flags & 64)
+	SvREFCNT_dec(sig_sv);
+}
+
 Signal_t
 sighandler(sig)
 int sig;
@@ -1659,15 +1716,56 @@ int sig;
     dSP;
     GV *gv;
     HV *st;
-    SV *sv;
+    SV *sv, *tSv = Sv;
     CV *cv;
     AV *oldstack;
+    OP *myop = op;
+    U32 flags = 0;
+    I32 o_save_i = savestack_ix, type;
+    CONTEXT *cx;
+    XPV *tXpv = Xpv;
+    
+    if (savestack_ix + 15 <= savestack_max)
+	flags |= 1;
+    if (cxstack_ix < cxstack_max - 2)
+	flags |= 2;
+    if (markstack_ptr < markstack_max - 2)
+	flags |= 4;
+    if (retstack_ix < retstack_max - 2)
+	flags |= 8;
+    if (scopestack_ix < scopestack_max - 3)
+	flags |= 16;
 
+    if (flags & 2) {		/* POPBLOCK may decrease cxstack too early. */
+	cxstack_ix++;		/* Protect from overwrite. */
+	cx = &cxstack[cxstack_ix];
+	type = cx->cx_type;		/* Can be during partial write. */
+	cx->cx_type = CXt_NULL;		/* Make it safe for unwind. */
+    }
     if (!psig_ptr[sig])
 	die("Signal SIG%s received, but no signal handler set.\n",
 	    sig_name[sig]);
 
-    cv = sv_2cv(psig_ptr[sig],&st,&gv,TRUE);
+    /* Max number of items pushed there is 3*n or 4. We cannot fix
+       infinity, so we fix 4 (in fact 5): */
+    if (flags & 1) {
+	savestack_ix += 5;		/* Protect save in progress. */
+	o_save_i = savestack_ix;
+	SAVEDESTRUCTOR(unwind_handler_stack, (void*)&flags);
+    }
+    if (flags & 4) 
+	markstack_ptr++;		/* Protect mark. */
+    if (flags & 8) {
+	retstack_ix++;
+	retstack[retstack_ix] = NULL;
+    }
+    if (flags & 16)
+	scopestack_ix += 1;
+    /* sv_2cv is too complicated, try a simpler variant first: */
+    if (!SvROK(psig_ptr[sig]) || !(cv = (CV*)SvRV(psig_ptr[sig])) 
+	|| SvTYPE(cv) != SVt_PVCV)
+	cv = sv_2cv(psig_ptr[sig],&st,&gv,TRUE);
+
     if (!cv || !CvROOT(cv)) {
 	if (dowarn)
 	    warn("SIG%s handler \"%s\" not defined.\n",
@@ -1680,9 +1778,11 @@ int sig;
 	AvFILL(signalstack) = 0;
     SWITCHSTACK(curstack, signalstack);
 
-    if(psig_name[sig])
+    if(psig_name[sig]) {
     	sv = SvREFCNT_inc(psig_name[sig]);
-    else {
+	flags |= 64;
+	sig_sv = sv;
+    } else {
 	sv = sv_newmortal();
 	sv_setpv(sv,sig_name[sig]);
     }
@@ -1693,6 +1793,23 @@ int sig;
     perl_call_sv((SV*)cv, G_DISCARD);
 
     SWITCHSTACK(signalstack, oldstack);
-
+    if (flags & 1)
+	savestack_ix -= 8; /* Unprotect save in progress. */
+    if (flags & 2) {
+	cxstack[cxstack_ix].cx_type = type;
+	cxstack_ix -= 1;
+    }
+    if (flags & 4) 
+	markstack_ptr--;
+    if (flags & 8) 
+	retstack_ix--;
+    if (flags & 16)
+	scopestack_ix -= 1;
+    if (flags & 64)
+	SvREFCNT_dec(sv);
+    op = myop;			/* Apparently not needed... */
+    
+    Sv = tSv;			/* Restore global temporaries. */
+    Xpv = tXpv;
     return;
 }

@@ -511,6 +511,27 @@ sub exp {
 }
 
 #
+# _logofzero
+#
+# Die on division by zero.
+#
+sub _logofzero {
+    my $mess = "$_[0]: Logarithm of zero.\n";
+
+    if (defined $_[1]) {
+	$mess .= "(Because in the definition of $_[0], the argument ";
+	$mess .= "$_[1] " unless ($_[1] eq '0');
+	$mess .= "is 0)\n";
+    }
+
+    my @up = caller(1);
+    
+    $mess .= "Died at $up[1] line $up[2].\n";
+
+    die $mess;
+}
+
+#
 # (log)
 #
 # Compute log(z).
@@ -659,7 +680,19 @@ sub cotan { Math::Complex::cot(@_) }
 sub acos {
 	my ($z) = @_;
 	$z = cplx($z, 0) unless ref $z;
-	return ~i * log($z + (Re($z) * Im($z) > 0 ? 1 : -1) * sqrt($z*$z - 1));
+	my ($re, $im) = @{$z->cartesian};
+	return atan2(sqrt(1 - $re * $re), $re)
+	    if ($im == 0 and abs($re) <= 1.0);
+	my $acos = ~i * log($z + sqrt($z*$z - 1));
+	if ($im == 0 ||
+	    (abs($re) < 1 && abs($im) < 1) ||
+	    (abs($re) > 1 && abs($im) > 1
+	     && !($re >  1 && $im >  1)
+	     && !($re < -1 && $im < -1))) {
+	    # this rule really, REALLY, must be simpler
+	    return -$acos;
+	}
+	return $acos;
 }
 
 #
@@ -670,6 +703,9 @@ sub acos {
 sub asin {
 	my ($z) = @_;
 	$z = cplx($z, 0) unless ref $z;
+	my ($re, $im) = @{$z->cartesian};
+	return atan2($re, sqrt(1 - $re * $re))
+	    if ($im == 0 and abs($re) <= 1.0);
 	return ~i * log(i * $z + sqrt(1 - $z*$z));
 }
 
@@ -681,7 +717,8 @@ sub asin {
 sub atan {
 	my ($z) = @_;
 	$z = cplx($z, 0) unless ref $z;
-	_divbyzero "atan($z)", "i - $z" if ($z == i);
+	_divbyzero "atan(i)"  if ( $z == i);
+	_divbyzero "atan(-i)" if (-$z == i);
 	return i/2*log((i + $z) / (i - $z));
 }
 
@@ -693,18 +730,35 @@ sub atan {
 sub asec {
 	my ($z) = @_;
 	_divbyzero "asec($z)", $z if ($z == 0);
-	return acos(1 / $z);
+	$z = cplx($z, 0) unless ref $z;
+	my ($re, $im) = @{$z->cartesian};
+	if ($im == 0 && abs($re) >= 1.0) {
+	    my $ire = 1 / $re;
+	    return atan2(sqrt(1 - $ire * $ire), $ire);
+	}
+	my $asec = acos(1 / $z);
+	return ~$asec if $re < 0 && $re > -1 && $im == 0;
+	return -$asec if $im && !($re > 0 && $im > 0) && !($re < 0 && $im < 0);
+	return $asec;
 }
 
 #
 # acsc
 #
-# Computes the arc cosecant sec(z) = asin(1 / z).
+# Computes the arc cosecant acsc(z) = asin(1 / z).
 #
 sub acsc {
 	my ($z) = @_;
 	_divbyzero "acsc($z)", $z if ($z == 0);
-	return asin(1 / $z);
+	$z = cplx($z, 0) unless ref $z;
+	my ($re, $im) = @{$z->cartesian};
+	if ($im == 0 && abs($re) >= 1.0) {
+	    my $ire = 1 / $re;
+	    return atan2($ire, sqrt(1 - $ire * $ire));
+	}
+	my $acsc = asin(1 / $z);
+	return ~$acsc if $re < 0 && $re > -1 && $im == 0;
+	return $acsc;
 }
 
 #
@@ -717,13 +771,15 @@ sub acosec { Math::Complex::acsc(@_) }
 #
 # acot
 #
-# Computes the arc cotangent acot(z) = -i/2 log((i+z) / (z-i))
+# Computes the arc cotangent acot(z) = atan(1 / z)
 #
 sub acot {
 	my ($z) = @_;
+	_divbyzero "acot($z)"           if ($z == 0);
 	$z = cplx($z, 0) unless ref $z;
-	_divbyzero "acot($z)", "$z - i" if ($z == i);
-	return i/-2 * log((i + $z) / ($z - i));
+	_divbyzero "acot(i)", if ( $z == i);
+	_divbyzero "acot(-i)" if (-$z == i);
+	return atan(1 / $z);
 }
 
 #
@@ -838,11 +894,14 @@ sub cotanh { Math::Complex::coth(@_) }
 #
 # acosh
 #
-# Computes the arc hyperbolic cosine acosh(z) = log(z + sqrt(z*z-1)).
+# Computes the arc hyperbolic cosine acosh(z) = log(z +- sqrt(z*z-1)).
 #
 sub acosh {
 	my ($z) = @_;
 	$z = cplx($z, 0) unless ref $z;
+	my ($re, $im) = @{$z->cartesian};
+	return log($re + sqrt(cplx($re*$re - 1, 0)))
+	    if ($im == 0 && $re < 0);
 	return log($z + sqrt($z*$z - 1));
 }
 
@@ -864,10 +923,14 @@ sub asinh {
 #
 sub atanh {
 	my ($z) = @_;
-	_divbyzero 'atanh(1)', "1 - $z" if ($z == 1);
+	_divbyzero 'atanh(1)',  "1 - $z" if ($z ==  1);
+	_logofzero 'atanh(-1)'           if ($z == -1);
 	$z = cplx($z, 0) unless ref $z;
-	my $cz = (1 + $z) / (1 - $z);
-	return log($cz) / 2;
+	my ($re, $im) = @{$z->cartesian};
+	if ($im == 0 && $re > 1) {
+	    return cplx(atanh(1 / $re), pi/2);
+	}
+	return log((1 + $z) / (1 - $z)) / 2;
 }
 
 #
@@ -878,6 +941,12 @@ sub atanh {
 sub asech {
 	my ($z) = @_;
 	_divbyzero 'asech(0)', $z if ($z == 0);
+	$z = cplx($z, 0) unless ref $z;
+	my ($re, $im) = @{$z->cartesian};
+	if ($im == 0 && $re < 0) {
+	    my $ire = 1 / $re;
+	    return log($ire + sqrt(cplx($ire*$ire - 1, 0)));
+	}
 	return acosh(1 / $z);
 }
 
@@ -906,10 +975,14 @@ sub acosech { Math::Complex::acsch(@_) }
 #
 sub acoth {
 	my ($z) = @_;
-	_divbyzero 'acoth(1)', "$z - 1" if ($z == 1);
+	_divbyzero 'acoth(1)', "$z - 1" if ($z ==  1);
+	_logofzero 'acoth(-1)'          if ($z == -1);
 	$z = cplx($z, 0) unless ref $z;
-	my $cz = (1 + $z) / ($z - 1);
-	return log($cz) / 2;
+	my ($re, $im) = @{$z->cartesian};
+	if ($im == 0 and abs($re) < 1) {
+	    return cplx(acoth(1/$re) , pi/2);
+	}
+	return log((1 + $z) / ($z - 1)) / 2;
 }
 
 #
@@ -1295,7 +1368,7 @@ numbers:
 
 	acsc(z) = asin(1 / z)
 	asec(z) = acos(1 / z)
-	acot(z) = -i/2 * log((i+z) / (z-i))
+	acot(z) = atan(1 / z) = -i/2 * log((i+z) / (z-i))
 
 	sinh(z) = 1/2 (exp(z) - exp(-z))
 	cosh(z) = 1/2 (exp(z) + exp(-z))
@@ -1437,18 +1510,26 @@ The division (/) and the following functions
 	acoth
 
 cannot be computed for all arguments because that would mean dividing
-by zero. These situations cause fatal runtime errors looking like this
+by zero or taking logarithm of zero. These situations cause fatal
+runtime errors looking like this
 
 	cot(0): Division by zero.
 	(Because in the definition of cot(0), the divisor sin(0) is 0)
 	Died at ...
 
-For the C<csc>, C<cot>, C<asec>, C<acsc>, C<csch>, C<coth>, C<asech>,
-C<acsch>, the argument cannot be C<0> (zero). For the C<atanh>,
-C<acoth>, the argument cannot be C<1> (one). For the C<atan>, C<acot>,
-the argument cannot be C<i> (the imaginary unit).  For the C<tan>,
-C<sec>, C<tanh>, C<sech>, the argument cannot be I<pi/2 + k * pi>, where
-I<k> is any integer.
+or
+
+	atanh(-1): Logarithm of zero.
+	Died at...
+
+For the C<csc>, C<cot>, C<asec>, C<acsc>, C<acot>, C<csch>, C<coth>,
+C<asech>, C<acsch>, the argument cannot be C<0> (zero).  For the
+C<atanh>, C<acoth>, the argument cannot be C<1> (one).  For the
+C<atanh>, C<acoth>, the argument cannot be C<-1> (minus one).  For the
+C<atan>, C<acot>, the argument cannot be C<i> (the imaginary unit).
+For the C<atan>, C<acoth>, the argument cannot be C<-i> (the negative
+imaginary unit).  For the C<tan>, C<sec>, C<tanh>, C<sech>, the
+argument cannot be I<pi/2 + k * pi>, where I<k> is any integer.
 
 =head1 BUGS
 

@@ -296,6 +296,10 @@ if ($notty) {
     $console = "sys\$command";
   }
 
+  if (($^O eq 'MSWin32') and ($emacs or defined $ENV{EMACS})) {
+    $console = undef;
+  }
+
   # Around a bug:
   if (defined $ENV{OS2_SHELL} and ($emacs or $ENV{WINDOWID})) { # In OS/2
     $console = undef;
@@ -428,6 +432,7 @@ sub DB {
 	@typeahead = @$pretype, @typeahead;
       CMD:
 	while (($term || &setterm),
+	       ($term_pid == $$ or &resetterm),
 	       defined ($cmd=&readline("  DB" . ('<' x $level) .
 				       ($#hist+1) . ('>' x $level) .
 				       " "))) {
@@ -1062,7 +1067,7 @@ sub DB {
 	    $evalarg = "\$^D = \$^D | \$DB::db_stop;\n$cmd"; &eval;
 	    if ($onetimeDump) {
 		$onetimeDump = undef;
-	    } else {
+	    } elsif ($term_pid == $$) {
 		print $OUT "\n";
 	    }
 	} continue {		# CMD:
@@ -1386,6 +1391,29 @@ sub setterm {
       $term->SetHistory(@hist);
     }
     ornaments($ornaments) if defined $ornaments;
+    $term_pid = $$;
+}
+
+sub resetterm {			# We forked, so we need a different TTY
+    $term_pid = $$;
+    if (defined &get_fork_TTY) {
+      &get_fork_TTY;
+    } elsif (not defined $fork_TTY 
+	     and defined $ENV{TERM} and $ENV{TERM} eq 'xterm' 
+	     and defined $ENV{WINDOWID} and defined $ENV{DISPLAY}) { 
+        # Possibly _inside_ XTERM
+        open XT, q[3>&1 xterm -title 'Forked Perl debugger' -e sh -c 'tty 1>&3;\
+ sleep 10000000' |];
+        $fork_TTY = <XT>;
+        chomp $fork_TTY;
+    }
+    if (defined $fork_TTY) {
+      TTY($fork_TTY);
+      undef $fork_TTY;
+    } else {
+      print $OUT "Forked, but do not know how to change a TTY.\n",
+          "Define \$DB::fork_TTY or get_fork_TTY().\n";
+    }
 }
 
 sub readline {
@@ -1511,8 +1539,21 @@ sub warn {
 }
 
 sub TTY {
-    if ($term) {
-	&warn("Too late to set TTY, enabled on next `R'!\n") if @_;
+    if (@_ and $term and $term->Features->{newTTY}) {
+      my ($in, $out) = shift;
+      if ($in =~ /,/) {
+	($in, $out) = split /,/, $in, 2;
+      } else {
+	$out = $in;
+      }
+      open IN, $in or die "cannot open `$in' for read: $!";
+      open OUT, ">$out" or die "cannot open `$out' for write: $!";
+      $term->newTTY(\*IN, \*OUT);
+      $IN	= \*IN;
+      $OUT	= \*OUT;
+      return $tty = $in;
+    } elsif ($term and @_) {
+	&warn("Too late to set TTY, enabled on next `R'!\n");
     } 
     $tty = shift if @_;
     $tty or $console;

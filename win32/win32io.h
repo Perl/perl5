@@ -1,6 +1,10 @@
 #ifndef WIN32IO_H
 #define WIN32IO_H
 
+#ifdef __BORLANDC__
+#include <stdarg.h>
+#endif
+
 typedef struct {
 int	signature_begin;
 int *	(*pfnerrno)(void);
@@ -51,12 +55,31 @@ int	(*pfnwrite)(int fd, const void *buf, unsigned int cnt);
 int	(*pfnopenmode)(int mode);
 int	(*pfn_open_osfhandle)(long handle, int flags);
 long	(*pfn_get_osfhandle)(int fd);
-int	(*pfnspawnvpe)(int mode, const char *cmdname, const char *const *argv, const char *const *envp);
+int	(*pfnspawnvp)(int mode, const char *cmdname, const char *const *argv);
 int	(*pfnmkdir)(const char *path);
 int	(*pfnrmdir)(const char *path);
 int	(*pfnchdir)(const char *path);
 int	(*pfnflock)(int fd, int oper);
-int		signature_end;
+int	(*pfnexecvp)(const char *cmdname, const char *const *argv);
+void	(*pfnperror)(const char *str);
+void	(*pfnsetbuf)(FILE *pf, char *buf);
+int	(*pfnsetvbuf)(FILE *pf, char *buf, int type, size_t size);
+int	(*pfnflushall)(void);
+int	(*pfnfcloseall)(void);
+char*	(*pfnfgets)(char *s, int n, FILE *pf);
+char*	(*pfngets)(char *s);
+int	(*pfnfgetc)(FILE *pf);
+int	(*pfnputc)(int c, FILE *pf);
+int	(*pfnputs)(const char *s);
+int	(*pfngetchar)(void);
+int	(*pfnputchar)(int c);
+int	(*pfnfscanf)(FILE *pf, const char *format, ...);
+int	(*pfnscanf)(const char *format, ...);
+void*	(*pfnmalloc)(size_t size);
+void*	(*pfncalloc)(size_t numitems, size_t size);
+void*	(*pfnrealloc)(void *block, size_t size);
+void	(*pfnfree)(void *block);
+int	signature_end;
 } WIN32_IOSUBSYSTEM; 
 
 typedef WIN32_IOSUBSYSTEM	*PWIN32_IOSUBSYSTEM;

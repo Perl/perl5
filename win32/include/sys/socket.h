@@ -85,12 +85,15 @@ struct protoent *win32_getprotoent(void);
 struct servent *win32_getservent(void);
 void win32_sethostent(int stayopen);
 void win32_setnetent(int stayopen);
+struct netent * win32_getnetent(void);
+struct netent * win32_getnetbyname(char *name);
+struct netent * win32_getnetbyaddr(long net, int type);
 void win32_setprotoent(int stayopen);
 void win32_setservent(int stayopen);
-void win32_endhostent();
-void win32_endnetent();
-void win32_endprotoent();
-void win32_endservent();
+void win32_endhostent(void);
+void win32_endnetent(void);
+void win32_endprotoent(void);
+void win32_endservent(void);
 
 //
 // direct to our version

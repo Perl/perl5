@@ -12,7 +12,9 @@
 
 # There is some symbol defined in global.sym and interp.sym
 # that does not present in the WIN32 port but there is no easy
-# way to find them so I just put a exeception list here
+# way to find them so I just put a exception list here
+
+my $CCTYPE = shift || "MSVC";
 
 $skip_sym=<<'!END!OF!SKIP!';
 Perl_SvIV
@@ -119,18 +121,13 @@ Perl_yyname
 Perl_yyrule
 allgvs
 curblock
-curcop
-curcopdb
 curcsv
-envgv
 lastretstr
 mystack_mark
 perl_init_ext
 perl_requirepv
-siggv
 stack
 statusvalue_vms
-tainting
 Perl_safexcalloc
 Perl_safexmalloc
 Perl_safexfree
@@ -139,6 +136,11 @@ Perl_my_memcmp
 Perl_my_memset
 Perl_cshlen
 Perl_cshname
+Perl_condpair_magic
+Perl_magic_mutexfree
+Perl_opsave
+Perl_unlock_condpair
+Perl_vtbl_mutex
 !END!OF!SKIP!
 
 # All symbols have a Perl_ prefix because that's what embed.h
@@ -158,8 +160,8 @@ while (<GLOBAL>) {
 	next if (/_amg[ \t]*$/);
 	$symbol = "Perl_$_";
     	next if ($skip_sym =~ m/$symbol/m);
-	print "\t$symbol";
-	};
+	emit_symbol($symbol);
+}
 close(GLOBAL);
 
 # also add symbols from interp.sym
@@ -175,8 +177,8 @@ while (<INTERP>) {
 	$symbol = $_;
     	next if ($skip_sym =~ m/$symbol/m);
 	#print "\t$symbol";
-	print "\tPerl_$symbol";
-	};
+	emit_symbol("Perl_" . $symbol);
+}
 
 #close(INTERP);
 
@@ -186,8 +188,27 @@ while (<DATA>) {
 	next if (/^#/);
 	$symbol = $_;
     	next if ($skip_sym =~ m/^$symbol/m);
-	print "\t$symbol";
-	};
+	emit_symbol($symbol);
+}
+
+sub emit_symbol {
+	my $symbol = shift;
+	chomp $symbol;
+	if ($CCTYPE eq "BORLAND") {
+		# workaround Borland quirk by exporting both the straight
+		# name and a name with leading underscore.  Note the
+		# alias *must* come after the symbol itself, if both
+		# are to be exported. (Linker bug?)
+		print "\t_$symbol\n";
+		print "\t$symbol = _$symbol\n";
+	}
+	else {
+		# for binary coexistence, export both the symbol and
+		# alias with leading underscore
+		print "\t$symbol\n";
+		print "\t_$symbol = $symbol\n";
+	}
+}
 
 1;
 __DATA__
@@ -259,12 +280,12 @@ win32_close
 win32_eof
 win32_read
 win32_write
-win32_spawnvpe
-win32_spawnle
+win32_spawnvp
 win32_mkdir
 win32_rmdir
 win32_chdir
 win32_flock
+win32_execvp
 win32_htons
 win32_ntohs
 win32_htonl
@@ -307,3 +328,25 @@ win32_sethostent
 win32_setnetent
 win32_setprotoent
 win32_setservent
+win32_getenv
+win32_perror
+win32_setbuf
+win32_setvbuf
+win32_flushall
+win32_fcloseall
+win32_fgets
+win32_gets
+win32_fgetc
+win32_putc
+win32_puts
+win32_getchar
+win32_putchar
+win32_malloc
+win32_calloc
+win32_realloc
+win32_free
+win32stdio
+Perl_win32_init
+RunPerl
+SetIOSubSystem
+GetIOSubSystem

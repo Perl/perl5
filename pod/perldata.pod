@@ -196,7 +196,7 @@ You can truncate an array down to nothing by assigning the null list ()
 to it.  The following are equivalent:
 
     @whatever = ();
-    $#whatever = $[ - 1;
+    $#whatever = -1;
 
 If you evaluate a named array in a scalar context, it returns the length of
 the array.  (Note that this is not true of lists, which return the

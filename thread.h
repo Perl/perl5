@@ -13,8 +13,34 @@
 /* Rats: if dTHR is just blank then the subsequent ";" throws an error */
 #define dTHR extern int errno
 #else
-#include <pthread.h>
 
+#ifdef FAKE_THREADS
+typedef struct thread *perl_thread;
+/* With fake threads, thr is global(ish) so we don't need dTHR */
+#define dTHR extern int errno
+
+/*
+ * Note that SCHEDULE() is only callable from pp code (which
+ * must be expecting to be restarted). We'll have to do
+ * something a bit different for XS code.
+ */
+#define SCHEDULE() return schedule(), op
+
+#define MUTEX_LOCK(m)
+#define MUTEX_UNLOCK(m)
+#define MUTEX_INIT(m)
+#define MUTEX_DESTROY(m)
+#define COND_INIT(c) perl_cond_init(c)
+#define COND_SIGNAL(c) perl_cond_signal(c)
+#define COND_BROADCAST(c) perl_cond_broadcast(c)
+#define COND_WAIT(c, m) STMT_START {	\
+	perl_cond_wait(c);		\
+	SCHEDULE();			\
+    } STMT_END
+#define COND_DESTROY(c)
+#else
+/* POSIXish threads */
+typedef pthread_t perl_thread;
 #ifdef OLD_PTHREADS_API
 #define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
 #define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
@@ -43,6 +69,10 @@
     if (pthread_cond_wait((c), (m))) croak("panic: COND_WAIT"); else 1
 #define COND_DESTROY(c) \
     if (pthread_cond_destroy((c))) croak("panic: COND_DESTROY"); else 1
+
+#define DETACH(t) \
+    if (pthread_detach((t)->Tself)) croak("panic: DETACH"); else 1
+
 /* XXX Add "old" (?) POSIX draft interface too */
 #ifdef OLD_PTHREADS_API
 struct thread *getTHR _((void));
@@ -51,20 +81,29 @@ struct thread *getTHR _((void));
 #define THR ((struct thread *) pthread_getspecific(thr_key))
 #endif /* OLD_PTHREADS_API */
 #define dTHR struct thread *thr = THR
+#endif /* FAKE_THREADS */
+
+#ifndef INIT_THREADS
+#  ifdef NEED_PTHREAD_INIT
+#    define INIT_THREADS pthread_init()
+#  else
+#    define INIT_THREADS NOOP
+#  endif
+#endif
 
 struct thread {
-    pthread_t	Tself;
-
     /* The fields that used to be global */
-    SV **	Tstack_base;
+    /* Important ones in the first cache line (if alignment is done right) */
     SV **	Tstack_sp;
-    SV **	Tstack_max;
-
 #ifdef OP_IN_REGISTER
     OP *	Topsave;
 #else
     OP *	Top;
 #endif
+    SV **	Tcurpad;
+    SV **	Tstack_base;
+
+    SV **	Tstack_max;
 
     I32 *	Tscopestack;
     I32		Tscopestack_ix;
@@ -82,12 +121,8 @@ struct thread {
     I32 *	Tmarkstack_ptr;
     I32 *	Tmarkstack_max;
 
-    SV **	Tcurpad;
-
     SV *	TSv;
     XPV *	TXpv;
-    char	Tbuf[2048];	/* should be a global locked by a mutex */
-    char	Ttokenbuf[256];	/* should be a global locked by a mutex */
     struct stat	Tstatbuf;
     struct tms	Ttimesbuf;
     
@@ -98,8 +133,6 @@ struct thread {
     /* XXX What about magic variables such as $/, $? and so on? */
     HV *	Tdefstash;
     HV *	Tcurstash;
-    AV *	Tpad;
-    AV *	Tpadname;
 
     SV **	Ttmps_stack;
     I32		Ttmps_ix;
@@ -111,45 +144,59 @@ struct thread {
     int		Tdelaymagic;
     bool	Tdirty;
     U8		Tlocalizing;
+    COP *	Tcurcop;
 
     CONTEXT *	Tcxstack;
     I32		Tcxstack_ix;
     I32		Tcxstack_max;
 
-    AV *	Tstack;
+    AV *	Tcurstack;
     AV *	Tmainstack;
     JMPENV *	Ttop_env;
     I32		Trunlevel;
 
     /* XXX Sort stuff, firstgv, secongv and so on? */
 
-    pthread_mutex_t *	Tthreadstart_mutexp;
+    perl_thread	Tself;
+    SV *	Toursv;
+    perl_mutex *Tthreadstart_mutexp;
     HV *	Tcvcache;
-    U32		Tthrflags;
+    U32		flags;
+    U32		tid;
+    struct thread *next, *prev;		/* Circular linked list of threads */
+
+#ifdef FAKE_THREADS
+    perl_thread next_run, prev_run;	/* Linked list of runnable threads */
+    perl_cond	wait_queue;		/* Wait queue that we are waiting on */
+    IV		private;		/* Holds data across time slices */
+    I32		savemark;		/* Holds MARK for thread join values */
+#endif /* FAKE_THREADS */
 };
 
 typedef struct thread *Thread;
 
-/* Values and macros for thrflags */
-#define THR_STATE_MASK	3
-#define THR_NORMAL	0
-#define THR_DETACHED	1
-#define THR_JOINED	2
-#define THR_DEAD	3
+/* Values and macros for thr->flags */
+#define THRf_STATE_MASK	3
+#define THRf_NORMAL	0
+#define THRf_DETACHED	1
+#define THRf_JOINED	2
+#define THRf_DEAD	3
 
-#define ThrSTATE(t)	(t->Tthrflags & THR_STATE_MASK)
+#define THRf_DIE_FATAL	4
+
+#define ThrSTATE(t)	(t->flags & THRf_STATE_MASK)
 #define ThrSETSTATE(t, s) STMT_START {		\
-	(t)->Tthrflags &= ~THR_STATE_MASK;	\
-	(t)->Tthrflags |= (s);			\
+	(t)->flags &= ~THRf_STATE_MASK;	\
+	(t)->flags |= (s);			\
 	DEBUG_L(fprintf(stderr, "thread 0x%lx set to state %d\n", \
 			(unsigned long)(t), (s))); \
     } STMT_END
 
 typedef struct condpair {
-    pthread_mutex_t	mutex;
-    pthread_cond_t	owner_cond;
-    pthread_cond_t	cond;
-    Thread		owner;
+    perl_mutex	mutex;
+    perl_cond	owner_cond;
+    perl_cond	cond;
+    Thread	owner;
 } condpair_t;
 
 #define MgMUTEXP(mg) (&((condpair_t *)(mg->mg_ptr))->mutex)
@@ -160,7 +207,7 @@ typedef struct condpair {
 #undef	stack_base
 #undef	stack_sp
 #undef	stack_max
-#undef	stack
+#undef	curstack
 #undef	mainstack
 #undef	markstack
 #undef	markstack_ptr
@@ -174,17 +221,31 @@ typedef struct condpair {
 #undef	retstack
 #undef	retstack_ix
 #undef	retstack_max
+#undef	curcop
 #undef	cxstack
 #undef	cxstack_ix
 #undef	cxstack_max
+#undef	defstash
+#undef	curstash
+#undef	tmps_stack
+#undef	tmps_floor
+#undef	tmps_ix
+#undef	tmps_max
 #undef	curpad
 #undef	Sv
 #undef	Xpv
+#undef	statbuf
+#undef	timesbuf
 #undef	top_env
 #undef	runlevel
 #undef	in_eval
+#undef	restartop
+#undef	delaymagic
+#undef	dirty
+#undef	localizing
 
 #define self		(thr->Tself)
+#define oursv		(thr->Toursv)
 #define stack_base	(thr->Tstack_base)
 #define stack_sp	(thr->Tstack_sp)
 #define stack_max	(thr->Tstack_max)
@@ -194,7 +255,9 @@ typedef struct condpair {
 #undef	op
 #define op		(thr->Top)
 #endif
+#define	curcop		(thr->Tcurcop)
 #define	stack		(thr->Tstack)
+#define curstack	(thr->Tcurstack)
 #define	mainstack	(thr->Tmainstack)
 #define	markstack	(thr->Tmarkstack)
 #define	markstack_ptr	(thr->Tmarkstack_ptr)
@@ -218,10 +281,10 @@ typedef struct condpair {
 #define curpad		(thr->Tcurpad)
 #define Sv		(thr->TSv)
 #define Xpv		(thr->TXpv)
+#define statbuf		(thr->Tstatbuf)
+#define timesbuf	(thr->Ttimesbuf)
 #define defstash	(thr->Tdefstash)
 #define curstash	(thr->Tcurstash)
-#define pad		(thr->Tpad)
-#define padname		(thr->Tpadname)
 
 #define tmps_stack	(thr->Ttmps_stack)
 #define tmps_ix		(thr->Ttmps_ix)
@@ -239,5 +302,4 @@ typedef struct condpair {
 
 #define	threadstart_mutexp	(thr->Tthreadstart_mutexp)
 #define	cvcache		(thr->Tcvcache)
-#define	thrflags	(thr->Tthrflags)
 #endif /* USE_THREADS */

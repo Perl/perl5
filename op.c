@@ -637,6 +637,7 @@ OP *o;
 {
     if (dowarn &&
 	o->op_type == OP_SASSIGN && cBINOPo->op_first->op_type == OP_CONST) {
+	dTHR;
 	line_t oldline = curcop->cop_line;
 
 	if (copline != NOLINE)
@@ -697,7 +698,7 @@ OP *o;
 	    else
 		scalar(kid);
 	}
-	curcop = &compiling;
+	WITH_THR(curcop = &compiling);
 	break;
     case OP_SCOPE:
     case OP_LINESEQ:
@@ -708,7 +709,7 @@ OP *o;
 	    else
 		scalar(kid);
 	}
-	curcop = &compiling;
+	WITH_THR(curcop = &compiling);
 	break;
     }
     return o;
@@ -821,7 +822,7 @@ OP *o;
 
     case OP_NEXTSTATE:
     case OP_DBSTATE:
-	curcop = ((COP*)o);		/* for warning below */
+	WITH_THR(curcop = ((COP*)o));		/* for warning below */
 	break;
 
     case OP_CONST:
@@ -860,7 +861,7 @@ OP *o;
 
     case OP_NULL:
 	if (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)
-	    curcop = ((COP*)o);		/* for warning below */
+	    WITH_THR(curcop = ((COP*)o));	/* for warning below */
 	if (o->op_flags & OPf_STACKED)
 	    break;
 	/* FALL THROUGH */
@@ -957,7 +958,7 @@ OP *o;
 	    else
 		list(kid);
 	}
-	curcop = &compiling;
+	WITH_THR(curcop = &compiling);
 	break;
     case OP_SCOPE:
     case OP_LINESEQ:
@@ -967,7 +968,7 @@ OP *o;
 	    else
 		list(kid);
 	}
-	curcop = &compiling;
+	WITH_THR(curcop = &compiling);
 	break;
     case OP_REQUIRE:
 	/* all requires must return a boolean value */
@@ -989,6 +990,7 @@ OP *o;
 	     o->op_type == OP_LEAVE ||
 	     o->op_type == OP_LEAVETRY)
 	{
+	    dTHR;
 	    for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling) {
 		if (kid->op_sibling) {
 		    scalarvoid(kid);
@@ -1034,6 +1036,7 @@ I32 type;
 
     switch (o->op_type) {
     case OP_UNDEF:
+	modcount++;
 	return o;
     case OP_CONST:
 	if (!(o->op_private & (OPpCONST_ARYBASE)))
@@ -1107,6 +1110,8 @@ I32 type;
 
     case OP_RV2AV:
     case OP_RV2HV:
+	if (!type && cUNOPo->op_first->op_type != OP_GV)
+	    croak("Can't localize through a reference");
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS) {
 	    modcount = 10000;
 	    return o;		/* Treat \(@foo) like ordinary list. */
@@ -1128,7 +1133,7 @@ I32 type;
 	break;
     case OP_RV2SV:
 	if (!type && cUNOPo->op_first->op_type != OP_GV)
-	    croak("Can't localize a reference");
+	    croak("Can't localize through a reference");
 	ref(cUNOPo->op_first, o->op_type); 
 	/* FALL THROUGH */
     case OP_GV:
@@ -1447,7 +1452,7 @@ scope(o)
 OP *o;
 {
     if (o) {
-	if (o->op_flags & OPf_PARENS || perldb || tainting) {
+	if (o->op_flags & OPf_PARENS || PERLDB_NOOPT || tainting) {
 	    o = prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
 	    o->op_type = OP_LEAVE;
 	    o->op_ppaddr = ppaddr[OP_LEAVE];
@@ -1534,7 +1539,7 @@ OP *o;
 	compcv = 0;
 
 	/* Register with debugger */
-	if (perldb) {
+	if (PERLDB_INTER) {
 	    CV *cv = perl_get_cv("DB::postponed", FALSE);
 	    if (cv) {
 		dSP;
@@ -1603,6 +1608,16 @@ register OP *o;
 
     if (!(opargs[type] & OA_FOLDCONST))
 	goto nope;
+
+    switch (type) {
+    case OP_SPRINTF:
+    case OP_UCFIRST:
+    case OP_LCFIRST:
+    case OP_UC:
+    case OP_LC:
+	if (o->op_private & OPpLOCALE)
+	    goto nope;
+    }
 
     if (error_count)
 	goto nope;		/* Don't try to run w/ errors */
@@ -2064,6 +2079,7 @@ OP *repl;
     if (o->op_type == OP_TRANS)
 	return pmtrans(o, expr, repl);
 
+    hints |= HINT_BLOCK_SCOPE;
     pm = (PMOP*)o;
 
     if (expr->op_type == OP_CONST) {
@@ -2528,7 +2544,7 @@ OP *o;
     register COP *cop;
 
     Newz(1101, cop, 1, COP);
-    if (perldb && curcop->cop_line && curstash != debstash) {
+    if (PERLDB_LINE && curcop->cop_line && curstash != debstash) {
 	cop->op_type = OP_DBSTATE;
 	cop->op_ppaddr = ppaddr[ OP_DBSTATE ];
     }
@@ -2559,7 +2575,7 @@ OP *o;
     cop->cop_filegv = (GV*)SvREFCNT_inc(curcop->cop_filegv);
     cop->cop_stash = curstash;
 
-    if (perldb && curstash != debstash) {
+    if (PERLDB_LINE && curstash != debstash) {
 	SV **svp = av_fetch(GvAV(curcop->cop_filegv),(I32)cop->cop_line, FALSE);
 	if (svp && *svp != &sv_undef && !SvIOK(*svp)) {
 	    (void)SvIOK_on(*svp);
@@ -2996,11 +3012,6 @@ CV *cv;
 	Safefree(CvMUTEXP(cv));
 	CvMUTEXP(cv) = 0;
     }
-    if (CvCONDP(cv)) {
-	COND_DESTROY(CvCONDP(cv));
-	Safefree(CvCONDP(cv));
-	CvCONDP(cv) = 0;
-    }
 #endif /* USE_THREADS */
 
     if (!CvXSUB(cv) && CvROOT(cv)) {
@@ -3129,10 +3140,8 @@ CV* outside;
 	CvANON_on(cv);
 
 #ifdef USE_THREADS
-    New(666, CvMUTEXP(cv), 1, pthread_mutex_t);
+    New(666, CvMUTEXP(cv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(cv));
-    New(666, CvCONDP(cv), 1, pthread_cond_t);
-    COND_INIT(CvCONDP(cv));
     CvOWNER(cv)		= 0;
 #endif /* USE_THREADS */
     CvFILEGV(cv)	= CvFILEGV(proto);
@@ -3371,10 +3380,8 @@ OP *block;
     CvSTASH(cv) = curstash;
 #ifdef USE_THREADS
     CvOWNER(cv) = 0;
-    New(666, CvMUTEXP(cv), 1, pthread_mutex_t);
+    New(666, CvMUTEXP(cv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(cv));
-    New(666, CvCONDP(cv), 1, pthread_cond_t);
-    COND_INIT(CvCONDP(cv));
 #endif /* USE_THREADS */
 
     if (ps)
@@ -3452,7 +3459,7 @@ OP *block;
     if (name) {
 	char *s;
 
-	if (perldb && curstash != debstash) {
+	if (PERLDB_SUBLINE && curstash != debstash) {
 	    SV *sv = NEWSV(0,0);
 	    SV *tmpstr = sv_newmortal();
 	    static GV *db_postponed;
@@ -3508,10 +3515,10 @@ OP *block;
 	    av_store(endav, 0, (SV *)cv);
 	    GvCV(gv) = 0;
 	}
-	else if (strEQ(s, "RESTART") && !error_count) {
-	    if (!restartav)
-		restartav = newAV();
-	    av_push(restartav, SvREFCNT_inc(cv));
+	else if (strEQ(s, "INIT") && !error_count) {
+	    if (!initav)
+		initav = newAV();
+	    av_push(initav, SvREFCNT_inc(cv));
 	}
     }
 
@@ -3578,10 +3585,8 @@ char *filename;
     }
     CvGV(cv) = (GV*)SvREFCNT_inc(gv);
 #ifdef USE_THREADS
-    New(666, CvMUTEXP(cv), 1, pthread_mutex_t);
+    New(666, CvMUTEXP(cv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(cv));
-    New(666, CvCONDP(cv), 1, pthread_cond_t);
-    COND_INIT(CvCONDP(cv));
     CvOWNER(cv) = 0;
 #endif /* USE_THREADS */
     CvFILEGV(cv) = gv_fetchfile(filename);
@@ -3606,10 +3611,10 @@ char *filename;
 	    av_store(endav, 0, (SV *)cv);
 	    GvCV(gv) = 0;
 	}
-	else if (strEQ(s, "RESTART")) {
-	    if (!restartav)
-		restartav = newAV();
-	    av_push(restartav, (SV *)cv);
+	else if (strEQ(s, "INIT")) {
+	    if (!initav)
+		initav = newAV();
+	    av_push(initav, (SV *)cv);
 	}
     }
     else
@@ -4488,12 +4493,25 @@ OP *o;
     I32 type = o->op_type;
 
     if (!(o->op_flags & OPf_KIDS)) {
+	OP *argop;
+	
 	op_free(o);
-	return newUNOP(type, 0,
-	    scalar(newUNOP(OP_RV2AV, 0,
-		scalar(newGVOP(OP_GV, 0, subline 
-			       ? defgv 
-			       : gv_fetchpv("ARGV", TRUE, SVt_PVAV) )))));
+#ifdef USE_THREADS
+	if (subline) {
+	    argop = newOP(OP_PADAV, OPf_REF);
+	    argop->op_targ = 0;		/* curpad[0] is @_ */
+	}
+	else {
+	    argop = newUNOP(OP_RV2AV, 0,
+		scalar(newGVOP(OP_GV, 0,
+		    gv_fetchpv("ARGV", TRUE, SVt_PVAV))));
+	}
+#else
+	argop = newUNOP(OP_RV2AV, 0,
+	    scalar(newGVOP(OP_GV, 0, subline ?
+			   defgv : gv_fetchpv("ARGV", TRUE, SVt_PVAV))));
+#endif /* USE_THREADS */
+	return newUNOP(type, 0, scalar(argop));
     }
     return scalar(modkids(ck_fun(o), type));
 }
@@ -4636,7 +4654,7 @@ OP *o;
 	}
     }
     o->op_private |= (hints & HINT_STRICT_REFS);
-    if (perldb && curstash != debstash)
+    if (PERLDB_SUB && curstash != debstash)
 	o->op_private |= OPpENTERSUB_DB;
     while (o2 != cvop) {
 	if (proto) {

@@ -62,7 +62,10 @@ while (<>) {
 	$exit = 1;
     }
     $last_blank = /^\s+$/;
-    close(ARGV) if eof;
+    if (eof) {
+	close(ARGV);
+	$last_blank = 0;
+    }
 }
 exit $exit
 !NO!SUBS!

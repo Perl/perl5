@@ -88,8 +88,9 @@
 # Initial revision
 #
 
-require 'chat2.pl';
-eval "require 'socket.ph'" || eval "require 'sys/socket.ph'" || die "socket.ph missing: $!\n";
+require 'chat2.pl';	# into main
+eval "require 'socket.ph'" || eval "require 'sys/socket.ph'"
+	|| die "socket.ph missing: $!\n";
 
 
 package ftp;

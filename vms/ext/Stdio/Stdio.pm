@@ -76,7 +76,7 @@ __END__
 
 =head1 NAME
 
-VMS::Stdio
+VMS::Stdio - standard I/O functions via VMS extensions
 
 =head1 SYNOPSIS
 
@@ -99,7 +99,7 @@ remove("another.file");
 
 =head1 DESCRIPTION
 
-This package gives Perl scripts access to VMS extensions to several
+This package gives Perl scripts access via VMS extensions to several
 C stdio operations not available through Perl's CORE I/O functions.
 The specific routines are described below.  These functions are
 prototyped as unary operators, with the exception of C<vmsopen>
@@ -140,6 +140,8 @@ will generate a warning, and will be routed to the equivalent
 VMS::Stdio function.  This compatibility interface will be
 removed in a future release of this extension, so please
 update your code to use the new routines.
+
+=over
 
 =item flush
 

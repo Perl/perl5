@@ -2,19 +2,20 @@ package ExtUtils::Liblist;
 use vars qw($VERSION);
 # Broken out of MakeMaker from version 4.11
 
-$VERSION = substr q$Revision: 1.2201 $, 10;
+$VERSION = substr q$Revision: 1.25 $, 10;
 
 use Config;
 use Cwd 'cwd';
 use File::Basename;
 
 sub ext {
-  if   ($^O eq 'VMS') { return &_vms_ext;      }
-  else                { return &_unix_os2_ext; }
+  if   ($^O eq 'VMS')     { return &_vms_ext;      }
+  elsif($^O eq 'MSWin32') { return &_win32_ext;    }
+  else                    { return &_unix_os2_ext; }
 }
 
 sub _unix_os2_ext {
-    my($self,$potential_libs, $Verbose) = @_;
+    my($self,$potential_libs, $verbose) = @_;
     if ($^O =~ 'os2' and $Config{libs}) { 
 	# Dynamic libraries are not transitive, so we may need including
 	# the libraries linked against perl.dll again.
@@ -23,7 +24,7 @@ sub _unix_os2_ext {
 	$potential_libs .= $Config{libs};
     }
     return ("", "", "", "") unless $potential_libs;
-    print STDOUT "Potential libraries are '$potential_libs':\n" if $Verbose;
+    print STDOUT "Potential libraries are '$potential_libs':\n" if $verbose;
 
     my($so)   = $Config{'so'};
     my($libs) = $Config{'libs'};
@@ -49,7 +50,7 @@ sub _unix_os2_ext {
 	    my($ptype) = $1;
 	    unless (-d $thislib){
 		print STDOUT "$ptype$thislib ignored, directory does not exist\n"
-			if $Verbose;
+			if $verbose;
 		next;
 	    }
 	    unless ($self->file_name_is_absolute($thislib)) {
@@ -124,10 +125,10 @@ sub _unix_os2_ext {
 		 #
 		 # , the compilation tools expand the environment variables.)
 	    } else {
-		print STDOUT "$thislib not found in $thispth\n" if $Verbose;
+		print STDOUT "$thislib not found in $thispth\n" if $verbose;
 		next;
 	    }
-	    print STDOUT "'-l$thislib' found at $fullname\n" if $Verbose;
+	    print STDOUT "'-l$thislib' found at $fullname\n" if $verbose;
 	    my($fullnamedir) = dirname($fullname);
 	    push @ld_run_path, $fullnamedir unless $ld_run_path_seen{$fullnamedir}++;
 	    $found++;
@@ -179,6 +180,81 @@ sub _unix_os2_ext {
     }
     return ('','','','') unless $found;
     ("@extralibs", "@bsloadlibs", "@ldloadlibs",join(":",@ld_run_path));
+}
+
+sub _win32_ext {
+    my($self, $potential_libs, $verbose) = @_;
+
+    # If user did not supply a list, we punt.
+    # (caller should probably use the list in $Config{libs})
+    return ("", "", "", "") unless $potential_libs;
+
+    my($so)   = $Config{'so'};
+    my($libs) = $Config{'libs'};
+    my($libpth) = $Config{'libpth'};
+    my($libext) = $Config{'lib_ext'} || ".lib";
+
+    if ($libs and $potential_libs !~ /:nodefault/i) { 
+	# If Config.pm defines a set of default libs, we always
+	# tack them on to the user-supplied list, unless the user
+	# specified :nodefault
+
+	$potential_libs .= " " if $potential_libs;
+	$potential_libs .= $libs;
+    }
+    print STDOUT "Potential libraries are '$potential_libs':\n" if $verbose;
+
+    # compute $extralibs from $potential_libs
+
+    my(@searchpath); # from "-L/path" entries in $potential_libs
+    my(@libpath) = split " ", $libpth;
+    my(@extralibs);
+    my($fullname, $thislib, $thispth);
+    my($pwd) = cwd(); # from Cwd.pm
+    my($lib) = '';
+    my($found) = 0;
+
+    foreach $thislib (split ' ', $potential_libs){
+
+	# Handle possible linker path arguments.
+	if ($thislib =~ s/^-L// and not -d $thislib) {
+	    print STDOUT "-L$thislib ignored, directory does not exist\n"
+		if $verbose;
+	    next;
+	}
+	elsif (-d $thislib) {
+	    unless ($self->file_name_is_absolute($thislib)) {
+	      print STDOUT "Warning: -L$thislib changed to -L$pwd/$thislib\n";
+	      $thislib = $self->catdir($pwd,$thislib);
+	    }
+	    push(@searchpath, $thislib);
+	    next;
+	}
+
+	# Handle possible library arguments.
+	$thislib =~ s/^-l//;
+	$thislib .= $libext if $thislib !~ /\Q$libext\E$/i;
+
+	my($found_lib)=0;
+	foreach $thispth (@searchpath, @libpath){
+	    unless (-f ($fullname="$thispth\\$thislib")) {
+		print STDOUT "$thislib not found in $thispth\n" if $verbose;
+		next;
+	    }
+	    print STDOUT "'$thislib' found at $fullname\n" if $verbose;
+	    $found++;
+	    $found_lib++;
+	    push(@extralibs, $fullname);
+	    last;
+	}
+	print STDOUT "Note (probably harmless): "
+		     ."No library found for '$thislib'\n"
+	    unless $found_lib>0;
+    }
+    return ('','','','') unless $found;
+    $lib = join(' ',@extralibs);
+    print "Result: $lib\n" if $verbose;
+    wantarray ? ($lib, '', $lib, '') : $lib;
 }
 
 
@@ -294,7 +370,7 @@ sub _vms_ext {
       if ($ctype) { 
         eval '$' . $ctype . "{'$cand'}++";
         die "Error recording library: $@" if $@;
-        print STDOUT "\tFound as $cand (really $ctest), type $ctype\n" if $verbose > 1;
+        print STDOUT "\tFound as $cand (really $test), type $ctype\n" if $verbose > 1;
         next LIB;
       }
     }
@@ -327,7 +403,7 @@ ExtUtils::Liblist - determine libraries to use and how to use them
 
 C<require ExtUtils::Liblist;>
 
-C<ExtUtils::Liblist::ext($potential_libs, $Verbose);>
+C<ExtUtils::Liblist::ext($self, $potential_libs, $verbose);>
 
 =head1 DESCRIPTION
 
@@ -338,7 +414,9 @@ C<-L/another/path> this will affect the searches for all subsequent
 libraries.
 
 It returns an array of four scalar values: EXTRALIBS, BSLOADLIBS,
-LDLOADLIBS, and LD_RUN_PATH.
+LDLOADLIBS, and LD_RUN_PATH.  Some of these don't mean anything
+on VMS and Win32.  See the details about those platform specifics
+below.
 
 Dependent libraries can be linked in one of three ways:
 
@@ -433,6 +511,58 @@ In general, the VMS version of ext() should properly handle input from
 extensions originally designed for a Unix or VMS environment.  If you
 encounter problems, or discover cases where the search could be improved,
 please let us know.
+
+=head2 Win32 implementation
+
+The version of ext() which is executed under Win32 differs from the
+Unix-OS/2 version in several respects:
+
+=over 2
+
+=item *
+
+Input library and path specifications are accepted with or without the
+C<-l> and C<-L> prefices used by Unix linkers.  C<-lfoo> specifies the
+library C<foo.lib> and C<-Ls:ome\dir> specifies a directory to look for
+the libraries that follow.  If neither prefix is present, a token is
+considered a directory to search if it is in fact a directory, and a
+library to search for otherwise.  The C<$Config{lib_ext}> suffix will
+be appended to any entries that are not directories and don't already
+have the suffix.  Authors who wish their extensions to be portable to
+Unix or OS/2 should use the Unix prefixes, since the Unix-OS/2 version
+of ext() requires them.
+
+=item *
+
+Entries cannot be plain object files, as many Win32 compilers will
+not handle object files in the place of libraries.
+
+=item *
+
+If C<$potential_libs> is empty, the return value will be empty.
+Otherwise, the libraries specified by C<$Config{libs}> (see Config.pm)
+will be appended to the list of C<$potential_libs>.  The libraries
+will be searched for in the directories specified in C<$potential_libs>
+as well as in C<$Config{libpth}>. For each library that is found,  a
+space-separated list of fully qualified library pathnames is generated.
+You may specify an entry that matches C</:nodefault/i> in
+C<$potential_libs> to disable the appending of default libraries
+found in C<$Config{libs}> (this should be only needed very rarely).
+
+=item *
+
+The libraries specified may be a mixture of static libraries and
+import libraries (to link with DLLs).  Since both kinds are used
+pretty transparently on the win32 platform, we do not attempt to
+distinguish between them.
+
+=item *
+
+LDLOADLIBS and EXTRALIBS are always identical under Win32, and BSLOADLIBS
+and LD_RUN_PATH are always empty (this may change in future).
+
+=back
+
 
 =head1 SEE ALSO
 

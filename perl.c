@@ -75,13 +75,23 @@ static void init_predump_symbols _((void));
 static void my_exit_jump _((void)) __attribute__((noreturn));
 static void nuke_stacks _((void));
 static void open_script _((char *, bool, SV *));
-#ifdef USE_THREADS
-static void thread_destruct _((void *));
-#endif /* USE_THREADS */
 static void usage _((char *));
 static void validate_suid _((char *, char*));
 
 static int fdscript = -1;
+
+#if defined(DEBUGGING) && defined(USE_THREADS) && defined(__linux__)
+#include <asm/sigcontext.h>
+static void
+catch_sigsegv(int signo, struct sigcontext_struct sc)
+{
+    signal(SIGSEGV, SIG_DFL);
+    fprintf(stderr, "Segmentation fault dereferencing 0x%lx\n"
+		    "return_address = 0x%lx, eip = 0x%lx\n",
+	    	    sc.cr2, __builtin_return_address(0), sc.eip);
+    fprintf(stderr, "thread = 0x%lx\n", (unsigned long)THR); 
+}
+#endif
 
 PerlInterpreter *
 perl_alloc()
@@ -97,9 +107,9 @@ void
 perl_construct( sv_interp )
 register PerlInterpreter *sv_interp;
 {
-#ifdef USE_THREADS
+#if defined(USE_THREADS) && !defined(FAKE_THREADS)
     struct thread *thr;
-#endif /* USE_THREADS */
+#endif
     
     if (!(curinterp = sv_interp))
 	return;
@@ -108,23 +118,38 @@ register PerlInterpreter *sv_interp;
     Zero(sv_interp, 1, PerlInterpreter);
 #endif
 
+   /* Init the real globals (and main thread)? */
+    if (!linestr) {
 #ifdef USE_THREADS
-#ifdef NEED_PTHREAD_INIT
-    pthread_init();
-#endif /* NEED_PTHREAD_INIT */
-    New(53, thr, 1, struct thread);
-    self = pthread_self();
-    if (pthread_key_create(&thr_key, thread_destruct))
-	croak("panic: pthread_key_create");
-    if (pthread_setspecific(thr_key, (void *) thr))
-	croak("panic: pthread_setspecific");
-    nthreads = 1;
-    cvcache = newHV();
-    thrflags = 0;
+    	INIT_THREADS;
+	New(53, thr, 1, struct thread);
+	MUTEX_INIT(&malloc_mutex);
+	MUTEX_INIT(&sv_mutex);
+	MUTEX_INIT(&eval_mutex);
+	COND_INIT(&eval_cond);
+	MUTEX_INIT(&threads_mutex);
+	COND_INIT(&nthreads_cond);
+	nthreads = 1;
+	cvcache = newHV();
+	curcop = &compiling;
+	thr->flags = THRf_NORMAL;
+	thr->next = thr;
+	thr->prev = thr;
+#ifdef FAKE_THREADS
+	self = thr;
+	thr->next_run = thr->prev_run = thr;
+	thr->wait_queue = 0;
+	thr->private = 0;
+	thr->tid = 0;
+#else
+	self = pthread_self();
+	if (pthread_key_create(&thr_key, 0))
+	    croak("panic: pthread_key_create");
+	if (pthread_setspecific(thr_key, (void *) thr))
+	    croak("panic: pthread_setspecific");
+#endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
 
-    /* Init the real globals? */
-    if (!linestr) {
 	linestr = NEWSV(65,80);
 	sv_upgrade(linestr,SVt_PVIV);
 
@@ -143,12 +168,7 @@ register PerlInterpreter *sv_interp;
 	nrs = newSVpv("\n", 1);
 	rs = SvREFCNT_inc(nrs);
 
-	MUTEX_INIT(&malloc_mutex);
-	MUTEX_INIT(&sv_mutex);
-	MUTEX_INIT(&eval_mutex);
-	MUTEX_INIT(&nthreads_mutex);
-	COND_INIT(&nthreads_cond);
-
+	sighandlerp = sighandler;
 	pidstatus = newHV();
 
 #ifdef MSDOS
@@ -205,28 +225,6 @@ register PerlInterpreter *sv_interp;
     ENTER;
 }
 
-#ifdef USE_THREADS
-void
-thread_destruct(arg)
-void *arg;
-{
-    struct thread *thr = (struct thread *) arg;
-    /*
-     * Decrement the global thread count and signal anyone listening.
-     * The only official thread listening is the original thread while
-     * in perl_destruct. It waits until it's the only thread and then
-     * performs END blocks and other process clean-ups.
-     */
-    DEBUG_L(fprintf(stderr, "thread_destruct: 0x%lx\n", (unsigned long) thr));
-
-    Safefree(thr);
-    MUTEX_LOCK(&nthreads_mutex);
-    nthreads--;
-    COND_BROADCAST(&nthreads_cond);
-    MUTEX_UNLOCK(&nthreads_mutex);
-}    
-#endif /* USE_THREADS */
-
 void
 perl_destruct(sv_interp)
 register PerlInterpreter *sv_interp;
@@ -235,24 +233,39 @@ register PerlInterpreter *sv_interp;
     int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     I32 last_sv_count;
     HV *hv;
+    Thread t;
 
     if (!(curinterp = sv_interp))
 	return;
 
 #ifdef USE_THREADS
-    /* Wait until all user-created threads go away */
-    MUTEX_LOCK(&nthreads_mutex);
+#ifndef FAKE_THREADS
+    /* Detach any remaining joinable threads apart from ourself */
+    MUTEX_LOCK(&threads_mutex);
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			  "perl_destruct: detaching remaining %d threads\n",
+			  nthreads - 1));
+    for (t = thr->next; t != thr; t = t->next) {
+	if (ThrSTATE(t) == THRf_NORMAL) {
+	    DETACH(t);
+	    ThrSETSTATE(t, THRf_DETACHED);
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "...detached %p\n", t));
+	}
+    }
+    /* Now wait for the thread count nthreads to drop to one */
     while (nthreads > 1)
     {
-	DEBUG_L(fprintf(stderr, "perl_destruct: waiting for %d threads\n",
-			nthreads - 1));
-	COND_WAIT(&nthreads_cond, &nthreads_mutex);
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "perl_destruct: waiting for %d threads\n",
+			      nthreads - 1));
+	COND_WAIT(&nthreads_cond, &threads_mutex);
     }
     /* At this point, we're the last thread */
-    MUTEX_UNLOCK(&nthreads_mutex);
-    DEBUG_L(fprintf(stderr, "perl_destruct: armageddon has arrived\n"));
-    MUTEX_DESTROY(&nthreads_mutex);
+    MUTEX_UNLOCK(&threads_mutex);
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "perl_destruct: armageddon has arrived\n"));
+    MUTEX_DESTROY(&threads_mutex);
     COND_DESTROY(&nthreads_cond);
+#endif /* !defined(FAKE_THREADS) */
 #endif /* USE_THREADS */
 
     destruct_level = perl_destruct_level;
@@ -406,8 +419,10 @@ register PerlInterpreter *sv_interp;
     /* startup and shutdown function lists */
     SvREFCNT_dec(beginav);
     SvREFCNT_dec(endav);
+    SvREFCNT_dec(initav);
     beginav = Nullav;
     endav = Nullav;
+    initav = Nullav;
 
     /* temp stack during pp_sort() */
     SvREFCNT_dec(sortstack);
@@ -506,6 +521,7 @@ register PerlInterpreter *sv_interp;
     MUTEX_DESTROY(&sv_mutex);
     MUTEX_DESTROY(&malloc_mutex);
     MUTEX_DESTROY(&eval_mutex);
+    COND_DESTROY(&eval_cond);
 #endif /* USE_THREADS */
 
     /* As the absolutely last thing, free the non-arena SV for mess() */
@@ -604,6 +620,7 @@ setuid perl scripts securely.\n");
 	/* my_exit() was called */
 	while (scopestack_ix > oldscope)
 	    LEAVE;
+	FREETMPS;
 	curstash = defstash;
 	if (endav)
 	    call_list(oldscope, endav);
@@ -770,12 +787,23 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		cddir = savepv(s);
 	    break;
 	case '-':
+	    if (*++s) { /* catch use of gnu style long options */
+		if (strEQ(s, "version")) {
+		    s = "v";
+		    goto reswitch;
+		}
+		if (strEQ(s, "help")) {
+		    s = "h";
+		    goto reswitch;
+		}
+		croak("Unrecognized switch: --%s  (-h will show valid options)",s);
+	    }
 	    argc--,argv++;
 	    goto switch_end;
 	case 0:
 	    break;
 	default:
-	    croak("Unrecognized switch: -%s",s);
+	    croak("Unrecognized switch: -%s  (-h will show valid options)",s);
 	}
     }
   switch_end:
@@ -841,11 +869,10 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #ifdef USE_THREADS
     av_store(comppad_name, 0, newSVpv("@_", 2));
     curpad[0] = (SV*)newAV();
+    SvPADMY_on(curpad[0]);	/* XXX Needed? */
     CvOWNER(compcv) = 0;
-    New(666, CvMUTEXP(compcv), 1, pthread_mutex_t);
+    New(666, CvMUTEXP(compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(compcv));
-    New(666, CvCONDP(compcv), 1, pthread_cond_t);
-    COND_INIT(CvCONDP(compcv));
 #endif /* USE_THREADS */
 
     comppadlist = newAV();
@@ -857,8 +884,12 @@ print \"  \\@INC:\\n    @INC\\n\";");
     boot_core_UNIVERSAL();
     if (xsinit)
 	(*xsinit)();	/* in case linked C routines want magical variables */
-#ifdef VMS
+#if defined(VMS) || defined(WIN32)
     init_os_extras();
+#endif
+
+#if defined(DEBUGGING) && defined(USE_THREADS) && defined(__linux__)
+    DEBUG_L(signal(SIGSEGV, (void(*)(int))catch_sigsegv););
 #endif
 
     init_predump_symbols();
@@ -901,7 +932,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     LEAVE;
     FREETMPS;
 
-#ifdef DEBUGGING_MSTATS
+#ifdef MYMALLOC
     if ((s=getenv("PERL_DEBUG_MSTATS")) && atoi(s) >= 2)
 	dump_mstats("after compilation:");
 #endif
@@ -935,11 +966,11 @@ PerlInterpreter *sv_interp;
 	/* my_exit() was called */
 	while (scopestack_ix > oldscope)
 	    LEAVE;
+	FREETMPS;
 	curstash = defstash;
 	if (endav)
 	    call_list(oldscope, endav);
-	FREETMPS;
-#ifdef DEBUGGING_MSTATS
+#ifdef MYMALLOC
 	if (getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
@@ -974,10 +1005,10 @@ PerlInterpreter *sv_interp;
 	    PerlIO_printf(PerlIO_stderr(), "%s syntax OK\n", origfilename);
 	    my_exit(0);
 	}
-	if (perldb && DBsingle)
-	    sv_setiv(DBsingle, 1); 
-	if (restartav)
-	    call_list(oldscope, restartav);
+	if (PERLDB_SINGLE && DBsingle)
+	   sv_setiv(DBsingle, 1); 
+	if (initav)
+	    call_list(oldscope, initav);
     }
 
     /* do it */
@@ -1113,6 +1144,7 @@ I32 flags;		/* See G_* flags in cop.h */
     bool oldcatch = CATCH_GET;
     dJMPENV;
     int ret;
+    OP* oldop = op;
 
     if (flags & G_DISCARD) {
 	ENTER;
@@ -1134,7 +1166,7 @@ I32 flags;		/* See G_* flags in cop.h */
     oldmark = TOPMARK;
     oldscope = scopestack_ix;
 
-    if (perldb && curstash != debstash
+    if (PERLDB_SUB && curstash != debstash
 	   /* Handle first BEGIN of -d. */
 	  && (DBcv || (DBcv = GvCV(DBsub)))
 	   /* Try harder, since this may have been a sighandler, thus
@@ -1235,6 +1267,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	FREETMPS;
 	LEAVE;
     }
+    op = oldop;
     return retval;
 }
 
@@ -1253,7 +1286,8 @@ I32 flags;		/* See G_* flags in cop.h */
     I32 oldscope;
     dJMPENV;
     int ret;
-    
+    OP* oldop = op;
+
     if (flags & G_DISCARD) {
 	ENTER;
 	SAVETMPS;
@@ -1324,6 +1358,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	FREETMPS;
 	LEAVE;
     }
+    op = oldop;
     return retval;
 }
 
@@ -1390,10 +1425,10 @@ char *name;
     printf("\n  -e 'command'    one line of script. Several -e's allowed. Omit [programfile].");
     printf("\n  -F/pattern/     split() pattern for autosplit (-a). The //'s are optional.");
     printf("\n  -i[extension]   edit <> files in place (make backup if extension supplied)");
-    printf("\n  -Idirectory     specify @INC/#include directory (may be used more then once)");
-    printf("\n  -l[octal]       enable line ending processing, specifies line teminator");
+    printf("\n  -Idirectory     specify @INC/#include directory (may be used more than once)");
+    printf("\n  -l[octal]       enable line ending processing, specifies line terminator");
     printf("\n  -[mM][-]module.. executes `use/no module...' before executing your script.");
-    printf("\n  -n              assume 'while (<>) { ... }' loop arround your script");
+    printf("\n  -n              assume 'while (<>) { ... }' loop around your script");
     printf("\n  -p              assume loop like -n but print line also like sed");
     printf("\n  -P              run script through C preprocessor before compilation");
     printf("\n  -s              enable some switch parsing for switches after script name");
@@ -1403,7 +1438,7 @@ char *name;
     printf("\n  -U              allow unsafe operations");
     printf("\n  -v              print version number and patchlevel of perl");
     printf("\n  -V[:variable]   print perl configuration information");
-    printf("\n  -w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT.");
+    printf("\n  -w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT. Recommended.");
     printf("\n  -x[directory]   strip off text before #!perl line and perhaps cd to directory\n");
 }
 
@@ -1450,7 +1485,7 @@ char *s;
 	    s += strlen(s);
 	}
 	if (!perldb) {
-	    perldb = TRUE;
+	    perldb = PERLDB_ALL;
 	    init_debugger();
 	}
 	return s;
@@ -1695,6 +1730,8 @@ init_main_stash()
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
     errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
     GvMULTI_on(errgv);
+    (void)form("%240s","");	/* Preallocate temp - for immediate signals. */
+    sv_grow(GvSV(errgv), 240);	/* Preallocate - for immediate signals. */
     sv_setpvn(GvSV(errgv), "", 0);
     curstash = defstash;
     compiling.cop_stash = defstash;
@@ -1714,6 +1751,7 @@ bool dosearch;
 SV *sv;
 #endif
 {
+    dTHR;
     char *xfound = Nullch;
     char *xfailed = Nullch;
     register char *s;
@@ -1723,6 +1761,10 @@ SV *sv;
 #  define SEARCH_EXTS ".bat", ".cmd", NULL
 #  define MAX_EXT_LEN 4
 #endif
+#ifdef OS2
+#  define SEARCH_EXTS ".cmd", ".btm", ".bat", ".pl", NULL
+#  define MAX_EXT_LEN 4
+#endif
 #ifdef VMS
 #  define SEARCH_EXTS ".pl", ".com", NULL
 #  define MAX_EXT_LEN 4
@@ -1730,14 +1772,35 @@ SV *sv;
     /* additional extensions to try in each dir if scriptname not found */
 #ifdef SEARCH_EXTS
     char *ext[] = { SEARCH_EXTS };
-    int extidx = (strchr(scriptname,'.')) ? -1 : 0; /* has ext already */
+    int extidx = 0, i = 0;
+    char *curext = Nullch;
 #else
 #  define MAX_EXT_LEN 0
 #endif
 
+    /*
+     * If dosearch is true and if scriptname does not contain path
+     * delimiters, search the PATH for scriptname.
+     *
+     * If SEARCH_EXTS is also defined, will look for each
+     * scriptname{SEARCH_EXTS} whenever scriptname is not found
+     * while searching the PATH.
+     *
+     * Assuming SEARCH_EXTS is C<".foo",".bar",NULL>, PATH search
+     * proceeds as follows:
+     *   If DOSISH:
+     *     + look for ./scriptname{,.foo,.bar}
+     *     + search the PATH for scriptname{,.foo,.bar}
+     *
+     *   If !DOSISH:
+     *     + look *only* in the PATH for scriptname{,.foo,.bar} (note
+     *       this will not look in '.' if it's not in the PATH)
+     */
+
 #ifdef VMS
     if (dosearch) {
 	int hasdir, idx = 0, deftypes = 1;
+	bool seen_dot = 1;
 
 	hasdir = (strpbrk(scriptname,":[</") != Nullch) ;
 	/* The first time through, just add SEARCH_EXTS to whatever we
@@ -1754,38 +1817,81 @@ SV *sv;
 		continue;	/* don't search dir with too-long name */
 	    strcat(tokenbuf, scriptname);
 #else  /* !VMS */
-    if (dosearch && !strchr(scriptname, '/') && (s = getenv("PATH"))) {
+
+#ifdef DOSISH
+    if (strEQ(scriptname, "-"))
+ 	dosearch = 0;
+    if (dosearch) {		/* Look in '.' first. */
+	char *cur = scriptname;
+#ifdef SEARCH_EXTS
+	if ((curext = strrchr(scriptname,'.')))	/* possible current ext */
+	    while (ext[i])
+		if (strEQ(ext[i++],curext)) {
+		    extidx = -1;		/* already has an ext */
+		    break;
+		}
+	do {
+#endif
+	    DEBUG_p(PerlIO_printf(Perl_debug_log,
+				  "Looking for %s\n",cur));
+	    if (Stat(cur,&statbuf) >= 0) {
+		dosearch = 0;
+		scriptname = cur;
+#ifdef SEARCH_EXTS
+		break;
+#endif
+	    }
+#ifdef SEARCH_EXTS
+	    if (cur == scriptname) {
+		len = strlen(scriptname);
+		if (len+MAX_EXT_LEN+1 >= sizeof(tokenbuf))
+		    break;
+		cur = strcpy(tokenbuf, scriptname);
+	    }
+	} while (extidx >= 0 && ext[extidx]	/* try an extension? */
+		 && strcpy(tokenbuf+len, ext[extidx++]));
+#endif
+    }
+#endif
+
+    if (dosearch && !strchr(scriptname, '/')
+#ifdef DOSISH
+		 && !strchr(scriptname, '\\')
+#endif
+		 && (s = getenv("PATH"))) {
+	bool seen_dot = 0;
+	
 	bufend = s + strlen(s);
 	while (s < bufend) {
-#ifndef atarist
-	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
-#ifdef DOSISH
-			 ';',
-#else
-			 ':',
-#endif
-			 &len);
-#else  /* atarist */
-	    for (len = 0; *s && *s != ',' && *s != ';'; len++, s++) {
+#if defined(atarist) || defined(DOSISH)
+	    for (len = 0; *s
+#  ifdef atarist
+		    && *s != ','
+#  endif
+		    && *s != ';'; len++, s++) {
 		if (len < sizeof tokenbuf)
 		    tokenbuf[len] = *s;
 	    }
 	    if (len < sizeof tokenbuf)
 		tokenbuf[len] = '\0';
-#endif /* atarist */
+#else  /* ! (atarist || DOSISH) */
+	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
+			':',
+			&len);
+#endif /* ! (atarist || DOSISH) */
 	    if (s < bufend)
 		s++;
 	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tokenbuf)
 		continue;	/* don't search dir with too-long name */
 	    if (len
-#if defined(atarist) && !defined(DOSISH)
-		&& tokenbuf[len - 1] != '/'
-#endif
 #if defined(atarist) || defined(DOSISH)
+		&& tokenbuf[len - 1] != '/'
 		&& tokenbuf[len - 1] != '\\'
 #endif
 	       )
 		tokenbuf[len++] = '/';
+	    if (len == 2 && tokenbuf[0] == '.')
+		seen_dot = 1;
 	    (void)strcpy(tokenbuf + len, scriptname);
 #endif  /* !VMS */
 
@@ -1818,8 +1924,16 @@ SV *sv;
 	    if (!xfailed)
 		xfailed = savepv(tokenbuf);
 	}
+#ifndef DOSISH
+	if (!xfound && !seen_dot && !xfailed && (Stat(scriptname,&statbuf) < 0))
+#endif
+	    seen_dot = 1;			/* Disable message. */
 	if (!xfound)
-	    croak("Can't execute %s", xfailed ? xfailed : scriptname );
+	    croak("Can't %s %s%s%s",
+		  (xfailed ? "execute" : "find"),
+		  (xfailed ? xfailed : scriptname),
+		  (xfailed ? "" : " on PATH"),
+		  (xfailed || seen_dot) ? "" : ", '.' not in PATH");
 	if (xfailed)
 	    Safefree(xfailed);
 	scriptname = xfound;
@@ -2175,6 +2289,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #else /* !DOSUID */
     if (euid != uid || egid != gid) {	/* (suidperl doesn't exist, in fact) */
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
+	dTHR;
 	Fstat(PerlIO_fileno(rsfp),&statbuf);	/* may be either wrapped or real suid */
 	if ((euid != uid && euid == statbuf.st_uid && statbuf.st_mode & S_ISUID)
 	    ||
@@ -2279,6 +2394,7 @@ dARGS
     cxstack_ix	= -1;
 
     New(50,tmps_stack,128,SV*);
+    tmps_floor = -1;
     tmps_ix = -1;
     tmps_max = 128;
 
@@ -2338,6 +2454,7 @@ static void
 init_lexer()
 {
     tmpfp = rsfp;
+    rsfp = Nullfp;
     lex_start(linestr);
     rsfp = tmpfp;
     subname = newSVpv("main",4);
@@ -2455,6 +2572,10 @@ register char **env;
 	    sv = newSVpv(s--,0);
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    *s = '=';
+#if defined(__BORLANDC__) && defined(USE_WIN32_RTL_ENV)
+	    /* Sins of the RTL. See note in my_setenv(). */
+	    (void)putenv(savepv(*env));
+#endif
 	}
 #endif
 #ifdef DYNAMIC_ENV_FETCH
@@ -2669,10 +2790,10 @@ AV* list;
 	    /* my_exit() was called */
 	    while (scopestack_ix > oldscope)
 		LEAVE;
+	    FREETMPS;
 	    curstash = defstash;
 	    if (endav)
 		call_list(oldscope, endav);
-	    FREETMPS;
 	    JMPENV_POP;
 	    curcop = &compiling;
 	    curcop->cop_line = oldline;

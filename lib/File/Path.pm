@@ -130,7 +130,10 @@ sub mkpath {
 	my $parent = File::Basename::dirname($path);
 	push(@created,mkpath($parent, $verbose, $mode)) unless (-d $parent);
 	print "mkdir $path\n" if $verbose;
-	mkdir($path,$mode) || croak "mkdir $path: $!";
+	unless (mkdir($path,$mode)) {
+	    # allow for another process to have created it meanwhile
+	    croak "mkdir $path: $!" unless -d $path;
+	}
 	push(@created, $path);
     }
     @created;

@@ -270,7 +270,7 @@ $x run from 4..8 and $y run from 7 to 12?  Hmm... here's the simple way:
 
     @newLoL = ();
     for ($startx = $x = 4; $x <= 8; $x++) {
-	for ($starty = $y = 7; $x <= 12; $y++) {
+	for ($starty = $y = 7; $y <= 12; $y++) {
 	    $newLoL[$x - $startx][$y - $starty] = $LoL[$x][$y];
 	}
     }

@@ -226,6 +226,7 @@ void
 lex_start(line)
 SV *line;
 {
+    dTHR;
     char *s;
     STRLEN len;
 
@@ -309,6 +310,7 @@ static void
 incline(s)
 char *s;
 {
+    dTHR;
     char *t;
     char *n;
     char ch;
@@ -370,7 +372,9 @@ register char *s;
 	    return s;
 	if ((s = filter_gets(linestr, rsfp, (prevlen = SvCUR(linestr)))) == Nullch) {
 	    if (minus_n || minus_p) {
-		sv_setpv(linestr,minus_p ? ";}continue{print" : "");
+		sv_setpv(linestr,minus_p ?
+			 ";}continue{print or die qq(-p destination: $!\\n)" :
+			 "");
 		sv_catpv(linestr,";}");
 		minus_n = minus_p = 0;
 	    }
@@ -384,6 +388,8 @@ register char *s;
 		PerlIO_clearerr(rsfp);
 	    else
 		(void)PerlIO_close(rsfp);
+	    if (e_fp == rsfp)
+		e_fp = Nullfp;
 	    rsfp = Nullfp;
 	    return s;
 	}
@@ -391,7 +397,7 @@ register char *s;
 	bufend = s + SvCUR(linestr);
 	s = bufptr;
 	incline(s);
-	if (perldb && curstash != debstash) {
+	if (PERLDB_LINE && curstash != debstash) {
 	    SV *sv = NEWSV(85,0);
 
 	    sv_upgrade(sv, SVt_PVMG);
@@ -459,6 +465,7 @@ expectation x;
 char *s;
 #endif /* CAN_PROTOTYPE */
 {
+    dTHR;
     yylval.ival = f;
     CLINE;
     expect = x;
@@ -651,6 +658,7 @@ sublex_start()
 static I32
 sublex_push()
 {
+    dTHR;
     push_scope();
 
     lex_state = sublex_info.super_state;
@@ -755,7 +763,7 @@ char *start;
     register char *d = SvPVX(sv);
     bool dorange = FALSE;
     I32 len;
-    char *leave =
+    char *leaveit =
 	lex_inpat
 	    ? "\\.^$@AGZdDwWsSbB+*?|()-nrtfeaxc0123456789[{]} \t\n\r\f\v#"
 	    : (lex_inwhat & OP_TRANS)
@@ -801,7 +809,7 @@ char *start;
 	}
 	if (*s == '\\' && s+1 < send) {
 	    s++;
-	    if (*s && strchr(leave, *s)) {
+	    if (*s && strchr(leaveit, *s)) {
 		*d++ = '\\';
 		*d++ = *s++;
 		continue;
@@ -1528,7 +1536,7 @@ yylex()
 	    sv_catpv(linestr, "\n");
 	    oldoldbufptr = oldbufptr = s = linestart = SvPVX(linestr);
 	    bufend = SvPVX(linestr) + SvCUR(linestr);
-	    if (perldb && curstash != debstash) {
+	    if (PERLDB_LINE && curstash != debstash) {
 		SV *sv = NEWSV(85,0);
 
 		sv_upgrade(sv, SVt_PVMG);
@@ -1547,6 +1555,8 @@ yylex()
 			PerlIO_clearerr(rsfp);
 		    else
 			(void)PerlIO_close(rsfp);
+		    if (e_fp == rsfp)
+			e_fp = Nullfp;
 		    rsfp = Nullfp;
 		}
 		if (!in_eval && (minus_n || minus_p)) {
@@ -1576,7 +1586,7 @@ yylex()
 	    incline(s);
 	} while (doextract);
 	oldoldbufptr = oldbufptr = bufptr = linestart = s;
-	if (perldb && curstash != debstash) {
+	if (PERLDB_LINE && curstash != debstash) {
 	    SV *sv = NEWSV(85,0);
 
 	    sv_upgrade(sv, SVt_PVMG);
@@ -1701,7 +1711,7 @@ yylex()
 			    }
 			    d = moreswitches(d);
 			} while (d);
-			if (perldb && !oldpdb ||
+			if (PERLDB_LINE && !oldpdb ||
 			    ( minus_n || minus_p ) && !(oldn || oldp) )
 			      /* if we have already added "LINE: while (<>) {",
 			         we must not do it again */
@@ -1710,7 +1720,7 @@ yylex()
 			    oldoldbufptr = oldbufptr = s = linestart = SvPVX(linestr);
 			    bufend = SvPVX(linestr) + SvCUR(linestr);
 			    preambled = FALSE;
-			    if (perldb)
+			    if (PERLDB_LINE)
 				(void)gv_fetchfile(origfilename);
 			    goto retry;
 			}
@@ -1994,19 +2004,73 @@ yylex()
 		s = skipspace(s);
 		if (*s == '}')
 		    OPERATOR(HASHBRACK);
-		if (isALPHA(*s)) {
-		    for (t = s; t < bufend && isALNUM(*t); t++) ;
+		/* This hack serves to disambiguate a pair of curlies
+		 * as being a block or an anon hash.  Normally, expectation
+		 * determines that, but in cases where we're not in a
+		 * position to expect anything in particular (like inside
+		 * eval"") we have to resolve the ambiguity.  This code
+		 * covers the case where the first term in the curlies is a
+		 * quoted string.  Most other cases need to be explicitly
+		 * disambiguated by prepending a `+' before the opening
+		 * curly in order to force resolution as an anon hash.
+		 *
+		 * XXX should probably propagate the outer expectation
+		 * into eval"" to rely less on this hack, but that could
+		 * potentially break current behavior of eval"".
+		 * GSAR 97-07-21
+		 */
+		t = s;
+		if (*s == '\'' || *s == '"' || *s == '`') {
+		    /* common case: get past first string, handling escapes */
+		    for (t++; t < bufend && *t != *s;)
+			if (*t++ == '\\' && (*t == '\\' || *t == *s))
+			    t++;
+		    t++;
 		}
-		else if (*s == '\'' || *s == '"') {
-		    t = strchr(s+1,*s);
-		    if (!t++)
-			t = s;
+		else if (*s == 'q') {
+		    if (++t < bufend
+			&& (!isALNUM(*t)
+			    || ((*t == 'q' || *t == 'x') && ++t < bufend
+				&& !isALNUM(*t)))) {
+			char *tmps;
+			char open, close, term;
+			I32 brackets = 1;
+
+			while (t < bufend && isSPACE(*t))
+			    t++;
+			term = *t;
+			open = term;
+			if (term && (tmps = strchr("([{< )]}> )]}>",term)))
+			    term = tmps[5];
+			close = term;
+			if (open == close)
+			    for (t++; t < bufend; t++) {
+				if (*t == '\\' && t+1 < bufend && open != '\\')
+				    t++;
+				else if (*t == open)
+				    break;
+			    }
+			else
+			    for (t++; t < bufend; t++) {
+				if (*t == '\\' && t+1 < bufend)
+				    t++;
+				else if (*t == close && --brackets <= 0)
+				    break;
+				else if (*t == open)
+				    brackets++;
+			    }
+		    }
+		    t++;
 		}
-		else
-		    t = s;
+		else if (isALPHA(*s)) {
+		    for (t++; t < bufend && isALNUM(*t); t++) ;
+		}
 		while (t < bufend && isSPACE(*t))
 		    t++;
-		if ((*t == ',' && !isLOWER(*s)) || (*t == '=' && t[1] == '>'))
+		/* if comma follows first term, call it an anon hash */
+		/* XXX it could be a comma expression with loop modifiers */
+		if (t < bufend && ((*t == ',' && (*s == 'q' || !isLOWER(*s)))
+				   || (*t == '=' && t[1] == '>')))
 		    OPERATOR(HASHBRACK);
 		if (expect == XREF)
 		    expect = XTERM;
@@ -2264,8 +2328,23 @@ yylex()
 	    else if (isIDFIRST(*s)) {
 		char tmpbuf[sizeof tokenbuf];
 		scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
-		if (keyword(tmpbuf, len))
-		    expect = XTERM;	/* e.g. print $fh length() */
+		if (tmp = keyword(tmpbuf, len)) {
+		    /* binary operators exclude handle interpretations */
+		    switch (tmp) {
+		    case -KEY_x:
+		    case -KEY_eq:
+		    case -KEY_ne:
+		    case -KEY_gt:
+		    case -KEY_lt:
+		    case -KEY_ge:
+		    case -KEY_le:
+		    case -KEY_cmp:
+			break;
+		    default:
+			expect = XTERM;	/* e.g. print $fh length() */
+			break;
+		    }
+		}
 		else {
 		    GV *gv = gv_fetchpv(tmpbuf, FALSE, SVt_PVCV);
 		    if (gv && GvCVu(gv))
@@ -2735,7 +2814,7 @@ yylex()
 	case KEY_DESTROY:
 	case KEY_BEGIN:
 	case KEY_END:
-	case KEY_RESTART:
+	case KEY_INIT:
 	    if (expect == XSTATE) {
 		s = bufptr;
 		goto really_sub;
@@ -3927,6 +4006,9 @@ I32 len;
     case 'h':
 	if (strEQ(d,"hex"))			return -KEY_hex;
 	break;
+    case 'I':
+	if (strEQ(d,"INIT"))			return KEY_INIT;
+	break;
     case 'i':
 	switch (len) {
 	case 2:
@@ -4065,9 +4147,6 @@ I32 len;
 	    if (strEQ(d,"qx"))			return KEY_qx;
 	}
 	else if (strEQ(d,"quotemeta"))		return -KEY_quotemeta;
-	break;
-    case 'R':
-	if (strEQ(d,"RESTART"))			return KEY_RESTART;
 	break;
     case 'r':
 	switch (len) {
@@ -4316,7 +4395,7 @@ char *what;
 	}
 	if (*w)
 	    for (; *w && isSPACE(*w); w++) ;
-	if (!*w || !strchr(";|})]oa!=", *w))	/* an advisory hack only... */
+	if (!*w || !strchr(";|})]oaiuw!=", *w))	/* an advisory hack only... */
 	    warn("%s (...) interpreted as function",name);
     }
     while (s < bufend && isSPACE(*s))
@@ -4482,7 +4561,7 @@ I32 ck_uni;
 		lex_state = LEX_INTERPEND;
 	    if (funny == '#')
 		funny = '@';
-	    if (dowarn &&
+	    if (dowarn && lex_state == LEX_NORMAL &&
 	      (keyword(dest, d - dest) || perl_get_cv(dest, FALSE)))
 		warn("Ambiguous use of %c{%s} resolved to %c%s",
 		    funny, dest, funny, dest);
@@ -4800,7 +4879,7 @@ register char *s;
 	    missingterm(tokenbuf);
 	}
 	curcop->cop_line++;
-	if (perldb && curstash != debstash) {
+	if (PERLDB_LINE && curstash != debstash) {
 	    SV *sv = NEWSV(88,0);
 
 	    sv_upgrade(sv, SVt_PVMG);
@@ -4901,8 +4980,13 @@ char *start;
     register char *to;
     I32 brackets = 1;
 
-    if (isSPACE(*s))
-	s = skipspace(s);
+    if (isSPACE(*s)) {
+	/* "#" is allowed as delimiter if on same line */
+	while (*s == ' ' || *s == '\t')
+	    s++;
+	if (isSPACE(*s))
+	    s = skipspace(s);
+    }
     CLINE;
     term = *s;
     multi_start = curcop->cop_line;
@@ -4938,13 +5022,13 @@ char *start;
 	    for (; s < bufend; s++,to++) {
 		if (*s == '\n' && !rsfp)
 		    curcop->cop_line++;
-		if (*s == '\\' && s+1 < bufend && term != '\\') {
-		    if (s[1] == term)
+		if (*s == '\\' && s+1 < bufend) {
+		    if ((s[1] == multi_open) || (s[1] == multi_close))
 			s++;
 		    else
 			*to++ = *s++;
 		}
-		else if (*s == term && --brackets <= 0)
+		else if (*s == multi_close && --brackets <= 0)
 		    break;
 		else if (*s == multi_open)
 		    brackets++;
@@ -4963,7 +5047,7 @@ char *start;
 	    return Nullch;
 	}
 	curcop->cop_line++;
-	if (perldb && curstash != debstash) {
+	if (PERLDB_LINE && curstash != debstash) {
 	    SV *sv = NEWSV(88,0);
 
 	    sv_upgrade(sv, SVt_PVMG);
@@ -5225,16 +5309,21 @@ U32 flags;
     CvFLAGS(compcv) |= flags;
 
     comppad = newAV();
-    comppad_name = newAV();
-    comppad_name_fill = 0;
-#ifdef USE_THREADS
-    av_store(comppad_name, 0, newSVpv("@_", 2));
-#endif /* USE_THREADS */
-    min_intro_pending = 0;
     av_push(comppad, Nullsv);
     curpad = AvARRAY(comppad);
+    comppad_name = newAV();
+    comppad_name_fill = 0;
+    min_intro_pending = 0;
     padix = 0;
     subline = curcop->cop_line;
+#ifdef USE_THREADS
+    av_store(comppad_name, 0, newSVpv("@_", 2));
+    curpad[0] = (SV*)newAV();
+    SvPADMY_on(curpad[0]);	/* XXX Needed? */
+    CvOWNER(compcv) = 0;
+    New(666, CvMUTEXP(compcv), 1, perl_mutex);
+    MUTEX_INIT(CvMUTEXP(compcv));
+#endif /* USE_THREADS */
 
     comppadlist = newAV();
     AvREAL_off(comppadlist);
@@ -5245,10 +5334,8 @@ U32 flags;
     CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc((SV*)outsidecv);
 #ifdef USE_THREADS
     CvOWNER(compcv) = 0;
-    New(666, CvMUTEXP(compcv), 1, pthread_mutex_t);
+    New(666, CvMUTEXP(compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(compcv));
-    New(666, CvCONDP(compcv), 1, pthread_cond_t);
-    COND_INIT(CvCONDP(compcv));
 #endif /* USE_THREADS */
 
     return oldsavestack_ix;

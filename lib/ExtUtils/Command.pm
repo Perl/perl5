@@ -10,7 +10,7 @@ require Exporter;
 use vars qw(@ISA @EXPORT $VERSION);
 @ISA     = qw(Exporter);
 @EXPORT  = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f);
-$VERSION = '1.00';
+$VERSION = '1.01';
 
 =head1 NAME
 
@@ -18,16 +18,16 @@ ExtUtils::Command - utilities to replace common UNIX commands in Makefiles etc.
 
 =head1 SYNOPSIS
 
-  perl -MExtUtils::command -e cat files... > destination
-  perl -MExtUtils::command -e mv source... destination
-  perl -MExtUtils::command -e cp source... destination
-  perl -MExtUtils::command -e touch files...
-  perl -MExtUtils::command -e rm_f file...
-  perl -MExtUtils::command -e rm_rf directories...
-  perl -MExtUtils::command -e mkpath directories...
-  perl -MExtUtils::command -e eqtime source destination
-  perl -MExtUtils::command -e chmod mode files...
-  perl -MExtUtils::command -e test_f file
+  perl -MExtUtils::Command -e cat files... > destination
+  perl -MExtUtils::Command -e mv source... destination
+  perl -MExtUtils::Command -e cp source... destination
+  perl -MExtUtils::Command -e touch files...
+  perl -MExtUtils::Command -e rm_f file...
+  perl -MExtUtils::Command -e rm_rf directories...
+  perl -MExtUtils::Command -e mkpath directories...
+  perl -MExtUtils::Command -e eqtime source destination
+  perl -MExtUtils::Command -e chmod mode files...
+  perl -MExtUtils::Command -e test_f file
 
 =head1 DESCRIPTION
 

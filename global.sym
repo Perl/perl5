@@ -200,6 +200,7 @@ rsfp
 rsfp_filters
 rshift_amg
 rshift_ass_amg
+runops
 savestack
 savestack_ix
 savestack_max
@@ -511,6 +512,7 @@ listkids
 localize
 looks_like_number
 magic_clearenv
+magic_clear_all_env
 magic_clearpack
 magic_clearsig
 magic_existspack
@@ -1015,7 +1017,6 @@ rsignal
 rsignal_save
 rsignal_state
 rsignal_restore
-runops
 rxres_free
 rxres_restore
 rxres_save
@@ -1081,6 +1082,7 @@ setenv_getix
 share_hek
 sharepvn
 sighandler
+sighandlerp
 skipspace
 stack_grow
 start_subparse
@@ -1137,6 +1139,7 @@ sv_setiv
 sv_setnv
 sv_setptrobj
 sv_setpv
+sv_setpviv
 sv_setpvn
 sv_setref_iv
 sv_setref_nv
@@ -1158,6 +1161,7 @@ taint_proper
 too_few_arguments
 too_many_arguments
 unlnk
+unlock_condpair
 unshare_hek
 unsharepvn
 utilize

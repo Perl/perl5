@@ -131,10 +131,6 @@ struct io {
 #define SVphv_SHAREKEYS 0x20000000	/* keys live on shared string table */
 #define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
 
-#ifdef USE_THREADS
-#define SVp_SYNC	0x10000000	/* Synchronised CV or an SV lock */
-#endif /* USE_THREADS */
-
 struct xrv {
     SV *	xrv_rv;		/* pointer to another SV */
 };
@@ -224,6 +220,8 @@ struct xpvbm {
 
 /* This structure much match XPVCV */
 
+typedef U16 cv_flags_t;
+
 struct xpvfm {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
@@ -244,11 +242,11 @@ struct xpvfm {
     AV *	xcv_padlist;
     CV *	xcv_outside;
 #ifdef USE_THREADS
-    pthread_mutex_t *	xcv_mutexp;
-    pthread_cond_t *	xcv_condp;	/* signalled when owner leaves CV */
-    struct thread *	xcv_owner;	/* current owner thread */
+    perl_mutex *xcv_mutexp;
+    perl_cond *	xcv_condp;	/* signalled when owner leaves CV */
+    struct thread *xcv_owner;	/* current owner thread */
 #endif /* USE_THREADS */
-    U8		xcv_flags;
+    cv_flags_t	xcv_flags;
 
     I32		xfm_lines;
 };

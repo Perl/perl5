@@ -5,7 +5,6 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $Too_Big *FROM *TO);
 
 require Exporter;
 use Carp;
-use UNIVERSAL qw(isa);
 
 $VERSION = '1.1001';
 @ISA = qw(Exporter);
@@ -34,7 +33,8 @@ sub compare {
     croak("from undefined") unless (defined $from);
     croak("to undefined") unless (defined $to);
 
-    if (ref($from) && (isa($from,'GLOB') || isa($from,'IO::Handle'))) {
+    if (ref($from) && 
+        (UNIVERSAL::isa($from,'GLOB') || UNIVERSAL::isa($from,'IO::Handle'))) {
 	*FROM = *$from;
     } elsif (ref(\$from) eq 'GLOB') {
 	*FROM = $from;
@@ -45,7 +45,8 @@ sub compare {
 	$fromsize = -s FROM;
     }
 
-    if (ref($to) && (isa($to,'GLOB') || isa($to,'IO::Handle'))) {
+    if (ref($to) &&
+        (UNIVERSAL::isa($to,'GLOB') || UNIVERSAL::isa($to,'IO::Handle'))) {
 	*TO = *$to;
     } elsif (ref(\$to) eq 'GLOB') {
 	*TO = $to;

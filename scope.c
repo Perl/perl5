@@ -579,7 +579,8 @@ I32 base;
 	case SAVEt_CLEARSV:
 	    ptr = (void*)&curpad[SSPOPLONG];
 	    sv = *(SV**)ptr;
-	    if (SvREFCNT(sv) <= 1) { /* Can clear pad variable in place. */
+	    /* Can clear pad variable in place? */
+	    if (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) {
 		if (SvTHINKFIRST(sv)) {
 		    if (SvREADONLY(sv))
 			croak("panic: leave_scope clearsv");

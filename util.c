@@ -1172,6 +1172,8 @@ die(pat, va_alist)
     GV *gv;
     CV *cv;
 
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "die: curstack = %p, mainstack= %p\n",
+    		    curstack, mainstack));/*debug*/
     /* We have to switch back to mainstack or die_where may try to pop
      * the eval block from the wrong stack if die is being called from a
      * signal handler.  - dkindred@cs.cmu.edu */
@@ -1188,6 +1190,8 @@ die(pat, va_alist)
     message = mess(pat, &args);
     va_end(args);
 
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "die: message = %s\ndiehook = %p\n",
+		   message, diehook));/*debug*/
     if (diehook) {
 	/* sv_2cv might call croak() */
 	SV *olddiehook = diehook;
@@ -1215,6 +1219,9 @@ die(pat, va_alist)
     }
 
     restartop = die_where(message);
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+    		    "die: restartop = %p, was_in_eval = %d, oldrunlevel = %d\n",
+		    restartop, was_in_eval, oldrunlevel));/*debug*/
     if ((!restartop && was_in_eval) || oldrunlevel > 1)
 	JMPENV_JUMP(3);
     return restartop;
@@ -1246,7 +1253,7 @@ croak(pat, va_alist)
     message = mess(pat, &args);
     va_end(args);
 #ifdef USE_THREADS
-    DEBUG_L(fprintf(stderr, "croak: 0x%lx %s", (unsigned long) thr, message));
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s", (unsigned long) thr, message));
 #endif /* USE_THREADS */
     if (diehook) {
 	/* sv_2cv might call croak() */
@@ -1341,7 +1348,7 @@ warn(pat,va_alist)
 }
 
 #ifndef VMS  /* VMS' my_setenv() is in VMS.c */
-#ifndef _WIN32
+#ifndef WIN32
 void
 my_setenv(nam,val)
 char *nam, *val;
@@ -1389,6 +1396,74 @@ char *nam, *val;
 #endif /* MSDOS */
 }
 
+#else /* if WIN32 */
+
+void
+my_setenv(nam,val)
+char *nam, *val;
+{
+
+#ifdef USE_WIN32_RTL_ENV
+
+    register char *envstr;
+    STRLEN namlen = strlen(nam);
+    STRLEN vallen;
+    char *oldstr = environ[setenv_getix(nam)];
+
+    /* putenv() has totally broken semantics in both the Borland
+     * and Microsoft CRTLs.  They either store the passed pointer in
+     * the environment without making a copy, or make a copy and don't
+     * free it. And on top of that, they dont free() old entries that
+     * are being replaced/deleted.  This means the caller must
+     * free any old entries somehow, or we end up with a memory
+     * leak every time my_setenv() is called.  One might think
+     * one could directly manipulate environ[], like the UNIX code
+     * above, but direct changes to environ are not allowed when
+     * calling putenv(), since the RTLs maintain an internal
+     * *copy* of environ[]. Bad, bad, *bad* stink.
+     * GSAR 97-06-07
+     */
+
+    if (!val) {
+	if (!oldstr)
+	    return;
+	val = "";
+	vallen = 0;
+    }
+    else
+	vallen = strlen(val);
+    New(904, envstr, namlen + vallen + 3, char);
+    (void)sprintf(envstr,"%s=%s",nam,val);
+    (void)putenv(envstr);
+    if (oldstr)
+	Safefree(oldstr);
+#ifdef _MSC_VER
+    Safefree(envstr);		/* MSVCRT leaks without this */
+#endif
+
+#else /* !USE_WIN32_RTL_ENV */
+
+    /* The sane way to deal with the environment.
+     * Has these advantages over putenv() & co.:
+     *  * enables us to store a truly empty value in the
+     *    environment (like in UNIX).
+     *  * we don't have to deal with RTL globals, bugs and leaks.
+     *  * Much faster.
+     * Why you may want to enable USE_WIN32_RTL_ENV:
+     *  * environ[] and RTL functions will not reflect changes,
+     *    which might be an issue if extensions want to access
+     *    the env. via RTL.  This cuts both ways, since RTL will
+     *    not see changes made by extensions that call the Win32
+     *    functions directly, either.
+     * GSAR 97-06-07
+     */
+    SetEnvironmentVariable(nam,val);
+
+#endif
+}
+
+#endif /* WIN32 */
+
 I32
 setenv_getix(nam)
 char *nam;
@@ -1396,41 +1471,18 @@ char *nam;
     register I32 i, len = strlen(nam);
 
     for (i = 0; environ[i]; i++) {
-	if (strnEQ(environ[i],nam,len) && environ[i][len] == '=')
+	if (
+#ifdef WIN32
+	    strnicmp(environ[i],nam,len) == 0
+#else
+	    strnEQ(environ[i],nam,len)
+#endif
+	    && environ[i][len] == '=')
 	    break;			/* strnEQ must come first to avoid */
     }					/* potential SEGV's */
     return i;
 }
 
-#else /* if _WIN32 */
-
-void
-my_setenv(nam,val)
-char *nam, *val;
-{
-    register char *envstr;
-    STRLEN namlen = strlen(nam);
-    STRLEN vallen = strlen(val ? val : "");
-
-    New(904, envstr, namlen + vallen + 3, char);
-    (void)sprintf(envstr,"%s=%s",nam,val);
-    if (!vallen) {
-        /* An attempt to delete the entry.
-	 * We try to fix a Win32 process handling goof: Children
-	 * of the current process will end up seeing the
-	 * grandparent's entry if the current process has never
-	 * modified the entry being deleted. So we call _putenv()
-	 * twice: once to pretend to modify the entry, and the
-	 * second time to actually delete it. GSAR 97-03-19
-	 */
-        envstr[namlen+1] = 'X'; envstr[namlen+2] = '\0';
-	(void)_putenv(envstr);
-	envstr[namlen+1] = '\0';
-    }
-    (void)_putenv(envstr);
-}
-
-#endif /* _WIN32 */
 #endif /* !VMS */
 
 #ifdef UNLINK_ALL_VERSIONS
@@ -2047,11 +2099,17 @@ int flags;
 	}
     }
 #ifdef HAS_WAITPID
+#  ifdef HAS_WAITPID_RUNTIME
+    if (!HAS_WAITPID_RUNTIME)
+	goto hard_way;
+#  endif
     return waitpid(pid,statusp,flags);
-#else
-#ifdef HAS_WAIT4
+#endif
+#if !defined(HAS_WAITPID) && defined(HAS_WAIT4)
     return wait4((pid==-1)?0:pid,statusp,flags,Null(struct rusage *));
-#else
+#endif
+#if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
+  hard_way:
     {
 	I32 result;
 	if (flags)
@@ -2064,7 +2122,6 @@ int flags;
 	}
 	return result;
     }
-#endif
 #endif
 }
 #endif /* !DOSISH */
@@ -2293,6 +2350,84 @@ I32 *retlen;
 }
 
 #ifdef USE_THREADS
+#ifdef FAKE_THREADS
+/* Very simplistic scheduler for now */
+void
+schedule(void)
+{
+    thr = thr->next_run;
+}
+
+void
+perl_cond_init(cp)
+perl_cond *cp;
+{
+    *cp = 0;
+}
+
+void
+perl_cond_signal(cp)
+perl_cond *cp;
+{
+    perl_thread t;
+    perl_cond cond = *cp;
+    
+    if (!cond)
+	return;
+    t = cond->thread;
+    /* Insert t in the runnable queue just ahead of us */
+    t->next_run = thr->next_run;
+    thr->next_run->prev_run = t;
+    t->prev_run = thr;
+    thr->next_run = t;
+    thr->wait_queue = 0;
+    /* Remove from the wait queue */
+    *cp = cond->next;
+    Safefree(cond);
+}
+
+void
+perl_cond_broadcast(cp)
+perl_cond *cp;
+{
+    perl_thread t;
+    perl_cond cond, cond_next;
+    
+    for (cond = *cp; cond; cond = cond_next) {
+	t = cond->thread;
+	/* Insert t in the runnable queue just ahead of us */
+	t->next_run = thr->next_run;
+	thr->next_run->prev_run = t;
+	t->prev_run = thr;
+	thr->next_run = t;
+	thr->wait_queue = 0;
+	/* Remove from the wait queue */
+	cond_next = cond->next;
+	Safefree(cond);
+    }
+    *cp = 0;
+}
+
+void
+perl_cond_wait(cp)
+perl_cond *cp;
+{
+    perl_cond cond;
+
+    if (thr->next_run == thr)
+	croak("panic: perl_cond_wait called by last runnable thread");
+    
+    New(666, cond, 1, struct perl_wait_queue);
+    cond->thread = thr;
+    cond->next = *cp;
+    *cp = cond;
+    thr->wait_queue = cond;
+    /* Remove ourselves from runnable queue */
+    thr->next_run->prev_run = thr->prev_run;
+    thr->prev_run->next_run = thr->next_run;
+}
+#endif /* FAKE_THREADS */
+
 #ifdef OLD_PTHREADS_API
 struct thread *
 getTHR _((void))
@@ -2337,6 +2472,10 @@ SV *sv;
 	    mg->mg_ptr = (char *)cp;
 	    mg->mg_len = sizeof(cp);
 	    MUTEX_UNLOCK(&sv_mutex);
+	    DEBUG_L(WITH_THR(PerlIO_printf(PerlIO_stderr(),
+					   "0x%lx: condpair_magic 0x%lx\n",
+					   (unsigned long)thr,
+					   (unsigned long)sv));)
 	}
     }
     return mg;

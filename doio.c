@@ -34,7 +34,7 @@
 #endif
 
 #ifdef I_UTIME
-#  ifdef WIN32
+#  ifdef _MSC_VER
 #    include <sys/utime.h>
 #  else
 #    include <utime.h>
@@ -283,6 +283,7 @@ PerlIO *supplied_fp;
     }
     if (IoTYPE(io) &&
       IoTYPE(io) != '|' && IoTYPE(io) != '-') {
+	dTHR;
 	if (Fstat(PerlIO_fileno(fp),&statbuf) < 0) {
 	    (void)PerlIO_close(fp);
 	    goto say_false;
@@ -297,8 +298,9 @@ PerlIO *supplied_fp;
 	    !statbuf.st_mode
 #endif
 	) {
-	    Sock_size_t buflen = sizeof tokenbuf;
-	    if (getsockname(PerlIO_fileno(fp), (struct sockaddr *)tokenbuf,
+	    char tmpbuf[256];
+	    Sock_size_t buflen = sizeof tmpbuf;
+	    if (getsockname(PerlIO_fileno(fp), (struct sockaddr *)tmpbuf,
 			    &buflen) >= 0
 		  || errno != ENOTSOCK)
 		IoTYPE(io) = 's'; /* some OS's return 0 on fstat()ed socket */
@@ -340,6 +342,7 @@ PerlIO *supplied_fp;
 #endif
     IoIFP(io) = fp;
     if (writing) {
+	dTHR;
 	if (IoTYPE(io) == 's'
 	  || (IoTYPE(io) == '>' && S_ISCHR(statbuf.st_mode)) ) {
 	    if (!(IoOFP(io) = PerlIO_fdopen(PerlIO_fileno(fp),"w"))) {
@@ -482,7 +485,10 @@ register GV *gv;
 #ifdef HAS_FCHMOD
 		(void)fchmod(lastfd,filemode);
 #else
+#  if !(defined(WIN32) && defined(__BORLANDC__))
+		/* Borland runtime creates a readonly file! */
 		(void)chmod(oldname,filemode);
+#  endif
 #endif
 		if (fileuid != statbuf.st_uid || filegid != statbuf.st_gid) {
 #ifdef HAS_FCHOWN
@@ -724,7 +730,6 @@ I32 my_chsize(fd, length)
 I32 fd;			/* file descriptor */
 Off_t length;		/* length to set file to */
 {
-    extern long lseek();
     struct flock fl;
     struct stat filebuf;
 
@@ -943,7 +948,7 @@ do_execfree()
     }
 }
 
-#ifndef OS2
+#if !defined(OS2) && !defined(WIN32)
 
 bool
 do_exec(cmd)
@@ -1034,7 +1039,7 @@ char *cmd;
     return FALSE;
 }
 
-#endif /* OS2 */
+#endif /* OS2 || WIN32 */
 
 I32
 apply(type,mark,sp)
@@ -1337,6 +1342,9 @@ SV **sp;
     char *a;
     I32 id, n, cmd, infosize, getinfo;
     I32 ret = -1;
+#ifdef __linux__	/* XXX Need metaconfig test */
+    union semun unsemds;
+#endif
 
     id = SvIVx(*++mark);
     n = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
@@ -1366,7 +1374,21 @@ SV **sp;
 	else if (cmd == GETALL || cmd == SETALL)
 	{
 	    struct semid_ds semds;
+#ifdef __linux__	/* XXX Need metaconfig test */
+/* linux (and Solaris2?) uses :
+   int semctl (int semid, int semnum, int cmd, union semun arg)
+       union semun {
+            int val;
+            struct semid_ds *buf;
+            ushort *array;
+       };
+*/
+            union semun semun;
+            semun.buf = &semds;
+	    if (semctl(id, 0, IPC_STAT, semun) == -1)
+#else
 	    if (semctl(id, 0, IPC_STAT, &semds) == -1)
+#endif
 		return -1;
 	    getinfo = (cmd == GETALL);
 	    infosize = semds.sem_nsems * sizeof(short);
@@ -1412,7 +1434,12 @@ SV **sp;
 #endif
 #ifdef HAS_SEM
     case OP_SEMCTL:
+#ifdef __linux__	/* XXX Need metaconfig test */
+        unsemds.buf = (struct semid_ds *)a;
+	ret = semctl(id, n, cmd, unsemds);
+#else
 	ret = semctl(id, n, cmd, (struct semid_ds *)a);
+#endif
 	break;
 #endif
 #ifdef HAS_SHM

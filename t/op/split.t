@@ -2,7 +2,7 @@
 
 # $RCSfile: split.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:26 $
 
-print "1..14\n";
+print "1..16\n";
 
 $FS = ':';
 
@@ -66,3 +66,13 @@ print $_ eq "1|-|10||20" ? "ok 13\n" : "not ok 13\n";
 # do subpatterns generate additional fields (with a limit)?
 $_ = join '|', split(/,|(-)/, "1-10,20,,,", 10);
 print $_ eq "1|-|10||20||||||" ? "ok 14\n" : "not ok 14\n";
+
+# is the 'two undefs' bug fixed?
+(undef, $a, undef, $b) = qw(1 2 3 4);
+print "$a|$b" eq "2|4" ? "ok 15\n" : "not ok 15\n";
+
+# .. even for locals?
+{
+  local(undef, $a, undef, $b) = qw(1 2 3 4);
+  print "$a|$b" eq "2|4" ? "ok 16\n" : "not ok 16\n";
+}

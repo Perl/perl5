@@ -201,6 +201,8 @@ can also call methods directly to manipulate individual symbols.  In some
 cases, this allows you finer control than using a tied hash aggregate.  The
 following methods are supported:
 
+=over
+
 =item new
 
 This creates a C<VMS::DCLsym> object which can be used as a handle for later

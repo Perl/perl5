@@ -322,6 +322,7 @@
 #define lshift_amg		Perl_lshift_amg
 #define lshift_ass_amg		Perl_lshift_ass_amg
 #define lt_amg			Perl_lt_amg
+#define magic_clear_all_env	Perl_magic_clear_all_env
 #define magic_clearenv		Perl_magic_clearenv
 #define magic_clearpack		Perl_magic_clearpack
 #define magic_clearsig		Perl_magic_clearsig
@@ -992,6 +993,7 @@
 #define sig_name		Perl_sig_name
 #define sig_num			Perl_sig_num
 #define sighandler		Perl_sighandler
+#define sighandlerp		Perl_sighandlerp
 #define simple			Perl_simple
 #define sin_amg			Perl_sin_amg
 #define skipspace		Perl_skipspace
@@ -1064,6 +1066,7 @@
 #define sv_setptrobj		Perl_sv_setptrobj
 #define sv_setpv		Perl_sv_setpv
 #define sv_setpvf		Perl_sv_setpvf
+#define sv_setpviv		Perl_sv_setpviv
 #define sv_setpvn		Perl_sv_setpvn
 #define sv_setref_iv		Perl_sv_setref_iv
 #define sv_setref_nv		Perl_sv_setref_nv
@@ -1091,6 +1094,7 @@
 #define too_many_arguments	Perl_too_many_arguments
 #define uid			Perl_uid
 #define unlnk			Perl_unlnk
+#define unlock_condpair		Perl_unlock_condpair
 #define unshare_hek		Perl_unshare_hek
 #define unsharepvn		Perl_unsharepvn
 #define utilize			Perl_utilize
@@ -1264,6 +1268,7 @@
 #define gensym			(curinterp->Igensym)
 #define in_eval			(curinterp->Iin_eval)
 #define incgv			(curinterp->Iincgv)
+#define initav			(curinterp->Iinitav)
 #define inplace			(curinterp->Iinplace)
 #define last_in_gv		(curinterp->Ilast_in_gv)
 #define lastfd			(curinterp->Ilastfd)
@@ -1291,10 +1296,6 @@
 #define minus_n			(curinterp->Iminus_n)
 #define minus_p			(curinterp->Iminus_p)
 #define multiline		(curinterp->Imultiline)
-#define mystack_base		(curinterp->Imystack_base)
-#define mystack_mark		(curinterp->Imystack_mark)
-#define mystack_max		(curinterp->Imystack_max)
-#define mystack_sp		(curinterp->Imystack_sp)
 #define mystrk			(curinterp->Imystrk)
 #define nrs			(curinterp->Inrs)
 #define ofmt			(curinterp->Iofmt)
@@ -1315,7 +1316,6 @@
 #define preambleav		(curinterp->Ipreambleav)
 #define preambled		(curinterp->Ipreambled)
 #define preprocess		(curinterp->Ipreprocess)
-#define restartav		(curinterp->Irestartav)
 #define restartop		(curinterp->Irestartop)
 #define rightgv			(curinterp->Irightgv)
 #define rs			(curinterp->Irs)
@@ -1419,6 +1419,7 @@
 #define Igensym			gensym
 #define Iin_eval		in_eval
 #define Iincgv			incgv
+#define Iinitav			initav
 #define Iinplace		inplace
 #define Ilast_in_gv		last_in_gv
 #define Ilastfd			lastfd
@@ -1446,10 +1447,6 @@
 #define Iminus_n		minus_n
 #define Iminus_p		minus_p
 #define Imultiline		multiline
-#define Imystack_base		mystack_base
-#define Imystack_mark		mystack_mark
-#define Imystack_max		mystack_max
-#define Imystack_sp		mystack_sp
 #define Imystrk			mystrk
 #define Inrs			nrs
 #define Iofmt			ofmt
@@ -1470,7 +1467,6 @@
 #define Ipreambleav		preambleav
 #define Ipreambled		preambled
 #define Ipreprocess		preprocess
-#define Irestartav		restartav
 #define Irestartop		restartop
 #define Irightgv		rightgv
 #define Irs			rs
@@ -1583,6 +1579,7 @@
 #define gensym			Perl_gensym
 #define in_eval			Perl_in_eval
 #define incgv			Perl_incgv
+#define initav			Perl_initav
 #define inplace			Perl_inplace
 #define last_in_gv		Perl_last_in_gv
 #define lastfd			Perl_lastfd
@@ -1610,10 +1607,6 @@
 #define minus_n			Perl_minus_n
 #define minus_p			Perl_minus_p
 #define multiline		Perl_multiline
-#define mystack_base		Perl_mystack_base
-#define mystack_mark		Perl_mystack_mark
-#define mystack_max		Perl_mystack_max
-#define mystack_sp		Perl_mystack_sp
 #define mystrk			Perl_mystrk
 #define nrs			Perl_nrs
 #define ofmt			Perl_ofmt
@@ -1634,7 +1627,6 @@
 #define preambleav		Perl_preambleav
 #define preambled		Perl_preambled
 #define preprocess		Perl_preprocess
-#define restartav		Perl_restartav
 #define restartop		Perl_restartop
 #define rightgv			Perl_rightgv
 #define rs			Perl_rs

@@ -108,7 +108,8 @@ sub export {
 			last;
 		    }
 		} elsif ($sym !~ s/^&// || !$exports{$sym}) {
-		    warn qq["$sym" is not exported by the $pkg module];
+                    require Carp;
+		    Carp::carp(qq["$sym" is not exported by the $pkg module]);
 		    $oops++;
 		}
 	    }
@@ -137,8 +138,9 @@ sub export {
 	if (@failed) {
 	    @failed = $pkg->export_fail(@failed);
 	    foreach $sym (@failed) {
-		warn qq["$sym" is not implemented by the $pkg module ],
-			"on this architecture";
+                require Carp;
+		Carp::carp(qq["$sym" is not implemented by the $pkg module ],
+			"on this architecture");
 	    }
 	    if (@failed) {
 		require Carp;
@@ -165,11 +167,21 @@ sub export {
     }
 }
 
+sub export_to_level
+{
+      my $pkg = shift;
+      my ($level, $junk) = (shift, shift);  # need to get rid of first arg
+                                            # we know it already.
+      my $callpkg = caller($level);
+      $pkg->export($callpkg, @_);
+}
+
 sub import {
     my $pkg = shift;
     my $callpkg = caller($ExportLevel);
     export $pkg, $callpkg, @_;
 }
+
 
 
 # Utility functions
@@ -345,6 +357,53 @@ with a leading ^, e.g., C</^EXIT/> rather than C</EXIT/>.
 You can say C<BEGIN { $Exporter::Verbose=1 }> to see how the
 specifications are being processed and what is actually being imported
 into modules.
+
+=head2 Exporting without using Export's import method
+
+Exporter has a special method, 'export_to_level' which is used in situations
+where you can't directly call Export's import method. The export_to_level
+method looks like:
+
+MyPackage->export_to_level($where_to_export, @what_to_export);
+
+where $where_to_export is an integer telling how far up the calling stack
+to export your symbols, and @what_to_export is an array telling what
+symbols *to* export (usually this is @_).
+
+For example, suppose that you have a module, A, which already has an
+import function:
+
+package A;
+
+@ISA = qw(Exporter);
+@EXPORT_OK = qw ($b);
+
+sub import
+{
+    $A::b = 1;     # not a very useful import method
+}
+
+and you want to Export symbol $A::b back to the module that called 
+package A. Since Exporter relies on the import method to work, via 
+inheritance, as it stands Exporter::import() will never get called. 
+Instead, say the following:
+
+package A;
+@ISA = qw(Exporter);
+@EXPORT_OK = qw ($b);
+
+sub import
+{
+    $A::b = 1;
+    A->export_to_level(1, @_);
+}
+
+This will export the symbols one level 'above' the current package - ie: to 
+the program or module that used package A. 
+
+Note: Be careful not to modify '@_' at all before you call export_to_level
+- or people using your package will get very unexplained results!
+
 
 =head2 Module Version Checking
 

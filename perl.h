@@ -62,9 +62,17 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 
 #define NOOP (void)0
 
+#define WITH_THR(s) do { dTHR; s; } while (0)
 #ifdef USE_THREADS
+#ifdef FAKE_THREADS
+#include "fakethr.h"
+#else
 #include <pthread.h>
-#endif
+typedef pthread_mutex_t perl_mutex;
+typedef pthread_cond_t perl_cond;
+typedef pthread_key_t perl_key;
+#endif /* FAKE_THREADS */
+#endif /* USE_THREADS */
 
 /*
  * SOFT_CAST can be used for args to prototyped functions to retain some
@@ -375,8 +383,14 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #   include <netinet/in.h>
 #endif
 
+#if defined(SF_APPEND) && defined(USE_SFIO) && defined(I_SFIO)
+/* <sfio.h> defines SF_APPEND and <sys/stat.h> might define SF_APPEND
+ * (the neo-BSD seem to do this).  */
+#   undef SF_APPEND
+#endif
+
 #ifdef I_SYS_STAT
-#include <sys/stat.h>
+#   include <sys/stat.h>
 #endif
 
 /* The stat macros for Amdahl UTS, Unisoft System V/88 (and derivatives
@@ -853,9 +867,9 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 
 #endif
 
-/* Digital UNIX defines CONTEXT when pthreads is in use */
-#ifdef CONTEXT
-#  undef CONTEXT
+/* Digital UNIX defines a typedef CONTEXT when pthreads is in use */ 
+#if defined(__osf__)
+#  define CONTEXT PERL_CONTEXT
 #endif
 
 typedef MEM_SIZE STRLEN;
@@ -875,7 +889,9 @@ typedef struct loop LOOP;
 
 typedef struct Outrec Outrec;
 typedef struct interpreter PerlInterpreter;
-typedef struct ff FF;
+#ifndef __BORLANDC__
+typedef struct ff FF;		/* XXX not defined anywhere, should go? */
+#endif
 typedef struct sv SV;
 typedef struct av AV;
 typedef struct hv HV;
@@ -1300,14 +1316,21 @@ typedef Sighandler_t Sigsave_t;
 # ifndef register
 #  define register
 # endif
-# ifdef MYMALLOC
-#  ifndef DEBUGGING_MSTATS
-#   define DEBUGGING_MSTATS
-#  endif
-# endif
 # define PAD_SV(po) pad_sv(po)
+# define RUNOPS_DEFAULT runops_debug
 #else
 # define PAD_SV(po) curpad[po]
+# define RUNOPS_DEFAULT runops_standard
+#endif
+
+/*
+ * These need prototyping here because <proto.h> isn't
+ * included until after runops is initialised.
+ */
+
+int runops_standard _((void));
+#ifdef DEBUGGING
+int runops_debug _((void));
 #endif
 
 /****************/
@@ -1317,15 +1340,18 @@ typedef Sighandler_t Sigsave_t;
 /* global state */
 EXT PerlInterpreter *	curinterp;	/* currently running interpreter */
 #ifdef USE_THREADS
-EXT pthread_key_t	thr_key;	/* For per-thread struct thread ptr */
-EXT pthread_mutex_t	sv_mutex;	/* Mutex for allocating SVs in sv.c */
-EXT pthread_mutex_t	malloc_mutex;	/* Mutex for malloc */
-EXT pthread_mutex_t	eval_mutex;	/* Mutex for doeval */
-EXT pthread_cond_t	eval_cond;	/* Condition variable for doeval */
+EXT perl_key		thr_key;	/* For per-thread struct thread ptr */
+EXT perl_mutex		sv_mutex;	/* Mutex for allocating SVs in sv.c */
+EXT perl_mutex		malloc_mutex;	/* Mutex for malloc */
+EXT perl_mutex		eval_mutex;	/* Mutex for doeval */
+EXT perl_cond		eval_cond;	/* Condition variable for doeval */
 EXT struct thread *	eval_owner;	/* Owner thread for doeval */
 EXT int			nthreads;	/* Number of threads currently */
-EXT pthread_mutex_t	nthreads_mutex;	/* Mutex for nthreads */
-EXT pthread_cond_t	nthreads_cond;	/* Condition variable for nthreads */
+EXT perl_mutex		threads_mutex;	/* Mutex for nthreads and thread list */
+EXT perl_cond		nthreads_cond;	/* Condition variable for nthreads */
+#ifdef FAKE_THREADS
+EXT struct thread *	thr;		/* Currently executing (fake) thread */
+#endif
 #endif /* USE_THREADS */
 
 /* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
@@ -1359,6 +1385,7 @@ EXT U32 *	profiledata;
 EXT int		maxo INIT(MAXO);/* Number of ops */
 EXT char *	osname;		/* operating system */
 EXT char *	sh_path INIT(SH_PATH); /* full path of shell */
+EXT Sighandler_t	sighandlerp;
 
 EXT XPV*	xiv_arenaroot;	/* list of allocated xiv areas */
 EXT IV **	xiv_root;	/* free xiv list--shared by interpreters */
@@ -1381,6 +1408,7 @@ EXT OP *	opsave;		/* save current op register across longjmps */
 #else
 EXT OP *	op;		/* current op--when not in a global register */
 #endif
+EXT int		(*runops) _((void)) INIT(RUNOPS_DEFAULT);
 EXT I32 *	scopestack;	/* blocks we've entered */
 EXT I32		scopestack_ix;
 EXT I32		scopestack_max;
@@ -1421,37 +1449,37 @@ EXTCONST char *	hexdigit INIT("0123456789abcdef0123456789ABCDEFx");
 EXTCONST char *	patleave INIT("\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}");
 EXTCONST char *	vert INIT("|");
 
-EXTCONST char	warn_uninit[]
+EXTCONST char warn_uninit[]
   INIT("Use of uninitialized value");
-EXTCONST char	warn_nosemi[]
+EXTCONST char warn_nosemi[]
   INIT("Semicolon seems to be missing");
-EXTCONST char	warn_reserved[]
+EXTCONST char warn_reserved[]
   INIT("Unquoted string \"%s\" may clash with future reserved word");
-EXTCONST char	warn_nl[]
+EXTCONST char warn_nl[]
   INIT("Unsuccessful %s on filename containing newline");
-EXTCONST char	no_wrongref[]
+EXTCONST char no_wrongref[]
   INIT("Can't use %s ref as %s ref");
-EXTCONST char	no_symref[]
+EXTCONST char no_symref[]
   INIT("Can't use string (\"%.32s\") as %s ref while \"strict refs\" in use");
-EXTCONST char	no_usym[]
+EXTCONST char no_usym[]
   INIT("Can't use an undefined value as %s reference");
-EXTCONST char	no_aelem[]
+EXTCONST char no_aelem[]
   INIT("Modification of non-creatable array value attempted, subscript %d");
-EXTCONST char	no_helem[]
+EXTCONST char no_helem[]
   INIT("Modification of non-creatable hash value attempted, subscript \"%s\"");
-EXTCONST char	no_modify[]
+EXTCONST char no_modify[]
   INIT("Modification of a read-only value attempted");
-EXTCONST char	no_mem[]
+EXTCONST char no_mem[]
   INIT("Out of memory!\n");
-EXTCONST char	no_security[]
+EXTCONST char no_security[]
   INIT("Insecure dependency in %s%s");
-EXTCONST char	no_sock_func[]
+EXTCONST char no_sock_func[]
   INIT("Unsupported socket function \"%s\" called");
-EXTCONST char	no_dir_func[]
+EXTCONST char no_dir_func[]
   INIT("Unsupported directory function \"%s\" called");
-EXTCONST char	no_func[]
+EXTCONST char no_func[]
   INIT("The %s function is unimplemented");
-EXTCONST char	no_myglob[]
+EXTCONST char no_myglob[]
   INIT("\"my\" variable %s can't be in a package");
 
 EXT SV		sv_undef;
@@ -1840,7 +1868,7 @@ IEXT HV *	Idebstash;	/* symbol table for perldb package */
 IEXT SV *	Icurstname;	/* name of current package */
 IEXT AV *	Ibeginav;	/* names of BEGIN subroutines */
 IEXT AV *	Iendav;		/* names of END subroutines */
-IEXT AV *	Irestartav;	/* names of RESTART subroutines */
+IEXT AV *	Iinitav;	/* names of INIT subroutines */
 IEXT HV *	Istrtab;	/* shared string table */
 
 /* memory management */
@@ -1898,9 +1926,6 @@ IEXT I32	Irunlevel;
 /* stack stuff */
 IEXT AV *	Icurstack;		/* THE STACK */
 IEXT AV *	Imainstack;	/* the stack when nothing funny is happening */
-IEXT SV **	Imystack_base;	/* stack->array_ary */
-IEXT SV **	Imystack_sp;	/* stack pointer now */
-IEXT SV **	Imystack_max;	/* stack->array_ary + stack->array_max */
 
 /* format accumulators */
 IEXT SV *	Iformtarget;
@@ -1970,7 +1995,8 @@ EXT MGVTBL vtbl_sv =	{magic_get,
 				magic_set,
 					magic_len,
 						0,	0};
-EXT MGVTBL vtbl_env =	{0,	0,	0,	0,	0};
+EXT MGVTBL vtbl_env =	{0,	0,	0,	magic_clear_all_env,
+							0};
 EXT MGVTBL vtbl_envelem =	{0,	magic_setenv,
 					0,	magic_clearenv,
 							0};
@@ -2207,6 +2233,22 @@ enum {
 
 #endif /* OVERLOAD */
 
+#define PERLDB_ALL	0xff
+#define PERLDBf_SUB	0x01		/* Debug sub enter/exit. */
+#define PERLDBf_LINE	0x02		/* Keep line #. */
+#define PERLDBf_NOOPT	0x04		/* Switch off optimizations. */
+#define PERLDBf_INTER	0x08		/* Preserve more data for
+					   later inspections.  */
+#define PERLDBf_SUBLINE	0x10		/* Keep subr source lines. */
+#define PERLDBf_SINGLE	0x20		/* Start with single-step on. */
+
+#define PERLDB_SUB	(perldb && (perldb & PERLDBf_SUB))
+#define PERLDB_LINE	(perldb && (perldb & PERLDBf_LINE))
+#define PERLDB_NOOPT	(perldb && (perldb & PERLDBf_NOOPT))
+#define PERLDB_INTER	(perldb && (perldb & PERLDBf_INTER))
+#define PERLDB_SUBLINE	(perldb && (perldb & PERLDBf_SUBLINE))
+#define PERLDB_SINGLE	(perldb && (perldb & PERLDBf_SINGLE))
+
 #ifdef USE_LOCALE_COLLATE
 EXT U32		collation_ix;		/* Collation generation index */
 EXT char *	collation_name;		/* Name of current collation */
@@ -2247,6 +2289,19 @@ EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
  */
 #define printf PerlIO_stdoutf
 #endif
+
+/*
+ * nice_chunk and nice_chunk size need to be set
+ * and queried under the protection of sv_mutex
+ */
+#define offer_nice_chunk(chunk, chunk_size) do {	\
+	MUTEX_LOCK(&sv_mutex);				\
+	if (!nice_chunk) {				\
+	    nice_chunk = (char*)(chunk);		\
+	    nice_chunk_size = (chunk_size);		\
+	}						\
+	MUTEX_UNLOCK(&sv_mutex);			\
+    } while (0)
 
 #endif /* Include guard */
 

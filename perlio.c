@@ -360,7 +360,11 @@ PerlIO *f;
 #ifdef HAS_SETLINEBUF
     setlinebuf(f);
 #else
+#  ifdef __BORLANDC__ /* Borland doesn't like NULL size for _IOLBF */
+    setvbuf(f, Nullch, _IOLBF, BUFSIZ);
+#  else
     setvbuf(f, Nullch, _IOLBF, 0);
+#  endif
 #endif
 }
 

@@ -395,10 +395,14 @@ for (map { chr } 0..255) {
 print "ok 101\n";
 
 # The @Locale should be internally consistent.
+# Thanks to Hallvard Furuseth <h.b.furuseth@usit.uio.no>
+# for inventing a way to test for ordering consistency
+# without requiring any particular order.
+# ++$jhi;#@iki.fi
 
 print "# testing 102\n";
 {
-    my ($from, $to, $lesser, $greater, @test, %test, $test);
+    my ($from, $to, $lesser, $greater, @test, %test, $test, $yes, $no, $sign);
 
     for (0..9) {
 	# Select a slice.
@@ -410,24 +414,25 @@ print "# testing 102\n";
 	$from++; $to++;
         $to = $#Locale if ($to > $#Locale);
 	$greater = join('', @Locale[$from..$to]);
+	($yes, $no, $sign) = ($lesser lt $greater
+				? ("    ", "not ", 1)
+				: ("not ", "    ", -1));
+	# all these tests should FAIL (return 0).
 	@test = 
 	    (
-	     'not ($lesser  lt $greater)', # 0
-	     'not ($lesser  le $greater)', # 1
-	     'not ($lesser  ne $greater)', # 2
-	     '    ($lesser  eq $greater)', # 3
-	     '    ($lesser  ge $greater)', # 4
-	     '    ($lesser  gt $greater)', # 5
-	     '    ($greater lt $lesser )', # 6
-	     '    ($greater le $lesser )', # 7
-	     'not ($greater ne $lesser )', # 8
-	     '    ($greater eq $lesser )', # 9
-	     'not ($greater ge $lesser )', # 10
-	     'not ($greater gt $lesser )', # 11
-	     # Well, these two are sort of redundant
-	     # because @Locale was derived using cmp.
-	     'not (($lesser  cmp $greater) == -1)', # 12
-	     'not (($greater cmp $lesser ) ==  1)'  # 13
+	     $no.'    ($lesser  lt $greater)',  # 0
+	     $no.'    ($lesser  le $greater)',  # 1
+	     $no.'    ($lesser  ne $greater)',  # 2
+	     $yes.'    ($lesser  eq $greater)', # 3
+	     $yes.'    ($lesser  ge $greater)', # 4
+	     $yes.'    ($lesser  gt $greater)', # 5
+	     $yes.'    ($greater lt $lesser )', # 6
+	     $yes.'    ($greater le $lesser )', # 7
+	     $no.'     ($greater ne $lesser )', # 8
+	     $yes.'    ($greater eq $lesser )', # 9
+	     $no.'     ($greater ge $lesser )', # 10
+	     $no.'     ($greater gt $lesser )', # 11
+	     'not (($lesser cmp $greater) == -$sign)' # 12
 	     );
 	@test{@test} = 0 x @test;
 	$test = 0;
@@ -436,6 +441,8 @@ print "# testing 102\n";
 	    print "# failed 102 at:\n";
 	    print "# lesser  = '$lesser'\n";
 	    print "# greater = '$greater'\n";
+	    print "# lesser cmp greater = ", $lesser cmp $greater, "\n";
+	    print "# greater cmp lesser = ", $greater cmp $lesser, "\n";
 	    print "# (greater) from = $from, to = $to\n";
 	    for my $ti (@test) {
 		printf("# %-40s %-4s", $ti,
@@ -452,3 +459,5 @@ print "# testing 102\n";
     }
 }
 print "ok 102\n";
+
+# eof

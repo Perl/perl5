@@ -2,6 +2,10 @@
  *
  */
 
+#if defined(PERL_CORE) && !defined(DEBUGGING_MSTATS)
+#  define DEBUGGING_MSTATS
+#endif 
+
 #ifndef lint
 #  if defined(DEBUGGING) && !defined(NO_RCHECK)
 #    define RCHECK
@@ -367,7 +371,7 @@ static void
 morecore(bucket)
 	register int bucket;
 {
-  	register union overhead *op;
+  	register union overhead *ovp;
   	register int rnu;       /* 2^rnu bytes will be requested */
   	register int nblks;     /* become nblks blocks of the desired size */
 	register MEM_SIZE siz, needed;
@@ -384,10 +388,10 @@ morecore(bucket)
 	 * make getpageize call?
 	 */
 #ifndef atarist /* on the atari we dont have to worry about this */
-  	op = (union overhead *)sbrk(0);
+  	ovp = (union overhead *)sbrk(0);
 #  ifndef I286
-  	if ((UV)op & (0x7FF >> CHUNK_SHIFT)) {
-	    slack = (0x800 >> CHUNK_SHIFT) - ((UV)op & (0x7FF >> CHUNK_SHIFT));
+  	if ((UV)ovp & (0x7FF >> CHUNK_SHIFT)) {
+	    slack = (0x800 >> CHUNK_SHIFT) - ((UV)ovp & (0x7FF >> CHUNK_SHIFT));
 	    (void)sbrk(slack);
 #    if defined(DEBUGGING_MSTATS)
 	    sbrk_slack += slack;
@@ -411,11 +415,11 @@ morecore(bucket)
 #ifdef TWO_POT_OPTIMIZE
 	needed += (bucket >= (FIRST_BIG_TWO_POT - 3) ? PERL_PAGESIZE : 0);
 #endif 
-	op = (union overhead *)sbrk(needed);
+	ovp = (union overhead *)sbrk(needed);
 	/* no more room! */
-  	if (op == (union overhead *)-1) {
-	    op = (union overhead *)emergency_sbrk(needed);
-	    if (op == (union overhead *)-1)
+  	if (ovp == (union overhead *)-1) {
+	    ovp = (union overhead *)emergency_sbrk(needed);
+	    if (ovp == (union overhead *)-1)
   		return;
 	}
 #ifdef DEBUGGING_MSTATS
@@ -427,11 +431,11 @@ morecore(bucket)
 	 */
 #ifndef I286
 #  ifdef PACK_MALLOC
-	if ((UV)op & 0x7FF)
+	if ((UV)ovp & 0x7FF)
 		croak("panic: Off-page sbrk");
 #  endif
-  	if ((UV)op & 7) {
-  		op = (union overhead *)(((UV)op + 8) & ~7);
+  	if ((UV)ovp & 7) {
+  		ovp = (union overhead *)(((UV)ovp + 8) & ~7);
   		nblks--;
   	}
 #else
@@ -443,29 +447,29 @@ morecore(bucket)
 	 */
   	siz = 1 << (bucket + 3);
 #ifdef PACK_MALLOC
-	*(u_char*)op = bucket;	/* Fill index. */
+	*(u_char*)ovp = bucket;	/* Fill index. */
 	if (bucket <= MAX_PACKED - 3) {
-	    op = (union overhead *) ((char*)op + blk_shift[bucket]);
+	    ovp = (union overhead *) ((char*)ovp + blk_shift[bucket]);
 	    nblks = n_blks[bucket];
 #  ifdef DEBUGGING_MSTATS
 	    start_slack += blk_shift[bucket];
 #  endif
 	} else if (bucket <= 11 - 1 - 3) {
-	    op = (union overhead *) ((char*)op + blk_shift[bucket]);
+	    ovp = (union overhead *) ((char*)ovp + blk_shift[bucket]);
 	    /* nblks = n_blks[bucket]; */
 	    siz -= sizeof(union overhead);
-	} else op++;		/* One chunk per block. */
+	} else ovp++;		/* One chunk per block. */
 #endif /* !PACK_MALLOC */
-  	nextf[bucket] = op;
+  	nextf[bucket] = ovp;
 #ifdef DEBUGGING_MSTATS
 	nmalloc[bucket] += nblks;
 #endif 
   	while (--nblks > 0) {
-		op->ov_next = (union overhead *)((caddr_t)op + siz);
-		op = (union overhead *)((caddr_t)op + siz);
+		ovp->ov_next = (union overhead *)((caddr_t)ovp + siz);
+		ovp = (union overhead *)((caddr_t)ovp + siz);
   	}
 	/* Not all sbrks return zeroed memory.*/
-	op->ov_next = (union overhead *)NULL;
+	ovp->ov_next = (union overhead *)NULL;
 #ifdef PACK_MALLOC
 	if (bucket == 7 - 3) {	/* Special case, explanation is above. */
 	    union overhead *n_op = nextf[7 - 3]->ov_next;
@@ -481,7 +485,7 @@ free(mp)
 	Malloc_t mp;
 {   
   	register MEM_SIZE size;
-	register union overhead *op;
+	register union overhead *ovp;
 	char *cp = (char*)mp;
 #ifdef PACK_MALLOC
 	u_char bucket;
@@ -493,12 +497,12 @@ free(mp)
 
 	if (cp == NULL)
 		return;
-	op = (union overhead *)((caddr_t)cp 
-				- sizeof (union overhead) * CHUNK_SHIFT);
+	ovp = (union overhead *)((caddr_t)cp 
+				 - sizeof (union overhead) * CHUNK_SHIFT);
 #ifdef PACK_MALLOC
-	bucket = OV_INDEX(op);
+	bucket = OV_INDEX(ovp);
 #endif 
-	if (OV_MAGIC(op, bucket) != MAGIC) {
+	if (OV_MAGIC(ovp, bucket) != MAGIC) {
 		static int bad_free_warn = -1;
 		if (bad_free_warn == -1) {
 		    char *pbf = getenv("PERL_BADFREE");
@@ -508,7 +512,7 @@ free(mp)
 		    return;
 #ifdef RCHECK
 		warn("%s free() ignored",
-		    op->ov_rmagic == RMAGIC - 1 ? "Duplicate" : "Bad");
+		    ovp->ov_rmagic == RMAGIC - 1 ? "Duplicate" : "Bad");
 #else
 		warn("Bad free() ignored");
 #endif
@@ -516,15 +520,15 @@ free(mp)
 	}
 	MUTEX_LOCK(&malloc_mutex);
 #ifdef RCHECK
-  	ASSERT(op->ov_rmagic == RMAGIC);
-	if (OV_INDEX(op) <= MAX_SHORT_BUCKET)
-		ASSERT(*(u_int *)((caddr_t)op + op->ov_size + 1 - RSLOP) == RMAGIC);
-	op->ov_rmagic = RMAGIC - 1;
+  	ASSERT(ovp->ov_rmagic == RMAGIC);
+	if (OV_INDEX(ovp) <= MAX_SHORT_BUCKET)
+		ASSERT(*(u_int *)((caddr_t)ovp + ovp->ov_size + 1 - RSLOP) == RMAGIC);
+	ovp->ov_rmagic = RMAGIC - 1;
 #endif
-  	ASSERT(OV_INDEX(op) < NBUCKETS);
-  	size = OV_INDEX(op);
-	op->ov_next = nextf[size];
-  	nextf[size] = op;
+  	ASSERT(OV_INDEX(ovp) < NBUCKETS);
+  	size = OV_INDEX(ovp);
+	ovp->ov_next = nextf[size];
+  	nextf[size] = ovp;
 	MUTEX_UNLOCK(&malloc_mutex);
 }
 
@@ -547,7 +551,7 @@ realloc(mp, nbytes)
 	MEM_SIZE nbytes;
 {   
   	register MEM_SIZE onb;
-	union overhead *op;
+	union overhead *ovp;
   	char *res;
 	register int i;
 	int was_alloced = 0;
@@ -574,10 +578,10 @@ realloc(mp, nbytes)
 #endif /* PERL_CORE */
 
 	MUTEX_LOCK(&malloc_mutex);
-	op = (union overhead *)((caddr_t)cp 
-				- sizeof (union overhead) * CHUNK_SHIFT);
-	i = OV_INDEX(op);
-	if (OV_MAGIC(op, i) == MAGIC) {
+	ovp = (union overhead *)((caddr_t)cp 
+				 - sizeof (union overhead) * CHUNK_SHIFT);
+	i = OV_INDEX(ovp);
+	if (OV_MAGIC(ovp, i) == MAGIC) {
 		was_alloced = 1;
 	} else {
 		/*
@@ -591,8 +595,8 @@ realloc(mp, nbytes)
 		 * the memory block being realloc'd is the
 		 * smallest possible.
 		 */
-		if ((i = findbucket(op, 1)) < 0 &&
-		    (i = findbucket(op, reall_srchlen)) < 0)
+		if ((i = findbucket(ovp, 1)) < 0 &&
+		    (i = findbucket(ovp, reall_srchlen)) < 0)
 			i = 0;
 	}
 	onb = (1L << (i + 3)) - 
@@ -624,7 +628,7 @@ realloc(mp, nbytes)
 		 * Record new allocated size of block and
 		 * bound space with magic numbers.
 		 */
-		if (OV_INDEX(op) <= MAX_SHORT_BUCKET) {
+		if (OV_INDEX(ovp) <= MAX_SHORT_BUCKET) {
 			/*
 			 * Convert amount of memory requested into
 			 * closest block size stored in hash buckets
@@ -633,8 +637,8 @@ realloc(mp, nbytes)
 			 */
 			nbytes += M_OVERHEAD;
 			nbytes = (nbytes + 3) &~ 3; 
-			op->ov_size = nbytes - 1;
-			*((u_int *)((caddr_t)op + nbytes - RSLOP)) = RMAGIC;
+			ovp->ov_size = nbytes - 1;
+			*((u_int *)((caddr_t)ovp + nbytes - RSLOP)) = RMAGIC;
 		}
 #endif
 		res = cp;
@@ -789,6 +793,9 @@ int size;
 #ifdef PERL_CORE
     reqsize = size; /* just for the DEBUG_m statement */
 #endif
+#ifdef PACK_MALLOC
+    size = (size + 0x7ff) & ~0x7ff;
+#endif
     if (size <= Perl_sbrk_oldsize) {
 	got = Perl_sbrk_oldchunk;
 	Perl_sbrk_oldchunk += size;
@@ -804,6 +811,9 @@ int size;
 	small = 1;
       }
       got = (IV)SYSTEM_ALLOC(size);
+#ifdef PACK_MALLOC
+      got = (got + 0x7ff) & ~0x7ff;
+#endif
       if (small) {
 	/* Chunk is small, register the rest for future allocs. */
 	Perl_sbrk_oldchunk = got + reqsize;

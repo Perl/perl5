@@ -7,6 +7,7 @@ WriteMakefile(
     NAME      => 'sdbm', # (doesn't matter what the name is here) oh yes it does
     LINKTYPE  => 'static',
     DEFINE    => $define,
+    INC       => '-I$(PERL_INC)', # force PERL_INC dir ahead of system -I's
     SKIP      => [qw(dynamic dynamic_lib)],
     OBJECT    => '$(O_FILES)',
     clean     => {'FILES' => 'dbu libsdbm.a dbd dba dbe x-dbu *.dir *.pag'},

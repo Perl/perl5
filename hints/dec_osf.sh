@@ -161,6 +161,16 @@ case "$optimize" in
     	;;
 esac
 
+if [ "X$usethreads" != "X" ]; then
+    ccflags="-DUSE_THREADS $ccflags"
+    optimize="-pthread $optimize"
+    ldflags="-pthread $ldflags"
+    set `echo X "$libswanted "| sed -e 's/ c / pthread c_r /'`
+    shift
+    libswanted="$*"
+    usemymalloc='n'
+fi
+
 #
 # Unset temporary variables no more needed.
 #

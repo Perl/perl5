@@ -6,7 +6,7 @@ xsubpp - compiler to convert Perl XS code into C code
 
 =head1 SYNOPSIS
 
-B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-prototypes>] [B<-noversioncheck>] [B<-typemap typemap>]... file.xs
+B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-prototypes>] [B<-noversioncheck>] [B<-nolinenumbers>] [B<-typemap typemap>]... file.xs
 
 =head1 DESCRIPTION
 
@@ -55,6 +55,10 @@ Disables the run time test that determines if the object file (derived
 from the C<.xs> file) and the C<.pm> files have the same version
 number.
 
+=item B<-nolinenumbers>
+
+Prevents the inclusion of `#line' directives in the output.
+
 =back
 
 =head1 ENVIRONMENT
@@ -83,7 +87,7 @@ sub Q ;
 
 # Global Constants
 
-$XSUBPP_version = "1.9402";
+$XSUBPP_version = "1.9504";
 
 my ($Is_VMS, $SymSet);
 if ($^O eq 'VMS') {
@@ -96,7 +100,7 @@ if ($^O eq 'VMS') {
 
 $FH = 'File0000' ;
 
-$usage = "Usage: xsubpp [-v] [-C++] [-except] [-prototypes] [-noversioncheck] [-s pattern] [-typemap typemap]... file.xs\n";
+$usage = "Usage: xsubpp [-v] [-C++] [-except] [-prototypes] [-noversioncheck] [-nolinenumbers] [-s pattern] [-typemap typemap]... file.xs\n";
 
 $proto_re = "[" . quotemeta('\$%&*@;') . "]" ;
 
@@ -104,6 +108,7 @@ $except = "";
 $WantPrototypes = -1 ;
 $WantVersionChk = 1 ;
 $ProtoUsed = 0 ;
+$WantLineNumbers = 1 ;
 SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $flag = shift @ARGV;
     $flag =~ s/^-// ;
@@ -115,6 +120,8 @@ SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $WantVersionChk = 1, next SWITCH	if $flag eq 'versioncheck';
     $except = " TRY",	next SWITCH	if $flag eq 'except';
     push(@tm,shift),	next SWITCH	if $flag eq 'typemap';
+    $WantLineNumbers = 0, next SWITCH	if $flag eq 'nolinenumbers';
+    $WantLineNumbers = 1, next SWITCH	if $flag eq 'linenumbers';
     (print "xsubpp version $XSUBPP_version\n"), exit  	
 	if $flag eq 'v';
     die $usage;
@@ -127,6 +134,7 @@ else
 
 @ARGV == 1 or die $usage;
 ($dir, $filename) = $ARGV[0] =~ m#(.*)/(.*)#
+	or ($dir, $filename) = $ARGV[0] =~ m#(.*)\\(.*)#
 	or ($dir, $filename) = $ARGV[0] =~ m#(.*[>\]])(.*)#
 	or ($dir, $filename) = ('.', $ARGV[0]);
 chdir($dir);
@@ -238,13 +246,59 @@ sub check_keyword {
 }
 
 
+if ($WantLineNumbers) {
+    {
+	package xsubpp::counter;
+	sub TIEHANDLE {
+	    my ($class, $cfile) = @_;
+	    my $buf = "";
+	    $SECTION_END_MARKER = "#line --- \"$cfile\"";
+	    $line_no = 1;
+	    bless \$buf;
+	}
+
+	sub PRINT {
+	    my $self = shift;
+	    for (@_) {
+		$$self .= $_;
+		while ($$self =~ s/^([^\n]*\n)//) {
+		    my $line = $1;
+		    ++ $line_no;
+		    $line =~ s|^\#line\s+---(?=\s)|#line $line_no|;
+		    print STDOUT $line;
+		}
+	    }
+	}
+
+	sub PRINTF {
+	    my $self = shift;
+	    my $fmt = shift;
+	    $self->PRINT(sprintf($fmt, @_));
+	}
+
+	sub DESTROY {
+	    # Not necessary if we're careful to end with a "\n"
+	    my $self = shift;
+	    print STDOUT $$self;
+	}
+    }
+
+    my $cfile = $filename;
+    $cfile =~ s/\.xs$/.c/i or $cfile .= ".c";
+    tie(*PSEUDO_STDOUT, 'xsubpp::counter', $cfile);
+    select PSEUDO_STDOUT;
+}
+
 sub print_section {
-    my $count = 0;
-    $_ = shift(@line) while !/\S/ && @line;
+    # the "do" is required for right semantics
+    do { $_ = shift(@line) } while !/\S/ && @line;
+    
+    print("#line ", $line_no[@line_no - @line -1], " \"$filename\"\n")
+	if $WantLineNumbers && !/^\s*#\s*line\b/;
     for (;  defined($_) && !/^$BLOCK_re/o;  $_ = shift(@line)) {
-        print line_directive() unless ($count++);
 	print "$_\n";
     }
+    print "$xsubpp::counter::SECTION_END_MARKER\n" if $WantLineNumbers;
 }
 
 sub process_keyword($)
@@ -254,7 +308,6 @@ sub process_keyword($)
 
     &{"${kwd}_handler"}() 
         while $kwd = check_keyword($pattern) ;
-    print line_directive();
 }
 
 sub CASE_handler {
@@ -331,7 +384,6 @@ sub OUTPUT_handler {
 	    unless defined($args_match{$outarg});
 	blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
 	    unless defined $var_types{$outarg} ;
-	print line_directive();
 	if ($outcode) {
 	    print "\t$outcode\n";
 	} else {
@@ -649,7 +701,10 @@ print <<EOM ;
  */
 
 EOM
-print "#line 1 \"$filename\"\n"; 
+ 
+
+print("#line 1 \"$filename\"\n")
+    if $WantLineNumbers;
 
 while (<$FH>) {
     last if ($Module, $Package, $Prefix) =
@@ -786,7 +841,9 @@ while (fetch_para()) {
 
     if (check_keyword("BOOT")) {
 	&check_cpp;
-        push (@BootCode, $_, line_directive(), @line, "") ;
+	push (@BootCode, "#line $line_no[@line_no - @line] \"$filename\"")
+	  if $WantLineNumbers && $line[0] !~ /^\s*#\s*line\b/;
+        push (@BootCode, @line, "") ;
         next PARAGRAPH ;
     }
 
@@ -1004,7 +1061,6 @@ EOF
 	} elsif ($gotRETVAL || $wantRETVAL) {
 	    &generate_output($ret_type, 0, 'RETVAL');
 	}
-	print line_directive();
 
 	# do cleanup
 	process_keyword("CLEANUP|ALIAS|PROTOTYPE") ;
@@ -1063,11 +1119,11 @@ EOF
     if ($ProtoThisXSUB) {
 	$newXS = "newXSproto";
 
-	if ($ProtoThisXSUB == 2) {
+	if ($ProtoThisXSUB eq 2) {
 	    # User has specified empty prototype
 	    $proto = ', ""' ;
 	}
-        elsif ($ProtoThisXSUB != 1) {
+        elsif ($ProtoThisXSUB ne 1) {
             # User has specified a prototype
             $proto = ', "' . $ProtoThisXSUB . '"';
         }
@@ -1134,8 +1190,9 @@ EOF
 
 if (@BootCode)
 {
-    print "\n    /* Initialisation Section */\n" ;
-    print grep (s/$/\n/, @BootCode) ;
+    print "\n    /* Initialisation Section */\n\n" ;
+    @line = @BootCode;
+    print_section();
     print "\n    /* End of Initialisation Section */\n\n" ;
 }
 
@@ -1155,15 +1212,6 @@ sub output_init {
     local($arg) = "ST(" . ($num - 1) . ")";
 
     eval qq/print " $init\\\n"/;
-}
-
-sub line_directive
-{
-    # work out the line number
-    my $line_no = $line_no[@line_no - @line -1] ;
- 
-    return "#line $line_no \"$filename\"\n" ;
-
 }
 
 sub Warn

@@ -20,7 +20,7 @@ IPC::Open3, open3 - open a process for reading, writing, and error handling
 
 =head1 SYNOPSIS
 
-    $pid = open3(\*WTRFH, \*RDRFH, \*ERRFH
+    $pid = open3(\*WTRFH, \*RDRFH, \*ERRFH,
 		    'some cmd and args', 'optarg', ...);
 
 =head1 DESCRIPTION
