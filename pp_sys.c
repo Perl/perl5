@@ -4740,7 +4740,7 @@ PP(pp_gpwent)
 PP(pp_spwent)
 {
     djSP;
-#if defined(HAS_PASSWD) && defined(HAS_SETPWENT) && !defined(CYGWIN)
+#if defined(HAS_PASSWD) && defined(HAS_SETPWENT)
     setpwent();
 #   ifdef HAS_SETSPENT
     setspent();

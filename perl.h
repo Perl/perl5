@@ -2576,7 +2576,7 @@ struct perl_vars {
 EXT struct perl_vars PL_Vars;
 EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
 #else /* PERL_CORE */
-#if !defined(__GNUC__) || !(defined(WIN32) || defined(CYGWIN))
+#if !defined(__GNUC__) || !defined(WIN32)
 EXT
 #endif /* WIN32 */
 struct perl_vars *PL_VarsPtr;

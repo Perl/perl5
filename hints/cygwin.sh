@@ -25,6 +25,7 @@ lddlflags='-L/usr/local/lib'
 useshrplib='true'
 libperl='libperl.a'
 dlext='dll'
+dynamic_ext=' '
 
 man1dir=/usr/local/man/man1
 man3dir=/usr/local/man/man3

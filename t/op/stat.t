@@ -13,7 +13,7 @@ print "1..58\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_Dos = $^O eq 'dos';
-$Is_Dosish = $Is_Dos || $^O eq 'os2' || $Is_MSWin32 || $^O =~ /cygwin/;
+$Is_Dosish = $Is_Dos || $^O eq 'os2' || $Is_MSWin32;
 chop($cwd = ($Is_MSWin32 ? `cd` : `pwd`));
 
 $DEV = `ls -l /dev` unless $Is_Dosish;
