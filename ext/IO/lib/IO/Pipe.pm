@@ -14,7 +14,7 @@ use vars qw($VERSION);
 use Carp;
 use Symbol;
 
-$VERSION = "1.09";
+$VERSION = "1.0901";
 
 sub new {
     my $type = shift;
@@ -65,6 +65,7 @@ sub _doit {
         }
         bless $io, "IO::Handle";
         $io->fdopen($fh, $mode);
+        $fh->close;
 
         if ($do_spawn) {
           $pid = eval { system 1, @_ }; # 1 == P_NOWAIT
