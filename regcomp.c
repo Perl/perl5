@@ -1636,6 +1636,9 @@ tryagain:
     case '[':
 	PL_regcomp_parse++;
 	ret = (UTF ? regclassutf8() : regclass());
+	if (*PL_regcomp_parse != ']')
+	    FAIL("unmatched [] in regexp");
+	nextchar();
 	*flagp |= HASWIDTH|SIMPLE;
 	break;
     case '(':
@@ -1781,6 +1784,29 @@ tryagain:
 	    if (UTF && !PL_utf8_digit)
 		is_utf8_digit("1");	/* preload table */
 	    break;
+	case 'p':
+	case 'P':
+	    {	/* a lovely hack--pretend we saw [\pX] instead */
+		char* oldregxend = PL_regxend;
+
+		if (PL_regcomp_parse[1] == '{') {
+		    PL_regxend = strchr(PL_regcomp_parse, '}');
+		    if (!PL_regxend)
+			FAIL("Missing right brace on \\p{}");
+		    PL_regxend++;
+		}
+		else
+		    PL_regxend = PL_regcomp_parse + 2;
+		PL_regcomp_parse--;
+
+		ret = regclassutf8();
+
+		PL_regxend = oldregxend;
+		PL_regcomp_parse--;
+		nextchar();
+		*flagp |= HASWIDTH|SIMPLE;
+	    }
+	    break;
 	case 'n':
 	case 'r':
 	case 't':
@@ -1876,6 +1902,8 @@ tryagain:
 		    case 'S':
 		    case 'd':
 		    case 'D':
+		    case 'p':
+		    case 'P':
 			--p;
 			goto loopdone;
 		    case 'n':
@@ -2215,9 +2243,6 @@ regclass(void)
 	}
 	lastvalue = value;
     }
-    if (*PL_regcomp_parse != ']')
-	FAIL("unmatched [] in regexp");
-    nextchar();
     /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
     if (!SIZE_ONLY && (*opnd & (0xFF ^ ANYOF_INVERT)) == ANYOF_FOLD) {
 	for (value = 0; value < 256; ++value) {
@@ -2444,9 +2469,6 @@ regclassutf8(void)
 		sv_catpvf(listsv, "%04x\n", value);
 	}
     }
-    if (*PL_regcomp_parse != ']')
-	FAIL("unmatched [] in regexp");
-    nextchar();
 
     ret = reganode(ANYOFUTF8, 0);
 
