@@ -78,6 +78,28 @@ installusrbinperl="$undef"
 # This is there but in machine/ieeefp_h.
 ieeefp_h="define"
 
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads. 
+cat > UU/usethreads.cbu <<'EOCBU' 
+case "$usethreads" in 
+$define|true|[yY]*) 
+        # The GNU pth is the recommended user-level pthreads implementation. 
+        # As of NetBSD 1.5.2 there are no kernel pthreads. 
+        if pkg_info -qe pth; then 
+            # Add -lpthread. 
+            libswanted="$libswanted pthread" 
+            # -R so that we find the libpthread.so from /usr/pkg/lib
+            # during Configure and build.
+            ldflags="-R/usr/pkg/lib $ldflags" 
+            # There is no libc_r as of NetBSD 1.5.2, so no c -> c_r. 
+        else 
+            echo "$0: You need to install the GNU pth.  Aborting." >&4 
+            exit 1 
+        fi 
+        ;; 
+esac 
+EOCBU 
+
 # Recognize the NetBSD packages collection.
 # GDBM might be here.
 test -d /usr/pkg/lib     && loclibpth="$loclibpth /usr/pkg/lib"
