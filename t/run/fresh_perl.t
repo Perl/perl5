@@ -2,7 +2,7 @@
 
 # ** DO NOT ADD ANY MORE TESTS HERE **
 # Instead, put the test in the appropriate test file and use the 
-# kill_perl() function in t/test.pl.
+# fresh_perl_is()/fresh_perl_like() functions in t/test.pl.
 
 # This is for tests that will normally cause segfaults, and other nasty
 # errors that might kill the interpreter and for some reason you can't
@@ -52,7 +52,9 @@ foreach my $prog (@prgs) {
 
     my($prog,$expected) = split(/\nEXPECT\n/, $raw_prog);
 
-    kill_perl($prog, $expected, { switches => [$switch] }, $name);
+    $expected =~ s/\n+$//;
+
+    fresh_perl_is($prog, $expected, { switches => [$switch] }, $name);
 }
 
 __END__
@@ -280,7 +282,7 @@ print "ok\n" if ("\0" lt "\xFF");
 EXPECT
 ok
 ########
-open(H,'run/kill_perl.t'); # must be in the 't' directory
+open(H,'run/fresh_perl.t'); # must be in the 't' directory
 stat(H);
 print "ok\n" if (-e _ and -f _ and -r _);
 EXPECT

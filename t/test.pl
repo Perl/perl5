@@ -396,8 +396,16 @@ my $tmpfile = "misctmp000";
 1 while -f ++$tmpfile;
 END { unlink_all $tmpfile }
 
-sub kill_perl {
-    my($prog, $expected, $runperl_args, $name) = @_;
+#
+# _fresh_perl
+#
+# The $resolve must be a subref that tests the first argument
+# for success, or returns the definition of success (e.g. the
+# expected scalar) if given no arguments.
+#
+
+sub _fresh_perl {
+    my($prog, $resolve, $runperl_args, $name) = @_;
 
     $runperl_args ||= {};
     $runperl_args->{progfile} = $tmpfile;
@@ -437,19 +445,45 @@ sub kill_perl {
         $results =~ s/\n\n/\n/g;
     }
 
-    $expected =~ s/\n+$//;
-
-    my $pass = $results eq $expected;
+    my $pass = $resolve->($results);
     unless ($pass) {
         print STDERR "# PROG: $switch\n$prog\n";
-        print STDERR "# EXPECTED:\n$expected\n";
+        print STDERR "# EXPECTED:\n", $resolve->(), "\n";
         print STDERR "# GOT:\n$results\n";
         print STDERR "# STATUS: $status\n";
     }
 
     ($name) = $prog =~ /^(.{1,35})/ unless $name;
 
-    _ok($pass, _where(), "kill_perl - $name");
+    _ok($pass, _where(), "fresh_perl - $name");
+}
+
+#
+# run_perl_is
+#
+# Combination of run_perl() and is().
+#
+
+sub fresh_perl_is {
+    my($prog, $expected, $runperl_args, $name) = @_;
+    _fresh_perl($prog,
+		sub { @_ ? $_[0] eq $expected : $expected },
+		$runperl_args, $name);
+}
+
+#
+# run_perl_like
+#
+# Combination of run_perl() and like().
+#
+
+sub fresh_perl_like {
+    my($prog, $expected, $runperl_args, $name) = @_;
+    _fresh_perl($prog,
+		sub { @_ ?
+			  $_[0] =~ (ref $expected ? $expected : /$expected/) :
+		          $expected },
+		$runperl_args, $name);
 }
 
 1;
