@@ -18,7 +18,6 @@ the semantics.
 
 =cut 
 
-use strict;
 use Config;
 use File::Basename;
 
@@ -72,7 +71,7 @@ sub const_cccmd {
     return $self->{CONST_CCCMD} = <<'MAKE_FRAG';
 CCCMD = $(CC) $(CCFLAGS) $(INC) $(OPTIMIZE) \
 	$(PERLTYPE) $(MPOLLUTE) -o $@ \
-	-DVERSION="$(VERSION)" -DXS_VERSION="$(XS_VERSION)"
+	-DVERSION=\"$(VERSION)\" -DXS_VERSION=\"$(XS_VERSION)\"
 MAKE_FRAG
 
 }
@@ -248,43 +247,36 @@ PM_TO_BLIB = }.join(" \\\n\t", %{$self->{PM}}).q{
 
 sub static_lib {
     my($self) = @_;
+# Come to think of it, if there are subdirs with linkcode, we still have no INST_STATIC
+#    return '' unless $self->needs_linking(); #might be because of a subdir
 
     return '' unless $self->has_link_code;
 
-    my $m = <<'END';
+    my(@m);
+    push(@m, <<'END');
 $(INST_STATIC): $(OBJECT) $(MYEXTLIB) $(INST_ARCHAUTODIR)\.exists
 	$(RM_RF) $@
 END
 
     # If this extension has it's own library (eg SDBM_File)
     # then copy that to $(INST_STATIC) and add $(OBJECT) into it.
-    $m .= <<'END'  if $self->{MYEXTLIB};
-	$self->{CP} $(MYEXTLIB) $\@
-END
+    push(@m, "\t$self->{CP} \$(MYEXTLIB) \$\@\n") if $self->{MYEXTLIB};
 
-    my $ar_arg;
-    if( $BORLAND ) {
-        $ar_arg = '$@ $(OBJECT:^"+")';
-    }
-    elsif( $GCC ) {
-        $ar_arg = '-ru $@ $(OBJECT)';
-    }
-    else {
-        $ar_arg = '-type library -o $@ $(OBJECT)';
-    }
-
-    $m .= sprintf <<'END', $ar_arg;
-	$(AR) %s
-	$(NOECHO)echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)\extralibs.ld
+    push @m,
+q{	$(AR) }.($BORLAND ? '$@ $(OBJECT:^"+")'
+			  : ($GCC ? '-ru $@ $(OBJECT)'
+			          : '-type library -o $@ $(OBJECT)')).q{
+	}.$self->{NOECHO}.q{echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)\extralibs.ld
 	$(CHMOD) 755 $@
-END
+};
+# CW change ( -type library ... )
+# Old mechanism - still available:
 
-    $m .= <<'END' if $self->{PERL_SRC};
-        $(NOECHO)echo "$(EXTRALIBS)" >> $(PERL_SRC)\ext.libs
+    push @m, "\t$self->{NOECHO}".q{echo "$(EXTRALIBS)" >> $(PERL_SRC)\ext.libs}."\n\n"
+	if $self->{PERL_SRC};
 
-END
-
-    return $m;
+    push @m, $self->dir_target('$(INST_ARCHAUTODIR)');
+    join('', "\n",@m);
 }
 
 

@@ -540,8 +540,8 @@ entry, instead of locking the file descriptor.
 =head1 SPEED
 
 The heart of Storable is written in C for decent speed. Extra low-level
-optimization have been made when manipulating Perl internals, to
-sacrifice encapsulation for the benefit of a greater speed.
+optimizations have been made when manipulating perl internals, to
+sacrifice encapsulation for the benefit of greater speed.
 
 =head1 CANONICAL REPRESENTATION
 

@@ -356,9 +356,16 @@
 
 #ifdef DEBUGGING
 #  undef DEBUG_m
-#  define DEBUG_m(a)  \
+#  define DEBUG_m(a) 							\
     STMT_START {							\
-	if (PERL_GET_INTERP) { dTHX; if (DEBUG_m_TEST) { a; } }	\
+	if (PERL_GET_INTERP) {						\
+	    dTHX;							\
+	    if (DEBUG_m_TEST) {						\
+		PL_debug &= ~DEBUG_m_FLAG;				\
+		a;							\
+		PL_debug |= DEBUG_m_FLAG;				\
+	    }								\
+	}								\
     } STMT_END
 #endif
 
@@ -1103,11 +1110,6 @@ Perl_malloc(register size_t nbytes)
   		return (NULL);
 	}
 
-	DEBUG_m(PerlIO_printf(Perl_debug_log,
-			      "0x%"UVxf": (%05lu) malloc %ld bytes\n",
-			      PTR2UV(p), (unsigned long)(PL_an++),
-			      (long)size));
-
 	/* remove from linked list */
 #if defined(RCHECK)
 	if ((PTR2UV(p)) & (MEM_ALIGNBYTES - 1)) {
@@ -1127,6 +1129,11 @@ Perl_malloc(register size_t nbytes)
   	nextf[bucket] = p->ov_next;
 
 	MALLOC_UNLOCK;
+
+	DEBUG_m(PerlIO_printf(Perl_debug_log,
+			      "0x%"UVxf": (%05lu) malloc %ld bytes\n",
+			      PTR2UV(p), (unsigned long)(PL_an++),
+			      (long)size));
 
 #ifdef IGNORE_SMALL_BAD_FREE
 	if (bucket >= FIRST_BUCKET_WITH_CHECK)

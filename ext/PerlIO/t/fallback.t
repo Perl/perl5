@@ -5,6 +5,10 @@ BEGIN {
     @INC = '../lib';
     require "../t/test.pl";
     skip_all("No perlio") unless (find PerlIO::Layer 'perlio');
+    if (ord("A") == 193) {
+	print "1..0 # Skip: EBCDIC\n";
+	exit 0;
+    }
     plan (9);
 }
 use Encode qw(:fallback_all);

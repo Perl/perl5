@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 1.66 2002/05/01 05:41:06 dankogai Exp dankogai $
+# $Id: Encode.pm,v 1.68 2002/05/03 12:20:31 dankogai Exp $
 #
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.66 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.68 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -600,6 +600,8 @@ constants via C<use Encode qw(:fallback_all)>.
 
 In the future, you will be able to use a code reference to a callback
 function for the value of I<CHECK> but its API is still undecided.
+
+The fallback scheme does not work on EBCDIC platforms.
 
 =head1 Defining Encodings
 

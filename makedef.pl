@@ -722,7 +722,9 @@ Perl_PerlIO_unread
 Perl_PerlIO_write
 
 );
-
+if ($PLATFORM eq 'netware') {
+    push(@layer_syms,'PL_def_layerlist','PL_known_layers','PL_perlio');
+}
 
 if ($define{'USE_PERLIO'}) {
     # Export the symols that make up the PerlIO abstraction, regardless

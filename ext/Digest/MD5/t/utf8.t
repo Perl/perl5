@@ -20,10 +20,14 @@ eval {
 print "not " unless $@ && $@ =~ /^(Big byte|Wide character)/;
 print "ok 1\n";
 
+my $exp = ord "A" == 193 ? # EBCDIC
+	   "c307ec81deba65e9a222ca81cd8f6ccd" :
+	   "503debffe559537231ed24f25651ec20"; # Latin 1
+
 chop($str);  # only bytes left
-print "not " unless md5_hex($str) eq "503debffe559537231ed24f25651ec20";
+print "not " unless md5_hex($str) eq $exp;
 print "ok 2\n";
 
 # reference
-print "not " unless md5_hex("foo\xFF") eq "503debffe559537231ed24f25651ec20";
+print "not " unless md5_hex("foo\xFF") eq $exp;
 print "ok 3\n";

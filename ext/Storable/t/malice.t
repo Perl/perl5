@@ -31,7 +31,7 @@ sub BEGIN {
 
 use strict;
 use vars qw($file_magic_str $other_magic $network_magic $major $minor
-            $minor_write);
+            $minor_write $fancy);
 $file_magic_str = 'pst0';
 $other_magic = 7 + length($Config{byteorder});
 $network_magic = 2;
@@ -40,7 +40,16 @@ $minor = 5;
 $minor_write = $] > 5.007 ? 5 : 4;
 
 use Test;
-BEGIN { plan tests => 334 + length($Config{byteorder}) * 4}
+BEGIN {
+  # If it's 5.7.3 or later the hash will be stored with flags, which is
+  # 2 extra bytes. There are 2 * 2 * 2 tests per byte in the body and header
+  # common to normal and network order serialised objects (hence the 8)
+  # There are only 2 * 2 tests per byte in the parts of the header not present
+  # for network order, and 2 tests per byte on the 'pst0' "magic number" only
+  # present in files, but not in things store()ed to memory
+  $fancy = ($] > 5.007 ? 2 : 0);
+  plan tests => 334 + length($Config{byteorder}) * 4 + $fancy * 8;
+}
 
 use Storable qw (store retrieve freeze thaw nstore nfreeze);
 
@@ -49,7 +58,12 @@ die "Temporary file 'malice.$$' already exists" if -e $file;
 
 END { while (-f $file) {unlink $file or die "Can't unlink '$file': $!" }}
 
-my %hash = (perl => 'rules');
+# The chr 256 is a hack to force the hash to always have the utf8 keys flag
+# set on 5.7.3 and later. Otherwise the test fails if run with -Mutf8 because
+# only there does the hash has the flag on, and hence only there is it stored
+# as a flagged hash, which is 2 bytes longer
+my %hash = (perl => 'rules', chr 256, '');
+delete $hash{chr 256};
 
 sub test_hash {
   my $clone = shift;
@@ -225,7 +239,7 @@ sub slurp {
 
 ok (defined store(\%hash, $file));
 
-my $expected = 20 + length ($file_magic_str) + $other_magic;
+my $expected = 20 + length ($file_magic_str) + $other_magic + $fancy;
 my $length = -s $file;
 
 die "Don't seem to have written file '$file' as I can't get its length: $!"
@@ -253,7 +267,7 @@ unlink $file or die "Can't unlink '$file': $!";
 
 ok (defined nstore(\%hash, $file));
 
-$expected = 20 + length ($file_magic_str) + $network_magic;
+$expected = 20 + length ($file_magic_str) + $network_magic + $fancy;
 $length = -s $file;
 
 die "Don't seem to have written file '$file' as I can't get its length: $!"

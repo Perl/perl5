@@ -19,9 +19,9 @@ Mac OS X.
 
 =head1 DESCRIPTION
 
-The latest perl 5.6 source itself builds on Mac OS, with some additional
-pieces. Support for Mac OS is now in the perl core, and MacPerl will be
-able to, in the future, keep in closer sync with regular perl releases.
+The latest perl source itself builds on Mac OS, with some additional
+pieces. Support for Mac OS is now in the perl core, and MacPerl is kept
+in close sync with regular perl releases.
 
 To build perl for Mac OS (as an MPW tool), you will need the addition
 of the F<macos> subdirectory, distributed separately.  It includes extra
@@ -38,8 +38,8 @@ and binaries) and anonymous CVS.
 
 	http://dev.macperl.org/
 
-The source is also in the main perl repository in the maint-5.6/macperl
-branch.
+The source is also in the main perl repository in the macperl
+branch (the 5.6 source is in the maint-5.6/macperl branch).
 
 You will also need compilers and libraries, all of them freely
 available.  These are linked to from the SourceForge site. Go that site
@@ -50,7 +50,7 @@ and PowerPC architectures.  The MPW tool may be used on Mac OS 7.5.5
 and 68030 computers.
 
 MacPerl 5.2.0r4 is also available, on the CPAN and on SourceForge.  It
-is based on perl 5.004.
+is based on perl 5.004, and works with Mac OS 7.5.5 and 68030 computers.
 
 
 =head1 AUTHOR
@@ -62,4 +62,4 @@ Nandor E<lt>pudge@pobox.comE<gt>.
 
 =head1 DATE
 
-Last modified 2002.02.28.
+Last modified 2002.05.02.
