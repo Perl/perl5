@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Apr 17 20:57:08 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Sat Apr 19 20:43:09 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5488,14 +5488,10 @@ case "$doublesize" in
 	echo "Checking to see how big your double precision numbers are..." >&4
 	$cat >try.c <<EOCP
 #include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
 int main()
 {
     printf("%d\n", (int)sizeof(double));
-    exit(0);
+    return(0);
 }
 EOCP
 	set try
@@ -13808,11 +13804,12 @@ if $test "$uselongdouble" = "$define"; then
 *** You requested the use of long doubles but you do not seem to have
 *** the mathematic functions for long doubles.
 *** ($message)
-*** I'm disabling the use of long doubles.
+*** Please rerun Configure without -Duselongdouble and/or -Dusemorebits.
+*** Cannot continue, aborting.
 
 EOM
 
-	uselongdouble=$undef
+	exit 1
     fi
 fi
 
