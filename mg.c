@@ -208,7 +208,7 @@ Perl_mg_get(pTHX_ SV *sv)
     if (SvREFCNT(sv) == 1) {
 	/* We hold the last reference to this SV, which implies that the
 	   SV was deleted as a side effect of the routines we called.  */
-	SvOK_off(sv);
+	(void)SvOK_off(sv);
     }
     return 0;
 }
