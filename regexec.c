@@ -4284,15 +4284,16 @@ Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** listsvp, SV 
 	if (PL_regdata->what[n] == 's') {
 	    SV *rv = (SV*)PL_regdata->data[n];
 	    AV *av = (AV*)SvRV((SV*)rv);
+	    SV **ary = AvARRAY(av);
 	    SV **a, **b;
 	
 	    /* See the end of regcomp.c:S_reglass() for
 	     * documentation of these array elements. */
 
-	    si  = *av_fetch(av, 0, FALSE);
-	    a   =  av_fetch(av, 1, FALSE);
-	    b   =  av_fetch(av, 2, FALSE);
-	
+	    si = *ary;
+	    a  = SvTYPE(ary[1]) == SVt_RV   ? &ary[1] : 0;
+	    b  = SvTYPE(ary[2]) == SVt_PVAV ? &ary[2] : 0;
+
 	    if (a)
 		sw = *a;
 	    else if (si && doinit) {
