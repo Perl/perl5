@@ -57,6 +57,8 @@ find(sub {
 # delete bogus symbols grepped out of comments and such
 delete $rfuncs{setlocale_r} if $^O eq 'linux';
 
+my %syms;
+
 for my $exe (@EXES) {
     for my $sym (`$NMU $exe`) {
         chomp $sym;
@@ -65,7 +67,7 @@ for my $exe (@EXES) {
         next if /\s/;
         $sym =~ s/\@.*\z//;	# remove @@GLIBC_2.0 etc
         # warn "#### $sym\n";
-        if (exists $rfuncs{"${sym}_r"}) {
+        if (exists $rfuncs{"${sym}_r"} && ! $syms{"$sym:$exe"}++) {
     	    push @syms, $sym;
         }
     }
