@@ -722,6 +722,7 @@ t/op/cmp.t		See if the various string and numeric compare work
 t/op/cond.t		See if conditional expressions work
 t/op/defins.t		See if auto-insert of defined() works
 t/op/delete.t		See if delete works
+t/op/die.t		See if die works
 t/op/die_exit.t		See if die and exit status interaction works
 t/op/do.t		See if subroutines work
 t/op/each.t		See if hash iterators work
@@ -734,12 +735,12 @@ t/op/glob.t		See if <*> works
 t/op/goto.t		See if goto works
 t/op/groups.t		See if $( works
 t/op/gv.t		See if typeglobs work
-t/op/hashwarn.t	See if hash warnings work
+t/op/hashwarn.t		See if hash warnings work
 t/op/inc.t		See if inc/dec of integers near 32 bit limit work
 t/op/index.t		See if index works
 t/op/int.t		See if int works
-t/op/ipcmsg.t	See if msg* ops work
-t/op/ipcsem.t	See if sem* ops work
+t/op/ipcmsg.t		See if msg* ops work
+t/op/ipcsem.t		See if sem* ops work
 t/op/join.t		See if join works
 t/op/list.t		See if array lists work
 t/op/local.t		See if local works
