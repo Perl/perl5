@@ -1,14 +1,18 @@
 #define PERL_NO_GET_CONTEXT
-
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 #define U8 U8
 #include "encode.h"
-/* #include "8859.h" */
-/* #include "EBCDIC.h" */
-/* #include "Symbols.h" */
 #include "def_t.h"
+
+#define ENCODE_XS_PROFILE 0 /* set 1 to profile.
+                              t/encoding.t dumps core because of
+                              Perl_warner and PerlIO don't work well */
+
+#define ENCODE_XS_USEFP   1 /* set 0 to disable floating point to calculate
+                              buffer size for encode_method().
+                              1 is recommended. 2 restores NI-S original  */
 
 #define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {dTHX;   \
                          Perl_croak(aTHX_ "panic_unimplemented"); \
@@ -494,6 +498,9 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
     STRLEN tlen  = slen;
     STRLEN ddone = 0;
     STRLEN sdone = 0;
+
+   /* We allocate slen+1.
+      PerlIO dumps core if this value is smaller than this. */
     SV *dst = sv_2mortal(newSV(slen+1));
     if (slen) {
 	U8 *d = (U8 *) SvPVX(dst);
@@ -503,8 +510,8 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	    SvCUR_set(dst, dlen+ddone);
 	    SvPOK_only(dst);
 
-#if 0
-	    Perl_warn(aTHX_ "code=%d @ s=%d/%d/%d d=%d/%d/%d",code,slen,sdone,tlen,dlen,ddone,SvLEN(dst)-1);
+#if ENCODE_XS_PROFILE >= 3
+	    Perl_warn(aTHX_ "code=%d @ s=%d/%d/%d d=%d/%d/%d\n",code,slen,sdone,tlen,dlen,ddone,SvLEN(dst)-1);
 #endif
 	
 	    if (code == ENCODE_FALLBACK || code == ENCODE_PARTIAL)
@@ -512,22 +519,31 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 
 	    switch (code) {
 	    case ENCODE_NOSPACE:
-		{
-		    STRLEN need ;
+	    {
+		    STRLEN more, sleft;
 		    sdone += slen;
 		    ddone += dlen;
-		    if (sdone) {
-			need = (1.0*tlen*SvLEN(dst)+sdone-1)/sdone+UTF8_MAXLEN;
-#if 0
-			Perl_warn(aTHX_ "Done %d/%d had %d need %d",
-                                   sdone, tlen, SvLEN(dst), need);
+		    sleft = tlen - sdone;
+		    if (sdone) { /* has src ever been processed ? */
+#if   ENCODE_XS_USEFP == 2
+                           more = (1.0*tlen*SvLEN(dst)+sdone-1)/sdone
+                                   - SvLEN(dst);
+#elif ENCODE_XS_USEFP
+                           more = (1.0*SvLEN(dst)+1)/sdone * sleft;
+#else
+                           /* safe until SvLEN(dst) == MAX_INT/16 */
+                           more = (16*SvLEN(dst)+1)/sdone/16 * sleft;
 #endif
 		    }
-		    else {
-			need = SvLEN(dst) + UTF8_MAXLEN;
-		    }
 		
-		    d = (U8 *) SvGROW(dst, need);
+		    more += UTF8_MAXLEN; /* insurance policy */
+#if ENCODE_XS_PROFILE >= 2
+		    Perl_warn(aTHX_
+			      "more=%d, sdone=%d, sleft=%d, SvLEN(dst)=%d\n",
+			      more, sdone, sleft, SvLEN(dst));
+#endif
+		    d = (U8 *) SvGROW(dst, SvLEN(dst) + more);
+		    /* dst need to grow need MORE bytes! */
 		    if (ddone >= SvLEN(dst)) {
 			Perl_croak(aTHX_ "Destination couldn't be grown.");
 		    }
@@ -536,7 +552,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		    s   += slen;
 		    slen = tlen-sdone;
 		    continue;
-		}
+	    }
 
 	    case ENCODE_NOREP:
 		if (dir == enc->f_utf8) {
@@ -597,6 +613,16 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	SvCUR_set(dst, 0);
 	SvPOK_only(dst);
     }
+#if ENCODE_XS_PROFILE
+    if (SvCUR(dst) > SvCUR(src)){
+           Perl_warn(aTHX_
+                     "SvLEN(dst)=%d, SvCUR(dst)=%d. "
+                     "%d bytes unused(%f %%)\n",
+                     SvLEN(dst), SvCUR(dst), SvLEN(dst) - SvCUR(dst),
+                     (SvLEN(dst) - SvCUR(dst))*1.0/SvLEN(dst)*100.0);
+
+    }
+#endif
     *SvEND(dst) = '\0';
     return dst;
 }
@@ -794,8 +820,5 @@ BOOT:
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
  PerlIO_define_layer(aTHX_ &PerlIO_encode);
 #endif
-/* #include "8859_def.h" */
-/* #include "EBCDIC_def.h" */
-/* #include "Symbols_def.h" */
 #include "def_t_def.h"
 }
