@@ -351,17 +351,20 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_GVSV:
     case OP_GV:
     case OP_AELEMFAST:
+	if (! (o->op_type == OP_AELEMFAST && o->op_flags & OPf_SPECIAL)) {
+	    /* not an OP_PADAV replacement */
 #ifdef USE_ITHREADS
-	if (cPADOPo->op_padix > 0) {
-	    /* No GvIN_PAD_off(cGVOPo_gv) here, because other references
-	     * may still exist on the pad */
-	    pad_swipe(cPADOPo->op_padix, TRUE);
-	    cPADOPo->op_padix = 0;
-	}
+	    if (cPADOPo->op_padix > 0) {
+		/* No GvIN_PAD_off(cGVOPo_gv) here, because other references
+		 * may still exist on the pad */
+		pad_swipe(cPADOPo->op_padix, TRUE);
+		cPADOPo->op_padix = 0;
+	    }
 #else
-	SvREFCNT_dec(cSVOPo->op_sv);
-	cSVOPo->op_sv = Nullsv;
+	    SvREFCNT_dec(cSVOPo->op_sv);
+	    cSVOPo->op_sv = Nullsv;
 #endif
+	}
 	break;
     case OP_METHOD_NAMED:
     case OP_CONST:
@@ -370,7 +373,7 @@ Perl_op_clear(pTHX_ OP *o)
 #ifdef USE_ITHREADS
 	/** Bug #15654
 	  Even if op_clear does a pad_free for the target of the op,
-	  pad_free doesn't actually remove the sv that exists in the bad
+	  pad_free doesn't actually remove the sv that exists in the pad;
 	  instead it lives on. This results in that it could be reused as 
 	  a target later on when the pad was reallocated.
 	**/
@@ -1162,6 +1165,9 @@ Perl_mod(pTHX_ OP *o, I32 type)
     case OP_ANDASSIGN:
     case OP_ORASSIGN:
     case OP_AELEMFAST:
+	/* Needed if maint gets patch 19588
+	   localize = -1;
+	*/
 	PL_modcount++;
 	break;
 
@@ -6420,19 +6426,11 @@ Perl_peep(pTHX_ register OP *o)
 	    o->op_seq = PL_op_seqmax++;
 	    break;
 
+	case OP_PADAV:
 	case OP_GV:
-	    if (o->op_next->op_type == OP_RV2SV) {
-		if (!(o->op_next->op_private & OPpDEREF)) {
-		    op_null(o->op_next);
-		    o->op_private |= o->op_next->op_private & (OPpLVAL_INTRO
-							       | OPpOUR_INTRO);
-		    o->op_next = o->op_next->op_next;
-		    o->op_type = OP_GVSV;
-		    o->op_ppaddr = PL_ppaddr[OP_GVSV];
-		}
-	    }
-	    else if (o->op_next->op_type == OP_RV2AV) {
-		OP* pop = o->op_next->op_next;
+	    if (o->op_type == OP_PADAV || o->op_next->op_type == OP_RV2AV) {
+		OP* pop = (o->op_type == OP_PADAV) ?
+			    o->op_next : o->op_next->op_next;
 		IV i;
 		if (pop && pop->op_type == OP_CONST &&
 		    (PL_op = pop->op_next) &&
@@ -6444,16 +6442,34 @@ Perl_peep(pTHX_ register OP *o)
 		    i >= 0)
 		{
 		    GV *gv;
-		    op_null(o->op_next);
+		    if (o->op_type == OP_GV)
+			op_null(o->op_next);
 		    op_null(pop->op_next);
 		    op_null(pop);
 		    o->op_flags |= pop->op_next->op_flags & OPf_MOD;
 		    o->op_next = pop->op_next->op_next;
-		    o->op_type = OP_AELEMFAST;
 		    o->op_ppaddr = PL_ppaddr[OP_AELEMFAST];
 		    o->op_private = (U8)i;
-		    gv = cGVOPo_gv;
-		    GvAVn(gv);
+		    if (o->op_type == OP_GV) {
+			gv = cGVOPo_gv;
+			GvAVn(gv);
+		    }
+		    else
+			o->op_flags |= OPf_SPECIAL;
+		    o->op_type = OP_AELEMFAST;
+		}
+		o->op_seq = PL_op_seqmax++;
+		break;
+	    }
+
+	    if (o->op_next->op_type == OP_RV2SV) {
+		if (!(o->op_next->op_private & OPpDEREF)) {
+		    op_null(o->op_next);
+		    o->op_private |= o->op_next->op_private & (OPpLVAL_INTRO
+							       | OPpOUR_INTRO);
+		    o->op_next = o->op_next->op_next;
+		    o->op_type = OP_GVSV;
+		    o->op_ppaddr = PL_ppaddr[OP_GVSV];
 		}
 	    }
 	    else if ((o->op_private & OPpEARLY_CV) && ckWARN(WARN_PROTOTYPE)) {

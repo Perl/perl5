@@ -21,7 +21,8 @@ our @EXPORT_OK = qw(set_style set_style_standard add_callback
 
 # use #6
 use B qw(class ppname main_start main_root main_cv cstring svref_2object
-	 SVf_IOK SVf_NOK SVf_POK SVf_IVisUV SVf_FAKE OPf_KIDS CVf_ANON);
+	 SVf_IOK SVf_NOK SVf_POK SVf_IVisUV SVf_FAKE OPf_KIDS OPf_SPECIAL
+	 CVf_ANON);
 
 my %style = 
   ("terse" =>
@@ -559,12 +560,14 @@ sub concise_op {
 	undef $lastnext;
 	$h{arg} = "(other->" . seq($op->other) . ")";
     } elsif ($h{class} eq "SVOP") {
-	if (! ${$op->sv}) {
-	    my $sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$op->targ];
-	    $h{arg} = "[" . concise_sv($sv, \%h) . "]";
-	    $h{targarglife} = $h{targarg} = "";
-	} else {
-	    $h{arg} = "(" . concise_sv($op->sv, \%h) . ")";
+	unless ($h{name} eq 'aelemfast' and $op->flags & OPf_SPECIAL) {
+	    if (! ${$op->sv}) {
+		my $sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$op->targ];
+		$h{arg} = "[" . concise_sv($sv, \%h) . "]";
+		$h{targarglife} = $h{targarg} = "";
+	    } else {
+		$h{arg} = "(" . concise_sv($op->sv, \%h) . ")";
+	    }
 	}
     } elsif ($h{class} eq "PADOP") {
 	my $sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$op->padix];

@@ -907,8 +907,19 @@ PP(pp_mapwhile)
 	}
 	/* copy the new items down to the destination list */
 	dst = PL_stack_base + (PL_markstack_ptr[-2] += items) - 1;
-	while (items-- > 0)
-	    *dst-- = SvTEMP(TOPs) ? POPs : sv_mortalcopy(POPs);
+	if (gimme == G_ARRAY) {
+	    while (items-- > 0)
+		*dst-- = SvTEMP(TOPs) ? POPs : sv_mortalcopy(POPs);
+	}
+	else { 
+	    /* scalar context: we don't care about which values map returns
+	     * (we use undef here). And so we certainly don't want to do mortal
+	     * copies of meaningless values. */
+	    while (items-- > 0) {
+		POPs;
+		*dst-- = &PL_sv_undef;
+	    }
+	}
     }
     LEAVE;					/* exit inner scope */
 
