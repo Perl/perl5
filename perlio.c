@@ -853,7 +853,7 @@ PerlIO_fdupopen(pTHX_ PerlIO *f)
  else
   {
    SETERRNO(EBADF,SS$_IVCHAN);
-   return -1;
+   return NULL;
   }
 }
 
