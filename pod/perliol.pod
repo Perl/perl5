@@ -780,13 +780,13 @@ makes this layer available, although F<PerlIO.pm> "knows" where to
 find it.  It is an example of a layer which takes an argument as it is
 called thus:
 
-   open($fh,"<:encoding(iso-8859-7)",$pathname)
+   open( $fh, "<:encoding(iso-8859-7)", $pathname );
 
 =item ":Scalar"
 
-Provides support for
+Provides support for reading data from and writing data to a scalar.
 
-   open($fh,"...",\$scalar)
+   open( $fh, ":Scalar", \$scalar );
 
 When a handle is so opened, then reads get bytes from the string value
 of I<$scalar>, and writes change the value. In both cases the position
@@ -797,8 +797,8 @@ determined via C<tell>.
 
 Provided to allow layers to be implemented as Perl code.  For instance:
 
-   use MIME::QuotedPrint;
-   open(my $fh, ">Via(MIME::QuotedPrint)", "qp");
+   use PerlIO::Via::StripHTML;
+   open( my $fh, ">:Via(StripHTML)", "index.html" );
 
 See L<PerlIO::Via> for details.
 
@@ -867,6 +867,3 @@ a person who is not a PerlIO guru (yet).
 =back
 
 =cut
-
-
-

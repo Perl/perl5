@@ -20,14 +20,14 @@ my $fh;
 my $a = join("", map { chr } 0..255) x 10;
 my $b;
 
-BEGIN { use_ok('MIME::QuotedPrint'); }
+BEGIN { use_ok('PerlIO::Via::QuotedPrint'); }
 
-ok( !open($fh,"<Via(MIME::QuotedPrint)", $tmp), 'open QuotedPrint fails');
-ok( open($fh,">Via(MIME::QuotedPrint)", $tmp), 'open QuotedPrint for output');
+ok( !open($fh,"<Via(PerlIO::Via::QuotedPrint)", $tmp), 'open QuotedPrint for input fails');
+ok(  open($fh,">Via(PerlIO::Via::QuotedPrint)", $tmp), 'open QuotedPrint for output');
 ok( (print $fh $a), "print to output file");
 ok( close($fh), 'close output file');
 
-ok( open($fh,"<Via(MIME::QuotedPrint)", $tmp), 'open QuotedPrint for input');
+ok( open($fh,"<Via(PerlIO::Via::QuotedPrint)", $tmp), 'open QuotedPrint for input');
 { local $/; $b = <$fh> }
 ok( close($fh), "close input file");
 

@@ -11,30 +11,53 @@ PerlIO::Via - Helper class for PerlIO layers implemented in perl
 
 =head1 SYNOPSIS
 
-   use Some::Package;
+   use PerlIO::Via::Layer;
+   open($fh,"<:Via(Layer)",...);
 
-   open($fh,"<:Via(Some::Package)",...);
-
-   use PerlIO::Via::SomeLayer;
-
-   # Assume PerlIO::Via:: default namespace when SomeLayer.pm is not found
-   open($fh,"<:Via(SomeLayer)",...);
+   use Some::Other::Package;
+   open($fh,">:Via(Some::Other::Package)",...);
 
 =head1 DESCRIPTION
 
-The package to be used as a layer should implement at least some of the
-following methods. In the method descriptions below I<$fh> will be
+The PerlIO::Via module allows you to develop PerlIO layers in Perl, without
+having to go into the nitty gritty of programming C with XS as the interface
+to Perl.
+
+One example module, L<PerlIO::Via::QuotedPrint>, is include with Perl
+5.8.0, and more example modules are available from CPAN, such as
+L<PerlIO::Via::StripHTML> and L<PerlIO::Via::Base64>.  The
+PerlIO::Via::StripHTML for instance, allows you to say:
+
+	use PerlIO::Via::StripHTML;
+	open( my $fh, "<:Via(StripHTML)", "index.html" );
+        my @line = <$fh>;
+
+to obtain the text of an HTML-file in an array with all the HTML-tags
+automagically removed.
+
+Please note that if the layer is created in the PerlIO::Via:: namespace, it
+does B<not> have to be fully qualified.  The PerlIO::Via module will prefix
+the PerlIO::Via:: namespace if the specified modulename does not exist as a
+fully qualified module name.
+
+=head1 EXPECTED METHODS
+
+To create a Perl module that implements a PerlIO layer in Perl (as opposed to
+in C using XS as the interface to Perl), you need to supply some of the
+following subroutines.  It is recommended to create these Perl modules in the
+PerlIO::Via:: namespace, so that they can easily be located on CPAN and use
+the default namespace feature of the PerlIO::Via module itself.
+
+Please note that this is an area of recent development in Perl and that the
+interface described here is therefor still subject to change (and hopefully
+better documentation and more examples).
+
+In the method descriptions below I<$fh> will be
 a reference to a glob which can be treated as a perl file handle.
 It refers to the layer below. I<$fh> is not passed if the layer
 is at the bottom of the stack, for this reason and to maintain
 some level of "compatibility" with TIEHANDLE classes it is passed last.
-
-As an example, in Perl release 5.8.0 the included MIME::QuotedPrint
-module defines the required TIEHANDLE methods so that you can say
-
-	use MIME::QuotedPrint;
-	open(my $fh, ">Via(MIME::QuotedPrint)", "qp");
-
+  
 =over 4
 
 =item $class->PUSHED([$mode[,$fh]])
@@ -147,11 +170,17 @@ value of FILL or READ.
 
 =back
 
+=head1 EXAMPLES
+
+Check the PerlIO::Via:: namespace on CPAN for examples of PerlIO layers
+implemented in Perl.  To give you an idea how simple the implementation of
+a PerlIO layer can look, as simple example is included here.
+
 =head2 Example - a Hexadecimal Handle
 
-Given the following module, Hex.pm:
+Given the following module, PerlIO::Via::Hex.pm:
 
-    package Hex;
+    package PerlIO::Via::Hex;
 
     sub PUSHED
     {
@@ -190,7 +219,7 @@ output to hexadecimal dump of the output bytes: for example "A" will
 be converted to "41" (on ASCII-based machines, on EBCDIC platforms
 the "A" will become "c1")
 
-    use Hex;
+    use PerlIO::Via::Hex;
     open(my $fh, ">:Via(Hex)", "foo.hex");
 
 and the following code will read the hexdump in and convert it
@@ -199,7 +228,3 @@ on the fly back into bytes:
     open(my $fh, "<:Via(Hex)", "foo.hex");
 
 =cut
-
-
-
-

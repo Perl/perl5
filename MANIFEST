@@ -1359,6 +1359,8 @@ lib/overload.pm			Module for overloading perl operators
 lib/overload.t			See if operator overloading works
 lib/perl5db.pl			Perl debugging routines
 lib/PerlIO.pm			PerlIO support module
+lib/PerlIO/Via/QuotedPrint.pm	PerlIO::Via::QuotedPrint
+lib/PerlIO/Via/t/QuotedPrint.t	PerlIO::Via::QuotedPrint
 lib/ph.t			See if h2ph works
 lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
 lib/Pod/Find.pm			used by pod/splitpod
