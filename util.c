@@ -2085,7 +2085,7 @@ Perl_unlnk(pTHX_ char *f)	/* unlink all versions of a file */
 #endif
 
 /* this is a drop-in replacement for bcopy() */
-#if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
+#if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
 char *
 Perl_my_bcopy(register const char *from,register char *to,register I32 len)
 {

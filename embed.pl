@@ -1759,7 +1759,7 @@ p	|int	|mode_from_discipline|SV* discp
 Ap	|char*	|moreswitches	|char* s
 p	|OP*	|my		|OP* o
 Ap	|NV	|my_atof	|const char *s
-#if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
+#if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
 Anp	|char*	|my_bcopy	|const char* from|char* to|I32 len
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
