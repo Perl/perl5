@@ -1583,8 +1583,6 @@ tidy : cleanlis
 	- If F$Search("[...]*$(E);-1").nes."" Then Purge/NoConfirm/Log [...]*$(E)
 	- If F$Search("Config.H;-1").nes."" Then Purge/NoConfirm/Log Config.H
 	- If F$Search("Config.SH;-1").nes."" Then Purge/NoConfirm/Log Config.SH
-	- If F$Search("perly.c;-1").nes."" Then Purge/NoConfirm/Log perly.c
-	- If F$Search("perly.h;-1").nes."" Then Purge/NoConfirm/Log perly.h
 	- If F$Search("VMSish.H;-1").nes."" Then Purge/NoConfirm/Log VMSish.H
 	- If F$Search("VMS.C;-1")   .nes."" Then Purge/NoConfirm/Log VMS.C
 	- If F$Search("Perlmain.C;-1")   .nes."" Then Purge/NoConfirm/Log Perlmain.C
@@ -1617,10 +1615,6 @@ clean : tidy cleantest
 	- If F$Search("[...]*$(O);*") .nes."" Then Delete/NoConfirm/Log [...]*$(O);*
 	- If F$Search(F$Parse("Sys$Disk:[]","$(SOCKH)")).nes."" Then Delete/NoConfirm/Log $(SOCKH);*
 	- If F$Search(F$Parse("Sys$Disk:[]","$(SOCKC)")).nes."" Then Delete/NoConfirm/Log $(SOCKC);*
-	- If F$Search("perly.c").nes."" Then Delete/NoConfirm/Log perly.c;*
-	- Copy [.vms]perly_c.vms []perly.c
-	- If F$Search("perly.h").nes."" Then Delete/NoConfirm/Log perly.h;*
-	- Copy [.vms]perly_h.vms []perly.h
 	- If F$Search("VMSish.H").nes."" Then Delete/NoConfirm/Log VMSish.H;*
 	- If F$Search("VMS.C")   .nes."" Then Delete/NoConfirm/Log VMS.C;*
 	- If F$Search("Perlmain.C")   .nes."" Then Delete/NoConfirm/Log Perlmain.C;*
