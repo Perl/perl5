@@ -892,6 +892,20 @@ lib/autouse.t			See if autouse works
 lib/base.pm			Establish IS-A relationship at compile time
 lib/Benchmark.pm		Measure execution time
 lib/Benchmark.t			See if Benchmark works
+lib/Math/BigFloat/Trace.pm	bignum tracing
+lib/Math/BigInt/Trace.pm	bignum tracing
+lib/bigint.pm			bignum
+lib/bignum.pm			bignum
+lib/bignum/t/bigint.t		See if bignum works
+lib/bignum/t/bignum.t		See if bignum works
+lib/bignum/t/bigrat.t		See if bignum works
+lib/bignum/t/bn_lite.t		See if bignum works
+lib/bignum/t/br_lite.t		See if bignum works
+lib/bignum/t/option_a.t		See if bignum works
+lib/bignum/t/option_l.t		See if bignum works
+lib/bignum/t/option_p.t		See if bignum works
+lib/bignum/t/trace.t		See if bignum works
+lib/bigrat.pm			bignum
 lib/bigfloat.pl			An arbitrary precision floating point package
 lib/bigfloatpl.t		See if bigfloat.pl works
 lib/bigint.pl			An arbitrary precision integer arithmetic package
