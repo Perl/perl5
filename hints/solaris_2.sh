@@ -387,10 +387,10 @@ cat > UU/use64bitint.cbu <<'EOCBU'
 case "$use64bitint" in
 "$define"|true|[yY]*)
 	    case "`uname -r`" in
-	    2.[1-6])
+	    5.[1-6])
 		cat >&4 <<EOM
-Solaris `uname -r` does not support 64-bit integers.
-You should upgrade to at least Solaris 2.7.
+Solaris `uname -r|sed -e 's/^5\.\([789]\)$/\1/'` does not support 64-bit integers.
+You should upgrade to at least Solaris 7.
 EOM
 		exit 1
 		;;
