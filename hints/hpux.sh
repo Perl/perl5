@@ -61,7 +61,7 @@
 #
 # Lastly, you may want to include the "-z" HP linker flag so that
 # reading from a NULL pointer causes a SEGV.
-ccflags="$ccflags -D_HPUX_SOURCE -Wl,-z"
+ccflags="$ccflags -D_HPUX_SOURCE"
 
 # Check if you're using the bundled C compiler.  This compiler doesn't support
 # ANSI C (the -Aa flag) nor can it produce shared libraries.  Thus we have
