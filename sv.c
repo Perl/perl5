@@ -11187,7 +11187,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_reg_oldsaved	= Nullch;
     PL_reg_oldsavedlen	= 0;
 #ifdef PERL_COPY_ON_WRITE
-    PL_nrs		= NullSv;
+    PL_nrs		= Nullsv;
 #endif
     PL_reg_maxiter	= 0;
     PL_reg_leftiter	= 0;
