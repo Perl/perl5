@@ -192,9 +192,10 @@ FILE *supplied_fp;
 		    }
 		    if (dodup)
 			fd = dup(fd);
-		    if (!(fp = fdopen(fd,mode)))
+		    if (!(fp = fdopen(fd,mode))) {
 			if (dodup)
 			    close(fd);
+			}
 		}
 	    }
 	    else {
@@ -520,13 +521,14 @@ badexit:
 }
 #endif
 
+/* explicit renamed to avoid C++ conflict    -- kja */
 bool
 #ifndef CAN_PROTOTYPE
-do_close(gv,explicit)
+do_close(gv,not_implicit)
 GV *gv;
-bool explicit;
+bool not_implicit;
 #else
-do_close(GV *gv, bool explicit)
+do_close(GV *gv, bool not_implicit)
 #endif /* CAN_PROTOTYPE */
 {
     bool retval;
@@ -540,12 +542,12 @@ do_close(GV *gv, bool explicit)
     }
     io = GvIO(gv);
     if (!io) {		/* never opened */
-	if (dowarn && explicit)
+	if (dowarn && not_implicit)
 	    warn("Close on unopened file <%s>",GvENAME(gv));
 	return FALSE;
     }
     retval = io_close(io);
-    if (explicit) {
+    if (not_implicit) {
 	IoLINES(io) = 0;
 	IoPAGE(io) = 0;
 	IoLINES_LEFT(io) = IoPAGE_LEN(io);
@@ -681,7 +683,7 @@ nuts:
 	/* code courtesy of William Kucharski */
 #define HAS_CHSIZE
 
-I32 chsize(fd, length)
+I32 my_chsize(fd, length)
 I32 fd;			/* file descriptor */
 Off_t length;		/* length to set file to */
 {
@@ -1012,7 +1014,7 @@ char *cmd;
 		break;
 	    }
 	  doshell:
-	    execl("/bin/sh","sh","-c",cmd,(char*)0);
+	    execl(SH_PATH, "sh", "-c", cmd, (char*)0);
 	    return FALSE;
 	}
     }
@@ -1188,8 +1190,13 @@ register SV **sp;
 #endif
 
 	    Zero(&utbuf, sizeof utbuf, char);
+#ifdef BIG_TIME
+	    utbuf.actime = (Time_t)SvNVx(*++mark);    /* time accessed */
+	    utbuf.modtime = (Time_t)SvNVx(*++mark);    /* time modified */
+#else
 	    utbuf.actime = SvIVx(*++mark);    /* time accessed */
 	    utbuf.modtime = SvIVx(*++mark);    /* time modified */
+#endif
 	    tot = sp - mark;
 	    while (++mark <= sp) {
 		if (utime(SvPVx(*mark, na),&utbuf))
