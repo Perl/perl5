@@ -527,7 +527,7 @@ One can still revert to the old guaranteed repeatable order (and be
 vulnerable to attack by wily crackers) by setting the environment
 variable PERL_HASH_SEED, see L<perlrun/PERL_HASH_SEED>.  Another option
 is to add -DUSE_HASH_SEED_EXPLICIT to the compilation flags (for
-example by using C<Configure -Accflags=-DUSE_HAS_SEED_EXPLICIT>), in
+example by using C<Configure -Accflags=-DUSE_HASH_SEED_EXPLICIT>), in
 which case one has to explicitly set the PERL_HASH_SEED environment
 variable to enable the security feature, or by adding -DNO_HASH_SEED to
 the compilation flags to completely disable the randomisation feature.
