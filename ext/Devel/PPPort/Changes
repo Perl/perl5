@@ -1,3 +1,8 @@
+3.00_02 - 2004-08-19
+
+    * remove PPPort.pm and PPPort.xs dependencies from Makefile.PL,
+      as they can be rebuilt with a "make regen" when neccessary
+
 3.00_01 - 2004-08-17
 
     * fixed problems with $^X in t/ppphtest.t when building in
