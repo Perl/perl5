@@ -399,7 +399,7 @@ encountered.  The final sequence number in a range has the string "E0"
 appended to it, which doesn't affect its numeric value, but gives you
 something to search for if you want to exclude the endpoint.  You can
 exclude the beginning point by waiting for the sequence number to be
-greater than 1.  If either operand of scalar ".." is a numeric literal,
+greater than 1.  If either operand of scalar ".." is a constant expression,
 that operand is implicitly compared to the C<$.> variable, the current
 line number.  Examples:
 
