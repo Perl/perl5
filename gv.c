@@ -298,7 +298,11 @@ I32 create;
     char tmpbuf[1234];
     HV *stash;
     GV *tmpgv;
-    sprintf(tmpbuf,"%.*s::",1200,name);
+    /* Use strncpy to avoid bug in VMS sprintf */
+    /* sprintf(tmpbuf,"%.*s::",1200,name); */
+    strncpy(tmpbuf, name, 1200);
+    tmpbuf[1200] = '\0';  /* just in case . . . */
+    strcat(tmpbuf, "::");
     tmpgv = gv_fetchpv(tmpbuf,create, SVt_PVHV);
     if (!tmpgv)
 	return 0;
@@ -899,7 +903,7 @@ HV* stash;
           }
           if (cv) filled=1;
 	  else {
-	    die("Method for operation %s not found in package %.200s during blessing\n",
+	    die("Method for operation %s not found in package %.256s during blessing\n",
 		cp,HvNAME(stash));
 	    return FALSE;
 	  }
@@ -1068,10 +1072,9 @@ int flags;
       } else if (cvp && (cv=cvp[nomethod_amg])) {
 	notfound = 1; lr = 1;
       } else {
-	char tmpstr[512];
         if (off==-1) off=method;
-	sprintf(tmpstr,"Operation `%s': no method found,\n\tleft argument %s%.200s,\n\tright argument %s%.200s",
-		      ((char**)AMG_names)[off],
+	sprintf(buf, "Operation `%s': no method found,\n\tleft argument %s%.256s,\n\tright argument %s%.256s",
+		      ((char**)AMG_names)[method],
 		      SvAMAGIC(left)? 
 		        "in overloaded package ":
 		        "has no overloaded magic",
@@ -1085,16 +1088,16 @@ int flags;
 		        HvNAME(SvSTASH(SvRV(right))):
 		        "");
 	if (amtp && amtp->fallback >= AMGfallYES) {
-	  DEBUG_o( deb(tmpstr) );
+	  DEBUG_o( deb(buf) );
 	} else {
-	  die(tmpstr);
+	  die(buf);
 	}
 	return NULL;
       }
     }
   }
   if (!notfound) {
-    DEBUG_o( deb("Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %.200s%s\n",
+    DEBUG_o( deb("Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %.256s%s\n",
 		 ((char**)AMG_names)[off],
 		 method+assignshift==off? "" :
 		             " (initially `",
