@@ -1397,8 +1397,7 @@ sub process_puretext {
 #
 sub pre_escape {
     my($str) = @_;
-
-    $$str =~ s,&,&amp;,g;
+    $$str =~ s/&(?!\w+;|#)/&amp;/g;	# XXX not bulletproof
 }
 
 #

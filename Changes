@@ -79,6 +79,155 @@ Version 5.005_57        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3359] By: gsar                                  on 1999/05/10  07:49:26
+        Log: more Compiler patches from Vishal Bhatia <vishalb@my-dejanews.com>
+             Date: Tue, 27 Apr 1999 23:47:24 PDT
+             Message-ID: <19990428064724.95244.qmail@hotmail.com>
+             Subject: [PATCH 5.005_56] Saving Tied hashes ( C.pm)
+             --
+             Date: Thu, 29 Apr 1999 18:21:06 -0700
+             Message-ID: <GEFPBFDJADFJBAAA@my-dejanews.com>
+             Subject: [PATCH 5.005_56] double constants ( C.pm)
+             --
+             Date: Mon, 03 May 1999 20:21:31 PDT
+             Message-ID: <19990504032131.81113.qmail@hotmail.com>
+             Subject: [PATCH 5.005_56] Overloading implementation ( Compiler)
+             --
+             Date: Thu, 06 May 1999 17:57:09 -0700
+             Message-ID: <FCJELBLAJBOBAAAA@my-dejanews.com>
+             Subject: Stash.pm
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B.xs ext/B/B/Bblock.pm ext/B/B/C.pm
+           ! ext/B/B/CC.pm ext/B/B/Stash.pm t/harness
+____________________________________________________________________________
+[  3358] By: gsar                                  on 1999/05/10  04:39:15
+        Log: cygwin32 update (untested adaptation of patch against 5.005_03)
+             From: alexander smishlajev <als@turnhere.com>
+             Date: Sun, 25 Apr 1999 14:58:29 +0300
+             Message-ID: <37230365.5F68B460@turnhere.com>
+             Subject: [PATCH]5.005_03 (CORE) cygwin32 port
+     Branch: perl
+	   + cygwin32/Makefile.SHs cygwin32/build-instructions.READFIRST
+	   + cygwin32/build-instructions.charles-wilson
+	   + cygwin32/build-instructions.sebastien-barre
+	   + cygwin32/build-instructions.steven-morlock
+	   + cygwin32/build-instructions.steven-morlock2
+           + cygwin32/impure_ptr.c cygwin32/ld2.in cygwin32/perlld.in
+	   - cygwin32/cw32imp.h cygwin32/gcc2 cygwin32/ld2 cygwin32/perlgcc
+           - cygwin32/perlld
+	   ! Configure EXTERN.h MANIFEST Makefile.SH README.cygwin32 XSUB.h
+	   ! cflags.SH config_h.SH dosish.h ext/POSIX/Makefile.PL
+	   ! ext/SDBM_File/sdbm/pair.c hints/cygwin32.sh installperl
+	   ! lib/Cwd.pm lib/ExtUtils/MakeMaker.pm lib/perl5db.pl
+	   ! makedepend.SH perl.h perlvars.h pp_hot.c pp_sys.c regcomp.c
+           ! t/io/fs.t t/io/tell.t t/lib/anydbm.t t/op/stat.t util.c
+____________________________________________________________________________
+[  3357] By: gsar                                  on 1999/05/10  04:07:07
+        Log: applied suggested patch, modulo already applied parts
+             From: Charles Bailey <BAILEY@newman.upenn.edu>
+             Date: Sat, 24 Apr 1999 20:12:43 -0400 (EDT)
+             Message-id: <01JAF9UAV9XG002O0W@mail.newman.upenn.edu>
+             Subject: [Patch 5.005_56] VMS consolidated patch #2
+     Branch: perl
+	   ! configure.com t/op/filetest.t t/op/taint.t t/pragma/warn/doio
+	   ! t/pragma/warn/mg t/pragma/warn/pp_sys t/pragma/warn/sv
+	   ! vms/descrip_mms.template vms/ext/vmsish.t vms/perlvms.pod
+           ! vms/subconfigure.com vms/test.com vms/vms.c
+____________________________________________________________________________
+[  3356] By: gsar                                  on 1999/05/10  03:48:08
+        Log: applied suggested patch, with win32 and PERL_OBJECT additions
+             From: Tom Hughes <tom@compton.nu>
+             Date: Sat, 24 Apr 1999 18:11:59 +0100
+             Message-ID: <609bdff748.tom@compton.compton.nu>
+             Subject: ByteLoader patch
+     Branch: perl
+	   + ext/ByteLoader/ByteLoader.pm ext/ByteLoader/ByteLoader.xs
+           + ext/ByteLoader/Makefile.PL utils/perlbc.PL
+	   ! MANIFEST bytecode.h bytecode.pl byterun.c byterun.h embed.h
+	   ! embed.pl ext/B/B.xs ext/B/B/Asmdata.pm ext/B/B/Bytecode.pm
+	   ! ext/B/B/Debug.pm objXSUB.h op.c pp_ctl.c proto.h
+           ! utils/Makefile win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  3355] By: gsar                                  on 1999/05/10  03:22:49
+        Log: document 'test' attribute (from Andreas Koenig)
+     Branch: perl
+           ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  3354] By: gsar                                  on 1999/05/10  03:12:37
+        Log: From: pmarquess@bfsec.bt.co.uk
+             Date: Thu, 22 Apr 1999 23:12:08 +0100
+             Message-ID: <5104D4DBC598D211B5FE0000F8FE7EB29C6B45@mbtlipnt02.btlabs.bt.co.uk>
+             Subject: PATCH for small bug in scan_bin
+     Branch: perl
+           ! util.c
+____________________________________________________________________________
+[  3353] By: gsar                                  on 1999/05/10  02:39:33
+        Log: more bulletproof workaround for mangled paths (updates changes#3345,3350);
+             provide Win32::GetLongPathName() to complement Win32::GetShortPathName()
+     Branch: perl
+	   ! t/op/magic.t win32/makedef.pl win32/runperl.c win32/win32.c
+           ! win32/win32iop.h
+____________________________________________________________________________
+[  3352] By: gsar                                  on 1999/05/09  22:47:39
+        Log: flush all open output buffers before fork(), exec(), system, qx//
+             and pipe open() operations, simplifying buffering headaches faced
+             by users; uses fflush(NULL), which may need Configure test
+     Branch: perl
+	   ! perl.h pod/perldelta.pod pod/perlfunc.pod pod/perlipc.pod
+           ! pp_sys.c util.c vmesa/vmesa.c vms/vms.c win32/win32.c
+____________________________________________________________________________
+[  3351] By: gsar                                  on 1999/05/09  21:11:51
+        Log: perlcc on win32 (correct version of fix suggested by Jean-Louis
+             Leroy <jll@skynet.be>)
+     Branch: perl
+           ! utils/perlcc.PL
+____________________________________________________________________________
+[  3350] By: gsar                                  on 1999/05/09  20:39:11
+        Log: normalize $^X to full pathname on win32
+     Branch: perl
+           ! win32/runperl.c
+____________________________________________________________________________
+[  3349] By: gsar                                  on 1999/05/09  20:23:07
+        Log: allow readline($globref), <$globref> already works
+     Branch: perl
+           ! pp_hot.c
+____________________________________________________________________________
+[  3348] By: gsar                                  on 1999/05/09  20:00:09
+        Log: perldoc cleanups (variant of changes suggested by Christian Lemburg
+             <lemburg@online-club.de>)
+     Branch: perl
+           ! utils/perldoc.PL
+____________________________________________________________________________
+[  3347] By: gsar                                  on 1999/05/09  18:47:21
+        Log: additions to Thread.pm docs from Tuomas J. Lukka
+             <lukka@fas.harvard.edu>
+     Branch: perl
+           ! ext/Thread/Thread.pm
+____________________________________________________________________________
+[  3346] By: gsar                                  on 1999/05/09  18:38:00
+        Log: From: Stephen McCamant <smccam@uclink4.berkeley.edu>
+             Date: Sat, 17 Apr 1999 02:46:13 -0700 (PDT)
+             Message-ID: <14103.57454.614253.598264@fre-76-120.reshall.berkeley.edu>
+             Subject: [PATCH _56] Re: pdt: Perl Development Tools? 
+     Branch: perl
+           ! ext/B/B/Xref.pm
+____________________________________________________________________________
+[  3345] By: gsar                                  on 1999/05/09  18:22:43
+        Log: work around mangled archname on win32 while finding privlib/sitelib;
+             normalize lib paths to forward slashes internally
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  3344] By: gsar                                  on 1999/05/09  03:20:06
+        Log: fix typo in dbm filters that caused odbm.t to fail
+     Branch: perl
+           ! ext/ODBM_File/ODBM_File.xs t/lib/odbm.t
+____________________________________________________________________________
+[  3343] By: gsar                                  on 1999/05/09  02:02:59
+        Log: tweak test totals
+     Branch: perl
+           ! Changes t/lib/tie-stdhandle.t
+____________________________________________________________________________
 [  3342] By: gsar                                  on 1999/05/09  01:42:06
         Log: import list propagation busted (pointed out by Ton Hospel
              <thospel@mail.dma.be>)
