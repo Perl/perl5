@@ -1,8 +1,11 @@
 #!./perl
 
-if (! -x ($groups = '/usr/ucb/groups') &&
-    ! -x ($groups = '/usr/bin/groups') &&
-    ! -x ($groups = '/bin/groups')
+if (! -x ($groups = '/usr/ucb/groups')	&&
+    ! -x ($groups = '/usr/bin/groups')	&&
+    ! -x ($groups = '/bin/groups')	&&
+    ! -x ($groups = '/usr/bin/id')	&&
+    ! -x ($groups = '/bin/id')		&&
+    ! -x ($groups = '/usr/xpg4/bin/id')
 ) {
     print "1..0\n";
     exit 0;
@@ -26,6 +29,8 @@ for (split(' ', $()) {
 	push(@gr, $_);
     }
 } 
+
+$groups .= ' -Gn' if $groups =~ m:/id$:;
 
 $gr1 = join(' ', sort @gr);
 
