@@ -3796,48 +3796,43 @@ nope:
 
 PP(pp_readdir)
 {
-#if defined(Direntry_t) && defined(HAS_READDIR)
-    dSP;
+#if !defined(Direntry_t) || !defined(HAS_READDIR)
+    DIE(aTHX_ PL_no_dir_func, "readdir");
+#else
 #if !defined(I_DIRENT) && !defined(VMS)
     Direntry_t *readdir (DIR *);
 #endif
-    register Direntry_t *dp;
-    GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
+    dSP;
+
     SV *sv;
+    I32 gimme = GIMME;
+    GV *gv = (GV *)POPs;
+    register Direntry_t *dp;
+    register IO *io = GvIOn(gv);
 
     if (!io || !IoDIRP(io))
 	goto nope;
 
-    if (GIMME == G_ARRAY) {
-	/*SUPPRESS 560*/
-	while ((dp = (Direntry_t *)PerlDir_read(IoDIRP(io)))) {
+    do {
+        dp = (Direntry_t *)PerlDir_read(IoDIRP(io));
+        if (!dp)
+            break;
 #ifdef DIRNAMLEN
-	    sv = newSVpvn(dp->d_name, dp->d_namlen);
+        sv = newSVpvn(dp->d_name, dp->d_namlen);
 #else
-	    sv = newSVpv(dp->d_name, 0);
+        sv = newSVpv(dp->d_name, 0);
 #endif
 #ifndef INCOMPLETE_TAINTS
-	    if (!(IoFLAGS(io) & IOf_UNTAINT))
-		SvTAINTED_on(sv);
+        if (!(IoFLAGS(io) & IOf_UNTAINT))
+            SvTAINTED_on(sv);
 #endif
-	    XPUSHs(sv_2mortal(sv));
-	}
+        XPUSHs(sv_2mortal(sv));
     }
-    else {
-	if (!(dp = (Direntry_t *)PerlDir_read(IoDIRP(io))))
-	    goto nope;
-#ifdef DIRNAMLEN
-	sv = newSVpvn(dp->d_name, dp->d_namlen);
-#else
-	sv = newSVpv(dp->d_name, 0);
-#endif
-#ifndef INCOMPLETE_TAINTS
-	if (!(IoFLAGS(io) & IOf_UNTAINT))
-	    SvTAINTED_on(sv);
-#endif
-	XPUSHs(sv_2mortal(sv));
-    }
+    while (gimme == G_ARRAY);
+
+    if (!dp && gimme != G_ARRAY)
+        goto nope;
+
     RETURN;
 
 nope:
@@ -3847,8 +3842,6 @@ nope:
 	RETURN;
     else
 	RETPUSHUNDEF;
-#else
-    DIE(aTHX_ PL_no_dir_func, "readdir");
 #endif
 }
 
