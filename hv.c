@@ -703,8 +703,8 @@ Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
     xhv->xhv_keys++; /* HvKEYS(hv)++ */
     if (i) {				/* initial entry? */
 	xhv->xhv_fill++; /* HvFILL(hv)++ */
-	if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */)
-	    hsplit(hv);
+    } else if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {
+        hsplit(hv);
     }
 
     return &HeVAL(entry);
