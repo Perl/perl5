@@ -277,7 +277,7 @@ sub abs2rel {
     }
 
     # Split up paths
-    my ( $path_volume, $path_directories, $path_file ) =
+    my ( undef, $path_directories, $path_file ) =
         $self->splitpath( $path, 1 ) ;
 
     my $base_directories = ($self->splitpath( $base, 1 ))[1] ;
@@ -315,11 +315,8 @@ sub abs2rel {
         $path_directories = "$base_directories$path_directories" ;
     }
 
-    # It makes no sense to add a relative path to a UNC volume
-    $path_volume = '' unless $path_volume =~ m{^[A-Z]:}is ;
-
     return $self->canonpath( 
-        $self->catpath($path_volume, $path_directories, $path_file ) 
+        $self->catpath( "", $path_directories, $path_file ) 
     ) ;
 }
 
