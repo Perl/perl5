@@ -4,16 +4,13 @@ perl - Practical Extraction and Report Language
 
 =head1 SYNOPSIS
 
-B<perl>	S<[ B<-sTuU> ]>
-	S<[ B<-hv> ] [ B<-V>[:I<configvar>] ]>
-	S<[ B<-cw> ] [ B<-d>[:I<debugger>] ] [ B<-D>[I<number/list>] ]>
-	S<[ B<-pna> ] [ B<-F>I<pattern> ] [ B<-l>[I<octal>] ] [ B<-0>[I<octal>] ]>
-	S<[ B<-I>I<dir> ] [ B<-m>[B<->]I<module> ] [ B<-M>[B<->]I<'module...'> ]>
-	S<[ B<-P> ]>
-	S<[ B<-S> ]>
-	S<[ B<-x>[I<dir>] ]>
-	S<[ B<-i>[I<extension>] ]>
-	S<[ B<-e> I<'command'> ] [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
+B<perl>	S<[ B<-sTuU> ]> S<[ B<-hv> ] [ B<-V>[:I<configvar>] ]>
+    S<[ B<-cw> ] [ B<-d>[:I<debugger>] ] [ B<-D>[I<number/list>] ]>
+    S<[ B<-pna> ] [ B<-F>I<pattern> ] [ B<-l>[I<octal>] ] [ B<-0>[I<octal>] ]>
+    S<[ B<-I>I<dir> ] [ B<-m>[B<->]I<module> ] [ B<-M>[B<->]I<'module...'> ]>
+    S<[ B<-P> ]> S<[ B<-S> ]> S<[ B<-x>[I<dir>] ]>
+    S<[ B<-i>[I<extension>] ]> S<[ B<-e> I<'command'> ] 
+    [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
 
 For ease of access, the Perl manual has been split up into a number
 of sections:
@@ -40,11 +37,12 @@ of sections:
     perlform		Perl formats
     perllocale		Perl locale support
 
-    perlref		Perl references
     perlreftut		Perl references short introduction
+    perlref		Perl references, the rest of the story
     perldsc		Perl data structures intro
-    perllol		Perl data structures: lists of lists
-    perltoot		Perl OO tutorial
+    perllol		Perl data structures: arrays of arrays
+    perltoot		Perl OO tutorial, part 1
+    perltootc		Perl OO tutorial, part 2
     perlobj		Perl objects
     perltie		Perl objects hidden behind simple variables
     perlbot		Perl OO tricks and examples
@@ -75,7 +73,7 @@ of sections:
 (If you're intending to read these straight through for the first time,
 the suggested order will tend to reduce the number of forward references.)
 
-By default, all of the above manpages are installed in the 
+By default, the manpages listed above are installed in the 
 F</usr/local/man/> directory.  
 
 Extensive additional documentation for Perl modules is available.  The
@@ -140,107 +138,63 @@ scripts into Perl scripts.
 
 But wait, there's more...
 
-Perl version 5 is nearly a complete rewrite, and provides
-the following additional benefits:
+Begun in 1993 (see L<perlhist>), Perl version 5 is nearly a complete
+rewrite that provides the following additional benefits:
 
-=over 5
+=over
 
-=item * Many usability enhancements
+=item * modularity and reusability using innumerable modules 
 
-It is now possible to write much more readable Perl code (even within
-regular expressions).  Formerly cryptic variable names can be replaced
-by mnemonic identifiers.  Error messages are more informative, and the
-optional warnings will catch many of the mistakes a novice might make.
-This cannot be stressed enough.  Whenever you get mysterious behavior,
-try the B<-w> switch!!!  Whenever you don't get mysterious behavior,
-try using B<-w> anyway.
+Described in L<perlmod>, L<perlmodlib>, and L<perlmodinstall>.
 
-=item * Simplified grammar
+=item * embeddable and extensible 
 
-The new yacc grammar is one half the size of the old one.  Many of the
-arbitrary grammar rules have been regularized.  The number of reserved
-words has been cut by 2/3.  Despite this, nearly all old Perl scripts
-will continue to work unchanged.
+Described in L<perlembed>, L<perlxstut>, L<perlxs>, L<perlcall>,
+L<perlguts>, and L<xsubpp>.
 
-=item * Lexical scoping
+=item * roll-your-own magic variables (including multiple simultaneous DBM implementations)
 
-Perl variables may now be declared within a lexical scope, like "auto"
-variables in C.  Not only is this more efficient, but it contributes
-to better privacy for "programming in the large".  Anonymous
-subroutines exhibit deep binding of lexical variables (closures).
+Described in L<perltie> and L<AnyDBM_File>.
 
-=item * Arbitrarily nested data structures
+=item * subroutines can now be overridden, autoloaded, and prototyped
 
-Any scalar value, including any array element, may now contain a
-reference to any other variable or subroutine.  You can easily create
-anonymous variables and subroutines.  Perl manages your reference
-counts for you.
+Described in L<perlsub>.
 
-=item * Modularity and reusability
+=item * arbitrarily nested data structures and anonymous functions
 
-The Perl library is now defined in terms of modules which can be easily
-shared among various packages.  A package may choose to import all or a
-portion of a module's published interface.  Pragmas (that is, compiler
-directives) are defined and used by the same mechanism.
+Described in L<perlreftut>, L<perlref>, L<perldsc>, and L<perllol>.
 
-=item * Object-oriented programming
+=item * object-oriented programming
 
-A package can function as a class.  Dynamic multiple inheritance and
-virtual methods are supported in a straightforward manner and with very
-little new syntax.  Filehandles may now be treated as objects.
+Described in L<perlobj>, L<perltoot>, and L<perlbot>.
 
-=item * Embeddable and Extensible
+=item * compilability into C code or Perl bytecode
 
-Perl may now be embedded easily in your C or C++ application, and can
-either call or be called by your routines through a documented
-interface.  The XS preprocessor is provided to make it easy to glue
-your C or C++ routines into Perl.  Dynamic loading of modules is
-supported, and Perl itself can be made into a dynamic library.
+Described in L<B> and L<B::Bytecode>.
 
-=item * POSIX compliant
+=item * support for light-weight processes (threads)
 
-A major new module is the POSIX module, which provides access to all
-available POSIX routines and definitions, via object classes where
-appropriate.
+Described in L<perlthrtut> and L<Thread>.
 
-=item * Package constructors and destructors
+=item * support for internationalization, localization, and Unicode 
 
-The new BEGIN and END blocks provide means to capture control as
-a package is being compiled, and after the program exits.  As a
-degenerate case they work just like awk's BEGIN and END when you
-use the B<-p> or B<-n> switches.
+Described in L<perllocale> and L<utf8>.
 
-=item * Multiple simultaneous DBM implementations
+=item * lexical scoping
 
-A Perl program may now access DBM, NDBM, SDBM, GDBM, and Berkeley DB
-files from the same script simultaneously.  In fact, the old dbmopen
-interface has been generalized to allow any variable to be tied
-to an object class which defines its access methods.
+Described in L<perlsub>.
 
-=item * Subroutine definitions may now be autoloaded
+=item * regular expression enhancements
 
-In fact, the AUTOLOAD mechanism also allows you to define any arbitrary
-semantics for undefined subroutine calls.  It's not for just autoloading.
+Described in L<perlre>, with additional examples in L<perlop>.
 
-=item * Regular expression enhancements
+=item * enhanced debugger and interactive Perl environment, with intregrated editor support
 
-You can now specify nongreedy quantifiers.  You can now do grouping
-without creating a backreference.  You can now write regular expressions
-with embedded whitespace and comments for readability.  A consistent
-extensibility mechanism has been added that is upwardly compatible with
-all old regular expressions.
+Described in L<perldebug>.
 
-=item * Innumerable Unbundled Modules
+=item * POSIX 1003.1 compliant library
 
-The Comprehensive Perl Archive Network described in L<perlmodlib>
-contains hundreds of plug-and-play modules full of reusable code.
-See F<http://www.perl.com/CPAN> for a site near you.
-
-=item * Compilability
-
-While not yet in full production mode, a working perl-to-C compiler
-does exist.  It can generate portable byte code, simple C, or
-optimized C code.
+Described in L<POSIX>.
 
 =back
 
@@ -254,7 +208,7 @@ February 1999 and Perl 5.005_03.
 
 The following platforms are able to build Perl from the standard
 source code distribution available at
-F<http://www.perl.com/CPAN/src/index.html>
+http://www.perl.com/CPAN/src/index.html
 
         AIX             Linux           SCO ODT/OSR
         A/UX            MachTen         Solaris
@@ -278,7 +232,7 @@ F<http://www.perl.com/CPAN/src/index.html>
 The following platforms have been known to build Perl from the source
 but for the Perl release 5.005_03 we haven't been able to verify them,
 either because the hardware/software platforms are rather rare or
-because we don't have an active champion on these platforms, or both.
+because we don't have an active champion on these platforms--or both.
 					
         3b1             FPS             Plan 9
         AmigaOS         GENIX           PowerUX
@@ -301,7 +255,7 @@ supported in the Perl release 5.005_03:
         VM/ESA
 
 The following platforms have their own source code distributions and
-binaries available via F<http://www.perl.com/CPAN/ports/index.html>.
+binaries available via http://www.perl.com/CPAN/ports/index.html.
 
 				Perl release
 
@@ -311,7 +265,7 @@ binaries available via F<http://www.perl.com/CPAN/ports/index.html>.
 	Tandem Guardian		5.004
 
 The following platforms have only binaries available via
-F<http://www.perl.com/CPAN/ports/index.html>.
+http://www.perl.com/CPAN/ports/index.html.
 
 				Perl release
 
@@ -325,12 +279,12 @@ See L<perlrun>.
 
 =head1 AUTHOR
 
-Larry Wall <F<larry@wall.org>>, with the help of oodles of other folks.
+Larry Wall <larry@wall.org>, with the help of oodles of other folks.
 
 If your Perl success stories and testimonials may be of help to others 
 who wish to advocate the use of Perl in their applications, 
 or if you wish to simply express your gratitude to Larry and the 
-Perl developers, please write to <F<perl-thanks@perl.org>>.
+Perl developers, please write to perl-thanks@perl.org .
 
 =head1 FILES
 
@@ -339,8 +293,10 @@ Perl developers, please write to <F<perl-thanks@perl.org>>.
 =head1 SEE ALSO
 
  a2p	awk to perl translator
-
  s2p	sed to perl translator
+
+ http://www.perl.com/	    the Perl Home Page
+ http://www.perl.com/CPAN   the Comphrehensive Perl Archive
 
 =head1 DIAGNOSTICS
 
@@ -381,10 +337,10 @@ so they are limited to a maximum of 65535 (higher numbers usually being
 affected by wraparound).
 
 You may mail your bug reports (be sure to include full configuration
-information as output by the myconfig program in the perl source tree,
-or by C<perl -V>) to <F<perlbug@perl.com>>.
-If you've succeeded in compiling perl, the perlbug script in the utils/
-subdirectory can be used to help mail in a bug report.
+information as output by the myconfig program in the perl source
+tree, or by C<perl -V>) to perlbug@perl.com .  If you've succeeded
+in compiling perl, the perlbug script in the utils/ subdirectory
+can be used to help mail in a bug report.
 
 Perl actually stands for Pathologically Eclectic Rubbish Lister, but
 don't tell anyone I said that.

@@ -117,7 +117,7 @@ extent of 64-bit support.  Depending on the platform (hints file) more
 or less 64-awareness becomes available.  As of 5.005_54 at least
 somewhat 64-bit aware platforms are HP-UX 11 or better, Solaris 2.6 or
 better, IRIX 6.2 or better.  Naturally 64-bit platforms like Digital
-UNIX and UNICOS also have 64-bit support.
+Unix and UNICOS also have 64-bit support.
 
 =head2 Better syntax checks on parenthesized unary operators
 
@@ -335,8 +335,8 @@ O_ACCMODE: the mask of O_RDONLY, O_WRONLY, and O_RDWR.
 =item File::Spec
 
 New methods have been added to the File::Spec module: devnull() returns
-the name of the null device (/dev/null on UNIX) and tmpdir() the name of
-the temp directory (normally /tmp on UNIX). There are now also methods
+the name of the null device (/dev/null on Unix) and tmpdir() the name of
+the temp directory (normally /tmp on Unix). There are now also methods
 to convert between absolute and relative filenames: abs2rel() and
 rel2abs(). For compatibility with operating systems that specify volume
 names in file paths, the splitpath(), splitdir() and catdir() methods

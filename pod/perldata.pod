@@ -8,9 +8,9 @@ perldata - Perl data types
 
 Perl has three built-in data types: scalars, arrays of scalars, and
 associative arrays of scalars, known as "hashes".  Normal arrays
-are ordered lists indexed by number, starting with 0 and with
+are ordered lists of scalars indexed by number, starting with 0 and with
 negative subscripts counting from the end.  Hashes are unordered
-collections of values indexed by their associated string key.
+collections of scalar values indexed by their associated string key.
 
 Values are usually referred to by name, or through a named reference.
 The first character of the name tells you to what sort of data
@@ -165,7 +165,7 @@ references are strongly-typed, uncastable pointers with builtin
 reference-counting and destructor invocation.
 
 A scalar value is interpreted as TRUE in the Boolean sense if it is not
-the empty string or the number 0 (or its string equivalent, "0").  The
+the null string or the number 0 (or its string equivalent, "0").  The
 Boolean context is just a special kind of scalar context where no 
 conversion to a string or a number is ever performed.
 
@@ -220,7 +220,7 @@ had to break this to make sure destructors were called when expected.)
 You can also gain some miniscule measure of efficiency by pre-extending
 an array that is going to get big.  You can also extend an array
 by assigning to an element that is off the end of the array.  You
-can truncate an array down to nothing by assigning the empty list
+can truncate an array down to nothing by assigning the null list
 () to it.  The following are equivalent:
 
     @whatever = ();
@@ -278,8 +278,8 @@ integer formats:
 String literals are usually delimited by either single or double
 quotes.  They work much like quotes in the standard Unix shells:
 double-quoted string literals are subject to backslash and variable
-substitution; single-quoted strings are not (except for "C<\'>" and
-"C<\\>").  The usual C-style backslash rules apply for making
+substitution; single-quoted strings are not (except for C<\'> and
+C<\\>).  The usual C-style backslash rules apply for making
 characters such as newline, tab, etc., as well as some more exotic
 forms.  See L<perlop/"Quote and Quotelike Operators"> for a list.
 
@@ -490,7 +490,7 @@ followed by all the elements returned by the subroutine named SomeSub
 called in list context, followed by the key/value pairs of %glarch.
 To make a list reference that does I<NOT> interpolate, see L<perlref>.
 
-The empty list is represented by ().  Interpolating it in a list
+The null list is represented by ().  Interpolating it in a list
 has no effect.  Thus ((),(),()) is equivalent to ().  Similarly,
 interpolating an array with no elements is the same as if no
 array had been interpolated at that point.
@@ -530,7 +530,7 @@ produced by the expression on the right side of the assignment:
     $x = (($foo,$bar) = f());	        # set $x to f()'s return count
 
 This is handy when you want to do a list assignment in a Boolean
-context, because most list functions return a empty list when finished,
+context, because most list functions return a null list when finished,
 which when assigned produces a 0, which is interpreted as FALSE.
 
 The final element may be an array or a hash:
@@ -639,9 +639,10 @@ You couldn't just loop through C<values %hash> to do this because
 that function produces a new list which is a copy of the values,
 so changing them doesn't change the original.
 
-As a special rule, if a slice would produce a list consisting entirely
-of undefined values, the empty list is produced instead.  This makes
-it easy to write loops that terminate when an empty list is returned:
+As a special rule, if a list slice would produce a list consisting
+entirely of undefined values, the null list is produced instead.
+This makes it easy to write loops that terminate when a null list
+is returned:
 
     while ( ($home, $user) = (getpwent)[7,0]) {
 	printf "%-8s %s\n", $user, $home;
@@ -649,7 +650,7 @@ it easy to write loops that terminate when an empty list is returned:
 
 As noted earlier in this document, the scalar sense of list assignment
 is the number of elements on the right-hand side of the assignment.
-The empty list contains no elements, so when the password file is
+The null list contains no elements, so when the password file is
 exhausted, the result is 0, not 2.
 
 If you're confused about why you use an '@' there on a hash slice

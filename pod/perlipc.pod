@@ -58,7 +58,7 @@ You may also choose to assign the strings C<'IGNORE'> or C<'DEFAULT'> as
 the handler, in which case Perl will try to discard the signal or do the
 default thing.
 
-On most UNIX platforms, the C<CHLD> (sometimes also known as C<CLD>) signal
+On most Unix platforms, the C<CHLD> (sometimes also known as C<CLD>) signal
 has special behavior with respect to a value of C<'IGNORE'>.
 Setting C<$SIG{CHLD}> to C<'IGNORE'> on such a platform has the effect of
 not creating zombie processes when the parent process fails to C<wait()>
@@ -276,7 +276,7 @@ same effect as opening a pipe for reading:
 
 While this is true on the surface, it's much more efficient to process the
 file one line or record at a time because then you don't have to read the
-whole thing into memory at once. It also gives you finer control of the
+whole thing into memory at once.  It also gives you finer control of the
 whole process, letting you to kill off the child process early if you'd
 like.
 
@@ -1157,7 +1157,7 @@ server. (Under Unix, ports under 1024 are restricted to the
 superuser.)  In our sample, we'll use port 9000, but you can use
 any port that's not currently in use on your system.  If you try
 to use one already in used, you'll get an "Address already in use"
-message. Under Unix, the C<netstat -a> command will show
+message.  Under Unix, the C<netstat -a> command will show
 which services current have servers.
 
 =item Listen

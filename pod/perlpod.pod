@@ -11,7 +11,6 @@ L<verbatim|/"Verbatim Paragraph">,
 L<command|/"Command Paragraph">, and
 L<ordinary text|/"Ordinary Block of Text">.
 
-
 =head2 Verbatim Paragraph
 
 A verbatim paragraph, distinguished by being indented (that is,
@@ -19,7 +18,6 @@ it starts with space or tab).  It should be reproduced exactly,
 with tabs assumed to be on 8-column boundaries.  There are no
 special formatting escapes, so you can't italicize or anything
 like that.  A \ means \, and nothing else.
-
 
 =head2 Command Paragraph
 
@@ -74,7 +72,6 @@ or use "=item 1.", "=item 2.", etc., to produce numbered lists, or use
 "=item foo", "=item bar", etc., i.e., things that looks nothing like bullets
 or numbers. If you start with bullets or numbers, stick with them, as many
 formatters use the first "=item" type to decide how to format the list.
-
 
 =item =for
 
@@ -149,9 +146,7 @@ Some examples of lists include:
 
  =back
 
-
 =back
-
 
 =head2 Ordinary Block of Text
 
@@ -193,7 +188,6 @@ here and in commands:
     	    	    E<html>		Some non-numeric HTML entity, such
 					as E<Agrave>
 
-
 =head2 The Intent
 
 That's it.  The intent is simplicity, not power.  I wanted paragraphs
@@ -223,7 +217,6 @@ TeX, and other markup languages, as used for online documentation.
 Translators exist for B<pod2man>  (that's for nroff(1) and troff(1)),
 B<pod2text>, B<pod2html>, B<pod2latex>, and B<pod2fm>.
 
-
 =head2 Embedding Pods in Perl Modules
 
 You can embed pod documentation in your Perl scripts.  Start your
@@ -236,14 +229,12 @@ directive.
 
     __END__
 
-
     =head1 NAME
 
     modern - I am a modern module
 
 If you had not had that empty line there, then the translators wouldn't
 have seen it.
-
 
 =head2 Common Pod Pitfalls
 

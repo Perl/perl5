@@ -44,7 +44,7 @@ subroutine without defining it by saying C<sub name>, thus:
     sub myname;
     $me = myname $0 		or die "can't get myname";
 
-Note that it functions as a list operator, not as a unary operator; so
+Note that my() functions as a list operator, not as a unary operator; so
 be careful to use C<or> instead of C<||> in this case.  However, if
 you were to declare the subroutine as C<sub myname ($)>, then
 C<myname> would function as a unary operator, so either C<or> or
@@ -86,7 +86,7 @@ presuming you're a speaker of English.  The C<foreach> modifier is an
 iterator:  For each value in EXPR, it aliases C<$_> to the value and
 executes the statement.  The C<while> and C<until> modifiers have the
 usual "C<while> loop" semantics (conditional evaluated first), except
-when applied to a C<do>-BLOCK (or to the now-deprecated C<do>-SUBROUTINE
+when applied to a C<do>-BLOCK (or to the deprecated C<do>-SUBROUTINE
 statement), in which case the block executes once before the
 conditional is evaluated.  This is so that you can write loops like:
 
@@ -289,9 +289,7 @@ is therefore visible only within the loop.  Otherwise, the variable is
 implicitly local to the loop and regains its former value upon exiting
 the loop.  If the variable was previously declared with C<my>, it uses
 that variable instead of the global one, but it's still localized to
-the loop.  (Note that a lexically scoped variable can cause problems
-if you have subroutine or format declarations within the loop which
-refer to it.)
+the loop.  
 
 The C<foreach> keyword is actually a synonym for the C<for> keyword, so
 you can use C<foreach> for readability or C<for> for brevity.  (Or because
@@ -490,15 +488,15 @@ C<HTTP_USER_AGENT> envariable.
 That kind of switch statement only works when you know the C<&&> clauses
 will be true.  If you don't, the previous C<?:> example should be used.
 
-You might also consider writing a hash instead of synthesizing a C<switch>
-statement.
+You might also consider writing a hash of subroutine references
+instead of synthesizing a C<switch> statement.
 
 =head2 Goto
 
-Although not for the faint of heart, Perl does support a C<goto> statement.
-A loop's LABEL is not actually a valid target for a C<goto>;
-it's just the name of the loop.  There are three forms: C<goto>-LABEL,
-C<goto>-EXPR, and C<goto>-&NAME.
+Although not for the faint of heart, Perl does support a C<goto>
+statement.  There are three forms: C<goto>-LABEL, C<goto>-EXPR, and
+C<goto>-&NAME.  A loop's LABEL is not actually a valid target for
+a C<goto>; it's just the name of the loop.
 
 The C<goto>-LABEL form finds the statement labeled with LABEL and resumes
 execution there.  It may not be used to go into any construct that

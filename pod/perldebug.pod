@@ -557,7 +557,7 @@ Quit.  ("quit" doesn't work for this.)  This is the only supported way
 to exit the debugger, though typing C<exit> twice may do it too.
 
 Set an C<O>ption C<inhibit_exit> to 0 if you want to be able to I<step
-off> the end the script.  You may also need to set C<$finished> to 0 at
+off> the end the script.  You may also need to set $finished to 0 at
 some moment if you want to step through global destruction.
 
 =item R
@@ -968,7 +968,7 @@ application.
 
 The array C<@{"_E<lt>$filename"}> is the line-by-line contents of
 $filename for all the compiled files.  Same for C<eval>ed strings which
-contain subroutines, or which are currently executed.  The C<$filename>
+contain subroutines, or which are currently executed.  The $filename
 for C<eval>ed strings looks like C<(eval 34)>.
 
 =item *

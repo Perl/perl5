@@ -73,7 +73,7 @@ from a different file, and forget to trim it before opening:
 This is not a bug, but a feature.  Because C<open> mimics the shell in
 its style of using redirection arrows to specify how to open the file, it
 also does so with respect to extra white space around the filename itself
-as well.  For accessing files with naughty names, see L</"Dispelling
+as well.  For accessing files with naughty names, see L<"Dispelling
 the Dweomer">.
 
 =head2 Pipe Opens

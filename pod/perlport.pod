@@ -196,6 +196,8 @@ transfer and store numbers always in text format, instead of raw
 binary, or consider using modules like Data::Dumper (included in
 the standard distribution as of Perl 5.005) and Storable.
 
+Also, don't depend on specific values returned from C<printf> and
+C<sprintf>.  These in some cases may differ from platform to platform.
 
 =head2 Files and Filesystems
 
@@ -257,7 +259,7 @@ Also of use is File::Basename, from the standard distribution, which
 splits a pathname into pieces (base filename, full path to directory,
 and file suffix).
 
-Even when on a single platform (if you can call UNIX a single platform),
+Even when on a single platform (if you can call Unix a single platform),
 remember not to count on the existence or the contents of
 system-specific files or directories, like F</etc/passwd>,
 F</etc/sendmail.conf>, F</etc/resolv.conf>, or even F</tmp/>. For
@@ -343,26 +345,24 @@ often behave differently, and often represent their results in a
 platform-dependent way.  Thus you should seldom depend on them to produce
 consistent results.
 
-The UNIX System V IPC (msg*(), sem*(), shm*()) is not available
-even in all UNIX platforms.
-
 One especially common bit of Perl code is opening a pipe to sendmail:
 
-    open(MAIL, '| /usr/lib/sendmail -t') or die $!;
+    open(MAIL, '|/usr/lib/sendmail -t') or die $!;
 
 This is fine for systems programming when sendmail is known to be
 available.  But it is not fine for many non-Unix systems, and even
 some Unix systems that may not have sendmail installed.  If a portable
-solution is needed, see the various distributions on CPAN that deal with
-it.  Mail::Mailer and Mail::Send in the MailTools distribution
-are commonly used, and provide several mailing methods, including mail,
-sendmail, and direct SMTP (via Net::SMTP) if a mail transfer agent is
-not available.  Mail::Sendmail is a standalone module that provides
-simple, platform-independent mailing.
+solution is needed, see the C<Mail::Send> and C<Mail::Mailer> modules
+in the C<MailTools> distribution.  C<Mail::Mailer> provides several
+mailing methods, including mail, sendmail, and direct SMTP
+(via C<Net::SMTP>) if a mail transfer agent is not available.
 
 The rule of thumb for portable code is: Do it all in portable Perl, or
 use a module (that may internally implement it with platform-specific
 code, but expose a common interface).
+
+The Unix System V IPC (C<msg*(), sem*(), shm*()>) is not available
+even in all Unix platforms.
 
 
 =head2 External Subroutines (XS)
@@ -415,6 +415,13 @@ Date::Parse.  An array of values, such as those returned by
 C<localtime>, can be converted to an OS-specific representation using
 Time::Local.
 
+When calculating specific times, such as for tests in time or date modules,
+it may be appropriate to calculate an offset for the epoch.
+    require Time::Local;
+    $offset = Time::Local::timegm(0, 0, 0, 1, 0, 70);
+The value for C<$offset> in Unix will be C<0>, but in Mac OS will be
+some large number.  C<$offset> can then be added to a Unix time value
+to get what should be the proper value on any system.
 
 =head2 Character sets and character encoding
 
@@ -432,7 +439,7 @@ before the 'b'.
 =head2 Internationalisation
 
 If you may assume POSIX (a rather large assumption, that in practice
-means UNIX), you may read more about the POSIX locale system (see
+means Unix), you may read more about the POSIX locale system from
 L<perllocale>.  The locale system at least attempts to make things a
 little bit more portable, or at least more convenient and
 native-friendly for non-English users.  The system affects character
@@ -479,6 +486,11 @@ to other platforms easier.  Use the Config module and the special
 variable C<$^O> to differentiate platforms, as described in
 L<"PLATFORMS">.
 
+Be careful in the tests you supply with your module or programs.  Often
+module code is fully portable, but the tests are not.  This occurs
+often when tests spawn off other processes or call external programs
+to aid in the testing, or when (as noted above) the tests assume certain
+things about the filesystem and paths.
 Be careful not to depend on a specific output style for errors,
 such as when checking C<$@> after an C<eval>.  Some platforms
 expect a certain output format, and perl on those platforms may
@@ -535,30 +547,29 @@ field of the string returned by typing C<uname -a> (or a similar command)
 at the shell prompt.  Here, for example, are a few of the more popular
 Unix flavors:
 
-    uname         $^O        $Config{'archname'}
+    uname        $^O        $Config{'archname'}
     --------------------------------------------
-    AIX           aix        aix
+    AIX          aix        aix
     BSD/OS        bsdos      i386-bsdos
     dgux          dgux       AViiON-dgux
     DYNIX/ptx     dynixptx   i386-dynixptx
-    FreeBSD       freebsd    freebsd-i386    
-    Linux         linux      i386-linux
+    FreeBSD      freebsd    freebsd-i386    
+    Linux        linux      i386-linux
     Linux         linux      i586-linux
     Linux         linux      ppc-linux
-    HP-UX         hpux       PA-RISC1.1
-    IRIX          irix       irix
+    HP-UX        hpux       PA-RISC1.1
+    IRIX         irix       irix
     openbsd       openbsd    i386-openbsd
-    OSF1          dec_osf    alpha-dec_osf
+    OSF1         dec_osf    alpha-dec_osf
     reliantunix-n svr4       RM400-svr4
     SCO_SV        sco_sv     i386-sco_sv
     SINIX-N       svr4       RM400-svr4
     sn4609        unicos     CRAY_C90-unicos
     sn6521        unicosmk   t3e-unicosmk
     sn9617        unicos     CRAY_J90-unicos
-    sn9716        unicos     CRAY_J90-unicos
-    SunOS         solaris    sun4-solaris
-    SunOS         solaris    i86pc-solaris
-    SunOS4        sunos      sun4-sunos
+    SunOS        solaris    sun4-solaris
+    SunOS        solaris    i86pc-solaris
+    SunOS4       sunos      sun4-sunos
 
 Note that because the C<$Config{'archname'}> may depend on the hardware
 architecture it may vary quite a lot, much more than the C<$^O>.
@@ -1603,6 +1614,8 @@ Not useful. (S<RISC OS>)
 
 =over 4
 
+=item v1.42, 22 May 1999
+Added notes about tests, sprintf/printf, and epoch offsets.
 =item v1.41, 19 May 1999
 
 Lots more little changes to formatting and content.
@@ -1675,6 +1688,7 @@ Nick Ing-Simmons E<lt>nick@ni-s.u-net.comE<gt>,
 Andreas J. KE<ouml>nig E<lt>koenig@kulturbox.deE<gt>,
 Markus Laker E<lt>mlaker@contax.co.ukE<gt>,
 Andrew M. Langmead E<lt>aml@world.std.comE<gt>,
+Larry Moore E<lt>ljmoore@freespace.netE<gt>,
 Paul Moore E<lt>Paul.Moore@uk.origin-it.comE<gt>,
 Chris Nandor E<lt>pudge@pobox.comE<gt>,
 Matthias Neeracher E<lt>neeri@iis.ee.ethz.chE<gt>,
@@ -1693,4 +1707,4 @@ E<lt>pudge@pobox.comE<gt>.
 
 =head1 VERSION
 
-Version 1.41, last modified 19 May 1999
+Version 1.42, last modified 22 May 1999

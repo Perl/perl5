@@ -57,7 +57,7 @@ References can be created in several ways.
 
 By using the backslash operator on a variable, subroutine, or value.
 (This works much like the & (address-of) operator in C.)  Note
-that this typically creates I<ANOTHER> reference to a variable, because
+that this typically creates I<another> reference to a variable, because
 there's already a reference to the variable in the symbol table.  But
 the symbol table reference might go away, and you'll still have the
 reference that the backslash returned.  Here are some examples:
@@ -150,7 +150,7 @@ Note the presence of the semicolon.  Except for the fact that the code
 inside isn't executed immediately, a C<sub {}> is not so much a
 declaration as it is an operator, like C<do{}> or C<eval{}>.  (However, no
 matter how many times you execute that particular line (unless you're in an
-C<eval("...")>), C<$coderef> will still have a reference to the I<SAME>
+C<eval("...")>), $coderef will still have a reference to the I<same>
 anonymous subroutine.)
 
 Anonymous subroutines act as closures with respect to my() variables,
@@ -299,9 +299,9 @@ a simple scalar variable containing a reference of the correct type:
     &$coderef(1,2,3);
     print $globref "output\n";
 
-It's important to understand that we are specifically I<NOT> dereferencing
+It's important to understand that we are specifically I<not> dereferencing
 C<$arrayref[0]> or C<$hashref{"KEY"}> there.  The dereference of the
-scalar variable happens I<BEFORE> it does any key lookups.  Anything more
+scalar variable happens I<before> it does any key lookups.  Anything more
 complicated than a simple scalar variable must use methods 2 or 3 below.
 However, a "simple scalar" includes an identifier that itself uses method
 1 recursively.  Therefore, the following prints "howdy".
@@ -334,7 +334,7 @@ people often make the mistake of viewing the dereferencing symbols as
 proper operators, and wonder about their precedence.  If they were,
 though, you could use parentheses instead of braces.  That's not the case.
 Consider the difference below; case 0 is a short-hand version of case 1,
-I<NOT> case 2:
+I<not> case 2:
 
     $$hashref{"KEY"}   = "VALUE";	# CASE 0
     ${$hashref}{"KEY"} = "VALUE";	# CASE 1
@@ -356,7 +356,7 @@ syntactic sugar, the examples for method 2 may be written:
     $coderef->(1,2,3);            # Subroutine call
 
 The left side of the arrow can be any expression returning a reference,
-including a previous dereference.  Note that C<$array[$x]> is I<NOT> the
+including a previous dereference.  Note that C<$array[$x]> is I<not> the
 same thing as C<$array-E<gt>[$x]> here:
 
     $array[$x]->{"foo"}->[0] = "January";
@@ -369,7 +369,7 @@ C<{"foo"}> in it.  Likewise C<$array[$x]-E<gt>{"foo"}> will automatically get
 defined with an array reference so that we can look up C<[0]> in it.
 This process is called I<autovivification>.
 
-One more thing here.  The arrow is optional I<BETWEEN> brackets
+One more thing here.  The arrow is optional I<between> brackets
 subscripts, so you can shrink the above down to
 
     $array[$x]{"foo"}[0] = "January";
@@ -421,9 +421,9 @@ chicanery is also useful for arbitrary expressions:
 
 We said that references spring into existence as necessary if they are
 undefined, but we didn't say what happens if a value used as a
-reference is already defined, but I<ISN'T> a hard reference.  If you
+reference is already defined, but I<isn't> a hard reference.  If you
 use it as a reference in this case, it'll be treated as a symbolic
-reference.  That is, the value of the scalar is taken to be the I<NAME>
+reference.  That is, the value of the scalar is taken to be the I<name>
 of a variable, rather than a direct link to a (possibly) anonymous
 value.
 

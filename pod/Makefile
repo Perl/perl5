@@ -38,6 +38,7 @@ POD = \
 	perldsc.pod	\
 	perllol.pod	\
 	perltoot.pod	\
+	perltootc.pod	\
 	perlobj.pod	\
 	perltie.pod	\
 	perlbot.pod	\
@@ -96,6 +97,7 @@ MAN = \
 	perldsc.man	\
 	perllol.man	\
 	perltoot.man	\
+	perltootc.man	\
 	perlobj.man	\
 	perltie.man	\
 	perlbot.man	\
@@ -154,6 +156,7 @@ HTML = \
 	perldsc.html	\
 	perllol.html	\
 	perltoot.html	\
+	perltootc.html	\
 	perlobj.html	\
 	perltie.html	\
 	perlbot.html	\
@@ -212,6 +215,7 @@ TEX = \
 	perldsc.tex	\
 	perllol.tex	\
 	perltoot.tex	\
+	perltootc.tex	\
 	perlobj.tex	\
 	perltie.tex	\
 	perlbot.tex	\
