@@ -1866,8 +1866,8 @@ win32_alarm(unsigned int sec)
         timerid=0;  
        }
      }
-    return 0;
 #endif /* !PERL_IMPLICIT_CONTEXT */
+    return 0;
 }
 
 #ifdef HAVE_DES_FCRYPT
