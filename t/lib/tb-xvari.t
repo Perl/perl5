@@ -11,7 +11,7 @@ BEGIN {
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..77\n"; }
+BEGIN { $| = 1; print "1..81\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Text::Balanced qw ( extract_variable );
 $loaded = 1;
@@ -82,6 +82,8 @@ $a->{"cat"}[1];
 @$listref;
 @{$listref};
 $obj->nextval;
+$obj->_nextval;
+$obj->next_val_;
 @{$obj->nextval};
 @{$obj->nextval($cat,$dog)->{new}};
 @{$obj->nextval($cat?$dog:$fish)->{new}};
