@@ -75,7 +75,7 @@ SaveError(pat, va_alist)
     if (LastError)
         LastError = (char*)saferealloc(LastError, len) ;
     else
-        LastError = safemalloc(len) ;
+        LastError = (char *) safemalloc(len) ;
 
     /* Copy message into LastError (including terminating null char)	*/
     strncpy(LastError, message, len) ;
