@@ -1,6 +1,6 @@
 /* perlhost.h
  *
- * (c) 1999 Microsoft Corporation. All rights reserved. 
+ * (c) 1999 Microsoft Corporation. All rights reserved.
  * Portions (c) 1999 ActiveState Tool Corp, http://www.ActiveState.com/
  *
  *    You may distribute under the terms of either the GNU General Public
@@ -52,6 +52,7 @@ public:
     void PerlDestroy(void);
 
 /* IPerlMem */
+    /* Locks provided but should be unnecessary as this is private pool */
     inline void* Malloc(size_t size) { return m_pVMem->Malloc(size); };
     inline void* Realloc(void* ptr, size_t size) { return m_pVMem->Realloc(ptr, size); };
     inline void Free(void* ptr) { m_pVMem->Free(ptr); };
@@ -68,12 +69,32 @@ public:
     inline int IsLocked(void) { return m_pVMem->IsLocked(); };
 
 /* IPerlMemShared */
+    /* Locks used to serialize access to the pool */
+    inline void GetLockShared(void) { m_pVMemShared->GetLock(); };
+    inline void FreeLockShared(void) { m_pVMemShared->FreeLock(); };
+    inline int IsLockedShared(void) { return m_pVMemShared->IsLocked(); };
     inline void* MallocShared(size_t size)
     {
-	return m_pVMemShared->Malloc(size);
+	void *result;
+	GetLockShared();
+	result = m_pVMemShared->Malloc(size);
+	FreeLockShared()
+	return result;
     };
-    inline void* ReallocShared(void* ptr, size_t size) { return m_pVMemShared->Realloc(ptr, size); };
-    inline void FreeShared(void* ptr) { m_pVMemShared->Free(ptr); };
+    inline void* ReallocShared(void* ptr, size_t size)
+    {
+	void *result;
+	GetLockShared();
+	result = m_pVMemShared->Realloc(ptr, size);
+	FreeLockShared()
+	return result;
+    };
+    inline void FreeShared(void* ptr)
+    {
+	GetLockShared();
+	m_pVMemShared->Free(ptr);
+	FreeLockShared()
+    };
     inline void* CallocShared(size_t num, size_t size)
     {
 	size_t count = num*size;
@@ -82,11 +103,14 @@ public:
 	    ZeroMemory(lpVoid, count);
 	return lpVoid;
     };
-    inline void GetLockShared(void) { m_pVMem->GetLock(); };
-    inline void FreeLockShared(void) { m_pVMem->FreeLock(); };
-    inline int IsLockedShared(void) { return m_pVMem->IsLocked(); };
 
 /* IPerlMemParse */
+    /* Assume something else is using locks to mangaging serialize
+       on a batch basis
+     */
+    inline void GetLockParse(void) { m_pVMemParse->GetLock(); };
+    inline void FreeLockParse(void) { m_pVMemParse->FreeLock(); };
+    inline int IsLockedParse(void) { return m_pVMemParse->IsLocked(); };
     inline void* MallocParse(size_t size) { return m_pVMemParse->Malloc(size); };
     inline void* ReallocParse(void* ptr, size_t size) { return m_pVMemParse->Realloc(ptr, size); };
     inline void FreeParse(void* ptr) { m_pVMemParse->Free(ptr); };
@@ -98,9 +122,6 @@ public:
 	    ZeroMemory(lpVoid, count);
 	return lpVoid;
     };
-    inline void GetLockParse(void) { m_pVMem->GetLock(); };
-    inline void FreeLockParse(void) { m_pVMem->FreeLock(); };
-    inline int IsLockedParse(void) { return m_pVMem->IsLocked(); };
 
 /* IPerlEnv */
     char *Getenv(const char *varname);
@@ -497,7 +518,7 @@ PerlEnvGetChildIO(struct IPerlEnv* piPerl, child_IO_table* ptr)
     win32_get_child_IO(ptr);
 }
 
-struct IPerlEnv perlEnv = 
+struct IPerlEnv perlEnv =
 {
     PerlEnvGetenv,
     PerlEnvPutenv,
@@ -824,7 +845,7 @@ PerlStdIOFdupopen(struct IPerlStdIO* piPerl, FILE* pf)
     }
 #endif
 
-    /* it appears that the binmode is attached to the 
+    /* it appears that the binmode is attached to the
      * file descriptor so binmode files will be handled
      * correctly
      */
@@ -837,7 +858,7 @@ PerlStdIOFdupopen(struct IPerlStdIO* piPerl, FILE* pf)
     return pfdup;
 }
 
-struct IPerlStdIO perlStdIO = 
+struct IPerlStdIO perlStdIO =
 {
     PerlStdIOStdin,
     PerlStdIOStdout,
@@ -2115,7 +2136,7 @@ compare(const void *arg1, const void *arg2)
 	    if(c1 != c2) {
 		if(c1 < c2)
 		    return -1; // string 1 < string 2
-	    
+	
 		return 1; // string 1 > string 2
 	    }
 	}
