@@ -304,7 +304,11 @@
 #  ifndef pTHX
 #     define pTHX		void
 #     define pTHX_
-#     define dTHX		extern int Perl___notused
+#     ifdef HASATTRIBUTE
+#        define dTHX		extern int Perl___notused __attribute__ ((unused))
+#     else
+#        define dTHX            extern int Perl___notused
+#     endif
 #     define WITH_THX(s)	s
 #  endif
 #  ifndef PERL_GET_INTERP
