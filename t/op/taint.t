@@ -31,10 +31,6 @@ sub ok ($;$) {
 
 $| = 1;
 
-# We do not want the whole taint.t to fail
-# just because Errno possibly failing.
-eval { require Errno; import Errno };
-
 use vars qw($ipcsysv); # did we manage to load IPC::SysV?
 
 BEGIN {
@@ -409,7 +405,9 @@ else {
     test 72, $@ eq '', $@;		# NB: This should be allowed
 
     # Try first new style but allow also old style.
-    test 73, $!{ENOENT} ||
+    # We do not want the whole taint.t to fail
+    # just because Errno possibly failing.
+    test 73, eval('$!{ENOENT}') ||
 	$! == 2 || # File not found
 	($Is_Dos && $! == 22) ||
 	($^O eq 'mint' && $! == 33);
