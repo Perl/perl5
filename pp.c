@@ -2476,14 +2476,16 @@ PP(pp_i_modulo_1)
 {
 #ifdef __GLIBC__
      /* This is the i_modulo with the workaround for the _moddi3 bug
-      * in (at least) glibc 2.2.5 (the abs() is the workaround).
+      * in (at least) glibc 2.2.5 (the "right = -right" is the workaround).
       * See below for pp_i_modulo. */
      dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
      {
 	  dPOPTOPiirl;
 	  if (!right)
 	       DIE(aTHX_ "Illegal modulus zero");
-	  SETi( left % abs(right) );
+	  if (right < 0)
+	       right = -right;
+	  SETi( left % right );
 	  RETURN;
      }
 #endif
@@ -2520,7 +2522,8 @@ PP(pp_i_modulo)
 			 PL_ppaddr[OP_I_MODULO] =
 			     &Perl_pp_i_modulo_1;
 		    /* Make certain we work right this time, too. */
-		    right = abs(right);
+		    if (right < 0)
+			 right = -right;
 	       }
 	  }
 #endif
