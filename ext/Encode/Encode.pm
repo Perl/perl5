@@ -243,15 +243,18 @@ sub getEncoding
     {
 	return $encoding{$lc};
     }
+
+    my $oc = $class->findAlias($name);
+    return $oc if defined $oc;
+
+    $oc = $class->findAlias($lc) if $lc ne $name;
+    return $oc if defined $oc;
+
     if (exists $external_tables{$lc})
     {
 	require $external_tables{$lc};
 	return $encoding{$name} if exists $encoding{$name};
     }
-
-    my $oc = $class->findAlias($name);
-    return $oc if defined $oc;
-    return $class->findAlias($lc) if $lc ne $name;
 
     return;
 }
