@@ -35,10 +35,10 @@ struct cop {
 #  define CopFILEAV(c)		(CopFILE(c) \
 				 ? GvAV(gv_fetchfile(CopFILE(c))) : Nullav)
 #  define CopSTASHPV(c)		((c)->cop_stashpv)
-#  define CopSTASHPV_set(c,pv)	((c)->cop_stashpv = savepv(pv))
+#  define CopSTASHPV_set(c,pv)	((c)->cop_stashpv = ((pv) ? savepv(pv) : Nullch))
 #  define CopSTASH(c)		(CopSTASHPV(c) \
 				 ? gv_stashpv(CopSTASHPV(c),GV_ADD) : Nullhv)
-#  define CopSTASH_set(c,hv)	CopSTASHPV_set(c, HvNAME(hv))
+#  define CopSTASH_set(c,hv)	CopSTASHPV_set(c, (hv) ? HvNAME(hv) : Nullch)
 #  define CopSTASH_eq(c,hv)	((hv) 					\
 				 && (CopSTASHPV(c) == HvNAME(hv)	\
 				     || (CopSTASHPV(c) && HvNAME(hv)	\
