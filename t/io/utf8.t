@@ -306,6 +306,7 @@ ok( 1 );
     open F, ">a";
     binmode F, ":utf8";
     syswrite(F, $a = chr(0x100));
+    close A;
     is( ord($a), 0x100, '23428 syswrite should not downgrade scalar' );
     like( $a, qr/^\w+/, '23428 syswrite should not downgrade scalar' );
 }
