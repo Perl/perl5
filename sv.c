@@ -5636,13 +5636,13 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 	      mg = mg_find(sv, PERL_MAGIC_utf8);
 	      if (mg && mg->mg_ptr) {
 		   cache = (STRLEN *) mg->mg_ptr;
-                   if (cache[1] == *offsetp) {
+                   if (cache[1] == (STRLEN)*offsetp) {
                         /* An exact match. */
                         *offsetp = cache[0];
 
 			return;
 		   }
-		   else if (cache[1] < *offsetp) {
+		   else if (cache[1] < (STRLEN)*offsetp) {
 			/* We already know part of the way. */
 			len = cache[0];
 			s  += cache[1];

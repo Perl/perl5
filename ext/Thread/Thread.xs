@@ -369,8 +369,11 @@ new(classname, startsv, ...)
 void
 join(t)
 	Thread	t
-	AV *	av = NO_INIT
-	int	i = NO_INIT
+    PREINIT:
+#ifdef USE_5005THREADS
+	AV *	av;
+	int	i;
+#endif
     PPCODE:
 #ifdef USE_5005THREADS
 	if (t == thr)
@@ -469,7 +472,9 @@ void
 self(classname)
 	char *	classname
     PREINIT:
+#ifdef USE_5005THREADS
 	SV *sv;
+#endif
     PPCODE:        
 #ifdef USE_5005THREADS
 	sv = newSViv(thr->tid);
@@ -511,7 +516,10 @@ yield()
 void
 cond_wait(sv)
 	SV *	sv
-	MAGIC *	mg = NO_INIT
+PREINIT:
+#ifdef USE_5005THREADS
+	MAGIC *	mg;
+#endif
 CODE:                       
 #ifdef USE_5005THREADS
 	if (SvROK(sv))
@@ -536,7 +544,10 @@ CODE:
 void
 cond_signal(sv)
 	SV *	sv
-	MAGIC *	mg = NO_INIT
+PREINIT:
+#ifdef USE_5005THREADS
+	MAGIC *	mg;
+#endif
 CODE:
 #ifdef USE_5005THREADS
 	if (SvROK(sv))
@@ -556,7 +567,10 @@ CODE:
 void
 cond_broadcast(sv)
 	SV *	sv
-	MAGIC *	mg = NO_INIT
+PREINIT:
+#ifdef USE_5005THREADS
+	MAGIC *	mg;
+#endif
 CODE: 
 #ifdef USE_5005THREADS
 	if (SvROK(sv))
@@ -578,10 +592,12 @@ void
 list(classname)
 	char *	classname
     PREINIT:
+#ifdef USE_5005THREADS
 	Thread	t;
 	AV *	av;
 	SV **	svp;
 	int	n = 0;
+#endif
     PPCODE:
 #ifdef USE_5005THREADS
 	av = newAV();
