@@ -312,12 +312,12 @@ malformed:
 
     if (flags & UTF8_CHECK_ONLY) {
 	if (retlen)
-	    *retlen = len;
+	    *retlen = -1;
 	return 0;
     }
 
     if (retlen)
-	*retlen = -1;
+	*retlen = expectlen ? expectlen : len;
 
     return UNICODE_REPLACEMENT_CHARACTER;
 }

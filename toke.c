@@ -1332,7 +1332,7 @@ S_scan_const(pTHX_ char *start)
 	    UV uv;
 
 	    uv = utf8_to_uv((U8*)s, send - s, &len, UTF8_CHECK_ONLY);
-	    if (len == 1) {
+	    if (len == (STRLEN)-1) {
 		/* Illegal UTF8 (a high-bit byte), make it valid. */
 		char *old_pvx = SvPVX(sv);
 		/* need space for one extra char (NOTE: SvCUR() not set here) */

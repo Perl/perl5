@@ -1486,7 +1486,7 @@ PP(pp_complement)
 
 	  send = tmps + len;
 	  while (tmps < send) {
-	    UV c = utf8_to_uv(tmps, 0, &l, UTF8_ALLOW_ANY);
+	    UV c = utf8_to_uv(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
 	    tmps += UTF8SKIP(tmps);
 	    targlen += UNISKIP(~c);
 	    nchar++;
@@ -1500,7 +1500,7 @@ PP(pp_complement)
 	  if (nwide) {
 	      Newz(0, result, targlen + 1, U8);
 	      while (tmps < send) {
-		  UV c = utf8_to_uv(tmps, 0, &l, UTF8_ALLOW_ANY);
+		  UV c = utf8_to_uv(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
 		  tmps += UTF8SKIP(tmps);
 		  result = uv_to_utf8(result, ~c);
 	      }
