@@ -275,6 +275,7 @@ win32_mkdir
 win32_rmdir
 win32_chdir
 win32_flock
+win32_execvp
 win32_htons
 win32_ntohs
 win32_htonl

@@ -104,6 +104,7 @@ int mytimes(struct tms *timebuf);
 unsigned int myalarm(unsigned int sec);
 int do_aspawn(void* really, void** mark, void** arglast);
 int do_spawn(char *cmd);
+char do_exec(char *cmd);
 
 typedef  char *		caddr_t;	/* In malloc.c (core address). */
 

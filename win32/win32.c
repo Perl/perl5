@@ -31,6 +31,10 @@
 #define CROAK croak
 #define WARN warn
 
+#define EXECF_EXEC 1
+#define EXECF_SPAWN 2
+#define EXECF_SPAWN_NOWAIT 3
+
 static DWORD IdOS(void);
 
 extern WIN32_IOSUBSYSTEM	win32stdio;
@@ -41,6 +45,8 @@ DWORD Win32System = (DWORD)-1;
 char  szShellPath[MAX_PATH+1];
 char  szPerlLibRoot[MAX_PATH+1];
 HANDLE PerlDllHandle = INVALID_HANDLE_VALUE;
+
+static int do_spawn2(char *cmd, int exectype);
 
 int 
 IsWin95(void) {
@@ -390,7 +396,7 @@ do_aspawn(void* really, void** mark, void** arglast)
 }
 
 int
-do_spawn(char *cmd)
+do_spawn2(char *cmd, int exectype)
 {
     char **a;
     char *s;
@@ -420,7 +426,19 @@ do_spawn(char *cmd)
 	}
 	*a = Nullch;
 	if(argv[0]) {
-	    status = win32_spawnvp(P_WAIT, argv[0], (const char* const*)argv);
+	    switch (exectype) {
+	    case EXECF_SPAWN:
+		status = win32_spawnvp(P_WAIT, argv[0],
+				       (const char* const*)argv);
+		break;
+	    case EXECF_SPAWN_NOWAIT:
+		status = win32_spawnvp(P_NOWAIT, argv[0],
+				       (const char* const*)argv);
+		break;
+	    case EXECF_EXEC:
+		status = win32_execvp(argv[0], (const char* const*)argv);
+		break;
+	    }
 	    if(status != -1 || errno == 0)
 		needToTry = FALSE;
 	}
@@ -431,15 +449,42 @@ do_spawn(char *cmd)
 	char *argv[5];
 	argv[0] = shell; argv[1] = "/x"; argv[2] = "/c";
 	argv[3] = cmd; argv[4] = Nullch;
-	status = win32_spawnvp(P_WAIT, argv[0], (const char* const*)argv);
+	switch (exectype) {
+	case EXECF_SPAWN:
+	    status = win32_spawnvp(P_WAIT, argv[0],
+				   (const char* const*)argv);
+	    break;
+	case EXECF_SPAWN_NOWAIT:
+	    status = win32_spawnvp(P_NOWAIT, argv[0],
+				   (const char* const*)argv);
+	    break;
+	case EXECF_EXEC:
+	    status = win32_execvp(argv[0], (const char* const*)argv);
+	    break;
+	}
     }
     if (status < 0) {
 	if (dowarn)
-	    warn("Can't spawn \"%s\": %s", needToTry ? shell : argv[0],
+	    warn("Can't %s \"%s\": %s",
+		 (exectype == EXECF_EXEC ? "exec" : "spawn"),
+		 needToTry ? shell : argv[0],
 		 strerror(errno));
 	status = 255 << 8;
     }
     return (status);
+}
+
+int
+do_spawn(char *cmd)
+{
+    return do_spawn2(cmd, EXECF_SPAWN);
+}
+
+bool
+do_exec(char *cmd)
+{
+    do_spawn2(cmd, EXECF_EXEC);
+    return FALSE;
 }
 
 
@@ -1105,6 +1150,12 @@ DllExport int
 win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 {
     return pIOSubSystem->pfnspawnvp(mode, cmdname, argv);
+}
+
+DllExport int
+win32_execvp(const char *cmdname, const char *const *argv)
+{
+    return pIOSubSystem->pfnexecvp(cmdname, argv);
 }
 
 int

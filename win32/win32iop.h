@@ -63,6 +63,7 @@ EXT int		win32_mkdir(const char *dir, int mode);
 EXT int		win32_rmdir(const char *dir);
 EXT int		win32_chdir(const char *dir);
 EXT int		win32_flock(int fd, int oper);
+EXT int		win32_execvp(const char *cmdname, const char *const *argv);
 
 /*
  * these two are win32 specific but still io related
@@ -154,6 +155,7 @@ void *	SetIOSubSystem(void	*piosubsystem);
 #define rmdir			win32_rmdir
 #define chdir			win32_chdir
 #define flock(fd,o)		win32_flock(fd,o)
+#define execvp			win32_execvp
 #endif /* WIN32IO_IS_STDIO */
 
 #endif /* WIN32IOP_H */

@@ -942,7 +942,7 @@ do_execfree()
     }
 }
 
-#ifndef OS2
+#if !defined(OS2) && !defined(WIN32)
 
 bool
 do_exec(cmd)
@@ -1033,7 +1033,7 @@ char *cmd;
     return FALSE;
 }
 
-#endif /* OS2 */
+#endif /* OS2 || WIN32 */
 
 I32
 apply(type,mark,sp)

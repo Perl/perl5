@@ -337,7 +337,7 @@ all of the Activeware extensions and most other Win32 extensions from
 CPAN in source form, along with many added bugfixes, and with MakeMaker
 support.  This bundle is available at:
 
-   http://www.perl.com/CPAN/authors/id/GSAR/libwin32-0.06.tar.gz
+   http://www.perl.com/CPAN/authors/id/GSAR/libwin32-0.07.tar.gz
 
 See the README in that distribution for building and installation
 instructions.  Look for later versions that may be available at the
@@ -404,10 +404,16 @@ bogus.
 
 =item *
 
-The following functions are currently unavailable: C<fork()>, C<exec()>,
+The following functions are currently unavailable: C<fork()>,
 C<dump()>, C<chown()>, C<link()>, C<symlink()>, C<chroot()>,
 C<setpgrp()>, C<getpgrp()>, C<setpriority()>, C<getpriority()>,
 C<syscall()>, C<fcntl()>.  This list is possibly very incomplete.
+
+=item *
+
+crypt() is not available due to silly export restrictions.  It may
+become available when the laws change.  Meanwhile, look in CPAN for
+extensions that provide it.
 
 =item *
 
@@ -488,7 +494,7 @@ sundry hacks since then.
 
 Borland support was added in 5.004_01 (Gurusamy Sarathy).
 
-Last updated: 11 June 1997
+Last updated: 15 June 1997
 
 =cut
 

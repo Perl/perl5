@@ -297,6 +297,7 @@ WIN32_IOSUBSYSTEM	win32stdio = {
     _rmdir,
     _chdir,
     my_flock,		/* (*pfunc_flock)(int fd, int oper) */
+    execvp,
     87654321L,		/* end of structure */
 };
 

@@ -60,7 +60,8 @@ int	(*pfnmkdir)(const char *path);
 int	(*pfnrmdir)(const char *path);
 int	(*pfnchdir)(const char *path);
 int	(*pfnflock)(int fd, int oper);
-int		signature_end;
+int	(*pfnexecvp)(const char *cmdname, const char *const *argv);
+int	signature_end;
 } WIN32_IOSUBSYSTEM; 
 
 typedef WIN32_IOSUBSYSTEM	*PWIN32_IOSUBSYSTEM;
