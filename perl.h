@@ -1064,6 +1064,11 @@ typedef UVTYPE UV;
 #define PTR2IV(p)	INT2PTR(IV,p)
 #define PTR2UV(p)	INT2PTR(UV,p)
 #define PTR2NV(p)	NUM2PTR(NV,p)
+#if PTRSIZE == LONGSIZE 
+#  define PTR2ul(p)	(unsigned long)(p)
+#else
+#  define PTR2ul(p)	INT2PTR(unsigned long,p)	
+#endif
   
 #ifdef USE_LONG_DOUBLE
 #  if !(defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE))
@@ -1608,7 +1613,11 @@ typedef struct ptr_tbl PTR_TBL_t;
 #     endif
 #   endif
 # endif
-#endif         
+#endif
+
+#ifndef NO_ENVIRON_ARRAY
+#  define USE_ENVIRON_ARRAY
+#endif
 
 #ifndef PERL_SYS_INIT3
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
@@ -1798,9 +1807,25 @@ typedef pthread_key_t	perl_key;
 #  endif 
 #endif
 
+#ifndef UVf
+#  ifdef CHECK_FORMAT
+#    define UVf UVuf
+#  else
+#    define UVf "Vu"
+#  endif 
+#endif
+
+#ifndef VDf
+#  ifdef CHECK_FORMAT
+#    define VDf "p"
+#  else
+#    define VDf "vd"
+#  endif 
+#endif
+
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
-   below to be rejected by the compmiler.  Sigh.
+   below to be rejected by the compiler.  Sigh.
 */
 #ifdef HAS_PAUSE
 #define Pause	pause
@@ -2020,6 +2045,7 @@ Gid_t getegid (void);
 
 #ifndef Perl_error_log
 #  define Perl_error_log	(PL_stderrgv			\
+				 && GvIOp(PL_stderrgv)          \
 				 && IoOFP(GvIOp(PL_stderrgv))	\
 				 ? IoOFP(GvIOp(PL_stderrgv))	\
 				 : PerlIO_stderr())
@@ -2242,11 +2268,11 @@ EXT char *** environ_pointer;
 #  endif
 #else
    /* VMS and some other platforms don't use the environ array */
-#  if !defined(VMS)
+#  ifdef USE_ENVIRON_ARRAY
 #    if !defined(DONT_DECLARE_STD) || \
         (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
         defined(__sgi) || \
-        defined(__DGUX) || defined(EPOC)
+        defined(__DGUX) 
 extern char **	environ;	/* environment variables supplied via exec */
 #    endif
 #  endif

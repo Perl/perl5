@@ -58,6 +58,7 @@ Perl_epoc_init(int *argcp, char ***argvp) {
 
 }
 
+
 #ifdef __MARM__
 /* Symbian forgot to include __fixunsdfi into the MARM euser.lib */
 /* This is from libgcc2.c , gcc-2.7.2.3                          */
@@ -85,6 +86,8 @@ __fixunsdfsi (a)
     return (SItype) (a + (- 2147483647L  -1) ) - (- 2147483647L  -1) ;
   return (SItype) a;
 }
+
+#endif
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -143,5 +146,64 @@ do_spawn (pTHX_ SV *really,SV **mark,SV **sp)
     return rc;
 }
 
- 
-#endif
+static
+XS(epoc_getcwd)   /* more or less stolen from win32.c */
+{
+    dXSARGS;
+    /* Make the host for current directory */
+    char *buffer; 
+    int buflen = 256;
+
+    char *ptr;
+    buffer = (char *) malloc( buflen);
+    if (buffer == NULL) {
+      XSRETURN_UNDEF;
+    }
+    while ((NULL == ( ptr = getcwd( buffer, buflen))) && (errno == ERANGE)) {
+      buflen *= 2;
+      if (NULL == realloc( buffer, buflen)) {
+	 XSRETURN_UNDEF;
+      }
+      
+    }
+
+    /* 
+     * If ptr != Nullch 
+     *   then it worked, set PV valid, 
+     *   else return 'undef' 
+     */
+
+    if (ptr) {
+	SV *sv = sv_newmortal();
+	char *tptr;
+
+	for (tptr = ptr; *tptr != '\0'; tptr++) {
+	  if (*tptr == '\\') {
+	    *tptr = '/';
+	  }
+	}
+	sv_setpv(sv, ptr);
+	free( buffer);
+
+	EXTEND(SP,1);
+	SvPOK_on(sv);
+	ST(0) = sv;
+	XSRETURN(1);
+    }
+    free( buffer);
+    XSRETURN_UNDEF;
+}
+  
+
+void
+Perl_init_os_extras(void)
+{ 
+  dTHXo;
+  char *file = __FILE__;
+  newXS("EPOC::getcwd", epoc_getcwd, file);
+}
+
+void
+Perl_my_setenv(pTHX_ char *nam,char *val) {
+  setenv( nam, val, 1);
+}

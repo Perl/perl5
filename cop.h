@@ -433,6 +433,7 @@ L<perlcall>.
 #define EVAL_INEVAL	1	/* some enclosing scope is an eval */
 #define EVAL_WARNONLY	2	/* used by yywarn() when calling yyerror() */
 #define EVAL_KEEPERR	4	/* set by Perl_call_sv if G_KEEPERR */
+#define EVAL_INREQUIRE	8	/* The code is being required. */
 
 /* Support for switching (stack and block) contexts.
  * This ensures magic doesn't invalidate local stack and cx pointers.

@@ -40,6 +40,7 @@ Perl_ck_sort
 Perl_ck_spair
 Perl_ck_split
 Perl_ck_subr
+Perl_ck_substr
 Perl_ck_svconst
 Perl_ck_trunc
 Perl_pp_null

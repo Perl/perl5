@@ -320,7 +320,16 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			     * fsetpos(src)+fgetpos(dst)?  --nik */
 			    PerlIO_flush(fp);
 			    fd = PerlIO_fileno(fp);
-			    if (IoTYPE(thatio) == IoTYPE_SOCKET)
+			    /* When dup()ing STDIN, STDOUT or STDERR
+			     * explicitly set appropriate access mode */
+			    if (IoIFP(thatio) == PerlIO_stdout()
+				|| IoIFP(thatio) == PerlIO_stderr())
+			        IoTYPE(io) = IoTYPE_WRONLY;
+			    else if (IoIFP(thatio) == PerlIO_stdin())
+                                IoTYPE(io) = IoTYPE_RDONLY;
+			    /* When dup()ing a socket, say result is
+			     * one as well */
+			    else if (IoTYPE(thatio) == IoTYPE_SOCKET)
 				IoTYPE(io) = IoTYPE_SOCKET;
 			}
 			else
@@ -450,7 +459,9 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 #else
 	    !PL_statbuf.st_mode
 #endif
-	) {
+	    && IoTYPE(io) != IoTYPE_WRONLY  /* Dups of STD* filehandles already have */
+	    && IoTYPE(io) != IoTYPE_RDONLY  /* type so they aren't marked as sockets */
+	) {				    /* on OS's that return 0 on fstat()ed pipe */
 	    char tmpbuf[256];
 	    Sock_size_t buflen = sizeof tmpbuf;
 	    if (PerlSock_getsockname(PerlIO_fileno(fp), (struct sockaddr *)tmpbuf,

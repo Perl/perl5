@@ -39,6 +39,7 @@ PERL_CKDEF(Perl_ck_sort)
 PERL_CKDEF(Perl_ck_spair)
 PERL_CKDEF(Perl_ck_split)
 PERL_CKDEF(Perl_ck_subr)
+PERL_CKDEF(Perl_ck_substr)
 PERL_CKDEF(Perl_ck_svconst)
 PERL_CKDEF(Perl_ck_trunc)
 

@@ -221,7 +221,7 @@ File::Copy - Copy files or filehandles
   	use POSIX;
 	use File::Copy cp;
 
-	$n=FileHandle->new("/dev/null","r");
+	$n = FileHandle->new("/a/file","r");
 	cp($n,"x");'
 
 =head1 DESCRIPTION

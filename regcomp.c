@@ -234,7 +234,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	    ellipses = "...";                                                \
 	}                                                                    \
 	Perl_croak(aTHX_ "%s in regex m/%.*s%s/",                            \
-		   msg, len, PL_regprecomp, ellipses);                        \
+		   msg, (int)len, PL_regprecomp, ellipses);                  \
     } STMT_END
 
 /*
@@ -256,7 +256,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	    ellipses = "...";                                                \
 	}                                                                    \
 	S_re_croak2(aTHX_ pat, " in regex m/%.*s%s/",                        \
-		    msg, len, PL_regprecomp, ellipses);                     \
+		    msg, (int)len, PL_regprecomp, ellipses);                \
     } STMT_END
 
 
@@ -268,7 +268,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
                                                                              \
       Perl_croak(aTHX_ "%s" REPORT_LOCATION,               \
-		 m, offset, PL_regprecomp, PL_regprecomp + offset);          \
+		 m, (int)offset, PL_regprecomp, PL_regprecomp + offset);     \
     } STMT_END
 
 /*
@@ -289,7 +289,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
                                                                              \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1,       \
-		  offset, PL_regprecomp, PL_regprecomp + offset);            \
+		  (int)offset, PL_regprecomp, PL_regprecomp + offset);       \
     } STMT_END
 
 /*
@@ -311,7 +311,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
                                                                              \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2,   \
-		  offset, PL_regprecomp, PL_regprecomp + offset);            \
+		  (int)offset, PL_regprecomp, PL_regprecomp + offset);       \
     } STMT_END
 
 /*
@@ -332,7 +332,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
                                                                              \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3,\
-		  offset, PL_regprecomp, PL_regprecomp + offset);            \
+		  (int)offset, PL_regprecomp, PL_regprecomp + offset);       \
     } STMT_END
 
 /*
@@ -342,7 +342,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     STMT_START {                                                             \
       unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3, a4,\
-		  offset, PL_regprecomp, PL_regprecomp + offset);            \
+		  (int)offset, PL_regprecomp, PL_regprecomp + offset);       \
     } STMT_END
 
 
@@ -350,7 +350,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     STMT_START {                                                             \
         unsigned offset = strlen(PL_regprecomp)-(PL_regxend-(loc));          \
 	Perl_warner(aTHX_ WARN_REGEXP, "%s" REPORT_LOCATION,\
-		 m, offset, PL_regprecomp, PL_regprecomp + offset);          \
+		 m, (int)offset, PL_regprecomp, PL_regprecomp + offset);          \
     } STMT_END                                                               \
 
 
@@ -359,7 +359,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         unsigned offset = strlen(PL_regprecomp)-(PL_regxend-(loc));          \
 	Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,\
                  a1,                                                         \
-		 offset, PL_regprecomp, PL_regprecomp + offset);             \
+		 (int)offset, PL_regprecomp, PL_regprecomp + offset);        \
     } STMT_END
 
 #define	vWARN3(loc, m, a1, a2)                                               \
@@ -367,7 +367,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       unsigned offset = strlen(PL_regprecomp) - (PL_regxend - (loc));        \
 	Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,                    \
                  a1, a2,                                                     \
-		 offset, PL_regprecomp, PL_regprecomp + offset);             \
+		 (int)offset, PL_regprecomp, PL_regprecomp + offset);        \
     } STMT_END
 
 #define	vWARN4(loc, m, a1, a2, a3)                                           \
@@ -375,7 +375,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       unsigned offset = strlen(PL_regprecomp)-(PL_regxend-(loc));            \
 	Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,\
                  a1, a2, a3,                                                 \
-		 offset, PL_regprecomp, PL_regprecomp + offset);             \
+		 (int)offset, PL_regprecomp, PL_regprecomp + offset);        \
     } STMT_END
 
 
@@ -1963,7 +1963,10 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 		    else
 			sv = newSVpvn("", 0);
 
+		    ENTER;
+		    Perl_save_re_context(aTHX);
 		    rop = sv_compile_2op(sv, &sop, "re", &av);
+		    LEAVE;
 
 		    n = add_data(3, "nop");
 		    PL_regcomp_rx->data->data[n] = (void*)rop;
@@ -2881,7 +2884,7 @@ tryagain:
 		default:
 		  normal_default:
 		    if ((*p & 0xc0) == 0xc0 && UTF) {
-			ender = utf8_to_uv((U8*)p, &numlen);
+			ender = utf8_to_uv_chk((U8*)p, &numlen, 0);
 			p += numlen;
 		    }
 		    else
@@ -3635,12 +3638,12 @@ S_regclassutf8(pTHX)
 	namedclass = OOB_NAMEDCLASS;
 	if (!range)
 	    rangebegin = PL_regcomp_parse;
-	value = utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
+	value = utf8_to_uv_chk((U8*)PL_regcomp_parse, &numlen, 0);
 	PL_regcomp_parse += numlen;
 	if (value == '[')
 	    namedclass = regpposixcc(value);
 	else if (value == '\\') {
-	    value = (U32)utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
+	    value = (U32)utf8_to_uv_chk((U8*)PL_regcomp_parse, &numlen, 0);
 	    PL_regcomp_parse += numlen;
 	    /* Some compilers cannot handle switching on 64-bit integer
 	     * values, therefore value cannot be an UV.  Yes, this will

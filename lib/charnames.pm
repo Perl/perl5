@@ -1,5 +1,6 @@
 package charnames;
 use bytes ();		# for $bytes::hint_bits
+use warnings();
 $charnames::hint_bits = 0x20000;
 
 my $txt;
@@ -51,6 +52,13 @@ sub import {
   $^H{charnames_full} = delete $h{':full'};
   $^H{charnames_short} = delete $h{':short'};
   $^H{charnames_scripts} = [map uc, keys %h];
+  if (warnings::enabled('utf8') && @{$^H{charnames_scripts}}) {
+	$txt = do "unicode/Name.pl" unless $txt;
+    for (@{$^H{charnames_scripts}}) {
+        warnings::warn('utf8',  "No such script: '$_'") unless
+	    $txt =~ m/\t\t$_ (?:CAPITAL |SMALL )?LETTER /;
+	}
+  }
 }
 
 

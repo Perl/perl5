@@ -729,6 +729,7 @@
 #define utf8_to_bytes		Perl_utf8_to_bytes
 #define bytes_to_utf8		Perl_bytes_to_utf8
 #define utf8_to_uv		Perl_utf8_to_uv
+#define utf8_to_uv_chk		Perl_utf8_to_uv_chk
 #define uv_to_utf8		Perl_uv_to_utf8
 #define vivify_defelem		Perl_vivify_defelem
 #define vivify_ref		Perl_vivify_ref
@@ -1175,6 +1176,7 @@
 #define ck_spair		Perl_ck_spair
 #define ck_split		Perl_ck_split
 #define ck_subr			Perl_ck_subr
+#define ck_substr		Perl_ck_substr
 #define ck_svconst		Perl_ck_svconst
 #define ck_trunc		Perl_ck_trunc
 #define pp_aassign		Perl_pp_aassign
@@ -2185,6 +2187,7 @@
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
 #define bytes_to_utf8(a,b)	Perl_bytes_to_utf8(aTHX_ a,b)
 #define utf8_to_uv(a,b)		Perl_utf8_to_uv(aTHX_ a,b)
+#define utf8_to_uv_chk(a,b,c)	Perl_utf8_to_uv_chk(aTHX_ a,b,c)
 #define uv_to_utf8(a,b)		Perl_uv_to_utf8(aTHX_ a,b)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
@@ -2624,6 +2627,7 @@
 #define ck_spair(a)		Perl_ck_spair(aTHX_ a)
 #define ck_split(a)		Perl_ck_split(aTHX_ a)
 #define ck_subr(a)		Perl_ck_subr(aTHX_ a)
+#define ck_substr(a)		Perl_ck_substr(aTHX_ a)
 #define ck_svconst(a)		Perl_ck_svconst(aTHX_ a)
 #define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
 #define pp_aassign()		Perl_pp_aassign(aTHX)
@@ -4282,6 +4286,8 @@
 #define bytes_to_utf8		Perl_bytes_to_utf8
 #define Perl_utf8_to_uv		CPerlObj::Perl_utf8_to_uv
 #define utf8_to_uv		Perl_utf8_to_uv
+#define Perl_utf8_to_uv_chk	CPerlObj::Perl_utf8_to_uv_chk
+#define utf8_to_uv_chk		Perl_utf8_to_uv_chk
 #define Perl_uv_to_utf8		CPerlObj::Perl_uv_to_utf8
 #define uv_to_utf8		Perl_uv_to_utf8
 #define Perl_vivify_defelem	CPerlObj::Perl_vivify_defelem
@@ -5090,6 +5096,8 @@
 #define ck_split		Perl_ck_split
 #define Perl_ck_subr		CPerlObj::Perl_ck_subr
 #define ck_subr			Perl_ck_subr
+#define Perl_ck_substr		CPerlObj::Perl_ck_substr
+#define ck_substr		Perl_ck_substr
 #define Perl_ck_svconst		CPerlObj::Perl_ck_svconst
 #define ck_svconst		Perl_ck_svconst
 #define Perl_ck_trunc		CPerlObj::Perl_ck_trunc

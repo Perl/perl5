@@ -249,6 +249,8 @@ nm_opt='-p'
 
 ####### We define these functions ourselves
 
+d_strtoll='define'
+d_strtoull='define'
 d_getprior='define'
 d_setprior='define'
 

@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.7 2000/09/03 09:22:57 eagle Exp $
+# $Id: Man.pm,v 1.8 2000/10/10 02:14:31 eagle Exp $
 #
 # Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 1.07;
+$VERSION = 1.08;
 
 
 ############################################################################
@@ -185,7 +185,8 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 .\}
 .rm #[ #] #H #V #F C
 ----END OF PREAMBLE----
-                                   
+#`# for cperl-mode
+
 # This table is taken nearly verbatim from Tom Christiansen's pod2man.  It
 # assumes that the standard preamble has already been printed, since that's
 # what defines all of the accent marks.  Note that some of these are quoted
@@ -277,7 +278,7 @@ sub protect {
     s/^([.\'\\])/\\&$1/mg;
     $_;
 }
-                    
+
 # Given a command and a single argument that may or may not contain double
 # quotes, handle double-quote formatting for it.  If there are no double
 # quotes, just return the command followed by the argument in double quotes.
@@ -308,7 +309,7 @@ sub switchquotes {
 # Translate a font string into an escape.
 sub toescape { (length ($_[0]) > 1 ? '\f(' : '\f') . $_[0] }
 
-                    
+
 ############################################################################
 # Initialization
 ############################################################################
@@ -374,7 +375,7 @@ sub initialize {
     }
 
     # Figure out what quotes we'll be using for C<> text.
-    $$self{quotes} ||= "'";
+    $$self{quotes} ||= '"';
     if ($$self{quotes} eq 'none') {
         $$self{LQUOTE} = $$self{RQUOTE} = '';
     } elsif (length ($$self{quotes}) == 1) {
@@ -396,6 +397,7 @@ sub initialize {
     $$self{INDENT}  = 0;        # Current indentation level.
     $$self{INDENTS} = [];       # Stack of indentations.
     $$self{INDEX}   = [];       # Index keys waiting to be printed.
+    $$self{ITEMS}   = 0;        # The number of consecutive =items.
 
     $self->SUPER::initialize;
 }
@@ -490,7 +492,8 @@ sub command {
         $self->$command (@_);
      } else {
         my ($text, $line, $paragraph) = @_;
-        my ($file, $line) = $paragraph->file_line;
+        my $file;
+        ($file, $line) = $paragraph->file_line;
         $text =~ s/\n+\z//;
         $text = " $text" if ($text =~ /^\S/);
         warn qq($file:$line: Unknown command paragraph "=$command$text"\n);
@@ -512,7 +515,7 @@ sub verbatim {
     1 while s/^(.*?)(\t+)/$1 . ' ' x (length ($2) * 8 - length ($1) % 8)/me;
     s/\\/\\e/g;
     s/^(\s*\S)/'\&' . $1/gme;
-    $self->makespace if $$self{NEEDSPACE};
+    $self->makespace;
     $self->output (".Vb $lines\n$_.Ve\n");
     $$self{NEEDSPACE} = 0;
 }
@@ -538,7 +541,7 @@ sub textblock {
           >
           (
               ,?\s+(and\s+)?    # Allow lots of them, conjuncted.
-              L<  
+              L<
                   /
                   ( [:\w]+ ( \(\) )? )
               >
@@ -564,7 +567,7 @@ sub textblock {
     # scalars as well as scalars and does the right thing with them.
     $text = $self->parse ($text, @_);
     $text =~ s/\n\s*$/\n/;
-    $self->makespace if $$self{NEEDSPACE};
+    $self->makespace;
     $self->output (protect $self->mapfonts ($text));
     $self->outindex;
     $$self{NEEDSPACE} = 1;
@@ -624,7 +627,7 @@ sub sequence {
         my $tmp = $self->buildlink ($_);
         return bless \ "$tmp", 'Pod::Man::String';
     }
-                         
+
     # Whitespace protection replaces whitespace with "\ ".
     if ($command eq 'S') {
         s/\s+/\\ /g;
@@ -654,6 +657,10 @@ sub cmd_head1 {
     local $_ = $self->parse (@_);
     s/\s+$//;
     s/\\s-?\d//g;
+    if ($$self{ITEMS} > 1) {
+        $$self{ITEMS} = 0;
+        $self->output (".PD\n");
+    }
     $self->output (switchquotes ('.SH', $self->mapfonts ($_)));
     $self->outindex (($_ eq 'NAME') ? () : ('Header', $_));
     $$self{NEEDSPACE} = 0;
@@ -664,6 +671,10 @@ sub cmd_head2 {
     my $self = shift;
     local $_ = $self->parse (@_);
     s/\s+$//;
+    if ($$self{ITEMS} > 1) {
+        $$self{ITEMS} = 0;
+        $self->output (".PD\n");
+    }
     $self->output (switchquotes ('.Sh', $self->mapfonts ($_)));
     $self->outindex ('Subsection', $_);
     $$self{NEEDSPACE} = 0;
@@ -726,9 +737,11 @@ sub cmd_item {
         $$self{WEIRDINDENT} = 0;
     }
     $_ = $self->mapfonts ($_);
+    $self->output (".PD 0\n") if ($$self{ITEMS} == 1);
     $self->output (switchquotes ('.Ip', $_, $$self{INDENT}));
     $self->outindex ($index ? ('Item', $index) : ());
     $$self{NEEDSPACE} = 0;
+    $$self{ITEMS}++;
 }
 
 # Begin a block for a particular translator.  Setting VERBATIM triggers
@@ -861,7 +874,7 @@ sub parse {
     $self->parse_text ({ -expand_seq   => 'sequence',
                          -expand_ptree => 'collapse' }, @_);
 }
-    
+
 # Takes a parse tree and a flag saying whether or not to treat it as literal
 # text (not call guesswork on it), and returns the concatenation of all of
 # the text strings in that parse tree.  If the literal flag isn't true,
@@ -975,7 +988,10 @@ sub guesswork {
 # Make vertical whitespace.
 sub makespace {
     my $self = shift;
-    $self->output ($$self{INDENT} > 0 ? ".Sp\n" : ".PP\n");
+    $self->output (".PD\n") if ($$self{ITEMS} > 1);
+    $$self{ITEMS} = 0;
+    $self->output ($$self{INDENT} > 0 ? ".Sp\n" : ".PP\n")
+        if $$self{NEEDSPACE};
 }
 
 # Output any pending index entries, and optionally an index entry given as

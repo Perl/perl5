@@ -2886,6 +2886,10 @@ PERL_VERSION (Oldsyms.U):
 perladmin (perladmin.U):
 	Electronic mail address of the perl5 administrator.
 
+perllibs (End.U):
+	The list of libraries needed by Perl only (any libraries needed
+	by extensions only will by dropped, if using dynamic loading).
+
 perlpath (perlpath.U):
 	This variable contains the eventual value of the PERLPATH symbol,
 	which contains the name of the perl interpreter to be used in
@@ -3681,6 +3685,18 @@ version (patchlevel.U):
 	full version number, including any possible subversions.
 	This is suitable for use as a directory name, and hence is
 	filesystem dependent.
+
+versiononly (versiononly.U):
+	If set, this symbol indicates that only the version-specific
+	components of a perl installation should be installed.
+	This may be useful for making a test installation of a new
+	version without disturbing the existing installation.
+	Setting versiononly is equivalent to setting installperl's -v option.
+	In particular, the non-versioned scripts and programs such as
+	a2p, c2ph, h2xs, pod2*, and perldoc are not installed
+	(see INSTALL for a more complete list).  Nor are the man
+	pages installed.
+	Usually, this is undef.
 
 vi (Loc.U):
 	This variable is defined but not used by Configure.

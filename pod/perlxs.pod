@@ -166,21 +166,37 @@ argument and returns a single value.
      sin(x)
        double x
 
-When using parameters with C pointer types, as in
+Optionally, one can merge the description of types and the list of
+argument names, rewriting this as
 
-     double string_to_double(char *s);
+     double
+     sin(double x)
 
-there may be two ways to describe this argument to B<xsubpp>:
+This makes this XSUB look similar to an ANSI C declaration.  An optional
+semicolon is allowed after the argument list, as in
+
+     double
+     sin(double x);
+
+Parameters with C pointer types can have different semantic: C functions
+with similar declarations
+
+     bool string_looks_as_a_number(char *s);
+     bool make_char_uppercase(char *c);
+
+are used in absolutely incompatible manner.  Parameters to these functions
+could be described B<xsubpp> like this:
 
      char *  s
-     char    &s
+     char    &c
 
 Both these XS declarations correspond to the C<char*> C type, but they have
-different semantics.  It is convenient to think that the indirection operator
+different semantics, see L<"The & Unary Operator">.
+
+It is convenient to think that the indirection operator
 C<*> should be considered as a part of the type and the address operator C<&>
-should be considered part of the variable.  See L<"The Typemap"> and
-L<"The & Unary Operator"> for more info about handling qualifiers and unary
-operators in C types.
+should be considered part of the variable.  See L<"The Typemap">
+for more info about handling qualifiers and unary operators in C types.
 
 The function name and the return type must be placed on
 separate lines and should be flush left-adjusted.
@@ -191,7 +207,7 @@ separate lines and should be flush left-adjusted.
     double x                       sin(x)
 				     double x
 
-The function body may be indented or left-adjusted.  The following example
+The rest of the function description may be indented or left-adjusted.  The following example
 shows a function with its body left-adjusted.  Most examples in this
 document will indent the body for better readability.
 
@@ -363,6 +379,31 @@ to disable it for the remainder of the parameters in the OUTPUT section.
 Likewise,  C<SETMAGIC: ENABLE> can be used to reenable it for the
 remainder of the OUTPUT section.  See L<perlguts> for more details
 about 'set' magic.
+
+=head2 The NO_OUTPUT Keyword
+
+The NO_OUTPUT can be placed as the first token of the XSUB.  This keyword
+indicates that while the C subroutine we provide an interface to has
+a non-C<void> return type, the return value of this C subroutine should not
+be returned from the generated Perl subroutine.
+
+With this keyword present L<The RETVAL Variable> is created, and in the
+generated call to the subroutine this variable is assigned to, but the value
+of this variable is not going to be used in the auto-generated code.
+
+This keyword makes sense only if C<RETVAL> is going to be accessed by the
+user-supplied code.  It is especially useful to make a function interface
+more Perl-like, especially when the C return value is just an error condition
+indicator.  For example,
+
+  NO_OUTPUT int
+  delete_file(char *name)
+    POST_CALL:
+      if (RETVAL != 0)
+	  croak("Error %d while deleting file '%s'", RETVAL, name);
+
+Here the generated XS function returns nothing on success, and will die()
+with a meaningful error message on error.
 
 =head2 The CODE: Keyword
 
@@ -713,6 +754,70 @@ thus C<host> is initialized on the declaration line, and our assignment
 C<h = host> is not performed too early.  Otherwise one would need to have the
 assignment C<h = host> in a CODE: or INIT: section.)
 
+=head2 The IN/OUTLIST/IN_OUTLIST Keywords
+
+In the list of parameters for an XSUB, one can precede parameter names
+by the C<IN>/C<OUTLIST>/C<IN_OUTLIST> keywords.  C<IN> keyword is a default,
+the other two keywords indicate how the Perl interface should differ from
+the C interface.
+
+Parameters preceded by C<OUTLIST>/C<IN_OUTLIST> keywords are considered to
+be used by the C subroutine I<via pointers>.  C<OUTLIST> keyword indicates
+that the C subroutine does not inspect the memory pointed by this parameter,
+but will write through this pointer to provide additional return values.
+Such parameters do not appear in the usage signature of the generated Perl
+function.
+
+Parameters preceded by C<IN_OUTLIST> I<do> appear as parameters to the
+Perl function.  These parameters are converted to the corresponding C type,
+then pointers to these data are given as arguments to the C function.  It
+is expected that the C function will write through these pointers 
+
+The return list of the generated Perl function consists of the C return value
+from the function (unless the XSUB is of C<void> return type or
+C<The NO_INIT Keyword> was used) followed by all the C<OUTLIST>
+and C<IN_OUTLIST> parameters (in the order of appearence).  Say, an XSUB
+
+  void
+  day_month(OUTLIST day, IN unix_time, OUTLIST month)
+    int day
+    int unix_time
+    int month
+
+should be used from Perl as
+
+  my ($day, $month) = day_month(time);
+
+The C signature of the corresponding function should be
+
+  void day_month(int *day, int unix_time, int *month);
+
+The C<in>/C<OUTLIST>/C<IN_OUTLIST> keywords can be mixed with ANSI-style
+declarations, as in
+
+  void
+  day_month(OUTLIST int day, int unix_time, OUTLIST int month)
+
+(here the optional C<IN> keyword is omitted).
+
+The C<IN_OUTLIST> parameters are somewhat similar to parameters introduced
+with L<The & Unary Operator> and put into the C<OUTPUT:> section (see
+L<The OUTPUT: Keyword>).  Say, the same C function can be interfaced with as
+
+  void
+  day_month(day, unix_time, month)
+      int &day = NO_INIT
+      int  unix_time
+      int &month = NO_INIT
+    OUTPUT:
+      day
+      month
+
+However, the generated Perl function is called in very C-ish style:
+
+  my ($day, $month);
+  day_month($day, time, $month);
+
 =head2 Variable-length Parameter Lists
 
 XSUBs can have variable-length parameter lists by specifying an ellipsis
@@ -927,14 +1032,14 @@ rewrite this example as:
 	OUTPUT:
 	  RETVAL
 
-In fact, one can put this check into a CLEANUP: section as well.  Together
+In fact, one can put this check into a POST_CALL: section as well.  Together
 with PREINIT: simplifications, this leads to:
 
      int
      rpcb_gettime(host)
           char *host
           time_t  timep;
-	CLEANUP:
+	POST_CALL:
 	  if (RETVAL == 0)
 		XSRETURN_UNDEF;
 
@@ -954,6 +1059,16 @@ before it terminates.  When the CLEANUP:  keyword is used it must follow
 any CODE:, PPCODE:, or OUTPUT: blocks which are present in the XSUB.  The
 code specified for the cleanup block will be added as the last statements
 in the XSUB.
+
+=head2 The POST_CALL: Keyword
+
+This keyword can be used when an XSUB requires special procedures
+executed after the C subroutine call is performed.  When the POST_CALL:
+keyword is used it must precede OUTPUT: and CLEANUP: blocks which are
+present in the XSUB.
+
+The POST_CALL: block does not make a lot of sense when the C subroutine
+call is supplied by user by providing either CODE: or PPCODE: section.
 
 =head2 The BOOT: Keyword
 
@@ -1235,7 +1350,7 @@ C<&> through, so the function call looks like C<rpcb_gettime(host, &timep)>.
 =head2 Inserting Comments and C Preprocessor Directives
 
 C preprocessor directives are allowed within BOOT:, PREINIT: INIT:,
-CODE:, PPCODE:, and CLEANUP: blocks, as well as outside the functions.
+CODE:, PPCODE:, POST_CALL:, and CLEANUP: blocks, as well as outside the functions.
 Comments are allowed anywhere after the MODULE keyword.  The compiler
 will pass the preprocessor directives through untouched and will remove
 the commented lines.
@@ -1390,7 +1505,7 @@ of failure.  They may be
 candidates to return undef or an empty list in case of failure.  If the
 failure may be detected without a call to the C function, you may want to use
 an INIT: section to report the failure.  For failures detectable after the C
-function returns one may want to use a CLEANUP: section to process the
+function returns one may want to use a POST_CALL: section to process the
 failure.  In more complicated cases use CODE: or PPCODE: sections.
 
 If many functions use the same failure indication based on the return value,

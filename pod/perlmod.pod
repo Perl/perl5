@@ -8,7 +8,7 @@ perlmod - Perl modules (packages and symbol tables)
 
 Perl provides a mechanism for alternative namespaces to protect
 packages from stomping on each other's variables.  In fact, there's
-really no such thing as a global variable in Perl .  The package
+really no such thing as a global variable in Perl.  The package
 statement declares the compilation unit as being in the given
 namespace.  The scope of the package declaration is from the
 declaration itself through the end of the enclosing block, C<eval>,
@@ -96,6 +96,12 @@ table lookups at compile time:
     local *main::foo    = *main::bar;
     local $main::{foo}  = $main::{bar};
 
+(Be sure to note the B<vast> difference between the second line above
+and C<local $main::foo = $main::bar>. The former is accessing the hash
+C<%main::>, which is the symbol table of package C<main>. The latter is
+simply assigning scalar C<$bar> in package C<main> to scalar C<$foo> of
+the same package.)
+
 You can use this to print out all the variables in a package, for
 instance.  The standard but antiquated F<dumpvar.pl> library and
 the CPAN module Devel::Symdump make use of this.
@@ -139,7 +145,7 @@ Another use of symbol tables is for making "constant" scalars.
 
     *PI = \3.14159265358979;
 
-Now you cannot alter $PI, which is probably a good thing all in all.
+Now you cannot alter C<$PI>, which is probably a good thing all in all.
 This isn't the same as a constant subroutine, which is subject to
 optimization at compile-time.  A constant subroutine is one prototyped
 to take no arguments and to return a constant expression.  See 

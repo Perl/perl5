@@ -357,7 +357,6 @@ Perl_lex_start(pTHX_ SV *line)
 	    SAVEVPTR(PL_nextval[toke]);
 	}
 	SAVEI32(PL_nexttoke);
-	PL_nexttoke = 0;
     }
     SAVECOPLINE(PL_curcop);
     SAVEPPTR(PL_bufptr);
@@ -391,6 +390,7 @@ Perl_lex_start(pTHX_ SV *line)
     PL_lex_stuff = Nullsv;
     PL_lex_repl = Nullsv;
     PL_lex_inpat = 0;
+    PL_nexttoke = 0;
     PL_lex_inwhat = 0;
     PL_sublex_info.sub_inwhat = 0;
     PL_linestr = line;
@@ -812,7 +812,7 @@ Perl_str_to_version(pTHX_ SV *sv)
 	I32 skip;
 	UV n;
 	if (utf)
-	    n = utf8_to_uv((U8*)start, &skip);
+	    n = utf8_to_uv_chk((U8*)start, &skip, 0);
 	else {
 	    n = *(U8*)start;
 	    skip = 1;
@@ -1309,7 +1309,7 @@ S_scan_const(pTHX_ char *start)
 	/* (now in tr/// code again) */
 
 	if (*s & 0x80 && thisutf) {
-	   (void)utf8_to_uv((U8*)s, &len);
+	   (void)utf8_to_uv_chk((U8*)s, &len, 0);
 	   if (len == 1) {
 	       /* illegal UTF8, make it valid */
 	       char *old_pvx = SvPVX(sv);
@@ -1475,7 +1475,10 @@ S_scan_const(pTHX_ char *start)
 			char *ostart = SvPVX(sv);
 			SvCUR_set(sv, d - ostart);
 			SvPOK_on(sv);
+			*d = '\0';
 			sv_utf8_upgrade(sv);
+			/* this just broke our allocation above... */
+			SvGROW(sv, send - start);
 			d = SvPVX(sv) + SvCUR(sv);
 			has_utf = TRUE;
 		    }
@@ -7356,7 +7359,7 @@ Perl_yyerror(pTHX_ char *s)
 	qerror(msg);
     if (PL_error_count >= 10) {
 	if (PL_in_eval && SvCUR(ERRSV))
-	    Perl_croak(aTHX_ "%_%s has too many errors.\n",
+	    Perl_croak(aTHX_ "%"SVf"%s has too many errors.\n",
 		       ERRSV, CopFILE(PL_curcop));
 	else
 	    Perl_croak(aTHX_ "%s has too many errors.\n",

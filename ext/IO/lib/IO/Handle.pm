@@ -71,7 +71,7 @@ corresponding built-in functions:
     $io->printf ( FMT, [ARGS] )
     $io->stat
     $io->sysread ( BUF, LEN, [OFFSET] )
-    $io->syswrite ( BUF, LEN, [OFFSET] )
+    $io->syswrite ( BUF, [LEN, [OFFSET]] )
     $io->truncate ( LEN )
 
 See L<perlvar> for complete descriptions of each of the following
@@ -425,8 +425,11 @@ sub write {
 
 sub syswrite {
     @_ >= 2 && @_ <= 4 or croak 'usage: $io->syswrite(BUF [, LEN [, OFFSET]])';
-    $_[2] = length($_[1]) unless defined $_[2];
-    syswrite($_[0], $_[1], $_[2], $_[3] || 0);
+    if (defined($_[2])) {
+	syswrite($_[0], $_[1], $_[2], $_[3] || 0);
+    } else {
+	syswrite($_[0], $_[1]);
+    }
 }
 
 sub stat {

@@ -2188,7 +2188,7 @@ PP(pp_ord)
     I32 retlen;
 
     if ((*tmps & 0x80) && DO_UTF8(tmpsv))
-	value = utf8_to_uv(tmps, &retlen);
+	value = utf8_to_uv_chk(tmps, &retlen, 0);
     else
 	value = (UV)(*tmps & 255);
     XPUSHu(value);
@@ -2255,7 +2255,7 @@ PP(pp_ucfirst)
 	I32 ulen;
 	U8 tmpbuf[UTF8_MAXLEN];
 	U8 *tend;
-	UV uv = utf8_to_uv(s, &ulen);
+	UV uv = utf8_to_uv_chk(s, &ulen, 0);
 
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2314,7 +2314,7 @@ PP(pp_lcfirst)
 	I32 ulen;
 	U8 tmpbuf[UTF8_MAXLEN];
 	U8 *tend;
-	UV uv = utf8_to_uv(s, &ulen);
+	UV uv = utf8_to_uv_chk(s, &ulen, 0);
 
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2391,7 +2391,7 @@ PP(pp_uc)
 		TAINT;
 		SvTAINTED_on(TARG);
 		while (s < send) {
-		    d = uv_to_utf8(d, toUPPER_LC_uni( utf8_to_uv(s, &ulen)));
+		    d = uv_to_utf8(d, toUPPER_LC_uni( utf8_to_uv_chk(s, &ulen, 0)));
 		    s += ulen;
 		}
 	    }
@@ -2465,7 +2465,7 @@ PP(pp_lc)
 		TAINT;
 		SvTAINTED_on(TARG);
 		while (s < send) {
-		    d = uv_to_utf8(d, toLOWER_LC_uni( utf8_to_uv(s, &ulen)));
+		    d = uv_to_utf8(d, toLOWER_LC_uni( utf8_to_uv_chk(s, &ulen, 0)));
 		    s += ulen;
 		}
 	    }
@@ -3607,7 +3607,7 @@ PP(pp_unpack)
 		len = strend - s;
 	    if (checksum) {
 		while (len-- > 0 && s < strend) {
-		    auint = utf8_to_uv((U8*)s, &along);
+		    auint = utf8_to_uv_chk((U8*)s, &along, 0);
 		    s += along;
 		    if (checksum > 32)
 			cdouble += (NV)auint;
@@ -3619,7 +3619,7 @@ PP(pp_unpack)
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0 && s < strend) {
-		    auint = utf8_to_uv((U8*)s, &along);
+		    auint = utf8_to_uv_chk((U8*)s, &along, 0);
 		    s += along;
 		    sv = NEWSV(37, 0);
 		    sv_setuv(sv, (UV)auint);
@@ -4038,7 +4038,7 @@ PP(pp_unpack)
 			char *t;
 			STRLEN n_a;
 
-			sv = Perl_newSVpvf(aTHX_ "%.*Vu", (int)TYPE_DIGITS(UV), auv);
+			sv = Perl_newSVpvf(aTHX_ "%.*"UVf, (int)TYPE_DIGITS(UV), auv);
 			while (s < strend) {
 			    sv = mul128(sv, *s & 0x7f);
 			    if (!(*s++ & 0x80)) {
@@ -4967,6 +4967,7 @@ PP(pp_split)
     AV *ary;
     register I32 limit = POPi;			/* note, negative is forever */
     SV *sv = POPs;
+    bool isutf = DO_UTF8(sv);
     STRLEN len;
     register char *s = SvPV(sv, len);
     char *strend = s + len;
@@ -5069,6 +5070,8 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
+	    if (isutf)
+		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 
 	    s = m + 1;
@@ -5089,6 +5092,8 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
+	    if (isutf)
+		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    s = m;
 	}
@@ -5112,6 +5117,8 @@ PP(pp_split)
 		sv_setpvn(dstr, s, m-s);
 		if (make_mortal)
 		    sv_2mortal(dstr);
+		if (isutf)
+		    (void)SvUTF8_on(dstr);
 		XPUSHs(dstr);
 		s = m + 1;
 	    }
@@ -5127,6 +5134,8 @@ PP(pp_split)
 		sv_setpvn(dstr, s, m-s);
 		if (make_mortal)
 		    sv_2mortal(dstr);
+		if (isutf)
+		    (void)SvUTF8_on(dstr);
 		XPUSHs(dstr);
 		s = m + len;		/* Fake \n at the end */
 	    }
@@ -5154,6 +5163,8 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
+	    if (isutf)
+		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    if (rx->nparens) {
 		for (i = 1; i <= rx->nparens; i++) {
@@ -5167,6 +5178,8 @@ PP(pp_split)
 			dstr = NEWSV(33, 0);
 		    if (make_mortal)
 			sv_2mortal(dstr);
+		    if (isutf)
+			(void)SvUTF8_on(dstr);
 		    XPUSHs(dstr);
 		}
 	    }
@@ -5185,6 +5198,8 @@ PP(pp_split)
 	sv_setpvn(dstr, s, strend-s);
 	if (make_mortal)
 	    sv_2mortal(dstr);
+	if (isutf)
+	    (void)SvUTF8_on(dstr);
 	XPUSHs(dstr);
 	iters++;
     }

@@ -1417,6 +1417,12 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	    LEAVE;
 
+	    /* LEAVE could clobber PL_curcop (see save_re_context())
+	     * XXX it might be better to find a way to avoid messing with
+	     * PL_curcop in save_re_context() instead, but this is a more
+	     * minimal fix --GSAR */
+	    PL_curcop = cx->blk_oldcop;
+
 	    if (optype == OP_REQUIRE) {
 		char* msg = SvPVx(ERRSV, n_a);
 		DIE(aTHX_ "%sCompilation failed in require",
@@ -2728,7 +2734,9 @@ S_doeval(pTHX_ int gimme, OP** startop)
     AV* comppadlist;
     I32 i;
 
-    PL_in_eval = EVAL_INEVAL;
+    PL_in_eval = ((saveop && saveop->op_type == OP_REQUIRE)
+		  ? (EVAL_INREQUIRE | (PL_in_eval & EVAL_INEVAL))
+		  : EVAL_INEVAL);
 
     PUSHMARK(SP);
 
@@ -2891,6 +2899,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
     CvDEPTH(PL_compcv) = 1;
     SP = PL_stack_base + POPMARK;		/* pop original mark */
     PL_op = saveop;			/* The caller may need it. */
+    PL_lex_state = LEX_NOTPARSING;	/* $^S needs this. */
 #ifdef USE_THREADS
     MUTEX_LOCK(&PL_eval_mutex);
     PL_eval_owner = 0;
@@ -2959,13 +2968,13 @@ PP(pp_require)
 	    U8 *s = (U8*)SvPVX(sv);
 	    U8 *end = (U8*)SvPVX(sv) + SvCUR(sv);
 	    if (s < end) {
-		rev = utf8_to_uv(s, &len);
+		rev = utf8_to_uv_chk(s, &len, 0);
 		s += len;
 		if (s < end) {
-		    ver = utf8_to_uv(s, &len);
+		    ver = utf8_to_uv_chk(s, &len, 0);
 		    s += len;
 		    if (s < end)
-			sver = utf8_to_uv(s, &len);
+			sver = utf8_to_uv_chk(s, &len, 0);
 		}
 	    }
 	    if (PERL_REVISION < rev

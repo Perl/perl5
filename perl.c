@@ -377,6 +377,7 @@ perl_destruct(pTHXx)
     DEBUG_S(PerlIO_printf(Perl_debug_log, "perl_destruct: armageddon has arrived\n"));
     MUTEX_DESTROY(&PL_threads_mutex);
     COND_DESTROY(&PL_nthreads_cond);
+    PL_nthreads--;
 #endif /* !defined(FAKE_THREADS) */
 #endif /* USE_THREADS */
 
@@ -835,7 +836,7 @@ setuid perl scripts securely.\n");
 
     PL_origargv = argv;
     PL_origargc = argc;
-#ifndef VMS  /* VMS doesn't have environ array */
+#if !defined( VMS) && !defined(EPOC)  /* VMS doesn't have environ array */
     PL_origenviron = environ;
 #endif
 
@@ -1252,7 +1253,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     if (xsinit)
 	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */
-#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__)
+#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__) || defined(EPOC)
     init_os_extras();
 #endif
 
@@ -2244,7 +2245,7 @@ Perl_moreswitches(pTHX_ char *s)
 	return s;
     case 'v':
 	PerlIO_printf(PerlIO_stdout(),
-		      Perl_form(aTHX_ "\nThis is perl, v%vd built for %s",
+		      Perl_form(aTHX_ "\nThis is perl, v%"VDf" built for %s",
 				PL_patchlevel, ARCHNAME));
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
@@ -3463,7 +3464,7 @@ S_init_perllib(pTHX)
 #endif /* MACOS_TRADITIONAL */
 }
 
-#if defined(DOSISH)
+#if defined(DOSISH) || defined(EPOC)
 #    define PERLLIB_SEP ';'
 #else
 #  if defined(VMS)

@@ -146,9 +146,17 @@ PP(pp_concat)
     dPOPTOPssrl;
     STRLEN len;
     U8 *s;
-    bool left_utf = DO_UTF8(left);
-    bool right_utf = DO_UTF8(right);
+    bool left_utf;
+    bool right_utf;
 
+    if (TARG == right && SvGMAGICAL(right))
+        mg_get(right);
+    if (SvGMAGICAL(left))
+        mg_get(left);
+
+    left_utf  = DO_UTF8(left);
+    right_utf = DO_UTF8(right);
+ 
     if (left_utf != right_utf) {
         if (TARG == right && !right_utf) {
             sv_utf8_upgrade(TARG); /* Now straight binary copy */
@@ -159,11 +167,15 @@ PP(pp_concat)
             U8 *l, *c, *olds = NULL;
             STRLEN targlen;
 	    s = (U8*)SvPV(right,len);
+	    right_utf |= DO_UTF8(right);
             if (TARG == right) {
 		/* Take a copy since we're about to overwrite TARG */
 		olds = s = (U8*)savepvn((char*)s, len);
 	    }
+	    if (!SvOK(left) && SvTYPE(left) <= SVt_PVMG)
+		sv_setpv(left, "");	/* Suppress warning. */
             l = (U8*)SvPV(left, targlen);
+	    left_utf |= DO_UTF8(left);
             if (TARG != left)
                 sv_setpvn(TARG, (char*)l, targlen);
             if (!left_utf)
@@ -203,8 +215,6 @@ PP(pp_concat)
 	}
 	sv_setpvn(TARG, (char *)s, len);
     }
-    else if (SvGMAGICAL(TARG))
-	mg_get(TARG);
     else if (!SvOK(TARG) && SvTYPE(TARG) <= SVt_PVMG)
 	sv_setpv(TARG, "");	/* Suppress warning. */
     s = (U8*)SvPV(right,len);
@@ -373,6 +383,7 @@ PP(pp_print)
     else
 	gv = PL_defoutgv;
     if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
+      had_magic:
 	if (MARK == ORIGMARK) {
 	    /* If using default handle then we need to make space to 
 	     * pass object as 1st arg, so move other args up ...
@@ -396,6 +407,8 @@ PP(pp_print)
     }
     if (!(io = GvIO(gv))) {
         dTHR;
+        if ((GvEGV(gv)) && (mg = SvTIED_mg((SV*)GvEGV(gv),'q')))
+            goto had_magic;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
 	SETERRNO(EBADF,RMS$_IFI);

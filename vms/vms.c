@@ -60,6 +60,11 @@
 #  define WARN_INTERNAL WARN_MISC
 #endif
 
+#if defined(__VMS_VER) && __VMS_VER >= 70000000 && __DECC_VER >= 50200000
+#  define RTL_USES_UTC 1
+#endif
+
+
 /* gcc's header files don't #define direct access macros
  * corresponding to VAXC's variant structs */
 #ifdef __GNUC__
@@ -114,6 +119,10 @@ static int no_translate_barewords;
 
 /* Temp for subprocess commands */
 static struct dsc$descriptor_s VMScmd = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,Nullch};
+
+#ifndef RTL_USES_UTC
+static int tz_updated = 1;
+#endif
 
 /*{{{int vmstrnenv(const char *lnm, char *eqv, unsigned long int idx, struct dsc$descriptor_s **tabvec, unsigned long int flags) */
 int
@@ -695,7 +704,9 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
 void
 Perl_my_setenv(pTHX_ char *lnm,char *eqv)
 {
-  if (lnm && *lnm && strlen(lnm) == 7) {
+  if (lnm && *lnm) {
+    int len = strlen(lnm);
+    if  (len == 7) {
     char uplnm[8];
     int i;
     for (i = 0; lnm[i]; i++) uplnm[i] = _toupper(lnm[i]);
@@ -703,6 +714,17 @@ Perl_my_setenv(pTHX_ char *lnm,char *eqv)
       if (eqv && *eqv) chdir(eqv);
       return;
     }
+  }
+#ifndef RTL_USES_UTC
+    if (len == 6 || len == 2) {
+        char uplnm[7];
+        int i;
+        for (i = 0; lnm[i]; i++) uplnm[i] = _toupper(lnm[i]);
+        uplnm[len] = '\0';
+        if (!strcmp(uplnm,"UCX$TZ")) tz_updated = 1;
+        if (!strcmp(uplnm,"TZ")) tz_updated = 1;
+    }
+#endif
   }
   (void) vmssetenv(lnm,eqv,NULL);
 }
@@ -971,6 +993,9 @@ my_tmpfile(void)
 }
 /*}}}*/
 
+/* default piping mailbox size */
+#define PERL_BUFSIZ        512
+
 
 static void
 create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
@@ -984,12 +1009,10 @@ create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
   if (!syssize) {
     unsigned long syiitm = SYI$_MAXBUF;
     /*
-     * Get the SYSGEN parameter MAXBUF, and the smaller of it and the
-     * preprocessor consant BUFSIZ from stdio.h defaults as the size of the
-     * 'pipe' mailbox.
+     * Get the SYSGEN parameter MAXBUF
      *
      * If the logical 'PERL_MBX_SIZE' is defined
-     * use the value of the logical instead of BUFSIZ, but again
+     * use the value of the logical instead of PERL_BUFSIZ, but 
      * keep the size between 128 and MAXBUF.
      *
      */
@@ -999,7 +1022,7 @@ create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
   if (vmstrnenv("PERL_MBX_SIZE", csize, 0, fildev, 0)) {
       mbxbufsiz = atoi(csize);
   } else {
-      mbxbufsiz = BUFSIZ;
+      mbxbufsiz = PERL_BUFSIZ;
   }
   if (mbxbufsiz < 128) mbxbufsiz = 128;
   if (mbxbufsiz > syssize) mbxbufsiz = syssize;
@@ -3930,7 +3953,7 @@ vms_image_init(int *argcp, char ***argvp)
   if (tabidx) { tabvec[tabidx] = NULL; env_tables = tabvec; }
 
   getredirection(argcp,argvp);
-#if defined(USE_THREADS) && defined(__DECC)
+#if defined(USE_THREADS) && ( defined(__DECC) || defined(__DECCXX) )
   {
 # include <reentrancy.h>
   (void) decc$set_reentrancy(C$C_MULTITHREAD);
@@ -4695,24 +4718,37 @@ do_spawn(char *cmd)
 /* 
  * A simple fwrite replacement which outputs itmsz*nitm chars without
  * introducing record boundaries every itmsz chars.
+ * We are using fputs, which depends on a terminating null.  We may
+ * well be writing binary data, so we need to accommodate not only
+ * data with nulls sprinkled in the middle but also data with no null 
+ * byte at the end.
  */
 /*{{{ int my_fwrite(void *src, size_t itmsz, size_t nitm, FILE *dest)*/
 int
 my_fwrite(void *src, size_t itmsz, size_t nitm, FILE *dest)
 {
-  register char *cp, *end;
+  register char *cp, *end, *cpd, *data;
+  int retval;
+  int bufsize = itmsz*nitm+1;
 
-  end = (char *)src + itmsz * nitm;
+  _ckvmssts_noperl(lib$get_vm( &bufsize, &data ));
+  memcpy( data, src, itmsz*nitm );
+  data[itmsz*nitm] = '\0';
 
-  while ((char *)src <= end) {
-    for (cp = src; cp <= end; cp++) if (!*cp) break;
-    if (fputs(src,dest) == EOF) return EOF;
+  end = data + itmsz * nitm;
+  retval = (int) nitm; /* on success return # items written */
+
+  cpd = data;
+  while (cpd <= end) {
+    for (cp = cpd; cp <= end; cp++) if (!*cp) break;
+    if (fputs(cpd,dest) == EOF) { retval = EOF; break; }
     if (cp < end)
-      if (fputc('\0',dest) == EOF) return EOF;
-    src = cp + 1;
+      if (fputc('\0',dest) == EOF) { retval = EOF; break; }
+    cpd = cp + 1;
   }
 
-  return nitm;
+  if (data) _ckvmssts_noperl(lib$free_vm( &bufsize, &data ));
+  return retval;
 
 }  /* end of my_fwrite() */
 /*}}}*/
@@ -5115,9 +5151,6 @@ static long int utc_offset_secs;
 #undef localtime
 #undef time
 
-#if defined(__VMS_VER) && __VMS_VER >= 70000000 && __DECC_VER >= 50200000
-#  define RTL_USES_UTC 1
-#endif
 
 /*
  * DEC C previous to 6.0 corrupts the behavior of the /prefix
@@ -5166,6 +5199,289 @@ static time_t toloc_dst(time_t utc) {
        (gmtime_emulation_type == 1 ? toloc_dst(secs) : \
        ((secs) + utc_offset_secs))))
 
+#ifndef RTL_USES_UTC
+/*
+  
+    ucx$tz = "EST5EDT4,M4.1.0,M10.5.0"  typical 
+        DST starts on 1st sun of april      at 02:00  std time
+            ends on last sun of october     at 02:00  dst time
+    see the UCX management command reference, SET CONFIG TIMEZONE
+    for formatting info.
+
+    No, it's not as general as it should be, but then again, NOTHING
+    will handle UK times in a sensible way. 
+*/
+
+
+/* 
+    parse the DST start/end info:
+    (Jddd|ddd|Mmon.nth.dow)[/hh:mm:ss]
+*/
+
+static char *
+tz_parse_startend(char *s, struct tm *w, int *past)
+{
+    int dinm[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+    int ly, dozjd, d, m, n, hour, min, sec, j, k;
+    time_t g;
+
+    if (!s)    return 0;
+    if (!w) return 0;
+    if (!past) return 0;
+
+    ly = 0;
+    if (w->tm_year % 4        == 0) ly = 1;
+    if (w->tm_year % 100      == 0) ly = 0;
+    if (w->tm_year+1900 % 400 == 0) ly = 1;
+    if (ly) dinm[1]++;
+
+    dozjd = isdigit(*s);
+    if (*s == 'J' || *s == 'j' || dozjd) {
+        if (!dozjd && !isdigit(*++s)) return 0;
+        d = *s++ - '0';
+        if (isdigit(*s)) {
+            d = d*10 + *s++ - '0';
+            if (isdigit(*s)) {
+                d = d*10 + *s++ - '0';
+            }
+        }
+        if (d == 0) return 0;
+        if (d > 366) return 0;
+        d--;
+        if (!dozjd && d > 58 && ly) d++;  /* after 28 feb */
+        g = d * 86400;
+        dozjd = 1;
+    } else if (*s == 'M' || *s == 'm') {
+        if (!isdigit(*++s)) return 0;
+        m = *s++ - '0';
+        if (isdigit(*s)) m = 10*m + *s++ - '0';
+        if (*s != '.') return 0;
+        if (!isdigit(*++s)) return 0;
+        n = *s++ - '0';
+        if (n < 1 || n > 5) return 0;
+        if (*s != '.') return 0;
+        if (!isdigit(*++s)) return 0;
+        d = *s++ - '0';
+        if (d > 6) return 0;
+    }
+
+    if (*s == '/') {
+        if (!isdigit(*++s)) return 0;
+        hour = *s++ - '0';
+        if (isdigit(*s)) hour = 10*hour + *s++ - '0';
+        if (*s == ':') {
+            if (!isdigit(*++s)) return 0;
+            min = *s++ - '0';
+            if (isdigit(*s)) min = 10*min + *s++ - '0';
+            if (*s == ':') {
+                if (!isdigit(*++s)) return 0;
+                sec = *s++ - '0';
+                if (isdigit(*s)) sec = 10*sec + *s++ - '0';
+            }
+        }
+    } else {
+        hour = 2;
+        min = 0;
+        sec = 0;
+    }
+
+    if (dozjd) {
+        if (w->tm_yday < d) goto before;
+        if (w->tm_yday > d) goto after;
+    } else {
+        if (w->tm_mon+1 < m) goto before;
+        if (w->tm_mon+1 > m) goto after;
+
+        j = (42 + w->tm_wday - w->tm_mday)%7;   /*dow of mday 0 */
+        k = d - j; /* mday of first d */
+        if (k <= 0) k += 7;
+        k += 7 * ((n>4?4:n)-1);  /* mday of n'th d */
+        if (n == 5 && k+7 <= dinm[w->tm_mon]) k += 7;
+        if (w->tm_mday < k) goto before;
+        if (w->tm_mday > k) goto after;
+    }
+
+    if (w->tm_hour < hour) goto before;
+    if (w->tm_hour > hour) goto after;
+    if (w->tm_min  < min)  goto before;
+    if (w->tm_min  > min)  goto after;
+    if (w->tm_sec  < sec)  goto before;
+    goto after;
+
+before:
+    *past = 0;
+    return s;
+after:
+    *past = 1;
+    return s;
+}
+
+
+
+
+/*  parse the offset:   (+|-)hh[:mm[:ss]]  */
+
+static char *
+tz_parse_offset(char *s, int *offset)
+{
+    int hour = 0, min = 0, sec = 0;
+    int neg = 0;
+    if (!s) return 0;
+    if (!offset) return 0;
+
+    if (*s == '-') {neg++; s++;}
+    if (*s == '+') s++;
+    if (!isdigit(*s)) return 0;
+    hour = *s++ - '0';
+    if (isdigit(*s)) hour = hour*10+(*s++ - '0');
+    if (hour > 24) return 0;
+    if (*s == ':') {
+        if (!isdigit(*++s)) return 0;
+        min = *s++ - '0';
+        if (isdigit(*s)) min = min*10 + (*s++ - '0');
+        if (min > 59) return 0;
+        if (*s == ':') {
+            if (!isdigit(*++s)) return 0;
+            sec = *s++ - '0';
+            if (isdigit(*s)) sec = sec*10 + (*s++ - '0');
+            if (sec > 59) return 0;
+        }
+    }
+
+    *offset = (hour*60+min)*60 + sec;
+    if (neg) *offset = -*offset;
+    return s;
+}
+
+/*
+    input time is w, whatever type of time the CRTL localtime() uses.
+    sets dst, the zone, and the gmtoff (seconds)
+
+    caches the value of TZ and UCX$TZ env variables; note that 
+    my_setenv looks for these and sets a flag if they're changed
+    for efficiency. 
+
+    We have to watch out for the "australian" case (dst starts in
+    october, ends in april)...flagged by "reverse" and checked by
+    scanning through the months of the previous year.
+
+*/
+
+static int
+tz_parse(time_t *w, int *dst, char *zone, int *gmtoff)
+{
+    time_t when;
+    struct tm *w2;
+    char *s,*s2;
+    char *dstzone, *tz, *s_start, *s_end;
+    int std_off, dst_off, isdst;
+    int y, dststart, dstend;
+    static char envtz[1025];  /* longer than any logical, symbol, ... */
+    static char ucxtz[1025];
+    static char reversed = 0;
+
+    if (!w) return 0;
+
+    if (tz_updated) {
+        tz_updated = 0;
+        reversed = -1;  /* flag need to check  */
+        envtz[0] = ucxtz[0] = '\0';
+        tz = my_getenv("TZ",0);
+        if (tz) strcpy(envtz, tz);
+        tz = my_getenv("UCX$TZ",0);
+        if (tz) strcpy(ucxtz, tz);
+        if (!envtz[0] && !ucxtz[0]) return 0;  /* we give up */
+    }
+    tz = envtz;
+    if (!*tz) tz = ucxtz;
+
+    s = tz;
+    while (isalpha(*s)) s++;
+    s = tz_parse_offset(s, &std_off);
+    if (!s) return 0;
+    if (!*s) {                  /* no DST, hurray we're done! */
+        isdst = 0;
+        goto done;
+    }
+
+    dstzone = s;
+    while (isalpha(*s)) s++;
+    s2 = tz_parse_offset(s, &dst_off);
+    if (s2) {
+        s = s2;
+    } else {
+        dst_off = std_off - 3600;
+    }
+
+    if (!*s) {      /* default dst start/end?? */
+        if (tz != ucxtz) {          /* if TZ tells zone only, UCX$TZ tells rule */
+            s = strchr(ucxtz,',');
+        }
+        if (!s || !*s) s = ",M4.1.0,M10.5.0";   /* we know we do dst, default rule */
+    }
+    if (*s != ',') return 0;
+
+    when = *w;
+    when = _toutc(when);      /* convert to utc */
+    when = when - std_off;    /* convert to pseudolocal time*/
+
+    w2 = localtime(&when);
+    y = w2->tm_year;
+    s_start = s+1;
+    s = tz_parse_startend(s_start,w2,&dststart);
+    if (!s) return 0;
+    if (*s != ',') return 0;
+
+    when = *w;
+    when = _toutc(when);      /* convert to utc */
+    when = when - dst_off;    /* convert to pseudolocal time*/
+    w2 = localtime(&when);
+    if (w2->tm_year != y) {   /* spans a year, just check one time */
+        when += dst_off - std_off;
+        w2 = localtime(&when);
+    }
+    s_end = s+1;
+    s = tz_parse_startend(s_end,w2,&dstend);
+    if (!s) return 0;
+
+    if (reversed == -1) {  /* need to check if start later than end */
+        int j, ds, de;
+
+        when = *w;
+        if (when < 2*365*86400) {
+            when += 2*365*86400;
+        } else {
+            when -= 365*86400;
+        }
+        w2 =localtime(&when);
+        when = when + (15 - w2->tm_yday) * 86400;   /* jan 15 */
+
+        for (j = 0; j < 12; j++) {
+            w2 =localtime(&when);
+            (void) tz_parse_startend(s_start,w2,&ds);
+            (void) tz_parse_startend(s_end,w2,&de);
+            if (ds != de) break;
+            when += 30*86400;
+        }
+        reversed = 0;
+        if (de && !ds) reversed = 1;
+    }
+
+    isdst = dststart && !dstend;
+    if (reversed) isdst = dststart  || !dstend;
+
+done:
+    if (dst)    *dst = isdst;
+    if (gmtoff) *gmtoff = isdst ? dst_off : std_off;
+    if (isdst)  tz = dstzone;
+    if (zone) {
+        while(isalpha(*tz))  *zone++ = *tz++;
+        *zone = '\0';
+    }
+    return 1;
+}
+
+#endif /* !RTL_USES_UTC */
 
 /* my_time(), my_localtime(), my_gmtime()
  * By default traffic in UTC time values, using CRTL gmtime() or
@@ -5197,6 +5513,7 @@ time_t my_time(time_t *timep)
       gmtime_emulation_type++;
       if (!vmstrnenv("SYS$TIMEZONE_DIFFERENTIAL",off,0,fildev,0)) {
         gmtime_emulation_type++;
+        utc_offset_secs = 0;
         Perl_warn(aTHX_ "no UTC offset information; assuming local time is UTC");
       }
       else { utc_offset_secs = atol(off); }
@@ -5265,8 +5582,9 @@ struct tm *
 my_localtime(const time_t *timep)
 {
   dTHX;
-  time_t when;
+  time_t when, whenutc;
   struct tm *rsltmp;
+  int dst, offset;
 
   if (timep == NULL) {
     set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
@@ -5282,15 +5600,24 @@ my_localtime(const time_t *timep)
 # endif
   /* CRTL localtime() wants UTC as input, does tz correction itself */
   return localtime(&when);
-# else
+  
+# else /* !RTL_USES_UTC */
+  whenutc = when;
 # ifdef VMSISH_TIME
-  if (!VMSISH_TIME) when = _toloc(when);   /*  Input was UTC */
+  if (!VMSISH_TIME) when = _toloc(whenutc);  /*  input was UTC */
+  if (VMSISH_TIME) whenutc = _toutc(when);   /*  input was truelocal */
 # endif
+  dst = -1;
+#ifndef RTL_USES_UTC
+  if (tz_parse(&when, &dst, 0, &offset)) {   /* truelocal determines DST*/
+      when = whenutc - offset;                   /* pseudolocal time*/
+  }
 # endif
   /* CRTL localtime() wants local time as input, so does no tz correction */
   rsltmp = localtime(&when);
-  if (rsltmp && gmtime_emulation_type != 1) rsltmp->tm_isdst = -1;
+  if (rsltmp && gmtime_emulation_type != 1) rsltmp->tm_isdst = dst;
   return rsltmp;
+# endif
 
 } /*  end of my_localtime() */
 /*}}}*/
@@ -5442,7 +5769,7 @@ int my_utime(char *file, struct utimbuf *utimes)
   fnmdsc.dsc$w_length = mynam.nam$b_name + mynam.nam$b_type + mynam.nam$b_ver;
 
   memset((void *) &myfib, 0, sizeof myfib);
-#ifdef __DECC
+#if defined(__DECC) || defined(__DECCXX)
   for (i=0;i<3;i++) myfib.fib$w_fid[i] = mynam.nam$w_fid[i];
   for (i=0;i<3;i++) myfib.fib$w_did[i] = mynam.nam$w_did[i];
   /* This prevents the revision time of the file being reset to the current

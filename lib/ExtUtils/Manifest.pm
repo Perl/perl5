@@ -238,7 +238,7 @@ sub cp {
 
 sub ln {
     my ($srcFile, $dstFile) = @_;
-    return &cp if $Is_VMS;
+    return &cp if $Is_VMS or ($^O eq 'MSWin32' and Win32::IsWin95());
     link($srcFile, $dstFile);
     local($_) = $dstFile; # chmod a+r,go-w+X (except "X" only applies to u=x)
     my $mode= 0444 | (stat)[2] & 0700;

@@ -2328,6 +2328,10 @@ PP(pp_accept)
     fcntl(fd, F_SETFD, fd > PL_maxsysfd);	/* ensure close-on-exec */
 #endif
 
+#ifdef EPOC
+    len = sizeof saddr;  /* EPOC somehow truncates info */
+#endif
+
     PUSHp((char *)&saddr, len);
     RETURN;
 
@@ -4961,8 +4965,10 @@ PP(pp_gpwent)
 		sv_setpv(sv, spwent->sp_pwdp);
 	}
 #  endif
+#   ifdef PWPASSWD
 	if (!SvPOK(sv)) /* Use the standard password, then. */
 	    sv_setpv(sv, pwent->pw_passwd);
+#   endif
 
 #  ifndef INCOMPLETE_TAINTS
 	/* passwd is tainted because user himself can diddle with it.

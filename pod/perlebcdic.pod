@@ -63,12 +63,12 @@ The layout on the cards was such that high bits were set for the
 upper and lower case alphabet characters [a-z] and [A-Z], but there
 were gaps within each latin alphabet range.
 
-=head2 13 variant characters
-
 Some IBM EBCDIC character sets may be known by character code set 
 identification numbers (CCSID numbers) or code page numbers.  Leading
 zero digits in CCSID numbers within this document are insignificant.
 E.g. CCSID 0037 may be referred to as 37 in places.
+
+=head2 13 variant characters
 
 Among IBM EBCDIC character code sets there are 13 characters that
 are often mapped to different integer values.  Those characters
@@ -106,14 +106,15 @@ extensions to ASCII have been labelled with character names roughly
 corresponding to I<The Unicode Standard, Version 2.0> albeit with 
 substitutions such as s/LATIN// and s/VULGAR// in all cases, 
 s/CAPITAL LETTER// in some cases, and s/SMALL LETTER ([A-Z])/\l$1/ 
-in some other cases.  The "names" of the C1 control set 
-(128..159 in ISO 8859-1) are somewhat arbitrary.  The differences 
-between the 0037 and 1047 sets are flagged with ***.  The differences 
-between the 1047 and POSIX-BC sets are flagged with ###.  
-All ord() numbers listed are decimal.  If you would rather see this 
-table listing octal values then run the table (that is, the pod 
-version of this document since this recipe may not work with 
-a pod2_other_format translation) through:
+in some other cases (the C<charnames> pragma names unfortunately do 
+not list explicit names for the C0 or C1 control characters).  The 
+"names" of the C1 control set (128..159 in ISO 8859-1) listed here are 
+somewhat arbitrary.  The differences between the 0037 and 1047 sets are 
+flagged with ***.  The differences between the 1047 and POSIX-BC sets 
+are flagged with ###.  All ord() numbers listed are decimal.  If you 
+would rather see this table listing octal values then run the table 
+(that is, the pod version of this document since this recipe may not 
+work with a pod2_other_format translation) through:
 
 =over 4
 
@@ -490,6 +491,8 @@ code page you can use the Config module like so:
 
 =head1 CONVERSIONS
 
+=head2 tr///
+
 In order to convert a string of characters from one character set to 
 another a simple list of numbers, such as in the right columns in the
 above table, along with perl's tr/// operator is all that is needed.  
@@ -519,13 +522,15 @@ column from the output of recipe 0 and use it in tr/// like so:
     '\060\061\062\063\064\065\066\067\070\071\263\333\334\331\332\237' ;
 
     my $ebcdic_string = $ascii_string;
-    $ebcdic_string = tr/\000-\377/$cp_037/;
+    eval '$ebcdic_string =~ tr/\000-\377/' . $cp_037 . '/';
 
 To convert from EBCDIC to ASCII just reverse the order of the tr/// 
 arguments like so:
 
     my $ascii_string = $ebcdic_string;
-    $ascii_string = tr/$code_page_chrs/\000-\037/;
+    eval '$ascii_string = tr/' . $code_page_chrs . '/\000-\037/';
+
+=head2 iconv
 
 XPG4 operability often implies the presence of an I<iconv> utility
 available from the shell or from the C library.  Consult your system's
@@ -543,6 +548,10 @@ or the inverse map:
     $ebcdic_data = `echo '$ascii_data'| iconv -f ISO8859-1 -t IBM-1047`
 
 For other perl based conversion options see the Convert::* modules on CPAN.
+
+=head2 C RTL
+
+The OS/390 C run time library provides _atoe() and _etoa() functions.
 
 =head1 OPERATOR DIFFERENCES
 
@@ -895,11 +904,18 @@ connection.
 This strategy can employ a network connection.  As such
 it would be computationally expensive.
 
-=head1 URL ENCODING and DECODING
+=head1 TRANFORMATION FORMATS
+
+There are a variety of ways of transforming data with an intra character set 
+mapping that serve a variety of purposes.  Sorting was discussed in the 
+previous section and a few of the other more popular mapping techniques are 
+discussed next.
+
+=head2 URL decoding and encoding
 
 Note that some URLs have hexadecimal ASCII code points in them in an
-attempt to overcome character limitation issues.  For example the
-tilde character is not on every keyboard hence a URL of the form:
+attempt to overcome character or protocol limitation issues.  For example 
+the tilde character is not on every keyboard hence a URL of the form:
 
     http://www.pvhp.com/~pvhp/
 
@@ -933,6 +949,153 @@ of decoding such a URL under CCSID 1047:
         140, 73,205,206,203,207,204,225,112,221,222,219,220,141,142,223
     );
     $url =~ s/%([0-9a-fA-F]{2})/pack("c",$a2e_1047[hex($1)])/ge;
+
+Conversely, here is a partial solution for the task of encoding such 
+a URL under the 1047 code page:
+
+    $url = 'http://www.pvhp.com/~pvhp/';
+    # this array assumes code page 1047
+    my @e2a_1047 = (
+          0,  1,  2,  3,156,  9,134,127,151,141,142, 11, 12, 13, 14, 15,
+         16, 17, 18, 19,157, 10,  8,135, 24, 25,146,143, 28, 29, 30, 31,
+        128,129,130,131,132,133, 23, 27,136,137,138,139,140,  5,  6,  7,
+        144,145, 22,147,148,149,150,  4,152,153,154,155, 20, 21,158, 26,
+         32,160,226,228,224,225,227,229,231,241,162, 46, 60, 40, 43,124,
+         38,233,234,235,232,237,238,239,236,223, 33, 36, 42, 41, 59, 94,
+         45, 47,194,196,192,193,195,197,199,209,166, 44, 37, 95, 62, 63,
+        248,201,202,203,200,205,206,207,204, 96, 58, 35, 64, 39, 61, 34,
+        216, 97, 98, 99,100,101,102,103,104,105,171,187,240,253,254,177,
+        176,106,107,108,109,110,111,112,113,114,170,186,230,184,198,164,
+        181,126,115,116,117,118,119,120,121,122,161,191,208, 91,222,174,
+        172,163,165,183,169,167,182,188,189,190,221,168,175, 93,180,215,
+        123, 65, 66, 67, 68, 69, 70, 71, 72, 73,173,244,246,242,243,245,
+        125, 74, 75, 76, 77, 78, 79, 80, 81, 82,185,251,252,249,250,255,
+         92,247, 83, 84, 85, 86, 87, 88, 89, 90,178,212,214,210,211,213,
+         48, 49, 50, 51, 52, 53, 54, 55, 56, 57,179,219,220,217,218,159
+    );
+    # The following regular expression does not address the 
+    # mappings for: ('.' => '%2E', '/' => '%2F', ':' => '%3A') 
+    $url =~ s/([\t "#%&\(\),;<=>\?\@\[\\\]^`{|}~])/sprintf("%%%02X",$e2a_1047[ord($1)])/ge;
+
+where a more complete solution would split the URL into components 
+and apply a full s/// substitution only to the appropriate parts.
+
+In the remaining examples a @e2a or @a2e array may be employed
+but the assignment will not be shown explicitly.  For code page 1047
+you could use the @a2e_1047 or @e2a_1047 arrays just shown.
+
+=head2 uu encoding and decoding
+
+The C<u> template to pack() or unpack() will render EBCDIC data in EBCDIC 
+characters equivalent to their ASCII counterparts.  For example, the 
+following will print "Yes indeed\n" on either an ASCII or EBCDIC computer:
+
+    $all_byte_chrs = '';
+    for (0..255) { $all_byte_chrs .= chr($_); }
+    $uuencode_byte_chrs = pack('u', $all_byte_chrs);
+    ($uu = <<'    ENDOFHEREDOC') =~ s/^\s*//gm;
+    M``$"`P0%!@<("0H+#`T.#Q`1$A,4%187&!D:&QP='A\@(2(C)"4F)R@I*BLL
+    M+2XO,#$R,S0U-C<X.3H[/#T^/T!!0D-$149'2$E*2TQ-3D]045)35%565UA9
+    M6EM<75Y?8&%B8V1E9F=H:6IK;&UN;W!Q<G-T=79W>'EZ>WQ]?G^`@8*#A(6&
+    MAXB)BHN,C8Z/D)&2DY25EI>8F9J;G)V>GZ"AHJ.DI::GJ*FJJZRMKJ^PL;*S
+    MM+6VM[BYNKN\O;Z_P,'"P\3%QL?(R<K+S,W.S]#1TM/4U=;7V-G:V]S=WM_@
+    ?X>+CY.7FY^CIZNOL[>[O\/'R\_3U]O?X^?K[_/W^_P``
+    ENDOFHEREDOC
+    if ($uuencode_byte_chrs eq $uu) {
+        print "Yes ";
+    }
+    $uudecode_byte_chrs = unpack('u', $uuencode_byte_chrs);
+    if ($uudecode_byte_chrs eq $all_byte_chrs) {
+        print "indeed\n";
+    }
+
+Here is a very spartan uudecoder that will work on EBCDIC provided
+that the @e2a array is filled in appropriately:
+
+    #!/usr/local/bin/perl
+    @e2a = ( # this must be filled in
+           );
+    $_ = <> until ($mode,$file) = /^begin\s*(\d*)\s*(\S*)/;
+    open(OUT, "> $file") if $file ne "";
+    while(<>) {
+        last if /^end/;
+        next if /[a-z]/;
+        next unless int(((($e2a[ord()] - 32 ) & 077) + 2) / 3) ==
+            int(length() / 4);
+        print OUT unpack("u", $_);
+    }
+    close(OUT);
+    chmod oct($mode), $file;
+
+
+=head2 Quoted-Printable encoding and decoding
+
+On ASCII encoded machines it is possible to strip characters outside of
+the printable set using:
+
+    # This QP encoder works on ASCII only
+    $qp_string =~ s/([=\x00-\x1F\x80-\xFF])/sprintf("=%02X",ord($1))/ge;
+
+Whereas a QP encoder that works on both ASCII and EBCDIC machines 
+would look somewhat like the following (where the EBCDIC branch @e2a 
+array is omitted for brevity):
+
+    if (ord('A') == 65) {    # ASCII
+        $delete = "\x7F";    # ASCII
+        @e2a = (0 .. 255)    # ASCII to ASCII identity map
+    }
+    else {                   # EBCDIC
+        $delete = "\x07";    # EBCDIC
+        @e2a =               # EBCDIC to ASCII map (as shown above)
+    }
+    $qp_string =~
+      s/([^ !"\#\$%&'()*+,\-.\/0-9:;<>?\@A-Z[\\\]^_`a-z{|}~$delete])/sprintf("=%02X",$e2a[ord($1)])/ge;
+
+(although in production code the substitutions might be done
+in the EBCDIC branch with the @e2a array and separately in the 
+ASCII branch without the expense of the identity map).
+
+Such QP strings can be decoded with:
+
+    # This QP decoder is limited to ASCII only
+    $string =~ s/=([0-9A-Fa-f][0-9A-Fa-f])/chr hex $1/ge;
+    $string =~ s/=[\n\r]+$//;
+
+Whereas a QP decoder that works on both ASCII and EBCDIC machines 
+would look somewhat like the following (where the @a2e array is
+omitted for brevity):
+
+    $string =~ s/=([0-9A-Fa-f][0-9A-Fa-f])/chr $a2e[hex $1]/ge;
+    $string =~ s/=[\n\r]+$//;
+
+=head2 Caesarian cyphers
+
+The practice of shifting an alphabet one or more characters for encipherment
+dates back thousands of years and was explicitly detailed by Gaius Julius
+Caesar in his B<Gallic Wars> text.  A single alphabet shift is sometimes 
+referred to as a rotation and the shift amount is given as a number $n after
+the string 'rot' or "rot$n".  Rot0 and rot26 would designate identity maps 
+on the 26 letter English version of the Latin alphabet.  Rot13 has the 
+interesting property that alternate subsequent invocations are identity maps 
+(thus rot13 is its own non-trivial inverse in the group of 26 alphabet 
+rotations).  Hence the following is a rot13 encoder and decoder that will 
+work on ASCII and EBCDIC machines:
+
+    #!/usr/local/bin/perl
+
+    while(<>){
+        tr/n-za-mN-ZA-M/a-zA-Z/;
+        print;
+    }
+
+In one-liner form:
+
+    perl -ne 'tr/n-za-mN-ZA-M/a-zA-Z/;print'
+
+
+=head1 Hashing order and checksums
+
+XXX
 
 =head1 I18N AND L10N
 
@@ -969,8 +1132,8 @@ Perl runs under Unix Systems Services or USS.
 
 =item chcp
 
-L<chcp> is supported as a shell utility for displaying and changing 
-one's code page.
+B<chcp> is supported as a shell utility for displaying and changing 
+one's code page.  See also L<chcp>.
 
 =item dataset access
 
@@ -984,9 +1147,10 @@ or:
 
 See also the OS390::Stdio module on CPAN.
 
-=item iconv
+=item OS/390 iconv
 
-L<iconv> is supported as both a shell utility and a C RTL routine.
+B<iconv> is supported as both a shell utility and a C RTL routine.
+See also the iconv(1) and iconv(3) manual pages.
 
 =item locales
 
@@ -1048,14 +1212,19 @@ Reference and Registry>, IBM SC09-2190-00, December 1996.
 & Technology, B<#26 Vol. 10 Issue 4>, August/September 1999;
 ISSN 1523-0309; Multilingual Computing Inc. Sandpoint ID, USA.
 
+B<Codes, Ciphers, and Other Cryptic and Clandestine Communication>
+Fred B. Wrixon, ISBN 1-57912-040-7, Black Dog & Leventhal Publishers,
+1998.
+
 =head1 AUTHOR
 
 Peter Prymmer pvhp@best.com wrote this in 1999 and 2000 
 with CCSID 0819 and 0037 help from Chris Leach and 
 AndrE<eacute> Pirard A.Pirard@ulg.ac.be as well as POSIX-BC 
 help from Thomas Dorner Thomas.Dorner@start.de.
-Thanks also to Philip Newton and Vickie Cooper.  Trademarks, registered 
-trademarks, service marks and registered service marks used in this 
-document are the property of their respective owners.
+Thanks also to Vickie Cooper, Philip Newton, William Raffloer, and 
+Joe Smith.  Trademarks, registered trademarks, service marks and 
+registered service marks used in this document are the property of 
+their respective owners.
 
 

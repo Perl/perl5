@@ -3,9 +3,9 @@
 use File::Find;
 use Cwd;
 
-$VERSION="5.6";
+$VERSION="5.7";
 $PATCH="0";
-$EPOC_VERSION=20;
+$EPOC_VERSION=24;
 $CROSSCOMPILEPATH=cwd;
 $CROSSREPLACEPATH="H:\\perl";
 
@@ -32,7 +32,7 @@ open OUT,">perl.pkg";
 
 print OUT "#{\"perl$VERSION\"},(0x100051d8),$PATCH,$EPOC_VERSION,0\n";
 
-print OUT "\"$CROSSREPLACEPATH\\perlmain.exe\"-\"!:\\perl.exe\"\n";
+print OUT "\"$CROSSREPLACEPATH\\perlmain.exe\"-\"!:\\system\\programs\\perl.exe\"\n";
 
 find(\&filefound, cwd.'/lib');
 print OUT "@\"G:\\lib\\stdlib.sis\",(0x0100002c3)\n"

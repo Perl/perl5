@@ -346,6 +346,11 @@ sub _qnx_abs_path {
     return $realpath;
 }
 
+sub _epoc_cwd {
+    $ENV{'PWD'} = EPOC::getcwd();
+    return $ENV{'PWD'};
+}
+
 {
     no warnings;	# assignments trigger 'subroutine redefined' warning
 
@@ -392,6 +397,12 @@ sub _qnx_abs_path {
         *getcwd	= \&cwd;
         *fastgetcwd	= \&cwd;
         *fastcwd	= \&cwd;
+        *abs_path	= \&fast_abs_path;
+    }
+    elsif ($^O eq 'epoc') {
+        *getcwd	= \&_epoc_cwd;
+        *fastgetcwd	= \&_epoc_cwd;
+        *fastcwd	= \&_epoc_cwd;
         *abs_path	= \&fast_abs_path;
     }
 }

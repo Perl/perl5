@@ -383,6 +383,11 @@ be used instead.  C<bool> is used in the flow control operators
 return any arbitrary Perl value.  If the corresponding operation for this value
 is overloaded too, that operation will be called again with this value.
 
+As a special case if the overload returns the object itself then it will
+be used directly. An overloaded conversion returning the object is
+probably a bug, because you're likely to get something that looks like
+C<YourPackage=HASH(0x8172b34)>.
+
 =item * I<Iteration>
 
     "<>"

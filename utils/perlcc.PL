@@ -231,17 +231,18 @@ EOF
     vprint 1, "Compiling...";
     vprint 3, "Calling $command";
 
-	my ($output_r, $error_r) = spawnit($command);
-	my @output = @$output_r;
-	my @error = @$error_r;
+    my ($output_r, $error_r) = spawnit($command);
 
-    if (@error && $? != 0) {
-        die "$0: $Input did not compile, which can't happen:\n@error\n";
+    if (@$error_r && $? != 0) {
+	die "$0: $Input did not compile, which can't happen:\n@$error_r\n";
+    } else {
+	my @error = grep { !/^$Input syntax OK$/o } @$error_r;
+	warn "$0: Unexpected compiler output:\n@error" if @error;
     }
-
+	
     # Write it and leave.
-    print OUT @output               or die "can't write $Output: $!";
-    close OUT                       or die "can't close $Output: $!";
+    print OUT @$output_r               or die "can't write $Output: $!";
+    close OUT                          or die "can't close $Output: $!";
 
     # wait, how could it be anything but what you see next?
     chmod 0777 & ~umask, $Output    or die "can't chmod $Output: $!";

@@ -10,13 +10,19 @@ BEGIN {
     }
 }
 
-print "1..66\n";
+print "1..75\n";
 
 my $test = 1;
 
 sub ok {
     my ($got,$expect) = @_;
     print "# expected [$expect], got [$got]\nnot " if $got ne $expect;
+    print "ok $test\n";
+}
+
+sub nok {
+    my ($got,$expect) = @_;
+    print "# expected not [$expect], got [$got]\nnot " if $got eq $expect;
     print "ok $test\n";
 }
 
@@ -27,6 +33,12 @@ sub ok_bytes {
     print "ok $test\n";
 }
 
+sub nok_bytes {
+    use bytes;
+    my ($got,$expect) = @_;
+    print "# expected not [$expect], got [$got]\nnot " if $got eq $expect;
+    print "ok $test\n";
+}
 
 {
     use utf8;
@@ -294,4 +306,71 @@ sub ok_bytes {
     use utf8;
     ok_bytes chr(0xe2), pack("C*", 0xc3, 0xa2);
     $test++;                # 66
+}
+
+{
+    use utf8;
+    my @a = map ord, split(//, join("", map chr, (1234, 123, 2345)));
+    ok "@a", "1234 123 2345";
+    $test++;                # 67
+}
+
+{
+    use utf8;
+    my $x = chr(123);
+    my @a = map ord, split(/$x/, join("", map chr, (1234, 123, 2345)));
+    ok "@a", "1234 2345";
+    $test++;                # 68
+}
+
+{
+  my($a,$b);
+  { use bytes; $a = "\xc3\xa4"; }  
+  { use utf8;  $b = "\xe4"; }
+  { use bytes; ok_bytes $a, $b; $test++; } # 69
+  { use utf8;  nok      $a, $b; $test++; } # 70
+}
+
+{
+    my @x = ("stra\337e 138","stra\337e 138");
+    for (@x) {
+	s/(\d+)\s*([\w\-]+)/$1 . uc $2/e;
+	my($latin) = /^(.+)(?:\s+\d)/;
+	print $latin eq "stra\337e" ? "ok $test\n" :
+	    "#latin[$latin]\nnot ok $test\n";
+	$test++;
+	$latin =~ s/stra\337e/straße/; # \303\237 after the 2nd a
+	use utf8;
+	$latin =~ s!(s)tr(?:aß|s+e)!$1tr.!; # \303\237 after the a
+    }
+}
+
+{
+    $_ = $dx = "\x{10f2}";
+    s/($dx)/$dx$1/;
+    {
+	use bytes;
+	print "not " unless $_ eq "$dx$dx";
+	print "ok $test\n";
+	$test++;
+    }
+
+    $_ = $dx = "\x{10f2}";
+    s/($dx)/$1$dx/;
+    {
+	use bytes;
+	print "not " unless $_ eq "$dx$dx";
+	print "ok $test\n";
+	$test++;
+    }
+
+    $dx = "\x{10f2}";
+    $_  = "\x{10f2}\x{10f2}";
+    s/($dx)($dx)/$1$2/;
+    {
+	use bytes;
+	print "not " unless $_ eq "$dx$dx";
+	print "ok $test\n";
+	$test++;
+    }
 }

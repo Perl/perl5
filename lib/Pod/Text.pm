@@ -1,5 +1,5 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 2.5 2000/09/03 09:23:29 eagle Exp $
+# $Id: Text.pm,v 2.6 2000/10/10 02:13:17 eagle Exp $
 #
 # Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
@@ -37,7 +37,7 @@ use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 2.05;
+$VERSION = 2.06;
 
 
 ############################################################################
@@ -55,7 +55,7 @@ $VERSION = 2.05;
     'quot'      =>    '"',      # double quote
     'sol'       =>    '/',      # solidus (forward slash)
     'verbar'    =>    '|',      # vertical bar
-                                 
+
     "Aacute"    =>    "\xC1",   # capital A, acute accent
     "aacute"    =>    "\xE1",   # small a, acute accent
     "Acirc"     =>    "\xC2",   # capital A, circumflex accent
@@ -82,8 +82,8 @@ $VERSION = 2.05;
     "eth"       =>    "\xF0",   # small eth, Icelandic
     "Euml"      =>    "\xCB",   # capital E, dieresis or umlaut mark
     "euml"      =>    "\xEB",   # small e, dieresis or umlaut mark
-    "Iacute"    =>    "\xCD",   # capital I, acute accent
-    "iacute"    =>    "\xED",   # small i, acute accent
+    "Iacute"    =>    "\xCC",   # capital I, acute accent
+    "iacute"    =>    "\xEC",   # small i, acute accent
     "Icirc"     =>    "\xCE",   # capital I, circumflex accent
     "icirc"     =>    "\xEE",   # small i, circumflex accent
     "Igrave"    =>    "\xCD",   # capital I, grave accent
@@ -118,7 +118,7 @@ $VERSION = 2.05;
     "Yacute"    =>    "\xDD",   # capital Y, acute accent
     "yacute"    =>    "\xFD",   # small y, acute accent
     "yuml"      =>    "\xFF",   # small y, dieresis or umlaut mark
-                                  
+
     "laquo"     =>    "\xAB",   # left pointing double angle quotation mark
     "lchevron"  =>    "\xAB",   #  synonym (backwards compatibility)
     "raquo"     =>    "\xBB",   # right pointing double angle quotation mark
@@ -212,7 +212,8 @@ sub command {
         $self->$command (@_);
     } else {
         my ($text, $line, $paragraph) = @_;
-        my ($file, $line) = $paragraph->file_line;
+        my $file;
+        ($file, $line) = $paragraph->file_line;
         $text =~ s/\n+\z//;
         $text = " $text" if ($text =~ /^\S/);
         warn qq($file:$line: Unknown command paragraph "=$command$text"\n);
@@ -257,7 +258,7 @@ sub textblock {
           >
           (
               ,?\s+(and\s+)?    # Allow lots of them, conjuncted.
-              L<  
+              L<
                   /
                   (
                       [:\w]+
@@ -422,7 +423,7 @@ sub cmd_end {
     my $self = shift;
     $$self{EXCLUDE} = 0;
     $$self{VERBATIM} = 0;
-}    
+}
 
 # One paragraph for a particular translator.  Ignore it unless it's intended
 # for text, in which case we treat it as a verbatim text block.

@@ -82,9 +82,9 @@ print "ok 28\n" if sprintf("%vd", v4095.801.4095 & v801.4095) eq '801.801';
 print "ok 29\n" if sprintf("%vd", v4095.801.4095 | v801.4095) eq '4095.4095.4095';
 print "ok 30\n" if sprintf("%vd", v801.4095 ^ v4095.801.4095) eq '3294.3294.4095';
 #
-print "ok 31\n" if sprintf("%vd", v120.v300 & v200.v400) eq '72.256';
-print "ok 32\n" if sprintf("%vd", v120.v300 | v200.v400) eq '248.444';
-print "ok 33\n" if sprintf("%vd", v120.v300 ^ v200.v400) eq '176.188';
+print "ok 31\n" if sprintf("%vd", v120.v300 & v200.400) eq '72.256';
+print "ok 32\n" if sprintf("%vd", v120.v300 | v200.400) eq '248.444';
+print "ok 33\n" if sprintf("%vd", v120.v300 ^ v200.400) eq '176.188';
 #
 my $a = v120.300;
 my $b = v200.400;

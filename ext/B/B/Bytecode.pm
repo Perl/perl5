@@ -850,7 +850,7 @@ sub compile {
 		$compress_nullops = 1;
 		$omit_seq = 1;
 	    }
-	} elsif ($opt eq "P") {
+	} elsif ($opt eq "u") {
 	    $arg ||= shift @options;
 	    push @packages, $arg;
 	} else {
@@ -975,7 +975,7 @@ Prints each CV taken from the final symbol tree walk.
 Output (bytecode) assembler source rather than piping it
 through the assembler and outputting bytecode.
 
-=item B<-Ppackage>
+=item B<-upackage>
   
 Stores package in the output.
   
@@ -983,16 +983,16 @@ Stores package in the output.
 
 =head1 EXAMPLES
 
-    perl -MO=Bytecode,-O6,-ofoo.plc,-Pmain foo.pl
+    perl -MO=Bytecode,-O6,-ofoo.plc,-umain foo.pl
 
-    perl -MO=Bytecode,-S,-Pmain foo.pl > foo.S
+    perl -MO=Bytecode,-S,-umain foo.pl > foo.S
     assemble foo.S > foo.plc
 
 Note that C<assemble> lives in the C<B> subdirectory of your perl
 library directory. The utility called perlcc may also be used to 
 help make use of this compiler.
 
-    perl -MO=Bytecode,-PFoo,-oFoo.pmc Foo.pm
+    perl -MO=Bytecode,-uFoo,-oFoo.pmc Foo.pm
 
 =head1 BUGS
 

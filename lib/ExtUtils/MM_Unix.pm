@@ -1140,9 +1140,9 @@ in these dirs:
 @$dirs
 ";
     }
-    foreach $dir (@$dirs){
-	next unless defined $dir; # $self->{PERL_SRC} may be undefined
-	foreach $name (@$names){
+    foreach $name (@$names){
+	foreach $dir (@$dirs){
+	    next unless defined $dir; # $self->{PERL_SRC} may be undefined
 	    my ($abs, $val);
 	    if ($self->file_name_is_absolute($name)) { # /foo/bar
 		$abs = $name;

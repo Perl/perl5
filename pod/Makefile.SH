@@ -22,7 +22,7 @@ if test -d pod; then
 fi
 POD=`echo *.pod`
 MAN=`echo $POD|sed 's/\.pod/\.man/g'`
-HTML=`echo $POD|sed 's/perltoc.pod//'|sed 's/\.pod/\.man/g'`
+HTML=`echo $POD|sed 's/perltoc.pod//'|sed 's/\.pod/\.html/g'`
 TEX=`echo $POD|sed 's/\.pod/\.tex/g'`
 
 echo "Extracting pod/Makefile (with variable substitutions)"

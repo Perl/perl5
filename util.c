@@ -1929,7 +1929,8 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     }
 }
 
-#ifndef VMS  /* VMS' my_setenv() is in VMS.c */
+#ifdef USE_ENVIRON_ARRAY
+       /* VMS' and EPOC's my_setenv() is in vms.c and epoc.c */
 #if !defined(WIN32) && !defined(__CYGWIN__)
 void
 Perl_my_setenv(pTHX_ char *nam, char *val)
@@ -2096,7 +2097,7 @@ Perl_setenv_getix(pTHX_ char *nam)
     return i;
 }
 
-#endif /* !VMS */
+#endif /* !VMS && !EPOC*/
 
 #ifdef UNLINK_ALL_VERSIONS
 I32
@@ -3578,6 +3579,8 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_dirty = 0;
     PL_localizing = 0;
     Zero(&PL_hv_fetch_ent_mh, 1, HE);
+    PL_efloatbuf = (char*)NULL;
+    PL_efloatsize = 0;
 #else
     Zero(thr, 1, struct perl_thread);
 #endif
@@ -3596,7 +3599,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 
     JMPENV_BOOTSTRAP;
 
-    PL_in_eval = EVAL_NULL;	/* ~(EVAL_INEVAL|EVAL_WARNONLY|EVAL_KEEPERR) */
+    PL_in_eval = EVAL_NULL;	/* ~(EVAL_INEVAL|EVAL_WARNONLY|EVAL_KEEPERR|EVAL_INREQUIRE) */
     PL_restartop = 0;
 
     PL_statname = NEWSV(66,0);

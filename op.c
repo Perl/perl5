@@ -2654,7 +2654,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    qsort(cp, i, sizeof(U8*), utf8compare);
 	    for (j = 0; j < i; j++) {
 		U8 *s = cp[j];
-		UV val = utf8_to_uv(s, &ulen);
+		UV val = utf8_to_uv_chk(s, &ulen, 0);
 		s += ulen;
 		diff = val - nextmin;
 		if (diff > 0) {
@@ -2667,7 +2667,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		    }
 	        }
 		if (*s == 0xff)
-		    val = utf8_to_uv(s+1, &ulen);
+		    val = utf8_to_uv_chk(s+1, &ulen, 0);
 		if (val >= nextmin)
 		    nextmin = val + 1;
 	    }
@@ -2694,10 +2694,10 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	while (t < tend || tfirst <= tlast) {
 	    /* see if we need more "t" chars */
 	    if (tfirst > tlast) {
-		tfirst = (I32)utf8_to_uv(t, &ulen);
+		tfirst = (I32)utf8_to_uv_chk(t, &ulen, 0);
 		t += ulen;
 		if (t < tend && *t == 0xff) {	/* illegal utf8 val indicates range */
-		    tlast = (I32)utf8_to_uv(++t, &ulen);
+		    tlast = (I32)utf8_to_uv_chk(++t, &ulen, 0);
 		    t += ulen;
 		}
 		else
@@ -2707,10 +2707,10 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    /* now see if we need more "r" chars */
 	    if (rfirst > rlast) {
 		if (r < rend) {
-		    rfirst = (I32)utf8_to_uv(r, &ulen);
+		    rfirst = (I32)utf8_to_uv_chk(r, &ulen, 0);
 		    r += ulen;
 		    if (r < rend && *r == 0xff) {	/* illegal utf8 val indicates range */
-			rlast = (I32)utf8_to_uv(++r, &ulen);
+			rlast = (I32)utf8_to_uv_chk(++r, &ulen, 0);
 			r += ulen;
 		    }
 		    else
@@ -6451,6 +6451,22 @@ Perl_ck_trunc(pTHX_ OP *o)
 	}
     }
     return ck_fun(o);
+}
+
+OP *
+Perl_ck_substr(pTHX_ OP *o)
+{
+    o = ck_fun(o);
+    if ((o->op_flags & OPf_KIDS) && o->op_private == 4) {
+	OP *kid = cLISTOPo->op_first;
+
+	if (kid->op_type == OP_NULL)
+	    kid = kid->op_sibling;
+	if (kid)
+	    kid->op_flags |= OPf_MOD;
+
+    }
+    return o;
 }
 
 /* A peephole optimizer.  We visit the ops in the order they're to execute. */

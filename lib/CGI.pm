@@ -17,8 +17,8 @@ require 5.004;
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.42 2000/08/13 16:04:43 lstein Exp $';
-$CGI::VERSION='2.72';
+$CGI::revision = '$Id: CGI.pm,v 1.45 2000/09/13 02:55:41 lstein Exp $';
+$CGI::VERSION='2.74';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -1294,15 +1294,15 @@ sub start_html {
         $dtd = $XHTML ? XHTML_DTD : $DEFAULT_DTD;
     }
     if (ref($dtd) && ref($dtd) eq 'ARRAY') {
-        push(@result,qq(<!DOCTYPE HTML\n\tPUBLIC "$dtd->[0]"\n\t"$dtd->[1]">));
+        push(@result,qq(<!DOCTYPE html\n\tPUBLIC "$dtd->[0]"\n\t"$dtd->[1]">));
     } else {
-        push(@result,qq(<!DOCTYPE HTML\n\tPUBLIC "$dtd">));
+        push(@result,qq(<!DOCTYPE html\n\tPUBLIC "$dtd">));
     }
     push(@result,$XHTML ? qq(<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang"><head><title>$title</title>)
                         : qq(<html lang="$lang"><head><title>$title</title>));
 	if (defined $author) {
     push(@result,$XHTML ? "<link rev=\"made\" href=\"mailto:$author\" />"
-								: "<link rev=made href=\"mailto:$author\">");
+								: "<link rev=\"made\" href=\"mailto:$author\">");
 	}
 
     if ($base || $xbase || $target) {
@@ -1461,10 +1461,13 @@ sub startform {
     my($method,$action,$enctype,@other) = 
 	rearrange([METHOD,ACTION,ENCTYPE],@p);
 
-    $method = uc($method) || 'POST';
+    $method = lc($method) || 'post';
     $enctype = $enctype || &URL_ENCODED;
-    $action = $action ? qq(action="$action") : qq 'action="' . 
-              $self->url(-absolute=>1,-path=>1,-query=>1) . '"';
+    unless (defined $action) {
+       $action = $self->url(-absolute=>1,-path=>1);
+       $action .= "?$ENV{QUERY_STRING}" if $ENV{QUERY_STRING};
+    }
+    $action = qq(action="$action");
     my($other) = @other ? " @other" : '';
     $self->{'.parametersToAdd'}={};
     return qq/<form method="$method" $action enctype="$enctype"$other>\n/;
@@ -1776,9 +1779,9 @@ sub checkbox {
 
     if (!$override && ($self->{'.fieldnames'}->{$name} || 
 		       defined $self->param($name))) {
-	$checked = grep($_ eq $value,$self->param($name)) ? ' checked="yes"' : '';
+	$checked = grep($_ eq $value,$self->param($name)) ? ' checked' : '';
     } else {
-	$checked = $checked ? qq/ checked="yes"/ : '';
+	$checked = $checked ? qq/ checked/ : '';
     }
     my($the_label) = defined $label ? $label : $name;
     $name = $self->escapeHTML($name);
@@ -1843,7 +1846,7 @@ sub checkbox_group {
 
     my($other) = @other ? " @other" : '';
     foreach (@values) {
-	$checked = $checked{$_} ? qq/ checked="yes"/ : '';
+	$checked = $checked{$_} ? qq/ checked/ : '';
 	$label = '';
 	unless (defined($nolabels) && $nolabels) {
 	    $label = $_;
@@ -1988,7 +1991,7 @@ sub radio_group {
 
     my($other) = @other ? " @other" : '';
     foreach (@values) {
-	my($checkit) = $checked eq $_ ? qq/ checked="yes"/ : '';
+	my($checkit) = $checked eq $_ ? qq/ checked/ : '';
 	my($break);
 	if ($linebreak) {
     $break = $XHTML ? "<br />" : "<br>";
@@ -2049,7 +2052,7 @@ sub popup_menu {
 
     $result = qq/<select name="$name"$other>\n/;
     foreach (@values) {
-	my($selectit) = defined($selected) ? ($selected eq $_ ? qq/selected="yes"/ : '' ) : '';
+	my($selectit) = defined($selected) ? ($selected eq $_ ? qq/selected/ : '' ) : '';
 	my($label) = $_;
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	my($value) = $self->escapeHTML($_);
@@ -2096,14 +2099,14 @@ sub scrolling_list {
     $size = $size || scalar(@values);
 
     my(%selected) = $self->previous_or_default($name,$defaults,$override);
-    my($is_multiple) = $multiple ? qq/ multiple="yes"/ : '';
+    my($is_multiple) = $multiple ? qq/ multiple/ : '';
     my($has_size) = $size ? qq/ size="$size"/: '';
     my($other) = @other ? " @other" : '';
 
     $name=$self->escapeHTML($name);
     $result = qq/<select name="$name"$has_size$is_multiple$other>\n/;
     foreach (@values) {
-	my($selectit) = $selected{$_} ? qq/selected="yes"/ : '';
+	my($selectit) = $selected{$_} ? qq/selected/ : '';
 	my($label) = $_;
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	$label=$self->escapeHTML($label);
@@ -2153,8 +2156,8 @@ sub hidden {
     $name=$self->escapeHTML($name);
     foreach (@value) {
 	$_ = defined($_) ? $self->escapeHTML($_,1) : '';
-	push(@result,$XHTMl ? qq(<input type="hidden" name="$name" value="$_" />)
-                            : qq/<input type="hidden" name="$name" value="$_">/);
+	push @result,$XHTMl ? qq(<input type="hidden" name="$name" value="$_" />)
+                            : qq(<input type="hidden" name="$name" value="$_">);
     }
     return wantarray ? @result : join('',@result);
 }
@@ -2215,10 +2218,10 @@ END_OF_FUNC
 'url' => <<'END_OF_FUNC',
 sub url {
     my($self,@p) = self_or_default(@_);
-    my ($relative,$absolute,$full,$path_info,$query) = 
-	rearrange(['RELATIVE','ABSOLUTE','FULL',['PATH','PATH_INFO'],['QUERY','QUERY_STRING']],@p);
+    my ($relative,$absolute,$full,$path_info,$query,$base) = 
+	rearrange(['RELATIVE','ABSOLUTE','FULL',['PATH','PATH_INFO'],['QUERY','QUERY_STRING'],'BASE'],@p);
     my $url;
-    $full++ if !($relative || $absolute);
+    $full++ if $base || !($relative || $absolute);
 
     my $path = $self->path_info;
     my $script_name = $self->script_name;
@@ -2251,12 +2254,14 @@ sub url {
 		unless (lc($protocol) eq 'http' && $port == 80)
 		    || (lc($protocol) eq 'https' && $port == 443);
 	}
+        return $url if $base;
 	$url .= $script_name;
     } elsif ($relative) {
 	($url) = $script_name =~ m!([^/]+)$!;
     } elsif ($absolute) {
 	$url = $script_name;
     }
+
     $url .= $path if $path_info and defined $path;
     $url .= "?" . $self->query_string if $query and $self->query_string;
     $url = '' unless defined $url;
@@ -3173,8 +3178,7 @@ sub read {
     die "Malformed multipart POST\n" unless ($start >= 0) || ($self->{LENGTH} > 0);
 
     # If the boundary begins the data, then skip past it
-    # and return undef.  The +2 here is a fiendish plot to
-    # remove the CR/LF pair at the end of the boundary.
+    # and return undef.
     if ($start == 0) {
 
 	# clear us out completely if we've hit the last boundary.
@@ -3185,7 +3189,8 @@ sub read {
 	}
 
 	# just remove the boundary.
-	substr($self->{BUFFER},0,length($self->{BOUNDARY})+2)='';
+	substr($self->{BUFFER},0,length($self->{BOUNDARY}))='';
+        $self->{BUFFER} =~ s/^\012\015?//;
 	return undef;
     }
 
@@ -4519,6 +4524,7 @@ You can also retrieve the unprocessed query string with query_string():
     $absolute_url  = $query->url(-absolute=>1);
     $url_with_path = $query->url(-path_info=>1);
     $url_with_path_and_query = $query->url(-path_info=>1,-query=>1);
+    $netloc        = $query->url(-base => 1);
 
 B<url()> returns the script's URL in a variety of formats.  Called
 without any arguments, it returns the full form of the URL, including
@@ -4559,6 +4565,10 @@ is provided as a synonym.
 Append the query string to the URL.  This can be combined with
 B<-full>, B<-absolute> or B<-relative>.  B<-query_string> is provided
 as a synonym.
+
+=item B<-base>
+
+Generate just the protocol and net location, as in http://www.foo.com:8000
 
 =back
 
@@ -5807,13 +5817,17 @@ To create multiple cookies, give header() an array reference:
 				  -value=>\%answers);
 	print $query->header(-cookie=>[$cookie1,$cookie2]);
 
-To retrieve a cookie, request it by name by calling cookie()
-method without the B<-value> parameter:
+To retrieve a cookie, request it by name by calling cookie() method
+without the B<-value> parameter:
 
 	use CGI;
 	$query = new CGI;
-	%answers = $query->cookie(-name=>'answers');
-	# $query->cookie('answers') will work too!
+	$riddle = $query->cookie('riddle_name');
+        %answers = $query->cookie('answers');
+
+Cookies created with a single scalar value, such as the "riddle_name"
+cookie, will be returned in that form.  Cookies with array and hash
+values can also be retrieved.
 
 The cookie and CGI namespaces are separate.  If you have a parameter
 named 'answers' and a cookie named 'answers', the values retrieved by
@@ -6111,6 +6125,10 @@ name.
 
 When using virtual hosts, returns the name of the host that
 the browser attempted to contact
+
+=item B<server_port ()>
+
+Return the port that the server is listening on.
 
 =item B<server_software ()>
 

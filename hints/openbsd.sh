@@ -37,7 +37,15 @@ OpenBSD.alpha|OpenBSD.mips|OpenBSD.powerpc|OpenBSD.vax)
 	# we use -fPIC here because -fpic is *NOT* enough for some of the
 	# extensions like Tk on some OpenBSD platforms (ie: sparc)
 	cccdlflags="-DPIC -fPIC $cccdlflags"
-	lddlflags="-Bshareable $lddlflags"
+	case "$osvers" in
+	[01].*|2.[0-7]|2.[0-7].*)
+		lddlflags="-Bshareable $lddlflags"
+		;;
+	*) # from 2.8 onwards
+		ld=${cc:-cc}
+		lddlflags="-shared $lddlflags"
+		;;
+	esac
 	;;
 esac
 

@@ -22,6 +22,7 @@
 #### Start of system configuration section. ####
 
 ~DECC~
+~DECCXX~
 ~GNUC~
 ~ARCH-TYPE~ = 1
 ~THREAD~
@@ -131,7 +132,11 @@ DBGSPECFLAGS = /Show=All
 	@ If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("DECC$System_Include").eqs."" Then Define/NoLog SYS DECC$Library_Include
 .endif
 
+.ifdef DECCXX
+XTRACCFLAGS = /Include=[]/Standard=ANSI/Prefix=All/Obj=$(OBJVAL)
+.else
 XTRACCFLAGS = /Include=[]/Standard=Relaxed_ANSI/Prefix=All/Obj=$(OBJVAL)
+.endif
 XTRADEF =
 POSIX = POSIX
 .endif
@@ -300,7 +305,11 @@ ac8 = $(ARCHCORE)perlapi.h $(ARCHCORE)perlio.h $(ARCHCORE)perlsdio.h
 ac9 = $(ARCHCORE)perlvars.h $(ARCHCORE)perly.h $(ARCHCORE)pp.h
 ac10 = $(ARCHCORE)pp_proto.h $(ARCHCORE)proto.h $(ARCHCORE)regcomp.h
 ac11 = $(ARCHCORE)regexp.h $(ARCHCORE)regnodes.h $(ARCHCORE)scope.h
+.ifdef SOCKARCH
 ac12 = $(ARCHCORE)sv.h $(ARCHCORE)thrdvar.h $(SOCKARCH)
+.else
+ac12 = $(ARCHCORE)sv.h $(ARCHCORE)thrdvar.h
+.endif 
 ac13 = $(ARCHCORE)thread.h $(ARCHCORE)utf8.h $(ARCHCORE)util.h
 ac14 = $(ARCHCORE)vmsish.h $(ARCHCORE)warnings.h $(ARCHCORE)xsub.h
 acopt = $(ARCHCORE)perlshr_attr.opt $(ARCHCORE)$(DBG)perlshr_bld.opt
@@ -486,7 +495,7 @@ $(ARCHDIR)vmspipe.com : vmspipe.com
 	@ Rename/Log xsloader.pm [.ext.dynaloader]
 
 dynext : $(LIBPREREQ) $(DBG)perlshr$(E)
-	@build_ext "$(dynamic_ext)" "$(MINIPERL_EXE)" "$(MMS)"
+	@make_ext "$(dynamic_ext)" "$(MINIPERL_EXE)" "$(MMS)"
 
 [.lib]vmsish.pm : [.vms.ext]vmsish.pm
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
@@ -891,6 +900,9 @@ perly$(O) : perly.c, perly.h, $(h)
 [.t.lib]vmsish.t : [.vms.ext]vmsish.t
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
+check : test
+	@ Continue
+
 test : all [.t.lib]vmsfspec.t [.t.lib]vmsish.t
 	- @[.VMS]Test.Com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
@@ -1236,7 +1248,7 @@ tidy : cleanlis
 	- If F$Search("[.lib.pod]*.com;-1").nes."" Then Purge/NoConfirm/Log [.lib.pod]*.com
 
 clean : tidy
-	- @build_ext "$(dynamic_ext)" "$(MINIPERL_EXE)" "$(MMS)" clean
+	- @make_ext "$(dynamic_ext)" "$(MINIPERL_EXE)" "$(MMS)" clean
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
 	- If F$Search("[...]*$(O);*") .nes."" Then Delete/NoConfirm/Log [...]*$(O);*
 	- If F$Search(F$Parse("Sys$Disk:[]","$(SOCKH)")).nes."" Then Delete/NoConfirm/Log $(SOCKH);*
@@ -1261,14 +1273,14 @@ clean : tidy
 	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
 
 realclean : clean
-	- @build_ext "$(dynamic_ext)" "$(MINIPERL_EXE)" "$(MMS)" realclean
+	- @make_ext "$(dynamic_ext)" "$(MINIPERL_EXE)" "$(MMS)" realclean
 	- If F$Search("*$(OLB)").nes."" Then Delete/NoConfirm/Log *$(OLB);*
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
 	- If F$Search("Config.H").nes."" Then Delete/NoConfirm/Log Config.H;*
 	- If F$Search("Config.SH").nes."" Then Delete/NoConfirm/Log Config.SH;*
 	- $(MINIPERL) -e "use File::Path; rmtree(\@ARGV,1,0);" config
 	- If F$Search("Descrip.MMS").nes."" Then Delete/NoConfirm/Log Descrip.MMS;*
-	- If F$Search("Build_Ext.Com").nes."" Then Delete/NoConfirm/Log Build_Ext.Com;*
+	- If F$Search("make_ext.Com").nes."" Then Delete/NoConfirm/Log make_ext.Com;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.Lib]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]DynaLoader.pm;*

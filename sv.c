@@ -1488,7 +1488,8 @@ Perl_sv_2iv(pTHX_ register SV *sv)
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	  SV* tmpstr;
-	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
+          if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
+                  (SvRV(tmpstr) != SvRV(sv)))
 	      return SvIV(tmpstr);
 	  return PTR2IV(SvRV(sv));
 	}
@@ -1618,7 +1619,8 @@ Perl_sv_2uv(pTHX_ register SV *sv)
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	  SV* tmpstr;
-	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
+          if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
+                  (SvRV(tmpstr) != SvRV(sv)))
 	      return SvUV(tmpstr);
 	  return PTR2UV(SvRV(sv));
 	}
@@ -1785,7 +1787,8 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	  SV* tmpstr;
-	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)))
+          if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
+                  (SvRV(tmpstr) != SvRV(sv)))
 	      return SvNV(tmpstr);
 	  return PTR2NV(SvRV(sv));
 	}
@@ -2112,7 +2115,8 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	    SV* tmpstr;
-	    if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)))
+            if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
+                    (SvRV(tmpstr) != SvRV(sv)))
 		return SvPV(tmpstr,*lp);
 	    sv = (SV*)SvRV(sv);
 	    if (!sv)
@@ -2356,7 +2360,8 @@ Perl_sv_2bool(pTHX_ register SV *sv)
     if (SvROK(sv)) {
 	dTHR;
 	SV* tmpsv;
-	if (SvAMAGIC(sv) && (tmpsv = AMG_CALLun(sv,bool_)))
+        if (SvAMAGIC(sv) && (tmpsv=AMG_CALLun(sv,bool_)) &&
+                (SvRV(tmpsv) != SvRV(sv)))
 	    return SvTRUE(tmpsv);
       return SvRV(sv) != 0;
     }
@@ -2393,41 +2398,26 @@ Convert the PV of an SV to its UTF8-encoded form.
 void
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
-    int hicount;
-    char *c;
+    char *s, *t;
+    bool hibit;
 
     if (!sv || !SvPOK(sv) || SvUTF8(sv))
 	return;
 
-    /* This function could be much more efficient if we had a FLAG
-     * to signal if there are any hibit chars in the string
+    /* This function could be much more efficient if we had a FLAG in SVs
+     * to signal if there are any hibit chars in the PV.
      */
-    hicount = 0;
-    for (c = SvPVX(sv); c < SvEND(sv); c++) {
-	if (*c & 0x80)
-	    hicount++;
-    }
+    for (s = t = SvPVX(sv), hibit = FALSE; t < SvEND(sv) && !hibit; t++)
+	if (*t & 0x80)
+	    hibit = TRUE;
 
-    if (hicount) {
-	char *src, *dst;
-	SvGROW(sv, SvCUR(sv) + hicount + 1);
-
-	src = SvEND(sv) - 1;
-	SvCUR_set(sv, SvCUR(sv) + hicount);
-	dst = SvEND(sv) - 1;
-
-	while (src < dst) {
-	    if (*src & 0x80) {
-		dst--;
-		uv_to_utf8((U8*)dst, (U8)*src--);
-		dst--;
-	    }
-	    else {
-		*dst-- = *src--;
-	    }
-	}
-
+    if (hibit) {
+	STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
+	SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
+	SvCUR(sv) = len - 1;
+	SvLEN(sv) = len; /* No longer know the real size. */
 	SvUTF8_on(sv);
+	Safefree(s); /* No longer using what was there before. */
     }
 }
 
@@ -2447,46 +2437,15 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 {
     if (SvPOK(sv) && SvUTF8(sv)) {
         char *c = SvPVX(sv);
-        char *first_hi = 0;
-        /* need to figure out if this is possible at all first */
-        while (c < SvEND(sv)) {
-            if (*c & 0x80) {
-                I32 len;
-                UV uv = utf8_to_uv((U8*)c, &len);
-                if (uv >= 256) {
-		    if (fail_ok)
-			return FALSE;
-		    else {
-			/* XXX might want to make a callback here instead */
-			Perl_croak(aTHX_ "Big byte");
-		    }
-		}
-                if (!first_hi)
-                    first_hi = c;
-                c += len;
-            }
-            else {
-                c++;
-            }
-        }
-
-        if (first_hi) {
-            char *src = first_hi;
-            char *dst = first_hi;
-            while (src < SvEND(sv)) {
-                if (*src & 0x80) {
-                    I32 len;
-                    U8 u = (U8)utf8_to_uv((U8*)src, &len);
-                    *dst++ = u;
-                    src += len;
-                }
-                else {
-                    *dst++ = *src++;
-                }
-            }
-            SvCUR_set(sv, dst - SvPVX(sv));
-        }
-        SvUTF8_off(sv);
+	STRLEN len = SvCUR(sv) + 1;	/* include trailing NUL */
+        if (!utf8_to_bytes((U8*)c, &len)) {
+	    if (fail_ok)
+		return FALSE;
+	    else
+		Perl_croak(aTHX_ "big byte");
+	}
+	SvCUR(sv) = len - 1;
+	SvUTF8_off(sv);
     }
     return TRUE;
 }
@@ -2520,24 +2479,15 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
          * we want to make sure everything inside is valid utf8 first.
          */
         c = SvPVX(sv);
-        while (c < SvEND(sv)) {
-            if (*c & 0x80) {
-                I32 len;
-                (void)utf8_to_uv((U8*)c, &len);
-                if (len == 1) {
-                    /* bad utf8 */
-                    return FALSE;
-                }
-                c += len;
-                has_utf = TRUE;
-            }
-            else {
-                c++;
-            }
-        }
+	if (!is_utf8_string((U8*)c, SvCUR(sv)+1))
+	    return FALSE;
 
-        if (has_utf)
-            SvUTF8_on(sv);
+        while (c < SvEND(sv)) {
+            if (*c++ & 0x80) {
+		SvUTF8_on(sv);
+		break;
+	    }
+        }
     }
     return TRUE;
 }
@@ -4114,7 +4064,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	pv2 = SvPV(sv2, cur2);
 
     /* do not utf8ize the comparands as a side-effect */
-    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE && 0) {
+    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
 	if (SvUTF8(sv1)) {
 	    pv2 = (char*)bytes_to_utf8((U8*)pv2, &cur2);
 	    pv2tmp = TRUE;
@@ -5113,7 +5063,7 @@ Perl_sv_reset(pTHX_ register char *s, HV *stash)
 		}
 		if (GvHV(gv) && !HvNAME(GvHV(gv))) {
 		    hv_clear(GvHV(gv));
-#ifndef VMS  /* VMS has no environ array */
+#if !defined( VMS) && !defined(EPOC)  /* VMS has no environ array */
 		    if (gv == PL_envgv)
 			environ[0] = Nullch;
 #endif
@@ -6317,7 +6267,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    break;
 		}
 		if (utf)
-		    iv = (IV)utf8_to_uv(vecstr, &ulen);
+		    iv = (IV)utf8_to_uv_chk(vecstr, &ulen, 0);
 		else {
 		    iv = *vecstr;
 		    ulen = 1;
@@ -6399,7 +6349,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    break;
 		}
 		if (utf)
-		    uv = utf8_to_uv(vecstr, &ulen);
+		    uv = utf8_to_uv_chk(vecstr, &ulen, 0);
 		else {
 		    uv = *vecstr;
 		    ulen = 1;

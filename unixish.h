@@ -141,3 +141,6 @@
 #define BIT_BUCKET "/dev/null"
 
 #define dXSUB_SYS
+
+#define USE_ENVIRON_ARRAY
+

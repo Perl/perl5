@@ -139,4 +139,6 @@
 double epoc_atof( const char *ptr);
 #define atof(a) epoc_atof(a)
 
+#define init_os_extras Perl_init_os_extras
 
+#define NO_ENVIRON_ARRAY

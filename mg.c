@@ -575,9 +575,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    if (PL_lex_state != LEX_NOTPARSING)
 		(void)SvOK_off(sv);
 	    else if (PL_in_eval)
-		sv_setiv(sv, 1);
-	    else
-		sv_setiv(sv, 0);
+ 		sv_setiv(sv, PL_in_eval & ~(EVAL_INREQUIRE));
 	}
 	break;
     case '\024':		/* ^T */
@@ -916,7 +914,7 @@ Perl_magic_set_all_env(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 {
-#if defined(VMS)
+#if defined(VMS) || defined(EPOC)
     Perl_die(aTHX_ "Can't make list assignment to %%ENV on this system");
 #else
 #   ifdef PERL_IMPLICIT_SYS
@@ -1425,6 +1423,8 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
     if (rem + offs > len)
 	rem = len - offs;
     sv_setpvn(sv, tmps + offs, (STRLEN)rem);
+    if (DO_UTF8(lsv))
+        SvUTF8_on(sv);
     return 0;
 }
 
