@@ -14,7 +14,7 @@ BEGIN {
 
 my $tmp = "via$$";
 
-use Test::More tests => 15;
+use Test::More tests => 16;
 
 my $fh;
 my $a = join("", map { chr } 0..255) x 10;
@@ -22,6 +22,7 @@ my $b;
 
 BEGIN { use_ok('MIME::QuotedPrint'); }
 
+ok( !open($fh,"<Via(MIME::QuotedPrint)", $tmp), 'open QuotedPrint fails');
 ok( open($fh,">Via(MIME::QuotedPrint)", $tmp), 'open QuotedPrint for output');
 ok( (print $fh $a), "print to output file");
 ok( close($fh), 'close output file');
@@ -76,3 +77,4 @@ is( $obj, 'PerlIO::Via::Bar', 'search for package PerlIO::Via::Bar' );
 END {
     1 while unlink $tmp;
 }
+

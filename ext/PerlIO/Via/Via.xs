@@ -97,6 +97,7 @@ PerlIOVia_method(pTHX_ PerlIO * f, char *method, CV ** save, int flags,
 	}
 	else {
 	    PerlIO_debug("No next\n");
+	    /* FIXME: How should this work for OPEN etc? */
 	}
 	PUTBACK;
 	count = call_sv((SV *) cv, flags);
@@ -256,15 +257,20 @@ PerlIOVia_open(pTHX_ PerlIO_funcs * self, PerlIO_list_t * layers,
 			    f = NULL;
 			}
 		    }
+		    /* FIXME - Call an OPENED method here ? */
 		    return f;
 		}
 		else {
+		    PerlIO_debug("Open fail %s => %p->%p\n", tab->name,
+				 PerlIONext(f), *PerlIONext(f));
 		    /* Sub-layer open failed */
 		}
 	    }
 	    else {
+	         PerlIO_debug("Nothing to open with");
 		/* Nothing to do the open */
 	    }
+	    PerlIO_pop(aTHX_ f);
 	    return NULL;
 	}
     }
@@ -599,5 +605,8 @@ BOOT:
  PerlIO_define_layer(aTHX_ &PerlIO_object);
 #endif
 }
+
+
+
 
 

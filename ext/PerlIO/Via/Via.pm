@@ -43,13 +43,20 @@ Should return an object or the class, or -1 on failure.  (Compare
 TIEHANDLE.)  The arguments are an optional mode string ("r", "w",
 "w+", ...) and a filehandle for the PerlIO layer below.  Mandatory.
 
+When layer is pushed as part of an C<open> call, C<PUSHED> will be called 
+I<before> the actual open occurs whether than be via C<OPEN>, C<SYSOPEN>,
+C<FDOPEN> or by letting lower layer do the open. 
+
 =item $obj->POPPED([$fh])
 
 Optional - layer is about to be removed.
 
-=item $class->OPEN($path,$mode[,$fh])
+=item $obj->OPEN($path,$mode[,$fh])
 
-Not yet in use.
+Optional - if not present lower layer does open.
+If present called for normal opens after layer is pushed.
+This function is subject to change as there is no easy way 
+to get lower layer to do open and then regain control.
 
 =item $obj->BINMODE([,$fh])
 
@@ -57,13 +64,21 @@ Optional - if not available layer is popped on binmode($fh) or when C<:raw>
 is pushed. If present it should return 0 on success -1 on error and undef
 to pop the layer.
 
-=item $class->FDOPEN($fd)
+=item $obj->FDOPEN($fd[,$fh])
 
-Not yet in use.
+Optional - if not present lower layer does open.
+If present called for opens which pass a numeric file 
+descriptor after layer is pushed. 
+This function is subject to change as there is no easy way 
+to get lower layer to do open and then regain control.
 
-=item $class->SYSOPEN($path,$imode,$perm,$fh)
+=item $obj->SYSOPEN($path,$imode,$perm,[,$fh])
 
-Not yet in use.
+Optional - if not present lower layer does open.
+If present called for sysopen style opens which pass a numeric mode 
+and permissions after layer is pushed.
+This function is subject to change as there is no easy way 
+to get lower layer to do open and then regain control.
 
 =item $obj->FILENO($fh)
 
@@ -184,5 +199,7 @@ on the fly back into bytes:
     open(my $fh, "<:Via(Hex)", "foo.hex");
 
 =cut
+
+
 
 
