@@ -719,6 +719,9 @@ unmaintained.
 
 By default, Configure selects ithreads if -Dusethreads is specified.
 
+(You need to use also the PerlIO layer, explained later, if you decide
+to use ithreads, to guarantee the good interworking of threads and I/O.)
+
 However, you can select the old 5005threads behavior
 
 	sh Configure -Dusethreads -Duse5005threads
