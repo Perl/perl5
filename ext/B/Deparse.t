@@ -20,7 +20,7 @@ print "1..14\n";
 use B::Deparse;
 my $deparse = B::Deparse->new() or print "not ";
 my $i=1;
-print "ok ", $i++, "\n";
+print "ok " . $i++ . "\n";
 
 
 # Tell B::Deparse about our ambient pragmas
@@ -49,7 +49,7 @@ while (<DATA>) {
     my $coderef = eval "sub {$input}";
 
     if ($@) {
-	print "not ok ", $i++, "\n";
+	print "not ok " . $i++ . "\n";
 	print "# $@";
     }
     else {
@@ -61,8 +61,7 @@ while (<DATA>) {
 	};
 
 	my $ok = ($deparsed =~ /^\{\s*$regex\s*\}$/);
-	print ($ok ? "ok " : "not ok ");
-	print $i++, "\n";
+	print (($ok ? "ok " : "not ok ") . $i++ . "\n");
 	if (!$ok) {
 	    print "# EXPECTED:\n";
 	    $regex =~ s/^/# /mg;
@@ -77,19 +76,19 @@ while (<DATA>) {
 
 use constant 'c', 'stuff';
 print "not " if (eval "sub ".$deparse->coderef2text(\&c))->() ne 'stuff';
-print "ok ", $i++, "\n";
+print "ok " . $i++ . "\n";
 
 $a = 0;
 print "not " if "{\n    (-1) ** \$a;\n}"
 		ne $deparse->coderef2text(sub{(-1) ** $a });
-print "ok ", $i++, "\n";
+print "ok " . $i++ . "\n";
 
 # XXX ToDo - constsub that returns a reference
 #use constant cr => ['hello'];
 #my $string = "sub " . $deparse->coderef2text(\&cr);
 #my $val = (eval $string)->();
 #print "not " if ref($val) ne 'ARRAY' || $val->[0] ne 'hello';
-#print "ok ", $i++, "\n";
+#print "ok " . $i++ . "\n";
 
 my $a;
 my $Is_VMS = $^O eq 'VMS';
@@ -112,7 +111,7 @@ LINE: while (defined($_ = <ARGV>)) {
 
 EOF
 print "# [$a]\n\# vs expected\n# [$b]\nnot " if $a ne $b;
-print "ok ", $i++, "\n";
+print "ok " . $i++ . "\n";
 
 __DATA__
 # 1
