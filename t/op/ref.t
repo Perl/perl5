@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..55\n";
+print "1..56\n";
 
 # Test glob operations.
 
@@ -271,14 +271,22 @@ print $$_,"\n";
     print "# good, didn't recurse\n";
 }
 
+# test if refgen behaves with autoviv magic
+
+{
+    my @a;
+    $a[1] = "ok 53\n";
+    print ${\$_} for @a;
+}
+
 # test global destruction
 
 package FINALE;
 
 {
-    $ref3 = bless ["ok 55\n"];		# package destruction
-    my $ref2 = bless ["ok 54\n"];	# lexical destruction
-    local $ref1 = bless ["ok 53\n"];	# dynamic destruction
+    $ref3 = bless ["ok 56\n"];		# package destruction
+    my $ref2 = bless ["ok 55\n"];	# lexical destruction
+    local $ref1 = bless ["ok 54\n"];	# dynamic destruction
     1;					# flush any temp values on stack
 }
 
