@@ -62,8 +62,17 @@ use strict;
 
 sub B::GV::SAFENAME {
   my $name = (shift())->NAME;
-  $name =~ s/^([\cA-\cZ])/"^".chr(64 + ord($1))/e;
+
+  # The regex below corresponds to the isCONTROLVAR macro
+  # from toke.c
+
+  $name =~ s/^([\cA-\cZ\c\\c[\c]\c?\c_\c^])/"^".chr(64 ^ ord($1))/e;
   return $name;
+}
+
+sub B::IV::int_value {
+  my ($self) = @_;
+  return (($self->FLAGS() & SVf_IVisUV()) ? $self->UVX : $self->IV);
 }
 
 my $debug;
@@ -339,7 +348,21 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =item IV
 
+Returns the value of the IV, I<interpreted as
+a signed integer>. This will be misleading
+if C<FLAGS & SVf_IVisUV>. Perhaps you want the
+C<int_value> method instead?
+
 =item IVX
+
+=item UVX
+
+=item int_value
+
+This method returns the value of the IV as an integer.
+It differs from C<IV> in that it returns the correct
+value regardless of whether it's stored signed or
+unsigned.
 
 =item needs64bits
 

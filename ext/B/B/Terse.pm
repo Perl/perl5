@@ -1,7 +1,7 @@
 package B::Terse;
 use strict;
 use B qw(peekop class walkoptree walkoptree_exec walkoptree_slow
-	 main_start main_root cstring svref_2object);
+	 main_start main_root cstring svref_2object SVf_IVisUV);
 use B::Asmdata qw(@specialsv_name);
 
 sub terse {
@@ -108,7 +108,8 @@ sub B::GV::terse {
 sub B::IV::terse {
     my ($sv, $level) = @_;
     print indent($level);
-    printf "%s (0x%lx) %d\n", class($sv), $$sv, $sv->IV;
+    my $v = $sv->FLAGS & SVf_IVisUV ? "%u" : "%d";
+    printf "%s (0x%lx) $v\n", class($sv), $$sv, $sv->int_value;
 }
 
 sub B::NV::terse {

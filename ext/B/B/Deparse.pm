@@ -774,7 +774,7 @@ sub gv_name {
     my $self = shift;
     my $gv = shift;
     my $stash = $gv->STASH->NAME;
-    my $name = $gv->NAME;
+    my $name = $gv->SAFENAME;
     if ($stash eq $self->{'curstash'} or $globalnames{$name}
 	or $name =~ /^[^A-Za-z_]/)
     {
@@ -782,9 +782,8 @@ sub gv_name {
     } else {
 	$stash = $stash . "::";
     }
-    if ($name =~ /^([\cA-\cZ])(.*)$/) {
-	$name = "^" . chr(64 + ord($1)) . $2;
-	$name = "{$name}" if length($2);	# ${^WARNING_BITS} etc
+    if ($name =~ /^\^../) {
+        $name = "{$name}";       # ${^WARNING_BITS} etc
     }
     return $stash . $name;
 }
@@ -2375,7 +2374,7 @@ sub const {
     if (class($sv) eq "SPECIAL") {
 	return ('undef', '1', '0')[$$sv-1]; # sv_undef, sv_yes, sv_no
     } elsif ($sv->FLAGS & SVf_IOK) {
-	return $sv->IV;
+	return $sv->int_value;
     } elsif ($sv->FLAGS & SVf_NOK) {
 	return $sv->NV;
     } elsif ($sv->FLAGS & SVf_ROK) {
