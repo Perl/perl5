@@ -3,11 +3,12 @@
 require 5.003;
 
 my @vars5005 = qw(sv_undef sv_yes sv_no na dowarn
-                 curcop compiling 
-                 tainting tainted stack_base stack_sp sv_arenaroot
-                 curstash DBsub DBsingle debstash
-                 rsfp 
-                 stdingv
+		 curcop compiling 
+		 tainting tainted stack_base stack_sp sv_arenaroot
+		 no_modify
+		 curstash DBsub DBsingle debstash
+		 rsfp 
+		 stdingv
 		 defgv
 		 errgv
 		 rsfp_filters
@@ -15,7 +16,7 @@ my @vars5005 = qw(sv_undef sv_yes sv_no na dowarn
 		 diehook
 		 dirty
 		 perl_destruct_level
-                );
+		);
 
 
 sub readsyms (\%$) {
