@@ -1093,13 +1093,6 @@ contain a slash character cannot be processed.  Such files must be
 renamed before they can be processed by Perl.  Note that VOS limits
 file names to 32 or fewer characters.
 
-Perl on VOS can be built using two different compilers and two different
-versions of the POSIX runtime.  The recommended method for building full
-Perl is with the GNU C compiler and the generally-available version of
-VOS POSIX support.  See F<README.vos> (installed as L<perlvos>) for
-restrictions that apply when Perl is built using the VOS Standard C
-compiler or the alpha version of VOS POSIX support.
-
 The value of C<$^O> on VOS is "VOS".  To determine the architecture that
 you are running on without resorting to loading all of C<%Config> you
 can examine the content of the @INC array like so:
@@ -1109,19 +1102,6 @@ can examine the content of the @INC array like so:
     } else {
         print "I'm not on a Stratus box!\n";
         die;
-    }
-
-    if (grep(/860/, @INC)) {
-        print "This box is a Stratus XA/R!\n";
-
-    } elsif (grep(/7100/, @INC)) {
-        print "This box is a Stratus HP 7100 or 8xxx!\n";
-
-    } elsif (grep(/8000/, @INC)) {
-        print "This box is a Stratus HP 8xxx!\n";
-
-    } else {
-        print "This box is a Stratus 68K!\n";
     }
 
 Also see:
@@ -1502,9 +1482,11 @@ in the SYSTEM environment settings.  (Cygwin)
 
 =item chown LIST
 
-Not implemented. (S<Mac OS>, Win32, S<Plan 9>, S<RISC OS>, VOS)
+Not implemented. (S<Mac OS>, Win32, S<Plan 9>, S<RISC OS>)
 
 Does nothing, but won't fail. (Win32)
+
+A little funky, because VOS's notion of ownership is a little funky (VOS).
 
 =item chroot FILENAME
 
@@ -1516,8 +1498,6 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<Plan 9>, S<RISC OS>, VOS, VM/ESA)
 
 May not be available if library or source was not provided when building
 perl. (Win32)
-
-Not implemented. (VOS)
 
 =item dbmclose HASH
 
@@ -1567,7 +1547,7 @@ Available only on Windows NT (not on Windows 95). (Win32)
 
 =item fork
 
-Not implemented. (S<Mac OS>, AmigaOS, S<RISC OS>, VOS, VM/ESA, VMS)
+Not implemented. (S<Mac OS>, AmigaOS, S<RISC OS>, VM/ESA, VMS)
 
 Emulated using multiple interpreters.  See L<perlfork>.  (Win32)
 
@@ -1580,7 +1560,7 @@ Not implemented. (S<Mac OS>, S<RISC OS>)
 
 =item getpgrp PID
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
+Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
 
 =item getppid
 
@@ -1794,7 +1774,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 
 =item setgrent
 
-Not implemented. (S<Mac OS>, MPE/iX, VMS, Win32, S<RISC OS>)
+Not implemented. (S<Mac OS>, MPE/iX, VMS, Win32, S<RISC OS>, VOS)
 
 =item setpgrp PID,PGRP
 
@@ -1806,7 +1786,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 
 =item setpwent
 
-Not implemented. (S<Mac OS>, MPE/iX, Win32, S<RISC OS>)
+Not implemented. (S<Mac OS>, MPE/iX, Win32, S<RISC OS>, VOS)
 
 =item setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL
 
@@ -1939,7 +1919,7 @@ Not useful. (S<RISC OS>)
 
 Not implemented. (Older versions of VMS)
 
-Truncation to zero-length only. (VOS)
+Truncation to same-or-shorter lengths only. (VOS)
 
 If a FILEHANDLE is supplied, it must be writable and opened in append
 mode (i.e., use C<<< open(FH, '>>filename') >>>
@@ -1969,7 +1949,7 @@ two seconds. (Win32)
 
 =item waitpid PID,FLAGS
 
-Not implemented. (S<Mac OS>, VOS)
+Not implemented. (S<Mac OS>)
 
 Can only be applied to process handles returned for processes spawned
 using C<system(1, ...)> or pseudo processes created with C<fork()>. (Win32)
@@ -1981,6 +1961,10 @@ Not useful. (S<RISC OS>)
 =head1 CHANGES
 
 =over 4
+
+=item v1.49, 12 August 2002
+
+Updates for VOS from Paul Green.
 
 =item v1.48, 02 February 2001
 
@@ -2216,7 +2200,7 @@ Andy Dougherty <doughera@lafayette.edu>,
 Dominic Dunlop <domo@computer.org>,
 Neale Ferguson <neale@vma.tabnsw.com.au>,
 David J. Fiander <davidf@mks.com>,
-Paul Green <Paul_Green@stratus.com>,
+Paul Green <Paul.Green@stratus.com>,
 M.J.T. Guy <mjtg@cam.ac.uk>,
 Jarkko Hietaniemi <jhi@iki.fi>,
 Luther Huffman <lutherh@stratcom.com>,
