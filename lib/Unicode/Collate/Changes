@@ -1,5 +1,14 @@
 Revision history for Perl extension Unicode::Collate.
 
+0.09  Sun Nov 11 17:02:40:18 2001
+    - add the following methods: eq, ne, lt, le, gt, le.
+    - relies on &Unicode::Normalize::getCombinClass()
+      in place of %Unicode::Normalize::Combin
+      (the hash is not defined in the XS version of Unicode::Normalize).
+      then you should install Unicode::Normalize 0.10 or later.
+    - now independent of Lingua::KO::Hangul::Util
+      (this module does decomposition of Hangul syllables for itself)
+
 0.08  Mon Aug 20 22:40:18 2001
     - add the index method.
 

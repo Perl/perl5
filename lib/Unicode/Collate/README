@@ -1,4 +1,4 @@
-Unicode/Collate version 0.08
+Unicode/Collate version 0.09
 ===============================
 
 use UCA (Unicode Collation Algorithm)
@@ -17,13 +17,15 @@ SYNOPSIS
   use Unicode::Collate;
 
   #construct
-  $UCA = Unicode::Collate->new(%tailoring);
+  $Collator = Unicode::Collate->new(%tailoring);
 
   #sort
-  @sorted = $UCA->sort(@not_sorted);
+  @sorted = $Collator->sort(@not_sorted);
 
   #compare
-  $result = $UCA->cmp($a, $b); # returns 1, 0, or -1.
+  $result = $Collator->cmp($a, $b); # returns 1, 0, or -1.
+  $result = $Collator->eq($a, $b);  # returns true/false
+    (similarly ->ne, ->lt, ->le, ->gt, ->ge)
 
 INSTALLATION
 
@@ -38,13 +40,7 @@ To install this module type the following:
 
 DEPENDENCIES
 
-This module requires these other modules and libraries:
-
-Carp
-Exporter
-Lingua::KO::Hangul::Util
-
-It's better if Unicode::Normalize has been installed
+It's better if you have Unicode::Normalize (v 0.10 or later)
 although Unicode::Collate can be used without Unicode::Normalize.
 
 COPYRIGHT AND LICENCE
