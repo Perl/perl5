@@ -28,8 +28,6 @@
 static char ident_too_long[] = "Identifier too long";
 
 static void restore_rsfp(pTHXo_ void *f);
-static void restore_expect(pTHXo_ void *e);
-static void restore_lex_expect(pTHXo_ void *e);
 
 #define UTF (PL_hints & HINT_UTF8)
 /*
@@ -380,8 +378,8 @@ Perl_lex_start(pTHX_ SV *line)
     SAVEI32(PL_lex_defer);
     SAVEI32(PL_sublex_info.sub_inwhat);
     SAVESPTR(PL_lex_repl);
-    SAVEDESTRUCTOR_X(restore_expect, PL_tokenbuf + PL_expect); /* encode as pointer */
-    SAVEDESTRUCTOR_X(restore_lex_expect, PL_tokenbuf + PL_lex_expect);
+    SAVEINT(PL_expect);
+    SAVEINT(PL_lex_expect);
 
     PL_lex_state = LEX_NORMAL;
     PL_lex_defer = 0;
@@ -7033,30 +7031,4 @@ restore_rsfp(pTHXo_ void *f)
     else if (PL_rsfp && (PL_rsfp != fp))
 	PerlIO_close(PL_rsfp);
     PL_rsfp = fp;
-}
-
-/*
- * restore_expect
- * Restores the state of PL_expect when the lexing that begun with a
- * start_lex() call has ended.
- */ 
-
-static void
-restore_expect(pTHXo_ void *e)
-{
-    /* a safe way to store a small integer in a pointer */
-    PL_expect = (expectation)((char *)e - PL_tokenbuf);
-}
-
-/*
- * restore_lex_expect
- * Restores the state of PL_lex_expect when the lexing that begun with a
- * start_lex() call has ended.
- */ 
-
-static void
-restore_lex_expect(pTHXo_ void *e)
-{
-    /* a safe way to store a small integer in a pointer */
-    PL_lex_expect = (expectation)((char *)e - PL_tokenbuf);
 }
