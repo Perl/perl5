@@ -73,6 +73,7 @@ is( $^H{'open_IO'}, 'crlf', 'should record last layer set in %^H' );
 SKIP: {
     skip("no perlio, no :utf8", 4) unless $Config{'useperlio'};
 
+    eval <<EOE;
     use open ':utf8';
     open(O, ">utf8");
     print O chr(0x100);
@@ -80,6 +81,7 @@ SKIP: {
     open(I, "<utf8");
     is(ord(<I>), 0x100, ":utf8 single wide character round-trip");
     close I;
+EOE
 
     open F, ">a";
     @a = map { chr(1 << ($_ << 2)) } 0..5; # 0x1, 0x10, .., 0x100000
