@@ -237,7 +237,7 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
-	'Scalar-List-Util' =>
+	'Scalar-List-Utils' =>
 		{
 		'MAINTAINER'	=> 'gbarr',
 		'FILES'		=> q[ext/List/Util],
