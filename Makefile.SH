@@ -612,7 +612,7 @@ perl.valgrind.config: config.sh
 	@grep "^usemymalloc="    config.sh
 	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
 	@echo "And of course you have to have valgrind..."
-	valgrind --help >/dev/null || exit 1
+	valgrind ./perl -e 1 2>/dev/null || exit 1
 
 # Third Degree Perl (Tru64 only)
 
