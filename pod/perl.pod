@@ -17,6 +17,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perl		Perl overview (this section)
     perlfaq		Perl frequently asked questions
     perltoc		Perl documentation table of contents
+    perlbook		Perl book information
 
     perlsyn		Perl syntax
     perldata		Perl data structures
@@ -106,6 +107,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perlmachten		Perl notes for Power MachTen
     perlos2		Perl notes for OS/2
     perlos390		Perl notes for OS/390
+    perlposix-bc	Perl notes for POSIX-BC
     perlvms		Perl notes for VMS
     perlwin32		Perl notes for Windows
 

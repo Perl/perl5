@@ -325,6 +325,14 @@ DESCRIPTION
 
 =back
 
+=head2 perlbook - Perl book information
+
+=over
+
+=item DESCRIPTION
+
+=back
+
 =head2 perlsyn - Perl syntax
 
 =over
@@ -4668,8 +4676,9 @@ probably be written as "%s", %s() called too early to check prototype, %s
 argument is not a HASH or ARRAY element, %s argument is not a HASH or ARRAY
 element or slice, %s argument is not a subroutine name, %s package
 attribute may clash with future reserved word: %s, (in cleanup) %s, <>
-should be quotes, Attempt to join self, Bad evalled substitution pattern,
-Bad realloc() ignored, Bareword found in conditional, Binary number >
+should be quotes, Ambiguous range in transliteration operator, Attempt to
+join self, Bad evalled substitution pattern, Bad realloc() ignored,
+Bareword found in conditional, Binary number >
 0b11111111111111111111111111111111 non-portable, Bit vector size > 32
 non-portable, Buffer overflow in prime_env_iter: %s, Can't check filesystem
 of script "%s", Can't declare class for non-scalar %s in "%s", Can't
@@ -4687,28 +4696,28 @@ explicit package name, Hexadecimal number > 0xffffffff non-portable,
 Ill-formed CRTL environ value "%s", Ill-formed message in prime_env_iter:
 |%s|, Illegal binary digit %s, Illegal binary digit %s ignored, Illegal
 number of bits in vec, Integer overflow in %s number, Invalid %s attribute:
-%s, Invalid %s attributes: %s, invalid [] range "%s" in regexp, Invalid
-separator character %s in attribute list, Invalid separator character %s in
-subroutine attribute list, leaving effective %s failed, Lvalue subs
-returning %s not implemented yet, Method %s not permitted, Missing
-%sbrace%s on \N{}, Missing command in piped open, Missing name in "my sub",
-No %s specified for -%c, No package name allowed for variable %s in "our",
-No space allowed after -%c, no UTC offset information; assuming local time
-is UTC, Octal number > 037777777777 non-portable, panic: del_backref,
-panic: kid popen errno read, panic: magic_killbackrefs, Parentheses missing
-around "%s" list, Possible Y2K bug: %s, pragma "attrs" is deprecated, use
-"sub NAME : ATTRS" instead, Premature end of script headers, Repeat count
-in pack overflows, Repeat count in unpack overflows, realloc() of freed
-memory ignored, Reference is already weak, setpgrp can't take arguments,
-Strange *+?{} on zero-length expression, switching effective %s is not
-implemented, This Perl can't reset CRTL environ elements (%s), This Perl
-can't set CRTL environ elements (%s=%s), Too late to run %s block, Unknown
-open() mode '%s', Unknown process %x sent message to prime_env_iter: %s,
-Unrecognized escape \\%c passed through, Unterminated attribute parameter
-in attribute list, Unterminated attribute list, Unterminated attribute
-parameter in subroutine attribute list, Unterminated subroutine attribute
-list, Value of CLI symbol "%s" too long, Version number must be a constant
-number
+%s, Invalid %s attributes: %s, invalid [] range "%s" in regexp, invalid []
+range "%s" in transliteration operator, Invalid separator character %s in
+attribute list, Invalid separator character %s in subroutine attribute
+list, leaving effective %s failed, Lvalue subs returning %s not implemented
+yet, Method %s not permitted, Missing %sbrace%s on \N{}, Missing command in
+piped open, Missing name in "my sub", No %s specified for -%c, No package
+name allowed for variable %s in "our", No space allowed after -%c, no UTC
+offset information; assuming local time is UTC, Octal number > 037777777777
+non-portable, panic: del_backref, panic: kid popen errno read, panic:
+magic_killbackrefs, Parentheses missing around "%s" list, Possible Y2K bug:
+%s, pragma "attrs" is deprecated, use "sub NAME : ATTRS" instead, Premature
+end of script headers, Repeat count in pack overflows, Repeat count in
+unpack overflows, realloc() of freed memory ignored, Reference is already
+weak, setpgrp can't take arguments, Strange *+?{} on zero-length
+expression, switching effective %s is not implemented, This Perl can't
+reset CRTL environ elements (%s), This Perl can't set CRTL environ elements
+(%s=%s), Too late to run %s block, Unknown open() mode '%s', Unknown
+process %x sent message to prime_env_iter: %s, Unrecognized escape \\%c
+passed through, Unterminated attribute parameter in attribute list,
+Unterminated attribute list, Unterminated attribute parameter in subroutine
+attribute list, Unterminated subroutine attribute list, Value of CLI symbol
+"%s" too long, Version number must be a constant number
 
 =item New tests
 
@@ -6053,6 +6062,47 @@ C<COND_WAIT>, F<os2.c>
 =item Usage Hints
 
 =item Extensions
+
+=back
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=over
+
+=item Mailing list
+
+=back
+
+=item HISTORY
+
+=back
+
+=head2 perlposix-bc, README.posix-bc - building and installing Perl for
+BS2000 POSIX.
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over
+
+=item gzip
+
+=item bison
+
+=item Unpacking
+
+=item Compiling
+
+=item Testing
+
+=item Install
+
+=item Using Perl
 
 =back
 

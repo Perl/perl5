@@ -3158,7 +3158,7 @@ Perl_yylex(pTHX)
 	    yyerror("Unmatched right curly bracket");
 	else
 	    PL_expect = (expectation)PL_lex_brackstack[--PL_lex_brackets];
-	if (PL_lex_brackets < PL_lex_formbrack)
+	if (PL_lex_brackets < PL_lex_formbrack && PL_lex_state != LEX_INTERPNORMAL)
 	    PL_lex_formbrack = 0;
 	if (PL_lex_state == LEX_INTERPNORMAL) {
 	    if (PL_lex_brackets == 0) {
@@ -7162,7 +7162,7 @@ S_scan_formline(pTHX_ register char *s)
     bool needargs = FALSE;
 
     while (!needargs) {
-	if (*s == '.' || *s == '}') {
+	if (*s == '.' || *s == /*{*/'}') {
 	    /*SUPPRESS 530*/
 #ifdef PERL_STRICT_CR
 	    for (t = s+1;SPACE_OR_TAB(*t); t++) ;

@@ -21,9 +21,9 @@ print '1..', scalar @tests, "\n";
 
 $SIG{__WARN__} = sub {
     if ($_[0] =~ /^Invalid conversion/) {
-    $w = ' INVALID'
+	$w = ' INVALID'
     } else {
-    warn @_;
+	warn @_;
     }
 };
 
@@ -34,12 +34,26 @@ for ($i = 1; @tests; $i++) {
     $x = sprintf(">$template<",
                  defined @$evalData ? @$evalData : $evalData);
     substr($x, -1, 0) = $w if $w;
+    # $y may have 3 exponent digits, not 2
+    my $r;
+    if (($y = $x) =~ s/([Ee][-+])0(\d)/$1$2/g) {
+	$y =~ s/^>\s+/>/;
+	$y =~ s/\s+<$/</;
+	$r = $result;
+	$r =~ s/^\s+//;
+	$r =~ s/\s+$//;
+    }
+
     if ($x eq ">$result<") {
         print "ok $i\n";
     }
+    elsif ($r and $y eq ">$r<")	# Some C libraries always give
+    {				# three-digit exponent
+	print("ok $i >$result< $x # three-digit exponent accepted\n");
+    }
     else {
-    print("not ok $i >$template< >$data< >$result< $x",
-        $comment ? " # $comment\n" : "\n");
+	print("not ok $i >$template< >$data< >$result< $x",
+	    $comment ? " # $comment\n" : "\n");
     }
 }
     
@@ -56,30 +70,18 @@ for ($i = 1; @tests; $i++) {
 #
 # template    data          result
 __END__
->%6 .6s<    >''<          >%6 .6s INVALID< >First test from old sprintf.t<
 >%6. 6s<    >''<          >%6. 6s INVALID< >(See use of $w in code above)<
+>%6 .6s<    >''<          >%6 .6s INVALID<
 >%6.6 s<    >''<          >%6.6 s INVALID<
->%3s<       >'hi'<        > hi<
->%-4s<      >123<         >123 <
->%%foo<     >'bar'<       >%foo< 
->%.0d<      >0<           ><
->%5d<       >456<         >  456<
->%#x<       >0<           >0<
->%c<        >ord('A')<    >A<
->%3.1f<     >3.0999<      >3.1<
->%b<        >11<          >1011<
->%x<        >171<         >ab<
->%X<        >171<         >AB<
->%#b<       >11<          >0b1011<
->%#x<       >171<         >0xab<
->%#X<       >171<         >0XAB<           >Last test from old sprintf.t<
->%A<        >''<          >%A INVALID<     >First new test<
+>%A<        >''<          >%A INVALID<
 >%B<        >''<          >%B INVALID<
 >%C<        >''<          >%C INVALID<
 >%D<        >0x7fffffff<  >2147483647<     >Synonym for %ld<
 >%E<        >123456.789<  >1.234568E+05<   >Like %e, but using upper-case "E"<
 >%F<        >123456.789<  >123456.789000<  >Synonym for %f<
 >%G<        >1234567.89<  >1.23457E+06<    >Like %g, but using upper-case "E"<
+>%G<        >1234567e96<  >1.23457E+102<
+>%G<        >.1234567e-101< >1.23457E-102<
 >%G<        >12345.6789<  >12345.7<
 >%H<        >''<          >%H INVALID<
 >%I<        >''<          >%I INVALID<
@@ -88,13 +90,13 @@ __END__
 >%L<        >''<          >%L INVALID<
 >%M<        >''<          >%M INVALID<
 >%N<        >''<          >%N INVALID<
->%O<        >2**32-1<     >37777777777<    >Synonym for %lo<
+>%O<        >2**32-1<     >37777777777<    >Synonum for %lo<
 >%P<        >''<          >%P INVALID<
 >%Q<        >''<          >%Q INVALID<
 >%R<        >''<          >%R INVALID<
 >%S<        >''<          >%S INVALID<
 >%T<        >''<          >%T INVALID<
->%U<        >2**32-1<     >4294967295<     >Synonym for %lu<
+>%U<        >2**32-1<     >4294967295<     >Synonum for %lu<
 >%V<        >''<          >%V INVALID<
 >%W<        >''<          >%W INVALID<
 >%X<        >2**32-1<     >FFFFFFFF<       >Like %x, but with u/c letters<
@@ -147,8 +149,12 @@ __END__
 >%v+-3d<    >"\01\02\03"< >+1 .2  .3  <
 >%v4.3d<    >"\01\02\03"< > 001. 002. 003<
 >%v04.3d<   >"\01\02\03"< >0001.0002.0003<
->%*v02d<    >['-', "\0\6\35"]< >00-06-29<
+>%*v02d<    >['-', "\0\7\13"]< >00-07-11<
 >%e<        >1234.875<    >1.234875e+03<
+>%e<        >0.000012345< >1.234500e-05<
+>%e<        >1234567E96<  >1.234567e+102<
+>%e<        >0<           >0.000000e+00<
+>%e<        >.1234567E-101< >1.234567e-102<
 >%+e<       >1234.875<    >+1.234875e+03<
 >%#e<       >1234.875<    >1.234875e+03<
 >%e<        >-1234.875<   >-1.234875e+03<
@@ -180,6 +186,11 @@ __END__
 >%+-8.1f<   >-1234.875<   >-1234.9 <
 >%+8.1f<    >-1234.875<   > -1234.9<
 >%*.*f<     >[5, 2, 12.3456]< >12.35<
+>%f<        >0<           >0.000000<
+>%.0f<      >0<           >0<
+>%.0f<      >2**38<       >274877906944<   >Should have exact int'l rep'n<
+>%.0f<      >0.5<         >0<
+>%.0f<      >-0.5<        >-0<
 >%g<        >12345.6789<  >12345.7<
 >%+g<       >12345.6789<  >+12345.7<
 >%#g<       >12345.6789<  >12345.7<
@@ -200,6 +211,11 @@ __END__
 >%g<        >-1234567.89< >-1.23457e+06<
 >%+g<       >-1234567.89< >-1.23457e+06<
 >%#g<       >-1234567.89< >-1.23457e+06<
+>%g<        >0.00012345<  >0.00012345<
+>%g<        >0.000012345< >1.2345e-05<
+>%g<        >1234567E96<  >1.23457e+102<
+>%g<        >.1234567E-101< >1.23457e-102<
+>%g<        >0<           >0<
 >%13g<      >1234567.89<  >  1.23457e+06<
 >%+13g<     >1234567.89<  > +1.23457e+06<
 >%013g<      >1234567.89< >001.23457e+06<
