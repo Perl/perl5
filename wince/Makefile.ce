@@ -554,6 +554,7 @@ MICROCORE_SRC	=		\
 		..\hv.c		\
 		..\mg.c		\
 		..\op.c		\
+		..\pad.c	\
 		..\perl.c	\
 		..\perlapi.c	\
 		..\perly.c	\
@@ -1015,6 +1016,7 @@ $(DLLDIR)\locale.obj \
 $(DLLDIR)\mg.obj \
 $(DLLDIR)\numeric.obj \
 $(DLLDIR)\op.obj \
+$(DLLDIR)\pad.obj \
 $(DLLDIR)\perl.obj \
 $(DLLDIR)\perlapi.obj \
 $(DLLDIR)\perlio.obj \
