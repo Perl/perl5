@@ -83,22 +83,25 @@ Charles Bailey E<lt>F<bailey@genetics.upenn.edu>E<gt>
 
 =head1 REVISION
 
-This module was last revised 14-Feb-1996, for perl 5.002.
-$VERSION is 1.0101.
+Current $VERSION is 1.02.
 
 =cut
 
-require 5.000;
 use Carp;
-use File::Basename;
-require Exporter;
+use File::Basename ();
+use DirHandle ();
+use Exporter ();
+use strict;
 
 use vars qw( $VERSION @ISA @EXPORT );
-$VERSION = "1.0101";
+$VERSION = "1.02";
 @ISA = qw( Exporter );
 @EXPORT = qw( mkpath rmtree );
 
 my $Is_VMS = $^O eq 'VMS';
+
+# These OSes complain if you want to remove a file that you have no
+# write permission to:
 my $force_writeable = ($^O eq 'os2' || $^O eq 'msdos' || $^O eq 'MSWin32'
 		       || $^O eq 'amigaos');
 
@@ -110,12 +113,12 @@ sub mkpath {
     local($")="/";
     $mode = 0777 unless defined($mode);
     $paths = [$paths] unless ref $paths;
-    my(@created);
+    my(@created,$path);
     foreach $path (@$paths) {
         next if -d $path;
         # Logic wants Unix paths, so go with the flow.
         $path = VMS::Filespec::unixify($path) if $Is_VMS;
-        my $parent = dirname($path);
+        my $parent = File::Basename::dirname($path);
         push(@created,mkpath($parent, $verbose, $mode)) unless (-d $parent);
         print "mkdir $path\n" if $verbose;
         mkdir($path,$mode) || croak "mkdir $path: $!";
@@ -129,13 +132,25 @@ sub rmtree {
     my(@files);
     my($count) = 0;
     $roots = [$roots] unless ref $roots;
+    $verbose ||= 0;
+    $safe ||= 0;
 
+    my($root);
     foreach $root (@{$roots}) {
        $root =~ s#/$##;
-       if (not -l $root and -d _) { 
-           opendir(D,$root);
-           @files = readdir(D);
-           closedir(D);
+       $count++, next unless -e $root;
+       if (not -l $root and -d _) {
+	   # notabene: 0777 is for making readable in the first place,
+	   # it's also intended to change it to writable in case we have
+	   # to recurse in which case we are better than rm -rf for 
+	   # subtrees with strange permissions
+           chmod 0777, $root or carp "Can't make directory $root read+writeable: $!"
+	       unless $safe;
+
+           my $d = DirHandle->new($root) or carp "Could not read $root: $!";
+           @files = $d->read;
+           $d->close;
+
            # Deleting large numbers of files from VMS Files-11 filesystems
            # is faster if done in reverse ASCIIbetical order 
            @files = reverse @files if $Is_VMS;
