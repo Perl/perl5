@@ -596,7 +596,7 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
             if ((cp1 = strchr(environ[i],'=')) && 
                 !strncmp(environ[i],lnm,cp1 - environ[i])) {
 #ifdef HAS_SETENV
-              return setenv(lnm,eqv,1) ? vaxc$errno : 0;
+              return setenv(lnm,"",1) ? vaxc$errno : 0;
             }
           }
           ivenv = 1; retsts = SS$_NOLOGNAM;

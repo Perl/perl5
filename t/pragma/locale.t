@@ -278,7 +278,7 @@ Norsk Norwegian:no no\@nynorsk:no:1 15
 Occitan:oc:es:1 15
 Polski Polish:pl:pl:2
 Rumanian:ro:ro:2
-Russki Russian:ru:ru su ua:5 koi8 koi8r KOI8-R koi8u cp1251
+Russki Russian:ru:ru su ua:5 koi8 koi8r KOI8-R koi8u cp1251 cp866
 Serbski Serbian:sr:yu:5
 Slovak:sk:sk:2
 Slovene Slovenian:sl:si:2
@@ -354,7 +354,12 @@ foreach (0..15) {
 
 # Sanitize the environment so that we can run the external 'locale'
 # program without the taint mode getting grumpy.
-delete @ENV{qw(PATH IFS CDPATH ENV BASH_ENV)};
+
+# $ENV{PATH} is special in VMS.
+delete $ENV{PATH} if $^O ne 'VMS' or $Config{d_setenv};
+
+# Other subversive stuff.
+delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
 if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
     while (<LOCALES>) {
@@ -399,6 +404,8 @@ if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
 }
 
 setlocale(LC_ALL, "C");
+
+sub utf8locale { $_[0] =~ /utf-?8/i }
 
 @Locale = sort @Locale;
 
@@ -490,7 +497,10 @@ foreach $Locale (@Locale) {
 
 	# Test \w.
     
-	{
+	if (utf8locale($Locale)) {
+	    # Until the polymorphic regexen arrive.
+	    debug "# skipping UTF-8 locale '$Locale'\n";
+	} else {
 	    my $word = join('', @Neoalpha);
 
 	    $word =~ /^(\w+)$/;
@@ -672,7 +682,10 @@ foreach $Locale (@Locale) {
     # Does lc of an UPPER (if different from the UPPER) match
     # case-insensitively the UPPER, and does the UPPER match
     # case-insensitively the lc of the UPPER.  And vice versa.
-    {
+    if (utf8locale($Locale)) {
+        # Until the polymorphic regexen arrive.
+        debug "# skipping UTF-8 locale '$Locale'\n";
+    } else {
 	use locale;
 
 	my @f = ();
