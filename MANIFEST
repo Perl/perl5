@@ -1,5 +1,3 @@
-lib/Class/ISA.pm	Class::ISA
-t/lib/class-isa.t	See if Class::ISA works
 AUTHORS			Contact info for contributors
 Artistic		The "Artistic License"
 Changes			Differences from previous version
@@ -691,6 +689,7 @@ lib/CPAN/FirstTime.pm	Utility for creating CPAN config files
 lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
 lib/Carp.pm		Error message base class
 lib/Carp/Heavy.pm	Error message workhorse
+lib/Class/ISA.pm	Class::ISA
 lib/Class/Struct.pm	Declare struct-like datatypes as Perl classes
 lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
 lib/DB.pm		Debugger API (draft)
@@ -1435,6 +1434,7 @@ t/lib/cgi-pretty.t	See if CGI.pm works
 t/lib/cgi-request.t	See if CGI.pm works
 t/lib/charnames.t	See if character names work
 t/lib/checktree.t	See if File::CheckTree works
+t/lib/class-isa.t	See if Class::ISA works
 t/lib/class-struct.t	See if Class::Struct works
 t/lib/complex.t		See if Math::Complex works
 t/lib/compmod.pl	Helper for 1_compile.t
@@ -1864,6 +1864,7 @@ vos/vos_dummies.c	Wrappers to soak up undefined functions
 vos/vosish.h		VOS-specific header file
 warnings.h		The warning numbers
 warnings.pl		Program to write warnings.h and lib/warnings.pm
+win32/FindExt.pm	Scan for extensions
 win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/bin/exetype.pl	Set executable type to CONSOLE or WINDOWS
 win32/bin/mdelete.bat	multifile delete
@@ -1883,7 +1884,6 @@ win32/config_sh.PL	Perl code to update Win32 config.sh from Makefile
 win32/des_fcrypt.patch	Win32 port
 win32/distclean.bat	Remove _ALL_ files not listed here in MANIFEST
 win32/dl_win32.xs	Win32 port
-win32/FindExt.pm	Scan for extensions
 win32/genmk95.pl        Perl code to generate command.com-usable makefile.95
 win32/include/arpa/inet.h	Win32 port
 win32/include/dirent.h		Win32 port
