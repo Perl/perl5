@@ -9,16 +9,34 @@ BEGIN {
 
 use warnings;
 
+my $test = 1;
 sub ok {
-    my ($n, $result, $info) = @_;
-    if ($result) {
-	print "ok $n\n";
+    my($ok, $info, $todo) = @_;
+
+    # You have to do it this way or VMS will get confused.
+    printf "%s $test%s\n", $ok ? "ok" : "not ok",
+                           $todo ? " # TODO $todo" : '';
+
+    unless( $ok ) {
+        printf "# Failed test at line %d\n", (caller)[2];
+        print  "# $info" if defined $info;
     }
-    else {
-    	print "not ok $n\n";
-	print "# $info\n" if $info;
-    }
+
+    $test++;
+    return $ok;
 }
+
+sub skip {
+    my($reason) = @_;
+
+    printf "ok $test # skipped%s\n", defined $reason ? ": $reason" : '';
+
+    $test++;
+    return 1;
+}
+
+print "1..41\n";
+
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
@@ -29,34 +47,31 @@ $Is_Cygwin   = $^O eq 'cygwin';
 $Is_MPE     = $^O eq 'mpeix';		
 $PERL = ($Is_MSWin32 ? '.\perl' : ($Is_NetWare ? 'perl' : './perl'));
 
-print "1..41\n";
-
 eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
 # cmd.exe will echo 'variable=value' but 4nt will echo just the value
 # -- Nikola Knezevic
-if ($Is_MSWin32) { ok 1, `set FOO` =~ /^(FOO=)?hi there$/; }
-else             { ok 1, `echo \$FOO` eq "hi there\n"; }
+if ($Is_MSWin32) { ok `set FOO` =~ /^(FOO=)?hi there$/; }
+else             { ok `echo \$FOO` eq "hi there\n"; }
 
 unlink 'ajslkdfpqjsjfk';
 $! = 0;
 open(FOO,'ajslkdfpqjsjfk');
-ok 2, $!, $!;
+ok $!, $!;
 close FOO; # just mention it, squelch used-only-once
 
 if ($Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE) {
-    ok "3 # skipped",1;
-    ok "4 # skipped",1;
+    skip() for 1..2;
 }
 else {
   # the next tests are embedded inside system simply because sh spits out
   # a newline onto stderr when a child process kills itself with SIGINT.
-  system './perl', '-e', <<'END';
+    system './perl', '-e', <<'END';
 
     $| = 1;		# command buffering
 
     $SIG{"INT"} = "ok3";     kill "INT",$$; sleep 1;
     $SIG{"INT"} = "IGNORE";  kill "INT",$$; sleep 1; print "ok 4\n";
-    $SIG{"INT"} = "DEFAULT"; kill "INT",$$; sleep 1; print "not ok\n";
+    $SIG{"INT"} = "DEFAULT"; kill "INT",$$; sleep 1; print "not ok 4\n";
 
     sub ok3 {
 	if (($x = pop(@_)) eq "INT") {
@@ -69,49 +84,50 @@ else {
 
 END
 }
+$test += 2;
 
 # can we slice ENV?
 @val1 = @ENV{keys(%ENV)};
 @val2 = values(%ENV);
-ok 5, join(':',@val1) eq join(':',@val2);
-ok 6, @val1 > 1;
+ok join(':',@val1) eq join(':',@val2);
+ok @val1 > 1;
 
 # regex vars
 'foobarbaz' =~ /b(a)r/;
-ok 7, $` eq 'foo', $`;
-ok 8, $& eq 'bar', $&;
-ok 9, $' eq 'baz', $';
-ok 10, $+ eq 'a', $+;
+ok $` eq 'foo', $`;
+ok $& eq 'bar', $&;
+ok $' eq 'baz', $';
+ok $+ eq 'a', $+;
 
 # $"
 @a = qw(foo bar baz);
-ok 11, "@a" eq "foo bar baz", "@a";
+ok "@a" eq "foo bar baz", "@a";
 {
     local $" = ',';
-    ok 12, "@a" eq "foo,bar,baz", "@a";
+    ok "@a" eq "foo,bar,baz", "@a";
 }
 
 # $;
 %h = ();
 $h{'foo', 'bar'} = 1;
-ok 13, (keys %h)[0] eq "foo\034bar", (keys %h)[0];
+ok((keys %h)[0] eq "foo\034bar", (keys %h)[0]);
 {
     local $; = 'x';
     %h = ();
     $h{'foo', 'bar'} = 1;
-    ok 14, (keys %h)[0] eq 'fooxbar', (keys %h)[0];
+    ok((keys %h)[0] eq 'fooxbar', (keys %h)[0]);
 }
 
 # $?, $@, $$
 system qq[$PERL -e "exit(0)"];
-ok 15, $? == 0, $?;
+ok $? == 0, $?;
 system qq[$PERL -e "exit(1)"];
-ok 16, $? != 0, $?;
+ok $? != 0, $?;
 
 eval { die "foo\n" };
-ok 17, $@ eq "foo\n", $@;
+ok $@ eq "foo\n", $@;
 
-ok 18, $$ > 0, $$;
+ok $$ > 0, $$;
 
 # $^X and $0
 {
@@ -161,35 +177,34 @@ EOT
 EOH
     }
     $s1 = "\$^X is $perl, \$0 is $script\n";
-    ok 19, open(SCRIPT, ">$script"), $!;
-    ok 20, print(SCRIPT $headmaybe . <<EOB . <<'EOF' . $tailmaybe), $!;
+    ok open(SCRIPT, ">$script"), $!;
+    ok print(SCRIPT $headmaybe . <<EOB . <<'EOF' . $tailmaybe), $!;
 #!$wd/perl
 EOB
 print "\$^X is $^X, \$0 is $0\n";
 EOF
-    ok 21, close(SCRIPT), $!;
-    ok 22, chmod(0755, $script), $!;
+    ok close(SCRIPT), $!;
+    ok chmod(0755, $script), $!;
     $_ = `$script`;
     s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
     s{is perl}{is $perl}; # for systems where $^X is only a basename
     s{\\}{/}g;
-    ok 23, (($Is_MSWin32 || $Is_os2) ? uc($_) eq uc($s1) : $_ eq $s1), " :$_:!=:$s1:";
+    ok((($Is_MSWin32 || $Is_os2) ? uc($_) eq uc($s1) : $_ eq $s1), " :$_:!=:$s1:");
     $_ = `$perl $script`;
     s/\.exe//i if $Is_Dos or $Is_os2;
     s{\\}{/}g;
-    ok 24, (($Is_MSWin32 || $Is_os2) ? uc($_) eq uc($s1) : $_ eq $s1), " :$_:!=:$s1: after `$perl $script`";
-    ok 25, unlink($script), $!;
+    ok((($Is_MSWin32 || $Is_os2) ? uc($_) eq uc($s1) : $_ eq $s1), " :$_:!=:$s1: after `$perl $script`");
+    ok unlink($script), $!;
 }
 
 # $], $^O, $^T
-ok 26, $] >= 5.00319, $];
-ok 27, $^O;
-ok 28, $^T > 850000000, $^T;
+ok $] >= 5.00319, $];
+ok $^O;
+ok $^T > 850000000, $^T;
 
 if ($Is_VMS || $Is_Dos) {
-	ok "29 # skipped", 1;
-	ok "30 # skipped", 1;
+    skip() for 1..2;
 }
 else {
 	$PATH = $ENV{PATH};
@@ -198,21 +213,21 @@ else {
 	%ENV = ();
 	$ENV{PATH} = $PATH;
 	$ENV{PERL_DESTRUCT_LEVEL} = $PDL || 0;
-	ok 29, ($Is_MSWin32 ? (`set foo 2>NUL` eq "")
+	ok ($Is_MSWin32 ? (`set foo 2>NUL` eq "")
 				: (`echo \$foo` eq "\n") );
 
 	$ENV{__NoNeSuCh} = "foo";
 	$0 = "bar";
 # cmd.exe will echo 'variable=value' but 4nt will echo just the value
 # -- Nikola Knezevic
-	ok 30, ($Is_MSWin32 ? (`set __NoNeSuCh` =~ /^(__NoNeSuCh=)?foo$/)
+	ok ($Is_MSWin32 ? (`set __NoNeSuCh` =~ /^(__NoNeSuCh=)?foo$/)
 			    : (`echo \$__NoNeSuCh` eq "foo\n") );
 }
 
 {
     local $SIG{'__WARN__'} = sub { print "# @_\nnot " };
     $! = undef;
-    print "ok 31\n";
+    ok 1;
 }
 
 # test case-insignificance of %ENV (these tests must be enabled only
@@ -221,25 +236,22 @@ if ($Is_MSWin32 || $Is_NetWare) {
     %ENV = ();
     $ENV{'Foo'} = 'bar';
     $ENV{'fOo'} = 'baz';
-    ok 32, (scalar(keys(%ENV)) == 1);
-    ok 33, exists($ENV{'FOo'});
-    ok 34, (delete($ENV{'foO'}) eq 'baz');
-    ok 35, (scalar(keys(%ENV)) == 0);
+    ok (scalar(keys(%ENV)) == 1);
+    ok exists($ENV{'FOo'});
+    ok (delete($ENV{'foO'}) eq 'baz');
+    ok (scalar(keys(%ENV)) == 0);
 }
 else {
-    ok "32 # skipped: no caseless %ENV support",1;
-    ok "33 # skipped: no caseless %ENV support",1;
-    ok "34 # skipped: no caseless %ENV support",1;
-    ok "35 # skipped: no caseless %ENV support",1;
+    skip('no caseless %ENV support') for 1..4;
 }
 
 # Make sure Errno hasn't been prematurely autoloaded
 
-ok 36, !defined %Errno::;
+ok !defined %Errno::;
 
 # Test auto-loading of Errno when %! is used
 
-ok 37, scalar eval q{
+ok scalar eval q{
    my $errs = %!;
    defined %Errno::;
 }, $@;
@@ -252,8 +264,8 @@ delete $INC{"Errno.pm"};
 
 open(FOO, "nonesuch"); # Generate ENOENT
 my %errs = %{"!"}; # Cause Errno.pm to be loaded at run-time
-ok 38, ${"!"}{ENOENT};
+ok ${"!"}{ENOENT};
 
-ok 39, $^S == 0;
-eval { ok 40, $^S == 1 };
-ok 41, $^S == 0;
+ok $^S == 0;
+eval { ok $^S == 1 };
+ok $^S == 0;
