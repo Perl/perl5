@@ -277,6 +277,17 @@ if ($OS2::is_aout) {
 $preconfig{d_fork} = undef unless $OS2::can_fork; # Some funny cases can't
 sub TIEHASH { bless {%preconfig} }
 ENDOFSET
+  # Extract the name of the DLL from the makefile to avoid duplication
+  my ($f) = grep -r, qw(GNUMakefile Makefile);
+  my $dll;
+  if (open my $fh, '<', $f) {
+    while (<$fh>) {
+      $dll = $1, last if /^PERL_DLL_BASE\s*=\s*(\S*)\s*$/;
+    }
+  }
+  print CONFIG <<ENDOFSET if $dll;
+\$preconfig{dll_name} = '$dll';
+ENDOFSET
 } else {
   print CONFIG <<'ENDOFSET';
 sub TIEHASH { bless {} }

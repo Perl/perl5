@@ -334,6 +334,9 @@ elsif ($PLATFORM eq 'os2') {
 		    Perl_hab_GET
 		    loadByOrdinal
 		    pExtFCN
+		    os2error
+		    ResetWinError
+		    CroakWinError
 		    )]);
 }
 elsif ($PLATFORM eq 'MacOS') {

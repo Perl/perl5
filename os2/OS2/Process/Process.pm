@@ -1,24 +1,33 @@
 package OS2::localMorphPM;
+# use strict;
 
-sub new { my ($c,$f) = @_; OS2::MorphPM($f); bless [shift], $c }
-sub DESTROY { OS2::UnMorphPM(shift->[0]) }
+sub new {
+  my ($c,$f) = @_;
+  OS2::MorphPM($f);
+  # print STDERR ">>>>>\n";
+  bless [$f], $c
+}
+sub DESTROY {
+  # print STDERR "<<<<<\n";
+  OS2::UnMorphPM(shift->[0])
+}
 
 package OS2::Process;
 
 BEGIN {
   require Exporter;
-  require DynaLoader;
+  require XSLoader;
   #require AutoLoader;
 
-  @ISA = qw(Exporter DynaLoader);
-  $VERSION = "1.0";
-  bootstrap OS2::Process;
+  our @ISA = qw(Exporter);
+  our $VERSION = "1.0";
+  XSLoader::load('OS2::Process', $VERSION);
 }
 
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
-@EXPORT = qw(
+our @EXPORT = qw(
 	P_BACKGROUND
 	P_DEBUG
 	P_DEFAULT
@@ -62,15 +71,24 @@ BEGIN {
 	process_hentries
 	change_entry
 	change_entryh
+	process_hwnd
 	Title_set
 	Title
+	winTitle_set
+	winTitle
+	swTitle_set
+	bothTitle_set
 	WindowText
 	WindowText_set
 	WindowPos
 	WindowPos_set
+	hWindowPos
+	hWindowPos_set
 	WindowProcess
 	SwitchToProgram
+	DesktopWindow
 	ActiveWindow
+	ActiveWindow_set
 	ClassName
 	FocusWindow
 	FocusWindow_set
@@ -94,32 +112,75 @@ BEGIN {
 	WindowFromId
 	WindowFromPoint
 	EnumDlgItem
+        EnableWindow
+        EnableWindowUpdate
+        IsWindowEnabled
+        IsWindowVisible
+        IsWindowShowing
+        WindowPtr
+        WindowULong
+        WindowUShort
+        SetWindowBits
+        SetWindowPtr
+        SetWindowULong
+        SetWindowUShort
 
 	get_title
 	set_title
 );
+our @EXPORT_OK = qw(
+	ResetWinError
+        MPFROMSHORT
+        MPVOID
+        MPFROMCHAR
+        MPFROM2SHORT
+        MPFROMSH2CH
+        MPFROMLONG
+);
+
+our $AUTOLOAD;
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
     # XS function.  If a constant is not found then control is passed
     # to the AUTOLOAD in AutoLoader.
 
-    local($constname);
-    ($constname = $AUTOLOAD) =~ s/.*:://;
-    $val = constant($constname, @_ ? $_[0] : 0);
+    (my $constname = $AUTOLOAD) =~ s/.*:://;
+    my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
 	if ($! =~ /Invalid/ || $!{EINVAL}) {
-	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
-	    goto &AutoLoader::AUTOLOAD;
-	}
-	else {
-	    ($pack,$file,$line) = caller;
+	    die "Unsupported function $AUTOLOAD"
+	} else {
+	    my ($pack,$file,$line) = caller;
 	    die "Your vendor has not defined OS2::Process macro $constname, used at $file line $line.
 ";
 	}
     }
     eval "sub $AUTOLOAD { $val }";
     goto &$AUTOLOAD;
+}
+
+sub const_import {
+  require OS2::Process::Const;
+  my $sym = shift;
+  my ($err, $val) = OS2::Process::Const::constant($sym);
+  die $err if $err;
+  my $p = caller(1);
+
+  # no strict;
+
+  *{"$p\::$sym"} = sub () { $val };
+  ();			# needed by import()
+}
+
+sub import {
+  my $class = shift;
+  my $ini = @_;
+  @_ = ($class,
+	map {
+	  /^(HWND|WM|SC|SWP|WC|PROG|QW|EDI|WS|QWS|QWP|QWL|FF|FI|LS|FS|FCF|BS|MS|TBM|CF|CFI|FID)_/ ? const_import($_) : $_
+	} @_);
+  goto &Exporter::import if @_ > 1 or $ini == 0;
 }
 
 # Preloaded methods go here.
@@ -134,7 +195,7 @@ sub swTitle_set_sw {
   change_entry(@sw);
 }
 
-sub swTitle_set {
+sub swTitle_set ($) {
   my (@sw) = process_entry();
   swTitle_set_sw(shift, @sw);
 }
@@ -145,19 +206,25 @@ sub winTitle_set_sw {
   WindowText_set $sw[1], $title;
 }
 
-sub winTitle_set {
+sub winTitle_set ($) {
   my (@sw) = process_entry();
   winTitle_set_sw(shift, @sw);
 }
 
-sub bothTitle_set {
+sub winTitle () {
+  my (@sw) = process_entry();
+  my $h = OS2::localMorphPM->new(0);
+  WindowText $sw[1];
+}
+
+sub bothTitle_set ($) {
   my (@sw) = process_entry();
   my $t = shift;
   winTitle_set_sw($t, @sw);
   swTitle_set_sw($t, @sw);
 }
 
-sub Title_set {
+sub Title_set ($) {
   my $t = shift;
   return 1 if sesmgr_title_set($t);
   return 0 unless $^E == 372;
@@ -179,6 +246,7 @@ sub swentry_hexpand ($) {
 }
 
 sub process_hentry { swentry_hexpand(process_swentry(@_)) }
+sub process_hwnd { process_hentry()->{owner_hwnd} }
 
 my $swentry_size = swentry_size();
 
@@ -214,14 +282,53 @@ sub change_entryh ($) {
 
 # Massage entries into the same order as WindowPos_set:
 sub WindowPos ($) {
-  my ($fl, $w, $h, $x, $y, $behind, $hwnd, @rest)
+  my ($fl, $h, $w, $y, $x, $behind, $hwnd, @rest)
 	= unpack 'L l4 L4', WindowSWP(shift);
   ($x, $y, $fl, $w, $h, $behind, @rest);
 }
 
-sub ChildWindows ($) {
+# Put them into a hash
+sub hWindowPos ($) {
+  my %h;
+  @h{ qw(flags height width y x behind hwnd reserved1 reserved2) }
+	= unpack 'L l4 L4', WindowSWP(shift);
+  \%h;
+}
+
+my @SWP_keys = ( [qw(width height)],	# SWP_SIZE=1
+		 [qw(x y)],		# SWP_MOVE=2
+		 [qw(behind)] );	# SWP_ZORDER=3
+my %SWP_def;
+@SWP_def{ map @$_, @SWP_keys }  = (0) x 20;
+
+# Get them from a hash
+sub hWindowPos_set ($$) {
+  my $hash = shift;
+  my $hwnd = (@_ ? shift : $hash->{hwnd} );
+  my $flags;
+  if (exists $hash->{flags}) {
+    $flags = $hash->{flags};
+  } else {			# Set flags according to existing keys in $hash
+    $flags = 0;
+    for my $bit (0..2) {
+      exists $hash->{$_} and $flags |= (1<<$bit) for @{$SWP_keys[$bit]};
+    }
+  }
+  for my $bit (0..2) {		# Check for required keys
+    next unless $flags & (1<<$bit);
+    exists $hash->{$_}
+      or die sprintf "key $_ required for flags=%#x", $flags
+	for @{$SWP_keys[$bit]};
+  }
+  my %h = (%SWP_def, flags => $flags, %$hash);		# Avoid warnings
+  my ($x, $y, $fl, $w, $h, $behind) = @h{ qw(x y flags width height behind) };
+  WindowPos_set($hwnd, $x, $y, $fl, $w, $h, $behind);
+}
+
+sub ChildWindows (;$) {
+  my $hm = OS2::localMorphPM->new(0);
   my @kids;
-  my $h = BeginEnumWindows shift;
+  my $h = BeginEnumWindows(@_ ? shift : 1);	# HWND_DESKTOP
   my $w;
   push @kids, $w while $w = GetNextWindow $h;
   EndEnumWindows $h;
@@ -554,11 +661,16 @@ changes a process entry, arguments are the same as process_entry() returns.
 
 Similar to change_entry(), but takes a hash reference as an argument.
 
+=item process_hwnd()
+
+returns the C<owner_hwnd> of the process entry (for VIO windowed processes
+this is the frame window of the session).
+
 =item Title()
 
-returns a title of the current session.  (There is no way to get this
-info in non-standard Session Managers, this implementation is a
-shortcut via process_entry().)
+returns the text of the task switch menu entry of the current session.
+(There is no way to get this info in non-standard Session Managers.  This
+implementation is a shortcut via process_entry().)
 
 =item C<Title_set(newtitle)>
 
@@ -569,8 +681,29 @@ This is a limitation of OS/2, in such a case $^E is set to 372 (type
   help 372
 
 for a funny - and wrong  - explanation ;-).  In such cases a
-direct-manipulation of low-level entries is used.  Keep in mind that
-some versions of OS/2 leak memory with such a manipulation.
+direct-manipulation of low-level entries is used (same as bothTitle_set()).
+Keep in mind that some versions of OS/2 leak memory with such a manipulation.
+
+=item winTitle()
+
+returns text of the titlebar of the current process' window.
+
+=item C<winTitle_set(newtitle)>
+
+sets text of the titlebar of the current process' window.  The change does not
+affect the text of the switch entry of the current window.
+
+=item C<swTitle_set(newtitle)>
+
+sets text of the task switch menu entry of the current process' window.  [There
+is no API to query this title.]  Does it via SwitchEntry interface,
+not Session manager interface.  The change does not affect the text of the
+titlebar of the current window.
+
+=item C<bothTitle_set(newtitle)>
+
+sets text of the titlebar and task switch menu of the current process' window
+via direct manipulation of the windows' texts.
 
 =item C<SwitchToProgram($sw_entry)>
 
@@ -614,42 +747,61 @@ important restriction on ownership is that owner should be created by
 the same thread as the owned thread, so they engage in the same
 message queue.]
 
-Windows may be in many different state: Focused, Activated (=Windows
-in the I<parent/child> tree between the root and the window with
-focus; usually indicate such "active state" by titlebar highlights),
-Enabled/Disabled (this influences *an ability* to receive user input
-(be focused?), and may change appearance, as for enabled/disabled
-buttons), Visible/Hidden, Minimized/Maximized/Restored, Modal, etc.
+Windows may be in many different state: Focused (take keyboard events) or not,
+Activated (=Frame windows in the I<parent/child> tree between the root and
+the window with the focus; usually indicate such "active state" by titlebar
+highlights, and take mouse events) or not, Enabled/Disabled (this influences
+the ability to update the graphic, and may change appearance, as for 
+enabled/disabled buttons), Visible/Hidden, Minimized/Maximized/Restored, Modal
+or not, etc.
+
+The APIs below all die() on error with the message being $^E.
 
 =over
 
 =item C<WindowText($hwnd)>
 
-gets "a text content" of a window.
+gets "a text content" of a window.  Requires (morphing to) PM.
 
 =item C<WindowText_set($hwnd, $text)>
 
-sets "a text content" of a window.
+sets "a text content" of a window.  Requires (morphing to) PM.
 
-=item C<WindowPos($hwnd)>
+=item C<($x, $y, $flags, $width, $height, $behind, @rest) = WindowPos($hwnd)>
 
 gets window position info as 8 integers (of C<SWP>), in the order suitable
-for WindowPos_set(): $x, $y, $fl, $w, $h, $behind, @rest.
+for WindowPos_set().  @rest is marked as "reserved" in PM docs.  $flags
+is a combination of C<SWP_*> constants.
 
-=item C<WindowPos_set($hwnd, $x, $y, $flags = SWP_MOVE, $wid = 0, $h = 0, $behind = HWND_TOP)>
+=item C<$hash = hWindowPos($hwnd)>
+
+gets window position info as a hash reference; the keys are C<flags width
+height x y behind hwnd reserved1 reserved2>.
+
+Example:
+
+  exit unless $hash->{flags} & SWP_MAXIMIZE;	# Maximized
+
+=item C<WindowPos_set($hwnd, $x, $y, $flags = SWP_MOVE, $width = 0, $height = 0, $behind = HWND_TOP)>
 
 Set state of the window: position, size, zorder, show/hide, activation,
 minimize/maximize/restore etc.  Which of these operations to perform
 is governed by $flags.
 
-=item C<WindowProcess($hwnd)>
+=item C<hWindowPos_set($hash, [$hwnd])>
+
+Same as C<WindowPos_set>, but takes the position from keys C<fl width height
+x y behind hwnd> of the hash referenced by $hash.  If $hwnd is explicitly
+specified, it overrides C<$hash->{hwnd}>.  If $hash->{flags} is not specified,
+it is calculated basing on the existing keys of $hash.  Requires (morphing to) PM.
+
+Example:
+
+  hWindowPos_set {flags => SWP_MAXIMIZE}, $hwnd; # Maximize
+
+=item C<($pid, $tid) = WindowProcess($hwnd)>
 
 gets I<PID> and I<TID> of the process associated to the window.
-
-=item ActiveWindow([$parentHwnd])
-
-gets the active subwindow's handle for $parentHwnd or desktop.
-Returns FALSE if none.
 
 =item C<ClassName($hwnd)>
 
@@ -662,51 +814,102 @@ constant.
 
 =item FocusWindow()
 
-returns the handle of the focus window.  Optional argument for specifying the desktop
-to use.
+returns the handle of the focus window.  Optional argument for specifying
+the desktop to use.
 
 =item C<FocusWindow_set($hwnd)>
 
 set the focus window by handle.  Optional argument for specifying the desktop
 to use.  E.g, the first entry in program_entries() is the C<Ctrl-Esc> list.
-To show it
+To show an application, use either one of
 
-       WinShowWindow( wlhwnd, TRUE );
-       WinSetFocus( HWND_DESKTOP, wlhwnd );
-       WinSwitchToProgram(wlhswitch);
+       WinShowWindow( $hwnd, 1 );
+       SetFocus( $hwnd );
+       SwitchToProgram($switch_handle);
 
+(Which work with alternative focus-to-front policies?)  Requires (morphing to) PM.
+
+=item C<ActiveWindow([$parentHwnd])>
+
+gets the active subwindow's handle for $parentHwnd or desktop.
+Returns FALSE if none.
+
+=item C<ActiveWindow_set($hwnd, [$parentHwnd])>
+
+sets the active subwindow's handle for $parentHwnd or desktop.  Requires (morphing to) PM.
 
 =item C<ShowWindow($hwnd [, $show])>
 
 Set visible/hidden flag of the window.  Default: $show is TRUE.
 
+=item C<EnableWindowUpdate($hwnd [, $update])>
+
+Set window visibility state flag for the window for subsequent drawing.
+No actual drawing is done at this moment.  Use C<ShowWindow($hwnd, $state)>
+when redrawing is needed.  While update is disabled, changes to the "window
+state" do not change the appearence of the window.  Default: $update is TRUE.
+
+(What is manipulated is the bit C<WS_VISIBLE> of the window style.)
+
+=item C<EnableWindow($hwnd [, $enable])>
+
+Set the window enabled state.  Default: $enable is TRUE.
+
+Results in C<WM_ENABLED> message sent to the window.  Typically, this
+would change the appearence of the window.  If at the moment of disabling
+focus is in the window (or a descendant), focus is lost (no focus anywhere).
+If focus is needed, it can be reassigned explicitly later.
+
+=item IsWindowEnabled(), IsWindowVisible(), IsWindowShowing()
+
+these functions take $hwnd as an argument.  IsWindowEnabled() queries
+the state changed by EnableWindow(), IsWindowVisible() the state changed
+by ShowWindow(), IsWindowShowing() is true if there is a part of the window
+visible on the screen.
+
 =item C<PostMsg($hwnd, $msg, $mp1, $mp2)>
 
 post message to a window.  The meaning of $mp1, $mp2 is specific for each
-message id $msg, they default to 0.  E.g., in C it is done similar to
+message id $msg, they default to 0.  E.g.,
 
-    /* Emulate `Restore' */
-    WinPostMsg(SwitchBlock.tswe[i].swctl.hwnd, WM_SYSCOMMAND,
-               MPFROMSHORT(SC_RESTORE),        0);
+  use OS2::Process qw(:DEFAULT WM_SYSCOMMAND WM_CONTEXTMENU
+		      WM_SAVEAPPLICATION WM_QUIT WM_CLOSE
+		      SC_MAXIMIZE SC_RESTORE);
+  $hwnd = process_hentry()->{owner_hwnd};
+  # Emulate choosing `Restore' from the window menu:
+  PostMsg $hwnd, WM_SYSCOMMAND, MPFROMSHORT(SC_RESTORE); # Not immediate
 
-    /* Emulate `Show-Contextmenu' (Double-Click-2) */
-    hwndParent = WinQueryFocus(HWND_DESKTOP);
-    hwndActive = WinQueryActiveWindow(hwndParent);
-    WinPostMsg(hwndActive, WM_CONTEXTMENU, MPFROM2SHORT(0,0), MPFROMLONG(0));
+  # Emulate `Show-Contextmenu' (Double-Click-2), two ways:
+  PostMsg ActiveWindow, WM_CONTEXTMENU;
+  PostMsg FocusWindow, WM_CONTEXTMENU;
 
-    /* Emulate `Close' */
-    WinPostMsg(pSWB->aswentry[i].swctl.hwnd, WM_CLOSE, 0, 0);
+  /* Emulate `Close' */
+  PostMsg ActiveWindow, WM_CLOSE;
 
-    /* Same but softer: */
-    WinPostMsg(hwndactive, WM_SAVEAPPLICATION, 0L, 0L);
-    WinPostMsg(hwndactive, WM_CLOSE, 0L, 0L));
-    WinPostMsg(hwndactive, WM_QUIT, 0L, 0L));
+  /* Same but with some "warnings" to the application */
+  $hwnd = ActiveWindow;
+  PostMsg $hwnd, WM_SAVEAPPLICATION;
+  PostMsg $hwnd, WM_CLOSE;
+  PostMsg $hwnd, WM_QUIT;
+
+In fact, MPFROMSHORT() may be omited above.
+
+For messages to other processes, messages which take/return a pointer are
+not supported.
+
+=item C<MP*()>
+
+The functions MPFROMSHORT(), MPVOID(), MPFROMCHAR(), MPFROM2SHORT(),
+MPFROMSH2CH(), MPFROMLONG() can be used the same way as from C.  Use them
+to construct parameters $m1, $m2 to PostMsg().
+
+These functions are not exported by default.
 
 =item C<$eh = BeginEnumWindows($hwnd)>
 
 starts enumerating immediate child windows of $hwnd in z-order.  The
 enumeration reflects the state at the moment of BeginEnumWindows() calls;
-use IsWindow() to be sure.
+use IsWindow() to be sure.  All the functions in this group require (morphing to) PM.
 
 =item C<$kid_hwnd = GetNextWindow($eh)>
 
@@ -716,10 +919,11 @@ gets the next kid in the list.  Gets 0 on error or when the list ends.
 
 End enumeration and release the list.
 
-=item C<@list = ChildWindows($hwnd)>
+=item C<@list = ChildWindows([$hwnd])>
 
 returns the list of child windows at the moment of the call.  Same remark
-as for enumeration interface applies.  Example of usage:
+as for enumeration interface applies.  Defaults to HWND_DESKTOP.
+Example of usage:
 
   sub l {
     my ($o,$h) = @_;
@@ -752,7 +956,7 @@ return a window handle of a child of $hwnd with the given $id.
 =item C<WindowFromPoint($x, $y [, $hwndParent [, $descedantsToo]])>
 
 gets a handle of a child of $hwndParent at C<($x,$y)>.  If $descedantsToo
-(defaulting to 0) then children of children may be returned too.  May return
+(defaulting to 1) then children of children may be returned too.  May return
 $hwndParent (defaults to desktop) if no suitable children are found,
 or 0 if the point is outside the parent.
 
@@ -809,11 +1013,27 @@ item list when beginning is reached.
 
 =back
 
+=item ResetWinError()
+
+Resets $^E.  One may need to call it before the C<Win*>-class APIs which may
+return 0 during normal operation.  In such a case one should check both
+for return value being zero and $^E being non-zero.  The following APIs
+do ResetWinError() themselves, thus do not need an explicit one:
+
+  WindowPtr
+  WindowULong
+  WindowUShort
+  WindowTextLength
+  ActiveWindow
+  PostMsg
+
+This function is normally not needed.  Not exported by default.
+
 =back
 
 =head1 OS2::localMorphPM class
 
-This class morphs the process to PM for the duration of the given context.
+This class morphs the process to PM for the duration of the given scope.
 
   {
     my $h = OS2::localMorphPM->new(0);
@@ -825,23 +1045,199 @@ nest with internal ones being NOPs.
 
 =head1 TODO
 
-Constants (currently one needs to get them looking in a header file):
+Add tests for:
 
-  HWND_*
-  WM_*			/* Separate module? */
-  SC_*
-  SWP_*
-  WC_*
-  PROG_*
-  QW_*
-  EDI_*
-  WS_*
+	SwitchToProgram
+	ClassName
+	out_codepage
+	out_codepage_set
+	in_codepage
+	in_codepage_set
+	cursor
+	cursor_set
+	screen
+	screen_set
+	process_codepages
+	QueryWindow
+	EnumDlgItem
+        WindowPtr
+        WindowULong
+        WindowUShort
+        SetWindowBits
+        SetWindowPtr
+        SetWindowULong
+        SetWindowUShort
+	my_type
+	file_type
+	scrsize
+	scrsize_set
 
-Show/Hide, Enable/Disable (WinShowWindow(), WinIsWindowVisible(),
-WinEnableWindow(), WinIsWindowEnabled()).
+Document:
+Query/SetWindowULong/Short/Ptr, SetWindowBits.
 
-Maximize/minimize/restore via WindowPos_set(), check via checking
-WS_MAXIMIZED/WS_MINIMIZED flags (how to get them?).
+Implement InvalidateRect,
+CreateFrameControl. ClipbrdFmtInfo, ClipbrdData, OpenClipbrd, CloseClipbrd,
+ClipbrdData_set, EnumClipbrdFmt, EmptyClipbrd.  SOMETHINGFROMMR.
+
+
+  >But I wish to change the default button if the user enters some
+  >text into an entryfield.  I can detect the entry ok, but can't
+  >seem to get the button to change to default.
+  >
+  >No matter what message I send it, it's being ignored.
+
+  You need to get the style of the buttons using WinQueryWindowULong/QWL_STYLE,
+  set and reset the BS_DEFAULT bits as appropriate and then use
+  WinSetWindowULong/QWL_STYLE to set the button style.
+  Something like this:
+    hwnd1 = WinWindowFromID (hwnd, id1);
+    hwnd2 = WinWindowFromID (hwnd, id2);
+    style1 = WinQueryWindowULong (hwnd1, QWL_STYLE);
+    style2 = WinQueryWindowULong (hwnd2, QWL_STYLE);
+    style1 |= style2 & BS_DEFAULT;
+    style2 &= ~BS_DEFAULT;
+    WinSetWindowULong (hwnd1, QWL_STYLE, style1);
+    WinSetWindowULong (hwnd2, QWL_STYLE, style2);
+
+ > How to do query and change a frame creation flags for existing window?
+
+ Set the style bits that correspond to the FCF_* flag for the frame
+ window and then send a WM_UPDATEFRAME message with the appropriate FCF_*
+ flag in mp1.
+
+ ULONG ulFrameStyle;
+ ulFrameStyle = WinQueryWindowULong( WinQueryWindow(hwnd, QW_PARENT),
+ QWL_STYLE );
+ ulFrameStyle = (ulFrameStyle & ~FS_SIZEBORDER) | FS_BORDER;
+ WinSetWindowULong(   WinQueryWindow(hwnd, QW_PARENT),
+                      QWL_STYLE,
+                      ulFrameStyle );
+ WinSendMsg( WinQueryWindow(hwnd, QW_PARENT),
+             WM_UPDATEFRAME,
+             MPFROMP(FCF_SIZEBORDER),
+             MPVOID );
+
+ If the FCF_* flags you want to change does not have a corresponding FS_*
+ style (i.e. the FCF_* flag corresponds to the presence/lack of a frame
+ control rather than a property of the frame itself) then you create or
+ destroy the appropriate control window using the correct FID_* window
+ identifier and then send the WM_UPDATEFRAME message with the appropriate
+ FCF_* flag in mp1.
+
+ /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*
+  |  SetFrameBorder()                                                          |
+  |    Changes a frame window's border to the requested type.                  |
+  |                                                                            |
+  |  Parameters on entry:                                                      |
+  |    hwndFrame     -> Frame window whose border is to be changed.            |
+  |    ulBorderStyle -> Type of border to change to.                           |
+  |                                                                            |
+  |  Returns:                                                                  |
+  |    BOOL          -> Success indicator.                                     |
+  |                                                                            |
+  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+ BOOL SetFrameBorder( HWND hwndFrame, ULONG ulBorderType )  {
+   ULONG  ulFrameStyle;
+   BOOL   fSuccess = TRUE;
+
+   ulFrameStyle = WinQueryWindowULong( hwndFrame, QWL_STYLE );
+
+   switch ( ulBorderType )  {
+     case FS_SIZEBORDER :
+       ulFrameStyle = (ulFrameStyle & ~(FS_DLGBORDER | FS_BORDER))
+                      | FS_SIZEBORDER;
+       break;
+
+     case FS_DLGBORDER :
+       ulFrameStyle = (ulFrameStyle & ~(FS_SIZEBORDER | FS_BORDER))
+                      | FS_DLGBORDER;
+       break;
+
+     case FS_BORDER :
+       ulFrameStyle = (ulFrameStyle & ~(FS_SIZEBORDER | FS_DLGBORDER))
+                      | FS_BORDER;
+       break;
+
+     default :
+       fSuccess = FALSE;
+       break;
+   }  // end switch
+
+   if ( fSuccess )  {
+     fSuccess = WinSetWindowULong( hwndFrame, QWL_STYLE, ulFrameStyle );
+
+     if ( fSuccess )  {
+       fSuccess = (BOOL)WinSendMsg( hwndFrame, WM_UPDATEFRAME, 0, 0 );
+       if ( fSuccess )
+         fSuccess = WinInvalidateRect( hwndFrame, NULL, TRUE );
+     }
+   }
+
+   return ( fSuccess );
+
+ }  // End SetFrameBorder()
+
+         hwndMenu=WinLoadMenu(hwndParent,NULL,WND_IMAGE);
+         WinSetWindowUShort(hwndMenu,QWS_ID,FID_MENU);
+         ulStyle=WinQueryWindowULong(hwndMenu,QWL_STYLE);
+         WinSetWindowULong(hwndMenu,QWL_STYLE,ulStyle|MS_ACTIONBAR);
+         WinSendMsg(hwndParent,WM_UPDATEFRAME,MPFROMSHORT(FCF_MENU),0L);
+
+  OS/2-windows have another "parent" called the *owner*,
+  which must be set separately - to get a close relationship:
+
+    WinSetOwner (hwndFrameChild, hwndFrameMain);
+
+  Now your child should move with your main window!
+  And always stays on top of it....
+
+  To avoid this, for example for dialogwindows, you can
+  also "disconnect" this relationship with:
+
+    WinSetWindowBits (hwndFrameChild, QWL_STYLE
+                      , FS_NOMOVEWITHOWNER
+                      , FS_NOMOVEWITHOWNER);
+
+ Adding a button icon later:
+
+ /* switch the button style to BS_MINIICON */
+ WinSetWindowBits(hwndBtn, QWL_STYLE, BS_MINIICON, BS_MINIICON) ;
+
+ /* set up button control data */
+ BTNCDATA    bcd;
+ bcd.cb = sizeof(BTNCDATA);
+ bcd.hImage = WinLoadPointer(HWND_DESKTOP, dllHandle, ID_ICON_BUTTON1) ;
+ bcd.fsCheckState = bcd.fsHiliteState = 0 ;
+
+
+ WNDPARAMS   wp;
+ wp.fsStatus = WPM_CTLDATA;
+ wp.pCtlData = &bcd;
+
+ /* add the icon on the button */
+ WinSendMsg(hwndBtn, WM_SETWINDOWPARAMS, (MPARAM)&wp, NULL);
+
+ MO> Can anyone tell what OS/2 expects of an application to be properly
+ MO> minimized to the desktop?
+ case WM MINMAXFRAME :
+ {
+   BOOL  fShow = ! (((PSWP) mp1)->fl & SWP MINIMIZE);
+   HENUM henum;
+
+   HWND  hwndChild;
+
+   WinEnableWindowUpdate ( hwnd, FALSE );
+
+   for (henum=WinBeginEnumWindows(hwnd);
+        (hwndChild = WinGetNextWindow (henum)) != 0; )
+   WinShowWindow ( hwndChild, fShow );
+
+   WinEndEnumWindows ( henum );
+   WinEnableWindowUpdate ( hwnd, TRUE );
+ }
+ break;
+
+Why C<hWindowPos DesktopWindow> gives C<< behind => HWND_TOP >>?
 
 =head1 $^E
 
@@ -850,6 +1246,37 @@ whether they die() on failure or not).  By the semantic of PM API
 which returns something other than a boolean, it is impossible to
 distinguish failure from a "normal" 0-return.  In such cases C<$^E ==
 0> indicates an absence of error.
+
+=head1 EXPORTS
+
+In addition to symbols described above, the following constants (available
+also via module C<OS2::Process::Const>) are exportable.  Note that these
+symbols live in package C<OS2::Process::Const>, they are not available
+by full name through C<OS2::Process>!
+
+  HWND_*		Standard (abstract) window handles
+  WM_*			Message ids
+  SC_*			WM_SYSCOMMAND flavor
+  SWP_*			Size/move etc flag
+  WC_*			Standard window classes
+  PROG_*		Program category (PM, VIO etc)
+  QW_*			Query-Window flag
+  EDI_*			Enumerate-Dialog-Item code
+  WS_*			Window Style flag
+  QWS_*			Query-window-UShort offsets
+  QWP_*			Query-window-pointer offsets
+  QWL_*			Query-window-ULong offsets
+  FF_*			Frame-window state flags
+  FI_*			Frame-window information flags
+  LS_*			List box styles
+  FS_*			Frame style
+  FCF_*			Frame creation flags
+  BS_*			Button style
+  MS_*			Menu style
+  TBM_*			Title bar messages?
+  CF_*			Clipboard formats
+  CFI_*			Clipboard storage type
+  FID_*			ids of subwindows of frames
 
 =head1 BUGS
 

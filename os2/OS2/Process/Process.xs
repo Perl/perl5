@@ -245,6 +245,8 @@ file_type(char *path)
     return apptype;
 }
 
+/* These use different type of wrapper.  Good to check wrappers. ;-)  */
+/* XXXX This assumes DOS type return type, without SEVERITY?! */
 DeclFuncByORD(HSWITCH, myWinQuerySwitchHandle,  ORD_WinQuerySwitchHandle,
 		  (HWND hwnd, PID pid), (hwnd, pid))
 DeclFuncByORD(ULONG, myWinQuerySwitchEntry,  ORD_WinQuerySwitchEntry,
@@ -253,44 +255,85 @@ DeclFuncByORD(ULONG, myWinSetWindowText,  ORD_WinSetWindowText,
 		  (HWND hwnd, char* text), (hwnd, text))
 DeclFuncByORD(BOOL, myWinQueryWindowProcess,  ORD_WinQueryWindowProcess,
 		  (HWND hwnd, PPID ppid, PTID ptid), (hwnd, ppid, ptid))
-
 DeclFuncByORD(ULONG, XmyWinSwitchToProgram,  ORD_WinSwitchToProgram,
 		  (HSWITCH hsw), (hsw))
 #define myWinSwitchToProgram(hsw) (!CheckOSError(XmyWinSwitchToProgram(hsw)))
 
-DeclFuncByORD(HWND, myWinQueryActiveWindow,  ORD_WinQueryActiveWindow,
-		  (HWND hwnd), (hwnd))
 
 
+DeclWinFunc_CACHE(HWND, QueryWindow, (HWND hwnd, LONG cmd), (hwnd, cmd))
+DeclWinFunc_CACHE(BOOL, QueryWindowPos, (HWND hwnd, PSWP pswp),
+		  (hwnd, pswp))
+DeclWinFunc_CACHE(LONG, QueryWindowText,
+		  (HWND hwnd, LONG cchBufferMax, PCH pchBuffer),
+		  (hwnd, cchBufferMax, pchBuffer))
+DeclWinFunc_CACHE(LONG, QueryClassName, (HWND hwnd, LONG cchMax, PCH pch),
+		  (hwnd, cchMax, pch))
+DeclWinFunc_CACHE(HWND, QueryFocus, (HWND hwndDesktop), (hwndDesktop))
+DeclWinFunc_CACHE(BOOL, SetFocus, (HWND hwndDesktop, HWND hwndFocus),
+		  (hwndDesktop, hwndFocus))
+DeclWinFunc_CACHE(BOOL, ShowWindow, (HWND hwnd, BOOL fShow), (hwnd, fShow))
+DeclWinFunc_CACHE(BOOL, EnableWindow, (HWND hwnd, BOOL fEnable),
+		      (hwnd, fEnable))
+DeclWinFunc_CACHE(BOOL, SetWindowPos,
+		  (HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y,
+		   LONG cx, LONG cy, ULONG fl),
+		  (hwnd, hwndInsertBehind, x, y, cx, cy, fl))
+DeclWinFunc_CACHE(HENUM, BeginEnumWindows, (HWND hwnd), (hwnd))
+DeclWinFunc_CACHE(BOOL, EndEnumWindows, (HENUM henum), (henum))
+DeclWinFunc_CACHE(BOOL, EnableWindowUpdate, (HWND hwnd, BOOL fEnable),
+		  (hwnd, fEnable))
+DeclWinFunc_CACHE(BOOL, SetWindowBits,
+		  (HWND hwnd, LONG index, ULONG flData, ULONG flMask),
+		  (hwnd, index, flData, flMask))
+DeclWinFunc_CACHE(BOOL, SetWindowPtr, (HWND hwnd, LONG index, PVOID p),
+		  (hwnd, index, p))
+DeclWinFunc_CACHE(BOOL, SetWindowULong, (HWND hwnd, LONG index, ULONG ul),
+		  (hwnd, index, ul))
+DeclWinFunc_CACHE(BOOL, SetWindowUShort, (HWND hwnd, LONG index, USHORT us),
+		  (hwnd, index, us))
+DeclWinFunc_CACHE(HWND, IsChild, (HWND hwnd, HWND hwndParent),
+		  (hwnd, hwndParent))
+DeclWinFunc_CACHE(HWND, WindowFromId, (HWND hwnd, ULONG id), (hwnd, id))
+DeclWinFunc_CACHE(HWND, EnumDlgItem, (HWND hwndDlg, HWND hwnd, ULONG code),
+		  (hwndDlg, hwnd, code))
+DeclWinFunc_CACHE(HWND, QueryDesktopWindow, (HAB hab, HDC hdc), (hab, hdc));
+DeclWinFunc_CACHE(BOOL, SetActiveWindow, (HWND hwndDesktop, HWND hwnd),
+		  (hwndDesktop, hwnd));
+
+/* These functions may return 0 on success; check $^E/Perl_rc on res==0: */
+DeclWinFunc_CACHE_resetError(PVOID, QueryWindowPtr, (HWND hwnd, LONG index),
+			     (hwnd, index))
+DeclWinFunc_CACHE_resetError(ULONG, QueryWindowULong, (HWND hwnd, LONG index),
+			     (hwnd, index))
+DeclWinFunc_CACHE_resetError(SHORT, QueryWindowUShort, (HWND hwnd, LONG index),
+			     (hwnd, index))
+DeclWinFunc_CACHE_resetError(LONG,  QueryWindowTextLength, (HWND hwnd), (hwnd))
+DeclWinFunc_CACHE_resetError(HWND,  QueryActiveWindow, (HWND hwnd), (hwnd))
+DeclWinFunc_CACHE_resetError(BOOL, PostMsg,
+			     (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2),
+			     (hwnd, msg, mp1, mp2))
+DeclWinFunc_CACHE_resetError(HWND, GetNextWindow, (HENUM henum), (henum))
+DeclWinFunc_CACHE_resetError(BOOL, IsWindowEnabled, (HWND hwnd), (hwnd))
+DeclWinFunc_CACHE_resetError(BOOL, IsWindowVisible, (HWND hwnd), (hwnd))
+DeclWinFunc_CACHE_resetError(BOOL, IsWindowShowing, (HWND hwnd), (hwnd))
+
+/* No die()ing on error */
+DeclWinFunc_CACHE_survive(BOOL, IsWindow, (HAB hab, HWND hwnd), (hab, hwnd))
+
+/* These functions are called frow complicated wrappers: */
 ULONG (*pWinQuerySwitchList) (HAB hab, PSWBLOCK pswblk, ULONG usDataLength);
 ULONG (*pWinChangeSwitchEntry) (HSWITCH hsw, __const__ SWCNTRL *pswctl);
-
-HWND (*pWinQueryWindow) (HWND hwnd, LONG cmd);
-BOOL (*pWinQueryWindowPos) (HWND hwnd, PSWP pswp);
-LONG (*pWinQueryWindowText) (HWND hwnd, LONG cchBufferMax, PCH pchBuffer);
-LONG (*pWinQueryWindowTextLength) (HWND hwnd);
-LONG (*pWinQueryClassName) (HWND hwnd, LONG cchMax, PCH pch);
-HWND (*pWinQueryFocus) (HWND hwndDesktop);
-BOOL (*pWinSetFocus) (HWND hwndDesktop, HWND hwndFocus);
-BOOL (*pWinShowWindow) (HWND hwnd, BOOL fShow);
-BOOL (*pWinPostMsg) (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
-BOOL (*pWinSetWindowPos) (HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y,
-    LONG cx, LONG cy, ULONG fl);
-HENUM (*pWinBeginEnumWindows) (HWND hwnd);
-BOOL (*pWinEndEnumWindows) (HENUM henum);
-HWND (*pWinGetNextWindow) (HENUM henum);
-BOOL (*pWinIsWindow) (HAB hab, HWND hwnd);
-HWND (*pWinQueryWindow) (HWND hwnd, LONG cmd);
-
-DeclWinFuncByORD(HWND, IsChild,  ORD_WinIsChild,
-		 (HWND hwnd, HWND hwndParent), (hwnd, hwndParent))
-DeclWinFuncByORD(HWND, WindowFromId,  ORD_WinWindowFromId,
-		 (HWND hwnd, ULONG id), (hwnd, id))
-
 HWND (*pWinWindowFromPoint)(HWND hwnd, __const__ POINTL *pptl, BOOL fChildren);
 
-DeclWinFuncByORD(HWND, EnumDlgItem, ORD_WinEnumDlgItem,
-		 (HWND hwndDlg, HWND hwnd, ULONG code), (hwndDlg, hwnd, code));
+
+/* These functions have different names/signatures than what is
+   declared above */
+#define QueryFocusWindow QueryFocus
+#define FocusWindow_set(hwndFocus, hwndDesktop) SetFocus(hwndDesktop, hwndFocus)
+#define WindowPos_set(hwnd, x, y, fl, cx, cy, hwndInsertBehind)	\
+	SetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl)
+#define myWinQueryWindowPtr(hwnd, i)	((ULONG)QueryWindowPtr(hwnd, i))
 
 int
 WindowText_set(HWND hwnd, char* text)
@@ -298,31 +341,25 @@ WindowText_set(HWND hwnd, char* text)
    return !CheckWinError(myWinSetWindowText(hwnd, text));
 }
 
-LONG
-QueryWindowTextLength(HWND hwnd)
-{
-    LONG ret;
-
-    if (!pWinQueryWindowTextLength)
-	AssignFuncPByORD(pWinQueryWindowTextLength, ORD_WinQueryWindowTextLength);
-    ret = pWinQueryWindowTextLength(hwnd);
-    CheckWinError(ret);			/* May put false positive */
-    return ret;
-}
-
 SV *
-QueryWindowText(HWND hwnd)
+myQueryWindowText(HWND hwnd)
 {
-    LONG l = QueryWindowTextLength(hwnd);
-    SV *sv = newSVpvn("", 0);
+    LONG l = QueryWindowTextLength(hwnd), len;
+    SV *sv;
     STRLEN n_a;
 
-    if (l == 0)
-	return sv;
+    if (l == 0) {
+	if (Perl_rc)		/* Last error */
+	    return &PL_sv_undef;
+	return &PL_sv_no;
+    }
+    sv = newSVpvn("", 0);
     SvGROW(sv, l + 1);
-    if (!pWinQueryWindowText)
-	AssignFuncPByORD(pWinQueryWindowText, ORD_WinQueryWindowText);
-    CheckWinError(l = pWinQueryWindowText(hwnd, l + 1, SvPV_force(sv, n_a)));
+    len = WinQueryWindowText(hwnd, l + 1, SvPV_force(sv, n_a));
+    if (len != l) {
+	Safefree(sv);
+	croak("WinQueryWindowText() uncompatible with WinQueryWindowTextLength()");
+    }
     SvCUR_set(sv, l);
     return sv;
 }
@@ -332,9 +369,7 @@ QueryWindowSWP_(HWND hwnd)
 {
     SWP swp;
 
-    if (!pWinQueryWindowPos)
-	AssignFuncPByORD(pWinQueryWindowPos, ORD_WinQueryWindowPos);
-    if (CheckWinError(pWinQueryWindowPos(hwnd, &swp)))
+    if (!QueryWindowPos(hwnd, &swp))
 	croak("WinQueryWindowPos() error");
     return swp;
 }
@@ -348,109 +383,21 @@ QueryWindowSWP(HWND hwnd)
 }
 
 SV *
-QueryClassName(HWND hwnd)
+myQueryClassName(HWND hwnd)
 {
     SV *sv = newSVpvn("",0);
     STRLEN l = 46, len = 0, n_a;
 
-    if (!pWinQueryClassName)
-	AssignFuncPByORD(pWinQueryClassName, ORD_WinQueryClassName);
     while (l + 1 >= len) {
 	if (len)
 	    len = 2*len + 10;		/* Grow quick */
 	else
 	    len = l + 2;
 	SvGROW(sv, len);
-	l = pWinQueryClassName(hwnd, len, SvPV_force(sv, n_a));
-	CheckWinError(l);
-	SvCUR_set(sv, l);
+	l = QueryClassName(hwnd, len, SvPV_force(sv, n_a));
     }
+    SvCUR_set(sv, l);
     return sv;
-}
-
-HWND
-QueryFocusWindow(HWND hwndDesktop)
-{
-    HWND ret;
-
-    if (!pWinQueryFocus)
-	AssignFuncPByORD(pWinQueryFocus, ORD_WinQueryFocus);
-    ret = pWinQueryFocus(hwndDesktop);
-    CheckWinError(ret);
-    return ret;
-}
-
-BOOL
-FocusWindow_set(HWND hwndFocus, HWND hwndDesktop)
-{
-    if (!pWinSetFocus)
-	AssignFuncPByORD(pWinSetFocus, ORD_WinSetFocus);
-    return !CheckWinError(pWinSetFocus(hwndDesktop, hwndFocus));
-}
-
-BOOL
-ShowWindow(HWND hwnd, BOOL fShow)
-{
-    if (!pWinShowWindow)
-	AssignFuncPByORD(pWinShowWindow, ORD_WinShowWindow);
-    return !CheckWinError(pWinShowWindow(hwnd, fShow));
-}
-
-BOOL
-PostMsg(HWND hwnd, ULONG msg, ULONG mp1, ULONG mp2)
-{
-    if (!pWinPostMsg)
-	AssignFuncPByORD(pWinPostMsg, ORD_WinPostMsg);
-    return !CheckWinError(pWinPostMsg(hwnd, msg, (MPARAM)mp1, (MPARAM)mp2));
-}
-
-BOOL
-WindowPos_set(HWND hwnd, LONG x, LONG y, ULONG fl, LONG cx, LONG cy, 
-	      HWND hwndInsertBehind)
-{
-    if (!pWinSetWindowPos)
-	AssignFuncPByORD(pWinSetWindowPos, ORD_WinSetWindowPos);
-    return !CheckWinError(pWinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl));
-}
-
-HENUM
-BeginEnumWindows(HWND hwnd)
-{
-    if (!pWinBeginEnumWindows)
-	AssignFuncPByORD(pWinBeginEnumWindows, ORD_WinBeginEnumWindows);
-    return SaveWinError(pWinBeginEnumWindows(hwnd));
-}
-
-BOOL
-EndEnumWindows(HENUM henum)
-{
-    if (!pWinEndEnumWindows)
-	AssignFuncPByORD(pWinEndEnumWindows, ORD_WinEndEnumWindows);
-    return !CheckWinError(pWinEndEnumWindows(henum));
-}
-
-HWND
-GetNextWindow(HENUM henum)
-{
-    if (!pWinGetNextWindow)
-	AssignFuncPByORD(pWinGetNextWindow, ORD_WinGetNextWindow);
-    return SaveWinError(pWinGetNextWindow(henum));
-}
-
-BOOL
-IsWindow(HWND hwnd, HAB hab)
-{
-    if (!pWinIsWindow)
-	AssignFuncPByORD(pWinIsWindow, ORD_WinIsWindow);
-    return !CheckWinError(pWinIsWindow(hab, hwnd));
-}
-
-HWND
-QueryWindow(HWND hwnd, LONG cmd)
-{
-    if (!pWinQueryWindow)
-	AssignFuncPByORD(pWinQueryWindow, ORD_WinQueryWindow);
-    return !CheckWinError(pWinQueryWindow(hwnd, cmd));
 }
 
 HWND
@@ -474,7 +421,7 @@ fill_swentry(SWENTRY *swentryp, HWND hwnd, PID pid)
 	     croak("switch_entry not implemented on DOS"); /* not OS/2. */
 	 if (CheckWinError(hSwitch = 
 			   myWinQuerySwitchHandle(hwnd, pid)))
-	     croak("WinQuerySwitchHandle err %ld", Perl_rc);
+	     croak("WinQuerySwitchHandle: %s", os2error(Perl_rc));
 	 swentryp->hswitch = hSwitch;
 	 if (CheckOSError(myWinQuerySwitchEntry(hSwitch, &swentryp->swctl)))
 	     croak("WinQuerySwitchEntry err %ld", rc);
@@ -899,8 +846,16 @@ sidOf(int pid)
   return sid;
 }
 
+#define ulMPFROMSHORT(i)		((unsigned long)MPFROMSHORT(i))
+#define ulMPVOID()			((unsigned long)MPVOID)
+#define ulMPFROMCHAR(i)			((unsigned long)MPFROMCHAR(i))
+#define ulMPFROM2SHORT(x1,x2)		((unsigned long)MPFROM2SHORT(x1,x2))
+#define ulMPFROMSH2CH(s, c1, c2)	((unsigned long)MPFROMSH2CH(s, c1, c2))
+#define ulMPFROMLONG(x)			((unsigned long)MPFROMLONG(x))
+
 MODULE = OS2::Process		PACKAGE = OS2::Process
 
+PROTOTYPES: ENABLE
 
 unsigned long
 constant(name,arg)
@@ -939,6 +894,7 @@ swentry_expand( SV *sv )
 
 SV *
 create_swentry( char *title, unsigned long sw_hwnd, unsigned long icon_hwnd, unsigned long owner_phandle, unsigned long owner_pid, unsigned long owner_sid, unsigned long visible, unsigned long switchable,	 unsigned long jumpable, unsigned long ptype, unsigned long sw_entry)
+PROTOTYPE: DISABLE
 
 int
 change_swentry( SV *sv )
@@ -949,12 +905,16 @@ sesmgr_title_set(s)
 
 SV *
 process_swentry(unsigned long pid = getpid(), unsigned long hwnd = NULLHANDLE);
+  PROTOTYPE: DISABLE
 
 int
 swentry_size()
 
 SV *
 swentries_list()
+
+void
+ResetWinError()
 
 int
 WindowText_set(unsigned long hwndFrame, char *title)
@@ -966,10 +926,15 @@ bool
 ShowWindow(unsigned long hwnd, bool fShow = TRUE)
 
 bool
+EnableWindow(unsigned long hwnd, bool fEnable = TRUE)
+
+bool
 PostMsg(unsigned long hwnd, unsigned long msg, unsigned long mp1 = 0, unsigned long mp2 = 0)
+    C_ARGS: hwnd, msg, (MPARAM)mp1, (MPARAM)mp2
 
 bool
 WindowPos_set(unsigned long hwnd, long x, long y, unsigned long fl = SWP_MOVE, long cx = 0, long cy = 0, unsigned long hwndInsertBehind = HWND_TOP)
+  PROTOTYPE: DISABLE
 
 unsigned long
 BeginEnumWindows(unsigned long hwnd)
@@ -981,7 +946,13 @@ unsigned long
 GetNextWindow(unsigned long henum)
 
 bool
-IsWindow(unsigned long hwnd, unsigned long hab = Acquire_hab())
+IsWindowVisible(unsigned long hwnd)
+
+bool
+IsWindowEnabled(unsigned long hwnd)
+
+bool
+IsWindowShowing(unsigned long hwnd)
 
 unsigned long
 QueryWindow(unsigned long hwnd, long cmd)
@@ -993,11 +964,37 @@ unsigned long
 WindowFromId(unsigned long hwndParent, unsigned long id)
 
 unsigned long
-WindowFromPoint(long x, long y, unsigned long hwnd, bool fChildren = 0)
+WindowFromPoint(long x, long y, unsigned long hwnd = HWND_DESKTOP, bool fChildren = TRUE)
+PROTOTYPE: DISABLE
 
 unsigned long
 EnumDlgItem(unsigned long hwndDlg, unsigned long code, unsigned long hwnd = NULLHANDLE)
    C_ARGS: hwndDlg, hwnd, code
+
+bool
+EnableWindowUpdate(unsigned long hwnd, bool fEnable = TRUE)
+
+bool
+SetWindowBits(unsigned long hwnd, long index, unsigned long flData, unsigned long flMask)
+
+bool
+SetWindowPtr(unsigned long hwnd, long index, unsigned long p)
+    C_ARGS: hwnd, index, (PVOID)p
+
+bool
+SetWindowULong(unsigned long hwnd, long index, unsigned long i)
+
+bool
+SetWindowUShort(unsigned long hwnd, long index, unsigned short i)
+
+bool
+IsWindow(unsigned long hwnd, unsigned long hab = Acquire_hab())
+    C_ARGS: hab, hwnd
+
+BOOL
+ActiveWindow_set(unsigned long hwnd, unsigned long hwndDesktop = HWND_DESKTOP)
+    CODE:
+	RETVAL = SetActiveWindow(hwndDesktop, hwnd);
 
 int
 out_codepage()
@@ -1035,6 +1032,21 @@ process_codepages()
 bool
 process_codepage_set(int cp)
 
+void
+cursor(OUTLIST int stp, OUTLIST int ep, OUTLIST int wp, OUTLIST int ap)
+  PROTOTYPE:
+
+bool
+cursor_set(int s, int e, int w = cursor__(0), int a = cursor__(1))
+
+MODULE = OS2::Process		PACKAGE = OS2::Process	PREFIX = myQuery
+
+SV *
+myQueryWindowText(unsigned long hwnd)
+
+SV *
+myQueryClassName(unsigned long hwnd)
+
 MODULE = OS2::Process		PACKAGE = OS2::Process	PREFIX = Query
 
 unsigned long
@@ -1044,35 +1056,40 @@ long
 QueryWindowTextLength(unsigned long hwnd)
 
 SV *
-QueryWindowText(unsigned long hwnd)
-
-SV *
 QueryWindowSWP(unsigned long hwnd)
 
-SV *
-QueryClassName(unsigned long hwnd)
+unsigned long
+QueryWindowULong(unsigned long hwnd, long index)
 
-MODULE = OS2::Process		PACKAGE = OS2::Process	PREFIX = myWin
+unsigned short
+QueryWindowUShort(unsigned long hwnd, long index)
+
+unsigned long
+QueryActiveWindow(unsigned long hwnd = HWND_DESKTOP)
+
+unsigned long
+QueryDesktopWindow(unsigned long hab = Acquire_hab(), unsigned long hdc = NULLHANDLE)
+
+MODULE = OS2::Process		PACKAGE = OS2::Process	PREFIX = myWinQuery
+
+unsigned long
+myWinQueryWindowPtr(unsigned long hwnd, long index)
 
 NO_OUTPUT BOOL
 myWinQueryWindowProcess(unsigned long hwnd, OUTLIST unsigned long pid, OUTLIST unsigned long tid)
+   PROTOTYPE: $
    POSTCALL:
 	if (CheckWinError(RETVAL))
-	    croak("QueryWindowProcess() error");
+	    croak("WindowProcess() error");
 
-void
-cursor(OUTLIST int stp, OUTLIST int ep, OUTLIST int wp, OUTLIST int ap)
-
-bool
-cursor_set(int s, int e, int w = cursor__(0), int a = cursor__(1))
+MODULE = OS2::Process		PACKAGE = OS2::Process	PREFIX = myWin
 
 int
 myWinSwitchToProgram(unsigned long hsw)
     PREINIT:
 	ULONG rc;
 
-unsigned long
-myWinQueryActiveWindow(unsigned long hwnd = HWND_DESKTOP)
+MODULE = OS2::Process		PACKAGE = OS2::Process	PREFIX = myWinQuery
 
 MODULE = OS2::Process		PACKAGE = OS2::Process	PREFIX = get
 
@@ -1087,6 +1104,30 @@ sidOf(int pid = getpid())
 
 void
 getscrsize(OUTLIST int wp, OUTLIST int hp)
+  PROTOTYPE:
 
 bool
 scrsize_set(int w_or_h, int h = -9999)
+
+MODULE = OS2::Process		PACKAGE = OS2::Process	PREFIX = ul
+
+unsigned long
+ulMPFROMSHORT(unsigned short i)
+
+unsigned long
+ulMPVOID()
+
+unsigned long
+ulMPFROMCHAR(unsigned char i)
+
+unsigned long
+ulMPFROM2SHORT(unsigned short x1, unsigned short x2)
+  PROTOTYPE: DISABLE
+
+unsigned long
+ulMPFROMSH2CH(unsigned short s, unsigned char c1, unsigned char c2)
+  PROTOTYPE: DISABLE
+
+unsigned long
+ulMPFROMLONG(unsigned long x)
+
