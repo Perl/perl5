@@ -444,20 +444,25 @@ I32 flags;
 	return Nullsv;
     if (SvRMAGICAL(hv)) {
 	sv = *hv_fetch(hv, key, klen, TRUE);
-	mg_clear(sv);
-	if (mg_find(sv, 's')) {
-	    return Nullsv;		/* %SIG elements cannot be deleted */
-	}
-	if (mg_find(sv, 'p')) {
-	    sv_unmagic(sv, 'p');	/* No longer an element */
-	    return sv;
-	}
+	/* If sv isn't magical, do nothing.  This enables the HV to have
+	 * magic that doesn't propagate to the elements (such as '~').
+	 */
+	if (SvRMAGICAL(sv)) {
+	    mg_clear(sv);
+	    if (mg_find(sv, 's')) {
+		return Nullsv;		/* %SIG elements cannot be deleted */
+	    }
+	    if (mg_find(sv, 'p')) {
+		sv_unmagic(sv, 'p');	/* No longer an element */
+		return sv;
+	    }
 #ifdef ENV_IS_CASELESS
-	if (mg_find((SV*)hv,'E')) {
-	    sv = sv_2mortal(newSVpv(key,klen));
-	    key = strupr(SvPVX(sv));
-	}
+	    if (mg_find((SV*)hv,'E')) {
+		sv = sv_2mortal(newSVpv(key,klen));
+		key = strupr(SvPVX(sv));
+	    }
 #endif
+	}
     }
     xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array)
@@ -512,19 +517,24 @@ U32 hash;
     if (SvRMAGICAL(hv)) {
 	entry = hv_fetch_ent(hv, keysv, TRUE, hash);
 	sv = HeVAL(entry);
-	mg_clear(sv);
-	if (mg_find(sv, 'p')) {
-	    sv_unmagic(sv, 'p');	/* No longer an element */
-	    return sv;
-	}
+	/* If sv isn't magical, do nothing.  This enables the HV to have
+	 * magic that doesn't propagate to the elements (such as '~').
+	 */
+	if (SvRMAGICAL(sv)) {	     
+	    mg_clear(sv);
+	    if (mg_find(sv, 'p')) {
+		sv_unmagic(sv, 'p');	/* No longer an element */
+		return sv;
+	    }
 #ifdef ENV_IS_CASELESS
-	else if (mg_find((SV*)hv,'E')) {
-	    key = SvPV(keysv, klen);
-	    keysv = sv_2mortal(newSVpv(key,klen));
-	    (void)strupr(SvPVX(keysv));
-	    hash = 0; 
-	}
+	    else if (mg_find((SV*)hv,'E')) {
+		key = SvPV(keysv, klen);
+		keysv = sv_2mortal(newSVpv(key,klen));
+		(void)strupr(SvPVX(keysv));
+		hash = 0; 
+	    }
 #endif
+	}
     }
     xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array)
