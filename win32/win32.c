@@ -506,7 +506,7 @@ get_shell(void)
 	 *     for).
 	 */
 	const char* defaultshell = (IsWinNT()
-				    ? "cmd.exe /x/c" : "command.com /c");
+				    ? "cmd.exe /x/d/c" : "command.com /c");
 	const char *usershell = PerlEnv_getenv("PERL5SHELL");
 	w32_perlshell_items = tokenize(usershell ? usershell : defaultshell,
 				       &w32_perlshell_tokens,

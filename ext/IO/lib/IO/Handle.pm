@@ -20,6 +20,7 @@ IO::Handle - supply object methods for I/O handles
         $io->print("Some text\n");
     }
 
+    # setvbuf is not available by default on Perls 5.8.0 and later.
     use IO::Handle '_IOLBF';
     $io->setvbuf($buffer_var, _IOLBF, 1024);
 
@@ -192,6 +193,10 @@ are the same as their C counterparts--including the constants C<_IOFBF>,
 C<_IOLBF>, and C<_IONBF> for setvbuf()--except that the buffer parameter
 specifies a scalar variable to use as a buffer. You should only
 change the buffer before any I/O, or immediately after calling flush.
+
+WARNING: The IO::Handle::setvbuf() is not available by default on
+Perls 5.8.0 and later because setvbuf() is rather specific to using
+the stdio library, while Perl prefers the new perlio subsystem instead.
 
 WARNING: A variable used as a buffer by C<setbuf> or C<setvbuf> B<must not
 be modified> in any way until the IO::Handle is closed or C<setbuf> or

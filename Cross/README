@@ -4,15 +4,17 @@ Summary
 This is a patch set which adds cross-compilation to the perl
 buildsystem.  It was built as a part of the Open Zaurus
 (http://www.openzaurus.com/) distribution.  Most / All of the
-optimisations are "borrowed" from this excellent project.
+arm compiler optimisations are "borrowed" from this excellent
+project.
 
 The main target is arm-linux but I have also managed to
 successfully cross-compile perl for solaris x86 using the same
 buildsystem.
 
 We are currently dependent on an existing working local copy of
-perl which is available as /usr/bin/perl.  This could be migrated
-to using native miniperl with some additional effort.
+perl ** of the same version and revision ** which is available
+as /usr/bin/perl.  This could be migrated to using native
+miniperl with some additional effort.
 
 Obviously you need a working and tested cross-compiler for your
 build and target combination.  The binary directory must be in
@@ -47,7 +49,7 @@ documentation in the core - Therefore man pages are not even generated.
 Enjoy!
 
 References
--------
+----------
 Redvers Davies <red@criticalintegration.com>
 Open Zaurus http://www.openzaurus.org/
 Perl OZ Packages http://www.openzaurus.org/official/testing/feed/

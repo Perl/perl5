@@ -469,6 +469,7 @@ ext/IO/lib/IO/t/io_taint.t	See if the untaint method from IO works
 ext/IO/lib/IO/t/io_tell.t	See if seek()/tell()-related methods from IO work
 ext/IO/lib/IO/t/io_udp.t	See if UDP socket-related methods from IO work
 ext/IO/lib/IO/t/io_unix.t	See if UNIX socket-related methods from IO work
+ext/IO/lib/IO/t/io_utf8.t	See if perlio opens work
 ext/IO/lib/IO/t/io_xs.t		See if XSUB methods from IO work
 ext/IO/Makefile.PL		IO extension makefile writer
 ext/IO/poll.c			IO poll() emulation using select()

@@ -9,7 +9,7 @@
 #
 #	This means we can go
 #
-#	if test "${CC+set}" != set; then
+#	if test "${AR+set}" != set; then
 #		ar='arm-linux-ar'
 #	else 
 #		ar=${AR}
@@ -128,4 +128,15 @@ sub library_munge {
 	}
 		
 }
+
+
+
+
+
+
+
+
+
+
+
 

@@ -416,6 +416,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 #endif
     }
 
+    keysave = key = SvPV(keysv, klen);
     xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array /* !HvARRAY(hv) */) {
 	if (lval
@@ -430,7 +431,6 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	    return 0;
     }
 
-    keysave = key = SvPV(keysv, klen);
     is_utf8 = (SvUTF8(keysv)!=0);
 
     if (is_utf8) {

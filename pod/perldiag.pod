@@ -4035,6 +4035,16 @@ earlier in the line, and you really meant a "less than".
 (W untie) A copy of the object returned from C<tie> (or C<tied>) was
 still valid when C<untie> was called.
 
+=item Usage: POSIX::%s(%s)
+
+(F) You called a POSIX function with incorrect arguments.
+See L<POSIX/FUNCTIONS> for more information.
+
+=item Usage: Win32::%s(%s)
+
+(F) You called a Win32 function with incorrect arguments.
+See L<Win32> for more information.
+
 =item Useless (?-%s) - don't use /%s modifier in regex; marked by <-- HERE in m/%s/
 
 (W regexp) You have used an internal modifier such as (?-o) that has no

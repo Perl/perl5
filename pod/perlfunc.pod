@@ -460,7 +460,7 @@ otherwise it returns C<undef> and sets C<$!> (errno).
 If LAYER is omitted or specified as C<:raw> the filehandle is made
 suitable for passing binary data. This includes turning off possible CRLF
 translation and marking it as bytes (as opposed to Unicode characters).
-Note that as desipite what may be implied in I<"Programming Perl">
+Note that as despite what may be implied in I<"Programming Perl">
 (the Camel) or elsewhere C<:raw> is I<not> the simply inverse of C<:crlf>
 -- other layers which would affect binary nature of the stream are
 I<also> disabled. See L<PerlIO>, L<perlrun> and the discussion about the
@@ -498,7 +498,9 @@ pending buffered output data (and perhaps pending input data) on the
 handle.  An exception to this is the C<:encoding> layer that
 changes the default character encoding of the handle, see L<open>.
 The C<:encoding> layer sometimes needs to be called in
-mid-stream, and it doesn't flush the stream.
+mid-stream, and it doesn't flush the stream.  The C<:encoding>
+also implicitly pushes on top of itself the C<:utf8> layer because
+internally Perl will operate on UTF-8 encoded Unicode characters.
 
 The operating system, device drivers, C libraries, and Perl run-time
 system all work together to let the programmer treat a single
@@ -5587,21 +5589,15 @@ See L<perlopentut> for a kinder, gentler explanation of opening files.
 
 =item sysread FILEHANDLE,SCALAR,LENGTH
 
-Attempts to read LENGTH I<characters> of data into variable SCALAR
-from the specified FILEHANDLE, using the system call read(2).  It
-bypasses buffered IO, so mixing this with other kinds of reads,
-C<print>, C<write>, C<seek>, C<tell>, or C<eof> can cause confusion
-because stdio usually buffers data.  Returns the number of characters
-actually read, C<0> at end of file, or undef if there was an error (in
-the latter case C<$!> is also set).  SCALAR will be grown or shrunk so
-that the last byte actually read is the last byte of the scalar after
-the read.
-
-Note the I<characters>: depending on the status of the filehandle,
-either (8-bit) bytes or characters are read.  By default all
-filehandles operate on bytes, but for example if the filehandle has
-been opened with the C<:utf8> I/O layer (see L</open>, and the C<open>
-pragma, L<open>), the I/O will operate on characters, not bytes.
+Attempts to read LENGTH bytes of data into variable SCALAR from the
+specified FILEHANDLE, using the system call read(2).  It bypasses
+buffered IO, so mixing this with other kinds of reads, C<print>,
+C<write>, C<seek>, C<tell>, or C<eof> can cause confusion because the
+perlio or stdio layers usually buffers data.  Returns the number of
+bytes actually read, C<0> at end of file, or undef if there was an
+error (in the latter case C<$!> is also set).  SCALAR will be grown or
+shrunk so that the last byte actually read is the last byte of the
+scalar after the read.
 
 An OFFSET may be specified to place the read data at some place in the
 string other than the beginning.  A negative OFFSET specifies
@@ -5614,9 +5610,15 @@ There is no syseof() function, which is ok, since eof() doesn't work
 very well on device files (like ttys) anyway.  Use sysread() and check
 for a return value for 0 to decide whether you're done.
 
+Note that if the filehandle has been marked as C<:utf8> Unicode
+characters are read instead of bytes (the LENGTH, OFFSET, and the
+return value of sysread() are in Unicode characters).
+The C<:encoding(...)> layer implicitly introduces the C<:utf8> layer.
+See L</binmode>, L</open>, and the C<open> pragma, L<open>.
+
 =item sysseek FILEHANDLE,POSITION,WHENCE
 
-Sets FILEHANDLE's system position I<in bytes> using the system call
+Sets FILEHANDLE's system position in bytes using the system call
 lseek(2).  FILEHANDLE may be an expression whose value gives the name
 of the filehandle.  The values for WHENCE are C<0> to set the new
 position to POSITION, C<1> to set the it to the current position plus
@@ -5628,7 +5630,7 @@ on characters (for example by using the C<:utf8> I/O layer), tell()
 will return byte offsets, not character offsets (because implementing
 that would render sysseek() very slow).
 
-sysseek() bypasses normal buffered io, so mixing this with reads (other
+sysseek() bypasses normal buffered IO, so mixing this with reads (other
 than C<sysread>, for example &gt;&lt or read()) C<print>, C<write>,
 C<seek>, C<tell>, or C<eof> may cause confusion.
 
@@ -5707,27 +5709,27 @@ See L<perlop/"`STRING`"> and L</exec> for details.
 
 =item syswrite FILEHANDLE,SCALAR
 
-Attempts to write LENGTH characters of data from variable SCALAR to
-the specified FILEHANDLE, using the system call write(2).  If LENGTH
-is not specified, writes whole SCALAR.  It bypasses buffered IO, so
+Attempts to write LENGTH bytes of data from variable SCALAR to the
+specified FILEHANDLE, using the system call write(2).  If LENGTH is
+not specified, writes whole SCALAR.  It bypasses buffered IO, so
 mixing this with reads (other than C<sysread())>, C<print>, C<write>,
-C<seek>, C<tell>, or C<eof> may cause confusion because stdio usually
-buffers data.  Returns the number of characters actually written, or
-C<undef> if there was an error (in this case the errno variable C<$!>
-is also set).  If the LENGTH is greater than the available data in the
-SCALAR after the OFFSET, only as much data as is available will be
-written.
+C<seek>, C<tell>, or C<eof> may cause confusion because the perlio and
+stdio layers usually buffers data.  Returns the number of bytes
+actually written, or C<undef> if there was an error (in this case the
+errno variable C<$!> is also set).  If the LENGTH is greater than the
+available data in the SCALAR after the OFFSET, only as much data as is
+available will be written.
 
 An OFFSET may be specified to write the data from some part of the
 string other than the beginning.  A negative OFFSET specifies writing
 that many characters counting backwards from the end of the string.
 In the case the SCALAR is empty you can use OFFSET but only zero offset.
 
-Note the I<characters>: depending on the status of the filehandle,
-either (8-bit) bytes or characters are written.  By default all
-filehandles operate on bytes, but for example if the filehandle has
-been opened with the C<:utf8> I/O layer (see L</open>, and the open
-pragma, L<open>), the I/O will operate on characters, not bytes.
+Note that if the filehandle has been marked as C<:utf8>,
+Unicode characters are written instead of bytes (the LENGTH, OFFSET,
+and the return value of syswrite() are in Unicode characters).
+The C<:encoding(...)> layer implicitly introduces the C<:utf8> layer.
+See L</binmode>, L</open>, and the C<open> pragma, L<open>.
 
 =item tell FILEHANDLE
 
