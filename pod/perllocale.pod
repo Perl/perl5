@@ -23,6 +23,8 @@ several environment variables.
 
 B<NOTE>: This feature is new in Perl 5.004, and does not apply unless an
 application specifically requests it - see L<Backward compatibility>.
+The one exception is that write() now B<always> uses the current locale
+- see L<"NOTES">.
 
 =head1 PREPARING TO USE LOCALES
 
@@ -357,10 +359,12 @@ a couple of transformations.  In fact, it doesn't save anything: Perl
 magic (see L<perlguts/Magic>) creates the transformed version of a
 string the first time it's needed in a comparison, then keeps it around
 in case it's needed again.  An example rewritten the easy way with
-C<cmp> runs just about as fast. It also copes with null characters
+C<cmp> runs just about as fast.  It also copes with null characters
 embedded in strings; if you call strxfrm() directly, it treats the first
-null it finds as a terminator. In short, don't call strxfrm() directly:
-let Perl do it for you.
+null it finds as a terminator.  And don't expect the transformed strings
+it produces to be portable across systems - or even from one revision
+of your operating system to the next.  In short, don't call strxfrm()
+directly: let Perl do it for you.
 
 Note: C<use locale> isn't shown in some of these examples, as it isn't
 needed: strcoll() and strxfrm() exist only to generate locale-dependent
@@ -377,7 +381,14 @@ regular expressions.)  Thanks to C<LC_CTYPE>, depending on your locale
 setting, characters like 'E<aelig>', 'E<eth>', 'E<szlig>', and
 'E<oslash>' may be understood as C<\w> characters.
 
-C<LC_CTYPE> also affects the POSIX character-class test functions -
+The C<LC_CTYPE> locale also provides the map used in translating
+characters between lower- and upper-case.  This affects the case-mapping
+functions - lc(), lcfirst, uc() and ucfirst(); case-mapping
+interpolation with C<\l>, C<\L>, C<\u> or <\U> in double-quoted strings
+and in C<s///> substitutions; and case-independent regular expression
+pattern matching using the C<i> modifier.
+
+Finally, C<LC_CTYPE> affects the POSIX character-class test functions -
 isalpha(), islower() and so on.  For example, if you move from the "C"
 locale to a 7-bit Scandinavian one, you may find - possibly to your
 surprise - that "|" moves from the ispunct() class to isalpha().
@@ -478,6 +489,12 @@ characters such as "E<gt>" and "|" are alphanumeric.
 
 =item *
 
+String interpolation with case-mapping, as in, say, C<$dest =
+"C:\U$name.$ext">, may produce dangerous results if a bogus LC_CTYPE
+case-mapping table is in effect.
+
+=item *
+
 If the decimal point character in the C<LC_NUMERIC> locale is
 surreptitiously changed from a dot to a comma, C<sprintf("%g",
 0.123456e3)> produces a string result of "123,456". Many people would
@@ -525,22 +542,31 @@ the locale:
 
 Scalar true/false (or less/equal/greater) result is never tainted.
 
+=item B<Case-mapping interpolation> (with C<\l>, C<\L>, C<\u> or <\U>)
+
+Result string containing interpolated material is tainted if
+C<use locale> is in effect.
+
 =item B<Matching operator> (C<m//>):
 
 Scalar true/false result never tainted.
 
 Subpatterns, either delivered as an array-context result, or as $1 etc.
 are tainted if C<use locale> is in effect, and the subpattern regular
-expression contains C<\w> (to match an alphanumeric character).  The
-matched pattern variable, $&, is also tainted if C<use locale> is in
-effect, and the regular expression contains C<\w>.
+expression contains C<\w> (to match an alphanumeric character), C<\W>
+(non-alphanumeric character), C<\s> (white-space character), or C<\S>
+(non white-space character).  The matched pattern variable, $&, $`
+(pre-match), $' (post-match), and $+ (last match) are also tainted if
+C<use locale> is in effect and the regular expression contains C<\w>,
+C<\W>, C<\s>, or C<\S>.
 
 =item B<Substitution operator> (C<s///>):
 
-Has the same behavior as the match operator.  When C<use locale> is
-in effect, he left operand of C<=~> will become tainted if it is
-modified as a result of a substitution based on a regular expression
-match involving C<\w>.
+Has the same behavior as the match operator.  Also, the left
+operand of C<=~> becomes tainted when C<use locale> in effect,
+if it is modified as a result of a substitution based on a regular
+expression match involving C<\w>, C<\W>, C<\s>, or C<\S>; or of
+case-mapping with C<\l>, C<\L>,C<\u> or <\U>.
 
 =item B<In-memory formatting function> (sprintf()):
 
@@ -718,6 +744,16 @@ exact multiplier depends on the string's contents, the operating system
 and the locale.) These downsides are dictated more by the operating
 system's implementation of the locale system than by Perl.
 
+=head2 write() and LC_NUMERIC
+
+Formats are the only part of Perl which unconditionally use information
+from a program's locale; if a program's environment specifies an
+LC_NUMERIC locale, it is always used to specify the decimal point
+character in formatted output.  Formatted output cannot be controlled by
+C<use locale> because the pragma is tied to the block structure of the
+program, and, for historical reasons, formats exist outside that block
+structure.
+
 =head2 Freely available locale definitions
 
 There is a large collection of locale definitions at
@@ -772,4 +808,4 @@ L<POSIX (3)/strxfrm>
 Jarkko Hietaniemi's original F<perli18n.pod> heavily hacked by Dominic
 Dunlop, assisted by the perl5-porters.
 
-Last update: Tue Dec 24 16:43:11 EST 1996
+Last update: Tue Dec 31 01:30:55 EST 1996
