@@ -7,6 +7,8 @@ Oldconfig.U
     Clean up and extend the $osvers detection for DEC OSF/1 on the Alpha.
 archname.U
     Protect against spaces in the output of uname -m.
+libc.U
+    Pick up Linux nm output with leading __IO.
 sig_name.U
     Look in <linux/signals.h> too.
 usrinc.U
@@ -84,6 +86,45 @@ Prereq:  3.0.1.1
   	else
   		tarch="$osname"
   	fi
+Index: libc.U
+Prereq:  3.0.1.7 
+*** mcon/U/libc.U	Sat Oct 29 15:28:06 1994
+--- /home2/doughera/lib/dist/U/libc.U	Mon Mar  6 10:34:07 1995
+***************
+*** 218,224 ****
+  xscan='eval "<libc.ptf $com >libc.list"; $echo $n ".$c" >&4'
+  xrun='eval "<libc.tmp $com >libc.list"; echo "done" >&4'
+  ?X: BSD-like output, I-type for Linux
+! if com="$sed -n -e 's/^.* [ADTSI]  *_[_.]*//p' -e 's/^.* [ADTSI] //p'";\
+  	eval $xscan;\
+  	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+  		eval $xrun
+--- 218,225 ----
+  xscan='eval "<libc.ptf $com >libc.list"; $echo $n ".$c" >&4'
+  xrun='eval "<libc.tmp $com >libc.list"; echo "done" >&4'
+  ?X: BSD-like output, I-type for Linux
+! ?X: Some versions of Linux include a leading __IO in the symbol name.
+! if com="$sed -n -e 's/__IO//' -e 's/^.* [ADTSI]  *_[_.]*//p' -e 's/^.* [ADTSI] //p'";\
+  	eval $xscan;\
+  	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+  		eval $xrun
+***************
+*** 263,269 ****
+  		eval $xrun
+  else
+  	nm -p $* 2>/dev/null >libc.tmp
+! 	com="$sed -n -e 's/^.* [ADTS]  *_[_.]*//p' -e 's/^.* [ADTS] //p'";\
+  	eval "<libc.tmp $com >libc.list"
+  	if $contains '^fprintf$' libc.list >/dev/null 2>&1; then
+  		nm_opt='-p'
+--- 264,270 ----
+  		eval $xrun
+  else
+  	nm -p $* 2>/dev/null >libc.tmp
+! 	com="$sed -n -e 's/^.* [ADTSI]  *_[_.]*//p' -e 's/^.* [ADTSI] //p'";\
+  	eval "<libc.tmp $com >libc.list"
+  	if $contains '^fprintf$' libc.list >/dev/null 2>&1; then
+  		nm_opt='-p'
 Index: sig_name.U
 Prereq:  3.0.1.2 
 *** mcon/U/sig_name.U	Wed Jun 22 01:20:22 1994

@@ -1,12 +1,12 @@
-package File::Mkpath;
+package File::Path;
 
 =head1 NAME
 
-File::Mkpath - create or remove a series of directories
+File::Path - create or remove a series of directories
 
 =head1 SYNOPSIS
 
-C<use File::Mkpath>
+C<use File::Path>
 
 C<mkpath(['/foo/bar/baz', 'blurfl/quux'], 1, 0711);>
 

@@ -1,14 +1,22 @@
 # hints/linux.sh
 # Original version by rsanders
-# Additional dlext support by Kenneth Albanowski <kjahds@kjahds.com>
+# Additional support by Kenneth Albanowski <kjahds@kjahds.com>
 #
 # First pass at ELF support by Andy Dougherty <doughera@lafcol.lafayette.edu>
 # Fri Feb  3 14:05:00 EST 1995
 # Use   sh Configure -Dcc=gcc-elf     to try using gcc-elf.  It might work.
 #
+# Last updated Mon Mar  6 10:18:10 EST 1995
+#
 
-ccflags='-I/usr/include/bsd'
-cppflags=' -I/usr/include/bsd'
+# Why is this needed?
+bin='/usr/bin'
+
+# Apparently some versions of gcc 2.6.2 are picking up _G_HAVE_BOOL
+# from somewhere (_G_config.h maybe?) but not actually defining bool.
+# Anyone really know what's going on?
+ccflags='-Dbool=char -DHAS_BOOL'
+
 d_dosuid='define'
 
 malloctype='void *'

@@ -938,6 +938,7 @@ sv_grow
 sv_inc
 sv_insert
 sv_isa
+sv_isobject
 sv_len
 sv_magic
 sv_mortalcopy

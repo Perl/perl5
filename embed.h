@@ -938,6 +938,7 @@
 #define sv_inc		Perl_sv_inc
 #define sv_insert	Perl_sv_insert
 #define sv_isa		Perl_sv_isa
+#define sv_isobject	Perl_sv_isobject
 #define sv_len		Perl_sv_len
 #define sv_magic	Perl_sv_magic
 #define sv_mortalcopy	Perl_sv_mortalcopy

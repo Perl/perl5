@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.6 1994/10/29 15:54:19 ram Exp $
 #
-# Generated on Tue Feb 28 10:00:27 EST 1995 [metaconfig 3.0 PL51]
+# Generated on Mon Mar  6 11:00:02 EST 1995 [metaconfig 3.0 PL51]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -3084,7 +3084,7 @@ $echo $n ".$c"
 $grep fprintf libc.tmp > libc.ptf
 xscan='eval "<libc.ptf $com >libc.list"; $echo $n ".$c" >&4'
 xrun='eval "<libc.tmp $com >libc.list"; echo "done" >&4'
-if com="$sed -n -e 's/^.* [ADTSI]  *_[_.]*//p' -e 's/^.* [ADTSI] //p'";\
+if com="$sed -n -e 's/__IO//' -e 's/^.* [ADTSI]  *_[_.]*//p' -e 's/^.* [ADTSI] //p'";\
 	eval $xscan;\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
 		eval $xrun
@@ -3127,7 +3127,7 @@ elif com="$sed -n -e '/Def. Text/s/.* \([^ ]*\)\$/\1/p'";\
 		eval $xrun
 else
 	nm -p $* 2>/dev/null >libc.tmp
-	com="$sed -n -e 's/^.* [ADTS]  *_[_.]*//p' -e 's/^.* [ADTS] //p'";\
+	com="$sed -n -e 's/^.* [ADTSI]  *_[_.]*//p' -e 's/^.* [ADTSI] //p'";\
 	eval "<libc.tmp $com >libc.list"
 	if $contains '^fprintf$' libc.list >/dev/null 2>&1; then
 		nm_opt='-p'
