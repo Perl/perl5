@@ -2821,6 +2821,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    COP *ocurcop = PL_curcop;
 	    PAD *old_comppad;
 	    SV *ret;
+	    struct regexp *oreg = PL_reg_re;
 	
 	    n = ARG(scan);
 	    PL_op = (OP_4tree*)PL_regdata->data[n];
@@ -2953,8 +2954,10 @@ S_regmatch(pTHX_ regnode *prog)
 		sw = SvTRUE(ret);
 		logical = 0;
 	    }
-	    else
+	    else {
 		sv_setsv(save_scalar(PL_replgv), ret);
+		cache_re(oreg);
+	    }
 	    break;
 	}
 	case OPEN:

@@ -22,7 +22,7 @@ use Net::Config;
 use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 # use AutoLoader qw(AUTOLOAD);
 
-$VERSION = "2.70"; # $Id: //depot/libnet/Net/FTP.pm#76 $
+$VERSION = "2.71"; # $Id: //depot/libnet/Net/FTP.pm#78 $
 @ISA     = qw(Exporter Net::Cmd IO::Socket::INET);
 
 # Someday I will "use constant", when I am not bothered to much about
@@ -713,7 +713,8 @@ sub _store_cmd
    # _store_cmd call, figure out if the local file is a regular file(not
    # a pipe, or device) and if so get the file size from stat, and send
    # an ALLO command before sending the STOR, STOU, or APPE command.
-   $ftp->_ALLO(-s _) if -f $loc; # no ALLO if sending data from a pipe
+   my $size = -f $local && -s _; # no ALLO if sending data from a pipe
+   $ftp->_ALLO($size) if $size;
   }
  croak("Bad remote filename '$remote'\n")
 	if $remote =~ /[\r\n]/s;
@@ -1766,6 +1767,6 @@ under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/FTP.pm#76 $>
+I<$Id: //depot/libnet/Net/FTP.pm#78 $>
 
 =cut

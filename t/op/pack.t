@@ -183,6 +183,9 @@ sub list_eq ($$) {
     skip "-- the IEEE infinity model is unavailable in this configuration."
        if (($^O eq 'VMS') && !defined($Config{useieee}));
 
+    skip "-- MPE/iX has serious fp indigestionf on w-packed infinities"
+       if (($^O eq 'mpeix'));
+
     my $inf = eval '2**10000';
 
     skip "Couldn't generate infinity - got error '$@'"

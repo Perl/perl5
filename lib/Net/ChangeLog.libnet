@@ -1,3 +1,12 @@
+Change 820 on 2003/06/17 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Fix uninit warning when sending the ALLO command inside put
+
+Change 819 on 2003/06/13 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.15
+
 Change 818 on 2003/06/13 by <gbarr@pobox.com> (Graham Barr)
 
 	Net::FTP

@@ -1,6 +1,6 @@
-# $Id: encoding.pm,v 1.44 2003/03/09 20:07:37 dankogai Exp $
+# $Id: encoding.pm,v 1.45 2003/06/18 09:29:02 dankogai Exp $
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.44 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.45 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -21,11 +21,11 @@ unless ($@){
 
 sub _exception{
     my $name = shift;
-    $] > 5.008 and return 0;             # 5.8.1 then no
+    $] > 5.008 and return 0;               # 5.8.1 or higher then no
     my %utfs = map {$_=>1}
 	qw(utf8 UCS-2BE UCS-2LE UTF-16 UTF-16BE UTF-16LE
 	   UTF-32 UTF-32BE UTF-32LE);
-    $utfs{$name} or return 0;            # UTFs or no
+    $utfs{$name} or return 0;               # UTFs or no
     require Config; Config->import(); our %Config;
     return $Config{perl_patchlevel} ? 0 : 1 # maintperl then no
 }

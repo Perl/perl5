@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 1.95 2003/05/21 08:40:59 dankogai Exp $
+# $Id: Encode.pm,v 1.96 2003/06/18 09:29:02 dankogai Exp $
 #
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.95 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -738,6 +738,8 @@ implementation.  As such, they are efficient but may change.
 [INTERNAL] Tests whether the UTF-8 flag is turned on in the STRING.
 If CHECK is true, also checks the data in STRING for being well-formed
 UTF-8.  Returns true if successful, false otherwise.
+
+As of perl 5.8.1, L<utf8> also has utf8::is_utif8().
 
 =item _utf8_on(STRING)
 
