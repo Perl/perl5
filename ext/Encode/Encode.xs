@@ -9,6 +9,232 @@
 UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
 UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
 
+#ifdef USE_PERLIO
+#include "perliol.h"
+
+typedef struct
+{
+ PerlIOBuf	base;         /* PerlIOBuf stuff */
+ SV *		bufsv;
+ SV *		enc;
+} PerlIOEncode;
+
+
+IV
+PerlIOEncode_pushed(PerlIO *f, const char *mode,const char *arg,STRLEN len)
+{
+ PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
+ dTHX;
+ dSP;
+ IV code;
+ code = PerlIOBuf_pushed(f,mode,Nullch,0);
+ ENTER;
+ SAVETMPS;
+ PUSHMARK(sp);
+ XPUSHs(sv_2mortal(newSVpv("Encode",0)));
+ XPUSHs(sv_2mortal(newSVpvn(arg,len)));
+ PUTBACK;
+ if (perl_call_method("getEncoding",G_SCALAR) != 1)
+  return -1;
+ SPAGAIN;
+ e->enc = POPs;
+ PUTBACK;
+ if (!SvROK(e->enc))
+  return -1;
+ SvREFCNT_inc(e->enc);
+ FREETMPS;
+ LEAVE;
+ PerlIOBase(f)->flags |= PERLIO_F_UTF8;
+ return code;
+}
+
+IV
+PerlIOEncode_popped(PerlIO *f)
+{
+ PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
+ dTHX;
+ if (e->enc)
+  {
+   SvREFCNT_dec(e->enc);
+   e->enc = Nullsv;
+  }
+ if (e->bufsv)
+  {
+   SvREFCNT_dec(e->bufsv);
+   e->bufsv = Nullsv;
+  }
+ return 0;
+}
+
+STDCHAR *
+PerlIOEncode_get_base(PerlIO *f)
+{
+ PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
+ dTHX;
+ if (!e->base.bufsiz)
+  e->base.bufsiz = 1024;
+ if (!e->bufsv)
+  {
+   e->bufsv = newSV(e->base.bufsiz);
+   sv_setpvn(e->bufsv,"",0);
+  }
+ e->base.buf = SvPVX(e->bufsv);
+ if (!e->base.ptr)
+  e->base.ptr = e->base.buf;
+ if (!e->base.end)
+  e->base.end = e->base.buf;
+ if (e->base.ptr < e->base.buf || e->base.ptr > e->base.buf+SvLEN(e->bufsv))
+  {
+   Perl_warn(aTHX_ " ptr %p(%p)%p",
+             e->base.buf,e->base.ptr,e->base.buf+SvLEN(e->bufsv));
+   abort();
+  }
+ if (SvLEN(e->bufsv) < e->base.bufsiz)
+  {
+   SSize_t poff = e->base.ptr - e->base.buf;
+   SSize_t eoff = e->base.end - e->base.buf;
+   e->base.buf  = SvGROW(e->bufsv,e->base.bufsiz);
+   e->base.ptr  = e->base.buf + poff;
+   e->base.end  = e->base.buf + eoff;
+  }
+ if (e->base.ptr < e->base.buf || e->base.ptr > e->base.buf+SvLEN(e->bufsv))
+  {
+   Perl_warn(aTHX_ " ptr %p(%p)%p",
+             e->base.buf,e->base.ptr,e->base.buf+SvLEN(e->bufsv));
+   abort();
+  }
+ return e->base.buf;
+}
+
+static void
+Break(void)
+{
+
+}
+
+IV
+PerlIOEncode_fill(PerlIO *f)
+{
+ PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
+ dTHX;
+ dSP;
+ IV code;
+ Break();
+ code = PerlIOBuf_fill(f);
+ if (code == 0)
+  {
+   SV *uni;
+   SvCUR_set(e->bufsv, e->base.end - e->base.buf);
+   SvUTF8_off(e->bufsv);
+   ENTER;
+   SAVETMPS;
+   PUSHMARK(sp);
+   XPUSHs(e->enc);
+   XPUSHs(e->bufsv);
+   XPUSHs(&PL_sv_yes);
+   PUTBACK;
+   if (perl_call_method("toUnicode",G_SCALAR) != 1)
+    code = -1;
+   SPAGAIN;
+   uni = POPs;
+   PUTBACK;
+   sv_setsv(e->bufsv,uni);
+   sv_utf8_upgrade(e->bufsv);
+   e->base.buf    = SvPVX(e->bufsv);
+   e->base.end    = e->base.buf+SvCUR(e->bufsv);
+   e->base.ptr    = e->base.buf;
+   FREETMPS;
+   LEAVE;
+  }
+ return code;
+}
+
+IV
+PerlIOEncode_flush(PerlIO *f)
+{
+ PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
+ IV code = 0;
+ dTHX;
+ if (e->bufsv && (PerlIOBase(f)->flags & (PERLIO_F_RDBUF|PERLIO_F_WRBUF)))
+  {
+   dSP;
+   SV *str;
+   char *s;
+   STRLEN len;
+   ENTER;
+   SAVETMPS;
+   PUSHMARK(sp);
+   XPUSHs(e->enc);
+   SvCUR_set(e->bufsv, e->base.end - e->base.buf);
+   SvUTF8_on(e->bufsv);
+   XPUSHs(e->bufsv);
+   XPUSHs(&PL_sv_yes);
+   PUTBACK;
+   if (perl_call_method("fromUnicode",G_SCALAR) != 1)
+    code = -1;
+   SPAGAIN;
+   str = POPs;
+   PUTBACK;
+   sv_setsv(e->bufsv,str);
+   SvUTF8_off(e->bufsv);
+   e->base.buf = SvPVX(e->bufsv);
+   e->base.ptr = e->base.buf+SvCUR(e->bufsv);
+   FREETMPS;
+   LEAVE;
+   if (PerlIOBuf_flush(f) != 0)
+    code = -1;
+  }
+ return code;
+}
+
+IV
+PerlIOEncode_close(PerlIO *f)
+{
+ PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
+ IV code = PerlIOBase_close(f);
+ dTHX;
+ if (e->bufsv)
+  {
+   SvREFCNT_dec(e->bufsv);
+   e->bufsv = Nullsv;
+  }
+ e->base.buf = NULL;
+ e->base.ptr = NULL;
+ e->base.end = NULL;
+ PerlIOBase(f)->flags &= ~(PERLIO_F_RDBUF|PERLIO_F_WRBUF);
+ return code;
+}
+
+PerlIO_funcs PerlIO_encode = {
+ "encode",
+ sizeof(PerlIOEncode),
+ PERLIO_K_BUFFERED,
+ PerlIOBase_fileno,
+ PerlIOBuf_fdopen,
+ PerlIOBuf_open,
+ PerlIOBuf_reopen,
+ PerlIOEncode_pushed,
+ PerlIOEncode_popped,
+ PerlIOBuf_read,
+ PerlIOBuf_unread,
+ PerlIOBuf_write,
+ PerlIOBuf_seek,
+ PerlIOBuf_tell,
+ PerlIOEncode_close,
+ PerlIOEncode_flush,
+ PerlIOEncode_fill,
+ PerlIOBase_eof,
+ PerlIOBase_error,
+ PerlIOBase_clearerr,
+ PerlIOBuf_setlinebuf,
+ PerlIOEncode_get_base,
+ PerlIOBuf_bufsiz,
+ PerlIOBuf_get_ptr,
+ PerlIOBuf_get_cnt,
+ PerlIOBuf_set_ptrcnt,
+};
+#endif
+
 void call_failure (SV *routine, U8* done, U8* dest, U8* orig) {}
 
 MODULE = Encode         PACKAGE = Encode
@@ -239,3 +465,9 @@ _utf_to_utf(sv, from, to, ...)
       OUTPUT:
 	RETVAL
 
+BOOT:
+{
+#ifdef USE_PERLIO
+ PerlIO_define_layer(&PerlIO_encode);
+#endif
+}

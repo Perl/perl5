@@ -10,7 +10,7 @@ struct _PerlIO_funcs
  PerlIO *	(*Fdopen)(PerlIO_funcs *tab, int fd, const char *mode);
  PerlIO *	(*Open)(PerlIO_funcs *tab, const char *path, const char *mode);
  int		(*Reopen)(const char *path, const char *mode, PerlIO *f);
- IV		(*Pushed)(PerlIO *f,const char *mode);
+ IV		(*Pushed)(PerlIO *f,const char *mode,const char *arg,STRLEN len);
  IV		(*Popped)(PerlIO *f);
  /* Unix-like functions - cf sfio line disciplines */
  SSize_t	(*Read)(PerlIO *f, void *vbuf, Size_t count);
@@ -94,7 +94,7 @@ extern PerlIO *PerlIO_allocate(pTHX);
 /* Generic, or stub layer functions */
 
 extern IV	PerlIOBase_fileno    (PerlIO *f);
-extern IV	PerlIOBase_pushed    (PerlIO *f, const char *mode);
+extern IV	PerlIOBase_pushed    (PerlIO *f, const char *mode,const char *arg,STRLEN len);
 extern IV	PerlIOBase_popped    (PerlIO *f);
 extern SSize_t	PerlIOBase_unread    (PerlIO *f, const void *vbuf, Size_t count);
 extern IV	PerlIOBase_eof       (PerlIO *f);
