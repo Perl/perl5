@@ -9,11 +9,16 @@ esac
 # The default is to die in runtime on math overflows.
 # Let's not do that. --jhi
 ccflags="$ccflags -h matherror=errno" 
-# Give int((2/3)*3) a chance to be 2, not 1. --jhi
-case "`uname -m`" in
-"CRAY TS")	;; # -h rounddiv not available here
-*)		ccflags="$ccflags -h rounddiv" ;;
-esac
+
+# Cray floating point (cfp) CPUs need -h rounddiv
+# (It gives int((2/3)*3) a chance to be 2, not 1. --jhi)
+# (but IEEE CPUs, IEEE/ieee/CPE1 CPUs should not have -h rounddiv,
+#  since the compiler on those CPUs doesn't even support the option.)
+if /etc/cpu -i | grep -q cfp
+then
+    ccflags="$ccflags -h rounddiv"
+fi
+
 # Avoid an optimizer bug where a volatile variables
 # isn't correctly saved and restored --Mark P. Lutz 
 pp_ctl_cflags='ccflags="$ccflags -h scalar0 -h vector0"'

@@ -1,7 +1,7 @@
 #
 # Locale::Country - ISO codes for country identification (ISO 3166)
 #
-# $Id: Country.pm,v 2.3 2002/03/23 23:39:21 neilb Exp $
+# $Id: Country.pm,v 2.4 2002/05/20 05:05:18 neilb Exp $
 #
 
 package Locale::Country;
@@ -17,7 +17,7 @@ use Locale::Constants;
 #	Public Global Variables
 #-----------------------------------------------------------------------
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = sprintf("%d.%02d", q$Revision: 2.3 $ =~ /(\d+)\.(\d+)/);
+$VERSION   = sprintf("%d.%02d", q$Revision: 2.4 $ =~ /(\d+)\.(\d+)/);
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2country country2code
                 all_country_codes all_country_names
@@ -423,7 +423,7 @@ kp:prk:408:Korea, Democratic People's Republic of:Korea, North:North Korea
 kr:kor:410:Korea, Republic of:Korea, South:South Korea
 kw:kwt:414:Kuwait
 ky:cym:136:Cayman Islands
-kz:kaz:398:Kazakstan
+kz:kaz:398:Kazakhstan:Kazakstan
 la:lao:418:Lao People's Democratic Republic
 lb:lbn:422:Lebanon
 lc:lca:662:Saint Lucia
@@ -444,7 +444,7 @@ mk:mkd:807:Macedonia, the Former Yugoslav Republic of:Macedonia, Former Yugoslav
 ml:mli:466:Mali
 mm:mmr:104:Myanmar
 mn:mng:496:Mongolia
-mo:mac:446:Macau
+mo:mac:446:Macao:Macau
 mp:mnp:580:Northern Mariana Islands
 mq:mtq:474:Martinique
 mr:mrt:478:Mauritania
@@ -517,7 +517,7 @@ tk:tkl:772:Tokelau
 tm:tkm:795:Turkmenistan
 tn:tun:788:Tunisia
 to:ton:776:Tonga
-tp:tmp:626:East Timor
+tl:tls:626:East Timor
 tr:tur:792:Turkey
 tt:tto:780:Trinidad and Tobago
 tv:tuv:798:Tuvalu

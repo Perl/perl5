@@ -2446,21 +2446,25 @@ PerlIO_importFILE(FILE *stdio, int fl)
 	/* We need to probe to see how we can open the stream
 	   so start with read/write and then try write and read
 	   we dup() so that we can fclose without loosing the fd.
+
+	   Note that the errno value set by a failing fdopen
+	   varies between stdio implementations.
 	 */
 	int fd = PerlLIO_dup(fileno(stdio));
 	char *mode = "r+";
 	FILE *f2 = fdopen(fd, mode);
 	PerlIOStdio *s;
-	if (!f2 && errno == EINVAL) {
+	if (!f2) {
 	    mode = "w";
 	    f2 = fdopen(fd, mode);
 	}
-	if (!f2 && errno == EINVAL) {
+	if (!f2) {
 	    mode = "r";
 	    f2 = fdopen(fd, mode);
 	}
 	if (!f2) {
 	    /* Don't seem to be able to open */
+	    PerlLIO_close(fd);
 	    return f;
 	}
 	fclose(f2);
@@ -2632,15 +2636,54 @@ PerlIOStdio_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 SSize_t
 PerlIOStdio_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-    FILE *s = PerlIOSelf(f, PerlIOStdio)->stdio;
-    STDCHAR *buf = ((STDCHAR *) vbuf) + count - 1;
     SSize_t unread = 0;
-    while (count > 0) {
-	int ch = *buf-- & 0xff;
-	if (PerlSIO_ungetc(ch, s) != ch)
-	    break;
-	unread++;
-	count--;
+    FILE *s = PerlIOSelf(f, PerlIOStdio)->stdio;
+
+    if (PerlIO_fast_gets(f) && PerlIO_has_base(f)) {
+	STDCHAR *buf = ((STDCHAR *) vbuf) + count;
+	STDCHAR *base = PerlIO_get_base(f);
+	SSize_t cnt   = PerlIO_get_cnt(f);
+	STDCHAR *ptr  = PerlIO_get_ptr(f);
+	SSize_t avail = ptr - base;
+	if (avail > 0) {
+	    if (avail > count) {
+		avail = count;
+	    }
+	    ptr -= avail;
+	    Move(buf-avail,ptr,avail,STDCHAR);
+	    count -= avail;
+	    unread += avail;
+	    PerlIO_set_ptrcnt(f,ptr,cnt+avail);
+	    if (PerlSIO_feof(s) && unread >= 0)
+		PerlSIO_clearerr(s);
+	}
+    }
+    else if (PerlIO_has_cntptr(f)) {
+	/* We can get pointer to buffer but not its base
+	   Do ungetc() but check chars are ending up in the
+	   buffer
+	 */
+	STDCHAR *eptr = (STDCHAR*)PerlSIO_get_ptr(s);
+	STDCHAR *buf = ((STDCHAR *) vbuf) + count;
+	while (count > 0) {
+	    int ch = *--buf & 0xFF;
+	    if (ungetc(ch,s) != ch) {
+		/* ungetc did not work */
+		break;
+	    }
+	    if ((STDCHAR*)PerlSIO_get_ptr(s) != --eptr || ((*eptr & 0xFF) != ch)) {
+		/* Did not change pointer as expected */
+		fgetc(s);  /* get char back again */
+		break;
+	    }
+	    /* It worked ! */
+	    count--;
+	    unread++;
+	}
+    }
+
+    if (count > 0) {
+	unread += PerlIOBase_unread(aTHX_ f, vbuf, count);
     }
     return unread;
 }
@@ -2689,24 +2732,6 @@ PerlIOStdio_flush(pTHX_ PerlIO *f)
 	    errno = err;
 #endif
     }
-    return 0;
-}
-
-IV
-PerlIOStdio_fill(pTHX_ PerlIO *f)
-{
-    FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    int c;
-    /*
-     * fflush()ing read-only streams can cause trouble on some stdio-s
-     */
-    if ((PerlIOBase(f)->flags & PERLIO_F_CANWRITE)) {
-	if (PerlSIO_fflush(stdio) != 0)
-	    return EOF;
-    }
-    c = PerlSIO_fgetc(stdio);
-    if (c == EOF || PerlSIO_ungetc(c, stdio) != c)
-	return EOF;
     return 0;
 }
 
@@ -2807,7 +2832,67 @@ PerlIOStdio_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 #endif                          /* STDIO_CNT_LVALUE */
 }
 
+
 #endif
+
+IV
+PerlIOStdio_fill(pTHX_ PerlIO *f)
+{
+    FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
+    int c;
+    /*
+     * fflush()ing read-only streams can cause trouble on some stdio-s
+     */
+    if ((PerlIOBase(f)->flags & PERLIO_F_CANWRITE)) {
+	if (PerlSIO_fflush(stdio) != 0)
+	    return EOF;
+    }
+    c = PerlSIO_fgetc(stdio);
+    if (c == EOF)
+	return EOF;
+
+#if (defined(STDIO_PTR_LVALUE) && (defined(STDIO_CNT_LVALUE) || defined(STDIO_PTR_LVAL_SETS_CNT)))
+    if (PerlIO_fast_gets(f) && PerlIO_has_base(f)) {
+	/* Fake ungetc() to the real buffer in case system's ungetc
+	   goes elsewhere
+	 */
+	STDCHAR *base = (STDCHAR*)PerlSIO_get_base(stdio);
+	SSize_t cnt   = PerlSIO_get_cnt(stdio);
+	STDCHAR *ptr  = (STDCHAR*)PerlSIO_get_ptr(stdio);
+	if (ptr == base+1) {
+	    *--ptr = (STDCHAR) c;
+	    PerlIOStdio_set_ptrcnt(aTHX_ f,ptr,cnt+1);
+	    if (PerlSIO_feof(stdio))
+		PerlSIO_clearerr(stdio);
+	    return 0;
+	}
+    }
+    else if (PerlIO_has_cntptr(f)) {
+	STDCHAR ch = c;
+	if (PerlIOStdio_unread(aTHX_ f,&ch,1) == 1) {
+	    return 0;
+	}
+    }
+#endif
+
+#if defined(VMS)
+    /* An ungetc()d char is handled separately from the regular
+     * buffer, so we stuff it in the buffer ourselves.
+     * Should never get called as should hit code above
+     */
+    *(--((*stdio)->_ptr)) = (unsigned char) c;
+    (*stdio)->_cnt++;
+#else
+    /* If buffer snoop scheme above fails fall back to
+       using ungetc().
+     */
+    if (PerlSIO_ungetc(c, stdio) != c)
+	return EOF;
+#endif
+    return 0;
+}
+
+
 
 PerlIO_funcs PerlIO_stdio = {
     "stdio",
@@ -3161,6 +3246,9 @@ PerlIOBuf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	    unread += avail;
 	    PerlIOBase(f)->flags &= ~PERLIO_F_EOF;
 	}
+    }
+    if (count > 0) {
+	unread += PerlIOBase_unread(aTHX_ f, vbuf, count);
     }
     return unread;
 }

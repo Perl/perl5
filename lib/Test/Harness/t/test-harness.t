@@ -39,7 +39,6 @@ my $IsVMS = $^O eq 'VMS';
 
 # VMS uses native, not POSIX, exit codes.
 my $die_estat = $IsVMS ? 44 : 1;
-my $die_wstat = $IsVMS ? 1024 : 256;
 
 my %samples = (
             simple            => {
@@ -293,7 +292,6 @@ my %samples = (
                                            },
                                   failed => {
                                              estat      => $die_estat,
-                                             wstat      => $die_wstat,
                                              max        => '??',
                                              failed     => '??',
                                              canon      => '??',
@@ -316,7 +314,6 @@ my %samples = (
                                            },
                                   failed => {
                                              estat      => $die_estat,
-                                             wstat      => $die_wstat,
                                              max        => '??',
                                              failed     => '??',
                                              canon      => '??',
@@ -339,7 +336,6 @@ my %samples = (
                                            },
                                   failed => {
                                              estat      => $die_estat,
-                                             wstat      => $die_wstat,
                                              max        => 4,
                                              failed     => 0,
                                              canon      => '??',

@@ -1145,9 +1145,12 @@ See also L<Math::Trig>.
 
 =item sleep
 
-This is identical to Perl's builtin C<sleep()> function
-for suspending the execution of the current for process
-for certain number of seconds, see L<perlfunc/sleep>.
+This is functionally identical to Perl's builtin C<sleep()> function
+for suspending the execution of the current for process for certain
+number of seconds, see L<perlfunc/sleep>.  There is one signifanct 
+difference, however: C<POSIX::sleep()> returns the number of
+B<unslept> seconds, while the C<CORE::sleep()> returns the
+number of slept seconds.
 
 =item sprintf
 

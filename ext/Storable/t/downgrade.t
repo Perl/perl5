@@ -38,7 +38,7 @@ use vars qw(@RESTRICT_TESTS %R_HASH %U_HASH $UTF8_CROAK $RESTRICTED_CROAK);
                   );
 %R_HASH = (perl => 'rules');
 
-if ($] >= 5.007003) {
+if ($] > 5.007002) {
   # This is cheating. "\xdf" in Latin 1 is beta S, so will match \w if it
   # is stored in utf8, not bytes.
   # "\xdf" is y diaresis in EBCDIC (except for cp875, but so far no-one seems
@@ -92,11 +92,21 @@ sub thaw_hash {
 }
 
 sub thaw_scalar {
-  my ($name, $expected) = @_;
+  my ($name, $expected, $bug) = @_;
   my $scalar = eval {thaw $tests{$name}};
   is ($@, '', "Thawed $name without error?");
   isa_ok ($scalar, 'SCALAR', "Thawed $name?");
-  is ($$scalar, $expected, "And it is the data we expected?");
+  if ($bug and $] == 5.006) {
+    # Aargh. <expletive> <expletive> 5.6.0's harness doesn't even honour
+    # TODO tests.
+    warn "# Test skipped because eq is buggy for certain Unicode cases in 5.6.0";
+    warn "# Please upgrade to 5.6.1\n";
+    ok ("I'd really like to fail this test on 5.6.0 but I'm told that CPAN auto-dependancies mess up, and certain vendors only ship 5.6.0. Get your vendor to ugrade. Else upgrade your vendor.");
+    # One such vendor being the folks who brought you LONG_MIN as a positive
+    # integer.
+  } else {
+    is ($$scalar, $expected, "And it is the data we expected?");
+  }
   $scalar;
 }
 
@@ -186,9 +196,8 @@ if (eval "use Hash::Util; 1") {
 
 if ($] >= 5.006) {
   print "# We have utf8 scalars, so test that the utf8 scalars in <DATA> are valid\n";
-  print "# These seem to fail on 5.6 - you should seriously consider upgrading to 5.6.1\n" if $] == 5.006;
-  thaw_scalar ('Short 8 bit utf8 data', "\xDF");
-  thaw_scalar ('Long 8 bit utf8 data', "\xDF" x 256);
+  thaw_scalar ('Short 8 bit utf8 data', "\xDF", 1);
+  thaw_scalar ('Long 8 bit utf8 data', "\xDF" x 256, 1);
   thaw_scalar ('Short 24 bit utf8 data', chr 0xC0FFEE);
   thaw_scalar ('Long 24 bit utf8 data', chr (0xC0FFEE) x 256);
 } else {
@@ -206,7 +215,7 @@ if ($] >= 5.006) {
   thaw_scalar ('Long 24 bit utf8 data', $$bytes x 256);
 }
 
-if ($] >= 5.007003) {
+if ($] > 5.007002) {
   print "# We have utf8 hashes, so test that the utf8 hashes in <DATA> are valid\n";
   my $hash = thaw_hash ('Hash with utf8 keys', \%U_HASH);
   for (keys %$hash) {

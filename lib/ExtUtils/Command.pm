@@ -13,6 +13,8 @@ use vars qw(@ISA @EXPORT $VERSION);
 @EXPORT  = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f);
 $VERSION = '1.03_01';
 
+my $Is_VMS = $^O eq 'VMS';
+
 =head1 NAME
 
 ExtUtils::Command - utilities to replace common UNIX commands in Makefiles etc.
@@ -48,9 +50,11 @@ Filenames with * and ? will be glob expanded.
 
 =cut
 
+# VMS uses % instead of ? to mean "one character"
+my $wild_regex = $Is_VMS ? '*%' : '*?';
 sub expand_wildcards
 {
- @ARGV = map(/[\*\?]/ ? glob($_) : $_,@ARGV);
+ @ARGV = map(/[$wild_regex]/o ? glob($_) : $_,@ARGV);
 }
 
 =item cat 

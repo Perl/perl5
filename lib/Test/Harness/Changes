@@ -1,5 +1,11 @@
 Revision history for Perl extension Test::Harness
 
+2.23  Wed May 22 12:59:47 EDT 2002
+    - reason for all skip wasn't being displayed.  Broken in 2.20.
+    - Changed the wait status tests to conform with POSIX standards.
+    - Quieted some SYSTEM$ABORT noise leaking out from dying test tests
+      on VMS.
+
 2.22  Fri May 17 19:01:35 EDT 2002
     - Fixed parsing of #!/usr/bin/perl-current to not see a -t.
       (RT #574)

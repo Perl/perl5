@@ -57,18 +57,27 @@ please email me.
 Tom Spindler
 dogcow@isi.net
 
-=head2 Update 2002-03-02
+=head2 Update 2002-05-25
 
-The following tests fail on pre-5.8.0 Perl in BeOS Personal 5.0:
+The following tests fail on 5.8.0 Perl in BeOS Personal 5.03:
 
-        op/magic                        24-26
-        ext/POSIX/t/sigaction           13
-        ext/POSIX/t/waitpid             1
-        lib/ExtUtils/t/Installed        9-10 25-27 29-30 33-36
+ t/op/lfs............................FAILED at test 17
+ t/op/magic..........................FAILED at test 24
+ ext/Fcntl/t/syslfs..................FAILED at test 17
+ ext/File/Glob/t/basic...............FAILED at test 3
+ ext/POSIX/t/sigaction...............FAILED at test 13
+ ext/POSIX/t/waitpid.................FAILED at test 1
+ lib/Tie/File/t/16_handle............FAILED at test 39
 
-None of the failures look too serious:
+The reasons for the failures are as follows: 
 
 =over 4
+
+=item *
+
+The op/lfs and Fcntl/t/syslfs seem to hit a real bug: though we can
+seek around past the 2GB limit, reading from there doesn't work.
+Therefore, please don't try doing large files in BeOS with Perl.
 
 =item *
 
@@ -76,6 +85,11 @@ The op/magic failures look like something funny going on with $0 and
 $^X that I can't now figure out: none of the generated pathnames are
 wrong as such, they just seem to accumulate "./" prefixes and infixes
 in ways that define logic.
+
+=item *
+
+The Glob/t/basic indicates a bug in the getpw*() functions of Perl:
+they do not always return the correct user db entries.
 
 =item *
 
@@ -90,7 +104,8 @@ errno to ECHILD).  In BeOS, it doesn't seem to.
 
 =item *
 
-The Installed test has some filesystem portability assumptions.
+The Tie/File/t/16_handle seems to indicate some brokenness
+(non-UNIXness) in how BeOS handles pipes.
 
 =back
 

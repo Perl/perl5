@@ -5,4 +5,5 @@ ok 3
 ok 4
 DUMMY_TEST
 
+use if $^O eq 'VMS', vmsish => 'hushed';
 exit 1;

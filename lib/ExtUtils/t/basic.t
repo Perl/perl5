@@ -30,14 +30,21 @@ if( $^O eq 'VMS' ) {
     # in a DCL subprocess and put it in the job table so the parent sees it.
     open( BFDTMP, '>bfdtesttmp.com' ) || die "Error creating command file; $!";
     print BFDTMP <<'COMMAND';
-$ BFD_TEST_ROOT = F$PARSE("[.t]",,,,"NO_CONCEAL")-".][000000"-"]["-"].;"+".]"
+$ IF F$TRNLNM("PERL_CORE") .EQS. "" .AND. F$TYPE(PERL_CORE) .EQS. ""
+$ THEN
+$!  building CPAN version
+$   BFD_TEST_ROOT = F$PARSE("SYS$DISK:[]",,,,"NO_CONCEAL")-".][000000"-"]["-"].;"+".]"
+$ ELSE
+$!  we're in the core
+$   BFD_TEST_ROOT = F$PARSE("SYS$DISK:[-]",,,,"NO_CONCEAL")-".][000000"-"]["-"].;"+".]"
+$ ENDIF
 $ DEFINE/JOB/NOLOG/TRANSLATION=CONCEALED BFD_TEST_ROOT 'BFD_TEST_ROOT'
 COMMAND
     close BFDTMP;
 
     system '@bfdtesttmp.com';
     END { 1 while unlink 'bfdtesttmp.com' }
-    $root_dir = 'BFD_TEST_ROOT:[000000]';
+    $root_dir = 'BFD_TEST_ROOT:[t]';
 }
 
 chdir $root_dir;

@@ -1,3 +1,31 @@
+Sat May 25 22:38:39 BST 2002   Nicholas Clark <nick@ccl4.org>
+
+. Description:
+
+	Version 2.02
+		
+	Rewrite Storable.xs so that the file header structure for write_magic
+	is built at compile time, and check_magic attempts to the header in
+	blocks rather than byte per byte. These changes make the compiled
+	extension 2.25% smaller, but are not significant enough to give a
+	noticeable speed up.
+
+Thu May 23 22:50:41 BST 2002   Nicholas Clark <nick@ccl4.org>
+
+. Description:
+
+	Version 2.01
+
+	New regression tests integer.t
+	Add code to safely store large unsigned integers.
+	Change code not to attempt to store large integers (ie > 32 bits)
+	in network order as 32 bits.
+	*Never* underestimate the value of a pathological test suite carefully
+	crafted with maximum malice before writing a line of real code. It
+	prevents crafty bugs from stowing away in your released code.
+	It's much less embarrassing to find them before you ship.
+	(Well, never underestimate it if you ever want to work for me)
+	
 Fri May 17 22:48:59 BST 2002   Nicholas Clark <nick@ccl4.org>
 
 . Description:
