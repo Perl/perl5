@@ -74,9 +74,9 @@ why what it's doing isn't what it should be doing.
 =head2 How do I profile my Perl programs?
 
 You should get the Devel::DProf module from the standard distribution
-(and separately on CPAN) or also use Benchmark.pm from the standard
-distribution.  The Benchmark module lets you time specific portions of
-your code, while Devel::DProf gives detailed breakdowns of where your
+(or separately on CPAN) and also use Benchmark.pm from the standard 
+distribution.  The Benchmark module lets you time specific portions of 
+your code, while Devel::DProf gives detailed breakdowns of where your 
 code spends its time.
 
 Here's a sample use of Benchmark:
@@ -209,10 +209,12 @@ GUI creation.
 
 On Mac OS the MacPerl Application comes with a simple 32k text editor
 that behaves like a rudimentary IDE.  In contrast to the MacPerl Application
-the MPW Perl tool can make use of MPW itself as an editor (with
+the MPW Perl tool can make use of the MPW Shell itself as an editor (with
 no 32k limit).  BBEdit and BBEdit Lite are text editors for Mac OS 
-that have a Perl sensitivity mode (http://web.barebones.com/),
-as does the Alpha editor (http://www.bcity.com/alphatext).
+that have a Perl sensitivity mode (http://web.barebones.com/).
+Alpha is an editor, written and extensible in Tcl, that nonetheless has
+built in support for several popular markup and programming languages
+including Perl and HTML (http://alpha.olm.net/).
 
 =head2 Where can I get Perl macros for vi?
 
