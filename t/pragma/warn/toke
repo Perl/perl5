@@ -52,7 +52,7 @@ toke.c	AOK
      warn(warn_reserved	
 	$a = abc;
 
-     chmod: mode argument is missing initial 0 
+     chmod() mode argument is missing initial 0 
 	chmod 3;
 
      Possible attempt to separate words with commas 
@@ -305,7 +305,7 @@ chmod 3;
 no warnings 'octal' ;
 chmod 3;
 EXPECT
-chmod: mode argument is missing initial 0 at - line 3.
+chmod() mode argument is missing initial 0 at - line 3.
 ########
 # toke.c
 use warnings 'syntax' ;
