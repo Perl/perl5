@@ -321,6 +321,7 @@ extern char *		win32_get_privlib(char *pl);
 extern char *		win32_get_sitelib(char *pl);
 extern int		IsWin95(void);
 extern int		IsWinNT(void);
+extern void		win32_argv2utf8(pTHX_ int argc, char** argv);
 
 extern char *		staticlinkmodules[];
 

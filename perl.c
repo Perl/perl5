@@ -906,12 +906,16 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	s = argv[0]+1;
       reswitch:
 	switch (*s) {
+	case 'C':
+#ifdef	WIN32
+	    win32_argv2utf8(aTHX_ argc-1, argv+1);
+	    /* FALL THROUGH */
+#endif
 #ifndef PERL_STRICT_CR
 	case '\r':
 #endif
 	case ' ':
 	case '0':
-	case 'C':
 	case 'F':
 	case 'a':
 	case 'c':
@@ -3153,7 +3157,10 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	(void)gv_AVadd(PL_argvgv);
 	av_clear(GvAVn(PL_argvgv));
 	for (; argc > 0; argc--,argv++) {
-	    av_push(GvAVn(PL_argvgv),newSVpv(argv[0],0));
+	    SV *sv = newSVpv(argv[0],0);
+	    av_push(GvAVn(PL_argvgv),sv);
+	    if (PL_widesyscalls)
+		sv_utf8_upgrade(sv);
 	}
     }
     if (PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV)) {

@@ -15,6 +15,7 @@
 #define Win32_Winsock
 #endif
 #include <windows.h>
+#include <shellapi.h>
 #include <winnt.h>
 #include <io.h>
 
@@ -4003,4 +4004,32 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->thr_intern.Winit_socktype = src->thr_intern.Winit_socktype;
 }
 #endif
+
+static void
+win32_free_argvw(pTHXo_ void *ptr)
+{
+    char** argv = (char**)ptr;
+    while(*argv) {
+	Safefree(*argv);
+	*argv++ = Nullch;
+    }
+}
+
+void
+win32_argv2utf8(pTHX_ int argc, char** argv)
+{
+    char* psz;
+    int length, wargc;
+    LPWSTR* lpwStr = CommandLineToArgvW(GetCommandLineW(), &wargc);
+    if (lpwStr && argc) {
+	while (argc--) {
+	    length = WideCharToMultiByte(CP_UTF8, 0, lpwStr[--wargc], -1, NULL, 0, NULL, NULL);
+	    Newz(0, psz, length, char);
+	    WideCharToMultiByte(CP_UTF8, 0, lpwStr[wargc], -1, psz, length, NULL, NULL);
+	    argv[argc] = psz;
+	}
+	call_atexit(win32_free_argvw, argv);
+    }
+    GlobalFree((HGLOBAL)lpwStr);
+}
 
