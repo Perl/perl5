@@ -2074,6 +2074,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define ARCHNAME "$archname"		/**/
 
+/* I_MACH_CTHREADS:
+ *    This symbol, if defined, indicates to the C program that it should
+ *    include <mach/cthreads.h>.
+ */
+#$i_machcthreads	I_MACH_CTHREADS         /**/
+
+/* I_PTHREAD:
+ *    This symbol, if defined, indicates to the C program that it should
+ *    include <pthread.h>.
+ */
+#$i_pthread   I_PTHREAD               /**/
+
 /* HAS_PTHREAD_YIELD:
  *	This symbol, if defined, indicates that the pthread_yield 
  *	routine is available to yield the execution of the current

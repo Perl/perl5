@@ -1150,11 +1150,22 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #      ifdef OS2
 #        include "os2thread.h"
 #      else
-#        include <pthread.h>
-typedef pthread_t perl_os_thread;
-typedef pthread_mutex_t perl_mutex;
-typedef pthread_cond_t perl_cond;
-typedef pthread_key_t perl_key;
+#        ifdef I_MACH_CTHREADS
+#          include <mach/cthreads.h>
+#          ifdef NeXT
+#            define MUTEX_INIT_CALLS_MALLOC
+#          endif
+typedef cthread_t	perl_os_thread;
+typedef mutex_t		perl_mutex;
+typedef condition_t	perl_cond;
+typedef void *		perl_key;
+#        else /* Posix threads */
+#          include <pthread.h>
+typedef pthread_t	perl_os_thread;
+typedef pthread_mutex_t	perl_mutex;
+typedef pthread_cond_t	perl_cond;
+typedef pthread_key_t	perl_key;
+#        endif /* I_MACH_CTHREADS */
 #      endif /* OS2 */
 #    endif /* WIN32 */
 #  endif /* FAKE_THREADS */
@@ -1595,8 +1606,22 @@ typedef Sighandler_t Sigsave_t;
 #endif
 
 #ifdef MYMALLOC
-#  define MALLOC_INIT MUTEX_INIT(&PL_malloc_mutex)
-#  define MALLOC_TERM MUTEX_DESTROY(&PL_malloc_mutex)
+#  ifdef MUTEX_INIT_CALLS_MALLOC
+#    define MALLOC_INIT					\
+	STMT_START {					\
+		PL_malloc_mutex = NULL;			\
+		MUTEX_INIT(&PL_malloc_mutex);		\
+	} STMT_END
+#    define MALLOC_TERM					\
+	STMT_START {					\
+		perl_mutex tmp = PL_malloc_mutex;	\
+		PL_malloc_mutex = NULL;			\
+		MUTEX_DESTROY(&tmp);			\
+	} STMT_END
+#  else
+#    define MALLOC_INIT MUTEX_INIT(&PL_malloc_mutex)
+#    define MALLOC_TERM MUTEX_DESTROY(&PL_malloc_mutex)
+#  endif
 #else
 #  define MALLOC_INIT
 #  define MALLOC_TERM

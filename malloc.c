@@ -570,6 +570,13 @@ static char bucket_of[] =
 #    define BIG_SIZE (1<<16)		/* 64K */
 #  endif 
 
+#ifdef MUTEX_INIT_CALLS_MALLOC
+#  undef      MUTEX_LOCK
+#  define MUTEX_LOCK(m)       STMT_START { if (*m) mutex_lock(*m); } STMT_END
+#  undef      MUTEX_UNLOCK
+#  define MUTEX_UNLOCK(m)     STMT_START { if (*m) mutex_unlock(*m); } STMT_END
+#endif
+
 static char *emergency_buffer;
 static MEM_SIZE emergency_buffer_size;
 static Malloc_t emergency_sbrk(MEM_SIZE size);
@@ -671,6 +678,7 @@ static  u_int start_slack;
 static	u_int goodsbrk;
 
 #ifdef DEBUGGING
+#undef ASSERT
 #define	ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p));  else
 static void
 botch(char *diag, char *s)

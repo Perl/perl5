@@ -412,6 +412,8 @@ d_portable=''
 d_pthread_yield=''
 d_sched_yield=''
 d_pthreads_created_joinable=''
+i_pthread=''
+i_machcthreads=''
 d_readdir=''
 d_rewinddir=''
 d_seekdir=''
@@ -7850,11 +7852,26 @@ set d_sched_yield
 eval $setvar
 $rm -f try try.*
 
+: see if this is a pthread.h system
+set pthread.h i_pthread
+eval $inhdr
+
+: see if this is a mach/cthreads.h system
+set mach/cthreads.h i_machcthreads
+eval $inhdr
+
 : test whether pthreads are created in joinable -- aka undetached -- state
 if test "X$usethreads" = "X$define"; then
 	echo $n "Checking whether pthreads are created joinable. $c" >&4 
 	$cat >try.c <<'EOCP'
+#$i_pthread I_PTHREAD
+#$i_machcthreads I_MACH_CTHREADS
+#ifdef I_PTHREAD
 #include <pthread.h>
+#endif
+#ifdef I_MACH_CTHREADS
+#include <mach/cthreads.h>
+#endif
 #include <stdio.h>
 int main() {
     pthread_attr_t attr;
@@ -12048,6 +12065,7 @@ i_grp='$i_grp'
 i_limits='$i_limits'
 i_locale='$i_locale'
 i_malloc='$i_malloc'
+i_machcthreads='$i_machcthreads'
 i_math='$i_math'
 i_memory='$i_memory'
 i_mntent='$i_mntent'
@@ -12056,6 +12074,7 @@ i_netdb='$i_netdb'
 i_neterrno='$i_neterrno'
 i_niin='$i_niin'
 i_pwd='$i_pwd'
+i_pthread='$i_pthread'
 i_rpcsvcdbm='$i_rpcsvcdbm'
 i_sfio='$i_sfio'
 i_sgtty='$i_sgtty'
