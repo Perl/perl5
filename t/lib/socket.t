@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib' if -d '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bSocket\b/ && 
-        !(($^O eq 'VMS') && $Config{d_has_socket})) {
+        !(($^O eq 'VMS') && $Config{d_socket})) {
 	print "1..0\n";
 	exit 0;
     }
