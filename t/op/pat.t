@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..990\n";
+print "1..993\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3123,5 +3123,21 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
     ok ( $p == 5, "(??{ }) returns stale values");
 }
 
-# last test 990
+{
+  # Subject: Odd regexp behavior
+  # From: Markus Kuhn <Markus.Kuhn@cl.cam.ac.uk>
+  # Date: Wed, 26 Feb 2003 16:53:12 +0000
+  # Message-Id: <E18o4nw-0008Ly-00@wisbech.cl.cam.ac.uk>
+  # To: perl-unicode@perl.org
+    
+  $x = "\x{2019}\nk"; $x =~ s/(\S)\n(\S)/$1 $2/sg;
+  ok($x eq "\x{2019} k", "Markus Kuhn 2003-02-26");
+
+  $x = "b\nk"; $x =~ s/(\S)\n(\S)/$1 $2/sg;
+  ok($x eq "b k", "Markus Kuhn 2003-02-26");
+
+  ok("\x{2019}" =~ /\S/, "Markus Kuhn 2003-02-26");
+}
+
+# last test 993
 
