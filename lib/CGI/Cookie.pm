@@ -153,7 +153,19 @@ sub name {
 sub value {
     my $self = shift;
     my $value = shift;
-    $self->{'value'} = $value if defined $value;
+      if (defined $value) {
+              my @values;
+        if (ref($value)) {
+            if (ref($value) eq 'ARRAY') {
+                @values = @$value;
+            } elsif (ref($value) eq 'HASH') {
+                @values = %$value;
+            }
+        } else {
+            @values = ($value);
+        }
+      $self->{'value'} = [@values];
+      }
     return wantarray ? @{$self->{'value'}} : $self->{'value'}->[0]
 }
 

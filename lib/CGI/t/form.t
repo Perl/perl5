@@ -1,5 +1,11 @@
 #!/usr/local/bin/perl -w
 
+use lib qw(t/lib);
+
+# Due to a bug in older versions of MakeMaker & Test::Harness, we must
+# ensure the blib's are in @INC, else we might use the core CGI.pm
+use lib qw(blib/lib blib/arch);
+
 use Test::More tests => 17;
 
 BEGIN { use_ok('CGI'); };
@@ -73,30 +79,30 @@ is(checkbox(-name     => 'weather',
 	    -label    => 'forecast',
 	    -checked  => 1,
 	    -override => 1),
-   qq(<input type="checkbox" name="weather" value="nice" checked />forecast),
+   qq(<input type="checkbox" name="weather" value="nice" checked="1" />forecast),
    "checkbox()");
 
 is(checkbox(-name  => 'weather',
 	    -value => 'dull',
 	    -label => 'forecast'),
-   qq(<input type="checkbox" name="weather" value="dull" checked />forecast),
+   qq(<input type="checkbox" name="weather" value="dull" checked="1" />forecast),
    "checkbox()");
 
 is(radio_group(-name => 'game'),
-   qq(<input type="radio" name="game" value="chess" checked />chess ).
+   qq(<input type="radio" name="game" value="chess" checked="1" />chess ).
    qq(<input type="radio" name="game" value="checkers" />checkers),
    'radio_group()');
 
 is(radio_group(-name   => 'game',
 	       -labels => {'chess' => 'ping pong'}),
-   qq(<input type="radio" name="game" value="chess" checked />ping pong ).
+   qq(<input type="radio" name="game" value="chess" checked="1" />ping pong ).
    qq(<input type="radio" name="game" value="checkers" />checkers),
    'radio_group()');
 
 is(checkbox_group(-name   => 'game',
 		  -Values => [qw/checkers chess cribbage/]),
-   qq(<input type="checkbox" name="game" value="checkers" checked />checkers ).
-   qq(<input type="checkbox" name="game" value="chess" checked />chess ).
+   qq(<input type="checkbox" name="game" value="checkers" checked="1" />checkers ).
+   qq(<input type="checkbox" name="game" value="chess" checked="1" />chess ).
    qq(<input type="checkbox" name="game" value="cribbage" />cribbage),
    'checkbox_group()');
 
@@ -105,7 +111,7 @@ is(checkbox_group(-name       => 'game',
 		  '-defaults' => ['cribbage'],-override=>1),
    qq(<input type="checkbox" name="game" value="checkers" />checkers ).
    qq(<input type="checkbox" name="game" value="chess" />chess ).
-   qq(<input type="checkbox" name="game" value="cribbage" checked />cribbage),
+   qq(<input type="checkbox" name="game" value="cribbage" checked="1" />cribbage),
    'checkbox_group()');
 
 is(popup_menu(-name     => 'game',
@@ -116,7 +122,7 @@ is(popup_menu(-name     => 'game',
 <select name="game">
 <option  value="checkers">checkers</option>
 <option  value="chess">chess</option>
-<option selected value="cribbage">cribbage</option>
+<option selected="1" value="cribbage">cribbage</option>
 </select>
 END
 

@@ -1,11 +1,12 @@
 #!/usr/local/bin/perl -w
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
-
+use lib qw(t/lib);
 use strict;
+
+# Due to a bug in older versions of MakeMaker & Test::Harness, we must
+# ensure the blib's are in @INC, else we might use the core CGI.pm
+use lib qw(blib/lib blib/arch);
+
 use Test::More tests => 86;
 use CGI::Util qw(escape unescape);
 use POSIX qw(strftime);

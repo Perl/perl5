@@ -1,6 +1,6 @@
 use CGI;
 
-our $VERSION = '1.00';
+$VERSION = '1.00';
 
 1;
 

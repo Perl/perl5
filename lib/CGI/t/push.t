@@ -1,9 +1,10 @@
 #!./perl -wT
 
-BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-}
+use lib qw(t/lib);
+
+# Due to a bug in older versions of MakeMaker & Test::Harness, we must
+# ensure the blib's are in @INC, else we might use the core CGI.pm
+use lib qw(blib/lib blib/arch);
 
 use Test::More tests => 12; 
 
@@ -12,7 +13,7 @@ use_ok( 'CGI::Push' );
 ok( my $q = CGI::Push->new(), 'create a new CGI::Push object' );
 
 # test the simple_counter() method
-like( join('', $q->simple_counter(10)) , qr/updated.+?10.+?times./, 'counter' );
+like( join('', $q->simple_counter(10)) , '/updated.+?10.+?times./', 'counter' );
 
 # test do_sleep, except we don't want to bog down the tests
 # there's also a potential timing-related failure lurking here
@@ -43,7 +44,7 @@ my %vars = (
 $q->do_push(%vars);
 
 # this seems to appear on every page
-like( $$out, qr/WARNING: YOUR BROWSER/, 'unsupported browser warning' );
+like( $$out, '/WARNING: YOUR BROWSER/', 'unsupported browser warning' );
 
 # these should appear correctly
 is( ($$out =~ s/next page//g), 2, 'next_page callback called appropriately' );
@@ -52,7 +53,7 @@ is( ($$out =~ s/last page//g), 1, 'last_page callback called appropriately' );
 # send a fake content type (header capitalization varies in CGI, CGI::Push)
 $$out = '';
 $q->do_push(%vars, -type => 'fake' );
-like( $$out, qr/Content-[Tt]ype: fake/, 'set custom Content-type' );
+like( $$out, '/Content-[Tt]ype: fake/', 'set custom Content-type' );
 
 # use our own counter, as $COUNTER in CGI::Push is now off
 my $i;
@@ -69,7 +70,7 @@ $q->do_push(
 );
 
 # header capitalization again, our word should appear only once
-like( $$out, qr!ype: text/plain!, 'set custom Content-type in next_page()' );
+like( $$out, '/ype: text\/plain/', 'set custom Content-type in next_page()' );
 is( $$out =~ s/arduk//g, 1, 'found text from next_page()' );
 	
 package TieOut;

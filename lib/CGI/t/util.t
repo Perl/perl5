@@ -1,10 +1,5 @@
 #!/usr/local/bin/perl -w
 
-BEGIN {
-    chdir('t') if -d 't';
-    @INC = '../lib';
-}
-
 # Test ability to escape() and unescape() punctuation characters
 # except for qw(- . _).
 ######################### We start with some black magic to print on failure.

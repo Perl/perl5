@@ -18,12 +18,12 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.51 2001/08/07 12:28:43 lstein Exp $';
-$CGI::VERSION='2.77';
+$CGI::revision = '$Id: CGI.pm,v 1.55 2001/09/26 02:15:52 lstein Exp $';
+$CGI::VERSION='2.78';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
-# $TempFile::TMPDIRECTORY = '/usr/tmp';
+# $CGITempFile::TMPDIRECTORY = '/usr/tmp';
 use CGI::Util qw(rearrange make_attributes unescape escape expires);
 
 use constant XHTML_DTD => ['-//W3C//DTD XHTML Basic 1.0//EN',
@@ -140,8 +140,8 @@ $AutoloadClass = $DefaultClass unless defined $CGI::AutoloadClass;
 # The path separator is a slash, backslash or semicolon, depending
 # on the paltform.
 $SL = {
-    UNIX=>'/', OS2=>'\\', EPOC=>'/', 
-    WINDOWS=>'\\', DOS=>'\\', MACINTOSH=>':', VMS=>'/'
+       UNIX=>'/', OS2=>'\\', EPOC=>'/',
+       WINDOWS=>'\\', DOS=>'\\', MACINTOSH=>':', VMS=>'/'
     }->{$OS};
 
 # This no longer seems to be necessary
@@ -1307,8 +1307,11 @@ END_OF_FUNC
 'start_html' => <<'END_OF_FUNC',
 sub start_html {
     my($self,@p) = &self_or_default(@_);
-    my($title,$author,$base,$xbase,$script,$noscript,$target,$meta,$head,$style,$dtd,$lang,@other) = 
-	rearrange([TITLE,AUTHOR,BASE,XBASE,SCRIPT,NOSCRIPT,TARGET,META,HEAD,STYLE,DTD,LANG],@p);
+    my($title,$author,$base,$xbase,$script,$noscript,
+        $target,$meta,$head,$style,$dtd,$lang,$encoding,@other) = 
+	rearrange([TITLE,AUTHOR,BASE,XBASE,SCRIPT,NOSCRIPT,TARGET,META,HEAD,STYLE,DTD,LANG,ENCODING],@p);
+
+    $encoding = 'utf-8' unless defined $encoding;
 
     # strangely enough, the title needs to be escaped as HTML
     # while the author needs to be escaped as a URL
@@ -1328,7 +1331,7 @@ sub start_html {
 
     $xml_dtd++ if ref($dtd) eq 'ARRAY' && $dtd->[0] =~ /\bXHTML\b/i;
     $xml_dtd++ if ref($dtd) eq '' && $dtd =~ /\bXHTML\b/i;
-    push @result,q(<?xml version="1.0" encoding="utf-8"?>) if $xml_dtd; 
+    push @result,qq(<?xml version="1.0" encoding="$encoding"?>) if $xml_dtd; 
 
     if (ref($dtd) && ref($dtd) eq 'ARRAY') {
         push(@result,qq(<!DOCTYPE html\n\tPUBLIC "$dtd->[0]"\n\t"$dtd->[1]">));
@@ -1819,9 +1822,9 @@ sub checkbox {
 
     if (!$override && ($self->{'.fieldnames'}->{$name} || 
 		       defined $self->param($name))) {
-	$checked = grep($_ eq $value,$self->param($name)) ? ' checked' : '';
+	$checked = grep($_ eq $value,$self->param($name)) ? ' checked="1"' : '';
     } else {
-	$checked = $checked ? qq/ checked/ : '';
+	$checked = $checked ? qq/ checked="1"/ : '';
     }
     my($the_label) = defined $label ? $label : $name;
     $name = $self->escapeHTML($name);
@@ -1886,7 +1889,7 @@ sub checkbox_group {
 
     my($other) = @other ? " @other" : '';
     foreach (@values) {
-	$checked = $checked{$_} ? qq/ checked/ : '';
+	$checked = $checked{$_} ? qq/ checked="1"/ : '';
 	$label = '';
 	unless (defined($nolabels) && $nolabels) {
 	    $label = $_;
@@ -1907,6 +1910,8 @@ END_OF_FUNC
 # Escape HTML -- used internally
 'escapeHTML' => <<'END_OF_FUNC',
 sub escapeHTML {
+         # hack to work around  earlier hacks
+         push @_,$_[0] if @_==1 && $_[0] eq 'CGI';
          my ($self,$toencode,$newlinestoo) = CGI::self_or_default(@_);
          return undef unless defined($toencode);
          return $toencode if ref($self) && $self->{'dontescape'};
@@ -2032,7 +2037,7 @@ sub radio_group {
 
     my($other) = @other ? " @other" : '';
     foreach (@values) {
-	my($checkit) = $checked eq $_ ? qq/ checked/ : '';
+	my($checkit) = $checked eq $_ ? qq/ checked="1"/ : '';
 	my($break);
 	if ($linebreak) {
           $break = $XHTML ? "<br />" : "<br>";
@@ -2093,7 +2098,7 @@ sub popup_menu {
 
     $result = qq/<select name="$name"$other>\n/;
     foreach (@values) {
-	my($selectit) = defined($selected) ? ($selected eq $_ ? qq/selected/ : '' ) : '';
+	my($selectit) = defined($selected) ? ($selected eq $_ ? qq/selected="1"/ : '' ) : '';
 	my($label) = $_;
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	my($value) = $self->escapeHTML($_);
@@ -2140,14 +2145,14 @@ sub scrolling_list {
     $size = $size || scalar(@values);
 
     my(%selected) = $self->previous_or_default($name,$defaults,$override);
-    my($is_multiple) = $multiple ? qq/ multiple/ : '';
+    my($is_multiple) = $multiple ? qq/ multiple="multiple"/ : '';
     my($has_size) = $size ? qq/ size="$size"/: '';
     my($other) = @other ? " @other" : '';
 
     $name=$self->escapeHTML($name);
     $result = qq/<select name="$name"$has_size$is_multiple$other>\n/;
     foreach (@values) {
-	my($selectit) = $selected{$_} ? qq/selected/ : '';
+	my($selectit) = $selected{$_} ? qq/selected="1"/ : '';
 	my($label) = $_;
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	$label=$self->escapeHTML($label);
@@ -2220,7 +2225,7 @@ sub image_button {
     my($name,$src,$alignment,@other) =
 	rearrange([NAME,SRC,ALIGN],@p);
 
-    my($align) = $alignment ? " align=\U$alignment" : '';
+    my($align) = $alignment ? " align=\U\"$alignment\"" : '';
     my($other) = @other ? " @other" : '';
     $name=$self->escapeHTML($name);
     return $XHTML ? qq(<input type="image" name="$name" src="$src"$align$other />)
@@ -2911,7 +2916,7 @@ sub read_multipart {
 	  # choose a relatively unpredictable tmpfile sequence number
           my $seqno = unpack("%16C*",join('',localtime,values %ENV));
           for (my $cnt=10;$cnt>0;$cnt--) {
-	    next unless $tmpfile = new TempFile($seqno);
+	    next unless $tmpfile = new CGITempFile($seqno);
 	    $tmp = $tmpfile->as_string;
 	    last if defined($filehandle = Fh->new($filename,$tmp,$PRIVATE_TEMPFILES));
             $seqno += int rand(100);
@@ -3249,7 +3254,8 @@ sub read {
     substr($self->{BUFFER},0,$bytesToReturn)='';
     
     # If we hit the boundary, remove the CRLF from the end.
-    return ($start > 0) ? substr($returnval,0,-2) : $returnval;
+    return (($start > 0) && ($start <= $bytes)) 
+           ? substr($returnval,0,-2) : $returnval;
 }
 END_OF_FUNC
 
@@ -3306,7 +3312,7 @@ END_OF_AUTOLOAD
 ####################################################################################
 ################################## TEMPORARY FILES #################################
 ####################################################################################
-package TempFile;
+package CGITempFile;
 
 $SL = $CGI::SL;
 $MAC = $CGI::OS eq 'MACINTOSH';
@@ -3338,7 +3344,7 @@ $MAXTRIES = 5000;
 
 # cute feature, but overload implementation broke it
 # %OVERLOAD = ('""'=>'as_string');
-*TempFile::AUTOLOAD = \&CGI::AUTOLOAD;
+*CGITempFile::AUTOLOAD = \&CGI::AUTOLOAD;
 
 ###############################################################################
 ################# THESE FUNCTIONS ARE AUTOLOADED ON DEMAND ####################
@@ -4395,6 +4401,9 @@ the <HTML> tag.  The default if not specified is "en-US" for US
 English.  For example:
 
     print $q->start_html(-lang=>'fr-CA');
+
+The B<-encoding> argument can be used to specify the character set for
+XHTML.  It defaults to UTF-8 if not specified.
 
 You can place other arbitrary HTML elements to the <HEAD> section with the
 B<-head> tag.  For example, to place the rarely-used <LINK> element in the
@@ -5463,7 +5472,7 @@ of the particular button clicked on using the "this" variable.
 =head2 CREATING A STANDALONE CHECKBOX
 
     print $query->checkbox(-name=>'checkbox_name',
-			   -checked=>'checked',
+			   -checked=>1,
 			   -value=>'ON',
 			   -label=>'CLICK ME');
 
@@ -5731,7 +5740,6 @@ field.
 The second argument (-src) is also required and specifies the URL
 
 =item 3.
-
 The third option (-align, optional) is an alignment type, and may be
 TOP, BOTTOM or MIDDLE
 
@@ -6165,7 +6173,6 @@ Returns either the remote host name or IP address.
 if the former is unavailable.
 
 =item B<script_name()>
-
 Return the script name as a partial URL, for self-refering
 scripts.
 

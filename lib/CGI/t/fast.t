@@ -1,21 +1,23 @@
 #!./perl -w
 
-use vars qw( $CGI::Q $CGI::Fast::Ext_Request );
+use lib qw(t/lib);
+
+# Due to a bug in older versions of MakeMaker & Test::Harness, we must
+# ensure the blib's are in @INC, else we might use the core CGI.pm
+use lib qw(blib/lib blib/arch);
 
 my $fcgi;
 BEGIN {
-	chdir 't' if -d 't';
-
-	# unshift, don't assign, so FCGI can be found if it's installed
-	# unlikely, but possible
-	unshift @INC, '../lib';
-
 	local $@;
 	eval { require FCGI };
 	$fcgi = $@ ? 0 : 1;
 }
 
 use Test::More tests => 7;
+
+# Shut up "used only once" warnings.
+() = $CGI::Q;
+() = $CGI::Fast::Ext_Request;
 
 SKIP: {
 	skip( 'FCGI not installed, cannot continue', 7 ) unless $fcgi;
