@@ -124,6 +124,8 @@ Make sure you install the binaries as indicated in the web sites
 above.  You will need to set up a few environment variables (usually
 run from a batch file).
 
+You also need dmake.  See L</"Borland C++"> above on how to get it.
+
 =back
 
 =head2 Building
@@ -191,8 +193,8 @@ will fail, but you can try putting the path in double quotes.  Some
 parts of perl try to accomodate that, but not all pieces do.
 
 The default value for CCHOME in the makefiles for Visual C++
-may not be correct if you have a version later than 5.2.  Make
-sure the default exists and is valid.
+may not be correct for some versions.  Make sure the default exists
+and is valid.
 
 Other options are explained in the makefiles.  Be sure to read the
 instructions carefully.
@@ -401,9 +403,34 @@ be built, tested and installed with the standard mantra:
     $MAKE test
     $MAKE install
 
-where $MAKE stands for NMAKE or DMAKE.  Some extensions may not
-provide a testsuite (so "$MAKE test" may not do anything, or fail),
-but most serious ones do.
+where $MAKE is whatever 'make' program you have configured perl to
+use.  Use "perl -V:make" to find out what this is.  Some extensions
+may not provide a testsuite (so "$MAKE test" may not do anything, or
+fail), but most serious ones do.
+
+It is important that you use a supported 'make' program, and
+ensure Config.pm knows about it.  If you don't have nmake, you can
+either get dmake from the location mentioned earlier, or get an
+old version of nmake reportedly available from:
+
+    ftp://ftp.microsoft.com/Softlib/MSLFILES/nmake15.exe
+
+Another option is to use the make written in Perl, available from
+CPAN:
+
+    http://www.perl.com/CPAN/authors/id/NI-S/Make-0.03.tar.gz
+
+Note that MakeMaker actually emits makefiles with different syntax
+depending on what 'make' it thinks you are using.  Therefore, it is
+important that one of the following values appears in Config.pm:
+
+    make='nmake'	# MakeMaker emits nmake syntax
+    make='dmake'	# MakeMaker emits dmake syntax
+    any other value	# MakeMaker emits generic make syntax
+    			    (e.g GNU make, or Perl make)
+
+If the value doesn't match the 'make' program you want to use,
+edit Config.pm to fix it.
 
 If a module implements XSUBs, you will need one of the supported
 C compilers.  You must make sure you have set up the environment for
