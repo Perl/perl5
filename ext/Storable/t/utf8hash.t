@@ -45,8 +45,12 @@ for $Storable::canonical (0, 1) {
 # first we generate a nasty hash which keys include both utf8
 # on and off with identical PVs
 
+no utf8; # we have a naked 8-bit byte below (in Latin 1, anyway)
+
+# In Latin 1 -ese the below ord() should end up 0xc0 (192),
+# in EBCDIC 0x64 (100).  Both should end up being UTF-8/UTF-EBCDIC.
 my @ords = (
-	    0xc0,   # LATIN CAPITAL LETTER A WITH GRAVE
+	    ord("Á"), # LATIN CAPITAL LETTER A WITH GRAVE
 	    0x3000, #IDEOGRAPHIC SPACE
 	   );
 
