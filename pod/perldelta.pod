@@ -238,6 +238,11 @@ the deprecation warnings, use:
 
 =head2 Miscellaneous Enhancements
 
+If a socket gets closed by the server while printing to it, the client
+now gets a SIGPIPE.  While this new feature was not planned, it fell
+naturally out of PerlIO changes, and is to be considered an accidental
+feature.
+
 PerlIO::get_layers(FH) returns the names of the PerlIO layers
 active on a filehandle.
 
