@@ -23,7 +23,7 @@ STMT_START {\
 #include <thread.h>
 
 #define PERL_THREAD_SET_SPECIFIC(k,v) pthread_setspecific(k,v)
-#define PERL_THREAD_GET_SPECIFIC(k)   PTHREAD_GETSPECIFIC(k)
+#define PERL_THREAD_GET_SPECIFIC(k)   pthread_getspecific(k)
 #define PERL_THREAD_ALLOC_SPECIFIC(k) STMT_START {\
   if(pthread_key_create(&(k),0)) {\
     PerlIO_printf(PerlIO_stderr(), "panic threads.h: pthread_key_create");\
