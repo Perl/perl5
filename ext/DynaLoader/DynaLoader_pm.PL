@@ -254,7 +254,7 @@ sub bootstrap {
 	my $dir;
 	if ($Is_MacOS) {
 	    my $path = $_;
-	    if ($Mac_FS) {
+	    if ($Mac_FS && ! -d $path) {
 		$path = Mac::FileSpec::Unixish::nativize($path);
 	    }
 	    $path .= ":"  unless /:$/;

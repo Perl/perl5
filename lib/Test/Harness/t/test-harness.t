@@ -433,7 +433,7 @@ while (my($test, $expect) = each %samples) {
         select NULL;    # _run_all_tests() isn't as quiet as it should be.
         local $SIG{__WARN__} = sub { $warning .= join '', @_; };
         ($totals, $failed) = 
-          Test::Harness::_run_all_tests($^O eq 'macos' ?
+          Test::Harness::_run_all_tests($^O eq 'MacOS' ?
 					catfile($SAMPLE_TESTS, $test) :
 					"$SAMPLE_TESTS/$test");
     };
@@ -453,7 +453,7 @@ while (my($test, $expect) = each %samples) {
         is_deeply( {map { $_=>$totals->{$_} } keys %{$expect->{total}}},
                    $expect->{total},
                                                   "$test - totals" );
-        is_deeply( {map { $_=>$failed->{$^O eq 'macos' ?
+        is_deeply( {map { $_=>$failed->{$^O eq 'MacOS' ?
                                         catfile($SAMPLE_TESTS, $test) :
                                         "$SAMPLE_TESTS/$test"}{$_} }
                     keys %{$expect->{failed}}},
