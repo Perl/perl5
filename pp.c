@@ -4977,14 +4977,7 @@ PP(pp_split)
 		++s;
 	}
     }
-    else if (rx->prelen == 1 && *rx->precomp == '^') {
-	if (!(pm->op_pmflags & PMf_MULTILINE)
-	    && !(pm->op_pmregexp->reganch & ROPT_WARNED)) {
-	    if (ckWARN(WARN_DEPRECATED))
-		Perl_warner(aTHX_ WARN_DEPRECATED,
-			    "split /^/ better written as split /^/m");
-	    pm->op_pmregexp->reganch |= ROPT_WARNED;
-	}	
+    else if (strEQ("^", rx->precomp)) {
 	while (--limit) {
 	    /*SUPPRESS 530*/
 	    for (m = s; m < strend && *m != '\n'; m++) ;
