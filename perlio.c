@@ -2694,7 +2694,7 @@ PerlIOStdio_get_base(PerlIO *f)
 {
     dSYS;
     FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    return PerlSIO_get_base(stdio);
+    return (STDCHAR*)PerlSIO_get_base(stdio);
 }
 
 Size_t
@@ -2712,7 +2712,7 @@ PerlIOStdio_get_ptr(PerlIO *f)
 {
     dSYS;
     FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    return PerlSIO_get_ptr(stdio);
+    return (STDCHAR*)PerlSIO_get_ptr(stdio);
 }
 
 SSize_t
@@ -2730,7 +2730,7 @@ PerlIOStdio_set_ptrcnt(PerlIO *f, STDCHAR * ptr, SSize_t cnt)
     dSYS;
     if (ptr != NULL) {
 #ifdef STDIO_PTR_LVALUE
-	PerlSIO_set_ptr(stdio, ptr);
+        PerlSIO_set_ptr(stdio, (void*)ptr); /* LHS STDCHAR* cast non-portable */ 
 #ifdef STDIO_PTR_LVAL_SETS_CNT
 	if (PerlSIO_get_cnt(stdio) != (cnt)) {
 	    dTHX;

@@ -5700,7 +5700,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 			      "Screamer: going to getc, ptr=%"UVuf", cnt=%ld\n",
 			      PTR2UV(ptr),(long)cnt));
-	PerlIO_set_ptrcnt(fp, ptr, cnt); /* deregisterize cnt and ptr */
+	PerlIO_set_ptrcnt(fp, (STDCHAR*)ptr, cnt); /* deregisterize cnt and ptr */
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 	    "Screamer: pre: FILE * thinks ptr=%"UVuf", cnt=%ld, base=%"UVuf"\n",
 	    PTR2UV(PerlIO_get_ptr(fp)), (long)PerlIO_get_cnt(fp),
@@ -5741,7 +5741,7 @@ thats_really_all_folks:
 	cnt += shortbuffered;
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 	    "Screamer: quitting, ptr=%"UVuf", cnt=%ld\n",PTR2UV(ptr),(long)cnt));
-    PerlIO_set_ptrcnt(fp, ptr, cnt);	/* put these back or we're in trouble */
+    PerlIO_set_ptrcnt(fp, (STDCHAR*)ptr, cnt);	/* put these back or we're in trouble */
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 	"Screamer: end: FILE * thinks ptr=%"UVuf", cnt=%ld, base=%"UVuf"\n",
 	PTR2UV(PerlIO_get_ptr(fp)), (long)PerlIO_get_cnt(fp),
