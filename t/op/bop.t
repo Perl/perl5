@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..42\n";
+print "1..44\n";
 
 # numerics
 print ((0xdead & 0xbeef) == 0x9ead ? "ok 1\n" : "not ok 1\n");
@@ -163,3 +163,9 @@ print "ok 40\n";
 # More variations on 19 and 22.
 print "ok \xFF\x{FF}\n" & "ok 41\n";
 print "ok \x{FF}\xFF\n" & "ok 42\n";
+
+# Tests to see if you really can do casts negative floats to unsigned properly
+$neg1 = -1.0;
+print ((~ $neg1 == 0) ? "ok 43\n" : "not ok 43\n");
+$neg7 = -7.0;
+print ((~ $neg7 == 6) ? "ok 44\n" : "not ok 44\n");
