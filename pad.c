@@ -552,13 +552,8 @@ Perl_pad_findmy(pTHX_ char *name)
 	    continue;
 	}
 	else {
-	    if (
-		   (   seq >  (U32)I_32(SvNVX(sv))	/* min */
-		    && seq <= (U32)SvIVX(sv))		/* max */
-		||
-		    /* 'our' is visible before introduction */
-		    (!SvIVX(sv) && (SvFLAGS(sv) & SVpad_OUR))
-	    )
+	    if (   seq >  (U32)I_32(SvNVX(sv))	/* min */
+		&& seq <= (U32)SvIVX(sv))	/* max */
 		return off;
 	}
     }
