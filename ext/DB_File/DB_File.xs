@@ -592,7 +592,7 @@ const DBT * key2 ;
 }
 
 
-#ifdef BERKELEY_DB_1_OR_2
+#if defined(BERKELEY_DB_1_OR_2) && !(DB_VERSION_MINOR == 7 && DB_VERSION_PATCH >= 7)
 #    define HASH_CB_SIZE_TYPE size_t
 #else
 #    define HASH_CB_SIZE_TYPE u_int32_t
