@@ -30,17 +30,20 @@ BEGIN {
 (my $libnet_t = __FILE__) =~ s/datasend.t/libnet_t.pl/;
 require $libnet_t or die;
 
-print "1..15\n";
+print "1..51\n";
 
 sub check {
   my $expect = pop;
   my $cmd = Foo->new;
-  $cmd->datasend unless @_;
+  ok($cmd->datasend, 'datasend') unless @_;
   foreach my $line (@_) {
-    $cmd->datasend($line);
+    ok($cmd->datasend($line), 'datasend');
   }
-  $cmd->dataend;
-  is($cmd->output, $expect);
+  ok($cmd->dataend, 'dataend');
+  is(
+    unpack("H*",$cmd->output),
+    unpack("H*",$expect)
+  );
 }
 
 my $cmd;

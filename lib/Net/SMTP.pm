@@ -16,7 +16,7 @@ use IO::Socket;
 use Net::Cmd;
 use Net::Config;
 
-$VERSION = "2.28";
+$VERSION = "2.29";
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -109,8 +109,10 @@ sub etrn {
 sub auth {
     my ($self, $username, $password) = @_;
 
-    require MIME::Base64;
-    require Authen::SASL;
+    eval {
+	require MIME::Base64;
+	require Authen::SASL;
+    } or $self->set_status(500,["Need MIME::Base64 and Authen::SASL todo auth"]), return 0;
 
     my $mechanisms = $self->supports('AUTH',500,["Command unknown: 'AUTH'"]);
     return unless defined $mechanisms;

@@ -21,7 +21,7 @@ BEGIN {
   }
 }
 
-$VERSION = "2.25";
+$VERSION = "2.26";
 @ISA     = qw(Exporter);
 @EXPORT  = qw(CMD_INFO CMD_OK CMD_MORE CMD_REJECT CMD_ERROR CMD_PENDING);
 
@@ -431,7 +431,7 @@ sub datasend
  while($len)
   {
    my $wout;
-   if (select(undef,$wout=$win, undef, $timeout) > 0)
+   if (select(undef,$wout=$win, undef, $timeout) > 0 or -f $cmd) # -f for testing on win32
     {
      my $w = syswrite($cmd, $line, $len, $offset);
      unless (defined($w))
