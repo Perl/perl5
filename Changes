@@ -28,6 +28,169 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21091] By: jhi                                   on 2003/09/08  14:10:40
+        Log: Integrate:
+             [ 21090]
+             Win32 is playing to hard to get but I do not have
+             time to chase it, so restore #21072, more or less.
+             I think testing the debugger in UNIX-like places
+             is enough, no need to go into painful contortions
+             trying to "portably" run interactive programs like
+             the debugger.
+     Branch: maint-5.8/perl
+	  !> lib/perl5db/de0.t
+____________________________________________________________________________
+[ 21089] By: jhi                                   on 2003/09/08  12:53:10
+        Log: Integrate:
+             [ 21084]
+             Clean up pp_readdir() somewhat.
+             
+             [ 21085]
+             Superparanoia.
+             
+             [ 21086]
+             XSRETURN_UV was missing.
+             
+             [ 21087]
+             Add Hash::Util::hash_seed() which answers among
+             other things the question whether our hashes are
+             "randomised".  (They always were...)
+             
+             [ 21088]
+             5.8.1 was mistakenly redefining PL_sv_placeholder.
+     Branch: maint-5.8/perl
+	  !> XSUB.h ext/Storable/Storable.xs lib/Hash/Util.pm
+	  !> lib/Hash/Util.t pod/perlrun.pod pp_sys.c universal.c util.c
+____________________________________________________________________________
+[ 21083] By: jhi                                   on 2003/09/08  11:34:40
+        Log: Integrate:
+             [ 21082]
+             The #21073 broke ext/B/t/o.t, retracting the #21073.
+     Branch: maint-5.8/perl
+	  !> ext/PerlIO/scalar/scalar.xs ext/PerlIO/t/scalar.t
+____________________________________________________________________________
+[ 21081] By: jhi                                   on 2003/09/08  09:55:24
+        Log: Integrate:
+             [ 21076]
+             Let's require fork for this test.
+             
+             [ 21077]
+             Move Config test.
+             
+             [ 21078]
+             In Win32 the cmd.exe console output doesn't seem to
+             be catchable using the in-memory I/O + select trick,
+             so use tie-STDOUT trick instead.
+             
+             [ 21080]
+             In Win32 IPC::Open3 + IO::Select does not work that well
+             so mostly undo the change #21072 and revert back to using
+             a temp file.
+     Branch: maint-5.8/perl
+	  !> lib/perl5db/de0.t lib/perl5db/dumpvar.t
+____________________________________________________________________________
+[ 21079] By: jhi                                   on 2003/09/08  09:44:46
+        Log: Integrate:
+             [ 21061]
+             Retract #21010.
+     Branch: maint-5.8/perl
+	  !> lib/dumpvar.pl
+____________________________________________________________________________
+[ 21075] By: jhi                                   on 2003/09/08  08:15:50
+        Log: Integrate:
+             [ 21051]
+             1. Work around the bug fixed by #20587 (because it's in 5.8.0).
+             2. Compensate for PL_sv_placeholder <= 5.8.1.
+             3. Clean up non-backwards-compatible tests.
+             4. Prepare for the 2.08 CPAN release.
+             
+             [ 21052]
+             Musty corners of Syslog.pm.
+             
+             [ 21057]
+             Updated Sharp Zaurus cross-compilation from Redvers Davies.
+             
+             [ 21058]
+             Vanity patch.
+             
+             [ 21063]
+             Subject: [PATCH] Re: [perl #23656] Safe reval bleeds local variable values
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Sun, 7 Sep 2003 19:14:44 +0100
+             Message-ID: <20030907181444.GA7058@fdgroup.com>
+             
+             [ 21064]
+             Upgrade to Unicode::Collate 0.28
+             
+             [ 21065]
+             Subject: [PATCH] Test skeleton for debugger commands
+             From: Andreas J Koenig <andreas.koenig@anima.de>
+             Date: Sun, 07 Sep 2003 18:51:56 +0200
+             Message-ID: <87fzj8k0cz.fsf@franz.ak.mind.de>
+             With minor adjustments
+             
+             [ 21066]
+             The in-memory files require PerlIO::scalar.
+             
+             [ 21067]
+             Cleanup PerlIO::scalar documentation a bit.
+             
+             [ 21068]
+             dumpvar.t: use Test::More;
+             
+             [ 21069]
+             An empty test.
+             
+             [ 21070]
+             More dumpvar testing.
+             
+             [ 21071]
+             de0.t: use Test::More, add some tests.
+             
+             [ 21072]
+             Subject: Re: [PATCH] Test skeleton for debugger commands
+             From: Andreas J Koenig <andreas.koenig@anima.de>
+             Date: Mon, 08 Sep 2003 10:48:27 +0200
+             Message-ID: <87llszis2s.fsf@franz.ak.mind.de>
+             
+             [ 21073]
+             Subject: Re: one nit to fix [PATCH]
+             From: Rafael Garcia-Suarez <raphel.garcia-suarez@hexaflux.com>
+             Date: Mon, 8 Sep 2003 10:19:08 +0200
+             Message-Id: <20030908101908.5571326d.rgarcia@hexaflux.com>
+             
+             [ 21074]
+             Subject: [PATCH] call_(pv|etc.) for Devel::PPPort
+             From: Tassilo von Parseval <tassilo.parseval@post.rwth-aachen.de>
+             Date: Mon, 08 Sep 2003 08:56:09 +0200
+             Message-id: <20030908065609.GA1260@ethan>
+     Branch: maint-5.8/perl
+	  +> lib/Unicode/Collate/t/contract.t lib/perl5db/de0.t
+	  +> lib/perl5db/dumpvar.t
+	  !> (integrate 26 files)
+____________________________________________________________________________
+[ 21054] By: jhi                                   on 2003/09/06  06:30:49
+        Log: Bytecompiler and byteloader are now in better shape.
+             (While the C backend is a smoking ruin.)
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21053] By: jhi                                   on 2003/09/05  20:45:41
+        Log: Enache thinks now is a good spot to bring back the fixed
+             bytecode goodness to maint.  (Not the bytecode.t, though:
+             that's still too unfinished.)
+     Branch: maint-5.8/perl
+	  !> bytecode.pl embed.fnc embed.h ext/B/B/Asmdata.pm
+	  !> ext/B/B/Assembler.pm ext/B/B/Bytecode.pm
+	  !> ext/B/B/Disassembler.pm ext/B/t/assembler.t
+	  !> ext/ByteLoader/bytecode.h ext/ByteLoader/byterun.c global.sym
+	  !> op.c op.h proto.h t/TEST
+____________________________________________________________________________
+[ 21050] By: jhi                                   on 2003/09/05  14:23:02
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21049] By: jhi                                   on 2003/09/05  13:56:44
         Log: Integrate:
              [ 21036]
