@@ -128,12 +128,16 @@ binmode(fh)
 	SV *	fh
 	PROTOTYPE: $
 	CODE:
-	    IO *io = sv_2io(fh);
-           PerlIO *fp = io ? IoOFP(io) : NULL;
-	    char iotype = io ? IoTYPE(io) : '\0';
-	    char filespec[NAM$C_MAXRSS], *acmode, *s, *colon, *dirend = Nullch;
-	    int ret = 0, saverrno = errno, savevmserrno = vaxc$errno;
+           SV *name;
+	   IO *io;
+	   char iotype;
+	   char filespec[NAM$C_MAXRSS], *acmode, *s, *colon, *dirend = Nullch;
+	   int ret = 0, saverrno = errno, savevmserrno = vaxc$errno;
            SV pos;
+           PerlIO *fp;
+	   io = sv_2io(fh);
+           fp = io ? IoOFP(io) : NULL;
+	   iotype = io ? IoTYPE(io) : '\0';
 	    if (fp == NULL || strchr(">was+-|",iotype) == Nullch) {
 	      set_errno(EBADF); set_vaxc_errno(SS$_IVCHAN); XSRETURN_UNDEF;
 	    }
@@ -169,7 +173,7 @@ binmode(fh)
 	        acmode = "rb+";
 	    }
            /* appearances to the contrary, this is an freopen substitute */
-           SV *name = sv_2mortal(newSVpvn(filespec,strlen(filespec)));
+           name = sv_2mortal(newSVpvn(filespec,strlen(filespec)));
            if (PerlIO_openn(Nullch,acmode,-1,0,0,fp,1,&name) == Nullfp) XSRETURN_UNDEF;
            if (iotype != '-' && ret != -1 && PerlIO_setpos(fp,&pos) == -1) XSRETURN_UNDEF;
 	    if (ret == -1) { set_errno(saverrno); set_vaxc_errno(savevmserrno); }
@@ -291,6 +295,7 @@ vmsopen(spec,...)
 	    char *args[8],mode[3] = {'r','\0','\0'}, type = '<';
 	    register int i, myargc;
 	    FILE *fp;
+            SV *fh;
            PerlIO *pio_fp;
 	    STRLEN n_a;
 	
@@ -344,8 +349,8 @@ vmsopen(spec,...)
 	    }
            if (fp != Null(FILE*)) {
              pio_fp = PerlIO_importFILE(fp,0);
-             SV *fh = newFH(pio_fp,(mode[1] ? '+' : (mode[0] == 'r' ? '<' : (mode[0] == 'a' ? 'a' : '>'))));
-	      ST(0) = (fh ? sv_2mortal(fh) : &PL_sv_undef);
+             fh = newFH(pio_fp,(mode[1] ? '+' : (mode[0] == 'r' ? '<' : (mode[0] == 'a' ? 'a' : '>'))));
+	     ST(0) = (fh ? sv_2mortal(fh) : &PL_sv_undef);
 	    }
 	    else { ST(0) = &PL_sv_undef; }
 
@@ -404,8 +409,8 @@ vmssysopen(spec,mode,perm,...)
 	    if (fd >= 0 &&
               ((fp = fdopen(fd, &("r\000w\000r+"[2*i]))) != Null(FILE*))) {
              pio_fp = PerlIO_importFILE(fp,0);
-             SV *fh = newFH(pio_fp,"<>++"[i]);
-	      ST(0) = (fh ? sv_2mortal(fh) : &PL_sv_undef);
+             fh = newFH(pio_fp,"<>++"[i]);
+	     ST(0) = (fh ? sv_2mortal(fh) : &PL_sv_undef);
 	    }
 	    else { ST(0) = &PL_sv_undef; }
 
