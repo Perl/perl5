@@ -2626,12 +2626,22 @@ and C<IPC::SysV::Msg> documentation.
 
 =item my EXPR
 
+=item my TYPE EXPR
+
 =item my EXPR : ATTRIBUTES
+
+=item my TYPE EXPR : ATTRIBUTES
 
 A C<my> declares the listed variables to be local (lexically) to the
 enclosing block, file, or C<eval>.  If
-more than one value is listed, the list must be placed in parentheses.  See
-L<perlsub/"Private Variables via my()"> for details.
+more than one value is listed, the list must be placed in parentheses.
+
+The use of TYPE and ATTRIBUTES is considered experimental and subject
+to change.  TYPE is currently bound to the use of C<fields> pragma,
+and attributes are handled using the C<attributes> pragma, or starting
+from Perl 5.8.0 also via the C<Attribute::Handlers> module.  See
+L<perlsub/"Private Variables via my()"> for details, and L<fields>,
+L<attributes>, and L<Attribute::Handlers>.
 
 =item next LABEL
 
@@ -3058,7 +3068,11 @@ See L<perlunicode> and L<encoding> for more about Unicode.
 
 =item our EXPR
 
+=item our EXPR TYPE
+
 =item our EXPR : ATTRIBUTES
+
+=item our TYPE EXPR : ATTRIBUTES
 
 An C<our> declares the listed variables to be valid globals within
 the enclosing block, file, or C<eval>.  That is, it has the same
@@ -3099,15 +3113,20 @@ package, Perl will emit warnings if you have asked for them.
     our $bar;		# emits warning
 
 An C<our> declaration may also have a list of attributes associated
-with it.  B<WARNING>: This is an experimental feature that may be
-changed or removed in future releases of Perl.  It should not be
-relied upon.
+with it.
 
-The only currently recognized attribute is C<unique> which indicates
-that a single copy of the global is to be used by all interpreters
-should the program happen to be running in a multi-interpreter
-environment. (The default behaviour would be for each interpreter
-to have its own copy of the global.)  Examples:
+The use of TYPE and ATTRIBUTES is considered experimental and subject
+to change.  TYPE is currently bound to the use of C<fields> pragma,
+and attributes are handled using the C<attributes> pragma, or starting
+from Perl 5.8.0 also via the C<Attribute::Handlers> module.  See
+L<perlsub/"Private Variables via my()"> for details, and L<fields>,
+L<attributes>, and L<Attribute::Handlers>.
+
+The only currently recognized C<our()> attribute is C<unique> which
+indicates that a single copy of the global is to be used by all
+interpreters should the program happen to be running in a
+multi-interpreter environment. (The default behaviour would be for
+each interpreter to have its own copy of the global.)  Examples:
 
     our @EXPORT : unique = qw(foo);
     our %EXPORT_TAGS : unique = (bar => [qw(aa bb cc)]);
