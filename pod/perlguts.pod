@@ -2171,6 +2171,15 @@ Do magic after a value is assigned to the SV.  See C<sv_magic>.
 
 	int	mg_set (SV* sv)
 
+=item modglobal
+
+C<modglobal> is a general purpose, interpreter global HV for use by
+extensions.  While it could hold extension specific information, it is
+meant primarily for information that needs to be shared between
+extensions.  Moreover, while it could be used for any kind of
+information, it is meant for information that should be not accessible
+in the usual way from the perl symbol table.
+
 =item Move
 
 The XSUB-writer's interface to the C C<memmove> function.  The C<s> is the
