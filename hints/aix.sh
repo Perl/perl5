@@ -139,14 +139,6 @@ $define|true|[yY]*)
 	    # (e.g. pragma/overload core dumps)	 Let's suspect xlC_r, too.
 	    # --jhi@iki.fi
 	    cc=cc_r
-	    if test ! -e /bin/cc_r; then
-		    cat >&4 <<EOM
-For pthreads you should use the AIX C compiler cc_r.
-But I cannot find it as /bin/cc_r.
-Cannot continue, aborting.
-EOM
-	    exit 1
-	    fi
 	    ;;
 	'') 
 	    cc=cc_r
