@@ -263,7 +263,8 @@ a prebuilt binary from the HP porting center. There are two places where
 gcc prebuilds can be fetched the first and best (for HP-UX 11 only) is
 http://h21007.www2.hp.com/dspp/tech/tech_TechSoftwareDetailPage_IDX/1,1703,547,00.html
 the second is http://hpux.cs.utah.edu/hppd/hpux/Gnu/ where you can also
-find the GNU binutils package.
+find the GNU binutils package. (Browse through the list, because there
+are often multiple versions of the same package available).
 
 Building a 64bit capable gcc from source is possible only when you have
 the HP C-ANSI C compiler available, which you should use anyway when
