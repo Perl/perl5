@@ -28,6 +28,41 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20101] By: jhi                                   on 2003/07/09  17:49:23
+        Log: Integrate:
+             [ 20094]
+             No Perl malloc for FreeBSD.
+             
+             [ 20095]
+             Update Changes.
+             
+             [ 20096]
+             More Darwin/MacOSX paths twiddling.
+             
+             [ 20097]
+             Fix for the 'print v65' plus safety tweaks from Rafael.
+             
+             [ 20098]
+             Fixes from Ron Kimball.
+             
+             [ 20099]
+             No more no more.  Errrm, no longer no more.
+             
+             [ 20100]
+             Detypo.
+     Branch: maint-5.8/perl
+	  !> hints/darwin.sh hints/freebsd.sh pod/perldata.pod toke.c
+____________________________________________________________________________
+[ 20099] By: jhi                                   on 2003/07/09  17:31:38
+        Log: No more no more.  Errrm, no longer no more.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20095] By: jhi                                   on 2003/07/09  12:03:48
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20094] By: jhi                                   on 2003/07/09  11:56:22
         Log: No Perl malloc for FreeBSD.
      Branch: maint-5.8/perl
