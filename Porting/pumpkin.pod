@@ -241,6 +241,9 @@ some or all of the modules File::Basename, File::Spec, File::Path, and
 File::Copy to become aware of your native filesystem syntax and
 peculiarities.
 
+Remember to have a $VERSION in the modules.  You can use the
+Porting/checkVERSION.pl script for checking this.
+
 =item documentation
 
 If your operating system comes from outside UNIX you almost certainly
