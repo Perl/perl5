@@ -46,7 +46,10 @@ if ($Is_VMS) { @scripts = map { "$_.Com" } @scripts; }
 
 @pods = (<pod/*.pod>);
 
-%archpms = (Config => 1, FileHandle => 1, overload => 1);
+%archpms = (
+    Config => 1, FileHandle => 1, overload => 1,
+    'File/Basename' => 1,	# uses m//t
+);
 
 if ($^O eq 'dos') {
     push(@scripts,'djgpp/fixpmain');
