@@ -122,35 +122,34 @@ enum {
     INSN_OP_FIRST,			/* 91 */
     INSN_OP_LAST,			/* 92 */
     INSN_OP_OTHER,			/* 93 */
-    INSN_OP_CHILDREN,			/* 94 */
-    INSN_OP_PMREPLROOT,			/* 95 */
-    INSN_OP_PMREPLROOTGV,			/* 96 */
-    INSN_OP_PMREPLSTART,			/* 97 */
-    INSN_OP_PMNEXT,			/* 98 */
-    INSN_PREGCOMP,			/* 99 */
-    INSN_OP_PMFLAGS,			/* 100 */
-    INSN_OP_PMPERMFLAGS,			/* 101 */
-    INSN_OP_SV,			/* 102 */
-    INSN_OP_PADIX,			/* 103 */
-    INSN_OP_PV,			/* 104 */
-    INSN_OP_PV_TR,			/* 105 */
-    INSN_OP_REDOOP,			/* 106 */
-    INSN_OP_NEXTOP,			/* 107 */
-    INSN_OP_LASTOP,			/* 108 */
-    INSN_COP_LABEL,			/* 109 */
-    INSN_COP_STASHPV,			/* 110 */
-    INSN_COP_FILE,			/* 111 */
-    INSN_COP_SEQ,			/* 112 */
-    INSN_COP_ARYBASE,			/* 113 */
-    INSN_COP_LINE,			/* 114 */
-    INSN_COP_WARNINGS,			/* 115 */
-    INSN_MAIN_START,			/* 116 */
-    INSN_MAIN_ROOT,			/* 117 */
-    INSN_CURPAD,			/* 118 */
-    INSN_PUSH_BEGIN,			/* 119 */
-    INSN_PUSH_INIT,			/* 120 */
-    INSN_PUSH_END,			/* 121 */
-    MAX_INSN = 121
+    INSN_OP_PMREPLROOT,			/* 94 */
+    INSN_OP_PMREPLROOTGV,			/* 95 */
+    INSN_OP_PMREPLSTART,			/* 96 */
+    INSN_OP_PMNEXT,			/* 97 */
+    INSN_PREGCOMP,			/* 98 */
+    INSN_OP_PMFLAGS,			/* 99 */
+    INSN_OP_PMPERMFLAGS,			/* 100 */
+    INSN_OP_SV,			/* 101 */
+    INSN_OP_PADIX,			/* 102 */
+    INSN_OP_PV,			/* 103 */
+    INSN_OP_PV_TR,			/* 104 */
+    INSN_OP_REDOOP,			/* 105 */
+    INSN_OP_NEXTOP,			/* 106 */
+    INSN_OP_LASTOP,			/* 107 */
+    INSN_COP_LABEL,			/* 108 */
+    INSN_COP_STASHPV,			/* 109 */
+    INSN_COP_FILE,			/* 110 */
+    INSN_COP_SEQ,			/* 111 */
+    INSN_COP_ARYBASE,			/* 112 */
+    INSN_COP_LINE,			/* 113 */
+    INSN_COP_WARNINGS,			/* 114 */
+    INSN_MAIN_START,			/* 115 */
+    INSN_MAIN_ROOT,			/* 116 */
+    INSN_CURPAD,			/* 117 */
+    INSN_PUSH_BEGIN,			/* 118 */
+    INSN_PUSH_INIT,			/* 119 */
+    INSN_PUSH_END,			/* 120 */
+    MAX_INSN = 120
 };
 
 enum {
