@@ -1435,6 +1435,8 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 
             semun.buf = &semds;
 	    getinfo = (cmd == GETALL);
+	    if (Semctl(id, 0, IPC_STAT, semun) == -1)
+		return -1;
 	    infosize = semds.sem_nsems * sizeof(short);
 		/* "short" is technically wrong but much more portable
 		   than guessing about u_?short(_t)? */
