@@ -885,7 +885,8 @@ our ($g1);
 
 $v = sprintf $m1;
 $v = sprintf '%d%d%d%d', $m1, $m2, $g1, $g2;
-eval {formline $m1 };	undef $m1;
+my $m3;
+eval {formline $m3 };
 formline '@<<@<<@<<@<<', $m1, $m2, $g1, $g2;
 EXPECT
 Use of uninitialized value $m1 in sprintf at - line 5.
