@@ -5,6 +5,9 @@
  *    as specified in the README file.
  *
  * $Log: Perl.r,v $
+ * Revision 1.8  2002/01/23 05:45:39  pudge
+ * Update text
+ *
  * Revision 1.7  2001/10/03 19:31:55  pudge
  * Sync with perforce maint-5.6/macperl
  *
@@ -264,7 +267,7 @@ resource 'cmdo' (128) {
 					MPVersionStr
 				},
 				"Perl by Larry Wall <larry@wall.org>\n"
-				"MPW port by Matthias Neeracher <neeracher@mac.com>,\n"
+				"MPW port by Matthias Neeracher <neeracher@mac.com>\n"
 				"Maintained by Chris Nandor <pudge@pobox.com>\n",
 				0
 			},
@@ -277,9 +280,9 @@ resource 'cmdo' (128) {
 					{ 36,  20,  51, 220}, "Newline", "", set, 
 					"Records are terminated with newlines.",
 					{ 53,  20,  68, 220}, "Null Character", "-0", notset, 
-					"Records are terminated with null characters",
+					"Records are terminated with null characters.",
 					{ 70,  20,  85, 220}, "Paragraph", "-00", notset, 
-					"Records are terminated with two consecutive newlines"
+					"Records are terminated with two consecutive newlines."
 				}
 			},
 			Or {{-3}}, CheckOption {
@@ -307,7 +310,7 @@ resource 'cmdo' (128) {
 				"Enables some rudimentary switch parsing."
 			},
 			notDependent {}, CheckOption {
-				NotSet, {115, 240, 131, 465}, "Skip leading garbage.", "-x", 
+				NotSet, {115, 240, 131, 465}, "Skip leading garbage", "-x", 
 				"Skip lines to the first #!perl line. Great for shell scripts."
 			},
 			notDependent {}, TextBox {
