@@ -824,18 +824,32 @@ EXPECT
 foo at - line 1.
 ######## glob() bug Mon, 01 Sep 2003 02:25:41 -0700 <200309010925.h819Pf0X011457@smtp3.ActiveState.com>
 -lw
+if ($^O eq 'VMS') { # VMS is not *that* kind of a glob.
+print <<__EOF__;
+./"TEST"
+./"TEST"
+__EOF__
+} else {
 print glob(q(./"TEST"));
 use File::Glob;
 print glob(q(./"TEST"));
+}
 EXPECT
 ./"TEST"
 ./"TEST"
 ######## glob() bug Mon, 01 Sep 2003 02:25:41 -0700 <200309010925.h819Pf0X011457@smtp3.ActiveState.com>
 -lw
+if ($^O eq 'VMS') { # VMS is not *that* kind of a glob.
+print <<__EOF__;
+./"TEST"
+./"TEST"
+__EOF__
+} else {
 use File::Glob;
 print glob(q(./"TEST"));
 use File::Glob;
 print glob(q(./"TEST"));
+}
 EXPECT
 ./"TEST"
 ./"TEST"
