@@ -5,6 +5,7 @@ use Carp;
 
 @ISA		= qw( Exporter );
 @EXPORT		= qw( timegm timelocal );
+@EXPORT_OK	= qw( timegm_nocheck timelocal_nocheck );
 
 # Set up constants
     $SEC  = 1;
@@ -16,6 +17,8 @@ use Carp;
     $nextCentury = int($thisYear / 100) * 100;
     $breakpoint = ($thisYear + 50) % 100;
     $nextCentury += 100 if $breakpoint < 50;
+
+my %options;
 
 sub timegm {
     my (@date) = @_;
@@ -33,6 +36,11 @@ sub timegm {
     + $date[1] * $MIN
     + $date[2] * $HR
     + ($date[3]-1) * $DAY;
+}
+
+sub timegm_nocheck {
+    local $options{no_range_check} = 1;
+    &timegm;
 }
 
 sub timelocal {
@@ -69,10 +77,15 @@ sub timelocal {
     $time;
 }
 
+sub timelocal_nocheck {
+    local $options{no_range_check} = 1;
+    &timelocal;
+}
+
 sub cheat {
     $year = $_[5];
     $month = $_[4];
-    unless ($no_range_check) {
+    unless ($options{no_range_check}) {
 	croak "Month '$month' out of range 0..11" if $month > 11 || $month < 0;
 	croak "Day '$_[3]' out of range 1..31"	  if $_[3] > 31 || $_[3] < 1;
 	croak "Hour '$_[2]' out of range 0..23"	  if $_[2] > 23 || $_[2] < 0;
@@ -138,27 +151,25 @@ the values provided.  While the day of the month is expected to be in
 the range 1..31, the month should be in the range 0..11.  
 This is consistent with the values returned from localtime() and gmtime().
 
-Also worth noting is the ability to disable the range checking that
-would normally occur on the input $sec, $min, $hours, $mday, and $mon
-values.  You can do this by localizing $Time::Local::no_range_check
-to 1.
+The timelocal() and timegm() functions perform range checking on the
+input $sec, $min, $hours, $mday, and $mon values by default.  If you'd
+rather they didn't, you can explicitly import the timelocal_nocheck()
+and timegm_nocheck() functions.
 
-	use Time::Local;
+	use Time::Local 'timelocal_nocheck';
 	
 	{
-	    local $Time::Local::no_range_check = 1;
-
 	    # The 365th day of 1999
-	    print scalar localtime timelocal 0,0,0,365,0,99;
+	    print scalar localtime timelocal_nocheck 0,0,0,365,0,99;
 
 	    # The twenty thousandth day since 1970
-	    print scalar localtime timelocal 0,0,0,20000,0,70;
+	    print scalar localtime timelocal_nocheck 0,0,0,20000,0,70;
 
 	    # And even the 10,000,000th second since 1999!
-	    print scalar localtime timelocal 10000000,0,0,1,0,99;
+	    print scalar localtime timelocal_nocheck 10000000,0,0,1,0,99;
 	}
 
-Your mileage may vary when trying this trick with minutes and hours,
+Your mileage may vary when trying these with minutes and hours,
 and it doesn't work at all for months.
 
 Strictly speaking, the year should also be specified in a form consistent
