@@ -914,7 +914,7 @@ The current value of the warning switch, initially true if B<-w>
 was used, false otherwise, but directly modifiable.  (Mnemonic:
 related to the B<-w> switch.)  See also L<warnings>.
 
-=item ${^Warnings}
+=item ${^WARNING_BITS}
 
 The current set of warning checks enabled by the C<use warnings> pragma.
 See the documentation of C<warnings> for more details.

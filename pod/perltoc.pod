@@ -1826,7 +1826,7 @@ $EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID, $GID, $(,
 $EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $PERL_VERSION, $],
 $COMPILING, $^C, $DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, %^H,
 $INPLACE_EDIT, $^I, $^M, $OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04,
-0x08, 0x10, 0x20, $^R, $^S, $BASETIME, $^T, $WARNING, $^W, ${^Warnings},
+0x08, 0x10, 0x20, $^R, $^S, $BASETIME, $^T, $WARNING, $^W, ${^WARNING_BITS},
 $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC, @_, %INC, %ENV, $ENV{expr},
 %SIG, $SIG{expr}
 

@@ -570,10 +570,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\025':		/* ^U */
 	sv_setiv(sv, (IV)PL_bigchar);
 	break;
-    case '\027':		/* ^W  & $^Warnings*/
+    case '\027':		/* ^W  & $^WARNING_BITS */
 	if (*(mg->mg_ptr+1) == '\0')
 	    sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
-	else if (strEQ(mg->mg_ptr, "\027arnings")) {
+	else if (strEQ(mg->mg_ptr, "\027ARNING_BITS")) {
 	    if (PL_compiling.cop_warnings == WARN_NONE ||
 	        PL_compiling.cop_warnings == WARN_STD)
 	    {
@@ -1713,7 +1713,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '\025':	/* ^U */
 	PL_bigchar = SvTRUE(sv);
 	break;
-    case '\027':	/* ^W & $^Warnings */
+    case '\027':	/* ^W & $^WARNING_BITS */
 	if (*(mg->mg_ptr+1) == '\0') {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
 	        i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -1721,7 +1721,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    		| (i ? G_WARN_ON : G_WARN_OFF) ;
 	    }
 	}
-	else if (strEQ(mg->mg_ptr, "\027arnings")) {
+	else if (strEQ(mg->mg_ptr, "\027ARNING_BITS")) {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
                 if (memEQ(SvPVX(sv), WARN_ALLstring, WARNsize)) {
 	            PL_compiling.cop_warnings = WARN_ALL;

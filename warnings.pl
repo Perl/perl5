@@ -316,12 +316,12 @@ sub bits {
 
 sub import {
     shift;
-    ${^Warnings} |= bits(@_ ? @_ : 'all') ;
+    ${^WARNING_BITS} |= bits(@_ ? @_ : 'all') ;
 }
 
 sub unimport {
     shift;
-    ${^Warnings} &= ~ bits(@_ ? @_ : 'all') ;
+    ${^WARNING_BITS} &= ~ bits(@_ ? @_ : 'all') ;
 }
 
 sub enabled
@@ -329,7 +329,7 @@ sub enabled
     my $string = shift ;
 
     return 1
-	if $bits{$string} && ${^Warnings} & $bits{$string} ;
+	if $bits{$string} && ${^WARNING_BITS} & $bits{$string} ;
    
     return 0 ; 
 }

@@ -845,8 +845,8 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	if (len > 1)
 	    break;
 	goto ro_magicalize;
-    case '\027':	/* $^W & $^Warnings */
-	if (len > 1 && strNE(name, "\027arnings"))
+    case '\027':	/* $^W & $^WARNING_BITS */
+	if (len > 1 && strNE(name, "\027ARNING_BITS"))
 	    break;
 	goto magicalize;
 
