@@ -4,16 +4,26 @@ Test::Tutorial - A tutorial about writing really basic tests
 
 =head1 DESCRIPTION
 
-    AHHHHHHH!!!!  NOT B<TESTING>!  Anything but testing!  
-    Beat me, whip me, send me to I<Detroit>, but don't make 
-    me write tests!
 
-    *sob*
+B<AHHHHHHH!!!!  NOT TESTING!  Anything but testing!  
+Beat me, whip me, send me to Detroit, but don't make 
+me write tests!>
 
-    Besides, I don't know how to write the damned things.
+B<*sob*>
+
+B<Besides, I don't know how to write the damned things.>
+
 
 Is this you?  Is writing tests right up there with writing
-documentation and having your fingernails pulled out?
+documentation and having your fingernails pulled out?  Did you open up
+a test and read 
+
+    ######## We start with some black magic
+
+and decide that's quite enough for you?
+
+It's ok.  That's all gone now.  We've done all the black magic for
+you.  And here are the tricks...
 
 
 =head2 Nuts and bolts of testing.

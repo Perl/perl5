@@ -14,7 +14,7 @@ BEGIN {
 
 require Exporter;
 use vars qw($VERSION @ISA @EXPORT $TODO);
-$VERSION = '0.18';
+$VERSION = '0.19';
 @ISA    = qw(Exporter);
 @EXPORT = qw(ok use_ok require_ok
              is isnt like
@@ -567,6 +567,7 @@ USE
     my $ok = ok( !$@, "use $module;" );
 
     unless( $ok ) {
+        chomp $@;
         my_print *TESTERR, <<DIAGNOSTIC;
 #     Tried to use '$module'.
 #     Error:  $@
@@ -598,6 +599,7 @@ REQUIRE
     my $ok = ok( !$@, "require $module;" );
 
     unless( $ok ) {
+        chomp $@;
         my_print *TESTERR, <<DIAGNOSTIC;
 #     Tried to require '$module'.
 #     Error:  $@

@@ -7,7 +7,7 @@ use Test::Utils;
 
 use vars qw($VERSION);
 
-$VERSION = '0.18';
+$VERSION = '0.19';
 
 my(@Test_Results) = ();
 my($Num_Tests, $Planned_Tests, $Test_Died) = (0,0,0);
@@ -73,7 +73,7 @@ sub no_plan {
 
 $| = 1;
 open(*TESTOUT, ">&STDOUT") or _whoa(1, "Can't dup STDOUT!");
-open(*TESTERR, ">&STDERR") or _whoa(1, "Can't dup STDERR!");
+open(*TESTERR, ">&STDOUT") or _whoa(1, "Can't dup STDOUT!");
 {
     my $orig_fh = select TESTOUT;
     $| = 1;
@@ -155,14 +155,15 @@ sub ok ($;$) {
 
     $Num_Tests++;
 
-    my_print *TESTERR, <<ERR if defined $name and $name !~ /\D/;
+    my_print *TESTERR, <<ERR if defined $name and $name =~ /^[\d\s]+$/;
 You named your test '$name'.  You shouldn't use numbers for your test names.
 Very confusing.
 ERR
 
 
     my($pack, $file, $line) = caller;
-    if( $pack eq 'Test::More' ) {   # special case for Test::More's calls
+    # temporary special case for Test::More & Parrot::Test's calls.
+    if( $pack eq 'Test::More' || $pack eq 'Parrot::Test' ) {
         ($pack, $file, $line) = caller(1);
     }
 
@@ -179,7 +180,7 @@ ERR
     }
     $msg   .= "ok $Num_Tests";
 
-    if( @_ == 2 ) {
+    if( defined $name ) {
         $name =~ s|#|\\#|g;     # # in a name can confuse Test::Harness.
         $msg   .= " - $name";
     }
@@ -192,8 +193,9 @@ ERR
     my_print *TESTOUT, $msg;
 
     #'#
-    unless( $test or $is_todo ) {
-        my_print *TESTERR, "#     Failed test ($file at line $line)\n";
+    unless( $test ) {
+        my $msg = $is_todo ? "Failed (TODO)" : "Failed";
+        my_print *TESTERR, "#     $msg test ($file at line $line)\n";
     }
 
     return $test ? 1 : 0;

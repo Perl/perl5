@@ -34,6 +34,7 @@ my($out, $err) = Test::Simple::Catch::caught();
 
 Test::Simple->import(tests => 5);
 
+#line 32
 ok( 1, 'passing' );
 ok( 2, 'passing still' );
 ok( 3, 'still passing' );
