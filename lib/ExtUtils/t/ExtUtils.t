@@ -403,6 +403,7 @@ if ($^O eq 'MSWin32' && $make eq 'nmake') { $make .= " -nologo"; }
 
 my @makeout;
 
+if ($^O eq 'VMS') { $make .= ' all'; }
 print "# make = '$make'\n";
 @makeout = `$make`;
 if ($?) {
@@ -412,6 +413,8 @@ if ($?) {
 } else {
   print "ok 3\n";
 }
+
+if ($^O eq 'VMS') { $make =~ s{ all}{}; }
 
 if ($Config{usedl}) {
   print "ok 4\n";
