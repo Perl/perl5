@@ -244,11 +244,11 @@ sub full_setup {
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
 
-    installpm IMPORTS
+    installpm
+
 	/;
 
     # ^^^ installpm is deprecated, will go about Summer 96
-    # IMPORTS is used under OS/2
 
     # @Overridable is close to @MM_Sections but not identical.  The
     # order is important. Many subroutines declare macros. These

@@ -228,7 +228,7 @@ sub expr {
 		$id .= ' ' . $1;
 		$isatype{$id} = 1;
 	    }
-	    elsif ($id eq 'unsigned' || $id eq 'long') {
+	    elsif ($id eq 'unsigned') {
 		s/^\s+(\w+)//;
 		$id .= ' ' . $1;
 		$isatype{$id} = 1;

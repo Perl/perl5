@@ -329,9 +329,7 @@ sub runloop {
 	last if $pack ne $curpack;
     }
 
-    my $subcode = (ref $c eq 'CODE')
-	? "sub { package $pack; my(\$_i)=$n; while (\$_i--){&\$c;} }"
-	: "sub { package $pack; my(\$_i)=$n; while (\$_i--){$c;} }";
+    my $subcode = "sub { package $pack; my(\$_i)=$n; while (\$_i--){$c;} }";
     my $subref  = eval $subcode;
     croak "runloop unable to compile '$c': $@\ncode: $subcode\n" if $@;
     print STDERR "runloop $n '$subcode'\n" if ($debug);

@@ -32,9 +32,7 @@ libemx="`../UU/loc . X c:/emx/lib d:/emx/lib e:/emx/lib f:/emx/lib g:/emx/lib h:
 
 if test "$libemx" = "X"; then echo "Cannot find C library!"; fi
 
-# Acute backslashitis:
-libpth="`echo \"$LIBRARY_PATH\" | tr ';\\\' ' /'`"
-libpth="$libpth $libemx/mt $libemx"
+libpth="$libemx/mt $libemx"
 
 set `emxrev -f emxlibcm`
 emxcrtrev=$5

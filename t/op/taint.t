@@ -94,9 +94,8 @@ print "1..96\n";
     test 4, $@ =~ /^Insecure \$ENV{IFS}/, $@;
 
     my ($tmp) = grep { (stat)[2] & 2 } '/tmp', '/var/tmp', '/usr/tmp';
-    if ($tmp and $^O ne 'os2') {	# All dirs are writable under OS/2
+    if ($tmp) {
 	$ENV{PATH} = $tmp;
-	$ENV{IFS} = '';
 	test 5, eval { `$echo 1` } eq '';
 	test 6, $@ =~ /^Insecure directory in \$ENV{PATH}/, $@;
     }
