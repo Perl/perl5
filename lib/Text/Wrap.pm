@@ -6,7 +6,7 @@ require Exporter;
 @EXPORT = qw(wrap);
 @EXPORT_OK = qw($columns);
 
-$VERSION = 96.041801;
+$VERSION = 97.011701;
 
 use vars qw($VERSION $columns $debug);
 use strict;
@@ -16,7 +16,7 @@ BEGIN	{
 	$debug = 0;
 }
 
-use Text::Tabs;
+use Text::Tabs qw(expand unexpand);
 
 sub wrap
 {
@@ -42,10 +42,15 @@ sub wrap
 		$nl = $2;
 
 		# repeat the above until there's none left
-		while ($t and $t =~ s/^([^\n]{0,$ll})(\s|\Z(?!\n))//xm) {
-			print "\$2 is '$2'\n" if $debug;
-			$nl = $2;
-			$r .= unexpand("\n" . $lead . $1);
+		while ($t) {
+			if ( $t =~ s/^([^\n]{0,$ll})(\s|\Z(?!\n))//xm ) {
+				print "\$2 is '$2'\n" if $debug;
+				$nl = $2;
+				$r .= unexpand("\n" . $lead . $1);
+			} elsif ($t =~ s/^([^\n]{$ll})//) {
+				$nl = "\n";
+				$r .= unexpand("\n" . $lead . $1);
+			}
 		}
 		$r .= $nl;
 	} 
@@ -63,9 +68,8 @@ sub wrap
 	return $r;
 }
 
-
 1;
-__DATA__
+__END__
 
 =head1 NAME
 
@@ -94,12 +98,20 @@ should be set to the full width of your output device.
 	print wrap("\t","","This is a bit of text that forms 
 		a normal book-style paragraph");
 
+=head1 BUGS
+
+It's not clear what the correct behavior should be when Wrap() is
+presented with a word that is longer than a line.  The previous 
+behavior was to die.  Now the word is split at line-length.
+
 =head1 AUTHOR
 
 David Muir Sharnoff <muir@idiom.com> with help from Tim Pierce and
 others.
 
 =cut
+
+Latest change by Andreas Koenig <k@anna.in-berlin.de> - 1/17/97
 
 	print fill($initial_tab, $subsequent_tab, @text);
 
