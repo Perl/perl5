@@ -1,13 +1,10 @@
 package File::Glob;
 
 use strict;
-use Carp;
 our($VERSION, @ISA, @EXPORT_OK, @EXPORT_FAIL, %EXPORT_TAGS,
     $AUTOLOAD, $DEFAULT_FLAGS);
 
-require Exporter;
 use XSLoader ();
-require AutoLoader;
 
 @ISA = qw(Exporter AutoLoader);
 
@@ -60,6 +57,7 @@ require AutoLoader;
 $VERSION = '0.991';
 
 sub import {
+    require Exporter;
     my $i = 1;
     while ($i < @_) {
 	if ($_[$i] =~ /^:(case|nocase|globally)$/) {
@@ -67,7 +65,7 @@ sub import {
 	    $DEFAULT_FLAGS &= ~GLOB_NOCASE() if $1 eq 'case';
 	    $DEFAULT_FLAGS |= GLOB_NOCASE() if $1 eq 'nocase';
 	    if ($1 eq 'globally') {
-		no warnings;
+		local $^W;
 		*CORE::GLOBAL::glob = \&File::Glob::csh_glob;
 	    }
 	    next;
@@ -87,11 +85,13 @@ sub AUTOLOAD {
     my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
 	if ($! =~ /Invalid/) {
+	    require AutoLoader;
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}
 	else {
-		croak "Your vendor has not defined File::Glob macro $constname";
+	    require Carp;
+	    Carp::croak("Your vendor has not defined File::Glob macro $constname");
 	}
     }
     eval "sub $AUTOLOAD { $val }";

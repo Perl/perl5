@@ -3306,6 +3306,20 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
     PL_expect = XSTATE;
 }
 
+/*
+=for apidoc load_module
+
+Loads the module whose name is pointed to by the string part of name.
+Note that the actual module name, not its filename, should be given.
+Eg, "Foo::Bar" instead of "Foo/Bar.pm".  flags can be any of
+PERL_LOADMOD_DENY, PERL_LOADMOD_NOIMPORT, or PERL_LOADMOD_IMPORT_OPS
+(or 0 for no flags). ver, if specified, provides version semantics
+similar to C<use Foo::Bar VERSION>.  The optional trailing SV*
+arguments can be used to specify arguments to the module's import()
+method, similar to C<use Foo::Bar VERSION LIST>.
+
+=cut */
+
 void
 Perl_load_module(pTHX_ U32 flags, SV *name, SV *ver, ...)
 {
@@ -5848,11 +5862,14 @@ Perl_ck_glob(pTHX_ OP *o)
 #if !defined(PERL_EXTERNAL_GLOB)
     /* XXX this can be tightened up and made more failsafe. */
     if (!gv) {
+	GV *glob_gv;
 	ENTER;
-	Perl_load_module(aTHX_ 0, newSVpvn("File::Glob", 10), Nullsv,
-			 /* null-terminated import list */
-			 newSVpvn(":globally", 9), Nullsv);
+	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn("File::Glob", 10), Nullsv,
+			 Nullsv, Nullsv);
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
+	glob_gv = gv_fetchpv("File::Glob::csh_glob", FALSE, SVt_PVCV);
+	GvCV(gv) = GvCV(glob_gv);
+	GvIMPORTED_CV_on(gv);
 	LEAVE;
     }
 #endif /* PERL_EXTERNAL_GLOB */

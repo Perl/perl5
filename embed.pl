@@ -1675,7 +1675,7 @@ p	|void	|lex_start	|SV* line
 p	|OP*	|linklist	|OP* o
 p	|OP*	|list		|OP* o
 p	|OP*	|listkids	|OP* o
-Ap	|void	|load_module|U32 flags|SV* name|SV* ver|...
+Apd	|void	|load_module|U32 flags|SV* name|SV* ver|...
 Ap	|void	|vload_module|U32 flags|SV* name|SV* ver|va_list* args
 p	|OP*	|localize	|OP* arg|I32 lexical
 Apd	|I32	|looks_like_number|SV* sv

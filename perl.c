@@ -1985,10 +1985,11 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 /*
 =for apidoc p||require_pv
 
-Tells Perl to C<require> a module.
+Tells Perl to C<require> the file named by the string argument.  It is
+analogous to the Perl code C<eval "require '$file'">.  It's even
+implemented that way; consider using Perl_load_module instead.
 
-=cut
-*/
+=cut */
 
 void
 Perl_require_pv(pTHX_ const char *pv)

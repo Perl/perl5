@@ -1086,6 +1086,22 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 =for hackers
 Found in file scope.h
 
+=item load_module
+
+Loads the module whose name is pointed to by the string part of name.
+Note that the actual module name, not its filename, should be given.
+Eg, "Foo::Bar" instead of "Foo/Bar.pm".  flags can be any of
+PERL_LOADMOD_DENY, PERL_LOADMOD_NOIMPORT, or PERL_LOADMOD_IMPORT_OPS
+(or 0 for no flags). ver, if specified, provides version semantics
+similar to C<use Foo::Bar VERSION>.  The optional trailing SV*
+arguments can be used to specify arguments to the module's import()
+method, similar to C<use Foo::Bar VERSION LIST>.
+
+	void	load_module(U32 flags, SV* name, SV* ver, ...)
+
+=for hackers
+Found in file op.c
+
 =item looks_like_number
 
 Test if an the content of an SV looks like a number (or is a
@@ -1697,7 +1713,9 @@ Found in file handy.h
 
 =item require_pv
 
-Tells Perl to C<require> a module.
+Tells Perl to C<require> the file named by the string argument.  It is
+analogous to the Perl code C<eval "require '$file'">.  It's even
+implemented that way; consider using Perl_load_module instead.
 
 NOTE: the perl_ form of this function is deprecated.
 
@@ -2390,19 +2408,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
-
-=for hackers
-Found in file sv.h
-
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
