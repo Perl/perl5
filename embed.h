@@ -4342,7 +4342,7 @@
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
 #endif
 #ifdef PERL_CORE
-#define visit(a)		S_visit(aTHX_ a)
+#define visit(a,b,c)		S_visit(aTHX_ a,b,c)
 #endif
 #ifdef PERL_CORE
 #define sv_add_backref(a,b)	S_sv_add_backref(aTHX_ a,b)

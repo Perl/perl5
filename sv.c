@@ -321,10 +321,11 @@ S_more_sv(pTHX)
     return sv;
 }
 
-/* visit(): call the named function for each non-free SV in the arenas. */
+/* visit(): call the named function for each non-free SV in the arenas
+ * whose flags field matches the flags/mask args. */
 
 STATIC I32
-S_visit(pTHX_ SVFUNC_t f)
+S_visit(pTHX_ SVFUNC_t f, U32 flags, U32 mask)
 {
     SV* sva;
     SV* sv;
@@ -334,7 +335,10 @@ S_visit(pTHX_ SVFUNC_t f)
     for (sva = PL_sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {
 	svend = &sva[SvREFCNT(sva)];
 	for (sv = sva + 1; sv < svend; ++sv) {
-	    if (SvTYPE(sv) != SVTYPEMASK && SvREFCNT(sv)) {
+	    if (SvTYPE(sv) != SVTYPEMASK
+		    && (sv->sv_flags & mask) == flags
+		    && SvREFCNT(sv))
+	    {
 		(FCALL)(aTHX_ sv);
 		++visited;
 	    }
@@ -369,7 +373,7 @@ void
 Perl_sv_report_used(pTHX)
 {
 #ifdef DEBUGGING
-    visit(do_report_used);
+    visit(do_report_used, 0, 0);
 #endif
 }
 
@@ -429,10 +433,10 @@ void
 Perl_sv_clean_objs(pTHX)
 {
     PL_in_clean_objs = TRUE;
-    visit(do_clean_objs);
+    visit(do_clean_objs, SVf_ROK, SVf_ROK);
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
     /* some barnacles may yet remain, clinging to typeglobs */
-    visit(do_clean_named_objs);
+    visit(do_clean_named_objs, SVt_PVGV, SVTYPEMASK);
 #endif
     PL_in_clean_objs = FALSE;
 }
@@ -462,7 +466,7 @@ Perl_sv_clean_all(pTHX)
 {
     I32 cleaned;
     PL_in_clean_all = TRUE;
-    cleaned = visit(do_clean_all);
+    cleaned = visit(do_clean_all, 0,0);
     PL_in_clean_all = FALSE;
     return cleaned;
 }

@@ -1220,7 +1220,7 @@ s	|void	|del_xpvbm	|XPVBM* p
 s	|void	|del_xrv	|XRV* p
 s	|void	|sv_unglob	|SV* sv
 s	|void	|not_a_number	|SV *sv
-s	|I32	|visit		|SVFUNC_t f
+s	|I32	|visit		|SVFUNC_t f|U32 flags|U32 mask
 s	|void	|sv_add_backref	|SV *tsv|SV *sv
 s	|void	|sv_del_backref	|SV *sv
 #  ifdef DEBUGGING
