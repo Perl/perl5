@@ -25,7 +25,9 @@ sub BEGIN {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
     }
-    if (!$Config{'d_flock'} && !$Config{'d_fcntl'} && !$Config{'d_lockf'}) {
+    if (!$Config{'d_flock'} &&
+	!$Config{'d_fcntl_can_lock'} &&
+	!$Config{'d_lockf'}) {
         print "1..0 # Skip: no flock or flock emulation on this platform\n";
         exit 0;
     }
