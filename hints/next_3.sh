@@ -10,10 +10,14 @@ POSIX_cflags='ccflags="-posix $ccflags"'
 ldflags='-u libsys_s'
 libswanted='dbm gdbm db'
 
-lddlflags='-r'
+lddlflags='-nostdlib -r'
 # Give cccdlflags an empty value since Configure will detect we are
 # using GNU cc and try to specify -fpic for cccdlflags.
 cccdlflags=' '
+
+mab='-arch m68k -arch i386 -arch hppa -arch sparc'
+archname='next-fat'
+ld='cc'
 
 i_utime='undef'
 groupstype='int'
@@ -36,6 +40,4 @@ ranlib='sleep 5; /bin/ranlib'
 #
 # There where reports that the compiler on HPPA machines
 # fails with the -O flag on pp.c.
-if [ `arch` = "hppa" ]; then
 pp_cflags='optimize="-g"'
-fi
