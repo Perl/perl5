@@ -2860,7 +2860,10 @@ argument being C<undef>:
 
     open(TMP, "+>", undef) or die ...
 
-opens a filehandle to an anonymous temporary file.
+opens a filehandle to an anonymous temporary file.  Also using "+<"
+works for symmetry, but you really should consider writing something
+to the temporary file first.  You will need to seek() to do the
+reading.
 
 File handles can be opened to "in memory" files held in Perl scalars via:
 

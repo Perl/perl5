@@ -564,6 +564,7 @@ ext/PerlIO/scalar/scalar.xs	PerlIO layer for scalars
 ext/PerlIO/t/encoding.t		See if PerlIO encoding conversion works
 ext/PerlIO/t/fail.t		See if bad layers fail
 ext/PerlIO/t/fallback.t		See if PerlIO fallbacks work
+ext/PerlIO/t/open.t		See if PerlIO certain special opens work
 ext/PerlIO/t/scalar.t		See if PerlIO::scalar works
 ext/PerlIO/t/via.t		See if PerlIO::via works
 ext/PerlIO/via/Makefile.PL	PerlIO layer for layers in perl
