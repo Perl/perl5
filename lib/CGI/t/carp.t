@@ -1,8 +1,13 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 2 -*-
 #!/usr/local/bin/perl -w
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 use strict;
-use lib qw(t/lib);
+#use lib qw(t/lib);
 use Test::More tests => 42;
 use IO::Handle;
 
@@ -91,7 +96,7 @@ is(@CGI::Carp::WARNINGS, 0, "_warn not called");
 # Test that _warn is called at the correct time
 $CGI::Carp::WARN = 1;
 
-$expect_l = __LINE__ + 1;
+my $save_expect_l = $expect_l = __LINE__ + 1;
 like(CGI::Carp::warn("There is a problem"),
    "/] $id: There is a problem at $q_file line $expect_l.".'$/',
    "CGI::Carp::warn builds correct message");
@@ -166,7 +171,7 @@ untie *STDOUT;
 open(STDOUT, ">&REAL_STDOUT");
 my $fname = $0;
 $fname =~ tr/<>-/\253\273\255/; # _warn does this so we have to also
-is( $fake_out, "<!-- warning: There is a problem at $fname line 95. -->\n",
+is( $fake_out, "<!-- warning: There is a problem at $fname line $save_expect_l. -->\n",
                         'warningsToBrowser() on' );
 
 is($CGI::Carp::EMIT_WARNINGS, 1, "Warnings turned off");

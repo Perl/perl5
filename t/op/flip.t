@@ -2,6 +2,8 @@
 
 # $RCSfile: flip.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:52 $
 
+chdir 't' if -d 't';
+
 print "1..10\n";
 
 @a = (1,2,3,4,5,6,7,8,9,10,11,12);

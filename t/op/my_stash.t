@@ -3,6 +3,7 @@
 package Foo;
 
 BEGIN {
+    chdir 't' if -d 't';
     @INC = '../lib';
 }
 

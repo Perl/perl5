@@ -1,6 +1,7 @@
 #!./perl -w
 
 BEGIN {
+    chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bDB_File\b/) {

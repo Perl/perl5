@@ -6,12 +6,15 @@ my %Expect_Name = (); # what we expect for $File::Find::name/fullname
 my %Expect_Dir  = (); # what we expect for $File::Find::dir
 my ($cwd, $cwd_untainted);
 
-use Config;
 
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC => '../lib';
+}
 
+use Config;
+
+BEGIN {
     for (keys %ENV) { # untaint ENV
 	($ENV{$_}) = $ENV{$_} =~ /(.*)/;
     }
