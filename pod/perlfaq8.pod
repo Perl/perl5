@@ -619,7 +619,7 @@ module for other solutions.
 
 =item *
 
-Open /dev/tty and use the the TIOCNOTTY ioctl on it.  See L<tty(4)>
+Open /dev/tty and use the TIOCNOTTY ioctl on it.  See L<tty(4)>
 for details.
 
 =item *

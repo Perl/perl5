@@ -988,8 +988,10 @@ char *message;
 
 	    LEAVE;
 
-	    if (optype == OP_REQUIRE)
-		DIE("%s", SvPVx(GvSV(errgv), na));
+	    if (optype == OP_REQUIRE) {
+		char* msg = SvPVx(GvSV(errgv), na);
+		DIE("%s", *msg ? msg : "Compilation failed in require");
+	    }
 	    return pop_return();
 	}
     }
@@ -2081,8 +2083,10 @@ int gimme;
 	pop_return();
 	lex_end();
 	LEAVE;
-	if (optype == OP_REQUIRE)
-	    DIE("%s", SvPVx(GvSV(errgv), na));
+	if (optype == OP_REQUIRE) {
+	    char* msg = SvPVx(GvSV(errgv), na);
+	    DIE("%s", *msg ? msg : "Compilation failed in require");
+	}
 	SvREFCNT_dec(rs);
 	rs = SvREFCNT_inc(nrs);
 	RETPUSHUNDEF;

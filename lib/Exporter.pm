@@ -370,7 +370,7 @@ or constants that may not exist on some systems.
 The names of any symbols that cannot be exported should be listed
 in the C<@EXPORT_FAIL> array.
 
-If a module attempts to import any of these symbols the Exporter will
+If a module attempts to import any of these symbols the Exporter
 will give the module an opportunity to handle the situation before
 generating an error. The Exporter will call an export_fail method
 with a list of the failed symbols:

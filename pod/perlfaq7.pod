@@ -339,9 +339,9 @@ IO::File modules, both part of the standard Perl distribution.
 
 To pass regexps around, you'll need to either use one of the highly
 experimental regular expression modules from CPAN (Nick Ing-Simmons's
-Regexp or Ilya Zakharevich's Devel::Regexp), pass around strings
-and use an exception-trapping eval, or else be be very, very clever.
-Here's an example of how to pass in a string to be regexp compared:
+Regexp or Ilya Zakharevich's Devel::Regexp), pass around strings and
+use an exception-trapping eval, or else be very, very clever.  Here's
+an example of how to pass in a string to be regexp compared:
 
     sub compare($$) {
         my ($val1, $regexp) = @_;

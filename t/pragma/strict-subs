@@ -172,7 +172,7 @@ Fred ;
 require "./abc";
 EXPECT
 Bareword "Fred" not allowed while "strict subs" in use at ./abc line 2.
- at - line 2.
+Compilation failed in require at - line 2.
 ########
 
 --FILE-- abc.pm
@@ -184,7 +184,7 @@ Fred ;
 use abc;
 EXPECT
 Bareword "Fred" not allowed while "strict subs" in use at abc.pm line 2.
- at - line 2.
+Compilation failed in require at - line 2.
 BEGIN failed--compilation aborted at - line 2.
 ########
 

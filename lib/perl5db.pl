@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 0.9909;
+$VERSION = 0.9911;
 $header = "perl5db.pl patch level $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -177,7 +177,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  compactDump veryCompact quote HighBit undefPrint
 		  globPrint PrintRet UsageOnly frame AutoTrace
 		  TTY noTTY ReadLine NonStop LineInfo maxTraceLen
-		  recallCommand ShellBang pager tkRunning
+		  recallCommand ShellBang pager tkRunning ornaments
 		  signalLevel warnLevel dieLevel inhibit_exit);
 
 %optionVars    = (
@@ -211,6 +211,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  warnLevel	=> \&warnLevel,
 		  dieLevel	=> \&dieLevel,
 		  tkRunning	=> \&tkRunning,
+		  ornaments	=> \&ornaments,
 		 );
 
 %optionRequire = (
@@ -285,7 +286,7 @@ if ($notty) {
 
   if (-e "/dev/tty") {
     $console = "/dev/tty";
-  } elsif (-e "con") {
+  } elsif (-e "con" or $^O eq 'MSWin32') {
     $console = "con";
   } else {
     $console = "sys\$command";
@@ -1374,6 +1375,7 @@ sub setterm {
     if ($term->Features->{setHistory} and "@hist" ne "?") {
       $term->SetHistory(@hist);
     }
+    ornaments($ornaments) if defined $ornaments;
 }
 
 sub readline {
@@ -1563,6 +1565,16 @@ sub shellBang {
     $psh;
 }
 
+sub ornaments {
+  if (defined $term) {
+    local ($warnLevel,$dieLevel) = (0, 1);
+    return '' unless $term->Features->{ornaments};
+    eval { $term->ornaments(@_) } || '';
+  } else {
+    $ornaments = shift;
+  }
+}
+
 sub recallCommand {
     if (@_) {
 	$rc = quotemeta shift;
@@ -1679,6 +1691,7 @@ O [opt[=val]] [opt\"val\"] [opt?]...
          frame    affects printing messages on entry and exit from subroutines.
          AutoTrace affects printing messages on every possible breaking point.
 	 maxTraceLen gives maximal length of evals/args listed in stack trace.
+	 ornaments affects screen appearance of the command line.
 		During startup options are initialized from \$ENV{PERLDB_OPTS}.
 		You can put additional initialization options TTY, noTTY,
 		ReadLine, and NonStop there.

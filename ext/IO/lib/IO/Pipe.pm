@@ -186,12 +186,12 @@ processes.
 
 =item new ( [READER, WRITER] )
 
-Creates a C<IO::Pipe>, which is a reference to a
-newly created symbol (see the C<Symbol> package). C<IO::Pipe::new>
-optionally takes two arguments, which should be objects blessed into
-C<IO::Handle>, or a subclass thereof. These two objects will be used
-for the system call to C<pipe>. If no arguments are given then then
-method C<handles> is called on the new C<IO::Pipe> object.
+Creates a C<IO::Pipe>, which is a reference to a newly created symbol
+(see the C<Symbol> package). C<IO::Pipe::new> optionally takes two
+arguments, which should be objects blessed into C<IO::Handle>, or a
+subclass thereof. These two objects will be used for the system call
+to C<pipe>. If no arguments are given then method C<handles> is called
+on the new C<IO::Pipe> object.
 
 These two handles are held in the array part of the GLOB until either
 C<reader> or C<writer> is called.

@@ -66,7 +66,7 @@ package ExtUtils::Liblist;
 
 package ExtUtils::MakeMaker;
 #
-# Now we can can pull in the friends
+# Now we can pull in the friends
 #
 $Is_VMS   = $^O eq 'VMS';
 $Is_OS2   = $^O eq 'os2';

@@ -406,8 +406,8 @@ atomic test-and-set instruction.   In theory, this "ought" to work:
 
 except that lamentably, file creation (and deletion) is not atomic
 over NFS, so this won't work (at least, not every time) over the net.
-Various schemes involving involving link() have been suggested, but
-these tend to involve busy-wait, which is also subdesirable.
+Various schemes involving link() have been suggested, but these tend
+to involve busy-wait, which is also subdesirable.
 
 =head2 I still don't get locking.  I just want to increment the number
 in the file.  How can I do this?

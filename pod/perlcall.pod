@@ -356,7 +356,7 @@ As mentioned above, you can determine the context of the currently
 executing subroutine in Perl with I<wantarray>.  The equivalent test
 can be made in C by using the C<GIMME_V> macro, which returns
 C<G_ARRAY> if you have been called in an array context, C<G_SCALAR> if
-in a a scalar context, or C<G_VOID> if in a void context (i.e. the
+in a scalar context, or C<G_VOID> if in a void context (i.e. the
 return value will not be used).  An older version of this macro is
 called C<GIMME>; in a void context it returns C<G_SCALAR> instead of
 C<G_VOID>.  An example of using the C<GIMME_V> macro is shown in

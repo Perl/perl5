@@ -3143,7 +3143,7 @@ produce both the unofficial Location: header and the official URI:
 header.  This should satisfy most servers and browsers.
 
 One hint I can offer is that relative links may not work correctly
-when when you generate a redirection to another document on your site.
+when you generate a redirection to another document on your site.
 This is due to a well-intentioned optimization that some servers use.
 The solution to this is to use the full URL (including the http: part)
 of the document you are redirecting to.
@@ -3793,7 +3793,7 @@ list.  Otherwise, they will be strung together on a horizontal line.
 =item 4.
 
 The optional fifth argument is a pointer to an associative array
-relating the checkbox values to the user-visible labels that will will
+relating the checkbox values to the user-visible labels that will
 be printed next to them (-labels).  If not provided, the values will
 be used as the default.
 
@@ -4390,9 +4390,9 @@ You can pass a value of 'true' to dump() in order to get it to
 print the results out as plain text, suitable for incorporating
 into a <PRE> section.
 
-As a shortcut, as of version 1.56 you can interpolate the entire 
-CGI object into a string and it will be replaced with the
-the a nice HTML dump shown above:
+As a shortcut, as of version 1.56 you can interpolate the entire CGI
+object into a string and it will be replaced with the a nice HTML dump
+shown above:
 
     $query=new CGI;
     print "<H2>Current Values</H2> $query\n";

@@ -115,7 +115,7 @@ require "./abc";
 EXPECT
 Variable "$joe" is not imported at ./abc line 2.
 Global symbol "joe" requires explicit package name at ./abc line 2.
- at - line 2.
+Compilation failed in require at - line 2.
 ########
 
 --FILE-- abc.pm
@@ -128,7 +128,7 @@ use abc;
 EXPECT
 Variable "$joe" is not imported at abc.pm line 2.
 Global symbol "joe" requires explicit package name at abc.pm line 2.
- at - line 2.
+Compilation failed in require at - line 2.
 BEGIN failed--compilation aborted at - line 2.
 ########
 

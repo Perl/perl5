@@ -54,9 +54,9 @@ a time.  Programs like B<sort> that read their entire input stream first,
 however, are quite apt to cause deadlock.  
 
 The big problem with this approach is that if you don't have control 
-over source code being run in the the child process, you can't control what it does 
-with pipe buffering.  Thus you can't just open a pipe to C<cat -v> and continually
-read and write a line from it.
+over source code being run in the child process, you can't control
+what it does with pipe buffering.  Thus you can't just open a pipe to
+C<cat -v> and continually read and write a line from it.
 
 =head1 SEE ALSO
 

@@ -105,6 +105,15 @@ support reacher set of commands.
 All these commands are callable via method interface and have names
 which conform to standard conventions with the leading C<rl_> stripped.
 
+The stub package included with the perl distribution allows two
+additional methods: C<tkRunning> and C<ornaments>.  The first one
+makes Tk event loop run when waiting for user input (i.e., during
+C<readline> method), the second one makes the command line stand out
+by using termcap data.  The argument to C<ornaments> should be 0, 1,
+or a string of a form "aa,bb,cc,dd".  Four components of this string
+should be names of I<terminal capacities>, first two will be issued to
+make the prompt standout, last two to make the input line standout.
+
 =head1 EXPORTS
 
 None
@@ -121,20 +130,22 @@ If the variable is not set, the best available package is loaded.
 =cut
 
 package Term::ReadLine::Stub;
-@ISA = 'Term::ReadLine::Tk';
+@ISA = qw'Term::ReadLine::Tk Term::ReadLine::TermCap';
 
 $DB::emacs = $DB::emacs;	# To peacify -w
+*rl_term_set = \@Term::ReadLine::TermCap::rl_term_set;
 
 sub ReadLine {'Term::ReadLine::Stub'}
 sub readline {
   my $self = shift;
   my ($in,$out,$str) = @$self;
-  print $out shift; 
+  print $out $rl_term_set[0], shift, $rl_term_set[1], $rl_term_set[2]; 
   $self->register_Tk 
      if not $Term::ReadLine::registered and $Term::ReadLine::toloop
 	and defined &Tk::DoOneEvent;
   #$str = scalar <$in>;
   $str = $self->get_line;
+  print $out $rl_term_set[3]; 
   # bug in 5.000: chomping empty string creats length -1:
   chomp $str if defined $str;
   $str;
@@ -200,7 +211,7 @@ sub OUT { shift->[1] }
 sub MinLine { undef }
 sub Attribs { {} }
 
-my %features = (tkRunning => 1);
+my %features = (tkRunning => 1, ornaments => 1);
 sub Features { \%features }
 
 package Term::ReadLine;		# So late to allow the above code be defined?
@@ -232,6 +243,35 @@ if (defined &Term::ReadLine::Gnu::readline) {
 } else {
   @ISA = qw(Term::ReadLine::Stub);
 }
+
+package Term::ReadLine::TermCap;
+
+# Prompt-start, prompt-end, command-line-start, command-line-end
+#     -- zero-width beautifies to emit around prompt and the command line.
+@rl_term_set = ("","","","");
+# string encoded:
+$rl_term_set = ',,,';
+
+sub LoadTermCap {
+  return if defined $terminal;
+  
+  require Term::Cap;
+  $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
+}
+
+sub ornaments {
+  shift;
+  return $rl_term_set unless @_;
+  $rl_term_set = shift;
+  $rl_term_set ||= ',,,';
+  $rl_term_set = 'us,ue,md,me' if $rl_term_set == 1;
+  my @ts = split /,/, $rl_term_set, 4;
+  eval { LoadTermCap };
+  warn("Cannot find termcap: $@\n"), return unless defined $terminal;
+  @rl_term_set = map {$_ ? $terminal->Tputs($_,1) || '' : ''} @ts;
+  return $rl_term_set;
+}
+
 
 package Term::ReadLine::Tk;
 

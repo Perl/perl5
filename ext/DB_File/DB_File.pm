@@ -282,8 +282,6 @@ sub get_dup
 1;
 __END__
 
-=cut
-
 =head1 NAME
 
 DB_File - Perl5 access to Berkeley DB
@@ -772,11 +770,11 @@ with the key, C<$key>.
 In list context, it returns all the values which match C<$key>. Note
 that the values will be returned in an apparently random order.
 
-In list context, if the second parameter is present and evaluates TRUE,
-the method returns an associative array. The keys of the associative
-array correspond to the the values that matched in the BTREE and the
-values of the array are a count of the number of times that particular
-value occurred in the BTREE.
+In list context, if the second parameter is present and evaluates
+TRUE, the method returns an associative array. The keys of the
+associative array correspond to the values that matched in the BTREE
+and the values of the array are a count of the number of times that
+particular value occurred in the BTREE.
 
 So assuming the database created above, we can use C<get_dup> like
 this:
@@ -1397,7 +1395,7 @@ F<authors/id/TOMC/scripts/nshist.gz>).
 
 =head2 The untie() Gotcha
 
-If you make use of the Berkeley DB API, it is is I<very> strongly
+If you make use of the Berkeley DB API, it is I<very> strongly
 recommended that you read L<perltie/The untie Gotcha>. 
 
 Even if you don't currently make use of the API interface, it is still

@@ -46,6 +46,141 @@ And the Keepers of the Patch Pumpkin:
 
 
 -------------------
+ Version 5.003_97d
+-------------------
+
+Any minute now... second public beta... no, really...
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Fix for incorrect overloaded assignment"
+   From:  Ilya Zakharevich
+ Msg-ID:  <199704112225.SAA03482@monk.mps.ohio-state.edu>
+   Date:  Fri, 11 Apr 1997 18:25:33 -0400 (EDT)
+  Files:  gv.c
+
+  Title:  "Fix C< $x=''; pos($x)=0; $x=~/\G$/ >"
+   From:  Chip Salzenberg
+  Files:  pp_hot.c
+
+  Title:  "Fix label on C<for(;;)> statement"
+   From:  Chip Salzenberg
+  Files:  perly.c perly.y
+
+ CORE PORTABILITY
+
+  Title:  "update to 5.003_97b/hint/irix_6_2.sh"
+   From:  Scott Henry <scotth@sgi.com>
+ Msg-ID:  <yd8hghdjbk0.fsf@hoshi.engr.sgi.com>
+   Date:  11 Apr 1997 18:05:03 -0700
+  Files:  hints/irix_6_2.sh
+
+ OTHER CORE CHANGES
+
+  Title:  "Before 'BEGIN not safe', explain why"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "New error msg for low-key failure of C<require>"
+   From:  Chip Salzenberg
+  Files:  pod/perldiag.pod pp_ctl.c t/pragma/strict-subs
+          t/pragma/strict-vars
+
+  Title:  "Put "dXSUB_SYS" last in declarations"
+   From:  Chip Salzenberg
+  Files:  win32/perllib.c
+
+  Title:  "Minor type cleanup"
+   From:  Chip Salzenberg
+  Files:  proto.h toke.c
+
+ BUILD PROCESS
+
+   (no changes)
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "win32: perl5db patch"
+   From:  Gurusamy Sarathy
+ Msg-ID:  <199704102142.RAA27396@aatma.engin.umich.edu>
+   Date:  Thu, 10 Apr 1997 17:42:13 -0400
+  Files:  lib/perl5db.pl
+
+  Title:  "Enhancements to debugger, Term::ReadLine, Term::Cap"
+   From:  Ilya Zakharevich
+ Msg-ID:  <199704101948.PAA01841@monk.mps.ohio-state.edu>
+   Date:  Thu, 10 Apr 1997 15:48:07 -0400 (EDT)
+  Files:  lib/Term/Cap.pm lib/Term/ReadLine.pm lib/perl5db.pl
+
+  Title:  "MM_Unix patch for use under CVS"
+   From:  Ulrich Pfeifer
+ Msg-ID:  <yfmd8s1vhpn.fsf@ls6.informatik.uni-dortmund.de>
+   Date:  11 Apr 1997 14:59:00 +0200
+  Files:  lib/ExtUtils/MM_Unix.pm
+
+  Title:  "Complex update (five patches)"
+   From:  Jarkko Hietaniemi
+  Files:  lib/Math/Complex.pm t/lib/complex.t
+
+  Title:  "Fix undef warning in Math::BigInt"
+   From:  Chip Salzenberg
+  Files:  lib/Math/BigInt.pm
+
+ TESTS
+
+   (no other changes)
+
+ UTILITIES
+
+  Title:  "Add B<-o> option to a2p, for old awk; make new the default"
+   From:  Chip Salzenberg
+  Files:  x2p/a2p.h x2p/a2p.pod x2p/a2py.c x2p/walk.c
+
+ DOCUMENTATION
+
+  Title:  "typo in lib/diagnostics.pm"
+   From:  barnett@grymoire.crd.ge.com (Bruce Barnett)
+ Msg-ID:  <199704111800.OAA27297@grymoire.crd.ge.com>
+   Date:  Fri, 11 Apr 1997 14:00:54 -0400
+  Files:  lib/diagnostics.pm
+
+  Title:  "Use B<> for options in Class::Struct pod"
+   From:  Hugo van der Sanden <hv@iii.co.uk>
+ Msg-ID:  <334D2E7B.67F0@iii.co.uk>
+   Date:  Thu, 10 Apr 1997 19:16:27 +0100
+  Files:  lib/Class/Struct.pm
+
+  Title:  "Explain //g and \G issues"
+   From:  Gurusamy Sarathy
+ Msg-ID:  <199704122048.QAA25060@aatma.engin.umich.edu>
+   Date:  Sat, 12 Apr 1997 16:48:41 -0400
+  Files:  pod/perldelta.pod pod/perlop.pod pod/perlre.pod
+
+  Title:  "more (err, less) doubled words"
+   From:  Jarkko Hietaniemi
+ Msg-ID:  <199704111931.WAA24460@alpha.hut.fi>
+   Date:  Fri, 11 Apr 1997 22:31:25 +0300 (EET DST)
+  Files:  ext/DB_File/DB_File.pm ext/DynaLoader/DynaLoader.pm
+          ext/IO/lib/IO/Pipe.pm lib/CGI.pm lib/Exporter.pm
+          lib/ExtUtils/MakeMaker.pm lib/IPC/Open2.pm lib/IPC/Open3.pm
+          lib/vars.pm pod/perlcall.pod pod/perldiag.pod
+          pod/perlfaq1.pod pod/perlfaq3.pod pod/perlfaq5.pod
+          pod/perlfaq7.pod pod/perlfaq8.pod pod/perlipc.pod
+
+  Title:  "Freudian slip error in perlsub.pod"
+   From:  barnett@grymoire.crd.ge.com (Bruce Barnett)
+ Msg-ID:  <199704111755.NAA27200@grymoire.crd.ge.com>
+   Date:  Fri, 11 Apr 1997 13:55:07 -0400
+  Files:  pod/perlsub.pod
+
+  Title:  "Little patch for perl5.003_97c/pod/perlpod.pod"
+   From:  rse@engelschall.com (Ralf S. Engelschall)
+ Msg-ID:  <199704112048.WAA08733@en1.engelschall.com>
+   Date:  Fri, 11 Apr 1997 22:48:37 +0200
+  Files:  pod/perlpod.pod
+
+
+-------------------
  Version 5.003_97c
 -------------------
 

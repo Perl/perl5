@@ -613,7 +613,7 @@ package name.
 
 =item Can't locate %s in @INC
 
-(F) You said to do (or require, or use) a file that couldn't be found in
+(F) You said to do (or require, or use) a file that couldn't be found
 in any of the libraries mentioned in @INC.  Perhaps you need to set the
 PERL5LIB or PERL5OPT environment variable to say where the extra library
 is, or maybe the script needs to add the library name to @INC.  Or maybe
@@ -841,6 +841,12 @@ to 01411.  Octal constants are introduced with a leading 0 in Perl, as in C.
 =item Close on unopened file E<lt>%sE<gt>
 
 (W) You tried to close a filehandle that was never opened.
+
+=item Compilation failed in require
+
+(F) Perl could not compile a file specified in a C<require> statement.
+Perl uses this generic message when none of the errors that it encountered
+were severe enough to halt compilation immediately.
 
 =item connect() on closed fd
 

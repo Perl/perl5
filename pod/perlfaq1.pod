@@ -187,7 +187,7 @@ ok, while "awk and Perl" and "Python and perl" do not.
 It doesn't matter.
 
 In "standard terminology" a I<program> has been compiled to physical
-machine code once, and can then be be run multiple times, whereas a
+machine code once, and can then be run multiple times, whereas a
 I<script> must be translated by a program each time it's used.  Perl
 programs, however, are usually neither strictly compiled nor strictly
 interpreted.  They can be compiled to a bytecode form (something of a Perl

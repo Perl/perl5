@@ -104,8 +104,11 @@ as C<$self-E<gt>{TERMCAP}>.
 sub termcap_path { ## private
     my @termcap_path;
     # $TERMCAP, if it's a filespec
-    push(@termcap_path, $ENV{TERMCAP}) if ((exists $ENV{TERMCAP}) &&
-                                           ($ENV{TERMCAP} =~ /^\//));
+    push(@termcap_path, $ENV{TERMCAP})
+	if ((exists $ENV{TERMCAP}) &&
+	    (($^O eq 'os2' || $^O eq 'MSWin32')
+	     ? $ENV{TERMCAP} =~ /^[a-z]:[\\\/]/i
+	     : $ENV{TERMCAP} =~ /^\//));
     if ((exists $ENV{TERMPATH}) && ($ENV{TERMPATH})) {
 	# Add the users $TERMPATH
 	push(@termcap_path, split(/(:|\s+)/, $ENV{TERMPATH}))
