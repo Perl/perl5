@@ -1068,15 +1068,23 @@ PP(pp_sselect)
 #endif
     }
 
+#ifdef PERL_IRIX5_SELECT_TIMEVAL_VOID_CAST
+    /* Can't make just the (void*) conditional because that would be
+     * cpp #if within cpp macro, and not all compilers like that. */
     nfound = PerlSock_select(
 	maxlen * 8,
 	(Select_fd_set_t) fd_sets[1],
 	(Select_fd_set_t) fd_sets[2],
 	(Select_fd_set_t) fd_sets[3],
-#ifdef PERL_IRIX5_SELECT_TIMEVAL_VOID_CAST
-	(void*) /* Workaround for a compiler bug. */
-#endif
+	(void*) tbuf); /* Workaround for compiler bug. */
+#else
+    nfound = PerlSock_select(
+	maxlen * 8,
+	(Select_fd_set_t) fd_sets[1],
+	(Select_fd_set_t) fd_sets[2],
+	(Select_fd_set_t) fd_sets[3],
 	tbuf);
+#endif
     for (i = 1; i <= 3; i++) {
 	if (fd_sets[i]) {
 	    sv = SP[i];
