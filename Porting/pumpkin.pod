@@ -1297,11 +1297,29 @@ Configure/build/install process still assume src='.'.
 
 If a vendor supplies perl, but wants to leave $siteperl and $sitearch
 for the local user to use, where should the vendor put vendor-supplied
-modules (such as Tk.so?)  If the vendor puts them in $archlib, then
-they need to be updated each time the perl version is updated.
-Perhaps we need a set of libries $vendorperl and $vendorarch that
-track $apiversion (like the $sitexxx directories do) rather than
-just $version (like the main perl directory).
+modules (such as Tk.so)?  If the vendor puts them in the default $archlib,
+then they need to be updated each time the perl version is updated.
+Perhaps we need a set of libries $vendorlib and $vendorarch that
+track $apiversion (like the $sitexxx directories do) rather than just
+$version (like the main perl directory).
+
+An alternative (and perhaps even better) plan might be for the vendor
+to select non-default $privlib and $archlib directories, perhaps using
+$apiversion instead of $version (or even just /usr/lib/perl5 with no
+version stuff at all), and put modules into those directories (with perl
+Makefile.PL INSTALLDIRS=perl).  This would be fine unless the vendor
+wanted to support different versions of perl installed at the same time.
+(How many vendors *really* want to do that?)
+
+=item Separate directories for Perl-supplied and add-on man pages
+
+Man pages supplied with the perl distribution proper ought to go in
+an appropriate man directory.  Perhaps man pages supplied with add-on
+modules ought to (at least optionally) go into a $siteman[1-9] directory.
+For example, suppose that $privlib is /usr/lib/perl5 and $man1dir
+is /usr/man/man1.  Also, suppose $sitelib is /usr/local/lib/perl5.
+In this situation, it might make sense for man pages to go into
+/usr/local/lib/man/man1.
 
 =item Hint file fixes
 
