@@ -295,7 +295,7 @@ EOF
 	push @H, $h;
 	my @h = grep { /$p/ } @{$seena{$f}};
 	if (@h) {
-	    push @define, "#if (" . join(" || ", map { "${F}_R_PROTO == REENTRANT_PROTO_$_" } @h) . ")\n";
+	    push @define, "#if defined(HAS_${F}_R) && (" . join(" || ", map { "${F}_R_PROTO == REENTRANT_PROTO_$_" } @h) . ")\n";
 
 	    push @define, <<EOF;
 #   define $h
