@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 use warnings;
-print "1..115\n";
+print "1..125\n";
 
 # these shouldn't hang
 {
@@ -469,7 +469,7 @@ ok join(" ", map {0+$_} @input), "8 7 6 5 4 3 2 1 0",
     'revesed stable $a cmp $b in place sort';
 
 @input = &generate;
-$output = reverse sort @input;
+$output = reverse sort {$a cmp $b} @input;
 ok $output, "CCCBBBAAA", 'Reversed stable $a cmp $b sort in scalar context';
 
 @input = &generate;
@@ -485,6 +485,25 @@ ok join(" ", map {0+$_} @input), "2 1 0 5 4 3 8 7 6",
 @input = &generate;
 $output = reverse sort {$b cmp $a} @input;
 ok $output, "AAABBBCCC", 'Reversed stable $b cmp $a sort in scalar context';
+
+sub stuff {
+    # Something complex enough to defeat any constant folding optimiser
+    $$ - $$;
+}
+
+@input = &generate;
+@output = reverse sort {stuff || $a cmp $b} @input;
+ok join(" ", map {0+$_} @output), "8 7 6 5 4 3 2 1 0",
+    'reversed stable complex sort';
+
+@input = &generate;
+@input = reverse sort {stuff || $a cmp $b} @input;
+ok join(" ", map {0+$_} @input), "8 7 6 5 4 3 2 1 0",
+    'revesed stable complex in place sort';
+
+@input = &generate;
+$output = reverse sort {stuff || $a cmp $b } @input;
+ok $output, "CCCBBBAAA", 'Reversed stable complex sort in scalar context';
 
 sub sortr {
     reverse sort @_;
@@ -518,6 +537,17 @@ ok join(" ", map {0+$_} @output), "2 1 0 5 4 3 8 7 6",
 $output = sortcmprba &generate;
 ok $output, "AAABBBCCC",
 'reversed stable $b cmp $a sort return scalar context';
+
+sub sortcmprq {
+    reverse sort {stuff || $a cmp $b} @_;
+}
+
+@output = sortcmpr &generate;
+ok join(" ", map {0+$_} @output), "8 7 6 5 4 3 2 1 0",
+    'reversed stable complex sort return list context';
+$output = sortcmpr &generate;
+ok $output, "CCCBBBAAA",
+    'reversed stable complex sort return scalar context';
 
 # And now with numbers
 
@@ -584,6 +614,17 @@ ok "@input", "C B A F E D I H G", 'revesed stable $b <=> $a in place sort';
 $output = reverse sort {$b <=> $a} @input;
 ok $output, "CBAFEDIHG", 'reversed stable $b <=> $a sort in scalar context';
 
+@input = &generate1;
+@output = reverse sort {stuff || $a <=> $b} @input;
+ok "@output", "I H G F E D C B A", 'reversed stable complex sort';
+
+@input = &generate1;
+@input = reverse sort {stuff || $a <=> $b} @input;
+ok "@input", "I H G F E D C B A", 'revesed stable complex in place sort';
+
+@input = &generate1;
+$output = reverse sort {stuff || $a <=> $b} @input;
+ok $output, "IHGFEDCBA", 'reversed stable complex sort in scalar context';
 
 sub sortnumr {
     reverse sort {$a <=> $b} @_;
@@ -606,3 +647,14 @@ ok "@output", "C B A F E D I H G",
 $output = sortnumrba &generate1;
 ok $output, "CBAFEDIHG",
 'reversed stable $b <=> $a sort return scalar context';
+
+sub sortnumrq {
+    reverse sort {stuff || $a <=> $b} @_;
+}
+
+@output = sortnumrq &generate1;
+ok "@output", "I H G F E D C B A",
+    'reversed stable complex sort return list context';
+$output = sortnumrq &generate1;
+ok $output, "IHGFEDCBA",
+    'reversed stable complex sort return scalar context';
