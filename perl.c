@@ -2300,7 +2300,7 @@ Perl_moreswitches(pTHX_ char *s)
 					OSNAME, __DATE__, __TIME__));
 	PerlIO_printf(PerlIO_stdout(),
 			Perl_form(aTHX_ "        OS Specific Release: %s\n",
-					OSVERSION));
+					OSVERS));
 #endif /* !DGUX */
 
 #if defined(LOCAL_PATCH_COUNT)

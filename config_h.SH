@@ -1062,15 +1062,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	by Configure.  You shouldn't rely on it too much; the specific
  *	feature tests from Configure are generally more reliable.
  */
-#define OSNAME "$osname"		/**/
-
-/* OSVERSION:
- *	<takis@xfree86.org>
+/* OSVERS:
  *	This symbol contains the version of the operating system, as determined
  *	by Configure.  You shouldn't rely on it too much; the specific
  *	feature tests from Configure are generally more reliable.
  */
-#define OSVERSION "$osvers"		/**/
+#define OSNAME "$osname"		/**/
+#define OSVERS "$osvers"		/**/
 
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
