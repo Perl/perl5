@@ -140,32 +140,10 @@ else
 fi
 
 # Do this right now instead of the delayed callback unit approach.
-case "$use64bitint" in
-$define|true|[yY]*)
-    case "$ccisgcc" in
-    "$define") ld=$cc ;;
-    *) ld=/usr/bin/ld ;;
-    esac
-    ar=/usr/bin/ar
-    full_ar=$ar
-
-    case "$ccisgcc" in
-    "$define") ;;
-    *) # The strict ANSI mode (-Aa) doesn't like the LL suffixes.
-       case "$ccflags" in
-       *-Ae*)
-	    echo "(Changing from strict ANSI compilation to extended because of 64-bitintness)"
-	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @g'`
-	    ;;
-       *) ccflags="$ccflags -Ae" ;;
-       esac
-       ;;
-    esac    
-    ;;
-esac
-
-# Do this right now instead of the delayed callback unit approach.
 case "$use64bitall" in
+$define|true|[yY]*) use64bitint="$define" ;;
+esac
+case "$use64bitint" in
 $define|true|[yY]*)
     if [ "$xxOsRevMajor" -lt 11 ]; then
 		cat <<EOM >&4
@@ -198,10 +176,32 @@ EOM
 *LP64*|*PA-RISC2.0*) ;;
 *) xxx=/no/64-bit$xxx ;;
 esac'
+    case "$ccisgcc" in
+    "$define") ld=$cc ;;
+    *) ld=/usr/bin/ld ;;
+    esac
+    ar=/usr/bin/ar
+    full_ar=$ar
+
+    case "$ccisgcc" in
+    "$define") ;;
+    *) # The strict ANSI mode (-Aa) doesn't like the LL suffixes.
+       case "$ccflags" in
+       *-Aa*)
+	    echo "(Changing from strict ANSI compilation to extended because of 64-bitness)"
+	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
+	    ;;
+       *) ccflags="$ccflags -Ae" ;;
+       esac
+       ;;
+    esac    
 
     set `echo " $libswanted " | sed -e 's@ dl @ @'`
     libswanted="$*"
 
+    case "$ccisgcc" in
+    "$define") ;;
+    esac
     ;;
 esac
 
@@ -209,6 +209,7 @@ case "$ccisgcc" in
 # Even if you use gcc, prefer the HP math library over the GNU one.
 "$define") test -d /lib/pa1.1 && ccflags="$ccflags -L/lib/pa1.1" ;;
 esac
+    
 
 case "$ccisgcc" in
 "$define") ;;
