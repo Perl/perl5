@@ -294,7 +294,10 @@ FORCE:
 	@sh -c true
 
 opmini$(OBJ_EXT): op.c
-	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(OBJ_EXT) op.c
+	$(RMS) opmini.c
+	$(LNS) op.c opmini.c
+	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB opmini.c
+	$(RMS) opmini.c
 
 miniperlmain$(OBJ_EXT): miniperlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
