@@ -595,6 +595,8 @@ pod/perlport.pod		pudge
 pod/perlre.pod			regex
 pod/perlref.pod	
 pod/perlreftut.pod		mjd
+pod/perlrequick.pod		mkvale
+pod/perlretut.pod		mkvale
 pod/perlrun.pod	
 pod/perlsec.pod	
 pod/perlstyle.pod	

@@ -1341,10 +1341,15 @@ esac
 case "$fastread$alldone" in
 yescont|yesexit) ;;
 *)
-	if test ! -t 0; then
-		echo "Say 'sh Configure', not 'sh <Configure'"
-		exit 1
-	fi
+	case "$extractsh" in
+	true) ;;
+	*)
+		if test ! -t 0; then
+			echo "Say 'sh Configure', not 'sh <Configure'"
+			exit 1
+		fi
+		;;
+	esac
 	;;
 esac
 

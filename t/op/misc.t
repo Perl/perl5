@@ -551,3 +551,10 @@ my $x = "foo";
 { f } continue { print $x, "\n" }
 EXPECT
 foo
+########
+sub C () { 1 }
+sub M { $_[0] = 2; }
+eval "C";
+M(C);
+EXPECT
+Modification of a read-only value attempted at - line 2.
