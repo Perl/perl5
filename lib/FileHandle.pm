@@ -69,7 +69,8 @@ import IO::Handle grep { !defined(&$_) } @EXPORT, @EXPORT_OK;
 sub import {
     my $pkg = shift;
     my $callpkg = caller;
-    Exporter::export $pkg, $callpkg, @_;
+    require Exporter;
+    Exporter::export($pkg, $callpkg, @_);
 
     #
     # If the Fcntl extension is available,
@@ -77,7 +78,7 @@ sub import {
     #
     eval {
 	require Fcntl;
-	Exporter::export 'Fcntl', $callpkg;
+	Exporter::export('Fcntl', $callpkg);
     };
 }
 
