@@ -36,3 +36,12 @@ Revision history for Perl extension File::Glob
 	- ansified prototypes
 	- s/struct stat/Stat_t/
 	- split on spaces to make <*.c *.h> work (for compatibility)
+0.991 Tue Oct 26 09:48:00 BST 1999
+	- Add case-insensitive matching (GLOB_NOCASE)
+	- Make glob_csh case insensitive by default on Win32, VMS,
+	  OS/2, DOS, RISC OS, and Mac OS
+	- Add support for :case and :nocase tags
+	- Hack to make patterns like C:* work on DOSISH systems
+	- Add support for either \ or / as separators on DOSISH systems
+	- Limit effect of \ as a quoting operator on DOSISH systems to
+	  when it precedes one of []{}-~\ (to minimise backslashitis).

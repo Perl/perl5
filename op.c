@@ -5357,7 +5357,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	modname->op_private |= OPpCONST_BARE;
 	ENTER;
 	utilize(1, start_subparse(FALSE, 0), Nullop, modname,
-		newSVOP(OP_CONST, 0, newSVpvn("globally", 8)));
+		newSVOP(OP_CONST, 0, newSVpvn(":globally", 9)));
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
 	LEAVE;
     }

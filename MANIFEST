@@ -1231,6 +1231,7 @@ t/lib/findbin.t		See if FindBin works
 t/lib/gdbm.t		See if GDBM_File works
 t/lib/getopt.t		See if Getopt::Std and Getopt::Long work
 t/lib/glob-basic.t	See if File::Glob works
+t/lib/glob-case.t	See if File::Glob works
 t/lib/glob-global.t	See if File::Glob works
 t/lib/glob-taint.t	See if File::Glob works
 t/lib/gol-basic.t	See if Getopt::Long works
