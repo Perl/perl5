@@ -1,4 +1,4 @@
-/* $Header: doarg.c,v 3.0.1.7 90/08/13 22:14:15 lwall Locked $
+/* $Header: doarg.c,v 3.0.1.8 90/10/15 16:04:04 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,14 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doarg.c,v $
+ * Revision 3.0.1.8  90/10/15  16:04:04  lwall
+ * patch29: @ENV = () now works
+ * patch29: added caller
+ * patch29: tr/// now understands c, d and s options, and handles nulls right
+ * patch29: *foo now prints as *package'foo
+ * patch29: added caller
+ * patch29: local() without initialization now creates undefined values
+ * 
  * Revision 3.0.1.7  90/08/13  22:14:15  lwall
  * patch28: the NSIG hack didn't work on Xenix
  * patch28: defined(@array) and defined(%array) didn't work right
@@ -59,7 +67,7 @@
 
 extern unsigned char fold[];
 
-int wantarray;
+extern char **environ;
 
 #ifdef BUGGY_MSC
  #pragma function(memcmp)
@@ -320,15 +328,17 @@ nope:
 int
 do_trans(str,arg)
 STR *str;
-register ARG *arg;
+ARG *arg;
 {
-    register char *tbl;
+    register short *tbl;
     register char *s;
     register int matches = 0;
     register int ch;
     register char *send;
+    register char *d;
+    register int squash = arg[2].arg_len & 1;
 
-    tbl = arg[2].arg_ptr.arg_cval;
+    tbl = (short*) arg[2].arg_ptr.arg_cval;
     s = str_get(str);
     send = s + str->str_cur;
     if (!tbl || !s)
@@ -338,12 +348,36 @@ register ARG *arg;
 	deb("2.TBL\n");
     }
 #endif
-    while (s < send) {
-	if (ch = tbl[*s & 0377]) {
-	    matches++;
-	    *s = ch;
+    if (!arg[2].arg_len) {
+	while (s < send) {
+	    if ((ch = tbl[*s & 0377]) >= 0) {
+		matches++;
+		*s = ch;
+	    }
+	    s++;
 	}
-	s++;
+    }
+    else {
+	d = s;
+	while (s < send) {
+	    if ((ch = tbl[*s & 0377]) >= 0) {
+		*d = ch;
+		if (matches++ && squash) {
+		    if (d[-1] == *d)
+			matches--;
+		    else
+			d++;
+		}
+		else
+		    d++;
+	    }
+	    else if (ch == -1)		/* -1 is unmapped character */
+		*d++ = *s;		/* -2 is delete character */
+	    s++;
+	}
+	matches += send - d;	/* account for disappeared chars */
+	*d = '\0';
+	str->str_cur = d - str->str_ptr;
     }
     STABSET(str);
     return matches;
@@ -713,10 +747,14 @@ register STR **sarg;
 		xlen = (*sarg)->str_cur;
 		if (*xs == 'S' && xs[1] == 't' && xs[2] == 'B'
 		  && xlen == sizeof(STBP) && strlen(xs) < xlen) {
-		    xs = stab_name(((STAB*)(*sarg))); /* a stab value! */
-		    sprintf(tokenbuf,"*%s",xs);	/* reformat to non-binary */
+		    STR *tmpstr = Str_new(24,0);
+
+		    stab_fullname(tmpstr, ((STAB*)(*sarg))); /* a stab value! */
+		    sprintf(tokenbuf,"*%s",tmpstr->str_ptr);
+					/* reformat to non-binary */
 		    xs = tokenbuf;
 		    xlen = strlen(tokenbuf);
+		    str_free(tmpstr);
 		}
 		if (strEQ(t-2,"%s")) {	/* some printfs fail on >128 chars */
 		    *buf = '\0';
@@ -801,82 +839,12 @@ int *arglast;
     register int sp = arglast[1];
     register int items = arglast[2] - sp;
     register SUBR *sub;
-    ARRAY *savearray;
-    STAB *stab;
-    char *oldfile = filename;
-    int oldsave = savestack->ary_fill;
-    int oldtmps_base = tmps_base;
-
-    if ((arg[1].arg_type & A_MASK) == A_WORD)
-	stab = arg[1].arg_ptr.arg_stab;
-    else {
-	STR *tmpstr = stab_val(arg[1].arg_ptr.arg_stab);
-
-	if (tmpstr)
-	    stab = stabent(str_get(tmpstr),TRUE);
-	else
-	    stab = Nullstab;
-    }
-    if (!stab)
-	fatal("Undefined subroutine called");
-    saveint(&wantarray);
-    wantarray = gimme;
-    sub = stab_sub(stab);
-    if (!sub)
-	fatal("Undefined subroutine \"%s\" called", stab_name(stab));
-    if (sub->usersub) {
-	st[sp] = arg->arg_ptr.arg_str;
-	if ((arg[2].arg_type & A_MASK) == A_NULL)
-	    items = 0;
-	return sub->usersub(sub->userindex,sp,items);
-    }
-    if ((arg[2].arg_type & A_MASK) != A_NULL) {
-	savearray = stab_xarray(defstab);
-	stab_xarray(defstab) = afake(defstab, items, &st[sp+1]);
-    }
-    savelong(&sub->depth);
-    sub->depth++;
-    if (sub->depth >= 2) {	/* save temporaries on recursion? */
-	if (sub->depth == 100 && dowarn)
-	    warn("Deep recursion on subroutine \"%s\"",stab_name(stab));
-	savelist(sub->tosave->ary_array,sub->tosave->ary_fill);
-    }
-    filename = sub->filename;
-    tmps_base = tmps_max;
-    sp = cmd_exec(sub->cmd,gimme,--sp);		/* so do it already */
-    st = stack->ary_array;
-
-    if ((arg[2].arg_type & A_MASK) != A_NULL) {
-	afree(stab_xarray(defstab));  /* put back old $_[] */
-	stab_xarray(defstab) = savearray;
-    }
-    filename = oldfile;
-    tmps_base = oldtmps_base;
-    if (savestack->ary_fill > oldsave) {
-	for (items = arglast[0] + 1; items <= sp; items++)
-	    st[items] = str_static(st[items]);
-		/* in case restore wipes old str */
-	restorelist(oldsave);
-    }
-    return sp;
-}
-
-int
-do_dbsubr(arg,gimme,arglast)
-register ARG *arg;
-int gimme;
-int *arglast;
-{
-    register STR **st = stack->ary_array;
-    register int sp = arglast[1];
-    register int items = arglast[2] - sp;
-    register SUBR *sub;
-    ARRAY *savearray;
     STR *str;
     STAB *stab;
-    char *oldfile = filename;
     int oldsave = savestack->ary_fill;
     int oldtmps_base = tmps_base;
+    int hasargs = ((arg[2].arg_type & A_MASK) != A_NULL);
+    register CSV *csv;
 
     if ((arg[1].arg_type & A_MASK) == A_WORD)
 	stab = arg[1].arg_ptr.arg_stab;
@@ -890,44 +858,60 @@ int *arglast;
     }
     if (!stab)
 	fatal("Undefined subroutine called");
-    saveint(&wantarray);
-    wantarray = gimme;
-/* begin differences */
-    str = stab_val(DBsub);
-    saveitem(str);
-    str_set(str,stab_name(stab));
-    sub = stab_sub(DBsub);
-    if (!sub)
-	fatal("No DBsub routine");
-/* end differences */
-    if ((arg[2].arg_type & A_MASK) != A_NULL) {
-	savearray = stab_xarray(defstab);
-	stab_xarray(defstab) = afake(defstab, items, &st[sp+1]);
+    if (arg->arg_type == O_DBSUBR) {
+	str = stab_val(DBsub);
+	saveitem(str);
+	stab_fullname(str,stab);
+	sub = stab_sub(DBsub);
+	if (!sub)
+	    fatal("No DBsub routine");
     }
-    savelong(&sub->depth);
+    else {
+	if (!(sub = stab_sub(stab))) {
+	    STR *tmpstr = arg[0].arg_ptr.arg_str;
+
+	    stab_fullname(tmpstr, stab);
+	    fatal("Undefined subroutine \"%s\" called",tmpstr->str_ptr);
+	}
+    }
+    str = Str_new(15, sizeof(CSV));
+    str->str_state = SS_SCSV;
+    (void)apush(savestack,str);
+    csv = (CSV*)str->str_ptr;
+    csv->sub = sub;
+    csv->stab = stab;
+    csv->curcsv = curcsv;
+    csv->curcmd = curcmd;
+    csv->depth = sub->depth;
+    csv->wantarray = gimme;
+    csv->hasargs = hasargs;
+    curcsv = csv;
+    if (sub->usersub) {
+	st[sp] = arg->arg_ptr.arg_str;
+	if (!hasargs)
+	    items = 0;
+	return (*sub->usersub)(sub->userindex,sp,items);
+    }
+    if (hasargs) {
+	csv->savearray = stab_xarray(defstab);
+	csv->argarray = afake(defstab, items, &st[sp+1]);
+	stab_xarray(defstab) = csv->argarray;
+    }
     sub->depth++;
     if (sub->depth >= 2) {	/* save temporaries on recursion? */
 	if (sub->depth == 100 && dowarn)
 	    warn("Deep recursion on subroutine \"%s\"",stab_name(stab));
 	savelist(sub->tosave->ary_array,sub->tosave->ary_fill);
     }
-    filename = sub->filename;
     tmps_base = tmps_max;
     sp = cmd_exec(sub->cmd,gimme, --sp);	/* so do it already */
     st = stack->ary_array;
 
-    if ((arg[2].arg_type & A_MASK) != A_NULL) {
-	afree(stab_xarray(defstab));  /* put back old $_[] */
-	stab_xarray(defstab) = savearray;
-    }
-    filename = oldfile;
     tmps_base = oldtmps_base;
-    if (savestack->ary_fill > oldsave) {
-	for (items = arglast[0] + 1; items <= sp; items++)
-	    st[items] = str_static(st[items]);
-		/* in case restore wipes old str */
-	restorelist(oldsave);
-    }
+    for (items = arglast[0] + 1; items <= sp; items++)
+	st[items] = str_static(st[items]);
+	    /* in case restore wipes old str */
+    restorelist(oldsave);
     return sp;
 }
 
@@ -992,12 +976,31 @@ int *arglast;
 	    else if (str->str_state == SS_HASH) {
 		char *tmps;
 		STR *tmpstr;
+		int magic = 0;
+		STAB *tmpstab = str->str_u.str_stab;
 
 		if (makelocal)
 		    hash = savehash(str->str_u.str_stab);
 		else {
 		    hash = stab_hash(str->str_u.str_stab);
-		    hclear(hash);
+		    if (tmpstab == envstab) {
+			magic = 'E';
+			environ[0] = Nullch;
+		    }
+		    else if (tmpstab == sigstab) {
+			magic = 'S';
+#ifndef NSIG
+#define NSIG 32
+#endif
+			for (i = 1; i < NSIG; i++)
+			    signal(i, SIG_DFL);	/* crunch, crunch, crunch */
+		    }
+#ifdef SOME_DBM
+		    else if (hash->tbl_dbm)
+			magic = 'D';
+#endif
+		    hclear(hash, magic == 'D');	/* wipe any dbm file too */
+
 		}
 		while (relem < lastrelem) {	/* gobble up all the rest */
 		    if (*relem)
@@ -1010,6 +1013,10 @@ int *arglast;
 			str_sset(tmpstr,*relem);	/* value */
 		    *(relem++) = tmpstr;
 		    (void)hstore(hash,tmps,str->str_cur,tmpstr,0);
+		    if (magic) {
+			str_magic(tmpstr, tmpstab, magic, tmps, str->str_cur);
+			stabset(tmpstr->str_magic, tmpstr);
+		    }
 		}
 	    }
 	    else
@@ -1023,7 +1030,7 @@ int *arglast;
 		*(relem++) = str;
 	    }
 	    else {
-		str_nset(str, "", 0);
+		str_sset(str, &str_undef);
 		if (gimme == G_ARRAY) {
 		    i = ++lastrelem - firstrelem;
 		    relem++;		/* tacky, I suppose */
@@ -1207,7 +1214,15 @@ int *arglast;
     }
     else if (type == O_HASH || type == O_LHASH) {
 	stab = arg[1].arg_ptr.arg_stab;
-	(void)hfree(stab_xhash(stab));
+	if (stab == envstab)
+	    environ[0] = Nullch;
+	else if (stab == sigstab) {
+	    int i;
+
+	    for (i = 1; i < NSIG; i++)
+		signal(i, SIG_DFL);	/* munch, munch, munch */
+	}
+	(void)hfree(stab_xhash(stab), TRUE);
 	stab_xhash(stab) = Null(HASH*);
     }
     else if (type == O_SUBR || type == O_DBSUBR) {

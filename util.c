@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0.1.7 90/08/13 22:40:26 lwall Locked $
+/* $Header: util.c,v 3.0.1.8 90/10/16 11:26:57 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
+ * Revision 3.0.1.8  90/10/16  11:26:57  lwall
+ * patch29: added waitpid
+ * patch29: various portability fixes
+ * patch29: scripts now run at almost full speed under the debugger
+ * 
  * Revision 3.0.1.7  90/08/13  22:40:26  lwall
  * patch28: the NSIG hack didn't work right on Xenix
  * patch28: rename was busted on systems without rename system call
@@ -437,7 +442,7 @@ int iflag;
     register int i;
     register int len = str->str_cur;
     int rarest = 0;
-    int frequency = 256;
+    unsigned int frequency = 256;
 
     Str_Grow(str,len+258);
 #ifndef lint
@@ -479,7 +484,7 @@ int iflag;
     s = Null(unsigned char*);
 #endif
     if (iflag) {
-	register int tmp, foldtmp;
+	register unsigned int tmp, foldtmp;
 	str->str_pok |= SP_CASEFOLD;
 	for (i = 0; i < len; i++) {
 	    tmp=freq[s[i]];
@@ -559,7 +564,7 @@ STR *littlestr;
     s = big + littlelen;
     oldlittle = little = table - 2;
     if (littlestr->str_pok & SP_CASEFOLD) {	/* case insensitive? */
-	while (s < bigend) {
+	if (s < bigend) {
 	  top1:
 	    if (tmp = table[*s]) {
 #ifdef POINTERRIGOR
@@ -592,7 +597,7 @@ STR *littlestr;
 	}
     }
     else {
-	while (s < bigend) {
+	if (s < bigend) {
 	  top2:
 	    if (tmp = table[*s]) {
 #ifdef POINTERRIGOR
@@ -777,7 +782,8 @@ long a1, a2, a3, a4;
     s += strlen(s);
     if (s[-1] != '\n') {
 	if (curcmd->c_line) {
-	    (void)sprintf(s," at %s line %ld", filename, (long)curcmd->c_line);
+	    (void)sprintf(s," at %s line %ld",
+	      stab_val(curcmd->c_filestab)->str_ptr, (long)curcmd->c_line);
 	    s += strlen(s);
 	}
 	if (last_in_stab &&
@@ -874,7 +880,8 @@ va_list args;
     s += strlen(s);
     if (s[-1] != '\n') {
 	if (curcmd->c_line) {
-	    (void)sprintf(s," at %s line %ld", filename, (long)curcmd->c_line);
+	    (void)sprintf(s," at %s line %ld",
+	      stab_val(curcmd->c_filestab)->str_ptr, (long)curcmd->c_line);
 	    s += strlen(s);
 	}
 	if (last_in_stab &&
@@ -1229,6 +1236,7 @@ char	*mode;
 	if (tmpstab = stabent("$",allstabs))
 	    str_numset(STAB_STR(tmpstab),(double)getpid());
 	forkprocess = 0;
+	hclear(pidstatus);	/* we have no children */
 	return Nullfp;
 #undef THIS
 #undef THAT
@@ -1240,9 +1248,8 @@ char	*mode;
 	close(p[this]);
 	p[this] = p[that];
     }
-    str = afetch(pidstatary,p[this],TRUE);
-    str_numset(str,(double)pid);
-    str->str_cur = 0;
+    str = afetch(fdpid,p[this],TRUE);
+    str->str_u.str_useful = pid;
     forkprocess = pid;
     return fdopen(p[this], mode);
 }
@@ -1298,36 +1305,77 @@ FILE *ptr;
 #endif
     int status;
     STR *str;
-    register int pid;
+    int pid;
 
-    str = afetch(pidstatary,fileno(ptr),TRUE);
+    str = afetch(fdpid,fileno(ptr),TRUE);
+    astore(fdpid,fileno(ptr),Nullstr);
     fclose(ptr);
-    pid = (int)str_gnum(str);
-    if (!pid)
-	return -1;
+    pid = (int)str->str_u.str_useful;
     hstat = signal(SIGHUP, SIG_IGN);
     istat = signal(SIGINT, SIG_IGN);
     qstat = signal(SIGQUIT, SIG_IGN);
-#ifdef WAIT4
-    if (wait4(pid,&status,0,Null(struct rusage *)) < 0)
-	status = -1;
-#else
-    if (pid < 0)		/* already exited? */
-	status = str->str_cur;
-    else {
-	int result;
-
-	while ((result = wait(&status)) != pid && result >= 0)
-	    pidgone(result,status);
-	if (result < 0)
-	    status = -1;
-    }
-#endif
+    pid = wait4pid(pid, &status, 0);
     signal(SIGHUP, hstat);
     signal(SIGINT, istat);
     signal(SIGQUIT, qstat);
-    str_numset(str,0.0);
-    return(status);
+    return(pid < 0 ? pid : status);
+}
+
+int
+wait4pid(pid,statusp,flags)
+int pid;
+int *statusp;
+int flags;
+{
+    int result;
+    STR *str;
+    char spid[16];
+
+    if (!pid)
+	return -1;
+#ifdef WAIT4
+    return wait4(pid,statusp,flags,Null(struct rusage *));
+#else
+#ifdef WAITPID
+    return waitpid(pid,statusp,flags);
+#else
+    if (pid > 0) {
+	sprintf(spid, "%d", pid);
+	str = hfetch(pidstatus,spid,strlen(pid),FALSE);
+	if (str != &str_undef) {
+	    *statusp = (int)str->str_u.str_useful;
+	    hdelete(pidstatus,spid,strlen(pid));
+	    return pid;
+	}
+    }
+    else {
+	HENT *entry;
+
+	hiterinit(pidstatus);
+	if (entry = hiternext(pidstatus)) {
+	    pid = atoi(hiterkey(entry,statusp));
+	    str = hiterval(entry);
+	    *statusp = (int)str->str_u.str_useful;
+	    sprintf(spid, "%d", pid);
+	    hdelete(pidstatus,spid,strlen(pid));
+	    return pid;
+	}
+    }
+    if (flags)
+	fatal("Can't do waitpid with flags");
+    else {
+	int result;
+	register int count;
+	register STR *str;
+
+	while ((result = wait(statusp)) != pid && pid > 0 && result >= 0)
+	    pidgone(result,*statusp);
+	if (result < 0)
+	    *statusp = -1;
+    }
+#endif
+#endif
+    return result;
 }
 #endif /* !MSDOS */
 
@@ -1335,21 +1383,16 @@ pidgone(pid,status)
 int pid;
 int status;
 {
-#ifdef WAIT4
-    return;
+#if defined(WAIT4) || defined(WAITPID)
 #else
-    register int count;
     register STR *str;
+    char spid[16];
 
-    for (count = pidstatary->ary_fill; count >= 0; --count) {
-	if ((str = afetch(pidstatary,count,FALSE)) &&
-	  ((int)str->str_u.str_nval) == pid) {
-	    str_numset(str, -str->str_u.str_nval);
-	    str->str_cur = status;
-	    return;
-	}
-    }
+    sprintf(spid, "%d", pid);
+    str = hfetch(pidstatus,pid,strlen(pid),TRUE);
+    str->str_u.str_useful = status;
 #endif
+    return;
 }
 
 #ifndef MEMCMP

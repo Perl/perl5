@@ -1,4 +1,4 @@
-/* $Header: walk.c,v 3.0.1.5 90/08/09 05:55:01 lwall Locked $
+/* $Header: walk.c,v 3.0.1.6 90/10/16 11:35:51 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	walk.c,v $
+ * Revision 3.0.1.6  90/10/16  11:35:51  lwall
+ * patch29: a2p mistranslated certain weird field separators
+ * 
  * Revision 3.0.1.5  90/08/09  05:55:01  lwall
  * patch19: a2p emited local($_) without a semicolon
  * patch19: a2p didn't make explicit split on whitespace skip leading whitespace
@@ -694,7 +697,7 @@ sub Pick {\n\
 		i = fstr->str_ptr[1] & 127;
 		if (index("*+?.[]()|^$\\",i))
 		    sprintf(tokenbuf,"/\\%c/",i);
-		else if (i = ' ')
+		else if (i == ' ')
 		    sprintf(tokenbuf,"' '");
 		else
 		    sprintf(tokenbuf,"/%c/",i);

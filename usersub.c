@@ -1,10 +1,13 @@
-/* $Header: usersub.c,v 3.0.1.1 90/08/09 05:40:45 lwall Locked $
+/* $Header: usersub.c,v 3.0.1.2 90/10/16 11:22:04 lwall Locked $
  *
  *  This file contains stubs for routines that the user may define to
  *  set up glue routines for C libraries or to decrypt encrypted scripts
  *  for execution.
  *
  * $Log:	usersub.c,v $
+ * Revision 3.0.1.2  90/10/16  11:22:04  lwall
+ * patch29: added waitpid
+ * 
  * Revision 3.0.1.1  90/08/09  05:40:45  lwall
  * patch19: Initial revision
  * 
@@ -96,9 +99,8 @@ VOID	(*func)();
     }
     close(p[1]);
     fclose(fil);
-    str = afetch(pidstatary,p[0],TRUE);
-    str_numset(str,(double)pipepid);
-    str->str_cur = 0;
+    str = afetch(fdpid,p[0],TRUE);
+    str->str_u.str_useful = pipepid;
     return fdopen(p[0], "r");
 }
 
