@@ -147,7 +147,7 @@ if (setup_badly_terminated_file(2)) {
 # There's special-case code to fix the final record when it is read normally.
 # But the $#a forces it to be read from the cache, which skips the
 # termination.
-$badrec = "world\nhello";
+$badrec = "world${RECSEP}hello";
 if (setup_badly_terminated_file(1)) {
   tie(@a, "Tie::File", $file, mode => 0, recsep => $RECSEP)
       or die "Couldn't tie file: $!";

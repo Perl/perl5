@@ -147,7 +147,15 @@ sub new {
     my $class = shift;
     my $this = $class->SUPER::new( @_ );
 
-    Apache->request->register_cleanup(\&CGI::Pretty::_reset_globals) if ($CGI::MOD_PERL);
+    if ($CGI::MOD_PERL) {
+        my $r = Apache->request;
+        if ($CGI::MOD_PERL == 1) {
+            $r->register_cleanup(\&CGI::Pretty::_reset_globals);
+        }
+        else {
+            $r->pool->cleanup_register(\&CGI::Pretty::_reset_globals);
+        }
+    }
     $class->_reset_globals if $CGI::PERLEX;
 
     return bless $this, $class;

@@ -2615,8 +2615,8 @@ win32_rewind(FILE *pf)
     return;
 }
 
-DllExport FILE*
-win32_tmpfile(void)
+DllExport int
+win32_tmpfd(void)
 {
     dTHX;
     char prefix[MAX_PATH+1];
@@ -2640,11 +2640,20 @@ win32_tmpfile(void)
 #endif
 		    DEBUG_p(PerlIO_printf(Perl_debug_log,
 					  "Created tmpfile=%s\n",filename));
-		    return fdopen(fd, "w+b");
+		    return fd;
 		}
 	    }
 	}
     }
+    return -1;
+}
+
+DllExport FILE*
+win32_tmpfile(void)
+{
+    int fd = win32_tmpfd();
+    if (fd >= 0)
+	return win32_fdopen(fd, "w+b");
     return NULL;
 }
 
@@ -3599,7 +3608,9 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
 
     	if (!extra_quotes
 	    && cmd_shell
-	    && (stricmp(arg, "/x/c") == 0 || stricmp(arg, "/c") == 0))
+	    && curlen >= 2
+	    && *arg  == '/'     /* see if arg is "/c", "/x/c", "/x/d/c" etc. */
+	    && stricmp(arg+curlen-2, "/c") == 0)
 	{
 	    /* is there a next argument? */
 	    if (args[index+1]) {

@@ -139,7 +139,11 @@ case "$osvers" in
    ;;
 esac
 ldlibpthname='DYLD_LIBRARY_PATH';
-useshrplib='true';
+
+# useshrplib=true results in much slower startup times.
+case "$useshrplib" in
+'') useshrplib='false' ;;
+esac
 
 cat > UU/archname.cbu <<'EOCBU'
 # This script UU/archname.cbu will get 'called-back' by Configure 

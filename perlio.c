@@ -4817,45 +4817,39 @@ PerlIO_tmpfile(void)
      dTHX;
      PerlIO *f = NULL;
      int fd = -1;
-     SV *sv = Nullsv;
-     GV *gv = gv_fetchpv("File::Temp::tempfile", FALSE, SVt_PVCV);
+#ifdef WIN32
+     fd = win32_tmpfd();
+     if (fd >= 0)
+	  f = PerlIO_fdopen(fd, "w+b");
+#else /* WIN32 */
+#    ifdef HAS_MKSTEMP
+     SV *sv = newSVpv("/tmp/PerlIO_XXXXXX", 0);
 
-     if (!gv) {
-	  ENTER;
-	  Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-			   newSVpvn("File::Temp", 10), Nullsv, Nullsv, Nullsv);
-	  gv = gv_fetchpv("File::Temp::tempfile", FALSE, SVt_PVCV);
-	  GvIMPORTED_CV_on(gv);
-	  LEAVE;
-     }
-
-     if (gv && GvCV(gv)) {
-	  dSP;
-	  ENTER;
-	  SAVETMPS;
-	  PUSHMARK(SP);
-	  PUTBACK;
-	  if (call_sv((SV*)GvCV(gv), G_SCALAR)) {
-	       GV *gv = (GV*)SvRV(newSVsv(*PL_stack_sp--));
-	       IO *io = gv ? GvIO(gv) : 0;
-	       fd = io ? PerlIO_fileno(IoIFP(io)) : -1;
-	  }
-	  SPAGAIN;
-	  PUTBACK;
-	  FREETMPS;
-	  LEAVE;
-     }
-
+     /*
+      * I have no idea how portable mkstemp() is ... NI-S
+      */
+     fd = mkstemp(SvPVX(sv));
      if (fd >= 0) {
 	  f = PerlIO_fdopen(fd, "w+");
-	  if (sv) {
-	       if (f)
-		    PerlIOBase(f)->flags |= PERLIO_F_TEMP;
-	       PerlLIO_unlink(SvPVX(sv));
-	       SvREFCNT_dec(sv);
-	  }
+	  if (f)
+	       PerlIOBase(f)->flags |= PERLIO_F_TEMP;
+	  PerlLIO_unlink(SvPVX(sv));
+	  SvREFCNT_dec(sv);
      }
+#    else	/* !HAS_MKSTEMP, fallback to stdio tmpfile(). */
+     FILE *stdio = PerlSIO_tmpfile();
 
+     if (stdio) {
+	  if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)),
+                               &PerlIO_stdio, "w+", Nullsv))) {
+               PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
+
+               if (s)
+                    s->stdio = stdio;
+          }
+     }
+#    endif /* else HAS_MKSTEMP */
+#endif /* else WIN32 */
      return f;
 }
 

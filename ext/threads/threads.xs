@@ -669,7 +669,7 @@ PPCODE:
   MUTEX_LOCK(&create_destruct_mutex);
   curr_thread = threads;
   if(curr_thread->tid != 0)	
-    PUSHs( sv_2mortal(ithread_to_SV(aTHX_ NULL, curr_thread, classname, TRUE)));
+    XPUSHs( sv_2mortal(ithread_to_SV(aTHX_ NULL, curr_thread, classname, TRUE)));
   while(curr_thread) {
     curr_thread = curr_thread->next;
     if(curr_thread == threads)
@@ -677,7 +677,7 @@ PPCODE:
     if(curr_thread->state & PERL_ITHR_DETACHED ||
        curr_thread->state & PERL_ITHR_JOINED)
          continue;
-     PUSHs( sv_2mortal(ithread_to_SV(aTHX_ NULL, curr_thread, classname, TRUE)));
+     XPUSHs( sv_2mortal(ithread_to_SV(aTHX_ NULL, curr_thread, classname, TRUE)));
   }	
   MUTEX_UNLOCK(&create_destruct_mutex);
 }

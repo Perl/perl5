@@ -45,6 +45,9 @@ eval {
 # and mingw32 uses said silly CRT
 $have_setlocale = 0 if (($^O eq 'MSWin32' || $^O eq 'NetWare') && $Config{cc} =~ /^(cl|gcc)/i);
 
+# UWIN seems to loop after test 98, just skip for now
+$have_setlocale = 0 if ($^O =~ /^uwin/);
+
 my $last = $have_setlocale ? &last : &last_without_setlocale;
 
 print "1..$last\n";
