@@ -380,6 +380,10 @@ sv_free_arenas()
 	    Safefree((void *)sva);
     }
 
+    if (nice_chunk)
+	Safefree(nice_chunk);
+    nice_chunk = Nullch;
+    nice_chunk_size = 0;
     sv_arenaroot = 0;
     sv_root = 0;
 }

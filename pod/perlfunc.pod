@@ -657,7 +657,7 @@ Breaks the binding between a DBM file and a hash.
 
 [This function has been superseded by the tie() function.]
 
-This binds a dbm(3), ndbm(3), sdbm(3), gdbm(), or Berkeley DB file to a
+This binds a dbm(3), ndbm(3), sdbm(3), gdbm(3), or Berkeley DB file to a
 hash.  HASH is the name of the hash.  (Unlike normal open, the first
 argument is I<NOT> a filehandle, even though it looks like one).  DBNAME
 is the name of the database (without the F<.dir> or F<.pag> extension if
@@ -1277,7 +1277,7 @@ you're done.  You should reopen those to /dev/null if it's any issue.
 
 =item format
 
-Declare a picture format with use by the write() function.  For
+Declare a picture format for use by the write() function.  For
 example:
 
     format Something =
@@ -1582,7 +1582,7 @@ Note that, because $_ is a reference into the list value, it can be used
 to modify the elements of the array.  While this is useful and
 supported, it can cause bizarre results if the LIST is not a named
 array.  Similarly, grep returns aliases into the original list,
-much like the way that L<Foreach Loops>'s index variable aliases the list
+much like the way that a for loops's index variable aliases the list
 elements.  That is, modifying an element of a list returned by grep
 (for example, in a C<foreach>, C<map> or another C<grep>)
 actually modifies the element in the original list.
@@ -1794,8 +1794,8 @@ subroutine, C<eval{}>, or C<do>.  If more than one value is listed, the
 list must be placed in parentheses.  See L<perlsub/"Temporary Values via
 local()"> for details, including issues with tied arrays and hashes.
 
-But you really probably want to be using my() instead, because local() isn't
-what most people think of as "local").  See L<perlsub/"Private Variables
+You really probably want to be using my() instead, because local() isn't
+what most people think of as "local".  See L<perlsub/"Private Variables
 via my()"> for details.
 
 =item localtime EXPR
@@ -2954,7 +2954,7 @@ always sleep the full amount.
 
 For delays of finer granularity than one second, you may use Perl's
 syscall() interface to access setitimer(2) if your system supports it,
-or else see L</select()> below.
+or else see L</select()> above.
 
 See also the POSIX module's sigpause() function.
 
@@ -3148,9 +3148,9 @@ splits on whitespace (after skipping any leading whitespace).  Anything
 matching PATTERN is taken to be a delimiter separating the fields.  (Note
 that the delimiter may be longer than one character.)
 
-If LIMIT is specified and is not negative, splits into no more than
-that many fields (though it may split into fewer).  If LIMIT is
-unspecified, trailing null fields are stripped (which potential users
+If LIMIT is specified and is positive, splits into no more than that
+many fields (though it may split into fewer).  If LIMIT is unspecified
+or zero, trailing null fields are stripped (which potential users
 of pop() would do well to remember).  If LIMIT is negative, it is
 treated as if an arbitrarily large LIMIT had been specified.
 
@@ -3299,7 +3299,7 @@ omitted, uses a semi-random value based on the current time and process
 ID, among other things.  In versions of Perl prior to 5.004 the default
 seed was just the current time().  This isn't a particularly good seed,
 so many old programs supply their own seed value (often C<time ^ $$> or
-C<time ^ ($$ + ($$ << 15))>), but that isn't necessary any more.
+C<time ^ ($$ + ($$ E<lt>E<lt> 15))>), but that isn't necessary any more.
 
 In fact, it's usually not necessary to call srand() at all, because if
 it is not called explicitly, it is called implicitly at the first use of
@@ -3449,6 +3449,8 @@ a NAME, it's an anonymous function declaration, and does actually return a
 value: the CODE ref of the closure you just created.  See L<perlsub> and
 L<perlref> for details.
 
+=item substr EXPR,OFFSET,LEN,REPLACEMENT
+
 =item substr EXPR,OFFSET,LEN
 
 =item substr EXPR,OFFSET
@@ -3470,6 +3472,12 @@ something shorter than LEN, the string will shrink, and if you assign
 something longer than LEN, the string will grow to accommodate it.  To
 keep the string the same length you may need to pad or chop your value
 using sprintf().
+
+An alternative to using substr() as an lvalue is to specify the
+replacement string as the 4th argument.  This allows you to replace
+parts of the EXPR and return what was there before in one operation.
+In this case LEN can be C<undef> if you want to affect everything to
+the end of the string.
 
 =item symlink OLDFILE,NEWFILE
 
@@ -3507,7 +3515,7 @@ Syscall returns whatever value returned by the system call it calls.
 If the system call fails, syscall returns -1 and sets C<$!> (errno).
 Note that some system calls can legitimately return -1.  The proper
 way to handle such calls is to assign C<$!=0;> before the call and
-check the value of <$!> if syscall returns -1.
+check the value of C<$!> if syscall returns -1.
 
 There's a problem with C<syscall(&SYS_pipe)>: it returns the file
 number of the read end of the pipe it creates.  There is no way
@@ -3601,13 +3609,18 @@ Here's a more elaborate example of analysing the return value from
 system() on a Unix system to check for all possibilities, including for
 signals and core dumps.
 
-    $rc = 0xffff & system @args;
+    $! = 0;
+    $rc = system @args;
     printf "system(%s) returned %#04x: ", "@args", $rc;
     if ($rc == 0) {
 	print "ran with normal exit\n";
     }
     elsif ($rc == 0xff00) {
-	print "command failed: $!\n";
+	# Note that $! can be an empty string if the command that
+	# system() tried to execute was not found, not executable, etc.
+	# These errors occur in the child process after system() has
+	# forked, so the errno value is not visible in the parent.
+	printf "command failed: %s\n", ($! || "Unknown system() error");
     }
     elsif ($rc > 0x80) {
 	$rc >>= 8;

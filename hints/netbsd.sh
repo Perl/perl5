@@ -65,6 +65,10 @@ case "$osvers" in
 	;;
 esac
 
+# vfork is ok on NetBSD.
+case "$usevfork" in
+'') usevfork=true ;;
+esac
 # Avoid telldir prototype conflict in pp_sys.c  (NetBSD uses const DIR *)
 # Configure should test for this.  Volunteers?
 pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'

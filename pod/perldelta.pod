@@ -753,26 +753,27 @@ in Windows NT).  This port includes support for perl extension
 building tools like L<MakeMaker> and L<h2xs>, so that many extensions
 available on the Comprehensive Perl Archive Network (CPAN) can now be
 readily built under Windows NT.  See http://www.perl.com/ for more
-information on CPAN, and L<README.win32> for more details on how to
-get started with building this port.
+information on CPAN and F<README.win32> in the perl distribution for more
+details on how to get started with building this port.
 
 There is also support for building perl under the Cygwin32 environment.
 Cygwin32 is a set of GNU tools that make it possible to compile and run
 many UNIX programs under Windows NT by providing a mostly UNIX-like 
-interface for compilation and execution.  See L<README.cygwin32> for
-more details on this port, and how to obtain the Cygwin32 toolkit.
+interface for compilation and execution.  See F<README.cygwin32> in the
+perl distribution for more details on this port and how to obtain the
+Cygwin32 toolkit.
 
 =head2 Plan 9
 
-See L<README.plan9>.
+See F<README.plan9> in the perl distribution.
 
 =head2 QNX
 
-See L<README.qnx>.
+See F<README.qnx> in the perl distribution.
 
 =head2 AmigaOS
 
-See L<README.amigaos>.
+See F<README.amigaos> in the perl distribution.
 
 =head1 Pragmata
 
@@ -1379,8 +1380,7 @@ a possibility to shut down by trapping this error is granted.
 (W) qw() lists contain items separated by whitespace; as with literal
 strings, comment characters are not ignored, but are instead treated
 as literal data.  (You may have used different delimiters than the
-exclamation marks parentheses shown here; braces are also frequently
-used.)
+parentheses shown here; braces are also frequently used.)
 
 You probably wrote something like this:
 

@@ -34,6 +34,13 @@ line anywhere within the string,
 Treat string as single line.  That is, change "." to match any character
 whatsoever, even a newline, which it normally would not match.
 
+The /s and /m modifiers both override the C<$*> setting.  That is, no matter
+what C<$*> contains, /s (without /m) will force "^" to match only at the
+beginning of the string and "$" to match only at the end (or just before a
+newline at the end) of the string.  Together, as /ms, they let the "." match
+any character whatsoever, while yet allowing "^" and "$" to match,
+respectively, just after and just before newlines within the string.
+
 =item x
 
 Extend your pattern's legibility by permitting whitespace and comments.
@@ -139,7 +146,7 @@ also work:
     \Q		quote (disable) regexp metacharacters till \E
 
 If C<use locale> is in effect, the case map used by C<\l>, C<\L>, C<\u>
-and <\U> is taken from the current locale.  See L<perllocale>.
+and C<\U> is taken from the current locale.  See L<perllocale>.
 
 In addition, Perl defines the following:
 
@@ -238,7 +245,7 @@ non-alphanumeric characters:
     $pattern =~ s/(\W)/\\$1/g;
 
 Now it is much more common to see either the quotemeta() function or
-the \Q escape sequence used to disable the metacharacters special
+the C<\Q> escape sequence used to disable all metacharacters' special
 meanings like this:
 
     /$unquoted\Q$quoted\E$unquoted/

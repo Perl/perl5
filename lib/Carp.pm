@@ -47,21 +47,14 @@ environment variable.
 
 # This package is heavily used. Be small. Be fast. Be good.
 
-
-#========================================================================
-#
 # Comments added by Andy Wardley <abw@kfs.org> 09-Apr-98, based on an
 # _almost_ complete understanding of the package.  Corrections and
 # comments are welcome.
-#
-#========================================================================
 
-#
 # The $CarpLevel variable can be set to "strip off" extra caller levels for
 # those times when Carp calls are buried inside other functions.  The
 # $Max(EvalLen|(Arg(Len|Nums)) variables are used to specify how the eval
 # text and function arguments should be formatted when printed.
-#
 
 $CarpLevel = 0;		# How many extra package levels to skip on carp.
 $MaxEvalLen = 0;	# How much eval '...text...' to show. 0 = all.
@@ -74,36 +67,28 @@ require Exporter;
 @EXPORT_OK = qw(cluck verbose);
 @EXPORT_FAIL = qw(verbose);	# hook to enable verbose mode
 
-#
+
 # if the caller specifies verbose usage ("perl -MCarp=verbose script.pl")
-# then the following function will be called by the Exporter which knows
+# then the following method will be called by the Exporter which knows
 # to do this thanks to @EXPORT_FAIL, above.  $_[1] will contain the word
 # 'verbose'.
-#
 
 sub export_fail {
-    # get rid of the package name passed implicitly
     shift;
     if ($_[0] eq 'verbose') {
-	# disable warnings to avoid "sub-routine redefined..." warning
-	local $^W = 0;
-	# set shortmess() as an alias to longmess()
-	*shortmess = \&longmess;
-	# remove 'verbose' from the args to keep Exporter happy
-	shift;
+	local $^W = 0; # avoid "sub-routine redefined..." warning
+	*shortmess = \&longmess; # set shortmess() as an alias to longmess()
+	shift; # remove 'verbose' from the args to keep Exporter happy
     }
     return @_;
 }
 
 
-
-#
 # longmess() crawls all the way up the stack reporting on all the function
 # calls made.  The error string, $error, is originally constructed from the
 # arguments passed into longmess() via confess(), cluck() or shortmess().
 # This gets appended with the stack trace messages which are generated for
 # each function call on the stack.
-#
 
 sub longmess {
     my $error = join '', @_;
@@ -111,15 +96,12 @@ sub longmess {
     my $i = 1 + $CarpLevel;
     my ($pack,$file,$line,$sub,$hargs,$eval,$require);
     my (@a);
-
     #
     # crawl up the stack....
     #
     while (do { { package DB; @a = caller($i++) } } ) {
-
 	# get copies of the variables returned from caller()
 	($pack,$file,$line,$sub,$hargs,undef,$eval,$require) = @a;
-
 	#
 	# if the $error error string is newline terminated then it
 	# is copied into $mess.  Otherwise, $mess gets set (at the end of
@@ -134,11 +116,9 @@ sub longmess {
 	#  subsequent times: $mess .= $sub $error at $file line $line
 	#                                  ^^^^^^
 	#                                 "called"
-
 	if ($error =~ m/\n$/) {
 	    $mess .= $error;
 	} else {
-
 	    # Build a string, $sub, which names the sub-routine called.
 	    # This may also be "require ...", "eval '...' or "eval {...}"
 	    if (defined $eval) {
@@ -154,15 +134,12 @@ sub longmess {
 	    } elsif ($sub eq '(eval)') {
 		$sub = 'eval {...}';
 	    }
-
-
 	    # if there are any arguments in the sub-routine call, format
 	    # them according to the format variables defined earlier in
 	    # this file and join them onto the $sub sub-routine string
 	    if ($hargs) {
 		# we may trash some of the args so we take a copy
 		@a = @DB::args;	# must get local copy of args
-
 		# don't print any more than $MaxArgNums
 		if ($MaxArgNums and @a > $MaxArgNums) {
 		    # cap the length of $#a and set the last element to '...'
@@ -172,7 +149,6 @@ sub longmess {
 		for (@a) {
 		    # set args to the string "undef" if undefined
 		    $_ = "undef", next unless defined $_;
-
 		    if (ref $_) {
 			# dunno what this is for...
 			$_ .= '';
@@ -184,10 +160,8 @@ sub longmess {
 			substr($_,$MaxArgLen) = '...'
 			    if $MaxArgLen and $MaxArgLen < length;
 		    }
-
 		    # 'quote' arg unless it looks like a number
 		    $_ = "'$_'" unless /^-?[\d.]+$/;
-
 		    # print high-end chars as 'M-<char>' or '^<char>'
 		    s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
 		    s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
@@ -195,7 +169,6 @@ sub longmess {
 		# append ('all', 'the', 'arguments') to the $sub string
 		$sub .= '(' . join(', ', @a) . ')';
 	    }
-
 	    # here's where the error message, $mess, gets constructed
 	    $mess .= "\t$sub " if $error eq "called";
 	    $mess .= "$error at $file line $line\n";
@@ -212,14 +185,11 @@ sub longmess {
 }
 
 
-
-#
 # shortmess() is called by carp() and croak() to skip all the way up to
 # the top-level caller's package and report the error from there.  confess()
 # and cluck() generate a full stack trace so they call longmess() to
 # generate that.  In verbose mode shortmess() is aliased to longmess() so
 # you always get a stack trace
-#
 
 sub shortmess {	# Short-circuit &longmess if called via multiple packages
     my $error = join '', @_;
@@ -227,7 +197,6 @@ sub shortmess {	# Short-circuit &longmess if called via multiple packages
     my $extra = $CarpLevel;
     my $i = 2;
     my ($pack,$file,$line);
-
     # when reporting an error, we want to report it from the context of the
     # calling package.  So what is the calling package?  Within a module,
     # there may be many calls between methods and perhaps between sub-classes
@@ -264,7 +233,6 @@ sub shortmess {	# Short-circuit &longmess if called via multiple packages
 	next
 	    if(exists $isa{$pack});
 
-
 	# Hey!  We've found a package that isn't one of our caller's
 	# clan....but wait, $extra refers to the number of 'extra' levels
 	# we should skip up.  If $extra > 0 then this is a false alarm.
@@ -297,17 +265,14 @@ sub shortmess {	# Short-circuit &longmess if called via multiple packages
 }
 
 
-
-#
 # the following four functions call longmess() or shortmess() depending on
 # whether they should generate a full stack trace (confess() and cluck())
 # or simply report the caller's package (croak() and carp()), respectively.
 # confess() and croak() die, carp() and cluck() warn.
-#
 
-sub confess { die longmess @_; }
-sub croak { die shortmess @_; }
-sub carp { warn shortmess @_; }
-sub cluck { warn longmess @_; }
+sub croak   { die  shortmess @_ }
+sub confess { die  longmess  @_ }
+sub carp    { warn shortmess @_ }
+sub cluck   { warn longmess  @_ }
 
 1;

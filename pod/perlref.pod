@@ -15,9 +15,9 @@ hashes, hashes of arrays, arrays of hashes of functions, and so on.
 
 Hard references are smart--they keep track of reference counts for you,
 automatically freeing the thing referred to when its reference count goes
-to zero.  (Note: The reference counts for values in self-referential or
+to zero.  (Note: the reference counts for values in self-referential or
 cyclic data structures may not go to zero without a little help; see
-L<perlobj/"Two-Phased Garbage Collection"> for a detailed explanation.
+L<perlobj/"Two-Phased Garbage Collection"> for a detailed explanation.)
 If that thing happens to be an object, the object is destructed.  See
 L<perlobj> for more about objects.  (In a sense, everything in Perl is an
 object, but we usually reserve the word for references to objects that

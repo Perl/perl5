@@ -20,8 +20,8 @@ apart from all the other "types" in Perl.  This means that if you have a
 function named "Foo", it is not the same thing as having a format named
 "Foo".  However, the default name for the format associated with a given
 filehandle is the same as the name of the filehandle.  Thus, the default
-format for STDOUT is name "STDOUT", and the default format for filehandle
-TEMP is name "TEMP".  They just look the same.  They aren't.
+format for STDOUT is named "STDOUT", and the default format for filehandle
+TEMP is named "TEMP".  They just look the same.  They aren't.
 
 Output record formats are declared as follows:
 
