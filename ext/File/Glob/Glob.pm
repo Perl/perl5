@@ -306,7 +306,7 @@ implemented in the Perl version because they involve more complex
 interaction with the underlying C structures.
 
 The following flag has been added in the Perl implementation for
-csh compatibility:
+compatibility with common flavors of csh:
 
 =over 4
 
