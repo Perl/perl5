@@ -52,6 +52,7 @@ README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
 README.posix-bc		Notes about BS2000 POSIX port
 README.qnx		Notes about QNX port
+README.solaris		Notes about Solaris port
 README.threads		Notes about multithreading
 README.vmesa		Notes about VM/ESA port
 README.vms		Notes about installing the VMS port
