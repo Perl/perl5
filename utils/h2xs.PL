@@ -905,6 +905,7 @@ my $exp_doc = <<EOD;
 #None by default.
 #
 EOD
+
 if (@const_names and not $opt_P) {
   $exp_doc .= <<EOD;
 #=head2 Exportable constants
@@ -913,19 +914,29 @@ if (@const_names and not $opt_P) {
 #
 EOD
 }
+
 if (defined $fdecls and @$fdecls and not $opt_P) {
   $exp_doc .= <<EOD;
 #=head2 Exportable functions
 #
 EOD
+
 #  $exp_doc .= <<EOD if $opt_p;
 #When accessing these functions from Perl, prefix C<$opt_p> should be removed.
 #
-EOD
+#EOD
   $exp_doc .= <<EOD;
 #  @{[join "\n  ", @known_fnames{@fnames}]}
 #
 EOD
+}
+
+my $meth_doc = '';
+
+if ($opt_x && $opt_a) {
+  my($name, $struct);
+  $meth_doc .= accessor_docs($name, $struct)
+    while ($name, $struct) = each %structs;
 }
 
 my $pod = <<"END" unless $opt_P;
@@ -947,7 +958,7 @@ my $pod = <<"END" unless $opt_P;
 #unedited.
 #
 #Blah blah blah.
-$exp_doc$revhist
+$exp_doc$meth_doc$revhist
 #=head1 AUTHOR
 #
 #$author, $email
@@ -1404,6 +1415,70 @@ $item->[2](THIS, __value = NO_INIT)
 EOF
     }
   }
+}
+
+sub accessor_docs {
+  my($name, $struct) = @_;
+  return unless defined $struct && $name !~ /\s|_ANON/;
+  $name = normalize_type($name);
+  my $ptrname = $name . 'Ptr';
+  my @items = @$struct;
+  my @list;
+  while (@items) {
+    my $item = shift @items;
+    if ($item->[0] =~ /_ANON/) {
+      if (defined $item->[2]) {
+	push @items, map [
+	  @$_[0, 1], "$item->[2]_$_->[2]", "$item->[2].$_->[2]",
+	], @{ $structs{$item->[0]} };
+      } else {
+	push @items, @{ $structs{$item->[0]} };
+      }
+    } else {
+      push @list, $item->[2];
+    }
+  }
+  my $methods = (join '(...)>, C<', @list), '(...)';
+
+  return <<"EOF";
+
+=head2 Object and class methods for C<$name>/C<$ptrname>
+
+The principal Perl representation of a C object of type C<$name> is an
+object of class C<$ptrname> which is a reference to an integer
+representation of a C pointer.  To create such an object, one may use
+a combination
+
+  my $buffer = $name->new();
+  my $obj = $buf->_to_ptr();
+
+This exersizes the following two methods, and an additional class
+C<$name>, the internal representation of which is a reference to a
+packed string with the C structure.  Keep in mind that $buffer should
+better survive longer than $obj.
+
+=over
+
+=item C<\$object_of_type_$name->_to_ptr()>
+
+Converts an object of type C<$name> to an object of type C<$ptrname>.
+
+=item C<$name->new()>
+
+Creates an empty object of type C<$name>.  The corresponding packed
+string is zeroed out.
+
+=item C<$methods>
+
+return the current value of the corresponding element if called
+without additional arguments.  Set the element to the supplied value
+(and return the new value) if called with an additional argument.
+
+Applicable to objects of type C<$ptrname>.
+
+=back
+
+EOF
 }
 
 # Should be called before any actual call to normalize_type().
