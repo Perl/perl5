@@ -329,11 +329,13 @@ lintflags = -hbvxac
 .c.s:
 	$(CCCMDSRC) -S $*.c
 
-.PHONY: all compile translators utilities
+.PHONY: all
 
 all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
+
+.PHONY: compile translators utilities
 
 compile: all
 	echo "testing compilation" > testcompile;
