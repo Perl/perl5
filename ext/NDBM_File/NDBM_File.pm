@@ -1,6 +1,10 @@
 package NDBM_File;
 
-use strict;
+BEGIN {
+    if ($] >= 5.002) {
+	use strict;
+    }
+}
 use vars qw($VERSION @ISA); 
 
 require Tie::Hash;
