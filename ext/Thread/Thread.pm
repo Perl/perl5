@@ -130,7 +130,7 @@ signal is discarded.
 
 =item cond_broadcast VARIABLE
 
-The C<cond_broadcast> function works similarly to C<cond_wait>.
+The C<cond_broadcast> function works similarly to C<cond_signal>.
 C<cond_broadcast>, though, will unblock B<all> the threads that are blocked
 in a C<cond_wait> on the locked variable, rather than only one.
 
