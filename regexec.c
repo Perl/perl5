@@ -278,7 +278,16 @@ S_cache_re(pTHX_ regexp *prog)
 /* A failure to find a constant substring means that there is no need to make
    an expensive call to REx engine, thus we celebrate a failure.  Similarly,
    finding a substring too deep into the string means that less calls to
-   regtry() should be needed. */
+   regtry() should be needed.
+
+   REx compiler's optimizer found 4 possible hints:
+	a) Anchored substring;
+	b) Fixed substring;
+	c) Whether we are anchored (beginning-of-line or \G);
+	d) First node (of those at offset 0) which may distingush positions;
+   We use 'a', 'b', multiline-part of 'c', and try to find a position in the
+   string which does not contradict any of them.
+ */
 
 char *
 Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
@@ -293,6 +302,9 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     I32 ml_anch;
     char *tmp;
     register char *other_last = Nullch;
+#ifdef DEBUGGING
+    char *i_strpos = strpos;
+#endif
 
     DEBUG_r( if (!PL_colorset) reginitcolors() );
     DEBUG_r(PerlIO_printf(Perl_debug_log,
@@ -420,7 +432,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	goto fail_finish;
 
     /* Finish the diagnostic message */
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(s - strpos)) );
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(s - i_strpos)) );
 
     /* Got a candidate.  Check MBOL anchoring, and the *other* substr.
        Start with the other substr.
@@ -431,11 +443,13 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
      */
 
     if (prog->float_substr && prog->anchored_substr) {
-	/* Take into account the anchored substring. */
+	/* Take into account the "other" substring. */
 	/* XXXX May be hopelessly wrong for UTF... */
 	if (!other_last)
 	    other_last = strpos - 1;
 	if (check == prog->float_substr) {
+	  do_other_anchored:
+	    {
 		char *last = s - start_shift, *last1, *last2;
 		char *s1 = s;
 
@@ -446,7 +460,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			|| (PL_bostr = strpos, /* Used in regcopmaybe() */
 			    (t = reghopmaybe_c(s, -(prog->check_offset_max)))
 			    && t > strpos)))
-		    ;
+		    /* EMPTY */;
 		else
 		    t = strpos;
 		t += prog->anchored_offset;
@@ -478,7 +492,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    }
 		    DEBUG_r(PerlIO_printf(Perl_debug_log,
 			", trying floating at offset %ld...\n",
-			(long)(s1 + 1 - strpos)));
+			(long)(s1 + 1 - i_strpos)));
 		    PL_regeol = strend;			/* Used in HOP() */
 		    other_last = last1 + prog->anchored_offset;
 		    s = HOPc(last, 1);
@@ -486,14 +500,15 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		}
 		else {
 		    DEBUG_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
-			  (long)(s - strpos)));
+			  (long)(s - i_strpos)));
 		    t = s - prog->anchored_offset;
 		    other_last = s - 1;
+		    s = s1;
 		    if (t == strpos)
 			goto try_at_start;
-		    s = s1;
 		    goto try_at_offset;
 		}
+	    }
 	}
 	else {		/* Take into account the floating substring. */
 		char *last, *last1;
@@ -529,7 +544,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    }
 		    DEBUG_r(PerlIO_printf(Perl_debug_log,
 			", trying anchored starting at offset %ld...\n",
-			(long)(s1 + 1 - strpos)));
+			(long)(s1 + 1 - i_strpos)));
 		    other_last = last;
 		    PL_regeol = strend;			/* Used in HOP() */
 		    s = HOPc(t, 1);
@@ -537,11 +552,11 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		}
 		else {
 		    DEBUG_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
-			  (long)(s - strpos)));
+			  (long)(s - i_strpos)));
 		    other_last = s - 1;
+		    s = s1;
 		    if (t == strpos)
 			goto try_at_start;
-		    s = s1;
 		    goto try_at_offset;
 		}
 	}
@@ -559,18 +574,36 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	   cannot start at strpos. */
       try_at_offset:
 	if (ml_anch && t[-1] != '\n') {
-	  find_anchor:		/* Eventually fbm_*() should handle this */
+	    /* Eventually fbm_*() should handle this, but often
+	       anchored_offset is not 0, so this check will not be wasted. */
+	    /* XXXX In the code below we prefer to look for "^" even in
+	       presence of anchored substrings.  And we search even
+	       beyond the found float position.  These pessimizations
+	       are historical artefacts only.  */
+	  find_anchor:
 	    while (t < strend - prog->minlen) {
 		if (*t == '\n') {
 		    if (t < s - prog->check_offset_min) {
+			if (prog->anchored_substr) {
+			    /* We definitely contradict the found anchored
+			       substr.  Due to the above check we do not
+			       contradict "check" substr.
+			       Thus we can arrive here only if check substr
+			       is float.  Redo checking for "other"=="fixed".
+			     */
+			    strpos = t + 1;			    
+			    DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m at offset %ld, rescanning for anchored from offset %ld...\n",
+				PL_colors[0],PL_colors[1], (long)(strpos - i_strpos), (long)(strpos - i_strpos + prog->anchored_offset)));
+			    goto do_other_anchored;
+			}
 			s = t + 1;
 			DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m at offset %ld...\n",
-			    PL_colors[0],PL_colors[1], (long)(s - strpos)));
+			    PL_colors[0],PL_colors[1], (long)(s - i_strpos)));
 			goto set_useful;
 		    }
 		    DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m, restarting at offset %ld...\n",
-			PL_colors[0],PL_colors[1], (long)(t + 1 - strpos)));
-		    s = t + 1;
+			PL_colors[0],PL_colors[1], (long)(t + 1 - i_strpos)));
+		    strpos = s = t + 1;
 		    goto restart;
 		}
 		t++;
@@ -596,8 +629,12 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    t = strpos;
 	    goto find_anchor;
 	}
+	DEBUG_r( if (ml_anch)
+	    PerlIO_printf(Perl_debug_log, "Does not contradict /%s^%s/m...\n",
+			PL_colors[0],PL_colors[1]);
+	);
       success_at_start:
-	if (!(prog->reganch & ROPT_NAUGHTY)
+	if (!(prog->reganch & ROPT_NAUGHTY)	/* XXXX If strpos moved? */
 	    && --BmUSEFUL(prog->check_substr) < 0
 	    && prog->check_substr == prog->float_substr) { /* boo */
 	    /* If flags & SOMETHING - do not do it many times on the same match */
@@ -612,7 +649,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     }
 
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%sGuessed:%s match at offset %ld\n",
-			  PL_colors[4], PL_colors[5], (long)(s - strpos)) );
+			  PL_colors[4], PL_colors[5], (long)(s - i_strpos)) );
     return s;
 
   fail_finish:				/* Substring not found */
@@ -755,9 +792,12 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    end = HOPc(strend, -dontbother) - 1;
 	    /* for multiline we only have to try after newlines */
 	    if (prog->check_substr) {
+		if (s == startpos)
+		    goto after_try;
 		while (1) {
 		    if (regtry(prog, s))
 			goto got_it;
+		  after_try:
 		    if (s >= end)
 			goto phooey;
 		    s = re_intuit_start(prog, sv, s + 1, strend, flags, NULL);
