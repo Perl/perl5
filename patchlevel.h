@@ -51,7 +51,7 @@
 	please place your applied patch line after its dependencies. This
 	will help tracking of patch dependencies.
 
-	Please either use 'diff -u --context=0' if your diff supports
+	Please either use 'diff --unified=0' if your diff supports
 	that or edit the hunk of the diff output which adds your patch
 	to this list, to remove context lines which would give patch
 	problems. For instance, if the original context diff is
@@ -73,6 +73,7 @@
 	   *** 41,43 ***
 	   --- 41,44 ---
 	   + 	,"MINE001 - my new patch"
+	     	,NULL
 	     };
 	
 	(Note changes to line numbers as well as removal of context lines.)
