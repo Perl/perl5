@@ -15,7 +15,7 @@ ccflags="$ccflags -h rounddiv"
 # isn't correctly saved and restored --Mark P. Lutz 
 pp_ctl_cflags='ccflags="$ccflags -h scalar0 -h vector0"'
 # Otherwise the unpack %65c checksums will fail.
-pp_pack_cflags='ccflags="$ccflags -h scalar0 -h vector0"'
+pp_pack_cflags='optimize="$ccflags -h scalar0 -h vector0"'
 case "$usemymalloc" in
 '') # The perl malloc.c SHOULD work says Ilya.
     # But for the time being (5.004_68), alas, it doesn't. --jhi
