@@ -590,7 +590,7 @@ to change the version number near the top of the F<Changes> file.
 
 =head2 Todo
 
-The F<Todo> file contains a roughly-catgorized unordered list of
+The F<pod/perltodo.pod> file contains a roughly-catgorized unordered list of
 aspects of Perl that could use enhancement, features that could be
 added, areas that could be cleaned up, and so on.  During your term as
 pumpkin-holder, you will probably address some of these issues, and
@@ -602,7 +602,7 @@ You might like, early in your pumpkin-holding career, to see if you
 can find champions for partiticular issues on the to-do list: an issue
 owned is an issue more likely to be resolved.
 
-There are also some more porting-specific L<Todo> items later in this
+There are also some more porting-specific L</Todo> items later in this
 file.
 
 =head2 OS/2-specific updates
@@ -1325,9 +1325,11 @@ Anyway, all this leads to quite obscure failures that are sure to drive
 casual users crazy.  Even experienced users will get confused :-).  Upon
 reflection, I'd say leave libperl.so in $archlib.
 
-=item 4.
+=back
 
-Indentation style: over the years Perl has become a mishmash of
+=head2 Indentation style
+
+Over the years Perl has become a mishmash of
 various indentation styles, but the original "Larry style" can
 probably be restored with (GNU) indent somewhat like this:
 
@@ -1339,8 +1341,6 @@ be quite ungainly.  Also note that GNU indent also doesn't do aligning
 of consecutive assignments, which would truly wreck the layout in
 places like sv.c:Perl_sv_upgrade() or sv.c:Perl_clone_using().
 Similarly nicely aligned &&s, ||s and ==s would not be respected.
-
-=back
 
 =head1 Upload Your Work to CPAN
 
