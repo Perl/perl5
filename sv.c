@@ -3470,12 +3470,12 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	     return len;
     }
 
-    if (SvUTF8(sv))
-	return SvCUR(sv);
-
     if (SvIsCOW(sv)) {
         sv_force_normal_flags(sv, 0);
     }
+
+    if (SvUTF8(sv))
+	return SvCUR(sv);
 
     if (PL_encoding && !(flags & SV_UTF8_NO_ENCODING))
         sv_recode_to_utf8(sv, PL_encoding);
