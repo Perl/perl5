@@ -31,6 +31,169 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10380] By: jhi                                   on 2001/06/01  16:19:18
+        Log: Subject: [PATCH] Re: [ID 20010529.004] program doesn't work unless in debug mode
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Fri, 01 Jun 2001 18:17:02 +0100
+             Message-Id: <E155sXm-0001C2-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 10379] By: jhi                                   on 2001/06/01  16:13:28
+        Log: Subject: Re: [ID 20010529.006] String plus zero inconsistent across platforms
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 31 May 2001 20:49:48 +0100
+             Message-Id: <200105311949.UAA02798@crypt.compulink.co.uk>
+     Branch: perl
+	   ! embed.h embed.pl global.sym objXSUB.h perl.h perlapi.c proto.h
+	   ! util.c
+____________________________________________________________________________
+[ 10378] By: jhi                                   on 2001/06/01  15:56:35
+        Log: Zero() is not available in x2p (or, rather, some of its
+             implementations like memzero() might not be available.)
+     Branch: perl
+	   ! x2p/hash.c
+____________________________________________________________________________
+[ 10377] By: jhi                                   on 2001/06/01  15:44:48
+        Log: Subject: [PATCH x2p/hash.c] bzero -> memset
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 1 Jun 2001 12:00:29 +0100
+             Message-ID: <20010601120029.F29027@blackrider.blackstar.co.uk>
+             
+             (But use Zero() instead of memset.)
+     Branch: perl
+	   ! x2p/hash.c
+____________________________________________________________________________
+[ 10376] By: jhi                                   on 2001/06/01  15:39:52
+        Log: Subject: Re: [PATCHES] regcomp.c, pod/perldiag.pod, t/op/pat.t
+             From: Jeff Pinyan <jeffp@crusoe.net>
+             Date: Fri, 1 Jun 2001 10:33:55 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0106011032080.21027-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! pod/perldiag.pod regcomp.c t/op/pat.t
+____________________________________________________________________________
+[ 10375] By: jhi                                   on 2001/06/01  15:36:35
+        Log: Retract #10324 and #10333; not needed.
+     Branch: perl
+	   ! hints/irix_6.sh hints/linux.sh
+____________________________________________________________________________
+[ 10374] By: jhi                                   on 2001/06/01  15:35:19
+        Log: The #10370 wasn't quite right.
+     Branch: perl
+	   ! ext/XS/Typemap/Typemap.xs
+____________________________________________________________________________
+[ 10373] By: jhi                                   on 2001/06/01  15:34:49
+        Log: The metaconfig units changes for #10372.
+     Branch: metaconfig/U/perl
+	   + d_realpath.U d_sresgproto.U d_sresuproto.U
+	   ! gccvers.U i_db.U
+____________________________________________________________________________
+[ 10372] By: jhi                                   on 2001/06/01  15:34:24
+        Log: Configure tweaks; record the Berkeley DB version,
+             probe for realpath(), for setresuid() and setresgid()
+             prototypes; use realpath() (try to be paranoid enough),
+             use the setres[ug]id prototypes because glibc has the functions
+             but not their prototypes; add -Wall -ansi to gcc ccflags;
+             regen toc.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh
+	   ! ext/DB_File/DB_File.xs perl.h pod/perlapi.pod pod/perltoc.pod
+	   ! uconfig.h uconfig.sh util.c vos/config.alpha.def
+	   ! vos/config.ga.def win32/config.bc win32/config.gc
+	   ! win32/config.vc
+____________________________________________________________________________
+[ 10371] By: jhi                                   on 2001/06/01  12:50:05
+        Log: Subject: Re: [PATCH xsutils.c] Quieting warnings
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 1 Jun 2001 11:28:14 +0100
+             Message-ID: <20010601112814.B29027@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! lib/attributes.pm xsutils.c
+____________________________________________________________________________
+[ 10370] By: jhi                                   on 2001/06/01  12:48:55
+        Log: Subject: [PATCH] Fix -Wall on XS::Typemap
+             From: Tim Jenness <t.jenness@jach.hawaii.edu>
+             Date: Thu, 31 May 2001 16:15:37 -1000 (HST)
+             Message-ID: <Pine.LNX.4.33.0105311610110.9337-100000@lapaki.jach.hawaii.edu>
+     Branch: perl
+	   ! ext/XS/Typemap/Typemap.xs
+____________________________________________________________________________
+[ 10369] By: jhi                                   on 2001/06/01  12:47:21
+        Log: Subject: [patch] Cwd.xs optimizations/abstraction
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Thu, 31 May 2001 17:37:37 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0105311733270.732-100000@mako.covalent.net> 
+     Branch: perl
+	   ! embed.h embed.pl ext/Cwd/Cwd.xs global.sym lib/Cwd.pm
+	   ! objXSUB.h perlapi.c pod/perlapi.pod proto.h util.c
+____________________________________________________________________________
+[ 10368] By: jhi                                   on 2001/06/01  12:32:00
+        Log: Subject: Re: Why t/lib/extutils.t is failing  (was Re: [PATCH] Re: [PATCH] Re: [SPAM] Re: [SPAM] Re: [EGGS] Re: [BACON] Re: [TOAST] Re: [PATCH] Re: [PATCH] Re: h2xs [was Re: HEAR YE, HEAR YE!])
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 31 May 2001 23:56:40 +0100
+             Message-ID: <20010531235640.F12698@plum.flirble.org>
+             
+             Make the test work also under only static extensions
+             (sh Configure -Uusedl fakes this nicely)
+     Branch: perl
+	   ! t/lib/extutils.t
+____________________________________________________________________________
+[ 10367] By: jhi                                   on 2001/06/01  12:27:53
+        Log: Subject: [PATCH hv.c] Eliminating trigraph
+             From: Michael G Schwern <schwern@pobox.com>
+             Message-ID: <20010601114955.E29027@blackrider.blackstar.co.uk>
+             Date: Fri, 1 Jun 2001 11:49:56 +0100
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 10366] By: jhi                                   on 2001/06/01  12:14:57
+        Log: Subject: Re: [PATCH] Tests for File::Compare 
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Thu, 31 May 2001 19:44:05 +0200
+             Message-Id: <200105311748.f4VHmCt18269@chaos.wustl.edu>
+             
+             Unnecessary "quotation marks".
+     Branch: perl
+	   ! t/lib/filecomp.t
+____________________________________________________________________________
+[ 10365] By: jhi                                   on 2001/06/01  12:13:26
+        Log: Integrate perlio.
+     Branch: perl
+	  !> lib/ExtUtils/MM_Win32.pm t/lib/filecomp.t
+____________________________________________________________________________
+[ 10364] By: nick                                  on 2001/06/01  10:13:31
+        Log: Cleanup dll.base and dll.exp created by GCC builds.
+     Branch: perlio
+	   ! lib/ExtUtils/MM_Win32.pm
+____________________________________________________________________________
+[ 10363] By: nick                                  on 2001/06/01  10:02:17
+        Log: Make filecomp test work on CRLF platforms by adding binmode.
+     Branch: perlio
+	   ! t/lib/filecomp.t
+____________________________________________________________________________
+[ 10362] By: nick                                  on 2001/06/01  08:37:17
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes Configure patchlevel.h perlio.c
+____________________________________________________________________________
+[ 10361] By: jhi                                   on 2001/05/31  15:09:34
+        Log: panic:claustrophobia.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 10360] By: jhi                                   on 2001/05/31  13:04:25
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 10359] By: nick                                  on 2001/05/31  12:35:50
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> t/lib/filecomp.t
+	  !> AUTHORS MANIFEST ext/Storable/Storable.xs gv.c perl.c perl.h
+	  !> pp_ctl.c sv.c t/lib/1_compile.t toke.c util.c
+____________________________________________________________________________
 [ 10358] By: jhi                                   on 2001/05/31  12:35:05
         Log: Integrate perlio.
      Branch: perl
@@ -190,9 +353,10 @@ ____________________________________________________________________________
 	   ! t/op/cmp.t
 ____________________________________________________________________________
 [ 10336] By: jhi                                   on 2001/05/30  23:18:48
-        Log: It's is not, it isn't ain't, and it's it's, not its, if you mean it
-             is. If you don't, it's its. Then too, it's hers. It isn't her's. It
-             isn't our's either. It's ours, and likewise yours and theirs.
+        Log: It's is not, it isn't ain't, and it's it's, not its,
+             if you mean it is. If you don't, it's its. Then too,
+             it's hers. It isn't her's. It isn't our's either.
+             It's ours, and likewise yours and theirs.
              -- Oxford University Press, Edpress News
      Branch: perl
 	   ! lib/autouse.pm
@@ -218,7 +382,9 @@ ____________________________________________________________________________
 	   ! perl.c t/run/runenv.t
 ____________________________________________________________________________
 [ 10333] By: jhi                                   on 2001/05/30  22:25:02
-        Log: IRIX hints patch from Merijn Broeren.
+        Log: (Retracted by #10375.)
+             
+             IRIX hints patch from Merijn Broeren.
              
              TODO: (this and the earlier Linux hints patch) should be solved
              at Configure level.  Merijn: -ldb should not be used on any platform
@@ -277,7 +443,9 @@ ____________________________________________________________________________
 	   ! win32/config.gc win32/config.vc
 ____________________________________________________________________________
 [ 10324] By: jhi                                   on 2001/05/30  13:49:44
-        Log: Linux DB tweak from Merijn Broeren <merijnb@iloquent.nl>.
+        Log: (Retracted by #10375.)
+             
+             Linux DB tweak from Merijn Broeren <merijnb@iloquent.nl>.
      Branch: perl
 	   ! hints/linux.sh
 ____________________________________________________________________________
@@ -505,12 +673,17 @@ ____________________________________________________________________________
 	   ! ext/POSIX/Makefile.PL
 ____________________________________________________________________________
 [ 10294] By: jhi                                   on 2001/05/29  15:53:43
-        Log: Syncing with Test::Harness 1.21, from Michael G Schwern
+        Log: Subject: [PATCH lib/Test/Harness.pm t/lib/test-harness.t] Syncing with 1.21
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 29 May 2001 09:53:29 +0100
+             Message-ID: <20010529095329.T675@blackrider.blackstar.co.uk>
+             
              (#10280 retracted)
      Branch: perl
 	   ! lib/Test/Harness.pm t/lib/test-harness.t
 ____________________________________________________________________________
 [ 10293] By: jhi                                   on 2001/05/29  15:46:10
+
         Log: Subject: [PATCH t/TEST lib/Test.pm t/lib/Test/*.t] Syncing with Test-1.17
              From: Michael G Schwern <schwern@pobox.com>
              Date: Tue, 29 May 2001 09:19:52 +0100

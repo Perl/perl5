@@ -85,8 +85,10 @@ use base qw/ Exporter /;
 our @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
 our @EXPORT_OK = qw(chdir abs_path fast_abs_path realpath fast_realpath);
 
-# Indicates if the XS portion has been loaded or not
-my $Booted = 0;
+eval {
+    require XSLoader;
+    XSLoader::load('Cwd');
+};
 
 # The 'natural and safe form' for UNIX (pwd may be setuid root)
 
@@ -122,19 +124,6 @@ sub getcwd
 {
     abs_path('.');
 }
-
-# Now a callout to an XSUB.  We have to delay booting of the XSUB
-# until the first time fastcwd is called since Cwd::cwd is needed in the
-# building of perl when dynamic loading may be unavailable
-sub fastcwd {
-    unless ($Booted) {
-	require XSLoader;
-        XSLoader::load("Cwd");
-	++$Booted;
-    }
-    return &Cwd::_fastcwd;
-}
-
 
 # Keeps track of current working directory in PWD environment var
 # Usage:
@@ -204,17 +193,6 @@ sub chdir {
 	$ENV{'PWD'} = join('/',@curdir) || '/';
     }
     1;
-}
-
-# Now a callout to an XSUB
-sub abs_path
-{
-    unless ($Booted) {
-        require XSLoader;
-        XSLoader::load("Cwd");
-        ++$Booted;
-    }
-    return &Cwd::_abs_path(@_);
 }
 
 # added function alias for those of us more

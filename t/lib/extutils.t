@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..10\n";
+print "1..12\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -12,8 +12,13 @@ use strict;
 use ExtUtils::MakeMaker;
 use ExtUtils::Constant qw (constant_types C_constant XS_constant autoload);
 use Config;
+use File::Spec::Functions;
+use File::Spec;
+# Because were are going to be changing directory before running Makefile.PL
+my $perl = File::Spec->rel2abs( $^X );
 
-my $runperl = $^X;
+print "# perl=$perl\n";
+my $runperl = "$perl \"-I../../lib\"";
 
 $| = 1;
 
@@ -23,7 +28,6 @@ my @files;
 print "# $dir being created...\n";
 mkdir $dir, 0777 or die "mkdir: $!\n";
 
-use File::Spec::Functions;
 
 END {
     use File::Path;
@@ -31,9 +35,9 @@ END {
     rmtree($dir);
 }
 
-my @names = ("THREE", {name=>"OK4", type=>"PV",},
-             {name=>"OK5", type=>"PVN",
-              value=>['"not ok 5\\n\\0ok 5\\n"', 15]},
+my @names = ("FIVE", {name=>"OK6", type=>"PV",},
+             {name=>"OK7", type=>"PVN",
+              value=>['"not ok 7\\n\\0ok 7\\n"', 15]},
              {name => "FARTHING", type=>"NV"},
              {name => "NOT_ZERO", type=>"UV", value=>"~(UV)0"});
 
@@ -45,9 +49,9 @@ my $header = catfile($dir, "test.h");
 push @files, "test.h";
 open FH, ">$header" or die "open >$header: $!\n";
 print FH <<'EOT';
-#define THREE 3
-#define OK4 "ok 4\n"
-#define OK5 1
+#define FIVE 5
+#define OK6 "ok 6\n"
+#define OK7 1
 #define FARTHING 0.25
 #define NOT_ZERO 1
 EOT
@@ -112,31 +116,31 @@ open FH, ">$testpl" or die "open >$testpl: $!\n";
 print FH "use $package qw(@names_only);\n";
 print FH <<'EOT';
 
-my $three = THREE;
-if ($three == 3) {
-  print "ok 3\n";
+my $five = FIVE;
+if ($five == 5) {
+  print "ok 5\n";
 } else {
-  print "not ok 3 # $three\n";
+  print "not ok 5 # $five\n";
 }
 
-print OK4;
+print OK6;
 
-$_ = OK5;
+$_ = OK7;
 s/.*\0//s;
 print;
 
 my $farthing = FARTHING;
 if ($farthing == 0.25) {
-  print "ok 6\n";
+  print "ok 8\n";
 } else {
-  print "not ok 6 # $farthing\n";
+  print "not ok 8 # $farthing\n";
 }
 
 my $not_zero = NOT_ZERO;
 if ($not_zero > 0 && $not_zero == ~0) {
-  print "ok 7\n";
+  print "ok 9\n";
 } else {
-  print "not ok 7 # \$not_zero=$not_zero ~0=" . (~0) . "\n";
+  print "not ok 9 # \$not_zero=$not_zero ~0=" . (~0) . "\n";
 }
 
 
@@ -144,31 +148,43 @@ EOT
 
 close FH or die "close $testpl: $!\n";
 
-################ dummy Makefile.PL
+################ Makefile.PL
 # Keep the dependancy in the Makefile happy
 my $makefilePL = catfile($dir, "Makefile.PL");
 push @files, "Makefile.PL";
 open FH, ">$makefilePL" or die "open >$makefilePL: $!\n";
+print FH <<"EOT";
+use ExtUtils::MakeMaker;
+WriteMakefile(
+              'NAME'		=> "$package",
+              'VERSION_FROM'	=> "$package.pm", # finds \$VERSION
+              (\$] >= 5.005 ?
+               (#ABSTRACT_FROM => "$package.pm", # XXX add this
+                AUTHOR     => "$0") : ())
+             );
+EOT
+
 close FH or die "close $makefilePL: $!\n";
 
 chdir $dir or die $!; push @INC,  '../../lib';
 END {chdir ".." or warn $!};
 
-# Grr. MakeMaker hardwired to write its message to STDOUT.
-print "# ";
-WriteMakefile(
-              'NAME'		=> $package,
-              'VERSION_FROM'	=> "$package.pm", # finds $VERSION
-              ($] >= 5.005 ?
-               (#ABSTRACT_FROM => "$package.pm", # XXX add this
-                AUTHOR     => $0) : ())
-             );
+my @perlout = `$runperl Makefile.PL`;
+if ($?) {
+  print "not ok 1 # $runperl Makefile.PL failed: $?\n";
+  print "# $_" foreach @perlout;
+  exit($?);
+} else {
+  print "ok 1\n";
+}
+
+
 my $makefile = ($^O eq 'VMS' ? 'descrip' : 'Makefile');
 my $makefile_ext = ($^O eq 'VMS' ? '.mms' : '');
 if (-f "$makefile$makefile_ext") {
-  print "ok 1\n";
+  print "ok 2\n";
 } else {
-  print "not ok 1\n";
+  print "not ok 2\n";
 }
 my $makefile_rename = ($^O eq 'VMS' ? '.mms' : '.old');
 push @files, "$makefile$makefile_rename"; # Renamed by make clean
@@ -182,17 +198,32 @@ my $makeout;
 print "# make = '$make'\n";
 $makeout = `$make`;
 if ($?) {
-  print "not ok 2 # $make failed: $?\n";
+  print "not ok 3 # $make failed: $?\n";
   exit($?);
 } else {
-  print "ok 2\n";
+  print "ok 3\n";
+}
+
+if ($Config{usedl}) {
+  print "ok 4\n";
+} else {
+  push @files, "perl$Config{exe_ext}";
+  my $makeperl = "$make perl";
+  print "# make = '$makeperl'\n";
+  $makeout = `$makeperl`;
+  if ($?) {
+    print "not ok 4 # $makeperl failed: $?\n";
+    exit($?);
+  } else {
+    print "ok 4\n";
+  }
 }
 
 my $maketest = "$make test";
 print "# make = '$maketest'\n";
 $makeout = `$maketest`;
 if ($?) {
-  print "not ok 8 # $make failed: $?\n";
+  print "not ok 10 # $maketest failed: $?\n";
 } else {
   # Perl babblings
   $makeout =~ s/^\s*PERL_DL_NONLAZY=.+?\n//m;
@@ -200,17 +231,23 @@ if ($?) {
   # GNU make babblings
   $makeout =~ s/^\w*?make.+?(?:entering|leaving) directory.+?\n//mig;
 
+  # Hopefully gets most make's babblings
+  # make -f Makefile.aperl perl
+  $makeout =~ s/^\w*?make.+\sperl[^A-Za-z0-9]*\n//mig;
+  # make[1]: `perl' is up to date.
+  $makeout =~ s/^\w*?make.+perl.+?is up to date.*?\n//mig;
+
   print $makeout;
-  print "ok 8\n";
+  print "ok 10\n";
 }
 
 my $makeclean = "$make clean";
 print "# make = '$makeclean'\n";
 $makeout = `$makeclean`;
 if ($?) {
-  print "not ok 9 # $make failed: $?\n";
+  print "not ok 11 # $make failed: $?\n";
 } else {
-  print "ok 9\n";
+  print "ok 11\n";
 }
 
 foreach (@files) {
@@ -226,7 +263,7 @@ while (defined (my $entry = readdir DIR)) {
 }
 closedir DIR or warn "closedir '.': $!";
 if ($fail) {
-  print "not ok 10\n";
+  print "not ok 12\n";
 } else {
-  print "ok 10\n";
+  print "ok 12\n";
 }

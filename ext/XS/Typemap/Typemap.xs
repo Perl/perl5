@@ -764,11 +764,12 @@ the subtype.
 
 intArray *
 T_ARRAY( dummy, array, ... )
-  int dummy = NO_INIT
+  int dummy = 0;
   intArray * array
  PREINIT:
   U32 size_RETVAL;
  CODE:
+  dummy += 0; /* Fix -Wall */
   size_RETVAL = ix_array;
   RETVAL = array;
  OUTPUT:

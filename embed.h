@@ -668,6 +668,7 @@
 #define sv_collxfrm		Perl_sv_collxfrm
 #endif
 #define sv_compile_2op		Perl_sv_compile_2op
+#define sv_getcwd		Perl_sv_getcwd
 #define sv_dec			Perl_sv_dec
 #define sv_dump			Perl_sv_dump
 #define sv_derived_from		Perl_sv_derived_from
@@ -691,6 +692,7 @@
 #define sv_pos_b2u		Perl_sv_pos_b2u
 #define sv_pvutf8n_force	Perl_sv_pvutf8n_force
 #define sv_pvbyten_force	Perl_sv_pvbyten_force
+#define sv_realpath		Perl_sv_realpath
 #define sv_reftype		Perl_sv_reftype
 #define sv_replace		Perl_sv_replace
 #define sv_report_used		Perl_sv_report_used
@@ -1176,6 +1178,7 @@
 #define sv_utf8_upgrade_flags	Perl_sv_utf8_upgrade_flags
 #define sv_pvn_force_flags	Perl_sv_pvn_force_flags
 #define sv_2pv_flags		Perl_sv_2pv_flags
+#define my_atof2		Perl_my_atof2
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -2163,6 +2166,7 @@
 #define sv_collxfrm(a,b)	Perl_sv_collxfrm(aTHX_ a,b)
 #endif
 #define sv_compile_2op(a,b,c,d)	Perl_sv_compile_2op(aTHX_ a,b,c,d)
+#define sv_getcwd(a)		Perl_sv_getcwd(aTHX_ a)
 #define sv_dec(a)		Perl_sv_dec(aTHX_ a)
 #define sv_dump(a)		Perl_sv_dump(aTHX_ a)
 #define sv_derived_from(a,b)	Perl_sv_derived_from(aTHX_ a,b)
@@ -2186,6 +2190,7 @@
 #define sv_pos_b2u(a,b)		Perl_sv_pos_b2u(aTHX_ a,b)
 #define sv_pvutf8n_force(a,b)	Perl_sv_pvutf8n_force(aTHX_ a,b)
 #define sv_pvbyten_force(a,b)	Perl_sv_pvbyten_force(aTHX_ a,b)
+#define sv_realpath(a,b,c)	Perl_sv_realpath(aTHX_ a,b,c)
 #define sv_reftype(a,b)		Perl_sv_reftype(aTHX_ a,b)
 #define sv_replace(a,b)		Perl_sv_replace(aTHX_ a,b)
 #define sv_report_used()	Perl_sv_report_used(aTHX)
@@ -2663,6 +2668,7 @@
 #define sv_utf8_upgrade_flags(a,b)	Perl_sv_utf8_upgrade_flags(aTHX_ a,b)
 #define sv_pvn_force_flags(a,b,c)	Perl_sv_pvn_force_flags(aTHX_ a,b,c)
 #define sv_2pv_flags(a,b,c)	Perl_sv_2pv_flags(aTHX_ a,b,c)
+#define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)
@@ -4249,6 +4255,8 @@
 #endif
 #define Perl_sv_compile_2op	CPerlObj::Perl_sv_compile_2op
 #define sv_compile_2op		Perl_sv_compile_2op
+#define Perl_sv_getcwd		CPerlObj::Perl_sv_getcwd
+#define sv_getcwd		Perl_sv_getcwd
 #define Perl_sv_dec		CPerlObj::Perl_sv_dec
 #define sv_dec			Perl_sv_dec
 #define Perl_sv_dump		CPerlObj::Perl_sv_dump
@@ -4297,6 +4305,8 @@
 #define sv_pvutf8n_force	Perl_sv_pvutf8n_force
 #define Perl_sv_pvbyten_force	CPerlObj::Perl_sv_pvbyten_force
 #define sv_pvbyten_force	Perl_sv_pvbyten_force
+#define Perl_sv_realpath	CPerlObj::Perl_sv_realpath
+#define sv_realpath		Perl_sv_realpath
 #define Perl_sv_reftype		CPerlObj::Perl_sv_reftype
 #define sv_reftype		Perl_sv_reftype
 #define Perl_sv_replace		CPerlObj::Perl_sv_replace
@@ -5178,6 +5188,8 @@
 #define sv_pvn_force_flags	Perl_sv_pvn_force_flags
 #define Perl_sv_2pv_flags	CPerlObj::Perl_sv_2pv_flags
 #define sv_2pv_flags		Perl_sv_2pv_flags
+#define Perl_my_atof2		CPerlObj::Perl_my_atof2
+#define my_atof2		Perl_my_atof2
 #define Perl_ck_anoncode	CPerlObj::Perl_ck_anoncode
 #define ck_anoncode		Perl_ck_anoncode
 #define Perl_ck_bitop		CPerlObj::Perl_ck_bitop

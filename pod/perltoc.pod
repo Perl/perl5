@@ -881,7 +881,7 @@ listing
 
 =item Predefined Names
 
-$ARG, $_, $<I<digits>>, $MATCH, $&, $PREMATCH, $`, $POSTMATCH, $',
+$ARG, $_, $a, $b, $<I<digits>>, $MATCH, $&, $PREMATCH, $`, $POSTMATCH, $',
 $LAST_PAREN_MATCH, $+, @LAST_MATCH_END, @+, $MULTILINE_MATCHING, $*,
 input_line_number HANDLE EXPR, $INPUT_LINE_NUMBER, $NR, $,
 input_record_separator HANDLE EXPR, $INPUT_RECORD_SEPARATOR, $RS, $/,
@@ -908,8 +908,8 @@ $DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, %^H, $INPLACE_EDIT, $^I, $^M,
 $OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
 0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R, $EXCEPTIONS_BEING_CAUGHT, $^S,
 $BASETIME, $^T, $PERL_VERSION, $^V, $WARNING, $^W, ${^WARNING_BITS},
-${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC, @_, %INC,
-%ENV, $ENV{expr}, %SIG, $SIG{expr}
+${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @F, @INC, @_,
+%INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 
 =item Error Indicators
 
@@ -2203,9 +2203,9 @@ CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CPAN,
 CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA, Class::Struct,
 Cwd, DB, DB_File, Devel::SelfStubber, Digest, DirHandle, Dumpvalue, Encode,
 Encode::EncodeFormat, Encode::Tcl, English, Env, Exporter, Exporter::Heavy,
-ExtUtils::Command, ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed,
-ExtUtils::Liblist, ExtUtils::MM_Cygwin, ExtUtils::MM_OS2,
-ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
+ExtUtils::Command, ExtUtils::Constant, ExtUtils::Embed, ExtUtils::Install,
+ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM_Cygwin,
+ExtUtils::MM_OS2, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
 ExtUtils::MakeMaker, ExtUtils::Manifest, ExtUtils::Mkbootstrap,
 ExtUtils::Mksymlists, ExtUtils::Packlist, ExtUtils::testlib, Fatal, Fcntl,
 File::Basename, File::CheckTree, File::Compare, File::Copy, File::DosGlob,
@@ -2213,11 +2213,12 @@ File::Find, File::Path, File::Spec, File::Spec::Epoc,
 File::Spec::Functions, File::Spec::Mac, File::Spec::OS2, File::Spec::Unix,
 File::Spec::VMS, File::Spec::Win32, File::Temp, File::stat, FileCache,
 FileHandle, Filter::Simple, FindBin, Getopt::Long, Getopt::Std,
-I18N::Collate, IO, IPC::Open2, IPC::Open3, Locale::Constants,
-Locale::Country, Locale::Currency, Locale::Language, Math::BigFloat,
-Math::BigInt, Math::Complex, Math::Trig, NDBM_File, NEXT, Net::Ping,
-Net::hostent, Net::netent, Net::protoent, Net::servent, O, ODBM_File,
-Opcode, POSIX, PerlIO, Pod::Checker, Pod::Find, Pod::Html,
+I18N::Collate, I18N::LangTags, I18N::LangTags::List, IO, IPC::Open2,
+IPC::Open3, Locale::Constants, Locale::Country, Locale::Currency,
+Locale::Language, Locale::Maketext, Locale::Maketext::TPJ13,
+Math::BigFloat, Math::BigInt, Math::Complex, Math::Trig, NDBM_File, NEXT,
+Net::Ping, Net::hostent, Net::netent, Net::protoent, Net::servent, O,
+ODBM_File, Opcode, POSIX, PerlIO, Pod::Checker, Pod::Find, Pod::Html,
 Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseUtils, Pod::Parser,
 Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
 Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe,
@@ -3900,28 +3901,29 @@ SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp,
 SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVX, SvPV_force,
 SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
 SvROK_on, SvRV, SvSETMAGIC, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
-SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, svtype, SVt_IV,
+SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV,
 SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE,
 SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, sv_2mortal, sv_bless, sv_catpv,
 sv_catpvf, sv_catpvf_mg, sv_catpvn, sv_catpvn_flags, sv_catpvn_mg,
 sv_catpv_mg, sv_catsv, sv_catsv_flags, sv_catsv_mg, sv_chop, sv_clear,
-sv_cmp, sv_cmp_locale, sv_dec, sv_derived_from, sv_eq, sv_free, sv_gets,
-sv_grow, sv_inc, sv_insert, sv_isa, sv_isobject, sv_len, sv_len_utf8,
-sv_magic, sv_mortalcopy, sv_newmortal, sv_pvn_force, sv_pvn_force_flags,
-sv_pvutf8n_force, sv_reftype, sv_replace, sv_rvweaken, sv_setiv,
-sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg,
-sv_setpviv, sv_setpviv_mg, sv_setpvn, sv_setpvn_mg, sv_setpv_mg,
-sv_setref_iv, sv_setref_nv, sv_setref_pv, sv_setref_pvn, sv_setref_uv,
-sv_setsv, sv_setsv_flags, sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_true,
-sv_unmagic, sv_unref, sv_unref_flags, sv_upgrade, sv_usepvn, sv_usepvn_mg,
-sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode, sv_utf8_upgrade,
-sv_utf8_upgrade_flags, sv_vcatpvfn, sv_vsetpvfn, THIS, toLOWER, toUPPER,
-utf8n_to_uvchr, utf8n_to_uvuni, utf8_distance, utf8_hop, utf8_length,
-utf8_to_bytes, utf8_to_uvchr, utf8_to_uvuni, uvchr_to_utf8, uvuni_to_utf8,
-warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY,
-XSRETURN_IV, XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF,
-XSRETURN_YES, XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES,
-XS_VERSION, XS_VERSION_BOOTCHECK, Zero
+sv_cmp, sv_cmp_locale, sv_dec, sv_derived_from, sv_eq, sv_free, sv_getcwd,
+sv_gets, sv_grow, sv_inc, sv_insert, sv_isa, sv_isobject, sv_len,
+sv_len_utf8, sv_magic, sv_mortalcopy, sv_newmortal, sv_pvn_force,
+sv_pvn_force_flags, sv_pvutf8n_force, sv_realpath, sv_reftype, sv_replace,
+sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv,
+sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
+sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
+sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_flags, sv_setsv_mg,
+sv_setuv, sv_setuv_mg, sv_true, sv_unmagic, sv_unref, sv_unref_flags,
+sv_upgrade, sv_usepvn, sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade,
+sv_utf8_encode, sv_utf8_upgrade, sv_utf8_upgrade_flags, sv_vcatpvfn,
+sv_vsetpvfn, THIS, toLOWER, toUPPER, utf8n_to_uvchr, utf8n_to_uvuni,
+utf8_distance, utf8_hop, utf8_length, utf8_to_bytes, utf8_to_uvchr,
+utf8_to_uvuni, uvchr_to_utf8, uvuni_to_utf8, warn, XPUSHi, XPUSHn, XPUSHp,
+XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO,
+XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNO,
+XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK,
+Zero
 
 =item AUTHORS
 
@@ -5869,50 +5871,6 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
-=head2 perldos - Perl under DOS, W31, W95.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Prerequisites
-
-DJGPP, Pthreads
-
-=item Shortcomings of Perl under DOS
-
-=item Building
-
-=item Testing
-
-=item Installation
-
-=back
-
-=item BUILDING AND INSTALLING MODULES
-
-=over 4
-
-=item Building Prerequisites
-
-=item Unpacking CPAN Modules
-
-=item Building Non-XS Modules
-
-=item Building XS Modules
-
-=back
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -6629,48 +6587,6 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
-
-=back
-
-=head2 perlwin32 - Perl under Win32
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Setting Up
-
-Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
-
-=item Building
-
-=item Testing
-
-=item Installation
-
-=item Usage Hints
-
-Environment Variables, File Globbing, Using perl from the command line,
-Building Extensions, Command-line Wildcard Expansion, Win32 Specific
-Extensions, Running Perl Scripts, Miscellaneous Things
-
-=back
-
-=item BUGS AND CAVEATS
-
-=item AUTHORS
-
-Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
-E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
-E<lt>nick@ing-simmons.netE<gt>
-
-=item SEE ALSO
-
-=item HISTORY
 
 =back
 
@@ -8491,9 +8407,10 @@ C<_a>, C<_exe>, C<_o>
 
 =item a
 
-C<afs>, C<alignbytes>, C<ansi2knr>, C<aphostname>, C<api_revision>,
-C<api_subversion>, C<api_version>, C<api_versionstring>, C<ar>, C<archlib>,
-C<archlibexp>, C<archname64>, C<archname>, C<archobjs>, C<awk>
+C<afs>, C<afsroot>, C<alignbytes>, C<ansi2knr>, C<aphostname>,
+C<api_revision>, C<api_subversion>, C<api_version>, C<api_versionstring>,
+C<ar>, C<archlib>, C<archlibexp>, C<archname64>, C<archname>, C<archobjs>,
+C<awk>
 
 =item b
 
@@ -8553,8 +8470,8 @@ C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>, C<d_PRIu64>,
 C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>,
 C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>,
 C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>, C<d_readlink>,
-C<d_readv>, C<d_recvmsg>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>,
-C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>,
+C<d_readv>, C<d_realpath>, C<d_recvmsg>, C<d_rename>, C<d_rewinddir>,
+C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>,
 C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>,
 C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
 C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_sendmsg>, C<d_setegid>,
@@ -8566,9 +8483,9 @@ C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>, C<d_setsid>,
 C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>,
 C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigprocmask>,
 C<d_sigsetjmp>, C<d_sockatmark>, C<d_socket>, C<d_socklen_t>,
-C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>,
-C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>,
-C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
+C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>, C<d_sresuproto>,
+C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
+C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
 C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
 C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
 C<d_strerror>, C<d_strftime>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
@@ -8581,8 +8498,9 @@ C<d_uname>, C<d_union_semun>, C<d_usleep>, C<d_ustat>, C<d_vendorarch>,
 C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
 C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
 C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_writev>, C<d_xenix>, C<date>,
-C<db_hashtype>, C<db_prefixtype>, C<defvoidused>, C<direntrytype>,
-C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<dynamic_ext>
+C<db_hashtype>, C<db_prefixtype>, C<db_version_major>, C<db_version_minor>,
+C<db_version_patch>, C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>,
+C<doublesize>, C<drand01>, C<dynamic_ext>
 
 =item e
 
@@ -8669,7 +8587,7 @@ C<orderlib>, C<osname>, C<osvers>, C<otherlibdirs>
 =item p
 
 C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl5>,
-C<perl>
+C<perl>, C<perl_patchlevel>
 
 =item P
 
@@ -14151,13 +14069,31 @@ C<tkRunning>, C<ornaments>, C<newTTY>
 
 =item DESCRIPTION
 
+=over 4
+
+=item Functions
+
+B<plan>
+
+=back
+
+=back
+
+B<_to_value>
+
+B<ok>
+
+=over 4
+
 =item TEST TYPES
 
 NORMAL TESTS, SKIPPED TESTS, TODO TESTS
 
-=item RETURN VALUE
-
 =item ONFAIL
+
+=item BUGS and CAVEATS
+
+=item TODO
 
 =item SEE ALSO
 
@@ -14179,9 +14115,28 @@ NORMAL TESTS, SKIPPED TESTS, TODO TESTS
 
 B<'1..M'>, B<'ok', 'not ok'.  Ok?>, B<test numbers>,
 B<$Test::Harness::verbose>, B<$Test::Harness::switches>, B<Skipping tests>,
-B<Todo tests>, B<Bail out!>, B<Comments>
+B<Todo tests>, B<Bail out!>, B<Comments>, B<Anything else>
+
+=item Failure
+
+B<Failed Test>, B<Stat>, B<Wstat>, B<Total>, B<Fail>, B<Failed>, B<List of
+Failed>
+
+=item Functions
+
+B<runtests>
 
 =back
+
+=back
+
+B<_globdir>
+
+B<_run_all_tests>
+
+B<_mk_leader>
+
+=over 4
 
 =item EXPORT
 
@@ -14198,9 +14153,13 @@ C<HARNESS_IGNORE_EXITCODE>, C<HARNESS_NOTTY>, C<HARNESS_COMPILE_TEST>,
 C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_PERL_SWITCHES>, C<HARNESS_COLUMNS>,
 C<HARNESS_ACTIVE>
 
+=item EXAMPLE
+
 =item SEE ALSO
 
 =item AUTHORS
+
+=item TODO
 
 =item BUGS
 

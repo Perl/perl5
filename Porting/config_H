@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed May 30 17:57:39 EET DST 2001
+ * Configuration time: Fri Jun  1 18:23:33 EET DST 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -3319,6 +3319,12 @@
 #define PERL_XS_APIVERSION "5.7.1"
 #define PERL_PM_APIVERSION "5.005"
 
+/* HAS_REALPATH:
+ *	This symbol, if defined, indicates that the realpath routine is
+ *	available to do resolve paths.
+ */
+#define HAS_REALPATH		/**/
+
 /* HAS_SIGPROCMASK:
  *	This symbol, if defined, indicates that the sigprocmask
  *	system call is available to examine or change the signal mask
@@ -3331,6 +3337,14 @@
  *	available to test whether a socket is at the out-of-band mark.
  */
 /*#define HAS_SOCKATMARK		/ **/
+
+/* HAS_SETRESUID_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the setresuid() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern int setresuid(uid_t ruid, uid_t euid, uid_t suid);
+ */
+/*#define	HAS_SETRESUID_PROTO	/ **/
 
 /* HAS_STRFTIME:
  *	This symbol, if defined, indicates that the strftime routine is

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..615\n";
+print "1..625\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1685,3 +1685,61 @@ EOT
     print "ok 615\n";
 }
 
+{
+    # from japhy
+    my $w;
+    use warnings;    
+    local $SIG{__WARN__} = sub { $w .= shift };
+
+    $w = "";
+    eval 'qr/(?c)/';
+    print "not " if $w !~ /^Useless \(\?c\)/;
+    print "ok 616\n";
+
+    $w = "";
+    eval 'qr/(?-c)/';
+    print "not " if $w !~ /^Useless \(\?-c\)/;
+    print "ok 617\n";
+
+    $w = "";
+    eval 'qr/(?g)/';
+    print "not " if $w !~ /^Useless \(\?g\)/;
+    print "ok 618\n";
+
+    $w = "";
+    eval 'qr/(?-g)/';
+    print "not " if $w !~ /^Useless \(\?-g\)/;
+    print "ok 619\n";
+
+    $w = "";
+    eval 'qr/(?o)/';
+    print "not " if $w !~ /^Useless \(\?o\)/;
+    print "ok 620\n";
+
+    $w = "";
+    eval 'qr/(?-o)/';
+    print "not " if $w !~ /^Useless \(\?-o\)/;
+    print "ok 621\n";
+
+    # now test multi-error regexes
+
+    $w = "";
+    eval 'qr/(?g-o)/';
+    print "not " if $w !~ /^Useless \(\?g\).*\nUseless \(\?-o\)/;
+    print "ok 622\n";
+
+    $w = "";
+    eval 'qr/(?g-c)/';
+    print "not " if $w !~ /^Useless \(\?g\).*\nUseless \(\?-c\)/;
+    print "ok 623\n";
+
+    $w = "";
+    eval 'qr/(?o-cg)/';  # (?c) means (?g) error won't be thrown
+    print "not " if $w !~ /^Useless \(\?o\).*\nUseless \(\?-c\)/;
+    print "ok 624\n";
+
+    $w = "";
+    eval 'qr/(?ogc)/';
+    print "not " if $w !~ /^Useless \(\?o\).*\nUseless \(\?g\).*\nUseless \(\?c\)/;
+    print "ok 625\n";
+}

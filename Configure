@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May 31 16:30:15 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Jun  1 19:20:32 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -478,6 +478,7 @@ d_seekdir=''
 d_telldir=''
 d_readlink=''
 d_readv=''
+d_realpath=''
 d_recvmsg=''
 d_rename=''
 d_rmdir=''
@@ -544,6 +545,7 @@ socketlib=''
 d_socklen_t=''
 d_socks5_init=''
 d_sqrtl=''
+d_sresuproto=''
 d_statblks=''
 d_statfs_f_flags=''
 d_statfs_s=''
@@ -636,6 +638,9 @@ h_sysfile=''
 i_arpainet=''
 db_hashtype=''
 db_prefixtype=''
+db_version_major=''
+db_version_minor=''
+db_version_patch=''
 i_db=''
 i_dbm=''
 i_rpcsvcdbm=''
@@ -3217,6 +3222,15 @@ EOM
 esac
 case "$ccname" in
 '') ccname="$cc" ;;
+esac
+
+case "$gccversion" in
+'') ;;
+*)  case "$ccflags" in
+    *-Wall*) ;;
+    *) ccflags="$ccflags -Wall -ansi" ;;
+    esac
+    ;;
 esac
 
 : see how we invoke the C preprocessor
@@ -11049,6 +11063,10 @@ eval $inlibc
 set readv d_readv
 eval $inlibc
 
+: see if realpath exists
+set realpath d_realpath
+eval $inlibc
+
 : see if recvmsg exists
 set recvmsg d_recvmsg
 eval $inlibc
@@ -11863,6 +11881,11 @@ eval $inlibc
 : see if socks5_init exists
 set socks5_init d_socks5_init
 eval $inlibc
+
+: see if prototype for setresuid is available
+echo " "
+set d_sresuproto setresuid $i_unistd unistd.h
+eval $hasproto
 
 : see if sys/stat.h is available
 set sys/stat.h i_sysstat
@@ -13012,13 +13035,19 @@ $define)
 #include <sys/types.h>
 #include <stdio.h>
 #include <db.h>
-int main()
+int main(int argc, char *argv[])
 {
 #ifdef DB_VERSION_MAJOR	/* DB version >= 2 */
     int Major, Minor, Patch ;
     unsigned long Version ;
     (void)db_version(&Major, &Minor, &Patch) ;
-    printf("You have Berkeley DB Version 2 or greater\n");
+    if (argc == 2) {
+        printf("%d %d %d %d %d %d\n",
+               DB_VERSION_MAJOR, DB_VERSION_MINOR, DB_VERSION_PATCH,
+               Major, Minor, Patch);
+        exit(0);
+    }
+    printf("You have Berkeley DB Version 2 or greater.\n");
 
     printf("db.h is from Berkeley DB Version %d.%d.%d\n",
 		DB_VERSION_MAJOR, DB_VERSION_MINOR, DB_VERSION_PATCH);
@@ -13027,11 +13056,11 @@ int main()
 
     /* check that db.h & libdb are compatible */
     if (DB_VERSION_MAJOR != Major || DB_VERSION_MINOR != Minor || DB_VERSION_PATCH != Patch) {
-	printf("db.h and libdb are incompatible\n") ;
+	printf("db.h and libdb are incompatible.\n") ;
         exit(3);	
     }
 
-    printf("db.h and libdb are compatible\n") ;
+    printf("db.h and libdb are compatible.\n") ;
 
     Version = DB_VERSION_MAJOR * 1000000 + DB_VERSION_MINOR * 1000
 		+ DB_VERSION_PATCH ;
@@ -13039,14 +13068,18 @@ int main()
     /* needs to be >= 2.3.4 */
     if (Version < 2003004) {
     /* if (DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR == 0 && DB_VERSION_PATCH < 5) { */
-	printf("but Perl needs Berkeley DB 2.3.4 or greater\n") ;
+	printf("Perl needs Berkeley DB 2.3.4 or greater.\n") ;
         exit(2);	
     }
 
     exit(0);
 #else
 #if defined(_DB_H_) && defined(BTREEMAGIC) && defined(HASHMAGIC)
-    printf("You have Berkeley DB Version 1\n");
+    if (argc == 2) {
+        printf("1 0 0\n");
+        exit(0);
+    }
+    printf("You have Berkeley DB Version 1.\n");
     exit(0);	/* DB version < 2: the coast is clear. */
 #else
     exit(1);	/* <db.h> not Berkeley DB? */
@@ -13057,6 +13090,10 @@ EOCP
 	set try
 	if eval $compile_ok && ./try; then
 		echo 'Looks OK.' >&4
+		set `./try 1`
+		db_version_major=$1
+		db_version_minor=$2
+		db_version_patch=$3
 	else
 		echo "I can't use Berkeley DB with your <db.h>.  I'll disable Berkeley DB." >&4
 		i_db=$undef
@@ -16360,6 +16397,7 @@ d_quad='$d_quad'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'
 d_readv='$d_readv'
+d_realpath='$d_realpath'
 d_recvmsg='$d_recvmsg'
 d_rename='$d_rename'
 d_rewinddir='$d_rewinddir'
@@ -16420,6 +16458,7 @@ d_socklen_t='$d_socklen_t'
 d_sockpair='$d_sockpair'
 d_socks5_init='$d_socks5_init'
 d_sqrtl='$d_sqrtl'
+d_sresuproto='$d_sresuproto'
 d_statblks='$d_statblks'
 d_statfs_f_flags='$d_statfs_f_flags'
 d_statfs_s='$d_statfs_s'
@@ -16486,6 +16525,9 @@ d_xenix='$d_xenix'
 date='$date'
 db_hashtype='$db_hashtype'
 db_prefixtype='$db_prefixtype'
+db_version_major='$db_version_major'
+db_version_minor='$db_version_minor'
+db_version_patch='$db_version_patch'
 defvoidused='$defvoidused'
 direntrytype='$direntrytype'
 dlext='$dlext'
