@@ -39,7 +39,11 @@ if ($^O eq 'win32' || $^O eq 'vms') {
 # consume less blocks than one megabyte (assuming nobody has
 # one megabyte blocks...)
 
-sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
+my $O_LARGEFILE;
+eval { $O_LARGEFILE = O_LARGEFILE };
+$O_LARGEFILE = 0 unless defined $O_LARGEFILE;
+
+sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC|$O_LARGEFILE) or
 	do { warn "sysopen failed: $!\n"; bye };
 sysseek(BIG, 1_000_000, SEEK_SET);
 syswrite(BIG, "big");
@@ -68,7 +72,7 @@ print "1..8\n";
 
 my $fail = 0;
 
-sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
+sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC|$O_LARGEFILE) or
 	do { warn "sysopen failed: $!\n"; bye };
 sysseek(BIG, 5_000_000_000, SEEK_SET);
 syswrite(BIG, "big");
