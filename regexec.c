@@ -986,10 +986,10 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			to_utf8_fold(tmpbuf, foldbuf, &foldlen);
 			f = utf8_to_uvchr(foldbuf, 0);
 			
-			if ( (c == c1 && ln == len) ||
-			     (f == c1 && ln == foldlen)
-			     || !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
-					    m, UTF, (I32)ln)
+			if ( ((c == c1 && ln == len) ||
+			      (f == c1 && ln == foldlen) ||
+			      !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
+					  m, UTF, (I32)ln))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			s += len;
@@ -1005,10 +1005,10 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			if (c == (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA ||
 			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
 			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;
-			if ( ((c == c1 || c == c2) && ln == len) ||
-			     ((f == c1 || f == c2) && ln == foldlen)
-			     || !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
-					    m, UTF, (I32)ln)
+			if ( (((c == c1 || c == c2) && ln == len) ||
+			      ((f == c1 || f == c2) && ln == foldlen) ||
+			      !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
+					  m, UTF, (I32)ln))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			s += len;
