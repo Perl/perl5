@@ -20,7 +20,12 @@ cccdlflags=' '
 # Change the line below if you do not want to build 'quad-fat'
 # binaries
 #
-mab='-arch m68k -arch i386 -arch hppa -arch sparc'
+archs=`/bin/lipo -info /usr/lib/libm.a | sed 's/^[^:]*:[^:]*: //'`
+for d in  $archs
+do
+       mab="$mab -arch $d"
+done
+
 
 archname='next-fat'
 ld='cc'
