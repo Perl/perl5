@@ -3064,7 +3064,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
           HE* he;
 	  he = hv_fetch_ent(PL_stashcache, sv, 0, 0);
           if (he) { 
-            stash = (HV*)SvIV(HeVAL(he));
+            stash = INT2PTR(HV*,SvIV(HeVAL(he)));
             goto fetch;
           }
         }
@@ -3090,7 +3090,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    if (!stash)
 		packsv = sv;
             else {
-	        SV* ref = newSViv((IV)stash);
+	        SV* ref = newSViv(PTR2IV(stash));
 	        hv_store(PL_stashcache, packname, packlen, ref, 0);
 	    }
 	    goto fetch;

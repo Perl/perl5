@@ -10,6 +10,11 @@ BEGIN {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
+    eval 'use Encode';
+    if ($@ =~ /dynamic loading not available/) {
+        print "1..0 # miniperl cannot load Encode\n";
+	exit 0;
+    }
     # Makes testing easier.
     $ENV{PERLIO} = 'stdio' if exists $ENV{PERLIO} && $ENV{PERLIO} eq '';
     if (exists $ENV{PERLIO} && $ENV{PERLIO} !~ /^(stdio|perlio|mmap)$/) {
