@@ -280,8 +280,8 @@ release.
 
 =item *
 
-The C<exec LIST> and C<system LIST> will become fatal errors
-under tainting in some future release.
+The C<exec LIST> and C<system LIST> operations will produce fatal
+errors on tainted data in some future release.
 
 =item *
 
@@ -626,10 +626,10 @@ This is not a substitute for -T.>
 
 In other taint news, the C<exec LIST> and C<system LIST> have now been
 considered too risky (think C<exec @ARGV>: it can start any program
-with any arguments), and now the said forms cause a warning.
-You should carefully launder the arguments to guarantee their
-validity.  In future releases of Perl the forms will become fatal
-errors so consider starting laundering now.
+with any arguments), and now the said forms cause a warning under
+lexical warnings.  You should carefully launder the arguments to
+guarantee their validity.  In future releases of Perl the forms will
+become fatal errors so consider starting laundering now.
 
 =item *
 
