@@ -92,6 +92,7 @@ PerlIO_init(void)
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
+#include "XSUB.h"
 
 #undef printf
 void PerlIO_debug(char *fmt,...) __attribute__((format(printf,1,2)));
@@ -172,18 +173,19 @@ struct _PerlIO
 /*--------------------------------------------------------------------------------------*/
 
 /* Flag values */
-#define PERLIO_F_EOF		0x0010000
-#define PERLIO_F_CANWRITE	0x0020000
-#define PERLIO_F_CANREAD	0x0040000
-#define PERLIO_F_ERROR		0x0080000
-#define PERLIO_F_TRUNCATE	0x0100000
-#define PERLIO_F_APPEND		0x0200000
-#define PERLIO_F_BINARY		0x0400000
-#define PERLIO_F_TEMP		0x0800000
-#define PERLIO_F_LINEBUF	0x0100000
-#define PERLIO_F_WRBUF		0x2000000
-#define PERLIO_F_RDBUF		0x4000000
-#define PERLIO_F_OPEN		0x8000000
+#define PERLIO_F_EOF		0x00010000
+#define PERLIO_F_CANWRITE	0x00020000
+#define PERLIO_F_CANREAD	0x00040000
+#define PERLIO_F_ERROR		0x00080000
+#define PERLIO_F_TRUNCATE	0x00100000
+#define PERLIO_F_APPEND		0x00200000
+#define PERLIO_F_BINARY		0x00400000
+#define PERLIO_F_UTF8		0x00800000
+#define PERLIO_F_LINEBUF	0x01000000
+#define PERLIO_F_WRBUF		0x02000000
+#define PERLIO_F_RDBUF		0x04000000
+#define PERLIO_F_TEMP		0x08000000
+#define PERLIO_F_OPEN		0x10000000
 
 #define PerlIOBase(f)      (*(f))
 #define PerlIOSelf(f,type) ((type *)PerlIOBase(f))
@@ -199,7 +201,7 @@ PerlIO *_perlio      = NULL;
 PerlIO *
 PerlIO_allocate(void)
 {
- /* Find a free slot in the table, growing table as necessary */
+ /* Find a free slot in the table, allocating new table as necessary */
  PerlIO **last = &_perlio;
  PerlIO *f;
  while ((f = *last))
@@ -280,18 +282,148 @@ PerlIO_fileno(PerlIO *f)
  return (*PerlIOBase(f)->tab->Fileno)(f);
 }
 
-extern PerlIO_funcs PerlIO_unix;
-extern PerlIO_funcs PerlIO_stdio;
-extern PerlIO_funcs PerlIO_perlio;
 
-#define PerlIO_default_top() &PerlIO_stdio
-#define PerlIO_default_btm() &PerlIO_unix
+extern PerlIO_funcs PerlIO_unix;
+extern PerlIO_funcs PerlIO_perlio;
+extern PerlIO_funcs PerlIO_stdio;
+
+XS(XS_perlio_import)
+{
+ dXSARGS;
+ GV *gv = CvGV(cv);
+ char *s = GvNAME(gv);
+ STRLEN l = GvNAMELEN(gv);
+ PerlIO_debug("%.*s\n",(int) l,s);
+ XSRETURN_EMPTY;
+}
+
+XS(XS_perlio_unimport)
+{
+ dXSARGS;
+ GV *gv = CvGV(cv);
+ char *s = GvNAME(gv);
+ STRLEN l = GvNAMELEN(gv);
+ PerlIO_debug("%.*s\n",(int) l,s);
+ XSRETURN_EMPTY;
+}
+
+HV *PerlIO_layer_hv;
+AV *PerlIO_layer_av;
+
+SV *
+PerlIO_find_layer(char *name, STRLEN len)
+{
+ dTHX;
+ SV **svp;
+ SV *sv;
+ if (len <= 0)
+  len = strlen(name);
+ svp  = hv_fetch(PerlIO_layer_hv,name,len,0);
+ if (svp && (sv = *svp) && SvROK(sv))
+  return *svp;
+ return NULL;
+}
+
+void
+PerlIO_define_layer(PerlIO_funcs *tab)
+{
+ dTHX;
+ HV *stash = gv_stashpv("perlio::Layer", TRUE);
+ SV *sv = sv_bless(newRV_noinc(newSViv((IV) tab)),stash);
+ hv_store(PerlIO_layer_hv,tab->name,strlen(tab->name),sv,0);
+}
+
+PerlIO_funcs *
+PerlIO_default_layer(I32 n)
+{
+ dTHX;
+ SV **svp;
+ SV *layer;
+ PerlIO_funcs *tab = &PerlIO_stdio;
+ int len;
+ if (!PerlIO_layer_hv)
+  {
+   char *s  = getenv("PERLIO");
+   newXS("perlio::import",XS_perlio_import,__FILE__);
+   newXS("perlio::unimport",XS_perlio_unimport,__FILE__);
+   PerlIO_layer_hv = get_hv("perlio::layers",GV_ADD|GV_ADDMULTI);
+   PerlIO_layer_av = get_av("perlio::layers",GV_ADD|GV_ADDMULTI);
+   PerlIO_define_layer(&PerlIO_unix);
+   PerlIO_define_layer(&PerlIO_unix);
+   PerlIO_define_layer(&PerlIO_perlio);
+   PerlIO_define_layer(&PerlIO_stdio);
+   av_push(PerlIO_layer_av,SvREFCNT_inc(PerlIO_find_layer(PerlIO_unix.name,0)));
+   if (s)
+    {
+     while (*s)
+      {
+       while (*s && isspace((unsigned char)*s))
+        s++;
+       if (*s)
+        {
+         char *e = s;
+         SV *layer;
+         while (*e && !isspace((unsigned char)*e))
+          e++;
+         layer = PerlIO_find_layer(s,e-s);
+         if (layer)
+          {
+           PerlIO_debug("Pushing %.*s\n",(e-s),s);
+           av_push(PerlIO_layer_av,SvREFCNT_inc(layer));
+          }
+         else
+          Perl_croak(aTHX_ "Unknown layer %.*s",(e-s),s);
+         s = e;
+        }
+      }
+    }
+  }
+ len  = av_len(PerlIO_layer_av);
+ if (len < 1)
+  {
+   if (PerlIO_stdio.Set_ptrcnt)
+    {
+     av_push(PerlIO_layer_av,SvREFCNT_inc(PerlIO_find_layer(PerlIO_stdio.name,0)));
+    }
+   else
+    {
+     av_push(PerlIO_layer_av,SvREFCNT_inc(PerlIO_find_layer(PerlIO_perlio.name,0)));
+    }
+   len  = av_len(PerlIO_layer_av);
+  }
+ if (n < 0)
+  n += len+1;
+ svp = av_fetch(PerlIO_layer_av,n,0);
+ if (svp && (layer = *svp) && SvROK(layer) && SvIOK((layer = SvRV(layer))))
+  {
+   tab = (PerlIO_funcs *) SvIV(layer);
+  }
+ /* PerlIO_debug("Layer %d is %s\n",n,tab->name); */
+ return tab;
+}
+
+#define PerlIO_default_top() PerlIO_default_layer(-1)
+#define PerlIO_default_btm() PerlIO_default_layer(0)
+
+void
+PerlIO_stdstreams()
+{
+ if (!_perlio)
+  {
+   PerlIO_allocate();
+   PerlIO_fdopen(0,"Ir");
+   PerlIO_fdopen(1,"Iw");
+   PerlIO_fdopen(2,"Iw");
+  }
+}
 
 #undef PerlIO_fdopen
 PerlIO *
 PerlIO_fdopen(int fd, const char *mode)
 {
  PerlIO_funcs *tab = PerlIO_default_top();
+ if (!_perlio)
+  PerlIO_stdstreams();
  return (*tab->Fdopen)(fd,mode);
 }
 
@@ -300,6 +432,8 @@ PerlIO *
 PerlIO_open(const char *path, const char *mode)
 {
  PerlIO_funcs *tab = PerlIO_default_top();
+ if (!_perlio)
+  PerlIO_stdstreams();
  return (*tab->Open)(path,mode);
 }
 
@@ -437,6 +571,13 @@ PerlIO_flush(PerlIO *f)
   }
 }
 
+#undef PerlIO_isutf8
+int
+PerlIO_isutf8(PerlIO *f)
+{
+ return (PerlIOBase(f)->flags & PERLIO_F_UTF8) != 0;
+}
+
 #undef PerlIO_eof
 int
 PerlIO_eof(PerlIO *f)
@@ -544,14 +685,14 @@ PerlIO_get_cnt(PerlIO *f)
 void
 PerlIO_set_cnt(PerlIO *f,int cnt)
 {
- return (*PerlIOBase(f)->tab->Set_ptrcnt)(f,NULL,cnt);
+ (*PerlIOBase(f)->tab->Set_ptrcnt)(f,NULL,cnt);
 }
 
 #undef PerlIO_set_ptrcnt
 void
 PerlIO_set_ptrcnt(PerlIO *f, STDCHAR *ptr, int cnt)
 {
- return (*PerlIOBase(f)->tab->Set_ptrcnt)(f,ptr,cnt);
+ (*PerlIOBase(f)->tab->Set_ptrcnt)(f,ptr,cnt);
 }
 
 /*--------------------------------------------------------------------------------------*/
@@ -1584,9 +1725,6 @@ PerlIO_init(void)
  if (!_perlio)
   {
    atexit(&PerlIO_cleanup);
-   PerlIO_fdopen(0,"Ir");
-   PerlIO_fdopen(1,"Iw");
-   PerlIO_fdopen(2,"Iw");
   }
 }
 
@@ -1595,7 +1733,7 @@ PerlIO *
 PerlIO_stdin(void)
 {
  if (!_perlio)
-  PerlIO_init();
+  PerlIO_stdstreams();
  return &_perlio[1];
 }
 
@@ -1604,7 +1742,7 @@ PerlIO *
 PerlIO_stdout(void)
 {
  if (!_perlio)
-  PerlIO_init();
+  PerlIO_stdstreams();
  return &_perlio[2];
 }
 
@@ -1613,7 +1751,7 @@ PerlIO *
 PerlIO_stderr(void)
 {
  if (!_perlio)
-  PerlIO_init();
+  PerlIO_stdstreams();
  return &_perlio[3];
 }
 

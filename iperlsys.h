@@ -78,13 +78,17 @@ extern void PerlIO_init (void);
 typedef Signal_t (*Sighandler_t) (int);
 #endif
 
+#ifndef Fpos_t
+#define Fpos_t Off_t
+#endif
+
 #if defined(PERL_IMPLICIT_SYS)
 
 #ifndef PerlIO
 typedef struct _PerlIO PerlIOl;
 typedef PerlIOl *PerlIO;
 #define PerlIO PerlIO
-#endif
+#endif /* No PerlIO */
 
 /* IPerlStdIO		*/
 struct IPerlStdIO;
@@ -136,6 +140,7 @@ typedef int		(*LPSetpos)(struct IPerlStdIO*, PerlIO*,
 typedef void		(*LPInit)(struct IPerlStdIO*);
 typedef void		(*LPInitOSExtras)(struct IPerlStdIO*);
 typedef PerlIO*		(*LPFdupopen)(struct IPerlStdIO*, PerlIO*);
+typedef int		(*LPIsUtf8)(struct IPerlStdIO*, PerlIO*);
 
 struct IPerlStdIO
 {
@@ -178,6 +183,7 @@ struct IPerlStdIO
     LPInit		pInit;
     LPInitOSExtras	pInitOSExtras;
     LPFdupopen		pFdupopen;
+    LPIsUtf8		pIsUtf8;
 };
 
 struct IPerlStdIOInfo
@@ -296,18 +302,22 @@ struct IPerlStdIOInfo
 	(*PL_StdIO->pInitOSExtras)(PL_StdIO)
 #define PerlIO_fdupopen(f)						\
 	(*PL_StdIO->pFdupopen)(PL_StdIO, (f))
+#define PerlIO_isutf8(f)						\
+	(*PL_StdIO->pIsUtf8)(PL_StdIO, (f))
 
 #else	/* PERL_IMPLICIT_SYS */
 
 #include "perlsdio.h"
 #include "perl.h"
 #define PerlIO_fdupopen(f)		(f)
+#define PerlIO_isutf8(f)		0
 
 #endif	/* PERL_IMPLICIT_SYS */
 
 #ifndef PERLIO_IS_STDIO
 #ifdef USE_SFIO
 #include "perlsfio.h"
+#define PerlIO_isutf8(f)		0
 #endif /* USE_SFIO */
 #endif /* PERLIO_IS_STDIO */
 
@@ -337,10 +347,6 @@ typedef struct _PerlIO PerlIOl;
 typedef PerlIOl *PerlIO;
 #define PerlIO PerlIO
 #endif /* No PerlIO */
-
-#ifndef Fpos_t
-#define Fpos_t long
-#endif
 
 #ifndef NEXT30_NO_ATTRIBUTE
 #ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
@@ -483,7 +489,9 @@ extern int	PerlIO_setpos		(PerlIO *,const Fpos_t *);
 #ifndef PerlIO_fdupopen
 extern PerlIO *	PerlIO_fdupopen		(PerlIO *);
 #endif
-
+#ifndef PerlIO_isutf8
+extern int	PerlIO_isutf8		(PerlIO *);
+#endif
 
 /*
  *   Interface for directory functions
