@@ -336,6 +336,37 @@ S_xstat(pTHX_ int flag)
 
 #endif /* LEAKTEST */
 
+/* These must be defined when not using Perl's malloc for binary
+ * compatibility */
+
+#ifndef MYMALLOC
+
+Malloc_t Perl_malloc (MEM_SIZE nbytes)
+{
+    dTHXs;
+    return PerlMem_malloc(nbytes);
+}
+
+Malloc_t Perl_calloc (MEM_SIZE elements, MEM_SIZE size)
+{
+    dTHXs;
+    return PerlMem_calloc(elements, size);
+}
+
+Malloc_t Perl_realloc (Malloc_t where, MEM_SIZE nbytes)
+{
+    dTHXs;
+    return PerlMem_realloc(where, nbytes);
+}
+
+Free_t   Perl_mfree (Malloc_t where)
+{
+    dTHXs;
+    PerlMem_free(where);
+}
+
+#endif
+
 /* copy a string up to some (non-backslashed) delimiter, if any */
 
 char *

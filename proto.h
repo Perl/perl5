@@ -24,11 +24,11 @@ PERL_CALLCONV PerlInterpreter*	perl_clone_using(PerlInterpreter *interp, UV flag
 #  endif
 #endif
 
-#if defined(MYMALLOC)
 PERL_CALLCONV Malloc_t	Perl_malloc(MEM_SIZE nbytes);
 PERL_CALLCONV Malloc_t	Perl_calloc(MEM_SIZE elements, MEM_SIZE size);
 PERL_CALLCONV Malloc_t	Perl_realloc(Malloc_t where, MEM_SIZE nbytes);
 PERL_CALLCONV Free_t	Perl_mfree(Malloc_t where);
+#if defined(MYMALLOC)
 PERL_CALLCONV MEM_SIZE	Perl_malloced_size(void *p);
 #endif
 

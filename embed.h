@@ -3084,11 +3084,11 @@
 #  if defined(PERL_IMPLICIT_SYS)
 #  endif
 #endif
-#if defined(MYMALLOC)
 #define malloc			Perl_malloc
 #define calloc			Perl_calloc
 #define realloc			Perl_realloc
 #define mfree			Perl_mfree
+#if defined(MYMALLOC)
 #define malloced_size		Perl_malloced_size
 #endif
 #define get_context		Perl_get_context

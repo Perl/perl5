@@ -1359,11 +1359,11 @@ Ajno	|PerlInterpreter*|perl_clone_using|PerlInterpreter *interp|UV flags \
 #  endif
 #endif
 
-#if defined(MYMALLOC)
 Ajnop	|Malloc_t|malloc	|MEM_SIZE nbytes
 Ajnop	|Malloc_t|calloc	|MEM_SIZE elements|MEM_SIZE size
 Ajnop	|Malloc_t|realloc	|Malloc_t where|MEM_SIZE nbytes
 Ajnop	|Free_t	|mfree		|Malloc_t where
+#if defined(MYMALLOC)
 jnp	|MEM_SIZE|malloced_size	|void *p
 #endif
 
