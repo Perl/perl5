@@ -734,7 +734,7 @@ CFG_VARS = \
  "INST_VER=$(INST_VER)" \
  "INST_ARCH=$(INST_ARCH)" \
  "archname=$(ARCHNAME)" \
- "cc=$(CC)" \
+ "CC=$(CC)" \
  "ccflags=$(OPTIMIZE) $(DEFINES) $(BUILDOPT)" \
  "cf_by=Rainer Keuchel" \
  "cf_email=coyxc@rainer-keuchel.de" \
@@ -806,7 +806,7 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 #----------------------------------------------------------------------------------
 Extensions: ..\win32\buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(HPERL) -I..\lib -I..\win32 -MCross=$(CROSS_NAME) ..\win32\buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) \
-	!Errno !File/Glob !POSIX !Time/HiRes
+	!File/Glob !POSIX !Time/HiRes
 
 Extensions_clean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean

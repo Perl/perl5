@@ -6338,7 +6338,7 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 	len = tmplen;
     }
     if (!hash)
-	PERL_HASH(hash, (U8*)src, len);
+	PERL_HASH(hash, src, len);
     new_SV(sv);
     sv_upgrade(sv, SVt_PVIV);
     SvPVX(sv) = sharepvn(src, is_utf8?-len:len, hash);
@@ -9711,7 +9711,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PERL_SET_THX(my_perl);
 
 #  ifdef DEBUGGING
-    memset(my_perl, 0xab, sizeof(PerlInterpreter));
+    Poison(my_perl, 1, PerlInterpreter);
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
@@ -9742,7 +9742,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 
 #    ifdef DEBUGGING
-    memset(my_perl, 0xab, sizeof(PerlInterpreter));
+    Poison(my_perl, 1, PerlInterpreter);
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;

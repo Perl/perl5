@@ -77,6 +77,5 @@ ExtUtils::MM_NW5
 ExtUtils::Install
 ExtUtils::Liblist
 ExtUtils::Mksymlists
-O
 Pod::Plainer
 Test::Harness::Iterator

@@ -208,6 +208,13 @@ and these
     use open ':encoding(iso-8859-7)';
     use open IO => ':encoding(iso-8859-7)';
 
+The matching of encoding names is loose: case does not matter, and
+many encodings have several aliases.  See L<Encode::Supported> for
+details and the list of supported locales.
+
+Note that C<:utf8> discipline must always be specified exactly like
+that, it is not subject to the loose matching of encoding names.
+
 When open() is given an explicit list of layers they are appended to
 the list declared using this pragma.
 

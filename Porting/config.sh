@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Wed May  1 06:32:57 EET DST 2002
+# Configuration time: Mon May 20 18:22:54 EET DST 2002
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -63,7 +63,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Wed May  1 06:32:57 EET DST 2002'
+cf_time='Mon May 20 18:22:54 EET DST 2002'
 charsize='1'
 chgrp=''
 chmod='chmod'
@@ -80,7 +80,7 @@ cppccsymbols='LANGUAGE_C=1'
 cppflags='-std -D_INTRINSICS -ieee -DLANGUAGE_C'
 cpplast=''
 cppminus=''
-cpprun='/usr/bin/cpp'
+cpprun='/usr/local/bin/cpp'
 cppstdin='cppstdin'
 cppsymbols='_AES_SOURCE=1 __alpha=1 __ALPHA=1 _ANSI_C_SOURCE=1 _INTRINSICS=1 __LANGUAGE_C__=1 _LONGLONG=1 __osf__=1 _OSF_SOURCE=1 _POSIX_C_SOURCE=199506 _POSIX_SOURCE=1 __STDC__=1 _SYSTYPE_BSD=1 __unix__=1 _XOPEN_SOURCE=1'
 crypt_r_proto='0'
@@ -769,7 +769,7 @@ patchlevel='7'
 path_sep=':'
 perl5='perl'
 perl=''
-perl_patchlevel='16266'
+perl_patchlevel='16693'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lm -lutil'
 perlpath='/opt/perl/bin/perl5.7.3'
@@ -953,7 +953,7 @@ vendorlibexp=''
 vendorprefix=''
 vendorprefixexp=''
 version='5.7.3'
-version_patchlevel_string='version 7 subversion 3 patch 16266'
+version_patchlevel_string='version 7 subversion 3 patch 16693'
 versiononly='define'
 vi=''
 voidflags='15'
@@ -983,7 +983,7 @@ PERL_SUBVERSION=3
 PERL_API_REVISION=5
 PERL_API_VERSION=7
 PERL_API_SUBVERSION=3
-PERL_PATCHLEVEL=16266
+PERL_PATCHLEVEL=16693
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'

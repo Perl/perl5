@@ -1,7 +1,7 @@
 package Encode::MIME::Header;
 use strict;
 # use warnings;
-our $VERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(find_encoding encode_utf8);
 use MIME::Base64;
@@ -51,7 +51,7 @@ sub decode($$;$){
     $str =~
 	s{
 	    =\?                  # begin encoded word
-		([0-9A-Za-z\-]+) # charset (encoding)
+		([0-9A-Za-z\-_]+) # charset (encoding)
 		\?([QqBb])\?     # delimiter
 		(.*?)            # Base64-encodede contents
 		\?=              # end encoded word      

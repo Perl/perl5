@@ -738,6 +738,7 @@ my @layer_syms = qw(
 			 PerlIOBase_error
 			 PerlIOBase_fileno
 			 PerlIOBase_pushed
+			 PerlIOBase_popped
 			 PerlIOBase_read
 			 PerlIOBase_setlinebuf
 			 PerlIOBase_unread
@@ -749,6 +750,7 @@ my @layer_syms = qw(
 			 PerlIOBuf_get_ptr
 			 PerlIOBuf_open
 			 PerlIOBuf_pushed
+			 PerlIOBuf_popped
 			 PerlIOBuf_read
 			 PerlIOBuf_seek
 			 PerlIOBuf_set_ptrcnt
@@ -1348,7 +1350,7 @@ perl_destruct
 perl_free
 perl_parse
 perl_run
-# Oddities from PerlIO 
+# Oddities from PerlIO
 PerlIO_binmode
 PerlIO_getpos
 PerlIO_init

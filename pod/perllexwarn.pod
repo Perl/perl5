@@ -285,6 +285,8 @@ The current hierarchy is:
        |
        +- taint
        |
+       +- threads
+       |
        +- uninitialized
        |
        +- unpack

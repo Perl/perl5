@@ -54,7 +54,7 @@ B<You have to recompile your XS modules.>
 
 (Pure Perl modules should continue to work.)
 
-The major reason for the discontinity is the new IO architecture
+The major reason for the discontinuity is the new IO architecture
 called PerlIO.  PerlIO is the default configuration because
 without it many new features of Perl 5.8 cannot be used.  In other
 words: you just have to recompile your modules, sorry about that.
@@ -898,8 +898,8 @@ C<Storable> gives persistence to Perl data structures by allowing the
 storage and retrieval of Perl data to and from files in a fast and
 compact binary format.  Because in effect Storable does serialisation
 of Perl data structues, with it you can also clone deep, hierarchical
-datastructures.  Storable was created by Raphael Manfredi but it is
-now maintained by the Perl development team.  Storable has been
+datastructures.  Storable was originally created by Raphael Manfredi,
+but it is now maintained by Abhijit Menon-Sen.  Storable has been
 enhanced to understand the two new hash features, Unicode keys and
 restricted hashes.  See L<Storable>.
 
@@ -1050,6 +1050,10 @@ is called with an array/hash element as the B<sole> argument.
 
 =item *
 
+The return value of Cwd::fastcwd() is now tainted.
+
+=item *
+
 Data::Dumper has now an option to sort hashes.
 
 =item *
@@ -1064,6 +1068,12 @@ other improvements.
 
 =item *
 
+Devel::Peek now has an interface for the Perl memory statistics
+(this works only if you are using perl's malloc, and if you have
+compiled with debugging).
+
+=item *
+
 The English module can now be used without the infamous performance
 hit by saying
 
@@ -1072,6 +1082,11 @@ hit by saying
 (Assuming, of course, that one doesn't need the troublesome variables
 C<$`>, C<$&>, or C<$'>.)  Also, introduced C<@LAST_MATCH_START> and
 C<@LAST_MATCH_END> English aliases for C<@-> and C<@+>.
+
+=item *
+
+ExtUtils::MakeMaker now uses File::Spec internally, which hopefully
+leads into better portability.
 
 =item *
 
@@ -1111,12 +1126,6 @@ the returned list of filenames.
 
 =item *
 
-Devel::Peek now has an interface for the Perl memory statistics
-(this works only if you are using perl's malloc, and if you have
-compiled with debugging).
-
-=item *
-
 IPC::Open3 now allows the use of numeric file descriptors.
 
 =item *
@@ -1140,11 +1149,6 @@ that the operating system will make one up.)
 
 use lib now works identically to @INC.  Removing directories
 with 'no lib' now works.
-
-=item *
-
-ExtUtils::MakeMaker now uses File::Spec internally, which hopefully
-leads into better portability.
 
 =item *
 
@@ -1866,7 +1870,9 @@ The autouse pragma didn't work for Multi::Part::Function::Names.
 =item *
 
 caller() could cause core dumps in certain situations.  Carp was sometimes
-affected by this problem.
+affected by this problem.  In particular, caller() now returns a
+subroutine name of C<(unknown)> for subroutines that have been removed
+from the symbol table.
 
 =item *
 
@@ -1911,6 +1917,7 @@ L<dprofpp> -R didn't work.
 =item *
 
 C<*foo{FORMAT}> now works.
+
 =item *
 
 Infinity is now recognized as a number.
@@ -2759,12 +2766,6 @@ having slightly different types for their first argument.
 
 =back
 
-=head2 Amiga Perl Invoking Mystery
-
-One cannot call Perl using the C<volume:> syntax, that is, C<perl -v>
-works, but for example C<bin:perl -v> doesn't.  The exact reason isn't
-known but the current suspect is the F<ixemul> library.
-
 =head2 ext/threads/t/libc
 
 If this test fails, it indicates that your libc (C library) is not
@@ -2855,6 +2856,10 @@ The suggested cure is to upgrade your Solaris.
 When Perl is built using the native build process on VOS Release
 14.5.0 and GNU C++/GNU Tools 2.0.1, all attempted tests either
 pass or result in TODO (ignored) failures.
+
+=head Term::ReadKey not working on Win32
+
+Use Term::ReadKey 2.20 or later.
 
 =head2 Failure of Thread (5.005-style) tests
 
@@ -3013,9 +3018,9 @@ platform-dependent.
 Though mostly working, Unicode support still has problem spots on
 EBCDIC platforms.  One such known spot are the C<\p{}> and C<\P{}>
 regular expression constructs for code points less than 256: the
-pP are testing for Unicode code points, not knowing about EBCDIC.
+C<pP> are testing for Unicode code points, not knowing about EBCDIC.
 
-=head2 The Compiler Suite Is Still Experimental
+=head2 The Compiler Suite Is Still Very Experimental
 
 The compiler suite is slowly getting better but it continues to be
 highly experimental.  Use in production environments is discouraged.
@@ -3038,6 +3043,11 @@ C<Time::Piece> (previously known as C<Time::Object>) was removed
 because it was felt that it didn't have enough value in it to be a
 core module.  It is still a useful module, though, and is available
 from the CPAN.
+
+Perl 5.8 unfortunately does not build anymore on AmigaOS,
+this broke at some point accidentally.  Since there are not that many
+Amiga developers available, we could not get this fixed and tested in
+time for 5.8.0.
 
 =head1 Reporting Bugs
 

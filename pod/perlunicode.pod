@@ -162,7 +162,7 @@ Named Unicode properties, scripts, and block ranges may be used like
 character classes via the new C<\p{}> (matches property) and C<\P{}>
 (doesn't match property) constructs. For instance, C<\p{Lu}> matches any
 character with the Unicode "Lu" (Letter, uppercase) property, while
-C<\p{M}> matches any character with a "M" (mark -- accents and such)
+C<\p{M}> matches any character with an "M" (mark -- accents and such)
 property. Single letter properties may omit the brackets, so that can be
 written C<\pM> also. Many predefined properties are available, such
 as C<\p{Mirrored}> and C<\p{Tibetan}>.
@@ -814,11 +814,11 @@ The following table is from Unicode 3.2.
 
    U+0000..U+007F       00..7F
    U+0080..U+07FF       C2..DF    80..BF
-   U+0800..U+0FFF       E0        A0..BF    80..BF  
-   U+1000..U+CFFF       E1..EC    80..BF    80..BF  
-   U+D000..U+D7FF       ED        80..9F    80..BF  
+   U+0800..U+0FFF       E0        A0..BF    80..BF
+   U+1000..U+CFFF       E1..EC    80..BF    80..BF
+   U+D000..U+D7FF       ED        80..9F    80..BF
    U+D800..U+DFFF       ******* ill-formed *******
-   U+E000..U+FFFF       EE..EF    80..BF    80..BF  
+   U+E000..U+FFFF       EE..EF    80..BF    80..BF
   U+10000..U+3FFFF      F0        90..BF    80..BF    80..BF
   U+40000..U+FFFFF      F1..F3    80..BF    80..BF    80..BF
  U+100000..U+10FFFF     F4        80..8F    80..BF    80..BF
@@ -857,15 +857,15 @@ UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
 use them internally.)
 
 UTF-16 is a 2 or 4 byte encoding.  The Unicode code points
-0x0000..0xFFFF are stored in two 16-bit units, and the code points
-0x010000..0x10FFFF in two 16-bit units.  The latter case is
+U+0000..U+FFFF are stored in a single 16-bit unit, and the code points
+U+10000..U+10FFFF in two 16-bit units.  The latter case is
 using I<surrogates>, the first 16-bit unit being the I<high
 surrogate>, and the second being the I<low surrogate>.
 
-Surrogates are code points set aside to encode the 0x01000..0x10FFFF
+Surrogates are code points set aside to encode the U+10000..U+10FFFF
 range of Unicode code points in pairs of 16-bit units.  The I<high
-surrogates> are the range 0xD800..0xDBFF, and the I<low surrogates>
-are the range 0xDC00..0xDFFFF.  The surrogate encoding is
+surrogates> are the range U+D800..U+DBFF, and the I<low surrogates>
+are the range U+DC00..U+DFFF.  The surrogate encoding is
 
 	$hi = ($uni - 0x10000) / 0x400 + 0xD800;
 	$lo = ($uni - 0x10000) % 0x400 + 0xDC00;
@@ -888,7 +888,7 @@ This introduces another problem: what if you just know that your data
 is UTF-16, but you don't know which endianness?  Byte Order Marks
 (BOMs) are a solution to this.  A special character has been reserved
 in Unicode to function as a byte order marker: the character with the
-code point 0xFEFF is the BOM.
+code point U+FEFF is the BOM.
 
 The trick is that if you read a BOM, you will know the byte order,
 since if it was written on a big endian platform, you will read the
@@ -897,9 +897,9 @@ you will read the bytes 0xFF 0xFE.  (And if the originating platform
 was writing in UTF-8, you will read the bytes 0xEF 0xBB 0xBF.)
 
 The way this trick works is that the character with the code point
-0xFFFE is guaranteed not to be a valid Unicode character, so the
+U+FFFE is guaranteed not to be a valid Unicode character, so the
 sequence of bytes 0xFF 0xFE is unambiguously "BOM, represented in
-little-endian format" and cannot be "0xFFFE, represented in big-endian
+little-endian format" and cannot be "U+FFFE, represented in big-endian
 format".
 
 =item *
@@ -916,7 +916,7 @@ needed.  The BOM signatures will be 0x00 0x00 0xFE 0xFF for BE and
 UCS-2, UCS-4
 
 Encodings defined by the ISO 10646 standard.  UCS-2 is a 16-bit
-encoding.  Unlike UTF-16, UCS-2 is not extensible beyond 0xFFFF,
+encoding.  Unlike UTF-16, UCS-2 is not extensible beyond U+FFFF,
 because it does not use surrogates.  UCS-4 is a 32-bit encoding,
 functionally identical to UTF-32.
 

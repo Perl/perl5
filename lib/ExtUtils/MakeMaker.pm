@@ -1,11 +1,11 @@
-BEGIN {require 5.004;}
-
 package ExtUtils::MakeMaker;
 
-$VERSION = "5.92_01";
+BEGIN {require 5.005_03;}
+
+$VERSION = "5.95_01";
 $Version_OK = "5.49";   # Makefiles older than $Version_OK will die
                         # (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.46 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.53 $, 10)) =~ s/\s+$//;
 
 require Exporter;
 use Config;
@@ -498,7 +498,7 @@ sub WriteEmptyMakefile {
     rename $self->{MAKEFILE}, "$self->{MAKEFILE}.old"
       or warn "rename $self->{MAKEFILE} $self->{MAKEFILE}.old: $!"
         if -f $self->{MAKEFILE};
-    open MF, '>', $self->{MAKEFILE} or die "open $self->{MAKEFILE} for write: $!";
+    open MF, '>'.$self->{MAKEFILE} or die "open $self->{MAKEFILE} for write: $!";
     print MF <<'EOP';
 all:
 
@@ -624,7 +624,7 @@ sub check_hints {
 }
 
 sub _run_hintfile {
-    our $self;
+    no strict 'vars';
     local($self) = shift;       # make $self available to the hint file.
     my($hint_file) = shift;
 
@@ -646,7 +646,10 @@ sub mv_all_methods {
     # still trying to reduce the list to some reasonable minimum --
     # because I want to make it easier for the user. A.K.
 
-    no warnings 'redefine';
+    local $SIG{__WARN__} = sub { 
+        # can't use 'no warnings redefined', 5.6 only
+        warn @_ unless $_[0] =~ /^Subroutine .* redefined/ 
+    };
     foreach my $method (@Overridable) {
 
         # We cannot say "next" here. Nick might call MY->makeaperl
@@ -1763,7 +1766,9 @@ RedHatism for C<PREREQ_PRINT>.  The output format is different, though:
 
 Like PREFIX, but only for the site install locations.
 
-Defaults to PREFIX (if set) or $Config{siteprefixexp}
+Defaults to PREFIX (if set) or $Config{siteprefixexp}.  Perls prior to
+5.6.0 didn't have an explicit siteprefix in the Config.  In those
+cases $Config{installprefix} will be used.
 
 =item SKIP
 
@@ -1812,7 +1817,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.46 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.53 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 

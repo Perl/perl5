@@ -9,7 +9,6 @@
 
 # I'm trying to keep this test easily backwards compatible to 5.004, so no
 # qr//;
-# Currently using Test not Test::More, as Test is in core that far back.
 
 # This test tries to craft malicious data to test out as many different
 # error traps in Storable as possible
@@ -18,38 +17,54 @@
 sub BEGIN {
     if ($ENV{PERL_CORE}){
 	chdir('t') if -d 't';
-	@INC = '.';
-	push @INC, '../lib';
+	@INC = ('.', '../lib');
     }
     require Config; import Config;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
     }
-    # require 'lib/st-dump.pl';
 }
 
 use strict;
-use vars qw($file_magic_str $other_magic $network_magic $major $minor
-            $minor_write $fancy);
+use vars qw($file_magic_str $other_magic $network_magic $byteorder
+            $major $minor $minor_write $fancy);
+
+$byteorder = $Config{byteorder};
+
+if ($] < 5.007003 && $] >= 5.006 && $^O ne 'MSWin32'
+    && $Config{longsize} != $Config{ivsize}) {
+  # 5.6.x, not on Windows, built with IVs as long long
+  # config.h and Config.sh differ in their idea of the value of byteorder
+  # Storable's header is written out using C (hence config.h), but we're
+  # testing with perl
+  if ($byteorder eq '12345678') {
+    $byteorder = '1234';
+  } elsif ($byteorder eq '87654321') {
+    $byteorder = '4321';
+  } else {
+    die "I don't recognise Your byteorder: '$byteorder'";
+  }
+}
+
 $file_magic_str = 'pst0';
-$other_magic = 7 + length($Config{byteorder});
+$other_magic = 7 + length $byteorder;
 $network_magic = 2;
 $major = 2;
 $minor = 5;
 $minor_write = $] > 5.007 ? 5 : 4;
 
-use Test;
-BEGIN {
-  # If it's 5.7.3 or later the hash will be stored with flags, which is
-  # 2 extra bytes. There are 2 * 2 * 2 tests per byte in the body and header
-  # common to normal and network order serialised objects (hence the 8)
-  # There are only 2 * 2 tests per byte in the parts of the header not present
-  # for network order, and 2 tests per byte on the 'pst0' "magic number" only
-  # present in files, but not in things store()ed to memory
-  $fancy = ($] > 5.007 ? 2 : 0);
-  plan tests => 378 + length($Config{byteorder}) * 4 + $fancy * 8;
-}
+use Test::More;
+
+# If it's 5.7.3 or later the hash will be stored with flags, which is
+# 2 extra bytes. There are 2 * 2 * 2 tests per byte in the body and header
+# common to normal and network order serialised objects (hence the 8)
+# There are only 2 * 2 tests per byte in the parts of the header not present
+# for network order, and 2 tests per byte on the 'pst0' "magic number" only
+# present in files, but not in things store()ed to memory
+$fancy = ($] > 5.007 ? 2 : 0);
+
+plan tests => 368 + length ($byteorder) * 4 + $fancy * 8;
 
 use Storable qw (store retrieve freeze thaw nstore nfreeze);
 
@@ -67,29 +82,26 @@ delete $hash{chr 256};
 
 sub test_hash {
   my $clone = shift;
-  ok (ref $clone, "HASH", "Get hash back");
-  ok (scalar keys %$clone, 1, "with 1 key");
-  ok ((keys %$clone)[0], "perl", "which is correct");
-  ok ($clone->{perl}, "rules");
+  is (ref $clone, "HASH", "Get hash back");
+  is (scalar keys %$clone, 1, "with 1 key");
+  is ((keys %$clone)[0], "perl", "which is correct");
+  is ($clone->{perl}, "rules");
 }
 
 sub test_header {
   my ($header, $isfile, $isnetorder) = @_;
-  ok (!!$header->{file}, !!$isfile, "is file");
-  ok ($header->{major}, $major, "major number");
-  ok ($header->{minor}, $minor_write, "minor number");
-  ok (!!$header->{netorder}, !!$isnetorder, "is network order");
+  is (!!$header->{file}, !!$isfile, "is file");
+  is ($header->{major}, $major, "major number");
+  is ($header->{minor}, $minor_write, "minor number");
+  is (!!$header->{netorder}, !!$isnetorder, "is network order");
   if ($isnetorder) {
-    # Skip these
-    for (1..5) {
-      ok (1, 1, "Network order header has no sizes");
-    }
+    # Network order header has no sizes
   } else {
-    ok ($header->{byteorder}, $Config{byteorder}, "byte order");
-    ok ($header->{intsize}, $Config{intsize}, "int size");
-    ok ($header->{longsize}, $Config{longsize}, "long size");
-    ok ($header->{ptrsize}, $Config{ptrsize}, "long size");
-    ok ($header->{nvsize}, $Config{nvsize} || $Config{doublesize} || 8,
+    is ($header->{byteorder}, $byteorder, "byte order");
+    is ($header->{intsize}, $Config{intsize}, "int size");
+    is ($header->{longsize}, $Config{longsize}, "long size");
+    is ($header->{ptrsize}, $Config{ptrsize}, "long size");
+    is ($header->{nvsize}, $Config{nvsize} || $Config{doublesize} || 8,
         "nv size"); # 5.00405 doesn't even have doublesize in config.
   }
 }
@@ -116,12 +128,12 @@ sub test_truncated {
     my $short = substr $data, 0, $i;
 
     my $clone = &$sub($short);
-    ok (defined ($clone), '', "truncated $what to $i should fail");
+    is (defined ($clone), '', "truncated $what to $i should fail");
     if ($i < $magic_len) {
-      ok ($@, "/^Magic number checking on storable $what failed/",
+      like ($@, "/^Magic number checking on storable $what failed/",
           "Should croak with magic number warning");
     } else {
-      ok ($@, "", "Should not set \$\@");
+      is ($@, "", "Should not set \$\@");
     }
   }
 }
@@ -130,8 +142,8 @@ sub test_corrupt {
   my ($data, $sub, $what, $name) = @_;
 
   my $clone = &$sub($data);
-  ok (defined ($clone), '', "$name $what should fail");
-  ok ($@, $what, $name);
+  is (defined ($clone), '', "$name $what should fail");
+  like ($@, $what, $name);
 }
 
 sub test_things {
@@ -145,7 +157,7 @@ sub test_things {
   # Test that if we re-write it, everything still works:
   my $clone = &$sub ($contents);
 
-  ok ($@, "", "There should be no error");
+  is ($@, "", "There should be no error");
 
   test_hash ($clone);
 
@@ -177,7 +189,7 @@ sub test_things {
   {
     # Now by default newer minor version numbers are not a pain.
     $clone = &$sub($copy);
-    ok ($@, "", "by default no error on higher minor");
+    is ($@, "", "by default no error on higher minor");
     test_hash ($clone);
 
     local $Storable::accept_future_minor = 0;

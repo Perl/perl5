@@ -75,6 +75,11 @@ extra-libraries argument.
 Omit all autoload facilities.  This is the same as B<-c> but also
 removes the S<C<use AutoLoader>> statement from the .pm file.
 
+=item B<-B>, B<--beta-version>
+
+Use an alpha/beta style version number.  Causes version number to
+be "0.00_01" unless B<-v> is specified.
+
 =item B<-C>, B<--omit-changes>
 
 Omits creation of the F<Changes> file, and adds a HISTORY section to
@@ -207,7 +212,7 @@ of C<h2xs> may gain the ability to make educated guesses.
 =item B<--use-new-tests>
 
 When B<--compat-version> (B<-b>) is present the generated tests will use
-C<Test::More> rather then C<Test> which is the default for versions before
+C<Test::More> rather than C<Test> which is the default for versions before
 5.7.2 .   C<Test::More> will be added to PREREQ_PM in the generated
 C<Makefile.PL>.
 
@@ -239,7 +244,8 @@ Do not use the pragma C<warnings>.
 =item B<-v>, B<--version>=I<version>
 
 Specify a version number for this extension.  This version number is added
-to the templates.  The default is 0.01.
+to the templates.  The default is 0.01, or 0.00_01 if C<-B> is specified.
+The version specified should be numeric.
 
 =item B<-x>, B<--autogen-xsubs>
 
@@ -457,7 +463,7 @@ See L<perlxs> and L<perlxstut> for additional details.
 use strict;
 
 
-my( $H2XS_VERSION ) = ' $Revision: 1.21 $ ' =~ /\$Revision:\s+([^\s]+)/;
+my( $H2XS_VERSION ) = ' $Revision: 1.22 $ ' =~ /\$Revision:\s+([^\s]+)/;
 my $TEMPLATE_VERSION = '0.01';
 my @ARGS = @ARGV;
 my $compat_version = $];
@@ -477,6 +483,7 @@ h2xs [OPTIONS ... ] [headerfile [extra_libraries]]
 version: $H2XS_VERSION
 OPTIONS:
     -A, --omit-autoload   Omit all autoloading facilities (implies -c).
+    -B, --beta-version    Use beta \$VERSION of 0.00_01 (ignored if -v).
     -C, --omit-changes    Omit creating the Changes file, add HISTORY heading
                           to stub POD.
     -F, --cpp-flags       Additional flags for C preprocessor/compile.
@@ -521,6 +528,7 @@ EOFUSAGE
 }
 
 my ($opt_A,
+    $opt_B,
     $opt_C,
     $opt_F,
     $opt_M,
@@ -556,6 +564,7 @@ Getopt::Long::Configure('bundling');
 
 my %options = (
                 'omit-autoload|A'    => \$opt_A,
+                'beta-version|B'     => \$opt_B,
                 'omit-changes|C'     => \$opt_C,
                 'cpp-flags|F=s'      => \$opt_F,
                 'func-mask|M=s'      => \$opt_M,
@@ -612,8 +621,35 @@ specify a minimum perl version with the -b option.
 EOF
 }
 
+if( $opt_B ){
+    $TEMPLATE_VERSION = '0.00_01';
+}
+
 if( $opt_v ){
 	$TEMPLATE_VERSION = $opt_v;
+
+    # check if it is numeric
+    my $temp_version = $TEMPLATE_VERSION;
+    my $beta_version = $temp_version =~ s/(\d)_(\d\d)/$1$2/;
+    my $notnum;
+    {
+        local $SIG{__WARN__} = sub { $notnum = 1 };
+        use warnings 'numeric';
+        $temp_version = 0+$temp_version;
+    }
+
+    if ($notnum) {
+        my $module = $opt_n || 'Your::Module';
+        warn <<"EOF";
+You have specified a non-numeric version.  Unless you supply an
+appropriate VERSION class method, users may not be able to specify a
+minimum required version with C<use $module versionnum>.
+
+EOF
+    }
+    else {
+        $opt_B = $beta_version;
+    }
 }
 
 # -A implies -c.
@@ -1023,19 +1059,11 @@ unless ($skip_autoloader) { # no autoloader whatsoever.
 }
 
 if ( $compat_version < 5.006 ) {
-    if ( $opt_X || $opt_c || $opt_A ) {
-	if ($skip_exporter) {
-	  print PM 'use vars qw($VERSION @ISA);';
-	} else {
-	  print PM 'use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);';
-	}
-    } else {
-	if ($skip_exporter) {
-	  print PM 'use vars qw($VERSION @ISA $AUTOLOAD);';
-	} else {
-	  print PM 'use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);';
-	}
-    }
+    my $vars = '$VERSION @ISA';
+    $vars .= ' @EXPORT @EXPORT_OK %EXPORT_TAGS' unless $skip_exporter;
+    $vars .= ' $AUTOLOAD' unless $opt_X || $opt_c || $opt_A;
+    $vars .= ' $XS_VERSION' if $opt_B && !$opt_X;
+    print PM "use vars qw($vars);";
 }
 
 # Determine @ISA.
@@ -1070,10 +1098,12 @@ our \@EXPORT = qw(
 
 END
 
-$tmp .= <<"END";
-our \$VERSION = '$TEMPLATE_VERSION';
-
-END
+$tmp .= "our \$VERSION = '$TEMPLATE_VERSION';\n";
+if ($opt_B) {
+    $tmp .= "our \$XS_VERSION = \$VERSION;\n" unless $opt_X;
+    $tmp .= "\$VERSION = eval \$VERSION;  # see L<perlmodstyle>\n";
+}
+$tmp .= "\n";
 
 $tmp =~ s/^our //mg if $compat_version < 5.006;
 print PM $tmp;
@@ -1087,15 +1117,17 @@ print PM autoload ($module, $compat_version) unless $opt_c or $opt_X;
 
 if( ! $opt_X ){ # print bootstrap, unless XS is disabled
   if ($use_Dyna) {
-	print PM <<"END";
+	$tmp = <<"END";
 bootstrap $module \$VERSION;
 END
   } else {
-	print PM <<"END";
+	$tmp = <<"END";
 require XSLoader;
 XSLoader::load('$module', \$VERSION);
 END
   }
+  $tmp =~ s:\$VERSION:\$XS_VERSION:g if $opt_B;
+  print PM $tmp;
 }
 
 # tying the variables can happen only after bootstrap

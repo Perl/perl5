@@ -587,7 +587,7 @@ prime_env_iter(void)
         Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Ill-formed message in prime_env_iter: |%s|",buf);
         continue;
       }
-      PERL_HASH(hash,(U8*)key,keylen);
+      PERL_HASH(hash,key,keylen);
       sv = newSVpvn(cp2,cp1 - cp2 + 1);
       SvTAINTED_on(sv);
       hv_store(envhv,key,keylen,sv,hash);
@@ -3886,7 +3886,7 @@ static void mp_expand_wild_cards(pTHX_ char *item,
 				struct list_item **tail,
 				int *count);
 
-static int background_process(int argc, char **argv);
+static int background_process(pTHX_ int argc, char **argv);
 
 static void pipe_and_fork(pTHX_ char **cmargv);
 
@@ -3936,11 +3936,11 @@ mp_getredirection(pTHX_ int *ac, char ***av)
      */
     ap = argv[argc-1];
     if (0 == strcmp("&", ap))
-	exit(background_process(--argc, argv));
+       exit(background_process(aTHX_ --argc, argv));
     if (*ap && '&' == ap[strlen(ap)-1])
 	{
 	ap[strlen(ap)-1] = '\0';
-	exit(background_process(argc, argv));
+       exit(background_process(aTHX_ argc, argv));
 	}
     /*
      * Now we handle the general redirection cases that involve '>', '>>',
@@ -4336,7 +4336,7 @@ pipe_and_fork(pTHX_ char **cmargv)
 	}
 }
 
-static int background_process(int argc, char **argv)
+static int background_process(pTHX_ int argc, char **argv)
 {
 char command[2048] = "$";
 $DESCRIPTOR(value, "");

@@ -506,7 +506,7 @@ struct utimbuf {
  * help it out a bit.
  */
 #  ifndef DONT_MASK_RTL_CALLS
-#    define sigaction(a,b,c) Perl_my_sigaction(a,b,c)
+#    define sigaction(a,b,c) Perl_my_sigaction(aTHX_ a,b,c)
 #  endif
 #endif
 #ifdef KILL_BY_SIGPRC

@@ -457,7 +457,7 @@ name of the filehandle.
 DISCIPLINE can be either of C<:raw> for binary mode or C<:crlf> for
 "text" mode.  If the DISCIPLINE is omitted, it defaults to C<:raw>.
 Returns true on success, C<undef> on failure.  To mark FILEHANDLE as
-UTF-8, use C<:utf8>, and to mark the as bytes, use C<:bytes>.
+UTF-8, use C<:utf8>, and to mark it as bytes, use C<:bytes>.
 
 The C<:raw> are C<:clrf>, and any other directives of the form
 C<:...>, are called I/O I<disciplines>.  The C<open> pragma can be
@@ -554,11 +554,13 @@ C<$is_require> are set: C<$is_require> is true if the frame is created by a
 C<require> or C<use> statement, $evaltext contains the text of the
 C<eval EXPR> statement.  In particular, for an C<eval BLOCK> statement,
 $filename is C<(eval)>, but $evaltext is undefined.  (Note also that
-each C<use> statement creates a C<require> frame inside an C<eval EXPR>)
-frame.  C<$hasargs> is true if a new instance of C<@_> was set up for the
-frame.  C<$hints> and C<$bitmask> contain pragmatic hints that the caller
-was compiled with.  The C<$hints> and C<$bitmask> values are subject to
-change between versions of Perl, and are not meant for external use.
+each C<use> statement creates a C<require> frame inside an C<eval EXPR>
+frame.)  $subroutine may also be C<(unknown)> if this particular
+subroutine happens to have been deleted from the symbol table.
+C<$hasargs> is true if a new instance of C<@_> was set up for the frame.
+C<$hints> and C<$bitmask> contain pragmatic hints that the caller was
+compiled with.  The C<$hints> and C<$bitmask> values are subject to change
+between versions of Perl, and are not meant for external use.
 
 Furthermore, when called from within the DB package, caller returns more
 detailed information: it sets the list variable C<@DB::args> to be the

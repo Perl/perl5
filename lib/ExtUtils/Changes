@@ -1,3 +1,38 @@
+5.95_01 Sat May 18 14:40:12 EDT 2002
+    - Fixed ExtUtils::testlib so it has a reasonable chance of working
+      under taint mode.
+
+5.94_02 Fri May 17 17:16:04 EDT 2002
+    - Fixing Manifest.t test for relative @INC when core testing.
+
+5.94_01 Fri May 17 14:53:54 EDT 2002
+    - Small NetWare change from Novell.
+    - worked around 5.005_03's lack of a $Config{siteprefix} and
+      $Config{sitebin}.
+    - Small cross compilation changes (bleadperl 16582, 16548)
+
+    [[ Test Fixes ]]
+    - Fixing ExtUtils::Command tests for VMS shell wildcard differences.
+    - Fixing ExtUtils::Installed tests so they don't go looking at already
+      installed installed lists.
+
+5.93_01 Mon May  6 00:54:39 EDT 2002
+    - fixed basic.t for limited depth VMS systems
+    * MM_BeOS was totally hosed by a typo.
+    - Made the ExtUtils::Command docs clear about how things come
+      from @ARGV not @_.
+    - Quieted nmake banners in disttest
+
+    * Backporting to 5.005_03
+    - 'require 5.006' statements to 5.00503
+    - Removing uses of File::Spec::Functions
+    - Adding MODE arg to mkdir()
+    - Changing uses of 'our' to 'use vars'
+    - Changing uses of 'no warnings' to 'local $SIG{__WARN__}'
+    - Changing 3-arg opens to 2-arg
+    - Changing 'open my $fh' to 'open FH'
+    - 5.005_03's File::Find doesn't have 'no_chdir'
+
 5.92_01 Mon Apr 29 23:09:38 EDT 2002
     - Fixing case of modules with no .pm files on VMS.
     - LDLOADLIBS fix for NetBSD and easier overriding (bleadperl 16233)

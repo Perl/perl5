@@ -1169,6 +1169,29 @@ in the regular expression engine; or rewriting the regular expression so
 that it is simpler or backtracks less.  (See L<perlfaq2> for information
 on I<Mastering Regular Expressions>.)
 
+=item cond_broadcast() called on unlocked variable
+
+(W threads) Within a thread-enabled program, you tried to call
+cond_broadcast() on a variable which wasn't locked. The cond_broadcast()
+function  is used to wake up another thread that is waiting in a
+cond_wait(). To ensure that the signal isn't sent before the other thread
+has a chance to enter the wait, it is usual for the signaling thread to
+first wait for a lock on variable. This lock attempt will only succeed
+after the other thread has entered cond_wait() and thus relinquished the
+lock.
+
+
+=item cond_signal() called on unlocked variable
+
+(W threads) Within a thread-enabled program, you tried to call
+cond_signal() on a variable which wasn't locked. The cond_signal()
+function  is used to wake up another thread that is waiting in a
+cond_wait(). To ensure that the signal isn't sent before the other thread
+has a chance to enter the wait, it is usual for the signaling thread to
+first wait for a lock on variable. This lock attempt will only succeed
+after the other thread has entered cond_wait() and thus relinquished the
+lock.
+
 =item connect() on closed socket %s
 
 (W closed) You tried to do a connect on a closed socket.  Did you forget
@@ -1193,7 +1216,7 @@ See L<perlsub/"Constant Functions"> and L<constant>.
 
 =item Constant subroutine %s redefined
 
-(S|W redefine) You redefined a subroutine which had previously been
+(S) You redefined a subroutine which had previously been
 eligible for inlining.  See L<perlsub/"Constant Functions"> for
 commentary and workarounds.
 

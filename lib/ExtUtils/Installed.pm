@@ -1,6 +1,6 @@
 package ExtUtils::Installed;
 
-use 5.006;
+use 5.00503;
 use strict;
 use Carp qw();
 use ExtUtils::Packlist;
@@ -11,7 +11,8 @@ use File::Basename;
 use File::Spec;
 require VMS::Filespec if $^O eq 'VMS';
 
-our $VERSION = '0.05';
+use vars qw($VERSION);
+$VERSION = '0.05';
 
 my $DOSISH = ($^O =~ /^(MSWin\d\d|os2|dos|mint)$/);
 

@@ -44,7 +44,7 @@
  *
  */
 
-#define MPVersionStr	"5.7.3a1 patch 16610"
+#define MPVersionStr	"5.7.3a1 patch 16713"
 #define MPRevision	0x05
 #define MPVersion	0x73
 #define MPBuild		0x01

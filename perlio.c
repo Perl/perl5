@@ -2359,7 +2359,7 @@ PerlIO_funcs PerlIO_unix = {
     sizeof(PerlIOUnix),
     PERLIO_K_RAW,
     PerlIOUnix_pushed,
-    PerlIOBase_noop_ok,
+    PerlIOBase_popped,
     PerlIOUnix_open,
     NULL,
     PerlIOUnix_fileno,
@@ -2814,7 +2814,7 @@ PerlIO_funcs PerlIO_stdio = {
     sizeof(PerlIOStdio),
     PERLIO_K_BUFFERED,
     PerlIOBase_pushed,
-    PerlIOBase_noop_ok,
+    PerlIOBase_popped,
     PerlIOStdio_open,
     NULL,
     PerlIOStdio_fileno,
@@ -3243,6 +3243,20 @@ PerlIOBuf_tell(pTHX_ PerlIO *f)
 }
 
 IV
+PerlIOBuf_popped(pTHX_ PerlIO *f)
+{
+    IV code = PerlIOBase_popped(aTHX_ f);
+    PerlIOBuf *b = PerlIOSelf(f, PerlIOBuf);
+    if (b->buf && b->buf != (STDCHAR *) & b->oneword) {
+	Safefree(b->buf);
+    }
+    b->buf = NULL;
+    b->ptr = b->end = b->buf;
+    PerlIOBase(f)->flags &= ~(PERLIO_F_RDBUF | PERLIO_F_WRBUF);
+    return code;
+}
+
+IV
 PerlIOBuf_close(pTHX_ PerlIO *f)
 {
     IV code = PerlIOBase_close(aTHX_ f);
@@ -3331,7 +3345,7 @@ PerlIO_funcs PerlIO_perlio = {
     sizeof(PerlIOBuf),
     PERLIO_K_BUFFERED,
     PerlIOBuf_pushed,
-    PerlIOBase_noop_ok,
+    PerlIOBuf_popped,
     PerlIOBuf_open,
     NULL,
     PerlIOBase_fileno,
@@ -3452,7 +3466,7 @@ PerlIO_funcs PerlIO_pending = {
     sizeof(PerlIOBuf),
     PERLIO_K_BUFFERED,
     PerlIOPending_pushed,
-    PerlIOBase_noop_ok,
+    PerlIOBuf_popped,
     NULL,
     NULL,
     PerlIOBase_fileno,
@@ -3745,7 +3759,7 @@ PerlIO_funcs PerlIO_crlf = {
     sizeof(PerlIOCrlf),
     PERLIO_K_BUFFERED | PERLIO_K_CANCRLF,
     PerlIOCrlf_pushed,
-    PerlIOBase_noop_ok,         /* popped */
+    PerlIOBuf_popped,         /* popped */
     PerlIOBuf_open,
     NULL,
     PerlIOBase_fileno,
@@ -4060,7 +4074,7 @@ PerlIO_funcs PerlIO_mmap = {
     sizeof(PerlIOMmap),
     PERLIO_K_BUFFERED,
     PerlIOBuf_pushed,
-    PerlIOBase_noop_ok,
+    PerlIOBuf_popped,
     PerlIOBuf_open,
     NULL,
     PerlIOBase_fileno,

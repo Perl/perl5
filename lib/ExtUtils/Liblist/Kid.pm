@@ -5,10 +5,11 @@ package ExtUtils::Liblist::Kid;
 # This kid package is to be used by MakeMaker.  It will not work if
 # $self is not a Makemaker.
 
-use 5.006;
+use 5.00503;
 # Broken out of MakeMaker from version 4.11
 
-our $VERSION = 1.28_01;
+use vars qw($VERSION);
+$VERSION = 1.28_01;
 
 use Config;
 use Cwd 'cwd';

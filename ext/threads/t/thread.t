@@ -12,7 +12,7 @@ BEGIN {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { $| = 1; print "1..21\n" };
+BEGIN { $| = 1; print "1..24\n" };
 use threads;
 use threads::shared;
 
@@ -121,3 +121,23 @@ sub threaded {
     ok($thr6->join());
     ok($thr7->join());
 }
+
+# test that 'yield' is importable
+
+package Test1;
+
+use threads 'yield';
+yield;
+main::ok(1);
+
+package main;
+
+
+# test async
+
+{
+    my $th = async {return 1 };
+    ok($th);
+    ok($th->join());
+}
+

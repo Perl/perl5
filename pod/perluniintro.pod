@@ -302,17 +302,28 @@ To ensure that the output is explicitly rendered in the encoding you
 desire (and to avoid the warning), open the stream with the desired
 encoding. Some examples:
 
-    open FH, ">:ucs2",      "file"
-    open FH, ">:utf8",      "file";
-    open FH, ">:Shift-JIS", "file";
+    open FH, ">:utf8", "file";
+
+    open FH, ">:encoding(ucs2)",      "file";
+    open FH, ">:encoding(UTF-8)",     "file";
+    open FH, ">:encoding(shift_jis)", "file";
 
 and on already open streams use C<binmode()>:
 
-    binmode(STDOUT, ":ucs2");
     binmode(STDOUT, ":utf8");
-    binmode(STDOUT, ":Shift-JIS");
 
-See documentation for the C<Encode> module for many supported encodings.
+    binmode(STDOUT, ":encoding(ucs2)");
+    binmode(STDOUT, ":encoding(UTF-8)");
+    binmode(STDOUT, ":encoding(shift_jis)");
+
+The matching of encoding names is loose: case does not matter, and
+many encodings have several aliases.  Note that C<:utf8> discipline
+must always be specified exactly like that, it is not subject to the
+loose matching of encoding names.
+
+See L<PerlIO> for the C<:utf8> layer;
+L<PerlIO::encoding> and L<Encode::PerlIO> for the C<:encoding()> layer;
+L<Encode::Supported> for many encodings supported by the C<Encode> module.
 
 Reading in a file that you know happens to be encoded in one of the
 Unicode encodings does not magically turn the data into Unicode in
@@ -322,7 +333,7 @@ opening files
     open(my $fh,'<:utf8', 'anything');
     my $line_of_unicode = <$fh>;
 
-    open(my $fh,'<:Big5', 'anything');
+    open(my $fh,'<:encoding(Big5)', 'anything');
     my $line_of_unicode = <$fh>;
 
 The I/O disciplines can also be specified more flexibly with
@@ -719,7 +730,7 @@ well-formed Unicode data by C<pack("U*", 0xff, ...)>.
 
 How Do I Display Unicode?  How Do I Input Unicode?
 
-See http://www.hclrss.demon.co.uk/unicode/ and
+See http://www.alanwood.net/unicode/ and
 http://www.cl.cam.ac.uk/~mgk25/unicode.html
 
 =item 
@@ -737,7 +748,8 @@ The Unicode standard prefers using hexadecimal notation because that
 shows better the division of Unicode into blocks of 256 characters.
 Hexadecimal is also simply shorter than decimal.  You can use decimal
 notation, too, but learning to use hexadecimal just makes life easier
-with the Unicode standard.
+with the Unicode standard.  The "U+HHHH" notation uses hexadecimal,
+for example.
 
 The C<0x> prefix means a hexadecimal number, the digits are 0-9 I<and>
 a-f (or A-F, case doesn't matter).  Each hexadecimal digit represents
@@ -792,7 +804,7 @@ Unicode Useful Resources
 
 Unicode and Multilingual Support in HTML, Fonts, Web Browsers and Other Applications
 
-    http://www.hclrss.demon.co.uk/unicode/
+    http://www.alanwood.net/unicode/
 
 =item *
 
@@ -824,11 +836,6 @@ The main Unicode data file is F<UnicodeData.txt> (or F<Unicode.301> in
 Perl 5.6.1.)  You can find the C<$Config{installprivlib}> by
 
     perl "-V:installprivlib"
-
-Note that some of the files have been renamed from the Unicode
-standard since the Perl installation tries to live by the "8.3"
-filenaming restrictions.  The renamings are shown in the
-accompanying F<rename> file.
 
 You can explore various information from the Unicode data files using
 the C<Unicode::UCD> module.

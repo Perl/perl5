@@ -565,7 +565,7 @@ perl.third.config: config.sh
 	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
 
 perl.third: /usr/bin/atom perl.third.config perl
-	atom -tool third -L. -all -gp -toolargs="-pthread -fork -quiet -invalid -uninit heap+stack+partword+copy -min 0" perl
+	atom -tool third -L. -all -gp -toolargs="-invalid -uninit heap+stack+copy -min 0" perl
 	@echo "Now you may run perl.third and then study perl.3log."
 
 # Pixie Perls (Tru64 and IRIX only)

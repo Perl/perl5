@@ -732,7 +732,7 @@ Perl_sharedsv_locksv(pTHX_ SV *sv)
 
     if(SvROK(sv))
 	sv = SvRV(sv);
-    shared = Perl_sharedsv_find(aTHX, sv);
+    shared = Perl_sharedsv_find(aTHX_ sv);
     if(!shared)
        croak("lock can only be used on shared values");
     Perl_sharedsv_lock(aTHX_ shared);
@@ -962,7 +962,7 @@ share(SV *ref)
 	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
-	Perl_sharedsv_share(aTHX, ref);
+	Perl_sharedsv_share(aTHX_ ref);
 
 void
 lock_enabled(SV *ref)
@@ -972,7 +972,7 @@ lock_enabled(SV *ref)
 	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
-	shared = Perl_sharedsv_find(aTHX, ref);
+	shared = Perl_sharedsv_find(aTHX_ ref);
 	if(!shared)
 	   croak("lock can only be used on shared values");
 	Perl_sharedsv_lock(aTHX_ shared);
@@ -1017,6 +1017,9 @@ cond_signal_enabled(SV *ref)
 	if(SvROK(ref))
 	    ref = SvRV(ref);
 	shared = Perl_sharedsv_find(aTHX_ ref);
+	if (ckWARN(WARN_THREADS) && shared->lock.owner != aTHX)
+	    Perl_warner(aTHX_ packWARN(WARN_THREADS),
+			    "cond_signal() called on unlocked variable");
 	if(!shared)
 	    croak("cond_signal can only be used on shared values");
 	COND_SIGNAL(&shared->user_cond);
@@ -1032,6 +1035,9 @@ cond_broadcast_enabled(SV *ref)
 	shared = Perl_sharedsv_find(aTHX_ ref);
 	if(!shared)
 	    croak("cond_broadcast can only be used on shared values");
+	if (ckWARN(WARN_THREADS) && shared->lock.owner != aTHX)
+	    Perl_warner(aTHX_ packWARN(WARN_THREADS),
+			    "cond_broadcast() called on unlocked variable");
 	COND_BROADCAST(&shared->user_cond);
 
 #endif /* USE_ITHREADS */

@@ -1945,7 +1945,7 @@ Consequently, it hasn't really been tested, and may well be incomplete.
 
 =cut
 
-our %olbs;
+use vars qw(%olbs);
 
 sub makeaperl {
     my($self, %attribs) = @_;
