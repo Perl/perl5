@@ -576,7 +576,7 @@ so it was truncated to the string shown.
 
 =item Callback called exit
 
-(F) A subroutine invoked from an external package via perl_call_sv()
+(F) A subroutine invoked from an external package via call_sv()
 exited by calling exit.
 
 =item Can't "goto" out of a pseudo block
