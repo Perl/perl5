@@ -2789,13 +2789,13 @@ Perl_package(pTHX_ OP *o)
 }
 
 void
-Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
+Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 {
     OP *pack;
     OP *imop;
     OP *veop;
 
-    if (id->op_type != OP_CONST)
+    if (idop->op_type != OP_CONST)
 	Perl_croak(aTHX_ "Module name must be constant");
 
     veop = Nullop;
@@ -2813,8 +2813,8 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	    if (version->op_type != OP_CONST || !SvNIOKp(vesv))
 		Perl_croak(aTHX_ "Version number must be constant number");
 
-	    /* Make copy of id so we don't free it twice */
-	    pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)id)->op_sv));
+	    /* Make copy of idop so we don't free it twice */
+	    pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
 
 	    /* Fake up a method call to VERSION */
 	    meth = newSVpvn("VERSION",7);
@@ -2831,14 +2831,14 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
     /* Fake up an import/unimport */
     if (arg && arg->op_type == OP_STUB)
 	imop = arg;		/* no import on explicit () */
-    else if (SvNIOKp(((SVOP*)id)->op_sv)) {
+    else if (SvNIOKp(((SVOP*)idop)->op_sv)) {
 	imop = Nullop;		/* use 5.0; */
     }
     else {
 	SV *meth;
 
-	/* Make copy of id so we don't free it twice */
-	pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)id)->op_sv));
+	/* Make copy of idop so we don't free it twice */
+	pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
 
 	/* Fake up a method call to import/unimport */
 	meth = aver ? newSVpvn("import",6) : newSVpvn("unimport", 8);
@@ -2858,7 +2858,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	Nullop,
 	append_elem(OP_LINESEQ,
 	    append_elem(OP_LINESEQ,
-	        newSTATEOP(0, Nullch, newUNOP(OP_REQUIRE, 0, id)),
+	        newSTATEOP(0, Nullch, newUNOP(OP_REQUIRE, 0, idop)),
 	        newSTATEOP(0, Nullch, veop)),
 	    newSTATEOP(0, Nullch, imop) ));
 
