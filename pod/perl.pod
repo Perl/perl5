@@ -359,10 +359,10 @@ http://www.perl.com/CPAN/ports/index.html:
 	AOS			5.002
 	LynxOS			5.004_02
 
-Although we do suggest that you always build your own Perl from the
-source code, both for maximal configurability and for security,
-in case you are in a hurry you can check the URL
-http://www.perl.com/CPAN/ports/index.html for binary releases.
+Although we do suggest that you always build your own Perl from
+the source code, both for maximal configurability and for security,
+in case you are in a hurry you can check
+http://www.perl.com/CPAN/ports/index.html for binary distributions.
 
 =head1 ENVIRONMENT
 
