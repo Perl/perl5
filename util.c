@@ -2547,7 +2547,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 }
 #endif /* !DOSISH */
 
-#if  !defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(CYGWIN)
+#if  !defined(DOSISH) || defined(OS2) || defined(WIN32)
 I32
 Perl_wait4pid(pTHX_ int pid, int *statusp, int flags)
 {

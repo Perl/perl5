@@ -3543,7 +3543,7 @@ PP(pp_fork)
 
 PP(pp_wait)
 {
-#if !defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(CYGWIN)
+#if !defined(DOSISH) || defined(OS2) || defined(WIN32)
     djSP; dTARGET;
     Pid_t childpid;
     int argflags;
@@ -3559,7 +3559,7 @@ PP(pp_wait)
 
 PP(pp_waitpid)
 {
-#if !defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(CYGWIN)
+#if !defined(DOSISH) || defined(OS2) || defined(WIN32)
     djSP; dTARGET;
     Pid_t childpid;
     int optype;

@@ -1653,7 +1653,7 @@ typedef pthread_key_t	perl_key;
  */
 #  define USEMYBINMODE / **/
 #  define my_binmode(fp, iotype) \
-            (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : NULL)
+            (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : FALSE)
 #endif
 
 #ifdef UNION_ANY_DEFINITION
