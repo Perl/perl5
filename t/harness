@@ -57,6 +57,7 @@ if (@ARGV) {
         push @tests, <op/*.t>;
         push @tests, <uni/*.t>;
         push @tests, <lib/*.t>;
+	push @tests, <win32/*.t> if $^O eq 'MSWin32';
 	use File::Spec;
 	my $updir = File::Spec->updir;
 	my $mani  = File::Spec->catfile(File::Spec->updir, "MANIFEST");

@@ -2552,6 +2552,7 @@ t/uni/lower.t			See if Unicode casing works
 t/uni/sprintf.t			See if Unicode sprintf works
 t/uni/title.t			See if Unicode casing works
 t/uni/upper.t			See if Unicode casing works
+t/win32/longpath.t		Test if Win32::GetLongPathName() works
 t/x2p/s2p.t			See if s2p/psed work
 taint.c				Tainting code
 thrdvar.h			Per-thread variables
