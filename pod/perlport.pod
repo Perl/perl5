@@ -84,7 +84,7 @@ should be considered a perpetual work in progress
 
 =head2 Newlines
 
-In most operating systems, lines in files are separated with newlines.
+In most operating systems, lines in files are terminated by newlines.
 Just what is used as a newline may vary from OS to OS.  Unix
 traditionally uses C<\012>, one kind of Windows I/O uses C<\015\012>,
 and S<Mac OS> uses C<\015>.

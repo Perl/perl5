@@ -1135,7 +1135,8 @@ mod(OP *o, I32 type)
 	if (type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN)
 	    break;
 	yyerror(form("Can't modify %s in %s",
-		     op_desc[o->op_type],
+		     (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)
+		      ? "do block" : op_desc[o->op_type]),
 		     type ? op_desc[type] : "local"));
 	return o;
 
@@ -1264,7 +1265,9 @@ mod(OP *o, I32 type)
 	break;
 
     case OP_NULL:
-	if (!(o->op_flags & OPf_KIDS))
+	if (o->op_flags & OPf_SPECIAL)		/* do BLOCK */
+	    goto nomod;
+	else if (!(o->op_flags & OPf_KIDS))
 	    break;
 	if (o->op_targ != OP_LIST) {
 	    mod(cBINOPo->op_first, type);
