@@ -87,17 +87,6 @@ class subtraction.
 
 	http://www.unicode.org/unicode/reports/tr18/
 
-=head2 Unicode Scripts support
-
-Currently the C<\p{In...}> supports only the Blocks database, like
-C<\p{BasicLatin}>, C<\p{InGreek}>, C<\p{InThai}>, but there's also the
-Scripts database, which has members like C<Latin>, C<Greek>,
-C<Armenian>, C<Han>.  It is desireable that also the script names
-could be used for the C<\p{In...}> construct.  Note: needs to be
-researched whether this is possible, that is, are there conflicts
-between the Blocks and the Scripts, is the Blocks Greek the same as
-the Scripts Greek?
-
 =head2 use Thread for iThreads
 
 Artur Bergman's C<iThreads> module is a start on this, but needs to

@@ -2,5 +2,7 @@
 # This file is built by mktables.PL from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-0180	024F
+0531	0556
+0561	0587
+FB13	FB17
 END

@@ -49,6 +49,34 @@ statically built in.  This may or may not be a problem with ancient
 TCP/IP stacks of VMS: we do not know since we weren't able to test
 Perl in such configurations.
 
+=head2 Different Definition of the Unicode Character Classes \p{In...}
+
+As suggested by the Unicode consortium, the Unicode character classes
+now prefer I<scripts> as opposed to I<blocks> (as defined by Unicode);
+in Perl, when the C<\p{In....}> and the C<\p{In....}> regular expression
+constructs are used.  This has changed the definition of some of those
+character classes.
+
+The difference between scripts and blocks is that scripts are the
+glyphs used by a language or a group of languages, while the blocks
+are more artificial groupings of 256 characters based on the Unicode
+numbering.
+
+In general this change results in more inclusive Unicode character
+classes, but changes to the other direction also do take place:
+for example while the script C<Latin> includes all the Latin
+characters and their various diacritic-adorned versions, it
+does not include the various punctuation or digits (since they
+are not solely C<Latin>).
+
+Changes in the character class semantics may have happened if a script
+and a block happen to have the same name, for example C<Hebrew>.
+In such cases the script wins and C<\p{InHebrew}> now means the script
+definition of Hebrew.  The block definition in still available,
+though, by appending C<Block> to the name: C<\p{InHebrewBlock}> means
+what C<\p{InHebrew}> meant in perl 5.6.0.  For the full list
+of affected character classes, see L<perlunicode/Blocks>.
+
 =head2 Deprecations
 
 The current user-visible implementation of pseudo-hashes (the weird

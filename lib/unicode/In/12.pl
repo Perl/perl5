@@ -2,5 +2,17 @@
 # This file is built by mktables.PL from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-0700	074F
+0B02	0B03
+0B05	0B0C
+0B0F	0B10
+0B13	0B28
+0B2A	0B30
+0B32	0B33
+0B36	0B39
+0B41	0B43
+0B47	0B48
+0B4B	0B4C
+0B5C	0B5D
+0B5F	0B61
+0B66	0B6F
 END

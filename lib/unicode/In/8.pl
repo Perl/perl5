@@ -2,5 +2,13 @@
 # This file is built by mktables.PL from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-0400	04FF
+0901	0902
+0905	0939
+093E	0940
+0941	0948
+0949	094C
+0951	0954
+0958	0961
+0962	0963
+0966	096F
 END

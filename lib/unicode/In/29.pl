@@ -2,5 +2,11 @@
 # This file is built by mktables.PL from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-1100	11FF
+1780	17B3
+17B4	17B6
+17B7	17BD
+17BE	17C5
+17C7	17C8
+17C9	17D3
+17E0	17E9
 END

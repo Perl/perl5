@@ -174,9 +174,9 @@ sub charblock {
     my $code = shift;
 
     unless (@BLOCKS) {
-	if (openunicode(\$BLOCKS, "Blocks.pl")) {
+	if (openunicode(\$BLOCKS, "Blocks.txt")) {
 	    while (<$BLOCKS>) {
-		if (/^([0-9A-F]+)\s+([0-9A-F]+)\s+(.+)/) {
+		if (/^([0-9A-F]+)\.\.([0-9A-F]+);\s+(.+)/) {
 		    push @BLOCKS, [ hex($1), hex($2), $3 ];
 		}
 	    }
@@ -240,6 +240,40 @@ For scripts see UTR #24: http://www.unicode.org/unicode/reports/tr24/
 Note also that the script names are all in uppercase, e.g. C<HEBREW>,
 while the block names are Capitalized and with intermixed spaces,
 e.g. C<Yi Syllables>.
+
+Greek
+Cyrillic
+Armenian
+Hebrew
+Arabic
+Syriac
+Thaana
+Devanagari
+Bengali
+Gurmukhi
+Gujarati
+Oriya
+Tamil
+Telugu
+Kannada
+Malayalam
+Sinhala
+Thai
+Lao
+Tibetan
+Myanmar
+Georgian
+Ethiopic
+Cherokee
+Ogham
+Runic
+Khmer
+Hiragana
+Katakana
+Bopomofo
+OldItalic
+Gothic
+Deseret
 
 =head1 IMPLEMENTATION NOTE
 

@@ -2,5 +2,11 @@
 # This file is built by mktables.PL from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-0100	017F
+0400	0481
+0483	0486
+048C	04C4
+04C7	04C8
+04CB	04CC
+04D0	04F5
+04F8	04F9
 END

@@ -2,5 +2,18 @@
 # This file is built by mktables.PL from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-0B80	0BFF
+0E81	0E82
+0E87	0E88
+0E94	0E97
+0E99	0E9F
+0EA1	0EA3
+0EAA	0EAB
+0EAD	0EB0
+0EB2	0EB3
+0EB4	0EB9
+0EBB	0EBC
+0EC0	0EC4
+0EC8	0ECD
+0ED0	0ED9
+0EDC	0EDD
 END
