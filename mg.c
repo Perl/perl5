@@ -2450,7 +2450,7 @@ Perl_whichsig(pTHX_ char *sig)
     if (strEQ(sig,"CLD"))
 	return SIGCHLD;
 #endif
-    return 0;
+    return -1;
 }
 
 #if !defined(PERL_IMPLICIT_CONTEXT)
