@@ -3369,7 +3369,7 @@ static int magic_write(stcxt_t *cxt)
         length -= sizeof (magicstr) - 1;
     }        
 
-    WRITE(header, length);
+    WRITE( (unsigned char*) header, length);
 
     if (!cxt->netorder) {
 	TRACEME(("ok (magic_write byteorder = 0x%lx [%d], I%d L%d P%d D%d)",
