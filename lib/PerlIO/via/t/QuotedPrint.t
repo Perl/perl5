@@ -9,6 +9,9 @@ BEGIN {
         print "1..0 # Skip: PerlIO not used\n";
 	exit 0;
     }
+    if (ord("A") == 193) {
+	print "1..0 # Skip: EBCDIC\n";
+    }
 }
 
 use Test::More tests => 11;
