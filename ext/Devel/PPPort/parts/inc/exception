@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 2 $
+##  $Revision: 3 $
 ##  $Author: mhx $
-##  $Date: 2005/01/31 08:10:51 +0100 $
+##  $Date: 2005/02/02 21:48:36 +0100 $
 ##
 ################################################################################
 ##
@@ -25,54 +25,26 @@ XCPT_RETHROW
 
 =implementation
 
-#ifdef dJMPENV
-
-#  ifndef dXCPT
+#ifdef NO_XSLOCKS
+#  ifdef dJMPENV
 #    define dXCPT             dJMPENV; int rEtV = 0
 #    define XCPT_TRY_START    JMPENV_PUSH(rEtV); if (rEtV == 0)
 #    define XCPT_TRY_END      JMPENV_POP;
 #    define XCPT_CATCH        if (rEtV != 0)
 #    define XCPT_RETHROW      JMPENV_JUMP(rEtV)
+#  else
+#    define dXCPT             Sigjmp_buf oldTOP; int rEtV = 0
+#    define XCPT_TRY_START    Copy(top_env, oldTOP, 1, Sigjmp_buf); rEtV = Sigsetjmp(top_env, 1); if (rEtV == 0)
+#    define XCPT_TRY_END      Copy(oldTOP, top_env, 1, Sigjmp_buf);
+#    define XCPT_CATCH        if (rEtV != 0)
+#    define XCPT_RETHROW      Siglongjmp(top_env, rEtV)
 #  endif
-
-#else
-
-#  define dXCPT             Sigjmp_buf oldTOP; int rEtV = 0
-#  define XCPT_TRY_START    Copy(top_env, oldTOP, 1, Sigjmp_buf); rEtV = Sigsetjmp(top_env, 1); if (rEtV == 0)
-#  define XCPT_TRY_END      Copy(oldTOP, top_env, 1, Sigjmp_buf);
-#  define XCPT_CATCH        if (rEtV != 0)
-#  define XCPT_RETHROW      Siglongjmp(top_env, rEtV)
-
 #endif
 
 =xsmisc
 
-static void throws_exception(int throw_e)
-{
-  if (throw_e)
-    croak("boo\n");
-}
-
-static int exception(int throw_e)
-{
-  dTHR;
-  dXCPT;
-  SV *caught = get_sv("Devel::PPPort::exception_caught", 0);
-
-  XCPT_TRY_START {
-    throws_exception(throw_e);
-  } XCPT_TRY_END
-
-  XCPT_CATCH
-  {
-    sv_setiv(caught, 1);
-    XCPT_RETHROW;
-  }
-
-  sv_setiv(caught, 0);
-
-  return 42;
-}
+/* defined in module3.c */
+int exception(int throw_e);
 
 =xsubs
 
