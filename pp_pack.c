@@ -1386,7 +1386,7 @@ PP(pp_pack)
 	case 'a':
 	    fromstr = NEXTFROM;
 	    aptr = SvPV(fromstr, fromlen);
-	    if (pat[-1] == '*') {
+	    if (pat[lengthcode ? -2 : -1] == '*') { /* -2 after '/' */  
 		len = fromlen;
 		if (datumtype == 'Z')
 		    ++len;
