@@ -11,18 +11,16 @@ use strict;
 use warnings;
 use File::Path;
 
-print "1..14\n";
+use Test::More tests => 16;
+
+my $IsVMS = $^O eq 'VMS';
 
 # check imports
-print +(defined(&cwd) && 
-	defined(&getcwd) &&
-	defined(&fastcwd) &&
-	defined(&fastgetcwd) ?
-        "" : "not "), "ok 1\n";
-print +(!defined(&chdir) &&
-	!defined(&abs_path) &&
-	!defined(&fast_abs_path) ?
-	"" : "not "), "ok 2\n";
+can_ok('main', qw(cwd getcwd fastcwd fastgetcwd));
+ok( !defined(&chdir),           'chdir() not exported by default' );
+ok( !defined(&abs_path),        '  nor abs_path()' );
+ok( !defined(&fast_abs_path),   '  nor fast_abs_path()');
+
 
 # XXX force Cwd to bootsrap its XSUBs since we have set @INC = "../lib"
 # XXX and subsequent chdir()s can make them impossible to find
@@ -34,55 +32,50 @@ my $pwd_cmd =
     ($^O eq "MSWin32" || $^O eq "NetWare") ? "cd" : (grep { -x && -f } map { "$_/pwd" }
 			       split m/$Config{path_sep}/, $ENV{PATH})[0];
 
-if ($^O eq 'VMS') { $pwd_cmd = 'SHOW DEFAULT'; }
+$pwd_cmd = 'SHOW DEFAULT' if $IsVMS;
 
-if (defined $pwd_cmd) {
+SKIP: {
+    skip "No native pwd command found to test against", 4 unless $pwd_cmd;
+
     chomp(my $start = `$pwd_cmd`);
     # Win32's cd returns native C:\ style
     $start =~ s,\\,/,g if ($^O eq 'MSWin32' || $^O eq "NetWare");
     # DCL SHOW DEFAULT has leading spaces
-    $start =~ s/^\s+// if $^O eq 'VMS';
-    if ($?) {
-	for (3..6) {
-	    print "ok $_ # Skip: '$pwd_cmd' failed\n";
-	}
-    } else {
+    $start =~ s/^\s+// if $IsVMS;
+    SKIP: {
+        skip "'$pwd_cmd' failed, nothing to test against", 4 if $?;
+
 	my $cwd        = cwd;
 	my $getcwd     = getcwd;
 	my $fastcwd    = fastcwd;
 	my $fastgetcwd = fastgetcwd;
-	print +($cwd        eq $start ? "" : "not "), "ok 3\n";
-	print +($getcwd     eq $start ? "" : "not "), "ok 4\n";
-	print +($fastcwd    eq $start ? "" : "not "), "ok 5\n";
-	print +($fastgetcwd eq $start ? "" : "not "), "ok 6\n";
-    }
-} else {
-    for (3..6) {
-	print "ok $_ # Skip: no pwd command found\n";
+	is(cwd(),       $start, 'cwd()');
+	is(getcwd(),    $start, 'getcwd()');
+	is(fastcwd(),   $start, 'fastcwd()');
+	is(fastgetcwd(),$start, 'fastgetcwd()');
     }
 }
 
-mkpath(["_ptrslt_/_path_/_to_/_a_/_dir_"], 0, 0777);
-Cwd::chdir "_ptrslt_/_path_/_to_/_a_/_dir_";
-my $cwd        = cwd;
-my $getcwd     = getcwd;
-my $fastcwd    = fastcwd;
-my $fastgetcwd = fastgetcwd;
-my $want = "t/_ptrslt_/_path_/_to_/_a_/_dir_";
-print "# cwd        = '$cwd'\n";
-print "# getcwd     = '$getcwd'\n";
-print "# fastcwd    = '$fastcwd'\n";
-print "# fastgetcwd = '$fastgetcwd'\n";
-# This checked out OK on ODS-2 and ODS-5:
-$want = "T\.PTEERSLT\.PATH\.TO\.A\.DIR\]" if $^O eq 'VMS';
-print +($cwd        =~ m|$want$| ? "" : "not "), "ok 7\n";
-print +($getcwd     =~ m|$want$| ? "" : "not "), "ok 8\n";
-print +($fastcwd    =~ m|$want$| ? "" : "not "), "ok 9\n";
-print +($fastgetcwd =~ m|$want$| ? "" : "not "), "ok 10\n";
+my $Top_Test_Dir = '_ptrslt_';
+my $Test_Dir     = "$Top_Test_Dir/_path_/_to_/_a_/_dir_";
+my $want = "t/$Test_Dir";
+if( $IsVMS ) {
+    # translate the unixy path to VMSish
+    $want = uc $want;
+    $want =~ s|/|\.|g;
+    $want .= '\]';
+}
+
+mkpath(["$Test_Dir"], 0, 0777);
+Cwd::chdir "$Test_Dir";
+
+like(cwd(),        qr|$want$|, 'chdir() + cwd()');
+like(getcwd(),     qr|$want$|, '        + getcwd()');    
+like(fastcwd(),    qr|$want$|, '        + fastcwd()');
+like(fastgetcwd(), qr|$want$|, '        + fastgetcwd()');
 
 # Cwd::chdir should also update $ENV{PWD}
-print "#$ENV{PWD}\n";
-print +($ENV{PWD} =~ m|$want$| ? "" : "not "), "ok 11\n";
+like($ENV{PWD}, qr|$want$|,      'Cwd::chdir() updates $ENV{PWD}');
 Cwd::chdir "..";
 print "#$ENV{PWD}\n";
 Cwd::chdir "..";
@@ -94,33 +87,28 @@ print "#$ENV{PWD}\n";
 Cwd::chdir "..";
 print "#$ENV{PWD}\n";
 
-rmtree(["_ptrslt_"], 0, 0);
+rmtree([$Top_Test_Dir], 0, 0);
 
-if ($^O eq 'VMS') {
-    # This checked out OK on ODS-2 and ODS-5:
-    print +($ENV{PWD}  =~ m|\bT\]$| ? "" : "not "), "ok 12\n";
+if ($IsVMS) {
+    like($ENV{PWD}, qr|\bT\]$|);
 }
 else {
-    print +($ENV{PWD}  =~ m|\bt$| ? "" : "not "), "ok 12\n";
+    like($ENV{PWD}, qr|\bt$|);
 }
 
-if ($Config{d_symlink}) {
-    mkpath(["_ptrslt_/_path_/_to_/_a_/_dir_"], 0, 0777);
-    symlink "_ptrslt_/_path_/_to_/_a_/_dir_" => "linktest";
+SKIP: {
+    skip "no symlinks on this platform", 2 unless $Config{d_symlink};
+
+    mkpath([$Test_Dir], 0, 0777);
+    symlink $Test_Dir => "linktest";
 
     my $abs_path      =  Cwd::abs_path("linktest");
     my $fast_abs_path =  Cwd::fast_abs_path("linktest");
-    my $want          = "t/_ptrslt_/_path_/_to_/_a_/_dir_";
+    my $want          = "t/$Test_Dir";
 
-    print "# abs_path      $abs_path\n";
-    print "# fast_abs_path $fast_abs_path\n";
-    print "# want          $want\n";
-    print +($abs_path      =~ m|$want$| ? "" : "not "), "ok 13\n";
-    print +($fast_abs_path =~ m|$want$| ? "" : "not "), "ok 14\n";
+    like($abs_path,      qr|$want$|);
+    like($fast_abs_path, qr|$want$|);
 
-    rmtree(["_ptrslt_"], 0, 0);
+    rmtree([$Top_Test_Dir], 0, 0);
     unlink "linktest";
-} else {
-    print "ok 13 # skipped\n";
-    print "ok 14 # skipped\n";
 }
