@@ -666,8 +666,13 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
 	} else {
 	    SV *pkgsv = newSVpvn("PerlIO", 6);
 	    SV *layer = newSVpvn(name, len);
-	    ENTER;
+	    CV *cv  = get_cv("PerlIO::Layer::NoWarnings", FALSE);
+    	    ENTER;
 	    SAVEINT(PL_in_load_module);
+	    if (cv) {
+	        SAVESPTR(PL_warnhook);
+		PL_warnhook = (SV *) cv;
+	    }
 	    PL_in_load_module++;
 	    /*
 	     * The two SVs are magically freed by load_module
@@ -768,6 +773,17 @@ PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
     HV *stash = gv_stashpv("PerlIO::Layer", TRUE);
     SV *sv = sv_bless(newRV_noinc(newSViv(PTR2IV(tab))), stash);
     return sv;
+}
+
+XS(XS_PerlIO__Layer__NoWarnings)
+{
+    /* This is used as a %SIG{__WARN__} handler to supress warnings 
+       during loading of layers.
+     */
+    dXSARGS;
+    if (items)
+    	PerlIO_debug("warning:%s\n",SvPV_nolen(ST(0)));
+    XSRETURN(0);
 }
 
 XS(XS_PerlIO__Layer__find)
@@ -1012,6 +1028,7 @@ Perl_boot_core_PerlIO(pTHX)
 	  __FILE__);
 #endif
     newXS("PerlIO::Layer::find", XS_PerlIO__Layer__find, __FILE__);
+    newXS("PerlIO::Layer::NoWarnings", XS_PerlIO__Layer__NoWarnings, __FILE__);
 }
 
 PerlIO_funcs *
