@@ -105,6 +105,146 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7178] By: jhi                                   on 2000/10/09  19:18:23
+        Log: Warn about unknown scripts.
+             
+             Subject: Re: ideas? patches? [PATCH bleadperl]
+             From: Dominic Dunlop <domo@computer.org>
+             Date: Mon, 9 Oct 2000 14:57:17 +0200
+             Message-Id: <p04320400b6076a75b15f@[192.168.1.4]>
+     Branch: perl
+	   ! lib/charnames.pm
+____________________________________________________________________________
+[  7177] By: jhi                                   on 2000/10/09  19:13:27
+        Log: Change #7160 had a nasty typo.
+     Branch: metaconfig
+	   ! U/compline/Compile.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7176] By: gsar                                  on 2000/10/09  18:59:33
+        Log: pod nit
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  7175] By: gsar                                  on 2000/10/09  18:54:28
+        Log: Windows9x doesn't support link(), despite what Config.pm
+             might think
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[  7174] By: gsar                                  on 2000/10/09  18:50:03
+        Log: avoid nonportable example code
+     Branch: perl
+	   ! lib/File/Copy.pm
+____________________________________________________________________________
+[  7173] By: gsar                                  on 2000/10/09  18:46:54
+        Log: on Windows, avoid potential exception (could happen if MSVCRT isn't
+             being used) when closing a socket handle
+     Branch: perl
+	   ! win32/win32.c win32/win32.h win32/win32sck.c
+____________________________________________________________________________
+[  7172] By: gsar                                  on 2000/10/09  18:41:40
+        Log: on Windows, cwd strings in the environment should be of the
+             form =X:=X:\foo instead of =X=X:\foo\
+     Branch: perl
+	   ! win32/vdir.h
+____________________________________________________________________________
+[  7171] By: gsar                                  on 2000/10/09  18:30:09
+        Log: on Windows, LoadLibrary() could load an extension DLL multiple
+             times if forward slashes are used in the path
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  7170] By: jhi                                   on 2000/10/09  17:53:59
+        Log: Add a todo note about overloadable assertions.
+     Branch: perl
+	   ! Todo-5.6
+____________________________________________________________________________
+[  7169] By: jhi                                   on 2000/10/09  13:43:45
+        Log: Subject: PATCH 5.6 perldebguts grammar cleanup
+             From: mjd@plover.com
+             Date: 9 Oct 2000 00:24:44 -0000
+             Message-ID: <20001009002444.10616.qmail@plover.com>
+     Branch: perl
+	   ! pod/perldebguts.pod
+____________________________________________________________________________
+[  7168] By: nick                                  on 2000/10/08  13:16:33
+        Log: Tables assume network byte order for 16 bit forms, so 'S' packing
+             is not right thing to do on (e.g. x86). Network order is also "right" for
+             X fonts.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  7167] By: nick                                  on 2000/10/08  12:54:42
+        Log: Make "encodings" work post-install when Encode/*.enc files may not
+             be in same directory as Encode.pm
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  7166] By: nick                                  on 2000/10/08  11:51:26
+        Log: Work round the fact that $hash->{$key} does not take into account
+             UTF8'ness of $key yet.  Thus fromUnicode needs to do $hash->{chr(ord($ch))}
+             so that key is always in the "expected" encoding - i.e. same way we put
+             it in the hash.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  7165] By: gsar                                  on 2000/10/08  04:15:29
+        Log: save_re_context() could reset PL_curcop to freed memory, causing core
+             dumps in code such as C<use CGI::Carp; use something_that_calls_die;>
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[  7164] By: jhi                                   on 2000/10/06  20:51:48
+        Log: UTF8ize split() so that the cloned substrings get the UTF8
+             flag of the original scalar.  Problem reported by Simon Cozens.
+     Branch: perl
+	   ! pp.c t/pragma/utf8.t
+____________________________________________________________________________
+[  7163] By: nick                                  on 2000/10/06  20:48:34
+        Log: Fix in change 7162 was too-late for case where we "upgraded" to PVIV and
+             got a false +ve and so did not reach code which would have un-FAKEd the SV.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  7162] By: nick                                  on 2000/10/06  20:25:37
+        Log: Make sv_upgrade() undo READONLY|FAKE shared string hackery.
+             To fix  (sort {$a <=> $b} keys %hash) in particular but
+             should cover a number of other as-yet-unknown cases as well.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  7161] By: jhi                                   on 2000/10/06  19:56:18
+        Log: Change the version number of Tie::Handle in the core to 4.0,
+             the (unrelated) Tie::Handle in CPAN will remain at 3.0.
+             
+             Subject: Note on Tie::Handle
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 	06 Oct 2000 21:48:58 +0200
+             Message-ID: <m3ya01kaxh.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/Tie/Handle.pm
+____________________________________________________________________________
+[  7160] By: jhi                                   on 2000/10/06  18:20:35
+        Log: Fix bug in #7157 (s/cflags/ccflags); moved the -o foo
+             as the first option of cc/ld because of ultrapicky compilers
+             (e.g. OS/390 R2.5)
+     Branch: metaconfig
+	   + U/modified/d_getpgrp.U U/modified/d_setpgrp.U
+	   ! U/compline/Compile.U U/compline/Csym.U U/compline/ccflags.U
+	   ! U/compline/orderlib.U U/modified/Cppsym.U
+	   ! U/modified/d_access.U
+     Branch: metaconfig/U/perl
+	   ! Checkcc.U d_dlsymun.U gccvers.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7159] By: jhi                                   on 2000/10/06  13:56:39
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7158] By: jhi                                   on 2000/10/06  12:48:40
         Log: Eliminate $Is_VMS code from the test.
              
