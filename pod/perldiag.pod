@@ -1778,7 +1778,7 @@ L<perlsub/"Lvalue subroutines">.
 (F) There is currently a limit on the length of string which lookbehind can
 handle. This restriction may be eased in a future release. The << HERE shows in
 the regular expression about where the problem was discovered.
-       
+
 =item Malformed PERLLIB_PREFIX
 
 (F) An error peculiar to OS/2.  PERLLIB_PREFIX should be of the form
