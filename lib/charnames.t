@@ -181,13 +181,15 @@ print "ok 27\n";
 print "not " unless "\N{LF}" eq "\n";
 print "ok 28\n";
 
-print "not " unless "\N{NEXT LINE (NEL)}" eq chr(0x85);
+my $nel = ord("A") == 193 ? qr/^(?:\x15|\x25)$/ : qr/^\x85$/;
+
+print "not " unless "\N{NEXT LINE (NEL)}" =~ $nel;
 print "ok 29\n";
 
-print "not " unless "\N{NEXT LINE}" eq chr(0x85);
+print "not " unless "\N{NEXT LINE}" =~ $nel;
 print "ok 30\n";
 
-print "not " unless "\N{NEL}" eq chr(0x85);
+print "not " unless "\N{NEL}" =~ $nel;
 print "ok 31\n";
 
 print "not " unless "\N{BYTE ORDER MARK}" eq chr(0xFFFE);
