@@ -98,7 +98,8 @@ $
 $!  And do it
 $   Show Process/Accounting
 $   testdir = "Directory/NoHead/NoTrail/Column=1"
-$   Define 'dbg'Perlshr Sys$Disk:[-]'dbg'PerlShr'exe'
+$   PerlShr_filespec = f$parse("Sys$Disk:[-]''dbg'PerlShr''exe'")
+$   Define 'dbg'Perlshr 'PerlShr_filespec'
 $   MCR Sys$Disk:[]Perl. "-I[-.lib]" - "''p3'" "''p4'" "''p5'" "''p6'"
 $   Deck/Dollar=$$END-OF-TEST$$
 # $RCSfile: TEST,v $$Revision: 4.1 $$Date: 92/08/07 18:27:00 $
