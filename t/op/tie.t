@@ -44,6 +44,21 @@ untie %h;
 EXPECT
 ########
 
+# standard behaviour, without any extra references
+use Tie::Hash ;
+{package Tie::HashUntie;
+ use base 'Tie::StdHash';
+ sub UNTIE
+  {
+   warn "Untied\n";
+  }
+}
+tie %h, Tie::HashUntie;
+untie %h;
+EXPECT
+Untied
+########
+
 # standard behaviour, with 1 extra reference
 use Tie::Hash ;
 $a = tie %h, Tie::StdHash;
