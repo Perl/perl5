@@ -169,7 +169,7 @@ include alt.sources; see their FAQ for details.
 
 =head2 Perl Books
 
-A number books on Perl and/or CGI programming are available.  A few of
+A number of books on Perl and/or CGI programming are available.  A few of
 these are good, some are ok, but many aren't worth your money.  Tom
 Christiansen maintains a list of these books, some with extensive
 reviews, at http://www.perl.com/perl/critiques/index.html.
@@ -314,7 +314,7 @@ to join or leave this list.
 =item Perl-Packrats
 
 Discussion related to archiving of perl materials, particularly the
-Comprehensive PerlArchive Network (CPAN). Subscribe by emailing
+Comprehensive Perl Archive Network (CPAN). Subscribe by emailing
 majordomo@cis.ufl.edu:
 
     subscribe perl-packrats

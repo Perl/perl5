@@ -802,7 +802,7 @@ files.
 =head2 Why does Perl let me delete read-only files?  Why does C<-i> clobber protected files?  Isn't this a bug in Perl?
 
 This is elaborately and painstakingly described in the "Far More Than
-You Every Wanted To Know" in
+You Ever Wanted To Know" in
 http://www.perl.com/CPAN/doc/FMTEYEWTK/file-dir-perms .
 
 The executive summary: learn how your filesystem works.  The
