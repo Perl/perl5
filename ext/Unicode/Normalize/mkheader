@@ -194,7 +194,7 @@ my @tripletable = (
   {
     file => "unfcmb",
     name => "combin",
-    type => "char",
+    type => "STDCHAR",
     hash => \%Combin,
     null =>  0,
   },
