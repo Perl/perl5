@@ -1756,6 +1756,7 @@ You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 bool
 Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 {
+
     char*	pv = NULL;
     U32		cur = 0;
     U32		len = 0;
@@ -1953,7 +1954,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvSTASH(sv)	= stash;
 	AvALLOC(sv)	= 0;
 	AvARYLEN(sv)	= 0;
-	AvFLAGS(sv)	= 0;
+	AvFLAGS(sv)	= AVf_REAL;
 	break;
     case SVt_PVHV:
 	SvANY(sv) = new_XPVHV();
