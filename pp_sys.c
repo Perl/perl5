@@ -1329,7 +1329,7 @@ PP(pp_sysread)
     {
 	length = PerlIO_read(IoIFP(io), buffer+offset, length);
 	/* fread() returns 0 on both error and EOF */
-	if (PerlIO_error(IoIFP(io)))
+	if (length == 0 && PerlIO_error(IoIFP(io)))
 	    length = -1;
     }
     if (length < 0)
