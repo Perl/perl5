@@ -17,7 +17,7 @@ WriteMakefile(
     NAME	=> "B",
     VERSION	=> "a5",
     clean	=> {
-	FILES		=> "perl byteperl$e *$o B.c *~"
+	FILES		=> "perl$e byteperl$e *$o B.c *~"
     }
 );
 

@@ -65,8 +65,20 @@ print BYTERUN_C $c_header, <<'EOT';
 
 #include "EXTERN.h"
 #include "perl.h"
-#include "bytecode.h"
-#include "byterun.h"
+
+void *
+bset_obj_store(void *obj, I32 ix)
+{
+    if (ix > obj_list_fill) {
+	if (obj_list_fill == -1)
+	    New(666, obj_list, ix + 1, void*);
+	else
+	    Renew(obj_list, ix + 1, void*);
+	obj_list_fill = ix;
+    }
+    obj_list[ix] = obj;
+    return obj;
+}
 
 #ifdef INDIRECT_BGET_MACROS
 void byterun(struct bytestream bs)
@@ -153,18 +165,12 @@ struct bytestream {
     int (*fread)(char *, size_t, size_t, void*);
     void (*freadpv)(U32, void*);
 };
-void freadpv _((U32, void *));
 void byterun _((struct bytestream));
 #else
 void byterun _((FILE *));
 #endif /* INDIRECT_BGET_MACROS */
 
-#ifndef PATCHLEVEL
-#include "patchlevel.h"
-#endif
-#if PATCHLEVEL < 4 || (PATCHLEVEL == 4 && SUBVERSION < 50)
-#define dTHR extern int errno
-#endif
+void *bset_obj_store _((void *, I32));
 
 enum {
 EOT

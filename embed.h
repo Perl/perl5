@@ -68,6 +68,7 @@
 #define bool__amg		Perl_bool__amg
 #define boot_core_UNIVERSAL	Perl_boot_core_UNIVERSAL
 #define bor_amg			Perl_bor_amg
+#define bset_obj_store		Perl_bset_obj_store
 #define bxor_amg		Perl_bxor_amg
 #define byterun			Perl_byterun
 #define call_list		Perl_call_list
@@ -910,6 +911,7 @@
 #define sle_amg			Perl_sle_amg
 #define slt_amg			Perl_slt_amg
 #define sne_amg			Perl_sne_amg
+#define specialsv_list		Perl_specialsv_list
 #define sqrt_amg		Perl_sqrt_amg
 #define stack_grow		Perl_stack_grow
 #define start_subparse		Perl_start_subparse

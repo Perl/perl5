@@ -100,6 +100,7 @@ sin_amg
 sle_amg
 slt_amg
 sne_amg
+specialsv_list
 sqrt_amg
 string_amg
 subtr_amg
@@ -198,6 +199,7 @@ block_end
 block_gimme
 block_start
 boot_core_UNIVERSAL
+bset_obj_store
 byterun
 call_list
 cando

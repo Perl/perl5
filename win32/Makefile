@@ -14,7 +14,7 @@ INST_TOP=$(INST_DRV)\perl5004.5x
 
 #
 # uncomment to enable threads-capabilities
-#USE_THREADS=-DUSE_THREADS
+#USE_THREADS=define
 
 #
 # uncomment next line if you are using Visual C++ 2.x
@@ -55,19 +55,22 @@ D_CRYPT=define
 CRYPT_FLAG=-DHAVE_DES_FCRYPT
 !ENDIF
 
-BUILDOPT	= $(USE_THREADS)
-#BUILDOPT	= $(USE_THREADS) -DMULTIPLICITY 
-#BUILDOPT	= $(USE_THREADS) -DPERL_GLOBAL_STRUCT -DMULTIPLICITY
+#BUILDOPT	= -DMULTIPLICITY 
+#BUILDOPT	= -DPERL_GLOBAL_STRUCT -DMULTIPLICITY
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
+
+!IF "$(USE_THREADS)" == ""
+USE_THREADS = undef
+!ENDIF
 
 !IF "$(PROCESSOR_ARCHITECTURE)" == ""
 PROCESSOR_ARCHITECTURE	= x86
 !ENDIF
 
-!IF "$(USE_THREADS)" == ""
-ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
-!ELSE
+!IF "$(USE_THREADS)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
+!ELSE
+ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 !ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
@@ -191,6 +194,7 @@ CRYPT_OBJ=$(CRYPT_SRC:.c=.obj)
 XSUBPP=..\$(MINIPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp -C++ -prototypes
 
 CORE_C=	..\av.c		\
+	..\byterun.c	\
 	..\deb.c	\
 	..\doio.c	\
 	..\doop.c	\
@@ -220,6 +224,7 @@ CORE_C=	..\av.c		\
 	$(CRYPT_SRC)
 
 CORE_OBJ= ..\av$(o)	\
+	..\byterun$(o)	\
 	..\deb$(o)	\
 	..\doio$(o)	\
 	..\doop$(o)	\
@@ -271,6 +276,8 @@ X2P_OBJ = ..\x2p\a2p$(o)	\
 	..\x2p\walk$(o)
 
 CORE_H = ..\av.h	\
+	..\byterun.h	\
+	..\bytecode.h	\
 	..\cop.h	\
 	..\cv.h		\
 	..\dosish.h	\
@@ -307,7 +314,7 @@ CORE_H = ..\av.h	\
 	.\include\sys\socket.h	\
 	.\win32.h
 
-DYNAMIC_EXT=Socket IO Fcntl Opcode SDBM_File attrs Thread
+DYNAMIC_EXT=Socket IO Fcntl Opcode SDBM_File attrs Thread B
 STATIC_EXT=DynaLoader
 
 DYNALOADER=$(EXTDIR)\DynaLoader\DynaLoader
@@ -318,6 +325,7 @@ SDBM_FILE=$(EXTDIR)\SDBM_File\SDBM_File
 IO=$(EXTDIR)\IO\IO
 ATTRS=$(EXTDIR)\attrs\attrs
 THREAD=$(EXTDIR)\Thread\Thread
+B=$(EXTDIR)\B\B
 
 SOCKET_DLL=..\lib\auto\Socket\Socket.dll
 FCNTL_DLL=..\lib\auto\Fcntl\Fcntl.dll
@@ -326,6 +334,7 @@ SDBM_FILE_DLL=..\lib\auto\SDBM_File\SDBM_File.dll
 IO_DLL=..\lib\auto\IO\IO.dll
 ATTRS_DLL=..\lib\auto\attrs\attrs.dll
 THREAD_DLL=..\lib\auto\Thread\Thread.dll
+B_DLL=..\lib\auto\B\B.dll
 
 STATICLINKMODULES=DynaLoader
 DYNALOADMODULES=	\
@@ -335,12 +344,30 @@ DYNALOADMODULES=	\
 	$(SDBM_FILE_DLL)\
 	$(IO_DLL)	\
 	$(ATTRS_DLL)	\
-	$(THREAD_DLL)
+	$(THREAD_DLL)	\
+	$(B_DLL)
 
 POD2HTML=$(PODDIR)\pod2html
 POD2MAN=$(PODDIR)\pod2man
 POD2LATEX=$(PODDIR)\pod2latex
 POD2TEXT=$(PODDIR)\pod2text
+
+CFG_VARS=   "INST_DRV=$(INST_DRV)"		\
+	    "INST_TOP=$(INST_TOP)"		\
+	    "archname=$(ARCHNAME)"		\
+	    "cc=$(CC)"				\
+	    "ccflags=$(OPTIMIZE) $(DEFINES)"	\
+	    "cf_email=$(EMAIL)"			\
+	    "d_crypt=$(D_CRYPT)"		\
+	    "libs=$(LIBFILES)"			\
+	    "incpath=$(CCINCDIR)"		\
+	    "libpth=$(CCLIBDIR)"		\
+	    "libc=$(LIBC)"			\
+	    "static_ext=$(STATIC_EXT)"		\
+	    "dynamic_ext=$(DYNAMIC_EXT)"	\
+	    "usethreads=$(USE_THREADS)"		\
+	    "LINK_FLAGS=$(LINK_FLAGS)"		\
+	    "optimize=$(OPTIMIZE)"
 
 #
 # Top targets
@@ -369,23 +396,7 @@ config.w32 : $(CFGSH_TMPL)
 	copy $(CFGH_TMPL) config.h
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
-	$(MINIPERL) -I..\lib config_sh.PL	\
-	    "INST_DRV=$(INST_DRV)"		\
-	    "INST_TOP=$(INST_TOP)"		\
-	    "archname=$(ARCHNAME)"		\
-	    "cc=$(CC)"				\
-	    "ccflags=$(OPTIMIZE) $(DEFINES)"	\
-	    "cf_email=$(EMAIL)"			\
-	    "d_crypt=$(D_CRYPT)"		\
-	    "libs=$(LIBFILES)"			\
-	    "incpath=$(CCINCDIR)"		\
-	    "libpth=$(CCLIBDIR)"		\
-	    "libc=$(LIBC)"			\
-	    "static_ext=$(STATIC_EXT)"		\
-	    "dynamic_ext=$(DYNAMIC_EXT)"	\
-	    "LINK_FLAGS=$(LINK_FLAGS)"		\
-	    "optimize=$(OPTIMIZE)"		\
-	    config.w32				> ..\config.sh
+	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) config.w32 > ..\config.sh
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	cd .. && miniperl configpm
@@ -470,7 +481,7 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
-$(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
+$(B_DLL): $(PERLEXE) $(B).xs
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
@@ -482,6 +493,11 @@ $(THREAD_DLL): $(PERLEXE) $(THREAD).xs
 	$(MAKE)
 	cd ..\..\win32
 
+$(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
+	cd $(EXTDIR)\$(*B)
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\win32
 
 $(IO_DLL): $(PERLEXE) $(CONFIGPM) $(IO).xs
 	cd $(EXTDIR)\$(*B)
@@ -539,9 +555,9 @@ distclean: clean
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \
-		$(OPCODE_DLL) $(ATTRS_DLL) $(THREAD_DLL)
+		$(OPCODE_DLL) $(ATTRS_DLL) $(THREAD_DLL) $(B_DLL)
 	-del /f $(SOCKET).c $(IO).c $(SDBM_FILE).c $(FCNTL).c $(OPCODE).c \
-		$(DYNALOADER).c $(ATTRS).c $(THREAD).c
+		$(DYNALOADER).c $(ATTRS).c $(THREAD).c $(B).c
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c \

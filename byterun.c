@@ -11,8 +11,20 @@
 
 #include "EXTERN.h"
 #include "perl.h"
-#include "bytecode.h"
-#include "byterun.h"
+
+void *
+bset_obj_store(void *obj, I32 ix)
+{
+    if (ix > obj_list_fill) {
+	if (obj_list_fill == -1)
+	    New(666, obj_list, ix + 1, void*);
+	else
+	    Renew(obj_list, ix + 1, void*);
+	obj_list_fill = ix;
+    }
+    obj_list[ix] = obj;
+    return obj;
+}
 
 #ifdef INDIRECT_BGET_MACROS
 void byterun(struct bytestream bs)
