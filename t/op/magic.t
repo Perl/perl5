@@ -23,7 +23,7 @@ $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_VMS     = $^O eq 'VMS';
 $PERL = ($Is_MSWin32 ? '.\perl' : './perl');
 
-print "1..30\n";
+print "1..31\n";
 
 eval '$ENV{"foo"} = "hi there";';	# check that ENV is inited inside eval
 if ($Is_MSWin32) { ok 1, `cmd /x /c set foo` eq "foo=hi there\n"; }
@@ -179,3 +179,8 @@ else {
 						: (`echo \$NoNeSuCh` eq "foo\n") );
 }
 
+{
+    local $SIG{'__WARN__'} = sub { print "not " };
+    $! = undef;
+    print "ok 31\n";
+}
