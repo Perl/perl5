@@ -379,6 +379,7 @@ perl.PPC:	:PLib:Perl.PPC.Lib :PLib:PerlLib.PPC.Lib perlmain.c.PPC.o preplibrary 
 	$(LinkPPC) -map perl.map -@export perl.exp -name Perl -o perl.PPC ¶
 		:Obj:perlmain.c.PPC.o $(LibFilesPPC) ¶
 		:PLib:Perl.PPC.Lib $(Static_Ext_AutoInit_PPC) $(MoLibsPPC)
+	MergeFragment "$(AEGizmos)AEGizmos4Perl.shlb.PPC" perl.PPC
 perl.PPC::	Perl.r Perl.rsrc 
 	Rez $(ROptions) -a -c 'MPS ' -t MPST Perl.r -o perl.PPC
 perl.SC:	:PLib:Perl.SC.Lib :PLib:PerlLib.SC.Lib perlmain.c.SC.o preplibrary
@@ -391,6 +392,7 @@ perl.MrC:	:PLib:Perl.MrC.Lib :PLib:PerlLib.MrC.Lib perlmain.c.MrC.o preplibrary 
 	$(LinkMrC) -@export perl.exp -fragname Perl -o perl.MrC ¶
 		:Obj:perlmain.c.MrC.o $(LibFilesMrC) ¶
 		:PLib:Perl.MrC.Lib $(Static_Ext_AutoInit_MrC) $(MoLibsMrC)
+	MergeFragment "$(AEGizmos)AEGizmos4Perl.shlb.PPC" perl.MrC
 perl.MrC::	Perl.r Perl.rsrc 
 	Rez $(ROptions) -a -c 'MPS ' -t MPST Perl.r -o perl.MrC
 
