@@ -29,6 +29,13 @@ trnl='$trnl'
 !GROK!THIS!
 $spitshell >>makedepend <<'!NO!SUBS!'
 
+if test -d .depending; then
+	echo "$0: Already running, exiting."
+	exit 0
+fi
+
+mkdir .depending
+
 # This script should be called with 
 #     sh ./makedepend MAKE=$(MAKE)
 case "$1" in 
@@ -224,6 +231,7 @@ $cp $mf.new $mf
 $rm $mf.new
 $echo "# WARNING: Put nothing here or make depend will gobble it up!" >> $mf
 $rm -rf .deptmp UU .shlist .clist .hlist .hsed
+rmdir .depending
 
 !NO!SUBS!
 $eunicefix makedepend
