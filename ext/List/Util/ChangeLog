@@ -1,3 +1,25 @@
+Change 825 on 2003/08/14 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.12
+
+Change 824 on 2003/08/14 by <gbarr@pobox.com> (Graham Barr)
+
+	Don't directly use the SV returned as $a in the next iteration,
+	take a copy instead. Fixes problem if the code block result was from
+	an eval or sub call
+
+Change 823 on 2003/08/14 by <gbarr@pobox.com> (Graham Barr)
+
+	Install into the 'perl' installdirs for >= 5.008
+
+Change 822 on 2003/08/14 by <gbarr@pobox.com> (Graham Barr)
+
+	Fix test for EBCDIC portability
+
+Change 771 on 2003/03/03 by <gbarr@pobox.com> (Graham Barr)
+
+	Get path for make from $Config
+
 Change 770 on 2003/02/14 by <gbarr@pobox.com> (Graham Barr)
 
 	Release 1.11
