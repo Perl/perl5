@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-BEGIN { $| = 1; print "1..19\n"; }
+BEGIN { $| = 1; print "1..21\n"; }
 
 END {print "not ok 1\n" unless $loaded;}
 
@@ -222,4 +222,8 @@ unless (defined &Time::HiRes::setitimer
 
     $SIG{VTALRM} = 'DEFAULT';
 }
+
+print abs(sleep(1)                  - 1) < 0.001 ? "ok 20\n" : "not ok 20\n";
+
+print abs(usleep(1000000) / 1000000 - 1) < 0.001 ? "ok 21\n" : "not ok 21\n";
 

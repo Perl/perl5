@@ -367,20 +367,42 @@ constant(name, arg)
 	char *		name
 	int		arg
 
-#ifdef HAS_USLEEP
+#if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY)
 
-void
+int
 usleep(useconds)
         int useconds 
-
-void
-sleep(...)
-	PROTOTYPE: ;$
+	PREINIT:
+	struct timeval Ta, Tb;
 	CODE:
+	gettimeofday(&Ta, NULL);
+	if (items > 0) {
+	    if (useconds > 1000000)
+	        croak("usleep: useconds must be between 0 and 1000000 (inclusive)");
+	    usleep(useconds);
+	} else
+	    PerlProc_pause();
+	gettimeofday(&Tb, NULL);
+	RETVAL = 1000000*(Tb.tv_sec-Ta.tv_sec)+(Tb.tv_usec-Ta.tv_usec);
+
+	OUTPUT:
+	RETVAL
+
+NV
+sleep(...)
+	PREINIT:
+	struct timeval Ta, Tb;
+	CODE:
+	gettimeofday(&Ta, NULL);
 	if (items > 0)
 	    usleep((int)(SvNV(ST(0)) * 1000000));
 	else
 	    PerlProc_pause();
+	gettimeofday(&Tb, NULL);
+	RETVAL = (NV)(Tb.tv_sec-Ta.tv_sec)+0.000001*(NV)(Tb.tv_usec-Ta.tv_usec);
+
+	OUTPUT:
+	RETVAL
 
 #endif
 
