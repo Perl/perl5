@@ -71,7 +71,7 @@ sleep 3 if $funky_FAT_timestamps;
 print FOO "Now is the time for all good men to come to.\n";
 close(FOO);
 
-sleep 2 unless $funky_FAT_timestamps;
+sleep 2;
 
 
 SKIP: {

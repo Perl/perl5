@@ -22,4 +22,5 @@ plan( tests => 1 );
 
     FileCache::cacheout("<", $file);
     ::ok( <$file> eq "bar" );
+    close $file;
 }
