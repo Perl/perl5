@@ -706,6 +706,14 @@ have to set the PAGER environment variable to use a specific pager.
 "perldoc -f foo" will print information about the perl operator
 "foo".
 
+One common mistake when using this port with a GUI library like C<Tk>
+is assuming that Perl's normal behavior of opening a command-line
+window will go away.  This isn't the case.  If you want to start a copy
+of C<perl> without opening a command-line window, use the C<wperl>
+executable built during the installation process.  Usage is exactly
+the same as normal C<perl> on Win32, except that options like C<-h>
+don't work (since they need a command-line window to print to).
+
 If you find bugs in perl, you can run C<perlbug> to create a
 bug report (you may have to send it manually if C<perlbug> cannot
 find a mailer on your system).
