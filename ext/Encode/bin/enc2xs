@@ -159,7 +159,7 @@ my $hname = $cname;
 
 my ($doC,$doEnc,$doUcm,$doPet);
 
-if ($cname =~ /\.(c|xs)$/)
+if ($cname =~ /\.(c|xs)$/i) # VMS may have upcased filenames with DECC$ARGV_PARSE_STYLE defined
  {
   $doC = 1;
   $dname =~ s/(\.[^\.]*)?$/.exh/;

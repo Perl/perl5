@@ -3668,6 +3668,13 @@ $ tmp = "sys/file.h"
 $ GOSUB inhdr
 $ i_sysfile = tmp
 $!
+$!
+$! Check for sys/ioctl.h
+$!
+$ tmp = "sys/ioctl.h"
+$ GOSUB inhdr
+$ i_sysioctl = tmp
+$!
 $! Check for sys/utsname.h
 $!
 $ tmp = "sys/utsname.h"
@@ -5642,7 +5649,7 @@ $ WC "i_sunmath='undef'"
 $ WC "i_sysaccess='" + i_sysaccess + "'"
 $ WC "i_sysdir='undef'"
 $ WC "i_sysfile='" + i_sysfile + "'"
-$ WC "i_sysioctl='undef'"
+$ WC "i_sysioctl='" + i_sysioctl + "'"
 $ WC "i_syslog='" + i_syslog + "'"
 $ WC "i_sysmman='undef'"
 $ WC "i_sysmode='" + i_sysmode + "'"
