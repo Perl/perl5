@@ -296,6 +296,8 @@ sub tab {
 #	ucfirst etc not OK: TMP arg processed inplace
 #	each repeat not OK too due to array context
 #	pack split - unknown whether they are safe
+#	sprintf: is calling do_sprintf(TARG,...) which can act on TARG
+#	  before other args are processed.
 
 # pp_hot.c
 #	readline - unknown whether it is safe
@@ -479,7 +481,7 @@ vec		vec			ck_fun		ist@	S S S
 index		index			ck_index	isT@	S S S?
 rindex		rindex			ck_index	isT@	S S S?
 
-sprintf		sprintf			ck_fun_locale	mfsT@	S L
+sprintf		sprintf			ck_fun_locale	mfst@	S L
 formline	formline		ck_fun		ms@	S L
 ord		ord			ck_fun		ifsTu%	S?
 chr		chr			ck_fun		fsTu%	S?
