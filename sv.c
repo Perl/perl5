@@ -6338,7 +6338,7 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 	len = tmplen;
     }
     if (!hash)
-	PERL_HASH(hash, (U8*)src, len);
+	PERL_HASH(hash, src, len);
     new_SV(sv);
     sv_upgrade(sv, SVt_PVIV);
     SvPVX(sv) = sharepvn(src, is_utf8?-len:len, hash);

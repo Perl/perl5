@@ -47,12 +47,19 @@ struct xpvhv {
 };
 
 /* hash a key */
-/* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins */
-/* from requirements by Colin Plumb. */
-/* (http://burtleburtle.net/bob/hash/doobs.html) */
+/* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins
+ * from requirements by Colin Plumb.
+ * (http://burtleburtle.net/bob/hash/doobs.html) */
+/* The use of a temporary pointer and the casting games
+ * is needed to serve the dual purposes of
+ * (a) the hashed data being interpreted as "unsigned char" (new since 5.8,
+ *     a "char" can be either signed or signed, depending on the compiler)
+ * (b) catering for old code that uses a "char"
+ */
 #define PERL_HASH(hash,str,len) \
      STMT_START	{ \
-	register const unsigned char *s_PeRlHaSh = str; \
+	register const char *s_PeRlHaSh_tmp = str; \
+	register const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
 	register I32 i_PeRlHaSh = len; \
 	register U32 hash_PeRlHaSh = 0; \
 	while (i_PeRlHaSh--) { \
