@@ -93,9 +93,9 @@ Perl_reentrant_size(pTHX) {
 #endif /* HAS_GETSERVBYNAME_R */
 #ifdef HAS_GETSPNAM_R
 #   if defined(HAS_SYSCONF) && defined(_SC_GETPW_R_SIZE_MAX) && !defined(__GLIBC__)
-	PL_reentrant_buffer->_pwent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
-	if (PL_reentrant_buffer->_pwent_size == -1)
-		PL_reentrant_buffer->_pwent_size = REENTRANTUSUALSIZE;
+	PL_reentrant_buffer->_spent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
+	if (PL_reentrant_buffer->_spent_size == -1)
+		PL_reentrant_buffer->_spent_size = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
 	PL_reentrant_buffer->_spent_size = SIABUFSIZ;

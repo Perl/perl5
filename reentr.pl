@@ -505,8 +505,7 @@ EOF
 EOF
 	    my $sc = $genfunc eq 'grent' ?
 		    '_SC_GETGR_R_SIZE_MAX' : '_SC_GETPW_R_SIZE_MAX';
-	    my $sz = $genfunc eq 'grent' ?
-                    '_grent_size' : '_pwent_size';
+	    my $sz = "_${genfunc}_size";
 	    push @size, <<EOF;
 #   if defined(HAS_SYSCONF) && defined($sc) && !defined(__GLIBC__)
 	PL_reentrant_buffer->$sz = sysconf($sc);
@@ -514,12 +513,12 @@ EOF
 		PL_reentrant_buffer->$sz = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
-	PL_reentrant_buffer->_${genfunc}_size = SIABUFSIZ;
+	PL_reentrant_buffer->$sz = SIABUFSIZ;
 #       else
 #           ifdef __sgi
-	PL_reentrant_buffer->_${genfunc}_size = BUFSIZ;
+	PL_reentrant_buffer->$sz = BUFSIZ;
 #           else
-	PL_reentrant_buffer->_${genfunc}_size = REENTRANTUSUALSIZE;
+	PL_reentrant_buffer->$sz = REENTRANTUSUALSIZE;
 #           endif
 #       endif
 #   endif 
