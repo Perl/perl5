@@ -1732,7 +1732,7 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 		*flagp = TRYAGAIN;
 		return NULL;
 	    case 'p':
-		if (PL_regcode == &PL_regdummy)
+		if (SIZE_ONLY)
 		    Perl_warner(aTHX_ WARN_REGEXP,
 				"(?p{}) is deprecated - use (??{})");
 		/* FALL THROUGH*/
