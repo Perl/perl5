@@ -5381,14 +5381,13 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    && !(kkid->op_private & OPpLVAL_INTRO))
 	{
 	    /* Concat has problems if target is equal to right arg. */
-	    if (kid->op_type == OP_CONCAT
-		&& kLISTOP->op_first->op_sibling->op_type == OP_PADSV
-		&& kLISTOP->op_first->op_sibling->op_targ == kkid->op_targ)
-	    {
-		return o;
+	    if (kid->op_type == OP_CONCAT) {
+		if (kLISTOP->op_first->op_sibling->op_type == OP_PADSV
+		    && kLISTOP->op_first->op_sibling->op_targ == kkid->op_targ)
+		    return o;
 	    }
-	    if (kid->op_type == OP_JOIN) {
-		/* do_join has problems the arguments coincide with target.
+	    else if (kid->op_type == OP_JOIN) {
+		/* do_join has problems if the arguments coincide with target.
 		   In fact the second argument *can* safely coincide,
 		   but ignore=pessimize this rare occasion. */
 		OP *arg = kLISTOP->op_first->op_sibling; /* Skip PUSHMARK */
@@ -5399,6 +5398,12 @@ Perl_ck_sassign(pTHX_ OP *o)
 			return o;
 		    arg = arg->op_sibling;
 		}
+	    }
+	    else if (kid->op_type == OP_QUOTEMETA) {
+		/* quotemeta has problems if the argument coincides with target. */
+		if (kLISTOP->op_first->op_type == OP_PADSV
+		    && kLISTOP->op_first->op_targ == kkid->op_targ)
+		    return o;
 	    }
 	    kid->op_targ = kkid->op_targ;
 	    /* Now we do not need PADSV and SASSIGN. */

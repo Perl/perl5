@@ -79,6 +79,86 @@ Version 5.005_62        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  4086] By: gsar                                  on 1999/09/06  17:57:52
+        Log: misc tweaks
+     Branch: perl
+	   ! bytecode.pl ext/ByteLoader/byterun.h pod/perlsyn.pod toke.c
+____________________________________________________________________________
+[  4085] By: gsar                                  on 1999/09/06  03:54:23
+        Log: applied patch suggested by Hans Mulder to fix problems on
+             OPENSTEP-Mach; be more careful about PERL_POLLUTE_MALLOC
+             when they ask for bincompat (platforms that used to default
+             to EMBEDMYMALLOC continue to do so); disable warnings.t#192
+             (appears unsalvageable on some platforms)
+     Branch: perl
+	   ! embed.h embed.pl handy.h perl.h pp_sys.c t/pragma/warn/pp_hot
+____________________________________________________________________________
+[  4084] By: bailey                                on 1999/09/06  02:39:11
+        Log: Integrate mainline 5.05_61
+     Branch: vmsperl
+	  +> (branch 32 files)
+	   - lib/unicode/EthiopicSyllables.txt
+	   - lib/unicode/MakeEthiopicSyllables.PL t/pragma/warning.t
+	   - warning.pl
+	   ! vms/descrip_mms.template vms/gen_shrfls.pl vms/perly_c.vms
+	   ! vms/perly_h.vms vms/vms.c
+	  !> (integrate 346 files)
+____________________________________________________________________________
+[  4083] By: gsar                                  on 1999/09/06  00:10:40
+        Log: optional warning on join(/foo/...) (reworked suggested patch
+             by Mark-Jason Dominus <mjd@plover.com>)
+     Branch: perl
+	   ! embed.h objXSUB.h op.c opcode.h opcode.pl perlapi.c
+	   ! pod/perldelta.pod pod/perldiag.pod pod/perlfunc.pod pp.sym
+	   ! pp_proto.h t/pragma/warn/op
+____________________________________________________________________________
+[  4082] By: gsar                                  on 1999/09/05  22:28:57
+        Log: fix data loss when more than one block is read from SDBM
+             *.dir file (suggested by Uwe Ohse <uwe@ohse.de>)
+     Branch: perl
+	   ! ext/SDBM_File/sdbm/sdbm.c
+____________________________________________________________________________
+[  4081] By: gsar                                  on 1999/09/05  22:07:18
+        Log: initial implementation of lvalue subroutines (slightly fixed
+             version of patch suggested by Ilya Zakharevich, which in turn
+             is based on the one suggested by Tuomas J. Lukka <lukka@iki.fi>)
+     Branch: perl
+	   + t/pragma/sub_lval.t
+	   ! MANIFEST cop.h cv.h dump.c embed.h ext/Opcode/Opcode.pm
+	   ! ext/attrs/attrs.pm ext/attrs/attrs.xs global.sym objXSUB.h
+	   ! op.c op.h opcode.h opcode.pl opnames.h perlapi.c
+	   ! pod/perldiag.pod pod/perlsub.pod pp.c pp.sym pp_hot.c
+	   ! pp_proto.h proto.h t/pragma/warn/pp_ctl
+____________________________________________________________________________
+[  4080] By: jhi                                   on 1999/09/05  22:02:18
+        Log: Undo #4055 (related to #4079).
+     Branch: cfgperl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  4079] By: jhi                                   on 1999/09/05  21:30:54
+        Log: Time is not yet ripe.
+     Branch: cfgperl
+	   ! pod/perldelta.pod pod/perlop.pod pp.c t/op/64bit.t t/op/misc.t
+____________________________________________________________________________
+[  4078] By: gsar                                  on 1999/09/05  18:17:32
+        Log: modified suggested patch to handle cross-refs and qr// objects
+             correctly; unfollowed refs are represented as simple string
+             value, not just the bare type; $VERSION stays the same until
+             it is ready for prime time (avoids CPAN confustication)
+             From:    John Nolan <jpnolan@Op.Net>
+             Date:    Wed, 04 Aug 1999 20:21:10 EDT
+             Message-Id: <199908050021.UAA09693@monet.op.net>
+             Subject: [ID 19990804.006] [PATCH]5.005_60 (Data::Dumper) - implements Maxdepth setting
+     Branch: perl
+	   ! Changes ext/Data/Dumper/Changes ext/Data/Dumper/Dumper.pm
+	   ! ext/Data/Dumper/Dumper.xs ext/Data/Dumper/Todo t/lib/dumper.t
+____________________________________________________________________________
+[  4077] By: jhi                                   on 1999/09/04  21:54:42
+        Log: timesum() wasn't @EXPORTed as promised by the documentation.
+             Bug reported by Alex Efros <powerman@inart.kharkov.com>.
+     Branch: cfgperl
+	   ! lib/Benchmark.pm
+____________________________________________________________________________
 [  4076] By: gsar                                  on 1999/09/04  20:21:59
         Log: integrate cfgperl contents into mainline
      Branch: perl
