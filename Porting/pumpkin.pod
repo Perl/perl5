@@ -1556,6 +1556,77 @@ in recent config.sh files though.
 
 =back
 
+=head2 Copyright Issues
+
+The following is based on the consensus of a couple of IPR lawyers,
+but it is of course not a legally binding statement, just a common
+sense summary.
+
+=over 4
+
+=item *
+
+Tacking on copyright statements is unnecessary to begin with because
+of the Berne convention.  But assuming you want to go ahead...
+
+=item *
+
+The right form of a copyright statement is
+
+	Copyright (C) Year, Year, ... by Someone
+
+The (C) is not required everywhere but it doesn't hurt and in certain
+jurisdictions it is required, so let's leave it in.  (Yes, it's true
+that in some jurisdictions the "(C)" is not legally binding, one should
+use the true ringed-C.  But we don't have that character available for
+Perl's source code.)
+
+The years must be listed out separately.  Year-Year is not correct.
+Only the years when the piece has changed 'significantly' may be added.
+
+=item *
+
+One cannot give away one's copyright trivially.  One can give one's
+copyright away by using public domain, but even that requires a little
+bit more than just saying 'this is in public domain'.  (What it
+exactly requires depends on your jurisdiction.)  But barring public
+domain, one cannot "transfer" one's copyright to another person or
+entity.  In the context of software, it means that contributors cannot
+give away their copyright or "transfer" it to the "owner" of the software.
+
+Also remember that in many cases if you are employed by someone,
+your work may be copyrighted to your employer, even when you are
+contributing on your own time (this all depends on too many things
+to list here).  But the bottom line is that you definitely can't give
+away a copyright you may not even have.
+
+What is possible, however, is that the software can simply state
+
+	Copyright (C) Year, Year, ... by Someone and others
+
+and then list the "others" somewhere in the distribution.
+And this is exactly what Perl does.  (The "somewhere" is
+AUTHORS and the Changes* files.)
+
+=item *
+
+Split files, merged files, and generated files are problematic.
+The rule of thumb: in split files, copy the copyright years of
+the original file to all the new files; in merged files make
+an union of the copyright years of all the old files; in generated
+files propagate the copyright years of the generating file(s).
+
+=item *
+
+The files of Perl source code distribution do carry a lot of
+copyrights, by various people.  (There are many copyrights embedded in
+perl.c, for example.)  The most straightforward thing for pumpkings to
+do is to simply update Larry's copyrights at the beginning of the
+*.[hcy], x2p/*.[hcy], *.pl, and README files, and leave all other
+copyrights alone.  Doing more than that requires quite a bit of tracking. 
+
+=back
+
 =head1 AUTHORS
 
 Original author:  Andy Dougherty doughera@lafayette.edu .
