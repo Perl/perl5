@@ -107,11 +107,14 @@ usemymalloc='y'
 alignbytes=8
 selecttype='int *' 
 
-# There are some lingering issues about whether g/setpgrp should be a part
-# of the perl core.  This setting should cause perl to conform to the Principle
-# of Least Astonishment.  The best thing is to use the g/setpgrp in the POSIX
+# There are some lingering issues about handling g/setpgrp
+# in the perl core.  The best thing is to use the g/setpgrp in the POSIX
 # module.
-d_bsdpgrp='define'
+# We've given up trying to guess which setting will cause perl to
+# conform to the Principle of Least Astonishment.  If you want to use
+# BSD-style g/setpgrp, you'll have to uncomment the next two lines.
+# i_unistd='undef'
+# d_bsdpgrp='define'
 
 # If your compile complains about FLT_MIN, uncomment the next line
 # POSIX_cflags='ccflags="$ccflags -DFLT_MIN=1.17549435E-38"'
