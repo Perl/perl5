@@ -25,15 +25,6 @@ use File::Find;
 use File::Spec;
 use Cwd;
 
-# Remove insecure directories from PATH
-my @path;
-my $sep = ($^O eq 'MSWin32') ? ';' : ':';
-foreach my $dir (split(/$sep/,$ENV{'PATH'}))
- {
-  push(@path,$dir) unless -w $dir;
- }
-$ENV{'PATH'} = join($sep,@path);
-
 my $NonTaintedCwd = $^O eq 'MSWin32' || $^O eq 'cygwin';
 
 cleanup();
