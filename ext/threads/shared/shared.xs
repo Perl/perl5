@@ -982,7 +982,14 @@ cond_wait_enabled(SV *ref)
 	shared->lock.owner = NULL;
 	locks = shared->lock.locks;
 	shared->lock.locks = 0;
+
+	/* since we are releasing the lock here we need to tell other
+	people that is ok to go ahead and use it */
+	COND_SIGNAL(&shared->lock.cond);
 	COND_WAIT(&shared->user_cond, &shared->lock.mutex);
+	while(shared->lock.owner != NULL) {
+		COND_WAIT(&shared->lock.cond,&shared->lock.mutex);
+	}	
 	shared->lock.owner = aTHX;
 	shared->lock.locks = locks;
 	MUTEX_UNLOCK(&shared->lock.mutex);
