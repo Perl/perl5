@@ -1336,8 +1336,7 @@ PERL_CALLCONV void	Perl_hv_assert(pTHX_ HV* tb);
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 STATIC SV*	S_hv_delete_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
-STATIC HE*	S_hv_fetch_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int flags, int action, U32 hash);
-STATIC HE*	S_hv_store_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int flags, SV* val, U32 hash);
+STATIC HE*	S_hv_fetch_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int flags, int action, SV* val, U32 hash);
 #endif
 
 PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV* hb);
