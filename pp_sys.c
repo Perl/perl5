@@ -4123,17 +4123,17 @@ PP(pp_system)
 	    fcntl(pp[1], F_SETFD, FD_CLOEXEC);
 #endif
 	}
+	if (PL_op->op_flags & OPf_STACKED) {
+	    SV *really = *++MARK;
+	    value = (I32)do_aexec5(really, MARK, SP, pp[1], did_pipes);
+	}
+	else if (SP - MARK != 1)
+	    value = (I32)do_aexec5(Nullsv, MARK, SP, pp[1], did_pipes);
+	else {
+	    value = (I32)do_exec3(SvPVx(sv_mortalcopy(*SP), n_a), pp[1], did_pipes);
+	}
+	PerlProc__exit(-1);
     }
-    if (PL_op->op_flags & OPf_STACKED) {
-	SV *really = *++MARK;
-	value = (I32)do_aexec5(really, MARK, SP, pp[1], did_pipes);
-    }
-    else if (SP - MARK != 1)
-	value = (I32)do_aexec5(Nullsv, MARK, SP, pp[1], did_pipes);
-    else {
-	value = (I32)do_exec3(SvPVx(sv_mortalcopy(*SP), n_a), pp[1], did_pipes);
-    }
-    PerlProc__exit(-1);
 #else /* ! FORK or VMS or OS/2 */
     PL_statusvalue = 0;
     result = 0;
