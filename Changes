@@ -95,6 +95,79 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6654] By: jhi                                   on 2000/08/16  14:10:12
+        Log: Update to perldebtut 1.9, from Richard Foley.
+     Branch: perl
+	   ! pod/perldebtut.pod
+____________________________________________________________________________
+[  6653] By: jhi                                   on 2000/08/16  14:08:17
+        Log: Change the regx compilation error markers to use = instead of <
+             since pod makes using the latter quite messy.  Reported in
+             ID 20000814.006 by Abigail and in
+             Subject: Unknown escape E<> ?
+             From: Lupe Christoph <lupe@lupe-christoph.de>
+             Date: Fri, 11 Aug 2000 00:30:27 +0200
+             Message-ID: <20000811003027.F17420@alanya.lupe-christoph.de>
+     Branch: perl
+	   ! pod/perldiag.pod regcomp.c t/op/misc.t t/op/re_tests
+	   ! t/op/regmesg.t t/pragma/warn/regcomp
+____________________________________________________________________________
+[  6652] By: jhi                                   on 2000/08/16  13:25:31
+        Log: Change the perlbug address to perl.org since it's more forgiving.
+             
+             Subject: [ID 20000814.007] [PATCH] Email address in perlbug.
+             From: abigail@foad.org
+             Date: 15 Aug 2000 04:15:40 -0000
+             Message-Id: <20000815041540.8633.qmail@foad.org>
+     Branch: perl
+	   ! utils/perlbug.PL
+____________________________________________________________________________
+[  6651] By: jhi                                   on 2000/08/16  13:22:35
+        Log: Subject: [PATCH] Cwd::_backtick_pwd does not check return value
+             From: Tim Jenness <timj@jach.hawaii.edu>
+             Date: Tue, 15 Aug 2000 15:51:59 -1000 (HST)
+             Message-ID: <Pine.LNX.4.21.0008151547560.1223-100000@lapaki.jach.hawaii.edu>
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[  6650] By: jhi                                   on 2000/08/16  13:18:13
+        Log: Update to CPAN 1.57.
+             
+             Subject: Re: [PATCH] Cwd::_backtick_pwd does not check return value
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 16 Aug 2000 15:09:46 +0200
+             Message-ID: <m3k8dh5p45.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/CPAN.pm
+____________________________________________________________________________
+[  6649] By: jhi                                   on 2000/08/16  13:12:31
+        Log: Subject: [ID 20000324.040] minor fix to perlhpux.pod
+             From: "Larry W. Virden" <lvirden@cas.org>
+             Date: Fri, 24 Mar 2000 14:25:37 -0500 (EST)
+             Message-Id: <200003241925.OAA27985@lwv26awu.cas.org>
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[  6648] By: jhi                                   on 2000/08/16  13:03:53
+        Log: The numeric locale was reset to "C" by s?printf and never restored.
+             
+             Subject: [ID 20000809.003] setlocale(LC_NUMERIC...) produces different results in 5.005 and 5.6
+             From: Christian Kirsch <ck@held.mind.de>
+             Date: Wed, 9 Aug 2000 17:05:17 +0200
+             Message-Id: <20000809170517.A25389@held>
+             
+             No test since adding the failing example to locale.t
+             does not fail -- probably because the locale settings are so
+             thoroughly tweaked by that time.  Running the example standalone
+             does fail, though.
+     Branch: perl
+	   ! dump.c perl.h pp.c pp_ctl.c sv.c
+____________________________________________________________________________
+[  6647] By: jhi                                   on 2000/08/16  00:07:54
+        Log: Update Changes and test semi-automatic patchlevel updating.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6646] By: jhi                                   on 2000/08/15  23:35:07
         Log: Fix a dependency problem.
              
