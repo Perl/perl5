@@ -120,7 +120,8 @@ sub mkpath{
 
 sub rmtree {
     my($roots, $verbose, $safe) = @_;
-    my(@files,$count);
+    my(@files);
+    my($count) = 0;
     $roots = [$roots] unless ref $roots;
 
     foreach $root (@{$roots}) {
