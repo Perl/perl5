@@ -51,28 +51,14 @@
 #define av_unshift        CPerlObj::Perl_av_unshift
 #undef  avhv_keys
 #define avhv_keys         CPerlObj::Perl_avhv_keys
-#undef  avhv_fetch
-#define avhv_fetch        CPerlObj::Perl_avhv_fetch
 #undef  avhv_fetch_ent
 #define avhv_fetch_ent    CPerlObj::Perl_avhv_fetch_ent
-#undef  avhv_store
-#define avhv_store        CPerlObj::Perl_avhv_store
-#undef  avhv_store_ent
-#define avhv_store_ent    CPerlObj::Perl_avhv_store_ent
 #undef  avhv_exists_ent
 #define avhv_exists_ent   CPerlObj::Perl_avhv_exists_ent
-#undef  avhv_exists
-#define avhv_exists       CPerlObj::Perl_avhv_exists
-#undef  avhv_delete
-#define avhv_delete       CPerlObj::Perl_avhv_delete
-#undef  avhv_delete_ent
-#define avhv_delete_ent   CPerlObj::Perl_avhv_delete_ent
 #undef  avhv_iternext
 #define avhv_iternext     CPerlObj::Perl_avhv_iternext
 #undef  avhv_iterval
 #define avhv_iterval      CPerlObj::Perl_avhv_iterval
-#undef  avhv_iternextsv
-#define avhv_iternextsv   CPerlObj::Perl_avhv_iternextsv
 #undef  bad_type
 #define bad_type          CPerlObj::bad_type
 #undef  bind_match

@@ -590,14 +590,25 @@ av_fill(register AV *av, I32 fill)
 	(void)av_store(av,fill,&sv_undef);
 }
 
-  
+
+/* AVHV: Support for treating arrays as if they were hashes.  The
+ * first element of the array should be a hash reference that maps
+ * hash keys to array indices.
+ */
+
+static I32
+avhv_index_sv(SV* sv)
+{
+    I32 index = SvIV(sv);
+    if (index < 1)
+	croak("Bad index while coercing array into hash");
+    return index;    
+}
+
 HV*
 avhv_keys(AV *av)
 {
-    SV **keysp;
-    HV *keys = Nullhv;
-
-    keysp = av_fetch(av, 0, FALSE);
+    SV **keysp = av_fetch(av, 0, FALSE);
     if (keysp) {
 	SV *sv = *keysp;
 	if (SvGMAGICAL(sv))
@@ -605,34 +616,10 @@ avhv_keys(AV *av)
 	if (SvROK(sv)) {
 	    sv = SvRV(sv);
 	    if (SvTYPE(sv) == SVt_PVHV)
-		keys = (HV*)sv;
+		return (HV*)sv;
 	}
     }
-    if (!keys)
-	croak("Can't coerce array into hash");
-    return keys;
-}
-
-SV**
-avhv_fetch(AV *av, char *key, U32 klen, I32 lval)
-{
-    SV **indsvp;
-    HV *keys = avhv_keys(av);
-    I32 ind;
-    
-    indsvp = hv_fetch(keys, key, klen, FALSE);
-    if (indsvp) {
-	ind = SvIV(*indsvp);
-	if (ind < 1)
-	    croak("Bad index while coercing array into hash");
-    } else {
-	if (!lval)
-	    return 0;
-	
-	ind = AvFILL(av) + 1;
-	hv_store(keys, key, klen, newSViv(ind), 0);
-    }
-    return av_fetch(av, ind, lval);
+    croak("Can't coerce array into hash");
 }
 
 SV**
@@ -641,59 +628,11 @@ avhv_fetch_ent(AV *av, SV *keysv, I32 lval, U32 hash)
     SV **indsvp;
     HV *keys = avhv_keys(av);
     HE *he;
-    I32 ind;
     
     he = hv_fetch_ent(keys, keysv, FALSE, hash);
-    if (he) {
-	ind = SvIV(HeVAL(he));
-	if (ind < 1)
-	    croak("Bad index while coercing array into hash");
-    } else {
-	if (!lval)
-	    return 0;
-	
-	ind = AvFILL(av) + 1;
-	hv_store_ent(keys, keysv, newSViv(ind), 0);
-    }
-    return av_fetch(av, ind, lval);
-}
-
-SV**
-avhv_store(AV *av, char *key, U32 klen, SV *val, U32 hash)
-{
-    SV **indsvp;
-    HV *keys = avhv_keys(av);
-    I32 ind;
-    
-    indsvp = hv_fetch(keys, key, klen, FALSE);
-    if (indsvp) {
-	ind = SvIV(*indsvp);
-	if (ind < 1)
-	    croak("Bad index while coercing array into hash");
-    } else {
-	ind = AvFILL(av) + 1;
-	hv_store(keys, key, klen, newSViv(ind), hash);
-    }
-    return av_store(av, ind, val);
-}
-
-SV**
-avhv_store_ent(AV *av, SV *keysv, SV *val, U32 hash)
-{
-    HV *keys = avhv_keys(av);
-    HE *he;
-    I32 ind;
-    
-    he = hv_fetch_ent(keys, keysv, FALSE, hash);
-    if (he) {
-	ind = SvIV(HeVAL(he));
-	if (ind < 1)
-	    croak("Bad index while coercing array into hash");
-    } else {
-	ind = AvFILL(av) + 1;
-	hv_store_ent(keys, keysv, newSViv(ind), hash);
-    }
-    return av_store(av, ind, val);
+    if (!he)
+        croak("No such array field");
+    return av_fetch(av, avhv_index_sv(HeVAL(he)), lval);
 }
 
 bool
@@ -701,69 +640,6 @@ avhv_exists_ent(AV *av, SV *keysv, U32 hash)
 {
     HV *keys = avhv_keys(av);
     return hv_exists_ent(keys, keysv, hash);
-}
-
-bool
-avhv_exists(AV *av, char *key, U32 klen)
-{
-    HV *keys = avhv_keys(av);
-    return hv_exists(keys, key, klen);
-}
-
-/* avhv_delete leaks. Caller can re-index and compress if so desired. */
-SV *
-avhv_delete(AV *av, char *key, U32 klen, I32 flags)
-{
-    HV *keys = avhv_keys(av);
-    SV *sv;
-    SV **svp;
-    I32 ind;
-    
-    sv = hv_delete(keys, key, klen, 0);
-    if (!sv)
-	return Nullsv;
-    ind = SvIV(sv);
-    if (ind < 1)
-	croak("Bad index while coercing array into hash");
-    svp = av_fetch(av, ind, FALSE);
-    if (!svp)
-	return Nullsv;
-    if (flags & G_DISCARD) {
-	sv = Nullsv;
-	SvREFCNT_dec(*svp);
-    } else {
-	sv = sv_2mortal(*svp);
-    }
-    *svp = &sv_undef;
-    return sv;
-}
-
-/* avhv_delete_ent leaks. Caller can re-index and compress if so desired. */
-SV *
-avhv_delete_ent(AV *av, SV *keysv, I32 flags, U32 hash)
-{
-    HV *keys = avhv_keys(av);
-    SV *sv;
-    SV **svp;
-    I32 ind;
-    
-    sv = hv_delete_ent(keys, keysv, 0, hash);
-    if (!sv)
-	return Nullsv;
-    ind = SvIV(sv);
-    if (ind < 1)
-	croak("Bad index while coercing array into hash");
-    svp = av_fetch(av, ind, FALSE);
-    if (!svp)
-	return Nullsv;
-    if (flags & G_DISCARD) {
-	sv = Nullsv;
-	SvREFCNT_dec(*svp);
-    } else {
-	sv = sv_2mortal(*svp);
-    }
-    *svp = &sv_undef;
-    return sv;
 }
 
 HE *
@@ -776,32 +652,6 @@ avhv_iternext(AV *av)
 SV *
 avhv_iterval(AV *av, register HE *entry)
 {
-    HV *keys = avhv_keys(av);
-    SV *sv;
-    I32 ind;
-    
-    sv = hv_iterval(keys, entry);
-    ind = SvIV(sv);
-    if (ind < 1)
-	croak("Bad index while coercing array into hash");
-    return *av_fetch(av, ind, TRUE);
-}
-
-SV *
-avhv_iternextsv(AV *av, char **key, I32 *retlen)
-{
-    HV *keys = avhv_keys(av);
-    HE *he;
-    SV *sv;
-    I32 ind;
-    
-    he = hv_iternext(keys);
-    if (!he)
-        return Nullsv;
-    *key = hv_iterkey(he, retlen);
-    sv = hv_iterval(keys, he);
-    ind = SvIV(sv);
-    if (ind < 1)
-	croak("Bad index while coercing array into hash");
-    return *av_fetch(av, ind, TRUE);
+    SV *sv = hv_iterval(avhv_keys(av), entry);
+    return *av_fetch(av, avhv_index_sv(sv), TRUE);
 }

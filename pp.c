@@ -2358,8 +2358,6 @@ PP(pp_delete)
 	while (++MARK <= SP) {
 	    if (hvtype == SVt_PVHV)
 		sv = hv_delete_ent(hv, *MARK, discard, 0);
-	    else if (hvtype == SVt_PVAV)
-		sv = avhv_delete_ent((AV*)hv, *MARK, discard, 0);
 	    else
 		DIE("Not a HASH reference");
 	    *MARK = sv ? sv : &sv_undef;
@@ -2377,8 +2375,6 @@ PP(pp_delete)
 	hv = (HV*)POPs;
 	if (SvTYPE(hv) == SVt_PVHV)
 	    sv = hv_delete_ent(hv, keysv, discard, 0);
-	else if (SvTYPE(hv) == SVt_PVAV)
-	    sv = avhv_delete_ent((AV*)hv, keysv, discard, 0);
 	else
 	    DIE("Not a HASH reference");
 	if (!sv)

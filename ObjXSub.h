@@ -715,30 +715,16 @@
 #define av_undef            pPerl->Perl_av_undef
 #undef  av_unshift
 #define av_unshift          pPerl->Perl_av_unshift
-#undef  avhv_delete
-#define avhv_delete         pPerl->Perl_avhv_delete
-#undef  avhv_delete_ent
-#define avhv_delete_ent     pPerl->Perl_avhv_delete_ent
-#undef  avhv_exists
-#define avhv_exists         pPerl->Perl_avhv_exists
 #undef  avhv_exists_ent
 #define avhv_exists_ent     pPerl->Perl_avhv_exists_ent
-#undef  avhv_fetch
-#define avhv_fetch          pPerl->Perl_avhv_fetch
 #undef  avhv_fetch_ent
 #define avhv_fetch_ent      pPerl->Perl_avhv_fetch_ent
 #undef  avhv_iternext
 #define avhv_iternext       pPerl->Perl_avhv_iternext
-#undef  avhv_iternextsv
-#define avhv_iternextsv     pPerl->Perl_avhv_iternextsv
 #undef  avhv_iterval
 #define avhv_iterval        pPerl->Perl_avhv_iterval
 #undef  avhv_keys
 #define avhv_keys           pPerl->Perl_avhv_keys
-#undef  avhv_store
-#define avhv_store          pPerl->Perl_avhv_store
-#undef  avhv_store_ent
-#define avhv_store_ent      pPerl->Perl_avhv_store_ent
 #undef  bind_match
 #define bind_match          pPerl->Perl_bind_match
 #undef  block_end

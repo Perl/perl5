@@ -321,6 +321,11 @@ system malloc().
 (F) A field name of a typed variable was looked up in the %FIELDS
 hash, but the index found was not legal, i.e. less than 1.
 
+=item Bad index while coercing array into hash
+
+(F) The index looked up in the hash found as 0'th element of the array
+is not legal.  Index values must be at 1 or greater.
+
 =item Bad name after %s::
 
 (F) You started to name a symbol by using a package prefix, and then didn't
@@ -496,6 +501,12 @@ but then $foo no longer contains a glob.
 
 (F) Certain types of SVs, in particular real symbol table entries
 (typeglobs), can't be forced to stop being what they are.
+
+=item Can't coerce array into hash
+
+(F) You used an array where a hash was expected, but the array has no
+information on how to map from keys to array indices.  You can do that
+only with arrays that have a hash reference at index 0.
 
 =item Can't create pipe mailbox
 
@@ -1605,6 +1616,12 @@ your system.
 
 (F) The argument to B<-I> must follow the B<-I> immediately with no
 intervening space.
+
+=item No such array field
+
+(F) You tried to access an array as a hash, but the field name used is
+not defined.  The hash at index 0 should map all valid field names to
+array indices for that to work.
 
 =item No such field "%s" in variable %s of type %s
 

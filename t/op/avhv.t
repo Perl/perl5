@@ -32,12 +32,11 @@ $a->[0] = $sch;
 $a->{'abc'} = 'ABC';
 $a->{'def'} = 'DEF';
 $a->{'jkl'} = 'JKL';
-$a->{'a'} = 'A';     #should extend schema
 
 @keys = keys %$a;
 @values = values %$a;
 
-if ($#keys == 3 && $#values == 3) {print "ok 1\n";} else {print "not ok 1\n";}
+if ($#keys == 2 && $#values == 2) {print "ok 1\n";} else {print "not ok 1\n";}
 
 $i = 0;		# stop -w complaints
 
@@ -48,7 +47,7 @@ while (($key,$value) = each %$a) {
     }
 }
 
-if ($i == 4) {print "ok 2\n";} else {print "not ok 2\n";}
+if ($i == 3) {print "ok 2\n";} else {print "not ok 2\n";}
 
 # quick check with tied array
 tie @fake, 'Tie::StdArray';
