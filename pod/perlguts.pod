@@ -2085,11 +2085,12 @@ static functions start with C<S_>.)
 Inside the Perl core, you can get at the functions either with or
 without the C<Perl_> prefix, thanks to a bunch of defines that live in
 F<embed.h>. This header file is generated automatically from
-F<embed.pl>. F<embed.pl> also creates the prototyping header files for
-the internal functions, generates the documentation and a lot of other
-bits and pieces. It's important that when you add a new function to the
-core or change an existing one, you change the data in the table at the
-end of F<embed.pl> as well. Here's a sample entry from that table:
+F<embed.pl> and F<embed.fnc>. F<embed.pl> also creates the prototyping
+header files for the internal functions, generates the documentation
+and a lot of other bits and pieces. It's important that when you add
+a new function to the core or change an existing one, you change the
+data in the table in F<embed.fnc> as well. Here's a sample entry from
+that table:
 
     Apd |SV**   |av_fetch   |AV* ar|I32 key|I32 lval
 
@@ -2148,19 +2149,32 @@ or disappear without notice.
 This function should not have a compatibility macro to define, say,
 C<Perl_parse> to C<parse>. It must be called as C<Perl_parse>.
 
-=item j
-
-This function is not a member of C<CPerlObj>. If you don't know
-what this means, don't use it.
-
 =item x
 
 This function isn't exported out of the Perl core.
 
+=item m
+
+This is implemented as a macro.
+
+=item X
+
+This function is explicitly exported.
+
+=item E
+
+This function is visible to extensions included in the Perl core.
+
+=item b
+
+Binary backward compatibility; this function is a macro but also has
+a C<Perl_> implementation (which is exported).
+
 =back
 
-If you edit F<embed.pl>, you will need to run C<make regen_headers> to
-force a rebuild of F<embed.h> and other auto-generated files.
+If you edit F<embed.pl> or F<embed.fnc>, you will need to run
+C<make regen_headers> to force a rebuild of F<embed.h> and other
+auto-generated files.
 
 =head2 Formatted Printing of IVs, UVs, and NVs
 
