@@ -171,7 +171,7 @@ do_test(12,
     IV = 1
     NV = 0
     ARRAY = $ADDR  \\(0:7, 1:1\\)
-    hash quality = 150.0%
+    hash quality = 100.0%
     KEYS = 1
     FILL = 1
     MAX = 7
