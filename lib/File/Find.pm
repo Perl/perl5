@@ -31,6 +31,9 @@ C<"$File::Find::dir/$_">.  You are chdir()'d to $File::Find::dir when
 the function is called.  The function may set $File::Find::prune to
 prune the tree.
 
+File::Find assumes that you don't alter the $_ variable.  If you do then
+make sure you return it to its original value before exiting your function.
+
 This library is primarily for the C<find2perl> tool, which when fed, 
 
     find2perl / -name .nfs\* -mtime +7 \
