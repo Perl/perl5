@@ -1129,6 +1129,8 @@ print "not " unless "A \x{263a} B z C" =~ /A . B (??{ "z" }) C/;
 print "ok $test\n";
 $test++;
 
+my $ordA = ord('A');
+
 $_ = "a\x{100}b";
 if (/(.)(\C)(\C)(.)/) {
   print "ok 232\n";
@@ -1137,15 +1139,32 @@ if (/(.)(\C)(\C)(.)/) {
   } else {
     print "not ok 233\n";
   }
-  if ($2 eq "\xC4") {
-    print "ok 234\n";
+  if ($ordA == 65) { # ASCII (or equivalent), should be UTF-8
+      if ($2 eq "\xC4") {
+	  print "ok 234\n";
+      } else {
+	  print "not ok 234\n";
+      }
+      if ($3 eq "\x80") {
+	  print "ok 235\n";
+      } else {
+	  print "not ok 235\n";
+      }
+  } elsif ($ordA == 193) { # EBCDIC (or equivalent), should be UTF-EBCDIC
+      if ($2 eq "\x8C") {
+	  print "ok 234\n";
+      } else {
+	  print "not ok 234\n";
+      }
+      if ($3 eq "\x41") {
+	  print "ok 235\n";
+      } else {
+	  print "not ok 235\n";
+      }
   } else {
-    print "not ok 234\n";
-  }
-  if ($3 eq "\x80") {
-    print "ok 235\n";
-  } else {
-    print "not ok 235\n";
+      for (234..235) {
+	  print "not ok $_ # ord('A') == $ordA\n";
+      }
   }
   if ($4 eq "b") {
     print "ok 236\n";
@@ -1161,10 +1180,20 @@ $_ = "\x{100}";
 if (/(\C)/g) {
   print "ok 237\n";
   # currently \C are still tagged as UTF-8
-  if ($1 eq "\xC4") {
-    print "ok 238\n";
+  if ($ordA == 65) {
+      if ($1 eq "\xC4") {
+	  print "ok 238\n";
+      } else {
+	  print "not ok 238\n";
+      }
+  } elsif ($ordA == 193) {
+      if ($1 eq "\x8C") {
+	  print "ok 238\n";
+      } else {
+	  print "not ok 238\n";
+      }
   } else {
-    print "not ok 238\n";
+      print "not ok 238 # ord('A') == $ordA\n";
   }
 } else {
   for (237..238) {
@@ -1174,10 +1203,20 @@ if (/(\C)/g) {
 if (/(\C)/g) {
   print "ok 239\n";
   # currently \C are still tagged as UTF-8
-  if ($1 eq "\x80") {
-    print "ok 240\n";
+  if ($ordA == 65) {
+      if ($1 eq "\x80") {
+	  print "ok 240\n";
+      } else {
+	  print "not ok 240\n";
+      }
+  } elsif ($ordA == 193) {
+      if ($1 eq "\x41") {
+	  print "ok 240\n";
+      } else {
+	  print "not ok 240\n";
+      }
   } else {
-    print "not ok 240\n";
+      print "not ok 240 # ord('A') == $ordA\n";
   }
 } else {
   for (239..240) {
