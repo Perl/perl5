@@ -173,9 +173,9 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
  * SSPTR() converts the index returned by SSNEW/SSNEWa() into a pointer.
  */
 
-#define SSNEW(size)             save_alloc(aTHX_ (size), 0)
+#define SSNEW(size)             Perl_save_alloc(aTHX_ (size), 0)
 #define SSNEWt(n,t)             SSNEW((n)*sizeof(t))
-#define SSNEWa(size,align)	save_alloc(aTHX_ (size), \
+#define SSNEWa(size,align)	Perl_save_alloc(aTHX_ (size), \
     (align - ((int)((caddr_t)&PL_savestack[PL_savestack_ix]) % align)) % align)
 #define SSNEWat(n,t,align)	SSNEWa((n)*sizeof(t), align)
 
@@ -289,7 +289,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 	OP_REG_TO_MEM;					\
     } STMT_END
 
-#define JMPENV_PUSH_INIT(THROWFUNC) JMPENV_PUSH_INIT_ENV(*(JMPENV*)pcur_env,THROWFUNC) 
+#define JMPENV_PUSH_INIT(THROWFUNC) JMPENV_PUSH_INIT_ENV(*(JMPENV*)pcur_env,THROWFUNC)
 
 #define JMPENV_POST_CATCH_ENV(ce) \
     STMT_START {					\
@@ -314,7 +314,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 	(v) = EXCEPT_GET_ENV(ce);				\
     } STMT_END
 
-#define JMPENV_PUSH(v) JMPENV_PUSH_ENV(*(JMPENV*)pcur_env,v) 
+#define JMPENV_PUSH(v) JMPENV_PUSH_ENV(*(JMPENV*)pcur_env,v)
 
 #define JMPENV_POP_ENV(ce) \
     STMT_START {						\
@@ -322,7 +322,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 	    PL_top_env = (ce).je_prev;				\
     } STMT_END
 
-#define JMPENV_POP  JMPENV_POP_ENV(*(JMPENV*)pcur_env) 
+#define JMPENV_POP  JMPENV_POP_ENV(*(JMPENV*)pcur_env)
 
 #define JMPENV_JUMP(v) \
     STMT_START {						\
