@@ -9,6 +9,8 @@ BEGIN {
 }
 
 use Config;
+
+# Make sure when we run `perl` we get this perl
 $ENV{'PATH'} = '.' . $Config{'path_sep'} . $ENV{'PATH'};
 
 use Test::More tests => 5;

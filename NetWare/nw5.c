@@ -212,7 +212,7 @@ long
 nw_telldir(DIR *dirp)
 {
 	dTHX;
-	Perl_croak(aTHX_ "telldir function is not implemented");
+	Perl_croak(aTHX_ "The telldir() function is not implemented on NetWare\n");
 	return 0l;
 }
 
@@ -298,7 +298,7 @@ nw_crypt(const char *txt, const char *salt)
     dTHR;
     return des_fcrypt(txt, salt, w32_crypt_buffer);
 #else
-    Perl_croak(aTHX_ "The crypt() function is unimplemented due to excessive paranoia.");
+    Perl_croak(aTHX_ "The crypt() function is not implemented on NetWare\n");
     return Nullch;
 #endif
 }
@@ -394,6 +394,8 @@ nw_fileno(FILE *pf)
 int
 nw_flock(int fd, int oper)
 {
+	dTHX;
+	Perl_croak(aTHX_ "The flock() function is not implemented on NetWare\n");
 	return 0;
 }
 
@@ -753,7 +755,7 @@ void
 nw_rewinddir(DIR *dirp)
 {
 	dTHX;
-	Perl_croak(aTHX_ "rewinddir function is not implemented");
+	Perl_croak(aTHX_ "The rewinddir() function is not implemented on NetWare\n");
 }
 
 void
@@ -767,7 +769,7 @@ void
 nw_seekdir(DIR *dirp, long loc)
 {
 	dTHX;
-	Perl_croak(aTHX_ "seekdir function is not implemented");
+	Perl_croak(aTHX_ "The seekdir() function is not implemented on NetWare\n");
 }
 
 int *

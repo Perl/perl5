@@ -3,7 +3,7 @@
 @rem CREATED: Sat Apr 14 13:05:44 2001
 @rem LAST REVISED: Sat Apr 14 2001
 @rem Batch file to toggle b/n building and not building NetWare
-@rem specific extns - cgi2perl & perl2ucs.
+@rem specific extns - cgi2perl, perl2ucs & ucsext.
 
 if "%1" == "" goto Usage
 

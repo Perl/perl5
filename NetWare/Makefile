@@ -306,19 +306,24 @@ EXTENSION_NLP	=		\
 #		$(CWD_NLP)	\
 # cwd.pm needs to be modifed for NetWare.
 
-# Begin - Following is required to build NetWare specific extensions Perl2UCS & CGI2Perl
 
-PERL2UCS		= $(EXTDIR)\Perl2UCS\Perl2UCS
-CGI2PERL		= CGI2Perl\CGI2Perl
+# Begin - Following is required to build NetWare specific extensions Perl2UCS, UCSExt & CGI2Perl
 
-PERL2UCS_NLP = $(AUTODIR)\Perl2UCS\Perl2UCS.nlp
-CGI2PERL_NLP = \CGI2Perl\CGI2Perl.nlp
+PERL2UCS	= $(EXTDIR)\Perl2UCS\Perl2UCS
+UCSEXT		= $(EXTDIR)\UCSExt\UCSExt
+CGI2PERL	= CGI2Perl\CGI2Perl
+
+PERL2UCS_NLP	=	$(AUTODIR)\Perl2UCS\Perl2UCS.nlp
+UCSEXT_NLP		=	$(AUTODIR)\UCSExt\UCSExt.nlp
+CGI2PERL_NLP	=	\CGI2Perl\CGI2Perl.nlp
 
 NETWARE_EXTNS =	\
 		$(PERL2UCS_NLP)	\
+		$(UCSEXT_NLP)	\
 		$(CGI2PERL_NLP)
 
 # End
+
 
 ECHO_SRC			= TestNLM\echo\echo.c
 TYPE_SRC			= TestNLM\type\type.c
@@ -388,7 +393,7 @@ BASE_LIBRARIES =
 !endif																#!ifdef WATCOM	
 !endif																#!ifndef BASE_LIBRARIES
 
-COPYRIGHT = Copyright 2001 by Novell, Inc. All rights reserved.
+COPYRIGHT = (C) Copyright 2001-2002 Novell Inc. All rights reserved.
 
 EXPORTS = Export @perl.imp
 
@@ -763,7 +768,7 @@ X2P_OBJ		= $(X2P_SRC:.c=.obj)
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Storable/Storable List/Util MIME/Base64/Base64 \
-		XS/Typemap/Typemap Unicode/Normalize/Normalize Sys/Hostnamees
+		XS/Typemap/Typemap Unicode/Normalize/Normalize Sys/Hostname
 
 
 STATIC_EXT	= DynaLoader
@@ -939,7 +944,7 @@ HEADERS :
 	@copy << stdio.h >\nul
 
 /*
- * Copyright © 2001 Novell, Inc. All Rights Reserved.
+ * (C) Copyright 2001-2002 Novell Inc. All rights reserved.
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the README file.
@@ -976,7 +981,7 @@ HEADERS :
 	@copy << string.h >\nul
 
 /*
- * Copyright © 2001 Novell, Inc. All Rights Reserved.
+ * (C) Copyright 2001-2002 Novell Inc. All rights reserved.
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the README file.
@@ -1171,7 +1176,7 @@ $(EXT_MAIN_OBJ) : $(CLIB_H_FILES)
 #	$(MINIPERL) -I..\lib config_sh.PL $(NW_CFG_VARS) config.nw5 > ..\config.sh
 #	@pause
 #	cd ..
-#	del config.sh
+#	del /f /q config.sh
 #	rename nwconfig.sh config.sh
 #	cd netware
 
@@ -1406,6 +1411,14 @@ $(PERL2UCS_NLP):
 	cd ..\..\netware
 !endif
 
+$(UCSEXT_NLP):
+!if "$(NW_EXTNS)"=="yes"
+	cd $(EXTDIR)\$(*B)
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\netware
+!endif
+
 nwclean:
 	-rmdir /s /q $(REL_DIR)
 	-rmdir /s /q $(DEB_DIR)
@@ -1473,13 +1486,16 @@ distclean: clean nwclean
 	-del /f /q $(CONFIGPM)
 	-del /f /q bin\*.bat
 	cd $(EXTDIR)
-	-del /s /q *.lib *.def *.map *.pdb *.bs Makefile *$(o) pm_to_blib *.xdc *.err
+	-del /s /f /q *.lib *.def *.map *.pdb *.bs Makefile *$(o) pm_to_blib *.xdc *.err
 	cd ..\netware
 !if "$(NW_EXTNS)"=="yes"
 	cd cgi2perl
 	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map
 	cd ..
 	cd $(EXTDIR)\Perl2UCS
+	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.c
+	cd ..\..\netware
+	cd $(EXTDIR)\UCSExt
 	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.c
 	cd ..\..\netware
 !endif
