@@ -361,7 +361,7 @@ XS(XS_version_new)
 	if (items == 3 )
 	{
 	    char *vs = savepvn(SvPVX(ST(2)),SvCUR(ST(2)));
-	    version = newSVpvf("v%s",vs);
+	    version = Perl_newSVpvf(aTHX_ "v%s",vs);
 	}
 
 	PUSHs(new_version(version));
