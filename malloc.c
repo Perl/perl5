@@ -63,7 +63,7 @@
     # Which allocator to use if PERL_SBRK_VIA_MALLOC
     SYSTEM_ALLOC(a) 		malloc(a)
 
-    # Minimal alignment (power of 2) of SYSTEM_ALLOC
+    # Minimal alignment (in bytes, should be a power of 2) of SYSTEM_ALLOC
     SYSTEM_ALLOC_ALIGNMENT	MEM_ALIGNBYTES
 
     # Disable memory overwrite checking with DEBUGGING.  Memory and speed
