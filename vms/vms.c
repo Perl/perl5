@@ -5108,8 +5108,8 @@ Perl_do_spawn(pTHX_ char *cmd)
   if (!cmd || !*cmd) {
     hadcmd = 0;
     sts = lib$spawn(0,0,0,0,0,0,&substs,0,0,0,0,0,0);
-  if (!(sts & 1)) {
-    switch (sts) {
+    if (!(sts & 1)) {
+      switch (sts) {
       case RMS$_FNF:  case RMS$_DNF:
         set_errno(ENOENT); break;
       case RMS$_DIR:
@@ -5126,14 +5126,15 @@ Perl_do_spawn(pTHX_ char *cmd)
         _ckvmssts(sts); /* fall through */
       default:  /* SS$_DUPLNAM, SS$_CLI, resource exhaustion, etc. */
         set_errno(EVMSERR); 
+      }
+      set_vaxc_errno(sts);
+      if (ckWARN(WARN_EXEC)) {
+	Perl_warner(aTHX_ WARN_EXEC,"Can't spawn \"%s\": %s",
+		    hadcmd ? cmd : "",
+		    Strerror(errno));
+      }
     }
-    set_vaxc_errno(sts);
-    if (ckWARN(WARN_EXEC)) {
-      Perl_warner(aTHX_ WARN_EXEC,"Can't spawn \"%s\": %s",
-             hadcmd ? cmd : "",
-             Strerror(errno));
-    }
-  }
+    sts = substs;
   }
   else {
     (void) safe_popen(cmd, "nW", (int *)&sts);
