@@ -506,6 +506,12 @@ and interact() functions.  Find the library (and we hope its
 successor F<IPC::Chat>) at your nearest CPAN archive as detailed
 in the SEE ALSO section below.
 
+The newer Expect.pm module from CPAN also addresses this kind of thing.
+This module requires two other modules from CPAN: IO::Pty and IO::Stty.
+It sets up a pseudo-terminal to interact with programs that insist on
+using talking to the terminal device driver.  If your system is 
+amongst those supported, this may be your best bet.
+
 =head2 Bidirectional Communication with Yourself
 
 If you want, you may make low-level pipe() and fork()

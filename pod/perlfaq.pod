@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 1997/04/24 22:46:06 $)
+perlfaq - frequently asked questions about Perl ($Date: 1998/06/22 15:15:57 $)
 
 =head1 DESCRIPTION
 
@@ -64,8 +64,8 @@ at http://www.perl.com/perl/faq/ .
 =head2 How to contribute to this document
 
 You may mail corrections, additions, and suggestions to
-perlfaq-suggestions@perl.com .  Mail sent to the old perlfaq alias
-will merely cause the FAQ to be sent to you.
+perlfaq-suggestions@perl.com .  This alias should not be 
+used to I<ask> FAQs.  It's for fixing the current FAQ.
 
 =head2 What will happen if you mail your Perl programming problems to the authors
 
@@ -88,30 +88,23 @@ Perl Porters.
 
 =head1 Author and Copyright Information
 
-Copyright (c) 1997 Tom Christiansen and Nathan Torkington.
+Copyright (c) 1997, 1998 Tom Christiansen and Nathan Torkington.
 All rights reserved.
 
-=head2 Noncommercial Reproduction
+=head2 Bundled Distributions
 
-Permission is granted to distribute this document, in part or in full,
-via electronic means or printed copy providing that (1) that all credits
-and copyright notices be retained, (2) that no charges beyond reproduction
-be involved, and (3) that a reasonable attempt be made to use the most
-current version available.
+When included as part of the Standard Version of Perl, or as part of
+its complete documentation whether printed or otherwise, this work
+may be distributed only under the terms of Perl's Artistic License.
+Any distribution of this file or derivatives thereof I<outside>
+of that package require that special arrangements be made with
+copyright holder.
 
-Furthermore, you may include this document in any distribution of the
-full Perl source or binaries, in its verbatim documentation, or on a
-complete dump of the CPAN archive, providing that the three stipulations
-given above continue to be met.
-
-=head2 Commercial Reproduction
-
-Requests for all other distribution rights, including the incorporation
-in part or in full of this text or its code into commercial products
-such as but not limited to books, magazine articles, or CD-ROMs, must
-be made to perlfaq-legal@perl.com.  Any commercial use of any portion
-of this document without prior written authorization by its authors
-will be subject to appropriate action.
+Irrespective of its distribution, all code examples in these files
+are hereby placed into the public domain.  You are permitted and
+encouraged to use this code in your own programs for fun
+or for profit as you see fit.  A simple comment in the code giving
+credit would be courteous but is not required.
 
 =head2 Disclaimer
 
@@ -123,6 +116,11 @@ in respect of this information or its use.
 =head1 Changes
 
 =over 4
+
+=head 22/June/98
+
+Significant changes throughout in preparation for the 5.005
+release.
 
 =item 24/April/97
 

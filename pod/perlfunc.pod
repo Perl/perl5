@@ -3872,9 +3872,9 @@ C<$?> like this:
     $signal_num  = $? & 127;
     $dumped_core = $? & 128;
 
-When the arguments get executed via the system shell, results will
-be subject to its quirks and capabilities.  See L<perlop/"`STRING`">
-and L</exec> for details.
+When the arguments get executed via the system shell, results
+and return codes will be subject to its quirks and capabilities.
+See L<perlop/"`STRING`"> and L</exec> for details.
 
 =item syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET
 

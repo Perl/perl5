@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regexps ($Revision: 1.17 $, $Date: 1997/04/24 22:44:10 $)
+perlfaq6 - Regexps ($Revision: 1.21 $, $Date: 1998/06/22 04:23:04 $)
 
 =head1 DESCRIPTION
 
