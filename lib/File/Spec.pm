@@ -10,7 +10,7 @@ my %module = (MacOS   => 'Mac',
 	      os2     => 'OS2',
 	      VMS     => 'VMS',
 	      epoc    => 'Epoc',
-	      NetWare => 'NW5',
+	      NetWare => 'Win32', # Yes, File::Spec::Win32 works on NetWare.
 	      cygwin  => 'Cygwin');
 
 

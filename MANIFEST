@@ -988,7 +988,6 @@ lib/File/Spec/Cygwin.pm		portable operations on Cygwin file names
 lib/File/Spec/Epoc.pm		portable operations on EPOC file names
 lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
 lib/File/Spec/Mac.pm		portable operations on Mac file names
-lib/File/Spec/NW5.pm		portable operations on NetWare file names
 lib/File/Spec/OS2.pm		portable operations on OS2 file names
 lib/File/Spec/t/Functions.t     See if File::Spec::Functions works
 lib/File/Spec/t/rel2abs2rel.t   See if File::Spec->rel2abs/abs2rel works
