@@ -2161,6 +2161,7 @@ S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
 "-s              enable rudimentary parsing for switches after programfile",
 "-S              look for programfile using PATH environment variable",
 "-T              enable tainting checks",
+"-t              enable tainting warnings",
 "-u              dump core after parsing program",
 "-U              allow unsafe operations",
 "-v              print version, subversion (includes VERY IMPORTANT perl info)",
