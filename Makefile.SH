@@ -233,6 +233,12 @@ lintflags = -hbvxac
 all: $(FIRSTMAKEFILE) miniperl $(private) $(plextract) $(public) $(dynamic_ext)
 	@echo " "; echo "	Everything is up to date."
 
+compile: all
+	echo "testing compilation" > testcompile;
+	cd utils;  $(MAKE) compile;
+	cd x2p; $(MAKE) compile; 
+	cd pod; $(MAKE) compile;
+
 translators:	miniperl lib/Config.pm FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
 
@@ -373,6 +379,12 @@ $(plextract):	miniperl lib/Config.pm
 install: all install.perl install.man
 
 install.perl:	all installperl
+	if [ -n "$(COMPILE)" ]; \
+	then \
+		cd utils; $(MAKE) compile; \
+		cd ../x2p; $(MAKE) compile; \
+		cd ../pod; $(MAKE) compile; \
+	fi
 	$(LDLIBPTH) ./perl installperl
 
 install.man:	all installman
@@ -485,6 +497,7 @@ _tidy:
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
 	sh ext/util/make_ext clean $$x MAKE=$(MAKE) ; \
 	done
+	rm -f testcompile compilelog
 
 # Do not 'make _cleaner' directly.
 _cleaner:
@@ -503,6 +516,7 @@ _cleaner:
 	rm -f lib/.exists
 	rm -f h2ph.man pstruct
 	rm -rf .config
+	rm -f testcompile compilelog
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.

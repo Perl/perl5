@@ -910,6 +910,7 @@ utils/perlbug.PL	A simple tool to submit a bug report
 utils/perldoc.PL	A simple tool to find & display perl's documentation
 utils/pl2pm.PL		A pl to pm translator
 utils/splain.PL		Stand-alone version of diagnostics.pm
+utils/perlcc.PL		Front-end for compiler
 vms/config.vms		default config.h for VMS
 vms/descrip.mms		MM[SK] description file for build
 vms/ext/DCLsym/0README.txt	ReadMe file for VMS::DCLsym

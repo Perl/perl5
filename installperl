@@ -38,8 +38,8 @@ while (@ARGV) {
 umask 022 unless $Is_VMS;
 
 @scripts = qw(	utils/c2ph utils/h2ph utils/h2xs
-		utils/perlbug utils/perldoc utils/pl2pm utils/splain
-		x2p/s2p x2p/find2perl
+		utils/perlbug utils/perldoc utils/pl2pm utils/splain utils/perlcc
+		x2p/s2p x2p/find2perl 
 		pod/pod2man pod/pod2html pod/pod2latex pod/pod2text);
 
 if ($Is_VMS) { @scripts = map { "$_.Com" } @scripts; }
@@ -51,6 +51,11 @@ if ($Is_VMS) { @scripts = map { "$_.Com" } @scripts; }
 if ($^O eq 'dos') {
     push(@scripts,'djgpp/fixpmain');
     $archpms{config} = $archpms{filehand} = 1;
+}
+
+if ((-e "testcompile") && (defined($ENV{'COMPILE'})))
+{
+	push(@scripts, map("$_.exe", @scripts));
 }
 
 find(sub {
