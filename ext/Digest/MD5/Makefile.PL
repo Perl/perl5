@@ -13,7 +13,8 @@ unless ($Config{d_u32align}) {
 my @optimize = ();
 if ($^O eq 'VMS') {
     if (defined($Config{ccname})) {
-        if ($Config{ccversion} <= 50390006 && grep(/VMS_VAX/, @INC) && ($Config{ccname} eq 'DEC')) {
+        if (grep(/VMS_VAX/, @INC) && ($Config{ccname} eq 'DEC')) {
+            # VAX compiler optimizer even as late as v6.4 gets stuck
             @optimize = ("OPTIMIZE","/Optimize=(NODISJOINT)");
         }
     }
