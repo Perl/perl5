@@ -19,7 +19,7 @@ BEGIN {
 use warnings;
 use strict;
 
-# Test::MJore doesn't have fresh_perl_is() yet
+# Test::More doesn't have fresh_perl_is() yet
 # use Test::More tests => 240;
 
 BEGIN {
@@ -137,9 +137,6 @@ for my $test (
     ok(eq_array( [ eval { call_pv('d', $flags, @$args) }, $@ ],
 	[ "its_dead_jim\n" ]), "$description eval { call_pv('d') }");
 
-    #use Data::Dumper; print Dumper([ eval { eval_sv('d', $flags), $@ }, $@ ]);
-#    print Dumper([ ($flags & (G_ARRAY|G_DISCARD)) ? (0) : (undef, 1),
-#		"its_dead_jim\n", undef ]);
     ok(eq_array( [ eval { eval_sv('d', $flags), $@ }, $@ ],
 	[ ($flags & (G_ARRAY|G_DISCARD)) ? (0) : (undef, 1),
 		"its_dead_jim\n", '' ]),
