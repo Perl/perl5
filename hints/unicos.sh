@@ -33,6 +33,9 @@ d_setitimer='undef'
 # These exist but do not really work.
 d_setregid='undef'
 d_setreuid='undef'
+# No shared libraries.
+so='none'
+# Threads call-back unit.
 cat > UU/usethreads.cbu <<'EOCBU'
 # This script UU/usethreads.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use threads.
