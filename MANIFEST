@@ -2083,6 +2083,7 @@ t/op/sort.t			See if sort works
 t/op/splice.t			See if splice works
 t/op/split.t			See if split works
 t/op/sprintf.t			See if sprintf works
+t/op/srand.t                    See if srand works
 t/op/stat.t			See if stat works
 t/op/study.t			See if study works
 t/op/subst.t			See if substitution works

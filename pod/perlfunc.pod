@@ -4786,6 +4786,11 @@ seed was just the current C<time>.  This isn't a particularly good seed,
 so many old programs supply their own seed value (often C<time ^ $$> or
 C<time ^ ($$ + ($$ << 15))>), but that isn't necessary any more.
 
+Most implementations of C<srand> take an integer and will silently
+truncate decimal numbers.  This means C<srand(42)> will usually
+produce the same results as C<srand(42.1)>.  To be safe, always pass
+C<srand> an integer.
+
 In fact, it's usually not necessary to call C<srand> at all, because if
 it is not called explicitly, it is called implicitly at the first use of
 the C<rand> operator.  However, this was not the case in version of Perl
