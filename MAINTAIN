@@ -168,7 +168,7 @@ ext/GDBM_File/GDBM_File.pm
 ext/GDBM_File/GDBM_File.xs	
 ext/GDBM_File/Makefile.PL	
 ext/GDBM_File/typemap	
-ext/IO/*			gbarr
+ext/IO/*			
 ext/IPC/SysV/*			gbarr
 ext/NDBM_File/Makefile.PL	
 ext/NDBM_File/NDBM_File.pm	

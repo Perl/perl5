@@ -240,7 +240,8 @@ L<IO::Handle>
 
 =head1 AUTHOR
 
-Graham Barr <gbarr@pobox.com>
+Graham Barr. Currently maintained by the Perl Porters.  Please report all
+bugs to <perl5-porters@perl.org>.
 
 =head1 COPYRIGHT
 
