@@ -962,7 +962,7 @@ static char bucket_of[] =
 
 static void	morecore	(register int bucket);
 #  if defined(DEBUGGING)
-static void	botch		(char *diag, char *s);
+static void	botch		(char *diag, char *s, char *file, int line);
 #  endif
 static void	add_to_chain	(void *p, MEM_SIZE size, MEM_SIZE chip);
 static void*	get_from_chain	(MEM_SIZE size);
@@ -1261,23 +1261,30 @@ write2(char *mess)
 
 #ifdef DEBUGGING
 #undef ASSERT
-#define	ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p));  else
+#define	ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p),__FILE__,__LINE__);  else
 static void
-botch(char *diag, char *s)
+botch(char *diag, char *s, char *file, int line)
 {
     if (!(PERL_MAYBE_ALIVE && PERL_GET_THX))
 	goto do_write;
     else {
 	dTHX;
+	char linebuf[10];
 
 	if (PerlIO_printf(PerlIO_stderr(),
-			  "assertion botched (%s?): %s\n", diag, s) != 0) {
+			  "assertion botched (%s?): %s%s %s:%d\n",
+			  diag, s, file, line) != 0) {
 	 do_write:		/* Can be initializing interpreter */
 	    write2("assertion botched (");
 	    write2(diag);
 	    write2("?): ");
 	    write2(s);
-	    write2("\n");
+	    write2(" (");
+	    write2(file);
+	    write2(":");
+	    sprintf(linebuf, "%d", line);
+	    write2(linebuf);
+	    write2(")\n");
 	}
 	PerlProc_abort();
     }
