@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..854\n";
+print "1..855\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2666,4 +2666,20 @@ print "# some Unicode properties\n";
     print "A\x{200}\x{300}B" =~ /(?<=A..)B/ ? "ok 852\n" : "not ok 852\n";
     print "\x{400}AB"        =~ /(?<=\x{400}.)B/ ? "ok 853\n" : "not ok 853\n";
     print "\x{500\x{600}}B"  =~ /(?<=\x{500}.)B/ ? "ok 854\n" : "not ok 854\n";
+}
+
+{
+    print "# [ID 20020124.005]\n";
+
+    # Fixed by #14795.
+
+    $char = "\x{f00f}";
+    $x = "$char b $char";
+
+    $x =~ s{($char)}{
+	"c" =~ /d/;
+	"x";
+    }ge;
+
+    print $x eq "x b x" ? "ok 855\n" : "not ok 855\n";
 }
