@@ -9,7 +9,7 @@ BEGIN {
     $| = 1;
 }
 
-print "1..93\n";
+print "1..94\n";
 
 $a = {};
 bless $a, "Bob";
@@ -58,6 +58,8 @@ $a = new Alice;
 
 test $a->isa("Alice");
 test $a->isa("main::Alice");    # check that alternate class names work
+
+test(("main::Alice"->new)->isa("Alice"));
 
 test $a->isa("Bob");
 test $a->isa("main::Bob");
