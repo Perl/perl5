@@ -1,7 +1,7 @@
 CONVERTERS = pod2html pod2latex pod2man
 
 all: $(CONVERTERS) man
-PERL = perl
+PERL = ../miniperl
 
 POD = 	\
 	perl.pod	\
