@@ -7,7 +7,7 @@ BEGIN {
 	eval { my $q = pack "q", 0 };
 	if ($@) {
 		print "1..0\n# no 64-bit types\n";
-		bye();
+		exit(0);
 	}
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
@@ -15,7 +15,7 @@ BEGIN {
 	require Config; import Config;
 	if ($Config{lseeksize} < 8) {
 		print "1..0\n# no 64-bit file offsets\n";
-		bye();
+		exit(0);
 	}
 }
 
