@@ -28,6 +28,346 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.7.X		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 15974] By: jhi                                   on 2002/04/17  14:34:16
+        Log: Subject: [PATCH B::Deparse] "foo bar"->()
+             From: Robin Houston <robin@kitsite.com>
+             Date: Wed, 17 Apr 2002 15:45:32 +0100
+             Message-ID: <20020417154532.A25446@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 15973] By: jhi                                   on 2002/04/17  14:34:03
+        Log: metaconfig unit change for #15972.
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
+[ 15972] By: jhi                                   on 2002/04/17  14:31:42
+        Log: As suggested by Arthur: the threads and threads::shared
+             modules are always present.  This tries to preempt two
+             kinds of bug reports: (1) "the Perl 5.8.0 was supposed
+             to have this new fancy threads implementation but my Perl
+             doesn't seem to have it" (2) someone attempting to install
+             threads using CPAN.pm and CPAN.pm helpfully starting to
+             install perl 5.8.0 (which they might already have installed).
+     Branch: perl
+	   ! Configure ext/threads/Makefile.PL
+	   ! ext/threads/shared/Makefile.PL ext/threads/shared/shared.pm
+	   ! ext/threads/shared/shared.xs ext/threads/threads.pm
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 15971] By: jhi                                   on 2002/04/17  14:19:07
+        Log: More signedness nits.
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 15970] By: jhi                                   on 2002/04/17  13:02:33
+        Log: fast_abs_path() is tainted.
+     Branch: perl
+	   ! ext/Cwd/t/cwd.t
+____________________________________________________________________________
+[ 15969] By: jhi                                   on 2002/04/17  12:56:17
+        Log: Signedness nit.
+     Branch: perl
+	   ! ext/Encode/bin/enc2xs
+____________________________________________________________________________
+[ 15968] By: jhi                                   on 2002/04/17  12:45:42
+        Log: Subject: gcc on HP
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 17 Apr 2002 12:43:38 +0200
+             Message-Id: <20020417124159.66F5.H.M.BRAND@hccnet.nl>     
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 15967] By: jhi                                   on 2002/04/17  12:43:07
+        Log: Add just a little bit more explanation to PerlIO::encoding.
+     Branch: perl
+	   ! ext/PerlIO/encoding/encoding.pm
+____________________________________________________________________________
+[ 15966] By: jhi                                   on 2002/04/17  12:32:17
+        Log: PerlIO::encoding 0.01 from Dan Kogai.
+     Branch: perl
+	   + ext/PerlIO/encoding/MANIFEST ext/PerlIO/encoding/Makefile.PL
+	   + ext/PerlIO/encoding/encoding.pm
+	   + ext/PerlIO/encoding/encoding.xs
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15965] By: jhi                                   on 2002/04/17  12:24:56
+        Log: Upgrade to Encode 1.42, from Dan Kogai.
+     Branch: perl
+	   - ext/Encode/lib/Encode/XS.pm
+	   ! MANIFEST ext/Encode/Byte/Byte.pm ext/Encode/CN/CN.pm
+	   ! ext/Encode/Changes ext/Encode/EBCDIC/EBCDIC.pm
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs
+	   ! ext/Encode/Encode/Makefile_PL.e2x ext/Encode/Encode/_PM.e2x
+	   ! ext/Encode/JP/JP.pm ext/Encode/KR/KR.pm ext/Encode/MANIFEST
+	   ! ext/Encode/Symbol/Symbol.pm ext/Encode/TW/TW.pm
+	   ! ext/Encode/bin/enc2xs ext/Encode/bin/piconv
+	   ! ext/Encode/encoding.pm ext/Encode/lib/Encode/CN/HZ.pm
+	   ! ext/Encode/lib/Encode/Config.pm
+	   ! ext/Encode/lib/Encode/KR/2022_KR.pm ext/Encode/t/CN.t
+	   ! ext/Encode/t/Encoder.t ext/Encode/t/JP.t ext/Encode/t/KR.t
+	   ! ext/Encode/t/TW.t ext/Encode/t/Unicode.t
+	   ! ext/Encode/t/encoding.t
+____________________________________________________________________________
+[ 15964] By: jhi                                   on 2002/04/17  12:17:42
+        Log: Test tweaks from mjd and Benjamin Goldberg.
+     Branch: perl
+	   ! t/io/full.t
+____________________________________________________________________________
+[ 15963] By: jhi                                   on 2002/04/16  22:31:24
+        Log: Document taint-safeness.   Life in the fast_abs_path()
+             lane is unsafe.
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 15962] By: jhi                                   on 2002/04/16  22:14:41
+        Log: Subject: Re: [ID 20020416.001] 'close' does not report failure when buffer flush fails
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Tue, 16 Apr 2002 19:24:12 -0400
+             Message-ID: <20020416232412.14297.qmail@plover.com>
+     Branch: perl
+	   + t/io/full.t
+	   ! MANIFEST perlio.c
+____________________________________________________________________________
+[ 15961] By: jhi                                   on 2002/04/16  22:10:54
+        Log: Manifestations of mjd, from mjd.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15960] By: jhi                                   on 2002/04/16  22:10:11
+        Log: metaconfig unit change for #15959.
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
+[ 15959] By: jhi                                   on 2002/04/16  22:09:56
+        Log: Subject: Re: [-Uusedl] Encode does work but perl -V goes funny! 
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Tue, 16 Apr 2002 13:39:14 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10204161333450.28145-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 15958] By: jhi                                   on 2002/04/16  22:05:07
+        Log: Subject: [PATCH] Re: Unbalanced string table refcount (was: perl@15930)
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Tue, 16 Apr 2002 22:22:41 +0100
+             Message-ID: <20020416212241.GA315@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! embed.fnc global.sym hv.c universal.c
+____________________________________________________________________________
+[ 15957] By: jhi                                   on 2002/04/16  21:58:44
+        Log: Documents for Merijn and lots of XXXs for NI-S :-)
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perlrun.pod
+____________________________________________________________________________
+[ 15956] By: sky                                   on 2002/04/16  21:26:53
+        Log: Added queue.pm and test case, still disabled because of discovered race (or am I insane)
+             in the locking code. All threaded code seems to fail mysteriusly from the PL_utf8_idstart
+             stuff being 0xabababab on cleanup.
+     Branch: perl
+	   + ext/threads/shared/queue.pm ext/threads/shared/t/queue.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15955] By: nick                                  on 2002/04/16  20:46:03
+        Log: Integate mainline (other machine)
+     Branch: perlio
+	  !> Changes lib/FileCache.t patchlevel.h pod/perlhist.pod
+	  !> t/op/magic.t
+____________________________________________________________________________
+[ 15954] By: nick                                  on 2002/04/16  20:13:32
+        Log: Integrate mainline
+     Branch: perlio
+	  +> README.cn README.jp README.ko README.tw
+	  +> ext/threads/shared/t/av_refs.t
+	  +> ext/threads/shared/t/shared_attr.t t/japh/abigail.t
+	  !> (integrate 41 files)
+____________________________________________________________________________
+[ 15953] By: rgs                                   on 2002/04/16  19:53:28
+        Log: B::walkoptree bugfix (see also #15850)
+     Branch: perl
+	   ! ext/B/B.xs ext/B/t/terse.t
+____________________________________________________________________________
+[ 15952] By: rgs                                   on 2002/04/16  18:36:49
+        Log: Subject: [PATCH perltodo.pod] Small patch: detypo and style change
+             From: Philip Newton <Philip.Newton@gmx.net>
+             Date: Tue, 16 Apr 2002 21:09:44 +0200
+             Message-ID: <altobus8993o1qee6eu6ac1ro4topkt0vr@4ax.com>
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 15951] By: jhi                                   on 2002/04/16  13:44:28
+        Log: Subject: [PATCH] B::Deparse problems with japhs
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Tue, 16 Apr 2002 15:47:33 +0100
+             Message-Id: <200204161447.g3GElX016515@crypt.compulink.co.uk>    
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 15950] By: jhi                                   on 2002/04/16  13:36:30
+        Log: Stas' tainting worries, obscured by me.
+     Branch: perl
+	   ! ext/Cwd/t/cwd.t lib/Cwd.pm
+____________________________________________________________________________
+[ 15949] By: jhi                                   on 2002/04/16  13:16:31
+        Log: Pod tweak to avoid =item<japanese> problems.
+     Branch: perl
+	   ! README.jp
+____________________________________________________________________________
+[ 15948] By: jhi                                   on 2002/04/16  12:39:18
+        Log: Some UTF-8 todos.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 15947] By: jhi                                   on 2002/04/16  12:34:36
+        Log: Let's not promise too much: use utf8 only works on identifier
+             names, not package or subroutine names (admittedly limited [1], but
+             that's what the Camel says, and that's what we are going to stick
+             to for 5.8.0).  Also document that use vars does not do utf8.
+             [1] The obvious problem in both is that package and subroutine
+             names need to mappable to the filesystem.
+     Branch: perl
+	   ! lib/utf8.pm lib/vars.pm pod/perluniintro.pod
+____________________________________________________________________________
+[ 15946] By: jhi                                   on 2002/04/16  12:02:18
+        Log: Subject: [PATCH] small typo in IO::Pipe pod
+             From: Slaven Rezic <rezic@onlineoffice.de>
+             Date: Tue, 16 Apr 2002 12:31:10 +0200
+             Message-Id: <200204161031.MAA08156@mom.intra.onlineoffice.de>
+     Branch: perl
+	   ! ext/IO/lib/IO/Pipe.pm
+____________________________________________________________________________
+[ 15945] By: jhi                                   on 2002/04/16  11:57:45
+        Log: Subject: [PATCH] Flaw in Attribute::Handlers 0.76
+             From: Arthur Bergman <arthur@contiller.se>
+             Date: Tue, 16 Apr 2002 11:58:45 +0200
+             Message-Id: <8A74F82C-5120-11D6-AEA5-003065D64CBE@contiller.se>
+     Branch: perl
+	   ! lib/Attribute/Handlers.pm
+____________________________________________________________________________
+[ 15944] By: jhi                                   on 2002/04/16  04:31:49
+        Log: Add CJK READMEs from Autrijus Tang, Dan Kogai, and
+             Jungshik Shin.  Regen toc.
+     Branch: perl
+	   + README.cn README.jp README.ko README.tw
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 15943] By: jhi                                   on 2002/04/16  03:59:00
+        Log: my $utf8here, our $utf8here, and package variable $utf8here.
+             
+             The actual minimal fix is in utf8.c and from NI-S,
+             the rest are the tests (in fresh_perl since I couldn't get
+             them easily to work elsewhere) and a slight behaviour change:
+             previously UTF-8 identifiers had to start with an alphabetic
+             character.  No more so, now they can start with an (Unicode)
+             ID_Continue character (which however is not a (Unicode) digit).
+             (Limiting the first character to ID_Start would be rather
+             restrictive, since ID_Start allows only alphabetic letters.)
+             
+             TODO: use vars qw($utf8here).  This I don't find to be
+             a showstopper.
+     Branch: perl
+	   ! embed.fnc embed.h embedvar.h handy.h intrpvar.h lib/vars.pm
+	   ! perl.c perlapi.h proto.h sv.c t/run/fresh_perl.t utf8.c
+____________________________________________________________________________
+[ 15942] By: ams                                   on 2002/04/16  02:24:25
+        Log: Subject: [PATCH] lib/FileCache.t needs to use valid filename chars
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 15 Apr 2002 22:06:14 -0500
+             Message-Id: <a05101501b8e144aa1d4a@[172.16.52.1]>
+     Branch: perl
+	   ! lib/FileCache.t
+____________________________________________________________________________
+[ 15941] By: ams                                   on 2002/04/16  02:16:35
+        Log: Subject: [PATCH] s2p fix for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 15 Apr 2002 21:48:36 -0500
+             Message-Id: <a05101500b8e13f80e770@[172.16.52.1]>
+     Branch: perl
+	   ! configure.com t/x2p/s2p.t x2p/s2p.PL
+____________________________________________________________________________
+[ 15940] By: jhi                                   on 2002/04/15  22:23:31
+        Log: The LGPL code relicensed, with permission from Mark Klein of DIS.
+             (and the licensing of the other code clarified, from Mark Bixby.)
+     Branch: perl
+	   ! mpeix/mpeix.c
+____________________________________________________________________________
+[ 15939] By: jhi                                   on 2002/04/15  22:17:16
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 15938] By: sky                                   on 2002/04/15  22:13:17
+        Log: Add support for my $foo : shared; 
+             Add testcase for this.
+             Update manifest.
+     Branch: perl
+	   + ext/threads/shared/t/shared_attr.t
+	   ! MANIFEST ext/threads/shared/shared.pm
+____________________________________________________________________________
+[ 15937] By: jhi                                   on 2002/04/15  21:58:38
+        Log: Subject: [PATCH] t/japh/abigail.t (was: FETCH for tied $" called an odd number of times.)
+             From: abigail@foad.org
+             Date: Mon, 15 Apr 2002 17:41:17 +0200
+             Message-ID: <20020415154117.1559.qmail@foad.org>
+             
+             (With EBCDIC skippage added, and the skip reason
+             skippage on the two ?? loops tweaked.)
+     Branch: perl
+	   + t/japh/abigail.t
+	   ! MANIFEST t/TEST
+____________________________________________________________________________
+[ 15936] By: jhi                                   on 2002/04/15  21:48:56
+        Log: Subject: Re: [ID 20020412.005] Dancing ??s
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>    
+             Date: Sun, 14 Apr 2002 16:09:30 +0100
+             Message-Id: <200204141509.g3EF9UQ18111@crypt.compulink.co.uk>
+     Branch: perl
+	   ! pod/perlop.pod pp_hot.c t/op/pat.t
+____________________________________________________________________________
+[ 15935] By: jhi                                   on 2002/04/15  21:47:45
+        Log: Subject: [PATCH] t/test.pl additional functionality for runperl
+             From: abigail@foad.org
+             Date: Mon, 15 Apr 2002 17:40:02 +0200
+             Message-ID: <20020415154002.1549.qmail@foad.org>
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 15934] By: jhi                                   on 2002/04/15  21:46:27
+        Log: Subject: [PATCH]universal.c:XS_Internals_hv_clear_placeholders is too long
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 15 Apr 2002 14:05:26 -0500
+             Message-Id: <5.1.0.14.2.20020415125256.0332ede0@exchi01>
+     Branch: perl
+	   ! universal.c
+____________________________________________________________________________
+[ 15933] By: sky                                   on 2002/04/15  21:26:16
+        Log: Test arrays containing references, and references to shared arrays.
+     Branch: perl
+	   + ext/threads/shared/t/av_refs.t
+____________________________________________________________________________
+[ 15932] By: nick                                  on 2002/04/15  15:06:49
+        Log: Integrate mainline (for Encode)
+     Branch: perlio
+	  +> ext/Encode/Encode/ConfigLocal_PM.e2x
+	  +> ext/Encode/lib/Encode/JP/JIS7.pm
+	   - ext/Encode/lib/Encode/JP/2022_JP.pm
+	   - ext/Encode/lib/Encode/JP/2022_JP1.pm
+	   - ext/Encode/lib/Encode/JP/JIS.pm
+	  !> (integrate 26 files)
+____________________________________________________________________________
+[ 15931] By: ams                                   on 2002/04/15  14:51:31
+        Log: Subject: [PATCH] Chip didn't time travel.
+             From: abigail@foad.org
+             Date: Mon, 15 Apr 2002 17:40:22 +0200
+             Message-Id: <20020415154022.1554.qmail@foad.org>
+     Branch: perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[ 15930] By: jhi                                   on 2002/04/15  14:40:56
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 15929] By: jhi                                   on 2002/04/15  14:33:52
         Log: The #15921 made the 'no warnings' unnecessary.
      Branch: perl
