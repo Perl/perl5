@@ -8,10 +8,11 @@ use File::Compare;
 use File::Basename;
 use File::Path qw(rmtree);
 require Exporter;
-use vars qw(@ISA @EXPORT $VERSION);
-@ISA     = qw(Exporter);
-@EXPORT  = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f);
-$VERSION = '1.05';
+use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
+@ISA       = qw(Exporter);
+@EXPORT    = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f chmod 
+                dos2unix);
+$VERSION = '1.07';
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -30,7 +31,8 @@ ExtUtils::Command - utilities to replace common UNIX commands in Makefiles etc.
   perl -MExtUtils::Command       -e mkpath directories...
   perl -MExtUtils::Command       -e eqtime source destination
   perl -MExtUtils::Command       -e test_f file
-  perl -MExtUtils::Command=chmod -e chmod mode files...
+  perl -MExtUtils::Command       -e chmod mode files...
+  ...
 
 =head1 DESCRIPTION
 
@@ -132,34 +134,48 @@ sub touch {
 
 =item mv source... destination
 
-Moves source to destination.
-Multiple sources are allowed if destination is an existing directory.
+Moves source to destination.  Multiple sources are allowed if
+destination is an existing directory.
+
+Returns true if all moves succeeded, false otherwise.
 
 =cut 
 
 sub mv {
-    my $dst = pop(@ARGV);
     expand_wildcards();
-    croak("Too many arguments") if (@ARGV > 1 && ! -d $dst);
-    foreach my $src (@ARGV) {
-        move($src,$dst);
+    my @src = @ARGV;
+    my $dst = pop @src;
+
+    croak("Too many arguments") if (@src > 1 && ! -d $dst);
+
+    my $nok = 0;
+    foreach my $src (@src) {
+        $nok ||= !move($src,$dst);
     }
+    return !$nok;
 }
 
 =item cp source... destination
 
-Copies source to destination.
-Multiple sources are allowed if destination is an existing directory.
+Copies source to destination.  Multiple sources are allowed if
+destination is an existing directory.
+
+Returns true if all copies succeeded, false otherwise.
 
 =cut
 
 sub cp {
-    my $dst = pop(@ARGV);
     expand_wildcards();
-    croak("Too many arguments") if (@ARGV > 1 && ! -d $dst);
-    foreach my $src (@ARGV) {
-        copy($src,$dst);
+    my @src = @ARGV;
+    my $dst = pop @src;
+
+    croak("Too many arguments") if (@src > 1 && ! -d $dst);
+
+    my $nok = 0;
+    foreach my $src (@src) {
+        $nok ||= !copy($src,$dst);
     }
+    return $nok;
 }
 
 =item chmod mode files...
@@ -169,6 +185,7 @@ Sets UNIX like permissions 'mode' on all the files.  e.g. 0666
 =cut 
 
 sub chmod {
+    local @ARGV = @ARGV;
     my $mode = shift(@ARGV);
     expand_wildcards();
     chmod(oct $mode,@ARGV) || die "Cannot chmod ".join(' ',$mode,@ARGV).":$!";
@@ -194,12 +211,40 @@ Tests if a file exists
 
 sub test_f
 {
- exit !-f shift(@ARGV);
+ exit !-f $ARGV[0];
 }
 
+=item dos2unix
 
-1;
-__END__ 
+Converts DOS and OS/2 linefeeds to Unix style recursively.
+
+=cut
+
+sub dos2unix {
+    require File::Find;
+    File::Find::find(sub {
+        return if -d;
+        return unless -w _;
+        return unless -r _;
+        return if -B _;
+
+        local $\;
+
+	my $orig = $_;
+	my $temp = '.dos2unix_tmp';
+	open ORIG, $_ or do { warn "dos2unix can't open $_: $!"; return };
+	open TEMP, ">$temp" or 
+	    do { warn "dos2unix can't create .dos2unix_tmp: $!"; return };
+        while (my $line = <ORIG>) { 
+            $line =~ s/\015\012/\012/g;
+            print TEMP $line;
+        }
+	close ORIG;
+	close TEMP;
+	rename $temp, $orig;
+
+    }, @ARGV);
+}
 
 =back
 
@@ -213,7 +258,9 @@ ExtUtils::MakeMaker, ExtUtils::MM_Unix, ExtUtils::MM_Win32
 
 =head1 AUTHOR
 
-Nick Ing-Simmons <F<nick@ni-s.u-net.com>>.
+Nick Ing-Simmons C<ni-s@cpan.org>
+
+Currently maintained by Michael G Schwern C<schwern@pobox.com>.
 
 =cut
 

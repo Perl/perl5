@@ -398,6 +398,7 @@ sub run_filter {
 
 Copies each key of %from_to to its corresponding value efficiently.
 Filenames with the extension .pm are autosplit into the $autosplit_dir.
+Any destination directories are created.
 
 $filter_cmd is an optional shell command to run each .pm file through
 prior to splitting and copying.  Input is the contents of the module,
@@ -416,8 +417,6 @@ sub pm_to_blib {
     use File::Path qw(mkpath);
     use File::Compare qw(compare);
     use AutoSplit;
-    # my $my_req = $self->catfile(qw(auto ExtUtils Install forceunlink.al));
-    # require $my_req; # Hairy, but for the first
 
     if (!ref($fromto) && -r $fromto)
      {
@@ -533,14 +532,14 @@ Will be prepended to each install path.
 
 Original author lost in the mists of time.  Probably the same as Makemaker.
 
-Currently maintained by Michael G Schwern <F<schwern@pobox.com>>
+Currently maintained by Michael G Schwern C<schwern@pobox.com>
 
-Send patches and ideas to <F<makemaker@perl.org>>.
+Send patches and ideas to C<makemaker@perl.org>.
 
 Send bug reports via http://rt.cpan.org/.  Please send your
 generated Makefile along with your report.
 
-For more up-to-date information, see http://www.makemaker.org.
+For more up-to-date information, see L<http://www.makemaker.org>.
 
 
 =head1 LICENSE
@@ -548,7 +547,7 @@ For more up-to-date information, see http://www.makemaker.org.
 This program is free software; you can redistribute it and/or 
 modify it under the same terms as Perl itself.
 
-See F<http://www.perl.com/perl/misc/Artistic.html>
+See L<http://www.perl.com/perl/misc/Artistic.html>
 
 
 =cut

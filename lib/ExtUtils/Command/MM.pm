@@ -228,7 +228,7 @@ uninstallation.
 =cut
 
 sub uninstall {
-    my($packlist) = shift;
+    my($packlist) = shift @ARGV;
 
     require ExtUtils::Install;
 
