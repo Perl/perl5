@@ -682,6 +682,13 @@ Perl_do_aexec(pTHXo_ SV* really, SV** mark, SV** sp)
     return ((CPerlObj*)pPerl)->Perl_do_aexec(really, mark, sp);
 }
 
+#undef  Perl_do_aexec5
+bool
+Perl_do_aexec5(pTHXo_ SV* really, SV** mark, SV** sp, int fd, int flag)
+{
+    return ((CPerlObj*)pPerl)->Perl_do_aexec5(really, mark, sp, fd, flag);
+}
+
 #undef  Perl_do_binmode
 int
 Perl_do_binmode(pTHXo_ PerlIO *fp, int iotype, int flag)

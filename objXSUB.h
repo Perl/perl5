@@ -1147,6 +1147,10 @@
 #define Perl_do_aexec		pPerl->Perl_do_aexec
 #undef  do_aexec
 #define do_aexec		Perl_do_aexec
+#undef  Perl_do_aexec5
+#define Perl_do_aexec5		pPerl->Perl_do_aexec5
+#undef  do_aexec5
+#define do_aexec5		Perl_do_aexec5
 #undef  Perl_do_binmode
 #define Perl_do_binmode		pPerl->Perl_do_binmode
 #undef  do_binmode

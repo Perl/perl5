@@ -1081,6 +1081,7 @@ p	|OP*	|vdie		|const char* pat|va_list* args
 p	|OP*	|die_where	|char* message|STRLEN msglen
 p	|void	|dounwind	|I32 cxix
 p	|bool	|do_aexec	|SV* really|SV** mark|SV** sp
+p	|bool	|do_aexec5	|SV* really|SV** mark|SV** sp|int fd|int flag
 p	|int	|do_binmode	|PerlIO *fp|int iotype|int flag
 p	|void	|do_chop	|SV* asv|SV* sv
 p	|bool	|do_close	|GV* gv|bool not_implicit

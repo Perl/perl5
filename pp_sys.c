@@ -3577,6 +3577,8 @@ PP(pp_system)
     int status;
     Sigsave_t ihand,qhand;     /* place to save signals during system() */
     STRLEN n_a;
+    I32 did_pipes = 0;
+    int pp[2];
 
     if (SP - MARK == 1) {
 	if (PL_tainting) {
@@ -3587,16 +3589,24 @@ PP(pp_system)
     }
     PERL_FLUSHALL_FOR_CHILD;
 #if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2)
+    if (PerlProc_pipe(pp) >= 0)
+	did_pipes = 1;
     while ((childpid = vfork()) == -1) {
 	if (errno != EAGAIN) {
 	    value = -1;
 	    SP = ORIGMARK;
 	    PUSHi(value);
+	    if (did_pipes) {
+		PerlLIO_close(pp[0]);
+		PerlLIO_close(pp[1]);
+	    }
 	    RETURN;
 	}
 	sleep(5);
     }
     if (childpid > 0) {
+	if (did_pipes)
+	    PerlLIO_close(pp[1]);
 	rsignal_save(SIGINT, SIG_IGN, &ihand);
 	rsignal_save(SIGQUIT, SIG_IGN, &qhand);
 	do {
@@ -3607,17 +3617,43 @@ PP(pp_system)
 	STATUS_NATIVE_SET(result == -1 ? -1 : status);
 	do_execfree();	/* free any memory child malloced on vfork */
 	SP = ORIGMARK;
+	if (did_pipes) {
+	    int errkid;
+	    int n = 0, n1;
+
+	    while (n < sizeof(int)) {
+		n1 = PerlLIO_read(pp[0],
+				  (void*)(((char*)&errkid)+n),
+				  (sizeof(int)) - n);
+		if (n1 <= 0)
+		    break;
+		n += n1;
+	    }
+	    PerlLIO_close(pp[0]);
+	    if (n) {			/* Error */
+		if (n != sizeof(int))
+		    Perl_croak(aTHX_ "panic: kid popen errno read");
+		errno = errkid;		/* Propagate errno from kid */
+		STATUS_CURRENT = -1;
+	    }
+	}
 	PUSHi(STATUS_CURRENT);
 	RETURN;
     }
+    if (did_pipes) {
+	PerlLIO_close(pp[0]);
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+	fcntl(pp[1], F_SETFD, FD_CLOEXEC);
+#endif
+    }
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
-	value = (I32)do_aexec(really, MARK, SP);
+	value = (I32)do_aexec5(really, MARK, SP, pp[1], did_pipes);
     }
     else if (SP - MARK != 1)
-	value = (I32)do_aexec(Nullsv, MARK, SP);
+	value = (I32)do_aexec5(Nullsv, MARK, SP, pp[1], did_pipes);
     else {
-	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), n_a));
+	value = (I32)do_exec3(SvPVx(sv_mortalcopy(*SP), n_a), pp[1], did_pipes);
     }
     PerlProc__exit(-1);
 #else /* ! FORK or VMS or OS/2 */

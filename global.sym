@@ -86,6 +86,7 @@ Perl_vdie
 Perl_die_where
 Perl_dounwind
 Perl_do_aexec
+Perl_do_aexec5
 Perl_do_binmode
 Perl_do_chop
 Perl_do_close

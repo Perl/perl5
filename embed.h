@@ -102,6 +102,7 @@
 #define die_where		Perl_die_where
 #define dounwind		Perl_dounwind
 #define do_aexec		Perl_do_aexec
+#define do_aexec5		Perl_do_aexec5
 #define do_binmode		Perl_do_binmode
 #define do_chop			Perl_do_chop
 #define do_close		Perl_do_close
@@ -1422,6 +1423,7 @@
 #define die_where(a,b)		Perl_die_where(aTHX_ a,b)
 #define dounwind(a)		Perl_dounwind(aTHX_ a)
 #define do_aexec(a,b,c)		Perl_do_aexec(aTHX_ a,b,c)
+#define do_aexec5(a,b,c,d,e)	Perl_do_aexec5(aTHX_ a,b,c,d,e)
 #define do_binmode(a,b,c)	Perl_do_binmode(aTHX_ a,b,c)
 #define do_chop(a,b)		Perl_do_chop(aTHX_ a,b)
 #define do_close(a,b)		Perl_do_close(aTHX_ a,b)
@@ -2829,6 +2831,8 @@
 #define dounwind		Perl_dounwind
 #define Perl_do_aexec		CPerlObj::Perl_do_aexec
 #define do_aexec		Perl_do_aexec
+#define Perl_do_aexec5		CPerlObj::Perl_do_aexec5
+#define do_aexec5		Perl_do_aexec5
 #define Perl_do_binmode		CPerlObj::Perl_do_binmode
 #define do_binmode		Perl_do_binmode
 #define Perl_do_chop		CPerlObj::Perl_do_chop

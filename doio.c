@@ -1049,6 +1049,12 @@ Perl_my_lstat(pTHX)
 bool
 Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp)
 {
+    return do_aexec5(really, mark, sp, 0, 0);
+}
+
+bool
+do_aexec5(SV *really, register SV **mark, register SV **sp, int fd, int do_report)
+{
     register char **a;
     char *tmps;
     STRLEN n_a;
@@ -1073,6 +1079,12 @@ Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp)
 	if (ckWARN(WARN_EXEC))
 	    Perl_warner(aTHX_ WARN_EXEC, "Can't exec \"%s\": %s", 
 		PL_Argv[0], Strerror(errno));
+	if (do_report) {
+	    int e = errno;
+
+	    PerlLIO_write(fd, (void*)&e, sizeof(int));
+	    PerlLIO_close(fd);
+	}
     }
     do_execfree();
     return FALSE;

@@ -95,6 +95,7 @@ VIRTUAL OP*	Perl_vdie(pTHX_ const char* pat, va_list* args);
 VIRTUAL OP*	Perl_die_where(pTHX_ char* message, STRLEN msglen);
 VIRTUAL void	Perl_dounwind(pTHX_ I32 cxix);
 VIRTUAL bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp);
+VIRTUAL bool	Perl_do_aexec5(pTHX_ SV* really, SV** mark, SV** sp, int fd, int flag);
 VIRTUAL int	Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int flag);
 VIRTUAL void	Perl_do_chop(pTHX_ SV* asv, SV* sv);
 VIRTUAL bool	Perl_do_close(pTHX_ GV* gv, bool not_implicit);
