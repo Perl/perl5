@@ -55,7 +55,7 @@ sub charnames
 
   if ($name eq "BYTE ORDER MARK") {
       $fname = $name;
-      $ord = 0xFFFE;
+      $ord = 0xFEFF;
   } else {
       ## Suck in the code/name list as a big string.
       ## Lines look like:
@@ -208,7 +208,7 @@ sub viacode
 
     if ($txt =~ m/^$hex\t\t(.+)/m) {
         return $viacode{$hex} = $1;
-    } elsif ($hex eq 'FFFE') {
+    } elsif ($hex eq 'FEFF') {
         return $viacode{$hex} = "BYTE ORDER MARK";
     } else {
 	carp "Unknown charcode '$hex'";
