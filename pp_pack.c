@@ -245,7 +245,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 
 struct packsize_t {
-    const char *array;
+    const unsigned char *array;
     int first;
     int size;
 };
