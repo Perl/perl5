@@ -189,12 +189,12 @@ PerlIOWin32_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const ch
    s->h      = h;
    s->fd     = fd;
    s->refcnt = 1;
-   if (fd >= 0) 
+   if (fd >= 0)
     {
-     fdtable[fd] = s; 
+     fdtable[fd] = s;
      if (fd > max_open_fd)
       max_open_fd = fd;
-    } 
+    }
    return f;
   }
  if (f)
@@ -294,6 +294,13 @@ PerlIOWin32_close(PerlIO *f)
  return 0;
 }
 
+PerlIO *
+PerlIOWin32_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *params)
+{
+ /* Almost certainly needs more work */
+ return PerlIOBase_dup(aTHX_ f, o, params);
+}
+
 PerlIO_funcs PerlIO_win32 = {
  "win32",
  sizeof(PerlIOWin32),
@@ -303,6 +310,7 @@ PerlIO_funcs PerlIO_win32 = {
  PerlIOWin32_open,
  NULL,                 /* getarg */
  PerlIOWin32_fileno,
+ PerlIOWin32_dup,
  PerlIOWin32_read,
  PerlIOBase_unread,
  PerlIOWin32_write,

@@ -974,16 +974,11 @@ PerlIO__close(PerlIO *f)
 
 #undef PerlIO_fdupopen
 PerlIO *
-PerlIO_fdupopen(pTHX_ PerlIO *f)
+PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param)
 {
     if (f && *f) {
-	char buf[8];
-	int fd = PerlLIO_dup(PerlIO_fileno(f));
-	PerlIO *new = PerlIO_fdopen(fd, PerlIO_modestr(f, buf));
-	if (new) {
-	    Off_t posn = PerlIO_tell(f);
-	    PerlIO_seek(new, posn, SEEK_SET);
-	}
+	PerlIO_funcs *tab = PerlIOBase(f)->tab;
+	PerlIO *new = (*tab->Dup)(aTHX_ PerlIO_allocate(aTHX),f,param);
 	return new;
     }
     else {
@@ -1984,29 +1979,51 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
     }
 }
 
-PerlIO *
-PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, clone_params *param)
+SV *
+PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param)
 {
-    PerlIO_funcs *self = PerlIOBase(o)->tab;
-    SV *arg = Nullsv;
-    char buf[8];
-    if (self->Getarg) {
-	arg = (*self->Getarg)(o);
+    if (!arg)
+	return Nullsv;
 #ifdef sv_dup
-	if (arg) {
-	    arg = sv_dup(arg, param);
-	}
+    if (param) {
+	return sv_dup(arg, param);
+    }
+    else {
+	return newSVsv(arg);
+    }
+#else
+    return newSVsv(arg);
 #endif
+}
+
+PerlIO *
+PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+{
+    PerlIO *nexto = PerlIONext(o);
+    if (*nexto) {
+	PerlIO_funcs *tab = PerlIOBase(nexto)->tab;
+	f = (*tab->Dup)(aTHX_ f, nexto, param);
     }
-    if (!f) {
-	f = PerlIO_allocate(aTHX);
+    if (f) {
+	PerlIO_funcs *self = PerlIOBase(o)->tab;
+	SV *arg = Nullsv;
+	char buf[8];
+	if (self->Getarg) {
+	    arg = (*self->Getarg)(o);
+	    if (arg) {
+		arg = PerlIO_sv_dup(aTHX_ arg, param);
+	    }
+	}
+	f = PerlIO_push(aTHX_ f, self, PerlIO_modestr(o,buf), arg);
+	if (!f && arg) {
+	    SvREFCNT_dec(arg);
+	}
     }
-    f = PerlIO_push(aTHX_ f, self, PerlIO_modestr(o,buf), arg);
     return f;
 }
 
 PerlIO *
-PerlIOUnix_dup(pTHX_ PerlIO *f, PerlIO *o, clone_params *param)
+PerlIOUnix_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
 {
     PerlIOUnix *os = PerlIOSelf(o, PerlIOUnix);
     int fd = PerlLIO_dup(os->fd);
@@ -2513,7 +2530,7 @@ PerlIOStdio_set_ptrcnt(PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 #endif
 
 PerlIO *
-PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, clone_params *param)
+PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
 {
  return NULL;
 }
@@ -3010,7 +3027,7 @@ PerlIOBuf_set_ptrcnt(PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 }
 
 PerlIO *
-PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, clone_params *param)
+PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
 {
  return NULL;
 }
@@ -3738,7 +3755,7 @@ PerlIOMmap_close(PerlIO *f)
 }
 
 PerlIO *
-PerlIOMmap_dup(pTHX_ PerlIO *f, PerlIO *o, clone_params *param)
+PerlIOMmap_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
 {
  return NULL;
 }

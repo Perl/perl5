@@ -54,7 +54,6 @@ PerlIOVia_fetchmethod(pTHX_ PerlIOVia *s,char *method,CV **save)
   {
    return *save = (CV *) -1;
   }
-
 }
 
 SV *
@@ -492,6 +491,13 @@ PerlIOVia_eof(PerlIO *f)
  return (result) ? SvIV(result) : PerlIOBase_eof(f);
 }
 
+PerlIO *
+PerlIOVia_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+{
+ /* FIXME - Needs more work */
+ return PerlIOBase_dup(aTHX_ f, o, param);
+}
+
 PerlIO_funcs PerlIO_object = {
  "Via",
  sizeof(PerlIOVia),
@@ -501,6 +507,7 @@ PerlIO_funcs PerlIO_object = {
  NULL, /* PerlIOVia_open, */
  PerlIOVia_getarg,
  PerlIOVia_fileno,
+ PerlIOVia_dup,
  PerlIOVia_read,
  PerlIOVia_unread,
  PerlIOVia_write,

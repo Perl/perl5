@@ -236,6 +236,12 @@ PerlIOScalar_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const c
  return NULL;
 }
 
+PerlIO *
+PerlIOScalar_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+{
+ /* FIXME - Needs more work */
+ return PerlIOBase_dup(aTHX_ f, o, param);
+}
 
 PerlIO_funcs PerlIO_scalar = {
  "Scalar",
@@ -246,6 +252,7 @@ PerlIO_funcs PerlIO_scalar = {
  PerlIOScalar_open,
  NULL,
  PerlIOScalar_fileno,
+ PerlIOScalar_dup,
  PerlIOBase_read,
  PerlIOScalar_unread,
  PerlIOScalar_write,

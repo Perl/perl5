@@ -325,6 +325,13 @@ PerlIOEncode_tell(PerlIO *f)
  return b->posn;
 }
 
+PerlIO *
+PerlIOEncode_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *params)
+{
+ /* FIXME - Almost certainly needs more work */
+ return PerlIOBase_dup(aTHX_ f, o, params);
+}
+
 PerlIO_funcs PerlIO_encode = {
  "encoding",
  sizeof(PerlIOEncode),
@@ -334,6 +341,7 @@ PerlIO_funcs PerlIO_encode = {
  PerlIOBuf_open,
  PerlIOEncode_getarg,
  PerlIOBase_fileno,
+ PerlIOEncode_dup,
  PerlIOBuf_read,
  PerlIOBuf_unread,
  PerlIOBuf_write,

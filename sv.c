@@ -123,7 +123,7 @@ Private API to rest of sv.c
 
 Public API:
 
-    sv_report_used(), sv_clean_objs(), sv_clean_all(), sv_free_arenas() 
+    sv_report_used(), sv_clean_objs(), sv_clean_all(), sv_free_arenas()
 
 
 =cut
@@ -3198,7 +3198,7 @@ Perl_sv_2pvutf8(pTHX_ register SV *sv, STRLEN *lp)
 =for apidoc sv_2bool
 
 This function is only called on magical items, and is only used by
-sv_true() or its macro equivalent. 
+sv_true() or its macro equivalent.
 
 =cut
 */
@@ -4280,8 +4280,8 @@ Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
     if ((spv = SvPV(ssv, slen))) {
 	/*  sutf8 and dutf8 were type bool, but under USE_ITHREADS,
 	    gcc version 2.95.2 20000220 (Debian GNU/Linux) for
-	    Linux xxx 2.2.17 on sparc64 with gcc -O2, we erroneously 
-	    get dutf8 = 0x20000000, (i.e.  SVf_UTF8) even though 
+	    Linux xxx 2.2.17 on sparc64 with gcc -O2, we erroneously
+	    get dutf8 = 0x20000000, (i.e.  SVf_UTF8) even though
 	    dsv->sv_flags doesn't have that bit set.
 		Andy Dougherty  12 Oct 2001
 	*/
@@ -8376,7 +8376,7 @@ ptr_table_* functions.
 #define gv_dup_inc(s,t)	(GV*)SvREFCNT_inc(sv_dup((SV*)s,t))
 #define SAVEPV(p)	(p ? savepv(p) : Nullch)
 #define SAVEPVN(p,n)	(p ? savepvn(p,n) : Nullch)
- 
+
 
 /* Duplicate a regexp. Required reading: pregcomp() and pregfree() in
    regcomp.c. AMS 20010712 */
@@ -8480,7 +8480,7 @@ Perl_re_dup(pTHX_ REGEXP *r, clone_params *param)
 /* duplicate a file handle */
 
 PerlIO *
-Perl_fp_dup(pTHX_ PerlIO *fp, char type)
+Perl_fp_dup(pTHX_ PerlIO *fp, char type,clone_params *param)
 {
     PerlIO *ret;
     if (!fp)
@@ -8492,7 +8492,7 @@ Perl_fp_dup(pTHX_ PerlIO *fp, char type)
 	return ret;
 
     /* create anew and remember what it is */
-    ret = PerlIO_fdupopen(aTHX_ fp);
+    ret = PerlIO_fdupopen(aTHX_ fp, param);
     ptr_table_store(PL_ptr_table, fp, ret);
     return ret;
 }
@@ -9820,10 +9820,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	for(i = 1; i <= len; i++) {
             if(SvREPADTMP(regexen[i])) {
 	      av_push(PL_regex_padav, sv_dup_inc(regexen[i], param));
-            } else { 
+            } else {
 	        av_push(PL_regex_padav,
                     SvREFCNT_inc(
-                        newSViv(PTR2IV(re_dup(INT2PTR(REGEXP *, 
+                        newSViv(PTR2IV(re_dup(INT2PTR(REGEXP *,
                              SvIVX(regexen[i])), param)))
                        ));
 	    }
@@ -10308,7 +10308,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
         ptr_table_free(PL_ptr_table);
         PL_ptr_table = NULL;
     }
-    
+
     /* Call the ->CLONE method, if it exists, for each of the stashes
        identified by sv_dup() above.
     */

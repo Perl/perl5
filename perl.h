@@ -1632,6 +1632,8 @@ typedef struct mgvtbl MGVTBL;
 typedef union any ANY;
 typedef struct ptr_tbl_ent PTR_TBL_ENT_t;
 typedef struct ptr_tbl PTR_TBL_t;
+typedef struct clone_params CLONE_PARAMS;
+
 
 #include "handy.h"
 
