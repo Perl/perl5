@@ -1,5 +1,3 @@
-# Written $Id: //depot/perlio/ext/Encode/compile#14 $
-# compile -n dingbats -o Encode/dingbats.ucm Encode/dingbats.enc
 <code_set_name> "dingbats"
 <mb_cur_min> 1
 <mb_cur_max> 1

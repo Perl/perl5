@@ -1,4 +1,3 @@
-# Written $Id: //depot/perlio/ext/Encode/compile#14 $
 # compile -n cp1047 -o Encode/cp1047.ucm Encode/cp1047.enc
 <code_set_name> "cp1047"
 <mb_cur_min> 1

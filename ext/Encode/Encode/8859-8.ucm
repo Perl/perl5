@@ -1,4 +1,3 @@
-# Written $Id: //depot/perlio/ext/Encode/compile#15 $
 # ./compile -n iso-8859-8 -o Encode/iso8859-8.ucm Encode/iso8859-8.enc
 <code_set_name> "iso-8859-8"
 <mb_cur_min> 1

@@ -1,7 +1,6 @@
 package Encode;
 use strict;
-
-our $VERSION = '0.02';
+our $VERSION = do {my @r=(q$Revision: 0.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r};
 
 require DynaLoader;
 require Exporter;
@@ -71,50 +70,50 @@ sub encodings
 
 sub findAlias
 {
- my $class = shift;
- local $_ = shift;
- # print "# findAlias $_\n";
- unless (exists $alias{$_})
-  {
-   for (my $i=0; $i < @alias; $i += 2)
+    my $class = shift;
+    local $_ = shift;
+    # print "# findAlias $_\n";
+    unless (exists $alias{$_})
     {
-     my $alias = $alias[$i];
-     my $val   = $alias[$i+1];
-     my $new;
-     if (ref($alias) eq 'Regexp' && $_ =~ $alias)
-      {
-       $new = eval $val;
-      }
-     elsif (ref($alias) eq 'CODE')
-      {
-       $new = &{$alias}($val)
-      }
-     elsif (lc($_) eq lc($alias))
-      {
-       $new = $val;
-      }
-     if (defined($new))
-      {
-       next if $new eq $_; # avoid (direct) recursion on bugs
-       my $enc = (ref($new)) ? $new : find_encoding($new);
-       if ($enc)
-        {
-         $alias{$_} = $enc;
-         last;
-        }
-      }
+	for (my $i=0; $i < @alias; $i += 2)
+	{
+	    my $alias = $alias[$i];
+	    my $val   = $alias[$i+1];
+	    my $new;
+	    if (ref($alias) eq 'Regexp' && $_ =~ $alias)
+	    {
+		$new = eval $val;
+	    }
+	    elsif (ref($alias) eq 'CODE')
+	    {
+		$new = &{$alias}($val)
+		}
+	    elsif (lc($_) eq lc($alias))
+	    {
+		$new = $val;
+	    }
+	    if (defined($new))
+	    {
+		next if $new eq $_; # avoid (direct) recursion on bugs
+		my $enc = (ref($new)) ? $new : find_encoding($new);
+		if ($enc)
+		{
+		    $alias{$_} = $enc;
+		    last;
+		}
+	    }
+	}
     }
-  }
- return $alias{$_};
+    return $alias{$_};
 }
 
 sub define_alias
 {
- while (@_)
-  {
-   my ($alias,$name) = splice(@_,0,2);
-   push(@alias, $alias => $name);
-  }
+    while (@_)
+    {
+	my ($alias,$name) = splice(@_,0,2);
+	push(@alias, $alias => $name);
+    }
 }
 
 # Allow variants of iso-8859-1 etc.
@@ -174,285 +173,112 @@ define_alias( qr/^koi8u$/i => 'koi8-u' );
 #       Kannada Khmer Korean Laotian Malayalam Mongolian
 #       Oriya Sinhalese Symbol Tamil Telugu Tibetan Vietnamese
 # TODO: what is the Japanese 'UJIS' encoding seen in some Linuxes?
-
+#       Answer: euc-jp <dankogai@dan.co.jp>
 # Map white space and _ to '-'
+
 define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
 
 sub define_encoding
 {
- my $obj  = shift;
- my $name = shift;
- $encoding{$name} = $obj;
- my $lc = lc($name);
- define_alias($lc => $obj) unless $lc eq $name;
- while (@_)
-  {
-   my $alias = shift;
-   define_alias($alias,$obj);
-  }
- return $obj;
+    my $obj  = shift;
+    my $name = shift;
+    $encoding{$name} = $obj;
+    my $lc = lc($name);
+    define_alias($lc => $obj) unless $lc eq $name;
+    while (@_)
+    {
+	my $alias = shift;
+	define_alias($alias,$obj);
+    }
+    return $obj;
 }
 
 sub getEncoding
 {
- my ($class,$name) = @_;
- my $enc;
- if (ref($name) && $name->can('new_sequence'))
-  {
-   return $name;
-  }
- my $lc = lc $name;
- if (exists $encoding{$name})
-  {
-   return $encoding{$name};
-  }
- if (exists $encoding{$lc})
-  {
-   return $encoding{$lc};
-  }
+    my ($class,$name) = @_;
+    my $enc;
+    if (ref($name) && $name->can('new_sequence'))
+    {
+	return $name;
+    }
+    my $lc = lc $name;
+    if (exists $encoding{$name})
+    {
+	return $encoding{$name};
+    }
+    if (exists $encoding{$lc})
+    {
+	return $encoding{$lc};
+    }
 
-  my $oc = $class->findAlias($name);
-  return $oc if defined $oc;
-  return $class->findAlias($lc) if $lc ne $name;
+    my $oc = $class->findAlias($name);
+    return $oc if defined $oc;
+    return $class->findAlias($lc) if $lc ne $name;
 
-  return;
+    return;
 }
 
 sub find_encoding
 {
- my ($name) = @_;
- return __PACKAGE__->getEncoding($name);
+    my ($name) = @_;
+    return __PACKAGE__->getEncoding($name);
 }
 
 sub encode
 {
- my ($name,$string,$check) = @_;
- my $enc = find_encoding($name);
- croak("Unknown encoding '$name'") unless defined $enc;
- my $octets = $enc->encode($string,$check);
- return undef if ($check && length($string));
- return $octets;
+    my ($name,$string,$check) = @_;
+    my $enc = find_encoding($name);
+    croak("Unknown encoding '$name'") unless defined $enc;
+    my $octets = $enc->encode($string,$check);
+    return undef if ($check && length($string));
+    return $octets;
 }
 
 sub decode
 {
- my ($name,$octets,$check) = @_;
- my $enc = find_encoding($name);
- croak("Unknown encoding '$name'") unless defined $enc;
- my $string = $enc->decode($octets,$check);
- $_[1] = $octets if $check;
- return $string;
+    my ($name,$octets,$check) = @_;
+    my $enc = find_encoding($name);
+    croak("Unknown encoding '$name'") unless defined $enc;
+    my $string = $enc->decode($octets,$check);
+    $_[1] = $octets if $check;
+    return $string;
 }
 
 sub from_to
 {
- my ($string,$from,$to,$check) = @_;
- my $f = find_encoding($from);
- croak("Unknown encoding '$from'") unless defined $f;
- my $t = find_encoding($to);
- croak("Unknown encoding '$to'") unless defined $t;
- my $uni = $f->decode($string,$check);
- return undef if ($check && length($string));
- $string = $t->encode($uni,$check);
- return undef if ($check && length($uni));
- return length($_[0] = $string);
+    my ($string,$from,$to,$check) = @_;
+    my $f = find_encoding($from);
+    croak("Unknown encoding '$from'") unless defined $f;
+    my $t = find_encoding($to);
+    croak("Unknown encoding '$to'") unless defined $t;
+    my $uni = $f->decode($string,$check);
+    return undef if ($check && length($string));
+    $string = $t->encode($uni,$check);
+    return undef if ($check && length($uni));
+    return length($_[0] = $string);
 }
 
 sub encode_utf8
 {
- my ($str) = @_;
- utf8::encode($str);
- return $str;
+    my ($str) = @_;
+  utf8::encode($str);
+    return $str;
 }
 
 sub decode_utf8
 {
- my ($str) = @_;
- return undef unless utf8::decode($str);
- return $str;
+    my ($str) = @_;
+    return undef unless utf8::decode($str);
+    return $str;
 }
 
-package Encode::Encoding;
-# Base class for classes which implement encodings
-
-sub Define
-{
- my $obj = shift;
- my $canonical = shift;
- $obj = bless { Name => $canonical },$obj unless ref $obj;
- # warn "$canonical => $obj\n";
- Encode::define_encoding($obj, $canonical, @_);
-}
-
-sub name { shift->{'Name'} }
-
-# Temporary legacy methods
-sub toUnicode    { shift->decode(@_) }
-sub fromUnicode  { shift->encode(@_) }
-
-sub new_sequence { return $_[0] }
-
-package Encode::XS;
-use base 'Encode::Encoding';
-
-package Encode::Internal;
-use base 'Encode::Encoding';
-
-# Dummy package that provides the encode interface but leaves data
-# as UTF-X encoded. It is here so that from_to() works.
-
-__PACKAGE__->Define('Internal');
-
-Encode::define_alias( 'Unicode' => 'Internal' ) if ord('A') == 65;
-
-sub decode
-{
- my ($obj,$str,$chk) = @_;
- utf8::upgrade($str);
- $_[1] = '' if $chk;
- return $str;
-}
-
-*encode = \&decode;
-
-package Encoding::Unicode;
-use base 'Encode::Encoding';
-
-__PACKAGE__->Define('Unicode') unless ord('A') == 65;
-
-sub decode
-{
- my ($obj,$str,$chk) = @_;
- my $res = '';
- for (my $i = 0; $i < length($str); $i++)
-  {
-   $res .= chr(utf8::unicode_to_native(ord(substr($str,$i,1))));
-  }
- $_[1] = '' if $chk;
- return $res;
-}
-
-sub encode
-{
- my ($obj,$str,$chk) = @_;
- my $res = '';
- for (my $i = 0; $i < length($str); $i++)
-  {
-   $res .= chr(utf8::native_to_unicode(ord(substr($str,$i,1))));
-  }
- $_[1] = '' if $chk;
- return $res;
-}
-
-
-package Encode::utf8;
-use base 'Encode::Encoding';
-# package to allow long-hand
-#   $octets = encode( utf8 => $string );
-#
-
-__PACKAGE__->Define(qw(UTF-8 utf8));
-
-sub decode
-{
- my ($obj,$octets,$chk) = @_;
- my $str = Encode::decode_utf8($octets);
- if (defined $str)
-  {
-   $_[1] = '' if $chk;
-   return $str;
-  }
- return undef;
-}
-
-sub encode
-{
- my ($obj,$string,$chk) = @_;
- my $octets = Encode::encode_utf8($string);
- $_[1] = '' if $chk;
- return $octets;
-}
-
-package Encode::iso10646_1;
-use base 'Encode::Encoding';
-# Encoding is 16-bit network order Unicode (no surogates)
-# Used for X font encodings
-
-__PACKAGE__->Define(qw(UCS-2 iso-10646-1));
-
-sub decode
-{
- my ($obj,$str,$chk) = @_;
- my $uni   = '';
- while (length($str))
-  {
-   my $code = unpack('n',substr($str,0,2,'')) & 0xffff;
-   $uni .= chr($code);
-  }
- $_[1] = $str if $chk;
- utf8::upgrade($uni);
- return $uni;
-}
-
-sub encode
-{
- my ($obj,$uni,$chk) = @_;
- my $str   = '';
- while (length($uni))
-  {
-   my $ch = substr($uni,0,1,'');
-   my $x  = ord($ch);
-   unless ($x < 32768)
-    {
-     last if ($chk);
-     $x = 0;
-    }
-   $str .= pack('n',$x);
-  }
- $_[1] = $uni if $chk;
- return $str;
-}
-
-package Encode::ucs_2le;
-use base 'Encode::Encoding';
-
-__PACKAGE__->Define(qw(UCS-2le UCS-2LE ucs-2le));
-
-sub decode
-{
- my ($obj,$str,$chk) = @_;
- my $uni   = '';
- while (length($str))
- {
-  my $code = unpack('v',substr($str,0,2,'')) & 0xffff;
-  $uni .= chr($code);
- }
- $_[1] = $str if $chk;
- utf8::upgrade($uni);
- return $uni;
-}
-
-sub encode
-{
- my ($obj,$uni,$chk) = @_;
- my $str   = '';
- while (length($uni))
- {
-  my $ch = substr($uni,0,1,'');
-  my $x  = ord($ch);
-  unless ($x < 32768)
-  {
-   last if ($chk);
-   $x = 0;
-  }
-  $str .= pack('v',$x);
- }
- $_[1] = $uni if $chk;
- return $str;
-}
-
-# switch back to Encode package in case we ever add AutoLoader
-package Encode;
+require Encode::Encoding;
+require Encode::XS;
+require Encode::Internal;
+require Encode::Unicode;
+require Encode::utf8;
+require Encode::iso10646_1;
+require Encode::ucs2_le;
 
 1;
 
