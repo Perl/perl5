@@ -4315,8 +4315,8 @@ PP(pp_threadsv)
 	PUSHs(*save_threadsv(op->op_targ));
     else
 	PUSHs(*av_fetch(thr->threadsv, op->op_targ, FALSE));
+    RETURN;
 #else
     DIE("tried to access per-thread data in non-threaded perl");
 #endif /* USE_THREADS */
-    RETURN;
 }
