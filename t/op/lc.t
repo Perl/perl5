@@ -49,7 +49,7 @@ ok(uc($b)         eq "HELLO\.\* WORLD",      'uc');
 ok(lc($b)         eq "hello\.\* world",      'lc');
 
 # \x{100} is LATIN CAPITAL LETTER A WITH MACRON; its bijective lowercase is
-# \x{100}, LATIN SMALL LETTER A WITH MACRON.
+# \x{101}, LATIN SMALL LETTER A WITH MACRON.
 
 $a = "\x{100}\x{101}\x{41}\x{61}";
 $b = "\x{101}\x{100}\x{61}\x{41}";
@@ -82,7 +82,7 @@ ok(lc($b)         eq "\x{101}\x{101}\x{61}\x{61}",  'lc');
 # \x{149} is LATIN SMALL LETTER N PRECEDED BY APOSTROPHE, its uppercase is
 # \x{2BC}\x{E4} or MODIFIER LETTER APOSTROPHE and N.
 
-ok("\U\x{DF}ab\x{149}cd" eq "\x{53}\x{53}AB\x{2BC}\x{4E}CD",
+ok("\U\x{DF}ab\x{149}cd" eq "SSAB\x{2BC}NCD",
    "multicharacter uppercase");
 
 # The \x{DF} is its own lowercase, ditto for \x{149}.
