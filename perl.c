@@ -2678,7 +2678,7 @@ Perl_moreswitches(pTHX_ char *s)
 	    av_push(PL_preambleav, sv);
 	}
 	else
-	    Perl_croak(aTHX_ "No space allowed after -%c", *(s-1));
+	    Perl_croak(aTHX_ "Missing argument to -%c", *(s-1));
 	return s;
     case 'n':
 	PL_minus_n = TRUE;

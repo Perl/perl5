@@ -2152,6 +2152,11 @@ ended earlier on the current line.
 (W syntax) An underscore (underbar) in a numeric constant did not
 separate two digits.
 
+=item Missing argument to -%c
+
+(F) The argument to the indicated command line switch must follow
+immediately after the switch, without intervening spaces.
+
 =item Missing %sbrace%s on \N{}
 
 (F) Wrong syntax of character name literal C<\N{charname}> within
@@ -2439,11 +2444,6 @@ your system.
 
 (F) Configure didn't find anything resembling the setreuid() call for
 your system.
-
-=item No space allowed after -%c
-
-(F) The argument to the indicated command line switch must follow
-immediately after the switch, without intervening spaces.
 
 =item No %s specified for -%c
 
