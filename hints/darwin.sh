@@ -44,7 +44,10 @@ case "$prefix" in
 
     # Where to put modules.
     sitelib=$prefix/lib/perl5/site_perl/${version}
-    vendorlib="/System/Library/Perl/${version}"; # Apple-supplied modules
+    # Use -Uvendorlib to not to get /System/Library.
+    case "$vendorlib" in
+    '') vendorlib="/System/Library/Perl/${version}"; # Apple-supplied modules
+    esac
     ;;
 
 esac
