@@ -8813,6 +8813,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		intsize = 'q';
 #endif
 		break;
+/* [perl #20339] - we should accept and ignore %hf, %lf rather than die */
+	    case 'l':
+		/* FALL THROUGH */
 	    default:
 #if defined(USE_LONG_DOUBLE)
 		intsize = args ? 0 : 'q';
@@ -8825,8 +8828,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		/* FALL THROUGH */
 #endif
 	    case 'h':
-		/* FALL THROUGH */
-	    case 'l':
 		goto unknown;
 	    }
 
