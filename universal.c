@@ -910,7 +910,9 @@ XS(XS_PerlIO_get_layers)
 
 XS(XS_Internals_hash_seed)
 {
-    dXSARGS;
+    /* Using dXSARGS would also have dITEM and dSP,
+     * which define 2 unused local variables.  */
+    dMARK; dAX;
     XSRETURN_UV(PL_hash_seed);
 }
 
