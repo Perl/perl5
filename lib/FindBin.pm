@@ -89,7 +89,7 @@ sub is_abs_path
  local $_ = shift if (@_);
  if ($^O eq 'MSWin32' || $^O eq 'dos')
   {
-   return m#^[a-z]:[\\/]#i;
+   return m#^([a-z]:[\\/]|\\\\)#i;
   }
  elsif ($^O eq 'VMS')
   {
