@@ -81,8 +81,9 @@ require Exporter;
 # The 'natural and safe form' for UNIX (pwd may be setuid root)
 
 sub _backtick_pwd {
-    my $cwd;
-    chop($cwd = `pwd`);
+    my $cwd = `pwd`;
+    # `pwd` may fail e.g. if the disk is full
+    chomp($cwd) if defined $cwd;
     $cwd;
 }
 
