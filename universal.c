@@ -198,6 +198,9 @@ XS(XS_UNIVERSAL_VERSION)
     GV *gv;
     SV *sv;
     char *undef;
+#ifdef _SYS_ISC
+    double req = SvNV(ST(1));
+#endif
 
     if(SvROK(ST(0))) {
         sv = (SV*)SvRV(ST(0));
@@ -222,7 +225,12 @@ XS(XS_UNIVERSAL_VERSION)
         undef = "(undef)";
     }
 
+#ifdef _SYS_ISC
+    /* needed for C compiler of Interactive Unix */
+    if(items > 1 && (undef || (req = SvNV(ST(1)) && req > SvNV(sv))))
+#else
     if(items > 1 && (undef || SvNV(ST(1)) > SvNV(sv)))
+#endif
 	croak("%s version %s required--this is only version %s",
 	    HvNAME(pkg),SvPV(ST(1),na),undef ? undef : SvPV(sv,na));
 

@@ -27,6 +27,8 @@ case "$cc" in
 	ldflags="$ldflags -Xp"
     	;;
 esac
+#  fix some errors of libinet.a and compiler
+ccflags="$ccflags -D_SYS_ISC"
 
 # You can also include -D_SYSV3 to pick up "traditionally visible"
 # symbols hidden by name-space pollution rules.  This raises some

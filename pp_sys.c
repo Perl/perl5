@@ -121,7 +121,7 @@ static int dooneliner _((char *cmd, char *filename));
 #  endif /* no flock() or fcntl(F_SETLK,...) */
 
 #  ifdef FLOCK
-     static int FLOCK(int, int);
+     static int FLOCK _((int, int));
 
     /*
      * These are the flock() constants.  Since this sytems doesn't have
@@ -1860,6 +1860,12 @@ PP(pp_getpeername)
 	    goto nuts2;
 	break;
     }
+#ifdef _SYS_ISC
+    /* Interactive Unix, getpeername() and getsockname()
+      does not return valid namelen */
+    if (aint == 256)
+	aint = sizeof(struct sockaddr);
+#endif
     SvCUR_set(sv,aint);
     *SvEND(sv) ='\0';
     PUSHs(sv);
