@@ -3808,6 +3808,7 @@ newXS(char *name, void (*subaddr) (CV * _CPERLproto), char *filename)
 	    if (!PL_initav)
 		PL_initav = newAV();
 	    av_push(PL_initav, (SV *)cv);
+	    GvCV(gv) = 0;
 	}
     }
     else
@@ -3888,7 +3889,7 @@ oopsAV(OP *o)
     case OP_PADSV:
 	o->op_type = OP_PADAV;
 	o->op_ppaddr = ppaddr[OP_PADAV];
-	return ref(newUNOP(OP_RV2AV, 0, scalar(o)), OP_RV2AV);
+	return ref(o, OP_RV2AV);
 	
     case OP_RV2SV:
 	o->op_type = OP_RV2AV;
@@ -3911,7 +3912,7 @@ oopsHV(OP *o)
     case OP_PADAV:
 	o->op_type = OP_PADHV;
 	o->op_ppaddr = ppaddr[OP_PADHV];
-	return ref(newUNOP(OP_RV2HV, 0, scalar(o)), OP_RV2HV);
+	return ref(o, OP_RV2HV);
 
     case OP_RV2SV:
     case OP_RV2AV:
@@ -5063,24 +5064,6 @@ peep(register OP *o)
 		}
 	    }
 	    o->op_seq = PL_op_seqmax++;
-	    break;
-
-	case OP_PADAV:
-	    if (o->op_next->op_type == OP_RV2AV
-		&& (o->op_next->op_flags & OPf_REF))
-	    {
-		null(o->op_next);
-	       	o->op_next = o->op_next->op_next;
-	    }
-	    break;
-	
-	case OP_PADHV:
-	    if (o->op_next->op_type == OP_RV2HV
-		&& (o->op_next->op_flags & OPf_REF))
-	    {
-		null(o->op_next);
-	       	o->op_next = o->op_next->op_next;
-	    }
 	    break;
 
 	case OP_MAPWHILE:
