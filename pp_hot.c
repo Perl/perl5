@@ -1057,6 +1057,10 @@ play_it_again:
 		len = rx->endp[i] - rx->startp[i];
 		s = rx->startp[i] + truebase;
 		sv_setpvn(*SP, s, len);
+		if ((pm->op_pmdynflags & PMdf_UTF8) && !IN_BYTE) {
+		    SvUTF8_on(*SP);
+		    sv_utf8_downgrade(*SP, TRUE);
+		}
 	    }
 	}
 	if (global) {

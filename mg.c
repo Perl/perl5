@@ -386,12 +386,12 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
     register I32 paren;
     register I32 i;
     register REGEXP *rx;
+    I32 s1, t1;
 
     switch (*mg->mg_ptr) {
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
 	if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
-	    I32 s1, t1;
 
 	    paren = atoi(mg->mg_ptr);
 	  getparen:
@@ -400,6 +400,16 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 		(t1 = rx->endp[paren]) != -1)
 	    {
 		i = t1 - s1;
+	      getlen:
+		if (i > 0 && (PL_curpm->op_pmdynflags & PMdf_UTF8) && !IN_BYTE) {
+		    char *s = rx->subbeg + s1;
+		    char *send = rx->subbeg + t1;
+		    i = 0;
+		    while (s < send) {
+			s += UTF8SKIP(s);
+			i++;
+		    }
+		}
 		if (i >= 0)
 		    return i;
 	    }
@@ -416,8 +426,11 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
 	    if (rx->startp[0] != -1) {
 		i = rx->startp[0];
-		if (i >= 0)
-		    return i;
+		if (i > 0) {
+		    s1 = 0;
+		    t1 = i;
+		    goto getlen;
+		}
 	    }
 	}
 	return 0;
@@ -425,8 +438,11 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
 	    if (rx->endp[0] != -1) {
 		i = rx->sublen - rx->endp[0];
-		if (i >= 0)
-		    return i;
+		if (i > 0) {
+		    s1 = rx->endp[0];
+		    t1 = rx->sublen;
+		    goto getlen;
+		}
 	    }
 	}
 	return 0;

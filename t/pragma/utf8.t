@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..12\n";
+print "1..60\n";
 
 my $test = 1;
 
@@ -83,4 +83,171 @@ sub ok {
     m/([\p{IsAlnum}]+)/; 
     ok $1, '123alpha';
     $test++;
+}
+{
+    use utf8;
+
+    $_ = "\x{263A}>\x{263A}\x{263A}"; 
+
+    ok length, 4;
+    $test++;
+
+    ok length((m/>(.)/)[0]), 1;
+    $test++;
+
+    ok length($&), 2;
+    $test++;
+
+    ok length($'), 1;
+    $test++;
+
+    ok length($`), 1;
+    $test++;
+
+    ok length($1), 1;
+    $test++;
+
+    ok length($tmp=$&), 2;
+    $test++;
+
+    ok length($tmp=$'), 1;
+    $test++;
+
+    ok length($tmp=$`), 1;
+    $test++;
+
+    ok length($tmp=$1), 1;
+    $test++;
+
+    ok $&, pack("C*", ord(">"), 0342, 0230, 0272);
+    $test++;
+
+    ok $', pack("C*", 0342, 0230, 0272);
+    $test++;
+
+    ok $`, pack("C*", 0342, 0230, 0272);
+    $test++;
+
+    ok $1, pack("C*", 0342, 0230, 0272);
+    $test++;
+
+    {
+	use bytes;
+	no utf8;
+
+	ok length, 10;
+	$test++;
+
+    	ok length((m/>(.)/)[0]), 1;
+    	$test++;
+
+    	ok length($&), 2;
+    	$test++;
+
+    	ok length($'), 5;
+    	$test++;
+
+    	ok length($`), 3;
+    	$test++;
+
+    	ok length($1), 1;
+    	$test++;
+
+	ok $&, pack("C*", ord(">"), 0342);
+	$test++;
+
+	ok $', pack("C*", 0230, 0272, 0342, 0230, 0272);
+	$test++;
+
+	ok $`, pack("C*", 0342, 0230, 0272);
+	$test++;
+
+	ok $1, pack("C*", 0342);
+	$test++;
+
+    }
+
+
+    {
+	no utf8;
+	$_="\342\230\272>\342\230\272\342\230\272";
+    }
+
+    ok length, 10;
+    $test++;
+
+    ok length((m/>(.)/)[0]), 1;
+    $test++;
+
+    ok length($&), 2;
+    $test++;
+
+    ok length($'), 1;
+    $test++;
+
+    ok length($`), 1;
+    $test++;
+
+    ok length($1), 1;
+    $test++;
+
+    ok length($tmp=$&), 2;
+    $test++;
+
+    ok length($tmp=$'), 1;
+    $test++;
+
+    ok length($tmp=$`), 1;
+    $test++;
+
+    ok length($tmp=$1), 1;
+    $test++;
+
+    ok $&, pack("C*", ord(">"), 0342, 0230, 0272);
+    $test++;
+
+    ok $', pack("C*", 0342, 0230, 0272);
+    $test++;
+
+    ok $`, pack("C*", 0342, 0230, 0272);
+    $test++;
+
+    ok $1, pack("C*", 0342, 0230, 0272);
+    $test++;
+
+    {
+	use bytes;
+	no utf8;
+
+	ok length, 10;
+	$test++;
+
+    	ok length((m/>(.)/)[0]), 1;
+    	$test++;
+
+    	ok length($&), 2;
+    	$test++;
+
+    	ok length($'), 5;
+    	$test++;
+
+    	ok length($`), 3;
+    	$test++;
+
+    	ok length($1), 1;
+    	$test++;
+
+	ok $&, pack("C*", ord(">"), 0342);
+	$test++;
+
+	ok $', pack("C*", 0230, 0272, 0342, 0230, 0272);
+	$test++;
+
+	ok $`, pack("C*", 0342, 0230, 0272);
+	$test++;
+
+	ok $1, pack("C*", 0342);
+	$test++;
+
+    }
 }
