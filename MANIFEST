@@ -1580,6 +1580,8 @@ t/lib/mimeqp.t		see whether MIME::QuotedPrint works
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/net-hostent.t	See if Net::hostent works
 t/lib/net-nent.t	See if Net::netent works
+t/lib/net-pent.t	See if Net::protoent works
+t/lib/net-sent.t	See if Net::servtent works
 t/lib/next.t		See if NEXT works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works

@@ -194,6 +194,8 @@ NDBM_File
 NEXT
 Net::hostent
 Net::netent
+Net::protoent
+Net::servent
 ODBM_File
 Opcode
 PerlIO
