@@ -164,7 +164,7 @@ SKIP:{
 	open  $fh, ">:encoding($utf_nobom)", $sfile or die "$sfile : $!";
 	print $fh $str;
 	close $fh;
-	open my $fh, "<:raw", $sfile or die "$sfile : $!";
+	open my $fh, "<", $sfile or die "$sfile : $!";
 	read $fh, my $cmp, -s $sfile;
 	close $fh;
 	use bytes ();

@@ -5747,7 +5747,7 @@ $ WC "path_sep='|'"
 $ WC "perl_root='" + perl_root + "'" ! VMS specific $trnlnm()
 $ WC "perladmin='" + perladmin + "'"
 $ WC "perllibs='" + perllibs + "'"
-$ WC "perlpath='" + "''vms_prefix':[000000]Perl''ext'" + "'"
+$ WC "perlpath='" + "''vms_prefix':[000000]Perl''exe_ext'" + "'"
 $ WC "perl_symbol='" + perl_symbol + "'"  ! VMS specific
 $ WC "perl_verb='" + perl_verb + "'"      ! VMS specific
 $ WC "pgflquota='" + pgflquota + "'"
@@ -6401,31 +6401,32 @@ $ WRITE CONFIG "$! This perl configured & administered by ''perladmin'"
 $ ENDIF
 $ WRITE CONFIG "$!"
 $ prefix = prefix - "000000."
-$ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN -
-    prefix = prefix - "]" + ".]" 
+$ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN prefix = prefix - "]" + ".]" 
 $ WRITE CONFIG "$ define/translation=concealed ''vms_prefix' ''prefix'"
 $ WRITE CONFIG "$ ext = "".exe"""
 $ IF sharedperl
 $ THEN
-$   write config "$ if f$getsyi(""HW_MODEL"") .ge. 1024 then ext = "".AXE"""
+$ WRITE CONFIG "$ if f$getsyi(""HW_MODEL"") .ge. 1024 then ext = "".AXE"""
 $ ENDIF
 $ IF (perl_symbol)
 $ THEN
+$   perl_setup_perl = "'" + "'perl'" ! triple quoted foreign command symbol
 $   IF (use_vmsdebug_perl)
 $   THEN
-$     WRITE CONFIG "$ dbgperl :== $''vms_prefix':[000000]dbgPerl'ext'"
-$     WRITE CONFIG "$ perl    :== $''vms_prefix':[000000]ndbgPerl'ext'"
-$     WRITE CONFIG "$ define dbgPerlShr ''vms_prefix':[000000]dbgPerlShr'ext'"
+$     WRITE CONFIG "$ dbgperl :== $''vms_prefix':[000000]dbgperl'ext'"
+$     WRITE CONFIG "$ perl    :== $''vms_prefix':[000000]ndbgperl'ext'"
+$     WRITE CONFIG "$ define dbgperlshr ''vms_prefix':[000000]dbgperlshr'ext'"
 $   ELSE
 $     WRITE CONFIG "$ perl :== $''vms_prefix':[000000]Perl'ext'"
-$     WRITE CONFIG "$ define PerlShr ''vms_prefix':[000000]PerlShr'ext'"
+$     WRITE CONFIG "$ define perlshr ''vms_prefix':[000000]perlshr'ext'"
 $   ENDIF
 $ ELSE ! .NOT.perl_symbol
+$   perl_setup_perl = "perl" ! command verb
 $   IF (use_vmsdebug_perl)
 $   THEN
-$     WRITE CONFIG "$ define dbgPerlShr ''vms_prefix':[000000]dbgPerlShr'ext'"
+$     WRITE CONFIG "$ define dbgperlshr ''vms_prefix':[000000]dbgperlshr'ext'"
 $   ELSE
-$     WRITE CONFIG "$ define PerlShr ''vms_prefix':[000000]PerlShr'ext'"
+$     WRITE CONFIG "$ define perlshr ''vms_prefix':[000000]perlshr'ext'"
 $   ENDIF
 $   IF perl_verb .EQS. "PROCESS"
 $   THEN
@@ -6445,46 +6446,35 @@ $ ENDIF
 $ WRITE CONFIG "$!"
 $ WRITE CONFIG "$! Symbols for commonly used programs:"
 $ WRITE CONFIG "$!"
-$ IF (perl_symbol)
+$ WRITE CONFIG "$ c2ph       == """ + perl_setup_perl + " ''vms_prefix':[utils]c2ph.com"""
+$ WRITE CONFIG "$ cpan       == """ + perl_setup_perl + " ''vms_prefix':[utils]cpan.com"""
+$ IF F$LOCATE("Devel::DProf",extensions) .LT. F$LENGTH(extensions)
 $ THEN
-$   WRITE CONFIG "$ Perldoc  == ""'"+"'Perl' ''vms_prefix':[lib.pod]Perldoc.com -t"""
-$   WRITE CONFIG "$ pod2text == ""'"+"'Perl' pod2text"""
-$   WRITE CONFIG "$ pod2html == ""'"+"'Perl' pod2html"""
-$   WRITE CONFIG "$ pod2latex == ""'"+"'Perl' ''vms_prefix':[lib.pod]pod2latex.com"""
-$   WRITE CONFIG "$!pod2man  == ""'"+"'Perl' pod2man"""
-$   WRITE CONFIG "$!Perlbug  == ""'"+"'Perl' ''vms_prefix':[lib]Perlbug.com"""
-$   WRITE CONFIG "$ c2ph     == ""'"+"'Perl' ''vms_prefix':[utils]c2ph.com"""
-$   IF F$LOCATE("Devel::DProf",extensions) .LT. F$LENGTH(extensions)
-$   THEN
-$     WRITE CONFIG "$ dprofpp     == ""'"+"'Perl' ''vms_prefix':[utils]dprofpp.com"""
-$   ENDIF 
-$   WRITE CONFIG "$ h2ph     == ""'"+"'Perl' ''vms_prefix':[utils]h2ph.com"""
-$   WRITE CONFIG "$ h2xs     == ""'"+"'Perl' ''vms_prefix':[utils]h2xs.com"""
-$   WRITE CONFIG "$ libnetcfg == ""'"+"'Perl' ''vms_prefix':[utils]libnetcfg.com"""
-$   WRITE CONFIG "$!perlcc   == ""'"+"'Perl' ''vms_prefix':[utils]perlcc.com"""
-$   WRITE CONFIG "$ perlivp  == ""'"+"'Perl' ''vms_prefix':[utils]perlivp.com"""
-$   WRITE CONFIG "$ splain   == ""'"+"'Perl' ''vms_prefix':[utils]splain.com"""
-$   WRITE CONFIG "$ xsubpp   == ""'"+"'Perl' ''vms_prefix':[utils]xsubpp.com"""
-$ ELSE
-$   WRITE CONFIG "$ Perldoc  == ""Perl ''vms_prefix':[lib.pod]Perldoc.com -t"""
-$   WRITE CONFIG "$ pod2text == ""Perl pod2text"""
-$   WRITE CONFIG "$ pod2html == ""Perl pod2html"""
-$   WRITE CONFIG "$ pod2latex == ""Perl ''vms_prefix':[lib.pod]pod2latex.com"""
-$   WRITE CONFIG "$!pod2man  == ""Perl pod2man"""
-$   WRITE CONFIG "$!Perlbug  == ""Perl ''vms_prefix':[lib]Perlbug.com"""
-$   WRITE CONFIG "$ c2ph     == ""Perl ''vms_prefix':[utils]c2ph.com"""
-$   IF F$LOCATE("Devel::DProf",extensions) .LT. F$LENGTH(extensions)
-$   THEN
-$     WRITE CONFIG "$ dprofpp     == ""Perl ''vms_prefix':[utils]dprofpp.com"""
-$   ENDIF 
-$   WRITE CONFIG "$ h2ph     == ""Perl ''vms_prefix':[utils]h2ph.com"""
-$   WRITE CONFIG "$ h2xs     == ""Perl ''vms_prefix':[utils]h2xs.com"""
-$   WRITE CONFIG "$ libnetcfg == ""Perl ''vms_prefix':[utils]libnetcfg.com"""
-$   WRITE CONFIG "$!perlcc   == ""Perl ''vms_prefix':[utils]perlcc.com"""
-$   WRITE CONFIG "$ perlivp  == ""Perl ''vms_prefix':[utils]perlivp.com"""
-$   WRITE CONFIG "$ splain   == ""Perl ''vms_prefix':[utils]splain.com"""
-$   WRITE CONFIG "$ xsubpp   == ""Perl ''vms_prefix':[utils]xsubpp.com"""
-$ ENDIF
+$ WRITE CONFIG "$ dprofpp    == """ + perl_setup_perl + " ''vms_prefix':[utils]dprofpp.com"""
+$ ENDIF 
+$ WRITE CONFIG "$ enc2xs     == """ + perl_setup_perl + " ''vms_prefix':[utils]enc2xs.com"""
+$ WRITE CONFIG "$!find2perl  == """ + perl_setup_perl + " ''vms_prefix':[utils]find2perl.com"""
+$ WRITE CONFIG "$ h2ph       == """ + perl_setup_perl + " ''vms_prefix':[utils]h2ph.com"""
+$ WRITE CONFIG "$ h2xs       == """ + perl_setup_perl + " ''vms_prefix':[utils]h2xs.com"""
+$ WRITE CONFIG "$ libnetcfg  == """ + perl_setup_perl + " ''vms_prefix':[utils]libnetcfg.com"""
+$ WRITE CONFIG "$!perlbug    == """ + perl_setup_perl + " ''vms_prefix':[lib]perlbug.com"""
+$ WRITE CONFIG "$!perlcc     == """ + perl_setup_perl + " ''vms_prefix':[utils]perlcc.com"""
+$ WRITE CONFIG "$ perldoc    == """ + perl_setup_perl + " ''vms_prefix':[lib.pod]perldoc.com -t"""
+$ WRITE CONFIG "$ perlivp    == """ + perl_setup_perl + " ''vms_prefix':[utils]perlivp.com"""
+$ WRITE CONFIG "$ piconv     == """ + perl_setup_perl + " ''vms_prefix':[utils]piconv.com"""
+$ WRITE CONFIG "$ pl2pm      == """ + perl_setup_perl + " ''vms_prefix':[utils]pl2pm.com"""
+$ WRITE CONFIG "$ pod2html   == """ + perl_setup_perl + " pod2html"""
+$ WRITE CONFIG "$ pod2latex  == """ + perl_setup_perl + " ''vms_prefix':[lib.pod]pod2latex.com"""
+$ WRITE CONFIG "$ pod2text   == """ + perl_setup_perl + " pod2text"""
+$ WRITE CONFIG "$!pod2man    == """ + perl_setup_perl + " pod2man"""
+$ WRITE CONFIG "$ pod2usage  == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2usage.com"""
+$ WRITE CONFIG "$ podchecker == """ + perl_setup_perl + " ''vms_prefix':[utils]podchecker.com"""
+$ WRITE CONFIG "$ podselect  == """ + perl_setup_perl + " ''vms_prefix':[utils]podselect.com"""
+$ WRITE CONFIG "$ psed       == """ + perl_setup_perl + " ''vms_prefix':[utils]psed.com"""
+$ WRITE CONFIG "$ pstruct    == """ + perl_setup_perl + " ''vms_prefix':[utils]pstruct.com"""
+$ WRITE CONFIG "$ s2p        == """ + perl_setup_perl + " ''vms_prefix':[utils]s2p.com"""
+$ WRITE CONFIG "$ splain     == """ + perl_setup_perl + " ''vms_prefix':[utils]splain.com"""
+$ WRITE CONFIG "$ xsubpp     == """ + perl_setup_perl + " ''vms_prefix':[utils]xsubpp.com"""
 $ CLOSE CONFIG
 $!
 $ echo  ""

@@ -26,7 +26,8 @@ ok( defined &ExtUtils::Liblist::ext,
     my @warn;
     local $SIG{__WARN__} = sub {push @warn, [@_]};
 
-    my @out = ExtUtils::Liblist->ext('-ln0tt43r3_perl');
+    my $ll = bless {}, 'ExtUtils::Liblist';
+    my @out = $ll->ext('-ln0tt43r3_perl');
     is( @out, 4, 'enough output' );
     unlike( $out[2], qr/-ln0tt43r3_perl/, 'bogus library not added' );
     ok( @warn, 'had warning');

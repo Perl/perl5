@@ -1,6 +1,6 @@
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    push @INC, '../lib';
     require Config; import Config;
     unless ($Config{'useithreads'}) {
         print "1..0 # Skip: no useithreads\n";
@@ -43,11 +43,11 @@ ok(1,"");
 {
     my ($thread) = threads->create(sub { return (1,2,3) });
     my @retval = $thread->join();
-    ok($retval[0] == 1 && $retval[1] == 2 && $retval[2] == 3);
+    ok($retval[0] == 1 && $retval[1] == 2 && $retval[2] == 3,'');
 }
 {
     my $retval = threads->create(sub { return [1] })->join();
-    ok($retval->[0] == 1,"Check that a array ref works");
+    ok($retval->[0] == 1,"Check that a array ref works",);
 }
 {
     my $retval = threads->create(sub { return { foo => "bar" }})->join();
@@ -69,15 +69,15 @@ ok(1,"");
 {
     my $test = "hi";
     my $retval = threads->create(sub { return $_[0]}, \$test)->join();
-    ok($$retval eq 'hi');
+    ok($$retval eq 'hi','');
 }
 {
     my $test = "hi";
     share($test);
     my $retval = threads->create(sub { return $_[0]}, \$test)->join();
-    ok($$retval eq 'hi');
+    ok($$retval eq 'hi','');
     $test = "foo";
-    ok($$retval eq 'foo');
+    ok($$retval eq 'foo','');
 }
 {
     my %foo;

@@ -15,7 +15,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    push @INC, '../lib';
     require Config; import Config;
     unless ($Config{'useithreads'}) {
 	print "1..0 # Skip: no useithreads\n";
@@ -117,6 +117,7 @@ ok(14, 0 == threads->self->tid(),"Check so that tid for threads work for main th
 ok(15, 0 == threads->tid(),"Check so that tid for threads work for main thread");
 
 {
+	no warnings;
     local *CLONE = sub { ok(16, threads->tid() == 9, "Tid should be correct in the clone")};
     threads->create(sub { ok(17, threads->tid() == 9, "And tid be 9 here too") })->join();
 }
