@@ -95,7 +95,7 @@ struct xpvhv {
 	register const char *s_PeRlHaSh_tmp = str; \
 	register const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
 	register I32 i_PeRlHaSh = len; \
-	register U32 hash_PeRlHaSh = PL_new_hash_seed; \
+	register U32 hash_PeRlHaSh = PL_rehash_seed; \
 	while (i_PeRlHaSh--) { \
 	    hash_PeRlHaSh += *s_PeRlHaSh++; \
 	    hash_PeRlHaSh += (hash_PeRlHaSh << 10); \
