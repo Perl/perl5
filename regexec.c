@@ -2075,13 +2075,6 @@ S_regmatch(pTHX_ regnode *prog)
 		sayNO;
 	    break;
 	case SANY:
-	    if (do_utf8) {
-		locinput += PL_utf8skip[nextchr];
-		if (locinput > PL_regeol)
-		    sayNO;
-		nextchr = UCHARAT(locinput);
-		break;
-	    }
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -3563,15 +3556,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 	}
 	break;
     case SANY:
-	if (do_utf8) {
-	    loceol = PL_regeol;
-	    while (hardcount < max && scan < loceol) {
-		scan += UTF8SKIP(scan);
-		hardcount++;
-	    }
-	} else {
-	    scan = loceol;
-	}
+	scan = loceol;
 	break;
     case EXACT:		/* length of string is 1 */
 	c = (U8)*STRING(p);
