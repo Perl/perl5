@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..51\n";
+print "1..54\n";
 
 $x = 'x';
 
@@ -245,3 +245,18 @@ EOT
   print "ok $test\n";
   ++$test;
 }
+
+# Tests 52-54
+# => should only quote foo::bar if it isn't a real sub. AMS, 20010621
+
+sub xyz::foo { "bar" }
+my %str = (
+    foo      => 1,
+    xyz::foo => 1,
+    xyz::bar => 1,
+);
+
+my $test = 52;
+print ((exists $str{foo}      ? "" : "not ")."ok $test\n"); ++$test;
+print ((exists $str{bar}      ? "" : "not ")."ok $test\n"); ++$test;
+print ((exists $str{xyz::bar} ? "" : "not ")."ok $test\n"); ++$test;
