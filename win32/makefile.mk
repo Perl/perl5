@@ -690,7 +690,7 @@ PERLDLL		= ..\perl59.dll
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d
-NOOP		= @echo
+NOOP		= @echo.
 
 #
 # filenames given to xsubpp must have forward slashes (since it puts
