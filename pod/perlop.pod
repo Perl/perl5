@@ -1520,7 +1520,7 @@ terminator of a C<{}>-delimited construct.
 It is possible to inspect both the string given to RE engine and the
 resulting finite automaton.  See the arguments C<debug>/C<debugcolor>
 in the C<use L<re>> pragma, as well as Perl's B<-Dr> command-line
-switch documented in L<perlrun/Switches>.
+switch documented in L<perlrun/"Command Switches">.
 
 =item Optimization of regular expressions
 

@@ -1939,7 +1939,7 @@ done inside our C code:
 
 C<eval_pv> is used to compile the anonymous subroutine, which
 will be the return value as well (read more about C<eval_pv> in
-L<perlguts/eval_pv>).  Once this code reference is in hand, it
+L<perlapi/eval_pv>).  Once this code reference is in hand, it
 can be mixed in with all the previous examples we've shown.
 
 =head1 SEE ALSO

@@ -283,7 +283,7 @@ double-quoted string literals are subject to backslash and variable
 substitution; single-quoted strings are not (except for C<\'> and
 C<\\>).  The usual C-style backslash rules apply for making
 characters such as newline, tab, etc., as well as some more exotic
-forms.  See L<perlop/"Quote and Quotelike Operators"> for a list.
+forms.  See L<perlop/"Quote and Quote-like Operators"> for a list.
 
 Hexadecimal, octal, or binary, representations in string literals
 (e.g. '0xff') are not automatically converted to their integer

@@ -617,7 +617,7 @@ Why do you want to do that? :-)
 
 If you want to override a predefined function, such as open(),
 then you'll have to import the new definition from a different
-module.  See L<perlsub/"Overriding Builtin Functions">.  There's
+module.  See L<perlsub/"Overriding Built-in Functions">.  There's
 also an example in L<perltoot/"Class::Template">.
 
 If you want to overload a Perl operator, such as C<+> or C<**>,

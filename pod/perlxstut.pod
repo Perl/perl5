@@ -906,7 +906,7 @@ to assist in making the interface between Perl and your extension simpler
 or easier to understand.  These routines should live in the .pm file.
 Whether they are automatically loaded when the extension itself is loaded
 or only loaded when called depends on where in the .pm file the subroutine
-definition is placed.  You can also consult L<Autoloader> for an alternate
+definition is placed.  You can also consult L<AutoLoader> for an alternate
 way to store and load your extra subroutines.
 
 =head2 Documenting your Extension
