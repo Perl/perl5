@@ -3720,7 +3720,7 @@ seconds, for this process and the children of this process.
 
 =item tr///
 
-The translation operator.  Same as y///. See L<perlop>.
+The transliteration operator.  Same as y///. See L<perlop>.
 
 =item truncate FILEHANDLE,LENGTH
 
@@ -4062,6 +4062,6 @@ Note that write is I<NOT> the opposite of read.  Unfortunately.
 
 =item y///
 
-The translation operator.  Same as tr///.  See L<perlop>.
+The transliteration operator.  Same as tr///.  See L<perlop>.
 
 =back

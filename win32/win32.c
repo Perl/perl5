@@ -685,6 +685,7 @@ int
 chown(const char *path, uid_t owner, gid_t group)
 {
     /* XXX noop */
+    return 0;
 }
 
 int

@@ -6,13 +6,6 @@
 #define XS(name) void name(cv) CV* cv;
 #endif
 
-#if 0 /*defined(WIN32) && defined(__GNUC__)*/ /* this bug is gone in mingw32/gcc-2.8.0*/
-#define STRINGIFY_THINGY(x) #x
-#define FORCE_ARG_STRING(x) STRINGIFY_THINGY(x)
-#else
-#define FORCE_ARG_STRING(x) x
-#endif
-
 #define dXSARGS				\
 	dSP; dMARK;		\
 	I32 ax = mark - stack_base + 1;	\
@@ -50,8 +43,7 @@
 #ifdef XS_VERSION
 # define XS_VERSION_BOOTCHECK \
     STMT_START {							\
-        char *xs_version = FORCE_ARG_STRING(XS_VERSION);		\
-	char *vn = "", *module = SvPV(ST(0),na);			\
+	char *vn = Nullch, *module = SvPV(ST(0),na);			\
 	if (items >= 2)	 /* version supplied as bootstrap arg */	\
 	    Sv = ST(1);							\
 	else {								\
@@ -62,9 +54,11 @@
 		Sv = perl_get_sv(form("%s::%s", module,			\
 				      vn = "VERSION"), FALSE);		\
 	}								\
-	if (Sv && (!SvOK(Sv) || strNE(xs_version, SvPV(Sv, na))))	\
-	    croak("%s object version %s does not match $%s::%s %_",	\
-		  module, xs_version, module, vn, Sv);			\
+	if (Sv && (!SvOK(Sv) || strNE(XS_VERSION, SvPV(Sv, na))))	\
+	    croak("%s object version %s does not match %s%s%s%s %_",	\
+		  module, XS_VERSION,					\
+		  vn ? "$" : "", vn ? module : "", vn ? "::" : "",	\
+		  vn ? vn : "bootstrap parameter", Sv);			\
     } STMT_END
 #else
 # define XS_VERSION_BOOTCHECK

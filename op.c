@@ -41,6 +41,7 @@ static void null _((OP* o));
 static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
 	CV* startcv, I32 cx_ix));
 static OP *newDEFSVOP _((void));
+static OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 
 static char*
 gv_ename(GV *gv)
@@ -85,9 +86,17 @@ assertref(OP *o)
     int type = o->op_type;
     if (type != OP_AELEM && type != OP_HELEM) {
 	yyerror(form("Can't use subscript on %s", op_desc[type]));
-	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV)
-	    warn("(Did you mean $ or @ instead of %c?)\n",
-		 type == OP_ENTERSUB ? '&' : '%');
+	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV) {
+	    SV *msg = sv_2mortal(
+			newSVpvf("(Did you mean $ or @ instead of %c?)\n",
+				 type == OP_ENTERSUB ? '&' : '%'));
+	    if (in_eval & 2)
+		warn("%_", msg);
+	    else if (in_eval)
+		sv_catsv(GvSV(errgv), msg);
+	    else
+		PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
+	}
     }
 }
 
@@ -1390,8 +1399,9 @@ my(OP *o)
     if (type == OP_LIST) {
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
 	    my(kid);
-    }
-    else if (type != OP_PADSV &&
+    } else if (type == OP_UNDEF) {
+	return o;
+    } else if (type != OP_PADSV &&
 	     type != OP_PADAV &&
 	     type != OP_PADHV &&
 	     type != OP_PUSHMARK)
@@ -2598,9 +2608,17 @@ intro_my(void)
 OP *
 newLOGOP(I32 type, I32 flags, OP *first, OP *other)
 {
+    return new_logop(type, flags, &first, &other);
+}
+
+static OP *
+new_logop(I32 type, I32 flags, OP** firstp, OP** otherp)
+{
     dTHR;
     LOGOP *logop;
     OP *o;
+    OP *first = *firstp;
+    OP *other = *otherp;
 
     if (type == OP_XOR)		/* Not short circuit, but here by precedence. */
 	return newBINOP(type, flags, scalar(first), scalar(other));
@@ -2614,7 +2632,7 @@ newLOGOP(I32 type, I32 flags, OP *first, OP *other)
 	    else
 		type = OP_AND;
 	    o = first;
-	    first = cUNOPo->op_first;
+	    first = *firstp = cUNOPo->op_first;
 	    if (o->op_next)
 		first->op_next = o->op_next;
 	    cUNOPo->op_first = Nullop;
@@ -2626,10 +2644,12 @@ newLOGOP(I32 type, I32 flags, OP *first, OP *other)
 	    warn("Probable precedence problem on %s", op_desc[type]);
 	if ((type == OP_AND) == (SvTRUE(((SVOP*)first)->op_sv))) {
 	    op_free(first);
+	    *firstp = Nullop;
 	    return other;
 	}
 	else {
 	    op_free(other);
+	    *otherp = Nullop;
 	    return first;
 	}
     }
@@ -2814,9 +2834,10 @@ newLOOPOP(I32 flags, I32 debuggable, OP *expr, OP *block)
     }
 
     listop = append_elem(OP_LINESEQ, block, newOP(OP_UNSTACK, 0));
-    o = newLOGOP(OP_AND, 0, expr, listop);
+    o = new_logop(OP_AND, 0, &expr, &listop);
 
-    ((LISTOP*)listop)->op_last->op_next = LINKLIST(o);
+    if (listop)
+	((LISTOP*)listop)->op_last->op_next = LINKLIST(o);
 
     if (once && o != listop)
 	o->op_next = ((LOGOP*)cUNOPo->op_first)->op_other;
@@ -2864,14 +2885,17 @@ newWHILEOP(I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *expr, OP *b
     redo = LINKLIST(listop);
 
     if (expr) {
-	o = newLOGOP(OP_AND, 0, expr, scalar(listop));
+	copline = whileline;
+	scalar(listop);
+	o = new_logop(OP_AND, 0, &expr, &listop);
 	if (o == expr && o->op_type == OP_CONST && !SvTRUE(cSVOPo->op_sv)) {
 	    op_free(expr);		/* oops, it's a while (0) */
 	    op_free((OP*)loop);
-	    return Nullop;		/* (listop already freed by newLOGOP) */
+	    return Nullop;		/* listop already freed by new_logop */
 	}
-	((LISTOP*)listop)->op_last->op_next = condop =
-	    (o == listop ? redo : LINKLIST(o));
+	if (listop)
+	    ((LISTOP*)listop)->op_last->op_next = condop =
+		(o == listop ? redo : LINKLIST(o));
 	if (!next)
 	    next = condop;
     }
@@ -3941,17 +3965,16 @@ ck_rvconst(register OP *o)
 	  "Can't use bareword (\"%s\") as %s ref while \"strict refs\" in use",
 		      name, badthing);
 	}
-	kid->op_type = OP_GV;
+	/*
+	 * This is a little tricky.  We only want to add the symbol if we
+	 * didn't add it in the lexer.  Otherwise we get duplicate strict
+	 * warnings.  But if we didn't add it in the lexer, we must at
+	 * least pretend like we wanted to add it even if it existed before,
+	 * or we get possible typo warnings.  OPpCONST_ENTERED says
+	 * whether the lexer already added THIS instance of this symbol.
+	 */
 	iscv = (o->op_type == OP_RV2CV) * 2;
-	for (gv = 0; !gv; iscv++) {
-	    /*
-	     * This is a little tricky.  We only want to add the symbol if we
-	     * didn't add it in the lexer.  Otherwise we get duplicate strict
-	     * warnings.  But if we didn't add it in the lexer, we must at
-	     * least pretend like we wanted to add it even if it existed before,
-	     * or we get possible typo warnings.  OPpCONST_ENTERED says
-	     * whether the lexer already added THIS instance of this symbol.
-	     */
+	do {
 	    gv = gv_fetchpv(name,
 		iscv | !(kid->op_private & OPpCONST_ENTERED),
 		iscv
@@ -3963,9 +3986,12 @@ ck_rvconst(register OP *o)
 			    : o->op_type == OP_RV2HV
 				? SVt_PVHV
 				: SVt_PVGV);
+	} while (!gv && !(kid->op_private & OPpCONST_ENTERED) && !iscv++);
+	if (gv) {
+	    kid->op_type = OP_GV;
+	    SvREFCNT_dec(kid->op_sv);
+	    kid->op_sv = SvREFCNT_inc(gv);
 	}
-	SvREFCNT_dec(kid->op_sv);
-	kid->op_sv = SvREFCNT_inc(gv);
     }
     return o;
 }
@@ -4717,7 +4743,7 @@ peep(register OP *o)
 	    goto nothin;
 	case OP_NULL:
 	    if (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)
-		curcop = ((COP*)op);
+		curcop = ((COP*)o);
 	    goto nothin;
 	case OP_SCALAR:
 	case OP_LINESEQ:

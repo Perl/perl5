@@ -555,7 +555,7 @@ force_ident(register char *s, int kind)
 	    /* XXX see note in pp_entereval() for why we forgo typo
 	       warnings if the symbol must be introduced in an eval.
 	       GSAR 96-10-12 */
-	    gv_fetchpv(s, in_eval ? GV_ADDMULTI : TRUE,
+	    gv_fetchpv(s, in_eval ? (GV_ADDMULTI | 8) : TRUE,
 		kind == '$' ? SVt_PV :
 		kind == '@' ? SVt_PVAV :
 		kind == '%' ? SVt_PVHV :
@@ -758,15 +758,88 @@ sublex_done(void)
     }
 }
 
+/*
+  scan_const
+
+  Extracts a pattern, double-quoted string, or transliteration.  This
+  is terrifying code.
+
+  It looks at lex_inwhat and lex_inpat to find out whether it's
+  processing a pattern (lex_inpat is true), a transliteration
+  (lex_inwhat & OP_TRANS is true), or a double-quoted string.
+
+  In patterns:
+    backslashes:
+      double-quoted style: \r and \n
+      regexp special ones: \D \s
+      constants: \x3
+      backrefs: \1 (deprecated in substitution replacements)
+      case and quoting: \U \Q \E
+    stops on @ and $, but not for $ as tail anchor
+
+  In transliterations:
+    characters are VERY literal, except for - not at the start or end
+    of the string, which indicates a range.  scan_const expands the
+    range to the full set of intermediate characters.
+
+  In double-quoted strings:
+    backslashes:
+      double-quoted style: \r and \n
+      constants: \x3
+      backrefs: \1 (deprecated)
+      case and quoting: \U \Q \E
+    stops on @ and $
+
+  scan_const does *not* construct ops to handle interpolated strings.
+  It stops processing as soon as it finds an embedded $ or @ variable
+  and leaves it to the caller to work out what's going on.
+
+  @ in pattern could be: @foo, @{foo}, @$foo, @'foo, @:foo.
+
+  $ in pattern could be $foo or could be tail anchor.  Assumption:
+  it's a tail anchor if $ is the last thing in the string, or if it's
+  followed by one of ")| \n\t"
+
+  \1 (backreferences) are turned into $1
+
+  The structure of the code is
+      while (there's a character to process) {
+          handle transliteration ranges
+	  skip regexp comments
+	  skip # initiated comments in //x patterns
+	  check for embedded @foo
+	  check for embedded scalars
+	  if (backslash) {
+	      leave intact backslashes from leave (below)
+	      deprecate \1 in strings and sub replacements
+	      handle string-changing backslashes \l \U \Q \E, etc.
+	      switch (what was escaped) {
+	          handle - in a transliteration (becomes a literal -)
+		  handle \132 octal characters
+		  handle 0x15 hex characters
+		  handle \cV (control V)
+		  handle printf backslashes (\f, \r, \n, etc)
+	      } (end switch)
+	  } (end if backslash)
+    } (end while character to read)
+		  
+*/
+
 static char *
 scan_const(char *start)
 {
-    register char *send = bufend;
-    SV *sv = NEWSV(93, send - start);
-    register char *s = start;
-    register char *d = SvPVX(sv);
-    bool dorange = FALSE;
-    I32 len;
+    register char *send = bufend;		/* end of the constant */
+    SV *sv = NEWSV(93, send - start);		/* sv for the constant */
+    register char *s = start;			/* start of the constant */
+    register char *d = SvPVX(sv);		/* destination for copies */
+    bool dorange = FALSE;			/* are we in a translit range? */
+    I32 len;					/* ? */
+
+    /*
+      leave is the set of acceptably-backslashed characters.
+
+      I do *not* understand why there's the double hook here.
+    */
     char *leaveit =
 	lex_inpat
 	    ? "\\.^$@AGZdDwWsSbB+*?|()-nrtfeaxc0123456789[{]} \t\n\r\f\v#"
@@ -775,25 +848,38 @@ scan_const(char *start)
 		: "";
 
     while (s < send || dorange) {
+        /* get transliterations out of the way (they're most literal) */
 	if (lex_inwhat == OP_TRANS) {
+	    /* expand a range A-Z to the full set of characters.  AIE! */
 	    if (dorange) {
-		I32 i;
-		I32 max;
-		i = d - SvPVX(sv);
-		SvGROW(sv, SvLEN(sv) + 256);
-		d = SvPVX(sv) + i;
-		d -= 2;
-		max = (U8)d[1];
+		I32 i;				/* current expanded character */
+		I32 max;			/* last character in range */
+
+		i = d - SvPVX(sv);		/* remember current offset */
+		SvGROW(sv, SvLEN(sv) + 256);	/* expand the sv -- there'll never be more'n 256 chars in a range for it to grow by */
+		d = SvPVX(sv) + i;		/* restore d after the grow potentially has changed the ptr */
+		d -= 2;				/* eat the first char and the - */
+
+		max = (U8)d[1];			/* last char in range */
+
 		for (i = (U8)*d; i <= max; i++)
 		    *d++ = i;
+
+		/* mark the range as done, and continue */
 		dorange = FALSE;
 		continue;
 	    }
+
+	    /* range begins (ignore - as first or last char) */
 	    else if (*s == '-' && s+1 < send  && s != start) {
 		dorange = TRUE;
 		s++;
 	    }
 	}
+
+	/* if we get here, we're not doing a transliteration */
+
+	/* skip for regexp comments /(?#comment)/ */
 	else if (*s == '(' && lex_inpat && s[1] == '?') {
 	    if (s[2] == '#') {
 		while (s < send && *s != ')')
@@ -820,26 +906,40 @@ scan_const(char *start)
 		    *d++ = *s++;
 	    }
 	}
+
+	/* likewise skip #-initiated comments in //x patterns */
 	else if (*s == '#' && lex_inpat &&
 	  ((PMOP*)lex_inpat)->op_pmflags & PMf_EXTENDED) {
 	    while (s+1 < send && *s != '\n')
 		*d++ = *s++;
 	}
+
+	/* check for embedded arrays (@foo, @:foo, @'foo, @{foo}, @$foo) */
 	else if (*s == '@' && s[1] && (isALNUM(s[1]) || strchr(":'{$", s[1])))
 	    break;
+
+	/* check for embedded scalars.  only stop if we're sure it's a
+	   variable.
+        */
 	else if (*s == '$') {
 	    if (!lex_inpat)	/* not a regexp, so $ must be var */
 		break;
 	    if (s + 1 < send && !strchr("()| \n\t", s[1]))
 		break;		/* in regexp, $ might be tail anchor */
 	}
+
+	/* backslashes */
 	if (*s == '\\' && s+1 < send) {
 	    s++;
+
+	    /* some backslashes we leave behind */
 	    if (*s && strchr(leaveit, *s)) {
 		*d++ = '\\';
 		*d++ = *s++;
 		continue;
 	    }
+
+	    /* deprecate \1 in strings and substitution replacements */
 	    if (lex_inwhat == OP_SUBST && !lex_inpat &&
 		isDIGIT(*s) && *s != '0' && !isDIGIT(s[1]))
 	    {
@@ -848,34 +948,49 @@ scan_const(char *start)
 		*--s = '$';
 		break;
 	    }
+
+	    /* string-change backslash escapes */
 	    if (lex_inwhat != OP_TRANS && *s && strchr("lLuUEQ", *s)) {
 		--s;
 		break;
 	    }
+
+	    /* if we get here, it's either a quoted -, or a digit */
 	    switch (*s) {
+
+	    /* quoted - in transliterations */
 	    case '-':
 		if (lex_inwhat == OP_TRANS) {
 		    *d++ = *s++;
 		    continue;
 		}
 		/* FALL THROUGH */
+	    /* default action is to copy the quoted character */
 	    default:
 		*d++ = *s++;
 		continue;
+
+	    /* \132 indicates an octal constant */
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
 		*d++ = scan_oct(s, 3, &len);
 		s += len;
 		continue;
+
+	    /* \x24 indicates a hex constant */
 	    case 'x':
 		*d++ = scan_hex(++s, 2, &len);
 		s += len;
 		continue;
+
+	    /* \c is a control character */
 	    case 'c':
 		s++;
 		len = *s++;
 		*d++ = toCTRL(len);
 		continue;
+
+	    /* printf-style backslashes, formfeeds, newlines, etc */
 	    case 'b':
 		*d++ = '\b';
 		break;
@@ -897,20 +1012,27 @@ scan_const(char *start)
 	    case 'a':
 		*d++ = '\007';
 		break;
-	    }
+	    } /* end switch */
+
 	    s++;
 	    continue;
-	}
+	} /* end if (backslash) */
+
 	*d++ = *s++;
-    }
+    } /* while loop to process each character */
+
+    /* terminate the string and set up the sv */
     *d = '\0';
     SvCUR_set(sv, d - SvPVX(sv));
     SvPOK_on(sv);
 
+    /* shrink the sv if we allocated more than we used */
     if (SvCUR(sv) + 5 < SvLEN(sv)) {
 	SvLEN_set(sv, SvCUR(sv) + 1);
 	Renew(SvPVX(sv), SvLEN(sv), char);
     }
+
+    /* ??? */
     if (s > bufptr)
 	yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
     else
@@ -1080,7 +1202,12 @@ intuit_method(char *start, GV *gv)
 	return *s == '(' ? FUNCMETH : METHOD;
     }
     if (!keyword(tmpbuf, len)) {
-	indirgv = gv_fetchpv(tmpbuf,FALSE, SVt_PVCV);
+	if (len > 2 && tmpbuf[len - 2] == ':' && tmpbuf[len - 1] == ':') {
+	    len -= 2;
+	    tmpbuf[len] = '\0';
+	    goto bare_package;
+	}
+	indirgv = gv_fetchpv(tmpbuf, FALSE, SVt_PVCV);
 	if (indirgv && GvCVu(indirgv))
 	    return 0;
 	/* filehandle or package name makes it a method */
@@ -1088,11 +1215,10 @@ intuit_method(char *start, GV *gv)
 	    s = skipspace(s);
 	    if ((bufend - s) >= 2 && *s == '=' && *(s+1) == '>')
 		return 0;	/* no assumptions -- "=>" quotes bearword */
-	    nextval[nexttoke].opval =
-		(OP*)newSVOP(OP_CONST, 0,
-			    newSVpv(tmpbuf,0));
-	    nextval[nexttoke].opval->op_private =
-		OPpCONST_BARE;
+      bare_package:
+	    nextval[nexttoke].opval = (OP*)newSVOP(OP_CONST, 0,
+						   newSVpv(tmpbuf,0));
+	    nextval[nexttoke].opval->op_private = OPpCONST_BARE;
 	    expect = XTERM;
 	    force_next(WORD);
 	    bufptr = s;
@@ -1214,7 +1340,6 @@ filter_read(int idx, SV *buf_sv, int maxlen)
 	        else
 		    return 0 ;		/* end of file */
 	    }
-
 	}
 	return SvCUR(buf_sv);
     }
@@ -1234,7 +1359,6 @@ filter_read(int idx, SV *buf_sv, int maxlen)
     /* Return: <0:error, =0:eof, >0:not eof 		*/
     return (*funcp)(idx, buf_sv, maxlen);
 }
-
 
 static char *
 filter_gets(register SV *sv, register PerlIO *fp, STRLEN append)
@@ -1265,6 +1389,31 @@ filter_gets(register SV *sv, register PerlIO *fp, STRLEN append)
 
 EXT int yychar;		/* last token */
 
+/*
+  yylex
+
+  Works out what to call the token just pulled out of the input
+  stream.  The yacc parser takes care of taking the ops we return and
+  stitching them into a tree.
+
+  Returns:
+    PRIVATEREF
+
+  Structure:
+      if read an identifier
+          if we're in a my declaration
+	      croak if they tried to say my($foo::bar)
+	      build the ops for a my() declaration
+	  if it's an access to a my() variable
+	      are we in a sort block?
+	          croak if my($a); $a <=> $b
+	      build ops for access to a my() variable
+	  if in a dq string, and they've said @foo and we can't find @foo
+	      croak
+	  build ops for a bareword
+      if we already built the token before, use it.
+*/
+
 int
 yylex(void)
 {
@@ -1276,17 +1425,38 @@ yylex(void)
     GV *gv = Nullgv;
     GV **gvp = 0;
 
+    /* check if there's an identifier for us to look at */
     if (pending_ident) {
+        /* pit holds the identifier we read and pending_ident is reset */
 	char pit = pending_ident;
 	pending_ident = 0;
 
+	/* if we're in a my(), we can't allow dynamics here.
+	   $foo'bar has already been turned into $foo::bar, so
+	   just check for colons.
+
+	   if it's a legal name, the OP is a PADANY.
+	*/
 	if (in_my) {
 	    if (strchr(tokenbuf,':'))
 		croak(no_myglob,tokenbuf);
+
 	    yylval.opval = newOP(OP_PADANY, 0);
 	    yylval.opval->op_targ = pad_allocmy(tokenbuf);
 	    return PRIVATEREF;
 	}
+
+	/* 
+	   build the ops for accesses to a my() variable.
+
+	   Deny my($a) or my($b) in a sort block, *if* $a or $b is
+	   then used in a comparison.  This catches most, but not
+	   all cases.  For instance, it catches
+	       sort { my($a); $a <=> $b }
+	   but not
+	       sort { my($a); $a < $b ? -1 : $a == $b ? 0 : 1; }
+	   (although why you'd do that is anyone's guess).
+	*/
 
 	if (!strchr(tokenbuf,':')) {
 #ifdef USE_THREADS
@@ -1301,6 +1471,7 @@ yylex(void)
 	    }
 #endif /* USE_THREADS */
 	    if ((tmp = pad_findmy(tokenbuf)) != NOT_IN_PAD) {
+		/* if it's a sort block and they're naming $a or $b */
 		if (last_lop_op == OP_SORT &&
 		    tokenbuf[0] == '$' &&
 		    (tokenbuf[1] == 'a' || tokenbuf[1] == 'b')
@@ -1323,7 +1494,11 @@ yylex(void)
 	    }
 	}
 
-	/* Force them to make up their mind on "@foo". */
+	/*
+	   Whine if they've said @foo in a doublequoted string,
+	   and @foo isn't a variable we can find in the symbol
+	   table.
+	*/
 	if (pit == '@' && lex_state != LEX_NORMAL && !lex_brackets) {
 	    GV *gv = gv_fetchpv(tokenbuf+1, FALSE, SVt_PVAV);
 	    if (!gv || ((tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
@@ -1331,14 +1506,17 @@ yylex(void)
 			     tokenbuf, tokenbuf));
 	}
 
+	/* build ops for a bareword */
 	yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf+1, 0));
 	yylval.opval->op_private = OPpCONST_ENTERED;
-	gv_fetchpv(tokenbuf+1, in_eval ? GV_ADDMULTI : TRUE,
+	gv_fetchpv(tokenbuf+1, in_eval ? (GV_ADDMULTI | 8) : TRUE,
 		   ((tokenbuf[0] == '$') ? SVt_PV
 		    : (tokenbuf[0] == '@') ? SVt_PVAV
 		    : SVt_PVHV));
 	return WORD;
     }
+
+    /* no identifier pending identification */
 
     switch (lex_state) {
 #ifdef COMMENTARY
@@ -1347,6 +1525,7 @@ yylex(void)
 	break;
 #endif
 
+    /* when we're already built the next token, just pull it out the queue */
     case LEX_KNOWNEXT:
 	nexttoke--;
 	yylval = nextval[nexttoke];
@@ -1357,16 +1536,23 @@ yylex(void)
 	}
 	return(nexttype[nexttoke]);
 
+    /* interpolated case modifiers like \L \U, including \Q and \E.
+       when we get here, bufptr is at the \
+    */
     case LEX_INTERPCASEMOD:
 #ifdef DEBUGGING
 	if (bufptr != bufend && *bufptr != '\\')
 	    croak("panic: INTERPCASEMOD");
 #endif
-	if (bufptr == bufend || bufptr[1] == 'E') {
+	/* handle \E or end of string */
+       	if (bufptr == bufend || bufptr[1] == 'E') {
 	    char oldmod;
+
+	    /* if at a \E */
 	    if (lex_casemods) {
 		oldmod = lex_casestack[--lex_casemods];
 		lex_casestack[lex_casemods] = '\0';
+
 		if (bufptr != bufend && strchr("LUQ", oldmod)) {
 		    bufptr += 2;
 		    lex_state = LEX_INTERPCONCAT;
@@ -1825,9 +2011,6 @@ yylex(void)
 		s++;
 
 	    if (strnEQ(s,"=>",2)) {
-		if (dowarn)
-		    warn("Ambiguous use of -%c => resolved to \"-%c\" =>",
-			(int)tmp, (int)tmp);
 		s = force_word(bufptr,WORD,FALSE,FALSE,FALSE);
 		OPERATOR('-');		/* unary minus */
 	    }
@@ -2029,12 +2212,6 @@ yylex(void)
 		    d++;
 		if (*d == '}') {
 		    char minus = (tokenbuf[0] == '-');
-		    if (dowarn &&
-			(keyword(tokenbuf + 1, len) ||
-			 (minus && len == 1 && isALPHA(tokenbuf[1])) ||
-			 perl_get_cv(tokenbuf + 1, FALSE) ))
-			warn("Ambiguous use of {%s} resolved to {\"%s\"}",
-			     tokenbuf + !minus, tokenbuf + !minus);
 		    s = force_word(s + minus, WORD, FALSE, TRUE, FALSE);
 		    if (minus)
 			force_next('-');
@@ -2630,9 +2807,6 @@ yylex(void)
 	/* Is this a word before a => operator? */
 	if (strnEQ(d,"=>",2)) {
 	    CLINE;
-	    if (dowarn && (tmp || perl_get_cv(tokenbuf, FALSE)))
-		warn("Ambiguous use of %s => resolved to \"%s\" =>",
-			tokenbuf, tokenbuf);
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
 	    yylval.opval->op_private = OPpCONST_BARE;
 	    TERM(WORD);
@@ -2670,10 +2844,12 @@ yylex(void)
 		/* Get the rest if it looks like a package qualifier */
 
 		if (*s == '\'' || *s == ':' && s[1] == ':') {
+		    STRLEN morelen;
 		    s = scan_word(s, tokenbuf + len, sizeof tokenbuf - len,
-				  TRUE, &len);
-		    if (!len)
+				  TRUE, &morelen);
+		    if (!morelen)
 			croak("Bad name after %s::", tokenbuf);
+		    len += morelen;
 		}
 
 		if (expect == XOPERATOR) {
@@ -2686,7 +2862,28 @@ yylex(void)
 			no_op("Bareword",s);
 		}
 
-		/* Look for a subroutine with this name in current package. */
+		/* Look for a subroutine with this name in current package,
+		   unless name is "Foo::", in which case Foo is a bearword
+		   (and a package name). */
+
+		if (len > 2 &&
+		    tokenbuf[len - 2] == ':' && tokenbuf[len - 1] == ':')
+		{
+		    if (dowarn && ! gv_fetchpv(tokenbuf, FALSE, SVt_PVHV))
+			warn("Bareword \"%s\" refers to nonexistent package",
+			     tokenbuf);
+		    len -= 2;
+		    tokenbuf[len] = '\0';
+		    gv = Nullgv;
+		    gvp = 0;
+		}
+		else {
+		    len = 0;
+		    if (!gv)
+			gv = gv_fetchpv(tokenbuf, FALSE, SVt_PVCV);
+		}
+
+		/* if we saw a global override before, get the right name */
 
 		if (gvp) {
 		    sv = newSVpv("CORE::GLOBAL::",14);
@@ -2694,14 +2891,17 @@ yylex(void)
 		}
 		else
 		    sv = newSVpv(tokenbuf,0);
-		if (!gv)
-		    gv = gv_fetchpv(tokenbuf,FALSE, SVt_PVCV);
 
 		/* Presume this is going to be a bareword of some sort. */
 
 		CLINE;
 		yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 		yylval.opval->op_private = OPpCONST_BARE;
+
+		/* And if "Foo::", then that's what it certainly is. */
+
+		if (len)
+		    goto safe_bareword;
 
 		/* See if it's the indirect object for a list operator. */
 
@@ -2831,6 +3031,8 @@ yylex(void)
 			    warn(warn_reserved, tokenbuf);
 		    }
 		}
+
+	    safe_bareword:
 		if (lastchar && strchr("*%&", lastchar)) {
 		    warn("Operator or semicolon missing before %c%s",
 			lastchar, tokenbuf);
@@ -3074,7 +3276,7 @@ yylex(void)
 	case KEY_foreach:
 	    yylval.ival = curcop->cop_line;
 	    s = skipspace(s);
-	    if (isIDFIRST(*s)) {
+	    if (expect == XSTATE && isIDFIRST(*s)) {
 		char *p = s;
 		if ((bufend - p) >= 3 &&
 		    strnEQ(p, "my", 2) && isSPACE(*(p + 2)))
@@ -4512,7 +4714,7 @@ scan_word(register char *s, char *dest, STRLEN destlen, int allow_package, STRLE
 	    *d++ = ':';
 	    s++;
 	}
-	else if (*s == ':' && s[1] == ':' && allow_package && isIDFIRST(s[2])) {
+	else if (*s == ':' && s[1] == ':' && allow_package && s[2] != '$') {
 	    *d++ = *s++;
 	    *d++ = *s++;
 	}
@@ -4767,7 +4969,7 @@ scan_trans(char *start)
 	if (lex_stuff)
 	    SvREFCNT_dec(lex_stuff);
 	lex_stuff = Nullsv;
-	croak("Translation pattern not terminated");
+	croak("Transliteration pattern not terminated");
     }
     if (s[-1] == multi_open)
 	s--;
@@ -4780,7 +4982,7 @@ scan_trans(char *start)
 	if (lex_repl)
 	    SvREFCNT_dec(lex_repl);
 	lex_repl = Nullsv;
-	croak("Translation replacement not terminated");
+	croak("Transliteration replacement not terminated");
     }
 
     New(803,tbl,256,short);
@@ -4815,7 +5017,7 @@ scan_heredoc(register char *s)
     register char *d;
     register char *e;
     char *peek;
-    int outer = (rsfp && !lex_inwhat);
+    int outer = (rsfp && !(lex_inwhat == OP_SCALAR));
 
     s += 2;
     d = tokenbuf;
@@ -4931,39 +5133,89 @@ scan_heredoc(register char *s)
     return s;
 }
 
+/* scan_inputsymbol
+   takes: current position in input buffer
+   returns: new position in input buffer
+   side-effects: yylval and lex_op are set.
+
+   This code handles:
+
+   <>		read from ARGV
+   <FH> 	read from filehandle
+   <pkg::FH>	read from package qualified filehandle
+   <pkg'FH>	read from package qualified filehandle
+   <$fh>	read from filehandle in $fh
+   <*.h>	filename glob
+
+*/
+
 static char *
 scan_inputsymbol(char *start)
 {
-    register char *s = start;
+    register char *s = start;		/* current position in buffer */
     register char *d;
     register char *e;
     I32 len;
 
-    d = tokenbuf;
-    e = tokenbuf + sizeof tokenbuf;
-    s = delimcpy(d, e, s + 1, bufend, '>', &len);
+    d = tokenbuf;			/* start of temp holding space */
+    e = tokenbuf + sizeof tokenbuf;	/* end of temp holding space */
+    s = delimcpy(d, e, s + 1, bufend, '>', &len);	/* extract until > */
+
+    /* die if we didn't have space for the contents of the <>,
+       or if it didn't end
+    */
+
     if (len >= sizeof tokenbuf)
 	croak("Excessively long <> operator");
     if (s >= bufend)
 	croak("Unterminated <> operator");
+
     s++;
+
+    /* check for <$fh>
+       Remember, only scalar variables are interpreted as filehandles by
+       this code.  Anything more complex (e.g., <$fh{$num}>) will be
+       treated as a glob() call.
+       This code makes use of the fact that except for the $ at the front,
+       a scalar variable and a filehandle look the same.
+    */
     if (*d == '$' && d[1]) d++;
+
+    /* allow <Pkg'VALUE> or <Pkg::VALUE> */
     while (*d && (isALNUM(*d) || *d == '\'' || *d == ':'))
 	d++;
+
+    /* If we've tried to read what we allow filehandles to look like, and
+       there's still text left, then it must be a glob() and not a getline.
+       Use scan_str to pull out the stuff between the <> and treat it
+       as nothing more than a string.
+    */
+
     if (d - tokenbuf != len) {
 	yylval.ival = OP_GLOB;
 	set_csh();
 	s = scan_str(start);
 	if (!s)
-	    croak("Glob not terminated");
+	   croak("Glob not terminated");
 	return s;
     }
     else {
+    	/* we're in a filehandle read situation */
 	d = tokenbuf;
+
+	/* turn <> into <ARGV> */
 	if (!len)
 	    (void)strcpy(d,"ARGV");
+
+	/* if <$fh>, create the ops to turn the variable into a
+	   filehandle
+	*/
 	if (*d == '$') {
 	    I32 tmp;
+
+	    /* try to find it in the pad for this block, otherwise find
+	       add symbol table ops
+	    */
 	    if ((tmp = pad_findmy(d)) != NOT_IN_PAD) {
 		OP *o = newOP(OP_PADSV, 0);
 		o->op_targ = tmp;
@@ -4976,71 +5228,147 @@ scan_inputsymbol(char *start)
 					    newUNOP(OP_RV2SV, 0,
 						newGVOP(OP_GV, 0, gv))));
 	    }
+	    /* we created the ops in lex_op, so make yylval.ival a null op */
 	    yylval.ival = OP_NULL;
 	}
+
+	/* If it's none of the above, it must be a literal filehandle
+	   (<Foo::BAR> or <FOO>) so build a simple readline OP */
 	else {
 	    GV *gv = gv_fetchpv(d,TRUE, SVt_PVIO);
 	    lex_op = (OP*)newUNOP(OP_READLINE, 0, newGVOP(OP_GV, 0, gv));
 	    yylval.ival = OP_NULL;
 	}
     }
+
     return s;
 }
+
+
+/* scan_str
+   takes: start position in buffer
+   returns: position to continue reading from buffer
+   side-effects: multi_start, multi_close, lex_repl or lex_stuff, and
+   	updates the read buffer.
+
+   This subroutine pulls a string out of the input.  It is called for:
+   	q		single quotes		q(literal text)
+	'		single quotes		'literal text'
+	qq		double quotes		qq(interpolate $here please)
+	"		double quotes		"interpolate $here please"
+	qx		backticks		qx(/bin/ls -l)
+	`		backticks		`/bin/ls -l`
+	qw		quote words		@EXPORT_OK = qw( func() $spam )
+	m//		regexp match		m/this/
+	s///		regexp substitute	s/this/that/
+	tr///		string transliterate	tr/this/that/
+	y///		string transliterate	y/this/that/
+	($*@)		sub prototypes		sub foo ($)
+	<>		readline or globs	<FOO>, <>, <$fh>, or <*.c>
+	
+   In most of these cases (all but <>, patterns and transliterate)
+   yylex() calls scan_str().  m// makes yylex() call scan_pat() which
+   calls scan_str().  s/// makes yylex() call scan_subst() which calls
+   scan_str().  tr/// and y/// make yylex() call scan_trans() which
+   calls scan_str().
+      
+   It skips whitespace before the string starts, and treats the first
+   character as the delimiter.  If the delimiter is one of ([{< then
+   the corresponding "close" character )]}> is used as the closing
+   delimiter.  It allows quoting of delimiters, and if the string has
+   balanced delimiters ([{<>}]) it allows nesting.
+
+   The lexer always reads these strings into lex_stuff, except in the
+   case of the operators which take *two* arguments (s/// and tr///)
+   when it checks to see if lex_stuff is full (presumably with the 1st
+   arg to s or tr) and if so puts the string into lex_repl.
+
+*/
 
 static char *
 scan_str(char *start)
 {
     dTHR;
-    SV *sv;
-    char *tmps;
-    register char *s = start;
-    register char term;
-    register char *to;
-    I32 brackets = 1;
+    SV *sv;				/* scalar value: string */
+    char *tmps;				/* temp string, used for delimiter matching */
+    register char *s = start;		/* current position in the buffer */
+    register char term;			/* terminating character */
+    register char *to;			/* current position in the sv's data */
+    I32 brackets = 1;			/* bracket nesting level */
 
+    /* skip space before the delimiter */
     if (isSPACE(*s))
 	s = skipspace(s);
+
+    /* mark where we are, in case we need to report errors */
     CLINE;
+
+    /* after skipping whitespace, the next character is the terminator */
     term = *s;
+    /* mark where we are */
     multi_start = curcop->cop_line;
     multi_open = term;
+
+    /* find corresponding closing delimiter */
     if (term && (tmps = strchr("([{< )]}> )]}>",term)))
 	term = tmps[5];
     multi_close = term;
 
+    /* create a new SV to hold the contents.  87 is leak category, I'm
+       assuming.  80 is the SV's initial length.  What a random number. */
     sv = NEWSV(87,80);
     sv_upgrade(sv, SVt_PVIV);
     SvIVX(sv) = term;
     (void)SvPOK_only(sv);		/* validate pointer */
+
+    /* move past delimiter and try to read a complete string */
     s++;
     for (;;) {
+    	/* extend sv if need be */
 	SvGROW(sv, SvCUR(sv) + (bufend - s) + 1);
+	/* set 'to' to the next character in the sv's string */
 	to = SvPVX(sv)+SvCUR(sv);
+	
+	/* if open delimiter is the close delimiter read unbridle */
 	if (multi_open == multi_close) {
 	    for (; s < bufend; s++,to++) {
+	    	/* embedded newlines increment the current line number */
 		if (*s == '\n' && !rsfp)
 		    curcop->cop_line++;
+		/* handle quoted delimiters */
 		if (*s == '\\' && s+1 < bufend && term != '\\') {
 		    if (s[1] == term)
 			s++;
+		/* any other quotes are simply copied straight through */
 		    else
 			*to++ = *s++;
 		}
+		/* terminate when run out of buffer (the for() condition), or
+		   have found the terminator */
 		else if (*s == term)
 		    break;
 		*to = *s;
 	    }
 	}
+	
+	/* if the terminator isn't the same as the start character (e.g.,
+	   matched brackets), we have to allow more in the quoting, and
+	   be prepared for nested brackets.
+	*/
 	else {
+	    /* read until we run out of string, or we find the terminator */
 	    for (; s < bufend; s++,to++) {
+	    	/* embedded newlines increment the line count */
 		if (*s == '\n' && !rsfp)
 		    curcop->cop_line++;
+		/* backslashes can escape the open or closing characters */
 		if (*s == '\\' && s+1 < bufend) {
 		    if ((s[1] == multi_open) || (s[1] == multi_close))
 			s++;
 		    else
 			*to++ = *s++;
 		}
+		/* allow nested opens and closes */
 		else if (*s == multi_close && --brackets <= 0)
 		    break;
 		else if (*s == multi_open)
@@ -5048,18 +5376,29 @@ scan_str(char *start)
 		*to = *s;
 	    }
 	}
+	/* terminate the copied string and update the sv's end-of-string */
 	*to = '\0';
 	SvCUR_set(sv, to - SvPVX(sv));
 
-    if (s < bufend) break;	/* string ends on this line? */
+	/*
+	 * this next chunk reads more into the buffer if we're not done yet
+	 */
 
+  	if (s < bufend) break;	/* handle case where we are done yet :-) */
+
+	/* if we're out of file, or a read fails, bail and reset the current
+	   line marker so we can report where the unterminated string began
+	*/
 	if (!rsfp ||
 	 !(oldoldbufptr = oldbufptr = s = linestart = filter_gets(linestr, rsfp, 0))) {
 	    sv_free(sv);
 	    curcop->cop_line = multi_start;
 	    return Nullch;
 	}
+	/* we read a line, so increment our line counter */
 	curcop->cop_line++;
+	
+	/* update debugger info */
 	if (PERLDB_LINE && curstash != debstash) {
 	    SV *sv = NEWSV(88,0);
 
@@ -5068,14 +5407,26 @@ scan_str(char *start)
 	    av_store(GvAV(curcop->cop_filegv),
 	      (I32)curcop->cop_line, sv);
 	}
+	
+	/* having changed the buffer, we must update bufend */
 	bufend = SvPVX(linestr) + SvCUR(linestr);
     }
+    
+    /* at this point, we have successfully read the delimited string */
+
     multi_end = curcop->cop_line;
     s++;
+
+    /* if we allocated too much space, give some back */
     if (SvCUR(sv) + 5 < SvLEN(sv)) {
 	SvLEN_set(sv, SvCUR(sv) + 1);
 	Renew(SvPVX(sv), SvLEN(sv), char);
     }
+
+    /* decide whether this is the first or second quoted string we've read
+       for this op
+    */
+    
     if (lex_stuff)
 	lex_repl = sv;
     else
@@ -5083,121 +5434,231 @@ scan_str(char *start)
     return s;
 }
 
+/*
+  scan_num
+  takes: pointer to position in buffer
+  returns: pointer to new position in buffer
+  side-effects: builds ops for the constant in yylval.op
+
+  Read a number in any of the formats that Perl accepts:
+
+  0(x[0-7A-F]+)|([0-7]+)
+  [\d_]+(\.[\d_]*)?[Ee](\d+)
+
+  Underbars (_) are allowed in decimal numbers.  If -w is on,
+  underbars before a decimal point must be at three digit intervals.
+
+  Like most scan_ routines, it uses the tokenbuf buffer to hold the
+  thing it reads.
+
+  If it reads a number without a decimal point or an exponent, it will
+  try converting the number to an integer and see if it can do so
+  without loss of precision.
+*/
+  
 char *
 scan_num(char *start)
 {
-    register char *s = start;
-    register char *d;
-    register char *e;
-    I32 tryiv;
-    double value;
-    SV *sv;
-    I32 floatit;
-    char *lastub = 0;
+    register char *s = start;		/* current position in buffer */
+    register char *d;			/* destination in temp buffer */
+    register char *e;			/* end of temp buffer */
+    I32 tryiv;				/* used to see if it can be an int */
+    double value;			/* number read, as a double */
+    SV *sv;				/* place to put the converted number */
+    I32 floatit;			/* boolean: int or float? */
+    char *lastub = 0;			/* position of last underbar */
     static char number_too_long[] = "Number too long";
+
+    /* We use the first character to decide what type of number this is */
 
     switch (*s) {
     default:
-	croak("panic: scan_num");
+      croak("panic: scan_num");
+      
+    /* if it starts with a 0, it could be an octal number, a decimal in
+       0.13 disguise, or a hexadecimal number.
+    */
     case '0':
 	{
+	  /* variables:
+	     u		holds the "number so far"
+	     shift	the power of 2 of the base (hex == 4, octal == 3)
+	     overflowed	was the number more than we can hold?
+
+	     Shift is used when we add a digit.  It also serves as an "are
+	     we in octal or hex?" indicator to disallow hex characters when
+	     in octal mode.
+	   */
 	    UV u;
 	    I32 shift;
 	    bool overflowed = FALSE;
 
+	    /* check for hex */
 	    if (s[1] == 'x') {
 		shift = 4;
 		s += 2;
 	    }
+	    /* check for a decimal in disguise */
 	    else if (s[1] == '.')
 		goto decimal;
+	    /* so it must be octal */
 	    else
 		shift = 3;
 	    u = 0;
+
+	    /* read the rest of the octal number */
 	    for (;;) {
-		UV n, b;
+		UV n, b;	/* n is used in the overflow test, b is the digit we're adding on */
 
 		switch (*s) {
+
+		/* if we don't mention it, we're done */
 		default:
 		    goto out;
+
+		/* _ are ignored */
 		case '_':
 		    s++;
 		    break;
+
+		/* 8 and 9 are not octal */
 		case '8': case '9':
 		    if (shift != 4)
 			yyerror("Illegal octal digit");
 		    /* FALL THROUGH */
+
+	        /* octal digits */
 		case '0': case '1': case '2': case '3': case '4':
 		case '5': case '6': case '7':
-		    b = *s++ & 15;
+		    b = *s++ & 15;		/* ASCII digit -> value of digit */
 		    goto digit;
+
+	        /* hex digits */
 		case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
 		case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
+		    /* make sure they said 0x */
 		    if (shift != 4)
 			goto out;
 		    b = (*s++ & 7) + 9;
+
+		    /* Prepare to put the digit we have onto the end
+		       of the number so far.  We check for overflows.
+		    */
+
 		  digit:
-		    n = u << shift;
+		    n = u << shift;	/* make room for the digit */
 		    if (!overflowed && (n >> shift) != u) {
 			warn("Integer overflow in %s number",
 			     (shift == 4) ? "hex" : "octal");
 			overflowed = TRUE;
 		    }
-		    u = n | b;
+		    u = n | b;		/* add the digit to the end */
 		    break;
 		}
 	    }
+
+	  /* if we get here, we had success: make a scalar value from
+	     the number.
+	  */
 	  out:
 	    sv = NEWSV(92,0);
 	    sv_setuv(sv, u);
 	}
 	break;
+
+    /*
+      handle decimal numbers.
+      we're also sent here when we read a 0 as the first digit
+    */
     case '1': case '2': case '3': case '4': case '5':
     case '6': case '7': case '8': case '9': case '.':
       decimal:
 	d = tokenbuf;
 	e = tokenbuf + sizeof tokenbuf - 6; /* room for various punctuation */
 	floatit = FALSE;
+
+	/* read next group of digits and _ and copy into d */
 	while (isDIGIT(*s) || *s == '_') {
+	    /* skip underscores, checking for misplaced ones 
+	       if -w is on
+	    */
 	    if (*s == '_') {
 		if (dowarn && lastub && s - lastub != 3)
 		    warn("Misplaced _ in number");
 		lastub = ++s;
 	    }
 	    else {
+	        /* check for end of fixed-length buffer */
 		if (d >= e)
 		    croak(number_too_long);
+		/* if we're ok, copy the character */
 		*d++ = *s++;
 	    }
 	}
+
+	/* final misplaced underbar check */
 	if (dowarn && lastub && s - lastub != 3)
 	    warn("Misplaced _ in number");
+
+	/* read a decimal portion if there is one.  avoid
+	   3..5 being interpreted as the number 3. followed
+	   by .5
+	*/
 	if (*s == '.' && s[1] != '.') {
 	    floatit = TRUE;
 	    *d++ = *s++;
+
+	    /* copy, ignoring underbars, until we run out of
+	       digits.  Note: no misplaced underbar checks!
+	    */
 	    for (; isDIGIT(*s) || *s == '_'; s++) {
+	        /* fixed length buffer check */
 		if (d >= e)
 		    croak(number_too_long);
 		if (*s != '_')
 		    *d++ = *s;
 	    }
 	}
+
+	/* read exponent part, if present */
 	if (*s && strchr("eE",*s) && strchr("+-0123456789",s[1])) {
 	    floatit = TRUE;
 	    s++;
+
+	    /* regardless of whether user said 3E5 or 3e5, use lower 'e' */
 	    *d++ = 'e';		/* At least some Mach atof()s don't grok 'E' */
+
+	    /* allow positive or negative exponent */
 	    if (*s == '+' || *s == '-')
 		*d++ = *s++;
+
+	    /* read digits of exponent (no underbars :-) */
 	    while (isDIGIT(*s)) {
 		if (d >= e)
 		    croak(number_too_long);
 		*d++ = *s++;
 	    }
 	}
+
+	/* terminate the string */
 	*d = '\0';
+
+	/* make an sv from the string */
 	sv = NEWSV(92,0);
+	/* reset numeric locale in case we were earlier left in Swaziland */
 	SET_NUMERIC_STANDARD();
 	value = atof(tokenbuf);
+
+	/* 
+	   See if we can make do with an integer value without loss of
+	   precision.  We use I_V to cast to an int, because some
+	   compilers have issues.  Then we try casting it back and see
+	   if it was the same.  We only do this if we know we
+	   specifically read an integer.
+
+	   Note: if floatit is true, then we don't need to do the
+	   conversion at all.
+	*/
 	tryiv = I_V(value);
 	if (!floatit && (double)tryiv == value)
 	    sv_setiv(sv, tryiv);
@@ -5205,6 +5666,8 @@ scan_num(char *start)
 	    sv_setnv(sv, value);
 	break;
     }
+
+    /* make the op for the constant and return */
 
     yylval.opval = newSVOP(OP_CONST, 0, sv);
 

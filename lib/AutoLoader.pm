@@ -73,7 +73,7 @@ sub import {
     # 'auto/POSIX/autosplit.ix' (without the leading 'lib').
     #
 
-    (my $calldir = $callpkg) =~ s#::#/#;
+    (my $calldir = $callpkg) =~ s#::#/#g;
     my $path = $INC{$calldir . '.pm'};
     if (defined($path)) {
 	# Try absolute path name.

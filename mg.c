@@ -1547,7 +1547,7 @@ magic_set(SV *sv, MAGIC *mg)
 	    STATUS_POSIX_SET(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '!':
-	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv),
+	SETERRNO(SvIOK(sv) ? SvIVX(sv) : SvOK(sv) ? sv_2iv(sv) : 0,
 		 (SvIV(sv) == EVMSERR) ? 4 : vaxc$errno);
 	break;
     case '<':

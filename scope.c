@@ -433,6 +433,28 @@ save_delete(HV *hv, char *key, I32 klen)
 }
 
 void
+save_aelem(AV *av, I32 idx, SV **sptr)
+{
+    SSCHECK(4);
+    SSPUSHPTR(av);
+    SSPUSHINT(idx);
+    SSPUSHPTR(*sptr);
+    SSPUSHINT(SAVEt_AELEM);
+    save_scalar_at(sptr);
+}
+
+void
+save_helem(HV *hv, SV *key, SV **sptr)
+{
+    SSCHECK(4);
+    SSPUSHPTR(hv);
+    SSPUSHPTR(key);
+    SSPUSHPTR(*sptr);
+    SSPUSHINT(SAVEt_HELEM);
+    save_scalar_at(sptr);
+}
+
+void
 save_list(register SV **sarg, I32 maxsarg)
 {
     dTHR;
@@ -478,6 +500,7 @@ leave_scope(I32 base)
     register AV *av;
     register HV *hv;
     register void* ptr;
+    I32 i;
 
     if (base < -1)
 	croak("panic: corrupt saved stack index");
@@ -689,17 +712,26 @@ leave_scope(I32 base)
 	    (*SSPOPDPTR)(ptr);
 	    break;
 	case SAVEt_REGCONTEXT:
-	    {
-		I32 delta = SSPOPINT;
-		savestack_ix -= delta;	/* regexp must have croaked */
-	    }
+	    i = SSPOPINT;
+	    savestack_ix -= i;  	/* regexp must have croaked */
 	    break;
 	case SAVEt_STACK_POS:		/* Position on Perl stack */
-	    {
-		I32 delta = SSPOPINT;
-		stack_sp = stack_base + delta;
-	    }
+	    i = SSPOPINT;
+	    stack_sp = stack_base + i;
 	    break;
+	case SAVEt_AELEM:		/* array element */
+	    value = (SV*)SSPOPPTR;
+	    i = SSPOPINT;
+	    av = (AV*)SSPOPPTR;
+	    ptr = av_fetch(av,i,1);
+	    goto restore_sv;
+	case SAVEt_HELEM:		/* hash element */
+	    value = (SV*)SSPOPPTR;
+	    sv = (SV*)SSPOPINT;
+	    hv = (HV*)SSPOPPTR;
+	    ptr = hv_fetch_ent(hv, sv, 1, 0);
+	    ptr = &HeVAL((HE*)ptr);
+	    goto restore_sv;
 	case SAVEt_OP:
 	    op = (OP*)SSPOPPTR;
 	    break;

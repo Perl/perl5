@@ -84,10 +84,10 @@ struct io {
 	++count;				\
 	MUTEX_UNLOCK(&svref_mutex);		\
      } STMT_END
-#    define ATOMIC_DEC_AND_TEST(res,count) 	\
-	MUTEX_LOCK(&svref_mutex);		\
-	res = (--count == 0);			\
-	MUTEX_UNLOCK(&svref_mutex);		\
+#    define ATOMIC_DEC_AND_TEST(res,count) STMT_START {	\
+	MUTEX_LOCK(&svref_mutex);			\
+	res = (--count == 0);				\
+	MUTEX_UNLOCK(&svref_mutex);			\
      } STMT_END
 #  else
 #    define ATOMIC_INC(count) atomic_inc(&count)

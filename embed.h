@@ -846,6 +846,7 @@
 #define same_dirent		Perl_same_dirent
 #define save_I16		Perl_save_I16
 #define save_I32		Perl_save_I32
+#define save_aelem		Perl_save_aelem
 #define save_aptr		Perl_save_aptr
 #define save_ary		Perl_save_ary
 #define save_clearsv		Perl_save_clearsv
@@ -856,6 +857,7 @@
 #define save_freesv		Perl_save_freesv
 #define save_gp			Perl_save_gp
 #define save_hash		Perl_save_hash
+#define save_helem		Perl_save_helem
 #define save_hptr		Perl_save_hptr
 #define save_int		Perl_save_int
 #define save_item		Perl_save_item

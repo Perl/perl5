@@ -491,7 +491,7 @@ regular expressions.)  Thanks to C<LC_CTYPE>, depending on your locale
 setting, characters like 'E<aelig>', 'E<eth>', 'E<szlig>', and
 'E<oslash>' may be understood as C<\w> characters.
 
-The C<LC_CTYPE> locale also provides the map used in translating
+The C<LC_CTYPE> locale also provides the map used in transliterating
 characters between lower and uppercase.  This affects the case-mapping
 functions - lc(), lcfirst, uc() and ucfirst(); case-mapping
 interpolation with C<\l>, C<\L>, C<\u> or <\U> in double-quoted strings
