@@ -110,6 +110,9 @@ esac
 case "$osname" in
 os390)	test -f /bin/env && ldlibpth="/bin/env $ldlibpth"
 	;;
+linux)
+	ldlibpth="LD_PRELOAD=\"\$\$LD_PRELOAD `pwd`/$libperl\" $ldlibpth"
+	;;
 esac
 
 : Prepare dependency lists for Makefile.
