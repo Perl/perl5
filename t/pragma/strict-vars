@@ -397,3 +397,14 @@ EXPECT
 "our" variable $foo redeclared at - line 7.
 	(Did you mean "local" instead of "our"?)
 Name "Foo::foo" used only once: possible typo at - line 9.
+########
+
+# Make sure the strict vars failure still occurs
+# now that the `@i should be written as \@i' failure does not occur
+# 20000522 mjd@plover.com (MJD)
+use strict 'vars';
+no warnings;
+"@i_like_crackers";
+EXPECT
+Global symbol "@i_like_crackers" requires explicit package name at - line 7.
+Execution of - aborted due to compilation errors.

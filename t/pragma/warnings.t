@@ -26,9 +26,7 @@ else
 
 foreach (@w_files) {
 
-    next if /\.orig$/ ;
-
-    next if /(~|\.orig)$/;
+    next if /(~|\.orig|,v)$/;
 
     open F, "<$_" or die "Cannot open $_: $!\n" ;
     while (<F>) {
