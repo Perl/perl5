@@ -267,6 +267,9 @@ Because while a constructor is explicitly called, a destructor is not.
 Destruction happens automatically via Perl's garbage collection (GC)
 system, which is a quick but somewhat lazy reference-based GC system.
 To know what to call, Perl insists that the destructor be named DESTROY.
+Perl's notion of the right time to call a destructor is not well-defined
+currently, which is why your destructors should not rely on when they are
+called.
 
 Why is DESTROY in all caps?  Perl on occasion uses purely uppercase
 function names as a convention to indicate that the function will
