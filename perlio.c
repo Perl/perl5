@@ -2684,91 +2684,13 @@ PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
     return f;
 }
 
-static int
-PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
-{
-    /* XXX this could use PerlIO_canset_fileno() and
-     * PerlIO_set_fileno() support from Configure 
-     */
-#  if defined(__GLIBC__)
-    /* There may be a better way for GLIBC:
-    	- libio.h defines a flag to not close() on cleanup 
-     */	
-    f->_fileno = -1;
-    return 1;
-#  elif defined(__sun__)
-#    if defined(_LP64)
-    /* On solaris, if _LP64 is defined, the FILE structure is this:
-     *
-     *  struct FILE {
-     *      long __pad[16];
-     *  };
-     *
-     * It turns out that the fd is stored in the top 32 bits of 
-     * file->__pad[4]. The lower 32 bits contain flags. file->pad[5] appears
-     * to contain a pointer or offset into another structure. All the
-     * remaining fields are zero.
-     *
-     * We set the top bits to -1 (0xFFFFFFFF).
-     */
-    f->__pad[4] |= 0xffffffff00000000L;
-    assert(fileno(f) == 0xffffffff);
-#    else /* !defined(_LP64) */
-    /* _file is just a unsigned char :-( 
-       Not clear why we dup() rather than using -1 
-       even if that would be treated as 0xFF - so will 
-       a dup fail ...
-     */
-    f->_file = PerlLIO_dup(fileno(f));
-#    endif /* defined(_LP64) */
-    return 1;
-#  elif defined(__hpux)
-    f->__fileH = 0xff;
-    f->__fileL = 0xff;
-    return 1;
-   /* Next one ->_file seems to be a reasonable fallback, i.e. if
-      your platform does not have special entry try this one.       
-      [For OSF only have confirmation for Tru64 (alpha)
-      but assume other OSFs will be similar.]
-    */    
-#  elif defined(_AIX) || defined(__osf__) || defined(__irix__)
-    f->_file = -1;
-    return 1;
-#  elif defined(__FreeBSD__)
-    /* There may be a better way on FreeBSD:
-        - we could insert a dummy func in the _close function entry 
-	f->_close = (int (*)(void *)) dummy_close; 
-     */
-    f->_file = -1;
-    return 1;
-#  elif defined(__CYGWIN__)
-    /* There may be a better way on CYGWIN:
-        - we could insert a dummy func in the _close function entry 
-	f->_close = (int (*)(void *)) dummy_close; 
-     */
-    f->_file = -1;
-    return 1;
-#  elif defined(WIN32)
-#    if defined(__BORLANDC__)
-    f->fd = PerlLIO_dup(fileno(f));
-#    else
-    f->_file = -1;
-#    endif
-    return 1;
-#  else
-#if 0
-    /* Sarathy's code did this - we fall back to a dup/dup2 hack 
-       (which isn't thread safe) instead
-     */  
-#    error "Don't know how to set FILE.fileno on your platform"
-#endif
-    return 0;
-#  endif
-}
-
 IV
 PerlIOStdio_close(pTHX_ PerlIO *f)
 {
+#ifdef SOCKS5_VERSION_NAME
+    int optval;
+    Sock_size_t optlen = sizeof(int);
+#endif
     FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
     if (!stdio) {
 	errno = EBADF;
@@ -2776,67 +2698,42 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
     }
     else {
         int fd = fileno(stdio);
-	int socksfd = 0;
-	int invalidate = 0;
+	int dupfd = -1;
 	IV result;
-	int saveerr = 0;
-	int dupfd = 0;
-#ifdef SOCKS5_VERSION_NAME
-    	/* Socks lib overrides close() but stdio isn't linked to 
-	   that library (though we are) - so we must call close() 
-	   on sockets on stdio's behalf. 
-	 */   
-    	int optval;
-    	Sock_size_t optlen = sizeof(int);
-    	if (getsockopt(fd, SOL_SOCKET, SO_TYPE, (void *) &optval, &optlen) == 0) {
-            socksfd = 1;
-	    invalidate = 1;  
-    	}
-#endif
     	if (PerlIOUnix_refcnt_dec(fd) > 0) {
 	    /* File descriptor still in use */
-	    invalidate = 1;
-	    socksfd = 0;
-	}    
-	if (invalidate) {
-   	    /* For STD* handles don't close the stdio at all 
-	       this is because we have shared the FILE * too 
-   	     */
-	    if (stdio == stdin) {
-	    	/* Some stdios are buggy fflush-ing inputs */
-	    	return 0;
-	    }
-	    else if (stdio == stdout || stdio == stderr) {
+	    if (fd < 3) {
+	    	/* For STD* handles don't close the stdio at all */
 	    	return PerlIO_flush(f);
 	    }
-            /* Tricky - must fclose(stdio) to free memory but not close(fd) 
-	       Use Sarathy's trick from maint-5.6 to invalidate the 
-	       fileno slot of the FILE * 
-	    */ 
-	    saveerr = errno;
-    	    if (!(invalidate = PerlIOStdio_invalidate_fileno(aTHX_ stdio))) {
+	    else {
+            	/* Tricky - must fclose(stdio) to free memory but not close(fd) */ 
 	    	dupfd = PerlLIO_dup(fd);
 	    }
-	} 
-        result = PerlSIO_fclose(stdio);
-	/* We treat error from stdio as success if we invalidated 
-	   errno may NOT be expected EBADF 
-	 */
-	if (invalidate && result != 0) {
-	    errno = saveerr;
-	    result = 0;
-	} 
-	if (socksfd) {
-	    /* in SOCKS case let close() determine return value */
-	    result = close(fd);
-	}
-	if (dupfd) {
-	    PerlLIO_dup2(dupfd,fd);
-	    close(dupfd);
+	}    
+        result = (
+#ifdef SOCKS5_VERSION_NAME
+	       (getsockopt
+		(PerlIO_fileno(f), SOL_SOCKET, SO_TYPE, (void *) &optval,
+		 &optlen) <
+		0) ? PerlSIO_fclose(stdio) : close(PerlIO_fileno(f))
+#else
+	       PerlSIO_fclose(stdio)
+#endif
+	);
+	if (dupfd >= 0) {
+	    /* We need to restore fd from the saved copy */
+	    if (PerlLIO_dup2(dupfd,fd) != fd)
+	      result = -1;
+	    if (PerlLIO_close(dupfd) != 0)
+	      result = -1; 
 	}
 	return result;
     } 
+
 }
+
+
 
 SSize_t
 PerlIOStdio_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
