@@ -904,6 +904,7 @@ scan_const(char *start)
 	    /* expand a range A-Z to the full set of characters.  AIE! */
 	    if (dorange) {
 		I32 i;				/* current expanded character */
+		I32 min;			/* first character in range */
 		I32 max;			/* last character in range */
 
 		i = d - SvPVX(sv);		/* remember current offset */
@@ -911,10 +912,26 @@ scan_const(char *start)
 		d = SvPVX(sv) + i;		/* restore d after the grow potentially has changed the ptr */
 		d -= 2;				/* eat the first char and the - */
 
-		max = (U8)d[1];			/* last char in range */
+		min = (U8)*d;			/* first char in range */
+		max = (U8)d[1];			/* last char in range  */
 
-		for (i = (U8)*d; i <= max; i++)
-		    *d++ = i;
+#ifndef ASCIIish
+		if ((isLOWER(min) && isLOWER(max)) ||
+		    (isUPPER(min) && isUPPER(max))) {
+		    if (isLOWER(min)) {
+			for (i = min; i <= max; i++)
+			    if (isLOWER(i))
+				*d++ = i;
+		    } else {
+			for (i = min; i <= max; i++)
+			    if (isUPPER(i))
+				*d++ = i;
+		    }
+		}
+		else
+#endif
+		    for (i = min; i <= max; i++)
+			*d++ = i;
 
 		/* mark the range as done, and continue */
 		dorange = FALSE;

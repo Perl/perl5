@@ -735,6 +735,13 @@ following all specify the same class of three characters: C<[-az]>,
 C<[az-]>, and C<[a\-z]>.  All are different from C<[a-z]>, which
 specifies a class containing twenty-six characters.)
 
+Note also that the whole range idea is rather unportable between
+character sets--and even within character sets they may cause results
+you probably didn't expect.  A sound principle is to use only ranges
+that begin from and end at either alphabets of equal case ([a-e],
+[A-E]), or digits ([0-9]).  Anything else is unsafe.  If in doubt,
+spell out the character sets in full.
+
 Characters may be specified using a metacharacter syntax much like that
 used in C: "\n" matches a newline, "\t" a tab, "\r" a carriage return,
 "\f" a form feed, etc.  More generally, \I<nnn>, where I<nnn> is a string

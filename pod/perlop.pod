@@ -1149,12 +1149,20 @@ the number of characters replaced or deleted.  If no string is
 specified via the =~ or !~ operator, the $_ string is transliterated.  (The
 string specified with =~ must be a scalar variable, an array element, a
 hash element, or an assignment to one of those, i.e., an lvalue.)
+
 A character range may be specified with a hyphen, so C<tr/A-J/0-9/> 
 does the same replacement as C<tr/ACEGIBDFHJ/0246813579/>.
 For B<sed> devotees, C<y> is provided as a synonym for C<tr>.  If the
 SEARCHLIST is delimited by bracketing quotes, the REPLACEMENTLIST has
 its own pair of quotes, which may or may not be bracketing quotes,
 e.g., C<tr[A-Z][a-z]> or C<tr(+\-*/)/ABCD/>.
+
+Note also that the whole range idea is rather unportable between
+character sets--and even within character sets they may cause results
+you probably didn't expect.  A sound principle is to use only ranges
+that begin from and end at either alphabets of equal case (a-e, A-E),
+or digits (0-4).  Anything else is unsafe.  If in doubt, spell out the
+character sets in full.
 
 Options:
 

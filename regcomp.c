@@ -2245,9 +2245,24 @@ regclass(void)
 	    }
 	}
 	if (!SIZE_ONLY) {
-	    for ( ; lastvalue <= value; lastvalue++)
-		ANYOF_SET(opnd, lastvalue);
-	}
+#ifndef ASCIIish
+	    if ((isLOWER(lastvalue) && isLOWER(value)) ||
+		(isUPPER(lastvalue) && isUPPER(value))) {
+ 		if (isLOWER(lastvalue)) {
+ 		    for (i = lastvalue; i <= value; i++)
+			if (isLOWER(i))
+			    ANYOF_SET(opnd, i);
+ 		} else {
+ 		    for (i = lastvalue; i <= value; i++)
+			if (isUPPER(i))
+			    ANYOF_SET(opnd, i);
+		}
+	    }
+	    else
+#endif
+		for ( ; lastvalue <= value; lastvalue++)
+		    ANYOF_SET(opnd, lastvalue);
+        }
 	lastvalue = value;
     }
     /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
