@@ -143,9 +143,9 @@ sub printTree
 
 ###########################################################################
 
-sub mkHex
+sub mkHexOct
 {
-    my ($max, @a) = @_ ;
+    my ($f, $max, @a) = @_ ;
     my $mask = "\x00" x $max ;
     my $string = "" ;
 
@@ -153,12 +153,27 @@ sub mkHex
 	vec($mask, $_, 1) = 1 ;
     }
 
-    #$string = unpack("H$max", $mask) ;
-    #$string =~ s/(..)/\x$1/g;
     foreach (unpack("C*", $mask)) {
-	$string .= '\x' . sprintf("%2.2x", $_) ;
+        if ($f eq 'x') {
+            $string .= '\x' . sprintf("%2.2x", $_)
+        }
+        else {
+            $string .= '\\' . sprintf("%o", $_)
+        }
     }
     return $string ;
+}
+
+sub mkHex
+{
+    my($max, @a) = @_;
+    return mkHexOct("x", $max, @a);
+}
+
+sub mkOct
+{
+    my($max, @a) = @_;
+    return mkHexOct("o", $max, @a);
 }
 
 ###########################################################################
@@ -222,6 +237,9 @@ print WARN tab(5, '#define WARNsize'),	"$warn_size\n" ;
 #print WARN tab(5, '#define WARN_ALLstring'), '"', ('\377' x $warn_size) , "\"\n" ;
 print WARN tab(5, '#define WARN_ALLstring'), '"', ('\125' x $warn_size) , "\"\n" ;
 print WARN tab(5, '#define WARN_NONEstring'), '"', ('\0' x $warn_size) , "\"\n" ;
+my $WARN_TAINTstring = mkOct($warn_size, map $_ * 2, @{ $list{'taint'} });
+
+print WARN tab(5, '#define WARN_TAINTstring'), qq["$WARN_TAINTstring"\n] ;
 
 print WARN <<'EOM';
 
