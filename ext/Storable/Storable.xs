@@ -1037,11 +1037,11 @@ static void clean_store_context(stcxt_t *cxt)
 	 */
 
 	hv_iterinit(cxt->hseen);
-	while (he = hv_iternext(cxt->hseen))
+	while ((he = hv_iternext(cxt->hseen)))
 		HeVAL(he) = &PL_sv_undef;
 
 	hv_iterinit(cxt->hclass);
-	while (he = hv_iternext(cxt->hclass))
+	while ((he = hv_iternext(cxt->hclass)))
 		HeVAL(he) = &PL_sv_undef;
 
 	/*
@@ -1296,7 +1296,6 @@ static SV *pkg_fetchmeth(
 {
 	GV *gv;
 	SV *sv;
-	SV **svh;
 
 	/*
 	 * The following code is the same as the one performed by UNIVERSAL::can
@@ -1767,7 +1766,7 @@ static int store_array(stcxt_t *cxt, AV *av)
 			continue;
 		}
 		TRACEME(("(#%d) item", i));
-		if (ret = store(cxt, *sav))
+		if ((ret = store(cxt, *sav)))
 			return ret;
 	}
 
@@ -1875,7 +1874,7 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 			
 			TRACEME(("(#%d) value 0x%"UVxf, i, PTR2UV(val)));
 
-			if (ret = store(cxt, val))
+			if ((ret = store(cxt, val)))
 				goto out;
 
 			/*
@@ -1921,7 +1920,7 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 
 			TRACEME(("(#%d) value 0x%"UVxf, i, PTR2UV(val)));
 
-			if (ret = store(cxt, val))
+			if ((ret = store(cxt, val)))
 				goto out;
 
 			/*
@@ -2004,7 +2003,7 @@ static int store_tied(stcxt_t *cxt, SV *sv)
 	 * accesses on the retrieved object will indeed call the magic methods...
 	 */
 
-	if (ret = store(cxt, mg->mg_obj))
+	if ((ret = store(cxt, mg->mg_obj)))
 		return ret;
 
 	TRACEME(("ok (tied)"));
@@ -2043,12 +2042,12 @@ static int store_tied_item(stcxt_t *cxt, SV *sv)
 		PUTMARK(SX_TIED_KEY);
 		TRACEME(("store_tied_item: storing OBJ 0x%"UVxf, PTR2UV(mg->mg_obj)));
 
-		if (ret = store(cxt, mg->mg_obj))
+		if ((ret = store(cxt, mg->mg_obj)))
 			return ret;
 
 		TRACEME(("store_tied_item: storing PTR 0x%"UVxf, PTR2UV(mg->mg_ptr)));
 
-		if (ret = store(cxt, (SV *) mg->mg_ptr))
+		if ((ret = store(cxt, (SV *) mg->mg_ptr)))
 			return ret;
 	} else {
 		I32 idx = mg->mg_len;
@@ -2057,7 +2056,7 @@ static int store_tied_item(stcxt_t *cxt, SV *sv)
 		PUTMARK(SX_TIED_IDX);
 		TRACEME(("store_tied_item: storing OBJ 0x%"UVxf, PTR2UV(mg->mg_obj)));
 
-		if (ret = store(cxt, mg->mg_obj))
+		if ((ret = store(cxt, mg->mg_obj)))
 			return ret;
 
 		TRACEME(("store_tied_item: storing IDX %d", idx));
@@ -2279,7 +2278,7 @@ static int store_hook(
 		 * Serialize entry if not done already, and get its tag.
 		 */
 
-		if (svh = hv_fetch(cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE))
+		if ((svh = hv_fetch(cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE)))
 			goto sv_seen;		/* Avoid moving code too far to the right */
 
 		TRACEME(("listed object %d at 0x%"UVxf" is unknown", i-1, PTR2UV(xsv)));
@@ -2304,7 +2303,7 @@ static int store_hook(
 		} else
 			PUTMARK(flags);
 
-		if (ret = store(cxt, xsv))		/* Given by hook for us to store */
+		if ((ret = store(cxt, xsv)))		/* Given by hook for us to store */
 			return ret;
 
 		svh = hv_fetch(cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE);
@@ -2481,7 +2480,7 @@ static int store_hook(
 		 * [<magic object>]
 		 */
 
-		if (ret = store(cxt, mg->mg_obj))
+		if ((ret = store(cxt, mg->mg_obj)))
 			return ret;
 	}
 
@@ -2618,8 +2617,8 @@ static int store_other(stcxt_t *cxt, SV *sv)
 	 * Store placeholder string as a scalar instead...
 	 */
 
-	(void) sprintf(buf, "You lost %s(0x%"UVxf")\0", sv_reftype(sv, FALSE),
-		       PTR2UV(sv));
+	(void) sprintf(buf, "You lost %s(0x%"UVxf")%c", sv_reftype(sv, FALSE),
+		       PTR2UV(sv), (char)0);
 
 	len = strlen(buf);
 	STORE_SCALAR(buf, len);
@@ -2702,7 +2701,6 @@ static int store(stcxt_t *cxt, SV *sv)
 {
 	SV **svh;
 	int ret;
-	SV *tag;
 	int type;
 	HV *hseen = cxt->hseen;
 
@@ -3188,7 +3186,6 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname)
 	SV *sv;
 	SV *rv;
 	int obj_type;
-	I32 classname;
 	int clone = cxt->optype & ST_CLONE;
 	char mtype = '\0';
 	unsigned int extra_type = 0;
@@ -4155,7 +4152,6 @@ static SV *retrieve_hash(stcxt_t *cxt, char *cname)
 	I32 i;
 	HV *hv;
 	SV *sv;
-	static SV *sv_h_undef = (SV *) 0;		/* hv_store() bug */
 
 	TRACEME(("retrieve_hash (#%d)", cxt->tagnum));
 
@@ -4287,7 +4283,7 @@ static SV *old_retrieve_hash(stcxt_t *cxt, char *cname)
 	I32 size;
 	I32 i;
 	HV *hv;
-	SV *sv;
+	SV *sv=NULL;
 	int c;
 	static SV *sv_h_undef = (SV *) 0;		/* hv_store() bug */
 
