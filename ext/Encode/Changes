@@ -1,9 +1,17 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.62 2002/04/27 11:17:39 dankogai Exp dankogai $
+# $Id: Changes,v 1.63 2002/04/27 18:59:50 dankogai Exp $
 #
 
-$Revision: 1.62 $ $Date: 2002/04/27 11:17:39 $
+$Revision: 1.63 $ $Date: 2002/04/27 18:59:50 $
+! lib/Encode/Encoding.pm
+! Encoding.pm Unicode/Unicode.pm lib/Encode/Guess.pm lib/Encode/CN/HZ.pm 
+! lib/Encode/JP/JIS7.pm lib/Encode/MIME/Header.pm lib/Encode/KR/2022_KR.pm 
+  Make use of the Encode::Encoding base class!
+  And other cleanups in Encode.xs upon NI-XS suggestions
+  Message-Id: <20020427160718.1290.15@bactrian.ni-s.u-net.com>
+
+1.62 2002/04/27 11:17:39
 ! Encode.pm
   encodings() now just check %ExtModule instead of eval{require}
   all of them for ":all" to conserve more memory.
@@ -520,7 +528,7 @@ $Revision: 1.62 $ $Date: 2002/04/27 11:17:39 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/27 11:17:39 $
+1.11  $Date: 2002/04/27 18:59:50 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

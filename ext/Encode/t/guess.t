@@ -59,7 +59,7 @@ for my $jp (@jp){
 
 is (decode('Guess', encode('euc-jp', $utf8on)), $utf8on, "decode('Guess')");
 eval{ encode('Guess', $utf8on) };
-like($@, qr/lazy/io, "no encode()");
+like($@, qr/not defined/io, "no encode()");
 
 my %CJKT = 
     (

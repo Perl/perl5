@@ -1,15 +1,13 @@
 #
-# $Id: H2Z.pm,v 1.1 2002/04/22 03:43:05 dankogai Exp $
+# $Id: H2Z.pm,v 1.2 2002/04/27 18:59:50 dankogai Exp $
 #
 
 package Encode::JP::H2Z;
 
 use strict;
 
-our $RCSID = q$Id: H2Z.pm,v 1.1 2002/04/22 03:43:05 dankogai Exp $;
-our $VERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-
-use Carp;
+our $RCSID = q$Id: H2Z.pm,v 1.2 2002/04/27 18:59:50 dankogai Exp $;
+our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode::CJKConstants qw(:all);
 

@@ -1,5 +1,5 @@
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.33 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.34 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -7,7 +7,7 @@ use strict;
 BEGIN {
     if (ord("A") == 193) {
 	require Carp;
-	Carp::croak "encoding pragma does not support EBCDIC platforms";
+	Carp::croak("encoding pragma does not support EBCDIC platforms");
     }
 }
 
@@ -26,7 +26,7 @@ sub import {
     my $enc = find_encoding($name);
     unless (defined $enc) {
 	require Carp;
-	Carp::croak "Unknown encoding '$name'";
+	Carp::croak("Unknown encoding '$name'");
     }
     unless ($arg{Filter}){
 	${^ENCODING} = $enc; # this is all you need, actually.
@@ -35,7 +35,7 @@ sub import {
 	    if ($arg{$h}){
 		unless (defined find_encoding($arg{$h})) {
 		    require Carp;
-		    Carp::croak "Unknown encoding for $h, '$arg{$h}'";
+		    Carp::croak("Unknown encoding for $h, '$arg{$h}'");
 		}
 		eval { binmode($h, ":encoding($arg{$h})") };
 	    }else{

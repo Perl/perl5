@@ -3,7 +3,7 @@ package Encode::Unicode;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = (q$Revision: 1.35 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.36 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load(__PACKAGE__,$VERSION);
@@ -13,6 +13,7 @@ XSLoader::load(__PACKAGE__,$VERSION);
 #
 
 require Encode;
+
 for my $name (qw(UTF-16 UTF-16BE UTF-16LE
                  UTF-32 UTF-32BE UTF-32LE
                         UCS-2BE  UCS-2LE))
@@ -37,27 +38,7 @@ for my $name (qw(UTF-16 UTF-16BE UTF-16LE
 
 }
 
-sub name { shift->{'Name'} }
-sub new_sequence
-{
-    my $self = shift;
-    # Return the original if endian known
-    return $self if ($self->{endian});
-    # Return a clone
-    return bless {%$self},ref($self);
-}
-
-sub needs_lines { 0 };
-
-sub perlio_ok { 
-    eval{ require PerlIO::encoding };
-    if ($@){
-	return 0;
-    }else{
-	return 1;
-    }
-}
-
+use base qw(Encode::Encoding);
 
 #
 # three implementations of (en|de)code exist.  The XS version is the

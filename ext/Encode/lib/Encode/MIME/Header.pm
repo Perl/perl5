@@ -1,7 +1,7 @@
 package Encode::MIME::Header;
 use strict;
 # use warnings;
-our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(find_encoding encode_utf8);
 use MIME::Base64;
@@ -36,8 +36,8 @@ $Encode::Encoding{'MIME-Q'} =
 	Name        => 'MIME-Q',
     } => __PACKAGE__;
 
-sub name { shift->{'Name'} }
-sub new_sequence { $_[0] }
+use base qw(Encode::Encoding);
+
 sub needs_lines { 1 }
 sub perlio_ok{ 0 };
 

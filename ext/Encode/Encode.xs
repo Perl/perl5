@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.40 2002/04/27 11:17:39 dankogai Exp dankogai $
+ $Id: Encode.xs,v 1.41 2002/04/27 18:59:50 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -8,6 +8,8 @@
 #include "XSUB.h"
 #define U8 U8
 #include "encode.h"
+
+# define PERLIO_MODNAME  "PerlIO::encoding"
 # define PERLIO_FILENAME "PerlIO/encoding.pm"
 
 /* set 1 or more to profile.  t/encoding.t dumps core because of
@@ -219,9 +221,6 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	SvCUR_set(src, sdone);
     }
     /* warn("check = 0x%X, code = 0x%d\n", check, code); */
-    if (code && !(check & ENCODE_RETURN_ON_ERR)) {
-    	return &PL_sv_undef;
-    }
     
     SvCUR_set(dst, dlen+ddone);
     SvPOK_only(dst);
@@ -296,13 +295,14 @@ SV *	obj
 CODE:
 {
     encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
-    require_pv(PERLIO_FILENAME);
-    if (hv_exists(get_hv("INC", 0), 
-		  PERLIO_FILENAME, strlen(PERLIO_FILENAME)))
-    {
-	ST(0) = &PL_sv_yes;
-    }else{
+    /* require_pv(PERLIO_FILENAME); */
+
+    eval_pv("require PerlIO::encoding", 0);
+
+    if (SvTRUE(get_sv("@", 0))) {
 	ST(0) = &PL_sv_no;
+    }else{
+	ST(0) = &PL_sv_yes;
     }
     XSRETURN(1);
 }

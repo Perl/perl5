@@ -1,9 +1,12 @@
+#
+# $Id: Encode.pm,v 1.63 2002/04/27 18:59:50 dankogai Exp $
+#
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.62 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.63 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
-XSLoader::load 'Encode';
+XSLoader::load(__PACKAGE__, $VERSION);
 
 require Exporter;
 use base qw/Exporter/;
@@ -37,8 +40,6 @@ our %EXPORT_TAGS =
     );
 
 # Documentation moved after __END__ for speed - NI-S
-
-use Carp;
 
 our $ON_EBCDIC = (ord("A") == 193);
 
@@ -83,44 +84,33 @@ sub define_encoding
     $Encoding{$name} = $obj;
     my $lc = lc($name);
     define_alias($lc => $obj) unless $lc eq $name;
-    while (@_)
-    {
+    while (@_){
 	my $alias = shift;
-	define_alias($alias,$obj);
+	define_alias($alias, $obj);
     }
     return $obj;
 }
 
 sub getEncoding
 {
-    my ($class,$name,$skip_external) = @_;
-    my $enc;
-    if (ref($name) && $name->can('new_sequence'))
-    {
-	return $name;
-    }
+    my ($class, $name, $skip_external) = @_;
+
+    ref($name) && $name->can('new_sequence') and return $name;
+    exists $Encoding{$name} and return $Encoding{$name};
     my $lc = lc $name;
-    if (exists $Encoding{$name})
-    {
-	return $Encoding{$name};
-    }
-    if (exists $Encoding{$lc})
-    {
-	return $Encoding{$lc};
-    }
+    exists $Encoding{$lc} and return $Encoding{$lc};
 
     my $oc = $class->find_alias($name);
-    return $oc if defined $oc;
-
-    $oc = $class->find_alias($lc) if $lc ne $name;
-    return $oc if defined $oc;
+    defined($oc) and return $oc;
+    $lc ne $name and $oc = $class->find_alias($lc);
+    defined($oc) and return $oc;
 
     unless ($skip_external)
     {
 	if (my $mod = $ExtModule{$name} || $ExtModule{$lc}){
 	    $mod =~ s,::,/,g ; $mod .= '.pm';
 	    eval{ require $mod; };
-	    return $Encoding{$name} if exists $Encoding{$name};
+	    exists $Encoding{$name} and return $Encoding{$name};
 	}
     }
     return;
@@ -128,7 +118,7 @@ sub getEncoding
 
 sub find_encoding
 {
-    my ($name,$skip_external) = @_;
+    my ($name, $skip_external) = @_;
     return __PACKAGE__->getEncoding($name,$skip_external);
 }
 
@@ -143,7 +133,10 @@ sub encode($$;$)
     my ($name,$string,$check) = @_;
     $check ||=0;
     my $enc = find_encoding($name);
-    croak("Unknown encoding '$name'") unless defined $enc;
+    unless(defined $enc){
+	require Carp;
+	Carp::croak("Unknown encoding '$name'");
+    }
     my $octets = $enc->encode($string,$check);
     return undef if ($check && length($string));
     return $octets;
@@ -154,7 +147,10 @@ sub decode($$;$)
     my ($name,$octets,$check) = @_;
     $check ||=0;
     my $enc = find_encoding($name);
-    croak("Unknown encoding '$name'") unless defined $enc;
+    unless(defined $enc){
+	require Carp;
+	Carp::croak("Unknown encoding '$name'");
+    }
     my $string = $enc->decode($octets,$check);
     $_[1] = $octets if $check;
     return $string;
@@ -165,9 +161,15 @@ sub from_to($$$;$)
     my ($string,$from,$to,$check) = @_;
     $check ||=0;
     my $f = find_encoding($from);
-    croak("Unknown encoding '$from'") unless defined $f;
+    unless (defined $f){
+	require Carp;
+	Carp::croak("Unknown encoding '$from'");
+    }
     my $t = find_encoding($to);
-    croak("Unknown encoding '$to'") unless defined $t;
+    unless (defined $t){
+	require Carp;
+	Carp::croak("Unknown encoding '$to'");
+    }
     my $uni = $f->decode($string,$check);
     return undef if ($check && length($string));
     $string =  $t->encode($uni,$check);
@@ -194,17 +196,13 @@ predefine_encodings();
 #
 # This is to restore %Encoding if really needed;
 #
+
 sub predefine_encodings{
+    use Encode::Encoding;
     if ($ON_EBCDIC) {
 	# was in Encode::UTF_EBCDIC
 	package Encode::UTF_EBCDIC;
-	*name         = sub{ shift->{'Name'} };
-	*new_sequence = sub{ return $_[0] };
-	*needs_lines = sub{ 0 };
-	*perlio_ok = sub { 
-	    eval{ require PerlIO::encoding };
-	    return $@ ? 0 : 1;
-	};
+	push @Encode::UTF_EBCDIC::ISA, 'Encode::Encoding';
 	*decode = sub{
 	    my ($obj,$str,$chk) = @_;
 	    my $res = '';
@@ -228,15 +226,8 @@ sub predefine_encodings{
 	$Encode::Encoding{Unicode} =
 	    bless {Name => "UTF_EBCDIC"} => "Encode::UTF_EBCDIC";
     } else {
-	# was in Encode::UTF_EBCDIC
 	package Encode::Internal;
-	*name         = sub{ shift->{'Name'} };
-	*new_sequence = sub{ return $_[0] };
-	*needs_lines = sub{ 0 };
-	*perlio_ok = sub { 
-	    eval{ require PerlIO::encoding };
-	    return $@ ? 0 : 1;
-	};
+	push @Encode::Internal::ISA, 'Encode::Encoding';
 	*decode = sub{
 	    my ($obj,$str,$chk) = @_;
 	    utf8::upgrade($str);
@@ -251,13 +242,7 @@ sub predefine_encodings{
     {
 	# was in Encode::utf8
 	package Encode::utf8;
-	*name         = sub{ shift->{'Name'} };
-	*new_sequence = sub{ return $_[0] };
-	*needs_lines = sub{ 0 };
-	*perlio_ok = sub { 
-	    eval{ require PerlIO::encoding };
-	    return $@ ? 0 : 1;
-	};
+	push @Encode::utf8::ISA, 'Encode::Encoding';
 	*decode = sub{
 	    my ($obj,$octets,$chk) = @_;
 	    my $str = Encode::decode_utf8($octets);
