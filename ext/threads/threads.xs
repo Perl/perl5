@@ -522,14 +522,15 @@ Perl_ithread_join(pTHX_ SV *obj)
 	  PERL_THREAD_GETSPECIFIC(self_key,current_thread);
 	  PERL_THREAD_SETSPECIFIC(self_key,thread);
 
+#if 0
 	  {
 	    I32 len = av_len(params)+1;
 	    I32 i;
 	    for(i = 0; i < len; i++) {
-	      //	      sv_dump(SvRV(AvARRAY(params)[i]));
+	      sv_dump(SvRV(AvARRAY(params)[i]));
 	    }
 	  }
-
+#endif
 	  retparam = (AV*) sv_dup((SV*)params, &clone_params);
 #if 0
 	  {
