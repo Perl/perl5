@@ -1397,16 +1397,21 @@ S_scan_const(pTHX_ char *start)
 
 	      NUM_ESCAPE_INSERT:
 		/* Insert oct or hex escaped character.
-		 * There will always enough room in sv since such escapes will
-		 * be longer than any utf8 sequence they can end up as
-		 */
+		 * There will always enough room in sv since such
+		 * escapes will be longer than any UT-F8 sequence
+		 * they can end up as. */
 		if (uv > 127) {
 		    if (!has_utf8 && (to_be_utf8 || uv > 255)) {
-		        /* might need to recode whatever we have accumulated so far
-			 * if it contains any hibit chars
+		        /* Might need to recode whatever we have
+			 * accumulated so far if it contains any
+			 * hibit chars.
+			 *
+			 * (Can't we keep track of that and avoid
+			 *  this rescan? --jhi)
 			 */
 		        int hicount = 0;
 			char *c;
+
 			for (c = SvPVX(sv); c < d; c++) {
 			    if (UTF8_IS_CONTINUED(*c))
 			        hicount++;
@@ -1416,7 +1421,10 @@ S_scan_const(pTHX_ char *start)
 			    char *src, *dst;
 			    U8 tmpbuf[UTF8_MAXLEN+1];
 			    U8 *tmpend;
-			    d = SvGROW(sv, SvCUR(sv) + hicount + 1) + (d - old_pvx);
+			  
+			    d = SvGROW(sv,
+				       SvCUR(sv) + hicount + 1) +
+				         (d - old_pvx);
 
 			    src = d - 1;
 			    d += hicount;
@@ -1436,7 +1444,7 @@ S_scan_const(pTHX_ char *start)
                         }
                     }
 
-                    if (to_be_utf8 || uv > 255) {
+                    if (to_be_utf8 || (has_utf8 && uv > 127) || uv > 255) {
 		        d = (char*)uv_to_utf8((U8*)d, uv);
 			has_utf8 = TRUE;
                     }
