@@ -1,5 +1,5 @@
 ==============================================================================
-                Release of version 0.75 of Attribute::Handlers
+                Release of version 0.76 of Attribute::Handlers
 ==============================================================================
 
 
@@ -51,22 +51,15 @@ COPYRIGHT
 
 ==============================================================================
 
-CHANGES IN VERSION 0.75
+CHANGES IN VERSION 0.76
 
 
-	- Cleaned up AUTOLOAD
+	- Fixed documentation nit (thanks Rick)
 
-	- Numerous bug fixes (thanks Pete)
+	- Improving intuitiveness of autotie mechanism (thanks Marcel)
 
-	- Fixed handling of attribute data that includes a newline (thanks Pete)
-
-	- Added "autotieref" option (thanks Pete)
-
-	- Switched off $DB::single
-
-	- Changed licence for inclusion in core distribution
-
-	- Fixed 'autotie' for tied classes with multi-level names (thanks Jeff)
+	- Added $VERSION numbrs to demo modules (seems bizarre to me, but
+	  they're core too now).
 
 
 ==============================================================================
