@@ -2369,8 +2369,8 @@ regcomp.c			Regular expression compiler
 regcomp.h			Private declarations for above
 regcomp.pl			Builder of regnodes.h
 regcomp.sym			Data for regnodes.h
-regen.pl			Common file routines for generator scripts
-regen_headers.pl		Run all scripts that (re)generate files
+regen.pl			Run all scripts that (re)generate files
+regen_lib.pl			Common file routines for generator scripts
 regexec.c			Regular expression evaluator
 regexp.h			Public declarations for the above
 regnodes.h			Description of nodes of RE engine

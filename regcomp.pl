@@ -1,6 +1,6 @@
 BEGIN {
     # Get function prototypes
-    require 'regen.pl';
+    require 'regen_lib.pl';
 }
 #use Fatal qw(open close rename chmod unlink);
 open DESC, 'regcomp.sym';
