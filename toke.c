@@ -495,8 +495,6 @@ S_incline(pTHX_ char *s)
     *t = '\0';
     if (t - s > 0)
 	CopFILE_set(PL_curcop, s);
-    else
-	CopFILE_set(PL_curcop, PL_origfilename);
     *t = ch;
     CopLINE_set(PL_curcop, atoi(n)-1);
 }
