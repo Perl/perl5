@@ -3039,7 +3039,7 @@ because it was felt that it didn't have enough value in it to be a
 core module.  It is still a useful module, though, and is available
 from the CPAN.
 
-Perl 5.8 does not unfortunately does not build anymore on AmigaOS,
+Perl 5.8 unfortunately does not build anymore on AmigaOS,
 this broke at some point accidentally.  Since there are not that many
 Amiga developers available, we could not get this fixed and tested in
 time for 5.8.0.
