@@ -271,6 +271,8 @@ char *my_tmpnam (char *);
 #define isatty	_isterm
 #define rand	random
 #define srand	srandom
+#define strtoll	_strtoll
+#define strtoull	_strtoull
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
