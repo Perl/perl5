@@ -2385,7 +2385,7 @@ EXT U32 opargs[] = {
 	0x09116504,	/* sysopen */
 	0x00116504,	/* sysseek */
 	0x0917651d,	/* sysread */
-	0x0911651d,	/* syswrite */
+	0x0991651d,	/* syswrite */
 	0x0911651d,	/* send */
 	0x0117651d,	/* recv */
 	0x0000ec14,	/* eof */
