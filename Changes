@@ -78,6 +78,17 @@ Version 5.005_04        Fourth maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[ 21790] By: acme                                  on 2003/11/28  08:41:42
+        Log: Subject: [PATCH perl5.005_03] low hanging fruit.  bring
+             perl5.005_03 up to compiling on a modern linux system From:
+             Richard Clamp <richardc@unixbeard.net> To:
+             perl5-porters@perl.org, Chip Salzenberg <chip@pobox.com> Date:
+             Sun, 4 May 2003 20:53:33 +0100
+             First part: Teach makedepend about ggc3's extra output that
+             needs stripping (stolen from bleadperls makedepend.SH)
+     Branch: maint-5.005/perl
+           ! makedepend.SH
+____________________________________________________________________________
 [ 17647] By: chip                                  on 2002/07/19  22:47:57
         Log: ensure that hashes never attempt to malloc with a negative size
              From: Hugo <hv@crypt.compulink.co.uk>
