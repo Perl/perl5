@@ -9,6 +9,8 @@ BEGIN {
 
 use Config;
 
+$Is_Dos=$^O eq 'dos';
+
 # avoid win32 (for now)
 do { print "1..0\n"; exit(0); } if $^O eq 'MSWin32';
 
@@ -30,35 +32,35 @@ close(fh);
 open(fh,'>a') || die "Can't create a";
 close(fh);
 
-if (eval {link('a','b')}) {print "ok 2\n";} else {print "not ok 2\n";}
+if (eval {link('a','b')} || $Is_Dos) {print "ok 2\n";} else {print "not ok 2\n";}
 
-if (eval {link('b','c')}) {print "ok 3\n";} else {print "not ok 3\n";}
+if (eval {link('b','c')} || $Is_Dos) {print "ok 3\n";} else {print "not ok 3\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
 
-if ($Config{dont_use_nlink} || $nlink == 3)
+if ($Config{dont_use_nlink} || $nlink == 3 || $Is_Dos)
     {print "ok 4\n";} else {print "not ok 4\n";}
 
-if (($mode & 0777) == 0666 || $^O eq 'amigaos')
+if (($mode & 0777) == 0666 || $^O eq 'amigaos' || $Is_Dos)
     {print "ok 5\n";} else {print "not ok 5\n";}
 
 if ((chmod 0777,'a') == 1) {print "ok 6\n";} else {print "not ok 6\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
-if (($mode & 0777) == 0777) {print "ok 7\n";} else {print "not ok 7\n";}
+if (($mode & 0777) == 0777 || $Is_Dos) {print "ok 7\n";} else {print "not ok 7\n";}
 
-if ((chmod 0700,'c','x') == 2) {print "ok 8\n";} else {print "not ok 8\n";}
+if ((chmod 0700,'c','x') == 2 || $Is_Dos) {print "ok 8\n";} else {print "not ok 8\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
-if (($mode & 0777) == 0700) {print "ok 9\n";} else {print "not ok 9\n";}
+if (($mode & 0777) == 0700 || $Is_Dos) {print "ok 9\n";} else {print "not ok 9\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('x');
-if (($mode & 0777) == 0700) {print "ok 10\n";} else {print "not ok 10\n";}
+if (($mode & 0777) == 0700 || $Is_Dos) {print "ok 10\n";} else {print "not ok 10\n";}
 
-if ((unlink 'b','x') == 2) {print "ok 11\n";} else {print "not ok 11\n";}
+if ((unlink 'b','x') == 2 || $Is_Dos) {print "ok 11\n";} else {print "not ok 11\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('b');
 if ($ino == 0) {print "ok 12\n";} else {print "not ok 12\n";}
@@ -76,7 +78,7 @@ if ($foo == 1) {print "ok 16\n";} else {print "not ok 16 $foo\n";}
     $blksize,$blocks) = stat('b');
 if ($ino) {print "ok 17\n";} else {print "not ok 17\n";}
 if (($atime == 500000000 && $mtime == 500000001)
-	|| $wd =~ m#/afs/# || $^O eq 'amigaos')
+	|| $wd =~ m#/afs/# || $^O eq 'amigaos' || $Is_Dos)
     {print "ok 18\n";}
 else
     {print "not ok 18 $atime $mtime\n";}
@@ -120,8 +122,14 @@ else {
   { select FH; $| = 1; select STDOUT }
   print FH "helloworld\n";
   truncate FH, 5;
+  if ($Is_Dos) {
+      close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
+  }
   if (-s "Iofs.tmp" == 5) {print "ok 25\n"} else {print "not ok 25\n"}
   truncate FH, 0;
+  if ($Is_Dos) {
+      close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
+  }
   if (-z "Iofs.tmp") {print "ok 26\n"} else {print "not ok 26\n"}
   close FH;
 }

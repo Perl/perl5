@@ -17,6 +17,7 @@ use Config;
 
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
+my $Is_Dos = $^O eq 'dos';
 my $Invoke_Perl = $Is_VMS ? 'MCR Sys$Disk:[]Perl.' :
                   $Is_MSWin32 ? '.\perl' : './perl';
 my @MoreEnv = qw/IFS CDPATH ENV BASH_ENV/;
@@ -96,7 +97,7 @@ print "1..140\n";
 
     test 1, eval { `$echo 1` } eq "1\n";
 
-    if ($Is_MSWin32 || $Is_VMS) {
+    if ($Is_MSWin32 || $Is_VMS || $Is_Dos) {
 	print "# Environment tainting tests skipped\n";
 	for (2..5) { print "ok $_\n" }
     }
@@ -120,7 +121,7 @@ print "1..140\n";
     }
 
     my $tmp;
-    unless ($^O eq 'os2' || $^O eq 'amigaos' || $Is_MSWin32) {
+    unless ($^O eq 'os2' || $^O eq 'amigaos' || $Is_MSWin32 || $Is_Dos) {
 	$tmp = (grep { defined and -d and (stat _)[2] & 2 }
 		     qw(/tmp /var/tmp /usr/tmp /sys$scratch),
 		     @ENV{qw(TMP TEMP)})[0]
@@ -340,7 +341,7 @@ else {
 
     test 65, eval { open FOO, $foo } eq '', 'open for read';
     test 66, $@ eq '', $@;		# NB: This should be allowed
-    test 67, $! == 2;			# File not found
+    test 67, $! == ($Config{"archname"} !~ "djgpp" ? 2 : 22); # File not found
 
     test 68, eval { open FOO, "> $foo" } eq '', 'open for write';
     test 69, $@ =~ /^Insecure dependency/, $@;

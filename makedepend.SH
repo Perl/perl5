@@ -54,7 +54,7 @@ esac
 # cppstdin wrapper script.
 # Put .. and . first so that we pick up the present cppstdin, not
 # an older one lying about in /usr/local/bin.
-PATH=".:..:$PATH"
+PATH=".$path_sep..$path_sep$PATH"
 export PATH
 
 $cat /dev/null >.deptmp

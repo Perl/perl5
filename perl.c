@@ -897,7 +897,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     boot_core_UNIVERSAL();
     if (xsinit)
 	(*xsinit)();	/* in case linked C routines want magical variables */
-#if defined(VMS) || defined(WIN32)
+#if defined(VMS) || defined(WIN32) || defined(DJGPP)
     init_os_extras();
 #endif
 
@@ -1661,6 +1661,7 @@ moreswitches(char *s)
 #endif
 #ifdef DJGPP
 	printf("djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n");
+	printf("djgpp v2 port (perl5004) by Laszlo Molnar, 1997\n");
 #endif
 #ifdef OS2
 	printf("\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
@@ -2599,7 +2600,7 @@ init_postdump_symbols(register int argc, register char **argv, register char **e
 	    if (!(s = strchr(*env,'=')))
 		continue;
 	    *s++ = '\0';
-#ifdef WIN32
+#if defined(WIN32) || defined(MSDOS)
 	    (void)strupr(*env);
 #endif
 	    sv = newSVpv(s--,0);

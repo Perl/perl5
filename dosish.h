@@ -7,9 +7,30 @@
 #ifdef DJGPP
 #  define BIT_BUCKET "nul"
 #  define OP_BINARY O_BINARY
-void Perl_DJGPP_init();
-#  define PERL_SYS_INIT(argcp, argvp) STMT_START {        \
-    Perl_DJGPP_init();    } STMT_END
+#  define PERL_SYS_INIT(c,v) Perl_DJGPP_init(c,v)
+#  include <signal.h>
+#  define HAS_UTIME
+#  define HAS_KILL
+   char *djgpp_pathexp (const char*);
+#  if (DJGPP==2 && DJGPP_MINOR < 2)
+#    define NO_LOCALECONV_MON_THOUSANDS_SEP
+#  endif
+#  ifdef USE_THREADS
+#    define NEED_PTHREAD_INIT
+#    define OLD_PTHREADS_API
+#    define YIELD pthread_yield(NULL)
+#    define DETACH(t)				\
+       STMT_START {				\
+         if (pthread_detach(&(t)->self)) {	\
+             MUTEX_UNLOCK(&(t)->mutex);		\
+             croak("panic: DETACH");		\
+         }					\
+       } STMT_END
+#    define pthread_mutexattr_default NULL
+#    define pthread_condattr_default NULL
+#    define pthread_attr_default NULL
+#    define pthread_addr_t any_t
+#  endif
 #else	/* DJGPP */
 #  ifdef WIN32
 #    define PERL_SYS_INIT(c,v)	Perl_win32_init(c,v)

@@ -416,8 +416,12 @@ nextargv(register GV *gv)
 #ifndef FLEXFILENAMES
 		    if (Stat(SvPVX(sv),&statbuf) >= 0
 		      && statbuf.st_dev == filedev
-		      && statbuf.st_ino == fileino ) {
-			warn("Can't do inplace edit: %s > 14 characters",
+		      && statbuf.st_ino == fileino
+#ifdef DJGPP
+                      || (_djstat_fail_bits & _STFAIL_TRUENAME)!=0
+#endif
+                      ) {
+			warn("Can't do inplace edit: %s would not be uniq",
 			  SvPVX(sv) );
 			do_close(gv,FALSE);
 			continue;
@@ -922,7 +926,7 @@ do_execfree(void)
     }
 }
 
-#if !defined(OS2) && !defined(WIN32)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP)
 
 bool
 do_exec(char *cmd)

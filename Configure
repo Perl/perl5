@@ -63,6 +63,9 @@ if test -d c:/. -a -n "$OS2_SHELL"; then
 	PATH=`cmd /c "echo %PATH%" | tr '\\\\' / `
 	OS2_SHELL=`cmd /c "echo %OS2_SHELL%" | tr '\\\\' / | tr '[A-Z]' '[a-z]'`
 fi
+if test -d c:/. -a -n "$DJDIR"; then
+        p_=\;
+fi
 
 : Proper PATH setting
 paths='/bin /usr/bin /usr/local/bin /usr/ucb /usr/local /usr/lbin'
@@ -1900,6 +1903,10 @@ EOM
 			set X $myuname
 			osname=os2
 			osvers="$5"
+			if test -n "$DJDIR"; then
+				osname=dos
+				osvers=djgpp
+			fi
 		fi
 	fi
 	
@@ -10058,35 +10065,35 @@ cd ../UU
 avail_ext=''
 for xxx in $known_extensions ; do
     case "$xxx" in
-    DB_File) case "$i_db" in 
+    DB_File|db_file) case "$i_db" in
 	    $define) avail_ext="$avail_ext $xxx" ;;
 	    esac
 	    ;;
-    GDBM_File) case "$i_gdbm" in 
+    GDBM_File|gdbm_fil) case "$i_gdbm" in 
 	    $define) avail_ext="$avail_ext $xxx" ;;
 	    esac
 	    ;;
-    NDBM_File) case "$i_ndbm" in 
+    NDBM_File|ndbm_fil) case "$i_ndbm" in
 	    $define) avail_ext="$avail_ext $xxx" ;;
 	    esac
 	    ;;
-    ODBM_File) case "${i_dbm}${i_rpcsvcdbm}" in 
+    ODBM_File|odbm_fil) case "${i_dbm}${i_rpcsvcdbm}" in
 	    *"${define}"*) avail_ext="$avail_ext $xxx" ;;
 	    esac
 	    ;;
-    POSIX) case "$useposix" in 
+    POSIX|posix) case "$useposix" in
 	    true|define|y) avail_ext="$avail_ext $xxx" ;;
 	    esac
 	    ;;
-    Opcode) case "$useopcode" in 
+    Opcode|opcode) case "$useopcode" in
 	    true|define|y) avail_ext="$avail_ext $xxx" ;;
 	    esac
 	    ;;
-    Socket) case "$d_socket" in 
+    Socket|socket) case "$d_socket" in 
 	    $define) avail_ext="$avail_ext $xxx" ;;
 	    esac
 	    ;;
-    Thread) case "$usethreads" in 
+    Thread|thread) case "$usethreads" in 
 	    $define) avail_ext="$avail_ext $xxx" ;;
 	    esac
 	    ;;

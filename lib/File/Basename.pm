@@ -141,7 +141,7 @@ sub fileparse_set_fstype {
   my @old = ($Fileparse_fstype, $Fileparse_igncase);
   if (@_) {
     $Fileparse_fstype = $_[0];
-    $Fileparse_igncase = ($_[0] =~ /^(?:MacOS|VMS|AmigaOS|os2|RISCOS|MSWin32)/i);
+    $Fileparse_igncase = ($_[0] =~ /^(?:MacOS|VMS|AmigaOS|os2|RISCOS|MSWin32|MSDOS)/i);
   }
   wantarray ? @old : $old[0];
 }

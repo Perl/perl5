@@ -64,6 +64,12 @@ autoflush STDOUT 1;
 print "not " unless ($|);
 print "ok 10\n";
 
+if ($^O eq 'dos')
+{
+    printf("ok %d\n",11);
+    exit(0);
+}
+
 ($rd,$wr) = FileHandle::pipe;
 
 if ($^O eq 'VMS' || $^O eq 'os2' || $^O eq 'amigaos' || $^O eq 'MSWin32') {
