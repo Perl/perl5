@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..66\n";
+print "1..68\n";
 
 my $test = 1;
 
@@ -294,4 +294,19 @@ sub ok_bytes {
     use utf8;
     ok_bytes chr(0xe2), pack("C*", 0xc3, 0xa2);
     $test++;                # 66
+}
+
+{
+    use utf8;
+    my @a = map ord, split(//, join("", map chr, (1234, 123, 2345)));
+    ok "@a", "1234 123 2345";
+    $test++;                # 67
+}
+
+{
+    use utf8;
+    my $x = chr(123);
+    my @a = map ord, split(/$x/, join("", map chr, (1234, 123, 2345)));
+    ok "@a", "1234 2345";
+    $test++;                # 68
 }

@@ -4974,6 +4974,7 @@ PP(pp_split)
     AV *ary;
     register I32 limit = POPi;			/* note, negative is forever */
     SV *sv = POPs;
+    bool isutf = DO_UTF8(sv);
     STRLEN len;
     register char *s = SvPV(sv, len);
     char *strend = s + len;
@@ -5076,6 +5077,8 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
+	    if (isutf)
+		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 
 	    s = m + 1;
@@ -5096,6 +5099,8 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
+	    if (isutf)
+		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    s = m;
 	}
@@ -5119,6 +5124,8 @@ PP(pp_split)
 		sv_setpvn(dstr, s, m-s);
 		if (make_mortal)
 		    sv_2mortal(dstr);
+		if (isutf)
+		    (void)SvUTF8_on(dstr);
 		XPUSHs(dstr);
 		s = m + 1;
 	    }
@@ -5134,6 +5141,8 @@ PP(pp_split)
 		sv_setpvn(dstr, s, m-s);
 		if (make_mortal)
 		    sv_2mortal(dstr);
+		if (isutf)
+		    (void)SvUTF8_on(dstr);
 		XPUSHs(dstr);
 		s = m + len;		/* Fake \n at the end */
 	    }
@@ -5161,6 +5170,8 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
+	    if (isutf)
+		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    if (rx->nparens) {
 		for (i = 1; i <= rx->nparens; i++) {
@@ -5174,6 +5185,8 @@ PP(pp_split)
 			dstr = NEWSV(33, 0);
 		    if (make_mortal)
 			sv_2mortal(dstr);
+		    if (isutf)
+			(void)SvUTF8_on(dstr);
 		    XPUSHs(dstr);
 		}
 	    }
@@ -5192,6 +5205,8 @@ PP(pp_split)
 	sv_setpvn(dstr, s, strend-s);
 	if (make_mortal)
 	    sv_2mortal(dstr);
+	if (isutf)
+	    (void)SvUTF8_on(dstr);
 	XPUSHs(dstr);
 	iters++;
     }
