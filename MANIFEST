@@ -21,6 +21,7 @@ README.cygwin32		Notes about Cygwin32 port
 README.os2		Notes about OS/2 port
 README.plan9		Notes about Plan9 port
 README.qnx		Notes about QNX port
+README.threads		Notes about multithreading
 README.vms		Notes about VMS port
 README.win32		Notes about Win32 port
 Todo			The Wishlist
@@ -317,6 +318,7 @@ lib/CPAN.pm		Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm	Utility for creating CPAN config files
 lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
 lib/Carp.pm		Error message base class
+lib/Class/Fields.pm	Set up object field names for pseudo-hash-using classes
 lib/Class/Struct.pm	Declare struct-like datatypes as Perl classes
 lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
 lib/Devel/SelfStubber.pm Generate stubs for SelfLoader.pm
@@ -354,6 +356,7 @@ lib/Getopt/Std.pm	Fetch command options (getopt, getopts)
 lib/I18N/Collate.pm	Routines to do strxfrm-based collation
 lib/IPC/Open2.pm	Open a two-ended pipe
 lib/IPC/Open3.pm	Open a three-ended pipe!
+lib/ISA.pm		Initialise @ISA at compile-time
 lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
