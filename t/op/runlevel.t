@@ -176,19 +176,19 @@ print "bar reached\n";
 EXPECT
 Can't "goto" out of a pseudo block at - line 2.
 ########
+%seen = ();
 sub sortfn {
   (split(/./, 'x'x10000))[0];
   my (@y) = ( 4, 6, 5);
   @y = sort { $a <=> $b } @y;
-  print "sortfn ".join(', ', @y)."\n";
+  my $t = "sortfn ".join(', ', @y)."\n";
+  print $t if ($seen{$t}++ == 0);
   return $_[0] <=> $_[1];
 }
 @x = ( 3, 2, 1 );
 @x = sort { &sortfn($a, $b) } @x;
 print "---- ".join(', ', @x)."\n";
 EXPECT
-sortfn 4, 5, 6
-sortfn 4, 5, 6
 sortfn 4, 5, 6
 ---- 1, 2, 3
 ########
