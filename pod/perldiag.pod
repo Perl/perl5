@@ -3710,6 +3710,15 @@ old way has bad side effects.
 (D deprecated) This was an ill-advised attempt to emulate a poorly
 defined B<awk> feature.  Use an explicit printf() or sprintf() instead.
 
+=item Use of reference "%s" in array index
+
+(W) You tried to use a reference as an array index; this probably
+isn't what you mean, because references tend to be huge numbers which
+take you out of memory, and so usually indicates programmer error.
+
+If you really do mean it, explicitly numify your reference, like so: 
+C<$array[0+$ref]>
+
 =item Use of reserved word "%s" is deprecated
 
 (D deprecated) The indicated bareword is a reserved word.  Future

@@ -2815,12 +2815,15 @@ PP(pp_aelem)
 {
     djSP;
     SV** svp;
-    IV elem = POPi;
+    SV* elemsv = POPs;
+    IV elem = SvIV(elemsv);
     AV* av = (AV*)POPs;
     U32 lval = PL_op->op_flags & OPf_MOD;
     U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));
     SV *sv;
 
+    if (SvROK(elemsv) && ckWARN(WARN_MISC))
+	Perl_warner(aTHX_ WARN_MISC, "Use of reference \"%s\" as array index", SvPV_nolen(elemsv));
     if (elem > 0)
 	elem -= PL_curcop->cop_arybase;
     if (SvTYPE(av) != SVt_PVAV)

@@ -47,6 +47,9 @@
   Possible Y2K bug: about to append an integer to '19' [pp_concat]
     $x     = "19$yy\n";
 
+  Use of reference "%s" as array index [pp_aelem]
+    $x[\1]
+
 __END__
 # pp_hot.c [pp_print]
 use warnings 'unopened' ;
@@ -228,3 +231,17 @@ $x     = "19" . $yy . "\n";
 EXPECT
 Possible Y2K bug: about to append an integer to '19' at - line 12.
 Possible Y2K bug: about to append an integer to '19' at - line 13.
+########
+# pp_hot.c [pp_aelem]
+{
+use warnings 'misc';
+print $x[\1];
+}
+{
+no warnings 'misc';
+print $x[\1];
+}
+
+EXPECT
+OPTION regex
+Use of reference ".*" as array index at - line 4.
