@@ -1935,6 +1935,14 @@ C<-torture> argument to F<t/harness>.
 
 Run all the tests with -Mutf8.  Not all tests will succeed.
 
+=item minitest.utf16 test.utf16
+
+Runs the tests with UTF-16 encoded scripts, encoded with different
+versions of this encoding.
+
+C<make utest.utf16> runs the test suite with a combination of C<-utf8> and
+C<-utf16> arguments to F<t/TEST>.
+
 =item test_harness
 
 Run the test suite with the F<t/harness> controlling program, instead of
