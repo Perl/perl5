@@ -1158,16 +1158,16 @@ win32_uname(struct utsname *name)
 	    break;
 	}
 
-	/* version */
-	sprintf(name->version, "%d.%d",
+	/* release */
+	sprintf(name->release, "%d.%d",
 		osver.dwMajorVersion, osver.dwMinorVersion);
 
-	/* release */
-	sprintf(name->release, "Build %d",
+	/* version */
+	sprintf(name->version, "Build %d",
 		osver.dwPlatformId == VER_PLATFORM_WIN32_NT
 		? osver.dwBuildNumber : (osver.dwBuildNumber & 0xffff));
 	if (osver.szCSDVersion[0]) {
-	    char *buf = name->release + strlen(name->release);
+	    char *buf = name->version + strlen(name->version);
 	    sprintf(buf, " (%s)", osver.szCSDVersion);
 	}
     }
