@@ -43,9 +43,10 @@ The six routines are:
     SV*  newSVpvf(const char*, ...);
     SV*  newSVsv(SV*);
 
-To change the value of an *already-existing* SV, there are six routines:
+To change the value of an *already-existing* SV, there are seven routines:
 
     void  sv_setiv(SV*, IV);
+    void  sv_setuv(SV*, UV);
     void  sv_setnv(SV*, double);
     void  sv_setpv(SV*, char*);
     void  sv_setpvn(SV*, char*, int)
