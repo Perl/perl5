@@ -2875,7 +2875,7 @@ Perl_yylex(pTHX)
 			"### '-%c' looked like a file test but was not\n",
 			tmp);
 		} );
-		s -= 2;
+		s = --PL_bufptr;
 	    }
 	}
 	tmp = *s++;
