@@ -299,8 +299,8 @@ If that variable isn't set, the encoding pragma will fail.
 The C<Encode> module knows about many encodings and has interfaces
 for doing conversions between those encodings:
 
-    use Encode 'from_to';
-    from_to($data, "iso-8859-3", "utf-8"); # from legacy to utf-8
+    use Encode 'decode';
+    $data = decode("iso-8859-3", $data); # convert from legacy to utf-8
 
 =head2 Unicode I/O
 

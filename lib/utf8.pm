@@ -31,9 +31,11 @@ utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source code
     use utf8;
     no utf8;
 
+    # Convert a Perl scalar to/from UTF-8.
     $num_octets = utf8::upgrade($string);
     $success    = utf8::downgrade($string[, FAIL_OK]);
 
+    # Change the native bytes of a Perl scalar to/from UTF-8 bytes.
     utf8::encode($string);
     utf8::decode($string);
 
@@ -133,18 +135,23 @@ pragma.
 
 =item * utf8::encode($string)
 
-Converts (in-place) I<$string> from logical characters to octet
-sequence representing it in Perl's I<UTF-X> encoding.  Returns
-nothing.  Same as Encode::encode_utf8(). Note that this should not be
-used to convert a legacy byte encoding to Unicode: use Encode for
-that.
+Converts in-place the octets of the I<$string> to the octet sequence
+in Perl's I<UTF-X> encoding.  Returns nothing.  B<Note that this does
+not change the "type" of I<$string> to UTF-8>, and that this handles
+only ISO 8859-1 (or EBCDIC) as the source character set. Therefore
+this should not be used to convert a legacy 8-bit encoding to Unicode:
+use Encode::decode() for that.  In the very limited case of wanting to
+handle just ISO 8859-1 (or EBCDIC), you could use utf8::upgrade().
 
 =item * utf8::decode($string)
 
 Attempts to convert I<$string> in-place from Perl's I<UTF-X> encoding
-into logical characters. Returns nothing.  Same as Encode::decode_utf8().
-Note that this should not be used to convert Unicode back to a legacy
-byte encoding: use Encode for that.
+into octets.  Returns nothing.  B<Note that this does not change the
+"type" of <$string> from UTF-8>, and that this handles only ISO 8859-1
+(or EBCDIC) as the destination character set.  Therefore this should
+not be used to convert Unicode back to a legacy 8-bit encoding:
+use Encode::encode() for that.  In the very limited case of wanting
+to handle just ISO 8859-1 (or EBCDIC), you could use utf8::downgrade().
 
 =item * $flag = utf8::is_utf8(STRING)
 
