@@ -10474,9 +10474,10 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	  PUTBACK;
 	  s = SvPV(uni, len);
 	  if (s != SvPVX(sv)) {
-	       SvGROW(sv, len);
+	       SvGROW(sv, len + 1);
 	       Move(s, SvPVX(sv), len, char);
 	       SvCUR_set(sv, len);
+	       SvPVX(sv)[len] = 0;	
 	  }
 	  FREETMPS;
 	  LEAVE;
