@@ -767,7 +767,8 @@ tryagain:
     case '?':
     case '+':
     case '*':
-	FAIL("?+* follows nothing in regexp");
+    case '{':
+	FAIL("?+*{} follows nothing in regexp");
 	break;
     case '\\':
 	switch (*++regparse) {
