@@ -266,6 +266,14 @@ sub c_o {
     my($self) = shift;
     return '' unless $self->needs_linking();
     my(@m);
+    if (my $cpp = $Config{cpprun}) {
+        my $cpp_cmd = $self->const_cccmd;
+        $cpp_cmd =~ s/^CCCMD\s*=\s*\$\(CC\)/$cpp/;
+        push @m, '
+.c.i:
+	'. $cpp_cmd . ' $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c > $*.i
+';
+    }
     push @m, '
 .c$(OBJ_EXT):
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
@@ -630,7 +638,7 @@ MAN3PODS = ".join(" \\\n\t", sort keys %{$self->{MAN3PODS}})."
 # work around a famous dec-osf make(1) feature(?):
 makemakerdflt: all
 
-.SUFFIXES: .xs .c .C .cpp .cxx .cc \$(OBJ_EXT)
+.SUFFIXES: .xs .c .C .cpp .i .cxx .cc \$(OBJ_EXT)
 
 # Nick wanted to get rid of .PRECIOUS. I don't remember why. I seem to recall, that
 # some make implementations will delete the Makefile when we rebuild it. Because
