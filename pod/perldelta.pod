@@ -183,7 +183,9 @@ start losing precision (their lower digits).
 =head2 Large file support
 
 If you have filesystems that support "large files" (files larger than
-2 gigabytes), you may now also be able to create and access them from Perl.
+2 gigabytes), you may now also be able to create and access them from
+Perl.  You have to use Configure -Duselfs.  Turning on the large file
+support turns on also the 64-bit support, for obvious reasons.
 
 Note that in addition to requiring a proper file system to do large
 files you may also need to adjust your per-process (or your
@@ -203,7 +205,17 @@ included with the standard Perl distribution) may also be of use, it
 offers the getrlimit/setrlimit interface that can be used to adjust
 process resource usage limits, including the maximum filesize limit.
  
-(Large file support is related to 64-bit support, for obvious reasons.)
+=head2 Long doubles
+
+In some systems you may be able to use long doubles to enhance the
+range of precision of your double precision floating point numbers
+(that is, Perl's numbers).  Use Configure -Duselongdouble to enable
+this support (if it is available).
+
+=head2 "more bits"
+
+You can Configure -Dusemorebits to turn on both the 64-bit support
+and the long double support.
 
 =head2 Better syntax checks on parenthesized unary operators
 
