@@ -31,6 +31,8 @@ while( <DATA> ) {
        print "not ";
     }
     printf "ok %d\n", ++$test; 
+    close OUT;
+    close IN;
 }
 
 END { 
