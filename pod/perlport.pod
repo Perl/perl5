@@ -229,8 +229,8 @@ transferring or storing raw binary numbers.
 One can circumnavigate both these problems in two ways.  Either
 transfer and store numbers always in text format, instead of raw
 binary, or else consider using modules like Data::Dumper (included in
-the standard distribution as of Perl 5.005) and Storable.  Keeping
-all data as text significantly simplifies matters.
+the standard distribution as of Perl 5.005) and Storable (included as
+of perl 5.8).  Keeping all data as text significantly simplifies matters.
 
 =head2 Files and Filesystems
 
@@ -595,7 +595,7 @@ are a few of the more popular Unix flavors:
     Linux         linux      ppc-linux
     HP-UX         hpux       PA-RISC1.1
     IRIX          irix       irix
-    Mac OS X      rhapsody   rhapsody
+    Mac OS X      darwin     darwin
     MachTen PPC   machten    powerpc-machten
     NeXT 3        next       next-fat
     NeXT 4        next       OPENSTEP-Mach
@@ -784,14 +784,10 @@ the application or MPW tool version is running, check:
     $is_ppc    = $MacPerl::Architecture eq 'MacPPC';
     $is_68k    = $MacPerl::Architecture eq 'Mac68K';
 
-S<Mac OS X> and S<Mac OS X Server>, based on NeXT's OpenStep OS, will
-(in theory) be able to run MacPerl natively, under the "Classic"
-environment.  The new "Cocoa" environment (formerly called the "Yellow Box")
-may run a slightly modified version of MacPerl, using the Carbon interfaces.
-
-S<Mac OS X Server> and its Open Source version, Darwin, both run Unix
-perl natively (with a few patches).  Full support for these
-is slated for perl 5.6.
+S<Mac OS X>, based on NeXT's OpenStep OS, runs MacPerl natively, under the
+"Classic" environment.  There is no "Carbon" version of MacPerl to run
+under the primary Mac OS X environment.  S<Mac OS X> and its Open Source
+version, Darwin, both run Unix perl natively.
 
 Also see:
 
@@ -874,10 +870,11 @@ process on VMS, is a pure Perl module that can easily be installed on
 non-VMS platforms and can be helpful for conversions to and from RMS
 native formats.
 
-What C<\n> represents depends on the type of file opened.  It could
-be C<\015>, C<\012>, C<\015\012>, or nothing.  The VMS::Stdio module
-provides access to the special fopen() requirements of files with unusual
-attributes on VMS.
+What C<\n> represents depends on the type of file opened.  It usually
+represents C<\012> but it could also be C<\015>, C<\012>, C<\015\012>, 
+C<\000>, C<\040>, or nothing depending on the file organiztion and 
+record format.  The VMS::Stdio module provides access to the 
+special fopen() requirements of files with unusual attributes on VMS.
 
 TCP/IP stacks are optional on VMS, so socket routines might not be
 implemented.  UDP sockets may not be supported.
@@ -1885,13 +1882,13 @@ First public release with perl5.005.
 
 =head1 Supported Platforms
 
-As of early 2001 (the Perl release 5.6.1), the following platforms are
-able to build Perl from the standard source code distribution
-available at http://www.perl.com/CPAN/src/index.html
+As of early 2001 (the Perl releases 5.6.1 and 5.7.1), the following
+platforms are able to build Perl from the standard source code
+distribution available at http://www.perl.com/CPAN/src/index.html
 
 	AIX
 	AmigaOS
-	Darwin		(Rhapsody)
+	Darwin		(Mac OS X)
 	DG/UX
 	DOS DJGPP 	1)
 	DYNIX/ptx
@@ -1923,9 +1920,9 @@ available at http://www.perl.com/CPAN/src/index.html
            list macperl-porters@macperl.org for more information.
         3) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
 
-The following platforms worked for the previous release (5.6.0),
-but we did not manage to test these in time for the 5.6.1 release.
-There is a very good chance that these will work fine with 5.6.1.
+The following platforms worked for the previous releases (5.6.0 and 5.7.0),
+but we did not manage to test these in time for the 5.7.1 release.
+There is a very good chance that these will work fine with the 5.7.1.
 
 	DomainOS
 	Hurd
@@ -1944,12 +1941,11 @@ There is a very good chance that these will work fine with 5.6.1.
 	Windows Me
 
 The following platform worked for the 5.005_03 major release but not
-5.6.0.  Standardization on UTF-8 as the internal string representation
-in 5.6.0 and 5.6.1 has introduced incompatibilities in this EBCDIC
-platform.  While Perl 5.6.1 will build on this platform some
+for 5.6.0.  Standardization on UTF-8 as the internal string
+representation in 5.6.0 and 5.6.1 introduced incompatibilities in this
+EBCDIC platform.  While Perl 5.7.1 will build on this platform some
 regression tests may fail and the C<use utf8;> pragma typically
-introduces text handling errors.  UTF-8 support for this platform may
-be enabled in a future release:
+introduces text handling errors.
 
 	OS/390	1)
 
@@ -2038,28 +2034,31 @@ http://www.perl.com/CPAN/ports/index.html for binary distributions.
 
 =head1 SEE ALSO
 
-L<perlaix>, L<perlamiga>, L<perlcygwin>, L<perldos>, L<perlepoc>,
-L<perlebcdic>, L<perlhpux>, L<perlos2>, L<perlos390>, L<perlbs2000>,
-L<perlwin32>, L<perlvms>, L<perlvos>, and L<Win32>.
+L<perlaix>, L<perlapollo>, L<perlamiga>, L<perlbeos>, L<perlbs200>,
+L<perlcygwin>, L<perldgux>, L<perldos>, L<perlepoc>, L<perlebcdic>,
+L<perlhurd>, L<perlhpux>, L<perlmachten>, L<perlmacos>, L<perlmint>,
+L<perlmpeix>, L<perlnetware>, L<perlos2>, L<perlos390>, L<perlplan9>,
+L<perlqnx>, L<perlsolaris>, L<perltru64>, L<perlunicode>,
+L<perlvmesa>, L<perlvms>, L<perlvos>, L<perlwin32>, and L<Win32>.
 
 =head1 AUTHORS / CONTRIBUTORS
 
-Abigail <abigail@fnx.com>,
+Abigail <abigail@foad.org>,
 Charles Bailey <bailey@newman.upenn.edu>,
 Graham Barr <gbarr@pobox.com>,
 Tom Christiansen <tchrist@perl.com>,
-Nicholas Clark <Nicholas.Clark@liverpool.ac.uk>,
+Nicholas Clark <nick@ccl4.org>,
 Thomas Dorner <Thomas.Dorner@start.de>,
-Andy Dougherty <doughera@lafcol.lafayette.edu>,
-Dominic Dunlop <domo@vo.lu>,
-Neale Ferguson <neale@mailbox.tabnsw.com.au>,
+Andy Dougherty <doughera@lafayette.edu>,
+Dominic Dunlop <domo@computer.org>,
+Neale Ferguson <neale@vma.tabnsw.com.au>,
 David J. Fiander <davidf@mks.com>,
 Paul Green <Paul_Green@stratus.com>,
-M.J.T. Guy <mjtg@cus.cam.ac.uk>,
+M.J.T. Guy <mjtg@cam.ac.uk>,
 Jarkko Hietaniemi <jhi@iki.fi>,
 Luther Huffman <lutherh@stratcom.com>,
-Nick Ing-Simmons <nick@ni-s.u-net.com>,
-Andreas J. KE<ouml>nig <koenig@kulturbox.de>,
+Nick Ing-Simmons <nick@ing-simmons.net>,
+Andreas J. KE<ouml>nig <a.koenig@mind.de>,
 Markus Laker <mlaker@contax.co.uk>,
 Andrew M. Langmead <aml@world.std.com>,
 Larry Moore <ljmoore@freespace.net>,
@@ -2074,12 +2073,9 @@ Hugo van der Sanden <hv@crypt0.demon.co.uk>,
 Gurusamy Sarathy <gsar@activestate.com>,
 Paul J. Schinder <schinder@pobox.com>,
 Michael G Schwern <schwern@pobox.com>,
-Dan Sugalski <sugalskd@ous.edu>,
+Dan Sugalski <dan@sidhe.org>,
 Nathan Torkington <gnat@frii.com>.
-
-This document is maintained by Chris Nandor
-<pudge@pobox.com>.
 
 =head1 VERSION
 
-Version 1.47, last modified 22 March 2000
+Version 1.50, last modified 10 Jul 2001
