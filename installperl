@@ -792,7 +792,7 @@ sub installlib {
     my $name = $_;
 
     # Ignore version control directories.
-    if (($name eq 'CVS' or $name eq 'RCS' or $name eq '.svn') and -d $name) {
+    if ($name =~ /^(?:CVS|RCS|SCCS|\.svn)\z/ and -d $name) {
 	$File::Find::prune = 1;
 	return;
     }
