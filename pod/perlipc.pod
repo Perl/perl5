@@ -121,11 +121,15 @@ signal handlers like this:
     $SIG{CHLD} = \&REAPER;
     # now do something that forks...
 
-or even the more elaborate:
+or better still:
 
     use POSIX ":sys_wait_h";
     sub REAPER {
 	my $child;
+	# If a second child dies while in the signal handler caused by the
+	# first death, we won't get another signal. So must loop here else
+	# we will leave the unreaped child as a zombie. And the next time
+	# two children die we get another zombie. And so on.
         while (($child = waitpid(-1,WNOHANG)) > 0) {
 	    $Kid_Status{$child} = $?;
 	}
@@ -724,10 +728,13 @@ go back to service a new client.
     my $waitedpid = 0;
     my $paddr;
 
+    use POSIX ":sys_wait_h";
     sub REAPER {
-	$waitedpid = wait;
+	my $child;
+        while (($waitedpid = waitpid(-1,WNOHANG)) > 0) {
+	    logmsg "reaped $waitedpid" . ($? ? " with exit $?" : '');
+	}
 	$SIG{CHLD} = \&REAPER;  # loathe sysV
-	logmsg "reaped $waitedpid" . ($? ? " with exit $?" : '');
     }
 
     $SIG{CHLD} = \&REAPER;
@@ -881,10 +888,13 @@ to be on the localhost, and thus everything works right.
 
     my $waitedpid;
 
+    use POSIX ":sys_wait_h";
     sub REAPER {
-	$waitedpid = wait;
+	my $child;
+        while (($waitedpid = waitpid(-1,WNOHANG)) > 0) {
+	    logmsg "reaped $waitedpid" . ($? ? " with exit $?" : '');
+	}
 	$SIG{CHLD} = \&REAPER;  # loathe sysV
-	logmsg "reaped $waitedpid" . ($? ? " with exit $?" : '');
     }
 
     $SIG{CHLD} = \&REAPER;
