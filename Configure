@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jan 26 09:59:39 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Feb  4 21:57:24 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -399,6 +399,7 @@ d_getsbyport=''
 d_gnulibc=''
 d_hasmntopt=''
 d_htonl=''
+d_iconv=''
 d_inetaton=''
 d_int64t=''
 d_isascii=''
@@ -600,6 +601,7 @@ i_float=''
 i_gdbm=''
 d_grpasswd=''
 i_grp=''
+i_iconv=''
 i_inttypes=''
 i_limits=''
 i_locale=''
@@ -693,6 +695,9 @@ plibpth=''
 xlibpth=''
 ignore_versioned_solibs=''
 libs=''
+libsdirs=''
+libsfiles=''
+libsfound=''
 lns=''
 d_PRIEldbl=''
 d_PRIFldbl=''
@@ -907,66 +912,6 @@ if test -f /etc/unixtovms.exe; then
 fi
 
 i_whoami=''
-: list of known cpp symbols, sorted alphabetically
-al="386BSD 3b1 a29k ABI64 aegis AES_SOURCE AIX AIX32 AIX370"
-al="$al AIX41 AIX42 AIX43 AIX_SOURCE aixpc ALL_SOURCE"
-al="$al alliant alpha am29000 AM29000 amiga AMIGAOS AMIX"
-al="$al ansi ANSI_C_SOURCE apollo ardent atarist att386 att3b BeOS"
-al="$al BIG_ENDIAN BIT_MSF bsd BSD bsd43 bsd4_2 bsd4_3 BSD4_3 bsd4_4"
-al="$al BSD_4_3 BSD_4_4 BSD_NET2 BSD_TIME BSD_TYPES BSDCOMPAT bsdi"
-al="$al bull c cadmus clipper CMU COFF COMPILER_VERSION"
-al="$al concurrent convex cpu cray CRAY CRAYMPP ctix CX_UX"
-al="$al CYGWIN DGUX DGUX_SOURCE DJGPP dmert DOLPHIN DPX2 DSO"
-al="$al Dynix DynixPTX ELF encore EPI EXTENSIONS FILE_OFFSET_BITS"
-al="$al FreeBSD GCC_NEW_VARARGS gcos gcx gimpel"
-al="$al GNU_SOURCE GNUC GNUC_MINOR GO32 gould GOULD_PN"
-al="$al H3050R H3050RX hbullx20 hcx host_mips"
-al="$al hp200 hp300 hp700 HP700 hp800 hp9000"
-al="$al hp9000s200 hp9000s300 hp9000s400 hp9000s500"
-al="$al hp9000s700 hp9000s800 hp9k8 hp_osf hppa hpux HPUX_SOURCE"
-al="$al i186 i286 i386 i486 i586 i686 i8086 i80960 i860 I960"
-al="$al iAPX286 ibm ibm032 ibmesa IBMR2 ibmrt ILP32 ILP64"
-al="$al INLINE_INTRINSICS INTRINSICS INT64 interdata is68k ksr1"
-al="$al LANGUAGE_C LARGE_FILE_API LARGEFILE64_SOURCE"
-al="$al LARGEFILE_SOURCE LFS64_LARGEFILE LFS_LARGEFILE"
-al="$al Linux LITTLE_ENDIAN LONG64 LONG_DOUBLE LONG_LONG"
-al="$al LONGDOUBLE LONGLONG LP64 luna luna88k Lynx"
-al="$al M68000 m68k m88100 m88k M88KBCS_TARGET M_COFF"
-al="$al M_I186 M_I286 M_I386 M_I8086 M_I86 M_I86SM M_SYS3"
-al="$al M_SYS5 M_SYSIII M_SYSV M_UNIX M_XENIX MACH machine MachTen"
-al="$al MATH_HAS_NO_SIDE_EFFECTS"
-al="$al mc300 mc500 mc68000 mc68010 mc68020 mc68030 mc68040"
-al="$al mc68060 mc68k mc68k32 mc700 mc88000 mc88100 merlin"
-al="$al mert MiNT mips MIPS_FPSET MIPS_ISA MIPS_SIM MIPS_SZINT"
-al="$al MIPS_SZLONG MIPS_SZPTR MIPSEB MIPSEL MODERN_C motorola"
-al="$al mpeix MSDOS MTXINU MULTIMAX mvs MVS n16 ncl_el ncl_mr"
-al="$al NetBSD news1500 news1700 news1800 news1900 news3700"
-al="$al news700 news800 news900 NeXT NLS ns16000 ns32000"
-al="$al ns32016 ns32332 ns32k nsc32000"
-al="$al OCS88 OEMVS OpenBSD os OS2 OS390 osf OSF1 OSF_SOURCE"
-al="$al pa_risc PA_RISC1_1 PA_RISC2_0 PARAGON parisc"
-al="$al pc532 pdp11 PGC PIC plexus PORTAR posix"
-al="$al POSIX1B_SOURCE POSIX2_SOURCE POSIX4_SOURCE"
-al="$al POSIX_C_SOURCE POSIX_SOURCE POWER"
-al="$al PROTOTYPES PWB pyr QNX R3000 REENTRANT RES Rhapsody RISC6000"
-al="$al riscix riscos RT scs SCO sequent sgi SGI_SOURCE sinix"
-al="$al SIZE_INT SIZE_LONG SIZE_PTR SOCKET_SOURCE SOCKETS_SOURCE"
-al="$al sony sony_news sonyrisc sparc sparclite spectrum"
-al="$al stardent stdc STDC_EXT stratos sun sun3 sun386"
-al="$al Sun386i svr3 svr4 SVR4_2 SVR4_SOURCE svr5"
-al="$al SX system SYSTYPE_BSD SYSTYPE_BSD43 SYSTYPE_BSD44"
-al="$al SYSTYPE_SVR4 SYSTYPE_SVR5 SYSTYPE_SYSV SYSV SYSV3 SYSV4 SYSV5"
-al="$al sysV68 sysV88 Tek4132 Tek4300 titan"
-al="$al tower tower32 tower32_200 tower32_600 tower32_700"
-al="$al tower32_800 tower32_850 tss"
-al="$al u370 u3b u3b2 u3b20 u3b200 u3b20d u3b5"
-al="$al ultrix UMAXV UnicomPBB UnicomPBD UNICOS UNICOSMK"
-al="$al unix UNIX95 UNIX99 unixpc unos USGr4 USGr4_2"
-al="$al Utek UTek UTS UWIN uxpm uxps vax venix VMESA vms xenix Xenix286"
-al="$al XOPEN_SOURCE XOPEN_SOURCE_EXTENDED XPG2 XPG2_EXTENDED"
-al="$al XPG3 XPG3_EXTENDED XPG4 XPG4_EXTENDED"
-al="$al z8000"
-
 : set useposix=false in your hint file to disable the POSIX extension.
 useposix=true
 : set useopcode=false in your hint file to disable the Opcode extension.
@@ -2125,7 +2070,8 @@ $eunicefix tr
 : Try to determine whether config.sh was made on this system
 case "$config_sh" in
 '')
-myuname=`( ($uname -a) 2>/dev/null || hostname) 2>&1`
+myuname=`$uname -a 2>/dev/null`
+$test -z "$myuname" && myuname=`hostname 2>/dev/null`
 # tr '[A-Z]' '[a-z]' would not work in EBCDIC
 # because the A-Z/a-z are not consecutive.
 myuname=`echo $myuname | $sed -e 's/^[^=]*=//' -e 's/\///g' | \
@@ -3739,42 +3685,46 @@ $define)
 esac
 for thislib in $libswanted; do
 	
-	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`;
-		$test -f "$xxx" -a "X$ignore_versioned_solibs" = "X"; then
-		echo "Found -l$thislib (shared)."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
-		esac
+	libname="$thislib"
+	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`; $test -f "$xxx"; then
+		if $test "X$ignore_versioned_solibs" = "X"; then
+			xxx=/ignored$xxx
+		else
+			libstyle=shared
+		fi
 	elif xxx=`./loc lib$thislib.$so X $libpth` ; $test -f "$xxx"; then
-		echo "Found -l$thislib (shared)."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
-		esac
+		libstyle=shared
 	elif xxx=`./loc lib$thislib$_a X $libpth`; $test -f "$xxx"; then
-		echo "Found -l$thislib."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
-		esac
+		libstyle=static
 	elif xxx=`./loc $thislib$_a X $libpth`; $test -f "$xxx"; then
-		echo "Found -l$thislib."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
-		esac
+		libstyle=static
 	elif xxx=`./loc lib${thislib}_s$_a X $libpth`; $test -f "$xxx"; then
-		echo "Found -l${thislib}_s."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l${thislib}_s";;
-		esac
+		libstyle=static
+		libname=${thislib}_s
 	elif xxx=`./loc Slib$thislib$_a X $xlibpth`; $test -f "$xxx"; then
-		echo "Found -l$thislib."
+		libstyle="static"
+	fi
+	if $test -f "$xxx"; then
+		eval $libscheck
+	fi
+	if $test -f "$xxx"; then
+		case "$libstyle" in
+		shared) echo "Found -l$libname (shared)." ;;
+		static) echo "Found -l$libname." ;;
+		*)      echo "Found -l$libname ($libstyle)." ;;
+		esac
 		case " $dflt " in
 		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
+		*) dflt="$dflt -l$libname"
+                   libsfound="$libsfound $xxx"
+                   yyy=`basename $xxx`
+                   libsfiles="$libsfiles $yyy"
+                   yyy=`echo $xxx|sed "s@/$yyy\\$@@"`
+                   case " $libsdirs " in
+                   *" $yyy "*) ;;
+                   *) libsdirs="$libsdirs $yyy" ;;
+                   esac
+		   ;;
 		esac
 	else
 		echo "No -l$thislib."
@@ -3789,6 +3739,18 @@ case "$libs" in
 esac
 case "$dflt" in
 ' '|'') dflt='none';;
+esac
+
+case "$libsfound" in
+*libm*) ;;
+*) cat <<EOM >&4
+
+I could not find -lm, the mathematics library.
+This means that something went awfully wrong.
+
+EOM
+   exit 1
+   ;;
 esac
 
 $cat <<EOM
@@ -7023,6 +6985,10 @@ else
 	installsitebin="$sitebinexp"
 fi
 
+: see if sqrtl exists
+set sqrtl d_sqrtl
+eval $inlibc
+
 cat <<EOM
 
 Perl can be built to take advantage of long doubles which
@@ -7068,6 +7034,18 @@ EOM
 	;;
 esac
 
+case "$uselongdouble:$d_sqrtl" in
+$define:$undef)
+		$cat <<EOM >&4
+
+You requested the use of long doubles but you do not seem to have
+the mathematic functions for long doubles.  I'm disabling the use
+of long doubles.
+EOM
+	uselongdouble=$undef
+	;;
+esac
+
 cat <<EOM
 
 Perl can be built to take advantage of long longs which
@@ -7081,8 +7059,7 @@ case "$ccflags" in
 esac
 
 case "$uselonglong" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
+'')	dflt='y';;
 esac
 rp='Try to use long longs if available?'
 . ./myread
@@ -7270,6 +7247,7 @@ char *myname = "sprintf";
 
 #include <stdio.h>
 
+#define I_STDLIB $i_stdlib
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
@@ -8938,7 +8916,7 @@ esac
 set fseeko d_fseeko
 eval $inlibc
 case "$longsize" in
-8) echo "(Your long is 64 bits, so in a pinch you could use fseek.)" ;;
+8) echo "(Your long is 64 bits, so you could use fseek.)" ;;
 esac
 
 : see if fsetpos exists
@@ -8964,7 +8942,7 @@ eval $inlibc
 set ftello d_ftello
 eval $inlibc
 case "$longsize" in
-8) echo "(Your long is 64 bits, so in a pinch you could use ftell.)" ;;
+8) echo "(Your long is 64 bits, so you could use ftell.)" ;;
 esac
 
 : see if getgrent exists
@@ -9263,6 +9241,10 @@ EOM
 esac
 set d_htonl
 eval $setvar
+
+: see if iconv exists
+set iconv d_iconv
+eval $inlibc
 
 : index or strchr
 echo " "
@@ -9620,8 +9602,8 @@ case "$intsize" in
       eval $setvar
       quadkind=2
       ;;
-   *) case "$uselonglong:$d_longlong:$longlongsize" in
-      define:define:8)
+   *) case "$d_longlong:$longlongsize" in
+      define:8)
         val='"long long"'
         set quadtype
         eval $setvar
@@ -10922,10 +10904,6 @@ esac
 set d_sigsetjmp
 eval $setvar
 $rm -f try.c try
-
-: see if sqrtl exists
-set sqrtl d_sqrtl
-eval $inlibc
 
 : see if sys/stat.h is available
 set sys/stat.h i_sysstat
@@ -13618,6 +13596,10 @@ esac
 set i_fcntl
 eval $setvar
 
+: see if this is a iconv.h system
+set iconv.h i_iconv
+eval $inhdr
+
 : see if locale.h is available
 set locale.h i_locale
 eval $inhdr
@@ -13697,66 +13679,122 @@ eval $inhdr
 set poll.h i_poll
 eval $inhdr
 
-: get C preprocessor symbols handy
 echo " "
 $echo "Guessing which symbols your C compiler and preprocessor define..." >&4 
-echo $al $osname | $tr ' ' $trnl >Cppsym.know
+$cat <<'EOSH' > Cppsym.know
+a29k ABI64 aegis AES_SOURCE AIX AIX32 AIX370
+AIX41 AIX42 AIX43 AIX_SOURCE aixpc ALL_SOURCE
+alliant alpha am29000 AM29000 amiga AMIGAOS AMIX
+ansi ANSI_C_SOURCE apollo ardent atarist att386 att3b BeOS
+BIG_ENDIAN BIT_MSF bsd BSD bsd43 bsd4_2 bsd4_3 BSD4_3 bsd4_4
+BSD_4_3 BSD_4_4 BSD_NET2 BSD_TIME BSD_TYPES BSDCOMPAT bsdi
+bull c cadmus clipper CMU COFF COMPILER_VERSION
+concurrent convex cpu cray CRAY CRAYMPP ctix CX_UX
+CYGWIN DGUX DGUX_SOURCE DJGPP dmert DOLPHIN DPX2 DSO
+Dynix DynixPTX ELF encore EPI EXTENSIONS FILE_OFFSET_BITS
+FreeBSD GCC_NEW_VARARGS gcos gcx gimpel
+GNU_SOURCE GNUC GNUC_MINOR GO32 gould GOULD_PN
+H3050R H3050RX hbullx20 hcx host_mips
+hp200 hp300 hp700 HP700 hp800 hp9000
+hp9000s200 hp9000s300 hp9000s400 hp9000s500
+hp9000s700 hp9000s800 hp9k8 hp_osf hppa hpux HPUX_SOURCE
+i186 i286 i386 i486 i586 i686 i8086 i80960 i860 I960
+iAPX286 ibm ibm032 ibmesa IBMR2 ibmrt ILP32 ILP64
+INLINE_INTRINSICS INTRINSICS INT64 interdata is68k ksr1
+LANGUAGE_C LARGE_FILE_API LARGEFILE64_SOURCE
+LARGEFILE_SOURCE LFS64_LARGEFILE LFS_LARGEFILE
+Linux LITTLE_ENDIAN LONG64 LONG_DOUBLE LONG_LONG
+LONGDOUBLE LONGLONG LP64 luna luna88k Lynx
+M68000 m68k m88100 m88k M88KBCS_TARGET M_COFF
+M_I186 M_I286 M_I386 M_I8086 M_I86 M_I86SM M_SYS3
+M_SYS5 M_SYSIII M_SYSV M_UNIX M_XENIX MACH machine MachTen
+MATH_HAS_NO_SIDE_EFFECTS
+mc300 mc500 mc68000 mc68010 mc68020 mc68030 mc68040
+mc68060 mc68k mc68k32 mc700 mc88000 mc88100 merlin
+mert MiNT mips MIPS_FPSET MIPS_ISA MIPS_SIM MIPS_SZINT
+MIPS_SZLONG MIPS_SZPTR MIPSEB MIPSEL MODERN_C motorola
+mpeix MSDOS MTXINU MULTIMAX mvs MVS n16 ncl_el ncl_mr
+NetBSD news1500 news1700 news1800 news1900 news3700
+news700 news800 news900 NeXT NLS ns16000 ns32000
+ns32016 ns32332 ns32k nsc32000
+OCS88 OEMVS OpenBSD os OS2 OS390 osf OSF1 OSF_SOURCE
+pa_risc PA_RISC1_1 PA_RISC2_0 PARAGON parisc
+pc532 pdp11 PGC PIC plexus PORTAR posix
+POSIX1B_SOURCE POSIX2_SOURCE POSIX4_SOURCE
+POSIX_C_SOURCE POSIX_SOURCE POWER
+PROTOTYPES PWB pyr QNX R3000 REENTRANT RES Rhapsody RISC6000
+riscix riscos RT scs SCO sequent sgi SGI_SOURCE sinix
+SIZE_INT SIZE_LONG SIZE_PTR SOCKET_SOURCE SOCKETS_SOURCE
+sony sony_news sonyrisc sparc sparclite spectrum
+stardent stdc STDC_EXT stratos sun sun3 sun386
+Sun386i svr3 svr4 SVR4_2 SVR4_SOURCE svr5
+SX system SYSTYPE_BSD SYSTYPE_BSD43 SYSTYPE_BSD44
+SYSTYPE_SVR4 SYSTYPE_SVR5 SYSTYPE_SYSV SYSV SYSV3 SYSV4 SYSV5
+sysV68 sysV88 Tek4132 Tek4300 titan
+tower tower32 tower32_200 tower32_600 tower32_700
+tower32_800 tower32_850 tss
+u370 u3b u3b2 u3b20 u3b200 u3b20d u3b5
+ultrix UMAXV UnicomPBB UnicomPBD UNICOS UNICOSMK
+unix UNIX95 UNIX99 unixpc unos USGr4 USGr4_2
+Utek UTek UTS UWIN uxpm uxps vax venix VMESA vms xenix Xenix286
+XOPEN_SOURCE XOPEN_SOURCE_EXTENDED XPG2 XPG2_EXTENDED
+XPG3 XPG3_EXTENDED XPG4 XPG4_EXTENDED
+z8000
+EOSH
+# Maybe put other stuff here too.
+cat <<EOSH >>Cppsym.know
+$osname
+EOSH
 ./tr '[a-z]' '[A-Z]' < Cppsym.know > Cppsym.a
 ./tr '[A-Z]' '[a-z]' < Cppsym.know > Cppsym.b
-cat Cppsym.a Cppsym.b >> Cppsym.know
-$sed 's/^/_/'           < Cppsym.know > Cppsym.a
-$sed 's/^/__/'          < Cppsym.know > Cppsym.b
-$sed 's/\(.*\)/__\1__/' < Cppsym.know > Cppsym.c
-$cat Cppsym.know Cppsym.a Cppsym.b Cppsym.c | sort | uniq > Cppsym.d
-mv Cppsym.d Cppsym.know
-rm Cppsym.?
-$cat <<EOSS >Cppsym
+$cat Cppsym.a Cppsym.b | $tr ' ' $trnl | sort | uniq > Cppsym.know
+$rm -f Cppsym.a Cppsym.b
+cat <<EOSH > Cppsym
 $startsh
-case "\$1" in
--l) list=true
-	shift
-	;;
-esac
-unknown=''
-case "\$list\$#" in
-1|2)
-	for sym do
-		if $contains "^\$1$" Cppsym.true >/dev/null 2>&1; then
-			exit 0
-		elif $contains "^\$1$" Cppsym.know >/dev/null 2>&1; then
-			:
-		else
-			unknown="\$unknown \$sym"
-		fi
-	done
-	set X \$unknown
-	shift
-	;;
-esac
-case \$# in
-0) exit 1;;
-esac
-echo \$* | $tr ' ' '$trnl' | $sed -e 's/\(.*\)/\\
-#ifdef \1\\
-exit 0; _ _ _ _\1\\	 \1\\
-#endif\\
-/' >Cppsym\$\$
-echo "exit 1; _ _ _" >>Cppsym\$\$
-$cppstdin $cppminus <Cppsym\$\$ | $grep '^exit [01]; _ _'  >Cppsym2\$\$
-case "\$list" in
-true) $awk 'NF > 5 {print substr(\$6,2,100)}' <Cppsym2\$\$ ;;
-*)
-	sh Cppsym2\$\$
-	status=\$?
-	;;
-esac
-$rm -f Cppsym\$\$ Cppsym2\$\$
-exit \$status
-EOSS
+if $test \$# -gt 0; then
+    echo \$* | $tr " " "$trnl" | ./Cppsym.try > Cppsym.got
+    if $test -s Cppsym.got; then
+        $rm -f Cppsym.got
+        exit 0
+    fi
+    $rm -f Cppsym.got
+    exit 1
+else
+    $tr " " "$trnl" | ./Cppsym.try
+    exit 0
+fi
+EOSH
 chmod +x Cppsym
 $eunicefix Cppsym
-./Cppsym -l $al | $sort | $grep -v '^$' >Cppsym.true
-
+cat <<EOSH > Cppsym.try
+$startsh
+cat <<'EOCP' > try.c
+#include <stdio.h>
+int main() {
+EOCP
+$awk \\
+EOSH
+cat <<'EOSH' >> Cppsym.try
+'length($1) > 0 {
+    printf "#ifdef %s\n#if %s+0\nprintf(\"%s=%%ld\\n\", %s);\n#else\nprintf(\"%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+    printf "#ifdef _%s\n#if _%s+0\nprintf(\"_%s=%%ld\\n\", _%s);\n#else\nprintf(\"_%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+    printf "#ifdef __%s\n#if __%s+0\nprintf(\"__%s=%%ld\\n\", __%s);\n#else\nprintf(\"__%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+    printf "#ifdef __%s__\n#if __%s__+0\nprintf(\"__%s__=%%ld\\n\", __%s__);\n#else\nprintf(\"__%s__\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+}'	 >> try.c
+echo '}' >> try.c
+EOSH
+cat <<EOSH >> Cppsym.try
+cc="$cc"
+optimize="$optimize"
+ccflags="$ccflags"
+ldflags="$ldflags"
+libs="$libs"
+exe_ext="$exe_ext"
+$cc $optimize $ccflags $ldflags -o try$exe_ext try.c $libs && ./try$exe_ext
+EOSH
+chmod +x Cppsym.try
+$eunicefix Cppsym.try
+./Cppsym < Cppsym.know > Cppsym.true
 : now check the C compiler for additional symbols
 postprocess_cc_v=''
 case "$osname" in
@@ -13788,7 +13826,8 @@ fi
 
 $awk '/\=/ { print $0; next }
 	{ print $0"=1" }' ccsym.raw >ccsym.list
-$awk '{ print $0"=1" }' Cppsym.true >ccsym.true
+$awk '/\=/ { print $0; next }
+	{ print $0"=1" }' Cppsym.true >ccsym.true
 $comm -13 ccsym.true ccsym.list >ccsym.own
 $comm -12 ccsym.true ccsym.list >ccsym.com
 $comm -23 ccsym.true ccsym.list >ccsym.cpp
@@ -14570,6 +14609,7 @@ d_gnulibc='$d_gnulibc'
 d_grpasswd='$d_grpasswd'
 d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
+d_iconv='$d_iconv'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_int64t='$d_int64t'
@@ -14800,6 +14840,7 @@ i_fcntl='$i_fcntl'
 i_float='$i_float'
 i_gdbm='$i_gdbm'
 i_grp='$i_grp'
+i_iconv='$i_iconv'
 i_inttypes='$i_inttypes'
 i_limits='$i_limits'
 i_locale='$i_locale'
@@ -14896,6 +14937,9 @@ libc='$libc'
 libperl='$libperl'
 libpth='$libpth'
 libs='$libs'
+libsdirs='$libsdirs'
+libsfiles='$libsfiles'
+libsfound='$libsfound'
 libswanted='$libswanted'
 line='$line'
 lint='$lint'
