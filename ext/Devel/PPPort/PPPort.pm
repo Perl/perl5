@@ -617,6 +617,79 @@ SV *sv;
 
 #endif /* START_MY_CXT */
 
+#ifndef IVdf
+#  if IVSIZE == LONGSIZE
+#       define	IVdf		"ld"
+#       define	UVuf		"lu"
+#       define	UVof		"lo"
+#       define	UVxf		"lx"
+#       define	UVXf		"lX"
+#   else
+#       if IVSIZE == INTSIZE
+#           define	IVdf	"d"
+#           define	UVuf	"u"
+#           define	UVof	"o"
+#           define	UVxf	"x"
+#           define	UVXf	"X"
+#       endif
+#   endif
+#endif
+
+#ifndef NVef
+#   if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE) && \
+	defined(PERL_PRIfldbl) /* Not very likely, but let's try anyway. */ 
+#       define NVef		PERL_PRIeldbl
+#       define NVff		PERL_PRIfldbl
+#       define NVgf		PERL_PRIgldbl
+#   else
+#       define NVef		"e"
+#       define NVff		"f"
+#       define NVgf		"g"
+#   endif
+#endif
+
+#ifndef UVSIZE
+#   define UVSIZE IVSIZE
+#endif
+
+#ifndef NVTYPE
+#   if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
+#       define NVTYPE long double
+#   else
+#       define NVTYPE double
+#   endif
+typedef NVTYPE NV;
+#endif
+
+#ifndef INT2PTR
+
+#if (IVSIZE == PTRSIZE) && (UVSIZE == PTRSIZE)
+#  define PTRV                  UV
+#  define INT2PTR(any,d)        (any)(d)
+#else
+#  if PTRSIZE == LONGSIZE
+#    define PTRV                unsigned long
+#  else
+#    define PTRV                unsigned
+#  endif
+#  define INT2PTR(any,d)        (any)(PTRV)(d)
+#endif
+#define NUM2PTR(any,d)  (any)(PTRV)(d)
+#define PTR2IV(p)       INT2PTR(IV,p)
+#define PTR2UV(p)       INT2PTR(UV,p)
+#define PTR2NV(p)       NUM2PTR(NV,p)
+#if PTRSIZE == LONGSIZE
+#  define PTR2ul(p)     (unsigned long)(p)
+#else
+#  define PTR2ul(p)     INT2PTR(unsigned long,p)        
+#endif
+
+#endif /* !INT2PTR */
+
+#ifndef AvFILLp			/* Older perls (<=5.003) lack AvFILLp */
+#   define AvFILLp AvFILL
+#endif
+
 #endif /* _P_P_PORTABILITY_H_ */
 
 /* End of File ppport.h */
