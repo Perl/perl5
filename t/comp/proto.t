@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 
-print "1..134\n";
+print "1..135\n";
 
 my $i = 1;
 
@@ -528,20 +528,29 @@ print "ok ", $i++, "\n";
     print "ok ", $i++, "\n";
 }
 
-# check that obviously bad prototypes are getting rejected
-eval 'sub badproto (@bar) { 1; }';
-print "not " unless $@ =~ /^Malformed prototype for main::badproto : \@bar/;
-print "ok ", $i++, "\n";
+# check that obviously bad prototypes are getting warnings
+{
+  my $warn = "";
+  local $SIG{__WARN__} = sub { $warn .= join("",@_) };
+  
+  eval 'sub badproto (@bar) { 1; }';
+  print "not " unless $warn =~ /Illegal character in prototype for main::badproto : \@bar/;
+  print "ok ", $i++, "\n";
 
-eval 'sub badproto2 (bar) { 1; }';
-print "not " unless $@ =~ /^Malformed prototype for main::badproto2 : bar/;
-print "ok ", $i++, "\n";
+  eval 'sub badproto2 (bar) { 1; }';
+  print "not " unless $warn =~ /Illegal character in prototype for main::badproto2 : bar/;
+  print "ok ", $i++, "\n";
+  
+  eval 'sub badproto3 (&$bar$@) { 1; }';
+  print "not " unless $warn =~ /Illegal character in prototype for main::badproto3 : &\$bar\$\@/;
+  print "ok ", $i++, "\n";
+  
+  eval 'sub badproto4 (@ $b ar) { 1; }';
+  print "not " unless $warn =~ /Illegal character in prototype for main::badproto4 : \@\$bar/;
+  print "ok ", $i++, "\n";
+}
 
-eval 'sub badproto3 (&$bar$@) { 1; }';
-print "not " unless $@ =~ /^Malformed prototype for main::badproto3 : &\$bar\$\@/;
+# make sure whitespace in prototypes works
+eval "sub good (\$\t\$\n\$) { 1; }";
+print "not " if $@;
 print "ok ", $i++, "\n";
-
-eval 'sub badproto4 (@ $b ar) { 1; }';
-print "not " unless $@ =~ /^Malformed prototype for main::badproto4 : \@\$bar/;
-print "ok ", $i++, "\n";
-

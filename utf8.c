@@ -1707,48 +1707,61 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 }
 
 /*
-=for apidoc A|I32|ibcmp_utf8|const char *s1|register I32 len1|bool u1|char **f1|const char *s2|register I32 len2|bool u2|char **f2
+=for apidoc A|I32|ibcmp_utf8|const char *s1|char **pe1|register UV l1|bool u1|const char *s2|char **pe2|register UV l2|bool u2
 
 Return true if the strings s1 and s2 differ case-insensitively, false
 if not (if they are equal case-insensitively).  If u1 is true, the
 string s1 is assumed to be in UTF-8-encoded Unicode.  If u2 is true,
-the string s2 is assumed to be in UTF-8-encoded Unicode.
+the string s2 is assumed to be in UTF-8-encoded Unicode.  If u1 or u2
+are false, the respective string is assumed to be in native 8-bit
+encoding.
+
+If the pe1 and pe2 are non-NULL, the scanning pointers will be copied
+in there (they will point at the beginning of the I<next> character).
+If the pointers behind pe1 or pe2 are non-NULL, they are the end
+pointers beyond which scanning will not continue under any
+circustances.  If the byte lengths l1 and l2 are non-zero, s1+l1 and
+s2+l2 will be used as goal end pointers that will also stop the scan,
+and which qualify towards defining a successful match: all the scans
+that define an explicit length must reach their goal pointers for
+a match to succeed).
 
 For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
 http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 
-If either length is (STRLEN)-1 the scan will continue until a match is
-found.  If both lengths are (STRLEN)-1, true is returned (as a sign of
-non-match).  In the case of a match, the f1 and f2 are updated to record
-how far the comparison proceeded.
-
 =cut */
 I32
-Perl_ibcmp_utf8(pTHX_ const char *s1, register I32 len1, bool u1, char **f1, const char *s2, register I32 len2, bool u2, char **f2)
+Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2)
 {
      register U8 *p1  = (U8*)s1;
      register U8 *p2  = (U8*)s2;
-     register U8 *e1, *q1 = 0;
-     register U8 *e2, *q2 = 0;
-     STRLEN l1 = 0, l2 = 0;
+     register U8 *e1 = 0, *f1 = 0, *q1 = 0;
+     register U8 *e2 = 0, *f2 = 0, *q2 = 0;
+     STRLEN n1 = 0, n2 = 0;
      U8 foldbuf1[UTF8_MAXLEN_FOLD+1];
      U8 foldbuf2[UTF8_MAXLEN_FOLD+1];
      U8 natbuf[1+1];
      STRLEN foldlen1, foldlen2;
-     bool inf1, inf2, match;
+     bool match;
      
-     inf1 = len1 == (STRLEN)-1;
-     inf2 = len2 == (STRLEN)-1;
-     if (inf1 && inf2)
-	  return 1; /* mismatch */
-     if (!inf1)
-	  e1 = p1 + len1;
-     if (!inf2)
-	  e2 = p2 + len2;
+     if (pe1)
+	  e1 = *(U8**)pe1;
+     if (e1 == 0 || (l1 && l1 < e1 - (U8*)s1))
+	  f1 = (U8*)s1 + l1;
+     if (pe2)
+	  e2 = *(U8**)pe2;
+     if (e2 == 0 || (l2 && l2 < e2 - (U8*)s2))
+	  f2 = (U8*)s2 + l2;
 
-     while ((p1 < e1 || inf1) && (p2 < e2 || inf2)) {
-	  if (l1 == 0) {
+     if ((e1 == 0 && f1 == 0) || (e2 == 0 && f2 == 0) || (f1 == 0 && f2 == 0))
+	  return 1; /* mismatch; possible infinite loop or false positive */
+
+     while ((e1 == 0 || p1 < e1) &&
+	    (f1 == 0 || p1 < f1) &&
+	    (e2 == 0 || p2 < e2) &&
+	    (f2 == 0 || p2 < f2)) {
+	  if (n1 == 0) {
 	       if (u1)
 		    to_utf8_fold(p1, foldbuf1, &foldlen1);
 	       else {
@@ -1756,41 +1769,44 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, register I32 len1, bool u1, char **f1, con
 		    to_utf8_fold(natbuf, foldbuf1, &foldlen1);
 	       }
 	       q1 = foldbuf1;
-	       l1 = foldlen1;
+	       n1 = foldlen1;
 	  }
-	  if (l2 == 0) {
+	  if (n2 == 0) {
 	       if (u2)
 		    to_utf8_fold(p2, foldbuf2, &foldlen2);
 	       else {
-		    natbuf[0] = NATIVE_TO_UNI(*p1);
+		    natbuf[0] = NATIVE_TO_UNI(*p2);
 		    to_utf8_fold(natbuf, foldbuf2, &foldlen2);
 	       }
 	       q2 = foldbuf2;
-	       l2 = foldlen2;
+	       n2 = foldlen2;
 	  }
-	  while (l1 && l2) {
-	       if (UTF8SKIP(q1) != UTF8SKIP(q2) ||
-		   memNE((char*)q1, (char*)q2, UTF8SKIP(q1)))
+	  while (n1 && n2) {
+	       if ( UTF8SKIP(q1) != UTF8SKIP(q2) ||
+		   (UTF8SKIP(q1) == 1 && *q1 != *q2) ||
+		    memNE((char*)q1, (char*)q2, UTF8SKIP(q1)) )
 		   return 1; /* mismatch */
-	       l1 -= UTF8SKIP(q1);
+	       n1 -= UTF8SKIP(q1);
 	       q1 += UTF8SKIP(q1);
-	       l2 -= UTF8SKIP(q2);
+	       n2 -= UTF8SKIP(q2);
 	       q2 += UTF8SKIP(q2);
 	  }
-	  if (l1 == 0)
+	  if (n1 == 0)
 	       p1 += u1 ? UTF8SKIP(p1) : 1;
-	  if (l2 == 0)
+	  if (n2 == 0)
 	       p2 += u2 ? UTF8SKIP(p2) : 1;
 
      }
 
-     match = (inf1 ? 1 : p1 == e1) && (inf2 ? 1 : p2 == e2);
+     /* A match is defined by all the scans that specified
+      * an explicit length reaching their final goals. */
+     match = (f1 == 0 || p1 == f1) && (f2 == 0 || p2 == f2);
 
      if (match) {
-	  if (f1)
-	       *f1 = (char *)p1;
-	  if (f2)
-	       *f2 = (char *)p2;
+	  if (pe1)
+	       *pe1 = (char*)p1;
+	  if (pe2)
+	       *pe2 = (char*)p2;
      }
 
      return match ? 0 : 1; /* 0 match, 1 mismatch */

@@ -282,3 +282,12 @@ VVEERRBBAATTIIMM
     the text since otherwise text with mixed tabs and spaces will get messed
     up.)
 
+        And now we test verbatim paragraphs right before a heading.  Older
+        versions of Pod::Man generated two spaces between paragraphs like this
+        and the heading.  (In order to properly test this, one may have to
+        visually inspect the nroff output when run on the generated *roff
+        text, unfortunately.)
+
+CCOONNCCLLUUSSIIOONN
+    That's all, folks!
+

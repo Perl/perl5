@@ -10,6 +10,13 @@ use overload
 
 #use threads::Shared;
 
+BEGIN {
+    warn "Warning, threads::shared has already been loaded. ".
+       "To enable shared variables for these modules 'use threads' ".
+       "must be called before any of those modules are loaded\n"
+               if($threads::shared::threads_shared);
+}
+
 require Exporter;
 require DynaLoader;
 
@@ -83,7 +90,10 @@ must use threads::shared.
 
 It is also important to note that you preferably enable threads by
 doing C<use threads> as early as possible and that it is not possible
-to enable threading inside an eval "";
+to enable threading inside an eval "";  In particular, if you are
+intending to share variables with threads::shared, you must
+C<use threads> before you C<use threads::shared> and threads will emit
+a warning if you do it the other way around.
 
 =over
 

@@ -1,7 +1,7 @@
 # Pod::Text::Termcap -- Convert POD data to ASCII text with format escapes.
-# $Id: Termcap.pm,v 1.6 2001/11/28 05:44:09 eagle Exp $
+# $Id: Termcap.pm,v 1.9 2002/01/02 07:59:09 eagle Exp $
 #
-# Copyright 1999, 2001 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2001, 2002 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -30,7 +30,7 @@ use vars qw(@ISA $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.06;
+$VERSION = 1.09;
 
 
 ##############################################################################
@@ -51,10 +51,10 @@ sub initialize {
     # available (such as on VMS).
     eval { $termios = POSIX::Termios->new };
     if ($@) {
-        $ospeed = '9600';
+        $ospeed = 9600;
     } else {
         $termios->getattr;
-        $ospeed = $termios->getospeed;
+        $ospeed = $termios->getospeed || 9600;
     }
 
     # Fall back on the ANSI escape sequences if Term::Cap doesn't work.
@@ -166,7 +166,7 @@ Russ Allbery <rra@stanford.edu>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2001 by Russ Allbery <rra@stanford.edu>.
+Copyright 1999, 2001, 2002 by Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

@@ -557,3 +557,4 @@ sub preprocess_paragraph {
     return  $self->SUPER::preprocess_paragraph($_);
 }
 
+1; # keep require happy

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..828\n";
+print "1..834\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2380,11 +2380,7 @@ print "# some Unicode properties\n";
     print "# GREEK CAPITAL LETTER SIGMA vs COMBINING GREEK PERISPOMENI\n";
 
     my $SIGMA = "\N{GREEK CAPITAL LETTER SIGMA}";
-
-    my $hSIGMA = sprintf "%04x", ord $SIGMA;
-    
-    my $char = "\N{COMBINING GREEK PERISPOMENI}";
-    my $code = sprintf "%04x", ord($char);
+    my $char  = "\N{COMBINING GREEK PERISPOMENI}";
 
     # Before #13843 this was failing by matching falsely.
     print "_:$char:_" =~ m/_:$SIGMA:_/i ? "not ok 786\n" : "ok 786\n";
@@ -2557,4 +2553,28 @@ print "# some Unicode properties\n";
 	    print "not ok 828\n";
 	}
     }
+}
+
+{
+    print "# more SIGMAs\n";
+
+    my $SIGMA = "\x{03A3}"; # CAPITAL
+    my $Sigma = "\x{03C2}"; # SMALL FINAL
+    my $sigma = "\x{03C3}"; # SMALL
+
+    my $S3 = "$SIGMA$Sigma$sigma";
+
+    print ":$S3:" =~ /:(($SIGMA)+):/i   && $1 eq $S3 && $2 eq $sigma ?
+	"ok 829\n" : "not ok 829\n";
+    print ":$S3:" =~ /:(($Sigma)+):/i   && $1 eq $S3 && $2 eq $sigma ?
+	"ok 830\n" : "not ok 830\n";
+    print ":$S3:" =~ /:(($sigma)+):/i   && $1 eq $S3 && $2 eq $sigma ?
+	"ok 831\n" : "not ok 831\n";
+
+    print ":$S3:" =~ /:(([$SIGMA])+):/i && $1 eq $S3 && $2 eq $sigma ?
+	"ok 832\n" : "not ok 832\n";
+    print ":$S3:" =~ /:(([$Sigma])+):/i && $1 eq $S3 && $2 eq $sigma ?
+	"ok 833\n" : "not ok 833\n";
+    print ":$S3:" =~ /:(([$sigma])+):/i && $1 eq $S3 && $2 eq $sigma ?
+	"ok 834\n" : "not ok 834\n";
 }

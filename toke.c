@@ -4957,15 +4957,17 @@ Perl_yylex(pTHX)
 		    tmp = 0;
 		    bad_proto = FALSE;
 		    for (p = d; *p; ++p) {
-			if (!strchr("$@%*;[]&\\ ", *p))
-			    bad_proto = TRUE;
-			if (!isSPACE(*p))
+			if (!isSPACE(*p)) {
 			    d[tmp++] = *p;
+			    if (!strchr("$@%*;[]&\\", *p))
+				bad_proto = TRUE;
+			}
 		    }
 		    d[tmp] = '\0';
 		    if (bad_proto)
-			Perl_croak(aTHX_ "Malformed prototype for %s : %s",
-				   SvPVX(PL_subname), d);
+			Perl_warn(aTHX_
+				  "Illegal character in prototype for %s : %s",
+				  SvPVX(PL_subname), d);
 		    SvCUR(PL_lex_stuff) = tmp;
 		    have_proto = TRUE;
 

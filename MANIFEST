@@ -1,6 +1,7 @@
 apollo/netinet/in.h	Apollo DomainOS port: C header file frontend
 Artistic		The "Artistic License"
 AUTHORS			Contact info for contributors
+autodoc.pl		Creates pod/perlintern.pod and pod/perlapi.pod
 av.c			Array value code
 av.h			Array value header
 beos/beos.c		BeOS port
@@ -44,6 +45,7 @@ dump.c			Debugging output
 emacs/cperl-mode.el	An alternate perl-mode
 emacs/e2ctags.pl	etags to ctags converter
 emacs/ptags		Creates smart TAGS file
+embed.fnc		Database used by embed.pl
 embed.h			Maps symbols to safer names
 embed.pl		Produces {embed,embedvar,proto}.h, global.sym
 embedvar.h		C namespace management
@@ -602,6 +604,7 @@ ext/threads/shared/shared.xs    thread shared variables
 ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
 ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
+ext/threads/shared/t/no_share.t	Tests for disabled share on variables.
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
 ext/threads/t/basic.t		ithreads
@@ -1208,9 +1211,11 @@ lib/Pod/t/basic.ovr		podlators test
 lib/Pod/t/basic.pod		podlators test
 lib/Pod/t/basic.t		podlators test
 lib/Pod/t/basic.txt		podlators test
+lib/Pod/t/man.t    		podlators test
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/latex.t		Test for Pod::LaTeX
 lib/Pod/t/parselink.t		podlators test
+lib/Pod/t/text-errors.t		podlators test
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
 lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
 lib/Pod/Text/Color.pm		Convert POD data to color ASCII text

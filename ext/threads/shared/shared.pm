@@ -17,7 +17,7 @@ BEGIN {
 	*share = \&share_disabled;
 	*cond_wait = \&cond_wait_disabled;
 	*cond_signal = \&cond_signal_disabled;
-	*cond_broadcast = \&cond_broadcast_dosabled;
+	*cond_broadcast = \&cond_broadcast_disabled;
 	*unlock = \&unlock_disabled;
     }
 }
@@ -100,6 +100,9 @@ sub TIEHASH {
 }
 
 package threads::shared;
+
+$threads::shared::threads_shared = 1;
+
 bootstrap threads::shared $VERSION;
 
 __END__
@@ -204,6 +207,14 @@ signal is discarded.
 The C<cond_broadcast> function works similarly to C<cond_signal>.
 C<cond_broadcast>, though, will unblock B<all> the threads that are blocked
 in a C<cond_wait> on the locked variable, rather than only one.
+
+
+=head1 NOTES
+
+threads::shared is designed is disable itself silently if threads are
+not available. If you want access to threads, you must C<use threads>
+before you C<use threads::shared>.  threads will emit a warning if you
+use it before threads::shared.
 
 =head1 BUGS
 

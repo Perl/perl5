@@ -1,6 +1,5 @@
-.UC
 .SH "NAME"
-basic.pod \- Test of various basic \s-1POD\s0 features in translators.
+basic.pod \- Test of various basic POD features in translators.
 .SH "HEADINGS"
 .IX Header "HEADINGS"
 Try a few different levels of headings, with embedded formatting codes and
@@ -299,10 +298,12 @@ Throw in a few verbatim paragraphs.
 \&    print "This text is normal.\en";
 \&    print colored ['yellow on_magenta'], "Yellow on magenta.\en";
 .Ve
+.PP
 .Vb 2
 \&    use Term::ANSIColor qw(uncolor);
 \&    print uncolor '01;31', "\en";
 .Ve
+.PP
 But this isn't verbatim (make sure it wraps properly), and the next
 paragraph is again:
 .PP
@@ -310,9 +311,11 @@ paragraph is again:
 \&    use Term::ANSIColor qw(:constants);
 \&    print BOLD, BLUE, "This text is in bold blue.\en", RESET;
 .Ve
+.PP
 .Vb 1
 \&    use Term::ANSIColor qw(:constants); $Term::ANSIColor::AUTORESET = 1; print BOLD BLUE "This text is in bold blue.\en"; print "This text is normal.\en";
 .Ve
+.PP
 (Ugh, that's obnoxiously long.)  Try different spacing:
 .PP
 .Vb 7
@@ -324,12 +327,25 @@ paragraph is again:
 \&tab.  But this should still be verbatim.
 \& As should this.
 .Ve
+.PP
 This isn't.
 .PP
 .Vb 2
 \& This is.  And this:    is an internal tab.  It should be:
 \&                    |--| <= lined up with that.
 .Ve
+.PP
 (Tricky, but tabs should be expanded before the translator starts in on
 the text since otherwise text with mixed tabs and spaces will get messed
 up.)
+.PP
+.Vb 5
+\&    And now we test verbatim paragraphs right before a heading.  Older
+\&    versions of Pod::Man generated two spaces between paragraphs like this
+\&    and the heading.  (In order to properly test this, one may have to
+\&    visually inspect the nroff output when run on the generated *roff
+\&    text, unfortunately.)
+.Ve
+.SH "CONCLUSION"
+.IX Header "CONCLUSION"
+That's all, folks!

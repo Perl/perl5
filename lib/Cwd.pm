@@ -466,12 +466,18 @@ sub _dos_cwd {
 }
 
 sub _qnx_cwd {
+	local $ENV{PATH} = '';
+	local $ENV{CDPATH} = '';
+	local $ENV{ENV} = '';
     $ENV{'PWD'} = `/usr/bin/fullpath -t`;
     chop $ENV{'PWD'};
     return $ENV{'PWD'};
 }
 
 sub _qnx_abs_path {
+	local $ENV{PATH} = '';
+	local $ENV{CDPATH} = '';
+	local $ENV{ENV} = '';
     my $path = @_ ? shift : '.';
     my $realpath=`/usr/bin/fullpath -t $path`;
     chop $realpath;

@@ -31,6 +31,159 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14014] By: jhi                                   on 2002/01/02  15:12:57
+        Log: One more iteration of the ibcmp_utf8() interface,
+             hopefully this is a convergent iteration...
+     Branch: perl
+	   ! embed.pl pod/perlapi.pod proto.h regexec.c t/op/pat.t utf8.c
+____________________________________________________________________________
+[ 14013] By: ams                                   on 2002/01/02  13:43:58
+        Log: Upgrade to podlators-1.19.
+     Branch: perl
+	   + lib/Pod/t/man.t lib/Pod/t/text-errors.t
+	   ! MANIFEST lib/Pod/Man.pm lib/Pod/Text.pm
+	   ! lib/Pod/Text/Termcap.pm lib/Pod/t/basic.cap
+	   ! lib/Pod/t/basic.clr lib/Pod/t/basic.man lib/Pod/t/basic.ovr
+	   ! lib/Pod/t/basic.pod lib/Pod/t/basic.txt
+____________________________________________________________________________
+[ 14012] By: ams                                   on 2002/01/02  09:48:51
+        Log: Subject: [ID 20011219.004] Pod::Usage does not terminate with a true value
+             From: martyn@inpharmatica.co.uk
+             Date: Wed, 19 Dec 2001 19:05:00 +0000
+             Message-Id: <E16Gm1U-00005z-00@baker-st.inpharmatica.co.uk>
+     Branch: perl
+	   ! lib/Pod/Usage.pm
+____________________________________________________________________________
+[ 14010] By: jhi                                   on 2002/01/02  03:59:22
+        Log: Make ibcmp_utf8() optionally progress in either string for
+             as long as it takes and optionally record how far it got.
+     Branch: perl
+	   ! embed.h embed.pl pod/perlapi.pod proto.h regexec.c utf8.c
+____________________________________________________________________________
+[ 14009] By: jhi                                   on 2002/01/02  00:35:15
+        Log: Once more try to get the PPPort Makefile right.
+     Branch: perl
+	   ! ext/Devel/PPPort/Makefile.PL ext/Devel/PPPort/ppport_h.PL
+____________________________________________________________________________
+[ 14008] By: jhi                                   on 2002/01/02  00:03:27
+        Log: -Wall silencing.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14007] By: jhi                                   on 2002/01/01  23:48:19
+        Log: Subject: [PATCH B::Deparse] alternate way to figure out prototypes
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 1 Jan 2002 22:45:21 +0100       
+             Message-ID: <20020101224521.A691@rafael>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 14006] By: jhi                                   on 2002/01/01  23:40:10
+        Log: VOS tweak from Paul Green: VOS has different O_BINARY
+             and O_TEXT, but VOS always uses LF, never CRLF.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 14005] By: jhi                                   on 2002/01/01  23:34:25
+        Log: Make ibcmp_utf8() more robust and make regmatch() use it.
+     Branch: perl
+	   ! regexec.c utf8.c
+____________________________________________________________________________
+[ 14004] By: jhi                                   on 2002/01/01  18:27:50
+        Log: Now that to_utf8_fold() was fixed.
+     Branch: perl
+	   ! regcomp.c regexec.c
+____________________________________________________________________________
+[ 14003] By: jhi                                   on 2002/01/01  18:04:02
+        Log: Integrate perlio; experimental binmode() re-coding.
+     Branch: perl
+	  !> perlio.c
+____________________________________________________________________________
+[ 14002] By: jhi                                   on 2002/01/01  17:53:44
+        Log: Document the to_utf8_*() functions.
+     Branch: perl
+	   ! embed.pl pod/perlapi.pod utf8.c
+____________________________________________________________________________
+[ 14001] By: jhi                                   on 2002/01/01  17:29:05
+        Log: Better support for multicharacter foldings.
+             Now all but two of the CaseFold.txt cases work-- but
+             only when the target string is single-character, more
+             debugging needed.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 14000] By: ams                                   on 2002/01/01  15:59:43
+        Log: Subject: [PATCH] don't installperl pods
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Tue, 1 Jan 2002 16:44:12 +0000
+             Message-Id: <20020101164411.A3157@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 13999] By: ams                                   on 2002/01/01  14:34:04
+        Log: Subject: [PATCH] perldiag.pod transposition
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Tue, 1 Jan 2002 15:03:52 +0000
+             Message-Id: <20020101150350.A2963@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 13998] By: ams                                   on 2002/01/01  13:36:49
+        Log: Subject: [PATCH perldiag] Corrections : unknown warning category
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 1 Jan 2002 15:12:36 +0100
+             Message-Id: <20020101151236.A951@rafael>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 13997] By: ams                                   on 2002/01/01  13:33:06
+        Log: Subject: [better PATCH] Re: Low-lights of Win32 / bleadperl
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Tue, 1 Jan 2002 13:13:17 +0000
+             Message-Id: <20020101131316.A475@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/Socket/socketpair.t
+____________________________________________________________________________
+[ 13996] By: ams                                   on 2002/01/01  04:44:28
+        Log: Subject: [PATCH @13746] Leaner exporter
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 31 Dec 2001 18:16:08 -0500
+             Message-Id: <20011231181608.A29253@math.ohio-state.edu>
+     Branch: perl
+	   ! ext/B/t/stash.t lib/Exporter.pm lib/Exporter/Heavy.pm
+____________________________________________________________________________
+[ 13995] By: ams                                   on 2002/01/01  04:29:44
+        Log: Subject: [PATCH @13746] h2xs broken
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 31 Dec 2001 17:48:55 -0500
+             Message-Id: <20011231174855.A29128@math.ohio-state.edu>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 13994] By: ams                                   on 2002/01/01  04:25:46
+        Log: Subject: Re: [PATCH @13746] uninstalled build of modules broken
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 31 Dec 2001 17:42:25 -0500
+             Message-Id: <20011231174225.A29048@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 13993] By: jhi                                   on 2002/01/01  03:45:24
+        Log: Rename the variables to be a bit more consistent.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13992] By: jhi                                   on 2002/01/01  03:35:01
+        Log: Unnecessary/Lingering UTF8 flag might mess up caseless matching
+             (found by Jeffrey Friedl)
+     Branch: perl
+	   ! regexec.c t/op/pat.t utf8.c
+____________________________________________________________________________
+[ 13990] By: jhi                                   on 2001/12/31  17:13:12
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13989] By: jhi                                   on 2001/12/31  16:47:28
         Log: Less unused ones.
      Branch: perl

@@ -1,5 +1,5 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 2.16 2001/11/28 01:15:50 eagle Exp $
+# $Id: Text.pm,v 2.18 2002/01/01 02:40:51 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -43,7 +43,7 @@ use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 2.16;
+$VERSION = 2.18;
 
 
 ##############################################################################
@@ -227,7 +227,7 @@ sub command {
         ($file, $line) = $paragraph->file_line;
         $text =~ s/\n+\z//;
         $text = " $text" if ($text =~ /^\S/);
-        warn qq($file:$line: Unknown command paragraph "=$command$text"\n);
+        warn qq($file:$line: Unknown command paragraph: =$command$text\n);
         return;
     }
 }
@@ -291,7 +291,6 @@ sub interior_sequence {
             return chr;
         } else {
             return $ESCAPES{$_} if defined $ESCAPES{$_};
-            my $seq = shift;
             my ($file, $line) = $seq->file_line;
             warn "$file:$line: Unknown escape: E<$_>\n";
             return "E<$_>";
@@ -316,9 +315,8 @@ sub interior_sequence {
     elsif ($command eq 'I') { return $self->seq_i ($_) }
     elsif ($command eq 'L') { return $self->seq_l ($_, $seq) }
     else {
-        my $seq = shift;
         my ($file, $line) = $seq->file_line;
-        warn "$file:$line: Unknown formatting code $command<$_>\n";
+        warn "$file:$line: Unknown formatting code: $command<$_>\n";
     }
 }
 
@@ -771,7 +769,7 @@ and the input file it was given could not be opened.
 (F) The quote specification given (the quotes option to the constructor) was
 invalid.  A quote specification must be one, two, or four characters long.
 
-=item %s:%d: Unknown command paragraph "%s".
+=item %s:%d: Unknown command paragraph: %s
 
 (W) The POD source contained a non-standard command paragraph (something of
 the form C<=command args>) that Pod::Man didn't know about.  It was ignored.

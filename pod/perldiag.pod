@@ -543,7 +543,7 @@ quotas or other plumbing problems.
 
 =item Can't declare class for non-scalar %s in "%s"
 
-(S) Currently, only scalar variables can declared with a specific class
+(F) Currently, only scalar variables can declared with a specific class
 qualifier in a "my" or "our" declaration.  The semantics may be extended
 for other types of variables in future.
 
@@ -1605,6 +1605,11 @@ when Perl was built using standard options.  For some reason, your
 version of Perl appears to have been built without this support.  Talk
 to your Perl administrator.
 
+=item Illegal character in prototype for %s : %s
+
+(S) An illegal character was found in a prototype declaration.  Legal
+characters in prototypes are $, @, %, *, ;, [, ], &, and \.
+
 =item Illegal division by zero
 
 (F) You tried to divide a number by 0.  Either something was wrong in
@@ -1871,10 +1876,10 @@ appear if components are not found, or are too long.  See
 
 =item Malformed prototype for %s: %s
 
-(F) You declared or tried to use a function with a malformed
-prototype.  The syntax of function prototypes is given a brief
-compile-time check for obvious errors like invalid characters.  A more
-rigorous check is run when the function is called.
+(F) You tried to use a function with a malformed prototype.  The
+syntax of function prototypes is given a brief compile-time check for
+obvious errors like invalid characters.  A more rigorous check is run
+when the function is called.
 
 =item Malformed UTF-8 character (%s)
 
@@ -2196,6 +2201,11 @@ immediately after the switch, without intervening spaces.
 
 (F) The indicated command line switch needs a mandatory argument, but
 you haven't specified one.
+
+=item No such class %s
+
+(F) You provided a class qualifier in a "my" or "our" declaration, but
+this class doesn't exist at this point in your program.
 
 =item No such pipe open
 
