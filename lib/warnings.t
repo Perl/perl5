@@ -121,6 +121,9 @@ for (@prgs){
     if ($^O eq 'VMS') {
         # some tests will trigger VMS messages that won't be expected
         $results =~ s/\n?%[A-Z]+-[SIWEF]-[A-Z]+,.*//;
+
+        # pipes double these sometimes
+        $results =~ s/\n\n/\n/g;
     }
 # bison says 'parse error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
