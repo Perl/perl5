@@ -13,6 +13,7 @@ INSTALL			Detailed installation instructions
 INTERN.h		Included before domestic .h files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
+Porting/Contract	Guidelines for creating patches to Perl
 Porting/Glossary	Glossary of config.sh variables
 Porting/makerel		Release making utility
 Porting/patchls		Flexible patch file listing utility
@@ -390,6 +391,7 @@ lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 lib/Text/Soundex.pm	Perl module to implement Soundex
 lib/Text/Tabs.pm	Do expand and unexpand
 lib/Text/Wrap.pm	Paragraph formatter
+lib/Tie/Handle.pm	Base class for tied handles
 lib/Tie/Hash.pm		Base class for tied hashes
 lib/Tie/RefHash.pm	Base class for tied hashes with references as keys
 lib/Tie/Scalar.pm	Base class for tied scalars
@@ -765,6 +767,7 @@ t/op/substr.t		See if substr works
 t/op/sysio.t		See if sysread and syswrite work
 t/op/taint.t		See if tainting works
 t/op/tie.t		See if tie/untie functions work
+t/op/tiehandle.t	See if tied handle functions work
 t/op/time.t		See if time functions work
 t/op/undef.t		See if undef works
 t/op/universal.t	See if UNIVERSAL class works
