@@ -266,96 +266,135 @@ a scalar is encoded internally in UTF-8 (Unicode).
 
 =head2 Updated Modules And Pragmata
 
-base
+The following modules and pragmata have been updated since Perl 5.8.0
 
-B::Bytecode - in much better shape than it used to be.  Still far
-from perfect, but maybe worth a try.
+=over 4
 
-B::Concise
+=item base
 
-B::Deparse
+=item B::Bytecode
 
-Benchmark - an optional feature, C<:hireswallclock>, now allows
-for high resolution wall clock times (uses Time::HiRes).
+In much better shape than it used to be.  Still far from perfect, but
+maybe worth a try.
 
-ByteLoader - see B::Bytecode.
+=item B::Concise
 
-bytes - now has bytes::substr.
+=item B::Deparse
+
+=item Benchmark
+
+An optional feature, C<:hireswallclock>, now allows for high
+resolution wall clock times (uses Time::HiRes).
+
+=item ByteLoader
+
+See B::Bytecode.
+
+=item bytes
+
+Now has bytes::substr.
+
+=item 
 
 CGI
 
-charnames - one can now have custom character name aliases.
+=item charnames
 
-CPAN - there is now a simple command line frontend to the CPAN.pm
+One can now have custom character name aliases.
+
+=item CPAN
+
+There is now a simple command line frontend to the CPAN.pm
 module called F<cpan>.
 
-Data::Dumper - a new option, Pair, allows choosing the separator
-between hash keys and values.
+=item Data::Dumper
 
-DB_File
+A new option, Pair, allows choosing the separator between hash keys
+and values.
 
-Devel::PPPort
+=item DB_File
 
-Digest::MD5
+=item Devel::PPPort
 
-Encode - significant updates on the encoding pragma functionality
+=item Digest::MD5
+
+=item Encode
+
+Significant updates on the encoding pragma functionality
 (tr/// and the DATA filehandle, formats).  The ISO 8859-6 conversion
 table has been corrected (the 0x30..0x39 erroneously mapped to
 U+0660..U+0669, instead of U+0030..U+0039).  The UTF-7 encoding has
 been added (making Encode feature-complete with Unicode::String).
 
-libnet
+=item libnet
 
-Math::BigInt
+=item Math::BigInt
 
-MIME::Base64
+=item MIME::Base64
 
-NEXT - diamond inheritance now works.
+=item NEXT
 
-Net::Ping
+Diamond inheritance now works.
 
-podlators
+=item Net::Ping
 
-Pod::LaTeX
+=item podlators
 
-PodParsers
+=item Pod::LaTeX
 
-Pod::Perldoc - complete rewrite.  As a side-effect, no more refuses
-to startup when run by root.
+=item PodParsers
 
-Scalar::Util - new utilities: refaddr, isvstring, looks_like_number,
-set_prototype.
+=item Pod::Perldoc
 
-Storable - can now store code references (via B::Deparse, so not
-foolproof).
+Complete rewrite.  As a side-effect, no more refuses to startup when
+run by root.
 
-Term::ANSIcolor
+=item Scalar::Util
 
-Test::Harness - now much more picky about extra or missing output
-from test scripts.
+New utilities: refaddr, isvstring, looks_like_number, set_prototype.
 
-Test::More
+=item Storable
 
-Test::Simple
+Can now store code references (via B::Deparse, so not foolproof).
 
-Text::Balanced
+=item Term::ANSIcolor
 
-Time::HiRes - use of nanosleep(), if available, allows mixing
-subsecond sleeps with alarms.
+=item Test::Harness
 
-threads - several fixes, for example for join() problems and memory
+Now much more picky about extra or missing output from test scripts.
+
+=item Test::More
+
+=item Test::Simple
+
+=item Text::Balanced
+
+=item Time::HiRes
+
+Use of nanosleep(), if available, allows mixing subsecond sleeps with
+alarms.
+
+=item threads
+
+Several fixes, for example for join() problems and memory
 leaks.  In some platforms (like Linux) that use glibc the minimum memory
 footprint of one ithread has been reduced by several hundred kilobytes.
 
-threads::shared - many memory leaks have been fixed.
+=item threads::shared
 
-Unicode::Collate
+Many memory leaks have been fixed.
 
-Unicode::Normalize
+=item Unicode::Collate
 
-Win32::GetFolderPath
+=item Unicode::Normalize
 
-Win32::GetOSVersion - now returns extra information
+=item Win32::GetFolderPath
+
+=item Win32::GetOSVersion
+
+Now returns extra information.
+
+=back
 
 =head1 Utility Changes
 
@@ -735,14 +774,14 @@ This warning should have been already in 5.8.0, since they are.
 
 =head2 New "Tied variable freed while still in use"
 
-Something pulled the plug on a live free variable, Perl plays
+Something pulled the plug on a live tied variable, Perl plays
 safe by bailing out.
 
 =head2 New "To%s: illegal mapping '%s'"
 
 An illegal user-defined Unicode casemapping was specified.
 
-=head2 New "Use of freed value in iteration (perhaps you modified the iterated array within the loop?)"
+=head2 New "Use of freed value in iteration"
 
 Something modified the values being iterated over.  This is not good.
 
@@ -762,8 +801,8 @@ for lexical variables) has been conducted by Dave Mitchell.
 Extensive work on the v-strings by John Peacock.
 
 UTF-8 length and position cache: to speed up the handling of Unicode
-(UTF-8) scalars, a cache was introduced.  Potential problems if an
-extension bypasses the official APIs and directly modifies the PV
+(UTF-8) scalars, a cache was introduced.  Potential problems exist if
+an extension bypasses the official APIs and directly modifies the PV
 of an SV: the UTF-8 cache does not get cleared as it should.
 
 APIs obsoleted in Perl 5.8.0, like sv_2pv, sv_catpvn, sv_catsv,
@@ -840,11 +879,12 @@ regardless of whether the hash is empty or has elements.
 The root cause is that there is no interface for the implementors of
 tied hashes to implement the behaviour of a hash in scalar context.
 
-=head2 lib/Net/Ping/t/510_ping_udp.t subtest 2
+=head2 Net::Ping 450_service and 510_ping_udp failures
 
-The subtest 2 of lib/Net/Ping/t/510_ping_udp.t might fail if you have
-an unusual networking setup.  The test is trying to send a UDP ping to
-the IP address 127.0.0.1.
+The subtests 9 and 18 of lib/Net/Ping/t/450_service.t, and the
+subtest 2 of lib/Net/Ping/t/510_ping_udp.t might fail if you have
+an unusual networking setup.  For example in the latter case the
+test is trying to send a UDP ping to the IP address 127.0.0.1.
 
 =head2 B::C
 
@@ -899,10 +939,14 @@ of the performance problems.
 =head2 HP-UX: HP cc warnings about sendfile and sendpath
 
 With certain HP C compiler releases (e.g. B.11.11.02) you will
-get many warnings like this:
+get many warnings like this (lines wrapped for easier reading):
 
-    cc: "/usr/include/sys/socket.h", line 504: warning 562: Redeclaration of "sendfile" with a different storage class specifier: "sendfile" will have internal linkage.
-    cc: "/usr/include/sys/socket.h", line 505: warning 562: Redeclaration of "sendfile" with a different storage class specifier: "sendfile" will have internal linkage.
+  cc: "/usr/include/sys/socket.h", line 504: warning 562:
+    Redeclaration of "sendfile" with a different storage class specifier:
+      "sendfile" will have internal linkage.
+  cc: "/usr/include/sys/socket.h", line 505: warning 562:
+    Redeclaration of "sendpath" with a different storage class specifier:
+      "sendpath" will have internal linkage.
 
 The warnings show up both during the build of Perl and during certain
 lib/ExtUtils tests that invoke the C compiler.  The warning, however,
