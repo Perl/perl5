@@ -1,7 +1,6 @@
 package utf8;
 use strict;
 use warnings;
-require "utf8_pva.pl";
 
 sub DEBUG () { 0 }
 
@@ -78,8 +77,8 @@ sub SWASHNEW {
 	    ##
 	    ## See if it's in some enumeration.
 	    ##
+	    require "utf8_pva.pl";
 	    if ($type =~ /^([\w\s]+)[:=]\s*(.*)/) {
-		require "utf8_pva.pl";
 		my ($enum, $val) = (lc $1, lc $2);
 		$enum =~ tr/ _-//d;
 		$val =~ tr/ _-//d;
