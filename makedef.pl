@@ -116,7 +116,7 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 	output_symbol("perl_get_host_info");
 	output_symbol("perl_alloc_override");
     }
-    if ($define{USE_ITHREADS}) {
+    if ($define{USE_ITHREADS} and $define{PERL_IMPLICIT_SYS}) {
 	output_symbol("perl_clone_host");
     }
 }
