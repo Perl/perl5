@@ -1873,7 +1873,7 @@ PerlIOBuf_flush(PerlIO *f)
  if (PerlIOBase(f)->flags & PERLIO_F_WRBUF)
   {
    /* write() the buffer */
-   STDCHAR *buf = PerlIO_get_base(f);
+   STDCHAR *buf = b->buf;
    STDCHAR *p = buf;
    int count;
    PerlIO *n = PerlIONext(f);
@@ -1920,7 +1920,6 @@ PerlIOBuf_fill(PerlIO *f)
 {
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
  PerlIO *n = PerlIONext(f);
- STDCHAR *buf;
  SSize_t avail;
  /* FIXME: doing the down-stream flush is a bad idea if it causes
     pre-read data in stdio buffer to be discarded
@@ -1933,7 +1932,10 @@ PerlIOBuf_fill(PerlIO *f)
  if (PerlIO_flush(f) != 0)
   return -1;
 
- b->ptr = b->end = buf = PerlIO_get_base(f);
+ if (!b->buf)
+  PerlIO_get_base(f); /* allocate via vtable */
+
+ b->ptr = b->end = b->buf;
  if (PerlIO_fast_gets(n))
   {
    /* Layer below is also buffered
@@ -1975,7 +1977,7 @@ PerlIOBuf_fill(PerlIO *f)
     PerlIOBase(f)->flags |= PERLIO_F_ERROR;
    return -1;
   }
- b->end      = buf+avail;
+ b->end      = b->buf+avail;
  PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
  return 0;
 }
@@ -2752,11 +2754,14 @@ PerlIOMmap_map(PerlIO *f)
         }
        posn = (b->posn / page_size) * page_size;
        len  = st.st_size - posn;
-       m->mptr = mmap(NULL, len, PROT_READ, MAP_PRIVATE, fd, posn);
+       m->mptr = mmap(NULL, len, PROT_READ, MAP_SHARED, fd, posn);
        if (m->mptr && m->mptr != (Mmap_t) -1)
         {
-#if defined(HAS_MADVISE) && defined(MADV_SEQUENTIAL)
+#if 0 && defined(HAS_MADVISE) && defined(MADV_SEQUENTIAL)
          madvise(m->mptr, len, MADV_SEQUENTIAL);
+#endif
+#if 0 && defined(HAS_MADVISE) && defined(MADV_WILLNEED)
+         madvise(m->mptr, len, MADV_WILLNEED);
 #endif
          PerlIOBase(f)->flags = (flags & ~PERLIO_F_EOF) | PERLIO_F_RDBUF;
          b->end  = ((STDCHAR *)m->mptr) + len;
