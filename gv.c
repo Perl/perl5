@@ -1245,30 +1245,6 @@ Perl_gp_free(pTHX_ GV *gv)
     GvGP(gv) = 0;
 }
 
-#if defined(CRIPPLED_CC) && (defined(iAPX286) || defined(M_I286) || defined(I80286))
-#define MICROPORT
-#endif
-
-#ifdef	MICROPORT	/* Microport 2.4 hack */
-AV *GvAVn(gv)
-register GV *gv;
-{
-    if (GvGP(gv)->gp_av)
-	return GvGP(gv)->gp_av;
-    else
-	return GvGP(gv_AVadd(gv))->gp_av;
-}
-
-HV *GvHVn(gv)
-register GV *gv;
-{
-    if (GvGP(gv)->gp_hv)
-	return GvGP(gv)->gp_hv;
-    else
-	return GvGP(gv_HVadd(gv))->gp_hv;
-}
-#endif			/* Microport 2.4 hack */
-
 int
 Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
 {

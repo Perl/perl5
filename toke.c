@@ -685,35 +685,6 @@ S_check_uni(pTHX)
     }
 }
 
-/* workaround to replace the UNI() macro with a function.  Only the
- * hints/uts.sh file mentions this.  Other comments elsewhere in the
- * source indicate Microport Unix might need it too.
- */
-
-#ifdef CRIPPLED_CC
-
-#undef UNI
-#define UNI(f) return uni(f,s)
-
-STATIC int
-S_uni(pTHX_ I32 f, char *s)
-{
-    yylval.ival = f;
-    PL_expect = XTERM;
-    PL_bufptr = s;
-    PL_last_uni = PL_oldbufptr;
-    PL_last_lop_op = f;
-    if (*s == '(')
-	return FUNC1;
-    s = skipspace(s);
-    if (*s == '(')
-	return FUNC1;
-    else
-	return UNIOP;
-}
-
-#endif /* CRIPPLED_CC */
-
 /*
  * LOP : macro to build a list operator.  Its behaviour has been replaced
  * with a subroutine, S_lop() for which LOP is just another name.

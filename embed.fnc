@@ -1286,9 +1286,6 @@ s	|char*	|incl_perldb
 s	|I32	|utf16_textfilter|int idx|SV *sv|int maxlen
 s	|I32	|utf16rev_textfilter|int idx|SV *sv|int maxlen
 #endif
-#  if defined(CRIPPLED_CC)
-s	|int	|uni		|I32 f|char *s
-#  endif
 #  if defined(PERL_CR_FILTER)
 s	|I32	|cr_textfilter	|int idx|SV *sv|int maxlen
 #  endif

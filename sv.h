@@ -161,7 +161,7 @@ perform the upgrade if necessary.  See C<svtype>.
 	nsv;				\
     })
 #else
-#  if defined(CRIPPLED_CC) || defined(USE_5005THREADS)
+#  ifdef USE_5005THREADS
 #    if defined(VMS) && defined(__ALPHA)
 #      define SvREFCNT_inc(sv) \
           (PL_Sv=(SV*)(sv), (PL_Sv && __ATOMIC_INCREMENT_LONG(&(SvREFCNT(PL_Sv)))), (SV *)PL_Sv)
@@ -967,7 +967,7 @@ otherwise.
 #define sv_utf8_upgrade_nomg(sv) sv_utf8_upgrade_flags(sv, 0)
 #define sv_catpvn_nomg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, 0)
 
-#ifndef CRIPPLED_CC
+/* #ifndef CRIPPLED_CC */
 /* redefine some things to more efficient inlined versions */
 
 /* Let us hope that bitmaps for UV and IV are the same */
@@ -1131,7 +1131,7 @@ otherwise.
 #  define SvTRUEx(sv) ((PL_Sv = (sv)), SvTRUE(PL_Sv))
 #endif /* !USE_5005THREADS */
 #endif /* !__GNU__ */
-#endif /* !CRIPPLED_CC */
+/* #endif !CRIPPLED_CC */ 
 
 /*
 =for apidoc Am|SV*|newRV_inc|SV* sv

@@ -1198,9 +1198,6 @@
 #define utf16_textfilter	S_utf16_textfilter
 #define utf16rev_textfilter	S_utf16rev_textfilter
 #endif
-#  if defined(CRIPPLED_CC)
-#define uni			S_uni
-#  endif
 #  if defined(PERL_CR_FILTER)
 #define cr_textfilter		S_cr_textfilter
 #  endif
@@ -2751,9 +2748,6 @@
 #define utf16_textfilter(a,b,c)	S_utf16_textfilter(aTHX_ a,b,c)
 #define utf16rev_textfilter(a,b,c)	S_utf16rev_textfilter(aTHX_ a,b,c)
 #endif
-#  if defined(CRIPPLED_CC)
-#define uni(a,b)		S_uni(aTHX_ a,b)
-#  endif
 #  if defined(PERL_CR_FILTER)
 #define cr_textfilter(a,b,c)	S_cr_textfilter(aTHX_ a,b,c)
 #  endif

@@ -22,10 +22,6 @@ struct gp {
     char *	gp_file;	/* file first declared in (for -w) */
 };
 
-#if defined(CRIPPLED_CC) && (defined(iAPX286) || defined(M_I286) || defined(I80286))
-#define MICROPORT
-#endif
-
 #define GvXPVGV(gv)	((XPVGV*)SvANY(gv))
 
 #define GvGP(gv)	(GvXPVGV(gv)->xgv_gp)
@@ -56,22 +52,14 @@ Return the SV from the GV.
 /* This macro is deprecated.  Do not use! */
 #define GvREFCNT_inc(gv) ((GV*)SvREFCNT_inc(gv))	/* DO NOT USE */
 
-#ifdef	MICROPORT	/* Microport 2.4 hack */
-AV *GvAVn();
-#else
 #define GvAVn(gv)	(GvGP(gv)->gp_av ? \
 			 GvGP(gv)->gp_av : \
 			 GvGP(gv_AVadd(gv))->gp_av)
-#endif
 #define GvHV(gv)	((GvGP(gv))->gp_hv)
 
-#ifdef	MICROPORT	/* Microport 2.4 hack */
-HV *GvHVn();
-#else
 #define GvHVn(gv)	(GvGP(gv)->gp_hv ? \
 			 GvGP(gv)->gp_hv : \
 			 GvGP(gv_HVadd(gv))->gp_hv)
-#endif			/* Microport 2.4 hack */
 
 #define GvCV(gv)	(GvGP(gv)->gp_cv)
 #define GvCVGEN(gv)	(GvGP(gv)->gp_cvgen)

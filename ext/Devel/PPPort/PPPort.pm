@@ -440,7 +440,7 @@ __DATA__
           nsv;                            \
       })
 #  else
-#    if defined(CRIPPLED_CC) || defined(USE_THREADS)
+#    if defined(USE_THREADS)
 static SV * newRV_noinc (SV * sv)
 {
           SV *nsv = (SV*)newRV(sv);       

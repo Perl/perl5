@@ -2312,16 +2312,6 @@ non-numeric warning), even if your atof() doesn't grok them.
 =for hackers
 Found in file sv.c
 
-=item memcmp_byte_utf8
-
-Similar to memcmp(), but the first string is with bytes, the second
-with utf8.  Takes into account that the lengths may be different.
-
-	int	memcmp_byte_utf8(char *sbyte, STRLEN lbyte, char *sutf, STRLEN lutf)
-
-=for hackers
-Found in file util.c
-
 =item newRV_inc
 
 Creates an RV wrapper for an SV.  The reference count for the original SV is
@@ -2594,22 +2584,22 @@ version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvIVx
-
-Coerces the given SV to an integer and returns it. Guarantees to evaluate
-sv only once. Use the more efficient C<SvIV> otherwise.
-
-	IV	SvIVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvIVX
 
 Returns the raw value in the SV's IV slot, without checks or conversions.
 Only use when you are sure SvIOK is true. See also C<SvIV()>.
 
 	IV	SvIVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVx
+
+Coerces the given SV to an integer and returns it. Guarantees to evaluate
+sv only once. Use the more efficient C<SvIV> otherwise.
+
+	IV	SvIVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3172,22 +3162,22 @@ for a version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvUVx
-
-Coerces the given SV to an unsigned integer and returns it. Guarantees to
-evaluate sv only once. Use the more efficient C<SvUV> otherwise.
-
-	UV	SvUVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvUVX
 
 Returns the raw value in the SV's UV slot, without checks or conversions.
 Only use when you are sure SvIOK is true. See also C<SvUV()>.
 
 	UV	SvUVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvUVx
+
+Coerces the given SV to an unsigned integer and returns it. Guarantees to
+evaluate sv only once. Use the more efficient C<SvUV> otherwise.
+
+	UV	SvUVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3537,10 +3527,10 @@ Found in file sv.c
 
 Copies a stringified representation of the source SV into the
 destination SV.  Automatically performs any necessary mg_get and
-coercion of numeric values into strings.  Guaranteed to preserve 
+coercion of numeric values into strings.  Guaranteed to preserve
 UTF-8 flag even from overloaded objects.  Similar in nature to
-sv_2pv[_flags] but operates directly on an SV instead of just the 
-string.  Mostly uses sv_2pv_flags to do its work, except when that 
+sv_2pv[_flags] but operates directly on an SV instead of just the
+string.  Mostly uses sv_2pv_flags to do its work, except when that
 would lose the UTF-8'ness of the PV.
 
 	void	sv_copypv(SV* dsv, SV* ssv)
@@ -4389,6 +4379,9 @@ This may not be possible if the PV contains non-byte encoding characters;
 if this is the case, either returns false or, if C<fail_ok> is not
 true, croaks.
 
+This is not as a general purpose Unicode to byte encoding interface:
+use the Encode extension for that.
+
 NOTE: this function is experimental and may change or be
 removed without notice.
 
@@ -4415,6 +4408,9 @@ Forces the SV to string form if it is not already.
 Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear.
 
+This is not as a general purpose byte encoding to Unicode interface:
+use the Encode extension for that.
+
 	STRLEN	sv_utf8_upgrade(SV *sv)
 
 =for hackers
@@ -4428,6 +4424,9 @@ Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear. If C<flags> has C<SV_GMAGIC> bit set,
 will C<mg_get> on C<sv> if appropriate, else not. C<sv_utf8_upgrade> and
 C<sv_utf8_upgrade_nomg> are implemented in terms of this function.
+
+This is not as a general purpose byte encoding to Unicode interface:
+use the Encode extension for that.
 
 	STRLEN	sv_utf8_upgrade_flags(SV *sv, I32 flags)
 
