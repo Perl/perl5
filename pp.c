@@ -564,54 +564,57 @@ PP(pp_gelem)
     gv = (GV*)POPs;
     tmpRef = Nullsv;
     sv = Nullsv;
-    switch (elem ? *elem : '\0')
-    {
-    case 'A':
-	if (strEQ(elem, "ARRAY"))
-	    tmpRef = (SV*)GvAV(gv);
-	break;
-    case 'C':
-	if (strEQ(elem, "CODE"))
-	    tmpRef = (SV*)GvCVu(gv);
-	break;
-    case 'F':
-	if (strEQ(elem, "FILEHANDLE")) {
-	    /* finally deprecated in 5.8.0 */
-	    deprecate("*glob{FILEHANDLE}");
-	    tmpRef = (SV*)GvIOp(gv);
+    if (elem) {
+	/* elem will always be NUL terminated.  */
+	const char *elem2 = elem + 1;
+	switch (*elem) {
+	case 'A':
+	    if (strEQ(elem2, "RRAY"))
+		tmpRef = (SV*)GvAV(gv);
+	    break;
+	case 'C':
+	    if (strEQ(elem2, "ODE"))
+		tmpRef = (SV*)GvCVu(gv);
+	    break;
+	case 'F':
+	    if (strEQ(elem2, "ILEHANDLE")) {
+		/* finally deprecated in 5.8.0 */
+		deprecate("*glob{FILEHANDLE}");
+		tmpRef = (SV*)GvIOp(gv);
+	    }
+	    else
+		if (strEQ(elem2, "ORMAT"))
+		    tmpRef = (SV*)GvFORM(gv);
+	    break;
+	case 'G':
+	    if (strEQ(elem2, "LOB"))
+		tmpRef = (SV*)gv;
+	    break;
+	case 'H':
+	    if (strEQ(elem2, "ASH"))
+		tmpRef = (SV*)GvHV(gv);
+	    break;
+	case 'I':
+	    if (*elem2 == 'O' && !elem[2])
+		tmpRef = (SV*)GvIOp(gv);
+	    break;
+	case 'N':
+	    if (strEQ(elem2, "AME"))
+		sv = newSVpvn(GvNAME(gv), GvNAMELEN(gv));
+	    break;
+	case 'P':
+	    if (strEQ(elem2, "ACKAGE")) {
+		if (HvNAME(GvSTASH(gv)))
+		    sv = newSVpv(HvNAME(GvSTASH(gv)), 0);
+		else
+		    sv = newSVpv("__ANON__",0);
+	    }
+	    break;
+	case 'S':
+	    if (strEQ(elem2, "CALAR"))
+		tmpRef = GvSV(gv);
+	    break;
 	}
-	else
-	if (strEQ(elem, "FORMAT"))
-	    tmpRef = (SV*)GvFORM(gv);
-	break;
-    case 'G':
-	if (strEQ(elem, "GLOB"))
-	    tmpRef = (SV*)gv;
-	break;
-    case 'H':
-	if (strEQ(elem, "HASH"))
-	    tmpRef = (SV*)GvHV(gv);
-	break;
-    case 'I':
-	if (strEQ(elem, "IO"))
-	    tmpRef = (SV*)GvIOp(gv);
-	break;
-    case 'N':
-	if (strEQ(elem, "NAME"))
-	    sv = newSVpvn(GvNAME(gv), GvNAMELEN(gv));
-	break;
-    case 'P':
-        if (strEQ(elem, "PACKAGE")) {
-            if (HvNAME(GvSTASH(gv)))
-                sv = newSVpv(HvNAME(GvSTASH(gv)), 0);
-            else
-                sv = newSVpv("__ANON__",0);
-        }
-	break;
-    case 'S':
-	if (strEQ(elem, "SCALAR"))
-	    tmpRef = GvSV(gv);
-	break;
     }
     if (tmpRef)
 	sv = newRV(tmpRef);
