@@ -128,16 +128,14 @@ struct perl_thread *getTHR _((void));
 #  endif
 #endif
 
-#ifdef PTHREADS_CREATED_JOINABLE
+#if !defined(ATTR_JOINABLE) && defined(PTHREAD_CREATE_JOINABLE)
 #  define ATTR_JOINABLE PTHREAD_CREATE_JOINABLE
-#else
-#  ifdef PTHREAD_CREATE_UNDETACHED
-#    define ATTR_JOINABLE PTHREAD_CREATE_UNDETACHED
-#  else
-#    ifdef __UNDETACHED
-#      define ATTR_JOINABLE __UNDETACHED
-#    endif
-#  endif
+#endif
+#if !defined(ATTR_JOINABLE) && defined(PTHREAD_CREATE_UNDETACHED)
+#  define ATTR_JOINABLE PTHREAD_CREATE_UNDETACHED
+#endif
+#if !defined(ATTR_JOINABLE) && defined(__UNDETACHED)
+#  define ATTR_JOINABLE __UNDETACHED
 #endif
 
 #ifndef MUTEX_INIT
