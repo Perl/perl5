@@ -3189,12 +3189,17 @@ Use PDL 2.3.4 or later.
 
 =head2 Perl_get_sv
 
-You may get errors like 'Undefined symbol "Perl_get_sv"' or
-"can't resolve symbol 'Perl_get_sv'".  This probably means that
-you are trying to use an older shared Perl library with Perl 5.8.0
-executable.  Perl used to have such a subroutine, but that is no more
-the case.  Check your shared library path, and any shared Perl
-libraries in those directories.
+You may get errors like 'Undefined symbol "Perl_get_sv"' or "can't
+resolve symbol 'Perl_get_sv'", or the symbol may be "Perl_sv_2pv".
+This probably means that you are trying to use an older shared Perl
+library (or extensions linked with such) with Perl 5.8.0 executable.
+Perl used to have such a subroutine, but that is no more the case.
+Check your shared library path, and any shared Perl libraries in those
+directories.
+
+Sometimes this problem may also indicate a partial Perl 5.8.0
+installation, see L</"Mac OS X dyld undefined symbols"> for an
+example and how to deal with it.
 
 =head2 Self-tying Problems
 
@@ -3452,6 +3457,26 @@ If you Configure with ithreads, ext/threads/t/libc.t will fail. Again,
 this is not Perl's fault-- the libc of Mac OS X is not threadsafe
 (in this particular test, the localtime() call is found to be
 threadunsafe.)
+
+=head2 Mac OS X dyld undefined symbols
+
+If after installing Perl 5.8.0 you are getting warnings about missing
+symbols, for example
+
+    dyld: perl Undefined symbols
+    _perl_sv_2pv
+    _perl_get_sv
+
+you probably have an old pre-Perl-5.8.0 installation (or parts of one)
+in /Library/Perl (the undefined symbols used to exist in pre-5.8.0 Perls).
+It seems that for some reason "make install" doesn't always completely
+overwrite the files in /Library/Perl.  You can remove the shared
+libraries for example like this:
+
+   # find /Library/Perl -name '*.bundle' -print | xargs rm -i
+
+and then reissue "make install".  (If you already installed some XS
+extensions beyond the Perl core, you will have to reinstall them, too.)
 
 =head2 OS/2 Test Failures
 
