@@ -4155,27 +4155,34 @@ is a beta version).
 char *
 Perl_scan_version(pTHX_ char *version, SV *rv)
 {
-    char *d;
+    char* d;
     int beta = 0;
-    SV * sv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
+    SV* sv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
     d = version;
     if (*d == 'v')
 	d++;
     if (isDIGIT(*d)) {
-	while (isDIGIT(*d) || *d == '.')
+	while (isDIGIT(*d) || *d == '.' || *d == '\0')
 	    d++;
-	if ( *d == '_' ) {
+	if (*d == '_') {
 	    *d = '.';
-	    if ( *(d+1) == '0' && *(d+2) != '0' ) { /* perl-style version */
+	    if (*(d+1) == '0' && *(d+2) != '0') { /* perl-style version */
 		*(d+1) = *(d+2);
 		*(d+2) = '0';
+		if (ckWARN(WARN_PORTABLE))
+		    Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
+				"perl-style version not portable");
 	    }
 	    else {
 		beta = -1;
 	    }
 	}
+	while (isDIGIT(*d) || *d == '.' || *d == '\0')
+	    d++;
+	if (*d == '_')
+	    Perl_croak(aTHX_ "Invalid version format (multiple underscores)");
     }
-    version = scan_vstring(version,sv); 	/* store the v-string in the object */
+    version = scan_vstring(version, sv); /* store the v-string in the object */
     SvIVX(sv) = beta;
     return version;
 }
@@ -4299,10 +4306,14 @@ Perl_vstringify(pTHX_ SV *sv, SV *vs)
 	pv += retlen, len -= retlen)
     {
 	digit = utf8_to_uvchr(pv,&retlen);
-	Perl_sv_catpvf(aTHX_ sv,".%03"UVf,digit);
+	Perl_sv_catpvf(aTHX_ sv,".%"UVf,digit);
     }
-    if ( SvIVX(vs) < 0 )
-	sv_catpv(sv,"beta");
+    if (SvIVX(vs) < 0) {
+	char* pv = SvPVX(sv); 
+	for (pv += SvCUR(sv); *pv != '.'; pv--)
+	    ;
+	*pv = '_';
+    }
     return sv;
 }
 
