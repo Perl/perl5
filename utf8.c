@@ -1228,8 +1228,6 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 	 HE *he;
 
 	 uv = utf8_to_uvchr(p, 0);
-	 if (uv <= 0xff)
-	     uv = NATIVE_TO_UTF(uv);
 
 	 if ((hv    = get_hv(special, FALSE)) &&
 	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%04"UVXf, uv))) &&
@@ -1240,7 +1238,6 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 	      if (*lenp > 1 || UNI_IS_INVARIANT(c))
 		   Copy(s, ustrp, *lenp, U8);
 	      else {
-		   c = UTF_TO_NATIVE(c);
 		   /* something in the 0x80..0xFF range */
 		   ustrp[0] = UTF8_EIGHT_BIT_HI(c);
 		   ustrp[1] = UTF8_EIGHT_BIT_LO(c);
