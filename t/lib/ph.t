@@ -4,8 +4,12 @@
 # just socket.ph and pals.
 #   -- Kurt Starsinic <kstar@isinet.com>
 
-use lib '../lib';
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
 
+use Config;
 
 # All the constants which Socket.pm tries to make available:
 my @possibly_defined = qw(
@@ -90,3 +94,5 @@ foreach (@possibly_defined) {
     if ($pm_val == $ph_val) { print "ok $i\n" }
     else                    { print "not ok $i\n" }
 }
+
+
