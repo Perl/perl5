@@ -2754,14 +2754,14 @@ sub pp_enterwrite { unop(@_, "write") }
 # but not character escapes
 sub uninterp {
     my($str) = @_;
-    $str =~ s/(^|\G|[^\\])((?:\\\\)*)([\$\%\@]|\\[uUlLQE])/$1$2\\$3/g;
+    $str =~ s/(^|\G|[^\\])((?:\\\\)*)([\$\@]|\\[uUlLQE])/$1$2\\$3/g;
     return $str;
 }
 
 # the same, but treat $|, $), $( and $ at the end of the string differently
 sub re_uninterp {
     my($str) = @_;
-    $str =~ s/(^|\G|[^\\])((?:\\\\)*)([\$\%\@](?!\||\)|\$\(|$)|\\[uUlLQE])/$1$2\\$3/g
+    $str =~ s/(^|\G|[^\\])((?:\\\\)*)([\$\@](?!\||\)|\$\(|$)|\\[uUlLQE])/$1$2\\$3/g
 ;
     return $str;
 }
