@@ -99,7 +99,7 @@
 # undef I_SYS_UN
 #endif 
 
-#ifdef USE_5005THREADS
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
 
 #define do_spawn(a)      os2_do_spawn(aTHX_ (a))
 #define do_aspawn(a,b,c) os2_do_aspawn(aTHX_ (a),(b),(c))
@@ -184,7 +184,7 @@ extern int rc;
 #  define pthread_getspecific(k)	(*(k))
 #  define pthread_setspecific(k,v)	(*(k)=(v),0)
 #  define pthread_key_create(keyp,flag)			\
-	( DosAllocThreadLocalMemory(1,(U32*)keyp)	\
+	( DosAllocThreadLocalMemory(1,(unsigned long**)keyp)	\
 	  ? Perl_croak_nocontext("LocalMemory"),1	\
 	  : 0						\
 	)
@@ -401,14 +401,18 @@ char *ctermid(char *s);
 #if OS2_STAT_HACK
 
 #define Stat(fname,bufptr) os2_stat((fname),(bufptr))
-#define Fstat(fd,bufptr)   fstat((fd),(bufptr))
+#define Fstat(fd,bufptr)   os2_fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
 #define Mkdir(path,mode)   mkdir((path),(mode))
+#define chmod(path,mode)   os2_chmod((path),(mode))
 
 #undef S_IFBLK
 #undef S_ISBLK
-#define S_IFBLK		0120000
+#define S_IFBLK		0120000		/* Hacks to make things compile... */
 #define S_ISBLK(mode)	(((mode) & S_IFMT) == S_IFBLK)
+
+int os2_chmod(const char *name, int pmode);
+int os2_fstat(int handle, struct stat *st);
 
 #else
 
@@ -670,11 +674,14 @@ void CroakWinError(int die, char *name);
 #define PERLLIB_MANGLE(s, n) perllib_mangle((s), (n))
 char *perllib_mangle(char *, unsigned int);
 
+#define fork	fork_with_resources
+
 typedef int (*Perl_PFN)();
 Perl_PFN loadByOrdinal(enum entries_ordinals ord, int fail);
 extern const Perl_PFN * const pExtFCN;
 char *os2error(int rc);
 int os2_stat(const char *name, struct stat *st);
+int fork_with_resources();
 int setpriority(int which, int pid, int val);
 int getpriority(int which /* ignored */, int pid);
 

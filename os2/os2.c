@@ -9,6 +9,7 @@
 #define SPU_ENABLESUPPRESSION           1
 #include <os2.h>
 #include "dlfcn.h"
+#include <emx/syscalls.h>
 
 #include <sys/uflags.h>
 
@@ -29,7 +30,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifdef USE_5005THREADS
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
 
 typedef void (*emx_startroutine)(void *);
 typedef void* (*pthreads_startroutine)(void *);
@@ -40,6 +41,8 @@ enum pthreads_state {
     pthreads_st_exited, 
     pthreads_st_detached, 
     pthreads_st_waited,
+    pthreads_st_norun,
+    pthreads_st_exited_waited,
 };
 const char *pthreads_states[] = {
     "uninit",
@@ -47,7 +50,23 @@ const char *pthreads_states[] = {
     "exited",
     "detached",
     "waited for",
+    "could not start",
+    "exited, then waited on",
 };
+
+enum pthread_exists { pthread_not_existant = -0xff };
+
+static const char*
+pthreads_state_string(enum pthreads_state state)
+{
+  if (state < 0 || state >= sizeof(pthreads_states)/sizeof(*pthreads_states)) {
+    static char buf[80];
+
+    snprintf(buf, sizeof(buf), "unknown thread state %d", (int)state);
+    return buf;
+  }
+  return pthreads_states[state];
+}
 
 typedef struct {
     void *status;
@@ -63,43 +82,90 @@ int
 pthread_join(perl_os_thread tid, void **status)
 {
     MUTEX_LOCK(&start_thread_mutex);
+    if (tid < 1 || tid >= thread_join_count) {
+	MUTEX_UNLOCK(&start_thread_mutex);
+	if (tid != pthread_not_existant)
+	    Perl_croak_nocontext("panic: join with a thread with strange ordinal %d", (int)tid);
+	Perl_warn_nocontext("panic: join with a thread which could not start");
+	*status = 0;
+	return 0;
+    }
     switch (thread_join_data[tid].state) {
     case pthreads_st_exited:
-	thread_join_data[tid].state = pthreads_st_none;	/* Ready to reuse */
-	MUTEX_UNLOCK(&start_thread_mutex);
+	thread_join_data[tid].state = pthreads_st_exited_waited;
 	*status = thread_join_data[tid].status;
+	MUTEX_UNLOCK(&start_thread_mutex);
+	COND_SIGNAL(&thread_join_data[tid].cond);    
 	break;
     case pthreads_st_waited:
 	MUTEX_UNLOCK(&start_thread_mutex);
 	Perl_croak_nocontext("join with a thread with a waiter");
 	break;
-    case pthreads_st_run:
-	thread_join_data[tid].state = pthreads_st_waited;
-	COND_INIT(&thread_join_data[tid].cond);
+    case pthreads_st_norun:
+    {
+	int state = (int)thread_join_data[tid].status;
+
+	thread_join_data[tid].state = pthreads_st_none;
 	MUTEX_UNLOCK(&start_thread_mutex);
-	COND_WAIT(&thread_join_data[tid].cond, NULL);    
-	COND_DESTROY(&thread_join_data[tid].cond);
-	thread_join_data[tid].state = pthreads_st_none;	/* Ready to reuse */
-	*status = thread_join_data[tid].status;
+	Perl_croak_nocontext("panic: join with a thread which could not run"
+			     " due to attempt of tid reuse (state='%s')",
+			     pthreads_state_string(state));
 	break;
+    }
+    case pthreads_st_run:
+    {
+	perl_cond cond;
+
+	thread_join_data[tid].state = pthreads_st_waited;
+	thread_join_data[tid].status = (void *)status;
+	COND_INIT(&thread_join_data[tid].cond);
+	cond = thread_join_data[tid].cond;
+	COND_WAIT(&thread_join_data[tid].cond, &start_thread_mutex);
+	COND_DESTROY(&cond);
+	MUTEX_UNLOCK(&start_thread_mutex);
+	break;
+    }
     default:
 	MUTEX_UNLOCK(&start_thread_mutex);
-	Perl_croak_nocontext("join: unknown thread state: '%s'", 
-	      pthreads_states[thread_join_data[tid].state]);
+	Perl_croak_nocontext("panic: join with thread in unknown thread state: '%s'", 
+	      pthreads_state_string(thread_join_data[tid].state));
 	break;
     }
     return 0;
 }
 
+typedef struct {
+  pthreads_startroutine sub;
+  void *arg;
+  void *ctx;
+} pthr_startit;
+
+/* The lock is used:
+	a) Since we temporarily usurp the caller interp, so malloc() may
+	   use it to decide on debugging the call;
+	b) Since *args is on the caller's stack.
+ */
 void
-pthread_startit(void *arg)
+pthread_startit(void *arg1)
 {
     /* Thread is already started, we need to transfer control only */
-    pthreads_startroutine start_routine = *((pthreads_startroutine*)arg);
+    pthr_startit args = *(pthr_startit *)arg1;
     int tid = pthread_self();
-    void *retval;
-    
-    arg = ((void**)arg)[1];
+    void *rc;
+    int state;
+
+    if (tid <= 1) {
+	/* Can't croak, the setjmp() is not in scope... */
+	char buf[80];
+
+	snprintf(buf, sizeof(buf),
+		 "panic: thread with strange ordinal %d created\n\r", tid);
+	write(2,buf,strlen(buf));
+	MUTEX_UNLOCK(&start_thread_mutex);
+	return;
+    }
+    /* Until args.sub resets it, makes debugging Perl_malloc() work: */
+    PERL_SET_CONTEXT(0);
     if (tid >= thread_join_count) {
 	int oc = thread_join_count;
 	
@@ -111,43 +177,89 @@ pthread_startit(void *arg)
 	    Newz(1323, thread_join_data, thread_join_count, thread_join_t);
 	}
     }
-    if (thread_join_data[tid].state != pthreads_st_none)
-	Perl_croak_nocontext("attempt to reuse thread id %i", tid);
+    if (thread_join_data[tid].state != pthreads_st_none) {
+	/* Can't croak, the setjmp() is not in scope... */
+	char buf[80];
+
+	snprintf(buf, sizeof(buf),
+		 "panic: attempt to reuse thread id %d (state='%s')\n\r",
+		 tid, pthreads_state_string(thread_join_data[tid].state));
+	write(2,buf,strlen(buf));
+	thread_join_data[tid].status = (void*)thread_join_data[tid].state;
+	thread_join_data[tid].state = pthreads_st_norun;
+	MUTEX_UNLOCK(&start_thread_mutex);
+	return;
+    }
     thread_join_data[tid].state = pthreads_st_run;
     /* Now that we copied/updated the guys, we may release the caller... */
     MUTEX_UNLOCK(&start_thread_mutex);
-    thread_join_data[tid].status = (*start_routine)(arg);
+    rc = (*args.sub)(args.arg);
+    MUTEX_LOCK(&start_thread_mutex);
     switch (thread_join_data[tid].state) {
     case pthreads_st_waited:
-	COND_SIGNAL(&thread_join_data[tid].cond);    
+	COND_SIGNAL(&thread_join_data[tid].cond);
+	thread_join_data[tid].state = pthreads_st_none;
+	*((void**)thread_join_data[tid].status) = rc;
+	break;
+    case pthreads_st_detached:
+	thread_join_data[tid].state = pthreads_st_none;
+	break;
+    case pthreads_st_run:
+	/* Somebody can wait on us; cannot exit, since OS can reuse the tid
+	   and our waiter will get somebody else's status. */
+	thread_join_data[tid].state = pthreads_st_exited;
+	thread_join_data[tid].status = rc;
+	COND_INIT(&thread_join_data[tid].cond);
+	COND_WAIT(&thread_join_data[tid].cond, &start_thread_mutex);
+	COND_DESTROY(&thread_join_data[tid].cond);
+	thread_join_data[tid].state = pthreads_st_none;	/* Ready to reuse */
 	break;
     default:
-	thread_join_data[tid].state = pthreads_st_exited;
-	break;
+	state = thread_join_data[tid].state;
+	MUTEX_UNLOCK(&start_thread_mutex);
+	Perl_croak_nocontext("panic: unexpected thread state on exit: '%s'",
+			     pthreads_state_string(state));
     }
+    MUTEX_UNLOCK(&start_thread_mutex);
 }
 
 int
-pthread_create(perl_os_thread *tid, const pthread_attr_t *attr, 
+pthread_create(perl_os_thread *tidp, const pthread_attr_t *attr, 
 	       void *(*start_routine)(void*), void *arg)
 {
-    void *args[2];
+    dTHX;
+    pthr_startit args;
 
-    args[0] = (void*)start_routine;
-    args[1] = arg;
+    args.sub = (void*)start_routine;
+    args.arg = arg;
+    args.ctx = PERL_GET_CONTEXT;
 
     MUTEX_LOCK(&start_thread_mutex);
-    *tid = _beginthread(pthread_startit, /*stack*/ NULL, 
-			/*stacksize*/ 10*1024*1024, (void*)args);
-    MUTEX_LOCK(&start_thread_mutex);
+    /* Test suite creates 31 extra threads;
+       on machine without shared-memory-hogs this stack sizeis OK with 31: */
+    *tidp = _beginthread(pthread_startit, /*stack*/ NULL, 
+			 /*stacksize*/ 4*1024*1024, (void*)&args);
+    if (*tidp == -1) {
+	*tidp = pthread_not_existant;
+	MUTEX_UNLOCK(&start_thread_mutex);
+	return EINVAL;
+    }
+    MUTEX_LOCK(&start_thread_mutex);		/* Wait for init to proceed */
     MUTEX_UNLOCK(&start_thread_mutex);
-    return *tid ? 0 : EINVAL;
+    return 0;
 }
 
 int 
 pthread_detach(perl_os_thread tid)
 {
     MUTEX_LOCK(&start_thread_mutex);
+    if (tid < 1 || tid >= thread_join_count) {
+	MUTEX_UNLOCK(&start_thread_mutex);
+	if (tid != pthread_not_existant)
+	    Perl_croak_nocontext("panic: detach of a thread with strange ordinal %d", (int)tid);
+	Perl_warn_nocontext("detach of a thread which could not start");
+	return 0;
+    }
     switch (thread_join_data[tid].state) {
     case pthreads_st_waited:
 	MUTEX_UNLOCK(&start_thread_mutex);
@@ -157,16 +269,35 @@ pthread_detach(perl_os_thread tid)
 	thread_join_data[tid].state = pthreads_st_detached;
 	MUTEX_UNLOCK(&start_thread_mutex);
 	break;
+    case pthreads_st_exited:
+	MUTEX_UNLOCK(&start_thread_mutex);
+	COND_SIGNAL(&thread_join_data[tid].cond);    
+	break;
+    case pthreads_st_detached:
+	MUTEX_UNLOCK(&start_thread_mutex);
+	Perl_warn_nocontext("detach on an already detached thread");
+	break;
+    case pthreads_st_norun:
+    {
+	int state = (int)thread_join_data[tid].status;
+
+	thread_join_data[tid].state = pthreads_st_none;
+	MUTEX_UNLOCK(&start_thread_mutex);
+	Perl_croak_nocontext("panic: detaching thread which could not run"
+			     " due to attempt of tid reuse (state='%s')",
+			     pthreads_state_string(state));
+	break;
+    }
     default:
 	MUTEX_UNLOCK(&start_thread_mutex);
-	Perl_croak_nocontext("detach: unknown thread state: '%s'", 
-	      pthreads_states[thread_join_data[tid].state]);
+	Perl_croak_nocontext("panic: detach of a thread with unknown thread state: '%s'", 
+	      pthreads_state_string(thread_join_data[tid].state));
 	break;
     }
     return 0;
 }
 
-/* This is a very bastardized version: */
+/* This is a very bastardized version; may be OK due to edge trigger of Wait */
 int
 os2_cond_wait(perl_cond *c, perl_mutex *m)
 {						
@@ -180,9 +311,10 @@ os2_cond_wait(perl_cond *c, perl_mutex *m)
 	Perl_croak_nocontext("panic: COND_WAIT: rc=%i", rc);		
     if (rc == ERROR_INTERRUPT)
 	errno = EINTR;
-    if (m) MUTEX_LOCK(m);					
+    if (m) MUTEX_LOCK(m);
+    return 0;
 } 
-#endif 
+#endif
 
 static int exe_is_aout(void);
 
@@ -1280,23 +1412,99 @@ int	setgid(x)	{ errno = EINVAL; return -1; }
 
 #if OS2_STAT_HACK
 
+enum os2_stat_extra {	/* EMX 0.9d fix 4 defines up to 0100000 */
+  os2_stat_archived	= 0x1000000,	/* 0100000000 */
+  os2_stat_hidden	= 0x2000000,	/* 0200000000 */
+  os2_stat_system	= 0x4000000,	/* 0400000000 */
+  os2_stat_force	= 0x8000000,	/* Do not ignore flags on chmod */
+};
+
+#define OS2_STAT_SPECIAL (os2_stat_system | os2_stat_archived | os2_stat_hidden)
+
+static void
+massage_os2_attr(struct stat *st)
+{
+    if ( ((st->st_mode & S_IFMT) != S_IFREG
+	  && (st->st_mode & S_IFMT) != S_IFDIR)
+         || !(st->st_attr & (FILE_ARCHIVED | FILE_HIDDEN | FILE_SYSTEM)))
+	return;
+
+    if ( st->st_attr & FILE_ARCHIVED )
+	st->st_mode |= (os2_stat_archived | os2_stat_force);
+    if ( st->st_attr & FILE_HIDDEN )
+	st->st_mode |= (os2_stat_hidden | os2_stat_force);
+    if ( st->st_attr & FILE_SYSTEM )
+	st->st_mode |= (os2_stat_system | os2_stat_force);
+}
+
     /* First attempt used DosQueryFSAttach which crashed the system when
        used with 5.001. Now just look for /dev/. */
-
 int
 os2_stat(const char *name, struct stat *st)
 {
     static int ino = SHRT_MAX;
+    STRLEN l = strlen(name);
 
-    if (stricmp(name, "/dev/con") != 0
-     && stricmp(name, "/dev/tty") != 0)
-	return stat(name, st);
+    if ( ( l < 8 || l > 9) || strnicmp(name, "/dev/", 5) != 0
+         || (    stricmp(name + 5, "con") != 0
+	      && stricmp(name + 5, "tty") != 0
+	      && stricmp(name + 5, "nul") != 0
+	      && stricmp(name + 5, "null") != 0) ) {
+	int s = stat(name, st);
+
+	if (s)
+	    return s;
+	massage_os2_attr(st);
+	return 0;
+    }
 
     memset(st, 0, sizeof *st);
     st->st_mode = S_IFCHR|0666;
     st->st_ino = (ino-- & 0x7FFF);
     st->st_nlink = 1;
     return 0;
+}
+
+int
+os2_fstat(int handle, struct stat *st)
+{
+    int s = fstat(handle, st);
+
+    if (s)
+	return s;
+    massage_os2_attr(st);
+    return 0;
+}
+
+#undef chmod
+int
+os2_chmod (const char *name, int pmode)	/* Modelled after EMX src/lib/io/chmod.c */
+{
+    int attr, rc;
+
+    if (!(pmode & os2_stat_force))
+	return chmod(name, pmode);
+
+    attr = __chmod (name, 0, 0);           /* Get attributes */
+    if (attr < 0)
+	return -1;
+    if (pmode & S_IWRITE)
+	attr &= ~FILE_READONLY;
+    else
+	attr |= FILE_READONLY;
+    /* New logic */
+    attr &= ~(FILE_ARCHIVED | FILE_HIDDEN | FILE_SYSTEM);
+
+    if ( pmode & os2_stat_archived )
+        attr |= FILE_ARCHIVED;
+    if ( pmode & os2_stat_hidden )
+        attr |= FILE_HIDDEN;
+    if ( pmode & os2_stat_system )
+        attr |= FILE_SYSTEM;
+
+    rc = __chmod (name, 1, attr);
+    if (rc >= 0) rc = 0;
+    return rc;
 }
 
 #endif
@@ -1406,9 +1614,6 @@ mod2fname(pTHX_ SV *sv)
 	}
 	avlen --;
     }
-#ifdef USE_5005THREADS
-    sum++;				/* Avoid conflict of DLLs in memory. */
-#endif 
    /* We always load modules as *specific* DLLs, and with the full name.
       When loading a specific DLL by its full name, one cannot get a
       different DLL, even if a DLL with the same basename is loaded already.
@@ -1446,6 +1651,7 @@ XS(XS_DynaLoader_mod2fname)
 char *
 os2error(int rc)
 {
+	dTHX;
 	static char buf[300];
 	ULONG len;
 	char *s;
@@ -1492,8 +1698,11 @@ void
 CroakWinError(int die, char *name)
 {
   FillWinError;
-  if (die && Perl_rc)
-    croak("%s: %s", (name ? name : "Win* API call"), os2error(Perl_rc));
+  if (die && Perl_rc) {
+    dTHX;
+
+    Perl_croak(aTHX_ "%s: %s", (name ? name : "Win* API call"), os2error(Perl_rc));
+  }
 }
 
 char *
@@ -1601,6 +1810,7 @@ Perl_Register_MQ(int serve)
     /* 64 messages if before OS/2 3.0, ignored otherwise */
     Perl_hmq = (*PMWIN_entries.CreateMsgQueue)(perl_hab_GET(), 64); 
     if (!Perl_hmq) {
+        dTHX;
 	static int cnt;
 
 	SAVEINT(cnt);			/* Allow catch()ing. */
@@ -2240,6 +2450,7 @@ enum module_name_how { mod_name_handle, mod_name_shortname, mod_name_full};
 static SV*
 module_name_at(void *pp, enum module_name_how how)
 {
+    dTHX;
     char buf[MAXPATHLEN];
     char *p = buf;
     HMODULE mod;
@@ -2264,8 +2475,11 @@ module_name_at(void *pp, enum module_name_how how)
 static SV*
 module_name_of_cv(SV *cv, enum module_name_how how)
 {
-    if (!cv || !SvROK(cv) || SvTYPE(SvRV(cv)) != SVt_PVCV || !CvXSUB(SvRV(cv)))
-	croak("Not an XSUB reference");
+    if (!cv || !SvROK(cv) || SvTYPE(SvRV(cv)) != SVt_PVCV || !CvXSUB(SvRV(cv))) {
+	dTHX;
+
+	Perl_croak(aTHX_ "Not an XSUB reference");
+    }
     return module_name_at(CvXSUB(SvRV(cv)), how);
 }
 
@@ -2303,7 +2517,7 @@ XS(XS_OS2__control87)
 {
     dXSARGS;
     if (items != 2)
-	croak("Usage: OS2::_control87(new,mask)");
+	Perl_croak(aTHX_ "Usage: OS2::_control87(new,mask)");
     {
 	unsigned	new = (unsigned)SvIV(ST(0));
 	unsigned	mask = (unsigned)SvIV(ST(1));
@@ -2320,7 +2534,7 @@ XS(XS_OS2_get_control87)
 {
     dXSARGS;
     if (items != 0)
-	croak("Usage: OS2::get_control87()");
+	Perl_croak(aTHX_ "Usage: OS2::get_control87()");
     {
 	unsigned	RETVAL;
 
@@ -2336,7 +2550,7 @@ XS(XS_OS2_set_control87)
 {
     dXSARGS;
     if (items < 0 || items > 2)
-	croak("Usage: OS2::set_control87(new=MCW_EM, mask=MCW_EM)");
+	Perl_croak(aTHX_ "Usage: OS2::set_control87(new=MCW_EM, mask=MCW_EM)");
     {
 	unsigned	new;
 	unsigned	mask;
@@ -2757,7 +2971,9 @@ Perl_OS2_init3(char **env, void **preg, int flags)
 	    if (PL_sh_path[i] == '\\') PL_sh_path[i] = '/';
 	}
     }
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
     MUTEX_INIT(&start_thread_mutex);
+#endif
     os2_mytype = my_type();		/* Do it before morphing.  Needed? */
     /* Some DLLs reset FP flags on load.  We may have been linked with them */
     _control87(MCW_EM, MCW_EM);
@@ -3068,4 +3284,23 @@ char *
 gcvt_os2 (double value, int digits, char *buffer)
 {
   return gcvt (value, digits, buffer);
+}
+
+#undef fork
+int fork_with_resources()
+{
+#if (defined(USE_5005THREADS) || defined(USE_ITHREADS)) && !defined(USE_SLOW_THREAD_SPECIFIC)
+  dTHX;
+  void *ctx = PERL_GET_CONTEXT;
+#endif
+
+  int rc = fork();
+
+#if (defined(USE_5005THREADS) || defined(USE_ITHREADS)) && !defined(USE_SLOW_THREAD_SPECIFIC)
+  if (rc == 0) {			/* child */
+    ALLOC_THREAD_KEY;			/* Acquire the thread-local memory */
+    PERL_SET_CONTEXT(ctx);		/* Reinit the thread-local memory */
+  }
+#endif
+  return rc;
 }

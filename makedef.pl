@@ -6,13 +6,20 @@
 # and by MacOS Classic.
 #
 # reads global.sym, pp.sym, perlvars.h, intrpvar.h, thrdvar.h, config.h
-# On OS/2 reads miniperl.map as well
+# On OS/2 reads miniperl.map and the previous version of perl5.def as well
 
 my $PLATFORM;
 my $CCTYPE;
 
 while (@ARGV) {
     my $flag = shift;
+    if ($flag =~ s/^CC_FLAGS=/ /) {
+	for my $fflag ($flag =~ /(?:^|\s)-D(\S+)/g) {
+	    $fflag     .= '=1' unless $fflag =~ /^(\w+)=/;
+	    $define{$1} = $2   if $fflag =~ /^(\w+)=(.+)$/;
+	}
+	next;
+    }
     $define{$1} = 1 if ($flag =~ /^-D(\w+)$/);
     $define{$1} = $2 if ($flag =~ /^-D(\w+)=(.+)$/);
     $CCTYPE   = $1 if ($flag =~ /^CCTYPE=(\w+)$/);
@@ -418,7 +425,14 @@ elsif ($PLATFORM eq 'os2') {
 		    os2error
 		    ResetWinError
 		    CroakWinError
+		    PL_do_undump
 		    )]);
+    emit_symbols([qw(os2_cond_wait
+		     pthread_join
+		     pthread_create
+		     pthread_detach
+		    )])
+      if $define{'USE_5005THREADS'} or $define{'USE_ITHREADS'};
 }
 elsif ($PLATFORM eq 'MacOS') {
     skip_symbols [qw(
@@ -947,7 +961,7 @@ if ($define{'MULTIPLICITY'}) {
 	emit_symbols $glob;
     }
     # XXX AIX seems to want the perlvars.h symbols, for some reason
-    if ($PLATFORM eq 'aix') {
+    if ($PLATFORM eq 'aix' or $PLATFORM eq 'os2') {	# OS/2 needs PL_thr_key
 	my $glob = readvar($perlvars_h);
 	emit_symbols $glob;
     }

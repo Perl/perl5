@@ -390,7 +390,7 @@
 #define PL_runops		(PERL_GET_INTERP->Irunops)
 #define PL_savebegin		(PERL_GET_INTERP->Isavebegin)
 #define PL_sawampersand		(PERL_GET_INTERP->Isawampersand)
-#define PL_sh_path		(PERL_GET_INTERP->Ish_path)
+#define PL_sh_path_compat	(PERL_GET_INTERP->Ish_path_compat)
 #define PL_sig_pending		(PERL_GET_INTERP->Isig_pending)
 #define PL_sighandlerp		(PERL_GET_INTERP->Isighandlerp)
 #define PL_signals		(PERL_GET_INTERP->Isignals)
@@ -697,7 +697,7 @@
 #define PL_runops		(vTHX->Irunops)
 #define PL_savebegin		(vTHX->Isavebegin)
 #define PL_sawampersand		(vTHX->Isawampersand)
-#define PL_sh_path		(vTHX->Ish_path)
+#define PL_sh_path_compat	(vTHX->Ish_path_compat)
 #define PL_sig_pending		(vTHX->Isig_pending)
 #define PL_sighandlerp		(vTHX->Isighandlerp)
 #define PL_signals		(vTHX->Isignals)
@@ -1007,7 +1007,7 @@
 #define PL_Irunops		PL_runops
 #define PL_Isavebegin		PL_savebegin
 #define PL_Isawampersand	PL_sawampersand
-#define PL_Ish_path		PL_sh_path
+#define PL_Ish_path_compat	PL_sh_path_compat
 #define PL_Isig_pending		PL_sig_pending
 #define PL_Isighandlerp		PL_sighandlerp
 #define PL_Isignals		PL_signals
@@ -1396,6 +1396,7 @@
 #define PL_ppid			(PL_Vars.Gppid)
 #define PL_runops_dbg		(PL_Vars.Grunops_dbg)
 #define PL_runops_std		(PL_Vars.Grunops_std)
+#define PL_sh_path		(PL_Vars.Gsh_path)
 #define PL_sharehook		(PL_Vars.Gsharehook)
 #define PL_thr_key		(PL_Vars.Gthr_key)
 #define PL_threadhook		(PL_Vars.Gthreadhook)
@@ -1416,6 +1417,7 @@
 #define PL_Gppid		PL_ppid
 #define PL_Grunops_dbg		PL_runops_dbg
 #define PL_Grunops_std		PL_runops_std
+#define PL_Gsh_path		PL_sh_path
 #define PL_Gsharehook		PL_sharehook
 #define PL_Gthr_key		PL_thr_key
 #define PL_Gthreadhook		PL_threadhook
