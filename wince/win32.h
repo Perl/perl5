@@ -211,14 +211,14 @@ typedef long		gid_t;
 #define flushall	_flushall
 #define fcloseall	_fcloseall
 
+#endif /* __MINGW32__ */
+
 #ifndef _O_NOINHERIT
 #  define _O_NOINHERIT	0x0080
 #  ifndef _NO_OLDNAMES
 #    define O_NOINHERIT	_O_NOINHERIT
 #  endif
 #endif
-
-#endif /* __MINGW32__ */
 
 /* both GCC/Mingw32 and MSVC++ 4.0 are missing this, so we put it here */
 #ifndef CP_UTF8

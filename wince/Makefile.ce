@@ -465,7 +465,7 @@ LINK32		= link
 LIB32		= $(LINK32) -lib
 RSC		= rc
 
-INCLUDES	= -I.\include -I. -I..
+INCLUDES	= -I.\include -I..\win32\include -I. -I..
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG) $(CECFLAGS)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 CXX_FLAG	= -TP
@@ -739,6 +739,7 @@ $(CONFIGPM): .\config.h ..\config.sh ..\minimod.pl
 	$(XCOPY) *.h $(XCOREDIR)\*.*
 	$(XCOPY) ..\ext\re\re.pm $(LIBDIR)\*.*
 	$(RCOPY) include $(XCOREDIR)\*.*
+	$(XCOPY) ..\win32\include $(XCOREDIR)\*.*
 	-$(HPERL) -I..\lib -MCross=$(CROSS_NAME) config_h.PL "INST_VER=$(INST_VER)" "CORE_DIR=$(XCOREDIR)"
 	if errorlevel 1 $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
 

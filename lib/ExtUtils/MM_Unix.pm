@@ -127,30 +127,30 @@ sub c_o {
         $cpp_cmd =~ s/^CCCMD\s*=\s*\$\(CC\)/$cpp/;
         push @m, '
 .c.i:
-	'. $cpp_cmd . ' $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.c > $*.i
+	'. $cpp_cmd . ' $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.c > $*.i
 ';
     }
     push @m, '
 .c.s:
-	$(CCCMD) -S $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.c
+	$(CCCMD) -S $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.c
 ';
     push @m, '
 .c$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.c
+	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.c
 ';
     push @m, '
 .C$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.C
+	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.C
 ' if !$Is_OS2 and !$Is_Win32 and !$Is_Dos; #Case-specific
     push @m, '
 .cpp$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.cpp
+	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.cpp
 
 .cxx$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.cxx
+	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.cxx
 
 .cc$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.cc
+	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.cc
 ';
     join "", @m;
 }
@@ -363,8 +363,10 @@ sub const_cccmd {
     my($self,$libperl)=@_;
     return $self->{CONST_CCCMD} if $self->{CONST_CCCMD};
     return '' unless $self->needs_linking();
+    # PASTHRU_INC is defined explicitly by extensions
+    # wanting to do complex things.
     return $self->{CONST_CCCMD} =
-	q{CCCMD = $(CC) -c $(PASTHRU_INC) $(INC) \\
+	q{CCCMD = $(CC) -c $(INC) $(PASTHRU_INC) \\
 	$(CCFLAGS) $(OPTIMIZE) \\
 	$(PERLTYPE) $(MPOLLUTE) $(DEFINE_VERSION) \\
 	$(XS_DEFINE_VERSION)};
@@ -3108,10 +3110,12 @@ sub pasthru {
     my($sep) = $Is_VMS ? ',' : '';
     $sep .= "\\\n\t";
 
-    foreach $key (qw(LIB LIBPERL_A LINKTYPE PREFIX OPTIMIZE)) {
+    foreach $key (qw(LIB LIBPERL_A LINKTYPE PREFIX OPTIMIZE INC DEFINE)) {
 	push @pasthru, "$key=\"\$($key)\"";
     }
 
+    # PASTHRU_DEFINE and PASTHRU_INC are defined explicitly
+    # by extensions wanting to do really complex things.
     foreach $key (qw(DEFINE INC)) {
 	push @pasthru, "PASTHRU_$key=\"\$(PASTHRU_$key)\"";
     }

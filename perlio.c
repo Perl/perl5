@@ -2980,6 +2980,8 @@ PerlIOStdio_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	}
 	else
 	    got = PerlSIO_fread(vbuf, 1, count, s);
+	if (got == 0 && PerlSIO_ferror(s))
+	    got = -1;
 	if (got >= 0 || errno != EINTR)
 	    break;
 	PERL_ASYNC_CHECK();

@@ -684,6 +684,23 @@ The application (or layer above) must ensure they are consistent.
 
 =head2 Implementing PerlIO Layers
 
+If you find the implementation document unclear or not sufficient,
+look at the existing perlio layer implementations, which include:
+
+=over
+
+=item * C implementations
+
+PerlIO::encoding, PerlIO::scalar, PerlIO::via in the Perl core.
+
+PerlIO::gzip and APR::PerlIO (mod_perl 2.0) on CPAN.
+
+=item * Perl implementations
+
+PerlIO::via::QuotedPrint in the Perl core and PerlIO::via::* on CPAN.
+
+=back
+
 If you are creating a PerlIO layer, you may want to be lazy, in other
 words, implement only the methods that interest you.  The other methods
 you can either replace with the "blank" methods

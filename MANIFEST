@@ -2993,7 +2993,6 @@ wince/config_h.PL			WinCE port
 wince/config_sh.PL			WinCE port
 wince/dl_win32.xs			WinCE port
 wince/include/arpa/inet.h		WinCE port
-wince/include/netdb.h			WinCE port
 wince/include/sys/socket.h		WinCE port
 wince/makedist.pl			WinCE port
 wince/Makefile.ce			WinCE port

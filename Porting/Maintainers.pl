@@ -18,6 +18,7 @@ package Maintainers;
 	'dankogai'	=> 'Dan Kogai <dankogai@cpan.org>',
 	'dconway'	=> 'Damian Conway <dconway@cpan.org>',
 	'drolsky'	=> 'Dave Rolsky <drolsky@cpan.org>',
+	'elizabeth'	=> 'Elizabeth Mattijsen <liz@dijkmat.nl>',
 	'gbarr'		=> 'Graham Barr <gbarr@cpan.org>',
 	'gaas'		=> 'Gisle Aas <gaas@cpan.org>',
 	'gsar'		=> 'Gurusamy Sarathy <gsar@activestate.com>',
@@ -27,14 +28,19 @@ package Maintainers;
 	'jstowe'	=> 'Jonathan Stowe <jstowe@cpan.org>',
 	'jv'		=> 'Johan Vromans <jv@cpan.org>',
 	'kwilliams'	=> 'Ken Williams <kwilliams@cpan.org>',
+	'laun'		=> 'Wolfgang Laun <Wolfgang.Laun@alcatel.at>',
 	'lstein'	=> 'Lincoln D. Stein <lds@cpan.org>',
 	'marekr'	=> 'Marek Rouchal <marekr@cpan.org>',
 	'mjd'		=> 'Mark-Jason Dominus <mjd@cpan.org>',
 	'muir'		=> 'David Muir Sharnoff <muir@cpan.org>',
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
+	'ni-s'		=> 'Nick Ing-Simmons <nick@ing-simmons.net>',
 	'p5p'		=> 'perl5-porters <perl5-porters@perl.org>',
+	'perlfaq'	=> 'perlfaq-workers <perlfaq-workers@perl.org>',
+	'perlref'	=> 'Mark-Jason Dominus <mjd@cpan.org>',
 	'petdance'	=> 'Andy Lester <petdance@cpan.org>',
 	'pmqs'		=> 'Paul Marquess <pmqs@cpan.org>',
+	'pvhp'		=> 'Peter Prymmer <pvhp@best.com>',
 	'rmbarker'	=> 'Robin Barker <rmbarker@cpan.org>',
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
 	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
@@ -156,6 +162,13 @@ package Maintainers;
 		'FILES'		=> q[lib/ExtUtils/{Command,Install,Installed,Liblist,MakeMaker,Manifest,Mkbootstrap,Mksymlists,MM*,MY,Packlist,testlib}.pm lib/ExtUtils/{Command,Liblist,MakeMaker}
 				     lib/ExtUtils/t t/lib/MakeMaker t/lib/TieIn.pm t/lib/TieOut.pm],
 		'CPAN'		=> 1,
+		},
+
+	'faq' =>
+		{
+		'MAINTAINER'	=> 'perlfaq',
+		'FILES'		=> q[pod/perlfaq*],
+		'CPAN'		=> 0,
 		},
 
 	'File::Spec' =>
@@ -295,11 +308,55 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'perlio-doc' =>
+		{
+		'MAINTAINER'	=> 'ni-s',
+		'FILES'		=> q[pod/perlapio.pod
+				     pod/perliol.pod
+				     lib/PerlIO.pm],
+		'CPAN'		=> 0,
+		},
+
+	'perlebcdic' =>
+		{
+		'MAINTAINER'	=> 'pvhp',
+		'FILES'		=> q[pod/perlebcdic.pod],
+		'CPAN'		=> 0,
+		},
+
 	'PerlIO' =>
 		{
 		'MAINTAINER'	=> 'p5p',
 		'FILES'		=> q[ext/PerlIO lib/PerlIO],
 		'CPAN'		=> 1,
+		},
+
+	'perlref' =>
+		{
+		'MAINTAINER'	=> 'mjd',
+		'FILES'		=> q[pod/perlref.pod],
+		'CPAN'		=> 0,
+		},
+
+	'perlpacktut' =>
+		{
+		'MAINTAINER'	=> 'laun',
+		'FILES'		=> q[pod/perlpacktut.pod],
+		'CPAN'		=> 0,
+		},
+
+	'perlpodspec' =>
+		{
+		'MAINTAINER'	=> 'sburke',
+		'FILES'		=> q[pod/perlpodspec.pod],
+		'CPAN'		=> 0,
+		},
+
+	'perlthrtut' =>
+		{
+		'MAINTAINER'	=> 'elizabeth',
+		'FILES'		=> q[pod/perlthrtut.pod],
+		'CPAN'		=> 0,
 		},
 
 	'Pod::Find' =>
@@ -333,8 +390,8 @@ package Maintainers;
 	'Pod::Plainer' =>
 		{
 		'MAINTAINER'	=> 'rmbarker',
-		'FILES'		=> q[lib/Pod/Plainer.pm],
-		'CPAN'		=> 1,
+		'FILES'		=> q[lib/Pod/Plainer.pm t/pod/plainer.t],
+		'CPAN'		=> 0,
 		},
 
 	'Safe' =>
@@ -486,6 +543,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'gsar',
 		'FILES'		=> q[win32 README.win32 lib/Win32.pod t/win32],
+		'CPAN'		=> 0,
+		},
+
+	's2p' =>
+		{
+		'MAINTAINER'	=> 'laun',
+		'FILES'		=> q[x2p/s2p.PL],
 		'CPAN'		=> 0,
 		},
 
