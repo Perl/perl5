@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..104\n";
+print "1..105\n";
 
 my $test = 1;
 
@@ -543,3 +543,14 @@ sub nok_bytes {
     $test++;					# 104
 }
 
+{
+    # 20000517.001
+
+    my $x = "\x{100}A";
+
+    $x =~ s/A/B/;
+
+    print "not " unless $x eq "\x{100}B" && length($x) == 2;
+    print "ok $test\n";
+    $test++;					# 105
+}
