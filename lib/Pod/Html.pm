@@ -245,6 +245,8 @@ $itemcache = "pod2htmi$cache_ext";
 @libpods = ();	    	# files to search for links from C<> directives
 $htmlroot = "/";	    	# http-server base directory from which all
 				#   relative paths in $podpath stem.
+$htmldir = "";	    	# The directory to which the html pages
+				# will (eventually) be written.
 $htmlfile = "";		# write to stdout by default
 $podfile = "";		# read from stdin by default
 @podpath = ();		# list of directories containing library pods.
@@ -616,7 +618,7 @@ sub parse_command_line {
 
     $podfile  = $opt_infile if defined $opt_infile;
     $htmlfile = $opt_outfile if defined $opt_outfile;
-    $htmldir  = $opt_htmldir if defined $opt_outfile;
+    $htmldir  = $opt_htmldir if defined $opt_htmldir;
 
     @podpath  = split(":", $opt_podpath) if defined $opt_podpath;
     @libpods  = split(":", $opt_libpods) if defined $opt_libpods;
@@ -1334,7 +1336,7 @@ sub process_puretext {
 	# skip space runs
  	next if $word =~ /^\s*$/;
 	# see if we can infer a link
-	if( $notinIS && $word =~ s/^(\w+)\((.*)\)\W*$/$1/ ) {
+	if( $notinIS && $word =~ /^(\w+)\((.*)\)\W*$/ ) {
 	    # has parenthesis so should have been a C<> ref
             ## try for a pagename (perlXXX(1))?
             if( $2 =~ /^\d+$/ ){
@@ -1786,7 +1788,6 @@ sub coderef($$){
     my( $url );
 
     my $fid = fragment_id( $item );
-    return( $url, $fid );
     if( defined( $page ) ){
 	# we have been given a $page...
 	$page =~ s{::}{/}g;
@@ -1801,10 +1802,12 @@ sub coderef($$){
 
     } else {
         # no page - local items precede cached items
-        if(  exists $local_items{$fid} ){
-	    $page = $local_items{$fid};
-	} else {
-	    $page = $items{$fid};
+	if( defined( $fid ) ){
+	    if(  exists $local_items{$fid} ){
+		$page = $local_items{$fid};
+	    } else {
+		$page = $items{$fid};
+	    }
 	}
     }
 
@@ -1880,10 +1883,11 @@ sub htmlify {
 # Note: can be called with copy or modify semantics
 #
 my %E2c;
-$E2c{lt} = '<';
-$E2c{gt} = '>';
-$E2c{sol} = '/';
+$E2c{lt}     = '<';
+$E2c{gt}     = '>';
+$E2c{sol}    = '/';
 $E2c{verbar} = '|';
+$E2c{amp}    = '&'; # in Tk's pods
 
 sub depod1($;$);
 
