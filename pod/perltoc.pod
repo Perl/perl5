@@ -1190,6 +1190,8 @@ $ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 
 =item Alignment, Take 2
 
+=item Alignment, Take 3
+
 =item Pointers for How to Use Them
 
 =back
@@ -2564,8 +2566,6 @@ User::pwent, Win32
 =over 4
 
 =item Guidelines for Module Creation
-
-Adding a Copyright Notice
 
 =item Guidelines for Converting Perl 4 Library Scripts into Modules
 
@@ -6432,7 +6432,7 @@ C<-lcygipc> (C<use IPC::SysV>)
 
 =item Configure-time Options for Perl on Cygwin
 
-C<-Uusedl>, C<-Uusemymalloc>, C<-Dusemultiplicity>, C<-Duseperlio>,
+C<-Uusedl>, C<-Uusemymalloc>, C<-Uuseperlio>, C<-Dusemultiplicity>,
 C<-Duse64bitint>, C<-Duselongdouble>, C<-Dusethreads>, C<-Duselargefiles>
 
 =item Suspicious Warnings on Cygwin
@@ -6731,6 +6731,8 @@ op/lexassign.t, pragma/warnings.t
 =item SYNOPSIS
 
 =item NOTE
+
+=item Binary distribution from HP
 
 =item What's New in Perl for MPE/iX
 
@@ -7054,7 +7056,8 @@ C<COND_WAIT>, F<os2.c>
 
 =back
 
-=head2 perlos390, README.os390 - building and installing Perl for OS/390.
+=head2 perlos390, README.os390 - building and installing Perl for OS/390
+and z/OS
 
 =over 4
 
@@ -7063,6 +7066,8 @@ C<COND_WAIT>, F<os2.c>
 =item DESCRIPTION
 
 =over 4
+
+=item Tools
 
 =item Unpacking Perl distribution on OS/390
 
@@ -10426,6 +10431,8 @@ arrays
 =item Managing Unknown Symbols
 
 =item Tag Handling Utility Functions
+
+=item C<AUTOLOAD>ed Constants
 
 =back
 
@@ -15004,7 +15011,7 @@ escape EE<lt>%sE<gt>, %s:%d: Unknown formatting code %s, %s:%d: Unmatched
 
 =back
 
-=head2 Pod::ParseLink -- Parse an L<> formatting code in POD text
+=head2 Pod::ParseLink -- Parse an LE<lt>E<gt> formatting code in POD text
 
 =over 4
 
