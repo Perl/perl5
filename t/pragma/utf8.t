@@ -283,7 +283,7 @@ sub nok_bytes {
 
 {
     use utf8;
-    ok_bytes chr(0xe2), pack("C*", 0xc3, 0xa2);
+    ok_bytes chr(0x1e2), pack("C*", 0xc7, 0xa2);
     $test++;                # 65
 }
 

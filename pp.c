@@ -2792,6 +2792,8 @@ PP(pp_substr)
 	RETPUSHUNDEF;
     }
     else {
+	I32 upos = pos;
+	I32 urem = rem;
 	if (utfcurlen)
 	    sv_pos_u2b(sv, &pos, &rem);
 	tmps += pos;
@@ -2826,8 +2828,8 @@ PP(pp_substr)
 		    SvREFCNT_dec(LvTARG(TARG));
 		LvTARG(TARG) = SvREFCNT_inc(sv);
 	    }
-	    LvTARGOFF(TARG) = pos;
-	    LvTARGLEN(TARG) = rem;
+	    LvTARGOFF(TARG) = upos;
+	    LvTARGLEN(TARG) = urem;
 	}
     }
     SPAGAIN;
@@ -2970,20 +2972,15 @@ PP(pp_chr)
 
     (void)SvUPGRADE(TARG,SVt_PV);
 
-    if ((value > 255 && !IN_BYTE) ||
-	(UTF8_IS_CONTINUED(value) && (PL_hints & HINT_UTF8)) ) {
-	SvGROW(TARG, UTF8_MAXLEN+1);
-	tmps = SvPVX(TARG);
-	tmps = (char*)uv_to_utf8((U8*)tmps, (UV)value);
+    if (value > 255 && !IN_BYTE) {
+	SvGROW(TARG, UNISKIP(value)+1);
+	tmps = (char*)uv_to_utf8((U8*)SvPVX(TARG), value);
 	SvCUR_set(TARG, tmps - SvPVX(TARG));
 	*tmps = '\0';
 	(void)SvPOK_only(TARG);
 	SvUTF8_on(TARG);
 	XPUSHs(TARG);
 	RETURN;
-    }
-    else {
-	SvUTF8_off(TARG);
     }
 
     SvGROW(TARG,2);

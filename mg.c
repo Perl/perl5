@@ -1404,12 +1404,14 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
     I32 offs = LvTARGOFF(sv);
     I32 rem = LvTARGLEN(sv);
 
+    if (SvUTF8(lsv))
+	sv_pos_u2b(lsv, &offs, &rem);
     if (offs > len)
 	offs = len;
     if (rem + offs > len)
 	rem = len - offs;
     sv_setpvn(sv, tmps + offs, (STRLEN)rem);
-    if (DO_UTF8(lsv))
+    if (SvUTF8(lsv))
         SvUTF8_on(sv);
     return 0;
 }
@@ -1417,25 +1419,26 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
-    STRLEN littlelen;
-    char *tmps = SvPV(sv, littlelen);
+    STRLEN len;
+    char *tmps = SvPV(sv, len);
+    SV *lsv = LvTARG(sv);
+    I32 lvoff = LvTARGOFF(sv);
+    I32 lvlen = LvTARGLEN(sv);
 
     if (DO_UTF8(sv)) {
-	I32 bigoff = LvTARGOFF(sv);
-	I32 biglen = LvTARGLEN(sv);
-	U8 *s, *a, *b;
-
-	sv_utf8_upgrade(LvTARG(sv));
-	/* sv_utf8_upgrade() might have moved and/or resized
-	 * the string to be replaced, we must rediscover it. --jhi */
-	s = (U8*)SvPVX(LvTARG(sv));
-	a = utf8_hop(s, bigoff);
-	b = utf8_hop(a, biglen);
-	sv_insert(LvTARG(sv), a - s, b - a, tmps, littlelen);
-	SvUTF8_on(LvTARG(sv));
+	sv_utf8_upgrade(lsv);
+ 	sv_pos_u2b(lsv, &lvoff, &lvlen);
+	sv_insert(lsv, lvoff, lvlen, tmps, len);
+	SvUTF8_on(lsv);
+    }
+    else if (SvUTF8(lsv)) {
+	sv_pos_u2b(lsv, &lvoff, &lvlen);
+	tmps = bytes_to_utf8(tmps, &len);
+	sv_insert(lsv, lvoff, lvlen, tmps, len);
+	Safefree(tmps);
     }
     else
-        sv_insert(LvTARG(sv), LvTARGOFF(sv), LvTARGLEN(sv), tmps, littlelen);
+        sv_insert(lsv, lvoff, lvlen, tmps, len);
 
     return 0;
 }
