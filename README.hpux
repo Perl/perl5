@@ -394,8 +394,10 @@ achieved using
 
   Configure -A prepend:libswanted='cl pthread ' ...
 
-Do not forget the space before the trailing quote. Also note that this
-does not (yet) work with 64bit versions of GCC.
+Do not forget the space before the trailing quote.
+
+Also note that this does not (yet) work with all configurations,
+it is known to fail with 64bit versions of GCC.
 
 =head2 GDBM and Threads on HP-UX
 
