@@ -2529,6 +2529,11 @@ The exceptions to this rule are when the file or directory should be
 kept private (mail files, for instance).  The perlfunc(1) entry on
 C<umask> discusses the choice of MASK in more detail.
 
+Note that according to the POSIX 1003.1-1996 the FILENAME may have any
+number of trailing slashes.  Some operating and filesystems do not get
+this right, so Perl automatically removes all trailing slashes to keep
+everyone happy.
+
 =item msgctl ID,CMD,ARG
 
 Calls the System V IPC function msgctl(2).  You'll probably have to say
