@@ -188,7 +188,7 @@ sub minus_f_nocase {
      if (!$opt_i or $Is_VMS or $Is_MSWin32 or $Is_Dos or $^O eq 'os2') {
         # on a case-forgiving file system or if case is important 
 	# that is it all we can do
-	warn "Ignored $file: unreadable\n" if -f _;
+	warn "Ignored $path: unreadable\n" if -f _;
 	return '';
      }
      local *DIR;
@@ -227,7 +227,7 @@ sub minus_f_nocase {
  	    return "" unless $found;
  	    push @p, $cip;
  	    return "@p" if -f "@p" and -r _;
-	    warn "Ignored $file: unreadable\n" if -f _;
+	    warn "Ignored @p: unreadable\n" if -f _;
  	}
      }
      return "";
