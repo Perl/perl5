@@ -4,10 +4,16 @@ perlre - Perl regular expressions
 
 =head1 DESCRIPTION
 
-This page describes the syntax of regular expressions in Perl.  For a
-description of how to I<use> regular expressions in matching
-operations, plus various examples of the same, see discussions
-of C<m//>, C<s///>, C<qr//> and C<??> in L<perlop/"Regexp Quote-Like Operators">.
+This page describes the syntax of regular expressions in Perl.  
+
+if you haven't used regular expressions before, a quick-start
+introduction is available in L<perlrequick>, and a longer tutorial
+introduction is available in L<perlretut>.
+
+For reference on how regular expressions are used in matching
+operations, plus various examples of the same, see discussions of
+C<m//>, C<s///>, C<qr//> and C<??> in L<perlop/"Regexp Quote-Like
+Operators">.
 
 Matching operations can have various modifiers.  Modifiers
 that relate to the interpretation of the regular expression inside
@@ -1269,6 +1275,10 @@ This document needs a rewrite that separates the tutorial content
 from the reference content.
 
 =head1 SEE ALSO
+
+L<perlrequick>.
+
+L<perlretut>.
 
 L<perlop/"Regexp Quote-Like Operators">.
 
