@@ -2951,6 +2951,14 @@ sub pp_entersub {
 	# it back.
 	$kid =~ s/^CORE::GLOBAL:://;
 
+        # If the sub name is not a valid identifier, then somebody
+        # (probably Abigail) must have written "foo"->(...). Reproduce
+        # this.
+        if ($kid !~ /^([a-zA-Z_]|::)([a-zA-Z_0-9]|::)*$/) {
+            $kid = single_delim("qq", '"', uninterp(escape_str(unback($kid))));
+            $kid .= "->";
+        }
+
         if (!$declared) {
 	    return "$kid(" . $args . ")";
 	} elsif (defined $proto and $proto eq "") {
