@@ -95,6 +95,65 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6697] By: jhi                                   on 2000/08/18  13:35:57
+        Log: Tiny Getopt::Long patch from Johan Vromans.
+     Branch: perl
+	   ! lib/Getopt/Long.pm t/lib/gol-basic.t t/lib/gol-oo.t
+____________________________________________________________________________
+[  6696] By: jhi                                   on 2000/08/18  13:26:14
+        Log: Subject: [ID 20000817.018] behaviour change 5.5.3 -> 5.6.0 re "Modification of a read-only value"
+             From: Paul David Fardy <pdf@morgan.ucs.mun.ca>
+             Date: Thu, 17 Aug 2000 17:23:40 -0230 (NDT)
+             Message-Id: <200008171953.RAA17673@porthos.ucs.mun.ca>
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlsyn.pod
+____________________________________________________________________________
+[  6695] By: jhi                                   on 2000/08/18  13:13:26
+        Log: Subject: [PATCH] perlfunc.pod -- clarifying sprintf array argument issues
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Fri, 18 Aug 2000 03:13:36 -0700
+             Message-ID: <20000818031336.B14165@ilmd.chetlin.org>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  6694] By: jhi                                   on 2000/08/18  13:08:05
+        Log: Subject: [PATCH] perltrap.pod spring cleaning
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Fri, 18 Aug 2000 03:06:54 -0700
+             Message-ID: <20000818030654.A14165@ilmd.chetlin.org>
+             
+             plus Mike Guy's nitfix.
+     Branch: perl
+	   ! pod/perltrap.pod
+____________________________________________________________________________
+[  6693] By: jhi                                   on 2000/08/18  13:00:26
+        Log: Unbuffer the output.
+             
+             Subject: Re: [ID 20000817.017] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6680 on
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Thu, 17 Aug 2000 18:39:29 -0700
+             Message-ID: <RPJn5gzkgydf092yn@efn.org>
+     Branch: perl
+	   ! t/op/fork.t
+____________________________________________________________________________
+[  6692] By: jhi                                   on 2000/08/18  05:19:17
+        Log: Delete the image, too, not just its MANIFEStation.
+     Branch: perl
+	   - lib/CGI/eg/wilogo.gif
+____________________________________________________________________________
+[  6691] By: jhi                                   on 2000/08/18  05:10:26
+        Log: Propagate new Configure vars.
+     Branch: perl
+	   ! configure.com epoc/config.sh uconfig.h uconfig.sh
+	   ! vos/config.def vos/config.h vos/config_h.SH_orig
+	   ! win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  6690] By: jhi                                   on 2000/08/18  04:30:56
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6689] By: jhi                                   on 2000/08/18  04:12:30
         Log: Fix the lib/complex failure of
              
