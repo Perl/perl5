@@ -2795,6 +2795,7 @@ tryagain:
 	case 'Z':
 	    ret = reg_node(pRExC_state, SEOL);
 	    *flagp |= SIMPLE;
+	    RExC_seen_zerolen++;		/* Do not optimize RE away */
 	    nextchar(pRExC_state);
 	    break;
 	case 'z':
