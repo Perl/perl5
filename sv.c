@@ -9090,6 +9090,11 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	CvROOT(dstr)	= OpREFCNT_inc(CvROOT(sstr));
 	CvXSUB(dstr)	= CvXSUB(sstr);
 	CvXSUBANY(dstr)	= CvXSUBANY(sstr);
+	if (CvCONST(sstr)) {
+	    CvXSUBANY(dstr).any_ptr = GvUNIQUE(CvGV(sstr)) ?
+                SvREFCNT_inc(CvXSUBANY(sstr).any_ptr) :
+                sv_dup_inc(CvXSUBANY(sstr).any_ptr, param);
+	}
 	CvGV(dstr)	= gv_dup(CvGV(sstr), param);
 	if (param->flags & CLONEf_COPY_STACKS) {
 	  CvDEPTH(dstr)	= CvDEPTH(sstr);
