@@ -3615,7 +3615,7 @@ OP *block;
     return cv;
 }
 
-V *
+CV *
 newXS(name, subaddr, filename)
 char *name;
 void (*subaddr) _((CV*));

@@ -503,12 +503,14 @@ PP(pp_tie)
     SV *varsv;
     HV* stash;
     GV *gv;
-    BINOP myop;
     SV *sv;
     SV **mark = stack_base + ++*markstack_ptr;	/* reuse in entersub */
     I32 markoff = mark - stack_base - 1;
     char *methname;
+#ifdef ORIGINAL_TIE
+    BINOP myop;
     bool oldcatch = CATCH_GET;
+#endif
 
     varsv = mark[0];
     if (SvTYPE(varsv) == SVt_PVHV)
@@ -525,6 +527,7 @@ PP(pp_tie)
 	DIE("Can't locate object method \"%s\" via package \"%s\"",
 		methname, SvPV(mark[1],na));
 
+#ifdef ORIGINAL_TIE
     Zero(&myop, 1, BINOP);
     myop.op_last = (OP *) &myop;
     myop.op_next = Nullop;
@@ -545,6 +548,11 @@ PP(pp_tie)
     SPAGAIN;
 
     CATCH_SET(oldcatch);
+#else
+    ENTER;
+    perl_call_sv((SV*)gv, G_SCALAR);
+    SPAGAIN;
+#endif	
     sv = TOPs;
     if (sv_isobject(sv)) {
 	if (SvTYPE(varsv) == SVt_PVHV || SvTYPE(varsv) == SVt_PVAV) {
@@ -619,9 +627,11 @@ PP(pp_dbmopen)
     dPOPPOPssrl;
     HV* stash;
     GV *gv;
-    BINOP myop;
     SV *sv;
+#ifdef ORIGINAL_TIE
+    BINOP myop;
     bool oldcatch = CATCH_GET;
+#endif	
 
     hv = (HV*)POPs;
 
@@ -636,6 +646,7 @@ PP(pp_dbmopen)
 	    DIE("No dbm on this machine");
     }
 
+#ifdef ORIGINAL_TIE
     Zero(&myop, 1, BINOP);
     myop.op_last = (OP *) &myop;
     myop.op_next = Nullop;
@@ -649,7 +660,10 @@ PP(pp_dbmopen)
 	op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
     pp_pushmark(ARGS);
-
+#else
+    ENTER;
+    PUSHMARK(sp);
+#endif	
     EXTEND(sp, 5);
     PUSHs(sv);
     PUSHs(left);
@@ -658,32 +672,49 @@ PP(pp_dbmopen)
     else
 	PUSHs(sv_2mortal(newSViv(O_RDWR)));
     PUSHs(right);
+#ifdef ORIGINAL_TIE
     PUSHs((SV*)GvCV(gv));
     PUTBACK;
 
     if (op = pp_entersub(ARGS))
         runops();
+#else
+    PUTBACK;
+    perl_call_sv((SV*)gv, G_SCALAR);
+#endif	
     SPAGAIN;
 
     if (!sv_isobject(TOPs)) {
 	sp--;
+#ifdef ORIGINAL_TIE
 	op = (OP *) &myop;
 	PUTBACK;
 	pp_pushmark(ARGS);
+#else
+	PUSHMARK(sp);
+#endif	
 
 	PUSHs(sv);
 	PUSHs(left);
 	PUSHs(sv_2mortal(newSViv(O_RDONLY)));
 	PUSHs(right);
+#ifdef ORIGINAL_TIE
 	PUSHs((SV*)GvCV(gv));
+#endif	
 	PUTBACK;
 
+#ifdef ORIGINAL_TIE
 	if (op = pp_entersub(ARGS))
 	    runops();
+#else
+	perl_call_sv((SV*)gv, G_SCALAR);
+#endif	
 	SPAGAIN;
     }
 
+#ifdef ORIGINAL_TIE
     CATCH_SET(oldcatch);
+#endif	
     if (sv_isobject(TOPs))
 	sv_magic((SV*)hv, TOPs, 'P', Nullch, 0);
     LEAVE;

@@ -358,6 +358,7 @@ typedef struct condpair {
 #define	rs		(thr->Trs)
 #define	last_in_gv	(thr->Tlast_in_gv)
 #define	ofs		(thr->Tofs)
+#define	ofslen		(thr->Tofslen)
 #define	defoutgv	(thr->Tdefoutgv)
 #define	chopset		(thr->Tchopset)
 #define	formtarget	(thr->Tformtarget)
