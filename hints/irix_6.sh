@@ -1,11 +1,16 @@
 # irix_6.sh
-# from Krishna Sethuraman, krishna@mit.edu
+# from Krishna Sethuraman, krishna@sgi.com
 # Date: Wed Jan 18 11:40:08 EST 1995
 # added `-32' to force compilation in 32-bit mode.
 # otherwise, copied from irix_5.sh.
 
 # Perl built with this hints file under IRIX 6.0.1 passes 
 # all tests (`make test').
+
+# Tue Jan  2 14:52:36 EST 1996
+# Apparently, there's a stdio bug that can lead to memory
+# corruption using perl's malloc, but not SGI's malloc.
+usemymalloc='n'
 
 ld=ld
 i_time='define'
@@ -20,7 +25,7 @@ libswanted="$*"
 #
 # The following might be of interest if you wish to try 64-bit mode:
 # irix_6_64bit.sh
-# Krishna Sethuraman, krishna@mit.edu
+# Krishna Sethuraman, krishna@sgi.com
 # taken from irix_5.sh .  Changes from irix_5.sh:
 # Olimit and nested comments (warning 1009) no longer accepted
 # -OPT:fold_arith_limit so POSIX module will optimize
