@@ -4771,10 +4771,10 @@ static unsigned int *sockflags, sockflagsize;
  * We don't shim the other file open routines since a socket isn't
  * likely to be opened by a name.
  */
-/*{{{ FILE *my_fdopen(int fd, char *mode)*/
-FILE *my_fdopen(int fd, char *mode)
+/*{{{ FILE *my_fdopen(int fd, const char *mode)*/
+FILE *my_fdopen(int fd, const char *mode)
 {
-  FILE *fp = fdopen(fd,mode);
+  FILE *fp = fdopen(fd, (char *) mode);
 
   if (fp) {
     unsigned int fdoff = fd / sizeof(unsigned int);

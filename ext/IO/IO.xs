@@ -420,7 +420,7 @@ sockatmark (sock)
    InputStream sock
    PROTOTYPE: $
    PREINIT:
-     int fd,flag,result;
+     int fd,flag=0;
    CODE:
    {
      fd = PerlIO_fileno(sock);

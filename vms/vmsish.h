@@ -736,7 +736,7 @@ bool	vms_do_aexec (SV *, SV **, SV **);
 bool	vms_do_exec (char *);
 unsigned long int	do_aspawn (void *, void **, void **);
 unsigned long int	do_spawn (char *);
-FILE *  my_fdopen (int, char *);
+FILE *  my_fdopen (int, const char *);
 int     my_fclose (FILE *);
 int	my_fwrite (void *, size_t, size_t, FILE *);
 int	my_flush (FILE *);
