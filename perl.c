@@ -1519,7 +1519,8 @@ SV *sv;
     if (fdscript >= 0) {
 	rsfp = PerlIO_fdopen(fdscript,"r");
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-	fcntl(PerlIO_fileno(rsfp),F_SETFD,1);	/* ensure close-on-exec */
+	if (rsfp)
+	    fcntl(PerlIO_fileno(rsfp),F_SETFD,1);  /* ensure close-on-exec */
 #endif
     }
     else if (preprocess) {
@@ -1597,13 +1598,14 @@ sed %s -e \"/^[^#]/b\" \
     else {
 	rsfp = PerlIO_open(scriptname,"r");
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-	fcntl(PerlIO_fileno(rsfp),F_SETFD,1);	/* ensure close-on-exec */
+	if (rsfp)
+	    fcntl(PerlIO_fileno(rsfp),F_SETFD,1);  /* ensure close-on-exec */
 #endif
     }
     if (e_tmpname) {
 	e_fp = rsfp;
     }
-    if ((PerlIO*)rsfp == Nullfp) {
+    if (!rsfp) {
 #ifdef DOSUID
 #ifndef IAMSUID		/* in case script is not readable before setuid */
 	if (euid && Stat(SvPVX(GvSV(curcop->cop_filegv)),&statbuf) >= 0 &&
@@ -2000,11 +2002,11 @@ nuke_stacks()
 }
 
 static PerlIO *tmpfp;  /* moved outside init_lexer() because of UNICOS bug */
+
 static void
 init_lexer()
 {
     tmpfp = rsfp;
-
     lex_start(linestr);
     rsfp = tmpfp;
     subname = newSVpv("main",4);
