@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..852\n";
+print "1..853\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2607,15 +2607,21 @@ print "# some Unicode properties\n";
 
     print "SS" =~
 	/[\N{LATIN SMALL LETTER SHARP S}]/i ? "ok 842\n" : "not ok 842\n";
+
+    print "\N{LATIN SMALL LETTER SHARP S}" =~ /ss/i ?
+	"ok 843\n" : "not ok 843\n";
+
+    print "\N{LATIN SMALL LETTER SHARP S}" =~ /SS/i ?
+	"ok 844\n" : "not ok 844\n";
 }
 
 {
     print "# more whitespace: U+0085, U+2028, U+2029\n";
 
     # U+0085 needs to be forced to be Unicode, the \x{100} does that.
-    print "<\x{100}\x{0085}>" =~ /<\x{100}\s>/ ? "ok 843\n" : "not ok 843\n";
-    print "<\x{2028}>" =~ /<\s>/ ? "ok 844\n" : "not ok 844\n";
-    print "<\x{2029}>" =~ /<\s>/ ? "ok 845\n" : "not ok 845\n";
+    print "<\x{100}\x{0085}>" =~ /<\x{100}\s>/ ? "ok 845\n" : "not ok 845\n";
+    print "<\x{2028}>" =~ /<\s>/ ? "ok 846\n" : "not ok 846\n";
+    print "<\x{2029}>" =~ /<\s>/ ? "ok 847\n" : "not ok 847\n";
 }
 
 {
@@ -2626,7 +2632,7 @@ print "# some Unicode properties\n";
     # This is not expected to match: the point is that
     # neither should we get "Malformed UTF-8" warnings.
     print $s =~ /\G(.+?)\n/gcs ?
-	"not ok 846\n" : "ok 846\n";
+	"not ok 848\n" : "ok 848\n";
 
     my @c;
 
@@ -2634,7 +2640,7 @@ print "# some Unicode properties\n";
 	push @c, $1;
     }
 
-    print join("", @c) eq $s ? "ok 847\n" : "not ok 847\n";
+    print join("", @c) eq $s ? "ok 849\n" : "not ok 849\n";
 
     my $t1 = "Q003\n\n\x{e4}\x{f6}\n\nQ004\n\n\x{e7}"; # test only chars < 256
     my $r1 = "";
@@ -2648,14 +2654,14 @@ print "# some Unicode properties\n";
 	$r2 .= $1 . $2;
     }
     $r2 =~ s/\x{100}//;
-    print $r1 eq $r2 ? "ok 848\n" : "not ok 848\n";
+    print $r1 eq $r2 ? "ok 850\n" : "not ok 850\n";
 }
 
 {
     print "# Unicode lookbehind\n";
 
-    print "A\x{100}B"        =~ /(?<=A.)B/  ? "ok 849\n" : "not ok 849\n";
-    print "A\x{200}\x{300}B" =~ /(?<=A..)B/ ? "ok 850\n" : "not ok 850\n";
-    print "\x{400}AB"        =~ /(?<=\x{400}.)B/ ? "ok 851\n" : "not ok 851\n";
-    print "\x{500\x{600}}B"  =~ /(?<=\x{500}.)B/ ? "ok 852\n" : "not ok 852\n";
+    print "A\x{100}B"        =~ /(?<=A.)B/  ? "ok 851\n" : "not ok 851\n";
+    print "A\x{200}\x{300}B" =~ /(?<=A..)B/ ? "ok 852\n" : "not ok 852\n";
+    print "\x{400}AB"        =~ /(?<=\x{400}.)B/ ? "ok 853\n" : "not ok 853\n";
+    print "\x{500\x{600}}B"  =~ /(?<=\x{500}.)B/ ? "ok 854\n" : "not ok 854\n";
 }

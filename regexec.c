@@ -2373,8 +2373,20 @@ S_regmatch(pTHX_ regnode *prog)
 		char *e = PL_regeol;
 
 		if (ibcmp_utf8(s, 0,  ln, do_utf8,
-			       l, &e, 0,  UTF))
-		     sayNO;
+			       l, &e, 0,  UTF)) {
+		     /* One more case for the sharp s:
+		      * pack("U0U*", 0xDF) =~ /ss/i,
+		      * the 0xC3 0x9F are the UTF-8
+		      * byte sequence for the U+00DF. */
+		     if (!(do_utf8 &&
+			   toLOWER(s[0]) == 's' &&
+			   ln >= 2 &&
+			   toLOWER(s[1]) == 's' &&
+			   (U8)l[0] == 0xC3 &&
+			   e - l >= 2 &&
+			   (U8)l[1] == 0x9F))
+			  sayNO;
+		}
 		locinput = e;
 		nextchr = UCHARAT(locinput);
 		break;
