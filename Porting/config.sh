@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
-# Configuration time: Tue Aug 15 18:22:31 EET DST 2000
+# Configuration time: Wed Aug 16 02:27:51 EET DST 2000
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -60,7 +60,7 @@ ccflags_uselargefiles=''
 ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_BSD=1 SYSTYPE_BSD=1 unix=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Tue Aug 15 18:22:31 EET DST 2000'
+cf_time='Wed Aug 16 02:27:51 EET DST 2000'
 charsize='1'
 chgrp=''
 chmod=''
@@ -260,6 +260,7 @@ d_phostname='undef'
 d_pipe='define'
 d_poll='define'
 d_portable='define'
+d_printf_exp_digits='2'
 d_pthread_yield='undef'
 d_pwage='undef'
 d_pwchange='undef'

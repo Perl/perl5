@@ -27,6 +27,37 @@ to be the case and the 'cc' does not seem to be the GNU C compiler
 
 =head1 Platform specific changes
 
+=head2 printf() and sprintf() give two-digit exponent where possible
+
+Perl's printf() and sprintf() use the standard C library sprintf()
+function to implement the floating point conversions provided by the
+C<%e>, C<%f> and C<%g> formats (and their upper-case counterparts).  C
+library sprintf() functions vary in the number of exponent digits that
+they produce in scientific notation when the modulus of the exponent
+is less than one hundred: most platforms give two digits (for example,
+C<1.234e-45>) while others, notably Microsoft's libraries for Windows,
+give three (as in C<1.234e-045>).  Previously, Perl's functions
+produced results identical to the platform's underlying library
+function, resulting in script portability problems.  Now, on all
+platforms, only two exponent digits are delivered unless more are
+needed.
+
+Note that this change applies only to explicit conversions made by
+printf() and sprintf(); implicit conversions still show the same
+behavior as the underlying library function:
+
+    print "native: ", 1234567e89, sprintf("; standardized: %e\n", 1234567e89)
+
+outputs
+
+    native: 1.234567e+95; standardized: 1.234567e+95
+
+on most platforms, and
+
+    native: 1.234567e+095; standardized: 1.234567e+95
+
+on the remainder.
+
 =head1 Significant bug fixes
 
 =head1 New or Changed Diagnostics
