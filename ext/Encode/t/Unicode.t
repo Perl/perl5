@@ -116,13 +116,16 @@ my @file = sort grep {/\.utf$/o} readdir $dh;
 closedir $dh;
 for my $file (@file){
     my $path = File::Spec->catfile($dir, $file);
-+    open my $fh, '<', $path or die "$path:$!";
+    open my $fh, '<', $path or die "$path:$!";
+    my $content;
     if (PerlIO::Layer->find('perlio')){
        binmode $fh => ':utf8';
-    }else{
+       $content = join('' => <$fh>);
+    }else{ # ugh!
        binmode $fh;
+       $content = join('' => <$fh>);
+       Encode::_utf8_on($content)
     }
-    my $content = join('' => <$fh>);
     close $fh;
     is(decode("UTF-7", encode("UTF-7", $content)), $content, 
        "UTF-7 RT:$file");
