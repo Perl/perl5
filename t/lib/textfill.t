@@ -1,4 +1,9 @@
-#!/usr/bin/perl -w -I.
+#!./perl -w
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
 
 @tests = (split(/\nEND\n/s, <<DONE));
 TEST1
