@@ -134,6 +134,9 @@ void	dump_packsubs _((HV* stash));
 void	dump_sub _((GV* gv));
 void	fbm_compile _((SV* sv));
 char*	fbm_instr _((unsigned char* big, unsigned char* bigend, SV* littlesv));
+#ifdef USE_THREADS
+PADOFFSET	find_thread_magical _((char *name));
+#endif
 OP*	force_list _((OP* arg));
 OP*	fold_constants _((OP* arg));
 char*	form _((const char* pat, ...));
@@ -319,6 +322,7 @@ OP*	newLISTOP _((I32 type, I32 flags, OP* first, OP* last));
 OP*	newPMOP _((I32 type, I32 flags));
 OP*	newPVOP _((I32 type, I32 flags, char* pv));
 SV*	newRV _((SV* ref));
+SV*	newRV_noinc _((SV *));
 #ifdef LEAKTEST
 SV*	newSV _((I32 x, STRLEN len));
 #else
@@ -465,6 +469,11 @@ SV*	sv_2mortal _((SV* sv));
 double	sv_2nv _((SV* sv));
 char*	sv_2pv _((SV* sv, STRLEN* lp));
 UV	sv_2uv _((SV* sv));
+IV	sv_iv _((SV* sv));
+UV	sv_uv _((SV* sv));
+double	sv_nv _((SV* sv));
+char *	sv_pvn _((SV *, STRLEN *));
+I32	sv_true _((SV *));
 void	sv_add_arena _((char* ptr, U32 size, U32 flags));
 int	sv_backoff _((SV* sv));
 SV*	sv_bless _((SV* sv, HV* stash));

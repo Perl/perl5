@@ -10,7 +10,10 @@
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 INST_DRV=c:
-INST_TOP=$(INST_DRV)\perl
+INST_TOP=$(INST_DRV)\perl\perl5004.5X
+BUILDOPT=-DUSE_THREADS 
+
+# -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
 
 #
 # uncomment one if you are using Visual C++ 2.x or Borland
@@ -25,14 +28,14 @@ CCTYPE=BORLAND
 #
 # set the install locations of the compiler include/libraries
 #CCHOME = f:\msdev\vc
-CCHOME = D:\bc5
+CCHOME = C:\bc5
 CCINCDIR = $(CCHOME)\include
 CCLIBDIR = $(CCHOME)\lib
 
 #
 # set this to point to cmd.exe (only needed if you use some
 # alternate shell that doesn't grok cmd.exe style commands)
-SHELL = g:\winnt\system32\cmd.exe
+#SHELL = g:\winnt\system32\cmd.exe
 
 #
 # set this to your email address (perl will guess a value from
@@ -60,7 +63,7 @@ IMPLIB = implib
 RUNTIME  = -D_RTLDLL
 INCLUDES = -I.\include -I. -I.. -I$(CCINCDIR)
 #PCHFLAGS = -H -H$(INTDIR)\bcmoduls.pch 
-DEFINES  = -DWIN32 -DUSE_THREADS -D_WIN32_WINNT=0x400
+DEFINES  = -DWIN32 $(BUILDOPT) 
 LOCDEFS  = -DPERLDLL
 SUBSYS   = console
 LIBC = cw32mti.lib
@@ -72,7 +75,7 @@ WINIOMAYBE =
 OPTIMIZE = -v $(RUNTIME)
 LINK_DBG = -v
 .ELSE
-OPTIMIZE = -O $(RUNTIME)
+OPTIMIZE = -5 -O2 $(RUNTIME)
 LINK_DBG = 
 .ENDIF
 
@@ -93,7 +96,7 @@ RUNTIME  = -MD
 .ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp$(INTDIR)\vcmoduls.pch -YX 
-DEFINES  = -DWIN32 -D_CONSOLE -DUSE_THREADS -D_WIN32_WINNT=0x400
+DEFINES  = -DWIN32 $(BUILDOPT) -D_CONSOLE -D_WIN32_WINNT=0x400
 LOCDEFS  = -DPERLDLL
 SUBSYS   = console
 
@@ -263,11 +266,13 @@ CORE_OBJ= ..\av.obj	\
 WIN32_C = perllib.c \
 	win32.c \
 	win32io.c \
-	win32sck.c
+	win32sck.c \
+	win32thread.c 
 
 WIN32_OBJ = win32.obj \
 	win32io.obj \
-	win32sck.obj
+	win32sck.obj \
+	win32thread.obj
 
 PERL95_OBJ = perl95.obj \
 	win32mt.obj \
@@ -374,7 +379,7 @@ perlglob.obj  : perlglob.c
 config.w32 : $(CFGSH_TMPL)
 	copy $(CFGSH_TMPL) config.w32
 
-.\config.h : $(CFGSH_TMPL)
+.\config.h : $(CFGH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
 
@@ -383,6 +388,7 @@ config.w32 : $(CFGSH_TMPL)
 	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(OPTIMIZE) $(DEFINES)" \
 	    "cf_email=$(EMAIL)" "libs=$(LIBFILES:f)" "incpath=$(CCINCDIR)" \
 	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" "libc=$(LIBC)" \
+            "LINK_FLAGS=$(LINK_FLAGS)" \
 	    config.w32 > ..\config.sh
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -409,8 +415,8 @@ $(WIN32_OBJ) : $(CORE_H)
 $(CORE_OBJ)  : $(CORE_H)
 $(DLL_OBJ)   : $(CORE_H) 
 
-perldll.def : $(MINIPERL) $(CONFIGPM)
-	$(MINIPERL) -w makedef.pl $(CCTYPE) > perldll.def
+perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym makedef.pl
+	$(MINIPERL) -w makedef.pl $(DEFINES) $(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
@@ -455,8 +461,8 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj
 .ENDIF
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" "../LIB/auto"
-	attrib -r ..\t\*.*
-	copy test ..\t
+#	attrib -r ..\t\*.*
+#	copy test ..\t
 
 .IF "$(CCTYPE)" != "BORLAND"
 

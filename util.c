@@ -2511,8 +2511,6 @@ struct thread *t;
     SvGROW(sv, sizeof(struct thread) + 1);
     SvCUR_set(sv, sizeof(struct thread));
     thr = (Thread) SvPVX(sv);
-    /* Zero(thr, 1, struct thread); */
-
     /* debug */
     memset(thr, 0xab, sizeof(struct thread));
     markstack = 0;
@@ -2524,7 +2522,7 @@ struct thread *t;
     /* end debug */
 
     thr->oursv = sv;
-    init_stacks(thr);
+    init_stacks(ARGS);
 
     curcop = &compiling;
     thr->cvcache = newHV();
@@ -2536,9 +2534,23 @@ struct thread *t;
     curcop = t->Tcurcop;       /* XXX As good a guess as any? */
     defstash = t->Tdefstash;   /* XXX maybe these should */
     curstash = t->Tcurstash;   /* always be set to main? */
-    /* top_env needs to be non-zero. The particular value doesn't matter */
-    top_env = t->Ttop_env;
-    runlevel = 1;		/* XXX should be safe ? */
+
+
+    /* top_env needs to be non-zero. It points to an area
+       in which longjmp() stuff is stored, as C callstack
+       info there at least is thread specific this has to
+       be per-thread. Otherwise a 'die' in a thread gives
+       that thread the C stack of last thread to do an eval {}!
+       See comments in scope.h    
+       Initialize top entry (as in perl.c for main thread)
+     */
+    start_env.je_prev = NULL;
+    start_env.je_ret = -1;
+    start_env.je_mustcatch = TRUE;
+    top_env  = &start_env;
+
+    runlevel = 0;		/* Let entering sub do increment */
+
     in_eval = FALSE;
     restartop = 0;
 
@@ -2563,7 +2575,8 @@ struct thread *t;
 	    av_store(thr->magicals, i, sv);
 	    sv_magic(sv, 0, 0, &per_thread_magicals[i], 1);
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-				  "new_struct_thread: copied magical %d\n",i));
+				  "new_struct_thread: copied magical %d %p->%p\n",i,
+                                  t, thr));
 	}
     } 
 
@@ -2576,8 +2589,17 @@ struct thread *t;
     thr->next->prev = thr;
     MUTEX_UNLOCK(&threads_mutex);
 
-#ifdef HAVE_THREAD_INTERN
-    init_thread_intern(thr);
+/*
+ * This is highly suspect - new_struct_thread is executed
+ * by creating thread so pthread_self() or equivalent
+ * is parent thread not the child.
+ * In particular this should _NOT_ change dTHR value of calling thread.
+ * 
+ * But a good place to have a 'hook' for filling in port-private
+ * fields of thr. 
+ */
+#ifdef INIT_THREAD_INTERN
+    INIT_THREAD_INTERN(thr);
 #else
     thr->self = pthread_self();
 #endif /* HAVE_THREAD_INTERN */

@@ -443,6 +443,7 @@
 #define newPVOP			Perl_newPVOP
 #define newRANGE		Perl_newRANGE
 #define newRV			Perl_newRV
+#define newRV_noinc		Perl_newRV_noinc
 #define newSLICEOP		Perl_newSLICEOP
 #define newSTATEOP		Perl_newSTATEOP
 #define newSUB			Perl_newSUB
@@ -482,6 +483,7 @@
 #define nomethod_amg		Perl_nomethod_amg
 #define not_amg			Perl_not_amg
 #define nthreads		Perl_nthreads
+#define nthreads_cond		Perl_nthreads_cond
 #define numer_amg		Perl_numer_amg
 #define numeric_local		Perl_numeric_local
 #define numeric_name		Perl_numeric_name
@@ -1055,12 +1057,14 @@
 #define sv_insert		Perl_sv_insert
 #define sv_isa			Perl_sv_isa
 #define sv_isobject		Perl_sv_isobject
+#define sv_iv			Perl_sv_iv
 #define sv_len			Perl_sv_len
 #define sv_magic		Perl_sv_magic
 #define sv_mortalcopy		Perl_sv_mortalcopy
 #define sv_newmortal		Perl_sv_newmortal
 #define sv_newref		Perl_sv_newref
 #define sv_no			Perl_sv_no
+#define sv_nv			Perl_sv_nv
 #define sv_peek			Perl_sv_peek
 #define sv_pvn_force		Perl_sv_pvn_force
 #define sv_ref			Perl_sv_ref
@@ -1083,12 +1087,14 @@
 #define sv_setuv		Perl_sv_setuv
 #define sv_taint		Perl_sv_taint
 #define sv_tainted		Perl_sv_tainted
+#define sv_true			Perl_sv_true
 #define sv_undef		Perl_sv_undef
 #define sv_unmagic		Perl_sv_unmagic
 #define sv_unref		Perl_sv_unref
 #define sv_untaint		Perl_sv_untaint
 #define sv_upgrade		Perl_sv_upgrade
 #define sv_usepvn		Perl_sv_usepvn
+#define sv_uv			Perl_sv_uv
 #define sv_vcatpvfn		Perl_sv_vcatpvfn
 #define sv_vsetpvfn		Perl_sv_vsetpvfn
 #define sv_yes			Perl_sv_yes
@@ -1096,6 +1102,7 @@
 #define taint_proper		Perl_taint_proper
 #define thisexpr		Perl_thisexpr
 #define thr_key			Perl_thr_key
+#define threads_mutex		Perl_threads_mutex
 #define timesbuf		Perl_timesbuf
 #define tokenbuf		Perl_tokenbuf
 #define too_few_arguments	Perl_too_few_arguments
@@ -1177,10 +1184,6 @@
 #ifndef BINCOMPAT3
 
 #define Error			Perl_Error
-#define SvIV			Perl_SvIV
-#define SvNV			Perl_SvNV
-#define SvTRUE			Perl_SvTRUE
-#define SvUV			Perl_SvUV
 #define block_type		Perl_block_type
 #define boot_core_UNIVERSAL	Perl_boot_core_UNIVERSAL
 #define comppad_name_floor	Perl_comppad_name_floor

@@ -1,13 +1,11 @@
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define WIN32_LEAN_AND_MEAN
-#define WIN32IO_IS_STDIO
-#define EXT
-#include <windows.h>
 #include <stdio.h>
+extern int my_fclose(FILE *pf);
+#include "EXTERN.h"
+#define WIN32IO_IS_STDIO
+#include <windows.h>
 #include <stdlib.h>
 #include <io.h>
 #include <sys/stat.h>
@@ -17,6 +15,16 @@ extern "C" {
 #include <errno.h>
 #include <process.h>
 #include <direct.h>
+
+
+#ifdef __cplusplus
+#define START_EXTERN_C extern "C" {
+#define END_EXTERN_C }
+#else
+#define START_EXTERN_C 
+#define END_EXTERN_C
+#endif
+
 #include "win32iop.h"
 
 /*
@@ -238,7 +246,6 @@ my_flock(int fd, int oper)
 #undef LK_ERR
 #undef LK_LEN
 
-EXT int		my_fclose(FILE *pf);
 
 #ifdef PERLDLL
 __declspec(dllexport)
@@ -321,7 +328,6 @@ WIN32_IOSUBSYSTEM	win32stdio = {
 };
 
 
-#ifdef __cplusplus
-}
-#endif
+
+
 

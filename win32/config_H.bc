@@ -113,7 +113,7 @@
  *	This symbol, if defined, indicates that the alarm routine is
  *	available.
  */
-/*#define HAS_ALARM		/**/
+#define HAS_ALARM		/**/
 
 /* HASATTRIBUTE:
  *	This symbol indicates the C compiler can check for function attributes,

@@ -11,6 +11,8 @@
 # newly built perl.
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl
+BUILDOPT=-DUSE_THREADS -TP
+CORECCOPT=
 
 #
 # uncomment next line if you are using Visual C++ 2.x
@@ -49,8 +51,8 @@ RUNTIME  = -MD
 !ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp"$(INTDIR)/modules.pch" -YX 
-DEFINES  = -DWIN32 -D_CONSOLE -DUSE_THREADS -D_WIN32_WINNT=0x400
-LOCDEFS  = -DPERLDLL
+DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT)
+LOCDEFS  = -DPERLDLL $(CORECCOPT)
 SUBSYS   = console
 
 !IF "$(RUNTIME)" == "-MD"
@@ -84,7 +86,7 @@ LIBFILES = oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	version.lib odbc32.lib odbccp32.lib
 
 CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS  = -nologo $(LIBFILES) $(LINK_DBG) -machine:I386
+LINK_FLAGS  = -nologo $(LIBFILES) $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG = -Fo
 
 #################### do not edit below this line #######################
@@ -196,11 +198,13 @@ CORE_OBJ= ..\av.obj	\
 WIN32_C = perllib.c \
 	win32.c \
 	win32io.c \
-	win32sck.c
+	win32sck.c \
+	win32thread.c 
 
 WIN32_OBJ = win32.obj \
 	win32io.obj \
-	win32sck.obj
+	win32sck.obj \
+	win32thread.obj 
 
 PERL95_OBJ = perl95.obj \
 	win32mt.obj \
@@ -269,7 +273,7 @@ DYNALOADMODULES=	\
 	$(OPCODE_DLL)	\
 	$(SDBM_FILE_DLL)\
 	$(IO_DLL)	\
-	$(ATTRS_DLL)	\
+	$(ATTRS_DLL)    \
 	$(THREAD_DLL)
 
 POD2HTML=$(PODDIR)\pod2html
@@ -300,9 +304,10 @@ perlglob.obj  : perlglob.c
 config.w32 : $(CFGSH_TMPL)
 	copy $(CFGSH_TMPL) config.w32
 
-.\config.h : $(CFGSH_TMPL)
+.\config.h : $(CFGH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
+	
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL "INST_DRV=$(INST_DRV)" \
@@ -330,7 +335,7 @@ $(CORE_OBJ)  : $(CORE_H)
 $(DLL_OBJ)   : $(CORE_H) 
 
 perldll.def : $(MINIPERL) $(CONFIGPM)
-	$(MINIPERL) -w makedef.pl $(CCTYPE) > perldll.def
+	$(MINIPERL) -w makedef.pl $(DEFINES) $(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 	$(LINK32) -dll -def:perldll.def -out:$@ @<<
@@ -357,8 +362,8 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj
 	del perl.exe
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" "../LIB/auto"
-	attrib -r ..\t\*.*
-	copy test ..\t
+#	attrib -r ..\t\*.*
+#	copy test ..\t
 
 perl95.c : runperl.c 
 	copy runperl.c perl95.c
@@ -391,19 +396,20 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
-$(THREAD_DLL): $(PERLEXE) $(THREAD).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
 $(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\win32
 
-$(IO_DLL): $(PERLEXE) $(IO).xs
+$(THREAD_DLL): $(PERLEXE) $(THREAD).xs
+	cd $(EXTDIR)\$(*B)
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\win32
+
+
+$(IO_DLL): $(PERLEXE) $(CONFIGPM) $(IO).xs
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)

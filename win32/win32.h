@@ -52,6 +52,10 @@ typedef long		gid_t;
 
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern  uid_t	getuid(void);
 extern  gid_t	getgid(void);
 extern  uid_t	geteuid(void);
@@ -60,6 +64,11 @@ extern  int	setuid(uid_t uid);
 extern  int	setgid(gid_t gid);
 
 extern  int	kill(int pid, int sig);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 extern  char	*staticlinkmodules[];
 
@@ -79,10 +88,16 @@ extern  char	*staticlinkmodules[];
 EXT char *win32_getenv(const char *name);
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 EXT void Perl_win32_init(int *argcp, char ***argvp);
 
 #define USE_SOCKETS_AS_HANDLES
 #ifndef USE_SOCKETS_AS_HANDLES
+
 extern FILE *myfdopen(int, char *);
 
 #undef fdopen
@@ -119,10 +134,14 @@ char *win32PerlLibPath(void);
 char *win32SiteLibPath(void);
 int mytimes(struct tms *timebuf);
 unsigned int myalarm(unsigned int sec);
-int do_aspawn(void* really, void** mark, void** arglast);
+int do_aspawn(void* really, void ** mark, void ** arglast);
 int do_spawn(char *cmd);
 char do_exec(char *cmd);
 void init_os_extras(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 typedef  char *		caddr_t;	/* In malloc.c (core address). */
 
@@ -144,8 +163,17 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
 #pragma  warning(disable: 4018 4035 4101 4102 4244 4245 4761)
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int IsWin95(void);
 int IsWinNT(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #ifndef VER_PLATFORM_WIN32_WINDOWS	/* VC-2.0 headers dont have this */
 #define VER_PLATFORM_WIN32_WINDOWS	1
