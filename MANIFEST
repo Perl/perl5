@@ -122,7 +122,12 @@ ext/B/t/optree_check.t		test OptreeCheck apparatus
 ext/B/t/optree_concise.t	more B::Concise tests
 ext/B/t/optree_samples.t	various basic codes: if for while 
 ext/B/t/optree_sort.t		inplace sort optimization regression
+ext/B/t/optree_specials.t	BEGIN, END, etc code
 ext/B/t/optree_varinit.t	my,our,local var init optimization
+ext/B/t/f_map			code from perldoc -f map
+ext/B/t/f_map.t			converted to optreeCheck()s
+ext/B/t/f_sort			optree test raw material
+ext/B/t/f_sort.t		optree test raw material
 ext/B/t/o.t		See if O works
 ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/stash.t		See if B::Stash works

@@ -1,5 +1,6 @@
-# OptreeCheck.pm
-# package-less .pm file allows 'use OptreeCheck';
+# non-package OptreeCheck.pm
+# pm allows 'use OptreeCheck', which also imports
+# no package decl means all functions defined into main
 # otherwise, it's like "require './test.pl'"
 
 =head1 NAME
@@ -9,11 +10,11 @@ OptreeCheck - check optrees
 =head1 SYNOPSIS
 
 OptreeCheck supports regression testing of perl's parser, optimizer,
-bytecode generator, via a single function: checkOptree(%args).
+bytecode generator, via a single function: checkOptree(%args).'
 
- checkOptree(name   => "your title here",
+ checkOptree(name   => "your title here", # optional, (synth from others)
 	     bcopts => '-exec',	# $opt or \@opts, passed to BC::compile
-	     code   => sub {my $a},	# must be CODE ref
+	     code   => sub {my $a},	# coderef, or source (wrapped and evald)
 	     # prog   => 'sort @a',	# run in subprocess, aka -MO=Concise
 	     # skip => 1,		# skips test
 	     # todo => 'excuse',	# anticipated failures
@@ -32,56 +33,57 @@ bytecode generator, via a single function: checkOptree(%args).
 
 =head1 checkOptree(%in) Overview
 
-Runs code or prog through B::Concise, and captures its rendering.
+Calls getRendering(), which runs code or prog through B::Concise, and
+captures its rendering.
 
 Calls mkCheckRex() to produce a regex which will match the expected
 rendering, and fail when it doesn't match.
 
-Also calls like($out,/$regex/,$name), and thereby plugs into the test.pl
-framework.
+Also calls like($rendering,/$regex/,$name), and thereby plugs into the
+test.pl framework.
 
 =head1 checkOptree(%Args) API
 
 Accepts %Args, with following requirements and actions:
 
-expect and expect_nt required, not empty, not whitespace.  Its a fatal
-error, because false positives are BAD.
+expect and expect_nt are both: required, not empty, not whitespace.
+It's a fatal error otherwise, because false positives are BAD.
 
-Either code or prog must be present.
-
-prog is some source code, and is passed through via runperl, to B::Concise
-like this: (bcopts are fixed up for cmdline)
+Either code or prog must be present.  prog is some source code, and is
+passed through via runperl, to B::Concise like this: (bcopts are fixed
+up for cmdline)
 
     './perl -w -MO=Concise,$bcopts_massaged -e $src'
 
 code is a subref, or $src, like above.  If it's not a subref, it's
-treated like source, and wrapped as a subroutine, and passed to
-B::Concise::compile():
+treated like source, but is wrapped as a subroutine, and passed to
+B::Concise::compile().
 
     $subref = eval "sub{$src}";
 
-I suppose I should also explain these more, but..
+I suppose I should also explain these more, but they seem obvious.
 
     # prog   => 'sort @a',	# run in subprocess, aka -MO=Concise
+    # noanchors => 1,		# no /^$/.  needed for 1-liners like above
+
     # skip => 1,		# skips test
-    # todo => 'excuse',	# anticipated failures
-    # fail => 1		# fails (by redirecting result)
+    # todo => 'excuse',		# anticipated failures
+    # fail => 1			# fails (by redirecting result)
     # debug => 1,		# turns on regex debug for match test !!
     # retry => 1		# retry with debug on test failure
 
-=head1 Usage Philosophy
+=head1 Test Philosophy
 
 2 platforms --> 2 reftexts: You want an accurate test, independent of
-which platform youre on.  This is obvious in retrospect, but ..
+which platform you're on.  So, two refdata properties, 'expect' and
+'expect_nt', carry renderings taken from threaded and non-threaded
+builds.  This has several benefits:
 
-I started this with 1 reftext, and tried to use it to construct regexs
-for both platforms.  This is extra complexity, trying to build a
-single regex for both cases makes the regex more complicated, and
-harder to get 'right'.
-
-Having 2 references also allows various 'tests', really explorations
-currently.  At the very least, having 2 samples side by side allows
-inspection and aids understanding of optrees.
+ 1. native reference data allows closer matching by regex.
+ 2. samples can be eyeballed to grok t-nt differences.
+ 3. data can help to validate mkCheckRex() operation.
+ 4. can develop regexes which accomodate t-nt differences.
+ 5. can test with both native and cross+converted regexes.
 
 Cross-testing (expect_nt on threaded, expect on non-threaded) exposes
 differences in B::Concise output, so mkCheckRex has code to do some
@@ -139,7 +141,7 @@ haven't 'enshrined' a bug).
 
 name: The test name.  May be augmented by a label, which is built from
 important params, and which helps keep names in sync with whats being
-tested.
+tested.'
 
 =cut
 
@@ -176,6 +178,7 @@ our %gOpts = 	# values are replaced at runtime !!
      fail	=> 'force all test to fail, print to stdout',
      dump	=> 'dump cmdline arg prcessing',
      rexpedant	=> 'try tighter regex, still buggy',
+     noanchors	=> 'dont anchor match rex',
      help	=> 0,	# 1 ends in die
 
      # array values are one-of selections, with 1st value as default
@@ -199,7 +202,7 @@ our %modes = (
 	      cross	=> [ !($threaded) ? 'expect' : 'expect_nt'],
 	      expect	=> [ 'expect' ],
 	      expect_nt	=> [ 'expect_nt' ],
-	);
+	      );
 
 our %msgs # announce cross-testing.
     = (
@@ -269,6 +272,7 @@ sub checkOptree {
 
     print "checkOptree args: ",Dumper \%in if $in{dump};
     SKIP: {
+	label(\%in);
 	skip($in{name}, 1) if $in{skip};
 	return runSelftest(\%in) if $gOpts{selftest};
 
@@ -276,24 +280,27 @@ sub checkOptree {
 	fail("FORCED: $in{name}:\n$rendering") if $gOpts{fail}; # silly ?
 
 	# Test rendering against ..
+      TODO:
 	foreach $want (@{$modes{$gOpts{testmode}}}) {
+	    local $TODO = $in{todo} if $in{todo};
 
-	    my $rex = mkCheckRex(\%in,$want);
+	    my ($rex,$txt,$rexstr) = mkCheckRex(\%in,$want);
 	    my $cross = $msgs{"$want-$thrstat"};
 
 	    # bad is anticipated failure on cross testing ONLY
 	    my $bad = (0 or ( $cross && $in{crossfail})
 			 or (!$cross && $in{fail})
-			 or 0);
+			 or 0); # no undefs! pedant
 
 	    # couldn't bear to pass \%in to likeyn
 	    $res = mylike ( # custom test mode stuff
 		[ !$bad,
-		$in{retry} || $gOpts{retry},
-		$in{debug} || $gOpts{retrydbg}
+		  $in{retry} || $gOpts{retry},
+		  $in{debug} || $gOpts{retrydbg},
+		  $rexstr,
 		],
 		# remaining is std API
-		$rendering, qr/$rex/ms, "$cross $in{name}")
+		$rendering, qr/$rex/ms, "$cross $in{name} $in{label}")
 	    || 0;
 	    printhelp(\%in, $rendering, $rex);
 	}
@@ -307,8 +314,15 @@ sub checkOptree {
 sub label {
     # may help get/keep test output consistent
     my ($in) = @_;
-    $in->{label} = join(',', map {"$_=>$in->{$_}"}
-			qw( bcopts name prog code ));
+    return if $in->{name};
+
+    my $buf = (ref $in->{bcopts}) 
+	? join(',', @{$in->{bcopts}}) : $in->{bcopts};
+
+    foreach (qw( note prog code )) {
+	$buf .= " $_: $in->{$_}" if $in->{$_} and not ref $in->{$_};
+    }
+    return $in->{label} = $buf;
 }
 
 sub testCombo {
@@ -316,9 +330,7 @@ sub testCombo {
     my $in = @_;
     my @cases;
     foreach $want (@{$modes{$gOpts{testmode}}}) {
-
-	push @cases, [ %in,
-		      ];
+	push @cases, [ %in ]
     }
     return @cases;
 }
@@ -342,7 +354,8 @@ sub runSelftest {
 	    # couldn't bear to pass \%in to likeyn
 	    $res = mylike ( [ !$bad,
 			      $in->{retry} || $gOpts{retry},
-			      $in->{debug} || $gOpts{retrydbg}
+			      $in->{debug} || $gOpts{retrydbg},
+			      #label($in)
 			      ],
 			    $rendering, qr/$rex/ms, "$cross $in{name}")
 		|| 0;
@@ -354,18 +367,30 @@ sub runSelftest {
 sub mylike {
     # note dependence on unlike()
     my ($control) = shift;
-    my ($yes,$retry,$debug) = @$control; # or dies
+    my ($yes,$retry,$debug,$postmortem) = @$control; # or dies
     my ($got, $expected, $name, @mess) = @_; # pass thru mostly
 
     die "unintended usage, expecting Regex". Dumper \@_
 	unless ref $_[1] eq 'Regexp';
 
+    #ok($got=~/$expected/, "wow");
+
     # same as A ^ B, but B has side effects
     my $ok = ( (!$yes   and unlike($got, $expected, $name, @mess))
 	       or ($yes and   like($got, $expected, $name, @mess)));
 
+    if (not $ok and $postmortem) {
+	# split rexstr into units that should eat leading lines.
+	my @rexs = map qr/^$_/, split (/\n/,$postmortem);
+	foreach my $rex (@rexs) {
+	    #$got =~ s/($rex)/ate: $1/msg;	# noisy
+	    $got =~ s/($rex)\n//msg;		# remove matches
+	}
+	print "sequentially deconstructed, these are unmatched:\n$got\n";
+    }
+
     if (not $ok and $retry) {
-	# redo, perhaps with use re debug
+	# redo, perhaps with use re debug - NOT ROBUST
 	eval "use re 'debug'" if $debug;
 	$ok = (!$yes   and unlike($got, $expected, "(RETRY) $name", @mess)
 	       or $yes and   like($got, $expected, "(RETRY) $name", @mess));
@@ -439,76 +464,179 @@ sub mkCheckRex {
     $str =~ s/^\# //mg;		# ease cut-paste testcase authoring
     my $reftxt = $str;		# extra return val !!
 
-    unless ($gOpts{rexpedant}) {
-	# convert all (args) and [args] to temporary '____'
-	$str =~ s/(\(.*?\))/____/msg;
-	$str =~ s/(\[.*?\])/____/msg;
+    # convert all (args) and [args] to temp forms wo bracing
+    $str =~ s/\[(.*?)\]/__CAPSQR$1__/msg;
+    $str =~ s/\((.*?)\)/__CAPRND$1__/msg;
+    $str =~ s/\((.*?)\)/__CAPRND$1__/msg; # nested () in nextstate
+    
+    # escape bracing, etc.. manual \Q (doesnt escape '+')
+    $str =~ s/([\[\]()*.\$\@\#\|{}])/\\$1/msg;
 
-	# escape remaining metachars. manual \Q (doesnt escape '+')
-	$str =~ s/([\[\]()*.\$\@\#])/\\$1/msg;
-	#$str =~ s/([*.\$\@\#])/\\$1/msg;
+    # now replace temp forms with original, preserving reference bracing 
+    $str =~ s/__CAPSQR(.*?)__\b/\\[$1\\]/msg; # \b is important
+    $str =~ s/__CAPRND(.*?)__\b/\\($1\\)/msg;
+    $str =~ s/__CAPRND(.*?)__\b/\\($1\\)/msg; # nested () in nextstate
+    
+    # no 'invisible' failures in debugger
+    $str =~ s/(?:next|db)state(\\\(.*?\\\))/(?:next|db)state(.*?)/msg;
+    
+    # don't care about:
+    $str =~ s/:-?\d+,-?\d+/:-?\\d+,-?\\d+/msg;		# FAKE line numbers
+    $str =~ s/match\\\(.*?\\\)/match\(.*?\)/msg;	# match args
+    $str =~ s/(0x[0-9A-Fa-f]+)/0x[0-9A-Fa-f]+/msg;	# hexnum values
+    $str =~ s/".*?"/".*?"/msg;				# quoted strings
 
-	# now replace '____' with something that matches both.
-	#  bracing style agnosticism is important here, it makes many
-	#  threaded / non-threaded diffs irrelevant
-	$str =~ s/____/(\\[.*?\\]|\\(.*?\\))/msg; # capture in case..
-
-	# no mysterious failures in debugger
-	$str =~ s/(?:next|db)state/(?:next|db)state/msg;
-    }
-    else {
-	# precise/pedantic way - only wildcard nextate, leavesub
-
-	# escape some literals
-	$str =~ s/([*.\$\@\#])/\\$1/msg;
-
-	# nextstate. replace args, and work under debugger
-	$str =~ s/(?:next|db)state\(.*?\)/(?:next|db)state\\(.*?\\)/msg;
-
-	# leavesub refcount changes, dont care
-	$str =~ s/leavesub\[.*?\]/leavesub[.*?]/msg;
-
-	# wildcard-ify all [contents]
-	$str =~ s/\[.*?\]/[.*?]/msg;	# add capture ?
-
-	# make [] literal now, keeping .* for contents
-	$str =~ s/([\[\]])/\\$1/msg;
-    }
-    # threaded <--> non-threaded transforms ??
-
-    if (not $Config::Config{usethreads}) {
-	# written for T->NT transform
-	# $str =~ s/<\\#>/<\\\$>/msg;	# GV on pad, a threads thing ?
-	$str =~ s/PADOP/SVOP/msg;	# fix terse output diffs
-    }
     croak "no reftext found for $want: $in->{name}"
 	unless $str =~ /\w+/; # fail unless a real test
 
     # $str = '.*'	if 1;	# sanity test
     # $str .= 'FAIL'	if 1;	# sanity test
 
-    # tabs fixup
-    $str =~ s/\t/ +/msg; # not \s+
-
+    # allow -eval, banner at beginning of anchored matches
+    $str = "(-e .*?)?(B::Concise::compile.*?)?\n" . $str
+	unless $in->{noanchors};
+    
     eval "use re 'debug'" if $debug;
-    my $qr = qr/$str/;
+    my $qr = ($in->{noanchors})	? qr/$str/ms : qr/^$str$/ms ;
     no re 'debug';
 
-    return ($qr, $reftxt) if wantarray;
+    return ($qr, $reftxt, $str) if wantarray;
     return $qr;
 }
 
+
 sub printhelp {
+    # crufty - may be still useful
     my ($in, $rendering, $rex) = @_;
-    print "<$rendering>\nVS\n<$reftext>\n" if $gOpts{vbasic};
+    print "<$rendering>\nVS\n<$rex>\n" if $gOpts{vbasic};
 
     # save this output to afile, edit out 'ok's and 1..N
     # then perl -d afile, and add re 'debug' to suit.
-    print("\$str = q{$rendering};\n".
-	  "\$rex = qr{$reftext};\n".
-	  "print \"\$str =~ m{\$rex}ms \";\n".
+    print("\$str = q%$rendering%;\n".
+	  "\$rex = qr%$rex%;\n\n".
+	  #"print \"\$str =~ m%\$rex%ms \";\n".
 	  "\$str =~ m{\$rex}ms or print \"doh\\n\";\n\n")
 	if $in{rextract} or $gOpts{rextract};
+}
+
+
+#########################
+# support for test writing
+
+sub preamble {
+    my $testct = shift || 1;
+    return <<EO_HEADER;
+#!perl
+
+BEGIN {
+    chdir q(t);
+    \@INC = qw(../lib ../ext/B/t);
+    require q(./test.pl);
+}
+use OptreeCheck;
+plan tests => $testct;
+
+EO_HEADER
+
+}
+
+sub OptreeCheck::wrap {
+    my $code = shift;
+    $code =~ s/(?:(\#.*?)\n)//gsm;
+    $code =~ s/\s+/ /mgs;	       
+    chomp $code;
+    return unless $code =~ /\S/;
+    my $comment = $1;
+    
+    my $testcode = qq{
+	
+checkOptree(note   => q{$comment},
+	    bcopts => q{-exec},
+	    code   => q{$code},
+	    expect => <<EOT_EOT, expect_nt => <<EONT_EONT);
+ThreadedRef
+EOT_EOT
+NonThreadRef
+EONT_EONT
+    
+};
+    return $testcode;
+}
+
+sub OptreeCheck::gentest {
+    my ($code,$opts) = @_;
+    my $rendering = getRendering({code => $code});
+    my $testcode = OptreeCheck::wrap($code);
+    return unless $testcode;
+
+    # run the prog, capture 'reference' concise output
+    my $preamble = preamble(1);
+    my $got = runperl( prog => "$preamble $testcode", stderr => 1,
+		       #switches => ["-I../ext/B/t", "-MOptreeCheck"], 
+		       );  #verbose => 1);
+    
+    # extract the 'reftext' ie the got 'block'
+    if ($got =~ m/got \'.*?\n(.*)\n\# \'\n\# expected/s) {
+	my $reftext = $1;
+	#and plug it into the test-src
+	if ($threaded) {
+	    $testcode =~ s/ThreadedRef/$reftext/;
+	} else {
+	    $testcode =~ s/NonThreadRef/$reftext/;
+	}
+	my $b4 = q{expect => <<EOT_EOT, expect_nt => <<EONT_EONT};
+	my $af = q{expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT'};
+	$testcode =~ s/$b4/$af/;
+	
+	my $got;
+	if ($internal_retest) {
+	    $got = runperl( prog => "$preamble $testcode", stderr => 1,
+			    #switches => ["-I../ext/B/t", "-MOptreeCheck"], 
+			    verbose => 1);
+	    print "got: $got\n";
+	}
+	return $testcode;
+    }
+    return '';
+}
+
+
+sub OptreeCheck::processExamples {
+    my @files = @_;
+    # gets array of paragraphs, which should be tests.
+
+    foreach my $file (@files) {
+	open (my $fh, $file) or die "cant open $file: $!\n";
+	$/ = "";
+	my @chunks = <$fh>;
+	print preamble (scalar @chunks);
+	foreach $t (@chunks) {
+	    print "\n\n=for gentest\n\n# chunk: $t=cut\n\n";
+	    print OptreeCheck::gentest ($t);
+	}
+    }
+}
+
+# OK - now for the final insult to your good taste...  
+
+if ($0 =~ /OptreeCheck\.pm/) {
+
+    #use lib 't';
+    require './t/test.pl';
+
+    # invoked as program.  Work like former gentest.pl,
+    # ie read files given as cmdline args,
+    # convert them to usable test files.
+
+    require Getopt::Std;
+    Getopt::Std::getopts('') or 
+	die qq{ $0 sample-files*    # no options
+
+	  expecting filenames as args.  Each should have paragraphs,
+	  these are converted to checkOptree() tests, and printed to
+	  stdout.  Redirect to file then edit for test. \n};
+
+  OptreeCheck::processExamples(@ARGV);
 }
 
 1;
@@ -520,11 +648,11 @@ __END__
 mkCheckRex receives the full testcase object, and constructs a regex.
 1st, it selects a reftxt from either the expect or expect_nt items.
 
-Once selected, reftext massaged & convert into a Regex that accepts
-'good' concise renderings, with appropriate input variations, but is
-otherwize as strict as possible.  For example, it should *not* match
-when opcode flags change, or when optimizations convert an op to an
-ex-op.
+Once selected, reftext is massaged & converted into a Regex that
+accepts 'good' concise renderings, with appropriate input variations,
+but is otherwise as strict as possible.  For example, it should *not*
+match when opcode flags change, or when optimizations convert an op to
+an ex-op.
 
 =head2 match criteria
 
@@ -533,57 +661,44 @@ purposes.  This loses some info in 'add[t5]', but greatly simplifys
 matching 'nextstate(main 22 (eval 10):1)'.  Besides, we are testing
 for regressions, not for complete accuracy.
 
-The regex is unanchored, allowing success on simple expectations, such
-as one with a single 'print' opcode.
+The regex is anchored by default, but can be suppressed with
+'noanchors', allowing 1-liner tests to succeed if opcode is found.
 
-=head2 complicating factors
+=head1 TEST DEVELOPMENT SUPPORT
 
-Note that %in may seem overly complicated, but it's needed to allow
-mkCheckRex to better support selftest,
+This optree regression testing framework needs tests in order to find
+bugs.  To that end, OptreeCheck has support for developing new tests,
+according to the following model:
 
-The emerging complexity is that mkCheckRex must choose which refdata
-to use as a template for the regex being constructed.  This feels like
-selection mechanics being duplicated.
+ 1. write a set of sample code into a single file, one per
+    paragraph.  f_map and f_sort in ext/B/t/ are examples.
 
-=head1 FEATURES, BUGS, ENHANCEMENTS
+ 2. run OptreeCheck as a program on the file
 
-Hey, they're the same thing now, modulo heisen-phase-shifting, and the
-probe used to observe them.
+   ./perl -Ilib ext/B/t/OptreeCheck.pm -w ext/B/t/f_map
+   ./perl -Ilib ext/B/t/OptreeCheck.pm -w ext/B/t/f_sort
 
-=head1 Test Data
+   gentest reads the sample code, runs each to generate a reference
+   rendering, folds this rendering into an optreeCheck() statement,
+   and prints it to stdout.
 
-Test cases were recently doubled, by adding a 2nd ref-data property;
-expect and expect_nt carry renderings taken from threaded and
-non-threaded builds.  This addition has several benefits:
+ 3. run the output file as above, redirect to files, then rerun on
+    same build (for sanity check), and on thread-opposite build.  With
+    editor in 1 window, and cmd in other, it's fairly easy to cut-paste
+    the gots into the expects, easier than running step 2 on both
+    builds then trying to sdiff them together.
 
- 1. native reference data allows closer matching by regex.
- 2. samples can be eyeballed to grok t-nt differences.
- 3. data can help to validate mkCheckRex() operation.
- 4. can develop code to smooth t-nt differences.
- 5. can test with both native and cross+converted rexes
+=head1 TODO
 
-Enhancements:
+There's a considerable amount of cruft in the whole arg-handling setup.
+I'll replace / strip it before 5.10
 
-Tests should specify both 'expect' and 'expect_nt', making the
-distinction now will allow a range of behaviors, in escalating
-thoroughness.  This variable is called provenance, indicating where
-the reftext came from.
+Treat %in as a test object, interwork better with Test::*
 
-build_only: tests which dont have the reference-sample of the
-right provenance will be skipped. NO GOOD.
+Refactor mkCheckRex() and selfTest() to isolate the selftest,
+crosstest, etc selection mechanics.
 
-prefer_expect: This is implied standard, as all tests done thus far
-started here.  One way t->nt conversions is done, based upon Config.
-
-activetest: do cross-testing when test-case has both, ie also test
-'expect_nt' references on threaded builds.  This is aggressive, and is
-intended to seek out t<->nt differences.  if mkCheckRex knows
-provenance and Config, it can do 2 way t<->nt conversions.
-
-activemapping: This builds upon activetest by controlling whether
-t<->nt conversions are done, and allows simpler verification that each
-conversion step is indeed necessary.
-
-pedantic: this fails if tests dont have both, whereas above doesn't care.
+improve retry, retrydbg, esp. it's control of eval "use re debug".
+This seems to work part of the time, but isn't stable enough.
 
 =cut

@@ -1,10 +1,11 @@
 package B::Showlex;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 use strict;
 use B qw(svref_2object comppadlist class);
 use B::Terse ();
+use B::Concise ();
 
 #
 # Invoke as
@@ -13,21 +14,32 @@ use B::Terse ();
 # or as
 #     perl -MO=Showlex bar.pl
 # to see the names of file scope lexicals used by bar.pl
-#    
+#
+
+
+# borrowed from B::Concise
+our $walkHandle = \*STDOUT;
+
+sub walk_output { # updates $walkHandle
+    $walkHandle = B::Concise::walk_output(@_);
+    #print "got $walkHandle";
+    #print $walkHandle "using it";
+    $walkHandle;
+}
 
 sub shownamearray {
     my ($name, $av) = @_;
     my @els = $av->ARRAY;
     my $count = @els;
     my $i;
-    print "$name has $count entries\n";
+    print $walkHandle "$name has $count entries\n";
     for ($i = 0; $i < $count; $i++) {
-        print "$i: ";
 	my $sv = $els[$i];
 	if (class($sv) ne "SPECIAL") {
-	    printf "%s (0x%lx) %s\n", class($sv), $$sv, $sv->PVX;
+	    printf $walkHandle "$i: %s (0x%lx) %s\n", class($sv), $$sv, $sv->PVX;
 	} else {
-            $sv->terse;
+	    printf $walkHandle "$i: %s\n", $sv->terse;
+	    #printf $walkHandle "$i: %s\n", B::Concise::concise_sv($sv);
 	}
     }
 }
@@ -37,10 +49,10 @@ sub showvaluearray {
     my @els = $av->ARRAY;
     my $count = @els;
     my $i;
-    print "$name has $count entries\n";
+    print $walkHandle "$name has $count entries\n";
     for ($i = 0; $i < $count; $i++) {
-	print "$i: ";
-	$els[$i]->terse;
+	printf $walkHandle "$i: %s\n", $els[$i]->terse;
+	#print $walkHandle "$i: %s\n", B::Concise::concise_sv($els[$i]);
     }
 }
 
@@ -50,10 +62,25 @@ sub showlex {
     showvaluearray("Pad of lexical values for $objname", $valsav);
 }
 
+sub newlex { # drop-in for showlex
+    my ($objname, $names, $vals) = @_;
+    my @names = $names->ARRAY;
+    my @vals  = $vals->ARRAY;
+    my $count = @names;
+    print $walkHandle "$objname Pad has $count entries\n";
+    printf $walkHandle "0: %s\n", $names[0]->terse;
+    for (my $i = 1; $i < $count; $i++) {
+	printf $walkHandle "$i: %s = %s\n", $names[$i]->terse, $vals[$i]->terse;
+    }
+}
+
+my $newlex; # rendering state var
+
 sub showlex_obj {
     my ($objname, $obj) = @_;
     $objname =~ s/^&main::/&/;
-    showlex($objname, svref_2object($obj)->PADLIST->ARRAY);
+    showlex($objname, svref_2object($obj)->PADLIST->ARRAY) if !$newlex;
+    newlex ($objname, svref_2object($obj)->PADLIST->ARRAY) if  $newlex;
 }
 
 sub showlex_main {
@@ -61,17 +88,29 @@ sub showlex_main {
 }
 
 sub compile {
-    my @options = @_;
-    if (@options) {
-	return sub {
-	    my $objname;
-	    foreach $objname (@options) {
+    my @options = grep(/^-/, @_);
+    my @args = grep(!/^-/, @_);
+    for my $o (@options) {
+	$newlex = 1 if $o eq "-newlex";
+    }
+
+    return \&showlex_main unless @args;
+    return sub {
+	foreach my $objname (@args) {
+	    my $objref;
+	    if (ref $objname) {
+		print $walkHandle "B::Showlex::compile($objname)\n";
+		$objref = $objname;
+	    } else {
 		$objname = "main::$objname" unless $objname =~ /::/;
-		eval "showlex_obj('&$objname', \\&$objname)";
+		print $walkHandle "$objname:\n";
+		no strict 'refs';
+		die "err: unknown function ($objname)\n"
+		    unless *{$objname}{CODE};
+		$objref = \&$objname;
 	    }
+	    showlex_obj($objname, $objref);
 	}
-    } else {
-	return \&showlex_main;
     }
 }
 

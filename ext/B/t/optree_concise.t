@@ -10,7 +10,7 @@ BEGIN {
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-plan tests => 24;
+plan tests => 23;
 SKIP: {
 skip "no perlio in this build", 24 unless $Config::Config{useperlio};
 
@@ -52,7 +52,6 @@ checkOptree ( name	=> 'canonical example w -exec',
 	      bcopts	=> '-exec',
 	      code	=> sub{$a=$b+42},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-#            goto -
 # 1  <;> nextstate(main 61 optree_concise.t:139) v
 # 2  <#> gvsv[*b] s
 # 3  <$> const[IV 42] s
@@ -61,7 +60,6 @@ checkOptree ( name	=> 'canonical example w -exec',
 # 6  <2> sassign sKS/2
 # 7  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-#            goto -
 # 1  <;> nextstate(main 61 optree_concise.t:139) v
 # 2  <$> gvsv(*b) s
 # 3  <$> const(IV 42) s
@@ -71,10 +69,6 @@ EOT_EOT
 # 7  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
-checkOptree ( name	=> 'tree reftext is messy cut-paste',
-	      skip	=> 1);
-
-
 #################################
 pass("B::Concise OPTION TESTS");
 
@@ -82,16 +76,14 @@ checkOptree ( name	=> '-base3 sticky-exec',
 	      bcopts	=> '-base3',
 	      code	=> sub{$a=$b+42},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> dbstate(main 24 optree_concise.t:132) v
 2  <#> gvsv[*b] s
 10 <$> const[IV 42] s
 11 <2> add[t3] sK/2
 12 <#> gvsv[*a] s
 20 <2> sassign sKS/2
-21 <1> leavesub[2 refs] K/REFC,1
+21 <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-#            goto -
 # 1  <;> nextstate(main 62 optree_concise.t:161) v
 # 2  <$> gvsv(*b) s
 # 10 <$> const(IV 42) s
@@ -194,12 +186,10 @@ checkOptree ( name	=> "sticky-terse exec",
 	      bcopts	=> [qw/ -exec /],
 	      code	=> sub{$a},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-    goto UNOP (0x82b0918)
 COP (0x82b0d70) nextstate 
 PADOP (0x82b0d30) gvsv  GV (0x82a818c) *a 
 UNOP (0x82b0e08) leavesub [1] 
 EOT_EOT
-#     goto UNOP (0x8282310)
 # COP (0x82828e0) nextstate 
 # SVOP (0x82828a0) gvsv  GV (0x814692c) *a 
 # UNOP (0x8282938) leavesub [1] 
@@ -252,12 +242,14 @@ EONT_EONT
 checkOptree ( name	=> 'cmdline self-strict compile err',
 	      prog	=> 'use strict; sort @a',
 	      bcopts	=> [qw/ -basic -concise -exec /],
+	      noanchors	=> 1,
 	      expect	=> 'compilation errors',
 	      expect_nt	=> 'compilation errors');
 
 checkOptree ( name	=> 'error at -e line 1',
 	      prog	=> 'our @a; sort @a',
 	      bcopts	=> [qw/ -basic -concise -exec /],
+	      noanchors	=> 1,
 	      expect	=> 'at -e line 1',
 	      expect_nt	=> 'at -e line 1');
 
@@ -301,7 +293,7 @@ use B::Concise qw( walk_output add_style set_style_standard add_callback );
       . "(x(;~=> #extra)x)\n" # new 'variable' used here
       
       , "  (*(    )*)     goto #seq\n"
-      , "(?(<#speq>)?)#exname#arg(?([#targarglife])?)"
+      , "(?(<#seq>)?)#exname#arg(?([#targarglife])?)"
       #. "(x(;~=> #extra)x)\n" # new 'variable' used here
       );
 
@@ -318,6 +310,11 @@ sub set_up_relative_test {
 	    # callback marks up const ops
 	    $h->{arg} .= ' CALLBACK' if $h->{name} eq 'const';
 	    $h->{extra} = '';
+
+	    if ($lastnext and $$lastnext != $$op) {
+		$h->{goto} = ($h->{seq} eq '-')
+		    ? 'unresolved' : $h->{seq};
+	    }
 
 	    # 2 style specific behaviors
 	    if ($style eq 'relative') {
@@ -339,7 +336,6 @@ checkOptree ( name	=> 'callback used, independent of style',
 	      bcopts	=> [qw/ -concise -exec /],
 	      code	=> sub{$a=$b+42},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> nextstate(main 76 optree_concise.t:337) v
 2  <#> gvsv[*b] s
 3  <$> const[IV 42] CALLBACK s
@@ -363,27 +359,27 @@ checkOptree ( name	=> "new 'relative' style, -exec mode",
 	      crossfail	=> 1,
 	      #retry	=> 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-7  <1> leavesub RELATIVE[1 ref] K ->(end)	=> RELATIVE
--     <@> lineseq KP ->7	=> RELATIVE
-1        <;> nextstate(main 49 optree_concise.t:309) v ->2	=> RELATIVE
-6        <2> sassign sKS ->7	=> RELATIVE
-4           <2> add[t3] sK ->5	=> RELATIVE
--              <1> ex-rv2sv sK ->3	=> RELATIVE
-2                 <#> gvsv[*b] s ->3	=> RELATIVE
-3              <$> const[IV 42] CALLBACK s ->4	=> RELATIVE
--           <1> ex-rv2sv sKRM* ->6	=> RELATIVE
-5              <#> gvsv[*a] s ->6	=> RELATIVE
+7  <1> leavesub RELATIVE[1 ref] K ->(end) => RELATIVE
+-     <@> lineseq KP ->7 => RELATIVE
+1        <;> nextstate(main 49 optree_concise.t:309) v ->2 => RELATIVE
+6        <2> sassign sKS ->7 => RELATIVE
+4           <2> add[t3] sK ->5 => RELATIVE
+-              <1> ex-rv2sv sK ->3 => RELATIVE
+2                 <#> gvsv[*b] s ->3 => RELATIVE
+3              <$> const[IV 42] CALLBACK s ->4 => RELATIVE
+-           <1> ex-rv2sv sKRM* ->6 => RELATIVE
+5              <#> gvsv[*a] s ->6 => RELATIVE
 EOT_EOT
-# 7  <1> leavesub RELATIVE[1 ref] K ->(end)	=> RELATIVE
-# -     <@> lineseq KP ->7	=> RELATIVE
-# 1        <;> nextstate(main 77 optree_concise.t:353) v ->2	=> RELATIVE
-# 6        <2> sassign sKS ->7	=> RELATIVE
-# 4           <2> add[t1] sK ->5	=> RELATIVE
-# -              <1> ex-rv2sv sK ->3	=> RELATIVE
-# 2                 <$> gvsv(*b) s ->3	=> RELATIVE
-# 3              <$> const(IV 42) CALLBACK s ->4	=> RELATIVE
-# -           <1> ex-rv2sv sKRM* ->6	=> RELATIVE
-# 5              <$> gvsv(*a) s ->6	=> RELATIVE
+# 7  <1> leavesub RELATIVE[1 ref] K ->(end) => RELATIVE
+# -     <@> lineseq KP ->7 => RELATIVE
+# 1        <;> nextstate(main 77 optree_concise.t:353) v ->2 => RELATIVE
+# 6        <2> sassign sKS ->7 => RELATIVE
+# 4           <2> add[t1] sK ->5 => RELATIVE
+# -              <1> ex-rv2sv sK ->3 => RELATIVE
+# 2                 <$> gvsv(*b) s ->3 => RELATIVE
+# 3              <$> const(IV 42) CALLBACK s ->4 => RELATIVE
+# -           <1> ex-rv2sv sKRM* ->6 => RELATIVE
+# 5              <$> gvsv(*a) s ->6 => RELATIVE
 EONT_EONT
 
 checkOptree ( name	=> "both -exec -relative",
@@ -391,7 +387,6 @@ checkOptree ( name	=> "both -exec -relative",
 	      code	=> sub{$a=$b+42},
 	      crossfail	=> 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> nextstate(main 50 optree_concise.t:326) v 
 2  <#> gvsv[*b] s 
 3  <$> const[IV 42] CALLBACK s 
@@ -424,11 +419,9 @@ checkOptree ( name	=> "both -exec -scope",
 	      bcopts	=> [qw/ -exec -scope /],
 	      code	=> sub{$a=$b+42},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-           goto -
 1  <;> nextstate(main 50 optree_concise.t:337) v 
 7  <1> leavesub[1 ref] K/REFC,1 
 EOT_EOT
-           goto -
 1  <;> nextstate(main 75 optree_concise.t:396) v 
 7  <1> leavesub[1 ref] K/REFC,1 
 EONT_EONT
@@ -446,6 +439,4 @@ EOT_EOT
 EONT_EONT
 
 } #skip
-
-__END__
 

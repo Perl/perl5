@@ -7,9 +7,9 @@ BEGIN {
 }
 use OptreeCheck;
 use Config;
-plan tests	=> 13;
+plan tests	=> 20;
 SKIP: {
-    skip "no perlio in this build", 13 unless $Config::Config{useperlio};
+    skip "no perlio in this build", 20 unless $Config::Config{useperlio};
 
 pass("GENERAL OPTREE EXAMPLES");
 
@@ -21,7 +21,6 @@ checkOptree ( name	=> '-basic sub {if shift print then,else}',
 				 else       { print "else" }
 			     },
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# B::Concise::compile(CODE(0x81a77b4))
 # 9  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->9
 # 1        <;> nextstate(main 426 optree.t:16) v ->2
@@ -94,9 +93,6 @@ checkOptree ( name	=> '-basic (see above, with my $a = shift)',
 # g                    <0> pushmark s ->h
 # h                    <$> const[PV "bar"] s ->i
 EOT_EOT
-# 1  <;> nextstate(main 45 optree.t:23) v
-# 2  <0> padsv[$a:45,46] M/LVINTRO
-# 3  <1> leavesub[1 ref] K/REFC,1
 # d  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->d
 # 1        <;> nextstate(main 428 optree_samples.t:48) v ->2
@@ -128,7 +124,6 @@ checkOptree ( name	=> '-exec sub {if shift print then,else}',
 				 else       { print "else" }
 			     },
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# B::Concise::compile(CODE(0x81a77b4))
 # 1  <;> nextstate(main 426 optree.t:16) v
 # 2  <#> gv[*_] s
 # 3  <1> rv2av[t2] sKRM/1
@@ -267,7 +262,6 @@ checkOptree ( name	=> '-exec sub { foreach (1..10) {print "foo $_"} }',
 #            goto e
 # g  <2> leaveloop K/2
 # h  <1> leavesub[1 ref] K/REFC,1
-# '
 EOT_EOT
 # 1  <;> nextstate(main 444 optree_samples.t:182) v
 # 2  <0> pushmark s
@@ -389,15 +383,12 @@ EOT_EOT
 #            goto f
 # h  <2> leaveloop vK/2
 # i  <@> leave[1 ref] vKP/REFC
-
 EONT_EONT
 
 checkOptree ( name	=> '-exec sub { print "foo $_" foreach (1..10) }',
 	      code	=> sub { print "foo $_" foreach (1..10) }, 
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# B::Concise::compile(CODE(0x8332b20))
-#            goto -
 # 1  <;> nextstate(main 445 optree.t:167) v
 # 2  <;> nextstate(main 445 optree.t:167) v
 # 3  <0> pushmark s
@@ -436,6 +427,197 @@ EOT_EOT
 # g  <2> leaveloop K/2
 # h  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
+
+pass("GREP: SAMPLES FROM PERLDOC -F GREP");
+
+checkOptree ( name	=> '@foo = grep(!/^\#/, @bar)',
+	      code	=> '@foo = grep(!/^\#/, @bar)',
+	      bcopts	=> '-exec',
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 1  <;> nextstate(main 496 (eval 20):1) v
+# 2  <0> pushmark s
+# 3  <0> pushmark s
+# 4  <#> gv[*bar] s
+# 5  <1> rv2av[t4] lKM/1
+# 6  <@> grepstart lK
+# 7  <|> grepwhile(other->8)[t5] lK
+# 8      </> match(/"^#"/) s/RTIME
+# 9      <1> not sK/1
+#            goto 7
+# a  <0> pushmark s
+# b  <#> gv[*foo] s
+# c  <1> rv2av[t2] lKRM*/1
+# d  <2> aassign[t6] KS/COMMON
+# e  <1> leavesub[1 ref] K/REFC,1
+EOT_EOT
+# 1  <;> nextstate(main 496 (eval 20):1) v
+# 2  <0> pushmark s
+# 3  <0> pushmark s
+# 4  <$> gv(*bar) s
+# 5  <1> rv2av[t2] lKM/1
+# 6  <@> grepstart lK
+# 7  <|> grepwhile(other->8)[t3] lK
+# 8      </> match(/"^\\#"/) s/RTIME
+# 9      <1> not sK/1
+#            goto 7
+# a  <0> pushmark s
+# b  <$> gv(*foo) s
+# c  <1> rv2av[t1] lKRM*/1
+# d  <2> aassign[t4] KS/COMMON
+# e  <1> leavesub[1 ref] K/REFC,1
+EONT_EONT
+
+
+pass("MAP: SAMPLES FROM PERLDOC -F MAP");
+
+checkOptree ( name	=> '%h = map { getkey($_) => $_ } @a',
+	      code	=> '%h = map { getkey($_) => $_ } @a',
+	      bcopts	=> '-exec',
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 1  <;> nextstate(main 501 (eval 22):1) v
+# 2  <0> pushmark s
+# 3  <0> pushmark s
+# 4  <#> gv[*a] s
+# 5  <1> rv2av[t8] lKM/1
+# 6  <@> mapstart lK*
+# 7  <|> mapwhile(other->8)[t9] lK
+# 8      <0> enter l
+# 9      <;> nextstate(main 500 (eval 22):1) v
+# a      <0> pushmark s
+# b      <0> pushmark s
+# c      <#> gvsv[*_] s
+# d      <#> gv[*getkey] s/EARLYCV
+# e      <1> entersub[t5] lKS/TARG,1
+# f      <#> gvsv[*_] s
+# g      <@> list lK
+# h      <@> leave lKP
+#            goto 7
+# i  <0> pushmark s
+# j  <#> gv[*h] s
+# k  <1> rv2hv[t2] lKRM*/1
+# l  <2> aassign[t10] KS/COMMON
+# m  <1> leavesub[1 ref] K/REFC,1
+EOT_EOT
+# 1  <;> nextstate(main 501 (eval 22):1) v
+# 2  <0> pushmark s
+# 3  <0> pushmark s
+# 4  <$> gv(*a) s
+# 5  <1> rv2av[t3] lKM/1
+# 6  <@> mapstart lK*
+# 7  <|> mapwhile(other->8)[t4] lK
+# 8      <0> enter l
+# 9      <;> nextstate(main 500 (eval 22):1) v
+# a      <0> pushmark s
+# b      <0> pushmark s
+# c      <$> gvsv(*_) s
+# d      <$> gv(*getkey) s/EARLYCV
+# e      <1> entersub[t2] lKS/TARG,1
+# f      <$> gvsv(*_) s
+# g      <@> list lK
+# h      <@> leave lKP
+#            goto 7
+# i  <0> pushmark s
+# j  <$> gv(*h) s
+# k  <1> rv2hv[t1] lKRM*/1
+# l  <2> aassign[t5] KS/COMMON
+# m  <1> leavesub[1 ref] K/REFC,1
+EONT_EONT
+
+checkOptree ( name	=> '%h=(); for $_(@a){$h{getkey($_)} = $_}',
+	      code	=> '%h=(); for $_(@a){$h{getkey($_)} = $_}',
+	      bcopts	=> '-exec',
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 1  <;> nextstate(main 505 (eval 24):1) v
+# 2  <0> pushmark s
+# 3  <0> pushmark s
+# 4  <#> gv[*h] s
+# 5  <1> rv2hv[t2] lKRM*/1
+# 6  <2> aassign[t3] vKS
+# 7  <;> nextstate(main 506 (eval 24):1) v
+# 8  <0> pushmark sM
+# 9  <#> gv[*a] s
+# a  <1> rv2av[t6] sKRM/1
+# b  <#> gv[*_] s
+# c  <1> rv2gv sKRM/1
+# d  <{> enteriter(next->o last->r redo->e) lKS
+# p  <0> iter s
+# q  <|> and(other->e) K/1
+# e      <;> nextstate(main 505 (eval 24):1) v
+# f      <#> gvsv[*_] s
+# g      <#> gv[*h] s
+# h      <1> rv2hv sKR/1
+# i      <0> pushmark s
+# j      <#> gvsv[*_] s
+# k      <#> gv[*getkey] s/EARLYCV
+# l      <1> entersub[t10] sKS/TARG,1
+# m      <2> helem sKRM*/2
+# n      <2> sassign vKS/2
+# o      <0> unstack s
+#            goto p
+# r  <2> leaveloop K/2
+# s  <1> leavesub[1 ref] K/REFC,1
+EOT_EOT
+# 1  <;> nextstate(main 505 (eval 24):1) v
+# 2  <0> pushmark s
+# 3  <0> pushmark s
+# 4  <$> gv(*h) s
+# 5  <1> rv2hv[t1] lKRM*/1
+# 6  <2> aassign[t2] vKS
+# 7  <;> nextstate(main 506 (eval 24):1) v
+# 8  <0> pushmark sM
+# 9  <$> gv(*a) s
+# a  <1> rv2av[t3] sKRM/1
+# b  <$> gv(*_) s
+# c  <1> rv2gv sKRM/1
+# d  <{> enteriter(next->o last->r redo->e) lKS
+# p  <0> iter s
+# q  <|> and(other->e) K/1
+# e      <;> nextstate(main 505 (eval 24):1) v
+# f      <$> gvsv(*_) s
+# g      <$> gv(*h) s
+# h      <1> rv2hv sKR/1
+# i      <0> pushmark s
+# j      <$> gvsv(*_) s
+# k      <$> gv(*getkey) s/EARLYCV
+# l      <1> entersub[t4] sKS/TARG,1
+# m      <2> helem sKRM*/2
+# n      <2> sassign vKS/2
+# o      <0> unstack s
+#            goto p
+# r  <2> leaveloop K/2
+# s  <1> leavesub[1 ref] K/REFC,1
+EONT_EONT
+
+checkOptree ( name	=> 'map $_+42, 10..20',
+	      code	=> 'map $_+42, 10..20',
+	      bcopts	=> '-exec',
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 1  <;> nextstate(main 497 (eval 20):1) v
+# 2  <0> pushmark s
+# 3  <$> const[AV ] s
+# 4  <1> rv2av lKPM/1
+# 5  <@> mapstart K
+# 6  <|> mapwhile(other->7)[t7] K
+# 7      <#> gvsv[*_] s
+# 8      <$> const[IV 42] s
+# 9      <2> add[t2] sK/2
+#            goto 6
+# a  <1> leavesub[1 ref] K/REFC,1
+EOT_EOT
+# 1  <;> nextstate(main 511 (eval 26):1) v
+# 2  <0> pushmark s
+# 3  <$> const(AV ) s
+# 4  <1> rv2av lKPM/1
+# 5  <@> mapstart K
+# 6  <|> mapwhile(other->7)[t4] K
+# 7      <$> gvsv(*_) s
+# 8      <$> const(IV 42) s
+# 9      <2> add[t1] sK/2
+#            goto 6
+# a  <1> leavesub[1 ref] K/REFC,1
+EONT_EONT
+
+pass("CONSTANTS");
 
 checkOptree ( name	=> '-e use constant j => qq{junk}; print j',
 	      prog	=> 'use constant j => qq{junk}; print j',
