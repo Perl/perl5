@@ -499,7 +499,42 @@ VMS
 
 =item *
 
-IO::Poll now works.
+Configuration now tests for the presence of C<poll()>, and IO::Poll
+now uses the vendor-supplied function if detected.
+
+=item *
+
+A rare access violation at Perl start-up could occur if the Perl image was
+installed with privileges or if there was an identifier with the
+subsystem attribute set in the process's rightslist.  Either of these
+circumstances triggered tainting code that contained a pointer bug. 
+The faulty pointer arithmetic has been fixed.
+
+=item *
+
+The length limit on values (not keys) in the %ENV hash has been raised
+from 255 bytes to 32640 bytes (except when the PERL_ENV_TABLES setting
+overrides the default use of logical names for %ENV).  If it is
+necessary to access these long values from outside Perl, be aware that
+they are implemented using search list logical names that store the
+value in pieces, each 255-byte piece (up to 128 of them) being an
+element in the search list. When doing a lookup in %ENV from within
+Perl, the elements are combined into a single value.  The existing
+VMS-specific ability to access individual elements of a search list
+logical name via the ENV{'foo;N'} syntax (where N is the search list
+index) is unimpaired.
+
+=item *
+
+The piping implementation now uses local rather than global DCL
+symbols for inter-process communication.
+
+=item *
+
+File::Find could become confused when navigating to a relative
+directory whose name collided with a logical name.  This problem has
+been corrected by adding directory syntax to relative path names, thus
+preventing logical name translation.
 
 =back
 
