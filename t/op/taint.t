@@ -894,8 +894,8 @@ else {
     my @untainted;
     while (my ($k, $v) = each %ENV) {
 	if (!tainted($v) &&
-	    # These we have untainted explicitly earlier.
-	    $k !~ /^(BASH_ENV|CDPATH|ENV|IFS|PATH|TEMP|TERM|TMP)$/) {
+	    # These we have explicitly untainted or set earlier.
+	    $k !~ /^(BASH_ENV|CDPATH|ENV|IFS|PATH|PERL_CORE|TEMP|TERM|TMP)$/) {
 	    push @untainted, "# '$k' = '$v'\n";
 	}
     }
