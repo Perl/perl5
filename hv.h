@@ -43,10 +43,8 @@ struct xpvhv {
     } STMT_END
 
 
-/* these hash entry flags ride on hent_klen */
-
-#define HEf_LAZYDEL	-1	/* entry must be deleted during next iter step */
-#define HEf_SVKEY	-2	/* hent_key is a SV* (only for magic/tied HVs) */
+/* these hash entry flags ride on hent_klen (for use only in magic/tied HVs) */
+#define HEf_SVKEY	-2	/* hent_key is a SV* */
 
 
 #define Nullhv Null(HV*)
@@ -62,6 +60,10 @@ struct xpvhv {
 #define HvSHAREKEYS(hv)		(SvFLAGS(hv) & SVphv_SHAREKEYS)
 #define HvSHAREKEYS_on(hv)	(SvFLAGS(hv) |= SVphv_SHAREKEYS)
 #define HvSHAREKEYS_off(hv)	(SvFLAGS(hv) &= ~SVphv_SHAREKEYS)
+
+#define HvLAZYDEL(hv)		(SvFLAGS(hv) & SVphv_LAZYDEL)
+#define HvLAZYDEL_on(hv)	(SvFLAGS(hv) |= SVphv_LAZYDEL)
+#define HvLAZYDEL_off(hv)	(SvFLAGS(hv) &= ~SVphv_LAZYDEL)
 
 #ifdef OVERLOAD
 
