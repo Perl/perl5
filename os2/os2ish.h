@@ -169,11 +169,16 @@ void Perl_OS2_init(char **);
 
 /* XXX This code hideously puts env inside: */
 
-#define PERL_SYS_INIT(argcp, argvp) STMT_START {	\
+#ifdef __EMX__
+#  define PERL_SYS_INIT(argcp, argvp) STMT_START {	\
     _response(argcp, argvp);			\
     _wildcard(argcp, argvp);			\
     Perl_OS2_init(env);	} STMT_END
-
+#else  /* Compiling embedded Perl with non-EMX compiler */
+#  define PERL_SYS_INIT(argcp, argvp) STMT_START {	\
+    Perl_OS2_init(env);	} STMT_END
+#  define PERL_CALLCONV _System
+#endif
 #define PERL_SYS_TERM()		MALLOC_TERM
 
 /* #define PERL_SYS_TERM() STMT_START {	\

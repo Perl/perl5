@@ -382,7 +382,7 @@ PP(pp_open)
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
     tmps = SvPV(sv, len);
-    if (do_open(gv, tmps, len, FALSE, 0, 0, Nullfp))
+    if (do_open(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp))
 	PUSHi( (I32)PL_forkprocess );
     else if (PL_forkprocess == 0)		/* we are a new child */
 	PUSHi(0);
@@ -2608,12 +2608,17 @@ PP(pp_fttext)
 	    odd += len;
 	    break;
 	}
+#ifdef EBCDIC
+        else if (!(isPRINT(*s) || isSPACE(*s))) 
+            odd++;
+#else
 	else if (*s & 128)
 	    odd++;
 	else if (*s < 32 &&
 	  *s != '\n' && *s != '\r' && *s != '\b' &&
 	  *s != '\t' && *s != '\f' && *s != 27)
 	    odd++;
+#endif
     }
 
     if ((odd * 3 > len) == (PL_op->op_type == OP_FTTEXT)) /* allow 1/3 odd */
@@ -2739,7 +2744,7 @@ PP(pp_rename)
 	if (same_dirent(tmps2, tmps))	/* can always rename to same name */
 	    anum = 1;
 	else {
-	    if (euid || PerlLIO_stat(tmps2, &PL_statbuf) < 0 || !S_ISDIR(PL_statbuf.st_mode))
+	    if (PL_euid || PerlLIO_stat(tmps2, &PL_statbuf) < 0 || !S_ISDIR(PL_statbuf.st_mode))
 		(void)UNLINK(tmps2);
 	    if (!(anum = link(tmps, tmps2)))
 		anum = UNLINK(tmps);

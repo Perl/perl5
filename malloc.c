@@ -101,6 +101,11 @@
     # This many continuous sbrk()s compensate for one discontinuous one.
     SBRK_FAILURE_PRICE		50
 
+    # Some configurations may ask for 12-byte-or-so allocations which
+    # require 8-byte alignment (?!).  In such situation one needs to
+    # define this to disable 12-byte bucket (will increase memory footprint)
+    STRICT_ALIGNMENT		undef
+
   This implementation assumes that calling PerlIO_printf() does not
   result in any memory allocation calls (used during a panic).
 
@@ -281,6 +286,7 @@ static void botch _((char *diag, char *s));
 #endif
 static void morecore _((int bucket));
 static int findbucket _((union overhead *freep, int srchlen));
+static void add_to_chain(void *p, MEM_SIZE size, MEM_SIZE chip);
 
 #define	MAGIC		0xff		/* magic # on accounting info */
 #define RMAGIC		0x55555555	/* magic # on range info */
@@ -571,46 +577,59 @@ static Malloc_t
 emergency_sbrk(size)
     MEM_SIZE size;
 {
+    MEM_SIZE rsize = (((size - 1)>>LOG_OF_MIN_ARENA) + 1)<<LOG_OF_MIN_ARENA;
+
     if (size >= BIG_SIZE) {
 	/* Give the possibility to recover: */
 	MUTEX_UNLOCK(&PL_malloc_mutex);
 	croak("Out of memory during \"large\" request for %i bytes", size);
     }
 
-    if (!emergency_buffer) {		
+    if (emergency_buffer_size >= rsize) {
+	char *old = emergency_buffer;
+	
+	emergency_buffer_size -= rsize;
+	emergency_buffer += rsize;
+	return old;
+    } else {		
 	dTHR;
 	/* First offense, give a possibility to recover by dieing. */
 	/* No malloc involved here: */
 	GV **gvp = (GV**)hv_fetch(PL_defstash, "^M", 2, 0);
 	SV *sv;
 	char *pv;
+	int have = 0;
 
+	if (emergency_buffer_size) {
+	    add_to_chain(emergency_buffer, emergency_buffer_size, 0);
+	    emergency_buffer_size = 0;
+	    emergency_buffer = Nullch;
+	    have = 1;
+	}
 	if (!gvp) gvp = (GV**)hv_fetch(PL_defstash, "\015", 1, 0);
 	if (!gvp || !(sv = GvSV(*gvp)) || !SvPOK(sv) 
-	    || (SvLEN(sv) < (1<<LOG_OF_MIN_ARENA) - M_OVERHEAD)) 
+	    || (SvLEN(sv) < (1<<LOG_OF_MIN_ARENA) - M_OVERHEAD)) {
+	    if (have)
+		goto do_croak;
 	    return (char *)-1;		/* Now die die die... */
-
+	}
 	/* Got it, now detach SvPV: */
 	pv = SvPV(sv, PL_na);
 	/* Check alignment: */
-	if (((u_bigint)(pv - M_OVERHEAD)) & ((1<<LOG_OF_MIN_ARENA) - 1)) {
+	if (((UV)(pv - sizeof(union overhead))) & ((1<<LOG_OF_MIN_ARENA) - 1)) {
 	    PerlIO_puts(PerlIO_stderr(),"Bad alignment of $^M!\n");
 	    return (char *)-1;		/* die die die */
 	}
 
-	emergency_buffer = pv - M_OVERHEAD;
-	emergency_buffer_size = SvLEN(sv) + M_OVERHEAD;
+	emergency_buffer = pv - sizeof(union overhead);
+	emergency_buffer_size = malloced_size(pv) + M_OVERHEAD;
 	SvPOK_off(sv);
-	SvREADONLY_on(sv);
-	MUTEX_UNLOCK(&PL_malloc_mutex);
-	croak("Out of memory during request for %i bytes", size);
+	SvPVX(sv) = Nullch;
+	SvCUR(sv) = SvLEN(sv) = 0;
     }
-    else if (emergency_buffer_size >= size) {
-	emergency_buffer_size -= size;
-	return emergency_buffer + emergency_buffer_size;
-    }
-    
-    return (char *)-1;			/* poor guy... */
+  do_croak:
+    MUTEX_UNLOCK(&PL_malloc_mutex);
+    croak("Out of memory during request for %i bytes", size);
 }
 
 #else /* !(defined(PERL_EMERGENCY_SBRK) && defined(PERL_CORE)) */
@@ -1033,6 +1052,12 @@ getpages_adjacent(int require)
 	    sbrked_remains = 0;
 	    last_sbrk_top = cp + require;
 	} else {
+	    if (cp == (char*)-1) {	/* Out of memory */
+#ifdef DEBUGGING_MSTATS
+		goodsbrk -= require;
+#endif
+		return 0;
+	    }
 	    /* Report the failure: */
 	    if (sbrked_remains)
 		add_to_chain((void*)(last_sbrk_top - sbrked_remains),
@@ -1352,6 +1377,10 @@ realloc(void *mp, size_t nbytes)
 #endif
 		res = cp;
 		MUTEX_UNLOCK(&PL_malloc_mutex);
+		DEBUG_m(PerlIO_printf(Perl_debug_log, 
+			      "0x%lx: (%05lu) realloc %ld bytes inplace\n",
+			      (unsigned long)res,(unsigned long)(PL_an++),
+			      (long)size));
 	} else if (incr == 1 && (cp - M_OVERHEAD == last_op) 
 		   && (onb > (1 << LOG_OF_MIN_ARENA))) {
 	    MEM_SIZE require, newarena = nbytes, pow;
@@ -1380,6 +1409,10 @@ realloc(void *mp, size_t nbytes)
 	} else {
 	  hard_way:
 	    MUTEX_UNLOCK(&PL_malloc_mutex);
+	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
+			      "0x%lx: (%05lu) realloc %ld bytes the hard way\n",
+			      (unsigned long)cp,(unsigned long)(PL_an++),
+			      (long)size));
 	    if ((res = (char*)malloc(nbytes)) == NULL)
 		return (NULL);
 	    if (cp != res)			/* common optimization */
@@ -1387,13 +1420,6 @@ realloc(void *mp, size_t nbytes)
 	    if (was_alloced)
 		free(cp);
 	}
-
-	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lu: (%05lu) rfree\n",
-			      (unsigned long)res,(unsigned long)(PL_an++)));
-	DEBUG_m(PerlIO_printf(Perl_debug_log, 
-			      "0x%lx: (%05lu) realloc %ld bytes\n",
-			      (unsigned long)res,(unsigned long)(PL_an++),
-			      (long)size));
   	return ((Malloc_t)res);
 }
 

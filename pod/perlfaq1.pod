@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 1.14 $, $Date: 1998/06/14 22:15:25 $)
+perlfaq1 - General Questions About Perl ($Revision: 1.15 $, $Date: 1998/08/05 11:52:24 $)
 
 =head1 DESCRIPTION
 
@@ -29,7 +29,8 @@ distribution policy of perl.  Perl is supported by its users.  The
 core, the standard Perl library, the optional modules, and the
 documentation you're reading now were all written by volunteers.  See
 the personal note at the end of the README file in the perl source
-distribution for more details.
+distribution for more details.  See L<perlhist> (new as of 5.005)
+for Perl's milestone releases.
 
 In particular, the core development team (known as the Perl
 Porters) are a rag-tag band of highly altruistic individuals
@@ -51,10 +52,10 @@ users the informal support will more than suffice.  See the answer to
 
 You should definitely use version 5.  Version 4 is old, limited, and
 no longer maintained; its last patch (4.036) was in 1992.  The most
-recent production release is 5.004_01.  Further references to the Perl
+recent production release is 5.005_01.  Further references to the Perl
 language in this document refer to this production release unless
 otherwise specified.  There may be one or more official bug fixes for
-5.004_01 by the time you read this, and also perhaps some experimental
+5.005_01 by the time you read this, and also perhaps some experimental
 versions on the way to the next release.
 
 =head2 What are perl4 and perl5?
@@ -210,7 +211,7 @@ available from http://www.perl.com/CPAN/misc/japh .
 Over a hundred quips by Larry, from postings of his or source code,
 can be found at http://www.perl.com/CPAN/misc/lwall-quotes .
 
-=head2 How can I convince my sysadmin/supervisor/employees to use version (5/5.004/Perl instead of some other language)?
+=head2 How can I convince my sysadmin/supervisor/employees to use version (5/5.005/Perl instead of some other language)?
 
 If your manager or employees are wary of unsupported software, or
 software which doesn't officially ship with your Operating System, you
@@ -240,10 +241,15 @@ for any given task.  Also mention that the difference between version
 (Well, ok, maybe not quite that distinct, but you get the idea.)  If
 you want support and a reasonable guarantee that what you're
 developing will continue to work in the future, then you have to run
-the supported version.  That probably means running the 5.004 release,
-although 5.003 isn't that bad (it's just one year and one release
+the supported version.  That probably means running the 5.005 release,
+although 5.004 isn't that bad (it's just one year and one release
 behind).  Several important bugs were fixed from the 5.000 through
-5.002 versions, though, so try upgrading past them if possible.
+5.003 versions, though, so try upgrading past them if possible.
+
+Of particular note is the massive bughunt for buffer overflow
+problems that went into the 5.004 release.  All releases prior to
+that, including perl4, are considered insecure and should be upgraded
+as soon as possible. 
 
 =head1 AUTHOR AND COPYRIGHT
 

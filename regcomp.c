@@ -319,7 +319,10 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 
 	}
 	if (OP(scan) != CURLYX) {
-	    int max = (reg_off_by_arg[OP(scan)] ? I32_MAX : U16_MAX);
+	    int max = (reg_off_by_arg[OP(scan)]
+		       ? I32_MAX
+		       /* I32 may be smaller than U16 on CRAYs! */
+		       : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
 	    int off = (reg_off_by_arg[OP(scan)] ? ARG(scan) : NEXT_OFF(scan));
 	    int noff;
 	    regnode *n = scan;

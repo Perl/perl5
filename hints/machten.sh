@@ -13,6 +13,10 @@
 #	Martijn Koster <m.koster@webcrawler.com>
 #	Richard Yeh <rcyeh@cco.caltech.edu>
 #
+# For now, explicitly disable dynamic loading -- MT 4.1.1 has it,
+# but these hints do not yet support it.
+# Define NOTEDEF_MACHTEN to undo gratuitous Tenon hack to signal.h.
+#                      -- Dominic Dunlop <domo@computer.org> 9800802
 # Completely disable SysV IPC pending more complete support from Tenon
 #                      -- Dominic Dunlop <domo@computer.org> 980712
 # Use vfork and perl's malloc by default
@@ -32,8 +36,16 @@
 #
 # Comments, questions, and improvements welcome!
 #
-# MachTen 4.X does support dynamic loading, but perl doesn't
+# MachTen 4.1.1 does support dynamic loading, but perl doesn't
 # know how to use it yet.
+usedl=${usedl:-undef}
+
+# MachTen 4.1.1 may have an unhelpful hack in /usr/include/signal.h.
+# Undo it if so.
+if grep NOTDEF_MACHTEN /usr/include/signal.h > /dev/null
+then
+    ccflags="$ccflags -DNOTDEF_MACHTEN"
+fi
 
 # Power MachTen is a real memory system and its standard malloc
 # has been optimized for this. Using this malloc instead of Perl's

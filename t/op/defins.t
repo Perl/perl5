@@ -61,6 +61,7 @@ while ($where{$seen} = <FILE>)
  }
 print "not " unless $seen;
 print "ok 5\n";
+close FILE;
 
 opendir(DIR,'.');
 $seen = 0;

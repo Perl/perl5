@@ -225,6 +225,8 @@ the undefined value if the file doesn't exist.  Despite the funny
 names, precedence is the same as any other named unary operator, and
 the argument may be parenthesized like any other unary operator.  The
 operator may be any of:
+X<-r>X<-w>X<-x>X<-o>X<-R>X<-W>X<-X>X<-O>X<-e>X<-z>X<-s>X<-f>X<-d>X<-l>X<-p>
+X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>
 
     -r	File is readable by effective uid/gid.
     -w	File is writable by effective uid/gid.
@@ -916,6 +918,12 @@ code evaluated with C<do FILENAME> doesn't see lexicals in the enclosing
 scope like C<eval STRING> does.  It's the same, however, in that it does
 reparse the file every time you call it, so you probably don't want to
 do this inside a loop.
+
+If C<do> cannot read the file, it returns undef and sets C<$!> to the
+error.    If C<do> can read the file but cannot compile it, it
+returns undef and sets an error message in C<$@>.   If the file is
+successfully compiled, C<do> returns the value of the last expression
+evaluated.
 
 Note that inclusion of library modules is better done with the
 C<use()> and C<require()> operators, which also do automatic error checking
@@ -3828,8 +3836,11 @@ FILENAME, MODE, PERMS.
 
 The possible values and flag bits of the MODE parameter are
 system-dependent; they are available via the standard module C<Fcntl>.
-However, for historical reasons, some values are universal: zero means
-read-only, one means write-only, and two means read/write.
+For historical reasons, some values work on almost every system
+supported by perl: zero means read-only, one means write-only, and two
+means read/write.  We know that these values do I<not> work under
+OS/390 Unix and on the Macintosh; you probably don't want to use them
+in new code.
 
 If the file named by FILENAME does not exist and the C<open()> call creates
 it (typically because MODE includes the C<O_CREAT> flag), then the value of

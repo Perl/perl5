@@ -21,6 +21,12 @@
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
+#ifdef I_FCNTL
+#include <fcntl.h>
+#endif
+#ifdef I_SYS_FILE
+#include <sys/file.h>
+#endif
 
 #define HOP(pos,off) (IN_UTF8 ? utf8_hop(pos, off) : (pos + off))
 
@@ -35,10 +41,10 @@ unset_cvowner(void *cvarg)
     dTHR;
 #endif /* DEBUGGING */
 
-    DEBUG_L((PerlIO_printf(PerlIO_stderr(), "%p unsetting CvOWNER of %p:%s\n",
+    DEBUG_S((PerlIO_printf(PerlIO_stderr(), "%p unsetting CvOWNER of %p:%s\n",
 			   thr, cv, SvPEEK((SV*)cv))));
     MUTEX_LOCK(CvMUTEXP(cv));
-    DEBUG_L(if (CvDEPTH(cv) != 0)
+    DEBUG_S(if (CvDEPTH(cv) != 0)
 		PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
 			      CvDEPTH(cv)););
     assert(thr == CvOWNER(cv));
@@ -1068,7 +1074,7 @@ do_readline(void)
 		    IoFLAGS(io) &= ~IOf_START;
 		    IoLINES(io) = 0;
 		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
-			do_open(PL_last_in_gv,"-",1,FALSE,0,0,Nullfp);
+			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,Nullfp);
 			sv_setpvn(GvSV(PL_last_in_gv), "-", 1);
 			SvSETMAGIC(GvSV(PL_last_in_gv));
 			fp = IoIFP(io);
@@ -1202,7 +1208,7 @@ do_readline(void)
 #endif /* !CSH */
 #endif /* !DOSISH */
 		(void)do_open(PL_last_in_gv, SvPVX(tmpcmd), SvCUR(tmpcmd),
-			      FALSE, 0, 0, Nullfp);
+			      FALSE, O_RDONLY, 0, Nullfp);
 		fp = IoIFP(io);
 #endif /* !VMS */
 		LEAVE;
@@ -1249,7 +1255,7 @@ do_readline(void)
 		IoFLAGS(io) |= IOf_START;
 	    }
 	    else if (type == OP_GLOB) {
-		if (do_close(PL_last_in_gv, FALSE) & ~0xFF)
+		if (!do_close(PL_last_in_gv, FALSE))
 		    warn("internal error: glob failed");
 	    }
 	    if (gimme == G_SCALAR) {
@@ -1465,7 +1471,9 @@ PP(pp_iter)
 	    char *max = SvPV((SV*)av, maxlen);
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
 #ifndef USE_THREADS			  /* don't risk potential race */
-		if (SvREFCNT(*cx->blk_loop.itervar) == 1) {
+		if (SvREFCNT(*cx->blk_loop.itervar) == 1
+		    && !SvMAGICAL(*cx->blk_loop.itervar))
+		{
 		    /* safe to reuse old SV */
 		    sv_setsv(*cx->blk_loop.itervar, cur);
 		}
@@ -1491,7 +1499,9 @@ PP(pp_iter)
 	    RETPUSHNO;
 
 #ifndef USE_THREADS			  /* don't risk potential race */
-	if (SvREFCNT(*cx->blk_loop.itervar) == 1) {
+	if (SvREFCNT(*cx->blk_loop.itervar) == 1
+	    && !SvMAGICAL(*cx->blk_loop.itervar))
+	{
 	    /* safe to reuse old SV */
 	    sv_setiv(*cx->blk_loop.itervar, cx->blk_loop.iterix++);
 	}
@@ -2089,7 +2099,7 @@ PP(pp_entersub)
 	    while (MgOWNER(mg))
 		COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
 	    MgOWNER(mg) = thr;
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: pp_entersub lock %p\n",
+	    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p: pp_entersub lock %p\n",
 				  thr, sv);)
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
 	    SvREFCNT_inc(sv);	/* Keep alive until magic_mutexfree */
@@ -2133,7 +2143,7 @@ PP(pp_entersub)
 	    /* We already have a clone to use */
 	    MUTEX_UNLOCK(CvMUTEXP(cv));
 	    cv = *(CV**)svp;
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 				  "entersub: %p already has clone %p:%s\n",
 				  thr, cv, SvPEEK((SV*)cv)));
 	    CvOWNER(cv) = thr;
@@ -2147,7 +2157,7 @@ PP(pp_entersub)
 		CvOWNER(cv) = thr;
 		SvREFCNT_inc(cv);
 		MUTEX_UNLOCK(CvMUTEXP(cv));
-		DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+		DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			    "entersub: %p grabbing %p:%s in stash %s\n",
 			    thr, cv, SvPEEK((SV*)cv), CvSTASH(cv) ?
 	    			HvNAME(CvSTASH(cv)) : "(none)"));
@@ -2156,7 +2166,7 @@ PP(pp_entersub)
 		CV *clonecv;
 		SvREFCNT_inc(cv); /* don't let it vanish from under us */
 		MUTEX_UNLOCK(CvMUTEXP(cv));
-		DEBUG_L((PerlIO_printf(PerlIO_stderr(),
+		DEBUG_S((PerlIO_printf(PerlIO_stderr(),
 				       "entersub: %p cloning %p:%s\n",
 				       thr, cv, SvPEEK((SV*)cv))));
 		/*
@@ -2173,7 +2183,7 @@ PP(pp_entersub)
 		cv = clonecv;
 		SvREFCNT_inc(cv);
 	    }
-	    DEBUG_L(if (CvDEPTH(cv) != 0)
+	    DEBUG_S(if (CvDEPTH(cv) != 0)
 			PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
 				      CvDEPTH(cv)););
 	    SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
@@ -2323,7 +2333,7 @@ PP(pp_entersub)
 	    SV** ary;
 
 #if 0
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 	    			  "%p entersub preparing @_\n", thr));
 #endif
 	    av = (AV*)PL_curpad[0];
@@ -2361,7 +2371,7 @@ PP(pp_entersub)
 	    }
 	}
 #if 0
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "%p entersub returning %p\n", thr, CvSTART(cv)));
 #endif
 	RETURNOP(CvSTART(cv));

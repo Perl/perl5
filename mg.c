@@ -422,7 +422,7 @@ magic_get(SV *sv, MAGIC *mg)
     case '\010':		/* ^H */
 	sv_setiv(sv, (IV)PL_hints);
 	break;
-    case '\t':			/* ^I */
+    case '\011':		/* ^I */ /* NOT \t in EBCDIC */
 	if (PL_inplace)
 	    sv_setpv(sv, PL_inplace);
 	else
@@ -520,7 +520,6 @@ magic_get(SV *sv, MAGIC *mg)
 	break;
     case '?':
 	{
-	    dTHR;
 	    sv_setiv(sv, (IV)STATUS_CURRENT);
 #ifdef COMPLEX_STATUS
 	    LvTARGOFF(sv) = PL_statusvalue;
@@ -1419,12 +1418,12 @@ vivify_defelem(SV *sv)
     if (mg->mg_obj) {
 	SV *ahv = LvTARG(sv);
 	if (SvTYPE(ahv) == SVt_PVHV) {
-	    HE *he = hv_fetch_ent((HV*)ahv, mg->mg_obj, FALSE, 0);
+	    HE *he = hv_fetch_ent((HV*)ahv, mg->mg_obj, TRUE, 0);
 	    if (he)
 		value = HeVAL(he);
 	}
 	else {
-	    SV **svp = avhv_fetch_ent((AV*)ahv, mg->mg_obj, FALSE, 0);
+	    SV **svp = avhv_fetch_ent((AV*)ahv, mg->mg_obj, TRUE, 0);
 	    if (svp)
 		value = *svp;
 	}
@@ -1542,7 +1541,7 @@ magic_set(SV *sv, MAGIC *mg)
     case '\010':	/* ^H */
 	PL_hints = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
-    case '\t':	/* ^I */
+    case '\011':	/* ^I */ /* NOT \t in EBCDIC */
 	if (PL_inplace)
 	    Safefree(PL_inplace);
 	if (SvOK(sv))
@@ -1867,7 +1866,7 @@ int
 magic_mutexfree(SV *sv, MAGIC *mg)
 {
     dTHR;
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: magic_mutexfree 0x%lx\n",
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "0x%lx: magic_mutexfree 0x%lx\n",
 			  (unsigned long)thr, (unsigned long)sv);)
     if (MgOWNER(mg))
 	croak("panic: magic_mutexfree");

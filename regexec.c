@@ -872,10 +872,13 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    else {
 		STRLEN len;
 		char *little = SvPV(prog->float_substr, len);
-		last = rninstr(s, strend, little, little + len);
+		if (len) 
+		    last = rninstr(s, strend, little, little + len);
+		else
+		    last = strend;	/* matching `$' */
 	    }
 	    if (last == NULL) goto phooey; /* Should not happen! */
-	    dontbother = strend - last - 1;
+	    dontbother = strend - last + prog->float_min_offset;
 	}
 	if (minlen && (dontbother < minlen))
 	    dontbother = minlen - 1;
@@ -883,11 +886,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	/* We don't know much -- general case. */
 	if (UTF) {
 	    for (;;) {
-		if (regtry(prog, s)) {
-		    strend += dontbother;  /* this one's always in bytes! */
-		    dontbother = 0;
+		if (regtry(prog, s))
 		    goto got_it;
-		}
 		if (s >= strend)
 		    break;
 		s += UTF8SKIP(s);
@@ -905,9 +905,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
     goto phooey;
 
 got_it:
-    strend = HOP(strend, dontbother);	/* uncheat */
     prog->subbeg = strbeg;
-    prog->subend = strend;
+    prog->subend = PL_regeol;	/* strend may have been modified */
     RX_MATCH_TAINTED_set(prog, PL_reg_flags & RF_tainted);
 
     /* make sure $`, $&, $', and $digit will work later */
@@ -919,7 +918,7 @@ got_it:
 	    }
 	}
 	else {
-	    I32 i = strend - startpos + (stringarg - strbeg);
+	    I32 i = PL_regeol - startpos + (stringarg - strbeg);
 	    s = savepvn(strbeg, i);
 	    Safefree(prog->subbase);
 	    prog->subbase = s;
@@ -1728,7 +1727,9 @@ regmatch(regnode *prog)
 		}
 		if (PL_dowarn && n >= REG_INFTY && !(PL_reg_flags & RF_warned)) {
 		    PL_reg_flags |= RF_warned;
-		    warn("count exceeded %d", REG_INFTY - 1);
+		    warn("%s limit (%d) exceeded",
+			 "Complex regular subexpression recursion",
+			 REG_INFTY - 1);
 		}
 
 		/* Failed deeper matches of scan, so see if this one works. */

@@ -6,20 +6,41 @@ print "1..21\n";
 
 sub backwards { $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 
+my $upperfirst = 'A' lt 'a';
+
+# Beware: in future this may become hairier because of possible
+# collation complications: qw(A a B c) can be sorted at least as
+# any of the following
+#
+#	A a B b
+#	A B a b
+#	a b A B
+#	a A b B
+#
+# All the above orders make sense.
+#
+# That said, EBCDIC sorts all small letters first, as opposed
+# to ASCII which sorts all big letters first.
+
 @harry = ('dog','cat','x','Cain','Abel');
 @george = ('gone','chased','yz','punished','Axed');
 
 $x = join('', sort @harry);
-print ($x eq 'AbelCaincatdogx' ? "ok 1\n" : "not ok 1\n");
-print "# x = '$x'\n";
+$expected = $upperfirst ? 'AbelCaincatdogx' : 'catdogxAbelCain';
+print "# 1: x = '$x', expected = '$expected'\n";
+print ($x eq $expected ? "ok 1\n" : "not ok 1\n");
 
 $x = join('', sort( backwards @harry));
-print ($x eq 'xdogcatCainAbel' ? "ok 2\n" : "not ok 2\n");
-print "# x = '$x'\n";
+$expected = $upperfirst ? 'xdogcatCainAbel' : 'CainAbelxdogcat';
+print "# 2: x = '$x', expected = '$expected'\n";
+print ($x eq $expected ? "ok 2\n" : "not ok 2\n");
 
 $x = join('', sort @george, 'to', @harry);
-print ($x eq 'AbelAxedCaincatchaseddoggonepunishedtoxyz'?"ok 3\n":"not ok 3\n");
-print "# x = '$x'\n";
+$expected = $upperfirst ?
+    'AbelAxedCaincatchaseddoggonepunishedtoxyz' :
+    'catchaseddoggonepunishedtoxyzAbelAxedCain' ;
+print "# 3: x = '$x', expected = '$expected'\n";
+print ($x eq $expected ?"ok 3\n":"not ok 3\n");
 
 @a = ();
 @b = reverse @a;
@@ -47,7 +68,9 @@ print ("@b" eq "2 3 4 10" ? "ok 9\n" : "not ok 9 (@b)\n");
 
 $sub = 'backwards';
 $x = join('', sort $sub @harry);
-print ($x eq 'xdogcatCainAbel' ? "ok 10\n" : "not ok 10\n");
+$expected = $upperfirst ? 'xdogcatCainAbel' : 'CainAbelxdogcat';
+print "# 10: x = $x, expected = '$expected'\n";
+print ($x eq $expected ? "ok 10\n" : "not ok 10\n");
 
 # literals, combinations
 

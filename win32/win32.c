@@ -1164,7 +1164,7 @@ win32_alarm(unsigned int sec)
 
 #if defined(HAVE_DES_FCRYPT) || defined(PERL_OBJECT)
 #ifdef HAVE_DES_FCRYPT
-extern char *	des_fcrypt(char *cbuf, const char *txt, const char *salt);
+extern char *	des_fcrypt(const char *txt, const char *salt, char *cbuf);
 #endif
 
 DllExport char *
@@ -1172,7 +1172,7 @@ win32_crypt(const char *txt, const char *salt)
 {
 #ifdef HAVE_DES_FCRYPT
     dTHR;
-    return des_fcrypt(crypt_buffer, txt, salt);
+    return des_fcrypt(txt, salt, crypt_buffer);
 #else
     die("The crypt() function is unimplemented due to excessive paranoia.");
     return Nullch;

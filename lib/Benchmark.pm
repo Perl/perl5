@@ -238,6 +238,13 @@ functionality.
 
 =cut
 
+# evaluate something in a clean lexical environment
+sub _doeval { eval shift }
+
+#
+# put any lexicals at file scope AFTER here
+#
+
 use Carp;
 use Exporter;
 @ISA=(Exporter);
@@ -280,7 +287,7 @@ sub real  { my($r,$pu,$ps,$cu,$cs) = @{$_[0]}; $r              ; }
 sub timediff {
     my($a, $b) = @_;
     my @r;
-    for ($i=0; $i < @$a; ++$i) {
+    for (my $i=0; $i < @$a; ++$i) {
 	push(@r, $a->[$i] - $b->[$i]);
     }
     bless \@r;
@@ -329,10 +336,15 @@ sub runloop {
 	last if $pack ne $curpack;
     }
 
-    my $subcode = (ref $c eq 'CODE')
-	? "sub { package $pack; my(\$_i)=$n; while (\$_i--){&\$c;} }"
-	: "sub { package $pack; my(\$_i)=$n; while (\$_i--){$c;} }";
-    my $subref  = eval $subcode;
+    my ($subcode, $subref);
+    if (ref $c eq 'CODE') {
+	$subcode = "sub { for (1 .. $n) { local \$_; package $pack; &\$c; } }";
+        $subref  = eval $subcode;
+    }
+    else {
+	$subcode = "sub { for (1 .. $n) { local \$_; package $pack; $c;} }";
+        $subref  = _doeval($subcode);
+    }
     croak "runloop unable to compile '$c': $@\ncode: $subcode\n" if $@;
     print STDERR "runloop $n '$subcode'\n" if $debug;
 

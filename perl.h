@@ -1424,6 +1424,7 @@ Gid_t getegid _((void));
 #ifndef Perl_debug_log
 #define Perl_debug_log	PerlIO_stderr()
 #endif
+#undef  YYDEBUG
 #define YYDEBUG 1
 #define DEB(a)     			a
 #define DEBUG(a)   if (PL_debug)		a
@@ -1443,6 +1444,11 @@ Gid_t getegid _((void));
 #define DEBUG_H(a) if (PL_debug & 8192)	a
 #define DEBUG_X(a) if (PL_debug & 16384)	a
 #define DEBUG_D(a) if (PL_debug & 32768)	a
+#  ifdef USE_THREADS
+#    define DEBUG_S(a) if (PL_debug & (1<<16))	a
+#  else
+#    define DEBUG_S(a)
+#  endif
 #else
 #define DEB(a)
 #define DEBUG(a)
@@ -1458,10 +1464,11 @@ Gid_t getegid _((void));
 #define DEBUG_r(a)
 #define DEBUG_x(a)
 #define DEBUG_u(a)
-#define DEBUG_L(a)
+#define DEBUG_S(a)
 #define DEBUG_H(a)
 #define DEBUG_X(a)
 #define DEBUG_D(a)
+#define DEBUG_S(a)
 #endif
 #define YYMAXDEPTH 300
 
@@ -1490,8 +1497,13 @@ double atof _((const char*));
 /* All of these are in stdlib.h or time.h for ANSI C */
 Time_t time();
 struct tm *gmtime(), *localtime();
+#ifdef OEMVS
+char *(strchr)(), *(strrchr)();
+char *(strcpy)(), *(strcat)();
+#else
 char *strchr(), *strrchr();
 char *strcpy(), *strcat();
+#endif
 #endif /* ! STANDARD_C */
 
 
@@ -1669,6 +1681,42 @@ EXT SV  * psig_name[];
 /* fast case folding tables */
 
 #ifdef DOINIT
+#ifdef EBCDIC
+EXT unsigned char fold[] = { /* fast EBCDIC case folding table */
+    0,      1,      2,      3,      4,      5,      6,      7,
+    8,      9,      10,     11,     12,     13,     14,     15,
+    16,     17,     18,     19,     20,     21,     22,     23,
+    24,     25,     26,     27,     28,     29,     30,     31,
+    32,     33,     34,     35,     36,     37,     38,     39,
+    40,     41,     42,     43,     44,     45,     46,     47,
+    48,     49,     50,     51,     52,     53,     54,     55,
+    56,     57,     58,     59,     60,     61,     62,     63,
+    64,     65,     66,     67,     68,     69,     70,     71,
+    72,     73,     74,     75,     76,     77,     78,     79,
+    80,     81,     82,     83,     84,     85,     86,     87,
+    88,     89,     90,     91,     92,     93,     94,     95,
+    96,     97,     98,     99,     100,    101,    102,    103,
+    104,    105,    106,    107,    108,    109,    110,    111,
+    112,    113,    114,    115,    116,    117,    118,    119,
+    120,    121,    122,    123,    124,    125,    126,    127,
+    128,    'A',    'B',    'C',    'D',    'E',    'F',    'G',
+    'H',    'I',    138,    139,    140,    141,    142,    143,
+    144,    'J',    'K',    'L',    'M',    'N',    'O',    'P',
+    'Q',    'R',    154,    155,    156,    157,    158,    159,
+    160,    161,    'S',    'T',    'U',    'V',    'W',    'X',
+    'Y',    'Z',    170,    171,    172,    173,    174,    175,
+    176,    177,    178,    179,    180,    181,    182,    183,
+    184,    185,    186,    187,    188,    189,    190,    191,
+    192,    'a',    'b',    'c',    'd',    'e',    'f',    'g',
+    'h',    'i',    202,    203,    204,    205,    206,    207,
+    208,    'j',    'k',    'l',    'm',    'n',    'o',    'p',
+    'q',    'r',    218,    219,    220,    221,    222,    223,
+    224,    225,    's',    't',    'u',    'v',    'w',    'x',
+    'y',    'z',    234,    235,    236,    237,    238,    239,
+    240,    241,    242,    243,    244,    245,    246,    247,
+    248,    249,    250,    251,    252,    253,    254,    255
+};
+#else   /* ascii rather than ebcdic */
 EXTCONST  unsigned char fold[] = {
 	0,	1,	2,	3,	4,	5,	6,	7,
 	8,	9,	10,	11,	12,	13,	14,	15,
@@ -1703,6 +1751,7 @@ EXTCONST  unsigned char fold[] = {
 	240,	241,	242,	243,	244,	245,	246,	247,
 	248,	249,	250,	251,	252,	253,	254,	255
 };
+#endif  /* !EBCDIC */
 #else
 EXTCONST unsigned char fold[];
 #endif
@@ -1747,6 +1796,42 @@ EXT unsigned char fold_locale[];
 #endif
 
 #ifdef DOINIT
+#ifdef EBCDIC
+EXT unsigned char freq[] = {/* EBCDIC frequencies for mixed English/C */
+    1,      2,      84,     151,    154,    155,    156,    157,
+    165,    246,    250,    3,      158,    7,      18,     29,
+    40,     51,     62,     73,     85,     96,     107,    118,
+    129,    140,    147,    148,    149,    150,    152,    153,
+    255,      6,      8,      9,     10,     11,     12,     13,
+     14,     15,     24,     25,     26,     27,     28,    226,
+     29,     30,     31,     32,     33,     43,     44,     45,
+     46,     47,     48,     49,     50,     76,     77,     78,
+     79,     80,     81,     82,     83,     84,     85,     86,
+     87,     94,     95,    234,    181,    233,    187,    190,
+    180,     96,     97,     98,     99,    100,    101,    102,
+    104,    112,    182,    174,    236,    232,    229,    103,
+    228,    226,    114,    115,    116,    117,    118,    119,
+    120,    121,    122,    235,    176,    230,    194,    162,
+    130,    131,    132,    133,    134,    135,    136,    137,
+    138,    139,    201,    205,    163,    217,    220,    224,
+    5,      248,    227,    244,    242,    255,    241,    231,
+    240,    253,    16,     197,    19,     20,     21,     187,
+    23,     169,    210,    245,    237,    249,    247,    239,
+    168,    252,    34,     196,    36,     37,     38,     39,
+    41,     42,     251,    254,    238,    223,    221,    213,
+    225,    177,    52,     53,     54,     55,     56,     57,
+    58,     59,     60,     61,     63,     64,     65,     66,
+    67,     68,     69,     70,     71,     72,     74,     75,
+    205,    208,    186,    202,    200,    218,    198,    179,
+    178,    214,    88,     89,     90,     91,     92,     93,
+    217,    166,    170,    207,    199,    209,    206,    204,
+    160,    212,    105,    106,    108,    109,    110,    111,
+    203,    113,    216,    215,    192,    175,    193,    243,
+    172,    161,    123,    124,    125,    126,    127,    128,
+    222,    219,    211,    195,    188,    193,    185,    184,
+    191,    183,    141,    142,    143,    144,    145,    146
+};
+#else  /* ascii rather than ebcdic */
 EXTCONST unsigned char freq[] = {	/* letter frequencies for mixed English/C */
 	1,	2,	84,	151,	154,	155,	156,	157,
 	165,	246,	250,	3,	158,	7,	18,	29,
@@ -1781,6 +1866,7 @@ EXTCONST unsigned char freq[] = {	/* letter frequencies for mixed English/C */
 	130,	131,	132,	133,	134,	135,	136,	137,
 	138,	139,	141,	142,	143,	144,	145,	146
 };
+#endif
 #else
 EXTCONST unsigned char freq[];
 #endif
@@ -1994,6 +2080,12 @@ typedef void *Thread;
 #endif
 
 #ifdef PERL_OBJECT
+/*
+ * The following is a buffer where new variables must
+ * be defined to maintain binary compatibility with PERL_OBJECT
+ * for 5.005
+ */
+PERLVAR(object_compatibility[30],	char)
 };
 
 #include "objpp.h"

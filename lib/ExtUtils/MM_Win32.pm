@@ -67,7 +67,21 @@ sub replace_manpage_separator {
 
 sub maybe_command {
     my($self,$file) = @_;
-    return "$file.exe" if -e "$file.exe";
+    my @e = exists($ENV{'PATHEXT'})
+          ? split(/;/, $ENV{PATHEXT})
+	  : qw(.com .exe .bat .cmd);
+    my $e = '';
+    for (@e) { $e .= "\Q$_\E|" }
+    chop $e;
+    # see if file ends in one of the known extensions
+    if ($file =~ /($e)$/i) {
+	return $file if -e $file;
+    }
+    else {
+	for (@e) {
+	    return "$file$_" if -e "$file$_";
+	}
+    }
     return;
 }
 
@@ -155,21 +169,19 @@ sub init_others
  $self->{'TEST_F'} = '$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Command -e test_f';
  $self->{'LD'}     = $Config{'ld'} || 'link';
  $self->{'AR'}     = $Config{'ar'} || 'lib';
- if ($GCC)
-  {
-   $self->{'LDLOADLIBS'} ||= ' ';
-  }
- else
-  {
-   $self->{'LDLOADLIBS'}
-      ||= ( $BORLAND
-            ? 'import32.lib'
-            : # compiler adds msvcrtd?.lib according to debug switches
-               'oldnames.lib kernel32.lib comdlg32.lib winspool.lib gdi32.lib '
-	      .'advapi32.lib user32.lib shell32.lib netapi32.lib ole32.lib '
-	      .'oleaut32.lib uuid.lib wsock32.lib mpr.lib winmm.lib version.lib'
-  	) . ' $(LIBC) odbc32.lib odbccp32.lib';
-  }
+ $self->{'LDLOADLIBS'} ||= $Config{'libs'};
+ # -Lfoo must come first for Borland, so we put it in LDDLFLAGS
+ if ($BORLAND) {
+     my $libs = $self->{'LDLOADLIBS'};
+     my $libpath = '';
+     while ($libs =~ s/(?:^|\s)(("?)-L.+?\2)(?:\s|$)/ /) {
+         $libpath .= ' ' if length $libpath;
+         $libpath .= $1;
+     }
+     $self->{'LDLOADLIBS'} = $libs;
+     $self->{'LDDLFLAGS'} ||= $Config{'lddlflags'};
+     $self->{'LDDLFLAGS'} .= " $libpath";
+ }
  $self->{'DEV_NULL'} = '> NUL';
  # $self->{'NOECHO'} = ''; # till we have it working
 }
@@ -718,6 +730,7 @@ We don't want manpage process.  XXX add pod2html support later.
 =cut
 
 sub manifypods {
+    my($self) = shift;
     return "\nmanifypods :\n\t$self->{NOECHO}\$(NOOP)\n";
 }
 

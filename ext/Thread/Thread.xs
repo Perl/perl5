@@ -23,7 +23,7 @@ static void
 remove_thread(struct perl_thread *t)
 {
 #ifdef USE_THREADS
-    DEBUG_L(WITH_THR(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_S(WITH_THR(PerlIO_printf(PerlIO_stderr(),
 				   "%p: remove_thread %p\n", thr, t)));
     MUTEX_LOCK(&PL_threads_mutex);
     MUTEX_DESTROY(&t->mutex);
@@ -48,7 +48,7 @@ threadstart(void *arg)
     AV *av;
     int i;
 
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread %p starting at %s\n",
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "new thread %p starting at %s\n",
 			  thr, SvPEEK(TOPs)));
     thr = (Thread) arg;
     savemark = TOPMARK;
@@ -67,7 +67,7 @@ threadstart(void *arg)
     myop.op_flags |= OPf_KNOW;
     myop.op_flags |= OPf_WANT_LIST;
     PL_op = pp_entersub(ARGS);
-    DEBUG_L(if (!PL_op)
+    DEBUG_S(if (!PL_op)
 	    PerlIO_printf(PerlIO_stderr(), "thread starts at Nullop\n"));
     /*
      * When this thread is next scheduled, we start in the right
@@ -88,7 +88,7 @@ threadstart(void *arg)
     AV *av = newAV();
     int i, ret;
     dJMPENV;
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread %p waiting to start\n",
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "new thread %p waiting to start\n",
 			  thr));
 
     /* Don't call *anything* requiring dTHR until after SET_THR() */
@@ -110,7 +110,7 @@ threadstart(void *arg)
     SET_THR(thr);
 
     /* Only now can we use SvPEEK (which calls sv_newmortal which does dTHR) */
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread %p starting at %s\n",
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "new thread %p starting at %s\n",
 			  thr, SvPEEK(TOPs)));
 
     sv = POPs;
@@ -125,10 +125,10 @@ threadstart(void *arg)
 	MUTEX_UNLOCK(&thr->mutex);
 	av_store(av, 0, &PL_sv_no);
 	av_store(av, 1, newSVsv(thr->errsv));
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p died: %s\n",
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p died: %s\n",
 			      thr, SvPV(thr->errsv, PL_na)));
     } else {
-	DEBUG_L(STMT_START {
+	DEBUG_S(STMT_START {
 	    for (i = 1; i <= retval; i++) {
 		PerlIO_printf(PerlIO_stderr(), "%p return[%d] = %s\n",
 				thr, i, SvPEEK(SP[i - 1]));
@@ -177,28 +177,28 @@ threadstart(void *arg)
     /*SvREFCNT_dec(PL_defoutgv);*/
 
     MUTEX_LOCK(&thr->mutex);
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			  "%p: threadstart finishing: state is %u\n",
 			  thr, ThrSTATE(thr)));
     switch (ThrSTATE(thr)) {
     case THRf_R_JOINABLE:
 	ThrSETSTATE(thr, THRf_ZOMBIE);
 	MUTEX_UNLOCK(&thr->mutex);
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "%p: R_JOINABLE thread finished\n", thr));
 	break;
     case THRf_R_JOINED:
 	ThrSETSTATE(thr, THRf_DEAD);
 	MUTEX_UNLOCK(&thr->mutex);
 	remove_thread(thr);
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "%p: R_JOINED thread finished\n", thr));
 	break;
     case THRf_R_DETACHED:
 	ThrSETSTATE(thr, THRf_DEAD);
 	MUTEX_UNLOCK(&thr->mutex);
 	SvREFCNT_dec(av);
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "%p: DETACHED thread finished\n", thr));
 	remove_thread(thr);	/* This might trigger main thread to finish */
 	break;
@@ -234,7 +234,7 @@ newthread (SV *startsv, AV *initargs, char *classname)
     savethread = thr;
     thr = new_struct_thread(thr);
     SPAGAIN;
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			  "%p: newthread (%p), tid is %u, preparing stack\n",
 			  savethread, thr, thr->tid));
     /* The following pushes the arg list and startsv onto the *new* stack */
@@ -283,7 +283,7 @@ newthread (SV *startsv, AV *initargs, char *classname)
     MUTEX_UNLOCK(&thr->mutex);
 #endif
     if (err) {
-        DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+        DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "%p: create of %p failed %d\n",
 			      savethread, thr, err));
 	/* Thread creation failed--clean up */
@@ -322,7 +322,7 @@ handle_thread_signal(int sig)
      * so don't be surprised if this isn't robust while debugging
      * with -DL.
      */
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 	    "handle_thread_signal: got signal %d\n", sig););
     write(sig_pipe[1], &c, 1);
 }
@@ -345,7 +345,7 @@ join(t)
 	int	i = NO_INIT
     PPCODE:
 #ifdef USE_THREADS
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: joining %p (state %u)\n",
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p: joining %p (state %u)\n",
 			      thr, t, ThrSTATE(t)););
     	MUTEX_LOCK(&t->mutex);
 	switch (ThrSTATE(t)) {
@@ -372,7 +372,7 @@ join(t)
 		XPUSHs(sv_2mortal(*av_fetch(av, i, FALSE)));
 	} else {
 	    char *mess = SvPV(*av_fetch(av, 1, FALSE), PL_na);
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 				  "%p: join propagating die message: %s\n",
 				  thr, mess));
 	    croak(mess);
@@ -384,7 +384,7 @@ detach(t)
 	Thread	t
     CODE:
 #ifdef USE_THREADS
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: detaching %p (state %u)\n",
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p: detaching %p (state %u)\n",
 			      thr, t, ThrSTATE(t)););
     	MUTEX_LOCK(&t->mutex);
 	switch (ThrSTATE(t)) {
@@ -476,7 +476,7 @@ CODE:
 	    sv = SvRV(sv);
 
 	mg = condpair_magic(sv);
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: cond_wait %p\n", thr, sv));
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p: cond_wait %p\n", thr, sv));
 	MUTEX_LOCK(MgMUTEXP(mg));
 	if (MgOWNER(mg) != thr) {
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
@@ -500,7 +500,7 @@ CODE:
 	    sv = SvRV(sv);
 
 	mg = condpair_magic(sv);
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: cond_signal %p\n",thr,sv));
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p: cond_signal %p\n",thr,sv));
 	MUTEX_LOCK(MgMUTEXP(mg));
 	if (MgOWNER(mg) != thr) {
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
@@ -520,7 +520,7 @@ CODE:
 	    sv = SvRV(sv);
 
 	mg = condpair_magic(sv);
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: cond_broadcast %p\n",
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p: cond_broadcast %p\n",
 			      thr, sv));
 	MUTEX_LOCK(MgMUTEXP(mg));
 	if (MgOWNER(mg) != thr) {
@@ -623,7 +623,7 @@ await_signal()
 	ST(0) = sv_newmortal();
 	if (ret)
 	    sv_setsv(ST(0), c ? psig_ptr[c] : &PL_sv_no);
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "await_signal returning %s\n", SvPEEK(ST(0))););
 
 MODULE = Thread		PACKAGE = Thread::Specific

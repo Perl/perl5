@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.25 $, $Date: 1998/07/05 15:07:20 $)
+perlfaq8 - System Interaction ($Revision: 1.26 $, $Date: 1998/08/05 12:20:28 $)
 
 =head1 DESCRIPTION
 
@@ -1005,7 +1005,7 @@ Perl offers several different ways to include code from one file into
 another.  Here are the deltas between the various inclusion constructs:
 
     1)  do $file is like eval `cat $file`, except the former:
-	1.1: searches @INC.
+	1.1: searches @INC and updates %INC.
 	1.2: bequeaths an *unrelated* lexical scope on the eval'ed code.
 
     2)  require $file is like do $file, except the former:

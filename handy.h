@@ -183,11 +183,20 @@ typedef unsigned short	U16;
 #define isSPACE(c) \
 	((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
 #define isDIGIT(c)	((c) >= '0' && (c) <= '9')
-#define isUPPER(c)	((c) >= 'A' && (c) <= 'Z')
-#define isLOWER(c)	((c) >= 'a' && (c) <= 'z')
-#define isPRINT(c)	(((c) > 32 && (c) < 127) || isSPACE(c))
-#define toUPPER(c)	(isLOWER(c) ? (c) - ('a' - 'A') : (c))
-#define toLOWER(c)	(isUPPER(c) ? (c) + ('a' - 'A') : (c))
+#ifdef EBCDIC
+    /* In EBCDIC we do not do locales: therefore() isupper() is fine. */
+#   define isUPPER(c)	isupper(c)
+#   define isLOWER(c)	islower(c)
+#   define isPRINT(c)	isprint(c)
+#   define toUPPER(c)	toupper(c)
+#   define toLOWER(c)	tolower(c)
+#else
+#   define isUPPER(c)	((c) >= 'A' && (c) <= 'Z')
+#   define isLOWER(c)	((c) >= 'a' && (c) <= 'z')
+#   define isPRINT(c)	(((c) > 32 && (c) < 127) || isSPACE(c))
+#   define toUPPER(c)	(isLOWER(c) ? (c) - ('a' - 'A') : (c))
+#   define toLOWER(c)	(isUPPER(c) ? (c) + ('a' - 'A') : (c))
+#endif
 
 #ifdef USE_NEXT_CTYPE
 
@@ -286,8 +295,13 @@ typedef unsigned short	U16;
 #define toTITLE_LC_utf8(p)	toTITLE_LC_uni(utf8_to_uv(p, 0))
 #define toLOWER_LC_utf8(p)	toLOWER_LC_uni(utf8_to_uv(p, 0))
 
-/* This conversion works both ways, strangely enough. */
-#define toCTRL(c)    (toUPPER(c) ^ 64)
+#ifdef EBCDIC
+EXT int ebcdic_control _((int));
+#  define toCTRL(c)	ebcdic_control(c)
+#else
+  /* This conversion works both ways, strangely enough. */
+#  define toCTRL(c)    (toUPPER(c) ^ 64)
+#endif
 
 /* Line numbers are unsigned, 16 bits. */
 typedef U16 line_t;

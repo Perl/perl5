@@ -125,22 +125,37 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
     }
 
     if (as_raw) {
-	result = rawmode & 3;
-	IoTYPE(io) = "<>++"[result];
+#ifndef O_ACCMODE
+#define O_ACCMODE 3		/* Assume traditional implementation */
+#endif
+	switch (result = rawmode & O_ACCMODE) {
+	case O_RDONLY:
+	     IoTYPE(io) = '<';
+	     break;
+	case O_WRONLY:
+	     IoTYPE(io) = '>';
+	     break;
+	case O_RDWR:
+	default:
+	     IoTYPE(io) = '+';
+	     break;
+	}
+
 	writing = (result > 0);
 	fd = PerlLIO_open3(name, rawmode, rawperm);
+
 	if (fd == -1)
 	    fp = NULL;
 	else {
 	    char *fpmode;
-	    if (result == 0)
+	    if (result == O_RDONLY)
 		fpmode = "r";
 #ifdef O_APPEND
 	    else if (rawmode & O_APPEND)
-		fpmode = (result == 1) ? "a" : "a+";
+		fpmode = (result == O_WRONLY) ? "a" : "a+";
 #endif
 	    else
-		fpmode = (result == 1) ? "w" : "r+";
+		fpmode = (result == O_WRONLY) ? "w" : "r+";
 	    fp = PerlIO_fdopen(fd, fpmode);
 	    if (!fp)
 		PerlLIO_close(fd);
@@ -400,7 +415,7 @@ nextargv(register GV *gv)
 	sv_setsv(GvSV(gv),sv);
 	SvSETMAGIC(GvSV(gv));
 	PL_oldname = SvPVx(GvSV(gv), oldlen);
-	if (do_open(gv,PL_oldname,oldlen,PL_inplace!=0,0,0,Nullfp)) {
+	if (do_open(gv,PL_oldname,oldlen,PL_inplace!=0,O_RDONLY,0,Nullfp)) {
 	    if (PL_inplace) {
 		TAINT_PROPER("inplace open");
 		if (oldlen == 1 && *PL_oldname == '-') {
@@ -462,7 +477,7 @@ nextargv(register GV *gv)
 		    do_close(gv,FALSE);
 		    (void)PerlLIO_unlink(SvPVX(sv));
 		    (void)PerlLIO_rename(PL_oldname,SvPVX(sv));
-		    do_open(gv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,0,0,Nullfp);
+		    do_open(gv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,O_RDONLY,0,Nullfp);
 #endif /* DOSISH */
 #else
 		    (void)UNLINK(SvPVX(sv));

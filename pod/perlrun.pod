@@ -272,6 +272,7 @@ equivalent to B<-Dtls>):
      8192  H  Hash dump -- usurps values()
     16384  X  Scratchpad allocation
     32768  D  Cleaning up
+    65536  S  Thread synchronization
 
 All these flags require C<-DDEBUGGING> when you compile the Perl
 executable.  This flag is automatically set if you include C<-g>

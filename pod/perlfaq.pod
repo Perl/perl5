@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 1998/07/20 23:12:17 $)
+perlfaq - frequently asked questions about Perl ($Date: 1998/08/05 12:09:32 $)
 
 =head1 DESCRIPTION
 
@@ -117,7 +117,7 @@ in respect of this information or its use.
 
 =over 4
 
-=head 22/June/98
+=item 22/June/98
 
 Significant changes throughout in preparation for the 5.005
 release.

@@ -225,7 +225,7 @@ L<Test::Harness> and various test coverage analysis tools.
 
 =head1 AUTHOR
 
-Copyright © 1998 Joshua Nathaniel Pritikin.  All rights reserved.
+Copyright (C) 1998 Joshua Nathaniel Pritikin.  All rights reserved.
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified

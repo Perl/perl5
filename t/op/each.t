@@ -43,7 +43,8 @@ if ($#keys == 29 && $#values == 29) {print "ok 1\n";} else {print "not ok 1\n";}
 $i = 0;		# stop -w complaints
 
 while (($key,$value) = each(%h)) {
-    if ($key eq $keys[$i] && $value eq $values[$i] && $key eq lc($value)) {
+    if ($key eq $keys[$i] && $value eq $values[$i]
+        && (('a' lt 'A' && $key lt $value) || $key gt $value)) {
 	$key =~ y/a-z/A-Z/;
 	$i++ if $key eq $value;
     }

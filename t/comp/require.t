@@ -7,16 +7,26 @@ BEGIN {
 
 # don't make this lexical
 $i = 1;
-print "1..3\n";
+print "1..4\n";
 
 sub do_require {
     %INC = ();
-    open(REQ,">bleah.pm") or die "Can't write 'bleah.pm': $!";
-    print REQ @_;
-    close REQ;
+    write_file('bleah.pm',@_);
     eval { require "bleah.pm" };
     my @a; # magic guard for scope violations (must be first lexical in file)
 }
+
+sub write_file {
+    my $f = shift;
+    open(REQ,">$f") or die "Can't write '$f': $!";
+    print REQ @_;
+    close REQ;
+}
+
+# interaction with pod (see the eof)
+write_file('bleah.pm', "print 'ok $i\n'; 1;\n");
+require "bleah.pm";
+$i++;
 
 # run-time failure in require
 do_require "0;\n";
@@ -25,7 +35,7 @@ print "ok ",$i++,"\n";
 
 # compile-time failure in require
 do_require "1)\n";
-print "# $@\nnot " unless $@ =~ /syntax error/;
+print "# $@\nnot " unless $@ =~ /syntax error/i;
 print "ok ",$i++,"\n";
 
 # successful require
@@ -33,4 +43,8 @@ do_require "1";
 print "# $@\nnot " if $@;
 print "ok ",$i++,"\n";
 
-unlink 'bleah.pm';
+END { unlink 'bleah.pm'; }
+
+# ***interaction with pod (don't put any thing after here)***
+
+=pod

@@ -53,6 +53,9 @@ sub get_files {
 	} elsif ($Config{vms_cc_type} eq 'gcc') {
 	    $file{'gnu_cc_include:[000000]errno.h'} = 1;
 	}
+    } elsif ($^O eq 'os390') {
+	# OS/390 C compiler doesn't generate #file or #line directives
+	$file{'/usr/include/errno.h'} = 1;
     } else {
 	open(CPPI,"> errno.c") or
 	    die "Cannot open errno.c";
@@ -104,7 +107,7 @@ sub write_errno_pm {
 	$cpp =~ s/sys\$input//i;
 	open(CPPO,"$cpp  errno.c |") or
           die "Cannot exec $Config{cppstdin}";
-    } elsif($^O eq 'next') {
+    } elsif(!$Config{'cpprun'} or $^O eq 'next') {
 	# NeXT will do syntax checking unless it is reading from stdin
 	my $cpp = "$Config{cppstdin} $Config{cppflags} $Config{cppminus}";
 	open(CPPO,"$cpp < errno.c |")

@@ -1203,6 +1203,21 @@ Old versions of the DB library (including the DB library which comes
 with FreeBSD 2.1) had broken handling of recno databases with modified
 bval settings.  Upgrade your DB library or OS.
 
+=item Bad arg length for semctl, is XX, should be ZZZ
+
+If you get this error message from the lib/ipc_sysv test, your System
+V IPC may be broken.  The XX typically is 20, and that is what ZZZ
+also should be.  Consider upgrading your OS, or reconfiguring your OS
+to include the System V semaphores.
+
+=item lib/ipc_sysv........semget: No space left on device
+
+Either your account or the whole system has run out of semaphores.  Or
+both.  Either list the semaphores with "ipcs" and remove the unneeded
+ones (which ones these are depends on your system and applications)
+with "ipcrm -s SEMAPHORE_ID_HERE" or configure more semaphores to your
+system.
+
 =item Miscellaneous
 
 Some additional things that have been reported for either perl4 or perl5:
@@ -1212,6 +1227,10 @@ Genix may need to use libc rather than libc_s, or #undef VARARGS.
 NCR Tower 32 (OS 2.01.01) may need -W2,-Sl,2000 and #undef MKDIR.
 
 UTS may need one or more of -DCRIPPLED_CC, -K or -g, and undef LSTAT.
+
+FreeBSD can fail the lib/ipc_sysv.t test if SysV IPC has not been
+configured to the kernel.  Perl tries to detect this, though, and
+you will get a message telling what to do.
 
 If you get syntax errors on '(', try -DCRIPPLED_CC.
 

@@ -187,7 +187,13 @@ missingterm(char *s)
 	if (nl)
 	    *nl = '\0';
     }
-    else if (PL_multi_close < 32 || PL_multi_close == 127) {
+    else if (
+#ifdef EBCDIC
+	iscntrl(PL_multi_close)
+#else
+	PL_multi_close < 32 || PL_multi_close == 127
+#endif
+	) {
 	*tmpbuf = '^';
 	tmpbuf[1] = toCTRL(PL_multi_close);
 	s = "\\n";
@@ -1069,8 +1075,15 @@ scan_const(char *start)
 	    /* \c is a control character */
 	    case 'c':
 		s++;
+#ifdef EBCDIC
+		*d = *s++;
+		if (isLOWER(*d))
+		   *d = toUPPER(*d);
+		*d++ = toCTRL(*d); 
+#else
 		len = *s++;
 		*d++ = toCTRL(len);
+#endif
 		continue;
 
 	    /* printf-style backslashes, formfeeds, newlines, etc */
@@ -1470,7 +1483,7 @@ filter_gets(register SV *sv, register PerlIO *fp, STRLEN append)
         else
 	    return Nullch ;
     }
-    else 
+    else
         return (sv_gets(sv, fp, append));
 }
 
@@ -1899,6 +1912,7 @@ yylex(void)
 		    else
 			(void)PerlIO_close(PL_rsfp);
 		    PL_rsfp = Nullfp;
+		    PL_doextract = FALSE;
 		}
 		if (!PL_in_eval && (PL_minus_n || PL_minus_p)) {
 		    sv_setpv(PL_linestr,PL_minus_p ? ";}continue{print" : "");
@@ -4147,7 +4161,17 @@ yylex(void)
 	    FUN0(OP_WANTARRAY);
 
 	case KEY_write:
-	    gv_fetchpv("\f",TRUE, SVt_PV);	/* Make sure $^L is defined */
+#ifdef EBCDIC
+	{
+	    static char ctl_l[2];
+
+	    if (ctl_l[0] == '\0') 
+ 		ctl_l[0] = toCTRL('L');
+	    gv_fetchpv(ctl_l,TRUE, SVt_PV);
+	}
+#else
+	    gv_fetchpv("\f",TRUE, SVt_PV);      /* Make sure $^L is defined */
+#endif
 	    UNI(OP_ENTERWRITE);
 
 	case KEY_x:

@@ -20,6 +20,7 @@ Porting/Glossary	Glossary of config.sh variables
 Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
 Porting/findvars	Find occurrences of words
+Porting/fixCORE		Find and fix modules that generate warnings
 Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/makerel		Release making utility
@@ -34,6 +35,7 @@ README.cygwin32		Notes about Cygwin32 port
 README.dos		Notes about dos/djgpp port
 README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
+README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
 README.qnx		Notes about QNX port
 README.threads		Notes about multithreading
@@ -73,6 +75,7 @@ doio.c			I/O operations
 doop.c			Support code for various operations
 dosish.h		Some defines for MS/DOSish machines
 dump.c			Debugging output
+ebcdic.c		EBCDIC support routines
 eg/ADB			An adb wrapper to put in your crash dir
 eg/README		Intro to example perl scripts
 eg/cgi/RunMeFirst		Setup script for CGI examples
@@ -1198,6 +1201,7 @@ win32/config_H.gc	Win32 config header (GNU build)?
 win32/config_H.vc	Win32 config header (Visual C++ build)
 win32/config_h.PL	Perl code to convert Win32 config.sh to config.h
 win32/config_sh.PL	Perl code to update Win32 config.sh from Makefile 
+win32/des_fcrypt.patch	Win32 port
 win32/dl_win32.xs	Win32 port
 win32/genxsdef.pl	Win32 port
 win32/include/arpa/inet.h	Win32 port

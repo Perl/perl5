@@ -1,5 +1,6 @@
 #ifndef __PATCHLEVEL_H_INCLUDED__
 #define PATCHLEVEL 5
+#undef SUBVERSION     /* OS/390 has a SUBVERSION in a system header */
 #define SUBVERSION 50
 
 /*

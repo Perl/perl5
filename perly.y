@@ -26,12 +26,20 @@ dep(void)
 
 %start prog
 
+%{
+#ifndef OEMVS
+%}
+
 %union {
     I32	ival;
     char *pval;
     OP *opval;
     GV *gvval;
 }
+
+%{
+#endif /* OEMVS */
+%}
 
 %token <ival> '{' ')'
 

@@ -1,11 +1,5 @@
 #!./perl
 
-
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib' if -d '../lib';
-}
-
 print "1..71\n";
 
 $x = 'foo';
@@ -187,13 +181,21 @@ tr/a-z/A-Z/;
 print $_ eq 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' ? "ok 52\n" : "not ok 52\n";
 
 # same as tr/A-Z/a-z/;
-y[\101-\132][\141-\172];
+if ($^O eq 'os390') {	# An EBCDIC variant.
+    y[\301-\351][\201-\251];
+} else {		# Ye Olde ASCII.  Or something like it.
+    y[\101-\132][\141-\172];
+}
 
 print $_ eq 'abcdefghijklmnopqrstuvwxyz0123456789' ? "ok 53\n" : "not ok 53\n";
 
-$_ = '+,-';
-tr/+--/a-c/;
-print $_ eq 'abc' ? "ok 54\n" : "not ok 54\n";
+if (ord("+") == ord(",") - 1 && ord(",") == ord("-") - 1 &&
+    ord("a") == ord("b") - 1 && ord("b") == ord("c") - 1) {
+  $_ = '+,-';
+  tr/+--/a-c/;
+  print "not " unless $_ eq 'abc';
+}
+print "ok 54\n";
 
 $_ = '+,-';
 tr/+\--/a\/c/;

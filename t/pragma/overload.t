@@ -5,8 +5,6 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Config;
-
 package Oscalar;
 use overload ( 
 				# Anonymous subroutines:
@@ -436,6 +434,265 @@ test($b, "_<oups1
 >_");	# 134
 test($c, "bareword");	# 135
 
+{
+  package symbolic;		# Primitive symbolic calculator
+  use overload nomethod => \&wrap, '""' => \&str, '0+' => \&num,
+      '=' => \&cpy, '++' => \&inc, '--' => \&dec;
+
+  sub new { shift; bless ['n', @_] }
+  sub cpy {
+    my $self = shift;
+    bless [@$self], ref $self;
+  }
+  sub inc { $_[0] = bless ['++', $_[0], 1]; }
+  sub dec { $_[0] = bless ['--', $_[0], 1]; }
+  sub wrap {
+    my ($obj, $other, $inv, $meth) = @_;
+    if ($meth eq '++' or $meth eq '--') {
+      @$obj = ($meth, (bless [@$obj]), 1); # Avoid circular reference
+      return $obj;
+    }
+    ($obj, $other) = ($other, $obj) if $inv;
+    bless [$meth, $obj, $other];
+  }
+  sub str {
+    my ($meth, $a, $b) = @{+shift};
+    $a = 'u' unless defined $a;
+    if (defined $b) {
+      "[$meth $a $b]";
+    } else {
+      "[$meth $a]";
+    }
+  } 
+  my %subr = ( 'n' => sub {$_[0]} );
+  foreach my $op (split " ", $overload::ops{with_assign}) {
+    $subr{$op} = $subr{"$op="} = eval "sub {shift() $op shift()}";
+  }
+  my @bins = qw(binary 3way_comparison num_comparison str_comparison);
+  foreach my $op (split " ", "@overload::ops{ @bins }") {
+    $subr{$op} = eval "sub {shift() $op shift()}";
+  }
+  foreach my $op (split " ", "@overload::ops{qw(unary func)}") {
+    $subr{$op} = eval "sub {$op shift()}";
+  }
+  $subr{'++'} = $subr{'+'};
+  $subr{'--'} = $subr{'-'};
+  
+  sub num {
+    my ($meth, $a, $b) = @{+shift};
+    my $subr = $subr{$meth} 
+      or die "Do not know how to ($meth) in symbolic";
+    $a = $a->num if ref $a eq __PACKAGE__;
+    $b = $b->num if ref $b eq __PACKAGE__;
+    $subr->($a,$b);
+  }
+  sub TIESCALAR { my $pack = shift; $pack->new(@_) }
+  sub FETCH { shift }
+  sub nop {  }		# Around a bug
+  sub vars { my $p = shift; tie($_, $p), $_->nop foreach @_; }
+  sub STORE { 
+    my $obj = shift; 
+    $#$obj = 1; 
+    @$obj->[0,1] = ('=', shift);
+  }
+}
+
+{
+  my $foo = new symbolic 11;
+  my $baz = $foo++;
+  test( (sprintf "%d", $foo), '12');
+  test( (sprintf "%d", $baz), '11');
+  my $bar = $foo;
+  $baz = ++$foo;
+  test( (sprintf "%d", $foo), '13');
+  test( (sprintf "%d", $bar), '12');
+  test( (sprintf "%d", $baz), '13');
+  my $ban = $foo;
+  $baz = ($foo += 1);
+  test( (sprintf "%d", $foo), '14');
+  test( (sprintf "%d", $bar), '12');
+  test( (sprintf "%d", $baz), '14');
+  test( (sprintf "%d", $ban), '13');
+  $baz = 0;
+  $baz = $foo++;
+  test( (sprintf "%d", $foo), '15');
+  test( (sprintf "%d", $baz), '14');
+  test( "$foo", '[++ [+= [++ [++ [n 11] 1] 1] 1] 1]');
+}
+
+{
+  my $iter = new symbolic 2;
+  my $side = new symbolic 1;
+  my $cnt = $iter;
+  
+  while ($cnt) {
+    $cnt = $cnt - 1;		# The "simple" way
+    $side = (sqrt(1 + $side**2) - 1)/$side;
+  }
+  my $pi = $side*(2**($iter+2));
+  test "$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]';
+  test( (sprintf "%f", $pi), '3.182598');
+}
+
+{
+  my $iter = new symbolic 2;
+  my $side = new symbolic 1;
+  my $cnt = $iter;
+  
+  while ($cnt--) {
+    $side = (sqrt(1 + $side**2) - 1)/$side;
+  }
+  my $pi = $side*(2**($iter+2));
+  test "$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]';
+  test( (sprintf "%f", $pi), '3.182598');
+}
+
+{
+  my ($a, $b);
+  symbolic->vars($a, $b);
+  my $c = sqrt($a**2 + $b**2);
+  $a = 3; $b = 4;
+  test( (sprintf "%d", $c), '5');
+  $a = 12; $b = 5;
+  test( (sprintf "%d", $c), '13');
+}
+
+{
+  package symbolic1;		# Primitive symbolic calculator
+  # Mutator inc/dec
+  use overload nomethod => \&wrap, '""' => \&str, '0+' => \&num, '=' => \&cpy;
+
+  sub new { shift; bless ['n', @_] }
+  sub cpy {
+    my $self = shift;
+    bless [@$self], ref $self;
+  }
+  sub wrap {
+    my ($obj, $other, $inv, $meth) = @_;
+    if ($meth eq '++' or $meth eq '--') {
+      @$obj = ($meth, (bless [@$obj]), 1); # Avoid circular reference
+      return $obj;
+    }
+    ($obj, $other) = ($other, $obj) if $inv;
+    bless [$meth, $obj, $other];
+  }
+  sub str {
+    my ($meth, $a, $b) = @{+shift};
+    $a = 'u' unless defined $a;
+    if (defined $b) {
+      "[$meth $a $b]";
+    } else {
+      "[$meth $a]";
+    }
+  } 
+  my %subr = ( 'n' => sub {$_[0]} );
+  foreach my $op (split " ", $overload::ops{with_assign}) {
+    $subr{$op} = $subr{"$op="} = eval "sub {shift() $op shift()}";
+  }
+  my @bins = qw(binary 3way_comparison num_comparison str_comparison);
+  foreach my $op (split " ", "@overload::ops{ @bins }") {
+    $subr{$op} = eval "sub {shift() $op shift()}";
+  }
+  foreach my $op (split " ", "@overload::ops{qw(unary func)}") {
+    $subr{$op} = eval "sub {$op shift()}";
+  }
+  $subr{'++'} = $subr{'+'};
+  $subr{'--'} = $subr{'-'};
+  
+  sub num {
+    my ($meth, $a, $b) = @{+shift};
+    my $subr = $subr{$meth} 
+      or die "Do not know how to ($meth) in symbolic";
+    $a = $a->num if ref $a eq __PACKAGE__;
+    $b = $b->num if ref $b eq __PACKAGE__;
+    $subr->($a,$b);
+  }
+  sub TIESCALAR { my $pack = shift; $pack->new(@_) }
+  sub FETCH { shift }
+  sub nop {  }		# Around a bug
+  sub vars { my $p = shift; tie($_, $p), $_->nop foreach @_; }
+  sub STORE { 
+    my $obj = shift; 
+    $#$obj = 1; 
+    @$obj->[0,1] = ('=', shift);
+  }
+}
+
+{
+  my $foo = new symbolic1 11;
+  my $baz = $foo++;
+  test( (sprintf "%d", $foo), '12');
+  test( (sprintf "%d", $baz), '11');
+  my $bar = $foo;
+  $baz = ++$foo;
+  test( (sprintf "%d", $foo), '13');
+  test( (sprintf "%d", $bar), '12');
+  test( (sprintf "%d", $baz), '13');
+  my $ban = $foo;
+  $baz = ($foo += 1);
+  test( (sprintf "%d", $foo), '14');
+  test( (sprintf "%d", $bar), '12');
+  test( (sprintf "%d", $baz), '14');
+  test( (sprintf "%d", $ban), '13');
+  $baz = 0;
+  $baz = $foo++;
+  test( (sprintf "%d", $foo), '15');
+  test( (sprintf "%d", $baz), '14');
+  test( "$foo", '[++ [+= [++ [++ [n 11] 1] 1] 1] 1]');
+}
+
+{
+  my $iter = new symbolic1 2;
+  my $side = new symbolic1 1;
+  my $cnt = $iter;
+  
+  while ($cnt) {
+    $cnt = $cnt - 1;		# The "simple" way
+    $side = (sqrt(1 + $side**2) - 1)/$side;
+  }
+  my $pi = $side*(2**($iter+2));
+  test "$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]';
+  test( (sprintf "%f", $pi), '3.182598');
+}
+
+{
+  my $iter = new symbolic1 2;
+  my $side = new symbolic1 1;
+  my $cnt = $iter;
+  
+  while ($cnt--) {
+    $side = (sqrt(1 + $side**2) - 1)/$side;
+  }
+  my $pi = $side*(2**($iter+2));
+  test "$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]';
+  test( (sprintf "%f", $pi), '3.182598');
+}
+
+{
+  my ($a, $b);
+  symbolic1->vars($a, $b);
+  my $c = sqrt($a**2 + $b**2);
+  $a = 3; $b = 4;
+  test( (sprintf "%d", $c), '5');
+  $a = 12; $b = 5;
+  test( (sprintf "%d", $c), '13');
+}
+
+{
+  package two_face;		# Scalars with separate string and
+                                # numeric values.
+  sub new { my $p = shift; bless [@_], $p }
+  use overload '""' => \&str, '0+' => \&num, fallback => 1;
+  sub num {shift->[1]}
+  sub str {shift->[0]}
+}
+
+{
+  my $seven = new two_face ("vii", 7);
+  test( (sprintf "seven=$seven, seven=%d, eight=%d", $seven, $seven+1),
+	'seven=vii, seven=7, eight=8');
+  test( scalar ($seven =~ /i/), '1')
+}
 
 # Last test is:
-sub last {135}
+sub last {173}

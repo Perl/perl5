@@ -165,7 +165,7 @@ perl program.  The C backend generates C code that captures perl's state
 just before execution begins.  It eliminates the compile-time overheads
 of the regular perl interpreter, but the run-time performance remains
 comparatively the same.  The CC backend generates optimized C code
-equivivalent to the code path at run-time.  The CC backend has greater
+equivalent to the code path at run-time.  The CC backend has greater
 potential for big optimizations, but only a few optimizations are
 implemented currently.  The Bytecode backend generates a platform
 independent bytecode representation of the interpreter's state
@@ -208,12 +208,12 @@ Changes in the RE engine:
 	New types of nodes to process (SUBEXPR)* and similar expressions
 	    quickly, used if the SUBEXPR has no side effects and matches
 	    strings of the same length;
-	better optimizations by lookup for constant substrings;
+	Better optimizations by lookup for constant substrings;
 	Better search for constants substrings anchored by $ ;
 
 Changes in Perl code using RE engine:
 
-	more optimizations to s/longer/short/;
+	More optimizations to s/longer/short/;
 	study() was not working;
 	/blah/ may be optimized to an analogue of index() if $& $` $' not seen;
 	Unneeded copying of matched-against string removed;
@@ -230,7 +230,7 @@ Note that only the major bug fixes are listed here.  See F<Changes> for others.
 	    possibility of a segfault;
 	(ZERO-LENGTH)* could segfault;
 	(ZERO-LENGTH)* was prohibited;
-	Long RE were not allowed;
+	Long REs were not allowed;
 	/RE/g could skip matches at the same position after a 
 	  zero-length match;
 
@@ -253,9 +253,10 @@ See L<New C<qr//> operator>.
 
 =item Other improvements
 
-	better debugging output (possibly with colors), even from non-debugging Perl;
+	Better debugging output (possibly with colors),
+            even from non-debugging Perl;
 	RE engine code now looks like C, not like assembler;
-	behaviour of RE modifiable by `use re' directive;
+	Behaviour of RE modifiable by `use re' directive;
 	Improved documentation;
 	Test suite significantly extended;
 	Syntax [:^upper:] etc., reserved inside character classes;
@@ -455,7 +456,7 @@ substr() can now both return and replace in one operation.  The optional
 
 =head2 Negative LENGTH argument to splice
 
-Splice() with a negative LENGTH argument now work similar to what the
+splice() with a negative LENGTH argument now work similar to what the
 LENGTH did for substr().  Previously a negative LENGTH was treated as
 0.  See L<perlfunc/splice>.
 
@@ -500,6 +501,8 @@ BeOS is now supported.  See L<README.beos>.
 DOS is now supported under the DJGPP tools.  See L<README.dos>.
 
 MPE/iX is now supported.  See L<README.mpeix>.
+
+MVS (OS390) is now supported.  See L<README.os390>.
 
 =head2 Changes in existing support
 

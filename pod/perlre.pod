@@ -7,12 +7,13 @@ perlre - Perl regular expressions
 This page describes the syntax of regular expressions in Perl.  For a
 description of how to I<use> regular expressions in matching
 operations, plus various examples of the same, see discussion
-of C<m//>, C<s///>, C<qr//> and C<??> in L<perlop/Regexp Quote-Like Operators>.
+of C<m//>, C<s///>, C<qr//> and C<??> in L<perlop/"Regexp Quote-Like Operators">.
 
 The matching operations can have various modifiers.  The modifiers
 that relate to the interpretation of the regular expression inside
-are listed below.  For the modifiers that alter the way regular expression
-is used by Perl, see L<perlop/Regexp Quote-Like Operators>.
+are listed below.  For the modifiers that alter the way a regular expression
+is used by Perl, see L<perlop/"Regexp Quote-Like Operators"> and 
+L<perlop/"Gory details of parsing quoted constructs">.
 
 =over 4
 
@@ -346,10 +347,6 @@ Experimental "evaluate any Perl code" zero-width assertion.  Always
 succeeds.  C<code> is not interpolated.  Currently the rules to
 determine where the C<code> ends are somewhat convoluted.
 
-Owing to the risks to security, this is only available when the
-C<use re 'eval'> pragma is used, and then only for patterns that don't
-have any variables that must be interpolated at run time.
-
 The C<code> is properly scoped in the following sense: if the assertion
 is backtracked (compare L<"Backtracking">), all the changes introduced after
 C<local>isation are undone, so
@@ -380,6 +377,28 @@ other C<(?{ code })> assertions inside the same regular expression.
 The above assignment to $^R is properly localized, thus the old value of $^R
 is restored if the assertion is backtracked (compare L<"Backtracking">).
 
+Due to security concerns, this construction is not allowed if the regular
+expression involves run-time interpolation of variables, unless 
+C<use re 'eval'> pragma is used (see L<re>), or the variables contain
+results of qr() operator (see L<perlop/"qr/STRING/imosx">).
+
+This restriction is due to the wide-spread (questionable) practice of 
+using the construct
+
+    $re = <>;
+    chomp $re;
+    $string =~ /$re/;
+
+without tainting.  While this code is frowned upon from security point
+of view, when C<(?{})> was introduced, it was considered bad to add 
+I<new> security holes to existing scripts.
+
+B<NOTE:>  Use of the above insecure snippet without also enabling taint mode
+is to be severely frowned upon.  C<use re 'eval'> does not disable tainting
+checks, thus to allow $re in the above snippet to contain C<(?{})>
+I<with tainting enabled>, one needs both C<use re 'eval'> and untaint
+the $re.
+
 =item C<(?E<gt>pattern)>
 
 An "independent" subexpression.  Matches the substring that a
@@ -392,7 +411,7 @@ C<a> at the beginning of string, leaving no C<a> for C<ab> to match.
 In contrast, C<a*ab> will match the same as C<a+b>, since the match of
 the subgroup C<a*> is influenced by the following group C<ab> (see
 L<"Backtracking">).  In particular, C<a*> inside C<a*ab> will match
-less characters that a standalone C<a*>, since this makes the tail match.
+fewer characters than a standalone C<a*>, since this makes the tail match.
 
 An effect similar to C<(?E<gt>pattern)> may be achieved by
 
@@ -401,40 +420,42 @@ An effect similar to C<(?E<gt>pattern)> may be achieved by
 since the lookahead is in I<"logical"> context, thus matches the same
 substring as a standalone C<a+>.  The following C<\1> eats the matched
 string, thus making a zero-length assertion into an analogue of
-C<(?>...)>.  (The difference between these two constructs is that the
+C<(?E<gt>...)>.  (The difference between these two constructs is that the
 second one uses a catching group, thus shifting ordinals of
 backreferences in the rest of a regular expression.)
 
 This construct is useful for optimizations of "eternal"
 matches, because it will not backtrack (see L<"Backtracking">).  
 
-    m{  \( ( 
-	 [^()]+ 
-       | 
-         \( [^()]* \)
-       )+
-	\) 
-    }x
+    m{ \(
+	  ( 
+	    [^()]+ 
+          | 
+            \( [^()]* \)
+          )+
+       \) 
+     }x
 
 That will efficiently match a nonempty group with matching
 two-or-less-level-deep parentheses.  However, if there is no such group,
 it will take virtually forever on a long string.  That's because there are
 so many different ways to split a long string into several substrings.
-This is essentially what C<(.+)+> is doing, and this is a subpattern
-of the above pattern.  Consider that C<((()aaaaaaaaaaaaaaaaaa> on the
-pattern above detects no-match in several seconds, but that  each extra
+This is what C<(.+)+> is doing, and C<(.+)+> is similar to a subpattern
+of the above pattern.  Consider that the above pattern detects no-match
+on C<((()aaaaaaaaaaaaaaaaaa> in several seconds, but that  each extra
 letter doubles this time.  This exponential performance will make it
 appear that your program has hung.
 
 However, a tiny modification of this pattern 
 
-    m{ \( ( 
-	 (?> [^()]+ )
-       | 
-         \( [^()]* \)
-       )+
-	\) 
-    }x
+    m{ \( 
+	  ( 
+	    (?> [^()]+ )
+          | 
+            \( [^()]* \)
+          )+
+       \) 
+     }x
 
 which uses C<(?E<gt>...)> matches exactly when the one above does (verifying
 this yourself would be a productive exercise), but finishes in a fourth
@@ -457,9 +478,9 @@ matched), or lookahead/lookbehind/evaluate zero-width assertion.
 Say,
 
     m{ ( \( )? 
-      [^()]+ 
+       [^()]+ 
        (?(1) \) ) 
-    }x
+     }x
 
 matches a chunk of non-parentheses, possibly included in parentheses
 themselves.
@@ -608,10 +629,10 @@ When using lookahead assertions and negations, this can all get even
 tricker.  Imagine you'd like to find a sequence of non-digits not
 followed by "123".  You might try to write that as
 
-	$_ = "ABC123";
-	if ( /^\D*(?!123)/ ) {				# Wrong!
-	    print "Yup, no 123 in $_\n";
-	}
+    $_ = "ABC123";
+    if ( /^\D*(?!123)/ ) {		# Wrong!
+	print "Yup, no 123 in $_\n";
+    }
 
 But that isn't going to match; at least, not the way you're hoping.  It
 claims that there is no 123 in the string.  Here's a clearer picture of
@@ -903,6 +924,8 @@ part of this regular expression needs to be converted explicitly
 =head2 SEE ALSO
 
 L<perlop/"Regexp Quote-Like Operators">.
+
+L<perlop/"Gory details of parsing quoted constructs">.
 
 L<perlfunc/pos>.
 

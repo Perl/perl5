@@ -279,8 +279,8 @@ belongs to C<joe>.
 
 It is possible for the Perl subroutine you are calling to terminate
 abnormally, e.g., by calling I<die> explicitly or by not actually
-existing.  By default, when either of these of events occurs, the
-process will terminate immediately.  If though, you want to trap this
+existing.  By default, when either of these events occurs, the
+process will terminate immediately.  If you want to trap this
 type of event, specify the G_EVAL flag.  It will put an I<eval { }>
 around the subroutine call.
 

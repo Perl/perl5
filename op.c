@@ -92,7 +92,7 @@ void
 assertref(OP *o)
 {
     int type = o->op_type;
-    if (type != OP_AELEM && type != OP_HELEM) {
+    if (type != OP_AELEM && type != OP_HELEM && type != OP_GELEM) {
 	yyerror(form("Can't use subscript on %s", op_desc[type]));
 	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV) {
 	    dTHR;
@@ -548,7 +548,7 @@ find_threadsv(char *name)
 	default:
 	    sv_magic(sv, 0, 0, name, 1); 
 	}
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "find_threadsv: new SV %p for $%s%c\n",
 			      sv, (*name < 32) ? "^" : "",
 			      (*name < 32) ? toCTRL(*name) : *name));
@@ -582,6 +582,10 @@ op_free(OP *o)
 	o->op_targ = 0;	/* Was holding hints. */
 	break;
 #ifdef USE_THREADS
+    case OP_ENTERITER:
+	if (!(o->op_flags & OPf_SPECIAL))
+	    break;
+	/* FALL THROUGH */
     case OP_THREADSV:
 	o->op_targ = 0;	/* Was holding index into thr->threadsv AV. */
 	break;

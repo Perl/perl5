@@ -16,6 +16,8 @@ $VERSION = "1.1602";
 # Some experimental versions of OS/2 build have broken $?
 my $ignore_exitcode = $ENV{HARNESS_IGNORE_EXITCODE};
 
+my $files_in_dir = $ENV{HARNESS_FILELEAK_IN_DIR};
+
 my $tests_skipped = 0;
 my $subtests_skipped = 0;
 
@@ -46,6 +48,8 @@ format STDOUT =
 $verbose = 0;
 $switches = "-w";
 
+sub globdir { opendir DIRH, shift; my @f = readdir DIRH; closedir DIRH; @f }
+
 sub runtests {
     my(@tests) = @_;
     local($|) = 1;
@@ -62,6 +66,7 @@ sub runtests {
 
     if ($^O eq 'VMS') { $switches =~ s/-(\S*[A-Z]\S*)/"-$1"/g }
 
+    my @dir_files = globdir $files_in_dir if defined $files_in_dir;
     my $t_start = new Benchmark;
     while ($test = shift(@tests)) {
 	$te = $test;
@@ -212,6 +217,17 @@ sub runtests {
 				  };
 	}
 	$subtests_skipped += $skipped;
+	if (defined $files_in_dir) {
+	    my @new_dir_files = globdir $files_in_dir;
+	    if (@new_dir_files != @dir_files) {
+		my %f;
+		@f{@new_dir_files} = (1) x @new_dir_files;
+		delete @f{@dir_files};
+		my @f = sort keys %f;
+		print "LEAKED FILES: @f\n";
+		@dir_files = @new_dir_files;
+	    }
+	}
     }
     my $t_total = timediff(new Benchmark, $t_start);
     
@@ -421,8 +437,18 @@ above messages.
 
 =head1 ENVIRONMENT
 
-Setting C<HARNESS_IGNORE_EXITCODE> makes it ignore the exit status
+Setting C<HARNESS_IGNORE_EXITCODE> makes harness ignore the exit status
 of child processes.
+
+If C<HARNESS_FILELEAK_IN_DIR> is set to the name of a directory, harness
+will check after each test whether new files appeared in that directory,
+and report them as
+
+  LEAKED FILES: scr.tmp 0 my.db
+
+If relative, directory name is with respect to the current directory at
+the moment runtests() was called.  Putting absolute path into 
+C<HARNESS_FILELEAK_IN_DIR> may give more predicatable results.
 
 =head1 SEE ALSO
 

@@ -1293,7 +1293,7 @@ sub process_puretext {
 	} elsif ($word =~ m,^\w+://\w,) {
 	    # looks like a URL
 	    $word = qq(<A HREF="$word">$word</A>);
-	} elsif ($word =~ /[\w.-]+\@\w+\.\w/) {
+	} elsif ($word =~ /[\w.-]+\@[\w-]+\.\w/) {
 	    # looks like an e-mail address
 	    my ($w1, $w2, $w3) = ("", $word, "");
 	    ($w1, $w2, $w3) = ("(", $1, ")$2") if $word =~ /^\((.*?)\)(,?)/;

@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 1.03;
+$VERSION = 1.0401;
 $header = "perl5db.pl version $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -179,7 +179,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  TTY noTTY ReadLine NonStop LineInfo maxTraceLen
 		  recallCommand ShellBang pager tkRunning ornaments
 		  signalLevel warnLevel dieLevel inhibit_exit
-		  ImmediateStop);
+		  ImmediateStop bareStringify);
 
 %optionVars    = (
 		 hashDepth	=> \$dumpvar::hashDepth,
@@ -191,6 +191,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		 undefPrint	=> \$dumpvar::printUndef,
 		 globPrint	=> \$dumpvar::globPrint,
 		 UsageOnly	=> \$dumpvar::usageOnly,     
+		 bareStringify	=> \$dumpvar::bareStringify,
 		 frame          => \$frame,
 		 AutoTrace      => \$trace,
 		 inhibit_exit   => \$inhibit_exit,
@@ -390,6 +391,7 @@ sub DB {
     if ($trace & 2) {
       for (my $n = 0; $n <= $#to_watch; $n++) {
 	$evalarg = $to_watch[$n];
+	local $onetimeDump;	# Do not output results
 	my ($val) = &eval;	# Fix context (&eval is doing array)?
 	$val = ( (defined $val) ? "'$val'" : 'undef' );
 	if ($val ne $old_watch[$n]) {
@@ -1823,6 +1825,7 @@ B<O> [I<opt>[B<=>I<val>]] [I<opt>B<\">I<val>B<\">] [I<opt>B<?>]...
     I<DumpPackages>:		dump symbol tables of packages;
     I<DumpReused>:		dump contents of \"reused\" addresses;
     I<quote>, I<HighBit>, I<undefPrint>:	change style of string dump;
+    I<bareStringify>:		Do not print the overload-stringified value;
   Option I<PrintRet> affects printing of return value after B<r> command,
          I<frame>    affects printing messages on entry and exit from subroutines.
          I<AutoTrace> affects printing messages on every possible breaking point.

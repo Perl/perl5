@@ -36,6 +36,7 @@ for (@prgs){
     $status = $?;
     $results = `$CAT $tmpfile`;
     $results =~ s/\n+$//;
+    $results =~ s/syntax error/syntax error/i;
     $expected =~ s/\n+$//;
     if ( $results ne $expected){
 	print STDERR "PROG: $switch\n$prog\n";

@@ -15,6 +15,10 @@ BEGIN {
 use strict;
 use Config;
 
+# We do not want the whole taint.t to fail
+# just because Errno possibly failing.
+eval { require Errno; import Errno };
+
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_Dos = $^O eq 'dos';
@@ -360,7 +364,9 @@ else {
 
     test 71, eval { open FOO, $foo } eq '', 'open for read';
     test 72, $@ eq '', $@;		# NB: This should be allowed
-    test 73, $! == 2 || ($Is_Dos && $! == 22); # File not found
+
+    # Try first new style but allow also old style.
+    test 73, $!{ENOENT} || $! == 2 || ($Is_Dos && $! == 22); # File not found
 
     test 74, eval { open FOO, "> $foo" } eq '', 'open for write';
     test 75, $@ =~ /^Insecure dependency/, $@;

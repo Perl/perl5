@@ -2097,7 +2097,6 @@ sv_setsv(SV *dstr, register SV *sstr)
     if (sflags & SVf_ROK) {
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
-		dTHR;
 		SV *sref = SvREFCNT_inc(SvRV(sstr));
 		SV *dref = 0;
 		int intro = GvINTRO(dstr);
@@ -2886,7 +2885,8 @@ sv_clear(register SV *sv)
     stash = NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
-	if (IoIFP(sv) != PerlIO_stdin() &&
+	if (IoIFP(sv) &&
+	    IoIFP(sv) != PerlIO_stdin() &&
 	    IoIFP(sv) != PerlIO_stdout() &&
 	    IoIFP(sv) != PerlIO_stderr())
 	  io_close((IO*)sv);
@@ -3620,10 +3620,24 @@ sv_inc(register SV *sv)
 	    *(d--) = '0';
 	}
 	else {
+#ifdef EBCDIC
+	    /* MKS: The original code here died if letters weren't consecutive.
+	     * at least it didn't have to worry about non-C locales.  The
+	     * new code assumes that ('z'-'a')==('Z'-'A'), letters are
+	     * arranged in order (although not consecutively) and that only 
+	     * [A-Za-z] are accepted by isALPHA in the C locale.
+	     */
+	    if (*d != 'z' && *d != 'Z') {
+		do { ++*d; } while (!isALPHA(*d));
+		return;
+	    }
+	    *(d--) -= 'z' - 'a';
+#else
 	    ++*d;
 	    if (isALPHA(*d))
 		return;
 	    *(d--) -= 'z' - 'a' + 1;
+#endif
 	}
     }
     /* oh,oh, the number grew */

@@ -15,7 +15,7 @@
 #include <sys/sem.h>
 #endif
 #ifdef HAS_SHM
-#ifdef PERL_SCO5
+#if defined(PERL_SCO5) || defined(PERL_ISC)
 #include <sys/sysmacros.h>
 #endif
 #include <sys/shm.h>
@@ -41,6 +41,7 @@ pack(obj)
     SV	* obj
 PPCODE:
 {
+#ifdef HAS_MSG
     SV *sv;
     struct msqid_ds ds;
     AV *list = (AV*)SvRV(obj);
@@ -50,6 +51,9 @@ PPCODE:
     sv = *av_fetch(list,6,TRUE); ds.msg_qbytes = SvIV(sv);
     ST(0) = sv_2mortal(newSVpv((char *)&ds,sizeof(ds)));
     XSRETURN(1);
+#else
+    croak("System V msgxxx is not implemented on this machine");
+#endif
 }
 
 void
@@ -58,6 +62,7 @@ unpack(obj,buf)
     SV * buf
 PPCODE:
 {
+#ifdef HAS_MSG
     STRLEN len;
     SV **sv_ptr;
     struct msqid_ds *ds = (struct msqid_ds *)SvPV(buf,len);
@@ -92,6 +97,9 @@ PPCODE:
     sv_ptr = av_fetch(list,11,TRUE);
     sv_setiv(*sv_ptr, ds->msg_ctime);
     XSRETURN(1);
+#else
+    croak("System V msgxxx is not implemented on this machine");
+#endif
 }
 
 MODULE=IPC::SysV	PACKAGE=IPC::Semaphore::stat
@@ -102,6 +110,7 @@ unpack(obj,ds)
     SV * ds
 PPCODE:
 {
+#ifdef HAS_SEM
     STRLEN len;
     AV *list = (AV*)SvRV(obj);
     struct semid_ds *data = (struct semid_ds *)SvPV(ds,len);
@@ -122,6 +131,9 @@ PPCODE:
     sv_setiv(*av_fetch(list,6,TRUE), data[0].sem_otime);
     sv_setiv(*av_fetch(list,7,TRUE), data[0].sem_nsems);
     XSRETURN(1);
+#else
+    croak("System V semxxx is not implemented on this machine");
+#endif
 }
 
 void
@@ -129,6 +141,7 @@ pack(obj)
     SV	* obj
 PPCODE:
 {
+#ifdef HAS_SEM
     SV **sv_ptr;
     SV *sv;
     struct semid_ds ds;
@@ -154,6 +167,9 @@ PPCODE:
 	ds.sem_nsems = SvIV(*sv_ptr);
     ST(0) = sv_2mortal(newSVpv((char *)&ds,sizeof(ds)));
     XSRETURN(1);
+#else
+    croak("System V semxxx is not implemented on this machine");
+#endif
 }
 
 MODULE=IPC::SysV	PACKAGE=IPC::SysV

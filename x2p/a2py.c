@@ -66,7 +66,7 @@ main(register int argc, register char **argv, register char **env)
 #ifdef DEBUGGING
 	case 'D':
 	    debug = atoi(argv[0]+2);
-#ifdef YYDEBUG
+#if YYDEBUG
 	    yydebug = (debug & 1);
 #endif
 	    break;
@@ -211,7 +211,7 @@ yylex(void)
     register int tmp;
 
   retry:
-#ifdef YYDEBUG
+#if YYDEBUG
     if (yydebug)
 	if (strchr(s,'\n'))
 	    fprintf(stderr,"Tokener at %s",s);
@@ -273,7 +273,11 @@ yylex(void)
     case ':':
 	tmp = *s++;
 	XOP(tmp);
+#ifdef EBCDIC
+    case 7:
+#else
     case 127:
+#endif
 	s++;
 	XTERM('}');
     case '}':

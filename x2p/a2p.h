@@ -412,6 +412,10 @@ EXT int debug INIT(0);
 EXT int dlevel INIT(0);
 #define YYDEBUG 1
 extern int yydebug;
+#else
+# ifndef YYDEBUG
+#  define YYDEBUG 0
+# endif
 #endif
 
 EXT STR *freestrroot INIT(Nullstr);

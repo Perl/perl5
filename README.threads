@@ -8,6 +8,8 @@ running one of the following:
 
   * Digital UNIX 4.x
 
+  * Digital UNIX 3.x (Formerly DEC OSF/1), see additional note below
+
   * Solaris 2.x for recentish x (2.5 is OK)
 
   * IRIX 6.2 or newer. 6.2 will require a few os patches.
@@ -58,6 +60,14 @@ For Digital Unix 4.x:
 	Change usemymalloc to n
 	Zap mallocobj and mallocsrc (foo='')
 	Change d_mymalloc to undef
+
+For Digital Unix 3.x (Formerly DEC OSF/1):
+    Add -DOLD_PTHREADS_API to ccflags
+    If compiling with the GNU cc compiler, remove -thread from ccflags
+
+    (The following should be done automatically if you call Configure
+      with the -Dusethreads option).
+    Add -lpthread -lmach -lc_r to libs (in the order specified).
 
 For IRIX:
     (This should all be done automatically by the hint file).
@@ -150,13 +160,13 @@ haven't tracked down yet) and there are very probably others too.
 
 Debugging
 
-Use the -DL command-line option to turn on debugging of the
+Use the -DS command-line option to turn on debugging of the
 multi-threading code. Under Linux, that also turns on a quick
 hack I did to grab a bit of extra information from segfaults.
 If you have a fancier gdb/threads setup than I do then you'll
 have to delete the lines in perl.c which say
     #if defined(DEBUGGING) && defined(USE_THREADS) && defined(__linux__)
-        DEBUG_L(signal(SIGSEGV, (void(*)(int))catch_sigsegv););
+        DEBUG_S(signal(SIGSEGV, (void(*)(int))catch_sigsegv););
     #endif
 
 

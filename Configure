@@ -1823,14 +1823,14 @@ ABYZ)
 *)	# There is a discontinuity in EBCDIC between 'I' and 'J'
         # (0xc9 and 0xd1), therefore that is a nice testing point.
         if test "X$up" = X -o "X$low" = X; then
-	    case "`echo IJ | tr '[I-J]' '[i-j]' 2>/dev/null`" in
+	    case "`echo IJ | $tr '[I-J]' '[i-j]' 2>/dev/null`" in
 	    ij) up='[A-Z]'
 	        low='[a-z]'
 		;;
 	    esac
         fi
 	if test "X$up" = X -o "X$low" = X; then
-	    case "`echo IJ | tr I-J i-j 2>/dev/null`" in
+	    case "`echo IJ | $tr I-J i-j 2>/dev/null`" in
 	    ij) up='A-Z'
 		low='a-z'
 		;;
@@ -1858,7 +1858,7 @@ ABYZ)
 	    esac
 	fi
 esac
-case "`echo IJ | tr \"$up\" \"$low\" 2>/dev/null`" in
+case "`echo IJ | $tr \"$up\" \"$low\" 2>/dev/null`" in
 ij)
     echo "Using $up and $low to convert case." >&4
     ;;
@@ -1887,7 +1887,7 @@ myuname=`( ($uname -a) 2>/dev/null || hostname) 2>&1`
 # tr '[A-Z]' '[a-z]' would not work in EBCDIC
 # because the A-Z/a-z are not consecutive.
 myuname=`echo $myuname | $sed -e 's/^[^=]*=//' -e 's/\///g' | \
-	./tr '[A-Z]' '[a-z]' | tr $trnl ' '`
+	./tr '[A-Z]' '[a-z]' | $tr $trnl ' '`
 newmyuname="$myuname"
 dflt=n
 case "$knowitall" in
@@ -1956,7 +1956,7 @@ EOM
 	$test -d /usr/apollo/bin && osname=apollo
 	$test -f /etc/saf/_sactab && osname=svr4
 	$test -d /usr/include/minix && osname=minix
-	if $test -d /MachTen; then
+	if $test -d /MachTen -o -d /MachTen_Folder; then
 		osname=machten
 		if $test -x /sbin/version; then
 			osvers=`/sbin/version | $awk '{print $2}' |
@@ -7631,6 +7631,25 @@ echo " "
 case "$d_msgctl$d_msgget$d_msgsnd$d_msgrcv" in
 *"$undef"*) h_msg=false;;
 esac
+case "$osname" in
+freebsd)
+    case "`ipcs 2>&1`" in
+    "SVID messages"*"not configured"*)
+	echo "But your FreeBSD kernel does not have the msg*(2) configured." >&4
+        h_msg=false
+	val="$undef"
+	set msgctl d_msgctl
+	eval $setvar
+	set msgget d_msgget
+	eval $setvar
+	set msgsnd d_msgsnd
+	eval $setvar
+	set msgrcv d_msgrcv
+	eval $setvar
+	;;
+    esac
+    ;;
+esac
 : we could also check for sys/ipc.h ...
 if $h_msg && $test `./findhdr sys/msg.h`; then
 	echo "You have the full msg*(2) library." >&4
@@ -8113,6 +8132,23 @@ echo " "
 case "$d_semctl$d_semget$d_semop" in
 *"$undef"*) h_sem=false;;
 esac
+case "$osname" in
+freebsd)
+    case "`ipcs 2>&1`" in
+    "SVID messages"*"not configured"*)
+	echo "But your FreeBSD kernel does not have the sem*(2) configured." >&4
+        h_sem=false
+	val="$undef"
+	set semctl d_semctl
+	eval $setvar
+	set semget d_semget
+	eval $setvar
+	set semop d_semop
+	eval $setvar
+	;;
+    esac
+    ;;
+esac
 : we could also check for sys/ipc.h ...
 if $h_sem && $test `./findhdr sys/sem.h`; then
 	echo "You have the full sem*(2) library." >&4
@@ -8458,6 +8494,25 @@ h_shm=true
 echo " "
 case "$d_shmctl$d_shmget$d_shmat$d_shmdt" in
 *"$undef"*) h_shm=false;;
+esac
+case "$osname" in
+freebsd)
+    case "`ipcs 2>&1`" in
+    "SVID shared memory"*"not configured"*)
+	echo "But your FreeBSD kernel does not have the shm*(2) configured." >&4
+        h_shm=false
+	val="$undef"
+	set shmctl d_shmctl
+	evat $setvar
+	set shmget d_shmget
+	evat $setvar
+	set shmat d_shmat
+	evat $setvar
+	set shmdt d_shmdt
+	evat $setvar
+	;;
+    esac
+    ;;
 esac
 : we could also check for sys/ipc.h ...
 if $h_shm && $test `./findhdr sys/shm.h`; then
@@ -11971,7 +12026,7 @@ esac
 case "$ebcdic" in
 $define)
     xxx=''
-    echo "This is an EBCDIC system, checking if any parser files may need regenerating." >&4
+    echo "This is an EBCDIC system, checking if any parser files need regenerating." >&4
     rm -f y.tab.c y.tab.h
     yacc -d perly.y >/dev/null 2>&1
     if cmp -s y.tab.c perly.c; then
@@ -11993,8 +12048,8 @@ $define)
     fi
     echo "x2p/a2p.y" >&4
     cd x2p
-    rm -f y.tab.c y.tab.h
-    yacc -d a2p.y >/dev/null 2>&1
+    rm -f y.tab.c
+    yacc a2p.y >/dev/null 2>&1
     if cmp -s y.tab.c a2p.c
     then
         rm -f y.tab.c
@@ -12005,14 +12060,6 @@ $define)
         sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
             -e 's/y\.tab/a2p/g' a2p.c >a2p.tmp && mv a2p.tmp a2p.c
         xxx="$xxx a2p.c"
-    fi
-    if cmp -s y.tab.h a2p.h
-    then
-        rm -f y.tab.h
-    else
-        echo "a2p.h -> a2p.h" >&4
-        mv -f y.tab.h a2p.h
-        xxx="$xxx a2p.h"
     fi
     cd ..
     case "$xxx" in

@@ -1,9 +1,18 @@
+#ifndef PERL_CALLCONV
+#  define PERL_CALLCONV
+#endif 
+
 #ifdef PERL_OBJECT
-#define VIRTUAL virtual
+#define VIRTUAL virtual PERL_CALLCONV
 #else
-#define VIRTUAL
+#define VIRTUAL PERL_CALLCONV
 START_EXTERN_C
 #endif
+
+/* NOTE!!! When new virtual functions are added, they must be added at
+ * the end of this file to maintain binary compatibility with PERL_OBJECT
+ */
+
 
 #ifndef NEXT30_NO_ATTRIBUTE
 #ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
@@ -559,13 +568,9 @@ VIRTUAL void	sv_add_arena _((char* ptr, U32 size, U32 flags));
 VIRTUAL int	sv_backoff _((SV* sv));
 VIRTUAL SV*	sv_bless _((SV* sv, HV* stash));
 VIRTUAL void	sv_catpvf _((SV* sv, const char* pat, ...));
-VIRTUAL void	sv_catpvf_mg _((SV *sv, const char* pat, ...));
 VIRTUAL void	sv_catpv _((SV* sv, char* ptr));
-VIRTUAL void	sv_catpv_mg _((SV *sv, char *ptr));
 VIRTUAL void	sv_catpvn _((SV* sv, char* ptr, STRLEN len));
-VIRTUAL void	sv_catpvn_mg _((SV *sv, char *ptr, STRLEN len));
 VIRTUAL void	sv_catsv _((SV* dsv, SV* ssv));
-VIRTUAL void	sv_catsv_mg _((SV *dstr, SV *sstr));
 VIRTUAL void	sv_chop _((SV* sv, char* ptr));
 VIRTUAL void	sv_clean_all _((void));
 VIRTUAL void	sv_clean_objs _((void));
@@ -607,25 +612,17 @@ VIRTUAL void	sv_replace _((SV* sv, SV* nsv));
 VIRTUAL void	sv_report_used _((void));
 VIRTUAL void	sv_reset _((char* s, HV* stash));
 VIRTUAL void	sv_setpvf _((SV* sv, const char* pat, ...));
-VIRTUAL void	sv_setpvf_mg _((SV *sv, const char* pat, ...));
 VIRTUAL void	sv_setiv _((SV* sv, IV num));
-VIRTUAL void	sv_setiv_mg _((SV *sv, IV i));
 VIRTUAL void	sv_setpviv _((SV* sv, IV num));
-VIRTUAL void	sv_setpviv_mg _((SV *sv, IV iv));
 VIRTUAL void	sv_setuv _((SV* sv, UV num));
-VIRTUAL void	sv_setuv_mg _((SV *sv, UV u));
 VIRTUAL void	sv_setnv _((SV* sv, double num));
-VIRTUAL void	sv_setnv_mg _((SV *sv, double num));
 VIRTUAL SV*	sv_setref_iv _((SV* rv, char* classname, IV iv));
 VIRTUAL SV*	sv_setref_nv _((SV* rv, char* classname, double nv));
 VIRTUAL SV*	sv_setref_pv _((SV* rv, char* classname, void* pv));
 VIRTUAL SV*	sv_setref_pvn _((SV* rv, char* classname, char* pv, I32 n));
 VIRTUAL void	sv_setpv _((SV* sv, const char* ptr));
-VIRTUAL void	sv_setpv_mg _((SV *sv, const char *ptr));
 VIRTUAL void	sv_setpvn _((SV* sv, const char* ptr, STRLEN len));
-VIRTUAL void	sv_setpvn_mg _((SV *sv, const char *ptr, STRLEN len));
 VIRTUAL void	sv_setsv _((SV* dsv, SV* ssv));
-VIRTUAL void	sv_setsv_mg _((SV *dstr, SV *sstr));
 VIRTUAL void	sv_taint _((SV* sv));
 VIRTUAL bool	sv_tainted _((SV* sv));
 VIRTUAL int	sv_unmagic _((SV* sv, int type));
@@ -633,7 +630,6 @@ VIRTUAL void	sv_unref _((SV* sv));
 VIRTUAL void	sv_untaint _((SV* sv));
 VIRTUAL bool	sv_upgrade _((SV* sv, U32 mt));
 VIRTUAL void	sv_usepvn _((SV* sv, char* ptr, STRLEN len));
-VIRTUAL void	sv_usepvn_mg _((SV *sv, char *ptr, STRLEN len));
 VIRTUAL void	sv_vcatpvfn _((SV* sv, const char* pat, STRLEN patlen,
 		       va_list* args, SV** svargs, I32 svmax,
 		       bool *used_locale));
@@ -931,4 +927,22 @@ VIRTUAL void byterun _((struct bytestream bs));
 #else
 VIRTUAL void byterun _((PerlIO *fp));
 #endif /* INDIRECT_BGET_MACROS */
+
+VIRTUAL void	sv_catpvf_mg _((SV *sv, const char* pat, ...));
+VIRTUAL void	sv_catpv_mg _((SV *sv, char *ptr));
+VIRTUAL void	sv_catpvn_mg _((SV *sv, char *ptr, STRLEN len));
+VIRTUAL void	sv_catsv_mg _((SV *dstr, SV *sstr));
+VIRTUAL void	sv_setpvf_mg _((SV *sv, const char* pat, ...));
+VIRTUAL void	sv_setiv_mg _((SV *sv, IV i));
+VIRTUAL void	sv_setpviv_mg _((SV *sv, IV iv));
+VIRTUAL void	sv_setuv_mg _((SV *sv, UV u));
+VIRTUAL void	sv_setnv_mg _((SV *sv, double num));
+VIRTUAL void	sv_setpv_mg _((SV *sv, const char *ptr));
+VIRTUAL void	sv_setpvn_mg _((SV *sv, const char *ptr, STRLEN len));
+VIRTUAL void	sv_setsv_mg _((SV *dstr, SV *sstr));
+VIRTUAL void	sv_usepvn_mg _((SV *sv, char *ptr, STRLEN len));
+
+/* New virtual functions must be added here to maintain binary
+ * compatablity with PERL_OBJECT
+ */
 

@@ -841,7 +841,6 @@
 #define push_return		Perl_push_return
 #define push_scope		Perl_push_scope
 #define q			Perl_q
-#define rcsid			Perl_rcsid
 #define reall_srchlen		Perl_reall_srchlen
 #define ref			Perl_ref
 #define refkids			Perl_refkids

@@ -55,6 +55,7 @@ for (@prgs){
     # allow expected output to be written as if $prog is on STDIN
     $results =~ s/tmp\d+/-/g;
     $results =~ s/\n%[A-Z]+-[SIWEF]-.*$// if $Is_VMS;  # clip off DCL status msg
+    $results =~ s/Syntax/syntax/;  # non-standard yacc
     $expected =~ s/\n+$//;
     my $prefix = ($results =~ s/^PREFIX\n//) ;
     if ( $results =~ s/^SKIPPED\n//) {

@@ -1253,21 +1253,17 @@ die(const char* pat, ...)
     GV *gv;
     CV *cv;
 
-#ifdef USE_THREADS
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			  "%p: die: curstack = %p, mainstack = %p\n",
 			  thr, PL_curstack, PL_mainstack));
-#endif /* USE_THREADS */
 
     va_start(args, pat);
     message = pat ? mess(pat, &args) : Nullch;
     va_end(args);
 
-#ifdef USE_THREADS
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			  "%p: die: message = %s\ndiehook = %p\n",
 			  thr, message, PL_diehook));
-#endif /* USE_THREADS */
     if (PL_diehook) {
 	/* sv_2cv might call croak() */
 	SV *olddiehook = PL_diehook;
@@ -1301,11 +1297,9 @@ die(const char* pat, ...)
     }
 
     PL_restartop = die_where(message);
-#ifdef USE_THREADS
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 	  "%p: die: restartop = %p, was_in_eval = %d, top_env = %p\n",
 	  thr, PL_restartop, was_in_eval, PL_top_env));
-#endif /* USE_THREADS */
     if ((!PL_restartop && was_in_eval) || PL_top_env->je_prev)
 	JMPENV_JUMP(3);
     return PL_restartop;
@@ -1324,9 +1318,7 @@ croak(const char* pat, ...)
     va_start(args, pat);
     message = mess(pat, &args);
     va_end(args);
-#ifdef USE_THREADS
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s", (unsigned long) thr, message));
-#endif /* USE_THREADS */
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s", (unsigned long) thr, message));
     if (PL_diehook) {
 	/* sv_2cv might call croak() */
 	SV *olddiehook = PL_diehook;
@@ -2719,7 +2711,7 @@ condpair_magic(SV *sv)
 	    mg->mg_ptr = (char *)cp;
 	    mg->mg_len = sizeof(cp);
 	    UNLOCK_SV_MUTEX;
-	    DEBUG_L(WITH_THR(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(WITH_THR(PerlIO_printf(PerlIO_stderr(),
 					   "%p: condpair_magic %p\n", thr, sv));)
 	}
     }
@@ -2820,7 +2812,7 @@ new_struct_thread(struct perl_thread *t)
 	    SV *sv = newSVsv(*svp);
 	    av_store(thr->threadsv, i, sv);
 	    sv_magic(sv, 0, 0, &PL_threadsv_names[i], 1);
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 		"new_struct_thread: copied threadsv %d %p->%p\n",i, t, thr));
 	}
     } 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.28 $, $Date: 1998/07/16 22:08:49 $)
+perlfaq3 - Programming Tools ($Revision: 1.29 $, $Date: 1998/08/05 11:57:04 $)
 
 =head1 DESCRIPTION
 
@@ -372,10 +372,10 @@ you want to be sure your licence's wording will stand up in court.
 =head2 How can I compile my Perl program into byte code or C?
 
 Malcolm Beattie has written a multifunction backend compiler,
-available from CPAN, that can do both these things.  It is as of
-Jul-1998 in late alpha release, which means it's fun to play with if
-you're a programmer but not really for people looking for turn-key
-solutions.
+available from CPAN, that can do both these things.  It is included
+in the perl5.005 release, but is still considered experimental.
+This means it's fun to play with if you're a programmer but not
+really for people looking for turn-key solutions.
 
 Merely compiling into C does not in and of itself guarantee that your
 code will run very much faster.  That's because except for lucky cases
@@ -385,11 +385,6 @@ long to run and be just as big.  Most programs save little more than
 compilation time, leaving execution no more than 10-30% faster.  A few
 rare programs actually benefit significantly (like several times
 faster), but this takes some tweaking of your code.
-
-The 5.005 release of Perl itself, whose main goal is merging the various
-non-Unix ports back into the one Perl source, will also have preliminary
-(strictly beta) support for Malcolm's compiler and his light-weight
-processes (sometimes called ``threads'').
 
 You'll probably be astonished to learn that the current version of the
 compiler generates a compiled form of your script whose executable is
@@ -410,7 +405,7 @@ and compilation never stopped software piracy in the form of crackers,
 viruses, or bootleggers.  The real advantage of the compiler is merely
 packaging, and once you see the size of what it makes (well, unless
 you use a shared I<libperl.so>), you'll probably want a complete
-Perl install anywayt.
+Perl install anyway.
 
 =head2 How can I get C<#!perl> to work on [MS-DOS,NT,...]?
 

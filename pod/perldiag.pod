@@ -1538,7 +1538,7 @@ backwards.
 
 =item Modification of non-creatable hash value attempted, subscript "%s"
 
-(F) You tried to make a hash value spring into existence, and it couldn't
+(P) You tried to make a hash value spring into existence, and it couldn't
 be created for some peculiar reason.
 
 =item Module name must be constant
@@ -2479,10 +2479,12 @@ if the error went away.  Sort of the cybernetic version of S<20 questions>.
 instead of Perl.  Check the #! line, or manually feed your script
 into Perl yourself.
 
-=item System V IPC is not implemented on this machine
+=item System V %s is not implemented on this machine
 
-(F) You tried to do something with a function beginning with "sem", "shm",
-or "msg".  See L<perlfunc/semctl>, for example.
+(F) You tried to do something with a function beginning with "sem",
+"shm", or "msg" but that System V IPC is not implemented in your
+machine.  In some machines the functionality can exist but be
+unconfigured.  Consult your system support.
 
 =item Syswrite on closed filehandle
 

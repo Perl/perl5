@@ -48,6 +48,14 @@ EOT
     $total = @tests;
     $files  = 0;
     $totmax = 0;
+    $maxlen = 0;
+    foreach (@tests) {
+	$len = length;
+	$maxlen = $len if $len > $maxlen;
+    }
+    # +3 : we want three dots between the test name and the "ok"
+    # -2 : the .t suffix
+    $dotdotdot = $maxlen + 3 - 2;
     while ($test = shift @tests) {
 
 	if ( $infinite{$test} && $type eq 'compile' ) {
@@ -59,7 +67,7 @@ EOT
 	}
 	$te = $test;
 	chop($te);
-	print "$te" . '.' x (18 - length($te));
+	print "$te" . '.' x ($dotdotdot - length($te));
 
 	open(SCRIPT,"<$test") or die "Can't run $test.\n";
 	$_ = <SCRIPT>;
