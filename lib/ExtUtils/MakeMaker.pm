@@ -163,9 +163,20 @@ sub eval_in_subdirs {
 sub eval_in_x {
     my($self,$dir) = @_;
     package main;
-    chdir $dir or Carp::carp("Couldn't change to directory $dir: $!");
+    chdir $dir or
+	Carp::carp("Couldn't change to directory $dir: $!");
 
-    eval { do './Makefile.PL' };
+    {
+	local *FH;
+	open(FH,"Makefile.PL") or
+	    Carp::carp("Couldn't open Makefile.PL in $dir");
+	local $/; # Sluuurp.
+	my $eval = join "", <FH>;
+	close FH;
+	# eval, not do, since we need lexical variables
+	eval $eval;
+    }
+
     if ($@) {
 # 	  if ($@ =~ /prerequisites/) {
 # 	      die "MakeMaker WARNING: $@";
