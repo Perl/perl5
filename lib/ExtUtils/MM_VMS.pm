@@ -6,7 +6,7 @@
 #   Author:  Charles Bailey  bailey@genetics.upenn.edu
 
 package ExtUtils::MM_VMS;
-$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.21 (15-Feb-1996)';
+$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.26 (17-Mar-1996)';
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
 use Config;
@@ -16,6 +16,29 @@ use File::Basename;
 
 Exporter::import('ExtUtils::MakeMaker', '$Verbose', '&neatvalue');
 
+=head1 NAME
+
+ExtUtils::MM_VMS - methods to override UN*X behaviour in ExtUtils::MakeMaker
+
+=head1 SYNOPSIS
+
+ use ExtUtils::MM_VMS; # Done internally by ExtUtils::MakeMaker if needed
+
+=head1 DESCRIPTION
+
+See ExtUtils::MM_Unix for a documentation of the methods provided
+there. This package overrides the implementation of these methods, not
+the semantics.
+
+=head2 Methods always loaded
+
+=item eliminate_macros
+
+Expands MM[KS]/Make macros in a text string, using the contents of
+identically named elements of C<%$self>, and returns the result
+as a file specification in Unix syntax.
+
+=cut
 
 sub eliminate_macros {
     my($self,$path) = @_;
@@ -42,10 +65,20 @@ sub eliminate_macros {
     $npath;
 }
 
-# Catchall routine to clean up problem macros.  Expands macros in any directory
-# specification, and expands expressions which are all macro, so that we can
-# tell how long the expansion is, and avoid overrunning DCL's command buffer
-# when MM[KS] is running.
+=item fixpath
+
+Catchall routine to clean up problem MM[SK]/Make macros.  Expands macros
+in any directory specification, in order to avoid juxtaposing two
+VMS-syntax directories when MM[SK] is run.  Also expands expressions which
+are all macro, so that we can tell how long the expansion is, and avoid
+overrunning DCL's command buffer when MM[KS] is running.
+
+If optional second argument has a TRUE value, then the return string is
+a VMS-syntax directory specification, otherwise it is a VMS-syntax file
+specification.
+
+=cut
+
 sub fixpath {
     my($self,$path,$force_path) = @_;
     unless (ref $self){
@@ -81,6 +114,13 @@ sub fixpath {
     $fixedpath;
 }
 
+=item catdir
+
+Concatenates a list of file specifications, and returns the result as a
+VMS-syntax directory specification.
+
+=cut
+
 sub catdir {
     my($self,@dirs) = @_;
     unless (ref $self){
@@ -101,6 +141,13 @@ sub catdir {
     print "catdir(",join(',',@_[1..$#_]),") = |$rslt|\n" if $Verbose >= 3;
     $rslt;
 }
+
+=item catfile
+
+Concatenates a list of file specifications, and returns the result as a
+VMS-syntax directory specification.
+
+=cut
 
 sub catfile {
     my($self,@files) = @_;
@@ -126,10 +173,99 @@ sub catfile {
     $rslt;
 }
 
+package ExtUtils::MM_VMS;
 
-# Default name is taken from the directory name if it's not passed in.
-# Since VMS filenames are case-insensitive, we actually look in the
-# extension files to find the Mixed-case name
+sub ExtUtils::MM_VMS::guess_name;
+sub ExtUtils::MM_VMS::find_perl;
+sub ExtUtils::MM_VMS::path;
+sub ExtUtils::MM_VMS::maybe_command;
+sub ExtUtils::MM_VMS::maybe_command_in_dirs;
+sub ExtUtils::MM_VMS::perl_script;
+sub ExtUtils::MM_VMS::file_name_is_absolute;
+sub ExtUtils::MM_VMS::replace_manpage_separator;
+sub ExtUtils::MM_VMS::init_others;
+sub ExtUtils::MM_VMS::constants;
+sub ExtUtils::MM_VMS::const_loadlibs;
+sub ExtUtils::MM_VMS::cflags;
+sub ExtUtils::MM_VMS::const_cccmd;
+sub ExtUtils::MM_VMS::pm_to_blib;
+sub ExtUtils::MM_VMS::tool_autosplit;
+sub ExtUtils::MM_VMS::tool_xsubpp;
+sub ExtUtils::MM_VMS::xsubpp_version;
+sub ExtUtils::MM_VMS::tools_other;
+sub ExtUtils::MM_VMS::dist;
+sub ExtUtils::MM_VMS::c_o;
+sub ExtUtils::MM_VMS::xs_c;
+sub ExtUtils::MM_VMS::xs_o;
+sub ExtUtils::MM_VMS::top_targets;
+sub ExtUtils::MM_VMS::dlsyms;
+sub ExtUtils::MM_VMS::dynamic_lib;
+sub ExtUtils::MM_VMS::dynamic_bs;
+sub ExtUtils::MM_VMS::static_lib;
+sub ExtUtils::MM_VMS::manifypods;
+sub ExtUtils::MM_VMS::processPL;
+sub ExtUtils::MM_VMS::installbin;
+sub ExtUtils::MM_VMS::subdir_x;
+sub ExtUtils::MM_VMS::clean;
+sub ExtUtils::MM_VMS::realclean;
+sub ExtUtils::MM_VMS::dist_basics;
+sub ExtUtils::MM_VMS::dist_core;
+sub ExtUtils::MM_VMS::dist_dir;
+sub ExtUtils::MM_VMS::dist_test;
+sub ExtUtils::MM_VMS::install;
+sub ExtUtils::MM_VMS::perldepend;
+sub ExtUtils::MM_VMS::makefile;
+sub ExtUtils::MM_VMS::test;
+sub ExtUtils::MM_VMS::test_via_harness;
+sub ExtUtils::MM_VMS::test_via_script;
+sub ExtUtils::MM_VMS::makeaperl;
+sub ExtUtils::MM_VMS::ext;
+sub ExtUtils::MM_VMS::nicetext;
+
+#use SelfLoader;
+sub AUTOLOAD {
+    my $code;
+    if (defined fileno(DATA)) {
+	while (<DATA>) {
+	    last if /^__END__/;
+	    $code .= $_;
+	}
+	close DATA;
+	eval $code;
+	if ($@) {
+	    $@ =~ s/ at .*\n//;
+	    Carp::croak $@;
+	}
+    } else {
+	warn "AUTOLOAD called unexpectedly for $AUTOLOAD"; 
+    }
+    defined(&$AUTOLOAD) or die "Myloader inconsistency error";
+    goto &$AUTOLOAD;
+}
+
+1;
+
+__DATA__
+
+=head2 SelfLoaded methods
+
+Those methods which override default MM_Unix methods are marked
+"(override)", while methods unique to MM_VMS are marked "(specific)".
+For overridden methods, documentation is limited to an explanation
+of why this method overrides the MM_Unix method; see the ExtUtils::MM_Unix
+documentation for more details.
+
+=item guess_name (override)
+
+Try to determine name of extension being built.  We begin with the name
+of the current directory.  Since VMS filenames are case-insensitive,
+however, we look for a F<.pm> file whose name matches that of the current
+directory (presumably the 'main' F<.pm> file for this extension), and try
+to find a C<package> statement from which to obtain the Mixed::Case
+package name.
+
+=cut
+
 sub guess_name {
     my($self) = @_;
     unless (ref $self){
@@ -164,6 +300,12 @@ sub guess_name {
     $defname;
 }
 
+=item find_perl (override)
+
+Use VMS file specification syntax and CLI commands to find and
+invoke Perl images.
+
+=cut
 
 sub find_perl{
     my($self, $ver, $names, $dirs, $trace) = @_;
@@ -171,21 +313,35 @@ sub find_perl{
 	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
 	$self = $ExtUtils::MakeMaker::Parent[-1];
     }
-    my($name, $dir,$vmsfile,@cand);
+    my($name,$dir,$vmsfile,@sdirs,@snames,@cand);
+    # Check in relative directories first, so we pick up the current
+    # version of Perl if we're running MakeMaker as part of the main build.
+    @sdirs = sort { my($absb) = file_name_is_absolute($a);
+                    my($absb) = file_name_is_absolute($b);
+                    if ($absa && $absb) { return $a cmp $b }
+                    else { return $absa ? 1 : ($absb ? -1 : ($a cmp $b)); }
+                  } @$dirs;
+    # Check miniperl before perl, and check names likely to contain
+    # version numbers before "generic" names, so we pick up an
+    # executable that's less likely to be from an old installation.
+    @snames = sort { my($ba) = $a =~ m!([^:>\]/]+)$!;  # basename
+                     my($bb) = $b =~ m!([^:>\]/]+)$!;
+                     substr($ba,0,1) cmp substr($bb,0,1)
+                     or -1*(length($ba) <=> length($bb)) } @$names;
     if ($trace){
 	print "Looking for perl $ver by these names:\n";
-	print "\t@$names,\n";
+	print "\t@snames,\n";
 	print "in these dirs:\n";
-	print "\t@$dirs\n";
+	print "\t@sdirs\n";
     }
-    foreach $dir (@$dirs){
+    foreach $dir (@sdirs){
 	next unless defined $dir; # $self->{PERL_SRC} may be undefined
-	foreach $name (@$names){
+	foreach $name (@snames){
 	    if ($name !~ m![/:>\]]!) { push(@cand,$self->catfile($dir,$name)); }
 	    else                     { push(@cand,$self->fixpath($name));      }
 	}
     }
-    foreach $name (sort { length($a) <=> length($b) } @cand) {
+    foreach $name (@cand) {
 	print "Checking $name\n" if ($trace >= 2);
 	next unless $vmsfile = $self->maybe_command($name);
 	print "Executing $vmsfile\n" if ($trace >= 2);
@@ -198,6 +354,12 @@ sub find_perl{
     0; # false and not empty
 }
 
+=item path (override)
+
+Translate logical name DCL$PATH as a searchlist, rather than trying
+to C<split> string value of C<$ENV{'PATH'}>.
+
+=cut
 
 sub path {
     my(@dirs,$dir,$i);
@@ -205,11 +367,22 @@ sub path {
     @dirs;
 }
 
+=item maybe_command (override)
+
+Follows VMS naming conventions for executable files.
+If the name passed in doesn't exactly match an executable file,
+appends F<.Exe> to check for executable image, and F<.Com> to check
+for DCL procedure.  If this fails, checks F<Sys$Share:> for an
+executable file having the name specified.  Finally, appends F<.Exe>
+and checks again.
+
+=cut
 
 sub maybe_command {
     my($self,$file) = @_;
     return $file if -x $file && ! -d _;
     return "$file.exe" if -x "$file.exe";
+    return "$file.com" if -x "$file.com";
     if ($file !~ m![/:>\]]!) {
 	my($shrfile) = 'Sys$Share:' . $file;
 	return $file if -x $shrfile && ! -d _;
@@ -218,6 +391,11 @@ sub maybe_command {
     return 0;
 }
 
+=item maybe_command_in_dirs (override)
+
+Uses DCL argument quoting on test command line.
+
+=cut
 
 sub maybe_command_in_dirs {	# $ver is optional argument if looking for perl
     my($self, $names, $dirs, $trace, $ver) = @_;
@@ -249,6 +427,13 @@ sub maybe_command_in_dirs {	# $ver is optional argument if looking for perl
     }
 }
 
+=item perl_script (override)
+
+If name passed in doesn't specify a readable file, appends F<.pl> and
+tries again, since it's customary to have file types on all files
+under VMS.
+
+=cut
 
 sub perl_script {
     my($self,$file) = @_;
@@ -257,11 +442,22 @@ sub perl_script {
     return '';
 }
 
+=item file_name_is_absolute (override)
+
+Checks for VMS directory spec as well as Unix separators.
+
+=cut
+
 sub file_name_is_absolute {
-    my($sefl,$file);
-    $file =~ m!^/! or $file =~ m![:<\[][^.]!;
+    my($self,$file);
+    $file =~ m!^/! or $file =~ m![:<\[][^.\-]!;
 }
 
+=item replace_manpage_separator
+
+Use as separator a character which is legal in a VMS-syntax file name.
+
+=cut
 
 sub replace_manpage_separator {
     my($self,$man) = @_;
@@ -270,6 +466,12 @@ sub replace_manpage_separator {
     $man;
 }
 
+=item init_others (override)
+
+Provide VMS-specific forms of various utility commands, then hand
+off to the default MM_Unix method.
+
+=cut
 
 sub init_others {
     my($self) = @_;
@@ -293,6 +495,13 @@ sub init_others {
     &ExtUtils::MM_Unix::init_others;
 }
 
+=item constants (override)
+
+Fixes up numerous file and directory macros to insure VMS syntax
+regardless of input syntax.  Also adds a few VMS-specific macros
+and makes lists of files comma-separated.
+
+=cut
 
 sub constants {
     my($self) = @_;
@@ -439,13 +648,24 @@ PERL_ARCHIVE = ',($ENV{'PERLSHR'} ? $ENV{'PERLSHR'} : 'Sys$Share:PerlShr.Exe'),'
 ';
     }
 
+    $self->{TO_INST_PM} = [ map($self->fixpath($_),sort keys %{$self->{PM}}) ];
+    $self->{PM_TO_BLIB} = [ map($self->fixpath($_),%{$self->{PM}}) ];
     push @m,'
-INST_PM = ',join(', ',map($self->fixpath($_),sort values %{$self->{PM}})),'
+TO_INST_PM = ',join(', ',@{$self->{TO_INST_PM}}),'
+
+PM_TO_BLIB = ',join(', ',@{$self->{PM_TO_BLIB}}),'
 ';
 
     join('',@m);
 }
 
+=item const_loadlibs (override)
+
+Basically a stub which passes through library specfications provided
+by the caller.  Will be updated or removed when VMS support is added
+to ExtUtils::Liblist.
+
+=cut
 
 sub const_loadlibs{
     my($self) = @_;
@@ -494,15 +714,25 @@ LDLOADLIBS = ",map($self->fixpath($_) . ' ',$self->{'LDLOADLIBS'}),"\n";
     join('',@m);
 }
 
+=item cflags (override)
 
-sub const_cccmd {
+Bypass shell script and produce qualifiers for CC directly (but warn
+user if a shell script for this extension exists).  Fold multiple
+/Defines into one, and do the same with /Includes, since some C
+compilers pay attention to only one instance of these qualifiers
+on the command line.
+
+=cut
+
+sub cflags {
     my($self,$libperl) = @_;
     unless (ref $self){
 	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
 	$self = $ExtUtils::MakeMaker::Parent[-1];
     }
-    my($cmd,$quals) = ($Config{'cc'},$Config{'ccflags'});
+    my($quals) = $Config{'ccflags'};
     my($name,$sys,@m);
+    my($optimize) = '/Optimize';
 
     ( $name = $self->{NAME} . "_cflags" ) =~ s/:/_/g ;
     print STDOUT "Unix shell script ".$Config{"$self->{'BASEEXT'}_cflags"}.
@@ -544,23 +774,108 @@ sub const_cccmd {
     }
     else { $quals .= "$incstr)"; }
 
+    $optimize = '/Debug/NoOptimize'
+	if ($self->{OPTIMIZE} =~ /-g/ or $self->{OPTIMIZE} =~ m!/Debug!i);
 
-   if ($Config{'vms_cc_type'} ne 'decc') {
-        push @m,'
-.FIRST
-	',$self->{NOECHO},'If F$TrnLnm("Sys").eqs."" Then Define/NoLog SYS ',
-        ($Config{'vms_cc_type'} eq 'gcc' ? 'GNU_CC_Include:[VMS]'
-                                         : 'Sys$Library'),'
-
-';
-   }
-   push(@m, "CCCMD = $cmd$quals\n");
-
-   $self->{CONST_CCCMD} = join('',@m);
+    return $self->{CFLAGS} = qq{
+CCFLAGS = $quals
+OPTIMIZE = $optimize
+PERLTYPE =
+SPLIT =
+LARGE =
+};
 }
 
+=item const_cccmd (override)
 
-# --- Tool Sections ---
+Adds directives to point C preprocessor to the right place when
+handling #include <sys/foo.h> directives.  Also constructs CC
+command line a bit differently than MM_Unix method.
+
+=cut
+
+sub const_cccmd {
+    my($self,$libperl) = @_;
+    unless (ref $self){
+	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
+	$self = $ExtUtils::MakeMaker::Parent[-1];
+    }
+    my(@m);
+
+    return $self->{CONST_CCCMD} if $self->{CONST_CCCMD};
+    return '' unless $self->needs_linking();
+    if ($Config{'vms_cc_type'} eq 'gcc') {
+        push @m,'
+.FIRST
+	',$self->{NOECHO},'If F$TrnLnm("Sys").eqs."" Then Define/NoLog SYS GNU_CC_Include:[VMS]';
+    }
+    elsif ($Config{'vms_cc_type'} eq 'vaxc') {
+        push @m,'
+.FIRST
+	',$self->{NOECHO},'If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("VAXC$Include").eqs."" Then Define/NoLog SYS Sys$Library
+	',$self->{NOECHO},'If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("VAXC$Include").nes."" Then Define/NoLog SYS VAXC$Include';
+    }
+    else {
+        push @m,'
+.FIRST
+	',$self->{NOECHO},'If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("DECC$System_Include").eqs."" Then Define/NoLog SYS ',
+		($Config{'arch'} eq 'VMS_AXP' ? 'Sys$Library' : 'DECC$Library_Include'),'
+	',$self->{NOECHO},'If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("DECC$System_Include").nes."" Then Define/NoLog SYS DECC$System_Include';
+    }
+
+    push(@m, "\n\nCCCMD = $Config{'cc'} \$(CCFLAGS)\$(OPTIMIZE)\n");
+
+    $self->{CONST_CCCMD} = join('',@m);
+}
+
+=item pm_to_blib (override)
+
+DCL I<still> accepts a maximum of 255 characters on a command
+line, so we write the (potentially) long list of file names
+to a temp file, then persuade Perl to read it instead of the
+command line to find args.
+
+=cut
+
+sub pm_to_blib {
+    my($self) = @_;
+    unless (ref $self){
+	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
+	$self = $ExtUtils::MakeMaker::Parent[-1];
+    }
+    my($line,$from,$to,@m);
+    my($autodir) = $self->catdir('$(INST_LIB)','auto');
+    my(@files) = @{$self->{PM_TO_BLIB}};
+
+    push @m, q{
+# As always, keep under DCL's 255-char limit
+pm_to_blib : $(TO_INST_PM)
+	},$self->{NOECHO},q{$(PERL) -e "print '},shift(@files),q{ },shift(@files),q{'" >.MM_tmp
+};
+
+    $line = '';  # avoid uninitialized var warning
+    while ($from = shift(@files),$to = shift(@files)) {
+	$line .= " $from $to";
+	if (length($line) > 128) {
+	    push(@m,"\t$self->{NOECHO}\$(PERL) -e \"print '$line'\" >>.MM_tmp\n");
+	    $line = '';
+	}
+    }
+
+    push(@m,q[	$(PERL) "-I$(PERL_LIB)" "-MExtUtils::Install" -e "pm_to_blib({split(' ',<STDIN>)},'].$autodir.q[')" <.MM_tmp]);
+    push(@m,qq[
+	$self->{NOECHO}Delete/NoLog/NoConfirm .MM_tmp;
+	$self->{NOECHO}\$(TOUCH) pm_to_blib.ts
+]);
+
+    join('',@m);
+}
+
+=item tool_autosplit (override)
+
+Use VMS-style quoting on command line.
+
+=cut
 
 sub tool_autosplit{
     my($self, %attribs) = @_;
@@ -575,6 +890,12 @@ sub tool_autosplit{
 AUTOSPLITFILE = $(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e "use AutoSplit;}.$asl.q{ AutoSplit::autosplit($ARGV[0], $ARGV[1], 0, 1, 1) ;"
 };
 }
+
+=item tool_sxubpp (override)
+
+Use VMS-style quoting on xsubpp command line.
+
+=cut
 
 sub tool_xsubpp{
     my($self) = @_;
@@ -620,7 +941,7 @@ sub tool_xsubpp{
     }
 
     "
-XSUBPPDIR = ".$self->fixpath($xsdir,1)."
+XSUBPPDIR = $xsdir
 XSUBPP = \$(PERL) \"-I\$(PERL_ARCHLIB)\" \"-I\$(PERL_LIB)\" \$(XSUBPPDIR)xsubpp
 XSPROTOARG = $self->{XSPROTOARG}
 XSUBPPDEPS = @tmdeps
@@ -628,6 +949,12 @@ XSUBPPARGS = @tmargs
 ";
 }
 
+=item xsubpp_version (override)
+
+Test xsubpp exit status according to VMS rules ($sts & 1 ==> good)
+rather than Unix rules ($sts == 0 ==> good).
+
+=cut
 
 sub xsubpp_version
 {
@@ -638,7 +965,7 @@ sub xsubpp_version
 
     # first try the -v flag, introduced in 1.921 & 2.000a2
 
-    my $command = "$self->{PERL} $xsubpp -v";
+    my $command = "$self->{PERL} \"-I$self->{PERL_LIB}\" $xsubpp -v";
     print "Running: $command\n" if $Verbose;
     $version = `$command` ;
     warn "Running '$command' exits with status " . $? unless ($? & 1);
@@ -681,6 +1008,16 @@ EOM
     return "1.0" ;
 }
 
+=item tools_other (override)
+
+Adds a few MM[SK] macros, and shortens some the installatin commands,
+in order to stay under DCL's 255-character limit.  Also changes
+EQUALIZE_TIMESTAMP to set revision date of target file to one second
+later than source file, since MMK interprets precisely equal revision
+dates for a source and target file as a sign that the target needs
+to be updated.
+
+=cut
 
 sub tools_other {
     my($self) = @_;
@@ -706,13 +1043,20 @@ RM_RF = $self->{RM_RF}
 UMASK_NULL = $self->{UMASK_NULL}
 MKPATH = Create/Directory
 EQUALIZE_TIMESTAMP = \$(PERL) -we "open F,qq{>\$ARGV[1]};close F;utime(0,(stat(\$ARGV[0]))[9]+1,\$ARGV[1])"
-WARN_IF_OLD_PACKLIST = \$(PERL) -e "if (-f \$ARGV[0]){print qq[WARNING: Old package found (\$ARGV[0]); please check for collisions\\n]}"
+!. ($self->{PARENT} ? '' : 
+q!WARN_IF_OLD_PACKLIST = \$(PERL) -e "if (-f \$ARGV[0]){print qq[WARNING: Old package found (\$ARGV[0]); please check for collisions\\n]}"
 MOD_INSTALL = \$(PERL) "-I\$(PERL_LIB)" "-MExtUtils::Install" -e "install({split(' ',<STDIN>)},1);"
 DOC_INSTALL = \$(PERL) -e "@ARGV=split('|',<STDIN>);print '=head3 ',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];while(\$key=shift && \$val=shift){print qq[=item *\\n\\nC<\$key: \$val>\\n\\n];}print qq[=back\\n\\n]"
 UNINSTALL = \$(PERL) "-I\$(PERL_LIB)" "-MExtUtils::Install" -e "uninstall(\$ARGV[0],1);"
-!;
+!);
 }
 
+=item dist (override)
+
+Provide VMSish defaults for some values, then hand off to
+default MM_Unix method.
+
+=cut
 
 sub dist {
     my($self, %attribs) = @_;
@@ -720,38 +1064,21 @@ sub dist {
 	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
 	$self = $ExtUtils::MakeMaker::Parent[-1];
     }
-    # VERSION should be sanitised before use as a file name
-    my($name)         = $attribs{NAME}          || '$(DISTVNAME)';
-    my($zip)          = $attribs{ZIP}           || 'zip';
-    my($zipflags)     = $attribs{ZIPFLAGS}      || '-Vu';
-    my($suffix)       = $attribs{SUFFIX}        || '';
-    my($shar)         = $attribs{SHAR}          || 'vms_share';
-    my($preop)        = $attribs{PREOP}         || '!'; # e.g., update MANIFEST
-    my($postop)       = $attribs{POSTOP}        || '!';
-    my($dist_cp)  = $attribs{DIST_CP}  || 'best';
-    my($dist_default) = $attribs{DIST_DEFAULT}  || 'zipdist';
+    $attribs{ZIPFLAGS}     ||= '-Vu';
+    $attribs{COMPRESS}     ||= 'gzip';
+    $attribs{SUFFIX}       ||= '-gz';
+    $attribs{SHAR}         ||= 'vms_share';
+    $attribs{DIST_DEFAULT} ||= 'zipdist';
 
-    my($src) = $name;
-    $src = "[.$src]" unless $src =~ /\[/;
-    $src =~ s#\]#...]#;
-    $src .= '*.*' if $src =~ /\]$/;
-    $suffix =~ s#\.#_#g;
-"
-DISTVNAME = \$(DISTNAME)-\$(VERSION_SYM)
-SRC = $src
-ZIP = $zip
-ZIPFLAGS = $zipflags
-SUFFIX = $suffix
-SHARE = $shar
-PREOP = $preop
-POSTOP = $postop
-DIST_CP = $dist_cp
-DIST_DEFAULT = $dist_default
-";
+    return ExtUtils::MM_Unix::dist($self,%attribs);
 }
 
+=item c_o (override)
 
-# --- Translation Sections ---
+Use VMS syntax on command line.  In particular, $(DEFINE) and
+$(PERL_INC) have been pulled into $(CCCMD).  Also use MM[SK] macros.
+
+=cut
 
 sub c_o {
     my($self) = @_;
@@ -763,8 +1090,21 @@ sub c_o {
     '
 .c$(OBJ_EXT) :
 	$(CCCMD) $(CCCDLFLAGS) $(MMS$TARGET_NAME).c
+
+.cpp$(OBJ_EXT) :
+	$(CCCMD) $(CCCDLFLAGS) $(MMS$TARGET_NAME).cpp
+
+.cxx$(OBJ_EXT) :
+	$(CCCMD) $(CCCDLFLAGS) $(MMS$TARGET_NAME).cxx
+
 ';
 }
+
+=item xs_c (override)
+
+Use MM[SK] macros.
+
+=cut
 
 sub xs_c {
     my($self) = @_;
@@ -778,6 +1118,12 @@ sub xs_c {
 	$(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $(MMS$TARGET_NAME).xs >$(MMS$TARGET)
 ';
 }
+
+=item xs_o (override)
+
+Use MM[SK] macros, and VMS command line for C compiler.
+
+=cut
 
 sub xs_o {	# many makes are too dumb to use xs_c then c_o
     my($self) = @_;
@@ -793,9 +1139,11 @@ sub xs_o {	# many makes are too dumb to use xs_c then c_o
 ';
 }
 
+=item top_targets (override)
 
-# --- Target Sections ---
+Use VMS quoting on command line for Version_check.
 
+=cut
 
 sub top_targets {
     my($self) = shift;
@@ -805,7 +1153,10 @@ sub top_targets {
     }
     my(@m);
     push @m, '
-all ::	config $(INST_PM) subdirs linkext manifypods
+all :: pure_all manifypods
+	$(NOOP)
+
+pure_all :: config pm_to_blib subdirs linkext
 	$(NOOP)
 
 subdirs :: $(MYEXTLIB)
@@ -823,8 +1174,9 @@ config :: $(INST_AUTODIR).exists
 
     push @m, q{
 config :: Version_check
+	$(NOOP)
 
-} unless $self->{PARENT} or ($self->{PERL_SRC} && $self->{INSTALLDIRS} eq "perl");
+} unless $self->{PARENT} or ($self->{PERL_SRC} && $self->{INSTALLDIRS} eq "perl") or $self->{NO_VC};
 
 
     push @m, $self->dir_target(qw[$(INST_AUTODIR) $(INST_LIBDIR) $(INST_ARCHAUTODIR)]);
@@ -861,6 +1213,13 @@ Version_check :
     join('',@m);
 }
 
+=item dlsyms (override)
+
+Create VMS linker options files specifying universal symbols for this
+extension's shareable image, and listing other shareable images or 
+libraries to which it should be linked.
+
+=cut
 
 sub dlsyms {
     my($self,%attribs) = @_;
@@ -882,10 +1241,12 @@ dynamic :: rtls.opt $(INST_ARCHAUTODIR)$(BASEEXT).opt
 	$(NOOP)
 ');
 	if ($srcdir) {
-	   my($opt) = $self->catfile($srcdir,'perlshr.opt');
+	   my($popt) = $self->catfile($srcdir,'perlshr.opt');
+	   my($lopt) = $self->catfile($srcdir,'crtl.opt');
 	   push(@m,"# Depend on $(BASEEXT).opt to insure we copy here *after* autogenerating (wrong) rtls.opt in Mksymlists
-rtls.opt : $opt \$(BASEEXT).opt
-	Copy/Log $opt Sys\$Disk:[]rtls.opt
+rtls.opt : $popt $lopt \$(BASEEXT).opt
+	Copy/Log $popt Sys\$Disk:[]rtls.opt
+	Append/Log $lopt Sys\$Disk:[]rtls.opt
 ");
 	}
 	else {
@@ -916,8 +1277,11 @@ $(BASEEXT).opt : Makefile.PL
     join('',@m);
 }
 
+=item dynamic_lib (override)
 
-# --- Dynamic Loading Sections ---
+Use VMS Link command.
+
+=cut
 
 sub dynamic_lib {
     my($self, %attribs) = @_;
@@ -948,6 +1312,12 @@ $(INST_DYNAMIC) : $(INST_STATIC) $(PERL_INC)perlshr_attr.opt rtls.opt $(INST_ARC
     join('',@m);
 }
 
+=item dynamic_bs (override)
+
+Use VMS-style quoting on Mkbootstrap command line.
+
+=cut
+
 sub dynamic_bs {
     my($self, %attribs) = @_;
     unless (ref $self){
@@ -974,7 +1344,12 @@ $(INST_BOOT) : $(BOOTSTRAP) $(INST_ARCHAUTODIR).exists
 	- $(CP) $(BOOTSTRAP) $(INST_BOOT)
 ';
 }
-# --- Static Loading Sections ---
+
+=item static_lib (override)
+
+Use VMS commands to manipulate object library.
+
+=cut
 
 sub static_lib {
     my($self) = @_;
@@ -1010,35 +1385,41 @@ $(INST_STATIC) : $(OBJECT) $(MYEXTLIB)
 }
 
 
-sub installpm_x { # called by installpm perl file
-    my($self, $dist, $inst, $splitlib) = @_;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
-    if ($inst =~ m!#!) {
-	warn "Warning: MM[SK] would have problems processing this file: $inst, SKIPPED\n";
-	return '';
-    }
-    $inst = $self->fixpath($inst);
-    $dist = $self->fixpath($dist);
-    my($instdir) = $inst =~ /([^\)]+\))[^\)]*$/ ? $1 : dirname($inst);
-    my(@m);
+# sub installpm_x { # called by installpm perl file
+#     my($self, $dist, $inst, $splitlib) = @_;
+#     unless (ref $self){
+# 	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
+# 	$self = $ExtUtils::MakeMaker::Parent[-1];
+#     }
+#     if ($inst =~ m!#!) {
+# 	warn "Warning: MM[SK] would have problems processing this file: $inst, SKIPPED\n";
+# 	return '';
+#     }
+#     $inst = $self->fixpath($inst);
+#     $dist = $self->fixpath($dist);
+#     my($instdir) = $inst =~ /([^\)]+\))[^\)]*$/ ? $1 : dirname($inst);
+#     my(@m);
+# 
+#     push(@m, "
+# $inst : $dist \$(MAKEFILE) ${instdir}.exists \$(INST_ARCHAUTODIR).exists
+# ",'	',$self->{NOECHO},'$(RM_F) $(MMS$TARGET)
+# 	',$self->{NOECHO},'$(CP) ',"$dist $inst",'
+# 	$(CHMOD) 644 $(MMS$TARGET)
+# ');
+#     push(@m, '	$(AUTOSPLITFILE) $(MMS$TARGET) ',
+#               $self->catdir($splitlib,'auto')."\n\n")
+#         if ($splitlib and $inst =~ /\.pm$/);
+#     push(@m,$self->dir_target($instdir));
+# 
+#     join('',@m);
+# }
 
-    push(@m, "
-$inst : $dist \$(MAKEFILE) ${instdir}.exists \$(INST_ARCHAUTODIR).exists
-",'	',$self->{NOECHO},'$(RM_F) $(MMS$TARGET)
-	',$self->{NOECHO},'$(CP) ',"$dist $inst",'
-	$(CHMOD) 644 $(MMS$TARGET)
-');
-    push(@m, '	$(AUTOSPLITFILE) $(MMS$TARGET) ',
-              $self->catdir($splitlib,'auto')."\n\n")
-        if ($splitlib and $inst =~ /\.pm$/);
-    push(@m,$self->dir_target($instdir));
+=item manifypods (override)
 
-    join('',@m);
-}
+Use VMS-style quoting on command line, and VMS logical name
+to specify fallback location at build time if we can't find pod2man.
 
+=cut
 
 sub manifypods {
     my($self, %attribs) = @_;
@@ -1089,6 +1470,11 @@ q[POD2MAN = $(PERL) -we "%m=@ARGV;for (keys %m){" -
     join('', @m);
 }
 
+=item processPL (override)
+
+Use VMS-style quoting on command line.
+
+=cut
 
 sub processPL {
     my($self) = @_;
@@ -1110,6 +1496,13 @@ $self->{PL_FILES}->{$plfile} :: $plfile
     join "", @m;
 }
 
+=item installbin (override)
+
+Stay under DCL's 255 character command line limit once again by
+splitting potentially long list of files across multiple lines
+in C<realclean> target.
+
+=cut
 
 sub installbin {
     my($self) = @_;
@@ -1147,6 +1540,7 @@ realclean ::
     push @m, "\t\$(RM_F) $line\n\n";
 
     while (($from,$to) = each %fromto) {
+	last unless defined $from;
 	my $todir;
 	if ($to =~ m#[/>:\]]#) { $todir = dirname($to); }
 	else                   { ($todir = $to) =~ s/[^\)]+$//; }
@@ -1160,8 +1554,11 @@ $to : $from \$(MAKEFILE) ${todir}.exists
     join "", @m;
 }
 
+=item subdir_x (override)
 
-# --- Sub-directory Sections ---
+Use VMS commands to change default directory.
+
+=cut
 
 sub subdir_x {
     my($self, $subdir) = @_;
@@ -1182,8 +1579,13 @@ subdirs ::
     join('',@m);
 }
 
+=item clean (override)
 
-# --- Cleanup and Distribution Sections ---
+Split potentially long list of files across multiple commands (in
+order to stay under the magic command line limit).  Also use MM[SK]
+commands for handling subdirectories.
+
+=cut
 
 sub clean {
     my($self, %attribs) = @_;
@@ -1202,12 +1604,12 @@ clean ::
 	push( @m, '	If F$Search("'.$vmsdir.'$(MAKEFILE)") Then \\',"\n\t",
 	      '$(PERL) -e "chdir ',"'$vmsdir'",'; print `$(MMS) clean`;"',"\n");
     }
-    push @m, '	$(RM_F) *.Map *.lis *.cpp *$(OBJ_EXT) *$(LIB_EXT) *.Opt $(BOOTSTRAP) $(BASEEXT).bso
+    push @m, '	$(RM_F) *.Map *.Dmp *.Lis *.cpp *.$(DLEXT) *$(OBJ_EXT) *$(LIB_EXT) *.Opt $(BOOTSTRAP) $(BASEEXT).bso
 ';
 
     my(@otherfiles) = values %{$self->{XS}}; # .c files from *.xs files
     push(@otherfiles, $attribs{FILES}) if $attribs{FILES};
-    push(@otherfiles, 'blib.dir', '$(MAKE_APERL_FILE)', 'extralibs.ld', 'perlmain.c');
+    push(@otherfiles, qw[ blib $(MAKE_APERL_FILE) extralibs.ld perlmain.c pm_to_blib.ts ]);
     push(@otherfiles,$self->catfile('$(INST_ARCHAUTODIR)','extralibs.all'));
     my($file,$line);
     $line = '';  #avoid unitialized var warning
@@ -1224,6 +1626,11 @@ clean ::
     join('', @m);
 }
 
+=item realclean (override)
+
+Guess what we're working around?  Also, use MM[SK] for subdirectories.
+
+=cut
 
 sub realclean {
     my($self, %attribs) = @_;
@@ -1248,7 +1655,8 @@ realclean :: clean
     # combination of macros).  In order to stay below DCL's 255 char limit,
     # we put only 2 on a line.
     my($file,$line,$fcnt);
-    my(@files) = qw{ *.Opt $(INST_DYNAMIC) $(INST_STATIC) $(INST_BOOT) $(INST_PM) $(OBJECT) $(MAKEFILE) $(MAKEFILE)_old };
+    my(@files) = qw{ $(INST_DYNAMIC) $(INST_STATIC) $(INST_BOOT) $(OBJECT) $(MAKEFILE) $(MAKEFILE)_old };
+    push(@files, values %{$self->{PM}});
     $line = '';  #avoid unitialized var warning
     foreach $file (@files) {
 	$file = $self->fixpath($file);
@@ -1276,6 +1684,11 @@ realclean :: clean
     join('', @m);
 }
 
+=item dist_basics (override)
+
+Use VMS-style quoting on command line.
+
+=cut
 
 sub dist_basics {
     my($self) = @_;
@@ -1298,6 +1711,12 @@ manifest :
 ';
 }
 
+=sub dist_core (override)
+
+Syntax for invoking F<VMS_Share> differs from that for Unix F<shar>,
+so C<shdist> target actions are VMS-specific.
+
+=cut
 
 sub dist_core {
     my($self) = @_;
@@ -1305,14 +1724,14 @@ sub dist_core {
 	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
 	$self = $ExtUtils::MakeMaker::Parent[-1];
     }
-'
+q[
 dist : $(DIST_DEFAULT)
+	].$self->{NOECHO}.q[$(PERL) -le "print 'Warning: $m older than $vf' if -e ($vf = '$(VERSION_FROM)') && -M $vf < -M ($m = '$(MAKEFILE)'"
+
+zipdist : $(DISTVNAME).zip
 	$(NOOP)
 
-zipdist : $(DISTVNAME).zip$(SUFFIX)
-	$(NOOP)
-
-$(DISTVNAME).zip$(SUFFIX) : distdir
+$(DISTVNAME).zip : distdir
 	$(PREOP)
 	$(ZIP) "$(ZIPFLAGS)" $(MMS$TARGET) $(SRC)
 	$(RM_RF) $(DISTVNAME)
@@ -1320,12 +1739,17 @@ $(DISTVNAME).zip$(SUFFIX) : distdir
 
 shdist : distdir
 	$(PREOP)
-	$(SHARE) $(SRC) $(DISTVNAME).share$(SUFFIX)
+	$(SHARE) $(SRC) $(DISTVNAME).share
 	$(RM_RF) $(DISTVNAME)
 	$(POSTOP)
-';
+];
 }
 
+=item dist_dir (override)
+
+Use VMS-style quoting on command line.
+
+=cut
 
 sub dist_dir {
     my($self) = @_;
@@ -1341,6 +1765,12 @@ distdir :
 };
 }
 
+=item dist_test (override)
+
+Use VMS commands to change default directory, and use VMS-style
+quoting on command line.
+
+=cut
 
 sub dist_test {
     my($self) = @_;
@@ -1359,19 +1789,14 @@ disttest : distdir
 };
 }
 
-sub dist_ci {
-    my($self) = @_;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
-'';
-}
-
-
 # --- Test and Installation Sections ---
 
+=item install (override)
 
+Work around DCL's 255 character limit several times,and use
+VMS-style command line quoting in a few cases.
+
+=cut
 
 sub install {
     my($self, %attribs) = @_;
@@ -1475,6 +1900,15 @@ uninstall_from_sitedirs ::
     join('',@m);
 }
 
+=item perldepend (override)
+
+Use VMS-style syntax for files; it's cheaper to just do it directly here
+than to have the MM_Unix method call C<catfile> repeatedly.  Also use
+config.vms as source of original config data if the Perl distribution
+is available; config.sh is an ancillary file under VMS.  Finally, if
+we have to rebuild Config.pm, use MM[SK] to do it.
+
+=cut
 
 sub perldepend {
     my($self) = @_;
@@ -1495,28 +1929,44 @@ $(OBJECT) : $(PERL_INC)vmsish.h, $(PERL_INC)util.h, $(PERL_INC)config.h
 
 ' if $self->{OBJECT}; 
 
-    push(@m,'
+    if ($self->{PERL_SRC}) {
+	my(@macros);
+	my($mmsquals) = '$(USEMAKEFILE)[.vms]$(MAKEFILE)';
+	push(@macros,'__AXP__=1') if $Config{'arch'} eq 'VMS_AXP';
+	push(@macros,'DECC=1')    if $Config{'vms_cc_type'} eq 'decc';
+	push(@macros,'GNUC=1')    if $Config{'vms_cc_type'} eq 'gcc';
+	push(@macros,'SOCKET=1')  if $Config{'d_has_sockets'};
+	push(@macros,qq["CC=$Config{'cc'}"])  if $Config{'cc'} =~ m!/!;
+	$mmsquals .= '$(USEMACROS)' . join(',',@macros) . '$(MACROEND)' if @macros;
+	push(@m,q[
 # Check for unpropagated config.sh changes. Should never happen.
 # We do NOT just update config.h because that is not sufficient.
 # An out of date config.h is not fatal but complains loudly!
 #$(PERL_INC)config.h : $(PERL_SRC)config.sh
 $(PERL_INC)config.h : $(PERL_VMS)config.vms
-	',$self->{NOECHO},'Write Sys$Error "Warning: $(PERL_INC)config.h out of date with $(PERL_VMS)config.vms"
+	],$self->{NOECHO},q[Write Sys$Error "Warning: $(PERL_INC)config.h out of date with $(PERL_VMS)config.vms"
 
 #$(PERL_ARCHLIB)Config.pm : $(PERL_SRC)config.sh
 $(PERL_ARCHLIB)Config.pm : $(PERL_VMS)config.vms $(PERL_VMS)genconfig.pl
-	',$self->{NOECHO},'Write Sys$Error "$(PERL_ARCHLIB)Config.pm may be out of date with config.vms or genconfig.pl"
+	],$self->{NOECHO},q[Write Sys$Error "$(PERL_ARCHLIB)Config.pm may be out of date with config.vms or genconfig.pl"
 	olddef = F$Environment("Default")
 	Set Default $(PERL_SRC)
-	$(MMS) $(USEMAKEFILE)[.VMS]$(MAKEFILE) [.lib.',$Config{'arch'},']config.pm
-	Set Default \'olddef\'
-') if $self->{PERL_SRC};
+	$(MMS)],$mmsquals,q[ $(MMS$TARGET)
+	Set Default 'olddef'
+]);
+    }
 
     push(@m, join(" ", map($self->fixpath($_),values %{$self->{XS}}))." : \$(XSUBPPDEPS)\n")
       if %{$self->{XS}};
 
     join('',@m);
 }
+
+=item makefile (override)
+
+Use VMS commands and quoting.
+
+=cut
 
 sub makefile {
     my($self) = @_;
@@ -1528,26 +1978,31 @@ sub makefile {
     # We do not know what target was originally specified so we
     # must force a manual rerun to be sure. But as it should only
     # happen very rarely it is not a significant problem.
-    push @m, '
+    push @m, q[
 $(OBJECT) : $(FIRST_MAKEFILE)
-' if $self->{OBJECT};
+] if $self->{OBJECT};
 
-    push @m,'
+    push @m,q[
 # We take a very conservative approach here, but it\'s worth it.
 # We move $(MAKEFILE) to $(MAKEFILE)_old here to avoid gnu make looping.
 $(MAKEFILE) : Makefile.PL $(CONFIGDEP)
-	',$self->{NOECHO},'Write Sys$Output "$(MAKEFILE) out-of-date with respect to $(MMS$SOURCE_LIST)"
-	',$self->{NOECHO},'Write Sys$Output "Cleaning current config before rebuilding $(MAKEFILE) ..."
+	],$self->{NOECHO},q[Write Sys$Output "$(MAKEFILE) out-of-date with respect to $(MMS$SOURCE_LIST)"
+	],$self->{NOECHO},q[Write Sys$Output "Cleaning current config before rebuilding $(MAKEFILE) ..."
 	- $(MV) $(MAKEFILE) $(MAKEFILE)_old
 	- $(MMS) $(USEMAKEFILE)$(MAKEFILE)_old clean
-	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" Makefile.PL ',join(' ',map(qq["$_"],@ARGV)),'
-	',$self->{NOECHO},'Write Sys$Output "$(MAKEFILE) has been rebuilt."
-	',$self->{NOECHO},'Write Sys$Output "Please run $(MMS) to build the extension."
-';
+	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" Makefile.PL ],join(' ',map(qq["$_"],@ARGV)),q[
+	],$self->{NOECHO},q[Write Sys$Output "$(MAKEFILE) has been rebuilt."
+	],$self->{NOECHO},q[Write Sys$Output "Please run $(MMS) to build the extension."
+];
 
     join('',@m);
 }
 
+=item test (override)
+
+Use VMS commands for handling subdirectories.
+
+=cut
 
 sub test {
     my($self, %attribs) = @_;
@@ -1559,10 +2014,14 @@ sub test {
     my(@m);
     push @m,"
 TEST_VERBOSE = 0
-TEST_TYPE=test_\$(LINKTYPE)
+TEST_TYPE = test_\$(LINKTYPE)
 
-test : \$(TEST_TYPE)
+test :: \$(TEST_TYPE)
 	\$(NOOP)
+
+testdb :: testdb_\$(LINKTYPE)
+	\$(NOOP)
+
 ";
     foreach(@{$self->{DIR}}){
       my($vmsdir) = $self->fixpath($_,1);
@@ -1573,29 +2032,46 @@ test : \$(TEST_TYPE)
         unless $tests or -f "test.pl" or @{$self->{DIR}};
     push(@m, "\n");
 
-    push(@m, "test_dynamic :: all\n");
+    push(@m, "test_dynamic :: pure_all\n");
     push(@m, $self->test_via_harness('$(FULLPERL)', $tests)) if $tests;
     push(@m, $self->test_via_script('$(FULLPERL)', 'test.pl')) if -f "test.pl";
     push(@m, "    \$(NOOP)\n") if (!$tests && ! -f "test.pl");
     push(@m, "\n");
 
+    if (-f 'test.pl') {
+	push(@m, "testdb_dynamic :: pure_all\n");
+	push(@m, $self->test_via_script('$(FULLPERL) -d', 'test.pl'));
+	push(@m, "\n");
+    }
+
     # Occasionally we may face this degenerate target:
     push @m, "test_ : test_dynamic\n\n";
  
-	if ($self->needs_linking()) {
-	push(@m, "test_static :: all \$(MAP_TARGET)\n");
+    if ($self->needs_linking()) {
+	push(@m, "test_static :: pure_all \$(MAP_TARGET)\n");
 	push(@m, $self->test_via_harness('$(MAP_TARGET)', $tests)) if $tests;
-	push(@m, $self->test_via_script('$(MAP_TARGET)', 'test.pl')) if -f "test.pl";
+	if (-f 'test.pl') {
+	    push(@m, $self->test_via_script('$(MAP_TARGET)', 'test.pl'));
+	    push(@m, "testdb_static :: pure_all \$(MAP_TARGET)\n");
+	    push(@m, $self->test_via_script('$(MAP_TARGET) -d', 'test.pl'));
+	    push(@m, "\n");
+	}
 	push(@m, "\t$self->{NOECHO}\$(NOOP)\n") if (!$tests && ! -f "test.pl");
 	push(@m, "\n");
     }
     else {
-	push @m, "test_static :: test_dynamic\n\t$self->{NOECHO}\$(NOOP)\n";
+	push @m, "test_static :: test_dynamic\n\t$self->{NOECHO}\$(NOOP)\n\n";
+	push @m, "testdb_static :: testdb_dynamic\n\t$self->{NOECHO}\$(NOOP)\n";
     }
 
     join('',@m);
 }
 
+=item test_via_harness (override)
+
+Use VMS-style quoting on command line.
+
+=cut
 
 sub test_via_harness {
     my($self,$perl,$tests) = @_;
@@ -1607,6 +2083,11 @@ sub test_via_harness {
     '-e "use Test::Harness qw(&runtests $verbose); $verbose=$(TEST_VERBOSE); runtests @ARGV;" \\'."\n\t$tests\n";
 }
 
+=item test_via_script (override)
+
+Use VMS-style quoting on command line.
+
+=cut
 
 sub test_via_script {
     my($self,$perl,$script) = @_;
@@ -1618,6 +2099,14 @@ sub test_via_script {
 ';
 }
 
+=item makeaperl (override)
+
+Undertake to build a new set of Perl images using VMS commands.  Since
+VMS does dynamic loading, it's not necessary to statically link each
+extension into the Perl image, so this isn't the normal build path.
+Consequently, it hasn't really been tested, and may well be incomplete.
+
+=cut
 
 sub makeaperl {
     my($self, %attribs) = @_;
@@ -1665,6 +2154,7 @@ $(MAP_TARGET) :: $(MAKE_APERL_FILE)
     # Which *.olb files could we make use of...
     local(%olbs);
     $olbs{$self->{INST_ARCHAUTODIR}} = "$self->{BASEEXT}\$(LIB_EXT)";
+    require File::Find;
     File::Find::find(sub {
 	return unless m/\Q$self->{LIB_EXT}\E$/;
 	return if m/^libperl/;
@@ -1796,6 +2286,13 @@ map_clean :
     join '', @m;
 }
   
+=item ext (specific)
+
+Stub routine standing in for C<ExtUtils::LibList::ext> until VMS
+support is added to that package.
+
+=cut
+
 sub ext {
     my($self) = @_;
     unless (ref $self){
@@ -1805,42 +2302,17 @@ sub ext {
     '','','';
 }
 
-
-# --- Make-Directories section (internal method) ---
-# dir_target(@array) returns a Makefile entry for the file .exists in each
-# named directory. Returns nothing, if the entry has already been processed.
-# We're helpless though, if the same directory comes as $(FOO) _and_ as "bar".
-# Both of them get an entry, that's why we use "::". I chose
-# '$(PERL_INC)perl.h' as the prerequisite, because there has to be one,
-# something that doesn't change too often :)
-
-sub dir_target {
-    my($self,@dirs) = @_;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
-    my(@m,$dir);
-    foreach $dir (@dirs) {
-	next if $self->{DIR_TARGET}{$self}{$dir}++;
-	my($vmsdir) = $self->fixpath($dir,1);
-	push @m, "
-${vmsdir}.exists :: \$(PERL_INC)perl.h
-	$self->{NOECHO}\$(MKPATH) $vmsdir
-	$self->{NOECHO}\$(EQUALIZE_TIMESTAMP) \$(MMS\$SOURCE) \$(MMS\$TARGET)
-";
-    }
-    join "", @m;
-}
-
-
 # --- Output postprocessing section ---
 
+=item nicetext (override)
+
+Insure that colons marking targets are preceded by space, in order
+to distinguish the target delimiter from a colon appearing as
+part of a filespec.
+
+=cut
+
 sub nicetext {
-    # Insure that colons marking targets are preceded by space -
-    # most Unix Makes don't need this, but it's necessary under VMS
-    # to distinguish the target delimiter from a colon appearing as
-    # part of a filespec.
 
     my($self,$text) = @_;
     unless (ref $self){
@@ -1854,17 +2326,3 @@ sub nicetext {
 1;
 
 __END__
-
-=head1 NAME
-
-ExtUtils::MM_VMS - methods to override UN*X behaviour in ExtUtils::MakeMaker
-
-=head1 SYNOPSIS
-
- use ExtUtils::MM_VMS; # Done internally by ExtUtils::MakeMaker if needed
-
-=head1 DESCRIPTION
-
-See ExtUtils::MM_Unix for a documentation of the methods provided
-there. This package overrides the implementation of these methods, not
-the semantics.
