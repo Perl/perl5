@@ -441,3 +441,16 @@ djgpp_fflush (FILE *fp)
 
     return res;
 }
+
+int djgpp_get_stream_mode(FILE *f)
+{
+    extern char *__file_handle_modes;
+
+    int mode = __file_handle_modes[fileno(f)];
+    if (f->_flag & _IORW)
+        return mode | O_RDWR;
+    if (f->_flag & _IOWRT)
+        return mode | O_WRONLY;
+    return mode | O_RDONLY;
+}
+
