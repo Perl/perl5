@@ -477,8 +477,16 @@ perl_destruct(pTHXx)
         SV **ary = AvARRAY(PL_regex_padav);
 
         while (i) {
-            REGEXP *re = (REGEXP *)SvIVX(ary[--i]);
-            if (re && (re->refcnt > 0)) {
+            SV *resv = ary[--i];
+            REGEXP *re = (REGEXP *)SvIVX(resv);
+
+            if (SvFLAGS(resv) & SVf_BREAK) {
+                /* this is PL_curpm, already freed
+                 * flag is set in regexec.c:S_regtry
+                 */
+                SvFLAGS(resv) &= ~SVf_BREAK;
+            }
+            else {
                 ReREFCNT_dec(re);
             }
         }
