@@ -2,6 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use Carp;
+use File::Spec;
 our $VERSION = '1.02';
 
 use bytes ();		# for $bytes::hint_bits
@@ -52,9 +53,21 @@ sub alias (@)
 
 sub alias_file ($)
 {
-  my $arg = shift;
-  my $file = -f $arg ? $arg : "unicore/${arg}_alias.pl";
+  my ($arg, $file) = @_;
+  if (-f $arg && File::Spec->file_name_is_absolute ($arg)) {
+    $file = $arg;
+  }
+  elsif ($arg =~ m/^\w+$/) {
+    $file = "unicore/${arg}_alias.pl";
+  }
+  else {
+    croak "Charnames alias files can only have identifier characters";
+  }
   if (my @alias = do $file) {
+    @alias == 1 && !defined $alias[0] and
+      croak "$file cannot be used as alias file for charnames";
+    @alias % 2 and
+      croak "$file did not return a (valid) list of alias pairs";
     alias (@alias);
     return (1);
   }
@@ -178,18 +191,28 @@ sub import
   ##
   my ($promote, %h, @args) = (0);
   while (@_ and $_ = shift) {
-    if ($_ eq ":alias" && @_) {
+    if ($_ eq ":alias") {
+      @_ or
+	croak ":alias needs an argument in charnames";
       my $alias = shift;
       if (ref $alias) {
 	ref $alias eq "HASH" or
-	  die "Only HASH reference supported as argument to :alias";
+	  croak "Only HASH reference supported as argument to :alias";
 	alias ($alias);
 	next;
       }
-      if ($alias =~ m{:(\w+)$} and $1 ne "full" && $1 ne "short") {
-	alias_file ($1) and $promote = 1, next;
+      if ($alias =~ m{:(\w+)$}) {
+	$1 eq "full" || $1 eq "short" and
+	  croak ":alias cannot use existing pragma :$1 (reversed order?)";
+	alias_file ($1) and $promote = 1;
+	next;
       }
-      alias_file ($alias) and next;
+      alias_file ($alias);
+      next;
+    }
+    if (m/^:/ and ! ($_ eq ":full" || $_ eq ":short")) {
+      warn "unsupported special '$_' in charnames";
+      next;
     }
     push @args, $_;
   }
