@@ -16,7 +16,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.40 $, 10;
+$VERSION = substr q$Revision: 1.41 $, 10;
 
 =head1 NAME
 
@@ -173,6 +173,20 @@ disable the cache scanning with 'never'.
         $ans = prompt("Perform cache scanning (atstart or never)?", $default);
     } while ($ans ne 'atstart' && $ans ne 'never');
     $CPAN::Config->{scan_cache} = $ans;
+
+    print qq{
+
+To speed up the initial CPAN shell startup, it is possible to use
+Storable or FreezeThaw to create an cache of metadata. If no
+serializer is avaiable, the normal index mechanism will be used.
+
+};
+
+    defined($default = $CPAN::Config->{cache_metadata}) or $default = 1;
+    do {
+        $ans = prompt("Cache metadata (yes/no)?", ($default ? 'yes' : 'no'));
+    } while ($ans !~ /^\s*[yn]/i);
+    $CPAN::Config->{cache_metadata} = ($ans =~ /^\s*y/i ? 1 : 0);
 
     #
     # prerequisites_policy
