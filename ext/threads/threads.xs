@@ -150,6 +150,11 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	}
 	MUTEX_UNLOCK(&thread->mutex);
 	MUTEX_DESTROY(&thread->mutex);
+#ifdef WIN32
+	if (thread->handle)
+	    CloseHandle(thread->handle);
+	thread->handle = 0;
+#endif
         PerlMemShared_free(thread);
         if (freeperl)
             perl_free(freeperl);
@@ -566,6 +571,8 @@ Perl_ithread_join(pTHX_ SV *obj)
 	MUTEX_UNLOCK(&thread->mutex);
 #ifdef WIN32
 	waitcode = WaitForSingleObject(thread->handle, INFINITE);
+	CloseHandle(thread->handle);
+	thread->handle = 0;
 #else
 	pthread_join(thread->thr,&retval);
 #endif
