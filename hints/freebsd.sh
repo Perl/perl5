@@ -223,21 +223,23 @@ EOM
 		 exit 1
 	      fi
 	      case "$osvers" in
-	      # Both in 4.x and 5.x gethostbyaddr_r exists but
-	      # it is "Temporary function, not threadsafe"...
-	      4.*)	d_gethostbyaddr_r="undef"
-			d_gethostbyaddr_r_proto="0"
-			ldflags="-pthread $ldflags"
-			;;
-	      5.*)	d_gethostbyaddr_r="undef"
-			d_gethostbyaddr_r_proto="0"
-                        if [ `/sbin/sysctl -n kern.osreldate` -lt 500016 ]; then
+	      # 500016 is the first osreldate in which one could
+	      # just link against libc_r without disposing of libc
+	      # at the same time.  500016 ... up to whatever it was
+	      # on the 31st of August 2003 can still be used with -pthread,
+	      # but it is not necessary.
+	      5.*)	if [ `/sbin/sysctl -n kern.osreldate` -lt 500016 ]; then
                                 ldflags="-pthread $ldflags"
                         fi
 			;;
 	      *)	ldflags="-pthread $ldflags"
 			;;
 	      esac
+	      # Both in 4.x and 5.x gethostbyaddr_r exists but
+	      # it is "Temporary function, not threadsafe"...
+	      # Presumably earlier it didn't even exist.
+	      d_gethostbyaddr_r="undef"
+	      d_gethostbyaddr_r_proto="0"
 	      ;;
 
 	esac
