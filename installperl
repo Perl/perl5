@@ -1,5 +1,8 @@
 #!./perl
 
+use strict;
+use vars qw($Is_VMS $Is_W32 $Is_OS2 $nonono $versiononly $depth);
+
 BEGIN {
     require 5.004;
     chdir '..' if !-d 'lib' and -d '..\lib';
@@ -11,7 +14,7 @@ BEGIN {
     if ($Is_VMS) { eval 'use VMS::Filespec;' }
 }
 
-$scr_ext = ($Is_VMS ? '.Com' : $Is_W32 ? '.bat' : '');
+my $scr_ext = ($Is_VMS ? '.Com' : $Is_W32 ? '.bat' : '');
 
 use File::Find;
 use File::Compare;
@@ -27,11 +30,11 @@ sub mkpath {
     File::Path::mkpath(@_) unless $nonono;
 }
 
-$mainperldir = "/usr/bin";
-$exe_ext = $Config{exe_ext};
+my $mainperldir = "/usr/bin";
+my $exe_ext = $Config{exe_ext};
 
 # Allow ``make install PERLNAME=something_besides_perl'':
-$perl = defined($ENV{PERLNAME}) ? $ENV{PERLNAME} : 'perl';
+my $perl = defined($ENV{PERLNAME}) ? $ENV{PERLNAME} : 'perl';
 
 while (@ARGV) {
     $nonono = 1 if $ARGV[0] eq '-n';
@@ -41,14 +44,14 @@ while (@ARGV) {
 
 umask 022 unless $Is_VMS;
 
-@scripts = qw(	utils/c2ph utils/h2ph utils/h2xs utils/perlbug utils/perldoc
+my @scripts = qw(utils/c2ph utils/h2ph utils/h2xs utils/perlbug utils/perldoc
 		utils/pl2pm utils/splain utils/perlcc
 		x2p/s2p x2p/find2perl 
 		pod/pod2man pod/pod2html pod/pod2latex pod/pod2text);
 
 if ($scr_ext) { @scripts = map { "$_$scr_ext" } @scripts; }
 
-@pods = (<pod/*.pod>);
+my @pods = (<pod/*.pod>);
 
 # Specify here any .pm files that are actually architecture-dependent.
 # (Those included with XS extensions under ext/ are automatically
@@ -56,7 +59,7 @@ if ($scr_ext) { @scripts = map { "$_$scr_ext" } @scripts; }
 # Now that the default privlib has the full perl version number included,
 # we no longer have to play the trick of sticking version-specific .pm 
 # files under the archlib directory.
-%archpms = (
+my %archpms = (
     Config => 1, 
 );
 
@@ -77,29 +80,29 @@ find(sub {
 	}
     }, 'ext');
 
-$ver = $];
-$release = substr($ver,0,3);   # Not used presently.
-$patchlevel = substr($ver,3,2);
+my $ver = $];
+my $release = substr($ver,0,3);   # Not used presently.
+my $patchlevel = substr($ver,3,2);
 die "Patchlevel of perl ($patchlevel)",
     "and patchlevel of config.sh ($Config{'PATCHLEVEL'}) don't match\n"
 	if $patchlevel != $Config{'PATCHLEVEL'};
 
 # Fetch some frequently-used items from %Config
-$installbin = $Config{installbin};
-$installscript = $Config{installscript};
-$installprivlib = $Config{installprivlib};
-$installarchlib = $Config{installarchlib};
-$installsitelib = $Config{installsitelib};
-$installsitearch = $Config{installsitearch};
-$installman1dir = $Config{installman1dir};
-$man1ext = $Config{man1ext};
-$libperl = $Config{libperl};
+my $installbin = $Config{installbin};
+my $installscript = $Config{installscript};
+my $installprivlib = $Config{installprivlib};
+my $installarchlib = $Config{installarchlib};
+my $installsitelib = $Config{installsitelib};
+my $installsitearch = $Config{installsitearch};
+my $installman1dir = $Config{installman1dir};
+my $man1ext = $Config{man1ext};
+my $libperl = $Config{libperl};
 # Shared library and dynamic loading suffixes.
-$so = $Config{so};
-$dlext = $Config{dlext};
+my $so = $Config{so};
+my $dlext = $Config{dlext};
 
-$d_dosuid = $Config{d_dosuid};
-$binexp = $Config{binexp};
+my $d_dosuid = $Config{d_dosuid};
+my $binexp = $Config{binexp};
 
 if ($Is_VMS) {  # Hang in there until File::Spec hits the big time
     foreach ( \$installbin,     \$installscript,  \$installprivlib,
@@ -128,7 +131,7 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 
 if ($Is_W32) {
 
-$perldll = 'perl.' . $dlext;
+my $perldll = 'perl.' . $dlext;
 $perldll = 'perlcore.' . $dlext if $Config{'ccflags'} =~ /PERL_OBJECT/i;
 
 -f $perldll || die "No perl DLL built\n";
@@ -141,7 +144,7 @@ chmod(0755, "$installbin/$perldll");
 }
 
 # This will be used to store the packlist
-$packlist = ExtUtils::Packlist->new("$installarchlib/.packlist");
+my $packlist = ExtUtils::Packlist->new("$installarchlib/.packlist");
 
 # First we install the version-numbered executables.
 
@@ -170,7 +173,7 @@ if ($d_dosuid) {
 
 # Install library files.
 
-$do_installarchlib = $do_installprivlib = 0;
+my ($do_installarchlib, $do_installprivlib) = (0, 0);
     
 mkpath($installprivlib, 1, 0777);
 mkpath($installarchlib, 1, 0777);
@@ -193,6 +196,7 @@ else {
 
 # Install header files and libraries.
 mkpath("$installarchlib/CORE", 1, 0777);
+my @corefiles;
 if ($Is_VMS) {  # We did core file selection during build
     my $coredir = "lib/$Config{'arch'}/$]";
     $coredir =~ tr/./_/;
@@ -205,7 +209,7 @@ else {
     # If they have built sperl.o...
     push(@corefiles,'sperl.o') if -f 'sperl.o';
 }
-foreach $file (@corefiles) {
+foreach my $file (@corefiles) {
     # HP-UX (at least) needs to maintain execute permissions
     # on dynamically-loadable libraries. So we do it for all.
     copy_if_diff($file,"$installarchlib/CORE/$file")
@@ -225,13 +229,13 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
 
 # Offer to install perl in a "standard" location
 
-$mainperl_is_instperl = 0;
+my $mainperl_is_instperl = 0;
 
 if (!$versiononly && !$nonono && !$Is_W32 && !$Is_VMS && -t STDIN && -t STDERR
 	&& -w $mainperldir && ! samepath($mainperldir, $installbin)) {
-    local($usrbinperl)	= "$mainperldir/$perl$exe_ext";
-    local($instperl)	= "$installbin/$perl$exe_ext";
-    local($expinstperl)	= "$binexp/$perl$exe_ext";
+    my($usrbinperl)	= "$mainperldir/$perl$exe_ext";
+    my($instperl)	= "$installbin/$perl$exe_ext";
+    my($expinstperl)	= "$binexp/$perl$exe_ext";
 
     # First make sure $usrbinperl is not already the same as the perl we
     # just installed.
@@ -319,7 +323,7 @@ if (! $versiononly || !($installprivlib =~ m/\Q$]/)) {
 	}
     }
 
-    foreach $file (@pods) {
+    foreach my $file (@pods) {
 	# $file is a name like  pod/perl.pod
 	copy_if_diff($file, "${installprivlib}/${file}");
     }
@@ -333,18 +337,18 @@ if (! $versiononly || !($installprivlib =~ m/\Q$]/)) {
 # installed perl.
 
 if (!$versiononly) {
-
-    $dirsep = ($Is_OS2 || $Is_W32) ? ';' : ':' ;
+	my ($path, @path);
+    my $dirsep = ($Is_OS2 || $Is_W32) ? ';' : ':' ;
     ($path = $ENV{"PATH"}) =~ s:\\:/:g ;
     @path = split(/$dirsep/, $path);
     if ($Is_VMS) {
         my $i = 0;
         while (exists $ENV{'DCL$PATH' . $i}) {
-            $dir = unixpath($ENV{'DCL$PATH' . $i});  $dir =~ s-/$--;
+            my $dir = unixpath($ENV{'DCL$PATH' . $i});  $dir =~ s-/$--;
             push(@path,$dir);
         }
     }
-    @otherperls = ();
+    my @otherperls;
     for (@path) {
 	next unless m,^/,;
 	# Use &samepath here because some systems have other dirs linked
@@ -373,9 +377,9 @@ exit 0;
 ###############################################################################
 
 sub yn {
-    local($prompt) = @_;
-    local($answer);
-    local($default) = $prompt =~ m/\[([yn])\]\s*$/i;
+    my($prompt) = @_;
+    my($answer);
+    my($default) = $prompt =~ m/\[([yn])\]\s*$/i;
     print STDERR $prompt;
     chop($answer = <STDIN>);
     $answer = $default if $answer =~ m/^\s*$/;
@@ -383,12 +387,12 @@ sub yn {
 }
 
 sub unlink {
-    local(@names) = @_;
+    my(@names) = @_;
     my($cnt) = 0;
 
     return scalar(@names) if $Is_VMS;
 
-    foreach $name (@names) {
+    foreach my $name (@names) {
 	next unless -e $name;
 	chmod 0777, $name if ($Is_OS2 || $Is_W32);
 	print STDERR "  unlink $name\n";
@@ -400,8 +404,8 @@ sub unlink {
 
 sub safe_unlink {
     return if $nonono or $Is_VMS;
-    local @names = @_;
-    foreach $name (@names) {
+    my @names = @_;
+    foreach my $name (@names) {
 	next unless -e $name;
 	chmod 0777, $name if ($Is_OS2 || $Is_W32);
 	print STDERR "  unlink $name\n";
@@ -416,7 +420,7 @@ sub safe_unlink {
 }
 
 sub safe_rename {
-    local($from,$to) = @_;
+    my($from,$to) = @_;
     if (-f $to and not unlink($to)) {
 	my($i);
 	for ($i = 1; $i < 50; $i++) {
@@ -455,7 +459,7 @@ sub link {
 }
 
 sub chmod {
-    local($mode,$name) = @_;
+    my($mode,$name) = @_;
 
     return if ($^O eq 'dos');
     printf STDERR "  chmod %o %s\n", $mode, $name;
@@ -476,12 +480,12 @@ sub copy {
 }
 
 sub samepath {
-    local($p1, $p2) = @_;
+    my($p1, $p2) = @_;
 
     return (lc($p1) eq lc($p2)) if $Is_W32;
 
     if ($p1 ne $p2) {
-	local($dev1, $ino1, $dev2, $ino2);
+	my($dev1, $ino1, $dev2, $ino2);
 	($dev1, $ino1) = stat($p1);
 	($dev2, $ino2) = stat($p2);
 	($dev1 == $dev2 && $ino1 == $ino2);
