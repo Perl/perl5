@@ -105,6 +105,117 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7077] By: jhi                                   on 2000/09/14  14:55:54
+        Log: Compilation warnings and an error.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  7076] By: jhi                                   on 2000/09/14  14:42:56
+        Log: Fix for a parsing bug, not for the original bug.
+             
+             Subject: Re: [ID 20000910.005] Another segfault with regexes. 
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Date: Wed, 13 Sep 2000 17:52:20 -0400
+             Message-Id: <200009132152.RAA24029@leggy.zk3.dec.com>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  7075] By: jhi                                   on 2000/09/14  14:40:40
+        Log: Batch of UTF-8 patches from Simon Cozens.
+     Branch: perl
+	   ! doop.c embed.h embed.pl ext/Encode/Encode.xs handy.h op.c
+	   ! pod/perlapi.pod pp.c pp_ctl.c proto.h regcomp.c regexec.c sv.c
+	   ! toke.c utf8.c
+____________________________________________________________________________
+[  7074] By: jhi                                   on 2000/09/14  14:29:58
+        Log: Subject: Re: Two advertising clauses need to be removed
+             From: Russ Allbery <rra@stanford.edu>
+             Date: 13 Sep 2000 18:50:26 -0700
+             Message-ID: <ylwvgfvj19.fsf@windlord.stanford.edu>
+     Branch: perl
+	   ! ext/SDBM_File/sdbm/dbm.c ext/SDBM_File/sdbm/dbm.h
+____________________________________________________________________________
+[  7073] By: jhi                                   on 2000/09/14  14:28:20
+        Log: Subject: [PATCH] de-wall t/README
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Wed, 13 Sep 2000 17:46:55 -0700
+             Message-ID: <//Bw5gzkge/e092yn@efn.org>
+     Branch: perl
+	   ! t/README
+____________________________________________________________________________
+[  7072] By: jhi                                   on 2000/09/14  14:25:10
+        Log: Hints optimization.
+             
+             Subject: Minor nit
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 13 Sep 2000 21:42:07 +0200
+             Message-Id: <20000913214116.1D38.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  7071] By: jhi                                   on 2000/09/14  14:23:30
+        Log: Allow chop() and chomp() to be overridden.
+             
+             Subject: [PATCH] Re: [ID 20000911.006] I can override glob but not chop?
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Wed, 13 Sep 2000 12:41:31 -0400 (EDT)
+             Message-ID: <Pine.OSF.4.21.0009131154120.6661-100000@home.kiski.net>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  7070] By: jhi                                   on 2000/09/14  14:20:36
+        Log: The return value of setlocale must be copied away.
+             
+             Subject: [ID 20000913.001] Heap corruption in Perl_init_i18nl10n
+             From: Alan Burlison <Alan.Burlison@uk.sun.com>
+             Date: Wed, 13 Sep 2000 16:27:37 +0100 
+             Message-Id: <39BF9CE9.3D7FBBDD@uk.sun.com>
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[  7069] By: jhi                                   on 2000/09/14  14:16:27
+        Log: Remove vestiges of tr//CU.
+             
+             Subject: [ID 20000912.009] perlunicode.pod still mentions tr///CU
+             From: Nick Clark <nick@plum.flirble.org>
+             Date: Tue, 12 Sep 2000 22:50:14 +0100
+             Message-Id: <E13YxwU-000DDQ-00@plum.flirble.org>
+             
+             Subject: Re: [ID 20000912.009] perlunicode.pod still mentions tr///CU
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Tue, 12 Sep 2000 21:38:48 -0700
+             Message-ID: <YTwv5gzkgmfL092yn@efn.org>
+     Branch: perl
+	   ! op.h pod/perlunicode.pod
+____________________________________________________________________________
+[  7068] By: jhi                                   on 2000/09/13  14:18:39
+        Log: Add the Encode extension.  The code is still largely just skeleton.
+     Branch: perl
+	   + ext/Encode/Encode.pm ext/Encode/Encode.xs
+	   + ext/Encode/Makefile.PL ext/Encode/Todo
+	   ! MANIFEST Todo-5.6
+____________________________________________________________________________
+[  7067] By: jhi                                   on 2000/09/12  17:43:33
+        Log: Allow for whitespace between "#" and "line" in cpp output.
+             
+             Subject: [PATCH] Re: Problems compiling bleadperl on Unicos 9
+             From: Calle Dybedahl <calle@lysator.liu.se>
+             Date: 12 Sep 2000 19:38:02 +0200 
+             Message-ID: <867l8hy0hx.fsf_-_@tezcatlipoca.algonet.se>
+     Branch: perl
+	   ! ext/Errno/ChangeLog ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  7066] By: gsar                                  on 2000/09/12  17:24:29
+        Log: change#6327 didn't quite go all the way to enable USE_SOCKETS_AS_HANDLES
+             initialization in all the threads on Windows
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  7065] By: jhi                                   on 2000/09/12  15:11:31
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7064] By: jhi                                   on 2000/09/12  14:54:54
         Log: Retract #7062, the pod tests are not ready.
      Branch: perl
