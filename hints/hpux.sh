@@ -337,10 +337,9 @@ EOCBU
 cat > UU/uselfs.cbu <<'EOCBU'
 case "$uselargefiles" in
 $define|true|[yY]*)
-        ccflags="$ccflags `getconf _CS_XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
-        ldflags="$ldflags `getconf _CS_XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
-
-        libswanted="$libswanted `getconf _CS_XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+	# there are largefile flags available via getconf(1)
+	# but we cheat for now.
+	ccflags="$ccflags -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 
         # The strict ANSI mode (-Aa) doesn't like large files.
 	ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
