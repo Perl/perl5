@@ -17,7 +17,7 @@ my %alias1 = (
 		'LF'			=> 'LINE FEED (LF)',
 		'FF'			=> 'FORM FEED (FF)',
 		'CR'			=> 'CARRIAGE RETURN (LF)',
-		'NEL'			=> 'NEXT LINE (NEXT LINE)',
+		'NEL'			=> 'NEXT LINE (NEL)',
 		'BOM'			=> 'BYTE ORDER MARK',
 	    );
 

@@ -12,7 +12,7 @@ BEGIN {
 
 $| = 1;
 
-print "1..34\n";
+print "1..37\n";
 
 use charnames ':full';
 
@@ -181,27 +181,36 @@ print "ok 27\n";
 print "not " unless "\N{LF}" eq "\n";
 print "ok 28\n";
 
-print "not " unless "\N{BYTE ORDER MARK}" eq chr(0xFFFE);
+print "not " unless "\N{NEXT LINE (NEL)}" eq chr(0x85);
 print "ok 29\n";
 
-print "not " unless "\N{BOM}" eq chr(0xFFFE);
+print "not " unless "\N{NEXT LINE}" eq chr(0x85);
 print "ok 30\n";
+
+print "not " unless "\N{NEL}" eq chr(0x85);
+print "ok 31\n";
+
+print "not " unless "\N{BYTE ORDER MARK}" eq chr(0xFFFE);
+print "ok 32\n";
+
+print "not " unless "\N{BOM}" eq chr(0xFFFE);
+print "ok 33\n";
 
 {
     use warnings 'deprecated';
 
     print "not " unless "\N{HORIZONTAL TABULATION}" eq "\t";
-    print "ok 31\n";
+    print "ok 34\n";
 
     print "not " unless grep { /"HORIZONTAL TABULATION" is deprecated/ } @WARN;
-    print "ok 32\n";
+    print "ok 35\n";
 
     no warnings 'deprecated';
 
     print "not " unless "\N{VERTICAL TABULATION}" eq "\013";
-    print "ok 33\n";
+    print "ok 36\n";
 
     print "not " if grep { /"VERTICAL TABULATION" is deprecated/ } @WARN;
-    print "ok 34\n";
+    print "ok 37\n";
 }
 
