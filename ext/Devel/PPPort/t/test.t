@@ -2,7 +2,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib' if -d '../lib';
     require Config;
-    if (($Config::Config{'extensions'} !~ /\bDevel::PPPort\b/) ){
+    if (($Config::Config{'extensions'} !~ m!\bDevel/PPPort\b!) ){
         print "1..0 # Skip -- Perl configured without Devel::PPPort module\n";
         exit 0;
     }

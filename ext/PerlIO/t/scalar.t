@@ -8,7 +8,7 @@ BEGIN {
 	exit 0;
     }
     require Config;
-    if (($Config::Config{'extensions'} !~ /\bPerlIO::scalar\b/) ){
+    if (($Config::Config{'extensions'} !~ m!\bPerlIO/scalar\b!) ){
         print "1..0 # Skip -- Perl configured without PerlIO::scalar module\n";
         exit 0;
     }

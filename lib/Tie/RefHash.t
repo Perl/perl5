@@ -14,7 +14,7 @@ BEGIN {
     @INC = '.'; 
     push @INC, '../lib';
     require Config;
-    if (($Config::Config{'extensions'} !~ /\bData::Dumper\b/) ){
+    if (($Config::Config{'extensions'} !~ m!\bData/Dumper\b!) ){
 	print "1..0 # Skip -- Perl configured without Data::Dumper module\n";
 	exit 0;
     }

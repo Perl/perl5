@@ -14,7 +14,7 @@ BEGIN {
     @INC = '../lib';
     # FIXME (or rather FIXh2xs)
     require Config;
-    if (($Config::Config{'extensions'} !~ /\bDevel::PPPort\b/) ){
+    if (($Config::Config{'extensions'} !~ m!\bDevel/PPPort\b!) ){
 	print "1..0 # Skip -- Perl configured without Devel::PPPort module\n";
 	exit 0;
     }
