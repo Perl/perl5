@@ -122,30 +122,23 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 #endif
 #endif
 
+static void
+S_init_tls_and_interp(pTHX)
+{
+    if (!PL_curinterp) {			
+	PERL_SET_INTERP(my_perl);
 #if defined(USE_ITHREADS)
-#  define INIT_TLS_AND_INTERP \
-    STMT_START {				\
-	if (!PL_curinterp) {			\
-	    PERL_SET_INTERP(my_perl);		\
-	    INIT_THREADS;			\
-	    ALLOC_THREAD_KEY;			\
-	    PERL_SET_THX(my_perl);		\
-	    OP_REFCNT_INIT;			\
-	    MUTEX_INIT(&PL_dollarzero_mutex);	\
-	}					\
-	else {					\
-	    PERL_SET_THX(my_perl);		\
-	}					\
-    } STMT_END
-#else
-#  define INIT_TLS_AND_INTERP \
-    STMT_START {				\
-	if (!PL_curinterp) {			\
-	    PERL_SET_INTERP(my_perl);		\
-	}					\
-	PERL_SET_THX(my_perl);			\
-    } STMT_END
+	INIT_THREADS;
+	ALLOC_THREAD_KEY;
+	PERL_SET_THX(my_perl);
+	OP_REFCNT_INIT;
+	MUTEX_INIT(&PL_dollarzero_mutex);
 #  endif
+    }
+    else {
+	PERL_SET_THX(my_perl);
+    }
+}
 
 #ifdef PERL_IMPLICIT_SYS
 PerlInterpreter *
@@ -158,7 +151,7 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
     PerlInterpreter *my_perl;
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
-    INIT_TLS_AND_INTERP;
+    S_init_tls_and_interp(my_perl);
     Zero(my_perl, 1, PerlInterpreter);
     PL_Mem = ipM;
     PL_MemShared = ipMS;
@@ -195,7 +188,7 @@ perl_alloc(void)
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
 
-    INIT_TLS_AND_INTERP;
+    S_init_tls_and_interp(my_perl);
     return ZeroD(my_perl, 1, PerlInterpreter);
 }
 #endif /* PERL_IMPLICIT_SYS */
