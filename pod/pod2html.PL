@@ -119,8 +119,9 @@ for $count (0,1) {
 	    open(HTML,">$html") || die "can't create $html: $ERRNO";
 	    print HTML '<!-- $Id$ -->',"\n",'<HTML><HEAD>',"\n";
 	    print HTML "<CENTER>" unless $NO_NS;
-	    print HTML "<TITLE>$pod</TITLE>\n</HEAD>\n<BODY>";
+	    print HTML "<TITLE>$pod</TITLE>";
 	    print HTML "</CENTER>" unless $NO_NS;
+	    print HTML "\n</HEAD>\n<BODY>";
 	}
 	for ($i = 0; $i <= $#all; $i++) {       # decide what to do with each chunk
 	    $all[$i] =~ /^(\w+)\s*(.*)\n?([^\0]*)$/ ;
@@ -380,7 +381,7 @@ sub picrefs {
 	    } 
 	} 
 	if (length($key)) {
-            ($pod2,$num) = split(/_/,$value,2);
+            ($pod2, $num) = $value =~ /^(.*)_(\S+_\d+)$/;
 	    if ($htype eq "NAME") {  
 		return "\n<A NAME=\"".$value."\">\n$bigkey</A>\n"
 	    }
