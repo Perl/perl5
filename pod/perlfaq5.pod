@@ -955,52 +955,6 @@ include also support for non-portable systems as well.
     printf "\nYou said %s, char number %03d\n",
         $key, ord $key;
 
-For legacy DOS systems, Dan Carson <dbc@tc.fluke.COM> reports the following:
-
-To put the PC in "raw" mode, use ioctl with some magic numbers gleaned
-from msdos.c (Perl source file) and Ralf Brown's interrupt list (comes
-across the net every so often):
-
-    $old_ioctl = ioctl(STDIN,0,0);     # Gets device info
-    $old_ioctl &= 0xff;
-    ioctl(STDIN,1,$old_ioctl | 32);    # Writes it back, setting bit 5
-
-Then to read a single character:
-
-    sysread(STDIN,$c,1);               # Read a single character
-
-And to put the PC back to "cooked" mode:
-
-    ioctl(STDIN,1,$old_ioctl);         # Sets it back to cooked mode.
-
-So now you have $c.  If C<ord($c) == 0>, you have a two byte code, which
-means you hit a special key.  Read another byte with C<sysread(STDIN,$c,1)>,
-and that value tells you what combination it was according to this
-table:
-
-    # PC 2-byte keycodes = ^@ + the following:
-
-    # HEX     KEYS
-    # ---     ----
-    # 0F      SHF TAB
-    # 10-19   ALT QWERTYUIOP
-    # 1E-26   ALT ASDFGHJKL
-    # 2C-32   ALT ZXCVBNM
-    # 3B-44   F1-F10
-    # 47-49   HOME,UP,PgUp
-    # 4B      LEFT
-    # 4D      RIGHT
-    # 4F-53   END,DOWN,PgDn,Ins,Del
-    # 54-5D   SHF F1-F10
-    # 5E-67   CTR F1-F10
-    # 68-71   ALT F1-F10
-    # 73-77   CTR LEFT,RIGHT,END,PgDn,HOME
-    # 78-83   ALT 1234567890-=
-    # 84      CTR PgUp
-
-This is all trial and error I did a long time ago; I hope I'm reading the
-file that worked...
-
 =head2 How can I tell whether there's a character waiting on a filehandle?
 
 The very first thing you should do is look into getting the Term::ReadKey
