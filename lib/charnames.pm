@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Carp;
 use File::Spec;
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 use bytes ();		# for $bytes::hint_bits
 $charnames::hint_bits = 0x20000; # HINT_LOCALIZE_HH
@@ -238,7 +238,19 @@ sub import
   }
 } # import
 
-require Unicode::UCD; # for Unicode::UCD::_getcode()
+# this comes actually from Unicode::UCD, but it avoids the
+# overhead of loading it
+sub _getcode {
+    my $arg = shift;
+
+    if ($arg =~ /^[1-9]\d*$/) {
+	return $arg;
+    } elsif ($arg =~ /^(?:[Uu]\+|0[xX])?([[:xdigit:]]+)$/) {
+	return hex($1);
+    }
+
+    return;
+}
 
 my %viacode;
 
@@ -250,7 +262,7 @@ sub viacode
   }
 
   my $arg = shift;
-  my $code = Unicode::UCD::_getcode($arg);
+  my $code = _getcode($arg);
 
   my $hex;
 
