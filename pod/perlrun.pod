@@ -1099,7 +1099,9 @@ C<safe> the safe signals are used.
 
 =item PERL_UNICODE
 
-Equivalent to the B<-C> command-line switch.
+Equivalent to the B<-C> command-line switch.  Note that this is not
+a boolean variable-- setting this to C<"1"> is not the right way to
+"enable Unicode" (whatever that would mean).
 
 =item SYS$LOGIN (specific to the VMS port)
 
