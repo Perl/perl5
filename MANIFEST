@@ -1256,10 +1256,13 @@ lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 lib/Devel/SelfStubber.t		See if Devel::SelfStubber works
 lib/diagnostics.pm		Print verbose diagnostics
 lib/diagnostics.t		See if diagnostics.pm works
+lib/Digest/Changes		Digest changelog
 lib/Digest/base.pm		Digest extensions
+lib/Digest/file.pm		Digest extensions
 lib/Digest.pm			Digest extensions
 lib/Digest/t/base.t		See if Digest extensions work
 lib/Digest/t/digest.t		See if Digest extensions work
+lib/Digest/t/file.t		See if Digest extensions work
 lib/DirHandle.pm		like FileHandle only for directories
 lib/DirHandle.t			See if DirHandle works
 lib/dotsh.pl			Code to "dot" in a shell script
