@@ -25,11 +25,7 @@ use Config;
 
 print "1..11\n";
 
-srand;			# Shouldn't need this with 5.004...
-			# But I'll include it now and test for
-			# whether we needed it later.
-
-my $reps = 1000;	# How many times to try rand each time.
+my $reps = 10000;	# How many times to try rand each time.
 			# May be changed, but should be over 500.
 			# The more the better! (But slower.)
 
