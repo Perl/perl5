@@ -4,7 +4,7 @@ eval 'exec perl -S $0  ${1+"$@"}'
 
 use Config;
 if ($Config{'osname'} eq 'VMS') {
-   $diagnostics::PODFILE = VMS::Filespec::unixify($Config{'privlib'} .
+   $diagnostics::PODFILE = VMS::Filespec::unixify($Config{'privlib'}) .
                            '/pod/perldiag.pod';
 }
 else { $diagnostics::PODFILE= $Config{privlib} . "/pod/perldiag.pod"; }
