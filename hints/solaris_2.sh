@@ -210,12 +210,6 @@ if echo "$verbose" | grep '^Reading specs from' >/dev/null 2>&1; then
 	# Using gcc.
 	#
 
-	tmp=`echo "$verbose" | grep '^Reading' |
-		awk '{print $NF}'  | sed 's/specs$/include/'`
-
-	# Determine if the fixed-includes look like they'll work.
-	# Doesn't work anymore for gcc-2.7.2.
-
 	# See if as(1) is GNU as(1).  GNU as(1) might not work for this job.
 	if echo "$verbose" | grep ' /usr/ccs/bin/as ' >/dev/null 2>&1; then
 	    :
@@ -313,22 +307,12 @@ END
 	# See if ld(1) is GNU ld(1).  GNU ld(1) might not work for this job.
 	# ld --version doesn't properly report itself as a GNU tool,
 	# as of ld version 2.6, so we need to be more strict. TWP 9/5/96
-	gnu_ld=false
-	case `ld --version < /dev/null 2>&1` in
-	*GNU*|ld\ version\ 2*)
-		gnu_ld=true ;;
-	*) ;;
-	esac
-	if $gnu_ld ; then :
+	# Sun's ld always emits the "Software Generation Utilities" string.
+	if ld -V 2>&1 | grep "ld: Software Generation Utilities" >/dev/null 2>&1; then
+	    # Ok, ld is /usr/ccs/bin/ld.
+	    :
 	else
-		# Try to guess from path
-		case `type ld | awk '{print $NF}'` in
-		*gnu*|*GNU*|*FSF*)
-			gnu_ld=true ;;
-		esac
-	fi
-	if $gnu_ld ; then
-		cat <<END >&2
+	    cat <<END >&2
 
 NOTE: You are apparently using GNU ld(1).  GNU ld(1) might not build Perl.
 You should arrange to use /usr/ccs/bin/ld, perhaps by adding /usr/ccs/bin
