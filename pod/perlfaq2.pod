@@ -369,8 +369,8 @@ Recommended books on (or mostly on) Perl follow.
 
     Mastering Regular Expressions
 	by Jeffrey E. F. Friedl
-	ISBN 1-56592-257-3 [1st edition January 1997]
-	http://www.oreilly.com/catalog/regex/
+	ISBN 0-596-00289-0 [2nd edition July 2002]
+	http://www.oreilly.com/catalog/regex2/
 
     Network Programming with Perl
 	by Lincoln Stein
