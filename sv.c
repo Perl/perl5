@@ -2561,7 +2561,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		char *name = GvNAME(sstr);
 		STRLEN len = GvNAMELEN(sstr);
 		sv_upgrade(dstr, SVt_PVGV);
-		sv_magic(dstr, dstr, '*', name, len);
+		sv_magic(dstr, dstr, '*', Nullch, 0);
 		GvSTASH(dstr) = (HV*)SvREFCNT_inc(GvSTASH(sstr));
 		GvNAME(dstr) = savepvn(name, len);
 		GvNAMELEN(dstr) = len;
