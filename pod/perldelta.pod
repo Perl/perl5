@@ -11,6 +11,16 @@ If you are upgrading from an earlier release like 5.6.1, read first
 the L<perl58delta>, which describes differences between 5.6.0 and
 5.8.0.
 
+In case you are wondering about 5.6.1, it was bug-fix-wise rather
+identical to the development release 5.7.1.  Confused?  This timeline
+hopefully helps a bit:
+
+          5.6.0         2000-Mar-22
+          5.7.0         2000-Sep-02
+          5.6.1         2001-Apr-08
+          5.7.1         2001-Apr-09
+          5.8.0         2002-Jul-18
+
 =head1 Incompatible Changes
 
 =head2 Hash Randomisation
