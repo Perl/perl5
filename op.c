@@ -1053,8 +1053,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
 
     case OP_RV2AV:
     case OP_RV2HV:
-	if (!type && cUNOPo->op_first->op_type != OP_GV)
-	    Perl_croak(aTHX_ "Can't localize through a reference");
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS) {
            PL_modcount = RETURN_UNLIMITED_NUMBER;
 	    return o;		/* Treat \(@foo) like ordinary list. */
@@ -1076,8 +1074,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
        PL_modcount = RETURN_UNLIMITED_NUMBER;
 	break;
     case OP_RV2SV:
-	if (!type && cUNOPo->op_first->op_type != OP_GV)
-	    Perl_croak(aTHX_ "Can't localize through a reference");
 	ref(cUNOPo->op_first, o->op_type);
 	/* FALL THROUGH */
     case OP_GV:

@@ -211,6 +211,7 @@ PP(pp_rv2gv)
 
 PP(pp_rv2sv)
 {
+    GV *gv = Nullgv;
     dSP; dTOPss;
 
     if (SvROK(sv)) {
@@ -226,9 +227,9 @@ PP(pp_rv2sv)
 	}
     }
     else {
-	GV *gv = (GV*)sv;
 	char *sym;
 	STRLEN len;
+	gv = (GV*)sv;
 
 	if (SvTYPE(gv) != SVt_PVGV) {
 	    if (SvGMAGICAL(sv)) {
@@ -265,8 +266,14 @@ PP(pp_rv2sv)
 	sv = GvSV(gv);
     }
     if (PL_op->op_flags & OPf_MOD) {
-	if (PL_op->op_private & OPpLVAL_INTRO)
-	    sv = save_scalar((GV*)TOPs);
+	if (PL_op->op_private & OPpLVAL_INTRO) {
+	    if (cUNOP->op_first->op_type == OP_NULL)
+		sv = save_scalar((GV*)TOPs);
+	    else if (gv)
+		sv = save_scalar(gv);
+	    else
+		Perl_croak(aTHX_ PL_no_localize_ref);
+	}
 	else if (PL_op->op_private & OPpDEREF)
 	    vivify_ref(sv, PL_op->op_private & OPpDEREF);
     }
