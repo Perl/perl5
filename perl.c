@@ -1093,7 +1093,7 @@ char *s;
 	s++;
 	return s;
     case 'v':
-	printf("\nThis is perl, version %s beta1g\n\n",patchlevel);
+	printf("\nThis is perl, version %s beta1h\n\n",patchlevel);
 	fputs("\nCopyright 1987-1995, Larry Wall\n",stdout);
 #ifdef MSDOS
 	fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",
@@ -1766,10 +1766,6 @@ register char **env;
 	    environ[0] = Nullch;
 	    hv_magic(hv, envgv, 'E');
 	}
-#endif
-#ifdef DYNAMIC_ENV_FETCH
-	HvNAME(hv) = savepv(ENV_HV_NAME);
-#endif
 	for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')))
 		continue;
@@ -1779,6 +1775,10 @@ register char **env;
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    *s = '=';
 	}
+#endif
+#ifdef DYNAMIC_ENV_FETCH
+	HvNAME(hv) = savepv(ENV_HV_NAME);
+#endif
 	hv_magic(hv, envgv, 'E');
     }
     tainted = 0;
