@@ -877,7 +877,7 @@ static UV _grok_bin (char *string, STRLEN *len, I32 *flags, NV *result) {
 #endif
    
 #ifndef grok_numeric_radix
-#   define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
+#   define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(aTHX_ sp, send)
 
 #define grok_numeric_radix Perl_grok_numeric_radix
     
