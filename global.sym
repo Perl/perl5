@@ -217,6 +217,7 @@ Perl_grok_oct
 Perl_markstack_grow
 Perl_mess
 Perl_vmess
+Perl_sortsv
 Perl_mg_clear
 Perl_mg_copy
 Perl_mg_find

@@ -2039,6 +2039,17 @@ Recursively unlocks a shared sv.
 =for hackers
 Found in file sharedsv.c
 
+=item sortsv
+
+Sort an array. Here is an example:
+
+    sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale); 
+
+	void	sortsv(SV ** array, size_t num_elts, SVCOMPARE_t cmp)
+
+=for hackers
+Found in file pp_sort.c
+
 =item SP
 
 Stack pointer.  This is usually handled by C<xsubpp>.  See C<dSP> and
@@ -2956,22 +2967,22 @@ for a version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvUVX
-
-Returns the raw value in the SV's UV slot, without checks or conversions.
-Only use when you are sure SvIOK is true. See also C<SvUV()>.
-
-	UV	SvUVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvUVx
 
 Coerces the given SV to an unsigned integer and returns it. Guarantees to
 evaluate sv only once. Use the more efficient C<SvUV> otherwise.
 
 	UV	SvUVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvUVX
+
+Returns the raw value in the SV's UV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvUV()>.
+
+	UV	SvUVX(SV* sv)
 
 =for hackers
 Found in file sv.h

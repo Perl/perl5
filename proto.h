@@ -457,6 +457,7 @@ PERL_CALLCONV SV*	Perl_mess(pTHX_ const char* pat, ...)
 ;
 PERL_CALLCONV SV*	Perl_vmess(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_qerror(pTHX_ SV* err);
+PERL_CALLCONV void	Perl_sortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t cmp);
 PERL_CALLCONV int	Perl_mg_clear(pTHX_ SV* sv);
 PERL_CALLCONV int	Perl_mg_copy(pTHX_ SV* sv, SV* nsv, const char* key, I32 klen);
 PERL_CALLCONV MAGIC*	Perl_mg_find(pTHX_ SV* sv, int type);
