@@ -6273,9 +6273,7 @@ Perl_ck_subr(pTHX_ OP *o)
 				OP *sibling = o2->op_sibling;
 				SV *n = newSVpvn("",0);
 				op_free(o2);
-				gv_fullname3(n, gv, "");
-				if (SvCUR(n)>6 && strnEQ(SvPVX(n),"main::",6))
-				    sv_chop(n, SvPVX(n)+6);
+				gv_fullname4(n, gv, "", FALSE);
 				o2 = newSVOP(OP_CONST, 0, n);
 				prev->op_sibling = o2;
 				o2->op_sibling = sibling;
