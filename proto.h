@@ -1008,6 +1008,7 @@ STATIC OP*	S_no_fh_allowed(pTHX_ OP *o);
 STATIC OP*	S_scalarboolean(pTHX_ OP *o);
 STATIC OP*	S_too_few_arguments(pTHX_ OP *o, char* name);
 STATIC OP*	S_too_many_arguments(pTHX_ OP *o, char* name);
+STATIC U8*	S_trlist_upgrade(pTHX_ U8** sp, U8** ep);
 STATIC void	S_op_clear(pTHX_ OP* o);
 STATIC void	S_null(pTHX_ OP* o);
 STATIC PADOFFSET	S_pad_addlex(pTHX_ SV* name);

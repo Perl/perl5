@@ -271,6 +271,7 @@ PPCODE:
 
     /* %INC must be clean for use/require in compartment */
     save_hash(PL_incgv);
+    sv_free((SV*)GvHV(PL_incgv));  /* get rid of what save_hash gave us*/
     GvHV(PL_incgv) = (HV*)SvREFCNT_inc(GvHV(gv_HVadd(gv_fetchpv("INC",TRUE,SVt_PVHV))));
 
     PUSHMARK(SP);

@@ -126,7 +126,7 @@ use Config;
 # insists on stat()ing a file descriptor before it'll use it.
 push(@libexcl,'io_xs.t') if $Config{'vms_cc_type'} ne 'decc';
 
-@opexcl=('die_exit.t','exec.t','fork.t','glob.t','groups.t','magic.t','misc.t','stat.t');
+@opexcl=('die_exit.t','exec.t','fork.t','glob.t','groups.t','magic.t','stat.t');
 @exclist=(@compexcl,@ioexcl,@libexcl,@opexcl);
 foreach $file (@exclist) { $skip{$file}++; }
 
