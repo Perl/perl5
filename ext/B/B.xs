@@ -1210,7 +1210,7 @@ CvXSUBANY(cv)
 
 MODULE = B    PACKAGE = B::CV
 
-U8
+U16
 CvFLAGS(cv)
       B::CV   cv
 
