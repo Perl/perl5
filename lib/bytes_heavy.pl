@@ -1,7 +1,7 @@
-package byte;
+package bytes;
 
 sub length ($) {
-    BEGIN { byte::import() }
+    BEGIN { bytes::import() }
     return CORE::length($_[0]);
 }
 
