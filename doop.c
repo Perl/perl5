@@ -695,6 +695,7 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 	SvTAINTED_on(sv);
 }
 
+/* XXX SvUTF8 support missing! */
 UV
 Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 {
@@ -827,6 +828,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
     return retnum;
 }
 
+/* XXX SvUTF8 support missing! */
 void
 Perl_do_vecset(pTHX_ SV *sv)
 {
@@ -842,6 +844,7 @@ Perl_do_vecset(pTHX_ SV *sv)
     if (!targ)
 	return;
     s = (unsigned char*)SvPV_force(targ, targlen);
+    (void)SvPOK_only(targ);
     lval = SvUV(sv);
     offset = LvTARGOFF(sv);
     size = LvTARGLEN(sv);
