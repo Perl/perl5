@@ -1155,7 +1155,7 @@ PP(pp_sysread)
     GV *gv;
     IO *io;
     char *buffer;
-    int length;
+    SSize_t length;
     Sock_size_t bufsize;
     SV *bufsv;
     STRLEN blen;

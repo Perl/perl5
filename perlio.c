@@ -382,21 +382,21 @@ int ch;
 }
 
 #undef PerlIO_read
-int      
+SSize_t
 PerlIO_read(f,buf,count)
 PerlIO *f;
 void *buf;
-size_t count;
+Size_t count;
 {
  return fread(buf,1,count,f);
 }
 
 #undef PerlIO_write
-int      
+SSize_t
 PerlIO_write(f,buf,count)
 PerlIO *f;
 const void *buf;
-size_t count;
+Size_t count;
 {
  return fwrite1(buf,1,count,f);
 }

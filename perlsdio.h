@@ -39,12 +39,14 @@
     * VAXCRTL which causes read from a pipe after EOF has been returned
     * once to hang.
     */
-#  define PerlIO_getc(f)		(feof(f) ? EOF : getc(f))
-#  define PerlIO_read(f,buf,count)	(feof(f) ? 0 : fread(buf,1,count,f))
+#  define PerlIO_getc(f) \
+		(feof(f) ? EOF : getc(f))
+#  define PerlIO_read(f,buf,count) \
+		(feof(f) ? 0 : (SSize_t)fread(buf,1,count,f))
 #else
 #  define PerlIO_ungetc(f,c)		ungetc(c,f)
 #  define PerlIO_getc(f)		getc(f)
-#  define PerlIO_read(f,buf,count)	fread(buf,1,count,f)
+#  define PerlIO_read(f,buf,count)	(SSize_t)fread(buf,1,count,f)
 #endif
 #define PerlIO_eof(f)			feof(f)
 #define PerlIO_getname(f,b)		fgetname(f,b)

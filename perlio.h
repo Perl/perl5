@@ -120,10 +120,10 @@ extern FILE *	PerlIO_findFILE		_((PerlIO *));
 extern void	PerlIO_releaseFILE	_((PerlIO *,FILE *));
 #endif
 #ifndef PerlIO_read
-extern int	PerlIO_read		_((PerlIO *,void *,size_t));
+extern SSize_t	PerlIO_read		_((PerlIO *,void *,Size_t));
 #endif
 #ifndef PerlIO_write
-extern int	PerlIO_write		_((PerlIO *,const void *,size_t));
+extern SSize_t	PerlIO_write		_((PerlIO *,const void *,Size_t));
 #endif
 #ifndef PerlIO_setlinebuf
 extern void	PerlIO_setlinebuf	_((PerlIO *));
