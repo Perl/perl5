@@ -2449,6 +2449,7 @@ t/pod/testcmp.pl		Module to compare output against expected results
 t/pod/testp2pt.pl		Module to test Pod::PlainText for a given file
 t/pod/testpchk.pl		Module to test Pod::Checker for a given file
 t/pod/testpods/lib/Pod/Stuff.pm			Sample data for find.t
+t/pod2html/README		Placeholder to keep the t/pod2html directory.
 t/README			Instructions for regression tests
 t/run/exit.t                    Test perl's exit status.
 t/run/fresh_perl.t              Tests that require a fresh perl.
