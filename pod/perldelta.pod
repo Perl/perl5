@@ -378,8 +378,9 @@ building and installing from source, the defaults should be fine.
 =head2 Unicode and UTF-8 support
 
 Perl can optionally use UTF-8 as its internal representation for character
-strings.  The C<utf8> pragma enables this support in the current lexical
-scope.  See L<utf8> for more information.
+strings.  The C<utf8> and C<byte> pragmas are used to control this support
+in the current lexical scope.  See L<perlunicode>, L<utf8> and L<byte> for
+more information.
 
 =head2 Interpreter cloning, threads, and concurrency
 
@@ -1652,6 +1653,10 @@ A tutorial that introduces the essentials of references.
 =item perltootc.pod
 
 A tutorial on managing class data for object modules.
+
+=item perlunicode.pod
+
+An introduction to Unicode support features in Perl.
 
 =back
 

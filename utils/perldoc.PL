@@ -559,6 +559,13 @@ if ($opt_q) {
     local @ARGV = @found;	# I'm lazy, sue me.
     my $found = 0;
     my %found_in;
+    my $rx = eval { qr/$opt_q/ };
+    die <<EOD unless $rx;
+Invalid regular expression '$opt_q' given as -q pattern:
+  $@
+Did you mean \\Q$opt_q ?
+
+EOD
 
     while (<>) {
 	if (/^=head2\s+.*(?:$opt_q)/oi) {
