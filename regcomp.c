@@ -2605,8 +2605,10 @@ tryagain:
 			    if (!e)
 				FAIL("Missing right brace on \\x{}");
 			    else if (UTF) {
+				numlen = 1;	/* allow underscores */
 				ender = (UV)scan_hex(p + 1, e - p, &numlen);
-				if (numlen + len >= 127) {	/* numlen is generous */
+				/* numlen is generous */
+				if (numlen + len >= 127) {
 				    p--;
 				    goto loopdone;
 				}
@@ -2616,6 +2618,7 @@ tryagain:
 				FAIL("Can't use \\x{} without 'use utf8' declaration");
 			}
 			else {
+			    numlen = 0;		/* disallow underscores */
 			    ender = (UV)scan_hex(p, 2, &numlen);
 			    p += numlen;
 			}
@@ -2629,6 +2632,7 @@ tryagain:
 		    case '5': case '6': case '7': case '8':case '9':
 			if (*p == '0' ||
 			  (isDIGIT(p[1]) && atoi(p) >= PL_regnpar) ) {
+			    numlen = 0;		/* disallow underscores */
 			    ender = (UV)scan_oct(p, 3, &numlen);
 			    p += numlen;
 			}
@@ -2940,6 +2944,7 @@ S_regclass(pTHX)
 	    case 'a':	value = '\057';			break;
 #endif
 	    case 'x':
+		numlen = 0;		/* disallow underscores */
 		value = (UV)scan_hex(PL_regcomp_parse, 2, &numlen);
 		PL_regcomp_parse += numlen;
 		break;
@@ -2949,6 +2954,7 @@ S_regclass(pTHX)
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9':
+		numlen = 0;		/* disallow underscores */
 		value = (UV)scan_oct(--PL_regcomp_parse, 3, &numlen);
 		PL_regcomp_parse += numlen;
 		break;
@@ -3414,12 +3420,14 @@ S_regclassutf8(pTHX)
 		    e = strchr(PL_regcomp_parse++, '}');
                     if (!e)
                         FAIL("Missing right brace on \\x{}");
+		    numlen = 1;		/* allow underscores */
 		    value = (UV)scan_hex(PL_regcomp_parse,
 				     e - PL_regcomp_parse,
 				     &numlen);
 		    PL_regcomp_parse = e + 1;
 		}
 		else {
+		    numlen = 0;		/* disallow underscores */
 		    value = (UV)scan_hex(PL_regcomp_parse, 2, &numlen);
 		    PL_regcomp_parse += numlen;
 		}
@@ -3430,6 +3438,7 @@ S_regclassutf8(pTHX)
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9':
+		numlen = 0;		/* disallow underscores */
 		value = (UV)scan_oct(--PL_regcomp_parse, 3, &numlen);
 		PL_regcomp_parse += numlen;
 		break;

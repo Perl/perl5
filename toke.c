@@ -1389,6 +1389,7 @@ S_scan_const(pTHX_ char *start)
 	    /* \132 indicates an octal constant */
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
+		len = 0;	/* disallow underscores */
 		uv = (UV)scan_oct(s, 3, &len);
 		s += len;
 		goto NUM_ESCAPE_INSERT;
@@ -1402,10 +1403,12 @@ S_scan_const(pTHX_ char *start)
 			yyerror("Missing right brace on \\x{}");
 			e = s;
 		    }
+		    len = 1;		/* allow underscores */
                     uv = (UV)scan_hex(s + 1, e - s - 1, &len);
                     s = e + 1;
 		}
 		else {
+		    len = 0;		/* disallow underscores */
 		    uv = (UV)scan_hex(s, 2, &len);
 		    s += len;
 		}
