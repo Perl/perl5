@@ -37,24 +37,12 @@ echo "Archname is $archname"
 
 ### HP-UX OS specific behaviour
 
-case "$ccflags" in
-'') cc_cppflags='' ;;
-*)  set `echo " $ccflags " | sed -e 's/ -A[ea] / /g' -e 's/ -D_HPUX_SOURCE / /'`
-    cc_cppflags="$* -D_HPUX_SOURCE"
-    ;;
-esac
-ccflags="-Ae $cc_cppflags"
-cppflags="-Aa -D__STDC_EXT__ $cc_cppflags"
-
-case "$prefix" in
-    "") prefix='/opt/perl5' ;;
-    esac
-
 # -ldbm is obsolete and should not be used
 # -lBSD contains BSD-style duplicates of SVR4 routines that cause confusion
 # -lPW is obsolete and should not be used
 # The libraries crypt, malloc, ndir, and net are empty.
-set `echo " $libswanted " | sed -e 's/ ld / /' -e 's/ dbm / /' -e 's/ BSD / /' -e 's/ PW / /'`
+set `echo "X $libswanted " | sed -e 's/ ld / /' -e 's/ dbm / /' -e 's/ BSD / /' -e 's/ PW / /'`
+shift
 libswanted="$*"
 
 # By setting the deferred flag below, this means that if you run perl
@@ -71,17 +59,30 @@ libswanted="$*"
 ccdlflags="-Wl,-E -Wl,-B,deferred $ccdlflags"
 
 cc=${cc:-cc}
+ar=/usr/bin/ar	# Yes, truly override.  We do not want the GNU ar.
+full_ar=$ar	# I repeat, no GNU ar.  arrr.
 
-ar=/usr/bin/ar # Yes, truly override.  We do not want the GNU ar.
-full_ar=$ar    # I repeat, no GNU ar.  arrr.
+set `echo "X $ccflags " | sed -e 's/ -A[ea] / /' -e 's/ -D_HPUX_SOURCE / /'`
+shift
+	cc_cppflags="$* -D_HPUX_SOURCE"
+cppflags="-Aa -D__STDC_EXT__ $cc_cppflags"
+
+case "$prefix" in
+    "") prefix='/opt/perl5' ;;
+    esac
 
 case `$cc -v 2>&1`"" in
-    *gcc*)  ccisgcc="$define" ;;
+    *gcc*)  ccisgcc="$define"
+	    ccflags="$cc_cppflags"
+	    case "`getconf KERNEL_BITS 2>/dev/null`" in
+		*64*)   ldflags="$ldflags -Wl,+vnocompatwarnings"
+			ccflags="$ccflags -Wl,+vnocompatwarnings -Wa,+DA2.0"
+			;;
+		esac
+	    ;;
     *)      ccisgcc=''
 	    ccversion=`which cc | xargs what | awk '/Compiler/{print $2}'`
-	    case "`getconf KERNEL_BITS 2>/dev/null`" in
-		*64*) ldflags="$ldflags -Wl,+vnocompatwarnings" ;;
-		esac
+	    ccflags="-Ae $cc_cppflags"
 	    case "$d_casti32" in
 		"") d_casti32='undef' ;;
 		esac
@@ -175,37 +176,54 @@ case "$ccisgcc" in
     $define|true|[Yy])
 	
 	case "$optimize" in
-	    "") optimize="-g -O" ;;
+	    "")           optimize="-g -O" ;;
+	    *O[3456789]*) optimize=`echo "$optimize" | sed -e 's/O[3-9]/O2/'` ;;
 	    esac
-	ld="$cc"
+	#ld="$cc"
+	ld="/usr/bin/ld"
 	cccdlflags='-fPIC'
-	lddlflags='-shared'
+	#lddlflags='-shared'
+	lddlflags='-b +vnocompatwarnings'
+	case "$optimize" in
+	    *-g*-O*|*-O*-g*)
+		# gcc without gas will not accept -g
+		echo "main(){}">try.c
+		case "`$cc $optimize -c try.c 2>&1`" in
+		    *"-g option disabled"*)
+			set `echo "X $optimize " | sed -e 's/ -g / /'`
+			shift
+			optimize="$*"
+			;;
+		    esac
+		;;
+	    esac
 	;;
 
     *)	# HP's compiler cannot combine -g and -O
 	case "$optimize" in
-	    "") optimize="-O" ;;
+	    "")           optimize="-O" ;;
+	    *O[3456789]*) optimize=`echo "$optimize" | sed -e 's/O[3-9]/O2/'` ;;
 	    esac
 	ld=/usr/bin/ld
 	cccdlflags='+Z'
-	lddlflags='-b'
+	lddlflags='-b +vnocompatwarnings'
 	;;
     esac
 
 
 ## LARGEFILES
 
-case "$uselargefiles-$ccisgcc" in
-    "$define-$define"|'-define') 
-	cat <<EOM >&4
-
-*** I'm ignoring large files for this build because
-*** I don't know how to do use large files in HP-UX using gcc.
-
-EOM
-	uselargefiles="$undef"
-	;;
-    esac
+#case "$uselargefiles-$ccisgcc" in
+#    "$define-$define"|'-define') 
+#	cat <<EOM >&4
+#
+#*** I'm ignoring large files for this build because
+#*** I don't know how to do use large files in HP-UX using gcc.
+#
+#EOM
+#	uselargefiles="$undef"
+#	;;
+#    esac
 
 cat >UU/uselargefiles.cbu <<'EOCBU'
 # This script UU/uselargefiles.cbu will get 'called-back' by Configure 
