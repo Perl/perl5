@@ -37,7 +37,7 @@ $a =~ s/-uWin32,// if $^O eq 'MSWin32';
 $a =~ s/-uNetWare,// if $^O eq 'NetWare';
 $a =~ s/-u(Cwd|File|File::Copy|OS2),//g if $^O eq 'os2';
 $a =~ s/-uCwd,// if $^O eq 'cygwin';
-  $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'
+  $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uaccess,-uattributes,'
      . '-umain,-ustrict,-uutf8,-uwarnings';
 if ($Is_VMS) {
     $a =~ s/-uFile,-uFile::Copy,//;

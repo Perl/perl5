@@ -187,6 +187,13 @@ know which context to supply to the right side.
 (F) When C<vec> is called in an lvalue context, the second argument must be
 greater than or equal to zero.
 
+=item Attempt to access to key '%_' in fixed hash
+
+(F) A hash has been marked as READONLY at the C level to turn it
+into a "record" with a fixed set of keys. The failing code
+has attempted to get or set the value of a key which does not
+exist or to delete a key.
+
 =item Attempt to bless into a reference
 
 (F) The CLASSNAME argument to the bless() operator is expected to be
@@ -3968,15 +3975,15 @@ program.
 =item Using a hash as a reference is deprecated
 
 (D deprecated) You tried to use a hash as a reference, as in
-C<< %foo->{"bar"} >> or C<< %$ref->{"hello"} >>.  Versions of perl <= 5.6.1 
-used to allow this syntax, but shouldn't have. It is now deprecated, and will 
+C<< %foo->{"bar"} >> or C<< %$ref->{"hello"} >>.  Versions of perl <= 5.6.1
+used to allow this syntax, but shouldn't have. It is now deprecated, and will
 be removed in a future version.
 
 =item Using an array as a reference is deprecated
 
 (D deprecated) You tried to use an array as a reference, as in
-C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to 
-allow this syntax, but shouldn't have. It is now deprecated, and will be 
+C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to
+allow this syntax, but shouldn't have. It is now deprecated, and will be
 removed in a future version.
 
 =item Value of %s can be "0"; test with defined()
@@ -4152,7 +4159,7 @@ Use a filename instead.
 
 (F) And you probably never will, because you probably don't have the
 sources to your kernel, and your vendor probably doesn't give a rip
-about what you want.  Your best bet is to put a setuid C wrapper around 
+about what you want.  Your best bet is to put a setuid C wrapper around
 your script.
 
 =item You need to quote "%s"

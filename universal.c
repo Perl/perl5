@@ -142,6 +142,7 @@ XS(XS_utf8_upgrade);
 XS(XS_utf8_downgrade);
 XS(XS_utf8_unicode_to_native);
 XS(XS_utf8_native_to_unicode);
+XS(XS_access_readonly);
 
 void
 Perl_boot_core_UNIVERSAL(pTHX)
@@ -158,6 +159,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXS("utf8::downgrade", XS_utf8_downgrade, file);
     newXS("utf8::native_to_unicode", XS_utf8_native_to_unicode, file);
     newXS("utf8::unicode_to_native", XS_utf8_unicode_to_native, file);
+    newXSproto("access::readonly",XS_access_readonly, file, "\\[$%@];$");
 }
 
 
@@ -425,4 +427,22 @@ XS(XS_utf8_unicode_to_native)
  XSRETURN(1);
 }
 
+XS(XS_access_readonly)
+{
+    dXSARGS;
+    SV *sv = SvRV(ST(0));
+    IV old = SvREADONLY(sv);
+    if (items == 2) {
+	if (SvTRUE(ST(1))) {
+	    SvREADONLY_on(sv);
+	}
+	else {
+	    SvREADONLY_off(sv);
+	}
+    }
+    if (old)
+	XSRETURN_YES;
+    else
+	XSRETURN_NO;
+}
 
