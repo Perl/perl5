@@ -493,6 +493,13 @@ in multiple arguments.)
 
 =item *
 
+C<do> followed by a bareword now ensures that this bareword isn't
+a keyword (to avoid a bug where C<do q(foo.pl)> tried to call
+subroutine called C<q>).  This means that for example instead of
+C<do format()> you must write C<do &format()>.
+
+=item *
+
 The builtin dump() now gives an optional warning
 C<dump() better written as CORE::dump()>,
 meaning that by default C<dump(...)> is resolved as the builtin
