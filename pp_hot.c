@@ -1930,7 +1930,6 @@ PP(pp_entersub)
 	assert(CvOWNER(cv) == 0);
 	CvOWNER(cv) = thr;	/* Assert ownership */
 	SvREFCNT_inc(cv);
-	MUTEX_UNLOCK(CvMUTEXP(cv));
 	if (CvDEPTH(cv) == 0)
 	    SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
     }
