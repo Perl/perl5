@@ -905,7 +905,7 @@ PP(pp_pow)
     djSP; dATARGET; tryAMAGICbin(pow,opASSIGN);
     {
       dPOPTOPnnrl;
-      SETn( pow( left, right) );
+      SETn( Perl_pow( left, right) );
       RETURN;
     }
 }
@@ -1010,8 +1010,8 @@ PP(pp_modulo)
 #endif
 
 	    /* Backward-compatibility clause: */
-	    dright = floor(dright + 0.5);
-	    dleft  = floor(dleft + 0.5);
+	    dright = Perl_floor(dright + 0.5);
+	    dleft  = Perl_floor(dleft + 0.5);
 
 	    if (!dright)
 		DIE(aTHX_ "Illegal modulus zero");
