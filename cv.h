@@ -136,3 +136,62 @@ Returns the stash of the CV.
 #define CvCONST(cv)		(CvFLAGS(cv) & CVf_CONST)
 #define CvCONST_on(cv)		(CvFLAGS(cv) |= CVf_CONST)
 #define CvCONST_off(cv)		(CvFLAGS(cv) &= ~CVf_CONST)
+
+/*
+=head1 Pad Data Structures
+
+=for apidoc m|AV *|CvPADLIST|CV *cv
+CV's can have CvPADLIST(cv) set to point to an AV.
+
+For these purposes "forms" are a kind-of CV, eval""s are too (except they're
+not callable at will and are always thrown away after the eval"" is done
+executing).
+
+XSUBs don't have CvPADLIST set - dXSTARG fetches values from PL_curpad,
+but that is really the callers pad (a slot of which is allocated by
+every entersub).
+
+The CvPADLIST AV has does not have AvREAL set, so REFCNT of component items
+is managed "manual" (mostly in op.c) rather than normal av.c rules.
+The items in the AV are not SVs as for a normal AV, but other AVs:
+
+0'th Entry of the CvPADLIST is an AV which represents the "names" or rather
+the "static type information" for lexicals.
+
+The CvDEPTH'th entry of CvPADLIST AV is an AV which is the stack frame at that
+depth of recursion into the CV.
+The 0'th slot of a frame AV is an AV which is @_.
+other entries are storage for variables and op targets.
+
+During compilation:
+C<PL_comppad_name> is set the the the names AV.
+C<PL_comppad> is set the the frame AV for the frame CvDEPTH == 1.
+C<PL_curpad> is set the body of the frame AV (i.e. AvARRAY(PL_comppad)).
+
+Itterating over the names AV itterates over all possible pad
+items. Pad slots that are SVs_PADTMP (targets/GVs/constants) end up having
+&PL_sv_undef "names" (see pad_alloc()).
+
+Only my/our variable (SVs_PADMY/SVs_PADOUR) slots get valid names.
+The rest are op targets/GVs/constants which are statically allocated
+or resolved at compile time.  These don't have names by which they
+can be looked up from Perl code at run time through eval"" like
+my/our variables can be.  Since they can't be looked up by "name"
+but only by their index allocated at compile time (which is usually
+in PL_op->op_targ), wasting a name SV for them doesn't make sense.
+
+The SVs in the names AV have their PV being the name of the variable.
+NV+1..IV inclusive is a range of cop_seq numbers for which the name is valid.
+For typed lexicals name SV is SVt_PVMG and SvSTASH points at the type.
+
+If SvFAKE is set on the name SV then slot in the frame AVs are
+a REFCNT'ed references to a lexical from "outside".
+
+If the 'name' is '&' the the corresponding entry in frame AV
+is a CV representing a possible closure.
+(SvFAKE and name of '&' is not a meaningful combination currently but could
+become so if C<my sub foo {}> is implemented.)
+
+=cut
+*/
+
