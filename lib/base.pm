@@ -22,15 +22,15 @@ it.  Multiple inheritance of %FIELDS is not supported.  The 'base'
 pragma will croak if multiple base classes have a %FIELDS hash.  See
 L<fields> for a description of this feature.
 
-When strict 'vars' is in scope I<base> also let you assign to @ISA
+When strict 'vars' is in scope, I<base> also lets you assign to @ISA
 without having to declare @ISA with the 'vars' pragma first.
 
 If any of the base classes are not loaded yet, I<base> silently
-C<require>s them.  Whether to C<require> a base class package is
-determined by the absence of a global $VERSION in the base package.
-If $VERSION is not detected even after loading it, <base> will
-define $VERSION in the base package, setting it to the string
-C<-1, set by base.pm>.
+C<require>s them (but it won't call the C<import> method).  Whether to
+C<require> a base class package is determined by the absence of a global
+$VERSION in the base package.  If $VERSION is not detected even after
+loading it, I<base> will define $VERSION in the base package, setting it to
+the string C<-1, set by base.pm>.
 
 =head1 HISTORY
 
