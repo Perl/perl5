@@ -363,6 +363,11 @@ if ($define{'MYMALLOC'}) {
 			PL_malloc_mutex
 			)];
     }
+    else {
+	skip_symbols [qw(
+			PL_malloc_mutex
+			)];
+    }
 }
 else {
     skip_symbols [qw(
