@@ -1004,10 +1004,10 @@ is identical to C<$Config{'osname'}>.  See also L<Config> and the
 B<-V> command-line switch documented in L<perlrun>.
 
 In Windows platforms the $^O is not very helpful since it is always
-MSWin32 (or MSWin64, when applicable), it doesn't tell the difference
-between 95/98/ME/NT/2000/XP/CE.  Use Win32::GetOSVersion() (see L<perlport>)
-and other means (like for example the presence/absence of some files) to
-distinguish those.
+C<MSWin32>, it doesn't tell the difference between 95/98/ME/NT/2000/XP/CE.
+Use Win32::GetOSVersion() (see L<perlport>) and other means (like for
+example the presence/absence of some files) to distinguish between
+the variants.
 
 =item ${^OPEN}
 
