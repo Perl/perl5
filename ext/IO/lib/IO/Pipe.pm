@@ -177,10 +177,10 @@ IO::pipe - supply object methods for pipes
 
 =head1 DESCRIPTION
 
-C<IO::Pipe> provides an interface to createing pipes between
+C<IO::Pipe> provides an interface to creating pipes between
 processes.
 
-=head1 CONSTRCUTOR
+=head1 CONSTRUCTOR
 
 =over 4
 
