@@ -2686,8 +2686,6 @@ S_init_main_stash(pTHX)
 {
     GV *gv;
 
-
-
     PL_curstash = PL_defstash = newHV();
     PL_curstname = newSVpvn("main",4);
     gv = gv_fetchpv("main::",TRUE, SVt_PVHV);

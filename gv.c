@@ -652,7 +652,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		char smallbuf[256];
 		char *tmpbuf;
 
-		if (len + 3 < sizeof smallbuf)
+		if (len + 3 < sizeof (smallbuf))
 		    tmpbuf = smallbuf;
 		else
 		    New(601, tmpbuf, len+3, char);
