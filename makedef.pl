@@ -341,6 +341,14 @@ else {
 		    )];
 }
 
+unless ($define{'PERL_FLEXIBLE_EXCEPTIONS'}) {
+    skip_symbols [qw(
+		    PL_protect
+		    Perl_default_protect
+		    Perl_vdefault_protect
+		    )];
+}
+
 if ($define{'MYMALLOC'}) {
     emit_symbols [qw(
 		    Perl_dump_mstats
