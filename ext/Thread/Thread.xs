@@ -279,14 +279,19 @@ newthread (pTHX_ SV *startsv, AV *initargs, char *classname)
     if (!attr_inited) {
 	attr_inited = 1;
 	err = pthread_attr_init(&attr);
+#  ifdef THREAD_CREATE_NEEDS_STACK
+       if (err == 0)
+            err = pthread_attr_setstacksize(&attr, THREAD_CREATE_NEEDS_STACK);
+       if (err)
+           croak("panic: pthread_attr_setstacksize failed");
+#else
+       croak("panic: can't pthread_attr_setstacksize");
+#  endif
 #  ifdef PTHREAD_ATTR_SETDETACHSTATE
-#ifdef DGUX
-	if (err == 0)
-	    err = pthread_attr_setstacksize(&attr, (1024*16));
-#endif
 	if (err == 0)
 	    err = PTHREAD_ATTR_SETDETACHSTATE(&attr, attr_joinable);
-
+       if (err)
+           croak("panic: pthread_attr_setdetachstate failed");
 #  else
 	croak("panic: can't pthread_attr_setdetachstate");
 #  endif
