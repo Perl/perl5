@@ -14,18 +14,21 @@ use ExtUtils::Constant qw (constant_types C_constant XS_constant autoload);
 use Config;
 
 my $runperl = $^X;
-my $tobitbucket = ">/dev/null";
-# my @cleanup;
+
 $| = 1;
 
 my $dir = "ext-$$";
-mkdir $dir, 0777 or die $!;
+
+print "# $dir being created...\n";
+mkdir $dir, 0777 or die "mkdir: $!\n";
+
+use File::Spec::Functions;
 
 END {
-  system "$Config{rm} -rf $dir";
+    use File::Path;
+    print "# $dir being removed...\n";
+    rmtree($dir);
 }
-
-# push @cleanup, $dir;
 
 my @names = ("THREE", {name=>"OK4", type=>"PV",},
              {name=>"OK5", type=>"PVN",
@@ -37,8 +40,8 @@ my @names_only = map {(ref $_) ? $_->{name} : $_} @names;
 
 my $package = "ExtTest";
 ################ Header
-my $header = "$dir/test.h";
-open FH, ">$header" or die $!;
+my $header = catfile($dir, "test.h");
+open FH, ">$header" or die "open >$header: $!\n";
 print FH <<'EOT';
 #define THREE 3
 #define OK4 "ok 4\n"
@@ -46,12 +49,11 @@ print FH <<'EOT';
 #define FARTHING 0.25
 #define NOT_ZERO 1
 EOT
-close FH or die $!;
-# push @cleanup, $header;
+close FH or die "close $header: $!\n";
 
 ################ XS
-my $xs = "$dir/$package.xs";
-open FH, ">$xs" or die $!;
+my $xs = catfile($dir, "$package.xs");
+open FH, ">$xs" or die "open >$xs: $!\n";
 
 print FH <<'EOT';
 #include "EXTERN.h"
@@ -68,12 +70,11 @@ foreach (C_constant (undef, "IV", $types, undef, undef, @names) ) {
 print FH "MODULE = $package		PACKAGE = $package\n";
 print FH "PROTOTYPES: ENABLE\n";
 print FH XS_constant ($package, $types); # XS for ExtTest::constant
-close FH or die $!;
-# push @cleanup, $xs;
+close FH or die "close $xs: $!\n";
 
 ################ PM
-my $pm = "$dir/$package.pm";
-open FH, ">$pm" or die $!;
+my $pm = catfile($dir, "$package.pm");
+open FH, ">$pm" or die "open >$pm: $!\n";
 print FH "package $package;\n";
 print FH "use $];\n";
 
@@ -97,12 +98,11 @@ print FH "\t$_\n" foreach (@names_only);
 print FH ");\n";
 print FH autoload ($package, $]);
 print FH "bootstrap $package \$VERSION;\n1;\n__END__\n";
-close FH or die $!;
-# push @cleanup, $pm;
+close FH or die "close $pm: $!\n";
 
 ################ test.pl
-my $testpl = "$dir/test.pl";
-open FH, ">$testpl" or die $!;
+my $testpl = catfile($dir, "test.pl");
+open FH, ">$testpl" or die "open >$testpl: $!\n";
 
 print FH "use $package qw(@names_only);\n";
 print FH <<'EOT';
@@ -137,20 +137,19 @@ if ($not_zero > 0 && $not_zero == ~0) {
 
 EOT
 
-close FH or die $!;
-# push @cleanup, $testpl;
+close FH or die "close $testpl: $!\n";
 
 ################ dummy Makefile.PL
 # Keep the dependancy in the Makefile happy
-my $makefilePL = "$dir/Makefile.PL";
-open FH, ">$makefilePL" or die $!;
-close FH or die $!;
-# push @cleanup, $makefilePL;
+my $makefilePL = catfile($dir, "Makefile.PL");
+open FH, ">$makefilePL" or die "open >$makefilePL: $!\n";
+close FH or die "close $makefilePL: $!\n";
 
 chdir $dir or die $!; push @INC,  '../../lib';
 END {chdir ".." or warn $!};
 
-print "# "; # Grr. MakeMaker hardwired to write its message to STDOUT
+# Grr. MakeMaker hardwired to write its message to STDOUT.
+print "# ";
 WriteMakefile(
               'NAME'		=> $package,
               'VERSION_FROM'	=> "$package.pm", # finds $VERSION
@@ -165,21 +164,32 @@ if (-f "Makefile") {
 }
 
 my $make = $Config{make};
+
 $make = $ENV{MAKE} if exists $ENV{MAKE};
+
+my $makeout;
+
 print "# make = '$make'\n";
-if (system "$make $tobitbucket") {
-  print "not ok 2 # $make failed\n";
-  # Bail out?
+$makeout = `$make`;
+if ($?) {
+  print "not ok 2 # $make failed: $?\n";
+  exit($?);
 } else {
   print "ok 2\n";
 }
 
 $make .= ' test';
-# This hack to get a # in front of "PERL_DL_NONLAZY=1 ..." isn't going to work
-# on VMS mailboxes.
-print "# make = '$make'\n# ";
-if (system $make) {
-  print "not ok 8 # $make failed\n";
+print "# make = '$make'\n";
+$makeout = `$make`;
+if ($?) {
+  print "not ok 8 # $make failed: $?\n";
 } else {
+  # Perl babblings
+  $makeout =~ s/^PERL_DL_NONLAZY=.+?\n//m;
+
+  # GNU make babblings
+  $makeout =~ s/^\w*?make.+?(?:entering|leaving) directory.+?\n//mig;
+
+  print $makeout;
   print "ok 8\n";
 }
