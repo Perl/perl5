@@ -246,9 +246,17 @@ EOT
 		or print "can't deparse '$deparse': $!.\n";
 	}
 	elsif ($type eq 'bytecompile') {
-	    my $perl = $ENV{PERL} || './perl';
-	    my $redir = ($^O eq 'VMS' ? '2>&1' : '');
-	    my $bswitch = "-MO=Bytecode,-H,-TI,-s`pwd`/$test,";
+	    my ($pwd, $null);
+            if( $^O eq 'MSWin32') {
+		$pwd = `cd`;
+		$null = 'nul';
+	    } else {
+		$pwd = `pwd`;
+		$null = '/dev/null';
+	    }
+	    chomp $pwd;
+	    my $perl = $ENV{PERL} || "$pwd/perl";
+	    my $bswitch = "-MO=Bytecode,-H,-TI,-s$pwd/$test,";
 	    $bswitch .= "-TF$test.plc,"
 		if $test =~ m(chdir|pod/|CGI/t/carp|lib/DB);
 	    $bswitch .= "-k,"
@@ -257,8 +265,8 @@ EOT
 		if $test =~ m(op/getpid);
 	    my $bytecompile =
 		"$perl $testswitch $switch -I../lib $bswitch". 
-		"-o$test.plc $test 2>/dev/null &&".
-		"$perl $testswitch $switch -I../lib $utf $test.plc $redir|";
+		"-o$test.plc $test 2>$null &&".
+		"$perl $testswitch $switch -I../lib $utf $test.plc |";
 	    open(RESULTS,$bytecompile)
 		or print "can't byte-compile '$bytecompile': $!.\n";
 	}

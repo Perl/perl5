@@ -191,14 +191,14 @@ typedef char *pvindex;
 	    SvFLAGS(sv) = arg;				\
 	    BSET_OBJ_STOREX(sv);			\
 	} STMT_END
-#define BSET_newop(o, arg)				\
-	((o = (OP*)safemalloc(arg)), memzero((char*)o,arg))
+
+#define BSET_newop(o, arg)	NewOpSz(666, o, arg)
 #define BSET_newopx(o, arg) STMT_START {	\
 	register int sz = arg & 0x7f;		\
-	register OP* new = (OP*) safemalloc(sz);\
-	memzero(new, sz);			\
-	/* new->op_next = o; XXX */		\
-	o = new;				\
+	register OP* newop;			\
+	BSET_newop(newop, sz);			\
+	/* newop->op_next = o; XXX */		\
+	o = newop;				\
 	arg >>=7;				\
 	BSET_op_type(o, arg);			\
 	BSET_OBJ_STOREX(o);			\

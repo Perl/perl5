@@ -483,3 +483,16 @@ struct loop {
 #include "reentr.h"
 #endif
 
+#if defined(PL_OP_SLAB_ALLOC)
+#define NewOp(m,var,c,type)	\
+	STMT_START {		\
+		var = (type *) Perl_Slab_Alloc(aTHX_ m,c*sizeof(type));\
+	} STMT_END
+#define NewOpSz(m,var,size)	\
+	STMT_START { var = (OP *) Perl_Slab_Alloc(aTHX_ m,size); } STMT_END
+#define FreeOp(p) Perl_Slab_Free(aTHX_ p)
+#else
+#define NewOp(m, var, c, type) Newz(m, var, c, type)
+#define NewOpSz(m, var, size) Newz(m, (char*)var, size, char)
+#define FreeOp(p) Safefree(p)
+#endif

@@ -1025,10 +1025,10 @@ s	|OP *	|my_kid		|OP *o|OP *attrs|OP **imopsp
 s	|OP *	|dup_attrlist	|OP *o
 s	|void	|apply_attrs	|HV *stash|SV *target|OP *attrs|bool for_my
 s	|void	|apply_attrs_my	|HV *stash|OP *target|OP *attrs|OP **imopsp
-#  if defined(PL_OP_SLAB_ALLOC)
-s	|void*	|Slab_Alloc	|int m|size_t sz
-s	|void	|Slab_Free	|void *op
-#  endif
+#endif
+#if defined(PL_OP_SLAB_ALLOC)
+Ap	|void*	|Slab_Alloc	|int m|size_t sz
+Ap	|void	|Slab_Free	|void *op
 #endif
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)

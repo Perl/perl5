@@ -981,10 +981,10 @@ STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp);
 STATIC OP *	S_dup_attrlist(pTHX_ OP *o);
 STATIC void	S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my);
 STATIC void	S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp);
-#  if defined(PL_OP_SLAB_ALLOC)
-STATIC void*	S_Slab_Alloc(pTHX_ int m, size_t sz);
-STATIC void	S_Slab_Free(pTHX_ void *op);
-#  endif
+#endif
+#if defined(PL_OP_SLAB_ALLOC)
+PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ int m, size_t sz);
+PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op);
 #endif
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
