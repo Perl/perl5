@@ -545,7 +545,7 @@ sub WriteEmptyMakefile {
   rename 'Makefile', 'Makefile.old' or warn "rename Makefile Makefile.old: $!"
     if -f 'Makefile';
   open MF, '> Makefile' or die "open Makefile for write: $!";
-  print MF, <<'EOP';
+  print MF <<'EOP';
 all:
 
 clean:
