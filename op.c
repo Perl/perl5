@@ -925,9 +925,9 @@ S_cop_free(pTHX_ COP* cop)
 	SvREFCNT_dec(cop->cop_warnings);
     if (! specialCopIO(cop->cop_io)) {
 #ifdef USE_ITHREADS
+#if 0
 	STRLEN len;
         char *s = SvPV(cop->cop_io,len);
-#if 0
 	Perl_warn(aTHX_ "io='%.*s'",(int) len,s); /* ??? --jhi */
 #endif
 #else
