@@ -154,6 +154,7 @@ $valid{CODE} = {map {$_ => 1} @code};
 $valid{SCALAR} = {map {$_ => 1} @other};
 $valid{ARRAY} = $valid{HASH} = $valid{SCALAR};
 
+our ($scalar, @array, %hash);
 foreach my $value (\&foo, \$scalar, \@array, \%hash) {
     my $type = ref $value;
     foreach my $negate ('', '-') {
