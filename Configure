@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Aug  2 01:31:40 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Aug  2 10:49:27 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -3626,9 +3626,10 @@ fi
 : Binary compatibility with 5.005 is not possible for builds
 : with advanced features
 case "$usethreads$usemultiplicity" in
-*define*) bincompat5005="$undef"
-	  d_bincompat5005="$undef"
-	  ;;
+*define*)
+	bincompat5005="$undef"
+	d_bincompat5005="$undef"
+	;;
 *)	$cat <<EOM
 
 Perl 5.006 can be compiled for binary compatibility with 5.005.
@@ -3649,8 +3650,12 @@ EOM
 	set d_bincompat5005
 	eval $setvar
 	case "$d_bincompat5005" in
-	"$define") bincompat5005="$define" ;;
-	*) bincompat5005="$undef" ;;
+	"$define")
+		bincompat5005="$define"
+		;;
+	*)	bincompat5005="$undef"
+		d_bincompat5005="$undef"
+		;;
 	esac
 	;;
 esac
@@ -4531,7 +4536,6 @@ fi
 exit 1
 EOF
 chmod +x findhdr
-
 
 : define an alternate in-header-list? function
 inhdr='echo " "; td=$define; tu=$undef; yyy=$@;
