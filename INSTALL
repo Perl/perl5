@@ -380,6 +380,10 @@ be used for installing those add-on modules and scripts.
 By default, ExtUtils::MakeMaker will install architecture-independent
 modules into $sitelib and architecture-dependent modules into $sitearch.
 
+NOTE:  As of 5.6.0, ExtUtils::MakeMaker will use $sitelib and $sitearch,
+but will not use the other site-specific directories.  Volunteers to
+fix this are needed.
+
 =item Directories for vendor-supplied add-on files
 
 Lastly, if you are building a binary distribution of perl for
@@ -431,6 +435,9 @@ This would have the effect of setting the following:
 Note how in this example, the vendor-supplied directories are in the
 /usr hierarchy, while the directories reserved for the end-user are in
 the /usr/local hierarchy.
+
+NOTE:  As of 5.6.0, ExtUtils::MakeMaker does not use these directories.
+Volunteers to fix this are needed.
 
 The entire installed library hierarchy is installed in locations with
 version numbers, keeping the installations of different versions distinct.
