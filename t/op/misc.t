@@ -34,7 +34,8 @@ for (@prgs){
 
     if ($^O eq 'MSWin32') {
       $results = `.\\perl -I../lib $switch $tmpfile 2>&1`;
-    } elsif ($^O eq 'MacOS') {
+    }
+    elsif ($^O eq 'MacOS') {
       $results = `$^X -I::lib $switch $tmpfile`;
     }
     else {
@@ -96,7 +97,7 @@ EXPECT
 ########
 eval {sub bar {print "In bar";}}
 ########
-system './perl -ne "print if eof" /dev/null'
+system './perl -ne "print if eof" /dev/null' unless $^O eq 'MacOS';
 ########
 chop($file = <DATA>);
 ########
@@ -274,7 +275,7 @@ print "ok\n" if ("\0" lt "\xFF");
 EXPECT
 ok
 ########
-open(H,'op/misc.t'); # must be in the 't' directory
+open(H,'op/misc.t') || open(H,':op:misc.t'); # must be in the 't' directory
 stat(H);
 print "ok\n" if (-e _ and -f _ and -r _);
 EXPECT

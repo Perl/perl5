@@ -10,7 +10,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    if ($^O eq 'dos') {
+    if ($^O eq 'dos' || $^O eq 'MacOS') {
         print "1..0 # Skip: no multitasking\n";
         exit 0;
     }

@@ -8,9 +8,11 @@ BEGIN {
 }
 
 use Config;
+use File::Spec::Functions;
 
 print "1..58\n";
 
+$Is_MacOS = $^O eq 'MacOS';
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_Dos = $^O eq 'dos';
 $Is_Dosish = $Is_Dos || $^O eq 'os2' || $Is_MSWin32;
@@ -52,7 +54,7 @@ if (open(FOO, ">Op.stat.tmp")) {
   print "# open failed: $!\nnot ok 1\nnot ok 2\n";
 }
 
-if ($Is_Dosish) { unlink "Op.stat.tmp2"}
+if ($Is_Dosish || $Is_MacOS) { unlink "Op.stat.tmp2"}
 else {
     `rm -f Op.stat.tmp2;ln Op.stat.tmp Op.stat.tmp2; chmod 644 Op.stat.tmp`;
 }
@@ -66,7 +68,7 @@ elsif ($nlink == 2)
     {print "ok 3\n";} 
 else {print "# \$nlink is |$nlink|\nnot ok 3\n";}
 
-if (   $Is_Dosish
+if (   $Is_Dosish || $Is_MacOS
         # Solaris tmpfs bug
 	|| ($cwd =~ m#^/tmp# and $mtime && $mtime==$ctime && $^O eq 'solaris')
 	|| $cwd =~ m#/afs/#
@@ -85,7 +87,7 @@ else {
 print "#4	:$mtime: should != :$ctime:\n";
 
 unlink "Op.stat.tmp" or print "# unlink failed: $!\n";
-if ($Is_MSWin32) {  open F, '>Op.stat.tmp' and close F }
+if ($Is_MSWin32 || $Is_MacOS) {  open F, '>Op.stat.tmp' and close F }
 else             { `touch Op.stat.tmp` }
 
 if (-z 'Op.stat.tmp') {print "ok 5\n";} else {print "not ok 5\n";}
@@ -118,15 +120,16 @@ eval { chown $>,'Op.stat.tmp'; 1 } or print "# $@" ;
 chmod 0700,'Op.stat.tmp';
 if (-r 'Op.stat.tmp') {print "ok 18\n";} else {print "not ok 18\n";}
 if (-w 'Op.stat.tmp') {print "ok 19\n";} else {print "not ok 19\n";}
-if ($Is_Dosish) {print "ok 20 # skipped: -x by extension\n";} 
+if ($Is_Dosish || $Is_MacOS) {print "ok 20 # skipped: -x by extension\n";} 
 elsif (-x 'Op.stat.tmp') {print "ok 20\n";} 
 else {print "not ok 20\n";}
 
 if (-f 'Op.stat.tmp') {print "ok 21\n";} else {print "not ok 21\n";}
 if (! -d 'Op.stat.tmp') {print "ok 22\n";} else {print "not ok 22\n";}
 
-if (-d '.') {print "ok 23\n";} else {print "not ok 23\n";}
-if (! -f '.') {print "ok 24\n";} else {print "not ok 24\n";}
+my $dir = curdir();
+if (-d $dir) {print "ok 23\n";} else {print "not ok 23\n";}
+if (! -f $dir) {print "ok 24\n";} else {print "not ok 24\n";}
 
 if (!$Is_Dosish and `ls -l perl` =~ /^l.*->/) {
     if (-l 'perl') {print "ok 25\n";} else {print "not ok 25\n";}
@@ -171,7 +174,7 @@ else
     {print "not ok 33\n";}
 if (! -b '.') {print "ok 34\n";} else {print "not ok 34\n";}
 
-if ($^O eq 'mpeix' or $^O eq 'amigaos' or $Is_Dosish or $Is_Cygwin) {
+if ($^O eq 'mpeix' or $^O eq 'amigaos' or $Is_Dosish or $Is_Cygwin or $Is_MacOS) {
   print "ok 35 # skipped: no -u\n"; goto tty_test;
 }
 
@@ -205,7 +208,7 @@ tty_test:
 # may not be available (at, cron  rsh etc), the PERL_SKIP_TTY_TEST env var
 # can be set to skip the tests that need a tty.
 unless($ENV{PERL_SKIP_TTY_TEST}) {
-    if ($Is_MSWin32) {
+    if ($Is_MSWin32 || $Is_MacOS) {
 	print "ok 36\n";
 	print "ok 37\n";
     }
@@ -235,20 +238,21 @@ else {
     print "ok 38\n";
     print "ok 39\n";
 }
-open(null,"/dev/null");
+my $devnull = File::Spec->devnull;
+open(null, $devnull);
 if (! -t null || -e '/xenix' || $^O eq 'machten' || $Is_MSWin32)
 	{print "ok 40\n";} else {print "not ok 40\n";}
 close(null);
 
 # These aren't strictly "stat" calls, but so what?
+my $file = catfile(curdir(), 'op', 'stat.t');
+if (-T $file) {print "ok 41\n";} else {print "not ok 41\n";}
+if (! -B $file) {print "ok 42\n";} else {print "not ok 42\n";}
 
-if (-T 'op/stat.t') {print "ok 41\n";} else {print "not ok 41\n";}
-if (! -B 'op/stat.t') {print "ok 42\n";} else {print "not ok 42\n";}
+if (-B './perl' || -B './perl.exe' || -B $^X) {print "ok 43\n";} else {print "not ok 43\n";}
+if (! -T './perl' && ! -T './perl.exe' || ! -T $^X) {print "ok 44\n";} else {print "not ok 44\n";}
 
-if (-B './perl' || -B './perl.exe') {print "ok 43\n";} else {print "not ok 43\n";}
-if (! -T './perl' && ! -T './perl.exe') {print "ok 44\n";} else {print "not ok 44\n";}
-
-open(FOO,'op/stat.t');
+open(FOO,$file);
 eval { -T FOO; };
 if ($@ =~ /not implemented/) {
     print "# $@";
@@ -265,7 +269,7 @@ else {
     if (! -B FOO) {print "ok 49\n";} else {print "not ok 49\n";}
     close(FOO);
 
-    open(FOO,'op/stat.t');
+    open(FOO,$file);
     $_ = <FOO>;
     if (/perl/) {print "ok 50\n";} else {print "not ok 50\n";}
     if (-T FOO) {print "ok 51\n";} else {print "not ok 51\n";}
@@ -276,8 +280,8 @@ else {
 }
 close(FOO);
 
-if (-T '/dev/null') {print "ok 55\n";} else {print "not ok 55\n";}
-if (-B '/dev/null') {print "ok 56\n";} else {print "not ok 56\n";}
+if (-T $devnull) {print "ok 55\n";} else {print "not ok 55\n";}
+if (-B $devnull) {print "ok 56\n";} else {print "not ok 56\n";}
 
 # and now, a few parsing tests:
 $_ = 'Op.stat.tmp';

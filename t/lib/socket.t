@@ -18,7 +18,9 @@ print "1..8\n";
 if (socket(T,PF_INET,SOCK_STREAM,6)) {
   print "ok 1\n";
 
-  if (connect(T,pack_sockaddr_in(7,inet_aton("localhost")))){
+  # localhost won't always work on Mac OS
+  my $host = $^O eq 'MacOS' ? "127.0.0.1" : "localhost";
+  if (connect(T,pack_sockaddr_in(7,inet_aton($host)))){
 	print "ok 2\n";
 
 	print "# Connected to " .

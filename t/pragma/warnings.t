@@ -7,8 +7,11 @@ BEGIN {
     require Config; import Config;
 }
 
+use File::Spec::Functions;
+
 $| = 1;
 
+my $Is_MacOS   = $^O eq 'MacOS';
 my $Is_VMS     = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $tmpfile = "tmp0000";
@@ -20,9 +23,15 @@ my @prgs = () ;
 my @w_files = () ;
 
 if (@ARGV)
-  { print "ARGV = [@ARGV]\n" ; @w_files = map { s#^#./pragma/warn/#; $_ } @ARGV }
+  { print "ARGV = [@ARGV]\n" ;
+    if ($^O eq 'MacOS') {
+      @w_files = map { s#^#:pragma:warn:#; $_ } @ARGV
+    } else {
+      @w_files = map { s#^#./pragma/warn/#; $_ } @ARGV
+    }
+  }
 else
-  { @w_files = sort glob("pragma/warn/*") }
+  { @w_files = sort glob(catfile(curdir(), "pragma", "warn", "*")) }
 
 foreach (@w_files) {
 
@@ -70,14 +79,24 @@ for (@prgs){
 	shift @files ;
 	$prog = shift @files ;
     }
+
+    # fix up some paths
+    if ($^O eq 'MacOS') {
+	$prog =~ s|require "./abc";|require ":abc";|g;
+	$prog =~ s|require "./abcd";|require ":abcd";|g;
+	$prog =~ s|"\."|":"|g;
+    }
+
     open TEST, ">$tmpfile";
     print TEST $prog,"\n";
     close TEST;
     my $results = $Is_VMS ?
-                  `./perl "-I../lib" $switch $tmpfile 2>&1` :
-		  $Is_MSWin32 ?
-                  `.\\perl -I../lib $switch $tmpfile 2>&1` :
-                  `./perl -I../lib $switch $tmpfile 2>&1`;
+	`./perl "-I../lib" $switch $tmpfile 2>&1` :
+	    $Is_MSWin32 ?
+		`.\\perl -I../lib $switch $tmpfile 2>&1` :
+		    $Is_MacOS ?
+			`$^X -I::lib $switch $tmpfile` :
+			    `./perl -I../lib $switch $tmpfile 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN
@@ -88,6 +107,14 @@ for (@prgs){
     $results =~ s/^(syntax|parse) error/syntax error/mig;
     # allow all tests to run when there are leaks
     $results =~ s/Scalars leaked: \d+\n//g;
+
+    # fix up some paths
+    if ($^O eq 'MacOS') {
+	$results =~ s|:abcd\b|./abcd|g;
+	$results =~ s|:abc\.pm\b|abc.pm|g;
+	$results =~ s|:abc\b|./abc|g;
+    }
+
     $expected =~ s/\n+$//;
     my $prefix = ($results =~ s#^PREFIX(\n|$)##) ;
     # any special options? (OPTIONS foo bar zap)

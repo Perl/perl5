@@ -8,7 +8,9 @@ BEGIN {
 }
 
 use Config;
+use File::Spec::Functions;
 
+$Is_MacOS  = $^O eq 'MacOS';
 $Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'dos' or
 	      $^O eq 'os2' or $^O eq 'mint');
 
@@ -21,25 +23,26 @@ print "1..29\n";
 $wd = (($^O eq 'MSWin32') ? `cd` : `pwd`);
 chop($wd);
 
-if ($^O eq 'MSWin32') { `rmdir /s /q tmp 2>nul`; `mkdir tmp`; }
+if ($^O eq 'MSWin32')  { `rmdir /s /q tmp 2>nul`; `mkdir tmp`; }
+elsif ($^O eq 'MacOS') { rmdir "tmp"; mkdir "tmp"; }
 else {  `rm -f tmp 2>/dev/null; mkdir tmp 2>/dev/null`; }
-chdir './tmp';
+chdir catdir(curdir(), 'tmp');
 `/bin/rm -rf a b c x` if -x '/bin/rm';
 
 umask(022);
 
-if ($^O eq 'MSWin32') { print "ok 1 # skipped: bogus umask()\n"; }
+if ($^O eq 'MSWin32' || $Is_MacOS) { print "ok 1 # skipped: bogus umask()\n"; }
 elsif ((umask(0)&0777) == 022) {print "ok 1\n";} else {print "not ok 1\n";}
 open(fh,'>x') || die "Can't create x";
 close(fh);
 open(fh,'>a') || die "Can't create a";
 close(fh);
 
-if ($Is_Dosish) {print "ok 2 # skipped: no link\n";} 
+if ($Is_Dosish || $Is_MacOS) {print "ok 2 # skipped: no link\n";} 
 elsif (eval {link('a','b')}) {print "ok 2\n";} 
 else {print "not ok 2\n";}
 
-if ($Is_Dosish) {print "ok 3 # skipped: no link\n";} 
+if ($Is_Dosish || $Is_MacOS) {print "ok 3 # skipped: no link\n";} 
 elsif (eval {link('b','c')}) {print "ok 3\n";} 
 else {print "not ok 3\n";}
 
@@ -52,7 +55,7 @@ elsif ($nlink == 3)
     {print "ok 4\n";} 
 else {print "not ok 4\n";}
 
-if ($^O eq 'amigaos' || $Is_Dosish)
+if ($^O eq 'amigaos' || $Is_Dosish || $Is_MacOS)
     {print "ok 5 # skipped: no link\n";} 
 elsif (($mode & 0777) == 0666)
     {print "ok 5\n";} 
@@ -63,7 +66,7 @@ if ((chmod $newmode,'a') == 1) {print "ok 6\n";} else {print "not ok 6\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
-if ($Is_Dosish) {print "ok 7 # skipped: no link\n";} 
+if ($Is_Dosish || $Is_MacOS) {print "ok 7 # skipped: no link\n";} 
 elsif (($mode & 0777) == $newmode) {print "ok 7\n";} 
 else {print "not ok 7\n";}
 
@@ -73,23 +76,23 @@ if ($^O eq 'MSWin32') {
     $newmode = 0666;
 }
 
-if ($Is_Dosish) {print "ok 8 # skipped: no link\n";} 
+if ($Is_Dosish || $Is_MacOS) {print "ok 8 # skipped: no link\n";} 
 elsif ((chmod $newmode,'c','x') == 2) {print "ok 8\n";} 
 else {print "not ok 8\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
-if ($Is_Dosish) {print "ok 9 # skipped: no link\n";} 
+if ($Is_Dosish || $Is_MacOS) {print "ok 9 # skipped: no link\n";} 
 elsif (($mode & 0777) == $newmode) {print "ok 9\n";} 
 else {print "not ok 9\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('x');
-if ($Is_Dosish) {print "ok 10 # skipped: no link\n";} 
+if ($Is_Dosish || $Is_MacOS) {print "ok 10 # skipped: no link\n";} 
 elsif (($mode & 0777) == $newmode) {print "ok 10\n";} 
 else {print "not ok 10\n";}
 
-if ($Is_Dosish) {print "ok 11 # skipped: no link\n"; unlink 'b','x'; } 
+if ($Is_Dosish || $Is_MacOS) {print "ok 11 # skipped: no link\n"; unlink 'b','x'; } 
 elsif ((unlink 'b','x') == 2) {print "ok 11\n";} 
 else {print "not ok 11\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
@@ -111,7 +114,7 @@ if ($foo == 1) {print "ok 16\n";} else {print "not ok 16 $foo\n";}
     $blksize,$blocks) = stat('b');
 if ($^O eq 'MSWin32') { print "ok 17 # skipped: bogus (stat)[1]\n"; }
 elsif ($ino) {print "ok 17\n";} else {print "not ok 17\n";}
-if ($wd =~ m#/afs/# || $^O eq 'amigaos' || $^O eq 'dos' || $^O eq 'MSWin32')
+if ($wd =~ m#/afs/# || $^O eq 'amigaos' || $^O eq 'dos' || $^O eq 'MSWin32' || $Is_MacOS)
     {print "ok 18 # skipped: granularity of the filetime\n";}
 elsif ($atime == 500000000 && $mtime == 500000000 + $delta)
     {print "ok 18\n";}
