@@ -108,6 +108,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Cwd' =>
+		{
+		'MAINTAINER'	=> 'kwilliams',
+		'FILES'		=> q[ext/Cwd lib/Cwd.pm],
+		'CPAN'		=> 1,
+		},
+
 	'Data::Dumper' =>
 		{
 		'MAINTAINER'	=> 'ilyam', # Not gsar.
