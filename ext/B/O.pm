@@ -42,7 +42,8 @@ sub import {
 		die $compilesub;
 	    }
 
-           local ($\,$",$,) = (undef,' ','');
+	    local $savebackslash = $\;
+	    local ($\,$",$,) = (undef,' ','');
 	    &$compilesub();
 
 	    close STDERR if $veryquiet;

@@ -98,11 +98,15 @@ my $path = join " ", map { qq["-I$_"] } @INC;
 $path .= " -MMac::err=unix" if $Is_MacOS;
 my $redir = $Is_MacOS ? "" : "2>&1";
 
-$a = `$^X $path "-MO=Deparse" -anle 1 $redir`;
+$a = `$^X $path "-MO=Deparse" -anlwi.bak -e 1 $redir`;
 $a =~ s/(?:# )?-e syntax OK\n//g;  # "# " for Mac OS
+$a =~ s/.*possible typo.*\n//;	   # Remove warning line
 $a =~ s{\\340\\242}{\\s} if (ord("\\") == 224); # EBCDIC, cp 1047 or 037
 $a =~ s{\\274\\242}{\\s} if (ord("\\") == 188); # $^O eq 'posix-bc'
 $b = <<'EOF';
+BEGIN { $^I = ".bak"; }
+BEGIN { $^W = 1; }
+BEGIN { $/ = "\n"; $\ = "\n"; }
 LINE: while (defined($_ = <ARGV>)) {
     chomp $_;
     our(@F) = split(" ", $_, 0);

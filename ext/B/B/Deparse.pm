@@ -19,7 +19,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber cstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.61;
+$VERSION = 0.62;
 use strict;
 use warnings ();
 
@@ -527,6 +527,18 @@ sub compile {
     my(@args) = @_;
     return sub { 
 	my $self = B::Deparse->new(@args);
+	# First deparse command-line args
+	if (defined $^I) { # deparse -i
+	    print q(BEGIN { $^I = ).cstring($^I).qq(; }\n);
+	}
+	if ($^W) { # deparse -w
+	    print qq(BEGIN { \$^W = $^W; }\n);
+	}
+	if ($/ ne "\n" or defined $O::savebackslash) { # deparse -l and -0
+	    my $fs = cstring($/) || 'undef';
+	    my $bs = cstring($O::savebackslash) || 'undef';
+	    print qq(BEGIN { \$/ = $fs; \$\\ = $bs; }\n);
+	}
 	my @BEGINs  = B::begin_av->isa("B::AV") ? B::begin_av->ARRAY : ();
 	my @INITs   = B::init_av->isa("B::AV") ? B::init_av->ARRAY : ();
 	my @ENDs    = B::end_av->isa("B::AV") ? B::end_av->ARRAY : ();
