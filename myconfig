@@ -24,7 +24,7 @@ Summary of my $package ($baserev patchlevel $PATCHLEVEL subversion $SUBVERSION) 
     osname=$osname, osvers=$osvers, archname=$archname
     uname='$myuname'
     hint=$hint, useposix=$useposix, d_sigaction=$d_sigaction
-    perlstdio=$d_perlstdio sfio=$d_sfio
+    useperlio=$useperlio d_sfio=$d_sfio
   Compiler:
     cc='$cc', optimize='$optimize', gccversion=$gccversion
     cppflags='$cppflags'
@@ -37,6 +37,7 @@ Summary of my $package ($baserev patchlevel $PATCHLEVEL subversion $SUBVERSION) 
     libpth=$libpth
     libs=$libs
     libc=$libc, so=$so
+    useshrplib=$useshrplib, libperl=$libperl
   Dynamic Linking:
     dlsrc=$dlsrc, dlext=$dlext, d_dlsymun=$d_dlsymun, ccdlflags='$ccdlflags'
     cccdlflags='$cccdlflags', lddlflags='$lddlflags'
