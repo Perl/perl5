@@ -194,15 +194,28 @@ END_EXTERN_C
 #define UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA	0x03C2
 #define UNICODE_GREEK_SMALL_LETTER_SIGMA	0x03C3
 
+#define EBCDIC_LATIN_SMALL_LETTER_SHARP_S	0x0059
+
 #define UNI_DISPLAY_ISPRINT	0x0001
 #define UNI_DISPLAY_BACKSLASH	0x0002
 #define UNI_DISPLAY_QQ		(UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
 #define UNI_DISPLAY_REGEX	(UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
 
-#define ANYOF_UNICODE_FOLD_SHARP_S(node, input, end)	\
+#ifdef EBCDIC
+#   define ANYOF_FOLD_SHARP_S(node, input, end)	\
+	(ANYOF_BITMAP_TEST(node, EBCDIC_LATIN_SMALL_LETTER_SHARP_S) && \
+	 (ANYOF_FLAGS(node) & ANYOF_UNICODE) && \
+	 (ANYOF_FLAGS(node) & ANYOF_FOLD) && \
+	 ((end) > (input) + 1) && \
+	 toLOWER((input)[0]) == 's' && \
+	 toLOWER((input)[1]) == 's')
+#else
+#   define ANYOF_FOLD_SHARP_S(node, input, end)	\
 	(ANYOF_BITMAP_TEST(node, UNICODE_LATIN_SMALL_LETTER_SHARP_S) && \
 	 (ANYOF_FLAGS(node) & ANYOF_UNICODE) && \
 	 (ANYOF_FLAGS(node) & ANYOF_FOLD) && \
 	 ((end) > (input) + 1) && \
 	 toLOWER((input)[0]) == 's' && \
 	 toLOWER((input)[1]) == 's')
+#endif
+#define SHARP_S_SKIP 2
