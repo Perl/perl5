@@ -283,4 +283,4 @@
 #  endif  /* NO_XSLOCKS */
 #endif  /* PERL_CAPI */
 
-#endif _INC_PERL_XSUB_H		/* include guard */
+#endif /* _INC_PERL_XSUB_H */		/* include guard */
