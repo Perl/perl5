@@ -1,14 +1,16 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require "./test.pl";
+
+    plan ('no_plan');
+
+    use_ok('Config');
 }
 
-plan 'no_plan';
-
-use_ok('Config');
+use strict;
 
 # Some (safe?) bets.
 
@@ -126,27 +128,30 @@ Config::config_vars('?flags');	# bogus regex, no explicit warning !
 my $out10 = $$out;
 $out->clear;
 
+undef $out;
 untie *STDOUT;
 
 like($out1, qr/^cc='\Q$Config{cc}\E';/, "found config_var cc");
 like($out2, qr/^d_bork='UNKNOWN';/, "config_var d_bork is UNKNOWN");
 
 # test for leading, trailing colon effects
-is(scalar split(/;\n/, $out3), 3, "3 lines found");
-is(scalar split(/;\n/, $out6), 3, "3 lines found");
+# Split in scalar context it deprecated, and will warn.
+my @tmp;
+is(scalar (@tmp = split(/;\n/, $out3)), 3, "3 lines found");
+is(scalar (@tmp = split(/;\n/, $out6)), 3, "3 lines found");
 
 is($out4 =~ /(;\n)/s, '', "trailing colon gives 1-line response: $out4");
 is($out5 =~ /(;\n)/s, '', "trailing colon gives 1-line response: $out5");
 
-is(scalar split(/=/, $out3), 4, "found 'tag='");
-is(scalar split(/=/, $out4), 4, "found 'tag='");
+is(scalar (@tmp = split(/=/, $out3)), 4, "found 'tag='");
+is(scalar (@tmp = split(/=/, $out4)), 4, "found 'tag='");
 
 my @api;
 
 my @rev = @Config{qw(PERL_API_REVISION PERL_API_VERSION PERL_API_SUBVERSION)};
 
 print ("# test tagged responses, multi-line and single-line\n");
-foreach $api ($out3, $out4) {
+foreach my $api ($out3, $out4) {
     @api = $api =~ /PERL_API_(\w+)=(.*?)(?:;\n|\s)/mg;
     is($api[0], "REVISION", "REVISION tag");
     is($api[4], "VERSION",  "VERSION tag");
@@ -157,7 +162,7 @@ foreach $api ($out3, $out4) {
 }
 
 print("# test non-tagged responses, multi-line and single-line\n");
-foreach $api ($out5, $out6) {
+foreach my $api ($out5, $out6) {
     @api = split /(?: |;\n)/, $api;
     is($api[0], "'$rev[0]'", "revision is $rev[0]");
     is($api[2], "'$rev[1]'", "version is $rev[1]");
