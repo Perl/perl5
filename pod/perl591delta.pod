@@ -171,6 +171,14 @@ difference unless you have code that explicitly makes assumptions about that
 ordering. (The inheritance hierarchy of C<B::*> objects has been changed
 to reflect this.)
 
+=head2 Removal of CPP symbols
+
+The C preprocessor symbols C<PERL_PM_APIVERSION> and
+C<PERL_XS_APIVERSION>, which were supposed to give the version number of
+the oldest perl binary-compatible (resp. source-compatible) with the
+present one, were not used, and sometimes had misleading values. They have
+been removed.
+
 =head1 Configuration and Building
 
 C<Configure> now invokes callbacks regardless of the value of the variable
