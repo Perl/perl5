@@ -287,7 +287,7 @@ Shuts down a Perl interpreter.  See L<perlembed>.
 int
 perl_destruct(pTHXx)
 {
-    int destruct_level;  /* 0=none, 1=full, 2=full with checks */
+    volatile int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     HV *hv;
 #ifdef USE_5005THREADS
     Thread t;
