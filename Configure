@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 3.0.1.1 89/10/26 22:58:02 lwall Locked $
+# $Header: Configure,v 3.0.1.2 89/11/11 04:05:37 lwall Locked $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -39,8 +39,8 @@ case "$1" in
 esac
 
 d_eunice=''
-eunicefix=''
 define=''
+eunicefix=''
 loclist=''
 expr=''
 sed=''
@@ -91,6 +91,7 @@ lp=''
 touch=''
 make=''
 date=''
+csh=''
 Log=''
 Header=''
 bin=''
@@ -103,6 +104,7 @@ d_bcopy=''
 d_charsprf=''
 d_crypt=''
 cryptlib=''
+d_csh=''
 d_dosuid=''
 d_dup2=''
 d_fchmod=''
@@ -139,7 +141,6 @@ d_socket=''
 d_sockpair=''
 d_oldsock=''
 socketlib=''
-sockethdr=''
 d_statblks=''
 d_stdstdio=''
 d_strctcpy=''
@@ -147,11 +148,13 @@ d_symlink=''
 d_syscall=''
 d_tminsys=''
 i_systime=''
+i_timetoo=''
 d_varargs=''
 d_vfork=''
 d_voidsig=''
 d_vprintf=''
 d_charvspr=''
+d_wait4=''
 gidtype=''
 i_dirent=''
 d_dirnamlen=''
@@ -161,14 +164,15 @@ i_niin=''
 i_pwd=''
 d_pwquota=''
 d_pwage=''
+d_pwchange=''
+d_pwclass=''
+d_pwexpire=''
 i_sysdir=''
 i_sysioctl=''
 i_varargs=''
 i_vfork=''
 intsize=''
 libc=''
-libdbm=''
-libndir=''
 libnm=''
 mallocsrc=''
 mallocobj=''
@@ -183,6 +187,7 @@ large=''
 huge=''
 optimize=''
 ccflags=''
+cppflags=''
 ldflags=''
 cc=''
 libs=''
@@ -230,7 +235,7 @@ fi
 
 echo "First let's make sure your kit is complete.  Checking..."
 (cd ..; awk '' `awk '$1 !~ /PACKINGLIST/ {print $1}' MANIFEST` >/dev/null || kill $$)
-echo " "
+echo "Looks good..."
 
 attrlist="mc68000 sun gcos unix ibm gimpel interdata tss os mert pyr"
 attrlist="$attrlist vax pdp11 i8086 z8000 u3b2 u3b5 u3b20 u3b200"
@@ -242,6 +247,7 @@ attrlist="$attrlist i186"
 pth="/usr/ucb /bin /usr/bin /usr/local /usr/local/bin /usr/lbin /usr/plx /usr/5bin /vol/local/bin /etc /usr/lib /lib /usr/local/lib /sys5.3/bin /sys5.3/usr/bin /bsd4.3/bin /bsd4.3/usr/bin /bsd4.3/usr/ucb"
 d_newshome="/usr/NeWS"
 defvoidused=7
+libswanted="net nm ndir ndbm dbm c_s"
 
 : some greps do not return status, grrr.
 echo "grimblepritz" >grimble
@@ -263,6 +269,66 @@ grep "$1" "$2" >.greptmp && cat .greptmp && test -s .greptmp
 EOSS
 chmod +x contains
 esac
+
+: see if sh knows # comments
+echo " "
+echo "Checking your sh to see if it knows about # comments..."
+if sh -c '#' >/dev/null 2>&1 ; then
+    echo "Your sh handles # comments correctly."
+    shsharp=true
+    spitshell=cat
+    echo " "
+    echo "Okay, let's see if #! works on this system..."
+    echo "#!/bin/echo hi" > try
+    $eunicefix try
+    chmod +x try
+    try > today
+    if $contains hi today >/dev/null 2>&1; then
+	echo "It does."
+	sharpbang='#!'
+    else
+	echo "#! /bin/echo hi" > try
+	$eunicefix try
+	chmod +x try
+	try > today
+	if test -s today; then
+	    echo "It does."
+	    sharpbang='#! '
+	else
+	    echo "It doesn't."
+	    sharpbang=': use '
+	fi
+    fi
+else
+    echo "Your sh doesn't grok # comments--I will strip them later on."
+    shsharp=false
+    echo "exec grep -v '^#'" >spitshell
+    chmod +x spitshell
+    $eunicefix spitshell
+    spitshell=`pwd`/spitshell
+    echo "I presume that if # doesn't work, #! won't work either!"
+    sharpbang=': use '
+fi
+
+: figure out how to guarantee sh startup
+echo " "
+echo "Checking out how to guarantee sh startup..."
+startsh=$sharpbang'/bin/sh'
+echo "Let's see if '$startsh' works..."
+cat >try <<EOSS
+$startsh
+set abc
+test "$?abc" != 1
+EOSS
+
+chmod +x try
+$eunicefix try
+if try; then
+    echo "Yup, it does."
+else
+    echo "Nope.  You may have to fix up the shell scripts to make sure sh runs them."
+fi
+rm -f try today
 
 : first determine how to suppress newline on echo command
 echo "Checking echo to see how to suppress newlines..."
@@ -423,6 +489,7 @@ uniq
 trylist="
 Mcc
 cpp
+csh
 egrep
 test
 "
@@ -511,221 +578,6 @@ FOO
     ;;
 esac
 rmlist="$rmlist loc"
-
-: get list of predefined functions in a handy place
-echo " "
-set /usr/lib/libc.so.[0-9]*
-eval set \$$#
-if test -f "$1"; then
-    echo "Your shared C library is in $1."
-    libc="$1"
-elif test -f /lib/libc.a; then
-    echo "Your C library is in /lib/libc.a.  You're normal."
-    libc=/lib/libc.a
-else
-    ans=`loc libc.a blurfl/dyick $libpth`
-    if test ! -f "$ans"; then
-	ans=`loc clib blurfl/dyick $libpth`
-    fi
-    if test ! -f "$ans"; then
-	ans=`loc libc blurfl/dyick $libpth`
-    fi
-    if test ! -f "$ans"; then
-	ans=`loc Slibc.a blurfl/dyick /usr/lib/386 /lib/386 $libpth`
-    fi
-    if test ! -f "$ans"; then
-	ans=`loc Mlibc.a blurfl/dyick $libpth`
-    fi
-    if test ! -f "$ans"; then
-	ans=`loc Llibc.a blurfl/dyick $libpth`
-    fi
-    if test -f "$ans"; then
-	echo "Your C library is in $ans, of all places."
-	libc=$ans
-    else
-	if test -f "$libc"; then
-	    echo "Your C library is in $libc, like you said before."
-	else
-	    cat <<EOM
- 
-I can't seem to find your C library.  I've looked in the following places:
-
-	$libpth
-
-None of these seems to contain your C library.  What is the full name
-EOM
-	    dflt=None
-	    $echo $n "of your C library? $c"
-	    rp='C library full name?'
-	    . myread
-	    libc="$ans"
-	fi
-    fi
-fi
-echo " "
-$echo $n "Extracting names from $libc for later perusal...$c"
-nm $libc 2>/dev/null >libc.tmp
-$sed -n -e 's/^.* [AT]  *_[_.]*//p' -e 's/^.* [AT] //p' <libc.tmp >libc.list
-if $contains '^printf$' libc.list >/dev/null 2>&1; then
-    echo "done"
-else
-    $sed -n -e 's/^__*//' -e 's/^\([a-zA-Z_0-9$]*\).*xtern.*/\1/p' <libc.tmp >libc.list
-    $contains '^printf$' libc.list >/dev/null 2>&1 || \
-	$sed -n -e 's/^.* D __*//p' -e 's/^.* D //p' <libc.tmp >libc.list
-    $contains '^printf$' libc.list >/dev/null 2>&1 || \
-       $sed -n -e 's/^_//' \
-	      -e 's/^\([a-zA-Z_0-9]*\).*xtern.*text.*/\1/p' <libc.tmp >libc.list
-    if $contains '^printf$' libc.list >/dev/null 2>&1; then
-	echo "done"
-    else
-	echo " "
-	echo "nm didn't seem to work right."
-	echo "Trying ar instead..."
-	if ar t $libc > libc.tmp; then
-	    $sed -e 's/\.o$//' < libc.tmp > libc.list
-	    echo "Ok."
-	else
-	    echo "ar didn't seem to work right."
-	    echo "Maybe this is a Cray...trying bld instead..."
-	    if bld t $libc | $sed -e 's/.*\///' -e 's/\.o:.*$//' > libc.list; then
-		echo "Ok."
-	    else
-	    	echo "That didn't work either.  Giving up."
-	    	exit 1
-	    fi
-	fi
-    fi
-fi
-
-inlibc='echo " ";
-if $contains "^$1\$" libc.list >/dev/null 2>&1;
-then echo "$1() found"; eval "$2=$define";
-else echo "$1() not found"; eval "$2=$undef"; fi'
-
-rmlist="$rmlist libc.tmp libc.list"
-
-: make some quick guesses about what we are up against
-echo " "
-$echo $n "Hmm...  $c"
-cat /usr/include/signal.h /usr/include/sys/signal.h >foo
-if $contains SIGTSTP foo >/dev/null 2>&1 ; then
-    echo "Looks kind of like a BSD system, but we'll see..."
-    echo exit 0 >bsd
-    echo exit 1 >usg
-    echo exit 1 >v7
-elif $contains '^fcntl$' libc.list >/dev/null 2>&1 ; then
-    echo "Looks kind of like a USG system, but we'll see..."
-    echo exit 1 >bsd
-    echo exit 0 >usg
-    echo exit 1 >v7
-else
-    echo "Looks kind of like a version 7 system, but we'll see..."
-    echo exit 1 >bsd
-    echo exit 1 >usg
-    echo exit 0 >v7
-fi
-if $contains '^vmssystem$' libc.list >/dev/null 2>&1 ; then
-    cat <<'EOI'
-There is, however, a strange, musty smell in the air that reminds me of
-something...hmm...yes...I've got it...there's a VMS nearby, or I'm a Blit.
-EOI
-    echo "exit 0" >eunice
-    eunicefix=unixtovms
-    d_eunice="$define"
-: it so happens the Eunice I know will not run shell scripts in Unix format
-else
-    echo " "
-    echo "Congratulations.  You aren't running Eunice."
-    eunicefix=':'
-    d_eunice="$undef"
-    echo "exit 1" >eunice
-fi
-if test -f /xenix; then
-    echo "Actually, this looks more like a XENIX system..."
-    echo "exit 0" >xenix
-else
-    echo " "
-    echo "It's not Xenix..."
-    echo "exit 1" >xenix
-fi
-chmod +x xenix
-$eunicefix xenix
-if test -f /venix; then
-    echo "Actually, this looks more like a VENIX system..."
-    echo "exit 0" >venix
-else
-    echo " "
-    if xenix; then
-	: null
-    else
-	echo "Nor is it Venix..."
-    fi
-    echo "exit 1" >venix
-fi
-chmod +x bsd usg v7 eunice venix
-$eunicefix bsd usg v7 eunice venix
-rm -rf foo
-rmlist="$rmlist bsd usg v7 eunice venix xenix"
-
-: see if sh knows # comments
-echo " "
-echo "Checking your sh to see if it knows about # comments..."
-if sh -c '#' >/dev/null 2>&1 ; then
-    echo "Your sh handles # comments correctly."
-    shsharp=true
-    spitshell=cat
-    echo " "
-    echo "Okay, let's see if #! works on this system..."
-    echo "#!/bin/echo hi" > try
-    $eunicefix try
-    chmod +x try
-    try > today
-    if $contains hi today >/dev/null 2>&1; then
-	echo "It does."
-	sharpbang='#!'
-    else
-	echo "#! /bin/echo hi" > try
-	$eunicefix try
-	chmod +x try
-	try > today
-	if test -s today; then
-	    echo "It does."
-	    sharpbang='#! '
-	else
-	    echo "It doesn't."
-	    sharpbang=': use '
-	fi
-    fi
-else
-    echo "Your sh doesn't grok # comments--I will strip them later on."
-    shsharp=false
-    echo "exec grep -v '^#'" >spitshell
-    chmod +x spitshell
-    $eunicefix spitshell
-    spitshell=`pwd`/spitshell
-    echo "I presume that if # doesn't work, #! won't work either!"
-    sharpbang=': use '
-fi
-
-: figure out how to guarantee sh startup
-echo " "
-echo "Checking out how to guarantee sh startup..."
-startsh=$sharpbang'/bin/sh'
-echo "Let's see if '$startsh' works..."
-cat >try <<EOSS
-$startsh
-set abc
-test "$?abc" != 1
-EOSS
-
-chmod +x try
-$eunicefix try
-if try; then
-    echo "Yup, it does."
-else
-    echo "Nope.  You may have to fix up the shell scripts to make sure sh runs them."
-fi
-rm -f try today
 
 : set up shell script to do ~ expansion
 cat >filexp <<EOSS
@@ -857,6 +709,69 @@ case "$mansrc" in
     manext=1
     ;;
 esac
+
+: make some quick guesses about what we are up against
+echo " "
+$echo $n "Hmm...  $c"
+cat /usr/include/signal.h /usr/include/sys/signal.h >foo
+if test `echo abc | tr a-z A-Z` = Abc ; then
+    echo "Looks kind of like a USG system, but we'll see..."
+    echo exit 1 >bsd
+    echo exit 0 >usg
+    echo exit 1 >v7
+elif $contains SIGTSTP foo >/dev/null 2>&1 ; then
+    echo "Looks kind of like a BSD system, but we'll see..."
+    echo exit 0 >bsd
+    echo exit 1 >usg
+    echo exit 1 >v7
+else
+    echo "Looks kind of like a version 7 system, but we'll see..."
+    echo exit 1 >bsd
+    echo exit 1 >usg
+    echo exit 0 >v7
+fi
+case "$eunicefix" in
+*unixtovms*)
+    cat <<'EOI'
+There is, however, a strange, musty smell in the air that reminds me of
+something...hmm...yes...I've got it...there's a VMS nearby, or I'm a Blit.
+EOI
+    echo "exit 0" >eunice
+    d_eunice="$define"
+    ;;
+*)
+    echo " "
+    echo "Congratulations.  You aren't running Eunice."
+    d_eunice="$undef"
+    echo "exit 1" >eunice
+    ;;
+esac
+if test -f /xenix; then
+    echo "Actually, this looks more like a XENIX system..."
+    echo "exit 0" >xenix
+else
+    echo " "
+    echo "It's not Xenix..."
+    echo "exit 1" >xenix
+fi
+chmod +x xenix
+$eunicefix xenix
+if test -f /venix; then
+    echo "Actually, this looks more like a VENIX system..."
+    echo "exit 0" >venix
+else
+    echo " "
+    if xenix; then
+	: null
+    else
+	echo "Nor is it Venix..."
+    fi
+    echo "exit 1" >venix
+fi
+chmod +x bsd usg v7 eunice venix
+$eunicefix bsd usg v7 eunice venix
+rm -rf foo
+rmlist="$rmlist bsd usg v7 eunice venix xenix"
 
 : see what memory models we can support
 case "$models" in
@@ -1078,6 +993,7 @@ case "$optimize" in
     ;;
 esac
 cat <<EOH
+
 Some C compilers have problems with their optimizers, by default, $package
 compiles with the -O flag to use the optimizer.  Alternately, you might
 want to use the symbolic debugger, which uses the -g flag (on traditional
@@ -1096,13 +1012,34 @@ esac
 
 case "$ccflags" in
 '') case "$cc" in
-    gcc) dflt='-fpcc-struct-return';;
+    *gcc*) dflt='-fpcc-struct-return';;
     *) dflt='none';;
     esac
     ;;
 *) dflt="$ccflags";;
 esac
-echo " "
+if test -d /usr/netinclude; then
+    case "$dflt" in
+    *netinclude*);;
+    *) dflt="$dflt -I/usr/netinclude";;
+    esac
+fi
+case "$optimize" in
+-g*)
+    case "$dflt" in
+    *DEBUGGING*);;
+    *) dflt="$dflt -DDEBUGGING";;
+    esac
+    ;;
+esac
+cat <<EOH
+
+Your C compiler may want other flags.  For this question you should
+include -I/whatever and -DWHATEVER flags and any other flags used by
+the C compiler, but you should NOT include libraries or ld flags like
+-lwhatever.  To use no flags, specify the word "none".
+  
+EOH
 rp="Any additional cc flags? [$dflt]"
 $echo $n "$rp $c"
 . myread
@@ -1110,6 +1047,26 @@ case "$ans" in
 none) ans='';
 esac
 ccflags="$ans"
+
+: the following weeds options from ccflags that are of no interest to cpp
+cppflags="$ccflags"
+case "$cc" in
+*gcc*) cppflags="$cppflags -D__GNUC__";;
+esac
+case "$cppflags" in
+'');;
+*)  set X $cppflags
+    cppflags=''
+    for flag do
+	case $flag in
+	-D*|-I*) cppflags="$cppflags $flag";;
+	esac
+    done
+    case "$cppflags" in
+    *-*)  echo "(C preprocessor flags: $cppflags)";;
+    esac
+    ;;
+esac
 
 case "$ldflags" in
 '') if venix; then
@@ -1130,9 +1087,37 @@ esac
 ldflags="$ans"
 rmlist="$rmlist pdp11"
 
+echo " "
+echo "Checking for optional libraries..."
 case "$libs" in
-'') dflt='none';;
+'') dflt='';;
 *) dflt="$libs";;
+esac
+case "$libswanted" in
+'') libswanted='c_s';;
+esac
+for thislib in $libswanted; do
+    if xxx=`loc lib$thislib.a X /usr/lib /usr/local/lib /lib`; then
+	echo "Found -l$thislib."
+	case "$dflt" in
+	*-l$thislib*);;
+	*) dflt="$dflt -l$thislib";;
+	esac
+    elif xxx=`loc lib$thislib.a X $libpth`; then
+	echo "Found $xxx."
+	case "$dflt" in
+	*$xxx*);;
+	*) dflt="$dflt $xxx";;
+	esac
+    else
+	echo "No -l$thislib."
+    fi
+done
+set X $dflt
+shift
+dflt="$*"
+case "$dflt" in
+'') dflt='none';;
 esac
 
 $cat <<EOM
@@ -1165,8 +1150,9 @@ cat <<'EOM'
 In the following, larger digits indicate more significance.  A big-endian
 machine like a Pyramid or a Motorola 680?0 chip will come out to 4321.  A
 little-endian machine like a Vax or an Intel 80?86 chip would be 1234.  Other
-machines may have weird orders like 3412.  If the test program works the
-default is probably right.  I'm now running the test program...
+machines may have weird orders like 3412.  A Cray will report 87654321.  If
+the test program works the default is probably right.
+I'm now running the test program...
 EOM
     $cat >try.c <<'EOCP'
 #include <stdio.h>
@@ -1175,17 +1161,19 @@ main()
     int i;
     union {
 	unsigned long l;
-	char c[4];
+	char c[8];
     } u;
 
-    u.l = 0x04030201;
-    printf("%c%c%c%c\n", u.c[0]+'0', u.c[1]+'0', u.c[2]+'0', u.c[3]+'0');
+    u.l = 0x0807060504030201;
+    for (i=0; i < sizeof(long); i++)
+	printf("%c",u.c[i]+'0');
+    printf("\n");
 }
 EOCP
     if $cc try.c -o try >/dev/null 2>&1 ; then
 	dflt=`try`
 	case "$dflt" in
-	????) echo "(The test program ran ok.)";;
+	????|????????) echo "(The test program ran ok.)";;
 	*) echo "(The test program didn't run right for some reason.)";;
 	esac
     else
@@ -1214,6 +1202,23 @@ ABC.XYZ
 EOT
 echo 'Maybe "'"$cc"' -E" will work...'
 $cc -E <testcpp.c >testcpp.out 2>&1
+: try to force gcc preprocessor if that is the compiler they are using
+case $? in
+0) cppstdin="$cc -E";;
+*) case "$cc" in
+    *gcc*)
+	cd ..
+	echo 'Trying (cat >/tmp/$$.c; '"$cc"' -E /tmp/$$.c; rm /tmp/$$.c)'
+	echo 'cat >/tmp/$$.c; '"$cc"' -E /tmp/$$.c; rm /tmp/$$.c' >cppstdin
+	chmod 755 cppstdin
+	cppstdin=`pwd`/cppstdin
+	cppminus='';
+	cd UU
+	$cppstdin <testcpp.c >testcpp.out 2>&1
+	;;
+    esac
+    ;;
+esac
 if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
     echo "Yup, it does."
     cppstdin="$cc -E"
@@ -1295,6 +1300,137 @@ else
     fi
 fi
 rm -f testcpp.c testcpp.out
+
+: get list of predefined functions in a handy place
+echo " "
+case "$libc" in
+'') libc=unknown;;
+esac
+case "$libpth" in
+'') libpth='/lib /usr/lib /usr/local/lib';;
+esac
+case "$libs" in
+*-lc_s*) libc=`loc libc_s.a $libc $libpth`
+esac
+libnames='';
+case "$libs" in
+'') ;;
+*)  for thislib in $libs; do
+	case "$thislib" in
+	-l*) thislib=`expr X$thislib : 'X-l\(.*\)'`
+	    try=`loc lib$thislib.a blurfl/dyick $libpth`
+	    if test ! -f $try; then
+		try=`loc lib$thislib blurfl/dyick $libpth`
+		if test ! -f $try; then
+		    try=`loc $thislib blurfl/dyick $libpth`
+		    if test ! -f $try; then
+			try=''
+		    fi
+		fi
+	    fi
+	    libnames="$libnames $try"
+	    ;;
+	*) libnames="$libnames $thisname" ;;
+	esac
+    done
+    ;;
+esac
+set /usr/lib/libc.so.[0-9]*
+eval set \$$#
+if test -f "$1"; then
+    echo "Your shared C library is in $1."
+    libc="$1"
+elif test -f $libc; then
+    echo "Your C library is in $libc, like you said before."
+elif test -f /lib/libc.a; then
+    echo "Your C library is in /lib/libc.a.  You're normal."
+    libc=/lib/libc.a
+else
+    ans=`loc libc.a blurfl/dyick $libpth`
+    if test ! -f "$ans"; then
+	ans=`loc libc blurfl/dyick $libpth`
+    fi
+    if test ! -f "$ans"; then
+	ans=`loc clib blurfl/dyick $libpth`
+    fi
+    if test ! -f "$ans"; then
+	ans=`loc Slibc.a blurfl/dyick /usr/lib/386 /lib/386 $libpth`
+    fi
+    if test ! -f "$ans"; then
+	ans=`loc Mlibc.a blurfl/dyick $libpth`
+    fi
+    if test ! -f "$ans"; then
+	ans=`loc Llibc.a blurfl/dyick $libpth`
+    fi
+    if test -f "$ans"; then
+	echo "Your C library is in $ans, of all places."
+	libc=$ans
+    else
+	cat <<EOM
+ 
+I can't seem to find your C library.  I've looked in the following places:
+
+	$libpth
+
+None of these seems to contain your C library.  What is the full name
+EOM
+	dflt=None
+	$echo $n "of your C library? $c"
+	rp='C library full name?'
+	. myread
+	libc="$ans"
+    fi
+fi
+echo " "
+set $libc $libnames
+$echo $n "Extracting names from $* for later perusal...$c"
+nm $* 2>/dev/null >libc.tmp
+$sed -n -e 's/^.* [AT]  *_[_.]*//p' -e 's/^.* [AT] //p' <libc.tmp >libc.list
+if $contains '^printf$' libc.list >/dev/null 2>&1; then
+    echo "done"
+else
+    $sed -n -e 's/^__*//' -e 's/^\([a-zA-Z_0-9$]*\).*xtern.*/\1/p' <libc.tmp >libc.list
+    $contains '^printf$' libc.list >/dev/null 2>&1 || \
+	$sed -n -e 's/^.* D __*//p' -e 's/^.* D //p' <libc.tmp >libc.list
+    $contains '^printf$' libc.list >/dev/null 2>&1 || \
+       $sed -n -e 's/^_//' \
+	      -e 's/^\([a-zA-Z_0-9]*\).*xtern.*text.*/\1/p' <libc.tmp >libc.list
+    if $contains '^printf$' libc.list >/dev/null 2>&1; then
+	echo "done"
+    else
+	echo " "
+	echo "nm didn't seem to work right."
+	echo "Trying ar instead..."
+	if ar t $libc > libc.tmp; then
+	    for thisname in $libnames; do
+		ar t $thisname >>libc.tmp
+	    done
+	    $sed -e 's/\.o$//' < libc.tmp > libc.list
+	    echo "Ok."
+	else
+	    echo "ar didn't seem to work right."
+	    echo "Maybe this is a Cray...trying bld instead..."
+	    if bld t $libc | $sed -e 's/.*\///' -e 's/\.o:.*$//' > libc.list; then
+		for thisname in $libnames; do
+		    bld t $libnames | \
+			$sed -e 's/.*\///' -e 's/\.o:.*$//' >>libc.list
+		    ar t $thisname >>libc.tmp
+		done
+		echo "Ok."
+	    else
+	    	echo "That didn't work either.  Giving up."
+	    	exit 1
+	    fi
+	fi
+    fi
+fi
+
+inlibc='echo " ";
+if $contains "^$1\$" libc.list >/dev/null 2>&1;
+then echo "$1() found"; eval "$2=$define";
+else echo "$1() not found"; eval "$2=$undef"; fi'
+
+rmlist="$rmlist libc.tmp libc.list"
 
 : see if bcmp exists
 set bcmp d_bcmp
@@ -1382,6 +1518,12 @@ else
 	d_crypt="$define"
     fi
 fi
+
+: get csh whereabouts
+case "$csh" in
+'csh') d_csh="$undef" ;;
+*)     d_csh="$define" ;;
+esac
 
 : see if this is a dirent system
 echo " "
@@ -1529,7 +1671,7 @@ eval $inlibc
 
 : see if ndbm is available
 echo " "
-if $test -r /usr/include/ndbm.h || $test -r /usr/local/include/ndbm.h; then
+if xxx=`loc ndbm.h x /usr/include /usr/local/include /usr/netinclude`; then
     d_ndbm="$define"
     echo "ndbm.h found."
 else
@@ -1539,7 +1681,7 @@ fi
 
 : see if we have the old dbm
 echo " "
-if $test -r /usr/include/dbm.h ; then
+if xxx=`loc dbm.h x /usr/include /usr/local/include /usr/netinclude`; then
     d_odbm="$define"
     echo "dbm.h found."
 else
@@ -1552,31 +1694,33 @@ echo " "
 if $test -r /usr/include/pwd.h ; then
     i_pwd="$define"
     echo "pwd.h found."
-    if $contains 'pw_quota' /usr/include/pwd.h >/dev/null 2>&1; then
+    $cppstdin $cppflags </usr/include/pwd.h >$$.h
+    if $contains 'pw_quota' $$.h >/dev/null 2>&1; then
 	d_pwquota="$define"
     else
 	d_pwquota="$undef"
     fi
-    if $contains 'pw_age' /usr/include/pwd.h >/dev/null 2>&1; then
+    if $contains 'pw_age' $$.h >/dev/null 2>&1; then
 	d_pwage="$define"
     else
 	d_pwage="$undef"
     fi
-    if $contains 'pw_change' /usr/include/pwd.h >/dev/null 2>&1; then
+    if $contains 'pw_change' $$.h >/dev/null 2>&1; then
 	d_pwchange="$define"
     else
 	d_pwchange="$undef"
     fi
-    if $contains 'pw_class' /usr/include/pwd.h >/dev/null 2>&1; then
+    if $contains 'pw_class' $$.h >/dev/null 2>&1; then
 	d_pwclass="$define"
     else
 	d_pwclass="$undef"
     fi
-    if $contains 'pw_expire' /usr/include/pwd.h >/dev/null 2>&1; then
+    if $contains 'pw_expire' $$.h >/dev/null 2>&1; then
 	d_pwexpire="$define"
     else
 	d_pwexpire="$undef"
     fi
+    rm -f $$.h
 else
     i_pwd="$undef"
     d_pwquota="$undef"
@@ -1636,7 +1780,6 @@ set setruid d_setruid
 eval $inlibc
 
 socketlib=''
-sockethdr=''
 : see whether socket exists
 echo " "
 if $contains socket libc.list >/dev/null 2>&1; then
@@ -1665,7 +1808,6 @@ else
 	    if $contains socket libc.list >/dev/null 2>&1; then
 		echo "but the Wollongong group seems to have hacked it in."
 		socketlib="-lnet"
-		sockethdr="-I/usr/netinclude"
 		d_socket="$define"
 		: now check for advanced features
 		if $contains setsockopt libc.list >/dev/null 2>&1; then
@@ -1767,6 +1909,11 @@ else
     d_tminsys="$define"
     i_systime="$define"
 fi
+if $contains '^#.*include.*<time\.h>' /usr/include/sys/time.h >/dev/null 2>&1 ; then
+    i_timetoo="$undef"
+else
+    i_timetoo="$define"
+fi
 
 : see if this is a varargs system
 echo " "
@@ -1791,6 +1938,10 @@ else
     echo "You have int (*signal())() instead of void."
     d_voidsig="$undef"
 fi
+
+: see if there is a wait4
+set wait4 d_wait4
+eval $inlibc
 
 : check for void type
 echo " "
@@ -1880,7 +2031,8 @@ case "$gidtype" in
 esac
 cont=true
 echo " "
-rp="What type are the group ids are returned by getgroups()? [$dflt]"
+echo "(The following only matters if you have getgroups().)"
+rp="What type are the group ids returned by getgroups()? [$dflt]"
 $echo $n "$rp $c"
 . myread
 gidtype="$ans"
@@ -1907,7 +2059,7 @@ fi
 
 : see if this is a netinet/in.h system
 echo " "
-if $test -r /usr/include/netinet/in.h ; then
+if xxx=`loc netinet/in.h x /usr/include /usr/local/include /usr/netinclude`; then
     i_niin="$define"
     echo "netinet/in.h found."
 else
@@ -2047,11 +2199,30 @@ echo " "
 case "$sig_name" in
 '')
     echo "Generating a list of signal names..."
-    set X `kill -l 2>/dev/null`
+    set X `cat /usr/include/signal.h /usr/include/sys/signal.h 2>&1 | awk '
+$1 ~ /^#define$/ && $2 ~ /^SIG[A-Z0-9]*$/ && $3 ~ /^[1-9][0-9]*$/ {
+    sig[$3] = substr($2,4,20)
+    if (max < $3 && $3 < 60) {
+	max = $3
+    }
+}
+
+END {
+    for (i=1; i<=max; i++) {
+	if (sig[i] == "")
+	    printf "%d", i
+	else
+	    printf "%s", sig[i]
+	if (i < max)
+	    printf " "
+    }
+    printf "\n"
+}
+'`
     shift
     case $# in
     0)  echo 'kill -l' >/tmp/foo$$
-	set X `/bin/csh -f </tmp/foo$$`
+	set X `$csh -f </tmp/foo$$`
 	shift
 	case $# in
 	0)set HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM
@@ -2101,55 +2272,6 @@ uidtype="$ans"
 Log='$Log'
 Header='$Header'
 
-
-: see if we should include -ldbm
-echo " "
-if $test -r /usr/lib/libdbm.a || $test -r /usr/local/lib/libdbm.a ; then
-    echo "-ldbm found."
-    libdbm='-ldbm'
-else
-    ans=`loc libdbm.a x $libpth`
-    case "$ans" in
-    x)
-	echo "No dbm library found."
-	libdbm=''
-	;;
-    *)
-	echo "DBM library found in $ans."
-	libdbm="$ans"
-	;;
-    esac
-fi
-
-: see if we should include -lndir
-echo " "
-if $test -r /usr/lib/libndir.a || $test -r /usr/local/lib/libndir.a ; then
-    echo "New directory library found."
-    libndir='-lndir'
-else
-    ans=`loc libndir.a x $libpth`
-    case "$ans" in
-    x)
-	echo "No ndir library found."
-	libndir=''
-	;;
-    *)
-	echo "New directory library found in $ans."
-	libndir="$ans"
-	;;
-    esac
-fi
-case "$libndir" in
-'') ;;
-*)
-    case "$d_readdir" in
-    $define)
-	echo "Since you have readdir in the C library, I'll ignore $libndir"
-	libndir=''
-	;;
-    esac
-    ;;
-esac
 
 : see if we should include -lnm
 echo " "
@@ -2211,8 +2333,8 @@ $startsh
 # This file was produced by running the Configure script.
 
 d_eunice='$d_eunice'
-eunicefix='$eunicefix'
 define='$define'
+eunicefix='$eunicefix'
 loclist='$loclist'
 expr='$expr'
 sed='$sed'
@@ -2263,6 +2385,7 @@ lp='$lp'
 touch='$touch'
 make='$make'
 date='$date'
+csh='$csh'
 Log='$Log'
 Header='$Header'
 bin='$bin'
@@ -2275,6 +2398,7 @@ d_bcopy='$d_bcopy'
 d_charsprf='$d_charsprf'
 d_crypt='$d_crypt'
 cryptlib='$cryptlib'
+d_csh='$d_csh'
 d_dosuid='$d_dosuid'
 d_dup2='$d_dup2'
 d_fchmod='$d_fchmod'
@@ -2311,7 +2435,6 @@ d_socket='$d_socket'
 d_sockpair='$d_sockpair'
 d_oldsock='$d_oldsock'
 socketlib='$socketlib'
-sockethdr='$sockethdr'
 d_statblks='$d_statblks'
 d_stdstdio='$d_stdstdio'
 d_strctcpy='$d_strctcpy'
@@ -2319,11 +2442,13 @@ d_symlink='$d_symlink'
 d_syscall='$d_syscall'
 d_tminsys='$d_tminsys'
 i_systime='$i_systime'
+i_timetoo='$i_timetoo'
 d_varargs='$d_varargs'
 d_vfork='$d_vfork'
 d_voidsig='$d_voidsig'
 d_vprintf='$d_vprintf'
 d_charvspr='$d_charvspr'
+d_wait4='$d_wait4'
 gidtype='$gidtype'
 i_dirent='$i_dirent'
 d_dirnamlen='$d_dirnamlen'
@@ -2333,14 +2458,15 @@ i_niin='$i_niin'
 i_pwd='$i_pwd'
 d_pwquota='$d_pwquota'
 d_pwage='$d_pwage'
+d_pwchange='$d_pwchange'
+d_pwclass='$d_pwclass'
+d_pwexpire='$d_pwexpire'
 i_sysdir='$i_sysdir'
 i_sysioctl='$i_sysioctl'
 i_varargs='$i_varargs'
 i_vfork='$i_vfork'
 intsize='$intsize'
 libc='$libc'
-libdbm='$libdbm'
-libndir='$libndir'
 libnm='$libnm'
 mallocsrc='$mallocsrc'
 mallocobj='$mallocobj'
@@ -2355,6 +2481,7 @@ large='$large'
 huge='$huge'
 optimize='$optimize'
 ccflags='$ccflags'
+cppflags='$cppflags'
 ldflags='$ldflags'
 cc='$cc'
 libs='$libs'

@@ -25,9 +25,13 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.1 89/10/26 23:00:38 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.2 89/11/11 04:07:30 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.2  89/11/11  04:07:30  lwall
+# patch2: $sockethdr incorporated into $ccflags
+# patch2: $libs now has most of the -l libraries
+# 
 # Revision 3.0.1.1  89/10/26  23:00:38  lwall
 # patch1: Makefile.SH needed some more .h dependecies
 # 
@@ -40,7 +44,7 @@ bin = $bin
 privlib = $privlib
 mansrc = $mansrc
 manext = $manext
-CFLAGS = $ccflags $optimize $sockethdr
+CFLAGS = $ccflags $optimize
 LDFLAGS = $ldflags
 SMALL = $small
 LARGE = $large $split
@@ -48,7 +52,7 @@ mallocsrc = $mallocsrc
 mallocobj = $mallocobj
 SLN = $sln
 
-libs = $libnm -lm $libdbm $libs $libndir $socketlib
+libs = $libs -lm
 
 public = perl taintperl $suidperl
 
