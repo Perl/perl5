@@ -143,6 +143,9 @@ handled by C<xsubpp>.
 =for apidoc Am|void|XSRETURN_IV|IV iv
 Return an integer from an XSUB immediately.  Uses C<XST_mIV>.
 
+=for apidoc Am|void|XSRETURN_UV|IV uv
+Return an integer from an XSUB immediately.  Uses C<XST_mUV>.
+
 =for apidoc Am|void|XSRETURN_NV|NV nv
 Return a double from an XSUB immediately.  Uses C<XST_mNV>.
 
@@ -180,6 +183,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 */
 
 #define XST_mIV(i,v)  (ST(i) = sv_2mortal(newSViv(v))  )
+#define XST_mUV(i,v)  (ST(i) = sv_2mortal(newSVuv(v))  )
 #define XST_mNV(i,v)  (ST(i) = sv_2mortal(newSVnv(v))  )
 #define XST_mPV(i,v)  (ST(i) = sv_2mortal(newSVpv(v,0)))
 #define XST_mPVN(i,v,n)  (ST(i) = sv_2mortal(newSVpvn(v,n)))
@@ -194,6 +198,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
     } STMT_END
 
 #define XSRETURN_IV(v) STMT_START { XST_mIV(0,v);  XSRETURN(1); } STMT_END
+#define XSRETURN_UV(v) STMT_START { XST_mUV(0,v);  XSRETURN(1); } STMT_END
 #define XSRETURN_NV(v) STMT_START { XST_mNV(0,v);  XSRETURN(1); } STMT_END
 #define XSRETURN_PV(v) STMT_START { XST_mPV(0,v);  XSRETURN(1); } STMT_END
 #define XSRETURN_PVN(v,n) STMT_START { XST_mPVN(0,v,n);  XSRETURN(1); } STMT_END
