@@ -98,7 +98,13 @@ PP(pp_rv2gv)
     if (SvROK(sv)) {
       wasref:
 	sv = SvRV(sv);
-	if (SvTYPE(sv) != SVt_PVGV)
+	if (SvTYPE(sv) == SVt_PVIO) {
+	    GV *gv = (GV*) sv_newmortal();
+	    gv_init(gv, 0, "", 0, 0);
+	    GvIOp(gv) = (IO *)sv;
+	    SvREFCNT_inc(sv);
+	    sv = (SV*) gv;
+	} else if (SvTYPE(sv) != SVt_PVGV)
 	    DIE("Not a GLOB reference");
     }
     else {
@@ -3515,7 +3521,7 @@ PP(pp_split)
 	iters++;
     }
     else if (!origlimit) {
-	while (iters > 0 && SvCUR(TOPs) == 0)
+	while (iters > 0 && (!TOPs || !SvANY(TOPs) || SvCUR(TOPs) == 0))
 	    iters--, SP--;
     }
     if (realarray) {
