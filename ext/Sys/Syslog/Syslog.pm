@@ -88,6 +88,7 @@ systems a character special device) returned by the C<_PATH_LOG> macro
 (if your system defines it), or F</dev/log> or F</dev/conslog>,
 whatever is writable.  A value of 'stream' will connect to the stream
 indicated by the pathname provided as the optional second parameter.
+(For example Solaris and IRIX require 'stream' instead of 'unix'.)
 A value of 'inet' will connect to an INET socket (either tcp or udp,
 tried in that order) returned by getservbyname(). 'tcp' and 'udp' can
 also be given as values. The value 'console' will send messages

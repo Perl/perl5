@@ -84,6 +84,9 @@ if ($Config{useperlio}) {
     close(F);
 }
 
+# To get STDOUT back.
+open(F, ">&DUPOUT") or die "Cannot dup stdout back: $!";
+
 curr_test(13);
 
 SKIP: {
