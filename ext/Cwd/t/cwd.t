@@ -29,10 +29,14 @@ eval { fastcwd };
 # Must find an external pwd (or equivalent) command.
 
 my $pwd_cmd =
-    ($^O eq "MSWin32" || $^O eq "NetWare") ? "cd" : (grep { -x && -f } map { "$_/pwd" }
-			       split m/$Config{path_sep}/, $ENV{PATH})[0];
+    ($^O eq "MSWin32" || $^O eq "NetWare") ?
+        "cd" :
+        (grep { -x && -f } map { "$_/pwd" }
+	                   split m/$Config{path_sep}/, $ENV{PATH})[0];
 
 $pwd_cmd = 'SHOW DEFAULT' if $IsVMS;
+
+print "# native pwd = '$pwd_cmd'\n";
 
 SKIP: {
     skip "No native pwd command found to test against", 4 unless $pwd_cmd;
