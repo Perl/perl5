@@ -3195,6 +3195,7 @@ EOM
 			mips)	osname=mips_osf1 ;;
 			esac
 			;;
+		# UnixWare 8 is now known as OpenUnix
 		openunix|unixware) osname=svr5
 			osvers="$4"
 			;;
