@@ -247,9 +247,11 @@ ext/Encode/t/Encode.t		Encode extension test
 ext/Encode/t/JP.t		Encode extension test
 ext/Encode/t/KR.t		Encode extension test
 ext/Encode/t/TW.t		Encode extension test
+ext/Encode/t/Unicode.t		Encode extension test
 ext/Encode/t/encoding.t	encoding extension test
 ext/Encode/t/gb2312.euc	test data
 ext/Encode/t/gb2312.ref	test data
+ext/Encode/t/grow.t		Encode extension test
 ext/Encode/t/jisx0208.euc	test data
 ext/Encode/t/jisx0208.ref	test data
 ext/Encode/t/jisx0212.euc	test data
