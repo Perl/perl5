@@ -1658,7 +1658,7 @@ PP(pp_redo)
 
 static OP* lastgotoprobe;
 
-static OP *
+STATIC OP *
 dofindlabel(OP *o, char *label, OP **opstack, OP **oplimit)
 {
     OP *kid;
@@ -1784,7 +1784,7 @@ PP(pp_goto)
 		}
 		else {
 		    stack_sp--;		/* There is no cv arg. */
-		    (void)(*CvXSUB(cv))(cv);
+		    (void)(*CvXSUB(cv))(THIS_ cv);
 		}
 		LEAVE;
 		return pop_return();
@@ -1986,7 +1986,7 @@ PP(pp_goto)
 		if (op->op_type == OP_ENTERITER)
 		    DIE("Can't \"goto\" into the middle of a foreach loop",
 			label);
-		(*op->op_ppaddr)(ARGS);
+		(CALLOP->op_ppaddr)(ARGS);
 	    }
 	    op = oldop;
 	}
@@ -2074,7 +2074,7 @@ PP(pp_cswitch)
 
 /* Eval. */
 
-static void
+STATIC void
 save_lines(AV *array, SV *sv)
 {
     register char *s = SvPVX(sv);
@@ -2098,7 +2098,7 @@ save_lines(AV *array, SV *sv)
     }
 }
 
-static OP *
+STATIC OP *
 docatch(OP *o)
 {
     dTHR;
@@ -2127,7 +2127,7 @@ docatch(OP *o)
 	restartop = 0;
 	/* FALL THROUGH */
     case 0:
-        runops();
+        CALLRUNOPS();
 	break;
     }
     JMPENV_POP;
@@ -2190,7 +2190,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
 }
 
 /* With USE_THREADS, eval_owner must be held on entry to doeval */
-static OP *
+STATIC OP *
 doeval(int gimme, OP** startop)
 {
     dSP;
@@ -2739,7 +2739,7 @@ PP(pp_leavetry)
     RETURN;
 }
 
-static void
+STATIC void
 doparseform(SV *sv)
 {
     STRLEN len;
