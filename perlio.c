@@ -2329,29 +2329,42 @@ PerlIOUnix_fileno(pTHX_ PerlIO *f)
     return PerlIOSelf(f, PerlIOUnix)->fd;
 }
 
+static void
+PerlIOUnix_setfd(pTHX_ PerlIO *f, int fd, int imode)
+{
+    PerlIOUnix *s = PerlIOSelf(f, PerlIOUnix);
+#if defined(WIN32)
+    Stat_t st;
+    if (PerlLIO_fstat(fd, &st) == 0) {
+	if (!S_ISREG(st.st_mode)) {
+	    PerlIO_debug("%d is not regular file\n",fd);
+    	    PerlIOBase(f)->flags |= PERLIO_F_NOTREG;
+	}
+	else {
+	    PerlIO_debug("%d _is_ a regular file\n",fd);
+	}
+    }
+#endif
+    s->fd = fd;
+    s->oflags = imode;
+    PerlIOUnix_refcnt_inc(fd);
+}
+
 IV
 PerlIOUnix_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
     IV code = PerlIOBase_pushed(aTHX_ f, mode, arg, tab);
     PerlIOUnix *s = PerlIOSelf(f, PerlIOUnix);
-#if defined(WIN32)
-    struct stat  st;
-    if (fstat(s->fd, &st) == 0) {
-	if (!S_ISREG(st.st_mode)) {
-    	    PerlIOBase(f)->flags |= PERLIO_F_NOTREG;
-	}
-    }
-#endif
     if (*PerlIONext(f)) {
 	/* We never call down so do any pending stuff now */
 	PerlIO_flush(PerlIONext(f));
-	s->fd = PerlIO_fileno(PerlIONext(f));
 	/*
 	 * XXX could (or should) we retrieve the oflags from the open file
 	 * handle rather than believing the "mode" we are passed in? XXX
 	 * Should the value on NULL mode be 0 or -1?
 	 */
-	s->oflags = mode ? PerlIOUnix_oflags(mode) : -1;
+        PerlIOUnix_setfd(aTHX_ f, PerlIO_fileno(PerlIONext(f)), 
+                         mode ? PerlIOUnix_oflags(mode) : -1);
     }
     PerlIOBase(f)->flags |= PERLIO_F_OPEN;
 
@@ -2380,7 +2393,6 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	}
     }
     if (fd >= 0) {
-	PerlIOUnix *s;
 	if (*mode == 'I')
 	    mode++;
 	if (!f) {
@@ -2391,11 +2403,8 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		return NULL;
 	    }
 	}
-	s = PerlIOSelf(f, PerlIOUnix);
-	s->fd = fd;
-	s->oflags = imode;
+        PerlIOUnix_setfd(aTHX_ f, fd, imode);
 	PerlIOBase(f)->flags |= PERLIO_F_OPEN;
-	PerlIOUnix_refcnt_inc(fd);
 	return f;
     }
     else {
@@ -2420,9 +2429,7 @@ PerlIOUnix_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 	f = PerlIOBase_dup(aTHX_ f, o, param, flags);
 	if (f) {
 	    /* If all went well overwrite fd in dup'ed lay with the dup()'ed fd */
-	    PerlIOUnix *s = PerlIOSelf(f, PerlIOUnix);
-	    s->fd = fd;
-	    PerlIOUnix_refcnt_inc(fd);
+	    PerlIOUnix_setfd(aTHX_ f, fd, os->oflags);
 	    return f;
 	}
     }
