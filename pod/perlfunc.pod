@@ -608,7 +608,7 @@ false otherwise. See the example under C<die>.
 
 Changes the permissions of a list of files.  The first element of the
 list must be the numerical mode, which should probably be an octal
-number, and which definitely should I<not> a string of octal digits:
+number, and which definitely should I<not> be a string of octal digits:
 C<0644> is okay, C<'0644'> is not.  Returns the number of files
 successfully changed.  See also L</oct>, if all you have is a string.
 
@@ -6637,13 +6637,17 @@ and for other examples.
 =item wantarray
 
 Returns true if the context of the currently executing subroutine or
-eval() block is looking for a list value.  Returns false if the context is
+C<eval> is looking for a list value.  Returns false if the context is
 looking for a scalar.  Returns the undefined value if the context is
 looking for no value (void context).
 
     return unless defined wantarray;	# don't bother doing more
     my @a = complex_calculation();
     return wantarray ? @a : "@a";
+
+C<wantarray()>'s result is unspecified in the top level of a file,
+in a C<BEGIN>, C<CHECK>, C<INIT> or C<END> block, or in a C<DESTROY>
+method.
 
 This function should have been named wantlist() instead.
 

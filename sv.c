@@ -4592,10 +4592,10 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
     mg->mg_moremagic = SvMAGIC(sv);
     SvMAGIC(sv) = mg;
 
-    /* Some magic sontains a reference loop, where the sv and object refer to
-       each other.  To prevent a reference loop that would prevent such
-       objects being freed, we look for such loops and if we find one we
-       avoid incrementing the object refcount.
+    /* Sometimes a magic contains a reference loop, where the sv and
+       object refer to each other.  To prevent a reference loop that
+       would prevent such objects being freed, we look for such loops
+       and if we find one we avoid incrementing the object refcount.
 
        Note we cannot do this to avoid self-tie loops as intervening RV must
        have its REFCNT incremented to keep it in existence.
@@ -4656,6 +4656,9 @@ then adds a new magic item of type C<how> to the head of the magic list.
 
 See C<sv_magicext> (which C<sv_magic> now calls) for a description of the
 handling of the C<name> and C<namlen> arguments.
+
+You need to use C<sv_magicext> to add magic to SvREADONLY SVs and also
+to add more than one instance of the same 'how'.
 
 =cut
 */

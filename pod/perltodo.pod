@@ -299,3 +299,9 @@ guide people attempting to optimise the guts of perl.
 system() accepts a LIST syntax (and a PROGRAM LIST syntax) to avoid
 running a shell. readpipe() (the function behind qx//) could be similarly
 extended.
+
+=head2 Self ties
+
+self ties are currently illegal because they caused too many segfaults. Maybe
+the causes of these could be tracked down and self-ties on all types re-
+instated.
