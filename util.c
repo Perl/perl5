@@ -2836,7 +2836,7 @@ new_struct_thread(struct perl_thread *t)
     SvGROW(sv, sizeof(struct perl_thread) + 1);
     SvCUR_set(sv, sizeof(struct perl_thread));
     thr = (Thread) SvPVX(sv);
-    /* debug */
+#ifdef DEBUGGING
     memset(thr, 0xab, sizeof(struct perl_thread));
     PL_markstack = 0;
     PL_scopestack = 0;
@@ -2844,7 +2844,10 @@ new_struct_thread(struct perl_thread *t)
     PL_retstack = 0;
     PL_dirty = 0;
     PL_localizing = 0;
-    /* end debug */
+    Zero(&PL_hv_fetch_ent_mh, 1, HE);
+#else
+    Zero(thr, 1, struct perl_thread);
+#endif
 
     thr->oursv = sv;
     init_stacks(ARGS);
