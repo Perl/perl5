@@ -1829,8 +1829,11 @@ Perl_newPROG(pTHX_ OP *o)
 	CALL_PEEP(PL_eval_start);
     }
     else {
-	if (o->op_type == OP_STUB)
+	if (o->op_type == OP_STUB) {
+	    PL_comppad_name = 0;
+	    PL_compcv = 0;
 	    return;
+	}
 	PL_main_root = scope(sawparens(scalarvoid(o)));
 	PL_curcop = &PL_compiling;
 	PL_main_start = LINKLIST(PL_main_root);
