@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Apr  9 18:44:25 EET DST 2002 [metaconfig 3.0 PL70]
+# Generated on Sun Apr 14 18:24:18 EET DST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -9314,12 +9314,7 @@ set asctime_r d_asctime_r
 eval $inlibc
 case "$d_asctime_r" in
 "$define")
-	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
-	case "time" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
+	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h $i_systime sys/time.h"
 	case "$d_asctime_r_proto:$usethreads" in
 	":define")	d_asctime_r_proto=define
 		set d_asctime_r_proto asctime_r $hdrs
@@ -9978,11 +9973,6 @@ eval $inlibc
 case "$d_crypt_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_crypt crypt.h"
-	case "crypt" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_crypt_r_proto:$usethreads" in
 	":define")	d_crypt_r_proto=define
 		set d_crypt_r_proto crypt_r $hdrs
@@ -10040,11 +10030,6 @@ eval $inlibc
 case "$d_ctermid_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h "
-	case "stdio" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_ctermid_r_proto:$usethreads" in
 	":define")	d_ctermid_r_proto=define
 		set d_ctermid_r_proto ctermid_r $hdrs
@@ -10085,12 +10070,7 @@ set ctime_r d_ctime_r
 eval $inlibc
 case "$d_ctime_r" in
 "$define")
-	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
-	case "time" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
+	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h $i_systime sys/time.h"
 	case "$d_ctime_r_proto:$usethreads" in
 	":define")	d_ctime_r_proto=define
 		set d_ctime_r_proto ctime_r $hdrs
@@ -10464,11 +10444,6 @@ eval $inlibc
 case "$d_drand48_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
-	case "stdlib" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_drand48_r_proto:$usethreads" in
 	":define")	d_drand48_r_proto=define
 		set d_drand48_r_proto drand48_r $hdrs
@@ -10552,11 +10527,6 @@ eval $inlibc
 case "$d_endgrent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
-	case "grp" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_endgrent_r_proto:$usethreads" in
 	":define")	d_endgrent_r_proto=define
 		set d_endgrent_r_proto endgrent_r $hdrs
@@ -10610,11 +10580,6 @@ eval $inlibc
 case "$d_endhostent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_endhostent_r_proto:$usethreads" in
 	":define")	d_endhostent_r_proto=define
 		set d_endhostent_r_proto endhostent_r $hdrs
@@ -10664,11 +10629,6 @@ eval $inlibc
 case "$d_endnetent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_endnetent_r_proto:$usethreads" in
 	":define")	d_endnetent_r_proto=define
 		set d_endnetent_r_proto endnetent_r $hdrs
@@ -10718,11 +10678,6 @@ eval $inlibc
 case "$d_endprotoent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_endprotoent_r_proto:$usethreads" in
 	":define")	d_endprotoent_r_proto=define
 		set d_endprotoent_r_proto endprotoent_r $hdrs
@@ -10860,11 +10815,6 @@ eval $inlibc
 case "$d_endpwent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
-	case "pwd" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_endpwent_r_proto:$usethreads" in
 	":define")	d_endpwent_r_proto=define
 		set d_endpwent_r_proto endpwent_r $hdrs
@@ -10914,11 +10864,6 @@ eval $inlibc
 case "$d_endservent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_endservent_r_proto:$usethreads" in
 	":define")	d_endservent_r_proto=define
 		set d_endservent_r_proto endservent_r $hdrs
@@ -11595,11 +11540,6 @@ eval $inlibc
 case "$d_getgrent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
-	case "grp" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getgrent_r_proto:$usethreads" in
 	":define")	d_getgrent_r_proto=define
 		set d_getgrent_r_proto getgrent_r $hdrs
@@ -11661,11 +11601,6 @@ eval $inlibc
 case "$d_getgrgid_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
-	case "grp" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getgrgid_r_proto:$usethreads" in
 	":define")	d_getgrgid_r_proto=define
 		set d_getgrgid_r_proto getgrgid_r $hdrs
@@ -11719,11 +11654,6 @@ eval $inlibc
 case "$d_getgrnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
-	case "grp" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getgrnam_r_proto:$usethreads" in
 	":define")	d_getgrnam_r_proto=define
 		set d_getgrnam_r_proto getgrnam_r $hdrs
@@ -11878,11 +11808,6 @@ eval $inlibc
 case "$d_gethostbyaddr_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_gethostbyaddr_r_proto:$usethreads" in
 	":define")	d_gethostbyaddr_r_proto=define
 		set d_gethostbyaddr_r_proto gethostbyaddr_r $hdrs
@@ -11960,11 +11885,6 @@ eval $inlibc
 case "$d_gethostbyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_gethostbyname_r_proto:$usethreads" in
 	":define")	d_gethostbyname_r_proto=define
 		set d_gethostbyname_r_proto gethostbyname_r $hdrs
@@ -12014,11 +11934,6 @@ eval $inlibc
 case "$d_gethostent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_gethostent_r_proto:$usethreads" in
 	":define")	d_gethostent_r_proto=define
 		set d_gethostent_r_proto gethostent_r $hdrs
@@ -12093,11 +12008,6 @@ eval $inlibc
 case "$d_getlogin_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_unistd unistd.h"
-	case "unistd" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getlogin_r_proto:$usethreads" in
 	":define")	d_getlogin_r_proto=define
 		set d_getlogin_r_proto getlogin_r $hdrs
@@ -12171,11 +12081,6 @@ eval $inlibc
 case "$d_getnetbyaddr_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getnetbyaddr_r_proto:$usethreads" in
 	":define")	d_getnetbyaddr_r_proto=define
 		set d_getnetbyaddr_r_proto getnetbyaddr_r $hdrs
@@ -12241,11 +12146,6 @@ eval $inlibc
 case "$d_getnetbyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getnetbyname_r_proto:$usethreads" in
 	":define")	d_getnetbyname_r_proto=define
 		set d_getnetbyname_r_proto getnetbyname_r $hdrs
@@ -12299,11 +12199,6 @@ eval $inlibc
 case "$d_getnetent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getnetent_r_proto:$usethreads" in
 	":define")	d_getnetent_r_proto=define
 		set d_getnetent_r_proto getnetent_r $hdrs
@@ -12403,11 +12298,6 @@ eval $inlibc
 case "$d_getprotobyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getprotobyname_r_proto:$usethreads" in
 	":define")	d_getprotobyname_r_proto=define
 		set d_getprotobyname_r_proto getprotobyname_r $hdrs
@@ -12457,11 +12347,6 @@ eval $inlibc
 case "$d_getprotobynumber_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getprotobynumber_r_proto:$usethreads" in
 	":define")	d_getprotobynumber_r_proto=define
 		set d_getprotobynumber_r_proto getprotobynumber_r $hdrs
@@ -12511,11 +12396,6 @@ eval $inlibc
 case "$d_getprotoent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getprotoent_r_proto:$usethreads" in
 	":define")	d_getprotoent_r_proto=define
 		set d_getprotoent_r_proto getprotoent_r $hdrs
@@ -12582,11 +12462,6 @@ eval $inlibc
 case "$d_getpwent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
-	case "pwd" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getpwent_r_proto:$usethreads" in
 	":define")	d_getpwent_r_proto=define
 		set d_getpwent_r_proto getpwent_r $hdrs
@@ -12648,11 +12523,6 @@ eval $inlibc
 case "$d_getpwnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
-	case "pwd" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getpwnam_r_proto:$usethreads" in
 	":define")	d_getpwnam_r_proto=define
 		set d_getpwnam_r_proto getpwnam_r $hdrs
@@ -12706,11 +12576,6 @@ eval $inlibc
 case "$d_getpwuid_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
-	case "pwd" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getpwuid_r_proto:$usethreads" in
 	":define")	d_getpwuid_r_proto=define
 		set d_getpwuid_r_proto getpwuid_r $hdrs
@@ -12777,11 +12642,6 @@ eval $inlibc
 case "$d_getservbyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getservbyname_r_proto:$usethreads" in
 	":define")	d_getservbyname_r_proto=define
 		set d_getservbyname_r_proto getservbyname_r $hdrs
@@ -12831,11 +12691,6 @@ eval $inlibc
 case "$d_getservbyport_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getservbyport_r_proto:$usethreads" in
 	":define")	d_getservbyport_r_proto=define
 		set d_getservbyport_r_proto getservbyport_r $hdrs
@@ -12885,11 +12740,6 @@ eval $inlibc
 case "$d_getservent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getservent_r_proto:$usethreads" in
 	":define")	d_getservent_r_proto=define
 		set d_getservent_r_proto getservent_r $hdrs
@@ -12956,11 +12806,6 @@ eval $inlibc
 case "$d_getspnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_shadow shadow.h"
-	case "shadow" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_getspnam_r_proto:$usethreads" in
 	":define")	d_getspnam_r_proto=define
 		set d_getspnam_r_proto getspnam_r $hdrs
@@ -13024,12 +12869,7 @@ set gmtime_r d_gmtime_r
 eval $inlibc
 case "$d_gmtime_r" in
 "$define")
-	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
-	case "time" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
+	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h $i_systime sys/time.h"
 	case "$d_gmtime_r_proto:$usethreads" in
 	":define")	d_gmtime_r_proto=define
 		set d_gmtime_r_proto gmtime_r $hdrs
@@ -13269,12 +13109,7 @@ set localtime_r d_localtime_r
 eval $inlibc
 case "$d_localtime_r" in
 "$define")
-	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
-	case "time" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
+	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h $i_systime sys/time.h"
 	case "$d_localtime_r_proto:$usethreads" in
 	":define")	d_localtime_r_proto=define
 		set d_localtime_r_proto localtime_r $hdrs
@@ -14035,11 +13870,6 @@ eval $inlibc
 case "$d_random_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
-	case "stdlib" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_random_r_proto:$usethreads" in
 	":define")	d_random_r_proto=define
 		set d_random_r_proto random_r $hdrs
@@ -14091,11 +13921,6 @@ eval $inlibc
 case "$d_readdir64_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_dirent dirent.h"
-	case "dirent" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_readdir64_r_proto:$usethreads" in
 	":define")	d_readdir64_r_proto=define
 		set d_readdir64_r_proto readdir64_r $hdrs
@@ -14141,11 +13966,6 @@ eval $inlibc
 case "$d_readdir_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_dirent dirent.h"
-	case "dirent" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_readdir_r_proto:$usethreads" in
 	":define")	d_readdir_r_proto=define
 		set d_readdir_r_proto readdir_r $hdrs
@@ -14695,11 +14515,6 @@ eval $inlibc
 case "$d_setgrent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
-	case "grp" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_setgrent_r_proto:$usethreads" in
 	":define")	d_setgrent_r_proto=define
 		set d_setgrent_r_proto setgrent_r $hdrs
@@ -14749,11 +14564,6 @@ eval $inlibc
 case "$d_sethostent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_sethostent_r_proto:$usethreads" in
 	":define")	d_sethostent_r_proto=define
 		set d_sethostent_r_proto sethostent_r $hdrs
@@ -14815,11 +14625,6 @@ eval $inlibc
 case "$d_setlocale_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_locale locale.h"
-	case "locale" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_setlocale_r_proto:$usethreads" in
 	":define")	d_setlocale_r_proto=define
 		set d_setlocale_r_proto setlocale_r $hdrs
@@ -14865,11 +14670,6 @@ eval $inlibc
 case "$d_setnetent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_setnetent_r_proto:$usethreads" in
 	":define")	d_setnetent_r_proto=define
 		set d_setnetent_r_proto setnetent_r $hdrs
@@ -14935,11 +14735,6 @@ eval $inlibc
 case "$d_setprotoent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_setprotoent_r_proto:$usethreads" in
 	":define")	d_setprotoent_r_proto=define
 		set d_setprotoent_r_proto setprotoent_r $hdrs
@@ -14989,11 +14784,6 @@ eval $inlibc
 case "$d_setpwent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
-	case "pwd" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_setpwent_r_proto:$usethreads" in
 	":define")	d_setpwent_r_proto=define
 		set d_setpwent_r_proto setpwent_r $hdrs
@@ -15063,11 +14853,6 @@ eval $inlibc
 case "$d_setservent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "netdb" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_setservent_r_proto:$usethreads" in
 	":define")	d_setservent_r_proto=define
 		set d_setservent_r_proto setservent_r $hdrs
@@ -15368,11 +15153,6 @@ eval $inlibc
 case "$d_srand48_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
-	case "stdlib" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_srand48_r_proto:$usethreads" in
 	":define")	d_srand48_r_proto=define
 		set d_srand48_r_proto srand48_r $hdrs
@@ -15414,11 +15194,6 @@ eval $inlibc
 case "$d_srandom_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
-	case "stdlib" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_srandom_r_proto:$usethreads" in
 	":define")	d_srandom_r_proto=define
 		set d_srandom_r_proto srandom_r $hdrs
@@ -15859,11 +15634,6 @@ eval $inlibc
 case "$d_strerror_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_string string.h"
-	case "string" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_strerror_r_proto:$usethreads" in
 	":define")	d_strerror_r_proto=define
 		set d_strerror_r_proto strerror_r $hdrs
@@ -16253,11 +16023,6 @@ eval $inlibc
 case "$d_tmpnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h "
-	case "stdio" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_tmpnam_r_proto:$usethreads" in
 	":define")	d_tmpnam_r_proto=define
 		set d_tmpnam_r_proto tmpnam_r $hdrs
@@ -16303,11 +16068,6 @@ eval $inlibc
 case "$d_ttyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_unistd unistd.h"
-	case "unistd" in
-	time)
-		hdrs="$hdrs $i_systime sys/time.h"
-		;;
-	esac
 	case "$d_ttyname_r_proto:$usethreads" in
 	":define")	d_ttyname_r_proto=define
 		set d_ttyname_r_proto ttyname_r $hdrs
