@@ -37,8 +37,56 @@ through to locate the proper section you're looking for.
 
 =back
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 2001/09/20
-03:03:00 $)
+=head2 perlintro -- a brief introduction and overview of Perl
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item What is Perl?
+
+=item Running Perl programs
+
+=item Basic syntax overview
+
+=item Perl variable types
+
+Scalars, Arrays, Hashes
+
+=item Variable scoping
+
+=item Conditional and looping constructs
+
+if, while, for, foreach
+
+=item Builtin operators and functions
+
+Arithmetic, Numeric comparison, String comparison, Boolean logic,
+Miscellaneous
+
+=item Files and I/O
+
+=item Regular expressions
+
+Simple matching, Simple substitution, More complex regular expressions,
+Parentheses for capturing, Other regexp features
+
+=item Writing subroutines
+
+=item OO Perl
+
+=item Using Perl modules
+
+=back
+
+=item AUTHOR
+
+=back
+
+=head2 perlfaq - frequently asked questions about Perl ($Date: 2001/10/16
+13:27:22 $)
 
 =over 4
 
@@ -2507,8 +2555,8 @@ Scheme, or Tcl?
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.1 $,
-$Date: 2001/09/20 03:03:00 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.2 $,
+$Date: 2001/10/16 13:27:22 $)
 
 =over 4
 
@@ -2563,8 +2611,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.7 $, $Date: 2001/10/09
-22:17:53 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.8 $, $Date: 2001/10/17
+14:14:20 $)
 
 =over 4
 
@@ -2632,8 +2680,6 @@ stringification, Pass by reference, Tie large variables to disk
 =item Why don't Perl one-liners work on my DOS/Mac/VMS system?
 
 =item Where can I learn about CGI or Web programming in Perl?
-
-=item Where can I learn about object-oriented Perl programming?
 
 =item Where can I learn about linking C with Perl? [h2xs, xsubpp]
 
@@ -2861,8 +2907,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.2 $, $Date: 2001/09/26
-10:44:41 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.3 $, $Date: 2001/10/16
+13:27:22 $)
 
 =over 4
 
@@ -2954,7 +3000,7 @@ protected files?  Isn't this a bug in Perl?
 
 =back
 
-=head2 perlfaq6 - Regexes ($Revision: 1.1 $, $Date: 2001/09/20 03:03:00 $)
+=head2 perlfaq6 - Regexes ($Revision: 1.3 $, $Date: 2001/10/16 13:27:22 $)
 
 =over 4
 
@@ -3020,8 +3066,8 @@ file?
 
 =back
 
-=head2 perlfaq7 - Perl Language Issues ($Revision: 1.1 $, $Date: 2001/09/20
-03:03:00 $)
+=head2 perlfaq7 - Perl Language Issues ($Revision: 1.2 $, $Date: 2001/10/16
+13:27:22 $)
 
 =over 4
 
@@ -3099,8 +3145,8 @@ is in scope?
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.1 $, $Date: 2001/09/20
-03:03:00 $)
+=head2 perlfaq8 - System Interaction ($Revision: 1.2 $, $Date: 2001/10/16
+13:27:22 $)
 
 =over 4
 
@@ -3227,7 +3273,7 @@ search path?
 
 =back
 
-=head2 perlfaq9 - Networking ($Revision: 1.2 $, $Date: 2001/09/28 06:40:07
+=head2 perlfaq9 - Networking ($Revision: 1.3 $, $Date: 2001/10/16 13:27:22
 $)
 
 =over 4
@@ -15415,6 +15461,110 @@ NORMAL TESTS, SKIPPED TESTS, TODO TESTS
 
 =back
 
+=head2 Test::Builder - Backend for building test libraries
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Construction
+
+B<new>
+
+=back
+
+=back
+
+=over 4
+
+=item Setting up tests
+
+B<exported_to>
+
+=back
+
+B<plan>
+
+B<expected_tests>
+
+B<no_plan>
+
+B<skip_all>
+
+=over 4
+
+=item Running tests
+
+B<ok>
+
+=back
+
+B<is_eq>, B<is_num>
+
+B<like>
+
+B<skip>
+
+B<skip_rest>
+
+=over 4
+
+=item Test style
+
+B<level>
+
+=back
+
+B<use_numbers>
+
+B<no_header>, B<no_ending>
+
+=over 4
+
+=item Output
+
+B<diag>
+
+=back
+
+B<_print>
+
+B<output>, B<failure_output>, B<todo_output>
+
+=over 4
+
+=item Test Status and Info
+
+B<current_test>
+
+=back
+
+B<summary>
+
+B<details>  I<UNIMPLEMENTED>, B<todo>
+
+B<caller>
+
+B<_sanity_check>
+
+B<_whoa>
+
+B<_my_exit>
+
+=over 4
+
+=item EXAMPLES
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 Test::Harness - run perl standard test scripts with statistics
 
 =over 4
@@ -15493,13 +15643,17 @@ C<HARNESS_ACTIVE>
 
 =item I love it when a plan comes together
 
+=back
+
+=back
+
+=over 4
+
 =item Test names
 
 =item I'm ok, you're not ok.
 
 B<ok>
-
-=back
 
 =back
 
@@ -15537,9 +15691,11 @@ B<TODO: BLOCK>
 
 =item Comparision functions
 
-B<eq_array>
+B<is_deeply>
 
 =back
+
+B<eq_array>
 
 B<eq_hash>
 
@@ -15573,12 +15729,6 @@ upgrades
 B<ok>
 
 =back
-
-B<_sanity_check>
-
-B<_whoa>
-
-B<_my_exit>
 
 =over 4
 

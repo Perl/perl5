@@ -95,6 +95,7 @@ if (-d "pod") {
     qw(
 
     perl
+    perlintro
     perlfaq
     perltoc
     perlbook

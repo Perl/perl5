@@ -12,9 +12,14 @@ B<perl>	S<[ B<-sTuU> ]> S<[ B<-hv> ] [ B<-V>[:I<configvar>] ]>
     S<[ B<-i>[I<extension>] ]> S<[ B<-e> I<'command'> ] 
     [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
 
-For ease of access, the Perl manual has been split up into several sections:
+If you're new to Perl, you should start with L<perlintro>, which is a 
+general intro for beginners and provides some background to help you
+navigate the rest of Perl's extensive documentation.
+
+For ease of access, the Perl manual has been split up into several sections.
 
     perl		Perl overview (this section)
+    perlintro		Perl introduction for beginners
     perlfaq		Perl frequently asked questions
     perltoc		Perl documentation table of contents
     perlbook		Perl book information
