@@ -1539,8 +1539,8 @@ sub new_extliblist {
 	    if (@fullname=<${thispth}/lib${thislib}.${so}.[0-9]*>){
 		$fullname=$fullname[-1]; #ATTN: 10 looses against 9!
 	    } elsif (-f ($fullname="$thispth/lib$thislib.$so")){
-	    } elsif (-f ($fullname="$thispth/lib${thislib}_s.a")
-		&& ($thislib .= "_s") ){ # we must explicitly ask for _s version
+          } elsif (-f ($fullname="$thispth/lib${thislib}_s.a")
+              && ($thislib .= "_s") ){ # we must explicitly ask for _s version
 	    } elsif (-f ($fullname="$thispth/lib$thislib.a")){
 	    } elsif (-f ($fullname="$thispth/Slib$thislib.a")){
 	    } else { 

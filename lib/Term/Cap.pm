@@ -71,7 +71,7 @@ sub Tgetent {
 	    $entry = $1;
 	    $_ = $2;
 	    s/\\E/\033/g;
-	    s/\\(\d\d\d)/pack('c',$1 & 0177)/eg;
+	    s/\\(\d\d\d)/pack('c',oct($1) & 0177)/eg;
 	    s/\\n/\n/g;
 	    s/\\r/\r/g;
 	    s/\\t/\t/g;

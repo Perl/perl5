@@ -31,12 +31,17 @@ if test "X$extspec" = X; then
 	exit 1;
 fi
 
-# convert old style Name.a into ext/Name/Name.a format
-case "$extspec" in
-ext/*)	;;
-*::*)	extspec=`echo "$extspec" | sed -e 's!\(.*\)::\(.*\)!ext/\1/\2/\2.a!'` ;;
-*)	extspec=`echo "$extspec" | sed -e 's:\(.*\)\.\(.*\):ext/\1/\1.\2:'` ;;
-esac
+# canonise
+extspec=`echo "$extspec" | sed -e 's:^ext/::' -e 's:\.[^\.]*$::'`
+extspec="ext/$extspec"
+tailext=`echo "$extspec" | sed -e 's:.*/\([^/]*\)$:\1:'"`
+headext=`echo "$extspec" | sed -e 's:/[^/]*$::'"`
+if test -d "$headext/$tailext"; then
+    extspec="$headext/$tailext"
+fi
+if test -f "$extspec/$tailext.xs"; then
+    extspec="$extspec/$tailext"
+fi
 
 # get extension directory path, module name and depth
 pname=`echo "$extspec" | sed -e 's:^ext/::' -e 's:/[^/]*$::'`

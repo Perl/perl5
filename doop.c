@@ -158,9 +158,9 @@ register SV **sarg;
     register char *t;
     register char *f;
     bool dolong;
-#ifdef QUAD
+#ifdef HAS_QUAD
     bool doquad;
-#endif /* QUAD */
+#endif /* HAS_QUAD */
     char ch;
     register char *send;
     register SV *arg;
@@ -189,9 +189,9 @@ register SV **sarg;
 	f = t;
 	*buf = '\0';
 	xs = buf;
-#ifdef QUAD
+#ifdef HAS_QUAD
 	doquad =
-#endif /* QUAD */
+#endif /* HAS_QUAD */
 	dolong = FALSE;
 	pre = post = 0;
 	for (t++; t < send; t++) {
@@ -208,7 +208,7 @@ register SV **sarg;
 	    case '.': case '#': case '-': case '+': case ' ':
 		continue;
 	    case 'l':
-#ifdef QUAD
+#ifdef HAS_QUAD
 		if (dolong) {
 		    dolong = FALSE;
 		    doquad = TRUE;
@@ -236,9 +236,9 @@ register SV **sarg;
 	    case 'd':
 		ch = *(++t);
 		*t = '\0';
-#ifdef QUAD
+#ifdef HAS_QUAD
 		if (doquad)
-		    (void)sprintf(buf,s,(quad)SvNV(arg));
+		    (void)sprintf(buf,s,(Quad_t)SvNV(arg));
 		else
 #endif
 		if (dolong)
@@ -254,9 +254,9 @@ register SV **sarg;
 		ch = *(++t);
 		*t = '\0';
 		value = SvNV(arg);
-#ifdef QUAD
+#ifdef HAS_QUAD
 		if (doquad)
-		    (void)sprintf(buf,s,(unsigned quad)value);
+		    (void)sprintf(buf,s,(unsigned Quad_t)value);
 		else
 #endif
 		if (dolong)

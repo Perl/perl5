@@ -18,14 +18,6 @@
 
 #include <fcntl.h> 
 
-#ifndef DBXS_HASH_TYPE
-#define DBXS_HASH_TYPE u_int32_t
-#endif
-
-#ifndef DBXS_PREFIX_TYPE
-#define DBXS_PREFIX_TYPE size_t
-#endif
-
 typedef DB * DB_File;
 typedef DBT DBTKEY ;
 
@@ -126,7 +118,7 @@ const DBT * key2 ;
 
 }
 
-static DBXS_PREFIX_TYPE
+static DB_Prefix_t
 btree_prefix(key1, key2)
 const DBT * key1 ;
 const DBT * key2 ;
@@ -173,7 +165,7 @@ const DBT * key2 ;
     return (retval) ;
 }
 
-static DBXS_HASH_TYPE
+static DB_Hash_t
 hash_cb(data, size)
 const void * data ;
 size_t size ;

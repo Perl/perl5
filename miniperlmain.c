@@ -2,7 +2,7 @@
  * "The Road goes ever on and on, down from the door where it began."
  */
 
-#include "INTERN.h"
+#include "EXTERN.h"
 #include "perl.h"
 
 static void xs_init _((void));

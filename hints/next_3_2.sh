@@ -14,3 +14,9 @@ d_setpgid='define'
 d_setsid='define'
 d_tcgetpgrp='define'
 d_tcsetpgrp='define'
+#
+# On some NeXT machines, the timestamp put by ranlib is not correct, and
+# this may cause useless recompiles.  Fix that by adding a sleep before
+# running ranlib.  The '5' is an empirical number that's "long enough."
+# (Thanks to Andreas Koenig <k@franz.ww.tu-berlin.de>)
+ranlib='sleep 5; /bin/ranlib' 

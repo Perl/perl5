@@ -1195,7 +1195,7 @@ char *sig;
     return 0;
 }
 
-VOIDRET
+Signal_t
 sighandler(sig)
 int sig;
 {

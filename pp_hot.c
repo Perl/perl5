@@ -1592,6 +1592,7 @@ PP(pp_entersub)
 
     if (CvXSUB(cv)) {
 	if (CvOLDSTYLE(cv)) {
+	    I32 (*fp3)_((int,int,int));
 	    dMARK;
 	    register I32 items = SP - MARK;
 	    while (sp > mark) {
@@ -1599,8 +1600,10 @@ PP(pp_entersub)
 		sp--;
 	    }
 	    stack_sp = mark + 1;
-	    items = (*(I32(*)_((int,int,int)))CvXSUB(cv))(CvXSUBANY(cv).any_i32,
-					MARK - stack_base + 1, items);
+	    fp3 = (I32(*)_((int,int,int)))CvXSUB(cv);
+	    items = (*fp3)(CvXSUBANY(cv).any_i32, 
+			   MARK - stack_base + 1,
+			   items);
 	    stack_sp = stack_base + items;
 	}
 	else {

@@ -2060,7 +2060,7 @@ EXT U32 opargs[] = {
 	0x0111111d,	/* msgrcv */
 	0x0001111d,	/* semget */
 	0x0011111d,	/* semctl */
-	0x0001111d,	/* semop */
+	0x0000111d,	/* semop */
 	0x000009c0,	/* require */
 	0x00000140,	/* dofile */
 	0x00000140,	/* entereval */

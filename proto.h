@@ -1,7 +1,7 @@
-#ifndef GNUC_ATTRIBUTE_CHECK /* disable GNUC attribute checking if not GNUC */
-#ifdef  __attribute__        /* Avoid possible redefinition errors */
+#ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
+#ifdef  __attribute__      /* Avoid possible redefinition errors */
 #undef  __attribute__
-#endif  
+#endif
 #define __attribute__(attr)
 #endif
 #ifdef OVERLOAD
@@ -207,6 +207,9 @@ char*	my_bcopy _((char* from, char* to, I32 len));
 char*	my_bzero _((char* loc, I32 len));
 #endif
 void	my_exit _((I32 status)) __attribute__((noreturn));
+#ifdef	USE_MY_FMOD
+double	my_fmod _((double x, double y));
+#endif
 I32	my_lstat _((void));
 #ifndef HAS_MEMCMP
 I32	my_memcmp _((unsigned char* s1, unsigned char* s2, I32 len));
@@ -386,7 +389,7 @@ char*	screaminstr _((SV* bigsv, SV* littlesv));
 #ifndef VMS
 I32	setenv_getix _((char* nam));
 #endif
-VOIDRET sighandler _((int sig));
+Signal_t sighandler _((int sig));
 SV**	stack_grow _((SV** sp, SV**p, int n));
 int	start_subparse _((void));
 bool	sv_2bool _((SV* sv));

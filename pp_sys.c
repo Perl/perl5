@@ -2616,8 +2616,8 @@ PP(pp_system)
     int childpid;
     int result;
     int status;
-    VOIDRET (*ihand)();     /* place to save signal during system() */
-    VOIDRET (*qhand)();     /* place to save signal during system() */
+    Signal_t (*ihand)();     /* place to save signal during system() */
+    Signal_t (*qhand)();     /* place to save signal during system() */
 
 #if defined(HAS_FORK) && !defined(VMS)
     if (SP - MARK == 1) {

@@ -22,16 +22,35 @@ case "$d_dosuid" in
 *) suidperl='';;
 esac
 
+shrpenv=""
+case "$d_shrplib" in
+*define*)
+    patchlevel=`egrep '^#define[ 	]+PATCHLEVEL' patchlevel.h \
+	| awk '{print $3}'`
+    case "$patchlevel" in
+     *[0-9]) plibsuf=.$so.$patchlevel;;
+     *)	    plibsuf=.$so;;
+    esac
+    case "$shrpdir" in
+     /usr/lib)	;;
+     "")	;;
+     *)		shrpenv="env LD_RUN_PATH=$shrpdir";;
+    esac
+    pldlflags="$cccdlflags";;
+*)  plibsuf=.a
+    pldlflags="";;
+esac
+
 : Configure sets byacc=byacc if byacc is not found.  We reset it to ''
 case "$byacc" in
-''|'byacc') byacc='';;
+'byacc') byacc='';;
 esac
 
 : Prepare dependency lists for Makefile.
 dynamic_list=' '
 for f in $dynamic_ext; do
     : the dependency named here will never exist
-	base=`echo "$f" | sed 's/.*\///'`
+      base=`echo "$f" | sed 's/.*\///'`
     dynamic_list="$dynamic_list ext/$f/$base.$dlext"
 done
 
@@ -85,6 +104,9 @@ LDDLFLAGS = $lddlflags
 CCDLFLAGS = $ccdlflags
 CCCDLFLAGS = $cccdlflags
 DLSUFFIX = .$dlext
+PLDLFLAGS = $pldlflags
+PLIBSUF = $plibsuf
+SHRPENV = $shrpenv
 
 dynamic_ext = $dynamic_list
 static_ext = $static_list
@@ -125,13 +147,13 @@ h = $(h1) $(h2) $(h3) $(h4)
 
 c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c
 c2 = perl.c perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c
-c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c
+c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c globals.c
 
 c = $(c1) $(c2) $(c3) miniperlmain.c perlmain.c
 
 obj1 = $(mallocobj) gv.o toke.o perly.o op.o regcomp.o dump.o util.o mg.o
 obj2 = hv.o av.o run.o pp_hot.o sv.o pp.o scope.o pp_ctl.o pp_sys.o
-obj3 = doop.o doio.o regexec.o taint.o deb.o 
+obj3 = doop.o doio.o regexec.o taint.o deb.o globals.o
 
 obj = $(obj1) $(obj2) $(obj3)
 
@@ -144,7 +166,7 @@ obj = $(obj1) $(obj2) $(obj3)
 # Eventually some form of 'make-a-perl' script will automate this
 # together with linking a perl executable with any desired
 # static modules.
-perllib = libperl.a
+perllib = libperl$(PLIBSUF)
 
 lintflags = -hbvxac
 
@@ -154,7 +176,7 @@ addedbyconf = UU
 SHELL = /bin/sh
 
 .c.o:
-	$(CCCMD) $*.c
+	$(CCCMD) $(PLDLFLAGS) $*.c
 
 all: makefile miniperl preplibrary $(public) $(dynamic_ext)
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(MAKE) all
@@ -173,11 +195,15 @@ $spitshell >>Makefile <<'!NO!SUBS!'
 miniperl: $& miniperlmain.o $(perllib)
 	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain.o $(perllib) $(libs)
 
+miniperlmain.o: miniperlmain.c
+	$(CCCMD) $(PLDLFLAGS) $*.c
+
 perlmain.c: miniperlmain.c config.sh makefile $(static_ext_autoinit)
 	sh writemain $(DYNALOADER) $(static_ext) > tmp
 	sh mv-if-diff tmp perlmain.c
 
 perlmain.o: perlmain.c
+	$(CCCMD) $(PLDLFLAGS) $*.c
 
 # The file ext.libs is a list of libraries that must be linked in
 # for static extensions, e.g. -lm -lgdbm, etc.  The individual
@@ -186,7 +212,7 @@ ext.libs:	$(static_ext)
 	-@test -f ext.libs || touch ext.libs
 
 perl: $& perlmain.o $(perllib) $(DYNALOADER) $(static_ext) ext.libs
-	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain.o $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
+	$(SHRPENV) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain.o $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
 
 pureperl: $& perlmain.o $(perllib) $(DYNALOADER) $(static_ext) ext.libs
 	purify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain.o $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
@@ -195,8 +221,23 @@ quantperl: $& perlmain.o $(perllib) $(DYNALOADER) $(static_ext) ext.libs
 	quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain.o $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
 
 $(perllib): $& perl.o $(obj)
+!NO!SUBS!
+
+case "$d_shrplib" in
+*define*)
+$spitshell >>Makefile <<'!NO!SUBS!'
+	ld $(LDDLFLAGS) -o $@ perl.o $(obj)
+!NO!SUBS!
+;;
+*)
+$spitshell >>Makefile <<'!NO!SUBS!'
 	ar rcu $(perllib) perl.o $(obj)
 	@$(ranlib) $(perllib)
+!NO!SUBS!
+;;
+esac
+
+$spitshell >>Makefile <<'!NO!SUBS!'
 
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
@@ -219,7 +260,7 @@ embed.h: embed_h.sh global.sym interp.sym
 	sh embed_h.sh
 
 preplibrary: miniperl lib/Config.pm
-	@test -d lib/auto || mkdir lib/auto
+	@./makedir lib/auto
 	@echo "	AutoSplitting perl library"
 	@./miniperl -Ilib -e 'use AutoSplit; \
 		autosplit_lib_modules(@ARGV)' lib/*.pm lib/*/*.pm
@@ -234,9 +275,8 @@ install: all
 : Only print out the rules for running byacc if the user _has_ byacc.
 : Otherwise, comment them out.  Users who really know what they are
 : doing can uncomment them and run yacc or bison or whatever.
-: Configure sets byacc=byacc if byacc is not found.
 case "$byacc" in
-''|'byacc')
+'')
 	comment1='#' 
 	comment2='' ;;
 *)	comment1=''
@@ -250,7 +290,7 @@ perly.h: perly.c
 	touch perly.h
 
 # I now supply perly.c with the kits, so the following section is
-# commented out if you don't have byacc.
+# used only if you have byacc.
 
 ${comment1}perly.c: 	perly.y perly.c.diff
 ${comment1}	@ echo 'Expect' 109 shift/reduce and 1 reduce/reduce conflict
@@ -259,7 +299,7 @@ ${comment1}	sh \$(shellflags) ./perly.fixer y.tab.c perly.c
 ${comment1}	mv y.tab.h perly.h
 ${comment1}	echo 'extern YYSTYPE yylval;' >>perly.h
 
-# This version is used only if you do not have byacc.
+# This version is used if you do not have byacc.
 ${comment2}perly.c:	perly.y
 ${comment2}	touch perly.c
 
@@ -293,11 +333,10 @@ clean:
 	@for x in $(dynamic_ext) $(static_ext) ; do \
 	sh ext/util/make_ext clean $$x ; \
 	done
-	rm -f perl suidperl miniperl
+	rm -f perl suidperl miniperl $(perllib)
 
 realclean: clean
 	-cd x2p; $(MAKE) realclean
-	: could add: "-cd pod; $(MAKE) realclean" here and to pod/Makefile
 	@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
 	sh ext/util/make_ext realclean $$x ; \
 	done
@@ -305,11 +344,15 @@ realclean: clean
 	rm -rf $(addedbyconf)
 	rm -f Makefile cflags makedepend makedir writemain
 	rm -f config.h makefile makefile.old
-	rm -f x2p/Makefile x2p/makefile x2p/makefile.old x2p/cflags
 	rm -f lib/Config.pm
 	rm -rf lib/auto
 	rm -f h2ph h2ph.man c2ph pstruct
 	rm -rf .config
+
+clobber:	realclean
+	rm -f config.sh cppstdin
+    
+distclean:	clobber
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.

@@ -22,6 +22,7 @@ echo "Extracting cflags (with variable substitutions)"
 : Protect any dollar signs and backticks that you do not want interpreted
 : by putting a backslash in front.  You may delete these comments.
 $spitshell >cflags <<!GROK!THIS!
+$startsh
 !GROK!THIS!
 
 : In the following dollars and backticks do not need the extra backslash.

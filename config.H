@@ -14,7 +14,7 @@
  * $Id: Config_h.U,v 3.0.1.2 1993/08/24 12:13:20 ram Exp $
  */
 
-/* Configuration time: Thu Oct  6 18:27:36 EDT 1994
+/* Configuration time: Mon Dec 19 13:04:26 EST 1994
  * Configured by: andy
  * Target system: crystal crystal 3.2 2 i386 
  */
@@ -28,6 +28,17 @@
  */
 #define MEM_ALIGNBYTES 4	/**/
 
+/* ARCHLIB:
+ *	This variable, if defined, holds the name of the directory in
+ *	which the user wants to put architecture-dependent public
+ *	library files for perl5.  It is most often a local directory
+ *	such as /usr/local/lib.  Programs using this variable must be
+ *	prepared to deal with filename expansion.  If ARCHLIB is the
+ *	same as PRIVLIB, it is not defined, since presumably the
+ *	program already searches PRIVLIB.
+ */
+#define ARCHLIB "/usr/local/lib/perl5/i386-isc"		/**/
+
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
  *	be installed. Program must be prepared to deal with ~name substitution.
@@ -39,6 +50,36 @@
  *	i.e. 0x1234 or 0x4321, etc...
  */
 #define BYTEORDER 0x1234	/* large digits for MSB */
+
+/* CAT2:
+ *	This macro catenates 2 tokens together.
+ */
+/* STRINGIFY:
+ *	This macro surrounds its token with double quotes.
+ */
+#if 1 == 1
+#define CAT2(a,b)a/**/b
+#define CAT3(a,b,c)a/**/b/**/c
+#define CAT4(a,b,c,d)a/**/b/**/c/**/d
+#define CAT5(a,b,c,d,e)a/**/b/**/c/**/d/**/e
+#define STRINGIFY(a)"a"
+		/* If you can get stringification with catify, tell me how! */
+#endif
+#if 1 == 42
+#define CAT2(a,b)a ## b
+#define CAT3(a,b,c)a ## b ## c
+#define CAT4(a,b,c,d)a ## b ## c ## d
+#define CAT5(a,b,c,d,e)a ## b ## c ## d ## e
+#define StGiFy(a)# a
+#define STRINGIFY(a)StGiFy(a)
+#define SCAT2(a,b)StGiFy(a) StGiFy(b)
+#define SCAT3(a,b,c)StGiFy(a) StGiFy(b) StGiFy(c)
+#define SCAT4(a,b,c,d)StGiFy(a) StGiFy(b) StGiFy(c) StGiFy(d)
+#define SCAT5(a,b,c,d,e)StGiFy(a) StGiFy(b) StGiFy(c) StGiFy(d) StGiFy(e)
+#endif
+#ifndef CAT2
+#include "Bletch: How does this C preprocessor catenate tokens?"
+#endif
 
 /* CPPSTDIN:
  *	This symbol contains the first part of the string which will invoke
@@ -52,7 +93,7 @@
  *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
  *	to specify standard input, otherwise the value is "".
  */
-#define CPPSTDIN "gcc -E"
+#define CPPSTDIN "cc -E"
 #define CPPMINUS "-"
 
 /* HAS_ALARM:
@@ -60,6 +101,15 @@
  *	available.
  */
 #define HAS_ALARM		/**/
+
+/* HASATTRIBUTE:
+ *	This symbol indicates the C compiler can check for function attributes,
+ *	such as printf formats. This is normally only supported by GNU cc.
+ */
+/*#define HASATTRIBUTE 	/**/
+#ifndef HASATTRIBUTE
+#define __attribute__(_arg_)
+#endif
 
 /* HAS_BCMP:
  *	This symbol is defined if the bcmp() routine is available to
@@ -96,16 +146,8 @@
  *		1 = couldn't cast < 0
  *		2 = couldn't cast >= 0x80000000
  */
-#define	CASTNEGFLOAT		/**/
-#define CASTFLAGS 0		/**/
-
-/* CHARSPRINTF:
- *	This symbol is defined if this system declares "char *sprintf()" in
- *	stdio.h.  The trend seems to be to declare it as "int sprintf()".  It
- *	is up to the package author to declare sprintf correctly based on the
- *	symbol.
- */
-/*#define	CHARSPRINTF 	/**/
+/*#define	CASTNEGFLOAT		/**/
+#define CASTFLAGS 3		/**/
 
 /* HAS_CHOWN:
  *	This symbol, if defined, indicates that the chown routine is
@@ -123,7 +165,13 @@
  *	This symbol, if defined, indicates that the chsize routine is available
  *	to truncate files.  You might need a -lx to get this routine.
  */
-#define	HAS_CHSIZE		/**/
+/*#define	HAS_CHSIZE		/**/
+
+/* VOID_CLOSEDIR:
+ *	This symbol, if defined, indicates that the closedir() routine
+ *	does not return a value.
+ */
+/*#define VOID_CLOSEDIR		/**/
 
 /* HASCONST:
  *	This symbol, if defined, indicates that this C compiler knows about
@@ -131,7 +179,7 @@
  *	within your programs. The mere use of the "const" keyword will
  *	trigger the necessary tests.
  */
-#define HASCONST	/**/
+/*#define HASCONST	/**/
 #ifndef HASCONST
 #define const
 #endif
@@ -167,6 +215,41 @@
  *	available.
  */
 #define HAS_DIFFTIME		/**/
+
+/* HAS_DLERROR:
+ *	This symbol, if defined, indicates that the dlerror routine is
+ *	available to return a string describing the last error that
+ *	occurred from a call to dlopen(), dlclose() or dlsym().
+ */
+/*#define HAS_DLERROR	/**/
+
+/* SETUID_SCRIPTS_ARE_SECURE_NOW:
+ *	This symbol, if defined, indicates that the bug that prevents
+ *	setuid scripts from being secure is not present in this kernel.
+ */
+/* DOSUID:
+ *	This symbol, if defined, indicates that the C program should
+ *	check the script that it is executing for setuid/setgid bits, and
+ *	attempt to emulate setuid/setgid on systems that have disabled
+ *	setuid #! scripts because the kernel can't do it securely.
+ *	It is up to the package designer to make sure that this emulation
+ *	is done securely.  Among other things, it should do an fstat on
+ *	the script it just opened to make sure it really is a setuid/setgid
+ *	script, it should make sure the arguments passed correspond exactly
+ *	to the argument on the #! line, and it should not trust any
+ *	subprocesses to which it must pass the filename rather than the
+ *	file descriptor of the script to be executed.
+ */
+/*#define SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
+/*#define DOSUID		/**/
+
+/* HAS_DREM:
+ *	This symbol, if defined, indicates that the drem routine is
+ *	available.  This routine is roughly the same as fmod, i.e. it
+ *	computes the remainder r=x-n*y, where n=rint(x/y), whereas fmod
+ *	uses n=trunc(x/y).
+ */
+/*#define HAS_DREM		/**/
 
 /* HAS_DUP2:
  *	This symbol, if defined, indicates that the dup2 routine is
@@ -210,6 +293,12 @@
  */
 /*#define HAS_FLOCK		/**/
 
+/* HAS_FMOD:
+ *	This symbol, if defined, indicates that the fmod routine is
+ *	available to compute the remainder r=x-n*y where n=trunc(x/y).
+ */
+#define HAS_FMOD		/**/
+
 /* HAS_FORK:
  *	This symbol, if defined, indicates that the fork routine is
  *	available.
@@ -221,6 +310,18 @@
  *	available to set the file position indicator, similar to fseek().
  */
 /*#define HAS_FSETPOS	/**/
+
+/* Gconvert:
+ *	This preprocessor macro is defined to convert a floating point
+ *	number to a string without a trailing decimal point.  This
+ *	emulates the behavior of sprintf("%g"), but is sometimes much more
+ *	efficient.  If gconvert() is not available, but gcvt() drops the
+ *	trailing decimal point, then gcvt() is used.  If all else fails,
+ *	a macro using sprintf("%g") is used. Arguments for the Gconvert
+ *	macro are: value, number of digits, whether trailing zeros should
+ *	be retained, and the output buffer.
+ */
+#define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
 
 /* HAS_GETGROUPS:
  *	This symbol, if defined, indicates that the getgroups() routine is
@@ -303,6 +404,12 @@
 #define HAS_NTOHL		/**/
 #define HAS_NTOHS		/**/
 
+/* HAS_ISASCII:
+ *	This manifest constant lets the C program know that isascii 
+ *	is available.
+ */
+#define HAS_ISASCII		/**/
+
 /* HAS_KILLPG:
  *	This symbol, if defined, indicates that the killpg routine is available
  *	to kill process groups.  If unavailable, you probably should use kill
@@ -315,6 +422,18 @@
  *	available to create hard links.
  */
 #define HAS_LINK	/**/
+
+/* USE_LINUX_STDIO:
+ *	This symbol is defined if this system has a FILE structure declaring
+ *	_IO_read_base, _IO_read_ptr, and _IO_read_end in stdio.h.
+ */
+/*#define USE_LINUX_STDIO 	/**/
+
+/* HAS_LOCALECONV:
+ *	This symbol, if defined, indicates that the localeconv routine is
+ *	available for numeric and monetary formatting conventions.
+ */
+#define HAS_LOCALECONV	/**/
 
 /* HAS_LOCKF:
  *	This symbol, if defined, indicates that the lockf routine is
@@ -379,6 +498,14 @@
  */
 #define HAS_MKDIR		/**/
 
+/* HAS_MKFIFO:
+ *	This symbol, if defined, indicates that the mkfifo routine is
+ *	available to create FIFOs. Otherwise, mknod should be able to
+ *	do it for you. However, if mkfifo is there, mknod might require
+ *	super-user privileges which mkfifo will not.
+ */
+#define HAS_MKFIFO		/**/
+
 /* HAS_MKTIME:
  *	This symbol, if defined, indicates that the mktime routine is
  *	available.
@@ -408,6 +535,19 @@
  *	available.
  */
 /*#define HAS_PASSWD		/**/
+
+/* HAS_PATHCONF:
+ *	This symbol, if defined, indicates that pathconf() is available
+ *	to determine file-system related limits and options associated
+ *	with a given filename.
+ */
+/* HAS_FPATHCONF:
+ *	This symbol, if defined, indicates that pathconf() is available
+ *	to determine file-system related limits and options associated
+ *	with a given open file descriptor.
+ */
+#define HAS_PATHCONF		/**/
+#define HAS_FPATHCONF		/**/
 
 /* HAS_PAUSE:
  *	This symbol, if defined, indicates that the pause routine is
@@ -466,6 +606,22 @@
  */
 #define HAS_RMDIR		/**/
 
+/* HAS_SAFE_BCOPY:
+ *	This symbol, if defined, indicates that the bcopy routine is available
+ *	to copy potentially overlapping memory blocks. Otherwise you should
+ *	probably use memmove() or memcpy(). If neither is defined, roll your
+ *	own version.
+ */
+#define HAS_SAFE_BCOPY	/**/
+
+/* HAS_SAFE_MEMCPY:
+ *	This symbol, if defined, indicates that the memcpy routine is available
+ *	to copy potentially overlapping memory blocks. Otherwise you should
+ *	probably use memmove() or memcpy(). If neither is defined, roll your
+ *	own version.
+ */
+#define HAS_SAFE_MEMCPY	/**/
+
 /* HAS_SELECT:
  *	This symbol, if defined, indicates that the select routine is
  *	available to select active file descriptors. If the timeout field
@@ -514,7 +670,13 @@
  *	This symbol, if defined, indicates that the setpgrp routine is
  *	available to set the current process group.
  */
+/* USE_BSDPGRP:
+ *	This symbol, if defined, indicates that the BSD notion of process
+ *	group is to be used. For instance, you have to say setpgrp(pid, pgrp)
+ *	instead of the USG setpgrp().
+ */
 #define HAS_SETPGRP		/**/
+/*#define USE_BSDPGRP		/**/
 
 /* HAS_SETPGRP2:
  *	This symbol, if defined, indicates that the setpgrp2() (as in DG/UX)
@@ -677,6 +839,12 @@
  */
 #define HAS_SYSCALL	/**/
 
+/* HAS_SYSCONF:
+ *	This symbol, if defined, indicates that sysconf() is available
+ *	to determine system related limits and options.
+ */
+#define HAS_SYSCONF	/**/
+
 /* HAS_SYSTEM:
  *	This symbol, if defined, indicates that the system routine is
  *	available to issue a shell command.
@@ -694,6 +862,13 @@
  *	available to set foreground process group ID.
  */
 #define HAS_TCSETPGRP		/**/
+
+/* Time_t:
+ *	This symbol holds the type returned by time(). It can be long,
+ *	or time_t on BSD sites (in which case <sys/types.h> should be
+ *	included).
+ */
+#define Time_t time_t		/* Time type */
 
 /* HAS_TIMES:
  *	This symbol, if defined, indicates that the times() routine exists.
@@ -731,13 +906,20 @@
  *	is up to the package author to declare things correctly based on the
  *	symbol.
  */
+/* Signal_t:
+ *	This symbol's value is either "void" or "int", corresponding to the
+ *	appropriate return type of a signal handler.  Thus, you can declare
+ *	a signal handler using "Signal_t (*handler)()", and define the
+ *	handler using "Signal_t handler(sig)".
+ */
 #define VOIDSIG 	/**/
+#define Signal_t void	/* Signal handler's return type */
 
 /* HASVOLATILE:
  *	This symbol, if defined, indicates that this C compiler knows about
  *	the volatile declaration.
  */
-#define	HASVOLATILE	/**/
+/*#define	HASVOLATILE	/**/
 #ifndef HASVOLATILE
 #define volatile
 #endif
@@ -794,6 +976,18 @@
  *	any typedef'ed information.
  */
 #define Gid_t gid_t		/* Type for getgid(), etc... */
+
+/* Groups_t:
+ *	This symbol holds the type used for the second argument to
+ *	getgroups().  Usually, this is the same of gidtype, but
+ *	sometimes it isn't.  It can be int, ushort, uid_t, etc... 
+ *	It may be necessary to include <sys/types.h> to get any 
+ *	typedef'ed information.  This is only required if you have
+ *	getgroups().
+ */
+#ifdef HAS_GETGROUPS
+#define Groups_t gid_t	/* Type for 2nd arg to getgroups() */
+#endif
 
 /* I_DIRENT:
  *	This symbol, if defined, indicates to the C program that it should
@@ -858,11 +1052,11 @@
  */
 /*#define I_MEMORY		/**/
 
-/* I_NDBM:
- *	This symbol, if defined, indicates that ndbm.h exists and should
- *	be included.
+/* I_NET_ERRNO:
+ *	This symbol, if defined, indicates that <net/errno.h> exists and 
+ *	should be included.
  */
-#define I_NDBM	/**/
+#define I_NET_ERRNO		/**/
 
 /* I_NETINET_IN:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1022,8 +1216,8 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <varargs.h>.
  */
-#define I_STDARG		/**/
-/*#define I_VARARGS	/**/
+/*#define I_STDARG		/**/
+#define I_VARARGS	/**/
 
 /* I_VFORK:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1044,6 +1238,14 @@
  */
 #define Off_t off_t		/* <offset> type */
 
+/* Mode_t:
+ *	This symbol holds the type used to declare file modes 
+ *	for systems calls.  It is usually mode_t, but may be
+ *	int or unsigned short.  It may be necessary to include <sys/types.h>
+ *	to get any typedef'ed information.
+ */
+#define Mode_t mode_t	 /* file mode parameter for system calls */
+
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
  *	The library is private in the sense that it needn't be in anyone's
@@ -1063,7 +1265,7 @@
  *
  *		int main _((int argc, char *argv[]));
  */
-#define	CAN_PROTOTYPE	/**/
+/*#define	CAN_PROTOTYPE	/**/
 #ifdef CAN_PROTOTYPE
 #define	_(args) args
 #else
@@ -1109,6 +1311,16 @@
  *	<sys/types.h> to get any typedef'ed information.
  */
 #define Size_t size_t	 /* length paramater for string functions */
+
+/* SSize_t:
+ *	This symbol holds the type used by functions that return
+ *	a count of bytes or an error condition.  It must be a signed type.
+ *	It is usually ssize_t, but may be long or int, etc.
+ *	It may be necessary to include <sys/types.h> or <unistd.h>
+ *	to get any typedef'ed information.
+ *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
+ */
+#define SSize_t int	 /* signed count of bytes */
 
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.
@@ -1167,62 +1379,6 @@
  */
 #define LOC_SED 	"/bin/sed"	/**/
 
-/* ARCHLIB:
- *	This variable, if defined, holds the name of the directory in
- *	which the user wants to put architecture-dependent public
- *	library files for perl5.  It is most often a local directory
- *	such as /usr/local/lib.  Programs using this variable must be
- *	prepared to deal with filename expansion.  If ARCHLIB is the
- *	same as PRIVLIB, it is not defined, since presumably the
- *	program already searches PRIVLIB.
- */
-#define ARCHLIB "/usr/local/lib/perl5/isc"		/**/
-
-/* CAT2:
- *	This macro catenates 2 tokens together.
- */
-#if 42 == 1
-#define CAT2(a,b)a/**/b
-#define CAT3(a,b,c)a/**/b/**/c
-#define CAT4(a,b,c,d)a/**/b/**/c/**/d
-#define CAT5(a,b,c,d,e)a/**/b/**/c/**/d/**/e
-#define STRINGIFY(a)"a"
-		/* If you can get stringification with catify, tell me how! */
-#endif
-#if 42 == 42
-#define CAT2(a,b)a ## b
-#define CAT3(a,b,c)a ## b ## c
-#define CAT4(a,b,c,d)a ## b ## c ## d
-#define CAT5(a,b,c,d,e)a ## b ## c ## d ## e
-#define StGiFy(a)# a
-#define STRINGIFY(a)StGiFy(a)
-#define SCAT2(a,b)StGiFy(a) StGiFy(b)
-#define SCAT3(a,b,c)StGiFy(a) StGiFy(b) StGiFy(c)
-#define SCAT4(a,b,c,d)StGiFy(a) StGiFy(b) StGiFy(c) StGiFy(d)
-#define SCAT5(a,b,c,d,e)StGiFy(a) StGiFy(b) StGiFy(c) StGiFy(d) StGiFy(e)
-#endif
-#ifndef CAT2
-#include "Bletch: How does this C preprocessor catenate tokens?"
-#endif
-
-/* GNUC_ATTRIBUTE_CHECK:
- *	This symbol indicates the C compiler can check for function attributes,
- *	such as printf formats.
- */
-#define 	GNUC_ATTRIBUTE_CHECK 	/* */
-
-/* VOID_CLOSEDIR:
- *	This symbol, if defined, indicates that the closedir() routine
- *	does not return a value.
- */
-/*#define VOID_CLOSEDIR		/**/
-
-/* HAS_DLERROR:
- *	This symbol, if defined, indicates that the dlerror routine is
- *	available.
- */
-/*#define HAS_DLERROR		/**/
-
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
  *	underscore to the symbol name before calling dlsym().  This only
@@ -1231,166 +1387,39 @@
  */
 /*#define 	DLSYM_NEEDS_UNDERSCORE 	/* */
 
-/* SETUID_SCRIPTS_ARE_SECURE_NOW:
- *	This symbol, if defined, indicates that the bug that prevents
- *	setuid scripts from being secure is not present in this kernel.
- */
-/* DOSUID:
- *	This symbol, if defined, indicates that the C program should
- *	check the script that it is executing for setuid/setgid bits, and
- *	attempt to emulate setuid/setgid on systems that have disabled
- *	setuid #! scripts because the kernel can't do it securely.
- *	It is up to the package designer to make sure that this emulation
- *	is done securely.  Among other things, it should do an fstat on
- *	the script it just opened to make sure it really is a setuid/setgid
- *	script, it should make sure the arguments passed correspond exactly
- *	to the argument on the #! line, and it should not trust any
- *	subprocesses to which it must pass the filename rather than the
- *	file descriptor of the script to be executed.
- */
-/*#define SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
-
-/*#define DOSUID		/**/
-
-/* HAS_DREM:
- *	This symbol, if defined, indicates that the drem routine is
- *	available.  This is a Pyramid routine that is the same as
- *	fmod.
- */
-/*#define HAS_DREM		/**/
-
-/* HAS_FMOD:
- *	This symbol, if defined, indicates that the fmod routine is
- *	available.
- */
-#define HAS_FMOD		/**/
-
-/* Gconvert:
- *	This preprocessor macro is defined to convert a floating point
- *	number to a string without a trailing decimal point.  This
- *	emulates the behavior of sprintf("%g"), but is sometimes much more
- *	efficient.  If gconvert() is not available, but gcvt() drops the
- *	trailing decimal point, then gcvt() is used.  If all else fails,
- *	a macro using sprintf("%g") is used.
- */
-#define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
-
-/* HAS_ISASCII:
- *	This manifest constant lets the C program know that isascii 
- *	is available.
- */
-#define HAS_ISASCII		/**/
-
-/* USE_LINUX_STDIO:
- *	This symbol is defined if this system has a FILE structure declaring
- *	_IO_read_base, _IO_read_ptr, and _IO_read_end in stdio.h.
- */
-/*#define USE_LINUX_STDIO 	/**/
-
-/* HAS_LOCALECONV:
- *	This symbol, if defined, indicates that the localeconv routine is
- *	available for numeric and monetary formatting conventions.
- */
-#define HAS_LOCALECONV	/**/
-
-/* HAS_MKFIFO:
- *	This symbol, if defined, indicates that the mkfifo routine is
- *	available.
- */
-#define HAS_MKFIFO		/**/
-
-/* HAS_PATHCONF:
- *	This symbol, if defined, indicates that pathconf() is available
- *	to determine file-system related limits and options associated
- *	with a given filename.
- */
-/* HAS_FPATHCONF:
- *	This symbol, if defined, indicates that pathconf() is available
- *	to determine file-system related limits and options associated
- *	with a given open file descriptor.
- */
-#define HAS_PATHCONF		/**/
-#define HAS_FPATHCONF		/**/
-
-/* HAS_SAFE_BCOPY:
- *	This symbol, if defined, indicates that the bcopy routine is available
- *	to copy potentially overlapping memory blocks. Otherwise you should
- *	probably use memmove() or memcpy(). If neither is defined, roll your
- *	own version.
- */
-#define HAS_SAFE_BCOPY	/**/
-
-/* HAS_SAFE_MEMCPY:
- *	This symbol, if defined, indicates that the memcpy routine is available
- *	to copy potentially overlapping memory blocks. Otherwise you should
- *	probably use memmove() or memcpy(). If neither is defined, roll your
- *	own version.
- */
-#define HAS_SAFE_MEMCPY	/**/
-
-/* HAS_SYSCONF:
- *	This symbol, if defined, indicates that sysconf() is available
- *	to determine system related limits and options.
- */
-#define HAS_SYSCONF		/**/
-
-/* Time_t:
- *	This symbol holds the type returned by time(). It can be long,
- *	or time_t on BSD sites (in which case <sys/types.h> should be
- *	included).
- */
-#define Time_t time_t		/* Time type */
-
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
  *	some sort is available.
  */
 /*#define USE_DYNAMIC_LOADING		/**/
 
-/* Groups_t:
- *	This symbol holds the type used for the second argument to
- *	getgroups().  Usually, this is the same of gidtype, but
- *	sometimes it isn't.  It can be int, ushort, uid_t, etc... 
- *	It may be necessary to include <sys/types.h> to get any 
- *	typedef'ed information.  This is only required if you have
- *	getgroups().
+/* DB_Prefix_t:
+ *	This symbol contains the type of the prefix structure element
+ *	in the <db.h> header file.  In older versions of DB, it was
+ *	int, while in newer ones it is u_int32_t.
  */
-#ifdef HAS_GETGROUPS
-#define Groups_t gid_t	/* Type for 2nd arg to getgroups() */
-#endif
+/* DB_Hash_t:
+ *	This symbol contains the type of the prefix structure element
+ *	in the <db.h> header file.  In older versions of DB, it was
+ *	int, while in newer ones it is size_t.
+ */
+#define DB_Hash_t	"int"		/**/
+#define DB_Prefix_t	"int"  	/**/
 
-/* I_NET_ERRNO:
- *	This symbol, if defined, indicates that <net/errno.h> exists and 
- *	should be included.
+/* I_NDBM:
+ *	This symbol, if defined, indicates that ndbm.h exists and should
+ *	be included.
  */
-#define I_NET_ERRNO		/**/
+#define I_NDBM	/**/
 
 /* Malloc_t:
  *	This symbol is the type of pointer returned by malloc and realloc.
  */
-#define Malloc_t void *			/**/
+#define Malloc_t char *			/**/
 
 /* MYMALLOC:
  *	This symbol, if defined, indicates that we're using our own malloc.
  */
 #define MYMALLOC			/**/
-
-/* Mode_t:
- *	This symbol holds the type used to declare file modes 
- *	for systems calls.  It is usually mode_t, but may be
- *	int or unsigned short.  It may be necessary to include <sys/types.h>
- *	to get any typedef'ed information.
- */
-#define Mode_t mode_t	 /* file mode parameter for system calls*/
-
-/* SSize_t:
- *	This symbol holds the type used by functions that return
- *	a count of bytes or an error condition.  It must be a signed type.
- *	It is usually ssize_t, but may be long or int, etc.
- *	It may be necessary to include <sys/types.h> or <unistd.h>
- *	to get any typedef'ed information.
- *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
- */
-#define SSize_t int	 /* signed count of bytes */
 
 #endif

@@ -69,11 +69,13 @@ Installation
     config.sh, and Makefile. You may have to explicitly say   
         sh Configure    to ensure that Configure is run under sh.
     If you're a hotshot, run Configure -d to take all the defaults and
-    then edit config.sh to patch up any flaws.
+    then edit config.sh to patch up any flaws and run Configure -S.
 
     Configure supports a number of useful options.  Run Configure -h 
     to get a listing.  To compile with gcc, for example, you can run 
-    Configure -Dcc=gcc, or answer 'gcc' at the cc prompt.
+    Configure -Dcc=gcc, or answer 'gcc' at the cc prompt.  If you
+    change compilers or make other significant changes, you should
+    probably _not_ re-use your old config.sh.
     
     By default, perl will be installed in /usr/local/{bin, lib, man}.
     You can specify a different prefix for the default installation
@@ -148,6 +150,9 @@ Installation
     If you get duplicates upon linking for malloc et al, say -DHIDEMYMALLOC.
     If you get duplicate function definitions (a perl function has the
     same name as another function on your system) try -DEMBED.
+    If you get varags problems with gcc, be sure that gcc is installed
+    correctly.  When using gcc, you should probably have i_stdarg='define'
+    and i_varags='undef' in config.sh.
 
 5)  make test
 

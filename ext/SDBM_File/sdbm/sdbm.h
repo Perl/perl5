@@ -216,7 +216,7 @@ extern long sdbm_hash proto((char *, int));
 #  endif
 #else
 #   ifndef memcmp
-#	define memcmp(s1,s2,l) my_memcmp(s1,s2,l)
+#	define memcmp 	my_memcmp
 #   endif
 #endif /* HAS_MEMCMP */
 

@@ -2280,14 +2280,14 @@ PP(pp_unpack)
     I16 ashort;
     int aint;
     I32 along;
-#ifdef QUAD
-    quad aquad;
+#ifdef HAS_QUAD
+    Quad_t aquad;
 #endif
     U16 aushort;
     unsigned int auint;
     U32 aulong;
-#ifdef QUAD
-    unsigned quad auquad;
+#ifdef HAS_QUAD
+    unsigned Quad_t auquad;
 #endif
     char *aptr;
     float afloat;
@@ -2726,15 +2726,15 @@ PP(pp_unpack)
 		sv_setpvn(sv, aptr, len);
 	    PUSHs(sv_2mortal(sv));
 	    break;
-#ifdef QUAD
+#ifdef HAS_QUAD
 	case 'q':
 	    EXTEND(SP, len);
 	    while (len-- > 0) {
-		if (s + sizeof(quad) > strend)
+		if (s + sizeof(Quad_t) > strend)
 		    aquad = 0;
 		else {
-		    Copy(s, &aquad, 1, quad);
-		    s += sizeof(quad);
+		    Copy(s, &aquad, 1, Quad_t);
+		    s += sizeof(Quad_t);
 		}
 		sv = NEWSV(42, 0);
 		sv_setiv(sv, (IV)aquad);
@@ -2744,11 +2744,11 @@ PP(pp_unpack)
 	case 'Q':
 	    EXTEND(SP, len);
 	    while (len-- > 0) {
-		if (s + sizeof(unsigned quad) > strend)
+		if (s + sizeof(unsigned Quad_t) > strend)
 		    auquad = 0;
 		else {
-		    Copy(s, &auquad, 1, unsigned quad);
-		    s += sizeof(unsigned quad);
+		    Copy(s, &auquad, 1, unsigned Quad_t);
+		    s += sizeof(unsigned Quad_t);
 		}
 		sv = NEWSV(43, 0);
 		sv_setiv(sv, (IV)auquad);
@@ -2929,9 +2929,9 @@ PP(pp_pack)
     unsigned int auint;
     I32 along;
     U32 aulong;
-#ifdef QUAD
-    quad aquad;
-    unsigned quad auquad;
+#ifdef HAS_QUAD
+    Quad_t aquad;
+    unsigned Quad_t auquad;
 #endif
     char *aptr;
     float afloat;
@@ -3227,22 +3227,22 @@ PP(pp_pack)
 		sv_catpvn(cat, (char*)&along, sizeof(I32));
 	    }
 	    break;
-#ifdef QUAD
+#ifdef HAS_QUAD
 	case 'Q':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		auquad = (unsigned quad)SvIV(fromstr);
-		sv_catpvn(cat, (char*)&auquad, sizeof(unsigned quad));
+		auquad = (unsigned Quad_t)SvIV(fromstr);
+		sv_catpvn(cat, (char*)&auquad, sizeof(unsigned Quad_t));
 	    }
 	    break;
 	case 'q':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aquad = (quad)SvIV(fromstr);
-		sv_catpvn(cat, (char*)&aquad, sizeof(quad));
+		aquad = (Quad_t)SvIV(fromstr);
+		sv_catpvn(cat, (char*)&aquad, sizeof(Quad_t));
 	    }
 	    break;
-#endif /* QUAD */
+#endif /* HAS_QUAD */
 	case 'P':
 	    len = 1;		/* assume SV is correct length */
 	    /* FALL THROUGH */

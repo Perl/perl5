@@ -11,27 +11,24 @@ i_time='define'
 cc="cc -32"
 ccflags="$ccflags -D_POSIX_SOURCE -ansiposix -D_BSD_TYPES -Olimit 3000"
 lddlflags="-32 -shared"
-set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl /
-/'`
+set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /'`
 shift
 libswanted="$*"
-
+#
 # The following might be of interest if you wish to try 64-bit mode:
-# irix_6.sh
+# irix_6_64bit.sh
 # Krishna Sethuraman, krishna@mit.edu
-# This will build a 64-bit perl 5 executable under IRIX 6.x.
-# I had to remove socket, sun, crypt, nsl, and dl from the 
-# link line because there are no 64-bit libraries with these
-# names (as of IRIX 6.0.1).
+# taken from irix_5.sh .  Changes from irix_5.sh:
+# Olimit and nested comments (warning 1009) no longer accepted
+# -OPT:fold_arith_limit so POSIX module will optimize
+# no 64bit versions of sun, crypt, nsl, socket, dl dso's available
+# as of IRIX 6.0.1 so omit those from libswanted line via `sed'.
 
-# I don't know if this will actually build a fully working perl because I
-# can't tell if the symbols normally provided by these libraries
-# are provided by other libraries which remain on the link line.
-# In any case, perl does build with this file without unresolved
-# symbol complaints.
+# perl 5 built with this hints file passes most tests (`make test').
+# Fails on op/subst test only. (built and tested under IRIX 6.0.1).
 
 # i_time='define'
-# ccflags="$ccflags -D_POSIX_SOURCE -ansiposix -D_BSD_TYPES -Olimit 3000"
+# ccflags="$ccflags -D_POSIX_SOURCE -ansiposix -D_BSD_TYPES -woff 1009 -OPT:fold_arith_limit=1046"
 # lddlflags="-shared"
 # set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ sun / /' -e 's/ crypt / /' -e 's/ nsl / /' -e 's/ dl / /'`
 # shift

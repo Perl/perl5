@@ -211,7 +211,7 @@ PerlInterpreter *sv_interp;
 	return;
     Safefree(sv_interp);
 }
-#ifndef STANDARD_C
+#if !defined(STANDARD_C) && !defined(HAS_GETENV_PROTOTYPE)
 char *getenv _((char *)); /* Usually in <stdlib.h> */
 #endif
 

@@ -172,7 +172,7 @@ EXT char Error[1];
 #  endif
 #else
 #   ifndef memcmp
-#	define memcmp(s1,s2,l) my_memcmp(s1,s2,l)
+#	define memcmp 	my_memcmp
 #   endif
 #endif /* HAS_MEMCMP */
 
@@ -447,17 +447,17 @@ EXT char Error[1];
 #endif
 
 #if defined(cray) || defined(convex) || defined (uts) || BYTEORDER > 0xffff
-#   define QUAD
+#   define HAS_QUAD
 #endif
 
-#ifdef QUAD
+#ifdef HAS_QUAD
 #   ifdef cray
-#	define quad int
+#	define Quad_t int
 #   else
 #	if defined(convex) || defined (uts)
-#	    define quad long long
+#	    define Quad_t long long
 #	else
-#	    define quad long
+#	    define Quad_t long
 #	endif
 #   endif
 #endif
@@ -544,8 +544,8 @@ typedef FILE * (*cryptswitch_t) _((FILE *rfp));
 
 #include "handy.h"
 
-#ifdef QUAD
-typedef quad IV;
+#ifdef HAS_QUAD
+typedef Quad_t IV;
 #else
 typedef long IV;
 #endif
@@ -574,14 +574,6 @@ union any {
 
 #if defined(iAPX286) || defined(M_I286) || defined(I80286)
 #   define I286
-#endif
-
-#ifndef	STANDARD_C
-#   ifdef CHARSPRINTF
-	char *sprintf _((char *, const char *, ...));
-#   else
-	int sprintf _((char *, const char *, ...));
-#   endif
 #endif
 
 #if defined(htonl) && !defined(HAS_HTONL)
@@ -778,6 +770,9 @@ char *strcpy(), *strcat();
 
 #if !defined(HAS_FMOD) && defined(HAS_DREM)
 #define fmod(x,y) drem((x),(y))
+#else
+#define USE_MY_FMOD
+#define fmod(x,y) my_fmod(x,y)
 #endif
 
 #ifndef __cplusplus
@@ -882,7 +877,7 @@ EXT XPV *	Xpv;
 EXT char	buf[1024];
 EXT char	tokenbuf[256];
 EXT struct stat	statbuf;
-#ifndef MSDOS
+#ifdef HAS_TIMES
 EXT struct tms	timesbuf;
 #endif
 EXT STRLEN na;		/* for use in SvPV when length is Not Applicable */

@@ -104,3 +104,4 @@ html: $(HTML)
 clean:
 	rm -f $(MAN) $(HTML)
 
+realclean:	clean

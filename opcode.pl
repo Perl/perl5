@@ -564,7 +564,7 @@ msgrcv		msgrcv			ck_fun		imst	S S S S S
 
 semget		semget			ck_fun		imst	S S S
 semctl		semctl			ck_fun		imst	S S S S
-semop		semop			ck_fun		imst	S S S
+semop		semop			ck_fun		imst	S S
 
 # Eval.
 

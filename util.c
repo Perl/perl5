@@ -19,9 +19,11 @@
 #include <signal.h>
 #endif
 
+/* Omit this -- it causes too much grief on mixed systems.
 #ifdef I_UNISTD
 #  include <unistd.h>
 #endif
+*/
 
 #ifdef I_VFORK
 #  include <vfork.h>
@@ -97,9 +99,9 @@ unsigned long size;
 #endif /* MSDOS */
 {
     char *ptr;
-#ifndef STANDARD_C
+#if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE)
     char *realloc();
-#endif /* ! STANDARD_C */
+#endif /* !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) */
 
 #ifdef MSDOS
 	if (size > 0xffff) {
@@ -832,7 +834,7 @@ mess(pat, args)
 	return buf;
 }
 
-#ifdef STANDARD_C
+#ifdef I_STDARG
 void
 croak(char* pat, ...)
 #else
@@ -866,7 +868,7 @@ croak(pat, va_alist)
 }
 
 void
-#ifdef STANDARD_C
+#ifdef I_STDARG
 warn(char* pat,...)
 #else
 /*VARARGS0*/
@@ -1342,11 +1344,7 @@ I32
 my_pclose(ptr)
 FILE *ptr;
 {
-#ifdef VOIDSIG
-    void (*hstat)(), (*istat)(), (*qstat)();
-#else
-    int (*hstat)(), (*istat)(), (*qstat)();
-#endif
+    Signal_t (*hstat)(), (*istat)(), (*qstat)();
     int status;
     SV **svp;
     int pid;
@@ -1606,3 +1604,28 @@ I32 *retlen;
     *retlen = s - start;
     return retval;
 }
+
+/* Amazingly enough, some systems (e.g. Dynix 3) don't have fmod.
+   This is a slow, stupid, but working emulation.  (AD)
+*/
+#ifdef USE_MY_FMOD
+double
+my_fmod(x, y)
+double x, y;
+{
+    double i = 0.0;   /* Can't use int because it can overflow */
+    if ((x == 0) || (y == 0))
+       return 0;
+    /* The sign of fmod is the same as the sign of x.  */
+    if ( (x < 0 && y > 0) || (x > 0 && y < 0) )
+	y = -y;
+    if (x > 0) {
+	while (x - i*y > y)
+	    i++;
+    } else {
+	while (x - i*y < y)
+	    i++;
+    }
+    return x - i * y;
+}
+#endif

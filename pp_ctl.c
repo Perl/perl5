@@ -880,7 +880,7 @@ I32 cxix;
     }
 }
 
-#ifdef STANDARD_C
+#ifdef I_STDARG
 OP *
 die(char* pat, ...)
 #else
@@ -1531,14 +1531,15 @@ PP(pp_goto)
 	    SAVETMPS;
 	    if (CvXSUB(cv)) {
 		if (CvOLDSTYLE(cv)) {
+		    I32 (*fp3)_((int,int,int));
 		    while (sp > mark) {
 			sp[1] = sp[0];
 			sp--;
 		    }
-		    items = (*(I32(*)_((int,int,int)))CvXSUB(cv))(
-					CvXSUBANY(cv).any_i32,
-					mark - stack_base + 1,
-					items);
+		    fp3 = (I32(*)_((int,int,int)))CvXSUB(cv);
+		    items = (*fp3)(CvXSUBANY(cv).any_i32,
+		                   mark - stack_base + 1,
+				   items);
 		    sp = stack_base + items;
 		}
 		else {

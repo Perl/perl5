@@ -40,7 +40,7 @@ deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
 
 #else /* !defined(I_STDARG) && !defined(I_VARARGS) */
 
-#  ifdef STANDARD_C
+#  ifdef I_STDARG
 void
 deb(char *pat, ...)
 #  else

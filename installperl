@@ -29,15 +29,7 @@ while (<CONFIG>) {
 }
 close CONFIG;
 
-open(PERL_C, "perl.c");
-while (<PERL_C>) {
-    last if /Revision:/;
-}
-close PERL_C;
-s/.*Revision: //;
-$major = $_ + 0;
-
-$ver = sprintf("%5.3f", $major + $PATCHLEVEL / 1000);
+$ver = sprintf("%5.3f", $] + 0);
 $release = substr($ver,0,3);
 $patchlevel = substr($ver,3,2);
 
@@ -56,6 +48,17 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 -x 't/TEST'		|| warn "WARNING: You've never run 'make test'!!!",
 	"  (Installing anyway.)\n";
 
+if ($d_shrplib) {
+    if (!<libperl*.$so*>) {
+	warn "WARNING: Can't find libperl*.$so* to install into $shrpdir.",
+	    "  (Installing other things anyway.)\n";
+    } else {
+	&makedir($shrpdir);
+	-w $shrpdir	|| die "$shrpdir is not writable by you\n";
+	&cmd("cp libperl*.$so* $shrpdir");
+    }
+}
+
 # First we install the version-numbered executables.
 
 &unlink("$installbin/perl$ver");
@@ -71,19 +74,13 @@ exit 0 if $versiononly;
 
 # Make links to ordinary names if installbin directory isn't current directory.
 
-($bdev,$bino) = stat($installbin);
-($ddev,$dino) = stat('.');
-
-if ($bdev != $ddev || $bino != $dino) {
+if (! &samepath($installbin, '.')) {
     &unlink("$installbin/perl", "$installbin/suidperl");
     &link("$installbin/perl$ver", "$installbin/perl");
     &link("$installbin/sperl$ver", "$installbin/suidperl") if $d_dosuid;
 }
 
-($bdev,$bino) = stat($installbin);
-($ddev,$dino) = stat('x2p');
-
-if ($bdev != $ddev || $bino != $dino) {
+if (! &samepath($installbin, 'x2p')) {
     &unlink("$installbin/a2p");
     &cmd("cp x2p/a2p $installbin/a2p");
     &chmod(0755, "$installbin/a2p");
@@ -105,8 +102,7 @@ for (@scripts) {
 if ($installmansrc ne '') {
     &makedir($installmansrc);
 
-    ($mdev,$mino) = stat($installmansrc);
-    if ($mdev != $ddev || $mino != $dino) {
+    if (! &samepath($installmansrc, '.')) {
 	for (@manpages) {
 	    ($new = $_) =~ s/man$/$manext/;
 	    $new =~ s#.*/##;
@@ -131,13 +127,8 @@ $do_installarchlib = $do_installprivlib = 0;
 &makedir($installprivlib);
 &makedir($installarchlib);
 if (chdir "lib") {
-    ($pdev,$pino) = stat($installarchlib);
-    ($ldev,$lino) = stat('.');
-    $do_installarchlib = ($pdev != $ldev || $pino != $lino);
-
-    ($pdev,$pino) = stat($installprivlib);
-    ($ldev,$lino) = stat('.');
-    $do_installprivlib = ($pdev != $ldev || $pino != $lino);
+    $do_installarchlib = ! &samepath($installarchlib, '.');
+    $do_installprivlib = ! &samepath($installprivlib, '.');
 
     if ($do_installarchlib || $do_installprivlib) {
 	find(\&installlib, '.');
@@ -156,24 +147,19 @@ foreach $file (<*.h libperl*.a>) {
 
 # Offer to install perl in a "standard" location
 
-($udev,$uino) = stat($mainperldir);
-
 $mainperl_is_instperl = 0;
 
-if (-w _ && ($udev != $bdev || $uino != $bino) && !$nonono) {
+if (-w $mainperldir && ! &samepath($mainperldir, $installbin) && !$nonono) {
     # First make sure $mainperldir/perl is not already the same as
     # the perl we just installed
     if (-x "$mainperldir/perl") {
-	# Use stat so we detect symbolic links transparently 
-	($mpdev, $mpino) = stat("$mainperldir/perl");
-	($ipdev, $ipino) = stat("$installbin/perl");
 	# Try to be clever about mainperl being a symbolic link
 	# to binexp/perl if binexp and installbin are different.
 	$mainperl_is_instperl =
-	    (($mpdev == $ipdev && $mpino == $ipino) ||
+	    &samepath("$mainperldir/perl", "$installbin/perl") ||
 	     (($binexp ne $installbin) &&
 	      (-l "$mainperldir/perl") &&
-	      ((readlink "$mainperldir/perl") eq "$binexp/perl")));
+	      ((readlink "$mainperldir/perl") eq "$binexp/perl"));
     }
     if ((! $mainperl_is_instperl) &&
 	(&yn("Many scripts expect perl to be installed as " .
