@@ -1178,10 +1178,10 @@ following statements:
 
 # Build up a set of file names (not command names).
   use Config;
-  use File::Spec;
-  $this_perl = File::Spec->canonpath($^X);
-  $this_perl .= $Config{_ext}
-          unless $this_perl =~ m/$Config{_ext}([;\d]*)$/i;
+  $this_perl = $^X;
+  if ($^O ne 'VMS')
+     {$this_perl .= $Config{_exe}
+          unless $this_perl =~ m/$Config{_exe}$/i;}
 
 Because many operating systems permit anyone with read access to
 the Perl program file to make a copy of it, patch the copy, and
@@ -1192,10 +1192,10 @@ this goal, and produce a pathname that can be invoked as a
 command or referenced as a file.
 
   use Config;
-  use File::Spec;
-  $secure_perl_path = File::Spec->canonpath($Config{perlpath});
-  $secure_perl_path .= $Config{_ext}
-          unless $secure_perl_path =~ m/$Config{_ext}([;\d]*)$/i;
+  $secure_perl_path = $Config{perlpath};
+  if ($^O ne 'VMS')
+     {$secure_perl_path .= $Config{_exe}
+          unless $secure_perl_path =~ m/$Config{_exe}$/i;}
 
 =item ARGV
 
