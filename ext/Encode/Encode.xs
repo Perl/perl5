@@ -324,7 +324,7 @@ PerlIO_funcs PerlIO_encode = {
  PerlIOBuf_get_cnt,
  PerlIOBuf_set_ptrcnt,
 };
-#endif
+#endif /* encode layer */
 
 void
 Encode_Define(pTHX_ encode_t *enc)

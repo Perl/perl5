@@ -253,11 +253,7 @@ Perl_utf8n_to_uvuni(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 {
     UV uv = *s, ouv;
     STRLEN len = 1;
-#ifdef EBCDIC
-    bool dowarn = 0;
-#else
     bool dowarn = ckWARN_d(WARN_UTF8);
-#endif
     STRLEN expectlen = 0;
     U32 warning = 0;
 

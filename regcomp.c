@@ -2837,19 +2837,11 @@ tryagain:
 			p++;
 			break;
 		    case 'e':
-#ifdef ASCIIish
-			  ender = '\033';
-#else
-			  ender = '\047';
-#endif
+			  ender = ASCII_TO_NATIVE('\033');
 			p++;
 			break;
 		    case 'a':
-#ifdef ASCIIish
-			  ender = '\007';
-#else
-			  ender = '\057';
-#endif
+			  ender = ASCII_TO_NATIVE('\007');
 			p++;
 			break;
 		    case 'x':
@@ -2910,7 +2902,7 @@ tryagain:
 		default:
 		  normal_default:
 		    if (UTF8_IS_START(*p) && UTF) {
-			ender = utf8n_to_uvuni((U8*)p, RExC_end - p,
+			ender = utf8n_to_uvchr((U8*)p, RExC_end - p,
 					       &numlen, 0);
 			p += numlen;
 		    }
@@ -2922,7 +2914,7 @@ tryagain:
 		    p = regwhite(p, RExC_end);
 		if (UTF && FOLD) {
 		    if (LOC)
-			ender = toLOWER_LC_uvchr(UNI_TO_NATIVE(ender));
+			ender = toLOWER_LC_uvchr(ender);
 		    else
 			ender = toLOWER_uni(ender);
 		}
@@ -2931,7 +2923,7 @@ tryagain:
 			p = oldp;
 		    /* ender is a Unicode value so it can be > 0xff --
 		     * in other words, do not use UTF8_IS_CONTINUED(). */
-		    else if (ender >= 0x80 && UTF) {
+		    else if (NATIVE_TO_ASCII(ender) >= 0x80 && UTF) {
 			reguni(pRExC_state, ender, s, &numlen);
 			s += numlen;
 			len += numlen;
@@ -2944,7 +2936,7 @@ tryagain:
 		}
 		/* ender is a Unicode value so it can be > 0xff --
 		 * in other words, do not use UTF8_IS_CONTINUED(). */
-		if (ender >= 0x80 && UTF) {
+		if (NATIVE_TO_ASCII(ender) >= 0x80 && UTF) {
 		    reguni(pRExC_state, ender, s, &numlen);
 		    s += numlen;
 		    len += numlen - 1;
@@ -3209,7 +3201,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	if (!range)
 	    rangebegin = RExC_parse;
 	if (UTF) {
-	    value = utf8n_to_uvuni((U8*)RExC_parse,
+	    value = utf8n_to_uvchr((U8*)RExC_parse,
 			       RExC_end - RExC_parse,
 			       &numlen, 0);
 	    RExC_parse += numlen;
@@ -3220,7 +3212,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    namedclass = regpposixcc(pRExC_state, value);
 	else if (value == '\\') {
 	    if (UTF) {
-		value = utf8n_to_uvuni((U8*)RExC_parse,
+		value = utf8n_to_uvchr((U8*)RExC_parse,
 				   RExC_end - RExC_parse,
 				   &numlen, 0);
 		RExC_parse += numlen;
@@ -3267,13 +3259,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    case 't':	value = '\t';			break;
 	    case 'f':	value = '\f';			break;
 	    case 'b':	value = '\b';			break;
-#ifdef ASCIIish
-	    case 'e':	value = '\033';			break;
-	    case 'a':	value = '\007';			break;
-#else
-	    case 'e':	value = '\047';			break;
-	    case 'a':	value = '\057';			break;
-#endif
+	    case 'e':	value = ASCII_TO_NATIVE('\033');break;
+	    case 'a':	value = ASCII_TO_NATIVE('\007');break;
 	    case 'x':
 		if (*RExC_parse == '{') {
 		    e = strchr(RExC_parse++, '}');
@@ -3333,8 +3320,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		    else {
 			ANYOF_FLAGS(ret) |= ANYOF_UNICODE;
 			Perl_sv_catpvf(aTHX_ listsv,
-				       /* 0x002D is Unicode for '-' */
-				       "%04"UVxf"\n002D\n", (UV)lastvalue);
+				       "%04"UVxf"\n%04"UVxf"\n", (UV)lastvalue, (UV) '-');
 		    }
 		}
 
@@ -3417,7 +3403,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_ASCII);
 		    else {
-#ifdef ASCIIish
+#ifndef EBCDIC
 			for (value = 0; value < 128; value++)
 			    ANYOF_BITMAP_SET(ret, value);
 #else  /* EBCDIC */
@@ -3433,7 +3419,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_NASCII);
 		    else {
-#ifdef ASCIIish
+#ifndef EBCDIC
 			for (value = 128; value < 256; value++)
 			    ANYOF_BITMAP_SET(ret, value);
 #else  /* EBCDIC */
@@ -3733,7 +3719,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	/* now is the next time */
 	if (!SIZE_ONLY) {
 	    if (lastvalue < 256 && value < 256) {
-#ifndef ASCIIish /* EBCDIC, for example. */
+#ifdef EBCDIC /* EBCDIC, for example. */
 		if ((isLOWER(lastvalue) && isLOWER(value)) ||
 		    (isUPPER(lastvalue) && isUPPER(value)))
 		{
@@ -3896,7 +3882,7 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 STATIC void
 S_reguni(pTHX_ RExC_state_t *pRExC_state, UV uv, char* s, STRLEN* lenp)
 {
-    *lenp = SIZE_ONLY ? UNISKIP(uv) : (uvuni_to_utf8((U8*)s, uv) - (U8*)s);
+    *lenp = SIZE_ONLY ? UNISKIP(uv) : (uvchr_to_utf8((U8*)s, uv) - (U8*)s);
 }
 
 /*
