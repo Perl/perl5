@@ -5,6 +5,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C/C++
 
 $Log: MPConsole.cp,v $
+Revision 1.11  2002/05/08 07:17:12  neeri
+Make interrupt act as end of file (MacPerl Bug #542154)
+
 Revision 1.10  2002/01/04 03:34:45  pudge
 Modifications for universal headers 3.4
 
@@ -263,7 +266,7 @@ ssize_t MPConsoleSocket::read(const GUSIScatterer & scatterer)
 	
 	avail = int(GetHandleSize(input));
 	
-	if (!avail)	{
+	if (!avail)	{ 
 		if (eof) {
 			eof = false;
 			
@@ -285,7 +288,7 @@ ssize_t MPConsoleSocket::read(const GUSIScatterer & scatterer)
 			GUSIErrorSaver saveError;
 			
 			gWantConsoleInput	= true;
-			while(!(avail = int(GetHandleSize(input))) && !eof && window)
+			while(!(avail = int(GetHandleSize(input))) && !eof && window && window->u.cons.selected)
 				GUSIContext::Yield(kGUSIPoll);
 			gWantConsoleInput	= false;
 	
