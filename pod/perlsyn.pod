@@ -94,8 +94,8 @@ expression.
 The only kind of simple statement is an expression evaluated for its
 side effects.  Every simple statement must be terminated with a
 semicolon, unless it is the final statement in a block, in which case
-the semicolon is optional.  (A semicolon is still encouraged there if
-the block takes up more than one line, because you may eventually add
+the semicolon is optional.  (A semicolon is still encouraged if the
+block takes up more than one line, because you may eventually add
 another line.)  Note that there are some operators like C<eval {}> and
 C<do {}> that look like compound statements, but aren't (they're just
 TERMs in an expression), and thus need an explicit termination if used
@@ -103,12 +103,12 @@ as the last item in a statement.
 
 =head2 Truth and Falsehood
 
-A false value is C<undef>, the number 0, the string C<'0'> and the
-empty string C<''>.  Note that unlike some languages, these are three
-distinctly different values.  A true value is everything which is not
-false.
+The number 0, the strings C<'0'> and C<''>, the empty list C<()>, and an
+explicit C<undef> are all false in a boolean context. Every other value
+is true.
 
-Note that while 0, 0.0 and C<'0'> are false, C<'0.0'> is true.
+Note that while 0, 0.0 and C<'0'> are false, C<'0.0'> and C<'0e0'> are
+true, but evaluate to 0 in a numeric context.
 
 =head2 Statement Modifiers
 
