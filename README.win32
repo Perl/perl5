@@ -237,16 +237,17 @@ perlglob.bat.
 perlglob.exe relies on the argv expansion done by the C Runtime of
 the particular compiler you used, and therefore behaves very
 differently depending on the Runtime used to build it.  To preserve
-compatiblity, perlglob.bat (a perl script/module that can be
-used portably) is installed.  Besides being portable, perlglob.bat
-also offers enhanced globbing functionality.
+compatiblity, perlglob.bat (a perl script that can be used portably)
+is installed.  Besides being portable, perlglob.bat also offers
+enhanced globbing functionality.
 
 If you want perl to use perlglob.bat instead of perlglob.exe, just
 delete perlglob.exe from the install location (or move it somewhere
-perl cannot find).  Using File::DosGlob.pm (which is the same
-as perlglob.bat) to override the internal CORE::glob() works about 10
-times faster than spawing perlglob.exe, and you should take this
-approach when writing new modules.  See File::DosGlob for details.
+perl cannot find).  Using File::DosGlob.pm (which implements the core
+functionality of perlglob.bat) to override the internal CORE::glob()
+works about 10 times faster than spawing perlglob.exe, and you should
+take this approach when writing new modules.  See File::DosGlob for
+details.
 
 =item Using perl from the command line
 
