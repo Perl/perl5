@@ -51,6 +51,10 @@ FileCache upgraded to version 1.04
 
 =item *
 
+libnet upgraded to version 1.19
+
+=item *
+
 Pod::Parser upgraded to version 1.28
 
 =item *
