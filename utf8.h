@@ -48,6 +48,10 @@ END_EXTERN_C
 #define NATIVE_TO_NEED(enc,ch)   (ch)
 #define ASCII_TO_NEED(enc,ch)    (ch)
 
+/* As there are no translations avoid the function wrapper */
+#define Perl_utf8n_to_uvchr Perl_utf8n_to_uvuni
+#define Perl_uvchr_to_utf8  Perl_uvuni_to_utf8
+
 /*
 
  The following table is from Unicode 3.1.

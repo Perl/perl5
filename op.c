@@ -114,12 +114,12 @@ S_trlist_upgrade(pTHX_ U8** sp, U8** ep)
     *sp = d;
 
     while (s < e) {
-        if (*s < 0x80 || *s == 0xff)
+        if (NATIVE_IS_INVARIANT(*s) || NATIVE_TO_UTF(*s) == 0xff)
             *d++ = *s++;
 	else {
-            U8 c = *s++;
-            *d++ = ((c >> 6)         | 0xc0);
-            *d++ = ((c       & 0x3f) | 0x80);
+	    U8 c = NATIVE_TO_ASCII(*s++);
+	    *d++ = UTF8_EIGHT_BIT_HI(c);
+	    *d++ = UTF8_EIGHT_BIT_LO(c);
         }
     }
     *ep = d;
@@ -2650,15 +2650,16 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 }
 
 static int
-utf8compare(const void *a, const void *b)
+uvcompare(const void *a, const void *b)
 {
-    int i;
-    for (i = 0; i < 10; i++) {
-	if ((*(U8**)a)[i] < (*(U8**)b)[i])
-	    return -1;
-	if ((*(U8**)a)[i] > (*(U8**)b)[i])
-	    return 1;
-    }
+    if (*((UV *)a) < (*(UV *)b))
+	return -1;
+    if (*((UV *)a) > (*(UV *)b))
+	return 1;
+    if (*((UV *)a+1) < (*(UV *)b+1))
+	return -1;
+    if (*((UV *)a+1) > (*(UV *)b+1))
+	return 1;
     return 0;
 }
 
@@ -2712,47 +2713,57 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	U8* tsave = from_utf ? NULL : trlist_upgrade(&t, &tend);
 	U8* rsave = (to_utf || !rlen) ? NULL : trlist_upgrade(&r, &rend);
 
+/* There are several snags with this code on EBCDIC:
+   1. 0xFF is a legal UTF-EBCDIC byte (there are no illegal bytes).
+   2. scan_const() in toke.c has encoded chars in native encoding which makes
+      ranges at least in EBCDIC 0..255 range the bottom odd.
+*/
+
 	if (complement) {
 	    U8 tmpbuf[UTF8_MAXLEN+1];
-	    U8** cp;
+	    UV *cp;
 	    UV nextmin = 0;
-	    New(1109, cp, tlen, U8*);
+	    New(1109, cp, 2*tlen, UV);
 	    i = 0;
 	    transv = newSVpvn("",0);
 	    while (t < tend) {
-		cp[i++] = t;
-		t += UTF8SKIP(t);
-		if (t < tend && *t == 0xff) {
+		cp[2*i] = utf8n_to_uvuni(t, tend-t, &ulen, 0);
+		t += ulen;
+		if (t < tend && NATIVE_TO_UTF(*t) == 0xff) {
 		    t++;
-		    t += UTF8SKIP(t);
+		    cp[2*i+1] = utf8n_to_uvuni(t, tend-t, &ulen, 0);
+		    t += ulen;
 		}
+		else {
+		 cp[2*i+1] = cp[2*i];
+		}
+		i++;
 	    }
-	    qsort(cp, i, sizeof(U8*), utf8compare);
+	    qsort(cp, i, 2*sizeof(UV), uvcompare);
 	    for (j = 0; j < i; j++) {
-		U8 *s = cp[j];
-		I32 cur = j < i - 1 ? cp[j+1] - s : tend - s;
-		/* CHECKME: Use unicode code points for ranges - needs more thought ... NI-S */
-		UV  val = utf8n_to_uvuni(s, cur, &ulen, 0);
-		s += ulen;
+		UV  val = cp[2*j];
 		diff = val - nextmin;
 		if (diff > 0) {
 		    t = uvuni_to_utf8(tmpbuf,nextmin);
 		    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 		    if (diff > 1) {
+			U8  range_mark = UTF_TO_NATIVE(0xff);
 			t = uvuni_to_utf8(tmpbuf, val - 1);
-			sv_catpvn(transv, "\377", 1);
+			sv_catpvn(transv, (char *)&range_mark, 1);
 			sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 		    }
 	        }
-		if (s < tend && *s == 0xff)
-		    val = utf8n_to_uvuni(s+1, cur - 1, &ulen, 0);
+		val = cp[2*j+1];
 		if (val >= nextmin)
 		    nextmin = val + 1;
 	    }
 	    t = uvuni_to_utf8(tmpbuf,nextmin);
 	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
+	    {
+		U8 range_mark = UTF_TO_NATIVE(0xff);
+		sv_catpvn(transv, (char *)&range_mark, 1);
+	    }
 	    t = uvuni_to_utf8(tmpbuf, 0x7fffffff);
-	    sv_catpvn(transv, "\377", 1);
 	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 	    t = (U8*)SvPVX(transv);
 	    tlen = SvCUR(transv);
@@ -2775,7 +2786,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    if (tfirst > tlast) {
 		tfirst = (I32)utf8n_to_uvuni(t, tend - t, &ulen, 0);
 		t += ulen;
-		if (t < tend && *t == 0xff) {	/* illegal utf8 val indicates range */
+		if (t < tend && NATIVE_TO_UTF(*t) == 0xff) {	/* illegal utf8 val indicates range */
 		    t++;
 		    tlast = (I32)utf8n_to_uvuni(t, tend - t, &ulen, 0);
 		    t += ulen;
@@ -2789,7 +2800,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		if (r < rend) {
 		    rfirst = (I32)utf8n_to_uvuni(r, rend - r, &ulen, 0);
 		    r += ulen;
-		    if (r < rend && *r == 0xff) {	/* illegal utf8 val indicates range */
+		    if (r < rend && NATIVE_TO_UTF(*r) == 0xff) {	/* illegal utf8 val indicates range */
 			r++;
 			rlast = (I32)utf8n_to_uvuni(r, rend - r, &ulen, 0);
 			r += ulen;
@@ -7040,3 +7051,4 @@ const_sv_xsub(pTHXo_ CV* cv)
     ST(0) = (SV*)XSANY.any_ptr;
     XSRETURN(1);
 }
+

@@ -2920,9 +2920,7 @@ tryagain:
 		if (ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)
 			p = oldp;
-		    /* ender is a Unicode value so it can be > 0xff --
-		     * in other words, do not use UTF8_IS_CONTINUED(). */
-		    else if (NATIVE_TO_ASCII(ender) >= 0x80 && UTF) {
+		    else if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(ender)) && UTF) {
 			reguni(pRExC_state, ender, s, &numlen);
 			s += numlen;
 			len += numlen;
@@ -2933,9 +2931,7 @@ tryagain:
 		    }
 		    break;
 		}
-		/* ender is a Unicode value so it can be > 0xff --
-		 * in other words, do not use UTF8_IS_CONTINUED(). */
-		if (NATIVE_TO_ASCII(ender) >= 0x80 && UTF) {
+		if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(ender)) && UTF) {
 		    reguni(pRExC_state, ender, s, &numlen);
 		    s += numlen;
 		    len += numlen - 1;
@@ -4251,7 +4247,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 		    U8 s[UTF8_MAXLEN+1];
 		
 		    for (i = 0; i <= 256; i++) { /* just the first 256 */
-			U8 *e = uvuni_to_utf8(s, i);
+			U8 *e = uvchr_to_utf8(s, i);
 			
 			if (i < 256 && swash_fetch(sw, s)) {
 			    if (rangestart == -1)
@@ -4261,14 +4257,14 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 			
 			    if (i <= rangestart + 3)
 				for (; rangestart < i; rangestart++) {
-				    for(e = uvuni_to_utf8(s, rangestart), p = s; p < e; p++)
+				    for(e = uvchr_to_utf8(s, rangestart), p = s; p < e; p++)
 					put_byte(sv, *p);
 				}
 			    else {
-				for (e = uvuni_to_utf8(s, rangestart), p = s; p < e; p++)
+				for (e = uvchr_to_utf8(s, rangestart), p = s; p < e; p++)
 				    put_byte(sv, *p);
 				sv_catpv(sv, "-");
-				    for (e = uvuni_to_utf8(s, i - 1), p = s; p < e; p++)
+				    for (e = uvchr_to_utf8(s, i - 1), p = s; p < e; p++)
 					put_byte(sv, *p);
 				}
 				rangestart = -1;

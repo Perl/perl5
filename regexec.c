@@ -950,7 +950,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		else {
 		    U8 *r = reghop3((U8*)s, -1, (U8*)startpos);
 		
-		    tmp = (I32)utf8n_to_uvuni(r, s - (char*)r, 0, 0);
+		    tmp = (I32)utf8n_to_uvchr(r, s - (char*)r, 0, 0);
 		}
 		tmp = ((OP(c) == BOUND ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
@@ -993,7 +993,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		else {
 		    U8 *r = reghop3((U8*)s, -1, (U8*)startpos);
 		
-		    tmp = (I32)utf8n_to_uvuni(r, s - (char*)r, 0, 0);
+		    tmp = (I32)utf8n_to_uvchr(r, s - (char*)r, 0, 0);
 		}
 		tmp = ((OP(c) == NBOUND ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
@@ -1433,7 +1433,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     else {
         if (prog->reganch & ROPT_UTF8 && do_utf8) {
 	    U8 *s = reghop3((U8*)stringarg, -1, (U8*)strbeg);
-	    PL_regprev = utf8n_to_uvuni(s, (U8*)stringarg - s, NULL, 0);
+	    PL_regprev = utf8n_to_uvchr(s, (U8*)stringarg - s, NULL, 0);
 	}
 	else
 	    PL_regprev = (U32)stringarg[-1];
@@ -2161,7 +2161,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    if (l >= PL_regeol) {
 			sayNO;
 		    }
-		    if ((UTF ? utf8n_to_uvuni((U8*)s, e - s, 0, 0) : *((U8*)s)) !=
+		    if ((UTF ? utf8n_to_uvchr((U8*)s, e - s, 0, 0) : *((U8*)s)) !=
 			(c1 ? toLOWER_utf8((U8*)l) : toLOWER_LC_utf8((U8*)l)))
 			    sayNO;
 		    s += UTF ? UTF8SKIP(s) : 1;
@@ -2263,7 +2263,7 @@ S_regmatch(pTHX_ regnode *prog)
 		else {
 		    U8 *r = reghop((U8*)locinput, -1);
 		
-		    ln = utf8n_to_uvuni(r, s - (char*)r, 0, 0);
+		    ln = utf8n_to_uvchr(r, s - (char*)r, 0, 0);
 		}
 		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
 		    ln = isALNUM_uni(ln);

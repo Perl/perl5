@@ -1260,6 +1260,8 @@ _EOE_
 
 close(DOC);
 
+unlink "pod/perlintern.pod";
+
 open(GUTS, ">pod/perlintern.pod") or
 		die "Unable to create pod/perlintern.pod: $!\n";
 print GUTS <<'END';

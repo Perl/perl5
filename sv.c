@@ -4733,8 +4733,9 @@ Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
     len = 0;
     while (s < send) {
 	STRLEN n;
-        /* We can use low level directly here as we are not looking at the values */
-	if (utf8n_to_uvuni(s, UTF8SKIP(s), &n, 0)) {
+	/* Call utf8n_to_uvchr() to validate the sequence */
+	utf8n_to_uvchr(s, UTF8SKIP(s), &n, 0);
+	if (n > 0) {
 	    s += n;
 	    len++;
 	}

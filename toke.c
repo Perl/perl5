@@ -36,8 +36,12 @@ static I32 utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
 #define XFAKEBRACK 128
 #define XENUMMASK 127
 
-/*#define UTF (SvUTF8(PL_linestr) && !(PL_hints & HINT_BYTE))*/
-#define UTF ((PL_linestr && DO_UTF8(PL_linestr)) || PL_hints & HINT_UTF8)
+#ifdef EBCDIC
+/* For now 'use utf8' does not affect tokenizer on EBCDIC */
+#define UTF (PL_linestr && DO_UTF8(PL_linestr))
+#else
+#define UTF ((PL_linestr && DO_UTF8(PL_linestr)) || (PL_hints & HINT_UTF8))
+#endif
 
 /* In variables name $^X, these are the legal values for X.
  * 1999-02-27 mjd-perl-patch@plover.com */
@@ -1218,21 +1222,21 @@ S_scan_const(pTHX_ char *start)
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
     bool didrange = FALSE;		        /* did we just finish a range? */
-    bool has_utf8 = (PL_linestr && SvUTF8(PL_linestr));
-						/* the constant is UTF8 */
+    I32  has_utf8 = FALSE;			/* Output constant is UTF8 */
+    I32  this_utf8 = UTF;			/* The source string is assumed to be UTF8 */
     UV uv;
 
-    I32 utf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
-	? (PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
-	: UTF;
-    I32 this_utf8 = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
-	? (PL_sublex_info.sub_op->op_private & (PL_lex_repl ?
-						OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF))
-	: UTF;
     const char *leaveit =	/* set of acceptably-backslashed characters */
 	PL_lex_inpat
 	    ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
 	    : "";
+
+    if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
+	/* If we are doing a trans and we know we want UTF8 set expectation */
+	has_utf8   = PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF);
+	this_utf8  = PL_sublex_info.sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
+    }
+
 
     while (s < send || dorange) {
         /* get transliterations out of the way (they're most literal) */
@@ -1243,17 +1247,18 @@ S_scan_const(pTHX_ char *start)
 		I32 min;			/* first character in range */
 		I32 max;			/* last character in range */
 
-		if (utf) {
+		if (has_utf8) {
 		    char *c = (char*)utf8_hop((U8*)d, -1);
 		    char *e = d++;
 		    while (e-- > c)
 			*(e + 1) = *e;
-		    *c = (char)0xff;
+		    *c = UTF_TO_NATIVE(0xff);
 		    /* mark the range as done, and continue */
 		    dorange = FALSE;
 		    didrange = TRUE;
 		    continue;
 		}
+
 		i = d - SvPVX(sv);		/* remember current offset */
 		SvGROW(sv, SvLEN(sv) + 256);	/* never more than 256 chars in a range */
 		d = SvPVX(sv) + i;		/* refresh d after realloc */
@@ -1297,8 +1302,8 @@ S_scan_const(pTHX_ char *start)
 		if (didrange) {
 		    Perl_croak(aTHX_ "Ambiguous range in transliteration operator");
 		}
-		if (utf) {
-		    *d++ = (char)0xff;	/* use illegal utf8 byte--see pmtrans */
+		if (has_utf8) {
+		    *d++ = UTF_TO_NATIVE(0xff);	/* use illegal utf8 byte--see pmtrans */
 		    s++;
 		    continue;
 		}
@@ -1367,6 +1372,8 @@ S_scan_const(pTHX_ char *start)
 	    if (s + 1 < send && !strchr("()| \n\t", s[1]))
 		break;		/* in regexp, $ might be tail anchor */
 	}
+
+	/* End of else if chain - OP_TRANS rejoin rest */
 
 	/* backslashes */
 	if (*s == '\\' && s+1 < send) {
@@ -1502,7 +1509,6 @@ S_scan_const(pTHX_ char *start)
 			    PL_sublex_info.sub_op->op_private |=
 				(PL_lex_repl ? OPpTRANS_FROM_UTF
 					     : OPpTRANS_TO_UTF);
-			    utf = TRUE;
 			}
                     }
 		    else {
@@ -1603,40 +1609,40 @@ S_scan_const(pTHX_ char *start)
 	} /* end if (backslash) */
 
     default_action:
-       if (!UTF8_IS_INVARIANT((U8)(*s)) && (this_utf8 || has_utf8)) {
-           STRLEN len = (STRLEN) -1;
-           UV uv;
-           if (this_utf8) {
-               uv = utf8n_to_uvchr((U8*)s, send - s, &len, 0);
-           }
-           if (len == (STRLEN)-1) {
-               /* Illegal UTF8 (a high-bit byte), make it valid. */
-               char *old_pvx = SvPVX(sv);
-               /* need space for one extra char (NOTE: SvCUR() not set here) */
-               d = SvGROW(sv, SvLEN(sv) + 1) + (d - old_pvx);
-               d = (char*)uvchr_to_utf8((U8*)d, (U8)*s++);
-           }
-           else {
-               while (len--)
-                   *d++ = *s++;
-           }
-           has_utf8 = TRUE;
-	   if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
-	       PL_sublex_info.sub_op->op_private |=
-		   (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
-	       utf = TRUE;
-	   }
-           continue;
-       }
-       *d++ = NATIVE_TO_NEED(has_utf8,*s++);
+	/* If we started with encoded form, or already know we want it
+	   and then encode the next character */
+	if ((has_utf8 || this_utf8) && !NATIVE_IS_INVARIANT((U8)(*s))) {
+	    STRLEN len  = 1;
+	    UV uv       = (this_utf8) ? utf8n_to_uvchr((U8*)s, send - s, &len, 0) : (UV) ((U8) *s);
+	    STRLEN need = UNISKIP(NATIVE_TO_UNI(uv));
+	    s += len;
+	    if (need > len) {
+		/* encoded value larger than old, need extra space (NOTE: SvCUR() not set here) */
+		STRLEN off = d - SvPVX(sv);
+		d = SvGROW(sv, SvLEN(sv) + (need-len)) + off;
+	    }
+	    d = (char*)uvchr_to_utf8((U8*)d, uv);
+	    has_utf8 = TRUE;
+	}
+	else {
+	    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
+	}
     } /* while loop to process each character */
 
     /* terminate the string and set up the sv */
     *d = '\0';
     SvCUR_set(sv, d - SvPVX(sv));
+    if (SvCUR(sv) >= SvLEN(sv))
+      Perl_croak(aTHX_ "panic:constant overflowed allocated space");
+
     SvPOK_on(sv);
-    if (has_utf8)
+    if (has_utf8) {
 	SvUTF8_on(sv);
+	if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
+		PL_sublex_info.sub_op->op_private |=
+		    (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
+	}
+    }
 
     /* shrink the sv if we allocated more than we used */
     if (SvCUR(sv) + 5 < SvLEN(sv)) {
