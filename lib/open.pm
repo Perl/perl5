@@ -6,7 +6,7 @@ our $VERSION = '1.01';
 
 my $locale_encoding;
 
-sub in_locale { $^H & $locale::hint_bits }
+sub in_locale { $^H & ($locale::hint_bits || 0)}
 
 sub _get_locale_encoding {
     unless (defined $locale_encoding) {
@@ -59,6 +59,7 @@ sub _get_locale_encoding {
 sub import {
     my ($class,@args) = @_;
     croak("`use open' needs explicit list of disciplines") unless @args;
+    my $std;
     $^H |= $open::hint_bits;
     my ($in,$out) = split(/\0/,(${^OPEN} || "\0"), -1);
     while (@args) {
@@ -67,6 +68,9 @@ sub import {
 	if ($type =~ /^:?(utf8|locale|encoding\(.+\))$/) {
 	    $type = 'IO';
 	    $dscp = ":$1";
+	} elsif ($type eq ':std') {
+	    $std = 1;
+	    next;
 	} else {
 	    $dscp = shift(@args) || '';
 	}
@@ -84,6 +88,7 @@ sub import {
 		} else {
 		    $layer = "encoding($locale_encoding)";
 		}
+		$std = 1;
 	    } else {
 		unless(PerlIO::Layer::->find($layer)) {
 		    carp("Unknown discipline layer '$layer'");
@@ -94,7 +99,6 @@ sub import {
 		$^H{"open_$type"} = $layer;
 	    }
 	}
-	# print "# type = $type, val = @val\n";
 	if ($type eq 'IN') {
 	    $in  = join(' ',@val);
 	}
@@ -109,6 +113,24 @@ sub import {
 	}
     }
     ${^OPEN} = join("\0",$in,$out) if $in or $out;
+    if ($std) {
+	if ($in) {
+	    if ($in =~ /:utf8\b/) {
+		    binmode(STDIN,  ":utf8");
+		} elsif ($in =~ /(\w+\(.+\))/) {
+		    binmode(STDIN,  ":$1");
+		}
+	}
+	if ($out) {
+	    if ($out =~ /:utf8\b/) {
+		binmode(STDOUT,  ":utf8");
+		binmode(STDERR,  ":utf8");
+	    } elsif ($out =~ /(\w+\(.+\))/) {
+		binmode(STDOUT,  ":$1");
+		binmode(STDERR,  ":$1");
+	    }
+	}
+    }
 }
 
 1;
@@ -129,6 +151,8 @@ open - perl pragma to set default disciplines for input and output
     use open ':utf8';
     use open ':locale';
     use open ':encoding(iso-8859-7)';
+
+    use open ':std';
 
 =head1 DESCRIPTION
 
@@ -182,6 +206,16 @@ and these
 
 When open() is given an explicit list of layers they are appended to
 the list declared using this pragma.
+
+The C<:std> subpragma on its own has no effect, but if combined with
+the C<:utf8> or C<:encoding> subpragmas, it converts the standard
+filehandles (STDIN, STDOUT, STDERR) to comply with encoding selected
+for input/output handles.  For example, if both input and out are
+chosen to be C<:utf8>, a C<:std> will mean that STDIN, STDOUT, and
+STDERR are also in C<:utf8>.  On the other hand, if only output is
+chosen to be in C<:encoding(koi8r)', a C<:std> will cause only the
+STDOUT and STDERR to be in C<koi8r>.  The C<:locale> subpragma
+implicitly turns on C<:std>.
 
 The logic of C<:locale> is as follows:
 
