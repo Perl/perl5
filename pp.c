@@ -3350,8 +3350,11 @@ PP(pp_unpack)
 	}
 	else if (isDIGIT(*pat)) {
 	    len = *pat++ - '0';
-	    while (isDIGIT(*pat))
+	    while (isDIGIT(*pat)) {
 		len = (len * 10) + (*pat++ - '0');
+		if (len < 0)
+		    Perl_croak(aTHX_ "Repeat count in unpack overflows");
+	    }
 	}
 	else
 	    len = (datumtype != '@');
@@ -4394,8 +4397,11 @@ PP(pp_pack)
 	}
 	else if (isDIGIT(*pat)) {
 	    len = *pat++ - '0';
-	    while (isDIGIT(*pat))
+	    while (isDIGIT(*pat)) {
 		len = (len * 10) + (*pat++ - '0');
+		if (len < 0)
+		    Perl_croak(aTHX_ "Repeat count in pack overflows");
+	    }
 	}
 	else
 	    len = 1;
