@@ -464,7 +464,7 @@ it has no prototype (C<PROTOTYPE> field is missing).
 =head1 EXPORTS
 
 C<Dump>, C<mstat>, C<DeadCode>, C<DumpArray>, C<DumpWithOP> and
-C<DumpProg>, C<fill_mstats>, C<mstats_fillhash<, C<mstats2hash> by
+C<DumpProg>, C<fill_mstats>, C<mstats_fillhash>, C<mstats2hash> by
 default. Additionally available C<SvREFCNT>, C<SvREFCNT_inc> and
 C<SvREFCNT_dec>.
 
