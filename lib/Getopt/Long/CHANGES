@@ -1,3 +1,23 @@
+Changes in version 2.27
+-----------------------
+
+* Fix several problems with internal and external use of 'die' and
+  signal handlers.
+
+* Fixed some bugs with subtle combinations of bundling_override and
+  ignore_case.
+
+* A callback routine that is associated with a hash-valued option will
+  now have both the hask key and the value passed. It used to get only
+  the value passed.
+
+* Eliminated the use of autoloading. Autoloading kept generating
+  problems during development, and when using perlcc.
+
+* Lots of internal restructoring to make room for extensions.
+
+* Redesigned the regression tests.
+
 Changes in version 2.26
 -----------------------
 
