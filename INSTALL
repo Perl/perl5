@@ -1416,7 +1416,7 @@ Study also how other non-UNIX ports have solved problems.
 
 =head1 suidperl
 
-suiperl is an optional component, which is built or installed by default.
+suidperl is an optional component, which is built or installed by default.
 From perlfaq1:
 
 	On some systems, setuid and setgid scripts (scripts written
@@ -1750,7 +1750,7 @@ the main Makefile.
 
 Since the functionality is so lacking, it must be considered
 highly experimental.  It is so experimental that it is not even
-mentioned during an interactive Configure session, a direct comand
+mentioned during an interactive Configure session, a direct command
 line invocation (detailed shortly) is required to access the
 functionality.
 
