@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..177\n";
+print "1..186\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
@@ -608,4 +608,24 @@ ok 174, $x eq "\x{100}\x{200}\xFFb";
     my $x = "0123456789\x{500}";
     my $y = substr $x, 4;
     ok 177, substr($x, 7, 1) eq "7";
+}
+
+# multiple assignments to lvalue [perl #24346]   
+{
+    my $x = "abcdef";
+    for (substr($x,1,3)) {
+	ok 178, $_ eq 'bcd';
+	$_ = 'XX';
+	ok 179, $_ eq 'XX';
+	ok 180, $x eq 'aXXef'; 
+	$_ = "\xFF";
+	ok 181, $_ eq "\xFF";   
+	ok 182, $x eq "a\xFFef";
+	$_ = "\xF1\xF2\xF3\xF4\xF5\xF6";
+	ok 183, $_ eq "\xF1\xF2\xF3\xF4\xF5\xF6";
+	ok 184, $x eq "a\xF1\xF2\xF3\xF4\xF5\xF6ef"; 
+	$_ = 'YYYY';
+	ok 185, $_ eq 'YYYY';   
+	ok 186, $x eq 'aYYYYef';
+    }
 }
