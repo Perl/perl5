@@ -1,14 +1,9 @@
 #!/usr/local/bin/perl -w
 # Test for File::Temp - tempfile function
 
-BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-	require Test; import Test;
-	plan(tests => 20);
-}
-
 use strict;
+use Test;
+BEGIN { plan tests => 20}
 use File::Spec;
 
 # Will need to check that all files were unlinked correctly

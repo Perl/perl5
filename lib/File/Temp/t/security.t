@@ -5,12 +5,8 @@
 # Test a simple open in the cwd and tmpdir foreach of the
 # security levels
 
-BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-	require Test; import Test;
-	plan(tests => 13);
-}
+use Test;
+BEGIN { plan tests => 13 }
 
 use strict;
 use File::Spec;
