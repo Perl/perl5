@@ -1594,6 +1594,21 @@ function.
 
 =back
 
+=over 8
+
+=item handler
+
+=item mask
+
+=item flags
+
+accessor functions to get/set the values of a SigAction object.
+
+	$sigset = $sigaction->mask;
+	$sigaction->flags(&POSIX::SA_RESTART);
+
+=back
+
 =head2 POSIX::SigSet
 
 =over 8

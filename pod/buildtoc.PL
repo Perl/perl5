@@ -81,6 +81,7 @@ if (-d "pod") {
     perlnetware             
     perlos2             
     perlos390           
+    perlos400           
     perlqnx
     perlplan9
     perlsolaris

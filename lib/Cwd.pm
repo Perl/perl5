@@ -192,7 +192,16 @@ foreach my $try (qw(/bin/pwd /usr/bin/pwd)) {
         last;
     }
 }
-$pwd_cmd ||= 'pwd';
+unless ($pwd_cmd) {
+    if (-x '/QOpenSys/bin/pwd') { # OS/400 PASE.
+        $pwd_cmd = '/QOpenSys/bin/pwd' ;
+    } else {
+        # Isn't this wrong?  _backtick_pwd() will fail if somenone has
+        # pwd in their path but it is not /bin/pwd or /usr/bin/pwd?
+        # See [perl #16774]. --jhi
+        $pwd_cmd = 'pwd';
+    }
+}
 
 # The 'natural and safe form' for UNIX (pwd may be setuid root)
 sub _backtick_pwd {

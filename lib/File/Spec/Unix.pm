@@ -88,7 +88,7 @@ complete path ending with a filename
 
 sub catfile {
     my $self = shift;
-    my $file = pop @_;
+    my $file = File::Spec->canonpath(pop @_);
     return $file unless @_;
     my $dir = $self->catdir(@_);
     $dir .= "/" unless substr($dir,-1) eq "/";

@@ -191,14 +191,14 @@ Perl_deb_stack_all(pTHX)
 	else
 	    si_name = si_names[si_name_ix];
 	PerlIO_printf(Perl_debug_log, "STACK %"IVdf": %s\n",
-						si_ix, si_name);
+						(IV)si_ix, si_name);
 
 	for (ix=0; ix<=si->si_cxix; ix++) {
 
 	    cx = &(si->si_cxstack[ix]);
 	    PerlIO_printf(Perl_debug_log,
 		    "  CX %"IVdf": %-6s => ",
-		    ix, PL_block_type[CxTYPE(cx)]
+		    (IV)ix, PL_block_type[CxTYPE(cx)]
 	    );
 	    /* substitution contexts don't save stack pointers etc) */
 	    if (CxTYPE(cx) == CXt_SUBST)

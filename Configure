@@ -5418,7 +5418,7 @@ case "$usenm" in
 	esac
 	case "$dflt" in
 	'') 
-		if $test "$osname" = aix -a ! -f /lib/syscalls.exp; then
+		if $test "$osname" = aix -a "X$PASE" != "$Xdefine" -a ! -f /lib/syscalls.exp; then
 			echo " "
 			echo "Whoops!  This is an AIX system without /lib/syscalls.exp!" >&4
 			echo "'nm' won't be sufficient on this sytem." >&4
@@ -5765,11 +5765,19 @@ else
 	fi
 fi
 nm_extract="$com"
-if $test -f /lib/syscalls.exp; then
+case "$PASE" in
+define)
+    echo " "
+    echo "Since you are compiling for PASE, extracting more symbols from libc.a...">&4
+    nm -Tv /lib/libc.a | grep '^\.[a-z]' | awk '$2 == "T" {print $1}' | sed 's/^.//' >> libc.list
+    ;;
+*)  if $test -f /lib/syscalls.exp; then
 	echo " "
 	echo "Also extracting names from /lib/syscalls.exp for good ole AIX..." >&4
 	$sed -n 's/^\([^ 	]*\)[ 	]*syscall[0-9]*[ 	]*$/\1/p' /lib/syscalls.exp >>libc.list
-fi
+    fi
+    ;;
+esac
 ;;
 esac
 $rm -f libnames libpath

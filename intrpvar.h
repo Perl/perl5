@@ -524,6 +524,8 @@ PERLVAR(Isort_RealCmp,  SVCOMPARE_t)
 
 PERLVARI(Icheckav_save, AV*, Nullav)	/* save CHECK{}s when compiling */
 
+PERLVARI(Iclocktick, long, 0)	/* this many times() ticks in a second */
+
 /* New variables must be added to the very end for binary compatibility.
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h. */

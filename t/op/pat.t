@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..922\n";
+print "1..924\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2902,3 +2902,12 @@ print "e" =~ /\P{InConsonant}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 }
 
 $test = 923;
+
+$a = bless qr/foo/, 'Foo';
+print(('goodfood' =~ $a ? '' : 'not '),
+	"ok $test\t# reblessed qr// matches\n");
+++$test;
+
+print(($a eq '(?-xism:foo)' ? '' : 'not '),
+	"ok $test\t# reblessed qr// stringizes\n");
+++$test;

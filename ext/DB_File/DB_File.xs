@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 1st March 2002
- version 1.803
+ last modified 1st September 2002
+ version 1.805
 
  All comments/suggestions/problems are welcome
 
@@ -101,6 +101,10 @@
         1.802 - No change to DB_File.xs
         1.803 - FETCH, STORE & DELETE don't map the flags parameter
                 into the equivalent Berkeley DB function anymore.
+        1.804 - no change.
+        1.805 - recursion detection added to the callbacks
+                Support for 4.1.X added.
+                Filter code can now cope with read-only $_
 
 */
 
@@ -180,6 +184,10 @@
 
 #if DB_VERSION_MAJOR > 3 || (DB_VERSION_MAJOR == 3 && DB_VERSION_MINOR >= 2)
 #    define AT_LEAST_DB_3_2
+#endif
+
+#if DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
+#    define AT_LEAST_DB_4_1
 #endif
 
 /* map version 2 features & constants onto their version 1 equivalent */
@@ -334,8 +342,8 @@ typedef union INFO {
 #define db_get(db, key, value, flags)   ((db->dbp)->get)(db->dbp, TXN &key, &value, flags)
 
 #ifdef DB_VERSION_MAJOR
-#define db_DESTROY(db)                  ( db->cursor->c_close(db->cursor),\
-					  (db->dbp->close)(db->dbp, 0) )
+#define db_DESTROY(db)                  (!db->aborted && ( db->cursor->c_close(db->cursor),\
+					  (db->dbp->close)(db->dbp, 0) ))
 #define db_close(db)			((db->dbp)->close)(db->dbp, 0)
 #define db_del(db, key, flags)          (flagSet(flags, R_CURSOR) 					\
 						? ((db->cursor)->c_del)(db->cursor, 0)		\
@@ -343,7 +351,7 @@ typedef union INFO {
 
 #else /* ! DB_VERSION_MAJOR */
 
-#define db_DESTROY(db)                  ((db->dbp)->close)(db->dbp)
+#define db_DESTROY(db)                  (!db->aborted && ((db->dbp)->close)(db->dbp))
 #define db_close(db)			((db->dbp)->close)(db->dbp)
 #define db_del(db, key, flags)          ((db->dbp)->del)(db->dbp, &key, flags)
 #define db_put(db, key, value, flags)   ((db->dbp)->put)(db->dbp, &key, &value, flags)
@@ -357,8 +365,12 @@ typedef struct {
 	DBTYPE	type ;
 	DB * 	dbp ;
 	SV *	compare ;
+	bool	in_compare ;
 	SV *	prefix ;
+	bool	in_prefix ;
 	SV *	hash ;
+	bool	in_hash ;
+	bool	aborted ;
 	int	in_memory ;
 #ifdef BERKELEY_DB_1_OR_2
 	INFO 	info ;
@@ -382,6 +394,8 @@ typedef DBT DBTKEY ;
 #define OutputValue(arg, name)  					\
 	{ if (RETVAL == 0) {						\
 	      my_sv_setpvn(arg, name.data, name.size) ;			\
+	      TAINT;                                       	\
+	      SvTAINTED_on(arg);                                       	\
 	      DBM_ckFilter(arg, filter_fetch_value,"filter_fetch_value") ; 	\
 	  }								\
 	}
@@ -394,6 +408,8 @@ typedef DBT DBTKEY ;
 		}							\
 		else 							\
 		    sv_setiv(arg, (I32)*(I32*)name.data - 1); 		\
+	      TAINT;                                       	\
+	      SvTAINTED_on(arg);                                       	\
 	      DBM_ckFilter(arg, filter_fetch_key,"filter_fetch_key") ; 	\
 	  } 								\
 	}
@@ -421,6 +437,8 @@ START_MY_CXT
 #define zero		(MY_CXT.x_zero)
 #define CurrentDB	(MY_CXT.x_CurrentDB)
 #define empty		(MY_CXT.x_empty)
+
+#define ERR_BUFF "DB_File::Error"
 
 #ifdef DB_VERSION_MAJOR
 
@@ -484,6 +502,13 @@ u_int		flags ;
 
 #endif /* DB_VERSION_MAJOR */
 
+static void
+tidyUp(DB_File db)
+{
+    /* db_DESTROY(db); */
+    db->aborted = TRUE ;
+}
+
 
 static int
 #ifdef AT_LEAST_DB_3_2
@@ -518,7 +543,14 @@ const DBT * key2 ;
     void * data1, * data2 ;
     int retval ;
     int count ;
+    DB_File	keep_CurrentDB = CurrentDB;
     
+
+    if (CurrentDB->in_compare) {
+        tidyUp(CurrentDB);
+        croak ("DB_File btree_compare: recursion detected\n") ;
+    }
+
     data1 = (char *) key1->data ;
     data2 = (char *) key2->data ;
 
@@ -542,18 +574,26 @@ const DBT * key2 ;
     PUSHs(sv_2mortal(newSVpvn(data2,key2->size)));
     PUTBACK ;
 
+    CurrentDB->in_compare = TRUE;
+
     count = perl_call_sv(CurrentDB->compare, G_SCALAR); 
+
+    CurrentDB = keep_CurrentDB;
+    CurrentDB->in_compare = FALSE;
 
     SPAGAIN ;
 
-    if (count != 1)
+    if (count != 1){
+        tidyUp(CurrentDB);
         croak ("DB_File btree_compare: expected 1 return value from compare sub, got %d\n", count) ;
+    }
 
     retval = POPi ;
 
     PUTBACK ;
     FREETMPS ;
     LEAVE ;
+
     return (retval) ;
 
 }
@@ -590,7 +630,13 @@ const DBT * key2 ;
     char * data1, * data2 ;
     int retval ;
     int count ;
+    DB_File	keep_CurrentDB = CurrentDB;
     
+    if (CurrentDB->in_prefix){
+        tidyUp(CurrentDB);
+        croak ("DB_File btree_prefix: recursion detected\n") ;
+    }
+
     data1 = (char *) key1->data ;
     data2 = (char *) key2->data ;
 
@@ -614,12 +660,19 @@ const DBT * key2 ;
     PUSHs(sv_2mortal(newSVpvn(data2,key2->size)));
     PUTBACK ;
 
+    CurrentDB->in_prefix = TRUE;
+
     count = perl_call_sv(CurrentDB->prefix, G_SCALAR); 
+
+    CurrentDB = keep_CurrentDB;
+    CurrentDB->in_prefix = FALSE;
 
     SPAGAIN ;
 
-    if (count != 1)
+    if (count != 1){
+        tidyUp(CurrentDB);
         croak ("DB_File btree_prefix: expected 1 return value from prefix sub, got %d\n", count) ;
+    }
  
     retval = POPi ;
  
@@ -668,6 +721,12 @@ HASH_CB_SIZE_TYPE size ;
     dMY_CXT;
     int retval ;
     int count ;
+    DB_File	keep_CurrentDB = CurrentDB;
+
+    if (CurrentDB->in_hash){
+        tidyUp(CurrentDB);
+        croak ("DB_File hash callback: recursion detected\n") ;
+    }
 
 #ifndef newSVpvn
     if (size == 0)
@@ -683,12 +742,19 @@ HASH_CB_SIZE_TYPE size ;
     XPUSHs(sv_2mortal(newSVpvn((char*)data,size)));
     PUTBACK ;
 
+    keep_CurrentDB->in_hash = TRUE;
+
     count = perl_call_sv(CurrentDB->hash, G_SCALAR); 
+
+    CurrentDB = keep_CurrentDB;
+    CurrentDB->in_hash = FALSE;
 
     SPAGAIN ;
 
-    if (count != 1)
+    if (count != 1){
+        tidyUp(CurrentDB);
         croak ("DB_File hash_cb: expected 1 return value from hash sub, got %d\n", count) ;
+    }
 
     retval = POPi ;
 
@@ -699,6 +765,24 @@ HASH_CB_SIZE_TYPE size ;
     return (retval) ;
 }
 
+static void
+#ifdef CAN_PROTOTYPE
+db_errcall_cb(const char * db_errpfx, char * buffer)
+#else
+db_errcall_cb(db_errpfx, buffer)
+const char * db_errpfx;
+char * buffer;
+#endif
+{
+    dTHX;
+    SV * sv = perl_get_sv(ERR_BUFF, FALSE) ;
+    if (sv) {
+        if (db_errpfx)
+            sv_setpvf(sv, "%s: %s", db_errpfx, buffer) ;
+        else
+            sv_setpv(sv, buffer) ;
+    }
+} 
 
 #if defined(TRACE) && defined(BERKELEY_DB_1_OR_2)
 
@@ -808,8 +892,10 @@ I32      value ;
 	I32 length = GetArrayLength(aTHX_ db) ;
 
 	/* check for attempt to write before start of array */
-	if (length + value + 1 <= 0)
+	if (length + value + 1 <= 0) {
+            tidyUp(db);
 	    croak("Modification of non-creatable array value attempted, subscript %ld", (long)value) ;
+	}
 
 	value = length + value + 1 ;
     }
@@ -1333,14 +1419,22 @@ SV *   sv ;
             Flags |= DB_TRUNCATE ;
 #endif
 
+#ifdef AT_LEAST_DB_4_1
+        status = (RETVAL->dbp->open)(RETVAL->dbp, NULL, name, NULL, RETVAL->type, 
+	    			Flags, mode) ; 
+#else
         status = (RETVAL->dbp->open)(RETVAL->dbp, name, NULL, RETVAL->type, 
 	    			Flags, mode) ; 
+#endif
 	/* printf("open returned %d %s\n", status, db_strerror(status)) ; */
 
-        if (status == 0)
+        if (status == 0) {
+	    RETVAL->dbp->set_errcall(RETVAL->dbp, db_errcall_cb) ;
+
             status = (RETVAL->dbp->cursor)(RETVAL->dbp, NULL, &RETVAL->cursor,
 			0) ;
-	/* printf("cursor returned %d %s\n", status, db_strerror(status)) ; */
+	    /* printf("cursor returned %d %s\n", status, db_strerror(status)) ; */
+	}
 
         if (status)
 	    RETVAL->dbp = NULL ;
@@ -1362,6 +1456,8 @@ INCLUDE: constants.xs
 
 BOOT:
   {
+    dTHX;
+    SV * sv_err = perl_get_sv(ERR_BUFF, GV_ADD|GV_ADDMULTI) ;    
     MY_CXT_INIT;
     __getBerkeleyDBInfo() ;
  
@@ -1404,7 +1500,9 @@ db_DESTROY(db)
 	  dMY_CXT;
 	INIT:
 	  CurrentDB = db ;
+	  Trace(("DESTROY %p\n", db));
 	CLEANUP:
+	  Trace(("DESTROY %p done\n", db));
 	  if (db->hash)
 	    SvREFCNT_dec(db->hash) ;
 	  if (db->compare)
@@ -1468,7 +1566,6 @@ db_FETCH(db, key, flags=0)
 
 	    DBT_clear(value) ; 
 	    CurrentDB = db ;
-	    /* RETVAL = ((db->dbp)->get)(db->dbp, TXN &key, &value, flags) ; */
 	    RETVAL = db_get(db, key, value, flags) ;
 	    ST(0) = sv_newmortal();
 	    OutputValue(ST(0), value)

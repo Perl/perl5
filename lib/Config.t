@@ -4,7 +4,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 23;
+plan tests => 29;
 
 use_ok('Config');
 
@@ -15,6 +15,16 @@ ok(keys %Config > 500, "Config has more than 500 entries");
 ok(each %Config);
 
 is($Config{PERL_REVISION}, 5, "PERL_REVISION is 5");
+
+# Check that old config variable names are aliased to their new ones.
+my %grandfathers = ( PERL_VERSION       => 'PATCHLEVEL',
+                     PERL_SUBVERSION    => 'SUBVERSION',
+                     PERL_CONFIG_SH     => 'CONFIG'
+                   );
+while( my($new, $old) = each %grandfathers ) {
+    isnt($Config{$new}, undef,       "$new is defined");
+    is($Config{$new}, $Config{$old}, "$new is aliased to $old");
+}
 
 ok( exists $Config{cc},      "has cc");
 

@@ -1077,6 +1077,15 @@ MODULE = B	PACKAGE = B::MAGIC	PREFIX = Mg
 B::MAGIC
 MgMOREMAGIC(mg)
 	B::MAGIC	mg
+     CODE:
+	if( MgMOREMAGIC(mg) ) {
+	    RETVAL = MgMOREMAGIC(mg);
+	}
+	else {
+	    XSRETURN_UNDEF;
+	}
+     OUTPUT:
+	RETVAL
 
 U16
 MgPRIVATE(mg)
