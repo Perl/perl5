@@ -4,9 +4,7 @@
 my %Expect_File = (); # what we expect for $_ 
 my %Expect_Name = (); # what we expect for $File::Find::name/fullname
 my %Expect_Dir  = (); # what we expect for $File::Find::dir
-my $symlink_exists = eval { symlink("",""); 1 };
-my $cwd;
-my $cwd_untainted;
+my ($cwd, $cwd_untainted);
 
 use Config;
 
@@ -35,23 +33,27 @@ BEGIN {
     $ENV{'PATH'} = join($sep,@path);
 }
 
+use Test::More tests => 45;
 
-if ( $symlink_exists ) { print "1..45\n"; }
-else                   { print "1..27\n";  }
+my $symlink_exists = eval { symlink("",""); 1 };
 
 use File::Find;
 use File::Spec;
 use Cwd;
 
-
 cleanup();
 
-find({wanted => sub { print "ok 1\n" if $_ eq 'commonsense.t'; },
-      untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
-
-finddepth({wanted => sub { print "ok 2\n" if $_ eq 'commonsense.t'; },
-           untaint => 1, untaint_pattern => qr|^(.+)$|},
-           File::Spec->curdir);
+my $found;
+find({wanted => sub { $found = 1 if ($_ eq 'commonsense.t') }, 
+		untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
+  
+ok($found, 'commonsense.t found');
+$found = 0;
+  
+finddepth({wanted => sub { $found = 1 if $_ eq 'commonsense.t'; },
+           untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
+  
+ok($found, 'commonsense.t found again');
 
 my $case = 2;
 my $FastFileTests_OK = 0;
@@ -83,37 +85,19 @@ END {
     cleanup();
 }
 
-sub Check($) {
-    $case++;
-    if ($_[0]) { print "ok $case\n"; }
-    else       { print "not ok $case\n"; }
-
-}
-
-sub CheckDie($) {
-    $case++;
-    if ($_[0]) { print "ok $case\n"; }
-    else       { print "not ok $case\n"; exit 0; }
-}
-
-sub Skip($) {
-    $case++;
-    print "ok $case # skipped: ",$_[0],"\n"; 
-}
-
 sub touch {
-    CheckDie( open(my $T,'>',$_[0]) );
+    ok( open(my $T,'>',$_[0]), "Opened $_[0] successfully" );
 }
 
 sub MkDir($$) {
-    CheckDie( mkdir($_[0],$_[1]) );
+    ok( mkdir($_[0],$_[1]), "Created directory $_[0] successfully" );
 }
 
 sub wanted_File_Dir {
     print "# \$File::Find::dir => '$File::Find::dir'\n";
     print "# \$_ => '$_'\n";
     s#\.$## if ($^O eq 'VMS' && $_ ne '.');
-    Check( $Expect_File{$_} );
+	ok( $Expect_File{$_}, "Expected and found $File::Find::name" );
     if ( $FastFileTests_OK ) {
         delete $Expect_File{ $_} 
           unless ( $Expect_Dir{$_} && ! -d _ );
@@ -127,7 +111,6 @@ sub wanted_File_Dir_prune {
     &wanted_File_Dir;
     $File::Find::prune=1 if  $_ eq 'faba';
 }
-
 
 sub simple_wanted {
     print "# \$File::Find::dir => '$File::Find::dir'\n";
@@ -251,9 +234,8 @@ sub file_path_name {
 }
 
 
-
 MkDir( dir_path('for_find'), 0770 );
-CheckDie(chdir( dir_path('for_find')));
+ok( chdir( dir_path('for_find')), 'successful chdir() to for_find' );
 
 $cwd = cwd(); # save cwd
 ( $cwd_untainted ) = $cwd =~ m|^(.+)$|; # untaint it
@@ -263,10 +245,13 @@ MkDir( dir_path('fb'), 0770  );
 touch( file_path('fb', 'fb_ord') );
 MkDir( dir_path('fb', 'fba'), 0770  );
 touch( file_path('fb', 'fba', 'fba_ord') );
+SKIP: {
+	skip "Creating symlink", 1, unless $symlink_exists;
 if ($^O eq 'MacOS') {
-      CheckDie( symlink(':fb',':fa:fsl') ) if $symlink_exists;
+      ok( symlink(':fb',':fa:fsl'), 'Created symbolic link' );
 } else {
-      CheckDie( symlink('../fb','fa/fsl') ) if $symlink_exists;
+      ok( symlink('../fb','fa/fsl'), 'Created symbolic link' );
+}
 }
 touch( file_path('fa', 'fa_ord') );
 
@@ -297,7 +282,7 @@ delete @Expect_Dir{ dir_path('fb'), dir_path('fba') } unless $symlink_exists;
 File::Find::find( {wanted => \&wanted_File_Dir_prune, untaint => 1,
 		   untaint_pattern => qr|^(.+)$|}, topdir('fa') );
 
-Check( scalar(keys %Expect_File) == 0 );
+is(scalar keys %Expect_File, 0, 'Found all expected files');
 
 
 # don't untaint at all, should die
@@ -306,7 +291,7 @@ Check( scalar(keys %Expect_File) == 0 );
 %Expect_Dir  = ();
 undef $@;
 eval {File::Find::find( {wanted => \&simple_wanted}, topdir('fa') );};
-Check( $@ =~ m|Insecure dependency| );
+like( $@, qr|Insecure dependency|, 'Tainted directory causes death (good)' );
 chdir($cwd_untainted);
 
 
@@ -317,7 +302,7 @@ eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
                          untaint_pattern => qr|^(NO_MATCH)$|},
                          topdir('fa') );};
 
-Check( $@ =~ m|is still tainted| );
+like( $@, qr|is still tainted|, 'Bad untaint pattern causes death (good)' );
 chdir($cwd_untainted);
 
 
@@ -331,12 +316,13 @@ eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
 
 print "# $@" if $@;
 #$^D = 8;
-Check( $@ =~ m|insecure cwd| );
-
+like( $@, qr|insecure cwd|, 'Bad untaint pattern causes death in cwd (good)' );
+ 
 chdir($cwd_untainted);
 
 
-if ( $symlink_exists ) {
+SKIP: {
+    skip "Symbolic link tests", 17, unless $symlink_exists;
     print "# --- symbolic link tests --- \n";
     $FastFileTests_OK= 1;
 
@@ -371,7 +357,7 @@ if ( $symlink_exists ) {
                        no_chdir => 1, untaint => 1, untaint_pattern =>
                        qr|^(.+)$| }, topdir('fa') );
 
-    Check( scalar(keys %Expect_File) == 0 );
+    is( scalar(keys %Expect_File), 0, 'Found all files in symlink test' );
  
     
     # don't untaint at all, should die
@@ -380,7 +366,7 @@ if ( $symlink_exists ) {
     eval {File::Find::find( {wanted => \&simple_wanted, follow => 1},
 			    topdir('fa') );};
 
-    Check( $@ =~ m|Insecure dependency| );
+    like( $@, qr|Insecure dependency|, 'Not untainting causes death (good)' );
     chdir($cwd_untainted);
 
     # untaint pattern doesn't match, should die
@@ -390,7 +376,7 @@ if ( $symlink_exists ) {
                              untaint => 1, untaint_pattern =>
                              qr|^(NO_MATCH)$|}, topdir('fa') );};
 
-    Check( $@ =~ m|is still tainted| );
+    like( $@, qr|is still tainted|, 'Bat untaint pattern causes death (good)' );
     chdir($cwd_untainted);
 
     # untaint pattern doesn't match, should die when we chdir to cwd
@@ -400,7 +386,7 @@ if ( $symlink_exists ) {
     eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
                              untaint_skip => 1, untaint_pattern =>
                              qr|^(NO_MATCH)$|}, topdir('fa') );};
-    Check( $@ =~ m|insecure cwd| );
+    like( $@, qr|insecure cwd|, 'Cwd not untainted with bad pattern (good)' );
 
     chdir($cwd_untainted);
 } 
