@@ -171,9 +171,9 @@ very useful for creating skeletons of pure Perl modules.
 
 =item L<dprofpp|dprofpp>
 
-Perl comes with a profiler, the F<Devel::Dprof> module. The
+Perl comes with a profiler, the F<Devel::DProf> module. The
 F<dprofpp> utility analyzes the output of this profiler and tells you
-which subroutines are taking up the most run time. See L<Devel::Dprof>
+which subroutines are taking up the most run time. See L<Devel::DProf>
 for more information.
 
 =item L<perlcc|perlcc>
@@ -190,6 +190,6 @@ L<podchecker|podchecker>, L<splain|splain>, L<perldiag>,
 L<roffitall|roffitall>, L<a2p|a2p>, L<s2p|s2p>, L<find2perl|find2perl>,
 L<File::Find|File::Find>, L<pl2pm|pl2pm>, L<perlbug|perlbug>,
 L<h2ph|h2ph>, L<c2ph|c2ph>, L<h2xs|h2xs>, L<dprofpp|dprofpp>,
-L<Devel::Dprof>, L<perlcc|perlcc>
+L<Devel::DProf>, L<perlcc|perlcc>
 
 =cut

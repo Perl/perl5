@@ -948,7 +948,7 @@ L<perldebtut>,
 L<perldebguts>,
 L<re>,
 L<DB>,
-L<Devel::Dprof>,
+L<Devel::DProf>,
 L<dprofpp>,
 L<Dumpvalue>,
 and

@@ -643,7 +643,7 @@ programming language, you insensitive scoundrel!
 
 Starting from Perl 5.6 Perl has had some level of multibyte character
 support.  Perl 5.8 or later is recommended.  Supported multibyte
-character repetoires include Unicode, and legacy encodings
+character repertoires include Unicode, and legacy encodings
 through the Encode module.  See L<perluniintro>, L<perlunicode>,
 and L<Encode>.
 

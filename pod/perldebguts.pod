@@ -967,4 +967,4 @@ L<perlguts>,
 L<perlrun>
 L<re>,
 and
-L<Devel::Dprof>.
+L<Devel::DProf>.

@@ -1714,7 +1714,7 @@ have been designed so that they will work with non-threaded Perl as well.
 It is therefore strongly recommended that these macros be used by all
 XS modules that make use of static data.
 
-The easiest way to get a template set of macros to use is by specifiying
+The easiest way to get a template set of macros to use is by specifying
 the C<-g> (C<--global>) option with h2xs (see L<h2xs>).
 
 Below is an example module that makes use of the macros.

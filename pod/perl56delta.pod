@@ -1011,7 +1011,7 @@ messages. For example:
 
     =head1 NAME
 
-    sample - Using GetOpt::Long and Pod::Usage
+    sample - Using Getopt::Long and Pod::Usage
 
     =head1 SYNOPSIS
 

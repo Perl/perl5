@@ -730,9 +730,9 @@ As you can see, the continuation bytes all begin with C<10>, and the
 leading bits of the start byte tells how many bytes the are in the
 encoded character.
 
-=item UTF-EBDIC
+=item UTF-EBCDIC
 
-Like UTF-8, but EBDCIC-safe, as UTF-8 is ASCII-safe.
+Like UTF-8, but EBCDIC-safe, as UTF-8 is ASCII-safe.
 
 =item UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
 

@@ -12,7 +12,7 @@ our $Verbose;
 
 Exporter::Heavy - Exporter guts
 
-=head1 SYNOPIS
+=head1 SYNOPSIS
 
 (internal use only)
 
