@@ -33,7 +33,11 @@ $ORS = "\n";
 
 {
 	local(*IN, *OUT);
-	pipe(IN, OUT);
+	if ($^O ne 'dos') {
+	    pipe(IN, OUT);
+	} else {
+	    open(OUT, ">en.tmp");
+	}
 	select(OUT);
 	$| = 1;
 	print 'ok', '7';
@@ -44,6 +48,7 @@ $ORS = "\n";
 	my $close = close OUT;
 	ok( !($close) == $CHILD_ERROR, '$CHILD_ERROR should be false' );
 
+	open(IN, "<en.tmp") if ($^O eq 'dos');
 	my $foo = <IN>;
 	like( $foo, qr/ok 7/, '$OFS' );
 
@@ -75,7 +80,7 @@ like( $EVAL_ERROR, qr/method/, '$EVAL_ERROR' );
 
 is( $UID, $<, '$UID' );
 is( $GID, $(, '$GID' );
-is( $EUID, $>, '$EUID' ); 
+is( $EUID, $>, '$EUID' );
 is( $EGID, $), '$EGID' );
 
 is( $PROGRAM_NAME, $0, '$PROGRAM_NAME' );
@@ -117,8 +122,8 @@ $SUBSEP = ',';
 $hash{'a', 'b', 'c'} = 1;
 my @keys = sort keys %hash;
 
-is( $keys[0], 'a,b,c', '$SUBSCRIPT_SEPARATOR' ); 
-is( $keys[1], 'd|e|f', '$SUBSCRIPT_SEPARATOR' ); 
+is( $keys[0], 'a,b,c', '$SUBSCRIPT_SEPARATOR' );
+is( $keys[1], 'd|e|f', '$SUBSCRIPT_SEPARATOR' );
 
 eval { is( $EXCEPTIONS_BEING_CAUGHT, 1, '$EXCEPTIONS_BEING_CAUGHT' ) };
 ok( !$EXCEPTIONS_BEING_CAUGHT, '$EXCEPTIONS_BEING_CAUGHT should be false' );

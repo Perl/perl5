@@ -1,5 +1,11 @@
 Revision history for Perl extension Test::Harness
 
+2.24  Wed May 29 19:02:18 EDT 2002
+    * Nikola Knezevic found a bug when tests are completely skipped
+      but no reason is given it was considered a failure.
+    * Made Test::Harness::Straps->analyze_file & Test::Harness a bit
+      more graceful when the test doesn't exist.
+
 2.23  Wed May 22 12:59:47 EDT 2002
     - reason for all skip wasn't being displayed.  Broken in 2.20.
     - Changed the wait status tests to conform with POSIX standards.

@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.27';
+$VERSION = '0.28';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -485,9 +485,11 @@ sub _mul_use_mul
     }
 
   # since multiplying $x with $x fails, make copy in this case
-  $yv = [@$xv] if "$xv" eq "$yv";	# same references?
+  $yv = [@$xv] if $xv == $yv;	# same references?
+#  $yv = [@$xv] if "$xv" eq "$yv";	# same references?
+
   # since multiplying $x with $x would fail here, use the faster squaring
-#  return _square($c,$xv) if "$xv" eq "$yv";	# same reference?
+#  return _square($c,$xv) if $xv == $yv;	# same reference?
 
   if ($LEN_CONVERT != 0)
     {
@@ -565,9 +567,10 @@ sub _mul_use_div
 
  
   # since multiplying $x with $x fails, make copy in this case
-  $yv = [@$xv] if "$xv" eq "$yv";	# same references?
+  $yv = [@$xv] if $xv == $yv;	# same references?
+#  $yv = [@$xv] if "$xv" eq "$yv";	# same references?
   # since multiplying $x with $x would fail here, use the faster squaring
-#  return _square($c,$xv) if "$xv" eq "$yv";	# same reference?
+#  return _square($c,$xv) if $xv == $yv;	# same reference?
 
   if ($LEN_CONVERT != 0)
     {
@@ -642,7 +645,7 @@ sub _div_use_mul
     return $x;
     }
 
-  my $y = [ @$yorg ];
+  my $y = [ @$yorg ];				# always make copy to preserve
   if ($LEN_CONVERT != 0)
     {
     $c->_to_small($x); $c->_to_small($y);
@@ -782,7 +785,7 @@ sub _div_use_div
     return $x;
     }
 
-  my $y = [ @$yorg ];
+  my $y = [ @$yorg ];				# always make copy to preserve
   if ($LEN_CONVERT != 0)
     {
     $c->_to_small($x); $c->_to_small($y);
@@ -1571,6 +1574,16 @@ sub _from_bin
   $x;
   }
 
+sub _modinv
+  {
+  # inverse modulus
+  }
+
+sub _modpow
+  {
+  # modulus of power ($x ** $y) % $z
+  }
+
 ##############################################################################
 ##############################################################################
 
@@ -1674,6 +1687,8 @@ slow) fallback routines to emulate these:
 	_gcd(obj,obj)	return Greatest Common Divisor of two objects
 	
 	_zeros(obj)	return number of trailing decimal zeros
+	_modinv		return inverse modulus
+	_modpow		return modulus of power ($x ** $y) % $z
 
 Input strings come in as unsigned but with prefix (i.e. as '123', '0xabc'
 or '0b1101').

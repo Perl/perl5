@@ -11,7 +11,7 @@ require Exporter;
 use vars qw(@ISA @EXPORT $VERSION);
 @ISA     = qw(Exporter);
 @EXPORT  = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f);
-$VERSION = '1.03_01';
+$VERSION = '1.04';
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -126,7 +126,7 @@ sub touch
  expand_wildcards();
  while (@ARGV)
   {
-   my $file = shift(@ARGV);               
+   my $file = shift(@ARGV);
    open(FILE,">>$file") || die "Cannot write $file:$!";
    close(FILE);
    utime($t,$t,$file);

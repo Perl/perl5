@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.31 2002/05/18 20:19:06 schwern Exp $
+# $Id: Harness.pm,v 1.33 2002/05/29 23:02:48 schwern Exp $
 
 package Test::Harness;
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = '2.23';
+$VERSION = '2.24';
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -158,13 +158,6 @@ Similarly, one can include a similar explanation in a C<1..0> line
 emitted if the test script is skipped completely:
 
   1..0 # Skipped: no leverage found
-
-If you don't have any comment on skipping, just print C<1..0> with 
-nothing after it. Test::Harness will say something like this:
-
-op/64bitint..............skipped
-       skipped: no reason given
-       
 
 =item B<Todo tests>
 
@@ -462,7 +455,8 @@ sub _run_all_tests {
         $tot{files}++;
 
         $Strap->{_seen_header} = 0;
-        my %results = $Strap->analyze_file($tfile);
+        my %results = $Strap->analyze_file($tfile) or
+          do { warn "$Strap->{error}\n";  next };
 
         # state of the current test.
         my @failed = grep { !$results{details}[$_-1]{ok} }
@@ -502,11 +496,11 @@ sub _run_all_tests {
                 print "$test{ml}ok\n        ".join(', ', @msg)."\n";
             } elsif ($test{max}) {
                 print "$test{ml}ok\n";
-            } elsif (defined $test{skip_all}) {
+            } elsif (length $test{skip_all}) {
                 print "skipped\n        all skipped: $test{skip_all}\n";
                 $tot{skipped}++;
             } else {
-                print "\n        skipped test on this platform\n";
+                print "skipped\n        all skipped: no reason given\n";
                 $tot{skipped}++;
             }
             $tot{good}++;

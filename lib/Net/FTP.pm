@@ -22,7 +22,7 @@ use Net::Config;
 use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 # use AutoLoader qw(AUTOLOAD);
 
-$VERSION = "2.64"; # $Id: //depot/libnet/Net/FTP.pm#67 $
+$VERSION = "2.65"; # $Id: //depot/libnet/Net/FTP.pm#68 $
 @ISA     = qw(Exporter Net::Cmd IO::Socket::INET);
 
 # Someday I will "use constant", when I am not bothered to much about
@@ -756,7 +756,7 @@ sub _store_cmd
  $sock->close() or
 	return undef;
 
- if ('STOU' eq uc $cmd and $ftp->message =~ m/unique\ file\ name:(.*)\)|"(.*)"/)
+ if ('STOU' eq uc $cmd and $ftp->message =~ m/unique\s+file\s*name\s*:\s*(.*)\)|"(.*)"/)
   {
    require File::Basename;
    $remote = File::Basename::basename($+) 
@@ -1710,6 +1710,6 @@ under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/FTP.pm#67 $>
+I<$Id: //depot/libnet/Net/FTP.pm#68 $>
 
 =cut

@@ -1717,6 +1717,12 @@ safe subprocesses, sockets, and semaphores)
 
 =item Signals
 
+=over 4
+
+=item Handling the SIGHUP Signal in Daemons
+
+=back
+
 =item Named Pipes
 
 =over 4
@@ -2106,6 +2112,8 @@ portable
 
 =item System Interaction
 
+=item Command names versus file pathnames
+
 =item Interprocess Communication (IPC)
 
 =item External Subroutines (XS)
@@ -2333,8 +2341,6 @@ LC_NUMERIC, LC_TIME, LANG
 =item Miscellaneous
 
 =item Questions With Answers
-
-, , , , , , 
 
 =item Hexadecimal Notation
 
@@ -3062,10 +3068,10 @@ Trig functions?
 
 =item How do I convert between numeric representations?
 
-B<How do I convert hexadecimal into decimal:>, B<How do I convert from
-decimal to hexadecimal:>, B<How do I convert from octal to decimal:>, B<How
-do I convert from decimal to octal:>, B<How do I convert from binary to
-decimal:>, B<How do I convert from decimal to binary:>
+How do I convert hexadecimal into decimal, How do I convert from decimal to
+hexadecimal, How do I convert from octal to decimal, How do I convert from
+decimal to octal, How do I convert from binary to decimal, How do I convert
+from decimal to binary
 
 =item Why doesn't & work the way I want it to?
 
@@ -3182,6 +3188,8 @@ intersection of two arrays?
 =item How do I shuffle an array randomly?
 
 =item How do I process/modify each element of an array?
+
+=item How do I select a random element from an array?
 
 =item How do I permute N elements of a list?
 
@@ -5334,6 +5342,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
+=item Linux with glibc 2.2.5 fails t/op/int subtest #6 with -Duse64bitint
+
 =item Linux With Sfio Fails op/misc Test 48
 
 =item Mac OS X
@@ -5364,7 +5374,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Localising Tied Arrays and Hashes Is Broken
 
-=item Self-tying of Arrays and Hashes Is Forbidden
+=item Self-tying Problems
 
 =item Building Extensions Can Fail Because Of Largefiles
 
@@ -6113,8 +6123,6 @@ C<PATCHLEVEL> is now C<PERL_VERSION>
 =item Localizing a tied hash element may leak memory
 
 =item Known test failures
-
-, , 
 
 =item EBCDIC platforms not fully supported
 
@@ -7025,7 +7033,7 @@ R4 x86, R4 PPC
 
 =item Contact Information
 
-=item Update 2002-05-25
+=item Update 2002-05-30
 
 =back
 
@@ -7321,6 +7329,8 @@ DJGPP, Pthreads
 =item Threaded Perl on HP-UX
 
 =item 64-bit Perl on HP-UX
+
+=item Oracle on HP-UX
 
 =item GDBM and Threads on HP-UX
 
@@ -15218,6 +15228,10 @@ Canonical notation, Input, Output
 
 =item bmod
 
+=item bmodinv
+
+=item bmodpow
+
 =item bpow
 
 =item blsft
@@ -15387,19 +15401,27 @@ the same terms as Perl itself.
 
 =over 4
 
-=item new
+=item new()
 
-=item numerator
+=item numerator()
 
-=item denominator
+=item denominator()
 
 	$d = $x->denominator();
 
-=item parts
+=item parts()
+
+=item as_number()
+
+=item bfac()/blog()
+
+=item bround()/round()/bfround()
 
 =back
 
 =item BUGS
+
+perl -Mbigrat -le 'print 1 + 2/3'
 
 =item LICENSE
 
@@ -15922,6 +15944,8 @@ ADDRESS [ ...]] [, OPTIONS ] ), to ( ADDRESS [, ADDRESS [...]] ), cc (
 ADDRESS [, ADDRESS [...]] ), bcc ( ADDRESS [, ADDRESS [...]] ), data ( [
 DATA ] ), expand ( ADDRESS ), verify ( ADDRESS ), help ( [ $subject ] ),
 quit ()
+
+=item ADDRESSES
 
 =item SEE ALSO
 
@@ -17892,6 +17916,12 @@ C<Storable::is_retrieving>
 =item WARNING
 
 =item BUGS
+
+=over 4
+
+=item 64 bit data in perl 5.6.0 and 5.6.1
+
+=back
 
 =item CREDITS
 

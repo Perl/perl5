@@ -1,7 +1,7 @@
 package Math::BigFloat;
 
 # 
-# Mike grinned. 'Two down, infinity to go' - Mike Nostrus in Before and After
+# Mike grinned. 'Two down, infinity to go' - Mike Nostrus in 'Before and After'
 #
 
 # The following hash values are internally used:
@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _p: precision
 #   _f: flags, used to signal MBI not to touch our private parts
 
-$VERSION = '1.31';
+$VERSION = '1.32';
 require 5.005;
 use Exporter;
 use File::Spec;
@@ -440,7 +440,6 @@ sub badd
   # return result as BFLOAT
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
-  #print "mbf badd $x $y\n";
   # inf and NaN handling
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
     {
@@ -678,7 +677,7 @@ sub blog
     $next = $over->copy()->bdiv($below->copy()->bmul($factor),$scale);
     last if $next->bcmp($limit) <= 0;
     $x->badd($next);
-    # print "step $steps $x\n";
+    # print "step  $x\n";
     # calculate things for the next term
     $over *= $u; $below *= $v; $factor->badd($f);
     #$steps++;
@@ -1199,7 +1198,6 @@ sub _pow2
       {
       $x->bsqrt(); $x->bmul($xc); $d->bdec();			# 1
       }
-    print "at $x\n";
     }
   # assume fraction ends in 1
   $x->bsqrt();							# 1
@@ -1337,7 +1335,7 @@ sub bpow
   return $x->bone() if $y->is_zero();
   return $x         if $x->is_one() || $y->is_one();
 
-  return $x->_pow2($y,$a,$p,$r) if !$y->is_int();	# non-integer power
+  return $x->_pow($y,$a,$p,$r) if !$y->is_int();	# non-integer power
 
   my $y1 = $y->as_number();		# make bigint
   # if ($x == -1)

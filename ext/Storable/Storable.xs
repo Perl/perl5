@@ -701,14 +701,49 @@ static const char magicstr[] = "pst0";		 /* Used as a magic number */
 #define MAGICSTR_BYTES  'p','s','t','0'
 #define OLDMAGICSTR_BYTES  'p','e','r','l','-','s','t','o','r','e'
 
+/* 5.6.x introduced the ability to have IVs as long long.
+   However, Configure still defined BYTEORDER based on the size of a long.
+   Storable uses the BYTEORDER value as part of the header, but doesn't
+   explicity store sizeof(IV) anywhere in the header.  Hence on 5.6.x built
+   with IV as long long on a platform that uses Configure (ie most things
+   except VMS and Windows) headers are identical for the different IV sizes,
+   despite the files containing some fields based on sizeof(IV)
+   Erk. Broken-ness.
+   5.8 is consistent - the following redifinition kludge is only needed on
+   5.6.x, but the interwork is needed on 5.8 while data survives in files
+   with the 5.6 header.
+
+*/
+
+#if defined (IVSIZE) && (IVSIZE == 8) && (LONGSIZE == 4)
+#ifndef NO_56_INTERWORK_KLUDGE
+#define USE_56_INTERWORK_KLUDGE
+#endif
+#if BYTEORDER == 0x1234
+#undef BYTEORDER
+#define BYTEORDER 0x12345678
+#else
+#if BYTEORDER == 0x4321
+#undef BYTEORDER
+#define BYTEORDER 0x87654321
+#endif
+#endif
+#endif
+
 #if BYTEORDER == 0x1234
 #define BYTEORDER_BYTES  '1','2','3','4'
 #else
 #if BYTEORDER == 0x12345678
 #define BYTEORDER_BYTES  '1','2','3','4','5','6','7','8'
+#ifdef USE_56_INTERWORK_KLUDGE
+#define BYTEORDER_BYTES_56  '1','2','3','4'
+#endif
 #else
 #if BYTEORDER == 0x87654321
 #define BYTEORDER_BYTES  '8','7','6','5','4','3','2','1'
+#ifdef USE_56_INTERWORK_KLUDGE
+#define BYTEORDER_BYTES_56  '4','3','2','1'
+#endif
 #else
 #if BYTEORDER == 0x4321
 #define BYTEORDER_BYTES  '4','3','2','1'
@@ -720,6 +755,9 @@ static const char magicstr[] = "pst0";		 /* Used as a magic number */
 #endif
 
 static const char byteorderstr[] = {BYTEORDER_BYTES, 0};
+#ifdef USE_56_INTERWORK_KLUDGE
+static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
+#endif
 
 #define STORABLE_BIN_MAJOR	2		/* Binary major "version" */
 #define STORABLE_BIN_MINOR	5		/* Binary minor "version" */
@@ -3170,6 +3208,20 @@ static int magic_write(stcxt_t *cxt)
         (unsigned char) sizeof(char *),
 	(unsigned char) sizeof(NV)
     };
+#ifdef USE_56_INTERWORK_KLUDGE
+    static const unsigned char file_header_56[] = {
+        MAGICSTR_BYTES,
+        (STORABLE_BIN_MAJOR << 1) | 0,
+        STORABLE_BIN_WRITE_MINOR,
+        /* sizeof the array includes the 0 byte at the end:  */
+        (char) sizeof (byteorderstr_56) - 1,
+        BYTEORDER_BYTES_56,
+        (unsigned char) sizeof(int),
+	(unsigned char) sizeof(long),
+        (unsigned char) sizeof(char *),
+	(unsigned char) sizeof(NV)
+    };
+#endif
     const unsigned char *header;
     SSize_t length;
 
@@ -3179,8 +3231,16 @@ static int magic_write(stcxt_t *cxt)
         header = network_file_header;
         length = sizeof (network_file_header);
     } else {
-        header = file_header;
-        length = sizeof (file_header);
+#ifdef USE_56_INTERWORK_KLUDGE
+        if (SvTRUE(perl_get_sv("Storable::interwork_56_64bit", TRUE))) {
+            header = file_header_56;
+            length = sizeof (file_header_56);
+        } else
+#endif
+        {
+            header = file_header;
+            length = sizeof (file_header);
+        }
     }        
 
     if (!cxt->fio) {
@@ -5039,8 +5099,19 @@ static SV *magic_check(stcxt_t *cxt)
 
     TRACEME(("byte order '%.*s' %d", c, buf, c));
 
-    if ((c != (sizeof (byteorderstr) - 1)) || memNE(buf, byteorderstr, c))
-        CROAK(("Byte order is not compatible"));
+#ifdef USE_56_INTERWORK_KLUDGE
+    /* No point in caching this in the context as we only need it once per
+       retrieve, and we need to recheck it each read.  */
+    if (SvTRUE(perl_get_sv("Storable::interwork_56_64bit", TRUE))) {
+        if ((c != (sizeof (byteorderstr_56) - 1))
+            || memNE(buf, byteorderstr_56, c))
+            CROAK(("Byte order is not compatible"));
+    } else
+#endif
+    {
+        if ((c != (sizeof (byteorderstr) - 1)) || memNE(buf, byteorderstr, c))
+            CROAK(("Byte order is not compatible"));
+    }
 
     current = buf + c;
     
@@ -5544,6 +5615,9 @@ BOOT:
 #ifdef DEBUGME
     /* Only disable the used only once warning if we are in debugging mode.  */
     gv_fetchpv("Storable::DEBUGME",   GV_ADDMULTI, SVt_PV);
+#endif
+#ifdef USE_56_INTERWORK_KLUDGE
+    gv_fetchpv("Storable::interwork_56_64bit",   GV_ADDMULTI, SVt_PV);
 #endif
 
 int

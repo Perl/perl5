@@ -237,6 +237,10 @@ sub bootstrap {
     # It may also edit @modparts if required.
     $modfname = &mod2fname(\@modparts) if defined &mod2fname;
 
+	if (($^O eq 'NetWare') && (length($modfname) > 8)) {
+		$modfname = substr($modfname, 0, 8);
+	}
+
     my $modpname = join(($Is_MacOS ? ':' : '/'),@modparts);
 
     print STDERR "DynaLoader::bootstrap for $module ",
@@ -258,11 +262,21 @@ sub bootstrap {
 	} else {
 	    $dir = "$_/auto/$modpname";
 	}
-	next unless -d $dir; # skip over uninteresting directories
+	if ($^O ne 'NetWare') {
+		next unless -d $dir; # skip over uninteresting directories
+	}
+	else {
+		next if -f $dir; # skip over uninteresting directories
+	}
 
 	# check for common cases to avoid autoload of dl_findfile
 	my $try = $Is_MacOS ? "$dir:$modfname.$dl_dlext" : "$dir/$modfname.$dl_dlext";
-	last if $file = ($do_expand) ? dl_expandspec($try) : (-f $try && $try);
+	if ($^O ne 'NetWare') {
+		last if $file = ($do_expand) ? dl_expandspec($try) : ((-f $try) && $try);
+	}
+	elsif (!(-d $try)) {
+		last if $file = ($do_expand) ? dl_expandspec($try) : ($try);
+	}
 
 	# no luck here, save dir for possible later dl_findfile search
 	push @dirs, $dir;
@@ -289,6 +303,14 @@ sub bootstrap {
         warn "$bs: $@\n" if $@;
     }
 
+    my $boot_symbol_ref;
+
+    if ($^O eq 'darwin') {
+        if ($boot_symbol_ref = dl_find_symbol(0, $bootname)) {
+            goto boot; #extension library has already been loaded, e.g. darwin
+        }
+    }
+
     # Many dynamic extension loading problems will appear to come from
     # this section of code: XYZ failed at line 123 of DynaLoader.pm.
     # Often these errors are actually occurring in the initialisation
@@ -307,12 +329,13 @@ sub bootstrap {
 	Carp::carp("Undefined symbols present after loading $file: @unresolved\n");
     }
 
-    my $boot_symbol_ref = dl_find_symbol($libref, $bootname) or
+    $boot_symbol_ref = dl_find_symbol($libref, $bootname) or
          croak("Can't find '$bootname' symbol in $file\n");
 
-    my $xs = dl_install_xsub("${module}::bootstrap", $boot_symbol_ref, $file);
-
     push(@dl_modules, $module); # record loaded module
+
+  boot:
+    my $xs = dl_install_xsub("${module}::bootstrap", $boot_symbol_ref, $file);
 
     # See comment block above
     &$xs(@args);

@@ -4,7 +4,7 @@ ok ($class->config()->{lib},$CL);
 
 while (<DATA>)
   {
-  chop;
+  chomp;
   $_ =~ s/#.*$//;	# remove comments
   $_ =~ s/\s+$//;	# trailing spaces
   next if /^$/;		# skip empty lines & comments

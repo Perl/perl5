@@ -2806,11 +2806,8 @@ The following tests fail on 5.8.0 Perl in BeOS Personal 5.03:
 
  t/op/lfs............................FAILED at test 17
  t/op/magic..........................FAILED at test 24
- ext/Fcntl/t/syslfs..................FAILED at test 17
- ext/File/Glob/t/basic...............FAILED at test 3
  ext/POSIX/t/sigaction...............FAILED at test 13
  ext/POSIX/t/waitpid.................FAILED at test 1
- lib/Tie/File/t/16_handle............FAILED at test 39
 
 See L<perlbeos> (README.beos) for more details.
 
@@ -2849,6 +2846,11 @@ If perl is configured with -Duse64bitall, the successful result of the
 subtest 10 of lib/posix may arrive before the successful result of the
 subtest 9, which confuses the test harness so much that it thinks the
 subtest 9 failed.
+
+=head2 Linux with glibc 2.2.5 fails t/op/int subtest #6 with -Duse64bitint
+
+This is a known bug in the glibc 2.2.5 with long long integers.
+( http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=65612 )
 
 =head2 Linux With Sfio Fails op/misc Test 48
 
@@ -3037,12 +3039,16 @@ know yet which the new semantics will exactly be.  In any case the
 change will break existing code that relies on the current
 (ill-defined) semantics, so just avoid doing this in general.
 
-=head2 Self-tying of Arrays and Hashes Is Forbidden
+=head2 Self-tying Problems
 
 Self-tying of arrays and hashes is broken in rather deep and
 hard-to-fix ways.  As a stop-gap measure to avoid people from getting
 frustrated at the mysterious results (core dumps, most often) it is
 for now forbidden (you will get a fatal error even from an attempt).
+
+Self-tying of globs is broken, but not disabled.
+
+Self-tying of scalars and IO works.
 
 =head2 Building Extensions Can Fail Because Of Largefiles
 

@@ -382,6 +382,20 @@ expected.
 compiler.  If you want to compile Perl using gcc, you will have to get a
 version of the compiler that support 64-bit operations.)
 
+=head2 Oracle on HP-UX
+
+Using perl to connect to Oracle databases through DBI and DBD::Oracle
+has caused a lot of people many headaches. Read README.hpux in the
+DBD::Oracle for much more information. The reason to mention it here
+is that Oracle requires a perl built with libcl and libpthread, the
+latter even when perl is build without threads. Building perl using
+all defaults, but still enabling to build DBD::Oracle later on can be
+achieved using
+
+  Configure -A prepend:libswanted='cl pthread ' ...
+
+Do not forget the space before the trailing quote.
+
 =head2 GDBM and Threads on HP-UX
 
 If you attempt to compile Perl with threads on an 11.X system and also
@@ -467,6 +481,6 @@ With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.6.5: 2002-02-27
+Version 0.6.6: 2002-05-30
 
 =cut

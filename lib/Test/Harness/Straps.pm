@@ -1,12 +1,12 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Straps.pm,v 1.6 2002/05/17 23:04:11 schwern Exp $
+# $Id: Straps.pm,v 1.8 2002/05/29 23:02:48 schwern Exp $
 
 package Test::Harness::Straps;
 
 use strict;
 use vars qw($VERSION);
 use Config;
-$VERSION = '0.11';
+$VERSION = '0.12';
 
 use Test::Harness::Assert;
 use Test::Harness::Iterator;
@@ -150,7 +150,7 @@ sub _analyze_iterator {
 
     $totals{skip_all} = $self->{skip_all} if defined $self->{skip_all};
 
-    my $passed = $totals{skip_all} || 
+    my $passed = !$totals{max} ||
                   ($totals{max} && $totals{seen} &&
                    $totals{max} == $totals{seen} && 
                    $totals{max} == $totals{ok});
@@ -257,6 +257,16 @@ results.  It will also use that name for the total report.
 sub analyze_file {
     my($self, $file) = @_;
 
+    unless( -e $file ) {
+        $self->{error} = "$file does not exist";
+        return;
+    }
+
+    unless( -r $file ) {
+        $self->{error} = "$file is not readable";
+        return;
+    }
+
     local $ENV{PERL5LIB} = $self->_INC2PERL5LIB;
 
     # Is this necessary anymore?
@@ -315,8 +325,11 @@ sub _switches {
     my $s = '';
     $s .= " $ENV{'HARNESS_PERL_SWITCHES'}"
       if exists $ENV{'HARNESS_PERL_SWITCHES'};
-    $s .= qq[ "-$1" ] if $first =~ /^#!.*\bperl.*\s-\w*([Tt]+)/;
-    $s .= join " ", map {qq["-I$_"]} $self->_filtered_INC;
+
+    # When taint mode is on, PERL5LIB is ignored.  So we need to put
+    # all that on the command line as -Is.
+    $s .= join " ", qq[ "-$1"], map {qq["-I$_"]} $self->_filtered_INC
+      if $first =~ /^#!.*\bperl.*\s-\w*([Tt]+)/;
 
     close(TEST) or print "can't close $file. $!\n";
 
@@ -443,7 +456,8 @@ sub _is_header {
     if( my($max, $extra) = $line =~ /^1\.\.(\d+)(.*)/ ) {
         $self->{max}  = $max;
         assert( $self->{max} >= 0,  'Max # of tests looks right' );
-	if( defined $extra ) {
+
+        if( defined $extra ) {
             my($todo, $skip, $reason) = $extra =~ /$Extra_Header_Re/xo;
 
             $self->{todo} = { map { $_ => 1 } split /\s+/, $todo } if $todo;

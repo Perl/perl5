@@ -10,18 +10,10 @@ BEGIN {
     }
 }
 
-use File::Spec::Functions;
-
-my $SAMPLE_TESTS = $ENV{PERL_CORE}
-    ? catdir(curdir(), 'lib', 'sample-tests')
-    : catdir(curdir(), 't', 'sample-tests');
+my $SAMPLE_TESTS = $ENV{PERL_CORE} ? 'lib/sample-tests' : 't/sample-tests';
 
 use strict;
 use Test::More;
-
-if ($^O eq 'MacOS') {
-    plan skip_all => "Exit status broken on Mac OS";
-}
 
 my $IsVMS = $^O eq 'VMS';
 
@@ -239,7 +231,28 @@ my %samples = (
                                        ]
                        },
 
-   skip_all           => {
+   'skip_nomsg'     => {
+                        passing     => 1,
+
+                        'exit'      => 0,
+                        'wait'      => 0,
+
+                        max         => 1,
+                        seen        => 1,
+
+                        'ok'          => 1,
+                        'todo'        => 0,
+                        'skip'        => 1,
+                        bonus       => 0,
+
+                        details     => [ { 'ok'   => 1, actual_ok => 1,
+                                           type   => 'skip',
+                                           reason => '',
+                                         },
+                                       ]
+                       },
+
+   skipall           => {
                           passing   => 1,
 
                           'exit'    => 0,
@@ -248,6 +261,23 @@ my %samples = (
                           max       => 0,
                           seen      => 0,
                           skip_all  => 'rope',
+
+                          'ok'      => 0,
+                          'todo'    => 0,
+                          'skip'    => 0,
+                          bonus     => 0,
+
+                          details   => [],
+                         },
+
+   skipall_nomsg    => {
+                          passing   => 1,
+
+                          'exit'    => 0,
+                          'wait'    => 0,
+
+                          max       => 0,
+                          seen      => 0,
 
                           'ok'      => 0,
                           'todo'    => 0,
@@ -406,7 +436,7 @@ my %samples = (
                        },
 );
 
-plan tests => (keys(%samples) * 3) + 1;
+plan tests => (keys(%samples) * 3) + 3;
 
 use_ok('Test::Harness::Straps');
 
@@ -425,7 +455,7 @@ while( my($test, $expect) = each %samples ) {
     }
 
     my $strap = Test::Harness::Straps->new;
-    my %results = $strap->analyze_file(catfile($SAMPLE_TESTS, $test));
+    my %results = $strap->analyze_file("$SAMPLE_TESTS/$test");
 
     is_deeply($results{details}, $expect->{details}, "$test details" );
 
@@ -439,3 +469,8 @@ while( my($test, $expect) = each %samples ) {
 
     is_deeply(\%results, $expect, "  the rest $test" );
 }
+
+
+my $strap = Test::Harness::Straps->new;
+ok( !$strap->analyze_file('I_dont_exist') );
+is( $strap->{error}, "I_dont_exist does not exist" );

@@ -2,10 +2,10 @@ package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
 
-$VERSION = "5.96_01";
+$VERSION = "6.01";
 $Version_OK = "5.49";   # Makefiles older than $Version_OK will die
                         # (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.55 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.59 $, 10)) =~ s/\s+$//;
 
 require Exporter;
 use Config;
@@ -44,10 +44,79 @@ sub WriteMakefile {
 
     require ExtUtils::MY;
     my %att = @_;
+
+    _verify_att(\%att);
+
     my $mm = MM->new(\%att);
     $mm->flush;
 
     return $mm;
+}
+
+
+# Basic signatures of the attributes WriteMakefile takes.  Each is
+# the reference type.  Any not noted simply take strings.
+my %Att_Sigs =
+(
+ C          => 'array',
+ CONFIG     => 'array',
+ CONFIGURE  => 'code',
+ DIR        => 'array',
+ DL_FUNCS   => 'hash',
+ DL_VARS    => 'array',
+ EXCLUDE_EXT=> 'array',
+ EXE_FILES  => 'array',
+ FUNCLIST   => 'array',
+ H          => 'array',
+ IMPORTS    => 'hash',
+ INCLUDE_EXT=> 'array',
+ LIBS       => ['array','string'],
+ MAN1PODS   => 'hash',
+ MAN3PODS   => 'hash',
+ PL_FILES   => 'hash',
+ PM         => 'hash',
+ PMLIBDIRS  => 'array',
+ PREREQ_PM  => 'hash',
+ SKIP       => 'array',
+ TYPEMAPS   => 'array',
+ XS         => 'hash',
+
+ clean      => 'hash',
+ depend     => 'hash',
+ dist       => 'hash',
+ dynamic_lib=> 'hash',
+ linkext    => 'hash',
+ macro      => 'hash',
+ realclean  => 'hash',
+ test       => 'hash',
+ tool_autosplit => 'hash',
+);
+
+my %Default_Att = (
+                   string => '',
+                   hash   => {},
+                   array  => [],
+                   code   => sub {}
+                  );
+
+sub _verify_att {
+    my($att) = @_;
+
+    while( my($key, $val) = each %$att ) {
+        my $sig = $Att_Sigs{$key};
+        my @sigs   = ref $sig ? @$sig : ($sig || 'string');
+        my $given = lc ref $val || 'string';
+        unless( grep $given eq $_, @sigs ) {
+            my $takes = join " or ", map { $_ ne 'string' ? "$_ reference"
+                                                          : "string/number"
+                                         } @sigs;
+            my $has   = $given ne 'string' ? "$given reference"
+                                           : "string/number";
+            warn "WARNING: $key takes a $takes not a $has.\n".
+                 "         Please inform the author.\n";
+            $att->{$key} = $Default_Att{$sigs[0]};
+        }
+    }
 }
 
 sub prompt ($;$) {
@@ -1289,7 +1358,9 @@ Ref to array of *.h file names. Similar to C.
 =item IMPORTS
 
 This attribute is used to specify names to be imported into the
-extension. It is only used on OS/2 and Win32.
+extension. Takes a hash ref.
+
+It is only used on OS/2 and Win32.
 
 =item INC
 
@@ -1426,7 +1497,7 @@ INSTALLSCRIPT.
 
 =item LDFROM
 
-defaults to "$(OBJECT)" and is used in the ld command to specify
+Defaults to "$(OBJECT)" and is used in the ld command to specify
 what files to link/load from (also see dynamic_lib below for how to
 specify ld flags)
 
@@ -1817,7 +1888,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.55 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.59 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 

@@ -529,7 +529,6 @@ void fnLaunchPerl(void* context)
 
 	errno = 0;
 
-
 	if (psdata->m_fromConsole)
 	{
 		// get the default working directory name
@@ -548,11 +547,9 @@ void fnLaunchPerl(void* context)
 	if (psdata->m_fromConsole)
 		chdir(defaultDir);
 
-
 	// run the script
 	//
 	fnRunScript(psdata);
-
 
 	// May have to check this, I am blindly calling UCSTerminate, irrespective of
 	// whether it is initialized or not
@@ -564,7 +561,6 @@ void fnLaunchPerl(void* context)
 		if (ucsterminate!=NULL)
 			(*ucsterminate)();
 	}
-
 
 	if (psdata->m_fromConsole)
 	{
@@ -606,7 +602,6 @@ void fnLaunchPerl(void* context)
 		// function started by BeginThreadGroup
 //		ExitThread(EXIT_THREAD, 0);
 	#endif
-
 
 	return;
 }
@@ -654,12 +649,10 @@ void fnRunScript(ScriptData* psdata)
 	int stderr_fd=-1, stderr_fd_dup=-1;
 
 
-
 	// Main callback instance
 	//
 	if (fnRegisterWithThreadTable() == FALSE)
 		return;
-
 
 	// parse the command line into argc/argv style:
 	// number of params and char array of params
@@ -670,7 +663,6 @@ void fnRunScript(ScriptData* psdata)
 		fnUnregisterWithThreadTable();
 		return;
 	}
-
 
 	// Initialise the variables
 	pclp->m_isValid = TRUE;
@@ -693,7 +685,6 @@ void fnRunScript(ScriptData* psdata)
 	pclp->m_AutoDestroy = 0;
 	pclp->m_argc = 0;
 	pclp->m_argv_len = 1;
-
 
 	// Allocate memory
 	pclp->m_argv = (char **) malloc(pclp->m_argv_len * sizeof(char *));
@@ -718,7 +709,6 @@ void fnRunScript(ScriptData* psdata)
 		fnUnregisterWithThreadTable();
 		return;
 	}
-
 
 	// Parse the command line
 	fnCommandLineParser(pclp, (char *)psdata->m_commandLine, FALSE);
@@ -771,7 +761,6 @@ void fnRunScript(ScriptData* psdata)
 			pclp->m_redirBothName = NULL;
 		}
 
-
 		// Signal a semaphore, if indicated by "-{" option, to indicate that
 		// the script has terminated and files are closed
 		//
@@ -790,7 +779,6 @@ void fnRunScript(ScriptData* psdata)
 		fnUnregisterWithThreadTable();
 		return;
 	}
-
 
 	// Simulating a shell on NetWare can be difficult. If you don't
 	// create a new screen for the script to run in, you can output to
@@ -839,7 +827,6 @@ void fnRunScript(ScriptData* psdata)
 	}
 	else if (use_system_console)
 	  CreateScreen((char *)"System Console", 0);
-
 
 	if (pclp->m_redirInName)
 	{
@@ -942,13 +929,11 @@ void fnRunScript(ScriptData* psdata)
 		}
 	}
 
-
 	env = NULL;
 	fnSetUpEnvBlock(&env);	// Set up the ENV block
 
 	// Run the Perl script
 	exitstatus = RunPerl(pclp->m_argc, pclp->m_argv, env);
-
 
 	// clean up any redirection
 	//
@@ -1004,9 +989,14 @@ void fnRunScript(ScriptData* psdata)
 		DestroyScreen(newscreenhandle);
 	}
 
+/**
+	// Commented since a few abends were happening in fnFpSetMode
 	// Set the mode for stdin and stdout
 	fnFpSetMode(stdin, O_TEXT, dummy);
 	fnFpSetMode(stdout, O_TEXT, dummy);
+**/
+	setmode(stdin, O_TEXT);
+	setmode(stdout, O_TEXT);
 
 	// Cleanup
 	if(pclp->m_argv)
@@ -1056,7 +1046,6 @@ void fnRunScript(ScriptData* psdata)
 		pclp->m_redirBothName = NULL;
 	}
 
-
 	// Signal a semaphore, if indicated by -{ option, to indicate that
 	// the script has terminated and files are closed
 	//
@@ -1076,11 +1065,14 @@ void fnRunScript(ScriptData* psdata)
 	}
 
 	if(env)
+	{
 		fnDestroyEnvBlock(env);
+		env = NULL;
+	}
+
 	fnUnregisterWithThreadTable();
 	// Remove the thread context set during Perl_set_context
 	Remove_Thread_Ctx();
-
 
 	return;
 }
@@ -1117,7 +1109,6 @@ void fnSetUpEnvBlock(char*** penv)
 	}
 	// add one for null termination
 	totalcnt++;
-
 
 	env = (char **) malloc (totalcnt * sizeof(char *));
 	if (env)
@@ -1227,7 +1218,6 @@ int fnFpSetMode(FILE* fp, int mode, int *err)
 
 	PFFSETMODE pf_fsetmode;
 
-
 	if (mode == O_BINARY || mode == O_TEXT)
 	{
 		if (fp)
@@ -1248,7 +1238,6 @@ int fnFpSetMode(FILE* fp, int mode, int *err)
 			}
 			if (errno)
 				err = &errno;
-
 		}
 		else
 		{
@@ -1261,7 +1250,6 @@ int fnFpSetMode(FILE* fp, int mode, int *err)
 		errno = EINVAL;
 		err = &errno;
 	}
-
 
 	return ret;
 }
@@ -1285,7 +1273,6 @@ void fnInternalPerlLaunchHandler(char* cmdLine)
 	int currentThreadGroup = -1;
 
 	ScriptData* psdata=NULL;
-
 
 	// Create a safe copy of the command line and pass it to the
 	// new thread for parsing. The new thread will be responsible

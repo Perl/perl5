@@ -1,3 +1,36 @@
+Thu May 30 20:31:08 BST 2002   Nicholas Clark <nick@ccl4.org>
+
+. Description:
+
+	Version 2.03	Header changes on 5.6.x on Unix where IV is long long
+
+	5.6.x introduced the ability to have IVs as long long.  However,
+	Configure still defined BYTEORDER based on the size of a long.
+	Storable uses the BYTEORDER value as part of the header, but doesn't
+	explicity store sizeof(IV) anywhere in the header.  Hence on 5.6.x
+	built with IV as long long on a platform that uses Configure (ie most
+	things except VMS and Windows) headers are identical for the different
+	IV sizes, despite the files containing some fields based on sizeof(IV)
+
+	5.8.0 is consistent; all platforms have BYTEORDER in config.h based on
+	sizeof(IV) rather than sizeof(long).  This means that the value of
+	BYTEORDER will change from (say) 4321 to 87654321 between 5.6.1 and
+	5.8.0 built with the same options to Configure on the same machine.
+	This means that the Storable header will differ, and the two versions
+	will wrongly thing that they are incompatible.
+
+	For the benefit of long term consistency, Storable now implements the
+	5.8.0 BYTEORDER policy on 5.6.x.  This means that 2.03 onwards default
+	to be incompatible with 2.02 and earlier (ie the large 1.0.x installed
+	base) on the same 5.6.x perl.
+
+	To allow interworking, a new variable $Storable::interwork_56_64bit
+	is introduced.  It defaults to false.  Set it to true to read and
+	write old format files.  Don't use it unless you have existing
+	stored data written with 5.6.x that you couldn't otherwise read,
+	or you need to interwork with a machine running older Storable on
+	a 5.6.x with long long IVs.  ie you probably don't need to use it.
+	
 Sat May 25 22:38:39 BST 2002   Nicholas Clark <nick@ccl4.org>
 
     Version 2.02

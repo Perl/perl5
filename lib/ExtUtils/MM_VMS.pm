@@ -14,7 +14,7 @@ use VMS::Filespec;
 use File::Basename;
 use File::Spec;
 use vars qw($Revision @ISA $VERSION);
-($VERSION) = $Revision = '5.64_01';
+($VERSION) = $Revision = '5.65';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
