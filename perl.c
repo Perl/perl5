@@ -901,11 +901,7 @@ setuid perl scripts securely.\n");
     /* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0
      * This MUST be done before any hash stores or fetches take place. */
     {
-       bool earlytaint = doing_taint(argc, argv, env);
-       char *s = NULL;
-
-       if (!earlytaint)
-	   s = PerlEnv_getenv("PERL_HASH_SEED");
+       char *s = PerlEnv_getenv("PERL_HASH_SEED");
        if (s)
            while (isSPACE(*s)) s++;
        if (s && isDIGIT(*s))
