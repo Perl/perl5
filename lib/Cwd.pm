@@ -469,7 +469,7 @@ sub _vms_abs_path {
 
 sub _os2_cwd {
     $ENV{'PWD'} = `cmd /c cd`;
-    chop $ENV{'PWD'};
+    chomp $ENV{'PWD'};
     $ENV{'PWD'} =~ s:\\:/:g ;
     return $ENV{'PWD'};
 }
@@ -488,7 +488,7 @@ sub _win32_cwd {
 sub _dos_cwd {
     if (!defined &Dos::GetCwd) {
         $ENV{'PWD'} = `command /c cd`;
-        chop $ENV{'PWD'};
+        chomp $ENV{'PWD'};
         $ENV{'PWD'} =~ s:\\:/:g ;
     } else {
         $ENV{'PWD'} = Dos::GetCwd();
@@ -501,7 +501,7 @@ sub _qnx_cwd {
 	local $ENV{CDPATH} = '';
 	local $ENV{ENV} = '';
     $ENV{'PWD'} = `/usr/bin/fullpath -t`;
-    chop $ENV{'PWD'};
+    chomp $ENV{'PWD'};
     return $ENV{'PWD'};
 }
 
@@ -510,8 +510,13 @@ sub _qnx_abs_path {
 	local $ENV{CDPATH} = '';
 	local $ENV{ENV} = '';
     my $path = @_ ? shift : '.';
-    my $realpath=`/usr/bin/fullpath -t $path`;
-    chop $realpath;
+    local *REALPATH;
+
+    open(REALPATH, '-|', '/usr/bin/fullpath', '-t', $path) or
+      die "Can't open /usr/bin/fullpath: $!";
+    my $realpath = <REALPATH>;
+    close REALPATH;
+    chomp $realpath;
     return $realpath;
 }
 
