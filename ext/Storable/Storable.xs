@@ -1226,7 +1226,7 @@ I32 flags;
 /*
  * array_call
  *
- * Call routine obj->hook(cloning) in array context.
+ * Call routine obj->hook(cloning) in list context.
  * Returns the list of returned values in an array.
  */
 static AV *array_call(obj, hook, cloning)

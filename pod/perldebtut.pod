@@ -168,7 +168,7 @@ break/watch/actions
  |[|]db_cmd  Send output to pager        ![!] syscmd Run cmd in a subprocess
  q or ^D     Quit                        R           Attempt a restart
  Data Examination:       expr     Execute perl code, also see: s,n,t expr
- x|m expr      Evals expr in array context, dumps the result or lists methods.
+ x|m expr      Evals expr in list context, dumps the result or lists methods.
  p expr        Print expression (uses script's current package).
  S [[!]pat]    List subroutine names [not] matching pattern
  V [Pk [Vars]] List Variables in Package.  Vars can be ~pattern or !pattern.
