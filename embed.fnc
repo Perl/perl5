@@ -1353,7 +1353,7 @@ sd	|void	|cv_dump	|CV *cv|char *title
 #  endif
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 #endif
-pd 	|CV*	|find_runcv
+pd 	|CV*	|find_runcv	|U32 *db_seqp
 
 
 

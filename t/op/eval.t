@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..78\n";
+print "1..84\n";
 
 eval 'print "ok 1\n";';
 
@@ -349,3 +349,29 @@ eval q{ my $yyy = 888; my $zzz = 999; fred5(); };
    print "ok 78\n";
 }
 
+# evals that appear in the DB package should see the lexical scope of the
+# thing outside DB that called them (usually the debugged code), rather
+# than the usual surrounding scope
+
+$test=79;
+our $x = 1;
+{
+    my $x=2;
+    sub db1	{ $x; eval '$x' }
+    sub DB::db2	{ $x; eval '$x' }
+    package DB;
+    sub db3	{ eval '$x' }
+    sub DB::db4	{ eval '$x' }
+    sub db5	{ my $x=4; eval '$x' }
+    package main;
+    sub db6	{ my $x=4; eval '$x' }
+}
+{
+    my $x = 3;
+    print db1()     == 2 ? 'ok' : 'not ok', " $test\n"; $test++;
+    print DB::db2() == 2 ? 'ok' : 'not ok', " $test\n"; $test++;
+    print DB::db3() == 3 ? 'ok' : 'not ok', " $test\n"; $test++;
+    print DB::db4() == 3 ? 'ok' : 'not ok', " $test\n"; $test++;
+    print DB::db5() == 3 ? 'ok' : 'not ok', " $test\n"; $test++;
+    print db6()     == 4 ? 'ok' : 'not ok', " $test\n"; $test++;
+}

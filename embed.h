@@ -2760,7 +2760,7 @@
 #  endif
 #define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
 #endif
-#define find_runcv()		Perl_find_runcv(aTHX)
+#define find_runcv(a)		Perl_find_runcv(aTHX_ a)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)

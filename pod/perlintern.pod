@@ -285,8 +285,12 @@ Found in file pad.h
 =item find_runcv
 
 Locate the CV corresponding to the currently executing sub or eval.
+If db_seqp is non_null, skip CVs that are in the DB package and populate
+*db_seqp with the cop sequence number at the point that the DB:: code was
+entered. (allows debuggers to eval in the scope of the breakpoint rather
+than in in the scope of the debuger itself).
 
-	CV*	find_runcv()
+	CV*	find_runcv(U32 *db_seqp)
 
 =for hackers
 Found in file pp_ctl.c
