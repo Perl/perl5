@@ -1215,7 +1215,6 @@ S_scan_const(pTHX_ char *start)
 		    *c = 0xff;
 		    /* mark the range as done, and continue */
 		    dorange = FALSE;
-		    didrange = TRUE;
 		    continue;
 		}
 		i = d - SvPVX(sv);		/* remember current offset */
