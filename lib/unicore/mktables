@@ -2,6 +2,7 @@
 require 5.008;	# Needs pack "U". Probably safest to run on 5.8.x
 use strict;
 use Carp;
+use File::Spec;
 
 ##
 ## mktables -- create the runtime Perl Unicode files (lib/unicore/**/*.pl)
@@ -18,9 +19,12 @@ use Carp;
 ##    whereby the case distinctions, whitespace, hyphens, and underbar
 ##    are ignored.
 
-mkdir("lib", 0755);
-mkdir("lib/gc_sc", 0755);
-mkdir("To",  0755);
+foreach my $lib ('To', 'lib',
+		 map {File::Spec->catdir("lib",$_)}
+		 qw(gc_sc dt bc hst ea jt lb nt ccc)) {
+  next if -d $lib;
+  mkdir $lib, 0755 or die "mkdir '$lib': $!";
+}
 
 ## Base names already used in lib/gc_sc (for avoiding 8.3 conflicts)
 my %BaseNames;
@@ -55,15 +59,26 @@ my $HEADER=<<"EOF";
 
 EOF
 
+sub force_unlink {
+    my $filename = shift;
+    return unless -e $filename;
+    return if CORE::unlink($filename);
+    # We might need write permission
+    chmod 0777, $filename;
+    CORE::unlink($filename) or die "Couldn't unlink $filename: $!\n";
+}
 
 ##
 ## Given a filename and a reference to an array of lines,
 ## write the lines to the file only if the contents have not changed.
+## Filename can be given as an arrayref of directory names
 ##
 sub WriteIfChanged($\@)
 {
     my $file  = shift;
     my $lines = shift;
+
+    $file = File::Spec->catfile(@$file) if ref $file;
 
     my $TextToWrite = join '', @$lines;
     if (open IN, $file) {
@@ -75,6 +90,7 @@ sub WriteIfChanged($\@)
             return;
         }
     }
+    force_unlink ($file);
     if (not open OUT, ">$file") {
         die "$0: can't open $file for output: $!\n";
     }
@@ -459,6 +475,7 @@ sub Table::Merge
 ##
 ## Given a filename, write a representation of the Table to a file.
 ## May have an optional comment as a 2nd arg.
+## Filename may actually be an arrayref of directories
 ##
 sub Table::Write
 {
@@ -941,39 +958,35 @@ sub UnicodeData_Txt()
     $Name->Write("Name.pl");
 
     # $Bidi->Write("Bidirectional.pl");
-    mkdir("lib/bc", 0755);
     for (keys %Bidi) {
 	$Bidi{$_}->Write(
-	    "lib/bc/$_.pl",
+	    ["lib","bc","$_.pl"],
 	    "BidiClass category '$PropValueAlias{bc}{$_}'"
 	);
     }
 
     $Comb->Write("CombiningClass.pl");
-    mkdir("lib/ccc", 0755);
     for (keys %{ $PropValueAlias{ccc} }) {
 	my ($code, $name) = @{ $PropValueAlias{ccc}{$_} };
 	(my $c = Table->New())->Append($code);
 	$c->Write(
-	    "lib/ccc/$_.pl",
+	    ["lib","ccc","$_.pl"],
 	    "CombiningClass category '$name'"
 	);
     }
 
     $Deco->Write("Decomposition.pl");
-    mkdir("lib/dt", 0755);
     for (keys %DC) {
 	$DC{$_}->Write(
-	    "lib/dt/$_.pl",
+	    ["lib","dt","$_.pl"],
 	    "DecompositionType category '$PropValueAlias{dt}{$_}'"
 	);
     }
 
     # $Number->Write("Number.pl");
-    mkdir("lib/nt", 0755);
     for (keys %Number) {
 	$Number{$_}->Write(
-	    "lib/nt/$_.pl",
+	    ["lib","nt","$_.pl"],
 	    "NumericType category '$PropValueAlias{nt}{$_}'"
 	);
     }
@@ -981,7 +994,7 @@ sub UnicodeData_Txt()
     # $General->Write("Category.pl");
 
     for my $to (sort keys %To) {
-        $To{$to}->Write("To/$to.pl");
+        $To{$to}->Write(["To","$to.pl"]);
     }
 
     for (keys %{ $PropValueAlias{gc} }) {
@@ -1021,11 +1034,10 @@ sub LineBreak_Txt()
 
     # $Lbrk->Write("Lbrk.pl");
 
-    mkdir("lib/lb", 0755);
 
     for (keys %Lbrk) {
 	$Lbrk{$_}->Write(
-	    "lib/lb/$_.pl",
+	    ["lib","lb","$_.pl"],
 	    "Linebreak category '$PropValueAlias{lb}{$_}'"
 	);
     }
@@ -1063,11 +1075,10 @@ sub ArabicShaping_txt()
     # $ArabLink->Write("ArabLink.pl");
     # $ArabLinkGroup->Write("ArabLnkGrp.pl");
 
-    mkdir("lib/jt", 0755);
 
     for (keys %JoinType) {
 	$JoinType{$_}->Write(
-	    "lib/jt/$_.pl",
+	    ["lib","jt","$_.pl"],
 	    "JoiningType category '$PropValueAlias{jt}{$_}'"
 	);
     }
@@ -1097,11 +1108,10 @@ sub EastAsianWidth_txt()
     }
     close IN;
 
-    mkdir("lib/ea", 0755);
 
     for (keys %EAW) {
 	$EAW{$_}->Write(
-	    "lib/ea/$_.pl",
+	    ["lib","ea","$_.pl"],
 	    "EastAsianWidth category '$PropValueAlias{ea}{$_}'"
 	);
     }
@@ -1130,11 +1140,9 @@ sub HangulSyllableType_txt()
     }
     close IN;
 
-    mkdir("lib/hst", 0755);
-
     for (keys %HST) {
 	$HST{$_}->Write(
-	    "lib/hst/$_.pl",
+	    ["lib","hst","$_.pl"],
 	    "HangulSyllableType category '$PropValueAlias{hst}{$_}'"
 	);
     }
@@ -1315,7 +1323,7 @@ sub PropList_txt()
 	# XXX I'm assuming that the names from %Prop don't suffer 8.3 clashes.
 	$BaseNames{lc $file}++;
 	$Prop{$_}->Write(
-	    "lib/gc_sc/$file.pl",
+	    ["lib","gc_sc","$file.pl"],
 	    "Binary property '$_'"
 	);
     }
@@ -1460,6 +1468,7 @@ sub RandomlyFuzzifyName($;$)
 sub MakePropTestScript()
 {
     ## this written directly -- it's huge.
+    force_unlink ("TestProp.pl");
     if (not open OUT, ">TestProp.pl") {
         die "$0: TestProp.pl: $!\n";
     }
@@ -1652,7 +1661,7 @@ sub WriteAllMappings()
             ##
             ## Okay, write the file...
             ##
-            $Table->Write("lib/gc_sc/$filename.pl", $Comment);
+            $Table->Write(["lib","gc_sc","$filename.pl"], $Comment);
 
             ## and register it
             $RawNameToFile{$Name} = $filename;
@@ -1831,7 +1840,7 @@ sub SpecialCasing_txt()
                     $NormalCase,
                     "END\n"
                     );
-        WriteIfChanged("To/$case.pl", @OUT);
+        WriteIfChanged(["To","$case.pl"], @OUT);
     }
 }
 
@@ -1889,7 +1898,7 @@ sub CaseFolding_txt()
                 "END\n",
                );
 
-    WriteIfChanged("To/Fold.pl", @OUT);
+    WriteIfChanged(["To","Fold.pl"], @OUT);
 }
 
 ## Do it....
