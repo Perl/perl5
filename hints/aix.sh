@@ -30,8 +30,6 @@ case "$osvers" in
     ccflags='-D_ALL_SOURCE'
     ;;
 *)  # These hints at least work for 4.x, possibly other systems too.
-    d_setregid='undef'
-    d_setreuid='undef'
     ccflags='-D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE'
     case "$cc" in
      *gcc*) ;;
@@ -40,6 +38,10 @@ case "$osvers" in
     nm_opt='-B'
     ;;
 esac
+
+# These functions don't work like Perl expects them to.
+d_setregid='undef'
+d_setreuid='undef'
 
 # The optimizer in 4.1.1 apparently generates bad code for scope.c.
 # Configure doesn't offer an easy way to propagate extra variables
