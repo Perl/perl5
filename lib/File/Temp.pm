@@ -697,7 +697,7 @@ sub _can_do_level {
   return 1 if $level == STANDARD;
 
   # Currently, the systems that can do HIGH or MEDIUM are identical
-  if ( $^O eq 'MSWin32' || $^O eq 'os2') {
+  if ( $^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'cygwin') {
     return 0;
   } else {
     return 1;
