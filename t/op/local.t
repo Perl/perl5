@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..71\n";
+print "1..75\n";
 
 sub foo {
     local($a, $b) = @_;
@@ -142,6 +142,8 @@ tie %h, 'TH';
 {
     local($h{'a'}) = 'foo';
     local($h{'b'}) = $h{'b'};
+    local($h{'y'});
+    local($h{'z'}) = 33;
     print +($h{'a'} eq 'foo') ? "" : "not ", "ok 42\n";
     print +($h{'b'} == 2) ? "" : "not ", "ok 43\n";
     local($h{'c'});
@@ -183,6 +185,8 @@ $ENV{_X_} = 'a';
 $ENV{_Y_} = 'b';
 $ENV{_Z_} = 'c';
 {
+    local($ENV{_A_});
+    local($ENV{_B_}) = 'foo';
     local($ENV{_X_}) = 'foo';
     local($ENV{_Y_}) = $ENV{_Y_};
     print +($ENV{_X_} eq 'foo') ? "" : "not ", "ok 54\n";
@@ -244,3 +248,12 @@ while (/(o.+?),/gc) {
     print "not " if exists $x{c};
     print "ok 71\n"; 
 }
+
+# these tests should be physically located after tests 46 and 58,
+# but are here instead to avoid renumbering everything. 
+
+# local() should preserve the existenceness of tied hashes and %ENV
+print "not " if exists $h{'y'}; print "ok 72\n";
+print "not " if exists $h{'z'}; print "ok 73\n";
+print "not " if exists $ENV{_A_}; print "ok 74\n";
+print "not " if exists $ENV{_B_}; print "ok 75\n";

@@ -544,8 +544,8 @@ errors so consider starting laundering now.
 
 =item *
 
-Tied hash interfaces are now required to have the EXISTS method
-(either own or inherited).
+Tied hash interfaces are now required to have the EXISTS and DELETE
+methods (either own or inherited).
 
 =item *
 
@@ -1946,8 +1946,8 @@ Localised tied variables no more leak memory
 
 =item *
 
-Localised hash elements are correctly unlocalised to not to exist,
-if that's what they where.
+Localised hash elements (and %ENV) are correctly unlocalised to not to
+exist, if that's what they where.
 
 
     use Tie::Hash;
@@ -1963,7 +1963,7 @@ if that's what they where.
     # but no more so. 
 
 As a side effect of this fix, tied hash interfaces B<must> define
-the EXISTS method.
+the EXISTS and DELETE methods.
 
 =item *
 
