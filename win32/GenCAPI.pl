@@ -3,6 +3,8 @@
 # takes one argument, the path to lib/CORE directory.
 # creates 2 files: "perlCAPI.cpp" and "perlCAPI.h".
 
+#use Config;
+
 my $hdrfile = "$ARGV[0]\\perlCAPI.h";
 my $infile = '..\\proto.h';
 my $embedfile = '..\\embed.h';
@@ -98,9 +100,9 @@ ENDCODE
 print OUTFILE "#ifdef SetCPerlObj_defined\n" unless ($separateObj == 0);
 
 print OUTFILE <<ENDCODE;
-extern "C" void SetCPerlObj(CPerlObj* pP)
+EXTERN_C void SetCPerlObj(void *pP)
 {
-    pPerl = pP;
+    pPerl = (CPerlObj*)pP;
 }
   
 ENDCODE
@@ -148,7 +150,7 @@ while () {
                     print OUTFILE <<ENDCODE;
 
 #undef $name
-extern "C" $type $funcName ($args)
+EXTERN_C $type $funcName ($args)
 {
     char *pstr;
     char *pmsg;
@@ -170,7 +172,7 @@ ENDCODE
                     print OUTFILE <<ENDCODE;
 
 #undef $name
-extern "C" $type $funcName ($args)
+EXTERN_C $type $funcName ($args)
 {
     SV *sv;
     va_list args;
@@ -192,7 +194,7 @@ ENDCODE
                     print OUTFILE <<ENDCODE;
 
 #undef $name
-extern "C" $type $funcName ($args)
+EXTERN_C $type $funcName ($args)
 {
     va_list args;
     va_start(args, $arg1);
@@ -214,7 +216,7 @@ ENDCODE
 #ifndef mg_set
 #define mg_set pPerl->Perl_mg_set
 #endif
-extern "C" $type $funcName ($args)
+EXTERN_C $type $funcName ($args)
 {
     va_list args;
     va_start(args, $arg1);
@@ -234,7 +236,7 @@ ENDCODE
                     print OUTFILE <<ENDCODE;
 
 #undef $name
-extern "C" $type $funcName ($args)
+EXTERN_C $type $funcName ($args)
 {
     va_list args;
     va_start(args, $arg1);
@@ -256,7 +258,7 @@ ENDCODE
 #ifndef mg_set
 #define mg_set pPerl->Perl_mg_set
 #endif
-extern "C" $type $funcName ($args)
+EXTERN_C $type $funcName ($args)
 {
     va_list args;
     va_start(args, $arg1);
@@ -276,7 +278,7 @@ ENDCODE
                     print OUTFILE <<ENDCODE;
 
 #undef $name
-extern "C" $type $name ($args)
+EXTERN_C $type $name ($args)
 {
     int nRet;
     va_list args;
@@ -321,7 +323,7 @@ ENDCODE
 		print OUTFILE <<ENDCODE;
 
 #undef $name
-extern "C" $type $name ($args)
+EXTERN_C $type $name ($args)
 {
     return pPerl->perl_parse(xsinit, argc, argv, env);
 }
@@ -334,7 +336,7 @@ ENDCODE
 		print OUTFILE <<ENDCODE;
 
 #undef $name
-extern "C" $type $name ($args)
+EXTERN_C $type $name ($args)
 {
     pPerl->perl_atexit(fn, ptr);
 }
@@ -353,7 +355,7 @@ ENDCODE
                 print OUTFILE <<ENDCODE;
 
 #undef $name
-extern "C" $type $funcName ()
+EXTERN_C $type $funcName ()
 {
 $return pPerl->$funcName();
 }
@@ -367,7 +369,7 @@ ENDCODE
             print OUTFILE <<ENDCODE;
 
 #undef $name
-extern "C" $type $funcName ($args)
+EXTERN_C $type $funcName ($args)
 {
 ENDCODE
 	    print OUTFILE "$return pPerl->$funcName";
@@ -521,8 +523,8 @@ readvars %globvar, '..\perlvars.h','G';
 
 open(HDRFILE, ">$hdrfile") or die "$0: Can't open $hdrfile: $!\n";
 print HDRFILE <<ENDCODE;
-void SetCPerlObj(void* pP);
-CV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename);
+EXTERN_C void SetCPerlObj(void* pP);
+EXTERN_C CV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename);
 
 ENDCODE
 
@@ -536,7 +538,7 @@ sub DoVariable($$) {
     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
     print OUTFILE <<ENDCODE;
 #undef PL_$name
-extern "C" $type * _PL_$name ()
+EXTERN_C $type * _PL_$name ()
 {
     return (($type *)&pPerl->PL_$name);
 }
@@ -548,7 +550,7 @@ ENDCODE
     print HDRFILE <<ENDCODE;
 
 #undef PL_$name
-$type * _PL_$name ();
+EXTERN_C $type * _PL_$name ();
 #define PL_$name (*_PL_$name())
 
 ENDCODE
@@ -569,9 +571,7 @@ foreach $key (keys %globvar) {
 
 print OUTFILE <<EOCODE;
 
-
-extern "C" {
-
+START_EXTERN_C
 
 char **	_Perl_op_desc(void)
 {
@@ -616,7 +616,7 @@ void xs_handler(CV* cv, CPerlObj* p)
     }
 }
 
-CV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename)
+EXTERN_C CV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename)
 {
     CV* cv = pPerl->Perl_newXS(name, xs_handler, filename);
     pPerl->Perl_sv_magic((SV*)cv, pPerl->Perl_sv_2mortal(pPerl->Perl_newSViv((IV)subaddr)), '~', "CAPI", 4);
@@ -1225,11 +1225,14 @@ void _win32_setservent(int stayopen)
 {
     pPerl->PL_piSock->Setservent(stayopen, ErrorNo());
 }
-} /* extern "C" */
+END_EXTERN_C
 EOCODE
 
 
 print HDRFILE <<EOCODE;
+
+START_EXTERN_C
+
 #undef Perl_op_desc
 char ** _Perl_op_desc ();
 #define Perl_op_desc (_Perl_op_desc())
@@ -1602,6 +1605,8 @@ void _win32_sethostent(int stayopen);
 void _win32_setnetent(int stayopen);
 void _win32_setprotoent(int stayopen);
 void _win32_setservent(int stayopen);
+
+END_EXTERN_C
 
 #pragma warning(once : 4113)
 EOCODE
