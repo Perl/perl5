@@ -42,7 +42,7 @@ INIT { eval { umask(0077) } }   # doubtless someone has no mask
 $Config{pager}
 /../
 my \@pagers = ();
-push \@pagers, \$pager if -x \$pager;
+push \@pagers, \$pager if -x (split /\\s+/, \$pager)[0];
 
 (my \$bindir = <<'/../') =~ s/\\s*\\z//;
 $Config{scriptdirexp}
