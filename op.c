@@ -6787,9 +6787,16 @@ Perl_ck_subr(pTHX_ OP *o)
 		     goto again;
 		     break;
 		case ']':
-		     if (contextclass)
-			  contextclass = 0;
-		     else
+		     if (contextclass) {
+			 char *p = proto;
+			 char s = *p;
+			 contextclass = 0;
+			 *p = '\0';
+			 while (*--p != '[');
+			 bad_type(arg, Perl_form("one of %s", p),
+				 gv_ename(namegv), o2);
+			 *proto = s;
+		     } else
 			  goto oops;
 		     break;
 		case '*':
