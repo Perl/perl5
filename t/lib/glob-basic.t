@@ -35,11 +35,15 @@ print "ok 2\n";
 # look up the user's home directory
 # should return a list with one item, and not set ERROR
 if ($^O ne 'MSWin32') {
+  eval {
     ($name, $home) = (getpwuid($>))[0,7];
+    1;
+  } and do {
     @a = File::Glob::glob("~$name", GLOB_TILDE);
     if (scalar(@a) != 1 || $a[0] ne $home || GLOB_ERROR) {
 	print "not ";
     }
+  };
 }
 print "ok 3\n";
 
@@ -69,7 +73,8 @@ mkdir $dir, 0;
 @a = File::Glob::glob("$dir/*", GLOB_ERR);
 #print "\@a = ", array(@a);
 rmdir $dir;
-if (scalar(@a) != 0 || ($^O ne 'MSWin32' && GLOB_ERROR == 0)) {
+if (scalar(@a) != 0 || (($^O ne 'MSWin32' and $^O ne 'os2')
+  			&& GLOB_ERROR == 0)) {
     print "not ";
 }
 print "ok 6\n";

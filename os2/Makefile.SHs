@@ -20,7 +20,7 @@ PERL_FULLVERSION = $perl_fullversion
 
 OPTIMIZE	= $optimize
 AOUT_OPTIMIZE	= \$(OPTIMIZE)
-AOUT_CCCMD	= \$(CC) $aout_ccflags \$(AOUT_OPTIMIZE)
+AOUT_CCCMD	= \$(CC) -DPERL_CORE $aout_ccflags \$(AOUT_OPTIMIZE)
 AOUT_AR		= $aout_ar
 AOUT_OBJ_EXT	= $aout_obj_ext
 AOUT_LIB_EXT	= $aout_lib_ext

@@ -259,6 +259,7 @@ threads_mutex
 nthreads
 nthreads_cond
 os2_cond_wait
+os2_stat
 pthread_join
 pthread_create
 pthread_detach
@@ -654,7 +655,8 @@ elsif ($PLATFORM eq 'os2') {
   /^\s*[\da-f:]+\s+(\w+)/i and $mapped{$1}++ foreach <MAP>;
   close MAP or die 'Cannot close miniperl.map';
   
-  @missing = grep { !exists $mapped{$_} } keys %export;
+  @missing = grep { !exists $mapped{$_} and !exists $bincompat5005{$_} }
+    keys %export;
   delete $export{$_} foreach @missing;
 }
 
