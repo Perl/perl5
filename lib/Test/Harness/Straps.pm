@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Straps.pm,v 1.1.2.20 2002/04/25 05:04:35 schwern Exp $
+# $Id: Straps.pm,v 1.3 2002/04/30 04:55:27 schwern Exp $
 
 package Test::Harness::Straps;
 
@@ -273,7 +273,12 @@ sub analyze_file {
     my %results = $self->analyze_fh($file, \*FILE);
     my $exit = close FILE;
     $results{'wait'} = $?;
-    $results{'exit'} = $? / 256;
+    if( $? && $self->{_is_vms} ) {
+        eval q{use vmsish "status"; $results{'exit'} = $?};
+    }
+    else {
+        $results{'exit'} = $? / 256;
+    }
     $results{passing} = 0 unless $? == 0;
 
     $self->_restore_PERL5LIB();

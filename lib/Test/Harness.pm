@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.14.2.18 2002/04/25 05:04:35 schwern Exp $
+# $Id: Harness.pm,v 1.22 2002/04/30 04:55:27 schwern Exp $
 
 package Test::Harness;
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = '2.03';
+$VERSION = '2.04';
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -505,14 +505,14 @@ sub _run_all_tests {
                     if $test{skipped};
                 push(@msg, "$test{bonus}/$test{max} unexpectedly succeeded")
                     if $test{bonus};
-                print "$test{ml}ok, ".join(', ', @msg)."\n";
+                print "$test{ml}ok\n        ".join(', ', @msg)."\n";
             } elsif ($test{max}) {
                 print "$test{ml}ok\n";
             } elsif (defined $test{skip_reason}) {
-                print "skipped: $test{skip_reason}\n";
+                print "skipped\n        all skipped: $test{skip_reason}\n";
                 $tot{skipped}++;
             } else {
-                print "skipped test on this platform\n";
+                print "\n        skipped test on this platform\n";
                 $tot{skipped}++;
             }
             $tot{good}++;
@@ -1016,7 +1016,7 @@ sub canonfailed ($@) {
     my $ender = 's' x ($skipped > 1);
     my $good = $max - $failed - $skipped;
     my $goodper = sprintf("%.2f",100*($good/$max));
-    push @result, " (-$skipped skipped test$ender: $good okay, ".
+    push @result, " (less $skipped skipped test$ender: $good okay, ".
                   "$goodper%)"
          if $skipped;
     push @result, "\n";

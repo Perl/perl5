@@ -20,6 +20,10 @@ use_ok('Test::Harness::Straps');
 
 my $IsVMS = $^O eq 'VMS';
 
+# VMS uses native, not POSIX, exit codes.
+my $die_exit = $IsVMS ? 44 : 1;
+my $die_wait = $IsVMS ? 1024 : 256;
+
 my %samples = (
    combined   => {
                   passing     => 0,
@@ -308,8 +312,8 @@ my %samples = (
    'die'            => {
                         passing     => 0,
 
-                        'exit'      => 1,
-                        'wait'      => 256,
+                        'exit'      => $die_exit,
+                        'wait'      => $die_wait,
 
                         max         => 0,
                         seen        => 0,
@@ -325,8 +329,8 @@ my %samples = (
    die_head_end     => {
                         passing     => 0,
 
-                        'exit'      => 1,
-                        'wait'      => 256,
+                        'exit'      => $die_exit,
+                        'wait'      => $die_wait,
 
                         max         => 0,
                         seen        => 4,
@@ -343,8 +347,8 @@ my %samples = (
    die_last_minute  => {
                         passing     => 0,
 
-                        'exit'      => 1,
-                        'wait'      => 256,
+                        'exit'      => $die_exit,
+                        'wait'      => $die_wait,
 
                         max         => 4,
                         seen        => 4,
@@ -391,5 +395,5 @@ while( my($test, $expect) = each %samples ) {
 
     delete $expect->{details};
     delete $results{details};
-    is_deeply(\%results, $expect, "  the rest" );
+    is_deeply(\%results, $expect, "  the rest $test" );
 }
