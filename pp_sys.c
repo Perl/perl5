@@ -3973,7 +3973,8 @@ PP(pp_gpwent)
 PP(pp_spwent)
 {
     dSP;
-#ifdef HAS_PASSWD
+ /* CYGWIN32 is missing setpwent(), (but has the others!) */
+#if 0
     setpwent();
     RETPUSHYES;
 #else

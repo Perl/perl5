@@ -1,0 +1,19 @@
+#!/bin/sh
+
+
+# gcc wrapper for building dynamic lib version of perl
+#  if -buildperl found on command line, then all args passed to
+#     perlgcc, else pass all args to gcc.
+#  jc 3/24/97
+#
+results=`echo "$*" | grep "\-buildperl"`
+# echo "results = <$results>"
+#if ( "$results" .eq. ""); then
+# if `sh -c echo '$*' | grep buildperl >/dev/null 2>&1`; then
+case "$results" in
+	"") gcc $*;;
+	*) miniperl perlgcc $*;;
+esac
+	
+
+

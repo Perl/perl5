@@ -995,8 +995,12 @@ union any {
 #include "form.h"
 #include "gv.h"
 #include "cv.h"
-#include "opcode.h"
 #include "op.h"
+/* Work Around some problems with importing globals from dlls for cygwin32 */
+#if defined(CYGWIN32) && defined(DLLIMPORT) 
+#   include "extLibInc.h"
+#endif
+#include "opcode.h"
 #include "cop.h"
 #include "av.h"
 #include "hv.h"

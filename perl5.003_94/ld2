@@ -1,0 +1,4 @@
+#!/bin/sh
+PERLPATH=/perl5.003_94
+# pass all args to the perl ld wrapper
+$PERLPATH/perl $PERLPATH/perlld $*
