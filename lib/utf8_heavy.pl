@@ -88,7 +88,7 @@ sub SWASHNEW {
 	    ## It could be a user-defined property.
 	    ##
 
-	    my $caller1 = caller(1);
+	    my $caller1 = $type =~ s/(.+)::// ? $1 : caller(1);
 
 	    if (defined $caller1 && $type =~ /^(?:\w+)$/) {
 		my $prop = $caller1 . "::" . ( $wasIs ? "Is" : "" ) . $type;
@@ -108,6 +108,7 @@ sub SWASHNEW {
 
 	    if (defined $caller0 && $type =~ /^To(?:\w+)$/) {
 		my $map = $caller0 . "::" . $type;
+
 		if (exists &{$map}) {
 		    no strict 'refs';
 		    
@@ -203,11 +204,14 @@ sub SWASHNEW {
 	    my $char = $1;
 	    my $name = $2;
 	    print STDERR "$1 => $2\n" if DEBUG;
-	    if ($char =~ /[-+!]/) {
+	    if ($char =~ /[-+!&]/) {
 		my ($c,$t) = split(/::/, $name, 2);	# bogus use of ::, really
 		my $subobj;
 		if ($c eq 'utf8') {
-		    $subobj = $c->SWASHNEW($t, "", 0, 0, 0);
+		    $subobj = utf8->SWASHNEW($t, "", 0, 0, 0);
+		}
+		elsif (exists &$name) {
+		    $subobj = utf8->SWASHNEW($name, "", 0, 0, 0);
 		}
 		elsif ($c =~ /^([0-9a-fA-F]+)/) {
 		    $subobj = utf8->SWASHNEW("", $c, 0, 0, 0);
@@ -315,7 +319,7 @@ sub SWASHGET {
     }
     for my $x ($self->{EXTRAS}) {
 	pos $x = 0;
-	while ($x =~ /^([-+!])(.*)/mg) {
+	while ($x =~ /^([-+!&])(.*)/mg) {
 	    my $char = $1;
 	    my $name = $2;
 	    print STDERR "INDIRECT $1 $2\n" if DEBUG;
@@ -351,6 +355,18 @@ sub SWASHGET {
 		else {
 		    for ($key = 0; $key < $len; $key++) {
 			if (vec($other, $key, $otherbits)) {
+			    vec($swatch, $key, $bits) = 0;
+			}
+		    }
+		}
+	    }
+	    elsif ($char eq '&') {
+		if ($bits == 1 and $otherbits == 1) {
+		    $swatch &= $other;
+		}
+		else {
+		    for ($key = 0; $key < $len; $key++) {
+			if (!vec($other, $key, $otherbits)) {
 			    vec($swatch, $key, $bits) = 0;
 			}
 		    }
