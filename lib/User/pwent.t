@@ -32,10 +32,16 @@ print "not " unless $pwent->uid    == 0 ||
                     ($^O eq 'cygwin'  && $pwent->uid == 500); # go figure
 print "ok 2\n";
 
-print "not " unless $pwent->name   == $pwent[0];
+print "not " unless $pwent->name   eq $pwent[0];
 print "ok 3\n";
 
-print "not " unless $pwent->passwd eq $pwent[1];
+if ($^O eq 'os390') {
+    print "not "
+	unless not defined $pwent->passwd &&
+	       $pwent[1] eq '0'; # go figure
+} else {
+    print "not " unless $pwent->passwd eq $pwent[1];
+}
 print "ok 4\n";
 
 print "not " unless $pwent->uid    == $pwent[2];
