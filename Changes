@@ -106,6 +106,244 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7445] By: jhi                                   on 2000/10/25  21:27:08
+        Log: Integrate with vmsperl #7430 by Charles Bailey:
+             
+             Cleanup from prior patch (Charles Lane?):
+             - improve handling of MFDs in Basename and Path
+             - default to no xsubpp line # munging when building debug images
+     Branch: perl
+	  !> lib/ExtUtils/MM_VMS.pm lib/File/Basename.pm lib/File/Path.pm
+____________________________________________________________________________
+[  7444] By: jhi                                   on 2000/10/25  21:03:50
+        Log: Subject: [PATCH] Zero-padded Numerics in Perl Format
+             From: John Peacock <JPeacock@UnivPress.com>
+             Date: Thu, 18 May 2000 11:55:27 -0400
+             Message-ID: <3924126F.A58BE57A@UnivPress.com>
+     Branch: perl
+	   ! form.h pod/perldelta.pod pod/perlform.pod pp_ctl.c
+	   ! t/op/write.t
+____________________________________________________________________________
+[  7443] By: jhi                                   on 2000/10/25  20:43:10
+        Log: Temporary stopgap for the self-tying issue: for now only
+             array and hash self-ties are verboten.  The real fix, of
+             course, would be to comprehensively test (and implement?)
+             and debug (and document) self-ties.
+     Branch: perl
+	   ! pod/perldiag.pod pp_sys.c t/op/tie.t
+____________________________________________________________________________
+[  7442] By: jhi                                   on 2000/10/25  20:14:30
+        Log: Subject: [PATCH 5.6.0]Add non-blocking thread doneness checking
+             From: Dan Sugalski <dan@sidhe.org>
+             Date: Wed, 25 Oct 2000 13:36:35 -0400
+             Message-Id: <5.0.0.25.0.20001025133504.01ef1e20@24.8.96.48>
+             
+             plus regen global.sym.
+     Branch: perl
+	   ! ext/Thread/Thread.pm ext/Thread/Thread.xs global.sym perl.c
+	   ! thrdvar.h util.c
+____________________________________________________________________________
+[  7441] By: jhi                                   on 2000/10/25  20:12:20
+        Log: buildtoc target tweaks.
+     Branch: perl
+	   ! pod/Makefile.SH
+____________________________________________________________________________
+[  7440] By: jhi                                   on 2000/10/25  20:03:53
+        Log: A new version of making the syslog test more robust.
+             (Replaces #7421.)
+             
+             Subject: Re: [ID 20001022.001] Not OK: perl v5.7.0 +DEVEL7368 on i686-linux 2.2.16
+             From: "Kurt D. Starsinic" <kstar@chapin.edu>
+             Date: Wed, 25 Oct 2000 12:13:54 -0400
+             Message-ID: <20001025121354.B2264@O2.chapin.edu>
+     Branch: perl
+	   ! t/lib/syslog.t
+____________________________________________________________________________
+[  7439] By: jhi                                   on 2000/10/25  20:00:48
+        Log: Continue the internal UTF-8 API tweaking.
+             Rename utf8_to_uv_chk() back to utf8_to_uv() because it's
+             used much more than the simpler API, now called utf8_to_uv_simple().
+             Still not quite happy with API, too much partial duplication
+             of functionality.
+     Branch: perl
+	   ! doop.c embed.h embed.pl handy.h objXSUB.h op.c perlapi.c
+	   ! pod/perlapi.pod pod/perlunicode.pod pp.c pp_ctl.c proto.h
+	   ! regcomp.c regexec.c sv.c toke.c utf8.c
+____________________________________________________________________________
+[  7438] By: jhi                                   on 2000/10/25  18:52:30
+        Log: Allow poking holes at the UTF-8 decoding strictness.
+     Branch: perl
+	   ! embed.pl pp.c proto.h sv.c t/pragma/utf8.t toke.c utf8.c
+	   ! utf8.h
+____________________________________________________________________________
+[  7437] By: jhi                                   on 2000/10/25  13:53:05
+        Log: Rename UTF8LEN() to be UNISKIP(), too confusing to have
+             UTF8LEN() and UTF8SKIP(). 
+     Branch: perl
+	   ! pp.c utf8.c utf8.h
+____________________________________________________________________________
+[  7436] By: jhi                                   on 2000/10/25  13:51:37
+        Log: Subject: [PATCH] Re: PerlIO - Configure tweak for Linux/glibc?
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 25 Oct 2000 14:44:05 +0100
+             Message-ID: <20001025144404.D27253@plum.flirble.org>
+     Branch: perl
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[  7435] By: jhi                                   on 2000/10/25  13:49:32
+        Log: Subject: [ID 20001024.007] [PATCH] "Dump local *FH" causes SEGV
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 24 Oct 2000 14:59:40 +0100
+             Message-Id: <E13o4c8-00076u-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! scope.c
+____________________________________________________________________________
+[  7434] By: jhi                                   on 2000/10/25  13:48:41
+        Log: AIX is picky about its symbol exports.  Solution for now
+             is to include the deb.o explicitly to the re extension build.
+             
+             Subject: Re: introduce missing .Perl_deb symbol to aix build (Questions)
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 24 Oct 2000 12:57:22 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10010241252180.127055-100000@aspara.forte.com>
+     Branch: perl
+	   ! ext/re/Makefile.PL hints/aix.sh
+____________________________________________________________________________
+[  7433] By: jhi                                   on 2000/10/25  13:46:49
+        Log: Subject: patch 7416 breaks sv.c on AIX and HP-UX (patch included)
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 25 Oct 2000 12:02:20 +0200
+             Message-Id: <20001025114712.C9F9.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! perlsdio.h
+____________________________________________________________________________
+[  7432] By: jhi                                   on 2000/10/25  13:44:28
+        Log: Subject: Minor update to find2perl, for portability
+             From: "Moore, Paul" <Paul.Moore@uk.origin-it.com>
+             Date: Wed, 25 Oct 2000 12:05:47 +0100
+             Message-ID: <714DFA46B9BBD0119CD000805FC1F53B012A8355@UKRUX002.rundc.uk.origin-it.com>
+     Branch: perl
+	   ! x2p/find2perl.PL
+____________________________________________________________________________
+[  7431] By: jhi                                   on 2000/10/25  13:40:39
+        Log: Add targets to Makefile.SH, most importantly
+             'regen_all' which also remembers to update vms/perly*.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  7429] By: jhi                                   on 2000/10/24  20:03:40
+        Log: Podify README.epoc and README.vos.
+     Branch: perl
+	   ! README.epoc README.vos pod/buildtoc.PL pod/perl.pod
+	   ! pod/perlport.pod pod/perltoc.pod
+____________________________________________________________________________
+[  7428] By: jhi                                   on 2000/10/24  19:10:33
+        Log: Stratus VOS updates from Paul Green.
+     Branch: perl
+	   + vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   + vos/config.ga.h vos/configure_perl.cm vos/install_perl.cm
+	   - vos/config.def vos/config.h vos/config_h.SH_orig
+	   ! MANIFEST README.vos pod/perlport.pod vos/Changes vos/build.cm
+	   ! vos/compile_perl.cm vos/config.pl vos/perl.bind vos/vosish.h
+____________________________________________________________________________
+[  7426] By: jhi                                   on 2000/10/24  17:57:44
+        Log: Missed the header file changes from #7425.
+     Branch: perl
+	   ! embed.h embed.pl objXSUB.h proto.h
+____________________________________________________________________________
+[  7425] By: jhi                                   on 2000/10/24  17:55:17
+        Log: Fix the bug reported in
+             
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Subject: Encode bug?
+             Date: 24 Oct 2000 14:01:26 +0200 
+             Message-ID: <m3lmveqwh5.fsf@ak-71.mind.de>
+             
+             Also make is_utf8_char() stricter.
+     Branch: perl
+	   ! ext/Encode/Encode.xs utf8.c
+____________________________________________________________________________
+[  7424] By: jhi                                   on 2000/10/24  15:15:39
+        Log: Subject: Re: [ID 20001023.003] PATCH perlfaq5 [perl-current]
+             From: Peter Scott <Peter@PSDT.com>
+             Date: Mon, 23 Oct 2000 19:46:01 -0700
+             Message-Id: <4.3.2.7.2.20001023194324.00ab7220@psdt.com>
+     Branch: perl
+	   ! pod/perlfaq5.pod
+____________________________________________________________________________
+[  7423] By: jhi                                   on 2000/10/24  14:25:30
+        Log: Test tweak to avoid pulling in the whole Config.
+     Branch: perl
+	   ! t/lib/st-lock.t
+____________________________________________________________________________
+[  7422] By: jhi                                   on 2000/10/24  14:03:16
+        Log: Fix the bug ID 20001024.005, the bug introduced by #7416.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  7421] By: jhi                                   on 2000/10/24  13:32:09
+        Log: (Replaced by #7440.)
+             
+             Subject: Re: [ID 20001022.001] Not OK: perl v5.7.0 +DEVEL7368 on i686-linux 2.2.16
+             From: "Kurt D. Starsinic" <kstar@chapin.edu>
+             Date: Mon, 23 Oct 2000 16:40:54 -0400
+             Message-ID: <20001023164054.B14491@O2.chapin.edu>
+     Branch: perl
+	   ! t/lib/syslog.t
+____________________________________________________________________________
+[  7420] By: jhi                                   on 2000/10/24  13:30:53
+        Log: Subject: [PATCH 5.7.0] static linking with uninstalled perl
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 23 Oct 2000 17:29:03 -0400
+             Message-ID: <20001023172903.A18749@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  7419] By: jhi                                   on 2000/10/24  13:29:57
+        Log: Subject: Re: [PATCH 5.7.0] h2xs not documenting the created module
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 23 Oct 2000 19:01:32 -0400
+             Message-ID: <20001023190132.A19791@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  7418] By: jhi                                   on 2000/10/24  13:26:04
+        Log: Replace #7409 with
+             
+             Subject: Re: [PATCH] Re: [ID 20001020.009] Not OK: perl v5.7.0 +DEVEL7368 on dos-djgpp djgp
+             From: Raphael Manfredi <Raphael_Manfredi@pobox.com>
+             Date: Mon, 23 Oct 2000 20:08:56 +0200
+             Message-ID: <20001023200855.A14850@nice.ram.loc>
+     Branch: perl
+	   ! ext/Storable/Storable.pm t/lib/st-lock.t
+____________________________________________________________________________
+[  7417] By: jhi                                   on 2000/10/24  13:17:52
+        Log: Run vms/vms_yfix.pl, should have done that after changing
+             perly.c in #7382.
+     Branch: perl
+	   ! vms/perly_c.vms vms/perly_h.vms
+____________________________________________________________________________
+[  7416] By: jhi                                   on 2000/10/24  02:55:33
+        Log: Make the UTF-8 decoding stricter and more verbose when
+             malformation happens.  This involved adding an argument
+             to utf8_to_uv_chk(), which involved changing its prototype,
+             and prefer STRLEN over I32 for the UTF-8 length, which as
+             a domino effect necessitated changing the prototypes of
+             scan_bin(), scan_oct(), scan_hex(), and reg_uni().
+             The stricter UTF-8 decoding checking uses Markus Kuhn's
+             UTF-8 Decode Stress Tester from
+             http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt
+     Branch: perl
+	   ! doop.c embed.h embed.pl handy.h objXSUB.h op.c perl.c
+	   ! perlapi.c pod/perlapi.pod pod/perldiag.pod pod/perlunicode.pod
+	   ! pp.c pp_ctl.c proto.h regcomp.c regexec.c sv.c t/pragma/utf8.t
+	   ! t/pragma/warn/utf8 toke.c utf8.c utf8.h util.c
+____________________________________________________________________________
+[  7415] By: jhi                                   on 2000/10/23  14:06:06
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7414] By: jhi                                   on 2000/10/23  12:39:52
         Log: Undo the basename() part of #7412 since the lib/basename
              tests would need upgrading too.
