@@ -1704,7 +1704,6 @@ EOM
 			esac;;
 		[23]100) osname=mips ;;
 		next*) osname=next ;;
-		news*) osname=news ;;
 		i386*)
 			if $test -f /etc/kconfig; then
 				osname=isc
@@ -1771,6 +1770,12 @@ EOM
 			;;
 		netbsd*) osname=netbsd 
 			osvers="$3"
+			;;
+		news-os) osvers="$3"
+			case "$3" in
+			4*) osname=newsos4 ;;
+			*) osname=newsos ;;
+			esac
 			;;
 		bsd386) osname=bsd386
 			osvers=`$uname -r`
@@ -1872,10 +1877,10 @@ EOM
 			;;
 		esac
 	else
-		if test -f /vmunix -a -f news_os.sh; then
+		if test -f /vmunix -a -f newsos4.sh; then
 			(what /vmunix | ../UU/tr '[A-Z]' '[a-z]') > ../UU/kernel.what 2>&1
 			if $contains news-os ../UU/kernel.what >/dev/null 2>&1; then
-				osname=news_os
+				osname=newsos4
 			fi
 			$rm -f ../UU/kernel.what
 		elif test -d c:/.; then
