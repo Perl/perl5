@@ -1,27 +1,47 @@
 use ExtUtils::MakeMaker;
 
-# This is not the CPAN Unicode::Normalize makefile
-# that can handle XS-NOXS installing.  We do just XS.
+# This code for XS-NOXS installer is shamelessly stolen
+# after Gurusamy Sarathy's Data::Dumper. Thank you!
 
-do "mkheader";
+# a bit modified.
 
-unless($ENV{PERL_CORE}) {
-    $ENV{PERL_CORE} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
+use File::Copy qw();
+
+my $arg = $ARGV[0] || "";
+
+if ($arg =~ /^no/i and -f "Normalize.xs") {
+    print STDERR "Disabling XS in sources...\n";
+
+    die "***** Failed, sources could be inconsistent! *****\n"
+     unless File::Copy::move('MANIFEST',	'MANIFEST.XS')
+	and File::Copy::move('MANIFEST.NXS',	'MANIFEST')
+	and File::Copy::move('Normalize.pm',	'Normalize.pm.XS')
+	and File::Copy::move('Normalize.xs',	'Normalize.xs.XS')
+	and File::Copy::move('Normalize.pm.NXS','Normalize.pm');
 }
-if ($ENV{PERL_CORE}) {
-    # Pods will be built by installman.
-    @coreopts = ( MAN3PODS => {} );
+if ($arg =~ /^xs/i and -f "Normalize.xs.XS") {
+    print STDERR "Enabling XS in sources...\n";
+
+    die "***** Failed, sources could be inconsistent! *****\n"
+     unless File::Copy::move('MANIFEST',	'MANIFEST.NXS')
+	and File::Copy::move('MANIFEST.XS',	'MANIFEST')
+	and File::Copy::move('Normalize.pm',	'Normalize.pm.NXS')
+	and File::Copy::move('Normalize.xs.XS',	'Normalize.xs')
+	and File::Copy::move('Normalize.pm.XS',	'Normalize.pm');
 }
-else {
-    @coreopts = ();
+
+my $clean = {};
+
+if (-f "Normalize.xs") {
+    print STDERR "Making header files for XS...\n";
+
+    do "mkheader";
+    $clean = { FILES => 'unfcan.h unfcmb.h unfcmp.h unfcpt.h unfexc.h' };
 }
 
 WriteMakefile(
+    'INSTALLDIRS'	=> $] > 5.007 ? 'perl' : 'site',
     'NAME'		=> 'Unicode::Normalize',
     'VERSION_FROM'	=> 'Normalize.pm', # finds $VERSION
-    ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM => 'Normalize.pm', # retrieve abstract from module
-       AUTHOR     => 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>') : ()),
-    clean => {FILES=> 'unfcan.h unfcmb.h unfcmp.h unfcpt.h unfexc.h'},
-    @coreopts,
+    'clean'		=> $clean,
 );

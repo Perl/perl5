@@ -1,6 +1,6 @@
 
 BEGIN {
-    unless ("A" eq pack('U', 0x41) || "A" eq pack('U', ord("A"))) {
+    unless ("A" eq pack('U', 0x41)) {
 	print "1..0 # Unicode::Normalize " .
 	    "cannot stringify a Unicode code point\n";
 	exit 0;

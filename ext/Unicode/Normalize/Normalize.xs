@@ -361,7 +361,7 @@ compose(arg)
 		    }
 		    /* preCC not changed to curCC */
 		    uvS = uvComp;
-	        } else if (! curCC && p < e) { /* blocked */
+		} else if (! curCC && p < e) { /* blocked */
 		    break;
 		} else {
 		    preCC = curCC;

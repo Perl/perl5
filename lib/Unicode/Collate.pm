@@ -1,7 +1,7 @@
 package Unicode::Collate;
 
 BEGIN {
-    unless ("A" eq pack('U', 0x41) || "A" eq pack('U', ord("A"))) {
+    unless ("A" eq pack('U', 0x41)) {
 	die "Unicode::Collate cannot stringify a Unicode code point\n";
     }
 }
@@ -14,7 +14,7 @@ use File::Spec;
 
 require Exporter;
 
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 our $PACKAGE = __PACKAGE__;
 
 our @ISA = qw(Exporter);
@@ -111,27 +111,12 @@ sub Base_Unicode_Version { $UNICODE_VERSION || 'unknown' }
 
 ######
 
-use constant UNICODE_FOR_PACK => ("A" eq pack('U', 0x41));
-use constant NATIVE_FOR_PACK  => ("A" eq pack('U', ord("A")));
-
-use constant UNICODE_FOR_UNPACK => (0x41 == unpack('U', "A"));
-use constant NATIVE_FOR_UNPACK  => (ord("A") == unpack('U', "A"));
-
 sub pack_U {
-    return UNICODE_FOR_PACK
-	? pack('U*', @_)
-	: NATIVE_FOR_PACK
-	    ? pack('U*', map utf8::unicode_to_native($_), @_)
-	    : die "$PACKAGE, a Unicode code point cannot be stringified.\n";
+    return pack('U*', @_);
 }
 
 sub unpack_U {
-    return UNICODE_FOR_UNPACK
-	? unpack('U*', shift)
-	: NATIVE_FOR_UNPACK
-	    ? map(utf8::native_to_unicode($_), unpack 'U*', shift)
-	    : die "$PACKAGE, a code point returned from unpack U " .
-		"cannot be converted into Unicode.\n";
+    return unpack('U*', pack('U*').shift);
 }
 
 ######
@@ -1206,9 +1191,12 @@ but it is not warned at present.>
 -- see 3.2 Default Unicode Collation Element Table, UTS #10.
 
 You can use another element table if desired.
-The table file must be in your C<lib/Unicode/Collate> directory.
+The table file must be put into a directory
+where F<Unicode/Collate.pm> is installed.
+E.g. in F<perl/lib/Unicode/Collate> directory
+when you have F<perl/lib/Unicode/Collate.pm>.
 
-By default, the file C<lib/Unicode/Collate/allkeys.txt> is used.
+By default, the filename F<"allkeys.txt"> is used.
 
 If C<undef> is passed explicitly as the value for this key,
 no file is read (but you can define collation elements via L<entry>).
@@ -1489,13 +1477,6 @@ this module is based on.
 
 None by default.
 
-=head2 TODO
-
-Unicode::Collate has not been ported to EBCDIC.
-IMHO, use of utf8::unicode_to_native()/utf8::native_to_unicode()
-at the proper postions should allow
-this module to work on EBCDIC platform...
-
 =head2 CAVEAT
 
 Use of the C<normalization> parameter requires
@@ -1526,7 +1507,7 @@ SADAHIRO Tomoyuki, E<lt>SADAHIRO@cpan.orgE<gt>
 
   http://homepage1.nifty.com/nomenclator/perl/
 
-  Copyright(C) 2001-2002, SADAHIRO Tomoyuki. Japan. All rights reserved.
+  Copyright(C) 2001-2003, SADAHIRO Tomoyuki. Japan. All rights reserved.
 
   This library is free software; you can redistribute it
   and/or modify it under the same terms as Perl itself.
