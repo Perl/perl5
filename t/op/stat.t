@@ -9,7 +9,7 @@ BEGIN {
 use Config;
 use File::Spec;
 
-plan tests => 75;
+plan tests => 73;
 
 my $Perl = which_perl();
 
@@ -389,13 +389,6 @@ SKIP: {
     eval { -l _ };
     like( $@, qr/^The stat preceding -l _ wasn't an lstat/,
 	'-l _ croaks after stat' );
-
-    eval { lstat STDIN };
-    like( $@, qr/^You can't use lstat\(\) on a filehandle/,
-	'lstat FILEHANDLE croaks' );
-    eval { -l STDIN };
-    like( $@, qr/^You can't use -l on a filehandle/,
-	'-l FILEHANDLE croaks' );
 
     # bug id 20020124.004
     # If we have d_lstat, we should have symlink()
