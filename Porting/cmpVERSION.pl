@@ -34,7 +34,14 @@ find(
 	       &&
 	       do { my $file2 =
 			catfile(catdir($dir2, $File::Find::dir), $_);
-		    return if compare($_, $file2) == 0;
+		    (my $xs_file1 = $_)     =~ s/\.pm$/.xs/;
+		    (my $xs_file2 = $file2) =~ s/\.pm$/.xs/;
+		    if (-e $xs_file1 && -e $xs_file2) {
+			return if compare($_, $file2) == 0 &&
+			          compare($xs_file1, $xs_file2) == 0;
+		    } else {
+			return if compare($_, $file2) == 0;
+		    }
 		    my $version1 = eval {MM->parse_version($_)};
 		    my $version2 = eval {MM->parse_version($file2)};
 		    push @wanted, $File::Find::name
