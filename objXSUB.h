@@ -1147,6 +1147,10 @@
 #define Perl_do_aexec		pPerl->Perl_do_aexec
 #undef  do_aexec
 #define do_aexec		Perl_do_aexec
+#undef  Perl_do_aexec5
+#define Perl_do_aexec5		pPerl->Perl_do_aexec5
+#undef  do_aexec5
+#define do_aexec5		Perl_do_aexec5
 #undef  Perl_do_binmode
 #define Perl_do_binmode		pPerl->Perl_do_binmode
 #undef  do_binmode
@@ -1525,6 +1529,10 @@
 #define Perl_ingroup		pPerl->Perl_ingroup
 #undef  ingroup
 #define ingroup			Perl_ingroup
+#undef  Perl_init_debugger
+#define Perl_init_debugger	pPerl->Perl_init_debugger
+#undef  init_debugger
+#define init_debugger		Perl_init_debugger
 #undef  Perl_init_stacks
 #define Perl_init_stacks	pPerl->Perl_init_stacks
 #undef  init_stacks

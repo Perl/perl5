@@ -620,9 +620,7 @@ function as operators, providing various kinds of interpolating and
 pattern matching capabilities.  Perl provides customary quote characters
 for these behaviors, but also provides a way for you to choose your
 quote character for any of them.  In the following table, a C<{}> represents
-any pair of delimiters you choose.  Non-bracketing delimiters use
-the same character fore and aft, but the 4 sorts of brackets
-(round, angle, square, curly) will all nest.
+any pair of delimiters you choose.  
 
     Customary  Generic        Meaning	     Interpolates
 	''	 q{}	      Literal		  no
@@ -633,6 +631,23 @@ the same character fore and aft, but the 4 sorts of brackets
 		qr{}	      Pattern		  yes (unless '' is delimiter)
 		 s{}{}	    Substitution	  yes (unless '' is delimiter)
 		tr{}{}	  Transliteration	  no (but see below)
+
+Non-bracketing delimiters use the same character fore and aft, but the four
+sorts of brackets (round, angle, square, curly) will all nest, which means
+that 
+
+	q{foo{bar}baz} 
+	
+is the same as 
+
+	'foo{bar}baz'
+
+Note, however, that this does not always work for quoting Perl code:
+
+	$s = q{ if($a eq "}") ... }; # WRONG
+
+is a syntax error. The C<Text::Balanced> module on CPAN is able to do this
+properly.
 
 There can be whitespace between the operator and the quoting
 characters, except when C<#> is being used as the quoting character.

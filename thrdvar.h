@@ -187,10 +187,8 @@ PERLVARI(Tregfree,	regfree_t, MEMBER_TO_FPTR(Perl_pregfree))
 PERLVARI(Treginterp_cnt,int,	    0)	/* Whether `Regexp'
 						   was interpolated. */
 PERLVARI(Treg_starttry,	char *,	    0)	/* -Dr: where regtry was called. */
-#ifdef DEBUGGING
 PERLVARI(Twatchaddr,	char **,    0)
 PERLVAR(Twatchok,	char *)
-#endif
 
 /* Note that the variables below are all explicitly referenced in the code
  * as thr->whatever and therefore don't need the 'T' prefix. */

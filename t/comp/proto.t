@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 
-print "1..100\n";
+print "1..107\n";
 
 my $i = 1;
 
@@ -448,11 +448,21 @@ star2 $star, $star, sub { print "ok $i\n"
 star2($star, $star, sub { print "ok $i\n"
 			if $_[0] eq 'FOO' and $_[1] eq 'FOO' }); $i++;
 star2 *FOO, *BAR, sub { print "ok $i\n"
-			if $_[0] eq \*FOO and $_[0] eq \*BAR }; $i++;
+			if $_[0] eq \*FOO and $_[1] eq \*BAR }; $i++;
 star2(*FOO, *BAR, sub { print "ok $i\n"
-			if $_[0] eq \*FOO and $_[0] eq \*BAR }); $i++;
+			if $_[0] eq \*FOO and $_[1] eq \*BAR }); $i++;
 star2 \*FOO, \*BAR, sub { no strict 'refs'; print "ok $i\n"
-			if $_[0] eq \*{'FOO'} and $_[0] eq \*{'BAR'} }; $i++;
+			if $_[0] eq \*{'FOO'} and $_[1] eq \*{'BAR'} }; $i++;
 star2(\*FOO, \*BAR, sub { no strict 'refs'; print "ok $i\n"
-			if $_[0] eq \*{'FOO'} and $_[0] eq \*{'BAR'} }); $i++;
+			if $_[0] eq \*{'FOO'} and $_[1] eq \*{'BAR'} }); $i++;
 
+# test scalarref prototype
+sub sreftest (\$$) {
+    print "ok $_[1]\n" if ref $_[0];
+}
+{
+    no strict 'vars';
+    sreftest my $sref, $i++;
+    sreftest($helem{$i}, $i++);
+    sreftest $aelem[0], $i++;
+}

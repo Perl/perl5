@@ -314,7 +314,7 @@ the strings?).
           5.005_03-MT5  1999-Jan-28
           5.005_03      1999-Mar-28
 
- Sarathy  5.005_50      1998-Jul-26     The 5.006 development track.
+ Sarathy  5.005_50      1998-Jul-26     The 5.6 development track.
           5.005_51      1998-Aug-10
           5.005_52      1998-Sep-25
           5.005_53      1998-Oct-31

@@ -1416,6 +1416,9 @@ Perl_mess(pTHX_ const char *pat, va_list *args)
 		      line_mode ? "line" : "chunk", 
 		      (long)IoLINES(GvIOp(PL_last_in_gv)));
 	}
+#ifdef USE_THREADS
+	sv_catpvf(sv, " thread %ld", thr->tid);
+#endif
 	sv_catpv(sv, PL_dirty ? dgd : ".\n");
     }
     return sv;
@@ -2304,10 +2307,11 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 		break;
 	    n += n1;
 	}
+	PerlLIO_close(pp[0]);
+	did_pipes = 0;
 	if (n) {			/* Error */
 	    if (n != sizeof(int))
 		Perl_croak(aTHX_ "panic: kid popen errno read");
-	    PerlLIO_close(pp[0]);
 	    errno = errkid;		/* Propagate errno from kid */
 	    return Nullfp;
 	}

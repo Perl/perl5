@@ -746,6 +746,7 @@ Perl_do_vecset(pTHX_ SV *sv)
 	    s[offset+3] = lval & 255;
 	}
     }
+    SvSETMAGIC(targ);
 }
 
 void

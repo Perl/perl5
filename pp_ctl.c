@@ -39,8 +39,13 @@ static I32 amagic_ncmp(pTHXo_ SV *a, SV *b);
 static I32 amagic_i_ncmp(pTHXo_ SV *a, SV *b);
 static I32 amagic_cmp(pTHXo_ SV *a, SV *b);
 static I32 amagic_cmp_locale(pTHXo_ SV *a, SV *b);
+#ifdef PERL_OBJECT
 static I32 sv_cmp_static(pTHXo_ SV *a, SV *b);
 static I32 sv_cmp_locale_static(pTHXo_ SV *a, SV *b);
+#else
+#define sv_cmp_static Perl_sv_cmp
+#define sv_cmp_locale_static Perl_sv_cmp_locale
+#endif
 
 PP(pp_wantarray)
 {
@@ -1911,29 +1916,32 @@ S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
 	*ops++ = cUNOPo->op_first;
 	if (ops >= oplimit)
 	    Perl_croak(aTHX_ too_deep);
+	*ops = 0;
     }
-    *ops = 0;
     if (o->op_flags & OPf_KIDS) {
 	dTHR;
 	/* First try all the kids at this level, since that's likeliest. */
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
-	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
-		    kCOP->cop_label && strEQ(kCOP->cop_label, label))
+	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+		&& kCOP->cop_label && strEQ(kCOP->cop_label, label))
+	    {
 		return kid;
+	    }
 	}
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if (kid == PL_lastgotoprobe)
 		continue;
-	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
-		(ops == opstack ||
-		 (ops[-1]->op_type != OP_NEXTSTATE &&
-		  ops[-1]->op_type != OP_DBSTATE)))
+	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+		&& (ops == opstack || (ops[-1]->op_type != OP_NEXTSTATE
+				       && ops[-1]->op_type != OP_DBSTATE)))
+	    {
 		*ops++ = kid;
+		*ops = 0;
+	    }
 	    if (o = dofindlabel(kid, label, ops, oplimit))
 		return o;
 	}
     }
-    *ops = 0;
     return 0;
 }
 
@@ -4090,6 +4098,8 @@ amagic_cmp_locale(pTHXo_ register SV *str1, register SV *str2)
     return sv_cmp_locale(str1, str2);
 }
 
+#ifdef PERL_OBJECT
+
 static I32
 sv_cmp_locale_static(pTHXo_ register SV *str1, register SV *str2)
 {
@@ -4101,3 +4111,5 @@ sv_cmp_static(pTHXo_ register SV *str1, register SV *str2)
 {
     return sv_cmp(str1, str2);
 }
+
+#endif /* PERL_OBJECT */

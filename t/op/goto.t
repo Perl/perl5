@@ -2,7 +2,7 @@
 
 # "This IS structured code.  It's just randomly structured."
 
-print "1..13\n";
+print "1..16\n";
 
 while ($?) {
     $foo = 1;
@@ -55,6 +55,27 @@ exit;
 
 FINALE:
 print "ok 13\n";
+
+# does goto LABEL handle block contexts correctly?
+
+my $cond = 1;
+for (1) {
+    if ($cond == 1) {
+	$cond = 0;
+	goto OTHER;
+    }
+    elsif ($cond == 0) {
+      OTHER:
+	$cond = 2;
+	print "ok 14\n";
+	goto THIRD;
+    }
+    else {
+      THIRD:
+	print "ok 15\n";
+    }
+}
+print "ok 16\n";
 exit;
 
 bypass:

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perldelta - what's new for perl5.006 (as of 5.005_56)
+perldelta - what's new for perl v5.6 (as of v5.5.58)
 
 =head1 DESCRIPTION
 
@@ -19,7 +19,7 @@ None known at this time.
 =item C<PERL_POLLUTE>
 
 Release 5.005 grandfathered old global symbol names by providing preprocessor
-macros for extension source compatibility.  As of release 5.006, these
+macros for extension source compatibility.  As of release 5.6, these
 preprocessor definitions are not available by default.  You need to explicitly
 compile perl with C<-DPERL_POLLUTE> to get these definitions.  For
 extensions still using the old symbols, this option can be
@@ -40,7 +40,7 @@ be called in programs that used Perl's malloc.  Previous versions of Perl
 have allowed this behaviour to be suppressed with the HIDEMYMALLOC and
 EMBEDMYMALLOC preprocessor definitions.
 
-As of release 5.006, Perl's malloc family of functions have default names
+As of release 5.6, Perl's malloc family of functions have default names
 distinct from the system versions.  You need to explicitly compile perl with
 C<-DPERL_POLLUTE_MALLOC> to get the older behaviour.  HIDEMYMALLOC
 and EMBEDMYMALLOC have no effect, since the behaviour they enabled is now

@@ -64,7 +64,7 @@ EOT
 }
 $head =~ s/^\t//gm;
 my $headlines = 2 + ($head =~ tr/\n/\n/);
-my $tail = "__END__\n:endofperl\n";
+my $tail = "\n__END__\n:endofperl\n";
 
 @ARGV = ('-') unless @ARGV;
 

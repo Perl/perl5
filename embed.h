@@ -102,6 +102,7 @@
 #define die_where		Perl_die_where
 #define dounwind		Perl_dounwind
 #define do_aexec		Perl_do_aexec
+#define do_aexec5		Perl_do_aexec5
 #define do_binmode		Perl_do_binmode
 #define do_chop			Perl_do_chop
 #define do_close		Perl_do_close
@@ -204,6 +205,7 @@
 #define ibcmp			Perl_ibcmp
 #define ibcmp_locale		Perl_ibcmp_locale
 #define ingroup			Perl_ingroup
+#define init_debugger		Perl_init_debugger
 #define init_stacks		Perl_init_stacks
 #define intro_my		Perl_intro_my
 #define instr			Perl_instr
@@ -781,7 +783,6 @@
 #define incpush			S_incpush
 #define init_interp		S_init_interp
 #define init_ids		S_init_ids
-#define init_debugger		S_init_debugger
 #define init_lexer		S_init_lexer
 #define init_main_stash		S_init_main_stash
 #define init_perllib		S_init_perllib
@@ -1422,6 +1423,7 @@
 #define die_where(a,b)		Perl_die_where(aTHX_ a,b)
 #define dounwind(a)		Perl_dounwind(aTHX_ a)
 #define do_aexec(a,b,c)		Perl_do_aexec(aTHX_ a,b,c)
+#define do_aexec5(a,b,c,d,e)	Perl_do_aexec5(aTHX_ a,b,c,d,e)
 #define do_binmode(a,b,c)	Perl_do_binmode(aTHX_ a,b,c)
 #define do_chop(a,b)		Perl_do_chop(aTHX_ a,b)
 #define do_close(a,b)		Perl_do_close(aTHX_ a,b)
@@ -1523,6 +1525,7 @@
 #define ibcmp(a,b,c)		Perl_ibcmp(aTHX_ a,b,c)
 #define ibcmp_locale(a,b,c)	Perl_ibcmp_locale(aTHX_ a,b,c)
 #define ingroup(a,b)		Perl_ingroup(aTHX_ a,b)
+#define init_debugger()		Perl_init_debugger(aTHX)
 #define init_stacks()		Perl_init_stacks(aTHX)
 #define intro_my()		Perl_intro_my(aTHX)
 #define instr(a,b)		Perl_instr(aTHX_ a,b)
@@ -2091,7 +2094,6 @@
 #define incpush(a,b)		S_incpush(aTHX_ a,b)
 #define init_interp()		S_init_interp(aTHX)
 #define init_ids()		S_init_ids(aTHX)
-#define init_debugger()		S_init_debugger(aTHX)
 #define init_lexer()		S_init_lexer(aTHX)
 #define init_main_stash()	S_init_main_stash(aTHX)
 #define init_perllib()		S_init_perllib(aTHX)
@@ -2829,6 +2831,8 @@
 #define dounwind		Perl_dounwind
 #define Perl_do_aexec		CPerlObj::Perl_do_aexec
 #define do_aexec		Perl_do_aexec
+#define Perl_do_aexec5		CPerlObj::Perl_do_aexec5
+#define do_aexec5		Perl_do_aexec5
 #define Perl_do_binmode		CPerlObj::Perl_do_binmode
 #define do_binmode		Perl_do_binmode
 #define Perl_do_chop		CPerlObj::Perl_do_chop
@@ -3023,6 +3027,8 @@
 #define ibcmp_locale		Perl_ibcmp_locale
 #define Perl_ingroup		CPerlObj::Perl_ingroup
 #define ingroup			Perl_ingroup
+#define Perl_init_debugger	CPerlObj::Perl_init_debugger
+#define init_debugger		Perl_init_debugger
 #define Perl_init_stacks	CPerlObj::Perl_init_stacks
 #define init_stacks		Perl_init_stacks
 #define Perl_intro_my		CPerlObj::Perl_intro_my
@@ -4135,8 +4141,6 @@
 #define init_interp		S_init_interp
 #define S_init_ids		CPerlObj::S_init_ids
 #define init_ids		S_init_ids
-#define S_init_debugger		CPerlObj::S_init_debugger
-#define init_debugger		S_init_debugger
 #define S_init_lexer		CPerlObj::S_init_lexer
 #define init_lexer		S_init_lexer
 #define S_init_main_stash	CPerlObj::S_init_main_stash

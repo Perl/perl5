@@ -705,7 +705,7 @@ may run a slightly modified version of MacPerl, using the Carbon interfaces.
 
 S<Mac OS X Server> and its Open Source version, Darwin, both run Unix
 perl natively (with a few patches).  Full support for these
-is slated for perl5.006.
+is slated for perl 5.6.
 
 Also see:
 

@@ -1,4 +1,5 @@
 #define DOOP(ppname) PUTBACK; PL_op = ppname(aTHX); SPAGAIN
+#define CCPP(s)   OP * s(pTHX)
 
 #define PP_LIST(g) do {			\
 	dMARK;				\

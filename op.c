@@ -5548,6 +5548,8 @@ Perl_ck_subr(pTHX_ OP *o)
 		case '$':
 		    if (o2->op_type != OP_RV2SV
 			&& o2->op_type != OP_PADSV
+			&& o2->op_type != OP_HELEM
+			&& o2->op_type != OP_AELEM
 			&& o2->op_type != OP_THREADSV)
 		    {
 			bad_type(arg, "scalar", gv_ename(namegv), o2);

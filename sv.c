@@ -1107,17 +1107,10 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	      return SvIV(tmpstr);
 	  return (IV)SvRV(sv);
 	}
-	if (SvREADONLY(sv)) {
-	    if (SvNOKp(sv)) {
-		return I_V(SvNVX(sv));
-	    }
-	    if (SvPOKp(sv) && SvLEN(sv))
-		return asIV(sv);
-	    {
-		dTHR;
-		if (ckWARN(WARN_UNINITIALIZED))
-		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
-	    }
+	if (SvREADONLY(sv) && !SvOK(sv)) {
+	    dTHR;
+	    if (ckWARN(WARN_UNINITIALIZED))
+		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    return 0;
 	}
     }
@@ -1252,17 +1245,10 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	      return SvUV(tmpstr);
 	  return (UV)SvRV(sv);
 	}
-	if (SvREADONLY(sv)) {
-	    if (SvNOKp(sv)) {
-		return U_V(SvNVX(sv));
-	    }
-	    if (SvPOKp(sv) && SvLEN(sv))
-		return asUV(sv);
-	    {
-		dTHR;
-		if (ckWARN(WARN_UNINITIALIZED))
-		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
-	    }
+	if (SvREADONLY(sv) && !SvOK(sv)) {
+	    dTHR;
+	    if (ckWARN(WARN_UNINITIALIZED))
+		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    return 0;
 	}
     }
@@ -1423,19 +1409,8 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	      return SvNV(tmpstr);
 	  return (NV)(unsigned long)SvRV(sv);
 	}
-	if (SvREADONLY(sv)) {
+	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
-	    if (SvPOKp(sv) && SvLEN(sv)) {
-		if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !looks_like_number(sv))
-		    not_a_number(sv);
-		return Atof(SvPVX(sv));
-	    }
-	    if (SvIOKp(sv)) {
-		if (SvIsUV(sv)) 
-		    return (NV)SvUVX(sv);
-		else
-		    return (NV)SvIVX(sv);
-	    }
 	    if (ckWARN(WARN_UNINITIALIZED))
 		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    return 0.0;
@@ -1817,29 +1792,10 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	    *lp = strlen(s);
 	    return s;
 	}
-	if (SvREADONLY(sv)) {
-	    if (SvNOKp(sv)) {		/* See note in sv_2uv() */
-		/* XXXX 64-bit?  IV may have better precision... */
-		Gconvert(SvNVX(sv), DBL_DIG, 0, tmpbuf);
-		tsv = Nullsv;
-		goto tokensave;
-	    }
-	    if (SvIOKp(sv)) {
-		char *ebuf;
-
-		if (SvIsUV(sv))
-		    tmpbuf = uiv_2buf(tbuf, 0, SvUVX(sv), 1, &ebuf);
-		else
-		    tmpbuf = uiv_2buf(tbuf, SvIVX(sv), 0, 0, &ebuf);
-		*ebuf = 0;
-		tsv = Nullsv;
-		goto tokensave;
-	    }
-	    {
-		dTHR;
-		if (ckWARN(WARN_UNINITIALIZED))
-		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
-	    }
+	if (SvREADONLY(sv) && !SvOK(sv)) {
+	    dTHR;
+	    if (ckWARN(WARN_UNINITIALIZED))
+		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    *lp = 0;
 	    return "";
 	}
@@ -1872,30 +1828,36 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
     }
     else if (SvIOKp(sv)) {
 	U32 isIOK = SvIOK(sv);
+	U32 isUIOK = SvIsUV(sv);
 	char buf[TYPE_CHARS(UV)];
 	char *ebuf, *ptr;
 
 	if (SvTYPE(sv) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_PVIV);
-	if (SvIsUV(sv)) {
+	if (isUIOK)
 	    ptr = uiv_2buf(buf, 0, SvUVX(sv), 1, &ebuf);
-	    sv_setpvn(sv, ptr, ebuf - ptr);
-	    SvIsUV_on(sv);
-	}
-	else {
+	else
 	    ptr = uiv_2buf(buf, SvIVX(sv), 0, 0, &ebuf);
-	    sv_setpvn(sv, ptr, ebuf - ptr);
-	}
+	SvGROW(sv, ebuf - ptr + 1);	/* inlined from sv_setpvn */
+	Move(ptr,SvPVX(sv),ebuf - ptr,char);
+	SvCUR_set(sv, ebuf - ptr);
 	s = SvEND(sv);
+	*s = '\0';
 	if (isIOK)
 	    SvIOK_on(sv);
 	else
 	    SvIOKp_on(sv);
+	if (isUIOK)
+	    SvIsUV_on(sv);
+	SvPOK_on(sv);
     }
     else {
 	dTHR;
-	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	if (ckWARN(WARN_UNINITIALIZED)
+	    && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	{
 	    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+	}
 	*lp = 0;
 	if (SvTYPE(sv) < SVt_PV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
@@ -1905,7 +1867,8 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
     *lp = s - SvPVX(sv);
     SvCUR_set(sv, *lp);
     SvPOK_on(sv);
-    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2pv(%s)\n",(unsigned long)sv,SvPVX(sv)));
+    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2pv(%s)\n",
+			  (unsigned long)sv,SvPVX(sv)));
     return SvPVX(sv);
 
   tokensave:
