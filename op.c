@@ -722,7 +722,7 @@ S_op_clear(pTHX_ OP *o)
 #ifdef USE_ITHREADS
 	if (cPADOPo->op_padix > 0) {
 	    if (PL_curpad) {
-		GV *gv = cGVOPo;
+		GV *gv = cGVOPo_gv;
 		pad_swipe(cPADOPo->op_padix);
 		/* No GvIN_PAD_off(gv) here, because other references may still
 		 * exist on the pad */
@@ -1403,7 +1403,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		    break;
 		}
 		
-		cv = GvCV(kGVOP);
+		cv = GvCV(kGVOP_gv);
 		if (!cv) 
 		    goto restore_2cv;
 		if (CvLVALUE(cv))
@@ -2861,7 +2861,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 		    }
 #else
 		    if (curop->op_type == OP_GV) {
-			GV *gv = cGVOPx(curop);
+			GV *gv = cGVOPx_gv(curop);
 			repl_has_vars = 1;
 			if (strchr("&`'123456789+", *GvENAME(gv)))
 			    break;
@@ -3209,7 +3209,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
 		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
 		    if (curop->op_type == OP_GV) {
-			GV *gv = cGVOPx(curop);
+			GV *gv = cGVOPx_gv(curop);
 			if (gv == PL_defgv || SvCUR(gv) == PL_generation)
 			    break;
 			SvCUR(gv) = PL_generation;
@@ -5114,7 +5114,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 	    kid->op_type = OP_GV;
 	    SvREFCNT_dec(kid->op_sv);
 #ifdef USE_ITHREADS
-	    /* XXXXXX hack: dependence on sizeof(PADOP) <= sizeof(SVOP) */
+	    /* XXX hack: dependence on sizeof(PADOP) <= sizeof(SVOP) */
 	    kPADOP->op_padix = pad_alloc(OP_GV, SVs_PADTMP);
 	    GvIN_PAD_on(gv);
 	    PL_curpad[kPADOP->op_padix] = SvREFCNT_inc(gv);
@@ -5826,7 +5826,7 @@ S_simplify_sort(pTHX_ OP *o)
     if (kUNOP->op_first->op_type != OP_GV)
 	return;
     kid = kUNOP->op_first;				/* get past rv2sv */
-    gv = kGVOP;
+    gv = kGVOP_gv;
     if (GvSTASH(gv) != PL_curstash)
 	return;
     if (strEQ(GvNAME(gv), "a"))
@@ -5842,7 +5842,7 @@ S_simplify_sort(pTHX_ OP *o)
     if (kUNOP->op_first->op_type != OP_GV)
 	return;
     kid = kUNOP->op_first;				/* get past rv2sv */
-    gv = kGVOP;
+    gv = kGVOP_gv;
     if (GvSTASH(gv) != PL_curstash
 	|| ( reversed
 	    ? strNE(GvNAME(gv), "a")
@@ -5952,7 +5952,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	null(cvop);		/* disable rv2cv */
 	tmpop = (SVOP*)((UNOP*)cvop)->op_first;
 	if (tmpop->op_type == OP_GV && !(o->op_private & OPpENTERSUB_AMPER)) {
-	    GV *gv = cGVOPx(tmpop);
+	    GV *gv = cGVOPx_gv(tmpop);
 	    cv = GvCVu(gv);
 	    if (!cv)
 		tmpop->op_private |= OPpEARLY_CV;
@@ -6020,7 +6020,7 @@ Perl_ck_subr(pTHX_ OP *o)
 				(gvop = ((UNOP*)gvop)->op_first) &&
 				gvop->op_type == OP_GV)
 			    {
-				GV *gv = cGVOPx(gvop);
+				GV *gv = cGVOPx_gv(gvop);
 				OP *sibling = o2->op_sibling;
 				SV *n = newSVpvn("",0);
 				op_free(o2);
@@ -6262,12 +6262,12 @@ Perl_peep(pTHX_ register OP *o)
 		    o->op_type = OP_AELEMFAST;
 		    o->op_ppaddr = PL_ppaddr[OP_AELEMFAST];
 		    o->op_private = (U8)i;
-		    gv = cGVOPo;
+		    gv = cGVOPo_gv;
 		    GvAVn(gv);
 		}
 	    }
 	    else if ((o->op_private & OPpEARLY_CV) && ckWARN(WARN_UNSAFE)) {
-		GV *gv = cGVOPo;
+		GV *gv = cGVOPo_gv;
 		if (SvTYPE(gv) == SVt_PVGV && GvCV(gv) && SvPVX(GvCV(gv))) {
 		    /* XXX could check prototype here instead of just carping */
 		    SV *sv = sv_newmortal();
@@ -6348,7 +6348,7 @@ Perl_peep(pTHX_ register OP *o)
 	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
 	    if (!fields || !GvHV(*fields))
 		break;
-	    svp = &cSVOPx_sv(((BINOP*)o)->op_last);
+	    svp = cSVOPx_svp(((BINOP*)o)->op_last);
 	    key = SvPV(*svp, keylen);
 	    indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
 	    if (!indsvp) {

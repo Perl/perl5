@@ -9,6 +9,8 @@
 #ifndef  _INC_WIN32_PERL5
 #define  _INC_WIN32_PERL5
 
+#define _WIN32_WINNT 0x0400	/* needed for TryEnterCriticalSection() etc. */
+
 #if defined(PERL_OBJECT) || defined(PERL_IMPLICIT_SYS) || defined(PERL_CAPI)
 #  define DYNAMIC_ENV_FETCH
 #  define ENV_HV_NAME "___ENV_HV_NAME___"

@@ -281,7 +281,6 @@ perl_alloc(void)
 				   pHost->m_pHostperlSock,
 				   pHost->m_pHostperlProc);
 	if (my_perl) {
-	    CPerlObj* pPerl = (CPerlObj*)my_perl;
 	    w32_internal_host = pHost;
 	}
     }

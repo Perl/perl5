@@ -58,9 +58,9 @@ PP(pp_gvsv)
     djSP;
     EXTEND(SP,1);
     if (PL_op->op_private & OPpLVAL_INTRO)
-	PUSHs(save_scalar(cGVOP));
+	PUSHs(save_scalar(cGVOP_gv));
     else
-	PUSHs(GvSV(cGVOP));
+	PUSHs(GvSV(cGVOP_gv));
     RETURN;
 }
 
@@ -95,7 +95,7 @@ PP(pp_stringify)
 PP(pp_gv)
 {
     djSP;
-    XPUSHs((SV*)cGVOP);
+    XPUSHs((SV*)cGVOP_gv);
     RETURN;
 }
 
@@ -271,7 +271,7 @@ PP(pp_add)
 PP(pp_aelemfast)
 {
     djSP;
-    AV *av = GvAV(cGVOP);
+    AV *av = GvAV(cGVOP_gv);
     U32 lval = PL_op->op_flags & OPf_MOD;
     SV** svp = av_fetch(av, PL_op->op_private, lval);
     SV *sv = (svp ? *svp : &PL_sv_undef);

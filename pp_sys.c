@@ -411,7 +411,7 @@ PP(pp_indread)
 
 PP(pp_rcatline)
 {
-    PL_last_in_gv = cGVOP;
+    PL_last_in_gv = cGVOP_gv;
     return do_readline();
 }
 
@@ -2437,7 +2437,7 @@ PP(pp_stat)
     STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF) {
-	tmpgv = cGVOP;
+	tmpgv = cGVOP_gv;
       do_fstat:
 	if (tmpgv != PL_defgv) {
 	    PL_laststype = OP_STAT;
@@ -2899,7 +2899,7 @@ PP(pp_fttty)
     STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF)
-	gv = cGVOP;
+	gv = cGVOP_gv;
     else if (isGV(TOPs))
 	gv = (GV*)POPs;
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
@@ -2941,7 +2941,7 @@ PP(pp_fttext)
     PerlIO *fp;
 
     if (PL_op->op_flags & OPf_REF)
-	gv = cGVOP;
+	gv = cGVOP_gv;
     else if (isGV(TOPs))
 	gv = (GV*)POPs;
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
@@ -2991,7 +2991,7 @@ PP(pp_fttext)
 	}
 	else {
 	    if (ckWARN(WARN_UNOPENED)) {
-		gv = cGVOP;
+		gv = cGVOP_gv;
 		Perl_warner(aTHX_ WARN_UNOPENED, "Test on unopened file <%s>",
 			    GvENAME(gv));
 	    }
