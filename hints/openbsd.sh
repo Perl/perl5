@@ -25,16 +25,18 @@ d_setruid=$undef
 
 #
 # Not all platforms support dynamic loading...
+# For the case of "$openbsd_distribution", the hints file
+# needs to know whether we are using dynamic loading so that
+# it can set the libperl name appropriately.
+# Allow command line overrides.
 #
 ARCH=`arch|sed 's/^OpenBSD.//'`
 case "${ARCH}-${osvers}" in
 alpha-*|mips-*|vax-*|powerpc-2.[0-7]|m88k-*)
-	usedl=$undef
+	test -z "$usedl" && usedl=$undef
 	;;
 *)
-	usedl=$define
-	d_dlopen=$define
-	d_dlerror=$define
+	test -z "$usedl" && usedl=$define
 	# we use -fPIC here because -fpic is *NOT* enough for some of the
 	# extensions like Tk on some OpenBSD platforms (ie: sparc)
 	cccdlflags="-DPIC -fPIC $cccdlflags"
