@@ -1,5 +1,5 @@
 
-# Time-stamp: "2004-03-30 16:59:14 AST"
+# Time-stamp: "2004-06-17 23:06:22 PDT"
 
 use I18N::LangTags::Detect;
 
@@ -15,8 +15,8 @@ my @in = grep m/\S/, split /\n/, q{
 [ en-us   ]  en-US
 [ en-us   ]  EN-US
 
-[ en-au en i-klingon en-gb en-us mt-mt mt ja ]  EN-au, JA;q=0.14, i-klingon;q=0.83, en-gb;q=0.71, en-us;q=0.57, mt-mt;q=0.43, mt;q=0.29, en;q=0.86
-[ en-au en i-klingon en-gb en-us mt-mt mt tli ja ]  EN-au, tli;q=0.201, JA;q=0.14, i-klingon;q=0.83, en-gb;q=0.71, en-us;q=0.57, mt-mt;q=0.43, mt;q=0.29, en;q=0.86
+[ en-au en i-klingon x-klingon en-gb en-us mt-mt mt ja ]  EN-au, JA;q=0.14, i-klingon;q=0.83, en-gb;q=0.71, en-us;q=0.57, mt-mt;q=0.43, mt;q=0.29, en;q=0.86
+[ en-au en i-klingon x-klingon en-gb en-us mt-mt mt tli ja ]  EN-au, tli;q=0.201, JA;q=0.14, i-klingon;q=0.83, en-gb;q=0.71, en-us;q=0.57, mt-mt;q=0.43, mt;q=0.29, en;q=0.86
 [ en-au en en-gb en-us ja  ]  en-au, ja;q=0.20, en-gb;q=0.60, en-us;q=0.40, en;q=0.80
 
 [ en-au en en-gb en-us mt-mt mt ja ]  EN-au, JA;q=0.14, en-gb;q=0.71, en-us;q=0.57, mt-mt;q=0.43, mt;q=0.29, en;q=0.86
