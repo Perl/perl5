@@ -5,6 +5,8 @@ BEGIN {
     @INC = '../lib';
 }
 
+use Config;
+
 print "1..134\n";
 
 sub try ($$) {
@@ -277,7 +279,11 @@ tryeq_sloppy 130, 18446744073709551616/9223372036854775808, 2;
 
 if ($^O eq 'vos') {
   print "not ok 134 # TODO VOS raises SIGFPE instead of producing infinity.\n";
-} else {
+} 
+elsif (($^O eq 'VMS') && !defined($Config{useieee})) {
+  print "ok 134 # SKIP -- the IEEE infinity model is unavailable in this configuration.\n";
+} 
+else {
   # The computation of $v should overflow and produce "infinity"
   # on any system whose max exponent is less than 10**1506.
   # The exact string used to represent infinity varies by OS,
