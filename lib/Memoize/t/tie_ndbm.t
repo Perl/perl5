@@ -1,15 +1,6 @@
 #!/usr/bin/perl
 
 use lib qw(. ..);
-
-BEGIN {
-    use Config;
-    unless ($Config{extensions} =~ /\bNDBM_File\b/) {
-	print "1..0 # Skip: no NDBM_File\n";
-        exit(0);
-    }
-}
-
 use Memoize 0.45 qw(memoize unmemoize);
 use Fcntl;
 # use Memoize::NDBM_File;
