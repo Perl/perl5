@@ -81,6 +81,7 @@
 #define PL_reg_ganch		(vTHX->Treg_ganch)
 #define PL_reg_leftiter		(vTHX->Treg_leftiter)
 #define PL_reg_magic		(vTHX->Treg_magic)
+#define PL_reg_match_utf8	(vTHX->Treg_match_utf8)
 #define PL_reg_maxiter		(vTHX->Treg_maxiter)
 #define PL_reg_oldcurpm		(vTHX->Treg_oldcurpm)
 #define PL_reg_oldpos		(vTHX->Treg_oldpos)
@@ -93,7 +94,6 @@
 #define PL_reg_start_tmpl	(vTHX->Treg_start_tmpl)
 #define PL_reg_starttry		(vTHX->Treg_starttry)
 #define PL_reg_sv		(vTHX->Treg_sv)
-#define PL_reg_sv_utf8		(vTHX->Treg_sv_utf8)
 #define PL_reg_whilem_seen	(vTHX->Treg_whilem_seen)
 #define PL_regbol		(vTHX->Tregbol)
 #define PL_regcc		(vTHX->Tregcc)
@@ -1087,6 +1087,7 @@
 #define PL_reg_ganch		(aTHX->Treg_ganch)
 #define PL_reg_leftiter		(aTHX->Treg_leftiter)
 #define PL_reg_magic		(aTHX->Treg_magic)
+#define PL_reg_match_utf8	(aTHX->Treg_match_utf8)
 #define PL_reg_maxiter		(aTHX->Treg_maxiter)
 #define PL_reg_oldcurpm		(aTHX->Treg_oldcurpm)
 #define PL_reg_oldpos		(aTHX->Treg_oldpos)
@@ -1099,7 +1100,6 @@
 #define PL_reg_start_tmpl	(aTHX->Treg_start_tmpl)
 #define PL_reg_starttry		(aTHX->Treg_starttry)
 #define PL_reg_sv		(aTHX->Treg_sv)
-#define PL_reg_sv_utf8		(aTHX->Treg_sv_utf8)
 #define PL_reg_whilem_seen	(aTHX->Treg_whilem_seen)
 #define PL_regbol		(aTHX->Tregbol)
 #define PL_regcc		(aTHX->Tregcc)
@@ -1226,6 +1226,7 @@
 #define PL_Treg_ganch		PL_reg_ganch
 #define PL_Treg_leftiter	PL_reg_leftiter
 #define PL_Treg_magic		PL_reg_magic
+#define PL_Treg_match_utf8	PL_reg_match_utf8
 #define PL_Treg_maxiter		PL_reg_maxiter
 #define PL_Treg_oldcurpm	PL_reg_oldcurpm
 #define PL_Treg_oldpos		PL_reg_oldpos
@@ -1238,7 +1239,6 @@
 #define PL_Treg_start_tmpl	PL_reg_start_tmpl
 #define PL_Treg_starttry	PL_reg_starttry
 #define PL_Treg_sv		PL_reg_sv
-#define PL_Treg_sv_utf8		PL_reg_sv_utf8
 #define PL_Treg_whilem_seen	PL_reg_whilem_seen
 #define PL_Tregbol		PL_regbol
 #define PL_Tregcc		PL_regcc

@@ -259,5 +259,5 @@ PERLVAR(thr_done,	bool)		/* True when the thread has finished */
 
 #endif /* USE_5005THREADS */
 
-PERLVAR(Treg_sv_utf8,	bool)		/* was what we matched against utf8 */
+PERLVAR(Treg_match_utf8,	bool)		/* was what we matched against utf8 */
 

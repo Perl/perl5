@@ -745,6 +745,8 @@ END_EXTERN_C
 #define PL_reg_leftiter		(*Perl_Treg_leftiter_ptr(aTHX))
 #undef  PL_reg_magic
 #define PL_reg_magic		(*Perl_Treg_magic_ptr(aTHX))
+#undef  PL_reg_match_utf8
+#define PL_reg_match_utf8	(*Perl_Treg_match_utf8_ptr(aTHX))
 #undef  PL_reg_maxiter
 #define PL_reg_maxiter		(*Perl_Treg_maxiter_ptr(aTHX))
 #undef  PL_reg_oldcurpm
@@ -769,8 +771,6 @@ END_EXTERN_C
 #define PL_reg_starttry		(*Perl_Treg_starttry_ptr(aTHX))
 #undef  PL_reg_sv
 #define PL_reg_sv		(*Perl_Treg_sv_ptr(aTHX))
-#undef  PL_reg_sv_utf8
-#define PL_reg_sv_utf8		(*Perl_Treg_sv_utf8_ptr(aTHX))
 #undef  PL_reg_whilem_seen
 #define PL_reg_whilem_seen	(*Perl_Treg_whilem_seen_ptr(aTHX))
 #undef  PL_regbol

@@ -10239,7 +10239,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_reg_re		= (regexp*)NULL;
     PL_reg_ganch	= Nullch;
     PL_reg_sv		= Nullsv;
-    PL_reg_sv_utf8	= FALSE;
+    PL_reg_match_utf8	= FALSE;
     PL_reg_magic	= (MAGIC*)NULL;
     PL_reg_oldpos	= 0;
     PL_reg_oldcurpm	= (PMOP*)NULL;

@@ -1232,7 +1232,7 @@ PP(pp_match)
 		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
 
-    PL_reg_sv_utf8 = DO_UTF8(TARG);
+    PL_reg_match_utf8 = DO_UTF8(TARG);
 
     if (pm->op_pmdynflags & PMdf_USED) {
       failure:
@@ -1400,7 +1400,7 @@ yup:					/* Confirmed by INTUIT */
     if (global) {
 	rx->subbeg = truebase;
 	rx->startp[0] = s - truebase;
-	if (PL_reg_sv_utf8) {
+	if (PL_reg_match_utf8) {
 	    char *t = (char*)utf8_hop((U8*)s, rx->minlen);
 	    rx->endp[0] = t - truebase;
 	}
@@ -1928,14 +1928,14 @@ PP(pp_subst)
 	rxtainted |= 2;
     TAINT_NOT;
 
-    PL_reg_sv_utf8 = DO_UTF8(TARG);
+    PL_reg_match_utf8 = DO_UTF8(TARG);
 
   force_it:
     if (!pm || !s)
 	DIE(aTHX_ "panic: pp_subst");
 
     strend = s + len;
-    slen = PL_reg_sv_utf8 ? utf8_length((U8*)s, (U8*)strend) : len;
+    slen = PL_reg_match_utf8 ? utf8_length((U8*)s, (U8*)strend) : len;
     maxiters = 2 * slen + 10;	/* We can match twice at each
 				   position, once with zero-length,
 				   second time with non-zero. */
