@@ -104,14 +104,14 @@ variables.  Named parameters are also demonstrated.
 
 	package main;
 
-	$a = Foo->new( 'High' => 42, 'Low' => 11 );
-	print "High=$a->{'High'}\n";
-	print "Low=$a->{'Low'}\n";
-
-	$b = Bar->new( 'Left' => 78, 'Right' => 40 );
-	print "Left=$b->[0]\n";
-	print "Right=$b->[1]\n";
-
+	$x = Foo->new( 'High' => 42, 'Low' => 11 );
+	print "High=$x->{'High'}\n";
+	print "Low=$x->{'Low'}\n";
+ 
+	$y = Bar->new( 'Left' => 78, 'Right' => 40 );
+	print "Left=$y->[0]\n";
+	print "Right=$y->[1]\n";
+  
 =head1 SCALAR INSTANCE VARIABLES
 
 An anonymous scalar can be used when only one instance variable is needed.
@@ -127,8 +127,8 @@ An anonymous scalar can be used when only one instance variable is needed.
 
 	package main;
 
-	$a = Foo->new( 42 );
-	print "a=$$a\n";
+	$x = Foo->new( 42 );
+	print "a=$$x\n";
 
 
 =head1 INSTANCE VARIABLE INHERITANCE
@@ -159,9 +159,9 @@ object.
 
 	package main;
 
-	$a = Foo->new;
-	print "buz = ", $a->{'buz'}, "\n";
-	print "biz = ", $a->{'biz'}, "\n";
+	$x = Foo->new;
+	print "buz = ", $x->{'buz'}, "\n";
+	print "biz = ", $x->{'biz'}, "\n";
 
 
 
@@ -191,9 +191,9 @@ relationships between objects.
 
 	package main;
 
-	$a = Foo->new;
-	print "buz = ", $a->{'Bar'}->{'buz'}, "\n";
-	print "biz = ", $a->{'biz'}, "\n";
+	$x = Foo->new;
+	print "buz = ", $x->{'Bar'}->{'buz'}, "\n";
+	print "biz = ", $x->{'biz'}, "\n";
 
 
 
@@ -314,8 +314,8 @@ that it is impossible to override the BAZ() method.
 
 	package main;
 
-	$a = FOO->new;
-	$a->bar;
+	$x = FOO->new;
+	$x->bar;
 
 Now we try to override the BAZ() method.  We would like FOO::bar() to call
 GOOP::BAZ(), but this cannot happen because FOO::bar() explicitly calls
@@ -351,8 +351,8 @@ FOO::private::BAZ().
 
 	package main;
 
-	$a = GOOP->new;
-	$a->bar;
+	$x = GOOP->new;
+	$x->bar;
 
 To create reusable code we must modify class FOO, flattening class
 FOO::private.  The next example shows a reusable class FOO which allows the
@@ -386,8 +386,8 @@ method GOOP::BAZ() to be used in place of FOO::BAZ().
 
 	package main;
 
-	$a = GOOP->new;
-	$a->bar;
+	$x = GOOP->new;
+	$x->bar;
 
 =head1 CLASS CONTEXT AND THE OBJECT
 
@@ -444,10 +444,10 @@ method where that data is located.
 
 	package main;
 
-	$a = Bar->new;
-	$b = Foo->new;
-	$a->enter;
-	$b->enter;
+	$x = Bar->new;
+	$y = Foo->new;
+	$x->enter;
+	$y->enter;
 
 =head1 INHERITING A CONSTRUCTOR
 
@@ -476,8 +476,8 @@ object will be a BAR not a FOO, even though the constructor is in class FOO.
 
 	package main;
 
-	$a = BAR->new;
-	$a->baz;
+	$x = BAR->new;
+	$x->baz;
 
 =head1 DELEGATION
 

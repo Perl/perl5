@@ -87,8 +87,8 @@ And once again, this results in:
 That's not fun yet.  Same number of characters, all constant, no
 variables.  But yet, the parts are separable now.  Watch:
 
-    $a = "Cow";
-    $a->speak; # invokes Cow->speak
+    $x = "Cow";
+    $x->speak; # invokes Cow->speak
 
 Ahh!  Now that the package name has been parted from the subroutine
 name, we can use a variable package name.  And this time, we've got
@@ -392,8 +392,8 @@ So far, we've seen the method arrow syntax:
 
 or the equivalent:
 
-  $a = "Class";
-  $a->method(@args);
+  $x = "Class";
+  $x->method(@args);
 
 which constructs an argument list of:
 

@@ -1489,7 +1489,7 @@ subroutine, and outside that is another subroutine; and the anonymous
 (innermost) subroutine is referencing a lexical variable defined in
 the outermost subroutine.  For example:
 
-   sub outermost { my $a; sub middle { sub { $a } } }
+   sub outermost { my $x; sub middle { sub { $x } } }
 
 If the anonymous subroutine is called or referenced (directly or
 indirectly) from the outermost subroutine, it will share the variable
