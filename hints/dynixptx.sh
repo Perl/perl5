@@ -19,9 +19,8 @@ libswanted=`echo $libswanted | sed -e 's/ inet / /'`
 # Configure defaults to usenm='y', which doesn't work very well
 usenm='n'
 
-# for performance, apparently this makes a huge difference (~krader)
+# removed d_vfork='define'; we can't use it any more ...
 
-d_vfork='define'
 case "$optimize" in
 '') optimize='-Wc,-O3 -W0,-xstring' ;;
 esac
