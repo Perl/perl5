@@ -989,6 +989,8 @@ win32_kill(int pid, int sig)
 	/* it is a pseudo-forked child */
 	long child = find_pseudo_pid(-pid);
 	if (child >= 0) {
+	    if (!sig)
+		return 0;
 	    hProcess = w32_pseudo_child_handles[child];
 	    if (TerminateThread(hProcess, sig)) {
 		remove_dead_pseudo_process(child);
@@ -1001,6 +1003,8 @@ win32_kill(int pid, int sig)
     {
 	long child = find_pid(pid);
 	if (child >= 0) {
+	    if (!sig)
+		return 0;
 	    hProcess = w32_child_handles[child];
 	    if (TerminateProcess(hProcess, sig)) {
 		remove_dead_process(child);
@@ -1009,9 +1013,13 @@ win32_kill(int pid, int sig)
 	}
 	else {
 	    hProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
-	    if (hProcess && TerminateProcess(hProcess, sig)) {
-		CloseHandle(hProcess);
-		return 0;
+	    if (hProcess) {
+		if (!sig)
+		    return 0;
+		if (TerminateProcess(hProcess, sig)) {
+		    CloseHandle(hProcess);
+		    return 0;
+		}
 	    }
 	}
     }
