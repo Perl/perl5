@@ -1,5 +1,20 @@
 use ExtUtils::MakeMaker;
-my @tables = qw(iso8859 EBCDIC Symbols);
+
+my %tables = (iso8859 => ['ascii.enc', 'cp1250.enc'],
+              EBCDIC  => ['cp1047.enc','cp37.enc','posix-bc.enc'],
+              Symbols => ['symbol.enc','dingbats.enc'],
+             );
+
+opendir(ENC,'Encode');
+while (defined(my $file = readdir(ENC)))
+ {
+  if ($file =~ /iso8859.*\.enc/)
+   {
+    push(@{$tables{iso8859}},$file);
+   }
+ }
+closedir(ENC);
+
 
 WriteMakefile(
 	NAME		=> "Encode",
@@ -19,32 +34,57 @@ package MY;
 sub post_initialize
 {
  my ($self) = @_;
- push(@{$self->{'O_FILES'}},map("$_\$(OBJ_EXT)",@tables));
- $self->{'clean'}{'FILES'} .= join(' ',map("$_.*",@tables));
+ my %o;
+ # Find existing O_FILES
+ foreach my $f (@{$self->{'O_FILES'}})
+  {
+   $o{$f} = 1;
+  } 
+ my $x = $self->{'OBJ_EXT'};
+ # Add the table O_FILES
+ foreach my $e (keys %tables)
+  {
+   $o{$e.$x} = 1;
+  }  
+ # Reset the variable 
+ $self->{'O_FILES'} = [sort keys %o];
+ my @files;
+ foreach my $table (keys %tables)
+  {
+   foreach my $ext (qw($(OBJ_EXT) .c .h .def))
+    {
+     push (@files,$table.$ext);
+    }
+  }
+ $self->{'clean'}{'FILES'} .= join(' ',@files);
  return '';
-}
-
-sub clean
-{
- my ($self) = @_;
- return $self->SUPER::clean . qq[
-	\$(RM_F) ].join(' ',map("$_.*",@tables))."\n"
 }
 
 sub postamble
 {
- return '
-
-Encode$(OBJ_EXT) : iso8859$(OBJ_EXT) EBCDIC$(OBJ_EXT) Symbols$(OBJ_EXT)
-
-iso8859.c : compile Makefile
-	$(PERL) compile $@ Encode/ascii.enc Encode/iso8859*.enc Encode/cp1250.enc
-
-EBCDIC.c : compile Makefile Encode/cp1047.enc Encode/cp37.enc Encode/posix-bc.enc
-	$(PERL) compile $@ Encode/cp1047.enc Encode/cp37.enc Encode/posix-bc.enc
-
-Symbols.c : compile Makefile Encode/symbol.enc Encode/dingbats.enc
-	$(PERL) compile $@ Encode/symbol.enc Encode/dingbats.enc
-
-'
+ my $self = shift;
+ my $dir  = $self->catdir($self->curdir,'Encode');
+ my $str  = "# Encode$(OBJ_EXT) depends on .h and .def files not .c files - but all written by compile\n";
+ $str  .= 'Encode$(OBJ_EXT) :';
+ my @rules;
+ foreach my $table (keys %tables)
+  {
+   $str .= " $table.c";
+  }
+ $str .= "\n\n";
+ foreach my $table (keys %tables)
+  {
+   $str .= "$table.c : compile Makefile.PL";
+   foreach my $file (@{$tables{$table}})
+    {
+     $str .= ' '.$self->catfile($dir,$file);
+    }
+   $str .= "\n\t\$(PERL) compile \$\@";
+   foreach my $file (@{$tables{$table}})
+    {
+     $str .= ' '.$self->catfile($dir,$file);
+    }
+   $str .= "\n\n";
+  }
+ return $str;
 }
