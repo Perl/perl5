@@ -368,7 +368,11 @@ Perl_reentrant_retry(const char *f, ...)
 		    p0 = va_arg(ap, void *);
 		    retptr = getgrnam(p0); break;
 	        case OP_GGRGID:
+#if Gid_t_size < INTSIZE
+		    gid = (Gid_t)va_arg(ap, int);
+#else
 		    gid = va_arg(ap, Gid_t);
+#endif
 		    retptr = getgrgid(gid); break;
 	        case OP_GGRENT:
 		    retptr = getgrent(); break;
@@ -431,7 +435,11 @@ Perl_reentrant_retry(const char *f, ...)
 		    p0 = va_arg(ap, void *);
 		    retptr = getpwnam(p0); break;
 	        case OP_GPWUID:
+#if Uid_t_size < INTSIZE
+		    uid = (Uid_t)va_arg(ap, int);
+#else
 		    uid = va_arg(ap, Uid_t);
+#endif
 		    retptr = getpwuid(uid); break;
 	        case OP_GPWENT:
 		    retptr = getpwent(); break;

@@ -2213,6 +2213,10 @@ typedef pthread_key_t	perl_key;
             (PerlLIO_setmode(PerlIO_fileno(fp), mode) != -1 ? TRUE : FALSE)
 #endif
 
+#ifdef __CYGWIN__
+void init_os_extras(void);
+#endif
+
 #ifdef UNION_ANY_DEFINITION
 UNION_ANY_DEFINITION;
 #else
