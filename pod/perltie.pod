@@ -129,7 +129,9 @@ probably the right thing to do.
 
 This method will be triggered every time the tied variable is set
 (assigned).  Beyond its self reference, it also expects one (and only one)
-argument--the new value the user is trying to assign.
+argument--the new value the user is trying to assign. Don't worry about
+returning a value from STORE -- the semantic of assignment returning the
+assigned value is implemented with FETCH.
 
     sub STORE {
         my $self = shift;
@@ -154,7 +156,6 @@ argument--the new value the user is trying to assign.
         unless (defined setpriority(PRIO_PROCESS, $$self, $new_nicety)) {
             confess "setpriority failed: $!";
         }
-        return $new_nicety;
     }
 
 =item UNTIE this
