@@ -226,7 +226,7 @@ sub check_file {
 	return minus_f_nocase($dir,$file);
     } else {
 	my $path = minus_f_nocase($dir,$file);
-        return $path if length $path and containspod($path);
+        return $path if containspod($path);
     }
     return "";
 }
