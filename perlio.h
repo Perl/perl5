@@ -206,7 +206,10 @@ extern void PerlIO_init(pTHX);
 #endif
 #ifndef PerlIO_stdoutf
 extern int PerlIO_stdoutf(const char *, ...)
-    __attribute__ ((__format__(__printf__, 1, 2)));
+#ifdef CHECK_FORMAT
+    __attribute__ ((__format__(__printf__, 1, 2)))
+#endif
+;
 #endif
 #ifndef PerlIO_puts
 extern int PerlIO_puts(PerlIO *, const char *);
@@ -266,11 +269,17 @@ extern void PerlIO_setlinebuf(PerlIO *);
 #endif
 #ifndef PerlIO_printf
 extern int PerlIO_printf(PerlIO *, const char *, ...)
-    __attribute__ ((__format__(__printf__, 2, 3)));
+#ifdef CHECK_FORMAT
+    __attribute__ ((__format__(__printf__, 2, 3)))
+#endif
+;
 #endif
 #ifndef PerlIO_sprintf
 extern int PerlIO_sprintf(char *, int, const char *, ...)
-    __attribute__ ((__format__(__printf__, 3, 4)));
+#ifdef CHECK_FORMAT
+    __attribute__ ((__format__(__printf__, 3, 4)))
+#endif
+;
 #endif
 #ifndef PerlIO_vprintf
 extern int PerlIO_vprintf(PerlIO *, const char *, va_list);

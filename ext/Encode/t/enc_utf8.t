@@ -1,7 +1,12 @@
+# $Id: enc_utf8.t,v 1.2 2003/01/22 03:29:07 dankogai Exp $
 # This is the twin of enc_eucjp.t, the only difference is that
 # this has "use encoding 'utf8'".
 
 BEGIN {
+#     if ($] <= 5.008){
+# 	print "1..0 # Skip: Perl 5.8.1 or later required\n";
+# 	exit 0;
+#     }
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
@@ -40,7 +45,7 @@ for my $i (0..$#c) {
   binmode(F, ":utf8");
   my $c = <F>;
   my $o = ord($c);
-  print $o == $c[$i] ? "ok $t - utf8 I/O $c[$i]\n" : "not ok $t - utf8 I/O $c[$$i]: $o != $c[$i]\n";
+  print $o == $c[$i] ? "ok $t - utf8 I/O $c[$i]\n" : "not ok $t - utf8 I/O $c[$i]: $o != $c[$i]\n";
   $t++;
 }
 
