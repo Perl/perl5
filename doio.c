@@ -219,7 +219,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 
 	if (num_svs) {
 	    /* New style explicit name, type is just mode and layer info */
-	    STRLEN l = 0;
 #ifdef USE_STDIO
 	    if (SvROK(*svp) && !strchr(name,'&')) {
 		if (ckWARN(WARN_IO))
@@ -229,9 +228,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		goto say_false;
 	    }
 #endif /* USE_STDIO */
-	    name = SvOK(*svp) ? SvPV(*svp, l) : "";
-	    len = (I32)l;
-	    name = savepvn(name, len);
+	    name = SvOK(*svp) ? savesvpv (*svp) : savepvn ("", 0);
 	    SAVEFREEPV(name);
 	}
 	else {
