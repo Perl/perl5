@@ -40,7 +40,6 @@ $ ans = ""
 $ macros = ""
 $ extra_flags = ""
 $ user_c_flags = ""
-$ use_debugging_perl = "y"
 $ use_ieee_math = "n"
 $ be_case_sensitive = "n"
 $ use_vmsdebug_perl = "n"
@@ -1720,6 +1719,24 @@ $   use_vmsdebug_perl = "Y"
 $   macros = macros + """__DEBUG__=1"","
 $ ELSE
 $   use_vmsdebug_perl = "N"
+$ ENDIF
+$!
+$! Ask if they want to build with DEBUGGING
+$ echo ""
+$ echo "Perl can be built with extra runtime debugging enabled. This
+$ echo "enables the -D switch, at the cost of some performance. It
+$ echo "was mandatory on perl 5.005 and before on VMS, but is now
+$ echo "optional. If you don't generally use it you should probably
+$ echo "leave this off and gain a bit of extra speed.
+$ dflt = "y"
+$ rp = "Build a DEBUGGING version of Perl? [''dflt'] "
+$ GOSUB myread
+$ IF ans.eqs."" then ans = dflt
+$ IF F$EXTRACT(0, 1, F$EDIT(ans,"COLLAPSE,UPCASE")) .eqs. "Y"
+$ THEN
+$   use_debugging_perl = "Y"
+$ ELSE
+$   use_debugging_perl = "N"
 $ ENDIF
 $!
 $! Ask if they want to build with MULTIPLICITY
