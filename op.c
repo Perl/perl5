@@ -4273,7 +4273,7 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
 	CopSTASH_set(PL_curcop,stash);
     }
 
-    cv = newXS(name, const_sv_xsub, __FILE__);
+    cv = newXS(name, const_sv_xsub, CopFILE(PL_curcop));
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
     sv_setpv((SV*)cv, "");  /* prototype is "" */
