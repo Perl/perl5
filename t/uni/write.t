@@ -5,6 +5,10 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = qw(../lib .);
     require "test.pl";
+    unless (PerlIO::Layer->find('perlio')){
+        print "1..0 # Skip: PerlIO required\n";
+        exit 0;
+    }
 }
 
 plan tests => 6;
