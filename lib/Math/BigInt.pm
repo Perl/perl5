@@ -3053,7 +3053,8 @@ zeros suppressed.
 =item Input
 
 Input values to these routines may be either Math::BigInt objects or
-strings of the form C</^\s*[+-]?[\d]+\.?[\d]*E?[+-]?[\d]*$/>.
+strings of the form C</^\s*[+-]?[\d]+\.?[\d]*E?[+-]?[\d]*$/>, or
+hexadecimal C</^\s*[+-]?[0-9a-f]+$/i>, or binary C</^\s*[+-]?[01]+$/>.
 
 You can include one underscore between any two digits.
 
