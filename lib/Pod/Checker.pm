@@ -10,7 +10,7 @@
 package Pod::Checker;
 
 use vars qw($VERSION);
-$VERSION = 1.3;  ## Current version of this package
+$VERSION = 1.40;  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 use Pod::ParseUtils; ## for hyperlinks and lists
@@ -273,6 +273,11 @@ C<=head1> followed immediately by C<=head2> does not trigger this warning.
 The NAME section (C<=head1 NAME>) should consist of a single paragraph
 with the script/module name, followed by a dash `-' and a very short
 description of what the thing is good for.
+
+=item * =headI<n> without preceding higher level
+
+For example if there is a C<=head2> in the POD file prior to a
+C<=head1>.
 
 =back
 
@@ -548,6 +553,7 @@ sub initialize {
     ## Initialize number of errors, and setup an error function to
     ## increment this number and then print to the designated output.
     $self->{_NUM_ERRORS} = 0;
+    $self->{_NUM_WARNINGS} = 0;
     $self->{-quiet} ||= 0;
     # set the error handling subroutine
     $self->errorsub($self->{-quiet} ? sub { 1; } : 'poderror');
@@ -609,6 +615,8 @@ sub poderror {
     ## Increment error count and print message "
     ++($self->{_NUM_ERRORS}) 
         if(!%opts || ($opts{-severity} && $opts{-severity} eq 'ERROR'));
+    ++($self->{_NUM_WARNINGS})
+        if(!%opts || ($opts{-severity} && $opts{-severity} eq 'WARNING'));
     my $out_fh = $self->output_handle() || \*STDERR;
     print $out_fh ($severity, $msg, $line, $file, "\n")
       if($self->{-warnings} || !%opts || $opts{-severity} ne 'WARNING');
@@ -624,6 +632,18 @@ Set (if argument specified) and retrieve the number of errors found.
 
 sub num_errors {
    return (@_ > 1) ? ($_[0]->{_NUM_ERRORS} = $_[1]) : $_[0]->{_NUM_ERRORS};
+}
+
+##################################
+
+=item C<$checker-E<gt>num_warnings()>
+
+Set (if argument specified) and retrieve the number of warnings found.
+
+=cut
+
+sub num_warnings {
+   return (@_ > 1) ? ($_[0]->{_NUM_WARNINGS} = $_[1]) : $_[0]->{_NUM_WARNINGS};
 }
 
 ##################################
@@ -907,17 +927,24 @@ sub command {
             }
         }
         elsif($cmd =~ /^head(\d+)/) {
+            my $hnum = $1;
+            $self->{"_have_head_$hnum"}++; # count head types
+            if($hnum > 1 && !$self->{"_have_head_".($hnum -1)}) {
+              $self->poderror({ -line => $line, -file => $file,
+                   -severity => 'WARNING', 
+                   -msg => "=head$hnum without preceding higher level"});
+            }
             # check whether the previous =head section had some contents
             if(defined $self->{_commands_in_head} &&
               $self->{_commands_in_head} == 0 &&
               defined $self->{_last_head} &&
-              $self->{_last_head} >= $1) {
+              $self->{_last_head} >= $hnum) {
                 $self->poderror({ -line => $line, -file => $file,
                      -severity => 'WARNING', 
                      -msg => "empty section in previous paragraph"});
             }
             $self->{_commands_in_head} = -1;
-            $self->{_last_head} = $1;
+            $self->{_last_head} = $hnum;
             # check if there is an open list
             if(@{$self->{_list_stack}}) {
                 my $list;
