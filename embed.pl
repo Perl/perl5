@@ -1563,11 +1563,11 @@ Ap	|HV*	|gv_stashpvn	|const char* name|U32 namelen|I32 create
 Apd	|HV*	|gv_stashsv	|SV* sv|I32 create
 Apd	|void	|hv_clear	|HV* tb
 Ap	|void	|hv_delayfree_ent|HV* hv|HE* entry
-Apd	|SV*	|hv_delete	|HV* tb|const char* key|U32 klen|I32 flags
+Apd	|SV*	|hv_delete	|HV* tb|const char* key|I32 klen|I32 flags
 Apd	|SV*	|hv_delete_ent	|HV* tb|SV* key|I32 flags|U32 hash
-Apd	|bool	|hv_exists	|HV* tb|const char* key|U32 klen
+Apd	|bool	|hv_exists	|HV* tb|const char* key|I32 klen
 Apd	|bool	|hv_exists_ent	|HV* tb|SV* key|U32 hash
-Apd	|SV**	|hv_fetch	|HV* tb|const char* key|U32 klen|I32 lval
+Apd	|SV**	|hv_fetch	|HV* tb|const char* key|I32 klen|I32 lval
 Apd	|HE*	|hv_fetch_ent	|HV* tb|SV* key|I32 lval|U32 hash
 Ap	|void	|hv_free_ent	|HV* hv|HE* entry
 Apd	|I32	|hv_iterinit	|HV* tb
@@ -1578,7 +1578,7 @@ Apd	|SV*	|hv_iternextsv	|HV* hv|char** key|I32* retlen
 Apd	|SV*	|hv_iterval	|HV* tb|HE* entry
 Ap	|void	|hv_ksplit	|HV* hv|IV newmax
 Apd	|void	|hv_magic	|HV* hv|GV* gv|int how
-Apd	|SV**	|hv_store	|HV* tb|const char* key|U32 klen|SV* val \
+Apd	|SV**	|hv_store	|HV* tb|const char* key|I32 klen|SV* val \
 				|U32 hash
 Apd	|HE*	|hv_store_ent	|HV* tb|SV* key|SV* val|U32 hash
 Apd	|void	|hv_undef	|HV* tb

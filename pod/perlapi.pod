@@ -761,7 +761,7 @@ hash and returned to the caller.  The C<klen> is the length of the key.
 The C<flags> value will normally be zero; if set to G_DISCARD then NULL
 will be returned.
 
-	SV*	hv_delete(HV* tb, const char* key, U32 klen, I32 flags)
+	SV*	hv_delete(HV* tb, const char* key, I32 klen, I32 flags)
 
 =for hackers
 Found in file hv.c
@@ -783,7 +783,7 @@ Found in file hv.c
 Returns a boolean indicating whether the specified hash key exists.  The
 C<klen> is the length of the key.
 
-	bool	hv_exists(HV* tb, const char* key, U32 klen)
+	bool	hv_exists(HV* tb, const char* key, I32 klen)
 
 =for hackers
 Found in file hv.c
@@ -809,7 +809,7 @@ dereferencing it to a C<SV*>.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-	SV**	hv_fetch(HV* tb, const char* key, U32 klen, I32 lval)
+	SV**	hv_fetch(HV* tb, const char* key, I32 klen, I32 lval)
 
 =for hackers
 Found in file hv.c
@@ -920,7 +920,7 @@ the call, and decrementing it if the function returned NULL.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-	SV**	hv_store(HV* tb, const char* key, U32 klen, SV* val, U32 hash)
+	SV**	hv_store(HV* tb, const char* key, I32 klen, SV* val, U32 hash)
 
 =for hackers
 Found in file hv.c
