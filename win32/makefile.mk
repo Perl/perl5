@@ -838,9 +838,9 @@ CFG_VARS	=					\
 		d_crypt=$(D_CRYPT)		~	\
 		d_mymalloc=$(PERL_MALLOC)	~	\
 		libs=$(LIBFILES:f)		~	\
-		incpath=$(CCINCDIR)		~	\
+		incpath=$(CCINCDIR:s/\/\\/)	~	\
 		libperl=$(PERLIMPLIB:f)		~	\
-		libpth=$(CCLIBDIR);$(EXTRALIBDIRS)		~	\
+		libpth=$(CCLIBDIR:s/\/\\/);$(EXTRALIBDIRS:s/\/\\/)	~	\
 		libc=$(LIBC)			~	\
 		make=dmake			~	\
 		_o=$(o)	obj_ext=$(o)		~	\
