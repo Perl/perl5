@@ -250,7 +250,7 @@ See also L<"64-bit support">.
 =head2 Long Doubles
 
 Some platforms have "long doubles", floating point numbers of even
-larger range than ordinary "doubles".  To enable using ng doubles for
+larger range than ordinary "doubles".  To enable using long doubles for
 Perl's scalars, use -Duselongdouble.
 
 =head2 -Dusemorebits
@@ -701,7 +701,7 @@ exec() fails, earlier versions did not report the error properly,
 since the exec() happened to be in a different process.
 
 The child process now communicates with the parent about the
-error in launching the external command, which allow these
+error in launching the external command, which allows these
 constructs to return with their usual error value and set $!.
 
 =head2 Implicitly closed filehandles are safer
@@ -754,7 +754,7 @@ enabled.
 
 =head2 Locale bugs fixed
 
-printf() and sprintf() previously did reset the numeric locale
+printf() and sprintf() previously reset the numeric locale
 back to the default "C" locale.  This has been fixed.
 
 Numbers formatted according to the local numeric locale
@@ -818,7 +818,7 @@ library's C<stderr>.
 
 =head2 Other fixes for better diagnostics
 
-Line numbers are suppressed no more (under most likely circumstances)
+Line numbers are no longer suppressed (under most likely circumstances)
 during the global destruction phase.
 
 Diagnostics emitted from code running in threads other than the main
@@ -1042,7 +1042,7 @@ Devel::DProf, a Perl source code profiler has been added.  See L<DProf>.
 
 =item Dumpvalue
 
-Added Dumpvalue module provides screen dumps of Perl data.
+The Dumpvalue module provides screen dumps of Perl data.
 
 =item Benchmark
 
@@ -1126,7 +1126,64 @@ instead of
 
 =item Getopt::Long
 
-[TODO - Johan Vromans <jvromans@squirrel.nl>]
+Getopt::Long licensing has changed to allow the Perl Artistic License
+as well as the GPL. It used to be GPL only, which got in the way of
+non-GPL applications that wanted to use Getopt::Long.
+
+Getopt::Long encourages the use of Pod::Usage to produce help
+messages. For example:
+
+    use Getopt::Long;
+    use Pod::Usage;
+    my $man = 0;
+    my $help = 0;
+    GetOptions('help|?' => \$help, man => \$man) or pod2usage(2);
+    pod2usage(1) if $help;
+    pod2usage(-exitstatus => 0, -verbose => 2) if $man;
+
+    __END__
+
+    =head1 NAME
+
+    sample - Using GetOpt::Long and Pod::Usage
+
+    =head1 SYNOPSIS
+
+    sample [options] [file ...]
+
+     Options:
+       -help            brief help message
+       -man             full documentation
+
+    =head1 OPTIONS
+
+    =over 8
+
+    =item B<-help>
+
+    Print a brief help message and exits.
+
+    =item B<-man>
+
+    Prints the manual page and exits.
+
+    =back
+
+    =head1 DESCRIPTION
+
+    B<This program> will read the given input file(s) and do someting
+    useful with the contents thereof.
+
+    =cut
+
+See L<Pod::Usage> for details.
+
+A bug that prevented the non-option call-back E<lt>E<gt> from being
+specified as the first argument has been fixed.
+
+To specify the characters E<lt> and E<gt> as option starters, use
+E<gt>E<lt>. Note, however, that changing option starters is strongly
+deprecated. 
 
 =item IO
 
@@ -1152,7 +1209,7 @@ C<no lib> removes all named entries.
 
 =item Math::BigInt
 
-The logical operations C<E<lt>E<lt>>, C<E<gt>E<gt>>, C<&>, C<|>,
+The bitwise operations C<E<lt>E<lt>>, C<E<gt>E<gt>>, C<&>, C<|>,
 and C<~> are now supported on bigints.
 
 =item Math::Complex
@@ -1187,7 +1244,7 @@ fixed.
 =item Time::Local
 
 The timelocal() and timegm() functions used to silently return bogus
-results when the date exceeded the machine's integer range.  They
+results when the date fell outside the machine's integer range.  They
 now consistently croak() if the date falls in an unsupported range.
 
 =item Win32
@@ -1231,7 +1288,7 @@ See L<perldbmfilter> for further information.
 
 =head2 Pragmata
 
-C<use attrs> is now obsolescent, and is only provided for
+C<use attrs> is now obsolete, and is only provided for
 backward-compatibility.  It's been replaced by the C<sub : attributes>
 syntax.  See L<perlsub/"Subroutine Attributes"> and L<attributes>.
 
@@ -1325,7 +1382,7 @@ See L<perlfunc/pack>.
 
 =item / must be followed by a*, A* or Z*
 
-(F) You had an pack template indicating a counted-length string,
+(F) You had a pack template indicating a counted-length string,
 Currently the only things that can have their length counted are a*, A* or Z*.
 See L<perlfunc/pack>.
 
@@ -1354,7 +1411,7 @@ C<'>-delimited regular expression.
 =item /%s/ should probably be written as "%s"
 
 (W) You have used a pattern where Perl expected to find a string,
-like in the first argument to C<join>.  Perl will treat the true
+as in the first argument to C<join>.  Perl will treat the true
 or false result of matching the pattern against $_ as the string,
 which is probably not what you had in mind.
 
@@ -1432,8 +1489,8 @@ so it was truncated to the string shown.
 
 =item Can't modify non-lvalue subroutine call
 
-(F) Subroutines used in lvalue context should be marked as such, see
-L<perlsub/"Lvalue subroutines">.
+(F) Subroutines meant to be used in lvalue context should be declared as
+such, see L<perlsub/"Lvalue subroutines">.
 
 =item Can't read CRTL environ
 
@@ -1462,13 +1519,15 @@ references can be weakened.
 =item Character class [:%s:] unknown
 
 (F) The class in the character class [: :] syntax is unknown.
+See L<perlre>.
 
 =item Character class syntax [%s] belongs inside character classes
 
 (W) The character class constructs [: :], [= =], and [. .]  go
 I<inside> character classes, the [] are part of the construct,
-for example: /[012[:alpha:]345]/.  Note that the last two constructs
-are not currently implemented, they are placeholders for future extensions.
+for example: /[012[:alpha:]345]/.  Note that [= =] and [. .]
+are not currently implemented; they are simply placeholders for
+future extensions.
 
 =item Constant is not %s reference
 
@@ -1516,7 +1575,7 @@ effective uids or gids failed.
 =item Filehandle %s opened only for output
 
 (W) You tried to read from a filehandle opened only for writing.  If you
-intended it to be a read-write filehandle, you needed to open it with
+intended it to be a read/write filehandle, you needed to open it with
 "+E<lt>" or "+E<gt>" or "+E<gt>E<gt>" instead of with "E<lt>" or nothing.  If
 you intended only to read from the file, use "E<lt>".  See
 L<perlfunc/open>.
@@ -1542,7 +1601,7 @@ line was ignored.
 
 =item Illegal binary digit %s
 
-(F) You used a digit other than 0 and 1 in a binary number.
+(F) You used a digit other than 0 or 1 in a binary number.
 
 =item Illegal binary digit %s ignored
 
@@ -1557,7 +1616,7 @@ two from 1 to 32 (or 64, if your platform supports that).
 =item Integer overflow in %s number
 
 (W) The hexadecimal, octal or binary number you have specified either
-as a literal in your code or as a scalar is too big for your
+as a literal or as an argument to hex() or oct() is too big for your
 architecture, and has been converted to a floating point number.  On a
 32-bit architecture the largest hexadecimal, octal or binary number
 representable without overflow is 0xFFFFFFFF, 037777777777, or
@@ -1687,7 +1746,7 @@ repetitions of "xyz" is C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
 (F) While under the C<use filetest> pragma, we cannot switch the
 real and effective uids or gids.
 
-=item This Perl can't reset CRTL eviron elements (%s)
+=item This Perl can't reset CRTL environ elements (%s)
 
 =item This Perl can't set CRTL environ elements (%s=%s)
 
@@ -1700,9 +1759,9 @@ L<perlvms>) so that the environ array isn't the target of the change to
 
 =item Unknown open() mode '%s'
 
-(F) The second argument of 3-arguments open is not one from the list
-of C<L<lt>>, C<L<gt>>, C<E<gt>E<gt>>, C<+L<lt>>, C<+L<gt>>,
-C<+E<gt>E<gt>>, C<-|>, C<|-> of possible open() modes.
+(F) The second argument of 3-argument open() is not among the list
+of valid modes: C<L<lt>>, C<L<gt>>, C<E<gt>E<gt>>, C<+L<lt>>,
+C<+L<gt>>, C<+E<gt>E<gt>>, C<-|>, C<|->.
 
 =item Unknown process %x sent message to prime_env_iter: %s
 
@@ -1804,7 +1863,7 @@ warning.  And in Perl 5.005, this special treatment will cease.
 
 =head1 BUGS
 
-If you find what you think is a bug, you might check the headers of
+If you find what you think is a bug, you might check the
 articles recently posted to the comp.lang.perl.misc newsgroup.
 There may also be information at http://www.perl.com/perl/, the Perl
 Home Page.
