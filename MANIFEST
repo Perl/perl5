@@ -819,6 +819,7 @@ lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
 lib/base.pm			Establish IS-A relationship at compile time
 lib/Benchmark.pm		Measure execution time
+lib/Benchmark.t			See if Benchmark works
 lib/bigfloat.pl			An arbitrary precision floating point package
 lib/bigfloat.t			See if bigfloat.pl works
 lib/bigint.pl			An arbitrary precision integer arithmetic package
