@@ -47,9 +47,7 @@ foreach (@JAVALIBS) {
         $INC =~ s#/#\\#g;
         $INC =~ s#\\$##;
         $CCFLAGS .= "-DWIN32 -Z7 -D_DEBUG";
-        $MYEXTLIB = "$libjava " .
-                "$Config{installarchlib}\\CORE\\perlcore.lib " .
-                "$Config{installarchlib}\\CORE\\perlcapi.lib";
+        $MYEXTLIB = $libjava;
     } elsif (/libkaffevm.so$/) {
         $CCFLAGS .= "-DKAFFE";
     }
@@ -98,6 +96,7 @@ my %Makefile = (
     LINKTYPE => 'dynamic',
     INC        => $INC,
     CCFLAGS => "$Config{ccflags} $CCFLAGS", 
+    ($Config{archname} =~ /mswin32.*-object/i ? ('CAPI' => 'TRUE') : ()),
 );
 
 $Makefile{LIBS} = ["$LIBPATH $LIBS"];
