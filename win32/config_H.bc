@@ -47,7 +47,7 @@
  *	where library files may be held under a private library, for
  *	instance.
  */
-#define ARCHNAME "MSWin32"		/**/
+#define ARCHNAME "MSWin32-x86-thread"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1466,9 +1466,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "c:\\perl\\lib"		/**/
-#define ARCHLIB_EXP (win32PerlLibPath())	/**/
-#define APPLLIB_EXP (win32SiteLibPath())	/**/
+#define ARCHLIB "c:\\perl\\lib\\MSWin32-x86-thread"		/**/
+#define ARCHLIB_EXP (win32PerlLibPath(ARCHNAME,NULL))	/**/
 
 /* BINCOMPAT3:
  *	This symbol, if defined, indicates that Perl 5.004 should be
@@ -1715,7 +1714,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define PRIVLIB "c:\\perl\\lib"		/**/
-#define PRIVLIB_EXP "c:\\perl\\lib"		/**/
+#define PRIVLIB_EXP (win32PerlLibPath(NULL))	/**/
 
 /* SH_PATH:
  *	This symbol contains the full pathname to the shell used on this
@@ -1771,7 +1770,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITEARCH "c:\\perl\\lib\\site"		/**/
-#define SITEARCH_EXP "c:\\perl\\lib\\site"		/**/
+#define SITEARCH_EXP (win32PerlLibPath("site",ARCHNAME,NULL))	/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1787,7 +1786,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITELIB "c:\\perl\\lib\\site"		/**/
-#define SITELIB_EXP "c:\\perl\\lib\\site"		/**/
+#define SITELIB_EXP (win32PerlLibPath("site",NULL))	/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl

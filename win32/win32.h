@@ -129,8 +129,7 @@ extern int		my_fclose(FILE *);
 extern int		do_aspawn(void* really, void ** mark, void ** arglast);
 extern int		do_spawn(char *cmd);
 extern char		do_exec(char *cmd);
-extern char *		win32PerlLibPath(void);
-extern char *		win32SiteLibPath(void);
+extern char *		win32PerlLibPath(char *sfx,...);
 extern int		IsWin95(void);
 extern int		IsWinNT(void);
 

@@ -55,30 +55,30 @@ IsWinNT(void) {
 }
 
 char *
-win32PerlLibPath(void)
+win32PerlLibPath(char *sfx,...)
 {
+    va_list ap;
     char *end;
+    va_start(ap,sfx);
     GetModuleFileName((PerlDllHandle == INVALID_HANDLE_VALUE) 
 		      ? GetModuleHandle(NULL)
 		      : PerlDllHandle,
 		      szPerlLibRoot, 
 		      sizeof(szPerlLibRoot));
-
     *(end = strrchr(szPerlLibRoot, '\\')) = '\0';
     if (stricmp(end-4,"\\bin") == 0)
      end -= 4;
     strcpy(end,"\\lib");
+    while (sfx)
+     {
+      strcat(end,"\\");
+      strcat(end,sfx);
+      sfx = va_arg(ap,char *);
+     }
+    va_end(ap); 
     return (szPerlLibRoot);
 }
 
-char *
-win32SiteLibPath(void)
-{
-    static char szPerlSiteLib[MAX_PATH+1];
-    strcpy(szPerlSiteLib, win32PerlLibPath());
-    strcat(szPerlSiteLib, "\\site");
-    return (szPerlSiteLib);
-}
 
 BOOL
 HasRedirection(char *ptr)
