@@ -1,10 +1,5 @@
 #!./perl -w
 
-BEGIN {
-    chdir 't' if -d 't';
-    unshift @INC, '../lib';
-}
-
 use Getopt::Long;
 
 print "1..18\n";
