@@ -311,6 +311,28 @@ PP(pp_die)
 	if(tmpsv ? SvROK(tmpsv) : SvROK(error)) {
 	    if(tmpsv)
 		SvSetSV(error,tmpsv);
+	    else if(sv_isobject(error)) {
+		HV *stash = SvSTASH(SvRV(error));
+		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
+		if (gv) {
+		    SV line,file;
+		    Zero(&line, 1, SV);
+		    SvREFCNT(&file) = 1;
+		    sv_setsv(&file,GvSV(curcop->cop_filegv));
+		    Zero(&file, 1, SV);
+		    SvREFCNT(&line) = 1;
+		    sv_setiv(&line,(long)curcop->cop_line);
+		    EXTEND(SP, 3);
+		    PUSHMARK(SP);
+		    PUSHs(error);
+		    PUSHs(&file);
+ 		    PUSHs(&line);
+		    PUTBACK;
+		    perl_call_sv((SV*)GvCV(gv),
+				 G_SCALAR|G_EVAL|G_KEEPERR);
+		    sv_setsv(error,*stack_sp--);
+		}
+	    }
 	    pat = Nullch;
 	}
 	else {
