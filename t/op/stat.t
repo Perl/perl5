@@ -200,7 +200,7 @@ SKIP: {
       unless -d '/dev' && -r '/dev' && -x '/dev';
 
     my $LS  = $Config{d_readlink} ? "ls -lL" : "ls -l"; 
-    my $CMD = "$LS /dev";
+    my $CMD = "$LS /dev 2>/dev/null";
     my $DEV = qx($CMD);
 
     skip "$CMD failed", 3 if $DEV eq '';
