@@ -976,8 +976,10 @@ scan_const(char *start)
 			count--;
 		    regparse++;
 		}
-		if (*regparse != ')')
+		if (*regparse != ')') {
+		    regparse--;		/* Leave one char for continuation. */
 		    yyerror("Sequence (?{...}) not terminated or not {}-balanced");
+		}
 		while (s < regparse)
 		    *d++ = *s++;
 	    }
