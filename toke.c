@@ -5279,7 +5279,9 @@ S_pending_ident(pTHX)
     */
 
     if (!strchr(PL_tokenbuf,':')) {
-        if ((tmp = pad_findmy(PL_tokenbuf)) != NOT_IN_PAD) {
+	if (!PL_in_my)
+	    tmp = pad_findmy(PL_tokenbuf);
+        if (tmp != NOT_IN_PAD) {
             /* might be an "our" variable" */
             if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
                 /* build ops for a bareword */

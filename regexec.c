@@ -4077,26 +4077,8 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     case ANYOF:
 	if (do_utf8) {
 	    loceol = PL_regeol;
-	    while (hardcount < max && scan < loceol) {
-		 bool cont = FALSE;
-		 if (ANYOF_FLAGS(p) & ANYOF_UNICODE) {
-		      if (reginclass(p, (U8*)scan, 0, do_utf8))
-			   cont = TRUE;
-		 }
-		 else {
-		      U8 c = (U8)scan[0];
-
-		      if (UTF8_IS_INVARIANT(c)) {
-			   if (ANYOF_BITMAP_TEST(p, c))
-				cont = TRUE;
-		      }
-		      else {
-			   if (reginclass(p, (U8*)scan, 0, do_utf8))
-				cont = TRUE;
-		      }
-		}
-		if (!cont)
-		     break;
+	    while (hardcount < max && scan < loceol &&
+		   reginclass(p, (U8*)scan, 0, do_utf8)) {
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }

@@ -1,25 +1,5 @@
   op.c		AOK
 
-     "my" variable %s masks earlier declaration in same scope
-	my $x;
-	my $x ;
-
-     Variable "%s" may be unavailable 
-	sub x {
-      	    my $x;
-      	    sub y {
-         	$x
-      	    }
-   	}
-
-     Variable "%s" will not stay shared 
-	sub x {
-      	    my $x;
-      	    sub y {
-         	sub { $x }
-      	    }
-   	}
-
      Found = in conditional, should be ==
 	1 if $a = 1 ;
 
@@ -118,79 +98,11 @@
         sub fred() ;
         sub fred($) {}
 
-    %s never introduced		[pad_leavemy]	TODO
     Runaway prototype		[newSUB]	TODO
     oops: oopsAV		[oopsAV]	TODO
     oops: oopsHV		[oopsHV]	TODO
     
 __END__
-# op.c
-use warnings 'misc' ;
-my $x ;
-my $x ;
-my $y = my $y ;
-no warnings 'misc' ;
-my $x ;
-my $y ;
-EXPECT
-"my" variable $x masks earlier declaration in same scope at - line 4.
-"my" variable $y masks earlier declaration in same statement at - line 5.
-########
-# op.c
-use warnings 'closure' ;
-sub x {
-      my $x;
-      sub y {
-         $x
-      }
-   }
-EXPECT
-Variable "$x" will not stay shared at - line 7.
-########
-# op.c
-no warnings 'closure' ;
-sub x {
-      my $x;
-      sub y {
-         $x
-      }
-   }
-EXPECT
-
-########
-# op.c
-use warnings 'closure' ;
-sub x {
-      our $x;
-      sub y {
-         $x
-      }
-   }
-EXPECT
-
-########
-# op.c
-use warnings 'closure' ;
-sub x {
-      my $x;
-      sub y {
-         sub { $x }
-      }
-   }
-EXPECT
-Variable "$x" may be unavailable at - line 6.
-########
-# op.c
-no warnings 'closure' ;
-sub x {
-      my $x;
-      sub y {
-         sub { $x }
-      }
-   }
-EXPECT
-
-########
 # op.c
 use warnings 'syntax' ;
 1 if $a = 1 ;

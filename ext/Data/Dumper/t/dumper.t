@@ -67,11 +67,11 @@ sub TEST {
 $Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 357; $XS = 1;
+  $TMAX = 363; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 180; $XS = 0;
+  $TMAX = 183; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -1353,3 +1353,19 @@ EOT
   TEST q(Data::Dumper->Dumpxs([\\%foo])),
     "XS quotekeys == 0 for utf8 flagged ASCII" if $XS;
 }
+############# 358
+{
+  $WANT = <<'EOT';
+#$VAR1 = [
+#  undef,
+#  undef,
+#  1
+#];
+EOT
+    @foo = ();
+    $foo[2] = 1;
+    TEST q(Data::Dumper->Dump([\@foo])), 'Richard Clamp, Message-Id: <20030104005247.GA27685@mirth.demon.co.uk>';
+    TEST q(Data::Dumper->Dumpxs([\@foo])) if $XS;
+}
+
+

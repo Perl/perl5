@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.31 $, $Date: 2003/01/03 20:10:11 $)
+perlfaq3 - Programming Tools ($Revision: 1.32 $, $Date: 2003/01/26 17:41:53 $)
 
 =head1 DESCRIPTION
 
@@ -42,17 +42,12 @@ operations typically found in symbolic debuggers.
 
 =head2 Is there a Perl shell?
 
-In general, not yet.  There is psh available at
-
-    http://www.focusresearch.com/gregor/psh
-
-Which includes the following description:
-
-    The Perl Shell is a shell that combines the interactive nature
-    of a Unix shell with the power of Perl. The goal is to eventually
-    have a full featured shell that behaves as expected for normal
-    shell activity. But, the Perl Shell will use Perl syntax and
-    functionality for control-flow statements and other things.
+The psh (Perl sh) is currently at version 1.8. The Perl Shell is a
+shell that combines the interactive nature of a Unix shell with the
+power of Perl. The goal is a full featured shell that behaves as
+expected for normal shell activity and uses Perl syntax and
+functionality for control-flow statements and other things.
+You can get psh at http://www.focusresearch.com/gregor/psh/ .
 
 The Shell.pm module (distributed with Perl) makes Perl try commands
 which aren't part of the Perl language as shell commands.  perlsh

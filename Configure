@@ -5470,6 +5470,11 @@ case "$usenm" in
 			echo "'nm' won't be sufficient on this sytem." >&4
 			dflt=n
 		fi
+		if $test "$osname" = plan9; then
+			echo " "
+			echo "Whoops!  Nm won't work on Plan 9!" >&4
+			dflt=n
+		fi
 		;;
 	esac
 	case "$dflt" in

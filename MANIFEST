@@ -2500,6 +2500,7 @@ t/lib/warnings/hv		Tests for hv.c for warnings.t
 t/lib/warnings/malloc		Tests for malloc.c for warnings.t
 t/lib/warnings/mg		Tests for mg.c for warnings.t
 t/lib/warnings/op		Tests for op.c for warnings.t
+t/lib/warnings/pad		Tests for pad.c for warnings.t
 t/lib/warnings/perl		Tests for perl.c for warnings.t
 t/lib/warnings/perlio		Tests for perlio.c for warnings.t
 t/lib/warnings/perly		Tests for perly.y for warnings.t

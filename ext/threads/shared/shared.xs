@@ -672,7 +672,9 @@ sharedsv_array_mg_copy(pTHX_ SV *sv, MAGIC* mg,
     MAGIC *nmg = sv_magicext(nsv,mg->mg_obj,
 			    toLOWER(mg->mg_type),&sharedsv_elem_vtbl,
 			    name, namlen);
+    ENTER_LOCK;
     SvREFCNT_inc(SHAREDSvPTR(shared));
+    LEAVE_LOCK;
     nmg->mg_flags |= MGf_DUP;
     return 1;
 }

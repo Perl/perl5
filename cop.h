@@ -120,12 +120,22 @@ struct block_sub {
     PAD		*oldcomppad;
 };
 
-#define PUSHSUB(cx)							\
+/* base for the next two macros. Don't use directly */
+#define PUSHSUB_BASE(cx)						\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
-	cx->blk_sub.hasargs = hasargs;					\
+	cx->blk_sub.hasargs = hasargs;
+
+#define PUSHSUB(cx)							\
+	PUSHSUB_BASE(cx)						\
 	cx->blk_sub.lval = PL_op->op_private &                          \
 	                      (OPpLVAL_INTRO|OPpENTERSUB_INARGS);
+
+/* variant for use by OP_DBSTATE, where op_private holds hint bits */
+#define PUSHSUB_DB(cx)							\
+	PUSHSUB_BASE(cx)						\
+	cx->blk_sub.lval = 0;
+
 
 #define PUSHFORMAT(cx)							\
 	cx->blk_sub.cv = cv;						\

@@ -2736,7 +2736,7 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
        even if that would be treated as 0xFF - so will 
        a dup fail ...
      */
-    f->_file = PerlLIO_dup(fd);
+    f->_file = PerlLIO_dup(fileno(f));
 #    endif /* defined(_LP64) */
     return 1;
 #  elif defined(__hpux)

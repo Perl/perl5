@@ -182,7 +182,8 @@ PP(pp_substcont)
 	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
 
 	    (void)SvOOK_off(targ);
-	    Safefree(SvPVX(targ));
+	    if (SvLEN(targ))
+		Safefree(SvPVX(targ));
 	    SvPVX(targ) = SvPVX(dstr);
 	    SvCUR_set(targ, SvCUR(dstr));
 	    SvLEN_set(targ, SvLEN(dstr));
@@ -1582,7 +1583,8 @@ PP(pp_dbstate)
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
 
-    if (PL_op->op_private || SvIV(PL_DBsingle) || SvIV(PL_DBsignal) || SvIV(PL_DBtrace))
+    if (PL_op->op_flags & OPf_SPECIAL /* breakpoint */
+	    || SvIV(PL_DBsingle) || SvIV(PL_DBsignal) || SvIV(PL_DBtrace))
     {
 	dSP;
 	register CV *cv;
@@ -1611,7 +1613,7 @@ PP(pp_dbstate)
 
 	push_return(PL_op->op_next);
 	PUSHBLOCK(cx, CXt_SUB, SP);
-	PUSHSUB(cx);
+	PUSHSUB_DB(cx);
 	CvDEPTH(cv)++;
 	(void)SvREFCNT_inc(cv);
 	PAD_SET_CUR(CvPADLIST(cv),1);

@@ -11,17 +11,20 @@
 # OpenBSD has a better malloc than perl...
 test "$usemymalloc" || usemymalloc='n'
 
-# Currently, vfork(2) is not a real win over fork(2) but this will
-# change starting with OpenBSD 2.7.
-usevfork='true'
+# Currently, vfork(2) is not a real win over fork(2).
+usevfork="$undef"
 
-# setre?[ug]id() have been replaced by the _POSIX_SAVED_IDS versions
-# in 4.4BSD.  Configure will find these but they are just emulated
-# and do not have the same semantics as in 4.3BSD.
-d_setregid=$undef
-d_setreuid=$undef
-d_setrgid=$undef
-d_setruid=$undef
+# In OpenBSD < 3.3, the setre?[ug]id() are emulated using the
+# _POSIX_SAVED_IDS functionality which does not have the same
+# semantics as 4.3BSD.  Starting with OpenBSD 3.3, the original
+# semantics have been restored.
+case "$osvers" in
+[0-2].*|3.[0-2])
+	d_setregid=$undef
+	d_setreuid=$undef
+	d_setrgid=$undef
+	d_setruid=$undef
+esac
 
 #
 # Not all platforms support dynamic loading...
@@ -32,7 +35,7 @@ d_setruid=$undef
 #
 ARCH=`arch | sed 's/^OpenBSD.//'`
 case "${ARCH}-${osvers}" in
-alpha-2.[0-8]|mips-2.[0-8]|powerpc-2.[0-7]|m88k-*|vax-*)
+alpha-2.[0-8]|mips-2.[0-8]|powerpc-2.[0-7]|m88k-*|hppa-*|vax-*)
 	test -z "$usedl" && usedl=$undef
 	;;
 *)
@@ -85,6 +88,9 @@ case ${ARCH} in
 m88k)
    optimize='-O0'
    ;;
+hppa)
+   optimize='-O0'
+   ;;
 *)
    test "$optimize" || optimize='-O2'
    ;;
@@ -98,11 +104,6 @@ $define|true|[yY]*)
 	# any openbsd version dependencies with pthreads?
 	ccflags="-pthread $ccflags"
 	ldflags="-pthread $ldflags"
-	# Add -lpthread.  Also change from -lc to -lc_r
-	libswanted="$libswanted pthread"
-	libswanted=`echo " $libswanted "| sed -e 's/ c / c_r /' -e 's/^ //' -e 's/ $//'`
-	# This is strange.
-	usevfork="$undef"
 esac
 EOCBU
 

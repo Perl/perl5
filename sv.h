@@ -1055,7 +1055,7 @@ otherwise.
 
 #ifdef PERL_COPY_ON_WRITE
 #  define SvRELEASE_IVX(sv)   ((void)((SvFLAGS(sv) & (SVf_OOK|SVf_READONLY|SVf_FAKE)) \
-				&& sv_release_IVX(sv)))
+				&& Perl_sv_release_IVX(aTHX_ sv)))
 #  define SvIsCOW_normal(sv)	(SvIsCOW(sv) && SvLEN(sv))
 #else
 #  define SvRELEASE_IVX(sv)   ((void)SvOOK_off(sv))

@@ -964,6 +964,7 @@ The current kinds of Magic Virtual Tables are:
     U  PERL_MAGIC_uvar           vtbl_uvar      Available for use by extensions
     v  PERL_MAGIC_vec            vtbl_vec       vec() lvalue
     V  PERL_MAGIC_vstring        (none)         v-string scalars
+    w  PERL_MAGIC_utf8           vtbl_utf8      UTF-8 length+offset cache
     x  PERL_MAGIC_substr         vtbl_substr    substr() lvalue
     y  PERL_MAGIC_defelem        vtbl_defelem   Shadow "foreach" iterator
 						variable / smart parameter
