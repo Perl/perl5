@@ -166,6 +166,7 @@ d_xenix=''
 eunicefix=''
 Mcc=''
 ar=''
+full_ar=''
 awk=''
 bash=''
 bison=''
@@ -9811,6 +9812,12 @@ esac
 
 : Store the full pathname to the sed program for use in the C program
 full_sed=$sed
+
+: Store the full pathname to the ar program for use in the Makefile.SH
+: Respect a hint or command line value for full_ar.
+case "$full_ar" in
+'') full_ar=$ar ;;
+esac
 
 : see what type gids are declared as in the kernel
 echo " "
