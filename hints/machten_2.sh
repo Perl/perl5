@@ -19,10 +19,32 @@
 #  Warning about tests which no longer fail
 #    fixed by Tom Phoenix <rootbeer@teleport.com>
 #  March 5, 1997
+#
+#  Locale, optimization, and malloc changes by Tom Phoenix Mar 15, 1997
 
-# I don't know why this is needed.  It might be similar to NeXT's
-# problem.  See hints/next_3.sh.
-usemymalloc='n'
+# There seem to be some hard-to-diagnose problems under MachTen's
+# malloc, so we'll use Perl's. If you have problems which Perl's
+# malloc's diagnostics can't help you with, you may wish to use
+# MachTen's malloc after all.
+case "$usemymalloc" in
+'') usemymalloc='y' ;;
+esac
+
+# I (Tom Phoenix) don't know how to test for locales on MachTen. (If
+# you do, please fix this hints file!) But since mine didn't come
+# with locales working out of the box, I'll assume that's the case
+# for most folks.
+case "$d_setlocale" in
+'') d_setlocale=undef
+esac
+
+# MachTen doesn't have secure setid scripts
+d_suidsafe='undef'
+d_dosuid='define'
+
+case "$optimize" in
+'') optimize='-O2' ;;
+esac
 
 so='none'
 # These are useful only if you have DLD, but harmless otherwise.
@@ -46,6 +68,9 @@ i_db=$undef
 dont_use_nlink=define
 
 cat <<'EOM' >&4
+
+During Configure, you may get two "WHOA THERE" messages, for $d_setlocale
+and $i_db being 'undef'. You may keep the undef value.
 
 At the end of Configure, you will see a harmless message
 
