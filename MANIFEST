@@ -125,9 +125,11 @@ ext/ODBM_File/Makefile.PL	ODBM extension makefile writer
 ext/ODBM_File/ODBM_File.pm	ODBM extension Perl module
 ext/ODBM_File/ODBM_File.xs	ODBM extension external subroutines
 ext/ODBM_File/hints/dec_osf.pl	Hint for ODBM_File for named architecture
+ext/ODBM_File/hints/hpux.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/sco.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/solaris.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/svr4.pl	Hint for ODBM_File for named architecture
+ext/ODBM_File/hints/ultrix.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/typemap		ODBM extension interface types
 ext/Opcode/Makefile.PL		Opcode extension makefile writer
 ext/Opcode/Opcode.pm		Opcode extension Perl module
@@ -457,6 +459,7 @@ plan9/setup.rc		Plan9 port: script for easy build+install
 plan9/versnum		Plan9 port: script to print version number
 pod/Makefile		Make pods into something else
 pod/buildtoc		generate perltoc.pod
+pod/checkpods.PL	Tool to check for common errors in pods.
 pod/perl.pod		Top level perl man page
 pod/perlapio.pod	IO API info
 pod/perlbook.pod	Book info
@@ -541,6 +544,7 @@ t/io/fs.t		See if directory manipulations work
 t/io/inplace.t		See if inplace editing works
 t/io/pipe.t		See if secure pipes work
 t/io/print.t		See if print commands work
+t/io/read.t		See if read works
 t/io/tell.t		See if file seeking works
 t/lib/anydbm.t		See if AnyDBM_File works
 t/lib/bigint.t		See if bigint.pl works
