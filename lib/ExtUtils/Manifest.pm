@@ -10,7 +10,7 @@ use strict;
 use vars qw($VERSION @ISA @EXPORT_OK
 	    $Is_VMS $Debug $Verbose $Quiet $MANIFEST $found);
 
-$VERSION = '1.2801';
+$VERSION = substr(q$Revision: 1.33 $, 10);
 @ISA=('Exporter');
 @EXPORT_OK = ('mkmanifest', 'manicheck', 'fullcheck', 'filecheck', 
 	      'skipcheck', 'maniread', 'manicopy');
@@ -85,10 +85,10 @@ sub skipcheck {
 sub _manicheck {
     my($arg) = @_;
     my $read = maniread();
+    my $found = manifind();
     my $file;
     my(@missfile,@missentry);
     if ($arg & 1){
-	my $found = manifind();
 	foreach $file (sort keys %$read){
 	    warn "Debug: manicheck checking from $MANIFEST $file\n" if $Debug;
 	    unless ( exists $found->{$file} ) {
@@ -100,7 +100,6 @@ sub _manicheck {
     if ($arg & 2){
 	$read ||= {};
 	my $matches = _maniskip();
-	my $found = manifind();
 	my $skipwarn = $arg & 4;
 	foreach $file (sort keys %$found){
 	    if (&$matches($file)){
@@ -119,7 +118,7 @@ sub _manicheck {
 
 sub maniread {
     my ($mfile) = @_;
-    $mfile = $MANIFEST unless defined $mfile;
+    $mfile ||= $MANIFEST;
     my $read = {};
     local *M;
     unless (open M, $mfile){
@@ -128,6 +127,7 @@ sub maniread {
     }
     while (<M>){
 	chomp;
+	next if /^#/;
 	if ($Is_VMS) {
 	    my($file)= /^(\S+)/;
 	    next unless $file;
@@ -151,12 +151,13 @@ sub _maniskip {
     my ($mfile) = @_;
     my $matches = sub {0};
     my @skip ;
-    $mfile = "$MANIFEST.SKIP" unless defined $mfile;
+    $mfile ||= "$MANIFEST.SKIP";
     local *M;
     return $matches unless -f $mfile;
     open M, $mfile or return $matches;
     while (<M>){
 	chomp;
+	next if /^#/;
 	next if /^\s*$/;
 	push @skip, $_;
     }
@@ -174,7 +175,7 @@ sub _maniskip {
 sub manicopy {
     my($read,$target,$how)=@_;
     croak "manicopy() called without target argument" unless defined $target;
-    $how = 'cp' unless defined $how && $how;
+    $how ||= 'cp';
     require File::Path;
     require File::Basename;
     my(%dirs,$file);
@@ -194,7 +195,7 @@ sub manicopy {
 
 sub cp_if_diff {
     my($from, $to, $how)=@_;
-    -f $from || carp "$0: $from not found";
+    -f $from or carp "$0: $from not found";
     my($diff) = 0;
     local(*F,*T);
     open(F,$from) or croak "Can't read $from: $!\n";
@@ -209,11 +210,14 @@ sub cp_if_diff {
 	if (-e $to) {
 	    unlink($to) or confess "unlink $to: $!";
 	}
-	STRICT_SWITCH: {
-	      best($from,$to), last STRICT_SWITCH if $how eq 'best';
-	        cp($from,$to), last STRICT_SWITCH if $how eq 'cp';
-	        ln($from,$to), last STRICT_SWITCH if $how eq 'ln';
-	  }
+      STRICT_SWITCH: {
+	    best($from,$to), last STRICT_SWITCH if $how eq 'best';
+	    cp($from,$to), last STRICT_SWITCH if $how eq 'cp';
+	    ln($from,$to), last STRICT_SWITCH if $how eq 'ln';
+	    croak("ExtUtils::Manifest::cp_if_diff " .
+		  "called with illegal how argument [$how]. " .
+		  "Legal values are 'best', 'cp', and 'ln'.");
+	}
     }
 }
 
@@ -309,6 +313,8 @@ files found below the current directory.
 Maniread($file) reads a named C<MANIFEST> file (defaults to
 C<MANIFEST> in the current directory) and returns a HASH reference
 with files being the keys and comments being the values of the HASH.
+Blank lines and lines which start with C<#> in the C<MANIFEST> file
+are discarded.
 
 I<Manicopy($read,$target,$how)> copies the files that are the keys in
 the HASH I<%$read> to the named target directory. The HASH reference
@@ -324,7 +330,9 @@ make a tree without any symbolic link. Best is the default.
 
 The file MANIFEST.SKIP may contain regular expressions of files that
 should be ignored by mkmanifest() and filecheck(). The regular
-expressions should appear one on each line. A typical example:
+expressions should appear one on each line. Blank lines and lines
+which start with C<#> are skipped.  Use C<\#> if you need a regular
+expression to start with a sharp character. A typical example:
 
     \bRCS\b
     ^MANIFEST\.
