@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 use XSLoader ();
 require Exporter;
