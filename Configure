@@ -12856,10 +12856,17 @@ esac
 : Remove SIGSTKSIZE used by Linux.
 : Remove SIGSTKSZ used by Posix.
 : Remove SIGTYP void lines used by OS2.
-xxx=`echo '#include <signal.h>' |
+if [ "X$fieldn" = X ]; then
+    xxx=`echo '#include <signal.h>' |
+	$cppstdin $cppminus $cppflags 2>/dev/null |
+	$grep '^[ 	]*#.*include' | 
+	$sed 's!"!!g' | $sort | $uniq`
+else
+    xxx=`echo '#include <signal.h>' |
 	$cppstdin $cppminus $cppflags 2>/dev/null |
 	$grep '^[ 	]*#.*include' | 
 	$awk "{print \\$$fieldn}" | $sed 's!"!!g' | $sort | $uniq`
+fi
 : Check this list of files to be sure we have parsed the cpp output ok.
 : This will also avoid potentially non-existent files, such 
 : as ../foo/bar.h
