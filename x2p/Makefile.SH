@@ -17,18 +17,24 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
+: ${bin_sh=/bin/sh}
+
 echo "Extracting x2p/Makefile (with variable substitutions)"
 rm -f Makefile
 cat >Makefile <<!GROK!THIS!
-# $RCSfile: Makefile.SH,v $$Revision: 4.1 $$Date: 92/08/07 18:29:07 $
+# $RCSfile: Makefile.SH,v $$Revision: 4.1 $$Date: 1996/07/05 23:49:56 $
 #
 # $Log:	Makefile.SH,v $
+# Revision 1.2  1996/07/05 23:49:56  gerti
+# OPENSTEP 4.0 patches
+#
 
 CC = $cc
 BYACC = $byacc
 LDFLAGS = $ldflags
 SMALL = $small
 LARGE = $large $split
+MAB = $mab
 mallocsrc = $mallocsrc
 mallocobj = $mallocobj
 shellflags = $shellflags
@@ -46,6 +52,9 @@ PATH_SEP = $path_sep
 FIRSTMAKEFILE = $firstmakefile
 
 .SUFFIXES: .c \$(OBJ_EXT)
+
+# grrr
+SHELL = $bin_sh
 
 !GROK!THIS!
 
@@ -77,17 +86,14 @@ obj = hash$(OBJ_EXT) $(mallocobj) str$(OBJ_EXT) util$(OBJ_EXT) walk$(OBJ_EXT)
 
 lintflags = -phbvxac
 
-# grrr
-SHELL = /bin/sh
-
 .c$(OBJ_EXT):
-	$(CCCMD) $*.c
+	$(CCCMD) $(MAB) $*.c
 
 all: $(public) $(private) $(util)
 	touch all
 
 a2p: $(obj) a2p$(OBJ_EXT)
-	$(CC) $(LDFLAGS) $(obj) a2p$(OBJ_EXT) $(libs) -o a2p
+	$(CC) $(MAB) $(LDFLAGS) $(obj) a2p$(OBJ_EXT) $(libs) -o a2p
 
 # I now supply a2p.c with the kits, so the following section is
 # used only if you force byacc to run by saying
@@ -104,7 +110,7 @@ a2p.c: a2p.y
 	-@touch a2p.c
 
 a2p$(OBJ_EXT): a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h str.h hash.h
-	$(CCCMD) $(LARGE) a2p.c
+	$(CCCMD) $(LARGE) $(MAB) a2p.c
 
 clean:
 	rm -f a2p *$(OBJ_EXT)
