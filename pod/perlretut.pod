@@ -2046,8 +2046,41 @@ in the regexp.  Here are some silly examples:
                                          # prints 'Hi Mom!'
     $x =~ /aaa(?{print "Hi Mom!";})def/; # doesn't match,
                                          # no 'Hi Mom!'
+
+Pay careful attention to the next example:
+
     $x =~ /abc(?{print "Hi Mom!";})ddd/; # doesn't match,
                                          # no 'Hi Mom!'
+                                         # but why not?
+
+At first glance, you'd think that it shouldn't print, because obviously
+the C<ddd> isn't going to match the target string. But look at this
+example:
+
+    $x =~ /abc(?{print "Hi Mom!";})[d]dd/; # doesn't match,
+                                           # but _does_ print
+
+Hmm. What happened here? If you've been following along, you know that
+the above pattern should be effectively the same as the last one --
+enclosing the d in a character class isn't going to change what it
+matches. So why does the first not print while the second one does?
+
+The answer lies in the optimizations the REx engine makes. In the first
+case, all the engine sees are plain old characters (aside from the
+C<?{}> construct). It's smart enough to realize that the string 'ddd'
+doesn't occur in our target string before actually running the pattern
+through. But in the second case, we've tricked it into thinking that our
+pattern is more complicated than it is. It takes a look, sees our
+character class, and decides that it will have to actually run the
+pattern to determine whether or not it matches, and in the process of
+running it hits the print statement before it discovers that we don't
+have a match.
+
+To take a closer look at how the engine does optimizations, see the
+section L<"Pragmas and debugging"> below.
+
+More fun with C<?{}>:
+
     $x =~ /(?{print "Hi Mom!";})/;       # matches,
                                          # prints 'Hi Mom!'
     $x =~ /(?{$c = 1;})(?{print "$c";})/;  # matches,
