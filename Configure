@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb 29 02:56:00 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Feb 29 03:12:47 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -14072,13 +14072,11 @@ cat <<'EOSH' >> Cppsym.try
 echo '}' >> try.c
 EOSH
 cat <<EOSH >> Cppsym.try
-cc="$cc"
-optimize="$optimize"
 ccflags="$ccflags"
-ldflags="$ldflags"
-libs="$libs"
-exe_ext="$exe_ext"
-$cc $optimize $ccflags $ldflags -o try try.c $libs && ./try$exe_ext
+case "$osname-$gccversion" in
+irix-) ccflags="\$ccflags -woff 1178" ;;
+esac
+$cc $optimize \$ccflags $ldflags -o try try.c $libs && ./try$exe_ext
 EOSH
 chmod +x Cppsym.try
 $eunicefix Cppsym.try
