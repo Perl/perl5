@@ -28,6 +28,232 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20318] By: jhi                                   on 2003/07/29  15:40:24
+        Log: Tell where to find 'dor' for 5.8.1.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20317] By: jhi                                   on 2003/07/29  15:31:56
+        Log: Integrate:
+             [ 20305]
+             Quieten MSVC6.
+             
+             [ 20306]
+             Too many my $fh:s.
+             
+             [ 20308]
+             The --destdir option to installman should be made
+             optional so that it doesn't complain when passed
+             an empty value (from Rafael)
+             
+             [ 20309]
+             Subject: [perluniintro vs Encode::Alias] Is KOI8R is an alise for koi8-r?
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 13 Jul 2003 10:23:35 +0900
+             Message-Id: <20030713102228.C76A.BQW10602@nifty.com>
+             
+             [ 20310]
+             Subject: [PATCH: (repatch) 5.8.1 RC2] Encode test fixes for VMS (was Re: possible fix to File::Find problems)
+             From: PPrymmer@factset.com
+             Date: Tue, 22 Jul 2003 11:12:05 -0400
+             Message-ID: <OFBD4A7559.D7CF9517-ON85256D6B.00534853-85256D6B.00538131@factset.com>
+             
+             [ 20312]
+             Subject: [PATCH] pod/perlvar.pod: minor typo
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Tue, 29 Jul 2003 23:49:18 +1000
+             Message-ID: <20030729134918.GA4339@londo.c47.org>
+             
+             [ 20314]
+             Slight rewording on the destdir.
+             
+             [ 20315]
+             Oops.
+             
+             [ 20316]
+             Don't nag about Module::Signature if there is no
+             way for the user to use it (based on Autrijus' patch).
+     Branch: maint-5.8/perl
+	  !> INSTALL ext/Encode/lib/Encode/Alias.pm
+	  !> ext/Encode/t/enc_eucjp.t ext/Encode/t/enc_utf8.t
+	  !> ext/Encode/t/perlio.t installman lib/CPAN.pm
+	  !> lib/CPAN/FirstTime.pm pod/perlvar.pod pp.c sv.c
+____________________________________________________________________________
+[ 20313] By: jhi                                   on 2003/07/29  13:23:54
+        Log: Advertise the --destdir.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20311] By: jhi                                   on 2003/07/29  13:13:38
+        Log: Also Apache::Test needs tweaking.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20307] By: jhi                                   on 2003/07/29  12:19:13
+        Log: Regen perltoc, perlmodlib.
+     Branch: maint-5.8/perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 20304] By: jhi                                   on 2003/07/29  11:46:15
+        Log: Subject: [PATCH maintperl] proofreading perldelta.pod
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Tue, 29 Jul 2003 18:26:53 +0800
+             Message-ID: <20030729102653.GA1770@not.autrijus.org>
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20303] By: jhi                                   on 2003/07/29  11:33:37
+        Log: Integrate:
+             [ 20297]
+             Green light from Stas.
+             
+             [ 20298]
+             DEC OSF/1 3.x did (does) not do sizer -v.
+             
+             [ 20299]
+             README.hpux now mentions the http mirror for prebuilt gcc binaries
+             
+             [ 20300]
+             Cleanup the sv_gets() logic for platforms with small stacks.
+             (I think hogging 8K of stack sounds like bad behaviour on any
+             platform, big stack or not.)
+             
+             [ 20301]
+             Subject: [perl #23134] Problems compiling 5.8.0 on alpha-dec_osf 3.2
+             From: Chaskiel M Grundman (via RT) <perlbug-followup@perl.org>
+             Date: 26 Jul 2003 21:44:06 -0000
+             Message-ID: <rt-23134-61814.9.36507226414463@rt.perl.org>
+             
+             Helps (the admittedly old) DEC OSF/1 3.x and harms not newer
+             releases 4.x and 5.x.
+             
+             [ 20302]
+             Subject: DESTDIR in perl-5.8.1 package?
+             From: Michael Schroeder <Michael.Schroeder@informatik.uni-erlangen.de>
+             Date: Fri, 11 Jul 2003 14:48:41 +0200
+             Message-ID: <20030711124841.GA18327@immd4.informatik.uni-erlangen.de>
+             
+             Subject: Re: DESTDIR in perl-5.8.1 package?
+             From: Michael Schroeder <Michael.Schroeder@informatik.uni-erlangen.de>
+             Date: Mon, 14 Jul 2003 12:00:25 +0200
+             Message-ID: <20030714100025.GA26612@immd4.informatik.uni-erlangen.de>
+             
+             (blindly prepending and s///ing away the $destdir does not work
+             at least in VMS, but the --destdir should help rpm builders
+             and the like)
+     Branch: maint-5.8/perl
+	  !> INSTALL Makefile.SH README.hpux hints/dec_osf.sh installman
+	  !> installperl perl.h sv.c
+____________________________________________________________________________
+[ 20297] By: jhi                                   on 2003/07/29  10:48:41
+        Log: Green light from Stas.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20296] By: jhi                                   on 2003/07/29  10:38:36
+        Log: Integrate:
+             [ 20291]
+             Tabify.
+             
+             [ 20292]
+             Most importantly, don't try HvNAME(gp->gp_hv)
+             unless PL_stashcache exists, otherwise we get
+             an invalid read (detected by valgrind, and crashes
+             ext/threads/t/basic.t in Windows).
+             
+             Also add a few if:s for the refcnt decrements,
+             no need to call Perl_sv_free() if there's nothing to free.
+             
+             [ 20293]
+             Upgrade to CPAN.pm 1.74.
+             
+             [ 20294]
+             There is no skip() since we are not using Test*.
+             
+             [ 20295]
+             Subject: [PATCH CPAN.pm] unlink pre-PGP-signed CHECKSUM
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Tue, 29 Jul 2003 09:58:35 +0800
+             Message-ID: <20030729015834.GA7149@not.autrijus.org>
+     Branch: maint-5.8/perl
+	  !> MANIFEST gv.c lib/CPAN.pm lib/CPAN/t/signature.t
+____________________________________________________________________________
+[ 20290] By: jhi                                   on 2003/07/29  08:55:19
+        Log: Integrate:
+             [ 20278]
+             More bytecode tweaks.
+             
+             [ 20281]
+             Subject: [PATCH] another File::Find tweak for VMS (improve on #20221)
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 29 Jul 2003 00:11:46 -0500
+             Message-ID: <3F260212.9000104@mac.com>
+             
+             [ 20282]
+             PerlIO_popped doc addition from NI-S.
+             
+             [ 20283]
+             The better prefixify() patch from Ed Moy.
+             
+             [ 20285]
+             Reintroduce Porting/Modules.  No, it's not duplicating
+             the information in Module::CoreList.
+             
+             [ 20287]
+             Subject: [PATCH pointer] B::Deparse 0.64
+             From: Stephen McCamant <smcc@mit.edu>
+             Date: Mon, 28 Jul 2003 16:57:19 -0400
+             Message-ID: <16165.36399.39977.566109@syllepsis.MIT.EDU>
+             
+             [ 20288]
+             Subject: [perl #22969] fix $hash{utf8bareword}
+             From: Rafael Garcia-Suarez <raphel.garcia-suarez@hexaflux.com>
+             Date: Tue, 29 Jul 2003 11:09:37 +0200
+             Message-Id: <20030729110937.31c422d2.rgarcia@hexaflux.com>
+             
+             [ 20289]
+             Subject: 5.8.1 change not in perldelta
+             From: "James A. Duncan" <jduncan@fotango.com>
+             Date: Wed, 16 Jul 2003 12:42:31 +0100
+             Message-Id: <957EF358-B782-11D7-AE25-000393D142E2@fotango.com>
+             
+             (the regexp magic change)
+     Branch: maint-5.8/perl
+	  +> Porting/Modules Porting/Modules.pl
+	  !> AUTHORS MANIFEST ext/B/B.xs ext/B/B/Bytecode.pm
+	  !> ext/B/B/Deparse.pm ext/B/t/deparse.t lib/ExtUtils/MM_Unix.pm
+	  !> lib/File/Find.pm pod/perliol.pod t/op/utfhash.t toke.c
+____________________________________________________________________________
+[ 20289] By: jhi                                   on 2003/07/29  08:48:19
+        Log: Subject: 5.8.1 change not in perldelta
+             From: "James A. Duncan" <jduncan@fotango.com>
+             Date: Wed, 16 Jul 2003 12:42:31 +0100
+             Message-Id: <957EF358-B782-11D7-AE25-000393D142E2@fotango.com>
+             
+             (the regexp magic change)
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20284] By: jhi                                   on 2003/07/29  05:18:48
+        Log: perldelta detypoing from Chris Reinhardt.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20280] By: jhi                                   on 2003/07/28  18:30:56
+        Log: Document the Mac OS X statical building.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20279] By: jhi                                   on 2003/07/28  18:23:43
+        Log: IRIX: a known oddity.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20277] By: jhi                                   on 2003/07/28  16:55:24
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20276] By: jhi                                   on 2003/07/28  16:49:56
         Log: Integrate:
              [ 20275]
