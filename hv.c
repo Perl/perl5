@@ -1880,9 +1880,9 @@ Perl_hv_iterkeysv(pTHX_ register HE *entry)
                Andreas would like keys he put in as utf8 to come back as utf8
             */
             STRLEN utf8_len = HEK_LEN(hek);
-            U8 *as_utf8 = bytes_to_utf8 (HEK_KEY(hek), &utf8_len);
+            U8 *as_utf8 = bytes_to_utf8 ((U8*)HEK_KEY(hek), &utf8_len);
 
-            sv = newSVpvn (as_utf8, utf8_len);
+            sv = newSVpvn ((char*)as_utf8, utf8_len);
             SvUTF8_on (sv);
         } else {
             sv = newSVpvn_share(HEK_KEY(hek),
