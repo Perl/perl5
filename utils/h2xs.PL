@@ -546,7 +546,7 @@ my %options = (
                 'const-subs|s=s'     => \$opt_s,
                 'default-type|t=s'   => \$opt_t,
                 'version|v=s'        => \$opt_v,
-                'autogen-xsubs|x=s'  => \$opt_x,
+                'autogen-xsubs|x'    => \$opt_x,
                 'use-new-tests'      => \$new_test,
                 'use-old-tests'      => \$old_test
               );
@@ -698,6 +698,7 @@ if( @path_h ){
       }
       if ($found) {
 	$rel_path_h = $path_h;
+	$fullpath{$path_h} = $fullpath;
       } else {
 	(my $epath = $module) =~ s,::,/,g;
 	$epath = File::Spec->catdir('ext', $epath) if -d 'ext';
@@ -729,7 +730,7 @@ if( @path_h ){
 	    s/\?\?</{/g;                         # | ??<|  {|
 	    s/\?\?>/}/g;                         # | ??>|  }|
 	}
-	if (/^[ \t]*#[ \t]*define\s+([\$\w]+)\b(?!\()\s*(?=[^" \t])(.*)/) {
+	if (/^[ \t]*#[ \t]*define\s+([\$\w]+)\b(?!\()\s*(?=[^"\s])(.*)/) {
 	    my $def = $1;
 	    my $rest = $2;
 	    $rest =~ s!/\*.*?(\*/|\n)|//.*!!g; # Remove comments
