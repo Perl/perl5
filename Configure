@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jan 19 17:27:25 MET 2004 [metaconfig 3.0 PL70]
+# Generated on Tue Feb 17 12:34:40 MET 2004 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3103,7 +3103,7 @@ EOM
 		domainos) osname=apollo
 			osvers="$3"
 			;;
-		dgux) osname=dgux 
+		dgux)	osname=dgux 
 			osvers="$3"
 			;;
 		dynixptx*) osname=dynixptx
@@ -3111,23 +3111,25 @@ EOM
 			;;
 		freebsd) osname=freebsd 
 			osvers="$3" ;;
-		genix) osname=genix ;;
-		hp*) osname=hpux 
+		genix)	osname=genix ;;
+		gnu)	osname=gnu
+			osvers="$3" ;;
+		hp*)	osname=hpux 
 			osvers=`echo "$3" | $sed 's,.*\.\([0-9]*\.[0-9]*\),\1,'`
 			;;
-		irix*) osname=irix
+		irix*)	osname=irix
 			case "$3" in
 			4*) osvers=4 ;;
 			5*) osvers=5 ;;
 			*)	osvers="$3" ;;
 			esac
 			;;
-		linux) osname=linux
+		linux)	osname=linux
 			case "$3" in
 			*)	osvers="$3" ;;
 			esac
 			;;
-		MiNT) osname=mint
+		MiNT)	osname=mint
 			;;
 		netbsd*) osname=netbsd
 			osvers="$3"
