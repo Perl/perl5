@@ -30,13 +30,25 @@ struct cop {
 #  define CopFILE(c)		((c)->cop_file)
 #  define CopFILEGV(c)		(CopFILE(c) \
 				 ? gv_fetchfile(CopFILE(c)) : Nullgv)
-#  define CopFILE_set(c,pv)	((c)->cop_file = savesharedpv(pv))
+				 
+ #ifdef NETWARE
+  #define CopFILE_set(c,pv)	((c)->cop_file = savepv(pv))
+ #else
+  #define CopFILE_set(c,pv)	((c)->cop_file = savesharedpv(pv))
+ #endif
+
 #  define CopFILESV(c)		(CopFILE(c) \
 				 ? GvSV(gv_fetchfile(CopFILE(c))) : Nullsv)
 #  define CopFILEAV(c)		(CopFILE(c) \
 				 ? GvAV(gv_fetchfile(CopFILE(c))) : Nullav)
 #  define CopSTASHPV(c)		((c)->cop_stashpv)
-#  define CopSTASHPV_set(c,pv)	((c)->cop_stashpv = savesharedpv(pv))
+
+  #ifdef NETWARE
+    #define CopSTASHPV_set(c,pv)	((c)->cop_stashpv = ((pv) ? savepv(pv) : Nullch))
+  #else
+    #define CopSTASHPV_set(c,pv)	((c)->cop_stashpv = savesharedpv(pv))
+  #endif
+
 #  define CopSTASH(c)		(CopSTASHPV(c) \
 				 ? gv_stashpv(CopSTASHPV(c),GV_ADD) : Nullhv)
 #  define CopSTASH_set(c,hv)	CopSTASHPV_set(c, (hv) ? HvNAME(hv) : Nullch)
@@ -44,8 +56,17 @@ struct cop {
 				 && (CopSTASHPV(c) == HvNAME(hv)	\
 				     || (CopSTASHPV(c) && HvNAME(hv)	\
 					 && strEQ(CopSTASHPV(c), HvNAME(hv)))))
-#  define CopSTASH_free(c)	PerlMemShared_free(CopSTASHPV(c))      
-#  define CopFILE_free(c)	(PerlMemShared_free(CopFILE(c)),(CopFILE(c) = Nullch))      
+  #ifdef NETWARE
+    #define CopSTASH_free(c) SAVECOPSTASH_FREE(c)
+  #else
+    #define CopSTASH_free(c)	PerlMemShared_free(CopSTASHPV(c))      
+  #endif
+
+  #ifdef NETWARE
+    #define CopFILE_free(c) SAVECOPFILE_FREE(c)
+  #else
+    #define CopFILE_free(c)	(PerlMemShared_free(CopFILE(c)),(CopFILE(c) = Nullch))      
+  #endif
 #else
 #  define CopFILEGV(c)		((c)->cop_filegv)
 #  define CopFILEGV_set(c,gv)	((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))

@@ -795,6 +795,25 @@ struct IPerlMemInfo
 	(*PL_Mem->pIsLocked)(PL_Mem)
 
 /* Shared memory macros */
+#ifdef NETWARE
+  
+ #define PerlMemShared_malloc(size)			    \
+	(*PL_Mem->pMalloc)(PL_Mem, (size))
+#define PerlMemShared_realloc(buf, size)		    \
+	(*PL_Mem->pRealloc)(PL_Mem, (buf), (size))
+#define PerlMemShared_free(buf)				    \
+	(*PL_Mem->pFree)(PL_Mem, (buf))
+#define PerlMemShared_calloc(num, size)			    \
+	(*PL_Mem->pCalloc)(PL_Mem, (num), (size))
+#define PerlMemShared_get_lock()			    \
+	(*PL_Mem->pGetLock)(PL_Mem)
+#define PerlMemShared_free_lock()			    \
+	(*PL_Mem->pFreeLock)(PL_Mem)
+#define PerlMemShared_is_locked()			    \
+	(*PL_Mem->pIsLocked)(PL_Mem)
+
+#else
+
 #define PerlMemShared_malloc(size)			    \
 	(*PL_MemShared->pMalloc)(PL_MemShared, (size))
 #define PerlMemShared_realloc(buf, size)		    \
@@ -810,6 +829,7 @@ struct IPerlMemInfo
 #define PerlMemShared_is_locked()			    \
 	(*PL_MemShared->pIsLocked)(PL_MemShared)
 
+#endif
 
 /* Parse tree memory macros */
 #define PerlMemParse_malloc(size)			    \

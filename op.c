@@ -45,8 +45,8 @@ S_Slab_Alloc(pTHX_ int m, size_t sz)
      */
     sz = (sz + 2*sizeof(I32 *) -1)/sizeof(I32 *);
     if ((PL_OpSpace -= sz) < 0) {
-	PL_OpPtr = (I32 **) PerlMemShared_malloc(PERL_SLAB_SIZE*sizeof(I32*));
-	if (!PL_OpPtr) {
+        PL_OpPtr = (I32 **) PerlMemShared_malloc(PERL_SLAB_SIZE*sizeof(I32*)); 
+    	if (!PL_OpPtr) {
 	    return NULL;
 	}
 	Zero(PL_OpPtr,PERL_SLAB_SIZE,I32 **);
@@ -82,7 +82,11 @@ S_Slab_Free(pTHX_ void *op)
     assert( ptr < ( (I32 **) slab + PERL_SLAB_SIZE) );
     assert( *slab > 0 );
     if (--(*slab) == 0) {
-	PerlMemShared_free(slab);
+     #ifdef NETWARE
+      #define PerlMemShared PerlMem
+     #endif
+	
+    PerlMemShared_free(slab);
 	if (slab == PL_OpSlab) {
 	    PL_OpSpace = 0;
 	}
