@@ -788,12 +788,13 @@ perl_free(pTHXx)
 #  if defined(WIN32)
 #  if defined(PERL_IMPLICIT_SYS)
     void *host = w32_internal_host;
-    if (PerlProc_lasthost())
-	PerlIO_cleanup();
+    if (PerlProc_lasthost()) {
+	PerlIO_cleanup();     
+    }
     PerlMem_free(aTHXx);
     win32_delete_internal_host(host);
 #else
-    PerlIO_cleanup();
+    PerlIO_cleanup();     
     PerlMem_free(aTHXx);
 #endif
 #  else
