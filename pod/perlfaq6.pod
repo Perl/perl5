@@ -404,7 +404,7 @@ expression engine to find a match as quickly as possible and pass
 control on to whatever is next in line, like you would if you were
 playing hot potato.
 
-=head2  How do I process each word on each line?
+=head2 How do I process each word on each line?
 
 Use the split function:
 

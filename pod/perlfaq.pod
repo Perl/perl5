@@ -46,7 +46,7 @@ Very general, high-level information about Perl.
 
 =item * Where can I get a list of Larry Wall witticisms?
 
-=item * How can I convince my sysadmin/supervisor/employees to use (version 5/5.005/Perl) instead of some other language?
+=item * How can I convince my sysadmin/supervisor/employees to use version 5/5.005/Perl instead of some other language?
 
 =back
 
@@ -74,7 +74,7 @@ and related matters.
 
 =item * Where can I get information on Perl?
 
-=item * What are the Perl newsgroups on USENET?  Where do I post questions?
+=item * What are the Perl newsgroups on Usenet?  Where do I post questions?
 
 =item * Where should I post source code?
 
@@ -84,7 +84,7 @@ and related matters.
 
 =item * Perl on the Net: FTP and WWW Access
 
-=item * What mailing lists are there for perl?
+=item * What mailing lists are there for Perl?
 
 =item * Archives of comp.lang.perl.misc
 
@@ -92,7 +92,7 @@ and related matters.
 
 =item * Where do I send bug reports?
 
-=item * What is perl.com?  
+=item * What is perl.com? Perl Mongers? pm.org? perl.org?
 
 =back
 
@@ -151,9 +151,9 @@ Programmer tools and programming support.
 
 =item * How can I get C<#!perl> to work on [MS-DOS,NT,...]?
 
-=item * Can I write useful perl programs on the command line?
+=item * Can I write useful Perl programs on the command line?
 
-=item * Why don't perl one-liners work on my DOS/Mac/VMS system?
+=item * Why don't Perl one-liners work on my DOS/Mac/VMS system?
 
 =item * Where can I learn about CGI or Web programming in Perl?
 
@@ -209,7 +209,7 @@ miscellaneous data issues.
 
 =item * How do I find yesterday's date?
 
-=item * Does Perl have a year 2000 problem?  Is Perl Y2K compliant?
+=item * Does Perl have a Year 2000 problem?  Is Perl Y2K compliant?
 
 =item * How do I validate input?
 
@@ -609,8 +609,6 @@ Interprocess communication (IPC), control over the user-interface
 =item * How do I close a process's filehandle without waiting for it to complete?
 
 =item * How do I fork a daemon process?
-
-=item * How do I make my program run with sh and csh?
 
 =item * How do I find out if I'm running interactively or not?
 
