@@ -32,6 +32,395 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8988] By: jhi                                   on 2001/03/02  19:57:08
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Encode/ascii.ucm ext/Encode/Encode/cp1047.ucm
+	  !> ext/Encode/Encode/cp1250.ucm ext/Encode/Encode/cp37.ucm
+	  !> ext/Encode/Encode/dingbats.ucm ext/Encode/Encode/iso8859-1.ucm
+	  !> ext/Encode/Encode/iso8859-10.ucm
+	  !> ext/Encode/Encode/iso8859-13.ucm
+	  !> ext/Encode/Encode/iso8859-14.ucm
+	  !> ext/Encode/Encode/iso8859-15.ucm
+	  !> ext/Encode/Encode/iso8859-16.ucm
+	  !> ext/Encode/Encode/iso8859-2.ucm
+	  !> ext/Encode/Encode/iso8859-3.ucm
+	  !> ext/Encode/Encode/iso8859-4.ucm
+	  !> ext/Encode/Encode/iso8859-5.ucm
+	  !> ext/Encode/Encode/iso8859-6.ucm
+	  !> ext/Encode/Encode/iso8859-7.ucm
+	  !> ext/Encode/Encode/iso8859-8.ucm
+	  !> ext/Encode/Encode/iso8859-9.ucm ext/Encode/Encode/posix-bc.ucm
+	  !> ext/Encode/Encode/symbol.ucm ext/Encode/compile
+____________________________________________________________________________
+[  8987] By: jhi                                   on 2001/03/02  19:43:40
+        Log: Integrate changes #8784,8839,8843,8847,8849,8859,8866,
+             8873,8874,8876,8879,8901,8902,8908,8913,8918,8919,8946,8947,8948,
+             8950,8952,8955 from mainline to maintperl.
+             
+             Subject: [PATCH: perl@8773] small fixups to perlclib.pod
+             
+             Put to rest the 20010205.001, the email address checking (not) regex.
+             
+             fork() not everywhere, cleanup temp files.
+             
+             The #8843 wasn't quite right: %Config needs to imported.
+             
+             Subject: [PATCH perl@8841] glob-basic.t, runenv.t fix-ups
+             (#8849: the glob-basic hunk needed massaging as it depended
+             on Schwern's large-scale (unintegrated) patches)
+             
+             Skip the Perl_sys_intern_clear and Perl_sys_intern_init.
+             
+             Upgrade to CGI.pm 2.752, from Lincoln Stein.
+             (Note: there were some conflicts due to EBCDIC and EPOC
+             patches, in general I preferred the repository code.)
+             (When 2.753 comes out, we need to synchronize.)
+             
+             Subject: [PATCH] fix for charnames above FFFF
+             
+             Subject: [patch perl@8841] One URL update and a possible OS Version snag for perlport.pod
+             
+             If no sfio, no -lsfio.
+             
+             Run run/*.t also in minitest.
+             
+             Subject:  [PATCH perl 5.7.0] malloc message address offset
+             
+             Subject:  [PATCH 5.7.0] don't zero CvFLAGS before checking for CvCONST!
+             
+             Subject: fix for parameter -Dm (for perl@8867)
+             
+             Subject: [PATCH: perl@8892] was Re: hashing order difference?
+             (make the test more portable)
+             
+             Subject: Re: [PATCH] fix for charnames above FFFF
+             
+             Subject: Re: I'm losing the war...
+             (hv_store() not working correctly in ENV_IS_CASELESS case.)
+             
+             Subject: Modified README.bs2000 
+             
+             Subject: [PATCH: perl@8935] -Dt padsv($var)
+             
+             Subject: [PATCH: perl@8890] small fix in pod/perlop.pod
+             
+             Subject: PATCH: extra tests to check on negative float to unsigned cast
+             
+             Subject: [PATCH] XPUSH[insp] was Re: progress
+             
+             Subject: Re: Compile with perlcc..
+     Branch: maint-5.6/perl
+	  !> (integrate 36 files)
+____________________________________________________________________________
+[  8986] By: jhi                                   on 2001/03/02  18:51:25
+        Log: Integrate changes #8689,8697,8724,8726,8731,8742,8754,8755,
+             8763,8767,8770,8772,8795,8796,8813,8822,8823 from mainline
+             to maintperl.
+             
+             Subject: Re: [PATCH lots of pod/] s/chop/chomp/g
+             
+             Subject: [DOC PATCH] overload.pm nits
+             
+             Add header for LIB$ prototypes (C. Berry)
+             
+             Convert fwrite()s to sockets to write()s, since some socket stacks
+             don't take kindly to stdio.
+             Ignore "expected" SS$_NOLOGNAM when doing internal LNM lookups
+             (for often optional LNMs)
+             Correct a few typos
+             (C. Bailey)
+             
+             Subject: [PATCH: 5.6.1 trial2 && perl@8671] provide EBCDIC CGI::Util::escape() and test
+             
+             De-cut-and-pasto.
+             
+             Subject: Re: [PATCH embed.pl] Forgot to add ./lib to @INC for File::Glob
+             
+             Upgrade to Text-Tabs+Wrap-2001.0131 from David Muir Sharnoff.
+             
+             Upgrade to CPAN 1.59_54, from Andreas König.
+             
+             Bogus shebang.
+             
+             Subject: [PATCH] Document makepatch in Porting/patching
+             
+             UTF-8 documentation.
+             
+             Subject: Re: [PATCH] pod/perlclib.pod - Replacements for C library functions
+             
+             Sort the MANIFEST.
+             
+             Subject: [ID 20010210.002] perldiag doesn't include the "Scalars leaked" message
+             
+             Subject: [PATCH @8807] toke.c cleanup: scan_str()
+             
+             Subject: [PATCH perl.c] Fixing PERL5OPT (was Re: Warnings, strict, and CPAN)
+             
+             Add run/*.t to testables.
+             
+             TODO: integrate #8784.
+     Branch: maint-5.6/perl
+	  +> pod/perlclib.pod t/lib/cgi-esc.t t/run/runenv.t
+	  !> (integrate 28 files)
+____________________________________________________________________________
+[  8985] By: nick                                  on 2001/03/02  18:15:45
+        Log: Integrate mainline
+     Branch: perlio
+	  !> doio.c lib/File/Copy.pm pod/perldata.pod pod/perlfaq1.pod
+	  !> vms/vms.c
+____________________________________________________________________________
+[  8984] By: jhi                                   on 2001/03/02  16:00:17
+        Log: Integrate changes #8978,8979,8980,8981,8983 from mainline.
+             
+             perlfaq1 reworded to suggest 5.6.0 or 5.005_03, or POSSIBLY
+             5.004_05, and mention the suidperl August 2000 security problem.
+             (#8978,#8981)
+             
+             Subject: [ID 20010301.004] Technically speaking in perldata
+             
+             Subject: [PATCH] File::Copy for bleadperl, maintperl
+             
+             Subject:  [PATCH 5.7.0/5.6.0+] VMS piping ... cleanup at interpreter exit
+             
+             (The #8982, fix for 20010221.005 and 20010221.008,
+             would be nice too but it didn't integrate cleanly.)
+     Branch: maint-5.6/perl
+	  !> lib/File/Copy.pm pod/perldata.pod pod/perlfaq1.pod vms/vms.c
+____________________________________________________________________________
+[  8983] By: jhi                                   on 2001/03/02  15:51:16
+        Log: Subject:  [PATCH 5.7.0/5.6.0+] VMS piping ... cleanup at interpreter exit
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Thu, 1 Mar 2001 15:54:09 EST
+             Message-Id: <010301155258.b8cc1@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[  8982] By: jhi                                   on 2001/03/02  15:43:31
+        Log: Subject: Re: sync sync sync: have I missed any patches?
+             From: Radu Greab <radu@netsoft.ro> 
+             Date: Thu, 1 Mar 2001 21:47:22 +0200 (EET)
+             Message-ID: <15006.42826.747914.669893@ix.netsoft.ro>
+             
+             Fixes the bugs 20010221.005 and 20010221.008: "the taint checker
+             was checking argv[0] regardless of whether a different pathname
+             will actually be executed."  Test case not supplied because 
+             drafting that, ironically enough, revealed another bug
+             (or a feature).
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[  8981] By: jhi                                   on 2001/03/02  15:28:03
+        Log: Misdate in #8978.
+     Branch: perl
+	   ! pod/perlfaq1.pod
+____________________________________________________________________________
+[  8980] By: jhi                                   on 2001/03/02  15:24:20
+        Log: Subject: [PATCH] File::Copy for bleadperl, maintperl
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Wed, 28 Feb 2001 22:10:15 -0500
+             Message-Id: <p05010400b6c36d959ae8@[10.0.1.177]>
+     Branch: perl
+	   ! lib/File/Copy.pm
+____________________________________________________________________________
+[  8979] By: jhi                                   on 2001/03/02  15:17:16
+        Log: Subject: [ID 20010301.004] Technically speaking in perldata
+             From: abela@geneanet.org
+             Date: Thu,  1 Mar 2001 17:59:27 +0100 (CET)
+             Message-Id: <20010301165927.262C2D17D@little-roots.geneanet.org>
+     Branch: perl
+	   ! pod/perldata.pod
+____________________________________________________________________________
+[  8978] By: jhi                                   on 2001/03/02  15:15:27
+        Log: Subject: [ID 20010301.003] ref to 5.004
+             From: abela@geneanet.org
+             Date: Thu,  1 Mar 2001 14:48:40 +0100 (CET)
+             Message-Id: <20010301134840.C0CD1D171@little-roots.geneanet.org>
+             
+             Reworded to suggest 5.6.0 or 5.005_03, or POSSIBLY 5.004_05,
+             and mention the suidperl August 2000 security problem.
+     Branch: perl
+	   ! pod/perlfaq1.pod
+____________________________________________________________________________
+[  8977] By: alanbur                               on 2001/03/02  14:17:45
+        Log: Resynchronised with parent
+     Branch: maint-5.6/pureperl
+	  !> AUTHORS README.epoc configure.com epoc/createpkg.pl
+	  !> lib/File/Temp.pm perl.c pp_sys.c t/lib/ftmp-mktemp.t
+	  !> t/lib/ftmp-posix.t t/op/append.t t/op/sprintf.t toke.c util.c
+	  !> vms/descrip_mms.template win32/win32.c win32/win32.h
+	  !> win32/win32iop.h
+____________________________________________________________________________
+[  8976] By: nick                                  on 2001/03/01  23:25:30
+        Log: Integrate mainline.
+     Branch: perlio
+	   - t/op/qu.t
+	  !> (integrate 55 files)
+____________________________________________________________________________
+[  8975] By: jhi                                   on 2001/03/01  16:51:34
+        Log: Integrate change #8974 from maintperl, fix for bugid 20010226.008.
+     Branch: perl
+	  !> toke.c
+____________________________________________________________________________
+[  8974] By: gsar                                  on 2001/03/01  16:28:21
+        Log: fix for bugid 20010226.008
+             
+             the problem was that some of the pointers (PL_last_lop and
+             PL_last_uni specifically) into the lex buffers weren't correctly
+             being invalidated when the buffer changed; this would leave the
+             pointers pointing at an arbitrary location in the buffer if
+             the buffer didn't need to be reallocated, or point into freed
+             memory if the buffer had to be realloced
+             
+             TODO item for bugdb maintainers: check other seemingly random
+             parser-related bugs--they might be cured by this
+     Branch: maint-5.6/perl
+	   ! toke.c
+____________________________________________________________________________
+[  8973] By: jhi                                   on 2001/03/01  02:23:25
+        Log: Retract #8970 because of a completely mysterious core dump:
+             adding the tests 241..244 causes op/pat dump core at test #25.
+             The test needs a lot of whittling down before the bug can be solved.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[  8972] By: jhi                                   on 2001/03/01  01:58:38
+        Log: Regen perlapi.
+     Branch: perl
+	   ! pod/perlapi.pod
+____________________________________________________________________________
+[  8971] By: jhi                                   on 2001/03/01  01:34:09
+        Log: Subject: [PATCH] don't write along symlinks into a read only source tree (was Re: [ID 20010129.006] OK: perl v5.7.0 +DEVEL8584 on i586-linux-64all 2.2.12 (UNINSTALLED))
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 28 Feb 2001 23:28:49 +0000
+             Message-ID: <20010228232849.A55187@plum.flirble.org>
+             
+             Allow a completely write protected source code tree
+             when using the Configure -Dmksymlinks.
+     Branch: perl
+	   ! embed.pl warnings.pl
+____________________________________________________________________________
+[  8970] By: jhi                                   on 2001/03/01  01:32:04
+        Log: Add back the EBCDIC character range tests (for matching).
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[  8969] By: nick                                  on 2001/02/28  18:18:01
+        Log: Add charname comments to .ucm files writen by 'compile',
+             also order charmaps in those files by source encoding.
+             regenerate distrubuted .ucm files
+     Branch: perlio
+	   ! ext/Encode/Encode/ascii.ucm ext/Encode/Encode/cp1047.ucm
+	   ! ext/Encode/Encode/cp1250.ucm ext/Encode/Encode/cp37.ucm
+	   ! ext/Encode/Encode/dingbats.ucm ext/Encode/Encode/iso8859-1.ucm
+	   ! ext/Encode/Encode/iso8859-10.ucm
+	   ! ext/Encode/Encode/iso8859-13.ucm
+	   ! ext/Encode/Encode/iso8859-14.ucm
+	   ! ext/Encode/Encode/iso8859-15.ucm
+	   ! ext/Encode/Encode/iso8859-16.ucm
+	   ! ext/Encode/Encode/iso8859-2.ucm
+	   ! ext/Encode/Encode/iso8859-3.ucm
+	   ! ext/Encode/Encode/iso8859-4.ucm
+	   ! ext/Encode/Encode/iso8859-5.ucm
+	   ! ext/Encode/Encode/iso8859-6.ucm
+	   ! ext/Encode/Encode/iso8859-7.ucm
+	   ! ext/Encode/Encode/iso8859-8.ucm
+	   ! ext/Encode/Encode/iso8859-9.ucm ext/Encode/Encode/posix-bc.ucm
+	   ! ext/Encode/Encode/symbol.ucm ext/Encode/compile
+____________________________________________________________________________
+[  8968] By: jhi                                   on 2001/02/28  16:26:37
+        Log: Expand usemorebits early if d_casti32 needs to be undefined.
+     Branch: perl
+	   ! hints/hpux.sh hints/irix_6.sh
+____________________________________________________________________________
+[  8967] By: jhi                                   on 2001/02/28  16:22:26
+        Log: Undo qu.  Retract #8814, rewrite op/each part of #8615,
+             retract toke.c/qu parts of #8583, retract #8485, retract
+             or rewrite qu parts of #8439 of toke.c, keywords.h, keywords.pl,
+             op/length.t, and MANIFEST, and delete t/op/qu.t.
+     Branch: perl
+	   - t/op/qu.t
+	   ! MANIFEST pod/perlfunc.pod pod/perlop.pod pod/perlre.pod
+	   ! pod/perlretut.pod pod/perlunicode.pod t/op/each.t
+	   ! t/op/length.t toke.c
+____________________________________________________________________________
+[  8966] By: jhi                                   on 2001/02/28  15:00:27
+        Log: Retract #8865 and #8869, un?pack C now again agree with Camel 3
+             by not changing from pre-Unicode days into being Unicode-aware.
+             Sniff.
+     Branch: perl
+	   ! pp.c t/op/pack.t t/op/qu.t
+____________________________________________________________________________
+[  8965] By: jhi                                   on 2001/02/28  14:37:55
+        Log: Subject: Re: Errors in core PODs
+             From: Michael Stevens <michael@etla.org> 
+             Date: Fri, 23 Feb 2001 15:47:56 +0000
+             Message-ID: <20010223154756.A7723@firedrake.org> 
+     Branch: perl
+	   ! ext/Encode/Encode.pm lib/Exporter/Heavy.pm
+	   ! lib/File/Spec/Epoc.pm lib/Test/Harness.pm lib/utf8.pm
+	   ! makedef.pl vms/ext/DCLsym/DCLsym.pm vms/ext/Stdio/Stdio.pm
+	   ! x2p/a2p.pod
+____________________________________________________________________________
+[  8964] By: jhi                                   on 2001/02/28  14:35:35
+        Log: Do not force d_casti32 to undef if we are on a 64-bit environment.
+             (The #8961 was too bold.)
+     Branch: perl
+	   ! hints/hpux.sh hints/irix_6.sh
+____________________________________________________________________________
+[  8963] By: jhi                                   on 2001/02/28  14:33:39
+        Log: Subject: Re: sync sync sync: have I missed any patches?
+             From: Tim Jenness <t.jenness@jach.hawaii.edu>
+             In-Reply-To: <20010227140737.Y10633@chaos.wustl.edu>
+             Date: Tue, 27 Feb 2001 13:24:58 -1000 (HST)
+             Message-ID: <Pine.LNX.4.30.0102271322070.8623-100000@lapaki.jach.hawaii.edu>
+             
+             Replace djSP with dSP.
+     Branch: perl
+	   ! cop.h doio.c doop.c ext/B/B/C.pm ext/B/B/CC.pm
+	   ! pod/perlhack.pod pp.c pp.h pp_ctl.c pp_hot.c pp_sys.c sv.c
+	   ! win32/perlhost.h
+____________________________________________________________________________
+[  8962] By: jhi                                   on 2001/02/27  23:21:14
+        Log: Upgrade to Filter::Simple 0.50 (just few doc tweaks).
+     Branch: perl
+	   ! lib/Filter/Simple.pm
+____________________________________________________________________________
+[  8961] By: jhi                                   on 2001/02/27  22:55:26
+        Log: The casting mystery in HP-UX and IRIX needs at least a workaround
+             and this would be it.
+     Branch: perl
+	   ! hints/hpux.sh hints/irix_6.sh
+____________________________________________________________________________
+[  8960] By: jhi                                   on 2001/02/27  22:51:33
+        Log: Subject: [PATCH perl@8958 and 5.6.1-trial2] configure.com bug fixing spree
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 27 Feb 2001 16:11:44 -0600
+             Message-Id: <5.0.2.1.0.20010227150548.02a200f8@exchi01>
+     Branch: maint-5.6/perl
+	   ! configure.com vms/descrip_mms.template
+____________________________________________________________________________
+[  8959] By: jhi                                   on 2001/02/27  22:47:23
+        Log: Subject: [PATCH perl@8958 and 5.6.1-trial2] configure.com bug fixing spree
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 27 Feb 2001 16:11:44 -0600
+             Message-Id: <5.0.2.1.0.20010227150548.02a200f8@exchi01>
+     Branch: perl
+	   ! configure.com vms/descrip_mms.template
+____________________________________________________________________________
+[  8958] By: jhi                                   on 2001/02/27  15:16:42
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  8957] By: jhi                                   on 2001/02/27  06:15:07
+        Log: Subject: [5.6.x] EPOC additions
+             From: Olaf Flebbe <O.Flebbe@science-computing.de>
+             Date: Mon, 26 Feb 2001 23:33:46 +0100 (CET)
+             Message-ID: <Pine.LNX.4.02.10102262333040.3736-100000@milkyway.science-computing.de>
+     Branch: maint-5.6/perl
+	   ! AUTHORS README.epoc epoc/createpkg.pl pp_sys.c
+____________________________________________________________________________
 [  8956] By: jhi                                   on 2001/02/27  06:12:11
         Log: Subject: [perl-current] EPOC 
              From: Olaf Flebbe <O.Flebbe@science-computing.de>
@@ -405,7 +794,8 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  8902] By: jhi                                   on 2001/02/23  01:37:41
         Log: (Retracted by #8914)
-             
+             (Wrongly, reinstated by #8941)             
+
              Subject:  [PATCH 5.7.0] don't zero CvFLAGS before checking for CvCONST!
              From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
              Date:     Thu, 22 Feb 2001 09:43:57 EST
