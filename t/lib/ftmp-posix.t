@@ -1,10 +1,4 @@
-#!./perl
-
-BEGIN {
-    chdir 't' if -d 't';
-    unshift @INC, '../lib';
-}
-
+#!/usr/local/bin/perl -w
 # Test for File::Temp - POSIX functions
 
 use strict;
