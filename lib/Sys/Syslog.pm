@@ -154,7 +154,7 @@ sub syslog {
 
     $whoami = $ident;
 
-    if (!$ident && $mask =~ /^(\S.*):\s?(.*)/) {
+    if (!$whoami && $mask =~ /^(\S.*?):\s?(.*)/) {
 	$whoami = $1;
 	$mask = $2;
     } 
