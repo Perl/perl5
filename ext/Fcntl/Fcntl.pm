@@ -45,8 +45,8 @@ what constants are implemented in your system.
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
 
 require Exporter;
-require DynaLoader;
-@ISA = qw(Exporter DynaLoader);
+use XSLoader ();
+@ISA = qw(Exporter);
 $VERSION = "1.03";
 # Items to export into callers namespace by default
 # (move infrequently used names to @EXPORT_OK below)
@@ -161,6 +161,6 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap Fcntl $VERSION;
+XSLoader::load 'Fcntl', $VERSION;
 
 1;

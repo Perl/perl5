@@ -1,9 +1,6 @@
 package attrs;
-require DynaLoader;
-use vars '@ISA';
-@ISA = 'DynaLoader';
+use XSLoader ();
 
-use vars qw($VERSION);
 $VERSION = "1.0";
 
 =head1 NAME
@@ -56,6 +53,6 @@ subroutine is entered.
 
 =cut
 
-bootstrap attrs $VERSION;
+XSLoader::load 'attrs', $VERSION;
 
 1;

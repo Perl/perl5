@@ -182,11 +182,11 @@ sub DB {
 #	print "nonXS DBDB\n";
 }
 
-require DynaLoader;
-@Devel::DProf::ISA = 'DynaLoader';
+use XSLoader ();
+
 $Devel::DProf::VERSION = '19990108'; # this version not authorized by
 				     # Dean Roehrich. See "Changes" file.
 
-bootstrap Devel::DProf $Devel::DProf::VERSION;
+XSLoader::load 'Devel::DProf', $Devel::DProf::VERSION;
 
 1;

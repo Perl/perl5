@@ -6,10 +6,10 @@ use vars qw($VERSION @ISA @EXPORT_OK @EXPORT_FAIL
             %EXPORT_TAGS $AUTOLOAD $DEFAULT_FLAGS);
 
 require Exporter;
-require DynaLoader;
+use XSLoader ();
 require AutoLoader;
 
-@ISA = qw(Exporter DynaLoader AutoLoader);
+@ISA = qw(Exporter AutoLoader);
 
 @EXPORT_OK   = qw(
     csh_glob
@@ -91,7 +91,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap File::Glob $VERSION;
+XSLoader::load 'File::Glob', $VERSION;
 
 # Preloaded methods go here.
 

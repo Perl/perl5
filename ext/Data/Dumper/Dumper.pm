@@ -9,22 +9,22 @@
 
 package Data::Dumper;
 
-$VERSION = $VERSION = '2.101';
+$VERSION = '2.101';
 
 #$| = 1;
 
 require 5.004_02;
 require Exporter;
-require DynaLoader;
+use XSLoader ();
 require overload;
 
 use Carp;
 
-@ISA = qw(Exporter DynaLoader);
+@ISA = qw(Exporter);
 @EXPORT = qw(Dumper);
 @EXPORT_OK = qw(DumperX);
 
-bootstrap Data::Dumper;
+XSLoader::load 'Data::Dumper';
 
 # module vars and their defaults
 $Indent = 2 unless defined $Indent;

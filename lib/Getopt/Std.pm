@@ -42,7 +42,7 @@ the argument or 1 if no argument is specified.
 
 @ISA = qw(Exporter);
 @EXPORT = qw(getopt getopts);
-$VERSION = $VERSION = '1.01';
+$VERSION = '1.01';
 
 # Process single-character switches with switch clustering.  Pass one argument
 # which is a string containing all switches that take an argument.  For each

@@ -6,9 +6,9 @@
 #      License or the Artistic License, as specified in the README file.
 #
 package B;
-require DynaLoader;
+use XSLoader ();
 require Exporter;
-@ISA = qw(Exporter DynaLoader);
+@ISA = qw(Exporter);
 @EXPORT_OK = qw(minus_c ppname
 		class peekop cast_I32 cstring cchar hash threadsv_names
 		main_root main_start main_cv svref_2object opnumber amagic_generation
@@ -259,7 +259,7 @@ sub walksymtable {
     }
 }
 
-bootstrap B;
+XSLoader::load 'B';
 
 1;
 

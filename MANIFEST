@@ -231,6 +231,7 @@ ext/Devel/Peek/Peek.xs		Data debugging tool, externals
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
+ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_cygwin.xs	Cygwin implementation
