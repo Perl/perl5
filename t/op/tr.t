@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..58\n";
+print "1..51\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -296,44 +296,3 @@ print "ok 50\n";
 ($a = v300.196.172.302.197.172) =~ tr/\xc4-\xc8/\x{12c}-\x{130}/;
 print "not " unless $a eq v300.300.172.302.301.172;
 print "ok 51\n";
-
-# Tricky on EBCDIC: while [a-z] must not match the gap characters,
-# (i-j, r-s, I-J, R-S), [\x89-\x91] has to match them, from Karsten
-# Sperling.
-
-if (ord('i') == 0x89 & ord('j') == 0x91) {
-
-$c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/\x89-\x91/X/;
-print "not " unless $c == 8 and $a eq "XXXXXXXX";
-print "ok 52\n";
-   
-$c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/i-j/X/;
-print "not " unless $c == 2 and $a eq "X\x8a\x8b\x8c\x8d\x8f\x90X";
-print "ok 53\n";
-   
-$c = ($a = "\xc9\xca\xcb\xcc\xcd\xcf\xd0\xd1") =~ tr/\xc9-\xd1/X/;
-print "not " unless $c == 8 and $a eq "XXXXXXXX";
-print "ok 54\n";
-   
-$c = ($a = "\xc9\xca\xcb\xcc\xcd\xcf\xd0\xd1") =~ tr/I-J/X/;
-print "not " unless $c == 2 and $a eq "X\xca\xcb\xcc\xcd\xcf\xd0X";
-print "ok 55\n";
-
-} else {
-  for (52..55) { print "ok $_ # Skip: not EBCDIC\n" }
-}
-
-# some more wide-char tests from Karsten Sperling
-
-($a = "\x{0100}") =~ tr/\x{0000}-\x{00ff}/X/c;
-print "not " unless $a eq "X";
-print "ok 56\n";
-
-($a = "\x{0100}") =~ tr/\x{0000}-\x{00ff}\x{0101}/X/c;
-print "not " unless $a eq "X";
-print "ok 57\n";
- 
-($a = v256) =~ tr/\x{0000}-\x{00ff}\x{0101}/X/c;
-print "not " unless $a eq "X";
-print ok "58\n"; 
-

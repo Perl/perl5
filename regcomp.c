@@ -3185,10 +3185,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     register char *e;
     UV n;
     bool dont_optimize_invert = FALSE;
-#ifdef ALPHAS_HAVE_GAPS
-    bool explicit_alpha      = TRUE;
-    bool explicit_alpha_prev = TRUE;
-#endif
 
     ret = reganode(pRExC_state, ANYOF, 0);
 
@@ -3375,6 +3371,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isALNUM(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsWord\n");	
 		    break;
 		case ANYOF_NALNUM:
@@ -3385,6 +3382,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isALNUM(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsWord\n");
 		    break;
 		case ANYOF_ALNUMC:
@@ -3395,6 +3393,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isALNUMC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsAlnum\n");
 		    break;
 		case ANYOF_NALNUMC:
@@ -3405,6 +3404,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isALNUMC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsAlnum\n");
 		    break;
 		case ANYOF_ALPHA:
@@ -3415,6 +3415,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isALPHA(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsAlpha\n");
 		    break;
 		case ANYOF_NALPHA:
@@ -3425,36 +3426,39 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isALPHA(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsAlpha\n");
 		    break;
 		case ANYOF_ASCII:
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_ASCII);
 		    else {
-#ifdef ALPHAS_HAVE_GAPS
+#ifdef ASCIIish
+			for (value = 0; value < 128; value++)
+			    ANYOF_BITMAP_SET(ret, value);
+#else  /* EBCDIC */
 			for (value = 0; value < 256; value++)
 			    if (isASCII(value))
 				ANYOF_BITMAP_SET(ret, value);
-#else
-			for (value = 0; value < 128; value++)
-			    ANYOF_BITMAP_SET(ret, value);
-#endif
+#endif /* EBCDIC */
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsASCII\n");
 		    break;
 		case ANYOF_NASCII:
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_NASCII);
 		    else {
-#ifdef ALPHAS_HAVE_GAPS
+#ifdef ASCIIish
+			for (value = 128; value < 256; value++)
+			    ANYOF_BITMAP_SET(ret, value);
+#else  /* EBCDIC */
 			for (value = 0; value < 256; value++)
 			    if (!isASCII(value))
 				ANYOF_BITMAP_SET(ret, value);
-#else
-			for (value = 128; value < 256; value++)
-			    ANYOF_BITMAP_SET(ret, value);
-#endif
+#endif /* EBCDIC */
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsASCII\n");
 		    break;
 		case ANYOF_BLANK:
@@ -3465,6 +3469,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isBLANK(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsBlank\n");
 		    break;
 		case ANYOF_NBLANK:
@@ -3475,6 +3480,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isBLANK(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsBlank\n");
 		    break;
 		case ANYOF_CNTRL:
@@ -3485,6 +3491,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isCNTRL(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsCntrl\n");
 		    break;
 		case ANYOF_NCNTRL:
@@ -3495,6 +3502,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isCNTRL(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsCntrl\n");
 		    break;
 		case ANYOF_DIGIT:
@@ -3505,6 +3513,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			for (value = '0'; value <= '9'; value++)
 			    ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsDigit\n");
 		    break;
 		case ANYOF_NDIGIT:
@@ -3517,6 +3526,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			for (value = '9' + 1; value < 256; value++)
 			    ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsDigit\n");
 		    break;
 		case ANYOF_GRAPH:
@@ -3527,6 +3537,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isGRAPH(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsGraph\n");
 		    break;
 		case ANYOF_NGRAPH:
@@ -3537,6 +3548,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isGRAPH(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsGraph\n");
 		    break;
 		case ANYOF_LOWER:
@@ -3547,6 +3559,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isLOWER(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsLower\n");
 		    break;
 		case ANYOF_NLOWER:
@@ -3557,6 +3570,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isLOWER(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsLower\n");
 		    break;
 		case ANYOF_PRINT:
@@ -3567,6 +3581,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isPRINT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsPrint\n");
 		    break;
 		case ANYOF_NPRINT:
@@ -3577,6 +3592,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isPRINT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsPrint\n");
 		    break;
 		case ANYOF_PSXSPC:
@@ -3587,6 +3603,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isPSXSPC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpace\n");
 		    break;
 		case ANYOF_NPSXSPC:
@@ -3597,6 +3614,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isPSXSPC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsSpace\n");
 		    break;
 		case ANYOF_PUNCT:
@@ -3607,6 +3625,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isPUNCT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsPunct\n");
 		    break;
 		case ANYOF_NPUNCT:
@@ -3617,6 +3636,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isPUNCT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsPunct\n");
 		    break;
 		case ANYOF_SPACE:
@@ -3627,6 +3647,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isSPACE(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpacePerl\n");
 		    break;
 		case ANYOF_NSPACE:
@@ -3637,6 +3658,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isSPACE(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsSpacePerl\n");
 		    break;
 		case ANYOF_UPPER:
@@ -3647,6 +3669,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isUPPER(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsUpper\n");
 		    break;
 		case ANYOF_NUPPER:
@@ -3657,6 +3680,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isUPPER(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsUpper\n");
 		    break;
 		case ANYOF_XDIGIT:
@@ -3667,6 +3691,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isXDIGIT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsXDigit\n");
 		    break;
 		case ANYOF_NXDIGIT:
@@ -3677,6 +3702,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isXDIGIT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsXDigit\n");
 		    break;
 		default:
@@ -3685,7 +3711,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		}
 		if (LOC)
 		    ANYOF_FLAGS(ret) |= ANYOF_CLASS;
-		dont_optimize_invert = TRUE;
 		continue;
 	    }
 	} /* end of namedclass \blah */
@@ -3701,10 +3726,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	}
 	else {
 	    lastvalue = value; /* save the beginning of the range */
-#ifdef ALPHAS_HAVE_GAPS
-	    explicit_alpha_prev = explicit_alpha;
-	    explicit_alpha      = isALPHA(value);
-#endif
 	    if (*RExC_parse == '-' && RExC_parse+1 < RExC_end &&
 		RExC_parse[1] != ']') {
 		RExC_parse++;
@@ -3728,18 +3749,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	/* now is the next time */
 	if (!SIZE_ONLY) {
 	    if (lastvalue < 256 && value < 256) {
-#ifdef ALPHAS_HAVE_GAPS
-		/* In EBCDIC the letters are not an unbroken range 
-		 * numerically, there's are gaps between i-j, r-s,
-		 * I-J, R-S.  We DWIM that if the endpoints of the
-		 * range are specified as explicitly alphabetic,
-		 * an alphabetic range is requested, otherwise
-		 * (the else branch) (say, explicit numeric endpoints
-		 * like \xHH are used) we do a straightforward
-		 * numeric range. */
-		if (explicit_alpha_prev && explicit_alpha &&
-		    ((isLOWER(lastvalue) && isLOWER(value)) ||
-		    ((isUPPER(lastvalue) && isUPPER(value)))))
+#ifndef ASCIIish /* EBCDIC, for example. */
+		if ((isLOWER(lastvalue) && isLOWER(value)) ||
+		    (isUPPER(lastvalue) && isUPPER(value)))
 		{
 		    IV i;
 		    if (isLOWER(lastvalue)) {

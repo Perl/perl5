@@ -3517,10 +3517,6 @@ typedef struct am_table_short AMTS;
 #define EXEC_ARGV_CAST(x) x
 #endif
 
-#ifdef EBCDIC
-#define ALPHAS_HAVE_GAPS
-#endif
-
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"
