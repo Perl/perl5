@@ -1795,7 +1795,6 @@ PP(pp_substr)
     djSP; dTARGET;
     SV *sv;
     I32 len;
-    I32 len_ok = 0;
     STRLEN curlen;
     I32 pos;
     I32 rem;
@@ -1807,21 +1806,13 @@ PP(pp_substr)
     STRLEN repl_len;
 
     SvTAINTED_off(TARG);			/* decontaminate */
-    if (MAXARG > 3) {
-	/* pop off replacement string */
-	sv = POPs;
-	repl = SvPV(sv, repl_len);
-	/* pop off length */
-	sv = POPs;
-	if (SvOK(sv)) {
-	    len = SvIV(sv);
-	    len_ok++;
+    if (MAXARG > 2) {
+	if (MAXARG > 3) {
+	    sv = POPs;
+	    repl = SvPV(sv, repl_len);
 	}
-    } else if (MAXARG == 3) {
 	len = POPi;
-	len_ok++;
-    }  
-
+    }
     pos = POPi;
     sv = POPs;
     PUTBACK;
@@ -1830,34 +1821,34 @@ PP(pp_substr)
 	pos -= arybase;
 	rem = curlen-pos;
 	fail = rem;
-        if (len_ok) {
-            if (len < 0) {
-	        rem += len;
-                if (rem < 0)
-                    rem = 0;
-            }
-            else if (rem > len)
-                     rem = len;
-        }
+	if (MAXARG > 2) {
+	    if (len < 0) {
+		rem += len;
+		if (rem < 0)
+		    rem = 0;
+	    }
+	    else if (rem > len)
+		     rem = len;
+	}
     }
     else {
-        pos += curlen;
-        if (!len_ok)
-            rem = curlen;
-        else if (len >= 0) {
-            rem = pos+len;
-            if (rem > (I32)curlen)
-                rem = curlen;
-        }
-        else {
-            rem = curlen+len;
-            if (rem < pos)
-                rem = pos;
-        }
-        if (pos < 0)
-            pos = 0;
-        fail = rem;
-        rem -= pos;
+	pos += curlen;
+	if (MAXARG < 3)
+	    rem = curlen;
+	else if (len >= 0) {
+	    rem = pos+len;
+	    if (rem > (I32)curlen)
+		rem = curlen;
+	}
+	else {
+	    rem = curlen+len;
+	    if (rem < pos)
+		rem = pos;
+	}
+	if (pos < 0)
+	    pos = 0;
+	fail = rem;
+	rem -= pos;
     }
     if (fail < 0) {
 	if (dowarn || lvalue || repl)
@@ -1894,7 +1885,7 @@ PP(pp_substr)
 	    LvTARGOFF(TARG) = pos;
 	    LvTARGLEN(TARG) = rem;
 	}
-        else if (repl)
+	else if (repl)
 	    sv_insert(sv, pos, rem, repl, repl_len);
     }
     SPAGAIN;

@@ -782,6 +782,10 @@ scalarvoid(OP *o)
     case OP_REPEAT:
 	if (o->op_flags & OPf_STACKED)
 	    break;
+	goto func_ops;
+    case OP_SUBSTR:
+	if (o->op_private == 4)
+	    break;
 	/* FALL THROUGH */
     case OP_GVSV:
     case OP_WANTARRAY:
@@ -798,7 +802,6 @@ scalarvoid(OP *o)
     case OP_HEX:
     case OP_OCT:
     case OP_LENGTH:
-    case OP_SUBSTR:
     case OP_VEC:
     case OP_INDEX:
     case OP_RINDEX:
@@ -851,6 +854,7 @@ scalarvoid(OP *o)
     case OP_GGRNAM:
     case OP_GGRGID:
     case OP_GETLOGIN:
+      func_ops:
 	if (!(o->op_private & OPpLVAL_INTRO))
 	    useless = op_desc[o->op_type];
 	break;
@@ -1206,10 +1210,14 @@ mod(OP *o, I32 type)
     case OP_KEYS:
 	if (type != OP_SASSIGN)
 	    goto nomod;
+	goto lvalue_func;
+    case OP_SUBSTR:
+	if (o->op_private == 4) /* don't allow 4 arg substr as lvalue */
+	    goto nomod;
 	/* FALL THROUGH */
     case OP_POS:
     case OP_VEC:
-    case OP_SUBSTR:
+      lvalue_func:
 	pad_free(o->op_targ);
 	o->op_targ = pad_alloc(o->op_type, SVs_PADMY);
 	assert(SvTYPE(PAD_SV(o->op_targ)) == SVt_NULL);
