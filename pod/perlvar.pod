@@ -409,6 +409,18 @@ to "C<$!>" in order to set I<errno> if, for instance, you want "C<$!>" to return
 string for error I<n>, or you want to set the exit value for the die()
 operator.  (Mnemonic: What just went bang?)
 
+=item $EXTENDED_OS_ERROR
+
+=item $^E
+
+More specific information about the last system error than that
+provided by C<$!>, if available.  (If not, it's just C<$!> again.)
+At the moment, this differs from C<$!> only under VMS, where it
+provides the VMS status value from the last system error.  The
+caveats mentioned in the description of C<$!> apply here, too.
+(Mnemonic: Extra error explanation.)
+
+
 =item $EVAL_ERROR
 
 =item $@
@@ -556,12 +568,19 @@ C<$^F> at the time of the open, not the time of the exec.
 The current value of the inplace-edit extension.  Use C<undef> to disable
 inplace editing.  (Mnemonic: value of B<-i> switch.)
 
+=item $OSNAME
+=item $^O
+
+The name of the operating system under which this copy of Perl was
+built, as determined during the configuration process.  The value
+is identical to C<$Config{'osname'}>.
+
 =item $PERLDB
 
 =item $^P
 
 The internal flag that the debugger clears so that it doesn't debug
-itself.  You could conceivable disable debugging yourself by clearing
+itself.  You could conceivably disable debugging yourself by clearing
 it.
 
 =item $BASETIME
