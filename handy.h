@@ -483,7 +483,6 @@ Converts the specified character to lowercase.
 #define isBLANK_LC_utf8(c)	isBLANK(c) /* could be wrong */
 
 #ifdef EBCDIC
-EXT int ebcdic_control (int);
 #  define toCTRL(c)	ebcdic_control(c)
 #else
   /* This conversion works both ways, strangely enough. */

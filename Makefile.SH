@@ -78,10 +78,10 @@ true)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"
 		;;
 	os390*)
-		shrpldflags='-W l,dll'
-		linklibperl='libperl.x'
-		DPERL_EXTERNAL_GLOB=''
-		;;
+            shrpldflags='-W l,dll'
+	    linklibperl='libperl.x'
+	    DPERL_EXTERNAL_GLOB=''
+	    ;;
 	esac
 	case "$ldlibpthname" in
 	'') ;;
@@ -313,6 +313,8 @@ utilities:	miniperl lib/Config.pm $(plextract) FORCE
 # Apparently some makes require an action for the FORCE target.
 FORCE:
 	@sh -c true
+!NO!SUBS!
+$spitshell >>Makefile <<!GROK!THIS!
 
 !NO!SUBS!
 $spitshell >>Makefile <<!GROK!THIS!
@@ -322,9 +324,15 @@ opmini\$(OBJ_EXT): op.c config.h
 	\$(CCCMD) \$(PLDLFLAGS) $DPERL_EXTERNAL_GLOB opmini.c
 	\$(RMS) opmini.c
 
+opmini\$(OBJ_EXT): op.c config.h
+	\$(RMS) opmini.c
+	\$(CPS) op.c opmini.c
+	\$(CCCMD) \$(PLDLFLAGS) $DPERL_EXTERNAL_GLOB opmini.c
+	\$(RMS) opmini.c
+
 !GROK!THIS!
 $spitshell >>Makefile <<'!NO!SUBS!'
-miniperlmain$(OBJ_EXT): miniperlmain.c
+miniperlmain$(OBJ_EXT): miniperlmain.c patchlevel.h
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
 perlmain.c: miniperlmain.c config.sh $(FIRSTMAKEFILE)

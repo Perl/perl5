@@ -139,14 +139,6 @@ case "$archname" in
 '') archname="$osname" ;;
 esac
 
-# Architecture related object files.
-# ebcdic.c contains special \cX mapping code for EBCDIC char sets.
-# Prepend your preference with Configure -Darchobs=your_preference.o.
-case "$archname" in
-'') archobjs="ebcdic.o" ;;
-*) archobjs="$archobjs ebcdic.o" ;;
-esac
-
 # We have our own cppstdin script.  This is not a variable since 
 # Configure sees the presence of the script file.
 # We put system header -D definitions in so that Configure
