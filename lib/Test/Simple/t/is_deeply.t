@@ -23,10 +23,23 @@ local $ENV{HARNESS_ACTIVE} = 0;
 # Can't use Test.pm, that's a 5.005 thing.
 package main;
 
-print "1..25\n";
+print "1..34\n";
 
 my $test_num = 1;
 # Utility testing functions.
+sub ok ($;$) {
+    my($test, $name) = @_;
+    my $ok = '';
+    $ok .= "not " unless $test;
+    $ok .= "ok $test_num";
+    $ok .= " - $name" if defined $name;
+    $ok .= "\n";
+    print $ok;
+    $test_num++;
+
+    return $test;
+}
+
 sub is ($$;$) {
     my($this, $that, $name) = @_;
     my $test = $$this eq $that;
@@ -50,7 +63,7 @@ sub is ($$;$) {
 
 sub like ($$;$) {
     my($this, $regex, $name) = @_;
-    
+
     $regex = qr/$regex/ unless ref $regex;
     my $test = $$this =~ $regex;
 
@@ -209,6 +222,7 @@ my $bar = {
 
 #line 198
 is_deeply( $foo, $bar, 'deep structures' );
+ok( @Test::More::Data_Stack == 0, '@Data_Stack not holding onto things' );
 is( $out, "not ok 11 - deep structures\n",  'deep structures' );
 is( $err, <<ERR,                            '    right diagnostic' );
 #     Failed test ($0 at line 198)
@@ -234,3 +248,34 @@ foreach my $test (@tests) {
     like \$warning, 
          qr/^is_deeply\(\) takes two or three args, you gave $num_args\.\n/;
 }
+
+
+#line 240
+# [rt.cpan.org 6837]
+ok !is_deeply([{Foo => undef}],[{Foo => ""}]), 'undef != ""';
+ok( @Test::More::Data_Stack == 0, '@Data_Stack not holding onto things' );
+
+
+#line 258
+# [rt.cpan.org 7031]
+my $a = [];
+ok !is_deeply($a, $a.''),       "don't compare refs like strings";
+ok !is_deeply([$a], [$a.'']),   "  even deep inside";
+
+
+#line 265
+# [rt.cpan.org 7030]
+ok !is_deeply( {}, {key => []} ),  '[] could match non-existent values';
+ok !is_deeply( [], [[]] );
+
+
+#line 273
+$$err = $$out = '';
+is_deeply( [\'a', 'b'], [\'a', 'c'] );
+is( $out, "not ok 20\n",  'scalar refs in an array' );
+is( $err, <<ERR,        '    right diagnostic' );
+#     Failed test ($0 at line 274)
+#     Structures begin differing at:
+#          \$got->[1] = 'b'
+#     \$expected->[1] = 'c'
+ERR

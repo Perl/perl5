@@ -1,8 +1,50 @@
+0.53  Mon Nov 29 04:43:24 EST 2004
+    - Apparently its possible to have Module::Signature installed without
+      it being functional.  Fixed the signature test to account for this.
+      (not a real bug)
+
+0.52  Sun Nov 28 21:41:03 EST 2004
+    - plan() now better checks that the given plan is valid. 
+      [rt.cpan.org 2597]
+
+0.51_02  Sat Nov 27 01:25:25 EST 2004
+    * is_deeply() and all the eq_* functions now handle circular data
+      structures.  [rt.cpan.org 7289]
+    * require_ok() now handles filepaths in addition to modules.
+    - Clarifying Test::More's position on overloaded objects 
+    - Fixed a bug introduced in 0.51_01 causing is_deeply() to pierce
+      overloaded objects.
+    - Mentioning rt.cpan.org for reporting bugs.
+
+0.51_01  Fri Nov 26 02:59:30 EST 2004
+    - plan() was accidentally exporting functions [rt.cpan.org 8385]
+    * diag @msgs would insert # between arguments. [rt.cpan.org 8392]
+    * eq_set() could cause problems under threads due to a weird sort bug
+      [rt.cpan.org 6782]
+    * undef no longer equals '' in is_deeply() [rt.cpan.org 6837]
+    * is_deeply() would sometimes compare references as strings.
+      [rt.cpan.org 7031]
+    - eq_array() and eq_hash() could hold onto references if they failed
+      keeping them in memory and preventing DESTROY.  [rt.cpan.org 7032]
+    * is_deeply() could confuse [] with a non-existing value
+      [rt.cpan.org 7030]
+    - is_deeply() diagnostics a little off when scalar refs were inside
+      an array or hash ref [rt.cpan.org 7033]
+    - Thanks to Fergal Daly for ferretting out all these long standing 
+      is_deeply and eq_* bugs.
+
+0.51  Tue Nov 23 04:51:12 EST 2004
+    - Fixed bug in fail_one.t on Windows (not a real bug).
+    - TODO reasons as overloaded objects now won't blow up under threads.
+      [Autrijus Tang]
+    - skip() in 0.50 tickled yet another bug in threads::shared.  Hacked
+      around it.
+
 0.50  Sat Nov 20 00:28:44 EST 2004
-    * Fixed bug in fail-more test on Windows (not a real bug).
+    - Fixed bug in fail-more test on Windows (not a real bug).
       [rt.cpan.org 8022]
-    - Change from CVS to SVK.  Hopefully this is the last version control
-      system change.
+    - Change from CVS to SVK.  Hopefully this is the last time I move
+      version control systems.
     - Again removing File::Spec dependency (came back in 0.48_02)
     - Change from Aegis back to CVS
 

@@ -1,20 +1,9 @@
-    Test use_ok() with imports better.
-
-    Add BAIL_OUT() (little known Test::Harness feature that basically
-    declares that the universe has turned out all wrong and the test
-    will now stop what it's doing and just go back to bed.)
-
-    Add a way to ask "Are we passing so far?".  Probably a
-    Test::Builder method.
+See https://rt.cpan.org/NoAuth/Bugs.html?Dist=Test-Simple plus here's
+a few more I haven't put in RT yet.
 
     Finish (start?) Test::FAQ
 
     Expand the Test::Tutorial
-
-    Restructure the Test::More synopsis.
-
-    Decide if the exit code behavior on failure is a useful default
-    case.
 
     $^C exception control?
 
@@ -22,13 +11,7 @@
 
     Add test name to diagnostic output
 
-    Put a newline before the first diagnostic failure when in Test::Harness
-
-    Trap bare exit() calls.
-
     Add diag() to details().
-
-    Add is_passing() method to check if we're passing?
 
     Add at_end() callback?
 
