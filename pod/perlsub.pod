@@ -1133,20 +1133,23 @@ The following functions would all be inlined:
     sub FLAG_MASK ()	{ FLAG_FOO | FLAG_BAR }
 
     sub OPT_BAZ ()	{ not (0x1B58 & FLAG_MASK) }
-    sub BAZ_VAL () {
+
+    sub N () { int(OPT_BAZ) / 3 }
+
+    sub FOO_SET () { 1 if FLAG_MASK & FLAG_FOO }
+
+Be aware that these will not be inlined; as they contain inner scopes,
+the constant folding doesn't reduce them to a single constant:
+
+    sub foo_set () { if (FLAG_MASK & FLAG_FOO) { 1 } }
+
+    sub baz_val () {
 	if (OPT_BAZ) {
 	    return 23;
 	}
 	else {
 	    return 42;
 	}
-    }
-
-    sub N () { int(BAZ_VAL) / 3 }
-    BEGIN {
-	my $prod = 1;
-	for (1..N) { $prod *= $_ }
-	sub N_FACTORIAL () { $prod }
     }
 
 If you redefine a subroutine that was eligible for inlining, you'll get
