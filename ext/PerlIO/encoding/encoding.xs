@@ -145,7 +145,7 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
     if (SvIV(result = get_sv("PerlIO::encoding::check", 1)) == 0){
 	PUSHMARK(sp);
 	PUTBACK;
-	if (call_pv("Encode::FB_QUIET", G_SCALAR|G_NOARGS) != 1) {
+       if (call_pv("Encode::FB_QUIET", G_SCALAR) != 1) {
 	    /* should never happen */
 	    Perl_die(aTHX_ "Encode::FB_QUIET did not return a value");
 	    return -1;
