@@ -307,7 +307,7 @@ opmini$(OBJ_EXT): op.c
 	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB opmini.c
 	$(RMS) opmini.c
 
-miniperlmain$(OBJ_EXT): miniperlmain.c
+miniperlmain$(OBJ_EXT): miniperlmain.c patchlevel.h
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
 perlmain.c: miniperlmain.c config.sh $(FIRSTMAKEFILE)
@@ -324,6 +324,14 @@ ext.libs: $(static_ext)
 	-@test -f ext.libs || touch ext.libs
 
 !NO!SUBS!
+
+if test -f .patch ; then $spitshell >>Makefile <<'!NO!SUBS!' 
+patchlevel.h: .patch
+	perl fix_pl || (make -f Makefile.micro && ./microperl fix_pl)
+
+!NO!SUBS!
+
+fi
 
 # How to build libperl.  This is still rather convoluted.
 # Load up custom Makefile.SH fragment for shared loading and executables:
