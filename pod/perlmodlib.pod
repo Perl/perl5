@@ -333,6 +333,11 @@ arbitrary size integer math package
 
 complex numbers and associated mathematical functions
 
+=item Math::Trig
+
+simple interface to parts of Math::Complex for those who
+need trigonometric functions only for real numbers
+
 =item NDBM_File
 
 tied access to ndbm files
