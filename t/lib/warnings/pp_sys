@@ -403,16 +403,18 @@ binmode() on unopened filehandle at - line 4.
 ########
 # pp_sys.c [pp_lstat]
 use warnings 'io';
-lstat STDIN;
+open FH, "harness" or die "# $!";
+lstat FH;
 open my $fh, $0 or die "# $!";
 lstat $fh;
 no warnings 'io';
-lstat STDIN;
+lstat FH;
 lstat $fh;
+close FH;
 close $fh;
 EXPECT
-lstat() on filehandle STDIN at - line 3.
-lstat() on filehandle $fh at - line 5.
+lstat() on filehandle FH at - line 4.
+lstat() on filehandle $fh at - line 6.
 ########
 # pp_sys.c [pp_getc]
 use warnings qw(unopened closed) ;
