@@ -1767,14 +1767,17 @@ lib/Test/Harness/Changes	Test::Harness
 lib/Test/Harness/Iterator.pm	Test::Harness::Iterator (internal use only)
 lib/Test/Harness.pm		A test harness
 lib/Test/Harness/Straps.pm	Test::Harness::Straps
+lib/Test/Harness/TAP.pod	Documentation for the Test Anything Protocol
 lib/Test/Harness/t/00compile.t	Test::Harness test
 lib/Test/Harness/t/assert.t	Test::Harness::Assert test
 lib/Test/Harness/t/base.t	Test::Harness test
 lib/Test/Harness/t/callback.t	Test::Harness test
+lib/Test/Harness/t/harness.t	Test::Harness test
 lib/Test/Harness/t/inc_taint.t	Test::Harness test
 lib/Test/Harness/t/nonumbers.t	Test::Harness test
 lib/Test/Harness/t/ok.t		Test::Harness test
 lib/Test/Harness/t/pod.t	Test::Harness test
+lib/Test/Harness/t/prove-globbing.t	Test::Harness::Straps test
 lib/Test/Harness/t/prove-switches.t	Test::Harness::Straps test
 lib/Test/Harness/t/strap-analyze.t	Test::Harness::Straps test
 lib/Test/Harness/t/strap.t		Test::Harness::Straps test

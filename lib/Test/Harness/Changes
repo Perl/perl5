@@ -1,5 +1,78 @@
 Revision history for Perl extension Test::Harness
 
+2.46    Thu Jan 20 11:50:59 CST 2005
+    Released.
+
+2.45_02 Fri Dec 31 14:57:33 CST 2004
+    [ENHANCEMENTS]
+    * Turns off buffering on both STDERR and STDOUT, so that the two
+      output handles don't get out of sync with each other.  Thanks to
+      David Wheeler.
+
+    * No longer requires, or supports, the HARNESS_OK_SLOW environment
+      variable.  Test counts are only updated once per second, which
+      used to require having HARNESS_OK_SLOW set.
+
+2.45_01 Fri Dec 17 22:39:17 CST 2004
+    [THINGS THAT MIGHT BREAK YOUR CODE]
+    * Test::Harness now requires Perl 5.004_05.
+
+    * We no longer try to print a stack if a coredump is detected.
+
+    [FIXES]
+    * Reverted Test::Harness::Iterator::next()'s use of readline, since
+      it fails under Perl 5.5.4.
+
+    * We no longer try to print a stack if a coredump is detected.
+      This means that the external problems we've had with wait.ph
+      now disappear.  This resolves a number of problems that various
+      Linux distros have, and closes a couple of RT tickets like #2729
+      and #7716.
+
+    [ENHANCEMENTS]
+    * Added Test::Harness->strap() method to access the internal strap.
+
+    [DOCUMENTATION]
+    * Obfuscated the rt.cpan.org email address.  The damage is already
+      done, but at least we'll have it hidden going forward.
+
+2.44 Tue Nov 30 18:38:17 CST 2004
+    [INTERNALS]
+    * De-anonymized the callbacks and handlers in Test::Harness, mostly
+      so I can profile better.
+
+    * Checks _is_header() only if _is_line() fails first.  No point
+      in checking every line of the input for something that can only
+      occur once.
+
+    * Inline the _detailize() function, which was getting called once
+      per line of input.  Reduced execution time about 5-7%.
+
+    * Removed unnecessary temporary variables in Test::Harness::Straps
+      and in Test::Harness::Iterator.
+
+2.43_02 Thu Nov 25 00:20:36 CST 2004
+    [ENHANCEMENTS]
+    * Added more debug output if $Test::Harness::Debug is on.
+
+    [FIXES]
+    * Test::Harness now removes default paths from the paths that it
+      sets in PERL5LIB.  This fixes RT #5649.  Thanks, Schwern.
+
+    [THINGS THAT MIGHT BREAK YOUR CODE]
+    * Test::Harness::Straps' constructor no longer will work as an
+      object method.  You can't say $strap->new any more, but that's
+      OK because you never really wanted to anyway.
+
+2.43_01
+    [FIXES]
+    * Added workaround for local $ENV{} bug on Cygwin to
+    t/prove-switches.t.  See the following RT tickets for details.
+
+    https://rt.cpan.org/Ticket/Display.html?id=6452
+    http://rt.perl.org/rt3/Ticket/Display.html?id=30952
+
+
 2.42        Wed Apr 28 22:13:11 CDT 2004
     [ENHANCEMENTS]
     * prove -v now sets TEST_VERBOSE in case your tests rely on them.

@@ -1,12 +1,12 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Straps.pm,v 1.35 2003/12/31 02:34:22 andy Exp $
+# $Id: Straps.pm 450 2004-12-20 04:51:42Z andy $
 
 package Test::Harness::Straps;
 
 use strict;
 use vars qw($VERSION);
 use Config;
-$VERSION = '0.19';
+$VERSION = '0.20';
 
 use Test::Harness::Assert;
 use Test::Harness::Iterator;
@@ -69,8 +69,7 @@ Initialize a new strap.
 =cut
 
 sub new {
-    my($proto) = shift;
-    my($class) = ref $proto || $proto;
+    my $class = shift;
 
     my $self = bless {}, $class;
     $self->_init;
@@ -96,7 +95,7 @@ sub _init {
 
 =head1 Analysis
 
-=head2 C<analyze>
+=head2 $strap->analyze( $name, \@output_lines )
 
   my %results = $strap->analyze($name, \@test_output);
 
@@ -161,14 +160,7 @@ sub _analyze_line {
     $self->{line}++;
 
     my $type;
-    if( $self->_is_header($line) ) {
-        $type = 'header';
-
-        $self->{saw_header}++;
-
-        $totals->{max} += $self->{max};
-    }
-    elsif( $self->_is_test($line, \%result) ) {
+    if ( $self->_is_test($line, \%result) ) {
         $type = 'test';
 
         $totals->{seen}++;
@@ -204,11 +196,33 @@ sub _analyze_line {
             warn "Can't detailize, too big.\n";
         }
         else {
-            $totals->{details}[$result{number} - 1] = 
-                               {$self->_detailize($pass, \%result)};
+            #Generates the details based on the last test line seen.  C<$pass> is
+            #true if it was considered to be a passed test.  C<%test> is the results
+            #of the test you're summarizing.
+            my $details = {
+                ok         => $pass,
+                actual_ok  => $result{ok}
+            };
+
+            assert( defined( $details->{ok} ) && defined( $details->{actual_ok} ) );
+
+            # We don't want these to be undef because they are often
+            # checked and don't want the checker to have to deal with
+            # uninitialized vars.
+            foreach my $piece (qw(name type reason)) {
+                $details->{$piece} = defined $result{$piece} ? $result{$piece} : '';
+            }
+            $totals->{details}[$result{number} - 1] = $details;
         }
 
         # XXX handle counter mismatch
+    }
+    elsif ( $self->_is_header($line) ) {
+        $type = 'header';
+
+        $self->{saw_header}++;
+
+        $totals->{max} += $self->{max};
     }
     elsif ( $self->_is_bail_out($line, \$self->{bailout_reason}) ) {
         $type = 'bailout';
@@ -235,7 +249,7 @@ sub analyze_fh {
     my($self, $name, $fh) = @_;
 
     my $it = Test::Harness::Iterator->new($fh);
-    $self->_analyze_iterator($name, $it);
+    return $self->_analyze_iterator($name, $it);
 }
 
 =head2 C<analyze_file>
@@ -261,6 +275,10 @@ sub analyze_file {
     }
 
     local $ENV{PERL5LIB} = $self->_INC2PERL5LIB;
+    if ( $Test::Harness::Debug ) {
+        local $^W=0; # ignore undef warnings
+        print "# PERL5LIB=$ENV{PERL5LIB}\n";
+    }
 
     # *sigh* this breaks under taint, but open -| is unportable.
     my $line = $self->_command_line($file);
@@ -446,9 +464,21 @@ sub _filtered_INC {
 	s/[\\\/+]$// foreach @inc;
     }
 
-    my %dupes;
-    @inc = grep !$dupes{$_}++, @inc;
+    my %seen;
+    $seen{$_}++ foreach $self->_default_inc();
+    @inc = grep !$seen{$_}++, @inc;
 
+    return @inc;
+}
+
+
+sub _default_inc {
+    my $self = shift;
+
+    local $ENV{PERL5LIB};
+    my $perl = $self->_command;
+    my @inc =`$perl -le "print join qq[\n], \@INC"`;
+    chomp @inc;
     return @inc;
 }
 
@@ -555,7 +585,7 @@ result back in C<%test> which will contain:
   type          'todo' or 'skip' (if any)
   reason        why is it todo or skip? (if any)
 
-If will also catch lone 'not' lines, note it saw them 
+It will also catch lone 'not' lines, note it saw them in
 C<< $strap->{saw_lone_not} >> and the line in C<< $strap->{lone_not_line} >>.
 
 =cut
@@ -569,23 +599,16 @@ my $Report_Re = <<'REGEX';
                   (.*)                  # and the rest
 REGEX
 
-my $Extra_Re = <<'REGEX';
-                 ^
-                  (.*?) (?:(?:[^\\]|^)# (.*))?
-                 $
-REGEX
-
 sub _is_test {
     my($self, $line, $test) = @_;
 
     # We pulverize the line down into pieces in three parts.
     if( my($not, $num, $extra)    = $line  =~ /$Report_Re/ox ) {
-        my ($name, $control) = $extra ? split(/(?:[^\\]|^)#/, $extra) : ();
-        my ($type, $reason)  = $control ? $control =~ /^\s*(\S+)(?:\s+(.*))?$/ : ();
+        ($test->{name}, my $control) = $extra ? split(/(?:[^\\]|^)#/, $extra) : ();
+        (my $type, $test->{reason})  = $control ? $control =~ /^\s*(\S+)(?:\s+(.*))?$/ : ();
 
         $test->{number} = $num;
         $test->{ok}     = $not ? 0 : 1;
-        $test->{name}   = $name;
 
         if( defined $type ) {
             $test->{type}   = $type =~ /^TODO$/i ? 'todo' :
@@ -594,7 +617,6 @@ sub _is_test {
         else {
             $test->{type} = '';
         }
-        $test->{reason} = $reason;
 
         return $YES;
     }
@@ -696,36 +718,6 @@ There is one final item, the details.
 
 Element 0 of the details is test #1.  I tried it with element 1 being
 #1 and 0 being empty, this is less awkward.
-
-=head2 C<_detailize>
-
-  my %details = $strap->_detailize($pass, \%test);
-
-Generates the details based on the last test line seen.  C<$pass> is
-true if it was considered to be a passed test.  C<%test> is the results
-of the test you're summarizing.
-
-=cut
-
-sub _detailize {
-    my($self, $pass, $test) = @_;
-
-    my %details = ( ok         => $pass,
-                    actual_ok  => $test->{ok}
-                  );
-
-    assert( !(grep !defined $details{$_}, keys %details),
-            'test contains the ok and actual_ok info' );
-
-    # We don't want these to be undef because they are often
-    # checked and don't want the checker to have to deal with
-    # uninitialized vars.
-    foreach my $piece (qw(name type reason)) {
-        $details{$piece} = defined $test->{$piece} ? $test->{$piece} : '';
-    }
-
-    return %details;
-}
 
 =head1 EXAMPLES
 

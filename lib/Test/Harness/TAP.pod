@@ -1,0 +1,175 @@
+=head1 NAME
+
+Test::Harness::TAP - Documentation for the TAP format
+
+=head1 SYNOPSIS
+
+Perl's interface between testing modules like Test::More and the
+test harness Test::Harness is a simple text-based format called
+TAP, the Test Anything Protocol.  This is its story.
+
+=head1 TERMINOLOGY
+
+The "interpreter" is the program that reads and analyzes some TAP
+output.  In Perl, this is handled by the C<Test::Harness> module,
+with the C<runtests()> function.
+
+=head1 THE TAP FORMAT
+
+Perl test scripts print to standard output C<"ok N"> for each single
+test, where C<N> is an increasing sequence of integers. The first
+line output by a standard test script is C<"1..M"> with C<M> being
+the number of tests that should be run within the test script.
+
+After all tests have been performed, runtests() prints some performance
+statistics that are computed by the Benchmark module.
+
+=head2 The test script output
+
+The following explains how Test::Harness interprets the output of your
+test program.
+
+=over 4
+
+=item B<"1..M">
+
+This header tells how many tests there will be.  For example, C<1..10>
+means you plan on running 10 tests.  This is a safeguard in case
+your test dies quietly in the middle of its run.
+
+It should be the first non-comment line output by your test program.
+
+In certain instances, you may not know how many tests you will
+ultimately be running.  In this case, it is permitted for the C<1..M>
+header to appear as the B<last> line output by your test (again,
+it can be followed by further comments).
+
+Under no circumstances should C<1..M> appear in the middle of your
+output or more than once.
+
+=item B<'ok', 'not ok'.  Ok?>
+
+Any output from the testscript to standard error is ignored and
+bypassed, thus will be seen by the user. Lines written to standard
+output containing C</^(not\s+)?ok\b/> are interpreted as feedback for
+the TAP interpreter.  All other lines are discarded.
+
+C</^not ok/> indicates a failed test.  C</^ok/> is a successful test.
+
+=item B<test numbers>
+
+TAP normally expects the "ok" or "not ok" to be followed by a test
+number.  It is tolerated if the test numbers after "ok" are omitted.
+In this case, the interpreter must temporarily maintain its own
+counter until the script supplies test numbers again. So the following
+test script
+
+    print <<END;
+    1..6
+    not ok
+    ok
+    not ok
+    ok
+    ok
+    END
+
+will generate
+
+    FAILED tests 1, 3, 6
+    Failed 3/6 tests, 50.00% okay
+
+=item B<test labels>
+
+Anything after the test number, but before the "#", is considered
+to be the label for the test.
+
+  ok 42 this is the label of the test
+
+Currently, Test::Harness does nothing with this information.
+
+=item B<Skipping tests>
+
+If the standard output line contains the substring C< # Skip> (with
+variations in spacing and case) after C<ok> or C<ok NUMBER>, it is
+counted as a skipped test.  If the whole testscript succeeds, the
+count of skipped tests is included in the generated output.
+C<Test::Harness> reports the text after C< # Skip\S*\s+> as a reason
+for skipping.
+
+  ok 23 # skip Insufficient flogiston pressure.
+
+Similarly, one can include a similar explanation in a C<1..0> line
+emitted if the test script is skipped completely:
+
+  1..0 # Skipped: no leverage found
+
+=item B<Todo tests>
+
+If the standard output line contains the substring C< # TODO > after
+C<not ok> or C<not ok NUMBER>, it is counted as a todo test.  The text
+afterwards is the thing that has to be done before this test will
+succeed.
+
+  not ok 13 # TODO harness the power of the atom
+
+Note that the TODO must have a space after it.
+
+These tests represent a feature to be implemented or a bug to be fixed
+and act as something of an executable "thing to do" list.  They are
+B<not> expected to succeed.  Should a todo test begin succeeding,
+Test::Harness will report it as a bonus.  This indicates that whatever
+you were supposed to do has been done and you should promote this to a
+normal test.
+
+=item B<Bail out!>
+
+As an emergency measure, a test script can decide that further tests
+are useless (e.g. missing dependencies) and testing should stop
+immediately. In that case the test script prints the magic words
+
+  Bail out!
+
+to standard output. Any message after these words must be displayed
+by the interpreter as the reason why testing must be stopped.
+
+=item B<Comments>
+
+Additional comments may be put into the testing output on their own
+lines.  Comment lines should begin with a '#', Test::Harness will
+ignore them.
+
+  ok 1
+  # Life is good, the sun is shining, RAM is cheap.
+  not ok 2
+  # got 'Bush' expected 'Gore'
+
+=item B<Anything else>
+
+Any other output Test::Harness sees it will silently ignore B<BUT WE
+PLAN TO CHANGE THIS!> If you wish to place additional output in your
+test script, please use a comment.
+
+=back
+
+=head1 DESCRIPTION
+
+=head1 RATIONALE
+
+=head1 ACKNOWLEDGEMENTS
+
+=head1 AUTHORS
+
+Andy Lester, based on the original Test::Harness documentation by Michael Schwern.
+
+=head1 COPYRIGHT
+
+Copyright 2003-2004 by
+Michael G Schwern C<< <schwern@pobox.com> >>,
+Andy Lester C<< <andy@petdance.com> >>.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See L<http://www.perl.com/perl/misc/Artistic.html>.
+
+=cut

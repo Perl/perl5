@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -Tw
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -12,7 +12,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 170;
+use Test::More tests => 176;
 
 BEGIN { use_ok('Test::Harness::Straps'); }
 
@@ -59,6 +59,7 @@ my @not_headers = (' 1..2',
 
 foreach my $unheader (@not_headers) {
     my $strap = Test::Harness::Straps->new;
+    isa_ok( $strap, 'Test::Harness::Straps' );
 
     ok( !$strap->_is_header($unheader),     
         "_is_header(), not a header '$unheader'" );
