@@ -5,14 +5,16 @@
 # do include non-BMP unicode characters -- Are you happy, jhi?
 #
 
-our $ON_EBCDIC;
 BEGIN {
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;
     }
-    $ON_EBCDIC = (ord("A") == 193) || $ARGV[0];
+    if (ord("A") == 193) {
+        print "1..0 # Skip: EBCDIC\n";
+	exit 0;
+    }
     $| = 1;
 }
 
@@ -87,7 +89,6 @@ is(index($@, 'UCS-2LE'), 0, "encode UCS-2LE: exception");
 # SvGROW test for (en|de)code_xs
 #
 SKIP: {
-    skip "Not on EBCDIC", 8 if $ON_EBCDIC;
     my $utf8 = '';
     for my $j (0,0x10){
 	for my $i (0..0xffff){
