@@ -30,10 +30,10 @@ require_ok( 'O' );
 my @args = ('-Ilib', '-MO=success,foo,bar', '-e', '1' );
 my @lines = get_lines( @args );
 
-is( $lines[0], '-e syntax OK', 'O.pm should not munge perl output without -qq');
-is( $lines[1], 'Compiling!', 'Output should not be saved without -q switch' );
-is( $lines[2], '(foo) <bar>', 'O.pm should call backend compile() method' );
-is( $lines[3], '[]', 'Nothing should be in $O::BEGIN_output without -q' );
+is( $lines[0], 'Compiling!', 'Output should not be saved without -q switch' );
+is( $lines[1], '(foo) <bar>', 'O.pm should call backend compile() method' );
+is( $lines[2], '[]', 'Nothing should be in $O::BEGIN_output without -q' );
+is( $lines[3], '-e syntax OK', 'O.pm should not munge perl output without -qq');
 
 $args[1] = '-MO=-q,success,foo,bar';
 @lines = get_lines( @args );
@@ -42,7 +42,7 @@ isnt( $lines[1], 'Compiling!', 'Output should not be printed with -q switch' );
 SKIP: {
 	skip( '-q redirection does not work without PerlIO', 2)
 		unless $Config{useperlio};
-	is( $lines[2], "[Compiling!", '... but should be in $O::BEGIN_output' );
+	is( $lines[1], "[Compiling!", '... but should be in $O::BEGIN_output' );
 
 	$args[1] = '-MO=-qq,success,foo,bar';
 	@lines = get_lines( @args );
@@ -51,7 +51,7 @@ SKIP: {
 
 $args[1] = '-MO=success,fail';
 @lines = get_lines( @args );
-like( $lines[0], qr/fail at .eval/,
+like( $lines[1], qr/fail at .eval/,
 	'O.pm should die if backend compile() does not return a subref' );
 
 sub get_lines {
@@ -65,6 +65,7 @@ END {
 __END__
 package B::success;
 
+$| = 1;
 print "Compiling!\n";
 
 sub compile {
