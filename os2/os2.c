@@ -1718,17 +1718,20 @@ XS(XS_OS2_Process_Messages)
     {
 	bool  force = SvOK(ST(0));
 	unsigned long   cnt;
-	I32 *cntp = NULL;
 
 	if (items == 2) {
+	    I32 cntr;
 	    SV *sv = ST(1);
 	    int fake = SvIV(sv);	/* Force SvIVX */
 	    
 	    if (!SvIOK(sv))
 		Perl_croak_nocontext("Can't upgrade count to IV");
-	    cntp = &SvIVX(sv);
-	}
-	cnt =  Perl_Process_Messages(force, cntp);
+	    cntr = SvIVX(sv);
+	    cnt =  Perl_Process_Messages(force, &cntr);
+	    SvIVX(sv) = cntr;
+	} else {
+	    cnt =  Perl_Process_Messages(force, NULL);
+        }
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), cnt);
     }
