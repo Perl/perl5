@@ -78,6 +78,11 @@ Version 5.005_04-tobe        Fourth maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[ 22060] By: acme                                  on 2004/01/05  20:50:07
+        Log: Remove test files from DB_File's MANIFEST as they are in t/ now
+     Branch: maint-5.005/perl
+           ! ext/DB_File/MANIFEST
+____________________________________________________________________________
 [ 21792] By: acme                                  on 2003/11/28  11:47:18
         Log: Merge in DB_File-1.807 from CPAN
              Also, alphabetically sort MANIFEST
