@@ -190,7 +190,7 @@ case "$osvers" in
     lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -e _nostart -lc"
     ;;
 *) 
-    lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -b noentry -lc"
+    lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -bnoentry -lc"
     ;;
 esac
 # AIX 4.2 (using latest patchlevels on 20001130) has a broken bind
@@ -303,8 +303,11 @@ EOM
         # Move xld-spefific -bflags.
         ccflags="`echo $ccflags | sed -e 's@ -b@ -Wl,-b@g'`"
         ldflags="`echo $ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
-	echo >&4 "(using ccflags $ccflags)"
-	echo >&4 "(using ldflags $ldflags)"
+        ld='gcc'
+        lddlflags="`echo $lddlflags | sed -e 's@ -b@ -Wl,-b@g'`"
+       echo >&4 "(using ccflags   $ccflags)"
+       echo >&4 "(using ldflags   $ldflags)"
+       echo >&4 "(using lddlflags $lddlflags)"
         ;; 
         esac
         ;;
