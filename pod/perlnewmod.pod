@@ -232,9 +232,8 @@ your request to be approved by the PAUSE administrators.
 =item C<perl Makefile.PL; make test; make dist>
 
 Once again, C<module-starter> or C<h2xs> has done all the work for you.
-They produce the standard C<Makefile.PL> you'll have seen when you
-downloaded and installs modules, and this produces a Makefile with a
-C<dist> target.
+They produce the standard C<Makefile.PL> you see when you download and
+install modules, and this produces a Makefile with a C<dist> target.
 
 Once you've ensured that your module passes its own tests - always a
 good thing to make sure - you can C<make dist>, and the Makefile will
