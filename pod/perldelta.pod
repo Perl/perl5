@@ -7,7 +7,7 @@ perldelta - what is new for perl v5.8.1
 This document describes differences between the 5.8.0 release and
 the 5.8.1 release.
 
-If you are upgrading from an earlier release like 5.6.1, read first
+If you are upgrading from an earlier release such as 5.6.1, first read
 the L<perl58delta>, which describes differences between 5.6.0 and
 5.8.0.
 
@@ -373,7 +373,7 @@ L<perlvar>) now works.
 
 =item Pod::Perldoc
 
-Complete rewrite.  As a side-effect, no more refuses to startup when
+Complete rewrite.  As a side-effect, no longer refuses to startup when
 run by root.
 
 =item Scalar::Util
