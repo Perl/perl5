@@ -3153,7 +3153,9 @@ trylocal: {
 		    int count;
 		    SV *loader = dirsv;
 
-		    if (SvTYPE(SvRV(loader)) == SVt_PVAV) {
+		    if (SvTYPE(SvRV(loader)) == SVt_PVAV
+			&& !sv_isobject(loader))
+		    {
 			loader = *av_fetch((AV *)SvRV(loader), 0, TRUE);
 		    }
 
