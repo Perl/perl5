@@ -489,6 +489,7 @@ d_pwchange=''
 d_pwclass=''
 d_pwcomment=''
 d_pwexpire=''
+d_pwgecos=''
 d_pwquota=''
 i_pwd=''
 i_sfio=''
@@ -7033,6 +7034,14 @@ $define)
 	set d_pwcomment
 	eval $setvar
 
+	if $contains 'pw_gecos' $$.h >/dev/null 2>&1; then
+		val="$define"
+	else
+		val="$undef"
+	fi
+	set d_pwgecos
+	eval $setvar
+
 	$rm -f $$.h
 	;;
 *)
@@ -7043,6 +7052,7 @@ $define)
 	set d_pwclass; eval $setvar
 	set d_pwexpire; eval $setvar
 	set d_pwcomment; eval $setvar
+	set d_pwgecos; eval $setvar
 	;;
 esac
 
@@ -10129,6 +10139,7 @@ d_pwchange='$d_pwchange'
 d_pwclass='$d_pwclass'
 d_pwcomment='$d_pwcomment'
 d_pwexpire='$d_pwexpire'
+d_pwgecos='$d_pwquota'
 d_pwquota='$d_pwquota'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'

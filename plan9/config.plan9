@@ -1144,12 +1144,17 @@
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_comment.
  */
+/* PWGECOS:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_gecos.
+ */
 #define I_PWD		/**/
 #undef PWQUOTA	/**/
 #undef PWAGE	/**/
 #undef PWCHANGE	/**/
 #undef PWCLASS	/**/
 #undef PWEXPIRE	/**/
+#define PWGECOS	/**/
 #undef PWCOMMENT	/**/
 
 /* I_STDDEF:

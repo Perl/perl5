@@ -21,6 +21,7 @@ Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 README			The Instructions
 README.amiga		Notes about AmigaOS port
+README.beos		Notes about BeOS port
 README.cygwin32		Notes about Cygwin32 port
 README.os2		Notes about OS/2 port
 README.plan9		Notes about Plan9 port
@@ -31,6 +32,7 @@ Todo			The Wishlist
 XSUB.h			Include file for extension subroutines
 av.c			Array value code
 av.h			Array value header
+beos/nm.c		BeOS port
 cflags.SH		A script that emits C compilation flags per file
 compat3.sym		List of symbols for binary-compatibility with 5.003
 config_H		Sample config.h
@@ -243,6 +245,7 @@ hints/altos486.sh	Hints for named architecture
 hints/amigaos.sh	Hints for named architecture
 hints/apollo.sh		Hints for named architecture
 hints/aux_3.sh		Hints for named architecture
+hints/beos.sh		Hints for named architecture
 hints/broken-db.msg	Warning message for systems with broken DB library
 hints/bsdos.sh		Hints for named architecture
 hints/convexos.sh	Hints for named architecture

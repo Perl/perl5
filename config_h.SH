@@ -1151,6 +1151,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_comment.
  */
+/* PWGECOS:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_gecos.
+ */
 #$i_pwd I_PWD		/**/
 #$d_pwquota PWQUOTA	/**/
 #$d_pwage PWAGE	/**/
@@ -1158,6 +1162,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_pwclass PWCLASS	/**/
 #$d_pwexpire PWEXPIRE	/**/
 #$d_pwcomment PWCOMMENT	/**/
+#$d_pwgecos PWGECOS	/**/
 
 /* I_STDDEF:
  *	This symbol, if defined, indicates that <stddef.h> exists and should
