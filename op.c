@@ -30,7 +30,7 @@
      : (*check[type])((OP*)o))
 
 static I32 list_assignment _((OP *o));
-static OP *bad_type _((I32 n, char *t, char *name, OP *kid));
+static void bad_type _((I32 n, char *t, char *name, OP *kid));
 static OP *modkids _((OP *o, I32 type));
 static OP *no_fh_allowed _((OP *o));
 static bool scalar_mod_type _((OP *o, I32 type));
@@ -77,7 +77,7 @@ char* name;
     return o;
 }
 
-static OP *
+static void
 bad_type(n, t, name, kid)
 I32 n;
 char *t;
