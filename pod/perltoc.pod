@@ -1834,6 +1834,8 @@ regular expressions
 
 =item Constant Folding
 
+=item No-ops
+
 =item Bitwise String Operators
 
 =item Integer Arithmetic
@@ -2252,7 +2254,7 @@ I<commandline>, B<-F>I<pattern>, B<-h>, B<-i>[I<extension>],
 B<-I>I<directory>, B<-l>[I<octnum>], B<-m>[B<->]I<module>,
 B<-M>[B<->]I<module>, B<-M>[B<->]I<'module ...'>,
 B<-[mM]>[B<->]I<module=arg[,arg]...>, B<-n>, B<-p>, B<-P>, B<-s>, B<-S>,
-B<-t>, B<-T>, B<-u>, B<-U>, B<-v>, B<-V>, B<-V:>I<name>, B<-w>, B<-W>,
+B<-t>, B<-T>, B<-u>, B<-U>, B<-v>, B<-V>, B<-V:>I<configvar>, B<-w>, B<-W>,
 B<-X>, B<-x>, B<-x> I<directory>
 
 =back
@@ -2261,10 +2263,11 @@ B<-X>, B<-x>, B<-x> I<directory>
 
 HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLIO, :bytes, :crlf, :mmap,
 :perlio, :pop, :raw, :stdio, :unix, :utf8, :win32, PERLIO_DEBUG, PERLLIB,
-PERL5DB, PERL5SHELL (specific to the Win32 port), PERL_DEBUG_MSTATS,
-PERL_DESTRUCT_LEVEL, PERL_DL_NONLAZY, PERL_ENCODING, PERL_HASH_SEED,
-PERL_HASH_SEED_DEBUG, PERL_ROOT (specific to the VMS port), PERL_SIGNALS,
-PERL_UNICODE, SYS$LOGIN (specific to the VMS port)
+PERL5DB, PERL5SHELL (specific to the Win32 port), PERL_ALLOW_NON_IFS_LSP
+(specific to the Win32 port), PERL_DEBUG_MSTATS, PERL_DESTRUCT_LEVEL,
+PERL_DL_NONLAZY, PERL_ENCODING, PERL_HASH_SEED, PERL_HASH_SEED_DEBUG,
+PERL_ROOT (specific to the VMS port), PERL_SIGNALS, PERL_UNICODE, SYS$LOGIN
+(specific to the VMS port)
 
 =back
 
@@ -3889,9 +3892,9 @@ Look around, Check it's new, Discuss the need, Choose a name, Check again
 
 =item Step-by-step: Making the module
 
-Start with F<h2xs>, Use L<strict|strict> and L<warnings|warnings>, Use
-L<Carp|Carp>, Use L<Exporter|Exporter> - wisely!, Use L<plain old
-documentation|perlpod>, Write tests, Write the README
+Start with F<module-starter> or F<h2xs>, Use L<strict|strict> and
+L<warnings|warnings>, Use L<Carp|Carp>, Use L<Exporter|Exporter> - wisely!,
+Use L<plain old documentation|perlpod>, Write tests, Write the README
 
 =item Step-by-step: Distributing your module
 
@@ -4688,8 +4691,8 @@ SvSetSV, SvSetSV_nosteal, SvSHARE, SvUNLOCK
 
 =item Memory Management
 
-Copy, Move, New, Newc, Newz, Poison, Renew, Renewc, Safefree, savepv,
-savepvn, savesharedpv, StructCopy, Zero
+Copy, CopyD, Move, MoveD, New, Newc, Newz, Poison, Renew, Renewc, Safefree,
+savepv, savepvn, savesharedpv, StructCopy, Zero, ZeroD
 
 =item Miscellaneous Functions
 
@@ -4734,30 +4737,31 @@ SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx,
 SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
 SvPOK_only_UTF8, SvPV, SvPVbyte, SvPVbytex, SvPVbytex_force,
 SvPVbyte_force, SvPVbyte_nolen, SvPVutf8, SvPVutf8x, SvPVutf8x_force,
-SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx, SvPV_force, SvPV_force_nomg,
+SvPVutf8_force, SvPVutf8_nolen, SvPVx, SvPVX, SvPV_force, SvPV_force_nomg,
 SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
 SvROK_on, SvRV, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on,
 SvTRUE, SvTYPE, SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV,
 SvUVx, SvUVX, sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv,
 sv_2pvbyte, sv_2pvbyte_nolen, sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags,
 sv_2pv_nolen, sv_2uv, sv_backoff, sv_bless, sv_catpv, sv_catpvf,
-sv_catpvf_mg, sv_catpvn, sv_catpvn_flags, sv_catpvn_mg, sv_catpv_mg,
-sv_catsv, sv_catsv_flags, sv_catsv_mg, sv_chop, sv_clear, sv_cmp,
-sv_cmp_locale, sv_collxfrm, sv_copypv, sv_dec, sv_derived_from, sv_eq,
-sv_force_normal, sv_force_normal_flags, sv_free, sv_gets, sv_grow, sv_inc,
-sv_insert, sv_isa, sv_isobject, sv_iv, sv_len, sv_len_utf8, sv_magic,
-sv_magicext, sv_mortalcopy, sv_newmortal, sv_newref, sv_nv, sv_pos_b2u,
-sv_pos_u2b, sv_pv, sv_pvbyte, sv_pvbyten, sv_pvbyten_force, sv_pvn,
-sv_pvn_force, sv_pvn_force_flags, sv_pvutf8, sv_pvutf8n, sv_pvutf8n_force,
-sv_reftype, sv_replace, sv_report_used, sv_reset, sv_rvweaken, sv_setiv,
-sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg,
-sv_setpviv, sv_setpviv_mg, sv_setpvn, sv_setpvn_mg, sv_setpv_mg,
-sv_setref_iv, sv_setref_nv, sv_setref_pv, sv_setref_pvn, sv_setref_uv,
-sv_setsv, sv_setsv_flags, sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_taint,
-sv_tainted, sv_true, sv_unmagic, sv_unref, sv_unref_flags, sv_untaint,
-sv_upgrade, sv_usepvn, sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade,
-sv_utf8_encode, sv_utf8_upgrade, sv_utf8_upgrade_flags, sv_uv, sv_vcatpvfn,
-sv_vsetpvfn
+sv_catpvf_mg, sv_catpvn, sv_catpvn_flags, sv_catpvn_mg, sv_catpvn_nomg,
+sv_catpv_mg, sv_catsv, sv_catsv_flags, sv_catsv_mg, sv_catsv_nomg, sv_chop,
+sv_clear, sv_cmp, sv_cmp_locale, sv_collxfrm, sv_copypv, sv_dec,
+sv_derived_from, sv_eq, sv_force_normal, sv_force_normal_flags, sv_free,
+sv_gets, sv_grow, sv_inc, sv_insert, sv_isa, sv_isobject, sv_iv, sv_len,
+sv_len_utf8, sv_magic, sv_magicext, sv_mortalcopy, sv_newmortal, sv_newref,
+sv_nv, sv_pos_b2u, sv_pos_u2b, sv_pv, sv_pvbyte, sv_pvbyten,
+sv_pvbyten_force, sv_pvn, sv_pvn_force, sv_pvn_force_flags, sv_pvutf8,
+sv_pvutf8n, sv_pvutf8n_force, sv_reftype, sv_replace, sv_report_used,
+sv_reset, sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg,
+sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
+sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
+sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_flags, sv_setsv_mg,
+sv_setsv_nomg, sv_setuv, sv_setuv_mg, sv_taint, sv_tainted, sv_true,
+sv_unmagic, sv_unref, sv_unref_flags, sv_untaint, sv_upgrade, sv_usepvn,
+sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode,
+sv_utf8_upgrade, sv_utf8_upgrade_flags, sv_uv, sv_vcatpvf, sv_vcatpvfn,
+sv_vcatpvf_mg, sv_vsetpvf, sv_vsetpvfn, sv_vsetpvf_mg
 
 =item Unicode Support
 
@@ -5029,7 +5033,7 @@ t/cmd t/run t/io t/op, t/lib ext lib
 coretest, test.deparse, test.taintwarn, minitest, test.valgrind
 check.valgrind utest.valgrind ucheck.valgrind, test.third check.third
 utest.third ucheck.third, test.torture torturetest, utest ucheck test.utf8
-check.utf8, test_harness
+check.utf8, minitest.utf16 test.utf16, test_harness
 
 =item Running tests by hand
 
@@ -5243,6 +5247,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Attach/detach debugger from running program
 
 =item A decent benchmark
+
+=item readpipe(LIST)
 
 =back
 
@@ -7947,17 +7953,17 @@ DJGPP, Pthreads
 
 =item PA-RISC
 
+=item Portability Between PA-RISC Versions
+
 =item PA-RISC 1.0
 
 =item PA-RISC 1.1
 
 =item PA-RISC 2.0
 
-=item Itanium & Itanium 2
-
-=item Portability Between PA-RISC Versions
-
 =item Itanium Processor Family and HP-UX
+
+=item Itanium & Itanium 2
 
 =item Building Dynamic Extensions on HP-UX
 
@@ -8915,8 +8921,9 @@ LIST, waitpid PID,FLAGS
 
 =item Setting Up Perl on Win32
 
-Make, Command Shell, Borland C++, Microsoft Visual C++, Microsoft Platform
-SDK 64-bit Compiler, MinGW release 3 with gcc, MinGW release 1 with gcc
+Make, Command Shell, Borland C++, Microsoft Visual C++, Microsoft Visual
+C++ Toolkit 2003, Microsoft Platform SDK 64-bit Compiler, MinGW release 3
+with gcc, MinGW release 1 with gcc
 
 =item Building
 
@@ -8932,7 +8939,7 @@ Extensions, Notes on 64-bit Windows
 
 =item Running Perl Scripts
 
-Miscellaneous Things
+=item Miscellaneous Things
 
 =back
 
@@ -9404,6 +9411,12 @@ Legend of characters above
 
 literals in regex that are longer than 127 bytes, EBCDIC, format
 
+=over 4
+
+=item The Logic of :locale
+
+=back
+
 =item HISTORY
 
 =item SEE ALSO
@@ -9707,6 +9720,33 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =back
 
+=head2 threadshared, threads::shared - Perl extension for sharing data
+structures between threads
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXPORT
+
+=item FUNCTIONS
+
+share VARIABLE, lock VARIABLE, cond_wait VARIABLE, cond_wait CONDVAR,
+LOCKVAR, cond_timedwait VARIABLE, ABS_TIMEOUT, cond_timedwait CONDVAR,
+ABS_TIMEOUT, LOCKVAR, cond_signal VARIABLE, cond_broadcast VARIABLE
+
+=item NOTES
+
+=item BUGS
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source
 code
 
@@ -10000,7 +10040,8 @@ FILL, MAX, KEYS, RITER, NAME, PMROOT, ARRAY
 
 =item B::OP Methods
 
-next, sibling, name, ppaddr, desc, targ, type, seq, flags, private
+next, sibling, name, ppaddr, desc, targ, type, opt, static, flags, private,
+spare
 
 =item B::UNOP METHOD
 
@@ -10209,30 +10250,40 @@ B<-base>I<n>, B<-bigendian>, B<-littleendian>
 
 =item Other options
 
-B<-main>, B<-banner>
+B<-main>, B<-nomain>, B<-nobanner>, B<-banner>, B<-banneris> => subref
 
 =item Option Stickiness
 
 =back
 
-=item FORMATTING SPECIFICATIONS
-
-B<(x(>I<exec_text>B<;>I<basic_text>B<)x)>, B<(*(>I<text>B<)*)>,
-B<(*(>I<text1>B<;>I<text2>B<)*)>, B<(?(>I<text1>B<#>I<var>I<Text2>B<)?)>,
-B<#>I<var>, B<#>I<var>I<N>, B<~>, B<#addr>, B<#arg>, B<#class>,
-B<#classsym>, B<#coplabel>, B<#exname>, B<#extarg>, B<#firstaddr>,
-B<#flags>, B<#flagval>, B<#hyphseq>, B<#label>, B<#lastaddr>, B<#name>,
-B<#NAME>, B<#next>, B<#nextaddr>, B<#noise>, B<#private>, B<#privval>,
-B<#seq>, B<#seqnum>, B<#sibaddr>, B<#svaddr>, B<#svclass>, B<#svval>,
-B<#targ>, B<#targarg>, B<#targarglife>, B<#typenum>
-
 =item ABBREVIATIONS
 
 =over 4
 
+=item OP class abbreviations
+
 =item OP flags abbreviations
 
-=item OP class abbreviations
+=back
+
+=item FORMATTING SPECIFICATIONS
+
+=over 4
+
+=item Special Patterns
+
+B<(x(>I<exec_text>B<;>I<basic_text>B<)x)>, B<(*(>I<text>B<)*)>,
+B<(*(>I<text1>B<;>I<text2>B<)*)>, B<(?(>I<text1>B<#>I<var>I<Text2>B<)?)>,
+B<~>
+
+=item # Variables
+
+B<#>I<var>, B<#>I<var>I<N>, B<#>I<Var>, B<#addr>, B<#arg>, B<#class>,
+B<#classsym>, B<#coplabel>, B<#exname>, B<#extarg>, B<#firstaddr>,
+B<#flags>, B<#flagval>, B<#hyphseq>, B<#label>, B<#lastaddr>, B<#name>,
+B<#NAME>, B<#next>, B<#nextaddr>, B<#noise>, B<#private>, B<#privval>,
+B<#seq>, B<#seqnum>, B<#opt>, B<#static>, B<#sibaddr>, B<#svaddr>,
+B<#svclass>, B<#svval>, B<#targ>, B<#targarg>, B<#targarglife>, B<#typenum>
 
 =back
 
@@ -10372,6 +10423,18 @@ B<-u Package>
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item EXAMPLES
+
+=over 4
+
+=item OPTIONS
+
+=back
+
+=item SEE ALSO
+
+=item TODO
 
 =item AUTHOR
 
@@ -11120,6 +11183,30 @@ module
 
 =back
 
+=back
+
+=over 4
+
+=item GLOBAL VARIABLES
+
+=over 4
+
+=item $Carp::CarpLevel
+
+=item $Carp::MaxEvalLen
+
+=item $Carp::MaxArgLen
+
+=item $Carp::MaxArgNums
+
+=item $Carp::Verbose
+
+=back
+
+=back
+
+=over 4
+
 =item BUGS
 
 =back
@@ -11860,13 +11947,45 @@ Dumper
 
 =over 4
 
+=item Why use ppport.h?
+
+You should use F<ppport.h> in modern code so that your code will work
+with the widest range of Perl interpreters possible, without significant
+additional work.
+
+=item How to use ppport.h
+
+=item Running ppport.h
+
+=back
+
+=item FUNCTIONS
+
+=over 4
+
 =item WriteFile
 
 =back
 
-=item ppport.h
+=item COMPATIBILITY
 
-=item AUTHOR
+=over 4
+
+=item Provided Perl compatibility API
+
+=item Perl API not supported by ppport.h
+
+perl 5.9.2, perl 5.9.1, perl 5.9.0, perl 5.8.3, perl 5.8.1, perl 5.8.0,
+perl 5.7.3, perl 5.7.2, perl 5.7.1, perl 5.6.1, perl 5.6.0, perl 5.005_03,
+perl 5.005, perl 5.004_05, perl 5.004_04, perl 5.004
+
+=back
+
+=item BUGS
+
+=item AUTHORS
+
+=item COPYRIGHT
 
 =item SEE ALSO
 
@@ -12839,6 +12958,12 @@ Legend of characters above
 
 literals in regex that are longer than 127 bytes, EBCDIC, format
 
+=over 4
+
+=item The Logic of :locale
+
+=back
+
 =item HISTORY
 
 =item SEE ALSO
@@ -12898,6 +13023,22 @@ arrays
 =item LIMITATIONS
 
 =item AUTHOR
+
+=back
+
+=head2 Errno - System errno constants
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEATS
+
+=item AUTHOR
+
+=item COPYRIGHT
 
 =back
 
@@ -14423,7 +14564,7 @@ splitdir, catpath(), abs2rel, rel2abs()
 
 =item SEE ALSO
 
-=item AUTHORS
+=item AUTHOR
 
 =back
 
@@ -16353,7 +16494,8 @@ of quoted-printable strings
 
 =item DESCRIPTION
 
-encode_qp($str), encode_qp($str, $eol), decode_qp($str);
+encode_qp($str), encode_qp($str, $eol), encode_qp($str, $eol, $binmode),
+decode_qp($str);
 
 =item COPYRIGHT
 
@@ -16370,7 +16512,8 @@ strings
 
 =item DESCRIPTION
 
-encode_qp($str), encode_qp($str, $eol), decode_qp($str);
+encode_qp($str), encode_qp($str, $eol), encode_qp($str, $eol, $binmode),
+decode_qp($str);
 
 =item COPYRIGHT
 
@@ -19453,6 +19596,27 @@ C<Storable::is_retrieving>
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item AUTHOR
+
+=back
+
+=head2 Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog - Perl
+interface to the UNIX syslog(3) calls
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+openlog $ident, $logopt, $facility, syslog $priority, $format, @args,
+setlogmask $mask_priority, setlogsock $sock_type [$stream_location] (added
+in 5.004_02), closelog
+
+=item EXAMPLES
+
+=item SEE ALSO
 
 =item AUTHOR
 
