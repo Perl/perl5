@@ -454,7 +454,6 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 		    char *s    = rx->subbeg + s1;
 		    char *send = rx->subbeg + t1;
 
-		    i = t1 - s1;
 		    if (is_utf8_string((U8*)s, i))
 			i = Perl_utf8_length(aTHX_ (U8*)s, (U8*)send);
 		}
