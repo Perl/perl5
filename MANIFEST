@@ -92,6 +92,7 @@ ext/B/ramblings/reg.alloc	Compiler ramblings: register allocation
 ext/B/ramblings/runtime.porting	Compiler ramblings: porting PP enging
 ext/B/README		Compiler backend README
 ext/B/t/asmdata.t       See if B::Asmdata works
+ext/B/t/assembler.t     See if B::Assembler, B::Disassembler comply
 ext/B/t/b.t		See if B works
 ext/B/t/bblock.t        See if B::Bblock works
 ext/B/t/debug.t		See if B::Debug works
