@@ -457,7 +457,8 @@ __END__
       if (memEQ(name, "WSTOPSIG", 8)) {
       /*                  ^          */
 #ifdef WSTOPSIG
-        *arg_result = WSTOPSIG(WMUNGE(*arg_result));
+        int i = *arg_result;
+        *arg_result = WSTOPSIG(WMUNGE(i));
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;
@@ -468,7 +469,8 @@ __END__
       if (memEQ(name, "WTERMSIG", 8)) {
       /*                  ^          */
 #ifdef WTERMSIG
-        *arg_result = WTERMSIG(WMUNGE(*arg_result));
+        int i = *arg_result;
+        *arg_result = WTERMSIG(WMUNGE(i));
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;
@@ -491,7 +493,8 @@ __END__
   case 9:
     if (memEQ(name, "WIFEXITED", 9)) {
 #ifdef WIFEXITED
-      *arg_result = WIFEXITED(WMUNGE(*arg_result));
+      int i = *arg_result;
+      *arg_result = WIFEXITED(WMUNGE(i));
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -501,7 +504,8 @@ __END__
   case 10:
     if (memEQ(name, "WIFSTOPPED", 10)) {
 #ifdef WIFSTOPPED
-      *arg_result = WIFSTOPPED(WMUNGE(*arg_result));
+      int i = *arg_result;
+      *arg_result = WIFSTOPPED(WMUNGE(i));
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -517,7 +521,8 @@ __END__
       if (memEQ(name, "WEXITSTATUS", 11)) {
       /*                ^                */
 #ifdef WEXITSTATUS
-        *arg_result = WEXITSTATUS(WMUNGE((int) *arg_result));
+	int i = *arg_result;
+        *arg_result = WEXITSTATUS(WMUNGE(i));
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;
@@ -528,7 +533,8 @@ __END__
       if (memEQ(name, "WIFSIGNALED", 11)) {
       /*                ^                */
 #ifdef WIFSIGNALED
-        *arg_result = WIFSIGNALED(WMUNGE(*arg_result));
+	int i = *arg_result;
+        *arg_result = WIFSIGNALED(WMUNGE(i));
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;
