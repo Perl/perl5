@@ -3257,6 +3257,10 @@
 #define Perl_wait4pid		pPerl->Perl_wait4pid
 #undef  wait4pid
 #define wait4pid		Perl_wait4pid
+#undef  Perl_report_uninit
+#define Perl_report_uninit	pPerl->Perl_report_uninit
+#undef  report_uninit
+#define report_uninit		Perl_report_uninit
 #undef  Perl_warn
 #define Perl_warn		pPerl->Perl_warn
 #undef  warn

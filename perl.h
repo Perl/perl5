@@ -2102,7 +2102,7 @@ START_EXTERN_C
 
 /* handy constants */
 EXTCONST char PL_warn_uninit[]
-  INIT("Use of uninitialized value");
+  INIT("Use of uninitialized value%s%s");
 EXTCONST char PL_warn_nosemi[]
   INIT("Semicolon seems to be missing");
 EXTCONST char PL_warn_reserved[]

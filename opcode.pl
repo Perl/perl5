@@ -363,9 +363,9 @@ pushre		push regexp		ck_null		d/
 # References and stuff.
 
 rv2gv		ref-to-glob cast	ck_rvconst	ds1	
-rv2sv		scalar deref		ck_rvconst	ds1	
+rv2sv		scalar dereference	ck_rvconst	ds1	
 av2arylen	array length		ck_null		is1	
-rv2cv		subroutine deref	ck_rvconst	d1
+rv2cv		subroutine dereference	ck_rvconst	d1
 anoncode	anonymous subroutine	ck_anoncode	$	
 prototype	subroutine prototype	ck_null		s%	S
 refgen		reference constructor	ck_spair	m1	L

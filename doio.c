@@ -1026,7 +1026,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	{
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED))
-		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		report_uninit();
 	}
 	return TRUE;
     case SVt_IV:

@@ -506,4 +506,4 @@ else {
   if ($x == 0) { print "" } else { print $x }
 }
 EXPECT
-Use of uninitialized value at - line 4.
+Use of uninitialized value in numeric eq (==) at - line 4.

@@ -58,7 +58,7 @@ $x = 1 + $a[0] ; # a
 no warnings 'uninitialized' ;
 $x = 1 + $b[0] ; # a
 EXPECT
-Use of uninitialized value at - line 4.
+Use of uninitialized value in integer addition (+) at - line 4.
 ########
 # sv.c (sv_2iv)
 package fred ;
@@ -73,7 +73,7 @@ $A *= 2 ;
 no warnings 'uninitialized' ;
 $A *= 2 ;
 EXPECT
-Use of uninitialized value at - line 10.
+Use of uninitialized value in integer multiplication (*) at - line 10.
 ########
 # sv.c
 use integer ;
@@ -82,7 +82,7 @@ my $x *= 2 ; #b
 no warnings 'uninitialized' ;
 my $y *= 2 ; #b 
 EXPECT
-Use of uninitialized value at - line 4.
+Use of uninitialized value in integer multiplication (*) at - line 4.
 ########
 # sv.c (sv_2uv)
 package fred ;
@@ -98,7 +98,7 @@ no warnings 'uninitialized' ;
 $B = 0 ;
 $B |= $A ;
 EXPECT
-Use of uninitialized value at - line 10.
+Use of uninitialized value in bitwise or (|) at - line 10.
 ########
 # sv.c
 use warnings 'uninitialized' ;
@@ -108,7 +108,7 @@ no warnings 'uninitialized' ;
 my $Y = 1 ; 
 $x = 1 | $b[$Y] ;
 EXPECT
-Use of uninitialized value at - line 4.
+Use of uninitialized value in bitwise or (|) at - line 4.
 ########
 # sv.c
 use warnings 'uninitialized' ;
@@ -116,7 +116,7 @@ my $x *= 1 ; # d
 no warnings 'uninitialized' ;
 my $y *= 1 ; # d
 EXPECT
-Use of uninitialized value at - line 3.
+Use of uninitialized value in multiplication (*) at - line 3.
 ########
 # sv.c
 use warnings 'uninitialized' ;
@@ -124,7 +124,7 @@ $x = 1 + $a[0] ; # e
 no warnings 'uninitialized' ;
 $x = 1 + $b[0] ; # e
 EXPECT
-Use of uninitialized value at - line 3.
+Use of uninitialized value in addition (+) at - line 3.
 ########
 # sv.c (sv_2nv)
 package fred ;
@@ -138,7 +138,7 @@ $A *= 2 ;
 no warnings 'uninitialized' ;
 $A *= 2 ;
 EXPECT
-Use of uninitialized value at - line 9.
+Use of uninitialized value in multiplication (*) at - line 9.
 ########
 # sv.c
 use warnings 'uninitialized' ;
@@ -146,7 +146,7 @@ $x = $y + 1 ; # f
 no warnings 'uninitialized' ;
 $x = $z + 1 ; # f
 EXPECT
-Use of uninitialized value at - line 3.
+Use of uninitialized value in addition (+) at - line 3.
 ########
 # sv.c
 use warnings 'uninitialized' ;
@@ -162,7 +162,7 @@ $x = chop $y ; # h
 no warnings 'uninitialized' ;
 $x = chop $z ; # h
 EXPECT
-Use of uninitialized value at - line 3.
+Use of uninitialized value in scalar chop at - line 3.
 ########
 # sv.c (sv_2pv)
 package fred ;
@@ -178,7 +178,7 @@ no warnings 'uninitialized' ;
 $C = "" ;
 $C .= $A ;
 EXPECT
-Use of uninitialized value at - line 10.
+Use of uninitialized value in concatenation (.) at - line 10.
 ########
 # sv.c 
 use warnings 'numeric' ;

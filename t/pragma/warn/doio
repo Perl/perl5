@@ -123,7 +123,7 @@ print $a ;
 no warnings 'uninitialized' ;
 print $b ;
 EXPECT
-Use of uninitialized value at - line 3.
+Use of uninitialized value in print at - line 3.
 ########
 # doio.c [Perl_my_stat Perl_my_lstat]
 use warnings 'io' ;

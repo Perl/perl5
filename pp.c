@@ -264,7 +264,7 @@ PP(pp_rv2gv)
 		    PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(aTHX_ PL_no_usym, "a symbol");
 		if (ckWARN(WARN_UNINITIALIZED))
-		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		    report_uninit();
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, n_a);
@@ -320,7 +320,7 @@ PP(pp_rv2sv)
 		    PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(aTHX_ PL_no_usym, "a SCALAR");
 		if (ckWARN(WARN_UNINITIALIZED))
-		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		    report_uninit();
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, n_a);

@@ -696,6 +696,7 @@ PERL_CALLCONV U8*	Perl_uv_to_utf8(pTHX_ U8 *d, UV uv);
 PERL_CALLCONV void	Perl_vivify_defelem(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_vivify_ref(pTHX_ SV* sv, U32 to_what);
 PERL_CALLCONV I32	Perl_wait4pid(pTHX_ Pid_t pid, int* statusp, int flags);
+PERL_CALLCONV void	Perl_report_uninit(pTHX);
 PERL_CALLCONV void	Perl_warn(pTHX_ const char* pat, ...);
 PERL_CALLCONV void	Perl_vwarn(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_warner(pTHX_ U32 err, const char* pat, ...);

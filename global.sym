@@ -610,6 +610,7 @@ Perl_uv_to_utf8
 Perl_vivify_defelem
 Perl_vivify_ref
 Perl_wait4pid
+Perl_report_uninit
 Perl_warn
 Perl_vwarn
 Perl_warner

@@ -459,7 +459,7 @@ PP(pp_rv2av)
 		      PL_op->op_private & HINT_STRICT_REFS)
 			DIE(aTHX_ PL_no_usym, "an ARRAY");
 		    if (ckWARN(WARN_UNINITIALIZED))
-			Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+			report_uninit();
 		    if (GIMME == G_ARRAY) {
 			(void)POPs;
 			RETURN;
@@ -559,7 +559,7 @@ PP(pp_rv2hv)
 		      PL_op->op_private & HINT_STRICT_REFS)
 			DIE(aTHX_ PL_no_usym, "a HASH");
 		    if (ckWARN(WARN_UNINITIALIZED))
-			Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+			report_uninit();
 		    if (GIMME == G_ARRAY) {
 			SP--;
 			RETURN;

@@ -67,7 +67,7 @@ use abc;
 my $a ; chop $a ;
 EXPECT
 Use of EQ is deprecated at abc.pm line 3.
-Use of uninitialized value at - line 3.
+Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
 --FILE-- abc
@@ -81,7 +81,7 @@ require "./abc";
 my $a ; chop $a ;
 EXPECT
 Use of EQ is deprecated at ./abc line 3.
-Use of uninitialized value at - line 3.
+Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
 --FILE-- abc.pm
@@ -95,7 +95,7 @@ use abc;
 my $a ; chop $a ;
 EXPECT
 Use of EQ is deprecated at abc.pm line 3.
-Use of uninitialized value at - line 3.
+Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
 --FILE-- abc
@@ -109,4 +109,4 @@ require "./abc";
 my $a ; chop $a ;
 EXPECT
 Use of EQ is deprecated at ./abc line 3.
-Use of uninitialized value at - line 3.
+Use of uninitialized value in scalar chop at - line 3.

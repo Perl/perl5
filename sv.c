@@ -316,6 +316,16 @@ Perl_sv_free_arenas(pTHX)
     PL_sv_root = 0;
 }
 
+void
+Perl_report_uninit(pTHX)
+{
+    if (PL_op)
+	Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit,
+		    " in ", PL_op_desc[PL_op->op_type]);
+    else
+	Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit, "", "");
+}
+
 STATIC XPVIV*
 S_new_xiv(pTHX)
 {
@@ -1427,7 +1437,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		    report_uninit();
 	    }
 	    return 0;
 	}
@@ -1442,7 +1452,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED))
-		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		report_uninit();
 	    return 0;
 	}
     }
@@ -1538,7 +1548,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
     else  {
 	dTHR;
 	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+	    report_uninit();
 	if (SvTYPE(sv) < SVt_IV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
 	    sv_upgrade(sv, SVt_IV);
@@ -1566,7 +1576,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		    report_uninit();
 	    }
 	    return 0;
 	}
@@ -1581,7 +1591,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED))
-		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		report_uninit();
 	    return 0;
 	}
     }
@@ -1695,7 +1705,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		report_uninit();
 	}
 	if (SvTYPE(sv) < SVt_IV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
@@ -1733,7 +1743,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		    report_uninit();
 	    }
             return 0;
         }
@@ -1748,7 +1758,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED))
-		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		report_uninit();
 	    return 0.0;
 	}
     }
@@ -1790,7 +1800,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     else  {
 	dTHR;
 	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+	    report_uninit();
 	if (SvTYPE(sv) < SVt_NV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
 	    sv_upgrade(sv, SVt_NV);
@@ -2035,7 +2045,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		    report_uninit();
 	    }
             *lp = 0;
             return "";
@@ -2129,7 +2139,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED))
-		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		report_uninit();
 	    *lp = 0;
 	    return "";
 	}
@@ -2193,7 +2203,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	if (ckWARN(WARN_UNINITIALIZED)
 	    && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	{
-	    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+	    report_uninit();
 	}
 	*lp = 0;
 	if (SvTYPE(sv) < SVt_PV)
