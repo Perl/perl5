@@ -31,6 +31,163 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9472] By: jhi                                   on 2001/03/30  15:16:08
+        Log: Integrate perlio.
+     Branch: perl
+	  !> t/lib/cwd.t t/lib/glob-basic.t
+____________________________________________________________________________
+[  9471] By: nick                                  on 2001/03/30  14:47:10
+        Log: Should be (^O eq 'MSWin32') not 'Win32'
+             Fail #12 seems real - chdir is in wrong dir.
+     Branch: perlio
+	   ! t/lib/cwd.t
+____________________________________________________________________________
+[  9470] By: jhi                                   on 2001/03/30  14:41:11
+        Log: Subject: Re: [ID 20010215.006] Bad arg length for Socket::unpack_sockaddr_un, length is 14 ... 
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Fri, 30 Mar 2001 15:09:06 +0300 (EEST)
+             Message-ID: <15044.30562.566390.559726@ix.netsoft.ro>
+             
+             Replace #9352.
+     Branch: perl
+	   ! ext/Socket/Socket.xs pp_sys.c
+____________________________________________________________________________
+[  9469] By: jhi                                   on 2001/03/30  14:37:51
+        Log: Subject: PATCH pod/perldiag.pod
+             From: Robin Houston <robin@kitsite.com>
+             Date: Fri, 30 Mar 2001 14:10:36 +0100
+             Message-ID: <20010330141036.A1105@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! pod/perldiag.pod t/lib/glob-basic.t
+____________________________________________________________________________
+[  9468] By: jhi                                   on 2001/03/30  14:36:36
+        Log: Subject: Better diagnostic in io/fs.t
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 30 Mar 2001 10:11:43 +0200
+             Message-ID: <m3hf0boev4.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[  9467] By: nick                                  on 2001/03/30  14:25:43
+        Log: Skip order test of glob if case-ignoring system cannot 
+             create a.test and A.test
+     Branch: perlio
+	   ! t/lib/glob-basic.t
+____________________________________________________________________________
+[  9466] By: nick                                  on 2001/03/30  13:03:12
+        Log: Integrate mainline.
+     Branch: perlio
+	   - ext/re/hints/aix.pl
+	  !> MANIFEST ext/B/B/Debug.pm ext/B/B/Deparse.pm
+	  !> lib/ExtUtils/MM_VMS.pm op.c pod/perlop.pod t/comp/require.t
+	  !> t/io/utf8.t t/lib/b.t t/lib/digest.t t/lib/glob-basic.t
+	  !> t/lib/io_multihomed.t t/lib/io_sock.t t/lib/md5-file.t
+____________________________________________________________________________
+[  9465] By: jhi                                   on 2001/03/30  03:53:37
+        Log: Add timeouts to the tests.  (In AIX 4.3.1.0 + vac 5.0.0.0
+             the tests sometimes hang, sometimes not.)
+     Branch: perl
+	   ! t/lib/io_multihomed.t t/lib/io_sock.t
+____________________________________________________________________________
+[  9464] By: jhi                                   on 2001/03/30  02:56:04
+        Log: Subject: [PATCH @9452] Better peep()ing for foreach() loops
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Date: Thu, 29 Mar 2001 18:50:45 -0800 (PST)
+             Message-ID: <15043.62129.253487.470281@soda.csua.berkeley.edu>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  9463] By: jhi                                   on 2001/03/30  02:34:48
+        Log: Test for #9462.
+     Branch: perl
+	   ! t/lib/b.t
+____________________________________________________________________________
+[  9462] By: jhi                                   on 2001/03/30  02:29:37
+        Log: Subject: B::Deparse precedence bug. (Patch included.)
+             From: Jeremy Madea <jmadea@inktomi.com>
+             Date: Thu, 29 Mar 2001 12:05:02 -0800
+             Message-ID: <20010329120502.A24881@dr.inktomi.com>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9461] By: jhi                                   on 2001/03/30  02:18:41
+        Log: Subject: [PATCH: 9452] more tests (was Re: Perl5.7.*  Unicode/EBCDIC status.)
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 29 Mar 2001 18:01:18 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10103291731150.1326-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/comp/require.t t/io/utf8.t t/lib/digest.t t/lib/glob-basic.t
+	   ! t/lib/md5-file.t
+____________________________________________________________________________
+[  9460] By: jhi                                   on 2001/03/30  02:17:07
+        Log: Subject: PATCH: B::Debug should show LOOP-specific fields
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 29 Mar 2001 20:47:56 +0100
+             Message-ID: <20010329204756.A32042@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Debug.pm
+____________________________________________________________________________
+[  9459] By: jhi                                   on 2001/03/30  02:16:05
+        Log: Subject: [PATCH perl@9424] further MM_VMS.pm tweak
+             From: "Craig A. Berry" <craig.berry@SignalTreeSolutions.com>
+             Date: Wed, 28 Mar 2001 18:02:20 -0600
+             Message-Id: <5.0.2.1.0.20010328172535.017d5600@exchi01>
+     Branch: perl
+	   ! lib/ExtUtils/MM_VMS.pm
+____________________________________________________________________________
+[  9458] By: jhi                                   on 2001/03/30  02:07:58
+        Log: Subject: [ID 20010328.013] Misspelling in perlop(1p) manual page
+             From: "Joshua E. Rodd" <jrodd@pbs.org>
+             Date: Wed, 28 Mar 2001 17:29:12 -0500
+             Message-Id: <E14iORE-0000ZV-00@shaggy.pbs.org>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  9457] By: jhi                                   on 2001/03/30  02:04:33
+        Log: Subject: ext/re/aix.pl can go
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Thu, 29 Mar 2001 12:03:28 +0200
+             Message-Id: <20010329120132.7C3B.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   - ext/re/hints/aix.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[  9456] By: jhi                                   on 2001/03/30  02:03:32
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Encode.xs installperl
+____________________________________________________________________________
+[  9455] By: nick                                  on 2001/03/29  21:11:46
+        Log: DLL name has changed so installperl needs to know
+             (Why isn't it working it out or passed it?)
+     Branch: perlio
+	   ! installperl
+____________________________________________________________________________
+[  9454] By: nick                                  on 2001/03/29  20:56:12
+        Log: Change Encode's check arguments to 'bool' so SvTRUE gets used
+             and we don't get undef warnings.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[  9453] By: nick                                  on 2001/03/29  17:58:48
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes patchlevel.h
+____________________________________________________________________________
+[  9452] By: jhi                                   on 2001/03/29  16:44:55
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  9451] By: nick                                  on 2001/03/29  16:31:38
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes Makefile.SH dump.c ext/Data/Dumper/Dumper.xs
+	  !> ext/Encode/Encode.xs ext/Storable/Storable.xs
+	  !> lib/ExtUtils/typemap patchlevel.h pod/perlhack.pod
+	  !> pod/perliol.pod t/lib/charnames.t t/lib/cwd.t t/op/bop.t
+	  !> t/op/vec.t t/op/ver.t toke.c utils/h2xs.PL
+____________________________________________________________________________
 [  9450] By: jhi                                   on 2001/03/29  16:29:17
         Log: Integrate perlio.
      Branch: perl
