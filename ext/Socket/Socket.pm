@@ -20,7 +20,7 @@ Socket, sockaddr_in, sockaddr_un, inet_aton, inet_ntoa - load the C socket.h def
 
     $proto = getprotobyname('tcp');
     socket(Socket_Handle, PF_INET, SOCK_STREAM, $proto);
-    $port = getservbyname('smtp');
+    $port = getservbyname('smtp', 'tcp');
     $sin = sockaddr_in($port,inet_aton("127.1"));
     $sin = sockaddr_in(7,inet_aton("localhost"));
     $sin = sockaddr_in(7,INADDR_LOOPBACK);
