@@ -4312,6 +4312,10 @@ PP(pp_time)
    it's supported.    --AD  9/96.
 */
 
+#ifdef __BEOS__
+#  define HZ 1000000
+#endif
+
 #ifndef HZ
 #  ifdef CLK_TCK
 #    define HZ CLK_TCK
