@@ -475,6 +475,7 @@ $(?<=^(a))	a	y	$1	a
 ([[.]+)	a.[b].	y	$1	.[
 [a[:xyz:	-	c	-	/[a[:xyz:/: unmatched [] in regexp
 [a[:xyz:]	-	c	-	/[a[:xyz:]/: unmatched [] in regexp
+[a[:]b[:c]	abc	y	$&	abc
 ([a[:xyz:]b]+)	pbaq	y	$1	ba
 ((?>a+)b)	aaab	y	$1	aaab
 (?>(a+))b	aaab	y	$1	aaa

@@ -2149,6 +2149,10 @@ regpposixcc(I32 value)
 		PL_regcomp_parse++; /* skip over the ending ] */
 		posixcc = s + 1;
 	    }
+	    else {
+		/* maternal grandfather */
+		PL_regcomp_parse = s;
+	    }
 	}
     }
 
