@@ -171,7 +171,9 @@ struct perl_thread {
     SV *	TSv;
     XPV *	TXpv;
     struct stat	Tstatbuf;
+#ifdef HAS_TIMES
     struct tms	Ttimesbuf;
+#endif
     
     /* XXX What about regexp stuff? */
 

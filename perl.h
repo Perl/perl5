@@ -1474,7 +1474,11 @@ EXT struct stat	statbuf;
 #ifdef HAS_TIMES
 EXT struct tms	timesbuf;
 #endif
+#if defined(WIN32) && defined(__GNUC__)
+static STRLEN na;
+#else
 EXT STRLEN na;		/* for use in SvPV when length is Not Applicable */
+#endif
 
 /* for tmp use in stupid debuggers */
 EXT int *	di;

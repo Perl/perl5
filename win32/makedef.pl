@@ -159,6 +159,11 @@ Perl_cshname
 Perl_opsave
 !END!OF!SKIP!
 
+if ($CCTYPE eq 'GCC')
+ {
+  $skip_sym .= "Perl_na\n";
+ }
+
 if ($define{'MYMALLOC'})
  {
   $skip_sym .= <<'!END!OF!SKIP!';

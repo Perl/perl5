@@ -30,13 +30,6 @@
  */
 START_EXTERN_C
 
-struct tms {
-	long	tms_utime;
-	long	tms_stime;
-	long	tms_cutime;
-	long	tms_cstime;
-};
-
 EXT int * 	win32_errno(void);
 EXT char *** 	win32_environ(void);
 EXT FILE*	win32_stdin(void);

@@ -1,18 +1,28 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifdef USE_DECLSPEC_THREAD
 __declspec(thread) struct perl_thread *Perl_current_thread = NULL;
+#endif
 
 void
 Perl_setTHR(struct perl_thread *t)
 {
+#ifdef USE_DECLSPEC_THREAD
  Perl_current_thread = t;
+#else
+ TlsSetValue(thr_key,t);
+#endif
 }
 
 struct perl_thread *
 Perl_getTHR(void)
 {
+#ifdef USE_DECLSPEC_THREAD
  return Perl_current_thread;
+#else
+ return (struct perl_thread *) TlsGetValue(thr_key);
+#endif
 }
 
 void

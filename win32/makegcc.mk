@@ -11,7 +11,7 @@
 # newly built perl.
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl5004.5x
-#BUILDOPT=-DUSE_THREADS
+BUILDOPT=-DUSE_THREADS
 
 
 #

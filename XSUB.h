@@ -7,7 +7,8 @@
 #endif
 
 #if defined(WIN32) && defined(__GNUC__)
-#define FORCE_ARG_STRING(x) #x
+#define STRINGIFY_THINGY(x) #x
+#define FORCE_ARG_STRING(x) STRINGIFY_THINGY(x)
 #else
 #define FORCE_ARG_STRING(x) x
 #endif

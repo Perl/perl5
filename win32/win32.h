@@ -15,6 +15,8 @@ typedef long long __int64;
 #define Win32_Winsock
 #endif
 
+
+
 #define  WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -32,6 +34,13 @@ typedef long long __int64;
 #ifndef EXT
 #include "EXTERN.h"
 #endif
+
+struct tms {
+	long	tms_utime;
+	long	tms_stime;
+	long	tms_cutime;
+	long	tms_cstime;
+};
 
 #ifndef START_EXTERN_C
 #ifdef __cplusplus
