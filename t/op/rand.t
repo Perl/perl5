@@ -74,7 +74,7 @@ sub bits ($) {
     # reason that the diagnostic message might get the
     # wrong value is that Config.pm is incorrect.)
     #
-    if ($max <= 0 or $max >= (1 << $randbits)) {	# Just in case...
+    if ($max <= 0 or $max >= (2 ** $randbits)) {# Just in case...
 	print "not ok 1\n";
 	print "# This perl was compiled with randbits=$randbits\n";
 	print "# which is _way_ off. Or maybe your system rand is broken,\n";
