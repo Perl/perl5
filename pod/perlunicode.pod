@@ -249,7 +249,8 @@ The following reserved ranges have C<In> tests:
 
 For example C<"\x{AC00}" =~ \p{HangulSyllable}> will test true.
 (Handling of surrogates is not implemented yet, because Perl
-uses UTF-8 and not UTF-16 internally to represent Unicode.)
+uses UTF-8 and not UTF-16 internally to represent Unicode.
+So you really can't use the "Cs" category.)
 
 Additionally, because scripts differ in their directionality
 (for example Hebrew is written right to left), all characters
