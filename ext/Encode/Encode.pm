@@ -130,7 +130,7 @@ define_alias( qr/^(.+)\@euro$/i => '"$1"' );
 define_alias( qr/^(?:iso[-_]?)?latin[-_]?(\d+)$/i => '"iso-8859-$latin2iso_num[$1]"' );
 
 # Allow winlatin1 style names as well
-define_alias( qr/^win(latin[12]|cyrillic|baltic|greek|turkish|hebrew|arabic|baltic|vietnamese)$/i => '"cp$winlatin2cp{$1}"' );
+define_alias( qr/^win(latin[12]|cyrillic|baltic|greek|turkish|hebrew|arabic|baltic|vietnamese)$/i => '"cp$winlatin2cp{\u$1}"' );
 
 # Common names for non-latin prefered MIME names
 define_alias( 'ascii'    => 'US-ascii',
