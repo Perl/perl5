@@ -231,7 +231,7 @@ PerlIO_fileno(PerlIO *f)
  return (*PerlIOBase(f)->tab->Fileno)(f);
 }
 
-XS(XS_perlio_import)
+XS(XS_io_import)
 {
  dXSARGS;
  GV *gv = CvGV(cv);
@@ -241,7 +241,7 @@ XS(XS_perlio_import)
  XSRETURN_EMPTY;
 }
 
-XS(XS_perlio_unimport)
+XS(XS_io_unimport)
 {
  dXSARGS;
  GV *gv = CvGV(cv);
@@ -265,11 +265,95 @@ PerlIO_find_layer(char *name, STRLEN len)
  return NULL;
 }
 
+
+static int
+perlio_mg_set(pTHX_ SV *sv, MAGIC *mg)
+{
+ if (SvROK(sv))
+  {
+   IO *io = GvIOn(SvRV(sv));
+   PerlIO *ifp = IoIFP(io);
+   PerlIO *ofp = IoOFP(io);
+   AV *av = (AV *) mg->mg_obj;
+   Perl_warn(aTHX_ "set %_ %p %p %p",sv,io,ifp,ofp);
+  }
+ return 0;
+}
+
+static int
+perlio_mg_get(pTHX_ SV *sv, MAGIC *mg)
+{
+ if (SvROK(sv))
+  {
+   IO *io = GvIOn(SvRV(sv));
+   PerlIO *ifp = IoIFP(io);
+   PerlIO *ofp = IoOFP(io);
+   AV *av = (AV *) mg->mg_obj;
+   Perl_warn(aTHX_ "get %_ %p %p %p",sv,io,ifp,ofp);
+  }
+ return 0;
+}
+
+static int
+perlio_mg_clear(pTHX_ SV *sv, MAGIC *mg)
+{
+ Perl_warn(aTHX_ "clear %_",sv);
+ return 0;
+}
+
+static int
+perlio_mg_free(pTHX_ SV *sv, MAGIC *mg)
+{
+ Perl_warn(aTHX_ "free %_",sv);
+ return 0;
+}
+
+MGVTBL perlio_vtab = {
+ perlio_mg_get,
+ perlio_mg_set,
+ NULL, /* len */
+ NULL,
+ perlio_mg_free
+};
+
+XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
+{
+ dXSARGS;
+ SV *sv    = SvRV(ST(1));
+ AV *av    = newAV();
+ MAGIC *mg;
+ int count = 0;
+ int i;
+ sv_magic(sv, (SV *)av, '~', NULL, 0);
+ SvRMAGICAL_off(sv);
+ mg = mg_find(sv,'~');
+ mg->mg_virtual = &perlio_vtab;
+ mg_magical(sv);
+ Perl_warn(aTHX_ "attrib %_",sv);
+ for (i=2; i < items; i++)
+  {
+   STRLEN len;
+   char *name = SvPV(ST(i),len);
+   SV *layer  = PerlIO_find_layer(name,len);
+   if (layer)
+    {
+     av_push(av,SvREFCNT_inc(layer));
+    }
+   else
+    {
+     ST(count) = ST(i);
+     count++;
+    }
+  }
+ SvREFCNT_dec(av);
+ XSRETURN(count);
+}
+
 void
 PerlIO_define_layer(PerlIO_funcs *tab)
 {
  dTHX;
- HV *stash = gv_stashpv("perlio::Layer", TRUE);
+ HV *stash = gv_stashpv("io::Layer", TRUE);
  SV *sv = sv_bless(newRV_noinc(newSViv(PTR2IV(tab))),stash);
  hv_store(PerlIO_layer_hv,tab->name,strlen(tab->name),sv,0);
 }
@@ -285,10 +369,11 @@ PerlIO_default_layer(I32 n)
  if (!PerlIO_layer_hv)
   {
    char *s  = PerlEnv_getenv("PERLIO");
-   newXS("perlio::import",XS_perlio_import,__FILE__);
-   newXS("perlio::unimport",XS_perlio_unimport,__FILE__);
-   PerlIO_layer_hv = get_hv("open::layers",GV_ADD|GV_ADDMULTI);
-   PerlIO_layer_av = get_av("open::layers",GV_ADD|GV_ADDMULTI);
+   newXS("io::import",XS_io_import,__FILE__);
+   newXS("io::unimport",XS_io_unimport,__FILE__);
+   newXS("io::MODIFY_SCALAR_ATTRIBUTES",XS_io_MODIFY_SCALAR_ATTRIBUTES,__FILE__);
+   PerlIO_layer_hv = get_hv("io::layers",GV_ADD|GV_ADDMULTI);
+   PerlIO_layer_av = get_av("io::layers",GV_ADD|GV_ADDMULTI);
    PerlIO_define_layer(&PerlIO_unix);
    PerlIO_define_layer(&PerlIO_perlio);
    PerlIO_define_layer(&PerlIO_stdio);
