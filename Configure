@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May  6 13:54:05 METDST 2004 [metaconfig 3.0 PL70]
+# Generated on Wed May 12 13:00:30 METDST 2004 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3891,7 +3891,6 @@ case "$gccversion" in
 *) gccshortvers=`echo "$gccversion"|sed 's/ .*//'`
    gccosandvers=`$cc -v 2>&1|grep '/specs$'|sed "s!.*/[^-/]*-[^-/]*-\([^-/]*\)/$gccshortvers/specs!\1!"`
    gccshortvers=''
-   ccflags="$ccflags -pipe"
    case "$gccosandvers" in
    $osname) gccosandvers='' ;; # linux gccs seem to have no linux osvers, grr
    $osname$osvers) ;; # looking good
@@ -4709,6 +4708,7 @@ default|recommended)
 	2*) if test -d /etc/conf/kconfig.d &&
 			$contains _POSIX_VERSION $usrinc/sys/unistd.h >/dev/null 2>&1
 		then
+			# Interactive Systems (ISC) POSIX mode.
 			dflt="$dflt -posix"
 		fi
 		;;
@@ -4722,10 +4722,30 @@ default|recommended)
 		if $cc -O2 -fno-strict-aliasing -o gcctest gcctest.c; then
 			echo "Yes, it does." 2>&1
 			case "$ccflags" in
-			*strict-aliasing*) 
+			*strict-aliasing*)
 				echo "Leaving current flags $ccflags alone." 2>&1
 				;;
 			*) dflt="$dflt -fno-strict-aliasing" ;;
+			esac
+		else
+			echo "Nope, it doesn't, but that's ok." 2>&1
+		fi
+		;;
+	esac
+	# For gcc, adding -pipe speeds up compilations for some, but apparently
+	# some assemblers can't read from stdin.  (It also slows down compilations
+	# in other cases, but those are apparently rarer these days.)  AD 5/2004.
+	case "$gccversion" in
+	?*)	echo " "
+		echo "Checking if your compiler accepts -pipe" 2>&1
+		echo 'int main(void) { return 0; }' > gcctest.c
+		if $cc -O2 -pipe -o gcctest gcctest.c; then
+			echo "Yes, it does." 2>&1
+			case "$ccflags" in
+			*-pipe*)
+				echo "Leaving current flags $ccflags alone." 2>&1
+				;;
+			*) dflt="$dflt -pipe" ;;
 			esac
 		else
 			echo "Nope, it doesn't, but that's ok." 2>&1
@@ -4743,8 +4763,8 @@ for thisincl in $inclwanted; do
 	if $test -d $thisincl; then
 		if $test x$thisincl != x$usrinc; then
 			case "$dflt" in
-                        *" -I$thisincl "*);;
-                        *) dflt="$dflt -I$thisincl ";;
+			*" -I$thisincl "*);;
+			*) dflt="$dflt -I$thisincl ";;
 			esac
 		fi
 	fi
@@ -4875,7 +4895,7 @@ esac
 for thislibdir in $libpth; do
 	case " $loclibpth " in
 	*" $thislibdir "*)
-		case "$dflt " in 
+		case "$dflt " in
 		*"-L$thislibdir "*) ;;
 		*)  dflt="$dflt -L$thislibdir" ;;
 		esac
