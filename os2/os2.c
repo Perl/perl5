@@ -2949,11 +2949,11 @@ XS(XS_Cwd_sys_cwd)
 XS(XS_Cwd_sys_abspath)
 {
     dXSARGS;
-    if (items < 1 || items > 2)
-	Perl_croak_nocontext("Usage: Cwd::sys_abspath(path, dir = NULL)");
+    if (items > 2)
+	Perl_croak_nocontext("Usage: Cwd::sys_abspath(path = '.', dir = NULL)");
     {
 	STRLEN n_a;
-	char *	path = (char *)SvPV(ST(0),n_a);
+	char *	path = items ? (char *)SvPV(ST(0),n_a) : ".";
 	char *	dir, *s, *t, *e;
 	char p[MAXPATHLEN];
 	char *	RETVAL;
@@ -3073,6 +3073,10 @@ XS(XS_Cwd_sys_abspath)
 	    *t = 0;
 	    SvCUR_set(sv, t - SvPVX(sv));
 	}
+#ifndef INCOMPLETE_TAINTS
+	if (!items)
+	    SvTAINTED_on(ST(0));
+#endif
     }
     XSRETURN(1);
 }
