@@ -397,7 +397,7 @@ they'll still work properly under C<use strict 'refs'>.  For example:
 If you're planning on generating new filehandles, you could do this:
 
     sub openit {
-        my $name = shift;
+        my $path = shift;
         local *FH;
         return open (FH, $path) ? *FH : undef;
     }
