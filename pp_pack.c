@@ -1720,8 +1720,27 @@ PP(pp_pack)
 		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
 		    sv_catpvn(cat, in, (buf + sizeof(buf)) - in);
 		}
-		else
-		    DIE(aTHX_ "Cannot compress non integer");
+		else {
+		    char           *from, *result, *in;
+		    SV             *norm;
+		    STRLEN          len;
+		    bool            done;
+
+		    /* Copy string and check for compliance */
+		    from = SvPV(fromstr, len);
+		    if ((norm = is_an_int(from, len)) == NULL)
+			DIE(aTHX_ "can compress only unsigned integer");
+
+		    New('w', result, len, char);
+		    in = result + len;
+		    done = FALSE;
+		    while (!done)
+			*--in = div128(norm, &done) | 0x80;
+		    result[len - 1] &= 0x7F; /* clear continue bit */
+		    sv_catpvn(cat, in, (result + len) - in);
+		    Safefree(result);
+		    SvREFCNT_dec(norm);	/* free norm */
+               }
 	    }
             break;
 	case 'i':
