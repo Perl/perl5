@@ -450,6 +450,7 @@ void PerlIO_debug(const char *fmt, ...)
 void
 PerlIO_debug(const char *fmt, ...)
 {
+#ifdef IAMSUID
     static int dbg = 0;
     va_list ap;
     dSYS;
@@ -492,6 +493,7 @@ PerlIO_debug(const char *fmt, ...)
 #endif
     }
     va_end(ap);
+#endif /* IAMSUID */
 }
 
 /*--------------------------------------------------------------------------------------*/
