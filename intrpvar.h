@@ -560,6 +560,9 @@ PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
 
 PERLVARI(Ihash_seed_set, bool, FALSE)		/* Hash initialized? */
 
+/* Restricted hashes placeholder value */
+PERLVAR(Isv_placeholder, SV)
+
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * (Don't forget to add your variable also to perl_clone()!)

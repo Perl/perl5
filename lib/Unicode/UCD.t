@@ -12,7 +12,7 @@ use strict;
 use Unicode::UCD;
 use Test::More;
 
-BEGIN { plan tests => 176 };
+BEGIN { plan tests => 178 };
 
 use Unicode::UCD 'charinfo';
 
@@ -299,3 +299,13 @@ is(Unicode::UCD::_getcode('123x'),    undef, "_getcode(123x)");
 is(Unicode::UCD::_getcode('x123'),    undef, "_getcode(x123)");
 is(Unicode::UCD::_getcode('0x123x'),  undef, "_getcode(x123)");
 is(Unicode::UCD::_getcode('U+123x'),  undef, "_getcode(x123)");
+
+{
+    my $r1 = charscript('Latin');
+    my $n1 = @$r1;
+    is($n1, 26, "26 ranges in Latin script (Unicode 4.0.0)");
+    shift @$r1 while @$r1;
+    my $r2 = charscript('Latin');
+    is(@$r2, $n1, "modifying results should not mess up internal caches");
+}
+

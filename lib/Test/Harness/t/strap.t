@@ -12,14 +12,12 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 147;
-
+use Test::More tests => 170;
 
 use_ok('Test::Harness::Straps');
 
 my $strap = Test::Harness::Straps->new;
-ok( defined $strap && $strap->isa("Test::Harness::Straps"),         'new()' );
-
+isa_ok( $strap, 'Test::Harness::Straps', 'new()' );
 
 ### Testing _is_comment()
 
@@ -39,6 +37,7 @@ my %comments = (
 
 while( my($line, $line_comment) = each %comments ) {
     my $strap = Test::Harness::Straps->new;
+    isa_ok( $strap, 'Test::Harness::Straps' );
 
     my $name = substr($line, 0, 20);
     ok( $strap->_is_comment($line, \$comment),        "  comment '$name'"   );
@@ -104,6 +103,7 @@ my %headers = (
 
 while( my($header, $expect) = each %headers ) {
     my $strap = Test::Harness::Straps->new;
+    isa_ok( $strap, 'Test::Harness::Straps' );
 
     ok( $strap->_is_header($header),    "_is_header() is a header '$header'" );
 
@@ -185,6 +185,8 @@ my @untests = (
               );
 foreach my $line (@untests) {
     my $strap = Test::Harness::Straps->new;
+    isa_ok( $strap, 'Test::Harness::Straps' );
+
     my %test = ();
     ok( !$strap->_is_test($line, \%test),    "_is_test() disregards '$line'" );
 
@@ -204,6 +206,8 @@ my %bails = (
 
 while( my($line, $expect) = each %bails ) {
     my $strap = Test::Harness::Straps->new;
+    isa_ok( $strap, 'Test::Harness::Straps' );
+
     my $reason;
     ok( $strap->_is_bail_out($line, \$reason), "_is_bail_out() spots '$line'");
     is( $reason, $expect,                       '  with the right reason' );
@@ -218,6 +222,8 @@ my @unbails = (
 
 foreach my $line (@unbails) {
     my $strap = Test::Harness::Straps->new;
+    isa_ok( $strap, 'Test::Harness::Straps' );
+
     my $reason;
 
     ok( !$strap->_is_bail_out($line, \$reason),  

@@ -137,14 +137,16 @@ sub GET_none {}
 
 sub GET_op_tr_array {
     my $fh = shift;
-    my @ary = unpack("S256", $fh->readn(256 * 2));
-    return join(",", @ary);
+    my $len = unpack "S", $fh->readn(2);
+    my @ary = unpack "S*", $fh->readn($len*2);
+    return join(",", $len, @ary);
 }
 
 sub GET_IV64 {
     my $fh = shift;
-    my ($hi, $lo) = unpack("LL", $fh->readn(8));
-    return sprintf("0x%x%08x", $hi, $lo); # cheat
+    my $str = $fh->readn(8);
+    croak "reached EOF while reading I32" unless length($str) == 8;
+    return sprintf "0x%09llx", unpack("q", $str);
 }
 
 sub GET_IV {

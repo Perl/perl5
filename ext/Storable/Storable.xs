@@ -1237,13 +1237,13 @@ static void clean_store_context(stcxt_t *cxt)
 	if (cxt->hseen) {
 		hv_iterinit(cxt->hseen);
 		while ((he = hv_iternext(cxt->hseen)))	/* Extra () for -Wall, grr.. */
-			HeVAL(he) = &PL_sv_undef;
+			HeVAL(he) = &PL_sv_placeholder;
 	}
 
 	if (cxt->hclass) {
 		hv_iterinit(cxt->hclass);
 		while ((he = hv_iternext(cxt->hclass)))	/* Extra () for -Wall, grr.. */
-			HeVAL(he) = &PL_sv_undef;
+			HeVAL(he) = &PL_sv_placeholder;
 	}
 
 	/*
@@ -2208,7 +2208,11 @@ static int store_hash(stcxt_t *cxt, HV *hv)
                             = (((hash_flags & SHV_RESTRICTED)
                                 && SvREADONLY(val))
                                ? SHV_K_LOCKED : 0);
+#ifdef PL_sv_placeholder
+                        if (val == &PL_sv_placeholder)
+#else
                         if (val == &PL_sv_undef)
+#endif
                             flags |= SHV_K_PLACEHOLDER;
 
 			keyval = SvPV(key, keylen_tmp);
@@ -2304,7 +2308,11 @@ static int store_hash(stcxt_t *cxt, HV *hv)
                             = (((hash_flags & SHV_RESTRICTED)
                                 && SvREADONLY(val))
                                              ? SHV_K_LOCKED : 0);
+#ifdef PL_sv_placeholder
+                        if (val == &PL_sv_placeholder)
+#else
                         if (val == &PL_sv_undef)
+#endif
                             flags |= SHV_K_PLACEHOLDER;
 
                         hek = HeKEY_hek(he);
@@ -4896,7 +4904,7 @@ static SV *retrieve_flag_hash(stcxt_t *cxt, char *cname)
 
             if (flags & SHV_K_PLACEHOLDER) {
                 SvREFCNT_dec (sv);
-                sv = &PL_sv_undef;
+                sv = &PL_sv_placeholder;
 		store_flags |= HVhek_PLACEHOLD;
 	    }
             if (flags & SHV_K_UTF8) {

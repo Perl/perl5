@@ -773,7 +773,7 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 #----------------------------------------------------------------------------------
 Extensions: ..\win32\buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(HPERL) -I..\lib -I..\win32 -MCross=$(CROSS_NAME) ..\win32\buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) \
-	!POSIX !Time/HiRes !XS/Typemap
+	!POSIX
 
 Extensions_clean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
@@ -840,9 +840,6 @@ XDLLOBJS	= $(XDLLOBJS) $(DLLDIR)\malloc.obj
 !IF "$(CRYPT_SRC)" != ""
 XDLLOBJS	= $(XDLLOBJS) $(DLLDIR)\fcrypt.obj
 !ENDIF
-!IF "$(CRYPT_SRC)" != ""
-XDLLOBJS	= $(XDLLOBJS) $(DLLDIR)\fcrypt.obj
-!ENDIF
 
 {$(SRCDIR)}.c{$(DLLDIR)}.obj:
     $(CC) -c $(CFLAGS_O) -DPERL_EXTERNAL_GLOB -Fo$(DLLDIR)\ $<
@@ -858,7 +855,7 @@ $(DLLDIR)\toke.obj:
 # -DPERL_IMPLICIT_SYS needs C++ for perllib.c
 # This is the only file that depends on perlhost.h, vmem.h, and vdir.h
 !IF "$(USE_IMP_SYS)" == "define"
-$(DLLDIR)\perllib$(o)	: perllib.c ..\win32\perlhost.h .\vdir.h .\vmem.h
+$(DLLDIR)\perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
 	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
 	rem (frustrated) mv perllib.obj $(DLLDIR)
 !ENDIF

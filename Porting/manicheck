@@ -22,14 +22,15 @@ use strict;
 
 sub help {
   die <<EOF;
-$0: Usage: $0 [-x|-m|-h]
+$0: Usage: $0 [-x|-m|-l|-h]
 -x show only the extra files
 -m show only the missing files
+-l show the files one per line instead of one line
 -h show only this help
 EOF
 }
 
-use vars qw($x $m $h);
+use vars qw($x $m $l $h);
 
 help() if $h;
 
@@ -73,8 +74,13 @@ for (sort keys %mani) {
   push @miss, $_ unless $find{$_};
 }
 
-printf("%s@xtra\n", $x || $m ? "" : "extra: ")   if @xtra && !$m;
-printf("%s@miss\n", $x || $m ? "" : "missing: ") if @miss && !$x;
+$" = "\n" if $l;
+
+unshift @xtra, "extra:"   if @xtra;
+unshift @miss, "missing:" if @miss;
+
+print "@xtra\n", if @xtra && !$m;
+print "@miss\n"  if @miss && !$x;
 
 exit 0;
 

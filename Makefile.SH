@@ -1043,7 +1043,7 @@ makedepend: makedepend.SH config.sh
 	utest ucheck test.utf8 check.utf8 test.torture torturetest \
 	test.third check.third utest.third ucheck.third test_notty.third \
 	test.deparse test_notty.deparse test_harness test_harness_notty \
-	minitest coretest
+	test.bytecompile minitest coretest
 
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
@@ -1115,6 +1115,11 @@ utest.third ucheck.third: test_prep.third perl.third
 
 test_notty.third: test_prep.third perl.third
 	PERL=./perl.third $(MAKE) PERL_DEBUG=PERL_3LOG=1 _test_notty
+
+# Targets for Bytecode/ByteLoader testing.
+
+test.bytecompile:	test_prep
+	PERL=./perl TEST_ARGS=-bytecompile $(MAKE) _test
 
 # Targets for Deparse testing.
 

@@ -3,10 +3,10 @@
 
 ######################### We start with some black magic to print on failure.
 require 5;
- # Time-stamp: "2001-06-21 22:59:38 MDT"
+ # Time-stamp: "2003-07-20 07:36:49 ADT"
 use strict;
 use Test;
-BEGIN { plan tests => 46 };
+BEGIN { plan tests => 64 };
 BEGIN { ok 1 }
 use I18N::LangTags (':ALL');
 
@@ -20,8 +20,8 @@ ok !is_language_tag('fr-CA-');
 ok !is_language_tag('fr_CA');
 ok  is_language_tag('fr-ca-joual');
 ok !is_language_tag('frca');
-ok  is_language_tag('nav');
-ok  is_language_tag('nav-shiprock');
+ok  is_language_tag('nav'); # (not actual tag)
+ok  is_language_tag('nav-shiprock'); # (not actual tag)
 ok !is_language_tag('nav-ceremonial'); # subtag too long
 ok !is_language_tag('x');
 ok !is_language_tag('i');
@@ -44,6 +44,8 @@ ok grep $_ eq 'it', panic_languages('es');
 
 
 print "# Now the ::List tests...\n";
+print "# Perl v$], I18N::LangTags::List v$I18N::LangTags::List::VERSION\n";
+
 use I18N::LangTags::List;
 foreach my $lt (qw(
  en
@@ -58,12 +60,30 @@ foreach my $lt (qw(
  it-it
  it-IT
  it-FR
+ ak
+ aka
+ jv
+ jw
+ no
+ no-nyn
+ nn
+ i-lux
+ lb
+ wa
  yi
  ji
+ den-syllabic
+ den-syllabic-western
+ den-western
+ den-latin
  cre-syllabic
  cre-syllabic-western
  cre-western
  cre-latin
+ cr-syllabic
+ cr-syllabic-western
+ cr-western
+ cr-latin
 )) {
   my $name = I18N::LangTags::List::name($lt);
   if($name) {
@@ -74,6 +94,8 @@ foreach my $lt (qw(
     print "#        Failed lookup on $lt\n";
   }
 }
+
+
 
 print "# So there!\n";
 

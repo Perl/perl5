@@ -64,6 +64,7 @@ XCE_EXPORT void XCEShowMessageA(const char *fmt, ...);
 #define ftime xceftime
 #define ctime xcectime
 #define gettimeofday xcegettimeofday
+#define GetSystemTimeAsFileTime XCEGetSystemTimeAsFileTime
 
 XCE_EXPORT int xcesetuid(uid_t id);
 XCE_EXPORT int xceseteuid(uid_t id);

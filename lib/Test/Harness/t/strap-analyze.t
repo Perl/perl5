@@ -460,7 +460,7 @@ my %samples = (
                        },
 );
 
-plan tests => (keys(%samples) * 4) + 3;
+plan tests => (keys(%samples) * 5) + 4;
 
 use_ok('Test::Harness::Straps');
 
@@ -480,6 +480,7 @@ while( my($test, $expect) = each %samples ) {
 
     my $test_path = File::Spec->catfile($SAMPLE_TESTS, $test);
     my $strap = Test::Harness::Straps->new;
+    isa_ok( $strap, 'Test::Harness::Straps' );
     my %results = $strap->analyze_file($test_path);
 
     is_deeply($results{details}, $expect->{details}, "$test details" );
@@ -507,5 +508,6 @@ while( my($test, $expect) = each %samples ) {
 
 
 my $strap = Test::Harness::Straps->new;
+isa_ok( $strap, 'Test::Harness::Straps' );
 ok( !$strap->analyze_file('I_dont_exist') );
 is( $strap->{error}, "I_dont_exist does not exist" );

@@ -1,10 +1,10 @@
 
 require 5;
 package I18N::LangTags::List;
-#  Time-stamp: "2002-02-02 20:13:58 MST"
+#  Time-stamp: "2003-07-20 07:31:08 ADT"
 use strict;
 use vars qw(%Name $Debug $VERSION);
-$VERSION = '0.25';
+$VERSION = '0.26';
 # POD at the end.
 
 #----------------------------------------------------------------------
@@ -13,17 +13,20 @@ $VERSION = '0.25';
   my $seeking = 1;
   my $count = 0;
   my($tag,$name);
+  my $last_name = '';
   while(<I18N::LangTags::List::DATA>) {
     if($seeking) {
       $seeking = 0 if m/=for woohah/;
-    } else {
-      next unless ($tag, $name) =
-       m/\{([-0-9a-zA-Z]+)\}(?:\s*:)?\s*([^\[\]]+)/;
+    } elsif( ($tag, $name) =
+          m/\{([-0-9a-zA-Z]+)\}(?:\s*:)?\s*([^\[\]]+)/
+    ) {
       $name =~ s/\s*[;\.]*\s*$//g;
       next unless $name;
       ++$count;
       print "<$tag> <$name>\n" if $Debug;
-      $Name{$tag} = $name;
+      $last_name = $Name{$tag} = $name;
+    } elsif (m/Formerly \"([-a-z0-9]+)\"/) {
+      $Name{$1} = "$last_name (old tag)" if $last_name;
     }
   }
   die "No tags read??" unless $count;
@@ -195,6 +198,10 @@ eq Abkhaz
 
 =item {ada} : Adangme
 
+=item {ady} : Adyghe
+
+eq Adygei
+
 =item {aa} : Afar
 
 =item {afh} : Afrihili
@@ -205,7 +212,9 @@ eq Abkhaz
 
 =item [{afa} : Afro-Asiatic (Other)]
 
-=item {aka} : Akan
+=item {ak} : Akan
+
+(Formerly "aka".)
 
 =item {akk} : Akkadian
 
@@ -264,7 +273,13 @@ NOT Amharic!  NOT Samaritan Aramaic!
 
 =item {hy} : Armenian
 
+=item {an} : Aragonese
+
 =item [{art} : Artificial (Other)]
+
+=item {ast} : Asturian
+
+eq Bable.
 
 =item {as} : Assamese
 
@@ -276,7 +291,9 @@ eq Athabaskan.  eq Athapaskan.  eq Athabascan.
 
 =item [{map} : Austronesian (Other)]
 
-=item {ava} : Avaric
+=item {av} : Avaric
+
+(Formerly "ava".)
 
 =item {ae} : Avestan
 
@@ -290,13 +307,20 @@ eq Zend
 
 eq Azeri
 
+Notable forms:
+{az-Arab} Azerbaijani in Arabic script;
+{az-Cyrl} Azerbaijani in Cyrillic script;
+{az-Latn} Azerbaijani in Latin script.
+
 =item {ban} : Balinese
 
 =item [{bat} : Baltic (Other)]
 
 =item {bal} : Baluchi
 
-=item {bam} : Bambara
+=item {bm} : Bambara
+
+(Formerly "bam".)
 
 =item [{bai} : Bamileke languages]
 
@@ -403,14 +427,16 @@ eq Nyanja.  eq Chinyanja.
 =item {zh} : Chinese
 
 Many forms are mutually un-intelligible in spoken media.
-Notable subforms:
-{zh-cn} PRC Chinese;
-{zh-hk} Hong Kong Chinese;
-{zh-mo} Macau Chinese;
-{zh-sg} Singapore Chinese;
+Notable forms:
+{zh-Hans} Chinese, in simplified script;
+{zh-Hant} Chinese, in traditional script;
 {zh-tw} Taiwan Chinese;
+{zh-cn} PRC Chinese;
+{zh-sg} Singapore Chinese;
+{zh-mo} Macau Chinese;
+{zh-hk} Hong Kong Chinese;
 {zh-guoyu} Mandarin [Putonghua/Guoyu];
-{zh-hakka} Hakka [formerly i-hakka];
+{zh-hakka} Hakka [formerly "i-hakka"];
 {zh-min} Hokkien;
 {zh-min-nan} Southern Hokkien;
 {zh-wuu} Shanghaiese;
@@ -447,9 +473,9 @@ eq Trukese.  eq Chuuk.  eq Truk.  eq Ruk.
 
 eq Corse.
 
-=item {cre} : Cree
+=item {cr} : Cree
 
-NOT Creek!
+NOT Creek!  (Formerly "cre".)
 
 =item {mus} : Creek
 
@@ -477,6 +503,8 @@ eq Nakota.  eq Latoka.
 
 =item {da} : Danish
 
+=item {dar} : Dargwa
+
 =item {day} : Dayak
 
 =item {i-default} : Default (Fallthru) Language
@@ -491,7 +519,9 @@ messages, for example.
 
 =item {din} : Dinka
 
-=item {div} : Divehi
+=item {dv} : Divehi
+
+eq Maldivian.  (Formerly "div".)
 
 =item {doi} : Dogri
 
@@ -555,13 +585,19 @@ Notable forms:
 
 eq Anglo-Saxon.  (Historical)
 
+=item {i-enochian} : Enochian (Artificial)
+
+=item {myv} : Erzya
+
 =item {eo} : Esperanto
 
 (Artificial)
 
 =item {et} : Estonian
 
-=item {ewe} : Ewe
+=item {ee} : Ewe
+
+(Formerly "ewe".)
 
 =item {ewo} : Ewondo
 
@@ -603,7 +639,9 @@ Notable forms:
 
 =item {fur} : Friulian
 
-=item {ful} : Fulah
+=item {ff} : Fulah
+
+(Formerly "ful".)
 
 =item {gaa} : Ga
 
@@ -615,7 +653,9 @@ NOT Scots!
 
 eq Galician
 
-=item {lug} : Ganda
+=item {lg} : Ganda
+
+(Formerly "lug".)
 
 =item {gay} : Gayo
 
@@ -679,6 +719,10 @@ eq Gwichin
 
 =item {hai} : Haida
 
+=item {ht} : Haitian
+
+eq Haitian Creole
+
 =item {ha} : Hausa
 
 =item {haw} : Hawaiian
@@ -716,7 +760,13 @@ Hawai'ian
 
 =item {is} : Icelandic
 
-=item {ibo} : Igbo
+=item {io} : Ido
+
+(Artificial)
+
+=item {ig} : Igbo
+
+(Formerly "ibo".)
 
 =item {ijo} : Ijo
 
@@ -732,6 +782,8 @@ Hawai'ian
 
 =for etc
 {in} Indonesian (old tag)
+
+=item {inh} : Ingush
 
 =item {ia} : Interlingua (International Auxiliary Language Association)
 
@@ -773,11 +825,15 @@ Notable forms:
 
 (NOT "jp"!)
 
-=item {jw} : Javanese
+=item {jv} : Javanese
+
+(Formerly "jw" because of a typo.)
 
 =item {jrb} : Judeo-Arabic
 
 =item {jpr} : Judeo-Persian
+
+=item {kbd} : Kabardian
 
 =item {kab} : Kabyle
 
@@ -787,19 +843,29 @@ Notable forms:
 
 eq Greenlandic "Eskimo"
 
+=item {xal} : Kalmyk
+
 =item {kam} : Kamba
 
 =item {kn} : Kannada
 
 eq Kanarese.  NOT Canadian!
 
-=item {kau} : Kanuri
+=item {kr} : Kanuri
+
+(Formerly "kau".)
+
+=item {krc} : Karachay-Balkar
 
 =item {kaa} : Kara-Kalpak
 
 =item {kar} : Karen
 
 =item {ks} : Kashmiri
+
+=item {csb} : Kashubian
+
+eq Kashub
 
 =item {kaw} : Kawi
 
@@ -829,7 +895,9 @@ eq Gikuyu.
 
 =item {kv} : Komi
 
-=item {kon} : Kongo
+=item {kg} : Kongo
+
+(Formerly "kon".)
 
 =item {kok} : Konkani
 
@@ -877,12 +945,16 @@ eq Lettish.
 
 =item {lb} : Letzeburgesch
 
-eq Luxemburgian, eq Luxemburger.  (Formerly i-lux.)
+eq Luxemburgian, eq Luxemburger.  (Formerly "i-lux".)
 
 =for etc
 {i-lux} Letzeburgesch (old tag)
 
 =item {lez} : Lezghian
+
+=item {li} : Limburgish
+
+eq Limburger, eq Limburgan.  NOT Letzeburgesch!
 
 =item {ln} : Lingala
 
@@ -892,9 +964,13 @@ eq Luxemburgian, eq Luxemburger.  (Formerly i-lux.)
 
 eq Low Saxon.  eq Low German.  eq Low Saxon.
 
+=item {art-lojban} : Lojban (Artificial)
+
 =item {loz} : Lozi
 
-=item {lub} : Luba-Katanga
+=item {lu} : Luba-Katanga
+
+(Formerly "lub".)
 
 =item {lua} : Luba-Lulua
 
@@ -985,6 +1061,8 @@ Don't use this.
 
 =item {moh} : Mohawk
 
+=item {mdf} : Moksha
+
 =item {mo} : Moldavian
 
 eq Moldovan.
@@ -1007,11 +1085,13 @@ Not for normal use.
 
 =item {nah} : Nahuatl
 
+=item {nap} : Neapolitan
+
 =item {na} : Nauru
 
 =item {nv} : Navajo
 
-eq Navaho.  (Formerly i-navajo.)
+eq Navaho.  (Formerly "i-navajo".)
 
 =for etc
 {i-navajo} Navajo (old tag)
@@ -1038,6 +1118,8 @@ eq Nepalese.  Notable forms:
 
 =item {niu} : Niuean
 
+=item {nog} : Nogai
+
 =item {non} : Old Norse
 
 (Historical)
@@ -1046,24 +1128,20 @@ eq Nepalese.  Notable forms:
 
 Do not use this.
 
-=item {se} : Northern Sami
-
-eq Lappish.  eq Lapp.  eq (Northern) Saami.
-
 =item {no} : Norwegian
 
 Note the two following forms:
 
 =item {nb} : Norwegian Bokmal
 
-eq BokmE<aring>l, (A form of Norwegian.)  (Formerly no-bok.)
+eq BokmE<aring>l, (A form of Norwegian.)  (Formerly "no-bok".)
 
 =for etc
 {no-bok} Norwegian Bokmal (old tag)
 
 =item {nn} : Norwegian Nynorsk
 
-(A form of Norwegian.)  (Formerly no-nyn.)
+(A form of Norwegian.)  (Formerly "no-nyn".)
 
 =for etc
 {no-nyn} Norwegian Nynorsk (old tag)
@@ -1082,9 +1160,9 @@ eq BokmE<aring>l, (A form of Norwegian.)  (Formerly no-bok.)
 
 eq ProvenE<ccedil>al, eq Provencal
 
-=item {oji} : Ojibwa
+=item {oj} : Ojibwa
 
-eq Ojibwe.
+eq Ojibwe.  (Formerly "oji".)
 
 =item {or} : Oriya
 
@@ -1202,6 +1280,18 @@ Large language group.
 
 NOT Aramaic!
 
+=item {se} : Northern Sami
+
+eq Lappish.  eq Lapp.  eq (Northern) Saami.
+
+=item {sma} : Southern Sami
+
+=item {smn} : Inari Sami
+
+=item {smj} : Lule Sami
+
+=item {sms} : Skolt Sami
+
 =item [{smi} : Sami languages (Other)]
 
 =item {sm} : Samoan
@@ -1234,6 +1324,10 @@ NOT Scots Gaelic!
 
 eq Serb.  NOT Sorbian.
 
+Notable forms:
+{sr-Cyrl} : Serbian in Cyrillic script;
+{sr-Latn} : Serbian in Latin script.
+
 =item {srr} : Serer
 
 =item {shn} : Shan
@@ -1249,6 +1343,8 @@ Always use with a subtag.  Notable forms:
 {sgn-ie} Irish Sign Language (ESL);
 {sgn-ni} Nicaraguan Sign Language (ISN);
 {sgn-us} American Sign Language (ASL).
+
+(And so on with other country codes as the subtag.)
 
 =item {bla} : Siksika
 
@@ -1422,6 +1518,8 @@ Same as Setswana.
 
 =item {tum} : Tumbuka
 
+=item [{tup} : Tupi languages]
+
 =item {tr} : Turkish
 
 (Typically in Roman script)
@@ -1429,6 +1527,10 @@ Same as Setswana.
 =item {ota} : Ottoman Turkish (1500-1928)
 
 (Typically in Arabic script)  (Historical)
+
+=item {crh} : Crimean Turkish
+
+eq Crimean Tatar
 
 =item {tk} : Turkmen
 
@@ -1441,6 +1543,8 @@ eq Turkmeni.
 eq Tuvan.  eq Tuvin.
 
 =item {tw} : Twi
+
+=item {udm} : Udmurt
 
 =item {uga} : Ugaritic
 
@@ -1462,11 +1566,15 @@ Not a tag for normal use.
 
 eq E<Ouml>zbek
 
+Notable forms:
+{uz-Cyrl} Uzbek in Cyrillic script;
+{uz-Latn} Uzbek in Latin script.
+
 =item {vai} : Vai
 
-=item {ven} : Venda
+=item {ve} : Venda
 
-NOT Wendish!  NOT Wend!  NOT Avestan!
+NOT Wendish!  NOT Wend!  NOT Avestan!  (Formerly "ven".)
 
 =item {vi} : Vietnamese
 
@@ -1481,6 +1589,8 @@ eq VolapE<uuml>k.  (Artificial)
 eq Votian.  eq Vod.
 
 =item [{wak} : Wakashan languages]
+
+=item {wa} : Walloon
 
 =item {wal} : Walamo
 
@@ -1517,12 +1627,14 @@ or IANA.  Example, x-double-dutch
 
 eq Yap
 
+=item {ii} : Sichuan Yi
+
 =item {yi} : Yiddish
 
-Formerly "ji".  Sometimes in Roman script, sometimes in Hebrew script.
+Formerly "ji".  Usually in Hebrew script.
 
-=for etc
-{ji} Yiddish (old tag)
+Notable forms:
+{yi-latn} Yiddish in Latin script
 
 =item {yo} : Yoruba
 
@@ -1558,7 +1670,7 @@ L<I18N::LangTags|I18N::LangTags> and its "See Also" section.
 
 =head1 COPYRIGHT AND DISCLAIMER
 
-Copyright (c) 2001,2002 Sean M. Burke. All rights reserved.
+Copyright (c) 2001,2002,2003 Sean M. Burke. All rights reserved.
 
 You can redistribute and/or
 modify this document under the same terms as Perl itself.

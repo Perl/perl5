@@ -1,5 +1,6 @@
 
 require 5;
+use 5.006;  # we use some open(X, "<", $y) syntax 
 package Pod::Perldoc;
 use strict;
 use warnings;
@@ -11,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.08';
+$VERSION = '3.09';
 #..........................................................................
 
 BEGIN {  # Make a DEBUG constant very first thing...
@@ -26,13 +27,6 @@ BEGIN {  # Make a DEBUG constant very first thing...
 }
 
 use Pod::Perldoc::GetOptsOO; # uses the DEBUG.
-
-#..........................................................................
-{ my $pager = $Config{'pager'};
-  push @Pagers, $pager if ((-x (split /\s+/, $pager)[0]) || $^O eq 'VMS');
-}
-$Bindir  = $Config{'scriptdirexp'};
-$Pod2man = "pod2man" . ( $Config{'versiononly'} ? $Config{'version'} : '' );
 
 #..........................................................................
 
@@ -52,13 +46,21 @@ $Temp_File_Lifetime ||= 60 * 60 * 24 * 5;
   #  that anyone's still looking at it!!
   # (Currently used only by the MSWin cleanup routine)
 
+
+#..........................................................................
+{ my $pager = $Config{'pager'};
+  push @Pagers, $pager if -x (split /\s+/, $pager)[0] or IS_VMS;
+}
+$Bindir  = $Config{'scriptdirexp'};
+$Pod2man = "pod2man" . ( $Config{'versiononly'} ? $Config{'version'} : '' );
+
 # End of class-init stuff
 #
 ###########################################################################
 #
 # Option accessors...
 
-foreach my $subname (map "opt_$_", split '', q{mhlvriFfXqnTd}) {
+foreach my $subname (map "opt_$_", split '', q{mhlvriFfXqnTdU}) {
   no strict 'refs';
   *$subname = do{ use strict 'refs';  sub () { shift->_elem($subname, @_) } };
 }
@@ -119,8 +121,6 @@ sub opt_V { # report version and exit
   ;
   exit;
 }
-
-sub opt_U {} # legacy no-op
 
 sub opt_t { # choose plaintext as output format
   my $self = shift;
@@ -214,6 +214,7 @@ sub aside {  # If we're in -v or DEBUG mode, say this.
         my $callsub = (caller(1))[3];
         my $package = quotemeta(__PACKAGE__ . '::');
         $callsub =~ s/^$package/'/os;
+         # the o is justified, as $package really won't change.
         $callsub . ": ";
       } : '',
       @_,
@@ -360,7 +361,9 @@ sub init_formatter_class_list {
   $self->opt_M_with('Pod::Perldoc::ToPod');   # the always-there fallthru
   $self->opt_o_with('text');
   $self->opt_o_with('man') unless IS_MSWin32 || IS_Dos || IS_Cygwin
-       || !($ENV{TERM} && $ENV{TERM} !~ /dumb|emacs|none|unknown/i);
+       || !($ENV{TERM} && (
+              ($ENV{TERM} || '') !~ /dumb|emacs|none|unknown/i
+           ));
 
   return;
 }
@@ -732,7 +735,7 @@ sub grand_search_init {
                             $file =~ s/\.(pm|pod)\z//;  # XXX: badfs
                             print STDERR "\tperldoc $_\::$file\n";
                         }
-                        closedir DIR    or die "closedir $dir: $!";
+                        closedir(DIR)    or die "closedir $dir: $!";
                     }
                 }
             }
@@ -804,12 +807,11 @@ sub search_perlfunc {
         or die("Can't open $perlfunc: $!");
 
     # Functions like -r, -e, etc. are listed under `-X'.
-    my $search_string = ($self->opt_f =~ /^-[rwxoRWXOeszfdlpSbctugkTBMAC]$/)
-                        ? 'I<-X' : $self->opt_f ;
-    
+    my $search_re = ($self->opt_f =~ /^-[rwxoRWXOeszfdlpSbctugkTBMAC]$/)
+                        ? '(?:I<)?-X' : quotemeta($self->opt_f) ;
+
     DEBUG > 2 and
-     print "Going to perlfunc-scan for $search_string in $perlfunc\n";
-    
+     print "Going to perlfunc-scan for $search_re in $perlfunc\n";
     
     # Skip introduction
     local $_;
@@ -821,7 +823,7 @@ sub search_perlfunc {
     my $found = 0;
     my $inlist = 0;
     while (<PFUNC>) {  # "The Mothership Connection is here!"
-        if (/^=item\s+\Q$search_string\E\b/o)  {
+        if ( m/^=item\s+$search_re\b/ )  {
             $found = 1;
         }
         elsif (/^=item/) {
@@ -856,7 +858,9 @@ sub search_perlfaqs {
     my $found = 0;
     my %found_in;
     my $search_key = $self->opt_q;
-    my $rx = eval { qr/$search_key/ } or die <<EOD;
+    
+    my $rx = eval { qr/$search_key/ }
+     or die <<EOD;
 Invalid regular expression '$search_key' given as -q pattern:
 $@
 Did you mean \\Q$search_key ?
@@ -866,9 +870,10 @@ EOD
     local $_;
     foreach my $file (@$found_things) {
         die "invalid file spec: $!" if $file =~ /[<>|]/;
-        open(INFAQ, "<", $file) or die "Can't read-open $file: $!\nAborting";
+        open(INFAQ, "<", $file)  # XXX 5.6ism
+         or die "Can't read-open $file: $!\nAborting";
         while (<INFAQ>) {
-            if (/^=head2\s+.*(?:$search_key)/oi) { # it's good for only one key
+            if ( m/^=head2\s+.*(?:$search_key)/i ) {
                 $found = 1;
                 push @$pod, "=head1 Found in $file\n\n" unless $found_in{$file}++;
             }
@@ -1098,7 +1103,7 @@ sub MSWin_perldoc_tempfile {
       $fh = Symbol::gensym();
     }
     DEBUG > 3 and print "About to try making temp file $spec\n";
-    return($fh, $spec) if open($fh, ">", $spec);
+    return($fh, $spec) if open($fh, ">", $spec);    # XXX 5.6ism
     $self->aside("Can't create temp file $spec: $!\n");
   }
 
@@ -1249,7 +1254,7 @@ sub page_module_file {
 	local $_;
 	my $any_error = 0;
         foreach my $output (@found) {
-	    unless( open(TMP, "<", $output) ) {
+	    unless( open(TMP, "<", $output) ) {    # XXX 5.6ism
 	      warn("Can't open $output: $!");
 	      $any_error = 1;
 	      next;
@@ -1337,7 +1342,7 @@ sub containspod {
     my($self, $file, $readit) = @_;
     return 1 if !$readit && $file =~ /\.pod\z/i;
     local($_);
-    open(TEST,"<", $file) 	or die "Can't open $file: $!";
+    open(TEST,"<", $file) 	or die "Can't open $file: $!";   # XXX 5.6ism
     while (<TEST>) {
 	if (/^=head/) {
 	    close(TEST) 	or die "Can't close $file: $!";
@@ -1388,7 +1393,9 @@ sub new_output_file {
     $fh = Symbol::gensym();
   }
   DEBUG > 3 and print "About to try writing to specified output file $outspec\n";
-  die "Can't write-open $outspec: $!" unless open($fh, ">", $outspec);
+  die "Can't write-open $outspec: $!"
+   unless open($fh, ">", $outspec); # XXX 5.6ism
+  
   DEBUG > 3 and print "Successfully opened $outspec\n";
   binmode($fh) if $self->{'output_is_binary'};
   return($fh, $outspec);
@@ -1447,7 +1454,7 @@ sub page {  # apply a pager to the output file
     my ($self, $output, $output_to_stdout, @pagers) = @_;
     if ($output_to_stdout) {
         $self->aside("Sending unpaged output to STDOUT.\n");
-	open(TMP, "<", $output)  or  die "Can't open $output: $!";
+	open(TMP, "<", $output)  or  die "Can't open $output: $!"; # XXX 5.6ism
 	local $_;
 	while (<TMP>) {
 	    print or die "Can't print to stdout: $!";
@@ -1609,8 +1616,14 @@ sub drop_privs_maybe {
             $< = $id; # real uid
             $> = $id; # effective uid
         };
-        die "Superuser must not run $0 without security audit and taint checks.\n"
-                unless !$@ && $< && $>;
+        if( !$@ && $< && $> ) {
+          DEBUG and print "OK, I dropped privileges.\n";
+        } elsif( $self->opt_U ) {
+          DEBUG and print "Couldn't drop privileges, but in -U mode, so feh."
+        } else {
+          DEBUG and print "Hm, couldn't drop privileges.  Ah well.\n";
+          # We used to die here; but that seemed pointless.
+        }
     }
     return;
 }

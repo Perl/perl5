@@ -3,7 +3,7 @@ package File::Spec;
 use strict;
 use vars qw(@ISA $VERSION);
 
-$VERSION = 0.84 ;
+$VERSION = '0.85';
 
 my %module = (MacOS   => 'Mac',
 	      MSWin32 => 'Win32',
@@ -290,3 +290,5 @@ Mac support by Paul Schinder <schinder@pobox.com>, and Thomas Wegner
 Yamaguchi <shigio@tamacom.com>, modified by Barrie Slaymaker
 <barries@slaysys.com>.  splitpath(), splitdir(), catpath() and
 catdir() by Barrie Slaymaker.
+
+=cut

@@ -5,6 +5,8 @@ use warnings;
 
 our $VERSION = '0.2';
 
+use Storable qw(dclone);
+
 require Exporter;
 
 our @ISA = qw(Exporter);
@@ -31,7 +33,7 @@ Unicode::UCD - Unicode character database
     my $charblock  = charblock($codepoint);
 
     use Unicode::UCD 'charscript';
-    my $charscript = charblock($codepoint);
+    my $charscript = charscript($codepoint);
 
     use Unicode::UCD 'charblocks';
     my $charblocks = charblocks();
@@ -320,7 +322,7 @@ sub charblock {
 	_search(\@BLOCKS, 0, $#BLOCKS, $code);
     } else {
 	if (exists $BLOCKS{$arg}) {
-	    return $BLOCKS{$arg};
+	    return dclone $BLOCKS{$arg};
 	} else {
 	    return;
 	}
@@ -385,7 +387,7 @@ sub charscript {
 	_search(\@SCRIPTS, 0, $#SCRIPTS, $code);
     } else {
 	if (exists $SCRIPTS{$arg}) {
-	    return $SCRIPTS{$arg};
+	    return dclone $SCRIPTS{$arg};
 	} else {
 	    return;
 	}
@@ -407,7 +409,7 @@ See also L</Blocks versus Scripts>.
 
 sub charblocks {
     _charblocks() unless %BLOCKS;
-    return \%BLOCKS;
+    return dclone \%BLOCKS;
 }
 
 =head2 charscripts
@@ -425,7 +427,7 @@ See also L</Blocks versus Scripts>.
 
 sub charscripts {
     _charscripts() unless %SCRIPTS;
-    return \%SCRIPTS;
+    return dclone \%SCRIPTS;
 }
 
 =head2 Blocks versus Scripts
@@ -709,7 +711,7 @@ sub casespec {
 
     _casespec() unless %CASESPEC;
 
-    return $CASESPEC{$code};
+    return ref $CASESPEC{$code} ? dclone $CASESPEC{$code} : $CASESPEC{$code};
 }
 
 =head2 Unicode::UCD::UnicodeVersion

@@ -2,6 +2,7 @@
 # t/test.pl - most of Test::More functionality without the fuss
 #
 
+$Level = 1;
 my $test = 1;
 my $planned;
 
@@ -76,7 +77,7 @@ sub _ok {
 }
 
 sub _where {
-    my @caller = caller(1);
+    my @caller = caller($Level);
     return "at $caller[1] line $caller[2]";
 }
 
@@ -585,6 +586,7 @@ sub _fresh_perl {
 
 sub fresh_perl_is {
     my($prog, $expected, $runperl_args, $name) = @_;
+    local $Level = 2;
     _fresh_perl($prog,
 		sub { @_ ? $_[0] eq $expected : $expected },
 		$runperl_args, $name);
@@ -598,6 +600,7 @@ sub fresh_perl_is {
 
 sub fresh_perl_like {
     my($prog, $expected, $runperl_args, $name) = @_;
+    local $Level = 2;
     _fresh_perl($prog,
 		sub { @_ ?
 			  $_[0] =~ (ref $expected ? $expected : /$expected/) :

@@ -21,7 +21,7 @@ if ($#ARGV >= 0) {
 	$verbose = 1 if $1 eq 'v';
 	$torture = 1 if $1 eq 'torture';
 	$with_utf= 1 if $1 eq 'utf8';
-        $byte_compile = 1 if $1 eq 'bytecompile';
+        $bytecompile = 1 if $1 eq 'bytecompile';
         $compile = 1 if $1 eq 'compile';
 	if ($1 =~ /^deparse(,.+)?$/) {
 	    $deparse = 1;
@@ -125,9 +125,11 @@ unless (@ARGV) {
 if ($deparse) {
     _testprogs('deparse', '',   @ARGV);
 }
-elsif( $compile || $byte_compile ) { 
-    _testprogs('compile', '',   @ARGV) if $compile;
-    _testprogs('compile', '-B', @ARGV) if $byte_compile;
+elsif( $compile ) { 
+    _testprogs('compile', '',   @ARGV);
+}
+elsif( $bytecompile ) {
+    _testprogs('bytecompile', '', @ARGV);
 }
 else {
     _testprogs('compile', '',   @ARGV) if -e "../testcompile";
@@ -148,6 +150,12 @@ EOT
     print <<'EOT' if ($type eq 'deparse');
 ------------------------------------------------------------------------------
 TESTING DEPARSER
+------------------------------------------------------------------------------
+EOT
+
+    print <<EOT if ($type eq 'bytecompile');
+------------------------------------------------------------------------------
+TESTING BYTECODE COMPILER
 ------------------------------------------------------------------------------
 EOT
 
@@ -234,6 +242,23 @@ EOT
 		"&& ./perl $testswitch $switch -I../lib $test.dp |";
 	    open(RESULTS, $deparse)
 		or print "can't deparse '$deparse': $!.\n";
+	}
+	elsif ($type eq 'bytecompile') {
+	    my $perl = $ENV{PERL} || './perl';
+	    my $redir = ($^O eq 'VMS' ? '2>&1' : '');
+	    my $bswitch = "-MO=Bytecode,-H,-TI,-s`pwd`/$test,";
+	    $bswitch .= "-TF$test.plc,"
+		if $test =~ m(chdir|pod/|CGI/t/carp|lib/DB);
+	    $bswitch .= "-k,"
+		if $test =~ m(deparse|terse|ext/Storable/t/code);
+	    $bswitch .= "-b,"
+		if $test =~ m(op/getpid);
+	    my $bytecompile =
+		"$perl $testswitch $switch -I../lib $bswitch". 
+		"-o$test.plc $test 2>/dev/null &&".
+		"$perl $testswitch $switch $utf $test.plc $redir|";
+	    open(RESULTS,$bytecompile)
+		or print "can't byte-compile '$bytecompile': $!.\n";
 	}
 	elsif ($type eq 'perl') {
 	    my $perl = $ENV{PERL} || './perl';

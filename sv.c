@@ -10616,6 +10616,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvNVX(&PL_sv_yes)		= 1;
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_yes, &PL_sv_yes);
 
+    SvANY(&PL_sv_placeholder)	= NULL;
+    SvREFCNT(&PL_sv_placeholder)= (~(U32)0)/2;
+    SvFLAGS(&PL_sv_placeholder)	= SVf_READONLY|SVt_NULL;
+    ptr_table_store(PL_ptr_table, &proto_perl->Isv_placeholder, &PL_sv_placeholder);
+
     /* create (a non-shared!) shared string table */
     PL_strtab		= newHV();
     HvSHAREKEYS_off(PL_strtab);

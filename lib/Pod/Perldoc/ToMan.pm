@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 # This class is unlike ToText.pm et al, because we're NOT paging thru
-# the output in that our particular format -- we make the output and
+# the output in our particular format -- we make the output and
 # then we run nroff (or whatever) on it, and then page thru the
 # (plaintext) output of THAT!
 
@@ -54,7 +54,12 @@ sub parse_from_file {
     )
     . " $switches --lax $file | $render -man"
   ;               # no temp file, just a pipe!
-  
+
+  # I hear persistent reports that adding a -c switch to $render
+  # solves many people's problems.  But I also hear that some mans
+  # don't have a -c switch, so that adding it here would presumably
+  # be a Bad Thing   -- sburke@cpan.org
+
   $command .= " | col -x" if $^O =~ /hpux/;
   
   defined(&Pod::Perldoc::DEBUG)

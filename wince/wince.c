@@ -9,6 +9,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define WIN32IO_IS_STDIO
 #include <windows.h>
+#include <signal.h>
 
 #define PERLIO_NOT_STDIO 0 
 
@@ -363,12 +364,6 @@ win32_signal(int sig, Sighandler_t subcode)
   return FALSE;
 }
 
-DllExport void
-win32_clearenv()
-{
-  return;
-}
-
 
 DllExport char ***
 win32_environ(void)
@@ -606,11 +601,76 @@ win32_uname(struct utsname *name)
     return 0;
 }
 
+void
+sig_terminate(pTHX_ int sig)
+{
+     Perl_warn(aTHX_ "Terminating on signal SIG%s(%d)\n",PL_sig_name[sig], sig);
+    /* exit() seems to be safe, my_exit() or die() is a problem in ^C 
+       thread 
+     */
+    exit(sig);
+}
+
+void
 DllExport int
 win32_async_check(pTHX)
 {
-  Perl_croak(aTHX_ "win32_async_check() TBD on this platform");
-  return 0;
+    MSG msg;
+    int ours = 1;
+    /* Passing PeekMessage -1 as HWND (2nd arg) only get PostThreadMessage() messages
+     * and ignores window messages - should co-exist better with windows apps e.g. Tk
+     */
+    while (PeekMessage(&msg, (HWND)-1, 0, 0, PM_REMOVE|PM_NOYIELD)) {
+	int sig;
+	switch(msg.message) {
+
+#if 0
+    /* Perhaps some other messages could map to signals ? ... */
+        case WM_CLOSE:
+        case WM_QUIT:
+	    /* Treat WM_QUIT like SIGHUP?  */
+	    sig = SIGHUP;
+	    goto Raise;
+	    break;
+#endif
+	/* We use WM_USER to fake kill() with other signals */
+	case WM_USER: {
+	    sig = msg.wParam;
+	Raise:
+	    if (do_raise(aTHX_ sig)) {
+		   sig_terminate(aTHX_ sig);
+	    }
+	    break;
+	}
+
+	case WM_TIMER: {
+	    /* alarm() is a one-shot but SetTimer() repeats so kill it */
+	    if (w32_timerid) {
+	    	KillTimer(NULL,w32_timerid);
+	    	w32_timerid=0;
+	    }
+	    /* Now fake a call to signal handler */
+	    if (do_raise(aTHX_ 14)) {
+	    	sig_terminate(aTHX_ 14);
+	    }
+	    break;
+	}
+
+	/* Otherwise do normal Win32 thing - in case it is useful */
+	default:
+	    TranslateMessage(&msg);
+	    DispatchMessage(&msg);
+	    ours = 0;
+	    break;
+	}
+    }
+    w32_poll_count = 0;
+
+    /* Above or other stuff may have set a signal flag */
+    if (PL_sig_pending) {
+	despatch_signals();
+    }
+    return ours;
 }
 
 /* This function will not return until the timeout has elapsed, or until
@@ -650,6 +710,76 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
     ticks = timeout - ticks;
     /* If we are past the end say zero */
     return (ticks > 0) ? ticks : 0;
+}
+
+/* Timing related stuff */
+
+int
+do_raise(pTHX_ int sig) 
+{
+    if (sig < SIG_SIZE) {
+	Sighandler_t handler = w32_sighandler[sig];
+	if (handler == SIG_IGN) {
+	    return 0;
+	}
+	else if (handler != SIG_DFL) {
+	    (*handler)(sig);
+	    return 0;
+	}
+	else {
+	    /* Choose correct default behaviour */
+	    switch (sig) {
+#ifdef SIGCLD
+		case SIGCLD:
+#endif
+#ifdef SIGCHLD
+		case SIGCHLD:
+#endif
+		case 0:
+		    return 0;
+		case SIGTERM:
+		default:
+		    break;
+	    }
+	}
+    }
+    /* Tell caller to exit thread/process as approriate */
+    return 1;
+}
+
+/* Timing related stuff */
+
+int
+do_raise(pTHX_ int sig) 
+{
+    if (sig < SIG_SIZE) {
+	Sighandler_t handler = w32_sighandler[sig];
+	if (handler == SIG_IGN) {
+	    return 0;
+	}
+	else if (handler != SIG_DFL) {
+	    (*handler)(sig);
+	    return 0;
+	}
+	else {
+	    /* Choose correct default behaviour */
+	    switch (sig) {
+#ifdef SIGCLD
+		case SIGCLD:
+#endif
+#ifdef SIGCHLD
+		case SIGCHLD:
+#endif
+		case 0:
+		    return 0;
+		case SIGTERM:
+		default:
+		    break;
+	    }
+	}
+    }
+    /* Tell caller to exit thread/process as approriate */
+    return 1;
 }
 
 static UINT timerid = 0;
@@ -1589,6 +1719,70 @@ qualified_path(const char *cmd)
     return Nullch;
 }
 
+/* The following are just place holders.
+ * Some hosts may provide and environment that the OS is
+ * not tracking, therefore, these host must provide that
+ * environment and the current directory to CreateProcess
+ */
+
+DllExport void*
+win32_get_childenv(void)
+{
+    return NULL;
+}
+
+DllExport void
+win32_free_childenv(void* d)
+{
+}
+
+DllExport void
+win32_clearenv(void)
+{
+    char *envv = GetEnvironmentStrings();
+    char *cur = envv;
+    STRLEN len;
+    while (*cur) {
+	char *end = strchr(cur,'=');
+	if (end && end != cur) {
+	    *end = '\0';
+	    xcesetenv(cur, "", 0);
+	    *end = '=';
+	    cur = end + strlen(end+1)+2;
+	}
+	else if ((len = strlen(cur)))
+	    cur += len+1;
+    }
+    FreeEnvironmentStrings(envv);
+}
+
+DllExport char*
+win32_get_childdir(void)
+{
+    dTHX;
+    char* ptr;
+    char szfilename[(MAX_PATH+1)*2];
+    if (USING_WIDE()) {
+	WCHAR wfilename[MAX_PATH+1];
+	GetCurrentDirectoryW(MAX_PATH+1, wfilename);
+	W2AHELPER(wfilename, szfilename, sizeof(szfilename));
+    }
+    else {
+	GetCurrentDirectoryA(MAX_PATH+1, szfilename);
+    }
+
+    New(0, ptr, strlen(szfilename)+1, char);
+    strcpy(ptr, szfilename);
+    return ptr;
+}
+
+DllExport void
+win32_free_childdir(char* d)
+{
+    dTHX;
+    Safefree(d);
+}
+
 /* XXX this needs to be made more compatible with the spawnvp()
  * provided by the various RTLs.  In particular, searching for
  * *.{com,bat,cmd} files (as done by the RTLs) is unimplemented.
@@ -2064,13 +2258,6 @@ Perl_win32_init(int *argcp, char ***argvp)
   MALLOC_INIT;
 }
 
-void
-Perl_win32_term(void)
-{
-    OP_REFCNT_TERM;
-    MALLOC_TERM;
-}
-
 DllExport void
 Perl_win32_term(void)
 {
@@ -2107,12 +2294,6 @@ win32_wait(int *status)
   dTHX;
   Perl_croak(aTHX_ PL_no_func, "wait");
   return -1;
-}
-
-int
-do_spawn(char *cmd)
-{
-  return xcesystem(cmd);
 }
 
 int
