@@ -574,7 +574,7 @@ PP(pp_sort)
 	    if (!(cv && CvROOT(cv))) {
 		if (gv) {
 		    SV *tmpstr = sv_newmortal();
-		    gv_efullname(tmpstr, gv, Nullch);
+		    gv_efullname3(tmpstr, gv, Nullch);
 		    if (cv && CvXSUB(cv))
 			DIE("Xsub \"%s\" called in sort", SvPVX(tmpstr));
 		    DIE("Undefined sort subroutine \"%s\" called",
@@ -1114,7 +1114,7 @@ PP(pp_caller)
 	RETURN;
     if (cx->cx_type == CXt_SUB) { /* So is cxstack[dbcxix]. */
 	sv = NEWSV(49, 0);
-	gv_efullname(sv, CvGV(cxstack[cxix].blk_sub.cv), Nullch);
+	gv_efullname3(sv, CvGV(cxstack[cxix].blk_sub.cv), Nullch);
 	PUSHs(sv_2mortal(sv));
 	PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
     }
@@ -1201,6 +1201,36 @@ const void *b;
     }
     if (!SvPOKp(str2))
 	return 1;
+
+    if (lc_collate_active) {	/* NOTE: this is the LC_COLLATE branch */
+      register char * pv1, * pv2, * pvx;
+      STRLEN cur1, cur2, curx;
+
+      pv1 = SvPV(str1, cur1);
+      pvx = mem_collxfrm(pv1, cur1, &curx);
+      pv1 = pvx;
+      cur1 = curx;
+
+      pv2 = SvPV(str2, cur2);
+      pvx = mem_collxfrm(pv2, cur2, &curx);
+      pv2 = pvx;
+      cur2 = curx;
+
+      retval = memcmp((void *)pv1, (void *)pv2, cur1 < cur2 ? cur1 : cur2);
+
+      Safefree(pv1);
+      Safefree(pv2);
+
+      if (retval)
+	return retval < 0 ? -1 : 1;
+
+      if (cur1 == cur2)
+	return 0;
+      else
+	return cur1 < cur2 ? -1 : 1;
+    }
+
+    /* NOTE: this is the non-LC_COLLATE area */
 
     if (SvCUR(str1) < SvCUR(str2)) {
 	/*SUPPRESS 560*/
@@ -1623,7 +1653,7 @@ PP(pp_goto)
 	    if (!CvROOT(cv) && !CvXSUB(cv)) {
 		if (CvGV(cv)) {
 		    SV *tmpstr = sv_newmortal();
-		    gv_efullname(tmpstr, CvGV(cv), Nullch);
+		    gv_efullname3(tmpstr, CvGV(cv), Nullch);
 		    DIE("Goto undefined subroutine &%s",SvPVX(tmpstr));
 		}
 		DIE("Goto undefined subroutine");
@@ -1764,7 +1794,7 @@ PP(pp_goto)
 		    /* &xsub is not copying @_ */
 		    SV *sv = GvSV(DBsub);
 		    save_item(sv);
-		    gv_efullname(sv, CvGV(cv), Nullch);
+		    gv_efullname3(sv, CvGV(cv), Nullch);
 		    /* We do not care about using sv to call CV,
 		     * just for info. */
 		}
