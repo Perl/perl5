@@ -222,148 +222,8 @@ Okay, that's I<definitely> enough hype.
 =head1 AVAILABILITY
 
 Perl is available for most operating systems, including virtually
-all Unix-like platforms.
-
-As of early March 2000 (the Perl release 5.6.0), the following
-platforms are able to build Perl from the standard source code
-distribution available at http://www.perl.com/CPAN/src/index.html
-
-	AIX
-	DOS DJGPP 	1)
-	FreeBSD
-	HP-UX
-	IRIX
-	Linux
-	LynxOS
-	MachTen
-	MPE/iX
-	NetBSD
-	OpenBSD
-	OS/2
-	Rhapsody/Darwin 2)
-	Solaris
-	Tru64 UNIX      3)
-	UNICOS
-	UNICOS/mk
-	VMS
-	VOS
-	Windows 3.1     1)
-	Windows 95      1) 4)
-	Windows 98      1) 4)
-	Windows NT      1) 4)
-
-        1) in DOS mode either the DOS or OS/2 ports can be used
-        2) new in 5.6.0: the BSD/NeXT-based UNIX of Mac OS X
-        3) formerly known as Digital UNIX and before that DEC OSF/1
-        4) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
-
-The following platforms worked for the previous major release
-(5.005_03 being the latest maintenance release of that, as of early
-March 2000), but be did not manage to test these in time for the 5.6.0
-release of Perl.  There is a very good chance that these will work
-just fine with 5.6.0.
-
-	A/UX
-	BeOS
-	BSD/OS
-	DG/UX
-	DYNIX/ptx
-	DomainOS
-	Hurd
-	NextSTEP
-	OpenSTEP
-	PowerMAX
-	QNX
-	SCO ODT/OSR	
-	SunOS
-	SVR4
-	Ultrix
-
-The following platform worked for the previous major release (5.005_03
-being the latest maintenance release of that, as of early March 2000).
-However, standardization on UTF-8 as the internal string representation
-in 5.6.0 has introduced incompatibilities in this EBCDIC platform.
-Support for this platform may be enabled in a future release:
-
-	OS390	1)
-
-	1) Previously known as MVS, or OpenEdition MVS.
-
-Strongly related to the OS390 platform by also being EBCDIC-based
-mainframe platforms are the following platforms:
-
-	BS2000
-	VM/ESA
-
-These are also not expected to work under 5.6.0 for the same reasons
-as OS390.  Contact the mailing list perl-mvs@perl.org for more details.
-
-MacOS (Classic, pre-X) is almost 5.6.0-ready; building from the source
-does work with 5.6.0, but additional MacOS specific source code is needed
-for a complete port.  Contact the mailing list macperl-porters@macperl.org
-for more more information.
-
-The following platforms have been known to build Perl from source in
-the past, but we haven't been able to verify their status for the
-current release, either because the hardware/software platforms are
-rare or because we don't have an active champion on these
-platforms--or both:
-
-	3b1
-	AmigaOS
-	ConvexOS
-	CX/UX
-	DC/OSx
-	DDE SMES
-	DOS EMX
-	Dynix
-	EP/IX
-	ESIX
-	FPS
-	GENIX
-	Greenhills
-	ISC
-	MachTen 68k
-	MiNT
-	MPC
-	NEWS-OS
-	Opus
-	Plan 9
-	PowerUX
-	RISC/os
-	Stellar
-	SVR2
-	TI1500
-	TitanOS
-	Unisys Dynix
-	Unixware
-
-Support for the following platform is planned for a future Perl release:
-
-	Netware
-
-The following platforms have their own source code distributions and
-binaries available via http://www.perl.com/CPAN/ports/index.html:
-
-				Perl release
-
-	AS/400			5.003
-	Netware			5.003_07
-	Tandem Guardian		5.004
-
-The following platforms have only binaries available via
-http://www.perl.com/CPAN/ports/index.html:
-
-				Perl release
-
-	Acorn RISCOS		5.005_02
-	AOS			5.002
-	LynxOS			5.004_02
-
-Although we do suggest that you always build your own Perl from
-the source code, both for maximal configurability and for security,
-in case you are in a hurry you can check
-http://www.perl.com/CPAN/ports/index.html for binary distributions.
+all Unix-like platforms.  See L<perlport/"Supported Platforms">
+for a listing.
 
 =head1 ENVIRONMENT
 
@@ -432,7 +292,7 @@ affected by wraparound).
 You may mail your bug reports (be sure to include full configuration
 information as output by the myconfig program in the perl source
 tree, or by C<perl -V>) to perlbug@perl.com .  If you've succeeded
-in compiling perl, the perlbug script in the utils/ subdirectory
+in compiling perl, the B<perlbug> script in the F<utils/> subdirectory
 can be used to help mail in a bug report.
 
 Perl actually stands for Pathologically Eclectic Rubbish Lister, but
