@@ -132,7 +132,8 @@ $i++;
 do_require("$utf8\nprint \"ok $i\n\"; 1;\n");
 $i++;
 do_require("$utf16\n1;");
-print "ok $i\n" if $@ =~ /Unsupported script encoding/;
+print "not " unless $@ =~ /^Unrecognized character /;
+print "ok $i\n";
 
 END { 1 while unlink 'bleah.pm'; 1 while unlink 'bleah.do'; }
 
