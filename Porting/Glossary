@@ -11,9 +11,9 @@ _a (Unix.U):
 
 _exe (Unix.U):
 	This variable defines the extension used for executable files.
-	DJGPP, Cygwin and OS/2 use '.exe'.  Stratus VOS uses '.pm'.
-	No other operating systems require an extension for executable
-	files, so it is empty for all others.
+	DJGPP, Cygwin and OS/2 use '.exe'.  Stratus VOS uses '.pm'. On
+	operating systems which do not require a specific extension for
+	executable files, this variable is empty.
 
 _o (Unix.U):
 	This variable defines the extension used for object files.
