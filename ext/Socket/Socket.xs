@@ -678,7 +678,7 @@ unpack_sockaddr_un(sun_sv)
 
 void
 pack_sockaddr_in(port,ip_address)
-	short	port
+	unsigned short	port
 	char *	ip_address
 	CODE:
 	{
@@ -699,7 +699,7 @@ unpack_sockaddr_in(sin_sv)
 	{
 	STRLEN sockaddrlen;
 	struct sockaddr_in addr;
-	short	port;
+	unsigned short	port;
 	struct in_addr	ip_address;
 	char *	sin = SvPV(sin_sv,sockaddrlen);
 	if (sockaddrlen != sizeof(addr)) {
@@ -718,7 +718,7 @@ unpack_sockaddr_in(sin_sv)
 	ip_address = addr.sin_addr;
 
 	EXTEND(sp, 2);
-	PUSHs(sv_2mortal(newSViv(port)));
+	PUSHs(sv_2mortal(newSViv((IV) port)));
 	PUSHs(sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address)));
 	}
 
