@@ -31,7 +31,8 @@ eval {
 # cannot expect this to fail reliably with stdio.
 my $stdio = !exists  $Config{useperlio} ||
 	    !defined $Config{useperlio} ||
-	    (exists $ENV{PERLIO} && $ENV{PERLIO} eq 'stdio');
+	    (exists $ENV{PERLIO} && $ENV{PERLIO} eq 'stdio') ||
+	    defined $Config{usefaststdio};
 print "not " unless $@ =~ /^Reading from filehandle failed at/ || $stdio;
 print "ok 3\n";
 
