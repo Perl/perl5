@@ -31,6 +31,191 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12440] By: jhi                                   on 2001/10/15  12:58:24
+        Log: MacOS Classic catdir() rewrite from Thomas Wegner
+             (backward incompatibility, but a deliberate one,
+             the old version simply is broken in its logic),
+             also documentation updates, and as suggested replicated
+             the File::Spec::Unix documentation updates also on the
+             File::Spec documentation.
+             
+             TODO: there seems to be duplication of documentation
+             between File::Spec and File::Spec::Unix.  I think
+             the ::Unix should be left only with specific UNIXisms,
+             and all the generic documentation should be in ::Spec.
+     Branch: perl
+	   ! lib/File/Find/t/find.t lib/File/Find/t/taint.t
+	   ! lib/File/Spec.pm lib/File/Spec.t lib/File/Spec/Mac.pm
+	   ! lib/File/Spec/Unix.pm
+____________________________________________________________________________
+[ 12439] By: jhi                                   on 2001/10/15  12:32:07
+        Log: Subject: Re: [PATCH t/op/magic.t] missing tests on Win32
+             From: Blair Zajac <blair@orcaware.com>
+             Date: Mon, 24 Sep 2001 11:48:58 -0700
+             Message-ID: <3BAF801A.88A4F614@orcaware.com>     
+             
+             (the skip() messages)
+     Branch: perl
+	   ! t/op/magic.t
+____________________________________________________________________________
+[ 12438] By: ams                                   on 2001/10/14  23:43:59
+        Log: Subject: [PATCH] make PerlIO default on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 14 Oct 2001 15:27:18 -0500
+             Message-Id: <5.1.0.14.0.20011014152339.021ec150@exchi01>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 12437] By: jhi                                   on 2001/10/14  23:05:57
+        Log: Retract #12436 (Abhijit already did this at #12426)
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 12436] By: jhi                                   on 2001/10/14  21:22:43
+        Log: (retracted by #12437)
+             Subject: [PATCH lib/ExtUtils/MM_Unix.pm] MakeMaker tries to parse commented out $VERSION
+             From: =?iso-8859-1?Q?Kay_R=F6pke?= <kroepke@dolphin-services.de>
+             Date: Sat, 13 Oct 2001 20:33:55 +0200
+             Message-Id: <E15sTbe-0001nt-00@mrvdom04.kundenserver.de>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 12435] By: jhi                                   on 2001/10/14  21:21:52
+        Log: Subject: h2xs grammar nit
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Fri, 12 Oct 2001 00:12:01 -0700 (PDT)
+             Message-ID: <Pine.GSU.4.21.0110120010540.9710-100000@garcia.efn.org>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 12434] By: jhi                                   on 2001/10/14  13:48:30
+        Log: Subject: [PATCH @12422] Fix scoping problem with FATAL warnings
+             From: "Paul Marquess" <Paul_Marquess@yahoo.co.uk>
+             Date: Sun, 14 Oct 2001 11:25:08 +0100
+             Message-ID: <AIEAJICLCBDNAAOLLOKLCEFDDCAA.Paul_Marquess@Yahoo.co.uk>
+     Branch: perl
+	   ! lib/warnings.pm pod/perllexwarn.pod t/lib/warnings/7fatal
+	   ! warnings.pl
+____________________________________________________________________________
+[ 12433] By: jhi                                   on 2001/10/13  23:20:11
+        Log: Use File::Spec (needs Thomas Wegner's upcoming patch
+             for File::Spec::Mac::catfile)
+     Branch: perl
+	   ! lib/h2xs.t
+____________________________________________________________________________
+[ 12432] By: jhi                                   on 2001/10/13  23:17:31
+        Log: Subject: [PATCH] Re: default module version for h2xs (was Re: [PATCH] Re: What sort of Makefile.PL should h2xs write?)   
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 13 Oct 2001 00:07:31 +0100
+             Message-ID: <20011013000731.D67535@plum.flirble.org>
+     Branch: perl
+	   ! lib/h2xs.t utils/h2xs.PL
+____________________________________________________________________________
+[ 12431] By: jhi                                   on 2001/10/13  22:35:58
+        Log: Define PASTHRU_DEFINE and PASTHRU_INC (which are used
+             before DEFINE and INC), and repent by taking DEFINE and
+             INC away from PASTHRU.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 12430] By: jhi                                   on 2001/10/13  21:23:09
+        Log: More MANIFEST anomalies.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12429] By: jhi                                   on 2001/10/13  21:01:32
+        Log: Not that many.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12428] By: sky                                   on 2001/10/13  20:59:27
+        Log: Subject: [DOC PATCH] pod syntax fixups for File::Spec::* modules
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sat, 13 Oct 2001 23:15:55 +0200
+             Message-ID: <20011013231555.A18071@rafael>
+     Branch: perl
+	   ! lib/File/Spec.pm lib/File/Spec/Epoc.pm lib/File/Spec/Mac.pm
+	   ! lib/File/Spec/Unix.pm lib/File/Spec/Win32.pm
+____________________________________________________________________________
+[ 12427] By: jhi                                   on 2001/10/13  20:54:17
+        Log: Rewrite mktables from scratch.
+             - Cleaner.
+             - Faster: 15-20 seconds as opposed to several minutes.
+             - More dynamic: the names of the various categories
+             such as the linebreak ones are dynamic, not static.
+             - Is.pl: long names for the general category properties
+             are now available.
+             - Ranges (<... ,First>, <..., Last>) from the general
+             categories work now.
+             - No more mktables.PL because the mktables.PL is not
+             and never has been run to create a mktables.
+             - syllables.txt and Is/Syl*.pl removed: non-standard
+             (not part of the Unicode), and the whole concept is
+             being reworked (http://syllabary.sourceforge.net/),
+             the old way wouldn't even work with the new Syllables.txt
+             (it would result in 1000+ new categories)
+     Branch: perl
+	   + lib/unicore/In/163.pl lib/unicore/In/164.pl
+	   + lib/unicore/In/165.pl lib/unicore/In/166.pl
+	   + lib/unicore/In/167.pl lib/unicore/In/168.pl
+	   + lib/unicore/In/169.pl lib/unicore/In/170.pl
+	   + lib/unicore/In/171.pl lib/unicore/Is.pl
+	   + lib/unicore/Is/Title.pl lib/unicore/Lbrk.pl
+	   + lib/unicore/mktables
+	   - lib/unicore/Is/SylA.pl lib/unicore/Is/SylAA.pl
+	   - lib/unicore/Is/SylAAI.pl lib/unicore/Is/SylAI.pl
+	   - lib/unicore/Is/SylC.pl lib/unicore/Is/SylE.pl
+	   - lib/unicore/Is/SylEE.pl lib/unicore/Is/SylI.pl
+	   - lib/unicore/Is/SylII.pl lib/unicore/Is/SylN.pl
+	   - lib/unicore/Is/SylO.pl lib/unicore/Is/SylOO.pl
+	   - lib/unicore/Is/SylU.pl lib/unicore/Is/SylV.pl
+	   - lib/unicore/Is/SylWA.pl lib/unicore/Is/SylWAA.pl
+	   - lib/unicore/Is/SylWC.pl lib/unicore/Is/SylWE.pl
+	   - lib/unicore/Is/SylWEE.pl lib/unicore/Is/SylWI.pl
+	   - lib/unicore/Is/SylWII.pl lib/unicore/Is/SylWO.pl
+	   - lib/unicore/Is/SylWOO.pl lib/unicore/Is/SylWU.pl
+	   - lib/unicore/Is/SylWV.pl lib/unicore/Is/Syllable.pl
+	   - lib/unicore/syllables.txt
+	   ! (edit 304 files)
+____________________________________________________________________________
+[ 12426] By: ams                                   on 2001/10/13  18:05:36
+        Log: ExtUtils::MM_Unix should ignore comments when searching for
+             $VERSION.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 12425] By: jhi                                   on 2001/10/13  12:26:41
+        Log: Subject: Re: New module XML::Clean
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 13 Oct 2001 10:17:09 +0200
+             Message-ID: <m37ku0t0my.fsf@anima.de>
+     Branch: perl
+	   ! pod/perlnewmod.pod
+____________________________________________________________________________
+[ 12424] By: sky                                   on 2001/10/13  09:39:59
+        Log: Set thread stack size if needed.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 12423] By: sky                                   on 2001/10/13  09:36:49
+        Log: We do want to set the attribute to joinable even on modern posix
+             platforms.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 12422] By: jhi                                   on 2001/10/13  02:04:44
+        Log: Subject: [PATCH ext/Data/Dumper.xs]
+             From: Brian Ingerson <ingy@ttul.org>
+             Date: Fri, 12 Oct 2001 19:32:35 -0700
+             Message-ID: <20011012193235.B889@ttul.org>
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.xs
+____________________________________________________________________________
+[ 12421] By: jhi                                   on 2001/10/12  23:22:45
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12420] By: jhi                                   on 2001/10/12  22:51:17
         Log: FAQ sync.
      Branch: perl
