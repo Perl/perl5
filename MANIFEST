@@ -1893,6 +1893,7 @@ t/comp/term.t			See if more terms work
 t/comp/use.t			See if pragmas work
 t/harness			Finer diagnostics from test suite
 t/io/argv.t			See if ARGV stuff works
+t/io/binmode.t                  See if binmode() works
 t/io/dup.t			See if >& works right
 t/io/fflush.t			See if auto-flush on fork/exec/system/qx works
 t/io/fs.t			See if directory manipulations work

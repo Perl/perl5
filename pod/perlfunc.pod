@@ -450,13 +450,12 @@ on systems where the run-time libraries distinguish between binary and
 text files.  If FILEHANDLE is an expression, the value is taken as the
 name of the filehandle.  DISCIPLINE can be either of C<":raw"> for
 binary mode or C<":crlf"> for "text" mode.  If the DISCIPLINE is
-omitted, it defaults to C<":raw">.
+omitted, it defaults to C<":raw">.  Returns true on success, C<undef> on
+failure.
 
 binmode() should be called after open() but before any I/O is done on
 the filehandle.
 
-On many systems binmode() currently has no effect, but in future, it
-will be extended to support user-defined input and output disciplines.
 On some systems binmode() is necessary when you're not working with a
 text file.  For the sake of portability it is a good idea to always use
 it when appropriate, and to never use it when it isn't appropriate.
@@ -3807,6 +3806,57 @@ The require function will look for the "F<Foo::Bar>" file in the @INC array and
 will complain about not finding "F<Foo::Bar>" there.  In this case you can do:
 
         eval "require $class";
+
+You can also insert hooks into the import facility, by putting directly
+Perl code into the @INC array.  There are three forms of hooks: subroutine
+references, array references and blessed objects.
+
+Subroutine references are the simplest case.  When the inclusion system
+walks through @INC and encounters a subroutine, this subroutine gets
+called with two parameters, the first being a reference to itself, and the
+second the name of the file to be included (e.g. "F<Foo/Bar.pm>").  The
+subroutine should return C<undef> or a filehandle, from which the file to
+include will be read.  If C<undef> is returned, C<require> will look at
+the remaining elements of @INC.
+
+If the hook is an array reference, its first element must be a subroutine
+reference.  This subroutine is called as above, but the first parameter is
+the array reference.  This enables to pass indirectly some arguments to
+the subroutine.
+
+In other words, you can write:
+
+    push @INC, \&my_sub;
+    sub my_sub {
+	my ($coderef, $filename) = @_;	# $coderef is \&my_sub
+	...
+    }
+
+or:
+
+    push @INC, [ \&my_sub, $x, $y, ... ];
+    sub my_sub {
+	my ($arrayref, $filename) = @_;
+	# Retrieve $x, $y, ...
+	my @parameters = @$arrayref[1..$#$arrayref];
+	...
+    }
+
+If the hook is an object, it must provide an INC method, that will be
+called as above, the first parameter being the object itself.  (Note that
+you must fully qualify the sub's name, as it is always forced into package
+C<main>.)  Here is a typical code layout:
+
+    # In Foo.pm
+    package Foo;
+    sub new { ... }
+    sub Foo::INC {
+	my ($self, $filename) = @_;
+	...
+    }
+
+    # In the main program
+    push @INC, new Foo(...);
 
 For a yet-more-powerful import facility, see L</use> and L<perlmod>.
 

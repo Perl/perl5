@@ -1554,6 +1554,64 @@ the module maintainer (with a copy to p5p).  This will help the module
 maintainer keep the CPAN version in sync with the core version without
 constantly scanning p5p.
 
+=head2 Adding a new function to the core
+
+If, as part of a patch to fix a bug, or just because you have an
+especially good idea, you decide to add a new function to the core,
+discuss your ideas on p5p well before you start work.  It may be that
+someone else has already attempted to do what you are considering and
+can give lots of good advice or even provide you with bits of code
+that they already started (but never finished).
+
+You have to follow all of the advice given above for patching.  It is
+extremely important to test any addition thoroughly and add new tests
+to explore all boundary conditions that your new function is expected
+to handle.  If your new function is used only by one module (e.g. toke),
+then it should probably be named S_your_function (for static); on the
+other hand, if you expect it to accessable from other functions in
+Perl, you should name it Perl_your_function.  See L<perlguts/Internal Functions>
+for more details.
+
+The location of any new code is also an important consideration.  Don't
+just create a new top level .c file and put your code there; you would
+have to make changes to Configure (so the Makefile is created properly),
+as well as possibly lots of include files.  This is strictly pumpking
+business.
+
+It is better to add your function to one of the existing top level
+source code files, but your choice is complicated by the nature of
+the Perl distribution.  Only the files that are marked as compiled
+static are located in the perl executable.  Everything else is located
+in the shared library (or DLL if you are running under WIN32).  So,
+for example, if a function was only used by functions located in
+toke.c, then your code can go in toke.c.  If, however, you want to call
+the function from universal.c, then you should put your code in another
+location, for example util.c.
+
+In addition to writing your c-code, you will need to create an
+appropriate entry in embed.pl describing your function, then run
+'make regen_headers' to create the entries in the numerous header
+files that perl needs to compile correctly.  See L<perlguts/Internal Functions>
+for information on the various options that you can set in embed.pl.
+You will forget to do this a few (or many) times and you will get
+warnings during the compilation phase.  Make sure that you mention
+this when you post your patch to P5P; the pumpking needs to know this.
+
+When you write your new code, please be conscious of existing code
+conventions used in the perl source files.  See <perlstyle> for
+details.  Although most of the guidelines discussed seem to focus on
+Perl code, rather than c, they all apply (except when they don't ;).
+See also I<Porting/patching.pod> file in the Perl source distribution
+for lots of details about both formatting and submitting patches of
+your changes.
+
+Lastly, TEST TEST TEST TEST TEST any code before posting to p5p.
+Test on as many platforms as you can find.  Test as many perl
+Configure options as you can (e.g. MULTIPLICITY).  If you have
+profiling or memory tools, see L<EXTERNAL TOOLS FOR DEBUGGING PERL>
+below for how to use them to futher test your code.  Remember that
+most of the people on P5P are doing this on their own time and
+don't have the time to debug your code.
 
 =head2 Writing a test
 

@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..113\n";
+print "1..130\n";
 
 sub try ($$) {
    print +($_[1] ? "ok" : "not ok"), " $_[0]\n";
@@ -211,3 +211,29 @@ tryeq 110, 1 + " 1", 2;
 tryeq 111, 3 + " -1", 2;
 tryeq 112, 1.2, " 1.2";
 tryeq 113, -1.2, " -1.2";
+
+# divide
+
+tryeq 114, 28/14, 2;
+tryeq 115, 28/-7, -4;
+tryeq 116, -28/4, -7;
+tryeq 117, -28/-2, 14;
+
+tryeq 118, 0x80000000/1, 0x80000000;
+tryeq 119, 0x80000000/-1, -0x80000000;
+tryeq 120, -0x80000000/1, -0x80000000;
+tryeq 121, -0x80000000/-1, 0x80000000;
+
+# The example for sloppy divide, rigged to avoid the peephole optimiser.
+tryeq 122, "20." / "5.", 4;
+
+tryeq 123, 2.5 / 2, 1.25;
+tryeq 124, 3.5 / -2, -1.75;
+tryeq 125, -4.5 / 2, -2.25;
+tryeq 126, -5.5 / -2, 2.75;
+
+# Bluuurg if your floating point can't accurately cope with powers of 2
+tryeq 127, 18446744073709551616/1, 18446744073709551616;
+tryeq 128, 18446744073709551616/2, 9223372036854775808;
+tryeq 129, 18446744073709551616/4294967296, 4294967296;
+tryeq 130, 18446744073709551616/9223372036854775808, 2;

@@ -439,16 +439,9 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #endif
 
 /* Use the reentrant APIs like localtime_r and getpwent_r */
-#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API)
+/* Win32 has naturally threadsafe libraries, no need to use any _r variants. */
+#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(WIN32)
 #   define USE_REENTRANT_API
-#endif
-
-/* Win32 has naturally threadsafe libraries,
- * no need to use any _r variants. */
-#ifdef USE_REENTRANT_API
-#   ifdef WIN32
-#       undef USE_REEENTRANT_API
-#   endif
 #endif
 
 /* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that

@@ -254,7 +254,7 @@ sub Pick {\n\
 	}
 	*d = '\0';
 	for (d=tokenbuf; *d; d++)
-	    *d += 128;
+           *d += (char)128;
 	str_cat(str,tokenbuf);
 	str_free(tmpstr);
 	str_cat(str,"/");
@@ -849,9 +849,9 @@ sub Pick {\n\
 	    tmp2str=walk(1,level,ops[ops[node+2].ival+1].ival,&numarg,P_MIN);
 	    for (t = tmp2str->str_ptr, d=tokenbuf; *t; d++,t++) {
 		if (*t == '&')
-		    *d++ = '$' + 128;
+                   *d++ = '$' + (char)128;
 		else if (*t == '$')
-		    *d++ = '\\' + 128;
+                   *d++ = '\\' + (char)128;
 		*d = *t + 128;
 	    }
 	    *d = '\0';
@@ -931,7 +931,7 @@ sub Pick {\n\
 		case '\\': case '"': case 'n': case 't': case '$':
 		    break;
 		default:	/* hide this from perl */
-		    *d++ = '\\' + 128;
+                   *d++ = '\\' + (char)128;
 		}
 	    }
 	    *d = *t + 128;
@@ -1008,7 +1008,7 @@ sub Pick {\n\
 		    strcpy(tokenbuf,"]");
 		else
 		    strcpy(tokenbuf,"}");
-		*tokenbuf += 128;
+               *tokenbuf += (char)128;
 		str_cat(str,tokenbuf);
 	    }
 	}
@@ -1060,7 +1060,7 @@ sub Pick {\n\
 	str_set(str,";");
 	tmpstr = walk(0,level,ops[node+1].ival,&numarg,P_MIN);
 	for (s = tmpstr->str_ptr; *s && *s != '\n'; s++)
-	    *s += 128;
+           *s += (char)128;
 	str_scat(str,tmpstr);
 	str_free(tmpstr);
 	tab(str,level);
@@ -1069,7 +1069,7 @@ sub Pick {\n\
 	str = str_new(0);
 	tmpstr = walk(0,level,ops[node+1].ival,&numarg,P_MIN);
 	for (s = tmpstr->str_ptr; *s && *s != '\n'; s++)
-	    *s += 128;
+           *s += (char)128;
 	str_scat(str,tmpstr);
 	str_free(tmpstr);
 	tab(str,level);
