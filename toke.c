@@ -2855,8 +2855,8 @@ yylex(void)
 		gv = Nullgv;
 		gvp = 0;
 		if (dowarn && hgv)
-		    warn("Subroutine %s::%s hidden by keyword; use ampersand",
-			 HvNAME(GvESTASH(hgv)), GvENAME(hgv));
+		    warn("Ambiguous call resolved as CORE::%s(), "
+			 "qualify as such or use &", GvENAME(hgv));
 	    }
 	}
 
