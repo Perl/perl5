@@ -94,6 +94,28 @@ Version 5.004_05        Maintenance release 5 for 5.004
       - Many other bugs fixed.
 
 
+Change 3282 by chip@perlsupport.com on 1999/04/26 23:13:39
+
+	Update Changes again for last few patches.
+
+Change 3281 by chip@perlsupport.com on 1999/04/26 23:12:28
+
+	Update OpenBSD hints.
+	(from Todd Miller <Todd.Miller@courtesan.com>)
+
+Change 3280 by chip@perlsupport.com on 1999/04/26 23:11:10
+
+	Allow AIX to use Perl's malloc if user insists on it.
+	(from Kurt Starsinic)
+
+Change 3279 by chip@perlsupport.com on 1999/04/26 23:09:26
+
+	Make &AutoLoad::AUTOLOAD reentrant.
+
+Change 3278 by chip@perlsupport.com on 1999/04/26 23:08:29
+
+	Refresh AutoLoader to 5.55.
+
 Change 3277 by chip@perlsupport.com on 1999/04/26 22:54:27
 
 	Update Changes and patchlevel.h for maint trial 9.
