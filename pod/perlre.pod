@@ -791,7 +791,7 @@ and the first "bar" thereafter.
   got <d is under the >
 
 Here's another example: let's say you'd like to match a number at the end
-of a string, and you also want to keep the preceding of part the match.
+of a string, and you also want to keep the preceding part of the match.
 So you write this:
 
     $_ = "I have 2 numbers: 53147";
