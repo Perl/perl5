@@ -178,7 +178,7 @@ hints/aix.sh		Hints for named architecture
 hints/altos486.sh	Hints for named architecture
 hints/apollo.sh		Hints for named architecture
 hints/aux.sh		Hints for named architecture
-hints/bsd386.sh		Hints for named architecture
+hints/bsdi_bsdos.sh	Hints for named architecture
 hints/convexos.sh	Hints for named architecture
 hints/cxux.sh		Hints for named architecture
 hints/dec_osf.sh	Hints for named architecture

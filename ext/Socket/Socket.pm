@@ -1,5 +1,5 @@
 package Socket;
-$VERSION = 1.3;
+$VERSION = 1.5;
 
 =head1 NAME
 
@@ -117,6 +117,7 @@ In an array context, unpacks its SOCKADDR_UN argument and returns an array
 consisting of (PATHNAME).  In a scalar context, packs its PATHANE
 arguments as a SOCKADDR_UN and returns it.  If this is confusing, use
 pack_sockaddr_un() and unpack_sockaddr_un() explicitly.
+These are only supported if your system has <sys/un.h>.
 
 =item pack_sockaddr_un PATH
 

@@ -7,7 +7,9 @@
 #  include <sys/types.h>
 # endif
 #include <sys/socket.h>
+#ifdef I_SYS_UN
 #include <sys/un.h>
+#endif
 # ifdef I_NETINET_IN
 #  include <netinet/in.h>
 # endif
@@ -632,11 +634,16 @@ pack_sockaddr_un(pathname)
 	char *	pathname
 	CODE:
 	{
+#ifdef I_SYS_UN
 	struct sockaddr_un sun_ad; /* fear using sun */
 	Zero( &sun_ad, sizeof sun_ad, char );
 	sun_ad.sun_family = AF_UNIX;
 	Copy( pathname, sun_ad.sun_path, sizeof sun_ad.sun_path, char );
 	ST(0) = sv_2mortal(newSVpv((char *)&sun_ad, sizeof sun_ad));
+#else
+	ST(0) = (SV *) not_here("pack_sockaddr_un");
+#endif
+	
 	}
 
 void
@@ -644,6 +651,7 @@ unpack_sockaddr_un(sun_sv)
 	SV *	sun_sv
 	PPCODE:
 	{
+#ifdef I_SYS_UN
 	STRLEN sockaddrlen;
 	struct sockaddr_un addr;
 	char *	sun_ad = SvPV(sun_sv,sockaddrlen);
@@ -663,6 +671,9 @@ unpack_sockaddr_un(sun_sv)
 			AF_UNIX);
 	} 
 	ST(0) = sv_2mortal(newSVpv(addr.sun_path, strlen(addr.sun_path)));
+#else
+	ST(0) = (SV *) not_here("unpack_sockaddr_un");
+#endif
 	}
 
 void

@@ -1183,6 +1183,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$i_systypes	I_SYS_TYPES		/**/
 
+/* I_SYS_UN:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/un.h> to get UNIX domain socket definitions.
+ */
+#$i_sysun I_SYS_UN		/**/
+
 /* I_TERMIO:
  *	This symbol, if defined, indicates that the program should include
  *	<termio.h> rather than <sgtty.h>.  There are also differences in
@@ -1514,6 +1520,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITEARCH_EXP "$sitearchexp"		/**/
+
+/* SITELIB_EXP:
+ *	This symbol contains the ~name expanded version of SITELIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define SITELIB_EXP "$sitelibexp"		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this

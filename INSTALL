@@ -60,7 +60,7 @@ the default installation directory, when Configure prompts you or by
 using the Configure command line option -Dprefix='/some/directory',
 e.g.
 
-	Configure -Dprefix=/opt/perl
+	sh Configure -Dprefix=/opt/perl
 
 If your prefix contains the string "perl", then the directories
 are simplified.  For example, if you use prefix=/opt/perl,
@@ -263,7 +263,7 @@ directory of your choice):
 
 Then, you can Configure and install in the usual way:
 
-    sh ./Configure -des
+    sh Configure -des
     make
     make test
     make install
@@ -276,7 +276,7 @@ installed on multiple systems.  Here's one way to do that:
 
     # Set up config.over to install perl into a different directory,
     # e.g. /tmp/perl5 (see previous part).
-    sh ./Configure -des
+    sh Configure -des
     make
     make test
     make install
@@ -289,6 +289,21 @@ installed on multiple systems.  Here's one way to do that:
 =head2 What if it doesn't work?
 
 =over 4
+
+=item Running Configure Interactively
+
+If Configure runs into trouble, remember that you can always run
+Configure interactively so that you can check (and correct) its
+guesses.
+
+All the installation questions have been moved to the top, so you don't
+have to wait for them.  Once you've handled them (and your C compiler &
+flags) you can type   '&-d'  at the next Configure prompt and Configure
+will use the defaults from then on.
+
+If you find yourself trying obscure command line incantations and
+config.over tricks, I recommend you run Configure interactively
+instead.  You'll probably save yourself time in the long run.
 
 =item Hint files.
 
@@ -314,7 +329,7 @@ B<gcc>, you should almost always remove your old config.sh.
 =item Propagating your changes
 
 If you later make any changes to F<config.sh>, you should propagate
-them to all the .SH files by running  B<Configure -S>.
+them to all the .SH files by running  B<sh Configure -S>.
 
 =item config.over
 
@@ -344,7 +359,7 @@ lost the next time you run B<Configure>.
 
 To change the C flags for all the files, edit F<config.sh>
 and change either C<$ccflags> or C<$optimize>,
-and then re-run  B<Configure -S ; make depend>.
+and then re-run  B<sh Configure -S ; make depend>.
 
 =item No sh.
 

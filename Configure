@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Mon Nov 20 09:55:37 EST 1995 [metaconfig 3.0 PL58]
+# Generated on Sat Dec  2 15:29:39 EST 1995 [metaconfig 3.0 PL58]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -469,6 +469,7 @@ i_sysselct=''
 i_sysstat=''
 i_systimes=''
 i_systypes=''
+i_sysun=''
 i_sgtty=''
 i_termio=''
 i_termios=''
@@ -551,6 +552,9 @@ sig_num=''
 installsitearch=''
 sitearch=''
 sitearchexp=''
+installsitelib=''
+sitelib=''
+sitelibexp=''
 sizetype=''
 so=''
 sharpbang=''
@@ -658,7 +662,12 @@ i_whoami=''
 libswanted=''
 : set useposix=false in your hint file to disable the POSIX extension.
 useposix=true
+: Define several unixisms.  These can be overridden in hint files.
+exe_ext='' 
+: Extra object files, if any, needed on this platform.
+archobjs=''
 : Possible local include directories to search.
+: Set locincpth to "" in a hint file to defeat local include searches.
 locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
 locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
 :
@@ -1303,7 +1312,7 @@ for dir in \$*; do
 	for thisthing in \$dir/\$thing; do
 		: just loop through to pick last item
 	done
-	if test -f \$thisthing -a -r \$thisthing; then
+	if test -f \$thisthing; then
 		echo \$thisthing
 		exit 0
 	elif test -f \$dir/\$thing.exe; then
@@ -1366,8 +1375,8 @@ for file in $loclist; do
 		echo $file is in $xxx.
 		;;
 	*)
-		echo "I don't know where '$file' is, and my life depends on it."
-		echo "Go find a public domain implementation or fix your PATH setting!"
+		echo "I don't know where '$file' is, and my life depends on it." >&4
+		echo "Go find a public domain implementation or fix your PATH setting!" >&4
 		exit 1
 		;;
 	esac
@@ -2486,24 +2495,6 @@ else
 	installbin="$binexp"
 fi
 
-: determine where manual pages are on this system
-echo " "
-case "$sysman" in
-'') 
-	syspath='/usr/man/man1 /usr/man/mann /usr/man/manl /usr/man/local/man1'
-	syspath="$syspath /usr/man/u_man/man1 /usr/share/man/man1"
-	syspath="$syspath /usr/catman/u_man/man1 /usr/man/l_man/man1"
-	syspath="$syspath /usr/local/man/u_man/man1 /usr/local/man/l_man/man1"
-	syspath="$syspath /usr/man/man.L /local/man/man1 /usr/local/man/man1"
-	sysman=`./loc . /usr/man/man1 $syspath`
-	;;
-esac
-if $test -d "$sysman"; then
-	echo "System manual is in $sysman." >&4
-else
-	echo "Could not find manual pages in source form." >&4
-fi
-
 : determine where manual pages go
 set man1dir man1dir none
 eval $prefixit
@@ -2521,18 +2512,28 @@ esac
 echo "If you don't want the manual sources installed, answer 'none'."
 case "$man1dir" in
 '')
-	lookpath="$prefixexp/man/man1 $prefixexp/man/u_man/man1"
-	lookpath="$lookpath $prefixexp/man/l_man/man1"
-	lookpath="$lookpath /usr/local/man/man1 /opt/man/man1 /usr/man/manl"
-	lookpath="$lookpath /usr/man/local/man1 /usr/man/l_man/man1"
-	lookpath="$lookpath /usr/local/man/u_man/man1 /usr/local/man/l_man/man1"
-	lookpath="$lookpath /usr/man/man.L"
-	man1dir=`./loc . $prefixexp/man/man1 $lookpath`
-	if $test -d "$man1dir"; then
-		dflt="$man1dir"
-	else
-		dflt="$sysman"
-	fi
+	lookpath="$prefixexp/man/man1 $prefixexp/man/l_man/man1"
+	lookpath="$lookpath $prefixexp/man/p_man/man1"
+	lookpath="$lookpath $prefixexp/man/u_man/man1"
+	: If prefix contains 'perl' then we want to keep the man pages
+	: under the prefix directory.  Otherwise, look in a variety of
+	: other possible places.  This is debatable, but probably a
+	: good compromise.
+	case "$prefix" in
+	*perl*) ;;
+	*)	lookpath="$lookpath /usr/local/man/man1"
+		lookpath="$lookpath /opt/local/man/man1"
+		lookpath="$lookpath /usr/local/man/man.1"
+		lookpath="$lookpath /opt/local/man/man.1"
+		lookpath="$lookpath /usr/man/local/man1"
+		lookpath="$lookpath /usr/man/l_man/man1"
+		lookpath="$lookpath /usr/man/p_man/man1"
+		lookpath="$lookpath /usr/man/u_man/man1"
+		lookpath="$lookpath /usr/man/man.L"
+		lookpath="$lookpath /usr/man/man.l"
+		;;
+	esac
+	dflt=`./loc . $prefixexp/man/man1 $lookpath`
 	set dflt
 	eval $prefixup
 	;;
@@ -2544,7 +2545,7 @@ echo " "
 fn=dn+~
 rp="Where do the main $spackage manual pages (source) go?"
 . ./getfile
-if test "X$man1direxp" != "X$ansexp"; then
+if $test "X$man1direxp" != "X$ansexp"; then
 	installman1dir=''
 fi
 man1dir="$ans"
@@ -2801,6 +2802,45 @@ else
 	installscript="$scriptdirexp"
 fi
 
+: determine where site specific libraries go.
+set dflt sitelib lib/site_perl
+eval $prefixit
+$cat <<EOM
+
+The installation process will also create a directory for
+site-specific extensions and modules.  Some users find it convenient
+to place all local files in this directory rather than in the main
+distribution directory.
+
+EOM
+fn=d~+
+rp='Pathname for the site-specific library files?'
+. ./getfile
+if $test "X$sitelibexp" != "X$ansexp"; then
+	installsitelib=''
+fi
+sitelib="$ans"
+sitelibexp="$ansexp"
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+private files reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installsitelib" in
+	'') dflt=`echo $sitelibexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installsitelib";;
+	esac
+	fn=de~
+	rp='Where will private files be installed?'
+	. ./getfile
+	installsitelib="$ans"
+else
+	installsitelib="$sitelibexp"
+fi
+
 : determine perl absolute location
 case "$perlpath" in
 '')	perlpath=$binexp/perl ;;
@@ -2834,6 +2874,24 @@ EOH
 	;;
 esac
 echo "I'll use $startperl to start perl scripts."
+
+: determine where manual pages are on this system
+echo " "
+case "$sysman" in
+'') 
+	syspath='/usr/man/man1 /usr/man/mann /usr/man/manl /usr/man/local/man1'
+	syspath="$syspath /usr/man/u_man/man1 /usr/share/man/man1"
+	syspath="$syspath /usr/catman/u_man/man1 /usr/man/l_man/man1"
+	syspath="$syspath /usr/local/man/u_man/man1 /usr/local/man/l_man/man1"
+	syspath="$syspath /usr/man/man.L /local/man/man1 /usr/local/man/man1"
+	sysman=`./loc . /usr/man/man1 $syspath`
+	;;
+esac
+if $test -d "$sysman"; then
+	echo "System manual is in $sysman." >&4
+else
+	echo "Could not find manual pages in source form." >&4
+fi
 
 : see what memory models we can support
 case "$models" in
@@ -3390,8 +3448,10 @@ case "$optimize" in
 esac
 
 dflt=''
-case "$ccflags" in
-'')	
+: We will not override a previous value, but we might want to
+: augment a hint file
+case "$hint" in
+none|recommended)
 	case "$gccversion" in
 	1*) dflt='-fpcc-struct-return' ;;
 	esac
@@ -3446,12 +3506,13 @@ fi
 set signal.h NO_PROTOTYPE; eval $inctest
 set signal.h _NO_PROTO; eval $inctest
 
-case "$dflt" in
-'') dflt=none;;
-esac
-case "$ccflags" in
-'') ;;
+case "$hint" in
+none|recommended) dflt="$ccflags $dflt" ;;
 *) dflt="$ccflags";;
+esac
+
+case "$dflt" in
+''|' ') dflt=none;;
 esac
 $cat <<EOH
 
@@ -3547,7 +3608,7 @@ for thislibdir in $libpth; do
 	case " $loclibpth " in
 	*" $thislibdir "*)
 		case "$dflt " in 
-		"-L$thislibdir ") ;;
+		*"-L$thislibdir "*) ;;
 		*)  dflt="$dflt -L$thislibdir" ;;
 		esac
 		;;
@@ -5433,7 +5494,7 @@ main()
 	exit(0);				/* Bye bye, thank you for playing! */
 }
 EOCP
-	if $cc $ccflags $ldflags try.c -o try >/dev/null; 2>&1; then
+	if $cc $ccflags $ldflags try.c -o try >/dev/null 2>&1; then
 		echo "./try >try.out 2>try.ret 3>try.err || exit 4" >mtry
 		chmod +x mtry
 		./mtry >/dev/null 2>&1
@@ -6696,16 +6757,39 @@ case "$myhostname" in
 	;;
 *) case "$mydomain" in
 	'')
-		$hostcat >hosts
-		dflt=.`$awk "/[0-9].*$myhostname/ {for(i=2; i<=NF;i++) print \\\$i}" \
+		{
+			: If we use NIS, try ypmatch.
+			: Is there some reason why this was not done before?
+			test "X$hostcat" = "Xypcat hosts" &&
+			ypmatch "$myhostname" hosts 2>/dev/null |\
+				$sed -e 's/[	 ]*#.*//; s/$/ /' > hosts && \
+			$test -s hosts
+		} || {
+			: Extract only the relevant hosts, reducing file size,
+			: remove comments, insert trailing space for later use.
+		     	$hostcat | $sed -n -e "s/[	 ]*#.*//; s/\$/ /
+					/[	 ]$myhostname[	. ]/p" > hosts
+		}
+		tmp_re="[	. ]"
+		$test x`$awk "/[0-9].*[	 ]$myhostname$tmp_re/ { sum++ }
+			     END { print sum }" hosts` = x1 || tmp_re="[	 ]"
+		dflt=.`$awk "/[0-9].*[	 ]$myhostname$tmp_re/ {for(i=2; i<=NF;i++) print \\\$i}" \
 			hosts | $sort | $uniq | \
-			$sed -n -e "s/$myhostname\.\([a-zA-Z_.]\)/\1/p"`
-		case "$dflt" in
+			$sed -n -e "s/$myhostname\.\([-a-zA-Z0-9_.]\)/\1/p"`
+		case `$echo X$dflt` in
+		X*\ *)	echo "(Several hosts in /etc/hosts matched hostname)"
+			dflt=.
+			;;
 		.) echo "(You do not have fully-qualified names in /etc/hosts)"
+			;;
+		esac
+		case "$dflt" in
+		.)
 			tans=`./loc resolv.conf X /etc /usr/etc`
 			if $test -f "$tans"; then
 				echo "(Attempting domain name extraction from $tans)"
-				dflt=.`egrep '^domain' $tans | $sed 's/domain[ 	]*\(.*\)/\1/' \
+				: Why was there an Egrep here, when Sed works?
+				dflt=.`$sed -n -e 's/^domain[ 	]*\(.*\)/\1/p' $tans \
 					| ./tr '[A-Z]' '[a-z]' 2>/dev/null`
 			fi
 			;;
@@ -6986,16 +7070,22 @@ rp="Doubles must be aligned on a how-many-byte boundary?"
 alignbytes="$ans"
 $rm -f try.c try
 
-: Define several unixisms.  These can be overridden in hint files.
-ar='ar'
-exe_ext=''
-lib_ext='.a'
-obj_ext='.o'
-path_sep='/'
-: Extra object files needed on this platform.
-archobjs=''
+case "$ar" in
+'') ar='ar';;
+esac
+case "$lib_ext" in
+'') lib_ext='.a';;
+esac
+case "$obj_ext" in
+'') obj_ext='.o';;
+esac
+case "$path_sep" in
+'') path_sep=':';;
+esac
 : Which makefile gets called first.  This is used by make depend.
-firstmakefile='makefile'
+case "$firstmakefile" in
+'') firstmakefile='makefile';;
+esac
 
 : check for ordering of bytes in a long
 case "$byteorder" in
@@ -8371,6 +8461,10 @@ eval $inhdr
 set sys/types.h i_systypes
 eval $inhdr
 
+: see if this is a sys/un.h system
+set sys/un.h i_sysun
+eval $inhdr
+
 : see if this is a unistd.h system
 set unistd.h i_unistd
 eval $inhdr
@@ -8966,6 +9060,7 @@ i_systime='$i_systime'
 i_systimek='$i_systimek'
 i_systimes='$i_systimes'
 i_systypes='$i_systypes'
+i_sysun='$i_sysun'
 i_termio='$i_termio'
 i_termios='$i_termios'
 i_time='$i_time'
@@ -8983,6 +9078,7 @@ installman3dir='$installman3dir'
 installprivlib='$installprivlib'
 installscript='$installscript'
 installsitearch='$installsitearch'
+installsitelib='$installsitelib'
 intsize='$intsize'
 known_extensions='$known_extensions'
 ksh='$ksh'
@@ -9081,6 +9177,8 @@ sig_num='$sig_num'
 signal_t='$signal_t'
 sitearch='$sitearch'
 sitearchexp='$sitearchexp'
+sitelib='$sitelib'
+sitelibexp='$sitelibexp'
 sizetype='$sizetype'
 sleep='$sleep'
 smail='$smail'

@@ -35,7 +35,7 @@ $Config{'startperl'}
 'ds 00 \"';
 'ig 00 ';
 
-\$perlincl = $Config{archlibexp};
+\$perlincl = "$Config{archlibexp}";
 
 !GROK!THIS!
 

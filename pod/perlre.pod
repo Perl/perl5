@@ -75,8 +75,8 @@ The following standard quantifiers are recognized:
 
 (If a curly bracket occurs in any other context, it is treated
 as a regular character.)  The "*" modifier is equivalent to C<{0,}>, the "+"
-modifier to C<{1,}>, and the "?" modifier to C<{0,1}>.  There is no limit to the
-size of n or m, but large numbers will chew up more memory. 
+modifier to C<{1,}>, and the "?" modifier to C<{0,1}>.  n and m are limited
+to integral values less than 65536. 
 
 By default, a quantified subpattern is "greedy", that is, it will match as
 many times as possible without causing the rest pattern not to match.  The
