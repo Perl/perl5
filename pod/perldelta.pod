@@ -1,4 +1,4 @@
-=head1 NAME
+M=head1 NAME
 
 perldelta - what is new for perl v5.8.0
 
@@ -698,6 +698,14 @@ L<Test::Simple> - Basic utilities for writing tests
 
 =item *
 
+L<threads> - interpreter threads
+
+=item *
+
+L<threads::shared> - data sharing for interpreter threads
+
+=item *
+
 L<Time::HiRes> - high resolution ualarm, usleep, and gettimeofday
 
 =item *
@@ -712,7 +720,15 @@ L<Time::Seconds> - a simple API to convert seconds to other date values
 
 =item *
 
-L<UnicodeCD> - Unicode Character Database
+L<Unicode::CD> - Unicode Character Database
+
+=item *
+
+Unicode::Collate - Unicode collation
+
+=item *
+
+Unicode::Normalize - Unicode normalization
 
 =back
 
@@ -898,6 +914,10 @@ that the operating system will make one up.)
 The L<vars> pragma now supports declaring fully qualified variables.
 (Something that C<our()> does not and will not support.)
 
+=item *
+
+List::Util now has shuffle() for randomizing a list.
+
 =back
 
 =head1 Utility Changes
@@ -990,7 +1010,26 @@ bring them back to the fold.
 
 =item *
 
+perlintro is a gentle introduction to Perl.
+
+=item *
+
+perlmodstyle is a style guide for writing modules.
+
+=item *
+
 perlnewmod tells about writing and submitting a new module.
+
+=item *
+
+perlpod has been rewritten to be clearer and to record the best
+practices gathered over the years.
+
+=item *
+
+perlpodstyle is a more formal specification of the pod format,
+mainly of interest for writers of pod applications, not to
+people writing in pod.
 
 =item *
 
@@ -1005,6 +1044,16 @@ perlretut is a regular expression tutorial.
 
 perlrequick is a regular expressions quick-start guide.
 Yes, much quicker than perlretut.
+
+=item *
+
+perltootc has been renamed as perltooc (to not to conflict
+with perltoot in filesystem restricted to "8.3" names)
+
+=item *
+
+perluniintro is an introduction to using Unicode in Perl
+(perlunicode is more of a reference)
 
 =item *
 
@@ -1339,6 +1388,33 @@ NetWare from Novell is now supported.  See L<perlnetware>.
 =item *
 
 The Amdahl UTS UNIX mainframe platform is now supported.
+
+=item *
+
+WinCE is now supported.  See L<perlce>.
+
+=item *
+
+If you have CPAN access you can during specify extra modules to
+Configure to build and install with Perl using the -Dextras=...
+option.  See INSTALL for more details.
+
+=item *
+
+In addition to config.over a new override file, config.arch, is
+available.  That is supposed to be used by hints file writers for
+architecture-wide changes (as opposed to config.over which is for
+site-wide changes).
+
+=item *
+
+Guidelines of how to construct minimal Perl installations have
+been added to INSTALL.
+
+=item *
+
+For Perl developers several new make targets for profiling
+have been added, see L<perlhack>.
 
 =back
 
@@ -1841,6 +1917,10 @@ IRIX, and Solaris.  This change breaks backward compatibility but
 Perl's malloc has problems with large address spaces and also the
 speed of vendors' malloc is generally better in large address space
 machines (Perl's malloc is mostly tuned for space).
+
+=item *
+
+PERL_OBJECT has been completely removed.
 
 =back
 
