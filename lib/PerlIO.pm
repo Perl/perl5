@@ -24,6 +24,8 @@ sub import
   }
 }
 
+sub F_UTF8 () { 0x8000 }
+
 1;
 __END__
 
@@ -122,11 +124,11 @@ the stream are also removed or disabled.
 The implementation of C<:raw> is as a pseudo-layer which when "pushed"
 pops itself and then any layers which do not declare themselves as suitable
 for binary data. (Undoing :utf8 and :crlf are implemented by clearing
-flags rather than poping layers but that is an implementation detail.)
+flags rather than popping layers but that is an implementation detail.)
 
 As a consequence of the fact that C<:raw> normally pops layers
-it usually only makes sense to have it as the only or first element in a
-layer specification.  When used as the first element it provides
+it usually only makes sense to have it as the only or first element in
+a layer specification.  When used as the first element it provides
 a known base on which to build e.g.
 
     open($fh,":raw:utf8",...)
@@ -148,6 +150,30 @@ An example of a possible use might be:
     binmode($fh,":pop");            # back to un-encocded
 
 A more elegant (and safer) interface is needed.
+
+=back
+
+=head2 Custom Layers
+
+It is possible to write custom layers in addition to the above builtin
+ones, both in C/XS and Perl.  Two such layers (and one example written
+in Perl using the latter) come with the Perl distribution.
+
+=over 4
+
+=item :encoding
+
+Use C<:encoding(ENCODING)> either in open() or binmode() to install
+a layer that does transparently character set and encoding transformations,
+for example from Shift-JIS to Unicode.  Note that an C<:encoding> also
+enables C<:utf8>.  See L<PerlIO::encoding> for more information.
+
+=item :via
+
+Use C<:via(MODULE)> either in open() or binmode() to install a layer
+that does whatever transformation (for example compression /
+decompression, encryption / decryption) to the filehandle.
+See L<PerlIO::via> for more information.
 
 =back
 
@@ -188,8 +214,8 @@ Otherwise the default layers are
 These defaults may change once perlio has been better tested and tuned.
 
 The default can be overridden by setting the environment variable
-PERLIO to a space separated list of layers (unix or platform low level
-layer is always pushed first).
+PERLIO to a space separated list of layers (C<unix> or platform low
+level layer is always pushed first).
 
 This can be used to see the effect of/bugs in the various layers e.g.
 
@@ -197,13 +223,48 @@ This can be used to see the effect of/bugs in the various layers e.g.
   PERLIO=stdio  ./perl harness
   PERLIO=perlio ./perl harness
 
+=head2 Querying the layers of filehandle
+
+The following returns the B<names> of the PerlIO layers on a filehandle.
+
+   my @layers = PerlIO::get_layers(FH);
+
+The layers are returned in the order an open() or binmode() call would
+use them.  Note that the stack begings (normally) from C<stdio>, the
+platform specific low-level I/O (like C<unix>) is not part of the stack.
+
+By default the layers from the input side of the filehandle is
+returned, to get the output side use the optional C<output> argument:
+
+   my @layers = PerlIO::get_layers(FH, output => 1);
+
+(Usually the layers are identical on either side of a filehandle but
+for example with sockets there may be differences.)
+
+B<Implementation details follow, please close your eyes.>
+
+The arguments to layers are by default returned in parenthesis after
+the name of the layer, and certain layers (like C<utf8>) are not real
+layers but instead flags on real layers: to get all of these returned
+separately use the optional C<separate> argument:
+
+   my @layer_and_args_and_flags = PerlIO::get_layers(FH, details => 1);
+
+The result will be up to be three times the number of layers:
+the first element will be a name, the second element the arguments
+(unspecified arguments will be C<undef>), the third element the flags,
+the fourth element a name again, and so forth.
+
+B<You may open your eyes now.>
+
 =head1 AUTHOR
 
 Nick Ing-Simmons E<lt>nick@ing-simmons.netE<gt>
 
 =head1 SEE ALSO
 
-L<perlfunc/"binmode">, L<perlfunc/"open">, L<perlunicode>, L<perliol>, L<Encode>
+L<perlfunc/"binmode">, L<perlfunc/"open">, L<perlunicode>, L<perliol>,
+L<Encode>
 
 =cut
 

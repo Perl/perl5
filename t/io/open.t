@@ -277,6 +277,5 @@ SKIP: {
     open($fh3{k}, "TEST");
     gimme($fh3{k});
     like($@, qr/<\$fh3{...}> line 1\./, "autoviv fh lexical helem");
-
 }
     

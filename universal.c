@@ -17,6 +17,10 @@
 #define PERL_IN_UNIVERSAL_C
 #include "perl.h"
 
+#ifdef USE_PERLIO
+#include "perliol.h" /* For the PERLIO_F_XXX */
+#endif
+
 /*
  * Contributed by Graham Barr  <Graham.Barr@tiuk.ti.com>
  * The main guts of traverse_isa was actually copied from gv_fetchmeth
@@ -176,6 +180,7 @@ XS(XS_utf8_native_to_unicode);
 XS(XS_Internals_SvREADONLY);
 XS(XS_Internals_SvREFCNT);
 XS(XS_Internals_hv_clear_placehold);
+XS(XS_PerlIO_get_layers);
 
 void
 Perl_boot_core_UNIVERSAL(pTHX)
@@ -214,6 +219,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXSproto("Internals::SvREFCNT",XS_Internals_SvREFCNT, file, "\\[$%@];$");
     newXSproto("Internals::hv_clear_placeholders",
                XS_Internals_hv_clear_placehold, file, "\\%");
+    newXS("PerlIO::get_layers", XS_PerlIO_get_layers, file);
 }
 
 
@@ -714,3 +720,128 @@ XS(XS_Internals_hv_clear_placehold)
 
     XSRETURN(0);
 }
+
+XS(XS_PerlIO_get_layers)
+{
+    dXSARGS;
+    if (items < 1 || items % 2 == 0)
+	Perl_croak(aTHX_ "Usage: PerlIO_get_layers(filehandle[,args])");
+    {
+	SV *	sv;
+	GV *	gv;
+	IO *	io;
+	bool	input = TRUE;
+	bool	details = FALSE;
+
+	if (items > 1) {
+	     SV **popuntil = MARK + 1;
+	     SV **svp;
+	     
+	     for (svp = MARK + 2; svp <= SP; svp += 2) {
+		  SV **varp = svp;
+		  SV **valp = svp + 1;
+		  STRLEN klen;
+		  char *key = SvPV(*varp, klen);
+
+		  switch (*key) {
+		  case 'i':
+		       if (klen == 5 && memEQ(key, "input", 5)) {
+			    input = SvTRUE(*valp);
+			    break;
+		       }
+		       goto fail;
+		  case 'o': 
+		       if (klen == 6 && memEQ(key, "output", 6)) {
+			    input = !SvTRUE(*valp);
+			    break;
+		       }
+		       goto fail;
+		  case 'd':
+		       if (klen == 7 && memEQ(key, "details", 7)) {
+			    details = SvTRUE(*valp);
+			    break;
+		       }
+		       goto fail;
+		  default:
+		  fail:
+		       Perl_croak(aTHX_
+				  "get_layers: unknown argument '%s'",
+				  key);
+		  }
+	     }
+
+	     SP -= (items - 1);
+	}
+
+	sv = POPs;
+	gv = (GV*)sv;
+
+	if (!isGV(sv)) {
+	     if (SvROK(sv) && isGV(SvRV(sv)))
+		  gv = (GV*)SvRV(sv);
+	     else
+		  gv = gv_fetchpv(SvPVX(sv), FALSE, SVt_PVIO);
+	}
+
+	if (gv && (io = GvIO(gv))) {
+	     dTARGET;
+	     AV* av = PerlIO_get_layers(aTHX_ input ?
+					IoIFP(io) : IoOFP(io));
+	     I32 i;
+	     I32 last = av_len(av);
+	     I32 nitem = 0;
+	     
+	     for (i = last; i >= 0; i -= 3) {
+		  SV **namsvp;
+		  SV **argsvp;
+		  SV **flgsvp;
+		  bool namok, argok, flgok;
+
+		  namsvp = av_fetch(av, i - 2, FALSE);
+		  argsvp = av_fetch(av, i - 1, FALSE);
+		  flgsvp = av_fetch(av, i,     FALSE);
+
+		  namok = namsvp && *namsvp && SvPOK(*namsvp);
+		  argok = argsvp && *argsvp && SvPOK(*argsvp);
+		  flgok = flgsvp && *flgsvp && SvIOK(*flgsvp);
+
+		  if (details) {
+		       XPUSHs(namok ?
+			     newSVpv(SvPVX(*namsvp), 0) : &PL_sv_undef);
+		       XPUSHs(argok ?
+			     newSVpv(SvPVX(*argsvp), 0) : &PL_sv_undef);
+		       if (flgok)
+			    XPUSHi(SvIVX(*flgsvp));
+		       else
+			    XPUSHs(&PL_sv_undef);
+		       nitem += 3;
+		  }
+		  else {
+		       if (namok && argok)
+			    XPUSHs(Perl_newSVpvf(aTHX_ "%"SVf"(%"SVf")",
+					       *namsvp, *argsvp));
+		       else if (namok)
+			    XPUSHs(Perl_newSVpvf(aTHX_ "%"SVf, *namsvp));
+		       else
+			    XPUSHs(&PL_sv_undef);
+		       nitem++;
+		       if (flgok) {
+			    IV flags = SvIVX(*flgsvp);
+
+			    if (flags & PERLIO_F_UTF8) {
+				 XPUSHs(newSVpvn("utf8", 4));
+				 nitem++;
+			    }
+		       }
+		  }
+	     }
+
+	     SvREFCNT_dec(av);
+
+	     XSRETURN(nitem);
+	}
+    }
+
+    XSRETURN(0);
+}
+

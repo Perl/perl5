@@ -640,6 +640,36 @@ PerlIO_pop(pTHX_ PerlIO *f)
     }
 }
 
+/* Return as an array the stack of layers on a filehandle.  Note that
+ * the stack is returned top-first in the array, and there are three
+ * times as many array elements as there are layers in the stack: the
+ * first element of a layer triplet is the name, the second one is the
+ * arguments, and the third one is the flags. */
+
+AV *
+PerlIO_get_layers(pTHX_ PerlIO *f)
+{
+     AV *av = newAV();
+
+     if (PerlIOValid(f)) {
+          dSP;
+	  PerlIOl *l = PerlIOBase(f);
+
+	  while (l) {
+	       SV *name = l->tab && l->tab->name ?
+		    newSVpv(l->tab->name, 0) : &PL_sv_undef;
+	       SV *arg = l->tab && l->tab->Getarg ?
+		    (*l->tab->Getarg)(aTHX_ &l, 0, 0) : &PL_sv_undef;
+	       av_push(av, name);
+	       av_push(av, arg);
+	       av_push(av, newSViv((IV)l->flags));
+	       l = l->next;
+	  }
+     }
+
+     return av;
+}
+
 /*--------------------------------------------------------------------------------------*/
 /*
  * XS Interface for perl code
