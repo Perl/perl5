@@ -131,8 +131,6 @@ XS(XS_UNIVERSAL_can)
     SV   *sv;
     char *name;
     SV   *rv;
-    GV   *gv;
-    CV   *cvp;
     HV   *pkg = NULL;
 
     if (items != 2)
@@ -152,16 +150,9 @@ XS(XS_UNIVERSAL_can)
     }
 
     if (pkg) {
-        gv = gv_fetchmethod(pkg, name);
-
-        if(gv && GvCV(gv)) {
-            /* If the sub is only a stub then we may have a gv to AUTOLOAD */
-            GV **gvp = (GV**)hv_fetch(GvSTASH(gv), name, strlen(name), TRUE);
-            if(gvp && (cvp = GvCV(*gvp))) {
-                rv = sv_newmortal();
-                sv_setsv(rv, newRV((SV*)cvp));
-            }
-        }
+        GV *gv = gv_fetchmethod_autoload(pkg, name, FALSE);
+        if (gv && isGV(gv))
+	    rv = sv_2mortal(newRV((SV*)GvCV(gv)));
     }
 
     ST(0) = rv;

@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00396#
+PERL_VERSION = 5_00397#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]

@@ -212,8 +212,16 @@ I32 level;
 	    if (gv = gv_fetchmeth(lastchance, name, len,
 				  (level >= 0) ? level + 1 : level - 1)) {
 	  gotcha:
-		/* Use topgv for cache only if it has no synonyms */
-		if (topgv && GvREFCNT(topgv) == 1) {
+		/*
+		 * Cache method in topgv if:
+		 *  1. topgv has no synonyms (else inheritance crosses wires)
+		 *  2. method isn't a stub (else AUTOLOAD fails spectacularly)
+		 */
+		if (topgv &&
+		    GvREFCNT(topgv) == 1 &&
+		    (cv = GvCV(gv)) &&
+		    (CvROOT(cv) || CvXSUB(cv)))
+		{
 		    if (cv = GvCV(topgv))
 			SvREFCNT_dec(cv);
 		    GvCV(topgv) = (CV*)SvREFCNT_inc(GvCV(gv));
@@ -231,6 +239,15 @@ GV *
 gv_fetchmethod(stash, name)
 HV* stash;
 char* name;
+{
+    return gv_fetchmethod_autoload(stash, name, TRUE);
+}
+
+GV *
+gv_fetchmethod_autoload(stash, name, autoload)
+HV* stash;
+char* name;
+I32 autoload;
 {
     register char *nend;
     char *nsplit = 0;
@@ -263,8 +280,16 @@ char* name;
     if (!gv) {
 	if (strEQ(name,"import"))
 	    gv = (GV*)&sv_yes;
-	else
+	else if (autoload)
 	    gv = gv_autoload4(stash, name, nend - name, TRUE);
+    }
+    else if (autoload) {
+	CV* cv = GvCV(gv);
+	if (!cv || (!CvROOT(cv) && !CvXSUB(cv))) {
+	    GV* autogv = gv_autoload4(GvSTASH(gv), name, nend - name, TRUE);
+	    if (autogv)
+		gv = autogv;
+	}
     }
 
     return gv;
@@ -287,16 +312,17 @@ I32 method;
 
     if (len == autolen && strnEQ(name, autoload, autolen))
 	return Nullgv;
-    if (method) {
-	if (!(gv = gv_fetchmeth(stash, autoload, autolen, FALSE)))
-	    return Nullgv;
-	cv = GvCV(gv);
-    }
-    else {
-	GV** gvp = (GV**)hv_fetch(stash, autoload, autolen, FALSE);
-	if (!gvp || !(gv = *gvp) || !(cv = GvCVu(gv)))
-	    return Nullgv;
-    }
+    if (!(gv = gv_fetchmeth(stash, autoload, autolen, FALSE)))
+	return Nullgv;
+    cv = GvCV(gv);
+
+    /*
+     * Inheriting AUTOLOAD for non-methods works ... for now.
+     */
+    if (dowarn && !method && (GvCVGEN(gv) || GvSTASH(gv) != stash))
+	warn(
+	  "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
+	     HvNAME(stash), (int)len, name);
 
     /*
      * Given &FOO::AUTOLOAD, set $FOO::AUTOLOAD to desired function name.
@@ -1037,11 +1063,10 @@ HV* stash;
 		
 		DEBUG_o( deb("Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n", 
 			     SvPV(GvSV(gv), na), cp, HvNAME(stash)) );
-		if (SvPOK(GvSV(gv)) 
-		    && (ngv = gv_fetchmethod(stash, SvPVX(GvSV(gv))))) {
-		    name = SvPVX(GvSV(gv));
-		    cv = GvCV(gv = ngv);
-		} else {
+		if (!SvPOK(GvSV(gv)) 
+		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX(GvSV(gv)),
+						       FALSE)))
+		{
 		    /* Can be an import stub (created by `can'). */
 		    if (GvCVGEN(gv)) {
 			croak("Stub found while resolving method `%.256s' overloading `%s' in package `%.256s'", 
@@ -1052,9 +1077,8 @@ HV* stash;
 			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
 			      cp, HvNAME(stash));
 		}
-	        /* If the sub is only a stub then we may have a gv to AUTOLOAD */
-	        gv = (GV*)*hv_fetch(GvSTASH(gv), name, strlen(name), TRUE);
-	        cv = GvCV(gv);
+		name = SvPVX(GvSV(gv));
+		cv = GvCV(gv = ngv);
 	    }
 	    DEBUG_o( deb("Overloading `%s' in package `%.256s' via `%.256s::%.256s' \n",
 			 cp, HvNAME(stash), HvNAME(GvSTASH(CvGV(cv))),

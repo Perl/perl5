@@ -803,7 +803,7 @@ with $/ or $INPUT_RECORD_SEPARATOR).
 
     $today = qx{ date };
 
-See L<I/O Operators> for more discussion.
+See L<"I/O Operators"> for more discussion.
 
 =item qw/STRING/
 

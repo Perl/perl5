@@ -1,4 +1,4 @@
-# Microsoft Developer Studio Generated NMAKE File, Format Version 4.20
+# Microsoft Developer Studio Generated NMAKE File, Format Version 4.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Console Application" 0x0103
@@ -49,12 +49,13 @@ RSC=rc.exe
 OUTDIR=.\Release
 INTDIR=.\Release
 
-ALL : "..\_perl.exe"
+ALL : "$(OUTDIR)\_perl.exe"
 
 CLEAN : 
-	-@erase "$(INTDIR)\perlmain.obj"
-	-@erase "$(INTDIR)\win32io.obj"
 	-@erase "..\_perl.exe"
+	-@erase ".\Release\perlmain.obj"
+	-@erase ".\Release\win32io.obj"
+	-@erase ".\Release\perl.res"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
@@ -64,15 +65,15 @@ CLEAN :
 CPP_PROJ=/nologo /MT /W3 /O2 /I "." /I ".\include" /I ".." /D "WIN32" /D\
  "NDEBUG" /D "_CONSOLE" /Fp"$(INTDIR)/perl.pch" /YX /Fo"$(INTDIR)/" /c 
 CPP_OBJS=.\Release/
-CPP_SBRS=.\.
+CPP_SBRS=
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
+RSC_PROJ=/l 0x409 /fo"$(INTDIR)/perl.res" /d "NDEBUG" 
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 BSC32_FLAGS=/nologo /o"$(OUTDIR)/perl.bsc" 
-BSC32_SBRS= \
-	
+BSC32_SBRS=
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib /nologo /subsystem:console /machine:I386
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib setargv.obj /nologo /subsystem:console /machine:I386 /out:"../_perl.exe"
@@ -81,11 +82,11 @@ LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
  /subsystem:console /incremental:no /pdb:"$(OUTDIR)/_perl.pdb" /machine:I386\
  /out:"../_perl.exe" 
 LINK32_OBJS= \
-	"$(INTDIR)\perlmain.obj" \
-	"$(INTDIR)\win32io.obj" \
+	"$(INTDIR)/perlmain.obj" \
+	"$(INTDIR)/win32io.obj" \
 	"..\perl.lib"
 
-"..\_perl.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
+"$(OUTDIR)\_perl.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<
@@ -105,35 +106,33 @@ LINK32_OBJS= \
 OUTDIR=.\Debug
 INTDIR=.\Debug
 
-ALL : "..\_perl.exe"
+ALL : "$(OUTDIR)\_perl.exe"
 
 CLEAN : 
-	-@erase "$(INTDIR)\perlmain.obj"
-	-@erase "$(INTDIR)\vc40.idb"
-	-@erase "$(INTDIR)\vc40.pdb"
-	-@erase "$(INTDIR)\win32io.obj"
-	-@erase "$(OUTDIR)\_perl.pdb"
 	-@erase "..\_perl.exe"
+	-@erase ".\Debug\perlmain.obj"
+	-@erase ".\Debug\win32io.obj"
+	-@erase ".\Debug\perl.res"
 	-@erase "..\_perl.ilk"
+	-@erase ".\Debug\_perl.pdb"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 # ADD BASE CPP /nologo /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /YX /c
-# ADD CPP /nologo /MT /W3 /Zi /Od /I "." /I ".\include" /I ".." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /YX /c
-CPP_PROJ=/nologo /MT /W3 /Zi /Od /I "." /I ".\include" /I ".." /D\
- "WIN32" /D "_DEBUG" /D "_CONSOLE" /Fp"$(INTDIR)/perl.pch" /YX /Fo"$(INTDIR)/"\
- /Fd"$(INTDIR)/" /c 
+# ADD CPP /nologo /MT /W3 /Z7 /Od /I "." /I ".\include" /I ".." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /YX /c
+CPP_PROJ=/nologo /MT /W3 /Z7 /Od /I "." /I ".\include" /I ".." /D "WIN32" /D\
+ "_DEBUG" /D "_CONSOLE" /Fp"$(INTDIR)/perl.pch" /YX /Fo"$(INTDIR)/" /c 
 CPP_OBJS=.\Debug/
-CPP_SBRS=.\.
+CPP_SBRS=
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
+RSC_PROJ=/l 0x409 /fo"$(INTDIR)/perl.res" /d "_DEBUG" 
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 BSC32_FLAGS=/nologo /o"$(OUTDIR)/perl.bsc" 
-BSC32_SBRS= \
-	
+BSC32_SBRS=
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib /nologo /subsystem:console /debug /machine:I386
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib setargv.obj /nologo /subsystem:console /debug /machine:I386 /out:"../_perl.exe"
@@ -142,11 +141,11 @@ LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
  /subsystem:console /incremental:yes /pdb:"$(OUTDIR)/_perl.pdb" /debug\
  /machine:I386 /out:"../_perl.exe" 
 LINK32_OBJS= \
-	"$(INTDIR)\perlmain.obj" \
-	"$(INTDIR)\win32io.obj" \
+	"$(INTDIR)/perlmain.obj" \
+	"$(INTDIR)/win32io.obj" \
 	"..\perl.lib"
 
-"..\_perl.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
+"$(OUTDIR)\_perl.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<
@@ -191,8 +190,19 @@ DEP_CPP_PERLM=\
 	".\win32io.h"\
 	
 
+!IF  "$(CFG)" == "perl - Win32 Release"
+
+
 "$(INTDIR)\perlmain.obj" : $(SOURCE) $(DEP_CPP_PERLM) "$(INTDIR)"
 
+
+!ELSEIF  "$(CFG)" == "perl - Win32 Debug"
+
+
+"$(INTDIR)\perlmain.obj" : $(SOURCE) $(DEP_CPP_PERLM) "$(INTDIR)"
+
+
+!ENDIF 
 
 # End Source File
 ################################################################################
@@ -215,8 +225,8 @@ DEP_CPP_WIN32=\
 	".\include\sys/socket.h"\
 	".\win32io.h"\
 	".\win32iop.h"\
-	"$(INCLUDE)\Sys\Stat.h"\
-	"$(INCLUDE)\Sys\Types.h"\
+	"$(INCLUDE)\sys\STAT.H"\
+	"$(INCLUDE)\sys\TYPES.H"\
 	
 
 "$(INTDIR)\win32io.obj" : $(SOURCE) $(DEP_CPP_WIN32) "$(INTDIR)"

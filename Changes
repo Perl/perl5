@@ -43,6 +43,129 @@ And the Keepers of the Patch Pumpkin:
 
 
 ------------------
+ Version 5.003_97
+------------------
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Reenable but deprecate inherited AUTOLOAD for plain funcs"
+   From:  Chip Salzenberg
+  Files:  ext/DynaLoader/DynaLoader.pm gv.c lib/Text/ParseWords.pm
+          pod/perldelta.pod pod/perldiag.pod t/op/method.t
+
+ CORE PORTABILITY
+
+  Title:  "Don't use setjmp() and longjmp() in complex exprs"
+   From:  Chip Salzenberg
+  Files:  perl.c pp_ctl.c scope.h
+
+  Title:  "Improve definition of Sock_size_t"
+   From:  Chip Salzenberg
+  Files:  doio.c pp_sys.c
+
+  Title:  "Don't use a completely empty macro parameter"
+   From:  Chip Salzenberg
+  Files:  sv.h
+
+  Title:  "Win32 update"
+   From:  Gurusamy Sarathy
+ Msg-ID:  <199704020608.BAA29538@aatma.engin.umich.edu>
+   Date:  Wed, 02 Apr 1997 01:08:09 -0500
+  Files:  win32/VC-2.0/modules.mak win32/VC-2.0/perl.mak win32/VC-
+          2.0/perldll.mak win32/perl.mak
+
+ OTHER CORE CHANGES
+
+  Title:  "Introduce and use gv_fetchmethod_autoload()"
+   From:  Chip Salzenberg
+  Files:  global.sym gv.c pod/perlguts.pod proto.h universal.c
+
+  Title:  "Reduce memory footprint of literal strings"
+   From:  ilya@math.ohio-state.edu (Ilya Zakharevich)
+ Msg-ID:  <1997Apr1.113438.1913905@hmivax.humgen.upenn.edu>
+   Date:  Tue, 01 Apr 1997 11:34:37 -0500 (EST)
+  Files:  toke.c
+
+ BUILD PROCESS
+
+  Title:  "Remove target before link() of perldiag.pod"
+   From:  Chip Salzenberg
+  Files:  installperl
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Refresh CPAN to 1.24"
+   From:  Andreas Koenig
+  Files:  lib/CPAN.pm lib/CPAN/FirstTime.pm
+
+  Title:  "Refresh ExtUtils::Manifest to 1.33"
+   From:  Andreas Koenig
+  Files:  lib/ExtUtils/Manifest.pm
+
+  Title:  "Update $VERSION of ExtUtils::Embed to reflect reality"
+   From:  Chip Salzenberg
+  Files:  lib/ExtUtils/Embed.pm
+
+  Title:  "Fix POSIX::raise()"
+   From:  "Jens T. Berger Thielemann" <jensthi@ifi.uio.no>
+ Msg-ID:  <Pine.SUN.3.91.970401153125.8053A-100000@holmenkollen.ifi.uio
+   Date:  Tue, 1 Apr 1997 15:34:47 +0200 (MET DST)
+  Files:  ext/POSIX/POSIX.pm
+
+  Title:  "Eliminate warnings in File::Basename"
+   From:  Robin Barker <rmb1@cise.npl.co.uk>
+ Msg-ID:  <11173.9704011111@tempest.cise.npl.co.uk>
+   Date:  Tue, 1 Apr 97 12:11:43 BST
+  Files:  lib/File/Basename.pm t/lib/basename.t
+
+  Title:  "Eliminate warning in CGI.pm"
+   From:  Chip Salzenberg
+  Files:  lib/CGI.pm
+
+  Title:  "Tweaks to constant.pm"
+   From:  Tom Phoenix
+ Msg-ID:  <Pine.GSO.3.96.970331205519.16684I-100000@kelly.teleport.com>
+   Date:  Mon, 31 Mar 1997 21:10:14 -0800 (PST)
+  Files:  lib/constant.pm
+
+  Title:  "Document eval vs. sub in Benchmark"
+   From:  Hugo van der Sanden <hv@crypt.compulink.co.uk>
+ Msg-ID:  <199704012231.XAA00225@crypt.compulink.co.uk>
+   Date:  Tue, 01 Apr 1997 23:31:55 +0100
+  Files:  lib/Benchmark.pm
+
+ TESTS
+
+   (no changes)
+
+ UTILITIES
+
+  Title:  "Improve heuristics for pod2man titles"
+   From:  Roderick Schertler
+ Msg-ID:  <pzn2ri9gto.fsf@eeyore.ibcinc.com>
+   Date:  01 Apr 1997 23:41:55 -0500
+  Files:  pod/pod2man.PL
+
+ DOCUMENTATION
+
+  Title:  "Clean up some poddities, and make C<make html> work again"
+   From:  Chip Salzenberg
+  Files:  pod/Makefile pod/perldelta.pod pod/perldiag.pod
+          pod/perlfaq8.pod pod/perlfunc.pod pod/perlop.pod
+          pod/perltrap.pod
+
+  Title:  "Fix MM doc's use of "SUPER::""
+   From:  avera@hal.com (Jim Avera)
+ Msg-ID:  <9704012235.AA07841@membrane.hal.com>
+   Date:  Tue, 1 Apr 1997 14:35:26 -0800 (PST)
+  Files:  lib/ExtUtils/MakeMaker.pm
+
+  Title:  "Eliminate pod warnings in libs"
+   From:  Chip Salzenberg
+  Files:  lib/CGI.pm lib/ExtUtils/Command.pm
+
+
+------------------
  Version 5.003_96
 ------------------
 
@@ -196,7 +319,7 @@ And the Keepers of the Patch Pumpkin:
           lib/CGI/Switch.pm
 
   Title:  "Fix C<print $_> in debugger"
-   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+   From:  Ilya Zakharevich
  Msg-ID:  <199703312355.SAA01068@monk.mps.ohio-state.edu>
    Date:  Mon, 31 Mar 1997 18:55:55 -0500 (EST)
   Files:  lib/perl5db.pl
@@ -276,7 +399,7 @@ And the Keepers of the Patch Pumpkin:
   Files:  pod/perldelta.pod
 
   Title:  "Improve and update documentation of constant subs"
-   From:  Tom Phoenix <rootbeer@teleport.com>
+   From:  Tom Phoenix
  Msg-ID:  <Pine.GSO.3.96.970331122546.14185C-100000@kelly.teleport.com>
    Date:  Mon, 31 Mar 1997 13:05:54 -0800 (PST)
   Files:  pod/perlsub.pod

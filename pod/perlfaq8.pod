@@ -10,7 +10,7 @@ control over the user-interface (keyboard, screen and pointing
 devices), and most anything else not related to data manipulation.
 
 Read the FAQs and documentation specific to the port of perl to your
-operating system (eg, L<perlvms>, L<perlplan9>, ...).  These should
+operating system (eg, L<perlvms>, F<REAMDE.os2>, ...).  These should
 contain more detailed information on the vagaries of your perl.
 
 =head2 How do I find out which operating system I'm running under?

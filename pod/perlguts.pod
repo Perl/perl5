@@ -1400,24 +1400,34 @@ method's CV, which can be obtained from the GV with the C<GvCV> macro.
 
 =item gv_fetchmethod
 
+=item gv_fetchmethod_autoload
+
 Returns the glob which contains the subroutine to call to invoke the
-method on the C<stash>. In fact in the presense of autoloading this may
-be the glob for "AUTOLOAD".  In this case the corresponing variable
+method on the C<stash>.  In fact in the presense of autoloading this may
+be the glob for "AUTOLOAD".  In this case the corresponding variable
 $AUTOLOAD is already setup.
 
-Note that if you want to keep this glob for a long time, you need to
-check for it being "AUTOLOAD", since at the later time the call
+The third parameter of C<gv_fetchmethod_autoload> determines whether AUTOLOAD
+lookup is performed if the given method is not present: non-zero means
+yes, look for AUTOLOAD; zero means no, don't look for AUTOLOAD.  Calling
+C<gv_fetchmethod> is equivalent to calling C<gv_fetchmethod_autoload> with a
+non-zero C<autoload> parameter.
+
+These functions grant C<"SUPER"> token as a prefix of the method name.
+
+Note that if you want to keep the returned glob for a long time, you
+need to check for it being "AUTOLOAD", since at the later time the call
 may load a different subroutine due to $AUTOLOAD changing its value.
 Use the glob created via a side effect to do this.
 
-This function grants C<"SUPER"> token as a prefix of the method name.
-
-Has the same side-effects and as C<gv_fetchmeth> with C<level==0>.
-C<name> should be writable if contains C<':'> or C<'\''>.
+These functions have the same side-effects and as C<gv_fetchmeth> with
+C<level==0>.  C<name> should be writable if contains C<':'> or C<'\''>.
 The warning against passing the GV returned by C<gv_fetchmeth> to
-C<perl_call_sv> apply equally to C<gv_fetchmethod>.
+C<perl_call_sv> apply equally to these functions.
 
         GV*     gv_fetchmethod _((HV* stash, char* name));
+        GV*     gv_fetchmethod_autoload _((HV* stash, char* name,
+                                           I32 autoload));
 
 =item gv_stashpv
 
@@ -2920,4 +2930,4 @@ API Listing by Dean Roehrich <F<roehrich@cray.com>>.
 
 =head1 DATE
 
-Version 31.4: 1997/3/30
+Version 31.5: 1997/4/1

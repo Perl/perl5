@@ -29,7 +29,7 @@ $AUTOLOAD_DEBUG=0;
 $NPH=0;
 
 $CGI::revision = '$Id: CGI.pm,v 2.32 1997/3/19 10:10 lstein Exp $';
-$CGI::VERSION='2.32';
+$CGI::VERSION='2.3201';
 
 # OVERRIDE THE OS HERE IF CGI.pm GUESSES WRONG
 # $OS = 'UNIX';
@@ -87,7 +87,9 @@ $SL = {
 $NPH++ if defined($ENV{'SERVER_SOFTWARE'}) && $ENV{'SERVER_SOFTWARE'}=~/IIS/;
 
 # Turn on special checking for Doug MacEachern's modperl
-if ($MOD_PERL = $ENV{'GATEWAY_INTERFACE'} =~ /^CGI-Perl/) {
+if (defined($MOD_PERL = $ENV{'GATEWAY_INTERFACE'}) &&
+    $MOD_PERL =~ /^CGI-Perl/)
+{
     $NPH++;
     $| = 1;
     $SEQNO = 1;
@@ -2696,6 +2698,11 @@ __END__
 =head1 NAME
 
 CGI - Simple Common Gateway Interface Class
+
+=head1 SYNOPSIS
+
+  use CGI;
+  # the rest is too complicated for a synopsis; keep reading
 
 =head1 ABSTRACT
 

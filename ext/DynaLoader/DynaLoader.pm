@@ -12,17 +12,15 @@ package DynaLoader;
 #
 # Tim.Bunce@ig.co.uk, August 1994
 
-use vars qw($VERSION @ISA) ;
+use vars qw($VERSION);
+
+$VERSION = "1.02";
 
 require Carp;
 require Config;
+
 require AutoLoader;
-
-@ISA=qw(AutoLoader);
-
-$VERSION = "1.01" ;
-
-sub import { }		# override import inherited from AutoLoader
+*AUTOLOAD = \&AutoLoader::AUTOLOAD;
 
 # enable debug/trace messages from DynaLoader perl code
 $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;

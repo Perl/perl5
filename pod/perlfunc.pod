@@ -410,13 +410,13 @@ to go back before the current one.
      $hasargs, $wantarray, $evaltext, $is_require) = caller($i);
 
 Here $subroutine may be C<"(eval)"> if the frame is not a subroutine
-call, but C<L<eval>>.  In such a case additional elements $evaltext and
-$is_require are set: $is_require is true if the frame is created by
-C<L<require>> or C<L<use>> statement, $evaltext contains the text of
-C<L<eval EXPR>> statement.  In particular, for C<L<eval BLOCK>>
-statement $filename is C<"(eval)">, but $evaltext is undefined. (Note
-also that C<L<use>> statement creates a C<L<require>> frame inside
-an C<L<eval EXPR>>) frame.
+call, but an C<eval>.  In such a case additional elements $evaltext and
+$is_require are set: $is_require is true if the frame is created by a
+C<require> or C<use> statement, $evaltext contains the text of the
+C<eval EXPR> statement.  In particular, for a C<eval BLOCK> statement,
+$filename is C<"(eval)">, but $evaltext is undefined.  (Note also that
+each C<use> statement creates a C<require> frame inside an C<eval EXPR>)
+frame.
 
 Furthermore, when called from within the DB package, caller returns more
 detailed information: it sets the list variable @DB::args to be the
@@ -434,7 +434,7 @@ Changes the permissions of a list of files.  The first element of the
 list must be the numerical mode, which should probably be an octal
 number, and which definitely should I<not> a string of octal digits:
 C<0644> is okay, C<'0644'> is not.  Returns the number of files
-successfully changed.  See also L<oct>, if all you have is a string.
+successfully changed.  See also L</oct>, if all you have is a string.
 
     $cnt = chmod 0755, 'foo', 'bar';
     chmod 0755, @executables;
@@ -532,7 +532,7 @@ restrictions may be relaxed, but this is not a portable assumption.
 =item chr
 
 Returns the character represented by that NUMBER in the character set.
-For example, C<chr(65)> is "A" in ASCII.  For the reverse, use L<ord>.
+For example, C<chr(65)> is "A" in ASCII.  For the reverse, use L</ord>.
 
 If NUMBER is omitted, uses $_.
 
@@ -697,7 +697,7 @@ is not guaranteed to produce intuitive results, and should probably be
 avoided.
 
 When used on a hash element, it tells you whether the value is defined,
-not whether the key exists in the hash.  Use L<exists> for the latter
+not whether the key exists in the hash.  Use L</exists> for the latter
 purpose.
 
 Examples:
@@ -741,7 +741,7 @@ again to have memory already ready to be filled.
 This counterintuitive behaviour of defined() on aggregates may be
 changed, fixed, or broken in a future release of Perl.
 
-See also L<undef>, L<exists>, L<ref>.
+See also L</undef>, L</exists>, L</ref>.
 
 =item delete EXPR
 
@@ -1530,7 +1530,7 @@ actually modifies the element in the original list.
 
 Interprets EXPR as a hex string and returns the corresponding
 value.  (To convert strings that might start with either 0 or 0x
-see L<oct>.)  If EXPR is omitted, uses $_.
+see L</oct>.)  If EXPR is omitted, uses $_.
 
     print hex '0xAf'; # prints '175'
     print hex 'aF';   # same
@@ -2078,7 +2078,7 @@ DIRHANDLEs have their own namespace separate from FILEHANDLEs.
 =item ord
 
 Returns the numeric ascii value of the first character of EXPR.  If
-EXPR is omitted, uses $_.  For the reverse, see L<chr>.
+EXPR is omitted, uses $_.  For the reverse, see L</chr>.
 
 =item pack TEMPLATE,LIST
 
@@ -3526,7 +3526,7 @@ If EXPR is omitted, uses $_.
 Sets the umask for the process to EXPR and returns the previous value.
 If EXPR is omitted, merely returns the current umask.  Remember that a
 umask is a number, usually given in octal; it is I<not> a string of octal
-digits.  See also L<oct>, if all you have is a string.
+digits.  See also L</oct>, if all you have is a string.
 
 =item undef EXPR
 

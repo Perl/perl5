@@ -134,6 +134,7 @@ void	gv_efullname3 _((SV* sv, GV* gv, char* prefix));
 GV*	gv_fetchfile _((char* name));
 GV*	gv_fetchmeth _((HV* stash, char* name, STRLEN len, I32 level));
 GV*	gv_fetchmethod _((HV* stash, char* name));
+GV*	gv_fetchmethod_autoload _((HV* stash, char* name, I32 autoload));
 GV*	gv_fetchpv _((char* name, I32 add, I32 sv_type));
 void	gv_fullname _((SV* sv, GV* gv));
 void	gv_fullname3 _((SV* sv, GV* gv, char* prefix));

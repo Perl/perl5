@@ -829,9 +829,9 @@ file on another machine?
 
 =item More precise warnings
 
-=item Subroutine arguments created only when they're modified
+=item Deprecated: Inherited C<AUTOLOAD> for non-methods
 
-=item Simple functions' C<AUTOLOAD> not looked up as method
+=item Subroutine arguments created only when they're modified
 
 =item Fixed parsing of $$<digit>, &$<digit>, etc.
 
@@ -2318,27 +2318,27 @@ av_shift, av_store, av_undef, av_unshift, CLASS, Copy, croak, CvSTASH,
 DBsingle, DBsub, DBtrace, dMARK, dORIGMARK, dowarn, dSP, dXSARGS, dXSI32,
 dXSI32, ENTER, EXTEND, FREETMPS, G_ARRAY, G_DISCARD, G_EVAL, GIMME,
 GIMME_V, G_NOARGS, G_SCALAR, G_VOID, gv_fetchmeth, gv_fetchmethod,
-gv_stashpv, gv_stashsv, GvSV, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV,
-HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, hv_clear, hv_delayfree_ent,
-hv_delete, hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
-hv_free_ent, hv_iterinit, hv_iterkey, hv_iterkeysv, hv_iternext,
-hv_iternextsv, hv_iterval, hv_magic, HvNAME, hv_store, hv_store_ent,
-hv_undef, isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE, isUPPER, items, ix,
-LEAVE, MARK, mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_len,
-mg_magical, mg_set, Move, na, New, Newc, Newz, newAV, newHV, newRV_inc,
-newRV_noinc, newSV, newSViv, newSVnv, newSVpv, newSVrv, newSVsv, newXS,
-newXSproto, Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc,
-perl_call_argv, perl_call_method, perl_call_pv, perl_call_sv,
-perl_construct, perl_destruct, perl_eval_sv, perl_free, perl_get_av,
-perl_get_cv, perl_get_hv, perl_get_sv, perl_parse, perl_require_pv,
-perl_run, POPi, POPl, POPp, POPn, POPs, PUSHMARK, PUSHi, PUSHn, PUSHp,
-PUSHs, PUTBACK, Renew, Renewc, RETVAL, safefree, safemalloc, saferealloc,
-savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE,
-strLT, strNE, strnEQ, strnNE, sv_2mortal, sv_bless, sv_catpv, sv_catpvn,
-sv_catsv, sv_cmp, sv_cmp, SvCUR, SvCUR_set, sv_dec, sv_dec, SvEND, sv_eq,
-SvGROW, sv_grow, sv_inc, SvIOK, SvIOK_off, SvIOK_on, SvIOK_only,
-SvIOK_only, SvIOKp, sv_isa, SvIV, sv_isobject, SvIVX, SvLEN, sv_len,
-sv_len, sv_magic, sv_mortalcopy, SvOK, sv_newmortal, sv_no, SvNIOK,
+gv_fetchmethod_autoload, gv_stashpv, gv_stashsv, GvSV, HEf_SVKEY, HeHASH,
+HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, hv_clear,
+hv_delayfree_ent, hv_delete, hv_delete_ent, hv_exists, hv_exists_ent,
+hv_fetch, hv_fetch_ent, hv_free_ent, hv_iterinit, hv_iterkey, hv_iterkeysv,
+hv_iternext, hv_iternextsv, hv_iterval, hv_magic, HvNAME, hv_store,
+hv_store_ent, hv_undef, isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE,
+isUPPER, items, ix, LEAVE, MARK, mg_clear, mg_copy, mg_find, mg_free,
+mg_get, mg_len, mg_magical, mg_set, Move, na, New, Newc, Newz, newAV,
+newHV, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv, newSVpv, newSVrv,
+newSVsv, newXS, newXSproto, Nullav, Nullch, Nullcv, Nullhv, Nullsv,
+ORIGMARK, perl_alloc, perl_call_argv, perl_call_method, perl_call_pv,
+perl_call_sv, perl_construct, perl_destruct, perl_eval_sv, perl_free,
+perl_get_av, perl_get_cv, perl_get_hv, perl_get_sv, perl_parse,
+perl_require_pv, perl_run, POPi, POPl, POPp, POPn, POPs, PUSHMARK, PUSHi,
+PUSHn, PUSHp, PUSHs, PUTBACK, Renew, Renewc, RETVAL, safefree, safemalloc,
+saferealloc, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE,
+strGT, strLE, strLT, strNE, strnEQ, strnNE, sv_2mortal, sv_bless, sv_catpv,
+sv_catpvn, sv_catsv, sv_cmp, sv_cmp, SvCUR, SvCUR_set, sv_dec, sv_dec,
+SvEND, sv_eq, SvGROW, sv_grow, sv_inc, SvIOK, SvIOK_off, SvIOK_on,
+SvIOK_only, SvIOK_only, SvIOKp, sv_isa, SvIV, sv_isobject, SvIVX, SvLEN,
+sv_len, sv_len, sv_magic, sv_mortalcopy, SvOK, sv_newmortal, sv_no, SvNIOK,
 SvNIOK_off, SvNIOKp, SvNOK, SvNOK_off, SvNOK_on, SvNOK_only, SvNOK_only,
 SvNOKp, SvNV, SvNVX, SvPOK, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only,
 SvPOKp, SvPV, SvPVX, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK,
@@ -2757,6 +2757,8 @@ clearcache ( COUNT ), clearallcache ( ), disablecache ( ), enablecache ( )
 
 =head2 CGI - Simple Common Gateway Interface Class
 
+=item SYNOPSIS
+
 =item ABSTRACT
 
 =item INSTALLATION:
@@ -3040,7 +3042,11 @@ distribution
 
 =item recompile
 
+=item The 4 Classes: Authors, Bundles, Modules, Distributions
+
 =item ProgrammerE<39>s interface
+
+expand($type,@things), Programming Examples
 
 =item Cache Manager
 
@@ -3290,7 +3296,7 @@ variables
 =head2 ExtUtils::Command - utilities to replace common UNIX commands in
 Makefiles etc.
 
-=item SYNOPSYS
+=item SYNOPSIS
 
 =item DESCRIPTION
 

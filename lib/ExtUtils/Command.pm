@@ -16,7 +16,7 @@ $VERSION = '1.00';
 
 ExtUtils::Command - utilities to replace common UNIX commands in Makefiles etc.
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
   perl -MExtUtils::command -e cat files... > destination
   perl -MExtUtils::command -e mv source... destination

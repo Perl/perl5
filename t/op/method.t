@@ -67,11 +67,8 @@ sub C::e;
 sub Y::f;
 $counter = 0;
 
-@Y::ISA = 'B';
-*Y::AUTOLOAD = *B::AUTOLOAD;
-
 @X::ISA = 'Y';
-*X::AUTOLOAD = *Y::AUTOLOAD;
+@Y::ISA = 'B';
 
 sub B::AUTOLOAD {
   my $c = ++$counter;

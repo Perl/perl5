@@ -37,11 +37,28 @@ may only be used to set the following switches: B<-[DIMUdmw]>.
 
 =head2 More precise warnings
 
-If you removed the -w option from your Perl 5.003 scripts because it
+If you removed the B<-w> option from your Perl 5.003 scripts because it
 made Perl too verbose, we recommend that you try putting it back when
 you upgrade to Perl 5.004.  Each new perl version tends to remove some
 undesirable warnings, while adding new warnings that may catch bugs in
 your scripts.
+
+=head2 Deprecated: Inherited C<AUTOLOAD> for non-methods
+
+Before Perl 5.004, C<AUTOLOAD> functions were looked up as methods
+(using the C<@ISA> hierarchy), even when the function to be autoloaded
+was called as a plain function (e.g. C<Foo::bar()>), not a method
+(e.g. C<Foo->bar()> or C<$obj->bar()>).
+
+Perl 5.005 will use method lookup only for methods' C<AUTOLOAD>s.
+However, there is a significant base of existing code that may be using
+the old behavior.  So, as an interim step, Perl 5.004 issues an optional
+warning when a non-method uses an inherited C<AUTOLOAD>.
+
+The simple rule is:  Inheritance will not work when autoloading
+non-methods.  The simple fix for old code is:  In any module that used to
+depend on inheriting C<AUTOLOAD> for non-methods from a base class named
+C<BaseClass>, execute C<*AUTOLOAD = \&BaseClass::AUTOLOAD> during startup.
 
 =head2 Subroutine arguments created only when they're modified
 
@@ -66,19 +83,6 @@ For example, given this code:
 After this code executes in Perl 5.004, $a{b} exists but $a[2] does
 not.  In Perl 5.002 and 5.003, both $a{b} and $a[2] would have existed
 (but $a[2]'s value would have been undefined).
-
-=head2 Simple functions' C<AUTOLOAD> not looked up as method
-
-Before Perl 5.004, C<AUTOLOAD> functions were looked up as methods
-(using the C<@ISA> hierarchy), even when the function to be autoloaded
-was called as a plain function (e.g. C<Foo::bar()>), not a method.
-Perl 5.004 no longer uses method lookup for C<AUTOLOAD>s of plain
-functions.
-
-The simple rule is: Inheritance does not work when autoloading plain
-functions.  The simple fix for old code is: In any module that used to
-depend on inheriting C<AUTOLOAD> from a base class named C<BaseClass>,
-execute C<*AUTOLOAD = *BaseClass::AUTOLOAD>.
 
 =head2 Fixed parsing of $$<digit>, &$<digit>, etc.
 
@@ -272,7 +276,7 @@ which have changed in incompatible ways from older versions of Perl.
 If the VERSION argument is present between Module and LIST, then the
 C<use> will call the VERSION method in class Module with the given
 version as an argument.  The default VERSION method, inherited from
-the Universal class, croaks if the given version is larger than the
+the UNIVERSAL class, croaks if the given version is larger than the
 value of the variable $Module::VERSION.  (Note that there is not a
 comma after VERSION!)
 
@@ -938,7 +942,7 @@ name (as opposed to a subroutine reference).
 =item Constant subroutine %s redefined
 
 (S) You redefined a subroutine which had previously been eligible for
-inlining.  See L<perlsub/"Constant Functions"for commentary and
+inlining.  See L<perlsub/"Constant Functions"> for commentary and
 workarounds.
 
 =item Constant subroutine %s undefined
@@ -1184,7 +1188,7 @@ version of Perl, and this should not happen anyway.
 
 =item Malformed PERLLIB_PREFIX
 
-(F) An error peculiar to OS/2. PERLLIB_PREFIX should be of the form
+(F) An error peculiar to OS/2.  PERLLIB_PREFIX should be of the form
 
     prefix1;prefix2
 
@@ -1192,21 +1196,23 @@ or
 
     prefix1 prefix2
 
-with nonempty prefix1 and prefix2. If C<prefix1> is indeed a prefix of
-a builtin library search path, prefix2 is substituted. The error may appear
-if components are not found, or are too long. See L<perlos2/"PERLLIB_PREFIX">.
+with nonempty prefix1 and prefix2.  If C<prefix1> is indeed a prefix
+of a builtin library search path, prefix2 is substituted.  The error
+may appear if components are not found, or are too long.  See
+"PERLLIB_PREFIX" in F<README.os2>.
 
 =item PERL_SH_DIR too long
 
 (F) An error peculiar to OS/2. PERL_SH_DIR is the directory to find the
-C<sh>-shell in. See L<perlos2/"PERL_SH_DIR">.
+C<sh>-shell in.  See "PERL_SH_DIR" in F<README.os2>.
 
 =item Process terminated by SIG%s
 
 (W) This is a standard message issued by OS/2 applications, while *nix
-applications die in silence. It is considered a feature of the OS/2
-port. One can easily disable this by appropriate sighandlers, see
-L<perlipc/"Signals">.  See L<perlos2/"Process terminated by SIGTERM/SIGINT">.
+applications die in silence.  It is considered a feature of the OS/2
+port.  One can easily disable this by appropriate sighandlers, see
+L<perlipc/"Signals">.  See also "Process terminated by SIGTERM/SIGINT"
+in F<README.os2>.
 
 =back
 

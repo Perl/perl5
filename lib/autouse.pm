@@ -3,7 +3,7 @@ package autouse;
 #use strict;		# debugging only
 use 5.003_90;		# ->can, for my $var
 
-$autouse::VERSION = '0.03';
+$autouse::VERSION = '1.00';
 
 my $DEBUG = $ENV{AUTOUSE_DEBUG};
 

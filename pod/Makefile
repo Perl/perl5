@@ -1,6 +1,13 @@
 CONVERTERS = pod2html pod2latex pod2man pod2text checkpods
 
+HTMLROOT = /	# Change this to fix cross-references in HTML
+POD2HTML = pod2html \
+	    --htmlroot=$(HTMLROOT) \
+	    --podroot=.. --podpath=pod:lib:ext:vms \
+	    --libpods=perlfunc:perlguts:perlvar:perlrun:perlop
+
 all: $(CONVERTERS) man
+
 PERL = ../miniperl
 
 POD = \
@@ -141,8 +148,8 @@ HTML = \
 	perlfaq6.html	\
 	perlfaq7.html	\
 	perlfaq8.html	\
-	perlfaq9.html	\
-	perltoc.html
+	perlfaq9.html
+# not perltoc.html
 
 TEX = \
 	perl.tex	\
@@ -191,19 +198,18 @@ TEX = \
 	perlfaq9.tex	\
 	perltoc.tex
 
-man:  pod2man $(MAN)
+man:	pod2man $(MAN)
 
-# pod2html normally runs on all the pods at once in order to build up
-# cross-references.
-html: pod2html
-	$(PERL) -I../lib pod2html $(POD)
+html:	pod2html $(HTML)
 
 tex:	pod2latex $(TEX)
 
 toc:
 	$(PERL) -I../lib buildtoc >perltoc.pod
 
-.SUFFIXES: .pm .pod .man
+.SUFFIXES: .pm .pod
+
+.SUFFIXES: .man
 
 .pm.man:     pod2man
 	$(PERL) -I../lib pod2man $*.pm >$*.man
@@ -211,24 +217,25 @@ toc:
 .pod.man:     pod2man
 	$(PERL) -I../lib pod2man $*.pod >$*.man
 
-.SUFFIXES: .mp .pod .html
+.SUFFIXES: .html
 
 .pm.html:    pod2html
-	$(PERL) -I../lib pod2html $*.pod
+	$(PERL) -I../lib $(POD2HTML) --infile=$*.pm --outfile=$*.html
 
 .pod.html:    pod2html
-	$(PERL) -I../lib pod2html $*.pod
+	$(PERL) -I../lib $(POD2HTML) --infile=$*.pod --outfile=$*.html
 
-.SUFFIXES: .pm .pod .tex
+.SUFFIXES: .tex
+
+.pm.tex: pod2latex
+	$(PERL) -I../lib pod2latex $*.pm
 
 .pod.tex: pod2latex
 	$(PERL) -I../lib pod2latex $*.pod
 
-.pm.tex: pod2latex
-	$(PERL) -I../lib pod2latex $*.pod
-
 clean:
 	rm -f $(MAN) $(HTML) $(TEX)
+	rm -f pod2html-*cache
 	rm -f *.aux *.log
 
 realclean:	clean

@@ -2464,12 +2464,6 @@ action-at-a-distance effects of C<$*>.
 (F) You attempted to use a feature of printf that is accessible from
 only C.  This usually means there's a better way to do it in Perl.
 
-=item Use of %s is deprecated
-
-(D) The construct indicated is no longer recommended for use, generally
-because there's a better way to do it, and also because the old way has
-bad side effects.
-
 =item Use of bare E<lt>E<lt> to mean E<lt>E<lt>"" is deprecated
 
 (D) You are now encouraged to use the explicitly quoted form if you
@@ -2480,6 +2474,30 @@ wish to use an empty line as the terminator of the here-document.
 (D) It makes a lot of work for the compiler when you clobber a
 subroutine's argument list, so it's better if you assign the results of
 a split() explicitly to an array (or list).
+
+=item Use of inherited AUTOLOAD for non-method %s() is deprecated
+
+As an (ahem) accidental feature, C<AUTOLOAD> subroutines are looked up
+as methods (using the C<@ISA> hierarchy) even when the subroutines to be
+autoloaded were called as plain functions (e.g. C<Foo::bar()>), not as
+methods (e.g. C<Foo->bar()> or C<$obj->bar()>).
+
+This bug will be rectified in Perl 5.005, which will use method lookup
+only for methods' C<AUTOLOAD>s.  However, there is a significant base
+of existing code that may be using the old behavior.  So, as an
+interim step, Perl 5.004 issues an optional warning when non-methods
+use inherited C<AUTOLOAD>s.
+
+The simple rule is:  Inheritance will not work when autoloading
+non-methods.  The simple fix for old code is:  In any module that used to
+depend on inheriting C<AUTOLOAD> for non-methods from a base class named
+C<BaseClass>, execute C<*AUTOLOAD = \&BaseClass::AUTOLOAD> during startup.
+
+=item Use of %s is deprecated
+
+(D) The construct indicated is no longer recommended for use, generally
+because there's a better way to do it, and also because the old way has
+bad side effects.
 
 =item Use of uninitialized value
 
@@ -2703,7 +2721,7 @@ version of Perl, and this should not happen anyway.
 
 =item Malformed PERLLIB_PREFIX
 
-(F) An error peculiar to OS/2. PERLLIB_PREFIX should be of the form
+(F) An error peculiar to OS/2.  PERLLIB_PREFIX should be of the form
 
     prefix1;prefix2
 
@@ -2711,21 +2729,23 @@ or
 
     prefix1 prefix2
 
-with nonempty prefix1 and prefix2. If C<prefix1> is indeed a prefix of
-a builtin library search path, prefix2 is substituted. The error may appear
-if components are not found, or are too long. See L<perlos2/"PERLLIB_PREFIX">.
+with nonempty prefix1 and prefix2.  If C<prefix1> is indeed a prefix
+of a builtin library search path, prefix2 is substituted.  The error
+may appear if components are not found, or are too long.  See
+"PERLLIB_PREFIX" in F<README.os2>.
 
 =item PERL_SH_DIR too long
 
 (F) An error peculiar to OS/2. PERL_SH_DIR is the directory to find the
-C<sh>-shell in. See L<perlos2/"PERL_SH_DIR">.
+C<sh>-shell in.  See "PERL_SH_DIR" in F<README.os2>.
 
 =item Process terminated by SIG%s
 
 (W) This is a standard message issued by OS/2 applications, while *nix
-applications die in silence. It is considered a feature of the OS/2
-port. One can easily disable this by appropriate sighandlers, see
-L<perlipc/"Signals">.  See L<perlos2/"Process terminated by SIGTERM/SIGINT">.
+applications die in silence.  It is considered a feature of the OS/2
+port.  One can easily disable this by appropriate sighandlers, see
+L<perlipc/"Signals">.  See also "Process terminated by SIGTERM/SIGINT"
+in F<README.os2>.
 
 =back
 

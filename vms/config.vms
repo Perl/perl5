@@ -76,7 +76,7 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00396"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00397"  /**/
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
 
 /* ARCHNAME:

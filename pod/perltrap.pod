@@ -688,8 +688,8 @@ Logical tests now return an null, instead of 0
     # perl4 prints: 0
     # perl5 prints:
 
-Also see the L<General Regular Expression Traps using s///, etc.>
-tests for another example of this new feature...
+Also see L<"General Regular Expression Traps using s///, etc.">
+for another example of this new feature...
 
 =back
 

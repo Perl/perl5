@@ -59,9 +59,9 @@ CLEAN :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 # ADD BASE CPP /nologo /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MT /W3 /O2 /I ".\include" /I "." /I ".." /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /YX /c
+# ADD CPP /nologo /MT /W3 /O2 /I ".\include" /I "." /I ".." /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "PERLDLL" /YX /c
 CPP_PROJ=/nologo /MT /W3 /O2 /I ".\include" /I "." /I ".." /D "NDEBUG" /D\
- "WIN32" /D "_WINDOWS" /D "MSDOS" /Fp"$(INTDIR)/modules.pch" /YX /Fo"$(INTDIR)/"\
+ "WIN32" /D "_WINDOWS" /D "PERLDLL" /Fp"$(INTDIR)/modules.pch" /YX /Fo"$(INTDIR)/"\
  /c 
 CPP_OBJS=.\Release/
 CPP_SBRS=.\.
@@ -108,9 +108,9 @@ CLEAN :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 # ADD BASE CPP /nologo /W3 /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MT /W3 /Z7 /Od /I ".\include" /I "." /I ".." /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /YX /c
+# ADD CPP /nologo /MT /W3 /Z7 /Od /I ".\include" /I "." /I ".." /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "PERLDLL" /YX /c
 CPP_PROJ=/nologo /MT /W3 /Z7 /Od /I ".\include" /I "." /I ".." /D "_DEBUG"\
- /D "WIN32" /D "_WINDOWS" /D "MSDOS" /Fp"$(INTDIR)/modules.pch" /YX\
+ /D "WIN32" /D "_WINDOWS" /D "PERLDLL" /Fp"$(INTDIR)/modules.pch" /YX\
  /Fo"$(INTDIR)/" /c 
 CPP_OBJS=.\Debug/
 CPP_SBRS=.\.

@@ -444,6 +444,7 @@ gv_efullname3
 gv_fetchfile
 gv_fetchmeth
 gv_fetchmethod
+gv_fetchmethod_autoload
 gv_fetchpv
 gv_fullname
 gv_fullname3

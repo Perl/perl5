@@ -1,15 +1,15 @@
 package Text::ParseWords;
 
 require 5.000;
-require Exporter;
-require AutoLoader;
 use Carp;
 
-@ISA = qw(Exporter AutoLoader);
+require AutoLoader;
+*AUTOLOAD = \&AutoLoader::AUTOLOAD;
+
+require Exporter;
+@ISA = qw(Exporter);
 @EXPORT = qw(shellwords quotewords);
 @EXPORT_OK = qw(old_shellwords);
-
-*AUTOLOAD = *AutoLoader::AUTOLOAD;
 
 =head1 NAME
 
