@@ -1,5 +1,5 @@
 package Sys::Syslog;
-require 5.000;
+require 5.006;
 require Exporter;
 require DynaLoader;
 use Carp;
@@ -7,7 +7,7 @@ use Carp;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(openlog closelog setlogmask syslog);
 @EXPORT_OK = qw(setlogsock);
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 # it would be nice to try stream/unix first, since that will be
 # most efficient. However streams are dodgy - see _syslog_send_stream
@@ -313,7 +313,7 @@ sub syslog {
 
     $whoami .= "[$$]" if $lo_pid;
 
-    $mask =~ s/%m/$!/g;
+    $mask =~ s/(?<!%)%m/$!/g;
     $mask .= "\n" unless $mask =~ /\n$/;
     $message = sprintf ($mask, @_);
 
