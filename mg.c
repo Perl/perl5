@@ -2227,7 +2227,7 @@ Perl_sighandler(int sig)
 
     POPSTACK;
     if (SvTRUE(ERRSV)) {
-#ifdef HAS_SIGACTION
+#ifdef HAS_SIGPROCMASK
 	/* Handler "died", for example to get out of a restart-able read().
 	 * Before we re-do that on its behalf re-enable the signal which was
 	 * blocked by the system when we entered.

@@ -2029,7 +2029,7 @@ $!: compute shared library extension
 $!: Looking for optional libraries
 $!: see if nm is to be used to determine whether a symbol is defined or not
 $!: get list of predefined functions in a handy place
-$!: see if we have sigaction
+$!: see if we have sigaction or sigprocmask
 $!: see whether socketshr exists
 $ IF (F$SEARCH(F$PARSE("SocketShr","Sys$Share:.Exe")).NES."")
 $ THEN
@@ -4494,6 +4494,7 @@ $   d_bcmp="define"
 $   d_gettimeod="define"
 $   d_uname="define"
 $   d_sigaction="define"
+$   d_sigprocmask="define"
 $   d_truncate="define"
 $   d_wait4="define"
 $   d_index="define"
@@ -4517,6 +4518,7 @@ $   d_gettimeod="undef"
 $   d_bcmp="undef"
 $   d_uname="undef"
 $   d_sigaction="undef"
+$   d_sigprocmask="undef"
 $   d_truncate="undef"
 $   d_wait4="undef"
 $   d_index="undef"
@@ -5098,6 +5100,7 @@ $ WC "d_sfio='undef'"
 $ WC "d_shm='undef'"
 $ WC "d_shmatprototype='undef'"
 $ WC "d_sigaction='" + d_sigaction + "'"
+$ WC "d_sigprocmask='" + d_sigprocmask + "'"
 $ WC "d_sigsetjmp='" + d_sigsetjmp + "'"
 $ WC "d_socket='" + d_socket + "'"
 $ WC "d_socklen_t='" + d_socklen_t + "'"

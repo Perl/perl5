@@ -7,8 +7,8 @@
 #
 
 # Package name      : perl5
-# Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
-# Configuration time: Thu Dec 21 18:13:27 EET 2000
+# Source directory  : .
+# Configuration time: Fri Jan 12 18:21:55 EET 2001
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -62,7 +62,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Thu Dec 21 18:13:27 EET 2000'
+cf_time='Fri Jan 12 18:21:55 EET 2001'
 charsize='1'
 chgrp=''
 chmod=''
@@ -329,6 +329,7 @@ d_shmctl='define'
 d_shmdt='define'
 d_shmget='define'
 d_sigaction='define'
+d_sigprocmask='define'
 d_sigsetjmp='define'
 d_socket='define'
 d_socklen_t='undef'
@@ -547,7 +548,7 @@ installvendorarch=''
 installvendorbin=''
 installvendorlib=''
 intsize='4'
-issymlink='-h'
+issymlink='test -h'
 ivdformat='"ld"'
 ivsize='8'
 ivtype='long'
@@ -724,7 +725,7 @@ socksizetype='int'
 sort='sort'
 spackage='Perl5'
 spitshell='cat'
-src='/m/fs/work/work/permanent/perl/pp4/perl'
+src='.'
 ssizetype='ssize_t'
 startperl='#!/opt/perl/bin/perl'
 startsh='#!/bin/sh'

@@ -1914,6 +1914,13 @@
  */
 /*#define HAS_SIGACTION	/**/
 
+/* HAS_SIGPROCMASK:
+ *	This symbol, if defined, indicates that sigprocmask
+ *	system call is available to examine or change the signal mask
+ *	of the calling process.
+ */
+/*#define HAS_SIGPROCMASK	/**/
+
 /* HAS_SIGSETJMP:
  *	This variable indicates to the C program that the sigsetjmp()
  *	routine is available to save the calling process's registers

@@ -16,8 +16,8 @@
 
 /*
  * Package name      : perl5
- * Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
- * Configuration time: Thu Dec 21 18:13:27 EET 2000
+ * Source directory  : .
+ * Configuration time: Fri Jan 12 18:21:55 EET 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -3236,5 +3236,12 @@
  */
 #define PERL_XS_APIVERSION "5.7.0"
 #define PERL_PM_APIVERSION "5.005"
+
+/* HAS_SIGPROCMASK:
+ *	This symbol, if defined, indicates that the sigprocmask
+ *	system call is available to examine or change the signal mask
+ *	of the calling process.
+ */
+#define HAS_SIGPROCMASK		/**/
 
 #endif
