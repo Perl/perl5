@@ -959,8 +959,8 @@ it's a copy constructor.
 
 The following methods are available on the object:
 
-    $t->s                    # 0..61 [1]
-                             # and 61: leap second and double leap second
+    $t->s                    # 0..61
+                             # 60 and 61: leap second and double leap second
     $t->sec                  # same as $t->s
     $t->second               # same as $t->s
     $t->min                  # 0..59
@@ -1008,23 +1008,27 @@ The following methods are available on the object:
 
     $t->week                 # week number (ISO 8601)
 
-    $t->is_leap_year         # true if it its
-    $t->month_last_day       # 28-31
+    $t->is_leap_year                  # true if it its
+    Time::Piece::_is_leap_year($year) # true if it its
+    $t->month_last_day                # 28..31
 
     $t->time_separator($s)   # set the default separator (default ":")
     $t->date_separator($s)   # set the default separator (default "-")
-    $t->wday(@days)          # set the default weekdays, abbreviated
-    $t->weekday_names(@days) # set the default weekdays
-    $t->mon_names(@days)     # set the default months, abbreviated
-    $t->month_names(@days)   # set the default months
+    $t->wday_names(@days)    # set the default weekday names, abbreviated
+    $t->weekday_names(@days) # set the default weekday names
+    $t->mon_names(@days)     # set the default month names, abbreviated
+    $t->month_names(@days)   # set the default month names
 
-    $t->strftime($format)    # data and time formatting
+    $t->strftime($format)    # date and time formatting
     $t->strftime()           # "Tue, 29 Feb 2000 12:34:56 GMT"
 
     $t->_strftime($format)   # same as POSIX::strftime (without the
                              # overhead of the full POSIX extension),
                              # calls the operating system libraries,
                              # as opposed to $t->strftime()
+
+    use Time::Piece 'strptime'; # date parsing
+    my %p = strptime("%H:%M", "12:34"); # $p{H} and ${M} will be set
 
 =head2 Local Locales
 
@@ -1033,17 +1037,19 @@ to index the name of the days against. This can be useful if you need
 to implement some form of localisation without actually installing or
 using the locales provided by the operating system.
 
-  my @days = qw( Dimanche Lundi Merdi Mercredi Jeudi Vendredi Samedi );
+  my @weekdays = qw( Dimanche Lundi Merdi Mercredi Jeudi Vendredi Samedi );
   
-  my $french_day = localtime->day(@days);
+  my $french_day = localtime->day(@weekdays);
 
 These settings can be overriden globally too:
 
-  Time::Piece::weekday_names(@days);
+  Time::Piece::weekday_names(@weekdays);
+  Time::Piece::wday_names(@wdays);
 
 Or for months:
 
   Time::Piece::month_names(@months);
+  Time::Piece::mon_names(@mon);
 
 And locally for months:
 
@@ -1081,17 +1087,206 @@ Date comparisons are also possible, using the full suite of "<", ">",
 
 The ISO 8601 standard defines the date format to be YYYY-MM-DD, and
 the time format to be hh:mm:ss (24 hour clock), and if combined, they
-should be concatenated with date first and with a capital 'T' in front
-of the time.
+should be concatenated with the date first and with a capital 'T' in
+front of the time.
 
 =head2 Week Number
 
 The I<week number> may be an unknown concept to some readers.  The ISO
 8601 standard defines that weeks begin on a Monday and week 1 of the
-year is the week that includes both January 4th and the first Thursday
-of the year.  In other words, if the first Monday of January is the
-2nd, 3rd, or 4th, the preceding days of the January are part of the
-last week of the preceding year.  Week numbers range from 1 to 53.
+year is the week that includes both January the 4th and the first
+Thursday of the year.  In other words, if the first Monday of January
+is the 2nd, 3rd, or 4th, the preceding days of the January are part of
+the last week of the preceding year.  Week numbers range from 1 to 53.
+
+=head2 strftime method
+
+The strftime() method can be used to format Time::Piece objects for output.
+The argument to strftime() is the format string to be used, for example:
+
+	$t->strftime("%H:%M");
+
+will output the hours and minutes concatenated with a colon.  The
+available format characters are as in the standard strftime() function
+(unless otherwise indicated the implementation is in pure Perl,
+no operating system strftime() is invoked):
+
+=over 4
+
+=item %%
+
+The percentage character "%".
+
+=item %a
+
+The abbreviated weekday name, e.g. 'Tue'.  Note that the abbreviations
+are not necessarily three characters wide in all languages.
+
+=item %A
+
+The weekday name, e.g. 'Tuesday'.
+
+=item %b
+
+The abbreviated month name, e.g. 'Feb'.  Note that the abbreviations
+are not necessarily three characters wide in all languages.
+
+=item %B
+
+The month name, e.g. 'February'.
+
+=item %c
+
+The ctime format, or the localtime()/gmtime() format: C<%a %b %m %H:%M:%S %Y>.
+
+(Should be avoided: use $t->timedate instead.)
+
+=item %C
+
+The 'centuries' number, e.g. 19 for the year 1999 and 20 for the year 2000.
+
+=item %d
+
+The zero-filled right-aligned day of the month, e.g. '09' or '10'.
+
+=item %D
+
+C<%m/%d/%d>.
+
+(Should be avoided: use $t->date instead.)
+
+=item %e
+
+The space-filled right-aligned day of the month, e.g. ' 9' or '10'.
+
+=item %h
+
+Same as C<%b>, the abbreviated monthname.
+
+=item %H
+
+The zero-filled right-aligned hours in 24 hour clock, e.g. '09' or '10'.
+
+=item %I
+
+The zero-filled right-aligned hours in 12 hour clock, e.g. '09' or '10'.
+
+=item %j
+
+The zero-filled right-aligned day of the year, e.g. '001' or '365'.
+
+=item %m
+
+The zero-filled right-aligned month number, e.g. '09' or '10'.
+
+=item %M
+
+The zero-filled right-aligned minutes, e.g. '09' or '10'.
+
+=item %n
+
+The newline character "\n".
+
+=item %p
+
+Notice that this is somewhat meaningless in 24 hour clocks.
+
+=item %r
+
+C<%I:%M:%S %p>.
+
+(Should be avoided: use $t->time instead.)
+
+=item %R
+
+C<%H:%M>.
+
+=item %S
+
+The zero-filled right-aligned seconds, e.g. '09' or '10'.
+
+=item %t
+
+The tabulator character "\t".
+
+=item %T
+
+C<%H:%M%S>
+
+(Should be avoided: use $t->time instead.)
+
+=item %u
+
+The day of the week with Monday as 1 (one) and Sunday as 7.
+
+=item %U
+
+The zero-filled right-aligned week number of the year, Sunday as the
+first day of the week, from '00' to '53'.
+
+(Currently taken care by the operating system strftime().)
+
+=item %V
+
+The zero-filled right-aligned week of the year, e.g. '01' or '53'.
+(ISO 8601)
+
+=item %w
+
+The day of the week with Sunday as 0 (zero) and Monday as 1 (one).
+
+=item %W
+
+The zero-filled right-aligned week number of the year, Monday as the
+first day of the week, from '00' to '53'.
+
+(Currently taken care by the operating system strftime().)
+
+=item %x
+
+C<%m/%d/%y>.
+
+(Should be avoided: use $t->date instead.)
+
+=item %y
+
+The zero-filled right-aligned last two numbers of the year, e.g. 99
+for 1999 and 01 for 2001.
+
+(Should be avoided: this is the Y2K bug alive and well.)
+
+=item %Y
+
+The year, e.g. 1999 or 2001.
+
+=item %Z
+
+The timezone name, for example "GMT" or "EET".
+
+(Taken care by the operating system strftime().)
+
+=back
+
+The format C<Z> and any of the C<O*> and C<E*> formats are handled by
+the operating system, not by Time::Piece, because those formats are
+usually rather unportable and non-standard.  (For example 'MST' can
+mean almost anything: 'Mountain Standard Time' or 'Moscow Standard Time'.)
+
+=head2 strptime function
+
+You can export the strptime() function and use it to parse date and
+time strings back to numbers.  For example the following will return
+the hours, minutes, and seconds as $parse{H}, $parse{M}, and $parse{S}.
+
+    use Time::Piece 'strptime';
+    my %parse = strptime('%H:%M:S', '12:34:56');
+
+For 'compound' formats like for example 'T' strptime() will return
+the 'components'.
+
+strptime() does not perform overly strict checks on the dates and
+times, it will be perfectly happy with the 31st day of February,
+for example.  Stricter validation should be performed by other means.
 
 =head2 Global Overriding
 
@@ -1102,7 +1297,9 @@ including the ':override' tag in the import list:
 
 =head1 SEE ALSO
 
-The excellent Calendar FAQ at http://www.tondering.dk/claus/calendar.html
+The excellent Calendar FAQ at L<http://www.tondering.dk/claus/calendar.html>
+
+L<strftime(3)>, L<strftime(3)>
 
 =head1 AUTHOR
 
