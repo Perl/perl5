@@ -4322,9 +4322,9 @@ themselves.  Default is a 16-bit checksum.  For example, the following
 computes the same number as the System V sum program:
 
     while (<>) {
-	$checksum += unpack("%16C*", $_);
+	$checksum += unpack("%32C*", $_);
     }
-    $checksum %= 65536;
+    $checksum %= 65535;
 
 The following efficiently counts the number of set bits in a bit vector:
 
