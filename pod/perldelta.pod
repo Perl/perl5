@@ -119,15 +119,15 @@ as follows
 
 =item *
 
-5.8.3 23:59:59, Wednesday December 31st 2003
+5.8.3 23:59:59 GMT, Wednesday December 31st 2003
 
 =item *
 
-5.8.4 23:59:59, Wednesday March 31st 2004
+5.8.4 23:59:59 GMT, Wednesday March 31st 2004
 
 =item *
 
-5.8.5 23:59:59, Wednesday June 30th 2004
+5.8.5 23:59:59 GMT, Wednesday June 30th 2004
 
 =back
 
