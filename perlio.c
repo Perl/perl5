@@ -2016,7 +2016,6 @@ PerlIO *
 PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
 {
     PerlIO *nexto = PerlIONext(o);
-    PerlIO_debug("PerlIOBase_dup f=%p o=%p param=%p\n",f,o,param);
     if (*nexto) {
 	PerlIO_funcs *tab = PerlIOBase(nexto)->tab;
 	f = (*tab->Dup)(aTHX_ f, nexto, param);
@@ -2025,6 +2024,7 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
 	PerlIO_funcs *self = PerlIOBase(o)->tab;
 	SV *arg = Nullsv;
 	char buf[8];
+	PerlIO_debug("PerlIOBase_dup %s f=%p o=%p param=%p\n",self->name,f,o,param);
 	if (self->Getarg) {
 	    arg = (*self->Getarg)(o);
 	    if (arg) {
@@ -2549,7 +2549,27 @@ PerlIOStdio_set_ptrcnt(PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 PerlIO *
 PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
 {
- return PerlIOBase_dup(aTHX_ f, o, param);
+    /* This assumes no layers underneath - which is what
+       happens, but is not how I remember it. NI-S 2001/10/16
+     */
+    int fd = PerlLIO_dup(PerlIO_fileno(o));
+    if (fd >= 0) {
+	char buf[8];
+	FILE *stdio = PerlSIO_fdopen(fd, PerlIO_modestr(o, buf));
+	if (stdio) {
+	    if ((f = PerlIOBase_dup(aTHX_ f, o, param))) {
+		PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
+	    }
+	    else {
+		PerlSIO_fclose(stdio);
+	    }
+	}
+	else {
+	    PerlLIO_close(fd);
+	    f = NULL;
+	}
+    }
+    return f;
 }
 
 PerlIO_funcs PerlIO_stdio = {
