@@ -758,10 +758,18 @@ char *
 Perl_savepv(pTHX_ const char *pv)
 {
     register char *newaddr;
+#ifdef PERL_MALLOC_WRAP
+    STRLEN pvlen;
+#endif
     if (!pv)
 	return Nullch;
 
+#ifdef PERL_MALLOC_WRAP
+    pvlen = strlen(pv)+1;
+    New(902,newaddr,pvlen,char);
+#else
     New(902,newaddr,strlen(pv)+1,char);
+#endif
     return strcpy(newaddr,pv);
 }
 
@@ -835,7 +843,8 @@ Perl_savesvpv(pTHX_ SV *sv)
     const char *pv = SvPV(sv, len);
     register char *newaddr;
 
-    New(903,newaddr,++len,char);
+    ++len;
+    New(903,newaddr,len,char);
     return CopyD(pv,newaddr,len,char);
 }
 

@@ -1226,14 +1226,15 @@ emergency_sbrk(MEM_SIZE size)
     MEM_SIZE rsize = (((size - 1)>>LOG_OF_MIN_ARENA) + 1)<<LOG_OF_MIN_ARENA;
 
     if (size >= BIG_SIZE
-	&& (!emergency_buffer_last_req || (size < emergency_buffer_last_req))) {
+	&& (!emergency_buffer_last_req ||
+	    (size < (MEM_SIZE)emergency_buffer_last_req))) {
 	/* Give the possibility to recover, but avoid an infinite cycle. */
 	MALLOC_UNLOCK;
 	emergency_buffer_last_req = size;
 	emergency_sbrk_croak("Out of memory during \"large\" request for %"UVuf" bytes, total sbrk() is %"UVuf" bytes", (UV)size, (UV)(goodsbrk + sbrk_slack));
     }
 
-    if (emergency_buffer_size >= rsize) {
+    if ((MEM_SIZE)emergency_buffer_size >= rsize) {
 	char *old = emergency_buffer;
 	
 	emergency_buffer_size -= rsize;
@@ -1673,9 +1674,9 @@ getpages(MEM_SIZE needed, int *nblksp, int bucket)
     MEM_SIZE slack = 0;
 
     if (sbrk_goodness > 0) {
-	if (!last_sbrk_top && require < FIRST_SBRK) 
+	if (!last_sbrk_top && require < (MEM_SIZE)FIRST_SBRK) 
 	    require = FIRST_SBRK;
-	else if (require < MIN_SBRK) require = MIN_SBRK;
+	else if (require < (MEM_SIZE)MIN_SBRK) require = MIN_SBRK;
 
 	if (require < goodsbrk * MIN_SBRK_FRAC1000 / 1000)
 	    require = goodsbrk * MIN_SBRK_FRAC1000 / 1000;
