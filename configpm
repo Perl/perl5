@@ -459,7 +459,7 @@ print CONFIG sprintf <<'ENDOFTIE', $fast_config;
 sub DESTROY { }
 
 sub AUTOLOAD {
-    require 'config_heavy.pl';
+    require 'Config_heavy.pl';
     goto \&launcher;
     die "&Config::AUTOLOAD failed on $Config::AUTOLOAD";
 }
