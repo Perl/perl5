@@ -1785,6 +1785,8 @@ PP(pp_subst)
 	TARG = DEFSV;
 	EXTEND(SP,1);
     }
+    if (SvFAKE(TARG) && SvREADONLY(TARG))
+	sv_force_normal(TARG);
     if (SvREADONLY(TARG)
 	|| (SvTYPE(TARG) > SVt_PVLV
 	    && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG))))
