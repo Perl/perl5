@@ -8,23 +8,23 @@
 
 %Maintainers =
 	(
+	'abergman'	=> 'Arthur Bergman <abergman@cpan.org>',
 	'ams'		=> 'Abhijit Menon-Sen <ams@cpan.org>',
-	'andreas'	=> 'Andreas J. Koenig <andk@cpan.org>',
-	'arthur'	=> 'Arthur Bergman <abergman@cpan.org>',
-	'autarch'	=> 'Dave Rolsky <drolsky@cpan.org>',
+	'andk'		=> 'Andreas J. Koenig <andk@cpan.org>',
 	'bbb'		=> 'Rob Brown <bbb@cpan.org>',
 	'craig'		=> 'Craig Berry <craigberry@mac.com>',
-	'damian'	=> 'Damian Conway <dconway@cpan.org>',
 	'dankogai'	=> 'Dan Kogai <dankogai@cpan.org>',
+	'dconway'	=> 'Damian Conway <dconway@cpan.org>',
+	'drolsky'	=> 'Dave Rolsky <drolsky@cpan.org>',
 	'gbarr'		=> 'Graham Barr <gbarr@cpan.org>',
+	'gaas'		=> 'Gisle Aas <gaas@cpan.org>',
 	'gsar'		=> 'Gurusamy Sarathy <gsar@activestate.com>',
-	'gisle'		=> 'Gisle Aas <gaas@cpan.org>',
 	'ilyam'		=> 'Ilya Martynov <ilyam@cpan.org>',
 	'ilyaz'		=> 'Ilya Zakharevich <ilyaz@cpan.org>',
 	'jhi'		=> 'Jarkko Hietaniemi <jhi@cpan.org>',
-	'jns'		=> 'Jonathan Stowe <jstowe@cpan.org>',
-	'jvromans'	=> 'Johan Vromans <jv@cpan.org>',
-	'kenw'		=> 'Ken Williams <kwilliams@cpan.org>',
+	'jstowe'	=> 'Jonathan Stowe <jstowe@cpan.org>',
+	'jv'		=> 'Johan Vromans <jv@cpan.org>',
+	'kwilliams'	=> 'Ken Williams <kwilliams@cpan.org>',
 	'lstein'	=> 'Lincoln D. Stein <lds@cpan.org>',
 	'marekr'	=> 'Marek Rouchal <marekr@cpan.org>',
 	'mjd'		=> 'Mark-Jason Dominus <mjd@cpan.org>',
@@ -32,13 +32,13 @@
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
 	'p5p'		=> 'perl5-porters <perl5-porters@perl.org>',
 	'petdance'	=> 'Andy Lester <petdance@cpan.org>',
-	'pmarquess'	=> 'Paul Marquess <pmqs@cpan.org>',
+	'pmqs'		=> 'Paul Marquess <pmqs@cpan.org>',
 	'rmbarker'	=> 'Robin Barker <rmbarker@cpan.org>',
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
 	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
 	'sburke'	=> 'Sean Burke <sburke@cpan.org>',
 	'schwern'	=> 'Michael Schwern <schwern@cpan.org>',
-	'smcc'		=> 'Stephen McCamant <smccam@cpan.org>',
+	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
 	'tels'		=> 'perl_dummy a-t bloodgate.com',
 	'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>'
 	);
@@ -51,7 +51,7 @@
 
 	'Attribute::Handlers' =>
 		{
-		'MAINTAINER'	=> 'arthur',
+		'MAINTAINER'	=> 'abergman',
 		'FILES'		=> q[lib/Attribute/Handlers.pm
 				     lib/Attribute/Handlers],
 		'CPAN'		=> 1,
@@ -59,14 +59,14 @@
 
 	'B::Concise' =>
 		{
-		'MAINTAINER'	=> 'smcc',
+		'MAINTAINER'	=> 'smccam',
 		'FILES'		=> q[ext/B/B/Concise.pm ext/B/t/concise.t],
 		'CPAN'		=> 0,
 		},
 
 	'B::Deparse' =>
 		{
-		'MAINTAINER'	=> 'smcc',
+		'MAINTAINER'	=> 'smccam',
 		'FILES'		=> q[ext/B/B/Deparse.pm ext/B/t/deparse.t],
 		'CPAN'		=> 0,
 		},
@@ -94,7 +94,7 @@
 
 	'CPAN' =>
 		{
-		'MAINTAINER'	=> 'andreas',
+		'MAINTAINER'	=> 'andk',
 		'FILES'		=> q[lib/CPAN.pm lib/CPAN],
 		'CPAN'		=> 1,
 		},
@@ -108,28 +108,28 @@
 
 	'DB::File' =>
 		{
-		'MAINTAINER'	=> 'pmarquess',
+		'MAINTAINER'	=> 'pmqs',
 		'FILES'		=> q[ext/DB_File],
 		'CPAN'		=> 1,
 		},
 
 	'Devel::PPPort' =>
 		{
-		'MAINTAINER'	=> 'pmarquess',
+		'MAINTAINER'	=> 'pmqs',
 		'FILES'		=> q[ext/Devel/PPPort],
 		'CPAN'		=> 1,
 		},
 
 	'Digest' =>
 		{
-		'MAINTAINER'	=> 'gisle',
+		'MAINTAINER'	=> 'gaas',
 		'FILES'		=> q[lib/Digest.{pm,t}],
 		'CPAN'		=> 1,
 		},
 
 	'Digest::MD5' =>
 		{
-		'MAINTAINER'	=> 'gisle',
+		'MAINTAINER'	=> 'gaas',
 		'FILES'		=> q[ext/Digest/MD5],
 		'CPAN'		=> 1,
 		},
@@ -158,7 +158,7 @@
 
 	'File::Spec' =>
 		{
-		'MAINTAINER'	=> 'kenw',
+		'MAINTAINER'	=> 'kwilliams',
 		'FILES'		=> q[lib/File/Spec.pm lib/File/Spec],
 		'CPAN'		=> 1,
 		},
@@ -172,7 +172,7 @@
 
 	'Filter::Simple' =>
 		{
-		'MAINTAINER'	=> 'damian',
+		'MAINTAINER'	=> 'dconway',
 		'FILES'		=> q[lib/Filter/Simple.pm lib/Filter/Simple
 				     t/lib/Filter/Simple],
 		'CPAN'		=> 1,
@@ -180,7 +180,7 @@
 
 	'Filter::Util::Call' =>
 		{
-		'MAINTAINER'	=> 'pmarquess',
+		'MAINTAINER'	=> 'pmqs',
 		'FILES'		=> q[ext/Filter/Util/Call ext/Filter/t/call.t
 				     t/lib/filter-util.pl],
 		'CPAN'		=> 1,
@@ -188,7 +188,7 @@
 
 	'Getopt::Long' =>
 		{
-		'MAINTAINER'	=> 'jvromans',
+		'MAINTAINER'	=> 'jv',
 		'FILES'		=> q[lib/Getopt/Long.pm lib/Getopt/Long],
 		'CPAN'		=> 1,
 		},
@@ -274,7 +274,7 @@
 
 	'MIME::Base64' =>
 		{
-		'MAINTAINER'	=> 'gisle',
+		'MAINTAINER'	=> 'gaas',
 		'FILES'		=> q[ext/MIME/Base64],
 		'CPAN'		=> 1,
 		},
@@ -288,7 +288,7 @@
 
 	'NEXT' =>
 		{
-		'MAINTAINER'	=> 'damian',
+		'MAINTAINER'	=> 'dconway',
 		'FILES'		=> q[lib/NEXT.pm lib/NEXT],
 		'CPAN'		=> 1,
 		},
@@ -344,7 +344,7 @@
 
 	'Switch' =>
 		{
-		'MAINTAINER'	=> 'damian',
+		'MAINTAINER'	=> 'dconway',
 		'FILES'		=> q[lib/Switch.pm lib/Switch],
 		'CPAN'		=> 1,
 		},
@@ -359,7 +359,7 @@
 
 	'Text::Balanced' =>
 		{
-		'MAINTAINER'	=> 'damian',
+		'MAINTAINER'	=> 'dconway',
 		'FILES'		=> q[lib/Text/Balanced.pm lib/Text/Balanced],
 		'CPAN'		=> 1,
 		},
@@ -410,14 +410,14 @@
 
 	'Term::Cap' =>
 		{
-		'MAINTAINER'	=> 'jns',
+		'MAINTAINER'	=> 'jstowe',
 		'FILES'		=> q[lib/Term/Cap.{pm,t}],
 		'CPAN'		=> 1,
 		},
 
 	'threads' =>
 		{
-		'MAINTAINER' => 'arthur',
+		'MAINTAINER' => 'abergman',
 		'FILES'	 => q[ext/threads],
 		'CPAN'		=> 1,
 		},
@@ -438,7 +438,7 @@
 
 	'Time::Local' =>
 		{
-		'MAINTAINER'	=> 'autarch',
+		'MAINTAINER'	=> 'drolsky',
 		'FILES'		=> q[lib/Time/Local.{pm,t}],
 		'CPAN'		=> 1,
 		},
@@ -467,10 +467,10 @@
 
 	'warnings' =>
 		{
-		'MAINTAINER'	=> 'pmarquess',
+		'MAINTAINER'	=> 'pmqs',
 		'FILES'		=> q[warnings.pl lib/warnings.{pm,t}
 				     lib/warnings t/lib/warnings],
-		'CPAN'		=> 1,
+		'CPAN'		=> 0,
 		},
 
 	'win32' =>
