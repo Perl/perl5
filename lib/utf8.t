@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
 # NOTE!
@@ -27,8 +28,7 @@ BEGIN {
 #
 #
 
-use Test;
-plan tests => 15;
+plan tests => 16;
 
 {
     # bug id 20001009.001
@@ -101,3 +101,20 @@ plan tests => 15;
     ok($w == 0 && $x eq "\x{100}");
 }
 
+{
+    my $progfile = 'utf' . $$;
+    END {unlink $progfile}
+    open P, ">$progfile" or die "Can't open '$progfile': $!";
+    # Interpolation of hex characters needs to take place now, as we're
+    # testing feeding malformed utf8 into perl. Bug now fixed was an
+    # "out of memory" error. We really need the "" [rather than qq() or q()]
+    # to get the best explosion.
+    print P <<"BANG";
+    use utf8; %a = ("\xE1\xA0"=>"sterling");
+    print 'start'; printf '%x,', ord $_ foreach keys %a; print "end\n";
+BANG
+    print "# Possible delay...\n";
+    my $result = runperl ( verbose => 1, stderr => 1, progfile => $progfile );
+    like ($result,
+          qr/^Malformed UTF-8 character \(2 bytes, need 3\).*start\d+,end$/s);
+}
