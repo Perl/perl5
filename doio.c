@@ -366,8 +366,12 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	PerlIO_clearerr(fp);
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-    fd = PerlIO_fileno(fp);
-    fcntl(fd,F_SETFD,fd > PL_maxsysfd);
+    {
+	int save_errno = errno;
+	fd = PerlIO_fileno(fp);
+	fcntl(fd,F_SETFD,fd > PL_maxsysfd); /* can change errno */
+	errno = save_errno;
+    }
 #endif
     IoIFP(io) = fp;
     if (writing) {
