@@ -812,9 +812,9 @@ h2pl/tcbreak2			cbreak test routine using .pl
 handy.h				Handy definitions
 hints/3b1cc			Hints for named architecture
 hints/3b1.sh			Hints for named architecture
-hints/aix.sh			Hints for named architecture
 hints/aix_3.sh			Hints for named architecture
 hints/aix_4.sh			Hints for named architecture
+hints/aix.sh			Hints for named architecture
 hints/altos486.sh		Hints for named architecture
 hints/amigaos.sh		Hints for named architecture
 hints/apollo.sh			Hints for named architecture
@@ -2815,9 +2815,9 @@ t/op/lop.t			See if logical operators work
 t/op/magic.t			See if magic variables work
 t/op/method.t			See if method calls work
 t/op/mkdir.t			See if mkdir works
+t/op/mydef.t			See if "my $_" works
 t/op/my_stash.t			See if my Package works
 t/op/my.t			See if lexical scoping works
-t/op/mydef.t			See if "my $_" works
 t/op/numconvert.t		See if accessing fields does not change numeric values
 t/op/oct.t			See if oct and hex work
 t/op/ord.t			See if ord works
