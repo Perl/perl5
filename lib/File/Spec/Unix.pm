@@ -423,7 +423,7 @@ Based on code written by Shigio Yamaguchi.
 
 =cut
 
-sub rel2abs($;$;) {
+sub rel2abs {
     my ($self,$path,$base ) = @_;
 
     # Clean up $path
