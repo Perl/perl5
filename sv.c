@@ -1928,29 +1928,53 @@ sv_setsv(SV *dstr, register SV *sstr)
 
     switch (stype) {
     case SVt_NULL:
+      undef_sstr:
 	if (dtype != SVt_PVGV) {
 	    (void)SvOK_off(dstr);
 	    return;
 	}
 	break;
     case SVt_IV:
-	if (dtype != SVt_IV && dtype < SVt_PVIV) {
-	    if (dtype < SVt_IV)
+	if (SvIOK(sstr)) {
+	    switch (dtype) {
+	    case SVt_NULL:
 		sv_upgrade(dstr, SVt_IV);
-	    else if (dtype == SVt_NV)
+		break;
+	    case SVt_NV:
 		sv_upgrade(dstr, SVt_PVNV);
-	    else
+		break;
+	    case SVt_RV:
+	    case SVt_PV:
 		sv_upgrade(dstr, SVt_PVIV);
+		break;
+	    }
+	    (void)SvIOK_only(dstr);
+	    SvIVX(dstr) = SvIVX(sstr);
+	    SvTAINT(dstr);
+	    return;
 	}
-	break;
+	goto undef_sstr;
+
     case SVt_NV:
-	if (dtype != SVt_NV && dtype < SVt_PVNV) {
-	    if (dtype < SVt_NV)
+	if (SvNOK(sstr)) {
+	    switch (dtype) {
+	    case SVt_NULL:
+	    case SVt_IV:
 		sv_upgrade(dstr, SVt_NV);
-	    else
+		break;
+	    case SVt_RV:
+	    case SVt_PV:
+	    case SVt_PVIV:
 		sv_upgrade(dstr, SVt_PVNV);
+		break;
+	    }
+	    SvNVX(dstr) = SvNVX(sstr);
+	    (void)SvNOK_only(dstr);
+	    SvTAINT(dstr);
+	    return;
 	}
-	break;
+	goto undef_sstr;
+
     case SVt_RV:
 	if (dtype < SVt_RV)
 	    sv_upgrade(dstr, SVt_RV);
