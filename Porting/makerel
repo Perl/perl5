@@ -85,6 +85,7 @@ system("find t ext lib -name 'test.pl' -print | xargs chmod +x");
 my @exe = qw(
     Configure
     configpm
+    configure.gnu
     embed.pl
     installperl
     installman
