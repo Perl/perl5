@@ -116,7 +116,7 @@ $a =~ s/-u(Cwd|File|File::Copy|OS2),//g if $^O eq 'os2';
 $a =~ s/-uCwd,// if $^O eq 'cygwin';
 if ($Config{static_ext} eq ' ') {
   $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'
-     . '-umain,-ustrict,-uwarnings';
+     . '-umain,-uwarnings';
   print "# [$a] vs [$b]\nnot " if $a ne $b;
   ok;
 } else {
