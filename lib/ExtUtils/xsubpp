@@ -109,7 +109,7 @@ sub Q ;
 
 # Global Constants
 
-$XSUBPP_version = "1.9507";
+$XSUBPP_version = "1.9508";
 
 my ($Is_VMS, $SymSet);
 if ($^O eq 'VMS') {
@@ -859,10 +859,21 @@ print("#line 1 \"$filename\"\n")
 firstmodule:
 while (<$FH>) {
     if (/^=/) {
+        my $podstartline = $.;
     	do {
-	    next firstmodule if /^=cut\s*$/;
+	    if (/^=cut\s*$/) {
+		print("/* Skipped embedded POD. */\n");
+		printf("#line %d \"$filename\"\n", $. + 1)
+		  if $WantLineNumbers;
+		next firstmodule
+	    }
+
 	} while (<$FH>);
-	&Exit;
+	# At this point $. is at end of file so die won't state the start
+	# of the problem, and as we haven't yet read any lines &death won't
+	# show the correct line in the message either.
+	die ("Error: Unterminated pod in $filename, line $podstartline\n")
+	  unless $lastline;
     }
     last if ($Module, $Package, $Prefix) =
 	/^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/;

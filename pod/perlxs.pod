@@ -66,7 +66,9 @@ for the library being linked.
 A file in XS format starts with a C language section which goes until the
 first C<MODULE =Z<>> directive.  Other XS directives and XSUB definitions
 may follow this line.  The "language" used in this part of the file
-is usually referred to as the XS language.
+is usually referred to as the XS language.  B<xsubpp> recognizes and
+skips POD (see L<perlpod>) in both the C and XS language sections, which
+allows the XS file to contain embedded documentation. 
 
 See L<perlxstut> for a tutorial on the whole extension creation process.
 
@@ -207,9 +209,9 @@ separate lines and should be flush left-adjusted.
     double x                       sin(x)
 				     double x
 
-The rest of the function description may be indented or left-adjusted.  The following example
-shows a function with its body left-adjusted.  Most examples in this
-document will indent the body for better readability.
+The rest of the function description may be indented or left-adjusted. The
+following example shows a function with its body left-adjusted.  Most
+examples in this document will indent the body for better readability.
 
   CORRECT
 
@@ -276,16 +278,14 @@ mercy of this heuristics unless you use C<SV *> as return value.)
 
 =head2 The MODULE Keyword
 
-The MODULE keyword is used to start the XS code and to
-specify the package of the functions which are being
-defined.  All text preceding the first MODULE keyword is
-considered C code and is passed through to the output
-untouched.  Every XS module will have a bootstrap function
-which is used to hook the XSUBs into Perl.  The package name
-of this bootstrap function will match the value of the last
-MODULE statement in the XS source files.  The value of
-MODULE should always remain constant within the same XS
-file, though this is not required.
+The MODULE keyword is used to start the XS code and to specify the package
+of the functions which are being defined.  All text preceding the first
+MODULE keyword is considered C code and is passed through to the output with
+POD stripped, but otherwise untouched.  Every XS module will have a
+bootstrap function which is used to hook the XSUBs into Perl.  The package
+name of this bootstrap function will match the value of the last MODULE
+statement in the XS source files.  The value of MODULE should always remain
+constant within the same XS file, though this is not required.
 
 The following example will start the XS code and will place
 all functions in a package named RPC.
@@ -776,7 +776,7 @@ is expected that the C function will write through these pointers
 The return list of the generated Perl function consists of the C return value
 from the function (unless the XSUB is of C<void> return type or
 C<The NO_INIT Keyword> was used) followed by all the C<OUTLIST>
-and C<IN_OUTLIST> parameters (in the order of appearence).  Say, an XSUB
+and C<IN_OUTLIST> parameters (in the order of appearance).  Say, an XSUB
 
   void
   day_month(OUTLIST day, IN unix_time, OUTLIST month)
@@ -1347,13 +1347,19 @@ C<&> through, so the function call looks like C<rpcb_gettime(host, &timep)>.
         OUTPUT:
           timep
 
-=head2 Inserting Comments and C Preprocessor Directives
+=head2 Inserting POD, Comments and C Preprocessor Directives
 
-C preprocessor directives are allowed within BOOT:, PREINIT: INIT:,
-CODE:, PPCODE:, POST_CALL:, and CLEANUP: blocks, as well as outside the functions.
-Comments are allowed anywhere after the MODULE keyword.  The compiler
-will pass the preprocessor directives through untouched and will remove
-the commented lines.
+C preprocessor directives are allowed within BOOT:, PREINIT: INIT:, CODE:,
+PPCODE:, POST_CALL:, and CLEANUP: blocks, as well as outside the functions.
+Comments are allowed anywhere after the MODULE keyword.  The compiler will
+pass the preprocessor directives through untouched and will remove the
+commented lines. POD documentation is allowed at any point, both in the
+C and XS language sections. POD must be terminated with a C<=cut> command;
+C<xsubpp> will exit with an error if it does not. It is very unlikely that
+human generated C code will be mistaken for POD, as most indenting styles
+result in whitespace in front of any line starting with C<=>. Machine
+generated XS files may fall into this trap unless care is taken to
+ensure that a space breaks the sequence "\n=".
 
 Comments can be added to XSUBs by placing a C<#> as the first
 non-whitespace of a line.  Care should be taken to avoid making the
@@ -1613,7 +1619,7 @@ getnetconfigent() XSUB and an object created by a normal Perl subroutine.
 
 The typemap is a collection of code fragments which are used by the B<xsubpp>
 compiler to map C function parameters and values to Perl values.  The
-typemap file may consist of three sections labeled C<TYPEMAP>, C<INPUT>, and
+typemap file may consist of three sections labelled C<TYPEMAP>, C<INPUT>, and
 C<OUTPUT>.  An unlabelled initial section is assumed to be a C<TYPEMAP>
 section.  The INPUT section tells
 the compiler how to translate Perl values
