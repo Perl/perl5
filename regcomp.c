@@ -189,6 +189,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define SCF_DO_STCLASS_AND	0x0800
 #define SCF_DO_STCLASS_OR	0x1000
 #define SCF_DO_STCLASS		(SCF_DO_STCLASS_AND|SCF_DO_STCLASS_OR)
+#define SCF_WHILEM_VISITED_POS	0x2000
 
 #define RF_utf8		8
 #define UTF (PL_reg_flags & RF_utf8)
@@ -686,6 +687,8 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 			data_fake.start_class = &this_class;
 			f = SCF_DO_STCLASS_AND;
 		    }		    
+		    if (flags & SCF_WHILEM_VISITED_POS)
+			f |= SCF_WHILEM_VISITED_POS;
 		    /* we suppose the run is continuous, last=next...*/
 		    minnext = study_chunk(&scan, &deltanext, next,
 					  &data_fake, f);
@@ -916,6 +919,14 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    f |= SCF_DO_STCLASS_AND;
 		    f &= ~SCF_DO_STCLASS_OR;
 		}
+		/* These are the cases when once a subexpression
+		   fails at a particular position, it cannot succeed
+		   even after backtracking at the enclosing scope.
+		   
+		   XXXX what if minimal match and we are at the
+		        initial run of {n,m}? */
+		if ((mincount != maxcount - 1) && (maxcount != REG_INFTY))
+		    f &= ~SCF_WHILEM_VISITED_POS;
 
 		/* This will finish on WHILEM, setting scan, or on NULL: */
 		minnext = study_chunk(&scan, &deltanext, last, data, 
@@ -1051,8 +1062,14 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    else
 			oscan->flags = 0;
 		}
-		else if (OP(oscan) == CURLYX && data && ++data->whilem_c < 16) {
-		    /* This stays as CURLYX, and can put the count/of pair. */
+		else if ((OP(oscan) == CURLYX)
+			 && (flags & SCF_WHILEM_VISITED_POS)
+			 /* See the comment on a similar expression above.
+			    However, this time it not a subexpression
+			    we care about, but the expression itself. */
+			 && (maxcount == REG_INFTY)
+			 && data && ++data->whilem_c < 16) {
+		    /* This stays as CURLYX, we can put the count/of pair. */
 		    /* Find WHILEM (as in regexec.c) */
 		    regnode *nxt = oscan + NEXT_OFF(oscan);
 
@@ -1382,8 +1399,10 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		 && OP(scan) == IFMATCH ) { /* Lookahead */
 		cl_init(&intrnl);
 		data_fake.start_class = &intrnl;
-		f = SCF_DO_STCLASS_AND;
+		f |= SCF_DO_STCLASS_AND;
 	    }
+	    if (flags & SCF_WHILEM_VISITED_POS)
+		f |= SCF_WHILEM_VISITED_POS;
 	    next = regnext(scan);
 	    nscan = NEXTOPER(NEXTOPER(scan));
 	    minnext = study_chunk(&nscan, &deltanext, last, &data_fake, f);
@@ -1402,7 +1421,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		data->flags |= SF_HAS_EVAL;
 	    if (data)
 		data->whilem_c = data_fake.whilem_c;
-	    if (f) {
+	    if (f & SCF_DO_STCLASS_AND) {
 		int was = (data->start_class->flags & ANYOF_EOS);
 
 		cl_and(data->start_class, &intrnl);
@@ -1739,7 +1758,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	data.last_closep = &last_close;
 
 	minlen = study_chunk(&first, &fake, scan + PL_regsize, /* Up to end */
-			     &data, SCF_DO_SUBSTR | stclass_flag);
+			     &data, SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag);
 	if ( PL_regnpar == 1 && data.longest == &(data.longest_fixed)
 	     && data.last_start_min == 0 && data.last_end > 0 
 	     && !PL_seen_zerolen
@@ -1848,7 +1867,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	cl_init(&ch_class);
 	data.start_class = &ch_class;
 	data.last_closep = &last_close;
-	minlen = study_chunk(&scan, &fake, scan + PL_regsize, &data, SCF_DO_STCLASS_AND);
+	minlen = study_chunk(&scan, &fake, scan + PL_regsize, &data, SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS);
 	r->check_substr = r->anchored_substr = r->float_substr = Nullsv;
 	if (!(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class)) {
@@ -1878,6 +1897,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	r->reganch |= ROPT_EVAL_SEEN;
     Newz(1002, r->startp, PL_regnpar, I32);
     Newz(1002, r->endp, PL_regnpar, I32);
+    PL_regdata = r->data; /* for regprop() ANYOFUTF8 */
     DEBUG_r(regdump(r));
     return(r);
 }
@@ -2852,7 +2872,7 @@ tryagain:
 				PL_regcomp_parse = p + 1;
 				vFAIL("Missing right brace on \\x{}");
 			    }
-			    else if (UTF) {
+			    else {
 				numlen = 1;	/* allow underscores */
 				ender = (UV)scan_hex(p + 1, e - p - 1, &numlen);
 				/* numlen is generous */
@@ -2862,12 +2882,6 @@ tryagain:
 				}
 				p = e + 1;
 			    }
-			    else
-			    {
-				PL_regcomp_parse = e + 1;
-				vFAIL("Can't use \\x{} without 'use utf8' declaration");
-			    }
-
 			}
 			else {
 			    numlen = 0;		/* disallow underscores */
@@ -3651,7 +3665,7 @@ S_regclassutf8(pTHX)
 	    flags |= ANYOF_FOLD;
 	if (LOC)
 	    flags |= ANYOF_LOCALE;
-	listsv = newSVpvn("# comment\n",10);
+	listsv = newSVpvn("# comment\n", 10);
     }
 
     if (!SIZE_ONLY && ckWARN(WARN_REGEXP))
@@ -3814,12 +3828,16 @@ S_regclassutf8(pTHX)
 		case ANYOF_NPUNCT:
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsPunct\n");	break;
 		case ANYOF_SPACE:
-		case ANYOF_PSXSPC:
-		case ANYOF_BLANK:
-		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpace\n");	break;
+		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpacePerl\n");break;
 		case ANYOF_NSPACE:
-		case ANYOF_NPSXSPC:
+		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsSpacePerl\n");break;
+		case ANYOF_BLANK:
+		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsBlank\n");	break;
 		case ANYOF_NBLANK:
+		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsBlank\n");	break;
+		case ANYOF_PSXSPC:
+		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpace\n");	break;
+		case ANYOF_NPSXSPC:
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsSpace\n");	break;
 		case ANYOF_UPPER:
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsUpper\n");	break;
@@ -3835,7 +3853,7 @@ S_regclassutf8(pTHX)
 	}
         if (range) {
 	    if (lastvalue > value) { /* b-a */
-		Simple_vFAIL4("invalid [] range \"%*.*s\"",
+		Simple_vFAIL4("Invalid [] range \"%*.*s\"",
 			      PL_regcomp_parse - rangebegin,
 			      PL_regcomp_parse - rangebegin,
 			      rangebegin);
@@ -3874,7 +3892,14 @@ S_regclassutf8(pTHX)
 
     if (!SIZE_ONLY) {
 	SV *rv = swash_init("utf8", "", listsv, 1, 0);
+#ifdef DEBUGGING
+	AV *av = newAV();
+	av_push(av, rv);
+	av_push(av, listsv);
+	rv = newRV_inc((SV*)av);
+#else
 	SvREFCNT_dec(listsv);
+#endif
 	n = add_data(1,"s");
 	PL_regcomp_rx->data->data[n] = (void*)rv;
 	ARG1_SET(ret, flags);
@@ -4230,7 +4255,7 @@ Perl_regdump(pTHX_ regexp *r)
 STATIC void
 S_put_byte(pTHX_ SV *sv, int c)
 {
-    if (c <= ' ' || c == 127 || c == 255)
+    if (isCNTRL(c) || c == 127 || c == 255)
 	Perl_sv_catpvf(aTHX_ sv, "\\%o", c);
     else if (c == '-' || c == ']' || c == '\\' || c == '^')
 	Perl_sv_catpvf(aTHX_ sv, "\\%c", c);
@@ -4271,8 +4296,10 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == ANYOF) {
 	int i, rangestart = -1;
-	const char * const out[] = {	/* Should be syncronized with
-					   ANYOF_ #xdefines in regcomp.h */
+	bool anyofutf8 = OP(o) == ANYOFUTF8;
+	U8 flags = anyofutf8 ? ARG1(o) : o->flags;
+	const char * const anyofs[] = {	/* Should be syncronized with
+					 * ANYOF_ #xdefines in regcomp.h */
 	    "\\w",
 	    "\\W",
 	    "\\s",
@@ -4305,33 +4332,85 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	    "[:^blank:]"
 	};
 
-	if (o->flags & ANYOF_LOCALE)
+	if (flags & ANYOF_LOCALE)
 	    sv_catpv(sv, "{loc}");
-	if (o->flags & ANYOF_FOLD)
+	if (flags & ANYOF_FOLD)
 	    sv_catpv(sv, "{i}");
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
-	if (o->flags & ANYOF_INVERT)
+	if (flags & ANYOF_INVERT)
 	    sv_catpv(sv, "^");
-	for (i = 0; i <= 256; i++) {
-	    if (i < 256 && ANYOF_BITMAP_TEST(o,i)) {
-		if (rangestart == -1)
-		    rangestart = i;
-	    } else if (rangestart != -1) {
-		if (i <= rangestart + 3)
-		    for (; rangestart < i; rangestart++)
+	if (OP(o) == ANYOF) {
+	    for (i = 0; i <= 256; i++) {
+		if (i < 256 && ANYOF_BITMAP_TEST(o,i)) {
+		    if (rangestart == -1)
+			rangestart = i;
+		} else if (rangestart != -1) {
+		    if (i <= rangestart + 3)
+			for (; rangestart < i; rangestart++)
+			    put_byte(sv, rangestart);
+		    else {
 			put_byte(sv, rangestart);
-		else {
-		    put_byte(sv, rangestart);
-		    sv_catpv(sv, "-");
-		    put_byte(sv, i - 1);
+			sv_catpv(sv, "-");
+			put_byte(sv, i - 1);
+		    }
+		    rangestart = -1;
 		}
-		rangestart = -1;
+	    }
+	    if (o->flags & ANYOF_CLASS)
+		for (i = 0; i < sizeof(anyofs)/sizeof(char*); i++)
+		    if (ANYOF_CLASS_TEST(o,i))
+			sv_catpv(sv, anyofs[i]);
+	}
+	else {
+	    SV *rv = (SV*)PL_regdata->data[ARG2(o)];
+	    AV *av = (AV*)SvRV((SV*)rv);
+	    SV *sw = *av_fetch(av, 0, FALSE);
+	    SV *lv = *av_fetch(av, 1, FALSE);
+	    UV i;
+	    U8 s[UTF8_MAXLEN+1];
+	    for (i = 0; i <= 256; i++) { /* just the first 256 */
+		U8 *e = uv_to_utf8(s, i);
+		if (i < 256 && swash_fetch(sw, s)) {
+		    if (rangestart == -1)
+			rangestart = i;
+		} else if (rangestart != -1) {
+		    U8 *p;
+
+		    if (i <= rangestart + 3)
+			for (; rangestart < i; rangestart++) {
+			    for(e = uv_to_utf8(s, rangestart), p = s; p < e; p++)
+				put_byte(sv, *p);
+			}
+		    else {
+			for (e = uv_to_utf8(s, rangestart), p = s; p < e; p++)
+			    put_byte(sv, *p);
+			sv_catpv(sv, "-");
+			for (e = uv_to_utf8(s, i - 1), p = s; p < e; p++)
+			    put_byte(sv, *p);
+		    }
+		    rangestart = -1;
+		}
+	    }
+	    sv_catpv(sv, "...");
+	    {
+		char *s = savepv(SvPVX(lv));
+
+		while(*s && *s != '\n') s++;
+		if (*s == '\n') {
+		    char *t = ++s;
+
+		    while (*s) {
+			if (*s == '\n')
+			    *s = ' ';
+			s++;
+		    }
+		    if (s[-1] == ' ')
+			s[-1] = 0;
+
+		    sv_catpv(sv, t);
+		}
 	    }
 	}
-	if (o->flags & ANYOF_CLASS)
-	    for (i = 0; i < sizeof(out)/sizeof(char*); i++)
-		if (ANYOF_CLASS_TEST(o,i))
-		    sv_catpv(sv, out[i]);
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
     }
     else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
@@ -4393,6 +4472,16 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	while (--n >= 0) {
 	    switch (r->data->what[n]) {
 	    case 's':
+#ifdef DEBUGGING
+	        {
+		    SV *rv = (SV*)r->data->data[n];
+		    AV *av = (AV*)SvRV((SV*)rv);
+		    SV *sw = *av_fetch(av, 0, FALSE);
+		    SV *lv = *av_fetch(av, 1, FALSE);
+		    SvREFCNT_dec(sw);
+		    SvREFCNT_dec(lv);
+		}
+#endif
 		SvREFCNT_dec((SV*)r->data->data[n]);
 		break;
 	    case 'f':
@@ -4536,6 +4625,7 @@ Perl_save_re_context(pTHX)
     SAVEI32(PL_reg_oldpos);			/* from regexec.c */
     SAVEVPTR(PL_reg_oldcurpm);		/* from regexec.c */
     SAVEVPTR(PL_reg_curpm);		/* from regexec.c */
+    SAVEI32(PL_regnpar);		/* () count. */
 #ifdef DEBUGGING
     SAVEPPTR(PL_reg_starttry);		/* from regexec.c */    
 #endif

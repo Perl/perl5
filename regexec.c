@@ -106,7 +106,11 @@
  */
 
 #define REGINCLASS(p,c)  (ANYOF_FLAGS(p) ? reginclass(p,c) : ANYOF_BITMAP_TEST(p,c))
-#define REGINCLASSUTF8(f,p)  (ARG1(f) ? reginclassutf8(f,p) : swash_fetch((SV*)PL_regdata->data[ARG2(f)],p))
+#ifdef DEBUGGING
+#   define REGINCLASSUTF8(f,p)  (ARG1(f) ? reginclassutf8(f,p) : swash_fetch(*av_fetch((AV*)SvRV((SV*)PL_regdata->data[ARG2(f)]),0,FALSE),p))
+#else
+#   define REGINCLASSUTF8(f,p)  (ARG1(f) ? reginclassutf8(f,p) : swash_fetch((SV*)PL_regdata->data[ARG2(f)],p))
+#endif
 
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
@@ -126,48 +130,56 @@ S_regcppush(pTHX_ I32 parenfloor)
 {
     dTHR;
     int retval = PL_savestack_ix;
-    int i = (PL_regsize - parenfloor) * 4;
+#define REGCP_PAREN_ELEMS 4
+    int paren_elems_to_push = (PL_regsize - parenfloor) * REGCP_PAREN_ELEMS;
     int p;
 
-    SSCHECK(i + 5);
+#define REGCP_OTHER_ELEMS 5
+    SSCHECK(paren_elems_to_push + REGCP_OTHER_ELEMS);
     for (p = PL_regsize; p > parenfloor; p--) {
+/* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
 	SSPUSHINT(PL_regendp[p]);
 	SSPUSHINT(PL_regstartp[p]);
 	SSPUSHPTR(PL_reg_start_tmp[p]);
 	SSPUSHINT(p);
     }
+/* REGCP_OTHER_ELEMS are pushed in any case, parentheses or no. */
     SSPUSHINT(PL_regsize);
     SSPUSHINT(*PL_reglastparen);
     SSPUSHPTR(PL_reginput);
-    SSPUSHINT(i + 3);
-    SSPUSHINT(SAVEt_REGCONTEXT);
+    SSPUSHINT(paren_elems_to_push + (REGCP_PAREN_ELEMS - 1));
+    SSPUSHINT(SAVEt_REGCONTEXT); /* Magic cookie. */
     return retval;
 }
 
 /* These are needed since we do not localize EVAL nodes: */
-#  define REGCP_SET  DEBUG_r(PerlIO_printf(Perl_debug_log,		\
+#  define REGCP_SET(cp)  DEBUG_r(PerlIO_printf(Perl_debug_log,		\
 			     "  Setting an EVAL scope, savestack=%"IVdf"\n",	\
-			     (IV)PL_savestack_ix)); lastcp = PL_savestack_ix
+			     (IV)PL_savestack_ix)); cp = PL_savestack_ix
 
-#  define REGCP_UNWIND  DEBUG_r(lastcp != PL_savestack_ix ?		\
+#  define REGCP_UNWIND(cp)  DEBUG_r(cp != PL_savestack_ix ?		\
 				PerlIO_printf(Perl_debug_log,		\
 				"  Clearing an EVAL scope, savestack=%"IVdf"..%"IVdf"\n", \
-				(IV)lastcp, (IV)PL_savestack_ix) : 0); regcpblow(lastcp)
+				(IV)(cp), (IV)PL_savestack_ix) : 0); regcpblow(cp)
 
 STATIC char *
 S_regcppop(pTHX)
 {
-    dTHR;
-    I32 i = SSPOPINT;
+    I32 i;
     U32 paren = 0;
     char *input;
     I32 tmps;
-    assert(i == SAVEt_REGCONTEXT);
+
+    /* Pop REGCP_OTHER_ELEMS before the parentheses loop starts. */
     i = SSPOPINT;
+    assert(i == SAVEt_REGCONTEXT); /* Check that the magic cookie is there. */
+    i = SSPOPINT; /* Parentheses elements to pop. */
     input = (char *) SSPOPPTR;
     *PL_reglastparen = SSPOPINT;
     PL_regsize = SSPOPINT;
-    for (i -= 3; i > 0; i -= 4) {
+
+    /* Now restore the parentheses context. */
+    for (i -= (REGCP_PAREN_ELEMS - 1); i > 0; i -= REGCP_PAREN_ELEMS) {
 	paren = (U32)SSPOPINT;
 	PL_reg_start_tmp[paren] = (char *) SSPOPPTR;
 	PL_regstartp[paren] = SSPOPINT;
@@ -190,11 +202,23 @@ S_regcppop(pTHX)
 			  (IV)(*PL_reglastparen + 1), (IV)PL_regnpar);
 	}
     );
+#if 1
+    /* It would seem that the similar code in regtry()
+     * already takes care of this, and in fact it is in
+     * a better location to since this code can #if 0-ed out
+     * but the code in regtry() is needed or otherwise tests
+     * requiring null fields (pat.t#187 and split.t#{13,14}
+     * (as of patchlevel 7877)  will fail.  Then again,
+     * this code seems to be necessary or otherwise
+     * building DynaLoader will fail:
+     * "Error: '*' not in typemap in DynaLoader.xs, line 164"
+     * --jhi */
     for (paren = *PL_reglastparen + 1; paren <= PL_regnpar; paren++) {
 	if (paren > PL_regsize)
 	    PL_regstartp[paren] = -1;
 	PL_regendp[paren] = -1;
     }
+#endif
     return input;
 }
 
@@ -219,7 +243,7 @@ typedef struct re_cc_state
     regexp *re;
 } re_cc_state;
 
-#define regcpblow(cp) LEAVE_SCOPE(cp)
+#define regcpblow(cp) LEAVE_SCOPE(cp)	/* Ignores regcppush()ed data. */
 
 #define TRYPAREN(paren, n, input) {				\
     if (paren) {						\
@@ -580,7 +604,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    DEBUG_r(PerlIO_printf(Perl_debug_log,
 			", trying anchored starting at offset %ld...\n",
 			(long)(s1 + 1 - i_strpos)));
-		    other_last = last + 1;
+		    other_last = last;
 		    PL_regeol = strend;			/* Used in HOP() */
 		    s = HOPc(t, 1);
 		    goto restart;
@@ -588,7 +612,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		else {
 		    DEBUG_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
 			  (long)(s - i_strpos)));
-		    other_last = s + 1;
+		    other_last = s; /* Fix this later. --Hugo */
 		    s = s1;
 		    if (t == strpos)
 			goto try_at_start;
@@ -917,10 +941,15 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case BOUNDUTF8:
-	    tmp = (I32)(s != startpos) ? utf8_to_uv(reghop((U8*)s, -1),
-							strend - s,
-							0, 0) : '\n';
-	    tmp = ((OP(c) == BOUNDUTF8 ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+	    if (s == startpos)
+		tmp = '\n';
+	    else {
+		U8 *r = reghop((U8*)s, -1);
+
+		tmp = (I32)utf8_to_uv(r, s - (char*)r, 0, 0);
+	    }
+	    tmp = ((OP(c) == BOUNDUTF8 ?
+		    isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
 	    while (s < strend) {
 		if (tmp == !(OP(c) == BOUNDUTF8 ?
 			     swash_fetch(PL_utf8_alnum, (U8*)s) :
@@ -955,10 +984,15 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NBOUNDUTF8:
-	    tmp = (I32)(s != startpos) ? utf8_to_uv(reghop((U8*)s, -1),
-							strend - s,
-							0, 0) : '\n';
-	    tmp = ((OP(c) == NBOUNDUTF8 ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+	    if (s == startpos)
+		tmp = '\n';
+	    else {
+		U8 *r = reghop((U8*)s, -1);
+
+		tmp = (I32)utf8_to_uv(r, s - (char*)r, 0, 0);
+	    }
+	    tmp = ((OP(c) == NBOUNDUTF8 ?
+		    isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
 	    while (s < strend) {
 		if (tmp == !(OP(c) == NBOUNDUTF8 ?
 			     swash_fetch(PL_utf8_alnum, (U8*)s) :
@@ -1706,6 +1740,9 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
     register I32 *ep;
     CHECKPOINT lastcp;
 
+#ifdef DEBUGGING
+    PL_regindent = 0;	/* XXXX Not good when matches are reenterable... */
+#endif
     if ((prog->reganch & ROPT_EVAL_SEEN) && !PL_reg_eval_set) {
 	MAGIC *mg;
 
@@ -1777,23 +1814,66 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 
     /* XXXX What this code is doing here?!!!  There should be no need
        to do this again and again, PL_reglastparen should take care of
-       this!  */
+       this!  --ilya*/
+
+    /* Tests pat.t#187 and split.t#{13,14} seem to depend on this code.
+     * Actually, the code in regcppop() (which Ilya may be meaning by
+     * PL_reglastparen), is not needed at all by the test suite
+     * (op/regexp, op/pat, op/split), but that code is needed, oddly
+     * enough, for building DynaLoader, or otherwise this
+     * "Error: '*' not in typemap in DynaLoader.xs, line 164"
+     * will happen.  Meanwhile, this code *is* needed for the
+     * above-mentioned test suite tests to succeed.  The common theme
+     * on those tests seems to be returning null fields from matches.
+     * --jhi */
+#if 1
     sp = prog->startp;
     ep = prog->endp;
     if (prog->nparens) {
-	for (i = prog->nparens; i >= 1; i--) {
+	for (i = prog->nparens; i > *PL_reglastparen; i--) {
 	    *++sp = -1;
 	    *++ep = -1;
 	}
     }
-    REGCP_SET;
+#endif
+    REGCP_SET(lastcp);
     if (regmatch(prog->program + 1)) {
 	prog->endp[0] = PL_reginput - PL_bostr;
 	return 1;
     }
-    REGCP_UNWIND;
+    REGCP_UNWIND(lastcp);
     return 0;
 }
+
+#define RE_UNWIND_BRANCH	1
+#define RE_UNWIND_BRANCHJ	2
+
+union re_unwind_t;
+
+typedef struct {		/* XX: makes sense to enlarge it... */
+    I32 type;
+    I32 prev;
+    CHECKPOINT lastcp;
+} re_unwind_generic_t;
+
+typedef struct {
+    I32 type;
+    I32 prev;
+    CHECKPOINT lastcp;
+    I32 lastparen;
+    regnode *next;
+    char *locinput;
+    I32 nextchr;
+#ifdef DEBUGGING
+    int regindent;
+#endif
+} re_unwind_branch_t;
+
+typedef union re_unwind_t {
+    I32 type;
+    re_unwind_generic_t generic;
+    re_unwind_branch_t branch;
+} re_unwind_t;
 
 /*
  - regmatch - main matching routine
@@ -1824,6 +1904,9 @@ S_regmatch(pTHX_ regnode *prog)
     register char *locinput = PL_reginput;
     register I32 c1, c2, paren;	/* case fold search, parenth */
     int minmod = 0, sw = 0, logical = 0;
+    I32 unwind = 0;
+    I32 firstcp = PL_savestack_ix;
+
 #ifdef DEBUGGING
     PL_regindent++;
 #endif
@@ -1833,7 +1916,7 @@ S_regmatch(pTHX_ regnode *prog)
     scan = prog;
     while (scan != NULL) {
 #define sayNO_L (logical ? (logical = 0, sw = 0, goto cont) : sayNO)
-#ifdef DEBUGGING
+#if 1
 #  define sayYES goto yes
 #  define sayNO goto no
 #  define sayYES_FINAL goto yes_final
@@ -2002,9 +2085,10 @@ S_regmatch(pTHX_ regnode *prog)
 		while (s < e) {
 		    if (l >= PL_regeol)
 			sayNO;
-		    if (utf8_to_uv((U8*)s, e - s, 0, 0) != (c1 ?
-						  toLOWER_utf8((U8*)l) :
-						  toLOWER_LC_utf8((U8*)l)))
+		    if (utf8_to_uv((U8*)s, e - s, 0, 0) !=
+			(c1 ?
+			 toLOWER_utf8((U8*)l) :
+			 toLOWER_LC_utf8((U8*)l)))
 		    {
 			sayNO;
 		    }
@@ -2139,9 +2223,13 @@ S_regmatch(pTHX_ regnode *prog)
 	case BOUNDUTF8:
 	case NBOUNDUTF8:
 	    /* was last char in word? */
-	    ln = (locinput != PL_regbol)
-		? utf8_to_uv(reghop((U8*)locinput, -1),
-				 PL_regeol - locinput, 0, 0) : PL_regprev;
+	    if (locinput == PL_regbol)
+		ln = PL_regprev;
+	    else {
+		U8 *r = reghop((U8*)locinput, -1);
+
+		ln = utf8_to_uv(r, s - (char*)r, 0, 0);
+	    }
 	    if (OP(scan) == BOUNDUTF8 || OP(scan) == NBOUNDUTF8) {
 		ln = isALNUM_uni(ln);
 		n = swash_fetch(PL_utf8_alnum, (U8*)locinput);
@@ -2439,7 +2527,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    PL_regcc = 0;
 		    
 		    cp = regcppush(0);	/* Save *all* the positions. */
-		    REGCP_SET;
+		    REGCP_SET(lastcp);
 		    cache_re(re);
 		    state.ss = PL_savestack_ix;
 		    *PL_reglastparen = 0;
@@ -2469,7 +2557,7 @@ S_regmatch(pTHX_ regnode *prog)
 			sayYES;
 		    }
 		    ReREFCNT_dec(re);
-		    REGCP_UNWIND;
+		    REGCP_UNWIND(lastcp);
 		    regcppop();
 		    PL_reg_call_cc = state.prev;
 		    PL_regcc = state.cc;
@@ -2730,12 +2818,12 @@ S_regmatch(pTHX_ regnode *prog)
 		    if (PL_regcc)
 			ln = PL_regcc->cur;
 		    cp = regcppush(cc->parenfloor);
-		    REGCP_SET;
+		    REGCP_SET(lastcp);
 		    if (regmatch(cc->next)) {
 			regcpblow(cp);
 			sayYES;	/* All done. */
 		    }
-		    REGCP_UNWIND;
+		    REGCP_UNWIND(lastcp);
 		    regcppop();
 		    if (PL_regcc)
 			PL_regcc->cur = ln;
@@ -2762,12 +2850,12 @@ S_regmatch(pTHX_ regnode *prog)
 		    cc->cur = n;
 		    cc->lastloc = locinput;
 		    cp = regcppush(cc->parenfloor);
-		    REGCP_SET;
+		    REGCP_SET(lastcp);
 		    if (regmatch(cc->scan)) {
 			regcpblow(cp);
 			sayYES;
 		    }
-		    REGCP_UNWIND;
+		    REGCP_UNWIND(lastcp);
 		    regcppop();
 		    cc->cur = n - 1;
 		    cc->lastloc = lastloc;
@@ -2780,12 +2868,12 @@ S_regmatch(pTHX_ regnode *prog)
 		    cp = regcppush(cc->parenfloor);
 		    cc->cur = n;
 		    cc->lastloc = locinput;
-		    REGCP_SET;
+		    REGCP_SET(lastcp);
 		    if (regmatch(cc->scan)) {
 			regcpblow(cp);
 			sayYES;
 		    }
-		    REGCP_UNWIND;
+		    REGCP_UNWIND(lastcp);
 		    regcppop();		/* Restore some previous $<digit>s? */
 		    PL_reginput = locinput;
 		    DEBUG_r(
@@ -2831,30 +2919,30 @@ S_regmatch(pTHX_ regnode *prog)
 		if (OP(next) != c1)	/* No choice. */
 		    next = inner;	/* Avoid recursion. */
 		else {
-		    int lastparen = *PL_reglastparen;
+		    I32 lastparen = *PL_reglastparen;
+		    I32 unwind1;
+		    re_unwind_branch_t *uw;
 
-		    REGCP_SET;
-		    do {
-			PL_reginput = locinput;
-			if (regmatch(inner))
-			    sayYES;
-			REGCP_UNWIND;
-			for (n = *PL_reglastparen; n > lastparen; n--)
-			    PL_regendp[n] = -1;
-			*PL_reglastparen = n;
-			scan = next;
-			/*SUPPRESS 560*/
-			if ((n = (c1 == BRANCH ? NEXT_OFF(next) : ARG(next))))
-			    next += n;
-			else
-			    next = NULL;
-			inner = NEXTOPER(scan);
-			if (c1 == BRANCHJ) {
-			    inner = NEXTOPER(inner);
-			}
-		    } while (scan != NULL && OP(scan) == c1);
-		    sayNO;
-		    /* NOTREACHED */
+		    /* Put unwinding data on stack */
+		    unwind1 = SSNEWt(1,re_unwind_branch_t);
+		    uw = SSPTRt(unwind1,re_unwind_branch_t);
+		    uw->prev = unwind;
+		    unwind = unwind1;
+		    uw->type = ((c1 == BRANCH)
+				? RE_UNWIND_BRANCH
+				: RE_UNWIND_BRANCHJ);
+		    uw->lastparen = lastparen;
+		    uw->next = next;
+		    uw->locinput = locinput;
+		    uw->nextchr = nextchr;
+#ifdef DEBUGGING
+		    uw->regindent = ++PL_regindent;
+#endif
+
+		    REGCP_SET(uw->lastcp);
+
+		    /* Now go into the first branch */
+		    next = inner;
 		}
 	    }
 	    break;
@@ -2904,7 +2992,7 @@ S_regmatch(pTHX_ regnode *prog)
 		}
 		else
 		    c1 = c2 = -1000;
-		REGCP_SET;
+		REGCP_SET(lastcp);
 		/* This may be improved if l == 0.  */
 		while (n >= ln || (n == REG_INFTY && ln > 0 && l)) { /* ln overflow ? */
 		    /* If it could work, try it. */
@@ -2923,7 +3011,7 @@ S_regmatch(pTHX_ regnode *prog)
 			}
 			if (regmatch(next))
 			    sayYES;
-			REGCP_UNWIND;
+			REGCP_UNWIND(lastcp);
 		    }
 		    /* Couldn't or didn't -- move forward. */
 		    PL_reginput = locinput;
@@ -2963,7 +3051,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    else
 			c1 = c2 = -1000;
 		}
-		REGCP_SET;
+		REGCP_SET(lastcp);
 		while (n >= ln) {
 		    /* If it could work, try it. */
 		    if (c1 == -1000 ||
@@ -2985,7 +3073,7 @@ S_regmatch(pTHX_ regnode *prog)
 			}
 			if (regmatch(next))
 			    sayYES;
-			REGCP_UNWIND;
+			REGCP_UNWIND(lastcp);
 		    }
 		    /* Couldn't or didn't -- back up. */
 		    n--;
@@ -3046,7 +3134,7 @@ S_regmatch(pTHX_ regnode *prog)
 		if (ln && regrepeat(scan, ln) < ln)
 		    sayNO;
 		locinput = PL_reginput;
-		REGCP_SET;
+		REGCP_SET(lastcp);
 		if (c1 != -1000) {
 		    char *e = locinput + n - ln; /* Should not check after this */
 		    char *old = locinput;
@@ -3076,7 +3164,7 @@ S_regmatch(pTHX_ regnode *prog)
 			/* PL_reginput == locinput now */
 			TRYPAREN(paren, ln, locinput);
 			PL_reginput = locinput;	/* Could be reset... */
-			REGCP_UNWIND;
+			REGCP_UNWIND(lastcp);
 			/* Couldn't or didn't -- move forward. */
 			old = locinput++;
 		    }
@@ -3089,7 +3177,7 @@ S_regmatch(pTHX_ regnode *prog)
 			UCHARAT(PL_reginput) == c2)
 		    {
 			TRYPAREN(paren, n, PL_reginput);
-			REGCP_UNWIND;
+			REGCP_UNWIND(lastcp);
 		    }
 		    /* Couldn't or didn't -- move forward. */
 		    PL_reginput = locinput;
@@ -3114,7 +3202,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    if (UCHARAT(PL_reginput - 1) == '\n' && OP(next) != EOS)
 			ln--;
 		}
-		REGCP_SET;
+		REGCP_SET(lastcp);
 		if (paren) {
 		    while (n >= ln) {
 			/* If it could work, try it. */
@@ -3123,7 +3211,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    UCHARAT(PL_reginput) == c2)
 			    {
 				TRYPAREN(paren, n, PL_reginput);
-				REGCP_UNWIND;
+				REGCP_UNWIND(lastcp);
 			    }
 			/* Couldn't or didn't -- back up. */
 			n--;
@@ -3138,7 +3226,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    UCHARAT(PL_reginput) == c2)
 			    {
 				TRYPAREN(paren, n, PL_reginput);
-				REGCP_UNWIND;
+				REGCP_UNWIND(lastcp);
 			    }
 			/* Couldn't or didn't -- back up. */
 			n--;
@@ -3156,7 +3244,7 @@ S_regmatch(pTHX_ regnode *prog)
 		CHECKPOINT cp, lastcp;
 		
 		cp = regcppush(0);	/* Save *all* the positions. */
-		REGCP_SET;
+		REGCP_SET(lastcp);
 		regcp_set_to(PL_reg_call_cc->ss); /* Restore parens of
 						    the caller. */
 		PL_reginput = locinput;	/* Make position available to
@@ -3169,7 +3257,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    regcpblow(cp);
 		    sayYES;
 		}
-		REGCP_UNWIND;
+		REGCP_UNWIND(lastcp);
 		regcppop();
 		PL_reg_call_cc = cur_call_cc;
 		PL_regcc = cctmp;
@@ -3276,6 +3364,7 @@ S_regmatch(pTHX_ regnode *prog)
 			  PTR2UV(scan), OP(scan));
 	    Perl_croak(aTHX_ "regexp memory corruption");
 	}
+      reenter:
 	scan = next;
     }
 
@@ -3301,6 +3390,11 @@ yes:
 #ifdef DEBUGGING
     PL_regindent--;
 #endif
+
+#if 0					/* Breaks $^R */
+    if (unwind)
+	regcpblow(firstcp);
+#endif
     return 1;
 
 no:
@@ -3312,6 +3406,55 @@ no:
     goto do_no;
 no_final:
 do_no:
+    if (unwind) {
+	re_unwind_t *uw = SSPTRt(unwind,re_unwind_t);
+
+	switch (uw->type) {
+	case RE_UNWIND_BRANCH:
+	case RE_UNWIND_BRANCHJ:
+	{
+	    re_unwind_branch_t *uwb = &(uw->branch);
+	    I32 lastparen = uwb->lastparen;
+	    
+	    REGCP_UNWIND(uwb->lastcp);
+	    for (n = *PL_reglastparen; n > lastparen; n--)
+		PL_regendp[n] = -1;
+	    *PL_reglastparen = n;
+	    scan = next = uwb->next;
+	    if ( !scan || 
+		 OP(scan) != (uwb->type == RE_UNWIND_BRANCH 
+			      ? BRANCH : BRANCHJ) ) {		/* Failure */
+		unwind = uwb->prev;
+#ifdef DEBUGGING
+		PL_regindent--;
+#endif
+		goto do_no;
+	    }
+	    /* Have more choice yet.  Reuse the same uwb.  */
+	    /*SUPPRESS 560*/
+	    if ((n = (uwb->type == RE_UNWIND_BRANCH
+		      ? NEXT_OFF(next) : ARG(next))))
+		next += n;
+	    else
+		next = NULL;	/* XXXX Needn't unwinding in this case... */
+	    uwb->next = next;
+	    next = NEXTOPER(scan);
+	    if (uwb->type == RE_UNWIND_BRANCHJ)
+		next = NEXTOPER(next);
+	    locinput = uwb->locinput;
+	    nextchr = uwb->nextchr;
+#ifdef DEBUGGING
+	    PL_regindent = uwb->regindent;
+#endif
+
+	    goto reenter;
+	}
+	/* NOT REACHED */
+	default:
+	    Perl_croak(aTHX_ "regexp unwind memory corruption");
+	}
+	/* NOT REACHED */
+    }
 #ifdef DEBUGGING
     PL_regindent--;
 #endif
@@ -3642,7 +3785,7 @@ S_reginclass(pTHX_ register regnode *p, register I32 c)
 	    (ANYOF_CLASS_TEST(p, ANYOF_NXDIGIT) && !isXDIGIT(c))    ||
 	    (ANYOF_CLASS_TEST(p, ANYOF_PSXSPC)  &&  isPSXSPC(c))    ||
 	    (ANYOF_CLASS_TEST(p, ANYOF_NPSXSPC) && !isPSXSPC(c))    ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_BLANK)   &&  isBLANK(c))    ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_BLANK)   &&  isBLANK(c))     ||
 	    (ANYOF_CLASS_TEST(p, ANYOF_NBLANK)  && !isBLANK(c))
 	    ) /* How's that for a conditional? */
 	{
@@ -3659,9 +3802,16 @@ S_reginclassutf8(pTHX_ regnode *f, U8 *p)
     dTHR;
     char flags = ARG1(f);
     bool match = FALSE;
-    SV *sv = (SV*)PL_regdata->data[ARG2(f)];
+#ifdef DEBUGGING
+    SV *rv = (SV*)PL_regdata->data[ARG2(f)];
+    AV *av = (AV*)SvRV((SV*)rv);
+    SV *sw = *av_fetch(av, 0, FALSE);
+    SV *lv = *av_fetch(av, 1, FALSE);
+#else
+    SV *sw = (SV*)PL_regdata->data[ARG2(f)];
+#endif
 
-    if (swash_fetch(sv, p))
+    if (swash_fetch(sw, p))
 	match = TRUE;
     else if (flags & ANYOF_FOLD) {
 	U8 tmpbuf[UTF8_MAXLEN];
@@ -3671,7 +3821,7 @@ S_reginclassutf8(pTHX_ regnode *f, U8 *p)
 	}
 	else
 	    uv_to_utf8(tmpbuf, toLOWER_utf8(p));
-	if (swash_fetch(sv, tmpbuf))
+	if (swash_fetch(sw, tmpbuf))
 	    match = TRUE;
     }
 

@@ -496,7 +496,7 @@ $test++;
 $_ = 'xabcx';
 foreach $ans ('', 'c') {
   /(?<=(?=a)..)((?=c)|.)/g;
-  print "not " unless $1 eq $ans;
+  print "# \$1  ='$1'\n# \$ans='$ans'\nnot " unless $1 eq $ans;
   print "ok $test\n";
   $test++;
 }
@@ -504,7 +504,7 @@ foreach $ans ('', 'c') {
 $_ = 'a';
 foreach $ans ('', 'a', '') {
   /^|a|$/g;
-  print "not " unless $& eq $ans;
+  print "# \$&  ='$&'\n# \$ans='$ans'\nnot " unless $& eq $ans;
   print "ok $test\n";
   $test++;
 }
@@ -1074,15 +1074,15 @@ my @space1 = sort grep { $space{$_} =~ /[[:space:]]/ } keys %space;
 my @space2 = sort grep { $space{$_} =~ /[[:blank:]]/ } keys %space;
 
 print "not " unless "@space0" eq "cr ff lf spc tab";
-print "ok $test\n";
+print "ok $test # @space0\n";
 $test++;
 
 print "not " unless "@space1" eq "cr ff lf spc tab vt";
-print "ok $test\n";
+print "ok $test # @space1\n";
 $test++;
 
 print "not " unless "@space2" eq "spc tab";
-print "ok $test\n";
+print "ok $test # @space2\n";
 $test++;
  
 # bugid 20001021.005 - this caused a SEGV
