@@ -1,17 +1,17 @@
-// wince.h
-// 
-// Time-stamp: <01/08/01 20:48:08 keuchel@w2k>
+/* wince.h */
 
-// This file includes extracts from the celib-headers, because
-// the celib-headers produces macro conflicts with defines in
-// win32iop.h etc
+/* Time-stamp: <01/08/01 20:48:08 keuchel@w2k> */
+
+/* This file includes extracts from the celib-headers, because */
+/* the celib-headers produces macro conflicts with defines in */
+/* win32iop.h etc */
 
 #ifndef WINCE_H
 #define WINCE_H 1
 
 #include "celib_defs.h"
 
-// include local copies of celib headers...
+/* include local copies of celib headers... */
 #include "errno.h"
 #include "sys/stat.h"
 #include "time.h"
@@ -38,7 +38,7 @@ XCE_EXPORT void XCEShowMessageA(const char *fmt, ...);
 #define gmtime xcegmtime
 #define localtime xcelocaltime
 #define asctime xceasctime
-//#define utime xceutime
+/* #define utime xceutime */
 #define futime xcefutime
 #define ftime xceftime
 #define ctime xcectime
@@ -113,7 +113,7 @@ XCE_EXPORT DWORD XCEAPI XCEGetModuleFileNameA(HMODULE hModule, LPTSTR lpName, DW
 XCE_EXPORT HMODULE XCEAPI XCEGetModuleHandleA(const char *lpName);
 XCE_EXPORT FARPROC XCEAPI XCEGetProcAddressA(HMODULE hMod, const char *name);
 
-//////////////////////////////////////////////////////////////////////
+/* //////////////////////////////////////////////////////////////////// */
 
 #define getgid  xcegetgid
 #define getegid xcegetegid

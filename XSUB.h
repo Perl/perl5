@@ -281,7 +281,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #    undef ungetc
 #    undef fileno
 
-//Following symbols were giving redefinition errors while building extensions - sgp 17th Oct 2000
+/* Following symbols were giving redefinition errors while building extensions - sgp 17th Oct 2000 */
 #ifdef NETWARE
 #	undef readdir
 #	undef fstat

@@ -36,7 +36,7 @@ $good = 'good';
 $multiline = "forescore\nand\nseven years\n";
 $foo = 'when in the course of human events it becomes necessary';
 write(OUT);
-close OUT;
+close OUT or die "Could not close: $!";
 
 $right =
 "the quick brown fox
@@ -75,7 +75,7 @@ $good = 'good';
 $multiline = "forescore\nand\nseven years\n";
 $foo = 'when in the course of human events it becomes necessary';
 write(OUT2);
-close OUT2;
+close OUT2 or die "Could not close: $!";
 
 $right =
 "the quick brown fox
@@ -118,7 +118,7 @@ $good = 'good';
 $multiline = "forescore\nand\nseven years\n";
 $foo = 'when in the course of human events it becomes necessary';
 write(OUT2);
-close OUT2;
+close OUT2 or die "Could not close: $!";
 
 $right =
 "the brown quick fox
@@ -185,7 +185,7 @@ open(OUT3, '>Op_write.tmp') || die "Can't create Op_write.tmp";
 
 $foo = 'fit          ';
 write(OUT3);
-close OUT3;
+close OUT3 or die "Could not close: $!";
 
 $right =
 "fit\n";
@@ -207,7 +207,7 @@ $this,$that
     write LEX;
     $that = 8;
     write LEX;
-    close LEX;
+    close LEX or die "Could not close: $!";
 }
 # LEX_INTERPNORMAL test
 my %e = ( a => 1 );
@@ -217,7 +217,7 @@ format OUT4 =
 .
 open   OUT4, ">Op_write.tmp" or die "Can't create Op_write.tmp";
 write (OUT4);
-close  OUT4;
+close  OUT4 or die "Could not close: $!";
 if (`$CAT Op_write.tmp` eq "1\n") {
     print "ok 9\n";
     1 while unlink "Op_write.tmp";
@@ -237,7 +237,7 @@ open(OUT10, '>Op_write.tmp') || die "Can't create Op_write.tmp";
 
 $test1 = 12.95;
 write(OUT10);
-close OUT10;
+close OUT10 or die "Could not close: $!";
 
 $right = "   12.95 00012.95\n";
 if (`$CAT Op_write.tmp` eq $right)
@@ -260,7 +260,7 @@ open(OUT11, '>Op_write.tmp') || die "Can't create Op_write.tmp";
 
 $test1 = 12.95;
 write(OUT11);
-close OUT11;
+close OUT11 or die "Could not close: $!";
 
 $right = 
 "00012.95

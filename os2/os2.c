@@ -2744,21 +2744,21 @@ my_flock(int handle, int o)
   if (!(_emx_env & 0x200) || !use_my) 
     return flock(handle, o);	/* Delegate to EMX. */
   
-                                        // is this a file?
+                                        /* is this a file? */
   if ((DosQueryHType(handle, &handle_type, &flag_word) != 0) ||
       (handle_type & 0xFF))
   {
     errno = EBADF;
     return -1;
   }
-                                        // set lock/unlock ranges
+                                        /* set lock/unlock ranges */
   rNull.lOffset = rNull.lRange = rFull.lOffset = 0;
   rFull.lRange = 0x7FFFFFFF;
-                                        // set timeout for blocking
+                                        /* set timeout for blocking */
   timeout = ((blocking = !(o & LOCK_NB))) ? 100 : 1;
-                                        // shared or exclusive?
+                                        /* shared or exclusive? */
   shared = (o & LOCK_SH) ? 1 : 0;
-                                        // do not block the unlock
+                                        /* do not block the unlock */
   if (o & (LOCK_UN | LOCK_SH | LOCK_EX)) {
     rc = DosSetFileLocks(handle, &rFull, &rNull, timeout, shared);
     switch (rc) {
@@ -2772,7 +2772,7 @@ my_flock(int handle, int o)
         errno = ENOLCK;
         return -1;
       case ERROR_LOCK_VIOLATION:
-        break;                          // not an error
+        break;                          /* not an error */
       case ERROR_INVALID_PARAMETER:
       case ERROR_ATOMIC_LOCK_NOT_SUPPORTED:
       case ERROR_READ_LOCKS_NOT_SUPPORTED:
@@ -2786,9 +2786,9 @@ my_flock(int handle, int o)
         return -1;
     }
   }
-                                        // lock may block
+                                        /* lock may block */
   if (o & (LOCK_SH | LOCK_EX)) {
-                                        // for blocking operations
+                                        /* for blocking operations */
     for (;;) {
       rc =
         DosSetFileLocks(
@@ -2826,7 +2826,7 @@ my_flock(int handle, int o)
           errno = EINVAL;
           return -1;
       }
-                                        // give away timeslice
+                                        /* give away timeslice */
       DosSleep(1);
     }
   }
@@ -2880,7 +2880,7 @@ my_getpwent (void)
   if (!use_my_pwent())
     return getpwent();			/* Delegate to EMX. */
   if (pwent_cnt++)
-    return 0;				// Return one entry only
+    return 0;				/* Return one entry only */
   return getpwuid(0);
 }
 
@@ -2901,7 +2901,7 @@ struct group *
 getgrent (void)
 {
   if (grent_cnt++)
-    return 0;				// Return one entry only
+    return 0;				/* Return one entry only */
   return getgrgid(0);
 }
 

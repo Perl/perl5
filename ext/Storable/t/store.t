@@ -113,7 +113,7 @@ eval { $r = fd_retrieve(::OUT); };
 print "not " unless $@;
 print "ok 20\n";
 
-close OUT;
+close OUT or die "Could not close: $!";
 END { 1 while unlink 'store' }
 
 

@@ -16,7 +16,7 @@ if ($x eq "ok\n") {print "ok 1\n";} else {print "not ok 1\n";}
 
 open(try,">Comp.script") || (die "Can't open temp file.");
 print try 'print "ok\n";'; print try "\n";
-close try;
+close try or die "Could not close: $!";
 
 $x = `$Perl Comp.script`;
 

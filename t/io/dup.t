@@ -40,11 +40,11 @@ else {
     system sprintf "$echo 1>&2", 7;
 }
 
-close(STDOUT);
-close(STDERR);
+close(STDOUT) or die "Could not close: $!";
+close(STDERR) or die "Could not close: $!";
 
-open(STDOUT,">&DUPOUT");
-open(STDERR,">&DUPERR");
+open(STDOUT,">&DUPOUT") or die "Could not open: $!";
+open(STDERR,">&DUPERR") or die "Could not open: $!";
 
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare') || ($^O eq 'VMS')) { print `type Io.dup` }
 else                  { system 'cat Io.dup' }

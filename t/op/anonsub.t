@@ -26,7 +26,7 @@ for (@prgs){
     my($prog,$expected) = split(/\nEXPECT\n/, $_);
     open TEST, ">$tmpfile";
     print TEST "$prog\n";
-    close TEST;
+    close TEST or die "Could not close: $!";
     my $results = $Is_VMS ?
 		`MCR $^X "-I[-.lib]" $switch $tmpfile 2>&1` :
 		  $Is_MSWin32 ?

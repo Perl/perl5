@@ -183,7 +183,7 @@ print ($h{''} eq 'bar' ? "ok 12\n" : "not ok 12\n");
    1 ;
 EOM
 
-    close FILE ;
+    close FILE  or die "Could not close: $!";
 
     BEGIN { push @INC, '.'; }
 

@@ -1,4 +1,4 @@
-// Time-stamp: <01/08/01 20:58:55 keuchel@w2k>
+/* Time-stamp: <01/08/01 20:58:55 keuchel@w2k> */
 
 #include "EXTERN.h"
 #include "perl.h"

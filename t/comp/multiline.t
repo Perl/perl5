@@ -26,7 +26,7 @@ $y = 'now is the time' . "\n" .
 is($x, $y,  'test data is sane');
 
 print TRY $x;
-close TRY;
+close TRY or die "Could not close: $!";
 
 open(TRY,'Comp.try') || (die "Can't reopen temp file.");
 $count = 0;

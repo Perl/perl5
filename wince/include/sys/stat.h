@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 
-// stat.h
+/* stat.h */
 #define _S_IFMT         0170000         /* file type mask */
 #define _S_IFDIR        0040000         /* directory */
 #define _S_IFCHR        0020000         /* character special */

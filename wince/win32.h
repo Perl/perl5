@@ -1,4 +1,4 @@
-// Time-stamp: <01/08/01 20:59:54 keuchel@w2k>
+/* Time-stamp: <01/08/01 20:59:54 keuchel@w2k> */
 
 /* WIN32.H
  *
@@ -116,7 +116,7 @@ struct utsname {
 /* Define USE_SOCKETS_AS_HANDLES to enable emulation of windows sockets as
  * real filehandles. XXX Should always be defined (the other version is untested) */
 
-//#define USE_SOCKETS_AS_HANDLES
+/* #define USE_SOCKETS_AS_HANDLES */
 
 /* read() and write() aren't transparent for socket handles */
 #define PERL_SOCK_SYSREAD_IS_RECV

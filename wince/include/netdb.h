@@ -1,7 +1,7 @@
-// netdb.h
+/* netdb.h */
 
-// djl
-// Provide UNIX compatibility
+/* djl */
+/* Provide UNIX compatibility */
 
 
 #ifndef  _INC_NETDB
@@ -9,4 +9,4 @@
 
 #include <sys/socket.h>
 
-#endif //_INC_NETDB
+#endif /* _INC_NETDB */

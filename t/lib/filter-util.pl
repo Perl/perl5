@@ -25,7 +25,7 @@ sub writeFile
     binmode(F) if $filename =~ /bin$/i;
     foreach (@strings)
       { print F }
-    close F ;
+    close F or die "Could not close: $!" ;
 }
 
 sub ok

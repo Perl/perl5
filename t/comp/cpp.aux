@@ -25,11 +25,11 @@ X#endif
 Xprint $ok;
 END
 print TRY $prog;
-close TRY;
+close TRY or die "Could not close Comp_cpp.tmp: $!";
 
 open(TRY,">Comp_cpp.inc") || (die "Can't open temp include file: $!");
 print TRY '#define OK "ok 3\n"' . "\n";
-close TRY;
+close TRY or die "Could not close Comp_cpp.tmp: $!";
 
 print `$^X "-P" Comp_cpp.tmp`;
 unlink "Comp_cpp.tmp", "Comp_cpp.inc";
