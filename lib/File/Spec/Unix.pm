@@ -2,6 +2,8 @@ package File::Spec::Unix;
 
 use strict;
 
+use Cwd;
+
 =head1 NAME
 
 File::Spec::Unix - methods used by File::Spec
@@ -23,13 +25,29 @@ Methods for manipulating file specifications.
 No physical check on the filesystem, but a logical cleanup of a
 path. On UNIX eliminated successive slashes and successive "/.".
 
+    $cpath = File::Spec->canonpath( $path ) ;
+    $cpath = File::Spec->canonpath( $path, $reduce_ricochet ) ;
+
+If $reduce_ricochet is present and true, then "dirname/.." 
+constructs are eliminated from the path. Without $reduce_ricochet,
+if dirname is a symbolic link, then "a/dirname/../b" will often 
+take you to someplace other than "a/b". This is sometimes desirable.
+If it's not, setting $reduce_ricochet causes the "dirname/.." to
+be removed from this path, resulting in "a/b".  This may make
+your perl more portable and robust, unless you want to
+ricochet (some scripts depend on it).
+
 =cut
 
 sub canonpath {
-    my ($self,$path) = @_;
+    my ($self,$path,$reduce_ricochet) = @_;
     $path =~ s|/+|/|g;                             # xx////xx  -> xx/xx
     $path =~ s|(/\.)+/|/|g;                        # xx/././xx -> xx/xx
     $path =~ s|^(\./)+|| unless $path eq "./";     # ./xx      -> xx
+    $path =~ s|^/(\.\./)+|/|;                      # /../../xx -> xx
+    if ( $reduce_ricochet ) {
+        while ( $path =~ s@[^/]+/\.\.(?:/|$)@@ ) {}# xx/..     -> xx
+    }
     $path =~ s|/$|| unless $path eq "/";           # xx/       -> xx
     return $path;
 }
@@ -177,6 +195,241 @@ sub join {
     my $self = shift;
     return $self->catfile(@_);
 }
+
+=item splitpath
+
+    ($volume,$directories,$file) = File::Spec->splitpath( $path );
+    ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
+
+Splits a path in to volume, directory, and filename portions. On systems
+with no concept of volume, returns undef for volume. 
+
+For systems with no syntax differentiating filenames from directories, 
+assumes that the last file is a path unless $no_file is true or a 
+trailing separator or /. or /.. is present. On Unix this means that $no_file
+true makes this return ( '', $path, '' ).
+
+The directory portion may or may not be returned with a trailing '/'.
+
+The results can be passed to L</catpath()> to get back a path equivalent to
+(usually identical to) the original path.
+
+=cut
+
+sub splitpath {
+    my ($self,$path, $nofile) = @_;
+
+    my ($volume,$directory,$file) = ('','','');
+
+    if ( $nofile ) {
+        $directory = $path;
+    }
+    else {
+        $path =~ m|^ ( (?: .* / (?: \.\.?$ )? )? ) ([^/]*) |x;
+        $directory = $1;
+        $file      = $2;
+    }
+
+    return ($volume,$directory,$file);
+}
+
+
+=item splitdir
+
+The opposite of L</catdir()>.
+
+    @dirs = File::Spec->splitdir( $directories );
+
+$directories must be only the directory portion of the path on systems 
+that have the concept of a volume or that have path syntax that differentiates
+files from directories.
+
+Unlike just splitting the directories on the separator, leading empty and 
+trailing directory entries can be returned, because these are significant
+on some OSs. So,
+
+    File::Spec->splitdir( "/a/b/c" );
+
+Yields:
+
+    ( '', 'a', 'b', '', 'c', '' )
+
+=cut
+
+sub splitdir {
+    my ($self,$directories) = @_ ;
+    #
+    # split() likes to forget about trailing null fields, so here we
+    # check to be sure that there will not be any before handling the
+    # simple case.
+    #
+    if ( $directories !~ m|/$| ) {
+        return split( m|/|, $directories );
+    }
+    else {
+        #
+        # since there was a trailing separator, add a file name to the end, 
+        # then do the split, then replace it with ''.
+        #
+        my( @directories )= split( m|/|, "${directories}dummy" ) ;
+        $directories[ $#directories ]= '' ;
+        return @directories ;
+    }
+}
+
+
+=item catpath
+
+Takes volume, directory and file portions and returns an entire path. Under
+Unix, $volume is ignored, and this is just like catfile(). On other OSs,
+the $volume become significant.
+
+=cut
+
+sub catpath {
+    my ($self,$volume,$directory,$file) = @_;
+
+    if ( $directory ne ''                && 
+         $file ne ''                     && 
+         substr( $directory, -1 ) ne '/' && 
+         substr( $file, 0, 1 ) ne '/' 
+    ) {
+        $directory .= "/$file" ;
+    }
+    else {
+        $directory .= $file ;
+    }
+
+    return $directory ;
+}
+
+=item abs2rel
+
+Takes a destination path and an optional base path returns a relative path
+from the base path to the destination path:
+
+    $rel_path = File::Spec->abs2rel( $destination ) ;
+    $rel_path = File::Spec->abs2rel( $destination, $base ) ;
+
+If $base is not present or '', then L<cwd()> is used. If $base is relative, 
+then it is converted to absolute form using L</rel2abs()>. This means that it
+is taken to be relative to L<cwd()>.
+
+On systems with the concept of a volume, this assumes that both paths 
+are on the $destination volume, and ignores the $base volume. 
+
+On systems that have a grammar that indicates filenames, this ignores the 
+$base filename as well. Otherwise all path components are assumed to be
+directories.
+
+If $path is relative, it is converted to absolute form using L</rel2abs()>.
+This means that it is taken to be relative to L<cwd()>.
+
+Based on code written by Shigio Yamaguchi.
+
+No checks against the filesystem are made. 
+
+=cut
+
+sub abs2rel {
+    my($self,$path,$base) = @_;
+
+    # Clean up $path
+    if ( ! $self->file_name_is_absolute( $path ) ) {
+        $path = $self->rel2abs( $path ) ;
+    }
+    else {
+        $path = $self->canonpath( $path ) ;
+    }
+
+    # Figure out the effective $base and clean it up.
+    if ( !defined( $base ) || $base eq '' ) {
+        $base = cwd() ;
+    }
+    elsif ( ! $self->file_name_is_absolute( $base ) ) {
+        $base = $self->rel2abs( $base ) ;
+    }
+    else {
+        $base = $self->canonpath( $base ) ;
+    }
+
+    # Now, remove all leading components that are the same
+    my @pathchunks = $self->splitdir( $path);
+    my @basechunks = $self->splitdir( $base);
+
+    while (@pathchunks && @basechunks && $pathchunks[0] eq $basechunks[0]) {
+        shift @pathchunks ;
+        shift @basechunks ;
+    }
+
+    $path = CORE::join( '/', @pathchunks );
+    $base = CORE::join( '/', @basechunks );
+
+    # $base now contains the directories the resulting relative path 
+    # must ascend out of before it can descend to $path_directory.  So, 
+    # replace all names with $parentDir
+    $base =~ s|[^/]+|..|g ;
+
+    # Glue the two together, using a separator if necessary, and preventing an
+    # empty result.
+    if ( $path ne '' && $base ne '' ) {
+        $path = "$base/$path" ;
+    } else {
+        $path = "$base$path" ;
+    }
+
+    return $self->canonpath( $path ) ;
+}
+
+=item rel2abs
+
+Converts a relative path to an absolute path. 
+
+    $abs_path = $File::Spec->rel2abs( $destination ) ;
+    $abs_path = $File::Spec->rel2abs( $destination, $base ) ;
+
+If $base is not present or '', then L<cwd()> is used. If $base is relative, 
+then it is converted to absolute form using L</rel2abs()>. This means that it
+is taken to be relative to L<cwd()>.
+
+On systems with the concept of a volume, this assumes that both paths 
+are on the $base volume, and ignores the $destination volume. 
+
+On systems that have a grammar that indicates filenames, this ignores the 
+$base filename as well. Otherwise all path components are assumed to be
+directories.
+
+If $path is absolute, it is cleaned up and returned using L</canonpath()>.
+
+Based on code written by Shigio Yamaguchi.
+
+No checks against the filesystem are made. 
+
+=cut
+
+sub rel2abs($;$;) {
+    my ($self,$path,$base ) = @_;
+
+    # Clean up $path
+    if ( ! $self->file_name_is_absolute( $path ) ) {
+        # Figure out the effective $base and clean it up.
+        if ( !defined( $base ) || $base eq '' ) {
+            $base = cwd() ;
+        }
+        elsif ( ! $self->file_name_is_absolute( $base ) ) {
+            $base = $self->rel2abs( $base ) ;
+        }
+        else {
+            $base = $self->canonpath( $base ) ;
+        }
+
+        # Glom them together
+        $path = $self->catdir( $base, $path ) ;
+    }
+
+    return $self->canonpath( $path ) ;
+}
+
 
 =back
 
