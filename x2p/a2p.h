@@ -1,4 +1,4 @@
-/* $Header: a2p.h,v 3.0.1.1 89/11/11 05:07:00 lwall Locked $
+/* $Header: a2p.h,v 3.0.1.2 89/12/21 20:30:29 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2p.h,v $
+ * Revision 3.0.1.2  89/12/21  20:30:29  lwall
+ * patch7: arranged so a2p has a chance of running on a 286
+ * 
  * Revision 3.0.1.1  89/11/11  05:07:00  lwall
  * patch2: Configure may now set -DDEBUGGING
  * 
@@ -213,11 +216,16 @@ extern char *opname[];
 
 EXT int mop INIT(1);
 
-#define OPSMAX 50000
-union {
+union u_ops {
     int ival;
     char *cval;
-} ops[OPSMAX];		/* hope they have 200k to spare */
+};
+#if defined(iAPX286) || defined(M_I286) || defined(I80286) 	/* 80286 hack */
+#define OPSMAX (64000/sizeof(union u_ops))	/* approx. max segment size */
+#else
+#define OPSMAX 50000
+#endif						 	/* 80286 hack */
+union u_ops ops[OPSMAX];
 
 #include <stdio.h>
 #include <ctype.h>

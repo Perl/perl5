@@ -1,4 +1,4 @@
-/* $Header: cmd.c,v 3.0.1.3 89/11/17 15:04:36 lwall Locked $
+/* $Header: cmd.c,v 3.0.1.4 89/12/21 19:17:41 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.c,v $
+ * Revision 3.0.1.4  89/12/21  19:17:41  lwall
+ * patch7: arranged for certain registers to be restored after longjmp()
+ * patch7: made nested or recursive foreach work right
+ * 
  * Revision 3.0.1.3  89/11/17  15:04:36  lwall
  * patch5: nested foreach on same array didn't work
  * 
@@ -32,27 +36,30 @@ static STR str_chop;
 
 void grow_dlevel();
 
+/* do longjmps() clobber register variables? */
+
+#if defined(cray) || defined(__STDC__)
+#define JMPCLOBBER
+#endif
+
 /* This is the main command loop.  We try to spend as much time in this loop
  * as possible, so lots of optimizations do their activities in here.  This
  * means things get a little sloppy.
  */
 
 int
-cmd_exec(cmd,gimme,sp)
-#ifdef cray	/* nobody else has complained yet */
-CMD *cmd;
-#else
-register CMD *cmd;
-#endif
+cmd_exec(cmdparm,gimme,sp)
+CMD *VOLATILE cmdparm;
 int gimme;
 int sp;
 {
-    SPAT *oldspat;
-    int oldsave;
-    int aryoptsave;
+    register CMD *cmd = cmdparm;
+    SPAT *VOLATILE oldspat;
+    VOLATILE int oldsave;
+    VOLATILE int aryoptsave;
 #ifdef DEBUGGING
-    int olddlevel;
-    int entdlevel;
+    VOLATILE int olddlevel;
+    VOLATILE int entdlevel;
 #endif
     register STR *retstr = &str_undef;
     register char *tmps;
@@ -61,8 +68,8 @@ int sp;
     register char *go_to = goto_targ;
     register int newsp = -2;
     register STR **st = stack->ary_array;
-    FILE *fp;
-    ARRAY *ar;
+    VOLATILE FILE *fp;
+    VOLATILE ARRAY *ar;
 
     lastsize = 0;
 #ifdef DEBUGGING
@@ -167,31 +174,48 @@ tail_recursion_entry:
 		    }
 #endif
 		}
-		switch (setjmp(loop_stack[loop_ptr].loop_env)) {
-		case O_LAST:	/* not done unless go_to found */
-		    go_to = Nullch;
-		    st = stack->ary_array;	/* possibly reallocated */
-		    if (lastretstr) {
-			retstr = lastretstr;
-			newsp = -2;
-		    }
-		    else {
-			newsp = sp + lastsize;
-			retstr = st[newsp];
-		    }
-#ifdef DEBUGGING
-		    olddlevel = dlevel;
+#ifdef JMPCLOBBER
+		cmdparm = cmd;
 #endif
-		    curspat = oldspat;
-		    if (savestack->ary_fill > oldsave)
-			restorelist(oldsave);
-		    goto next_cmd;
-		case O_NEXT:	/* not done unless go_to found */
-		    go_to = Nullch;
-		    goto next_iter;
-		case O_REDO:	/* not done unless go_to found */
-		    go_to = Nullch;
-		    goto doit;
+		if (match = setjmp(loop_stack[loop_ptr].loop_env)) {
+#ifdef JMPCLOBBER
+		    st = stack->ary_array;	/* possibly reallocated */
+		    cmd = cmdparm;
+		    cmdflags = cmd->c_flags|CF_ONCE;
+#endif
+		    switch (match) {
+		    case O_LAST:	/* not done unless go_to found */
+			go_to = Nullch;
+			if (lastretstr) {
+			    retstr = lastretstr;
+			    newsp = -2;
+			}
+			else {
+			    newsp = sp + lastsize;
+			    retstr = st[newsp];
+			}
+#ifdef DEBUGGING
+			olddlevel = dlevel;
+#endif
+			curspat = oldspat;
+			if (savestack->ary_fill > oldsave)
+			    restorelist(oldsave);
+			goto next_cmd;
+		    case O_NEXT:	/* not done unless go_to found */
+			go_to = Nullch;
+#ifdef JMPCLOBBER
+			newsp = -2;
+			retstr = &str_undef;
+#endif
+			goto next_iter;
+		    case O_REDO:	/* not done unless go_to found */
+			go_to = Nullch;
+#ifdef JMPCLOBBER
+			newsp = -2;
+			retstr = &str_undef;
+#endif
+			goto doit;
+		    }
 		}
 		oldspat = curspat;
 		oldsave = savestack->ary_fill;
@@ -572,7 +596,7 @@ until_loop:
 	newsp = eval(cmd->c_expr,gimme && (cmdflags & CF_TERM),sp);
 	st = stack->ary_array;	/* possibly reallocated */
 	retstr = st[newsp];
-	if (newsp > sp)
+	if (newsp > sp && retstr)
 	    match = str_true(retstr);
 	else
 	    match = FALSE;
@@ -725,29 +749,46 @@ until_loop:
 	    }
 #endif
 	}
-	switch (setjmp(loop_stack[loop_ptr].loop_env)) {
-	case O_LAST:
-	    /* retstr = lastretstr; */
-	    st = stack->ary_array;	/* possibly reallocated */
-	    if (lastretstr) {
-		retstr = lastretstr;
-		newsp = -2;
-	    }
-	    else {
-		newsp = sp + lastsize;
-		retstr = st[newsp];
-	    }
-	    curspat = oldspat;
-	    if (savestack->ary_fill > oldsave)
-		restorelist(oldsave);
-	    goto next_cmd;
-	case O_NEXT:
-	    goto next_iter;
-	case O_REDO:
-#ifdef DEBUGGING
-	    dlevel = olddlevel;
+#ifdef JMPCLOBBER
+	cmdparm = cmd;
 #endif
-	    goto doit;
+	if (match = setjmp(loop_stack[loop_ptr].loop_env)) {
+#ifdef JMPCLOBBER
+	    st = stack->ary_array;	/* possibly reallocated */
+	    cmd = cmdparm;
+	    cmdflags = cmd->c_flags|CF_ONCE;
+	    go_to = goto_targ;
+#endif
+	    switch (match) {
+	    case O_LAST:
+		if (lastretstr) {
+		    retstr = lastretstr;
+		    newsp = -2;
+		}
+		else {
+		    newsp = sp + lastsize;
+		    retstr = st[newsp];
+		}
+		curspat = oldspat;
+		if (savestack->ary_fill > oldsave)
+		    restorelist(oldsave);
+		goto next_cmd;
+	    case O_NEXT:
+#ifdef JMPCLOBBER
+		newsp = -2;
+		retstr = &str_undef;
+#endif
+		goto next_iter;
+	    case O_REDO:
+#ifdef DEBUGGING
+		dlevel = olddlevel;
+#endif
+#ifdef JMPCLOBBER
+		newsp = -2;
+		retstr = &str_undef;
+#endif
+		goto doit;
+	    }
 	}
 	oldspat = curspat;
 	oldsave = savestack->ary_fill;
@@ -1010,6 +1051,7 @@ int maxsarg;
 	str = Str_new(18,0);
 	str_sset(str,sarg[i]);
 	(void)apush(savestack,str);			/* remember the value */
+	sarg[i]->str_u.str_useful = -1;
     }
 }
 

@@ -25,9 +25,12 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.2 89/11/11 04:07:30 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.3 89/12/21 19:09:26 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.3  89/12/21  19:09:26  lwall
+# patch7: Configure now lets you pick between yacc or bison
+# 
 # Revision 3.0.1.2  89/11/11  04:07:30  lwall
 # patch2: $sockethdr incorporated into $ccflags
 # patch2: $libs now has most of the -l libraries
@@ -40,6 +43,7 @@ cat >Makefile <<!GROK!THIS!
 # 
 
 CC = $cc
+YACC = $yacc
 bin = $bin
 privlib = $privlib
 mansrc = $mansrc
@@ -102,11 +106,9 @@ SHELL = /bin/sh
 .c.o:
 	$(CC) -c $(CFLAGS) $(LARGE) $*.c
 
-all: $(public) $(private) $(util) perl.man x2p/all
-	touch all
-
-x2p/all:
+all: $(public) $(private) $(util) perl.man
 	cd x2p; $(MAKE) all
+	touch all
 
 # This is the standard version that contains no "taint" checks and is
 # used for all scripts that aren't set-id or running under something set-id.
@@ -254,7 +256,7 @@ tutil.o: util.c $(h)
 
 perl.c perly.h: perl.y
 	@ echo Expect 25 shift/reduce errors...
-	yacc -d perl.y
+	$(YACC) -d perl.y
 	mv y.tab.c perl.c
 	mv y.tab.h perly.h
 
@@ -307,7 +309,7 @@ fi
 	cd x2p; $(MAKE) install
 
 clean:
-	rm -f *.o all perl taintperl perl.man
+	rm -f *.o all perl taintperl $suidperl perl.man
 	cd x2p; $(MAKE) clean
 
 realclean:
@@ -344,7 +346,7 @@ shlist:
 	echo $(sh) | tr ' ' '\012' >.shlist
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
-perly.o $(obj):
+$(obj):
 	@ echo "You haven't done a "'"make depend" yet!'; exit 1
 makedepend: makedepend.SH
 	/bin/sh makedepend.SH

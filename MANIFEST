@@ -7,6 +7,7 @@ MANIFEST		This list of files
 Makefile.SH		Precursor to Makefile
 PACKINGLIST		Which files came from which kits
 README			The Instructions
+README.uport		Special instructions for Microports
 Wishlist		Some things that may or may not happen
 arg.h			Public declarations for the above
 array.c			Numerically subscripted arrays

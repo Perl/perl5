@@ -18,11 +18,14 @@ case "$mallocsrc" in
 esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.2 89/11/17 15:49:55 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.3 89/12/21 20:29:00 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.3  89/12/21  20:29:00  lwall
+# patch7: Configure now lets you pick between yacc or bison
+# 
 # Revision 3.0.1.2  89/11/17  15:49:55  lwall
-# patch: in x2p/Makefile.SH, removed reference to $libnm
+# patch: in x2p/Makefile.SH, removed reference to nm library
 # 
 # Revision 3.0.1.1  89/10/26  23:29:11  lwall
 # patch1: in x2p/Makefile.SH, added dependency on ../config.sh
@@ -42,6 +45,7 @@ cat >Makefile <<!GROK!THIS!
 # 
 
 CC = $cc
+YACC = $yacc
 bin = $bin
 lib = $lib
 mansrc = $mansrc
@@ -92,7 +96,7 @@ a2p: $(obj) a2p.o
 
 a2p.c: a2p.y
 	@ echo Expect 208 shift/reduce conflicts...
-	yacc a2p.y
+	$(YACC) a2p.y
 	mv y.tab.c a2p.c
 
 a2p.o: a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h

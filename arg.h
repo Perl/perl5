@@ -1,4 +1,4 @@
-/* $Header: arg.h,v 3.0.1.1 89/10/26 23:02:35 lwall Locked $
+/* $Header: arg.h,v 3.0.1.2 89/12/21 19:13:14 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	arg.h,v $
+ * Revision 3.0.1.2  89/12/21  19:13:14  lwall
+ * patch7: send() didn't allow a TO argument
+ * 
  * Revision 3.0.1.1  89/10/26  23:02:35  lwall
  * patch1: reverse didn't work
  * 
@@ -815,7 +818,7 @@ char opargs[MAXO+1] = {
 	A(1,1,0),	/* CONNECT */
 	A(1,1,0),	/* LISTEN */
 	A(1,1,0),	/* ACCEPT */
-	A(1,1,2),	/* SEND */
+	A(1,1,3),	/* SEND */
 	A(1,1,1),	/* RECV */
 	A(1,1,1),	/* SSELECT */
 	A(1,1,1),	/* SOCKETPAIR */

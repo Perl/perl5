@@ -60,6 +60,27 @@ Installation
 
     This will attempt to make perl in the current directory.
 
+    If you can't compile successfully, try adding a -DCRIPPLED_CC flag.
+    (Just because you get no errors doesn't mean it compiled right!)
+    This simplifies some complicated expressions for compilers that
+    get indigestion easily.  If that has no effect, try turning off
+    optimization.  If you have missing routines, you probably need to
+    add some library or other, or you need to undefine some feature that
+    Configure thought was there but is defective or incomplete.
+
+    Some compilers will not compile or optimize the larger files without
+    some extra switches to use larger jump offsets or allocate larger
+    internal tables.  It's okay to insert rules for specific files into
+    Makefile.SH, since a default rule only take effect in the
+    absence of a specific rule.
+
+    The 3b2 needs to turn off -O.
+    AIX/RT may need a -a switch and -DCRIPPLED_CC.
+    SGI machines may need -Ddouble="long float".
+    Ultrix (2.3) may need to hand assemble teval.s with a -J switch.
+    SCO Xenix may need -m25000 for yacc.
+    Genix needs to use libc rather than libc_s, or #undef VARARGS.
+
 5)  make test
 
     This will run the regression tests on the perl you just made.
@@ -88,7 +109,7 @@ Installation
     Context diffs are the best, then normal diffs.  Don't send ed scripts--
     I've probably changed my copy since the version you have.
 
-    Watch for perl patches in comp.sources.bugs.  Patches will generally be
+    Watch for perl patches in comp.lang.perl.  Patches will generally be
     in a form usable by the patch program.  If you are just now bringing up
     perl and aren't sure how many patches there are, write to me and I'll
     send any you don't have.  Your current patch level is shown in patchlevel.h.

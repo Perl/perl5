@@ -24,14 +24,14 @@
 sub Complete {
     local ($prompt) = shift (@_);
     local ($c, $cmp, $l, $r, $ret, $return, $test);
-    @_ = sort @_;
+    @_cmp_lst = sort @_;
     system 'stty raw -echo';
     loop: {
 	print $prompt, $return;
 	while (($c = getc(stdin)) ne "\r") {
 	    if ($c eq "\t") {			# (TAB) attempt completion
 		@_match = ();
-		foreach $cmp (@_) {
+		foreach $cmp (@_cmp_lst) {
 		    push (@_match, $cmp) if $cmp =~ /^$return/;
 		}
     	    	$test = $_match[0];
@@ -50,7 +50,7 @@ sub Complete {
 	    }
 	    elsif ($c eq "\004") {		# (^D) completion list
 		print "\r\n";
-		foreach $cmp (@_) {
+		foreach $cmp (@_cmp_lst) {
 		    print "$cmp\r\n" if $cmp =~ /^$return/;
 		}
 		redo loop;

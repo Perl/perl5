@@ -167,6 +167,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  */
 #$d_getpgrp	GETPGRP		/**/
 
+/* GETPGRP2:
+ *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)
+ *	routine is available to get the current process group.
+ */
+#$d_getpgrp2	GETPGRP2		/**/
+
 /* GETPRIORITY:
  *	This symbol, if defined, indicates that the getpriority() routine is
  *	available to get a process's priority.
@@ -294,6 +300,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  */
 #$d_setpgrp	SETPGRP		/**/
 
+/* SETPGRP2:
+ *	This symbol, if defined, indicates that the setpgrp2() (as in DG/UX)
+ *	routine is available to set the current process group.
+ */
+#$d_setpgrp2	SETPGRP2		/**/
+
 /* SETPRIORITY:
  *	This symbol, if defined, indicates that the setpriority() routine is
  *	available to set a process's priority.
@@ -373,6 +385,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  */
 #$d_strctcpy	STRUCTCOPY	/**/
 
+/* STRERROR:
+ *	This symbol, if defined, indicates that the strerror() routine is
+ *	available to translate error numbers to strings.
+ */
+#$d_strerror	STRERROR		/**/
+
 /* SYMLINK:
  *	This symbol, if defined, indicates that the symlink routine is available
  *	to create symbolic links.
@@ -384,28 +402,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	to call arbitrary system calls.  If undefined, that's tough.
  */
 #$d_syscall	SYSCALL		/**/
-
-/* TMINSYS:
- *	This symbol is defined if this system declares "struct tm" in
- *	in <sys/time.h> rather than <time.h>.  We can't just say
- *	-I/usr/include/sys because some systems have both time files, and
- *	the -I trick gets the wrong one.
- */
-/* I_SYSTIME:
- *	This symbol is defined if this system has the file <sys/time.h>.
- */
-/* I_TIMETOO:
- *	This symbol is defined if <sys/time.h> exists but doesn't include
- *	<time.h>.
- */
-/* I_SYSTIMETOO:
- *	This symbol is defined if <sys/time.h> exists but isn't included
- *	by <time.h>.
- */
-#$d_tminsys	TMINSYS 	/**/
-#$i_systime	I_SYSTIME 	/**/
-#$i_timetoo	I_TIMETOO 	/**/
-#$i_systimetoo	I_SYSTIMETOO 	/**/
 
 /* VARARGS:
  *	This symbol, if defined, indicates to the C program that it should
@@ -523,6 +519,32 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	be included.
  */
 #$i_sysioctl	I_SYSIOCTL		/**/
+
+/* I_SYSNDIR:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include sys/ndir.h.
+ */
+#$i_sysndir	I_SYSNDIR		/**/
+
+/* I_TIME:
+ *	This symbol is defined if the program should include <time.h>.
+ */
+/* I_SYSTIME:
+ *	This symbol is defined if the program should include <sys/time.h>.
+ */
+/* I_SYSTIMEKERNEL:
+ *	This symbol is defined if the program should include <sys/time.h>
+ *	with KERNEL defined.
+ */
+#$i_time		I_TIME	 	/**/
+#$i_systime	I_SYSTIME 	/**/
+#$d_systimekernel	SYSTIMEKERNEL 	/**/
+
+/* I_UTIME:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include utime.h (a DG/UX thingie).
+ */
+#$i_utime	I_UTIME		/**/
 
 /* I_VARARGS:
  *	This symbol, if defined, indicates to the C program that it should

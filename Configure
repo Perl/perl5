@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 3.0.1.3 89/11/17 15:01:21 lwall Locked $
+# $Header: Configure,v 3.0.1.4 89/12/21 18:57:00 lwall Locked $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -115,6 +115,7 @@ d_flock=''
 d_getgrps=''
 d_gethent=''
 d_getpgrp=''
+d_getpgrp2=''
 d_getprior=''
 d_htonl=''
 d_index=''
@@ -132,6 +133,7 @@ d_rmdir=''
 d_setegid=''
 d_seteuid=''
 d_setpgrp=''
+d_setpgrp2=''
 d_setprior=''
 d_setregid=''
 d_setresgid=''
@@ -146,12 +148,9 @@ socketlib=''
 d_statblks=''
 d_stdstdio=''
 d_strctcpy=''
+d_strerror=''
 d_symlink=''
 d_syscall=''
-d_tminsys=''
-i_systime=''
-i_timetoo=''
-i_systimetoo=''
 d_varargs=''
 d_vfork=''
 d_voidsig=''
@@ -172,6 +171,11 @@ d_pwclass=''
 d_pwexpire=''
 i_sysdir=''
 i_sysioctl=''
+i_sysndir=''
+i_time=''
+i_systime=''
+d_systimekernel=''
+i_utime=''
 i_varargs=''
 i_vfork=''
 intsize=''
@@ -206,8 +210,9 @@ stdchar=''
 uidtype=''
 voidflags=''
 defvoidused=''
-lib=''
+yacc=''
 privlib=''
+lib=''
 CONFIG=''
 : set package name
 package=perl
@@ -219,7 +224,9 @@ echo " "
 
 define='define'
 undef='undef'
-libpth='/usr/lib /usr/local/lib /usr/lib/386 /usr/lib/large /lib /lib/386 /lib/large /usr/lib/small /lib/small'
+: change the next line if compiling for Xenix/286 on Xenix/386
+xlibpth='/usr/lib/386 /lib/386'
+libpth='/usr/lib /usr/local/lib /usr/lib/large /lib '$xlibpth' /lib/large /usr/lib/small /lib/small'
 smallmach='pdp11 i8086 z8000 i80286 iAPX286'
 rmlist='kit[1-9]isdone kit[1-9][0-9]isdone'
 trap 'echo " "; rm -f $rmlist; exit 1' 1 2 3
@@ -245,12 +252,12 @@ attrlist="$attrlist hpux hp9000s300 hp9000s500 hp9000s800"
 attrlist="$attrlist ns32000 ns16000 iAPX286 mc300 mc500 mc700 sparc"
 attrlist="$attrlist nsc32000 sinix xenix venix posix ansi M_XENIX"
 attrlist="$attrlist $mc68k __STDC__ UTS M_I8086 M_I186 M_I286 M_I386"
-attrlist="$attrlist i186"
+attrlist="$attrlist i186 __m88k__ m88k DGUX __DGUX__"
 pth="/usr/ucb /bin /usr/bin /usr/local /usr/local/bin /usr/lbin /usr/plx /usr/5bin /vol/local/bin /etc /usr/lib /lib /usr/local/lib /sys5.3/bin /sys5.3/usr/bin /bsd4.3/bin /bsd4.3/usr/bin /bsd4.3/usr/ucb"
 d_newshome="/usr/NeWS"
 defvoidused=7
-libswanted="net nm ndir ndbm dbm sun bsd c_s"
-inclwanted='/usr/netinclude /usr/include/sun /usr/include/bsd'
+libswanted="net_s net nsl_s nsl socket nm ndir ndbm dbm sun bsd x c_s"
+inclwanted='/usr/netinclude /usr/include/sun /usr/include/bsd /usr/include/lan'
 : some greps do not return status, grrr.
 echo "grimblepritz" >grimble
 if grep blurfldyick grimble >/dev/null 2>&1 ; then
@@ -1104,11 +1111,17 @@ case "$libswanted" in
 '') libswanted='c_s';;
 esac
 for thislib in $libswanted; do
+    case "$thislib" in
+    dbm) thatlib=ndbm;;
+    *_s) thatlib=NONE;;
+    *) thatlib="${thislib}_s";;
+    *) thatlib=NONE;;
+    esac
     xxx=`loc lib$thislib.a X /usr/lib /usr/local/lib /lib`
     if test -f $xxx; then
 	echo "Found -l$thislib."
 	case "$dflt" in
-	*-l$thislib*);;
+	*-l$thislib*|*-l$thatlib*);;
 	*) dflt="$dflt -l$thislib";;
 	esac
     else
@@ -1120,11 +1133,11 @@ for thislib in $libswanted; do
 	    *) dflt="$dflt $xxx";;
 	    esac
 	else
-	    xxx=`loc Slib$thislib.a X /usr/lib /usr/local/lib /lib`
+	    xxx=`loc Slib$thislib.a X $xlibpth`
 	    if test -f $xxx; then
 		echo "Found -l$thislib."
 		case "$dflt" in
-		*-l$thislib*);;
+		*-l$thislib*|*-l$thatlib*);;
 		*) dflt="$dflt -l$thislib";;
 		esac
 	    else
@@ -1151,6 +1164,7 @@ cc command line when linking.  Other systems use shared libraries
 by default.  There may be other libraries needed to compile $package
 on your machine as well.  If your system needs the "-lc_s" option,
 include it here.  Include any other special libraries here as well.
+Say "none" for none.
 EOM
 
 echo " "
@@ -1347,7 +1361,10 @@ case "$libs" in
 		if test ! -f $try; then
 		    try=`loc $thislib blurfl/dyick $libpth`
 		    if test ! -f $try; then
-			try=''
+			try=`loc Slib$thislib.a blurfl/dyick $xlibpth`
+			if test ! -f $try; then
+			    try=''
+			fi
 		    fi
 		fi
 	    fi
@@ -1377,13 +1394,13 @@ else
 	ans=`loc clib blurfl/dyick $libpth`
     fi
     if test ! -f "$ans"; then
-	ans=`loc Slibc.a blurfl/dyick /usr/lib/386 /lib/386 $libpth`
+	ans=`loc Slibc.a blurfl/dyick $xlibpth`
     fi
     if test ! -f "$ans"; then
-	ans=`loc Mlibc.a blurfl/dyick $libpth`
+	ans=`loc Mlibc.a blurfl/dyick $xlibpth`
     fi
     if test ! -f "$ans"; then
-	ans=`loc Llibc.a blurfl/dyick $libpth`
+	ans=`loc Llibc.a blurfl/dyick $xlibpth`
     fi
     if test -f "$ans"; then
 	echo "Your C library is in $ans, of all places."
@@ -1522,14 +1539,14 @@ if $contains '^crypt$' libc.list >/dev/null 2>&1; then
     d_crypt="$define"
     cryptlib=''
 else
-    cryptlib=`loc Slibcrypt.a "" /lib/386 /lib`
+    cryptlib=`loc Slibcrypt.a "" $xlibpth`
     if $test -z "$cryptlib"; then
-	cryptlib=`loc Mlibcrypt.a "" /lib/386 /lib`
+	cryptlib=`loc Mlibcrypt.a "" $xlibpth`
     else
 	cryptlib=-lcrypt
     fi
     if $test -z "$cryptlib"; then
-	cryptlib=`loc Llibcrypt.a "" /lib/386 /lib`
+	cryptlib=`loc Llibcrypt.a "" $xlibpth`
     else
 	cryptlib=-lcrypt
     fi
@@ -1634,6 +1651,10 @@ eval $inlibc
 
 : see if getpgrp exists
 set getpgrp d_getpgrp
+eval $inlibc
+
+: see if getpgrp2 exists
+set getpgrp2 d_getpgrp2
 eval $inlibc
 
 : see if getpriority exists
@@ -1792,6 +1813,10 @@ eval $inlibc
 set setpgrp d_setpgrp
 eval $inlibc
 
+: see if setpgrp2 exists
+set setpgrp2 d_setpgrp2
+eval $inlibc
+
 : see if setpriority exists
 set setpriority d_setprior
 eval $inlibc
@@ -1923,6 +1948,10 @@ else
 fi
 $rm -f try.*
 
+: see if strerror exists
+set strerror d_strerror
+eval $inlibc
+
 : see if symlink exists
 set symlink d_symlink
 eval $inlibc
@@ -1931,31 +1960,71 @@ eval $inlibc
 set syscall d_syscall
 eval $inlibc
 
-: see if struct tm is defined in sys/time.h
-echo " "
-if $contains 'struct tm' /usr/include/time.h >/dev/null 2>&1 ; then
-    echo "You have struct tm defined in <time.h> rather than <sys/time.h>."
-    d_tminsys="$undef"
-    if test -f /usr/include/sys/time.h; then
-	i_systime="$define"
-    else
-	i_systime="$undef"
-    fi
-else
-    echo "You have struct tm defined in <sys/time.h> rather than <time.h>."
-    d_tminsys="$define"
-    i_systime="$define"
-fi
-if $contains '^#.*include.*<time\.h>' /usr/include/sys/time.h >/dev/null 2>&1 ; then
-    i_timetoo="$undef"
-else
-    i_timetoo="$define"
-fi
-if $contains '^#.*include.*<sys/time\.h>' /usr/include/time.h >/dev/null 2>&1 ; then
-    i_systimetoo="$undef"
-else
-    i_systimetoo="$define"
-fi
+: see if we should include time.h, sys/time.h, or both
+cat <<'EOM'
+  
+Testing to see if we should include <time.h>, <sys/time.h> or both.
+I'm now running the test program...
+EOM
+$cat >try.c <<'EOCP'
+#ifdef I_TIME
+#include <time.h>
+#endif
+#ifdef I_SYSTIME
+#ifdef SYSTIMEKERNEL
+#define KERNEL
+#endif
+#include <sys/time.h>
+#endif
+main()
+{
+    struct tm foo;
+#ifdef S_TIMEVAL
+    struct timeval bar;
+#endif
+    if (foo.tm_sec == foo.tm_sec)
+	exit(0);
+#ifdef S_TIMEVAL
+    if (bar.tv_sec == bar.tv_sec)
+	exit(0);
+#endif
+    exit(1);
+}
+EOCP
+flags=''
+for s_timeval in '-DS_TIMEVAL' ''; do
+    for d_systimekernel in '' '-DSYSTIMEKERNEL'; do
+	for i_time in '' '-DI_TIME'; do
+	    for i_systime in '-DI_SYSTIME' ''; do
+		case "$flags" in
+		'') echo Trying $i_time $i_systime $d_systimekernel $s_timeval
+		    if $cc try.c $ccflags \
+			    $i_time $i_systime $d_systimekernel $s_timeval \
+			    -o try >/dev/null 2>&1 ; then
+			set X $i_time $i_systime $d_systimekernel $s_timeval
+			shift
+			flags="$*"
+			echo Succeeded with $flags
+		    fi
+		    ;;
+		esac
+	    done
+	done
+    done
+done
+case "$flags" in
+*SYSTIMEKERNEL*) d_systimekernel="$define";;
+*) d_systimekernel="$undef";;
+esac
+case "$flags" in
+*I_TIME*) i_time="$define";;
+*) i_time="$undef";;
+esac
+case "$flags" in
+*I_SYSTIME*) i_systime="$define";;
+*) i_systime="$undef";;
+esac
+$rm -f try.c try
 
 : see if this is a varargs system
 echo " "
@@ -2120,10 +2189,10 @@ fi
 echo " "
 if $test -r /usr/include/sys/dir.h ; then
     i_sysdir="$define"
-    echo "sysdir.h found."
+    echo "sys/dir.h found."
 else
     i_sysdir="$undef"
-    echo "No sysdir.h found."
+    echo "No sys/dir.h found."
 fi
 
 : see if ioctl defs are in sgtty/termio or sys/ioctl
@@ -2134,6 +2203,27 @@ if $test -r /usr/include/sys/ioctl.h ; then
 else
     i_sysioctl="$undef"
     echo "sys/ioctl.h not found, assuming ioctl args are defined in sgtty.h."
+fi
+
+: see if this is a sys/ndir.h system
+echo " "
+xxx=`loc sys/ndir.h x /usr/include /usr/local/include $inclwanted`
+if test -f $xxx; then
+    i_sysndir="$define"
+    echo "sys/ndir.h found."
+else
+    i_sysndir="$undef"
+    echo "No sys/ndir.h found."
+fi
+
+: see if this is DG/UX with a funky utime.h
+echo " "
+if $test -r /usr/include/utime.h ; then
+    i_utime="$define"
+    echo "utime.h found."
+else
+    i_utime="$undef"
+    echo "No utime.h found, but that's ok."
 fi
 
 : see if this is a varargs system
@@ -2347,6 +2437,21 @@ y*) mallocsrc='malloc.c'; mallocobj='malloc.o';;
 *) mallocsrc=''; mallocobj='';;
 esac
 
+: determine compiler compiler
+case "$yacc" in
+'') dflt=yacc;;
+*)  dflt="$yacc";;
+esac
+cont=true
+    echo " "
+rp="Which compiler compiler (yacc or bison) will you use? [$dflt]"
+$echo $n "$rp $c"
+. myread
+case "$ans" in
+'') ans="$dflt";;
+esac
+yacc="$ans"
+
 echo " "
 echo "End of configuration questions."
 echo " "
@@ -2439,6 +2544,7 @@ d_flock='$d_flock'
 d_getgrps='$d_getgrps'
 d_gethent='$d_gethent'
 d_getpgrp='$d_getpgrp'
+d_getpgrp2='$d_getpgrp2'
 d_getprior='$d_getprior'
 d_htonl='$d_htonl'
 d_index='$d_index'
@@ -2456,6 +2562,7 @@ d_rmdir='$d_rmdir'
 d_setegid='$d_setegid'
 d_seteuid='$d_seteuid'
 d_setpgrp='$d_setpgrp'
+d_setpgrp2='$d_setpgrp2'
 d_setprior='$d_setprior'
 d_setregid='$d_setregid'
 d_setresgid='$d_setresgid'
@@ -2470,12 +2577,9 @@ socketlib='$socketlib'
 d_statblks='$d_statblks'
 d_stdstdio='$d_stdstdio'
 d_strctcpy='$d_strctcpy'
+d_strerror='$d_strerror'
 d_symlink='$d_symlink'
 d_syscall='$d_syscall'
-d_tminsys='$d_tminsys'
-i_systime='$i_systime'
-i_timetoo='$i_timetoo'
-i_systimetoo='$i_systimetoo'
 d_varargs='$d_varargs'
 d_vfork='$d_vfork'
 d_voidsig='$d_voidsig'
@@ -2496,6 +2600,11 @@ d_pwclass='$d_pwclass'
 d_pwexpire='$d_pwexpire'
 i_sysdir='$i_sysdir'
 i_sysioctl='$i_sysioctl'
+i_sysndir='$i_sysndir'
+i_time='$i_time'
+i_systime='$i_systime'
+d_systimekernel='$d_systimekernel'
+i_utime='$i_utime'
 i_varargs='$i_varargs'
 i_vfork='$i_vfork'
 intsize='$intsize'
@@ -2530,8 +2639,9 @@ stdchar='$stdchar'
 uidtype='$uidtype'
 voidflags='$voidflags'
 defvoidused='$defvoidused'
-lib='$lib'
+yacc='$yacc'
 privlib='$privlib'
+lib='$lib'
 CONFIG=true
 EOT
 
@@ -2549,6 +2659,7 @@ case "$ans" in
 *) : in case they cannot read
     eval $ans;;
 esac
+: if this fails, just run all the .SH files by hand
 . ./config.sh
 
 echo " "
