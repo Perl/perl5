@@ -37,8 +37,14 @@ if (eval {require File::Spec::Functions}) {
 }
 $file = catfile($tmpdir, "md$$");
 1 while unlink $file, "$file.dir", "$file.pag";
+if ( $^O eq 'VMS' ) {
+    1 while unlink "$file.sdbm_dir";
+}
 tryout('Memoize::SDBM_File', $file, 1);  # Test 1..4
 1 while unlink $file, "$file.dir", "$file.pag";
+if ( $^O eq 'VMS' ) {
+    1 while unlink "$file.sdbm_dir";
+}
 
 sub tryout {
   my ($tiepack, $file, $testno) = @_;
