@@ -2343,8 +2343,12 @@ t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
 t/lib/sample-tests/bailout		Test data for Test::Harness
+t/lib/sample-tests/bignum               Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness
+t/lib/sample-tests/die                  Test data for Test::Harness
+t/lib/sample-tests/die_head_end         Test data for Test::Harness
+t/lib/sample-tests/die_last_minute      Test data for Test::Harness
 t/lib/sample-tests/duplicates		Test data for Test::Harness
 t/lib/sample-tests/head_end	        Test data for Test::Harness
 t/lib/sample-tests/head_fail	        Test data for Test::Harness
