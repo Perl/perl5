@@ -23,7 +23,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
      * or the _name_ of the scalar
      */
     if (arg) {
-	if (SvROK(arg) && SvTYPE(SvRV(arg)) > SVt_NULL) {
+	if (SvROK(arg)) {
 	    s->var = SvREFCNT_inc(SvRV(arg));
 	    if (!SvPOK(s->var))
 		(void)SvPV_nolen(s->var);
