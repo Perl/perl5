@@ -26,15 +26,16 @@
 sub BEGIN {
     if ($ENV{PERL_CORE}){
 	chdir('t') if -d 't';
-	@INC = '.'; 
-	push @INC, '../lib';
+	@INC = ('.', '../lib', '../t/lib');
+    } else {
+	unshift @INC, 't';
     }
     require Config; import Config;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
     }
-    require 'lib/st-dump.pl';
+    require 'st-dump.pl';
 }
 
 sub ok;

@@ -8,10 +8,9 @@
 #
 
 sub BEGIN {
+    chdir('t') if -d 't';
     if ($ENV{PERL_CORE}){
-	chdir('t') if -d 't';
-	@INC = '.';
-	push @INC, '../lib';
+	@INC = ('.', '../lib', '../t/lib');
         require Config;
         if ($Config::Config{'extensions'} !~ /\bStorable\b/) {
             print "1..0 # Skip: Storable was not built\n";
@@ -26,8 +25,9 @@ sub BEGIN {
                 die;
             }
         }
+	unshift @INC, 't';
     }
-    require 'lib/st-dump.pl';
+    require 'st-dump.pl';
 }
 
 
