@@ -298,7 +298,7 @@ END
 
 print EM <<'END';
 
-#ifndef MIN_PERL_DEFINE  
+#if 0 /* ndef MIN_PERL_DEFINE */	/* unsupported in 5.006 */
 
 END
 

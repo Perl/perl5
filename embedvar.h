@@ -914,7 +914,7 @@
 #endif /* PERL_GLOBAL_STRUCT */
 
 
-#ifndef MIN_PERL_DEFINE  
+#if 0 /* ndef MIN_PERL_DEFINE */	/* unsupported in 5.006 */
 
 #define DBsingle		PL_DBsingle
 #define DBsub			PL_DBsub
