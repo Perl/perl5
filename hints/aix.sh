@@ -163,6 +163,20 @@ case "$osvers" in
     lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -b noentry -lc"
     ;;
 esac
+# AIX 4.2 (using latest patchlevels on 20001130) has a broken bind
+# library (getprotobyname and getprotobynumber are outversioned by
+# the same calls in libc, at least for xlc version 3...
+case "`oslevel`" in
+    4.2.1.*)  # Test for xlc version too, should we?
+      case "$ccversion" in    # Don't know if needed for gcc
+          3.1.4.*)    # libswanted "bind ... c ..." => "... c bind ..."
+              set `echo X "$libswanted "| sed -e 's/ bind\( .*\) \([cC]\) / \1 \2 bind /'`
+              shift
+              libswanted="$*"
+              ;;
+          esac
+      ;;
+    esac
 
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
