@@ -808,6 +808,8 @@ makedepend: makedepend.SH config.sh
 test-prep: miniperl perl preplibrary utilities $(dynamic_ext) $(nonxs_ext) $(TEST_PERL_DLL)
 	cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT))
 
+test_prep: test-prep
+
 # Second branch is for testing without a tty or controling terminal.
 # See t/op/stat.t
 _test test check: test-prep
