@@ -5,6 +5,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C
 
 $Log: MPScript.c,v $
+Revision 1.6  2001/09/26 21:51:15  pudge
+Sync with perforce maint-5.6/macperl/macos/macperl
+
 Revision 1.5  2001/09/13 07:28:10  neeri
 Fix signal handling (MacPerlBug #422129)
 

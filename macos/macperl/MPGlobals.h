@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPGlobals.h,v $
+Revision 1.2  2001/09/26 21:51:15  pudge
+Sync with perforce maint-5.6/macperl/macos/macperl
+
 Revision 1.1  2000/11/30 08:37:29  neeri
 Sources & Resources
 

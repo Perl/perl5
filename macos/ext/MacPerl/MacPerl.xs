@@ -1,4 +1,4 @@
-/* $Header: /cvsroot/macperl/perl/macos/ext/MacPerl/MacPerl.xs,v 1.2 2001/04/17 03:53:44 pudge Exp $
+/* $Header: /cvsroot/macperl/perl/macos/ext/MacPerl/MacPerl.xs,v 1.3 2001/09/02 00:38:40 pudge Exp $
  *
  *    Copyright (c) 1995 Matthias Neeracher
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file.
  *
  * $Log: MacPerl.xs,v $
+ * Revision 1.3  2001/09/02 00:38:40  pudge
+ * Sync with perforce
+ *
  * Revision 1.2  2001/04/17 03:53:44  pudge
  * Minor version/config changes, plus sync with maint-5.6/perl
  *

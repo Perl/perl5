@@ -64,7 +64,7 @@ __END__
 END_PM
 
 print XS<<END_XS;
-/* \$Header: /cvsroot/macperl/perl/macos/ext/Mac/ExtUtils/MakeToolboxModule,v 1.1 2000/08/14 03:39:30 neeri Exp $
+/* \$Header: /cvsroot/macperl/perl/macos/ext/Mac/ExtUtils/MakeToolboxModule,v 1.2 2001/10/03 19:31:55 pudge Exp $
  *
  *    Copyright (c) 1997 Matthias Neeracher
  *
@@ -72,6 +72,9 @@ print XS<<END_XS;
  *    as specified in the README file.
  *
  * \$Log: MakeToolboxModule,v $
+ * \Revision 1.2  2001/10/03 19:31:55  pudge
+ * \Sync with perforce maint-5.6/macperl
+ * \
  * \Revision 1.1  2000/08/14 03:39:30  neeri
  * \Checked into Sourceforge
  * \

@@ -13,6 +13,9 @@ Project	:	Perl5				-
 File	:	config.h			-	Mac configuration
 
 $Log: config.h,v $
+Revision 1.10  2001/10/03 19:31:55  pudge
+Sync with perforce maint-5.6/macperl
+
 Revision 1.9  2001/06/27 18:18:48  pudge
 Sync from p4; fix rand
 

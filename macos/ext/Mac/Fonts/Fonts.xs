@@ -1,4 +1,4 @@
-/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Fonts/Fonts.xs,v 1.1 2000/08/14 03:39:30 neeri Exp $
+/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Fonts/Fonts.xs,v 1.2 2001/09/26 21:50:13 pudge Exp $
  *
  *    Copyright (c) 1996 Matthias Neeracher
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file.
  *
  * $Log: Fonts.xs,v $
+ * Revision 1.2  2001/09/26 21:50:13  pudge
+ * Sync with perforce maint-5.6/macperl
+ *
  * Revision 1.1  2000/08/14 03:39:30  neeri
  * Checked into Sourceforge
  *

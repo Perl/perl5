@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPUtils.c,v $
+Revision 1.2  2001/10/03 19:23:16  pudge
+Sync with perforce maint-5.6/macperl
+
 Revision 1.1  2000/11/30 08:37:29  neeri
 Sources & Resources
 
@@ -465,7 +468,7 @@ pascal void DoAbout(Boolean easter)
 	
 	SetCursor(&qd.arrow);
 	
-	dlg 	= GetNewAppDialog(AboutDialog);
+	dlg 	= GetNewAppDialog(AboutDialog+easter);
 	sound 	= GetAppResource('snd ', AlertSoundID+easter);
 	hdl 	= GetAppResource('STR#', CreditID);
 	count	= **(short **) hdl;
