@@ -94,7 +94,7 @@ struct tms {
 
 /* Compiler-specific stuff. */
 
-#ifdef __BORLANDC__		/* Microsoft Visual C++ */
+#ifdef __BORLANDC__		/* Borland C++ */
 
 #define _access access
 #define _chdir chdir
@@ -114,7 +114,7 @@ struct tms {
 #pragma warn -csu
 #pragma warn -pro
 
-#else
+#endif
 
 #ifdef _MSC_VER			/* Microsoft Visual C++ */
 
@@ -124,9 +124,15 @@ typedef long		gid_t;
 
 #endif /* _MSC_VER */
 
+#ifdef __MINGW32__		/* Minimal Gnu-Win32 */
+
+typedef long		uid_t;
+typedef long		gid_t;
+
+#endif /* __MINGW32__ */
+
 /* compatibility stuff for other compilers goes here */
 
-#endif
 
 START_EXTERN_C
 
