@@ -381,7 +381,7 @@ EXEOUT_FLAG	= -e
 LIBOUT_FLAG	=
 .IF "$(BCCOLD)" != "define"
 LINK_FLAGS	+= -Gn
-DEFINES		+= -D_MT
+DEFINES  += -D_MT -D__USELOCALES__ -D_WIN32_WINNT=0x0410
 .END
 .IF "$(BCCVCL)" == "define"
 LIBC		= cp32mti.lib vcl.lib vcl50.lib vclx50.lib vcle50.lib
