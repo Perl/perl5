@@ -54,8 +54,8 @@ if($oldaction->{HANDLER} eq '::foo')
 if($oldaction->{MASK}->ismember(SIGUSR1))
   { print "ok 5\n" } else { print "not ok 5\n"}
 if($oldaction->{FLAGS}) {
-    if ($^O eq 'linux') {
-	print "ok 6 # Skip: sigaction() broken in $^O\n";
+    if ($^O eq 'linux' || $^O eq 'unicos') {
+	print "ok 6 # Skip: sigaction() thinks different in $^O\n";
     } else {
 	print "not ok 6\n";
     }
