@@ -429,13 +429,13 @@ sleep(...)
 
 #ifdef HAS_UALARM
 
-IV
+int
 ualarm(useconds,interval=0)
 	int useconds
 	int interval
 	CODE:
 	if (useconds < 0 || interval < 0)
-	    croak("Time::HiRes::ualarm(%"IVdf", %"IVdf"): negative time not invented yet", useconds, interval);
+	    croak("Time::HiRes::ualarm(%d, %d): negative time not invented yet", useconds, interval);
 	RETVAL = ualarm(useconds, interval);
 
 	OUTPUT:
