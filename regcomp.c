@@ -2569,8 +2569,8 @@ re_croak2(const char* pat1,const char* pat2,...)
 	l2 = 510 - l1;
     Copy(pat1, buf, l1 , char);
     Copy(pat2, buf + l1, l2 , char);
-    buf[l1 + l2 + 1] = '\n';
-    buf[l1 + l2 + 2] = '\0';
+    buf[l1 + l2] = '\n';
+    buf[l1 + l2 + 1] = '\0';
     va_start(args, pat2);
     message = mess(buf, &args);
     va_end(args);
