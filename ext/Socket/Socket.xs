@@ -343,13 +343,13 @@ constant(char *name, int arg)
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_CTRUNC"))
-#ifdef HAS_MSG_CTRUNC /* might be an enum */
+#if defined(MSG_TRUNC) || defined(HAS_MSG_CTRUNC) /* might be an enum */
 	    return MSG_CTRUNC;
 #else
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_DONTROUTE"))
-#ifdef HAS_MSG_DONTROUTE /* might be an enum */
+#if defined(MSG_DONTROUTE) || defined(HAS_MSG_DONTROUTE) /* might be an enum */
 	    return MSG_DONTROUTE;
 #else
 	    goto not_there;
@@ -385,7 +385,7 @@ constant(char *name, int arg)
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_MAXIOVLEN"))
-#ifdef MSG_MAXIOVLEN /* might be an enum */
+#ifdef MSG_MAXIOVLEN
 	    return MSG_MAXIOVLEN;
 #else
 	    goto not_there;
@@ -397,19 +397,19 @@ constant(char *name, int arg)
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_OOB"))
-#ifdef HAS_MSG_OOB /* might be an enum */
+#if defined(MSG_OOB) || defined(HAS_MSG_OOB) /* might be an enum */
 	    return MSG_OOB;
 #else
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_PEEK"))
-#ifdef HAS_MSG_PEEK /* might be an enum */
+#if defined(MSG_PEEK) || defined(HAS_MSG_PEEK) /* might be an enum */
 	    return MSG_PEEK;
 #else
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_PROXY"))
-#ifdef HAS_MSG_PROXY /* might be an enum */
+#if defined(MSG_PROXY) || defined(HAS_MSG_PROXY) /* might be an enum */
 	    return MSG_PROXY;
 #else
 	    goto not_there;
@@ -613,7 +613,7 @@ constant(char *name, int arg)
 	    goto not_there;
 #endif
 	if (strEQ(name, "SCM_RIGHTS"))
-#ifdef HAS_SCM_RIGHTS /* might be an enum */
+#if defined(SCM_RIGHTS) || defined(HAS_SCM_RIGHTS) /* might be an enum */
 	    return SCM_RIGHTS;
 #else
 	    goto not_there;
