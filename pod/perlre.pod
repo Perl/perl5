@@ -330,7 +330,7 @@ That won't work at all, because C<.*> was greedy and gobbled up the
 whole string. As C<\d*> can match on an empty string the complete
 regular expression matched successfully.
 
-    Beginning is <I have 2: 53147>, number is <>.
+    Beginning is <I have 2 numbers: 53147>, number is <>.
 
 Here are some variants, most of which don't work:
 
