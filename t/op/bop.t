@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..35\n";
+print "1..37\n";
 
 # numerics
 print ((0xdead & 0xbeef) == 0x9ead ? "ok 1\n" : "not ok 1\n");
@@ -82,9 +82,9 @@ print "ok 28\n" if sprintf("%vd", v4095.801.4095 & v801.4095) eq '801.801';
 print "ok 29\n" if sprintf("%vd", v4095.801.4095 | v801.4095) eq '4095.4095.4095';
 print "ok 30\n" if sprintf("%vd", v801.4095 ^ v4095.801.4095) eq '3294.3294.4095';
 #
-print "ok 31\n" if sprintf("%vd", v120.v300 & v200.400) eq '72.256';
-print "ok 32\n" if sprintf("%vd", v120.v300 | v200.400) eq '248.444';
-print "ok 33\n" if sprintf("%vd", v120.v300 ^ v200.400) eq '176.188';
+print "ok 31\n" if sprintf("%vd", v120.300 & v200.400) eq '72.256';
+print "ok 32\n" if sprintf("%vd", v120.300 | v200.400) eq '248.444';
+print "ok 33\n" if sprintf("%vd", v120.300 ^ v200.400) eq '176.188';
 #
 my $a = v120.300;
 my $b = v200.400;
@@ -94,3 +94,20 @@ my $a = v120.300;
 my $b = v200.400;
 $a |= $b;
 print "ok 35\n" if sprintf("%vd", $a) eq '248.444';
+#
+# UTF8 ~ behaviour
+for (0x100...0xFFF) {
+  $a = ~(chr $_);
+  print "not" if $a ne chr(~$_) or length($a) != 1 or ~$a ne chr($_);
+}
+print "ok 36\n";
+
+for my $i (0xEEE...0xF00) {
+  for my $j (0x0..0x120) {
+    $a = ~(chr ($i) . chr $j);
+    print "not" if $a ne chr(~$i).chr(~$j) 
+                or length($a) != 2 
+		or ~$a ne chr($i).chr($j);
+  }
+}
+print "ok 37\n";

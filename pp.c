@@ -1476,6 +1476,38 @@ PP(pp_complement)
 	SvSetSV(TARG, sv);
 	tmps = SvPV_force(TARG, len);
 	anum = len;
+	if (SvUTF8(TARG)) {
+	  /* Calculate exact length, let's not estimate */
+	  STRLEN targlen = 0;
+	  U8 *result;
+	  char *send;
+
+	  send = tmps + len;
+	  while (tmps < send) {
+	    I32 l;
+	    UV c = utf8_to_uv(tmps, &l);
+	    c = (UV)~c;
+	    tmps += UTF8SKIP(tmps);
+	    targlen += UTF8LEN(c);
+	  }
+
+	  /* Now rewind strings and write them. */
+	  tmps -= len;
+	  Newz(0, result, targlen + 1, U8);
+	  while (tmps < send) {
+	    I32 l;
+	    UV c = utf8_to_uv(tmps, &l);
+	    tmps += UTF8SKIP(tmps);
+	    result = uv_to_utf8(result,(UV)~c);
+	  }
+	  *result = '\0';
+	  result -= targlen;
+	  sv_setpvn(TARG, result, targlen);
+	  SvUTF8_on(TARG);
+	  Safefree(result);
+	  SETs(TARG);
+	  RETURN;
+	}
 #ifdef LIBERAL
 	for ( ; anum && (unsigned long)tmps % sizeof(long); anum--, tmps++)
 	    *tmps = ~*tmps;
