@@ -403,7 +403,7 @@ sub expr {
 	s/^\&\&// && do { $new .= " &&"; next;}; # handle && operator
 	s/^\&([\(a-z\)]+)/$1/i;	# hack for things that take the address of
 	s/^(\s+)//		&& do {$new .= ' '; next;};
-	s/^0X([0-9A-F]+)[UL]*//i 
+	s/^0X([0-9A-F]+)[UL]*//i
 	    && do {my $hex = $1;
 		   $hex =~ s/^0+//;
 		   if (length $hex > 8 && !$Config{use64bitint}) {
@@ -539,7 +539,7 @@ sub next_line
 
         while (length $in) {
             if ($pre_sub_tri_graphs) {
-                # Preprocess all tri-graphs 
+                # Preprocess all tri-graphs
                 # including things stuck in quoted string constants.
                 $in =~ s/\?\?=/#/g;                         # | ??=|  #|
                 $in =~ s/\?\?\!/|/g;                        # | ??!|  ||
@@ -552,17 +552,19 @@ sub next_line
                 $in =~ s/\?\?>/}/g;                         # | ??>|  }|
             }
 	    if ($in =~ /^\#ifdef __LANGUAGE_PASCAL__/) {
-                # Tru64 disassembler.h evilness: mixed C and Pascal.
+		# Tru64 disassembler.h evilness: mixed C and Pascal.
 		while (<IN>) {
-		    last if /^\#endif/; 
+		    last if /^\#endif/;
 		}
+		$in = "";
 		next READ;
 	    }
 	    if ($in =~ /^extern inline / && # Inlined assembler.
 		$^O eq 'linux' && $file =~ m!(?:^|/)asm/[^/]+\.h$!) {
- 		while (<IN>) {
-		    last if /^}/; 
+		while (<IN>) {
+		    last if /^}/;
 		}
+		$in = "";
 		next READ;
 	    }
             if ($in =~ s/\\$//) {                           # \-newline
