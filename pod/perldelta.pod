@@ -1746,7 +1746,18 @@ For details and examples, please see L<Pod::Usage>.
 
 =item Pod::Text and Pod::Man
 
-[TODO - Russ Allbery <rra@stanford.edu>]
+Pod::Text has been rewritten to use Pod::Parser.  While pod2text() is
+still available for backwards compatibility, the module now has a new
+preferred interface.  See L<Pod::Text> for the details.  The new Pod::Text
+module is easily subclassed for tweaks to the output, and two such
+subclasses (Pod::Text::Termcap for man-page-style bold and underlining
+using termcap information, and Pod::Text::Color for markup with ANSI color
+sequences) are now standard.
+
+pod2man has been turned into a module, Pod::Man, which also uses
+Pod::Parser.  In the process, several outstanding bugs related to quotes
+in section headers, quoting of code escapes, and nested lists have been
+fixed.  pod2man is now a wrapper script around this module.
 
 =item SDBM_File
 
@@ -1768,6 +1779,12 @@ no longer requires syslog.ph to exist.
 
 Sys::Hostname now uses XSUBs to call the C library's gethostname() or
 uname() if they exist.
+
+=item Term::ANSIColor
+
+Term::ANSIColor is a very simple module to provide easy and readable
+access to the ANSI color and highlighting escape sequences, supported by
+most ANSI terminal emulators.  It is now included standard.
 
 =item Time::Local
 

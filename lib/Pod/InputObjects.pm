@@ -522,7 +522,7 @@ sub _set_child2parent_links {
    my ($self, @children) = @_;
    ## Make sure any sequences know who their parent is
    for (@children) {
-      next unless (ref || ref eq 'SCALAR');
+      next if (!ref || ref eq 'SCALAR');
       if ($_->isa('Pod::InteriorSequence') or $_->can('nested')) {
           $_->nested($self);
       }

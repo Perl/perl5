@@ -651,6 +651,7 @@ lib/SelectSaver.pm	Enforce proper select scoping
 lib/SelfLoader.pm	Load functions only on demand
 lib/Shell.pm		Make AUTOLOADed system() calls
 lib/Symbol.pm		Symbol table manipulation routines
+lib/Term/ANSIColor.pm	Perl module supporting termcap usage
 lib/Term/Cap.pm		Perl module supporting termcap usage
 lib/Term/Complete.pm	A command completion subroutine
 lib/Term/ReadLine.pm	Stub readline library
@@ -1193,6 +1194,7 @@ t/io/print.t		See if print commands work
 t/io/read.t		See if read works
 t/io/tell.t		See if file seeking works
 t/lib/abbrev.t		See if Text::Abbrev works
+t/lib/ansicolor.t	See if Term::ANSIColor works
 t/lib/anydbm.t		See if AnyDBM_File works
 t/lib/attrs.t		See if attrs works with C<sub : attrs>
 t/lib/autoloader.t	See if AutoLoader works
