@@ -994,7 +994,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     default:
 	if (SvEVALED(sv))	sv_catpv(d, "EVALED,");
 	if (SvIsUV(sv))		sv_catpv(d, "IsUV,");
-	if (SvUTF8(sv))         sv_catpv(d, "UTF8");
 	break;
     case SVt_PVBM:
 	if (SvTAIL(sv))		sv_catpv(d, "TAIL,");
@@ -1005,6 +1004,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 				sv_catpv(d, "TYPED,");
 	break;
     }
+    if (SvUTF8(sv))
+        sv_catpv(d, "UTF8");
 
     if (*(SvEND(d) - 1) == ',')
 	SvPVX(d)[--SvCUR(d)] = '\0';
