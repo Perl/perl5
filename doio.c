@@ -94,7 +94,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 
     /* Collect default raw/crlf info from the op */
     if (PL_op && PL_op->op_type == OP_OPEN) {
-	/* set up disciplines */
+	/* set up IO layers */
 	U8 flags = PL_op->op_private;
 	in_raw = (flags & OPpOPEN_IN_RAW);
 	in_crlf = (flags & OPpOPEN_IN_CRLF);
@@ -212,7 +212,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    *--tend = '\0';
 
 	if (num_svs) {
-	    /* New style explict name, type is just mode and discipline/layer info */
+	    /* New style explicit name, type is just mode and layer info */
 	    STRLEN l = 0;
 #ifdef USE_STDIO
 	    if (SvROK(*svp) && !strchr(name,'&')) {
@@ -236,7 +236,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if ((*type == IoTYPE_RDWR) && /* scary */
            (*(type+1) == IoTYPE_RDONLY || *(type+1) == IoTYPE_WRONLY) &&
 	    ((!num_svs || (tend > type+1 && tend[-1] != IoTYPE_PIPE)))) {
-        TAINT_PROPER("open");
+	    TAINT_PROPER("open");
 	    mode[1] = *type++;
 	    writing = 1;
 	}
@@ -244,7 +244,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (*type == IoTYPE_PIPE) {
 	    if (num_svs) {
 		if (type[1] != IoTYPE_STD) {
-	          unknown_desr:
+	          unknown_open_mode:
 		    Perl_croak(aTHX_ "Unknown open() mode '%.*s'", (int)olen, oname);
 		}
 		type++;
@@ -289,7 +289,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    }
 		}
 	    }
-	}
+	} /* IoTYPE_PIPE */
 	else if (*type == IoTYPE_WRONLY) {
 	    TAINT_PROPER("open");
 	    type++;
@@ -422,7 +422,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 		}
 	    } /* !& */
-	}
+	} /* IoTYPE_WRONLY */
 	else if (*type == IoTYPE_RDONLY) {
 	    /*SUPPRESS 530*/
 	    for (type++; isSPACE(*type); type++) ;
@@ -453,8 +453,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		}
 		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
-	}
-	else if ((num_svs && type[0] == IoTYPE_STD && type[1] == IoTYPE_PIPE) ||
+	} /* IoTYPE_RDONLY */
+	else if ((num_svs && /* '-|...' or '...|' */
+		  type[0] == IoTYPE_STD && type[1] == IoTYPE_PIPE) ||
 	         (!num_svs && tend > type+1 && tend[-1] == IoTYPE_PIPE)) {
 	    if (num_svs) {
 		type += 2;   /* skip over '-|' */
@@ -499,9 +500,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		}
 	    }
 	}
-	else {
+	else { /* layer(Args) */
 	    if (num_svs)
-		goto unknown_desr;
+		goto unknown_open_mode;
 	    name = type;
 	    IoTYPE(io) = IoTYPE_RDONLY;
 	    /*SUPPRESS 530*/
