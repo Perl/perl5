@@ -165,14 +165,14 @@ CRYPT_SRC	*= fcrypt.c
 # extensions if you change the default.  Currently, this cannot be enabled
 # if you ask for USE_IMP_SYS above.
 #
-PERL_MALLOC	*= define
+#PERL_MALLOC	*= define
 
 #
 # set this to enable debugging mstats
 # This must be enabled to use the Devel::Peek::mstat() function.  This cannot
 # be enabled without PERL_MALLOC as well.
 #
-DEBUG_MSTATS  = define
+#DEBUG_MSTATS  = define
 
 #
 # set the install locations of the compiler include/libraries
@@ -273,6 +273,10 @@ DEBUG_MSTATS   = undef
 
 .IF "$(DEBUG_MSTATS)" == "define"
 BUILDOPT       += -DPERL_DEBUGGING_MSTATS
+.ENDIF
+
+.IF "$(USE_IMP_SYS)" == "define"
+PERL_MALLOC	= undef
 .ENDIF
 
 .IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)" == "defineundefundef"
@@ -838,7 +842,7 @@ DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Sys/Hostname Storable Filter/Util/Call Encode \
 		Digest/MD5 PerlIO/scalar MIME/Base64 Time/HiRes \
 		Unicode/Normalize Win32
-STATIC_EXT	= DynaLoader
+STATIC_EXT	= 
 NONXS_EXT	= Errno
 
 DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
@@ -1051,7 +1055,7 @@ $(DLL_OBJ)	: $(CORE_H)
 $(X2P_OBJ)	: $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
-	$(MINIPERL) -I..\lib buildext.pl --create-perllibst-h $(STATIC_EXT)
+	$(MINIPERL) -I..\lib buildext.pl --create-perllibst-h
 	$(MINIPERL) -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) \
 	$(BUILDOPT) CCTYPE=$(CCTYPE) > perldll.def
 
@@ -1065,15 +1069,18 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 	$(IMPLIB) $*.lib $@
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
+	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) \
+	        $(shell $(MINIPERL) -I..\lib buildext.pl --list-static-libs|tr \\\\ /) \
+	        $(LIBFILES) $(LKPOST))
 	dlltool --output-lib $(PERLIMPLIB) \
 		--dllname $(PERLDLL:b).dll \
 		--def perldll.def \
 		--base-file perl.base \
 		--output-exp perl.exp
 	$(LINK32) -mdll -o $@ $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) $(LIBFILES) \
-		perl.exp $(LKPOST))
+	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) \
+	        $(shell $(MINIPERL) -I..\lib buildext.pl --list-static-libs|tr \\\\ /) \
+	        $(LIBFILES) perl.exp $(LKPOST))
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ \
 	    $(shell $(MINIPERL) -I..\lib buildext.pl --list-static-libs) \
@@ -1284,6 +1291,10 @@ distclean: realclean
 	-if exist $(LIBDIR)\List rmdir /s $(LIBDIR)\List
 	-if exist $(LIBDIR)\Scalar rmdir /s /q $(LIBDIR)\Scalar
 	-if exist $(LIBDIR)\Scalar rmdir /s $(LIBDIR)\Scalar
+	-if exist $(LIBDIR)\Sys rmdir /s /q $(LIBDIR)\Sys
+	-if exist $(LIBDIR)\Sys rmdir /s $(LIBDIR)\Sys
+	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads
+	-if exist $(LIBDIR)\threads rmdir /s $(LIBDIR)\threads
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-if exist $(LIBDIR)\XS rmdir /s $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
