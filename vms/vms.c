@@ -3979,7 +3979,7 @@ static time_t toutc_dst(time_t loc) {
   if (rsltmp->tm_isdst) loc -= 3600;
   return loc;
 }
-#define _toutc(secs)  ((secs) == -1 ? -1 : \
+#define _toutc(secs)  ((secs) == (time_t) -1 ? (time_t) -1 : \
        ((gmtime_emulation_type || my_time(NULL)), \
        (gmtime_emulation_type == 1 ? toutc_dst(secs) : \
        ((secs) - utc_offset_secs))))
@@ -3992,7 +3992,7 @@ static time_t toloc_dst(time_t utc) {
   if (rsltmp->tm_isdst) utc += 3600;
   return utc;
 }
-#define _toloc(secs)  ((secs) == -1 ? -1 : \
+#define _toloc(secs)  ((secs) == (time_t) -1 ? (time_t) -1 : \
        ((gmtime_emulation_type || my_time(NULL)), \
        (gmtime_emulation_type == 1 ? toloc_dst(secs) : \
        ((secs) + utc_offset_secs))))

@@ -393,7 +393,7 @@ Perl_av_clear(pTHX_ register AV *av)
     SV** ary;
 
 #ifdef DEBUGGING
-    if (SvREFCNT(av) <= 0 && ckWARN_d(WARN_DEBUGGING)) {
+    if (SvREFCNT(av) == 0 && ckWARN_d(WARN_DEBUGGING)) {
 	Perl_warner(aTHX_ WARN_DEBUGGING, "Attempt to clear deleted array");
     }
 #endif
