@@ -96,6 +96,7 @@ ofs
 ofslen
 oldlastpm
 oldname
+op_mask
 origargc
 origargv
 origfilename

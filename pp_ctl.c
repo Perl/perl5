@@ -68,11 +68,11 @@ PP(pp_regcomp) {
     t = SvPV(tmpstr, len);
 
     if (pm->op_pmregexp) {
-	regfree(pm->op_pmregexp);
+	pregfree(pm->op_pmregexp);
 	pm->op_pmregexp = Null(REGEXP*);	/* crucial if regcomp aborts */
     }
 
-    pm->op_pmregexp = regcomp(t, t + len, pm);
+    pm->op_pmregexp = pregcomp(t, t + len, pm);
 
     if (!pm->op_pmregexp->prelen && curpm)
 	pm = curpm;
@@ -108,7 +108,7 @@ PP(pp_substcont)
 	rx->subbase = cx->sb_subbase;
 
 	/* Are we done */
-	if (cx->sb_once || !regexec(rx, s, cx->sb_strend, orig,
+	if (cx->sb_once || !pregexec(rx, s, cx->sb_strend, orig,
 				s == m, Nullsv, cx->sb_safebase))
 	{
 	    SV *targ = cx->sb_targ;
@@ -778,6 +778,21 @@ char *label;
 	}
     }
     return i;
+}
+
+I32
+dowantarray()
+{
+    I32 cxix;
+
+    cxix = dopoptosub(cxstack_ix);
+    if (cxix < 0)
+	return G_SCALAR;
+
+    if (cxstack[cxix].blk_gimme == G_ARRAY)
+	return G_ARRAY;
+    else
+	return G_SCALAR;
 }
 
 static I32
@@ -2045,6 +2060,11 @@ PP(pp_require)
     ENTER;
     SAVETMPS;
     lex_start(sv_2mortal(newSVpv("",0)));
+    if (rsfp_filters){
+ 	save_aptr(&rsfp_filters);
+	rsfp_filters = NULL;
+    }
+
     rsfp = tryrsfp;
     name = savepv(name);
     SAVEFREEPV(name);

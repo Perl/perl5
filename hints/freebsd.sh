@@ -14,9 +14,6 @@
 # Ollivier Robert <Ollivier.Robert@keltia.frmug.fr.net>
 # Date: Fri, 12 May 1995 14:30:38 +0200 (MET DST)
 #
-# FreeBSD has the dynamic loading dl*() functions in /usr/lib/crt0.o,
-# so Configure doesn't find them (unless you abandon the nm scan).
-#
 # The two flags "-fpic -DPIC" are used to indicate a
 # will-be-shared object.  Configure will guess the -fpic, (and the
 # -DPIC is not used by perl proper) but the full define is included to 
@@ -31,9 +28,7 @@ case "$osvers" in
 0.*|1.0*)
 	usedl="$undef"
 	;;
-1.1*)	d_dlopen="$define"
-	cccdlflags='-DPIC -fpic'
-	lddlflags="-Bshareable $lddlflags"
+1.1*)
 	malloctype='void *'
 	groupstype='int'
 	d_setregid='undef'
@@ -41,10 +36,7 @@ case "$osvers" in
 	d_setrgid='undef'
 	d_setruid='undef'
 	;;
-2.0-RELEASE*)
-	d_dlopen="$define"
-	cccdlflags='-DPIC -fpic'
-	lddlflags="-Bshareable $lddlflags"
+2.0-release*)
 	d_setregid='undef'
 	d_setreuid='undef'
 	d_setrgid='undef'
@@ -55,17 +47,26 @@ case "$osvers" in
 # It does not covert all 2.1-current versions as the output of uname
 # changed a few times.
 #
-2.0.5*|2.0-BUILD|2.1*)
-	d_dlopen="$define"
-	cccdlflags='-DPIC -fpic'
-	lddlflags="-Bshareable $lddlflags"
-	# Are these defines necessary?  Doesn't Configure find them
-	# correctly?
-	d_setregid='define'
-	d_setreuid='define'
-	d_setrgid='define'
-	d_setruid='define'
+2.0.5*|2.0-built*|2.1*)
+ 	usevfork='true'
+ 	d_dosuid='define'
+	;;
+#
+# Guesses at what will be needed after 2.1
+*)	usevfork='true'
+ 	d_dosuid='define'
+	;;
 esac
+
+# Dynamic Loading flags have not changed much, so they are separated
+# out here to avoid duplicating them everywhere.
+case "$osvers" in
+0.*|1.0*) ;;
+*)	cccdlflags='-DPIC -fpic'
+	lddlflags="-Bshareable $lddlflags"
+	;;
+esac
+
 # Avoid telldir prototype conflict in pp_sys.c  (FreeBSD uses const DIR *)
 # Configure should test for this.  Volunteers?
 pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'

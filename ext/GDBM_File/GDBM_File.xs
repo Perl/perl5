@@ -29,6 +29,16 @@ char *s;
     return -1;
 }
 
+/* Versions of gdbm prior to 1.7x might not have the gdbm_sync,
+   gdbm_exists, and gdbm_setopt functions.  Apparently Slackware
+   (Linux) 2.1 contains gdbm-1.5 (which dates back to 1991).
+*/
+#ifndef GDBM_FAST
+#define gdbm_exists(db,key) not_here("gdbm_exists")
+#define gdbm_sync(db) (void) not_here("gdbm_sync")
+#define gdbm_setopt(db,optflag,optval,optlen) not_here("gdbm_setopt")
+#endif
+
 static double
 constant(name, arg)
 char *name;

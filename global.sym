@@ -357,6 +357,7 @@ do_vop
 doeval
 dofindlabel
 dopoptoeval
+dowantarray
 dump_all
 dump_eval
 dump_gv

@@ -97,7 +97,7 @@ if(@ARGV<1) {
 	die <<EOF;
 Usage: $0 [-h] PageName|ModuleName
 
-We suggest you use C<perldoc perldoc> to get aquainted 
+We suggest you use "perldoc perldoc" to get aquainted 
 with the system.
 EOF
 }

@@ -752,7 +752,7 @@ play_it_again:
 	    pm->op_pmshort = Nullsv;	/* opt is being useless */
 	}
     }
-    if (regexec(rx, s, strend, truebase, minmatch,
+    if (pregexec(rx, s, strend, truebase, minmatch,
       SvSCREAM(TARG) ? TARG : Nullsv,
       safebase)) {
 	curpm = pm;
@@ -1311,7 +1311,7 @@ PP(pp_subst)
 	c = SvPV(dstr, clen);
 	if (clen <= rx->minlen) {
 					/* can do inplace substitution */
-	    if (regexec(rx, s, strend, orig, 0,
+	    if (pregexec(rx, s, strend, orig, 0,
 	      SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
 		if (force_on_match) {
 		    force_on_match = 0;
@@ -1392,7 +1392,7 @@ PP(pp_subst)
 			d += clen;
 		    }
 		    s = rx->endp[0];
-		} while (regexec(rx, s, strend, orig, s == m,
+		} while (pregexec(rx, s, strend, orig, s == m,
 		    Nullsv, TRUE));	/* (don't match same null twice) */
 		if (s != d) {
 		    i = strend - s;
@@ -1410,7 +1410,7 @@ PP(pp_subst)
     }
     else
 	c = Nullch;
-    if (regexec(rx, s, strend, orig, 0,
+    if (pregexec(rx, s, strend, orig, 0,
       SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
     long_way:
 	if (force_on_match) {
@@ -1443,7 +1443,7 @@ PP(pp_subst)
 		sv_catpvn(dstr, c, clen);
 	    if (once)
 		break;
-	} while (regexec(rx, s, strend, orig, s == m, Nullsv,
+	} while (pregexec(rx, s, strend, orig, s == m, Nullsv,
 	    safebase));
 	sv_catpvn(dstr, s, strend - s);
 

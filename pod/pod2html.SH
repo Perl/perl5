@@ -92,7 +92,7 @@ for $count (0,1){
 	    <!-- \$Log\$ -->
 	    <HTML>
 HTML__EOQ
-	    <TITLE> \U$pod\E </TITLE>
+	    <TITLE>\U$pod\E</TITLE>
 HTML__EOQQ
 	}
 
@@ -341,11 +341,11 @@ sub picrefs {
 	} 
     }
     if ($char =~ /[IF]/) {
-	return "<EM> $bigkey </EM>";
+	return "<EM>$bigkey</EM>";
     } elsif($char =~ /C/) {
-	return "<CODE> $bigkey </CODE>";
+	return "<CODE>$bigkey</CODE>";
     } else {
-	return "<STRONG> $bigkey </STRONG>";
+	return "<STRONG>$bigkey</STRONG>";
     }
 } 
 
@@ -380,18 +380,18 @@ sub lrefs {
     $item =~ s/\(\)$//;
     if (!$item) {
     	if (!defined $section && defined $Podnames{$page}) {
-	    return "\n$type$page.html\">\nthe <EM> $page </EM> manpage<\/A>\n";
+	    return "\n$type$page.html\">\nthe <EM>$page</EM> manpage<\/A>\n";
 	} else {
 	    (warn "Bizarre entry $page/$item") if $Debug;
-	    return "the <EM> $_[0] </EM>  manpage\n";
+	    return "the <EM>$_[0]</EM>  manpage\n";
 	} 
     } 
 
     if ($item =~ s/"(.*)"/$1/ || ($item =~ /[^\w\/\-]/ && $item !~ /^\$.$/)) {
-	$text = "<EM> $item </EM>";
+	$text = "<EM>$item</EM>";
 	$ref = "Headers";
     } else {
-	$text = "<EM> $item </EM>";
+	$text = "<EM>$item</EM>";
 	$ref = "Items";
     } 
     for $podname ($pod, @inclusions){
@@ -429,7 +429,7 @@ sub varrefs {
 	}
     }
     Debug( "vars", "bummer, $var not a var");
-    return "<STRONG> $var </STRONG>";
+    return "<STRONG>$var</STRONG>";
 } 
 
 sub gensym {

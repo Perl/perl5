@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.7 1995/03/21 08:46:15 ram Exp $
 #
-# Generated on Tue Jun  6 12:25:20 EDT 1995 [metaconfig 3.0 PL55]
+# Generated on Thu Jun 22 10:38:35 EDT 1995 [metaconfig 3.0 PL55]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -5478,7 +5478,8 @@ END
 	fi
 	echo "and it returns ($shmattype)." >&4
 	: see if a prototype for shmat is available
-	$cppstdin $cppflags $cppminus < $usrinc/sys/shm.h > shmat.c 2>/dev/null
+	xxx=`./findhdr sys/shm.h`
+	$cppstdin $cppflags $cppminus < $xxx > shmat.c 2>/dev/null
 	if $contains 'shmat.*(' shmat.c >/dev/null 2>&1; then
 		val="$define"
 	else
@@ -5523,7 +5524,10 @@ to search by default in addition to $privlib.
 If you don't want to use such an additional directory, answer 'none'.
 
 EOM
-dflt=none
+case "$sitelib" in
+'') dflt=none ;;
+*) dflt="$sitelib" ;;
+esac
 fn=d~+n
 rp='Local directory for additional library files?'
 . ./getfile
@@ -5533,27 +5537,32 @@ fi
 sitelib="$ans"
 sitelibexp="$ansexp"
 if $afs; then
-	$cat <<EOM
+    case "$sitelib" in
+	'') installsitelib="$sitelibexp"
+		;;
+	*)	$cat <<EOM
 
 Since you are running AFS, I need to distinguish the directory in which
 private files reside from the directory in which they are installed (and from
 which they are presumably copied to the former directory by occult means).
 
 EOM
-	case "$installsitelib" in
-	'') dflt=`echo $sitelibexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installsitelib";;
+		case "$installsitelib" in
+		'') dflt=`echo $sitelibexp | sed 's#^/afs/#/afs/.#'`;;
+		*) dflt="$installsitelib";;
+		esac
+		fn=de~
+		rp='Where will additional local files be installed?'
+		. ./getfile
+		installsitelib="$ans"
+		;;
 	esac
-	fn=de~
-	rp='Where will additional local files be installed?'
-	. ./getfile
-	installsitelib="$ans"
 else
 	installsitelib="$sitelibexp"
 fi
 
 case "$sitelibexp" in
-''|' ') d_sitelib=undef ;;
+'') d_sitelib=undef ;;
 *) d_sitelib=define ;;
 esac
 
@@ -5708,8 +5717,8 @@ eval $setvar
 
 : Can _ptr be used as an lvalue.  Only makes sense if we
 : have a known stdio implementation.
-case "$d_stdstdio" in
-$define) val=$ptr_lval ;;
+case "$d_stdstdio$ptr_lval" in
+$define$define) val=$define ;;
 *) val=$undef ;;
 esac
 set d_stdio_ptr_lval
@@ -5718,8 +5727,8 @@ eval $setvar
 
 : Can _cnt be used as an lvalue.  Only makes sense if we
 : have a known stdio implementation.
-case "$d_stdstdio" in
-$define) val=$cnt_lval ;;
+case "$d_stdstdio$cnt_lval" in
+$define$define) val=$define ;;
 *) val=$undef ;;
 esac
 set d_stdio_cnt_lval

@@ -64,8 +64,16 @@ sub runpod2man {
 
     # We insist on using the current version of pod2man in case there
     # are enhancements or changes from previous installed versions.
-    $pod2man = "../pod/pod2man";
-    -x  $pod2man	|| die "Executable $pod2man not found.\n";
+    # The error message doesn't include the '..' because the user
+    # won't be aware that we've chdir to $poddir.
+    -x  "../pod/pod2man" || die "Executable pod/pod2man not found.\n";
+
+    # We want to be sure to use the current perl.  We can't rely on
+    # the installed perl because it might not be actually installed
+    # yet. (The user may have set the $install* Configure variables 
+    # to point to some temporary home, from which the executable gets
+    # installed by occult means.)
+    $pod2man = "../perl -I ../lib ../pod/pod2man";
 
     &makedir($mandir);
     # Make a list of all the .pm and .pod files in the directory.  We will

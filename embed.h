@@ -357,6 +357,7 @@
 #define doeval		Perl_doeval
 #define dofindlabel	Perl_dofindlabel
 #define dopoptoeval	Perl_dopoptoeval
+#define dowantarray	Perl_dowantarray
 #define dump_all	Perl_dump_all
 #define dump_eval	Perl_dump_eval
 #define dump_gv		Perl_dump_gv
@@ -861,10 +862,10 @@
 #define q		Perl_q
 #define ref		Perl_ref
 #define refkids		Perl_refkids
-#define regcomp		Perl_regcomp
+#define pregcomp	Perl_pregcomp
 #define regdump		Perl_regdump
-#define regexec		Perl_regexec
-#define regfree		Perl_regfree
+#define pregexec	Perl_pregexec
+#define pregfree	Perl_pregfree
 #define regnext		Perl_regnext
 #define regprop		Perl_regprop
 #define repeatcpy	Perl_repeatcpy
@@ -1088,6 +1089,7 @@
 #define ofslen		(curinterp->Iofslen)
 #define oldlastpm	(curinterp->Ioldlastpm)
 #define oldname		(curinterp->Ioldname)
+#define op_mask		(curinterp->Iop_mask)
 #define origargc	(curinterp->Iorigargc)
 #define origargv	(curinterp->Iorigargv)
 #define origfilename	(curinterp->Iorigfilename)
@@ -1244,6 +1246,7 @@
 #define Iofslen		ofslen
 #define Ioldlastpm	oldlastpm
 #define Ioldname	oldname
+#define Iop_mask	op_mask
 #define Iorigargc	origargc
 #define Iorigargv	origargv
 #define Iorigfilename	origfilename

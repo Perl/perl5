@@ -79,7 +79,7 @@ emacs/perldb.el		Emacs debugging
 emacs/perldb.pl		Emacs debugging
 emacs/tedstuff		Some optional patches
 embed.h			Maps symbols to safer names
-embed_h.sh		Produces embed.h
+embed.pl		Produces embed.h
 ext/DB_File/DB_File.pm		Berkeley DB extension Perl module
 ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
@@ -307,6 +307,7 @@ lib/hostname.pl		Old hostname code
 lib/importenv.pl	Perl routine to get environment into variables
 lib/integer.pm		For "use integer"
 lib/less.pm		For "use less"
+lib/lib.pm		For "use lib"
 lib/look.pl		A "look" equivalent
 lib/newgetopt.pl	A perl library supporting long option parsing
 lib/open2.pl		Open a two-ended pipe

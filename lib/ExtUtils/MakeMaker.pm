@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker;
 
-$Version = 4.15; # Last edited $Date: 1995/06/06 14:04:00 $ by Andreas Koenig
+$Version = 4.16; # Last edited $Date: 1995/06/18 16:04:00 $ by Tim Bunce
 
 $Version_OK = 4.13;	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
@@ -263,13 +263,13 @@ sub help {print $Attrib_Help;}
     'clean'		=> {},
     'realclean'		=> {},
     'dist'		=> {},
-    'test'		=> {},
     'install'		=> {},
     'force'		=> {},
     'perldepend'	=> {},
     'makefile'		=> {},
-    'postamble'		=> {},
-    'staticmake'	=> {},
+    'staticmake'	=> {},	# Sadly this defines more macros
+    'test'		=> {},
+    'postamble'		=> {},	# should always be last
 );
 %MM_Sections = @MM_Sections_spec; # looses section ordering
 @MM_Sections = grep(!ref, @MM_Sections_spec); # keeps order
@@ -765,7 +765,8 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	    $xs{$name} = $c;
 	    $c{$c} = 1;
 	} elsif ($name =~ /\.c$/){
-	    $c{$name} = 1;
+	    $c{$name} = 1
+		unless $name =~ m/perlmain\.c/; # See MAP_TARGET
 	} elsif ($name =~ /\.h$/){
 	    $h{$name} = 1;
 	} elsif ($name =~ /\.(p[ml]|pod)$/){
@@ -1842,19 +1843,38 @@ sub test {
     my(@m);
     push(@m,"
 TEST_VERBOSE=0
+TEST_TYPE=test_$att{LINKTYPE}
 
-test :: all
+test :: \$(TEST_TYPE)
 ");
-    push(@m, <<"END") if $tests;
-	\$(FULLPERL) -I\$(INST_ARCHLIB) -I\$(INST_LIB) -I\$(PERL_ARCHLIB) -I\$(PERL_LIB) -e 'use Test::Harness qw(&runtests \$\$verbose); \$\$verbose=\$(TEST_VERBOSE); runtests \@ARGV;' $tests
-END
-    push(@m, <<'END') if -f "test.pl";
-	$(FULLPERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) test.pl
-END
     push(@m, map("\tcd $_ && test -f $att{MAKEFILE} && \$(MAKE) test \$(PASTHRU2)\n",
 		 @{$att{DIR}}));
-    push(@m, "\t\@echo 'No tests defined for \$(NAME) extension.'\n") unless @m > 1;
+    push(@m, "\t\@echo 'No tests defined for \$(NAME) extension.'\n")
+	unless $tests or -f "test.pl" or @{$att{DIR}};
+    push(@m, "\n");
+
+    push(@m, "test_dynamic :: all\n");
+    push(@m, $self->test_via_harness('$(FULLPERL)', $tests)) if $tests;
+    push(@m, $self->test_via_script('$(FULLPERL)', 'test.pl')) if -f "test.pl";
+    push(@m, "\n");
+
+    push(@m, "test_static :: all \$(MAP_TARGET)\n");
+    push(@m, $self->test_via_harness('./$(MAP_TARGET)', $tests)) if $tests;
+    push(@m, $self->test_via_script('./$(MAP_TARGET)', 'test.pl')) if -f "test.pl";
+    push(@m, "\n");
+
     join("", @m);
+}
+
+sub test_via_harness {
+    my($self, $perl, $tests) = @_;
+    "\t$perl".q! -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -e 'use Test::Harness qw(&runtests $$verbose); $$verbose=$(TEST_VERBOSE); runtests @ARGV;' !."$tests\n";
+}
+
+sub test_via_script {
+    my($self, $perl, $script) = @_;
+    "\t$perl".' -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) test.pl
+';
 }
 
 
@@ -2129,10 +2149,10 @@ inst_perl: pure_inst_perl doc_inst_perl
 pure_inst_perl: \$(MAP_TARGET)
 	$att{CP} \$(MAP_TARGET) \$(INSTALLBIN)/\$(MAP_TARGET)
 
-realclean :: map_clean
+clean :: map_clean
 
 map_clean :
-	$att{RM_F} $tmp/perlmain.o $tmp/perlmain.c $makefilename extralibs.ld
+	$att{RM_F} $tmp/perlmain.o $tmp/perlmain.c \$(MAP_TARGET) extralibs.ld
 };
 
     join '', @m;
@@ -2760,6 +2780,25 @@ directories in LDLOADLIBS.
 =head v4.15 June 6, 1995, by Andreas Koenig
 
 Add -I$(PERL_ARCHLIB) -I$(PERL_LIB) to calls to xsubpp.
+
+=head v4.16 June 18, 1995, by Tim Bunce
+
+Split test: target into test_static: and test_dynamic: with automatic
+selection based on LINKTYPE. The test_static: target automatically
+builds a local ./perl binary containing the extension and executes the
+tests using that binary. This fixes problems that users were having
+dealing with building and testing static extensions. It also simplifies
+the process down to the standard: make + make test.
+
+MakeMaker no longer incorrectly considers a perlmain.c file to be part
+of an extensions source files. The map_clean target is now invoked by
+clean not realclean and now deletes MAP_TARGET but does not delete
+Makefile (since that's done properly elsewhere).
+
+Since the staticmake section defines macros that the test target now
+needs the test section is written into the makefile after the
+staticmake section.  The postamble section has been made last again, as
+it should be.
 
 =head1 TODO
 

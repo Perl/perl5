@@ -190,7 +190,7 @@ int newlen;
 }
 
 /*VARARGS1*/
-int
+void
 croak(pat,a1,a2,a3,a4)
 char *pat;
 int a1,a2,a3,a4;
@@ -200,7 +200,7 @@ int a1,a2,a3,a4;
 }
 
 /*VARARGS1*/
-int
+void
 fatal(pat,a1,a2,a3,a4)
 char *pat;
 int a1,a2,a3,a4;

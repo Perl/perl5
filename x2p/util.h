@@ -24,10 +24,10 @@ int	makedir();
 
 char * cpy2 _(( char *to, char *from, int delim ));
 char * cpytill _(( char *to, char *from, int delim ));
-int croak _(( char *pat, int a1, int a2, int a3, int a4 ));
+void croak _(( char *pat, int a1, int a2, int a3, int a4 ));
 void growstr _(( char **strptr, int *curlen, int newlen ));
 char * instr _(( char *big, char *little ));
-int Myfatal ();
+void Myfatal ();
 char * safecpy _(( char *to, char *from, int len ));
 char * savestr _(( char *str ));
 void warn ();

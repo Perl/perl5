@@ -14,9 +14,14 @@
  * blame Henry for some of the lack of readability.
  */
 
+/* The names of the functions have been changed from regcomp and
+ * regexec to  pregcomp and pregexec in order to avoid conflicts
+ * with the POSIX routines of the same names.
+*/
+
 /*SUPPRESS 112*/
 /*
- * regcomp and regexec -- regsub and regerror are not used in perl
+ * pregcomp and pregexec -- regsub and regerror are not used in perl
  *
  *	Copyright (c) 1986 by University of Toronto.
  *	Written by Henry Spencer.  Not derived from licensed software.
@@ -132,7 +137,7 @@ regcppop()
 #define regcpblow(cp) leave_scope(cp)
 
 /*
- * regexec and friends
+ * pregexec and friends
  */
 
 /*
@@ -144,10 +149,10 @@ static I32 regrepeat _((char *p, I32 max));
 static I32 regtry _((regexp *prog, char *startpos));
 
 /*
- - regexec - match a regexp against a string
+ - pregexec - match a regexp against a string
  */
 I32
-regexec(prog, stringarg, strend, strbeg, minend, screamer, safebase)
+pregexec(prog, stringarg, strend, strbeg, minend, screamer, safebase)
 register regexp *prog;
 char *stringarg;
 register char *strend;	/* pointer to null at end of string */

@@ -3391,7 +3391,7 @@ PP(pp_split)
     else {
 	maxiters += (strend - s) * rx->nparens;
 	while (s < strend && --limit &&
-	    regexec(rx, s, strend, orig, 1, Nullsv, TRUE) ) {
+	    pregexec(rx, s, strend, orig, 1, Nullsv, TRUE) ) {
 	    if (rx->subbase
 	      && rx->subbase != orig) {
 		m = s;

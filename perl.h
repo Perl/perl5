@@ -1294,6 +1294,7 @@ IEXT bool	Idirty;		/* In the middle of tearing things down? */
 IEXT U8		Ilocalizing;	/* are we processing a local() list? */
 IEXT bool	Itainted;	/* using variables controlled by $< */
 IEXT bool	Itainting;	/* doing taint checks */
+IEXT char *	Iop_mask IINIT(NULL);	/* masked operations for safe evals */
 
 /* trace state */
 IEXT I32	Idlevel;

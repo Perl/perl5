@@ -18,6 +18,18 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifdef USE_OP_MASK
+/*
+ * In the following definition, the ", (OP *) op" is just to make the compiler
+ * think the expression is of the right type: croak actually does a longjmp.
+ */
+#define CHECKOP(type,op) ((op_mask && op_mask[type]) ? \
+    (croak("%s trapped by operation mask", op_name[type]), (OP *) op) \
+    : (*check[type])((OP *) op))
+#else
+#define CHECKOP(type,op) (*check[type])(op)
+#endif /* USE_OP_MASK */
+
 static I32 list_assignment _((OP *op));
 static OP *bad_type _((I32 n, char *t, OP *op, OP *kid));
 static OP *modkids _((OP *op, I32 type));
@@ -410,7 +422,7 @@ OP *op;
 	/* FALL THROUGH */
     case OP_PUSHRE:
     case OP_MATCH:
-	regfree(cPMOP->op_pmregexp);
+	pregfree(cPMOP->op_pmregexp);
 	SvREFCNT_dec(cPMOP->op_pmshort);
 	break;
     default:
@@ -1441,7 +1453,7 @@ OP* op;
     op->op_ppaddr = ppaddr[type];
     op->op_flags |= flags;
 
-    op = (*check[type])(op);
+    op = CHECKOP(type, op);
     if (op->op_type != type)
 	return op;
 
@@ -1617,7 +1629,7 @@ I32 flags;
 	scalar(op);
     if (opargs[type] & OA_TARGET)
 	op->op_targ = pad_alloc(type, SVs_PADTMP);
-    return (*check[type])(op);
+    return CHECKOP(type, op);
 }
 
 OP *
@@ -1640,7 +1652,7 @@ OP* first;
     unop->op_flags = flags | OPf_KIDS;
     unop->op_private = 1;
 
-    unop = (UNOP*)(*check[type])((OP*)unop);
+    unop = (UNOP*) CHECKOP(type, unop);
     if (unop->op_next)
 	return (OP*)unop;
 
@@ -1673,7 +1685,7 @@ OP* last;
 	first->op_sibling = last;
     }
 
-    binop = (BINOP*)(*check[type])((OP*)binop);
+    binop = (BINOP*)CHECKOP(type, binop);
     if (binop->op_next)
 	return (OP*)binop;
 
@@ -1794,7 +1806,7 @@ OP *repl;
 	    p = SvPV(pat, plen);
 	    pm->op_pmflags |= PMf_SKIPWHITE;
 	}
-	pm->op_pmregexp = regcomp(p, p + plen, pm);
+	pm->op_pmregexp = pregcomp(p, p + plen, pm);
 	if (strEQ("\\s+", pm->op_pmregexp->precomp)) 
 	    pm->op_pmflags |= PMf_WHITE;
 	hoistmust(pm);
@@ -1905,7 +1917,7 @@ SV *sv;
 	scalar((OP*)svop);
     if (opargs[type] & OA_TARGET)
 	svop->op_targ = pad_alloc(type, SVs_PADTMP);
-    return (*check[type])((OP*)svop);
+    return CHECKOP(type, svop);
 }
 
 OP *
@@ -1925,7 +1937,7 @@ GV *gv;
 	scalar((OP*)gvop);
     if (opargs[type] & OA_TARGET)
 	gvop->op_targ = pad_alloc(type, SVs_PADTMP);
-    return (*check[type])((OP*)gvop);
+    return CHECKOP(type, gvop);
 }
 
 OP *
@@ -1945,7 +1957,7 @@ char *pv;
 	scalar((OP*)pvop);
     if (opargs[type] & OA_TARGET)
 	pvop->op_targ = pad_alloc(type, SVs_PADTMP);
-    return (*check[type])((OP*)pvop);
+    return CHECKOP(type, pvop);
 }
 
 OP *
@@ -1967,7 +1979,7 @@ OP *cont;
 	scalar((OP*)cvop);
     if (opargs[type] & OA_TARGET)
 	cvop->op_targ = pad_alloc(type, SVs_PADTMP);
-    return (*check[type])((OP*)cvop);
+    return CHECKOP(type, cvop);
 }
 
 void

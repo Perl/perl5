@@ -185,7 +185,9 @@ all: makefile miniperl $(private) $(public) $(dynamic_ext)
 #	@echo " "; echo "	Making docs"; cd pod; $(MAKE) all;
 
 # Phony target to force checking subdirectories.
+# Apparently some makes require an action for the FORCE target.
 FORCE:
+	@true
 
 # The $& notation tells Sequent machines that it can do a parallel make,
 # and is harmless otherwise.
@@ -252,23 +254,6 @@ sperl.o: perl.c perly.h patchlevel.h $(h)
 	$(CCCMD) -DIAMSUID sperl.c
 	$(RMS) sperl.c
 
-# The following three header files are generated automatically
-# The correct versions should be already supplied with the perl kit,
-# in case you don't have perl or 'sh' available.
-# The - is to ignore error return codes in case you have the source
-# installed read-only or you don't have perl yet.
-keywords.h: keywords.pl
-	@echo "Don't worry if this fails."
-	- perl keywords.pl
-
-opcode.h: opcode.pl
-	@echo "Don't worry if this fails."
-	- perl opcode.pl
-
-embed.h: embed_h.sh global.sym interp.sym
-	@echo "Don't worry if this fails."
-	- sh embed_h.sh
-
 # We have to call our ./makedir because Ultrix 4.3 make can't handle the line
 #	test -d lib/auto || mkdir lib/auto
 #
@@ -321,6 +306,19 @@ perly.c: perly.y
 perly.h: perly.y
 	-@touch perly.h
 
+# The following three header files are generated automatically
+#	keywords.h:	keywords.pl
+#	opcode.h:	opcode.pl
+#	embed.h:  	embed.pl global.sym interp.sym
+# The correct versions should be already supplied with the perl kit,
+# in case you don't have perl available.
+# To force them to run, type
+#	make regen_headers
+regen_headers:	FORCE
+	perl keywords.pl
+	perl opcode.pl
+	perl embed.pl
+ 
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) will automatically
 # get built.  There should ordinarily be no need to change any of

@@ -31,6 +31,8 @@ of sections:
     perlguts	Perl internal functions for those doing extensions 
     perlcall	Perl calling conventions from C
     perlovl	Perl overloading semantics
+    perlembed	Perl how to embed perl in your C or C++ app
+    perlpod	Perl plain old documentation
     perlbook	Perl book information
 
 (If you're intending to read these straight through for the first time,

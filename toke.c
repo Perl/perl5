@@ -1018,7 +1018,8 @@ filter_add(funcp, datasv)
     IoDIRP(datasv) = (DIR*)funcp; /* stash funcp into spare field */
     if (filter_debug)
 	warn("filter_add func %lx (%s)", funcp, SvPV(datasv,na));
-    av_push(rsfp_filters, datasv);
+    av_unshift(rsfp_filters, 1);
+    av_store(rsfp_filters, 0, datasv) ;
     return(datasv);
 }
  
@@ -1033,8 +1034,10 @@ filter_del(funcp)
     if (!rsfp_filters || AvFILL(rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
-    if (IoDIRP(FILTER_DATA(AvFILL(rsfp_filters))) == (void*)funcp){
-	sv_free(av_pop(rsfp_filters));
+    if (IoDIRP(FILTER_DATA(0)) == (void*)funcp){
+	/* sv_free(av_pop(rsfp_filters)); */
+	sv_free(av_shift(rsfp_filters));
+
         return;
     }
     /* we need to search for the correct entry and clear it	*/
@@ -1051,12 +1054,12 @@ filter_read(idx, buf_sv, maxlen)
 {
     filter_t funcp;
     SV *datasv = NULL;
+
     if (!rsfp_filters)
 	return -1;
     if (idx > AvFILL(rsfp_filters)){       /* Any more filters?	*/
 	/* Provide a default input filter to make life easy.	*/
 	/* Note that we append to the line. This is handy.	*/
-	/* We ignore maxlen here				*/
 	if (filter_debug)
 	    warn("filter_read %d: from rsfp\n", idx);
 	if (maxlen) { 
@@ -2417,12 +2420,18 @@ yylex()
 	    TERM(THING);
 	}
 
+	case KEY___DATA__:
 	case KEY___END__: {
 	    GV *gv;
 
 	    /*SUPPRESS 560*/
-	    if (!in_eval) {
-		gv = gv_fetchpv("main::DATA",TRUE, SVt_PVIO);
+	    if (!in_eval || tokenbuf[2] == 'D') {
+		char dname[256];
+		char *pname = "main";
+		if (tokenbuf[2] == 'D')
+		    pname = HvNAME(curstash ? curstash : defstash);
+		sprintf(dname,"%s::DATA", pname);
+		gv = gv_fetchpv(dname,TRUE, SVt_PVIO);
 		SvMULTI_on(gv);
 		if (!GvIO(gv))
 		    GvIOp(gv) = newIO();
@@ -3308,6 +3317,7 @@ I32 len;
 	if (d[1] == '_') {
 	    if (strEQ(d,"__LINE__"))		return -KEY___LINE__;
 	    if (strEQ(d,"__FILE__"))		return -KEY___FILE__;
+	    if (strEQ(d,"__DATA__"))		return KEY___DATA__;
 	    if (strEQ(d,"__END__"))		return KEY___END__;
 	}
 	break;

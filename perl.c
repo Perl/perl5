@@ -996,7 +996,7 @@ char *s;
 	return s;
     case 'v':
 	printf("\nThis is perl, version %s\n\n",patchlevel);
-	fputs("\tUnofficial patchlevel 1l.\n",stdout);
+	fputs("\tUnofficial patchlevel 1m.\n",stdout);
 	fputs("\nCopyright 1987-1994, Larry Wall\n",stdout);
 #ifdef MSDOS
 	fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",

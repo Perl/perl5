@@ -14,9 +14,14 @@
  * blame Henry for some of the lack of readability.
  */
 
+/* The names of the functions have been changed from regcomp and
+ * regexec to  pregcomp and pregexec in order to avoid conflicts
+ * with the POSIX routines of the same names.
+*/
+
 /*SUPPRESS 112*/
 /*
- * regcomp and regexec -- regsub and regerror are not used in perl
+ * pregcomp and pregexec -- regsub and regerror are not used in perl
  *
  *	Copyright (c) 1986 by University of Toronto.
  *	Written by Henry Spencer.  Not derived from licensed software.
@@ -88,7 +93,7 @@
 #define TRYAGAIN	0x8	/* Weeded out a declaration. */
 
 /*
- * Forward declarations for regcomp()'s friends.
+ * Forward declarations for pregcomp()'s friends.
  */
 
 static char *reg _((I32, I32 *));
@@ -107,7 +112,7 @@ static void regtail _((char *, char *));
 static char* nextchar _((void));
 
 /*
- - regcomp - compile a regular expression into internal code
+ - pregcomp - compile a regular expression into internal code
  *
  * We can't allocate space until we know how big the compiled form will be,
  * but we can't compile it (and thus know how big it is) until we've got a
@@ -122,7 +127,7 @@ static char* nextchar _((void));
  * of the structure of the compiled regexp.  [I'll say.]
  */
 regexp *
-regcomp(exp,xend,pm)
+pregcomp(exp,xend,pm)
 char* exp;
 char* xend;
 PMOP* pm;
@@ -1608,7 +1613,7 @@ char *op;
 #endif /* DEBUGGING */
 
 void
-regfree(r)
+pregfree(r)
 struct regexp *r;
 {
     if (!r)

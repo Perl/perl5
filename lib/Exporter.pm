@@ -36,6 +36,16 @@ Application says:
 You can set C<$Exporter::Verbose=1;> to see how the specifications are
 being processed and what is actually being imported into modules.
 
+=head2 Module Version Checking
+
+The Exporter module will convert an attempt to import a number from a
+module into a call to $module_name->require_version($value). This can
+be used to validate that the version of the module being used is
+greater than or equal to the required version.
+
+The Exporter module supplies a default require_version method which
+checks the value of $VERSION in the exporting module.
+
 =cut
 
 require 5.001;
@@ -111,7 +121,15 @@ sub export {
 
 	foreach $sym (@imports) {
 	    if (!$exports{$sym}) {
-		if ($sym !~ s/^&// || !$exports{$sym}) {
+		if ($sym =~ m/^\d/) {
+		    $pkg->require_version($sym);
+		    # If the version number was the only thing specified
+		    # then we should act as if nothing was specified:
+		    if (@imports == 1) {
+			@imports = @exports;
+			last;
+		    }
+		} elsif ($sym !~ s/^&// || !$exports{$sym}) {
 		    warn qq["$sym" is not exported by the $pkg module ],
 			    "at $callfile line $callline\n";
 		    $oops++;
@@ -150,6 +168,15 @@ sub export_tags {
     *tags = \%{"${pkg}::EXPORT_TAGS"};
     push(@{"${pkg}::EXPORT"},
 	map {$tags{$_} ? @{$tags{$_}} : $_} @_ ? @_ : keys %tags);
+}
+
+sub require_version {
+    my($self, $wanted) = @_;
+    my $pkg = ref $self || $self;
+    my $version = ${"${pkg}::VERSION"} || "(undef)";
+    Carp::croak("$pkg $wanted required--this is only version $version")
+		if $version < $wanted;
+    $version;
 }
 
 1;

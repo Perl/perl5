@@ -41,7 +41,7 @@ typedef U16 PADOFFSET;
     U8		op_flags;		\
     U8		op_private;
 
-#define GIMME (op->op_flags & OPf_KNOW ? op->op_flags & OPf_LIST : cxstack[cxstack_ix].blk_gimme & G_ARRAY)
+#define GIMME (op->op_flags & OPf_KNOW ? op->op_flags & OPf_LIST : dowantarray())
 
 /* Public flags */
 #define OPf_LIST	1	/* Do operator in list context. */

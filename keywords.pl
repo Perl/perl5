@@ -26,6 +26,7 @@ __END__
 NULL
 __LINE__
 __FILE__
+__DATA__
 __END__
 AUTOLOAD
 BEGIN
