@@ -2447,7 +2447,7 @@ MAP_PERLINC   = @{$perlinc || []}
 MAP_STATIC    = ",
 join(" \\\n\t", reverse sort keys %static), "
 
-MAP_PRELIBS   = $Config::Config{libs} $Config::Config{cryptlib}
+MAP_PRELIBS   = $Config::Config{perllibs} $Config::Config{cryptlib}
 ";
 
     if (defined $libperl) {

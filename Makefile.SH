@@ -70,7 +70,7 @@ true)
 		*)	shrpldflags="$shrpldflags -b noentry"
 			;;
 		esac
-	        shrpldflags="$shrpldflags $ldflags $libs $cryptlib"
+	        shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
 		linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
 		;;
 	hpux*)
@@ -174,7 +174,7 @@ nonxs_ext = $nonxs_list
 ext = \$(dynamic_ext) \$(static_ext) \$(nonxs_ext)
 DYNALOADER = lib/auto/DynaLoader/DynaLoader\$(LIB_EXT)
 
-libs = $libs $cryptlib
+libs = $perllibs $cryptlib
 
 public = perl $suidperl utilities translators
 
@@ -342,7 +342,7 @@ esac
 case "$osname" in
 aix)
 	$spitshell >>Makefile <<!GROK!THIS!
-LIBS			= $libs
+LIBS			= $perllibs
 # In AIX we need to change this for building Perl itself from
 # its earlier definition (which is for building external
 # extensions *after* Perl has been built and installed)

@@ -56,15 +56,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_alarm HAS_ALARM		/**/
 
-/* HASATTRIBUTE:
- *	This symbol indicates the C compiler can check for function attributes,
- *	such as printf formats. This is normally only supported by GNU cc.
- */
-#$d_attribut HASATTRIBUTE 	/**/
-#ifndef HASATTRIBUTE
-#define __attribute__(_arg_)
-#endif
-
 /* HAS_BCMP:
  *	This symbol is defined if the bcmp() routine is available to
  *	compare blocks of memory.
@@ -100,17 +91,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	to truncate files.  You might need a -lx to get this routine.
  */
 #$d_chsize	HAS_CHSIZE		/**/
-
-/* HASCONST:
- *	This symbol, if defined, indicates that this C compiler knows about
- *	the const type. There is no need to actually test for that symbol
- *	within your programs. The mere use of the "const" keyword will
- *	trigger the necessary tests.
- */
-#$d_const HASCONST	/**/
-#ifndef HASCONST
-#define const
-#endif
 
 /* HAS_CRYPT:
  *	This symbol, if defined, indicates that the crypt routine is available
@@ -220,9 +200,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	The type "Timeval" should be used to refer to "struct timeval".
  */
 #$d_gettimeod HAS_GETTIMEOFDAY	/**/
-#ifdef HAS_GETTIMEOFDAY
-#define Timeval struct timeval	/* Structure used by gettimeofday() */
-#endif
 
 /* HAS_GETGROUPS:
  *	This symbol, if defined, indicates that the getgroups() routine is
@@ -694,15 +671,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_umask HAS_UMASK		/**/
 
-/* HASVOLATILE:
- *	This symbol, if defined, indicates that this C compiler knows about
- *	the volatile declaration.
- */
-#$d_volatile	HASVOLATILE	/**/
-#ifndef HASVOLATILE
-#define volatile
-#endif
-
 /* HAS_WAIT4:
  *	This symbol, if defined, indicates that wait4() exists.
  */
@@ -761,7 +729,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_dirent I_DIRENT		/**/
 #$d_dirnamlen DIRNAMLEN	/**/
-#define Direntry_t $direntrytype
 
 /* I_DLFCN:
  *	This symbol, if defined, indicates that <dlfcn.h> exists and should
@@ -977,10 +944,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_vfork I_VFORK	/**/
 
-/* CAN_PROTOTYPE:
- *	If defined, this macro indicates that the C compiler can handle
- *	function prototypes.
- */
 /* _:
  *	This macro is used to declare function parameters for folks who want
  *	to make declarations with prototypes using a different style than
@@ -988,12 +951,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *
  *		int main _((int argc, char *argv[]));
  */
-#$prototype	CAN_PROTOTYPE	/**/
-#ifdef CAN_PROTOTYPE
 #define	_(args) args
-#else
 #define	_(args) ()
-#endif
 
 /* SH_PATH:
  *	This symbol contains the full pathname to the shell used on this
@@ -1047,15 +1006,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, or QUAD_IS_INT64_T.
  */
 #$d_quad HAS_QUAD	/**/
-#ifdef HAS_QUAD
-#   define Quad_t $quadtype	/**/
-#   define Uquad_t $uquadtype	/**/
-#   define QUADKIND $quadkind	/**/
-#   define QUAD_IS_INT	1
-#   define QUAD_IS_LONG	2
-#   define QUAD_IS_LONG_LONG	3
-#   define QUAD_IS_INT64_T	4
-#endif
 
 /* HAS_ACCESSX:
  *	This symbol, if defined, indicates that the accessx routine is
@@ -1093,11 +1043,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	double, or a long double when applicable. Usual values are 2,
  *	4 and 8. The default is eight, for safety.
  */
-#if defined(CROSSCOMPILE) || defined(MULTIARCH)
-#  define MEM_ALIGNBYTES 8
-#else
-#define MEM_ALIGNBYTES $alignbytes
-#endif
 
 /* ARCHLIB:
  *	This variable, if defined, holds the name of the directory in
@@ -1170,32 +1115,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	so the default case (for NeXT) is big endian to catch them. 
  *	This might matter for NeXT 3.0.
  */
-#if defined(CROSSCOMPILE) || defined(MULTIARCH)
-#  ifdef __LITTLE_ENDIAN__
-#    if LONGSIZE == 4
-#      define BYTEORDER 0x1234
-#    else
-#      if LONGSIZE == 8
-#        define BYTEORDER 0x12345678
-#      endif
-#    endif
-#  else
-#    ifdef __BIG_ENDIAN__
-#      if LONGSIZE == 4
-#        define BYTEORDER 0x4321
-#      else
-#        if LONGSIZE == 8
-#          define BYTEORDER 0x87654321
-#        endif
-#      endif
-#    endif
-#  endif
-#  if !defined(BYTEORDER) && (defined(NeXT) || defined(__NeXT__))
-#    define BYTEORDER 0x4321
-#  endif
-#else
-#define BYTEORDER 0x$byteorder	/* large digits for MSB */
-#endif /* NeXT */
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -1203,23 +1122,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* STRINGIFY:
  *	This macro surrounds its token with double quotes.
  */
-#if $cpp_stuff == 1
 #define CAT2(a,b)	a/**/b
 #define STRINGIFY(a)	"a"
-		/* If you can get stringification with catify, tell me how! */
-#endif
-#if $cpp_stuff == 42
-#define PeRl_CaTiFy(a, b)	a ## b	
-#define PeRl_StGiFy(a)	#a
-/* the additional level of indirection enables these macros to be
- * used as arguments to other macros.  See K&R 2nd ed., page 231. */
 #define CAT2(a,b)	PeRl_CaTiFy(a,b)
-#define StGiFy(a)	PeRl_StGiFy(a)
 #define STRINGIFY(a)	PeRl_StGiFy(a)
-#endif
-#if $cpp_stuff != 1 && $cpp_stuff != 42
-#   include "Bletch: How does this C preprocessor catenate tokens?"
-#endif
 
 /* CPPSTDIN:
  *	This symbol contains the first part of the string which will invoke
@@ -1291,10 +1197,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* CSH:
  *	This symbol, if defined, contains the full pathname of csh.
  */
-#$d_csh HAS_CSH		/**/
-#ifdef HAS_CSH
-#define CSH "$full_csh"	/**/
-#endif
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
@@ -1477,12 +1379,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	contents of PHOSTNAME as a command to feed to the popen() routine
  *	to derive the host name.
  */
-#$d_gethname HAS_GETHOSTNAME	/**/
-#$d_uname HAS_UNAME		/**/
-#$d_phostname HAS_PHOSTNAME	/**/
-#ifdef HAS_PHOSTNAME
-#define PHOSTNAME "$aphostname"	/* How to get the host name */
-#endif
 
 /* HAS_GETHOST_PROTOS:
  *	This symbol, if defined, indicates that <netdb.h> includes
@@ -1945,16 +1841,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	traditional longjmp() if siglongjmp isn't available.
  *	See HAS_SIGSETJMP.
  */
-#$d_sigsetjmp HAS_SIGSETJMP	/**/
-#ifdef HAS_SIGSETJMP
-#define Sigjmp_buf sigjmp_buf
-#define Sigsetjmp(buf,save_mask) sigsetjmp((buf),(save_mask))
-#define Siglongjmp(buf,retval) siglongjmp((buf),(retval))
-#else
-#define Sigjmp_buf jmp_buf
-#define Sigsetjmp(buf,save_mask) setjmp((buf))
-#define Siglongjmp(buf,retval) longjmp((buf),(retval))
-#endif
 
 /* HAS_SOCKET:
  *	This symbol, if defined, indicates that the BSD socket interface is
@@ -2019,9 +1905,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol is defined if this system has a stat structure declaring
  *	st_blksize and st_blocks.
  */
-#ifndef USE_STAT_BLOCKS
-#$d_statblks USE_STAT_BLOCKS 	/**/
-#endif
 
 /* HAS_STRUCT_STATFS_F_FLAGS:
  *	This symbol, if defined, indicates that the struct statfs
@@ -2046,13 +1929,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_fstatvfs HAS_FSTATVFS		/**/
 
-/* USE_STDIO_PTR:
- *	This symbol is defined if the _ptr and _cnt fields (or similar)
- *	of the stdio FILE structure can be used to access the stdio buffer
- *	for a file handle.  If this is defined, then the FILE_ptr(fp)
- *	and FILE_cnt(fp) macros will also be defined and should be used
- *	to access these fields.
- */
 /* FILE_ptr:
  *	This macro is used to access the _ptr field (or equivalent) of the
  *	FILE structure pointed to by its argument. This macro will always be
@@ -2071,23 +1947,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol is defined if the FILE_cnt macro can be used as an
  *	lvalue.
  */
-#$d_stdstdio USE_STDIO_PTR 	/**/
-#ifdef USE_STDIO_PTR
 #define FILE_ptr(fp)	$stdio_ptr
 #$d_stdio_ptr_lval STDIO_PTR_LVALUE 		/**/
 #define FILE_cnt(fp)	$stdio_cnt
 #$d_stdio_cnt_lval STDIO_CNT_LVALUE 		/**/
-#endif
 
-/* USE_STDIO_BASE:
- *	This symbol is defined if the _base field (or similar) of the
- *	stdio FILE structure can be used to access the stdio buffer for
- *	a file handle.  If this is defined, then the FILE_base(fp) macro
- *	will also be defined and should be used to access this field.
- *	Also, the FILE_bufsiz(fp) macro will be defined and should be used
- *	to determine the number of bytes in the buffer.  USE_STDIO_BASE
- *	will never be defined unless USE_STDIO_PTR is.
- */
 /* FILE_base:
  *	This macro is used to access the _base field (or equivalent) of the
  *	FILE structure pointed to by its argument. This macro will always be
@@ -2099,11 +1963,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	structure pointed to its argument. This macro will always be defined
  *	if USE_STDIO_BASE is defined.
  */
-#$d_stdiobase USE_STDIO_BASE 	/**/
-#ifdef USE_STDIO_BASE
 #define FILE_base(fp)	$stdio_base
 #define FILE_bufsiz(fp)	$stdio_bufsiz
-#endif
 
 /* HAS_STRERROR:
  *	This symbol, if defined, indicates that the strerror routine is
@@ -2298,9 +2159,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	typedef'ed information.  This is only required if you have
  *	getgroups() or setgroups()..
  */
-#if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
-#define Groups_t $groupstype	/* Type for 2nd arg to [sg]etgroups() */
-#endif
 
 /* DB_Prefix_t:
  *	This symbol contains the type of the prefix structure element
@@ -2739,10 +2597,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define	U16TYPE		$u16type	/**/
 #define	I32TYPE		$i32type	/**/
 #define	U32TYPE		$u32type	/**/
-#ifdef HAS_QUAD
-#define	I64TYPE		$i64type	/**/
-#define	U64TYPE		$u64type	/**/
-#endif
 #define	NVTYPE		$nvtype		/**/
 #define	IVSIZE		$ivsize		/**/
 #define	UVSIZE		$uvsize		/**/
@@ -2752,10 +2606,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define	U16SIZE		$u16size	/**/
 #define	I32SIZE		$i32size	/**/
 #define	U32SIZE		$u32size	/**/
-#ifdef HAS_QUAD
-#define	I64SIZE		$i64size	/**/
-#define	U64SIZE		$u64size	/**/
-#endif
 #define	NVSIZE		$nvsize		/**/
 #$d_nv_preserves_uv	NV_PRESERVES_UV
 #define	NV_PRESERVES_UV_BITS	$d_nv_preserves_uv_bits
@@ -3027,54 +2877,32 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	be able to run the resulting executable in a 32-bit CPU at all or
  *	you may need at least to reboot your OS to 64-bit mode.
  */
-#ifndef USE_64_BIT_INT
-#$use64bitint	USE_64_BIT_INT		/**/
-#endif
-
-#ifndef USE_64_BIT_ALL
-#$use64bitall	USE_64_BIT_ALL		/**/
-#endif
 
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
  *	should be used when available.
  */
-#ifndef USE_LARGE_FILES
-#$uselargefiles	USE_LARGE_FILES		/**/
-#endif
 
 /* USE_LONG_DOUBLE:
  *	This symbol, if defined, indicates that long doubles should
  *	be used when available.
  */
-#ifndef USE_LONG_DOUBLE
-#$uselongdouble	USE_LONG_DOUBLE		/**/
-#endif
 
 /* USE_MORE_BITS:
  *	This symbol, if defined, indicates that 64-bit interfaces and
  *	long doubles should be used when available.
  */
-#ifndef USE_MORE_BITS
-#$usemorebits	USE_MORE_BITS		/**/
-#endif
 
 /* MULTIPLICITY:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
  */
-#ifndef MULTIPLICITY
-#$usemultiplicity	MULTIPLICITY		/**/
-#endif
 
 /* USE_PERLIO:
  *	This symbol, if defined, indicates that the PerlIO abstraction should
  *	be used throughout.  If not defined, stdio should be
  *	used in a fully backward compatible manner.
  */
-#ifndef USE_PERLIO
-#$useperlio	USE_PERLIO		/**/
-#endif
 
 /* USE_SOCKS:
  *	This symbol, if defined, indicates that Perl should
@@ -3098,9 +2926,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$use5005threads	USE_5005THREADS		/**/
 #$useithreads	USE_ITHREADS		/**/
-#if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
-#define		USE_THREADS		/* until src is revised*/
-#endif
 #$d_oldpthreads	OLD_PTHREADS_API		/**/
 
 /* PERL_VENDORARCH:
@@ -3132,31 +2957,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_vendorlib PERL_VENDORLIB_EXP "$vendorlibexp"		/**/
 #$d_vendorlib PERL_VENDORLIB_STEM "$vendorlib_stem"		/**/
-
-/* VOIDFLAGS:
- *	This symbol indicates how much support of the void type is given by this
- *	compiler.  What various bits mean:
- *
- *	    1 = supports declaration of void
- *	    2 = supports arrays of pointers to functions returning void
- *	    4 = supports comparisons between pointers to void functions and
- *		    addresses of void functions
- *	    8 = suports declaration of generic void pointers
- *
- *	The package designer should define VOIDUSED to indicate the requirements
- *	of the package.  This can be done either by #defining VOIDUSED before
- *	including config.h, or by defining defvoidused in Myinit.U.  If the
- *	latter approach is taken, only those flags will be tested.  If the
- *	level of void support necessary is not present, defines void to int.
- */
-#ifndef VOIDUSED
-#define VOIDUSED $defvoidused
-#endif
-#define VOIDFLAGS $voidflags
-#if (VOIDFLAGS & VOIDUSED) != VOIDUSED
-#define void int		/* is void to be avoided? */
-#define M_VOID			/* Xenix strikes again */
-#endif
 
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary

@@ -193,7 +193,7 @@ sub ldopts {
     @path = $path ? split(/:/, $path) : @INC;
 
     push(@potential_libs, @link_args)    if scalar @link_args;
-    push(@potential_libs, $Config{libs}) if defined $std;
+    push(@potential_libs, $Config{perllibs}) if defined $std;
 
     push(@mods, static_ext()) if $std;
 
