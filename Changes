@@ -32,6 +32,184 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7637] By: jhi                                   on 2000/11/10  14:14:28
+        Log: Explain better why certain regex tests are skipped.
+             
+             Subject: Re: tests skipped: unknown reason
+             From: Lupe Christoph <lupe@lupe-christoph.de>
+             Date: Fri, 10 Nov 2000 09:08:56 +0100
+             Message-ID: <20001110090856.J785@alanya.lupe-christoph.de>
+     Branch: perl
+	   ! t/op/regexp.t
+____________________________________________________________________________
+[  7635] By: nick                                  on 2000/11/10  13:25:52
+        Log: Re-instate stdio large file support via perlio.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  7634] By: jhi                                   on 2000/11/10  04:49:55
+        Log: Amdahl UTS hints updates.
+             
+             Subject: [ID 20001109.016] Trouble going from 5.4 to 5.6
+             From: hom00@utsglobal.com (Harold O Morris)
+             Date: Thu, 9 Nov 2000 20:02 PST
+             Message-Id: <m13u5OV-000045C@juno.uts.utsglobal.com>
+     Branch: perl
+	   ! hints/uts.sh
+____________________________________________________________________________
+[  7633] By: jhi                                   on 2000/11/09  23:33:28
+        Log: Subject: [PATCH] IO::Seekable pod
+             From: Nicholas Clark <nick@talking.bollo.cx>
+             Date: Thu, 9 Nov 2000 20:29:45 +0000
+             Message-ID: <20001109202945.A10451@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/IO/lib/IO/Handle.pm
+____________________________________________________________________________
+[  7632] By: jhi                                   on 2000/11/09  21:55:41
+        Log: Various doc oddball characters.
+             
+             Subject: [ID 20001106.004] Perl 5.6.0 bugs  
+             From: Michael Somos <somos@grail.cba.csuohio.edu>
+             Date: Mon, 6 Nov 2000 17:44:20 -0500
+             Message-Id: <200011062244.RAA28632@grail.cba.csuohio.edu>
+     Branch: perl
+	   ! emacs/cperl-mode.el lib/unicode/syllables.txt
+	   ! win32/bin/search.pl
+____________________________________________________________________________
+[  7631] By: jhi                                   on 2000/11/09  21:12:29
+        Log: Subject: Re: bash -c exit and linux hints 
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Thu, 02 Nov 2000 09:37:25 -0500
+             Message-Id: <200011021437.JAA63199@raptor.research.att.com>
+     Branch: perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[  7629] By: jhi                                   on 2000/11/09  19:46:31
+        Log: Missing dTHXs.
+             
+             Subject: RE: perl@7595 builds not on cygwin
+             From: "Eric Fifer" <egf7@columbia.edu>
+             Date: Thu, 9 Nov 2000 19:26:50 -0000
+             Message-ID: <000201c04a83$05ef1660$933570c2@fifer>
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.xs
+____________________________________________________________________________
+[  7628] By: jhi                                   on 2000/11/09  14:48:27
+        Log: Disable only the tests 99 and 166 for UTF-8 locales.
+     Branch: perl
+	   ! t/pragma/locale.t
+____________________________________________________________________________
+[  7627] By: jhi                                   on 2000/11/09  14:40:27
+        Log: There's no =head3.
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[  7626] By: jhi                                   on 2000/11/09  13:54:26
+        Log: The generated boot_* headers are wrong.  Pickier compiler,
+             such as KAI C++ will refuse to compile the resulting perlmain.
+             
+             Subject: [ID 20001109.005] Bug in minimod.pl, perl 5.6.0
+             From: Harri Pasanen <harri.pasanen@trema.com>
+             Date: Thu, 09 Nov 2000 14:23:28 +0100
+             Message-Id: <3A0AA550.26D548A3@trema.com>
+     Branch: perl
+	   ! minimod.pl
+____________________________________________________________________________
+[  7625] By: jhi                                   on 2000/11/09  13:50:44
+        Log: Subject: [PATCH: perl@7613] updates to Porting/pumpkin.pod
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Wed, 8 Nov 2000 22:13:26 -0800 (PST)
+             Message-ID: <Pine.BSF.4.21.0011082208390.5584-100000@shell8.ba.best.com>
+             
+             All except the "cow orker" change.
+     Branch: perl
+	   ! Porting/pumpkin.pod
+____________________________________________________________________________
+[  7624] By: jhi                                   on 2000/11/09  13:45:33
+        Log: Fix for
+             
+             Subject: [ID 20001109.003] Not OK: perl v5.7.0 +DEVEL7620 on PA-RISC2.0 11.00 (UNINSTALLED)
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl> 
+             Date: Thu, 09 Nov 2000 11:05:52 +0100
+             Message-Id: <20001109110452.66CF.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! pod/perldiag.pod t/pragma/warn/pp_sys
+____________________________________________________________________________
+[  7623] By: jhi                                   on 2000/11/09  13:37:16
+        Log: Typo in an ifndef.
+             
+             Subject: Re: [PATCH 5.7.0] better messages from malloc()
+             From: Joe Smith <jms@inwap.com>         
+             Date: Thu, 09 Nov 2000 01:33:14 -0800
+             Message-Id: <3A0A6F5A.1E3969BB@inwap.com>
+     Branch: perl
+	   ! malloc.c
+____________________________________________________________________________
+[  7622] By: jhi                                   on 2000/11/09  13:31:18
+        Log: Remove unused extra arguments.
+     Branch: metaconfig/U/perl
+	   ! perlxv.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7621] By: jhi                                   on 2000/11/09  13:16:36
+        Log: More VMS moves on environment handling, from Charles Lane.
+     Branch: perl
+	   ! t/pragma/locale.t
+____________________________________________________________________________
+[  7620] By: jhi                                   on 2000/11/09  04:42:38
+        Log: Subject: patch to detect stat followed by lstat(_): [ID 20001106.006] find2perl generated scripts issue new lstat()    on filehandle _ warning
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Wed, 8 Nov 2000 18:36:26 -0800 (PST)
+             Message-ID: <Pine.LNX.4.30.0011081817490.177-100000@dd.tc.fluke.com>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  7619] By: jhi                                   on 2000/11/09  04:36:21
+        Log: Forgot from #7618.
+     Branch: perl
+	   ! lib/File/stat.pm
+____________________________________________________________________________
+[  7618] By: jhi                                   on 2000/11/09  04:28:44
+        Log: Make deleting for %ENV work for (newer versions of) VMS,
+             from Craig A. Berry.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[  7617] By: jhi                                   on 2000/11/09  04:25:05
+        Log: Subject: [PATCH] Class::Struct at compile time
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Wed, 8 Nov 2000 20:46:41 -0500 (EST)
+             Message-ID: <Pine.OSF.4.21.0011082041360.8238-100000@home.kiski.net>
+     Branch: perl
+	   ! lib/Class/Struct.pm
+____________________________________________________________________________
+[  7616] By: jhi                                   on 2000/11/09  04:15:17
+        Log: Subject: [ID 20001108.013] spelling
+             From: "Todd T. Fries" <todd@fries.int.mrleng.com>
+             Date: Wed, 8 Nov 2000 18:36:42 -0600 (CST)
+             Message-Id: <200011090036.eA90agN05921@fries.int.mrleng.com>
+     Branch: perl
+	   ! lib/ftp.pl
+____________________________________________________________________________
+[  7615] By: jhi                                   on 2000/11/09  04:12:42
+        Log: Subject: [PATCH: perl@7613] add Encode to VMS build and tests
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 8 Nov 2000 15:29:06 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10011081524450.248546-100000@aspara.forte.com>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  7614] By: jhi                                   on 2000/11/08  22:42:55
+        Log: A missing aTHX_.
+     Branch: perl
+	   ! ext/IPC/SysV/SysV.xs
+____________________________________________________________________________
+[  7613] By: jhi                                   on 2000/11/08  19:30:21
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7612] By: jhi                                   on 2000/11/08  18:35:25
         Log: Subject: is this the appropriate patch to fix: [ID 20001106.006] find2perl generated scripts issue new lstat()    on filehandle _ warning
              From: David Dyck <dcd@tc.fluke.com>
