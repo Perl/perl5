@@ -1,6 +1,6 @@
 =head1 NAME
 
-perldelta - what's new for perl v5.6 (as of v5.005_64)
+perldelta - what's new for perl v5.6.0
 
 =head1 DESCRIPTION
 
@@ -60,14 +60,14 @@ See L<perldata>.
 
 =head2 Perl's version numbering has changed
 
-Beginning with Perl version 5.6, the version number convention has been
+Beginning with Perl version 5.6.0, the version number convention has been
 changed to a "dotted integer" scheme that is more commonly found in open
 source projects.
 
 Maintenance versions of v5.6.0 will be released as v5.6.1, v5.6.2 etc.
-The next development series following v5.6 will be numbered v5.7.x,
+The next development series following v5.6.0 will be numbered v5.7.x,
 beginning with v5.7.0, and the next major production release following
-v5.6 will be v5.8.
+v5.6.0 will be v5.8.0.
 
 The English module now sets $PERL_VERSION to $^V (a string value) rather
 than C<$]> (a numeric value).  (This is a potential incompatibility.
@@ -79,11 +79,12 @@ See L<Support for strings represented as a vector of ordinals> for more on that.
 To cope with the new versioning system's use of at least three significant
 digits for each version component, the method used for incrementing the
 subversion number has also changed slightly.  We assume that versions older
-than v5.6 have been incrementing the subversion component in multiples of
+than v5.6.0 have been incrementing the subversion component in multiples of
 10.  Versions after v5.6.0 will increment them by 1.  Thus, using the new
-notation, 5.005_03 is the same as v5.5.30, and the first maintenance
-version following v5.6.0 will be v5.6.1, which amounts to a floating point
-value of 5.006_001).
+notation, 5.005_03 is the "same" as v5.5.30, and the first maintenance
+version following v5.6.0 will be v5.6.1 (which should be read as being
+equivalent to a floating point value of 5.006_001 in the older format,
+stored in C<$]>).
 
 =item Literals of the form C<1.2.3> parse differently
 
@@ -922,11 +923,11 @@ BEGIN blocks are executed under such conditions, this variable
 enables perl code to determine whether actions that make sense
 only during normal running are warranted.  See L<perlvar>.
 
-=head2 New variable $^V contains Perl version in v5.6.0 format
+=head2 New variable $^V contains Perl version as a string
 
 C<$^V> contains the Perl version number as a string composed of
-characters whose ordinals match the version numbers, so that it may
-be used in string comparisons.
+characters whose ordinals match the version numbers, e.g., v5.6.0.
+This may be used in string comparisons.
 
 See C<Support for strings represented as a vector of ordinals> for an
 example.
@@ -1203,7 +1204,7 @@ provide marginal improvements in performance.
 
 =head1 Platform specific changes
 
-=head2 Additional supported platforms
+=head2 Supported platforms
 
 =over 4
 
@@ -1226,7 +1227,7 @@ GNU/Hurd is now supported.
 
 =item *
 
-Rhapsody is now supported.
+Rhapsody/Darwin is now supported.
 
 =item *
 
@@ -1259,6 +1260,16 @@ This port is still using its own builtin globbing.
 =head2 OS/2
 
 [TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
+
+=head2 OS/390 (OpenEdition MVS)
+
+Support for this EBCDIC platform has not been renewed in this release.
+There are difficulties in reconciling Perl's standardization on UTF-8
+as its internal representation for characters with the EBCDIC character
+set, because the two are incompatible.
+
+It is unclear whether future versions will renew support for this
+platform, but the possibility exists.
 
 =head2 VMS
 
