@@ -412,13 +412,13 @@ sequence(pTHX_ register OP *o)
     if (!o)
 	return;
 
-    op = newSVuv((UV) o);
+    op = newSVuv(PTR2UV(o));
     key = SvPV(op, len);
     if (hv_exists(Sequence, key, len))
 	return;
 
     for (; o; o = o->op_next) {
-	op = newSVuv((UV) o);
+	op = newSVuv(PTR2UV(o));
 	key = SvPV(op, len);
 	if (hv_exists(Sequence, key, len))
 	    break;
@@ -501,7 +501,7 @@ sequence_num(pTHX_ OP *o)
     char   *key;
     STRLEN  len;
     if (!o) return 0;
-    op = newSVuv((UV) o);
+    op = newSVuv(PTR2UV(o));
     key = SvPV(op, len);
     seq = hv_fetch(Sequence, key, len, 0);
     return seq ? SvUV(*seq): 0;
@@ -516,14 +516,15 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     level++;
     seq = sequence_num(aTHX_ o);
     if (seq)
-	PerlIO_printf(file, "%-4d", seq);
+	PerlIO_printf(file, "%-4"UVf, seq);
     else
 	PerlIO_printf(file, "    ");
     PerlIO_printf(file,
 		  "%*sTYPE = %s  ===> ",
 		  (int)(PL_dumpindent*level-4), "", OP_NAME(o));
     if (o->op_next)
-	PerlIO_printf(file, seq ? "%d\n" : "(%d)\n", sequence_num(aTHX_ o->op_next));
+	PerlIO_printf(file, seq ? "%"UVf"\n" : "(%"UVf")\n",
+				sequence_num(aTHX_ o->op_next));
     else
 	PerlIO_printf(file, "DONE\n");
     if (o->op_targ) {
@@ -795,17 +796,17 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     case OP_ENTERLOOP:
 	Perl_dump_indent(aTHX_ level, file, "REDO ===> ");
 	if (cLOOPo->op_redoop)
-	    PerlIO_printf(file, "%d\n", sequence_num(aTHX_ cLOOPo->op_redoop));
+	    PerlIO_printf(file, "%"UVf"\n", sequence_num(aTHX_ cLOOPo->op_redoop));
 	else
 	    PerlIO_printf(file, "DONE\n");
 	Perl_dump_indent(aTHX_ level, file, "NEXT ===> ");
 	if (cLOOPo->op_nextop)
-	    PerlIO_printf(file, "%d\n", sequence_num(aTHX_ cLOOPo->op_nextop));
+	    PerlIO_printf(file, "%"UVf"\n", sequence_num(aTHX_ cLOOPo->op_nextop));
 	else
 	    PerlIO_printf(file, "DONE\n");
 	Perl_dump_indent(aTHX_ level, file, "LAST ===> ");
 	if (cLOOPo->op_lastop)
-	    PerlIO_printf(file, "%d\n", sequence_num(aTHX_ cLOOPo->op_lastop));
+	    PerlIO_printf(file, "%"UVf"\n", sequence_num(aTHX_ cLOOPo->op_lastop));
 	else
 	    PerlIO_printf(file, "DONE\n");
 	break;
@@ -817,7 +818,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     case OP_AND:
 	Perl_dump_indent(aTHX_ level, file, "OTHER ===> ");
 	if (cLOGOPo->op_other)
-	    PerlIO_printf(file, "%d\n", sequence_num(aTHX_ cLOGOPo->op_other));
+	    PerlIO_printf(file, "%"UVf"\n", sequence_num(aTHX_ cLOGOPo->op_other));
 	else
 	    PerlIO_printf(file, "DONE\n");
 	break;

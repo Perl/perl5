@@ -3877,11 +3877,11 @@ Perl_vnumify(pTHX_ SV *vs)
 	return sv;
     }
     digit = SvIVX(*av_fetch((AV *)vs, 0, 0));
-    Perl_sv_setpvf(aTHX_ sv,"%d.", PERL_ABS(digit));
+    Perl_sv_setpvf(aTHX_ sv,"%d.", (int)PERL_ABS(digit));
     for ( i = 1 ; i <= len ; i++ )
     {
 	digit = SvIVX(*av_fetch((AV *)vs, i, 0));
-	Perl_sv_catpvf(aTHX_ sv,"%03d", PERL_ABS(digit));
+	Perl_sv_catpvf(aTHX_ sv,"%03d", (int)PERL_ABS(digit));
     }
     if ( len == 0 )
 	 Perl_sv_catpv(aTHX_ sv,"000");

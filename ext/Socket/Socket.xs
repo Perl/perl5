@@ -376,7 +376,7 @@ unpack_sockaddr_un(sun_sv)
 	e = (char*)addr.sun_path;
 	/* On Linux, the name of abstract unix domain sockets begins
 	 * with a '\0', so allow this. */
-	while ((*e || e == addr.sun_path && e[1] && sockaddrlen > 1)
+	while ((*e || (e == addr.sun_path && e[1] && sockaddrlen > 1))
 		&& e < (char*)addr.sun_path + sizeof addr.sun_path)
 	    ++e;
 	ST(0) = sv_2mortal(newSVpvn(addr.sun_path, e - (char*)addr.sun_path));
