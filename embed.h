@@ -261,6 +261,7 @@
 #define hv_undef		Perl_hv_undef
 #define ibcmp			Perl_ibcmp
 #define ibcmp_locale		Perl_ibcmp_locale
+#define ibcmp_utf8		Perl_ibcmp_utf8
 #define ingroup			Perl_ingroup
 #define init_argv_symbols	Perl_init_argv_symbols
 #define init_debugger		Perl_init_debugger
@@ -1780,6 +1781,7 @@
 #define hv_undef(a)		Perl_hv_undef(aTHX_ a)
 #define ibcmp(a,b,c)		Perl_ibcmp(aTHX_ a,b,c)
 #define ibcmp_locale(a,b,c)	Perl_ibcmp_locale(aTHX_ a,b,c)
+#define ibcmp_utf8(a,b,c,d,e)	Perl_ibcmp_utf8(aTHX_ a,b,c,d,e)
 #define ingroup(a,b)		Perl_ingroup(aTHX_ a,b)
 #define init_argv_symbols(a,b)	Perl_init_argv_symbols(aTHX_ a,b)
 #define init_debugger()		Perl_init_debugger(aTHX)

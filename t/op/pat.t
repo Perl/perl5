@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..753\n";
+print "1..757\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2248,6 +2248,8 @@ print "# some Unicode properties\n";
 }
 
 {
+    # Script=, Block=, Category=
+
     print "not " unless "\x{0100}" =~ /\p{Script=Latin}/;
     print "ok 748\n";
 
@@ -2259,6 +2261,8 @@ print "# some Unicode properties\n";
 }
 
 {
+    print "# the basic character classes and Unicode \n";
+
     # 0100;LATIN CAPITAL LETTER A WITH MACRON;Lu;0;L;0041 0304;;;;N;LATIN CAPITAL LETTER A MACRON;;;0101;
     print "not " unless "\x{0100}" =~ /\w/;
     print "ok 751\n";
@@ -2270,4 +2274,20 @@ print "# some Unicode properties\n";
     # 1680;OGHAM SPACE MARK;Zs;0;WS;;;;;N;;;;;
     print "not " unless "\x{1680}" =~ /\s/;
     print "ok 753\n";
+}
+
+{
+    print "# folding matches and Unicode\n";
+
+    print "not " unless "a\x{100}" =~ /A/i;
+    print "ok 754\n";
+
+    print "not " unless "A\x{100}" =~ /A/i;
+    print "ok 755\n";
+
+    print "not " unless "a\x{100}" =~ /a/i;
+    print "ok 756\n";
+
+    print "not " unless "A\x{100}" =~ /A/i;
+    print "ok 757\n";
 }

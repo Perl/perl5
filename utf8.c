@@ -1543,6 +1543,51 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 char *
 Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 {
-  return Perl_pv_uni_display(aTHX_ dsv, (U8*)SvPVX(ssv), SvCUR(ssv),
-			     pvlim, flags);
+     return Perl_pv_uni_display(aTHX_ dsv, (U8*)SvPVX(ssv), SvCUR(ssv),
+				pvlim, flags);
 }
+
+I32
+Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, const char *s2, bool u2, register I32 len)
+{
+     register U8 *a = (U8*)s1;
+     register U8 *b = (U8*)s2;
+     STRLEN la, lb;
+     UV ca, cb;
+     STRLEN ulen1, ulen2;
+     U8 tmpbuf1[UTF8_MAXLEN*3+1];
+     U8 tmpbuf2[UTF8_MAXLEN*3+1];
+
+     while (len) {
+	  if (u1)
+	       ca = utf8_to_uvchr((U8*)a, &la);
+	  else {
+	       ca = *a;
+	       la = 1;
+	  }
+	  if (u2)
+	       cb = utf8_to_uvchr((U8*)b, &lb);
+	  else {
+	       cb = *b;
+	       lb = 1;
+	  }
+	  if (ca != cb) {
+	       if (u1)
+		    to_uni_lower(NATIVE_TO_UNI(ca), tmpbuf1, &ulen1);
+	       else
+		    ulen1 = 1;
+	       if (u2)
+		    to_uni_lower(NATIVE_TO_UNI(cb), tmpbuf2, &ulen2);
+	       else
+		    ulen2 = 1;
+	       if (ulen1 != ulen2
+		   || (ulen1 == 1 && PL_fold[ca] != PL_fold[cb])
+		   || memNE(tmpbuf1, tmpbuf2, ulen1))
+		    return 1;
+	  }
+	  a += la;
+	  b += lb;
+    }
+    return 0;
+}
+

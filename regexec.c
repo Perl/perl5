@@ -962,14 +962,17 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		if (c1 == c2)
 		    while (s <= e) {
 			if ( utf8_to_uvchr((U8*)s, &len) == c1
-			     && regtry(prog, s) )
+			     && (ln == 1 ||
+				 ibcmp_utf8(s, do_utf8, m, UTF, ln)) )
 			    goto got_it;
 			s += len;
 		    }
 		else
 		    while (s <= e) {
 			UV c = utf8_to_uvchr((U8*)s, &len);
-			if ( (c == c1 || c == c2) && regtry(prog, s) )
+			if ( (c == c1 || c == c2)
+			     && (ln == 1 ||
+				 ibcmp_utf8(s, do_utf8, m, UTF, ln)) )
 			    goto got_it;
 			s += len;
 		    }
