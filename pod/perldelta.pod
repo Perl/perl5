@@ -322,11 +322,13 @@ by running Configure with C<-Dflag>.
 =head2 -Dusethreads and -Duse64bits now more daring
 
 The Configure options enabling the use of threads and the use of
-64-bitness are now more daring in the sense that they no more have
-an explicit list of operating systems of known threads/64-bit
+64-bitness are now more daring in the sense that they no more have an
+explicit list of operating systems of known threads/64-bit
 capabilities.  In other words: if your operating system has the
-necessary APIs, you should be able just to go ahead and use them.
-See also L<"64-bit support">.
+necessary APIs and datatypes, you should be able just to go ahead and
+use them, for threads by Configure -Dusethreads, and for 64 bits
+either explicitly by Configure -Duse64bits or implicitly if your
+system has 64 bit wide datatypes.  See also L<"64-bit support">.
 
 =head2 Long Doubles
 
@@ -631,8 +633,10 @@ Note that unless you have the case (a) you will have to configure
 and compile Perl using the -Duse64bits Configure flag.
 
 Unfortunately bit arithmetics (&, |, ^, ~, <<, >>) for numbers are not
-64-bit clean, they are explictly forced to be 32-bit.  Bit arithmetics
-for bit vectors (created by vec()) are not limited in their width.
+64-bit clean, they are explictly forced to be 32-bit because of
+tangled backward compatibility issues.  This limitation is subject to
+change.  Bit arithmetics for bit vector scalars (created by vec()) are
+not limited in their width.
 
 Last but not least: note that due to Perl's habit of always using
 floating point numbers the quads are still not true integers.
