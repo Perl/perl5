@@ -3594,6 +3594,17 @@ PP(pp_unpack)
 		    Copy(s, &auint, 1, unsigned int);
 		    s += sizeof(unsigned int);
 		    sv = NEWSV(41, 0);
+#ifdef __osf__
+                    /* Without the dummy below unpack("I", pack("I",0xFFFFFFFF))
+                     * returns 1.84467440737096e+19 instead of 0xFFFFFFFF for
+		     * DEC C V5.8-009 on Digital UNIX V4.0 (Rev. 1091) (aka V4.0D)
+		     * with optimization turned on.
+		     * (DEC C V5.2-040 on Digital UNIX V4.0 (Rev. 564) (aka V4.0B)
+		     * does not have this problem even with -O4)
+		     */
+                    (auint) ?
+		        sv_setuv(sv, (UV)auint) :
+#endif
 		    sv_setuv(sv, (UV)auint);
 		    PUSHs(sv_2mortal(sv));
 		}
