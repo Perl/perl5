@@ -2077,8 +2077,8 @@
 #define signal PerlProc_signal
 #define htonl PerlSock_htonl
 #define htons PerlSock_htons
-#define ntohs PerlSock_ntohl
-#define ntohl PerlSock_ntohs
+#define ntohl PerlSock_ntohl
+#define ntohs PerlSock_ntohs
 #define accept PerlSock_accept
 #define bind PerlSock_bind
 #define connect PerlSock_connect
