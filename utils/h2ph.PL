@@ -679,6 +679,10 @@ It is most easily run while in /usr/include:
 
 or
 
+	cd /usr/include; h2ph * sys/* arpa/* netinet/*
+
+or
+
 	cd /usr/include; h2ph -r -l .
 
 The output files are placed in the hierarchy rooted at Perl's
