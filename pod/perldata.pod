@@ -361,8 +361,8 @@ Note that using the v-strings for IPv4 addresses is not portable unless
 you also use the inet_aton()/inet_ntoa() routines of the Socket package.
 
 Note that since Perl 5.8.1 the single-number v-strings (like C<v65>)
-are not v-strings before the C<< => >> operator (which is used to
-separate a hash key from a hash value), instead they are interpreted
+are not v-strings before the C<< => >> operator (which is usually used
+to separate a hash key from a hash value), instead they are interpreted
 as literal strings ('v65').  They were v-strings from Perl 5.6.0 to
 Perl 5.8.0, but that caused more confusion and breakage than good.
 Multi-number v-strings like C<v65.66> and C<65.66.67> continue to
