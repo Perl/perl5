@@ -128,8 +128,7 @@ sub copy {
 	$size = shift(@_) + 0;
 	croak("Bad buffer size for copy: $size\n") unless ($size > 0);
     } else {
-       no warnings 'uninitialized';
-       $size = -s $from_h;
+	$size = tied(*$from_h) ? 0 : -s $from_h || 0;
 	$size = 1024 if ($size < 512);
 	$size = $Too_Big if ($size > $Too_Big);
     }
