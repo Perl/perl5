@@ -2850,6 +2850,11 @@ subtest 10 of lib/posix may arrive before the successful result of the
 subtest 9, which confuses the test harness so much that it thinks the
 subtest 9 failed.
 
+=head2 Linux with glibc 2.2.5 fails t/op/int subtest #6 with -Duse64bitint
+
+This is a known bug in the glibc 2.2.5 with long long integers.
+( http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=65612 )
+
 =head2 Linux With Sfio Fails op/misc Test 48
 
 No known fix.
