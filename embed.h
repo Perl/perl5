@@ -4005,7 +4005,7 @@
 #define forbid_setid(a)		S_forbid_setid(aTHX_ a)
 #endif
 #ifdef PERL_CORE
-#define incpush(a,b,c,d)	S_incpush(aTHX_ a,b,c,d)
+#define incpush(a,b,c,d,e)	S_incpush(aTHX_ a,b,c,d,e)
 #endif
 #ifdef PERL_CORE
 #define init_interp()		S_init_interp(aTHX)

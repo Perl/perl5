@@ -4657,6 +4657,13 @@ usereentrant (usethreads.U):
 	meaningful if usethreads is set and is very experimental, it is
 	not even prompted for.
 
+userelocatableinc (XXX.U):
+	This variable is set to true to indicate that perl should relocate
+	@INC entries at runtime based on the path to the perl binary.
+	Any @INC paths starting ".../" are relocated relative to the directory
+	containing the perl binary, and a logical cleanup of the path is then
+	made around the join point (removing "dir/../" pairs)
+
 usesfio (d_sfio.U):
 	This variable is set to true when the user agrees to use sfio.
 	It is set to false when sfio is not available or when the user

@@ -295,6 +295,67 @@ EOT
     $byteorder_code = "our \$byteorder = '?'x$s;\n";
 }
 
+my @need_relocation;
+
+if (fetch_string({},'userelocatableinc')) {
+    foreach my $what (qw(archlib archlibexp
+			 privlib privlibexp
+			 sitearch sitearchexp
+			 sitelib sitelibexp
+			 sitelib_stem
+			 vendorarch vendorarchexp
+			 vendorlib vendorlibexp
+			 vendorlib_stem)) {
+	push @need_relocation, $what if fetch_string({}, $what) =~ m!^\.\.\./!;
+    }
+    # This can have .../ anywhere:
+    push @need_relocation, 'otherlibdirs'
+	if fetch_string({}, 'otherlibdirs') =~ m!\.\.\./!;
+}
+
+my %need_relocation;
+@need_relocation{@need_relocation} = @need_relocation;
+
+my $relocation_code = <<'EOT';
+
+sub relocate_inc {
+  my $libdir = shift;
+  return $libdir unless $libdir =~ s!^\.\.\./!!;
+  my $prefix = $^X;
+  if ($prefix =~ s!/[^/]*$!!) {
+    while ($libdir =~ m!^\.\./!) {
+      # Loop while $libdir starts "../" and $prefix still has a trailing
+      # directory
+      last unless $prefix =~ s!/([^/]+)$!!;
+      # but bail out if the directory we picked off the end of $prefix is .
+      # or ..
+      if ($1 eq '.' or $1 eq '..') {
+	# Undo! This should be rare, hence code it this way rather than a
+	# check each time before the s!!! above.
+	$prefix = "$prefix/$1";
+	last;
+      }
+      # Remove that leading ../ and loop again
+      substr ($libdir, 0, 3, '');
+    }
+    $libdir = "$prefix/$libdir";
+  }
+  $libdir;
+}
+EOT
+
+if (@need_relocation) {
+  my $relocations_in_common;
+  foreach (@need_relocation) {
+    $relocations_in_common++ if $Common{$_};
+  }
+  if ($relocations_in_common) {
+    print CONFIG $relocation_code;
+  } else {
+    print CONFIG_HEAVY $relocation_code;
+  }
+}
+
 print CONFIG_HEAVY @non_v, "\n";
 
 # copy config summary format from the myconfig.SH script
@@ -330,6 +391,14 @@ if ($Common{byteorder}) {
     print CONFIG $byteorder_code;
 } else {
     print CONFIG_HEAVY $byteorder_code;
+}
+
+if (@need_relocation) {
+print CONFIG_HEAVY 'foreach my $what (qw(', join (' ', @need_relocation),
+      ")) {\n", <<'EOT';
+    s/^($what=)(['"])(.*?)\2/$1 . $2 . relocate_inc($3) . $2/me;
+}
+EOT
 }
 
 print CONFIG_HEAVY <<'EOT';
@@ -516,6 +585,9 @@ foreach my $key (keys %Common) {
 	$value =~ s!\\!\\\\!g;
 	$value =~ s!'!\\'!g;
 	$value = "'$value'";
+	if ($need_relocation{$key}) {
+	    $value = "relocate_inc($value)";
+	}
     } else {
 	$value = "undef";
     }
