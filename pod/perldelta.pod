@@ -531,6 +531,12 @@ The rules for allowing underscores (underbars) in numeric constants
 have been relaxed and simplified: now you can have an underscore
 simply B<between digits>.
 
+=item *
+
+Rather than relying on C's argv[0] (which may not contain a full pathname)
+where possible $^X is now set by asking the operating system.
+(eg by reading F</proc/self/exe> on Linux, F</proc/curproc/file> on FreeBSD)
+
 =back
 
 =head1 Modules and Pragmata
@@ -2519,6 +2525,16 @@ Don't panic.  Read INSTALL 'make test' section instead.
 =head2 Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
 
 The subtests 11 and 12 sometimes fail and sometimes work.
+
+=head2 FreeBSD 4.5 fails lib/File/Spec/t/rel2abs2rel.t
+
+Test 1 of F<lib/File/Spec/t/rel2abs2rel.t> runs "$^X" with a perl 1 liner.
+It is failing on FreeBSD 4.5, but only when run as part of make test.
+This seems to be a kernel problem rather than perl - reading the symlink
+F</proc/curproc/file> returns "unknown" rather than the path to perl, and a
+kernel debugger reveals that variable C<numfullpathfail2> in
+F</usr/src/sys/miscfs/procfs/procfs_vnops.c> is being incremented whenever
+F</proc/curproc/file> fails to return the perl executable's path.
 
 =head2 HP-UX lib/io_multihomed Fails When LP64-Configured
 
