@@ -78,7 +78,7 @@ data structures and objects are not dumped, unlike with the C<x> command.
 The C<DB::OUT> filehandle is opened to F</dev/tty>, regardless of
 where STDOUT may be redirected to.
 
-=item x expr
+=item x [maxdepth] expr
 
 Evaluates its expression in list context and dumps out the result
 in a pretty-printed fashion.  Nested data structures are printed out
@@ -87,6 +87,10 @@ See L<Dumpvalue> if you'd like to do this yourself.
 
 The output format is governed by multiple options described under
 L<"Configurable Options">.
+
+If the C<maxdepth> is included, it must be a numeral I<N>; the value is
+dumped only I<N> levels deep, as if the C<dumpDepth> option had been
+deporarily set to I<N>.
 
 =item V [pkg [vars]]
 
@@ -580,6 +584,11 @@ commands:
 =item C<arrayDepth>, C<hashDepth>
 
 Print only first N elements ('' for all).
+
+=item C<dumpDepth>
+
+Limit recursion depth to N levels when dumping structures.
+Negative values are interpreted as infinity.  Default: infinity.
 
 =item C<compactDump>, C<veryCompact>
 

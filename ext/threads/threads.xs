@@ -206,8 +206,8 @@ Perl_ithread_run(void * arg) {
 		len = call_sv(thread->init_function, thread->gimme|G_EVAL);
 		SPAGAIN;
 		for (i=len-1; i >= 0; i--) {
-		    SV *sv = POPs;
-		    av_store(params, i, SvREFCNT_inc(sv));
+		  SV *sv = POPs;
+		  av_store(params, i, SvREFCNT_inc(sv));
 		}
 		PUTBACK;
 		if (SvTRUE(ERRSV)) {
@@ -376,7 +376,7 @@ Perl_ithread_self (pTHX_ SV *obj, char* Class)
 }
 
 /*
- * joins the thread this code needs to take the returnvalue from the
+ * Joins the thread this code needs to take the returnvalue from the
  * call_sv and send it back
  */
 
@@ -393,7 +393,7 @@ Perl_ithread_CLONE(pTHX_ SV *obj)
   }
 }
 
-void
+AV* 
 Perl_ithread_join(pTHX_ SV *obj)
 {
     ithread *thread = SV_to_ithread(aTHX_ obj);
@@ -407,6 +407,7 @@ Perl_ithread_join(pTHX_ SV *obj)
 	Perl_croak(aTHX_ "Thread already joined");
     }
     else {
+        AV* retparam;
 #ifdef WIN32
 	DWORD waitcode;
 #else
@@ -419,12 +420,28 @@ Perl_ithread_join(pTHX_ SV *obj)
 	pthread_join(thread->thr,&retval);
 #endif
 	MUTEX_LOCK(&thread->mutex);
+	
+	{
+	  AV* params = (AV*) SvRV(thread->params);	  
+	  CLONE_PARAMS clone_params;
+	  clone_params.stashes = newAV();
+	  PL_ptr_table = ptr_table_new();
+	  retparam = (AV*) sv_dup((SV*)params, &clone_params);
+	  SvREFCNT_dec(clone_params.stashes);
+	  SvREFCNT_inc(retparam);
+	  ptr_table_free(PL_ptr_table);
+	  PL_ptr_table = NULL;
+
+	}
 	/* sv_dup over the args */
 	/* We have finished with it */
 	thread->detached |= 2;
 	MUTEX_UNLOCK(&thread->mutex);
 	sv_unmagic(SvRV(obj),PERL_MAGIC_shared_scalar);
+	Perl_ithread_destruct(aTHX_ thread);
+	return retparam;
     }
+    return (AV*)NULL;
 }
 
 void
@@ -450,6 +467,8 @@ Perl_ithread_DESTROY(pTHX_ SV *sv)
     ithread *thread = SV_to_ithread(aTHX_ sv);
     sv_unmagic(SvRV(sv),PERL_MAGIC_shared_scalar);
 }
+
+
 
 MODULE = threads		PACKAGE = threads	PREFIX = ithread_
 PROTOTYPES: DISABLE
@@ -484,6 +503,17 @@ ithread_tid(ithread *thread)
 
 void
 ithread_join(SV *obj)
+PPCODE:
+{
+  AV* params = Perl_ithread_join(aTHX_ obj);
+  int i;
+  I32 len = AvFILL(params);
+  for (i = 0; i <= len; i++) {
+    XPUSHs(av_shift(params));
+  }
+  SvREFCNT_dec(params);
+}
+
 
 void
 ithread_detach(ithread *thread)
@@ -494,6 +524,7 @@ ithread_DESTROY(SV *thread)
 BOOT:
 {
 	ithread* thread;
+	PL_perl_destruct_level = 2;
 	PERL_THREAD_ALLOC_SPECIFIC(self_key);
 	MUTEX_INIT(&create_mutex);
 	MUTEX_LOCK(&create_mutex);

@@ -1303,32 +1303,59 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%04"UVXf, uv))) &&
 	     (he    = hv_fetch_ent(hv, keysv, FALSE, 0))) {
 	      SV *val = HeVAL(he);
-	      char *s = SvPV(val, *lenp);
-	      U8 c = *(U8*)s;
+	      STRLEN len;
+	      char *s = SvPV(val, len);
 
-	      if (*lenp > 1 || UNI_IS_INVARIANT(c))
-		   Copy(s, ustrp, *lenp, U8);
-	      else {
-		   /* something in the 0x80..0xFF range */
-		   ustrp[0] = UTF8_EIGHT_BIT_HI(c);
-		   ustrp[1] = UTF8_EIGHT_BIT_LO(c);
-		   *lenp = 2;
-	      }
+	      if (len > 1) {
+		   Copy(s, ustrp, len, U8);
 #ifdef EBCDIC
-	      {
-		   U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
-		   U8 *d = tmpbuf;
-		   U8 *t, *tend;
-		   STRLEN tlen;
+		   {
+			/* If we have EBCDIC we need to remap the
+			 * characters coming in from the "special"
+			 * (usually, but not always multicharacter)
+			 * mapping, since any characters in the low 256
+			 * are in Unicode code points, not EBCDIC.
+			 * If we either had a bit in the "special"
+			 * mappings indicating "contains lower 256",
+			 * or if we on EBCDIC platforms regenerate the
+			 * lib/unicore/To/Foo.pl, we could do without
+			 * this, but for now, let's do it this way.
+			 * --jhi */
 
-		   for (t = ustrp, tend = t + *lenp; t < tend; t += tlen) {
-			UV c = utf8_to_uvchr(t, &tlen);
-			d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
+			U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
+			U8 *d = tmpbuf;
+			U8 *t, *tend;
+			
+			if (SvUTF8(val)) {
+			     STRLEN tlen = 0;
+
+			     for (t = ustrp, tend = t + len;
+				  t < tend; t += tlen) {
+				  UV c = utf8_to_uvchr(t, &tlen);
+				  
+				  if (tlen > 0)
+				       d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
+				  else
+				       break;
+			     }
+			} else {
+			     for (t = ustrp, tend = t + len;
+				  t < tend; t++)
+				  d = uvchr_to_utf8(d, UNI_TO_NATIVE(*t));
+			}
+			len = d - tmpbuf; 
+			Copy(tmpbuf, ustrp, len, U8);
 		   }
-		   *lenp = d - tmpbuf; 
-		   Copy(tmpbuf, ustrp, *lenp, U8);
-	      }
 #endif
+	      }
+	      else {
+		   UV  c = UNI_TO_NATIVE(*(U8*)s);
+		   U8 *d = uvchr_to_utf8(ustrp, c);
+
+		   len = d - ustrp;
+	      }
+	      if (lenp)
+		   *lenp = len;
 	      return utf8_to_uvchr(ustrp, 0);
 	 }
 	 uv  = NATIVE_TO_UNI(uv);

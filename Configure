@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Feb 11 17:45:48 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Wed Feb 13 08:17:38 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2307,7 +2307,7 @@ echo " "
 $touch blurfl
 if $ln -s blurfl sym > /dev/null 2>&1 ; then
 	echo "Symbolic links are supported." >&4
-	lns="$ln$_exe -s"
+	lns="$ln -s"
 else
 	echo "Symbolic links are NOT supported." >&4
 	lns="$ln"

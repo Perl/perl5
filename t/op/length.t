@@ -43,7 +43,7 @@ print "ok 3\n";
     if (ord('A') == 193)
      {
       printf "#%vx for 0xFF\n",$a;
-      print "not " unless $a eq "\x80\x45" && length($a) == 2;
+      print "not " unless $a eq "\x8b\x73" && length($a) == 2;
      }
     else
      {

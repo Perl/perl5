@@ -30,7 +30,7 @@ sub main::dumpValue {
   local $^W=0;
   (print "undef\n"), return unless defined $_[0];
   (print &stringify($_[0]), "\n"), return unless ref $_[0];
-  dumpvar::unwrap($_[0],0);
+  dumpvar::unwrap($_[0],0, $_[1]);
 }
 
 # This one is good for variable names:
@@ -115,7 +115,7 @@ sub DumpElem {
 	    join("' '", @{$v}[0..$tArrayDepth]) . "'$shortmore";
   } else {
     print "$short\n";
-    unwrap($_[0],$_[1]);
+    unwrap($_[0],$_[1],$_[2]);
   }
 }
 
@@ -123,6 +123,8 @@ sub unwrap {
     return if $DB::signal;
     local($v) = shift ; 
     local($s) = shift ; # extra no of spaces
+    local($m) = shift ; # maximum recursion depth
+    return if $m == 0;
     local(%v,@v,$sp,$value,$key,@sortKeys,$more,$shortmore,$short) ;
     local($tHashDepth,$tArrayDepth) ;
 
@@ -187,7 +189,7 @@ sub unwrap {
 	    return if $DB::signal;
 	    $value = $ {$v}{$key} ;
 	    print "$sp", &stringify($key), " => ";
-	    DumpElem $value, $s;
+	    DumpElem $value, $s, $m-1;
 	}
 	print "$sp  empty hash\n" unless @sortKeys;
 	print "$sp$more" if defined $more ;
@@ -218,7 +220,7 @@ sub unwrap {
 	    return if $DB::signal;
 	    print "$sp$num  ";
 	    if (exists $v->[$num]) {
-	        DumpElem $v->[$num], $s;
+	        DumpElem $v->[$num], $s, $m-1;
 	    } else {
 	    	print "empty slot\n";
 	    }
@@ -227,7 +229,7 @@ sub unwrap {
 	print "$sp$more" if defined $more ;  
     } elsif (  UNIVERSAL::isa($v, 'SCALAR') or ref $v eq 'REF' ) { 
 	    print "$sp-> ";
-	    DumpElem $$v, $s;
+	    DumpElem $$v, $s, $m-1;
     } elsif ( UNIVERSAL::isa($v, 'CODE') ) { 
 	    print "$sp-> ";
 	    dumpsub (0, $v);

@@ -449,7 +449,7 @@ PP(pp_unpack)
 	    if (checksum) {
 		while (len-- > 0 && s < strend) {
 		    STRLEN alen;
-		    auint = UNI_TO_NATIVE(utf8n_to_uvchr((U8*)s, strend - s, &alen, 0));
+		    auint = NATIVE_TO_UNI(utf8n_to_uvchr((U8*)s, strend - s, &alen, 0));
 		    along = alen;
 		    s += along;
 		    if (checksum > bits_in_uv)
@@ -463,7 +463,7 @@ PP(pp_unpack)
 		EXTEND_MORTAL(len);
 		while (len-- > 0 && s < strend) {
 		    STRLEN alen;
-		    auint = UNI_TO_NATIVE(utf8n_to_uvchr((U8*)s, strend - s, &alen, 0));
+		    auint = NATIVE_TO_UNI(utf8n_to_uvchr((U8*)s, strend - s, &alen, 0));
 		    along = alen;
 		    s += along;
 		    sv = NEWSV(37, 0);
@@ -1558,7 +1558,7 @@ PP(pp_pack)
 	case 'U':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		auint = NATIVE_TO_UNI(SvUV(fromstr));
+		auint = UNI_TO_NATIVE(SvUV(fromstr));
 		SvGROW(cat, SvCUR(cat) + UTF8_MAXLEN + 1);
 		SvCUR_set(cat, (char*)uvchr_to_utf8((U8*)SvEND(cat),auint)
 			       - SvPVX(cat));
