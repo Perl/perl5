@@ -1258,12 +1258,18 @@ a mail message from Larry:
     probably have been named something to do with overriding though.  Since
     it's undocumented we could still change it...  :-)
 
-Given that it's already there, you can use it to override
-distribution modules.  If you do
+Given that it's already there, you can use it to override distribution modules.
+One way to do that is to add
 
-	sh Configure -Dccflags='-DAPPLLIB_EXP=/my/override'
+	ccflags="$ccflags -DAPPLLIB_EXP='"/my/override"'
+	
+to your config.over file.  (You have to be particularly careful to get the
+double quotes in.  It might actually be easier to just #define it
+yourself in perl.c.)
 
-then perl.c will put /my/override ahead of ARCHLIB and PRIVLIB.
+Then perl.c will put /my/override ahead of ARCHLIB and PRIVLIB.  Perl will
+also search architecture-specific and version-specific subdirectories of
+APPLLIB_EXP.
 
 =head2 Shared libperl.so location
 
