@@ -141,7 +141,7 @@ PerlIO_canset_cnt(PerlIO *f)
 
 #undef PerlIO_set_cnt
 void
-PerlIO_set_cnt(PerlIO *f, int cnt)
+PerlIO_set_cnt(pTHX_ PerlIO *f, int cnt)
 {
  dTHX;
  if (cnt < -1 && ckWARN_d(WARN_INTERNAL))
@@ -155,7 +155,7 @@ PerlIO_set_cnt(PerlIO *f, int cnt)
 
 #undef PerlIO_set_ptrcnt
 void
-PerlIO_set_ptrcnt(PerlIO *f, STDCHAR *ptr, int cnt)
+PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR *ptr, int cnt)
 {
 #ifdef FILE_bufsiz
  dTHX;
@@ -182,7 +182,7 @@ PerlIO_set_ptrcnt(PerlIO *f, STDCHAR *ptr, int cnt)
 
 #undef PerlIO_get_cnt
 int 
-PerlIO_get_cnt(PerlIO *f)
+PerlIO_get_cnt(pTHX_ PerlIO *f)
 {
 #ifdef FILE_cnt
  return FILE_cnt(f);
@@ -195,7 +195,7 @@ PerlIO_get_cnt(PerlIO *f)
 
 #undef PerlIO_get_bufsiz
 int 
-PerlIO_get_bufsiz(PerlIO *f)
+PerlIO_get_bufsiz(pTHX_ PerlIO *f)
 {
 #ifdef FILE_bufsiz
  return FILE_bufsiz(f);
@@ -208,7 +208,7 @@ PerlIO_get_bufsiz(PerlIO *f)
 
 #undef PerlIO_get_ptr
 STDCHAR *
-PerlIO_get_ptr(PerlIO *f)
+PerlIO_get_ptr(pTHX_ PerlIO *f)
 {
 #ifdef FILE_ptr
  return FILE_ptr(f);
@@ -221,7 +221,7 @@ PerlIO_get_ptr(PerlIO *f)
 
 #undef PerlIO_get_base
 STDCHAR *
-PerlIO_get_base(PerlIO *f)
+PerlIO_get_base(pTHX_ PerlIO *f)
 {
 #ifdef FILE_base
  return FILE_base(f);
@@ -287,7 +287,7 @@ PerlIO_eof(PerlIO *f)
 
 #undef PerlIO_getname
 char *
-PerlIO_getname(PerlIO *f, char *buf)
+PerlIO_getname(pTHX_ PerlIO *f, char *buf)
 {
 #ifdef VMS
  return fgetname(f,buf);

@@ -792,7 +792,7 @@ Perl_do_eof(pTHX_ GV *gv)
     while (IoIFP(io)) {
 
         if (PerlIO_has_cntptr(IoIFP(io))) {	/* (the code works without this) */
-	    if (PerlIO_get_cnt(IoIFP(io)) > 0)	/* cheat a little, since */
+	    if (PerlIO_get_cnt(aTHX_ IoIFP(io)) > 0)	/* cheat a little, since */
 		return FALSE;			/* this is the most usual case */
         }
 
@@ -802,8 +802,8 @@ Perl_do_eof(pTHX_ GV *gv)
 	    return FALSE;
 	}
         if (PerlIO_has_cntptr(IoIFP(io)) && PerlIO_canset_cnt(IoIFP(io))) {
-	    if (PerlIO_get_cnt(IoIFP(io)) < -1)
-		PerlIO_set_cnt(IoIFP(io),-1);
+	    if (PerlIO_get_cnt(aTHX_ IoIFP(io)) < -1)
+		PerlIO_set_cnt(aTHX_ IoIFP(io),-1);
 	}
 	if (PL_op->op_flags & OPf_SPECIAL) { /* not necessarily a real EOF yet? */
 	    if (!nextargv(PL_argvgv))	/* get another fp handy */

@@ -2946,15 +2946,15 @@ PP(pp_fttext)
 		    RETPUSHNO;
 		else
 		    RETPUSHYES;
-	    if (PerlIO_get_cnt(IoIFP(io)) <= 0) {
+	    if (PerlIO_get_cnt(aTHX_ IoIFP(io)) <= 0) {
 		i = PerlIO_getc(IoIFP(io));
 		if (i != EOF)
 		    (void)PerlIO_ungetc(IoIFP(io),i);
 	    }
-	    if (PerlIO_get_cnt(IoIFP(io)) <= 0)	/* null file is anything */
+	    if (PerlIO_get_cnt(aTHX_ IoIFP(io)) <= 0)	/* null file is anything */
 		RETPUSHYES;
-	    len = PerlIO_get_bufsiz(IoIFP(io));
-	    s = (STDCHAR *) PerlIO_get_base(IoIFP(io));
+	    len = PerlIO_get_bufsiz(aTHX_ IoIFP(io));
+	    s = (STDCHAR *) PerlIO_get_base(aTHX_ IoIFP(io));
 	    /* sfio can have large buffers - limit to 512 */
 	    if (len > 512)
 		len = 512;

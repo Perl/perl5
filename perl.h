@@ -184,10 +184,13 @@ struct perl_thread;
 #    define dTHXa(a)	pTHX = (PerlInterpreter *)a
 #    define dTHX	dTHXa(PERL_GET_INTERP)
 #  endif
+#  define mTHX		macro_argument
 #  define pTHX_		pTHX,
 #  define _pTHX		,pTHX
 #  define aTHX_		aTHX,
 #  define _aTHX		,aTHX
+#  define mTHX_		mTHX,
+#  define _mTHX		,mTHX
 #endif
 
 #define STATIC static
@@ -220,6 +223,9 @@ struct perl_thread;
 #  define aTHX
 #  define aTHX_
 #  define _aTHX
+#  define mTHX
+#  define mTHX_
+#  define _mTHX
 #  define dTHXa(a)	dNOOP
 #  define dTHX		dNOOP
 #endif

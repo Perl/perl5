@@ -49,7 +49,7 @@
 #  define PerlIO_read(f,buf,count)	(SSize_t)fread(buf,1,count,f)
 #endif
 #define PerlIO_eof(f)			feof(f)
-#define PerlIO_getname(f,b)		fgetname(f,b)
+#define PerlIO_getname(mTHX_ f,b)		fgetname(f,b)
 #define PerlIO_error(f)			ferror(f)
 #define PerlIO_fileno(f)		fileno(f)
 #define PerlIO_clearerr(f)		clearerr(f)
@@ -90,34 +90,34 @@
 
 #ifdef USE_STDIO_PTR
 #define PerlIO_has_cntptr(f)		1       
-#define PerlIO_get_ptr(f)		FILE_ptr(f)          
-#define PerlIO_get_cnt(f)		FILE_cnt(f)          
+#define PerlIO_get_ptr(mTHX_ f)		FILE_ptr(f)          
+#define PerlIO_get_cnt(mTHX_ f)		FILE_cnt(f)          
 
 #ifdef STDIO_CNT_LVALUE
 #define PerlIO_canset_cnt(f)		1      
 #ifdef STDIO_PTR_LVALUE
 #define PerlIO_fast_gets(f)		1        
 #endif
-#define PerlIO_set_cnt(f,c)		(FILE_cnt(f) = (c))          
+#define PerlIO_set_cnt(mTHX_ f,c)		(FILE_cnt(f) = (c))          
 #else
 #define PerlIO_canset_cnt(f)		0      
-#define PerlIO_set_cnt(f,c)		abort()
+#define PerlIO_set_cnt(mTHX_ f,c)		abort()
 #endif
 
 #ifdef STDIO_PTR_LVALUE
-#define PerlIO_set_ptrcnt(f,p,c)	(FILE_ptr(f) = (p), PerlIO_set_cnt(f,c))          
+#define PerlIO_set_ptrcnt(mTHX_ f,p,c)	(FILE_ptr(f) = (p), pTHX_ PerlIO_set_cnt(mTHX_ f,c))          
 #else
-#define PerlIO_set_ptrcnt(f,p,c)	abort()
+#define PerlIO_set_ptrcnt(mTHX_ f,p,c)	abort()
 #endif
 
 #else  /* USE_STDIO_PTR */
 
 #define PerlIO_has_cntptr(f)		0
 #define PerlIO_canset_cnt(f)		0
-#define PerlIO_get_cnt(f)		(abort(),0)
-#define PerlIO_get_ptr(f)		(abort(),(void *)0)
-#define PerlIO_set_cnt(f,c)		abort()
-#define PerlIO_set_ptrcnt(f,p,c)	abort()
+#define PerlIO_get_cnt(mTHX_ f)		(abort(),0)
+#define PerlIO_get_ptr(mTHX_ f)		(abort(),(void *)0)
+#define PerlIO_set_cnt(mTHX_ f,c)		abort()
+#define PerlIO_set_ptrcnt(mTHX_ f,p,c)	abort()
 
 #endif /* USE_STDIO_PTR */
 
@@ -128,12 +128,12 @@
 
 #ifdef FILE_base
 #define PerlIO_has_base(f)		1         
-#define PerlIO_get_base(f)		FILE_base(f)         
-#define PerlIO_get_bufsiz(f)		FILE_bufsiz(f)       
+#define PerlIO_get_base(mTHX_ f)		FILE_base(f)         
+#define PerlIO_get_bufsiz(mTHX_ f)		FILE_bufsiz(f)       
 #else
 #define PerlIO_has_base(f)		0
-#define PerlIO_get_base(f)		(abort(),(void *)0)
-#define PerlIO_get_bufsiz(f)		(abort(),0)
+#define PerlIO_get_base(mTHX_ f)		(abort(),(void *)0)
+#define PerlIO_get_bufsiz(mTHX_ f)		(abort(),0)
 #endif
 #else /* PERLIO_IS_STDIO */
 #ifdef PERL_CORE

@@ -220,13 +220,13 @@ struct IPerlStdIOInfo
 	(*PL_StdIO->pClearerr)(PL_StdIO, (f))
 #define PerlIO_getc(f)							\
 	(*PL_StdIO->pGetc)(PL_StdIO, (f))
-#define PerlIO_get_base(f)						\
+#define PerlIO_get_base(mTHX_ f)						\
 	(*PL_StdIO->pGetBase)(PL_StdIO, (f))
-#define PerlIO_get_bufsiz(f)						\
+#define PerlIO_get_bufsiz(mTHX_ f)						\
 	(*PL_StdIO->pGetBufsiz)(PL_StdIO, (f))
-#define PerlIO_get_cnt(f)						\
+#define PerlIO_get_cnt(mTHX_ f)						\
 	(*PL_StdIO->pGetCnt)(PL_StdIO, (f))
-#define PerlIO_get_ptr(f)						\
+#define PerlIO_get_ptr(mTHX_ f)						\
 	(*PL_StdIO->pGetPtr)(PL_StdIO, (f))
 #define PerlIO_putc(f,c)						\
 	(*PL_StdIO->pPutc)(PL_StdIO, (f),(c))
@@ -252,9 +252,9 @@ struct IPerlStdIOInfo
 	(*PL_StdIO->pSetBuf)(PL_StdIO, (f), (b))
 #define PerlIO_setvbuf(f,b,t,s)						\
 	(*PL_StdIO->pSetVBuf)(PL_StdIO, (f),(b),(t),(s))
-#define PerlIO_set_cnt(f,c)						\
+#define PerlIO_set_cnt(mTHX_ f,c)						\
 	(*PL_StdIO->pSetCnt)(PL_StdIO, (f), (c))
-#define PerlIO_set_ptrcnt(f,p,c)					\
+#define PerlIO_set_ptrcnt(mTHX_ f,p,c)					\
 	(*PL_StdIO->pSetPtrCnt)(PL_StdIO, (f), (p), (c))
 #define PerlIO_setlinebuf(f)						\
 	(*PL_StdIO->pSetlinebuf)(PL_StdIO, (f))
@@ -425,22 +425,22 @@ extern int	PerlIO_fast_gets	(PerlIO *);
 extern int	PerlIO_canset_cnt	(PerlIO *);
 #endif
 #ifndef PerlIO_get_ptr
-extern STDCHAR * PerlIO_get_ptr		(PerlIO *);
+extern STDCHAR * PerlIO_get_ptr		(pTHX_ PerlIO *);
 #endif
 #ifndef PerlIO_get_cnt
-extern int	PerlIO_get_cnt		(PerlIO *);
+extern int	PerlIO_get_cnt		(pTHX_ PerlIO *);
 #endif
 #ifndef PerlIO_set_cnt
-extern void	PerlIO_set_cnt		(PerlIO *,int);
+extern void	PerlIO_set_cnt		(pTHX_ PerlIO *,int);
 #endif
 #ifndef PerlIO_set_ptrcnt
-extern void	PerlIO_set_ptrcnt	(PerlIO *,STDCHAR *,int);
+extern void	PerlIO_set_ptrcnt	(pTHX_ PerlIO *,STDCHAR *,int);
 #endif
 #ifndef PerlIO_get_base
-extern STDCHAR * PerlIO_get_base	(PerlIO *);
+extern STDCHAR * PerlIO_get_base	(pTHX_ PerlIO *);
 #endif
 #ifndef PerlIO_get_bufsiz
-extern int	PerlIO_get_bufsiz	(PerlIO *);
+extern int	PerlIO_get_bufsiz	(pTHX_ PerlIO *);
 #endif
 #ifndef PerlIO_tmpfile
 extern PerlIO *	PerlIO_tmpfile		(void);
