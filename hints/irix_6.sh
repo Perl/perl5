@@ -343,3 +343,6 @@ $define|true|[yY]*) ;;
 *) d_casti32='undef' ;;
 esac
 
+# Helmut Jarausch reports that Perl's malloc is rather unusable
+# with IRIX, and SGI confirms the problem.
+usemymalloc=${usemymalloc:-false}
