@@ -323,6 +323,7 @@ USE_OK
 #   switches => [ command-line switches ]
 #   nolib    => 1 # don't use -I../lib (included by default)
 #   prog     => one-liner (avoid quotes)
+#   progs    => [ multi-liner (avoid quotes) ]
 #   progfile => perl script
 #   stdin    => string to feed the stdin
 #   stderr   => redirect stderr to stdout
@@ -348,9 +349,6 @@ sub _quote_args {
 sub runperl {
     my %args = @_;
     my $runperl = $^X;
-    if ($args{switches}) {
-	_quote_args(\$runperl, $args{switches});
-    }
     unless ($args{nolib}) {
 	if ($is_macos) {
 	    $runperl .= ' -I::lib';
@@ -361,13 +359,21 @@ sub runperl {
 	    $runperl .= ' "-I../lib"'; # doublequotes because of VMS
 	}
     }
+    if ($args{switches}) {
+	_quote_args(\$runperl, $args{switches});
+    }
     if (defined $args{prog}) {
-	if ($is_mswin || $is_netware || $is_vms) {
-	    $runperl .= qq( -e ") . $args{prog} . qq(");
-	}
-	else {
-	    $runperl .= qq( -e ') . $args{prog} . qq(');
-	}
+        $args{progs} = [$args{prog}]
+    }
+    if (defined $args{progs}) {
+        foreach my $prog (@{$args{progs}}) {
+            if ($is_mswin || $is_netware || $is_vms) {
+                $runperl .= qq ( -e "$prog" );
+            }
+            else {
+                $runperl .= qq ( -e '$prog' );
+            }
+        }
     } elsif (defined $args{progfile}) {
 	$runperl .= qq( "$args{progfile}");
     }
