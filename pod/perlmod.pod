@@ -145,7 +145,7 @@ thing.
 
 On return, the reference wil overwrite the hash slot in the
 symbol table specified by the *some_hash typeglob.  This
-is a somewhat tricky way of passing around refernces cheaply
+is a somewhat tricky way of passing around references cheaply
 when you won't want to have to remember to dereference variables
 explicitly.
 
@@ -175,6 +175,11 @@ die() function.  (But not if it's is being blown out of the water by a
 signal--you have to trap that yourself (if you can).)  You may have
 multiple C<END> blocks within a file--they will execute in reverse
 order of definition; that is: last in, first out (LIFO).
+
+Inside an C<END> subroutine C<$?> contains the value that the script is
+going to pass to C<exit()>.  You can modify C<$?> to change the exit
+value of the script.  Beware of changing C<$?> by accident (eg, by
+running something via C<system>).
 
 Note that when you use the B<-n> and B<-p> switches to Perl, C<BEGIN>
 and C<END> work just as they do in B<awk>, as a degenerate case.
@@ -411,7 +416,7 @@ Dynamically load C libraries into Perl code
 
 =item English
 
-use nice English (or awk) names for ugly punctuation variables
+use nice English (or B<awk>) names for ugly punctuation variables
 
 =item Env
 
@@ -419,7 +424,7 @@ perl module that imports environment variables
 
 =item Exporter
 
-provide inport/export controls for Perl modules
+provide import/export controls for Perl modules
 
 =item ExtUtils::Liblist
 
@@ -511,7 +516,7 @@ run perl standard test scripts with statistics
 
 =item Text::Abbrev
 
-rceate an abbreviation table from a list
+create an abbreviation table from a list
 
 =back
 
@@ -541,7 +546,7 @@ disposition.
 
 CPAN stands for the Comprehensive Perl Archive Network.  This is a globally
 replicated collection of all known Perl materials, including hundreds 
-of unbunded modules.  Here are the major categories of modules:
+of unbundled modules.  Here are the major categories of modules:
 
 =over
 
@@ -750,13 +755,13 @@ Pass arrays as references so more parameters can be added later
 appropriate.  Split large methods into smaller more flexible ones.
 Inherit methods from other modules if appropriate.
 
-Avoid class name tests like: die "Invalid" unless ref $ref eq 'FOO'.
-Generally you can delete the "eq 'FOO'" part with no harm at all.
+Avoid class name tests like: C<die "Invalid" unless ref $ref eq 'FOO'>.
+Generally you can delete the "C<eq 'FOO'>" part with no harm at all.
 Let the objects look after themselves! Generally, avoid hardwired
 class names as far as possible.
 
-Avoid $r-E<gt>Class::func() where using @ISA=qw(... Class ...) and
-$r-E<gt>func() would work (see perlbot man page for more details).
+Avoid C<$r-E<gt>Class::func()> where using C<@ISA=qw(... Class ...)> and
+C<$r-E<gt>func()> would work (see L<perlbot> for more details).
 
 Use autosplit so little used or newly added functions won't be a
 burden to programs which don't use them. Add test functions to
@@ -765,18 +770,18 @@ the module after __END__ either using AutoSplit or by saying:
  eval join('',<main::DATA>) || die $@ unless caller();
 
 Does your module pass the 'empty sub-class' test? If you say
-"@SUBCLASS::ISA = qw(YOURCLASS);" your applications should be able
+"C<@SUBCLASS::ISA = qw(YOURCLASS);>" your applications should be able
 to use SUBCLASS in exactly the same way as YOURCLASS.  For example,
-does your application still work if you change:  $obj = new YOURCLASS;
-into: $obj = new SUBCLASS; ?
+does your application still work if you change:  C<$obj = new YOURCLASS;>
+into: C<$obj = new SUBCLASS;> ?
 
 Avoid keeping any state information in your packages. It makes it
 difficult for multiple other packages to use yours. Keep state
 information in objects.
 
-Always use C<-w>. Try to C<use strict;> (or C<use strict qw(...);>).
+Always use B<-w>. Try to C<use strict;> (or C<use strict qw(...);>).
 Remember that you can add C<no strict qw(...);> to individual blocks
-of code which need less strictness. Always use C<-w>. Always use C<-w>!
+of code which need less strictness. Always use B<-w>. Always use B<-w>!
 Follow the guidelines in the perlstyle(1) manual.
 
 =item Some simple style guidelines
@@ -806,7 +811,7 @@ or nature of a variable. For example:
  $no_caps_here    function scope my() or local() variables
 
 Function and method names seem to work best as all lowercase.
-E.g., $obj-E<gt>as_string().
+E.g., C<$obj-E<gt>as_string()>.
 
 You can use a leading underscore to indicate that a variable or
 function should not be used outside the package that defined it.
@@ -822,12 +827,12 @@ export try to use @EXPORT_OK in preference to @EXPORT and avoid
 short or common names to reduce the risk of name clashes.
 
 Generally anything not exported is still accessible from outside the
-module using the ModuleName::item_name (or $blessed_ref-E<gt>method)
+module using the ModuleName::item_name (or C<$blessed_ref-E<gt>method>)
 syntax.  By convention you can use a leading underscore on names to
 informally indicate that they are 'internal' and not for public use.
 
 (It is actually possible to get private functions by saying:
-my $subref = sub { ... };  &$subref; But there's no way to call that
+C<my $subref = sub { ... };  &$subref;>.  But there's no way to call that
 directly as a method, since a method must have a name in the symbol
 table.)
 
@@ -922,11 +927,11 @@ Copying, ToDo etc.
 
 =item Adding a Copyright Notice.
 
-How you choose to licence your work is a personal decision.
+How you choose to license your work is a personal decision.
 The general mechanism is to assert your Copyright and then make
 a declaration of how others may copy/use/modify your work.
 
-Perl, for example, is supplied with two types of licence: The GNU
+Perl, for example, is supplied with two types of license: The GNU
 GPL and The Artistic License (see the files README, Copying and
 Artistic).  Larry has good reasons for NOT just using the GNU GPL.
 
@@ -947,7 +952,7 @@ To be fully compatible with the Exporter and MakeMaker modules you
 should store your module's version number in a non-my package
 variable called $VERSION.  This should be a valid floating point 
 number with at least two digits after the decimal (ie hundredths,
-e.g, $VERSION = "0.01").  Don't use a "1.3.2" style version.
+e.g, C<$VERSION = "0.01">).  Don't use a "1.3.2" style version.
 See Exporter.pm in Perl5.001m or later for details.
 
 It may be handy to add a function or method to retrieve the number.
