@@ -688,7 +688,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		? s + (prog->minlen? cl_l : 0)
 		: (prog->float_substr ? check_at - start_shift + cl_l
 				      : strend) ;
-	char *startpos = sv ? strend - SvCUR(sv) : s;
+	char *startpos = sv && SvPOK(sv) ? strend - SvCUR(sv) : s;
 
 	t = s;
 	if (prog->reganch & ROPT_UTF8) {	
