@@ -3671,6 +3671,15 @@ iterating over it, and someone else stuck a message in the stream of
 data Perl expected.  Someone's very confused, or perhaps trying to
 subvert Perl's population of %ENV for nefarious purposes.
 
+=item Unknown warnings category '%s'
+
+(F) An error issued by the C<warnings> pragma. You specified a warnings
+category that is unknown to perl at this point.
+
+Note that if you want to enable a warnings category registered by a module
+(e.g. C<use warnings 'File::Find'>), you must have imported this module
+first.
+
 =item unmatched [ in regex; marked by <-- HERE in m/%s/
 
 (F) The brackets around a character class must match. If you wish to

@@ -332,7 +332,7 @@ eval { warnings::warn("fred", "joe") } ;
 print $@ ;
 EXPECT
 Usage: warnings::warn([category,] 'message') at - line 4
-unknown warnings category 'fred' at - line 6
+Unknown warnings category 'fred' at - line 6
 ########
 
 # check warnings::warnif
@@ -343,7 +343,7 @@ eval { warnings::warnif("fred", "joe") } ;
 print $@ ;
 EXPECT
 Usage: warnings::warnif([category,] 'message') at - line 4
-unknown warnings category 'fred' at - line 6
+Unknown warnings category 'fred' at - line 6
 ########
 
 --FILE-- abc.pm
