@@ -65,8 +65,6 @@ sub delete_by_prefix {
 
 delete_by_name('CGI::Fast');		# won't load without FCGI
 
-delete_by_name('Devel::DProf');		# needs to be run as -d:DProf
-
 delete_by_prefix('ExtUtils::MM_');	# ExtUtils::MakeMaker's domain
 
 delete_by_prefix('File::Spec::');	# File::Spec's domain
@@ -89,8 +87,6 @@ unless (using_feature('threads') && has_extension('Thread')) {
 unless (has_extension('NDBM_File')) {
     delete_by_name('Memoize::NDBM_File');
 }
-
-delete_by_prefix('unicode::');
 
 if (ord('A') == 193) {
     delete_by_prefix('Net::') unless eval { require Convert::EBCDIC };
@@ -145,7 +141,6 @@ CGI::Switch
 CGI::Util
 Carp::Heavy
 CPAN::Nox
-Devel::DProf
 Exporter::Heavy
 ExtUtils::Constant
 ExtUtils::MakeMaker
@@ -198,6 +193,5 @@ Time::tm
 UNIVERSAL
 attributes
 base
-bytes
 ops
 warnings::register
