@@ -1,5 +1,5 @@
 ==============================================================================
-                      Release of version 2.05 of Switch
+                      Release of version 2.06 of Switch
 ==============================================================================
 
 
@@ -26,12 +26,16 @@ COPYRIGHT
 
 ==============================================================================
 
-CHANGES IN VERSION 2.05
+CHANGES IN VERSION 2.06
 
 
-	- Changed licence for inclusion in core distribution
+	- Fixed parsing of ternary operators in Switch'ed source code
+	  (at the expense of no longer correctly parsing ?...? regexes)
+	  (thanks Mark)
 
-	- Added new test file for non-fallthrough and nested switches
+	- Fixed the parsing of embedded POD (thanks Brent)
+
+	- Fixed bug encountered when -s or -m file test used (thanks Jochen)
 
 
 ==============================================================================

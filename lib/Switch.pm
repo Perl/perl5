@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = '2.05';
+$VERSION = '2.06';
 
 
 # LOAD FILTERING MODULE...
@@ -74,6 +74,16 @@ sub is_block
 	return !$ishash;
 }
 
+
+my $EOP = qr/\n\n|\Z/;
+my $CUT = qr/\n=cut.*$EOP/;
+my $pod_or_DATA = qr/ ^=(?:head[1-4]|item) .*? $CUT
+                    | ^=pod .*? $CUT
+                    | ^=for .*? $EOP
+                    | ^=begin \s* (\S+) .*? \n=end \s* \1 .*? $EOP
+                    | ^__(DATA|END)__\n.*
+                    /smx;
+
 my $casecounter = 1;
 sub filter_blocks
 {
@@ -89,10 +99,13 @@ sub filter_blocks
 			$text .= q{use Switch 'noimport'};
 			next component;
 		}
-		my @pos = Text::Balanced::_match_quotelike(\$source,qr/\s*/,1,1);
+		my @pos = Text::Balanced::_match_quotelike(\$source,qr/\s*/,1,0);
 		if (defined $pos[0])
 		{
 			$text .= " " . substr($source,$pos[2],$pos[18]-$pos[2]);
+			next component;
+		}
+		if ($source =~ m/\G\s*($pod_or_DATA)/gc) {
 			next component;
 		}
 		@pos = Text::Balanced::_match_variable(\$source,qr/\s*/);
@@ -149,7 +162,7 @@ sub filter_blocks
 				$code =~ s {^\s*@}  { \@};
 				$text .= " $code)";
 			}
-			elsif ( @pos = Text::Balanced::_match_quotelike(\$source,qr/\s*/,1,1)) {
+			elsif ( @pos = Text::Balanced::_match_quotelike(\$source,qr/\s*/,1,0)) {
 				my $code = substr($source,$pos[2],$pos[18]-$pos[2]);
 				$code = filter_blocks($code,line(substr($source,0,$pos[2]),$line));
 				$code =~ s {^\s*m}  { qr}	||
@@ -186,7 +199,7 @@ sub filter_blocks
 			next component;
 		}
 
-		$source =~ m/\G(\s*(\w+|#.*\n|\W))/gc;
+		$source =~ m/\G(\s*(-[sm]\s+|\w+|#.*\n|\W))/gc;
 		$text .= $1;
 	}
 	$text;
@@ -341,7 +354,8 @@ sub switch(;$)
 	return 1;
 }
 
-sub case($) { $::_S_W_I_T_C_H->(@_); }
+sub case($) { local $SIG{__WARN__} = \&carp;
+	      $::_S_W_I_T_C_H->(@_); }
 
 # IMPLEMENT __
 
@@ -473,8 +487,8 @@ Switch - A switch statement for Perl
 
 =head1 VERSION
 
-This document describes version 2.05 of Switch,
-released September  3, 2001.
+This document describes version 2.06 of Switch,
+released November 14, 2001.
 
 =head1 SYNOPSIS
 
@@ -824,6 +838,12 @@ Damian Conway (damian@conway.org)
 
 There are undoubtedly serious bugs lurking somewhere in code this funky :-)
 Bug reports and other feedback are most welcome.
+
+=head1 LIMITATION
+
+Due to the heuristic nature of Switch.pm's source parsing, the presence
+of regexes specified with raw C<?...?> delimiters may cause mysterious
+errors. The workaround is to use C<m?...?> instead.
 
 =head1 COPYRIGHT
 
