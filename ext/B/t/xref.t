@@ -94,6 +94,7 @@ is(
 );
 
 END {
+    close XREF;
     1 while unlink $file;
 }
 
