@@ -62,11 +62,11 @@ use overload
 	  $y = abs($zi);
 	  if ($x >= $y) { 
 	      $r = $y/$x; 
-	      $w = sqrt($x) * sqrt(0.5*(1.0+sqrt(1.0+$r*$r))); 
+	      $w = sqrt(0.5 * $x * (1.0+sqrt(1.0+$r*$r))); 
 	  }
 	  else { 
 	      $r = $x/$y; 
-	      $w = sqrt($y) * sqrt($y) * sqrt(0.5*($r+sqrt(1.0+$r*$r))); 
+	      $w = sqrt(0.5 * ($x + $y*sqrt(1.0+$r*$r))); 
 	  }
 	  if ( $zr >= 0) { 
 	      @$c = ($w, $zi/(2 * $w) ); 
@@ -110,7 +110,7 @@ sub stringify {
     $re = $x if ($x);
     if ($y == 1) {$im = 'i';}  
     elsif ($y == -1){$im = '-i';} 
-    elsif ($y) {$im = "${y}i"; }
+    elsif ($y) {$im = $y . 'i'; }
 
     local $_ = $re.'+'.$im;
     s/\+-/-/;
