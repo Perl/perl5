@@ -295,8 +295,8 @@ for any given task.  Also mention that the difference between version
 (Well, OK, maybe it's not quite that distinct, but you get the idea.)
 If you want support and a reasonable guarantee that what you're
 developing will continue to work in the future, then you have to run
-the supported version.  As of early March 2001 that probably means
-running either of the releases 5.6.0 (released in March 2000) or
+the supported version.  As of April 2001 that probably means
+running either of the releases 5.6.1 (released in April 2001) or
 5.005_03 (released in March 1999), although 5.004_05 isn't that bad
 if you B<absolutely> need such an old version (released in April 1999)
 for stability reasons.  Anything older than 5.004_05 shouldn't be used.
