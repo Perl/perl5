@@ -959,25 +959,40 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	/* We know what class it must start with. */
 	switch (OP(c)) {
 	case ANYOF:
-	    while (s < strend) {
-		STRLEN skip = do_utf8 ? UTF8SKIP(s) : 1;
-		  
-		if (do_utf8 ?
-		    reginclass(c, (U8*)s, 0, do_utf8) :
-		    REGINCLASS(c, (U8*)s) ||
-		    (ANYOF_FOLD_SHARP_S(c, s, strend) &&
-		     /* The assignment of 2 is intentional:
-		      * for the sharp s, the skip is 2. */
-		     (skip = SHARP_S_SKIP)
-		     )) {
-		    if (tmp && (norun || regtry(prog, s)))
-			goto got_it;
-		    else
-			tmp = doevery;
-		}
-		else 
-		    tmp = 1;
-		s += skip;
+	    if (do_utf8) {
+		 while (s < strend) {
+		      if ((ANYOF_FLAGS(c) & ANYOF_UNICODE) ||
+			  !UTF8_IS_INVARIANT((U8)s[0]) ?
+			  reginclass(c, (U8*)s, 0, do_utf8) :
+			  REGINCLASS(c, (U8*)s)) {
+			   if (tmp && (norun || regtry(prog, s)))
+				goto got_it;
+			   else
+				tmp = doevery;
+		      }
+		      else 
+			   tmp = 1;
+		      s += UTF8SKIP(s);
+		 }
+	    }
+	    else {
+		 while (s < strend) {
+		      STRLEN skip = 1;
+
+		      if (REGINCLASS(c, (U8*)s) ||
+			  (ANYOF_FOLD_SHARP_S(c, s, strend) &&
+			   /* The assignment of 2 is intentional:
+			    * for the folded sharp s, the skip is 2. */
+			   (skip = SHARP_S_SKIP))) {
+			   if (tmp && (norun || regtry(prog, s)))
+				goto got_it;
+			   else
+				tmp = doevery;
+		      }
+		      else 
+			   tmp = 1;
+		      s += skip;
+		 }
 	    }
 	    break;
 	case CANY:
@@ -4053,8 +4068,26 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     case ANYOF:
 	if (do_utf8) {
 	    loceol = PL_regeol;
-	    while (hardcount < max && scan < loceol &&
-		   reginclass(p, (U8*)scan, 0, do_utf8)) {
+	    while (hardcount < max && scan < loceol) {
+		 bool cont = FALSE;
+		 if (ANYOF_FLAGS(p) & ANYOF_UNICODE) {
+		      if (reginclass(p, (U8*)scan, 0, do_utf8))
+			   cont = TRUE;
+		 }
+		 else {
+		      U8 c = (U8)scan[0];
+
+		      if (UTF8_IS_INVARIANT(c)) {
+			   if (ANYOF_BITMAP_TEST(p, c))
+				cont = TRUE;
+		      }
+		      else {
+			   if (reginclass(p, (U8*)scan, 0, do_utf8))
+				cont = TRUE;
+		      }
+		}
+		if (!cont)
+		     break;
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
