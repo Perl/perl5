@@ -28,7 +28,6 @@ ln='cp'             # no REAL ln on dos
 lns='cp'
 
 usenm='true'
-d_bincompat3='undef'
 
 d_link='undef'      # these are empty functions in libc.a
 d_symlink='undef'
