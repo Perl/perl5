@@ -31,6 +31,202 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10000] By: jhi                                   on 2001/05/05  18:32:15
+        Log: Subject: Re: bleadperl make install fails due to "psed"
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 05 May 2001 18:23:28 +0200
+             Message-ID: <m3u22zg3y7.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! x2p/Makefile.SH x2p/s2p.PL
+____________________________________________________________________________
+[  9999] By: jhi                                   on 2001/05/05  18:28:09
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[  9998] By: jhi                                   on 2001/05/05  18:16:00
+        Log: Updates on the pods related to the modules included since 5.6.
+             
+             TODO: perltodo really could use major updating.
+     Branch: perl
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq7.pod
+	   ! pod/perlfaq8.pod pod/perlfilter.pod pod/perlfunc.pod
+	   ! pod/perlop.pod pod/perlport.pod pod/perlsec.pod
+	   ! pod/perlsyn.pod pod/perltodo.pod
+____________________________________________________________________________
+[  9997] By: jhi                                   on 2001/05/05  17:35:17
+        Log: Hints file for AtheOS ( http://www.atheos.cx/ ),
+             from Kurt Skauen.
+     Branch: perl
+	   + hints/atheos.sh
+	   ! MANIFEST
+____________________________________________________________________________
+[  9996] By: jhi                                   on 2001/05/05  17:25:00
+        Log: Add preemptive #undefs for some of the shorter and more prone
+             to collision regcomp.h #defines.  (Background: the MASK collided
+             with a system header #define in Rhapsody.)
+     Branch: perl
+	   ! regcomp.h
+____________________________________________________________________________
+[  9995] By: jhi                                   on 2001/05/05  13:24:21
+        Log: Subject: [PATCH] Re: h2xs [was Re: HEAR YE, HEAR YE!]
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 5 May 2001 14:46:39 +0100
+             Message-ID: <20010505144639.O53513@plum.flirble.org>
+             
+             Add a test for the constants (if any) being processed correctly.
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  9994] By: jhi                                   on 2001/05/05  02:11:03
+        Log: Subject: [PATCH & retract: perl@9973] the real fix for t/lib/b-stash.t
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 4 May 2001 17:44:13 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10105041734280.67333-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/b-stash.t
+____________________________________________________________________________
+[  9993] By: jhi                                   on 2001/05/05  02:03:49
+        Log: Subject: [PATCH: perl@9973] fix const poisioning in  PerlIO_openn->fdopen->openn
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 4 May 2001 17:29:02 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10105041727420.67333-100000@aspara.forte.com>
+     Branch: perl
+	   ! perlio.c vms/vmsish.h
+____________________________________________________________________________
+[  9992] By: jhi                                   on 2001/05/04  17:21:12
+        Log: Subject: [PATHC perl@9944] missing library tests: Pod::Plainer
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 4 May 2001 18:13:47 +0100 (BST)
+             Message-Id: <200105041713.SAA14842@tempest.npl.co.uk>
+     Branch: perl
+	   + t/pod/plainer.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9991] By: jhi                                   on 2001/05/04  16:47:45
+        Log: Subject: [PATCH perl@9944] -Wformat error from ext/re/re_comp.c
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 4 May 2001 18:09:13 +0100 (BST)
+             Message-Id: <200105041709.SAA14835@tempest.npl.co.uk>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  9990] By: jhi                                   on 2001/05/04  14:37:20
+        Log: Subject: [PATCH: perl@9973] let win32 run t/lib/b-stash.t
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Fri, 4 May 2001 07:31:01 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0105040727430.14844-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! t/lib/b-stash.t
+____________________________________________________________________________
+[  9989] By: jhi                                   on 2001/05/04  14:03:58
+        Log: Introduce perl572delta, update Todo, add the missing
+             mention about signal safety since 5.7.1 (though this
+             requires verification and more details.)
+     Branch: perl
+	   + pod/perl572delta.pod
+	   ! MANIFEST Todo pod/perl571delta.pod
+____________________________________________________________________________
+[  9988] By: jhi                                   on 2001/05/04  12:41:51
+        Log: Subject: [PATCH perl@9944] long =item
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 4 May 2001 14:15:20 +0100 (BST)
+             Message-Id: <200105041315.OAA00436@tempest.npl.co.uk>
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.pm
+____________________________________________________________________________
+[  9987] By: jhi                                   on 2001/05/04  12:39:19
+        Log: The #9901 had removed one line essential for EBCDIC.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  9986] By: jhi                                   on 2001/05/04  12:30:23
+        Log: Subject: cygwin/Makefile.SHs INSTALL patch
+             From: Reini Urban <rurban@sbox.tu-graz.ac.at>
+             Date: Mon, 08 Jan 2001 04:59:21 +0200
+             Message-ID: <3A592D09.FD6AD35D@sbox.tu-graz.ac.at> 
+     Branch: perl
+	   ! cygwin/Makefile.SHs
+____________________________________________________________________________
+[  9985] By: jhi                                   on 2001/05/04  03:51:39
+        Log: Encode/IO doc tweaks.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  9984] By: jhi                                   on 2001/05/04  03:29:34
+        Log: Remove GDBM_File from the dynamic extensions for UTS,
+             GDBM is not a standard feature.
+     Branch: perl
+	   ! hints/uts.sh
+____________________________________________________________________________
+[  9983] By: jhi                                   on 2001/05/04  03:22:59
+        Log: Document the \pX and \p{Yz} (and \p{BidiXYZ}) classes a bit more.
+     Branch: perl
+	   ! pod/perlretut.pod
+____________________________________________________________________________
+[  9982] By: jhi                                   on 2001/05/03  23:21:03
+        Log: Subject: [PATCH] Let sv_dump understand GvSHARED
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Thu, 3 May 2001 16:51:07 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105031645280.805-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! dump.c
+____________________________________________________________________________
+[  9981] By: jhi                                   on 2001/05/03  23:20:05
+        Log: Subject: [PATCH] Allow clobbering of a PerlIO::Scalar and more tests
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Thu, 3 May 2001 15:28:21 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105031508360.805-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! ext/PerlIO/Scalar/Scalar.xs t/lib/io_scalar.t
+____________________________________________________________________________
+[  9980] By: jhi                                   on 2001/05/03  23:15:29
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Encode.pm
+____________________________________________________________________________
+[  9979] By: jhi                                   on 2001/05/03  16:54:59
+        Log: Install psed man page.
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[  9978] By: jhi                                   on 2001/05/03  16:45:58
+        Log: Remove unused files; noted by Sarathy.
+     Branch: perl
+	   - ext/SDBM_File/sdbm/dbm.c ext/SDBM_File/sdbm/dbm.h
+	   ! MANIFEST
+____________________________________________________________________________
+[  9977] By: jhi                                   on 2001/05/03  16:42:30
+        Log: Subject: [PATCH bleadperl] INSTALL patch -- space requirements
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 3 May 2001 11:16:10 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10105031114500.17868-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[  9976] By: nick                                  on 2001/05/03  16:40:42
+        Log: Allow $answer = encode($object,$text); like it says in docs.
+     Branch: perlio
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  9975] By: nick                                  on 2001/05/03  16:22:30
+        Log: Fix latin1 etc. alias code - (bit rot?) - the @latin2iso array now seems to need
+             to be in scope (fair enough), and also a package variable (our) for eval to see it.
+     Branch: perlio
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  9974] By: nick                                  on 2001/05/03  15:48:17
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> lib/NEXT.pm t/io/fflush.t t/lib/MyFilter.pm
+	  +> t/lib/filter-simple.t t/lib/next.t
+	  !> (integrate 70 files)
+____________________________________________________________________________
+[  9973] By: jhi                                   on 2001/05/03  13:09:09
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9972] By: jhi                                   on 2001/05/03  12:58:33
         Log: Subject: [PATCH: perl@9945] fix handling of $Config{variables} in io/fflush.t
              From: Prymmer/Kahn <pvhp@best.com>
