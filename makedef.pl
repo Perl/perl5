@@ -402,6 +402,8 @@ unless ($define{'USE_5005THREADS'}) {
 		    PL_svref_mutex
 		    PL_cred_mutex
 		    PL_eval_mutex
+		    PL_fdpid_mutex
+		    PL_sv_lock_mutex
 		    PL_eval_cond
 		    PL_eval_owner
 		    PL_threads_mutex
@@ -418,6 +420,7 @@ unless ($define{'USE_5005THREADS'}) {
 		    Perl_find_threadsv
 		    Perl_unlock_condpair
 		    Perl_magic_mutexfree
+		    Perl_lock
 		    )];
 }
 
