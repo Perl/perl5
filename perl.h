@@ -1018,7 +1018,11 @@ Free_t   Perl_mfree (Malloc_t where);
 #  if defined(INT32_MAX) && LONGSIZE == 4
 #    define IV_MAX INT32_MAX
 #    define IV_MIN INT32_MIN
-#    define UV_MAX UINT32_MAX
+#    ifndef UINT32_MAX_BROKEN /* e.g. HP-UX with gcc messes this up */
+#        define UV_MAX UINT32_MAX
+#    else
+#        define UV_MAX 4294967295U
+#    endif
 #    ifndef UINT32_MIN
 #      define UINT32_MIN 0
 #    endif
