@@ -1276,19 +1276,25 @@ print "not " unless "\x{abcd}" =~ /\x{abcd}/;
 print "ok 247\n";
 
 {
-    # bug id 20001008.001
+    if (ord("�") == 0337) { # Latin-1 only.
+	# bug id 20001008.001
 
-    my $test = 248;
-    my @x = ("stra\337e 138","stra\337e 138");
-    for (@x) {
-	s/(\d+)\s*([\w\-]+)/$1 . uc $2/e;
-	my($latin) = /^(.+)(?:\s+\d)/;
-	print $latin eq "stra\337e" ? "ok $test\n" :	# 248,249
-	    "#latin[$latin]\nnot ok $test\n";
-	$test++;
-	$latin =~ s/stra\337e/straße/; # \303\237 after the 2nd a
-	use utf8; # needed for the raw UTF-8
-	$latin =~ s!(s)tr(?:aß|s+e)!$1tr.!; # \303\237 after the a
+	my $test = 248;
+	my @x = ("stra\337e 138","stra\337e 138");
+	for (@x) {
+	    s/(\d+)\s*([\w\-]+)/$1 . uc $2/e;
+	    my($latin) = /^(.+)(?:\s+\d)/;
+	    print $latin eq "stra\337e" ? "ok $test\n" :	# 248,249
+		"#latin[$latin]\nnot ok $test\n";
+	    $test++;
+	    $latin =~ s/stra\337e/straße/; # \303\237 after the 2nd a
+	    use utf8; # needed for the raw UTF-8
+	    $latin =~ s!(s)tr(?:aß|s+e)!$1tr.!; # \303\237 after the a
+	}
+    } else {
+	for (248..249) {
+	    print "ok $_ # Skip: only in Latin-1\n";
+        }
     }
 }
 
