@@ -31,6 +31,412 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9582] By: jhi                                   on 2001/04/05  23:11:23
+        Log: Slight doc tweak.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[  9581] By: jhi                                   on 2001/04/05  23:04:11
+        Log: Integrate perlio.
+     Branch: perl
+	  !> pod/perlunicode.pod
+____________________________________________________________________________
+[  9580] By: jhi                                   on 2001/04/05  23:03:29
+        Log: Test for #9579.
+     Branch: perl
+	   ! t/op/do.t
+____________________________________________________________________________
+[  9579] By: jhi                                   on 2001/04/05  22:54:17
+        Log: Subject: [PATCH] Propagate calling context for do '...'
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 04 Apr 2001 20:17:29 -0700
+             Message-ID: <lrg0fo827q.fsf@caliper.ActiveState.com>
+     Branch: perl
+	   ! pod/perlfunc.pod pp_ctl.c
+____________________________________________________________________________
+[  9578] By: jhi                                   on 2001/04/05  22:52:51
+        Log: Subject: Re: [PATCH foolperl & bleadperl] README.vms update
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 5 Apr 2001 12:00:04 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10104051156340.518291-100000@aspara.forte.com>
+     Branch: perl
+	   ! README.vms
+____________________________________________________________________________
+[  9577] By: jhi                                   on 2001/04/05  22:48:22
+        Log: Subject: [PATCH foolperl & bleadperl] README.vms update
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 5 Apr 2001 13:43:28 -0500
+             Message-Id: <p04330101b6f269936918@[172.16.52.1]>
+     Branch: perl
+	   ! README.vms
+____________________________________________________________________________
+[  9576] By: jhi                                   on 2001/04/05  22:31:38
+        Log: Subject: [PATCH lib/base.pm t/lib/base.t] Fix subtle $VERSION mistakes with base.pm
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 5 Apr 2001 21:53:21 +0100
+             Message-ID: <20010405215321.A4828@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! lib/base.pm t/lib/fields.t
+____________________________________________________________________________
+[  9575] By: jhi                                   on 2001/04/05  22:26:10
+        Log: FreeBSD hints tweak from Anton Berezin.
+     Branch: perl
+	   ! hints/freebsd.sh
+____________________________________________________________________________
+[  9574] By: jhi                                   on 2001/04/05  22:24:03
+        Log: Subject: patch for t/op/oct.t that shows need for patch supplied with bug 20010404.009, (bugs in hex and oct)
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Thu, 5 Apr 2001 09:40:58 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.30.0104050838330.30478-100000@dd.tc.fluke.com>
+     Branch: perl
+	   ! t/op/oct.t
+____________________________________________________________________________
+[  9573] By: jhi                                   on 2001/04/05  22:23:06
+        Log: Subject: bleadperl / hex ignores variable length and/or tr doesn't null terminate   ( with patch)
+             Date: Wed, 4 Apr 2001 13:27:15 -0700 (PDT)
+             From: David Dyck <dcd@tc.fluke.com>
+             Message-ID: <Pine.LNX.4.30.0104041325310.25358-100000@dd.tc.fluke.com>
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  9572] By: jhi                                   on 2001/04/05  22:14:47
+        Log: Subject: [PATCH B::Deparse] suppress "unintialized value" warnings
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 5 Apr 2001 20:56:48 +0100
+             Message-ID: <20010405205648.A16814@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9571] By: jhi                                   on 2001/04/05  22:12:53
+        Log: Subject: [PATCH B::Deparse] regex quoting, and a minor milestone
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 5 Apr 2001 19:55:51 +0100
+             Message-ID: <20010405195551.A16686@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9570] By: jhi                                   on 2001/04/05  22:11:06
+        Log: Subject: [PATCH B::Deparse] binmode is no longer an UNOP
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 5 Apr 2001 20:16:29 +0100
+             Message-ID: <20010405201629.A16763@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9569] By: nick                                  on 2001/04/05  21:32:26
+        Log: Change sense from "incomplete" to "implemented but needs more work" in perlunicode.pod
+     Branch: perlio
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[  9568] By: nick                                  on 2001/04/05  19:38:09
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Class/ISA.pm t/lib/class-isa.t t/lib/md5-align.t
+	  !> (integrate 35 files)
+____________________________________________________________________________
+[  9567] By: jhi                                   on 2001/04/05  18:31:45
+        Log: Subject: [PATCH B::Deparse] "${foo}bar", "${foo}[1]" etc.
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 5 Apr 2001 18:03:23 +0100
+             Message-ID: <20010405180323.A16388@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9566] By: jhi                                   on 2001/04/05  18:29:35
+        Log: Subject: [PATCH B::*] cope with SVf_IVisUV, and cope with $^^ and friends
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 5 Apr 2001 16:45:18 +0100
+             Message-ID: <20010405164517.B16037@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B/Deparse.pm ext/B/B/Terse.pm
+____________________________________________________________________________
+[  9565] By: jhi                                   on 2001/04/05  18:24:23
+        Log: Subject: [PATCH B::Deparse] lexical variables with ridiculously long names that are used in list assignments
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 5 Apr 2001 14:50:09 +0100
+             Message-ID: <20010405145009.A15916@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9564] By: jhi                                   on 2001/04/05  18:23:03
+        Log: Subject: [PATCH B::*] print control-character vars readably
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 5 Apr 2001 14:27:38 +0100
+             Message-ID: <20010405142738.A15855@puffinry.freeserve.co.uk>
+             
+             Needs EBCDICification.
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B/Concise.pm ext/B/B/Debug.pm
+	   ! ext/B/B/Terse.pm
+____________________________________________________________________________
+[  9563] By: jhi                                   on 2001/04/05  18:20:32
+        Log: Subject: Re: Not OK: perl v5.6.1 +fools-gold on darwin 1.3 (UNINSTALLED)
+             Date: Thu, 5 Apr 2001 13:21:42 -0400
+             From: Paul Schinder <schinder@pobox.com>
+             Message-Id: <p05100900b6f25159e767@[10.0.1.52]>
+             
+             Mac OS X (Darwin) has extra pwent fields.
+     Branch: perl
+	   ! t/op/pwent.t
+____________________________________________________________________________
+[  9562] By: jhi                                   on 2001/04/05  17:57:51
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  9561] By: jhi                                   on 2001/04/05  17:47:33
+        Log: Metaconfig units changes for #9560, plus regen Glossary.patch.
+     Branch: metaconfig
+	   ! U/Glossary.patch
+     Branch: metaconfig/U/perl
+	   + d_u32align.U
+	   ! d_cmsghdr_s.U d_msghdr_s.U
+____________________________________________________________________________
+[  9560] By: jhi                                   on 2001/04/05  17:47:01
+        Log: Introduce d_u32align / U32_REQUIRES_ALIGNMENT, needed for
+             ext/Digest/MD5/Makefile.PL and t/lib/md5-align.t.
+             Introduce probes for struct msghdr, struct cmsghdr,
+             sendmsg, recvmsg, readv, writev, setitimer, getitimer,
+             ualarm, usleep, for possible later extension work.
+     Branch: perl
+	   + t/lib/md5-align.t
+	   ! Configure MANIFEST Porting/Glossary Porting/config.sh
+	   ! Porting/config_H config_h.SH configure.com epoc/config.sh
+	   ! ext/Digest/MD5/Makefile.PL perl.h uconfig.h uconfig.sh
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h win32/config.bc win32/config.gc
+	   ! win32/config.vc
+____________________________________________________________________________
+[  9559] By: jhi                                   on 2001/04/05  13:03:04
+        Log: Be traditional in your cpp (for the Errno extension).
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[  9558] By: jhi                                   on 2001/04/05  13:00:05
+        Log: Add $Config{cppflags} to the gcc incantation.
+     Branch: perl
+	   ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  9557] By: jhi                                   on 2001/04/05  04:22:39
+        Log: Introduce Sean Burke's Class::ISA 0.32.
+     Branch: perl
+	   + lib/Class/ISA.pm t/lib/class-isa.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9556] By: jhi                                   on 2001/04/05  04:09:50
+        Log: Subject: [PATCH AUTHORS] Housekeeping
+             From: Paul Johnson <paul@pjcj.net> 
+             Date: Wed, 4 Apr 2001 22:45:47 +0200
+             Message-ID: <20010404224547.D9548@pjcj.net>
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[  9555] By: jhi                                   on 2001/04/05  04:06:33
+        Log: Subject: [PATCH] Base64 update to perlfaq9.pod
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 04 Apr 2001 14:23:04 -0700
+             Message-ID: <lrlmpg9x6v.fsf@caliper.ActiveState.com>
+     Branch: perl
+	   ! pod/perlfaq9.pod
+____________________________________________________________________________
+[  9554] By: jhi                                   on 2001/04/05  04:05:49
+        Log: Downgrade also the "Wide character" diagnostic.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  9553] By: jhi                                   on 2001/04/05  04:00:33
+        Log: Integrate changes #9544,9547,9549(perlio),9550,9551 from
+             maintperl into mainline.
+             
+             "double" should be "NV"; standard typemap is missing entry
+             for NV
+             
+             s/djSP/dSP/
+             
+             Downgrade "Wide character in print" to a warning.
+             
+             B::Deparse fix for ${^FOO} and documentation for PVX() method
+             (from Robin Houston)
+             
+             tr/// doesn't null-terminate the result in some situations
+             (from Gisle Aas)
+     Branch: perl
+	  !> doio.c doop.c ext/B/B.pm ext/B/B.xs ext/B/B/C.pm
+	  !> ext/B/B/Deparse.pm ext/Thread/Thread.xs lib/ExtUtils/typemap
+	  !> t/io/utf8.t t/op/tr.t
+____________________________________________________________________________
+[  9552] By: jhi                                   on 2001/04/05  03:52:50
+        Log: Retract changes #9542 and #9538 (from maintperl, integrated
+             at #9540), shouldn't be needed because of the perlio changes.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[  9551] By: gsar                                  on 2001/04/05  00:18:34
+        Log: tr/// doesn't null-terminate the result in some situations
+             (from Gisle Aas)
+     Branch: maint-5.6/perl
+	   ! doop.c t/op/tr.t
+____________________________________________________________________________
+[  9550] By: gsar                                  on 2001/04/04  20:04:17
+        Log: B::Deparse fix for ${^FOO} and documentation for PVX() method
+             (from Robin Houston)
+     Branch: maint-5.6/perl
+	   ! ext/B/B.pm ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9549] By: nick                                  on 2001/04/04  18:56:15
+        Log: Downgrade "Wide character in print" to a warning.
+     Branch: perlio
+	   ! doio.c t/io/utf8.t
+____________________________________________________________________________
+[  9548] By: gsar                                  on 2001/04/04  18:51:49
+        Log: integrate changes#9460,9462,9482,9521,9522
+             
+             Subject: PATCH: B::Debug should show LOOP-specific fields
+             
+             Subject: B::Deparse precedence bug. (Patch included.)
+             
+             Subject: Re: [ID 20010330.003] O=Deparse,-p does not preserve "operational semantics"
+             
+             Subject: [PATCH B::Concise] @stash_array = split(/pat/, str);
+             
+             Subject: [PATCH B::Concise] padname values may have bogus SvCUR
+     Branch: maint-5.6/perl
+	  !> ext/B/B.pm ext/B/B.xs ext/B/B/Concise.pm ext/B/B/Debug.pm
+	  !> ext/B/B/Deparse.pm ext/B/B/Showlex.pm
+____________________________________________________________________________
+[  9547] By: gsar                                  on 2001/04/04  18:49:16
+        Log: s/djSP/dSP/
+     Branch: maint-5.6/perl
+	   ! ext/Thread/Thread.xs
+____________________________________________________________________________
+[  9546] By: nick                                  on 2001/04/04  18:44:00
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> Makefile.SH embed.pl ext/File/Glob/Glob.pm jpl/JNI/JNI.pm op.c
+	  !> os2/OS2/Process/Process.pm perl.c pod/perlapi.pod util.c
+____________________________________________________________________________
+[  9545] By: gsar                                  on 2001/04/04  18:38:52
+        Log: integrate change#8837 from mainline
+             
+             Subject: [patch] -Wall cleanup round 2
+     Branch: maint-5.6/perl
+	  !> ext/B/B.xs ext/Data/Dumper/Dumper.xs ext/Devel/DProf/DProf.xs
+	  !> ext/Devel/Peek/Peek.xs ext/Fcntl/Fcntl.xs
+	  !> ext/File/Glob/Glob.xs ext/GDBM_File/GDBM_File.xs ext/IO/IO.xs
+	  !> ext/IPC/SysV/SysV.xs ext/Opcode/Opcode.xs ext/POSIX/POSIX.xs
+	  !> ext/SDBM_File/SDBM_File.xs
+____________________________________________________________________________
+[  9544] By: gsar                                  on 2001/04/04  17:49:57
+        Log: "double" should be "NV"; standard typemap is missing entry
+             for NV
+     Branch: maint-5.6/perl
+	   ! ext/B/B.xs ext/B/B/C.pm lib/ExtUtils/typemap
+____________________________________________________________________________
+[  9543] By: jhi                                   on 2001/04/04  14:13:18
+        Log: Thou shalt not (just) match for English error messages.
+     Branch: perl
+	   ! ext/File/Glob/Glob.pm jpl/JNI/JNI.pm
+	   ! os2/OS2/Process/Process.pm
+____________________________________________________________________________
+[  9542] By: jhi                                   on 2001/04/04  13:20:39
+        Log: Make the stdio tricks of fflush_all() to exist only if
+             stdio is being used.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[  9541] By: jhi                                   on 2001/04/04  04:20:24
+        Log: Subject: Re: [PATCH] Lighten up glob
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Tue, 3 Apr 2001 17:03:48 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0104031700340.2143-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! embed.pl ext/File/Glob/Glob.pm op.c perl.c pod/perlapi.pod
+	   ! util.c
+____________________________________________________________________________
+[  9540] By: jhi                                   on 2001/04/04  04:03:57
+        Log: Integrate changes #9538,9539 from maintperl into mainline.
+             
+             fflush() is a macro on SunOS 4.1.x, so provide a wrapper
+             for use with _fwalk() (fix for change#7705)
+             
+             another tweak needed for SunOS 4.1.x build (from Mike Guy)
+             (cp -f is not portable)
+     Branch: perl
+	  !> Makefile.SH util.c
+____________________________________________________________________________
+[  9539] By: gsar                                  on 2001/04/04  03:01:14
+        Log: another tweak needed for SunOS 4.1.x build (from Mike Guy)
+     Branch: maint-5.6/perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9538] By: gsar                                  on 2001/04/04  01:00:38
+        Log: fflush() is a macro on SunOS 4.1.x, so provide a wrapper
+             for use with _fwalk() (fix for change#7705)
+     Branch: maint-5.6/perl
+	   ! util.c
+____________________________________________________________________________
+[  9537] By: nick                                  on 2001/04/03  19:24:55
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Cwd/Cwd.xs ext/Cwd/Makefile.PL lib/unicode/NamesList.txt
+	  +> lib/unicode/PropList.html
+	   - lib/unicode/Names.txt lib/unicode/README.Ethiopic
+	  !> (integrate 69 files)
+____________________________________________________________________________
+[  9536] By: jhi                                   on 2001/04/03  18:02:31
+        Log: Integrate change #9533 from maintperl into mainline.
+             
+             better fix for change#9517 to accomodate UNC paths like
+             \\server\share\foo, and paths with trailing backslash
+             like c:\this\
+     Branch: perl
+	  !> utils/perldoc.PL x2p/find2perl.PL x2p/s2p.PL
+____________________________________________________________________________
+[  9535] By: jhi                                   on 2001/04/03  17:58:07
+        Log: Change the push/unshift warning to be of class syntax, not misc.
+     Branch: perl
+	   ! op.c pod/perldiag.pod t/pragma/warn/op
+____________________________________________________________________________
+[  9534] By: jhi                                   on 2001/04/03  15:03:46
+        Log: Change the push/unshift warning (#9532) to talk about "no values"
+             instead of "no arguments".
+     Branch: perl
+	   ! op.c pod/perldiag.pod t/pragma/warn/op
+____________________________________________________________________________
+[  9533] By: gsar                                  on 2001/04/03  14:30:07
+        Log: better fix for change#9517 to accomodate UNC paths like
+             \\server\share\foo, and paths with trailing backslash
+             like c:\this\
+     Branch: maint-5.6/perl
+	   ! utils/perldoc.PL x2p/find2perl.PL x2p/s2p.PL
+____________________________________________________________________________
+[  9532] By: jhi                                   on 2001/04/03  13:11:46
+        Log: Subject: Re: [ID 20010331.003] new misc warning for push(@x), unshift(@x)
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 2 Apr 2001 15:03:29 +0100
+             Message-ID: <20010402150329.A6636@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! op.c pod/perldiag.pod t/lib/db-recno.t t/pragma/warn/op
+____________________________________________________________________________
+[  9531] By: jhi                                   on 2001/04/03  13:06:34
+        Log: Integrate change #9530 from maintperl into mainline.
+             
+             accomodate VMS "mailbox overflow" quirk in testsuite (from
+             Craig Berry)
+     Branch: perl
+	  !> t/lib/socket.t
+____________________________________________________________________________
+[  9530] By: gsar                                  on 2001/04/03  04:56:41
+        Log: accomodate VMS "mailbox overflow" quirk in testsuite (from
+             Craig Berry)
+     Branch: maint-5.6/perl
+	   ! t/lib/socket.t
+____________________________________________________________________________
+[  9529] By: jhi                                   on 2001/04/03  02:34:34
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9528] By: jhi                                   on 2001/04/03  01:27:57
         Log: Subject: [PATCH: 9508] perlfaq3: extend the silly long list even further
              Date: Mon, 2 Apr 2001 18:24:53 -0700 (PDT)
