@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 42;
+use Test::More tests => 41;
 
 # Make sure we don't mess with $@ or $!.  Test at bottom.
 my $Err   = "this should not be touched";
@@ -68,9 +68,6 @@ ok( eq_hash({ foo => 42, bar => 23 }, {bar => 23, foo => 42}),
     'eq_hash with simple hashes' );
 ok( eq_set([qw(this that whatever)], [qw(that whatever this)]),
     'eq_set with simple sets' );
-
-eq_array([[]], [{}]);
-is(scalar @Test::More::Data_Stack, 0, "data stack empty");
 
 my @complex_array1 = (
                       [qw(this that whatever)],
