@@ -79,6 +79,16 @@
 
 /* <--- here ends the logic shared by perl.h and makedef.pl */
 
+/*
+ * __APPLE__ for Darwin/MacOSX
+ * __bsdi__ for BSD/OS
+ */
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(__bsdi__) || defined(BSD41) || defined(BSD42) || defined(BSD43) || defined(BSD44)
+#   ifndef BSDish
+#       define BSDish
+#   endif
+#endif
+
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifndef MULTIPLICITY
 #    define MULTIPLICITY
