@@ -530,6 +530,11 @@ PERLVARI(Irehash_seed, UV, 0)		/* 582 hash initializer */
 
 PERLVARI(Irehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
 
+/* These two variables are needed to preserve 5.8.x bincompat because we can't
+   change function prototypes of two exported functions.  Probably should be
+   taken out of blead soon, and relevant prototypes changed.  */
+PERLVARI(Ifdscript, int, -1)	/* fd for script */
+PERLVARI(Isuidscript, int, -1)	/* fd for suid script */
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * (Don't forget to add your variable also to perl_clone()!)
