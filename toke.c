@@ -7407,21 +7407,21 @@ Perl_yyerror(pTHX_ char *s)
 }
 
 STATIC char*
-S_swallow_bom(pTHX_ char *s)
+S_swallow_bom(pTHX_ U8 *s)
 {
     STRLEN slen;
     slen = SvCUR(PL_linestr);
     switch (*s) {
-    case -1:       
-	if ((s[1] & 255) == 254) { 
+    case 0xFF:       
+	if (s[1] == 0xFE) { 
 	    /* UTF-16 little-endian */
 #ifndef PERL_NO_UTF16_FILTER
 	    U8 *news;
 #endif
-	    s += 2;
-	    if (*s == 0 && s[1] == 0)  /* UTF-32 little-endian */
+	    if (s[2] == 0 && s[3] == 0)  /* UTF-32 little-endian */
 		Perl_croak(aTHX_ "Unsupported script encoding");
 #ifndef PERL_NO_UTF16_FILTER
+	    s += 2;
 	    filter_add(S_utf16rev_textfilter, NULL);
 	    New(898, news, (PL_bufend - s) * 3 / 2 + 1, U8);
 	    PL_bufend = utf16_to_utf8((U16*)s, news, PL_bufend - s);
@@ -7431,9 +7431,8 @@ S_swallow_bom(pTHX_ char *s)
 #endif
 	}
 	break;
-
-    case -2:
-	if ((s[1] & 255) == 255) {   /* UTF-16 big-endian */
+    case 0xFE:
+	if (s[1] == 0xFF) {   /* UTF-16 big-endian */
 #ifndef PERL_NO_UTF16_FILTER
 	    U8 *news;
 	    filter_add(S_utf16_textfilter, NULL);
@@ -7445,15 +7444,14 @@ S_swallow_bom(pTHX_ char *s)
 #endif
 	}
 	break;
-
-    case -17:
-	if (slen > 2 && (s[1] & 255) == 187 && (s[2] & 255) == 191) {
+    case 0xEF:
+	if (slen > 2 && s[1] == 0xBB && s[2] == 0xBF) {
 	    s += 3;                      /* UTF-8 */
 	}
 	break;
     case 0:
 	if (slen > 3 && s[1] == 0 &&  /* UTF-32 big-endian */
-	    s[2] & 255 == 254 && s[3] & 255 == 255)
+	    s[2] == 0xFE && s[3] == 0xFF)
 	{
 	    Perl_croak(aTHX_ "Unsupported script encoding");
 	}
