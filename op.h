@@ -461,7 +461,7 @@ struct loop {
 #define PERL_LOADMOD_IMPORT_OPS		0x4
 
 #ifdef USE_REENTRANT_API
-er
+
 typedef struct {
   struct tm* tmbuff;
 } REBUF;
