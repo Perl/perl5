@@ -200,6 +200,7 @@ sub abs2rel {
 
     # Figure out the effective $base and clean it up.
     if ( !defined( $base ) || $base eq '' ) {
+        require Cwd;
         $base = Cwd::sys_cwd() ;
     } elsif ( ! $self->file_name_is_absolute( $base ) ) {
         $base = $self->rel2abs( $base ) ;
@@ -258,6 +259,7 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute( $path ) ) {
 
         if ( !defined( $base ) || $base eq '' ) {
+            require Cwd;
             $base = Cwd::sys_cwd() ;
         }
         elsif ( ! $self->file_name_is_absolute( $base ) ) {
@@ -296,6 +298,5 @@ File::Spec::OS2 - methods for OS/2 file specs
 
 =head1 DESCRIPTION
 
-See File::Spec::Unix for a documentation of the methods provided
-there. This package overrides the implementation of these methods, not
-the semantics.
+See L<File::Spec> and L<File::Spec::Unix>.  This package overrides the
+implementation of these methods, not the semantics.

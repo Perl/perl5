@@ -18,9 +18,8 @@ File::Spec::Cygwin - methods for Cygwin file specs
 
 =head1 DESCRIPTION
 
-See File::Spec::Unix for a documentation of the methods provided
-there. This package overrides the implementation of these methods, not
-the semantics.
+See L<File::Spec> and L<File::Spec::Unix>.  This package overrides the
+implementation of these methods, not the semantics.
 
 This module is still in beta.  Cygwin-knowledgeable folks are invited
 to offer patches and suggestions.

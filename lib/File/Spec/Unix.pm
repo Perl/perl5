@@ -5,8 +5,6 @@ use vars qw($VERSION);
 
 $VERSION = '1.5';
 
-use Cwd;
-
 =head1 NAME
 
 File::Spec::Unix - File::Spec for Unix, base for other File::Spec modules
@@ -375,7 +373,8 @@ sub abs2rel {
 
     # Figure out the effective $base and clean it up.
     if ( !defined( $base ) || $base eq '' ) {
-        $base = cwd() ;
+        require Cwd;
+        $base = Cwd::cwd() ;
     }
     elsif ( ! $self->file_name_is_absolute( $base ) ) {
         $base = $self->rel2abs( $base ) ;
@@ -447,7 +446,8 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute( $path ) ) {
         # Figure out the effective $base and clean it up.
         if ( !defined( $base ) || $base eq '' ) {
-            $base = cwd() ;
+            require Cwd;
+            $base = Cwd::cwd() ;
         }
         elsif ( ! $self->file_name_is_absolute( $base ) ) {
             $base = $self->rel2abs( $base ) ;

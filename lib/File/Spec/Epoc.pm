@@ -1,7 +1,6 @@
 package File::Spec::Epoc;
 
 use strict;
-use Cwd;
 use vars qw($VERSION @ISA);
 
 $VERSION = '1.1';
@@ -59,9 +58,12 @@ sub canonpath {
     return $path;
 }
 
+=pod
+
 =head1 SEE ALSO
 
-L<File::Spec>
+See L<File::Spec> and L<File::Spec::Unix>.  This package overrides the
+implementation of these methods, not the semantics.
 
 =cut
 
