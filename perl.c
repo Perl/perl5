@@ -294,6 +294,21 @@ perl_construct(pTHXx)
 }
 
 /*
+=for apidoc nothreadhook
+
+Stub that provides thread hook for perl_destruct when there are
+no threads.
+
+=cut
+*/
+
+int
+Perl_nothreadhook(pTHXx)
+{
+    return 0;
+}
+
+/*
 =for apidoc perl_destruct
 
 Shuts down a Perl interpreter.  See L<perlembed>.
@@ -409,6 +424,11 @@ perl_destruct(pTHXx)
     }
     LEAVE;
     FREETMPS;
+
+    if (CALL_FPTR(PL_threadhook)(aTHX)) {
+        /* Threads hook has vetoed further cleanup */
+        return STATUS_NATIVE_EXPORT;;
+    }
 
     /* We must account for everything.  */
 
@@ -2776,8 +2796,8 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 
 
         /* This strips off Perl comments which might interfere with
-           the C pre-processor, including #!.  #line directives are 
-           deliberately stripped to avoid confusion with Perl's version 
+           the C pre-processor, including #!.  #line directives are
+           deliberately stripped to avoid confusion with Perl's version
            of #line.  FWP played some golf with it so it will fit
            into VMS's 255 character buffer.
         */
@@ -2788,7 +2808,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 
         Perl_sv_setpvf(aTHX_ cmd, "\
 %s -ne%s%s%s %s | %"SVf" %s %"SVf" %s",
-                       perl, quote, code, quote, scriptname, cpp, 
+                       perl, quote, code, quote, scriptname, cpp,
                        cpp_discard_flag, sv, CPPMINUS);
 
 	PL_doextract = FALSE;
@@ -2812,8 +2832,8 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 	}
 #       endif /* IAMSUID */
 
-        DEBUG_P(PerlIO_printf(Perl_debug_log, 
-                              "PL_preprocess: cmd=\"%s\"\n", 
+        DEBUG_P(PerlIO_printf(Perl_debug_log,
+                              "PL_preprocess: cmd=\"%s\"\n",
                               SvPVX(cmd)));
 
 	PL_rsfp = PerlProc_popen(SvPVX(cmd), "r");
@@ -2840,8 +2860,8 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
                 PL_statbuf.st_mode & (S_ISUID|S_ISGID))
             {
                 /* try again */
-                PerlProc_execv(Perl_form(aTHX_ "%s/sperl"PERL_FS_VER_FMT, 
-                                         BIN_EXP, (int)PERL_REVISION, 
+                PerlProc_execv(Perl_form(aTHX_ "%s/sperl"PERL_FS_VER_FMT,
+                                         BIN_EXP, (int)PERL_REVISION,
                                          (int)PERL_VERSION,
                                          (int)PERL_SUBVERSION), PL_origargv);
                 Perl_croak(aTHX_ "Can't do setuid\n");

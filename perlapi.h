@@ -968,6 +968,8 @@ END_EXTERN_C
 #define PL_sharehook		(*Perl_Gsharehook_ptr(NULL))
 #undef  PL_thr_key
 #define PL_thr_key		(*Perl_Gthr_key_ptr(NULL))
+#undef  PL_threadhook
+#define PL_threadhook		(*Perl_Gthreadhook_ptr(NULL))
 #undef  PL_unlockhook
 #define PL_unlockhook		(*Perl_Gunlockhook_ptr(NULL))
 

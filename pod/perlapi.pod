@@ -576,6 +576,16 @@ method, similar to C<use Foo::Bar VERSION LIST>.
 =for hackers
 Found in file op.c
 
+=item nothreadhook
+
+Stub that provides thread hook for perl_destruct when there are
+no threads.
+
+	int	nothreadhook()
+
+=for hackers
+Found in file perl.c
+
 =item perl_alloc
 
 Allocates a new Perl interpreter.  See L<perlembed>.

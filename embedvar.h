@@ -1370,6 +1370,7 @@
 #define PL_runops_std		(PL_Vars.Grunops_std)
 #define PL_sharehook		(PL_Vars.Gsharehook)
 #define PL_thr_key		(PL_Vars.Gthr_key)
+#define PL_threadhook		(PL_Vars.Gthreadhook)
 #define PL_unlockhook		(PL_Vars.Gunlockhook)
 
 #else /* !PERL_GLOBAL_STRUCT */
@@ -1387,6 +1388,7 @@
 #define PL_Grunops_std		PL_runops_std
 #define PL_Gsharehook		PL_sharehook
 #define PL_Gthr_key		PL_thr_key
+#define PL_Gthreadhook		PL_threadhook
 #define PL_Gunlockhook		PL_unlockhook
 
 #endif /* PERL_GLOBAL_STRUCT */

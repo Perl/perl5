@@ -957,6 +957,7 @@ Ap |char * |custom_op_desc|OP* op
 Adp	|void	|sv_nosharing	|SV *
 Adp	|void	|sv_nolocking	|SV *
 Adp	|void	|sv_nounlocking	|SV *
+Adp	|int	|nothreadhook
 
 END_EXTERN_C
 

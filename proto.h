@@ -1004,6 +1004,7 @@ PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ OP* op);
 PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *);
 PERL_CALLCONV void	Perl_sv_nolocking(pTHX_ SV *);
 PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *);
+PERL_CALLCONV int	Perl_nothreadhook(pTHX);
 
 END_EXTERN_C
 

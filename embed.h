@@ -899,6 +899,7 @@
 #define sv_nosharing		Perl_sv_nosharing
 #define sv_nolocking		Perl_sv_nolocking
 #define sv_nounlocking		Perl_sv_nounlocking
+#define nothreadhook		Perl_nothreadhook
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #define avhv_index_sv		S_avhv_index_sv
 #define avhv_index		S_avhv_index
@@ -2447,6 +2448,7 @@
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
 #define sv_nolocking(a)		Perl_sv_nolocking(aTHX_ a)
 #define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
+#define nothreadhook()		Perl_nothreadhook(aTHX)
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #define avhv_index_sv(a)	S_avhv_index_sv(aTHX_ a)
 #define avhv_index(a,b,c)	S_avhv_index(aTHX_ a,b,c)
