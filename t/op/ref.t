@@ -200,14 +200,14 @@ foo WHATEVER "ok 38\n";
 # test the \(@foo) construct
 #
 package main;
-@foo = (1,2,3);
+@foo = \(1..3);
 @bar = \(@foo);
 @baz = \(1,@foo,@bar);
 print @bar == 3 ? "ok 39\n" : "not ok 39\n";
 print grep(ref($_), @bar) == 3 ? "ok 40\n" : "not ok 40\n";
 print @baz == 3 ? "ok 41\n" : "not ok 41\n";
 
-my(@fuu) = (1,2,3);
+my(@fuu) = \(1..2,3);
 my(@baa) = \(@fuu);
 my(@bzz) = \(1,@fuu,@baa);
 print @baa == 3 ? "ok 42\n" : "not ok 42\n";

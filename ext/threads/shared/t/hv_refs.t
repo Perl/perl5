@@ -86,7 +86,13 @@ ok(10, keys %foo == 0, "And make sure we realy have deleted the values");
 }
 {
     my $object : shared = &share({});
-    threads->new(sub { bless $object, 'test1' });
+    lock($object); # so that we can cond_wait
+    threads->new(sub {
+		     lock($object); # so that we can cond_signal
+		     bless $object, 'test1';
+		     cond_signal($object); # so that the parent thread waits
+		 });
+    cond_wait($object); # so that the child thread finishes
     ok(15, ref($object) eq 'test1', "blessing does work");
     my %test = (object => $object);
     ok(16, ref($test{object}) eq 'test1', "and some more work");
