@@ -95,6 +95,61 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6646] By: jhi                                   on 2000/08/15  23:35:07
+        Log: Fix a dependency problem.
+             
+             Subject: [PATCH: 6640] VMS Makefile.SH update
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 15 Aug 2000 16:31:34 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008151613140.141017-100000@aspara.forte.com>
+     Branch: perl
+	   ! vms/descrip_mms.template
+____________________________________________________________________________
+[  6645] By: jhi                                   on 2000/08/15  23:33:23
+        Log: Subject: [PATCH perl-current] make s?printf() produce two exponent digits where possible
+             From: Dominic Dunlop <domo@computer.org>
+             Date: Tue, 15 Aug 2000 22:20:52 +0200
+             Message-Id: <p04320403b5bf4c32d381@[192.168.1.4]>
+     Branch: metaconfig/U/perl
+	   + d_printfed.U
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH pod/perldelta.pod pod/perlfunc.pod sv.c
+	   ! t/op/sprintf.t
+____________________________________________________________________________
+[  6644] By: jhi                                   on 2000/08/15  21:17:20
+        Log: Subject: [ID 20000815.014] [PATCH] INSTALL doesn't mention 64 bit support.
+             From: abigail@foad.org
+             Date: 15 Aug 2000 20:12:41 -0000
+             Message-Id: <20000815201241.25556.qmail@foad.org>
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[  6643] By: jhi                                   on 2000/08/15  21:15:28
+        Log: (an already applied patch)
+     Branch: perl
+	   ! lib/CGI.pm
+____________________________________________________________________________
+[  6642] By: gsar                                  on 2000/08/15  19:54:05
+        Log: magic callbacks all need to have same type signature
+     Branch: perl
+	   ! embed.pl mg.c proto.h
+____________________________________________________________________________
+[  6641] By: jhi                                   on 2000/08/15  17:56:27
+        Log: Subject: [PATCH] for t/lib/peek.t (was Re: [ID 20000814.005] Not OK: perl v5.6.0 on i686-linux-64int 2.2.13)
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Message-Id: <E13OkU9-0006rb-00@libra.cus.cam.ac.uk>
+             Date: Tue, 15 Aug 2000 18:26:45 +0100
+             
+             Only the peek.t part applied, not the hash quality part.
+     Branch: perl
+	   ! t/lib/peek.t
+____________________________________________________________________________
+[  6640] By: jhi                                   on 2000/08/15  16:37:37
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  6639] By: jhi                                   on 2000/08/15  16:34:55
         Log: Missed a file from #6638.
      Branch: perl
