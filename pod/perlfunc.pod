@@ -5964,11 +5964,9 @@ tell() on pipes, fifos, and sockets usually returns -1.
 
 There is no C<systell> function.  Use C<sysseek(FH, 0, 1)> for that.
 
-Do not use tell() on a filehandle that has been opened using
-sysopen(), use sysseek() for that as described above.  Why?  Because
-sysopen() creates unbuffered, "raw", filehandles, while open() creates
-buffered filehandles.  sysseek() make sense only on the first kind,
-tell() only makes sense on the second kind.
+Do not use tell() (or other buffered I/O operations) on a file handle
+that has been manipulated by sysread(), syswrite() or sysseek().
+Those functions ignore the buffering, while tell() does not.
 
 =item telldir DIRHANDLE
 
