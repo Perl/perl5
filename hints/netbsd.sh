@@ -63,10 +63,6 @@ case "$usevfork" in
 '') usevfork=true ;;
 esac
 
-# Avoid telldir prototype conflict in pp_sys.c  (NetBSD uses const DIR *)
-# Configure should test for this.  Volunteers?
-pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
-
 # Pre-empt the /usr/bin/perl question of installperl.
 installusrbinperl='n'
 
