@@ -250,7 +250,18 @@ When you return an object the entire stash that the object is blessed
 as well.  This will lead to a large memory usage.  The ideal situation
 would be to detect the original stash if it existed.
 
+=item Creating threads inside BEGIN blocks
+
+Creating threads inside BEGIN blocks (or during the compilation phase
+in general) does not work.  (In Windows, trying to use fork() inside
+BEGIN blocks is an equally losing proposition, since it has been
+implemented in very much the same way as threads.)
+
 =item PERL_OLD_SIGNALS are not threadsafe, will not be.
+
+If your Perl has been built with PERL_OLD_SIGNALS (one has
+to explicitly add that symbol to ccflags, see C<perl -V>),
+signal handling is not threadsafe.
 
 =back
 
