@@ -4168,7 +4168,7 @@ my_binmode(FILE *fp, char iotype)
     if (s == dirend + 3) return fp;
     /* If we've got a non-file-structured device, clip off the trailing
      * junk, and don't lose sleep if we can't get a stream position.  */
-    if (dirend == Nullch) *(colon+1) = '\0';
+    if (dirend == Nullch) *(colon+1) = '\0'; 
     if (iotype != '-'&& (ret = fgetpos(fp, &pos)) == -1 && dirend) return NULL;
     switch (iotype) {
       case '<': case 'r':           acmode = "rb";                      break;
@@ -4178,8 +4178,12 @@ my_binmode(FILE *fp, char iotype)
       case 'a':                     acmode = "ab";                      break;
       case '+':  case 's':          acmode = "rb+";                     break;
       case '-':                     acmode = fileno(fp) ? "ab" : "rb";  break;
+      /* iotype'll be null for the SYS$INPUT:/SYS$OUTPUT:/SYS$ERROR: files */
+      /* since we didn't really open them and can't really */
+      /* reopen them */
+      case 0:                       return NULL;                        break;
       default:
-        warn("Unrecognized iotype %c in my_binmode",iotype);
+        warn("Unrecognized iotype %x for %s in my_binmode",iotype, filespec);
         acmode = "rb+";
     }
     if (freopen(filespec,acmode,fp) == NULL) return NULL;
