@@ -856,7 +856,7 @@ PP(pp_flop)
 	    char *tmps = SvPV(final, len);
 
 	    sv = sv_mortalcopy(left);
-	    SvPV_force(sv,na);
+	    SvPV_force(sv,PL_na);
 	    while (!SvNIOKp(sv) && SvCUR(sv) <= len) {
 		XPUSHs(sv);
 	        if (strEQ(SvPVX(sv),tmps))
@@ -2090,7 +2090,7 @@ PP(pp_goto)
 
     if (do_dump) {
 #ifdef VMS
-	if (!retop) retop = main_start;
+	if (!retop) retop = PL_main_start;
 #endif
 	PL_restartop = retop;
 	PL_do_undump = TRUE;
@@ -2144,8 +2144,8 @@ PP(pp_nswitch)
 	match = 0;
     else if (match > cCOP->uop.scop.scop_max)
 	match = cCOP->uop.scop.scop_max;
-    op = cCOP->uop.scop.scop_next[match];
-    RETURNOP(op);
+    PL_op = cCOP->uop.scop.scop_next[match];
+    RETURNOP(PL_op);
 }
 
 PP(pp_cswitch)
@@ -2153,18 +2153,18 @@ PP(pp_cswitch)
     djSP;
     register I32 match;
 
-    if (multiline)
-	op = op->op_next;			/* can't assume anything */
+    if (PL_multiline)
+	PL_op = PL_op->op_next;			/* can't assume anything */
     else {
-	match = *(SvPVx(GvSV(cCOP->cop_gv), na)) & 255;
+	match = *(SvPVx(GvSV(cCOP->cop_gv), PL_na)) & 255;
 	match -= cCOP->uop.scop.scop_offset;
 	if (match < 0)
 	    match = 0;
 	else if (match > cCOP->uop.scop.scop_max)
 	    match = cCOP->uop.scop.scop_max;
-	op = cCOP->uop.scop.scop_next[match];
+	PL_op = cCOP->uop.scop.scop_next[match];
     }
-    RETURNOP(op);
+    RETURNOP(PL_op);
 }
 #endif
 
@@ -2266,7 +2266,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     SAVEDELETE(PL_defstash, safestr, strlen(safestr));
     SAVEHINTS();
 #ifdef OP_IN_REGISTER
-    opsave = op;
+    PL_opsave = op;
 #else
     SAVEPPTR(PL_op);
 #endif
@@ -2276,7 +2276,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     PL_op->op_type = 0;			/* Avoid uninit warning. */
     PL_op->op_flags = 0;			/* Avoid uninit warning. */
     PUSHBLOCK(cx, CXt_EVAL, SP);
-    PUSHEVAL(cx, 0, compiling.cop_filegv);
+    PUSHEVAL(cx, 0, PL_compiling.cop_filegv);
     rop = doeval(G_SCALAR, startop);
     POPBLOCK(cx,PL_curpm);
     POPEVAL(cx);
@@ -2287,7 +2287,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     *avp = (AV*)SvREFCNT_inc(PL_comppad);
     LEAVE;
 #ifdef OP_IN_REGISTER
-    op = opsave;
+    op = PL_opsave;
 #endif
     return rop;
 }
@@ -2599,7 +2599,7 @@ PP(pp_require)
 
     push_return(PL_op->op_next);
     PUSHBLOCK(cx, CXt_EVAL, SP);
-    PUSHEVAL(cx, name, compiling.cop_filegv);
+    PUSHEVAL(cx, name, PL_compiling.cop_filegv);
 
     PL_compiling.cop_line = 0;
 
@@ -2657,7 +2657,7 @@ PP(pp_entereval)
 
     push_return(PL_op->op_next);
     PUSHBLOCK(cx, CXt_EVAL, SP);
-    PUSHEVAL(cx, 0, compiling.cop_filegv);
+    PUSHEVAL(cx, 0, PL_compiling.cop_filegv);
 
     /* prepare to compile string */
 

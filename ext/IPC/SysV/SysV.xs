@@ -32,40 +32,6 @@
 #   include <vm/vm_param.h>
 #endif
 
-#ifndef newCONSTSUB
-static void
-newCONSTSUB(stash,name,sv)
-    HV *stash;
-    char *name;
-    SV *sv;
-{
-#ifdef dTHR
-    dTHR;
-#endif
-    U32 oldhints = hints;
-    HV *old_cop_stash = curcop->cop_stash;
-    HV *old_curstash = curstash;
-    line_t oldline = curcop->cop_line;
-    curcop->cop_line = copline;
-
-    hints &= ~HINT_BLOCK_SCOPE;
-    if(stash)
-	curstash = curcop->cop_stash = stash;
-
-    newSUB(
-	start_subparse(FALSE, 0),
-	newSVOP(OP_CONST, 0, newSVpv(name,0)),
-	newSVOP(OP_CONST, 0, &sv_no),	/* SvPV(&sv_no) == "" -- GMB */
-	newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
-    );
-
-    hints = oldhints;
-    curcop->cop_stash = old_cop_stash;
-    curstash = old_curstash;
-    curcop->cop_line = oldline;
-}
-#endif
-
 MODULE=IPC::SysV	PACKAGE=IPC::Msg::stat
 
 PROTOTYPES: ENABLE
@@ -199,7 +165,7 @@ ftok(path, id)
     CODE:
 #if defined(HAS_SEM) || defined(HAS_SHM)
         key_t k = ftok(path, id);
-        ST(0) = k == (key_t) -1 ? &sv_undef : sv_2mortal(newSViv(k));
+        ST(0) = k == (key_t) -1 ? &PL_sv_undef : sv_2mortal(newSViv(k));
 #else
         DIE(no_func, "ftok");
 #endif

@@ -474,7 +474,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
     }
 
     while (++mark <= sp) {
-	if (*mark && (str = SvPV(*mark, na)))
+	if (*mark && (str = SvPV(*mark, PL_na)))
 	    argv[index++] = str;
 	else
 	    argv[index++] = "";
@@ -482,7 +482,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
     argv[index++] = 0;
    
     status = win32_spawnvp(flag,
-			   (const char*)(really ? SvPV(really,na) : argv[0]),
+			   (const char*)(really ? SvPV(really,PL_na) : argv[0]),
 			   (const char* const*)argv);
 
     if (status < 0 && errno == ENOEXEC) {
@@ -495,7 +495,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 	    argv[sh_items] = w32_perlshell_vec[sh_items];
    
 	status = win32_spawnvp(flag,
-			       (const char*)(really ? SvPV(really,na) : argv[0]),
+			       (const char*)(really ? SvPV(really,PL_na) : argv[0]),
 			       (const char* const*)argv);
     }
 
@@ -2122,7 +2122,7 @@ XS(w32_SetCwd)
     dXSARGS;
     if (items != 1)
 	croak("usage: Win32::SetCurrentDirectory($cwd)");
-    if (SetCurrentDirectory(SvPV(ST(0),na)))
+    if (SetCurrentDirectory(SvPV(ST(0),PL_na)))
 	XSRETURN_YES;
 
     XSRETURN_NO;
@@ -2305,8 +2305,8 @@ XS(w32_Spawn)
     if (items != 3)
 	croak("usage: Win32::Spawn($cmdName, $args, $PID)");
 
-    cmd = SvPV(ST(0),na);
-    args = SvPV(ST(1), na);
+    cmd = SvPV(ST(0),PL_na);
+    args = SvPV(ST(1), PL_na);
 
     memset(&stStartInfo, 0, sizeof(stStartInfo));   /* Clear the block */
     stStartInfo.cb = sizeof(stStartInfo);	    /* Set the structure size */
@@ -2362,7 +2362,7 @@ XS(w32_GetShortPathName)
 	ST(0) = shortpath;
     }
     else
-	ST(0) = &sv_undef;
+	ST(0) = &PL_sv_undef;
     XSRETURN(1);
 }
 

@@ -18,7 +18,7 @@ Perl_setTHR(struct perl_thread *t)
 #ifdef USE_DECLSPEC_THREAD
  Perl_current_thread = t;
 #else
- TlsSetValue(thr_key,t);
+ TlsSetValue(PL_thr_key,t);
 #endif
 #endif
 }
@@ -30,7 +30,7 @@ Perl_getTHR(void)
 #ifdef USE_DECLSPEC_THREAD
  return Perl_current_thread;
 #else
- return (struct perl_thread *) TlsGetValue(thr_key);
+ return (struct perl_thread *) TlsGetValue(PL_thr_key);
 #endif
 #else
  return NULL;
@@ -43,7 +43,7 @@ Perl_alloc_thread_key(void)
 #ifdef USE_THREADS
     static int key_allocated = 0;
     if (!key_allocated) {
-	if ((thr_key = TlsAlloc()) == TLS_OUT_OF_INDEXES)
+	if ((PL_thr_key = TlsAlloc()) == TLS_OUT_OF_INDEXES)
 	    croak("panic: TlsAlloc");
 	key_allocated = 1;
     }

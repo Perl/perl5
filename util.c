@@ -90,7 +90,7 @@ safemalloc(MEM_SIZE size)
 #if !(defined(I286) || defined(atarist))
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%x: (%05d) malloc %ld bytes\n",ptr,PL_an++,(long)size));
 #else
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) malloc %ld bytes\n",ptr,an++,(long)size));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) malloc %ld bytes\n",ptr,PL_an++,(long)size));
 #endif
     if (ptr != Nullch)
 	return ptr;
@@ -141,8 +141,8 @@ saferealloc(Malloc_t where,MEM_SIZE size)
     } )
 #else
     DEBUG_m( {
-	PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) rfree\n",where,an++);
-	PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) realloc %ld bytes\n",ptr,an++,(long)size);
+	PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) rfree\n",where,PL_an++);
+	PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) realloc %ld bytes\n",ptr,PL_an++,(long)size);
     } )
 #endif
 
@@ -166,7 +166,7 @@ safefree(Malloc_t where)
 #if !(defined(I286) || defined(atarist))
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%x: (%05d) free\n",(char *) where,PL_an++));
 #else
-    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) free\n",(char *) where,an++));
+    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) free\n",(char *) where,PL_an++));
 #endif
     if (where) {
 	/*SUPPRESS 701*/
@@ -197,7 +197,7 @@ safecalloc(MEM_SIZE count, MEM_SIZE size)
 #if !(defined(I286) || defined(atarist))
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%x: (%05d) calloc %ld  x %ld bytes\n",ptr,PL_an++,(long)count,(long)size));
 #else
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) calloc %ld x %ld bytes\n",ptr,an++,(long)count,(long)size));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) calloc %ld x %ld bytes\n",ptr,PL_an++,(long)count,(long)size));
 #endif
     if (ptr != Nullch) {
 	memset((void*)ptr, 0, size);
@@ -1106,7 +1106,7 @@ screaminstr(SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_
 	    if (!last) return (char *)(big+pos-previous);
 	    found = 1;
 	}
-    } while ( pos += screamnext[pos] );
+    } while ( pos += PL_screamnext[pos] );
     return (last && found) ? (char *)(big+(*old_posp)-previous) : Nullch;
 #else /* !POINTERRIGOR */
     big -= previous;
@@ -1848,7 +1848,7 @@ my_popen(char *cmd, char *mode)
 #ifndef NOFILE
 #define NOFILE 20
 #endif
-	    for (fd = maxsysfd + 1; fd < NOFILE; fd++)
+	    for (fd = PL_maxsysfd + 1; fd < NOFILE; fd++)
 		PerlLIO_close(fd);
 #endif
 	    do_exec(cmd);	/* may or may not use the shell */
@@ -2674,7 +2674,7 @@ getTHR _((void))
 {
     pthread_addr_t t;
 
-    if (pthread_getspecific(thr_key, &t))
+    if (pthread_getspecific(PL_thr_key, &t))
 	croak("panic: pthread_getspecific");
     return (struct perl_thread *) t;
 }
@@ -2780,7 +2780,7 @@ new_struct_thread(struct perl_thread *t)
     PL_in_eval = FALSE;
     PL_restartop = 0;
 
-    tainted = t->Ttainted;
+    PL_tainted = t->Ttainted;
     PL_curpm = t->Tcurpm;         /* XXX No PMOP ref count */
     PL_nrs = newSVsv(t->Tnrs);
     PL_rs = SvREFCNT_inc(PL_nrs);

@@ -135,8 +135,8 @@ struct jmpenv {
 typedef struct jmpenv JMPENV;
 
 #ifdef OP_IN_REGISTER
-#define OP_REG_TO_MEM	opsave = op
-#define OP_MEM_TO_REG	op = opsave
+#define OP_REG_TO_MEM	PL_opsave = op
+#define OP_MEM_TO_REG	op = PL_opsave
 #else
 #define OP_REG_TO_MEM	NOOP
 #define OP_MEM_TO_REG	NOOP

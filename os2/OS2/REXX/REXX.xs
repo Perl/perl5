@@ -94,9 +94,9 @@ exec_in_REXX(char *cmd, char * handlerName, RexxFunctionHandler *handler)
     } else {
 	res = NEWSV(729,0);
     }
-    if (rc || SvTRUE(GvSV(errgv))) {
-	if (SvTRUE(GvSV(errgv))) {
-	    die ("Error inside perl function called from REXX compartment.\n%s", SvPV(GvSV(errgv), na)) ;
+    if (rc || SvTRUE(GvSV(PL_errgv))) {
+	if (SvTRUE(GvSV(PL_errgv))) {
+	    die ("Error inside perl function called from REXX compartment.\n%s", SvPV(GvSV(PL_errgv), PL_na)) ;
 	}
 	die ("REXX compartment returned non-zero status %li", rc);
     }
@@ -374,7 +374,7 @@ _fetch(name, ...)
 			   var->shvname.strlength, var->shvname.strptr,
 			   namelen, var->shvvalue.strptr);
 	       if (var->shvret & RXSHV_NEWV || !var->shvvalue.strptr)
-		   PUSHs(&sv_undef);
+		   PUSHs(&PL_sv_undef);
 	       else
 		   PUSHs(sv_2mortal(newSVpv(var->shvvalue.strptr,
 					    namelen)));
@@ -428,7 +428,7 @@ _next(stem)
 	       PUSHs(sv_2mortal(newSVpv(sv.shvvalue.strptr, valuelen)));
 				DosFreeMem(sv.shvvalue.strptr);
 	   } else	
-	       PUSHs(&sv_undef);
+	       PUSHs(&PL_sv_undef);
        } else if (rc != RXSHV_LVAR) {
 	   die("Error %i when in _next", rc);
        } else {

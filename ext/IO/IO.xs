@@ -94,7 +94,7 @@ fgetpos(handle)
 	    ST(0) = sv_2mortal(newSVpv((char*)&pos, sizeof(Fpos_t)));
 	}
 	else {
-	    ST(0) = &sv_undef;
+	    ST(0) = &PL_sv_undef;
 	    errno = EINVAL;
 	}
 
@@ -104,7 +104,7 @@ fsetpos(handle, pos)
 	SV *		pos
     CODE:
 	char *p;
-	if (handle && (p = SvPVx(pos, na)) && na == sizeof(Fpos_t))
+	if (handle && (p = SvPVx(pos, PL_na)) && PL_na == sizeof(Fpos_t))
 #ifdef PerlIO
 	    RETVAL = PerlIO_setpos(handle, (Fpos_t*)p);
 #else
@@ -139,7 +139,7 @@ new_tmpfile(packname = "IO::File")
 	    SvREFCNT_dec(gv);	/* undo increment in newRV() */
 	}
 	else {
-	    ST(0) = &sv_undef;
+	    ST(0) = &PL_sv_undef;
 	    SvREFCNT_dec(gv);
 	}
 
@@ -153,7 +153,7 @@ constant(name)
 	if (constant(name, &i))
 	    ST(0) = sv_2mortal(newSViv(i));
 	else
-	    ST(0) = &sv_undef;
+	    ST(0) = &PL_sv_undef;
 
 int
 ungetc(handle, c)

@@ -618,7 +618,7 @@ void byterun(PerlIO *fp)
 	    {
 		strconst arg;
 		BGET_strconst(arg);
-		BSET_op_ppaddr(op->op_ppaddr, arg);
+		BSET_op_ppaddr(PL_op->op_ppaddr, arg);
 		break;
 	    }
 	  case INSN_OP_TARG:		/* 85 */

@@ -1885,7 +1885,7 @@ yylex(void)
 		     */
 		    SV *x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV));
 		    assert(SvPOK(x) || SvGMAGICAL(x));
-		    if (sv_eq(x, GvSV(curcop->cop_filegv))) {
+		    if (sv_eq(x, GvSV(PL_curcop->cop_filegv))) {
 			sv_setpvn(x, ipath, ipathend - ipath);
 			SvSETMAGIC(x);
 		    }
@@ -3197,7 +3197,7 @@ yylex(void)
 
 	case KEY_crypt:
 #ifdef FCRYPT
-	    if (!cryptseen++)
+	    if (!PL_cryptseen++)
 		init_des();
 #endif
 	    LOP(OP_CRYPT,XTERM);

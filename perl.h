@@ -1153,20 +1153,20 @@ typedef pthread_key_t perl_key;
 
   
 #ifdef VMS
-#   define STATUS_NATIVE	statusvalue_vms
+#   define STATUS_NATIVE	PL_statusvalue_vms
 #   define STATUS_NATIVE_EXPORT \
-	((I32)statusvalue_vms == -1 ? 44 : statusvalue_vms)
+	((I32)PL_statusvalue_vms == -1 ? 44 : PL_statusvalue_vms)
 #   define STATUS_NATIVE_SET(n)						\
 	STMT_START {							\
-	    statusvalue_vms = (n);					\
-	    if ((I32)statusvalue_vms == -1)				\
+	    PL_statusvalue_vms = (n);					\
+	    if ((I32)PL_statusvalue_vms == -1)				\
 		PL_statusvalue = -1;					\
-	    else if (statusvalue_vms & STS$M_SUCCESS)			\
+	    else if (PL_statusvalue_vms & STS$M_SUCCESS)		\
 		PL_statusvalue = 0;					\
-	    else if ((statusvalue_vms & STS$M_SEVERITY) == 0)		\
-		PL_statusvalue = 1 << 8;					\
+	    else if ((PL_statusvalue_vms & STS$M_SEVERITY) == 0)	\
+		PL_statusvalue = 1 << 8;				\
 	    else							\
-		PL_statusvalue = (statusvalue_vms & STS$M_SEVERITY) << 8;	\
+		PL_statusvalue = (PL_statusvalue_vms & STS$M_SEVERITY) << 8;	\
 	} STMT_END
 #   define STATUS_POSIX	PL_statusvalue
 #   ifdef VMSISH_STATUS
@@ -1179,12 +1179,12 @@ typedef pthread_key_t perl_key;
 	    PL_statusvalue = (n);				\
 	    if (PL_statusvalue != -1) {			\
 		PL_statusvalue &= 0xFFFF;			\
-		statusvalue_vms = PL_statusvalue ? 44 : 1;	\
+		PL_statusvalue_vms = PL_statusvalue ? 44 : 1;	\
 	    }						\
-	    else statusvalue_vms = -1;			\
+	    else PL_statusvalue_vms = -1;			\
 	} STMT_END
-#   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0, statusvalue_vms = 1)
-#   define STATUS_ALL_FAILURE	(PL_statusvalue = 1, statusvalue_vms = 44)
+#   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0, PL_statusvalue_vms = 1)
+#   define STATUS_ALL_FAILURE	(PL_statusvalue = 1, PL_statusvalue_vms = 44)
 #else
 #   define STATUS_NATIVE	STATUS_POSIX
 #   define STATUS_NATIVE_EXPORT	STATUS_POSIX
@@ -1568,7 +1568,7 @@ typedef Sighandler_t Sigsave_t;
 # define PAD_SV(po) pad_sv(po)
 # define RUNOPS_DEFAULT runops_debug
 #else
-# define PAD_SV(po) curpad[po]
+# define PAD_SV(po) PL_curpad[po]
 # define RUNOPS_DEFAULT runops_standard
 #endif
 

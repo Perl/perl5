@@ -93,11 +93,11 @@ newFH(FILE *fp, char type) {
      * symbol tables.  This code (through io = ...) is really
      * equivalent to gv_fetchpv("VMS::Stdio::__FH__",TRUE,SVt_PVIO),
      * with a little less overhead, and good exercise for me. :-) */
-    stashp = (GV **)hv_fetch(defstash,"VMS::",5,TRUE);
-    if (!stashp || *stashp == (GV *)&sv_undef) return Nullsv;
+    stashp = (GV **)hv_fetch(PL_defstash,"VMS::",5,TRUE);
+    if (!stashp || *stashp == (GV *)&PL_sv_undef) return Nullsv;
     if (!(stash = GvHV(*stashp))) stash = GvHV(*stashp) = newHV();
     stashp = (GV **)hv_fetch(GvHV(*stashp),"Stdio::",7,TRUE);
-    if (!stashp || *stashp == (GV *)&sv_undef) return Nullsv;
+    if (!stashp || *stashp == (GV *)&PL_sv_undef) return Nullsv;
     if (!(stash = GvHV(*stashp))) stash = GvHV(*stashp) = newHV();
 
     /* Set up GV to point to IO, and then take reference */
@@ -122,15 +122,15 @@ constant(name)
 	if (constant(name, &i))
 	    ST(0) = sv_2mortal(newSViv(i));
 	else
-	    ST(0) = &sv_undef;
+	    ST(0) = &PL_sv_undef;
 
 void
 flush(fp)
 	FILE *	fp
 	PROTOTYPE: $
 	CODE:
-	    if (fflush(fp)) { ST(0) = &sv_undef; }
-	    else            { clearerr(fp); ST(0) = &sv_yes; }
+	    if (fflush(fp)) { ST(0) = &PL_sv_undef; }
+	    else            { clearerr(fp); ST(0) = &PL_sv_yes; }
 
 char *
 getname(fp)
@@ -146,14 +146,14 @@ rewind(fp)
 	FILE *	fp
 	PROTOTYPE: $
 	CODE:
-	    ST(0) = rewind(fp) ? &sv_undef : &sv_yes;
+	    ST(0) = rewind(fp) ? &PL_sv_undef : &PL_sv_yes;
 
 void
 remove(name)
 	char *name
 	PROTOTYPE: $
 	CODE:
-	    ST(0) = remove(name) ? &sv_undef : &sv_yes;
+	    ST(0) = remove(name) ? &PL_sv_undef : &PL_sv_yes;
 
 void
 setdef(...)
@@ -166,14 +166,14 @@ setdef(...)
 	    struct dsc$descriptor_s dirdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
 	    if (items) {
 		SV *defsv = ST(items-1);  /* mimic chdir() */
-		ST(0) = &sv_undef;
+		ST(0) = &PL_sv_undef;
 		if (!SvPOK(defsv)) { SETERRNO(EINVAL,LIB$_INVARG); XSRETURN(1); }
-		if (tovmsspec(SvPV(defsv,na),vmsdef) == NULL) { XSRETURN(1); }
+		if (tovmsspec(SvPV(defsv,PL_na),vmsdef) == NULL) { XSRETURN(1); }
 		deffab.fab$l_fna = vmsdef; deffab.fab$b_fns = strlen(vmsdef);
 	    }
 	    else {
 		deffab.fab$l_fna = "SYS$LOGIN"; deffab.fab$b_fns = 9;
-		EXTEND(sp,1);  ST(0) = &sv_undef;
+		EXTEND(sp,1);  ST(0) = &PL_sv_undef;
 	    }
 	    defnam.nam$l_esa = es;  defnam.nam$b_ess = sizeof es;
 	    deffab.fab$l_nam = &defnam;
@@ -204,7 +204,7 @@ setdef(...)
 	    my_setenv("SYS$DISK",defnam.nam$b_node ? defnam.nam$l_node : defnam.nam$l_dev);
 	    *defnam.nam$l_dir = sep;
 	    dirdsc.dsc$a_pointer = defnam.nam$l_dir; dirdsc.dsc$w_length = defnam.nam$b_dir;
-	    if ((retsts = sys$setddir(&dirdsc,0,0)) & 1) ST(0) = &sv_yes;
+	    if ((retsts = sys$setddir(&dirdsc,0,0)) & 1) ST(0) = &PL_sv_yes;
 	    else { set_errno(EVMSERR); set_vaxc_errno(retsts); }
 	    (void) sys$parse(&deffab,0,0);  /* free up context */
 
@@ -213,8 +213,8 @@ sync(fp)
 	FILE *	fp
 	PROTOTYPE: $
 	CODE:
-	    if (fsync(fileno(fp))) { ST(0) = &sv_undef; }
-	    else                   { clearerr(fp); ST(0) = &sv_yes; }
+	    if (fsync(fileno(fp))) { ST(0) = &PL_sv_undef; }
+	    else                   { clearerr(fp); ST(0) = &PL_sv_yes; }
 
 char *
 tmpnam()
@@ -250,7 +250,7 @@ vmsopen(spec,...)
 	    }
 	    else if (*spec == '<') spec++;
 	    myargc = items - 1;
-	    for (i = 0; i < myargc; i++) args[i] = SvPV(ST(i+1),na);
+	    for (i = 0; i < myargc; i++) args[i] = SvPV(ST(i+1),PL_na);
 	    /* This hack brought to you by C's opaque arglist management */
 	    switch (myargc) {
 	      case 0:
@@ -283,9 +283,9 @@ vmsopen(spec,...)
 	    }
 	    if (fp != Nullfp) {
 	      SV *fh = newFH(fp,(mode[1] ? '+' : (mode[0] == 'r' ? '<' : (mode[0] == 'a' ? 'a' : '>'))));
-	      ST(0) = (fh ? sv_2mortal(fh) : &sv_undef);
+	      ST(0) = (fh ? sv_2mortal(fh) : &PL_sv_undef);
 	    }
-	    else { ST(0) = &sv_undef; }
+	    else { ST(0) = &PL_sv_undef; }
 
 void
 vmssysopen(spec,mode,perm,...)
@@ -304,7 +304,7 @@ vmssysopen(spec,mode,perm,...)
 	    }
 	    if (items > 11) croak("too many args");
 	    myargc = items - 3;
-	    for (i = 0; i < myargc; i++) args[i] = SvPV(ST(i+3),na);
+	    for (i = 0; i < myargc; i++) args[i] = SvPV(ST(i+3),PL_na);
 	    /* More fun with C calls; can't combine with above because
 	       args 2,3 of different types in fopen() and open() */
 	    switch (myargc) {
@@ -340,16 +340,16 @@ vmssysopen(spec,mode,perm,...)
 	    if (fd >= 0 &&
 	       ((fp = fdopen(fd, &("r\000w\000r+"[2*i]))) != Nullfp)) {
 	      SV *fh = newFH(fp,"<>++"[i]);
-	      ST(0) = (fh ? sv_2mortal(fh) : &sv_undef);
+	      ST(0) = (fh ? sv_2mortal(fh) : &PL_sv_undef);
 	    }
-	    else { ST(0) = &sv_undef; }
+	    else { ST(0) = &PL_sv_undef; }
 
 void
 waitfh(fp)
 	FILE *	fp
 	PROTOTYPE: $
 	CODE:
-	    ST(0) = fwait(fp) ? &sv_undef : &sv_yes;
+	    ST(0) = fwait(fp) ? &PL_sv_undef : &PL_sv_yes;
 
 void
 writeof(mysv)
@@ -363,9 +363,9 @@ writeof(mysv)
 	    FILE *fp = io ? IoOFP(io) : NULL;
 	    if (fp == NULL || strchr(">was+-|",IoTYPE(io)) == Nullch) {
 	      set_errno(EBADF); set_vaxc_errno(SS$_IVCHAN);
-	      ST(0) = &sv_undef;  XSRETURN(1);
+	      ST(0) = &PL_sv_undef;  XSRETURN(1);
 	    }
-	    if (fgetname(fp,devnam) == Nullch) { ST(0) = &sv_undef; XSRETURN(1); }
+	    if (fgetname(fp,devnam) == Nullch) { ST(0) = &PL_sv_undef; XSRETURN(1); }
 	    if ((cp = strrchr(devnam,':')) != NULL) *(cp+1) = '\0';
 	    devdsc.dsc$w_length = strlen(devnam);
 	    retsts = sys$assign(&devdsc,&chan,0,0);
@@ -373,7 +373,7 @@ writeof(mysv)
 	    if (retsts & 1) retsts = iosb[0];
 	    retsts2 = sys$dassgn(chan);  /* Be sure to deassign the channel */
 	    if (retsts & 1) retsts = retsts2;
-	    if (retsts & 1) { ST(0) = &sv_yes; }
+	    if (retsts & 1) { ST(0) = &PL_sv_yes; }
 	    else {
 	      set_vaxc_errno(retsts);
 	      switch (retsts) {
@@ -388,5 +388,5 @@ writeof(mysv)
 	        default:  /* Includes "shouldn't happen" cases that might map */
 	          set_errno(EVMSERR); break;         /* to other errno values */
 	      }
-	      ST(0) = &sv_undef;
+	      ST(0) = &PL_sv_undef;
 	    }

@@ -34,7 +34,7 @@ struct thread_intern {
  * something a bit different for XS code.
  */
 
-#define SCHEDULE() return schedule(), op
+#define SCHEDULE() return schedule(), PL_op
 
 #define MUTEX_LOCK(m)
 #define MUTEX_UNLOCK(m)

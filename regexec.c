@@ -820,7 +820,7 @@ regmatch(regnode *prog)
 		: (PL_multiline && 
 		   (nextchr || locinput < PL_regeol) && locinput[-1] == '\n') )
 	    {
-		/* regtill = regbol; */
+		/* PL_regtill = PL_regbol; */
 		break;
 	    }
 	    sayNO;

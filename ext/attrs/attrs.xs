@@ -27,7 +27,7 @@ char *	Class
 	if (!PL_compcv || !(cv = CvOUTSIDE(PL_compcv)))
 	    croak("can't set attributes outside a subroutine scope");
 	for (i = 1; i < items; i++) {
-	    char *attr = SvPV(ST(i), na);
+	    char *attr = SvPV(ST(i), PL_na);
 	    cv_flags_t flag = get_flag(attr);
 	    if (!flag)
 		croak("invalid attribute name %s", attr);
@@ -47,7 +47,7 @@ SV *	sub
 		sub = Nullsv;
 	}
 	else {
-	    char *name = SvPV(sub, na);
+	    char *name = SvPV(sub, PL_na);
 	    sub = (SV*)perl_get_cv(name, FALSE);
 	}
 	if (!sub)

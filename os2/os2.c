@@ -160,7 +160,7 @@ int
 os2_cond_wait(perl_cond *c, perl_mutex *m)
 {						
     int rc;
-    if ((rc = DosResetEventSem(*c,&na)) && (rc != ERROR_ALREADY_RESET))
+    if ((rc = DosResetEventSem(*c,&PL_na)) && (rc != ERROR_ALREADY_RESET))
 	croak("panic: COND_WAIT-reset: rc=%i", rc);		
     if (m) MUTEX_UNLOCK(m);					
     if (CheckOSError(DosWaitEventSem(*c,SEM_INDEFINITE_WAIT))
@@ -358,7 +358,7 @@ result(int flag, int pid)
 	rsignal(SIGINT, ihand);
 	rsignal(SIGQUIT, qhand);
 
-	statusvalue = (U16)status;
+	PL_statusvalue = (U16)status;
 	if (r < 0)
 		return -1;
 	return status & 0xFFFF;
@@ -366,10 +366,10 @@ result(int flag, int pid)
 	ihand = rsignal(SIGINT, SIG_IGN);
 	r = DosWaitChild(DCWA_PROCESS, DCWW_WAIT, &res, &rpid, pid);
 	rsignal(SIGINT, ihand);
-	statusvalue = res.codeResult << 8 | res.codeTerminate;
+	PL_statusvalue = res.codeResult << 8 | res.codeTerminate;
 	if (r)
 		return -1;
-	return statusvalue;
+	return PL_statusvalue;
 #endif
 }
 
@@ -379,7 +379,7 @@ result(int flag, int pid)
 #define EXECF_SPAWN_NOWAIT 3
 
 /* Spawn/exec a program, revert to shell if needed. */
-/* global Argv[] contains arguments. */
+/* global PL_Argv[] contains arguments. */
 
 int
 do_spawn_ve(really, flag, execf, inicmd)
@@ -403,44 +403,44 @@ char *inicmd;
 		flag = P_NOWAIT;
 
       retry:
-	if (strEQ(Argv[0],"/bin/sh")) 
-	    Argv[0] = sh_path;
+	if (strEQ(PL_Argv[0],"/bin/sh")) 
+	    PL_Argv[0] = PL_sh_path;
 
-	if (Argv[0][0] != '/' && Argv[0][0] != '\\'
-	    && !(Argv[0][0] && Argv[0][1] == ':' 
-		 && (Argv[0][2] == '/' || Argv[0][2] != '\\'))
+	if (PL_Argv[0][0] != '/' && PL_Argv[0][0] != '\\'
+	    && !(PL_Argv[0][0] && PL_Argv[0][1] == ':' 
+		 && (PL_Argv[0][2] == '/' || PL_Argv[0][2] != '\\'))
 	    ) /* will spawnvp use PATH? */
 	    TAINT_ENV();	/* testing IFS here is overkill, probably */
 	/* We should check PERL_SH* and PERLLIB_* as well? */
-	if (!really || !*(tmps = SvPV(really, na)))
-	    tmps = Argv[0];
+	if (!really || !*(tmps = SvPV(really, PL_na)))
+	    tmps = PL_Argv[0];
 #if 0
-	rc = result(trueflag, spawnvp(flag,tmps,Argv));
+	rc = result(trueflag, spawnvp(flag,tmps,PL_Argv));
 #else
 	if (execf == EXECF_TRUEEXEC)
-	    rc = execvp(tmps,Argv);
+	    rc = execvp(tmps,PL_Argv);
 	else if (execf == EXECF_EXEC)
-	    rc = spawnvp(trueflag | P_OVERLAY,tmps,Argv);
+	    rc = spawnvp(trueflag | P_OVERLAY,tmps,PL_Argv);
 	else if (execf == EXECF_SPAWN_NOWAIT)
-	    rc = spawnvp(trueflag | P_NOWAIT,tmps,Argv);
+	    rc = spawnvp(trueflag | P_NOWAIT,tmps,PL_Argv);
         else				/* EXECF_SPAWN */
 	    rc = result(trueflag, 
-			spawnvp(trueflag | P_NOWAIT,tmps,Argv));
+			spawnvp(trueflag | P_NOWAIT,tmps,PL_Argv));
 #endif 
 	if (rc < 0 && pass == 1
-	    && (tmps == Argv[0])) { /* Cannot transfer `really' via shell. */
+	    && (tmps == PL_Argv[0])) { /* Cannot transfer `really' via shell. */
 	    err = errno;
 	    if (err == ENOENT || err == ENOEXEC) {
 		/* No such file, or is a script. */
 		/* Try adding script extensions to the file name, and
 		   search on PATH. */
-		char *scr = find_script(Argv[0], TRUE, NULL, 0);
+		char *scr = find_script(PL_Argv[0], TRUE, NULL, 0);
 
 		if (scr) {
 		    FILE *file = fopen(scr, "r");
 		    char *s = 0, *s1;
 
-		    Argv[0] = scr;
+		    PL_Argv[0] = scr;
 		    if (!file)
 			goto panic_file;
 		    if (!fgets(buf, sizeof buf, file)) {
@@ -500,7 +500,7 @@ char *inicmd;
 		    }
 		  doshell_args:
 		    {
-			char **a = Argv;
+			char **a = PL_Argv;
 			char *exec_args[2];
 
 			if (!buf[0] && file) { /* File without magic */
@@ -525,7 +525,7 @@ char *inicmd;
 				    }
 				}
 				if (!inicmd) {
-				    s = Argv[0];
+				    s = PL_Argv[0];
 				    while (*s) { 
 					/* Dosish shells will choke on slashes
 					   in paths, fortunately, this is
@@ -550,29 +550,29 @@ char *inicmd;
 				/* Use the original cmd line */
 				/* XXXX This is good only until we refuse
 				        quoted arguments... */
-				Argv[0] = inicmd;
-				Argv[1] = Nullch;
+				PL_Argv[0] = inicmd;
+				PL_Argv[1] = Nullch;
 			    }
 			} else if (!buf[0] && inicmd) { /* No file */
 			    /* Start with the original cmdline. */
 			    /* XXXX This is good only until we refuse
 			            quoted arguments... */
 
-			    Argv[0] = inicmd;
-			    Argv[1] = Nullch;
+			    PL_Argv[0] = inicmd;
+			    PL_Argv[1] = Nullch;
 			    nargs = 2;	/* shell -c */
 			} 
 
 			while (a[1])		/* Get to the end */
 			    a++;
 			a++;			/* Copy finil NULL too */
-			while (a >= Argv) {
-			    *(a + nargs) = *a;	/* Argv was preallocated to be
+			while (a >= PL_Argv) {
+			    *(a + nargs) = *a;	/* PL_Argv was preallocated to be
 						   long enough. */
 			    a--;
 			}
 			while (nargs-- >= 0)
-			    Argv[nargs] = argsp[nargs];
+			    PL_Argv[nargs] = argsp[nargs];
 			/* Enable pathless exec if #! (as pdksh). */
 			pass = (buf[0] == '#' ? 2 : 3);
 			goto retry;
@@ -582,21 +582,21 @@ char *inicmd;
 		errno = err;
 	    }
 	} else if (rc < 0 && pass == 2 && err == ENOENT) { /* File not found */
-	    char *no_dir = strrchr(Argv[0], '/');
+	    char *no_dir = strrchr(PL_Argv[0], '/');
 
 	    /* Do as pdksh port does: if not found with /, try without
 	       path. */
 	    if (no_dir) {
-		Argv[0] = no_dir + 1;
+		PL_Argv[0] = no_dir + 1;
 		pass++;
 		goto retry;
 	    }
 	}
-	if (rc < 0 && dowarn)
+	if (rc < 0 && PL_dowarn)
 	    warn("Can't %s \"%s\": %s\n", 
 		 ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
 		  ? "spawn" : "exec"),
-		 Argv[0], Strerror(err));
+		 PL_Argv[0], Strerror(err));
 	if (rc < 0 && (execf != EXECF_SPAWN_NOWAIT) 
 	    && ((trueflag & 0xFF) == P_WAIT)) 
 	    rc = 255 << 8; /* Emulate the fork(). */
@@ -618,8 +618,8 @@ register SV **sp;
     int flag = P_WAIT, trueflag, err, secondtry = 0;
 
     if (sp > mark) {
-	New(1301,Argv, sp - mark + 3, char*);
-	a = Argv;
+	New(1301,PL_Argv, sp - mark + 3, char*);
+	a = PL_Argv;
 
 	if (mark < sp && SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
 		++mark;
@@ -628,7 +628,7 @@ register SV **sp;
 
 	while (++mark <= sp) {
 	    if (*mark)
-		*a++ = SvPVx(*mark, na);
+		*a++ = SvPVx(*mark, PL_na);
 	    else
 		*a++ = "";
 	}
@@ -668,7 +668,7 @@ int execf;
        have a shell which will not change between computers with the
        same architecture, to avoid "action on a distance". 
        And to have simple build, this shell should be sh. */
-    shell = sh_path;
+    shell = PL_sh_path;
     copt = "-c";
 #endif 
 
@@ -676,10 +676,10 @@ int execf;
 	cmd++;
 
     if (strnEQ(cmd,"/bin/sh",7) && isSPACE(cmd[7])) {
-	STRLEN l = strlen(sh_path);
+	STRLEN l = strlen(PL_sh_path);
 	
 	New(1302, news, strlen(cmd) - 7 + l + 1, char);
-	strcpy(news, sh_path);
+	strcpy(news, PL_sh_path);
 	strcpy(news + l, cmd + 7);
 	cmd = news;
     }
@@ -718,7 +718,7 @@ int execf;
 		/* In the ak code internal P_NOWAIT is P_WAIT ??? */
 		rc = result(P_WAIT,
 			    spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0));
-		if (rc < 0 && dowarn)
+		if (rc < 0 && PL_dowarn)
 		    warn("Can't %s \"%s\": %s", 
 			 (execf == EXECF_SPAWN ? "spawn" : "exec"),
 			 shell, Strerror(errno));
@@ -733,10 +733,10 @@ int execf;
     }
 
     /* cmd="a" may lead to "sh", "-c", "\"$@\"", "a", "a.cmd", NULL */
-    New(1303,Argv, (s - cmd + 11) / 2, char*);
-    Cmd = savepvn(cmd, s-cmd);
-    a = Argv;
-    for (s = Cmd; *s;) {
+    New(1303,PL_Argv, (s - cmd + 11) / 2, char*);
+    PL_Cmd = savepvn(cmd, s-cmd);
+    a = PL_Argv;
+    for (s = PL_Cmd; *s;) {
 	while (*s && isSPACE(*s)) s++;
 	if (*s)
 	    *(a++) = s;
@@ -745,7 +745,7 @@ int execf;
 	    *s++ = '\0';
     }
     *a = Nullch;
-    if (Argv[0])
+    if (PL_Argv[0])
 	rc = do_spawn_ve(NULL, 0, execf, cmd);
     else
     	rc = -1;
@@ -799,7 +799,7 @@ char	*mode;
     /* `this' is what we use in the parent, `that' in the child. */
     this = (*mode == 'w');
     that = !this;
-    if (tainting) {
+    if (PL_tainting) {
 	taint_env();
 	taint_proper("Insecure %s%s", "EXEC");
     }
@@ -830,10 +830,10 @@ char	*mode;
 	close(p[this]);
 	p[this] = p[that];
     }
-    sv = *av_fetch(fdpid,p[this],TRUE);
+    sv = *av_fetch(PL_fdpid,p[this],TRUE);
     (void)SvUPGRADE(sv,SVt_IV);
     SvIVX(sv) = pid;
-    forkprocess = pid;
+    PL_forkprocess = pid;
     return PerlIO_fdopen(p[this], mode);
 
 #else  /* USE_POPEN */
@@ -846,11 +846,11 @@ char	*mode;
 #  else
     char *shell = getenv("EMXSHELL");
 
-    my_setenv("EMXSHELL", sh_path);
+    my_setenv("EMXSHELL", PL_sh_path);
     res = popen(cmd, mode);
     my_setenv("EMXSHELL", shell);
 #  endif 
-    sv = *av_fetch(fdpid, PerlIO_fileno(res), TRUE);
+    sv = *av_fetch(PL_fdpid, PerlIO_fileno(res), TRUE);
     (void)SvUPGRADE(sv,SVt_IV);
     SvIVX(sv) = -1;			/* A cooky. */
     return res;
@@ -1004,8 +1004,8 @@ XS(XS_File__Copy_syscopy)
     if (items < 2 || items > 3)
 	croak("Usage: File::Copy::syscopy(src,dst,flag=0)");
     {
-	char *	src = (char *)SvPV(ST(0),na);
-	char *	dst = (char *)SvPV(ST(1),na);
+	char *	src = (char *)SvPV(ST(0),PL_na);
+	char *	dst = (char *)SvPV(ST(1),PL_na);
 	U32	flag;
 	int	RETVAL, rc;
 
@@ -1042,7 +1042,7 @@ mod2fname(sv)
     if (avlen < 0) 
       croak("Empty array reference given to mod2fname");
 
-    s = SvPV(*av_fetch((AV*)sv, avlen, FALSE), na);
+    s = SvPV(*av_fetch((AV*)sv, avlen, FALSE), PL_na);
     strncpy(fname, s, 8);
     len = strlen(s);
     if (len < 6) pos = len;
@@ -1052,7 +1052,7 @@ mod2fname(sv)
     }
     avlen --;
     while (avlen >= 0) {
-	s = SvPV(*av_fetch((AV*)sv, avlen, FALSE), na);
+	s = SvPV(*av_fetch((AV*)sv, avlen, FALSE), PL_na);
 	while (*s) {
 	    sum = 33 * sum + *(s++);	/* 7 is primitive mod 13. */
 	}
@@ -1182,7 +1182,7 @@ XS(XS_Cwd_sys_chdir)
     if (items != 1)
 	croak("Usage: Cwd::sys_chdir(path)");
     {
-	char *	path = (char *)SvPV(ST(0),na);
+	char *	path = (char *)SvPV(ST(0),PL_na);
 	bool	RETVAL;
 
 	RETVAL = sys_chdir(path);
@@ -1198,7 +1198,7 @@ XS(XS_Cwd_change_drive)
     if (items != 1)
 	croak("Usage: Cwd::change_drive(d)");
     {
-	char	d = (char)*SvPV(ST(0),na);
+	char	d = (char)*SvPV(ST(0),PL_na);
 	bool	RETVAL;
 
 	RETVAL = change_drive(d);
@@ -1214,7 +1214,7 @@ XS(XS_Cwd_sys_is_absolute)
     if (items != 1)
 	croak("Usage: Cwd::sys_is_absolute(path)");
     {
-	char *	path = (char *)SvPV(ST(0),na);
+	char *	path = (char *)SvPV(ST(0),PL_na);
 	bool	RETVAL;
 
 	RETVAL = sys_is_absolute(path);
@@ -1230,7 +1230,7 @@ XS(XS_Cwd_sys_is_rooted)
     if (items != 1)
 	croak("Usage: Cwd::sys_is_rooted(path)");
     {
-	char *	path = (char *)SvPV(ST(0),na);
+	char *	path = (char *)SvPV(ST(0),PL_na);
 	bool	RETVAL;
 
 	RETVAL = sys_is_rooted(path);
@@ -1246,7 +1246,7 @@ XS(XS_Cwd_sys_is_relative)
     if (items != 1)
 	croak("Usage: Cwd::sys_is_relative(path)");
     {
-	char *	path = (char *)SvPV(ST(0),na);
+	char *	path = (char *)SvPV(ST(0),PL_na);
 	bool	RETVAL;
 
 	RETVAL = sys_is_relative(path);
@@ -1277,7 +1277,7 @@ XS(XS_Cwd_sys_abspath)
     if (items < 1 || items > 2)
 	croak("Usage: Cwd::sys_abspath(path, dir = NULL)");
     {
-	char *	path = (char *)SvPV(ST(0),na);
+	char *	path = (char *)SvPV(ST(0),PL_na);
 	char *	dir;
 	char p[MAXPATHLEN];
 	char *	RETVAL;
@@ -1285,7 +1285,7 @@ XS(XS_Cwd_sys_abspath)
 	if (items < 2)
 	    dir = NULL;
 	else {
-	    dir = (char *)SvPV(ST(1),na);
+	    dir = (char *)SvPV(ST(1),PL_na);
 	}
 	if (path[0] == '.' && (path[1] == '/' || path[1] == '\\')) {
 	    path += 2;
@@ -1425,7 +1425,7 @@ XS(XS_Cwd_extLibpath_set)
     if (items < 1 || items > 2)
 	croak("Usage: Cwd::extLibpath_set(s, type = 0)");
     {
-	char *	s = (char *)SvPV(ST(0),na);
+	char *	s = (char *)SvPV(ST(0),PL_na);
 	bool	type;
 	U32	rc;
 	bool	RETVAL;
@@ -1486,19 +1486,19 @@ Perl_OS2_init(char **env)
 	environ = env;
     }
     if ( (shell = getenv("PERL_SH_DRIVE")) ) {
-	New(1304, sh_path, strlen(SH_PATH) + 1, char);
-	strcpy(sh_path, SH_PATH);
-	sh_path[0] = shell[0];
+	New(1304, PL_sh_path, strlen(SH_PATH) + 1, char);
+	strcpy(PL_sh_path, SH_PATH);
+	PL_sh_path[0] = shell[0];
     } else if ( (shell = getenv("PERL_SH_DIR")) ) {
 	int l = strlen(shell), i;
 	if (shell[l-1] == '/' || shell[l-1] == '\\') {
 	    l--;
 	}
-	New(1304, sh_path, l + 8, char);
-	strncpy(sh_path, shell, l);
-	strcpy(sh_path + l, "/sh.exe");
+	New(1304, PL_sh_path, l + 8, char);
+	strncpy(PL_sh_path, shell, l);
+	strcpy(PL_sh_path + l, "/sh.exe");
 	for (i = 0; i < l; i++) {
-	    if (sh_path[i] == '\\') sh_path[i] = '/';
+	    if (PL_sh_path[i] == '\\') PL_sh_path[i] = '/';
 	}
     }
     MUTEX_INIT(&start_thread_mutex);

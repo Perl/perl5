@@ -43,7 +43,7 @@ threadstart(void *arg)
     Thread savethread = thr;
     LOGOP myop;
     dSP;
-    I32 oldscope = scopestack_ix;
+    I32 oldscope = PL_scopestack_ix;
     I32 retval;
     AV *av;
     int i;
@@ -60,14 +60,14 @@ threadstart(void *arg)
     thr->private = 0;
 
     /* Now duplicate most of perl_call_sv but with a few twists */
-    op = (OP*)&myop;
-    Zero(op, 1, LOGOP);
+    PL_op = (OP*)&myop;
+    Zero(PL_op, 1, LOGOP);
     myop.op_flags = OPf_STACKED;
     myop.op_next = Nullop;
     myop.op_flags |= OPf_KNOW;
     myop.op_flags |= OPf_WANT_LIST;
-    op = pp_entersub(ARGS);
-    DEBUG_L(if (!op)
+    PL_op = pp_entersub(ARGS);
+    DEBUG_L(if (!PL_op)
 	    PerlIO_printf(PerlIO_stderr(), "thread starts at Nullop\n"));
     /*
      * When this thread is next scheduled, we start in the right
@@ -123,10 +123,10 @@ threadstart(void *arg)
 	MUTEX_LOCK(&thr->mutex);
 	thr->flags |= THRf_DID_DIE;
 	MUTEX_UNLOCK(&thr->mutex);
-	av_store(av, 0, &sv_no);
+	av_store(av, 0, &PL_sv_no);
 	av_store(av, 1, newSVsv(thr->errsv));
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p died: %s\n",
-			      thr, SvPV(thr->errsv, na)));
+			      thr, SvPV(thr->errsv, PL_na)));
     } else {
 	DEBUG_L(STMT_START {
 	    for (i = 1; i <= retval; i++) {
@@ -134,7 +134,7 @@ threadstart(void *arg)
 				thr, i, SvPEEK(SP[i - 1]));
 	    }
 	} STMT_END);
-	av_store(av, 0, &sv_yes);
+	av_store(av, 0, &PL_sv_yes);
 	for (i = 1; i <= retval; i++, SP++)
 	    sv_setsv(*av_fetch(av, i, TRUE), SvREFCNT_inc(*SP));
     }
@@ -142,7 +142,7 @@ threadstart(void *arg)
   finishoff:
 #if 0    
     /* removed for debug */
-    SvREFCNT_dec(curstack);
+    SvREFCNT_dec(PL_curstack);
 #endif
     SvREFCNT_dec(thr->cvcache);
     SvREFCNT_dec(thr->threadsv);
@@ -174,7 +174,7 @@ threadstart(void *arg)
     Safefree(PL_screamnext);
     Safefree(PL_reg_start_tmp);
     SvREFCNT_dec(PL_lastscream);
-    /*SvREFCNT_dec(defoutgv);*/
+    /*SvREFCNT_dec(PL_defoutgv);*/
 
     MUTEX_LOCK(&thr->mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
@@ -290,7 +290,7 @@ newthread (SV *startsv, AV *initargs, char *classname)
     return sv_bless(newRV_noinc(sv), gv_stashpv(classname, TRUE));
 #else
     croak("No threads in this perl");
-    return &sv_undef;
+    return &PL_sv_undef;
 #endif
 }
 
@@ -354,7 +354,7 @@ join(t)
 	    for (i = 1; i <= AvFILL(av); i++)
 		XPUSHs(sv_2mortal(*av_fetch(av, i, FALSE)));
 	} else {
-	    char *mess = SvPV(*av_fetch(av, 1, FALSE), na);
+	    char *mess = SvPV(*av_fetch(av, 1, FALSE), PL_na);
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 				  "%p: join propagating die message: %s\n",
 				  thr, mess));
@@ -396,7 +396,7 @@ equal(t1, t2)
 	Thread	t1
 	Thread	t2
     PPCODE:
-	PUSHs((t1 == t2) ? &sv_yes : &sv_no);
+	PUSHs((t1 == t2) ? &PL_sv_yes : &PL_sv_no);
 
 void
 flags(t)
@@ -438,7 +438,7 @@ void
 DESTROY(t)
 	SV *	t
     PPCODE:
-	PUSHs(&sv_yes);
+	PUSHs(&PL_sv_yes);
 
 void
 yield()
@@ -582,7 +582,7 @@ void
 kill_sighandler_thread()
     PPCODE:
 	write(sig_pipe[1], "\0", 1);
-	PUSHs(&sv_yes);
+	PUSHs(&PL_sv_yes);
 
 void
 init_thread_signals()
@@ -590,7 +590,7 @@ init_thread_signals()
 	PL_sighandlerp = handle_thread_signal;
 	if (pipe(sig_pipe) == -1)
 	    XSRETURN_UNDEF;
-	PUSHs(&sv_yes);
+	PUSHs(&PL_sv_yes);
 
 void
 await_signal()
@@ -605,7 +605,7 @@ await_signal()
 	    croak("panic: await_signal");
 	ST(0) = sv_newmortal();
 	if (ret)
-	    sv_setsv(ST(0), c ? psig_ptr[c] : &sv_no);
+	    sv_setsv(ST(0), c ? psig_ptr[c] : &PL_sv_no);
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			      "await_signal returning %s\n", SvPEEK(ST(0))););
 

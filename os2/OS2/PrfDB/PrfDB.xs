@@ -20,13 +20,13 @@ Prf_Get(HINI hini, PSZ app, PSZ key) {
     BOOL rc;
     SV *sv;
 
-    if (CheckWinError(PrfQueryProfileSize(hini, app, key, &len))) return &sv_undef;
+    if (CheckWinError(PrfQueryProfileSize(hini, app, key, &len))) return &PL_sv_undef;
     sv = newSVpv("", 0);
     SvGROW(sv, len + 1);
     if (CheckWinError(PrfQueryProfileData(hini, app, key, SvPVX(sv), &len))
 	|| (len == 0 && (app == NULL || key == NULL))) { /* Somewhy needed. */
 	SvREFCNT_dec(sv);
-	return &sv_undef;
+	return &PL_sv_undef;
     }
     SvCUR_set(sv, len);
     *SvEND(sv) = 0;
@@ -59,7 +59,7 @@ Prf_Profiles()
     char system[257];
     PRFPROFILE info = { 257, user, 257, system};
     
-    if (CheckWinError(PrfQueryProfile(Perl_hab, &info))) return &sv_undef;
+    if (CheckWinError(PrfQueryProfile(Perl_hab, &info))) return &PL_sv_undef;
     if (info.cchUserName > 257 || info.cchSysName > 257)
 	die("Panic: Profile names too long");
     av_push(av, newSVpv(user, info.cchUserName - 1));

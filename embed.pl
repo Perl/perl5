@@ -8,6 +8,8 @@ my @extvars = qw(sv_undef sv_yes sv_no na dowarn
                  curstash DBsub DBsingle debstash
                  rsfp 
                  stdingv
+		 defgv
+		 errgv
                 );
 
 sub readsyms (\%$) {

@@ -203,9 +203,9 @@
 #define HINT_M_VMSISH_STATUS	0x01000000 /* system, $? return VMS status */
 #define HINT_M_VMSISH_EXIT	0x02000000 /* exit(1) ==> SS$_NORMAL */
 #define HINT_M_VMSISH_TIME	0x04000000 /* times are local, not UTC */
-#define NATIVE_HINTS		(hints >> HINT_V_VMSISH)  /* used in op.c */
+#define NATIVE_HINTS		(PL_hints >> HINT_V_VMSISH)  /* used in op.c */
 
-#define TEST_VMSISH(h)	(curcop->op_private & ((h) >> HINT_V_VMSISH))
+#define TEST_VMSISH(h)	(PL_curcop->op_private & ((h) >> HINT_V_VMSISH))
 #define VMSISH_STATUS	TEST_VMSISH(HINT_M_VMSISH_STATUS)
 #define VMSISH_EXIT	TEST_VMSISH(HINT_M_VMSISH_EXIT)
 #define VMSISH_TIME	TEST_VMSISH(HINT_M_VMSISH_TIME)

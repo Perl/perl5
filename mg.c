@@ -447,7 +447,7 @@ magic_get(SV *sv, MAGIC *mg)
 	break;
     case '\024':		/* ^T */
 #ifdef BIG_TIME
- 	sv_setnv(sv, basetime);
+ 	sv_setnv(sv, PL_basetime);
 #else
 	sv_setiv(sv, (IV)PL_basetime);
 #endif
@@ -523,8 +523,8 @@ magic_get(SV *sv, MAGIC *mg)
 	    dTHR;
 	    sv_setiv(sv, (IV)STATUS_CURRENT);
 #ifdef COMPLEX_STATUS
-	    LvTARGOFF(sv) = statusvalue;
-	    LvTARGLEN(sv) = statusvalue_vms;
+	    LvTARGOFF(sv) = PL_statusvalue;
+	    LvTARGLEN(sv) = PL_statusvalue_vms;
 #endif
 	}
 	break;
@@ -655,7 +655,7 @@ magic_setenv(SV *sv, MAGIC *mg)
      /* waiting in the wings? */
     if (!len) {
 	SV **valp;
-	if ((valp = hv_fetch(GvHVn(envgv), ptr, klen, FALSE)))
+	if ((valp = hv_fetch(GvHVn(PL_envgv), ptr, klen, FALSE)))
 	    s = SvPV(*valp, len);
     }
 #endif
@@ -1542,7 +1542,7 @@ magic_set(SV *sv, MAGIC *mg)
 	break;
     case '\024':	/* ^T */
 #ifdef BIG_TIME
-	basetime = (Time_t)(SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv));
+	PL_basetime = (Time_t)(SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv));
 #else
 	PL_basetime = (Time_t)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #endif
@@ -1629,9 +1629,9 @@ magic_set(SV *sv, MAGIC *mg)
 	break;
     case '?':
 #ifdef COMPLEX_STATUS
-	if (localizing == 2) {
-	    statusvalue = LvTARGOFF(sv);
-	    statusvalue_vms = LvTARGLEN(sv);
+	if (PL_localizing == 2) {
+	    PL_statusvalue = LvTARGOFF(sv);
+	    PL_statusvalue_vms = LvTARGLEN(sv);
 	}
 	else
 #endif
@@ -1686,7 +1686,7 @@ magic_set(SV *sv, MAGIC *mg)
 	(void)setreuid((Uid_t)-1, (Uid_t)PL_euid);
 #else
 #ifdef HAS_SETRESUID
-	(void)setresuid((Uid_t)-1, (Uid_t)euid, (Uid_t)-1);
+	(void)setresuid((Uid_t)-1, (Uid_t)PL_euid, (Uid_t)-1);
 #else
 	if (PL_euid == PL_uid)		/* special case $> = $< */
 	    PerlProc_setuid(PL_euid);
@@ -1788,7 +1788,7 @@ magic_set(SV *sv, MAGIC *mg)
 	    for (i = 1; i < PL_origargc; i++) {
 		if (PL_origargv[i] == s + 1
 #ifdef OS2
-		    || origargv[i] == s + 2
+		    || PL_origargv[i] == s + 2
 #endif 
 		   )
 		    s += strlen(++s);	/* this one is ok too */
@@ -1798,7 +1798,7 @@ magic_set(SV *sv, MAGIC *mg)
 	    /* can grab env area too? */
 	    if (PL_origenviron && (PL_origenviron[0] == s + 1
 #ifdef OS2
-				|| (origenviron[0] == s + 9 && (s += 8))
+				|| (PL_origenviron[0] == s + 9 && (s += 8))
 #endif 
 	       )) {
 		my_setenv("NoNe  SuCh", Nullch);

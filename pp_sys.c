@@ -259,7 +259,7 @@ PP(pp_glob)
     PL_rs = sv_2mortal(newSVpv("", 1));
 #ifndef DOSISH
 #ifndef CSH
-    *SvPVX(rs) = '\n';
+    *SvPVX(PL_rs) = '\n';
 #endif	/* !CSH */
 #endif	/* !DOSISH */
 
@@ -271,7 +271,7 @@ PP(pp_glob)
 #if 0		/* XXX never used! */
 PP(pp_indread)
 {
-    last_in_gv = gv_fetchpv(SvPVx(GvSV((GV*)(*stack_sp--)), PL_na), TRUE,SVt_PVIO);
+    PL_last_in_gv = gv_fetchpv(SvPVx(GvSV((GV*)(*PL_stack_sp--)), PL_na), TRUE,SVt_PVIO);
     return do_readline();
 }
 #endif
@@ -504,7 +504,7 @@ PP(pp_umask)
      * since 'group' and 'other' concepts probably don't exist here. */
     if (MAXARG >= 1 && (POPi & 0700))
 	DIE("umask not implemented");
-    XPUSHs(&sv_undef);
+    XPUSHs(&PL_sv_undef);
 #endif
     RETURN;
 }
@@ -2186,9 +2186,9 @@ PP(pp_stat)
 #endif
 	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_size)));
 #ifdef BIG_TIME
-	PUSHs(sv_2mortal(newSVnv((U32)statcache.st_atime)));
-	PUSHs(sv_2mortal(newSVnv((U32)statcache.st_mtime)));
-	PUSHs(sv_2mortal(newSVnv((U32)statcache.st_ctime)));
+	PUSHs(sv_2mortal(newSVnv((U32)PL_statcache.st_atime)));
+	PUSHs(sv_2mortal(newSVnv((U32)PL_statcache.st_mtime)));
+	PUSHs(sv_2mortal(newSVnv((U32)PL_statcache.st_ctime)));
 #else
 	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_atime)));
 	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_mtime)));
@@ -2650,7 +2650,7 @@ PP(pp_chdir)
     }
 #ifdef VMS
     if (!tmps || !*tmps) {
-       svp = hv_fetch(GvHVn(envgv), "SYS$LOGIN", 9, FALSE);
+       svp = hv_fetch(GvHVn(PL_envgv), "SYS$LOGIN", 9, FALSE);
        if (svp)
            tmps = SvPV(*svp, PL_na);
     }
@@ -2660,7 +2660,7 @@ PP(pp_chdir)
 #ifdef VMS
     /* Clear the DEFAULT element of ENV so we'll get the new value
      * in the future. */
-    hv_delete(GvHVn(envgv),"DEFAULT",7,G_DISCARD);
+    hv_delete(GvHVn(PL_envgv),"DEFAULT",7,G_DISCARD);
 #endif
     RETURN;
 }
@@ -2734,11 +2734,11 @@ PP(pp_rename)
 #ifdef HAS_RENAME
     anum = PerlLIO_rename(tmps, tmps2);
 #else
-    if (!(anum = PerlLIO_stat(tmps, &statbuf))) {
+    if (!(anum = PerlLIO_stat(tmps, &PL_statbuf))) {
 	if (same_dirent(tmps2, tmps))	/* can always rename to same name */
 	    anum = 1;
 	else {
-	    if (euid || PerlLIO_stat(tmps2, &statbuf) < 0 || !S_ISDIR(statbuf.st_mode))
+	    if (euid || PerlLIO_stat(tmps2, &PL_statbuf) < 0 || !S_ISDIR(PL_statbuf.st_mode))
 		(void)UNLINK(tmps2);
 	    if (!(anum = link(tmps, tmps2)))
 		anum = UNLINK(tmps);
@@ -2826,7 +2826,7 @@ char *filename;
 
     if (myfp) {
 	SV *tmpsv = sv_newmortal();
-	/* Need to save/restore 'rs' ?? */
+	/* Need to save/restore 'PL_rs' ?? */
 	s = sv_gets(tmpsv, myfp, 0);
 	(void)PerlProc_pclose(myfp);
 	if (s != Nullch) {
@@ -2875,7 +2875,7 @@ char *filename;
 	    return 0;
 	}
 	else {	/* some mkdirs return no failure indication */
-	    anum = (PerlLIO_stat(save_filename, &statbuf) >= 0);
+	    anum = (PerlLIO_stat(save_filename, &PL_statbuf) >= 0);
 	    if (PL_op->op_type == OP_RMDIR)
 		anum = !anum;
 	    if (anum)
@@ -3422,7 +3422,7 @@ PP(pp_tms)
 #ifndef VMS
     (void)PerlProc_times(&PL_timesbuf);
 #else
-    (void)PerlProc_times((tbuffer_t *)&timesbuf);  /* time.h uses different name for */
+    (void)PerlProc_times((tbuffer_t *)&PL_timesbuf);  /* time.h uses different name for */
                                                    /* struct tms, though same data   */
                                                    /* is returned.                   */
 #endif
@@ -3749,7 +3749,7 @@ PP(pp_ghostent)
 	    sv_setpvn(sv, *elem, len);
 	}
 #else
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	if (hent->h_addr)
 	    sv_setpvn(sv, hent->h_addr, len);
 #endif /* h_addr */
@@ -4228,7 +4228,7 @@ PP(pp_gpwent)
 	sv_setpv(sv, pwent->pw_shell);
 
 #ifdef PWEXPIRE
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)pwent->pw_expire);
 #endif
     }

@@ -284,7 +284,7 @@ PP(pp_pushre)
     Copy(&PL_op, &LvTARGOFF(sv), 1, OP*);
     XPUSHs(sv);
 #else
-    XPUSHs((SV*)op);
+    XPUSHs((SV*)PL_op);
 #endif
     RETURN;
 }

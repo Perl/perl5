@@ -107,7 +107,7 @@ struct io {
 #    define SvREFCNT_inc(sv) sv_newref((SV*)sv)
 #  else
 #    define SvREFCNT_inc(sv)	\
-	((Sv=(SV*)(sv)), (Sv && ATOMIC_INC(SvREFCNT(Sv))), (SV*)Sv)
+	((PL_Sv=(SV*)(sv)), (PL_Sv && ATOMIC_INC(SvREFCNT(PL_Sv))), (SV*)PL_Sv)
 #  endif
 #endif
 
@@ -451,7 +451,7 @@ struct xpvio {
 #define SvLEN(sv) ((XPV*)  SvANY(sv))->xpv_len
 #define SvLENx(sv) SvLEN(sv)
 #define SvEND(sv)(((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
-#define SvENDx(sv) ((Sv = (sv)), SvEND(Sv))
+#define SvENDx(sv) ((PL_Sv = (sv)), SvEND(PL_Sv))
 #define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_magic
 #define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
 
@@ -590,18 +590,18 @@ struct xpvio {
 #  undef SvPVx
 #  undef SvTRUE
 #  undef SvTRUEx
-#  define SvIVx(sv) ((Sv = (sv)), SvIV(Sv))
-#  define SvUVx(sv) ((Sv = (sv)), SvUV(Sv))
-#  define SvNVx(sv) ((Sv = (sv)), SvNV(Sv))
-#  define SvPVx(sv, lp) ((Sv = (sv)), SvPV(Sv, lp))
+#  define SvIVx(sv) ((PL_Sv = (sv)), SvIV(PL_Sv))
+#  define SvUVx(sv) ((PL_Sv = (sv)), SvUV(PL_Sv))
+#  define SvNVx(sv) ((PL_Sv = (sv)), SvNV(PL_Sv))
+#  define SvPVx(sv, lp) ((PL_Sv = (sv)), SvPV(PL_Sv, lp))
 #  define SvTRUE(sv) (						\
     !sv								\
     ? 0								\
     :    SvPOK(sv)						\
-	?   ((Xpv = (XPV*)SvANY(sv)) &&				\
-	     (*Xpv->xpv_pv > '0' ||				\
-	      Xpv->xpv_cur > 1 ||				\
-	      (Xpv->xpv_cur && *Xpv->xpv_pv != '0'))		\
+	?   ((PL_Xpv = (XPV*)SvANY(sv)) &&			\
+	     (*PL_Xpv->xpv_pv > '0' ||				\
+	      PL_Xpv->xpv_cur > 1 ||				\
+	      (PL_Xpv->xpv_cur && *PL_Xpv->xpv_pv != '0'))	\
 	     ? 1						\
 	     : 0)						\
 	:							\
@@ -610,7 +610,7 @@ struct xpvio {
 	    :   SvNOK(sv)					\
 		? SvNVX(sv) != 0.0				\
 		: sv_2bool(sv) )
-#  define SvTRUEx(sv) ((Sv = (sv)), SvTRUE(Sv))
+#  define SvTRUEx(sv) ((PL_Sv = (sv)), SvTRUE(PL_Sv))
 #endif /* !USE_THREADS */
 #endif /* !__GNU__ */
 #endif /* !CRIPPLED_CC */

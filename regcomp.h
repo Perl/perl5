@@ -183,7 +183,7 @@ struct regnode_2 {
 #define	UCHARAT(p)	((int)*(p)&CHARMASK)
 #endif
 #else /* lint */
-#define UCHARAT(p)	regdummy
+#define UCHARAT(p)	PL_regdummy
 #endif /* lint */
 
 #define	FAIL(m)		croak    ("/%.127s/: %s",  PL_regprecomp,m)

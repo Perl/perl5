@@ -144,7 +144,7 @@ extern int rc;
 	if ((rc = DosCloseEventSem(*(c))))			\
 	    croak("panic: COND_DESTROY, rc=%i", rc);		\
     } STMT_END
-/*#define THR ((struct thread *) TlsGetValue(thr_key))
+/*#define THR ((struct thread *) TlsGetValue(PL_thr_key))
 #define dTHR struct thread *thr = THR
 */
 

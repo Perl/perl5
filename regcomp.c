@@ -2101,7 +2101,7 @@ reg_node(U8 op)
 
     ret = PL_regcode;
     if (SIZE_ONLY) {
-	SIZE_ALIGN(regsize);
+	SIZE_ALIGN(PL_regsize);
 	PL_regsize += 1;
 	return(ret);
     }
@@ -2126,7 +2126,7 @@ reganode(U8 op, U32 arg)
 
     ret = PL_regcode;
     if (SIZE_ONLY) {
-	SIZE_ALIGN(regsize);
+	SIZE_ALIGN(PL_regsize);
 	PL_regsize += 2;
 	return(ret);
     }

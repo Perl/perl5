@@ -483,21 +483,21 @@ pad_reset(void)
     dTHR;
     register I32 po;
 
-    if (AvARRAY(comppad) != curpad)
+    if (AvARRAY(PL_comppad) != PL_curpad)
 	croak("panic: pad_reset curpad");
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx reset\n",
-			  (unsigned long) thr, (unsigned long) curpad));
+			  (unsigned long) thr, (unsigned long) PL_curpad));
 #else
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx reset\n",
-			  (unsigned long) curpad));
+			  (unsigned long) PL_curpad));
 #endif /* USE_THREADS */
-    if (!tainting) {	/* Can't mix tainted and non-tainted temporaries. */
-	for (po = AvMAX(comppad); po > padix_floor; po--) {
-	    if (curpad[po] && !SvIMMORTAL(curpad[po]))
-		SvPADTMP_off(curpad[po]);
+    if (!PL_tainting) {	/* Can't mix tainted and non-tainted temporaries. */
+	for (po = AvMAX(PL_comppad); po > PL_padix_floor; po--) {
+	    if (PL_curpad[po] && !SvIMMORTAL(PL_curpad[po]))
+		SvPADTMP_off(PL_curpad[po]);
 	}
-	padix = padix_floor;
+	PL_padix = PL_padix_floor;
     }
 #endif
     PL_pad_reset_pending = FALSE;
@@ -3206,13 +3206,13 @@ CV* cv;
     PerlIO_printf(Perl_debug_log, "\tCV=0x%lx (%s), OUTSIDE=0x%lx (%s)\n",
 		  cv,
 		  (CvANON(cv) ? "ANON"
-		   : (cv == main_cv) ? "MAIN"
+		   : (cv == PL_main_cv) ? "MAIN"
 		   : CvUNIQUE(outside) ? "UNIQUE"
 		   : CvGV(cv) ? GvNAME(CvGV(cv)) : "UNDEFINED"),
 		  outside,
 		  (!outside ? "null"
 		   : CvANON(outside) ? "ANON"
-		   : (outside == main_cv) ? "MAIN"
+		   : (outside == PL_main_cv) ? "MAIN"
 		   : CvUNIQUE(outside) ? "UNIQUE"
 		   : CvGV(outside) ? GvNAME(CvGV(outside)) : "UNDEFINED"));
 
@@ -3695,7 +3695,7 @@ newCONSTSUB(HV *stash, char *name, SV *sv)
     newSUB(
 	start_subparse(FALSE, 0),
 	newSVOP(OP_CONST, 0, newSVpv(name,0)),
-	newSVOP(OP_CONST, 0, &PL_sv_no),	/* SvPV(&sv_no) == "" -- GMB */
+	newSVOP(OP_CONST, 0, &PL_sv_no),	/* SvPV(&PL_sv_no) == "" -- GMB */
 	newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
     );
 
@@ -4627,7 +4627,7 @@ ck_shift(OP *o)
 #ifdef USE_THREADS
 	if (!CvUNIQUE(PL_compcv)) {
 	    argop = newOP(OP_PADAV, OPf_REF);
-	    argop->op_targ = 0;		/* curpad[0] is @_ */
+	    argop->op_targ = 0;		/* PL_curpad[0] is @_ */
 	}
 	else {
 	    argop = newUNOP(OP_RV2AV, 0,

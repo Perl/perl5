@@ -51,8 +51,8 @@ taint_env(void)
     while (1) {
 	if (i)
 	    (void)sprintf(name,"DCL$PATH;%d", i);
-	svp = hv_fetch(GvHVn(envgv), name, strlen(name), FALSE);
-	if (!svp || *svp == &sv_undef)
+	svp = hv_fetch(GvHVn(PL_envgv), name, strlen(name), FALSE);
+	if (!svp || *svp == &PL_sv_undef)
 	    break;
 	if (SvTAINTED(*svp)) {
 	    dTHR;

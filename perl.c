@@ -166,7 +166,7 @@ perl_construct(register PerlInterpreter *sv_interp)
 
 #ifdef PERL_OBJECT
 	/* TODO: */
-	/* sighandlerp = sighandler; */
+	/* PL_sighandlerp = sighandler; */
 #else
 	PL_sighandlerp = sighandler;
 #endif
@@ -210,7 +210,7 @@ perl_construct(register PerlInterpreter *sv_interp)
 				+ ((double) PATCHLEVEL / (double) 1000)
 				+ ((double) SUBVERSION / (double) 100000));
 #else
-    sprintf(patchlevel, "%5.3f", (double) 5 +
+    sprintf(PL_patchlevel, "%5.3f", (double) 5 +
 				((double) PATCHLEVEL / (double) 1000));
 #endif
 
@@ -791,7 +791,7 @@ setuid perl scripts securely.\n");
 	    if (*++s != ':')  {
 		PL_Sv = newSVpv("print myconfig();",0);
 #ifdef VMS
-		sv_catpv(Sv,"print \"\\nCharacteristics of this PERLSHR image: \\n\",");
+		sv_catpv(PL_Sv,"print \"\\nCharacteristics of this PERLSHR image: \\n\",");
 #else
 		sv_catpv(PL_Sv,"print \"\\nCharacteristics of this binary (from libperl): \\n\",");
 #endif
@@ -801,7 +801,7 @@ setuid perl scripts securely.\n");
 		sv_catpv(PL_Sv," DEBUGGING");
 #  endif
 #  ifdef NO_EMBED
-		sv_catpv(Sv," NO_EMBED");
+		sv_catpv(PL_Sv," NO_EMBED");
 #  endif
 #  ifdef MULTIPLICITY
 		sv_catpv(PL_Sv," MULTIPLICITY");
@@ -823,7 +823,7 @@ setuid perl scripts securely.\n");
 #  ifdef __TIME__
 		sv_catpvf(PL_Sv,",\"  Compiled at %s %s\\n\"",__DATE__,__TIME__);
 #  else
-		sv_catpvf(Sv,",\"  Compiled on %s\\n\"",__DATE__);
+		sv_catpvf(PL_Sv,",\"  Compiled on %s\\n\"",__DATE__);
 #  endif
 #endif
 		sv_catpv(PL_Sv, "; \
@@ -1698,7 +1698,7 @@ moreswitches(char *s)
 	    PATCHLEVEL, SUBVERSION, ARCHNAME);
 #else
 	printf("\nThis is perl, version %s built for %s",
-		patchlevel, ARCHNAME);
+		PL_patchlevel, ARCHNAME);
 #endif
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
@@ -1784,7 +1784,7 @@ my_unexec(void)
 
     prog = newSVpv(BIN_EXP, 0);
     sv_catpv(prog, "/perl");
-    file = newSVpv(origfilename, 0);
+    file = newSVpv(PL_origfilename, 0);
     sv_catpv(file, ".perldump");
 
     unexec(SvPVX(file), SvPVX(prog), &etext, sbrk(0), 0);
@@ -1807,35 +1807,35 @@ init_interp(void)
 
 #ifdef PERL_OBJECT		/* XXX kludge */
 #define I_REINIT \
-  STMT_START {			\
-    chopset	= " \n-";	\
-    copline	= NOLINE;	\
-    curcop	= &compiling;	\
-    curcopdb    = NULL;		\
-    dbargs	= 0;		\
-    dlmax	= 128;		\
-    laststatval	= -1;		\
-    laststype	= OP_STAT;	\
-    maxscream	= -1;		\
-    maxsysfd	= MAXSYSFD;	\
-    statname	= Nullsv;	\
-    tmps_floor	= -1;		\
-    tmps_ix     = -1;		\
-    op_mask     = NULL;		\
-    dlmax       = 128;		\
-    laststatval = -1;		\
-    laststype   = OP_STAT;	\
-    mess_sv     = Nullsv;	\
-    splitstr    = " ";		\
-    generation  = 100;		\
-    exitlist    = NULL;		\
-    exitlistlen = 0;		\
-    regindent   = 0;		\
-    in_clean_objs = FALSE;	\
-    in_clean_all= FALSE;	\
-    profiledata = NULL;		\
-    rsfp	= Nullfp;	\
-    rsfp_filters= Nullav;	\
+  STMT_START {				\
+    PL_chopset		= " \n-";	\
+    PL_copline		= NOLINE;	\
+    PL_curcop		= &PL_compiling;\
+    PL_curcopdb		= NULL;		\
+    PL_dbargs		= 0;		\
+    PL_dlmax		= 128;		\
+    PL_laststatval	= -1;		\
+    PL_laststype	= OP_STAT;	\
+    PL_maxscream	= -1;		\
+    PL_maxsysfd		= MAXSYSFD;	\
+    PL_statname		= Nullsv;	\
+    PL_tmps_floor	= -1;		\
+    PL_tmps_ix		= -1;		\
+    PL_op_mask		= NULL;		\
+    PL_dlmax		= 128;		\
+    PL_laststatval	= -1;		\
+    PL_laststype	= OP_STAT;	\
+    PL_mess_sv		= Nullsv;	\
+    PL_splitstr		= " ";		\
+    PL_generation	= 100;		\
+    PL_exitlist		= NULL;		\
+    PL_exitlistlen	= 0;		\
+    PL_regindent	= 0;		\
+    PL_in_clean_objs	= FALSE;	\
+    PL_in_clean_all	= FALSE;	\
+    PL_profiledata	= NULL;		\
+    PL_rsfp		= Nullfp;	\
+    PL_rsfp_filters	= Nullav;	\
   } STMT_END
     I_REINIT;
 #else
@@ -1970,7 +1970,7 @@ sed %s -e \"/^[^#]/b\" \
  -e \"/^#[ 	]*endif/b\" \
  -e \"s/^#.*//\" \
  %s | %_ -C %_ %s",
-	  (doextract ? "-e \"1,/^#/d\n\"" : ""),
+	  (PL_doextract ? "-e \"1,/^#/d\n\"" : ""),
 #else
 	sv_setpvf(cmd, "\
 %s %s -e '/^[^#]/b' \
@@ -2031,10 +2031,12 @@ sed %s -e \"/^[^#]/b\" \
     if (!PL_rsfp) {
 #ifdef DOSUID
 #ifndef IAMSUID		/* in case script is not readable before setuid */
-	if (PL_euid && PerlLIO_stat(SvPVX(GvSV(curcop->cop_filegv)),&PL_statbuf) >= 0 &&
-	  PL_statbuf.st_mode & (S_ISUID|S_ISGID)) {
+	if (PL_euid &&
+	    PerlLIO_stat(SvPVX(GvSV(PL_curcop->cop_filegv)),&PL_statbuf) >= 0 &&
+	    PL_statbuf.st_mode & (S_ISUID|S_ISGID))
+	{
 	    /* try again */
-	    PerlProc_execv(form("%s/sperl%s", BIN_EXP, patchlevel), origargv);
+	    PerlProc_execv(form("%s/sperl%s", BIN_EXP, PL_patchlevel), PL_origargv);
 	    croak("Can't do setuid\n");
 	}
 #endif
@@ -2074,7 +2076,7 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
     char *s, *s2;
 
     if (PerlLIO_fstat(PerlIO_fileno(PL_rsfp),&PL_statbuf) < 0)	/* normal stat is insecure */
-	croak("Can't stat script \"%s\"",origfilename);
+	croak("Can't stat script \"%s\"",PL_origfilename);
     if (fdscript < 0 && PL_statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	I32 len;
 
@@ -2088,7 +2090,7 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
 	 * But I don't think it's too important.  The manual lies when
 	 * it says access() is useful in setuid programs.
 	 */
-	if (PerlLIO_access(SvPVX(GvSV(curcop->cop_filegv)),1))	/*double check*/
+	if (PerlLIO_access(SvPVX(GvSV(PL_curcop->cop_filegv)),1)) /*double check*/
 	    croak("Permission denied");
 #else
 	/* If we can swap euid and uid, then we can determine access rights
@@ -2109,7 +2111,7 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
 #endif
 		|| PerlProc_getuid() != PL_euid || PerlProc_geteuid() != PL_uid)
 		croak("Can't swap uid and euid");	/* really paranoid */
-	    if (PerlLIO_stat(SvPVX(GvSV(curcop->cop_filegv)),&tmpstatbuf) < 0)
+	    if (PerlLIO_stat(SvPVX(GvSV(PL_curcop->cop_filegv)),&tmpstatbuf) < 0)
 		croak("Permission denied");	/* testing full pathname here */
 	    if (tmpstatbuf.st_dev != PL_statbuf.st_dev ||
 		tmpstatbuf.st_ino != PL_statbuf.st_ino) {
@@ -2120,7 +2122,7 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
 (Filename of set-id script was %s, uid %ld gid %ld.)\n\nSincerely,\nperl\n",
 			(long)PL_uid,(long)tmpstatbuf.st_dev, (long)tmpstatbuf.st_ino,
 			(long)PL_statbuf.st_dev, (long)PL_statbuf.st_ino,
-			SvPVX(GvSV(curcop->cop_filegv)),
+			SvPVX(GvSV(PL_curcop->cop_filegv)),
 			(long)PL_statbuf.st_uid, (long)PL_statbuf.st_gid);
 		    (void)PerlProc_pclose(PL_rsfp);
 		}
@@ -2146,15 +2148,15 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
 	    croak("Permission denied");
 	if (PL_statbuf.st_mode & S_IWOTH)
 	    croak("Setuid/gid script is writable by world");
-	doswitches = FALSE;		/* -s is insecure in suid */
-	curcop->cop_line++;
-	if (sv_gets(linestr, PL_rsfp, 0) == Nullch ||
-	  strnNE(SvPV(linestr,na),"#!",2) )	/* required even on Sys V */
+	PL_doswitches = FALSE;		/* -s is insecure in suid */
+	PL_curcop->cop_line++;
+	if (sv_gets(PL_linestr, PL_rsfp, 0) == Nullch ||
+	  strnNE(SvPV(PL_linestr,PL_na),"#!",2) )	/* required even on Sys V */
 	    croak("No #! line");
-	s = SvPV(linestr,na)+2;
+	s = SvPV(PL_linestr,PL_na)+2;
 	if (*s == ' ') s++;
 	while (!isSPACE(*s)) s++;
-	for (s2 = s;  (s2 > SvPV(linestr,na)+2 &&
+	for (s2 = s;  (s2 > SvPV(PL_linestr,PL_na)+2 &&
 		       (isDIGIT(s2[-1]) || strchr("._-", s2[-1])));  s2--) ;
 	if (strnNE(s2-4,"perl",4) && strnNE(s-9,"perl",4))  /* sanity check */
 	    croak("Not a perl script");
@@ -2181,7 +2183,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    (void)PerlIO_close(PL_rsfp);
 #ifndef IAMSUID
 	    /* try again */
-	    PerlProc_execv(form("%s/sperl%s", BIN_EXP, patchlevel), origargv);
+	    PerlProc_execv(form("%s/sperl%s", BIN_EXP, PL_patchlevel), PL_origargv);
 #endif
 	    croak("Can't do setuid\n");
 	}
@@ -2243,7 +2245,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    croak("Permission denied\n");	/* they can't do this */
     }
 #ifdef IAMSUID
-    else if (preprocess)
+    else if (PL_preprocess)
 	croak("-P not allowed for setuid/setgid script\n");
     else if (fdscript >= 0)
 	croak("fd script not allowed in suidperl\n");
@@ -2255,15 +2257,15 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     /* (We pass script name as "subdir" of fd, which perl will grok.) */
     PerlIO_rewind(PL_rsfp);
     PerlLIO_lseek(PerlIO_fileno(PL_rsfp),(Off_t)0,0);  /* just in case rewind didn't */
-    for (which = 1; origargv[which] && origargv[which] != scriptname; which++) ;
-    if (!origargv[which])
+    for (which = 1; PL_origargv[which] && PL_origargv[which] != scriptname; which++) ;
+    if (!PL_origargv[which])
 	croak("Permission denied");
-    origargv[which] = savepv(form("/dev/fd/%d/%s",
-				  PerlIO_fileno(PL_rsfp), origargv[which]));
+    PL_origargv[which] = savepv(form("/dev/fd/%d/%s",
+				  PerlIO_fileno(PL_rsfp), PL_origargv[which]));
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #endif
-    PerlProc_execv(form("%s/perl%s", BIN_EXP, patchlevel), origargv);	/* try again */
+    PerlProc_execv(form("%s/perl%s", BIN_EXP, PL_patchlevel), PL_origargv);/* try again */
     croak("Can't do setuid\n");
 #endif /* IAMSUID */
 #else /* !DOSUID */
@@ -2655,8 +2657,8 @@ incpush(char *p, int addsubdirs)
 	    sprintf(PL_archpat_auto, "/%s/%s/auto", ARCHNAME, PL_patchlevel);
 #ifdef VMS
 	for (len = sizeof(ARCHNAME) + 2;
-	     archpat_auto[len] != '\0' && archpat_auto[len] != '/'; len++)
-		if (archpat_auto[len] == '.') archpat_auto[len] = '_';
+	     PL_archpat_auto[len] != '\0' && PL_archpat_auto[len] != '/'; len++)
+		if (PL_archpat_auto[len] == '.') PL_archpat_auto[len] = '_';
 #endif
 	}
     }
@@ -2669,7 +2671,7 @@ incpush(char *p, int addsubdirs)
 	/* skip any consecutive separators */
 	while ( *p == PERLLIB_SEP ) {
 	    /* Uncomment the next line for PATH semantics */
-	    /* av_push(GvAVn(incgv), newSVpv(".", 1)); */
+	    /* av_push(GvAVn(PL_incgv), newSVpv(".", 1)); */
 	    p++;
 	}
 
@@ -2693,7 +2695,7 @@ incpush(char *p, int addsubdirs)
 	    char *unix;
 	    STRLEN len;
 
-	    if ((unix = tounixspec_ts(SvPV(libdir,na),Nullch)) != Nullch) {
+	    if ((unix = tounixspec_ts(SvPV(libdir,PL_na),Nullch)) != Nullch) {
 		len = strlen(unix);
 		while (unix[len-1] == '/') len--;  /* Cosmetic */
 		sv_usepvn(libdir,unix,len);
@@ -2701,7 +2703,7 @@ incpush(char *p, int addsubdirs)
 	    else
 		PerlIO_printf(PerlIO_stderr(),
 		              "Failed to unixify @INC element \"%s\"\n",
-			      SvPV(libdir,na));
+			      SvPV(libdir,PL_na));
 #endif
 	    /* .../archname/version if -d .../archname/version/auto */
 	    sv_setsv(subdir, libdir);

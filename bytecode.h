@@ -11,7 +11,7 @@ EXT int iv_overflows INIT(0);
 
 EXT SV *sv;
 #ifndef USE_THREADS
-EXT OP *op;
+EXT OP *PL_op;
 #endif
 EXT XPV pv;
 

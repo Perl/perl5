@@ -119,7 +119,7 @@ pclose (FILE *pp)
 static int
 convretcode (int rc,char *prog,int fl)
 {
-    if (rc < 0 && dowarn)
+    if (rc < 0 && PL_dowarn)
         warn ("Can't %s \"%s\": %s",fl ? "exec" : "spawn",prog,Strerror (errno));
     if (rc > 0)
         return rc <<= 8;
@@ -141,7 +141,7 @@ do_aspawn (SV *really,SV **mark,SV **sp)
 
     while (++mark <= sp)
         if (*mark)
-            *a++ = SvPVx(*mark, na);
+            *a++ = SvPVx(*mark, PL_na);
         else
             *a++ = "";
     *a = Nullch;
@@ -152,7 +152,7 @@ do_aspawn (SV *really,SV **mark,SV **sp)
      ) /* will swawnvp use PATH? */
          TAINT_ENV();	/* testing IFS here is overkill, probably */
 
-    if (really && *(tmps = SvPV(really, na)))
+    if (really && *(tmps = SvPV(really, PL_na)))
         rc=spawnvp (P_WAIT,tmps,argv);
     else
         rc=spawnvp (P_WAIT,argv[0],argv);
@@ -208,10 +208,10 @@ doshell:
             return convretcode (system (cmd),cmd,execf);
 	}
 
-    New (1303,Argv,(s-cmd)/2+2,char*);
-    Cmd=savepvn (cmd,s-cmd);
-    a=Argv;
-    for (s=Cmd; *s;) {
+    New (1303,PL_Argv,(s-cmd)/2+2,char*);
+    PL_Cmd=savepvn (cmd,s-cmd);
+    a=PL_Argv;
+    for (s=PL_Cmd; *s;) {
 	while (*s && isSPACE (*s)) s++;
 	if (*s)
 	    *(a++)=s;
@@ -220,14 +220,14 @@ doshell:
 	    *s++='\0';
     }
     *a=Nullch;
-    if (!Argv[0])
+    if (!PL_Argv[0])
         return -1;
 
     if (execf==EXECF_EXEC)
-        rc=execvp (Argv[0],Argv);
+        rc=execvp (PL_Argv[0],PL_Argv);
     else
-        rc=spawnvp (P_WAIT,Argv[0],Argv);
-    return convretcode (rc,Argv[0],execf);
+        rc=spawnvp (P_WAIT,PL_Argv[0],PL_Argv);
+    return convretcode (rc,PL_Argv[0],execf);
 }
 
 int

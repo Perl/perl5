@@ -718,11 +718,11 @@ SV *   sv ;
 #endif
             svp = hv_fetch(action, "bfname", 6, FALSE); 
             if (svp && SvOK(*svp)) {
-		char * ptr = SvPV(*svp,na) ;
+		char * ptr = SvPV(*svp,PL_na) ;
 #ifdef DB_VERSION_MAJOR
-		name = (char*) na ? ptr : NULL ;
+		name = (char*) PL_na ? ptr : NULL ;
 #else
-                info->db_RE_bfname = (char*) (na ? ptr : NULL) ;
+                info->db_RE_bfname = (char*) (PL_na ? ptr : NULL) ;
 #endif
 	    }
 	    else
@@ -738,7 +738,7 @@ SV *   sv ;
             {
 		int value ;
                 if (SvPOK(*svp))
-		    value = (int)*SvPV(*svp, na) ;
+		    value = (int)*SvPV(*svp, PL_na) ;
 		else
 		    value = SvIV(*svp) ;
 
@@ -756,7 +756,7 @@ SV *   sv ;
             if (svp && SvOK(*svp))
             {
                 if (SvPOK(*svp))
-		    info->db_RE_bval = (u_char)*SvPV(*svp, na) ;
+		    info->db_RE_bval = (u_char)*SvPV(*svp, PL_na) ;
 		else
 		    info->db_RE_bval = (u_char)(unsigned long) SvIV(*svp) ;
 		DB_flags(info->flags, DB_DELIMITER) ;
@@ -1102,7 +1102,7 @@ db_DoTie_(isHASH, dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_H
 	    SV *	sv = (SV *) NULL ; 
 
 	    if (items >= 3 && SvOK(ST(2))) 
-	        name = (char*) SvPV(ST(2), na) ; 
+	        name = (char*) SvPV(ST(2), PL_na) ; 
 
             if (items == 6)
 	        sv = ST(5) ;
@@ -1245,8 +1245,8 @@ unshift(db, ...)
 #endif
 	    for (i = items-1 ; i > 0 ; --i)
 	    {
-	        value.data = SvPV(ST(i), na) ;
-	        value.size = na ;
+	        value.data = SvPV(ST(i), PL_na) ;
+	        value.size = PL_na ;
 	        One = 1 ;
 	        key.data = &One ;
 	        key.size = sizeof(int) ;
@@ -1286,7 +1286,7 @@ pop(db)
 		OutputValue(ST(0), value) ;
 	        RETVAL = db_del(db, key, R_CURSOR) ;
 	        if (RETVAL != 0) 
-	            sv_setsv(ST(0), &sv_undef); 
+	            sv_setsv(ST(0), &PL_sv_undef); 
 	    }
 	}
 
@@ -1313,7 +1313,7 @@ shift(db)
 		OutputValue(ST(0), value) ;
 	        RETVAL = db_del(db, key, R_CURSOR) ;
 	        if (RETVAL != 0)
-	            sv_setsv (ST(0), &sv_undef) ;
+	            sv_setsv (ST(0), &PL_sv_undef) ;
 	    }
 	}
 
@@ -1344,8 +1344,8 @@ push(db, ...)
 	        {
 		    
 		    ++ (* (int*)key.data) ;
-	            value.data = SvPV(ST(i), na) ;
-	            value.size = na ;
+	            value.data = SvPV(ST(i), PL_na) ;
+	            value.size = PL_na ;
 	            RETVAL = (Db->put)(Db, NULL, &key, &value, 0) ;
 	            if (RETVAL != 0)
 	                break;
@@ -1353,8 +1353,8 @@ push(db, ...)
 #else
 	        for (i = items - 1 ; i > 0 ; --i)
 	        {
-	            value.data = SvPV(ST(i), na) ;
-	            value.size = na ;
+	            value.data = SvPV(ST(i), PL_na) ;
+	            value.size = PL_na ;
 	            RETVAL = (Db->put)(Db, keyptr, &value, R_IAFTER) ;
 	            if (RETVAL != 0)
 	                break;

@@ -1143,9 +1143,9 @@ unsharepvn(char *str, I32 len, U32 hash)
     I32 found = 0;
     
     /* what follows is the moral equivalent of:
-    if ((Svp = hv_fetch(strtab, tmpsv, FALSE, hash))) {
+    if ((Svp = hv_fetch(PL_strtab, tmpsv, FALSE, hash))) {
 	if (--*Svp == Nullsv)
-	    hv_delete(strtab, str, len, G_DISCARD, hash);
+	    hv_delete(PL_strtab, str, len, G_DISCARD, hash);
     } */
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
@@ -1188,8 +1188,8 @@ share_hek(char *str, I32 len, register U32 hash)
 
     /* what follows is the moral equivalent of:
        
-    if (!(Svp = hv_fetch(strtab, str, len, FALSE)))
-    	hv_store(strtab, str, len, Nullsv, hash);
+    if (!(Svp = hv_fetch(PL_strtab, str, len, FALSE)))
+    	hv_store(PL_strtab, str, len, Nullsv, hash);
     */
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */

@@ -375,7 +375,7 @@ CODE:
 	}
 	set_opset_bits(bitmap, bitspec, on, opname);
     }
-    ST(0) = &sv_yes;
+    ST(0) = &PL_sv_yes;
 
 
 
@@ -400,7 +400,7 @@ PPCODE:
 	}
 	else if (SvPOK(bitspec) && SvCUR(bitspec) == opset_len) {
 	    int b, j;
-	    char *bitmap = SvPV(bitspec,na);
+	    char *bitmap = SvPV(bitspec,PL_na);
 	    myopcode = 0;
 	    for (b=0; b < opset_len; b++) {
 		U16 bits = bitmap[b];
@@ -423,7 +423,7 @@ CODE:
     STRLEN len;
     char *optag = SvPV(optagsv, len);
     put_op_bitspec(optag, len, mask); /* croaks */
-    ST(0) = &sv_yes;
+    ST(0) = &PL_sv_yes;
 
 
 void

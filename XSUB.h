@@ -10,11 +10,6 @@
 #define XS(name) void name(cv) CV* cv;
 #endif
 
-#define na		PL_na
-#define sv_undef	PL_sv_undef
-#define sv_yes		PL_sv_yes
-#define sv_no		PL_sv_no
-
 #define dXSARGS				\
 	dSP; dMARK;			\
 	I32 ax = mark - PL_stack_base + 1;	\
@@ -62,23 +57,23 @@
 #ifdef XS_VERSION
 # define XS_VERSION_BOOTCHECK \
     STMT_START {							\
-	SV *Sv;								\
-	char *vn = Nullch, *module = SvPV(ST(0),na);			\
+	SV *tmpsv;							\
+	char *vn = Nullch, *module = SvPV(ST(0),PL_na);			\
 	if (items >= 2)	 /* version supplied as bootstrap arg */	\
-	    Sv = ST(1);							\
+	    tmpsv = ST(1);						\
 	else {								\
 	    /* XXX GV_ADDWARN */					\
-	    Sv = perl_get_sv(form("%s::%s", module,			\
+	    tmpsv = perl_get_sv(form("%s::%s", module,			\
 				  vn = "XS_VERSION"), FALSE);		\
-	    if (!Sv || !SvOK(Sv))					\
-		Sv = perl_get_sv(form("%s::%s", module,			\
+	    if (!tmpsv || !SvOK(tmpsv))					\
+		tmpsv = perl_get_sv(form("%s::%s", module,		\
 				      vn = "VERSION"), FALSE);		\
 	}								\
-	if (Sv && (!SvOK(Sv) || strNE(XS_VERSION, SvPV(Sv, na))))	\
+	if (tmpsv && (!SvOK(tmpsv) || strNE(XS_VERSION, SvPV(tmpsv, PL_na))))	\
 	    croak("%s object version %s does not match %s%s%s%s %_",	\
 		  module, XS_VERSION,					\
 		  vn ? "$" : "", vn ? module : "", vn ? "::" : "",	\
-		  vn ? vn : "bootstrap parameter", Sv);			\
+		  vn ? vn : "bootstrap parameter", tmpsv);		\
     } STMT_END
 #else
 # define XS_VERSION_BOOTCHECK

@@ -269,7 +269,7 @@ T_IN
 	    if ( do_open(gv, "<&", 2, FALSE, 0, 0, $var) )
 		sv_setsv($arg, sv_bless(newRV((SV*)gv), gv_stashpv("$Package",1)));
 	    else
-		$arg = &sv_undef;
+		$arg = &PL_sv_undef;
 	}
 T_INOUT
 	{
@@ -277,7 +277,7 @@ T_INOUT
 	    if ( do_open(gv, "+<&", 3, FALSE, 0, 0, $var) )
 		sv_setsv($arg, sv_bless(newRV((SV*)gv), gv_stashpv("$Package",1)));
 	    else
-		$arg = &sv_undef;
+		$arg = &PL_sv_undef;
 	}
 T_OUT
 	{
@@ -285,5 +285,5 @@ T_OUT
 	    if ( do_open(gv, "+>&", 3, FALSE, 0, 0, $var) )
 		sv_setsv($arg, sv_bless(newRV((SV*)gv), gv_stashpv("$Package",1)));
 	    else
-		$arg = &sv_undef;
+		$arg = &PL_sv_undef;
 	}

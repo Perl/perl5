@@ -76,7 +76,7 @@ odbm_TIEHASH(dbtype, filename, flags, mode)
 		    croak("ODBM_FILE: Can't open %s", filename);
 	    }
 	    RETVAL = (void*)(dbminit(filename) >= 0 ? &dbmrefcnt : 0);
-	    ST(0) = sv_mortalcopy(&sv_undef);
+	    ST(0) = sv_mortalcopy(&PL_sv_undef);
 	    sv_setptrobj(ST(0), RETVAL, dbtype);
 	}
 

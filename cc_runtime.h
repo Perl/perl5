@@ -1,4 +1,4 @@
-#define DOOP(ppname) PUTBACK; op = ppname(ARGS); SPAGAIN
+#define DOOP(ppname) PUTBACK; PL_op = ppname(ARGS); SPAGAIN
 
 #define PP_LIST(g) do {			\
 	dMARK;				\
@@ -6,13 +6,13 @@
 	    if (++MARK <= SP)		\
 		*MARK = *SP;		\
 	    else			\
-		*MARK = &sv_undef;	\
+		*MARK = &PL_sv_undef;	\
 	    SP = MARK;			\
 	}				\
    } while (0)
 
 #define MAYBE_TAINT_SASSIGN_SRC(sv) \
-    if (tainting && tainted && (!SvGMAGICAL(left) || !SvSMAGICAL(left) || \
+    if (PL_tainting && PL_tainted && (!SvGMAGICAL(left) || !SvSMAGICAL(left) || \
                                 !((mg=mg_find(left, 't')) && mg->mg_len & 1)))\
         TAINT_NOT
 
@@ -28,9 +28,9 @@
 
 #define PP_UNSTACK do {		\
 	TAINT_NOT;		\
-	stack_sp = stack_base + cxstack[cxstack_ix].blk_oldsp;	\
+	PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;	\
 	FREETMPS;		\
-	oldsave = scopestack[scopestack_ix - 1]; \
+	oldsave = PL_scopestack[PL_scopestack_ix - 1]; \
 	LEAVE_SCOPE(oldsave);	\
 	SPAGAIN;		\
     } while(0)
@@ -43,19 +43,19 @@
 	JMPENV_PUSH(ret);			\
 	switch (ret) {				\
 	case 0:					\
-	    op = ppaddr(ARGS);			\
-	    retstack[retstack_ix - 1] = Nullop;	\
-	    if (op != nxt) runops();		\
+	    PL_op = ppaddr(ARGS);			\
+	    PL_retstack[PL_retstack_ix - 1] = Nullop;	\
+	    if (PL_op != nxt) runops();		\
 	    JMPENV_POP;				\
 	    break;				\
 	case 1: JMPENV_POP; JMPENV_JUMP(1);	\
 	case 2: JMPENV_POP; JMPENV_JUMP(2);	\
 	case 3:					\
 	    JMPENV_POP;				\
-	    if (restartop != nxt)		\
+	    if (PL_restartop != nxt)		\
 		JMPENV_JUMP(3);			\
 	}					\
-	op = nxt;				\
+	PL_op = nxt;				\
 	SPAGAIN;				\
     } while (0)
 

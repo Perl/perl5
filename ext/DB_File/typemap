@@ -16,8 +16,8 @@ DBTKEY			T_dbtkeydatum
 INPUT
 T_dbtkeydatum
 	if (db->type != DB_RECNO) {
-	    $var.data = SvPV($arg, na);
-	    $var.size = (int)na;
+	    $var.data = SvPV($arg, PL_na);
+	    $var.size = (int)PL_na;
 	    DBT_flags($var);
 	}
 	else {
@@ -27,8 +27,8 @@ T_dbtkeydatum
 	    DBT_flags($var);
 	}
 T_dbtdatum
-	$var.data = SvPV($arg, na);
-	$var.size = (int)na;
+	$var.data = SvPV($arg, PL_na);
+	$var.size = (int)PL_na;
 	DBT_flags($var);
 
 OUTPUT

@@ -78,7 +78,7 @@
 
    /* The non-POSIX CRTL times() has void return type, so we just get the
       current time directly */
-   clock_t vms_times(struct tms *bufptr) {
+   clock_t vms_times(struct tms *PL_bufptr) {
 	clock_t retval;
 	/* Get wall time and convert to 10 ms intervals to
 	 * produce the return value that the POSIX standard expects */
@@ -98,7 +98,7 @@
 	_ckvmssts(lib$ediv(&divisor,vmstime,(long int *)&retval,&remainder));
 #  endif
 	/* Fill in the struct tms using the CRTL routine . . .*/
-	times((tbuffer_t *)bufptr);
+	times((tbuffer_t *)PL_bufptr);
 	return (clock_t) retval;
    }
 #  define times(t) vms_times(t)
@@ -2807,7 +2807,7 @@ isalnum(charstring)
 	unsigned char *	charstring
     CODE:
 	unsigned char *s = charstring;
-	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	unsigned char *e = s + PL_na;	/* "PL_na" set by typemap side effect */
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isalnum(*s))
 		RETVAL = 0;
@@ -2819,7 +2819,7 @@ isalpha(charstring)
 	unsigned char *	charstring
     CODE:
 	unsigned char *s = charstring;
-	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	unsigned char *e = s + PL_na;	/* "PL_na" set by typemap side effect */
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isalpha(*s))
 		RETVAL = 0;
@@ -2831,7 +2831,7 @@ iscntrl(charstring)
 	unsigned char *	charstring
     CODE:
 	unsigned char *s = charstring;
-	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	unsigned char *e = s + PL_na;	/* "PL_na" set by typemap side effect */
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!iscntrl(*s))
 		RETVAL = 0;
@@ -2843,7 +2843,7 @@ isdigit(charstring)
 	unsigned char *	charstring
     CODE:
 	unsigned char *s = charstring;
-	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	unsigned char *e = s + PL_na;	/* "PL_na" set by typemap side effect */
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isdigit(*s))
 		RETVAL = 0;
@@ -2855,7 +2855,7 @@ isgraph(charstring)
 	unsigned char *	charstring
     CODE:
 	unsigned char *s = charstring;
-	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	unsigned char *e = s + PL_na;	/* "PL_na" set by typemap side effect */
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isgraph(*s))
 		RETVAL = 0;
@@ -2867,7 +2867,7 @@ islower(charstring)
 	unsigned char *	charstring
     CODE:
 	unsigned char *s = charstring;
-	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	unsigned char *e = s + PL_na;	/* "PL_na" set by typemap side effect */
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!islower(*s))
 		RETVAL = 0;
@@ -2879,7 +2879,7 @@ isprint(charstring)
 	unsigned char *	charstring
     CODE:
 	unsigned char *s = charstring;
-	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	unsigned char *e = s + PL_na;	/* "PL_na" set by typemap side effect */
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isprint(*s))
 		RETVAL = 0;
@@ -2891,7 +2891,7 @@ ispunct(charstring)
 	unsigned char *	charstring
     CODE:
 	unsigned char *s = charstring;
-	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	unsigned char *e = s + PL_na;	/* "PL_na" set by typemap side effect */
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!ispunct(*s))
 		RETVAL = 0;
@@ -2903,7 +2903,7 @@ isspace(charstring)
 	unsigned char *	charstring
     CODE:
 	unsigned char *s = charstring;
-	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	unsigned char *e = s + PL_na;	/* "PL_na" set by typemap side effect */
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isspace(*s))
 		RETVAL = 0;
@@ -2915,7 +2915,7 @@ isupper(charstring)
 	unsigned char *	charstring
     CODE:
 	unsigned char *s = charstring;
-	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	unsigned char *e = s + PL_na;	/* "PL_na" set by typemap side effect */
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isupper(*s))
 		RETVAL = 0;
@@ -2927,7 +2927,7 @@ isxdigit(charstring)
 	unsigned char *	charstring
     CODE:
 	unsigned char *s = charstring;
-	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	unsigned char *e = s + PL_na;	/* "PL_na" set by typemap side effect */
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isxdigit(*s))
 		RETVAL = 0;
@@ -3182,7 +3182,7 @@ sigaction(sig, action, oldaction = 0)
 
 	    /* Remember old handler name if desired. */
 	    if (oldaction) {
-		char *hand = SvPVx(*sigsvp, na);
+		char *hand = SvPVx(*sigsvp, PL_na);
 		svp = hv_fetch(oldaction, "HANDLER", 7, TRUE);
 		sv_setpv(*svp, *hand ? hand : "DEFAULT");
 	    }
@@ -3193,7 +3193,7 @@ sigaction(sig, action, oldaction = 0)
 		svp = hv_fetch(action, "HANDLER", 7, FALSE);
 		if (!svp)
 		    croak("Can't supply an action without a HANDLER");
-		sv_setpv(*sigsvp, SvPV(*svp, na));
+		sv_setpv(*sigsvp, SvPV(*svp, PL_na));
 		mg_set(*sigsvp);	/* handles DEFAULT and IGNORE */
 		act.sa_handler = sighandler;
 
@@ -3408,7 +3408,7 @@ strtod(str)
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
 	    else
-		PUSHs(&sv_undef);
+		PUSHs(&PL_sv_undef);
 	}
 
 void
@@ -3429,7 +3429,7 @@ strtol(str, base = 0)
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
 	    else
-		PUSHs(&sv_undef);
+		PUSHs(&PL_sv_undef);
 	}
 
 void
@@ -3450,7 +3450,7 @@ strtoul(str, base = 0)
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
 	    else
-		PUSHs(&sv_undef);
+		PUSHs(&PL_sv_undef);
 	}
 
 SV *

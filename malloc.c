@@ -591,7 +591,7 @@ emergency_sbrk(size)
 	    return (char *)-1;		/* Now die die die... */
 
 	/* Got it, now detach SvPV: */
-	pv = SvPV(sv, na);
+	pv = SvPV(sv, PL_na);
 	/* Check alignment: */
 	if (((u_bigint)(pv - M_OVERHEAD)) & ((1<<LOG_OF_MIN_ARENA) - 1)) {
 	    PerlIO_puts(PerlIO_stderr(),"Bad alignment of $^M!\n");

@@ -129,7 +129,7 @@ my_getenv(char *lnm)
     int trnsuccess;
     SV *tmpsv;
 
-    if (curinterp) {  /* Perl interpreter running -- may be threaded */
+    if (PL_curinterp) {  /* Perl interpreter running -- may be threaded */
       /* Set up a temporary buffer for the return value; Perl will
        * clean it up at the next statement transition */
       tmpsv = sv_2mortal(newSVpv("",LNM$C_NAMLENGTH+1));
@@ -188,7 +188,7 @@ prime_env_iter(void)
 {
   dTHR;
   static int primed = 0;
-  HV *envhv = GvHVn(envgv);
+  HV *envhv = GvHVn(PL_envgv);
   PerlIO *sholog;
   char eqv[LNM$C_NAMLENGTH+1],mbxnam[LNM$C_NAMLENGTH+1],*start,*end;
   unsigned short int chan;
@@ -248,13 +248,13 @@ prime_env_iter(void)
   }
   /* We use Perl's sv_gets to read from the pipe, since PerlIO_open is
    * tied to Perl's I/O layer, so it may not return a simple FILE * */
-  oldrs = rs;
-  rs = newSVpv("\n",1);
+  oldrs = PL_rs;
+  PL_rs = newSVpv("\n",1);
   linesv = newSVpv("",0);
   while (1) {
     if ((start = sv_gets(linesv,sholog,0)) == Nullch) {
       PerlIO_close(sholog);
-      SvREFCNT_dec(linesv); SvREFCNT_dec(rs); rs = oldrs;
+      SvREFCNT_dec(linesv); SvREFCNT_dec(PL_rs); PL_rs = oldrs;
       primed = 1;
       /* Wait for subprocess to clean up (we know subproc won't return 0) */
       while (substs == 0) { sys$hiber(); wakect++;}
@@ -270,7 +270,7 @@ prime_env_iter(void)
     else end = Nullch;
     if ((eqvlen = my_trnlnm(start,eqv,0)) == 0) {
       if (vaxc$errno == SS$_NOLOGNAM || vaxc$errno == SS$_IVLOGNAM) {
-        if (dowarn)
+        if (PL_dowarn)
           warn("Ill-formed logical name |%s| in prime_env_iter",start);
         continue;
       }
@@ -673,7 +673,7 @@ safe_popen(char *cmd, char *mode)
     info->next=open_pipes;  /* prepend to list */
     open_pipes=info;
         
-    forkprocess = info->pid;
+    PL_forkprocess = info->pid;
     return info->fp;
 }  /* end of safe_popen */
 
@@ -764,7 +764,7 @@ my_waitpid(Pid_t pid, int *statusp, int flags)
       unsigned long int ownercode = JPI$_OWNER, ownerpid, mypid;
       unsigned long int interval[2],sts;
 
-      if (dowarn) {
+      if (PL_dowarn) {
         _ckvmssts(lib$getjpi(&ownercode,&pid,0,&ownerpid,0,0));
         _ckvmssts(lib$getjpi(&ownercode,0,0,&mypid,0,0));
         if (ownerpid != mypid)
@@ -2374,7 +2374,7 @@ vms_image_init(int *argcp, char ***argvp)
     if (mask != rlst) Safefree(mask);
   }
   /* We need to use this hack to tell Perl it should run with tainting,
-   * since its tainting flag may be part of the curinterp struct, which
+   * since its tainting flag may be part of the PL_curinterp struct, which
    * hasn't been allocated when vms_image_init() is called.
    */
   if (add_taint) {
@@ -2829,9 +2829,9 @@ static struct dsc$descriptor_s VMScmd = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,Nullch};
 
 static void
 vms_execfree() {
-  if (Cmd) {
-    Safefree(Cmd);
-    Cmd = Nullch;
+  if (PL_Cmd) {
+    Safefree(PL_Cmd);
+    PL_Cmd = Nullch;
   }
   if (VMScmd.dsc$a_pointer) {
     Safefree(VMScmd.dsc$a_pointer);
@@ -2864,20 +2864,20 @@ setup_argstr(SV *really, SV **mark, SV **sp)
       cmdlen += rlen ? rlen + 1 : 0;
     }
   }
-  New(401,Cmd,cmdlen+1,char);
+  New(401,PL_Cmd,cmdlen+1,char);
 
   if (tmps && *tmps) {
-    strcpy(Cmd,tmps);
+    strcpy(PL_Cmd,tmps);
     mark++;
   }
-  else *Cmd = '\0';
+  else *PL_Cmd = '\0';
   while (++mark <= sp) {
     if (*mark) {
-      strcat(Cmd," ");
-      strcat(Cmd,SvPVx(*mark,na));
+      strcat(PL_Cmd," ");
+      strcat(PL_Cmd,SvPVx(*mark,PL_na));
     }
   }
-  return Cmd;
+  return PL_Cmd;
 
 }  /* end of setup_argstr() */
 
@@ -2909,9 +2909,9 @@ setup_cmddsc(char *cmd, int check_img)
   else isdcl = 1;
   if (isdcl) {  /* It's a DCL command, just do it. */
     VMScmd.dsc$w_length = strlen(cmd);
-    if (cmd == Cmd) {
-       VMScmd.dsc$a_pointer = Cmd;
-       Cmd = Nullch;  /* Don't try to free twice in vms_execfree() */
+    if (cmd == PL_Cmd) {
+       VMScmd.dsc$a_pointer = PL_Cmd;
+       PL_Cmd = Nullch;  /* Don't try to free twice in vms_execfree() */
     }
     else VMScmd.dsc$a_pointer = savepvn(cmd,VMScmd.dsc$w_length);
   }
@@ -3010,7 +3010,7 @@ vms_do_exec(char *cmd)
         set_errno(EVMSERR); 
     }
     set_vaxc_errno(retsts);
-    if (dowarn)
+    if (PL_dowarn)
       warn("Can't exec \"%s\": %s", VMScmd.dsc$a_pointer, Strerror(errno));
     vms_execfree();
   }
@@ -3067,7 +3067,7 @@ do_spawn(char *cmd)
         set_errno(EVMSERR); 
     }
     set_vaxc_errno(sts);
-    if (dowarn)
+    if (PL_dowarn)
       warn("Can't spawn \"%s\": %s",
            hadcmd ? VMScmd.dsc$a_pointer : "", Strerror(errno));
   }
@@ -3917,7 +3917,7 @@ is_null_device(name)
   return (*name++ == ':') && (*name != ':');
 }
 
-/* Do the permissions allow some operation?  Assumes statcache already set. */
+/* Do the permissions allow some operation?  Assumes PL_statcache already set. */
 /* Do this via $Check_Access on VMS, since the CRTL stat() returns only a
  * subset of the applicable information.
  */
@@ -3926,7 +3926,7 @@ I32
 cando(I32 bit, I32 effective, Stat_t *statbufp)
 {
   dTHR;
-  if (statbufp == &statcache) return cando_by_name(bit,effective,namecache);
+  if (statbufp == &PL_statcache) return cando_by_name(bit,effective,namecache);
   else {
     char fname[NAM$C_MAXRSS+1];
     unsigned long int retsts;
@@ -4061,7 +4061,7 @@ flex_fstat(int fd, Stat_t *statbufp)
 {
   dTHR;
   if (!fstat(fd,(stat_t *) statbufp)) {
-    if (statbufp == (Stat_t *) &statcache) *namecache == '\0';
+    if (statbufp == (Stat_t *) &PL_statcache) *namecache == '\0';
     statbufp->st_dev = encode_dev(statbufp->st_devnam);
 #   ifdef RTL_USES_UTC
 #   ifdef VMSISH_TIME
@@ -4097,7 +4097,7 @@ flex_stat(char *fspec, Stat_t *statbufp)
     char fileified[NAM$C_MAXRSS+1];
     int retval = -1;
 
-    if (statbufp == (Stat_t *) &statcache)
+    if (statbufp == (Stat_t *) &PL_statcache)
       do_tovmsspec(fspec,namecache,0);
     if (is_null_device(fspec)) { /* Fake a stat() for the null device */
       memset(statbufp,0,sizeof *statbufp);
@@ -4120,7 +4120,7 @@ flex_stat(char *fspec, Stat_t *statbufp)
      */
     if (do_fileify_dirspec(fspec,fileified,0) != NULL) {
       retval = stat(fileified,(stat_t *) statbufp);
-      if (!retval && statbufp == (Stat_t *) &statcache)
+      if (!retval && statbufp == (Stat_t *) &PL_statcache)
         strcpy(namecache,fileified);
     }
     if (retval) retval = stat(fspec,(stat_t *) statbufp);
@@ -4410,9 +4410,9 @@ rmsexpand_fromperl(CV *cv)
 
   if (!items || items > 2)
     croak("Usage: VMS::Filespec::rmsexpand(spec[,defspec])");
-  fspec = SvPV(ST(0),na);
+  fspec = SvPV(ST(0),PL_na);
   if (!fspec || !*fspec) XSRETURN_UNDEF;
-  if (items == 2) defspec = SvPV(ST(1),na);
+  if (items == 2) defspec = SvPV(ST(1),PL_na);
 
   rslt = do_rmsexpand(fspec,NULL,1,defspec,0);
   ST(0) = sv_newmortal();
@@ -4427,7 +4427,7 @@ vmsify_fromperl(CV *cv)
   char *vmsified;
 
   if (items != 1) croak("Usage: VMS::Filespec::vmsify(spec)");
-  vmsified = do_tovmsspec(SvPV(ST(0),na),NULL,1);
+  vmsified = do_tovmsspec(SvPV(ST(0),PL_na),NULL,1);
   ST(0) = sv_newmortal();
   if (vmsified != NULL) sv_usepvn(ST(0),vmsified,strlen(vmsified));
   XSRETURN(1);
@@ -4440,7 +4440,7 @@ unixify_fromperl(CV *cv)
   char *unixified;
 
   if (items != 1) croak("Usage: VMS::Filespec::unixify(spec)");
-  unixified = do_tounixspec(SvPV(ST(0),na),NULL,1);
+  unixified = do_tounixspec(SvPV(ST(0),PL_na),NULL,1);
   ST(0) = sv_newmortal();
   if (unixified != NULL) sv_usepvn(ST(0),unixified,strlen(unixified));
   XSRETURN(1);
@@ -4453,7 +4453,7 @@ fileify_fromperl(CV *cv)
   char *fileified;
 
   if (items != 1) croak("Usage: VMS::Filespec::fileify(spec)");
-  fileified = do_fileify_dirspec(SvPV(ST(0),na),NULL,1);
+  fileified = do_fileify_dirspec(SvPV(ST(0),PL_na),NULL,1);
   ST(0) = sv_newmortal();
   if (fileified != NULL) sv_usepvn(ST(0),fileified,strlen(fileified));
   XSRETURN(1);
@@ -4466,7 +4466,7 @@ pathify_fromperl(CV *cv)
   char *pathified;
 
   if (items != 1) croak("Usage: VMS::Filespec::pathify(spec)");
-  pathified = do_pathify_dirspec(SvPV(ST(0),na),NULL,1);
+  pathified = do_pathify_dirspec(SvPV(ST(0),PL_na),NULL,1);
   ST(0) = sv_newmortal();
   if (pathified != NULL) sv_usepvn(ST(0),pathified,strlen(pathified));
   XSRETURN(1);
@@ -4479,7 +4479,7 @@ vmspath_fromperl(CV *cv)
   char *vmspath;
 
   if (items != 1) croak("Usage: VMS::Filespec::vmspath(spec)");
-  vmspath = do_tovmspath(SvPV(ST(0),na),NULL,1);
+  vmspath = do_tovmspath(SvPV(ST(0),PL_na),NULL,1);
   ST(0) = sv_newmortal();
   if (vmspath != NULL) sv_usepvn(ST(0),vmspath,strlen(vmspath));
   XSRETURN(1);
@@ -4492,7 +4492,7 @@ unixpath_fromperl(CV *cv)
   char *unixpath;
 
   if (items != 1) croak("Usage: VMS::Filespec::unixpath(spec)");
-  unixpath = do_tounixpath(SvPV(ST(0),na),NULL,1);
+  unixpath = do_tounixpath(SvPV(ST(0),PL_na),NULL,1);
   ST(0) = sv_newmortal();
   if (unixpath != NULL) sv_usepvn(ST(0),unixpath,strlen(unixpath));
   XSRETURN(1);
@@ -4512,15 +4512,15 @@ candelete_fromperl(CV *cv)
   if (SvTYPE(mysv) == SVt_PVGV) {
     if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),fspec)) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
-      ST(0) = &sv_no;
+      ST(0) = &PL_sv_no;
       XSRETURN(1);
     }
     fsp = fspec;
   }
   else {
-    if (mysv != ST(0) || !(fsp = SvPV(mysv,na)) || !*fsp) {
+    if (mysv != ST(0) || !(fsp = SvPV(mysv,PL_na)) || !*fsp) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
-      ST(0) = &sv_no;
+      ST(0) = &PL_sv_no;
       XSRETURN(1);
     }
   }
@@ -4548,15 +4548,15 @@ rmscopy_fromperl(CV *cv)
   if (SvTYPE(mysv) == SVt_PVGV) {
     if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),inspec)) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
-      ST(0) = &sv_no;
+      ST(0) = &PL_sv_no;
       XSRETURN(1);
     }
     inp = inspec;
   }
   else {
-    if (mysv != ST(0) || !(inp = SvPV(mysv,na)) || !*inp) {
+    if (mysv != ST(0) || !(inp = SvPV(mysv,PL_na)) || !*inp) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
-      ST(0) = &sv_no;
+      ST(0) = &PL_sv_no;
       XSRETURN(1);
     }
   }
@@ -4564,15 +4564,15 @@ rmscopy_fromperl(CV *cv)
   if (SvTYPE(mysv) == SVt_PVGV) {
     if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),outspec)) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
-      ST(0) = &sv_no;
+      ST(0) = &PL_sv_no;
       XSRETURN(1);
     }
     outp = outspec;
   }
   else {
-    if (mysv != ST(1) || !(outp = SvPV(mysv,na)) || !*outp) {
+    if (mysv != ST(1) || !(outp = SvPV(mysv,PL_na)) || !*outp) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
-      ST(0) = &sv_no;
+      ST(0) = &PL_sv_no;
       XSRETURN(1);
     }
   }

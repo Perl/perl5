@@ -2103,7 +2103,7 @@ PP(pp_crypt)
 #ifdef HAS_CRYPT
     char *tmps = SvPV(left, PL_na);
 #ifdef FCRYPT
-    sv_setpv(TARG, fcrypt(tmps, SvPV(right, na)));
+    sv_setpv(TARG, fcrypt(tmps, SvPV(right, PL_na)));
 #else
     sv_setpv(TARG, crypt(tmps, SvPV(right, PL_na)));
 #endif

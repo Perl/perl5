@@ -34,7 +34,7 @@ main(int argc, char **argv, char **env)
     perl_init_i18nl14n(1);
 #endif
 
-    if (!do_undump) {
+    if (!PL_do_undump) {
 	my_perl = perl_alloc();
 	if (!my_perl)
 #ifdef VMS
@@ -46,8 +46,8 @@ main(int argc, char **argv, char **env)
     }
 
 #ifdef CSH
-    if (!cshlen) 
-      cshlen = strlen(cshname);
+    if (!PL_cshlen) 
+      PL_cshlen = strlen(PL_cshname);
 #endif
 
     if (argc < 2)
@@ -83,8 +83,8 @@ main(int argc, char **argv, char **env)
 	exit( exitstatus );
 
     sv_setpv(GvSV(gv_fetchpv("0", TRUE, SVt_PV)), argv[0]);
-    main_cv = compcv;
-    compcv = 0;
+    PL_main_cv = PL_compcv;
+    PL_compcv = 0;
 
 #ifdef INDIRECT_BGET_MACROS
     bs.data = fp;

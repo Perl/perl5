@@ -184,7 +184,7 @@ dl_expandspec(filespec)
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "\tSYNCHK sys$parse = %d\n",sts));
     if (!(sts & 1)) {
       dl_set_error(dlfab.fab$l_sts,dlfab.fab$l_stv);
-      ST(0) = &sv_undef;
+      ST(0) = &PL_sv_undef;
     }
     else {
       /* Now set up a default spec - everything but the name */
@@ -205,7 +205,7 @@ dl_expandspec(filespec)
       DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "\tname/default sys$parse = %d\n",sts));
       if (!(sts & 1)) {
         dl_set_error(dlfab.fab$l_sts,dlfab.fab$l_stv);
-        ST(0) = &sv_undef;
+        ST(0) = &PL_sv_undef;
       }
       else {
         /* Now find the actual file */
@@ -213,7 +213,7 @@ dl_expandspec(filespec)
         DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "\tsys$search = %d\n",sts));
         if (!(sts & 1)) {
           dl_set_error(dlfab.fab$l_sts,dlfab.fab$l_stv);
-          ST(0) = &sv_undef;
+          ST(0) = &PL_sv_undef;
         }
         else {
           ST(0) = sv_2mortal(newSVpv(dlnam.nam$l_rsa,dlnam.nam$b_rsl));
@@ -295,7 +295,7 @@ dl_load_file(filespec, flags)
       Safefree(dlptr->name.dsc$a_pointer);
       Safefree(dlptr->defspec.dsc$a_pointer);
       Safefree(dlptr);
-      ST(0) = &sv_undef;
+      ST(0) = &PL_sv_undef;
     }
     else {
       ST(0) = sv_2mortal(newSViv((IV) dlptr));
@@ -323,7 +323,7 @@ dl_find_symbol(librefptr,symname)
                       (unsigned long int) entry));
     if (!(sts & 1)) {
       /* error message already saved by findsym_handler */
-      ST(0) = &sv_undef;
+      ST(0) = &PL_sv_undef;
     }
     else ST(0) = sv_2mortal(newSViv((IV) entry));
 

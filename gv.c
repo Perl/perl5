@@ -1046,7 +1046,7 @@ Gv_AMupdate(HV *stash)
             default:
               if (!SvROK(sv)) {
                 if (!SvOK(sv)) break;
-		gv = gv_fetchmethod(stash, SvPV(sv, na));
+		gv = gv_fetchmethod(stash, SvPV(sv, PL_na));
                 if (gv) cv = GvCV(gv);
                 break;
               }

@@ -28,7 +28,7 @@ stack_grow(SV **sp, SV **p, int n)
 #ifndef STRESS_REALLOC
     av_extend(PL_curstack, (p - PL_stack_base) + (n) + 128);
 #else
-    av_extend(curstack, (p - stack_base) + (n) + 1);
+    av_extend(PL_curstack, (p - PL_stack_base) + (n) + 1);
 #endif
 #if defined(DEBUGGING) && !defined(USE_THREADS)
     growing--;

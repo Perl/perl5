@@ -10,7 +10,7 @@ my @optype= qw(OP UNOP BINOP LOGOP CONDOP LISTOP PMOP SVOP GVOP PVOP LOOP COP);
 
 # Nullsv *must* come first in the following so that the condition
 # ($$sv == 0) can continue to be used to test (sv == Nullsv).
-my @specialsv = qw(Nullsv &sv_undef &sv_yes &sv_no);
+my @specialsv = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no);
 
 my (%alias_from, $from, $tos);
 while (($from, $tos) = each %alias_to) {
@@ -215,7 +215,7 @@ print BYTERUN_H <<'EOT';
 #define INIT_SPECIALSV_LIST STMT_START { \
 EOT
 for ($i = 0; $i < @specialsv; $i++) {
-    print BYTERUN_H "\tspecialsv_list[$i] = $specialsv[$i]; \\\n";
+    print BYTERUN_H "\tPL_specialsv_list[$i] = $specialsv[$i]; \\\n";
 }
 print BYTERUN_H <<'EOT';
     } STMT_END
@@ -251,13 +251,13 @@ nop		none			none
 #
 ret		none			none		x
 ldsv		sv			svindex
-ldop		op			opindex
+ldop		PL_op			opindex
 stsv		sv			U32		s
-stop		op			U32		s
+stop		PL_op			U32		s
 ldspecsv	sv			U8		x
 newsv		sv			U8		x
-newop		op			U8		x
-newopn		op			U8		x
+newop		PL_op			U8		x
+newopn		PL_op			U8		x
 newpv		none			PV
 pv_cur		pv.xpv_cur		STRLEN
 pv_free		pv			none		x
@@ -329,14 +329,14 @@ gp_cvgen	GvCVGEN(sv)		U32
 gp_line		GvLINE(sv)		line_t
 gp_share	sv			svindex		x
 xgv_flags	GvFLAGS(sv)		U8
-op_next		op->op_next		opindex
-op_sibling	op->op_sibling		opindex
-op_ppaddr	op->op_ppaddr		strconst	x
-op_targ		op->op_targ		PADOFFSET
-op_type		op			OPCODE		x
-op_seq		op->op_seq		U16
-op_flags	op->op_flags		U8
-op_private	op->op_private		U8
+op_next		PL_op->op_next		opindex
+op_sibling	PL_op->op_sibling	opindex
+op_ppaddr	PL_op->op_ppaddr	strconst	x
+op_targ		PL_op->op_targ		PADOFFSET
+op_type		PL_op			OPCODE		x
+op_seq		PL_op->op_seq		U16
+op_flags	PL_op->op_flags		U8
+op_private	PL_op->op_private	U8
 op_first	cUNOP->op_first		opindex
 op_last		cBINOP->op_last		opindex
 op_other	cLOGOP->op_other	opindex
@@ -347,7 +347,7 @@ op_pmreplroot	cPMOP->op_pmreplroot	opindex
 op_pmreplrootgv	*(SV**)&cPMOP->op_pmreplroot	svindex
 op_pmreplstart	cPMOP->op_pmreplstart	opindex
 op_pmnext	*(OP**)&cPMOP->op_pmnext	opindex
-pregcomp	op			pvcontents	x
+pregcomp	PL_op			pvcontents	x
 op_pmflags	cPMOP->op_pmflags	U16
 op_pmpermflags	cPMOP->op_pmpermflags	U16
 op_sv		cSVOP->op_sv		svindex
@@ -363,6 +363,6 @@ cop_filegv	*(SV**)&cCOP->cop_filegv	svindex
 cop_seq		cCOP->cop_seq		U32
 cop_arybase	cCOP->cop_arybase	I32
 cop_line	cCOP->cop_line		line_t
-main_start	main_start		opindex
-main_root	main_root		opindex
-curpad		curpad			svindex		x
+main_start	PL_main_start		opindex
+main_root	PL_main_root		opindex
+curpad		PL_curpad		svindex		x
