@@ -374,9 +374,15 @@ cat > UU/uselargefiles.cbu <<'EOCBU'
 # after it has prompted the user for whether to use large files.
 case "$uselargefiles" in
 ''|$define|true|[yY]*)
-    ccflags="$ccflags `getconf LFS_CFLAGS 2>/dev/null`"
-    ldflags="$ldflags `getconf LFS_LDFLAGS 2>/dev/null`"
-    libswanted="$libswanted `getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+
+# Keep these in the left margin.
+ccflags_largefiles="`getconf LFS_CFLAGS 2>/dev/null`"
+ldflags_largefiles="`getconf LFS_LDFLAGS 2>/dev/null`"
+libswanted_largefiles="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+
+    ccflags="$ccflags $ccflags_largefiles"
+    ldflags="$ldflags $ldflags_largefiles"
+    libswanted="$libswanted $libswanted_largefiles"
     ;;
 esac
 EOCBU
@@ -387,10 +393,10 @@ cat > UU/use64bitint.cbu <<'EOCBU'
 case "$use64bitint" in
 "$define"|true|[yY]*)
 	    case "`uname -r`" in
-	    2.[1-6])
+	    5.[1-6])
 		cat >&4 <<EOM
-Solaris `uname -r` does not support 64-bit integers.
-You should upgrade to at least Solaris 2.7.
+Solaris `uname -r|sed -e 's/^5\.\([789]\)$/\1/'` does not support 64-bit integers.
+You should upgrade to at least Solaris 7.
 EOM
 		exit 1
 		;;

@@ -489,8 +489,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	{
 	    char msg[256];
 	    
-	    sv_setnv(sv,(double)gLastMacOSErr);
-	    sv_setpv(sv, gLastMacOSErr ? GetSysErrText(gLastMacOSErr, msg) : "");	
+	    sv_setnv(sv,(double)gMacPerl_OSErr);
+	    sv_setpv(sv, gMacPerl_OSErr ? GetSysErrText(gMacPerl_OSErr, msg) : "");	
 	}
 #else	
 #ifdef VMS
@@ -614,6 +614,9 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    {
 		i = t1 - s1;
 		s = rx->subbeg + s1;
+		if (!rx->subbeg)
+		    break;
+
 	      getrx:
 		if (i >= 0) {
 		    bool was_tainted;
@@ -950,6 +953,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+#ifndef PERL_MICRO
 int
 Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -1066,6 +1070,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     }
     return 0;
 }
+#endif /* !PERL_MICRO */
 
 int
 Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
@@ -1670,7 +1675,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\005':  /* ^E */
 #ifdef MACOS_TRADITIONAL
-	gLastMacOSErr = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	gMacPerl_OSErr = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 #else
 #  ifdef VMS
 	set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
@@ -1994,6 +1999,30 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
 #ifndef MACOS_TRADITIONAL
     case '0':
+#ifdef HAS_SETPROCTITLE
+	/* The BSDs don't show the argv[] in ps(1) output, they
+	 * show a string from the process struct and provide
+	 * the setproctitle() routine to manipulate that. */
+	{
+	    s = SvPV(sv, len);
+#   if __FreeBSD_version >= 410001
+	    /* The leading "-" removes the "perl: " prefix,
+	     * but not the "(perl) suffix from the ps(1)
+	     * output, because that's what ps(1) shows if the
+	     * argv[] is modified. */
+	    setproctitle("-%s", s, len + 1);
+#   else	/* old FreeBSDs, NetBSD, OpenBSD, anyBSD */
+	    /* This doesn't really work if you assume that
+	     * $0 = 'foobar'; will wipe out 'perl' from the $0
+	     * because in ps(1) output the result will be like
+	     * sprintf("perl: %s (perl)", s)
+	     * I guess this is a security feature:
+	     * one (a user process) cannot get rid of the original name.
+	     * --jhi */
+	    setproctitle("%s", s);
+#   endif
+	}
+#endif
 	if (!PL_origalen) {
 	    s = PL_origargv[0];
 	    s += strlen(s);

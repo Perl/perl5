@@ -106,7 +106,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : "";
     GvCVGEN(gv) = 0;
     GvEGV(gv) = gv;
-    sv_magic((SV*)gv, (SV*)gv, '*', name, len);
+    sv_magic((SV*)gv, (SV*)gv, '*', Nullch, 0);
     GvSTASH(gv) = (HV*)SvREFCNT_inc(stash);
     GvNAME(gv) = savepvn(name, len);
     GvNAMELEN(gv) = len;
@@ -372,7 +372,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 
     gv = gv_fetchmeth(stash, name, nend - name, 0);
     if (!gv) {
-	if (strEQ(name,"import"))
+	if (strEQ(name,"import") || strEQ(name,"unimport"))
 	    gv = (GV*)&PL_sv_yes;
 	else if (autoload)
 	    gv = gv_autoload4(stash, name, nend - name, TRUE);
@@ -418,6 +418,9 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	return Nullgv;
     cv = GvCV(gv);
 
+    if (!CvROOT(cv))
+	return Nullgv;
+
     /*
      * Inheriting AUTOLOAD for non-methods works ... for now.
      */
@@ -435,9 +438,18 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
      */
     varstash = GvSTASH(CvGV(cv));
     vargv = *(GV**)hv_fetch(varstash, autoload, autolen, TRUE);
+    ENTER;
+
+#ifdef USE_THREADS
+    sv_lock((SV *)varstash);
+#endif
     if (!isGV(vargv))
 	gv_init(vargv, varstash, autoload, autolen, FALSE);
+    LEAVE;
     varsv = GvSV(vargv);
+#ifdef USE_THREADS
+    sv_lock(varsv);
+#endif
     sv_setpv(varsv, HvNAME(stash));
     sv_catpvn(varsv, "::", 2);
     sv_catpvn(varsv, name, len);
@@ -907,6 +919,22 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 }
 
 void
+Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
+{
+    HV *hv = GvSTASH(gv);
+    if (!hv) {
+	(void)SvOK_off(sv);
+	return;
+    }
+    sv_setpv(sv, prefix ? prefix : "");
+    if (keepmain || strNE(HvNAME(hv), "main")) {
+	sv_catpv(sv,HvNAME(hv));
+	sv_catpvn(sv,"::", 2);
+    }
+    sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
+}
+
+void
 Perl_gv_fullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
 {
     HV *hv = GvSTASH(gv);
@@ -918,6 +946,15 @@ Perl_gv_fullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
     sv_catpv(sv,HvNAME(hv));
     sv_catpvn(sv,"::", 2);
     sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
+}
+
+void
+Perl_gv_efullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
+{
+    GV *egv = GvEGV(gv);
+    if (!egv)
+	egv = gv;
+    gv_fullname4(sv, egv, prefix, keepmain);
 }
 
 void
@@ -1579,4 +1616,111 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       return res;
     }
   }
+}
+
+/*
+=for apidoc is_gv_magical
+
+Returns C<TRUE> if given the name of a magical GV.
+
+Currently only useful internally when determining if a GV should be
+created even in rvalue contexts.
+
+C<flags> is not used at present but available for future extension to
+allow selecting particular classes of magical variable.
+
+=cut
+*/
+bool
+Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
+{
+    if (!len)
+	return FALSE;
+
+    switch (*name) {
+    case 'I':
+	if (len == 3 && strEQ(name, "ISA"))
+	    goto yes;
+	break;
+    case 'O':
+	if (len == 8 && strEQ(name, "OVERLOAD"))
+	    goto yes;
+	break;
+    case 'S':
+	if (len == 3 && strEQ(name, "SIG"))
+	    goto yes;
+	break;
+    case '\027':   /* $^W & $^WARNING_BITS */
+	if (len == 1
+	    || (len == 12 && strEQ(name, "\027ARNING_BITS"))
+	    || (len == 17 && strEQ(name, "\027IDE_SYSTEM_CALLS")))
+	{
+	    goto yes;
+	}
+	break;
+
+    case '&':
+    case '`':
+    case '\'':
+    case ':':
+    case '?':
+    case '!':
+    case '-':
+    case '#':
+    case '*':
+    case '[':
+    case '^':
+    case '~':
+    case '=':
+    case '%':
+    case '.':
+    case '(':
+    case ')':
+    case '<':
+    case '>':
+    case ',':
+    case '\\':
+    case '/':
+    case '|':
+    case '+':
+    case ';':
+    case ']':
+    case '\001':   /* $^A */
+    case '\003':   /* $^C */
+    case '\004':   /* $^D */
+    case '\005':   /* $^E */
+    case '\006':   /* $^F */
+    case '\010':   /* $^H */
+    case '\011':   /* $^I, NOT \t in EBCDIC */
+    case '\014':   /* $^L */
+    case '\017':   /* $^O */
+    case '\020':   /* $^P */
+    case '\023':   /* $^S */
+    case '\024':   /* $^T */
+    case '\026':   /* $^V */
+	if (len == 1)
+	    goto yes;
+	break;
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+	if (len > 1) {
+	    char *end = name + len;
+	    while (--end > name) {
+		if (!isDIGIT(*end))
+		    return FALSE;
+	    }
+	}
+    yes:
+	return TRUE;
+    default:
+	break;
+    }
+    return FALSE;
 }

@@ -586,6 +586,12 @@ Some error messages will be different.
 
 =item * Discontinuance
 
+In Perl 4, if in list context the delimiters to the first argument of
+C<split()> were C<??>, the result would be placed in C<@_> as well as
+being returned.   Perl 5 has more respect for your subroutine arguments.
+
+=item * Discontinuance
+
 Some bugs may have been inadvertently removed.  :-)
 
 =back
@@ -1296,7 +1302,8 @@ within certain expressions, statements, contexts, or whatever.
     print "To: someone@somewhere.com\n";
 
     # perl4 prints: To:someone@somewhere.com
-    # perl5 errors : In string, @somewhere now must be written as \@somewhere
+    # perl < 5.6.1, error : In string, @somewhere now must be written as \@somewhere
+    # perl >= 5.6.1, warning : Possible unintended interpolation of @somewhere in string
 
 =item * Interpolation
 

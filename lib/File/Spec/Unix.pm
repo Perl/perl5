@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '1.1';
+$VERSION = '1.2';
 
 use Cwd;
 
@@ -165,7 +165,12 @@ sub case_tolerant {
 
 =item file_name_is_absolute
 
-Takes as argument a path and returns true, if it is an absolute path.
+Takes as argument a path and returns true if it is an absolute path.
+
+This does not consult the local filesystem on Unix, Win32, or OS/2.  It
+does sometimes on MacOS (see L<File::Spec::MacOS/file_name_is_absolute>).
+It does consult the working environment for VMS (see
+L<File::Spec::VMS/file_name_is_absolute>).
 
 =cut
 
@@ -311,8 +316,8 @@ sub catpath {
 Takes a destination path and an optional base path returns a relative path
 from the base path to the destination path:
 
-    $rel_path = File::Spec->abs2rel( $destination ) ;
-    $rel_path = File::Spec->abs2rel( $destination, $base ) ;
+    $rel_path = File::Spec->abs2rel( $path ) ;
+    $rel_path = File::Spec->abs2rel( $path, $base ) ;
 
 If $base is not present or '', then L<cwd()> is used. If $base is relative, 
 then it is converted to absolute form using L</rel2abs()>. This means that it
@@ -328,9 +333,13 @@ directories.
 If $path is relative, it is converted to absolute form using L</rel2abs()>.
 This means that it is taken to be relative to L<cwd()>.
 
-Based on code written by Shigio Yamaguchi.
+No checks against the filesystem are made on most systems.  On MacOS,
+the filesystem may be consulted (see
+L<File::Spec::MacOS/file_name_is_absolute>).  On VMS, there is
+interaction with the working environment, as logicals and
+macros are expanded.
 
-No checks against the filesystem are made. 
+Based on code written by Shigio Yamaguchi.
 
 =cut
 
@@ -388,15 +397,15 @@ sub abs2rel {
 
 Converts a relative path to an absolute path. 
 
-    $abs_path = File::Spec->rel2abs( $destination ) ;
-    $abs_path = File::Spec->rel2abs( $destination, $base ) ;
+    $abs_path = File::Spec->rel2abs( $path ) ;
+    $abs_path = File::Spec->rel2abs( $path, $base ) ;
 
 If $base is not present or '', then L<cwd()> is used. If $base is relative, 
 then it is converted to absolute form using L</rel2abs()>. This means that it
 is taken to be relative to L<cwd()>.
 
 On systems with the concept of a volume, this assumes that both paths 
-are on the $base volume, and ignores the $destination volume. 
+are on the $base volume, and ignores the $path volume. 
 
 On systems that have a grammar that indicates filenames, this ignores the 
 $base filename as well. Otherwise all path components are assumed to be
@@ -404,13 +413,17 @@ directories.
 
 If $path is absolute, it is cleaned up and returned using L</canonpath()>.
 
-Based on code written by Shigio Yamaguchi.
+No checks against the filesystem are made on most systems.  On MacOS,
+the filesystem may be consulted (see
+L<File::Spec::MacOS/file_name_is_absolute>).  On VMS, there is
+interaction with the working environment, as logicals and
+macros are expanded.
 
-No checks against the filesystem are made. 
+Based on code written by Shigio Yamaguchi.
 
 =cut
 
-sub rel2abs($;$;) {
+sub rel2abs {
     my ($self,$path,$base ) = @_;
 
     # Clean up $path

@@ -1,9 +1,9 @@
 #!./perl
 
-print "1..16\n";
+print "1..22\n";
 
 BEGIN { unshift @INC, '../lib' }
-use English;
+use English qw( -no_match_vars ) ;
 use Config;
 my $threads = $Config{'use5005threads'} || 0;
 
@@ -17,13 +17,11 @@ sub foo {
 }
 &foo(1);
 
-if ($threads) {
-    $_ = "ok 4\nok 5\nok 6\n";
-} else {
-    $ARG = "ok 4\nok 5\nok 6\n";
-}
-/ok 5\n/;
-print $PREMATCH, $MATCH, $POSTMATCH;
+"abc" =~ /b/;
+
+print ! $PREMATCH  ? "" : "not ", "ok 4\n" ;
+print ! $MATCH     ? "" : "not ", "ok 5\n" ;
+print ! $POSTMATCH ? "" : "not ", "ok 6\n" ;
 
 $OFS = " ";
 $ORS = "\n";
@@ -43,5 +41,25 @@ print $GID == $( ? "ok 12\n" : "not ok 12\n";
 print $EUID == $> ? "ok 13\n" : "not ok 13\n";
 print $EGID == $) ? "ok 14\n" : "not ok 14\n";
 
-print $PROGRAM_NAME == $0 ? "ok 15\n" : "not ok 15\n";
+print $PROGRAM_NAME eq $0 ? "ok 15\n" : "not ok 15\n";
 print $BASETIME == $^T ? "ok 16\n" : "not ok 16\n";
+
+package B ;
+
+use English ;
+
+"abc" =~ /b/;
+
+print $PREMATCH  ? "" : "not ", "ok 17\n" ;
+print $MATCH     ? "" : "not ", "ok 18\n" ;
+print $POSTMATCH ? "" : "not ", "ok 19\n" ;
+
+package C ;
+
+use English qw( -no_match_vars ) ;
+
+"abc" =~ /b/;
+
+print ! $PREMATCH  ? "" : "not ", "ok 20\n" ;
+print ! $MATCH     ? "" : "not ", "ok 21\n" ;
+print ! $POSTMATCH ? "" : "not ", "ok 22\n" ;

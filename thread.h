@@ -280,7 +280,10 @@
 #  define UNLOCK_STRTAB_MUTEX	MUTEX_UNLOCK(&PL_strtab_mutex)
 #  define LOCK_CRED_MUTEX	MUTEX_LOCK(&PL_cred_mutex)
 #  define UNLOCK_CRED_MUTEX	MUTEX_UNLOCK(&PL_cred_mutex)
-
+#  define LOCK_FDPID_MUTEX	MUTEX_LOCK(&PL_fdpid_mutex)
+#  define UNLOCK_FDPID_MUTEX	MUTEX_UNLOCK(&PL_fdpid_mutex)
+#  define LOCK_SV_LOCK_MUTEX	MUTEX_LOCK(&PL_sv_lock_mutex)
+#  define UNLOCK_SV_LOCK_MUTEX	MUTEX_UNLOCK(&PL_sv_lock_mutex)
 
 /* Values and macros for thr->flags */
 #define THRf_STATE_MASK	7
@@ -374,6 +377,22 @@ typedef struct condpair {
 
 #ifndef UNLOCK_CRED_MUTEX
 #  define UNLOCK_CRED_MUTEX
+#endif
+
+#ifndef LOCK_FDPID_MUTEX
+#  define LOCK_FDPID_MUTEX
+#endif
+
+#ifndef UNLOCK_FDPID_MUTEX
+#  define UNLOCK_FDPID_MUTEX
+#endif
+
+#ifndef LOCK_SV_LOCK_MUTEX
+#  define LOCK_SV_LOCK_MUTEX
+#endif
+
+#ifndef UNLOCK_SV_LOCK_MUTEX
+#  define UNLOCK_SV_LOCK_MUTEX
 #endif
 
 /* THR, SET_THR, and dTHR are there for compatibility with old versions */

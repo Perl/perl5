@@ -1,29 +1,35 @@
+case "$CONFIG_SH" in
+'') CONFIG_SH=config.sh ;;
+esac
+case "$CONFIG_H" in
+'') CONFIG_H=config.h ;;
+esac
 case $CONFIG in
 '')
-	if test -f config.sh; then TOP=.;
-	elif test -f ../config.sh; then TOP=..;
-	elif test -f ../../config.sh; then TOP=../..;
-	elif test -f ../../../config.sh; then TOP=../../..;
-	elif test -f ../../../../config.sh; then TOP=../../../..;
+	if test -f $CONFIG_SH; then TOP=.;
+	elif test -f ../$CONFIG_SH; then TOP=..;
+	elif test -f ../../$CONFIG_SH; then TOP=../..;
+	elif test -f ../../../$CONFIG_SH; then TOP=../../..;
+	elif test -f ../../../../$CONFIG_SH; then TOP=../../../..;
 	else
-		echo "Can't find config.sh."; exit 1
+		echo "Can't find $CONFIG_SH."; exit 1
 	fi
-	. $TOP/config.sh
+	. $TOP/$CONFIG_SH
 	;;
 esac
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
-echo "Extracting config.h (with variable substitutions)"
-sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!'
+echo "Extracting $CONFIG_H (with variable substitutions)"
+sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!'
 /*
  * This file was produced by running the config_h.SH script, which
- * gets its values from config.sh, which is generally produced by
+ * gets its values from $CONFIG_SH, which is generally produced by
  * running Configure.
  *
  * Feel free to modify any of this as the need arises.  Note, however,
  * that running config_h.SH again will wipe out any changes you've made.
- * For a more permanent change edit config.sh and rerun config_h.SH.
+ * For a more permanent change edit $CONFIG_SH and rerun config_h.SH.
  *
  * \$Id: Config_h.U,v 3.0.1.5 1997/02/28 14:57:43 ram Exp $
  */
@@ -1198,18 +1204,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This macro surrounds its token with double quotes.
  */
 #if $cpp_stuff == 1
-#  define CAT2(a,b)	a/**/b
-#  define STRINGIFY(a)	"a"
+#define CAT2(a,b)	a/**/b
+#define STRINGIFY(a)	"a"
 		/* If you can get stringification with catify, tell me how! */
 #endif
 #if $cpp_stuff == 42
-#  define PeRl_CaTiFy(a, b)	a ## b	
-#  define PeRl_StGiFy(a)	#a
+#define PeRl_CaTiFy(a, b)	a ## b	
+#define PeRl_StGiFy(a)	#a
 /* the additional level of indirection enables these macros to be
  * used as arguments to other macros.  See K&R 2nd ed., page 231. */
-#  define CAT2(a,b)	PeRl_CaTiFy(a,b)
-#  define StGiFy(a)	PeRl_StGiFy(a)
-#  define STRINGIFY(a)	PeRl_StGiFy(a)
+#define CAT2(a,b)	PeRl_CaTiFy(a,b)
+#define StGiFy(a)	PeRl_StGiFy(a)
+#define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if $cpp_stuff != 1 && $cpp_stuff != 42
 #   include "Bletch: How does this C preprocessor catenate tokens?"
@@ -1342,12 +1348,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_endsent HAS_ENDSERVENT		/**/
 
-/* HAS_ENDSPENT:
- *	This symbol, if defined, indicates that the endspent system call is
- *	available to finalize the scan of SysV shadow password entries.
- */
-#$d_endspent HAS_ENDSPENT		/**/
-
 /* HAS_FD_SET:
  *	This symbol, when defined, indicates presence of the fd_set typedef
  *	in <sys/types.h>
@@ -1418,6 +1418,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to get the current working directory.
  */
 #$d_getcwd HAS_GETCWD		/**/
+
+/* HAS_GETESPWNAM:
+ *	This symbol, if defined, indicates that the getespwnam system call is
+ *	available to retrieve enchanced (shadow) password entries by name.
+ */
+#$d_getespwnam HAS_GETESPWNAM		/**/
 
 /* HAS_GETFSSTAT:
  *	This symbol, if defined, indicates that the getfsstat routine is
@@ -1549,6 +1555,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_getprotoprotos	HAS_GETPROTO_PROTOS	/**/
 
+/* HAS_GETPRPWNAM:
+ *	This symbol, if defined, indicates that the getprpwnam system call is
+ *	available to retrieve protected (shadow) password entries by name.
+ */
+#$d_getprpwnam HAS_GETPRPWNAM		/**/
+
 /* HAS_GETPWENT:
  *	This symbol, if defined, indicates that the getpwent routine is
  *	available for sequential access of the passwd database.
@@ -1569,12 +1581,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
  */
 #$d_getservprotos	HAS_GETSERV_PROTOS	/**/
-
-/* HAS_GETSPENT:
- *	This symbol, if defined, indicates that the getspent system call is
- *	available to retrieve SysV shadow password entries sequentially.
- */
-#$d_getspent HAS_GETSPENT		/**/
 
 /* HAS_GETSPNAM:
  *	This symbol, if defined, indicates that the getspnam system call is
@@ -1757,6 +1763,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_mmap HAS_MMAP		/**/
 #define Mmap_t $mmaptype	/**/
 
+/* HAS_MODFL:
+ *	This symbol, if defined, indicates that the modfl routine is
+ *	available to split a long double x into a fractional part f and
+ *	an integer part i such that |f| < 1.0 and (f + i) = x.
+ */
+#$d_modfl HAS_MODFL		/**/
+
 /* HAS_MPROTECT:
  *	This symbol, if defined, indicates that the mprotect system call is
  *	available to modify the access protection of a memory mapped file.
@@ -1869,6 +1882,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_setpent HAS_SETPROTOENT		/**/
 
+/* HAS_SETPROCTITLE:
+ *	This symbol, if defined, indicates that the setproctitle routine is
+ *	available to set process title.
+ */
+#$d_setproctitle HAS_SETPROCTITLE		/**/
+
 /* HAS_SETPWENT:
  *	This symbol, if defined, indicates that the setpwent routine is
  *	available for initializing sequential access of the passwd database.
@@ -1880,12 +1899,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available.
  */
 #$d_setsent HAS_SETSERVENT		/**/
-
-/* HAS_SETSPENT:
- *	This symbol, if defined, indicates that the setspent system call is
- *	available to initialize the scan of SysV shadow password entries.
- */
-#$d_setspent HAS_SETSPENT		/**/
 
 /* HAS_SETVBUF:
  *	This symbol, if defined, indicates that the setvbuf routine is
@@ -2355,6 +2368,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_poll	I_POLL		/**/
 
+/* I_PROT:
+ *	This symbol, if defined, indicates that <prot.h> exists and
+ *	should be included.
+ */
+#$i_prot	I_PROT		/**/
+
 /* I_PTHREAD:
  *     This symbol, if defined, indicates to the C program that it should
  *     include <pthread.h>.
@@ -2684,7 +2703,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 /* NV_PRESERVES_UV:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
- *	can preserve all the bit of a variable of type UVSIZE.
+ *	can preserve all the bits of a variable of type UVTYPE.
+ */
+/* NV_PRESERVES_UV_BITS:
+ *	This symbol contains the number of bits a variable of type NVTYPE
+ *	can preserve of a variable of type UVTYPE.
  */
 #define	IVTYPE		$ivtype		/**/
 #define	UVTYPE		$uvtype		/**/
@@ -2713,6 +2736,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #endif
 #define	NVSIZE		$nvsize		/**/
 #$d_nv_preserves_uv	NV_PRESERVES_UV
+#define	NV_PRESERVES_UV_BITS	$d_nv_preserves_uv_bits
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV
@@ -3132,12 +3156,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
 
-/* HAS_MODFL:
- *	This symbol, if defined, indicates that the modfl routine is
- *	available to split a long double x into a fractional part f and
- *	an integer part i such that |f| < 1.0 and (f + i) = x.
+/* I_LIBUTIL:
+ *	This symbol, if defined, indicates that <libutil.h> exists and
+ *	should be included.
  */
-#$d_modfl HAS_MODFL		/**/
+#$i_libutil	I_LIBUTIL		/**/
 
 #endif
 !GROK!THIS!

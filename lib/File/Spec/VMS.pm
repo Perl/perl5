@@ -265,7 +265,7 @@ sub rootdir {
 Returns a string representation of the first writable directory
 from the following list or '' if none are writable:
 
-    sys$scratch
+    sys$scratch:
     $ENV{TMPDIR}
 
 =cut
@@ -273,7 +273,7 @@ from the following list or '' if none are writable:
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    foreach ('sys$scratch', $ENV{TMPDIR}) {
+    foreach ('sys$scratch:', $ENV{TMPDIR}) {
 	next unless defined && -d && -w _;
 	$tmpdir = $_;
 	last;
@@ -451,7 +451,7 @@ Use VMS syntax when converting filespecs.
 
 =cut
 
-sub rel2abs($;$;) {
+sub rel2abs {
     my $self = shift ;
     return vmspath(File::Spec::Unix::rel2abs( $self, @_ ))
         if ( join( '', @_ ) =~ m{/} ) ;

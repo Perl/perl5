@@ -980,18 +980,18 @@ EOP
 			next CMD; };
 		    $cmd =~ /^<\s*(.*)/ && do {
 			unless ($1) {
-			    print OUT "All < actions cleared.\n";
+			    print $OUT "All < actions cleared.\n";
 			    $pre = [];
 			    next CMD;
 			} 
 			if ($1 eq '?') {
 			    unless (@$pre) {
-				print OUT "No pre-prompt Perl actions.\n";
+				print $OUT "No pre-prompt Perl actions.\n";
 				next CMD;
 			    } 
-			    print OUT "Perl commands run before each prompt:\n";
+			    print $OUT "Perl commands run before each prompt:\n";
 			    for my $action ( @$pre ) {
-				print "\t< -- $action\n";
+				print $OUT "\t< -- $action\n";
 			    } 
 			    next CMD;
 			} 
@@ -999,18 +999,18 @@ EOP
 			next CMD; };
 		    $cmd =~ /^>\s*(.*)/ && do {
 			unless ($1) {
-			    print OUT "All > actions cleared.\n";
+			    print $OUT "All > actions cleared.\n";
 			    $post = [];
 			    next CMD;
 			}
 			if ($1 eq '?') {
 			    unless (@$post) {
-				print OUT "No post-prompt Perl actions.\n";
+				print $OUT "No post-prompt Perl actions.\n";
 				next CMD;
 			    } 
-			    print OUT "Perl commands run after each prompt:\n";
+			    print $OUT "Perl commands run after each prompt:\n";
 			    for my $action ( @$post ) {
-				print "\t> -- $action\n";
+				print $OUT "\t> -- $action\n";
 			    } 
 			    next CMD;
 			} 
@@ -1018,7 +1018,7 @@ EOP
 			next CMD; };
 		    $cmd =~ /^\{\{\s*(.*)/ && do {
 			if ($cmd =~ /^\{.*\}$/ && unbalanced(substr($cmd,2))) { 
-			    print OUT "{{ is now a debugger command\n",
+			    print $OUT "{{ is now a debugger command\n",
 				"use `;{{' if you mean Perl code\n";
 			    $cmd = "h {{";
 			    redo CMD;
@@ -1027,23 +1027,23 @@ EOP
 			next CMD; };
 		    $cmd =~ /^\{\s*(.*)/ && do {
 			unless ($1) {
-			    print OUT "All { actions cleared.\n";
+			    print $OUT "All { actions cleared.\n";
 			    $pretype = [];
 			    next CMD;
 			}
 			if ($1 eq '?') {
 			    unless (@$pretype) {
-				print OUT "No pre-prompt debugger actions.\n";
+				print $OUT "No pre-prompt debugger actions.\n";
 				next CMD;
 			    } 
-			    print OUT "Debugger commands run before each prompt:\n";
+			    print $OUT "Debugger commands run before each prompt:\n";
 			    for my $action ( @$pretype ) {
-				print "\t{ -- $action\n";
+				print $OUT "\t{ -- $action\n";
 			    } 
 			    next CMD;
 			} 
 			if ($cmd =~ /^\{.*\}$/ && unbalanced(substr($cmd,1))) { 
-			    print OUT "{ is now a debugger command\n",
+			    print $OUT "{ is now a debugger command\n",
 				"use `;{' if you mean Perl code\n";
 			    $cmd = "h {";
 			    redo CMD;
@@ -1814,7 +1814,7 @@ sub readline {
   local $frame = 0;
   local $doret = -2;
   if (ref $OUT and UNIVERSAL::isa($OUT, 'IO::Socket::INET')) {
-    print $OUT @_;
+    $OUT->write(join('', @_));
     my $stuff;
     $IN->recv( $stuff, 2048 );  # XXX: what's wrong with sysread?
     $stuff;

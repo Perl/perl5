@@ -21,6 +21,7 @@ Perl_get_context
 Perl_set_context
 Perl_amagic_call
 Perl_Gv_AMupdate
+Perl_apply_attrs_string
 Perl_avhv_delete_ent
 Perl_avhv_exists_ent
 Perl_avhv_fetch_ent
@@ -32,14 +33,12 @@ Perl_av_clear
 Perl_av_delete
 Perl_av_exists
 Perl_av_extend
-Perl_av_fake
 Perl_av_fetch
 Perl_av_fill
 Perl_av_len
 Perl_av_make
 Perl_av_pop
 Perl_av_push
-Perl_av_reify
 Perl_av_shift
 Perl_av_store
 Perl_av_undef
@@ -185,6 +184,7 @@ Perl_to_uni_upper_lc
 Perl_to_uni_title_lc
 Perl_to_uni_lower_lc
 Perl_is_utf8_char
+Perl_is_utf8_string
 Perl_is_utf8_alnum
 Perl_is_utf8_alnumc
 Perl_is_utf8_idfirst
@@ -336,6 +336,7 @@ Perl_save_destructor_x
 Perl_save_freesv
 Perl_save_freepv
 Perl_save_generic_svref
+Perl_save_generic_pvref
 Perl_save_gp
 Perl_save_hash
 Perl_save_helem
@@ -459,6 +460,8 @@ Perl_utf16_to_utf8
 Perl_utf16_to_utf8_reversed
 Perl_utf8_distance
 Perl_utf8_hop
+Perl_utf8_to_bytes
+Perl_bytes_to_utf8
 Perl_utf8_to_uv
 Perl_uv_to_utf8
 Perl_warn
@@ -479,6 +482,7 @@ Perl_safexfree
 Perl_GetVars
 Perl_runops_standard
 Perl_runops_debug
+Perl_sv_lock
 Perl_sv_catpvf_mg
 Perl_sv_vcatpvf_mg
 Perl_sv_catpv_mg
@@ -540,4 +544,5 @@ Perl_ptr_table_new
 Perl_ptr_table_fetch
 Perl_ptr_table_store
 Perl_ptr_table_split
+Perl_sys_intern_clear
 Perl_sys_intern_init

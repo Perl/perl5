@@ -39,7 +39,7 @@ To call subroutines:
 Like many languages, Perl provides for user-defined subroutines.
 These may be located anywhere in the main program, loaded in from
 other files via the C<do>, C<require>, or C<use> keywords, or
-generated on the fly using C<eval> or anonymous subroutines (closures).
+generated on the fly using C<eval> or anonymous subroutines.
 You can even call a function indirectly using a variable containing
 its name or a CODE reference.
 
@@ -357,7 +357,7 @@ A compilation error results otherwise.  An inner block may countermand
 this with C<no strict 'vars'>.
 
 A C<my> has both a compile-time and a run-time effect.  At compile
-time, the compiler takes notice of it.  The principle usefulness
+time, the compiler takes notice of it.  The principal usefulness
 of this is to quiet C<use strict 'vars'>, but it is also essential
 for generation of closures as detailed in L<perlref>.  Actual
 initialization is delayed until run time, though, so it gets executed

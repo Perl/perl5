@@ -53,8 +53,8 @@ subroutine without defining it by saying C<sub name>, thus:
     sub myname;
     $me = myname $0 		or die "can't get myname";
 
-Note that my() functions as a list operator, not as a unary operator; so
-be careful to use C<or> instead of C<||> in this case.  However, if
+Note that myname() functions as a list operator, not as a unary operator;
+so be careful to use C<or> instead of C<||> in this case.  However, if
 you were to declare the subroutine as C<sub myname ($)>, then
 C<myname> would function as a unary operator, so either C<or> or
 C<||> would work.
@@ -597,6 +597,11 @@ C preprocessors: it matches the regular expression
 C</^#\s*line\s+(\d+)\s*(?:\s"([^"]+)")?\s*$/> with C<$1> being the line
 number for the next line, and C<$2> being the optional filename
 (specified within quotes).
+
+There is a fairly obvious gotcha included with the line directive:
+Debuggers and profilers will only show the last source line to appear
+at a particular line number in a given file.  Care should be taken not
+to cause line number collisions in code you'd like to debug later.
 
 Here are some examples that you should be able to type into your command
 shell:

@@ -3,12 +3,6 @@ toke.c	AOK
     we seem to have lost a few ambiguous warnings!!
 
  
-             	1 if $a EQ $b ;
-             	1 if $a NE $b ;
-             	1 if $a LT $b ;
-             	1 if $a GT $b ;
-             	1 if $a GE $b ;
-             	1 if $a LE $b ;
  		$a = <<;
  		Use of comma-less variable list is deprecated 
 		(called 3 times via depcom)
@@ -131,29 +125,6 @@ toke.c	AOK
 
 __END__
 # toke.c 
-use warnings 'deprecated' ;
-1 if $a EQ $b ;
-1 if $a NE $b ;
-1 if $a GT $b ;
-1 if $a LT $b ;
-1 if $a GE $b ;
-1 if $a LE $b ;
-no warnings 'deprecated' ;
-1 if $a EQ $b ;
-1 if $a NE $b ;
-1 if $a GT $b ;
-1 if $a LT $b ;
-1 if $a GE $b ;
-1 if $a LE $b ;
-EXPECT
-Use of EQ is deprecated at - line 3.
-Use of NE is deprecated at - line 4.
-Use of GT is deprecated at - line 5.
-Use of LT is deprecated at - line 6.
-Use of GE is deprecated at - line 7.
-Use of LE is deprecated at - line 8.
-########
-# toke.c
 use warnings 'deprecated' ;
 format STDOUT =
 @<<<  @|||  @>>>  @>>>
@@ -585,3 +556,11 @@ EXPECT
 Integer overflow in binary number at - line 5.
 Integer overflow in hexadecimal number at - line 8.
 Integer overflow in octal number at - line 11.
+########
+# toke.c
+use warnings 'ambiguous';
+"@mjd_previously_unused_array";        
+no warnings 'ambiguous';
+"@mjd_previously_unused_array";        
+EXPECT
+Possible unintended interpolation of @mjd_previously_unused_array in string at - line 3.

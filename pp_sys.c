@@ -21,13 +21,18 @@
 #ifdef I_SHADOW
 /* Shadow password support for solaris - pdo@cs.umd.edu
  * Not just Solaris: at least HP-UX, IRIX, Linux.
- * the API is from SysV. --jhi */
-#ifdef __hpux__
+ * The API is from SysV.
+ *
+ * There are at least two more shadow interfaces,
+ * see the comments in pp_gpwent().
+ *
+ * --jhi */
+#   ifdef __hpux__
 /* There is a MAXINT coming from <shadow.h> <- <hpsecurity.h> <- <values.h>
  * and another MAXINT from "perl.h" <- <sys/param.h>. */ 
-#undef MAXINT
-#endif
-#include <shadow.h>
+#       undef MAXINT
+#   endif
+#   include <shadow.h>
 #endif
 
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
@@ -195,7 +200,7 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 #endif
 
 #if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_EACCESS)
-#   if defined(I_SYS_SECURITY)
+#   ifdef I_SYS_SECURITY
 #       include <sys/security.h>
 #   endif
 #   ifdef ACC_SELF
@@ -1065,7 +1070,7 @@ PP(pp_select)
     else {
 	GV **gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
 	if (gvp && *gvp == egv) {
-	    gv_efullname3(TARG, PL_defoutgv, Nullch);
+	    gv_efullname4(TARG, PL_defoutgv, Nullch, FALSE);
 	    XPUSHTARG;
 	}
 	else {
@@ -1171,7 +1176,7 @@ PP(pp_enterwrite)
     if (!cv) {
 	if (fgv) {
 	    SV *tmpsv = sv_newmortal();
-	    gv_efullname3(tmpsv, fgv, Nullch);
+	    gv_efullname4(tmpsv, fgv, Nullch, FALSE);
 	    DIE(aTHX_ "Undefined format \"%s\" called",SvPVX(tmpsv));
 	}
 	DIE(aTHX_ "Not a format reference");
@@ -1252,7 +1257,7 @@ PP(pp_leavewrite)
 	cv = GvFORM(fgv);
 	if (!cv) {
 	    SV *tmpsv = sv_newmortal();
-	    gv_efullname3(tmpsv, fgv, Nullch);
+	    gv_efullname4(tmpsv, fgv, Nullch, FALSE);
 	    DIE(aTHX_ "Undefined top format \"%s\" called",SvPVX(tmpsv));
 	}
 	if (CvCLONE(cv))
@@ -1270,7 +1275,7 @@ PP(pp_leavewrite)
 	if (ckWARN2(WARN_CLOSED,WARN_IO)) {
 	    if (IoIFP(io)) {
 		SV* sv = sv_newmortal();
-		gv_efullname3(sv, gv, Nullch);
+		gv_efullname4(sv, gv, Nullch, FALSE);
 		Perl_warner(aTHX_ WARN_IO,
 			    "Filehandle %s opened only for input",
 			    SvPV_nolen(sv));
@@ -1340,7 +1345,7 @@ PP(pp_prtf)
     sv = NEWSV(0,0);
     if (!(io = GvIO(gv))) {
 	if (ckWARN(WARN_UNOPENED)) {
-	    gv_efullname3(sv, gv, Nullch);
+	    gv_efullname4(sv, gv, Nullch, FALSE);
 	    Perl_warner(aTHX_ WARN_UNOPENED,
 			"Filehandle %s never opened", SvPV(sv,n_a));
 	}
@@ -1350,7 +1355,7 @@ PP(pp_prtf)
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO))  {
 	    if (IoIFP(io)) {
-		gv_efullname3(sv, gv, Nullch);
+		gv_efullname4(sv, gv, Nullch, FALSE);
 		Perl_warner(aTHX_ WARN_IO,
 			    "Filehandle %s opened only for input",
 			    SvPV(sv,n_a));
@@ -1546,7 +1551,7 @@ PP(pp_sysread)
 	    || IoIFP(io) == PerlIO_stderr()) && ckWARN(WARN_IO))
 	{
 	    SV* sv = sv_newmortal();
-	    gv_efullname3(sv, gv, Nullch);
+	    gv_efullname4(sv, gv, Nullch, FALSE);
 	    Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
 			SvPV_nolen(sv));
 	}
@@ -3054,7 +3059,7 @@ PP(pp_fttext)
 	else {
 	    if (ckWARN(WARN_UNOPENED)) {
 		gv = cGVOP_gv;
-		Perl_warner(aTHX_ WARN_UNOPENED, "Test on unopened file <%s>",
+		Perl_warner(aTHX_ WARN_UNOPENED, "Test on unopened file %s",
 			    GvENAME(gv));
 	    }
 	    SETERRNO(EBADF,RMS$_IFI);
@@ -3744,7 +3749,7 @@ PP(pp_system)
 	}
     }
     PERL_FLUSHALL_FOR_CHILD;
-#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) && !defined(__CYGWIN__)
+#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) && !defined(__CYGWIN__) || defined(PERL_MICRO)
     if (PerlProc_pipe(pp) >= 0)
 	did_pipes = 1;
     while ((childpid = vfork()) == -1) {
@@ -3763,13 +3768,17 @@ PP(pp_system)
     if (childpid > 0) {
 	if (did_pipes)
 	    PerlLIO_close(pp[1]);
+#ifndef PERL_MICRO
 	rsignal_save(SIGINT, SIG_IGN, &ihand);
 	rsignal_save(SIGQUIT, SIG_IGN, &qhand);
+#endif
 	do {
 	    result = wait4pid(childpid, &status, 0);
 	} while (result == -1 && errno == EINTR);
+#ifndef PERL_MICRO
 	(void)rsignal_restore(SIGINT, &ihand);
 	(void)rsignal_restore(SIGQUIT, &qhand);
+#endif
 	STATUS_NATIVE_SET(result == -1 ? -1 : status);
 	do_execfree();	/* free any memory child malloced on vfork */
 	SP = ORIGMARK;
@@ -4773,11 +4782,59 @@ PP(pp_gpwent)
     register SV *sv;
     STRLEN n_a;
     struct passwd *pwent  = NULL;
-/* We do not use HAS_GETSPENT in pp_gpwent() but leave it here in the case
- * somebody wants to write an XS to access the shadow passwords. --jhi */
-#   ifdef HAS_GETSPNAM
-    struct spwd   *spwent = NULL;
-#   endif
+    /* 
+     * We currently support only the SysV getsp* shadow password interface.
+     * The interface is declared in <shadow.h> and often one needs to link
+     * with -lsecurity or some such.
+     * This interface is used at least by Solaris, HP-UX, IRIX, and Linux.
+     * (and SCO?)
+     *
+     * AIX getpwnam() is clever enough to return the encrypted password
+     * only if the caller (euid?) is root.
+     *
+     * There are at least two other shadow password APIs.  Many platforms
+     * seem to contain more than one interface for accessing the shadow
+     * password databases, possibly for compatibility reasons.
+     * The getsp*() is by far he simplest one, the other two interfaces
+     * are much more complicated, but also very similar to each other.
+     *
+     * <sys/types.h>
+     * <sys/security.h>
+     * <prot.h>
+     * struct pr_passwd *getprpw*();
+     * The password is in
+     * char getprpw*(...).ufld.fd_encrypt[]
+     * Mention HAS_GETPRPWNAM here so that Configure probes for it.
+     *
+     * <sys/types.h>
+     * <sys/security.h>
+     * <prot.h>
+     * struct es_passwd *getespw*();
+     * The password is in
+     * char *(getespw*(...).ufld.fd_encrypt)
+     * Mention HAS_GETESPWNAM here so that Configure probes for it.
+     *
+     * Mention I_PROT here so that Configure probes for it.
+     *
+     * In HP-UX for getprpw*() the manual page claims that one should include
+     * <hpsecurity.h> instead of <sys/security.h>, but that is not needed
+     * if one includes <shadow.h> as that includes <hpsecurity.h>,
+     * and pp_sys.c already includes <shadow.h> if there is such.
+     *
+     * Note that <sys/security.h> is already probed for, but currently
+     * it is only included in special cases.
+     * 
+     * In Digital UNIX/Tru64 if using the getespw*() (which seems to be
+     * be preferred interface, even though also the getprpw*() interface
+     * is available) one needs to link with -lsecurity -ldb -laud -lm.
+     * One also needs to call set_auth_parameters() in main() before
+     * doing anything else, whether one is using getespw*() or getprpw*().
+     *
+     * Note that accessing the shadow databases can be magnitudes
+     * slower than accessing the standard databases.
+     *
+     * --jhi
+     */
 
     switch (which) {
     case OP_GPWNAM:
@@ -4816,17 +4873,44 @@ PP(pp_gpwent)
 	sv_setpv(sv, pwent->pw_name);
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
+	SvPOK_off(sv);
+	/* If we have getspnam(), we try to dig up the shadow
+	 * password.  If we are underprivileged, the shadow
+	 * interface will set the errno to EACCES or similar,
+	 * and return a null pointer.  If this happens, we will
+	 * use the dummy password (usually "*" or "x") from the
+	 * standard password database.
+	 *
+	 * In theory we could skip the shadow call completely
+	 * if euid != 0 but in practice we cannot know which
+	 * security measures are guarding the shadow databases
+	 * on a random platform.
+	 *
+	 * Resist the urge to use additional shadow interfaces.
+	 * Divert the urge to writing an extension instead.
+	 *
+	 * --jhi */
 #   ifdef HAS_GETSPNAM
-	spwent = getspnam(pwent->pw_name);
-	if (spwent)
-	    sv_setpv(sv, spwent->sp_pwdp);
-	else
-	    sv_setpv(sv, pwent->pw_passwd);
-#   else
-	sv_setpv(sv, pwent->pw_passwd);
+	{
+	    struct spwd *spwent;
+	    int saverrno; /* Save and restore errno so that
+			   * underprivileged attempts seem
+			   * to have never made the unsccessful
+			   * attempt to retrieve the shadow password. */
+
+	    saverrno = errno;
+	    spwent = getspnam(pwent->pw_name);
+	    errno = saverrno;
+	    if (spwent && spwent->sp_pwdp)
+		sv_setpv(sv, spwent->sp_pwdp);
+	}
 #   endif
+	if (!SvPOK(sv)) /* Use the standard password, then. */
+	    sv_setpv(sv, pwent->pw_passwd);
+
 #   ifndef INCOMPLETE_TAINTS
-	/* passwd is tainted because user himself can diddle with it. */
+	/* passwd is tainted because user himself can diddle with it.
+	 * admittedly not much and in a very limited way, but nevertheless. */
 	SvTAINTED_on(sv);
 #   endif
 
@@ -4843,7 +4927,11 @@ PP(pp_gpwent)
 #   else
 	sv_setuv(sv, (UV)pwent->pw_gid);
 #   endif
-	/* pw_change, pw_quota, and pw_age are mutually exclusive. */
+	/* pw_change, pw_quota, and pw_age are mutually exclusive--
+	 * because of the poor interface of the Perl getpw*(),
+	 * not because there's some standard/convention saying so.
+	 * A better interface would have been to return a hash,
+	 * but we are accursed by our history, alas. --jhi.  */
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   ifdef PWCHANGE
 	sv_setiv(sv, (IV)pwent->pw_change);
@@ -4857,7 +4945,8 @@ PP(pp_gpwent)
 #       endif
 #   endif
 
-	/* pw_class and pw_comment are mutually exclusive. */
+	/* pw_class and pw_comment are mutually exclusive--.
+	 * see the above note for pw_change, pw_quota, and pw_age. */
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   ifdef PWCLASS
 	sv_setpv(sv, pwent->pw_class);
@@ -4902,9 +4991,6 @@ PP(pp_spwent)
     djSP;
 #if defined(HAS_PASSWD) && defined(HAS_SETPWENT)
     setpwent();
-#   ifdef HAS_SETSPENT
-    setspent();
-#   endif
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_func, "setpwent");
@@ -4916,9 +5002,6 @@ PP(pp_epwent)
     djSP;
 #if defined(HAS_PASSWD) && defined(HAS_ENDPWENT)
     endpwent();
-#   ifdef HAS_ENDSPENT
-    endspent();
-#   endif
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_func, "endpwent");

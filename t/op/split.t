@@ -2,7 +2,7 @@
 
 # $RCSfile: split.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:26 $
 
-print "1..25\n";
+print "1..27\n";
 
 $FS = ':';
 
@@ -109,3 +109,12 @@ print $_ eq "aa b |\naa d |" ? "ok 24\n" : "not ok 24\n# `$_'\n";
 $_ = "a : b :c: d";
 @ary = split(/\s*:\s*/);
 if (($res = join(".",@ary)) eq "a.b.c.d") {print "ok 25\n";} else {print "not ok 25\n# res=`$res' != `a.b.c.d'\n";}
+
+# use of match result as pattern (!)
+'p:q:r:s' eq join ':', split('abc' =~ /b/, 'p1q1r1s') or print "not ";
+print "ok 26\n";
+
+# /^/ treated as /^/m
+$_ = join ':', split /^/, "ab\ncd\nef\n";
+print "not " if $_ ne "ab\n:cd\n:ef\n";
+print "ok 27\n";

@@ -31,6 +31,7 @@ INSTALL
 INTERN.h	
 MANIFEST	
 Makefile.SH	
+Makefile.micro			simon
 objXSUB.h	
 Policy_sh.SH	
 Porting/*			cfg
@@ -56,6 +57,7 @@ README.dos			dos
 README.hpux			hpux
 README.lexwarn			lexwarn
 README.machten			machten
+README.micro			simon
 README.mpeix			mpeix
 README.os2			os2
 README.os390			mvs
@@ -69,6 +71,7 @@ README.vos			vos
 README.win32			win32
 Todo	
 Todo-5.005	
+Todo.micro			simon
 XSlock.h	
 XSUB.h	
 av.c	
@@ -434,10 +437,13 @@ lib/Pod/Checker.pm		bradapp
 lib/Pod/Functions.pm	
 lib/Pod/Html.pm			tchrist
 lib/Pod/InputObjects.pm		bradapp
+lib/Pod/LaTeX.pm		tjenness
+lib/Pod/Man.pm			rra
 lib/Pod/Parser.pm		bradapp
 lib/Pod/PlainText.pm		bradapp
 lib/Pod/Select.pm		bradapp
-lib/Pod/Text.pm			tchrist
+lib/Pod/Text.pm			rra
+lib/Pod/Text/*			rra
 lib/Pod/Usage.pm		bradapp
 lib/Search/Dict.pm	
 lib/SelectSaver.pm	
@@ -588,7 +594,9 @@ pod/perllocale.pod		locale
 pod/perllol.pod			tchrist
 pod/perlmod.pod	
 pod/perlmodinstall.pod		jon
-pod/perlmodlib.pod	
+pod/perlmodlib.pod		simon
+pod/perlmodlib.PL		simon
+pod/perlnewmod.pod		simon
 pod/perlobj.pod	
 pod/perlop.pod	
 pod/perlpod.pod			lwall
@@ -843,6 +851,8 @@ taint.c
 thrdvar.h	
 thread.h	
 toke.c	
+uconfig.h			simon
+uconfig.sh			simon
 universal.c	
 unixish.h	
 utf*				lwall

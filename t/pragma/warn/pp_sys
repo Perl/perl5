@@ -107,7 +107,7 @@ write STDIN;
 no warnings 'io' ;
 write STDIN;
 EXPECT
-Filehandle main::STDIN opened only for input at - line 5.
+Filehandle STDIN opened only for input at - line 5.
 ########
 # pp_sys.c [pp_leavewrite]
 use warnings 'closed' ;
@@ -123,9 +123,9 @@ write STDIN;
 opendir STDIN, ".";
 write STDIN;
 EXPECT
-write() on closed filehandle main::STDIN at - line 6.
-write() on closed filehandle main::STDIN at - line 8.
-	(Are you trying to call write() on dirhandle main::STDIN?)
+write() on closed filehandle STDIN at - line 6.
+write() on closed filehandle STDIN at - line 8.
+	(Are you trying to call write() on dirhandle STDIN?)
 ########
 # pp_sys.c [pp_leavewrite]
 use warnings 'io' ;
@@ -152,7 +152,7 @@ printf $a "fred";
 no warnings 'unopened' ;
 printf $a "fred";
 EXPECT
-Filehandle main::abc never opened at - line 4.
+Filehandle abc never opened at - line 4.
 ########
 # pp_sys.c [pp_prtf]
 use warnings 'closed' ;
@@ -166,9 +166,9 @@ printf STDIN "fred";
 opendir STDIN, ".";
 printf STDIN "fred";
 EXPECT
-printf() on closed filehandle main::STDIN at - line 4.
-printf() on closed filehandle main::STDIN at - line 6.
-	(Are you trying to call printf() on dirhandle main::STDIN?)
+printf() on closed filehandle STDIN at - line 4.
+printf() on closed filehandle STDIN at - line 6.
+	(Are you trying to call printf() on dirhandle STDIN?)
 ########
 # pp_sys.c [pp_prtf]
 use warnings 'io' ;
@@ -176,7 +176,7 @@ printf STDIN "fred";
 no warnings 'io' ;
 printf STDIN "fred";
 EXPECT
-Filehandle main::STDIN opened only for input at - line 3.
+Filehandle STDIN opened only for input at - line 3.
 ########
 # pp_sys.c [pp_send]
 use warnings 'closed' ;
@@ -190,9 +190,9 @@ syswrite STDIN, "fred", 1;
 opendir STDIN, ".";
 syswrite STDIN, "fred", 1;
 EXPECT
-syswrite() on closed filehandle main::STDIN at - line 4.
-syswrite() on closed filehandle main::STDIN at - line 6.
-	(Are you trying to call syswrite() on dirhandle main::STDIN?)
+syswrite() on closed filehandle STDIN at - line 4.
+syswrite() on closed filehandle STDIN at - line 6.
+	(Are you trying to call syswrite() on dirhandle STDIN?)
 ########
 # pp_sys.c [pp_flock]
 use Config; 
@@ -215,9 +215,9 @@ flock STDIN, 8;
 opendir STDIN, ".";
 flock STDIN, 8;
 EXPECT
-flock() on closed filehandle main::STDIN at - line 14.
-flock() on closed filehandle main::STDIN at - line 16.
-	(Are you trying to call flock() on dirhandle main::STDIN?)
+flock() on closed filehandle STDIN at - line 14.
+flock() on closed filehandle STDIN at - line 16.
+	(Are you trying to call flock() on dirhandle STDIN?)
 ########
 # pp_sys.c [pp_prtf pp_send pp_bind pp_connect pp_listen pp_accept pp_shutdown pp_ssockopt ppp_getpeername]
 use warnings 'io' ;
@@ -285,36 +285,36 @@ getsockopt STDIN, 1,2;
 getsockname STDIN;
 getpeername STDIN;
 EXPECT
-send() on closed socket main::STDIN at - line 22.
-bind() on closed socket main::STDIN at - line 23.
-connect() on closed socket main::STDIN at - line 24.
-listen() on closed socket main::STDIN at - line 25.
-accept() on closed socket main::STDIN at - line 26.
-shutdown() on closed socket main::STDIN at - line 27.
-setsockopt() on closed socket main::STDIN at - line 28.
-getsockopt() on closed socket main::STDIN at - line 29.
-getsockname() on closed socket main::STDIN at - line 30.
-getpeername() on closed socket main::STDIN at - line 31.
-send() on closed socket main::STDIN at - line 33.
-	(Are you trying to call send() on dirhandle main::STDIN?)
-bind() on closed socket main::STDIN at - line 34.
-	(Are you trying to call bind() on dirhandle main::STDIN?)
-connect() on closed socket main::STDIN at - line 35.
-	(Are you trying to call connect() on dirhandle main::STDIN?)
-listen() on closed socket main::STDIN at - line 36.
-	(Are you trying to call listen() on dirhandle main::STDIN?)
-accept() on closed socket main::STDIN at - line 37.
-	(Are you trying to call accept() on dirhandle main::STDIN?)
-shutdown() on closed socket main::STDIN at - line 38.
-	(Are you trying to call shutdown() on dirhandle main::STDIN?)
-setsockopt() on closed socket main::STDIN at - line 39.
-	(Are you trying to call setsockopt() on dirhandle main::STDIN?)
-getsockopt() on closed socket main::STDIN at - line 40.
-	(Are you trying to call getsockopt() on dirhandle main::STDIN?)
-getsockname() on closed socket main::STDIN at - line 41.
-	(Are you trying to call getsockname() on dirhandle main::STDIN?)
-getpeername() on closed socket main::STDIN at - line 42.
-	(Are you trying to call getpeername() on dirhandle main::STDIN?)
+send() on closed socket STDIN at - line 22.
+bind() on closed socket STDIN at - line 23.
+connect() on closed socket STDIN at - line 24.
+listen() on closed socket STDIN at - line 25.
+accept() on closed socket STDIN at - line 26.
+shutdown() on closed socket STDIN at - line 27.
+setsockopt() on closed socket STDIN at - line 28.
+getsockopt() on closed socket STDIN at - line 29.
+getsockname() on closed socket STDIN at - line 30.
+getpeername() on closed socket STDIN at - line 31.
+send() on closed socket STDIN at - line 33.
+	(Are you trying to call send() on dirhandle STDIN?)
+bind() on closed socket STDIN at - line 34.
+	(Are you trying to call bind() on dirhandle STDIN?)
+connect() on closed socket STDIN at - line 35.
+	(Are you trying to call connect() on dirhandle STDIN?)
+listen() on closed socket STDIN at - line 36.
+	(Are you trying to call listen() on dirhandle STDIN?)
+accept() on closed socket STDIN at - line 37.
+	(Are you trying to call accept() on dirhandle STDIN?)
+shutdown() on closed socket STDIN at - line 38.
+	(Are you trying to call shutdown() on dirhandle STDIN?)
+setsockopt() on closed socket STDIN at - line 39.
+	(Are you trying to call setsockopt() on dirhandle STDIN?)
+getsockopt() on closed socket STDIN at - line 40.
+	(Are you trying to call getsockopt() on dirhandle STDIN?)
+getsockname() on closed socket STDIN at - line 41.
+	(Are you trying to call getsockname() on dirhandle STDIN?)
+getpeername() on closed socket STDIN at - line 42.
+	(Are you trying to call getpeername() on dirhandle STDIN?)
 ########
 # pp_sys.c [pp_stat]
 use warnings 'newline' ;
@@ -331,7 +331,7 @@ close STDIN ;
 no warnings 'unopened' ;
 -T STDIN ;
 EXPECT
-Test on unopened file <STDIN> at - line 4.
+Test on unopened file STDIN at - line 4.
 ########
 # pp_sys.c [pp_fttext]
 use warnings 'newline' ;
@@ -351,4 +351,4 @@ my $a = sysread(F, $a,10) ;
 close F ;
 unlink $file ;
 EXPECT
-Filehandle main::F opened only for output at - line 5.
+Filehandle F opened only for output at - line 5.

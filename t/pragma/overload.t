@@ -417,7 +417,7 @@ EOF
   m'try it';
   s'first part'second part';
   s/yet another/tail here/;
-  tr/z-Z/z-Z/;
+  tr/A-Z/a-z/;
 }
 
 test($out, '_<foo>_');		# 117
@@ -425,7 +425,7 @@ test($out1, '_<f\'o\\o>_');		# 128
 test($out2, "_<a\a>_foo_<,\,>_");	# 129
 test("@q1", "foo q f'o\\\\o q a\\a qq ,\\, qq oups
  qq oups1
- q second part q tail here s z-Z tr z-Z tr");	# 130
+ q second part q tail here s A-Z tr a-z tr");	# 130
 test("@qr1", "b\\b qq .\\. qq try it q first part q yet another qq");	# 131
 test($res, 1);			# 132
 test($a, "_<oups

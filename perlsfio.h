@@ -49,7 +49,7 @@ extern int	_stdprintf _ARG_((const char*, ...));
 #define PerlIO_get_cnt(f)		((f)->endr - (f)->next)
 #define PerlIO_canset_cnt(f)		1      
 #define PerlIO_fast_gets(f)		1        
-#define PerlIO_set_ptrcnt(f,p,c)	((f)->next = (p))          
+#define PerlIO_set_ptrcnt(f,p,c)	((f)->next = (unsigned char *)(p))          
 #define PerlIO_set_cnt(f,c)		1
 
 #define PerlIO_has_base(f)		1         

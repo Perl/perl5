@@ -11,10 +11,6 @@
 
   Character class [:%.*s:] unknown	[S_regpposixcc]
 
-  Character class syntax [. .] is reserved for future extensions [S_regpposixcc]
-
-  Character class syntax [= =] is reserved for future extensions [S_checkposixcc]
-
   Character class syntax [%c %c] belongs inside character classes [S_checkposixcc] 
   
   /%.127s/: false [] range \"%*.*s\" in regexp [S_regclass]
@@ -58,32 +54,37 @@ BEGIN { $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3 }
 use warnings 'regexp' ;
 $_ = "" ;
 /[:alpha:]/;
-/[.bar.]/;
-/[=zog=]/;
-/[[:alpha:]]/;
-/[[.foo.]]/;
-/[[=bar=]]/;
 /[:zog:]/;
 /[[:zog:]]/;
 no warnings 'regexp' ;
 /[:alpha:]/;
-/[.foo.]/;
-/[=bar=]/;
-/[[:alpha:]]/;
-/[[.foo.]]/;
-/[[=bar=]]/;
-/[[:zog:]]/;
 /[:zog:]/;
+/[[:zog:]]/;
 EXPECT
 Character class syntax [: :] belongs inside character classes at - line 5.
-Character class syntax [. .] belongs inside character classes at - line 6.
-Character class syntax [. .] is reserved for future extensions at - line 6.
-Character class syntax [= =] belongs inside character classes at - line 7.
-Character class syntax [= =] is reserved for future extensions at - line 7.
-Character class syntax [. .] is reserved for future extensions at - line 9.
-Character class syntax [= =] is reserved for future extensions at - line 10.
-Character class syntax [: :] belongs inside character classes at - line 11.
-Character class [:zog:] unknown at - line 12.
+Character class syntax [: :] belongs inside character classes at - line 6.
+Character class [:zog:] unknown at - line 7.
+########
+# regcomp.c [S_checkposixcc]
+BEGIN { $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3 }
+use warnings 'regexp' ;
+$_ = "" ;
+/[.zog.]/;
+no warnings 'regexp' ;
+/[.zog.]/;
+EXPECT
+Character class syntax [. .] belongs inside character classes at - line 5.
+Character class syntax [. .] is reserved for future extensions at - line 5.
+########
+# regcomp.c [S_checkposixcc]
+BEGIN { $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3 }
+use warnings 'regexp' ;
+$_ = "" ;
+/[[.zog.]]/;
+no warnings 'regexp' ;
+/[[.zog.]]/;
+EXPECT
+Character class syntax [. .] is reserved for future extensions at - line 5.
 ########
 # regcomp.c [S_regclass]
 $_ = "";

@@ -259,7 +259,7 @@ of sixteen buckets has been touched, and presumably contains all
 10,000 of your items.  This isn't supposed to happen.
 
 You can preallocate space for a hash by assigning to the keys() function.
-This rounds up the allocated bucked to the next power of two:
+This rounds up the allocated buckets to the next power of two:
 
     keys(%users) = 1000;		# allocate 1024 buckets
 
@@ -303,7 +303,8 @@ price is $Z<>100."
     print "The price is $Price.\n";	# interpreted
 
 As in some shells, you can enclose the variable name in braces to
-disambiguate it from following alphanumerics.  You must also do
+disambiguate it from following alphanumerics (and underscores).
+You must also do
 this when interpolating a variable into a string to separate the
 variable name from a following double-colon or an apostrophe, since
 these would be otherwise treated as a package separator:

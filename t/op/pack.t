@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..156\n";
+print "1..159\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -406,3 +406,13 @@ $z = pack <<EOP,'string','etc';
   w/A*			# Count a  BER integer
 EOP
 print 'not ' unless $z eq "\000\006string\003etc"; print "ok $test\n"; $test++;
+
+print 'not ' unless "1.20.300.4000" eq sprintf "%vd", pack("U*",1,20,300,4000); 
+print "ok $test\n"; $test++;
+print 'not ' unless "1.20.300.4000" eq 
+                    sprintf "%vd", pack("  U*",1,20,300,4000); 
+print "ok $test\n"; $test++;
+print 'not ' unless v1.20.300.4000 ne 
+                    sprintf "%vd", pack("C0U*",1,20,300,4000); 
+print "ok $test\n"; $test++;
+

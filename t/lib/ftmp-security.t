@@ -1,26 +1,31 @@
-#!./perl
-
-BEGIN {
-    chdir 't' if -d 't';
-    unshift @INC, '../lib';
-}
-
+#!/usr/bin/perl -w
 # Test for File::Temp - Security levels
 
 # Some of the security checking will not work on all platforms
 # Test a simple open in the cwd and tmpdir foreach of the
 # security levels
 
-use strict;
-use Test;
-BEGIN { plan tests => 13}
+BEGIN {
+	chdir 't' if -d 't';
+	unshift @INC, '../lib';
+	require Test; import Test;
+	plan(tests => 13);
+}
 
+use strict;
 use File::Spec;
+
+# Set up END block - this needs to happen before we load
+# File::Temp since this END block must be evaluated after the
+# END block configured by File::Temp
+my @files; # list of files to remove
+END { foreach (@files) { ok( !(-e $_) )} }
+
 use File::Temp qw/ tempfile unlink0 /;
 ok(1);
 
 # The high security tests must currently be skipped on Windows
-my $skipplat = ( $^O eq 'MSWin32' ? 1 : 0 );
+my $skipplat = ( ($^O eq 'MSWin32' || $^O eq 'os2') ? 1 : 0 );
 
 # Can not run high security tests in perls before 5.6.0
 my $skipperl  = ($] < 5.006 ? 1 : 0 );
@@ -77,27 +82,17 @@ sub test_security {
   # of tests -- we dont use skip since the tempfile() commands will
   # fail with MEDIUM/HIGH security before the skip() command would be run
   if ($skip) {
-    
+
     skip($skip,1);
     skip($skip,1);
-    
+
     # plus we need an end block so the tests come out in the right order
     eval q{ END { skip($skip,1); skip($skip,1)  } 1; } || die;
-    
+
     return;
   }
 
-
-  # End blocks are evaluated in reverse order
-  # If I want to check that the file was unlinked by the autmoatic
-  # feature of the module I have to set up the end block before 
-  # creating the file.
-  # Use quoted end block to retain access to lexicals
-  my @files;
-
-  eval q{ END { foreach (@files) { ok( !(-e $_) )} } 1; } || die; 
-
-
+  # Create the tempfile
   my $template = "temptestXXXXXXXX";
   my ($fh1, $fname1) = tempfile ( $template, 
 				  DIR => File::Spec->curdir,

@@ -725,36 +725,60 @@ PP(pp_mapstart)
 PP(pp_mapwhile)
 {
     djSP;
-    I32 diff = (SP - PL_stack_base) - *PL_markstack_ptr;
+    I32 items = (SP - PL_stack_base) - *PL_markstack_ptr; /* how many new items */
     I32 count;
     I32 shift;
     SV** src;
     SV** dst; 
 
+    /* first, move source pointer to the next item in the source list */
     ++PL_markstack_ptr[-1];
-    if (diff) {
-	if (diff > PL_markstack_ptr[-1] - PL_markstack_ptr[-2]) {
-	    shift = diff - (PL_markstack_ptr[-1] - PL_markstack_ptr[-2]);
-	    count = (SP - PL_stack_base) - PL_markstack_ptr[-1] + 2;
+
+    /* if there are new items, push them into the destination list */
+    if (items) {
+	/* might need to make room back there first */
+	if (items > PL_markstack_ptr[-1] - PL_markstack_ptr[-2]) {
+	    /* XXX this implementation is very pessimal because the stack
+	     * is repeatedly extended for every set of items.  Is possible
+	     * to do this without any stack extension or copying at all
+	     * by maintaining a separate list over which the map iterates
+	     * (like foreach does). --gsar */
+
+	    /* everything in the stack after the destination list moves
+	     * towards the end the stack by the amount of room needed */
+	    shift = items - (PL_markstack_ptr[-1] - PL_markstack_ptr[-2]);
+
+	    /* items to shift up (accounting for the moved source pointer) */
+	    count = (SP - PL_stack_base) - (PL_markstack_ptr[-1] - 1);
+
+	    /* This optimization is by Ben Tilly and it does
+	     * things differently from what Sarathy (gsar)
+	     * is describing.  The downside of this optimization is
+	     * that leaves "holes" (uninitialized and hopefully unused areas)
+	     * to the Perl stack, but on the other hand this
+	     * shouldn't be a problem.  If Sarathy's idea gets
+	     * implemented, this optimization should become
+	     * irrelevant.  --jhi */
+            if (shift < count)
+                shift = count; /* Avoid shifting too often --Ben Tilly */
 	    
 	    EXTEND(SP,shift);
 	    src = SP;
 	    dst = (SP += shift);
 	    PL_markstack_ptr[-1] += shift;
 	    *PL_markstack_ptr += shift;
-	    while (--count)
+	    while (count--)
 		*dst-- = *src--;
 	}
-	dst = PL_stack_base + (PL_markstack_ptr[-2] += diff) - 1; 
-	++diff;
-	while (--diff)
+	/* copy the new items down to the destination list */
+	dst = PL_stack_base + (PL_markstack_ptr[-2] += items) - 1; 
+	while (items--)
 	    *dst-- = SvTEMP(TOPs) ? POPs : sv_mortalcopy(POPs); 
     }
     LEAVE;					/* exit inner scope */
 
     /* All done yet? */
     if (PL_markstack_ptr[-1] > *PL_markstack_ptr) {
-	I32 items;
 	I32 gimme = GIMME_V;
 
 	(void)POPMARK;				/* pop top */
@@ -777,6 +801,7 @@ PP(pp_mapwhile)
 	ENTER;					/* enter inner scope */
 	SAVEVPTR(PL_curpm);
 
+	/* set $_ to the new source item */
 	src = PL_stack_base[PL_markstack_ptr[-1]];
 	SvTEMP_off(src);
 	DEFSV = src;
@@ -891,6 +916,10 @@ PP(pp_sort)
 		    PL_secondgv = gv_fetchpv("b", TRUE, SVt_PV);
 		    PL_sortstash = stash;
 		}
+#ifdef USE_THREADS
+		sv_lock((SV *)PL_firstgv);
+		sv_lock((SV *)PL_secondgv);
+#endif
 		SAVESPTR(GvSV(PL_firstgv));
 		SAVESPTR(GvSV(PL_secondgv));
 	    }
@@ -913,6 +942,7 @@ PP(pp_sort)
 		cx->blk_sub.savearray = GvAV(PL_defgv);
 		GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
 #endif /* USE_THREADS */
+		cx->blk_sub.oldcurpad = PL_curpad;
 		cx->blk_sub.argarray = av;
 	    }
 	    qsortsv((myorigmark+1), max,
@@ -1555,7 +1585,7 @@ PP(pp_caller)
 	    PL_dbargs = GvAV(gv_AVadd(tmpgv = gv_fetchpv("DB::args", TRUE,
 				SVt_PVAV)));
 	    GvMULTI_on(tmpgv);
-	    AvREAL_off(PL_dbargs);		/* XXX Should be REIFY */
+	    AvREAL_off(PL_dbargs);	/* XXX should be REIFY (see av.h) */
 	}
 
 	if (AvMAX(PL_dbargs) < AvFILLp(ary) + off)
@@ -1571,9 +1601,12 @@ PP(pp_caller)
     {
 	SV * mask ;
 	SV * old_warnings = cx->blk_oldcop->cop_warnings ;
-	if  (old_warnings == pWARN_NONE || old_warnings == pWARN_STD)
+
+	if  (old_warnings == pWARN_NONE || 
+		(old_warnings == pWARN_STD && (PL_dowarn & G_WARN_ON) == 0))
             mask = newSVpvn(WARN_NONEstring, WARNsize) ;
-        else if (old_warnings == pWARN_ALL)
+        else if (old_warnings == pWARN_ALL || 
+		  (old_warnings == pWARN_STD && PL_dowarn & G_WARN_ON))
             mask = newSVpvn(WARN_ALLstring, WARNsize) ;
         else
             mask = newSVsv(old_warnings);
@@ -2305,6 +2338,7 @@ PP(pp_goto)
 		    cx->blk_sub.savearray = GvAV(PL_defgv);
 		    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
 #endif /* USE_THREADS */
+		    cx->blk_sub.oldcurpad = PL_curpad;
 		    cx->blk_sub.argarray = av;
 		    ++mark;
 
@@ -2631,11 +2665,9 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     /* switch to eval mode */
 
     if (PL_curcop == &PL_compiling) {
-	SAVECOPSTASH(&PL_compiling);
+	SAVECOPSTASH_FREE(&PL_compiling);
 	CopSTASH_set(&PL_compiling, PL_curstash);
     }
-    SAVECOPFILE(&PL_compiling);
-    SAVECOPLINE(&PL_compiling);
     if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
 	SV *sv = sv_newmortal();
 	Perl_sv_setpvf(aTHX_ sv, "_<(%.10seval %lu)[%s:%"IVdf"]",
@@ -2645,7 +2677,9 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     }
     else
 	sprintf(tmpbuf, "_<(%.10s_eval %lu)", code, (unsigned long)++PL_evalseq);
+    SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tmpbuf+2);
+    SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 1);
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
        deleting the eval's FILEGV from the stash before gv_check() runs
@@ -2993,8 +3027,19 @@ PP(pp_require)
     {
 	tryname = name;
 	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
+#ifdef MACOS_TRADITIONAL
+	/* We consider paths of the form :a:b ambiguous and interpret them first
+	   as global then as local
+	*/
+    	if (!tryrsfp && name[0] == ':' && name[1] != ':' && strchr(name+2, ':'))
+	    goto trylocal;
+    }
+    else 
+trylocal: {
+#else
     }
     else {
+#endif
 	AV *ar = GvAVn(PL_incgv);
 	I32 i;
 #ifdef VMS
@@ -3112,6 +3157,10 @@ PP(pp_require)
 		}
 		else {
 		    char *dir = SvPVx(dirsv, n_a);
+#ifdef MACOS_TRADITIONAL
+		    char buf[256];
+		    Perl_sv_setpvf(aTHX_ namesv, "%s%s", MacPerl_CanonDir(dir, buf), name+(name[0] == ':'));
+#else
 #ifdef VMS
 		    char *unixdir;
 		    if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
@@ -3121,8 +3170,17 @@ PP(pp_require)
 #else
 		    Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
 #endif
+#endif
 		    TAINT_PROPER("require");
 		    tryname = SvPVX(namesv);
+#ifdef MACOS_TRADITIONAL
+		    {
+		    	/* Convert slashes in the name part, but not the directory part, to colons */
+		    	char * colon;
+		    	for (colon = tryname+strlen(dir); colon = strchr(colon, '/'); )
+			    *colon++ = ':';
+		    }
+#endif
 		    tryrsfp = doopen_pmc(tryname, PERL_SCRIPT_MODE);
 		    if (tryrsfp) {
 			if (tryname[0] == '.' && tryname[1] == '/')
@@ -3133,7 +3191,7 @@ PP(pp_require)
 	    }
 	}
     }
-    SAVECOPFILE(&PL_compiling);
+    SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tryrsfp ? tryname : name);
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
@@ -3243,7 +3301,6 @@ PP(pp_entereval)
  
     /* switch to eval mode */
 
-    SAVECOPFILE(&PL_compiling);
     if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
 	SV *sv = sv_newmortal();
 	Perl_sv_setpvf(aTHX_ sv, "_<(eval %lu)[%s:%"IVdf"]",
@@ -3253,7 +3310,9 @@ PP(pp_entereval)
     }
     else
 	sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);
+    SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tmpbuf+2);
+    SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 1);
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
        deleting the eval's FILEGV from the stash before gv_check() runs

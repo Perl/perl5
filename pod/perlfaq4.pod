@@ -1746,7 +1746,7 @@ if you just want to say, ``Is this a float?''
 
 Or you could check out the String::Scanf module on CPAN instead.  The
 POSIX module (part of the standard Perl distribution) provides the
-C<strtol> and C<strtod> for converting strings to double and longs,
+C<strtod> and C<strtol> for converting strings to double and longs,
 respectively.
 
 =head2 How do I keep persistent data across program calls?

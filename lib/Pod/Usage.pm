@@ -211,7 +211,7 @@ convenient to use as an innocent looking error message handling function:
     ## Check for too many filenames
     pod2usage("$0: Too many files given.\n")  if (@ARGV > 1);
 
-Some user's however may feel that the above "economy of expression" is
+Some users however may feel that the above "economy of expression" is
 not particularly readable nor consistent and may instead choose to do
 something more like the following:
 

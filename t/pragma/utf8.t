@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..65\n";
+print "1..66\n";
 
 my $test = 1;
 
@@ -288,4 +288,10 @@ sub ok_bytes {
 
     ok "\x{ab}" =~ /^\x{ab}$/, 1;
     $test++;					# 65
+}
+
+{
+    use utf8;
+    ok_bytes chr(0xe2), pack("C*", 0xc3, 0xa2);
+    $test++;                # 66
 }

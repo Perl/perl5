@@ -215,7 +215,8 @@ Here's an example of decoding:
     $string =~ s/%([a-fA-F0-9]{2})/chr(hex($1))/ge;
 
 Encoding is a bit harder, because you can't just blindly change
-all the non-alphanumunder character (C<\W>) into their hex escapes.
+all characters that are not letters, digits or underscores (C<\W>)
+into their hex escapes.
 It's important that characters with special meaning like C</> and C<?>
 I<not> be translated.  Probably the easiest way to get this right is
 to avoid reinventing the wheel and just use the URI::Escape module,

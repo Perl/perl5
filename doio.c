@@ -476,11 +476,13 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    SV *sv;
 
 	    PerlLIO_dup2(PerlIO_fileno(fp), fd);
+	    LOCK_FDPID_MUTEX;
 	    sv = *av_fetch(PL_fdpid,PerlIO_fileno(fp),TRUE);
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    pid = SvIVX(sv);
 	    SvIVX(sv) = 0;
 	    sv = *av_fetch(PL_fdpid,fd,TRUE);
+	    UNLOCK_FDPID_MUTEX;
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    SvIVX(sv) = pid;
 	    if (!was_fdopen)
@@ -810,7 +812,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 	    dTHR;
 	    if (ckWARN(WARN_UNOPENED))
 		Perl_warner(aTHX_ WARN_UNOPENED, 
-		       "Close on unopened file <%s>",GvENAME(gv));
+		       "Close on unopened file %s",GvENAME(gv));
 	    SETERRNO(EBADF,SS$_IVCHAN);
 	}
 	return FALSE;
@@ -877,7 +879,7 @@ Perl_do_eof(pTHX_ GV *gv)
 		 || IoIFP(io) == PerlIO_stderr()))
     {
 	SV* sv = sv_newmortal();
-	gv_efullname3(sv, gv, Nullch);
+	gv_efullname4(sv, gv, Nullch, FALSE);
 	Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
 		    SvPV_nolen(sv));
     }
@@ -1194,7 +1196,7 @@ Perl_my_stat(pTHX)
 	    if (tmpgv == PL_defgv)
 		return PL_laststatval;
 	    if (ckWARN(WARN_UNOPENED))
-		Perl_warner(aTHX_ WARN_UNOPENED, "Stat on unopened file <%s>",
+		Perl_warner(aTHX_ WARN_UNOPENED, "Stat on unopened file %s",
 		  GvENAME(tmpgv));
 	    PL_statgv = Nullgv;
 	    sv_setpv(PL_statname,"");
@@ -1915,6 +1917,9 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 
     id = SvIVx(*++mark);
     mstr = *++mark;
+    /* suppress warning when reading into undef var --jhi */
+    if (! SvOK(mstr))
+	sv_setpvn(mstr, "", 0);
     msize = SvIVx(*++mark);
     mtype = (long)SvIVx(*++mark);
     flags = SvIVx(*++mark);

@@ -194,6 +194,7 @@ Perl_sv_free_arenas(pTHX)
 {
     SV* sva;
     SV* svanext;
+    XPV *arena, *arenanext;
 
     /* Free arenas here, but be careful about fake ones.  (We assume
        contiguity of the fake ones with the corresponding real ones.) */
@@ -206,6 +207,84 @@ Perl_sv_free_arenas(pTHX)
 	if (!SvFAKE(sva))
 	    Safefree((void *)sva);
     }
+
+    for (arena = PL_xiv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xiv_arenaroot = 0;
+
+    for (arena = PL_xnv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xnv_arenaroot = 0;
+
+    for (arena = PL_xrv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xrv_arenaroot = 0;
+
+    for (arena = PL_xpv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpv_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpviv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpviv_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvnv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvnv_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvcv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvcv_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvav_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvav_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvhv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvhv_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvmg_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvmg_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvlv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvlv_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvbm_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvbm_arenaroot = 0;
+
+    for (arena = (XPV*)PL_he_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_he_arenaroot = 0;
 
     if (PL_nice_chunk)
 	Safefree(PL_nice_chunk);
@@ -300,7 +379,12 @@ S_more_xnv(pTHX)
 {
     register NV* xnv;
     register NV* xnvend;
-    New(711, xnv, 1008/sizeof(NV), NV);
+    XPV *ptr;
+    New(711, ptr, 1008/sizeof(XPV), XPV);
+    ptr->xpv_pv = (char*)PL_xnv_arenaroot;
+    PL_xnv_arenaroot = ptr;
+
+    xnv = (NV*) ptr;
     xnvend = &xnv[1008 / sizeof(NV) - 1];
     xnv += (sizeof(XPVIV) - 1) / sizeof(NV) + 1; /* fudge by sizeof XPVIV */
     PL_xnv_root = xnv;
@@ -338,9 +422,15 @@ S_more_xrv(pTHX)
 {
     register XRV* xrv;
     register XRV* xrvend;
-    New(712, PL_xrv_root, 1008/sizeof(XRV), XRV);
-    xrv = PL_xrv_root;
+    XPV *ptr;
+    New(712, ptr, 1008/sizeof(XPV), XPV);
+    ptr->xpv_pv = (char*)PL_xrv_arenaroot;
+    PL_xrv_arenaroot = ptr;
+
+    xrv = (XRV*) ptr;
     xrvend = &xrv[1008 / sizeof(XRV) - 1];
+    xrv += (sizeof(XPV) - 1) / sizeof(XRV) + 1;
+    PL_xrv_root = xrv;
     while (xrv < xrvend) {
 	xrv->xrv_rv = (SV*)(xrv + 1);
 	xrv++;
@@ -375,9 +465,12 @@ S_more_xpv(pTHX)
 {
     register XPV* xpv;
     register XPV* xpvend;
-    New(713, PL_xpv_root, 1008/sizeof(XPV), XPV);
-    xpv = PL_xpv_root;
+    New(713, xpv, 1008/sizeof(XPV), XPV);
+    xpv->xpv_pv = (char*)PL_xpv_arenaroot;
+    PL_xpv_arenaroot = xpv;
+
     xpvend = &xpv[1008 / sizeof(XPV) - 1];
+    PL_xpv_root = ++xpv;
     while (xpv < xpvend) {
 	xpv->xpv_pv = (char*)(xpv + 1);
 	xpv++;
@@ -407,22 +500,23 @@ S_del_xpviv(pTHX_ XPVIV *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpviv(pTHX)
 {
     register XPVIV* xpviv;
     register XPVIV* xpvivend;
-    New(714, PL_xpviv_root, 1008/sizeof(XPVIV), XPVIV);
-    xpviv = PL_xpviv_root;
+    New(714, xpviv, 1008/sizeof(XPVIV), XPVIV);
+    xpviv->xpv_pv = (char*)PL_xpviv_arenaroot;
+    PL_xpviv_arenaroot = xpviv;
+
     xpvivend = &xpviv[1008 / sizeof(XPVIV) - 1];
+    PL_xpviv_root = ++xpviv;
     while (xpviv < xpvivend) {
 	xpviv->xpv_pv = (char*)(xpviv + 1);
 	xpviv++;
     }
     xpviv->xpv_pv = 0;
 }
-
 
 STATIC XPVNV*
 S_new_xpvnv(pTHX)
@@ -446,23 +540,23 @@ S_del_xpvnv(pTHX_ XPVNV *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvnv(pTHX)
 {
     register XPVNV* xpvnv;
     register XPVNV* xpvnvend;
-    New(715, PL_xpvnv_root, 1008/sizeof(XPVNV), XPVNV);
-    xpvnv = PL_xpvnv_root;
+    New(715, xpvnv, 1008/sizeof(XPVNV), XPVNV);
+    xpvnv->xpv_pv = (char*)PL_xpvnv_arenaroot;
+    PL_xpvnv_arenaroot = xpvnv;
+
     xpvnvend = &xpvnv[1008 / sizeof(XPVNV) - 1];
+    PL_xpvnv_root = ++xpvnv;
     while (xpvnv < xpvnvend) {
 	xpvnv->xpv_pv = (char*)(xpvnv + 1);
 	xpvnv++;
     }
     xpvnv->xpv_pv = 0;
 }
-
-
 
 STATIC XPVCV*
 S_new_xpvcv(pTHX)
@@ -486,23 +580,23 @@ S_del_xpvcv(pTHX_ XPVCV *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvcv(pTHX)
 {
     register XPVCV* xpvcv;
     register XPVCV* xpvcvend;
-    New(716, PL_xpvcv_root, 1008/sizeof(XPVCV), XPVCV);
-    xpvcv = PL_xpvcv_root;
+    New(716, xpvcv, 1008/sizeof(XPVCV), XPVCV);
+    xpvcv->xpv_pv = (char*)PL_xpvcv_arenaroot;
+    PL_xpvcv_arenaroot = xpvcv;
+
     xpvcvend = &xpvcv[1008 / sizeof(XPVCV) - 1];
+    PL_xpvcv_root = ++xpvcv;
     while (xpvcv < xpvcvend) {
 	xpvcv->xpv_pv = (char*)(xpvcv + 1);
 	xpvcv++;
     }
     xpvcv->xpv_pv = 0;
 }
-
-
 
 STATIC XPVAV*
 S_new_xpvav(pTHX)
@@ -526,23 +620,23 @@ S_del_xpvav(pTHX_ XPVAV *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvav(pTHX)
 {
     register XPVAV* xpvav;
     register XPVAV* xpvavend;
-    New(717, PL_xpvav_root, 1008/sizeof(XPVAV), XPVAV);
-    xpvav = PL_xpvav_root;
+    New(717, xpvav, 1008/sizeof(XPVAV), XPVAV);
+    xpvav->xav_array = (char*)PL_xpvav_arenaroot;
+    PL_xpvav_arenaroot = xpvav;
+
     xpvavend = &xpvav[1008 / sizeof(XPVAV) - 1];
+    PL_xpvav_root = ++xpvav;
     while (xpvav < xpvavend) {
 	xpvav->xav_array = (char*)(xpvav + 1);
 	xpvav++;
     }
     xpvav->xav_array = 0;
 }
-
-
 
 STATIC XPVHV*
 S_new_xpvhv(pTHX)
@@ -566,22 +660,23 @@ S_del_xpvhv(pTHX_ XPVHV *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvhv(pTHX)
 {
     register XPVHV* xpvhv;
     register XPVHV* xpvhvend;
-    New(718, PL_xpvhv_root, 1008/sizeof(XPVHV), XPVHV);
-    xpvhv = PL_xpvhv_root;
+    New(718, xpvhv, 1008/sizeof(XPVHV), XPVHV);
+    xpvhv->xhv_array = (char*)PL_xpvhv_arenaroot;
+    PL_xpvhv_arenaroot = xpvhv;
+
     xpvhvend = &xpvhv[1008 / sizeof(XPVHV) - 1];
+    PL_xpvhv_root = ++xpvhv;
     while (xpvhv < xpvhvend) {
 	xpvhv->xhv_array = (char*)(xpvhv + 1);
 	xpvhv++;
     }
     xpvhv->xhv_array = 0;
 }
-
 
 STATIC XPVMG*
 S_new_xpvmg(pTHX)
@@ -605,23 +700,23 @@ S_del_xpvmg(pTHX_ XPVMG *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvmg(pTHX)
 {
     register XPVMG* xpvmg;
     register XPVMG* xpvmgend;
-    New(719, PL_xpvmg_root, 1008/sizeof(XPVMG), XPVMG);
-    xpvmg = PL_xpvmg_root;
+    New(719, xpvmg, 1008/sizeof(XPVMG), XPVMG);
+    xpvmg->xpv_pv = (char*)PL_xpvmg_arenaroot;
+    PL_xpvmg_arenaroot = xpvmg;
+
     xpvmgend = &xpvmg[1008 / sizeof(XPVMG) - 1];
+    PL_xpvmg_root = ++xpvmg;
     while (xpvmg < xpvmgend) {
 	xpvmg->xpv_pv = (char*)(xpvmg + 1);
 	xpvmg++;
     }
     xpvmg->xpv_pv = 0;
 }
-
-
 
 STATIC XPVLV*
 S_new_xpvlv(pTHX)
@@ -645,22 +740,23 @@ S_del_xpvlv(pTHX_ XPVLV *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvlv(pTHX)
 {
     register XPVLV* xpvlv;
     register XPVLV* xpvlvend;
-    New(720, PL_xpvlv_root, 1008/sizeof(XPVLV), XPVLV);
-    xpvlv = PL_xpvlv_root;
+    New(720, xpvlv, 1008/sizeof(XPVLV), XPVLV);
+    xpvlv->xpv_pv = (char*)PL_xpvlv_arenaroot;
+    PL_xpvlv_arenaroot = xpvlv;
+
     xpvlvend = &xpvlv[1008 / sizeof(XPVLV) - 1];
+    PL_xpvlv_root = ++xpvlv;
     while (xpvlv < xpvlvend) {
 	xpvlv->xpv_pv = (char*)(xpvlv + 1);
 	xpvlv++;
     }
     xpvlv->xpv_pv = 0;
 }
-
 
 STATIC XPVBM*
 S_new_xpvbm(pTHX)
@@ -684,15 +780,17 @@ S_del_xpvbm(pTHX_ XPVBM *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvbm(pTHX)
 {
     register XPVBM* xpvbm;
     register XPVBM* xpvbmend;
-    New(721, PL_xpvbm_root, 1008/sizeof(XPVBM), XPVBM);
-    xpvbm = PL_xpvbm_root;
+    New(721, xpvbm, 1008/sizeof(XPVBM), XPVBM);
+    xpvbm->xpv_pv = (char*)PL_xpvbm_arenaroot;
+    PL_xpvbm_arenaroot = xpvbm;
+
     xpvbmend = &xpvbm[1008 / sizeof(XPVBM) - 1];
+    PL_xpvbm_root = ++xpvbm;
     while (xpvbm < xpvbmend) {
 	xpvbm->xpv_pv = (char*)(xpvbm + 1);
 	xpvbm++;
@@ -2292,6 +2390,14 @@ Perl_sv_2bool(pTHX_ register SV *sv)
     }
 }
 
+/*
+=for apidoc sv_utf8_upgrade
+
+Convert the PV of an SV to its UTF8-encoded form.
+
+=cut
+*/
+
 void
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
@@ -2332,6 +2438,17 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 	SvUTF8_on(sv);
     }
 }
+
+/*
+=for apidoc sv_utf8_downgrade
+
+Attempt to convert the PV of an SV from UTF8-encoded to byte encoding.
+This may not be possible if the PV contains non-byte encoding characters;
+if this is the case, either returns false or, if C<fail_ok> is not
+true, croaks.
+
+=cut
+*/
 
 bool
 Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
@@ -2381,6 +2498,15 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
     }
     return TRUE;
 }
+
+/*
+=for apidoc sv_utf8_encode
+
+Convert the PV of an SV to UTF8-encoded, but then turn off the C<SvUTF8>
+flag so that it looks like bytes again. Nothing calls this. 
+
+=cut
+*/
 
 void
 Perl_sv_utf8_encode(pTHX_ register SV *sv)
@@ -2561,7 +2687,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		char *name = GvNAME(sstr);
 		STRLEN len = GvNAMELEN(sstr);
 		sv_upgrade(dstr, SVt_PVGV);
-		sv_magic(dstr, dstr, '*', name, len);
+		sv_magic(dstr, dstr, '*', Nullch, 0);
 		GvSTASH(dstr) = (HV*)SvREFCNT_inc(GvSTASH(sstr));
 		GvNAME(dstr) = savepvn(name, len);
 		GvNAMELEN(dstr) = len;
@@ -2670,7 +2796,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 				if(const_sv)
 				    const_changed = sv_cmp(const_sv, 
 					   op_const_sv(CvSTART((CV*)sref), 
-						       Nullcv));
+						       (CV*)sref));
 				/* ahem, death to those who redefine
 				 * active sort subs */
 				if (PL_curstackinfo->si_type == PERLSI_SORT &&
@@ -2678,7 +2804,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 				    Perl_croak(aTHX_ 
 				    "Can't redefine active sort subroutine %s",
 					  GvENAME((GV*)dstr));
-				if ((const_changed || const_sv) && ckWARN(WARN_REDEFINE))
+				if ((const_changed && const_sv) || ckWARN(WARN_REDEFINE))
 				    Perl_warner(aTHX_ WARN_REDEFINE, const_sv ? 
 					     "Constant subroutine %s redefined"
 					     : "Subroutine %s redefined", 
@@ -2704,6 +2830,13 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		    else
 			dref = (SV*)GvIOp(dstr);
 		    GvIOp(dstr) = (IO*)sref;
+		    break;
+		case SVt_PVFM:
+		    if (intro)
+			SAVESPTR(GvFORM(dstr));
+		    else
+			dref = (SV*)GvFORM(dstr);
+		    GvFORM(dstr) = (CV*)sref;
 		    break;
 		default:
 		    if (intro)
@@ -3353,6 +3486,14 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
 }
 
+/*
+=for apidoc sv_unmagic
+
+Removes magic from an SV.
+
+=cut
+*/
+
 int
 Perl_sv_unmagic(pTHX_ SV *sv, int type)
 {
@@ -3386,6 +3527,14 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 
     return 0;
 }
+
+/*
+=for apidoc sv_rvweaken
+
+Weaken a reference.
+
+=cut
+*/
 
 SV *
 Perl_sv_rvweaken(pTHX_ SV *sv)
@@ -3538,7 +3687,13 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN
     SvSETMAGIC(bigstr);
 }
 
-/* make sv point to what nstr did */
+/*
+=for apidoc sv_replace
+
+Make the first argument a copy of the second, then delete the original.
+
+=cut
+*/
 
 void
 Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
@@ -3566,6 +3721,15 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
     SvFLAGS(nsv) |= SVTYPEMASK;		/* Mark as freed */
     del_SV(nsv);
 }
+
+/*
+=for apidoc sv_clear
+
+Clear an SV, making it empty. Does not free the memory used by the SV
+itself.
+
+=cut
+*/
 
 void
 Perl_sv_clear(pTHX_ register SV *sv)
@@ -3760,6 +3924,14 @@ Perl_sv_newref(pTHX_ SV *sv)
     return sv;
 }
 
+/*
+=for apidoc sv_free
+
+Free the memory used by an SV.
+
+=cut
+*/
+
 void
 Perl_sv_free(pTHX_ SV *sv)
 {
@@ -3827,6 +3999,15 @@ Perl_sv_len(pTHX_ register SV *sv)
 	junk = SvPV(sv, len);
     return len;
 }
+
+/*
+=for apidoc sv_len_utf8
+
+Returns the number of characters in the string in an SV, counting wide
+UTF8 bytes as a single character.
+
+=cut
+*/
 
 STRLEN
 Perl_sv_len_utf8(pTHX_ register SV *sv)
@@ -3923,38 +4104,51 @@ identical.
 */
 
 I32
-Perl_sv_eq(pTHX_ register SV *str1, register SV *str2)
+Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 {
     char *pv1;
     STRLEN cur1;
     char *pv2;
     STRLEN cur2;
+    I32  eq     = 0;
+    bool pv1tmp = FALSE;
+    bool pv2tmp = FALSE;
 
-    if (!str1) {
+    if (!sv1) {
 	pv1 = "";
 	cur1 = 0;
     }
     else
-	pv1 = SvPV(str1, cur1);
+	pv1 = SvPV(sv1, cur1);
 
-    if (cur1) {
-	if (!str2)
-	    return 0;
-	if (SvUTF8(str1) != SvUTF8(str2) && !IN_BYTE) {
-	    if (SvUTF8(str1)) {
-		sv_utf8_upgrade(str2);
-	    }
-	    else {
-		sv_utf8_upgrade(str1);
-	    }
+    if (!sv2){
+	pv2 = "";
+	cur2 = 0;
+    }
+    else
+	pv2 = SvPV(sv2, cur2);
+
+    /* do not utf8ize the comparands as a side-effect */
+    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE && 0) {
+	if (SvUTF8(sv1)) {
+	    pv2 = (char*)bytes_to_utf8((U8*)pv2, &cur2);
+	    pv2tmp = TRUE;
+	}
+	else {
+	    pv1 = (char*)bytes_to_utf8((U8*)pv1, &cur1);
+	    pv1tmp = TRUE;
 	}
     }
-    pv2 = SvPV(str2, cur2);
 
-    if (cur1 != cur2)
-	return 0;
+    if (cur1 == cur2)
+	eq = memEQ(pv1, pv2, cur1);
+	
+    if (pv1tmp)
+	Safefree(pv1);
+    if (pv2tmp)
+	Safefree(pv2);
 
-    return memEQ(pv1, pv2, cur1);
+    return eq;
 }
 
 /*
@@ -3968,60 +4162,72 @@ C<sv2>.
 */
 
 I32
-Perl_sv_cmp(pTHX_ register SV *str1, register SV *str2)
+Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 {
     STRLEN cur1, cur2;
     char *pv1, *pv2;
-    I32 retval;
+    I32  cmp; 
+    bool pv1tmp = FALSE;
+    bool pv2tmp = FALSE;
 
-    if (str1) {
-        pv1 = SvPV(str1, cur1);
-    }
-    else {
+    if (!sv1) {
+	pv1 = "";
 	cur1 = 0;
     }
+    else
+	pv1 = SvPV(sv1, cur1);
 
-    if (str2) {
-	if (SvPOK(str2)) {
-	    if (SvPOK(str1) && SvUTF8(str1) != SvUTF8(str2) && !IN_BYTE) {
-		/* must upgrade other to UTF8 first */
-		if (SvUTF8(str1)) {
-		    sv_utf8_upgrade(str2);
-		}
-		else {
-		    sv_utf8_upgrade(str1);
-		    /* refresh pointer and length */
-		    pv1  = SvPVX(str1);
-		    cur1 = SvCUR(str1);
-		}
-	    }
-	    pv2  = SvPVX(str2);
-	    cur2 = SvCUR(str2);
-    	}
-	else {
-	    pv2 = sv_2pv(str2, &cur2);
-	}
-    }
-    else {
+    if (!sv2){
+	pv2 = "";
 	cur2 = 0;
     }
-
-    if (!cur1)
-	return cur2 ? -1 : 0;
-
-    if (!cur2)
-	return 1;
-
-    retval = memcmp((void*)pv1, (void*)pv2, cur1 < cur2 ? cur1 : cur2);
-
-    if (retval)
-	return retval < 0 ? -1 : 1;
-
-    if (cur1 == cur2)
-	return 0;
     else
-	return cur1 < cur2 ? -1 : 1;
+	pv2 = SvPV(sv2, cur2);
+
+    /* do not utf8ize the comparands as a side-effect */
+    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
+	if (SvUTF8(sv1)) {
+	    pv2 = (char*)bytes_to_utf8((U8*)pv2, &cur2);
+	    pv2tmp = TRUE;
+	}
+	else {
+	    pv1 = (char*)bytes_to_utf8((U8*)pv1, &cur1);
+	    pv1tmp = TRUE;
+	}
+    }
+
+    if (!cur1) {
+	cmp = cur2 ? -1 : 0;
+    } else if (!cur2) {
+	cmp = 1;
+    } else {
+	I32 retval = memcmp((void*)pv1, (void*)pv2, cur1 < cur2 ? cur1 : cur2);
+
+	if (retval) {
+	    cmp = retval < 0 ? -1 : 1;
+	} else if (cur1 == cur2) {
+	    cmp = 0;
+        } else {
+	    cmp = cur1 < cur2 ? -1 : 1;
+	}
+    }
+
+    if (pv1tmp)
+	Safefree(pv1);
+    if (pv2tmp)
+	Safefree(pv2);
+
+    return cmp;
 }
+
+/*
+=for apidoc sv_cmp_locale
+
+Compares the strings in two SVs in a locale-aware manner. See
+L</sv_cmp_locale>
+
+=cut
+*/
 
 I32
 Perl_sv_cmp_locale(pTHX_ register SV *sv1, register SV *sv2)
@@ -4123,6 +4329,15 @@ Perl_sv_collxfrm(pTHX_ SV *sv, STRLEN *nxp)
 }
 
 #endif /* USE_LOCALE_COLLATE */
+
+/*
+=for apidoc sv_gets
+
+Get a line from the filehandle and store it into the SV, optionally
+appending to the currently-stored string.
+
+=cut
+*/
 
 char *
 Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
@@ -5030,6 +5245,14 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
     }
 }
 
+/*
+=for apidoc sv_true
+
+Returns true if the SV has a true value by Perl's rules.
+
+=cut
+*/
+
 I32
 Perl_sv_true(pTHX_ register SV *sv)
 {
@@ -5108,6 +5331,14 @@ Perl_sv_pvn(pTHX_ SV *sv, STRLEN *lp)
     return sv_2pv(sv, lp);
 }
 
+/*
+=for apidoc sv_pvn_force
+
+Get a sensible string out of the SV somehow.
+
+=cut
+*/
+
 char *
 Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
 {
@@ -5180,12 +5411,29 @@ Perl_sv_pvutf8n(pTHX_ SV *sv, STRLEN *lp)
     return sv_pvn(sv,lp);
 }
 
+/*
+=for apidoc sv_pvutf8n_force
+
+Get a sensible UTF8-encoded string out of the SV somehow. See
+L</sv_pvn_force>.
+
+=cut
+*/
+
 char *
 Perl_sv_pvutf8n_force(pTHX_ SV *sv, STRLEN *lp)
 {
     sv_utf8_upgrade(sv);
     return sv_pvn_force(sv,lp);
 }
+
+/*
+=for apidoc sv_reftype
+
+Returns a string describing what the SV is a reference to.
+
+=cut
+*/
 
 char *
 Perl_sv_reftype(pTHX_ SV *sv, int ob)
@@ -5865,17 +6113,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    case 'v':
 		vectorize = TRUE;
 		q++;
-		if (args)
-		    vecsv = va_arg(*args, SV*);
-		else if (svix < svmax)
-		    vecsv = svargs[svix++];
-		else {
-		    vecstr = (U8*)"";
-		    veclen = 0;
-		    continue;
-		}
-		vecstr = (U8*)SvPVx(vecsv,veclen);
-		utf = DO_UTF8(vecsv);
 		continue;
 
 	    default:
@@ -5924,6 +6161,23 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    precis = precis * 10 + (*q++ - '0');
 	    }
 	    has_precis = TRUE;
+	}
+
+	if (vectorize) {
+	    if (args) {
+		vecsv = va_arg(*args, SV*);
+		vecstr = (U8*)SvPVx(vecsv,veclen);
+		utf = DO_UTF8(vecsv);
+	    }
+	    else if (svix < svmax) {
+		vecsv = svargs[svix++];
+		vecstr = (U8*)SvPVx(vecsv,veclen);
+		utf = DO_UTF8(vecsv);
+	    }
+	    else {
+		vecstr = (U8*)"";
+		veclen = 0;
+	    }
 	}
 
 	/* SIZE */
@@ -6035,6 +6289,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* INTEGERS */
 
 	case 'p':
+	    if (alt)
+		goto unknown;
 	    if (args)
 		uv = PTR2UV(va_arg(*args, void*));
 	    else
@@ -6331,7 +6587,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else if (svix < svmax)
-		sv_setuv(svargs[svix++], (UV)i);
+		sv_setuv_mg(svargs[svix++], (UV)i);
 	    continue;	/* not "break" */
 
 	    /* UNKNOWN */
@@ -7152,6 +7408,12 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 	    gv = (GV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = gv_dup_inc(gv);
 	    break;
+	case SAVEt_GENERIC_PVREF:		/* generic char* */
+	    c = (char*)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = pv_dup(c);
+	    ptr = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+	    break;
         case SAVEt_GENERIC_SVREF:		/* generic sv */
         case SAVEt_SVREF:			/* scalar reference */
 	    sv = (SV*)POPPTR(ss,ix);
@@ -7430,17 +7692,29 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* arena roots */
     PL_xiv_arenaroot	= NULL;
     PL_xiv_root		= NULL;
+    PL_xnv_arenaroot	= NULL;
     PL_xnv_root		= NULL;
+    PL_xrv_arenaroot	= NULL;
     PL_xrv_root		= NULL;
+    PL_xpv_arenaroot	= NULL;
     PL_xpv_root		= NULL;
+    PL_xpviv_arenaroot	= NULL;
     PL_xpviv_root	= NULL;
+    PL_xpvnv_arenaroot	= NULL;
     PL_xpvnv_root	= NULL;
+    PL_xpvcv_arenaroot	= NULL;
     PL_xpvcv_root	= NULL;
+    PL_xpvav_arenaroot	= NULL;
     PL_xpvav_root	= NULL;
+    PL_xpvhv_arenaroot	= NULL;
     PL_xpvhv_root	= NULL;
+    PL_xpvmg_arenaroot	= NULL;
     PL_xpvmg_root	= NULL;
+    PL_xpvlv_arenaroot	= NULL;
     PL_xpvlv_root	= NULL;
+    PL_xpvbm_arenaroot	= NULL;
     PL_xpvbm_root	= NULL;
+    PL_he_arenaroot	= NULL;
     PL_he_root		= NULL;
     PL_nice_chunk	= NULL;
     PL_nice_chunk_size	= 0;

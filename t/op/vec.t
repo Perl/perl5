@@ -1,8 +1,6 @@
 #!./perl
 
-# $RCSfile: vec.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:36 $
-
-print "1..15\n";
+print "1..18\n";
 
 print vec($foo,0,1) == 0 ? "ok 1\n" : "not ok 1\n";
 print length($foo) == 0 ? "ok 2\n" : "not ok 2\n";
@@ -25,3 +23,11 @@ vec($Vec, 0, 32) = 0xbaddacab;
 print $Vec eq "\xba\xdd\xac\xab" ? "ok 14\n" : "not ok 14\n";
 print vec($Vec, 0, 32) == 3135089835 ? "ok 15\n" : "not ok 15\n";
 
+# ensure vec() handles numericalness correctly
+$foo = $bar = $baz = 0;
+vec($foo = 0,0,1) = 1;
+vec($bar = 0,1,1) = 1;
+$baz = $foo | $bar;
+print $foo eq "1" && $foo == 1 ? "ok 16\n" : "not ok 16\n";
+print $bar eq "2" && $bar == 2 ? "ok 17\n" : "not ok 17\n";
+print "$foo $bar $baz" eq "1 2 3" ? "ok 18\n" : "not ok 18\n";

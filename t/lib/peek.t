@@ -285,8 +285,6 @@ do_test(17,
     MG_VIRTUAL = &PL_vtbl_glob
     MG_TYPE = \'\\*\'
     MG_OBJ = $ADDR
-    MG_LEN = 1
-    MG_PTR = $ADDR "a"
   NAME = "a"
   NAMELEN = 1
   GvSTASH = $ADDR\\t"main"

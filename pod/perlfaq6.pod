@@ -415,7 +415,8 @@ Use the split function:
 Note that this isn't really a word in the English sense; it's just
 chunks of consecutive non-whitespace characters.
 
-To work with only alphanumeric sequences, you might consider
+To work with only alphanumeric sequences (including underscores), you
+might consider
 
     while (<>) {
 	foreach $word (m/(\w+)/g) {

@@ -16,6 +16,7 @@ INTERN.h		Included before domestic .h files
 MAINTAIN		Who maintains which files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
+Makefile.micro		microperl Makefile
 Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/Contract	Social contract for contributed modules in Perl core
 Porting/Glossary	Glossary of config.sh variables
@@ -42,6 +43,7 @@ README.epoc		Notes about EPOC port
 README.hpux		Notes about HP-UX port
 README.hurd		Notes about GNU/Hurd port
 README.machten		Notes about Power MachTen port
+README.micro		Notes about microperl 
 README.mint		Notes about Atari MiNT port
 README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
@@ -56,6 +58,7 @@ README.vos		Notes about Stratus VOS port
 README.win32		Notes about Win32 port
 Todo			The Wishlist
 Todo-5.6		What needs doing before/during the 5.6.x release cycle
+Todo.micro		The Wishlist for microperl
 XSUB.h			Include file for extension subroutines
 apollo/netinet/in.h	Apollo DomainOS port: C header file frontend
 av.c			Array value code
@@ -239,6 +242,7 @@ ext/DynaLoader/dl_dld.xs	GNU dld style implementation
 ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
 ext/DynaLoader/dl_dyld.xs	NeXT/Apple dyld implementation
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
+ext/DynaLoader/dl_mac.xs	MacOS implementation
 ext/DynaLoader/dl_mpeix.xs	MPE/iX implementation
 ext/DynaLoader/dl_next.xs	NeXT implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
@@ -247,6 +251,7 @@ ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/DynaLoader/hints/aix.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/linux.pl	Hint for DynaLoader for named architecture
+ext/DynaLoader/hints/netbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/Errno/ChangeLog		Errno perl module change log
 ext/Errno/Errno_pm.PL		Errno perl module create script
@@ -409,6 +414,7 @@ ext/re/re.xs		re extension external subroutines
 ext/util/make_ext	Used by Makefile to execute extension Makefiles
 ext/util/mkbootstrap	Turns ext/*/*_BS into bootstrap info
 fakethr.h		Fake threads header
+fix_pl			Fix up patchlevel.h for repository perls
 form.h			Public declarations for the above
 global.sym		Symbols that need hiding when embedded
 globals.c		File to declare global symbols (for shared library)
@@ -642,6 +648,7 @@ lib/Pod/Find.pm		used by pod/splitpod
 lib/Pod/Functions.pm	used by pod/splitpod
 lib/Pod/Html.pm		Convert POD data to HTML
 lib/Pod/InputObjects.pm	Pod-Parser - define objects for input streams
+lib/Pod/LaTeX.pm	Convert POD data to LaTeX
 lib/Pod/Man.pm		Convert POD data to *roff
 lib/Pod/ParseUtils.pm	Pod-Parser - pod utility functions
 lib/Pod/Parser.pm	Pod-Parser - define base class for parsing POD
@@ -715,7 +722,7 @@ lib/hostname.pl		Old hostname code
 lib/importenv.pl	Perl routine to get environment into variables
 lib/integer.pm		For "use integer"
 lib/less.pm		For "use less"
-lib/lib.pm		For "use lib"
+lib/lib_pm.PL		For "use lib", produces lib/lib.pm
 lib/locale.pm		For "use locale"
 lib/look.pl		A "look" equivalent
 lib/newgetopt.pl	A perl library supporting long option parsing
@@ -836,26 +843,37 @@ lib/unicode/Index.txt				Unicode character database
 lib/unicode/Is/ASCII.pl				Unicode character database
 lib/unicode/Is/Alnum.pl				Unicode character database
 lib/unicode/Is/Alpha.pl				Unicode character database
+lib/unicode/Is/BidiAL.pl			Unicode character database
 lib/unicode/Is/BidiAN.pl			Unicode character database
 lib/unicode/Is/BidiB.pl				Unicode character database
+lib/unicode/Is/BidiBN.pl			Unicode character database
 lib/unicode/Is/BidiCS.pl			Unicode character database
 lib/unicode/Is/BidiEN.pl			Unicode character database
 lib/unicode/Is/BidiES.pl			Unicode character database
 lib/unicode/Is/BidiET.pl			Unicode character database
 lib/unicode/Is/BidiL.pl				Unicode character database
+lib/unicode/Is/BidiLRE.pl			Unicode character database
+lib/unicode/Is/BidiLRO.pl			Unicode character database
+lib/unicode/Is/BidiNSM.pl			Unicode character database
 lib/unicode/Is/BidiON.pl			Unicode character database
+lib/unicode/Is/BidiPDF.pl			Unicode character database
 lib/unicode/Is/BidiR.pl				Unicode character database
+lib/unicode/Is/BidiRLE.pl			Unicode character database
+lib/unicode/Is/BidiRLO.pl			Unicode character database
 lib/unicode/Is/BidiS.pl				Unicode character database
 lib/unicode/Is/BidiWS.pl			Unicode character database
 lib/unicode/Is/C.pl				Unicode character database
 lib/unicode/Is/Cc.pl				Unicode character database
+lib/unicode/Is/Cf.pl				Unicode character database
 lib/unicode/Is/Cn.pl				Unicode character database
 lib/unicode/Is/Cntrl.pl				Unicode character database
 lib/unicode/Is/Co.pl				Unicode character database
+lib/unicode/Is/Cs.pl				Unicode character database
 lib/unicode/Is/DCcircle.pl			Unicode character database
 lib/unicode/Is/DCcompat.pl			Unicode character database
 lib/unicode/Is/DCfinal.pl			Unicode character database
 lib/unicode/Is/DCfont.pl			Unicode character database
+lib/unicode/Is/DCfraction.pl			Unicode character database
 lib/unicode/Is/DCinital.pl			Unicode character database
 lib/unicode/Is/DCinitial.pl			Unicode character database
 lib/unicode/Is/DCisolated.pl			Unicode character database
@@ -909,34 +927,53 @@ lib/unicode/Is/Lt.pl				Unicode character database
 lib/unicode/Is/Lu.pl				Unicode character database
 lib/unicode/Is/M.pl				Unicode character database
 lib/unicode/Is/Mc.pl				Unicode character database
+lib/unicode/Is/Me.pl				Unicode character database
 lib/unicode/Is/Mirrored.pl			Unicode character database
 lib/unicode/Is/Mn.pl				Unicode character database
 lib/unicode/Is/N.pl				Unicode character database
 lib/unicode/Is/Nd.pl				Unicode character database
+lib/unicode/Is/Nl.pl				Unicode character database
 lib/unicode/Is/No.pl				Unicode character database
 lib/unicode/Is/P.pl				Unicode character database
+lib/unicode/Is/Pc.pl				Unicode character database
 lib/unicode/Is/Pd.pl				Unicode character database
 lib/unicode/Is/Pe.pl				Unicode character database
+lib/unicode/Is/Pf.pl				Unicode character database
+lib/unicode/Is/Pi.pl				Unicode character database
 lib/unicode/Is/Po.pl				Unicode character database
 lib/unicode/Is/Print.pl				Unicode character database
 lib/unicode/Is/Ps.pl				Unicode character database
 lib/unicode/Is/Punct.pl				Unicode character database
 lib/unicode/Is/S.pl				Unicode character database
 lib/unicode/Is/Sc.pl				Unicode character database
+lib/unicode/Is/Sk.pl				Unicode character database
 lib/unicode/Is/Sm.pl				Unicode character database
 lib/unicode/Is/So.pl				Unicode character database
 lib/unicode/Is/Space.pl				Unicode character database
 lib/unicode/Is/SylA.pl				Unicode character database
+lib/unicode/Is/SylAA.pl				Unicode character database
+lib/unicode/Is/SylAAI.pl			Unicode character database
+lib/unicode/Is/SylAI.pl				Unicode character database
 lib/unicode/Is/SylC.pl				Unicode character database
 lib/unicode/Is/SylE.pl				Unicode character database
+lib/unicode/Is/SylEE.pl				Unicode character database
 lib/unicode/Is/SylI.pl				Unicode character database
+lib/unicode/Is/SylII.pl				Unicode character database
+lib/unicode/Is/SylN.pl				Unicode character database
 lib/unicode/Is/SylO.pl				Unicode character database
+lib/unicode/Is/SylOO.pl				Unicode character database
 lib/unicode/Is/SylU.pl				Unicode character database
 lib/unicode/Is/SylV.pl				Unicode character database
 lib/unicode/Is/SylWA.pl				Unicode character database
+lib/unicode/Is/SylWAA.pl			Unicode character database
 lib/unicode/Is/SylWC.pl				Unicode character database
 lib/unicode/Is/SylWE.pl				Unicode character database
+lib/unicode/Is/SylWEE.pl			Unicode character database
 lib/unicode/Is/SylWI.pl				Unicode character database
+lib/unicode/Is/SylWII.pl			Unicode character database
+lib/unicode/Is/SylWO.pl				Unicode character database
+lib/unicode/Is/SylWOO.pl			Unicode character database
+lib/unicode/Is/SylWU.pl				Unicode character database
 lib/unicode/Is/SylWV.pl				Unicode character database
 lib/unicode/Is/Syllable.pl			Unicode character database
 lib/unicode/Is/Upper.pl				Unicode character database
@@ -973,6 +1010,7 @@ lib/validate.pl		Perl library supporting wholesale file mode validation
 lib/vars.pm		Declare pseudo-imported global variables
 lib/warnings.pm		For "use warnings"
 lib/warnings/register.pm	For "use warnings::register"
+lib/Win32.pod		Documentation for Win32 extras
 makeaperl.SH		perl script that produces a new perl binary
 makedef.pl		Create symbol export lists for linking
 makedepend.SH		Precursor to makedepend
@@ -1082,17 +1120,16 @@ plan9/plan9.c		Plan9 port: Plan9-specific C routines
 plan9/plan9ish.h	Plan9 port: Plan9-specific C header file
 plan9/setup.rc		Plan9 port: script for easy build+install
 plan9/versnum		Plan9 port: script to print version number
-pod/Makefile		Make pods into something else
-pod/Win32.pod		Documentation for Win32 extras
-pod/buildtoc		generate perltoc.pod
+pod/Makefile.SH		generate Makefile whichs makes pods into something else
+pod/buildtoc.PL		generate buildtoc which generates perltoc.pod
 pod/checkpods.PL	Tool to check for common errors in pods
-pod/perl.pod		Top level perl man page
+pod/perl.pod		Top level perl documentation
 pod/perl5004delta.pod	Changes from 5.003 to 5.004
 pod/perl5005delta.pod	Changes from 5.004 to 5.005
 pod/perl56delta.pod	Changes from 5.005 to 5.6
 pod/perlapi.pod         Perl API documentation (autogenerated)
 pod/perlapio.pod	IO API info
-pod/perlbook.pod	Book info
+pod/perlbook.pod	Perl book information
 pod/perlboot.pod	Beginner's Object-oriented Tutorial
 pod/perlbot.pod		Object-oriented Bag o' Tricks
 pod/perlcall.pod	Callback info
@@ -1130,7 +1167,9 @@ pod/perllol.pod		How to use lists of lists
 pod/perlmod.pod		Module mechanism info
 pod/perlmodinstall.pod	Installing CPAN Modules
 pod/perlmodlib.pod	Module policy info
+pod/perlmodlib.PL	Generate pod/perlmodlib.pod
 pod/perlnumber.pod	Semantics of numbers and numeric operations
+pod/perlnewmod.pod	Preparing a new module for distribution
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info
 pod/perlopentut.pod	open() tutorial
@@ -1154,6 +1193,7 @@ pod/perltoot.pod	Tom's object-oriented tutorial
 pod/perltootc.pod	Tom's object-oriented tutorial (more on class data)
 pod/perltrap.pod	Trap info
 pod/perlunicode.pod	Unicode support info
+pod/perlutil.pod	Accompanying utilities explained
 pod/perlvar.pod		Variable info
 pod/perlxs.pod		XS api info
 pod/perlxstut.pod	XS tutorial
@@ -1333,6 +1373,7 @@ t/lib/safe2.t		See if Safe works
 t/lib/sdbm.t		See if SDBM_File works
 t/lib/searchdict.t	See if Search::Dict works
 t/lib/selectsaver.t	See if SelectSaver works
+t/lib/selfloader.t	See if SelfLoader works
 t/lib/socket.t		See if Socket works
 t/lib/soundex.t		See if Soundex works
 t/lib/symbol.t		See if Symbol works
@@ -1400,6 +1441,7 @@ t/op/method.t		See if method calls work
 t/op/misc.t		See if miscellaneous bugs have been fixed
 t/op/mkdir.t		See if mkdir works
 t/op/my.t		See if lexical scoping works
+t/op/my_stash.t		See if my Package works
 t/op/nothr5005.t	local @_ test which does not work under use5005threads
 t/op/numconvert.t	See if accessing fields does not change numeric values
 t/op/oct.t		See if oct and hex work
@@ -1528,6 +1570,8 @@ taint.c			Tainting code
 thrdvar.h		Per-thread variables
 thread.h		Threading header
 toke.c			The tokener
+uconfig.h		Configuration header for microperl
+uconfig.sh		Configuration script for microperl
 universal.c		The default UNIVERSAL package methods
 unixish.h		Defines that are assumed on Unix
 utf8.c			Unicode routines

@@ -80,6 +80,7 @@ else {
     print "not ok 4\n";
     print "#4 If test op/stat.t fails test 4, check if you are on a tmpfs\n";
     print "#4 of some sort.  Building in /tmp sometimes has this problem.\n";
+    print "#4 Also building on the ClearCase VOBS filesystem may cause this failure.\n";
 }
 print "#4	:$mtime: should != :$ctime:\n";
 

@@ -817,3 +817,87 @@ abc all not enabled
 def self enabled
 def abc not enabled
 def all not enabled
+########
+-w
+--FILE-- abc.pm
+package abc ;
+no warnings ;
+use warnings::register ;
+sub check { 
+  print "ok1\n" if warnings::enabled() ;
+  print "ok2\n" if warnings::enabled("io") ;
+  print "ok3\n" if warnings::enabled("all") ;
+}
+1;
+--FILE-- 
+use abc ;
+abc::check() ;
+EXPECT
+ok1
+ok2
+ok3
+########
+-w
+--FILE-- abc.pm
+package abc ;
+no warnings ;
+use warnings::register ;
+sub check { 
+  print "ok1\n" if !warnings::enabled() ;
+  print "ok2\n" if !warnings::enabled("io") ;
+  print "ok3\n" if !warnings::enabled("all") ;
+}
+1;
+--FILE-- 
+use abc ;
+use warnings 'abc';
+no warnings ;
+abc::check() ;
+EXPECT
+ok1
+ok2
+ok3
+########
+
+--FILE-- abc.pm
+package abc ;
+no warnings ;
+use warnings::register ;
+sub check { 
+  print "ok1\n" if !warnings::enabled() ;
+  print "ok2\n" if !warnings::enabled("io") ;
+  print "ok3\n" if !warnings::enabled("all") ;
+}
+1;
+--FILE-- 
+use abc ;
+use warnings 'abc';
+no warnings ;
+BEGIN { $^W = 1 ; }
+abc::check() ;
+EXPECT
+ok1
+ok2
+ok3
+########
+
+--FILE-- abc.pm
+package abc ;
+no warnings ;
+use warnings::register ;
+sub check { 
+  print "ok1\n" if !warnings::enabled() ;
+  print "ok2\n" if !warnings::enabled("io") ;
+  print "ok3\n" if !warnings::enabled("all") ;
+}
+1;
+--FILE-- 
+use abc ;
+use warnings 'abc';
+no warnings ;
+$^W = 1 ;
+abc::check() ;
+EXPECT
+ok1
+ok2
+ok3

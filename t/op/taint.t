@@ -24,7 +24,8 @@ BEGIN {
       $ENV{PATH} = $ENV{PATH};
       $ENV{TERM} = $ENV{TERM} ne ''? $ENV{TERM} : 'dummy';
   }
-  if ($Config{d_shm} || $Config{d_msg}) {
+  if ($Config{'extensions'} =~ /\bIPC\/SysV\b/
+      && ($Config{d_shm} || $Config{d_msg})) {
      require IPC::SysV;
      IPC::SysV->import(qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU));
   }
@@ -612,13 +613,13 @@ else {
 
 # test shmread
 {
-    if ($Config{d_shm}) {
+    if ($Config{'extensions'} =~ /\bIPC\/SysV\b/ && $Config{d_shm}) {
 	no strict 'subs';
 	my $sent = "foobar";
 	my $rcvd;
 	my $size = 2000;
-	my $id = shmget(IPC_PRIVATE, $size, S_IRWXU) ||
-	    warn "# shmget failed: $!\n";
+	my $id = shmget(IPC_PRIVATE, $size, S_IRWXU);
+
 	if (defined $id) {
 	    if (shmwrite($id, $sent, 0, 60)) {
 		if (shmread($id, $rcvd, 0, 60)) {
@@ -629,7 +630,7 @@ else {
 	    } else {
 		warn "# shmwrite failed: $!\n";
 	    }
-	    shmctl($id, IPC_RMID, 0) || warn "# shmctl failed: $!\n";
+	    shmctl($id, IPC_RMID, 0) or warn "# shmctl failed: $!\n";
 	} else {
 	    warn "# shmget failed: $!\n";
 	}
@@ -646,7 +647,7 @@ else {
 
 # test msgrcv
 {
-    if ($Config{d_msg}) {
+    if ($Config{'extensions'} =~ /\bIPC\/SysV\b/ && $Config{d_msg}) {
 	no strict 'subs';
 	my $id = msgget(IPC_PRIVATE, IPC_CREAT | S_IRWXU);
 
@@ -665,7 +666,7 @@ else {
 	    } else {
 		warn "# msgsnd failed\n";
 	    }
-	    msgctl($id, IPC_RMID, 0) || warn "# msgctl failed: $!\n";
+	    msgctl($id, IPC_RMID, 0) or warn "# msgctl failed: $!\n";
 	} else {
 	    warn "# msgget failed\n";
 	}

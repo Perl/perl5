@@ -10,7 +10,7 @@ This document describes differences between the 5.005 release and this one.
 
 =head2 Interpreter cloning, threads, and concurrency
 
-Perl 5.005_63 introduces the beginnings of support for running multiple
+Perl 5.6.0 introduces the beginnings of support for running multiple
 interpreters concurrently in different threads.  In conjunction with
 the perl_clone() API call, which can be used to selectively duplicate
 the state of any given interpreter, it is possible to compile a
@@ -375,7 +375,7 @@ problems associated with it.
     NOTE: This is currently an experimental feature.  Interfaces and
     implementation are subject to change.
 
-=item Support for CHECK blocks
+=head2 Support for CHECK blocks
 
 In addition to C<BEGIN>, C<INIT>, C<END>, C<DESTROY> and C<AUTOLOAD>,
 subroutines named C<CHECK> are now special.  These are queued up during
@@ -388,7 +388,7 @@ be called directly.
 For example to match alphabetic characters use /[[:alpha:]]/.
 See L<perlre> for details.
 
-=item Better pseudo-random number generator
+=head2 Better pseudo-random number generator
 
 In 5.005_0x and earlier, perl's rand() function used the C library
 rand(3) function.  As of 5.005_52, Configure tests for drand48(),
@@ -409,7 +409,7 @@ Thus:
 
 now correctly prints "3|a", instead of "2|a".
 
-=item Better worst-case behavior of hashes
+=head2 Better worst-case behavior of hashes
 
 Small changes in the hashing algorithm have been implemented in
 order to improve the distribution of lower order bits in the
@@ -632,7 +632,7 @@ Diagnostic output now goes to whichever file the C<STDERR> handle
 is pointing at, instead of always going to the underlying C runtime
 library's C<stderr>.
 
-=item More consistent close-on-exec behavior
+=head2 More consistent close-on-exec behavior
 
 On systems that support a close-on-exec flag on filehandles, the
 flag is now set for any handles created by pipe(), socketpair(),
@@ -693,7 +693,7 @@ The variable modified by shmread(), and messages returned by msgrcv()
 because other untrusted processes can modify messages and shared memory
 segments for their own nefarious purposes.
 
-=item More functional bareword prototype (*)
+=head2 More functional bareword prototype (*)
 
 Bareword prototypes have been rationalized to enable them to be used
 to override builtins that accept barewords and interpret them in
@@ -759,6 +759,38 @@ with another number.
 
 This behavior must be specifically enabled when running Configure.
 See F<INSTALL> and F<README.Y2K>.
+
+=head2 Arrays now always interpolate into double-quoted strings
+
+In double-quoted strings, arrays now interpolate, no matter what.  The
+behavior in earlier versions of perl 5 was that arrays would interpolate
+into strings if the array had been mentioned before the string was
+compiled, and otherwise Perl would raise a fatal compile-time error.
+In versions 5.000 through 5.003, the error was
+
+        Literal @example now requires backslash
+
+In versions 5.004_01 through 5.6.0, the error was
+
+        In string, @example now must be written as \@example
+
+The idea here was to get people into the habit of writing
+C<"fred\@example.com"> when they wanted a literal C<@> sign, just as
+they have always written C<"Give me back my \$5"> when they wanted a
+literal C<$> sign.
+
+Starting with 5.6.1, when Perl now sees an C<@> sign in a
+double-quoted string, it I<always> attempts to interpolate an array,
+regardless of whether or not the array has been used or declared
+already.  The fatal error has been downgraded to an optional warning:
+
+        Possible unintended interpolation of @example in string
+        
+This warns you that C<"fred@example.com"> is going to turn into
+C<fred.com> if you don't backslash the C<@>.
+
+See L<http://www.plover.com/~mjd/perl/at-error.html> for more details
+about the history here.
 
 =head1 Modules and Pragmata
 
@@ -1409,7 +1441,7 @@ eliminating redundant copying overheads.
 Minor changes in how subroutine calls are handled internally
 provide marginal improvements in performance.
 
-=item delete(), each(), values() and hash iteration are faster
+=head2 delete(), each(), values() and hash iteration are faster
 
 The hash values returned by delete(), each(), values() and hashes in a
 list context are the actual values in the hash, instead of copies.
@@ -2298,6 +2330,20 @@ when you meant
 
 Remember that "my", "our", and "local" bind tighter than comma.
 
+=item Possible unintended interpolation of %s in string
+
+(W ambiguous) It used to be that Perl would try to guess whether you
+wanted an array interpolated or a literal @.  It no longer does this;
+arrays are now I<always> interpolated into strings.  This means that 
+if you try something like:
+
+        print "fred@example.com";
+
+and the array C<@example> doesn't exist, Perl is going to print
+C<fred.com>, which is probably not what you wanted.  To get a literal
+C<@> sign in a string, put a backslash before it, just as you would
+to get a literal C<$> sign.
+
 =item Possible Y2K bug: %s
 
 (W y2k) You are concatenating the number 19 with another number, which
@@ -2522,7 +2568,7 @@ There is a potential incompatibility in the behavior of list slices
 that are comprised entirely of undefined values.
 See L</"Behavior of list slices is more consistent">.
 
-=head2 Format of $English::PERL_VERSION is different
+=item Format of $English::PERL_VERSION is different
 
 The English module now sets $PERL_VERSION to $^V (a string value) rather
 than C<$]> (a numeric value).  This is a potential incompatibility.
@@ -2647,7 +2693,7 @@ a simple scalar or as a reference to a typeglob.
 
 See L</"More functional bareword prototype (*)">.
 
-=head2 Semantics of bit operators may have changed on 64-bit platforms
+=item Semantics of bit operators may have changed on 64-bit platforms
 
 If your platform is either natively 64-bit or if Perl has been
 configured to used 64-bit integers, i.e., $Config{ivsize} is 8, 
@@ -2661,7 +2707,7 @@ the excess bits in the result of unary C<~>, e.g., C<~$x & 0xffffffff>.
 
 See L</"Bit operators support full native integer width">.
 
-=head2 More builtins taint their results
+=item More builtins taint their results
 
 As described in L</"Improved security features">, there may be more
 sources of taint in a Perl program.
@@ -2890,6 +2936,18 @@ names.  Because it cannot be translated normally, it is skipped, and will not
 appear in %ENV.  This may be a benign occurrence, as some software packages
 might directly modify logical name tables and introduce nonstandard names,
 or it may indicate that a logical name table has been corrupted.
+
+=item In string, @%s now must be written as \@%s
+
+The description of this error used to say:
+
+        (Someday it will simply assume that an unbackslashed @
+         interpolates an array.)
+
+That day has come, and this fatal error has been removed.  It has been
+replaced by a non-fatal warning instead.
+See L</Arrays now always interpolate into double-quoted strings> for
+details.
 
 =item Probable precedence problem on %s
 

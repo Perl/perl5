@@ -157,7 +157,7 @@ elsif ($PLATFORM eq 'os2') {
     # print STDERR "'$dll' <= '$define{PERL_DLL}'\n";
     print <<"---EOP---";
 LIBRARY '$dll' INITINSTANCE TERMINSTANCE
-DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $CONFIG_ARGS'
+DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter'
 STACKSIZE 32768
 CODE LOADONCALL
 DATA LOADONCALL NONSHARED MULTIPLE
@@ -259,6 +259,7 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_safexrealloc
 		     Perl_same_dirent
 		     Perl_unlnk
+		     Perl_sys_intern_clear
 		     Perl_sys_intern_dup
 		     Perl_sys_intern_init
 		     PL_cryptseen
@@ -402,6 +403,8 @@ unless ($define{'USE_5005THREADS'}) {
 		    PL_svref_mutex
 		    PL_cred_mutex
 		    PL_eval_mutex
+		    PL_fdpid_mutex
+		    PL_sv_lock_mutex
 		    PL_eval_cond
 		    PL_eval_owner
 		    PL_threads_mutex
@@ -418,6 +421,7 @@ unless ($define{'USE_5005THREADS'}) {
 		    Perl_find_threadsv
 		    Perl_unlock_condpair
 		    Perl_magic_mutexfree
+		    Perl_sv_lock
 		    )];
 }
 

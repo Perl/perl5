@@ -4,7 +4,7 @@ Perl 5 README file for the EPOC operating system.
 
 Olaf Flebbe <o.flebbe@gmx.de>
 http://www.linuxstart.com/~oflebbe/perl/perl5.html
-2000-02-20
+2000-05-15
 
 =====================================================================
 Introduction
@@ -13,9 +13,8 @@ Introduction
 EPOC is a OS for palmtops and mobile phones. For more informations look at:
 http://www.symbian.com/
 
-This is a port of Perl version 5.5.650 to EPOC. It runs on the Perl
-Series 5, Series 5mx and the Psion Revo. I have no reports for other
-EPOC devices.
+This is a port of Perl version 5.6.0 to EPOC. It runs on the Perl
+Series 5, Series 5mx and the Psion Revo and on the Ericson M128.
 
 Features are left out, because of restrictions of the POSIX support.
 
@@ -157,4 +156,4 @@ Support Status
 
 I'm offering this port "as is".  You can ask me questions, but I can't
 guarantee I'll be able to answer them; I don't know much about Perl
-internals myself;
+internals myself.

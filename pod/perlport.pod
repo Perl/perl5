@@ -1640,6 +1640,10 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS, VM/ESA)
 
 =item stat
 
+Platforms that do not have rdev, blksize, or blocks will return these
+as '', so numeric comparison or manipulation of these fields may cause
+'not numeric' warnings.
+
 mtime and atime are the same thing, and ctime is creation time instead of
 inode change time. (S<Mac OS>)
 
@@ -1649,6 +1653,9 @@ device and inode are not necessarily reliable.  (VMS)
 
 mtime, atime and ctime all return the last modification time.  Device and
 inode are not necessarily reliable.  (S<RISC OS>)
+
+dev, rdev, blksize, and blocks are not available.  inode is not
+meaningful and will differ between stat calls on the same file.  (os2)
 
 =item symlink OLDFILE,NEWFILE
 

@@ -278,7 +278,7 @@ Useless use of hash element in void context at - line 29.
 Useless use of hash slice in void context at - line 30.
 Useless use of unpack in void context at - line 31.
 Useless use of pack in void context at - line 32.
-Useless use of join in void context at - line 33.
+Useless use of join or string in void context at - line 33.
 Useless use of list slice in void context at - line 34.
 Useless use of sort in void context at - line 37.
 Useless use of reverse in void context at - line 38.
@@ -712,6 +712,20 @@ sub fred () { 1 }
 sub fred () { 1 }
 no warnings 'redefine' ;
 sub fred () { 1 }
+EXPECT
+Constant subroutine fred redefined at - line 4.
+########
+# op.c
+no warnings 'redefine' ;
+sub fred () { 1 }
+sub fred () { 2 }
+EXPECT
+Constant subroutine fred redefined at - line 4.
+########
+# op.c
+no warnings 'redefine' ;
+sub fred () { 1 }
+*fred = sub () { 2 };
 EXPECT
 Constant subroutine fred redefined at - line 4.
 ########

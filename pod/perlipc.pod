@@ -234,8 +234,7 @@ prepared to clean up core dumps now and again.
 
 To forbid signal handlers altogether would bars you from
 many interesting programs, including virtually everything in this manpage,
-since you could no longer even write SIGCHLD handlers.  Their dodginess
-is expected to be addresses in the 5.005 release.
+since you could no longer even write SIGCHLD handlers.  
 
 
 =head1 Using open() for IPC
@@ -837,7 +836,7 @@ domain sockets can show up in the file system with an ls(1) listing.
 You can test for these with Perl's B<-S> file test:
 
     unless ( -S '/dev/log' ) {
-	die "something's wicked with the print system";
+	die "something's wicked with the log system";
     }
 
 Here's a sample Unix-domain client:

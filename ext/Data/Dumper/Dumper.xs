@@ -584,7 +584,10 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
 	if (SvIOK(val)) {
             STRLEN len;
-            (void) sprintf(tmpbuf, "%"IVdf, SvIV(val));
+	    if (SvIsUV(val))
+	      (void) sprintf(tmpbuf, "%"UVuf, SvUV(val));
+	    else
+	      (void) sprintf(tmpbuf, "%"IVdf, SvIV(val));
             len = strlen(tmpbuf);
 	    sv_catpvn(retval, tmpbuf, len);
 	}

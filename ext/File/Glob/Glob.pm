@@ -138,6 +138,9 @@ sub csh_glob {
     $pat = $_ unless defined $pat;
 
     # extract patterns
+    $pat =~ s/^\s+//;	# Protect against empty elements in
+    $pat =~ s/\s+$//;	# things like < *.c> and <*.c >.
+			# These alone shouldn't trigger ParseWords.
     if ($pat =~ /\s/) {
         # XXX this is needed for compatibility with the csh
 	# implementation in Perl.  Need to support a flag

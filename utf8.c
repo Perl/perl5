@@ -134,6 +134,30 @@ Perl_is_utf8_char(pTHX_ U8 *s)
     return len;
 }
 
+/*
+=for apidoc Am|bool_utf8_string|U8 *s|STRLEN len
+
+Returns true if first C<len> bytes of the given string form valid a UTF8
+string, false otherwise.
+
+=cut
+*/
+
+bool 
+Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
+{
+    U8* x=s;
+    U8* send=s+len;
+    int c;
+    while (x < send) {
+        c = is_utf8_char(x);
+        x += c;
+        if (!c || x > send)
+            return 0;
+    }
+    return 1;
+}
+
 UV
 Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen)
 {
@@ -222,19 +246,100 @@ Perl_utf8_hop(pTHX_ U8 *s, I32 off)
     return s;
 }
 
-/* XXX NOTHING CALLS THE FOLLOWING TWO ROUTINES YET!!! */
 /*
- * Convert native or reversed UTF-16 to UTF-8.
+=for apidoc Am|U8 *|utf8_to_bytes|U8 *s|STRLEN len
+
+Converts a string C<s> of length C<len> from UTF8 into ASCII encoding.
+Unlike C<bytes_to_utf8>, this over-writes the original string.
+Returns zero on failure after converting as much as possible.
+
+=cut
+*/
+
+U8 *
+Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN len)
+{
+    dTHR;
+    U8 *send;
+    U8 *d;
+    U8 *save;
+
+    send = s + len;
+    d = save = s;
+    while (s < send) {
+        if (*s < 0x80)
+            *d++ = *s++;
+        else {
+            I32 ulen;
+            UV uv = utf8_to_uv(s, &ulen);
+            if (uv > 255) {
+                *d = '\0';
+                return 0;
+            }
+            s += ulen;
+            *d++ = (U8)uv;
+        }
+    }
+    *d = '\0';
+    return save;
+}
+
+/*
+=for apidoc Am|U8 *|bytes_to_utf8|U8 *s|STRLEN *len
+
+Converts a string C<s> of length C<len> from ASCII into UTF8 encoding.
+Returns a pointer to the newly-created string, and sets C<len> to
+reflect the new length.
+
+=cut
+*/
+
+U8*
+Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN *len)
+{
+    dTHR;
+    U8 *send;
+    U8 *d;
+    U8 *dst;
+    send = s + (*len);
+
+    Newz(801, d, (*len) * 2 + 1, U8);
+    dst = d;
+
+    while (s < send) {
+        if (*s < 0x80)
+            *d++ = *s++;
+        else {
+            UV uv = *s++;
+            *d++ = (( uv >>  6)         | 0xc0);
+            *d++ = (( uv        & 0x3f) | 0x80);
+        }
+    }
+    *d = '\0';
+    *len = d-dst;
+    return dst;
+}
+
+/*
+ * Convert native (big-endian) or reversed (little-endian) UTF-16 to UTF-8.
  *
  * Destination must be pre-extended to 3/2 source.  Do not use in-place.
  * We optimize for native, for obvious reasons. */
 
 U8*
-Perl_utf16_to_utf8(pTHX_ U16* p, U8* d, I32 bytelen)
+Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 {
-    U16* pend = p + bytelen / 2;
+    U8* pend;
+    U8* dstart = d;
+
+    if (bytelen & 1)
+	Perl_croak(aTHX_ "panic: utf16_to_utf8: odd bytelen");
+
+    pend = p + bytelen;
+
     while (p < pend) {
-	UV uv = *p++;
+	UV uv = (p[0] << 8) + p[1]; /* UTF-16BE */
+	p += 2;
 	if (uv < 0x80) {
 	    *d++ = uv;
 	    continue;
@@ -246,13 +351,9 @@ Perl_utf16_to_utf8(pTHX_ U16* p, U8* d, I32 bytelen)
 	}
 	if (uv >= 0xd800 && uv < 0xdbff) {	/* surrogates */
             dTHR;
-	    int low = *p++;
-	    if (low < 0xdc00 || low >= 0xdfff) {
-		if (ckWARN_d(WARN_UTF8))     
-	    	    Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-16 surrogate");
-		p--;
-		uv = 0xfffd;
-	    }
+	    UV low = *p++;
+	    if (low < 0xdc00 || low >= 0xdfff)
+		Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
 	    uv = ((uv - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
 	}
 	if (uv < 0x10000) {
@@ -269,13 +370,14 @@ Perl_utf16_to_utf8(pTHX_ U16* p, U8* d, I32 bytelen)
 	    continue;
 	}
     }
+    *newlen = d - dstart;
     return d;
 }
 
 /* Note: this one is slightly destructive of the source. */
 
 U8*
-Perl_utf16_to_utf8_reversed(pTHX_ U16* p, U8* d, I32 bytelen)
+Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 {
     U8* s = (U8*)p;
     U8* send = s + bytelen;
@@ -285,7 +387,7 @@ Perl_utf16_to_utf8_reversed(pTHX_ U16* p, U8* d, I32 bytelen)
 	s[1] = tmp;
 	s += 2;
     }
-    return utf16_to_utf8(p, d, bytelen);
+    return utf16_to_utf8(p, d, bytelen, newlen);
 }
 
 /* for now these are all defined (inefficiently) in terms of the utf8 versions */
@@ -791,7 +893,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 
     if (hv == PL_last_swash_hv &&
 	klen == PL_last_swash_klen &&
-	(!klen || memEQ(ptr,PL_last_swash_key,klen)) )
+	(!klen || memEQ((char *)ptr,(char *)PL_last_swash_key,klen)) )
     {
 	tmps = PL_last_swash_tmps;
 	slen = PL_last_swash_slen;

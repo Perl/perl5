@@ -13,9 +13,9 @@ use Cwd;
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
-$origdir = cwd;
+my $origdir = cwd;
 chdir dirname($0);
-$file = basename($0, '.PL');
+my $file = basename($0, '.PL');
 $file .= '.com' if $^O eq 'VMS';
 
 open OUT,">$file" or die "Can't create $file: $!";
@@ -41,7 +41,7 @@ h2xs - convert .h C header files to Perl extensions
 
 =head1 SYNOPSIS
 
-B<h2xs> [B<-ACOPXcdf>] [B<-v> version] [B<-n> module_name] [B<-p> prefix] [B<-s> sub] [headerfile ... [extra_libraries]]
+B<h2xs> [B<-ACOPXacdfkmx>] [B<-F> addflags] [B<-M> fmask] [B<-n> module_name] [B<-o> tmask] [B<-p> prefix] [B<-s> subs] [B<-v> version] [headerfile ... [extra_libraries]]
 
 B<h2xs> B<-h>
 
@@ -78,7 +78,7 @@ S<C<use AutoLoader>> statement from the .pm file.
 Omits creation of the F<Changes> file, and adds a HISTORY section to
 the POD template.
 
-=item B<-F>
+=item B<-F> I<addflags>
 
 Additional flags to specify to C preprocessor when scanning header for
 function declarations.  Should not be used without B<-x>.
@@ -190,6 +190,18 @@ result in XSUB-declarations/typemap-entries which need
 hand-editing. Such may be objects which cannot be converted from/to a
 pointer (like C<long long>), pointers to functions, or arrays.  See
 also the section on L<LIMITATIONS of B<-x>>.
+
+=item B<-b> I<version>
+
+Generates a .pm file which is backwards compatible with the specified
+perl version.
+
+For versions < 5.6.0, the changes are.
+    - no use of 'our' (uses 'use vars' instead)
+    - no 'use warnings'
+
+Specifying a compatibility version higher than the version of perl you
+are using to run h2xs will have no effect.
 
 =back
 
@@ -332,12 +344,13 @@ use strict;
 my( $H2XS_VERSION ) = ' $Revision: 1.20 $ ' =~ /\$Revision:\s+([^\s]+)/;
 my $TEMPLATE_VERSION = '0.01';
 my @ARGS = @ARGV;
+my $compat_version = $];
 
 use Getopt::Std;
 
 sub usage{
 	warn "@_\n" if @_;
-    die "h2xs [-ACOPXcdfh] [-v version] [-n module_name] [-p prefix] [-s subs] [headerfile [extra_libraries]]
+    die "h2xs [-ACOPXacdfhkmx] [-F addflags] [-M fmask] [-n module_name] [-o tmask] [-p prefix] [-s subs] [-v version] [headerfile [extra_libraries]]
 version: $H2XS_VERSION
     -A   Omit all autoloading facilities (implies -c).
     -C   Omit creating the Changes file, add HISTORY heading to stub POD.
@@ -359,6 +372,7 @@ version: $H2XS_VERSION
     -s   Create subroutines for specified macros.
     -v   Specify a version number for this extension.
     -x   Autogenerate XSUBs using C::Scan.
+    -b   Specify a perl version to be backwards compatibile with
 extra_libraries
          are any libraries that might be needed for loading the
          extension, e.g. -lm would try to link in the math library.
@@ -366,11 +380,21 @@ extra_libraries
 }
 
 
-getopts("ACF:M:OPXacdfhkmn:o:p:s:v:x") || usage;
+getopts("ACF:M:OPXacdfhkmn:o:p:s:v:xb:") || usage;
 use vars qw($opt_A $opt_C $opt_F $opt_M $opt_O $opt_P $opt_X $opt_a $opt_c $opt_d
-	    $opt_f $opt_h $opt_k $opt_m $opt_n $opt_o $opt_p $opt_s $opt_v $opt_x);
+	    $opt_f $opt_h $opt_k $opt_m $opt_n $opt_o $opt_p $opt_s $opt_v $opt_x 
+	    $opt_b);
 
 usage if $opt_h;
+
+if( $opt_b ){
+    usage "You cannot use -b and -m at the same time.\n" if ($opt_b && $opt_m);
+    $opt_b =~ /^\d+\.\d+\.\d+/ ||
+	usage "You must provide the backwards compatibility version in X.Y.Z form. " .
+	    "(i.e. 5.5.0)\n";
+    my ($maj,$min,$sub) = split(/\./,$opt_b,3);
+    $compat_version = sprintf("%d.%03d%02d",$maj,$min,$sub);
+} 
 
 if( $opt_v ){
 	$TEMPLATE_VERSION = $opt_v;
@@ -685,13 +709,23 @@ open(PM, ">$modfname.pm") || die "Can't create $ext$modpname/$modfname.pm: $!\n"
 $" = "\n\t";
 warn "Writing $ext$modpname/$modfname.pm\n";
 
+if ( $compat_version < 5.006 ) {
 print PM <<"END";
 package $module;
 
-require 5.005_62;
+use $compat_version;
+use strict;
+END
+} 
+else {
+print PM <<"END";
+package $module;
+
+use 5.006;
 use strict;
 use warnings;
 END
+}
 
 unless( $opt_X || $opt_c || $opt_A ){
 	# we'll have an AUTOLOAD(), and it will have $AUTOLOAD and
@@ -721,15 +755,25 @@ unless ($opt_A) { # no autoloader whatsoever.
 	}
 }
 
+if ( $compat_version < 5.006 ) {
+    if ( $opt_X || $opt_c || $opt_A ) {
+	print PM 'use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);';
+    } else {
+	print PM 'use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);';
+    }
+}
+
 # Determine @ISA.
 my $myISA = 'our @ISA = qw(Exporter';	# We seem to always want this.
 $myISA .= ' DynaLoader' 	unless $opt_X;  # no XS
 $myISA .= ');';
+$myISA =~ s/^our // if $compat_version < 5.006;
+
 print PM "\n$myISA\n\n";
 
 my @exported_names = (@const_names, @fnames_no_prefix, map '$'.$_, @vdecls);
 
-print PM<<"END";
+my $tmp=<<"END";
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
@@ -750,10 +794,15 @@ our \$VERSION = '$TEMPLATE_VERSION';
 
 END
 
+$tmp =~ s/^our //mg if $compat_version < 5.006;
+print PM $tmp;
+
 if (@vdecls) {
     printf PM "our(@{[ join ', ', map '$'.$_, @vdecls ]});\n\n";
 }
 
+
+$tmp = ( $compat_version < 5.006 ?  "" : "our \$AUTOLOAD;" );
 print PM <<"END" unless $opt_c or $opt_X;
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -761,7 +810,7 @@ sub AUTOLOAD {
     # to the AUTOLOAD in AutoLoader.
 
     my \$constname;
-    our \$AUTOLOAD;
+    $tmp
     (\$constname = \$AUTOLOAD) =~ s/.*:://;
     croak "&$module::constant not defined" if \$constname eq 'constant';
     my \$val = constant(\$constname, \@_ ? \$_[0] : 0);
@@ -834,48 +883,48 @@ my $email = 'a.u.thor@a.galaxy.far.far.away';
 
 my $revhist = '';
 $revhist = <<EOT if $opt_C;
-
-=head1 HISTORY
-
-=over 8
-
-=item $TEMPLATE_VERSION
-
-Original version; created by h2xs $H2XS_VERSION with options
-
-  @ARGS
-
-=back
-
+#
+#=head1 HISTORY
+#
+#=over 8
+#
+#=item $TEMPLATE_VERSION
+#
+#Original version; created by h2xs $H2XS_VERSION with options
+#
+#  @ARGS
+#
+#=back
+#
 EOT
 
 my $exp_doc = <<EOD;
-
-=head2 EXPORT
-
-None by default.
-
+#
+#=head2 EXPORT
+#
+#None by default.
+#
 EOD
 if (@const_names and not $opt_P) {
   $exp_doc .= <<EOD;
-=head2 Exportable constants
-
-  @{[join "\n  ", @const_names]}
-
+#=head2 Exportable constants
+#
+#  @{[join "\n  ", @const_names]}
+#
 EOD
 }
 if (defined $fdecls and @$fdecls and not $opt_P) {
   $exp_doc .= <<EOD;
-=head2 Exportable functions
-
+#=head2 Exportable functions
+#
 EOD
-  $exp_doc .= <<EOD if $opt_p;
-When accessing these functions from Perl, prefix C<$opt_p> should be removed.
-
+#  $exp_doc .= <<EOD if $opt_p;
+#When accessing these functions from Perl, prefix C<$opt_p> should be removed.
+#
 EOD
   $exp_doc .= <<EOD;
-  @{[join "\n  ", @known_fnames{@fnames}]}
-
+#  @{[join "\n  ", @known_fnames{@fnames}]}
+#
 EOD
 }
 
@@ -898,14 +947,14 @@ my $pod = <<"END" unless $opt_P;
 #unedited.
 #
 #Blah blah blah.
-#$exp_doc$revhist
+$exp_doc$revhist
 #=head1 AUTHOR
 #
 #$author, $email
 #
 #=head1 SEE ALSO
 #
-#perl(1).
+#L<perl>.
 #
 #=cut
 END

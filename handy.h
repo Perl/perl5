@@ -261,7 +261,7 @@ C<strncmp>).
 /*
 =for apidoc Am|bool|isALNUM|char ch
 Returns a boolean indicating whether the C C<char> is an ASCII alphanumeric
-character or digit.
+character (including underscore) or digit.
 
 =for apidoc Am|bool|isALPHA|char ch
 Returns a boolean indicating whether the C C<char> is an ASCII alphabetic
@@ -505,7 +505,7 @@ The XSUB-writer's interface to the C C<realloc> function.
 The XSUB-writer's interface to the C C<realloc> function, with
 cast.
 
-=for apidoc Am|void|Safefree|void* src|void* dest|int nitems|type
+=for apidoc Am|void|Safefree|void* ptr
 The XSUB-writer's interface to the C C<free> function.
 
 =for apidoc Am|void|Move|void* src|void* dest|int nitems|type

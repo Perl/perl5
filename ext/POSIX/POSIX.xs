@@ -55,6 +55,9 @@
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
+#ifdef MACOS_TRADITIONAL
+#undef fdopen
+#endif
 #include <fcntl.h>
 
 #if defined(__VMS) && !defined(__POSIX_SOURCE)
@@ -80,7 +83,7 @@
 
    /* The non-POSIX CRTL times() has void return type, so we just get the
       current time directly */
-   clock_t vms_times(struct tms *PL_bufptr) {
+   clock_t vms_times(struct tms *bufptr) {
 	dTHX;
 	clock_t retval;
 	/* Get wall time and convert to 10 ms intervals to
@@ -101,7 +104,7 @@
 	_ckvmssts(lib$ediv(&divisor,vmstime,(long int *)&retval,&remainder));
 #  endif
 	/* Fill in the struct tms using the CRTL routine . . .*/
-	times((tbuffer_t *)PL_bufptr);
+	times((tbuffer_t *)bufptr);
 	return (clock_t) retval;
    }
 #  define times(t) vms_times(t)
@@ -142,7 +145,7 @@
 #else
 
 #  ifndef HAS_MKFIFO
-#    ifdef OS2
+#    if defined(OS2) || defined(MACOS_TRADITIONAL)
 #      define mkfifo(a,b) not_here("mkfifo")
 #    else	/* !( defined OS2 ) */ 
 #      ifndef mkfifo
@@ -151,12 +154,19 @@
 #    endif
 #  endif /* !HAS_MKFIFO */
 
-#  include <grp.h>
-#  include <sys/times.h>
-#  ifdef HAS_UNAME
-#    include <sys/utsname.h>
+#  ifdef MACOS_TRADITIONAL
+	 struct tms { time_t tms_utime, tms_stime, tms_cutime, tms_cstime; }; 
+#    define times(a) not_here("times")
+#    define ttyname(a) (char*)not_here("ttyname")
+#    define tzset() not_here("tzset")
+#  else
+#    include <grp.h>
+#    include <sys/times.h>
+#    ifdef HAS_UNAME
+#      include <sys/utsname.h>
+#    endif
+#    include <sys/wait.h>
 #  endif
-#  include <sys/wait.h>
 #  ifdef I_UTIME
 #    include <utime.h>
 #  endif
@@ -2296,9 +2306,9 @@ constant(char *name, int arg)
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "STRERR_FILENO"))
-#ifdef STRERR_FILENO
-	    return STRERR_FILENO;
+	if (strEQ(name, "STDERR_FILENO"))
+#ifdef STDERR_FILENO
+	    return STDERR_FILENO;
 #else
 	    goto not_there;
 #endif
@@ -3352,7 +3362,7 @@ modf(x)
     PPCODE:
 	double intvar;
 	/* (We already know stack is long enough.) */
-	PUSHs(sv_2mortal(newSVnv(modf(x,&intvar))));
+	PUSHs(sv_2mortal(newSVnv(Perl_modf(x,&intvar))));
 	PUSHs(sv_2mortal(newSVnv(intvar)));
 
 double

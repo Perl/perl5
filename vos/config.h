@@ -1324,12 +1324,6 @@
  */
 #define HAS_ENDSERVENT		/**/
 
-/* HAS_ENDSPENT:
- *	This symbol, if defined, indicates that the endspent system call is
- *	available to finalize the scan of SysV shadow password entries.
- */
-/*#define HAS_ENDSPENT		/**/
-
 /* HAS_FD_SET:
  *	This symbol, when defined, indicates presence of the fd_set typedef
  *	in <sys/types.h>
@@ -1400,6 +1394,12 @@
  *	available to get the current working directory.
  */
 #define HAS_GETCWD		/**/
+
+/* HAS_GETESPWNAM:
+ *	This symbol, if defined, indicates that the getespwnam system call is
+ *	available to retrieve enchanced (shadow) password entries by name.
+ */
+/*#define HAS_GETESPWNAM		/**/
 
 /* HAS_GETFSSTAT:
  *	This symbol, if defined, indicates that the getfsstat routine is
@@ -1531,6 +1531,12 @@
  */
 #define	HAS_GETPROTO_PROTOS	/**/
 
+/* HAS_GETPRPWNAM:
+ *	This symbol, if defined, indicates that the getprpwnam system call is
+ *	available to retrieve protected (shadow) password entries by name.
+ */
+/*#define HAS_GETPRPWNAM		/**/
+
 /* HAS_GETPWENT:
  *	This symbol, if defined, indicates that the getpwent routine is
  *	available for sequential access of the passwd database.
@@ -1551,12 +1557,6 @@
  *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
  */
 #define	HAS_GETSERV_PROTOS	/**/
-
-/* HAS_GETSPENT:
- *	This symbol, if defined, indicates that the getspent system call is
- *	available to retrieve SysV shadow password entries sequentially.
- */
-/*#define HAS_GETSPENT		/**/
 
 /* HAS_GETSPNAM:
  *	This symbol, if defined, indicates that the getspnam system call is
@@ -1739,6 +1739,13 @@
 /*#define HAS_MMAP		/**/
 #define Mmap_t $mmaptype	/**/
 
+/* HAS_MODFL:
+ *	This symbol, if defined, indicates that the modfl routine is
+ *	available to split a long double x into a fractional part f and
+ *	an integer part i such that |f| < 1.0 and (f + i) = x.
+ */
+/*#define HAS_MODFL		/**/
+
 /* HAS_MPROTECT:
  *	This symbol, if defined, indicates that the mprotect system call is
  *	available to modify the access protection of a memory mapped file.
@@ -1862,12 +1869,6 @@
  *	available.
  */
 #define HAS_SETSERVENT		/**/
-
-/* HAS_SETSPENT:
- *	This symbol, if defined, indicates that the setspent system call is
- *	available to initialize the scan of SysV shadow password entries.
- */
-/*#define HAS_SETSPENT		/**/
 
 /* HAS_SETVBUF:
  *	This symbol, if defined, indicates that the setvbuf routine is
@@ -2337,6 +2338,12 @@
  */
 /*#define	I_POLL		/**/
 
+/* I_PROT:
+ *	This symbol, if defined, indicates that <prot.h> exists and
+ *	should be included.
+ */
+/*#define	I_PROT		/**/
+
 /* I_PTHREAD:
  *     This symbol, if defined, indicates to the C program that it should
  *     include <pthread.h>.
@@ -2588,6 +2595,16 @@
 #define Netdb_name_t		char * /**/
 #define Netdb_net_t		long /**/
 
+/* PERL_OTHERLIBDIRS:
+ *	This variable contains a colon-separated set of paths for the perl
+ *	binary to search for additional library files or modules.
+ *	These directories will be tacked to the end of @INC.
+ *	Perl will automatically search below each path for version-
+ *	and architecture-specific directories.  See PERL_INC_VERSION_LIST
+ *	for more details.
+ */
+/*#define PERL_OTHERLIBDIRS ""		/**/
+
 /* IVTYPE:
  *	This symbol defines the C type used for Perl's IV.
  */
@@ -2656,7 +2673,7 @@
  */
 /* NV_PRESERVES_UV:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
- *	can preserve all the bit of a variable of type UVSIZE.
+ *	can preserve all the bits of a variable of type UVTYPE.
  */
 #define	IVTYPE		int		/**/
 #define	UVTYPE		unsigned int		/**/
@@ -3103,12 +3120,5 @@
  */
 #define PERL_XS_APIVERSION "5.00563"
 #define PERL_PM_APIVERSION "5.00563"
-
-/* HAS_MODFL:
- *	This symbol, if defined, indicates that the modfl routine is
- *	available to split a long double x into a fractional part f and
- *	an integer part i such that |f| < 1.0 and (f + i) = x.
- */
-/*#define HAS_MODFL		/**/
 
 #endif

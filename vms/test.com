@@ -93,8 +93,9 @@ $
 $!  And do it
 $   Show Process/Accounting
 $   testdir = "Directory/NoHead/NoTrail/Column=1"
-$   Define/User 'dbg'Perlshr Sys$Disk:[-]'dbg'PerlShr'exe'
-$   set message/nofacil/nosever/noiden/notext
+$   oldshr = F$TrnLNm("''dbg'PerlShr","LNM$PROCESS")
+$   If F$Length(oldshr).ne.0 Then Write Sys$Error "Superseding ''dbg'PerlShr . . ."
+$   Define 'dbg'Perlshr Sys$Disk:[-]'dbg'PerlShr'exe'
 $   MCR Sys$Disk:[]Perl. "-I[-.lib]" - "''p3'" "''p4'" "''p5'" "''p6'"
 $   Deck/Dollar=$$END-OF-TEST$$
 # $RCSfile: TEST,v $$Revision: 4.1 $$Date: 92/08/07 18:27:00 $
@@ -241,8 +242,17 @@ print sprintf("u=%g  s=%g  cu=%g  cs=%g  files=%d  tests=%d\n",
     $user,$sys,$cuser,$csys,$files,$totmax);
 $$END-OF-TEST$$
 $ wrapup:
+$   If F$Length(oldshr).ne.0
+$   Then
+$     Write Sys$Error "restoring ''dbg'PerlShr . . ."
+$     Def/Translation=Concealed  'dbg'PerlShr 'oldshr'
+$   Else
+$     Deassign 'dbg'PerlShr
+$   EndIf
 $   Show Process/Accounting
 $   If F$Search("Echo.Exe").nes."" Then Delete/Log/NoConfirm Echo.Exe;*
 $   Set Default &olddef
 $   Set Message 'oldmsg'
 $   Exit
+
+

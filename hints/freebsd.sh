@@ -86,8 +86,13 @@ case "$osvers" in
 	d_setegid='undef'
 	d_seteuid='undef'
 	;;
+3.*)
+       usevfork='true'         
+       usemymalloc='n'
+       libswanted=`echo $libswanted | sed 's/ malloc / /'`     
+       ;;
 #
-# Guesses at what will be needed after 2.2
+# Guesses at what will be needed after 3.*
 *)	usevfork='true'
 	usemymalloc='n'
 	libswanted=`echo $libswanted | sed 's/ malloc / /'`

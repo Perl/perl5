@@ -222,21 +222,24 @@ private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 # Files to be built with variable substitution before miniperl
 # is available.
 sh = Makefile.SH cflags.SH config_h.SH makeaperl.SH makedepend.SH \
-	makedir.SH myconfig.SH writemain.SH
+	makedir.SH myconfig.SH writemain.SH pod/Makefile.SH
 
 shextract = Makefile cflags config.h makeaperl makedepend \
-	makedir myconfig writemain
+	makedir myconfig writemain pod/Makefile
 
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
 
 pl = pod/pod2html.PL pod/pod2latex.PL pod/pod2man.PL pod/pod2text.PL \
-	pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL
+	pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL \
+	pod/buildtoc.PL
 
+# lib/lib.pm is not listed here because it has a rule of its own.
 plextract = pod/pod2html pod/pod2latex pod/pod2man pod/pod2text \
-	pod/pod2usage pod/podchecker pod/podselect
+	pod/pod2usage pod/podchecker pod/podselect \
+	pod/buildtoc
 
-addedbyconf = UU $(shextract) $(plextract) pstruct
+addedbyconf = UU $(shextract) $(plextract) lib/lib.pm pstruct
 
 h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
@@ -286,7 +289,7 @@ compile: all
 translators:	miniperl lib/Config.pm FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
 
-utilities:	miniperl lib/Config.pm $(plextract) FORCE
+utilities:	miniperl lib/Config.pm $(plextract) lib/lib.pm FORCE
 	@echo " "; echo "	Making utilities"; cd utils; $(LDLIBPTH) $(MAKE) all
 
 
@@ -304,7 +307,7 @@ opmini$(OBJ_EXT): op.c
 	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB opmini.c
 	$(RMS) opmini.c
 
-miniperlmain$(OBJ_EXT): miniperlmain.c
+miniperlmain$(OBJ_EXT): miniperlmain.c patchlevel.h
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
 perlmain.c: miniperlmain.c config.sh $(FIRSTMAKEFILE)
@@ -321,6 +324,15 @@ ext.libs: $(static_ext)
 	-@test -f ext.libs || touch ext.libs
 
 !NO!SUBS!
+
+# if test -f .patch ; then $spitshell >>Makefile <<'!NO!SUBS!' 
+# patchlevel.h: .patch
+# 	perl fix_pl || (make -f Makefile.micro && ./microperl fix_pl)
+#	$(SHELL) Makefile.SH
+
+!NO!SUBS!
+
+fi
 
 # How to build libperl.  This is still rather convoluted.
 # Load up custom Makefile.SH fragment for shared loading and executables:
@@ -526,6 +538,9 @@ lib/re.pm: ext/re/re.pm
 $(plextract):	miniperl lib/Config.pm
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
 
+lib/lib.pm:	miniperl lib/Config.pm
+	$(LDLIBPTH) ./miniperl -Ilib lib/lib_pm.PL
+
 extra.pods: miniperl
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@rm -f extra.pods
@@ -635,6 +650,9 @@ regen_headers:	FORCE
 	-perl regcomp.pl
 	-perl warnings.pl
 
+regen_pods:	FORCE
+	-cd pod; $(LDLIBPTH) make regen_pods
+
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) or $(nonxs_ext) will
 # automatically get built.  There should ordinarily be no need to change
@@ -675,7 +693,7 @@ _mopup:
 	-rm -f perl.exp ext.libs extra.pods
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap
-	rm -f perl suidperl miniperl $(LIBPERL)
+	rm -f perl suidperl miniperl $(LIBPERL) libperl.* microperl
 
 # Do not 'make _tidy' directly.
 _tidy:
@@ -696,7 +714,7 @@ _cleaner:
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(LDLIBPTH) sh ext/util/make_ext realclean $$x MAKE=$(MAKE) ; \
 	done
-	rm -f *.orig */*.orig *~ */*~ core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/tmp* t/c t/perl .?*.c so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
+	rm -f core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/forktmp* t/tmp* t/c t/perl .?*.c so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
 	rm -f $(private)

@@ -21,7 +21,11 @@
 #endif /* PERL_FOR_X2P */
 
 #define VOIDUSED 1
-#include "config.h"
+#ifdef PERL_MICRO 
+#   include "uconfig.h"
+#else
+#   include "config.h"
+#endif
 
 #if defined(USE_ITHREADS) && defined(USE_5005THREADS)
 #  include "error: USE_ITHREADS and USE_5005THREADS are incompatible"
@@ -164,8 +168,8 @@ class CPerlObj;
 #define aTHXo_			this,
 #define PERL_OBJECT_THIS	aTHXo
 #define PERL_OBJECT_THIS_	aTHXo_
-#define dTHXoa(a)		pTHXo = a
-#define dTHXo			dTHXoa(PERL_GET_THX)
+#define dTHXoa(a)		pTHXo = (CPerlObj*)a
+#define dTHXo			pTHXo = PERL_GET_THX
 
 #define pTHXx		void
 #define pTHXx_
@@ -180,15 +184,16 @@ struct perl_thread;
 #    define pTHX	register struct perl_thread *thr
 #    define aTHX	thr
 #    define dTHR	dNOOP
+#    define dTHXa(a)	pTHX = (struct perl_thread*)a
 #  else
 #    ifndef MULTIPLICITY
 #      define MULTIPLICITY
 #    endif
 #    define pTHX	register PerlInterpreter *my_perl
 #    define aTHX	my_perl
+#    define dTHXa(a)	pTHX = (PerlInterpreter*)a
 #  endif
-#  define dTHXa(a)	pTHX = a
-#  define dTHX		dTHXa(PERL_GET_THX)
+#  define dTHX		pTHX = PERL_GET_THX
 #  define pTHX_		pTHX,
 #  define aTHX_		aTHX,
 #  define pTHX_1	2	
@@ -460,6 +465,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #undef METHOD
 #endif
 
+#ifdef PERL_MICRO
+#   define NO_LOCALE
+#endif
+
 #ifdef I_LOCALE
 #   include <locale.h>
 #endif
@@ -593,6 +602,7 @@ struct perl_mstats {
 #    endif
 #  endif
 #else
+#  undef  memset
 #  define memset(d,c,l) my_memset(d,c,l)
 #endif /* HAS_MEMSET */
 
@@ -809,6 +819,12 @@ struct perl_mstats {
 #		include <sys/dir.h>
 #	    endif
 #	endif
+#   endif
+#endif
+
+#ifdef PERL_MICRO
+#   ifndef DIR
+#      define DIR void
 #   endif
 #endif
 
@@ -1145,6 +1161,9 @@ typedef NVTYPE NV;
 #       include <sunmath.h>
 #   endif
 #   define NV_DIG LDBL_DIG
+#   ifdef LDBL_MANT_DIG
+#       define NV_MANT_DIG LDBL_MANT_DIG
+#   endif
 #   ifdef HAS_SQRTL
 #       define Perl_cos cosl
 #       define Perl_sin sinl
@@ -1178,6 +1197,9 @@ typedef NVTYPE NV;
 #   endif
 #else
 #   define NV_DIG DBL_DIG
+#   ifdef DBL_MANT_DIG
+#       define NV_MANT_DIG DBL_MANT_DIG
+#   endif
 #   define Perl_cos cos
 #   define Perl_sin sin
 #   define Perl_sqrt sqrt
@@ -1379,25 +1401,10 @@ typedef NVTYPE NV;
 
 #ifdef UV_IS_QUAD
 
-#  ifdef UQUAD_MAX
-#    define PERL_UQUAD_MAX ((UV)UQUAD_MAX)
-#  else
 #    define PERL_UQUAD_MAX	(~(UV)0)
-#  endif
-
-#  define PERL_UQUAD_MIN ((UV)0)
-
-#  ifdef QUAD_MAX
-#    define PERL_QUAD_MAX ((IV)QUAD_MAX)
-#  else
+#    define PERL_UQUAD_MIN	((UV)0)
 #    define PERL_QUAD_MAX 	((IV) (PERL_UQUAD_MAX >> 1))
-#  endif
-
-#  ifdef QUAD_MIN
-#    define PERL_QUAD_MIN ((IV)QUAD_MIN)
-#  else
 #    define PERL_QUAD_MIN 	(-PERL_QUAD_MAX - ((3 & -1) == 3))
-#  endif
 
 #endif
 
@@ -2788,10 +2795,14 @@ EXT MGVTBL PL_vtbl_envelem =	{0,	MEMBER_TO_FPTR(Perl_magic_setenv),
 					0,	MEMBER_TO_FPTR(Perl_magic_clearenv),
 							0};
 EXT MGVTBL PL_vtbl_sig =	{0,	0,		 0, 0, 0};
+#ifdef PERL_MICRO
+EXT MGVTBL PL_vtbl_sigelem =	{0,	0,		 0, 0, 0};
+#else
 EXT MGVTBL PL_vtbl_sigelem =	{MEMBER_TO_FPTR(Perl_magic_getsig),
 					MEMBER_TO_FPTR(Perl_magic_setsig),
 					0,	MEMBER_TO_FPTR(Perl_magic_clearsig),
 							0};
+#endif
 EXT MGVTBL PL_vtbl_pack =	{0,	0,	MEMBER_TO_FPTR(Perl_magic_sizepack),	MEMBER_TO_FPTR(Perl_magic_wipepack),
 							0};
 EXT MGVTBL PL_vtbl_packelem =	{MEMBER_TO_FPTR(Perl_magic_getpack),
@@ -3312,6 +3323,10 @@ typedef struct am_table_short AMTS;
 #endif
 
 #endif /* IAMSUID */
+
+#ifdef I_LIBUTIL
+#   include <libutil.h>		/* setproctitle() in some FreeBSDs */
+#endif
 
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT

@@ -66,9 +66,9 @@ Establish IS-A relationship with base class at compile time
 
 Use MakeMaker's uninstalled version of a package
 
-=item caller
+=item bytes
 
-Inherit pragmatic attributes from caller's context 
+Force byte semantics rather than character semantics
 
 =item charnames
 
@@ -80,15 +80,15 @@ Declare constants
 
 =item diagnostics
 
-Force verbose warning diagnostics
+Perl compiler pragma to force verbose warning diagnostics
 
 =item fields
 
-Declare a class's attribute fields at compile-time 
+Compile-time class fields
 
 =item filetest
 
-Control the filetest operators like C<-r>, C<-w> for AFS, etc.
+Control the filetest permission operators
 
 =item integer
 
@@ -96,7 +96,7 @@ Compute arithmetic in integer instead of double
 
 =item less
 
-Request less of something from the compiler (unimplemented)
+Request less of something from the compiler
 
 =item lib
 
@@ -104,7 +104,11 @@ Manipulate @INC at compile time
 
 =item locale
 
-Use or avoid POSIX locales for built-in operations
+Use and avoid POSIX locales for built-in operations
+
+=item open
+
+Set default disciplines for input and output
 
 =item ops
 
@@ -112,11 +116,11 @@ Restrict unsafe operations when compiling
 
 =item overload
 
-Overload Perl operations
+Package for overloading perl operations
 
 =item re
 
-Alter regular expression behavior
+Alter regular expression behaviour
 
 =item sigtrap
 
@@ -128,15 +132,15 @@ Restrict unsafe constructs
 
 =item subs
 
-Predeclare subroutine names
+Predeclare sub names
 
 =item utf8
 
-Turn on UTF-8 and Unicode support
+Enable/disable UTF-8 in source code
 
 =item vars
 
-Predeclare global variable names (obsoleted by our())
+Predeclare global variable names (obsolete)
 
 =item warnings
 
@@ -154,7 +158,7 @@ Exporter module.  See their own documentation for details.
 
 =item AnyDBM_File
 
-Provide framework for multiple DBM libraries
+Provide framework for multiple DBMs
 
 =item AutoLoader
 
@@ -166,7 +170,7 @@ Split a package for autoloading
 
 =item B
 
-Guts of the Perl code generator (aka compiler) 
+The Perl Compiler
 
 =item B::Asmdata
 
@@ -198,7 +202,7 @@ Walk Perl syntax tree, printing debug info about ops
 
 =item B::Deparse
 
-Perl compiler backend to produce Perl code
+Perl compiler backend to produce perl code
 
 =item B::Disassembler
 
@@ -206,7 +210,7 @@ Disassemble Perl bytecode
 
 =item B::Lint
 
-Module to catch dubious constructs
+Perl lint
 
 =item B::Showlex
 
@@ -215,8 +219,6 @@ Show lexical variables used in functions or files
 =item B::Stackobj
 
 Helper module for CC backend
-
-B::Stash -- XXX NFI XXX
 
 =item B::Terse
 
@@ -228,19 +230,19 @@ Generates cross reference reports for Perl programs
 
 =item Benchmark
 
-Benchmark running times of code
+Benchmark running times of Perl code
 
 =item ByteLoader
 
-Load byte-compiled Perl code
+Load byte compiled perl code
 
 =item CGI
 
-Simple Common Gateway Interface class
+Simple Common Gateway Interface Class
 
 =item CGI::Apache
 
-Make things work with CGI.pm against Perl-Apache API
+Backward compatibility module for CGI.pm
 
 =item CGI::Carp
 
@@ -264,15 +266,15 @@ Simple Interface to Server Push
 
 =item CGI::Switch
 
-Try more than one constructors and return the first object available
+Backward compatibility module for defunct CGI::Switch
 
 =item CPAN
 
-Query, download, and build Perl modules from CPAN sites
+Query, download and build perl modules from CPAN sites
 
 =item CPAN::FirstTime
 
-Utility for CPAN::Config file initialization
+Utility for CPAN::Config file Initialization
 
 =item CPAN::Nox
 
@@ -280,7 +282,7 @@ Wrapper around CPAN.pm without using any XS module
 
 =item Carp
 
-Act like warn/die from perspective of caller
+Warn of errors (from perspective of caller)
 
 =item Carp::Heavy
 
@@ -290,33 +292,17 @@ Carp guts
 
 Declare struct-like datatypes as Perl classes
 
-=item Config
-
-Access Perl configuration information
-
 =item Cwd
 
 Get pathname of current working directory
 
 =item DB
 
-Programmatic interface to the Perl debugging API (experimental)
+Programmatic interface to the Perl debugging API (draft, subject to
 
 =item DB_File
 
 Perl5 access to Berkeley DB version 1.x
-
-=item Data::Dumper
-
-Serialize Perl data structures
-
-=item Devel::DProf
-
-A Perl execution profiler 
-
-=item Devel::Peek
-
-A data debugging tool for the XS programmer
 
 =item Devel::SelfStubber
 
@@ -328,27 +314,19 @@ Supply object methods for directory handles
 
 =item Dumpvalue
 
-Provide screen dump of Perl data
-
-=item DynaLoader
-
-Dynamically load C libraries into Perl code
+Provides screen dump of Perl data.
 
 =item English
 
-Use English (or awk) names for ugly punctuation variables
+Use nice English (or awk) names for ugly punctuation variables
 
 =item Env
 
-Access environment variables as regular ones
-
-=item Errno
-
-Load the libc errno.h defines
+Perl module that imports environment variables as scalars or arrays
 
 =item Exporter
 
-Implement default import method for modules
+Implements default import method for modules
 
 =item Exporter::Heavy
 
@@ -356,11 +334,11 @@ Exporter guts
 
 =item ExtUtils::Command
 
-Utilities to replace common Unix commands in Makefiles etc.
+Utilities to replace common UNIX commands in Makefiles etc.
 
 =item ExtUtils::Embed
 
-Utilities for embedding Perl in C/C++ programs
+Utilities for embedding Perl in C/C++ applications
 
 =item ExtUtils::Install
 
@@ -376,11 +354,11 @@ Determine libraries to use and how to use them
 
 =item ExtUtils::MM_Cygwin
 
-Methods to override Unix behavior in ExtUtils::MakeMaker
+Methods to override UN*X behaviour in ExtUtils::MakeMaker
 
 =item ExtUtils::MM_OS2
 
-Methods to override Unix behavior in ExtUtils::MakeMaker
+Methods to override UN*X behaviour in ExtUtils::MakeMaker
 
 =item ExtUtils::MM_Unix
 
@@ -388,11 +366,11 @@ Methods used by ExtUtils::MakeMaker
 
 =item ExtUtils::MM_VMS
 
-Methods to override Unix behavior in ExtUtils::MakeMaker
+Methods to override UN*X behaviour in ExtUtils::MakeMaker
 
 =item ExtUtils::MM_Win32
 
-Methods to override Unix behavior in ExtUtils::MakeMaker
+Methods to override UN*X behaviour in ExtUtils::MakeMaker
 
 =item ExtUtils::MakeMaker
 
@@ -401,8 +379,6 @@ Create an extension Makefile
 =item ExtUtils::Manifest
 
 Utilities to write and check a MANIFEST file
-
-ExtUtils::Miniperl, writemain - Write the C code for perlmain.c
 
 =item ExtUtils::Mkbootstrap
 
@@ -426,7 +402,7 @@ Replace functions with equivalents which succeed or die
 
 =item Fcntl
 
-Load the libc fcntl.h defines
+Load the C Fcntl.h defines
 
 =item File::Basename
 
@@ -446,19 +422,15 @@ Copy files or filehandles
 
 =item File::DosGlob
 
-DOS-like globbing and then some
+DOS like globbing and then some
 
 =item File::Find
 
-Traverse a file tree 
-
-=item File::Glob
-
-Perl extension for BSD filename globbing 
+Traverse a file tree
 
 =item File::Path
 
-Create or remove a series of directories
+Create or remove directory trees
 
 =item File::Spec
 
@@ -488,6 +460,10 @@ Methods for VMS file specs
 
 Methods for Win32 file specs
 
+=item File::Temp
+
+Return name and handle of a temporary file safely
+
 =item File::stat
 
 By-name interface to Perl's built-in stat() functions
@@ -502,11 +478,7 @@ Supply object methods for filehandles
 
 =item FindBin
 
-Locate installation directory of running Perl program
-
-=item GDBM_File
-
-Access to the gdbm library
+Locate directory of original perl script
 
 =item Getopt::Long
 
@@ -518,55 +490,11 @@ Process single-character switches with switch clustering
 
 =item I18N::Collate
 
-Compare 8-bit scalar data according to current locale
+Compare 8-bit scalar data according to the current locale
 
 =item IO
 
-Front-end to load various IO modules
-
-=item IO::Dir
-
-Supply object methods for directory handles
-
-=item IO::File
-
-Supply object methods for filehandles
-
-=item IO::Handle
-
-Supply object methods for I/O handles
-
-=item IO::Pipe
-
-Supply object methods for pipes
-
-=item IO::Poll
-
-Object interface to system poll call
-
-=item IO::Seekable
-
-Supply seek based methods for I/O objects
-
-=item IO::Select
-
-OO interface to the select system call
-
-=item IO::Socket
-
-Object interface to socket communications
-
-=item IO::Socket::INET
-
-Object interface for AF_INET domain sockets
-
-=item IO::Socket::UNIX
-
-Object interface for AF_UNIX domain sockets
-
-=item IPC::Msg
-
-SysV Msg IPC object class
+Load various IO modules
 
 =item IPC::Open2
 
@@ -575,14 +503,6 @@ Open a process for both reading and writing
 =item IPC::Open3
 
 Open a process for reading, writing, and error handling
-
-=item IPC::Semaphore
-
-SysV Semaphore IPC object class
-
-=item IPC::SysV
-
-SysV IPC constants
 
 =item Math::BigFloat
 
@@ -599,6 +519,10 @@ Complex numbers and associated mathematical functions
 =item Math::Trig
 
 Trigonometric functions
+
+=item NDBM_File
+
+Tied access to ndbm files
 
 =item Net::Ping
 
@@ -624,17 +548,21 @@ By-name interface to Perl's built-in getserv*() functions
 
 Generic interface to Perl Compiler backends
 
+=item ODBM_File
+
+Tied access to odbm files
+
 =item Opcode
 
-Disable named opcodes when compiling Perl code
-
-=item POSIX
-
-Perl interface to IEEE Std 1003.1
+Disable named opcodes when compiling perl code
 
 =item Pod::Checker
 
 Check pod documents for syntax errors
+
+=item Pod::Find
+
+Find POD documents in directory trees
 
 =item Pod::Html
 
@@ -642,15 +570,23 @@ Module to convert pod files to HTML
 
 =item Pod::InputObjects
 
-Manage POD objects 
+Objects representing POD input paragraphs, commands, etc.
 
 =item Pod::Man
 
 Convert POD data to formatted *roff input
 
+=item Pod::ParseUtils
+
+Helpers for POD parsing and conversion
+
 =item Pod::Parser
 
 Base class for creating POD filters and translators
+
+=item Pod::Plainer
+
+Perl extension for converting Pod to old style Pod.
 
 =item Pod::Select
 
@@ -663,6 +599,10 @@ Convert POD data to formatted ASCII text
 =item Pod::Text::Color
 
 Convert POD data to formatted color ASCII text
+
+=item Pod::Text::Termcap
+
+Convert POD data to ASCII text with format escapes
 
 =item Pod::Usage
 
@@ -690,35 +630,31 @@ Load functions only on demand
 
 =item Shell
 
-Run shell commands transparently within Perl
+Run shell commands transparently within perl
 
 =item Socket
 
-Load the libc socket.h defines and structure manipulators
+Load the C socket.h defines and structure manipulators 
 
 =item Symbol
 
 Manipulate Perl symbols and their names
 
-=item Sys::Hostname
+=item Term::ANSIColor
 
-Try every conceivable way to get hostname
-
-=item Sys::Syslog
-
-Interface to the libc syslog(3) calls
+Color screen output using ANSI escape sequences
 
 =item Term::Cap
 
-Termcap interface
+Perl termcap interface
 
 =item Term::Complete
 
-Word completion module
+Perl word completion module
 
 =item Term::ReadLine
 
-Interface to various `readline' packages. 
+Perl interface to various C<readline> packages. If
 
 =item Test
 
@@ -726,7 +662,7 @@ Provides a simple framework for writing test scripts
 
 =item Test::Harness
 
-Run Perl standard test scripts with statistics
+Run perl standard test scripts with statistics
 
 =item Text::Abbrev
 
@@ -734,13 +670,11 @@ Create an abbreviation table from a list
 
 =item Text::ParseWords
 
-Parse text into a list of tokens or array of arrays
+Parse text into an array of tokens or array of arrays
 
 =item Text::Soundex
 
-Implementation of the Soundex Algorithm as described by Knuth
-
-Text::Tabs -- expand and unexpand tabs per expand(1) and unexpand(1)
+Implementation of the Soundex Algorithm as Described by Knuth
 
 =item Text::Wrap
 
@@ -801,29 +735,24 @@ By-name interface to Perl's built-in getpw*() functions
 =back
 
 To find out I<all> modules installed on your system, including
-those without documentation or outside the standard release, 
-just do this:
+those without documentation or outside the standard release,
+jus tdo this:
 
     % find `perl -e 'print "@INC"'` -name '*.pm' -print
 
-To get a log of all module distributions which have been installed
-since perl was installed, just do:
-
-    % perldoc perllocal
-
-Modules should all have their own documentation installed and accessible
-via your system man(1) command, or via the C<perldoc> program.  If you do
-not have a B<find>
+They should all have their own documentation installed and accessible
+via your system man(1) command.  If you do not have a B<find>
 program, you can use the Perl B<find2perl> program instead, which
 generates Perl code as output you can run through perl.  If you
 have a B<man> program but it doesn't find your modules, you'll have
-to fix your manpath.  See L<perl> for details.
+to fix your manpath.  See L<perl> for details.  If you have no
+system B<man> command, you might try the B<perldoc> program.
 
 =head2 Extension Modules
 
 Extension modules are written in C (or a mix of Perl and C).  They
 are usually dynamically loaded into Perl if and when you need them,
-but may also be linked in statically.  Supported extension modules
+but may also be be linked in statically.  Supported extension modules
 include Socket, Fcntl, and POSIX.
 
 Many popular C extension modules do not come bundled (at least, not
@@ -837,7 +766,7 @@ like Alta Vista or Deja News.
 
 CPAN stands for Comprehensive Perl Archive Network; it's a globally
 replicated trove of Perl materials, including documentation, style
-guides, tricks and trap, alternate ports to non-Unix systems and
+guides, tricks and traps, alternate ports to non-Unix systems and
 occasional binary distributions for these.   Search engines for
 CPAN can be found at http://cpan.perl.com/ and at
 http://theory.uwinnipeg.ca/mod_perl/cpan-search.pl .
@@ -985,7 +914,8 @@ You should try to choose one close to you:
                    ftp://ftp.freenet.de/pub/ftp.cpan.org/pub/
                    ftp://ftp.gmd.de/packages/CPAN/
                    ftp://ftp.gwdg.de/pub/languages/perl/CPAN/
-                   ftp://ftp.leo.org/pub/comp/general/programming/languages/script/perl/CPAN/
+
+ftp://ftp.leo.org/pub/comp/general/programming/languages/script/perl/CPAN/
                    ftp://ftp.mpi-sb.mpg.de/pub/perl/CPAN/
                    ftp://ftp.rz.ruhr-uni-bochum.de/pub/CPAN/
                    ftp://ftp.uni-erlangen.de/pub/source/CPAN/
@@ -994,7 +924,8 @@ You should try to choose one close to you:
                    ftp://ftp.freenet.de/pub/ftp.cpan.org/pub/
                    ftp://ftp.gmd.de/packages/CPAN/
                    ftp://ftp.gwdg.de/pub/languages/perl/CPAN/
-                   ftp://ftp.leo.org/pub/comp/general/programming/languages/script/perl/CPAN/
+
+ftp://ftp.leo.org/pub/comp/general/programming/languages/script/perl/CPAN/
                    ftp://ftp.mpi-sb.mpg.de/pub/perl/CPAN/
                    ftp://ftp.rz.ruhr-uni-bochum.de/pub/CPAN/
                    ftp://ftp.uni-erlangen.de/pub/source/CPAN/
@@ -1030,7 +961,8 @@ You should try to choose one close to you:
     Turkey         ftp://sunsite.bilkent.edu.tr/pub/languages/CPAN/
     United Kingdom ftp://ftp.demon.co.uk/pub/mirrors/perl/CPAN/
                    ftp://ftp.flirble.org/pub/languages/perl/CPAN/
-                   ftp://ftp.mirror.ac.uk/sites/ftp.funet.fi/pub/languages/perl/CPAN/
+
+ftp://ftp.mirror.ac.uk/sites/ftp.funet.fi/pub/languages/perl/CPAN/
                    ftp://ftp.plig.org/pub/CPAN/
                    ftp://sunsite.doc.ic.ac.uk/packages/CPAN/
 
@@ -1050,7 +982,8 @@ You should try to choose one close to you:
                    ftp://ftp.uwsg.indiana.edu/pub/perl/CPAN/
     Kentucky       ftp://ftp.uky.edu/CPAN/
     Manitoba       ftp://theoryx5.uwinnipeg.ca/pub/CPAN/
-    Massachusetts  ftp://ftp.ccs.neu.edu/net/mirrors/ftp.funet.fi/pub/languages/perl/CPAN/
+    Massachusetts
+ftp://ftp.ccs.neu.edu/net/mirrors/ftp.funet.fi/pub/languages/perl/CPAN/
                    ftp://ftp.iguide.com/pub/mirrors/packages/perl/CPAN/
     Mexico         ftp://ftp.msg.com.mx/pub/CPAN/
     New York       ftp://ftp.deao.net/pub/CPAN/
@@ -1102,7 +1035,7 @@ its methods by loading dynamic C or C++ objects, but that should be
 totally transparent to the user of the module.  Likewise, the module
 might set up an AUTOLOAD function to slurp in subroutine definitions on
 demand, but this is also transparent.  Only the F<.pm> file is required to
-exist.  See L<perlsub>, L<perltoot>, and L<AutoLoader> for details about 
+exist.  See L<perlsub>, L<perltoot>, and L<AutoLoader> for details about
 the AUTOLOAD mechanism.
 
 =head2 Guidelines for Module Creation
@@ -1127,24 +1060,24 @@ scheme as the original author.
 
 Try to C<use warnings;> (or C<use warnings qw(...);>).
 Remember that you can add C<no warnings qw(...);> to individual blocks
-of code that need less warnings.  
+of code that need less warnings.
 
 Use blessed references.  Use the two argument form of bless to bless
 into the class name given as the first parameter of the constructor,
 e.g.,:
 
  sub new {
-	my $class = shift;
-	return bless {}, $class;
+     my $class = shift;
+     return bless {}, $class;
  }
 
 or even this if you'd like it to be used as either a static
 or a virtual method.
 
  sub new {
-	my $self  = shift;
-	my $class = ref($self) || $self;
-	return bless {}, $class;
+     my $self  = shift;
+     my $class = ref($self) || $self;
+     return bless {}, $class;
  }
 
 Pass arrays as references so more parameters can be added later
@@ -1176,13 +1109,13 @@ Avoid keeping any state information in your packages. It makes it
 difficult for multiple other packages to use yours. Keep state
 information in objects.
 
-Always use B<-w>.  
+Always use B<-w>.
 
 Try to C<use strict;> (or C<use strict qw(...);>).
 Remember that you can add C<no strict qw(...);> to individual blocks
-of code that need less strictness.  
+of code that need less strictness.
 
-Always use B<-w>.  
+Always use B<-w>.
 
 Follow the guidelines in the perlstyle(1) manual.
 
@@ -1371,7 +1304,7 @@ module (or the module itself if small) to the comp.lang.perl.announce
 Usenet newsgroup.  This will at least ensure very wide once-off
 distribution.
 
-If possible, register the module with CPAN.  You should 
+If possible, register the module with CPAN.  You should
 include details of its location in your announcement.
 
 Some notes about ftp archives: Please use a long descriptive file

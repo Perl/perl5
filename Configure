@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Apr 28 23:33:15 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Aug  2 03:07:08 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -288,7 +288,6 @@ bincompat5005=''
 d_bincompat5005=''
 byteorder=''
 cc=''
-gccversion=''
 ccflags=''
 cppflags=''
 ldflags=''
@@ -343,7 +342,6 @@ d_endnent=''
 d_endpent=''
 d_endpwent=''
 d_endsent=''
-d_endspent=''
 d_fchmod=''
 d_fchown=''
 d_fcntl=''
@@ -365,6 +363,7 @@ d_ftime=''
 d_gettimeod=''
 d_Gconvert=''
 d_getcwd=''
+d_getespwnam=''
 d_getfsstat=''
 d_getgrent=''
 d_getgrps=''
@@ -393,10 +392,10 @@ d_getprior=''
 d_getpbyname=''
 d_getpbynumber=''
 d_getprotoprotos=''
+d_getprpwnam=''
 d_getpwent=''
 d_getsent=''
 d_getservprotos=''
-d_getspent=''
 d_getspnam=''
 d_getsbyname=''
 d_getsbyport=''
@@ -491,6 +490,7 @@ d_setpgrp2=''
 d_bsdsetpgrp=''
 d_setpgrp=''
 d_setprior=''
+d_setproctitle=''
 d_setpwent=''
 d_setregid=''
 d_setresgid=''
@@ -500,7 +500,6 @@ d_setrgid=''
 d_setruid=''
 d_setsent=''
 d_setsid=''
-d_setspent=''
 d_setvbuf=''
 d_sfio=''
 usesfio=''
@@ -598,6 +597,8 @@ fflushNULL=''
 fflushall=''
 fpossize=''
 fpostype=''
+gccosandvers=''
+gccversion=''
 gidformat=''
 gidsign=''
 gidsize=''
@@ -624,6 +625,7 @@ i_grp=''
 i_iconv=''
 i_ieeefp=''
 i_inttypes=''
+i_libutil=''
 i_limits=''
 i_locale=''
 i_machcthr=''
@@ -638,6 +640,7 @@ i_netinettcp=''
 i_niin=''
 i_sysin=''
 i_poll=''
+i_prot=''
 i_pthread=''
 d_pwage=''
 d_pwchange=''
@@ -796,6 +799,7 @@ perl5=''
 perladmin=''
 perlpath=''
 d_nv_preserves_uv=''
+d_nv_preserves_uv_bits=''
 i16size=''
 i16type=''
 i32size=''
@@ -1001,7 +1005,7 @@ defvoidused=15
 libswanted='sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl'
 libswanted="$libswanted dld ld sun m c cposix posix"
 libswanted="$libswanted ndir dir crypt sec"
-libswanted="$libswanted ucb bsd BSD PW x iconv"
+libswanted="$libswanted ucb bsd BSD PW x iconv util"
 : We probably want to search /usr/shlib before most other libraries.
 : This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
 glibpth=`echo " $glibpth " | sed -e 's! /usr/shlib ! !'`
@@ -2031,6 +2035,62 @@ FOO
 	;;
 esac
 
+cat <<EOS >checkcc
+$startsh
+EOS
+cat <<'EOSC' >>checkcc
+case "$cc" in
+'') ;;
+*)  $rm -f try try.*
+    $cat >try.c <<EOM
+int main(int argc, char *argv[]) {
+  return 0;
+}
+EOM
+    if $cc -o try try.c; then
+       :
+    else
+        echo "Uh-oh, the C compiler '$cc' doesn't seem to be working." >&4
+        despair=yes
+        trygcc=yes
+        case "$cc" in
+        *gcc*) trygcc=no ;;
+        esac
+        case "`$cc -v -c try.c 2>&1`" in
+        *gcc*) trygcc=no ;;
+        esac
+        if $test X"$trygcc" = Xyes; then
+            if gcc -o try -c try.c; then
+                echo " "
+                echo "You seem to have a working gcc, though." >&4
+                rp="Would you like to use it?"
+                dflt=y
+                if $test -f myread; then
+                    . ./myread
+                else
+                    if $test -f UU/myread; then
+                        . ./UU/myread
+                    else
+                        echo "Cannot find myread, sorry.  Aborting." >&2
+                        exit 1
+                    fi
+                fi  
+                case "$ans" in
+                [yY]*) cc=gcc; ccflags=''; despair=no ;;
+                esac
+            fi
+        fi
+        if $test X"$despair" = Xyes; then
+            echo "You need to find a working C compiler." >&4
+            echo "I cannot continue any further, aborting." >&4
+            exit 1
+        fi
+    fi
+    $rm -f try try.*
+    ;;
+esac
+EOSC
+
 : determine whether symbolic links are supported
 echo " "
 $touch blurfl
@@ -2163,6 +2223,7 @@ if test -f config.sh; then
 		;;
 	esac
 fi
+. ./UU/checkcc
 if test ! -f config.sh; then
 	$cat <<EOM
 
@@ -2347,7 +2408,11 @@ EOM
 		osf1|mls+)	case "$5" in
 				alpha)
 					osname=dec_osf
-					osvers=`echo "$3" | sed 's/^[xvt]//'`
+					osvers=`sizer -v | awk '{print $3}' |  tr '[A-Z]' '[a-z]' | sed 's/^[xvt]//'`
+					case "$osvers" in
+					[1-9].[0-9]*) ;;
+					*) osvers=`echo "$3" | sed 's/^[xvt]//'` ;;
+					esac
 					;;
 			hp*)	osname=hp_osf1	;;
 			mips)	osname=mips_osf1 ;;
@@ -2797,7 +2862,11 @@ int main() {
 #endif
 }
 EOP
-	( cc -o pdp11 pdp11.c ) >/dev/null 2>&1
+	case "$cc" in
+	'') modelcc="$cc" ;;
+	*) modelcc="cc" ;;
+	esac
+	( $modelcc -o pdp11 pdp11.c ) >/dev/null 2>&1
 	if $test -f pdp11 && ./pdp11 2>/dev/null; then
 		dflt='unsplit split'
 	else
@@ -3074,6 +3143,8 @@ fi
 if $test -f cc.cbu; then
     . ./cc.cbu
 fi
+. ./checkcc
+
 echo " "
 echo "Checking for GNU cc in disguise and/or its version number..." >&4
 $cat >gccvers.c <<EOM
@@ -3111,6 +3182,186 @@ $rm -f gccvers*
 case "$gccversion" in
 1*) cpp=`./loc gcc-cpp $cpp $pth` ;;
 esac
+case "$gccversion" in
+'') gccosandvers='' ;;
+*) gccosandvers=`$cc -v 2>&1|grep '/specs$'|sed 's!.*/[^-]*-[^-]*-\([^/]*\)/'$gccversion'/specs$!\1!'`
+   case "$gccosandvers" in
+   $osname) gccosandvers='' ;; # linux gccs seem to have no linux osvers, grr
+   $osname$osvers) ;; # looking good
+   $osname*) cat <<EOM >&4
+
+*** WHOA THERE!!! ***
+
+    Your gcc has not been compiled for the exact release of
+    your operating system ($gccosandvers versus $osname$osvers).
+
+    In general it is a good idea to keep gcc synchronized with
+    the operating system because otherwise serious problems
+    may ensue when trying to compile software, like Perl.
+
+    I'm trying to be optimistic here, though, and will continue.
+    If later during the configuration and build icky compilation
+    problems appear (headerfile conflicts being the most common
+    manifestation), I suggest reinstalling the gcc to match
+    your operating system release.
+
+EOM
+      ;;
+   *) gccosandvers='' ;; # failed to parse, better be silent
+   esac
+   ;;
+esac
+
+
+
+
+: see how we invoke the C preprocessor
+echo " "
+echo "Now, how can we feed standard input to your C preprocessor..." >&4
+cat <<'EOT' >testcpp.c
+#define ABC abc
+#define XYZ xyz
+ABC.XYZ
+EOT
+cd ..
+if test ! -f cppstdin; then
+	if test "X$osname" = "Xaix" -a "X$gccversion" = X; then
+		# AIX cc -E doesn't show the absolute headerfile
+		# locations but we'll cheat by using the -M flag.
+		echo 'cat >.$$.c; rm -f .$$.u; '"$cc"' ${1+"$@"} -M -c .$$.c 2>/dev/null; test -s .$$.u && awk '"'"'$2 ~ /\.h$/ { print "# 0 \""$2"\"" }'"'"' .$$.u; rm -f .$$.o .$$.u; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' > cppstdin
+	else
+		echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
+	fi
+else
+	echo "Keeping your $hint cppstdin wrapper."
+fi
+chmod 755 cppstdin
+wrapper=`pwd`/cppstdin
+ok='false'
+cd UU
+
+if $test "X$cppstdin" != "X" && \
+	$cppstdin $cppminus <testcpp.c >testcpp.out 2>&1 && \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+then
+	echo "You used to use $cppstdin $cppminus so we'll use that again."
+	case "$cpprun" in
+	'') echo "But let's see if we can live without a wrapper..." ;;
+	*)
+		if $cpprun $cpplast <testcpp.c >testcpp.out 2>&1 && \
+			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+		then
+			echo "(And we'll use $cpprun $cpplast to preprocess directly.)"
+			ok='true'
+		else
+			echo "(However, $cpprun $cpplast does not work, let's see...)"
+		fi
+		;;
+	esac
+else
+	case "$cppstdin" in
+	'') ;;
+	*)
+		echo "Good old $cppstdin $cppminus does not seem to be of any help..."
+		;;
+	esac
+fi
+
+if $ok; then
+	: nothing
+elif echo 'Maybe "'"$cc"' -E" will work...'; \
+	$cc -E <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yup, it does."
+	x_cpp="$cc -E"
+	x_minus='';
+elif echo 'Nope...maybe "'"$cc"' -E -" will work...'; \
+	$cc -E - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yup, it does."
+	x_cpp="$cc -E"
+	x_minus='-';
+elif echo 'Nope...maybe "'"$cc"' -P" will work...'; \
+	$cc -P <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yipee, that works!"
+	x_cpp="$cc -P"
+	x_minus='';
+elif echo 'Nope...maybe "'"$cc"' -P -" will work...'; \
+	$cc -P - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "At long last!"
+	x_cpp="$cc -P"
+	x_minus='-';
+elif echo 'No such luck, maybe "'$cpp'" will work...'; \
+	$cpp <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "It works!"
+	x_cpp="$cpp"
+	x_minus='';
+elif echo 'Nixed again...maybe "'$cpp' -" will work...'; \
+	$cpp - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Hooray, it works!  I was beginning to wonder."
+	x_cpp="$cpp"
+	x_minus='-';
+elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
+	$wrapper <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	x_cpp="$wrapper"
+	x_minus=''
+	echo "Eureka!"
+else
+	dflt=''
+	rp="No dice.  I can't find a C preprocessor.  Name one:"
+	. ./myread
+	x_cpp="$ans"
+	x_minus=''
+	$x_cpp <testcpp.c >testcpp.out 2>&1
+	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+		echo "OK, that will do." >&4
+	else
+echo "Sorry, I can't get that to work.  Go find one and rerun Configure." >&4
+		exit 1
+	fi
+fi
+
+case "$ok" in
+false)
+	cppstdin="$x_cpp"
+	cppminus="$x_minus"
+	cpprun="$x_cpp"
+	cpplast="$x_minus"
+	set X $x_cpp
+	shift
+	case "$1" in
+	"$cpp")
+		echo "Perhaps can we force $cc -E using a wrapper..."
+		if $wrapper <testcpp.c >testcpp.out 2>&1; \
+			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+		then
+			echo "Yup, we can."
+			cppstdin="$wrapper"
+			cppminus='';
+		else
+			echo "Nope, we'll have to live without it..."
+		fi
+		;;
+	esac
+	case "$cpprun" in
+	"$wrapper")
+		cpprun=''
+		cpplast=''
+		;;
+	esac
+	;;
+esac
+
+case "$cppstdin" in
+"$wrapper"|'cppstdin') ;;
+*) $rm -f $wrapper;;
+esac
+$rm -f testcpp.c testcpp.out
 
 : decide how portable to be.  Allow command line overrides.
 case "$d_portable" in
@@ -3277,6 +3528,7 @@ while test "$type"; do
 		true)
 			case "$ansexp" in
 			/*) value="$ansexp" ;;
+			[a-zA-Z]:/*) value="$ansexp" ;;
 			*)
 				redo=true
 				case "$already" in
@@ -3404,7 +3656,7 @@ if $test -f /bin/mips && /bin/mips; then
 /bsd43
 #endif
 EOCP
-	if $cc -E usr.c > usr.out && $contains / usr.out >/dev/null 2>&1; then
+	if cc -E usr.c > usr.out && $contains / usr.out >/dev/null 2>&1; then
 		dflt='/bsd43/usr/include'
 		incpath='/bsd43'
 		mips_type='BSD 4.3'
@@ -3436,154 +3688,6 @@ y)	fn=d/
 *)	usrinc="$dflt"
 	;;
 esac
-
-: see how we invoke the C preprocessor
-echo " "
-echo "Now, how can we feed standard input to your C preprocessor..." >&4
-cat <<'EOT' >testcpp.c
-#define ABC abc
-#define XYZ xyz
-ABC.XYZ
-EOT
-cd ..
-if test ! -f cppstdin; then
-	if test "X$osname" = "Xaix" -a "X$gccversion" = X; then
-		# AIX cc -E doesn't show the absolute headerfile
-		# locations but we'll cheat by using the -M flag.
-		echo 'cat >.$$.c; rm -f .$$.u; '"$cc"' ${1+"$@"} -M -c .$$.c 2>/dev/null; test -s .$$.u && awk '"'"'$2 ~ /\.h$/ { print "# 0 \""$2"\"" }'"'"' .$$.u; rm -f .$$.o .$$.u; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' > cppstdin
-	else
-		echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
-	fi
-else
-	echo "Keeping your $hint cppstdin wrapper."
-fi
-chmod 755 cppstdin
-wrapper=`pwd`/cppstdin
-ok='false'
-cd UU
-
-if $test "X$cppstdin" != "X" && \
-	$cppstdin $cppminus <testcpp.c >testcpp.out 2>&1 && \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-then
-	echo "You used to use $cppstdin $cppminus so we'll use that again."
-	case "$cpprun" in
-	'') echo "But let's see if we can live without a wrapper..." ;;
-	*)
-		if $cpprun $cpplast <testcpp.c >testcpp.out 2>&1 && \
-			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-		then
-			echo "(And we'll use $cpprun $cpplast to preprocess directly.)"
-			ok='true'
-		else
-			echo "(However, $cpprun $cpplast does not work, let's see...)"
-		fi
-		;;
-	esac
-else
-	case "$cppstdin" in
-	'') ;;
-	*)
-		echo "Good old $cppstdin $cppminus does not seem to be of any help..."
-		;;
-	esac
-fi
-
-if $ok; then
-	: nothing
-elif echo 'Maybe "'"$cc"' -E" will work...'; \
-	$cc -E <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yup, it does."
-	x_cpp="$cc -E"
-	x_minus='';
-elif echo 'Nope...maybe "'"$cc"' -E -" will work...'; \
-	$cc -E - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yup, it does."
-	x_cpp="$cc -E"
-	x_minus='-';
-elif echo 'Nope...maybe "'"$cc"' -P" will work...'; \
-	$cc -P <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yipee, that works!"
-	x_cpp="$cc -P"
-	x_minus='';
-elif echo 'Nope...maybe "'"$cc"' -P -" will work...'; \
-	$cc -P - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "At long last!"
-	x_cpp="$cc -P"
-	x_minus='-';
-elif echo 'No such luck, maybe "'$cpp'" will work...'; \
-	$cpp <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "It works!"
-	x_cpp="$cpp"
-	x_minus='';
-elif echo 'Nixed again...maybe "'$cpp' -" will work...'; \
-	$cpp - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Hooray, it works!  I was beginning to wonder."
-	x_cpp="$cpp"
-	x_minus='-';
-elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
-	$wrapper <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	x_cpp="$wrapper"
-	x_minus=''
-	echo "Eureka!"
-else
-	dflt=''
-	rp="No dice.  I can't find a C preprocessor.  Name one:"
-	. ./myread
-	x_cpp="$ans"
-	x_minus=''
-	$x_cpp <testcpp.c >testcpp.out 2>&1
-	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-		echo "OK, that will do." >&4
-	else
-echo "Sorry, I can't get that to work.  Go find one and rerun Configure." >&4
-		exit 1
-	fi
-fi
-
-case "$ok" in
-false)
-	cppstdin="$x_cpp"
-	cppminus="$x_minus"
-	cpprun="$x_cpp"
-	cpplast="$x_minus"
-	set X $x_cpp
-	shift
-	case "$1" in
-	"$cpp")
-		echo "Perhaps can we force $cc -E using a wrapper..."
-		if $wrapper <testcpp.c >testcpp.out 2>&1; \
-			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-		then
-			echo "Yup, we can."
-			cppstdin="$wrapper"
-			cppminus='';
-		else
-			echo "Nope, we'll have to live without it..."
-		fi
-		;;
-	esac
-	case "$cpprun" in
-	"$wrapper")
-		cpprun=''
-		cpplast=''
-		;;
-	esac
-	;;
-esac
-
-case "$cppstdin" in
-"$wrapper"|'cppstdin') ;;
-*) $rm -f $wrapper;;
-esac
-$rm -f testcpp.c testcpp.out
 
 : Set private lib path
 case "$plibpth" in
@@ -8524,10 +8628,6 @@ eval $inlibc
 set endservent d_endsent
 eval $inlibc
 
-: see if endspent exists
-set endspent d_endspent
-eval $inlibc
-
 : Locate the flags for 'open()'
 echo " "
 $cat >open3.c <<'EOCP'
@@ -9188,6 +9288,10 @@ esac
 set getcwd d_getcwd
 eval $inlibc
 
+: see if getespwnam exists
+set getespwnam d_getespwnam
+eval $inlibc
+
 
 : see if getfsstat exists
 set getfsstat d_getfsstat
@@ -9366,6 +9470,10 @@ echo " "
 set d_getprotoprotos getprotoent $i_netdb netdb.h
 eval $hasproto
 
+: see if getprpwnam exists
+set getprpwnam d_getprpwnam
+eval $inlibc
+
 : see if getpwent exists
 set getpwent d_getpwent
 eval $inlibc
@@ -9387,10 +9495,6 @@ eval $inlibc
 echo " "
 set d_getservprotos getservent $i_netdb netdb.h
 eval $hasproto
-
-: see if getspent exists
-set getspent d_getspent
-eval $inlibc
 
 : see if getspnam exists
 set getspnam d_getspnam
@@ -9691,7 +9795,7 @@ echo 'int main() { long long x = 7; return 0; }' > try.c
 set try
 if eval $compile; then
 	val="$define"
-	echo "You have have long long."
+	echo "You have long long."
 else
 	val="$undef"
 	echo "You do not have long long."
@@ -10200,6 +10304,39 @@ $define) $echo "Yes, they can."  2>&1 ;;
 esac
 
 $rm -f try.* try
+
+case "$d_nv_preserves_uv" in
+"$define") d_nv_preserves_uv_bits=`expr $uvsize \* 8` ;;
+*)	$echo "Checking how many bits of your UVs your NVs can preserve..." >&4
+	$cat <<EOP >try.c
+#include <stdio.h>
+int main() {
+    $uvtype u = 0;
+    int     n = 8 * $uvsize;
+    int     i;
+    for (i = 0; i < n; i++) {
+      u = u << 1 | ($uvtype)1;
+      if (($uvtype)($nvtype)u != u)
+        break;
+    }
+    printf("%d\n", i);
+    exit(0);
+}
+EOP
+	set try
+	if eval $compile; then
+		d_nv_preserves_uv_bits="`./try$exe_ext`"
+	fi
+	case "$d_nv_preserves_uv_bits" in
+	[1-9]*)	$echo "Your NVs can preserve $d_nv_preserves_uv_bits bits of your UVs."  2>&1 ;;
+	*)	$echo "Can't figure out how many bits your NVs preserve." 2>&1
+		d_nv_preserves_uv_bits="$undef"
+		;;
+	esac
+	$rm -f try.* try
+	;;
+esac
+
 
 
 : check for off64_t
@@ -10995,6 +11132,10 @@ eval $inlibc
 set setpriority d_setprior
 eval $inlibc
 
+: see if setproctitle exists
+set setproctitle d_setproctitle
+eval $inlibc
+
 : see if setpwent exists
 set setpwent d_setpwent
 eval $inlibc
@@ -11025,10 +11166,6 @@ eval $inlibc
 
 : see if setsid exists
 set setsid d_setsid
-eval $inlibc
-
-: see if setspent exists
-set setspent d_setspent
 eval $inlibc
 
 : see if setvbuf exists
@@ -14236,6 +14373,10 @@ eval $inhdr
 set ieeefp.h i_ieeefp
 eval $inhdr
 
+: see if this is a libutil.h system
+set libutil.h i_libutil
+eval $inhdr
+
 : see if locale.h is available
 set locale.h i_locale
 eval $inhdr
@@ -14313,6 +14454,10 @@ eval $inhdr
 
 : see if this is a poll.h system
 set poll.h i_poll
+eval $inhdr
+
+: see if this is a prot.h system
+set prot.h i_prot
 eval $inhdr
 
 echo " "
@@ -14886,6 +15031,12 @@ for xxx in $known_extensions ; do
 		true|$define|y) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
+	Sys/Syslog|sys/syslog)
+		: XXX syslog requires socket
+		case "$d_socket" in 
+		true|$define|y) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
 	Thread|thread)
 		case "$usethreads" in 
 		true|$define|y) avail_ext="$avail_ext $xxx" ;;
@@ -15223,7 +15374,6 @@ d_endnent='$d_endnent'
 d_endpent='$d_endpent'
 d_endpwent='$d_endpwent'
 d_endsent='$d_endsent'
-d_endspent='$d_endspent'
 d_eofnblk='$d_eofnblk'
 d_eunice='$d_eunice'
 d_fchmod='$d_fchmod'
@@ -15247,6 +15397,7 @@ d_fstatvfs='$d_fstatvfs'
 d_ftello='$d_ftello'
 d_ftime='$d_ftime'
 d_getcwd='$d_getcwd'
+d_getespwnam='$d_getespwnam'
 d_getfsstat='$d_getfsstat'
 d_getgrent='$d_getgrent'
 d_getgrps='$d_getgrps'
@@ -15271,12 +15422,12 @@ d_getpgrp='$d_getpgrp'
 d_getppid='$d_getppid'
 d_getprior='$d_getprior'
 d_getprotoprotos='$d_getprotoprotos'
+d_getprpwnam='$d_getprpwnam'
 d_getpwent='$d_getpwent'
 d_getsbyname='$d_getsbyname'
 d_getsbyport='$d_getsbyport'
 d_getsent='$d_getsent'
 d_getservprotos='$d_getservprotos'
-d_getspent='$d_getspent'
 d_getspnam='$d_getspnam'
 d_gettimeod='$d_gettimeod'
 d_gnulibc='$d_gnulibc'
@@ -15333,6 +15484,7 @@ d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
 d_nice='$d_nice'
 d_nv_preserves_uv='$d_nv_preserves_uv'
+d_nv_preserves_uv_bits='$d_nv_preserves_uv_bits'
 d_off64_t='$d_off64_t'
 d_old_pthread_create_joinable='$d_old_pthread_create_joinable'
 d_oldpthreads='$d_oldpthreads'
@@ -15387,6 +15539,7 @@ d_setpgid='$d_setpgid'
 d_setpgrp2='$d_setpgrp2'
 d_setpgrp='$d_setpgrp'
 d_setprior='$d_setprior'
+d_setproctitle='$d_setproctitle'
 d_setpwent='$d_setpwent'
 d_setregid='$d_setregid'
 d_setresgid='$d_setresgid'
@@ -15396,7 +15549,6 @@ d_setrgid='$d_setrgid'
 d_setruid='$d_setruid'
 d_setsent='$d_setsent'
 d_setsid='$d_setsid'
-d_setspent='$d_setspent'
 d_setvbuf='$d_setvbuf'
 d_sfio='$d_sfio'
 d_shm='$d_shm'
@@ -15496,6 +15648,7 @@ freetype='$freetype'
 full_ar='$full_ar'
 full_csh='$full_csh'
 full_sed='$full_sed'
+gccosandvers='$gccosandvers'
 gccversion='$gccversion'
 gidformat='$gidformat'
 gidsign='$gidsign'
@@ -15533,6 +15686,7 @@ i_grp='$i_grp'
 i_iconv='$i_iconv'
 i_ieeefp='$i_ieeefp'
 i_inttypes='$i_inttypes'
+i_libutil='$i_libutil'
 i_limits='$i_limits'
 i_locale='$i_locale'
 i_machcthr='$i_machcthr'
@@ -15546,6 +15700,7 @@ i_neterrno='$i_neterrno'
 i_netinettcp='$i_netinettcp'
 i_niin='$i_niin'
 i_poll='$i_poll'
+i_prot='$i_prot'
 i_pthread='$i_pthread'
 i_pwd='$i_pwd'
 i_rpcsvcdbm='$i_rpcsvcdbm'

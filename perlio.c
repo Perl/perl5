@@ -9,7 +9,11 @@
 
 
 #define VOIDUSED 1
-#include "config.h"
+#ifdef PERL_MICRO
+#   include "uconfig.h"
+#else
+#   include "config.h"
+#endif
 
 #define PERLIO_NOT_STDIO 0 
 #if !defined(PERLIO_IS_STDIO) && !defined(USE_SFIO)

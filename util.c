@@ -16,12 +16,14 @@
 #define PERL_IN_UTIL_C
 #include "perl.h"
 
+#ifndef PERL_MICRO
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
 #endif
 
 #ifndef SIG_ERR
 # define SIG_ERR ((Sighandler_t) -1)
+#endif
 #endif
 
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
@@ -87,7 +89,7 @@ Perl_safesysmalloc(MEM_SIZE size)
     if ((long)size < 0)
 	Perl_croak_nocontext("panic: malloc");
 #endif
-    ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
+    ptr = (Malloc_t)PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
     if (ptr != Nullch)
@@ -131,7 +133,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     if ((long)size < 0)
 	Perl_croak_nocontext("panic: realloc");
 #endif
-    ptr = PerlMem_realloc(where,size);
+    ptr = (Malloc_t)PerlMem_realloc(where,size);
     PERL_ALLOC_CHECK(ptr);
  
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
@@ -184,7 +186,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 	Perl_croak_nocontext("panic: calloc");
 #endif
     size *= count;
-    ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
+    ptr = (Malloc_t)PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) calloc %ld x %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)count,(long)size));
     if (ptr != Nullch) {
@@ -1000,7 +1002,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	if ( SvTAIL(littlestr) 
 	     && (bigend - big == littlelen - 1)
 	     && (littlelen == 1 
-		 || (*big == *little && memEQ(big, little, littlelen - 1))))
+		 || (*big == *little &&
+		     memEQ((char *)big, (char *)little, littlelen - 1))))
 	    return (char*)big;
 	return Nullch;
     }
@@ -1168,7 +1171,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	}
       check_end:
 	if ( s == bigend && (table[-1] & FBMcf_TAIL)
-	     && memEQ(bigend - littlelen, oldlittle - littlelen, littlelen) )
+	     && memEQ((char *)(bigend - littlelen),
+		      (char *)(oldlittle - littlelen), littlelen) )
 	    return (char*)bigend - littlelen;
 	return Nullch;
     }
@@ -1283,7 +1287,8 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	return (char*)big;
     big -= stop_pos;
     if (*big == first
-	&& ((stop_pos == 1) || memEQ(big + 1, little, stop_pos - 1)))
+	&& ((stop_pos == 1) ||
+	    memEQ((char *)(big + 1), (char *)little, stop_pos - 1)))
 	return (char*)big;
     return Nullch;
 }
@@ -1580,14 +1585,20 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
     SV *msv;
     STRLEN msglen;
 
-    msv = vmess(pat, args);
-    if (PL_errors && SvCUR(PL_errors)) {
-	sv_catsv(PL_errors, msv);
-	message = SvPV(PL_errors, msglen);
-	SvCUR_set(PL_errors, 0);
+    if (pat) {
+	msv = vmess(pat, args);
+	if (PL_errors && SvCUR(PL_errors)) {
+	    sv_catsv(PL_errors, msv);
+	    message = SvPV(PL_errors, msglen);
+	    SvCUR_set(PL_errors, 0);
+	}
+	else
+	    message = SvPV(msv,msglen);
     }
-    else
-	message = SvPV(msv,msglen);
+    else {
+	message = Nullch;
+	msglen = 0;
+    }
 
     DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%"UVxf" %s",
 			  PTR2UV(thr), message));
@@ -1606,9 +1617,14 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 
 	    ENTER;
 	    save_re_context();
-	    msg = newSVpvn(message, msglen);
-	    SvREADONLY_on(msg);
-	    SAVEFREESV(msg);
+	    if (message) {
+		msg = newSVpvn(message, msglen);
+		SvREADONLY_on(msg);
+		SAVEFREESV(msg);
+	    }
+	    else {
+		msg = ERRSV;
+	    }
 
 	    PUSHSTACKi(PERLSI_DIEHOOK);
 	    PUSHMARK(SP);
@@ -1655,9 +1671,16 @@ Perl_croak_nocontext(const char *pat, ...)
 /*
 =for apidoc croak
 
-This is the XSUB-writer's interface to Perl's C<die> function.  Use this
-function the same way you use the C C<printf> function.  See
-C<warn>.
+This is the XSUB-writer's interface to Perl's C<die> function.
+Normally use this function the same way you use the C C<printf>
+function.  See C<warn>.
+
+If you want to throw an exception object, assign the object to
+C<$@> and then pass C<Nullch> to croak():
+
+   errsv = get_sv("@", TRUE);
+   sv_setsv(errsv, exception_object);
+   croak(Nullch);
 
 =cut
 */
@@ -2301,7 +2324,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
     PERL_FLUSHALL_FOR_CHILD;
 #ifdef OS2
     if (doexec) {
-	return my_syspopen(cmd,mode);
+	return my_syspopen(aTHX_ cmd,mode);
     }
 #endif 
     This = (*mode == 'w');
@@ -2379,7 +2402,9 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	PerlLIO_close(p[This]);
 	p[This] = p[that];
     }
+    LOCK_FDPID_MUTEX;
     sv = *av_fetch(PL_fdpid,p[This],TRUE);
+    UNLOCK_FDPID_MUTEX;
     (void)SvUPGRADE(sv,SVt_IV);
     SvIVX(sv) = pid;
     PL_forkprocess = pid;
@@ -2473,7 +2498,7 @@ dup2(int oldfd, int newfd)
 }
 #endif
 
-
+#ifndef PERL_MICRO
 #ifdef HAS_SIGACTION
 
 Sighandler_t
@@ -2576,6 +2601,7 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 }
 
 #endif /* !HAS_SIGACTION */
+#endif /* !PERL_MICRO */
 
     /* VMS' my_pclose() is in VMS.c; same with OS/2 */
 #if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
@@ -2596,7 +2622,9 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     int saved_win32_errno;
 #endif
 
+    LOCK_FDPID_MUTEX;
     svp = av_fetch(PL_fdpid,PerlIO_fileno(ptr),TRUE);
+    UNLOCK_FDPID_MUTEX;
     pid = SvIVX(*svp);
     SvREFCNT_dec(*svp);
     *svp = &PL_sv_undef;
@@ -2617,15 +2645,19 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 #ifdef UTS
     if(PerlProc_kill(pid, 0) < 0) { return(pid); }   /* HOM 12/23/91 */
 #endif
+#ifndef PERL_MICRO
     rsignal_save(SIGHUP, SIG_IGN, &hstat);
     rsignal_save(SIGINT, SIG_IGN, &istat);
     rsignal_save(SIGQUIT, SIG_IGN, &qstat);
+#endif
     do {
 	pid2 = wait4pid(pid, &status, 0);
     } while (pid2 == -1 && errno == EINTR);
+#ifndef PERL_MICRO
     rsignal_restore(SIGHUP, &hstat);
     rsignal_restore(SIGINT, &istat);
     rsignal_restore(SIGQUIT, &qstat);
+#endif
     if (close_failed) {
 	SETERRNO(saved_errno, saved_vaxc_errno);
 	return -1;
@@ -3464,6 +3496,35 @@ Perl_condpair_magic(pTHX_ SV *sv)
     return mg;
 }
 
+SV *
+Perl_sv_lock(pTHX_ SV *osv)
+{
+    MAGIC *mg;
+    SV *sv = osv;
+
+    LOCK_SV_LOCK_MUTEX;
+    if (SvROK(sv)) {
+	sv = SvRV(sv);
+    }
+
+    mg = condpair_magic(sv);
+    MUTEX_LOCK(MgMUTEXP(mg));
+    if (MgOWNER(mg) == thr)
+	MUTEX_UNLOCK(MgMUTEXP(mg));
+    else {
+	while (MgOWNER(mg))
+	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
+	MgOWNER(mg) = thr;
+	DEBUG_S(PerlIO_printf(Perl_debug_log,
+			      "0x%"UVxf": Perl_lock lock 0x%"UVxf"\n",
+			      PTR2UV(thr), PTR2UV(sv));)
+	MUTEX_UNLOCK(MgMUTEXP(mg));
+	SAVEDESTRUCTOR_X(Perl_unlock_condpair, sv);
+    }
+    UNLOCK_SV_LOCK_MUTEX;
+    return sv;
+}
+
 /*
  * Make a new perl thread structure using t as a prototype. Some of the
  * fields for the new thread are copied from the prototype thread, t,
@@ -3643,12 +3704,12 @@ Perl_get_opargs(pTHX)
 PPADDR_t*
 Perl_get_ppaddr(pTHX)
 {
- return &PL_ppaddr;
+ return (PPADDR_t*)PL_ppaddr;
 }
 
 #ifndef HAS_GETENV_LEN
 char *
-Perl_getenv_len(pTHX_ char *env_elem, unsigned long *len)
+Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 {
     char *env_trans = PerlEnv_getenv(env_elem);
     if (env_trans)
@@ -3835,7 +3896,7 @@ Perl_report_closed_fh(pTHX_ GV *gv, IO *io, const char *func, const char *obj)
     assert(gv);
 
     sv = sv_newmortal();
-    gv_efullname3(sv, gv, Nullch);
+    gv_efullname4(sv, gv, Nullch, FALSE);
     name = SvPVX(sv);
 
     Perl_warner(aTHX_ WARN_CLOSED, "%s() on closed %s %s", func, obj, name);

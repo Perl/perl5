@@ -373,7 +373,7 @@ sub _find_opt {
 
             $name = $abs_dir . $_;
 
-            &$wanted_callback;
+            { &$wanted_callback }; # protect against wild "next"
 
         }
 
@@ -429,7 +429,7 @@ sub _find_dir($$$) {
             $_= ($no_chdir ? $dir_name : $dir_rel );
 	    # prune may happen here
             $prune= 0;
-            &$wanted_callback; 
+            { &$wanted_callback }; 	# protect against wild "next"
             next if $prune;
 	}
       
@@ -472,7 +472,7 @@ sub _find_dir($$$) {
 		
 		$name = $dir_pref . $FN;
 		$_ = ($no_chdir ? $name : $FN);
-		&$wanted_callback;
+		{ &$wanted_callback }; # protect against wild "next"
 	    }
 
 	}
@@ -496,13 +496,13 @@ sub _find_dir($$$) {
 		    else {
 			$name = $dir_pref . $FN;
 			$_= ($no_chdir ? $name : $FN);
-			&$wanted_callback;
+			{ &$wanted_callback }; # protect against wild "next"
 		    }
 		}
 		else {
 		    $name = $dir_pref . $FN;
 		    $_= ($no_chdir ? $name : $FN);
-		    &$wanted_callback;
+		    { &$wanted_callback }; # protect against wild "next"
 		}
 	    }
 	}
@@ -528,7 +528,7 @@ sub _find_dir($$$) {
                 if ( substr($_,-2) eq '/.' ) {
                   s|/\.$||;
                 }
-                &$wanted_callback;
+                { &$wanted_callback }; # protect against wild "next"
             } else {
                 push @Stack,[$CdLvl,$p_dir,$dir_rel,-1]  if  $bydepth;
                 last;
@@ -584,13 +584,25 @@ sub _find_dir_symlnk($$$) {
     while (defined $SE) {
 
 	unless ($bydepth) {
+	    # change to parent directory
+	    unless ($no_chdir) {
+		my $udir = $pdir_loc;
+		if ($untaint) {
+		    $udir = $1 if $pdir_loc =~ m|$untaint_pat|;
+		}
+		unless (chdir $udir) {
+		    warn "Can't cd to $udir: $!\n";
+		    next;
+		}
+	    }
 	    $dir= $p_dir;
             $name= $dir_name;
             $_= ($no_chdir ? $dir_name : $dir_rel );
             $fullname= $dir_loc;
 	    # prune may happen here
             $prune= 0;
-            &$wanted_callback;
+	    lstat($_); # make sure  file tests with '_' work
+            { &$wanted_callback }; # protect against wild "next"
             next if  $prune;
 	}
 
@@ -640,7 +652,7 @@ sub _find_dir_symlnk($$$) {
 		$fullname = $new_loc;
 		$name = $dir_pref . $FN;
 		$_ = ($no_chdir ? $name : $FN);
-		&$wanted_callback;
+		{ &$wanted_callback }; # protect against wild "next"
 	    }
 	}
 
@@ -673,7 +685,8 @@ sub _find_dir_symlnk($$$) {
                   s|/\.$||;
                 }
 
-	        &$wanted_callback;
+		lstat($_); # make sure  file tests with '_' work
+	        { &$wanted_callback }; # protect against wild "next"
             } else {
                 push @Stack,[$dir_loc, $pdir_loc, $p_dir, $dir_rel,-1]  if  $bydepth;
                 last;
@@ -721,7 +734,8 @@ if ($^O eq 'VMS') {
 }
 
 $File::Find::dont_use_nlink = 1
-    if $^O eq 'os2' || $^O eq 'dos' || $^O eq 'amigaos' || $^O eq 'MSWin32';
+    if $^O eq 'os2' || $^O eq 'dos' || $^O eq 'amigaos' || $^O eq 'MSWin32' ||
+       $^O eq 'cygwin';
 
 # Set dont_use_nlink in your hint file if your system's stat doesn't
 # report the number of links in a directory as an indication

@@ -688,8 +688,11 @@ On POSIX systems, you can detect this condition this way:
 
 Returns the character represented by that NUMBER in the character set.
 For example, C<chr(65)> is C<"A"> in either ASCII or Unicode, and
-chr(0x263a) is a Unicode smiley face (but only within the scope of
-a C<use utf8>).  For the reverse, use L</ord>.  
+chr(0x263a) is a Unicode smiley face. Within the scope of C<use utf8>, 
+characters higher than 127 are encoded in Unicode; if you don't want
+this, temporarily C<use bytes> or use C<pack("C*",...)>
+
+For the reverse, use L</ord>.  
 See L<utf8> for more about Unicode.
 
 If NUMBER is omitted, uses C<$_>.
@@ -1265,11 +1268,11 @@ there was an error.
 In the first form, the return value of EXPR is parsed and executed as if it
 were a little Perl program.  The value of the expression (which is itself
 determined within scalar context) is first parsed, and if there weren't any
-errors, executed in the context of the current Perl program, so that any
-variable settings or subroutine and format definitions remain afterwards.
-Note that the value is parsed every time the eval executes.  If EXPR is
-omitted, evaluates C<$_>.  This form is typically used to delay parsing
-and subsequent execution of the text of EXPR until run time.
+errors, executed in the lexical context of the current Perl program, so
+that any variable settings or subroutine and format definitions remain
+afterwards.  Note that the value is parsed every time the eval executes.
+If EXPR is omitted, evaluates C<$_>.  This form is typically used to
+delay parsing and subsequent execution of the text of EXPR until run time.
 
 In the second form, the code within the BLOCK is parsed only once--at the
 same time the code surrounding the eval itself was parsed--and executed
@@ -2078,9 +2081,9 @@ or equivalently,
 
     @foo = grep {!/^#/} @bar;    # weed out comments
 
-Note that, because C<$_> is a reference into the list value, it can
-be used to modify the elements of the array.  While this is useful and
-supported, it can cause bizarre results if the LIST is not a named array.
+Note that C<$_> is an alias to the list value, so it can be used to
+modify the elements of the LIST.  While this is useful and supported,
+it can cause bizarre results if the elements of LIST are not variables.
 Similarly, grep returns aliases into the original list, much as a for
 loop's index variable aliases the list elements.  That is, modifying an
 element of a list returned by grep (for example, in a C<foreach>, C<map>
@@ -2462,9 +2465,9 @@ is just a funny way to write
 	$hash{getkey($_)} = $_;
     }
 
-Note that, because C<$_> is a reference into the list value, it can
-be used to modify the elements of the array.  While this is useful and
-supported, it can cause bizarre results if the LIST is not a named array.
+Note that C<$_> is an alias to the list value, so it can be used to
+modify the elements of the LIST.  While this is useful and supported,
+it can cause bizarre results if the elements of LIST are not variables.
 Using a regular C<foreach> loop for this purpose would be clearer in
 most cases.  See also L</grep> for an array composed of those items of
 the original list for which the BLOCK or EXPR evaluates to true.
@@ -2495,13 +2498,13 @@ first to get the correct constant definitions.  If CMD is C<IPC_STAT>,
 then ARG must be a variable which will hold the returned C<msqid_ds>
 structure.  Returns like C<ioctl>: the undefined value for error,
 C<"0 but true"> for zero, or the actual return value otherwise.  See also
-C<IPC::SysV> and C<IPC::Semaphore> documentation.
+L<perlipc/"SysV IPC">, C<IPC::SysV>, and C<IPC::Semaphore> documentation.
 
 =item msgget KEY,FLAGS
 
 Calls the System V IPC function msgget(2).  Returns the message queue
-id, or the undefined value if there is an error.  See also C<IPC::SysV>
-and C<IPC::Msg> documentation.
+id, or the undefined value if there is an error.  See also
+L<perlipc/"SysV IPC"> and C<IPC::SysV> and C<IPC::Msg> documentation.
 
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
 
@@ -2511,7 +2514,8 @@ SIZE.  Note that when a message is received, the message type as a
 native long integer will be the first thing in VAR, followed by the
 actual message.  This packing may be opened with C<unpack("l! a*")>.
 Taints the variable.  Returns true if successful, or false if there is
-an error.  See also C<IPC::SysV> and C<IPC::SysV::Msg> documentation.
+an error.  See also L<perlipc/"SysV IPC">, C<IPC::SysV>, and
+C<IPC::SysV::Msg> documentation.
 
 =item msgsnd ID,MSG,FLAGS
 
@@ -3202,6 +3206,15 @@ equal $foo).
 
 =item *
 
+If the pattern begins with a C<U>, the resulting string will be treated
+as Unicode-encoded. You can force UTF8 encoding on in a string with an
+initial C<U0>, and the bytes that follow will be interpreted as Unicode
+characters. If you don't want this to happen, you can begin your pattern
+with C<C0> (or anything else) to force Perl not to UTF8 encode your
+string, and then follow this with a C<U*> somewhere in your pattern.
+
+=item *
+
 You must yourself do any alignment or padding by inserting for example
 enough C<'x'>es while packing.  There is no way to pack() and unpack()
 could know where the bytes are going to or coming from.  Therefore
@@ -3426,7 +3439,7 @@ Generalized quotes.  See L<perlop/"Regexp Quote-Like Operators">.
 
 =item quotemeta
 
-Returns the value of EXPR with all non-alphanumeric
+Returns the value of EXPR with all non-"word"
 characters backslashed.  (That is, all characters not matching
 C</[A-Za-z_0-9]/> will be preceded by a backslash in the
 returned string, regardless of any locale settings.)
@@ -3934,13 +3947,15 @@ semid_ds structure or semaphore value array.  Returns like C<ioctl>:
 the undefined value for error, "C<0 but true>" for zero, or the actual
 return value otherwise.  The ARG must consist of a vector of native
 short integers, which may be created with C<pack("s!",(0)x$nsem)>.
-See also C<IPC::SysV> and C<IPC::Semaphore> documentation.
+See also L<perlipc/"SysV IPC">, C<IPC::SysV>, C<IPC::Semaphore>
+documentation.
 
 =item semget KEY,NSEMS,FLAGS
 
 Calls the System V IPC function semget.  Returns the semaphore id, or
-the undefined value if there is an error.  See also C<IPC::SysV> and
-C<IPC::SysV::Semaphore> documentation.
+the undefined value if there is an error.  See also
+L<perlipc/"SysV IPC">, C<IPC::SysV>, C<IPC::SysV::Semaphore>
+documentation.
 
 =item semop KEY,OPSTRING
 
@@ -3955,8 +3970,9 @@ following code waits on semaphore $semnum of semaphore id $semid:
     $semop = pack("sss", $semnum, -1, 0);
     die "Semaphore trouble: $!\n" unless semop($semid, $semop);
 
-To signal the semaphore, replace C<-1> with C<1>.  See also C<IPC::SysV>
-and C<IPC::SysV::Semaphore> documentation.
+To signal the semaphore, replace C<-1> with C<1>.  See also
+L<perlipc/"SysV IPC">, C<IPC::SysV>, and C<IPC::SysV::Semaphore>
+documentation.
 
 =item send SOCKET,MSG,FLAGS,TO
 
@@ -4002,7 +4018,7 @@ C<@ARGV> array at file scopes or within the lexical scopes established by
 the C<eval ''>, C<BEGIN {}>, C<INIT {}>, C<CHECK {}>, and C<END {}>
 constructs.
 
-See also C<unshift>, C<push>, and C<pop>.  C<shift()> and C<unshift> do the
+See also C<unshift>, C<push>, and C<pop>.  C<shift> and C<unshift> do the
 same thing to the left end of an array that C<pop> and C<push> do to the
 right end.
 
@@ -4016,13 +4032,13 @@ first to get the correct constant definitions.  If CMD is C<IPC_STAT>,
 then ARG must be a variable which will hold the returned C<shmid_ds>
 structure.  Returns like ioctl: the undefined value for error, "C<0> but
 true" for zero, or the actual return value otherwise.
-See also C<IPC::SysV> documentation.
+See also L<perlipc/"SysV IPC"> and C<IPC::SysV> documentation.
 
 =item shmget KEY,SIZE,FLAGS
 
 Calls the System V IPC function shmget.  Returns the shared memory
 segment id, or the undefined value if there is an error.
-See also C<IPC::SysV> documentation.
+See also L<perlipc/"SysV IPC"> and C<IPC::SysV> documentation.
 
 =item shmread ID,VAR,POS,SIZE
 
@@ -4034,8 +4050,8 @@ detaching from it.  When reading, VAR must be a variable that will
 hold the data read.  When writing, if STRING is too long, only SIZE
 bytes are used; if STRING is too short, nulls are written to fill out
 SIZE bytes.  Return true if successful, or false if there is an error.
-shmread() taints the variable. See also C<IPC::SysV> documentation and
-the C<IPC::Shareable> module from CPAN.
+shmread() taints the variable. See also L<perlipc/"SysV IPC">,
+C<IPC::SysV> documentation, and the C<IPC::Shareable> module from CPAN.
 
 =item shutdown SOCKET,HOW
 
@@ -4237,15 +4253,12 @@ Examples:
 
 If you're using strict, you I<must not> declare $a
 and $b as lexicals.  They are package globals.  That means
-if you're in the C<main> package, it's
-
-    @articles = sort {$main::b <=> $main::a} @files;
-
-or just
-
-    @articles = sort {$::b <=> $::a} @files;
-
-but if you're in the C<FooPack> package, it's
+if you're in the C<main> package and type
+  
+    @articles = sort {$b <=> $a} @files;
+  
+then C<$a> and C<$b> are C<$main::a> and C<$main::b> (or C<$::a> and C<$::b>),
+but if you're in the C<FooPack> package, it's the same as typing
 
     @articles = sort {$FooPack::b <=> $FooPack::a} @files;
 
@@ -4304,11 +4317,9 @@ Example, assuming array lengths are passed before arrays:
 Splits a string into a list of strings and returns that list.  By default,
 empty leading fields are preserved, and empty trailing ones are deleted.
 
-If not in list context, returns the number of fields found and splits into
-the C<@_> array.  (In list context, you can force the split into C<@_> by
-using C<??> as the pattern delimiters, but it still returns the list
-value.)  The use of implicit split to C<@_> is deprecated, however, because
-it clobbers your subroutine arguments.
+In scalar context, returns the number of fields found and splits into
+the C<@_> array.  Use of split in scalar context is deprecated, however,
+because it clobbers your subroutine arguments.
 
 If EXPR is omitted, splits the C<$_> string.  If PATTERN is also omitted,
 splits on whitespace (after skipping any leading whitespace).  Anything
@@ -4367,6 +4378,9 @@ A C<split> on C</\s+/> is like a C<split(' ')> except that any leading
 whitespace produces a null first field.  A C<split> with no arguments
 really does a C<split(' ', $_)> internally.
 
+A PATTERN of C</^/> is treated as if it were C</^/m>, since it isn't
+much use otherwise.
+
 Example:
 
     open(PASSWD, '/etc/passwd');
@@ -4381,9 +4395,18 @@ L</chomp>, and L</join>.)
 
 =item sprintf FORMAT, LIST
 
-Returns a string formatted by the usual C<printf> conventions of the
-C library function C<sprintf>.  See L<sprintf(3)> or L<printf(3)>
-on your system for an explanation of the general principles.
+Returns a string formatted by the usual C<printf> conventions of the C
+library function C<sprintf>.  See below for more details
+and see L<sprintf(3)> or L<printf(3)> on your system for an explanation of
+the general principles.
+
+For example:
+
+        # Format number with up to 8 leading zeroes
+        $result = sprintf("%08d", $number);
+
+        # Round number to 3 digits after decimal point
+        $rounded = sprintf("%.3f", $number);
 
 Perl does its own C<sprintf> formatting--it emulates the C
 function C<sprintf>, but it doesn't use it (except for floating-point

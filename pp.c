@@ -198,7 +198,7 @@ PP(pp_rv2gv)
     else {
 	if (SvTYPE(sv) != SVt_PVGV) {
 	    char *sym;
-	    STRLEN n_a;
+	    STRLEN len;
 
 	    if (SvGMAGICAL(sv)) {
 		mg_get(sv);
@@ -236,13 +236,17 @@ PP(pp_rv2gv)
 		    report_uninit();
 		RETSETUNDEF;
 	    }
-	    sym = SvPV(sv, n_a);
+	    sym = SvPV(sv,len);
 	    if ((PL_op->op_flags & OPf_SPECIAL) &&
 		!(PL_op->op_flags & OPf_MOD))
 	    {
 		sv = (SV*)gv_fetchpv(sym, FALSE, SVt_PVGV);
-		if (!sv)
+		if (!sv
+		    && (!is_gv_magical(sym,len,0)
+			|| !(sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVGV))))
+		{
 		    RETSETUNDEF;
+		}
 	    }
 	    else {
 		if (PL_op->op_private & HINT_STRICT_REFS)
@@ -276,7 +280,7 @@ PP(pp_rv2sv)
     else {
 	GV *gv = (GV*)sv;
 	char *sym;
-	STRLEN n_a;
+	STRLEN len;
 
 	if (SvTYPE(gv) != SVt_PVGV) {
 	    if (SvGMAGICAL(sv)) {
@@ -292,13 +296,17 @@ PP(pp_rv2sv)
 		    report_uninit();
 		RETSETUNDEF;
 	    }
-	    sym = SvPV(sv, n_a);
+	    sym = SvPV(sv, len);
 	    if ((PL_op->op_flags & OPf_SPECIAL) &&
 		!(PL_op->op_flags & OPf_MOD))
 	    {
 		gv = (GV*)gv_fetchpv(sym, FALSE, SVt_PV);
-		if (!gv)
+		if (!gv
+		    && (!is_gv_magical(sym,len,0)
+			|| !(gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PV))))
+		{
 		    RETSETUNDEF;
+		}
 	    }
 	    else {
 		if (PL_op->op_private & HINT_STRICT_REFS)
@@ -591,6 +599,9 @@ PP(pp_gelem)
     case 'F':
 	if (strEQ(elem, "FILEHANDLE")) /* XXX deprecate in 5.005 */
 	    tmpRef = (SV*)GvIOp(gv);
+	else
+	if (strEQ(elem, "FORMAT"))
+	    tmpRef = (SV*)GvFORM(gv);
 	break;
     case 'G':
 	if (strEQ(elem, "GLOB"))
@@ -961,7 +972,7 @@ PP(pp_modulo)
 	NV dright;
 	NV dleft;
 
-	if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
+	if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
 	    IV i = SvIVX(POPs);
 	    right = (right_neg = (i < 0)) ? -i : i;
 	}
@@ -973,7 +984,7 @@ PP(pp_modulo)
 		dright = -dright;
 	}
 
-	if (!use_double && SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
+	if (!use_double && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
 	    IV i = SvIVX(POPs);
 	    left = (left_neg = (i < 0)) ? -i : i;
 	}
@@ -2195,7 +2206,7 @@ PP(pp_chr)
 
     (void)SvUPGRADE(TARG,SVt_PV);
 
-    if (value > 255 && !IN_BYTE) {
+    if ((value > 255 && !IN_BYTE) || (value & 0x80 && PL_hints & HINT_UTF8) ) {
 	SvGROW(TARG, UTF8_MAXLEN+1);
 	tmps = SvPVX(TARG);
 	tmps = (char*)uv_to_utf8((U8*)tmps, (UV)value);
@@ -4367,6 +4378,7 @@ PP(pp_pack)
     register I32 items;
     STRLEN fromlen;
     register char *pat = SvPVx(*++MARK, fromlen);
+    char *patcopy;
     register char *patend = pat + fromlen;
     register I32 len;
     I32 datumtype;
@@ -4397,6 +4409,7 @@ PP(pp_pack)
     items = SP - MARK;
     MARK++;
     sv_setpvn(cat, "", 0);
+    patcopy = pat;
     while (pat < patend) {
 	SV *lengthcode = Nullsv;
 #define NEXTFROM ( lengthcode ? lengthcode : items-- > 0 ? *MARK++ : &PL_sv_no)
@@ -4404,8 +4417,12 @@ PP(pp_pack)
 #ifdef PERL_NATINT_PACK
 	natint = 0;
 #endif
-	if (isSPACE(datumtype))
+	if (isSPACE(datumtype)) {
+	    patcopy++;
 	    continue;
+        }
+	if (datumtype == 'U' && pat == patcopy+1) 
+	    SvUTF8_on(cat);
 	if (datumtype == '#') {
 	    while (pat < patend && *pat != '\n')
 		pat++;
@@ -5249,24 +5266,7 @@ PP(pp_lock)
     dTOPss;
     SV *retsv = sv;
 #ifdef USE_THREADS
-    MAGIC *mg;
-
-    if (SvROK(sv))
-	sv = SvRV(sv);
-
-    mg = condpair_magic(sv);
-    MUTEX_LOCK(MgMUTEXP(mg));
-    if (MgOWNER(mg) == thr)
-	MUTEX_UNLOCK(MgMUTEXP(mg));
-    else {
-	while (MgOWNER(mg))
-	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
-	MgOWNER(mg) = thr;
-	DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%"UVxf": pp_lock lock 0x%"UVxf"\n",
-			      PTR2UV(thr), PTR2UV(sv));)
-	MUTEX_UNLOCK(MgMUTEXP(mg));
-	SAVEDESTRUCTOR_X(Perl_unlock_condpair, sv);
-    }
+    sv_lock(sv);
 #endif /* USE_THREADS */
     if (SvTYPE(retsv) == SVt_PVAV || SvTYPE(retsv) == SVt_PVHV
 	|| SvTYPE(retsv) == SVt_PVCV) {

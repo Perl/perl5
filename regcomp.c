@@ -901,6 +901,11 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 				sv_catsv(data->last_found, last_str);
 				data->last_end += l * (mincount - 1);
 			    }
+			} else {
+			    /* start offset must point into the last copy */
+			    data->last_start_min += minnext * (mincount - 1);
+			    data->last_start_max += is_inf ? 0 : (maxcount - 1)
+				* (minnext + data->pos_delta);
 			}
 		    }
 		    /* It is counted once already... */
@@ -2812,6 +2817,7 @@ S_regpposixcc(pTHX_ I32 value)
 			if (strnEQ(posixcc, "space", 5))
 			    namedclass =
 				complement ? ANYOF_NSPACE : ANYOF_SPACE;
+			break;
 		    case 'u':
 			if (strnEQ(posixcc, "upper", 5))
 			    namedclass =
@@ -2838,10 +2844,10 @@ S_regpposixcc(pTHX_ I32 value)
 			Perl_croak(aTHX_
 				   "Character class [:%.*s:] unknown",
 				   t - s - 1, s + 1);
-		} else if (ckWARN(WARN_REGEXP) && !SIZE_ONLY)
+		} else if (!SIZE_ONLY)
 		    /* [[=foo=]] and [[.foo.]] are still future. */
-		    Perl_warner(aTHX_ WARN_REGEXP,
-				"Character class syntax [%c %c] is reserved for future extensions", c, c);
+		    Perl_croak(aTHX_
+			       "Character class syntax [%c %c] is reserved for future extensions", c, c);
 	    } else {
 		/* Maternal grandfather:
 		 * "[:" ending in ":" but not in ":]" */
@@ -2869,8 +2875,8 @@ S_checkposixcc(pTHX)
 	    Perl_warner(aTHX_ WARN_REGEXP,
 			"Character class syntax [%c %c] belongs inside character classes", c, c);
 	    if (c == '=' || c == '.')
-		Perl_warner(aTHX_ WARN_REGEXP,
-			    "Character class syntax [%c %c] is reserved for future extensions", c, c);
+		Perl_croak(aTHX_
+			   "Character class syntax [%c %c] is reserved for future extensions", c, c);
 	}
     }
 }

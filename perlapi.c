@@ -41,6 +41,9 @@ START_EXTERN_C
 			{ return &(PL_##v); }
 #define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHXo)		\
 			{ return &(PL_##v); }
+#undef PERLVARIC
+#define PERLVARIC(v,t,i)	const t* Perl_##v##_ptr(pTHXo)		\
+			{ return (const t *)&(PL_##v); }
 #include "perlvars.h"
 
 #undef PERLVAR
@@ -80,6 +83,13 @@ bool
 Perl_Gv_AMupdate(pTHXo_ HV* stash)
 {
     return ((CPerlObj*)pPerl)->Perl_Gv_AMupdate(stash);
+}
+
+#undef  Perl_apply_attrs_string
+void
+Perl_apply_attrs_string(pTHXo_ char *stashpv, CV *cv, char *attrstr, STRLEN len)
+{
+    ((CPerlObj*)pPerl)->Perl_apply_attrs_string(stashpv, cv, attrstr, len);
 }
 
 #undef  Perl_avhv_delete_ent
@@ -159,13 +169,6 @@ Perl_av_extend(pTHXo_ AV* ar, I32 key)
     ((CPerlObj*)pPerl)->Perl_av_extend(ar, key);
 }
 
-#undef  Perl_av_fake
-AV*
-Perl_av_fake(pTHXo_ I32 size, SV** svp)
-{
-    return ((CPerlObj*)pPerl)->Perl_av_fake(size, svp);
-}
-
 #undef  Perl_av_fetch
 SV**
 Perl_av_fetch(pTHXo_ AV* ar, I32 key, I32 lval)
@@ -206,13 +209,6 @@ void
 Perl_av_push(pTHXo_ AV* ar, SV* val)
 {
     ((CPerlObj*)pPerl)->Perl_av_push(ar, val);
-}
-
-#undef  Perl_av_reify
-void
-Perl_av_reify(pTHXo_ AV* ar)
-{
-    ((CPerlObj*)pPerl)->Perl_av_reify(ar);
 }
 
 #undef  Perl_av_shift
@@ -1321,6 +1317,13 @@ int
 Perl_is_utf8_char(pTHXo_ U8 *p)
 {
     return ((CPerlObj*)pPerl)->Perl_is_utf8_char(p);
+}
+
+#undef  Perl_is_utf8_string
+bool
+Perl_is_utf8_string(pTHXo_ U8 *s, STRLEN len)
+{
+    return ((CPerlObj*)pPerl)->Perl_is_utf8_string(s, len);
 }
 
 #undef  Perl_is_utf8_alnum
@@ -2458,6 +2461,13 @@ Perl_save_generic_svref(pTHXo_ SV** sptr)
     ((CPerlObj*)pPerl)->Perl_save_generic_svref(sptr);
 }
 
+#undef  Perl_save_generic_pvref
+void
+Perl_save_generic_pvref(pTHXo_ char** str)
+{
+    ((CPerlObj*)pPerl)->Perl_save_generic_pvref(str);
+}
+
 #undef  Perl_save_gp
 void
 Perl_save_gp(pTHXo_ GV* gv, I32 empty)
@@ -3307,16 +3317,16 @@ Perl_unsharepvn(pTHXo_ const char* sv, I32 len, U32 hash)
 
 #undef  Perl_utf16_to_utf8
 U8*
-Perl_utf16_to_utf8(pTHXo_ U16* p, U8 *d, I32 bytelen)
+Perl_utf16_to_utf8(pTHXo_ U8* p, U8 *d, I32 bytelen, I32 *newlen)
 {
-    return ((CPerlObj*)pPerl)->Perl_utf16_to_utf8(p, d, bytelen);
+    return ((CPerlObj*)pPerl)->Perl_utf16_to_utf8(p, d, bytelen, newlen);
 }
 
 #undef  Perl_utf16_to_utf8_reversed
 U8*
-Perl_utf16_to_utf8_reversed(pTHXo_ U16* p, U8 *d, I32 bytelen)
+Perl_utf16_to_utf8_reversed(pTHXo_ U8* p, U8 *d, I32 bytelen, I32 *newlen)
 {
-    return ((CPerlObj*)pPerl)->Perl_utf16_to_utf8_reversed(p, d, bytelen);
+    return ((CPerlObj*)pPerl)->Perl_utf16_to_utf8_reversed(p, d, bytelen, newlen);
 }
 
 #undef  Perl_utf8_distance
@@ -3331,6 +3341,20 @@ U8*
 Perl_utf8_hop(pTHXo_ U8 *s, I32 off)
 {
     return ((CPerlObj*)pPerl)->Perl_utf8_hop(s, off);
+}
+
+#undef  Perl_utf8_to_bytes
+U8*
+Perl_utf8_to_bytes(pTHXo_ U8 *s, STRLEN len)
+{
+    return ((CPerlObj*)pPerl)->Perl_utf8_to_bytes(s, len);
+}
+
+#undef  Perl_bytes_to_utf8
+U8*
+Perl_bytes_to_utf8(pTHXo_ U8 *s, STRLEN *len)
+{
+    return ((CPerlObj*)pPerl)->Perl_bytes_to_utf8(s, len);
 }
 
 #undef  Perl_utf8_to_uv
@@ -3495,6 +3519,15 @@ Perl_runops_debug(pTHXo)
 {
     return ((CPerlObj*)pPerl)->Perl_runops_debug();
 }
+#if defined(USE_THREADS)
+
+#undef  Perl_sv_lock
+SV*
+Perl_sv_lock(pTHXo_ SV *sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_lock(sv);
+}
+#endif
 
 #undef  Perl_sv_catpvf_mg
 void
@@ -3944,6 +3977,13 @@ Perl_ptr_table_split(pTHXo_ PTR_TBL_t *tbl)
 }
 #endif
 #if defined(HAVE_INTERP_INTERN)
+
+#undef  Perl_sys_intern_clear
+void
+Perl_sys_intern_clear(pTHXo)
+{
+    ((CPerlObj*)pPerl)->Perl_sys_intern_clear();
+}
 
 #undef  Perl_sys_intern_init
 void
