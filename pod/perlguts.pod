@@ -76,6 +76,10 @@ L<perlsec>).  This pointer may be NULL if that information is not
 important.  Note that this function requires you to specify the length of
 the format.
 
+STRLEN is an integer type (Size_t, usually defined as size_t in
+config.h) guaranteed to be large enough to represent the size of 
+any string that perl can handle.
+
 The C<sv_set*()> functions are not generic enough to operate on values
 that have "magic".  See L<Magic Virtual Tables> later in this document.
 
