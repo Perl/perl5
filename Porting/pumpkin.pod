@@ -73,14 +73,12 @@ Let's worry about that problem when we get there.
 
 =head2 Subversions
 
-In addition, there may be "developer" sub-versions available.  These
-are not official releases.  They may contain unstable experimental
-features, and are subject to rapid change.  Such developer
-sub-versions are numbered with sub-version numbers.  For example,
-version 5.003_04 is the 4'th developer version built on top of
-5.003.  It might include the _01, _02, and _03 changes, but it
-also might not.  Sub-versions are allowed to be subversive. (But see
-the next section for recent changes.)
+In addition, there usually are sub-versions available. Sub-versions
+are numbered with sub-version numbers. For example, version 5.003_04
+is the 4'th developer version built on top of 5.003. It might include
+the _01, _02, and _03 changes, but it also might not. Sub-versions are
+allowed to be subversive. (But see the next section for recent
+changes.)
 
 These sub-versions can also be used as floating point numbers, so
 you can do things such as
@@ -92,28 +90,47 @@ You can also require particular version (or later) with
 	use 5.003_03;    # the "_" is optional
 
 Sub-versions produced by the members of perl5-porters are usually
-available on CPAN in the F<src/5.0/unsupported> directory.
+available on CPAN in the F<src/5.0/maint> and F<src/5.0/devel>
+directories.
 
 =head2 Maintenance and Development Subversions
 
-As an experiment, starting with version 5.004, subversions _01 through
-_49 will be reserved for bug-fix maintenance releases, and subversions
-_50 through _99 will be available for unstable development versions.
+Starting with version 5.004, subversions _01 through _49 is reserved
+for bug-fix maintenance releases, and subversions _50 through _99 for
+unstable development versions.
 
 The separate bug-fix track is being established to allow us an easy
 way to distribute important bug fixes without waiting for the
 developers to untangle all the other problems in the current
-developer's release.
+developer's release. The first rule of maintenance work is "First, do
+no harm."
 
 Trial releases of bug-fix maintenance releases are announced on
 perl5-porters. Trial releases use the new subversion number (to avoid
 testers installing it over the previous release) and include a 'local
-patch' entry in patchlevel.h.
+patch' entry in patchlevel.h. The distribution file contains the
+string C<MAINT_TRIAL> to make clear that the file is not meant for
+public consumption.
 
-Watch for announcements of maintenance subversions in
-comp.lang.perl.announce.
+In general, the names of official distribution files for the public
+always match the regular expression
 
-The first rule of maintenance work is "First, do no harm."
+    ^perl5\.\d{3}(_[0-4]\d)?\.tar\.gz$
+
+Developer releases always match
+
+    ^perl5\.\d{3}(_[5-9]\d)?\.tar\.gz$
+
+And the trial versions for a new maintainance release match
+
+    ^perl5\.\d{3}(_[0-4]\d)-MAINT_TRIAL_\d+\.tar\.gz$
+
+In the past it has been observed that pumkings tend to invent new
+naming conventions on the fly. If you are a pumpking, before you
+invent a new name for any of the three types of perl distributions,
+please inform the guys from the CPAN who are doing indexing and
+provide the trees of symlinks and the like. They will have to know
+I<in advance> what you decide.
 
 =head2 Why such a complicated scheme?
 
