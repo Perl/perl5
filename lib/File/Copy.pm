@@ -277,7 +277,7 @@ File::Copy - Copy files or filehandles
 	use File::Copy "cp";
 
 	$n = FileHandle->new("/a/file","r");
-	cp($n,"x");'
+	cp($n,"x");
 
 =head1 DESCRIPTION
 
