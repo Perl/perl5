@@ -269,7 +269,7 @@ can be used to provide additional information to the linker.
 
 =head1 AUTHOR
 
-Charles Bailey I<E<lt>bailey@genetics.upenn.eduE<gt>>
+Charles Bailey I<E<lt>bailey@newman.upenn.eduE<gt>>
 
 =head1 REVISION
 

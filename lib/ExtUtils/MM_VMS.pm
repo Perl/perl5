@@ -3,7 +3,7 @@
 #   This package is inserted into @ISA of MakeMaker's MM before the
 #   built-in ExtUtils::MM_Unix methods if MakeMaker.pm is run under VMS.
 #
-#   Author:  Charles Bailey  bailey@genetics.upenn.edu
+#   Author:  Charles Bailey  bailey@newman.upenn.edu
 
 package ExtUtils::MM_VMS;
 

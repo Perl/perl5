@@ -1925,7 +1925,7 @@ ExtUtils::Install, ExtUtils::Embed
 
 Andy Dougherty <F<doughera@lafcol.lafayette.edu>>, Andreas KE<ouml>nig
 <F<A.Koenig@franz.ww.TU-Berlin.DE>>, Tim Bunce <F<Tim.Bunce@ig.co.uk>>.
-VMS support by Charles Bailey <F<bailey@genetics.upenn.edu>>.  OS/2
+VMS support by Charles Bailey <F<bailey@newman.upenn.edu>>.  OS/2
 support by Ilya Zakharevich <F<ilya@math.ohio-state.edu>>.  Contact the
 makemaker mailing list C<mailto:makemaker@franz.ww.tu-berlin.de>, if
 you have any questions.

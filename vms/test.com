@@ -1,7 +1,7 @@
 $!  Test.Com - DCL driver for perl5 regression tests
 $!
 $!  Version 1.1   4-Dec-1995
-$!  Charles Bailey  bailey@genetics.upenn.edu
+$!  Charles Bailey  bailey@newman.upenn.edu
 $
 $!  A little basic setup
 $   On Error Then Goto wrapup
@@ -89,7 +89,7 @@ $   Define/User Perlshr Sys$Disk:[-]PerlShr'exe'
 $   MCR Sys$Disk:[]Perl. "-I[-.lib]" - "''p2'" "''p3'" "''p4'" "''p5'" "''p6'"
 $   Deck/Dollar=$$END-OF-TEST$$
 # $RCSfile: TEST,v $$Revision: 4.1 $$Date: 92/08/07 18:27:00 $
-# Modified for VMS 30-Sep-1994  Charles Bailey  bailey@genetics.upenn.edu
+# Modified for VMS 30-Sep-1994  Charles Bailey  bailey@newman.upenn.edu
 #
 # This is written in a peculiar style, since we're trying to avoid
 # most of the constructs we'll be testing for.

@@ -1429,7 +1429,7 @@ First public release with perl5.005.
 =head1 AUTHORS / CONTRIBUTORS
 
 Abigail E<lt>abigail@fnx.comE<gt>,
-Charles Bailey E<lt>bailey@genetics.upenn.eduE<gt>,
+Charles Bailey E<lt>bailey@newman.upenn.eduE<gt>,
 Graham Barr E<lt>gbarr@pobox.comE<gt>,
 Tom Christiansen E<lt>tchrist@perl.comE<gt>,
 Nicholas Clark E<lt>Nicholas.Clark@liverpool.ac.ukE<gt>,

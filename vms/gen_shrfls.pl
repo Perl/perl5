@@ -33,7 +33,7 @@
 #     library has everything old one did
 #     (i.e. /Define=DEBUGGING,EMBED,MULTIPLICITY)?
 #
-# Author: Charles Bailey  bailey@genetics.upenn.edu
+# Author: Charles Bailey  bailey@newman.upenn.edu
 
 require 5.000;
 

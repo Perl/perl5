@@ -768,7 +768,7 @@ my_waitpid(Pid_t pid, int *statusp, int flags)
         _ckvmssts(lib$getjpi(&ownercode,&pid,0,&ownerpid,0,0));
         _ckvmssts(lib$getjpi(&ownercode,0,0,&mypid,0,0));
         if (ownerpid != mypid)
-          warn("pid %d not a child",pid);
+          warn("pid %x not a child",pid);
       }
 
       _ckvmssts(sys$bintim(&intdsc,interval));
@@ -981,7 +981,7 @@ char *rmsexpand_ts(char *spec, char *buf, char *def, unsigned opt)
 **   tounixspec() - convert any file spec into a Unix-style file spec.
 **   tovmsspec() - convert any file spec into a VMS-style spec.
 **
-** Copyright 1996 by Charles Bailey  <bailey@genetics.upenn.edu>
+** Copyright 1996 by Charles Bailey  <bailey@newman.upenn.edu>
 ** Permission is given to distribute this code as part of the Perl
 ** standard distribution under the terms of the GNU General Public
 ** License or the Perl Artistic License.  Copies of each may be
@@ -1815,7 +1815,7 @@ char *tounixpath_ts(char *path, char *buf) { return do_tounixpath(path,buf,1); }
  *  gain.                                                                    *
  *                                                                           *
  *  27-Aug-1994 Modified for inclusion in perl5                              *
- *              by Charles Bailey  bailey@genetics.upenn.edu                 *
+ *              by Charles Bailey  bailey@newman.upenn.edu                   *
  *****************************************************************************
  */
 
@@ -2564,7 +2564,7 @@ trim_unixpath(char *fspec, char *wildspec, int opts)
  *  VMS readdir() routines.
  *  Written by Rich $alz, <rsalz@bbn.com> in August, 1990.
  *
- *  21-Jul-1994  Charles Bailey  bailey@genetics.upenn.edu
+ *  21-Jul-1994  Charles Bailey  bailey@newman.upenn.edu
  *  Minor modifications to original routines.
  */
 
@@ -3527,7 +3527,7 @@ static time_t toloc_dst(time_t utc) {
  * UTC support, since they also handle C<use vmsish qw(times);>
  *
  * Contributed by Chuck Lane  <lane@duphy4.physics.drexel.edu>
- * Modified by Charles Bailey <bailey@genetics.upenn.edu>
+ * Modified by Charles Bailey <bailey@newman.upenn.edu>
  */
 
 /*{{{time_t my_time(time_t *timep)*/
@@ -4223,7 +4223,7 @@ my_getlogin()
  *
  *  Returns 1 on success; returns 0 and sets errno and vaxc$errno on failure.
  *
- *  Copyright 1996 by Charles Bailey <bailey@genetics.upenn.edu>.
+ *  Copyright 1996 by Charles Bailey <bailey@newman.upenn.edu>.
  *  Incorporates, with permission, some code from EZCOPY by Tim Adye
  *  <T.J.Adye@rl.ac.uk>.  Permission is given to distribute this code
  * as part of the Perl standard distribution under the terms of the

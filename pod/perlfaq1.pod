@@ -36,7 +36,7 @@ In particular, the core development team (known as the Perl
 Porters) are a rag-tag band of highly altruistic individuals
 committed to producing better software for free than you
 could hope to purchase for money.  You may snoop on pending
-developments via news://genetics.upenn.edu/perl.porters-gw/ and
+developments via news://news.perl.com/perl.porters-gw/ and
 http://www.frii.com/~gnat/perl/porters/summary.html.
 
 While the GNU project includes Perl in its distributions, there's no

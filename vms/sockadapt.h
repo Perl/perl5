@@ -1,6 +1,6 @@
 /*  sockadapt.h
  *
- *  Authors: Charles Bailey  bailey@genetics.upenn.edu
+ *  Authors: Charles Bailey  bailey@newman.upenn.edu
  *           David Denholm  denholm@conmat.phys.soton.ac.uk
  *  Last Revised:  4-Mar-1997
  *

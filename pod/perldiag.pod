@@ -1258,7 +1258,6 @@ Did you forget to check the return value of your socket() call?
 (S) A warning peculiar to VMS.  The call to C<sys$getuai> underlying the
 C<getpwnam> operator returned an invalid UIC.
 
-
 =item Glob not terminated
 
 (F) The lexer saw a left angle bracket in a place where it was expecting
@@ -1703,6 +1702,14 @@ an attempt to close an unopened filehandle.
 (W) You specified a signal name as a subscript to %SIG that was not recognized.
 Say C<kill -l> in your shell to see the valid signal names on your system.
 
+=item no UTC offset information; assuming local time is UTC
+
+(S) A warning peculiar to VMS.  Per was unable to find the local
+timezone offset, so it's assuming that local system time is equivalent
+to UTC.  If it's not, define the logical name F<SYS$TIMEZONE_DIFFERENTIAL>
+to translate to the number of seconds which need to be added to UTC to
+get local time.
+
 =item Not a CODE reference
 
 (F) Perl was trying to evaluate a reference to a code value (that is, a
@@ -2037,7 +2044,7 @@ anyway?  See L<perlfunc/require>.
 
 (F) The setuid emulator in suidperl decided you were up to no good.
 
-=item pid %d not a child
+=item pid %x not a child
 
 (W) A warning peculiar to VMS.  Waitpid() was asked to wait for a process which
 isn't a subprocess of the current process.  While this is fine from VMS'

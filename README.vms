@@ -214,26 +214,26 @@ DEFINE/NOLOG PERLSHR PERL_ROOT:[000000]PERLSHR.EXE
 or copy perl_root:[000000]perlshr.exe sys$share:.
 
 5) Optionally define the command PERLDOC as 
-PERLDOC :== "$PERL_ROOT:[000000]PERL PERL_ROOT:[LIB.POD]PERLDOC.COM -t"
+PERLDOC == "$PERL_ROOT:[000000]PERL PERL_ROOT:[LIB.POD]PERLDOC.COM -t"
 Note that if you wish to use most as a pager please see
 ftp://space.mit.edu/pub/davis/ for both most and slang (or perhaps
 ftp://ftp.wku.edu/vms/narnia/most.zip ).
 
 6) Optionally define the command PERLBUG (the Perl bug report generator) as
-PERLBUG :== "$PERL_ROOT:[000000]PERL PERL_ROOT:[LIB]PERLBUG.COM"
+PERLBUG == "$PERL_ROOT:[000000]PERL PERL_ROOT:[LIB]PERLBUG.COM"
 
 7) Optionally define the command POD2MAN (Converts POD files to nroff
 source suitable for converting to man pages. Also quiets complaints during
 module builds) as
 
 DEFINE/NOLOG POD2MAN PERL_ROOT:[LIB.POD]POD2MAN.COM
-POD2MAN :== "$PERL_ROOT:[000000]PERL POD2MAN"
+POD2MAN == "$PERL_ROOT:[000000]PERL POD2MAN"
 
 8) Optionally define the command POD2TEXT (Converts POD files to text,
 which is required for perldoc -f to work properly) as
 
 DEFINE/NOLOG POD2TEXT PERL_ROOT:[LIB.POD]POD2TEXT.COM
-POD2TEXT :== "$PERL_ROOT:[000000]PERL POD2TEXT"
+POD2TEXT == "$PERL_ROOT:[000000]PERL POD2TEXT"
 
 In all these cases, if you've got PERL defined as a foreign command, you
 can replace $PERL_ROOT:[000000]PERL with ''perl'. If you've installed perl

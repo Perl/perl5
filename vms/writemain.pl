@@ -5,7 +5,7 @@
 # linker options file which causes the bootstrap routines for
 # these extension to be universal symbols in PerlShr.Exe.
 #
-# Last modified 29-Nov-1994 by Charles Bailey  bailey@genetics.upenn.edu
+# Last modified 29-Nov-1994 by Charles Bailey  bailey@newman.upenn.edu
 #
 
 if (-f 'miniperlmain.c') { $dir = ''; }

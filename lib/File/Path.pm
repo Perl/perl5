@@ -88,7 +88,7 @@ in situations where security is an issue.
 =head1 AUTHORS
 
 Tim Bunce <F<Tim.Bunce@ig.co.uk>> and
-Charles Bailey <F<bailey@genetics.upenn.edu>>
+Charles Bailey <F<bailey@newman.upenn.edu>>
 
 =head1 REVISION
 
