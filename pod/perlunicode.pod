@@ -601,9 +601,11 @@ than one Unicode character.
 Things to do with locales (Lithuanian, Turkish, Azeri) do B<not> work
 since Perl does not understand the concept of Unicode locales.
 
+See the Unicode Technical Report #21, Case Mappings, for more details.
+
 =back
 
-See the Unicode Technical Report #21, Case Mappings, for more details.
+=over 4
 
 =item *
 
