@@ -12,7 +12,7 @@ use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 @ISA       = qw(Exporter);
 @EXPORT    = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f chmod 
                 dos2unix);
-$VERSION = '1.06';
+$VERSION = '1.07';
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -223,18 +223,25 @@ Converts DOS and OS/2 linefeeds to Unix style recursively.
 sub dos2unix {
     require File::Find;
     File::Find::find(sub {
-        return if -d $_;
+        return if -d;
         return unless -w _;
+        return unless -r _;
         return if -B _;
 
-        local @ARGV = $_;
-        local $^I = '';
         local $\;
 
-        while (<>) { 
-            s/\015\012/\012/g;
-            print;
+	my $orig = $_;
+	my $temp = '.dos2unix_tmp';
+	open ORIG, $_ or do { warn "dos2unix can't open $_: $!"; return };
+	open TEMP, ">$temp" or 
+	    do { warn "dos2unix can't create .dos2unix_tmp: $!"; return };
+        while (my $line = <ORIG>) { 
+            $line =~ s/\015\012/\012/g;
+            print TEMP $line;
         }
+	close ORIG;
+	close TEMP;
+	rename $temp, $orig;
 
     }, @ARGV);
 }

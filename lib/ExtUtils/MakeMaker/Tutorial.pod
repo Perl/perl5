@@ -86,7 +86,7 @@ A simple listing of all the files in your distribution.
         MANIFEST
         lib/Your/Module.pm
 
-Filepaths in a MANIFEST always use Unix conventions (ie. /) even if you're
+File paths in a MANIFEST always use Unix conventions (ie. /) even if you're
 not on Unix.
 
 You can write this by hand or generate it with 'make manifest'.
@@ -144,7 +144,7 @@ Suggested information to include here:
 
 A file full of regular expressions to exclude when using 'make
 manifest' to generate the MANIFEST.  These regular expressions
-are checked against each filepath found in the distribution (so
+are checked against each file path found in the distribution (so
 you're matching against "t/foo.t" not "foo.t").
 
 Here's a sample:

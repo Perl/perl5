@@ -1,3 +1,12 @@
+6.20 Thu Nov  6 02:25:58 PST 2003
+    - Fixing dos2unix on Cygwin.  In-place editing doesn't work 100% so we
+      take a more conservative approach.
+    - Small postamble.t test temp file cleanup fix for Cygwin and Windows.
+    - Small Command.t test fix for 5.5.3.  No real bug [rt 4290]
+    - Small Liblist fix for Cygwin and import libraries [Gerrit P. Haase]
+    - metafile error message slightly mangled.  Bare $! mistake confusing 
+      nmake [rt 4285 4301]
+
 6.19 Mon Nov  3 22:53:56 PST 2003
     - Removed 00setup_dummy.t and zz_cleanup_dummy.t.  Tests now setup and
       teardown the dummy modules as needed.
