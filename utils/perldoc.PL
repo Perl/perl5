@@ -113,8 +113,8 @@ sub containspod {
      local($")="/";
      my(@p,$p,$cip);
      foreach $p (split(/\//, $file)){
-	if ($Is_VMS and not scalar @p) {
-	    # VMS filesystems don't begin at '/'
+	if (($Is_VMS or $^O eq 'os2') and not scalar @p) {
+	    # VMSish filesystems don't begin at '/'
 	    push(@p,$p);
 	    next;
 	}
