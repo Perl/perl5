@@ -928,10 +928,10 @@ scan_const(char *start)
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
     I32 len;					/* ? */
-    I32 utf = PL_lex_inwhat == OP_TRANS
+    I32 utf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
 	? (PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
 	: UTF;
-    I32 thisutf = PL_lex_inwhat == OP_TRANS
+    I32 thisutf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
 	? (PL_sublex_info.sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF))
 	: UTF;
 
