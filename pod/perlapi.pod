@@ -2899,7 +2899,7 @@ Found in file sv.c
 
 =item sv_2pv_flags
 
-Returns pointer to the string value of an SV, and sets *lp to its length.
+Returns a pointer to the string value of an SV, and sets *lp to its length.
 If flags includes SV_GMAGIC, does an mg_get() first. Coerces sv to a string
 if necessary.
 Normally invoked via the C<SvPV_flags> macro. C<sv_2pv()> and C<sv_2pv_nomg>
@@ -3499,7 +3499,7 @@ Make the first argument a copy of the second, then delete the original.
 The target SV physically takes over ownership of the body of the source SV
 and inherits its flags; however, the target keeps any magic it owns,
 and any magic in the source is discarded.
-Note that this a rather specialist SV copying operation; most of the
+Note that this is a rather specialist SV copying operation; most of the
 time you'll want to use C<sv_setsv> or one of its many macro front-ends.
 
 	void	sv_replace(SV* sv, SV* nsv)
@@ -3868,9 +3868,9 @@ Found in file sv.c
 
 =item sv_upgrade
 
-Upgrade an SV to a more complex form.  Gnenerally adds a new body type to the
+Upgrade an SV to a more complex form.  Generally adds a new body type to the
 SV, then copies across as much information as possible from the old body.
-You genrally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
+You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 
 	bool	sv_upgrade(SV* sv, U32 mt)
 

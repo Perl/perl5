@@ -68,12 +68,12 @@ SVs in the free list have their SvTYPE field set to all ones.
 
 Similarly, there are macros new_XIV()/del_XIV(), new_XNV()/del_XNV() etc
 that allocate and return individual body types. Normally these are mapped
-to the arena-maniplulating functions new_xiv()/del_xiv() etc, but may be
-instead mapped directly to malloc()/free() if PURIFY is in effect. The
+to the arena-manipulating functions new_xiv()/del_xiv() etc, but may be
+instead mapped directly to malloc()/free() if PURIFY is defined. The
 new/del functions remove from, or add to, the appropriate PL_foo_root
 list, and call more_xiv() etc to add a new arena if the list is empty.
 
-It the time of very final cleanup, sv_free_arenas() is called from
+At the time of very final cleanup, sv_free_arenas() is called from
 perl_destruct() to physically free all the arenas allocated since the
 start of the interpreter.  Note that this also clears PL_he_arenaroot,
 which is otherwise dealt with in hv.c.
@@ -271,7 +271,7 @@ S_more_sv(pTHX)
     return sv;
 }
 
-/* visit(): call the named function for each non-free in SV the arenas. */
+/* visit(): call the named function for each non-free SV in the arenas. */
 
 STATIC I32
 S_visit(pTHX_ SVFUNC_t f)
@@ -396,7 +396,7 @@ do_clean_all(pTHXo_ SV *sv)
 
 Decrement the refcnt of each remaining SV, possibly triggering a
 cleanup. This function may have to be called multiple times to free
-SVs which are in complex self-referential heirarchies.
+SVs which are in complex self-referential hierarchies.
 
 =cut
 */
@@ -1207,9 +1207,9 @@ S_more_xpvbm(pTHX)
 /*
 =for apidoc sv_upgrade
 
-Upgrade an SV to a more complex form.  Gnenerally adds a new body type to the
+Upgrade an SV to a more complex form.  Generally adds a new body type to the
 SV, then copies across as much information as possible from the old body.
-You genrally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
+You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 
 =cut
 */
@@ -2857,7 +2857,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 /*
 =for apidoc sv_2pv_flags
 
-Returns pointer to the string value of an SV, and sets *lp to its length.
+Returns a pointer to the string value of an SV, and sets *lp to its length.
 If flags includes SV_GMAGIC, does an mg_get() first. Coerces sv to a string
 if necessary.
 Normally invoked via the C<SvPV_flags> macro. C<sv_2pv()> and C<sv_2pv_nomg>
@@ -4779,7 +4779,7 @@ Make the first argument a copy of the second, then delete the original.
 The target SV physically takes over ownership of the body of the source SV
 and inherits its flags; however, the target keeps any magic it owns,
 and any magic in the source is discarded.
-Note that this a rather specialist SV copying operation; most of the
+Note that this is a rather specialist SV copying operation; most of the
 time you'll want to use C<sv_setsv> or one of its many macro front-ends.
 
 =cut
@@ -6332,7 +6332,7 @@ Perl_newRV_noinc(pTHX_ SV *tmpRef)
     return sv;
 }
 
-/* newRV_inc is the offical function name to use now.
+/* newRV_inc is the official function name to use now.
  * newRV_inc is in fact #defined to newRV in sv.h
  */
 
@@ -8378,7 +8378,7 @@ Perl_dirp_dup(pTHX_ DIR *dp)
     return dp;
 }
 
-/* duplictate a typeglob */
+/* duplicate a typeglob */
 
 GP *
 Perl_gp_dup(pTHX_ GP *gp, clone_params* param)
