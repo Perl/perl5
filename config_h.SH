@@ -987,19 +987,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
 #  ifdef __LITTLE_ENDIAN__
-#    if LONGSIZE == 4
+#    if UVSIZE == 4
 #      define BYTEORDER 0x1234
 #    else
-#      if LONGSIZE == 8
+#      if UVSIZE == 8
 #        define BYTEORDER 0x12345678
 #      endif
 #    endif
 #  else
 #    ifdef __BIG_ENDIAN__
-#      if LONGSIZE == 4
+#      if UVSIZE == 4
 #        define BYTEORDER 0x4321
 #      else
-#        if LONGSIZE == 8
+#        if UVSIZE == 8
 #          define BYTEORDER 0x87654321
 #        endif
 #      endif
