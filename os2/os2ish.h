@@ -231,7 +231,6 @@ void *sys_alloc(int size);
 #  define PerlIO FILE
 #endif 
 
-#define TMPPATH tmppath
 #define TMPPATH1 "plXXXXXX"
 extern char *tmppath;
 PerlIO *my_syspopen(char *cmd, char *mode);

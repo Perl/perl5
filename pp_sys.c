@@ -475,7 +475,7 @@ PP(pp_die)
 		HV *stash = SvSTASH(SvRV(error));
 		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
 		if (gv) {
-		    SV *file = sv_2mortal(newSVsv(GvSV(PL_curcop->cop_filegv)));
+		    SV *file = sv_2mortal(newSVsv(CopFILESV(PL_curcop)));
 		    SV *line = sv_2mortal(newSViv(PL_curcop->cop_line));
 		    EXTEND(SP, 3);
 		    PUSHMARK(SP);

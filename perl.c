@@ -2087,7 +2087,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 	}
     }
 
-    PL_curcop->cop_filegv = gv_fetchfile(PL_origfilename);
+    CopFILEGV_set(PL_curcop, gv_fetchfile(PL_origfilename));
     if (strEQ(PL_origfilename,"-"))
 	scriptname = "";
     if (*fdscript >= 0) {
@@ -2201,7 +2201,7 @@ sed %s -e \"/^[^#]/b\" \
 #ifdef DOSUID
 #ifndef IAMSUID		/* in case script is not readable before setuid */
 	if (PL_euid &&
-	    PerlLIO_stat(SvPVX(GvSV(PL_curcop->cop_filegv)),&PL_statbuf) >= 0 &&
+	    PerlLIO_stat(CopFILE(PL_curcop),&PL_statbuf) >= 0 &&
 	    PL_statbuf.st_mode & (S_ISUID|S_ISGID))
 	{
 	    /* try again */
@@ -2211,7 +2211,7 @@ sed %s -e \"/^[^#]/b\" \
 #endif
 #endif
 	Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
-	  SvPVX(GvSV(PL_curcop->cop_filegv)), Strerror(errno));
+		   CopFILE(PL_curcop), Strerror(errno));
     }
 }
 
@@ -2355,7 +2355,7 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 	 * But I don't think it's too important.  The manual lies when
 	 * it says access() is useful in setuid programs.
 	 */
-	if (PerlLIO_access(SvPVX(GvSV(PL_curcop->cop_filegv)),1)) /*double check*/
+	if (PerlLIO_access(CopFILE(PL_curcop),1)) /*double check*/
 	    Perl_croak(aTHX_ "Permission denied");
 #else
 	/* If we can swap euid and uid, then we can determine access rights
@@ -2376,7 +2376,7 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 #endif
 		|| PerlProc_getuid() != PL_euid || PerlProc_geteuid() != PL_uid)
 		Perl_croak(aTHX_ "Can't swap uid and euid");	/* really paranoid */
-	    if (PerlLIO_stat(SvPVX(GvSV(PL_curcop->cop_filegv)),&tmpstatbuf) < 0)
+	    if (PerlLIO_stat(CopFILE(PL_curcop),&tmpstatbuf) < 0)
 		Perl_croak(aTHX_ "Permission denied");	/* testing full pathname here */
 #if defined(IAMSUID) && !defined(NO_NOSUID_CHECK)
 	    if (fd_on_nosuid_fs(PerlIO_fileno(PL_rsfp)))
@@ -2391,7 +2391,7 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 (Filename of set-id script was %s, uid %"Uid_t_f" gid %"Gid_t_f".)\n\nSincerely,\nperl\n",
 			PL_uid,(long)tmpstatbuf.st_dev, (long)tmpstatbuf.st_ino,
 			(long)PL_statbuf.st_dev, (long)PL_statbuf.st_ino,
-			SvPVX(GvSV(PL_curcop->cop_filegv)),
+			CopFILE(PL_curcop),
 			PL_statbuf.st_uid, PL_statbuf.st_gid);
 		    (void)PerlProc_pclose(PL_rsfp);
 		}
@@ -2829,6 +2829,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	for (; argc > 0; argc--,argv++) {
 	    av_push(GvAVn(PL_argvgv),newSVpv(argv[0],0));
 	}
+	PL_argvout_stack = newAV();
     }
     if (PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV)) {
 	HV *hv;
@@ -3295,7 +3296,6 @@ S_my_exit_jump(pTHX)
 }
 
 #ifdef PERL_OBJECT
-#define NO_XSLOCKS
 #include "XSUB.h"
 #endif
 

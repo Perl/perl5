@@ -3541,7 +3541,6 @@ Perl_save_re_context(pTHX)
 }
 
 #ifdef PERL_OBJECT
-#define NO_XSLOCKS
 #include "XSUB.h"
 #undef this
 #define this pPerl

@@ -116,7 +116,7 @@ sub write_protos {
 	    $func = "S_$func";
 	}
 	else {
-	    $retval = "VIRTUAL $retval";
+	    $retval = "PERL_CALLCONV $retval";
 	    if ($flags =~ /p/) {
 		$func = "Perl_$func";
 	    }

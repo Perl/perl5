@@ -66,6 +66,7 @@ PERLVAR(Istderrgv,	GV *)
 PERLVAR(Idefgv,		GV *)
 PERLVAR(Iargvgv,	GV *)
 PERLVAR(Iargvoutgv,	GV *)
+PERLVAR(Iargvout_stack,	AV *)
 
 /* shortcuts to regexp stuff */
 /* this one needs to be moved to thrdvar.h and accessed via

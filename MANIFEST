@@ -1150,6 +1150,7 @@ t/io/dup.t		See if >& works right
 t/io/fs.t		See if directory manipulations work
 t/io/inplace.t		See if inplace editing works
 t/io/iprefix.t		See if inplace editing works with prefixes
+t/io/nargv.t		See if nested ARGV stuff works
 t/io/open.t		See if open works
 t/io/openpid.t		See if open works for subprocesses
 t/io/pipe.t		See if secure pipes work

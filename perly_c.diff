@@ -134,7 +134,7 @@
   yyaccept:
 !     return (0);
   }
---- 2524,2570 ----
+--- 2524,2569 ----
   #endif
       if (yyssp >= yyss + yystacksize - 1)
       {
@@ -164,7 +164,6 @@
 ! }
 ! 
 ! #ifdef PERL_OBJECT
-! #define NO_XSLOCKS
 ! #include "XSUB.h"
 ! #endif
 ! 

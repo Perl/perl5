@@ -1421,7 +1421,7 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 	dTHR;
 	if (PL_curcop->cop_line)
 	    Perl_sv_catpvf(aTHX_ sv, " at %_ line %"IVdf,
-		      GvSV(PL_curcop->cop_filegv), (IV)PL_curcop->cop_line);
+			   CopFILESV(PL_curcop), (IV)PL_curcop->cop_line);
 	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
 	    bool line_mode = (RsSIMPLE(PL_rs) &&
 			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');

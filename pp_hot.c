@@ -1085,9 +1085,9 @@ Perl_do_readline(pTHX)
 	if (!fp) {
 	    if (IoFLAGS(io) & IOf_ARGV) {
 		if (IoFLAGS(io) & IOf_START) {
-		    IoFLAGS(io) &= ~IOf_START;
 		    IoLINES(io) = 0;
 		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
+			IoFLAGS(io) &= ~IOf_START;
 			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,Nullfp);
 			sv_setpvn(GvSV(PL_last_in_gv), "-", 1);
 			SvSETMAGIC(GvSV(PL_last_in_gv));
@@ -1098,7 +1098,6 @@ Perl_do_readline(pTHX)
 		fp = nextargv(PL_last_in_gv);
 		if (!fp) { /* Note: fp != IoIFP(io) */
 		    (void)do_close(PL_last_in_gv, FALSE); /* now it does*/
-		    IoFLAGS(io) |= IOf_START;
 		}
 	    }
 	    else if (type == OP_GLOB) {
@@ -1302,7 +1301,6 @@ Perl_do_readline(pTHX)
 		if (fp)
 		    continue;
 		(void)do_close(PL_last_in_gv, FALSE);
-		IoFLAGS(io) |= IOf_START;
 	    }
 	    else if (type == OP_GLOB) {
 		if (!do_close(PL_last_in_gv, FALSE) && ckWARN(WARN_CLOSED)) {

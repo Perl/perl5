@@ -20,6 +20,14 @@ struct cop {
 
 #define Nullcop Null(COP*)
 
+#define CopFILEGV(c)		(c)->cop_filegv
+#define CopFILEGV_set(c,gv)	((c)->cop_filegv = gv)
+#define CopFILESV(c)		(CopFILEGV(c) ? GvSV(CopFILEGV(c)) : Nullsv)
+#define CopFILEAV(c)		(CopFILEGV(c) ? GvAV(CopFILEGV(c)) : Nullav)
+#define CopFILE(c)		(CopFILESV(c) ? SvPVX(CopFILESV(c)) : Nullch)
+#define CopLINE(c)		((c)->cop_line)
+#define CopLINE_set(c,l)	((c)->cop_line = (l))
+
 /*
  * Here we have some enormously heavy (or at least ponderous) wizardry.
  */
