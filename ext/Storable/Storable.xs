@@ -783,7 +783,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define STORABLE_BIN_WRITE_MINOR	6
 #endif /* (PATCHLEVEL <= 6) */
 
-#if (PATCHLEVEL <= 8 || (PATCHLEVEL == 8 && SUBVERSION < 1))
+#if (PATCHLEVEL < 8 || (PATCHLEVEL == 8 && SUBVERSION < 1))
 #define PL_sv_placeholder PL_sv_undef
 #endif
 
