@@ -27,12 +27,20 @@ void
 deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
     char *pat;
 {
+    dTHR;
     register I32 i;
     GV* gv = curcop->cop_filegv;
 
+#ifdef USE_THREADS
+    fprintf(stderr,"0x%lx (%s:%ld)\t",
+	(unsigned long) thr,
+	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
+	(long)curcop->cop_line);
+#else
     fprintf(stderr,"(%s:%ld)\t",
 	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
 	(long)curcop->cop_line);
+#endif /* USE_THREADS */
     for (i=0; i<dlevel; i++)
 	fprintf(stderr,"%c%c ",debname[i],debdelim[i]);
     fprintf(stderr,pat,a1,a2,a3,a4,a5,a6,a7,a8);
@@ -51,13 +59,21 @@ deb(pat, va_alist)
     va_dcl
 #  endif
 {
+    dTHR;
     va_list args;
     register I32 i;
     GV* gv = curcop->cop_filegv;
 
+#ifdef USE_THREADS
+    fprintf(stderr,"0x%lx (%s:%ld)\t",
+	(unsigned long) thr,
+	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
+	(long)curcop->cop_line);
+#else
     fprintf(stderr,"(%s:%ld)\t",
 	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
 	(long)curcop->cop_line);
+#endif /* USE_THREADS */
     for (i=0; i<dlevel; i++)
 	fprintf(stderr,"%c%c ",debname[i],debdelim[i]);
 
@@ -82,6 +98,7 @@ deb_growlevel()
 I32
 debstackptrs()
 {
+    dTHR;
     fprintf(stderr, "%8lx %8lx %8ld %8ld %8ld\n",
 	(unsigned long)stack, (unsigned long)stack_base,
 	(long)*markstack_ptr, (long)(stack_sp-stack_base),
@@ -95,6 +112,7 @@ debstackptrs()
 I32
 debstack()
 {
+    dTHR;
     I32 top = stack_sp - stack_base;
     register I32 i = top - 30;
     I32 *markscan = markstack;
@@ -106,7 +124,12 @@ debstack()
 	if (*markscan >= i)
 	    break;
 
+#ifdef USE_THREADS
+    fprintf(stderr, i ? "0x%lx    =>  ...  " : "0x%lx    =>  ",
+	    (unsigned long) thr);
+#else
     fprintf(stderr, i ? "    =>  ...  " : "    =>  ");
+#endif /* USE_THREADS */
     if (stack_base[0] != &sv_undef || stack_sp < stack_base)
 	fprintf(stderr, " [STACK UNDERFLOW!!!]\n");
     do {

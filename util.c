@@ -885,6 +885,7 @@ mess(pat, args)
     va_list *args;
 #endif
 {
+    dTHR;
     char *s;
     char *s_start;
     SV *tmpstr;
@@ -960,6 +961,7 @@ croak(pat, va_alist)
     va_dcl
 #endif
 {
+    dTHR;
     va_list args;
     char *message;
     HV *stash;
@@ -973,6 +975,9 @@ croak(pat, va_alist)
 #endif
     message = mess(pat, &args);
     va_end(args);
+#ifdef USE_THREADS
+    DEBUG_L(fprintf(stderr, "croak: 0x%lx %s", (unsigned long) thr, message));
+#endif /* USE_THREADS */
     if (diehook && (cv = sv_2cv(diehook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
 	dSP;
 
@@ -1030,6 +1035,7 @@ warn(pat,va_alist)
     va_end(args);
 
     if (warnhook && (cv = sv_2cv(warnhook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
+	dTHR;
 	dSP;
 
 	PUSHMARK(sp);
@@ -1810,3 +1816,17 @@ I32 *retlen;
     *retlen = s - start;
     return retval;
 }
+
+#ifdef USE_THREADS
+#ifdef OLD_PTHREADS_API
+struct thread *
+getTHR _((void))
+{
+    pthread_addr_t t;
+
+    if (pthread_getspecific(thr_key, &t))
+	croak("panic: pthread_getspecific");
+    return (struct thread *) t;
+}
+#endif /* OLD_PTHREADS_API */
+#endif /* USE_THREADS */

@@ -419,7 +419,7 @@ PP(pp_tie)
     XPUSHs(gv);
     PUTBACK;
 
-    if (op = pp_entersub())
+    if (op = pp_entersub(ARGS))
         runops();
     SPAGAIN;
 
@@ -504,7 +504,7 @@ PP(pp_dbmopen)
     SAVESPTR(op);
     op = (OP *) &myop;
     PUTBACK;
-    pp_pushmark();
+    pp_pushmark(ARGS);
 
     EXTEND(sp, 5);
     PUSHs(sv);
@@ -517,7 +517,7 @@ PP(pp_dbmopen)
     PUSHs(gv);
     PUTBACK;
 
-    if (op = pp_entersub())
+    if (op = pp_entersub(ARGS))
         runops();
     SPAGAIN;
 
@@ -525,7 +525,7 @@ PP(pp_dbmopen)
 	sp--;
 	op = (OP *) &myop;
 	PUTBACK;
-	pp_pushmark();
+	pp_pushmark(ARGS);
 
 	PUSHs(sv);
 	PUSHs(left);
@@ -534,7 +534,7 @@ PP(pp_dbmopen)
 	PUSHs(gv);
 	PUTBACK;
 
-	if (op = pp_entersub())
+	if (op = pp_entersub(ARGS))
 	    runops();
 	SPAGAIN;
     }
@@ -688,6 +688,7 @@ void
 setdefout(gv)
 GV *gv;
 {
+    dTHR;
     if (gv)
 	(void)SvREFCNT_inc(gv);
     if (defoutgv)
@@ -758,6 +759,7 @@ CV *cv;
 GV *gv;
 OP *retop;
 {
+    dTHR;
     register CONTEXT *cx;
     I32 gimme = GIMME;
     AV* padlist = CvPADLIST(cv);

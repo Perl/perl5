@@ -33,6 +33,10 @@
 # endif
 #endif
 
+#ifdef USE_THREADS
+#include <pthread.h>
+#endif
+
 #include "embed.h"
 
 #define VOIDUSED 1
@@ -607,6 +611,12 @@ union any {
     void	(*any_dptr) _((void*));
 };
 
+#ifdef USE_THREADS
+#define ARGSproto struct thread *
+#else
+#define ARGSproto void
+#endif /* USE_THREADS */
+
 #include "regexp.h"
 #include "sv.h"
 #include "util.h"
@@ -867,6 +877,18 @@ I32 unlnk _((char*));
 
 /* global state */
 EXT PerlInterpreter *	curinterp;	/* currently running interpreter */
+#ifdef USE_THREADS
+EXT pthread_key_t	thr_key;	/* For per-thread struct thread ptr */
+EXT pthread_mutex_t	sv_mutex;	/* Mutex for allocating SVs in sv.c */
+EXT pthread_mutex_t	malloc_mutex;	/* Mutex for malloc */
+EXT pthread_mutex_t	eval_mutex;	/* Mutex for doeval */
+EXT pthread_cond_t	eval_cond;	/* Condition variable for doeval */
+EXT struct thread *	eval_owner;	/* Owner thread for doeval */
+EXT int			nthreads;	/* Number of threads currently */
+EXT pthread_mutex_t	nthreads_mutex;	/* Mutex for nthreads */
+EXT pthread_cond_t	nthreads_cond;	/* Condition variable for nthreads */
+#endif /* USE_THREADS */
+
 #ifndef VMS  /* VMS doesn't use environ array */
 extern char **	environ;	/* environment variables supplied via exec */
 #endif
@@ -1412,6 +1434,7 @@ struct interpreter {
 };
 #endif
 
+#include "thread.h"
 #include "pp.h"
 
 #ifdef __cplusplus

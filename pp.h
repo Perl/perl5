@@ -7,10 +7,15 @@
  *
  */
 
+#ifdef USE_THREADS
+#define ARGS thr
+#define dARGS struct thread *thr;
+#define PP(s) OP* s(ARGS) dARGS
+#else
 #define ARGS
-#define ARGSproto void
 #define dARGS
 #define PP(s) OP* s(ARGS) dARGS
+#endif /* USE_THREADS */
 
 #define SP sp
 #define MARK mark

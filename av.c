@@ -30,8 +30,10 @@ AV* av;
     while (key) {
 	sv = AvARRAY(av)[--key];
 	assert(sv);
-	if (sv != &sv_undef)
+	if (sv != &sv_undef) {
+	    dTHR;
 	    (void)SvREFCNT_inc(sv);
+	}
     }
     AvREAL_on(av);
 }
@@ -41,6 +43,7 @@ av_extend(av,key)
 AV *av;
 I32 key;
 {
+    dTHR;			/* only necessary if we have to extend stack */
     if (key > AvMAX(av)) {
 	SV** ary;
 	I32 tmp;
@@ -131,6 +134,7 @@ I32 lval;
 
     if (SvRMAGICAL(av)) {
 	if (mg_find((SV*)av,'P')) {
+	    dTHR;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)av, sv, 0, key);
 	    Sv = sv;
@@ -196,6 +200,7 @@ SV *val;
     ary = AvARRAY(av);
     if (AvFILL(av) < key) {
 	if (!AvREAL(av)) {
+	    dTHR;
 	    if (av == stack && key > stack_sp - stack_base)
 		stack_sp = stack_base + key;	/* XPUSH in disguise */
 	    do

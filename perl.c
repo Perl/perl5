@@ -44,8 +44,10 @@ static void init_main_stash _((void));
 static void init_perllib _((void));
 static void init_postdump_symbols _((int, char **, char **));
 static void init_predump_symbols _((void));
-static void init_stacks _((void));
 static void open_script _((char *, bool, SV *));
+#ifdef USE_THREADS
+static void thread_destruct _((void *));
+#endif /* USE_THREADS */
 static void usage _((char *));
 static void validate_suid _((char *, char*));
 
@@ -65,12 +67,30 @@ void
 perl_construct( sv_interp )
 register PerlInterpreter *sv_interp;
 {
+#ifdef USE_THREADS
+    struct thread *thr;
+#endif /* USE_THREADS */
+    
     if (!(curinterp = sv_interp))
 	return;
 
 #ifdef MULTIPLICITY
     Zero(sv_interp, 1, PerlInterpreter);
 #endif
+
+#ifdef USE_THREADS
+#ifdef NEED_PTHREAD_INIT
+    pthread_init();
+#endif /* NEED_PTHREAD_INIT */
+    New(53, thr, 1, struct thread);
+    self = pthread_self();
+    if (pthread_key_create(&thr_key, thread_destruct))
+	croak("panic: pthread_key_create");
+    if (pthread_setspecific(thr_key, (void *) thr))
+	croak("panic: pthread_setspecific");
+    nthreads = 1;
+    cvcache = newHV();
+#endif /* USE_THREADS */
 
     /* Init the real globals? */
     if (!linestr) {
@@ -89,6 +109,12 @@ register PerlInterpreter *sv_interp;
 
 	nrs = newSVpv("\n", 1);
 	rs = SvREFCNT_inc(nrs);
+
+	MUTEX_INIT(&malloc_mutex);
+	MUTEX_INIT(&sv_mutex);
+	MUTEX_INIT(&eval_mutex);
+	MUTEX_INIT(&nthreads_mutex);
+	COND_INIT(&nthreads_cond);
 
 #ifdef MSDOS
 	/*
@@ -132,20 +158,64 @@ register PerlInterpreter *sv_interp;
     fdpid = newAV();	/* for remembering popen pids by fd */
     pidstatus = newHV();/* for remembering status of dead pids */
 
-    init_stacks();
+    init_stacks(ARGS);
+    DEBUG( {
+	New(51,debname,128,char);
+	New(52,debdelim,128,char);
+    } )
+
     ENTER;
 }
+
+#ifdef USE_THREADS
+void
+thread_destruct(arg)
+void *arg;
+{
+    struct thread *thr = (struct thread *) arg;
+    /*
+     * Decrement the global thread count and signal anyone listening.
+     * The only official thread listening is the original thread while
+     * in perl_destruct. It waits until it's the only thread and then
+     * performs END blocks and other process clean-ups.
+     */
+    DEBUG_L(fprintf(stderr, "thread_destruct: 0x%lx\n", (unsigned long) thr));
+
+    Safefree(thr);
+    MUTEX_LOCK(&nthreads_mutex);
+    nthreads--;
+    COND_BROADCAST(&nthreads_cond);
+    MUTEX_UNLOCK(&nthreads_mutex);
+}    
+#endif /* USE_THREADS */
 
 void
 perl_destruct(sv_interp)
 register PerlInterpreter *sv_interp;
 {
+    dTHR;
     int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     I32 last_sv_count;
     HV *hv;
 
     if (!(curinterp = sv_interp))
 	return;
+
+#ifdef USE_THREADS
+    /* Wait until all user-created threads go away */
+    MUTEX_LOCK(&nthreads_mutex);
+    while (nthreads > 1)
+    {
+	DEBUG_L(fprintf(stderr, "perl_destruct: waiting for %d threads\n",
+			nthreads - 1));
+	COND_WAIT(&nthreads_cond, &nthreads_mutex);
+    }
+    /* At this point, we're the last thread */
+    MUTEX_UNLOCK(&nthreads_mutex);
+    DEBUG_L(fprintf(stderr, "perl_destruct: armageddon has arrived\n"));
+    MUTEX_DESTROY(&nthreads_mutex);
+    COND_DESTROY(&nthreads_cond);
+#endif /* USE_THREADS */
 
     destruct_level = perl_destruct_level;
 #ifdef DEBUGGING
@@ -214,6 +284,11 @@ register PerlInterpreter *sv_interp;
     sv_free_arenas();
     
     DEBUG_P(debprofdump());
+#ifdef USE_THREADS
+    MUTEX_DESTROY(&sv_mutex);
+    MUTEX_DESTROY(&malloc_mutex);
+    MUTEX_DESTROY(&eval_mutex);
+#endif /* USE_THREADS */
 }
 
 void
@@ -236,6 +311,7 @@ int argc;
 char **argv;
 char **env;
 {
+    dTHR;
     register SV *sv;
     register char *s;
     char *scriptname = NULL;
@@ -436,6 +512,13 @@ setuid perl scripts securely.\n");
 
     compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)compcv, SVt_PVCV);
+#ifdef USE_THREADS
+    CvOWNER(compcv) = 0;
+    New(666, CvMUTEXP(compcv), 1, pthread_mutex_t);
+    MUTEX_INIT(CvMUTEXP(compcv));
+    New(666, CvCONDP(compcv), 1, pthread_cond_t);
+    COND_INIT(CvCONDP(compcv));
+#endif /* USE_THREADS */
 
     pad = newAV();
     comppad = pad;
@@ -444,6 +527,9 @@ setuid perl scripts securely.\n");
     padname = newAV();
     comppad_name = padname;
     comppad_name_fill = 0;
+#ifdef USE_THREADS
+    av_store(comppad_name, 0, newSVpv("@_", 2));
+#endif /* USE_THREADS */
     min_intro_pending = 0;
     padix = 0;
 
@@ -513,6 +599,7 @@ int
 perl_run(sv_interp)
 PerlInterpreter *sv_interp;
 {
+    dTHR;
     if (!(curinterp = sv_interp))
 	return 255;
     switch (Sigsetjmp(top_env,1)) {
@@ -545,6 +632,9 @@ PerlInterpreter *sv_interp;
     if (!restartop) {
 	DEBUG_x(dump_all());
 	DEBUG(fprintf(stderr,"\nEXECUTING...\n\n"));
+#ifdef USE_THREADS
+	DEBUG_L(fprintf(stderr,"main thread is 0x%lx\n", (unsigned long) thr));
+#endif /* USE_THREADS */	
 
 	if (minus_c) {
 	    fprintf(stderr,"%s syntax OK\n", origfilename);
@@ -574,10 +664,15 @@ void
 my_exit(status)
 U32 status;
 {
+    dTHR;
     register CONTEXT *cx;
     I32 gimme;
     SV **newsp;
 
+#ifdef USE_THREADS
+    DEBUG_L(fprintf(stderr, "my_exit: thread 0x%lx, status %lu\n",
+		    (unsigned long) thr, (unsigned long) status));
+#endif /* USE_THREADS */
     statusvalue = FIXSTATUS(status);
     if (cxstack_ix >= 0) {
 	if (cxstack_ix > 0)
@@ -649,6 +744,7 @@ char *subname;
 I32 flags;		/* See G_* flags in cop.h */
 register char **argv;	/* null terminated arg list */
 {
+    dTHR;
     dSP;
 
     PUSHMARK(sp);
@@ -675,13 +771,14 @@ perl_call_method(methname, flags)
 char *methname;		/* name of the subroutine */
 I32 flags;		/* See G_* flags in cop.h */
 {
+    dTHR;
     dSP;
     OP myop;
     if (!op)
 	op = &myop;
     XPUSHs(sv_2mortal(newSVpv(methname,0)));
     PUTBACK;
-    pp_method();
+    pp_method(ARGS);
     return perl_call_sv(*stack_sp--, flags);
 }
 
@@ -691,6 +788,7 @@ perl_call_sv(sv, flags)
 SV* sv;
 I32 flags;		/* See G_* flags in cop.h */
 {
+    dTHR;
     LOGOP myop;		/* fake syntax tree node */
     SV** sp = stack_sp;
     I32 oldmark = TOPMARK;
@@ -781,7 +879,7 @@ I32 flags;		/* See G_* flags in cop.h */
     }
 
     if (op == (OP*)&myop)
-	op = pp_entersub();
+	op = pp_entersub(ARGS);
     if (op)
 	runops();
     retval = stack_sp - (stack_base + oldmark);
@@ -821,6 +919,7 @@ perl_eval_sv(sv, flags)
 SV* sv;
 I32 flags;		/* See G_* flags in cop.h */
 {
+    dTHR;
     UNOP myop;		/* fake syntax tree node */
     SV** sp = stack_sp;
     I32 oldmark = sp - stack_base;
@@ -886,7 +985,7 @@ restart:
     }
 
     if (op == (OP*)&myop)
-	op = pp_entereval();
+	op = pp_entereval(ARGS);
     if (op)
 	runops();
     retval = stack_sp - (stack_base + oldmark);
@@ -1120,30 +1219,31 @@ char *s;
 	taint_not("-m");	/* XXX ? */
 	if (*++s) {
 	    char *start;
+	    SV *sv;
 	    char *use = "use ";
 	    /* -M-foo == 'no foo'	*/
 	    if (*s == '-') { use = "no "; ++s; }
-	    Sv = newSVpv(use,0);
+	    sv = newSVpv(use,0);
 	    start = s;
 	    /* We allow -M'Module qw(Foo Bar)'	*/
 	    while(isALNUM(*s) || *s==':') ++s;
 	    if (*s != '=') {
-		sv_catpv(Sv, start);
+		sv_catpv(sv, start);
 		if (*(start-1) == 'm') {
 		    if (*s != '\0')
 			croak("Can't use '%c' after -mname", *s);
-		    sv_catpv( Sv, " ()");
+		    sv_catpv( sv, " ()");
 		}
 	    } else {
-		sv_catpvn(Sv, start, s-start);
-		sv_catpv(Sv, " split(/,/,q{");
-		sv_catpv(Sv, ++s);
-		sv_catpv(Sv,    "})");
+		sv_catpvn(sv, start, s-start);
+		sv_catpv(sv, " split(/,/,q{");
+		sv_catpv(sv, ++s);
+		sv_catpv(sv,    "})");
 	    }
 	    s += strlen(s);
 	    if (preambleav == NULL)
 		preambleav = newAV();
-	    av_push(preambleav, Sv);
+	    av_push(preambleav, sv);
 	}
 	else
 	    croak("No space allowed after -%c", *(s-1));
@@ -1286,6 +1386,7 @@ my_unexec()
 static void
 init_main_stash()
 {
+    dTHR;
     GV *gv;
     curstash = defstash = newHV();
     curstname = newSVpv("main",4);
@@ -1798,6 +1899,7 @@ init_ids()
 static void
 init_debugger()
 {
+    dTHR;
     curstash = debstash;
     dbargs = GvAV(gv_AVadd((gv_fetchpv("args", GV_ADDMULTI, SVt_PVAV))));
     AvREAL_off(dbargs);
@@ -1813,8 +1915,9 @@ init_debugger()
     curstash = defstash;
 }
 
-static void
-init_stacks()
+void
+init_stacks(ARGS)
+dARGS
 {
     stack = newAV();
     mainstack = stack;			/* remember in case we switch stacks */
@@ -1848,11 +1951,6 @@ init_stacks()
     New(50,tmps_stack,128,SV*);
     tmps_ix = -1;
     tmps_max = 128;
-
-    DEBUG( {
-	New(51,debname,128,char);
-	New(52,debdelim,128,char);
-    } )
 }
 
 static FILE *tmpfp;  /* moved outside init_lexer() because of UNICOS bug */
@@ -1869,6 +1967,7 @@ init_lexer()
 static void
 init_predump_symbols()
 {
+    dTHR;
     GV *tmpgv;
     GV *othergv;
 
@@ -2033,6 +2132,7 @@ void
 calllist(list)
 AV* list;
 {
+    dTHR;
     Sigjmp_buf oldtop;
     STRLEN len;
     line_t oldline = curcop->cop_line;

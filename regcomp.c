@@ -58,6 +58,10 @@
 #include "INTERN.h"
 #include "regcomp.h"
 
+#ifdef USE_THREADS
+#undef op
+#endif /* USE_THREADS */
+
 #ifdef MSDOS
 # if defined(BUGGY_MSC6)
  /* MSC 6.00A breaks on op/regexp.t test 85 unless we turn this off */
@@ -1498,14 +1502,14 @@ regexp *r;
 - regprop - printable representation of opcode
 */
 char *
-regprop(op)
-char *op;
+regprop(o)
+char *o;
 {
     register char *p = 0;
 
     (void) strcpy(buf, ":");
 
-    switch (OP(op)) {
+    switch (OP(o)) {
     case BOL:
 	p = "BOL";
 	break;
@@ -1573,23 +1577,23 @@ char *op;
 	p = "NDIGIT";
 	break;
     case CURLY:
-	(void)sprintf(buf+strlen(buf), "CURLY {%d,%d}", ARG1(op),ARG2(op));
+	(void)sprintf(buf+strlen(buf), "CURLY {%d,%d}", ARG1(o),ARG2(o));
 	p = NULL;
 	break;
     case CURLYX:
-	(void)sprintf(buf+strlen(buf), "CURLYX {%d,%d}", ARG1(op),ARG2(op));
+	(void)sprintf(buf+strlen(buf), "CURLYX {%d,%d}", ARG1(o),ARG2(o));
 	p = NULL;
 	break;
     case REF:
-	(void)sprintf(buf+strlen(buf), "REF%d", ARG1(op));
+	(void)sprintf(buf+strlen(buf), "REF%d", ARG1(o));
 	p = NULL;
 	break;
     case OPEN:
-	(void)sprintf(buf+strlen(buf), "OPEN%d", ARG1(op));
+	(void)sprintf(buf+strlen(buf), "OPEN%d", ARG1(o));
 	p = NULL;
 	break;
     case CLOSE:
-	(void)sprintf(buf+strlen(buf), "CLOSE%d", ARG1(op));
+	(void)sprintf(buf+strlen(buf), "CLOSE%d", ARG1(o));
 	p = NULL;
 	break;
     case STAR:

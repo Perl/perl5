@@ -23,19 +23,21 @@ dEXT char *watchok;
 
 int
 runops() {
+    dTHR;
     SAVEI32(runlevel);
     runlevel++;
 
-    while ( op = (*op->op_ppaddr)() ) ;
+    while ( op = (*op->op_ppaddr)(ARGS) ) ;
     return 0;
 }
 
 #else
 
-static void debprof _((OP*op));
+static void debprof _((OP*o));
 
 int
 runops() {
+    dTHR;
     if (!op) {
 	warn("NULL OP IN RUN");
 	return 0;
@@ -52,26 +54,29 @@ runops() {
 	    DEBUG_s(debstack());
 	    DEBUG_t(debop(op));
 	    DEBUG_P(debprof(op));
+#ifdef USE_THREADS
+	    DEBUG_L(pthread_yield());	/* shake up scheduling a bit */
+#endif /* USE_THREADS */
 	}
-    } while ( op = (*op->op_ppaddr)() );
+    } while ( op = (*op->op_ppaddr)(ARGS) );
     return 0;
 }
 
 I32
-debop(op)
-OP *op;
+debop(o)
+OP *o;
 {
     SV *sv;
-    deb("%s", op_name[op->op_type]);
-    switch (op->op_type) {
+    deb("%s", op_name[o->op_type]);
+    switch (o->op_type) {
     case OP_CONST:
-	fprintf(stderr, "(%s)", SvPEEK(cSVOP->op_sv));
+	fprintf(stderr, "(%s)", SvPEEK(cSVOPo->op_sv));
 	break;
     case OP_GVSV:
     case OP_GV:
-	if (cGVOP->op_gv) {
+	if (cGVOPo->op_gv) {
 	    sv = NEWSV(0,0);
-	    gv_fullname(sv, cGVOP->op_gv);
+	    gv_fullname(sv, cGVOPo->op_gv);
 	    fprintf(stderr, "(%s)", SvPV(sv, na));
 	    SvREFCNT_dec(sv);
 	}
@@ -96,12 +101,12 @@ char **addr;
 }
 
 static void
-debprof(op)
-OP* op;
+debprof(o)
+OP* o;
 {
     if (!profiledata)
 	New(000, profiledata, MAXO, U32);
-    ++profiledata[op->op_type];
+    ++profiledata[o->op_type];
 }
 
 void

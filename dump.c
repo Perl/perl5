@@ -27,6 +27,7 @@ static void dump();
 void
 dump_all()
 {
+    dTHR;
 #ifdef HAS_SETLINEBUF
     setlinebuf(stderr);
 #else
@@ -41,6 +42,7 @@ void
 dump_packsubs(stash)
 HV* stash;
 {
+    dTHR;
     I32	i;
     HE	*entry;
 
@@ -100,115 +102,115 @@ dump_eval()
 }
 
 void
-dump_op(op)
-register OP *op;
+dump_op(o)
+register OP *o;
 {
     SV *tmpsv;
 
     dump("{\n");
-    if (op->op_seq)
-	fprintf(stderr, "%-4d", op->op_seq);
+    if (o->op_seq)
+	fprintf(stderr, "%-4d", o->op_seq);
     else
 	fprintf(stderr, "    ");
-    dump("TYPE = %s  ===> ", op_name[op->op_type]);
-    if (op->op_next) {
-	if (op->op_seq)
-	    fprintf(stderr, "%d\n", op->op_next->op_seq);
+    dump("TYPE = %s  ===> ", op_name[o->op_type]);
+    if (o->op_next) {
+	if (o->op_seq)
+	    fprintf(stderr, "%d\n", o->op_next->op_seq);
 	else
-	    fprintf(stderr, "(%d)\n", op->op_next->op_seq);
+	    fprintf(stderr, "(%d)\n", o->op_next->op_seq);
     }
     else
 	fprintf(stderr, "DONE\n");
     dumplvl++;
-    if (op->op_targ) {
-	if (op->op_type == OP_NULL)
-	    dump("  (was %s)\n", op_name[op->op_targ]);
+    if (o->op_targ) {
+	if (o->op_type == OP_NULL)
+	    dump("  (was %s)\n", op_name[o->op_targ]);
 	else
-	    dump("TARG = %d\n", op->op_targ);
+	    dump("TARG = %d\n", o->op_targ);
     }
 #ifdef DUMPADDR
-    dump("ADDR = 0x%lx => 0x%lx\n",op, op->op_next);
+    dump("ADDR = 0x%lx => 0x%lx\n",o, o->op_next);
 #endif
-    if (op->op_flags) {
+    if (o->op_flags) {
 	*buf = '\0';
-	if (op->op_flags & OPf_KNOW) {
-	    if (op->op_flags & OPf_LIST)
+	if (o->op_flags & OPf_KNOW) {
+	    if (o->op_flags & OPf_LIST)
 		(void)strcat(buf,"LIST,");
 	    else
 		(void)strcat(buf,"SCALAR,");
 	}
 	else
 	    (void)strcat(buf,"UNKNOWN,");
-	if (op->op_flags & OPf_KIDS)
+	if (o->op_flags & OPf_KIDS)
 	    (void)strcat(buf,"KIDS,");
-	if (op->op_flags & OPf_PARENS)
+	if (o->op_flags & OPf_PARENS)
 	    (void)strcat(buf,"PARENS,");
-	if (op->op_flags & OPf_STACKED)
+	if (o->op_flags & OPf_STACKED)
 	    (void)strcat(buf,"STACKED,");
-	if (op->op_flags & OPf_REF)
+	if (o->op_flags & OPf_REF)
 	    (void)strcat(buf,"REF,");
-	if (op->op_flags & OPf_MOD)
+	if (o->op_flags & OPf_MOD)
 	    (void)strcat(buf,"MOD,");
-	if (op->op_flags & OPf_SPECIAL)
+	if (o->op_flags & OPf_SPECIAL)
 	    (void)strcat(buf,"SPECIAL,");
 	if (*buf)
 	    buf[strlen(buf)-1] = '\0';
 	dump("FLAGS = (%s)\n",buf);
     }
-    if (op->op_private) {
+    if (o->op_private) {
 	*buf = '\0';
-	if (op->op_type == OP_AASSIGN) {
-	    if (op->op_private & OPpASSIGN_COMMON)
+	if (o->op_type == OP_AASSIGN) {
+	    if (o->op_private & OPpASSIGN_COMMON)
 		(void)strcat(buf,"COMMON,");
 	}
-	else if (op->op_type == OP_SASSIGN) {
-	    if (op->op_private & OPpASSIGN_BACKWARDS)
+	else if (o->op_type == OP_SASSIGN) {
+	    if (o->op_private & OPpASSIGN_BACKWARDS)
 		(void)strcat(buf,"BACKWARDS,");
 	}
-	else if (op->op_type == OP_TRANS) {
-	    if (op->op_private & OPpTRANS_SQUASH)
+	else if (o->op_type == OP_TRANS) {
+	    if (o->op_private & OPpTRANS_SQUASH)
 		(void)strcat(buf,"SQUASH,");
-	    if (op->op_private & OPpTRANS_DELETE)
+	    if (o->op_private & OPpTRANS_DELETE)
 		(void)strcat(buf,"DELETE,");
-	    if (op->op_private & OPpTRANS_COMPLEMENT)
+	    if (o->op_private & OPpTRANS_COMPLEMENT)
 		(void)strcat(buf,"COMPLEMENT,");
 	}
-	else if (op->op_type == OP_REPEAT) {
-	    if (op->op_private & OPpREPEAT_DOLIST)
+	else if (o->op_type == OP_REPEAT) {
+	    if (o->op_private & OPpREPEAT_DOLIST)
 		(void)strcat(buf,"DOLIST,");
 	}
-	else if (op->op_type == OP_ENTERSUB ||
-		 op->op_type == OP_RV2SV ||
-		 op->op_type == OP_RV2AV ||
-		 op->op_type == OP_RV2HV ||
-		 op->op_type == OP_RV2GV ||
-		 op->op_type == OP_AELEM ||
-		 op->op_type == OP_HELEM )
+	else if (o->op_type == OP_ENTERSUB ||
+		 o->op_type == OP_RV2SV ||
+		 o->op_type == OP_RV2AV ||
+		 o->op_type == OP_RV2HV ||
+		 o->op_type == OP_RV2GV ||
+		 o->op_type == OP_AELEM ||
+		 o->op_type == OP_HELEM )
 	{
-	    if (op->op_private & OPpENTERSUB_AMPER)
+	    if (o->op_private & OPpENTERSUB_AMPER)
 		(void)strcat(buf,"AMPER,");
-	    if (op->op_private & OPpENTERSUB_DB)
+	    if (o->op_private & OPpENTERSUB_DB)
 		(void)strcat(buf,"DB,");
-	    if (op->op_private & OPpDEREF_AV)
+	    if (o->op_private & OPpDEREF_AV)
 		(void)strcat(buf,"AV,");
-	    if (op->op_private & OPpDEREF_HV)
+	    if (o->op_private & OPpDEREF_HV)
 		(void)strcat(buf,"HV,");
-	    if (op->op_private & HINT_STRICT_REFS)
+	    if (o->op_private & HINT_STRICT_REFS)
 		(void)strcat(buf,"STRICT_REFS,");
 	}
-	else if (op->op_type == OP_CONST) {
-	    if (op->op_private & OPpCONST_BARE)
+	else if (o->op_type == OP_CONST) {
+	    if (o->op_private & OPpCONST_BARE)
 		(void)strcat(buf,"BARE,");
 	}
-	else if (op->op_type == OP_FLIP) {
-	    if (op->op_private & OPpFLIP_LINENUM)
+	else if (o->op_type == OP_FLIP) {
+	    if (o->op_private & OPpFLIP_LINENUM)
 		(void)strcat(buf,"LINENUM,");
 	}
-	else if (op->op_type == OP_FLOP) {
-	    if (op->op_private & OPpFLIP_LINENUM)
+	else if (o->op_type == OP_FLOP) {
+	    if (o->op_private & OPpFLIP_LINENUM)
 		(void)strcat(buf,"LINENUM,");
 	}
-	if (op->op_flags & OPf_MOD && op->op_private & OPpLVAL_INTRO)
+	if (o->op_flags & OPf_MOD && o->op_private & OPpLVAL_INTRO)
 	    (void)strcat(buf,"INTRO,");
 	if (*buf) {
 	    buf[strlen(buf)-1] = '\0';
@@ -216,14 +218,14 @@ register OP *op;
 	}
     }
 
-    switch (op->op_type) {
+    switch (o->op_type) {
     case OP_GVSV:
     case OP_GV:
-	if (cGVOP->op_gv) {
+	if (cGVOPo->op_gv) {
 	    ENTER;
 	    tmpsv = NEWSV(0,0);
 	    SAVEFREESV(tmpsv);
-	    gv_fullname(tmpsv,cGVOP->op_gv);
+	    gv_fullname(tmpsv,cGVOPo->op_gv);
 	    dump("GV = %s\n", SvPV(tmpsv, na));
 	    LEAVE;
 	}
@@ -231,41 +233,41 @@ register OP *op;
 	    dump("GV = NULL\n");
 	break;
     case OP_CONST:
-	dump("SV = %s\n", SvPEEK(cSVOP->op_sv));
+	dump("SV = %s\n", SvPEEK(cSVOPo->op_sv));
 	break;
     case OP_NEXTSTATE:
     case OP_DBSTATE:
-	if (cCOP->cop_line)
-	    dump("LINE = %d\n",cCOP->cop_line);
-	if (cCOP->cop_label)
-	    dump("LABEL = \"%s\"\n",cCOP->cop_label);
+	if (cCOPo->cop_line)
+	    dump("LINE = %d\n",cCOPo->cop_line);
+	if (cCOPo->cop_label)
+	    dump("LABEL = \"%s\"\n",cCOPo->cop_label);
 	break;
     case OP_ENTERLOOP:
 	dump("REDO ===> ");
-	if (cLOOP->op_redoop)
-	    fprintf(stderr, "%d\n", cLOOP->op_redoop->op_seq);
+	if (cLOOPo->op_redoop)
+	    fprintf(stderr, "%d\n", cLOOPo->op_redoop->op_seq);
 	else
 	    fprintf(stderr, "DONE\n");
 	dump("NEXT ===> ");
-	if (cLOOP->op_nextop)
-	    fprintf(stderr, "%d\n", cLOOP->op_nextop->op_seq);
+	if (cLOOPo->op_nextop)
+	    fprintf(stderr, "%d\n", cLOOPo->op_nextop->op_seq);
 	else
 	    fprintf(stderr, "DONE\n");
 	dump("LAST ===> ");
-	if (cLOOP->op_lastop)
-	    fprintf(stderr, "%d\n", cLOOP->op_lastop->op_seq);
+	if (cLOOPo->op_lastop)
+	    fprintf(stderr, "%d\n", cLOOPo->op_lastop->op_seq);
 	else
 	    fprintf(stderr, "DONE\n");
 	break;
     case OP_COND_EXPR:
 	dump("TRUE ===> ");
-	if (cCONDOP->op_true)
-	    fprintf(stderr, "%d\n", cCONDOP->op_true->op_seq);
+	if (cCONDOPo->op_true)
+	    fprintf(stderr, "%d\n", cCONDOPo->op_true->op_seq);
 	else
 	    fprintf(stderr, "DONE\n");
 	dump("FALSE ===> ");
-	if (cCONDOP->op_false)
-	    fprintf(stderr, "%d\n", cCONDOP->op_false->op_seq);
+	if (cCONDOPo->op_false)
+	    fprintf(stderr, "%d\n", cCONDOPo->op_false->op_seq);
 	else
 	    fprintf(stderr, "DONE\n");
 	break;
@@ -274,22 +276,22 @@ register OP *op;
     case OP_OR:
     case OP_AND:
 	dump("OTHER ===> ");
-	if (cLOGOP->op_other)
-	    fprintf(stderr, "%d\n", cLOGOP->op_other->op_seq);
+	if (cLOGOPo->op_other)
+	    fprintf(stderr, "%d\n", cLOGOPo->op_other->op_seq);
 	else
 	    fprintf(stderr, "DONE\n");
 	break;
     case OP_PUSHRE:
     case OP_MATCH:
     case OP_SUBST:
-	dump_pm((PMOP*)op);
+	dump_pm(cPMOPo);
 	break;
     default:
 	break;
     }
-    if (op->op_flags & OPf_KIDS) {
+    if (o->op_flags & OPf_KIDS) {
 	OP *kid;
-	for (kid = cUNOP->op_first; kid; kid = kid->op_sibling)
+	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling)
 	    dump_op(kid);
     }
     dumplvl--;

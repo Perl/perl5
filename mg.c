@@ -636,6 +636,7 @@ magic_setsig(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     register char *s;
     I32 i;
     SV** svp;
@@ -726,6 +727,7 @@ SV* sv;
 MAGIC* mg;
 char *meth;
 {
+    dTHR;
     dSP;
 
     ENTER;
@@ -763,6 +765,7 @@ magic_setpack(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     dSP;
 
     PUSHMARK(sp);
@@ -792,6 +795,7 @@ int magic_wipepack(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     dSP;
 
     PUSHMARK(sp);
@@ -809,6 +813,7 @@ SV* sv;
 MAGIC* mg;
 SV* key;
 {
+    dTHR;
     dSP;
     char *meth = SvOK(key) ? "NEXTKEY" : "FIRSTKEY";
 
@@ -842,6 +847,7 @@ magic_setdbline(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     OP *o;
     I32 i;
     GV* gv;
@@ -996,6 +1002,7 @@ magic_settaint(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     if (localizing) {
 	if (localizing == 1)
 	    mg->mg_len <<= 1;
@@ -1055,6 +1062,7 @@ magic_set(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     register char *s;
     I32 i;
     STRLEN len;
@@ -1356,6 +1364,7 @@ Signal_t
 sighandler(sig)
 int sig;
 {
+    dTHR;
     dSP;
     GV *gv;
     HV *st;

@@ -126,6 +126,7 @@ malloc(nbytes)
 #endif
 #endif /* safemalloc */
 
+	MUTEX_LOCK(&malloc_mutex);
 	/*
 	 * Convert amount of memory requested into
 	 * closest block size stored in hash buckets
@@ -145,6 +146,7 @@ malloc(nbytes)
   	if (nextf[bucket] == NULL)    
   		morecore(bucket);
   	if ((p = (union overhead *)nextf[bucket]) == NULL) {
+		MUTEX_UNLOCK(&malloc_mutex);
 #ifdef safemalloc
 		if (!nomemok) {
 		    fputs("Out of memory!\n", stderr);
@@ -182,6 +184,7 @@ malloc(nbytes)
 	p->ov_rmagic = RMAGIC;
   	*((u_int *)((caddr_t)p + nbytes - RSLOP)) = RMAGIC;
 #endif
+	MUTEX_UNLOCK(&malloc_mutex);
   	return ((Malloc_t)(p + 1));
 }
 
@@ -281,6 +284,7 @@ free(mp)
 		return;				/* sanity */
 	}
 #endif
+	MUTEX_LOCK(&malloc_mutex);
 #ifdef RCHECK
   	ASSERT(op->ov_rmagic == RMAGIC);
 	if (op->ov_index <= 13)
@@ -294,6 +298,7 @@ free(mp)
 #ifdef DEBUGGING_MSTATS
   	nmalloc[size]--;
 #endif
+	MUTEX_UNLOCK(&malloc_mutex);
 }
 
 /*
@@ -340,6 +345,7 @@ realloc(mp, nbytes)
 #endif
 #endif /* safemalloc */
 
+	MUTEX_LOCK(&malloc_mutex);
 	op = (union overhead *)((caddr_t)cp - sizeof (union overhead));
 	if (op->ov_magic == MAGIC) {
 		was_alloced++;
@@ -383,8 +389,10 @@ realloc(mp, nbytes)
 		}
 #endif
 		res = cp;
+		MUTEX_UNLOCK(&malloc_mutex);
 	}
 	else {
+		MUTEX_UNLOCK(&malloc_mutex);
 		if ((res = (char*)malloc(nbytes)) == NULL)
 			return (NULL);
 		if (cp != res)			/* common optimization */

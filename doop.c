@@ -31,6 +31,7 @@ do_trans(sv,arg)
 SV *sv;
 OP *arg;
 {
+    dTHR;
     register short *tbl;
     register U8 *s;
     register U8 *send;

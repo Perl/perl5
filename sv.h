@@ -129,6 +129,10 @@ struct io {
 #define SVpbm_CASEFOLD	0x40000000
 #define SVpbm_TAIL	0x20000000
 
+#ifdef USE_THREADS
+#define SVpcv_SYNC	0x10000000	/* Synchronised: 1 thread at a time */
+#endif /* USE_THREADS */
+
 #ifdef OVERLOAD
 #define SVpgv_AM        0x40000000
 /* #define SVpgv_badAM     0x20000000 */

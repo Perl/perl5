@@ -436,6 +436,7 @@ hv_store
 hv_undef
 ibcmp
 ingroup
+init_stacks
 instr
 intuit_more
 invert

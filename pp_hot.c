@@ -20,6 +20,43 @@
 
 /* Hot code. */
 
+#ifdef USE_THREADS
+static void
+unset_cvowner(cvarg)
+void *cvarg;
+{
+    register CV* cv = (CV *) cvarg;
+#ifdef DEBUGGING
+    dTHR;
+#endif /* DEBUGGING */
+
+    DEBUG_L((fprintf(stderr, "0x%lx unsetting CvOWNER of 0x%lx:%s\n",
+		     (unsigned long)thr, (unsigned long)cv, SvPEEK((SV*)cv))));
+    MUTEX_LOCK(CvMUTEXP(cv));
+    assert(CvDEPTH(cv) == 0);
+    assert(thr == CvOWNER(cv));
+    CvOWNER(cv) = 0;
+    if (CvCONDP(cv))
+	COND_SIGNAL(CvCONDP(cv)); /* next please */
+    MUTEX_UNLOCK(CvMUTEXP(cv));
+    SvREFCNT_dec(cv);
+}
+
+#if 0
+void
+mutex_unlock(m)
+void *m;
+{
+#ifdef DEBUGGING
+    dTHR;
+    DEBUG_L((fprintf(stderr, "0x%lx unlocking mutex 0x%lx\n",
+			 (unsigned long) thr, (unsigned long) m)));
+#endif /* DEBUGGING */
+    MUTEX_UNLOCK((pthread_mutex_t *) m);
+}
+#endif
+#endif /* USE_THREADS */
+
 PP(pp_const)
 {
     dSP;
@@ -932,6 +969,7 @@ ret_no:
 OP *
 do_readline()
 {
+    dTHR;
     dSP; dTARGETSTACKED;
     register SV *sv;
     STRLEN tmplen = 0;
@@ -1733,6 +1771,119 @@ PP(pp_entersub)
 	    DIE("No DBsub routine");
     }
 
+#ifdef USE_THREADS
+    MUTEX_LOCK(CvMUTEXP(cv));
+    if (!CvCONDP(cv)) {
+#ifdef DEBUGGING
+	DEBUG_L((fprintf(stderr, "0x%lx entering fast %s\n",
+				 (unsigned long)thr, SvPEEK((SV*)cv))));
+#endif /* DEBUGGING */
+	MUTEX_UNLOCK(CvMUTEXP(cv)); /* fast sub wants neither sync nor clone */
+    }
+    else if (SvFLAGS(cv) & SVpcv_SYNC) {
+	/*
+	 * It's a synchronised CV. Wait until it's free unless
+	 * we own it already (in which case we're recursing).
+	 */
+	if (CvOWNER(cv) && CvOWNER(cv) != thr) {
+	    do {
+		DEBUG_L((fprintf(stderr, "0x%lx wait for 0x%lx to leave %s\n",
+				 (unsigned long)thr,(unsigned long)CvOWNER(cv),
+				 SvPEEK((SV*)cv))));
+		COND_WAIT(CvCONDP(cv), CvMUTEXP(cv)); /* yawn */
+	    } while (CvOWNER(cv));
+	}
+	CvOWNER(cv) = thr;	/* Assert ownership */
+	SvREFCNT_inc(cv);
+	MUTEX_UNLOCK(CvMUTEXP(cv));
+	if (CvDEPTH(cv) == 0)
+	    SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
+    }
+    else {
+	/*
+	 * It's an ordinary unsynchronised CV so we must distinguish
+	 * three cases. (1) It's ours already (and we're recursing);
+	 * (2) it's free (but we may already be using a cached clone);
+	 * (3) another thread owns it. Case (1) is easy: we just use it.
+	 * Case (2) means we look for a clone--if we have one, use it
+	 * otherwise grab ownership of cv. Case (3) means look we for a
+	 * clone and have to create one if we don't already have one.
+	 * Why look for a clone in case (2) when we could just grab
+	 * ownership of cv straight away? Well, we could be recursing,
+	 * i.e. we originally tried to enter cv while another thread
+	 * owned it (hence we used a clone) but it has been freed up
+	 * and we're now recursing into it. It may or may not be "better"
+	 * to use the clone but at least CvDEPTH can be trusted.
+	 */
+	if (CvOWNER(cv) == thr)
+	    MUTEX_UNLOCK(CvMUTEXP(cv));
+	else {
+	    /* Case (2) or (3) */
+	    SV **svp;
+	    
+	    /*
+	     * XXX Might it be better to release CvMUTEXP(cv) while we
+	     * do the hv_fetch? We might find someone has pinched it
+	     * when we look again, in which case we would be in case
+	     * (3) instead of (2) so we'd have to clone. Would the fact
+	     * that we released the mutex more quickly make up for this?
+	     */
+	    svp = hv_fetch(cvcache, (char *)cv, sizeof(cv), FALSE);
+	    if (svp) {
+		/* We already have a clone to use */
+		MUTEX_UNLOCK(CvMUTEXP(cv));
+		cv = *(CV**)svp;
+		DEBUG_L(fprintf(stderr,
+				"entersub: 0x%lx already has clone 0x%lx:%s\n",
+				(unsigned long) thr, (unsigned long) cv,
+				SvPEEK((SV*)cv)));
+		CvOWNER(cv) = thr;
+		SvREFCNT_inc(cv);
+		if (CvDEPTH(cv) == 0)
+		    SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
+	    }
+	    else {
+		/* (2) => grab ownership of cv. (3) => make clone */
+		if (!CvOWNER(cv)) {
+		    CvOWNER(cv) = thr;
+		    SvREFCNT_inc(cv);
+		    MUTEX_UNLOCK(CvMUTEXP(cv));
+		    DEBUG_L(fprintf(stderr,
+				    "entersub: 0x%lx grabbing 0x%lx:%s\n",
+				    (unsigned long) thr, (unsigned long) cv,
+				    SvPEEK((SV*)cv)));
+		} else {
+		    /* Make a new clone. */
+		    CV *clonecv;
+		    SvREFCNT_inc(cv); /* don't let it vanish from under us */
+		    MUTEX_UNLOCK(CvMUTEXP(cv));
+		    DEBUG_L((fprintf(stderr,
+				     "entersub: 0x%lx cloning 0x%lx:%s\n",
+				     (unsigned long) thr, (unsigned long) cv,
+				     SvPEEK((SV*)cv))));
+		    /*
+		     * We're creating a new clone so there's no race
+		     * between the original MUTEX_UNLOCK and the
+		     * SvREFCNT_inc since no one will be trying to undef
+		     * it out from underneath us. At least, I don't think
+		     * there's a race...
+		     */
+		    clonecv = cv_clone(cv);
+		    SvREFCNT_dec(cv); /* finished with this */
+		    hv_store(cvcache, (char*)cv, sizeof(cv), (SV*)clonecv,0);
+		    CvOWNER(clonecv) = thr;
+		    cv = clonecv;
+		    SvREFCNT_inc(cv);
+		}
+		assert(CvDEPTH(cv) == 0);
+		SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
+	    }
+	}
+    }	
+#endif /* USE_THREADS */
+
+    gimme = GIMME;
+
     if (CvXSUB(cv)) {
 	if (CvOLDSTYLE(cv)) {
 	    I32 (*fp3)_((int,int,int));
@@ -1886,8 +2037,8 @@ PP(pp_aelem)
 }
 
 void
-provide_ref(op, sv)
-OP* op;
+provide_ref(o, sv)
+OP* o;
 SV* sv;
 {
     if (SvGMAGICAL(sv))
@@ -1896,7 +2047,7 @@ SV* sv;
 	if (SvREADONLY(sv))
 	    croak(no_modify);
 	(void)SvUPGRADE(sv, SVt_RV);
-	SvRV(sv) = (op->op_private & OPpDEREF_HV ?
+	SvRV(sv) = (o->op_private & OPpDEREF_HV ?
 		    (SV*)newHV() : (SV*)newAV());
 	SvROK_on(sv);
 	SvSETMAGIC(sv);

@@ -26,6 +26,11 @@ struct xpvcv {
     long	xcv_depth;		/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
+#ifdef USE_THREADS
+    pthread_mutex_t *	xcv_mutexp;
+    pthread_cond_t *	xcv_condp;	/* signalled when owner leaves CV */
+    struct thread *	xcv_owner;	/* current owner thread */
+#endif /* USE_THREADS */
     U8		xcv_flags;
 };
 
@@ -41,6 +46,11 @@ struct xpvcv {
 #define CvDEPTH(sv)	((XPVCV*)SvANY(sv))->xcv_depth
 #define CvPADLIST(sv)	((XPVCV*)SvANY(sv))->xcv_padlist
 #define CvOUTSIDE(sv)	((XPVCV*)SvANY(sv))->xcv_outside
+#ifdef USE_THREADS
+#define CvMUTEXP(sv)	((XPVCV*)SvANY(sv))->xcv_mutexp
+#define CvCONDP(sv)	((XPVCV*)SvANY(sv))->xcv_condp
+#define CvOWNER(sv)	((XPVCV*)SvANY(sv))->xcv_owner
+#endif /* USE_THREADS */
 #define CvFLAGS(sv)	((XPVCV*)SvANY(sv))->xcv_flags
 
 #define CVf_CLONE	0x01	/* anon CV uses external lexicals */
