@@ -44,7 +44,7 @@ $needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
 my $skip_mode_checks =
     $^O eq 'cygwin' && $ENV{CYGWIN} !~ /ntsec/;
 
-plan tests => 36;
+plan tests => 32;
 
 
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
