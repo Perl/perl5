@@ -6,6 +6,8 @@
 
 package chat;
 
+require 'sys/socket.ph';
+
 if( defined( &main'PF_INET ) ){
 	$pf_inet = &main'PF_INET;
 	$sock_stream = &main'SOCK_STREAM;
