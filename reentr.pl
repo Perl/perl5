@@ -457,6 +457,8 @@ EOF
     	    push @init, <<EOF;
 #ifdef __GLIBC__
 	PL_reentrant_buffer->_${func}_struct.initialized = 0;
+	/* work around glibc-2.2.5 bug */
+	PL_reentrant_buffer->_${func}_struct.current_saltbits = 0;
 #endif
 EOF
 	    pushssif $endif;
