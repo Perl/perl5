@@ -16,7 +16,6 @@ typedef long long __int64;
 #endif
 
 
-
 #define  WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -176,6 +175,22 @@ EXT void win32_strip_return(struct sv *sv);
 #else
 #define PERL_SCRIPT_MODE "r"
 #define win32_strip_return(sv) NOOP
+#endif
+
+/* 
+ * Now Win32 specific per-thread data stuff 
+ */
+
+#ifdef USE_THREADS
+#ifndef USE_DECLSPEC_THREAD
+#define HAVE_THREAD_INTERN
+
+struct thread_intern
+{
+ char		Wstrerror_buffer[512];
+ struct servent Wservent;
+};
+#endif
 #endif
 
 #endif /* _INC_WIN32_PERL5 */

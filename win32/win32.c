@@ -936,7 +936,15 @@ win32_feof(FILE *fp)
  * we have to roll our own.
  */
 
+#ifdef USE_THREADS
+#ifdef USE_DECLSPEC_THREAD
 __declspec(thread) char	strerror_buffer[512];
+#else
+#define strerror_buffer (thr->i.Wstrerror_buffer)
+#endif
+#else
+char	strerror_buffer[512];
+#endif
 
 DllExport char *
 win32_strerror(int e) 
@@ -947,6 +955,7 @@ win32_strerror(int e)
     DWORD source = 0;
 
     if(e < 0 || e > sys_nerr) {
+        dTHR;
 	if(e < 0)
 	    e = GetLastError();
 

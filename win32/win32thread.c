@@ -45,6 +45,24 @@ Perl_alloc_thread_key(void)
 }
 
 void
+Perl_init_thread_intern(struct perl_thread *thr)
+{
+#ifdef USE_THREADS
+#ifndef USE_DECLSPEC_THREAD
+
+ /* 
+  * Initialize port-specific per-thread data in thr->i
+  * as only things we have there are just static areas for
+  * return values we don't _need_ to do anything but 
+  * this is good practice:
+  */
+ memset(&thr->i,0,sizeof(thr->i));
+
+#endif
+#endif
+}
+
+void
 Perl_set_thread_self(struct perl_thread *thr)
 {
 #ifdef USE_THREADS
