@@ -11,7 +11,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan(tests => 61);
+plan(tests => 66);
 
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
@@ -182,6 +182,26 @@ try_strftime("Tue Feb 29 00:00:00 2000 060", 0,0,0, 0,2,100);
 try_strftime("Wed Mar 01 00:00:00 2000 061", 0,0,0, 1,2,100);
 try_strftime("Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
 &POSIX::setlocale(&POSIX::LC_TIME, $lc) if $Config{d_setlocale};
+
+SKIP: {
+    # XXX wait for smokers to see which OSs else to skip
+    skip("No mktime and/or tm_gmtoff", 5)
+	if !$Config{d_mktime} || !$Config{d_tm_tm_gmtoff} || !$Config{d_tm_tm_zone};
+    local $ENV{TZ} = "Europe/Berlin";
+
+    # May fail for ancient FreeBSD versions.
+    # %z is not included in POSIX, but valid on Linux and FreeBSD.
+    foreach $def ([1000,'Sun Sep  9 03:46:40 2001 +0200 CEST'],
+		  [900, 'Thu Jul  9 18:00:00 1998 +0200 CEST'],
+		  [800, 'Tue May  9 08:13:20 1995 +0200 CEST'],
+		  [700, 'Sat Mar  7 21:26:40 1992 +0100 CET'],
+		  [600, 'Thu Jan  5 11:40:00 1989 +0100 CET'],
+		 ) {
+	my($t, $expected) = @$def;
+        my @tm = localtime($t*1000000);
+	is(strftime("%c %z %Z",@tm), $expected, "validating zone setting: $expected");
+    }
+}
 
 {
     for my $test (0, 1) {
