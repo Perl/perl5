@@ -358,6 +358,7 @@
 #define PL_psig_ptr		(vTHX->Ipsig_ptr)
 #define PL_ptr_table		(vTHX->Iptr_table)
 #define PL_reentrant_buffer	(vTHX->Ireentrant_buffer)
+#define PL_reentrant_retint	(vTHX->Ireentrant_retint)
 #define PL_regex_pad		(vTHX->Iregex_pad)
 #define PL_regex_padav		(vTHX->Iregex_padav)
 #define PL_replgv		(vTHX->Ireplgv)
@@ -651,6 +652,7 @@
 #define PL_Ipsig_ptr		PL_psig_ptr
 #define PL_Iptr_table		PL_ptr_table
 #define PL_Ireentrant_buffer	PL_reentrant_buffer
+#define PL_Ireentrant_retint	PL_reentrant_retint
 #define PL_Iregex_pad		PL_regex_pad
 #define PL_Iregex_padav		PL_regex_padav
 #define PL_Ireplgv		PL_replgv

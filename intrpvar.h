@@ -504,6 +504,8 @@ PERLVAR(Iunicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
 
 PERLVAR(Isignals, U32)	/* Using which pre-5.8 signals */
 
+PERLVAR(Ireentrant_retint, int)	/* Integer return value from reentrant functions */
+
 PERLVAR(Istashcache,	HV *)		/* Cache to speed up S_method_common */
 
 PERLVAR(IDBassertion,   SV *)
