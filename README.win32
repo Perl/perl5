@@ -214,6 +214,14 @@ default path.  You will need to copy the DLLs reported by the messages
 from where Borland chose to install it, into the Windows system directory
 (usually somewhere like C:\WINNT\SYSTEM32) and rerun the test.
 
+If you're using Borland compiler versions 5.2 and below, you're risking
+to face a problem with finding incorrect header files. Don't be surprised
+when during compiling perl extension "Tk" you will fail because both perl
+and tk contain a header file with same name - "patchlevel.h".  The latest
+Borland compilers are free of this misbehaviour, and they even invented
+option -VI- for backward (bugward) compatibility as "Use old Borland
+search algorithm  to locate header files".
+
 Please report any other failures as described under L<BUGS AND CAVEATS>.
 
 =head2 Installation
