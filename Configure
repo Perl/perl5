@@ -11142,7 +11142,7 @@ else
 		symbols='ones'
 		$test "$silent" || sleep 1
 		cppccsymbols=`$cat ccsym.com`
-		cppccsymbols=`echo $cppcppsymbols`
+		cppccsymbols=`echo $cppccsymbols`
 	fi
 	if $test -s ccsym.cpp; then
 		$test "$also" && echo " "
