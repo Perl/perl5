@@ -10,7 +10,7 @@
 sub BEGIN {
     chdir('t') if -d 't';
     if ($ENV{PERL_CORE}){
-	@INC = ('.', '../lib', '../t/lib');
+	@INC = ('.', '../lib', '../ext/Storable/t');
         require Config;
         if ($Config::Config{'extensions'} !~ /\bStorable\b/) {
             print "1..0 # Skip: Storable was not built\n";
