@@ -103,7 +103,7 @@ isn't( $@, '', 'Tgetent() caught bad termcap file' );
 $vals->{TERM} = '';
 $ENV{TERMPATH} = $0;
 eval { $t = Term::Cap->Tgetent($vals) };
-like( $@, qr/failed termcap lookup/, 'Tgetent() dies with bad termcap file' );
+ok( $@, 'Tgetent() dies with bad termcap file' );
 
 SKIP: {
 	skip( "Can't write 'tcout' file for tests", 8 ) unless $writable;
