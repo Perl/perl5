@@ -111,7 +111,7 @@
 #define HOPMAYBEc(pos,off) ((char*)HOPMAYBE(pos,off))
 
 #define HOPBACK(pos, off) (		\
-    (UTF && PL_reg_match_utf8)		\
+    (PL_reg_match_utf8)			\
 	? reghopmaybe((U8*)pos, -off)	\
     : (pos - off >= PL_bostr)		\
 	? (U8*)(pos - off)		\

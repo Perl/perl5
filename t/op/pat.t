@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..846\n";
+print "1..847\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2651,4 +2651,11 @@ print "# some Unicode properties\n";
     }
     $r2 =~ s/\x{100}//;
     print $r1 eq $r2 ? "ok 846\n" : "not ok 846\n";
+}
+
+{
+    print "# Unicode lookbehind\n";
+
+    print "A\x{100}B"        =~ /(?<=A.)B/  ? "ok 847\n" : "not ok 847\n";
+    print "A\x{200}\x{300}B" =~ /(?<=A..)B/ ? "ok 848\n" : "not ok 848\n";
 }
