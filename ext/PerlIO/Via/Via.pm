@@ -32,10 +32,11 @@ module defines the required TIEHANDLE methods so that you can say
 
 =over 4
 
-=item $class->PUSHED([$mode][,$fh])
+=item $class->PUSHED([$mode[,$fh]])
 
-Should return an object or the class, or undef on failure.
-(Compare TIEHANDLE.)  Mandatory.
+Should return an object or the class, or -1 on failure.  (Compare
+TIEHANDLE.)  The arguments are an optional mode string ("r", "w",
+"w+", ...) and a filehandle for the PerlIO layer below.  Mandatory.
 
 =item $obj->POPPED([$fh])
 
