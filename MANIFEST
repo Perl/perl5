@@ -2674,17 +2674,20 @@ vms/vmsish.h			VMS-specific C header for Perl core
 vms/vmspipe.com			VMS-specific piped command helper script
 vms/vms_yfix.pl			convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/writemain.pl		Generate perlmain.c from miniperlmain.c+extensions
-vos/build.cm			VOS command macro to build Perl
+vos/build.cm			VOS command macro to build "mini" Perl
 vos/Changes			Changes made to port Perl to the VOS operating system
-vos/compile_perl.cm		VOS command macro to build multiple version of Perl
+vos/compile_full_perl.cm	VOS command macro to build "full" Perl
+vos/compile_perl.cm		VOS command macro to build "mini" Perl
 vos/config.alpha.def		definitions used by config.pl
 vos/config.alpha.h		config.h for use with alpha VOS POSIX.1 support
 vos/config.ga.def		definitions used by config.pl
 vos/config.ga.h			config.h for use with generally-available VOS POSIX.1 support
 vos/config.pl			script to convert a config_h.SH to a config.h
-vos/configure_perl.cm		VOS command macro to configure perl before building
-vos/install_perl.cm		VOS command macro to install perl after building
+vos/configure_full_perl.sh	VOS shell script to configure "full" perl before building
+vos/configure_perl.cm		VOS command macro to configure "mini" perl before building
+vos/install_perl.cm		VOS command macro to install "mini" perl after building
 vos/Makefile			A helper for maintaining the config.*.* in UNIX
+vos/make_full_perl.sh	VOS shell script to build and test "full" perl
 vos/perl.bind			VOS bind control file
 vos/test_vos_dummies.c		Test program for "vos_dummies.c"
 vos/vos.c			VOS emulations for missing POSIX functions
