@@ -108,6 +108,7 @@ sub test_security {
   my($fname2) = "foobar$$";
   my $fh2;
   open($fh2, ">$fname2") || warn "$0: failed to create '$fname2': $!\n";
+  END { unlink($fname2) }
   ok( (-e $fname2) );
   close($fh2);
 
