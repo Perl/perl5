@@ -1,6 +1,6 @@
 #!./perl -Tw
 
-print "1..581\n";
+print "1..610\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -18,8 +18,26 @@ my $test = 1;
 
 sub encode {
   my @result = @_;
-  s/([[:cntrl:]\177 ])/sprintf "\\%03o", ord $1/ge foreach @result;
+  foreach (@result) {
+    s/([[:cntrl:]\177 ])/sprintf "\\%03o", ord $1/ge if defined;
+  }
   @result;
+}
+
+sub encode_list {
+  my @result = @_;
+  foreach (@result) {
+    if (defined) {
+      s/([[:cntrl:]\177])/sprintf "\\%03o", ord $1/ge;
+      $_ = qq("$_");
+    } else {
+      $_ = 'undef';
+    }
+  }
+  if (@result == 1) {
+    return @result;
+  }
+  return '(' . join (', ', @result) . ')';
 }
 
 sub ok {
@@ -44,6 +62,24 @@ sub ok {
   $test++;
   return;
 }
+
+sub list_eq ($$) {
+  my ($l, $r) = @_;
+  return unless @$l == @$r;
+  for my $i (0..$#$l) {
+    if (defined $l->[$i]) {
+      return unless defined ($r->[$i]) && $l->[$i] eq $r->[$i];
+    } else {
+      return if defined $r->[$i]
+    }
+  }
+  return 1;
+}
+
+##############################################################################
+#
+# Here starteth the tests
+#
 
 {
 my $format = "c2 x5 C C x s d i l a6";
@@ -404,8 +440,9 @@ numbers ('N', 0, 1, 2147483647, 2147483648, 4294967295);
 numbers ('V', 0, 1, 2147483647, 2147483648, 4294967295);
 # All these should have exact binary representations:
 numbers ('f', -1, 0, 0.5, 42, 2**34);
-# These don't, but 'd' is NV.
-numbers ('d', -1, 0, 1, 1-exp(-1), -exp(1));
+numbers ('d', -(2**34), -1, 0, 1, 2**34);
+## These don't, but 'd' is NV.  XXX wrong, it's double
+#numbers ('d', -1, 0, 1, 1-exp(-1), -exp(1));
 
 numbers_with_total ('q', -1,
                     -9223372036854775808, -1, 0, 1,9223372036854775807);
@@ -444,6 +481,17 @@ ok (pack("V", 0xdeadbeef) eq "\xef\xbe\xad\xde");
     printf "# got '%s'\n", encode $z;
   }
 
+  $expect = 'hello world';
+  eval { ($x) = unpack ("w/a", chr (11) . "hello world!")};
+  ok ($x eq $expect);
+  ok ($@ eq '', undef, $@);
+  # Doing this in scalar context used to fail.
+  eval { $x = unpack ("w/a", chr (11) . "hello world!")};
+  unless (ok ($x eq $expect, undef, $@)) {
+    printf "# expected '$expect' got '%s'\n", encode $x;
+  }
+  ok ($@ eq '', undef, $@);
+
   foreach (
 ['a/a*/a*', '212ab345678901234567','ab3456789012'],
 ['a/a*/a*', '3012ab345678901234567', 'ab3456789012'],
@@ -451,10 +499,13 @@ ok (pack("V", 0xdeadbeef) eq "\xef\xbe\xad\xde");
 ) {
     my ($pat, $in, $expect) = @$_;
     eval { ($x) = unpack $pat, $in };
-    unless (ok ($x eq $expect)) {
-      $x = encode $x;
-      print "# pack ('$pat', '$in') gave '$x', expected '$expect'\n";
-    }
+    ok ($@ eq '' && $x eq $expect, undef, $@)
+      or printf "# list unpack ('$pat', '$in') gave %s, expected '$expect'\n",
+      encode_list ($x);
+    eval { $x = unpack $pat, $in };
+    ok ($@ eq '' && $x eq $expect, undef, $@)
+      or printf "# scalar unpack ('$pat', '$in') gave %s, expected '$expect'\n",
+      encode_list ($x);
   }
 
 # / with #
@@ -550,4 +601,48 @@ EOPOEMSNIPPET
     my $len = 65534 + $_;
     ok (unpack ("%33n$len", $pat) == 65535 * $len);
   }
+}
+
+
+# pack x X @
+foreach (
+['x', "N", "\0"],
+['x4', "N", "\0"x4],
+['xX', "N", ""],
+['xXa*', "Nick", "Nick"],
+['a5Xa5', "cameL", "llama", "camellama"],
+['@4', 'N', "\0"x4],
+['a*@8a*', 'Camel', 'Dromedary', "Camel\0\0\0Dromedary"],
+['a*@4a', 'Perl rules', '!', 'Perl!'],
+) {
+  my ($template, @in) = @$_;
+  my $out = pop @in;
+  my $got = eval {pack $template, @in};
+  ok ($@ eq '' and $out eq $got, '', $@)
+    or printf "# pack ('$template', %s) gave %s expected %s\n",
+    encode_list (@in), encode_list ($got), encode_list ($out);
+}
+
+# unpack x X @
+foreach (
+['x', "N"],
+['xX', "N"],
+['xXa*', "Nick", "Nick"],
+['a5Xa5', "camellama", "camel", "llama"],
+['@3', "ice"],
+['@2a2', "water", "te"],
+['a*@1a3', "steam", "steam", "tea"],
+) {
+  my ($template, $in, @out) = @$_;
+  my @got = eval {unpack $template, $in};
+  ok (($@ eq '' and list_eq (\@got, \@out)), undef, $@)
+    or printf "# list unpack ('$template', \"%s\") gave %s expected %s\n",
+    encode ($in), encode_list (@got), encode_list (@out);
+
+  my $got = eval {unpack $template, $in};
+  ok (($@ eq '' and @out ? $got eq $out[0] # 1 or more items; should get first
+       : !defined $got) # 0 items; should get undef
+      , "", $@)
+    or printf "# scalar unpack ('$template', \"%s\") gave %s expected %s\n",
+    encode ($in), encode_list ($got), encode_list ($out[0]);
 }

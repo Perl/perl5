@@ -170,33 +170,6 @@ PP(pp_unpack)
 #endif
     bool do_utf8 = DO_UTF8(right);
 
-    if (gimme != G_ARRAY) {		/* arrange to do first one only */
-	/*SUPPRESS 530*/
-        /* Skipping spaces will be useful later on.  */
-        while (isSPACE(*pat))
-            pat++;
-        /* Give up on optimisation of only doing first if the pattern
-           is getting too complex to parse.  */
-        if (*pat != '#') {
-            /* This pre-parser will let through certain invalid patterns
-               such as rows of !s, but the nothing that would cause multiple
-               conversions to be attempted.  */
-            char *here = pat;
-            bool seen_percent = FALSE;
-            if (*here == '%')
-                seen_percent = TRUE;
-            while (!isALPHA(*here) || *here == 'x')
-                here++;
-            if (strchr("aAZbBhHP", *here) || seen_percent) {
-                here++;
-                while (isDIGIT(*here) || *here == '*' || *here == '!')
-                    here++;
-            }
-            else
-                here++;
-            patend = here;
-        }
-    }
     while (pat < patend) {
       reparse:
 	datumtype = *pat++ & 0xFF;
@@ -1161,6 +1134,14 @@ PP(pp_unpack)
 	    XPUSHs(sv_2mortal(sv));
 	    checksum = 0;
 	}
+        if (gimme != G_ARRAY &&
+            SP - PL_stack_base == start_sp_offset + 1) {
+          /* do first one only unless in list context
+             / is implmented by unpacking the count, then poping it from the
+             stack, so must check that we're not in the middle of a /  */
+          if ((pat >= patend) || *pat != '/')
+            RETURN;
+        }
     }
     if (SP - PL_stack_base == start_sp_offset && gimme == G_SCALAR)
 	PUSHs(&PL_sv_undef);
