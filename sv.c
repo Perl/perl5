@@ -4760,7 +4760,8 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 =for apidoc sv_setpvn
 
 Copies a string into an SV.  The C<len> parameter indicates the number of
-bytes to be copied.  Does not handle 'set' magic.  See C<sv_setpvn_mg>.
+bytes to be copied.  If the C<ptr> argument is NULL the SV will become
+undefined.  Does not handle 'set' magic.  See C<sv_setpvn_mg>.
 
 =cut
 */
@@ -7616,7 +7617,7 @@ Perl_newSVpv(pTHX_ const char *s, STRLEN len)
 Creates a new SV and copies a string into it.  The reference count for the
 SV is set to 1.  Note that if C<len> is zero, Perl will create a zero length
 string.  You are responsible for ensuring that the source string is at least
-C<len> bytes long.
+C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
 
 =cut
 */
