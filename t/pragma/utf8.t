@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..80\n";
+print "1..82\n";
 
 my $test = 1;
 
@@ -324,14 +324,18 @@ sub nok_bytes {
 }
 
 {
-  my($a,$b);
-  { use bytes; $a = "\xc3\xa4"; }  
-  { use utf8;  $b = "\xe4"; }
-  { use bytes; ok_bytes $a, $b; $test++; } # 69
-  { use utf8;  nok      $a, $b; $test++; } # 70
+    # bug id 20001009.001
+
+    my($a,$b);
+    { use bytes; $a = "\xc3\xa4"; }  
+    { use utf8;  $b = "\xe4"; }
+    { use bytes; ok_bytes $a, $b; $test++; } # 69
+    { use utf8;  nok      $a, $b; $test++; } # 70
 }
 
 {
+    # bug id 20001008.001
+
     my @x = ("stra\337e 138","stra\337e 138");
     for (@x) {
 	s/(\d+)\s*([\w\-]+)/$1 . uc $2/e;
@@ -346,6 +350,8 @@ sub nok_bytes {
 }
 
 {
+    # bug id 20000819.004 
+
     $_ = $dx = "\x{10f2}";
     s/($dx)/$dx$1/;
     {
@@ -376,6 +382,8 @@ sub nok_bytes {
 }
 
 {
+    # bug id 20000323.056
+
     use utf8;
 
     print "not " unless "\x{41}" eq +v65;
@@ -395,6 +403,37 @@ sub nok_bytes {
     $test++;
 
     print "not " unless "\x{221b}" eq v8731;
+    print "ok $test\n";
+    $test++;
+}
+
+{
+    # bug id 20000427.003 
+
+    use utf8;
+    use warnings;
+    use strict;
+
+    my $sushi = "\x{b36c}\x{5a8c}\x{ff5b}\x{5079}\x{505b}";
+
+    my @charlist = split //, $sushi;
+    my $r = '';
+    foreach my $ch (@charlist) {
+	$r = $r . " " . sprintf "U+%04X", ord($ch);
+    }
+
+    print "not " unless $r eq " U+B36C U+5A8C U+FF5B U+5079 U+505B";
+    print "ok $test\n";
+    $test++;
+}
+
+{
+    # bug id 20000901.092
+    # test that undef left and right of utf8 results in a valid string
+
+    my $a;
+    $a .= "\x{1ff}";
+    print "not " unless $a eq "\x{1ff}";
     print "ok $test\n";
     $test++;
 }
