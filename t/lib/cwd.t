@@ -104,8 +104,8 @@ else {
     print +($ENV{PWD}  =~ m|\bt$| ? "" : "not "), "ok 12\n";
 }
 
-if ($Config{d_symlink}) {
-    my @dirs = split " " => $Config{libpth};
+my @dirs = grep(! -l $_ => (split " " => $Config{libpth}));
+if (@dirs && $Config{d_symlink}) {
     my $target = pop @dirs;
     symlink $target => "linktest";
     mkdir "pteerslt";
