@@ -37,7 +37,7 @@ sub _drop_oldenc {
     return unless @new >= 1 && $new[-1] =~ /^:encoding\(.+\)$/;
     my @old = PerlIO::get_layers($h);
     return unless @old >= 3 &&
-	          $old[-1] eq 'utf8';
+	          $old[-1] eq 'utf8' &&
                   $old[-2] =~ /^encoding\(.+\)$/;
     my ($loname, $lcname) = _get_encname($old[-2]);
     unless (defined $lcname) { # Should we trust get_layers()?
