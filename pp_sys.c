@@ -1807,9 +1807,12 @@ PP(pp_send)
 	buffer = SvPVutf8(bufsv, blen);
     }
     else {
-	if (DO_UTF8(bufsv))
-	    sv_utf8_downgrade(bufsv, FALSE);
-	buffer = SvPV(bufsv, blen);
+	 if (DO_UTF8(bufsv)) {
+	      /* Not modifying source SV, so making a temporary copy. */
+	      bufsv = sv_2mortal(newSVsv(bufsv));
+	      sv_utf8_downgrade(bufsv, FALSE);
+	 }
+	 buffer = SvPV(bufsv, blen);
     }
 
     if (PL_op->op_type == OP_SYSWRITE) {

@@ -288,7 +288,7 @@ to find out whether anyone (or anything) has accidentally removed our fifo.
 	sleep 2;    # to avoid dup signals
     }
 
-=head2 Deferred Signals (Safe signals)
+=head2 Deferred Signals (Safe Signals)
 
 In Perls before Perl 5.7.3 by installing Perl code to deal with
 signals, you were exposing yourself to danger from two things.  First,

@@ -772,12 +772,15 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 
     if (!stash) {
 	if (add) {
-	    qerror(Perl_mess(aTHX_
+	    register SV *err = Perl_mess(aTHX_
 		 "Global symbol \"%s%s\" requires explicit package name",
 		 (sv_type == SVt_PV ? "$"
 		  : sv_type == SVt_PVAV ? "@"
 		  : sv_type == SVt_PVHV ? "%"
-		  : ""), name));
+		  : ""), name);
+	    if (USE_UTF8_IN_NAMES)
+		SvUTF8_on(err);
+	    qerror(err);
 	    stash = PL_nullstash;
 	}
 	else

@@ -34,24 +34,6 @@ sub _cwd {
     return Cwd::sys_cwd();
 }
 
-=pod
-
-=item tmpdir
-
-Returns a string representation of the first existing directory
-from the following list:
-
-    $ENV{TMPDIR}
-    $ENV{TEMP}
-    $ENV{TMP}
-    /tmp
-    /
-
-Since Perl 5.8.0, if running under taint mode, and if the environment
-variables are tainted, they are not used.
-
-=cut
-
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
@@ -60,13 +42,6 @@ sub tmpdir {
 			      '/tmp',
 			      '/'  );
 }
-
-=item canonpath
-
-No physical check on the filesystem, but a logical cleanup of a
-path. On UNIX eliminated successive slashes and successive "/.".
-
-=cut
 
 sub canonpath {
     my ($self,$path) = @_;
@@ -80,24 +55,6 @@ sub canonpath {
     return $path;
 }
 
-=item splitpath
-
-    ($volume,$directories,$file) = File::Spec->splitpath( $path );
-    ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
-
-Splits a path into volume, directory, and filename portions. Assumes that 
-the last file is a path unless the path ends in '/', '/.', '/..'
-or $no_file is true.  On Win32 this means that $no_file true makes this return 
-( $volume, $path, '' ).
-
-Separators accepted are \ and /.
-
-Volumes can be drive letters or UNC sharenames (\\server\share).
-
-The results can be passed to L</catpath> to get back a path equivalent to
-(usually identical to) the original path.
-
-=cut
 
 sub splitpath {
     my ($self,$path, $nofile) = @_;
@@ -128,41 +85,11 @@ sub splitpath {
 }
 
 
-=item splitdir
-
-The opposite of L<catdir()|File::Spec/catdir()>.
-
-    @dirs = File::Spec->splitdir( $directories );
-
-$directories must be only the directory portion of the path on systems 
-that have the concept of a volume or that have path syntax that differentiates
-files from directories.
-
-Unlike just splitting the directories on the separator, leading empty and 
-trailing directory entries can be returned, because these are significant
-on some OSs. So,
-
-    File::Spec->splitdir( "/a/b//c/" );
-
-Yields:
-
-    ( '', 'a', 'b', '', 'c', '' )
-
-=cut
-
 sub splitdir {
     my ($self,$directories) = @_ ;
     split m|[\\/]|, $directories, -1;
 }
 
-
-=item catpath
-
-Takes volume, directory and file portions and returns an entire path. Under
-Unix, $volume is ignored, and this is just like catfile(). On other OSs,
-the $volume become significant.
-
-=cut
 
 sub catpath {
     my ($self,$volume,$directory,$file) = @_;
@@ -303,3 +230,25 @@ File::Spec::OS2 - methods for OS/2 file specs
 
 See L<File::Spec> and L<File::Spec::Unix>.  This package overrides the
 implementation of these methods, not the semantics.
+
+Amongst the changes made for OS/2 are...
+
+=over 4
+
+=item tmpdir
+
+Modifies the list of places temp directory information is looked for.
+
+    $ENV{TMPDIR}
+    $ENV{TEMP}
+    $ENV{TMP}
+    /tmp
+    /
+
+=item splitpath
+
+Volumes can be drive letters or UNC sharenames (\\server\share).
+
+=back
+
+=cut
