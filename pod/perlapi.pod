@@ -2151,6 +2151,16 @@ Tells an SV that it is a string and disables all other OK bits.
 =for hackers
 Found in file sv.h
 
+=item SvPOK_only_UTF8
+
+Tells an SV that it is a UTF8 string (do not use frivolously)
+and disables all other OK bits.
+  
+	void	SvPOK_only_UTF8(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvPV
 
 Returns a pointer to the string in the SV, or a stringified form of the SV
@@ -2417,6 +2427,33 @@ Used to upgrade an SV to a more complex form.  Uses C<sv_upgrade> to
 perform the upgrade if necessary.  See C<svtype>.
 
 	void	SvUPGRADE(SV* sv, svtype type)
+
+=for hackers
+Found in file sv.h
+
+=item SvUTF8
+
+Returns a boolean indicating whether the SV contains UTF-8 encoded data.
+
+	void	SvUTF8(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvUTF8_off
+
+Unsets the UTF8 status of an SV.
+
+	void	SvUTF8_off(SV *sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvUTF8_on
+
+Tells an SV that it is a string and encoded in UTF8.  Do not use frivolously.
+
+	void	SvUTF8_on(SV *sv)
 
 =for hackers
 Found in file sv.h

@@ -575,6 +575,23 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvNOK_only(sv)		((void)SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 
+/*
+=for apidoc Am|void|SvUTF8|SV* sv
+Returns a boolean indicating whether the SV contains UTF-8 encoded data.
+
+=for apidoc Am|void|SvUTF8_on|SV *sv
+Tells an SV that it is a string and encoded in UTF8.  Do not use frivolously.
+
+=for apidoc Am|void|SvUTF8_off|SV *sv
+Unsets the UTF8 status of an SV.
+
+=for apidoc Am|void|SvPOK_only_UTF8|SV* sv
+Tells an SV that it is a UTF8 string (do not use frivolously)
+and disables all other OK bits.
+  
+=cut
+ */
+
 #define SvUTF8(sv)		(SvFLAGS(sv) & SVf_UTF8)
 #define SvUTF8_on(sv)		(SvFLAGS(sv) |= (SVf_UTF8))
 #define SvUTF8_off(sv)		(SvFLAGS(sv) &= ~(SVf_UTF8))
