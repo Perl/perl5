@@ -7680,8 +7680,8 @@ Perl_gp_dup(pTHX_ GP *gp)
 MAGIC *
 Perl_mg_dup(pTHX_ MAGIC *mg)
 {
-    MAGIC *mgret = (MAGIC*)NULL;
-    MAGIC *mgprev;
+    MAGIC *mgprev = (MAGIC*)NULL;
+    MAGIC *mgret;
     if (!mg)
 	return (MAGIC*)NULL;
     /* look for it in the table first */
@@ -7692,10 +7692,10 @@ Perl_mg_dup(pTHX_ MAGIC *mg)
     for (; mg; mg = mg->mg_moremagic) {
 	MAGIC *nmg;
 	Newz(0, nmg, 1, MAGIC);
-	if (!mgret)
-	    mgret = nmg;
-	else
+	if (mgprev)
 	    mgprev->mg_moremagic = nmg;
+	else
+	    mgret = nmg;
 	nmg->mg_virtual	= mg->mg_virtual;	/* XXX copy dynamic vtable? */
 	nmg->mg_private	= mg->mg_private;
 	nmg->mg_type	= mg->mg_type;

@@ -674,7 +674,7 @@ glob3(Char *pathbuf, Char *pathend, Char *pattern,
 	 * and dirent.h as taking pointers to differently typed opaque
 	 * structures.
 	 */
-	Direntry_t *(*readdirfunc)();
+	Direntry_t *(*readdirfunc)(DIR*);
 
 	*pathend = BG_EOS;
 	errno = 0;
