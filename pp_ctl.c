@@ -1445,8 +1445,7 @@ PP(pp_caller)
 	PUSHs(&PL_sv_undef);
     else
 	PUSHs(sv_2mortal(newSVpv(HvNAME(hv), 0)));
-    PUSHs(sv_2mortal(newSVpvn(SvPVX(GvSV(cx->blk_oldcop->cop_filegv)),
-			      SvCUR(GvSV(cx->blk_oldcop->cop_filegv)))));
+    PUSHs(sv_2mortal(newSVsv(CopFILESV(cx->blk_oldcop))));
     PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->cop_line)));
     if (!MAXARG)
 	RETURN;
@@ -2489,10 +2488,10 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
 	SAVESPTR(PL_compiling.cop_stash);
 	PL_compiling.cop_stash = PL_curstash;
     }
-    SAVESPTR(PL_compiling.cop_filegv);
+    SAVESPTR(CopFILEGV(&PL_compiling));
     SAVEI16(PL_compiling.cop_line);
     sprintf(tmpbuf, "_<(%.10s_eval %lu)", code, (unsigned long)++PL_evalseq);
-    PL_compiling.cop_filegv = gv_fetchfile(tmpbuf+2);
+    CopFILEGV_set(&PL_compiling, gv_fetchfile(tmpbuf+2));
     PL_compiling.cop_line = 1;
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
        deleting the eval's FILEGV from the stash before gv_check() runs
@@ -2513,7 +2512,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     PL_op->op_type = OP_ENTEREVAL;
     PL_op->op_flags = 0;			/* Avoid uninit warning. */
     PUSHBLOCK(cx, CXt_EVAL, SP);
-    PUSHEVAL(cx, 0, PL_compiling.cop_filegv);
+    PUSHEVAL(cx, 0, Nullgv);
     rop = doeval(G_SCALAR, startop);
     POPBLOCK(cx,PL_curpm);
     POPEVAL(cx);
@@ -2691,7 +2690,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
 	if (cv) {
 	    dSP;
 	    PUSHMARK(SP);
-	    XPUSHs((SV*)PL_compiling.cop_filegv);
+	    XPUSHs((SV*)CopFILEGV(&PL_compiling));
 	    PUTBACK;
 	    call_sv((SV*)cv, G_DISCARD);
 	}
@@ -2938,8 +2937,8 @@ PP(pp_require)
 	    }
 	}
     }
-    SAVESPTR(PL_compiling.cop_filegv);
-    PL_compiling.cop_filegv = gv_fetchfile(tryrsfp ? tryname : name);
+    SAVESPTR(CopFILEGV(&PL_compiling));
+    CopFILEGV_set(&PL_compiling, gv_fetchfile(tryrsfp ? tryname : name));
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
 	if (PL_op->op_type == OP_REQUIRE) {
@@ -2974,7 +2973,7 @@ PP(pp_require)
 
     /* Assume success here to prevent recursive requirement. */
     (void)hv_store(GvHVn(PL_incgv), name, strlen(name),
-	newSVsv(GvSV(PL_compiling.cop_filegv)), 0 );
+		   newSVsv(CopFILESV(&PL_compiling)), 0 );
 
     ENTER;
     SAVETMPS;
@@ -3006,7 +3005,7 @@ PP(pp_require)
     /* switch to eval mode */
     push_return(PL_op->op_next);
     PUSHBLOCK(cx, CXt_EVAL, SP);
-    PUSHEVAL(cx, name, PL_compiling.cop_filegv);
+    PUSHEVAL(cx, name, Nullgv);
 
     SAVEI16(PL_compiling.cop_line);
     PL_compiling.cop_line = 0;
@@ -3049,9 +3048,9 @@ PP(pp_entereval)
  
     /* switch to eval mode */
 
-    SAVESPTR(PL_compiling.cop_filegv);
+    SAVESPTR(CopFILEGV(&PL_compiling));
     sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);
-    PL_compiling.cop_filegv = gv_fetchfile(tmpbuf+2);
+    CopFILEGV_set(&PL_compiling, gv_fetchfile(tmpbuf+2));
     PL_compiling.cop_line = 1;
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
        deleting the eval's FILEGV from the stash before gv_check() runs
@@ -3070,12 +3069,12 @@ PP(pp_entereval)
 
     push_return(PL_op->op_next);
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
-    PUSHEVAL(cx, 0, PL_compiling.cop_filegv);
+    PUSHEVAL(cx, 0, Nullgv);
 
     /* prepare to compile string */
 
     if (PERLDB_LINE && PL_curstash != PL_debstash)
-	save_lines(GvAV(PL_compiling.cop_filegv), PL_linestr);
+	save_lines(CopFILEAV(&PL_compiling), PL_linestr);
     PUTBACK;
 #ifdef USE_THREADS
     MUTEX_LOCK(&PL_eval_mutex);

@@ -101,8 +101,8 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     Newz(602, gp, 1, GP);
     GvGP(gv) = gp_ref(gp);
     GvSV(gv) = NEWSV(72,0);
-    GvLINE(gv) = PL_curcop->cop_line;
-    GvFILE(gv) = PL_curcop->cop_filegv ? SvPVX(GvSV(PL_curcop->cop_filegv)) : "";
+    GvLINE(gv) = CopLINE(PL_curcop);
+    GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : "";
     GvCVGEN(gv) = 0;
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, '*', name, len);
@@ -895,9 +895,9 @@ Perl_gv_check(pTHX_ HV *stash)
 		gv = (GV*)HeVAL(entry);
 		if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
 		    continue;
-		PL_curcop->cop_line = GvLINE(gv);
+		CopLINE_set(PL_curcop, GvLINE(gv));
 		filegv = GvFILEGV(gv);		/* XXX could be made faster */
-		PL_curcop->cop_filegv = filegv;
+		CopFILEGV_set(PL_curcop, filegv);
 		if (filegv && GvMULTI(filegv))	/* Filename began with slash */
 		    continue;
 		Perl_warner(aTHX_ WARN_ONCE,

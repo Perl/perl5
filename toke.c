@@ -474,9 +474,9 @@ S_incline(pTHX_ char *s)
     ch = *t;
     *t = '\0';
     if (t - s > 0)
-	PL_curcop->cop_filegv = gv_fetchfile(s);
+	CopFILEGV_set(PL_curcop, gv_fetchfile(s));
     else
-	PL_curcop->cop_filegv = gv_fetchfile(PL_origfilename);
+	CopFILEGV_set(PL_curcop, gv_fetchfile(PL_origfilename));
     *t = ch;
     PL_curcop->cop_line = atoi(n)-1;
 }
@@ -590,7 +590,7 @@ S_skipspace(pTHX_ register char *s)
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setpvn(sv,PL_bufptr,PL_bufend-PL_bufptr);
-	    av_store(GvAV(PL_curcop->cop_filegv),(I32)PL_curcop->cop_line,sv);
+	    av_store(CopFILEAV(PL_curcop),(I32)PL_curcop->cop_line,sv);
 	}
     }
 }
@@ -2330,7 +2330,7 @@ Perl_yylex(pTHX)
 
 		sv_upgrade(sv, SVt_PVMG);
 		sv_setsv(sv,PL_linestr);
-		av_store(GvAV(PL_curcop->cop_filegv),(I32)PL_curcop->cop_line,sv);
+		av_store(CopFILEAV(PL_curcop),(I32)PL_curcop->cop_line,sv);
 	    }
 	    goto retry;
 	}
@@ -2379,7 +2379,7 @@ Perl_yylex(pTHX)
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
-	    av_store(GvAV(PL_curcop->cop_filegv),(I32)PL_curcop->cop_line,sv);
+	    av_store(CopFILEAV(PL_curcop),(I32)PL_curcop->cop_line,sv);
 	}
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	if (PL_curcop->cop_line == 1) {
@@ -2420,7 +2420,7 @@ Perl_yylex(pTHX)
 		     */
 		    SV *x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV));
 		    assert(SvPOK(x) || SvGMAGICAL(x));
-		    if (sv_eq(x, GvSV(PL_curcop->cop_filegv))) {
+		    if (sv_eq(x, CopFILESV(PL_curcop))) {
 			sv_setpvn(x, ipath, ipathend - ipath);
 			SvSETMAGIC(x);
 		    }
@@ -3724,7 +3724,7 @@ Perl_yylex(pTHX)
 
 	case KEY___FILE__:
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0,
-					newSVsv(GvSV(PL_curcop->cop_filegv)));
+					newSVsv(CopFILESV(PL_curcop)));
 	    TERM(THING);
 
 	case KEY___LINE__:
@@ -6115,8 +6115,7 @@ S_scan_heredoc(pTHX_ register char *s)
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
-	    av_store(GvAV(PL_curcop->cop_filegv),
-	      (I32)PL_curcop->cop_line,sv);
+	    av_store(CopFILEAV(PL_curcop), (I32)PL_curcop->cop_line,sv);
 	}
 	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
 	    s = PL_bufend - 1;
@@ -6439,8 +6438,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
-	    av_store(GvAV(PL_curcop->cop_filegv),
-	      (I32)PL_curcop->cop_line, sv);
+	    av_store(CopFILEAV(PL_curcop), (I32)PL_curcop->cop_line, sv);
 	}
 
 	/* having changed the buffer, we must update PL_bufend */
@@ -6983,7 +6981,7 @@ Perl_yyerror(pTHX_ char *s)
     }
     msg = sv_2mortal(newSVpv(s, 0));
     Perl_sv_catpvf(aTHX_ msg, " at %_ line %"IVdf", ",
-              GvSV(PL_curcop->cop_filegv), (IV)PL_curcop->cop_line);
+		   CopFILESV(PL_curcop), (IV)PL_curcop->cop_line);
     if (context)
 	Perl_sv_catpvf(aTHX_ msg, "near \"%.*s\"\n", contlen, context);
     else
@@ -6999,7 +6997,7 @@ Perl_yyerror(pTHX_ char *s)
     else
 	qerror(msg);
     if (PL_error_count >= 10)
-	Perl_croak(aTHX_ "%_ has too many errors.\n", GvSV(PL_curcop->cop_filegv));
+	Perl_croak(aTHX_ "%_ has too many errors.\n", CopFILESV(PL_curcop));
     PL_in_my = 0;
     PL_in_my_stash = Nullhv;
     return 0;

@@ -283,7 +283,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 
 	if (GvCVu(gv))
 	    PL_sub_generation++;	/* taking a method out of circulation */
-	else if (GvIOp(gv) && (IoFLAGS(GvIOp(gv)) & IOf_ARGV)) {
+	if (GvIOp(gv) && (IoFLAGS(GvIOp(gv)) & IOf_ARGV)) {
 	    gp->gp_io = newIO();
 	    IoFLAGS(gp->gp_io) |= IOf_ARGV|IOf_START;
 	}

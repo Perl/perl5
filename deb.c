@@ -47,17 +47,16 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
 #ifdef DEBUGGING
     dTHR;
     register I32 i;
-    GV* gv = PL_curcop->cop_filegv;
+    char* file = CopFILE(PL_curcop);
 
 #ifdef USE_THREADS
     PerlIO_printf(Perl_debug_log, "0x%"UVxf" (%s:%ld)\t",
 		  PTR2UV(thr),
-		  SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
-		  (long)PL_curcop->cop_line);
+		  (file ? file : "<free>"),
+		  (long)CopLINE(PL_curcop));
 #else
-    PerlIO_printf(Perl_debug_log, "(%s:%ld)\t",
-	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
-	(long)PL_curcop->cop_line);
+    PerlIO_printf(Perl_debug_log, "(%s:%ld)\t", (file ? file : "<free>"),
+		  (long)CopLINE(PL_curcop));
 #endif /* USE_THREADS */
     (void) PerlIO_vprintf(Perl_debug_log, pat, *args);
 #endif /* DEBUGGING */

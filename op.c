@@ -761,7 +761,7 @@ STATIC void
 S_cop_free(pTHX_ COP* cop)
 {
     Safefree(cop->cop_label);
-    SvREFCNT_dec(cop->cop_filegv);
+    SvREFCNT_dec(CopFILEGV(cop));
     if (! specialWARN(cop->cop_warnings))
 	SvREFCNT_dec(cop->cop_warnings);
 }
@@ -2006,7 +2006,7 @@ Perl_newPROG(pTHX_ OP *o)
 	    if (cv) {
 		dSP;
 		PUSHMARK(SP);
-		XPUSHs((SV*)PL_compiling.cop_filegv);
+		XPUSHs((SV*)CopFILEGV(&PL_compiling));
 		PUTBACK;
 		call_sv((SV*)cv, G_DISCARD);
 	    }
@@ -3274,14 +3274,14 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     if (PL_copline == NOLINE)
         cop->cop_line = PL_curcop->cop_line;
     else {
-        cop->cop_line = PL_copline;
+	cop->cop_line = PL_copline;
         PL_copline = NOLINE;
     }
-    cop->cop_filegv = (GV*)SvREFCNT_inc(PL_curcop->cop_filegv);
+    CopFILEGV_set(cop, (GV*)SvREFCNT_inc(CopFILEGV(PL_curcop)));
     cop->cop_stash = PL_curstash;
 
     if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	SV **svp = av_fetch(GvAV(PL_curcop->cop_filegv),(I32)cop->cop_line, FALSE);
+	SV **svp = av_fetch(CopFILEAV(PL_curcop), (I32)CopLINE(cop), FALSE);
 	if (svp && *svp != &PL_sv_undef && !SvIOK(*svp)) {
 	    (void)SvIOK_on(*svp);
 	    SvIVX(*svp) = 1;
@@ -4366,8 +4366,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    HV *hv;
 
 	    Perl_sv_setpvf(aTHX_ sv, "%_:%ld-%ld",
-		    GvSV(PL_curcop->cop_filegv),
-		    (long)PL_subline, (long)PL_curcop->cop_line);
+			   CopFILESV(PL_curcop),
+			   (long)PL_subline, (long)CopLINE(PL_curcop));
 	    gv_efullname3(tmpstr, gv, Nullch);
 	    hv_store(GvHV(PL_DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
 	    hv = GvHVn(db_postponed);
@@ -4388,7 +4388,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	if (strEQ(s, "BEGIN")) {
 	    I32 oldscope = PL_scopestack_ix;
 	    ENTER;
-	    SAVESPTR(PL_compiling.cop_filegv);
+	    SAVESPTR(CopFILEGV(&PL_compiling));
 	    SAVEI16(PL_compiling.cop_line);
 	    save_svref(&PL_rs);
 	    sv_setsv(PL_rs, PL_nrs);
