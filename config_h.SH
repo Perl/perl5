@@ -1432,7 +1432,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_gethname HAS_GETHOSTNAME	/**/
 #$d_uname HAS_UNAME		/**/
-#$d_phostname HAS_PHOSTNAME
+#$d_phostname HAS_PHOSTNAME		/**/
 #ifdef HAS_PHOSTNAME
 #define PHOSTNAME "$aphostname"	/* How to get the host name */
 #endif
@@ -2795,7 +2795,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
  */
-#ifndef MULTIPLICTY
+#ifndef MULTIPLICITY
 #$usemultiplicity	MULTIPLICITY		/**/
 #endif
 
