@@ -20,16 +20,21 @@ print "1..12\n";
 unlink <Op.dbmx*>;
 
 umask(0);
-print (tie(%h,SDBM_File,'Op.dbmx', O_RDWR|O_CREAT, 0640) ? "ok 1\n" : "not ok 1\n");
+print (tie(%h,SDBM_File,'Op.dbmx', O_RDWR|O_CREAT, 0640)
+       ? "ok 1\n" : "not ok 1\n");
 
 $Dfile = "Op.dbmx.pag";
 if (! -e $Dfile) {
 	($Dfile) = <Op.dbmx*>;
 }
-($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
-   $blksize,$blocks) = stat($Dfile);
-print (($mode & 0777) == ($^O eq 'os2' ? 0666 : 0640) || $^O eq 'amigaos'
-                         ? "ok 2\n" : "not ok 2\n");
+if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32') {
+    print "ok 2\n";
+}
+else {
+    ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
+     $blksize,$blocks) = stat($Dfile);
+    print (($mode & 0777) == 0640 ? "ok 2\n" : "not ok 2\n");
+}
 while (($key,$value) = each(%h)) {
     $i++;
 }
