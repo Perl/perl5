@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.145 2003/12/10 15:16:08 lstein Exp $';
-$CGI::VERSION=3.01;
+$CGI::revision = '$Id: CGI.pm,v 1.151 2004/01/13 16:28:35 lstein Exp $';
+$CGI::VERSION=3.03;
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -181,6 +181,7 @@ if (exists $ENV{MOD_PERL}) {
   if (defined $mod_perl::VERSION) {
     if ($mod_perl::VERSION >= 1.99) {
       $MOD_PERL = 2;
+      require Apache::Response;
       require Apache::RequestRec;
       require Apache::RequestUtil;
       require APR::Pool;
@@ -303,6 +304,10 @@ sub new {
 	  UNIVERSAL::isa($initializer[0],'Apache::RequestRec')
 	 )) {
     $self->r(shift @initializer);
+  }
+ if (ref($initializer[0]) 
+     && (UNIVERSAL::isa($initializer[0],'CODE'))) {
+    $self->upload_hook(shift @initializer, shift @initializer);
   }
   if ($MOD_PERL) {
     $self->r(Apache->request) unless $self->r;
@@ -1911,7 +1916,7 @@ sub submit {
     $label=$self->escapeHTML($label);
     $value=$self->escapeHTML($value,1);
 
-    my($name) = ' name=".submit"' unless $NOSTICKY;
+    my $name = $NOSTICKY ? '' : ' name=".submit"';
     $name = qq/ name="$label"/ if defined($label);
     $value = defined($value) ? $value : $label;
     my $val = '';
@@ -2126,6 +2131,8 @@ END_OF_FUNC
 # unescape HTML -- used internally
 'unescapeHTML' => <<'END_OF_FUNC',
 sub unescapeHTML {
+    # hack to work around  earlier hacks
+    push @_,$_[0] if @_==1 && $_[0] eq 'CGI';
     my ($self,$string) = CGI::self_or_default(@_);
     return undef unless defined($string);
     my $latin = defined $self->{'.charset'} ? $self->{'.charset'} =~ /^(ISO-8859-1|WINDOWS-1252)$/i
@@ -2541,8 +2548,8 @@ sub url {
         $script_name =~ s/\?.+$//;   # strip query string
         # and path
         if (exists($ENV{PATH_INFO})) {
-           my $encoded_path = quotemeta($ENV{PATH_INFO});
-           $script_name      =~ s/$encoded_path$//i;
+           my $encoded_path = unescape($ENV{PATH_INFO});
+           $script_name      =~ s/\Q$encoded_path\E$//i;
          }
     }
 

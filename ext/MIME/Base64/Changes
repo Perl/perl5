@@ -1,3 +1,19 @@
+2004-01-08   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.23
+
+   Documentation fixes by Paul Croome <Paul.Croome@softwareag.com>.
+
+
+
+2004-01-08   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.22
+
+   Fix 'gcc -Wall' complaints.
+
+
+
 2003-10-09   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.21

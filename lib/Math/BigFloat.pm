@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _p: precision
 #   _f: flags, used to signal MBI not to touch our private parts
 
-$VERSION = '1.42';
+$VERSION = '1.43';
 require 5.005;
 
 require Exporter;
@@ -88,9 +88,6 @@ BEGIN
  
 ##############################################################################
 
-# in case we call SUPER::->foo() and this wants to call modify()
-# sub modify () { 0; }
-
 {
   # valid method aliases for AUTOLOAD
   my %methods = map { $_ => 1 }  
@@ -100,14 +97,14 @@ BEGIN
       /;
   # valid method's that can be hand-ed up (for AUTOLOAD)
   my %hand_ups = map { $_ => 1 }  
-   qw / is_nan is_inf is_negative is_positive
+   qw / is_nan is_inf is_negative is_positive is_pos is_neg
         accuracy precision div_scale round_mode fneg fabs fnot
         objectify upgrade downgrade
 	bone binf bnan bzero
       /;
 
-  sub method_alias { return exists $methods{$_[0]||''}; } 
-  sub method_hand_up { return exists $hand_ups{$_[0]||''}; } 
+  sub method_alias { exists $methods{$_[0]||''}; } 
+  sub method_hand_up { exists $hand_ups{$_[0]||''}; } 
 }
 
 ##############################################################################
@@ -790,7 +787,7 @@ sub blog
   if ($fallback)
     {
     # clear a/p after round, since user did not request it
-    $x->{_a} = undef; $x->{_p} = undef;
+    delete $x->{_a}; delete $x->{_p};
     }
   # restore globals
   $$abr = $ab; $$pbr = $pb;
@@ -1243,18 +1240,18 @@ sub bdiv
   # shortcut to not run through _find_round_parameters again
   if (defined $params[0])
     {
-    $x->{_a} = undef; 				# clear before round
+    delete $x->{_a}; 				# clear before round
     $x->bround($params[0],$params[2]);		# then round accordingly
     }
   else
     {
-    $x->{_p} = undef; 				# clear before round
+    delete $x->{_p}; 				# clear before round
     $x->bfround($params[1],$params[2]);		# then round accordingly
     }
   if ($fallback)
     {
     # clear a/p after round, since user did not request it
-    $x->{_a} = undef; $x->{_p} = undef;
+    delete $x->{_a}; delete $x->{_p};
     }
   
   if (wantarray)
@@ -1270,7 +1267,7 @@ sub bdiv
     if ($fallback)
       {
       # clear a/p after round, since user did not request it
-      $rem->{_a} = undef; $rem->{_p} = undef;
+      delete $rem->{_a}; delete $rem->{_p};
       }
     return ($x,$rem);
     }
@@ -1473,7 +1470,7 @@ sub broot
   if ($fallback)
     {
     # clear a/p after round, since user did not request it
-    $x->{_a} = undef; $x->{_p} = undef;
+    delete $x->{_a}; delete $x->{_p};
     }
   # restore globals
   $$abr = $ab; $$pbr = $pb;
@@ -1544,7 +1541,7 @@ sub bsqrt
     if ($fallback)
       {
       # clear a/p after round, since user did not request it
-      $x->{_a} = undef; $x->{_p} = undef;
+      delete $x->{_a}; delete $x->{_p};
       }
     # re-enable A and P, upgrade is taken care of by "local"
     ${"$self\::accuracy"} = $ab; ${"$self\::precision"} = $pb;
@@ -1608,7 +1605,7 @@ sub bsqrt
   if ($fallback)
     {
     # clear a/p after round, since user did not request it
-    $x->{_a} = undef; $x->{_p} = undef;
+    delete $x->{_a}; delete $x->{_p};
     }
   # restore globals
   $$abr = $ab; $$pbr = $pb;
@@ -1730,7 +1727,7 @@ sub _pow
   if ($fallback)
     {
     # clear a/p after round, since user did not request it
-    $x->{_a} = undef; $x->{_p} = undef;
+    delete $x->{_a}; delete $x->{_p};
     }
   # restore globals
   $$abr = $ab; $$pbr = $pb;
@@ -1814,7 +1811,7 @@ sub bfround
   return $x if (defined $x->{_p} && $x->{_p} < 0 && $scale < $x->{_p});
 
   $x->{_p} = $scale;			# remember round in any case
-  $x->{_a} = undef;			# and clear A
+  delete $x->{_a};			# and clear A
   if ($scale < 0)
     {
     # round right from the '.'
@@ -1938,9 +1935,8 @@ sub bround
   $x->{_m}->{sign} = $x->{sign};
   $x->{_m}->bround($scale,$mode);	# round mantissa
   $x->{_m}->{sign} = '+';		# fix sign back
-  # $x->{_m}->{_a} = undef; $x->{_m}->{_p} = undef;
   $x->{_a} = $scale;			# remember rounding
-  $x->{_p} = undef;			# and clear P
+  delete $x->{_p};			# and clear P
   $x->bnorm();				# del trailing zeros gen. by bround()
   }
 
@@ -2038,30 +2034,32 @@ sub AUTOLOAD
   # or falling back to MBI::bxxx()
   my $name = $AUTOLOAD;
 
-  $name =~ s/.*:://;	# split package
+  $name =~ s/(.*):://;	# split package
+  my $c = $1 || $class;
   no strict 'refs';
-  $class->import() if $IMPORT == 0;
+  $c->import() if $IMPORT == 0;
   if (!method_alias($name))
     {
     if (!defined $name)
       {
       # delayed load of Carp and avoid recursion	
       require Carp;
-      Carp::croak ("Can't call a method without name");
+      Carp::croak ("$c: Can't call a method without name");
       }
     if (!method_hand_up($name))
       {
       # delayed load of Carp and avoid recursion	
       require Carp;
-      Carp::croak ("Can't call $class\-\>$name, not a valid method");
+      Carp::croak ("Can't call $c\-\>$name, not a valid method");
       }
     # try one level up, but subst. bxxx() for fxxx() since MBI only got bxxx()
     $name =~ s/^f/b/;
     return &{"$MBI"."::$name"}(@_);
     }
   my $bname = $name; $bname =~ s/^f/b/;
-  *{$class."::$name"} = \&$bname;
-  &$bname;	# uses @_
+  $c .= "::$name";
+  *{$c} = \&{$bname};
+  &{$c};	# uses @_
   }
 
 sub exponent
@@ -2221,8 +2219,8 @@ sub bnorm
   $x->{_m}->{_f} = MB_NEVER_ROUND;
   $x->{_e}->{_f} = MB_NEVER_ROUND;
   # 'forget' that mantissa was rounded via MBI::bround() in MBF's bfround()
-  $x->{_m}->{_a} = undef; $x->{_e}->{_a} = undef;
-  $x->{_m}->{_p} = undef; $x->{_e}->{_p} = undef;
+  delete $x->{_m}->{_a}; delete $x->{_e}->{_a};
+  delete $x->{_m}->{_p}; delete $x->{_e}->{_p};
   $x;					# MBI bnorm is no-op, so dont call it
   } 
  
@@ -2331,8 +2329,8 @@ Math::BigFloat - Arbitrary size floating point math package
   $x->is_one('-');		# true if arg is -1
   $x->is_odd();			# true if odd, false for even
   $x->is_even();		# true if even, false for odd
-  $x->is_positive();		# true if >= 0
-  $x->is_negative();		# true if <  0
+  $x->is_pos();			# true if >= 0
+  $x->is_neg();			# true if <  0
   $x->is_inf(sign);		# true if +inf, or -inf (default is '+')
 
   $x->bcmp($y);			# compare numbers (undef,<0,=0,>0)
@@ -2397,7 +2395,8 @@ Math::BigFloat - Arbitrary size floating point math package
   
   $x->bstr();			# return string
   $x->bsstr();			# return string in scientific notation
- 
+
+  $x->as_int();			# return $x as BigInt 
   $x->exponent();		# return exponent as BigInt
   $x->mantissa();		# return mantissa as BigInt
   $x->parts();			# return (mantissa,exponent) as BigInt

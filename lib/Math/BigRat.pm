@@ -10,13 +10,14 @@
 #   _a   : accuracy
 #   _p   : precision
 #   _f   : flags, used by MBR to flag parts of a rational as untouchable
+# You should not look at the innards of a BigRat - use the methods for this.
 
 package Math::BigRat;
 
 require 5.005_03;
 use strict;
 
-use Exporter;
+require Exporter;
 use Math::BigFloat;
 use vars qw($VERSION @ISA $PACKAGE @EXPORT_OK $upgrade $downgrade
             $accuracy $precision $round_mode $div_scale $_trap_nan $_trap_inf);
@@ -24,7 +25,7 @@ use vars qw($VERSION @ISA $PACKAGE @EXPORT_OK $upgrade $downgrade
 @ISA = qw(Exporter Math::BigFloat);
 @EXPORT_OK = qw();
 
-$VERSION = '0.10';
+$VERSION = '0.11';
 
 use overload;			# inherit from Math::BigFloat
 
@@ -56,7 +57,7 @@ sub isa
 
 sub _new_from_float
   {
-  # turn a single float input into a rational (like '0.1')
+  # turn a single float input into a rational number (like '0.1')
   my ($self,$f) = @_;
 
   return $self->bnan() if $f->is_nan();
@@ -95,7 +96,7 @@ sub new
     {
     if ($n->isa('Math::BigFloat'))
       {
-      return $self->_new_from_float($n)->bnorm();
+      $self->_new_from_float($n);
       }
     if ($n->isa('Math::BigInt'))
       {
@@ -103,7 +104,6 @@ sub new
       $self->{_n} = $n->copy();				# "mantissa" = $n
       $self->{_d} = $MBI->bone();
       $self->{sign} = $self->{_n}->{sign}; $self->{_n}->{sign} = '+';
-      return $self->bnorm();
       }
     if ($n->isa('Math::BigInt::Lite'))
       {
@@ -111,8 +111,8 @@ sub new
       $self->{sign} = '+'; $self->{sign} = '-' if $$n < 0;
       $self->{_n} = $MBI->new(abs($$n),undef,undef);	# "mantissa" = $n
       $self->{_d} = $MBI->bone();
-      return $self->bnorm();
       }
+    return $self->bnorm();
     }
   return $n->copy() if ref $n;
 
@@ -174,8 +174,13 @@ sub new
         # inf/inf => NaN
         return $self->bnan() if
 	  ($self->{_n}->is_inf() && $self->{_d}->is_inf());
-        # +-inf/123 => +-inf
-        return $self->binf($self->{sign}) if $self->{_n}->is_inf();
+        if ($self->{_n}->is_inf())
+	  {
+	  my $s = '+'; 		# '+inf/+123' or '-inf/-123'
+	  $s = '-' if substr($self->{_n}->{sign},0,1) ne $self->{_d}->{sign};
+	  # +-inf/123 => +-inf
+          return $self->binf($s);
+	  }
         # 123/inf => 0
         return $self->bzero();
         }
@@ -231,7 +236,7 @@ sub config
 
 sub bstr
   {
-  my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
+  my ($self,$x) = ref($_[0]) ? (undef,$_[0]) : objectify(1,@_);
 
   if ($x->{sign} !~ /^[+-]$/)		# inf, NaN etc
     {
@@ -239,10 +244,10 @@ sub bstr
     return $s;
     }
 
-  my $s = ''; $s = $x->{sign} if $x->{sign} ne '+';	# +3 vs 3
+  my $s = ''; $s = $x->{sign} if $x->{sign} ne '+';	# '+3/2' => '3/2'
 
-  return $s.$x->{_n}->bstr() if $x->{_d}->is_one(); 
-  return $s.$x->{_n}->bstr() . '/' . $x->{_d}->bstr(); 
+  return $s . $x->{_n}->bstr() if $x->{_d}->is_one();
+  $s . $x->{_n}->bstr() . '/' . $x->{_d}->bstr();
   }
 
 sub bsstr
@@ -256,7 +261,7 @@ sub bsstr
     }
   
   my $s = ''; $s = $x->{sign} if $x->{sign} ne '+';	# +3 vs 3
-  return $s . $x->{_n}->bstr() . '/' . $x->{_d}->bstr(); 
+  $s . $x->{_n}->bstr() . '/' . $x->{_d}->bstr(); 
   }
 
 sub bnorm
@@ -279,8 +284,8 @@ sub bnorm
   $x->{_d}->{_f} = MB_NEVER_ROUND;
   $x->{_n}->{_f} = MB_NEVER_ROUND;
   # 'forget' that parts were rounded via MBI::bround() in MBF's bfround()
-  $x->{_d}->{_a} = undef; $x->{_n}->{_a} = undef;
-  $x->{_d}->{_p} = undef; $x->{_n}->{_p} = undef; 
+  delete $x->{_d}->{_a}; delete $x->{_n}->{_a};
+  delete $x->{_d}->{_p}; delete $x->{_n}->{_p}; 
 
   # no normalize for NaN, inf etc.
   return $x if $x->{sign} !~ /^[+-]$/;
@@ -365,7 +370,7 @@ sub _bzero
 
 sub badd
   {
-  # add two rationals
+  # add two rational numbers
 
   # set up parameters
   my ($self,$x,$y,@r) = (ref($_[0]),@_);
@@ -402,7 +407,7 @@ sub badd
 
   $x->{_d}->bmul($y->{_d});
 
-  # calculate new sign
+  # calculate sign of result and norm our _n part
   $x->{sign} = $x->{_n}->{sign}; $x->{_n}->{sign} = '+';
 
   $x->bnorm()->round(@r);
@@ -410,7 +415,7 @@ sub badd
 
 sub bsub
   {
-  # subtract two rationals
+  # subtract two rational numbers
 
   # set up parameters
   my ($self,$x,$y,@r) = (ref($_[0]),@_);
@@ -420,41 +425,18 @@ sub bsub
     ($self,$x,$y,@r) = objectify(2,@_);
     }
 
-  # TODO: $self instead or $class??
-  $x = $class->new($x) unless $x->isa($class);
-  $y = $class->new($y) unless $y->isa($class);
-
-  return $x->bnan() if ($x->{sign} eq 'NaN' || $y->{sign} eq 'NaN');
-  # TODO: inf handling
-
-  #  1   1    gcd(3,4) = 1    1*3 - 1*4    7
-  #  - - -                  = --------- = --                 
-  #  4   3                      4*3       12
-  
-  # we do not compute the gcd() here, but simple do:
-  #  5   7    5*3 - 7*4     13
-  #  - - -  = --------- = - --
-  #  4   3       4*3        12
-
-  local $Math::BigInt::accuracy = undef;
-  local $Math::BigInt::precision = undef;
-
-  $x->{_n}->bmul($y->{_d}); $x->{_n}->{sign} = $x->{sign};
-  my $m = $y->{_n}->copy()->bmul($x->{_d});
-  $m->{sign} = $y->{sign};			# 2/1 - 2/1
-  $x->{_n}->bsub($m);
-
-  $x->{_d}->bmul($y->{_d});
-  
-  # calculate new sign
-  $x->{sign} = $x->{_n}->{sign}; $x->{_n}->{sign} = '+';
-
-  $x->bnorm()->round(@r);
+  # flip sign of $x, call badd(), then flip sign of result
+  $x->{sign} =~ tr/+-/-+/
+    unless $x->{sign} eq '+' && $x->{_n}->is_zero();	# not -0
+  $x->badd($y,@r);			# does norm and round
+  $x->{sign} =~ tr/+-/-+/ 
+    unless $x->{sign} eq '+' && $x->{_n}->is_zero();	# not -0
+  $x;
   }
 
 sub bmul
   {
-  # multiply two rationals
+  # multiply two rational numbers
   
   # set up parameters
   my ($self,$x,$y,@r) = (ref($_[0]),@_);
@@ -800,6 +782,7 @@ sub bfac
   {
   my ($self,$x,@r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
 
+  # if $x is an integer
   if (($x->{sign} eq '+') && ($x->{_d}->is_one()))
     {
     $x->{_n}->bfac();
@@ -890,7 +873,91 @@ sub bpow
 
 sub blog
   {
-  return Math::BigRat->bnan();
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
+
+  # $x <= 0 => NaN
+  return $x->bnan() if $x->is_zero() || $x->{sign} ne '+' || $y->{sign} ne '+';
+
+  if ($x->is_int() && $y->is_int())
+    {
+    return $self->new($x->as_number()->blog($y->as_number(),@r));
+    }
+
+  warn ("blog() not fully implemented");
+  $x->bnan();
+  }
+
+sub broot
+  {
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
+
+  if ($x->is_int() && $y->is_int())
+    {
+    return $self->new($x->as_number()->broot($y->as_number(),@r));
+    }
+ 
+  warn ("broot() not fully implemented"); 
+  $x->bnan();
+  }
+
+sub bmodpow
+  {
+  # set up parameters
+  my ($self,$x,$y,$m,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$m,@r) = objectify(3,@_);
+    }
+
+  # $x or $y or $m are NaN or +-inf => NaN
+  return $x->bnan()
+   if $x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/ ||
+   $m->{sign} !~ /^[+-]$/;
+
+  if ($x->is_int() && $y->is_int() && $m->is_int())
+    {
+    return $self->new($x->as_number()->bmodpow($y->as_number(),$m,@r));
+    }
+
+  warn ("bmodpow() not fully implemented");
+  $x->bnan();
+  }
+
+sub bmodinv
+  {
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
+
+  # $x or $y are NaN or +-inf => NaN
+  return $x->bnan() 
+   if $x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/;
+
+  if ($x->is_int() && $y->is_int())
+    {
+    return $self->new($x->as_number()->bmodinv($y->as_number(),@r));
+    }
+
+  warn ("bmodinv() not fully implemented");
+  $x->bnan();
   }
 
 sub bsqrt
@@ -969,7 +1036,15 @@ sub bfround
 
 sub bcmp
   {
-  my ($self,$x,$y) = objectify(2,@_);
+  # compare two signed numbers 
+  
+  # set up parameters
+  my ($self,$x,$y) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y) = objectify(2,@_);
+    }
 
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
     {
@@ -999,14 +1074,23 @@ sub bcmp
 
 sub bacmp
   {
-  my ($self,$x,$y) = objectify(2,@_);
+  # compare two numbers (as unsigned)
+  
+  # set up parameters
+  my ($self,$x,$y) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y) = objectify(2,@_);
+    }
 
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
     {
     # handle +-inf and NaN
     return undef if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
     return 0 if $x->{sign} =~ /^[+-]inf$/ && $y->{sign} =~ /^[+-]inf$/;
-    return +1;  # inf is always bigger
+    return 1 if $x->{sign} =~ /^[+-]inf$/ && $y->{sign} !~ /^[+-]inf$/;
+    return -1;
     }
 
   my $t = $x->{_n} * $y->{_d};
@@ -1132,21 +1216,26 @@ __END__
 
 =head1 NAME
 
-Math::BigRat - arbitrarily big rationals
+Math::BigRat - arbitrarily big rational numbers
 
 =head1 SYNOPSIS
 
 	use Math::BigRat;
 
-	$x = Math::BigRat->new('3/7'); $x += '5/9';
+	my $x = Math::BigRat->new('3/7'); $x += '5/9';
 
 	print $x->bstr(),"\n";
   	print $x ** 2,"\n";
 
+	my $y = Math::BigRat->new('inf');
+	print "$y ", ($y->is_inf ? 'is' : 'is not') , " infinity\n";
+
+	my $z = Math::BigRat->new(144); $z->bsqrt();
+
 =head1 DESCRIPTION
 
 Math::BigRat complements Math::BigInt and Math::BigFloat by providing support
-for arbitrarily big rationals.
+for arbitrarily big rational numbers.
 
 =head2 MATH LIBRARY
 
@@ -1191,6 +1280,7 @@ information.
 Create a new Math::BigRat object. Input can come in various forms:
 
 	$x = Math::BigRat->new(123);				# scalars
+	$x = Math::BigRat->new('inf');				# infinity
 	$x = Math::BigRat->new('123.3');			# float
 	$x = Math::BigRat->new('1/3');				# simple string
 	$x = Math::BigRat->new('1 / 3');			# spaced
@@ -1311,6 +1401,12 @@ and then increment it by one).
 
 Truncate $x to an integer value.
 
+=head2 bsqrt()
+	
+	$x->bsqrt();
+
+Calculate the square root of $x.
+
 =head2 config
 
         use Data::Dumper;
@@ -1368,6 +1464,8 @@ Some things are not yet implemented, or only implemented half-way:
 
 =item $x ** $y where $y is not an integer
 
+=item bmod(), blog(), bmodinv() and bmodpow() (partial)
+
 =back
 
 =head1 LICENSE
@@ -1388,6 +1486,6 @@ may contain more documentation and examples as well as testcases.
 
 =head1 AUTHORS
 
-(C) by Tels L<http://bloodgate.com/> 2001-2002. 
+(C) by Tels L<http://bloodgate.com/> 2001, 2002, 2003, 2004.
 
 =cut

@@ -1,5 +1,5 @@
 #
-# $Id: QuotedPrint.pm,v 2.17 2003/10/09 19:04:29 gisle Exp $
+# $Id: QuotedPrint.pm,v 2.19 2004/01/08 14:07:26 gisle Exp $
 
 package MIME::QuotedPrint;
 
@@ -16,12 +16,12 @@ MIME::QuotedPrint - Encoding and decoding of quoted-printable strings
 
 =head1 DESCRIPTION
 
-This module provides functions to encode and decode strings into the
-Quoted-Printable encoding specified in RFC 2045 - I<MIME (Multipurpose
-Internet Mail Extensions)>.  The Quoted-Printable encoding is intended
+This module provides functions to encode and decode strings into and from the
+quoted-printable encoding specified in RFC 2045 - I<MIME (Multipurpose
+Internet Mail Extensions)>.  The quoted-printable encoding is intended
 to represent data that largely consists of bytes that correspond to
-printable characters in the ASCII character set.  Non-printable
-characters (as defined by english americans) are represented by a
+printable characters in the ASCII character set.  Each non-printable
+character (as defined by English Americans) is represented by a
 triplet consisting of the character "=" followed by two hexadecimal
 digits.
 
@@ -33,30 +33,30 @@ The following functions are provided:
 
 =item encode_qp($str, $eol)
 
-This function will return an encoded version of the string given as
+This function returns an encoded version of the string given as
 argument.
 
-The second argument is the line ending sequence to use.  It is
-optional and defaults to "\n".  Every occurence of "\n" will be
-replaced with this string and it will also be used for additional
+The second argument is the line-ending sequence to use.  It is
+optional and defaults to "\n".  Every occurrence of "\n" is
+replaced with this string, and it is also used for additional
 "soft line breaks" to ensure that no line is longer than 76
 characters.  You might want to pass it as "\015\012" to produce data
-suitable external consumption.  The string "\r\n" will produce the
+suitable for external consumption.  The string "\r\n" produces the
 same result on many platforms, but not all.
 
-An $eol of "" special.  If passed no "soft line breaks" are introduced
+An $eol of "" (the empty string) is special.  In this case, no "soft line breaks" are introduced
 and any literal "\n" in the original data is encoded as well.
 
 =item decode_qp($str);
 
-This function will return the plain text version of the string given
-as argument.  The lines of the result will be "\n" terminated even it
+This function returns the plain text version of the string given
+as argument.  The lines of the result are "\n" terminated, even if
 the $str argument contains "\r\n" terminated lines.
 
 =back
 
 
-If you prefer not to import these routines into your namespace you can
+If you prefer not to import these routines into your namespace, you can
 call them as:
 
   use MIME::QuotedPrint ();
@@ -64,8 +64,8 @@ call them as:
   $decoded = MIME::QuotedPrint::decode($encoded);
 
 Perl v5.6 and better allow extended Unicode characters in strings.
-Such strings cannot be encoded directly as the quoted-printable
-encoding is only defined for bytes.  The solution is to use the Encode
+Such strings cannot be encoded directly, as the quoted-printable
+encoding is only defined for single-byte characters.  The solution is to use the Encode
 module to select the byte encoding you want.  For example:
 
     use MIME::QuotedPrint qw(encode_qp);
@@ -76,7 +76,7 @@ module to select the byte encoding you want.  For example:
 
 =head1 COPYRIGHT
 
-Copyright 1995-1997,2002-2003 Gisle Aas.
+Copyright 1995-1997,2002-2004 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

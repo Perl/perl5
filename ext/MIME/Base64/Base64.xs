@@ -1,6 +1,6 @@
-/* $Id: Base64.xs,v 1.38 2003/10/09 11:26:12 gisle Exp $
+/* $Id: Base64.xs,v 1.41 2004/01/08 14:07:26 gisle Exp $
 
-Copyright 1997-2003 Gisle Aas
+Copyright 1997-2004 Gisle Aas
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
@@ -253,7 +253,7 @@ decode_base64(sv)
 
 MODULE = MIME::Base64		PACKAGE = MIME::QuotedPrint
 
-#define qp_isplain(c) ((c) == '\t' || ((c) >= ' ' && (c) <= '~') && (c) != '=')
+#define qp_isplain(c) ((c) == '\t' || (((c) >= ' ' && (c) <= '~') && (c) != '='))
 
 SV*
 encode_qp(sv,...)
@@ -399,7 +399,7 @@ decode_qp(sv)
 		    whitespace = 0;
                 }
             	if (*str == '=') {
-		    if ((str + 2) < end && isxdigit(str[1]) && isxdigit(str[2])) {
+		    if ((str + 2) < end && isXDIGIT(str[1]) && isXDIGIT(str[2])) {
 	                char buf[3];
                         str++;
 	                buf[0] = *str++;

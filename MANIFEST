@@ -1083,6 +1083,21 @@ lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
 lib/DB.pm			Debugger API (draft)
 lib/DB.t			See if DB works
+lib/DBM_Filter.pm		DBM Filter module
+lib/DBM_Filter/Changes    	DBM Filter Change history
+lib/DBM_Filter/compress.pm	DBM Filter to compress keys/values
+lib/DBM_Filter/encode.pm	DBM Filter for encoding
+lib/DBM_Filter/int32.pm		DBM Filter for creating int32 keys/values
+lib/DBM_Filter/null.pm		DBM Filter for null termination
+lib/DBM_Filter/t/01error.t	test DBM_Filter::null
+lib/DBM_Filter/t/02core.t	test DBM_Filter::null
+lib/DBM_Filter/t/compress.t	test DBM_Filter::compress
+lib/DBM_Filter/t/encode.t	test DBM_Filter::encode
+lib/DBM_Filter/t/int32.t	test DBM_Filter::int32
+lib/DBM_Filter/t/null.t		test DBM_Filter::null
+lib/DBM_Filter/t/utf8.t		test DBM_Filter::utf8
+lib/DBM_Filter/utf8.pm		DBM Filter for UTF-8 Encoding
+lib/dbm_filter_util.pl		Utility functions used by DBM Filter tests 
 lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 lib/Devel/SelfStubber.t		See if Devel::SelfStubber works
 lib/diagnostics.pm		Print verbose diagnostics
@@ -1124,7 +1139,7 @@ lib/ExtUtils/MakeMaker/Tutorial.pod	Writing a module with MakeMaker
 lib/ExtUtils/MakeMaker/vmsish.pm	Platform agnostic vmsish.pm
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
-lib/ExtUtils/META.yml	ExtUtils::MakeMaker metadata
+lib/ExtUtils/META.yml		ExtUtils::MakeMaker metadata
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/MM_Any.pm		MakeMaker methods for Any OS
@@ -1149,7 +1164,7 @@ lib/ExtUtils/t/00compile.t	See if MakeMaker modules compile
 lib/ExtUtils/t/00setup_dummy.t	Setup MakeMaker test module
 lib/ExtUtils/t/backwards.t	Check MakeMaker's backwards compatibility
 lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
-lib/ExtUtils/t/bytes.t	Test ExtUtils::MakeMaker::bytes
+lib/ExtUtils/t/bytes.t		Test ExtUtils::MakeMaker::bytes
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
@@ -1318,6 +1333,9 @@ lib/Locale/Maketext/t/00about.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/01make.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/02get.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/03http.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/04super.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/05super.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/06super.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/90utf8.t	Locale::Maketext
 lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 lib/locale.pm			For "use locale"
@@ -2488,7 +2506,7 @@ pp_sys.c			Push/Pop code for system interaction
 proto.h				Prototypes
 qnx/ar				QNX implementation of "ar" utility
 qnx/cpp				QNX implementation of preprocessor filter
-README			The Instructions
+README				The Instructions
 README.aix			Perl notes for AIX
 README.amiga			Perl notes for AmigaOS
 README.apollo			Perl notes for Apollo DomainOS
@@ -2509,7 +2527,7 @@ README.ko			Perl for Korean (in EUC-KR)
 README.machten			Perl notes for Power MachTen
 README.macos			Perl notes for Mac OS (Classic)
 README.macosx			Perl notes for Mac OS X
-README.micro		Notes about microperl
+README.micro			Notes about microperl
 README.mint			Perl notes for MiNT
 README.mpeix			Perl notes for MPE/iX
 README.netware			Perl notes for NetWare
@@ -2526,7 +2544,7 @@ README.vmesa			Perl notes for VM/ESA
 README.vms			Perl notes for VMS
 README.vos			Perl notes for Stratus VOS
 README.win32			Perl notes for Windows
-README.Y2K		Notes about Year 2000 concerns
+README.Y2K			Notes about Year 2000 concerns
 reentr.c			Reentrant interfaces
 reentr.h			Reentrant interfaces
 reentr.inc			Reentrant interfaces

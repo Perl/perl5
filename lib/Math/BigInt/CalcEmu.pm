@@ -1,12 +1,13 @@
-package Math::BigInt;
+package Math::BigInt::CalcEmu;
 
 use 5.005;
 use strict;
 # use warnings;	# dont use warnings for older Perls
-
 use vars qw/$VERSION/;
 
-$VERSION = '0.02';
+$VERSION = '0.03';
+
+package Math::BigInt;
 
 # See SYNOPSIS below.
 

@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.68';
+$VERSION = '1.69';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify bgcd blcm); 
@@ -284,18 +284,17 @@ sub accuracy
     if (ref($x))
       {
       # $object->accuracy() or fallback to global
-      $x->bround($a) if $a;             # not for undef, 0
-      $x->{_a} = $a;                    # set/overwrite, even if not rounded
-      $x->{_p} = undef;                 # clear P
+      $x->bround($a) if $a;		# not for undef, 0
+      $x->{_a} = $a;			# set/overwrite, even if not rounded
+      delete $x->{_p};			# clear P
       $a = ${"${class}::accuracy"} unless defined $a;   # proper return value
       }
     else
       {
-      # set global
-      ${"${class}::accuracy"} = $a;
-      ${"${class}::precision"} = undef; # clear P
+      ${"${class}::accuracy"} = $a;	# set global A
+      ${"${class}::precision"} = undef;	# clear global P
       }
-    return $a;                          # shortcut
+    return $a;				# shortcut
     }
 
   my $r;
@@ -331,18 +330,17 @@ sub precision
     if (ref($x))
       {
       # $object->precision() or fallback to global
-      $x->bfround($p) if $p;            # not for undef, 0
-      $x->{_p} = $p;                    # set/overwrite, even if not rounded
-      $x->{_a} = undef;                 # clear A
+      $x->bfround($p) if $p;		# not for undef, 0
+      $x->{_p} = $p;			# set/overwrite, even if not rounded
+      delete $x->{_a};			# clear A
       $p = ${"${class}::precision"} unless defined $p;  # proper return value
       }
     else
       {
-      # set global
-      ${"${class}::precision"} = $p;
-      ${"${class}::accuracy"} = undef;  # clear A
+      ${"${class}::precision"} = $p;	# set global P
+      ${"${class}::accuracy"} = undef;	# clear global A
       }
-    return $p;                          # shortcut
+    return $p;				# shortcut
     }
 
   my $r;
@@ -663,7 +661,7 @@ sub bnan
     }
   $self->{sign} = $nan;
   delete $self->{_a}; delete $self->{_p};	# rounding NaN is silly
-  return $self;
+  $self;
   }
 
 sub binf
@@ -698,7 +696,7 @@ sub binf
   $sign = $sign . 'inf' if $sign !~ /inf$/;	# - => -inf
   $self->{sign} = $sign;
   ($self->{_a},$self->{_p}) = @_;		# take over requested rounding
-  return $self;
+  $self;
   }
 
 sub bzero
@@ -1083,7 +1081,8 @@ sub bacmp
     # handle +-inf and NaN
     return undef if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
     return 0 if $x->{sign} =~ /^[+-]inf$/ && $y->{sign} =~ /^[+-]inf$/;
-    return +1;	# inf is always bigger
+    return 1 if $x->{sign} =~ /^[+-]inf$/ && $y->{sign} !~ /^[+-]inf$/;
+    return -1;
     }
   $CALC->_acmp($x->{value},$y->{value});	# lib does only 0,1,-1
   }
@@ -1249,6 +1248,8 @@ sub blog
     {
     ($self,$x,$base,@r) = objectify(2,$class,@_);
     }
+
+  return $x if $x->modify('blog');
 
   # inf, -inf, NaN, <0 => NaN
   return $x->bnan()
@@ -1996,8 +1997,9 @@ sub length
 sub digit
   {
   # return the nth decimal digit, negative values count backward, 0 is right
-  my ($self,$x,$n) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
+  my ($self,$x,$n) = ref($_[0]) ? (undef,@_) : objectify(1,@_);
 
+  $n = $n->numify() if ref($n);
   $CALC->_digit($x->{value},$n||0);
   }
 
@@ -2014,7 +2016,7 @@ sub _trailing_zeros
   # if not: since we do not know underlying internal representation:
   my $es = "$x"; $es =~ /([0]*)$/;
   return 0 if !defined $1;	# no zeros
-  CORE::length("$1");		# as string, not as +0!
+  CORE::length("$1");		# $1 as string, not as +0!
   }
 
 sub bsqrt
@@ -2122,7 +2124,7 @@ sub bfround
   {
   # precision: round to the $Nth digit left (+$n) or right (-$n) from the '.'
   # $n == 0 || $n == 1 => round to integer
-  my $x = shift; $x = $class->new($x) unless ref $x;
+  my $x = shift; my $self = ref($x) || $x; $x = $self->new($x) unless ref $x;
 
   my ($scale,$mode) = $x->_scale_p($x->precision(),$x->round_mode(),@_);
 
@@ -2131,8 +2133,8 @@ sub bfround
   # no-op for BigInts if $n <= 0
   $x->bround( $x->length()-$scale, $mode) if $scale > 0;
 
-  $x->{_a} = undef;				# bround sets {_a}
-  $x->{_p} = $scale;				# so correct it
+  delete $x->{_a};	# delete to save memory
+  $x->{_p} = $scale;	# store new _p
   $x;
   }
 
@@ -4396,8 +4398,8 @@ subclass files and benchmarks.
 =head1 AUTHORS
 
 Original code by Mark Biggar, overloaded interface by Ilya Zakharevich.
-Completely rewritten by Tels http://bloodgate.com in late 2000, 2001, 2002
-and still at it in 2003.
+Completely rewritten by Tels http://bloodgate.com in late 2000, 2001 - 2003
+and still at it in 2004.
 
 Many people contributed in one or more ways to the final beast, see the file
 CREDITS for an (uncomplete) list. If you miss your name, please drop me a
