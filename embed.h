@@ -639,14 +639,10 @@
 #define sv_2iv			Perl_sv_2iv
 #define sv_2mortal		Perl_sv_2mortal
 #define sv_2nv			Perl_sv_2nv
-#ifdef CRIPPLED_CC
 #define sv_2pv			Perl_sv_2pv
-#endif
 #define sv_2pvutf8		Perl_sv_2pvutf8
 #define sv_2pvbyte		Perl_sv_2pvbyte
-#ifdef CRIPPLED_CC
 #define sv_pvn_nomg		Perl_sv_pvn_nomg
-#endif
 #define sv_2uv			Perl_sv_2uv
 #define sv_iv			Perl_sv_iv
 #define sv_uv			Perl_sv_uv
@@ -661,12 +657,8 @@
 #define sv_catpvf		Perl_sv_catpvf
 #define sv_vcatpvf		Perl_sv_vcatpvf
 #define sv_catpv		Perl_sv_catpv
-#ifdef CRIPPLED_CC
 #define sv_catpvn		Perl_sv_catpvn
-#endif
-#ifdef CRIPPLED_CC
 #define sv_catsv		Perl_sv_catsv
-#endif
 #define sv_chop			Perl_sv_chop
 #define sv_clean_all		Perl_sv_clean_all
 #define sv_clean_objs		Perl_sv_clean_objs
@@ -699,9 +691,7 @@
 #define sv_peek			Perl_sv_peek
 #define sv_pos_u2b		Perl_sv_pos_u2b
 #define sv_pos_b2u		Perl_sv_pos_b2u
-#ifdef CRIPPLED_CC
 #define sv_pvn_force		Perl_sv_pvn_force
-#endif
 #define sv_pvutf8n_force	Perl_sv_pvutf8n_force
 #define sv_pvbyten_force	Perl_sv_pvbyten_force
 #define sv_reftype		Perl_sv_reftype
@@ -721,9 +711,7 @@
 #define sv_setref_pvn		Perl_sv_setref_pvn
 #define sv_setpv		Perl_sv_setpv
 #define sv_setpvn		Perl_sv_setpvn
-#ifdef CRIPPLED_CC
 #define sv_setsv		Perl_sv_setsv
-#endif
 #define sv_taint		Perl_sv_taint
 #define sv_tainted		Perl_sv_tainted
 #define sv_unmagic		Perl_sv_unmagic
@@ -843,9 +831,7 @@
 #define sv_pv			Perl_sv_pv
 #define sv_pvutf8		Perl_sv_pvutf8
 #define sv_pvbyte		Perl_sv_pvbyte
-#ifdef CRIPPLED_CC
 #define sv_utf8_upgrade		Perl_sv_utf8_upgrade
-#endif
 #define sv_utf8_downgrade	Perl_sv_utf8_downgrade
 #define sv_utf8_encode		Perl_sv_utf8_encode
 #define sv_utf8_decode		Perl_sv_utf8_decode

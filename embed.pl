@@ -344,14 +344,12 @@ walk_table {
     else {
 	my ($flags,$retval,$func,@args) = @_;
 	unless ($flags =~ /o/) {
-            $ret .= "#ifdef CRIPPLED_CC\n" if $flags =~ /C/;
 	    if ($flags =~ /s/) {
 		$ret .= hide($func,"S_$func");
 	    }
 	    elsif ($flags =~ /p/) {
 		$ret .= hide($func,"Perl_$func");
 	    }
-            $ret .= "#endif\n" if $flags =~ /C/;
 	}
     }
     $ret;
@@ -1054,7 +1052,6 @@ __END__
 :
 : flags are single letters with following meanings:
 :	A		member of public API
-:	C		wrap compatibility macro in #ifdef DCRIPPLED_CC
 :	d		function has documentation with its source
 :	s		static function, should have an S_ prefix in source
 :				file
@@ -1723,10 +1720,10 @@ Apd	|IO*	|sv_2io		|SV* sv
 Apd	|IV	|sv_2iv		|SV* sv
 Apd	|SV*	|sv_2mortal	|SV* sv
 Apd	|NV	|sv_2nv		|SV* sv
-ACp	|char*	|sv_2pv		|SV* sv|STRLEN* lp
+Ap	|char*	|sv_2pv		|SV* sv|STRLEN* lp
 Apd	|char*	|sv_2pvutf8	|SV* sv|STRLEN* lp
 Apd	|char*	|sv_2pvbyte	|SV* sv|STRLEN* lp
-ACp	|char*	|sv_pvn_nomg	|SV* sv|STRLEN* lp
+Ap	|char*	|sv_pvn_nomg	|SV* sv|STRLEN* lp
 Apd	|UV	|sv_2uv		|SV* sv
 Apd	|IV	|sv_iv		|SV* sv
 Apd	|UV	|sv_uv		|SV* sv
@@ -1741,8 +1738,8 @@ Apd	|SV*	|sv_bless	|SV* sv|HV* stash
 Afpd	|void	|sv_catpvf	|SV* sv|const char* pat|...
 Ap	|void	|sv_vcatpvf	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_catpv	|SV* sv|const char* ptr
-ACpd	|void	|sv_catpvn	|SV* sv|const char* ptr|STRLEN len
-ACpd	|void	|sv_catsv	|SV* dsv|SV* ssv
+Apd	|void	|sv_catpvn	|SV* sv|const char* ptr|STRLEN len
+Apd	|void	|sv_catsv	|SV* dsv|SV* ssv
 Apd	|void	|sv_chop	|SV* sv|char* ptr
 pd	|I32	|sv_clean_all
 pd	|void	|sv_clean_objs
@@ -1777,7 +1774,7 @@ Apd	|SV*	|sv_newref	|SV* sv
 Ap	|char*	|sv_peek	|SV* sv
 Apd	|void	|sv_pos_u2b	|SV* sv|I32* offsetp|I32* lenp
 Apd	|void	|sv_pos_b2u	|SV* sv|I32* offsetp
-ACpd	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
+Apd	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
 Apd	|char*	|sv_pvutf8n_force|SV* sv|STRLEN* lp
 Apd	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
 Apd	|char*	|sv_reftype	|SV* sv|int ob
@@ -1798,7 +1795,7 @@ Apd	|SV*	|sv_setref_pvn	|SV* rv|const char* classname|char* pv \
 				|STRLEN n
 Apd	|void	|sv_setpv	|SV* sv|const char* ptr
 Apd	|void	|sv_setpvn	|SV* sv|const char* ptr|STRLEN len
-ACpd	|void	|sv_setsv	|SV* dsv|SV* ssv
+Apd	|void	|sv_setsv	|SV* dsv|SV* ssv
 Apd	|void	|sv_taint	|SV* sv
 Apd	|bool	|sv_tainted	|SV* sv
 Apd	|int	|sv_unmagic	|SV* sv|int type
@@ -1929,7 +1926,7 @@ Apd	|char*	|sv_2pvbyte_nolen|SV* sv
 Apd	|char*	|sv_pv		|SV *sv
 Apd	|char*	|sv_pvutf8	|SV *sv
 Apd	|char*	|sv_pvbyte	|SV *sv
-ACpd	|STRLEN	|sv_utf8_upgrade|SV *sv
+Apd	|STRLEN	|sv_utf8_upgrade|SV *sv
 ApdM	|bool	|sv_utf8_downgrade|SV *sv|bool fail_ok
 Apd	|void	|sv_utf8_encode |SV *sv
 ApdM	|bool	|sv_utf8_decode |SV *sv
