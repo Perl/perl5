@@ -9,18 +9,16 @@ require Cwd;
 
 =head1 NAME
 
-find - traverse a file tree
-
-finddepth - traverse a directory structure depth-first
+File::Find - Traverse a directory tree.
 
 =head1 SYNOPSIS
 
     use File::Find;
-    find(\&wanted, '/foo', '/bar');
+    find(\&wanted, @directories_to_seach);
     sub wanted { ... }
 
     use File::Find;
-    finddepth(\&wanted, '/foo', '/bar');
+    finddepth(\&wanted, @directories_to_search);
     sub wanted { ... }
 
     use File::Find;
@@ -28,8 +26,40 @@ finddepth - traverse a directory structure depth-first
 
 =head1 DESCRIPTION
 
+These are functions for searching through directory trees doing work
+on each file found similar to the Unix I<find> command.  File::Find
+exports two functions, C<find> and C<finddepth>.  They work similarly
+but have subtle differences.
+
+=over 4
+
+=item B<find>
+
+  find(\&wanted,  @directories);
+  find(\%options, @directories);
+
+find() does a breadth-first search over the given @directories in the
+order they are given.  In essense, it works from the top down.
+
+For each file or directory found the &wanted subroutine is called (see
+below for details).  Additionally, for each directory found it will go
+into that directory and continue the search.
+
+=item B<finddepth>
+
+  finddepth(\&wanted,  @directories);
+  finddepth(\%options, @directories);
+
+finddepth() works just like find() except it does a depth-first search.
+It works from the bottom of the directory tree up.
+
+=back
+
+=head2 %options
+
 The first argument to find() is either a hash reference describing the
-operations to be performed for each file, or a code reference.
+operations to be performed for each file, or a code reference.  The
+code reference is described in L<The wanted function> below.
 
 Here are the possible keys for the hash:
 
@@ -37,8 +67,8 @@ Here are the possible keys for the hash:
 
 =item C<wanted>
 
-The value should be a code reference.  This code reference is called
-I<the wanted() function> below.
+The value should be a code reference.  This code reference is
+described in L<The wanted function> below.
 
 =item C<bydepth>
 
@@ -145,21 +175,40 @@ including all its sub-directories. The default is to 'die' in such a case.
 
 =back
 
-The wanted() function does whatever verifications you want.
-C<$File::Find::dir> contains the current directory name, and C<$_> the
-current filename within that directory.  C<$File::Find::name> contains
-the complete pathname to the file. You are chdir()'d to
-C<$File::Find::dir> when the function is called, unless C<no_chdir>
-was specified. Note that when changing to directories is in effect
-the root directory (F</>) is a somewhat special case inasmuch as the
-concatenation of C<$File::Find::dir>, C<'/'> and  C<$_> is not literally
-equal to C<$File::Find::name>. The table below summarizes all variants:
+=head2 The wanted function
+
+The wanted() function does whatever verifications you want on each
+file and directory.  It takes no arguments but rather does its work
+through a collection of variables.
+
+=over 4
+
+=item C<$File::Find::dir> is the current directory name, 
+
+=item C<$_> is the current filename within that directory
+
+=item C<$File::Find::name> is the complete pathname to the file. 
+
+=back
+
+For example, when examining the file /some/path/foo.ext you will have:
+
+    $File::Find::dir  = /some/path/
+    $_                = foo.ext
+    $File::Find::name = /some/path/foo.ext
+
+You are chdir()'d toC<$File::Find::dir> when the function is called,
+unless C<no_chdir> was specified. Note that when changing to
+directories is in effect the root directory (F</>) is a somewhat
+special case inasmuch as the concatenation of C<$File::Find::dir>,
+C<'/'> and C<$_> is not literally equal to C<$File::Find::name>. The
+table below summarizes all variants:
 
               $File::Find::name  $File::Find::dir  $_
  default      /                  /                 .
  no_chdir=>0  /etc               /                 etc
               /etc/x             /etc              x
-     
+
  no_chdir=>1  /                  /                 /
               /etc               /                 /etc
               /etc/x             /etc              /etc/x
@@ -650,7 +699,7 @@ sub _find_opt {
 
 	    $name = $abs_dir . $_; # $File::Find::name
 
-	    { &$wanted_callback }; # protect against wild "next"
+	    { $wanted_callback->() }; # protect against wild "next"
 
 	}
 
@@ -731,7 +780,7 @@ sub _find_dir($$$) {
 	    $_= ($no_chdir ? $dir_name : $dir_rel ); # $_
 	    # prune may happen here
 	    $prune= 0;
-	    { &$wanted_callback };	# protect against wild "next"
+	    { $wanted_callback->() };	# protect against wild "next"
 	    next if $prune;
 	}
 
@@ -779,7 +828,7 @@ sub _find_dir($$$) {
 	}
 	@filenames = readdir DIR;
 	closedir(DIR);
-	@filenames = &$pre_process(@filenames) if $pre_process;
+	@filenames = $pre_process->(@filenames) if $pre_process;
 	push @Stack,[$CdLvl,$dir_name,"",-2]   if $post_process;
 
 	# default: use whatever was specifid
@@ -795,7 +844,7 @@ sub _find_dir($$$) {
 		
 		$name = $dir_pref . $FN; # $File::Find::name
 		$_ = ($no_chdir ? $name : $FN); # $_
-		{ &$wanted_callback }; # protect against wild "next"
+		{ $wanted_callback->() }; # protect against wild "next"
 	    }
 
 	}
@@ -819,13 +868,13 @@ sub _find_dir($$$) {
 		    else {
 			$name = $dir_pref . $FN; # $File::Find::name
 			$_= ($no_chdir ? $name : $FN); # $_
-			{ &$wanted_callback }; # protect against wild "next"
+			{ $wanted_callback->() }; # protect against wild "next"
 		    }
 		}
 		else {
 		    $name = $dir_pref . $FN; # $File::Find::name
 		    $_= ($no_chdir ? $name : $FN); # $_
-		    { &$wanted_callback }; # protect against wild "next"
+		    { $wanted_callback->() }; # protect against wild "next"
 		}
 	    }
 	}
@@ -860,7 +909,7 @@ sub _find_dir($$$) {
 	    if ( $nlink == -2 ) {
 		$name = $dir = $p_dir; # $File::Find::name / dir
                 $_ = $File::Find::current_dir;
-		&$post_process;		# End-of-directory processing
+		$post_process->();		# End-of-directory processing
 	    }
 	    elsif ( $nlink < 0 ) {  # must be finddepth, report dirname now
 		$name = $dir_name;
@@ -882,7 +931,7 @@ sub _find_dir($$$) {
 			substr($_, length($_) == 2 ? -1 : -2) = '';
 		    }
 		}
-		{ &$wanted_callback }; # protect against wild "next"
+		{ $wanted_callback->() }; # protect against wild "next"
 	     }
 	     else {
 		push @Stack,[$CdLvl,$p_dir,$dir_rel,-1]  if  $bydepth;
@@ -971,7 +1020,7 @@ sub _find_dir_symlnk($$$) {
 	    # prune may happen here
 	    $prune= 0;
 	    lstat($_); # make sure  file tests with '_' work
-	    { &$wanted_callback }; # protect against wild "next"
+	    { $wanted_callback->() }; # protect against wild "next"
 	    next if $prune;
 	}
 
@@ -1026,7 +1075,7 @@ sub _find_dir_symlnk($$$) {
 		$fullname = $new_loc; # $File::Find::fullname 
 		$name = $dir_pref . $FN; # $File::Find::name
 		$_ = ($no_chdir ? $name : $FN); # $_
-		{ &$wanted_callback }; # protect against wild "next"
+		{ $wanted_callback->() }; # protect against wild "next"
 	    }
 	}
 
@@ -1075,7 +1124,7 @@ sub _find_dir_symlnk($$$) {
 		}
 
 		lstat($_); # make sure file tests with '_' work
-		{ &$wanted_callback }; # protect against wild "next"
+		{ $wanted_callback->() }; # protect against wild "next"
 	    }
 	    else {
 		push @Stack,[$dir_loc, $updir_loc, $p_dir, $dir_rel,-1]  if  $bydepth;
