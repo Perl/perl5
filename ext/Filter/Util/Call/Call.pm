@@ -1,3 +1,11 @@
+
+# Call.pm
+#
+# Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+ 
 package Filter::Util::Call ;
 
 require 5.002 ;
@@ -64,7 +72,10 @@ Filter::Util::Call - Perl Source Filter Utility Module
 =head1 DESCRIPTION
 
 This module provides you with the framework to write I<Source Filters>
-in Perl.
+in Perl. 
+
+An alternate interface to Filter::Util::Call is now available. See
+L<Filter::Simple> for more details.
 
 A I<Perl Source Filter> is implemented as a Perl module. The structure
 of the module can take one of two broadly similar formats. To
@@ -462,6 +473,18 @@ Here is the module.
     }
 
     1 ;
+
+=head1 Filter::Simple
+
+If you intend using the Filter::Call functionality, I would strongly
+recommend that you check out Damian Conway's excellent Filter::Simple
+module. This module provides a much cleaner interface than
+Filter::Util::Call. Although it doesn't allow the fine control that
+Filter::Util::Call does, it should be adequate for the majority of
+applications. It's available at
+
+   http://www.cpan.org/modules/by-author/Damian_Conway/Filter-Simple.tar.gz
+   http://www.csse.monash.edu.au/~damian/CPAN/Filter-Simple.tar.gz
 
 =head1 AUTHOR
 
