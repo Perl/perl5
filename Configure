@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Mar  4 10:08:40 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Tue Mar  9 14:37:57 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -8059,13 +8059,13 @@ eval $inlibc
 
 : see how we will look up host name
 echo " "
-if false; then
-	: dummy stub to allow use of elif
-elif set gethostname val -f d_gethname; eval $csym; $val; then
+call=''
+if set gethostname val -f d_gethname; eval $csym; $val; then
 	echo 'gethostname() found.' >&4
 	d_gethname="$define"
 	call=gethostname
-elif set uname val -f d_uname; eval $csym; $val; then
+fi
+if set uname val -f d_uname; eval $csym; $val; then
 	if ./xenix; then
 		$cat <<'EOM'
 uname() was found, but you're running xenix, and older versions of xenix
@@ -8085,7 +8085,9 @@ EOM
 	else
 		echo 'uname() found.' >&4
 		d_uname="$define"
-		call=uname
+		case "$call" in
+		'') call=uname ;;
+		esac
 	fi
 fi
 case "$d_gethname" in
