@@ -1,4 +1,4 @@
-/* $Header: stab.c,v 3.0.1.6 90/03/27 16:22:11 lwall Locked $
+/* $Header: stab.c,v 3.0.1.7 90/08/09 05:17:48 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,15 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.c,v $
+ * Revision 3.0.1.7  90/08/09  05:17:48  lwall
+ * patch19: fixed double include of <signal.h>
+ * patch19: $' broke on embedded nulls
+ * patch19: $< and $> better supported on machines without setreuid
+ * patch19: Added support for linked-in C subroutines
+ * patch19: %ENV wasn't forced to be global like it should
+ * patch19: $| didn't work before the filehandle was opened
+ * patch19: $! now returns "" in string context if errno == 0
+ * 
  * Revision 3.0.1.6  90/03/27  16:22:11  lwall
  * patch16: support for machines that can't cast negative floats to unsigned ints
  * 
@@ -38,7 +47,9 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifndef NSIG
 #include <signal.h>
+#endif
 
 static char *sig_name[] = {
     SIG_NAME,0
@@ -105,7 +116,7 @@ STR *str;
 	if (curspat) {
 	    if (curspat->spat_regexp &&
 	      (s = curspat->spat_regexp->endp[0]) ) {
-		str_set(stab_val(stab),s);
+		str_nset(stab_val(stab),s, curspat->spat_regexp->subend - s);
 	    }
 	    else
 		str_nset(stab_val(stab),"",0);
@@ -151,6 +162,8 @@ STR *str;
 	str_numset(stab_val(stab),(double)arybase);
 	break;
     case '|':
+	if (!stab_io(curoutstab))
+	    stab_io(curoutstab) = stio_new();
 	str_numset(stab_val(stab),
 	   (double)((stab_io(curoutstab)->flags & IOF_FLUSH) != 0) );
 	break;
@@ -165,7 +178,7 @@ STR *str;
 	break;
     case '!':
 	str_numset(stab_val(stab), (double)errno);
-	str_set(stab_val(stab), strerror(errno));
+	str_set(stab_val(stab), errno ? strerror(errno) : "");
 	stab_val(stab)->str_nok = 1;	/* what a wonderful hack! */
 	break;
     case '<':
@@ -198,6 +211,14 @@ STR *str;
 	}
 #endif
 	str_set(stab_val(stab),buf);
+	break;
+    default:
+	{
+	    struct ufuncs *uf = (struct ufuncs *)str->str_ptr;
+
+	    if (uf && uf->uf_val)
+		uf->uf_val(uf->uf_index, stab_val(stab));
+	}
 	break;
     }
     return stab_val(stab);
@@ -256,10 +277,17 @@ STR *str;
 		stab->str_pok = 1;
 		strcpy(stab_magic(stab),"StB");
 		stab_val(stab) = Str_new(70,0);
-		stab_line(stab) = line;
+		stab_line(stab) = curcmd->c_line;
 	    }
-	    else
+	    else {
 		stab = stabent(s,TRUE);
+		if (!stab_xarray(stab))
+		    aadd(stab);
+		if (!stab_xhash(stab))
+		    hadd(stab);
+		if (!stab_io(stab))
+		    stab_io(stab) = stio_new();
+	    }
 	    str_sset(str,stab);
 	}
 	break;
@@ -305,6 +333,8 @@ STR *str;
 	    stab_io(curoutstab)->page = (long)str_gnum(str);
 	    break;
 	case '|':
+	    if (!stab_io(curoutstab))
+		stab_io(curoutstab) = stio_new();
 	    stab_io(curoutstab)->flags &= ~IOF_FLUSH;
 	    if (str_gnum(str) != 0.0) {
 		stab_io(curoutstab)->flags |= IOF_FLUSH;
@@ -366,7 +396,10 @@ STR *str;
 	    if (setreuid((UIDTYPE)uid, (UIDTYPE)-1) < 0)
 		uid = (int)getuid();
 #else
-	    fatal("setruid() not implemented");
+	    if (uid == euid)		/* special case $< = $> */
+		setuid(uid);
+	    else
+		fatal("setruid() not implemented");
 #endif
 #endif
 	    break;
@@ -386,7 +419,10 @@ STR *str;
 	    if (setreuid((UIDTYPE)-1, (UIDTYPE)euid) < 0)
 		euid = (int)geteuid();
 #else
-	    fatal("seteuid() not implemented");
+	    if (euid == uid)		/* special case $> = $< */
+		setuid(euid);
+	    else
+		fatal("seteuid() not implemented");
 #endif
 #endif
 	    break;
@@ -429,6 +465,14 @@ STR *str;
 	case ':':
 	    chopset = str_get(str);
 	    break;
+	default:
+	    {
+		struct ufuncs *uf = (struct ufuncs *)str->str_magic->str_ptr;
+
+		if (uf && uf->uf_set)
+		    uf->uf_set(uf->uf_index, str);
+	    }
+	    break;
 	}
 	break;
     }
@@ -465,6 +509,9 @@ int sig;
     ARRAY *oldstack = stack;
     SUBR *sub;
 
+#ifdef OS2		/* or anybody else who requires SIG_ACK */
+    signal(sig, SIG_ACK);
+#endif
     stab = stabent(
 	str_get(hfetch(stab_hash(sigstab),sig_name[sig],strlen(sig_name[sig]),
 	  TRUE)), TRUE);
@@ -555,7 +602,7 @@ int add;
 	    if (*name == 'I' && strEQ(name, "INC"))
 		global = TRUE;
 	}
-	else if (*name >= 'A') {
+	else if (*name > 'A') {
 	    if (*name == 'E' && strEQ(name, "ENV"))
 		global = TRUE;
 	}
@@ -615,7 +662,7 @@ int add;
 	stab->str_pok = 1;
 	strcpy(stab_magic(stab),"StB");
 	stab_val(stab) = Str_new(72,0);
-	stab_line(stab) = line;
+	stab_line(stab) = curcmd->c_line;
 	str_magic(stab,stab,'*',name,len);
 	return stab;
     }
@@ -644,7 +691,7 @@ register int max;
 	    stab = (STAB*)entry->hent_val;
 	    if (stab->str_pok & SP_MULTI)
 		continue;
-	    line = stab_line(stab);
+	    curcmd->c_line = stab_line(stab);
 	    warn("Possible typo: \"%s\"", stab_name(stab));
 	}
     }

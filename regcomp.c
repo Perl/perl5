@@ -7,9 +7,16 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regcomp.c,v 3.0.1.3 90/03/12 16:59:22 lwall Locked $
+/* $Header: regcomp.c,v 3.0.1.4 90/08/09 05:05:33 lwall Locked $
  *
  * $Log:	regcomp.c,v $
+ * Revision 3.0.1.4  90/08/09  05:05:33  lwall
+ * patch19: sped up /x+y/ patterns greatly by not retrying on every x
+ * patch19: inhibited backoff on patterns anchored to the end like /\s+$/
+ * patch19: sped up {m,n} on simple items
+ * patch19: optimized /.*whatever/ to /^.*whatever/
+ * patch19: fixed character classes to allow backslashing hyphen
+ * 
  * Revision 3.0.1.3  90/03/12  16:59:22  lwall
  * patch13: pattern matches can now use \0 to mean \000
  * 
@@ -121,11 +128,10 @@ STATIC void regoptail();
  * of the structure of the compiled regexp.  [I'll say.]
  */
 regexp *
-regcomp(exp,xend,fold,rare)
+regcomp(exp,xend,fold)
 char *exp;
 char *xend;
 int fold;
-int rare;
 {
 	register regexp *r;
 	register char *scan;
@@ -137,6 +143,7 @@ int rare;
 	int curback;
 	extern char *safemalloc();
 	extern char *savestr();
+	int sawplus = 0;
 
 	if (exp == NULL)
 		fatal("NULL regexp argument");
@@ -190,8 +197,14 @@ int rare;
 		first = scan;
 		while ((OP(first) > OPEN && OP(first) < CLOSE) ||
 		    (OP(first) == BRANCH && OP(regnext(first)) != BRANCH) ||
-		    (OP(first) == PLUS) )
+		    (OP(first) == PLUS) ||
+		    (OP(first) == CURLY && ARG1(first) > 0) ) {
+			if (OP(first) == CURLY)
+			    first += 4;
+			else if (OP(first) == PLUS)
+			    sawplus = 2;
 			first = NEXTOPER(first);
+		}
 
 		/* Starting-point info. */
 		if (OP(first) == EXACTLY) {
@@ -204,8 +217,10 @@ int rare;
 			r->regstclass = first;
 		else if (OP(first) == BOUND || OP(first) == NBOUND)
 			r->regstclass = first;
-		else if (OP(first) == BOL)
-			r->reganch++;
+		else if (OP(first) == BOL ||
+		    (OP(first) == STAR && OP(NEXTOPER(first)) == ANY) )
+			r->reganch = 1;		/* kinda turn .* into ^.* */
+		r->reganch |= sawplus;
 
 #ifdef DEBUGGING
 		if (debug & 512)
@@ -449,21 +464,44 @@ int *flagp;
 		next++;
 	    }
 	    if (*next == '}') {		/* got one */
-		regsawbracket++;	/* remember we clobbered exp */
 		if (!max)
 		    max = next;
 		regparse++;
 		iter = atoi(regparse);
+		if (flags&SIMPLE) {	/* we can do it right after all */
+		    int tmp;
+
+		    reginsert(CURLY, ret);
+		    if (*max == ',')
+			max++;
+		    tmp = atoi(max);
+		    if (tmp && tmp < iter)
+			fatal("Can't do {n,m} with n > m");
+		    if (regcode != &regdummy) {
+#ifdef REGALIGN
+			*(unsigned short *)(ret+3) = iter;
+			*(unsigned short *)(ret+5) = tmp;
+#else
+			ret[3] = iter >> 8; ret[4] = iter & 0377;
+			ret[5] = tmp  >> 8; ret[6] = tmp  & 0377;
+#endif
+		    }
+		    regparse = next;
+		    goto nest_check;
+		}
+		regsawbracket++;	/* remember we clobbered exp */
 		if (iter > 0) {
 		    ch = *max;
 		    sprintf(regparse,"%.*d", max-regparse, iter - 1);
 		    *max = ch;
-		    if (*max == ',' && atoi(max+1) > 0) {
+		    if (*max == ',' && max[1] != '}') {
+			if (atoi(max+1) <= 0)
+			    fatal("Can't do {n,m} with n > m");
 			ch = *next;
 			sprintf(max+1,"%.*d", next-(max+1), atoi(max+1) - 1);
 			*next = ch;
 		    }
-		    if (iter != 1 || (*max == ',' || atoi(max+1))) {
+		    if (iter != 1 || *max == ',') {
 			regparse = origparse;	/* back up input pointer */
 			regnpar = orignpar;	/* don't make more parens */
 		    }
@@ -793,20 +831,20 @@ regclass()
 	register char *ret;
 	register int def;
 
+	ret = regnode(ANYOF);
 	if (*regparse == '^') {	/* Complement of range. */
-		ret = regnode(ANYBUT);
 		regparse++;
 		def = 0;
 	} else {
-		ret = regnode(ANYOF);
 		def = 255;
 	}
 	bits = regcode;
 	for (class = 0; class < 32; class++)
 	    regc(def);
 	if (*regparse == ']' || *regparse == '-')
-		regset(bits,def,lastclass = *regparse++);
+		goto skipcond;		/* allow 1st char to be ] or - */
 	while (regparse < regxend && *regparse != ']') {
+	      skipcond:
 		class = UCHARAT(regparse++);
 		if (class == '\\') {
 			class = UCHARAT(regparse++);
@@ -863,19 +901,21 @@ regclass()
 				break;
 			}
 		}
-		if (!range && class == '-' && regparse < regxend &&
-		    *regparse != ']') {
-			range = 1;
-			continue;
-		}
 		if (range) {
 			if (lastclass > class)
 				FAIL("invalid [] range in regexp");
+			range = 0;
 		}
-		else
-			lastclass = class - 1;
-		range = 0;
-		for (lastclass++; lastclass <= class; lastclass++) {
+		else {
+			lastclass = class;
+			if (*regparse == '-' && regparse+1 < regxend &&
+			    regparse[1] != ']') {
+				regparse++;
+				range = 1;
+				continue;	/* do it next time */
+			}
+		}
+		for ( ; lastclass <= class; lastclass++) {
 			regset(bits,def,lastclass);
 			if (regfold && isupper(lastclass))
 				regset(bits,def,tolower(lastclass));
@@ -949,21 +989,22 @@ char *opnd;
 	register char *src;
 	register char *dst;
 	register char *place;
+	register offset = (op == CURLY ? 4 : 0);
 
 	if (regcode == &regdummy) {
 #ifdef REGALIGN
-		regsize += 4;
+		regsize += 4 + offset;
 #else
-		regsize += 3;
+		regsize += 3 + offset;
 #endif
 		return;
 	}
 
 	src = regcode;
 #ifdef REGALIGN
-	regcode += 4;
+	regcode += 4 + offset;
 #else
-	regcode += 3;
+	regcode += 3 + offset;
 #endif
 	dst = regcode;
 	while (src > opnd)
@@ -973,6 +1014,8 @@ char *opnd;
 	*place++ = op;
 	*place++ = '\0';
 	*place++ = '\0';
+	while (offset-- > 0)
+	    *place++ = '\0';
 }
 
 /*
@@ -1081,7 +1124,7 @@ regexp *r;
 		else 
 			fprintf(stderr,"(%d)", (s-r->program)+(next-s));
 		s += 3;
-		if (op == ANYOF || op == ANYBUT) {
+		if (op == ANYOF) {
 			s += 32;
 		}
 		if (op == EXACTLY) {
@@ -1101,8 +1144,10 @@ regexp *r;
 		fprintf(stderr,"start `%s' ", r->regstart->str_ptr);
 	if (r->regstclass)
 		fprintf(stderr,"stclass `%s' ", regprop(r->regstclass));
-	if (r->reganch)
+	if (r->reganch & 1)
 		fprintf(stderr,"anchored ");
+	if (r->reganch & 2)
+		fprintf(stderr,"plus ");
 	if (r->regmust != NULL)
 		fprintf(stderr,"must have \"%s\" back %d ", r->regmust->str_ptr,
 		  r->regback);
@@ -1132,9 +1177,6 @@ char *op;
 		break;
 	case ANYOF:
 		p = "ANYOF";
-		break;
-	case ANYBUT:
-		p = "ANYBUT";
 		break;
 	case BRANCH:
 		p = "BRANCH";
@@ -1174,6 +1216,11 @@ char *op;
 		break;
 	case NDIGIT:
 		p = "NDIGIT";
+		break;
+	case CURLY:
+		(void)sprintf(buf+strlen(buf), "CURLY {%d,%d}",
+		    ARG1(op),ARG2(op));
+		p = NULL;
 		break;
 	case REF:
 	case REF+1:

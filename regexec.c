@@ -7,9 +7,16 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regexec.c,v 3.0.1.3 90/02/28 18:14:39 lwall Locked $
+/* $Header: regexec.c,v 3.0.1.4 90/08/09 05:12:03 lwall Locked $
  *
  * $Log:	regexec.c,v $
+ * Revision 3.0.1.4  90/08/09  05:12:03  lwall
+ * patch19: sped up /x+y/ patterns greatly by not retrying on every x
+ * patch19: inhibited backoff on patterns anchored to the end like /\s+$/
+ * patch19: sped up {m,n} on simple items
+ * patch19: $' broke on embedded nulls
+ * patch19: $ will now only match at end of string if $* == 0
+ * 
  * Revision 3.0.1.3  90/02/28  18:14:39  lwall
  * patch9: /[\200-\377]/ didn't work on machines with signed chars
  * patch9: \d, \w, and \s could misfire on characters with high bit set
@@ -198,7 +205,7 @@ int safebase;	/* no need to remember string in subbase */
 
 	/* Simplest case:  anchored match need be tried only once. */
 	/*  [unless multiline is set] */
-	if (prog->reganch) {
+	if (prog->reganch & 1) {
 		if (regtry(prog, string))
 			goto got_it;
 		else if (multiline) {
@@ -208,9 +215,9 @@ int safebase;	/* no need to remember string in subbase */
 			/* for multiline we only have to try after newlines */
 			if (s > string)
 			    s--;
-			for (; s < strend; s++) {
-			    if (*s == '\n') {
-				if (++s < strend && regtry(prog, s))
+			while (s < strend) {
+			    if (*s++ == '\n') {
+				if (s < strend && regtry(prog, s))
 				    goto got_it;
 			    }
 			}
@@ -220,8 +227,22 @@ int safebase;	/* no need to remember string in subbase */
 
 	/* Messy cases:  unanchored match. */
 	if (prog->regstart) {
-		/* We know what string it must start with. */
-		if (prog->regstart->str_pok == 3) {
+		if (prog->reganch & 2) {	/* we have /x+whatever/ */
+		    /* it must be a one character string */
+		    i = prog->regstart->str_ptr[0];
+		    while (s < strend) {
+			    if (*s == i) {
+				    if (regtry(prog, s))
+					    goto got_it;
+				    s++;
+				    while (s < strend && *s == i)
+					s++;
+			    }
+			    s++;
+		    }
+		}
+		else if (prog->regstart->str_pok == 3) {
+		    /* We know what string it must start with. */
 #ifndef lint
 		    while ((s = fbminstr((unsigned char*)s,
 		      (unsigned char*)strend, prog->regstart)) != NULL)
@@ -246,18 +267,26 @@ int safebase;	/* no need to remember string in subbase */
 		goto phooey;
 	}
 	if (c = prog->regstclass) {
+		int doevery = (prog->reganch & 2) == 0;
+
 		if (minlen)
 		    dontbother = minlen - 1;
 		strend -= dontbother;	/* don't bother with what can't match */
+		tmp = 1;
 		/* We know what class it must start with. */
 		switch (OP(c)) {
-		case ANYOF: case ANYBUT:
+		case ANYOF:
 		    c = OPERAND(c);
 		    while (s < strend) {
 			    i = UCHARAT(s);
-			    if (!(c[i >> 3] & (1 << (i&7))))
-				    if (regtry(prog, s))
+			    if (!(c[i >> 3] & (1 << (i&7)))) {
+				    if (tmp && regtry(prog, s))
 					    goto got_it;
+				    else
+					    tmp = doevery;
+			    }
+			    else
+				    tmp = 1;
 			    s++;
 		    }
 		    break;
@@ -305,50 +334,80 @@ int safebase;	/* no need to remember string in subbase */
 		case ALNUM:
 		    while (s < strend) {
 			    i = *s;
-			    if (isALNUM(i))
-				    if (regtry(prog, s))
+			    if (isALNUM(i)) {
+				    if (tmp && regtry(prog, s))
 					    goto got_it;
+				    else
+					    tmp = doevery;
+			    }
+			    else
+				    tmp = 1;
 			    s++;
 		    }
 		    break;
 		case NALNUM:
 		    while (s < strend) {
 			    i = *s;
-			    if (!isALNUM(i))
-				    if (regtry(prog, s))
+			    if (!isALNUM(i)) {
+				    if (tmp && regtry(prog, s))
 					    goto got_it;
+				    else
+					    tmp = doevery;
+			    }
+			    else
+				    tmp = 1;
 			    s++;
 		    }
 		    break;
 		case SPACE:
 		    while (s < strend) {
-			    if (isSPACE(*s))
-				    if (regtry(prog, s))
+			    if (isSPACE(*s)) {
+				    if (tmp && regtry(prog, s))
 					    goto got_it;
+				    else
+					    tmp = doevery;
+			    }
+			    else
+				    tmp = 1;
 			    s++;
 		    }
 		    break;
 		case NSPACE:
 		    while (s < strend) {
-			    if (!isSPACE(*s))
-				    if (regtry(prog, s))
+			    if (!isSPACE(*s)) {
+				    if (tmp && regtry(prog, s))
 					    goto got_it;
+				    else
+					    tmp = doevery;
+			    }
+			    else
+				    tmp = 1;
 			    s++;
 		    }
 		    break;
 		case DIGIT:
 		    while (s < strend) {
-			    if (isDIGIT(*s))
-				    if (regtry(prog, s))
+			    if (isDIGIT(*s)) {
+				    if (tmp && regtry(prog, s))
 					    goto got_it;
+				    else
+					    tmp = doevery;
+			    }
+			    else
+				    tmp = 1;
 			    s++;
 		    }
 		    break;
 		case NDIGIT:
 		    while (s < strend) {
-			    if (!isDIGIT(*s))
-				    if (regtry(prog, s))
+			    if (!isDIGIT(*s)) {
+				    if (tmp && regtry(prog, s))
 					    goto got_it;
+				    else
+					    tmp = doevery;
+			    }
+			    else
+				    tmp = 1;
 			    s++;
 		    }
 		    break;
@@ -379,6 +438,7 @@ int safebase;	/* no need to remember string in subbase */
 		    if (prog->subbase)
 			    Safefree(prog->subbase);
 		    prog->subbase = s;
+		    prog->subend = s+i;
 		}
 		else
 		    s = prog->subbase;
@@ -486,14 +546,16 @@ char *prog;
 			    ((nextchar || locinput < regeol) &&
 			      locinput[-1] == '\n') )
 			{
-				regtill--;
+				regtill = regbol;
 				break;
 			}
 			return(0);
 		case EOL:
 			if ((nextchar || locinput < regeol) && nextchar != '\n')
 				return(0);
-			regtill--;
+			if (!multiline && regeol - locinput > 1)
+				return 0;
+			regtill = regbol;
 			break;
 		case ANY:
 			if ((nextchar == '\0' && locinput >= regeol) ||
@@ -507,7 +569,7 @@ char *prog;
 			/* Inline the first character, for speed. */
 			if (*s != nextchar)
 				return(0);
-			if (locinput + ln > regeol)
+			if (regeol - locinput < ln)
 				return 0;
 			if (ln > 1 && bcmp(s, locinput, ln) != 0)
 				return(0);
@@ -515,7 +577,6 @@ char *prog;
 			nextchar = *locinput;
 			break;
 		case ANYOF:
-		case ANYBUT:
 			s = OPERAND(scan);
 			if (nextchar < 0)
 				nextchar = UCHARAT(locinput);
@@ -685,19 +746,33 @@ char *prog;
 				}
 			}
 			break;
+		case CURLY:
+			ln = ARG1(scan);  /* min to match */
+			n  = ARG2(scan);  /* max to match */
+			scan = NEXTOPER(scan) + 4;
+			goto repeat;
 		case STAR:
+			ln = 0;
+			n = 0;
+			scan = NEXTOPER(scan);
+			goto repeat;
 		case PLUS:
 			/*
 			 * Lookahead to avoid useless match attempts
 			 * when we know what character comes next.
 			 */
+			ln = 1;
+			n = 0;
+			scan = NEXTOPER(scan);
+		    repeat:
 			if (OP(next) == EXACTLY)
 				nextchar = *(OPERAND(next)+1);
 			else
 				nextchar = -1000;
-			ln = (OP(scan) == STAR) ? 0 : 1;
 			reginput = locinput;
-			n = regrepeat(NEXTOPER(scan));
+			n = regrepeat(scan, n);
+			if (!multiline && OP(next) == EOL)
+			    ln = n;			/* why back off? */
 			while (n >= ln) {
 				/* If it could work, try it. */
 				if (nextchar == -1000 || *reginput == nextchar)
@@ -739,8 +814,9 @@ char *prog;
  * rather than incrementing count on every character.]
  */
 static int
-regrepeat(p)
+regrepeat(p, max)
 char *p;
+int max;
 {
 	register char *scan;
 	register char *opnd;
@@ -748,6 +824,8 @@ char *p;
 	register char *loceol = regeol;
 
 	scan = reginput;
+	if (max && max < loceol - scan)
+	    loceol = scan + max;
 	opnd = OPERAND(p);
 	switch (OP(p)) {
 	case ANY:
@@ -760,7 +838,6 @@ char *p;
 			scan++;
 		break;
 	case ANYOF:
-	case ANYBUT:
 		c = UCHARAT(scan);
 		while (scan < loceol && !(opnd[c >> 3] & (1 << (c & 7)))) {
 			scan++;

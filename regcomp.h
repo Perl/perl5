@@ -1,6 +1,9 @@
-/* $Header: regcomp.h,v 3.0 89/10/18 15:22:39 lwall Locked $
+/* $Header: regcomp.h,v 3.0.1.1 90/08/09 05:06:49 lwall Locked $
  *
  * $Log:	regcomp.h,v $
+ * Revision 3.0.1.1  90/08/09  05:06:49  lwall
+ * patch19: sped up {m,n} on simple items
+ * 
  * Revision 3.0  89/10/18  15:22:39  lwall
  * 3.0 baseline
  * 
@@ -57,8 +60,8 @@
 #define	BOL	1	/* no	Match "" at beginning of line. */
 #define	EOL	2	/* no	Match "" at end of line. */
 #define	ANY	3	/* no	Match any one character. */
-#define	ANYOF	4	/* str	Match any character in this string. */
-#define	ANYBUT	5	/* str	Match any character not in this string. */
+#define	ANYOF	4	/* str	Match character in (or not in) this class. */
+#define	CURLY	5	/* str	Match this simple thing {n,m} times. */
 #define	BRANCH	6	/* node	Match this alternative, or the next... */
 #define	BACK	7	/* no	Match "", "next" ptr points backward. */
 #define	EXACTLY	8	/* str	Match this string (preceded by length). */
@@ -105,7 +108,7 @@
 #ifndef DOINIT
 extern char varies[];
 #else
-char varies[] = {BRANCH,BACK,STAR,PLUS,
+char varies[] = {BRANCH,BACK,STAR,PLUS,CURLY,
 	REF+1,REF+2,REF+3,REF+4,REF+5,REF+6,REF+7,REF+8,REF+9,0};
 #endif
 
@@ -113,7 +116,7 @@ char varies[] = {BRANCH,BACK,STAR,PLUS,
 #ifndef DOINIT
 extern char simple[];
 #else
-char simple[] = {ANY,ANYOF,ANYBUT,ALNUM,NALNUM,SPACE,NSPACE,DIGIT,NDIGIT,0};
+char simple[] = {ANY,ANYOF,ALNUM,NALNUM,SPACE,NSPACE,DIGIT,NDIGIT,0};
 #endif
 
 EXT char regdummy;
@@ -145,8 +148,12 @@ EXT char regdummy;
 #ifndef lint
 #ifdef REGALIGN
 #define NEXT(p) (*(short*)(p+1))
+#define ARG1(p) (*(unsigned short*)(p+3))
+#define ARG2(p) (*(unsigned short*)(p+5))
 #else
 #define	NEXT(p)	(((*((p)+1)&0377)<<8) + (*((p)+2)&0377))
+#define	ARG1(p)	(((*((p)+3)&0377)<<8) + (*((p)+4)&0377))
+#define	ARG2(p)	(((*((p)+5)&0377)<<8) + (*((p)+6)&0377))
 #endif
 #else /* lint */
 #define NEXT(p) 0

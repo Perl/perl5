@@ -1,4 +1,4 @@
-/* $Header: popen.c,v 3.0.1.1 90/03/27 16:11:57 lwall Locked $
+/* $Header: popen.c,v 3.0.1.2 90/08/09 04:04:42 lwall Locked $
  *
  *    (C) Copyright 1988, 1990 Diomidis Spinellis.
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	popen.c,v $
+ * Revision 3.0.1.2  90/08/09  04:04:42  lwall
+ * patch19: various MSDOS and OS/2 patches folded in
+ * 
  * Revision 3.0.1.1  90/03/27  16:11:57  lwall
  * patch16: MSDOS support
  * 
@@ -85,7 +88,7 @@ mypopen(const char *command, const char *t)
 
 	switch (*t) {
 	case 'r':
-		sprintf(buff, "%s >%s", command, name);
+		sprintf(buff, "%s>%s", command, name);
 		if (system(buff) || (f = fopen(name, "r")) == NULL) {
 			free(name);
 			return NULL;

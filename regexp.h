@@ -5,9 +5,12 @@
  * not the System V one.
  */
 
-/* $Header: regexp.h,v 3.0 89/10/18 15:22:46 lwall Locked $
+/* $Header: regexp.h,v 3.0.1.1 90/08/09 05:12:55 lwall Locked $
  *
  * $Log:	regexp.h,v $
+ * Revision 3.0.1.1  90/08/09  05:12:55  lwall
+ * patch19: $' broke on embedded nulls
+ * 
  * Revision 3.0  89/10/18  15:22:46  lwall
  * 3.0 baseline
  * 
@@ -24,6 +27,7 @@ typedef struct regexp {
 	int regback;		/* Can regmust locate first try? */
 	char *precomp;		/* pre-compilation regular expression */
 	char *subbase;		/* saved string so \digit works forever */
+	char *subend;		/* end of subbase */
 	char reganch;		/* Internal use only. */
 	char do_folding;	/* do case-insensitive match? */
 	char lastparen;		/* last paren matched */
