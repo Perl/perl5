@@ -79,6 +79,167 @@ Version 5.005_57        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3379] By: gsar                                  on 1999/05/10  12:17:26
+        Log: From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Sat, 01 May 1999 22:55:36 +0200
+             Message-ID: <373067e9.56194713@smtp1.ibm.net>
+             Subject: [PATCH 5.005_56] Win32 and VC++ 98 doesn't support CASTI
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perlop.pod win32/config.vc
+           ! win32/config_H.vc
+____________________________________________________________________________
+[  3378] By: gsar                                  on 1999/05/10  12:07:13
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 30 Apr 1999 22:26:09 -0400 (EDT)
+             Message-Id: <199905010226.WAA19127@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_56] Self-consistent numeric conversion again
+     Branch: perl
+           + t/op/numconvert.t
+	   ! MANIFEST doio.c dump.c perl.h pp.c pp_hot.c sv.c sv.h toke.c
+           ! util.c
+____________________________________________________________________________
+[  3377] By: gsar                                  on 1999/05/10  11:39:48
+        Log: pp_modulo comment tweak from Ilya
+     Branch: perl
+           ! pp.c
+____________________________________________________________________________
+[  3376] By: gsar                                  on 1999/05/10  11:30:40
+        Log: From: Joshua Pritikin <joshua.pritikin@db.com>
+             Date: Fri, 7 May 1999 11:31:00 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.02.9905071127100.1449-100000@eq1062.wks.na.deuba.com>
+             Subject: Test.pm update [PATCH _56]
+     Branch: perl
+           ! lib/Test.pm
+____________________________________________________________________________
+[  3375] By: gsar                                  on 1999/05/10  11:28:30
+        Log: From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Fri, 07 May 1999 00:59:54 +0200
+             Message-ID: <373318ae.19292461@smtp1.ibm.net>
+             Subject: Re: Using existing memory for an SV's PV 
+     Branch: perl
+           ! sv.c
+____________________________________________________________________________
+[  3374] By: gsar                                  on 1999/05/10  11:23:44
+        Log: From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Fri, 07 May 1999 00:59:52 +0200
+             Message-ID: <37321800.19118320@smtp1.ibm.net>
+             Subject: [PATCH 5.005_56] Fix -Dm memory debugging for PERL_OBJECT
+     Branch: perl
+           ! perl.h
+____________________________________________________________________________
+[  3373] By: gsar                                  on 1999/05/10  11:22:10
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 6 May 1999 18:17:28 -0400
+             Message-ID: <19990506181728.A12433@monk.mps.ohio-state.edu>
+             Subject: Re: [PATCH 5.005_56] Make open(F,"command |") return correct err(no)
+     Branch: perl
+	   ! doio.c embed.h global.sym objXSUB.h pod/perldiag.pod proto.h
+           ! util.c
+____________________________________________________________________________
+[  3372] By: gsar                                  on 1999/05/10  10:57:49
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 6 May 1999 01:21:05 -0400 (EDT)
+             Message-Id: <199905060521.BAA03485@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_56] Cosmetic: data-driven REx-dump
+     Branch: perl
+           ! regcomp.c regcomp.pl
+____________________________________________________________________________
+[  3371] By: gsar                                  on 1999/05/10  10:54:01
+        Log: From: lane@duphy4.physics.drexel.edu
+             Date: Tue, 04 May 1999 10:19:25 -0700
+             Message-Id: <3.0.6.32.19990504101925.02ecde30@ous.edu>
+             Subject: [PATCH 5.005.56] pod->html VMS fixes
+     Branch: perl
+           ! installhtml lib/Pod/Html.pm
+____________________________________________________________________________
+[  3370] By: gsar                                  on 1999/05/10  10:45:52
+        Log: testsuite nits
+     Branch: perl
+           ! t/lib/io_linenum.t t/op/filetest.t
+____________________________________________________________________________
+[  3369] By: gsar                                  on 1999/05/10  10:35:22
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 3 May 1999 22:38:50 -0400 (EDT)
+             Message-Id: <199905040238.WAA01865@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_53] Quickier thread-specific data on OS/2
+     Branch: perl
+           ! os2/os2ish.h os2/os2thread.h
+____________________________________________________________________________
+[  3368] By: gsar                                  on 1999/05/10  10:00:11
+        Log: From: Albert Dvornik <bert@genscan.com>
+             Date: 03 May 1999 12:20:57 -0400
+             Message-ID: <tqlnf6gm52.fsf@puma.genscan.com>
+             Subject: [PATCH 5.005_56] do_sv_dump does dump (core) on IO handles
+     Branch: perl
+           ! dump.c
+____________________________________________________________________________
+[  3367] By: gsar                                  on 1999/05/10  09:55:51
+        Log: shadow password support for Solaris (needs Configure help to
+             determine HAS_GETSPENT)
+             From: "Patrick O'Brien" <pdo@cs.umd.edu>
+             Date: Sat, 01 May 1999 19:41:17 -0400
+             Message-Id: <199905012341.TAA23989@optimus.cs.umd.edu>
+             Subject: getpwent() under solaris
+     Branch: perl
+           ! pp_sys.c
+____________________________________________________________________________
+[  3366] By: gsar                                  on 1999/05/10  09:45:58
+        Log: From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Sat, 01 May 1999 23:45:47 +0200
+             Message-ID: <373373fb.59284266@smtp1.ibm.net>
+             Subject: [PATCH 5.005_56] Add POLLUTE=1 option to MakeMaker
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MakeMaker.pm
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  3365] By: gsar                                  on 1999/05/10  09:34:22
+        Log: test suite and fix input_line_number()
+             From: Paul Johnson <pjcj@transeda.com>
+             Date: Thu, 29 Apr 1999 06:28:14 +0100
+             Message-ID: <19990429062814.A17906@west-tip.transeda.com>
+             Subject: [PATCH] IO::Handle 1.20 (was Re: FAIL Gedcom-1.01 i86pc-solaris 2.6)
+     Branch: perl
+           + t/lib/io_linenum.t
+           ! MANIFEST ext/IO/lib/IO/Handle.pm
+____________________________________________________________________________
+[  3364] By: gsar                                  on 1999/05/10  09:20:56
+        Log: fix overeager [:foo:] parsing
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Fri, 30 Apr 1999 09:26:18 +0100
+             Message-Id: <199904300826.JAA01257@crypt.compulink.co.uk>
+             Subject: [PATCH 5.005_{56,03}] Re: Regular expression difference b/n 5.004 & 5.005 
+     Branch: perl
+           ! regcomp.c t/op/re_tests
+____________________________________________________________________________
+[  3363] By: gsar                                  on 1999/05/10  09:09:21
+        Log: documentation for Win32 builtins (somewhat modified)
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Tue, 30 Mar 1999 08:05:03 +0200
+             Message-ID: <37006783.1926460@smtp1.ibm.net>
+             Subject: Re: Issues with build 509 
+     Branch: perl
+           + pod/Win32.pod
+           ! MANIFEST
+____________________________________________________________________________
+[  3362] By: gsar                                  on 1999/05/10  08:22:07
+        Log: provide File::Copy::syscopy() via Win32::CopyFile() on win32
+     Branch: perl
+           ! lib/File/Copy.pm win32/win32.c
+____________________________________________________________________________
+[  3361] By: gsar                                  on 1999/05/10  08:11:29
+        Log: escape ampersands in <pre> sections
+     Branch: perl
+           ! Changes lib/Pod/Html.pm
+____________________________________________________________________________
+[  3360] By: gsar                                  on 1999/05/10  08:04:14
+        Log: AIX hints enhancements (threads build, SOCKS support)
+             From: "David R. Favor" <dfavor@austin.ibm.com>
+             Date: Wed, 28 Apr 1999 08:45:28 -0500
+             Message-ID: <372710F8.B1F73BEB@austin.ibm.com>
+             Subject: Working build for AIX + gcc + threading
+     Branch: perl
+           ! hints/aix.sh
+____________________________________________________________________________
 [  3359] By: gsar                                  on 1999/05/10  07:49:26
         Log: more Compiler patches from Vishal Bhatia <vishalb@my-dejanews.com>
              Date: Tue, 27 Apr 1999 23:47:24 PDT
