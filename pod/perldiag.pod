@@ -188,10 +188,6 @@ the return value of your socket() call?  See L<perlfunc/accept>.
 
 (X) You can't allocate more than 64K on an MS-DOS machine.
 
-=item Allocation too large
-
-(F) You can't allocate more than 2^31+"small amount" bytes.
-
 =item Applying %s to %s will act on scalar(%s)
 
 (W) The pattern match (//), substitution (s///), and transliteration (tr///)
@@ -1754,7 +1750,7 @@ if you said "*foo * 'foo'".
 (F) The yacc parser wanted to grow its stack so it could continue parsing,
 but realloc() wouldn't give it more memory, virtual or otherwise.
 
-=item Out of memory!
+=item Out of memory during request for %s
 
 (X|F) The malloc() function returned 0, indicating there was insufficient
 remaining memory (or virtual memory) to satisfy the request.
@@ -1765,12 +1761,18 @@ However, if compiled for this, Perl may use the contents of C<$^M> as
 an emergency pool after die()ing with this message.  In this case the
 error is trappable I<once>.
 
-=item Out of memory during request for %s
+=item Out of memory during "large" request for %s
 
 (F) The malloc() function returned 0, indicating there was insufficient
 remaining memory (or virtual memory) to satisfy the request. However,
 the request was judged large enough (compile-time default is 64K), so
 a possibility to shut down by trapping this error is granted.
+
+=item Out of memory during ridiculously large request
+
+(F) You can't allocate more than 2^31+"small amount" bytes.  This error
+is most likely to be caused by a typo in the Perl program. e.g., C<$arr[time]>
+instead of C<$arr[$time]>.
 
 =item page overflow
 

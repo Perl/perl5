@@ -203,7 +203,8 @@ prime_env_iter(void)
   $DESCRIPTOR(clidsc,"DCL");            $DESCRIPTOR(tabdsc,"DCLTABLES");
   $DESCRIPTOR(mbxdsc,mbxnam); 
 #ifdef USE_THREADS
-  static perl_mutex primenv_mutex = PTHREAD_MUTEX_INITIALIZER;
+  static perl_mutex primenv_mutex;
+  MUTEX_INIT(&primenv_mutex);
 #endif
 
   if (primed) return;

@@ -119,7 +119,7 @@ use Text::ParseWords;
 
 unshift(@ARGV,shellwords($ENV{"PERLDOC"}));
 
-getopts("mhtluvriFf:Xq") || usage;
+getopts("mhtluvriFf:Xq:") || usage;
 
 usage if $opt_h || $opt_h; # avoid -w warning
 
@@ -226,7 +226,7 @@ sub check_file {
 	return minus_f_nocase($dir,$file);
     } else {
 	my $path = minus_f_nocase($dir,$file);
-        return $path if containspod($path);
+        return $path if length $path and containspod($path);
     }
     return "";
 }
@@ -524,6 +524,8 @@ B<perldoc> [B<-h>] [B<-v>] [B<-t>] [B<-u>] [B<-m>] [B<-l>] [B<-F>]  [B<-X>] Page
 
 B<perldoc> B<-f> BuiltinFunction
 
+B<perldoc> B<-q> FAQ Keyword
+
 =head1 DESCRIPTION
 
 I<perldoc> looks up a piece of documentation in .pod format that is embedded
@@ -575,6 +577,12 @@ Consider arguments as file names, no search in directories will be performed.
 
 The B<-f> option followed by the name of a perl built in function will
 extract the documentation of this function from L<perlfunc>.
+
+=item B<-q> perlfaq
+
+The B<-q> option takes a regular expression as an argument.  It will search
+the question headings in perlfaq[1-9] and print the entries matching
+the regular expression.
 
 =item B<-X> use an index if present
 

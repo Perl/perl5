@@ -108,11 +108,6 @@ BEGIN {
 
 use strict;
 
-# This test doesn't seem to work properly yet so skip it for _65
-print "1..0\n";
-exit;
-
-
 print "1..10\n";
 
 my $sem = semget($IPC_PRIVATE, 10, $S_IRWXU | $S_IRWXG | $S_IRWXO | $IPC_CREAT);

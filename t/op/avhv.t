@@ -17,7 +17,7 @@ sub STORESIZE { $#{$_[0]} = $_[1]+1 }
 
 package main;
 
-print "1..5\n";
+print "1..6\n";
 
 $sch = {
     'abc' => 1,
@@ -74,3 +74,8 @@ $a->[0] = \%fake;
 
 $a->{'abc'} = 'ABC';
 if ($a->{'abc'} eq 'ABC') {print "ok 5\n";} else {print "not ok 5\n";}
+
+# hash slice
+my $slice = join('', 'x',@$a{'abc','def'},'x');
+print "not " if $slice ne 'xABCx';
+print "ok 6\n";

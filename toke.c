@@ -2893,8 +2893,11 @@ yylex(void)
 		    oldoldbufptr < bufptr &&
 		    (oldoldbufptr == last_lop || oldoldbufptr == last_uni) &&
 		    /* NO SKIPSPACE BEFORE HERE! */
-		    (expect == XREF ||
-		     ((opargs[last_lop_op] >> OASHIFT)& 7) == OA_FILEREF) )
+		    (expect == XREF 
+		     || ((opargs[last_lop_op] >> OASHIFT)& 7) == OA_FILEREF
+		     || (last_lop_op == OP_ENTERSUB 
+			 && last_proto 
+			 && last_proto[last_proto[0] == ';' ? 1 : 0] == '*')) )
 		{
 		    bool immediate_paren = *s == '(';
 
@@ -2975,16 +2978,17 @@ yylex(void)
 		    /* Is there a prototype? */
 		    if (SvPOK(cv)) {
 			STRLEN len;
-			char *proto = SvPV((SV*)cv, len);
+			last_proto = SvPV((SV*)cv, len);
 			if (!len)
 			    TERM(FUNC0SUB);
-			if (strEQ(proto, "$"))
+			if (strEQ(last_proto, "$"))
 			    OPERATOR(UNIOPSUB);
-			if (*proto == '&' && *s == '{') {
+			if (*last_proto == '&' && *s == '{') {
 			    sv_setpv(subname,"__ANON__");
 			    PREBLOCK(LSTOPSUB);
 			}
-		    }
+		    } else
+			last_proto = NULL;
 		    nextval[nexttoke].opval = yylval.opval;
 		    expect = XTERM;
 		    force_next(WORD);
@@ -5045,7 +5049,7 @@ scan_heredoc(register char *s)
 	s--, herewas = newSVpv(s,d-s);
     s += SvCUR(herewas);
 
-    tmpstr = NEWSV(87,80);
+    tmpstr = NEWSV(87,79);
     sv_upgrade(tmpstr, SVt_PVIV);
     if (term == '\'') {
 	op_type = OP_CONST;
@@ -5303,8 +5307,8 @@ scan_str(char *start)
     multi_close = term;
 
     /* create a new SV to hold the contents.  87 is leak category, I'm
-       assuming.  80 is the SV's initial length.  What a random number. */
-    sv = NEWSV(87,80);
+       assuming.  79 is the SV's initial length.  What a random number. */
+    sv = NEWSV(87,79);
     sv_upgrade(sv, SVt_PVIV);
     SvIVX(sv) = term;
     (void)SvPOK_only(sv);		/* validate pointer */

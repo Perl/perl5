@@ -18,6 +18,7 @@ Porting/Contract	Social contract for contributed modules in Perl core
 Porting/Glossary	Glossary of config.sh variables
 Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
+Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/makerel		Release making utility
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
@@ -37,7 +38,6 @@ Todo			The Wishlist
 Todo.5.005		What needs doing before 5.005 release
 XSLock.h		Include file for extensions built with PERL_OBJECT defined
 XSUB.h			Include file for extension subroutines
-atomic.h		Atomic refcount handling for multi-threading
 av.c			Array value code
 av.h			Array value header
 beos/nm.c		BeOS port
@@ -189,6 +189,8 @@ ext/DynaLoader/dl_next.xs	Next implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
+ext/Errno/Errno_pm.PL		Errno perl module create script
+ext/Errno/Makefile.PL		Errno extension makefile writer
 ext/Fcntl/Fcntl.pm		Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs		Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL		Fcntl extension makefile writer
@@ -404,13 +406,7 @@ installman		Perl script to install man pages for pods
 installperl		Perl script to do "make install" dirty work
 interp.sym		Interpreter specific symbols to hide in a struct
 intrpvar.h		Variables held in each interpreter instance
-ipdir.h			Directory interface for Perl Object
-ipenv.h			Environment interface for Perl Object
-iplio.h			Low level IO interface for Perl Object
-ipmem.h			Memory interface for Perl Object
-ipproc.h		Process interface for Perl Object
-ipsock.h		Socket interface for Perl Object
-ipstdio.h		Stdio interface for Perl Object
+iperlsys.h		Perl's interface to the system
 keywords.h		The keyword numbers
 keywords.pl		Program to write keywords.h
 lib/AnyDBM_File.pm	Perl module to emulate dbmopen
@@ -461,6 +457,12 @@ lib/File/Copy.pm	Emulation of cp command
 lib/File/DosGlob.pm	Win32 DOS-globbing module
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	Do things like `mkdir -p' and `rm -r'
+lib/File/Spec.pm	portable operations on file names
+lib/File/Spec/Mac.pm	portable operations on Mac file names
+lib/File/Spec/OS2.pm	portable operations on OS2 file names
+lib/File/Spec/Unix.pm	portable operations on Unix file names
+lib/File/Spec/VMS.pm	portable operations on VMS file names
+lib/File/Spec/Win32.pm	portable operations on Win32 file names
 lib/File/stat.pm	By-name interface to Perl's builtin stat
 lib/FileCache.pm	Keep more files open than the system permits
 lib/FileHandle.pm	Backward-compatible front end to IO extension
@@ -626,18 +628,11 @@ patchlevel.h		The current patch level of perl
 perl.c			main()
 perl.h			Global declarations
 perl_exp.SH		Creates list of exported symbols for AIX
-perldir.h		Macros for directory abstraction
-perlenv.h		Macros for environment abstraction
 perlio.c		C code for PerlIO abstraction
-perlio.h		Interface to PerlIO abstraction
 perlio.sym		Symbols for PerlIO abstraction
-perllio.h		Macros for Low level IO abstraction
-perlmem.h		Macros for memory allocation abstraction
-perlproc.h		Macros for process abstraction
 perlsdio.h		Fake stdio using perlio
 perlsfio.h		Prototype sfio mapping for PerlIO
 perlsh			A poor man's perl shell
-perlsock.h		Macros for socket abstraction
 perlvars.h		Global variables
 perly.c			A byacc'ed perly.y
 perly.c.diff		Fixup perly.c to allow recursion
@@ -728,8 +723,11 @@ qnx/ar			QNX implementation of "ar" utility
 qnx/cpp			QNX implementation of preprocessor filter
 regcomp.c		Regular expression compiler
 regcomp.h		Private declarations for above
+regcomp.pl		Builder of regnodes.h
+regcomp.sym		Data for regnodes.h
 regexec.c		Regular expression evaluator
 regexp.h		Public declarations for the above
+regnodes.h		Description of nodes of RE engine
 run.c			The interpreter loop
 scope.c			Scope entry and exit code
 scope.h			Scope entry and exit header
@@ -786,11 +784,13 @@ t/lib/dirhand.t		See if DirHandle works
 t/lib/dosglob.t		See if File::DosGlob works
 t/lib/english.t		See if English works
 t/lib/env.t		See if Env works
+t/lib/errno.t		See if Errno works
 t/lib/filecache.t	See if FileCache works
 t/lib/filecopy.t	See if File::Copy works
 t/lib/filefind.t	See if File::Find works
 t/lib/filehand.t	See if FileHandle works
 t/lib/filepath.t	See if File::Path works
+t/lib/filespec.t	See if File::Spec works
 t/lib/findbin.t		See if FindBin works
 t/lib/gdbm.t		See if GDBM_File works
 t/lib/getopt.t		See if Getopt::Std and Getopt::Long works
@@ -1002,6 +1002,7 @@ win32/makefile.mk	Win32 makefile for DMAKE (BC++, VC++ builds)
 win32/makemain.pl	Win32 port
 win32/makeperldef.pl	Win32 port
 win32/perlglob.c	Win32 port
+win32/perlhost.h	Perl host implementation
 win32/perllib.c		Win32 port
 win32/pod.mak		Win32 port
 win32/runperl.c		Win32 port

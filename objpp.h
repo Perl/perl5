@@ -67,8 +67,6 @@
 #define avhv_delete       CPerlObj::Perl_avhv_delete
 #undef  avhv_delete_ent
 #define avhv_delete_ent   CPerlObj::Perl_avhv_delete_ent
-#undef  avhv_iterinit
-#define avhv_iterinit     CPerlObj::Perl_avhv_iterinit
 #undef  avhv_iternext
 #define avhv_iternext     CPerlObj::Perl_avhv_iternext
 #undef  avhv_iterval
@@ -499,6 +497,8 @@
 #define init_debugger     CPerlObj::init_debugger
 #undef  init_ids
 #define init_ids          CPerlObj::init_ids
+#undef  init_interp
+#define init_interp       CPerlObj::init_interp
 #undef  init_main_thread
 #define init_main_thread  CPerlObj::init_main_thread
 #undef  init_main_stash
@@ -651,6 +651,8 @@
 #define magic_wipepack    CPerlObj::Perl_magic_wipepack
 #undef  magicname
 #define magicname         CPerlObj::Perl_magicname
+#undef  malloced_size
+#define malloced_size     CPerlObj::Perl_malloced_size
 #undef  markstack_grow
 #define markstack_grow    CPerlObj::Perl_markstack_grow
 #undef  markstack_ptr

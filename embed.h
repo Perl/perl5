@@ -52,7 +52,6 @@
 #define avhv_exists_ent		Perl_avhv_exists_ent
 #define avhv_fetch		Perl_avhv_fetch
 #define avhv_fetch_ent		Perl_avhv_fetch_ent
-#define avhv_iterinit		Perl_avhv_iterinit
 #define avhv_iternext		Perl_avhv_iternext
 #define avhv_iternextsv		Perl_avhv_iternextsv
 #define avhv_iterval		Perl_avhv_iterval
@@ -327,6 +326,7 @@
 #define magic_sizepack		Perl_magic_sizepack
 #define magic_wipepack		Perl_magic_wipepack
 #define magicname		Perl_magicname
+#define malloced_size		Perl_malloced_size
 #define markstack_grow		Perl_markstack_grow
 #define mem_collxfrm		Perl_mem_collxfrm
 #define mess			Perl_mess

@@ -232,7 +232,7 @@ print "1..145\n";
 # Globs should be forbidden, except under VMS,
 #   which doesn't spawn an external program.
 if ($Is_VMS) {
-    for (29..30) { print "ok $_\n"; }
+    for (31..32) { print "ok $_\n"; }
 }
 else {
     my @globs = eval { <*> };

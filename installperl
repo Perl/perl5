@@ -6,8 +6,12 @@ BEGIN {
     @INC = 'lib';
     $ENV{PERL5LIB} = 'lib';
     $Is_VMS = $^O eq 'VMS';
+    $Is_W32 = $^O eq 'MSWin32';
+    $Is_OS2 = $^O eq 'os2';
     if ($Is_VMS) { eval 'use VMS::Filespec;' }
 }
+
+$scr_ext = ($Is_VMS ? '.Com' : $Is_W32 ? '.bat' : '');
 
 use File::Find;
 use File::Compare;
@@ -37,12 +41,12 @@ while (@ARGV) {
 
 umask 022 unless $Is_VMS;
 
-@scripts = qw(	utils/c2ph utils/h2ph utils/h2xs
-		utils/perlbug utils/perldoc utils/pl2pm utils/splain utils/perlcc
+@scripts = qw(	utils/c2ph utils/h2ph utils/h2xs utils/perlbug utils/perldoc
+		utils/pl2pm utils/splain utils/perlcc
 		x2p/s2p x2p/find2perl 
 		pod/pod2man pod/pod2html pod/pod2latex pod/pod2text);
 
-if ($Is_VMS) { @scripts = map { "$_.Com" } @scripts; }
+if ($scr_ext) { @scripts = map { "$_$scr_ext" } @scripts; }
 
 @pods = (<pod/*.pod>);
 
@@ -113,11 +117,11 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 -x 'perl' . $exe_ext	|| die "perl isn't executable!\n";
 -x 'suidperl' . $exe_ext|| die "suidperl isn't executable!\n" if $d_dosuid;
 
--x 't/TEST'		|| $^O eq 'MSWin32'
+-x 't/TEST'		|| $Is_W32
 			|| warn "WARNING: You've never run 'make test'!!!",
 				"  (Installing anyway.)\n";
 
-if ($^O eq 'MSWin32') {
+if ($Is_W32) {
 
 $perldll = 'perl.' . $dlext;
 $perldll = 'perlcore.' . $dlext if $Config{'ccflags'} =~ /PERL_OBJECT/i;
@@ -218,7 +222,7 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
 
 $mainperl_is_instperl = 0;
 
-if (!$versiononly && !$nonono && $^O ne 'MSWin32' && !$Is_VMS && -t STDIN && -t STDERR
+if (!$versiononly && !$nonono && !$Is_W32 && !$Is_VMS && -t STDIN && -t STDERR
 	&& -w $mainperldir && ! samepath($mainperldir, $installbin)) {
     local($usrbinperl)	= "$mainperldir/$perl$exe_ext";
     local($instperl)	= "$installbin/$perl$exe_ext";
@@ -282,12 +286,11 @@ if (! $versiononly) {
 # pstruct should be a link to c2ph
 
 if (! $versiononly) {
-    safe_unlink("$installscript/pstruct" . ($Is_VMS ? '.Com' : ''));
+    safe_unlink("$installscript/pstruct$scr_ext");
     if ($^O eq 'dos' or $Is_VMS) {
-        copy("$installscript/c2ph" . ($Is_VMS ? '.Com' : ''),
-             "$installscript/pstruct" . ($Is_VMS ? '.Com' : '')); 
+        copy("$installscript/c2ph$scr_ext", "$installscript/pstruct$scr_ext"); 
     } else {
-        link("$installscript/c2ph","$installscript/pstruct");
+        link("$installscript/c2ph$scr_ext", "$installscript/pstruct$scr_ext");
     }
 }
 
@@ -335,7 +338,7 @@ if (! $versiononly || !($installprivlib =~ m/\Q$]/)) {
 
 if (!$versiononly) {
 
-    $dirsep = ($^O eq 'os2' || $^O eq 'MSWin32') ? ';' : ':' ;
+    $dirsep = ($Is_OS2 || $Is_W32) ? ';' : ':' ;
     ($path = $ENV{"PATH"}) =~ s:\\:/:g ;
     @path = split(/$dirsep/, $path);
     if ($Is_VMS) {
@@ -391,7 +394,7 @@ sub unlink {
 
     foreach $name (@names) {
 	next unless -e $name;
-	chmod 0777, $name if ($^O eq 'os2' || $^O eq 'MSWin32');
+	chmod 0777, $name if ($Is_OS2 || $Is_W32);
 	print STDERR "  unlink $name\n";
 	( CORE::unlink($name) and ++$cnt 
 	  or warn "Couldn't unlink $name: $!\n" ) unless $nonono;
@@ -404,7 +407,7 @@ sub safe_unlink {
     local @names = @_;
     foreach $name (@names) {
 	next unless -e $name;
-	chmod 0777, $name if ($^O eq 'os2' || $^O eq 'MSWin32');
+	chmod 0777, $name if ($Is_OS2 || $Is_W32);
 	print STDERR "  unlink $name\n";
 	next if CORE::unlink($name);
 	warn "Couldn't unlink $name: $!\n";
@@ -479,7 +482,7 @@ sub copy {
 sub samepath {
     local($p1, $p2) = @_;
 
-    return (lc($p1) eq lc($p2)) if ($^O eq 'MSWin32');
+    return (lc($p1) eq lc($p2)) if $Is_W32;
 
     if ($p1 ne $p2) {
 	local($dev1, $ino1, $dev2, $ino2);
@@ -512,7 +515,7 @@ sub installlib {
     my $installlib = $installprivlib;
     if ($dir =~ /^auto/ ||
 	  ($name =~ /^(.*)\.(?:pm|pod)$/ && $archpms{$1}) ||
-	  ($name =~ /^(.*)\.(?:h|lib)$/i && $^O eq 'MSWin32')
+	  ($name =~ /^(.*)\.(?:h|lib)$/i && $Is_W32)
        ) {
         $installlib = $installarchlib;
 	return unless $do_installarchlib;
@@ -565,7 +568,7 @@ sub copy_if_diff {
         }
 	copy($from, $to);
 	# Restore timestamps if it's a .a library or for OS/2.
-	if (!$nonono && ($^O eq 'os2' || $to =~ /\.a$/)) {
+	if (!$nonono && ($Is_OS2 || $to =~ /\.a$/)) {
 	    my ($atime, $mtime) = (stat $from)[8,9];
 	    utime $atime, $mtime, $to;
 	}

@@ -354,9 +354,9 @@ a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
 '(ab)\d\1'i	Ab4ab	y	$1	Ab
 '(ab)\d\1'i	ab4Ab	y	$1	ab
 foo\w*\d{4}baz	foobar1234baz	y	$&	foobar1234baz
-a{1,32766}	aaa	y	$&	aaa
-a{1,32767}	-	c	-	/a{1,32767}/: Quantifier in {,} bigger than
-a{1,32768}	-	c	-	/a{1,32768}/: Quantifier in {,} bigger than
+a{1,$reg_infty_m}	aaa	y	$&	aaa
+a{1,$reg_infty}	-	c	-	/a{1,$reg_infty}/: Quantifier in {,} bigger than
+a{1,$reg_infty_p}	-	c	-	/a{1,$reg_infty_p}/: Quantifier in {,} bigger than
 a(?{})b	cabd	y	$&	ab
 a(?{)b	-	c	-	/a(?{)b/: Sequence (?{...}) not terminated or not {}-balanced
 a(?{{})b	-	c	-	/a(?{{})b/: Sequence (?{...}) not terminated or not {}-balanced

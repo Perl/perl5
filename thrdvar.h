@@ -1,117 +1,129 @@
+/***********************************************/
+/* Global only to current thread               */
+/***********************************************/
+
 /* Don't forget to re-run embed.pl to propagate changes! */
 
-/* Per-thread variables
-   The 'T' prefix is only needed for vars that need appropriate #defines
-generated when built with or without USE_THREADS.  (It is also used
-to generate the appropriate the export list for win32.) */
+/* The 'T' prefix is only needed for vars that need appropriate #defines
+ * generated when built with or without USE_THREADS.  It is also used
+ * to generate the appropriate export list for win32.
+ *
+ * When building without USE_THREADS, these variables will be truly global.
+ * When building without USE_THREADS but with MULTIPLICITY, these variables
+ * will be global per-interpreter.
+ *
+ * Avoid build-specific #ifdefs here, like DEBUGGING.  That way,
+ * we can keep binary compatibility of the curinterp structure */
 
 /* Important ones in the first cache line (if alignment is done right) */
 
-PERLVAR(Tstack_sp,	SV **)		
+PERLVAR(Tstack_sp,	SV **)		/* top of the stack */
 #ifdef OP_IN_REGISTER
-PERLVAR(Topsave,	OP *)		
+PERLVAR(Topsave,	OP *)
 #else
-PERLVAR(Top,		OP *)		
+PERLVAR(Top,		OP *)		/* currently executing op */
 #endif
-PERLVAR(Tcurpad,	SV **)		
+PERLVAR(Tcurpad,	SV **)		/* active pad (lexicals+tmps) */
 
-PERLVAR(Tstack_base,	SV **)		
-PERLVAR(Tstack_max,	SV **)		
+PERLVAR(Tstack_base,	SV **)
+PERLVAR(Tstack_max,	SV **)
 
-PERLVAR(Tscopestack,	I32 *)		
-PERLVAR(Tscopestack_ix,	I32)		
-PERLVAR(Tscopestack_max,I32)		
+PERLVAR(Tscopestack,	I32 *)		/* scopes we've ENTERed */
+PERLVAR(Tscopestack_ix,	I32)
+PERLVAR(Tscopestack_max,I32)
 
-PERLVAR(Tsavestack,	ANY *)		
-PERLVAR(Tsavestack_ix,	I32)		
-PERLVAR(Tsavestack_max,	I32)		
+PERLVAR(Tsavestack,	ANY *)		/* items that need to be restored
+					   when LEAVEing scopes we've ENTERed */
+PERLVAR(Tsavestack_ix,	I32)
+PERLVAR(Tsavestack_max,	I32)
 
-PERLVAR(Tretstack,	OP **)		
-PERLVAR(Tretstack_ix,	I32)		
-PERLVAR(Tretstack_max,	I32)		
+PERLVAR(Ttmps_stack,	SV **)		/* mortals we've made */
+PERLVARI(Ttmps_ix,	I32,	-1)
+PERLVARI(Ttmps_floor,	I32,	-1)
+PERLVAR(Ttmps_max,	I32)
 
-PERLVAR(Tmarkstack,	I32 *)		
-PERLVAR(Tmarkstack_ptr,	I32 *)		
-PERLVAR(Tmarkstack_max,	I32 *)		
+PERLVAR(Tmarkstack,	I32 *)		/* stack_sp locations we're remembering */
+PERLVAR(Tmarkstack_ptr,	I32 *)
+PERLVAR(Tmarkstack_max,	I32 *)
 
-PERLVAR(TSv,		SV *)		
-PERLVAR(TXpv,		XPV *)		
-PERLVAR(Tstatbuf,	Stat_t)		
+PERLVAR(Tretstack,	OP **)		/* OPs we have postponed executing */
+PERLVAR(Tretstack_ix,	I32)
+PERLVAR(Tretstack_max,	I32)
+
+PERLVAR(TSv,		SV *)		/* used to hold temporary values */
+PERLVAR(TXpv,		XPV *)		/* used to hold temporary values */
+
+PERLVAR(Tstatbuf,	Stat_t)
 #ifdef HAS_TIMES
-PERLVAR(Ttimesbuf,	struct tms)		
+PERLVAR(Ttimesbuf,	struct tms)
 #endif
-    
-/* Now the fields that used to be "per interpreter" (even when global) */
 
 /* Fields used by magic variables such as $@, $/ and so on */
 PERLVAR(Ttainted,	bool)		/* using variables controlled by $< */
-PERLVAR(Tcurpm,		PMOP *)		/* what to do \ interps from */
-PERLVAR(Tnrs,		SV *)		
-PERLVAR(Trs,		SV *)		/* $/ */
-PERLVAR(Tlast_in_gv,	GV *)		
-PERLVAR(Tofs,		char *)		/* $, */
-PERLVAR(Tofslen,	STRLEN)		
-PERLVAR(Tdefoutgv,	GV *)		
+PERLVAR(Tcurpm,		PMOP *)		/* what to do \ interps in REs from */
+PERLVAR(Tnrs,		SV *)
+PERLVAR(Trs,		SV *)		/* input record separator $/ */
+PERLVAR(Tlast_in_gv,	GV *)		/* GV used in last <FH> */
+PERLVAR(Tofs,		char *)		/* output field separator $, */
+PERLVAR(Tofslen,	STRLEN)
+PERLVAR(Tdefoutgv,	GV *)		/* default FH for output */
 PERLVARI(Tchopset,	char *,	" \n-")	/* $: */
-PERLVAR(Tformtarget,	SV *)		
-PERLVAR(Tbodytarget,	SV *)		
-PERLVAR(Ttoptarget,	SV *)		
+PERLVAR(Tformtarget,	SV *)
+PERLVAR(Tbodytarget,	SV *)
+PERLVAR(Ttoptarget,	SV *)
 
 /* Stashes */
 PERLVAR(Tdefstash,	HV *)		/* main symbol table */
 PERLVAR(Tcurstash,	HV *)		/* symbol table for current package */
 
-/* Stacks */
-PERLVAR(Ttmps_stack,	SV **)		
-PERLVARI(Ttmps_ix,	I32,	-1)	
-PERLVARI(Ttmps_floor,	I32,	-1)	
-PERLVAR(Ttmps_max,	I32)		
-
-PERLVAR(Trestartop,	OP *)		/* Are we propagating an error from croak? */
-PERLVARI(Tcurcop,	COP * VOL,	&compiling)	
+PERLVAR(Trestartop,	OP *)		/* propagating an error from croak? */
+PERLVARI(Tcurcop,	COP * VOL,	&compiling)
 PERLVAR(Tin_eval,	VOL int)	/* trap "fatal" errors? */
 PERLVAR(Tdelaymagic,	int)		/* ($<,$>) = ... */
-PERLVAR(Tdirty,		bool)		/* In the middle of tearing things down? */
+PERLVAR(Tdirty,		bool)		/* in the middle of tearing things down? */
 PERLVAR(Tlocalizing,	int)		/* are we processing a local() list? */
 
-PERLVAR(Tcurstack,	AV *)			/* THE STACK */
-PERLVAR(Tcurstackinfo,	PERL_SI *)		/* current stack + context */
-PERLVAR(Tmainstack,	AV *)			/* the stack when nothing funny is happening */
-PERLVAR(Ttop_env,	JMPENV *)		/* ptr. to current sigjmp() environment */
-PERLVAR(Tstart_env,	JMPENV)			/* empty startup sigjmp() environment */
+PERLVAR(Tcurstack,	AV *)		/* THE STACK */
+PERLVAR(Tcurstackinfo,	PERL_SI *)	/* current stack + context */
+PERLVAR(Tmainstack,	AV *)		/* the stack when nothing funny is happening */
+PERLVAR(Ttop_env,	JMPENV *)	/* ptr. to current sigjmp() environment */
+PERLVAR(Tstart_env,	JMPENV)		/* empty startup sigjmp() environment */
 
 /* statics "owned" by various functions */
-PERLVAR(Tav_fetch_sv,	SV *)
-PERLVAR(Thv_fetch_sv,	SV *)
-PERLVAR(Thv_fetch_ent_mh, HE)
-PERLVAR(Tmodcount, I32)
+PERLVAR(Tav_fetch_sv,	SV *)		/* owned by av_fetch() */
+PERLVAR(Thv_fetch_sv,	SV *)		/* owned by hv_fetch() */
+PERLVAR(Thv_fetch_ent_mh, HE)		/* owned by hv_fetch_ent() */
+
+PERLVAR(Tmodcount,	I32)		/* how much mod()ification in assignment? */
 
 /* XXX Sort stuff, firstgv secongv and so on? */
 /* XXX What about regexp stuff? */
 
 /* Note that the variables below are all explicitly referenced in the code
-as thr->whatever and therefore don't need the 'T' prefix. */
+ * as thr->whatever and therefore don't need the 'T' prefix. */
 
 #ifdef USE_THREADS
 
-PERLVAR(oursv,		SV *)		
-PERLVAR(cvcache,	HV *)		
-PERLVAR(self,		perl_os_thread)		/* Underlying thread object */
-PERLVAR(flags,		U32)		
-PERLVAR(threadsv,	AV *)			/* Per-thread SVs ($_, $@ etc.) */
-PERLVAR(threadsvp,	SV **)			/* AvARRAY(threadsv) */
-PERLVAR(specific,	AV *)			/* Thread-specific user data */
-PERLVAR(errsv,		SV *)			/* Backing SV for $@ */
-PERLVAR(errhv,		HV *)			/* HV for what was %@ in pp_ctl.c */
-PERLVAR(mutex,		perl_mutex)		/* For the fields others can change */
-PERLVAR(tid,		U32)		
+PERLVAR(oursv,		SV *)
+PERLVAR(cvcache,	HV *)
+PERLVAR(self,		perl_os_thread)	/* Underlying thread object */
+PERLVAR(flags,		U32)
+PERLVAR(threadsv,	AV *)		/* Per-thread SVs ($_, $@ etc.) */
+PERLVAR(threadsvp,	SV **)		/* AvARRAY(threadsv) */
+PERLVAR(specific,	AV *)		/* Thread-specific user data */
+PERLVAR(errsv,		SV *)		/* Backing SV for $@ */
+PERLVAR(errhv,		HV *)		/* HV for what was %@ in pp_ctl.c */
+PERLVAR(mutex,		perl_mutex)	/* For the fields others can change */
+PERLVAR(tid,		U32)
 PERLVAR(prev,		struct perl_thread *)
-PERLVAR(next,		struct perl_thread *)	/* Circular linked list of threads */
+PERLVAR(next,		struct perl_thread *)
+					/* Circular linked list of threads */
 
 #ifdef HAVE_THREAD_INTERN
-PERLVAR(i,		struct thread_intern)	/* Platform-dependent internals */
+PERLVAR(i,		struct thread_intern)
+					/* Platform-dependent internals */
 #endif
 
-PERLVAR(trailing_nul,	char)			/* For the sake of thrsv and oursv */
+PERLVAR(trailing_nul,	char)		/* For the sake of thrsv and oursv */
 
 #endif /* USE_THREADS */

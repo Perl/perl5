@@ -207,7 +207,7 @@ PP(pp_backtick)
 	    SV *sv;
 
 	    for (;;) {
-		sv = NEWSV(56, 80);
+		sv = NEWSV(56, 79);
 		if (sv_gets(sv, fp, 0) == Nullch) {
 		    SvREFCNT_dec(sv);
 		    break;

@@ -1486,10 +1486,22 @@ PP(pp_return)
 
     TAINT_NOT;
     if (gimme == G_SCALAR) {
-	if (MARK < SP)
-	    *++newsp = (popsub2 && SvTEMP(*SP))
-			? *SP : sv_mortalcopy(*SP);
-	else
+	if (MARK < SP) {
+	    if (popsub2) {
+		if (cxsub.cv && CvDEPTH(cxsub.cv) > 1) {
+		    if (SvTEMP(TOPs)) {
+			*++newsp = SvREFCNT_inc(*SP);
+			FREETMPS;
+			sv_2mortal(*newsp);
+		    } else {
+			FREETMPS;
+			*++newsp = sv_mortalcopy(*SP);
+		    }
+		} else
+		    *++newsp = (SvTEMP(*SP)) ? *SP : sv_mortalcopy(*SP);
+	    } else
+		*++newsp = sv_mortalcopy(*SP);
+	} else
 	    *++newsp = &sv_undef;
     }
     else if (gimme == G_ARRAY) {

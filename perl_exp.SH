@@ -44,8 +44,8 @@ syms=`ls -1 *.sym|egrep -v 'compat3|perlio'`
 
 sed -n '/^[A-Za-z]/ s/^/Perl_/p' $syms                  >> perl.exp
 
-sed -n 's/^PERLVAR.*(G\([^,]*\).*/Perl_\1/p' perlvars.h >> perl.exp
-sed -n 's/^PERLVAR.*(T\([^,]*\).*/Perl_\1/p' thrdvar.h  >> perl.exp
+sed -n 's/^PERLVAR.*(G\([^,[]*\).*/Perl_\1/p' perlvars.h >> perl.exp
+sed -n 's/^PERLVAR.*(T\([^,[]*\).*/Perl_\1/p' thrdvar.h  >> perl.exp
 
 # 
 # If we use the PerlIO abstraction layer, add its symbols

@@ -90,8 +90,8 @@ are local to a function.
 PERL HOST
 1. The perl host is linked with perlX.lib to get perl_alloc. This
 function will return a pointer to CPerlObj (the PERL_OBJECT). It
-takes pointers to the various PerlXXX_YYY interfaces (see ipdir.h for
-information on this).
+takes pointers to the various PerlXXX_YYY interfaces (see iperlsys.h
+for more information on this).
 2. The perl host calls the same functions as normally would be
 called in setting up and running a perl script, except that the
 functions are now member functions of the PERL_OBJECT.
@@ -312,13 +312,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #  endif
 #endif
 
-#include "perlio.h"
-#include "perlmem.h"
-#include "perllio.h"
-#include "perlsock.h"
-#include "perlproc.h"
-#include "perlenv.h"
-#include "perldir.h"
+#include "iperlsys.h"
 
 #ifdef USE_NEXT_CTYPE
 
@@ -379,7 +373,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #   ifdef HIDEMYMALLOC
 #	define malloc  Mymalloc
 #	define calloc  Mycalloc
-#	define realloc Myremalloc
+#	define realloc Myrealloc
 #	define free    Myfree
 Malloc_t Mymalloc _((MEM_SIZE nbytes));
 Malloc_t Mycalloc _((MEM_SIZE elements, MEM_SIZE size));
@@ -390,11 +384,21 @@ Free_t   Myfree _((Malloc_t where));
 #	define malloc  Perl_malloc
 #	define calloc  Perl_calloc
 #	define realloc Perl_realloc
+/* VMS' external symbols are case-insensitive, and there's already a */
+/* perl_free in perl.h */
+#ifdef VMS
+#	define free    Perl_myfree
+#else
 #	define free    Perl_free
+#endif
 Malloc_t Perl_malloc _((MEM_SIZE nbytes));
 Malloc_t Perl_calloc _((MEM_SIZE elements, MEM_SIZE size));
 Malloc_t Perl_realloc _((Malloc_t where, MEM_SIZE nbytes));
+#ifdef VMS
+Free_t   Perl_myfree _((Malloc_t where));
+#else
 Free_t   Perl_free _((Malloc_t where));
+#endif
 #   endif
 
 #   undef safemalloc
@@ -558,12 +562,6 @@ Free_t   Perl_free _((Malloc_t where));
 #if defined(HAS_STRERROR) && (!defined(HAS_MKDIR) || !defined(HAS_RMDIR))
 #   undef HAS_STRERROR
 #endif
-
-#ifndef HAS_MKFIFO
-#  ifndef mkfifo
-#    define mkfifo(path, mode) (mknod((path), (mode) | S_IFIFO, 0))
-#  endif
-#endif /* !HAS_MKFIFO */
 
 #include <errno.h>
 #ifdef HAS_SOCKET
@@ -1117,6 +1115,10 @@ typedef I32 (*filter_t) _((int, SV *, int));
  */
 
 #ifdef USE_THREADS
+   /* pending resolution of licensing issues, we avoid the erstwhile
+    * atomic.h everywhere */
+#  define EMULATE_ATOMIC_REFCOUNTS
+
 #  ifdef FAKE_THREADS
 #    include "fakethr.h"
 #  else
@@ -1207,17 +1209,17 @@ typedef pthread_key_t perl_key;
 #   endif
 #endif
 
+#ifdef UNION_ANY_DEFINITION
+UNION_ANY_DEFINITION;
+#else
 union any {
     void*	any_ptr;
     I32		any_i32;
     IV		any_iv;
     long	any_long;
     void	(CPERLscope(*any_dptr)) _((void*));
-#if defined(WIN32) && !defined(PERL_OBJECT)
-	/* Visual C thinks that a pointer to a member variable is 16 bytes in size. */
-	char	handle_VC_problem[16];
-#endif
 };
+#endif
 
 #ifdef USE_THREADS
 #define ARGSproto struct perl_thread *thr
@@ -1942,11 +1944,11 @@ typedef void *Thread;
 
 #ifndef MULTIPLICITY
 
-#ifndef USE_THREADS
-#include "thrdvar.h"
-#endif
+#  include "intrpvar.h"
+#  ifndef USE_THREADS
+#    include "thrdvar.h"
+#  endif
 
-#include "intrpvar.h"
 #endif
 
 #ifdef PERL_OBJECT

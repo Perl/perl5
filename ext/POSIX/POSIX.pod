@@ -660,6 +660,12 @@ This is similar to the C function C<mkfifo()>.
 
 Returns C<undef> on failure.
 
+=item mknod
+
+This is similar to the C function C<mknod()>.
+
+Returns C<undef> on failure.
+
 =item mktime
 
 Convert date/time info to a calendar time.

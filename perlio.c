@@ -16,7 +16,7 @@
 #endif
 /*
  * This file provides those parts of PerlIO abstraction 
- * which are not #defined in perlio.h.
+ * which are not #defined in iperlsys.h.
  * Which these are depends on various Configure #ifdef's 
  */
 

@@ -445,6 +445,7 @@ do_kv(ARGSproto)
 {
     djSP;
     HV *hv = (HV*)POPs;
+    HV *keys;
     register HE *entry;
     SV *tmpstr;
     I32 gimme = GIMME_V;
@@ -465,10 +466,8 @@ do_kv(ARGSproto)
 	RETURN;
     }
 
-    if (realhv)
-	(void)hv_iterinit(hv);	/* always reset iterator regardless */
-    else
-	(void)avhv_iterinit((AV*)hv);
+    keys = realhv ? hv : avhv_keys((AV*)hv);
+    (void)hv_iterinit(keys);	/* always reset iterator regardless */
 
     if (gimme == G_VOID)
 	RETURN;
@@ -483,33 +482,31 @@ do_kv(ARGSproto)
 		sv_magic(TARG, Nullsv, 'k', Nullch, 0);
 	    }
 	    LvTYPE(TARG) = 'k';
-	    if (LvTARG(TARG) != (SV*)hv) {
+	    if (LvTARG(TARG) != (SV*)keys) {
 		if (LvTARG(TARG))
 		    SvREFCNT_dec(LvTARG(TARG));
-		LvTARG(TARG) = SvREFCNT_inc(hv);
+		LvTARG(TARG) = SvREFCNT_inc(keys);
 	    }
 	    PUSHs(TARG);
 	    RETURN;
 	}
 
-	if (!SvRMAGICAL(hv) || !mg_find((SV*)hv,'P'))
-	    i = HvKEYS(hv);
+	if (!SvRMAGICAL(keys) || !mg_find((SV*)keys,'P'))
+	    i = HvKEYS(keys);
 	else {
 	    i = 0;
 	    /*SUPPRESS 560*/
-	    while (entry = realhv ? hv_iternext(hv) : avhv_iternext((AV*)hv)) {
-		i++;
-	    }
+	    while (hv_iternext(keys)) i++;
 	}
 	PUSHi( i );
 	RETURN;
     }
 
     /* Guess how much room we need.  hv_max may be a few too many.  Oh well. */
-    EXTEND(SP, HvMAX(hv) * (dokeys + dovalues));
+    EXTEND(SP, HvMAX(keys) * (dokeys + dovalues));
 
     PUTBACK;	/* hv_iternext and hv_iterval might clobber stack_sp */
-    while (entry = realhv ? hv_iternext(hv) : avhv_iternext((AV*)hv)) {
+    while (entry = hv_iternext(keys)) {
 	SPAGAIN;
 	if (dokeys)
 	    XPUSHs(hv_iterkeysv(entry));	/* won't clobber stack_sp */
@@ -520,8 +517,8 @@ do_kv(ARGSproto)
 		     hv_iterval(hv,entry) : avhv_iterval((AV*)hv,entry));
 	    DEBUG_H(sv_setpvf(tmpstr, "%lu%%%d=%lu",
 			    (unsigned long)HeHASH(entry),
-			    HvMAX(hv)+1,
-			    (unsigned long)(HeHASH(entry) & HvMAX(hv))));
+			    HvMAX(keys)+1,
+			    (unsigned long)(HeHASH(entry) & HvMAX(keys))));
 	    SPAGAIN;
 	    XPUSHs(tmpstr);
 	}

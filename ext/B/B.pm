@@ -31,7 +31,8 @@ use strict;
 @B::GV::ISA = 'B::PVMG';
 @B::HV::ISA = 'B::PVMG';
 @B::CV::ISA = 'B::PVMG';
-@B::IO::ISA = 'B::CV';
+@B::IO::ISA = 'B::PVMG';
+@B::FM::ISA = 'B::CV';
 
 @B::OP::ISA = 'B::OBJECT';
 @B::UNOP::ISA = 'B::OP';

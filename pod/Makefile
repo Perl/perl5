@@ -8,6 +8,8 @@ POD2HTML = pod2html \
 
 all: $(CONVERTERS) man
 
+converters: $(CONVERTERS)
+
 PERL = ../miniperl
 REALPERL = ../perl
 

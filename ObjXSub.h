@@ -234,6 +234,8 @@
 #define inplace			pPerl->Perl_inplace
 #undef  last_in_gv
 #define last_in_gv		pPerl->Perl_last_in_gv
+#undef  last_proto
+#define last_proto		pPerl->Perl_last_proto
 #undef  last_lop
 #define last_lop		pPerl->Perl_last_lop
 #undef  last_lop_op
@@ -723,8 +725,6 @@
 #define avhv_fetch          pPerl->Perl_avhv_fetch
 #undef  avhv_fetch_ent
 #define avhv_fetch_ent      pPerl->Perl_avhv_fetch_ent
-#undef  avhv_iterinit
-#define avhv_iterinit       pPerl->Perl_avhv_iterinit
 #undef  avhv_iternext
 #define avhv_iternext       pPerl->Perl_avhv_iternext
 #undef  avhv_iternextsv
@@ -1197,6 +1197,8 @@
 #define magic_wipepack      pPerl->Perl_magic_wipepack
 #undef  magicname
 #define magicname           pPerl->Perl_magicname
+#undef  malloced_size
+#define malloced_size       pPerl->Perl_malloced_size
 #undef  markstack_grow
 #define markstack_grow      pPerl->Perl_markstack_grow
 #undef  mem_collxfrm

@@ -10,6 +10,8 @@ BEGIN {
     $SIG{__WARN__} = sub { $warns++; warn $_[0] };
     print "1..14\n";
 }
+
+$wanted_filename = $^O eq 'VMS' ? '0.' : '0';
     
 print "not " if $warns;
 print "ok 1\n";
@@ -64,7 +66,7 @@ opendir(DIR,'.');
 $seen = 0;
 while (my $name = readdir(DIR))
  {
-  $seen++ if $name eq '0';
+  $seen++ if $name eq $wanted_filename;
  }            
 print "not " unless $seen;
 print "ok 6\n";
@@ -74,7 +76,7 @@ $seen = 0;
 $dummy = '';
 while (($seen ? $dummy : $name) = readdir(DIR))
  {
-  $seen++ if $name eq '0';
+  $seen++ if $name eq $wanted_filename;
  }
 print "not " unless $seen;
 print "ok 7\n";
@@ -83,7 +85,7 @@ rewinddir(DIR);
 $seen = 0;    
 while ($where{$seen} = readdir(DIR))
  {
-  $seen++ if $where{$seen} eq '0';
+  $seen++ if $where{$seen} eq $wanted_filename;
  }
 print "not " unless $seen;
 print "ok 8\n";
@@ -91,7 +93,7 @@ print "ok 8\n";
 $seen = 0;
 while (my $name = glob('*'))
  {
-  $seen++ if $name eq '0';
+  $seen++ if $name eq $wanted_filename;
  }            
 print "not " unless $seen;
 print "ok 9\n";
@@ -100,7 +102,7 @@ $seen = 0;
 $dummy = '';
 while (($seen ? $dummy : $name) = glob('*'))
  {
-  $seen++ if $name eq '0';
+  $seen++ if $name eq $wanted_filename;
  }
 print "not " unless $seen;
 print "ok 10\n";
@@ -108,7 +110,7 @@ print "ok 10\n";
 $seen = 0;    
 while ($where{$seen} = glob('*'))
  {
-  $seen++ if $where{$seen} eq '0';
+  $seen++ if $where{$seen} eq $wanted_filename;
  }
 print "not " unless $seen;
 print "ok 11\n";

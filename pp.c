@@ -2418,7 +2418,6 @@ PP(pp_exists)
 PP(pp_hslice)
 {
     djSP; dMARK; dORIGMARK;
-    register HE *he;
     register HV *hv = (HV*)POPs;
     register I32 lval = op->op_flags & OPf_MOD;
     I32 realhv = (SvTYPE(hv) == SVt_PVHV);
@@ -2428,18 +2427,18 @@ PP(pp_hslice)
 	    SV *keysv = *MARK;
 	    SV **svp;
 	    if (realhv) {
-		he = hv_fetch_ent(hv, keysv, lval, 0);
+		HE *he = hv_fetch_ent(hv, keysv, lval, 0);
 		svp = he ? &HeVAL(he) : 0;
 	    } else {
 		svp = avhv_fetch_ent((AV*)hv, keysv, lval, 0);
 	    }
 	    if (lval) {
-		if (!he || HeVAL(he) == &sv_undef)
+		if (!svp || *svp == &sv_undef)
 		    DIE(no_helem, SvPV(keysv, na));
 		if (op->op_private & OPpLVAL_INTRO)
-		    save_helem(hv, keysv, &HeVAL(he));
+		    save_helem(hv, keysv, svp);
 	    }
-	    *MARK = he ? HeVAL(he) : &sv_undef;
+	    *MARK = svp ? *svp : &sv_undef;
 	}
     }
     if (GIMME != G_ARRAY) {

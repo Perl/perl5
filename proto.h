@@ -1,11 +1,4 @@
 #ifdef PERL_OBJECT
-#include "ipstdio.h"
-#include "ipdir.h"
-#include "ipenv.h"
-#include "iplio.h"
-#include "ipmem.h"
-#include "ipproc.h"
-#include "ipsock.h"
 #define VIRTUAL virtual
 #else
 #define VIRTUAL
@@ -34,7 +27,6 @@ VIRTUAL bool	avhv_exists _((AV *ar, char* key, U32 klen));
 VIRTUAL bool	avhv_exists_ent _((AV *ar, SV* keysv, U32 hash));
 VIRTUAL SV**	avhv_fetch _((AV *ar, char* key, U32 klen, I32 lval));
 VIRTUAL SV**	avhv_fetch_ent _((AV *ar, SV* keysv, I32 lval, U32 hash));
-VIRTUAL I32	avhv_iterinit _((AV *ar));
 VIRTUAL HE*	avhv_iternext _((AV *ar));
 VIRTUAL SV *	avhv_iternextsv _((AV *ar, char** key, I32* retlen));
 VIRTUAL SV*	avhv_iterval _((AV *ar, HE* entry));
@@ -272,6 +264,9 @@ VIRTUAL U32	magic_sizepack	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_wipepack	_((SV* sv, MAGIC* mg));
 VIRTUAL void	magicname _((char* sym, char* name, I32 namlen));
 int	main _((int argc, char** argv, char** env));
+#ifdef MYMALLOC
+VIRTUAL MEM_SIZE	malloced_size _((void *p));
+#endif
 VIRTUAL void	markstack_grow _((void));
 #ifdef USE_LOCALE_COLLATE
 VIRTUAL char*	mem_collxfrm _((const char* s, STRLEN len, STRLEN* xlen));
@@ -779,6 +774,7 @@ CV *cv_clone2 _((CV *proto, CV *outside));
 void find_beginning _((void));
 void forbid_setid _((char *));
 void incpush _((char *, int));
+void init_interp _((void));
 void init_ids _((void));
 void init_debugger _((void));
 void init_lexer _((void));
