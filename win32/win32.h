@@ -554,5 +554,7 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
  */
 #include "win32iop.h"
 
+#define EXEC_ARGV_CAST(x) ((const char *const *) x)
+
 #endif /* _INC_WIN32_PERL5 */
 
