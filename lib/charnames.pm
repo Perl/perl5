@@ -30,7 +30,7 @@ sub charnames {
   die "Unknown charname '$name'" unless @off;
   
   my $ord = hex substr $txt, $off[0] - 4, 4;
-  if ($^H & 0x10) {	# "use byte" in effect?
+  if ($^H & 0x8) {	# "use byte" in effect?
     use byte;
     return chr $ord if $ord <= 255;
     my $hex = sprintf '%X=0%o', $ord, $ord;
