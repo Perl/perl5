@@ -1805,7 +1805,7 @@ print "ok 635\n";
 print "not " if "\t"     =~ /[[:print:]]/;
 print "ok 636\n";
 
-# Amazingly verrical tabulator is the same in ASCII and EBCDIC.
+# Amazingly vertical tabulator is the same in ASCII and EBCDIC.
 print "not " if "\014"  =~ /[[:print:]]/;
 print "ok 637\n";
 
