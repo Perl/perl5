@@ -869,7 +869,7 @@ module for other solutions.
 
 =item *
 
-Open /dev/tty and use the the TIOCNOTTY ioctl on it.  See L<tty(4)>
+Open /dev/tty and use the TIOCNOTTY ioctl on it.  See L<tty(4)>
 for details.  Or better yet, you can just use the POSIX::setsid()
 function, so you don't have to worry about process groups.
 

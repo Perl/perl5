@@ -4289,7 +4289,7 @@ If EXPR is omitted, merely returns the current umask.
 
 The Unix permission C<rwxr-x---> is represented as three sets of three
 bits, or three octal digits: C<0750> (the leading 0 indicates octal
-and isn't one of the the digits).  The C<umask> value is such a number
+and isn't one of the digits).  The C<umask> value is such a number
 representing disabled permissions bits.  The permission (or "mode")
 values you pass C<mkdir> or C<sysopen> are modified by your umask, so
 even if you tell C<sysopen> to create a file with permissions C<0777>,

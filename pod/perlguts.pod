@@ -1503,7 +1503,7 @@ It is strongly recommended that all Perl API functions that don't begin
 with C<perl> be referenced with an explicit C<Perl_> prefix.
 
 The sort order of the listing is case insensitive, with any
-occurrences of '_' ignored for the the purpose of sorting.
+occurrences of '_' ignored for the purpose of sorting.
 
 =over 8
 
