@@ -1362,6 +1362,7 @@ Ap	|bool	|is_uni_xdigit	|UV c
 Ap	|UV	|to_uni_upper	|UV c|U8 *p|STRLEN *lenp
 Ap	|UV	|to_uni_title	|UV c|U8 *p|STRLEN *lenp
 Ap	|UV	|to_uni_lower	|UV c|U8 *p|STRLEN *lenp
+Ap	|UV	|to_uni_fold	|UV c|U8 *p|STRLEN *lenp
 Ap	|bool	|is_uni_alnum_lc|UV c
 Ap	|bool	|is_uni_alnumc_lc|UV c
 Ap	|bool	|is_uni_idfirst_lc|UV c

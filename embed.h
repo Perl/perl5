@@ -290,6 +290,7 @@
 #define to_uni_upper		Perl_to_uni_upper
 #define to_uni_title		Perl_to_uni_title
 #define to_uni_lower		Perl_to_uni_lower
+#define to_uni_fold		Perl_to_uni_fold
 #define is_uni_alnum_lc		Perl_is_uni_alnum_lc
 #define is_uni_alnumc_lc	Perl_is_uni_alnumc_lc
 #define is_uni_idfirst_lc	Perl_is_uni_idfirst_lc
@@ -1810,6 +1811,7 @@
 #define to_uni_upper(a,b,c)	Perl_to_uni_upper(aTHX_ a,b,c)
 #define to_uni_title(a,b,c)	Perl_to_uni_title(aTHX_ a,b,c)
 #define to_uni_lower(a,b,c)	Perl_to_uni_lower(aTHX_ a,b,c)
+#define to_uni_fold(a,b,c)	Perl_to_uni_fold(aTHX_ a,b,c)
 #define is_uni_alnum_lc(a)	Perl_is_uni_alnum_lc(aTHX_ a)
 #define is_uni_alnumc_lc(a)	Perl_is_uni_alnumc_lc(aTHX_ a)
 #define is_uni_idfirst_lc(a)	Perl_is_uni_idfirst_lc(aTHX_ a)

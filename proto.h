@@ -344,6 +344,7 @@ PERL_CALLCONV bool	Perl_is_uni_xdigit(pTHX_ UV c);
 PERL_CALLCONV UV	Perl_to_uni_upper(pTHX_ UV c, U8 *p, STRLEN *lenp);
 PERL_CALLCONV UV	Perl_to_uni_title(pTHX_ UV c, U8 *p, STRLEN *lenp);
 PERL_CALLCONV UV	Perl_to_uni_lower(pTHX_ UV c, U8 *p, STRLEN *lenp);
+PERL_CALLCONV UV	Perl_to_uni_fold(pTHX_ UV c, U8 *p, STRLEN *lenp);
 PERL_CALLCONV bool	Perl_is_uni_alnum_lc(pTHX_ UV c);
 PERL_CALLCONV bool	Perl_is_uni_alnumc_lc(pTHX_ UV c);
 PERL_CALLCONV bool	Perl_is_uni_idfirst_lc(pTHX_ UV c);
