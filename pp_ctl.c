@@ -2362,13 +2362,12 @@ SV *sv;
 	    skipspaces++;
 	    arg -= skipspaces;
 	    if (arg) {
-		if (postspace) {
+		if (postspace)
 		    *fpc++ = FF_SPACE;
-		    postspace = FALSE;
-		}
 		*fpc++ = FF_LITERAL;
 		*fpc++ = arg;
 	    }
+	    postspace = FALSE;
 	    if (s <= send)
 		skipspaces--;
 	    if (skipspaces) {
