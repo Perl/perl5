@@ -91,6 +91,14 @@ During "make test" the C<comp/cpp> will be skipped because on Tru64 it
 cannot be tested before Perl has been installed.  The test refers to
 the use of the C<-P> option of Perl.
 
+=head1 ext/ODBM_File/odbm Test Failing With Static Builds
+
+The ext/ODBM_File/odbm is known to fail with static builds
+(Configure -Dusedl) due to a known bug in Tru64's static libdbm
+library.  The good news is that you very probably don't need to ever
+use the ODBM_File extension since more advanced NDBM_File works fine,
+not to mention the even more advanced DB_File.
+
 =head1 AUTHOR
 
 Jarkko Hietaniemi <jhi@iki.fi>
