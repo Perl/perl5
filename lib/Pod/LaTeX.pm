@@ -33,7 +33,7 @@ use Carp;
 
 use vars qw/ $VERSION %HTML_Escapes @LatexSections /;
 
-$VERSION = '0.56';
+$VERSION = '0.58';
 
 # Definitions of =headN -> latex mapping
 @LatexSections = (qw/
@@ -1454,7 +1454,7 @@ sub add_item {
     my ($hunk1, $hunk2) = $self->_split_delimited( $paragraph, $maxlen );
 
     # Print the first hunk
-    $self->_output("\n\\item[$hunk1] ");
+    $self->_output("\n\\item[{$hunk1}] ");
 
     # and the second hunk if it is defined
     if ($hunk2) {
@@ -1851,8 +1851,9 @@ E<lt>mah@everybody.orgE<gt>, Marcel Grunauer
 E<lt>marcel@codewerk.comE<gt>, Hugh S Myers
 E<lt>hsmyers@sdragons.comE<gt>, Peter J Acklam
 E<lt>jacklam@math.uio.noE<gt>, Sudhi Herle E<lt>sudhi@herle.netE<gt>,
-Ariel Scolnicov E<lt>ariels@compugen.co.ilE<gt> and
-Adriano Rodrigues Ferreira E<lt>ferreira@triang.com.brE<gt>.
+Ariel Scolnicov E<lt>ariels@compugen.co.ilE<gt>,
+Adriano Rodrigues Ferreira E<lt>ferreira@triang.com.brE<gt> and
+R. de Vries E<lt>r.de.vries@dutchspace.nlE<gt>.
 
 
 =head1 COPYRIGHT
@@ -1866,7 +1867,7 @@ it under the same terms as Perl itself.
 
 =head1 REVISION
 
-$Id: LaTeX.pm,v 1.18 2004/03/08 02:22:43 timj Exp $
+$Id: LaTeX.pm,v 1.19 2004/12/30 01:40:44 timj Exp $
 
 =end __PRIVATE__
 
