@@ -39,7 +39,6 @@
  */
 static	char	*local_patches[] = {
 	NULL
-	,"MAYBE - 5.005, but not just yet"
 	,NULL
 };
 

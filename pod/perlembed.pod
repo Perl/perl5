@@ -301,7 +301,7 @@ the first, a C<float> from the second, and a C<char *> from the third.
    
        /** Treat $a as a string **/
        perl_eval_pv("$a = 'rekcaH lreP rehtonA tsuJ'; $a = reverse($a);", TRUE);
-       printf("a = %s\n", SvPV(perl_get_sv("a", FALSE), na));
+       printf("a = %s\n", SvPV(perl_get_sv("a", FALSE), PL_na));
    
        perl_destruct(my_perl);
        perl_free(my_perl);
@@ -324,7 +324,7 @@ from I<perl_eval_pv()> instead.  Example:
 
    ...
    SV *val = perl_eval_pv("reverse 'rekcaH lreP rehtonA tsuJ'", TRUE);
-   printf("%s\n", SvPV(val,na));
+   printf("%s\n", SvPV(val,PL_na));
    ...
 
 This way, we avoid namespace pollution by not creating global
@@ -377,8 +377,8 @@ been wrapped here):
      retval = POPs;
      PUTBACK;
  
-     if (croak_on_error && SvTRUE(GvSV(errgv)))
- 	croak(SvPVx(GvSV(errgv), na));
+     if (croak_on_error && SvTRUE(ERRSV))
+ 	croak(SvPVx(ERRSV, PL_na));
  
      return retval;
  }
@@ -395,7 +395,7 @@ been wrapped here):
      SV *command = NEWSV(1099, 0), *retval;
  
      sv_setpvf(command, "my $string = '%s'; $string =~ %s",
- 	      SvPV(string,na), pattern);
+ 	      SvPV(string,PL_na), pattern);
  
      retval = my_perl_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
@@ -416,7 +416,7 @@ been wrapped here):
      SV *command = NEWSV(1099, 0), *retval;
  
      sv_setpvf(command, "$string = '%s'; ($string =~ %s)",
- 	      SvPV(*string,na), pattern);
+ 	      SvPV(*string,PL_na), pattern);
  
      retval = my_perl_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
@@ -439,7 +439,7 @@ been wrapped here):
      I32 num_matches;
  
      sv_setpvf(command, "my $string = '%s'; @array = ($string =~ %s)",
- 	      SvPV(string,na), pattern);
+ 	      SvPV(string,PL_na), pattern);
  
      my_perl_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
@@ -478,7 +478,7 @@ been wrapped here):
      printf("matches: m/(wi..)/g found %d matches...\n", num_matches);
  
      for (i = 0; i < num_matches; i++)
- 	printf("match: %s\n", SvPV(*av_fetch(match_list, i, FALSE),na));
+ 	printf("match: %s\n", SvPV(*av_fetch(match_list, i, FALSE),PL_na));
      printf("\n");
  
      /** Remove all vowels from text **/
@@ -486,7 +486,7 @@ been wrapped here):
      if (num_matches) {
  	printf("substitute: s/[aeiou]//gi...%d substitutions made.\n",
  	       num_matches);
- 	printf("Now text is: %s\n\n", SvPV(text,na));
+ 	printf("Now text is: %s\n\n", SvPV(text,PL_na));
      }
  
      /** Attempt a substitution **/
@@ -495,7 +495,7 @@ been wrapped here):
      }
  
      SvREFCNT_dec(text);
-     perl_destruct_level = 1;
+     PL_perl_destruct_level = 1;
      perl_destruct(my_perl);
      perl_free(my_perl);
  }
@@ -744,12 +744,12 @@ with L<perlfunc/my> whenever possible.
                            G_DISCARD | G_EVAL, args);
 
             /* check $@ */
-            if(SvTRUE(GvSV(errgv)))
-                fprintf(stderr, "eval error: %s\n", SvPV(GvSV(errgv),na));
+            if(SvTRUE(ERRSV))
+                fprintf(stderr, "eval error: %s\n", SvPV(ERRSV,PL_na));
         }
      }
 
-     perl_destruct_level = 0;
+     PL_perl_destruct_level = 0;
      perl_destruct(perl);
      perl_free(perl);
      exit(exitstatus);
@@ -787,16 +787,16 @@ release any resources associated with the interpreter.
 
 The program must take care to ensure that this takes place I<before>
 the next interpreter is constructed.  By default, the global variable
-C<perl_destruct_level> is set to C<0>, since extra cleaning isn't
+C<PL_perl_destruct_level> is set to C<0>, since extra cleaning isn't
 needed when a program has only one interpreter.
 
-Setting C<perl_destruct_level> to C<1> makes everything squeaky clean:
+Setting C<PL_perl_destruct_level> to C<1> makes everything squeaky clean:
 
- perl_destruct_level = 1;
+ PL_perl_destruct_level = 1;
 
  while(1) {
      ...
-     /* reset global variables here with perl_destruct_level = 1 */
+     /* reset global variables here with PL_perl_destruct_level = 1 */
      perl_construct(my_perl);
      ...
      /* clean and reset _everything_ during perl_destruct */
@@ -812,7 +812,7 @@ and symbol tables are cleaned up, and global variables are reset.
 Now suppose we have more than one interpreter instance running at the
 same time.  This is feasible, but only if you used the
 C<-DMULTIPLICITY> flag when building Perl.  By default, that sets
-C<perl_destruct_level> to C<1>.
+C<PL_perl_destruct_level> to C<1>.
 
 Let's give it a try:
 

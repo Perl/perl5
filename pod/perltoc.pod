@@ -862,7 +862,8 @@ CGI script to do bad things?
 
 =item C Source Compatibility
 
-Core sources now require ANSI C compiler, Enabling threads has source
+Core sources now require ANSI C compiler, All Perl global variables must
+now be referenced with an explicit prefix, Enabling threads has source
 compatibility issues
 
 =item Binary Compatibility
@@ -884,6 +885,10 @@ compatibility issues
 =item Compiler
 
 =item Regular Expressions
+
+Many new and improved optimizations, Many bug fixes, New regular expression
+constructs, New operator for precompiled regular expressions, Other
+improvements, Incompatible changes
 
 =item   Improved malloc()
 
@@ -972,18 +977,6 @@ CGI, POSIX, DB_File, MakeMaker, CPAN, Cwd, Benchmark
 =back
 
 =item Utility Changes
-
-=item API Changes
-
-=over
-
-=item Incompatible Changes
-
-=item Deprecations, Extensions
-
-=item C++ Support
-
-=back
 
 =item Documentation Changes
 
@@ -2671,21 +2664,22 @@ save_hptr(HV **hptr)>
 
 av_clear, av_extend, av_fetch, AvFILL, av_len, av_make, av_pop, av_push,
 av_shift, av_store, av_undef, av_unshift, CLASS, Copy, croak, CvSTASH,
-DBsingle, DBsub, DBtrace, dMARK, dORIGMARK, dowarn, dSP, dXSARGS, dXSI32,
-do_binmode, ENTER, EXTEND, fbm_compile, fbm_instr, FREETMPS, G_ARRAY,
-G_DISCARD, G_EVAL, GIMME, GIMME_V, G_NOARGS, G_SCALAR, gv_fetchmeth,
-gv_fetchmethod, gv_fetchmethod_autoload, G_VOID, gv_stashpv, gv_stashsv,
-GvSV, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force,
-HeSVKEY_set, HeVAL, hv_clear, hv_delayfree_ent, hv_delete, hv_delete_ent,
-hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent, hv_free_ent, hv_iterinit,
-hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iterval, hv_magic,
-HvNAME, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA, isDIGIT,
-isLOWER, isSPACE, isUPPER, items, ix, LEAVE, looks_like_number, MARK,
-mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_len, mg_magical, mg_set,
-Move, na, New, newAV, Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc,
-NEWSV, newSViv, newSVnv, newSVpv, newSVpvf, newSVpvn, newSVrv, newSVsv,
-newXS, newXSproto, Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK,
-perl_alloc, perl_call_argv, perl_call_method, perl_call_pv, perl_call_sv,
+PL_DBsingle, PL_DBsub, PL_DBtrace, dMARK, dORIGMARK, PL_dowarn, dSP,
+dXSARGS, dXSI32, do_binmode, ENTER, EXTEND, fbm_compile, fbm_instr,
+FREETMPS, G_ARRAY, G_DISCARD, G_EVAL, GIMME, GIMME_V, G_NOARGS, G_SCALAR,
+gv_fetchmeth, gv_fetchmethod, gv_fetchmethod_autoload, G_VOID, gv_stashpv,
+gv_stashsv, GvSV, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY,
+HeSVKEY_force, HeSVKEY_set, HeVAL, hv_clear, hv_delayfree_ent, hv_delete,
+hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
+hv_free_ent, hv_iterinit, hv_iterkey, hv_iterkeysv, hv_iternext,
+hv_iternextsv, hv_iterval, hv_magic, HvNAME, hv_store, hv_store_ent,
+hv_undef, isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE, isUPPER, items, ix,
+LEAVE, looks_like_number, MARK, mg_clear, mg_copy, mg_find, mg_free,
+mg_get, mg_len, mg_magical, mg_set, Move, PL_na, New, newAV, Newc,
+newCONSTSUB, newHV, newRV_inc, newRV_noinc, NEWSV, newSViv, newSVnv,
+newSVpv, newSVpvf, newSVpvn, newSVrv, newSVsv, newXS, newXSproto, Newz,
+Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc,
+perl_call_argv, perl_call_method, perl_call_pv, perl_call_sv,
 perl_construct, perl_destruct, perl_eval_sv, perl_eval_pv, perl_free,
 perl_get_av, perl_get_cv, perl_get_hv, perl_get_sv, perl_parse,
 perl_require_pv, perl_run, POPi, POPl, POPp, POPn, POPs, PUSHMARK, PUSHi,
@@ -2697,7 +2691,7 @@ sv_catsv, sv_catsv_mg, sv_chop, sv_cmp, SvCUR, SvCUR_set, sv_dec,
 sv_derived_from, sv_derived_from, SvEND, sv_eq, SvGETMAGIC, SvGROW,
 sv_grow, sv_inc, sv_insert, SvIOK, SvIOK_off, SvIOK_on, SvIOK_only, SvIOKp,
 sv_isa, sv_isobject, SvIV, SvIVX, SvLEN, sv_len, sv_magic, sv_mortalcopy,
-sv_newmortal, SvNIOK, SvNIOK_off, SvNIOKp, sv_no, SvNOK, SvNOK_off,
+sv_newmortal, SvNIOK, SvNIOK_off, SvNIOKp, PL_sv_no, SvNOK, SvNOK_off,
 SvNOK_on, SvNOK_only, SvNOKp, SvNV, SvNVX, SvOK, SvOOK, SvPOK, SvPOK_off,
 SvPOK_on, SvPOK_only, SvPOKp, SvPV, SvPV_force, SvPVX, SvREFCNT,
 SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC,
@@ -2707,10 +2701,10 @@ sv_setpvf_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv, sv_setref_pvn,
 SvSetSV, SvSetSV_nosteal, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg,
 SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SVt_IV, SVt_PV,
 SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SVt_NV, SvTRUE, SvTYPE, svtype,
-sv_undef, sv_unref, SvUPGRADE, sv_upgrade, sv_usepvn, sv_usepvn_mg,
+PL_sv_undef, sv_unref, SvUPGRADE, sv_upgrade, sv_usepvn, sv_usepvn_mg,
 sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale),
 sv_vsetpvfn(sv, pat, patlen, args, svargs, svmax, used_locale), SvUV,
-SvUVX, sv_yes, THIS, toLOWER, toUPPER, warn, XPUSHi, XPUSHn, XPUSHp,
+SvUVX, PL_sv_yes, THIS, toLOWER, toUPPER, warn, XPUSHi, XPUSHn, XPUSHp,
 XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO,
 XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNV,
 XST_mNO, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK,

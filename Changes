@@ -78,6 +78,61 @@ Version 5.005           Production release
 -------------
 
 ____________________________________________________________________________
+[  1645] By: gsar                                  on 1998/07/22  19:37:41
+        Log: don't use qualify() in class methods
+             From:    Albert Dvornik <bert@genscan.com>
+             Date:    22 Jul 1998 15:14:46 EDT
+             Message-Id: <tqbtqhlmu1.fsf_-_@puma.genscan.com>
+             Subject: [PATCH 5.005-MAYBE] Bug in IO::Handle->input_record_separator
+     Branch: perl
+           ! ext/IO/lib/IO/Handle.pm
+____________________________________________________________________________
+[  1644] By: gsar                                  on 1998/07/22  18:13:31
+        Log: newer perlembed.pod
+     Branch: perl
+           ! pod/perlembed.pod
+____________________________________________________________________________
+[  1643] By: gsar                                  on 1998/07/22  18:03:42
+        Log: From:    Andy Dougherty <doughera@lafcol.lafayette.edu>
+             Date:    Wed, 22 Jul 1998 13:42:20 EDT
+             Message-Id: <Pine.SUN.3.96.980722134049.10073C-100000@newton.phys>
+             Subject: Re: 5.005 - a sneak preview
+     Branch: perl
+           ! Porting/pumpkin.pod
+____________________________________________________________________________
+[  1642] By: gsar                                  on 1998/07/22  17:58:42
+        Log: add perlmodinstall, regen perltoc
+     Branch: perl
+           + pod/perlmodinstall.pod
+	   ! MANIFEST pod/Makefile pod/buildtoc pod/perl.pod
+           ! pod/perltoc.pod win32/pod.mak
+____________________________________________________________________________
+[  1641] By: gsar                                  on 1998/07/22  17:11:55
+        Log: support optional crypt() with PERL_OBJECT
+             From:    "Douglas Lankshear" <dougl@ActiveState.com>
+             Date:    Wed, 22 Jul 1998 08:21:10 PDT
+             Message-Id: <000701bdb584$5b57c070$a32fa8c0@tau.Active>
+             Subject: [PATCH 5.005 maybe] for crypt with PERL_OBJECT
+     Branch: perl
+	   ! iperlsys.h pp.c win32/Makefile win32/makefile.mk
+           ! win32/perlhost.h win32/win32.c win32/win32iop.h
+____________________________________________________________________________
+[  1640] By: gsar                                  on 1998/07/22  17:09:11
+        Log: win32 tweaks
+             Date:    Wed, 22 Jul 1998 07:09:09 PDT
+             Message-Id: <000001bdb57a$4bc9dd00$a32fa8c0@tau.Active>
+             From:    "Douglas Lankshear" <dougl@ActiveState.com>
+     Branch: perl
+           ! win32/Makefile win32/makefile.mk win32/win32.h
+____________________________________________________________________________
+[  1639] By: gsar                                  on 1998/07/22  17:00:30
+        Log: From:    d-lewart@uiuc.edu (Daniel S. Lewart)
+             Date:    Wed, 22 Jul 1998 06:20:08 CDT
+             Message-Id: <199807221120.GAA07962@staff2.cso.uiuc.edu>
+             Subject: [PATCH] lib/Sys/Syslog.pm doc
+     Branch: perl
+           ! Changes lib/Sys/Syslog.pm
+____________________________________________________________________________
 [  1638] By: gsar                                  on 1998/07/22  09:12:26
         Log: up patchlevel etc (only doc patching from now on, testing in progress)
      Branch: perl

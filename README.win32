@@ -147,12 +147,17 @@ ActiveState Tool Corp.)  PERL_OBJECT uses C++, and the binaries are
 therefore incompatible with the regular C build.  However, the
 PERL_OBJECT build does provide something called the C-API, for linking
 it with extensions that won't compile under PERL_OBJECT.  PERL_OBJECT
-cannot be enabled when using GCC or EGCS, yet.
+is not yet supported under GCC or EGCS.  WARNING:  Binaries built with
+PERL_OBJECT enabled are B<not> compatible with binaries built without.
+Perl installs PERL_OBJECT binaries under a distinct architecture name,
+so they B<can> coexist, though.
 
 Beginning with version 5.005, there is experimental support for building
 a perl interpreter that is capable of native threading.  Binaries built
 with thread support enabled are also incompatible with the vanilla C
-build.
+build.  WARNING:  Binaries built with threads enabled are B<not> compatible
+with binaries built without.  Perl installs threads enabled binaries under
+a distinct architecture name, so they B<can> coexist, though.
 
 At the present time, you cannot enable both threading and PERL_OBJECT.
 You can get only one of them in a Perl interpreter.
@@ -381,6 +386,59 @@ why it failed, and report problems to the module author.  If
 it looks like the extension building support is at fault, report
 that with full details of how the build failed using the perlbug
 utility.
+
+=item Command-line Wildcard Expansion
+
+The default command shells on DOS descendant operating systems (such
+as they are) usually do not expand wildcard arguments supplied to
+programs.  They consider it the application's job to handle that.
+This is commonly achieved by linking the application (in our case,
+perl) with startup code that the C runtime libraries usually provide.
+However, doing that results in incompatible perl versions (since the
+behavior of the argv expansion code differs depending on the
+compiler, and it is even buggy on some compilers).  Besides, it may
+be a source of frustration if you use such a perl binary with an
+alternate shell that *does* expand wildcards.
+
+Instead, the following solution works rather well. The nice things
+about it: 1) you can start using it right away 2) it is more powerful,
+because it will do the right thing with a pattern like */*/*.c
+3) you can decide whether you do/don't want to use it 4) you can
+extend the method to add any customizations (or even entirely
+different kinds of wildcard expansion).
+
+	C:\> copy con c:\perl\lib\Wild.pm
+	# Wild.pm - emulate shell @ARGV expansion on shells that don't
+	use File::DosGlob;
+	@ARGV = map {
+		      my @g = File::DosGlob::glob($_) if /[*?]/;
+		      @g ? @g : $_;
+		    } @ARGV;
+	1;
+	^Z
+	C:\> set PERL5OPT=-MWild
+	C:\> perl -le "for (@ARGV) { print }" */*/perl*.c
+	p4view/perl/perl.c
+	p4view/perl/perlio.c
+	p4view/perl/perly.c
+	perl5.005/win32/perlglob.c
+	perl5.005/win32/perllib.c
+	perl5.005/win32/perlglob.c
+	perl5.005/win32/perllib.c
+	perl5.005/win32/perlglob.c
+	perl5.005/win32/perllib.c
+
+Note there are two distinct steps there: 1) You'll have to create
+Wild.pm and put it in your perl lib directory. 2) You'll need to
+set the PERL5OPT environment variable.  If you want argv expansion
+to be the default, just set PERL5OPT in your default startup
+environment.
+
+If you are using the Visual C compiler, you can get the C runtime's
+command line wildcard expansion built into perl binary.  The resulting
+binary will always expand unquoted command lines, which may not be
+what you want if you use a shell that does that for you.  The expansion
+done is also somewhat less powerful than the approach suggested above.
 
 =item Win32 Specific Extensions
 

@@ -372,7 +372,7 @@ and C<$type> can be used as in typemaps.
 
      bool_t
      rpcb_gettime(host,timep)
-          char *host = (char *)SvPV($arg,na);
+          char *host = (char *)SvPV($arg,PL_na);
           time_t &timep = 0;
           OUTPUT:
           timep
@@ -396,7 +396,7 @@ initialization.
      bool_t
      rpcb_gettime(host,timep)
           time_t &timep ; /*\$v{time}=@{[$v{time}=$arg]}*/
-          char *host + SvOK($v{time}) ? SvPV($arg,na) : NULL;
+          char *host + SvOK($v{time}) ? SvPV($arg,PL_na) : NULL;
           OUTPUT:
           timep
 
@@ -555,7 +555,7 @@ The XS code, with ellipsis, follows.
           char *host = "localhost";
           CODE:
 		  if( items > 1 )
-		       host = (char *)SvPV(ST(1), na);
+		       host = (char *)SvPV(ST(1), PL_na);
 		  RETVAL = rpcb_gettime( host, &timep );
           OUTPUT:
           timep
@@ -681,7 +681,7 @@ return value, should the need arise.
                sv_setnv( ST(0), (double)timep);
           }
           else{
-               ST(0) = &sv_undef;
+               ST(0) = &PL_sv_undef;
           }
 
 To return an empty list one must use a PPCODE: block and
@@ -788,7 +788,7 @@ prototypes.
           char *host = "localhost";
           CODE:
 		  if( items > 1 )
-		       host = (char *)SvPV(ST(1), na);
+		       host = (char *)SvPV(ST(1), PL_na);
 		  RETVAL = rpcb_gettime( host, &timep );
           OUTPUT:
           timep

@@ -969,9 +969,9 @@ and some C to call it
         SPAGAIN ;
 
         /* Check the eval first */
-        if (SvTRUE(GvSV(errgv)))
+        if (SvTRUE(ERRSV))
         {
-            printf ("Uh oh - %s\n", SvPV(GvSV(errgv), na)) ;
+            printf ("Uh oh - %s\n", SvPV(ERRSV, PL_na)) ;
             POPs ;
         }
         else
@@ -1011,9 +1011,9 @@ I<Subtract>.
 
 The code
 
-    if (SvTRUE(GvSV(errgv)))
+    if (SvTRUE(ERRSV))
     {
-        printf ("Uh oh - %s\n", SvPV(GvSV(errgv), na)) ;
+        printf ("Uh oh - %s\n", SvPV(ERRSV, PL_na)) ;
         POPs ;
     }
 
@@ -1021,14 +1021,14 @@ is the direct equivalent of this bit of Perl
 
     print "Uh oh - $@\n" if $@ ;
 
-C<errgv> is a perl global of type C<GV *> that points to the
-symbol table entry containing the error.  C<GvSV(errgv)> therefore
+C<PL_errgv> is a perl global of type C<GV *> that points to the
+symbol table entry containing the error.  C<ERRSV> therefore
 refers to the C equivalent of C<$@>.
 
 =item 3.
 
 Note that the stack is popped using C<POPs> in the block where
-C<SvTRUE(GvSV(errgv))> is true.  This is necessary because whenever a
+C<SvTRUE(ERRSV)> is true.  This is necessary because whenever a
 I<perl_call_*> function invoked with G_EVAL|G_SCALAR returns an error,
 the top of the stack holds the value I<undef>. Because we want the
 program to continue after detecting this error, it is essential that
@@ -1877,7 +1877,7 @@ of values> recoded to use C<ST> instead of C<POP*>.
 
         SPAGAIN ;
         SP -= count ;
-        ax = (SP - stack_base) + 1 ;
+        ax = (SP - PL_stack_base) + 1 ;
 
         if (count != 2)
             croak("Big trouble\n") ;
@@ -1907,7 +1907,7 @@ The code
 
         SPAGAIN ;
         SP -= count ;
-        ax = (SP - stack_base) + 1 ;
+        ax = (SP - PL_stack_base) + 1 ;
 
 sets the stack up so that we can use the C<ST> macro.
 

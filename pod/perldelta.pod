@@ -6,10 +6,18 @@ perldelta - what's new for perl5.005
 
 This document describes differences between the 5.004 release and this one.
 
-[XXX this needs more verbose summaries of the sub topics, instead of just
-the "See foo."  Scheduled for a second iteration. GSAR]
-
 =head1 About the new versioning system
+
+Perl is now developed on two tracks: a maintenance track that makes
+small, safe updates to released production versions with emphasis on
+compatibility; and a development track that pursues more aggressive
+evolution.  Maintenance releases (which should be considered production
+quality) have subversion numbers that run from C<1> to C<49>, and
+development releases (which should be considered "alpha" quality) run
+from C<50> to C<99>.
+
+Perl 5.005 is the combined product of the new dual-track development
+scheme.
 
 =head1 Incompatible Changes
 
@@ -31,31 +39,80 @@ discussion of the changes in order to adapt them to your system.
 =head2 Perl Source Compatibility
 
 When none of the experimental features are enabled, there should be
-no user-visible Perl source compatibility issue.
+very few user-visible Perl source compatibility issues.
 
 If threads are enabled, then some caveats apply. C<@_> and C<$_> become
 lexical variables.  The effect of this should be largely transparent to
 the user, but there are some boundary conditions under which user will
-need to be aware of the issues. [XXX Add e.g. here.]
+need to be aware of the issues.  For example, C<local(@_)> results in
+a "Can't localize lexical variable @_ ..." message.  This may be enabled
+in a future version.
 
 Some new keywords have been introduced.  These are generally expected to
-have very little impact on compatibility.  See L</New C<INIT> keyword>,
-L</New C<lock> keyword>, and L</New C<qr//> operator>.
+have very little impact on compatibility.  See L<New C<INIT> keyword>,
+L<New C<lock> keyword>, and L<New C<qr//> operator>.
 
 Certain barewords are now reserved.  Use of these will provoke a warning
 if you have asked for them with the C<-w> switch.
-See L</C<our> is now a reserved word>.
+See L<C<our> is now a reserved word>.
 
 =head2 C Source Compatibility
 
+There have been a large number of changes in the internals to support
+the new features in this release.
+
+=over 4
+
 =item Core sources now require ANSI C compiler
 
+An ANSI C compiler is now B<required> to build perl.  See F<INSTALL>.
+
+=item All Perl global variables must now be referenced with an explicit prefix
+
+All Perl global variables that are visible for use by extensions now
+have a C<PL_> prefix.  New extensions should C<not> refer to perl globals
+by their unqualified names.  To preserve sanity, we provide limited
+backward compatibility for globals that are being widely used like
+C<sv_undef> and C<na> (which should now be written as C<PL_sv_undef>,
+C<PL_na> etc.)
+
+If you find that your XS extension does not compile anymore because a
+perl global is not visible, try adding a C<PL_> prefix to the global
+and rebuild.
+
+It is strongly recommended that all functions in the Perl API that don't
+begin with C<perl> be referenced with a C<Perl_> prefix.  The bare function
+names without the C<Perl_> prefix are supported with macros, but this
+support may cease in a future release.
+
+See L<perlguts/API LISTING>.
+
 =item Enabling threads has source compatibility issues
+
+Perl built with threading enabled requires extensions to use the new
+C<dTHR> macro to initialize the handle to access per-thread data.
+If you see a compiler error that talks about the variable C<thr> not
+being declared (when building a module that has XS code),  you need
+to add C<dTHR;> at the beginning of the block that elicited the error.
+
+The API function C<perl_get_sv("@",FALSE)> should be used instead of
+directly accessing perl globals as C<GvSV(errgv)>.  The API call is
+backward compatible with existing perls and provides source compatibility
+with threading is enabled.
+
+See L<API Changes for more information>.
+
+=back
 
 =head2 Binary Compatibility
 
 This version is NOT binary compatible with older versions.  All extensions
-will need to be recompiled.
+will need to be recompiled.  Further binaries built with threads enabled
+are incompatible with binaries built without.  This should largely be
+transparent to the user, as all binary incompatible configurations have
+their own unique architecture name, and extension binaries get installed at
+unique locations.  This allows coexistence of several configurations in
+the same directory hierarchy.  See F<INSTALL>.
 
 =head2 Security fixes may affect compatibility
 
@@ -78,24 +135,25 @@ features make them less often a problem.  See L<New Diagnostics>.
 Perl has a new Social Contract for contributors.  See F<Porting/Contract>.
 
 The license included in much of the Perl documentation has changed.
-[XXX See where?]
+See L<perl> and the individual perl man pages listed therein.
 
 =head1 Core Changes
 
 
 =head2 Threads
 
-WARNING: Threading is considered an experimental feature.  Details of the
+WARNING: Threading is considered an B<experimental> feature.  Details of the
 implementation may change without notice.  There are known limitations
-and and some bugs.
+and some bugs.  These are expected to be fixed in future versions.
 
 See L<README.threads>.
 
 =head2 Compiler
 
-WARNING: The Compiler and related tools are considered experimental.
+WARNING: The Compiler and related tools are considered B<experimental>.
 Features may change without notice, and there are known limitations
-and bugs.
+and bugs.  Since the compiler is fully external to perl, the default
+configuration will build and install it.
 
 The Compiler produces three different types of transformations of a
 perl program.  The C backend generates C code that captures perl's state
@@ -125,9 +183,86 @@ at a glance.
 
 C<perlcc> is a simple frontend for compiling perl.
 
-See C<ext/B/README>.
+See C<ext/B/README>, L<B>, and the respective compiler modules.
 
 =head2 Regular Expressions
+
+Perl's regular expression engine has been seriously overhauled, and
+many new constructs are supported.  Several bugs have been fixed.
+
+Here is an itemized summary:
+
+=over 4
+
+=item Many new and improved optimizations
+
+Changes in the RE engine:
+
+	Unneeded nodes removed;
+	Substrings merged together;
+	New types of nodes to process (SUBEXPR)* and similar expressions
+	    quickly, used if the SUBEXPR has no side effects and matches
+	    strings of the same length;
+	better optimizations by lookup for constant substrings;
+	Better search for constants substrings anchored by $ ;
+
+Changes in Perl code using RE engine:
+
+	more optimizations to s/longer/short/;
+	study() was not working;
+	/blah/ may be optimized to an analogue of index() if $& $` $' not seen;
+	Unneeded copying of matched-against string removed;
+	Only matched part of the string is copying if $` $' were not seen;
+
+=item Many bug fixes
+
+Note that only the major bug fixes are listed here.  See F<Changes> for others.
+
+	Backtracking might not restore start of $3.
+	No feedback if max count for * or + on "complex" subexpression
+	    was reached, similarly (but at compile time) for {3,34567}
+	Primitive restrictions on max count introduced to decrease a 
+	    possibility of a segfault;
+	(ZERO-LENGTH)* could segfault;
+	(ZERO-LENGTH)* was prohibited;
+	Long RE were not allowed;
+	/RE/g could skip matches at the same position after a 
+	  zero-length match;
+
+=item New regular expression constructs
+
+The following new syntax elements are supported:
+
+	(?<=RE)
+	(?<!RE)
+	(?{ CODE })
+	(?i-x)
+	(?i:RE)
+	(?(COND)YES_RE|NO_RE)
+	(?>RE)
+	\z
+
+=item New operator for precompiled regular expressions
+
+See L<New C<qr//> operator>.
+
+=item Other improvements
+
+	better debugging output (possibly with colors), even from non-debugging Perl;
+	RE engine code now looks like C, not like assembler;
+	behaviour of RE modifiable by `use re' directive;
+	Improved documentation;
+	Test suite significantly extended;
+	Syntax [:^upper:] etc., reserved inside character classes;
+
+=item Incompatible changes
+
+	(?i) localized inside enclosing group;
+	$( is not interpolated into RE any more;
+	/RE/g may match at the same position (with non-zero length)
+	    after a zero-length match (bug fix).
+
+=back
 
 See L<perlre> and L<perlop>.
 
@@ -137,15 +272,24 @@ See banner at the beginning of C<malloc.c> for details.
 
 =head2 Quicksort is internally implemented
 
+Perl now contains its own highly optimized qsort() routine.  The new qsort()
+is resistant to inconsistent comparison functions, so Perl's C<sort()> will
+not provoke coredumps any more when given poorly written sort subroutines.
+(Some C library C<qsort()>s that were being used before used to have this
+problem.)  In our testing, the new C<qsort()> required the minimal number
+of pair-wise compares on average, among all known C<qsort()> implementations.
+
 See C<perlfunc/sort>.
 
 =head2 Reliable signals
 
-Two kinds.
+Perl's signal handling is susceptible to random crashes, because signals
+arrive asynchronously, and the Perl runtime is not reentrant at arbitrary
+times.
 
-Via C<Thread::Signal>.
-
-Via switched runtime op loop.  [XXX Not yet available.]
+However, one experimental implementation of reliable signals is available
+when threads are enabled.  See C<Thread::Signal>.  Also see F<INSTALL> for
+how to build a Perl capable of threads.
 
 =head2 Reliable stack pointers
 
@@ -186,11 +330,18 @@ not try to allocate a 1000000-size list anymore.
 
 =head2 C<Foo::> can be used as implicitly quoted package name
 
-[XXX See what?]
+Barewords caused unintuitive behavior when a subroutine with the same
+name as a package happened to be defined.  Thus, C<new Foo @args>,
+use the result of the call to C<Foo()> instead of C<Foo> being treated
+as a literal.  The recommended way to write barewords in the indirect
+object slot is C<new Foo:: @args>.  Note that the method C<new()> is
+called with a first argument of C<Foo>, not C<Foo::> when you do that.
 
 =head2 C<exists $Foo::{Bar::}> tests existence of a package
 
-[XXX See what?]
+It was impossible to test for the existence of a package without
+actually creating it before.  Now C<exists $Foo::{Bar::}> can be
+used to test if the C<Foo::Bar> namespace has been created.
 
 =head2 Better locale support
 
@@ -216,8 +367,7 @@ See L<perlfunc/prototype>.
 
 C<die()> now accepts a reference value, and C<$@> gets set to that
 value in exception traps.  This makes it possible to propagate
-exception objects.  See L<perlfunc/eval>.  [XXX there's nothing
-about this in perlfunc/eval yet.]
+exception objects.  This is an undocumented B<experimental> feature.
 
 =head2 Re-blessing in DESTROY() supported for chaining DESTROY() methods
 
@@ -232,8 +382,6 @@ See L<perlfunc/printf>.
 C<INIT> subs are like C<BEGIN> and C<END>, but they get run just before
 the perl runtime begins execution.  e.g., the Perl Compiler makes use of
 C<INIT> blocks to initialize and resolve pointers to XSUBs.
-
-[XXX Needs to be documented in perlsub or perlmod.]
 
 =head2 New C<lock> keyword
 
@@ -252,6 +400,9 @@ form can now be explicitly passed around in variables, and interpolated in
 other regular expressions.  See L<perlop>.
 
 =head2 C<our> is now a reserved word
+
+Calling a subroutine with the name C<our> will now provoke a warning when
+using the C<-w> switch.
 
 =head2 Tied arrays are now fully supported
 
@@ -319,12 +470,11 @@ MPE/iX is now supported.  See L<README.mpeix>.
 
 Win32 support has been vastly enhanced.  Support for Perl Object, a C++
 encapsulation of Perl.  GCC and EGCS are now supported on Win32.
-[XXX Perl Object needs a big explanation elsewhere, and a pointer to
-that location here.]
+See F<README.win32>, aka L<perlwin32>.
 
 VMS configuration system has been rewritten.  See L<README.vms>.
 
-OpenBSD better supported.  [XXX what others?]
+The hints files for most Unix platforms have seen incremental improvements.
 
 =head1 Modules and Pragmata
 
@@ -334,7 +484,7 @@ OpenBSD better supported.  [XXX what others?]
 
 =item B
 
-Perl compiler and tools.  See [XXX what?].
+Perl compiler and tools.  See L<B>.
 
 =item Data::Dumper
 
@@ -427,7 +577,7 @@ subtle incompatibilities.
 
 =item CPAN
 
-[XXX What?]
+See <perlmodinstall> and L<CPAN>.
 
 =item Cwd
 
@@ -447,20 +597,19 @@ perlcc, a new experimental front end for the compiler is available.
 
 The crude GNU configure emulator is now called configure.gnu.
 
-=head1 API Changes
-
-=head2 Incompatible Changes
-
-=head2 Deprecations, Extensions
-
-=head2 C++ Support
-
 =head1 Documentation Changes
 
 Config.pm now has a glossary of variables.
 
-Porting/patching.pod has detailed instructions on how to create and
+F<Porting/patching.pod> has detailed instructions on how to create and
 submit patches for perl.
+
+L<perlport> specifies guidelines on how to write portably. 
+
+L<perlmodinstall> describes how to fetch and install modules from C<CPAN>
+sites.
+
+Some more Perl traps are documented now.  See L<perltrap>.
 
 =head1 New Diagnostics
 
@@ -691,7 +840,6 @@ a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 (F) The create routine failed for some reason while trying to process
 a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 
-
 =back
 
 =head1 BUGS
@@ -718,5 +866,10 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =head1 HISTORY
+
+Written by Gurusamy Sarathy <F<gsar@umich.edu>>, with many contributions
+from The Perl Porters.
+
+Send omissions or corrections to <F<perlbug@perl.com>>.
 
 =cut
