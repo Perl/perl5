@@ -496,9 +496,15 @@ sub new {
     return $self;
 }
 
-sub WARN_MASK () {
-    # Mask out the bits that C<use vars> uses
-    $warnings::Bits{all} | $warnings::DeadBits{all};
+{
+    # Mask out the bits that L<warnings::register> uses
+    my $WARN_MASK;
+    BEGIN {
+	$WARN_MASK = $warnings::Bits{all} | $warnings::DeadBits{all};
+    }
+    sub WARN_MASK () {
+	return $WARN_MASK;
+    }
 }
 
 # Initialise the contextual information, either from
@@ -626,7 +632,7 @@ sub ambient_pragmas {
 
 	elsif ($name eq 'warnings') {
 	    if ($val eq 'none') {
-		$warning_bits = "\0"x12;
+		$warning_bits = $warnings::NONE;
 		next();
 	    }
 
@@ -638,7 +644,7 @@ sub ambient_pragmas {
 		@names = split/\s+/, $val;
 	    }
 
-	    $warning_bits = "\0"x12 if !defined ($warning_bits);
+	    $warning_bits = $warnings::NONE if !defined ($warning_bits);
 	    $warning_bits |= warnings::bits(@names);
 	}
 
@@ -1270,10 +1276,10 @@ sub pp_nextstate {
     my $warnings = $op->warnings;
     my $warning_bits;
     if ($warnings->isa("B::SPECIAL") && $$warnings == 4) {
-	$warning_bits = $warnings::Bits{"all"};
+	$warning_bits = $warnings::Bits{"all"} & WARN_MASK;
     }
     elsif ($warnings->isa("B::SPECIAL") && $$warnings == 5) {
-        $warning_bits = "\0"x12;
+        $warning_bits = $warnings::NONE;
     }
     elsif ($warnings->isa("B::SPECIAL")) {
 	$warning_bits = undef;
