@@ -32,11 +32,11 @@ C<IO::Socket> will export all functions (and constants) defined by L<Socket>.
 
 =item new ( [ARGS] )
 
-Creates a C<IO::Socket>, which is a reference to a
+Creates an C<IO::Socket>, which is a reference to a
 newly created symbol (see the C<Symbol> package). C<new>
 optionally takes arguments, these arguments are in key-value pairs.
 C<new> only looks for one key C<Domain> which tells new which domain
-the socket it will be. All other arguments will be passed to the
+the socket will be in. All other arguments will be passed to the
 configuration method of the package for that domain, See below.
 
 =back
@@ -44,7 +44,7 @@ configuration method of the package for that domain, See below.
 =head1 METHODS
 
 See L<perlfunc> for complete descriptions of each of the following
-supported C<IO::Seekable> methods, which are just front ends for the
+supported C<IO::Socket> methods, which are just front ends for the
 corresponding built-in functions:
 
     socket
@@ -387,12 +387,12 @@ my %socket_type = ( tcp => SOCK_STREAM,
 C<IO::Socket::INET> provides a constructor to create an AF_INET domain socket
 and some related methods. The constructor can take the following options
 
-    PeerAddr	Remote host address             <hostname>[:<port>]
-    PeerPort	Remote port or service          <service>[(<no>)] | <no>
-    LocalAddr	Local host bind	address         hostname[:port]
-    LocalPort	Local host bind	port            <service>[(<no>)] | <no>
-    Proto	Protocol name                   "tcp" | "udp" | ...
-    Type	Socket type                     SOCK_STREAM | SOCK_DGRAM | ...
+    PeerAddr	Remote host address          <hostname>[:<port>]
+    PeerPort	Remote port or service       <service>[(<no>)] | <no>
+    LocalAddr	Local host bind	address      hostname[:port]
+    LocalPort	Local host bind	port         <service>[(<no>)] | <no>
+    Proto	Protocol name                "tcp" | "udp" | ...
+    Type	Socket type                  SOCK_STREAM | SOCK_DGRAM | ...
     Listen	Queue size for listen
     Reuse	Set SO_REUSEADDR before binding
     Timeout	Timeout	value for various operations
