@@ -633,7 +633,7 @@ else {
 		    )];
 }
 
-unless ($define{'NO_PERL_MALLOC_WRAP'}) {
+if ($define{'PERL_MALLOC_WRAP'}) {
     emit_symbols [qw(
 		    PL_memory_wrap
 		    )];
