@@ -136,7 +136,7 @@ the child process.
 
 =item *
 
-The following builtin functions are now overrideable: chop(), chomp(),
+The following builtin functions are now overridable: chop(), chomp(),
 each(), keys(), pop(), push(), shift(), splice(), unshift().
 
 =item *
@@ -175,7 +175,7 @@ The Unicode Character Database coming with Perl has been upgraded
 to Unicode 3.1.  For more information, see http://www.unicode.org/,
 and http://www.unicode.org/unicode/reports/tr27/
 
-For developers interested in enhanching Perl's Unicode capabilities:
+For developers interested in enhancing Perl's Unicode capabilities:
 almost all the UCD files are included with the Perl distribution in
 the lib/unicode subdirectory.  The most notable omission, for space
 considerations, is the Unihan database.
@@ -199,15 +199,18 @@ C<\s> doesn't.)
 
 =item *
 
-B::Concise is a new compiler backend for walking the Perl syntax tree,
-printing concise info about ops.  The output is highly customisable,
-so customisable that B::Terse has been re-implemented in terms of
-B::Concise.
+B::Concise, from Stephen McCamant, is a new compiler backend for
+walking the Perl syntax tree, printing concise info about ops.
+The output is highly customisable.
+
+See L<B::Concise> for more information.
 
 =item *
 
 Class::ISA for reporting the search path for a class's ISA tree,
 from Sean Burke, has been added.
+
+See L<Class::ISA> for more information.
 
 =item *
 
@@ -219,6 +222,8 @@ if not possible, the familiar Perl library implementation is used.
 
 Digest, a frontend module for calculating digests (checksums),
 from Gisle Aas, has been added.
+
+See L<Digest> for more information.
 
 =item *
 
@@ -234,16 +239,21 @@ has been added.
 NOTE: the MD5 backward compatibility module is purposefully not
 included since its use is discouraged.
 
+See L<Digest::MD5> for more information.
+
 =item *
 
-Encode provides a mechanism to translate between different character
-encodings.  Support for Unicode, ISO-8859-*, ASCII, CP*, KOI8-R, and
-three variants of EBCDIC are compiled in to the module.  Several other
-encodings (like Japanese, Chinese, and MacIntosh encodings) are
-included and will be loaded at runtime.
+Encode, from Nick Ing-Simmons, provides a mechanism to translate
+between different character encodings.  Support for Unicode,
+ISO-8859-*, ASCII, CP*, KOI8-R, and three variants of EBCDIC are
+compiled in to the module.  Several other encodings (like Japanese,
+Chinese, and MacIntosh encodings) are included and will be loaded at
+runtime.
 
 Any encoding supported by Encode module is also available to the
 ":encoding()" layer if PerlIO is used.
+
+See L<Encode> for more information.
 
 =item *
 
@@ -273,11 +283,14 @@ from Damian Conway.
 
     print "red\n";   # this code is not filtered, will print "red\n"
 
+See L<Filter::Simple> for more information.
+
 =item *
 
 Filter::Util::Call, from Paul Marquess, provides you with the
 framework to write I<Source Filters> in Perl.  For most uses
 the frontend Filter::Simple is to be preferred.
+See L<Filter::Util::Call> for more information.
 
 =item *
 
@@ -287,9 +300,12 @@ locale standards, such as "fr" for France, "usd" for US Dollar, and
 "jp" for Japanese.
 
     use Locale::Country;
-    
+
     $country = code2country('jp');               # $country gets 'Japan'
     $code    = country2code('Norway');           # $code gets 'no'
+
+See L<Locale::Constants>, L<Locale::Country>, L<Locale::Currency>,
+and L<Locale::Language> for more information.
 
 =item *
 
@@ -301,6 +317,8 @@ MIME::Base64, from Gisle Aas, allows you to encode data in base64.
     $decoded = decode_base64($encoded);
 
     print $encoded, "\n"; # "QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+
+See L<MIME::Base64> for more information.
 
 =item *
 
@@ -320,29 +338,33 @@ necessary to use it with PerlIO::Via as in :
     use MIME::QuotedPrint;
     open($fh,">Via(MIME::QuotedPrint)",$path)
 
-=item *
-
-PerlIO::Scalar provides the implementation of IO to "in memory" Perl
-scalars as discussed above.  It also serves as an example of
-a loadable layer.  Other future possibilities include PerlIO::Array
-and PerlIO::Code.
+See L<MIME::QuotedPrint> for more information.
 
 =item *
 
-PerlIO::Via acts as a PerlIO layer and wraps PerlIO layer
-functionality provided by a class (typically implemented in
-perl code).
+PerlIO::Scalar, from Nick Ing-Simmons, provides the implementation of
+IO to "in memory" Perl scalars as discussed above.  It also serves as
+an example of a loadable layer.  Other future possibilities include
+PerlIO::Array and PerlIO::Code.  See L<PerlIO::Scalar> for more
+information.
+
+=item *
+
+PerlIO::Via, from Nick Ing-Simmons, acts as a PerlIO layer and wraps
+PerlIO layer functionality provided by a class (typically implemented
+in perl code).
 
     use MIME::QuotedPrint;
     open($fh,">Via(MIME::QuotedPrint)",$path)
 
 This will automatically convert everything output to C<$fh>
-to Quoted-Printable.
+to Quoted-Printable.  See L<PerlIO::Via> for more information.
 
 =item *
 
 Pod::Text::Overstrike, from Joe Smith, has been added.
 It converts POD data to formatted overstrike text.
+See L<Pod::Text::Overstrike> for more information.
 
 =item *
 
@@ -368,13 +390,15 @@ you have C<switch> and C<case> available in Perl.
 		else		{ print "previous case not true" }
     }
 
+See L<Switch> for more information.
+
 =item *
 
 Text::Balanced from Damian Conway has been added, for
 extracting delimited text sequences from strings.
 
     use Text::Balanced 'extract_delimited';
-    
+
     ($a, $b) = extract_delimited("'never say never', he never said", "'", '');
 
 C<$a> will be "'never say never'", C<$b> will be ', he never said'.
@@ -382,12 +406,13 @@ C<$a> will be "'never say never'", C<$b> will be ', he never said'.
 In addition to extract_delimited() there are also extract_bracketed(),
 extract_quotelike(), extract_codeblock(), extract_variable(),
 extract_tagged(), extract_multiple(), gen_delimited_pat(), and
-gen_extract_tagged().
+gen_extract_tagged().  See L<Text::Balanced> for more information.
 
 =item *
 
 Tie::RefHash::Nestable, from Edward Avis, allows storing hash references
-(unlike the standard Tie::Refhash)
+(unlike the standard Tie::Refhash)  The module is contained within
+Tie::RefHash.
 
 =item *
 
@@ -404,7 +429,7 @@ worth studying.
 =item *
 
 B::Deparse should be now more robust.  It still far from providing a full
-round trip for any random piece of Perl code, though, and is unde active
+round trip for any random piece of Perl code, though, and is under active
 development: expect more robustness in 5.7.2.
 
 =item *
@@ -413,7 +438,8 @@ Class::Struct can now define the classes in compile time.
 
 =item *
 
-Math::BigFloat has undergone much fixing.
+Math::BigFloat has undergone much fixing, and in addition the fmod()
+function now supports modulus operations.
 
 (The fixed Math::BigFloat module is also available in CPAN for those
 who can't upgrade their Perl: http://www.cpan.org/authors/id/J/JP/JPEACOCK/)
@@ -639,15 +665,15 @@ and MacPerl have been synchronised)
 
 =item *
 
-NCR MP-RAS
+NCR MP-RAS is now supported.
 
 =item *
 
-NonStop-UX
+NonStop-UX is now supported.
 
 =item *
 
-Amdahl UTS
+Amdahl UTS is now supported.
 
 =item *
 
@@ -751,10 +777,15 @@ and Perl will be built and tested, all in /tmp/perl/build/directory.
 
 =head1 Selected Bug Fixes
 
-Numerous memory leaks have been hunted down.  Most importantly anonymous
-subs used to leak quite a bit.
+Numerous memory leaks and uninitialized memory leaks have been hunted down.
+Most importantly anonymous subs used to leak quite a bit.
 
 =over 4
+
+=item *
+
+chop(@list) in list context returned the characters chopped in reverse
+order.  This has been reversed to be in the right order.
 
 =item *
 
@@ -773,6 +804,12 @@ Attributes (like :shared) didn't work with our().
 
 The PERL5OPT environment variable (for passing command line arguments
 to Perl) didn't work for more than a single group of options.
+
+=item *
+
+The tainting behaviour of sprintf() has been rationalized.  It does
+not taint the result of floating point formats anymore, making the
+behaviour consistent with that of string interpolation.
 
 =item *
 
@@ -802,6 +839,34 @@ accept(), revcfrom() (in Perl: recv()), getpeername(), and getsockname().
 =item *
 
 Previously DYNIX/ptx had problems in its Configure probe for non-blocking I/O.
+
+=item *
+
+Windows
+
+=over 8
+
+=item *
+
+Borland C++ v5.5 is now a supported compiler that can build Perl.
+However, the generated binaries continue to be incompatible with those
+generated by the other supported compilers (GCC and Visual C++).
+
+=item *
+
+Win32::GetCwd() correctly returns C:\ instead of C: when at the drive root.
+Other bugs in chdir() and Cwd::cwd() have also been fixed.
+
+=item *
+
+Duping socket handles with open(F, ">&MYSOCK") now works under Windows 9x.
+
+=item *
+
+The makefiles now provide a single switch to bulk-enable all the features
+enabled in ActiveState ActivePerl (a popular binary distribution).
+
+=back
 
 =back
 
@@ -844,14 +909,18 @@ a no-op) and the latter replaced with dSP.
 =item *
 
 Perl now uses system malloc instead of Perl malloc in all 64-bit
-platforms.  This change breaks backward compatibility but Perl's
-malloc has problems with large address spaces and also the speed of
-vendors' malloc is generally better in large address space machines
-(Perl's malloc is mostly tuned for space).
+platforms, and even in some not-always-64-bit platforms like AIX,
+IRIX, and Solaris.  This change breaks backward compatibility but
+Perl's malloc has problems with large address spaces and also the
+speed of vendors' malloc is generally better in large address space
+machines (Perl's malloc is mostly tuned for space).
 
 =back
 
 =head1 Known Problems
+
+Notice that this list doesn't contain problems that were present in
+5.7.0 and still are there, see L<perl570delta> for those.
 
 =head2 lib/b test 19
 
