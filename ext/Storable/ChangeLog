@@ -1,3 +1,9 @@
+Sat Jul 10 22:37:47 BST 2004   Nicholas Clark <nick@ccl4.org>
+
+    Version 2.14
+
+	1. Store weak references
+
 Thu Jun 17 12:26:43 BST 2004   Nicholas Clark <nick@ccl4.org>
 
     Version 2.13

@@ -161,7 +161,9 @@ typedef double NV;			/* Older perls lack the NV type */
 #define SX_LUTF8STR	C(24)	/* UTF-8 string forthcoming (large) */
 #define SX_FLAG_HASH	C(25)	/* Hash with flags forthcoming (size, flags, key/flags/value triplet list) */
 #define SX_CODE         C(26)   /* Code references as perl source code */
-#define SX_ERROR	C(27)	/* Error */
+#define SX_WEAKREF	C(27)	/* Weak reference to object forthcoming */
+#define SX_WEAKOVERLOAD	C(28)	/* Overloaded weak reference */
+#define SX_ERROR	C(29)	/* Error */
 
 /*
  * Those are only used to retrieve "old" pre-0.6 binary images.
@@ -268,6 +270,9 @@ typedef unsigned long stag_t;	/* Used by pre-0.6 binary format */
 #endif
 #ifndef HAS_UTF8_ALL
 #define UTF8_CROAK() CROAK(("Cannot retrieve UTF8 data in non-UTF8 perl"))
+#endif
+#ifndef SvWEAKREF
+#define WEAKREF_CROAK() CROAK(("Cannot retrieve weak references in this perl"))
 #endif
 
 #ifdef HvPLACEHOLDERS
@@ -772,22 +777,16 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #endif
 
 #define STORABLE_BIN_MAJOR	2		/* Binary major "version" */
-#define STORABLE_BIN_MINOR	6		/* Binary minor "version" */
+#define STORABLE_BIN_MINOR	7		/* Binary minor "version" */
 
-/* If we aren't 5.7.3 or later, we won't be writing out files that use the
- * new flagged hash introdued in 2.5, so put 2.4 in the binary header to
- * maximise ease of interoperation with older Storables.
- * Could we write 2.3s if we're on 5.005_03? NWC
- */
-#if (PATCHLEVEL <= 6)
+#if (PATCHLEVEL <= 5)
 #define STORABLE_BIN_WRITE_MINOR	4
 #else 
-/* 
- * As of perl 5.7.3, utf8 hash key is introduced.
- * So this must change -- dankogai
+/*
+ * Perl 5.6.0 onwards can do weak references.
 */
-#define STORABLE_BIN_WRITE_MINOR	6
-#endif /* (PATCHLEVEL <= 6) */
+#define STORABLE_BIN_WRITE_MINOR	7
+#endif /* (PATCHLEVEL <= 5) */
 
 #if (PATCHLEVEL < 8 || (PATCHLEVEL == 8 && SUBVERSION < 1))
 #define PL_sv_placeholder PL_sv_undef
@@ -1089,6 +1088,8 @@ static SV *(*sv_old_retrieve[])(pTHX_ stcxt_t *cxt, char *cname) = {
 	retrieve_other,			/* SX_LUTF8STR not supported */
 	retrieve_other,			/* SX_FLAG_HASH not supported */
 	retrieve_other,			/* SX_CODE not supported */
+	retrieve_other,			/* SX_WEAKREF not supported */
+	retrieve_other,			/* SX_WEAKOVERLOAD not supported */
 	retrieve_other,			/* SX_ERROR */
 };
 
@@ -1105,6 +1106,8 @@ static SV *retrieve_tied_key(pTHX_ stcxt_t *cxt, char *cname);
 static SV *retrieve_tied_idx(pTHX_ stcxt_t *cxt, char *cname);
 static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, char *cname);
 static SV *retrieve_code(pTHX_ stcxt_t *cxt, char *cname);
+static SV *retrieve_weakref(pTHX_ stcxt_t *cxt, char *cname);
+static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, char *cname);
 
 static SV *(*sv_retrieve[])(pTHX_ stcxt_t *cxt, char *cname) = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
@@ -1134,6 +1137,8 @@ static SV *(*sv_retrieve[])(pTHX_ stcxt_t *cxt, char *cname) = {
 	retrieve_lutf8str,		/* SX_LUTF8STR */
 	retrieve_flag_hash,		/* SX_HASH */
 	retrieve_code,			/* SX_CODE */
+	retrieve_weakref,		/* SX_WEAKREF */
+	retrieve_weakoverloaded,	/* SX_WEAKOVERLOAD */
 	retrieve_other,			/* SX_ERROR */
 };
 
@@ -1831,23 +1836,29 @@ static int known_class(
  */
 static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
 {
+	int is_weak = 0;
 	TRACEME(("store_ref (0x%"UVxf")", PTR2UV(sv)));
 
 	/*
 	 * Follow reference, and check if target is overloaded.
 	 */
 
+#ifdef SvWEAKREF;
+	if (SvWEAKREF(sv))
+		is_weak = 1;
+	TRACEME(("ref (0x%"UVxf") is%s weak", PTR2UV(sv), is_weak ? "" : "n't"));
+#endif
 	sv = SvRV(sv);
 
 	if (SvOBJECT(sv)) {
 		HV *stash = (HV *) SvSTASH(sv);
 		if (stash && Gv_AMG(stash)) {
 			TRACEME(("ref (0x%"UVxf") is overloaded", PTR2UV(sv)));
-			PUTMARK(SX_OVERLOAD);
+			PUTMARK(is_weak ? SX_WEAKOVERLOAD : SX_OVERLOAD);
 		} else
-			PUTMARK(SX_REF);
+			PUTMARK(is_weak ? SX_WEAKREF : SX_REF);
 	} else
-		PUTMARK(SX_REF);
+		PUTMARK(is_weak ? SX_WEAKREF : SX_REF);
 
 	return store(aTHX_ cxt, sv);
 }
@@ -4302,6 +4313,29 @@ static SV *retrieve_ref(pTHX_ stcxt_t *cxt, char *cname)
 }
 
 /*
+ * retrieve_weakref
+ *
+ * Retrieve weak reference to some other scalar.
+ * Layout is SX_WEAKREF <object>, with SX_WEAKREF already read.
+ */
+static SV *retrieve_weakref(pTHX_ stcxt_t *cxt, char *cname)
+{
+	SV *sv;
+
+	TRACEME(("retrieve_weakref (#%d)", cxt->tagnum));
+
+	sv = retrieve_ref(aTHX_ cxt, cname);
+	if (sv) {
+#ifdef SvWEAKREF
+		sv_rvweaken(sv);
+#else
+		WEAKREF_CROAK();
+#endif
+	}
+	return sv;
+}
+
+/*
  * retrieve_overloaded
  *
  * Retrieve reference to some other scalar with overloading.
@@ -4368,6 +4402,29 @@ static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, char *cname)
 	TRACEME(("ok (retrieve_overloaded at 0x%"UVxf")", PTR2UV(rv)));
 
 	return rv;
+}
+
+/*
+ * retrieve_weakoverloaded
+ *
+ * Retrieve weak overloaded reference to some other scalar.
+ * Layout is SX_WEAKOVERLOADED <object>, with SX_WEAKOVERLOADED already read.
+ */
+static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, char *cname)
+{
+	SV *sv;
+
+	TRACEME(("retrieve_weakoverloaded (#%d)", cxt->tagnum));
+
+	sv = retrieve_overloaded(aTHX_ cxt, cname);
+	if (sv) {
+#ifdef SvWEAKREF
+		sv_rvweaken(sv);
+#else
+		WEAKREF_CROAK();
+#endif
+	}
+	return sv;
 }
 
 /*
