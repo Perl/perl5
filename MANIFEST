@@ -670,6 +670,7 @@ lib/unicode/Block.pl				Unicode character database
 lib/unicode/Category.pl				Unicode character database
 lib/unicode/CombiningClass.pl			Unicode character database
 lib/unicode/Decomposition.pl			Unicode character database
+lib/unicode/EthiopicSyllables.txt		Unicode character database
 lib/unicode/In/AlphabeticPresentationForms.pl	Unicode character database
 lib/unicode/In/Arabic.pl			Unicode character database
 lib/unicode/In/ArabicPresentationForms-A.pl	Unicode character database
@@ -696,6 +697,7 @@ lib/unicode/In/Devanagari.pl			Unicode character database
 lib/unicode/In/Dingbats.pl			Unicode character database
 lib/unicode/In/EnclosedAlphanumerics.pl		Unicode character database
 lib/unicode/In/EnclosedCJKLettersandMonths.pl	Unicode character database
+lib/unicode/In/Ethiopic.pl			Unicode character database
 lib/unicode/In/GeneralPunctuation.pl		Unicode character database
 lib/unicode/In/GeometricShapes.pl		Unicode character database
 lib/unicode/In/Georgian.pl			Unicode character database
@@ -798,15 +800,18 @@ lib/unicode/Is/Sc.pl				Unicode character database
 lib/unicode/Is/Sm.pl				Unicode character database
 lib/unicode/Is/So.pl				Unicode character database
 lib/unicode/Is/Space.pl				Unicode character database
+lib/unicode/Is/Syllable.pl			Unicode character database
 lib/unicode/Is/Upper.pl				Unicode character database
 lib/unicode/Is/Z.pl				Unicode character database
 lib/unicode/Is/Zl.pl				Unicode character database
 lib/unicode/Is/Zp.pl				Unicode character database
 lib/unicode/Is/Zs.pl				Unicode character database
 lib/unicode/JamoShort.pl			Unicode character database
+lib/unicode/MakeEthiopicSyllables.PL		Unicode character database
 lib/unicode/Makefile				Unicode character database
 lib/unicode/Name.pl				Unicode character database
 lib/unicode/Number.pl				Unicode character database
+lib/unicode/README.Ethiopic			Unicode character database
 lib/unicode/To/Digit.pl				Unicode character database
 lib/unicode/To/Lower.pl				Unicode character database
 lib/unicode/To/Title.pl				Unicode character database
