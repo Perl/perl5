@@ -5,11 +5,9 @@ TODO
 
 __END__
 
-# check illegal category is caught
-use warnings 'blah' ;
+# ignore unknown warning categories
+use warnings 'this-should-never-be-a-warning-category' ;
 EXPECT
-unknown warning category 'blah' at - line 3
-BEGIN failed--compilation aborted at - line 3.
 ########
 
 # Check compile time scope of pragma
