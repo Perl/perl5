@@ -88,7 +88,7 @@ sub postamble
        $continuator = '';
       }
     }
-   $str .= "\n\t\$(PERL) compile \$\@ $table.fnm\n\n";
+   $str .= "\n\t\$(PERL) compile -o \$\@ -F $table.fnm\n\n";
    open (FILELIST, ">$table.fnm")
        || die "Could not open $table.fnm: $!";
    foreach my $file (@{$tables{$table}})
