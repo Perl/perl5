@@ -953,7 +953,7 @@ And so do these:
 
     delete @HASH{keys %HASH};
 
-    delete @ARRAY{0 .. $#ARRAY};
+    delete @ARRAY[0 .. $#ARRAY];
 
 But both of these are slower than just assigning the empty list
 or undefining %HASH or @ARRAY:
@@ -2787,6 +2787,34 @@ in parentheses.  The C<our> declaration has no semantic effect unless
 declared global variable without qualifying it with a package name.
 (But only within the lexical scope of the C<our> declaration.  In this
 it differs from "use vars", which is package scoped.)
+
+An C<our> declaration declares a global variable that will be visible
+across its entire lexical scope, even across package boundaries.  The
+package in which the variable is entered is determined at the point
+of the declaration, not at the point of use.  This means the following
+behavior holds:
+
+    package Foo;
+    our $bar;		# declares $Foo::bar for rest of lexical scope
+    $bar = 20;
+
+    package Bar;
+    print $bar;		# prints 20
+
+Multiple C<our> declarations in the same lexical scope are allowed
+if they are in different packages.  If they happened to be in the same
+package, Perl will emit warnings if you have asked for them.
+
+    use warnings;
+    package Foo;
+    our $bar;		# declares $Foo::bar for rest of lexical scope
+    $bar = 20;
+
+    package Bar;
+    our $bar = 30;	# declares $Bar::bar for rest of lexical scope
+    print $bar;		# prints 30
+
+    our $bar;		# emits warning
 
 =item pack TEMPLATE,LIST
 
