@@ -435,6 +435,10 @@ VIRTUAL OP*	refkids _((OP* o, I32 type));
 VIRTUAL void	regdump _((regexp* r));
 VIRTUAL I32	pregexec _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave));
 VIRTUAL void	pregfree _((struct regexp* r));
+VIRTUAL regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
+VIRTUAL I32	regexec_flags _((regexp* prog, char* stringarg, char* strend,
+			 char* strbeg, I32 minend, SV* screamer,
+			 void* data, U32 flags));
 VIRTUAL regnode* regnext _((regnode* p));
 VIRTUAL void	regprop _((SV* sv, regnode* o));
 VIRTUAL void	repeatcpy _((char* to, char* from, I32 len, I32 count));
@@ -711,11 +715,6 @@ int div128 _((SV *pnum, bool *done));
 int runops_standard _((void));
 int runops_debug _((void));
 
-regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
-I32	regexec_flags _((regexp* prog, char* stringarg, char* strend,
-			 char* strbeg, I32 minend, SV* screamer,
-			 void* data, U32 flags));
-
 void check_uni _((void));
 void  force_next _((I32 type));
 char *force_version _((char *start));
@@ -880,10 +879,6 @@ VIRTUAL SV**	get_specialsv_list _((void));
 VIRTUAL int&	ErrorNo _((void));
 #endif	/* WIN32 */
 #else	/* !PERL_OBJECT */
-regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
-I32		regexec_flags _((regexp* prog, char* stringarg, char* strend,
-			 char* strbeg, I32 minend, SV* screamer,
-			 void* data, U32 flags));
 END_EXTERN_C
 #endif	/* PERL_OBJECT */
 
