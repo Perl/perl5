@@ -192,7 +192,7 @@ sub prompt ($;$) {
     } else {
 	print "$def\n";
     }
-    return $ans || $def;
+    return ($ans ne '') ? $ans : $def;
 }
 
 sub eval_in_subdirs {
