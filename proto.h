@@ -30,13 +30,14 @@ void	av_unshift _((AV* ar, I32 num));
 OP*	bind_match _((I32 type, OP* left, OP* pat));
 OP*	block_end _((int line, int floor, OP* seq));
 int	block_start _((void));
+void	boot_core_UNIVERSAL _((void));
 void	calllist _((AV* list));
 I32	cando _((I32 bit, I32 effective, struct stat* statbufp));
 #ifndef CASTNEGFLOAT
 U32	cast_ulong _((double f));
 #endif
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
-I32	chsize _((int fd, Off_t length));
+I32	my_chsize _((int fd, Off_t length));
 #endif
 OP *	ck_gvconst _((OP * o));
 OP *	ck_retarget _((OP *op));
@@ -66,7 +67,7 @@ OP*	die_where _((char* message));
 void	dounwind _((I32 cxix));
 bool	do_aexec _((SV* really, SV** mark, SV** sp));
 void    do_chop _((SV* asv, SV* sv));
-bool	do_close _((GV* gv, bool explicit));
+bool	do_close _((GV* gv, bool not_implicit));
 bool	do_eof _((GV* gv));
 bool	do_exec _((char* cmd));
 void	do_execfree _((void));
@@ -131,21 +132,27 @@ GV*	gv_fetchpv _((char* name, I32 add, I32 sv_type));
 void	gv_fullname _((SV* sv, GV* gv));
 void	gv_init _((GV *gv, HV *stash, char *name, STRLEN len, int multi));
 HV*	gv_stashpv _((char* name, I32 create));
+HV*	gv_stashpvn _((char* name, U32 namelen, I32 create));
 HV*	gv_stashsv _((SV* sv, I32 create));
-void	he_delayfree _((HE* hent));
-void	he_free _((HE* hent));
+void	he_delayfree _((HE* hent, I32 shared));
+void	he_free _((HE* hent, I32 shared));
 void	hoistmust _((PMOP* pm));
 void	hv_clear _((HV* tb));
 SV*	hv_delete _((HV* tb, char* key, U32 klen, I32 flags));
+SV*	hv_delete_ent _((HV* tb, SV* key, I32 flags, U32 hash));
 bool	hv_exists _((HV* tb, char* key, U32 klen));
+bool	hv_exists_ent _((HV* tb, SV* key, U32 hash));
 SV**	hv_fetch _((HV* tb, char* key, U32 klen, I32 lval));
+HE*	hv_fetch_ent _((HV* tb, SV* key, I32 lval, U32 hash));
 I32	hv_iterinit _((HV* tb));
 char*	hv_iterkey _((HE* entry, I32* retlen));
+SV*	hv_iterkeysv _((HE* entry));
 HE*	hv_iternext _((HV* tb));
-SV *	hv_iternextsv _((HV* hv, char** key, I32* retlen));
+SV*	hv_iternextsv _((HV* hv, char** key, I32* retlen));
 SV*	hv_iterval _((HV* tb, HE* entry));
 void	hv_magic _((HV* hv, GV* gv, int how));
 SV**	hv_store _((HV* tb, char* key, U32 klen, SV* val, U32 hash));
+HE*	hv_store_ent _((HV* tb, SV* key, SV* val, U32 hash));
 void	hv_undef _((HV* tb));
 I32	ibcmp _((U8* a, U8* b, I32 len));
 I32	ingroup _((I32 testgid, I32 effective));
@@ -164,12 +171,14 @@ OP*	localize _((OP* arg, I32 lexical));
 I32	looks_like_number _((SV* sv));
 int	magic_clearenv	_((SV* sv, MAGIC* mg));
 int	magic_clearpack	_((SV* sv, MAGIC* mg));
+int	magic_clearsig	_((SV* sv, MAGIC* mg));
 int	magic_existspack	_((SV* sv, MAGIC* mg));
 int	magic_get	_((SV* sv, MAGIC* mg));
 int	magic_getarylen	_((SV* sv, MAGIC* mg));
 int	magic_getpack	_((SV* sv, MAGIC* mg));
 int	magic_getglob	_((SV* sv, MAGIC* mg));
 int	magic_getpos	_((SV* sv, MAGIC* mg));
+int	magic_getsig	_((SV* sv, MAGIC* mg));
 int	magic_gettaint	_((SV* sv, MAGIC* mg));
 int	magic_getuvar	_((SV* sv, MAGIC* mg));
 U32	magic_len	_((SV* sv, MAGIC* mg));
@@ -202,11 +211,12 @@ Malloc_t	malloc _((MEM_SIZE nbytes));
 extern Malloc_t malloc _((MEM_SIZE nbytes));
 extern Malloc_t realloc _((Malloc_t, MEM_SIZE));
 extern Free_t   free _((Malloc_t));
+extern Malloc_t calloc _((MEM_SIZE, MEM_SIZE));
 #endif
 void	markstack_grow _((void));
 char*	mess _((char* pat, va_list* args));
 int	mg_clear _((SV* sv));
-int	mg_copy _((SV *, SV *, char *, STRLEN));
+int	mg_copy _((SV *, SV *, char *, I32));
 MAGIC*	mg_find _((SV* sv, int type));
 int	mg_free _((SV* sv));
 int	mg_get _((SV* sv));
@@ -313,7 +323,7 @@ SV*	perl_get_sv _((char* name, I32 create));
 AV*	perl_get_av _((char* name, I32 create));
 HV*	perl_get_hv _((char* name, I32 create));
 CV*	perl_get_cv _((char* name, I32 create));
-int	perl_init_i18nl14n _((int printwarn));
+int	perl_init_i18nl10n _((int printwarn));
 int	perl_parse _((PerlInterpreter* sv_interp, void(*xsinit)(void), int argc, char** argv, char** env));
 void	perl_require_pv _((char* pv));
 #define perl_requirepv perl_require_pv
@@ -347,17 +357,21 @@ char*	saferealloc _((char* where, MEM_SIZE size));
 #else
 char*	saferealloc _((char* where, unsigned long size));
 #endif
+char*	safecalloc _((MEM_SIZE cnt, MEM_SIZE size));
 #endif
 #ifdef LEAKTEST
 void	safexfree _((char* where));
 char*	safexmalloc _((I32 x, MEM_SIZE size));
 char*	safexrealloc _((char* where, MEM_SIZE size));
+char*	safexcalloc _((I32 x, MEM_SIZE size, MEM_SIZE size));
 #endif
 #ifndef HAS_RENAME
 I32	same_dirent _((char* a, char* b));
 #endif
 char*	savepv _((char* sv));
 char*	savepvn _((char* sv, I32 len));
+char*	sharepvn _((char* sv, I32 len, U32 hash));
+void	unsharepvn _((char* sv, I32 len, U32 hash));
 void	savestack_grow _((void));
 void	save_aptr _((AV** aptr));
 AV*	save_ary _((GV* gv));
@@ -461,7 +475,7 @@ void	taint_proper _((char* f, char* s));
 #ifdef UNLINK_ALL_VERSIONS
 I32	unlnk _((char* f));
 #endif
-void	utilize _((int aver, I32 floor, OP* id, OP* arg));
+void	utilize _((int aver, I32 floor, OP* version, OP* id, OP* arg));
 I32	wait4pid _((int pid, int* statusp, int flags));
 void	warn _((char* pat,...)) __attribute__((format(printf,1,2)));
 void	watch _((char **addr));
