@@ -46,6 +46,21 @@ More Extensive Regression Testing
 
 =head1 Incompatible Changes
 
+=head2 Binary Incompatibility
+
+Perl 5.8 has not been designed to be binary compatible with earlier
+releases of Perl.  While the compatibility has not been intentionally
+broken, it has not been intentionally protected, either.  The major
+reason for the discontinity is the new IO architecture called PerlIO.
+The PerlIO is the default configuration because without it many new
+features of Perl 5.8 cannot be used.  In other words: you just have
+to recompile your modules, sorry about that.
+
+In future releases of Perl non-PerlIO aware XS modules may become
+completely unsupported.  This shouldn't be too difficult for module
+authors, however: PerlIO has been designed as a drop-in replacement
+(at the source code level) for the stdio interface.
+
 =head2 64-bit platforms and malloc
 
 If your pointers are 64 bits wide, the Perl malloc is no longer being
