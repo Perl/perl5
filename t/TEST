@@ -312,7 +312,7 @@ SHRDLU_1
    ### in the 't' directory since most (>=80%) of the tests succeeded.
 SHRDLU_2
         if (eval {require Config; import Config; 1}) {
-	    if (my $p = $Config{ldlibpthname}) {
+	    if ($Config{usedl} && (my $p = $Config{ldlibpthname})) {
 		warn <<SHRDLU_3;
    ### You may have to set your dynamic library search path,
    ### $p, to point to the build directory:
