@@ -524,15 +524,15 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
     if (PerlIOValid(f)) {
 	PerlIO_funcs *tab = PerlIOBase(f)->tab;
-	PerlIO *new;
 	PerlIO_debug("fdupopen f=%p param=%p\n",(void*)f,(void*)param);
-	new = (*tab->Dup)(aTHX_ PerlIO_allocate(aTHX),f,param, flags);
-	return new;
+	if (tab && tab->Dup)
+	     return (*tab->Dup)(aTHX_ PerlIO_allocate(aTHX), f, param, flags);
+	SETERRNO(EINVAL, LIB_INVARG);
     }
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-	return NULL;
-    }
+    else
+	 SETERRNO(EBADF, SS_IVCHAN);
+
+    return NULL;
 }
 
 void
@@ -1153,7 +1153,8 @@ PerlIO_push(pTHX_ PerlIO *f, PerlIO_funcs *tab, const char *mode, SV *arg)
 	    *f = l;
 	    PerlIO_debug("PerlIO_push f=%p %s %s %p\n", (void*)f, tab->name,
 			(mode) ? mode : "(Null)", (void*)arg);
-	    if ((*l->tab->Pushed) (aTHX_ f, mode, arg, tab) != 0) {
+	    if (*l->tab->Pushed &&
+		(*l->tab->Pushed) (aTHX_ f, mode, arg, tab) != 0) {
 		PerlIO_pop(aTHX_ f);
 		return NULL;
 	    }
@@ -1163,8 +1164,9 @@ PerlIO_push(pTHX_ PerlIO *f, PerlIO_funcs *tab, const char *mode, SV *arg)
 	/* Pseudo-layer where push does its own stack adjust */
 	PerlIO_debug("PerlIO_push f=%p %s %s %p\n", (void*)f, tab->name,
 		     (mode) ? mode : "(Null)", (void*)arg);
-	if ((*tab->Pushed) (aTHX_ f, mode, arg, tab) != 0) {
-	    return NULL;
+	if (tab->Pushed &&
+	    (*tab->Pushed) (aTHX_ f, mode, arg, tab) != 0) {
+	     return NULL;
 	}
     }
     return f;
@@ -1526,8 +1528,13 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	    PerlIO_debug("openn(%s,'%s','%s',%d,%x,%o,%p,%d,%p)\n",
 			 tab->name, layers, mode, fd, imode, perm,
 			 (void*)f, narg, (void*)args);
-	    f = (*tab->Open) (aTHX_ tab, layera, n, mode, fd, imode, perm,
-			      f, narg, args);
+	    if (tab->Open)
+		 f = (*tab->Open) (aTHX_ tab, layera, n, mode, fd, imode, perm,
+				   f, narg, args);
+	    else {
+		 SETERRNO(EINVAL, LIB_INVARG);
+		 f = NULL;
+	    }
 	    if (f) {
 		if (n + 1 < layera->cur) {
 		    /*
@@ -1862,8 +1869,11 @@ PerlIORaw_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	       PerlIO *old, int narg, SV **args)
 {
     PerlIO_funcs *tab = PerlIO_default_btm();
-    return (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
-			 old, narg, args);
+    if (tab && tab->Open)
+	 return (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
+			      old, narg, args);
+    SETERRNO(EINVAL, LIB_INVARG);
+    return NULL;
 }
 
 PerlIO_funcs PerlIO_raw = {
@@ -2139,12 +2149,15 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
     }
     if (f) {
 	PerlIO_funcs *self = PerlIOBase(o)->tab;
-	SV *arg = Nullsv;
+	SV *arg;
 	char buf[8];
 	PerlIO_debug("PerlIOBase_dup %s f=%p o=%p param=%p\n",
 		     self->name, (void*)f, (void*)o, (void*)param);
-	if (self->Getarg) {
-	    arg = (*self->Getarg)(aTHX_ o,param,flags);
+	if (self->Getarg)
+	    arg = (*self->Getarg)(aTHX_ o, param, flags);
+	else {
+	     arg = Nullsv;
+	     SETERRNO(EINVAL, LIB_INVARG);
 	}
 	f = PerlIO_push(aTHX_ f, self, PerlIO_modestr(o,buf), arg);
 	if (arg) {
