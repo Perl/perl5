@@ -108,7 +108,8 @@ while (defined (my $file = next_file())) {
     }
 
     print OUT "require '_h2ph_pre.ph';\n\n";
-    while (defined (local $_ = next_line())) {
+
+    while (defined (local $_ = next_line($file))) {
 	if (s/^\s*\#\s*//) {
 	    if (s/^define\s+(\w+)//) {
 		$name = $1;
@@ -240,7 +241,7 @@ while (defined (my $file = next_file())) {
 	    }
 	} elsif(/^\s*(typedef\s*)?enum\s*(\s+[a-zA-Z_]\w*\s*)?/) {
 	    until(/\{[^}]*\}.*;/ || /;/) {
-		last unless defined ($next = next_line());
+		last unless defined ($next = next_line($file));
 		chomp $next;
 		# drop "#define FOO FOO" in enums
 		$next =~ s/^\s*#\s*define\s+(\w+)\s+\1\s*$//;
@@ -404,6 +405,7 @@ sub expr {
 
 sub next_line
 {
+    my $file = shift;
     my ($in, $out);
     my $pre_sub_tri_graphs = 1;
 
@@ -433,6 +435,13 @@ sub next_line
 		}
 		next READ;
 	    }
+	    if ($in =~ /^extern inline / &&
+		$^O eq 'linux' && $file =~ m!(?:^|/)asm/[^/]+\.h$!) {
+ 		while (<IN>) {
+		    last if /^}/; 
+		}
+		next READ;
+	    }
             if ($in =~ s/\\$//) {                           # \-newline
                 $out    .= ' ';
                 next READ;
@@ -458,7 +467,7 @@ sub next_line
             } elsif ($in =~ s/^([^\'\"\\\/]+)//) {
                 $out    .= $1;
             } else {
-                die "Cannot parse:\n$in\n";
+		die "Cannot parse:\n$in\n";
             }
         }
 
