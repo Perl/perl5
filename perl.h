@@ -247,9 +247,8 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #define SOFT_CAST(type)	(type)
 #endif
 
-/* Only these byteorders are really known and tested. */
-#if !(BYTEORDER == 0x1234 || BYTEORDER == 0x12345678 || BYTEORDER == 0x4321 || BYTEORDER == 0x87654321)
-#   error "UNKNOWN BYTEORDER!"
+#ifndef BYTEORDER  /* Should never happen -- byteorder is in config.h */
+#   define BYTEORDER 0x1234
 #endif
 
 /* Overall memory policy? */
