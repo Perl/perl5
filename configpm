@@ -79,6 +79,13 @@ my $summary_expanded = 0;
 
 sub myconfig {
 	return $summary if $summary_expanded;
+	$summary =~ s{
+	              \$(\w+)
+	             }{
+	                  defined $Config{$1} 
+	                  ? $Config{$1} 
+	                  : "not defined"
+ 	             }xge;
 	$summary =~ s/\$(\w+)/$Config{$1}/ge;
 	$summary_expanded = 1;
 	$summary;
