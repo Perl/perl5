@@ -95,7 +95,7 @@ sub ok { print "ok $test\n"; $test++ }
 
 # 24..26
 if ($Is_VMS) {
-    for (24..26) { print "ok $_ # skipped: not Unix fork\n"; }
+    for (24..26) { print "ok $_ # skipped: not Unix fork\n"; $test++;}
 }
 else {
     print "# \$!='$!'\nnot " unless open(my $f, '-|', <<'EOC');
@@ -111,7 +111,7 @@ EOC
 
 # 27..30
 if ($Is_VMS) {
-    for (27..30) { print "ok $_ # skipped: not Unix fork\n"; }
+    for (27..30) { print "ok $_ # skipped: not Unix fork\n"; $test++;}
 }
 else {
     print "# \$!='$!'\nnot " unless open(my $f, '|-', <<'EOC');
@@ -219,7 +219,7 @@ ok;
 
 # 56..58
 if ($Is_VMS) {
-    for (56..58) { print "ok $_ # skipped: not Unix fork\n"; }
+    for (56..58) { print "ok $_ # skipped: not Unix fork\n"; $test++;}
 }
 else {
     print "# \$!='$!'\nnot " unless open(local $f, '-|', <<'EOC');
@@ -235,7 +235,7 @@ EOC
 
 # 59..62
 if ($Is_VMS) {
-    for (59..62) { print "ok $_ # skipped: not Unix fork\n"; }
+    for (59..62) { print "ok $_ # skipped: not Unix fork\n"; $test++;}
 }
 else {
     print "# \$!='$!'\nnot " unless open(local $f, '|-', <<'EOC');

@@ -30,7 +30,7 @@ print "#2\t:$foo: == 4\n";
 if ($foo == 4) {print "ok 2\n";} else {print "not ok 2\n";}
 
 $PERL = ($^O eq 'MSWin32') ? '.\perl' : './perl';
-$CMD = qq[$PERL -e "goto foo;" ] . ($^O eq 'VMS' ? '' : ' 2>&1');
+$CMD = qq[$PERL -e "goto foo;" 2>&1 ];
 $x = `$CMD`;
 
 if ($x =~ /label/) {print "ok 3\n";} else {print "not ok 3\n";}

@@ -76,7 +76,7 @@ for (@prgs){
     print TEST $prog,"\n";
     close TEST;
     my $results = $Is_VMS ?
-                  `MCR $^X $switch $tmpfile` :
+                  `./perl "-I../lib" $switch $tmpfile 2>&1` :
 		  $Is_MSWin32 ?
                   `.\\perl -I../lib $switch $tmpfile 2>&1` :
                   `./perl -I../lib $switch $tmpfile 2>&1`;
@@ -91,7 +91,7 @@ for (@prgs){
     # allow all tests to run when there are leaks
     $results =~ s/Scalars leaked: \d+\n//g;
     $expected =~ s/\n+$//;
-    my $prefix = ($results =~ s/^PREFIX\n//) ;
+    my $prefix = ($results =~ s#^PREFIX(\n|$)##) ;
     # any special options? (OPTIONS foo bar zap)
     my $option_regex = 0;
     if ($expected =~ s/^OPTIONS? (.+)\n//) {

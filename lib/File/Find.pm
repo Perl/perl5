@@ -511,8 +511,9 @@ sub _find_dir($$$) {
 	while ( defined ($SE = pop @Stack) ) {
 	    ($Level, $p_dir, $dir_rel, $nlink) = @$SE;
 	    if ($CdLvl > $Level && !$no_chdir) {
-		die "Can't cd to $dir_name" . '../' x ($CdLvl-$Level)
-		    unless  chdir '../' x ($CdLvl-$Level);
+                my $tmp = join('/',('..') x ($CdLvl-$Level));
+                die "Can't cd to $dir_name" . $tmp
+                    unless chdir ($tmp);
 		$CdLvl = $Level;
 	    }
 	    $dir_name = ($p_dir eq '/' ? "/$dir_rel" : "$p_dir/$dir_rel");

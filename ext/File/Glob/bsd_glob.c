@@ -658,6 +658,21 @@ glob3(Char *pathbuf, Char *pathend, Char *pattern,
 	*pathend = BG_EOS;
 	errno = 0;
 
+#ifdef VMS
+        {
+            Char *q = pathend;
+            if (q - pathbuf > 5) {
+                q -= 5;
+                if (q[0] == '.' && tolower(q[1]) == 'd' && tolower(q[2]) == 'i'
+		    && tolower(q[3]) == 'r' && q[4] == '/')
+		{
+                    q[0] = '/';
+                    q[1] = BG_EOS;
+                    pathend = q+1;
+                }
+            }
+        }
+#endif
 	if ((dirp = g_opendir(pathbuf, pglob)) == NULL) {
 		/* TODO: don't call for ENOENT or ENOTDIR? */
 		if (pglob->gl_errfunc) {

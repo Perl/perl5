@@ -4273,7 +4273,7 @@ int my_utime(char *file, struct utimbuf *utimes)
     /* If input was UTC; convert to local for sys svc */
     if (!VMSISH_TIME) unixtime = _toloc(unixtime);
 #   endif
-    unixtime >> 1;  secscale << 1;
+    unixtime >>= 1;  secscale <<= 1;
     retsts = lib$emul(&secscale, &unixtime, &lowbit, bintime);
     if (!(retsts & 1)) {
       set_errno(EVMSERR);

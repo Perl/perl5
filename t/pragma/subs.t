@@ -46,7 +46,7 @@ for (@prgs){
     print TEST $prog,"\n";
     close TEST;
     my $results = $Is_VMS ?
-                  `MCR $^X $switch $tmpfile` :
+                  `./perl $switch $tmpfile 2>&1` :
 		  $Is_MSWin32 ?
                   `.\\perl -I../lib $switch $tmpfile 2>&1` :
                   `./perl $switch $tmpfile 2>&1`;
