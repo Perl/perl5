@@ -7858,13 +7858,10 @@ Perl_newSVsv(pTHX_ register SV *old)
 	return Nullsv;
     }
     new_SV(sv);
-    if (SvTEMP(old)) {
-	SvTEMP_off(old);
-	sv_setsv(sv,old);
-	SvTEMP_on(old);
-    }
-    else
-	sv_setsv(sv,old);
+    /* SV_GMAGIC is the default for sv_setv()
+       SV_NOSTEAL prevents TEMP buffers being, well, stolen, and saves games
+       with SvTEMP_off and SvTEMP_on round a call to sv_setsv.  */
+    sv_setsv_flags(sv, old, SV_GMAGIC | SV_NOSTEAL);
     return sv;
 }
 
