@@ -3427,8 +3427,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     SV *listsv = Nullsv;
     register char *e;
     UV n;
-    bool optimize_invert   = TRUE;
-    AV* unicode_alternate  = 0;
+    bool optimize_invert = TRUE;
 
     ret = reganode(pRExC_state, ANYOF, 0);
 
@@ -4029,35 +4028,18 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			 /* If folding and foldable and a single
 			  * character, insert also the folded version
 			  * to the charclass. */
-			 if (f != value) {
-			      if (foldlen == UNISKIP(f))
-				  Perl_sv_catpvf(aTHX_ listsv,
-						 "%04"UVxf"\n", f);
-			      else {
-				  /* Any multicharacter foldings
-				   * require the following transform:
-				   * [ABCDEF] -> (?:[ABCabcDEFd]|pq|rst)
-				   * where E folds into "pq" and F folds
-				   * into "rst", all other characters
-				   * fold to single characters. */
-				  SV *sv;
-
-				  if (!unicode_alternate)
-				      unicode_alternate = newAV();
-				  sv = newSVpvn((char*)foldbuf, foldlen);
-				  SvUTF8_on(sv);
-				  av_push(unicode_alternate, sv);
-			      }
-			 }
+			 if (f != value && foldlen == UNISKIP(f))
+			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", f);
 
 			 /* If folding and the value is one of the Greek
 			  * sigmas insert a few more sigmas to make the
 			  * folding rules of the sigmas to work right.
 			  * Note that not all the possible combinations
 			  * are handled here: some of them are handled
-			  * by the standard folding rules, and some of
-			  * them (literal or EXACTF cases) are handled
-			  * during runtime in regexec.c:S_find_byclass(). */
+			  * handled by the standard folding rules, and
+			  * some of them (literal or EXACTF cases) are
+			  * handled during runtime in
+			  * regexec.c:S_find_byclass(). */
 			 if (value == UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA) {
 			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
 					     (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA);
@@ -4114,7 +4096,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 
 	av_store(av, 0, listsv);
 	av_store(av, 1, NULL);
-	av_store(av, 2, (SV*)unicode_alternate);
 	rv = newRV_noinc((SV*)av);
 	n = add_data(pRExC_state, 1, "s");
 	RExC_rx->data->data[n] = (void*)rv;
@@ -4644,7 +4625,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 
 	{
 	    SV *lv;
-	    SV *sw = regclass_swash(o, FALSE, &lv, 0);
+	    SV *sw = regclass_swash(o, FALSE, &lv);
 	
 	    if (lv) {
 		if (sw) {
@@ -4798,7 +4779,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		new_comppad = NULL;
 		break;
 	    case 'n':
-	        break;
+		break;
 	    default:
 		Perl_croak(aTHX_ "panic: regfree data code '%c'", r->data->what[n]);
 	    }
