@@ -316,9 +316,9 @@ sub socket_blocking_mode
                         # set the non-blocking mode (set O_NONBLOCK)
 
   my $flags;
-  if ($^O eq 'MSWin32') {
-      # FIONBIO enables non-blocking sockets on windows.
-      # FIONBIO is (0x80000000|(4<<16)|(ord('f')<<8)|126), as per winsock.h.
+  if ($^O eq 'MSWin32' || $^O eq 'VMS') {
+      # FIONBIO enables non-blocking sockets on windows and vms.
+      # FIONBIO is (0x80000000|(4<<16)|(ord('f')<<8)|126), as per winsock.h, ioctl.h
       my $f = 0x8004667e;
       my $v = pack("L", $block ? 0 : 1);
       ioctl($fh, $f, $v) or croak("ioctl failed: $!");
