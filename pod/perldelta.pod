@@ -649,9 +649,13 @@ of the traditional two-argument form.  See L<perlfunc/open>.
     NOTE: The Configure flags -Duselonglong and -Duse64bits have been
     deprecated.  Use -Duse64bitint instead.
 
-Any platform that has 64-bit integers either (a) natively as longs or
-ints (b) via special compiler flags, or (c) using long long are able to
-use "quads" (64-bit integers) as follows:
+Any platform that has 64-bit integers either
+
+	(1) natively as longs or ints
+	(2) via special compiler flags
+	(3) using long long or int64_t
+
+are able to use "quads" (64-bit integers) as follows:
 
 =over 4
 
@@ -697,15 +701,22 @@ and compile Perl using the -Duse64bitint Configure flag.
 There are actually two modes of 64-bitness: the first one is achieved
 using Configure -Duse64bitint and the second one using Configure
 -Duse64bitall.  The difference is that the first one is minimal and
-the second one maximal.  The first one does only as much as is
-required to get 64-bit integers into Perl (this may mean, for example,
-using "long longs") while your memory may still be limited to 2
-gigabytes (because your pointers are still allowed to be 32-bit); the
-second one goes all the way by attempting to switch also longs (and
-pointers) to being 64-bit.  This may create an even more binary
-incompatible Perl than -Duse64bitint: the resulting executable may not
-run at all in a 32-bit box, or you may have to reboot/reconfigure/rebuild
-your operating system to be 64-bit aware.
+the second one maximal.
+
+The C<use64bitint> does only as much as is required to get 64-bit
+integers into Perl (this may mean, for example, using "long longs")
+while your memory may still be limited to 2 gigabytes (because your
+pointers could still be 32-bit).  Note that the name C<64bitint> does
+not imply that your C compiler will be using 64-bit C<int>s (it might,
+but it doesn't have to): the C<use64bitint> means that you will be
+able to have 64 bits wide scalar values.
+
+The C<use64bitall> goes all the way by attempting to switch also
+integers (if it can), longs (and pointers) to being 64-bit.  This may
+create an even more binary incompatible Perl than -Duse64bitint: the
+resulting executable may not run at all in a 32-bit box, or you may
+have to reboot/reconfigure/rebuild your operating system to be 64-bit
+aware.
 
 Natively 64-bit systems like Alpha and Cray need neither -Duse64bitint
 nor -Duse64bitall.
@@ -721,10 +732,15 @@ start losing precision (in their lower digits).
 
 If you have filesystems that support "large files" (files larger than
 2 gigabytes), you may now also be able to create and access them from
-Perl.  You have to use Configure -Duselargefiles.  Turning on the
-large file support also turns on 64-bit support on many platforms.
-Beware that unless your filesystem also supports "sparse files" seeking
-to umpteen petabytes may be unadvisable.
+Perl.  NOTE: the default action is to use the large file support, if
+available on the platform.
+
+If the large file support is on, and you have a Fcntl constant
+O_LARGEFILE, the O_LARGEFILE is automatically added to the flags
+of sysopen().
+
+Beware: unless your filesystem also supports "sparse files" seeking to
+umpteen petabytes may be unadvisable.
 
 Note that in addition to requiring a proper file system to do large
 files you may also need to adjust your per-process (or your
@@ -1489,15 +1505,14 @@ variables.
 =item Fcntl
 
 More Fcntl constants added: F_SETLK64, F_SETLKW64, O_LARGEFILE for
-large file (more than 4GB) access Note that the O_LARGEFILE is
-automatically/transparently added to sysopen() flags if large file
-support has been configured), Free/Net/OpenBSD locking behaviour flags
-F_FLOCK, F_POSIX, Linux F_SHLCK, and O_ACCMODE: the combined mask of
-O_RDONLY, O_WRONLY, and O_RDWR.  The seek()/sysseek() constants
-SEEK_SET, SEEK_CUR, and SEEK_END are available via the C<:seek> tag.
-The chmod()/stat() S_IF* constants and S_IS* functions are available
-via the C<:mode> tag.
-
+large file (more than 4GB) access (NOTE: the O_LARGEFILE is
+automatically added to sysopen() flags if large file support has been
+configured, as is the default), Free/Net/OpenBSD locking behaviour
+flags F_FLOCK, F_POSIX, Linux F_SHLCK, and O_ACCMODE: the combined
+mask of O_RDONLY, O_WRONLY, and O_RDWR.  The seek()/sysseek()
+constants SEEK_SET, SEEK_CUR, and SEEK_END are available via the
+C<:seek> tag.  The chmod()/stat() S_IF* constants and S_IS* functions
+are available via the C<:mode> tag.
 
 =item File::Compare
 

@@ -3091,7 +3091,11 @@ typedef struct am_table_short AMTS;
 /* It would be more fashionable to use Strtol() to define atol()
  * (as is done for Atoul(), see below) but for backward compatibility
  * we just assume atol(). */
-#   define Atol		atol
+#   if defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_ATOLL)
+#       define Atol	atoll
+#   else
+#       define Atol	atol
+#   endif
 #endif
 
 #if !defined(Strtoul) && defined(USE_64_BIT_INT) && defined(UV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG

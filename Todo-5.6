@@ -54,7 +54,12 @@ Configure
 Long doubles
     figure out where the PV->NV->PV conversion gets it wrong at least
     in AIX and Tru64 (V5.0 and onwards) when using long doubles: see the
-    regexp tricks we had to insert to t/comp/use.t and t/lib/bigfltpm.t.
+    regexp tricks we had to insert to t/comp/use.t and t/lib/bigfltpm.t,
+     (?:9|8999\d+) and the like.
+
+64-bit support
+    Configure probe for quad_t, uquad_t, and (argh) u_quad_t, they might
+    be in some systems the only thing working as quadtype and uquadtype.
 
 Locales
     deprecate traditional/legacy locales?
@@ -110,8 +115,10 @@ Miscellaneous
     floating point handling: nans, infinities, fp exception masks, etc.
 	at least the following interfaces exist: fp_classify(), fp_class(),
 	class(), isnan(), isinf(), isfinite(), finite(), isnormal(),
-	fp_setmask(), fp_getmask(), fp_setround(), fp_getround(), 
-	ieeefp.h, fp_class.h.  There are metaconfig units for all of these.
+	ordered(), fp_setmask(), fp_getmask(), fp_setround(), fp_getround(), 
+	ieeefp.h, fp_class.h.  There are metaconfig units for most of these.
+        Search for ifdef __osf__ in pp.c to find a temporary fix that
+	needs to be done right.
     fix the basic arithmetics (+ - * / %) to preserve IVness/UVness if
 	both arguments are IVs/UVs
     replace pod2html with new PodtoHtml? (requires other modules from CPAN)
@@ -120,7 +127,7 @@ Miscellaneous
     turn Cwd into an XS module?  (Configure already probes for getcwd())
     mmap for speeding up input? (Configure already probes for the mmap family)
     sendmsg, recvmsg? (Configure doesn't probe for these but the units exist)
-    setitimer, getitimer? (the units exist)
+    setitimer, getitimer? (the metaconfig units exist)
 
 Ongoing
     keep filenames 8.3 friendly, where feasible

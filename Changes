@@ -95,6 +95,252 @@ Version v5.6.0
 --------------
 
 ____________________________________________________________________________
+[  5676] By: gsar                                  on 2000/03/12  11:27:38
+        Log: don't bother testing if we can flush all handles when fflush(stdin)
+             shows the pipe bug
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  5675] By: jhi                                   on 2000/03/12  05:08:29
+        Log: continue flogging the string->int conversion ifdefs
+     Branch: cfgperl
+	   ! perl.h
+____________________________________________________________________________
+[  5674] By: gsar                                  on 2000/03/12  05:01:30
+        Log: fix File::DosGlob for patterns with drive names like c:*.bat
+             (suggested by Jason Mathews <mathews@computer.org>)
+     Branch: perl
+	   ! lib/File/DosGlob.pm
+____________________________________________________________________________
+[  5673] By: jhi                                   on 2000/03/12  04:48:14
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> doop.c perl.h pod/perldelta.pod pod/perldiag.pod
+	  !> pod/perlpod.pod toke.c utils/perldoc.PL
+____________________________________________________________________________
+[  5672] By: gsar                                  on 2000/03/12  03:57:23
+        Log: security fixes for perldoc (from Tom Christiansen)
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[  5671] By: gsar                                  on 2000/03/12  03:45:27
+        Log: Larry's patch to disallow CORE::Snark, with perldiag entry
+     Branch: perl
+	   ! pod/perldelta.pod pod/perldiag.pod toke.c
+____________________________________________________________________________
+[  5670] By: gsar                                  on 2000/03/12  03:36:17
+        Log: insufficient buffer in change#5317
+     Branch: perl
+	   ! doop.c
+____________________________________________________________________________
+[  5669] By: gsar                                  on 2000/03/12  03:15:29
+        Log: avoid L<foo|bar> for now, not all the pod2foo support it
+     Branch: perl
+	   ! pod/perlpod.pod
+____________________________________________________________________________
+[  5668] By: gsar                                  on 2000/03/12  02:35:55
+        Log: rework change#5664
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  5667] By: jhi                                   on 2000/03/11  21:35:29
+        Log: todo and perldelta updates
+     Branch: cfgperl
+	   ! Todo Todo-5.6 pod/perldelta.pod
+____________________________________________________________________________
+[  5666] By: jhi                                   on 2000/03/11  21:00:34
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> perl.h
+____________________________________________________________________________
+[  5665] By: jhi                                   on 2000/03/11  20:58:58
+        Log: Fixes for #5661.
+     Branch: cfgperl
+	   ! perl.h
+____________________________________________________________________________
+[  5664] By: gsar                                  on 2000/03/11  19:50:06
+        Log: fix Strtoul() misdefinition is change#5661
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  5663] By: gsar                                  on 2000/03/11  19:21:18
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  !> Configure config_h.SH hints/solaris_2.sh perl.h
+	  !> t/pragma/warn/pp_hot toke.c
+____________________________________________________________________________
+[  5662] By: jhi                                   on 2000/03/11  19:06:20
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> cop.h perl.c pp_ctl.c t/op/eval.t t/op/misc.t
+____________________________________________________________________________
+[  5661] By: jhi                                   on 2000/03/11  19:03:32
+        Log: Use Atof() instead of bare strtod(); ditto for Atol()/Atoul()
+             (introduce the latter) instead of bare strtoll()/strtoll().
+     Branch: cfgperl
+	   ! perl.h toke.c
+____________________________________________________________________________
+[  5660] By: gsar                                  on 2000/03/11  18:40:49
+        Log: another long-standing eval bug: return doesn't reset $@ correctly
+     Branch: perl
+	   ! pp_ctl.c t/op/eval.t
+____________________________________________________________________________
+[  5659] By: jhi                                   on 2000/03/11  18:27:54
+        Log: metaconfig-ify the test for broken fflush(NULL)
+             (which ails e.g. Solaris), from Ulrich Pfeifer.
+     Branch: cfgperl
+	   ! Configure config_h.SH hints/solaris_2.sh
+     Branch: metaconfig/U/perl
+	   ! d_unorderedl.U fflushall.U
+____________________________________________________________________________
+[  5658] By: gsar                                  on 2000/03/11  18:11:22
+        Log: change#3511 was not defensive enough about try blocks, causing
+             bogus attempts to free closures, and thence, segfaults
+     Branch: perl
+	   ! cop.h perl.c pp_ctl.c t/op/misc.t
+____________________________________________________________________________
+[  5657] By: jhi                                   on 2000/03/11  18:04:44
+        Log: Rewording.
+     Branch: cfgperl
+	   ! t/pragma/warn/pp_hot
+____________________________________________________________________________
+[  5656] By: jhi                                   on 2000/03/11  17:41:29
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> (integrate 27 files)
+____________________________________________________________________________
+[  5655] By: gsar                                  on 2000/03/11  17:06:03
+        Log: reword comment
+     Branch: perl
+	   ! t/pragma/warn/pp_hot
+____________________________________________________________________________
+[  5654] By: gsar                                  on 2000/03/11  17:01:47
+        Log: off-by-one in os2.c (from Ilya Zakharevich)
+     Branch: perl
+	   ! os2/os2.c
+____________________________________________________________________________
+[  5653] By: gsar                                  on 2000/03/11  16:59:48
+        Log: File::Spec::VMS fixups, *not tested* on VMS (from Barrie Slaymaker)
+     Branch: perl
+	   ! lib/File/Spec/VMS.pm t/lib/filespec.t
+____________________________________________________________________________
+[  5652] By: gsar                                  on 2000/03/11  16:52:03
+        Log: missing export list entry in change#5619
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[  5651] By: gsar                                  on 2000/03/11  16:50:05
+        Log: avoid using context pointer in MUTEX_INIT() et al; remove the
+             *_NOCONTEXT variants to keep it simple
+     Branch: perl
+	   ! malloc.c thread.h win32/win32thread.h
+____________________________________________________________________________
+[  5650] By: gsar                                  on 2000/03/11  16:07:35
+        Log: remove =for section (from Johan Vromans)
+     Branch: perl
+	   ! lib/Getopt/Long.pm
+____________________________________________________________________________
+[  5649] By: gsar                                  on 2000/03/11  16:05:50
+        Log: add nokfile target in Makefile (from Andy Dougherty)
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  5648] By: gsar                                  on 2000/03/11  16:02:53
+        Log: mention podchecker (from Tim Jenness <timj@jach.hawaii.edu>)
+     Branch: perl
+	   ! pod/perlpod.pod
+____________________________________________________________________________
+[  5647] By: gsar                                  on 2000/03/11  16:01:03
+        Log: VMS build tweaks (from Charles Bailey)
+     Branch: perl
+	   ! configure.com perl.c t/pragma/warn/doio t/pragma/warn/util
+	   ! vms/subconfigure.com
+____________________________________________________________________________
+[  5646] By: gsar                                  on 2000/03/11  10:13:27
+        Log: remove outdated ftp.cis.ufl.edu reference
+     Branch: perl
+	   ! pod/perlfaq2.pod
+____________________________________________________________________________
+[  5645] By: gsar                                  on 2000/03/11  10:10:39
+        Log: failed hunk in change#5644
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[  5644] By: gsar                                  on 2000/03/11  10:08:47
+        Log: fix optimizer bug in /^(?p{"a"})b/ (from Ilya Zakharevich)
+     Branch: perl
+	   ! regcomp.c t/op/pat.t
+____________________________________________________________________________
+[  5643] By: gsar                                  on 2000/03/11  09:48:30
+        Log: better {local,gm}time documentation (from Mark-Jason Dominus)
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  5642] By: gsar                                  on 2000/03/11  09:45:10
+        Log: tweaks for lynxos build (from Ed Mooring <mooring@lynx.com>)
+     Branch: perl
+	   ! doio.c hints/lynxos.sh perl.h
+____________________________________________________________________________
+[  5641] By: gsar                                  on 2000/03/11  09:42:56
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  !> Configure Todo-5.6 config_h.SH hints/irix_6.sh
+	  !> lib/Math/Complex.pm regcomp.c t/op/64bit.t
+____________________________________________________________________________
+[  5640] By: gsar                                  on 2000/03/11  09:24:30
+        Log: perldelta update, typos and whitespace adjustments
+     Branch: perl
+	   ! lib/open.pm miniperlmain.c pod/perldelta.pod win32/perllib.c
+____________________________________________________________________________
+[  5639] By: jhi                                   on 2000/03/11  00:51:48
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> (integrate 44 files)
+____________________________________________________________________________
+[  5638] By: jhi                                   on 2000/03/11  00:45:46
+        Log: Cpp out deadcode that IRIX compiler noticed. 
+     Branch: cfgperl
+	   ! regcomp.c
+____________________________________________________________________________
+[  5637] By: jhi                                   on 2000/03/10  14:22:24
+        Log: Do not use Perl's malloc in IRIX.
+     Branch: cfgperl
+	   ! hints/irix_6.sh
+____________________________________________________________________________
+[  5636] By: jhi                                   on 2000/03/10  05:27:03
+        Log: More/modified unused floating point units.
+     Branch: metaconfig/U/perl
+	   + d_fp_class_l.U d_unordered.U d_unorderedl.U
+	   ! d_fpclass.U
+____________________________________________________________________________
+[  5635] By: jhi                                   on 2000/03/10  01:54:07
+        Log: Add various yet-unused units.
+     Branch: metaconfig/U/perl
+	   + d_class.U d_fchdir.U d_finite.U d_fp_class.U d_fp_classl.U
+	   + d_fpclass.U d_fpclassify.U d_frexpl.U d_futimes.U
+	   + d_getitimer.U d_getrlimit.U d_iconv.U d_isfinite.U d_isinf.U
+	   + d_isnan.U d_isnanl.U d_lchmod.U d_lutimes.U d_setitimer.U
+	   + d_setrlimit.U d_ualarm.U d_utimes.U
+____________________________________________________________________________
+[  5634] By: jhi                                   on 2000/03/10  01:07:54
+        Log: Fix goofups noticed by Mark Bixby and Jeff Okamoto.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/compline/nblock_io.U
+     Branch: metaconfig/U/perl
+	   ! use64bits.U
+____________________________________________________________________________
+[  5633] By: jhi                                   on 2000/03/09  23:22:33
+        Log: Remove an obsolete note.
+     Branch: cfgperl
+	   ! t/op/64bit.t
+____________________________________________________________________________
+[  5632] By: gsar                                  on 2000/03/09  18:50:43
+        Log: update Changes
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  5631] By: gsar                                  on 2000/03/09  18:49:12
         Log: track more of the child state on Windows
      Branch: perl
