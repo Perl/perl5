@@ -356,3 +356,71 @@ my $b ; chop $b;
 print STDERR "The End.\n" ;
 EXPECT
 Use of uninitialized value in scalar chop at - line 7.
+########
+
+use warnings FATAL => 'syntax', NONFATAL => 'void' ;
+
+length "abc";
+print STDERR "The End.\n" ;
+EXPECT
+Useless use of length in void context at - line 4.
+The End.
+########
+
+use warnings FATAL => 'all', NONFATAL => 'void' ;
+
+length "abc";
+print STDERR "The End.\n" ;
+EXPECT
+Useless use of length in void context at - line 4.
+The End.
+########
+
+use warnings FATAL => 'all', NONFATAL => 'void' ;
+
+my $a ; chomp $a;
+length "abc";
+print STDERR "The End.\n" ;
+EXPECT
+Useless use of length in void context at - line 5.
+Use of uninitialized value in scalar chomp at - line 4.
+########
+
+use warnings FATAL => 'void', NONFATAL => 'void' ;
+
+length "abc";
+print STDERR "The End.\n" ;
+EXPECT
+Useless use of length in void context at - line 4.
+The End.
+########
+
+use warnings NONFATAL => 'void', FATAL => 'void' ;
+
+length "abc";
+print STDERR "The End.\n" ;
+EXPECT
+Useless use of length in void context at - line 4.
+########
+
+use warnings FATAL => 'all', NONFATAL => 'io';
+no warnings 'once';
+
+open(F, "<true\ncd");
+close "fred" ;
+print STDERR "The End.\n" ;
+EXPECT
+Unsuccessful open on filename containing newline at - line 5.
+close() on unopened filehandle fred at - line 6.
+The End.
+########
+
+use warnings FATAL => 'all', NONFATAL => 'io', FATAL => 'unopened' ;
+no warnings 'once';
+
+open(F, "<true\ncd");
+close "fred" ;
+print STDERR "The End.\n" ;
+EXPECT
+Unsuccessful open on filename containing newline at - line 5.
+close() on unopened filehandle fred at - line 6.
