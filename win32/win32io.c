@@ -297,8 +297,37 @@ PerlIOWin32_close(PerlIO *f)
 PerlIO *
 PerlIOWin32_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *params)
 {
- /* Almost certainly needs more work */
- return PerlIOBase_dup(aTHX_ f, o, params);
+ PerlIOWin32 *os = PerlIOSelf(f,PerlIOWin32);
+ HANDLE proc = GetCurrentProcess();
+ HANDLE new; 
+ if (DuplicateHandle(proc, os->h, proc, &new, 0, FALSE,  DUPLICATE_SAME_ACCESS))
+  {
+   char mode[8];
+   int fd = win32_open_osfhandle((long) new, PerlIOUnix_oflags(PerlIO_modestr(o,mode)));
+   if (fd >= 0) 
+    {
+     f = PerlIOBase_dup(aTHX_ f, o, params);
+     if (f) 
+      {
+       PerlIOWin32 *fs = PerlIOSelf(f,PerlIOWin32);
+       fs->h  = new;
+       fs->fd = fd;
+       fs->refcnt = 1;
+       fdtable[fd] = fs;
+       if (fd > max_open_fd)
+        max_open_fd = fd;
+      }
+     else
+      {
+       win32_close(fd);
+      }
+    }
+   else
+    {
+     CloseHandle(new);
+    }
+  }
+ return f;
 }
 
 PerlIO_funcs PerlIO_win32 = {
