@@ -53,6 +53,7 @@ $ use_two_pot_malloc = "N"
 $ use_pack_malloc = "N"
 $ use_debugmalloc = "N"
 $ ccflags = ""
+$ static_ext = ""
 $ vms_default_directory_name = F$ENVIRONMENT("DEFAULT")
 $ max_allowed_dir_depth = 3  ! e.g. [A.B.PERLxxx] not [A.B.C.PERLxxx]
 $! max_allowed_dir_depth = 2 ! e.g. [A.PERLxxx] not [A.B.PERLxxx]
@@ -2060,6 +2061,10 @@ $   Has_socketshr = "F"
 $   ans = F$EDIT(ans,"TRIM,COMPRESS,LOWERCASE")
 $   IF ans.eqs."decc" then Has_Dec_C_Sockets = "T"
 $   IF ans.eqs."socketshr" then Has_socketshr = "T"
+$ ENDIF
+$ IF Has_Dec_C_Sockets .or. Has_socketshr
+$ THEN
+$   static_ext = f$edit(static_ext+" "+"Socket","trim,compress")
 $ ENDIF
 $!
 $!
@@ -5310,7 +5315,7 @@ $ WC "spitshell='write sys$output '"
 $ WC "src='" + src + "'"
 $ WC "ssizetype='int'"
 $ WC "startperl=" + startperl ! This one's special--no enclosing single quotes
-$ WC "static_ext='" + "'"
+$ WC "static_ext='" + static_ext + "'"
 $ WC "stdchar='" + stdchar + "'"
 $ WC "stdio_base='((*fp)->_base)'"
 $ WC "stdio_bufsiz='((*fp)->_cnt + (*fp)->_ptr - (*fp)->_base)'"
