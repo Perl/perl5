@@ -54,7 +54,7 @@ while (<DATA>)
         $try .= "\$x->length();";
       # some unary ops (test the bxxx form, since that is done by AUTOLOAD)
       } elsif ($f =~ /^f(nan|sstr|neg|floor|ceil|abs)$/) {
-        $try .= "\$x->b$1();";
+        $try .= "\$x->f$1();";
       # some is_xxx test function	
       } elsif ($f =~ /^is_(zero|one|negative|positive|odd|even|nan)$/) {
         $try .= "\$x->$f();";
@@ -88,6 +88,10 @@ while (<DATA>)
         $try .= '$x * $y;';
       } elsif ($f eq "fdiv") {
         $try .= "$setup; \$x / \$y;";
+      } elsif ($f eq "frsft") {
+        $try .= '$x >> $y;';
+      } elsif ($f eq "flsft") {
+        $try .= '$x << $y;';
       } elsif ($f eq "fmod") {
         $try .= '$x % $y;';
       } else { warn "Unknown op '$f'"; }
@@ -128,7 +132,8 @@ while (<DATA>)
     }
   } # end while
 
-# check whether new() for BigInts destroys them ($y == 12 in this case)
+# check whether $class->new( Math::BigInt->new()) destroys it 
+# ($y == 12 in this case)
 $x = Math::BigInt->new(1200); $y = $class->new($x);
 ok ($y,1200); ok ($x,1200);
 
@@ -141,7 +146,12 @@ ok ($x,'NaN'); ok ($y,'NaN');
 $x = $class->bzero(); ($x,$y) = $x->fdiv(1);
 ok ($x,0); ok ($y,0);
 
-# all done
+$x = $class->new(2); $x->fzero(); ok_undef ($x->{_a}); ok_undef ($x->{_p});
+$x = $class->new(2); $x->finf();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+$x = $class->new(2); $x->fone();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+$x = $class->new(2); $x->fnan();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+
+1; # all done
 
 ###############################################################################
 # Perl 5.005 does not like ok ($x,undef)
@@ -155,6 +165,21 @@ sub ok_undef
   }
 
 __DATA__
+&frsft
+#NaNfrsft:NaN
+0:2:0
+1:1:0.5
+2:1:1
+4:1:2
+123:1:61.5
+32:3:4
+&flsft
+#NaNflsft:NaN
+2:1:4
+4:3:32
+5:3:40
+1:2:4
+0:5:0
 &fnorm
 1:1
 -0:0
@@ -867,6 +892,7 @@ abc:+1:abc:NaN
 +106500000:+339:314159.2920353982300884955752212389380531
 +1000000000:+3:333333333.3333333333333333333333333333333
 2:25.024996000799840031993601279744051189762:0.07992009269196593320152084692285869265447
+123456:1:123456
 $div_scale = 20
 +1000000000:+9:111111111.11111111111
 +2000000000:+9:222222222.22222222222
@@ -883,6 +909,7 @@ $div_scale = 20
 1:10000:0.0001
 1:504:0.001984126984126984127
 2:1.987654321:1.0062111801179738436
+123456789.123456789123456789123456789:1:123456789.12345678912
 # the next two cases are the "old" behaviour, but are now (>v0.01) different
 #+35500000:+113:314159.292035398230088
 #+71000000:+226:314159.292035398230088
@@ -893,6 +920,7 @@ $div_scale = 20
 $div_scale = 1
 # round to accuracy 1 after bdiv
 +124:+3:40
+123456789.1234:1:100000000
 # reset scale for further tests
 $div_scale = 40
 &fmod
@@ -913,14 +941,18 @@ $div_scale = 40
 nanfsqrt:NaN
 +inf:inf
 -inf:NaN
-+1:1
-+2:1.41421356237309504880168872420969807857
-+4:2
-+16:4
-+100:10
-+123.456:11.11107555549866648462149404118219234119
-+15241.38393:123.4559999756998444766131352122991626468
-+1.44:1.2
+1:1
+2:1.41421356237309504880168872420969807857
+4:2
+9:3
+16:4
+100:10
+123.456:11.11107555549866648462149404118219234119
+15241.38393:123.4559999756998444766131352122991626468
+1.44:1.2
+# sqrt(1.44) = 1.2, sqrt(e10) = e5 => 12e4
+1.44E10:120000
+2e10:141421.356237309504880168872420969807857
 &is_nan
 123:0
 abc:1

@@ -25,9 +25,8 @@ sub new
         my $proto  = shift;
         my $class  = ref($proto) || $proto;
 
-        my $value       = shift;	# no || 0 here!
-        my $decimal     = shift;
-        my $radix       = 0;
+        my $value       = shift;
+	$value 		= 0 if !defined $value; 	# no || 0 here!
 
         # Store the floating point value
         my $self = bless Math::BigInt->new($value), $class;

@@ -31,7 +31,7 @@ BEGIN
 #  unshift @INC, $location; # to locate the testing files
 #  # chdir 't' if -d 't';
 
-  plan tests => 1325;
+  plan tests => 1367;
   }
 
 use Math::BigInt;

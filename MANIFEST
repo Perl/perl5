@@ -1057,6 +1057,7 @@ lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
+lib/Math/BigInt/t/bare_mbi.t	Test Math::BigInt::CareCalc
 lib/Math/BigInt/t/bigfltpm.inc	Shared tests for bigfltpm.t and sub_mbf.t
 lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
 lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
@@ -1852,8 +1853,8 @@ pod/Makefile.SH			generate Makefile whichs makes pods into something else
 pod/perl.pod			Top level perl documentation
 pod/perl5004delta.pod		Changes from 5.003 to 5.004
 pod/perl5005delta.pod		Changes from 5.004 to 5.005
-pod/perl56delta.pod		Changes from 5.005 to 5.6
 pod/perl561delta.pod		Changes from 5.6.0 to 5.6.1
+pod/perl56delta.pod		Changes from 5.005 to 5.6
 pod/perl570delta.pod		Changes from 5.6 to 5.7.0
 pod/perl571delta.pod		Changes from 5.7.0 to 5.7.1
 pod/perl572delta.pod		Changes from 5.7.1 to 5.7.2
@@ -2096,6 +2097,7 @@ t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
 t/lib/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
+t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness

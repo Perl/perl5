@@ -24,9 +24,10 @@ sub new
         my $proto  = shift;
         my $class  = ref($proto) || $proto;
 
-        my $value       = shift || 0;   # Set to 0 if not provided
-        my $decimal     = shift;
-        my $radix       = 0;
+        my $value       = shift;
+	# Set to 0 if not provided, but don't use || (this would trigger for
+	# a passed objects to see if they are zero)
+	$value 	= 0 if !defined $value;   
 
         # Store the floating point value
         my $self = bless Math::BigFloat->new($value), $class;

@@ -35,7 +35,7 @@ sub _swap
 ##############################################################################
 package main;
 
-my $CALC = $class->_core_lib(); ok ($CALC,'Math::BigInt::Calc');
+my $CALC = $class->_core_lib(); ok ($CALC,$CL);
 
 my ($f,$z,$a,$exp,@a,$m,$e,$round_mode);
 
@@ -165,9 +165,16 @@ while (<DATA>)
         $try = "\$x = $class->new(\"$args[0]\"); \$x->digit($args[1]);";
       } else { warn "Unknown op '$f'"; }
     }
-    # print "trying $try\n";
+   #  print "trying $try\n";
     $ans1 = eval $try;
-    $ans =~ s/^[+]([0-9])/$1/; 		# remove leading '+' 
+    # remove leading '+' from target
+    $ans =~ s/^[+]([0-9])/$1/; 		
+    # convert hex/binary targets to decimal	
+    if ($ans =~ /^(0x0x|0b0b)/)
+      {
+      $ans =~ s/^0[xb]//;
+      $ans = Math::BigInt->new($ans)->bstr();
+      }
     if ($ans eq "")
       {
       ok_undef ($ans1); 
@@ -399,14 +406,14 @@ $x = $class->new('+inf'); ok ($x,'inf');
 
 ###############################################################################
 ###############################################################################
-# the followin tests only make sense with Math::BigInt::Calc
+# the followin tests only make sense with Math::BigInt::Calc or BareCalc
 
-exit if $CALC ne 'Math::BigInt::Calc'; # for Pari et al.
+exit if $CALC !~ /^Math::BigInt::(Calc|BareCalc)$/; # for Pari et al.
 
 ###############################################################################
 # check proper length of internal arrays
 
-my $bl = Math::BigInt::Calc::_base_len();
+my $bl = $CL->_base_len();
 my $BASE = '9' x $bl;
 my $MAX = $BASE;
 $BASE++;
@@ -428,18 +435,19 @@ ok($x->numify(),-($BASE*$BASE*1+$BASE*1+1));
 ###############################################################################
 # test bug in _digits with length($c[-1]) where $c[-1] was "00001" instead of 1
 
-$x = Math::BigInt->new(99998); $x++; $x++; $x++; $x++;
-if ($x > 100000) { ok (1,1) } else { ok ("$x < 100000","$x > 100000"); }
+$x = $class->new($BASE-2); $x++; $x++; $x++; $x++;
+if ($x > $BASE) { ok (1,1) } else { ok ("$x < $BASE","$x > $BASE"); }
 
-$x = Math::BigInt->new(100003); $x++;
-$y = Math::BigInt->new(1000000);
-if ($x < 1000000) { ok (1,1) } else { ok ("$x > 1000000","$x < 1000000"); }
+$x = $class->new($BASE+3); $x++;
+if ($x > $BASE) { ok (1,1) } else { ok ("$x > $BASE","$x < $BASE"); }
+
+# test for +0 instead of int(): 
+$x = $class->new($MAX); ok ($x->length(), length($MAX));
 
 ###############################################################################
 # bug in sub where number with at least 6 trailing zeros after any op failed
 
-$x = Math::BigInt->new(123456); $z = Math::BigInt->new(10000); $z *= 10;
-$x -= $z;
+$x = $class->new(123456); $z = $class->new(10000); $z *= 10; $x -= $z;
 ok ($z, 100000);
 ok ($x, 23456);
 
@@ -449,7 +457,7 @@ ok ($x, 23456);
 # construct a number with a zero-hole of BASE_LEN
 $x = '1' x $bl . '0' x $bl . '1' x $bl . '0' x $bl;
 $y = '1' x (2*$bl);
-$x = Math::BigInt->new($x)->bmul($y);
+$x = $class->new($x)->bmul($y);
 # result is 123..$bl .  $bl x (3*bl-1) . $bl...321 . '0' x $bl
 $y = ''; my $d = '';
 for (my $i = 1; $i <= $bl; $i++)
@@ -460,12 +468,33 @@ $y .= $bl x (3*$bl-1) . $d . '0' x $bl;
 ok ($x,$y);
 
 ###############################################################################
+# see if mul shortcut for small numbers works
+
+$x = '9' x $bl;
+$x = $class->new($x); 
+# 999 * 999 => 998 . 001, 9999*9999 => 9998 . 0001
+ok ($x*$x, '9' x ($bl-1) . '8' . '0' x ($bl-1) . '1');
+
+###############################################################################
 # bug with rest "-0" in div, causing further div()s to fail
 
-$x = Math::BigInt->new('-322056000'); ($x,$y) = $x->bdiv('-12882240');
+$x = $class->new('-322056000'); ($x,$y) = $x->bdiv('-12882240');
 
 ok ($y,'0','not -0');	# not '-0'
 is_valid($y);
+
+###############################################################################
+# test whether bone/bzero take additional A & P, or reset it etc
+
+$x = $class->new(2); $x->bzero(); ok_undef ($x->{_a}); ok_undef ($x->{_p});
+$x = $class->new(2); $x->binf();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+$x = $class->new(2); $x->bone();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+$x = $class->new(2); $x->bnan();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+
+$x = $class->new(2); $x->{_a} = 1; $x->{_p} = 2; $x->bnan();
+ok_undef ($x->{_a}); ok_undef ($x->{_p});
+$x = $class->new(2); $x->{_a} = 1; $x->{_p} = 2; $x->binf();
+ok_undef ($x->{_a}); ok_undef ($x->{_p});
 
 ### all tests done ############################################################
 
@@ -610,6 +639,7 @@ NaN:-inf:
 0b1000000000000000000000000000000:1073741824
 0b_101:NaN
 0b1_0_1:5
+0b0_0_0_1:1
 # hex input
 -0x0:0
 0xabcdefgh:NaN
@@ -619,6 +649,7 @@ NaN:-inf:
 -0x1234:-4660
 0x12345678:305419896
 0x1_2_3_4_56_78:305419896
+0xa_b_c_d_e_f:11259375
 0x_123:NaN
 # inf input
 inf:inf
@@ -1218,6 +1249,23 @@ abc:0:NaN
 -7:-4:-8
 -7:4:0
 -4:7:4
+# equal arguments are treated special, so also do some test with unequal ones
+0xFFFF:0xFFFF:0x0xFFFF
+0xFFFFFF:0xFFFFFF:0x0xFFFFFF
+0xFFFFFFFF:0xFFFFFFFF:0x0xFFFFFFFF
+0xFFFFFFFFFF:0xFFFFFFFFFF:0x0xFFFFFFFFFF
+0xFFFFFFFFFFFF:0xFFFFFFFFFFFF:0x0xFFFFFFFFFFFF
+0xF0F0:0xF0F0:0x0xF0F0
+0x0F0F:0x0F0F:0x0x0F0F
+0xF0F0F0:0xF0F0F0:0x0xF0F0F0
+0x0F0F0F:0x0F0F0F:0x0x0F0F0F
+0xF0F0F0F0:0xF0F0F0F0:0x0xF0F0F0F0
+0x0F0F0F0F:0x0F0F0F0F:0x0x0F0F0F0F
+0xF0F0F0F0F0:0xF0F0F0F0F0:0x0xF0F0F0F0F0
+0x0F0F0F0F0F:0x0F0F0F0F0F:0x0x0F0F0F0F0F
+0xF0F0F0F0F0F0:0xF0F0F0F0F0F0:0x0xF0F0F0F0F0F0
+0x0F0F0F0F0F0F:0x0F0F0F0F0F0F:0x0x0F0F0F0F0F0F
+0x1F0F0F0F0F0F:0x3F0F0F0F0F0F:0x0x1F0F0F0F0F0F
 &bior
 abc:abc:NaN
 abc:0:NaN
@@ -1232,6 +1280,38 @@ abc:0:NaN
 -6:-6:-6
 -7:4:-3
 -4:7:-1
+# equal arguments are treated special, so also do some test with unequal ones
+0xFFFF:0xFFFF:0x0xFFFF
+0xFFFFFF:0xFFFFFF:0x0xFFFFFF
+0xFFFFFFFF:0xFFFFFFFF:0x0xFFFFFFFF
+0xFFFFFFFFFF:0xFFFFFFFFFF:0x0xFFFFFFFFFF
+0xFFFFFFFFFFFF:0xFFFFFFFFFFFF:0x0xFFFFFFFFFFFF
+0:0xFFFF:0x0xFFFF
+0:0xFFFFFF:0x0xFFFFFF
+0:0xFFFFFFFF:0x0xFFFFFFFF
+0:0xFFFFFFFFFF:0x0xFFFFFFFFFF
+0:0xFFFFFFFFFFFF:0x0xFFFFFFFFFFFF
+0xFFFF:0:0x0xFFFF
+0xFFFFFF:0:0x0xFFFFFF
+0xFFFFFFFF:0:0x0xFFFFFFFF
+0xFFFFFFFFFF:0:0x0xFFFFFFFFFF
+0xFFFFFFFFFFFF:0:0x0xFFFFFFFFFFFF
+0xF0F0:0xF0F0:0x0xF0F0
+0x0F0F:0x0F0F:0x0x0F0F
+0xF0F0:0x0F0F:0x0xFFFF
+0xF0F0F0:0xF0F0F0:0x0xF0F0F0
+0x0F0F0F:0x0F0F0F:0x0x0F0F0F
+0x0F0F0F:0xF0F0F0:0x0xFFFFFF
+0xF0F0F0F0:0xF0F0F0F0:0x0xF0F0F0F0
+0x0F0F0F0F:0x0F0F0F0F:0x0x0F0F0F0F
+0x0F0F0F0F:0xF0F0F0F0:0x0xFFFFFFFF
+0xF0F0F0F0F0:0xF0F0F0F0F0:0x0xF0F0F0F0F0
+0x0F0F0F0F0F:0x0F0F0F0F0F:0x0x0F0F0F0F0F
+0x0F0F0F0F0F:0xF0F0F0F0F0:0x0xFFFFFFFFFF
+0xF0F0F0F0F0F0:0xF0F0F0F0F0F0:0x0xF0F0F0F0F0F0
+0x0F0F0F0F0F0F:0x0F0F0F0F0F0F:0x0x0F0F0F0F0F0F
+0x0F0F0F0F0F0F:0xF0F0F0F0F0F0:0x0xFFFFFFFFFFFF
+0x1F0F0F0F0F0F:0xF0F0F0F0F0F0:0x0xFFFFFFFFFFFF
 &bxor
 abc:abc:NaN
 abc:0:NaN
@@ -1248,6 +1328,37 @@ abc:0:NaN
 -4:7:-5
 4:-7:-3
 -4:-7:5
+# equal arguments are treated special, so also do some test with unequal ones
+0xFFFF:0xFFFF:0
+0xFFFFFF:0xFFFFFF:0
+0xFFFFFFFF:0xFFFFFFFF:0
+0xFFFFFFFFFF:0xFFFFFFFFFF:0
+0xFFFFFFFFFFFF:0xFFFFFFFFFFFF:0
+0:0xFFFF:0x0xFFFF
+0:0xFFFFFF:0x0xFFFFFF
+0:0xFFFFFFFF:0x0xFFFFFFFF
+0:0xFFFFFFFFFF:0x0xFFFFFFFFFF
+0:0xFFFFFFFFFFFF:0x0xFFFFFFFFFFFF
+0xFFFF:0:0x0xFFFF
+0xFFFFFF:0:0x0xFFFFFF
+0xFFFFFFFF:0:0x0xFFFFFFFF
+0xFFFFFFFFFF:0:0x0xFFFFFFFFFF
+0xFFFFFFFFFFFF:0:0x0xFFFFFFFFFFFF
+0xF0F0:0xF0F0:0
+0x0F0F:0x0F0F:0
+0xF0F0:0x0F0F:0x0xFFFF
+0xF0F0F0:0xF0F0F0:0
+0x0F0F0F:0x0F0F0F:0
+0x0F0F0F:0xF0F0F0:0x0xFFFFFF
+0xF0F0F0F0:0xF0F0F0F0:0
+0x0F0F0F0F:0x0F0F0F0F:0
+0x0F0F0F0F:0xF0F0F0F0:0x0xFFFFFFFF
+0xF0F0F0F0F0:0xF0F0F0F0F0:0
+0x0F0F0F0F0F:0x0F0F0F0F0F:0
+0x0F0F0F0F0F:0xF0F0F0F0F0:0x0xFFFFFFFFFF
+0xF0F0F0F0F0F0:0xF0F0F0F0F0F0:0
+0x0F0F0F0F0F0F:0x0F0F0F0F0F0F:0
+0x0F0F0F0F0F0F:0xF0F0F0F0F0F0:0x0xFFFFFFFFFFFF
 &bnot
 abc:NaN
 +0:-1
@@ -1367,18 +1478,30 @@ abc:12:NaN
 -123:3
 215960156869840440586892398248:30
 &bsqrt
+145:12
 144:12
+143:11
 16:4
+170:13
+169:13
+168:12
 4:2
+3:1
 2:1
+9:3
 12:3
 256:16
 100000000:10000
 4000000000000:2000000
+152399026:12345
+152399025:12345
+152399024:12344
 1:1
 0:0
 -2:NaN
+-123:NaN
 Nan:NaN
++inf:NaN
 &bround
 $round_mode('trunc')
 0:12:0
