@@ -1669,6 +1669,7 @@ SV *sv;
 #ifdef VMS
     if (dosearch) {
 	int hasdir, idx = 0, deftypes = 1;
+	bool seen_dot = 1;
 
 	hasdir = (strpbrk(scriptname,":[</") != Nullch) ;
 	/* The first time through, just add SEARCH_EXTS to whatever we
