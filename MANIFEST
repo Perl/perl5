@@ -268,6 +268,7 @@ ext/Encode/Encode/iso8859-8.enc	Encoding tables
 ext/Encode/Encode/iso8859-8.ucm	Encoding tables
 ext/Encode/Encode/iso8859-9.enc	Encoding tables
 ext/Encode/Encode/iso8859-9.ucm	Encoding tables
+ext/Encode/Encode/isoir-197.enc	Encoding tables
 ext/Encode/Encode/jis0201.enc	Encoding tables
 ext/Encode/Encode/jis0208.enc	Encoding tables
 ext/Encode/Encode/jis0212.enc	Encoding tables
@@ -283,6 +284,7 @@ ext/Encode/Encode/macIceland.enc	Encoding tables
 ext/Encode/Encode/macJapan.enc	Encoding tables
 ext/Encode/Encode/macRoman.enc	Encoding tables
 ext/Encode/Encode/macRomania.enc	Encoding tables
+ext/Encode/Encode/macSami.enc	Encoding tables
 ext/Encode/Encode/macThai.enc	Encoding tables
 ext/Encode/Encode/macTurkish.enc	Encoding tables
 ext/Encode/Encode/macUkraine.enc	Encoding tables
@@ -859,8 +861,8 @@ lib/ExtUtils/Installed.pm	Information on installed extensions
 lib/ExtUtils/Liblist.pm		Locates libraries
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
-lib/ExtUtils/Manifest.t		See if ExtUtils::Manifest works
 lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
+lib/ExtUtils/Manifest.t		See if ExtUtils::Manifest works
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
@@ -1151,7 +1153,6 @@ lib/Test/Simple/t/skipall.t     Test::More test, skip all tests
 lib/Test/Simple/t/todo.t        Test::More test, TODO tests
 lib/Test/Simple/t/undef.t       Test::More test, undefs don't cause warnings
 lib/Test/Simple/t/useing.t      Test::More test, compile test
-lib/Test/Tutorial.pod           A tutorial on writing tests
 lib/Test/t/fail.t		See if Test works
 lib/Test/t/mix.t		See if Test works
 lib/Test/t/onfail.t		See if Test works
@@ -1159,6 +1160,7 @@ lib/Test/t/qr.t			See if Test works
 lib/Test/t/skip.t		See if Test works
 lib/Test/t/success.t		See if Test works
 lib/Test/t/todo.t		See if Test works
+lib/Test/Tutorial.pod           A tutorial on writing tests
 lib/Test/Utils.pm               Utility module for Test::Simple/More
 lib/Text/Abbrev.pm		An abbreviation table builder
 lib/Text/Abbrev.t		Test Text::Abbrev
