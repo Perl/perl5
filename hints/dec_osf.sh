@@ -285,6 +285,10 @@ $define|true|[yY]*) d_Gconvert='sprintf((b),"%.*Lg",(n),(x))' ;;
 esac
 EOCBU
 
+case "`/usr/sbin/sizer -v`" in
+*4.0*) d_modfl=undef ;; # must wait till 5.0
+esac
+
 #
 # Unset temporary variables no more needed.
 #
