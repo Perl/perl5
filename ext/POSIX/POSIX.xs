@@ -2306,9 +2306,9 @@ constant(char *name, int arg)
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "STRERR_FILENO"))
-#ifdef STRERR_FILENO
-	    return STRERR_FILENO;
+	if (strEQ(name, "STDERR_FILENO"))
+#ifdef STDERR_FILENO
+	    return STDERR_FILENO;
 #else
 	    goto not_there;
 #endif
