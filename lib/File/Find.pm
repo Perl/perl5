@@ -592,7 +592,7 @@ sub _find_opt {
 	$follow_skip, $full_check, $untaint, $untaint_skip, $untaint_pat,
 	$pre_process, $post_process, $dangling_symlinks);
     local($dir, $name, $fullname, $prune);
-    for (my $_temp) { # creates a local $_ without retaining magic
+    local *_ = \my $a;
 
     my $cwd            = $wanted->{bydepth} ? Cwd::fastcwd() : Cwd::getcwd();
     my $cwd_untainted  = $cwd;
@@ -742,7 +742,6 @@ sub _find_opt {
 		die "Can't cd to $cwd: $!\n";
 	    }
 	}
-    }
     }
 }
 
