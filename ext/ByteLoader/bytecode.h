@@ -32,7 +32,7 @@ typedef char *pvindex;
 	BGET_U32(arg);							\
 	if (arg) {							\
 	    New(666, bstate->bs_pv.xpv_pv, arg, char);			\
-	    bl_read(bstate->bs_fdata, (void*)bstate->bs_pv.xpv_pv, arg, 1);\
+	    bl_read(bstate->bs_fdata, bstate->bs_pv.xpv_pv, arg, 1);	\
 	    bstate->bs_pv.xpv_len = arg;				\
 	    bstate->bs_pv.xpv_cur = arg - 1;				\
 	} else {							\
