@@ -113,6 +113,7 @@ my $libperl = $Config{libperl};
 # Shared library and dynamic loading suffixes.
 my $so = $Config{so};
 my $dlext = $Config{dlext};
+my $dlsrc = $Config{dlsrc};
 
 my $d_dosuid = $Config{d_dosuid};
 my $binexp = $Config{binexp};
@@ -161,14 +162,16 @@ if ($Is_Cygwin) {
   $perldll = 'perl56.' . $dlext if $Config{'ccflags'} =~ /PERL_OBJECT/i;
 }
 
--f $perldll || die "No perl DLL built\n";
+   if ($dlsrc != "dl_none.xs") {
+      -f $perldll || die "No perl DLL built\n";
 
 # Install the DLL
 
-safe_unlink("$installbin/$perldll");
-copy("$perldll", "$installbin/$perldll");
-chmod(0755, "$installbin/$perldll");
-}
+      safe_unlink("$installbin/$perldll");
+      copy("$perldll", "$installbin/$perldll");
+      chmod(0755, "$installbin/$perldll");
+   }
+} # if ($Is_W32 or $Is_Cygwin)
 
 # This will be used to store the packlist
 my $packlist = ExtUtils::Packlist->new("$installarchlib/.packlist");
@@ -365,19 +368,21 @@ if (! $versiononly) {
     }
 }
 
-# Install pod pages.  Where? I guess in $installprivlib/pod.
+# Install pod pages.  Where? I guess in $installprivlib/pod
+# ($installprivlib/pods for cygwin).
 
+my $pod = $Is_Cygwin ? 'pods' : 'pod';
 unless ( $versiononly && !($installprivlib =~ m/\Q$]/)) {
-    mkpath("${installprivlib}/pod", 1, 0777);
+    mkpath("${installprivlib}/$pod", 1, 0777);
 
     # If Perl 5.003's perldiag.pod is there, rename it.
-    if (open POD, "${installprivlib}/pod/perldiag.pod") {
+    if (open POD, "${installprivlib}/$pod/perldiag.pod") {
 	read POD, $_, 4000;
 	close POD;
 	# Some of Perl 5.003's diagnostic messages ended with periods.
 	if (/^=.*\.$/m) {
-	    my ($from, $to) = ("${installprivlib}/pod/perldiag.pod",
-			       "${installprivlib}/pod/perldiag-5.003.pod");
+	    my ($from, $to) = ("${installprivlib}/$pod/perldiag.pod",
+			       "${installprivlib}/$pod/perldiag-5.003.pod");
 	    print "  rename $from $to";
 	    rename($from, $to)
 		or warn "Couldn't rename $from to $to: $!\n"
@@ -385,9 +390,10 @@ unless ( $versiononly && !($installprivlib =~ m/\Q$]/)) {
 	}
     }
 
-    foreach my $file (@pods) {
-	# $file is a name like  pod/perl.pod
-	copy_if_diff($file, "${installprivlib}/${file}");
+    for (@pods) {
+	# $_ is a name like  pod/perl.pod
+        (my $base = $_) =~ s#.*/##;
+	copy_if_diff($_, "${installprivlib}/$pod/${base}");
     }
 
 }
