@@ -10,7 +10,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..24\n";
+print "1..25\n";
 
 my $fh;
 my $var = "ok 2\n";
@@ -126,3 +126,15 @@ close $fh;
 { package P; sub TIESCALAR {bless{}} sub FETCH {"ok 24\n"} }
 tie $p, P; open $fh, '<', \$p;
 print <$fh>;
+
+# don't warn when writing to an undefined scalar
+
+{
+    use warnings;
+    my $ok = 1;
+    local $SIG{__WARN__} = sub { $ok = 0; };
+    open my $fh, '>', \my $scalar;
+    print $fh "foo";
+    close $fh;
+    print $ok ? "ok 25\n" : "not ok 25\n";
+}
