@@ -776,7 +776,7 @@ EOF
 		Edit();
 	    } elsif ($action =~ /^[qc]/i) { # <C>ancel, <Q>uit
 		Cancel();
-	    } elsif ($action =~ /^s/) {
+	    } elsif ($action =~ /^s/i) {
 		paraprint <<EOF;
 I'm sorry, but I didn't understand that. Please type "send" or "save".
 EOF
@@ -844,7 +844,7 @@ report. We apologize for the inconvenience.
 So you may attempt to find some way of sending your message, it has
 been left in the file `$filename'.
 EOF
-	open(SENDMAIL, "|$sendmail -t") || die "'|$sendmail -t' failed: $!";
+	open(SENDMAIL, "|$sendmail -t -oi") || die "'|$sendmail -t -oi' failed: $!";
 sendout:
 	print SENDMAIL "To: $address\n";
 	print SENDMAIL "Subject: $subject\n";
