@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, '../lib' if -d '../lib';
 }
 
-BEGIN {$^W |= 1}		# Insist upon warnings
+use warnings;
 use vars qw{ @warnings };
 BEGIN {				# ...and save 'em for later
     $SIG{'__WARN__'} = sub { push @warnings, @_ }
@@ -135,7 +135,7 @@ test 37, @warnings &&
     shift @warnings;
 
 test 38, @warnings == 0, "unexpected warning";
-test 39, $^W & 1, "Who disabled the warnings?";
+test 39, 1;
 
 use constant CSCALAR	=> \"ok 40\n";
 use constant CHASH	=> { foo => "ok 41\n" };
@@ -194,7 +194,7 @@ test 58, $constant::declared{'Other::IN_OTHER_PACK'};
 
 @warnings = ();
 eval q{
-{
+    no warnings;
     use warnings 'constant';
     use constant 'BEGIN' => 1 ;
     use constant 'INIT' => 1 ;
@@ -210,7 +210,6 @@ eval q{
     use constant 'ENV' => 1 ;
     use constant 'INC' => 1 ;
     use constant 'SIG' => 1 ;
-}
 };
 
 test 59, @warnings == 14 ;

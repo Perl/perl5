@@ -10,8 +10,8 @@
 package Pod::Usage;
 
 use vars qw($VERSION);
-$VERSION = 1.11;  ## Current version of this package
-require  5.004;    ## requires this Perl version or later
+$VERSION = 1.12;  ## Current version of this package
+require  5.005;    ## requires this Perl version or later
 
 =head1 NAME
 

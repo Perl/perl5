@@ -92,8 +92,8 @@ between two backslashes) on this file system.
 =item Win32::FreeLibrary(HANDLE)
 
 [EXT] Unloads a previously loaded dynamic-link library. The HANDLE is
-no longer valid after this call. See L<LoadLibrary> for information on
-dynamically loading a library.
+no longer valid after this call. See L<LoadLibrary|Win32::LoadLibrary(LIBNAME)>
+for information on dynamically loading a library.
 
 =item Win32::GetArchName()
 

@@ -586,7 +586,7 @@ if( ! $opt_X ){  # use XS, unless it was disabled
       }
     }
     { local $" = '|';
-      $typedef_rex = qr(\b(?<!struct )(?:@good_td)\b);
+      $typedef_rex = qr(\b(?<!struct )(?:@good_td)\b) if @good_td;
     }
     %known_fnames = map @$_[1,3], @$fdecls_parsed; # [1,3] is NAME, FULLTEXT
     if ($fmask) {

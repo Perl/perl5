@@ -84,8 +84,17 @@ Another way is to use undef as an element on the left-hand-side:
 
 =head2 How do I temporarily block warnings?
 
-The C<$^W> variable (documented in L<perlvar>) controls
-runtime warnings for a block:
+If you are running Perl 5.6.0 or better, the C<use warnings> pragma
+allows fine control of what warning are produced.
+See L<perllexwarn> for more details.
+
+    {
+	no warnings;          # temporarily turn off warnings
+	$a = $b + $c;         # I know these might be undef
+    }
+
+If you have an older version of Perl, the C<$^W> variable (documented
+in L<perlvar>) controls runtime warnings for a block:
 
     {
 	local $^W = 0;        # temporarily turn off warnings
@@ -94,10 +103,6 @@ runtime warnings for a block:
 
 Note that like all the punctuation variables, you cannot currently
 use my() on C<$^W>, only local().
-
-A new C<use warnings> pragma is in the works to provide finer control
-over all this.  The curious should check the perl5-porters mailing list
-archives for details.
 
 =head2 What's an extension?
 
@@ -168,6 +173,7 @@ own module.  Make sure to change the names appropriately.
     package Some::Module;  # assumes Some/Module.pm
 
     use strict;
+    use warnings;
 
     BEGIN {
 	use Exporter   ();
@@ -611,7 +617,7 @@ Why do you want to do that? :-)
 
 If you want to override a predefined function, such as open(),
 then you'll have to import the new definition from a different
-module.  See L<perlsub/"Overriding Builtin Functions">.  There's
+module.  See L<perlsub/"Overriding Built-in Functions">.  There's
 also an example in L<perltoot/"Class::Template">.
 
 If you want to overload a Perl operator, such as C<+> or C<**>,

@@ -6,12 +6,11 @@ BEGIN {
 }
 
 use strict;
+use warnings;
 
 use vars qw{ @warnings };
 
 BEGIN {
-    $^W |= 1;		# Insist upon warnings
-    # ...and save 'em as we go
     $SIG{'__WARN__'} = sub { push @warnings, @_ };
     $| = 1;
     print "1..9\n";

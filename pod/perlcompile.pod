@@ -103,9 +103,9 @@ This is why all the back ends print:
 
 before producing any other output.
 
-=head2 The Cross Referencing Back End (B::Xref)
+=head2 The Cross Referencing Back End
 
-The cross referencing back end produces a report on your program,
+The cross referencing back end (B::Xref) produces a report on your program,
 breaking down declarations and uses of subroutines and variables (and
 formats) by file and subroutine.  For instance, here's part of the
 report from the I<pod2man> program that comes with Perl:
@@ -203,11 +203,11 @@ The B<-p> option adds parentheses where normally they are omitted:
 
 See L<B::Deparse> for more information on the formatting options.
 
-=head2 The Lint Back End (B::Lint)
+=head2 The Lint Back End
 
-The lint back end inspects programs for poor style.  One programmer's
-bad style is another programmer's useful tool, so options let you
-select what is complained about.
+The lint back end (B::Lint) inspects programs for poor style.  One
+programmer's bad style is another programmer's useful tool, so options
+let you select what is complained about.
 
 To run the style checker across your source code:
 

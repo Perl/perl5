@@ -6983,9 +6983,9 @@ Perl_scan_num(pTHX_ char *start)
     	    UV uv;
 	    errno = 0;
 	    if (*PL_tokenbuf == '-')
-		iv = Atol(PL_tokenbuf);
+		iv = Strtol(PL_tokenbuf, (char**)NULL, 10);
 	    else
-		uv = Atoul(PL_tokenbuf);
+		uv = Strtoul(PL_tokenbuf, (char**)NULL, 10);
 	    if (errno)
 	    	floatit = TRUE; /* probably just too large */
 	    else if (*PL_tokenbuf == '-')
@@ -6994,14 +6994,9 @@ Perl_scan_num(pTHX_ char *start)
 	    	sv_setuv(sv, uv);
 	}
 	if (floatit) {
-	    char *tp;
-	    errno = 0;
 	    value = Atof(PL_tokenbuf);
-	    if (errno)
-		Perl_die(aTHX_ "unparseable float");
-	    else
-	    	sv_setnv(sv, value);
-	} 
+	    sv_setnv(sv, value);
+	}
 #endif
 	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
 	               (PL_hints & HINT_NEW_INTEGER) )

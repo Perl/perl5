@@ -68,7 +68,7 @@
 	applied different patches than you.
  */
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
-static	char	*local_patches[] = {
+static	char	* __attribute__ ((unused)) local_patches[] = {
 	NULL
 	, "v5.6.0-RC1"
 	,NULL

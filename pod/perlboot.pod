@@ -7,7 +7,7 @@ perlboot - Beginner's Object-Oriented Tutorial
 If you're not familiar with objects from other languages, some of the
 other Perl object documentation may be a little daunting, such as
 L<perlobj>, a basic reference in using objects, and L<perltoot>, which
-introduces readers to the pecularities of Perl's object system in a
+introduces readers to the peculiarities of Perl's object system in a
 tutorial way.
 
 So, let's take a different approach, presuming no prior object
@@ -139,8 +139,8 @@ attempts to invoke subroutine C<Class::method> as:
 
 (If the subroutine can't be found, "inheritance" kicks in, but we'll
 get to that later.)  This means that we get the class name as the
-first parameter.  So we can rewrite the C<Sheep> speaking subroutine
-as:
+first parameter (the only parameter, if no arguments are given).  So
+we can rewrite the C<Sheep> speaking subroutine as:
 
     sub Sheep::speak {
       my $class = shift;
@@ -245,14 +245,15 @@ inheritance.
 
 When we turn on C<use strict>, we'll get complaints on C<@ISA>, since
 it's not a variable containing an explicit package name, nor is it a
-lexical ("my") variable.  We can't make it a lexical variable though,
+lexical ("my") variable.  We can't make it a lexical variable though
+(it has to belong to the package to be found by the inheritance mechanism),
 so there's a couple of straightforward ways to handle that.
 
 The easiest is to just spell the package name out:
 
     @Cow::ISA = qw(Animal);
 
-Or allow it as an implictly named package variable:
+Or allow it as an implicitly named package variable:
 
     package Cow;
     use vars qw(@ISA);
@@ -490,7 +491,7 @@ If Horse::sound had not been found, we'd be wandering up the
 C<@Horse::ISA> list to try to find the method in one of the
 superclasses, just as for a class method.  The only difference between
 a class method and an instance method is whether the first parameter
-is a instance (a blessed reference) or a class name (a string).
+is an instance (a blessed reference) or a class name (a string).
 
 =head2 Accessing the instance data
 
@@ -551,6 +552,17 @@ Notice we're back to a class method, so the two arguments to
 C<Horse::named> are C<Horse> and C<Mr. Ed>.  The C<bless> operator
 not only blesses C<$name>, it also returns the reference to C<$name>,
 so that's fine as a return value.  And that's how to build a horse.
+
+We've called the constructor C<named> here, so that it quickly denotes
+the constructor's argument as the name for this particular C<Horse>.
+You can use different constructors with different names for different
+ways of "giving birth" to the object (like maybe recording its
+pedigree or date of birth).  However, you'll find that most people
+coming to Perl from more limited languages use a single constructor
+named C<new>, with various ways of interpreting the arguments to
+C<new>.  Either style is fine, as long as you document your particular
+way of giving birth to an object.  (And you I<were> going to do that,
+right?)
 
 =head2 Inheriting the constructor
 

@@ -332,9 +332,9 @@ Second, if using the listed commands you see something B<exactly>
 (prefix matches do not count and case usually counts) like "En_US"
 without the quotes, then you should be okay because you are using a
 locale name that should be installed and available in your system.
-In this case, see L<Permanently fixing system locale configuration>.
+In this case, see L<Permanently fixing your system's locale configuration>.
 
-=head2 Permanently fixing your locale configuration
+=head2 Permanently fixing your system's locale configuration
 
 This is when you see something like:
 

@@ -129,7 +129,8 @@ assignment to an array or hash evaluates the righthand side in list
 context.  Assignment to a list (or slice, which is just a list
 anyway) also evaluates the righthand side in list context.
 
-When you use Perl's B<-w> command-line option, you may see warnings
+When you use the C<use warnings> pragma or Perl's B<-w> command-line 
+option, you may see warnings
 about useless uses of constants or functions in "void context".
 Void context just means the value has been discarded, such as a
 statement containing only C<"fred";> or C<getpwuid(0);>.  It still
@@ -282,7 +283,7 @@ double-quoted string literals are subject to backslash and variable
 substitution; single-quoted strings are not (except for C<\'> and
 C<\\>).  The usual C-style backslash rules apply for making
 characters such as newline, tab, etc., as well as some more exotic
-forms.  See L<perlop/"Quote and Quotelike Operators"> for a list.
+forms.  See L<perlop/"Quote and Quote-like Operators"> for a list.
 
 Hexadecimal, octal, or binary, representations in string literals
 (e.g. '0xff') are not automatically converted to their integer
@@ -366,7 +367,8 @@ A word that has no other interpretation in the grammar will
 be treated as if it were a quoted string.  These are known as
 "barewords".  As with filehandles and labels, a bareword that consists
 entirely of lowercase letters risks conflict with future reserved
-words, and if you use the B<-w> switch, Perl will warn you about any
+words, and if you use the C<use warnings> pragma or the B<-w> switch, 
+Perl will warn you about any
 such words.  Some people may wish to outlaw barewords entirely.  If you
 say
 

@@ -573,8 +573,8 @@ sub must_warn_pat {
 
 sub must_warn {
     my ($warn_pat, $code) = @_;
-    local $^W; local %SIG;
-    eval 'BEGIN { $^W = 1; $SIG{__WARN__} = $warn_pat };' . $code;
+    local %SIG;
+    eval 'BEGIN { use warnings; $SIG{__WARN__} = $warn_pat };' . $code;
     print "ok $test\n";
     $test++;
 }

@@ -701,8 +701,7 @@ can disable or promote into fatal errors specific warnings using
 C<__WARN__> hooks, as described in L<perlvar> and L<perlfunc/warn>.
 See also L<perldiag> and L<perltrap>.  A new, fine-grained warning
 facility is also available if you want to manipulate entire classes
-of warnings; see L<warnings> (or better yet, its source code) about
-that.
+of warnings; see L<warnings> or L<perllexwarn>.
 
 =item B<-W>
 

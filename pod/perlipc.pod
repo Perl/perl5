@@ -453,8 +453,8 @@ doesn't actually work:
 
     open(PROG_FOR_READING_AND_WRITING, "| some program |")
 
-and if you forget to use the B<-w> flag, then you'll miss out
-entirely on the diagnostic message:
+and if you forget to use the C<use warnings> pragma or the B<-w> flag,
+then you'll miss out entirely on the diagnostic message:
 
     Can't do bidirectional pipe at -e line 1.
 

@@ -398,14 +398,13 @@ you to stringify the keys (unlike the previous set of functions).
 
 They also return and accept whole hash entries (C<HE*>), making their
 use more efficient (since the hash number for a particular string
-doesn't have to be recomputed every time).  See L<API LISTING> later in
-this document for detailed descriptions.
+doesn't have to be recomputed every time).  See L<perlapi> for detailed
+descriptions.
 
 The following macros must always be used to access the contents of hash
 entries.  Note that the arguments to these macros must be simple
 variables, since they may get evaluated more than once.  See
-L<API LISTING> later in this document for detailed descriptions of these
-macros.
+L<perlapi> for detailed descriptions of these macros.
 
     HePV(HE* he, STRLEN len)
     HeVAL(HE* he)
@@ -912,7 +911,7 @@ calling these functions, or by using one of the C<sv_set*_mg()> or
 C<sv_cat*_mg()> functions.  Similarly, generic C code must call the
 C<SvGETMAGIC()> macro to invoke any 'get' magic if they use an SV
 obtained from external sources in functions that don't handle magic.
-L<API LISTING> later in this document identifies such functions.
+See L<perlapi> for a description of these functions.
 For example, calls to the C<sv_cat*()> functions typically need to be
 followed by C<SvSETMAGIC()>, but they don't need a prior C<SvGETMAGIC()>
 since their implementation handles 'get' magic.

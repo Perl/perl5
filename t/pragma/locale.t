@@ -52,7 +52,7 @@ sub ok {
 # even the default locale will taint under 'use locale'.
 
 sub is_tainted { # hello, camel two.
-    local $^W;	# no warnings 'undef'
+    no warnings 'uninitialized' ;
     my $dummy;
     not eval { $dummy = join("", @_), kill 0; 1 }
 }
@@ -582,9 +582,9 @@ foreach $Locale (@Locale) {
     tryneoalpha($Locale, 104, $c eq $d); 
 
     {
+	use warnings;
 	my $w = 0;
 	local $SIG{__WARN__} = sub { $w++ };
-	local $^W = 1;
 
 	# the == (among other ops) used to warn for locales
 	# that had something else than "." as the radix character

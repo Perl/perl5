@@ -98,7 +98,7 @@ print((unpack("p",pack("p",$test)) == $test ? "ok " : "not ok "),$test++,"\n");
 # temps
 sub foo { my $a = "a"; return $a . $a++ . $a++ }
 {
-  local $^W = 1;
+  use warnings;
   my $last = $test;
   local $SIG{__WARN__} = sub {
 	print "ok ",$test++,"\n" if $_[0] =~ /temporary val/

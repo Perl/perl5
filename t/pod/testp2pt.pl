@@ -44,13 +44,12 @@ sub catfile(@) { File::Spec->catfile(@_); }
 my $INSTDIR = abs_path(dirname $0);
 $INSTDIR = VMS::Filespec::unixpath($INSTDIR) if $^O eq 'VMS';
 $INSTDIR =~ s#/$## if $^O eq 'VMS';
-$INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'xtra');
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'pod');
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 't');
 my @PODINCDIRS = ( catfile($INSTDIR, 'lib', 'Pod'),
+                   catfile($INSTDIR, 'scripts'),
                    catfile($INSTDIR, 'pod'),
-                   catfile($INSTDIR, 't', 'pod'),
-                   catfile($INSTDIR, 't', 'pod', 'xtra')
+                   catfile($INSTDIR, 't', 'pod')
                  );
 
 ## Find the path to the file to =include
@@ -98,6 +97,10 @@ sub command {
     print $out_fh "###### begin =include $incbase #####\n"  if ($incdebug);
     $self->parse_from_file( {-cutting => 1}, $incfile );
     print $out_fh "###### end =include $incbase #####\n"    if ($incdebug);
+}
+
+sub begin_input {
+   $_[0]->{_INFILE} = VMS::Filespec::unixify($_[0]->{_INFILE}) if $^O eq 'VMS';
 }
 
 sub podinc2plaintext( $ $ ) {

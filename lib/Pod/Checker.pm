@@ -1,7 +1,7 @@
 #############################################################################
 # Pod/Checker.pm -- check pod documents for syntax errors
 #
-# Copyright (C) 1994-1999 by Bradford Appleton. All rights reserved.
+# Copyright (C) 1994-2000 by Bradford Appleton. All rights reserved.
 # This file is part of "PodParser". PodParser is free software;
 # you can redistribute it and/or modify it under the same terms
 # as Perl itself.
@@ -11,7 +11,7 @@ package Pod::Checker;
 
 use vars qw($VERSION);
 $VERSION = 1.098;  ## Current version of this package
-require  5.004;    ## requires this Perl version or later
+require  5.005;    ## requires this Perl version or later
 
 use Pod::ParseUtils; ## for hyperlinks and lists
 

@@ -743,6 +743,7 @@ a scalar.
     package Remember;
 
     use strict;
+    use warnings;
     use IO::File;
 
     sub TIESCALAR {
@@ -845,7 +846,8 @@ have not been flushed to disk.
 Now that you know what the problem is, what can you do to avoid it?
 Well, the good old C<-w> flag will spot any instances where you call
 untie() and there are still valid references to the tied object.  If
-the second script above is run with the C<-w> flag, Perl prints this
+the second script above this near the top C<use warnings 'untie'>
+or was run with the C<-w> flag, Perl prints this
 warning message:
 
     untie attempted while 1 inner references still exist
