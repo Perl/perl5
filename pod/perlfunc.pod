@@ -953,7 +953,7 @@ And so do these:
 
     delete @HASH{keys %HASH};
 
-    delete @ARRAY{0 .. $#ARRAY};
+    delete @ARRAY[0 .. $#ARRAY];
 
 But both of these are slower than just assigning the empty list
 or undefining %HASH or @ARRAY:
