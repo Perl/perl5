@@ -1315,7 +1315,7 @@ d_nv_preserves_uv (perlxv.U):
 	This variable indicates whether a variable of type nvtype
 	can preserve all the bits a variable of type uvtype.
 
-d_nv_preserves_uv_bits (perlxv.U):
+nv_preserves_uv_bits (perlxv.U):
 	This variable indicates how many of bits type uvtype
 	a variable nvtype can preserve.
 

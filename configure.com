@@ -4916,7 +4916,7 @@ $ IF tmp .EQS. "preserve"
 $ THEN 
 $   d_nv_preserves_uv = "define"
 $   echo "Yes, they can." 
-$   d_nv_preserves_uv_bits = F$STRING(F$INTEGER(uvsize) * 8)
+$   nv_preserves_uv_bits = F$STRING(F$INTEGER(uvsize) * 8)
 $ ELSE
 $   d_nv_preserves_uv = "undef"
 $   echo "No, they can't."
@@ -4940,7 +4940,7 @@ $   WS "    exit(0);"
 $   WS "}"
 $   CS
 $   GOSUB compile
-$   d_nv_preserves_uv_bits = tmp
+$   nv_preserves_uv_bits = tmp
 $ ENDIF
 $!
 $ echo4 "Checking whether your kill() uses SYS$FORCEX..."
@@ -5275,7 +5275,7 @@ $ WC "d_mymalloc='" + d_mymalloc + "'"
 $ WC "d_nice='define'"
 $ WC "d_nl_langinfo='" + d_nl_langinfo + "'"
 $ WC "d_nv_preserves_uv='" + d_nv_preserves_uv + "'"
-$ WC "d_nv_preserves_uv_bits='" + d_nv_preserves_uv_bits + "'"
+$ WC "nv_preserves_uv_bits='" + nv_preserves_uv_bits + "'"
 $ WC "d_off64_t='" + d_off64_t + "'"
 $ WC "d_old_pthread_create_joinable='" + d_old_pthread_create_joinable + "'"
 $ WC "d_oldarchlib='define'"

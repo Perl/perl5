@@ -3168,7 +3168,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #endif
 #define	NVSIZE		$nvsize		/**/
 #$d_nv_preserves_uv	NV_PRESERVES_UV
-#define	NV_PRESERVES_UV_BITS	$d_nv_preserves_uv_bits
+#define	NV_PRESERVES_UV_BITS	$nv_preserves_uv_bits
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV

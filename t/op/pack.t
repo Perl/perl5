@@ -336,7 +336,7 @@ sub numbers_with_total {
     # UVs (in which case ~0 is NV, ~0-1 will be the same NV) then we can't
     # correctly in perl calculate UV totals for long checksums, as pp_unpack
     # is using UV maths, and we've only got NVs.
-    $skip_if_longer_than = $Config{d_nv_preserves_uv_bits};
+    $skip_if_longer_than = $Config{nv_preserves_uv_bits};
   }
 
   foreach ('', 1, 2, 3, 15, 16, 17, 31, 32, 33, 53, 54, 63, 64, 65) {
