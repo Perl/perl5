@@ -251,7 +251,7 @@ The following platforms are able to build Perl from the standard
 source code distribution available at
 F<http://www.perl.com/CPAN/src/index.html>
 
-        AIX             IRIX            SCO OSR
+        AIX             IRIX            SCO ODT/OSR
         A/UX            Linux           Solaris
         BeOS            MachTen         SunOS
         BSD/OS      	MPE/iX          SVR4
@@ -271,7 +271,7 @@ F<http://www.perl.com/CPAN/src/index.html>
 The following platforms have been known to build Perl from the source
 but for the Perl release 5.005_03 we haven't been able to verify them,
 either because the hardware/software platforms are rather rare or
-because we don't have an active champion on these platforms, or both.
+because we don't have an active champion on these platforms.
 					
         3b1             FPS             Plan 9
         AmigaOS         GENIX           RISC/os
