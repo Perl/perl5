@@ -4932,7 +4932,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		switch (intsize) {
 		case 'h':	iv = (short)va_arg(*args, int); break;
+#ifdef IV_IS_QUAD
+		default:	iv = va_arg(*args, IV); break;
+#else
 		default:	iv = va_arg(*args, int); break;
+#endif
 		case 'l':	iv = va_arg(*args, long); break;
 		case 'V':	iv = va_arg(*args, IV); break;
 #ifdef HAS_QUAD
@@ -4944,7 +4948,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		iv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
 		switch (intsize) {
 		case 'h':	iv = (short)iv; break;
+#ifdef IV_IS_QUAD
+		default:	break;
+#else
 		default:	iv = (int)iv; break;
+#endif
 		case 'l':	iv = (long)iv; break;
 		case 'V':	break;
 #ifdef HAS_QUAD
@@ -4990,7 +4998,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		switch (intsize) {
 		case 'h':  uv = (unsigned short)va_arg(*args, unsigned); break;
+#ifdef UV_IS_QUAD
+		default:   uv = va_arg(*args, UV); break;
+#else
 		default:   uv = va_arg(*args, unsigned); break;
+#endif
 		case 'l':  uv = va_arg(*args, unsigned long); break;
 		case 'V':  uv = va_arg(*args, UV); break;
 #ifdef HAS_QUAD
@@ -5002,7 +5014,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		uv = (svix < svmax) ? SvUVx(svargs[svix++]) : 0;
 		switch (intsize) {
 		case 'h':	uv = (unsigned short)uv; break;
+#ifdef UV_IS_QUAD
+		default:	break;
+#else
 		default:	uv = (unsigned)uv; break;
+#endif
 		case 'l':	uv = (unsigned long)uv; break;
 		case 'V':	break;
 #ifdef HAS_QUAD
@@ -5152,7 +5168,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		switch (intsize) {
 		case 'h':	*(va_arg(*args, short*)) = i; break;
+#ifdef IV_IS_QUAD
+		default:	*(va_arg(*args, IV*)) = i; break;
+#else
 		default:	*(va_arg(*args, int*)) = i; break;
+#endif
 		case 'l':	*(va_arg(*args, long*)) = i; break;
 		case 'V':	*(va_arg(*args, IV*)) = i; break;
 #ifdef HAS_QUAD
