@@ -187,7 +187,7 @@ sub unwrap {
 	$tArrayDepth = $#{$v} ; 
 	undef $more ; 
 	$tArrayDepth = $#{$v} < $arrayDepth-1 ? $#{$v} : $arrayDepth-1 
-	  unless  $arrayDepth eq '' ; 
+	  if defined $arrayDepth && $arrayDepth ne '';
 	$more = "....\n" if $tArrayDepth < $#{$v} ; 
 	$shortmore = "";
 	$shortmore = " ..." if $tArrayDepth < $#{$v} ;
