@@ -972,29 +972,15 @@ otherwise.
 #undef SvNV
 #define SvNV(sv) (SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv))
 
-#define sv_setsv_macro(dsv, ssv) sv_setsv_flags(dsv, ssv, SV_GMAGIC)
+#define sv_setsv(dsv, ssv) sv_setsv_flags(dsv, ssv, SV_GMAGIC)
 #define sv_setsv_nomg(dsv, ssv) sv_setsv_flags(dsv, ssv, 0)
-#define sv_catsv_macro(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC)
+#define sv_catsv(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC)
 #define sv_catsv_nomg(dsv, ssv) sv_catsv_flags(dsv, ssv, 0)
-#define sv_catpvn_macro(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC)
-#define sv_2pv_macro(sv, lp) sv_2pv_flags(sv, lp, SV_GMAGIC)
+#define sv_catpvn(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC)
+#define sv_2pv(sv, lp) sv_2pv_flags(sv, lp, SV_GMAGIC)
 #define sv_2pv_nomg(sv, lp) sv_2pv_flags(sv, lp, 0)
-#define sv_pvn_force_macro(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
-#define sv_utf8_upgrade_macro(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
-
-/* function style also available for sourcecompat */
-#undef sv_setsv
-#define sv_setsv(dsv, ssv) sv_setsv_macro(dsv, ssv)
-#undef sv_catsv
-#define sv_catsv(dsv, ssv) sv_catsv_macro(dsv, ssv)
-#undef sv_catpvn
-#define sv_catpvn(dsv, sstr, slen) sv_catpvn_macro(dsv, sstr, slen)
-#undef sv_2pv
-#define sv_2pv(sv, lp) sv_2pv_macro(sv, lp)
-#undef sv_pvn_force
-#define sv_pvn_force(sv, lp) sv_pvn_force_macro(sv, lp)
-#undef sv_utf8_upgrade
-#define sv_utf8_upgrade(sv) sv_utf8_upgrade_macro(sv)
+#define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
+#define sv_utf8_upgrade(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
 
 #undef SvPV
 #define SvPV(sv, lp) SvPV_flags(sv, lp, SV_GMAGIC)
