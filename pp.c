@@ -4125,6 +4125,13 @@ PP(pp_splice)
     if (newlen && !AvREAL(ary) && AvREIFY(ary))
 	av_reify(ary);
 
+    /* make new elements SVs now: avoid problems if they're from the array */
+    for (dst = MARK, i = newlen; i; i--) {
+        SV *h = *dst;
+	*dst = NEWSV(46, 0);
+	sv_setsv(*dst++, h);
+    }
+
     if (diff < 0) {				/* shrinking the area */
 	if (newlen) {
 	    New(451, tmparyval, newlen, SV*);	/* so remember insertion */
@@ -4181,11 +4188,7 @@ PP(pp_splice)
 	    dst[--i] = &PL_sv_undef;
 	
 	if (newlen) {
-	    for (src = tmparyval, dst = AvARRAY(ary) + offset;
-	      newlen; newlen--) {
-		*dst = NEWSV(46, 0);
-		sv_setsv(*dst++, *src++);
-	    }
+ 	    Copy( tmparyval, AvARRAY(ary) + offset, newlen, SV* );
 	    Safefree(tmparyval);
 	}
     }
@@ -4224,10 +4227,10 @@ PP(pp_splice)
 	    }
 	}
 
-	for (src = MARK, dst = AvARRAY(ary) + offset; newlen; newlen--) {
-	    *dst = NEWSV(46, 0);
-	    sv_setsv(*dst++, *src++);
+	if (newlen) {
+	    Copy( MARK, AvARRAY(ary) + offset, newlen, SV* );
 	}
+
 	MARK = ORIGMARK + 1;
 	if (GIMME == G_ARRAY) {			/* copy return vals to stack */
 	    if (length) {
