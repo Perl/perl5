@@ -1056,6 +1056,7 @@ PP(pp_flip)
    an exception for .."0" [#18165]). AMS 20021031. */
 
 #define RANGE_IS_NUMERIC(left,right) ( \
+	(!SvOK(left) && !SvOK(right)) || \
 	SvNIOKp(left)  || (SvOK(left)  && !SvPOKp(left))  || \
 	SvNIOKp(right) || (SvOK(right) && !SvPOKp(right)) || \
 	(((!SvOK(left) && SvOK(right)) || (looks_like_number(left) && \
