@@ -368,15 +368,62 @@ Ambiguous use of ${fred} resolved to $fred at - line 4.
 ########
 # toke.c
 use warnings 'syntax' ;
-$a = 1_2;
-$a = 1_2345_6;
+$a = _123;	print "$a\n"; # not a number, a string
+$a = 1_23;	print "$a\n";
+$a = 1__3;	print "$a\n"; # misplaced [ 5]
+$a = 123_;	print "$a\n"; # misplaced [ 6]
+$a = 123._456;	print "$a\n"; # misplaced [ 7]
+$a = 123.4_56;	print "$a\n"; 
+$a = 123.4__6;	print "$a\n"; # misplaced [ 9]
+$a = 123.456_;	print "$a\n"; # misplaced [10]
+$a = 0b_101;	print "$a\n"; # misplaced [11]
+$a = 0b1_01;	print "$a\n";
+$a = 0b1__1;	print "$a\n"; # misplaced [13]
+$a = 0b101_;	print "$a\n"; # misplaced [14]
+$a = 0_123;	print "$a\n"; # misplaced [15]
+$a = 01_23;	print "$a\n";
+$a = 01__3;	print "$a\n"; # misplaced [17]
+$a = 0123_;	print "$a\n"; # misplaced [18]
+$a = 0x_123;	print "$a\n"; # misplaced [19]
+$a = 0x1_23;	print "$a\n";
+$a = 0x1__3;	print "$a\n"; # misplaced [21]
+$a = 0x123_;	print "$a\n"; # misplaced [22]
 no warnings 'syntax' ;
-$a = 1_2;
-$a = 1_2345_6;
 EXPECT
-Misplaced _ in number at - line 3.
-Misplaced _ in number at - line 4.
-Misplaced _ in number at - line 4.
+Misplaced _ in number at - line 5.
+Misplaced _ in number at - line 6.
+Misplaced _ in number at - line 7.
+Misplaced _ in number at - line 9.
+Misplaced _ in number at - line 10.
+Misplaced _ in number at - line 11.
+Misplaced _ in number at - line 13.
+Misplaced _ in number at - line 14.
+Misplaced _ in number at - line 15.
+Misplaced _ in number at - line 17.
+Misplaced _ in number at - line 18.
+Misplaced _ in number at - line 19.
+Misplaced _ in number at - line 21.
+Misplaced _ in number at - line 22.
+_123
+123
+13
+123
+123.456
+123.456
+123.46
+123.456
+5
+5
+3
+5
+83
+83
+11
+83
+291
+291
+19
+291
 ########
 # toke.c
 use warnings 'bareword' ;

@@ -1872,7 +1872,10 @@ ended earlier on the current line.
 
 =item Misplaced _ in number
 
-(W syntax) An underline in a decimal constant wasn't on a 3-digit boundary.
+(W syntax) An underscore (underbar) in a numeric constant either
+immediately followed earlier underscore, or an underscore began or
+ended a numeric constant, or its fractional part (in the case of
+decimal constants) began or ended a numeric constant.
 
 =item Missing %sbrace%s on \N{}
 
