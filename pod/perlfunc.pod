@@ -2151,22 +2151,13 @@ In scalar context, C<gmtime()> returns the ctime(3) value:
 
     $now_string = gmtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
-Also see the C<timegm> function provided by the C<Time::Local> module,
-and the strftime(3) function available via the POSIX module.
+If you need local time instead of GMT use the L</localtime> builtin. 
+See also the C<timegm> function provided by the C<Time::Local> module,
+and the strftime(3) and mktime(3) functions available via the L<POSIX> module.
 
-This scalar value is B<not> locale dependent (see L<perllocale>), but
-is instead a Perl builtin.  Also see the C<Time::Local> module, and the
-strftime(3) and mktime(3) functions available via the POSIX module.  To
-get somewhat similar but locale dependent date strings, set up your
-locale environment variables appropriately (please see L<perllocale>)
-and try for example:
-
-    use POSIX qw(strftime);
-    $now_string = strftime "%a %b %e %H:%M:%S %Y", gmtime;
-
-Note that the C<%a> and C<%b> escapes, which represent the short forms
-of the day of the week and the month of the year, may not necessarily
-be three characters wide in all locales.
+This scalar value is B<not> locale dependent (see L<perllocale>), but is
+instead a Perl builtin.  To get somewhat similar but locale dependent date
+strings, see the example in L</localtime>.
 
 =item goto LABEL
 
@@ -2538,17 +2529,20 @@ In scalar context, C<localtime()> returns the ctime(3) value:
 
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
-This scalar value is B<not> locale dependent, see L<perllocale>, but
-instead a Perl builtin.  Also see the C<Time::Local> module
-(to convert the second, minutes, hours, ... back to seconds since the
-stroke of midnight the 1st of January 1970, the value returned by
-time()), and the strftime(3) and mktime(3) functions available via the
-POSIX module.  To get somewhat similar but locale dependent date
-strings, set up your locale environment variables appropriately
-(please see L<perllocale>) and try for example:
+This scalar value is B<not> locale dependent but is a Perl builtin. For GMT
+instead of local time use the L</gmtime> builtin. See also the
+C<Time::Local> module (to convert the second, minutes, hours, ... back to
+the integer value returned by time()), and the L<POSIX> module's strftime(3)
+and mktime(3) functions.
+
+To get somewhat similar but locale dependent date strings, set up your
+locale environment variables appropriately (please see L<perllocale>) and
+try for example:
 
     use POSIX qw(strftime);
     $now_string = strftime "%a %b %e %H:%M:%S %Y", localtime;
+    # or for GMT formatted appropriately for your locale:
+    $now_string = strftime "%a %b %e %H:%M:%S %Y", gmtime;
 
 Note that the C<%a> and C<%b>, the short forms of the day of the week
 and the month of the year, may not necessarily be three characters wide.
