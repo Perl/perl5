@@ -1028,6 +1028,13 @@ typedef struct perl_mstats perl_mstats_t;
 #undef UV
 #endif
 
+/* Configure gets this right but the UTS compiler gets it wrong.
+   -- Hal Morris <hom00@utsglobal.com> */
+#ifdef UTS
+#  undef  UVTYPE
+#  define UVTYPE unsigned
+#endif
+
 /*
     The IV type is supposed to be long enough to hold any integral
     value or a pointer.
