@@ -1083,6 +1083,21 @@ lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
 lib/DB.pm			Debugger API (draft)
 lib/DB.t			See if DB works
+lib/DBM_Filter.pm		DBM Filter module
+lib/DBM_Filter/Changes    	DBM Filter Change history
+lib/DBM_Filter/compress.pm	DBM Filter to compress keys/values
+lib/DBM_Filter/encode.pm	DBM Filter for encoding
+lib/DBM_Filter/int32.pm		DBM Filter for creating int32 keys/values
+lib/DBM_Filter/null.pm		DBM Filter for null termination
+lib/DBM_Filter/t/01error.t	test DBM_Filter::null
+lib/DBM_Filter/t/02core.t	test DBM_Filter::null
+lib/DBM_Filter/t/compress.t	test DBM_Filter::compress
+lib/DBM_Filter/t/encode.t	test DBM_Filter::encode
+lib/DBM_Filter/t/int32.t	test DBM_Filter::int32
+lib/DBM_Filter/t/null.t		test DBM_Filter::null
+lib/DBM_Filter/t/utf8.t		test DBM_Filter::utf8
+lib/DBM_Filter/utf8.pm		DBM Filter for UTF-8 Encoding
+lib/dbm_filter_util.pl		Utility functions used by DBM Filter tests 
 lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 lib/Devel/SelfStubber.t		See if Devel::SelfStubber works
 lib/diagnostics.pm		Print verbose diagnostics
