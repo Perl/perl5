@@ -13,7 +13,7 @@ BEGIN {
 use Test::More tests => 5;
 
 BEGIN { use_ok 'Test::Harness' }
-BEGIN { diag( "Testing Test::Harness $Test::Harness::VERSION" ) }
+BEGIN { diag( "Testing Test::Harness $Test::Harness::VERSION" ) unless $ENV{PERL_CORE}}
 
 BEGIN { use_ok 'Test::Harness::Straps' }
 
