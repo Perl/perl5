@@ -159,6 +159,11 @@ sub configure {
 		    return _error($sock, $!, "$!");
 	}
 
+	if ($arg->{Broadcast}) {
+		$sock->sockopt(SO_BROADCAST,1) or
+		    return _error($sock, $!, "$!");
+	}
+
 	if($lport || ($laddr ne INADDR_ANY) || exists $arg->{Listen}) {
 	    $sock->bind($lport || 0, $laddr) or
 		    return _error($sock, $!, "$!");
@@ -309,6 +314,7 @@ C<IO::Socket::INET> provides.
     ReuseAddr	Set SO_REUSEADDR before binding
     Reuse	Set SO_REUSEADDR before binding (deprecated, prefer ReuseAddr)
     ReusePort	Set SO_REUSEPORT before binding
+    Broadcast	Set SO_BROADCAST before binding
     Timeout	Timeout	value for various operations
     MultiHomed  Try all adresses for multi-homed hosts
     Blocking    Determine if connection will be blocking mode
@@ -355,6 +361,12 @@ Examples:
 
    $sock = IO::Socket::INET->new('127.0.0.1:25');
 
+   $sock = IO::Socket::INET->new(PeerPort  => 9999,
+                                 PeerAddr  => inet_ntoa(INADDR_BROADCAST),
+                                 Proto     => udp,    
+                                 LocalAddr => 'localhost',
+                                 Broadcast => 1 ) 
+                             or die "Can't bind : $@\n";
 
  NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
 
