@@ -184,6 +184,13 @@ Clean these up. Move them to mathom.c, and don't compile for blead?
 The old perltodo notes "This has been done in places, but needs a thorough
 code review. Also fchdir is available in some platforms."
 
+=head2 Constant folding
+
+The peephole optimiser should trap errors during constant folding, and give
+up on the folding, rather than bailing out at compile time.  It is quite
+possible that the unfoldable constant is in unreachable code, eg something
+akin to C<$a = 0/0 if 0;>
+
 =head1 Tests
 
 =head2 Make Schwern poorer

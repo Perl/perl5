@@ -113,7 +113,7 @@ static char *dlopen(char *path, int mode /* mode is ignored */)
 	TranslateError(path, OFImage, dyld_result);
     else
     {
-    	// NSLinkModule will cause the run to abort on any link error's
+    	// NSLinkModule will cause the run to abort on any link errors
 	// not very friendly but the error recovery functionality is limited.
 	handle = NSLinkModule(ofile, path, TRUE);
 	NSDestroyObjectFileImage(ofile);
