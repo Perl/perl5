@@ -1507,7 +1507,6 @@ I32 lex;
     if (o->op_flags & OPf_PARENS)
 	list(o);
     else {
-	scalar(o);
 	if (dowarn && bufptr > oldbufptr && bufptr[-1] == ',') {
 	    char *s;
 	    for (s = bufptr; *s && (isALNUM(*s) || strchr("@$%, ",*s)); s++) ;
