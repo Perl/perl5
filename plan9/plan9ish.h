@@ -106,7 +106,7 @@
 #define ABORT() kill(PerlProc_getpid(),SIGABRT);
 
 #define BIT_BUCKET "/dev/null"
-#define PERL_SYS_INIT(c,v)	MALLOC_INIT
+#define PERL_SYS_INIT(c,v)	MALLOC_CHECK_TAINT2(*c,*v) MALLOC_INIT
 #define dXSUB_SYS
 #define PERL_SYS_TERM()		MALLOC_TERM
 

@@ -10747,6 +10747,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
+    PL_savestack_ix = 0;
+    PL_savestack_max = -1;
     PL_retstack = 0;
     PL_sig_pending = 0;
     Zero(&PL_debug_pad, 1, struct perl_debug_pad);
@@ -10778,6 +10780,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
+    PL_savestack_ix = 0;
+    PL_savestack_max = -1;
     PL_retstack = 0;
     PL_sig_pending = 0;
     Zero(&PL_debug_pad, 1, struct perl_debug_pad);
