@@ -2208,6 +2208,7 @@ Perl_yylex(pTHX)
     GV *gv = Nullgv;
     GV **gvp = 0;
     bool bof = FALSE;
+    I32 orig_keyword = 0;
 
     /* check if there's an identifier for us to look at */
     if (PL_pending_ident)
@@ -3800,7 +3801,7 @@ Perl_yylex(pTHX)
     case 'z': case 'Z':
 
       keylookup: {
-	I32 orig_keyword = 0;
+	orig_keyword = 0;
 	gv = Nullgv;
 	gvp = 0;
 
