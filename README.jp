@@ -2,7 +2,7 @@ If you read this file _as_is_, just ignore the funny characters you
 see. It is written in the POD format (see perlpod manpage) which is
 specially designed to be readable as is.
 
-The following documentation is written in FOO encoding.
+The following documentation is written in euc-jp encoding.
 
 =head1 NAME
 
@@ -10,7 +10,7 @@ perljp - ╞№╦▄╕ь Perl емеде╔
 
 =head1 └т╠└
 
-дшджд│д╜ Perl д╪!
+Perl д╬└д│жд╪дшджд│д╜!
 
 Perl 5.8.0 дшдъбвUnicodeе╡е▌б╝е╚дм┬ч╔¤д╦╢п▓╜д╡дьбвд╜д╬╖ы▓╠еще╞еє╩╕╗·░╩│░д╬╩╕╗·е│б╝е╔д╬е╡е▌б╝е╚дм CJK (├ц╣ё╕ьбв╞№╦▄╕ьбве╧еєе░еы)дЄ┤▐дсд╞▓├дядъд▐д╖д┐бгUnicodeд╧└д│ж├цд╬╩╕╗·дЄ░ьд─д╬╩╕╗·е│б╝е╔д╟░╖джд│д╚дЄ╠▄╗╪д╖д┐╔╕╜р╡м│╩д╟двдъбв┼ьдлдщ└╛бвд╧д┐д▐д┐д╜д╬┤╓д╬╩╕╗·б╩еоеъе╖еу╩╕╗·бвенеъб╝еы╩╕╗·бвевеще╙ев╩╕╗·бве╪е╓ещед╩╕╗·бве╟егб╝еЇебе╩емб╝еъ╩╕╗·бвд╩д╔д╩д╔б╦дфбвд│дьд▐д╟д╧OSе┘еєе└б╝дм╞╚╝лд╦─ъдсд╞ддд┐╩╕╗·(PCдкдшд╙Macintosh)дмд╣д╟д╦┤▐д▐дьд╞ддд▐д╣бг
 
@@ -71,7 +71,7 @@ Perl5.8д╟д╧бвд│дьдщд╬╡б╟╜дмд╣д┘д╞Perl╦▄┬╬д└д▒д╟╝┬╕╜д╟днды╛хд╦бв╞№╦▄╕ьд╬д▀д╩дщд║╛
 
 =item *
 
-бб╞■╜╨╬╧
+╞■╜╨╬╧
 
 ░╩▓╝д╬╬уд╧ддд┼дьдтShift_JISд╬╞■╬╧дЄEUC-JPд╦╩╤┤╣д╖д╞╜╨╬╧д╖д▐д╣бг
 
