@@ -1698,8 +1698,6 @@ sub unbalanced {
 }
 
 sub gets {
-    local($.);
-    #<IN>;
     &readline("cont: ");
 }
 
@@ -1804,6 +1802,7 @@ EOP
 }
 
 sub readline {
+  local $.;
   if (@typeahead) {
     my $left = @typeahead;
     my $got = shift @typeahead;
