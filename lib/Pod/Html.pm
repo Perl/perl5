@@ -204,9 +204,8 @@ This program is distributed under the Artistic License.
 
 my $cachedir = ".";		# The directory to which item and directory
 				# caches will be written.
-my $cache_ext = $^O eq 'VMS' ? ".tmp" : ".x~~";
-my $dircache = "pod2htmd$cache_ext";
-my $itemcache = "pod2htmi$cache_ext";
+my $dircache = "pod2htmd.tmp";
+my $itemcache = "pod2htmi.tmp";
 
 my @begin_stack = ();		# begin/end stack
 
@@ -255,8 +254,8 @@ my %local_items = ();           # local items - avoid destruction of %items
 my $Is83;                       # is dos with short filenames (8.3)
 
 sub init_globals {
-$dircache = "pod2htmd$cache_ext";
-$itemcache = "pod2htmi$cache_ext";
+$dircache = "pod2htmd.tmp";
+$itemcache = "pod2htmi.tmp";
 
 @begin_stack = ();		# begin/end stack
 
@@ -695,8 +694,8 @@ sub parse_command_line {
 
     warn "Flushing item and directory caches\n"
 	if $opt_verbose && defined $opt_flush;
-    $dircache = "$cachedir/pod2htmd$cache_ext";
-    $itemcache = "$cachedir/pod2htmi$cache_ext";
+    $dircache = "$cachedir/pod2htmd.tmp";
+    $itemcache = "$cachedir/pod2htmi.tmp";
     if (defined $opt_flush) {
 	1 while unlink($dircache, $itemcache);
     }

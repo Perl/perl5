@@ -55,9 +55,8 @@ sub convert_n_test {
 
     # pod2html creates these
     1 while unlink $outfile;
-    my $cache_ext = $^O eq 'VMS' ? ".tmp" : ".x~~";
-    1 while unlink "pod2htmd$cache_ext";
-    1 while unlink "pod2htmi$cache_ext";
+    1 while unlink "pod2htmd.tmp";
+    1 while unlink "pod2htmi.tmp";
 }
 
 1;
