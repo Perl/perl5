@@ -506,6 +506,18 @@ PP(pp_open)
 	DIE(PL_no_usym, "filehandle");
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
+    if (sv == &PL_sv_undef) {
+#ifdef PerlIO
+	PerlIO *fp = PerlIO_tmpfile();
+#else
+	PerlIO *fp = tmpfile();
+#endif                   
+	if (fp != Nullfp && do_open(gv, "+>&", 3, FALSE, 0, 0, fp)) 
+	    PUSHi( (I32)PL_forkprocess );
+	else
+	    RETPUSHUNDEF;
+	RETURN;
+    }   
     tmps = SvPV(sv, len);
     if (do_open(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp))
 	PUSHi( (I32)PL_forkprocess );
