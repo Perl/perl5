@@ -2364,7 +2364,23 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     }
     memset(&StartupInfo,0,sizeof(StartupInfo));
     StartupInfo.cb = sizeof(StartupInfo);
-    StartupInfo.wShowWindow = SW_SHOWDEFAULT;
+    StartupInfo.hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
+    StartupInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+    StartupInfo.hStdError  = GetStdHandle(STD_ERROR_HANDLE);
+    if (StartupInfo.hStdInput != INVALID_HANDLE_VALUE &&
+	StartupInfo.hStdOutput != INVALID_HANDLE_VALUE &&
+	StartupInfo.hStdError != INVALID_HANDLE_VALUE)
+    {
+	StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
+    }
+    else {
+	create |= CREATE_NEW_CONSOLE;
+    }
+
+#ifndef DEBUGGING
+    StartupInfo.dwFlags |= STARTF_USESHOWWINDOW;
+    StartupInfo.wShowWindow = SW_HIDE;
+#endif
 
 RETRY:
     if (!CreateProcess(cmdname,		/* search PATH to find executable */
