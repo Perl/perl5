@@ -1070,7 +1070,7 @@ PP(pp_select)
     else {
 	GV **gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
 	if (gvp && *gvp == egv) {
-	    gv_efullname3(TARG, PL_defoutgv, Nullch);
+	    gv_efullname4(TARG, PL_defoutgv, Nullch, FALSE);
 	    XPUSHTARG;
 	}
 	else {
@@ -1176,7 +1176,7 @@ PP(pp_enterwrite)
     if (!cv) {
 	if (fgv) {
 	    SV *tmpsv = sv_newmortal();
-	    gv_efullname3(tmpsv, fgv, Nullch);
+	    gv_efullname4(tmpsv, fgv, Nullch, FALSE);
 	    DIE(aTHX_ "Undefined format \"%s\" called",SvPVX(tmpsv));
 	}
 	DIE(aTHX_ "Not a format reference");
@@ -1257,7 +1257,7 @@ PP(pp_leavewrite)
 	cv = GvFORM(fgv);
 	if (!cv) {
 	    SV *tmpsv = sv_newmortal();
-	    gv_efullname3(tmpsv, fgv, Nullch);
+	    gv_efullname4(tmpsv, fgv, Nullch, FALSE);
 	    DIE(aTHX_ "Undefined top format \"%s\" called",SvPVX(tmpsv));
 	}
 	if (CvCLONE(cv))
@@ -1275,7 +1275,7 @@ PP(pp_leavewrite)
 	if (ckWARN2(WARN_CLOSED,WARN_IO)) {
 	    if (IoIFP(io)) {
 		SV* sv = sv_newmortal();
-		gv_efullname3(sv, gv, Nullch);
+		gv_efullname4(sv, gv, Nullch, FALSE);
 		Perl_warner(aTHX_ WARN_IO,
 			    "Filehandle %s opened only for input",
 			    SvPV_nolen(sv));
@@ -1345,7 +1345,7 @@ PP(pp_prtf)
     sv = NEWSV(0,0);
     if (!(io = GvIO(gv))) {
 	if (ckWARN(WARN_UNOPENED)) {
-	    gv_efullname3(sv, gv, Nullch);
+	    gv_efullname4(sv, gv, Nullch, FALSE);
 	    Perl_warner(aTHX_ WARN_UNOPENED,
 			"Filehandle %s never opened", SvPV(sv,n_a));
 	}
@@ -1355,7 +1355,7 @@ PP(pp_prtf)
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO))  {
 	    if (IoIFP(io)) {
-		gv_efullname3(sv, gv, Nullch);
+		gv_efullname4(sv, gv, Nullch, FALSE);
 		Perl_warner(aTHX_ WARN_IO,
 			    "Filehandle %s opened only for input",
 			    SvPV(sv,n_a));
@@ -1551,7 +1551,7 @@ PP(pp_sysread)
 	    || IoIFP(io) == PerlIO_stderr()) && ckWARN(WARN_IO))
 	{
 	    SV* sv = sv_newmortal();
-	    gv_efullname3(sv, gv, Nullch);
+	    gv_efullname4(sv, gv, Nullch, FALSE);
 	    Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
 			SvPV_nolen(sv));
 	}

@@ -400,7 +400,7 @@ PP(pp_print)
     if (!(io = GvIO(gv))) {
 	if (ckWARN(WARN_UNOPENED)) {
 	    SV* sv = sv_newmortal();
-	    gv_efullname3(sv, gv, Nullch);
+	    gv_efullname4(sv, gv, Nullch, FALSE);
             Perl_warner(aTHX_ WARN_UNOPENED, "Filehandle %s never opened",
 			SvPV(sv,n_a));
         }
@@ -411,7 +411,7 @@ PP(pp_print)
 	if (ckWARN2(WARN_CLOSED, WARN_IO))  {
 	    if (IoIFP(io)) {
 		SV* sv = sv_newmortal();
-		gv_efullname3(sv, gv, Nullch);
+		gv_efullname4(sv, gv, Nullch, FALSE);
 		Perl_warner(aTHX_ WARN_IO,
 			    "Filehandle %s opened only for input",
 			    SvPV(sv,n_a));
@@ -1382,7 +1382,7 @@ Perl_do_readline(pTHX)
 		     || fp == PerlIO_stderr()))
 	{
 	    SV* sv = sv_newmortal();
-	    gv_efullname3(sv, PL_last_in_gv, Nullch);
+	    gv_efullname4(sv, PL_last_in_gv, Nullch, FALSE);
 	    Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
 			SvPV_nolen(sv));
 	}

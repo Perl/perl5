@@ -879,7 +879,7 @@ Perl_do_eof(pTHX_ GV *gv)
 		 || IoIFP(io) == PerlIO_stderr()))
     {
 	SV* sv = sv_newmortal();
-	gv_efullname3(sv, gv, Nullch);
+	gv_efullname4(sv, gv, Nullch, FALSE);
 	Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
 		    SvPV_nolen(sv));
     }

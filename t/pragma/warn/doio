@@ -188,4 +188,4 @@ my $a = eof STDOUT ;
 no warnings 'io' ;
 $a = eof STDOUT ;
 EXPECT
-Filehandle main::STDOUT opened only for output at - line 3.
+Filehandle STDOUT opened only for output at - line 3.

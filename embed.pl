@@ -1545,6 +1545,7 @@ Ap	|GV*	|gv_autoload4	|HV* stash|const char* name|STRLEN len \
 Ap	|void	|gv_check	|HV* stash
 Ap	|void	|gv_efullname	|SV* sv|GV* gv
 Ap	|void	|gv_efullname3	|SV* sv|GV* gv|const char* prefix
+Ap	|void	|gv_efullname4	|SV* sv|GV* gv|const char* prefix|bool keepmain
 Ap	|GV*	|gv_fetchfile	|const char* name
 Apd	|GV*	|gv_fetchmeth	|HV* stash|const char* name|STRLEN len \
 				|I32 level
@@ -1554,6 +1555,7 @@ Apd	|GV*	|gv_fetchmethod_autoload|HV* stash|const char* name \
 Ap	|GV*	|gv_fetchpv	|const char* name|I32 add|I32 sv_type
 Ap	|void	|gv_fullname	|SV* sv|GV* gv
 Ap	|void	|gv_fullname3	|SV* sv|GV* gv|const char* prefix
+Ap	|void	|gv_fullname4	|SV* sv|GV* gv|const char* prefix|bool keepmain
 Ap	|void	|gv_init	|GV* gv|HV* stash|const char* name \
 				|STRLEN len|int multi
 Apd	|HV*	|gv_stashpv	|const char* name|I32 create

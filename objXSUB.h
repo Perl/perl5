@@ -423,6 +423,10 @@
 #define Perl_gv_efullname3	pPerl->Perl_gv_efullname3
 #undef  gv_efullname3
 #define gv_efullname3		Perl_gv_efullname3
+#undef  Perl_gv_efullname4
+#define Perl_gv_efullname4	pPerl->Perl_gv_efullname4
+#undef  gv_efullname4
+#define gv_efullname4		Perl_gv_efullname4
 #undef  Perl_gv_fetchfile
 #define Perl_gv_fetchfile	pPerl->Perl_gv_fetchfile
 #undef  gv_fetchfile
@@ -451,6 +455,10 @@
 #define Perl_gv_fullname3	pPerl->Perl_gv_fullname3
 #undef  gv_fullname3
 #define gv_fullname3		Perl_gv_fullname3
+#undef  Perl_gv_fullname4
+#define Perl_gv_fullname4	pPerl->Perl_gv_fullname4
+#undef  gv_fullname4
+#define gv_fullname4		Perl_gv_fullname4
 #undef  Perl_gv_init
 #define Perl_gv_init		pPerl->Perl_gv_init
 #undef  gv_init

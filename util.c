@@ -3896,7 +3896,7 @@ Perl_report_closed_fh(pTHX_ GV *gv, IO *io, const char *func, const char *obj)
     assert(gv);
 
     sv = sv_newmortal();
-    gv_efullname3(sv, gv, Nullch);
+    gv_efullname4(sv, gv, Nullch, FALSE);
     name = SvPVX(sv);
 
     Perl_warner(aTHX_ WARN_CLOSED, "%s() on closed %s %s", func, obj, name);
