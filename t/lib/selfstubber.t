@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use Devel::SelfStubber;
 
-my $runperl = './perl';
+my $runperl = "$^X \"-I../lib\"";
 
 print "1..7\n";
 
@@ -117,7 +117,8 @@ print ${module}->foo;
 {
   my %output;
   foreach my $module (@module) {
-    ($output{$module} = `$runperl -I $inlib $module--$$`)
+    print "# $runperl \"-I$inlib\" $module--$$\n";
+    ($output{$module} = `$runperl "-I$inlib" $module--$$`)
       =~ s/\'s foo//;
   }
 
@@ -156,7 +157,8 @@ print "ok 6\n";
 {
   my %output;
   foreach my $module (@module) {
-    ($output{$module} = `$runperl -I $lib $module--$$`)
+    print "# $runperl \"-I$lib\" $module--$$\n";
+    ($output{$module} = `$runperl "-I$lib" $module--$$`)
       =~ s/\'s foo//;
   }
 
