@@ -34,10 +34,9 @@ static I32 amagic_cmp_locale(pTHX_ SV *a, SV *b);
 #define sv_cmp_static Perl_sv_cmp
 #define sv_cmp_locale_static Perl_sv_cmp_locale
 
-#define SORTHINTS(hintsvp) \
-     ((PL_hintgv &&	\
-      (hintsvp = hv_fetch(GvHV(PL_hintgv), "SORT", 4, FALSE))) ? \
-	  (I32)SvIV(*hintsvp) : 0)
+#define SORTHINTS(hintsv) \
+    (((hintsv) = GvSV(gv_fetchpv("sort::hints", GV_ADDMULTI, SVt_IV))), \
+    (SvIOK(hintsv) ? ((I32)SvIV(hintsv)) : 0))
 
 #ifndef SMALLSORT
 #define	SMALLSORT (200)
@@ -1304,9 +1303,9 @@ cmpindir(pTHX_ gptr a, gptr b)
 STATIC void
 S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 {
-    SV **hintsvp;
+    SV *hintsv;
 
-    if (SORTHINTS(hintsvp) & HINT_SORT_STABLE) {
+    if (SORTHINTS(hintsv) & HINT_SORT_STABLE) {
 	 register gptr **pp, *q;
 	 register size_t n, j, i;
 	 gptr *small[SMALLSORT], **indir, tmp;
@@ -1391,7 +1390,7 @@ Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 {
     void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp) =
         S_mergesortsv;
-    SV **hintsvp;
+    SV *hintsv;
     I32 hints;
 
     /*  Sun's Compiler (cc: WorkShop Compilers 4.2 30 Oct 1996 C 4.2) used 
@@ -1399,7 +1398,7 @@ Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 	errors related to picking the correct sort() function, try recompiling 
 	this file without optimiziation.  -- A.D.  4/2002.
     */
-    hints = SORTHINTS(hintsvp);
+    hints = SORTHINTS(hintsv);
     if (hints & HINT_SORT_QUICKSORT) {
 	sortsvp = S_qsortsv;
     }

@@ -136,9 +136,8 @@ main(0);
 
 # XXX We're using this eval "..." trick to force recompilation,
 # to ensure that the correct pragma is enabled when main() is run.
-# Currently 'use sort' modifies $^H{SORT} at compile-time, but
-# pp_sort() fetches its value at run-time : thus the lexical scoping
-# of %^H is of no utility.
+# Currently 'use sort' modifies $sort::hints at compile-time, but
+# pp_sort() fetches its value at run-time.
 # The order of those evals is important.
 
 eval q{
