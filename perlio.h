@@ -308,7 +308,7 @@ extern PerlIO *	PerlIO_fdupopen		(PerlIO *);
 #ifndef PerlIO_isutf8
 extern int	PerlIO_isutf8		(PerlIO *);
 #endif
-#ifndef PerlIO_isutf8
+#ifndef PerlIO_apply_layers
 extern int	PerlIO_apply_layers	(pTHX_ PerlIO *f,const char *mode, const char *names);
 #endif
 
