@@ -28,6 +28,9 @@ lns='cp'
 
 usenm='true'
 
+# this reportedly causes compile errors in system includes
+i_ieeefp='undef'
+
 d_link='undef'      # these are empty functions in libc.a
 d_symlink='undef'
 d_fork='undef'
