@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb 22 23:55:00 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Feb 23 21:51:47 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -2405,12 +2405,12 @@ EOM
 	: specified already.
 	case "$hintfile" in
 	''|' ')
-		file=`echo "${osname}_${osvers}" | $sed -e 's@\.@_@g' -e 's@_$@@'`
+		file=`echo "${osname}_${osvers}" | $sed -e 's%\.%_%g' -e 's%_$%%'`
 		: Also try without trailing minor version numbers.
-		xfile=`echo $file | $sed -e 's@_[^_]*$@@'`
-		xxfile=`echo $xfile | $sed -e 's@_[^_]*$@@'`
-		xxxfile=`echo $xxfile | $sed -e 's@_[^_]*$@@'`
-		xxxxfile=`echo $xxxfile | $sed -e 's@_[^_]*$@@'`
+		xfile=`echo $file | $sed -e 's%_[^_]*$%%'`
+		xxfile=`echo $xfile | $sed -e 's%_[^_]*$%%'`
+		xxxfile=`echo $xxfile | $sed -e 's%_[^_]*$%%'`
+		xxxxfile=`echo $xxxfile | $sed -e 's%_[^_]*$%%'`
 		case "$file" in
 		'') dflt=none ;;
 		*)  case "$osvers" in
@@ -3752,7 +3752,7 @@ for thislib in $libswanted; do
                    libsfound="$libsfound $xxx"
                    yyy=`basename $xxx`
                    libsfiles="$libsfiles $yyy"
-                   yyy=`echo $xxx|sed "s@/$yyy\\$@@"`
+                   yyy=`echo $xxx|$sed -e "s%/$yyy\\$%%"`
                    case " $libsdirs " in
                    *" $yyy "*) ;;
                    *) libsdirs="$libsdirs $yyy" ;;
@@ -5967,7 +5967,7 @@ y*) usedl="$define"
 	. ./getfile
 	usedl="$define"
 	: emulate basename
-	dlsrc=`echo $ans | $sed -e 's@.*/\([^/]*\)$@\1@'`
+	dlsrc=`echo $ans | $sed -e 's%.*/\([^/]*\)$%\1%'`
 
 	$cat << EOM
 
