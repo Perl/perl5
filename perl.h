@@ -2535,4 +2535,20 @@ enum {
 #   endif
 #endif
 
+#ifdef IAMSUID
+
+#ifdef I_SYS_STATVFS
+#   include <sys/statvfs.h>
+#else
+#   ifdef I_SYS_MOUNT
+#       include <sys/mount.h>
+#   else
+#       ifdef I_MNTENT
+#           include <mntent.h>
+#       endif
+#   endif
+#endif
+
+#endif /* IAMSUID */
+
 #endif /* Include guard */

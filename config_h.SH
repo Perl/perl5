@@ -239,6 +239,54 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_fsetpos HAS_FSETPOS	/**/
 
+/* I_SYS_MOUNT:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/mount.h>.
+ */
+#$i_sysmount I_SYS_MOUNT		/**/
+
+/* HAS_FSTATFS:
+ *	This symbol, if defined, indicates that the fstatfs routine is
+ *	available to stat the filesystem of a file descriptor.
+ */
+#$d_fstatfs HAS_FSTATFS	/**/
+
+/* HAS_STRUCT_STATFS_FLAGS:
+ *	This symbol, if defined, indicates that the struct statfs has
+ *	the f_flags member for mount flags.
+ */
+#$d_statfsflags HAS_STRUCT_STATFS_FLAGS	/**/
+
+/* I_SYS_STATVFS:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/statvfs.h>.
+ */
+#$i_sysstatvfs I_SYS_STATVFS		/**/
+
+/* HAS_FSTATVFS:
+ *	This symbol, if defined, indicates that the fstatvfs routine is
+ *	available to stat the filesystem of a file descriptor.
+ */
+#$d_fstatfs HAS_FSTATFS	/**/
+
+/* I_MNTENT:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <mntent.h>.
+ */
+#$i_mntent I_MATH		/**/
+
+/* HAS_GETMNTENT:
+ *	This symbol, if defined, indicates that the getmntent routine is
+ *	available to lookup mount entries in some data base or other.
+ */
+#$d_getmntent HAS_GETMNTENT	/**/
+
+/* HAS_HASMNTOPT:
+ *	This symbol, if defined, indicates that the hasmntopt routine is
+ *	available to query mount entries returned by getmntent.
+ */
+#$d_hasmntopt HAS_HASMNTOPT	/**/
+
 /* HAS_GETTIMEOFDAY:
  *	This symbol, if defined, indicates that the gettimeofday() system
  *	call is available for a sub-second accuracy clock. Usually, the file
