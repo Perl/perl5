@@ -2879,22 +2879,22 @@ version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvIVX
-
-Returns the raw value in the SV's IV slot, without checks or conversions.
-Only use when you are sure SvIOK is true. See also C<SvIV()>.
-
-	IV	SvIVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvIVx
 
 Coerces the given SV to an integer and returns it. Guarantees to evaluate
 sv only once. Use the more efficient C<SvIV> otherwise.
 
 	IV	SvIVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVX
+
+Returns the raw value in the SV's IV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvIV()>.
+
+	IV	SvIVX(SV* sv)
 
 =for hackers
 Found in file sv.h

@@ -2264,9 +2264,9 @@ B<-X>, B<-x> I<directory>
 HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLIO, :bytes, :crlf, :mmap,
 :perlio, :pop, :raw, :stdio, :unix, :utf8, :win32, PERLIO_DEBUG, PERLLIB,
 PERL5DB, PERL5SHELL (specific to the Win32 port), PERL_DEBUG_MSTATS,
-PERL_DESTRUCT_LEVEL, PERL_ENCODING, PERL_HASH_SEED, PERL_HASH_SEED_DEBUG,
-PERL_ROOT (specific to the VMS port), PERL_SIGNALS, PERL_UNICODE, SYS$LOGIN
-(specific to the VMS port)
+PERL_DESTRUCT_LEVEL, PERL_DL_NONLAZY, PERL_ENCODING, PERL_HASH_SEED,
+PERL_HASH_SEED_DEBUG, PERL_ROOT (specific to the VMS port), PERL_SIGNALS,
+PERL_UNICODE, SYS$LOGIN (specific to the VMS port)
 
 =back
 
@@ -4473,7 +4473,7 @@ save_hptr(HV **hptr)>
 
 =item Internal Functions
 
-A, p, d, s, n, r, f, M, o, j, x
+A, p, d, s, n, r, f, M, o, x, m, X, E, b
 
 =over 4
 
@@ -4655,7 +4655,7 @@ HEf_SVKEY, Nullch, Nullsv
 =item Hash Manipulation Functions
 
 get_hv, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force, HeSVKEY_set,
-HeVAL, HvNAME, hv_clear, hv_delete, hv_delete_ent, hv_exists,
+HeVAL, HvNAME, hv_assert, hv_clear, hv_delete, hv_delete_ent, hv_exists,
 hv_exists_ent, hv_fetch, hv_fetch_ent, hv_iterinit, hv_iterkey,
 hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iternext_flags, hv_iterval,
 hv_magic, hv_store, hv_store_ent, hv_undef, newHV, Nullhv
@@ -13005,6 +13005,8 @@ mkpath directory..
 
 test_f file
 
+dos2unix
+
 =over 4
 
 =item BUGS
@@ -13231,6 +13233,8 @@ installvars
 =back
 
 os_flavor_is
+
+blibdirs_target (o)
 
 =over 4
 
@@ -13519,7 +13523,7 @@ constants (o)
 
 depend (o)
 
-dir_target (o)
+dir_target B<DEPRECATED>
 
 init_DEST
 
@@ -14086,7 +14090,7 @@ bin/
 
 =back
 
-=head2 ExtUtils::MakeMaker::bytes - Version agnostic bytes.pm
+=head2 ExtUtils::MakeMaker::bytes - Version-agnostic bytes.pm
 
 =over 4
 
@@ -14096,7 +14100,7 @@ bin/
 
 =back
 
-=head2 ExtUtils::MakeMaker::vmsish - Platform agnostic vmsish.pm
+=head2 ExtUtils::MakeMaker::vmsish - Platform-agnostic vmsish.pm
 
 =over 4
 
@@ -17772,7 +17776,7 @@ name space
 
 =item DESCRIPTION
 
-unix, stdio, perlio, crlf, utf8, bytes, raw, pop
+:unix, :stdio, :perlio, :crlf, :mmap, :utf8, :bytes, :raw, :pop, :win32
 
 =over 4
 
@@ -20734,9 +20738,10 @@ CLASS->can( METHOD ) >>, C<can( VAL, METHOD )>, C<VERSION ( [ REQUIRE ] )>
 
 =item Constructor and Tailoring
 
-UCA_Version, alternate, backwards, entry, ignoreName, ignoreChar, level,
-normalization, overrideCJK, overrideHangul, preprocess, rearrange, table,
-undefName, undefChar, katakana_before_hiragana, upper_before_lower
+UCA_Version, backwards, entry, hangul_terminator, ignoreName, ignoreChar,
+level, normalization, overrideCJK, overrideHangul, preprocess, rearrange,
+table, undefName, undefChar, katakana_before_hiragana, upper_before_lower,
+variable, alternate
 
 =item Methods for Collation
 
@@ -20760,8 +20765,8 @@ $Collator-E<gt>gsubst($string, $substring, $replacement)>
 
 =item Other Methods
 
-C<%old_tailoring = $Collator-E<gt>change(%new_tailoring)>, UCA_Version,
-Base_Unicode_Version
+C<%old_tailoring = $Collator-E<gt>change(%new_tailoring)>, C<$version =
+$Collator-E<gt>version()>, C<UCA_Version()>, C<Base_Unicode_Version()>
 
 =item EXPORT
 
@@ -20775,11 +20780,9 @@ Base_Unicode_Version
 
 =item SEE ALSO
 
-http://www.unicode.org/reports/tr10/,
-http://www.unicode.org/reports/tr10/allkeys.txt,
-http://www.unicode.org/reports/tr10/CollationTest.html
-http://www.unicode.org/reports/tr10/CollationTest.zip,
-http://www.unicode.org/reports/tr15/, L<Unicode::Normalize>
+Unicode Collation Algorithm - UTS #10, The Default Unicode Collation
+Element Table (DUCET), The conformance test for the UCA, Hangul Syllable
+Type, Unicode Normalization Forms - UAX #15, L<Unicode::Normalize>
 
 =back
 
@@ -20797,6 +20800,7 @@ http://www.unicode.org/reports/tr15/, L<Unicode::Normalize>
 
 C<$NFD_string = NFD($string)>, C<$NFC_string = NFC($string)>,
 C<$NFKD_string = NFKD($string)>, C<$NFKC_string = NFKC($string)>,
+C<$FCD_string = FCD($string)>, C<$FCC_string = FCC($string)>,
 C<$normalized_string = normalize($form_name, $string)>
 
 =item Decomposition and Composition
@@ -20809,6 +20813,7 @@ reorder($string)>, C<$composed_string	= compose($string)>
 
 C<$result = checkNFD($string)>, C<$result = checkNFC($string)>, C<$result =
 checkNFKD($string)>, C<$result = checkNFKC($string)>, C<$result =
+checkFCD($string)>, C<$result = checkFCC($string)>, C<$result =
 check($form_name, $string)>
 
 =item Character Data
@@ -20830,7 +20835,8 @@ C<$may_be_composed_with_prev_char = isComp2nd($codepoint)>
 =item SEE ALSO
 
 http://www.unicode.org/unicode/reports/tr15/,
-http://www.unicode.org/Public/UNIDATA/DerivedNormalizationProps.txt
+http://www.unicode.org/Public/UNIDATA/DerivedNormalizationProps.txt,
+http://www.unicode.org/notes/tn5/
 
 =back
 
