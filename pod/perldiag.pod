@@ -1441,17 +1441,16 @@ C<$ENV{ENV}> or C<$ENV{BASH_ENV}> are derived from data supplied (or
 potentially supplied) by the user.  The script must set the path to a
 known value, using trustworthy data.  See L<perlsec>.
 
-=item Integer overflow in hex number
+=item Integer overflow in %s number
 
-(S) The literal hex number you have specified is too big for your
-architecture. On a 32-bit architecture the largest hex literal is
-0xFFFFFFFF.
-
-=item Integer overflow in octal number
-
-(S) The literal octal number you have specified is too big for your
-architecture. On a 32-bit architecture the largest octal literal is
-037777777777.
+(S) The literal hex, octal or binary number you have specified is
+too big for your architecture. On a 32-bit architecture the largest
+literal hex, octal or binary number representable without overflow
+is 0xFFFFFFFF, 037777777777, or 0b11111111111111111111111111111111
+respectively.  Note that Perl transparently promotes decimal literals
+to a floating point representation internally--subject to loss of
+precision errors in subsequent operations--so this limit usually
+doesn't apply to decimal literals.
 
 =item Internal inconsistency in tracking vforks
 
