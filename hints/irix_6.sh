@@ -20,6 +20,8 @@
 # Tweaked by Chip Salzenberg <chip@perl.com> on 5/13/97
 #    - don't assume 'cc -n32' if the n32 libm.so is missing
 
+# gcc-enabled by Kurt Starsinic <kstar@isinet.com> on 12/1/1998
+
 # Use   sh Configure -Dcc='cc -n32' to try compiling with -n32.
 #     or -Dcc='cc -n32 -mips3' (or -mips4) to force (non)portability
 # Don't bother with -n32 unless you have the 7.1 or later compilers.
@@ -48,7 +50,7 @@ case "$cc" in
 	case "`$cc -version 2>&1`" in
 	*7.0*)                        # Mongoose 7.0
 	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1042,1048,1110,1116,1184 -OPT:Olimit=0"
-	     optimize='none'	  
+	     optimize='none'
 	     ;;
 	*7.1*|*7.2|*7.20)                   # Mongoose 7.1+
 	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0"
@@ -60,12 +62,12 @@ case "$cc" in
 pp_ctl_cflags='optimize=-O'
 	     ;;
 	*7.*)                         # Mongoose 7.2.1+
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0:space=on"
-	     optimize='-O3'	  
-	     ;;
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0:space=ON"
+	    optimize='-O3'
+	    ;;
 	*6.2*)                        # Ragnarok 6.2
 	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184"
-	     optimize='none'	  
+	     optimize='none'
 	     ;;
 	*)                            # Be safe and not optimize
 	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0"
@@ -73,7 +75,30 @@ pp_ctl_cflags='optimize=-O'
 	     ;;
 	esac
 
-	ld=ld
+# this is to accommodate the 'modules' capability of the 
+# 7.2 MIPSPro compilers, which allows for the compilers to be installed
+# in a nondefault location.  Almost everything works as expected, but
+# /usr/include isn't caught properly.  Hence see the /usr/include/pthread.h
+# change below to include TOOLROOT (a modules environment variable),
+# and the following code.  Additional
+# code to accommodate the 'modules' environment should probably be added
+# here if possible, or be inserted as a ${TOOLROOT} reference before
+# absolute paths (again, see the pthread.h change below). 
+# -- krishna@sgi.com, 8/23/98
+
+if [ "X${TOOLROOT}" != "X" ]; then
+# we cant set cppflags because it gets overwritten
+# we dont actually need $TOOLROOT/usr/include on the cc line cuz the 
+# modules functionality already includes it but
+# XXX - how do I change cppflags in the hints file?
+       ccflags="$ccflags -I${TOOLROOT}/usr/include"
+       usrinc="${TOOLROOT}/usr/include"
+fi
+
+       ld=$cc
+       # perl's malloc can return improperly aligned buffer
+       # usemymalloc='undef'
+malloc_cflags='ccflags="-DSTRICT_ALIGNMENT $ccflags"'
 	# NOTE: -L/usr/lib32 -L/lib32 are automatically selected by the linker
 	ldflags=' -L/usr/local/lib32 -L/usr/local/lib'
 	cccdlflags=' '
@@ -87,6 +112,11 @@ pp_ctl_cflags='optimize=-O'
 	nm_opt='-p'
 	nm_so_opt='-p'
 	;;
+*gcc*)
+	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -D_POSIX_C_SOURCE"
+	optimize="-O3"
+	usenm='undef'
+	;;
 *)
 	# this is needed to force the old-32 paths
 	#  since the system default can be changed.
@@ -98,7 +128,9 @@ esac
 # This should be a Configure thing, but not for now...
 pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
 
-# We don't want these libraries.  Anyone know why?
+# We don't want these libraries.
+# Socket networking is in libc, these are not installed by default,
+# and just slow perl down. (scotth@sgi.com)
 set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /'`
 shift
 libswanted="$*"
@@ -121,8 +153,9 @@ libswanted="$*"
 # you need is in libc.  You do also need '-lbsd' if you choose not
 # to use the -D_BSD_* defines.  Note that as of 6.2 the only
 # difference between '-lmalloc' and '-lc' malloc is the debugging
-# and control calls. -- scotth@sgi.com
+# and control calls, which aren't used by perl. -- scotth@sgi.com
 
-set `echo X "$libswanted "|sed -e 's/ sun / /' -e 's/ crypt / /' -e 's/ bsd / /' -e 's/ PW / /'`
+set `echo X "$libswanted "|sed -e 's/ sun / /' -e 's/ crypt / /' -e 's/ bsd / /' -e 's/ PW / /' -e 's/ malloc / /'`
 shift
 libswanted="$*"
+
