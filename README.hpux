@@ -124,7 +124,7 @@ If these dependent libraries are not listed at shared library creation
 time, you will get fatal "Unresolved symbol" errors at run time when the
 library is loaded.
 
-You may create a shared library that referers to another library, which
+You may create a shared library that refers to another library, which
 may be either an archive library or a shared library.  If this second
 library is a shared library, this is called a "dependent library".  The
 dependent library's name is recorded in the main shared library, but it
