@@ -4431,9 +4431,15 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (!name || GvCVGEN(gv))
 	cv = Nullcv;
     else if ((cv = GvCV(gv))) {
-	cv_ckproto(cv, gv, ps);
+        bool exists = CvROOT(cv) || CvXSUB(cv);
+        /* if the subroutine doesn't exist and wasn't pre-declared
+         * with a prototype, assume it will be AUTOLOADed,
+         * skipping the prototype check
+         */
+        if (exists || SvPOK(cv))
+            cv_ckproto(cv, gv, ps);
 	/* already defined (or promised)? */
-	if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
+	if (exists || GvASSUMECV(gv)) {
 	    SV* const_sv;
 	    bool const_changed = TRUE;
 	    if (!block && !attrs) {
