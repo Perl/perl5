@@ -26,6 +26,7 @@ struct _PerlIO_funcs {
 		     PerlIO *old, int narg, SV **args);
     SV *(*Getarg) (PerlIO *f);
     IV (*Fileno) (PerlIO *f);
+    PerlIO *(*Dup) (pTHX_ PerlIO *f, PerlIO *o, clone_params *param);
     /* Unix-like functions - cf sfio line disciplines */
      SSize_t(*Read) (PerlIO *f, void *vbuf, Size_t count);
      SSize_t(*Unread) (PerlIO *f, const void *vbuf, Size_t count);
@@ -119,6 +120,7 @@ extern SV *PerlIO_arg_fetch(PerlIO_list_t *av, IV n);
 /* Generic, or stub layer functions */
 
 extern IV PerlIOBase_fileno(PerlIO *f);
+extern PerlIO *PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, clone_params *param);
 extern IV PerlIOBase_pushed(PerlIO *f, const char *mode, SV *arg);
 extern IV PerlIOBase_popped(PerlIO *f);
 extern SSize_t PerlIOBase_read(PerlIO *f, void *vbuf, Size_t count);
