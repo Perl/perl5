@@ -303,13 +303,17 @@ append_list
 apply
 assertref
 avhv_delete
+avhv_delete_ent
 avhv_exists
+avhv_exists_ent
 avhv_fetch
+avhv_fetch_ent
 avhv_iterinit
 avhv_iternext
 avhv_iternextsv
 avhv_iterval
 avhv_store
+avhv_store_ent
 av_clear
 av_extend
 av_fake

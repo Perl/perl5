@@ -561,6 +561,32 @@ U32 hash;
     return av_store(av, ind, val);
 }
 
+SV**
+avhv_store_ent(av, keysv, val, hash)
+AV *av;
+SV *keysv;
+SV *val;
+U32 hash;
+{
+    SV **keys;
+    HE *he;
+    I32 ind;
+    
+    keys = av_fetch(av, 0, FALSE);
+    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
+	croak("Can't coerce array into hash");
+    he = hv_fetch_ent((HV*)SvRV(*keys), keysv, FALSE, hash);
+    if (he) {
+	ind = SvIV(HeVAL(he));
+	if (ind < 1)
+	    croak("Bad index while coercing array into hash");
+    } else {
+	ind = AvFILL(av) + 1;
+	hv_store_ent((HV*)SvRV(*keys), keysv, newSViv(ind), hash);
+    }
+    return av_store(av, ind, val);
+}
+
 bool
 avhv_exists_ent(av, keysv, hash)
 AV *av;
