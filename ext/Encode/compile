@@ -542,9 +542,28 @@ sub decode_U
  my $s = shift;
 }
 
+my @uname;
+sub char_names
+{
+ my $s = do "unicode/Name.pl";
+ pos($s) = 0;
+ while ($s =~ /\G([0-9a-f]+)\t([0-9a-f]*)\t(.*?)\s*\n/igc)
+  {
+   my $name = $3;
+   my $s = hex($1);
+   last if $s >= 0x10000;
+   my $e = length($2) ? hex($2) : $s;
+   for (my $i = $s; $i <= $e; $i++)
+    {
+     $uname[$i] = $name;
+#    print sprintf("U%04X $name\n",$i);
+    }
+  }
+}
+
 sub output_ucm_page
 {
- my ($fh,$a,$t,$pre) = @_;
+ my ($cmap,$a,$t,$pre) = @_;
  # warn sprintf("Page %x\n",$pre);
  foreach my $b (sort keys %$t)
   {
@@ -553,7 +572,7 @@ sub output_ucm_page
    my $u = ord($s);
    if ($n != $a && $n != $t)
     {
-     output_ucm_page($fh,$a,$n,(($pre|($u &0x3F)) << 6)&0xFFFF);
+     output_ucm_page($cmap,$a,$n,(($pre|($u &0x3F)) << 6)&0xFFFF);
     }
    elsif (length($out))
     {
@@ -561,12 +580,13 @@ sub output_ucm_page
       {
        $u = $pre|($u &0x3f);
       }
-     printf $fh "<U%04X> ",$u;
+     my $s = sprintf "<U%04X> ",$u;
      foreach my $c (split(//,$out))
       {
-       printf $fh "\\x%02X",ord($c);
+       $s .= sprintf "\\x%02X",ord($c);
       }
-     printf $fh " |%d\n",($fb ? 1 : 0);
+     $s .= sprintf " |%d # %s\n",($fb ? 1 : 0),$uname[$u];
+     push(@$cmap,$s);
     }
    else
     {
@@ -577,9 +597,10 @@ sub output_ucm_page
 
 sub output_ucm
 {
- my ($fh,$name,$a,$rep,$min_el,$max_el) = @_;
+ my ($fh,$name,$h,$rep,$min_el,$max_el) = @_;
  print $fh "# Written $perforce\n# $0 @orig_ARGV\n" unless $opt{'q'};
  print $fh "<code_set_name> \"$name\"\n";
+ char_names();
  if (defined $min_el)
   {
    print $fh "<mb_cur_min> $min_el\n";
@@ -597,8 +618,13 @@ sub output_ucm
     }
    print $fh "\n";
   }
+ my @cmap;
+ output_ucm_page(\@cmap,$h,$h,0);
  print $fh "#\nCHARMAP\n";
- output_ucm_page($fh,$a,$a,0);
+ foreach my $line (sort { substr($a,8) cmp substr($b,8) } @cmap)
+  {
+   print $fh $line;
+  }
  print $fh "END CHARMAP\n";
 }
 
