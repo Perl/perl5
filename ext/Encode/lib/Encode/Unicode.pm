@@ -3,7 +3,7 @@ package Encode::Unicode;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = (q$Revision: 1.28 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.29 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 #
 # Aux. subs & constants
@@ -15,11 +15,9 @@ sub BOM16LE(){ 0xFFFe }
 sub BOM32LE(){ 0xFFFe0000 }
 
 sub valid_ucs2($){
-    if ($_[0] < 0xD800){
-	return $_[0] > 0;
-    }else{
-	return ($_[0] > 0xDFFF && $_[0] <= 0xFFFF);
-    }
+    return 
+	(0 <= $_[0] && $_[0] < 0xD800) 
+	    || 	( 0xDFFF < $_[0] && $_[0] <= 0xFFFF);
 }
 
 sub issurrogate($){   0xD800 <= $_[0]  && $_[0] <= 0xDFFF }
@@ -74,9 +72,9 @@ sub name { shift->{'Name'} }
 sub new_sequence { $_[0] };
 
 #
-# the two implementation of (en|de)code exist.  *_modern use
-# array and *_classic stick with substr.  *_classic is much
-# slower but more memory conservative.  *_moder is default.
+# two implementation of (en|de)code exist.  *_modern use
+# an array and *_classic stick with substr.  *_classic is much
+# slower but more memory conservative.  *_modern is default.
 
 sub set_transcoder{
     no warnings qw(redefine);
@@ -88,7 +86,7 @@ sub set_transcoder{
 	*decode = \&decode_classic;
 	*encode = \&encode_classic;
     }else{
-	require Carp;
+	require Carp; 
 	Carp::croak __PACKAGE__, "::set_transcoder(modern|classic)";
     }
 }
@@ -115,7 +113,7 @@ sub decode_modern
 	my $ord = shift @ord;
 	unless ($size == 4 or valid_ucs2($ord &= $mask)){
 	    if ($ucs2){
-		$chk and
+		$chk and 
 		    poisoned2death($obj, "no surrogates allowed", $ord);
 		shift @ord; # skip the next one as well
 		$ord = FBCHAR;
@@ -151,12 +149,12 @@ sub encode_modern
 	unless ($size == 4 or valid_ucs2($ord)) {
 	    unless(issurrogate($ord)){
 		if ($ucs2){
-		    $chk and
+		    $chk and 
 			poisoned2death($obj, "code point too high", $ord);
 
 		    push @str, FBCHAR;
 		}else{
-		
+		 
 		    push @str, ensurrogate($ord);
 		}
 	    }else{  # not supposed to happen
@@ -188,7 +186,7 @@ sub decode_classic
 	 my $ord = unpack($endian, substr($str, 0, $size, ''));
 	unless ($size == 4 or valid_ucs2($ord &= $mask)){
 	    if ($ucs2){
-		$chk and
+		$chk and 
 		    poisoned2death($obj, "no surrogates allowed", $ord);
 		substr($str,0,$size,''); # skip the next one as well
 		$ord = FBCHAR;
@@ -224,7 +222,7 @@ sub encode_classic
 	unless ($size == 4 or valid_ucs2($ord)) {
 	    unless(issurrogate($ord)){
 		if ($ucs2){
-		    $chk and
+		    $chk and 
 			poisoned2death($obj, "code point too high", $ord);
 		    $str .= pack($endian, FBCHAR);
 		}else{
@@ -244,7 +242,7 @@ sub BOMB {
     my ($size, $bom) = @_;
     my $N = $size == 2 ? 'n' : 'N';
     my $ord = unpack($N, $bom);
-    return ($ord eq BOM_BE) ? $N :
+    return ($ord eq BOM_BE) ? $N : 
 	($ord eq BOM16LE) ? 'v' : ($ord eq BOM32LE) ? 'V' : undef;
 }
 
@@ -267,7 +265,7 @@ Encode::Unicode -- Various Unicode Transform Format
 
 =head1 SYNOPSIS
 
-    use Encode qw/encode decode/;
+    use Encode qw/encode decode/; 
     $ucs2 = encode("UCS-2BE", $utf8);
     $utf8 = decode("UCS-2BE", $ucs2);
 
@@ -311,26 +309,26 @@ Endianness, and Byte Order Mark.
 =head2 by Size
 
 UCS-2 is a fixed-length encoding with each character taking 16 bits.
-It B<does not> support I<Surrogate Pair>.  When surrogate pair is
-encountered during decode(), it fills its place with \xFFFD without
-I<CHECK> or croaks if I<CHECK>.  When a character which ord value is
-larger than 0xFFFF, it uses 0xFFFD without I<CHECK> or croaks if
-<CHECK>.
+It B<does not> support I<Surrogate Pairs>.  When a surrogate pair is
+encountered during decode(), its place is filled with \xFFFD without
+I<CHECK> or croaks if I<CHECK>.  When a character whose ord value is
+larger than 0xFFFF is encountered, it uses 0xFFFD without I<CHECK> or
+croaks if <CHECK>.
 
-UTF-16 is almost the same as UCS-2 but it supports I<Surrogate Pair>.
+UTF-16 is almost the same as UCS-2 but it supports I<Surrogate Pairs>.
 When it encounters a high surrogate (0xD800-0xDBFF), it fetches the
-following low surrogate (0xDC00-0xDFFF), C<desurrogate> them to form a
+following low surrogate (0xDC00-0xDFFF), C<desurrogate>s them to form a
 character.  Bogus surrogates result in death.  When \x{10000} or above
-is encountered during encode(), it C<ensurrogate>s them and push the
+is encountered during encode(), it C<ensurrogate>s them and pushes the
 surrogate pair to the output stream.
 
 UTF-32 is a fixed-length encoding with each character taking 32 bits.
-Since it is 32-bit there is no need for I<Surrogate Pair>.
+Since it is 32-bit there is no need for I<Surrogate Pairs>.
 
 =head2 by Endianness
 
 First (and now failed) goal of Unicode was to map all character
-repartories into a fixed-length integer so programmers are happy.
+repertories into a fixed-length integer so programmers are happy.
 Since each character is either I<short> or I<long> in C, you have to
 put endianness of each platform when you pass data to one another.
 
@@ -340,16 +338,16 @@ called Byte Order Mark (BOM) is prepended to the head of string.
 
 =over 4
 
-=item BOM as integer
+=item BOM as integer when fetched in network byte order
 
-            16         32 bits/char
--------------------------
-BE      0xFeFF 0x0000FeFF
-LE      0xFFeF 0xFFFe0000
--------------------------
+              16         32 bits/char
+  -------------------------
+  BE      0xFeFF 0x0000FeFF
+  LE      0xFFeF 0xFFFe0000
+  -------------------------
 
 =back
-
+ 
 This modules handles BOM as follows.
 
 =over 4
@@ -363,7 +361,7 @@ simply treated as one of characters (ZERO WIDTH NO-BREAK SPACE).
 
 When BE or LE is omitted during decode(), it checks if BOM is in the
 beginning of the string and if found endianness is set to what BOM
-says.  if not found, dies.
+says.  If not found, dies. 
 
 =item *
 
@@ -379,21 +377,22 @@ UCS-2 is already registered by IANA and others that way.
 
 =back
 
-=head1 The Surrogate Pair
+=head1 Surrogate Pairs
 
-To say the least, surrogate pair was the biggest mistake by Unicode
-Consortium.  I don't give a darn if they admit it or not.  But
-according to late Douglas Adams in I<The Hitchhiker's Guide to the
-Galaxy> Triology,  C<First the Universe was created and it was a bad
-move>. Their mistake was not this magnitude so let's forgive them.
+To say the least, surrogate pairs were the biggest mistake of the
+Unicode Consortium.  But according to the late Douglas Adams in I<The
+Hitchhiker's Guide to the Galaxy> Trilogy, C<In the beginning the
+Universe was created. This has made a lot of people very angry and
+been widely regarded as a bad move>.  Their mistake was not of this
+magnitude so let's forgive them.
 
 (I don't dare make any comparison with Unicode Consortium and the
 Vogons here ;)  Or, comparing Encode to Babel Fish is completely
 appropriate -- if you can only stick this into your ear :)
 
-A surrogate pair was born when Unicode Consortium had finally
-admitted that 16 bit was not big enough to hold all the world's
-character repartorie. But they have already made UCS-2 16-bit.  What
+Surrogate pairs were born when Unicode Consortium finally
+admitted that 16 bits were not big enough to hold all the world's
+character repertoire.  But they have already made UCS-2 16-bit.  What
 do we do?
 
 Back then 0xD800-0xDFFF was not allocated.  Let's split them half and
@@ -402,7 +401,7 @@ latter C<lower half of a character>.  That way you can represent 1024
 * 1024 = 1048576 more characters.  Now we can store character ranges
 up to \x{10ffff} even with 16-bit encodings.  This pair of
 half-character is now called a I<Surrogate Pair> and UTF-16 is the
-name of encoding that embraces them.
+name of the encoding that embraces them.
 
 Here is a fomula to ensurrogate a Unicode character \x{10000} and
 above;
@@ -414,8 +413,14 @@ And to desurrogate;
 
  $uni = 0x10000 + ($hi - 0xD800) * 0x400 + ($lo - 0xDC00);
 
-Note this move has made \x{D800}-\x{DFFF} forbidden zone  but perl
-does not prohibit them for uses.
+Note this move has made \x{D800}-\x{DFFF} into a forbidden zone but
+perl does not prohibit the use of characters within this range.  To perl, 
+every one of \x{0000_0000} up to \x{ffff_ffff} (*) is I<a character>.
+
+  (*) or \x{ffff_ffff_ffff_ffff} if your perl is compiled with 64-bit
+  integer support! (**)
+
+  (**) Is anything beyond \x{11_0000} still Unicode :?
 
 =head1 SEE ALSO
 
@@ -424,5 +429,9 @@ L<Encode>, L<http://www.unicode.org/glossary/>,
 RFC 2781 L<http://rfc.net/rfc2781.html>,
 
 L<http://www.unicode.org/unicode/faq/utf_bom.html>
+
+Ch. 15, pp. 403 of C<Programming Perl (3rd Edition)>
+by Larry Wall, Tom Christiansen, Jon Orwant; 
+O'Reilly & Associates; ISBN 0-596-00027-8
 
 =cut

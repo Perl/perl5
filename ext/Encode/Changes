@@ -1,9 +1,53 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.31 2002/04/08 18:08:07 dankogai Exp dankogai $
+# $Id: Changes,v 1.32 2002/04/09 20:06:15 dankogai Exp dankogai $
 #
 
-1.31 $Date: 2002/04/08 18:08:07 $
+1.32 $Date: 2002/04/09 20:06:15 $
++ bin/ucmlint
++ t/bogus.ucm
+- ucm/macDevanaga.ucm   Unicode Character Map
+- ucm/macGujarati.ucm   Unicode Character Map
+- ucm/macGurmukhi.ucm   Unicode Character Map
+  A utility to check integrity of .ucm files. t/bogus.ucm is a
+  ucm that is deliberately bogus. unused Indic mappings are removed
+  for the time being.
+! Encode.pm
+  resolve_alias() added as suggested by jhi.  Same as
+  find_encoding("alias")->name.  For convenience.  This one is
+  defined in Encode.pm instead of Alias.pm.
+  Message-Id: <20020409215846.H17022@alpha.hut.fi>
+! Encode.xs
+  Memory Allocate but detected during the devel of ucmlint -- fixed.
+  Message-Id: <C0DDCE16-4BE7-11D6-9204-00039301D480@dan.co.jp>
+! lib/Encode/Unicode.pm
+  valid_ucs2(0) is false but must be true.
+  3 patches from NI-S as follows.  This also has fixed the incident
+  Andy has reported. 
+! lib/Encode/Alias.pm
+  find_alias() recursion prevention
+! t/Aliases.t
+  Checks for the patch above
+! t/Encode/Unicode.pm
+  An extra "F" that causes valid_ucs2() return a bogus value fixed
+  Message-Id: <20020409133927.17803.1@bactrian.elixent.com>
+  Message-Id: <Pine.SOL.4.10.10204091338220.10390-100000@maxwell.phys.lafayette.edu>
+  2 Small Patches from jhi as follows:
+! Encode.pm
+  Encode->encodings() lists in case-insensitve order (as it was)
+! bin/piconv
+  -l option prints avaiable encodings to STDOUT instead of STDERR
+! lib/Encode/Aliases.pm
+  s/defintion/definition/
+  Message-Id: <200204082306.CAA21033@alpha.hut.fi>
+! AUTHORS
+! lib/Encode/Supported.pod
+! lib/Encode/Unicode.pm
+  POD revise by Philip Newton.  This adds Philip to AUTHORS list.
+  Thank you for the exact quote of Douglas Adams :)
+  Message-Id: <22s3bu4gpvhhsses64nj3afuu0lo927rv3@4ax.com>
+
+1.31 2002/04/08 18:08:07
 ! lib/Encode/Encoder.pm
 + t/Encoder.t
   Encode::Encoder, once just a placeholder of an idea, is now much more 
@@ -189,7 +233,7 @@
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/08 18:08:07 $
+1.11  $Date: 2002/04/09 20:06:15 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

@@ -28,6 +28,7 @@ TW/TW.pm		Encode extension
 bin/enc2xs	Encode module generator
 bin/piconv	iconv by perl
 bin/ucm2table	Table Generator for testing
+bin/ucmlint	A UCM Lint utility
 bin/unidump	Unicode Dump like hexdump(1)
 encengine.c		Encode extension
 encoding.pm	Perl Pragmactic Module
@@ -53,6 +54,7 @@ t/JP.t		Encode extension test
 t/KR.t		Encode extension test
 t/TW.t		Encode extension test
 t/Unicode.t	Encode extension test
+t/bogus.ucm	Sample data for ucmlint
 t/encoding.t	encoding extension test
 t/gb2312.euc	test data
 t/gb2312.ref	test data
@@ -146,12 +148,9 @@ ucm/macChinsimp.ucm	Unicode Character Map
 ucm/macChintrad.ucm	Unicode Character Map
 ucm/macCroatian.ucm	Unicode Character Map
 ucm/macCyrillic.ucm	Unicode Character Map
-ucm/macDevanaga.ucm	Unicode Character Map
 ucm/macDingbats.ucm	Unicode Character Map
 ucm/macFarsi.ucm	Unicode Character Map
 ucm/macGreek.ucm	Unicode Character Map
-ucm/macGujarati.ucm	Unicode Character Map
-ucm/macGurmukhi.ucm	Unicode Character Map
 ucm/macHebrew.ucm	Unicode Character Map
 ucm/macIceland.ucm	Unicode Character Map
 ucm/macJapanese.ucm	Unicode Character Map

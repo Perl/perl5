@@ -1,5 +1,5 @@
 #
-# $Id: adobeSymbol.ucm,v 1.20 2002/04/04 19:50:53 dankogai Exp $
+# $Id: adobeSymbol.ucm,v 1.21 2002/04/09 20:06:15 dankogai Exp dankogai $
 #
 # Original table can be obtained at
 # http://www.unicode.org/Public/MAPPINGS/VENDORS/ADOBE/symbol.txt
@@ -74,7 +74,7 @@ CHARMAP
 <U007B> \x7B |0 # LEFT CURLY BRACKET # braceleft
 <U007C> \x7C |0 # VERTICAL LINE # bar
 <U007D> \x7D |0 # RIGHT CURLY BRACKET # braceright
-<U00A0> \x20 |0 # NO-BREAK SPACE # space
+<U00A0> \x20 |1 # NO-BREAK SPACE # space
 <U00AC> \xD8 |0 # NOT SIGN # logicalnot
 <U00B0> \xB0 |0 # DEGREE SIGN # degree
 <U00B1> \xB1 |0 # PLUS-MINUS SIGN # plusminus
@@ -117,7 +117,7 @@ CHARMAP
 <U03B9> \x69 |0 # GREEK SMALL LETTER IOTA # iota
 <U03BA> \x6B |0 # GREEK SMALL LETTER KAPPA # kappa
 <U03BB> \x6C |0 # GREEK SMALL LETTER LAMDA # lambda
-<U03BC> \x6D |0 # GREEK SMALL LETTER MU # mu
+<U03BC> \x6D |1 # GREEK SMALL LETTER MU # mu
 <U03BD> \x6E |0 # GREEK SMALL LETTER NU # nu
 <U03BE> \x78 |0 # GREEK SMALL LETTER XI # xi
 <U03BF> \x6F |0 # GREEK SMALL LETTER OMICRON # omicron
@@ -144,7 +144,7 @@ CHARMAP
 <U2111> \xC1 |0 # BLACK-LETTER CAPITAL I # Ifraktur
 <U2118> \xC3 |0 # SCRIPT CAPITAL P # weierstrass
 <U211C> \xC2 |0 # BLACK-LETTER CAPITAL R # Rfraktur
-<U2126> \x57 |0 # OHM SIGN # Omega
+<U2126> \x57 |1 # OHM SIGN # Omega
 <U2135> \xC0 |0 # ALEF SYMBOL # aleph
 <U2190> \xAC |0 # LEFTWARDS ARROW # arrowleft
 <U2191> \xAD |0 # UPWARDS ARROW # arrowup
@@ -161,7 +161,7 @@ CHARMAP
 <U2202> \xB6 |0 # PARTIAL DIFFERENTIAL # partialdiff
 <U2203> \x24 |0 # THERE EXISTS # existential
 <U2205> \xC6 |0 # EMPTY SET # emptyset
-<U2206> \x44 |0 # INCREMENT # Delta
+<U2206> \x44 |1 # INCREMENT # Delta
 <U2207> \xD1 |0 # NABLA # gradient
 <U2208> \xCE |0 # ELEMENT OF # element
 <U2209> \xCF |0 # NOT AN ELEMENT OF # notelement
@@ -169,7 +169,7 @@ CHARMAP
 <U220F> \xD5 |0 # N-ARY PRODUCT # product
 <U2211> \xE5 |0 # N-ARY SUMMATION # summation
 <U2212> \x2D |0 # MINUS SIGN # minus
-<U2215> \xA4 |0 # DIVISION SLASH # fraction
+<U2215> \xA4 |1 # DIVISION SLASH # fraction
 <U2217> \x2A |0 # ASTERISK OPERATOR # asteriskmath
 <U221A> \xD6 |0 # SQUARE ROOT # radical
 <U221D> \xB5 |0 # PROPORTIONAL TO # proportional
