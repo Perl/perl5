@@ -106,13 +106,23 @@ sub bcmp { #(num_str, num_str) return cond_code
 
 sub cmp { # post-normalized compare for internal use
     local($cx, $cy) = @_;
-    $cx cmp $cy
-    &&
-    (
-	ord($cy) <=> ord($cx)
-	||
-	($cx cmp ',') * (length($cy) <=> length($cx) || $cy cmp $cx)
-    );
+    
+    return 0 if ($cx eq $cy);
+
+    local($sx, $sy) = (substr($cx, 0, 1), substr($cy, 0, 1));
+    local($ld);
+
+    if ($sx eq '+') {
+      return  1 if ($sy eq '-' || $cy eq '+0');
+      $ld = length($cx) - length($cy);
+      return $ld if ($ld);
+      return $cx cmp $cy;
+    } else { # $sx eq '-'
+      return -1 if ($sy eq '+');
+      $ld = length($cy) - length($cx);
+      return $ld if ($ld);
+      return $cy cmp $cx;
+    }
 }
 
 sub badd { #(num_str, num_str) return num_str
