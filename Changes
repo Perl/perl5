@@ -31,6 +31,183 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13910] By: jhi                                   on 2001/12/27  14:32:23
+        Log: More wait status trickery for BeOS.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[ 13908] By: jhi                                   on 2001/12/27  14:15:27
+        Log: Try to catch the SIGBUS, as suggested by Nicholas Clark.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13907] By: jhi                                   on 2001/12/27  14:05:09
+        Log: Subject: [ID 20011227.002] Not OK: perl v5.7.2 +DEVEL13884 on i386-freebsd 4.4-stable (UNINSTALLED)
+             From: gbarr@monty.mutatus.co.uk
+             Date: 27 Dec 2001 14:41:36 -0000
+             Message-Id: <20011227144136.71851.qmail@monty.mutatus.co.uk>    
+     Branch: perl
+	   ! lib/ExtUtils/t/Embed.t
+____________________________________________________________________________
+[ 13906] By: jhi                                   on 2001/12/27  13:58:18
+        Log: Subject: [PATCH] Re: socketpair emulation
+             From: Nicholas Clark <nick@unfortu.net> 
+             Date: Wed, 26 Dec 2001 20:08:14 +0000
+             Message-ID: <20011226200813.A11903@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/Socket/socketpair.t
+____________________________________________________________________________
+[ 13905] By: jhi                                   on 2001/12/27  13:55:03
+        Log: Subject: [DOC PATCH] left is right and right is left
+             From: Philip Newton <Philip.Newton@gmx.net>
+             Date: Thu, 27 Dec 2001 10:04:17 +0100
+             Message-ID: <vsol2uchfg3ruf0rfjf33b75544nv21uhi@4ax.com>
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perlport.pod
+____________________________________________________________________________
+[ 13904] By: jhi                                   on 2001/12/27  13:53:25
+        Log: Subject: [PATCH] check return of close
+             From: andreas.koenig@anima.de (Andreas J. Koenig)            
+             Date: 27 Dec 2001 09:47:30 +0100
+             Message-ID: <m3ellhgicd.fsf@anima.de> 
+             
+             Subject: [PATCH] improve error reporting
+             From: andreas.koenig@anima.de (Andreas J. Koenig)            
+             Date: 27 Dec 2001 09:54:55 +0100
+             Message-ID: <m3adw5gi00.fsf@anima.de> 
+             
+             Subject: [PATCH] check return value of close
+             From: andreas.koenig@anima.de (Andreas J. Koenig)            
+             Date: 27 Dec 2001 10:03:55 +0100
+             Message-ID: <m3666tghl0.fsf@anima.de> 
+             
+             Subject: [PATCH] return of close
+             From: andreas.koenig@anima.de (Andreas J. Koenig)            
+             Date: 27 Dec 2001 10:22:15 +0100
+             Message-ID: <m31yhhggqg.fsf@anima.de> 
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_dir.t lib/warnings.t t/cmd/subval.t
+	   ! t/io/fflush.t
+____________________________________________________________________________
+[ 13903] By: jhi                                   on 2001/12/27  13:44:57
+        Log: Subject: [PATCH] check return of close
+             From: andreas.koenig@anima.de (Andreas J. Koenig)            
+             Date: 27 Dec 2001 09:47:30 +0100
+             Message-ID: <m3ellhgicd.fsf@anima.de> 
+     Branch: perl
+	   ! t/base/rs.t
+____________________________________________________________________________
+[ 13902] By: jhi                                   on 2001/12/27  13:38:30
+        Log: Subject: [PATCH] better error diagnosis from t/op/sysio.t
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 27 Dec 2001 09:21:16 +0100
+             Message-ID: <m3n105gjk3.fsf@anima.de>
+     Branch: perl
+	   ! t/op/sysio.t
+____________________________________________________________________________
+[ 13901] By: jhi                                   on 2001/12/27  13:35:03
+        Log: Subject: [PATCH] Re: ExtUtils::MM_Cygwin test failures (was Re: [ PATCH ] Cygwin groups.t  (PLEASE CHECK))
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Thu, 27 Dec 2001 09:23:55 +0100 
+             Message-ID: <98211521662.20011227092355@familiehaase.de>
+     Branch: perl
+	   ! lib/ExtUtils/t/MM_Cygwin.t
+____________________________________________________________________________
+[ 13899] By: jhi                                   on 2001/12/26  21:30:13
+        Log: Replace the awful (most likely generated and not very persistent)
+             URL with something tangible.
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 13898] By: jhi                                   on 2001/12/26  21:21:01
+        Log: Naughty /dev/printer (ls -l, really) of IRIX.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13897] By: jhi                                   on 2001/12/26  20:56:09
+        Log: Upgrade to Net::Ping 2.10.
+     Branch: perl
+	   ! lib/Net/Ping.pm lib/Net/Ping/CHANGES lib/Net/Ping/t/100_load.t
+	   ! lib/Net/Ping/t/110_icmp_inst.t lib/Net/Ping/t/120_udp_inst.t
+	   ! lib/Net/Ping/t/130_tcp_inst.t lib/Net/Ping/t/140_stream_inst.t
+	   ! lib/Net/Ping/t/200_ping_tcp.t lib/Net/Ping/t/300_ping_stream.t
+____________________________________________________________________________
+[ 13896] By: jhi                                   on 2001/12/26  20:15:32
+        Log: BeOS has times() tick of 1000000, not CLK_TCK (1000)
+             (this showed up in Benchmark.t)
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 13895] By: jhi                                   on 2001/12/26  19:52:03
+        Log: BeOS updates.
+     Branch: perl
+	   ! README.beos beos/beos.c
+____________________________________________________________________________
+[ 13894] By: jhi                                   on 2001/12/26  19:31:38
+        Log: Subject: Re: bleadperl doesn't compile
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Wed, 26 Dec 2001 21:29:08 +0100
+             Message-ID: <22168634623.20011226212908@familiehaase.de>
+             
+             Cygwin with multiplicity.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 13893] By: jhi                                   on 2001/12/26  19:11:49
+        Log: Subject: [PATCH] Re: [ PATCH ] Cygwin groups.t  (PLEASE CHECK)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 26 Dec 2001 19:07:33 +0000
+             Message-ID: <20011226190732.J48842@plum.flirble.org>            
+             
+             socketpair() (un)signedness nit.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 13892] By: jhi                                   on 2001/12/26  19:10:15
+        Log: Subject: Re: [PATCH] Re: [ PATCH ] Cygwin groups.t  (PLEASE CHECK)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 26 Dec 2001 19:19:47 +0000
+             Message-ID: <20011226191946.K48842@plum.flirble.org>
+             
+             Use report_evil_fh().
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 13891] By: jhi                                   on 2001/12/26  18:58:09
+        Log: Bad $? assumptions.
+     Branch: perl
+	   ! ext/POSIX/POSIX.pod pod/perlfunc.pod pod/perlport.pod
+____________________________________________________________________________
+[ 13890] By: jhi                                   on 2001/12/26  17:47:57
+        Log: Net::Ping isn't going to work much without
+             the Socket extension; fail more gracefully.
+     Branch: perl
+	   ! lib/Net/Ping/t/100_load.t lib/Net/Ping/t/110_icmp_inst.t
+	   ! lib/Net/Ping/t/120_udp_inst.t lib/Net/Ping/t/130_tcp_inst.t
+	   ! lib/Net/Ping/t/140_stream_inst.t lib/Net/Ping/t/200_ping_tcp.t
+	   ! lib/Net/Ping/t/300_ping_stream.t
+____________________________________________________________________________
+[ 13888] By: jhi                                   on 2001/12/26  17:18:59
+        Log: test -d /system is a bit too generic test for VOS
+             (false hit in BeOS)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13887] By: jhi                                   on 2001/12/26  17:13:27
+        Log: No AF_UNIX in BeOS.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 13886] By: jhi                                   on 2001/12/26  17:07:39
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq5.pod
+____________________________________________________________________________
+[ 13885] By: jhi                                   on 2001/12/25  16:24:10
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13884] By: jhi                                   on 2001/12/25  16:20:19
         Log: Make -t equal -tw.
      Branch: perl
