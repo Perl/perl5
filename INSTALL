@@ -42,8 +42,13 @@ on the platform.  If that's not okay with you, use
 	make test
 	make install
 
-For information on non-Unix systems, see the section on
-L<"Porting information"> below.
+For information on non-Unix systems, see the section on L<"Porting
+information"> below.
+
+If "make install" just says "`install' is up to date" or something
+similar, you may be on case-preserving filesystems such as Mac's HFS+
+and you should say "make install-all".  (This confusion brought to you
+by the Perl distribution having a file called INSTALL.)
 
 If you have problems, corrections, or questions, please see
 L<"Reporting Problems"> below.

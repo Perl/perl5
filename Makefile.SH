@@ -606,7 +606,7 @@ extra.pods: miniperl
 install-strip:
 	$(MAKE) STRIPFLAGS=-s install
 
-install:
+install install-all:
 	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS)
 
 install-verbose:
