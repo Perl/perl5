@@ -1316,11 +1316,6 @@ int flags;
     res=POPs;
     PUTBACK;
 
-    if (notfound) {
-      /* sv_2mortal(res); */
-      return NULL;
-    }
-
     if (postpr) {
       int ans;
       switch (method) {
