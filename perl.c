@@ -47,6 +47,37 @@ static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
 #define perl_free	Perl_free
 #endif
 
+#if defined(USE_THREADS)
+#  define INIT_TLS_AND_INTERP \
+    STMT_START {				\
+	if (!PL_curinterp) {			\
+	    PERL_SET_INTERP(my_perl);		\
+	    INIT_THREADS;			\
+	    ALLOC_THREAD_KEY;			\
+	}					\
+    } STMT_END
+#else
+#  if defined(USE_ITHREADS)
+#  define INIT_TLS_AND_INTERP \
+    STMT_START {				\
+	if (!PL_curinterp) {			\
+	    PERL_SET_INTERP(my_perl);		\
+	    INIT_THREADS;			\
+	    ALLOC_THREAD_KEY;			\
+	}					\
+	PERL_SET_THX(my_perl);			\
+    } STMT_END
+#  else
+#  define INIT_TLS_AND_INTERP \
+    STMT_START {				\
+	if (!PL_curinterp) {			\
+	    PERL_SET_INTERP(my_perl);		\
+	}					\
+	PERL_SET_THX(my_perl);			\
+    } STMT_END
+#  endif
+#endif
+
 #ifdef PERL_IMPLICIT_SYS
 PerlInterpreter *
 perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
@@ -59,25 +90,11 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
 #ifdef PERL_OBJECT
     my_perl = (PerlInterpreter*)new(ipM) CPerlObj(ipM, ipMS, ipMP, ipE, ipStd,
 						  ipLIO, ipD, ipS, ipP);
-    if (!PL_curinterp) {
-	PERL_SET_INTERP(my_perl);
-#if defined(USE_THREADS) || defined(USE_ITHREADS)
-    	INIT_THREADS;
-        ALLOC_THREAD_KEY;
-#endif
-    }
-    PERL_SET_THX(my_perl);
+    INIT_TLS_AND_INTERP;
 #else
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
-    if (!PL_curinterp) {
-	PERL_SET_INTERP(my_perl);
-#if defined(USE_THREADS) || defined(USE_ITHREADS)
-    	INIT_THREADS;
-        ALLOC_THREAD_KEY;
-#endif
-    }
-    PERL_SET_THX(my_perl);
+    INIT_TLS_AND_INTERP;
     Zero(my_perl, 1, PerlInterpreter);
     PL_Mem = ipM;
     PL_MemShared = ipMS;
@@ -110,14 +127,7 @@ perl_alloc(void)
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
 
-    if (!PL_curinterp) {
-	PERL_SET_INTERP(my_perl);
-#if defined(USE_THREADS) || defined(USE_ITHREADS)
-    	INIT_THREADS;
-        ALLOC_THREAD_KEY;
-#endif
-    }
-    PERL_SET_THX(my_perl);
+    INIT_TLS_AND_INTERP;
     Zero(my_perl, 1, PerlInterpreter);
     return my_perl;
 }
@@ -3416,7 +3426,7 @@ S_init_main_thread(pTHX)
 #else
     thr->self = pthread_self();
 #endif /* SET_THREAD_SELF */
-    SET_THR(thr);
+    PERL_SET_THX(thr);
 
     /*
      * These must come after the SET_THR because sv_setpvn does

@@ -98,7 +98,7 @@ threadstart(void *arg)
     DEBUG_S(PerlIO_printf(Perl_debug_log, "new thread %p waiting to start\n",
 			  thr));
 
-    /* Don't call *anything* requiring dTHR until after SET_THR() */
+    /* Don't call *anything* requiring dTHR until after PERL_SET_THX() */
     /*
      * Wait until our creator releases us. If we didn't do this, then
      * it would be potentially possible for out thread to carry on and
@@ -114,7 +114,7 @@ threadstart(void *arg)
      * from our pthread_t structure to our struct perl_thread, since
      * we're the only thread who can get at it anyway.
      */
-    SET_THR(thr);
+    PERL_SET_THX(thr);
 
     /* Only now can we use SvPEEK (which calls sv_newmortal which does dTHR) */
     DEBUG_S(PerlIO_printf(Perl_debug_log, "new thread %p starting at %s\n",
@@ -252,7 +252,7 @@ newthread (pTHX_ SV *startsv, AV *initargs, char *classname)
      * XPUSHs() below want to grow the child's stack.  This is
      * safe, since the other thread is not yet created, and we
      * are the only ones who know about it */
-    SET_THR(thr);
+    PERL_SET_THX(thr);
     SPAGAIN;
     DEBUG_S(PerlIO_printf(Perl_debug_log,
 			  "%p: newthread (%p), tid is %u, preparing stack\n",
@@ -266,7 +266,7 @@ newthread (pTHX_ SV *startsv, AV *initargs, char *classname)
     PUTBACK;
 
     /* On your marks... */
-    SET_THR(savethread);
+    PERL_SET_THX(savethread);
     MUTEX_LOCK(&thr->mutex);
 
 #ifdef THREAD_CREATE
