@@ -1645,7 +1645,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	    SAVETMPS;
 	    
 	    push_return(PL_op->op_next);
-	    PUSHBLOCK(cx, CXt_EVAL, PL_stack_sp);
+	    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
 	    PUSHEVAL(cx, 0, 0);
 	    PL_eval_root = PL_op;             /* Only needed so that goto works right. */
 	    

@@ -361,6 +361,7 @@ struct context {
 
 /* private flags for CXt_EVAL */
 #define CXp_REAL	0x00000100	/* truly eval'', not a lookalike */
+#define CXp_TRYBLOCK	0x00000200	/* eval{}, not eval'' or similar */
 
 #ifdef USE_ITHREADS
 /* private flags for CXt_LOOP */
@@ -374,6 +375,8 @@ struct context {
 #define CxTYPE(c)	((c)->cx_type & CXTYPEMASK)
 #define CxREALEVAL(c)	(((c)->cx_type & (CXt_EVAL|CXp_REAL))		\
 			 == (CXt_EVAL|CXp_REAL))
+#define CxTRYBLOCK(c)	(((c)->cx_type & (CXt_EVAL|CXp_TRYBLOCK))	\
+			 == (CXt_EVAL|CXp_TRYBLOCK))
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 

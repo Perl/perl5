@@ -1815,6 +1815,8 @@ PP(pp_return)
 	break;
     case CXt_EVAL:
 	POPEVAL(cx);
+	if (CxTRYBLOCK(cx))
+	    break;
 	if (AvFILLp(PL_comppad_name) >= 0)
 	    free_closures();
 	lex_end();
@@ -3348,7 +3350,7 @@ PP(pp_entertry)
     SAVETMPS;
 
     push_return(cLOGOP->op_other->op_next);
-    PUSHBLOCK(cx, CXt_EVAL, SP);
+    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), SP);
     PUSHEVAL(cx, 0, 0);
     PL_eval_root = PL_op;		/* Only needed so that goto works right. */
 
