@@ -106,7 +106,7 @@ not_there:
 static double
 constant_LOG_AU(char *name, int len)
 {
-    if (6 + 2 >= len ) {
+    if (6 + 2 > len ) {
 	errno = EINVAL;
 	return 0;
     }
