@@ -27,4 +27,3 @@ if "%file%"=="" goto end
 del %file%
 goto nextfile
 :end
-
