@@ -450,14 +450,15 @@ perly.h: perly.y
 	-@sh -c true
 
 # No compat3.sym here since and including the 5.004_50.
-SYM  = global.sym interp.sym perlio.sym thread.sym
+# No interp.sym since 5.005_03.
+SYM  = global.sym perlio.sym thread.sym
 
 SYMH = perlvars.h thrdvar.h
 
 # The following files are generated automatically
 #	keywords.h:	keywords.pl
 #	opcode.h:	opcode.pl
-#	embed.h:  	embed.pl global.sym interp.sym
+#	embed.h:  	embed.pl global.sym
 #	byterun.h:	bytecode.pl
 #	byterun.c:	bytecode.pl
 #	lib/B/Asmdata.pm:	bytecode.pl
