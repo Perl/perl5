@@ -431,7 +431,7 @@ perl_destruct(pTHXx)
     FREETMPS;
 
     /* Need to flush since END blocks can produce output */
-    PerlIO_flush((PerlIO*)NULL); 
+    PerlIO_flush((PerlIO*)NULL);
 
     if (CALL_FPTR(PL_threadhook)(aTHX)) {
         /* Threads hook has vetoed further cleanup */
@@ -825,9 +825,6 @@ perl_destruct(pTHXx)
     SvANY(&PL_sv_no) = NULL;
     SvFLAGS(&PL_sv_no) = 0;
 
-    SvREFCNT(&PL_sv_undef) = 0;
-    SvREADONLY_off(&PL_sv_undef);
-
     {
         int i;
         for (i=0; i<=2; i++) {
@@ -845,6 +842,13 @@ perl_destruct(pTHXx)
     /* No more IO - including error messages ! */
     PerlIO_cleanup(aTHX);
 #endif
+
+    /* sv_undef needs to stay immortal until after PerlIO_cleanup
+       as currently layers use it rather than Nullsv as a marker
+       for no arg - and will try and SvREFCNT_dec it.
+     */
+    SvREFCNT(&PL_sv_undef) = 0;
+    SvREADONLY_off(&PL_sv_undef);
 
     Safefree(PL_origfilename);
     Safefree(PL_reg_start_tmp);
