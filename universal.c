@@ -374,7 +374,11 @@ XS(XS_UNIVERSAL_VERSION)
 		    vnumify(req),vnormal(req),vnumify(sv),vnormal(sv));
     }
 
-    ST(0) = vnumify(sv);
+    if (sv == (SV*)&PL_sv_undef) {
+	ST(0) = sv;
+    } else {
+	ST(0) = vnumify(sv);
+    }
 
     XSRETURN(1);
 }
