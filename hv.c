@@ -188,7 +188,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
     if (!xhv->xhv_array) {
 	if (lval
 #ifdef DYNAMIC_ENV_FETCH  /* if it's an %ENV lookup, we may get it on the fly */
-	         || (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME))
+	         || mg_find((SV*)hv, PERL_MAGIC_env)
 #endif
 	                                                          )
 	    Newz(503, xhv->xhv_array,
@@ -222,7 +222,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 	return &HeVAL(entry);
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
-    if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
+    if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 	unsigned long len;
 	char *env = PerlEnv_ENVgetenv_len(key,&len);
 	if (env) {
@@ -317,7 +317,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     if (!xhv->xhv_array) {
 	if (lval
 #ifdef DYNAMIC_ENV_FETCH  /* if it's an %ENV lookup, we may get it on the fly */
-	         || (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME))
+	         || mg_find((SV*)hv, PERL_MAGIC_env)
 #endif
 	                                                          )
 	    Newz(503, xhv->xhv_array,
@@ -350,7 +350,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	return entry;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
-    if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
+    if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 	unsigned long len;
 	char *env = PerlEnv_ENVgetenv_len(key,&len);
 	if (env) {
@@ -886,7 +886,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
 	return TRUE;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* is it out there? */
-    if (HvNAME(hv) && strEQ(HvNAME(hv), ENV_HV_NAME)) {
+    if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 	unsigned long len;
 	char *env = PerlEnv_ENVgetenv_len(key,&len);
 	if (env) {
@@ -978,7 +978,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	return TRUE;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* is it out there? */
-    if (HvNAME(hv) && strEQ(HvNAME(hv), ENV_HV_NAME)) {
+    if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 	unsigned long len;
 	char *env = PerlEnv_ENVgetenv_len(key,&len);
 	if (env) {
@@ -1414,7 +1414,7 @@ Perl_hv_iternext(pTHX_ HV *hv)
 	return Null(HE*);
     }
 #ifdef DYNAMIC_ENV_FETCH  /* set up %ENV for iteration */
-    if (!entry && HvNAME(hv) && strEQ(HvNAME(hv), ENV_HV_NAME))
+    if (!entry && mg_find((SV*)hv, PERL_MAGIC_env))
 	prime_env_iter();
 #endif
 

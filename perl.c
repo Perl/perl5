@@ -3443,9 +3443,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	}
 #endif /* NEED_ENVIRON_DUP_FOR_MODIFY */
 #endif /* USE_ENVIRON_ARRAY */
-#ifdef DYNAMIC_ENV_FETCH
-	HvNAME(hv) = savepv(ENV_HV_NAME);
-#endif
     }
     TAINT_NOT;
     if ((tmpgv = gv_fetchpv("$",TRUE, SVt_PV)))
