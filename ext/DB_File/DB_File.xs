@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 16th May 1998
- version 1.60
+ last modified 19th November 1998
+ version 1.61
 
  All comments/suggestions/problems are welcome
 
@@ -56,6 +56,8 @@
 		This was ok for DB 1.x, but isn't for DB 2.x.
         1.59 -  No change to DB_File.xs
         1.60 -  Some code tidy up
+        1.61 -  added flagSet macro for DB 2.5.x
+		fixed typo in O_RDONLY test.
 
 
 
@@ -153,6 +155,12 @@ typedef db_recno_t	recno_t;
 #define DBT_flags(x)	x.flags = 0
 #define DB_flags(x, v)	x |= v 
 
+#if DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR < 5
+#define flagSet(flags, bitmask)        ((flags) & (bitmask))
+#else
+#define flagSet(flags, bitmask)        (((flags) & DB_OPFLAGS_MASK) == (bitmask))
+#endif
+
 #else /* db version 1.x */
 
 typedef union INFO {
@@ -205,6 +213,7 @@ typedef union INFO {
 #define do_SEQ(db, key, value, flag)	(db->dbp->seq)(db->dbp, &key, &value, flag)
 #define DBT_flags(x)	
 #define DB_flags(x, v)	
+#define flagSet(flags, bitmask)        ((flags) & (bitmask))
 
 #endif /* db version 1 */
 
@@ -216,10 +225,11 @@ typedef union INFO {
 
 #define db_sync(db, flags)              ((db->dbp)->sync)(db->dbp, flags)
 #define db_get(db, key, value, flags)   ((db->dbp)->get)(db->dbp, TXN &key, &value, flags)
+
 #ifdef DB_VERSION_MAJOR
 #define db_DESTROY(db)                  ((db->dbp)->close)(db->dbp, 0)
 #define db_close(db)			((db->dbp)->close)(db->dbp, 0)
-#define db_del(db, key, flags)          ((flags & R_CURSOR) 					\
+#define db_del(db, key, flags)          (flagSet(flags, R_CURSOR) 					\
 						? ((db->cursor)->c_del)(db->cursor, 0)		\
 						: ((db->dbp)->del)(db->dbp, NULL, &key, flags) )
 
@@ -231,6 +241,7 @@ typedef union INFO {
 #define db_put(db, key, value, flags)   ((db->dbp)->put)(db->dbp, &key, &value, flags)
 
 #endif
+
 
 #define db_seq(db, key, value, flags)   do_SEQ(db, key, value, flags)
 
@@ -288,12 +299,17 @@ u_int		flags ;
 {
     int status ;
 
-    if (flags & R_CURSOR) {
+    if (flagSet(flags, R_CURSOR)) {
 	status = ((db->cursor)->c_del)(db->cursor, 0);
 	if (status != 0)
 	    return status ;
 
+#if DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR < 5
 	flags &= ~R_CURSOR ;
+#else
+	flags &= ~DB_OPFLAGS_MASK ;
+#endif
+
     }
 
     return ((db->dbp)->put)(db->dbp, NULL, &key, &value, flags) ;
@@ -577,6 +593,7 @@ SV *   sv ;
     DB_File	RETVAL = (DB_File)safemalloc(sizeof(DB_File_type)) ;
     void *	openinfo = NULL ;
     INFO	* info  = &RETVAL->info ;
+    STRLEN	n_a;
 
 /* printf("In ParseOpenInfo name=[%s] flags=[%d] mode = [%d]\n", name, flags, mode) ;  */
     Zero(RETVAL, 1, DB_File_type) ;
@@ -718,11 +735,11 @@ SV *   sv ;
 #endif
             svp = hv_fetch(action, "bfname", 6, FALSE); 
             if (svp && SvOK(*svp)) {
-		char * ptr = SvPV(*svp,PL_na) ;
+		char * ptr = SvPV(*svp,n_a) ;
 #ifdef DB_VERSION_MAJOR
-		name = (char*) PL_na ? ptr : NULL ;
+		name = (char*) n_a ? ptr : NULL ;
 #else
-                info->db_RE_bfname = (char*) (PL_na ? ptr : NULL) ;
+                info->db_RE_bfname = (char*) (n_a ? ptr : NULL) ;
 #endif
 	    }
 	    else
@@ -738,7 +755,7 @@ SV *   sv ;
             {
 		int value ;
                 if (SvPOK(*svp))
-		    value = (int)*SvPV(*svp, PL_na) ;
+		    value = (int)*SvPV(*svp, n_a) ;
 		else
 		    value = SvIV(*svp) ;
 
@@ -756,7 +773,7 @@ SV *   sv ;
             if (svp && SvOK(*svp))
             {
                 if (SvPOK(*svp))
-		    info->db_RE_bval = (u_char)*SvPV(*svp, PL_na) ;
+		    info->db_RE_bval = (u_char)*SvPV(*svp, n_a) ;
 		else
 		    info->db_RE_bval = (u_char)(unsigned long) SvIV(*svp) ;
 		DB_flags(info->flags, DB_DELIMITER) ;
@@ -808,7 +825,7 @@ SV *   sv ;
 #if O_RDONLY == 0
         if (flags == O_RDONLY)
 #else
-        if (flags & O_RDONLY) == O_RDONLY)
+        if ((flags & O_RDONLY) == O_RDONLY)
 #endif
             Flags |= DB_RDONLY ;
 
@@ -1100,9 +1117,10 @@ db_DoTie_(isHASH, dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_H
 	{
 	    char *	name = (char *) NULL ; 
 	    SV *	sv = (SV *) NULL ; 
+	    STRLEN	n_a;
 
 	    if (items >= 3 && SvOK(ST(2))) 
-	        name = (char*) SvPV(ST(2), PL_na) ; 
+	        name = (char*) SvPV(ST(2), n_a) ; 
 
             if (items == 6)
 	        sv = ST(5) ;
@@ -1232,6 +1250,7 @@ unshift(db, ...)
 	    int		i ;
 	    int		One ;
 	    DB *	Db = db->dbp ;
+	    STRLEN	n_a;
 
 	    DBT_flags(key) ; 
 	    DBT_flags(value) ; 
@@ -1245,8 +1264,8 @@ unshift(db, ...)
 #endif
 	    for (i = items-1 ; i > 0 ; --i)
 	    {
-	        value.data = SvPV(ST(i), PL_na) ;
-	        value.size = PL_na ;
+	        value.data = SvPV(ST(i), n_a) ;
+	        value.size = n_a ;
 	        One = 1 ;
 	        key.data = &One ;
 	        key.size = sizeof(int) ;
@@ -1329,6 +1348,7 @@ push(db, ...)
 	    DBT		value ;
 	    DB *	Db = db->dbp ;
 	    int		i ;
+	    STRLEN	n_a;
 
 	    DBT_flags(key) ; 
 	    DBT_flags(value) ; 
@@ -1344,8 +1364,8 @@ push(db, ...)
 	        {
 		    
 		    ++ (* (int*)key.data) ;
-	            value.data = SvPV(ST(i), PL_na) ;
-	            value.size = PL_na ;
+	            value.data = SvPV(ST(i), n_a) ;
+	            value.size = n_a ;
 	            RETVAL = (Db->put)(Db, NULL, &key, &value, 0) ;
 	            if (RETVAL != 0)
 	                break;
@@ -1353,8 +1373,8 @@ push(db, ...)
 #else
 	        for (i = items - 1 ; i > 0 ; --i)
 	        {
-	            value.data = SvPV(ST(i), PL_na) ;
-	            value.size = PL_na ;
+	            value.data = SvPV(ST(i), n_a) ;
+	            value.size = n_a ;
 	            RETVAL = (Db->put)(Db, keyptr, &value, R_IAFTER) ;
 	            if (RETVAL != 0)
 	                break;
@@ -1436,7 +1456,7 @@ db_put(db, key, value, flags=0)
 #endif
 	OUTPUT:
 	  RETVAL
-	  key		if (flags & (R_IAFTER|R_IBEFORE)) OutputKey(ST(1), key);
+	  key		if (flagSet(flags, R_IAFTER) || flagSet(flags, R_IBEFORE)) OutputKey(ST(1), key);
 
 int
 db_fd(db)
