@@ -390,8 +390,8 @@ package Maintainers;
 	'Pod::Plainer' =>
 		{
 		'MAINTAINER'	=> 'rmbarker',
-		'FILES'		=> q[lib/Pod/Plainer.pm],
-		'CPAN'		=> 1,
+		'FILES'		=> q[lib/Pod/Plainer.pm t/pod/plainer.t],
+		'CPAN'		=> 0,
 		},
 
 	'Safe' =>
