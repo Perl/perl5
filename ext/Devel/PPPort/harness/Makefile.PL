@@ -36,6 +36,8 @@ EOM
 
   my $Ilibdir = $^O eq 'VMS' ? qq{"-I$libdir"} : qq{-I$libdir};
 
+  $pmfile =~ s:\\:\\\\:g;
+
   $retval .= qq[\t\$(PERL) $Ilibdir -e "require qq{$pmfile}; Devel::PPPort::WriteFile(qq{ppport.h})"];
 
   return $retval;
