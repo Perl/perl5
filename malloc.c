@@ -1045,7 +1045,9 @@ Perl_malloc(register size_t nbytes)
 	    POW2_OPTIMIZE_ADJUST(nbytes);
 	    nbytes += M_OVERHEAD;
 	    nbytes = (nbytes + 3) &~ 3; 
+#if defined(PACK_MALLOC) && !defined(SMALL_BUCKET_VIA_TABLE)
 	  do_shifts:
+#endif
 	    shiftr = (nbytes - 1) >> START_SHIFT;
 	    bucket = START_SHIFTS_BUCKET;
 	    /* apart from this loop, this is O(1) */

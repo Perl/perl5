@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-if ( $symlink_exists ) { print "1..117\n"; }
+if ( $symlink_exists ) { print "1..119\n"; }
 else                   { print "1..61\n"; }
 
 use File::Find;
@@ -203,6 +203,15 @@ if ( $symlink_exists ) {
 
   File::Find::finddepth( {wanted => \&d_wanted, follow_fast => 1, no_chdir => 1},'fa' );
   Check( scalar(keys %Expect) == 0 );
+
+  # Verify that File::Find::find will call wanted even if the topdir of
+  #  is a symlink to a directory, and it shouldn't follow the link
+  #  unless follow is set, which it isn't in this case
+  %Expect = ('fsl' => 1);
+  %Expect_Dir = ();
+  File::Find::find( {wanted => \&wanted, },'fa/fsl' );
+  Check( scalar(keys %Expect) == 0 );
+
 }
 
 print "# of cases: $case\n";

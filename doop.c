@@ -646,8 +646,9 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
     register I32 items = sp - mark;
     register STRLEN len;
     STRLEN delimlen;
-    register char *delim = SvPV(del, delimlen);
     STRLEN tmplen;
+
+    (void) SvPV(del, delimlen); /* get the delimlen */
 
     mark++;
     len = (items > 0 ? (delimlen * (items - 1) ) : 0);

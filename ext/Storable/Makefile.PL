@@ -16,14 +16,10 @@
 use ExtUtils::MakeMaker;
 use Config;
 
-my @libs = ();
-$Config{gccversion} eq "" or @libs = ('LIBS' => ["-lgcc"]);
-
 WriteMakefile(
-    'NAME'		=> 'Storable',
+    'NAME'			=> 'Storable',
     'DISTNAME'		=> "Storable",
-    @libs,
-    'MAN3PODS'		=> {},
+	'MAN3PODS'		=> {},
     'VERSION_FROM'	=> 'Storable.pm',
     'dist'			=> { SUFFIX => 'gz', COMPRESS => 'gzip -f' },
 );

@@ -31,6 +31,224 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10326] By: jhi                                   on 2001/05/30  14:06:36
+        Log: More -Wall cleanup from Schwern; the EBCDIC MD5.xs checksum
+             is now wrong.
+     Branch: perl
+	   ! ext/Digest/MD5/MD5.xs t/lib/md5-file.t
+____________________________________________________________________________
+[ 10325] By: jhi                                   on 2001/05/30  14:04:28
+        Log: Introduce $Config{afsroot}.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH epoc/config.sh uconfig.sh win32/config.bc
+	   ! win32/config.gc win32/config.vc
+____________________________________________________________________________
+[ 10324] By: jhi                                   on 2001/05/30  13:49:44
+        Log: Linux DB tweak from Merijn Broeren <merijnb@iloquent.nl>.
+     Branch: perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[ 10323] By: jhi                                   on 2001/05/30  13:49:29
+        Log: AFS patches from Merijn Broeren <merijnb@iloquent.nl>.
+             (Also Configure tweaks needed; coming up soon.)
+     Branch: perl
+	   ! t/io/fs.t t/lib/glob-basic.t t/op/stat.t
+____________________________________________________________________________
+[ 10322] By: jhi                                   on 2001/05/30  13:37:56
+        Log: Subject: [PATCH lib/perl5db.pl] Conditional breakpoints
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 27 May 2001 10:29:43 +0100
+             Message-ID: <20010527102942.J711@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 10321] By: jhi                                   on 2001/05/30  13:36:28
+        Log: Medley of -Wall cleanups from Michael Schwen, Hugo van der Sanden,
+             and Abhijit Menon-Sen.
+     Branch: perl
+	   ! av.c doio.c doop.c dump.c ext/Digest/MD5/MD5.xs malloc.c op.c
+	   ! perl.c pp_sys.c regcomp.c
+____________________________________________________________________________
+[ 10320] By: jhi                                   on 2001/05/30  13:35:27
+        Log: Fix the BOOT section to call myU2time properly.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 10319] By: jhi                                   on 2001/05/30  13:06:09
+        Log: Subject: Re: [PATCH pod/perlfaq4.pod] Example of working in integers to avoid floating point errors
+             From: Ronald J Kimball <rjk@linguist.thayer.dartmouth.edu>
+             Date: Wed, 30 May 2001 09:44:29 -0400
+             Message-ID: <20010530094429.B133085@linguist.thayer.dartmouth.edu>
+             
+             Detypo; plus add one more trick.
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 10318] By: jhi                                   on 2001/05/30  12:47:11
+        Log: Subject: Re: [PATCH lib/autouse.pm t/pragma/autouse.t]  (was Re: [ID 20010528.001] use autouse 'URI::Escape' => qw(URI::Escape::uri_escape) failed)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 30 May 2001 14:39:06 +0100
+             Message-ID: <20010530143906.E670@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! lib/autouse.pm t/pragma/autouse.t
+____________________________________________________________________________
+[ 10317] By: jhi                                   on 2001/05/30  12:46:02
+        Log: Subject: Re: AIX and gcc (moving targets)
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 30 May 2001 15:25:08 +0200
+             Message-Id: <20010530152117.7097.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 10316] By: jhi                                   on 2001/05/30  12:40:46
+        Log: Subject: [PATCH t/TEST] sorting tests
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 30 May 2001 10:24:02 +0100
+             Message-ID: <20010530102402.Q670@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 10315] By: jhi                                   on 2001/05/30  12:37:43
+        Log: Subject: [ID 20010529.002] typos in man page perlre
+             From: bart@cg681574-a.adubn1.nj.home.com 
+             Date: Tue, 29 May 2001 13:58:59 -0500
+             Message-Id: <E154ohn-00053j-00@debian.adubn1.nj.home.com>
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[ 10314] By: jhi                                   on 2001/05/30  12:33:53
+        Log: Subject: [PATCH perl@10298] fix extutils.t and autouse.t for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 29 May 2001 23:23:45 -0500
+             Message-Id: <a05100e01b73a21721dee@[192.168.56.153]>
+     Branch: perl
+	   ! t/lib/extutils.t t/pragma/autouse.t
+____________________________________________________________________________
+[ 10313] By: jhi                                   on 2001/05/30  12:32:17
+        Log: Subject: Re: [ID 20010529.003] find2perl and File::Find doesn't emulate find when path is a symlink (patch to t/lib/filefind.t as requested)
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Tue, 29 May 2001 22:05:28 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.33.0105292200060.26992-100000@dd.tc.fluke.com>
+     Branch: perl
+	   ! t/lib/filefind.t
+____________________________________________________________________________
+[ 10312] By: jhi                                   on 2001/05/30  12:31:02
+        Log: AIX hints update for gcc from Merijn H. Brand.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 10311] By: jhi                                   on 2001/05/30  12:18:20
+        Log: Retract #10295 and #10296: a more generic solution
+             is needed (there's something funny with gcc on AIX).
+     Branch: perl
+	   ! ext/POSIX/Makefile.PL ext/Storable/Makefile.PL
+____________________________________________________________________________
+[ 10310] By: jhi                                   on 2001/05/30  12:08:07
+        Log: Subject: Re: [ID 20010528.004] dual bug under utf8: $@ has UTF8 flag and \s+ does not match
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Wed, 30 May 2001 11:59:19 +0100
+             Message-Id: <200105301059.LAA03182@crypt.compulink.co.uk>
+             
+             localizing $@ has unfortunate semantics - if you die past
+             a local $@, the die message is lost.
+     Branch: perl
+	   ! lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 10309] By: nick                                  on 2001/05/30  08:23:02
+        Log: Integrate mainline (autouse works again.)
+     Branch: perlio
+	  !> ext/Time/Piece/Piece.pm hints/os2.sh lib/File/Find.pm
+	  !> lib/autouse.pm pod/perlfaq4.pod pod/perlfaq6.pod
+	  !> pod/perlvar.pod t/op/cmp.t
+____________________________________________________________________________
+[ 10308] By: jhi                                   on 2001/05/30  01:55:02
+        Log: Subject: [ID 20010529.003] find2perl and File::Find doesn't emulate find when path is a symlink (with proposed patch)
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Tue, 29 May 2001 12:19:38 -0700 (PDT)
+             Message-Id: <Pine.LNX.4.33.0105291216510.17409-100000@dd.tc.fluke.com>
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 10307] By: jhi                                   on 2001/05/30  01:47:22
+        Log: Subject: [PATCH] Re: Report /pro/3gl/CPAN/perl-5.7.1
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 29 May 2001 23:16:09 +0100
+             Message-ID: <20010529231609.U86445@plum.flirble.org>
+             
+             Make the test output slightly clearer by distinguishing
+             between '' and undef.
+     Branch: perl
+	   ! t/op/cmp.t
+____________________________________________________________________________
+[ 10306] By: jhi                                   on 2001/05/30  01:45:12
+        Log: Subject: [PATCH 5.6.1] flushNULL OS/2
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 29 May 2001 19:15:19 -0400
+             Message-ID: <20010529191519.A16020@math.ohio-state.edu>
+     Branch: perl
+	   ! hints/os2.sh
+____________________________________________________________________________
+[ 10305] By: jhi                                   on 2001/05/30  01:42:36
+        Log: Subject: perlvar.pod addition
+             From: Peter Gessner <peter.gessner@post.rwth-aachen.de>
+             Date: Fri, 25 May 2001 20:23:12 +0200
+             Message-ID: <3B0EA310.B265C048@post.rwth-aachen.de>
+             
+             Subject: Re: perlvar.pod addition
+             From: "Abigail" <abigail@foad.org> 
+             Date: Fri, 25 May 2001 22:00:39 +0200
+             Message-ID: <20010525200039.28029.qmail@foad.org>
+             
+             Mention $a and $b in perlvar.
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 10304] By: jhi                                   on 2001/05/30  01:36:37
+        Log: Subject: [PATCH] perlvar.pod -- why isn't @F here?
+             From: Jeff Pinyan <jeffp@crusoe.net>
+             Date: Tue, 29 May 2001 22:27:51 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0105292227150.1961-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 10303] By: jhi                                   on 2001/05/30  01:35:31
+        Log: Subject: Re: [PATCH] perlfaq6.pod -- case-aware s///
+             From: Jeff Pinyan <jeffp@crusoe.net>
+             Date: Tue, 29 May 2001 18:03:27 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0105291802330.1961-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! pod/perlfaq6.pod
+____________________________________________________________________________
+[ 10302] By: jhi                                   on 2001/05/29  20:18:49
+        Log: Mention Time::localtime and Time::gmtime.
+     Branch: perl
+	   ! ext/Time/Piece/Piece.pm
+____________________________________________________________________________
+[ 10301] By: jhi                                   on 2001/05/29  20:13:54
+        Log: Subject: [PATCH pod/perlfaq4.pod] Example of working in integers to avoid floating point errors
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 29 May 2001 18:51:32 +0100
+             Message-ID: <20010529185132.C706@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 10300] By: jhi                                   on 2001/05/29  20:12:09
+        Log: Retract #10243.
+     Branch: perl
+	   ! lib/autouse.pm
+____________________________________________________________________________
+[ 10299] By: nick                                  on 2001/05/29  18:41:19
+        Log: Post weekend integrate mainline (fails one test pragma/autouse).
+     Branch: perlio
+	  +> (branch 29 files)
+	  !> (integrate 91 files)
+____________________________________________________________________________
+[ 10298] By: jhi                                   on 2001/05/29  16:29:19
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10297] By: jhi                                   on 2001/05/29  16:25:47
         Log: Fix Perl_swash_init & Perl_swash_fetch to save ERRSV (= $@)
              before Perl_load_module/Perl_call_method and restore the value

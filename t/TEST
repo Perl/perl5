@@ -54,7 +54,7 @@ my $updir  = File::Spec->updir;
 sub _find_tests {
     my($dir) = @_;
     opendir DIR, $dir || die "Trouble opening $dir: $!";
-    foreach my $f (readdir DIR) {
+    foreach my $f (sort { $a cmp $b } readdir DIR) {
         next if $f eq $curdir or $f eq $updir;
 
         my $fullpath = File::Spec->catdir($dir, $f);

@@ -96,7 +96,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 	}
 	else {
 	    if (AvALLOC(av)) {
-#ifndef STRANGE_MALLOC
+#if !defined(STRANGE_MALLOC) && !defined(MYMALLOC)
 		MEM_SIZE bytes;
 		IV itmp;
 #endif

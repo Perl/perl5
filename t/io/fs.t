@@ -111,7 +111,7 @@ if ($foo == 1) {print "ok 16\n";} else {print "not ok 16 $foo\n";}
     $blksize,$blocks) = stat('b');
 if ($^O eq 'MSWin32') { print "ok 17 # skipped: bogus (stat)[1]\n"; }
 elsif ($ino) {print "ok 17\n";} else {print "not ok 17\n";}
-if ($wd =~ m#/afs/# || $^O eq 'amigaos' || $^O eq 'dos' || $^O eq 'MSWin32')
+if ($wd =~ m#$Config{'afsroot'}/# || $^O eq 'amigaos' || $^O eq 'dos' || $^O eq 'MSWin32')
     {print "ok 18 # skipped: granularity of the filetime\n";}
 elsif ($atime == 500000000 && $mtime == 500000000 + $delta)
     {print "ok 18\n";}

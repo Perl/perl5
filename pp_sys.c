@@ -3970,7 +3970,7 @@ PP(pp_system)
 
     if (SP - MARK == 1) {
 	if (PL_tainting) {
-	    char *junk = SvPV(TOPs, n_a);
+	    (void)SvPV_nolen(TOPs);      /* stringify for taint check */
 	    TAINT_ENV();
 	    TAINT_PROPER("system");
 	}
@@ -4096,7 +4096,7 @@ PP(pp_exec)
 #endif
     else {
 	if (PL_tainting) {
-	    char *junk = SvPV(*SP, n_a);
+	    (void)SvPV_nolen(*SP);      /* stringify for taint check */
 	    TAINT_ENV();
 	    TAINT_PROPER("exec");
 	}
