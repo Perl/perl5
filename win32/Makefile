@@ -1183,13 +1183,13 @@ test-prep : all utils
 
 test : test-prep
 	cd ..\t
-	$(PERLEXE) -I..\lib harness
+	$(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 	cd ..\win32
 
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1
 	cd ..\t
-	$(PERLEXE) -I..\lib harness
+	$(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 	cd ..\win32
 
 _test : 
@@ -1197,7 +1197,7 @@ _test :
        $(XCOPY) $(PERLDLL) ..\t\$(NULL)
        $(XCOPY) $(GLOBEXE) ..\t\$(NULL)
        cd ..\t
-       $(PERLEXE) -I..\lib harness
+       $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
        cd ..\win32
 
 # the doubled rmdir calls are needed because older cmd shells

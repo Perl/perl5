@@ -1363,11 +1363,11 @@ test-prep : all utils
 .ENDIF
 
 test : $(RIGHTMAKE) test-prep
-	cd ..\t && $(PERLEXE) -I..\lib harness
+	cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1 && \
-	    cd ..\t && $(PERLEXE) -I.\lib harness
+	    cd ..\t && $(PERLEXE) -I.\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
 _test : $(RIGHTMAKE)
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
@@ -1377,7 +1377,7 @@ _test : $(RIGHTMAKE)
 .ELSE
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 .ENDIF
-	cd ..\t && $(PERLEXE) -I..\lib harness
+	cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
 # the doubled rmdir calls are needed because older cmd shells
 # don't understand /q
