@@ -1,6 +1,13 @@
 #
 #   @(#)dotsh.pl                                               03/19/94
 #
+# This library is no longer being maintained, and is included for backward
+# compatibility with Perl 4 programs which may require it.
+#
+# In particular, this should not be used as an example of modern Perl
+# programming techniques.
+#
+#
 #   Author: Charles Collins
 #
 #   Description:
