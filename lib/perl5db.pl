@@ -426,7 +426,7 @@ if ($notty) {
                                  PeerAddr => $remoteport,
                                  Proto    => 'tcp',
                                );
-    if (!$OUT) { die "Could not create socket to connect to remote host."; }
+    if (!$OUT) { die "Unable to connect to remote host: $remoteport\n"; }
     $IN = $OUT;
   }
   else {
