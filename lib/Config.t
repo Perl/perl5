@@ -205,10 +205,20 @@ is($Config{sig_num_init}  =~ tr/,/,/, $Config{sig_size}, "sig_num_init size");
 is($Config{sig_name_init} =~ tr/,/,/, $Config{sig_size}, "sig_name_init size");
 
 # Test the troublesome virtual stuff
-foreach my $pain (qw(byteorder)) {
-  # No config var is named with anything that is a regexp metachar"
-  my @result = Config::config_re($pain);
-  is (scalar @result, 1, "single result for config_re('$pain')");
-  like ($result[0], qr/^$pain=(['"])$Config{$pain}\1$/, # grr '
-				"which is the expected result for $pain");
+my @virtual = qw(byteorder ccflags_nolargefiles);
+
+foreach my $pain (@virtual) {
+  # No config var is named with anything that is a regexp metachar
+  my @result = $Config{$pain};
+  is (scalar @result, 1, "single result for \$config('$pain')");
+
+ TODO: {
+    local $TODO;
+    $TODO = "No regexp lookup for $pain yet" unless $pain eq 'byteorder';
+
+    @result = Config::config_re($pain);
+    is (scalar @result, 1, "single result for config_re('$pain')");
+    like ($result[0], qr/^$pain=(['"])$Config{$pain}\1$/, # grr '
+	  "which is the expected result for $pain");
+  }
 }
