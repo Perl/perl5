@@ -4559,8 +4559,12 @@ Perl_sv_clear(pTHX_ register SV *sv)
 		--PL_sv_objcount;	/* XXX Might want something more general */
 	}
     }
-    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
-	mg_free(sv);
+    if (SvTYPE(sv) >= SVt_PVMG) {
+    	if (SvMAGIC(sv))
+	    mg_free(sv);
+	if (SvFLAGS(sv) & SVpad_TYPED)
+	    SvREFCNT_dec(SvSTASH(sv));
+    }
     stash = NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVIO:

@@ -183,10 +183,9 @@ Perl_pad_allocmy(pTHX_ char *name)
 	if (*name != '$')
 	    yyerror(Perl_form(aTHX_ "Can't declare class for non-scalar %s in \"%s\"",
 			 name, PL_in_my == KEY_our ? "our" : "my"));
-	SvOBJECT_on(sv);
+	SvFLAGS(sv) |= SVpad_TYPED;
 	(void)SvUPGRADE(sv, SVt_PVMG);
 	SvSTASH(sv) = (HV*)SvREFCNT_inc(PL_in_my_stash);
-	PL_sv_objcount++;
     }
     if (PL_in_my == KEY_our) {
 	(void)SvUPGRADE(sv, SVt_PVGV);
@@ -223,11 +222,10 @@ S_pad_addlex(pTHX_ SV *proto_namesv)
 	(void)SvUPGRADE(namesv, SVt_PVGV);
 	GvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)GvSTASH(proto_namesv));
     }
-    if (SvOBJECT(proto_namesv)) {		/* A typed var */
-	SvOBJECT_on(namesv);
+    if (SvFLAGS(proto_namesv) & SVpad_TYPED) {	/* A typed lexical */
+	SvFLAGS(namesv) |= SVpad_TYPED;
 	(void)SvUPGRADE(namesv, SVt_PVMG);
 	SvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)SvSTASH(proto_namesv));
-	PL_sv_objcount++;
     }
     return newoff;
 }
@@ -1963,7 +1961,8 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
 
 	/* check for C<my Dog $spot> when deciding package */
 	namesvp = av_fetch(PL_comppad_name, o->op_targ, FALSE);
-	if (namesvp && *namesvp && SvOBJECT(*namesvp) && HvNAME(SvSTASH(*namesvp)))
+	if (namesvp && *namesvp && (SvFLAGS(*namesvp) & SVpad_TYPED)
+	    && HvNAME(SvSTASH(*namesvp)))
 	    stash = SvSTASH(*namesvp);
 	else
 	    stash = PL_curstash;
@@ -6887,7 +6886,7 @@ Perl_peep(pTHX_ register OP *o)
 	    if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
 		break;
 	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
-	    if (!SvOBJECT(lexname))
+	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
 		break;
 	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
 	    if (!fields || !GvHV(*fields))
@@ -6937,7 +6936,7 @@ Perl_peep(pTHX_ register OP *o)
 	    if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
 		break;
 	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
-	    if (!SvOBJECT(lexname))
+	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
 		break;
 	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
 	    if (!fields || !GvHV(*fields))
