@@ -670,8 +670,9 @@ Changes to the array are reflected in the file immediately.
 
 What is a 'record'?  By default, the meaning is the same as for the
 C<E<lt>...E<gt>> operator: It's a string terminated by C<$/>, which is
-probably C<"\n"> or C<"\r\n">.  You may change the definition of
-"record" by supplying the C<recsep> option in the C<tie> call:
+probably C<"\n">.  You may change the definition of "record" by
+supplying the C<recsep> option in the C<tie> call:
+
 
 	tie @array, 'Tie::File', $file, recsep => 'es';
 
@@ -685,6 +686,9 @@ then the C<@array> would appear to have four elements:
 	"e pes"
 	"ky flies"
 	"!\n"
+
+Windows users will probably want to use C<recsep =E<gt> "\r\n"> to get
+files terminated with the usual CRLF sequence.
 
 An undefined value is not permitted as a record separator.  Perl's
 special "paragraph mode" semantics (E<agrave> la C<$/ = "">) are not
