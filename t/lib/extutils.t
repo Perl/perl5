@@ -35,7 +35,7 @@ my @names = ("THREE", {name=>"OK4", type=>"PV",},
              {name=>"OK5", type=>"PVN",
               value=>['"not ok 5\\n\\0ok 5\\n"', 15]},
              {name => "FARTHING", type=>"NV"},
-             {name => "NOT_ZERO", type=>"UV", value=>~0 . "u"});
+             {name => "NOT_ZERO", type=>"UV", value=>"~(UV)0"});
 
 my @names_only = map {(ref $_) ? $_->{name} : $_} @names;
 
