@@ -2359,7 +2359,8 @@ PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
    if (strlen(s) >= (STRLEN)n)
     {
      dTHX;
-     PerlIO_puts(Perl_error_log,"panic: sprintf overflow - memory corrupted!\n");
+     (void)PerlIO_puts(Perl_error_log,
+		       "panic: sprintf overflow - memory corrupted!\n");
      my_exit(1);
     }
   }
