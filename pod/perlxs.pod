@@ -398,7 +398,7 @@ indicator.  For example,
 
   NO_OUTPUT int
   delete_file(char *name)
-    POST_CALL:
+    POSTCALL:
       if (RETVAL != 0)
 	  croak("Error %d while deleting file '%s'", RETVAL, name);
 
@@ -1053,14 +1053,14 @@ rewrite this example as:
 	OUTPUT:
 	  RETVAL
 
-In fact, one can put this check into a POST_CALL: section as well.  Together
+In fact, one can put this check into a POSTCALL: section as well.  Together
 with PREINIT: simplifications, this leads to:
 
      int
      rpcb_gettime(host)
           char *host
           time_t  timep;
-	POST_CALL:
+	POSTCALL:
 	  if (RETVAL == 0)
 		XSRETURN_UNDEF;
 
@@ -1081,14 +1081,16 @@ any CODE:, PPCODE:, or OUTPUT: blocks which are present in the XSUB.  The
 code specified for the cleanup block will be added as the last statements
 in the XSUB.
 
-=head2 The POST_CALL: Keyword
+=head2 The POSTCALL: Keyword
 
 This keyword can be used when an XSUB requires special procedures
-executed after the C subroutine call is performed.  When the POST_CALL:
+executed after the C subroutine call is performed.  When the POSTCALL:
 keyword is used it must precede OUTPUT: and CLEANUP: blocks which are
 present in the XSUB.
 
-The POST_CALL: block does not make a lot of sense when the C subroutine
+See examples in L<"The NO_OUTPUT Keyword"> and L<"Returning Undef And Empty Lists">.
+
+The POSTCALL: block does not make a lot of sense when the C subroutine
 call is supplied by user by providing either CODE: or PPCODE: section.
 
 =head2 The BOOT: Keyword
@@ -1371,7 +1373,7 @@ C<&> through, so the function call looks like C<rpcb_gettime(host, &timep)>.
 =head2 Inserting POD, Comments and C Preprocessor Directives
 
 C preprocessor directives are allowed within BOOT:, PREINIT: INIT:, CODE:,
-PPCODE:, POST_CALL:, and CLEANUP: blocks, as well as outside the functions.
+PPCODE:, POSTCALL:, and CLEANUP: blocks, as well as outside the functions.
 Comments are allowed anywhere after the MODULE keyword.  The compiler will
 pass the preprocessor directives through untouched and will remove the
 commented lines. POD documentation is allowed at any point, both in the
@@ -1532,7 +1534,7 @@ of failure.  They may be
 candidates to return undef or an empty list in case of failure.  If the
 failure may be detected without a call to the C function, you may want to use
 an INIT: section to report the failure.  For failures detectable after the C
-function returns one may want to use a POST_CALL: section to process the
+function returns one may want to use a POSTCALL: section to process the
 failure.  In more complicated cases use CODE: or PPCODE: sections.
 
 If many functions use the same failure indication based on the return value,
