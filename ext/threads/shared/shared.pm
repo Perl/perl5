@@ -5,16 +5,16 @@ use Config;
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT = qw(share cond_wait cond_broadcast cond_signal unlock);
-our @EXPORT_OK = qw(_id _thrcnt _refcnt);
+our @EXPORT = qw(share cond_wait cond_broadcast cond_signal _refcnt _id _thrcnt);
 our $VERSION = '0.90';
+
+use Attribute::Handlers;
 
 
 if ($Config{'useithreads'}) {
 	*cond_wait = \&cond_wait_enabled;
 	*cond_signal = \&cond_signal_enabled;
 	*cond_broadcast = \&cond_broadcast_enabled;
-	*unlock = \&unlock_enabled;
 	require XSLoader;
 	XSLoader::load('threads::shared',$VERSION);
 }
@@ -23,15 +23,12 @@ else {
 	*cond_wait = \&cond_wait_disabled;
 	*cond_signal = \&cond_signal_disabled;
 	*cond_broadcast = \&cond_broadcast_disabled;
-	*unlock = \&unlock_disabled;
 }
 
 
 sub cond_wait_disabled { return @_ };
 sub cond_signal_disabled { return @_};
 sub cond_broadcast_disabled { return @_};
-sub unlock_disabled { 1 };
-sub lock_disabled { 1 }
 sub share_disabled { return @_}
 
 $threads::shared::threads_shared = 1;
@@ -43,6 +40,10 @@ sub threads::shared::tie::SPLICE
  die "Splice not implemented for shared arrays";
 }
 
+sub UNIVERSAL::shared : ATTR {
+    my ($package, $symbol, $referent, $attr, $data, $phase) = @_;
+    share($referent);
+}
 
 __END__
 
