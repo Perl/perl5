@@ -446,9 +446,16 @@ pad_swipe(PADOFFSET po)
 	padix = po - 1;
 }
 
+/* XXX pad_reset() is currently disabled because it results in serious bugs.
+ * It causes pad temp TARGs to be shared between OPs. Since TARGs are pushed
+ * on the stack by OPs that use them, there are several ways to get an alias
+ * to  a shared TARG.  Such an alias will change randomly and unpredictably.
+ * We avoid doing this until we can think of a Better Way.
+ * GSAR 97-10-29 */
 void
 pad_reset()
 {
+#ifdef USE_BROKEN_PAD_RESET
     register I32 po;
 
     if (AvARRAY(comppad) != curpad)
@@ -461,6 +468,7 @@ pad_reset()
 	}
 	padix = padix_floor;
     }
+#endif
     pad_reset_pending = FALSE;
 }
 
