@@ -20,7 +20,8 @@ autoloaded from F<auto/$AUTOLOAD.al>.  See L<perlsub/"Autoloading">.
 =cut
 
 AUTOLOAD {
-    my $name = "auto/$AUTOLOAD.al";
+    $AUTOLOAD =~ /([\w:]+)/;	# avoid taint problems for eval require $name
+    my $name = "auto/$1.al";
     $name =~ s#::#/#g;
     eval {require $name};
     if ($@) {
@@ -41,6 +42,7 @@ AUTOLOAD {
 	    croak $@;
 	}
     }
+    $DB::sub = $AUTOLOAD;	# Now debugger know where we are.
     goto &$AUTOLOAD;
 }
                             
