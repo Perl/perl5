@@ -44,6 +44,12 @@ sub unctrl {
 	$_;
 }
 
+sub uniescape {
+    join("",
+	 map { $_ > 255 ? sprintf("\\x{%04X}", $_) : chr($_) }
+	     unpack("U*", $_[0]));
+}
+
 sub stringify {
 	local($_,$noticks) = @_;
 	local($v) ; 
@@ -67,6 +73,7 @@ sub stringify {
 	} elsif ($unctrl eq 'unctrl') {
 	  s/([\"\\])/\\$1/g ;
 	  s/([\000-\037\177])/'^'.pack('c',ord($1)^64)/eg;
+	  # uniescape?
 	  s/([\200-\377])/'\\0x'.sprintf('%2X',ord($1))/eg 
 	    if $quoteHighBit;
 	} elsif ($unctrl eq 'quote') {
@@ -74,6 +81,7 @@ sub stringify {
 	  s/\033/\\e/g;
 	  s/([\000-\037\177])/'\\c'.chr(ord($1)^64)/eg;
 	}
+	$_ = uniescape($_);
 	s/([\200-\377])/'\\'.sprintf('%3o',ord($1))/eg if $quoteHighBit;
 	($noticks || /^\d+(\.\d*)?\Z/) 
 	  ? $_ 

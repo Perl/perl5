@@ -1,11 +1,12 @@
 /*    perl.h
  *
- *    Copyright (c) 1987-2001, Larry Wall
+ *    Copyright (c) 1987-2002, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
  */
+
 #ifndef H_PERL
 #define H_PERL 1
 

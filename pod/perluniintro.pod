@@ -768,7 +768,7 @@ in Perl 5.8.0 or newer, and
 
 in the Perl 5.6 series.  (The renaming to F<lib/unicore> was done to
 avoid naming conflicts with lib/Unicode in case-insensitive filesystems.)
-The main Unicode data file is F<Unicode.txt> (or F<Unicode.301> in
+The main Unicode data file is F<UnicodeData.txt> (or F<Unicode.301> in
 Perl 5.6.1.)  You can find the C<$Config{installprivlib}> by
 
     perl "-V:installprivlib"
@@ -813,6 +813,6 @@ mailing lists for their valuable feedback.
 
 =head1 AUTHOR, COPYRIGHT, AND LICENSE
 
-Copyright 2001 Jarkko Hietaniemi <jhi@iki.fi>
+Copyright 2001-2002 Jarkko Hietaniemi <jhi@iki.fi>
 
 This document may be distributed under the same terms as Perl itself.

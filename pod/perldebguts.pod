@@ -5,9 +5,10 @@ perldebguts - Guts of Perl debugging
 =head1 DESCRIPTION
 
 This is not the perldebug(1) manpage, which tells you how to use
-the debugger.  This manpage describes low-level details ranging
-between difficult and impossible for anyone who isn't incredibly
-intimate with Perl's guts to understand.  Caveat lector.
+the debugger.  This manpage describes low-level details concerning
+the debugger's internals, which range from difficult to impossible
+to understand for anyone who isn't incredibly intimate with Perl's guts.
+Caveat lector.
 
 =head1 Debugger Internals
 
@@ -18,10 +19,11 @@ usable only if a special Perl is built per the instructions in the
 F<INSTALL> podpage in the Perl source tree.
 
 For example, whenever you call Perl's built-in C<caller> function
-from the package DB, the arguments that the corresponding stack
-frame was called with are copied to the @DB::args array.  The
-general mechanisms is enabled by calling Perl with the B<-d> switch, the
-following additional features are enabled (cf. L<perlvar/$^P>):
+from the package C<DB>, the arguments that the corresponding stack
+frame was called with are copied to the C<@DB::args> array.  These
+mechanisms are enabled by calling Perl with the B<-d> switch.
+Specifically, the following additional features are enabled
+(cf. L<perlvar/$^P>):
 
 =over 4
 
@@ -33,10 +35,10 @@ Perl inserts the contents of C<$ENV{PERL5DB}> (or C<BEGIN {require
 =item *
 
 Each array C<@{"_<$filename"}> holds the lines of $filename for a
-file compiled by Perl.  The same for C<eval>ed strings that contain
-subroutines, or which are currently being executed.  The $filename
-for C<eval>ed strings looks like C<(eval 34)>.   Code assertions
-in regexes look like C<(re_eval 19)>.  
+file compiled by Perl.  The same is also true for C<eval>ed strings
+that contain subroutines, or which are currently being executed.
+The $filename for C<eval>ed strings looks like C<(eval 34)>.
+Code assertions in regexes look like C<(re_eval 19)>.
 
 Values in this array are magical in numeric context: they compare
 equal to zero only if the line is not breakable.
@@ -84,8 +86,8 @@ C<eval>s, or C<(re_eval 19)> for those within regex code assertions.
 =item *
 
 When the execution of your program reaches a point that can hold a
-breakpoint, the C<DB::DB()> subroutine is called any of the variables
-$DB::trace, $DB::single, or $DB::signal is true.  These variables
+breakpoint, the C<DB::DB()> subroutine is called if any of the variables
+C<$DB::trace>, C<$DB::single>, or C<$DB::signal> is true.  These variables
 are not C<local>izable.  This feature is disabled when executing
 inside C<DB::DB()>, including functions called from it 
 unless C<< $^D & (1<<30) >> is true.
@@ -94,76 +96,121 @@ unless C<< $^D & (1<<30) >> is true.
 
 When execution of the program reaches a subroutine call, a call to
 C<&DB::sub>(I<args>) is made instead, with C<$DB::sub> holding the
-name of the called subroutine.  This doesn't happen if the subroutine
+name of the called subroutine. (This doesn't happen if the subroutine
 was compiled in the C<DB> package.)
 
 =back
 
 Note that if C<&DB::sub> needs external data for it to work, no
-subroutine call is possible until this is done.  For the standard
-debugger, the  C<$DB::deep> variable (how many levels of recursion
-deep into the debugger you can go before a mandatory break) gives
-an example of such a dependency.
+subroutine call is possible without it. As an example, the standard
+debugger's C<&DB::sub> depends on the C<$DB::deep> variable
+(it defines how many levels of recursion deep into the debugger you can go
+before a mandatory break).  If C<$DB::deep> is not defined, subroutine
+calls are not possible, even though C<&DB::sub> exists.
 
 =head2 Writing Your Own Debugger
 
-The minimal working debugger consists of one line
-
+=head3 Environment Variables
+ 
+The C<PERL5DB> environment variable can be used to define a debugger.
+For example, the minimal "working" debugger (it actually doesn't do anything)
+consists of one line:
+  
   sub DB::DB {}
 
-which is quite handy as contents of C<PERL5DB> environment
-variable:
-
+It can easily be defined like this:
+  
   $ PERL5DB="sub DB::DB {}" perl -d your-script
 
-Another brief debugger, slightly more useful, could be created
+Another brief debugger, slightly more useful, can be created
 with only the line:
 
   sub DB::DB {print ++$i; scalar <STDIN>}
 
-This debugger would print the sequential number of encountered
-statement, and would wait for you to hit a newline before continuing.
-
-The following debugger is quite functional:
-
+This debugger prints a number which increments for each statement
+encountered and waits for you to hit a newline before continuing
+to the next statement.
+  
+The following debugger is actually useful:
+  
   {
     package DB;
     sub DB  {}
     sub sub {print ++$i, " $sub\n"; &$sub}
   }
 
-It prints the sequential number of subroutine call and the name of the
-called subroutine.  Note that C<&DB::sub> should be compiled into the
-package C<DB>.
+It prints the sequence number of each subroutine call and the name of the
+called subroutine.  Note that C<&DB::sub> is being compiled into the
+package C<DB> through the use of the C<package> directive.
 
-At the start, the debugger reads your rc file (F<./.perldb> or
-F<~/.perldb> under Unix), which can set important options.  This file may
-define a subroutine C<&afterinit> to be executed after the debugger is
-initialized.
+When it starts, the debugger reads your rc file (F<./.perldb> or
+F<~/.perldb> under Unix), which can set important options.
+(A subroutine (C<&afterinit>) can be defined here as well; it is executed
+after the debugger completes its own initialization.)
 
 After the rc file is read, the debugger reads the PERLDB_OPTS
-environment variable and parses this as the remainder of a C<O ...>
-line as one might enter at the debugger prompt.
+environment variable and uses it to set debugger options. The
+contents of this variable are treated as if they were the argument
+of an C<O ...> debugger command (q.v. in L<perldebug/Options>).
 
-The debugger also maintains magical internal variables, such as
-C<@DB::dbline>, C<%DB::dbline>, which are aliases for
-C<@{"::_<current_file"}> C<%{"::_<current_file"}>.  Here C<current_file>
-is the currently selected file, either explicitly chosen with the
+=head3 Debugger internal variables
+In addition to the file and subroutine-related variables mentioned above,
+the debugger also maintains various magical internal variables.
+
+=over 4
+
+=item *
+
+C<@DB::dbline> is an alias for C<@{"::_<current_file"}>, which
+holds the lines of the currently-selected file (compiled by Perl), either
+explicitly chosen with the debugger's C<f> command, or implicitly by flow
+of execution.
+
+Values in this array are magical in numeric context: they compare
+equal to zero only if the line is not breakable.
+
+=item *
+
+C<%DB::dbline>, is an alias for C<%{"::_<current_file"}>, which
+contains breakpoints and actions keyed by line number in
+the currently-selected file, either explicitly chosen with the
 debugger's C<f> command, or implicitly by flow of execution.
 
-Some functions are provided to simplify customization.  See
-L<perldebug/"Options"> for description of options parsed by
-C<DB::parse_options(string)>.  The function C<DB::dump_trace(skip[,
-count])> skips the specified number of frames and returns a list
-containing information about the calling frames (all of them, if
-C<count> is missing).  Each entry is reference to a hash with
-keys C<context> (either C<.>, C<$>, or C<@>), C<sub> (subroutine
+As previously noted, individual entries (as opposed to the whole hash)
+are settable.  Perl only cares about Boolean true here, although
+the values used by F<perl5db.pl> have the form
+C<"$break_condition\0$action">.
+
+=back
+
+=head3 Debugger customization fucntions
+
+Some functions are provided to simplify customization.
+
+=over 4
+
+=item *
+
+See L<perldebug/"Options"> for description of options parsed by
+C<DB::parse_options(string)> parses debugger options; see
+L<pperldebug/Options> for a description of options recognized.
+
+=item *
+
+C<DB::dump_trace(skip[,count])> skips the specified number of frames
+and returns a list containing information about the calling frames (all
+of them, if C<count> is missing).  Each entry is reference to a hash
+with keys C<context> (either C<.>, C<$>, or C<@>), C<sub> (subroutine
 name, or info about C<eval>), C<args> (C<undef> or a reference to
 an array), C<file>, and C<line>.
 
-The function C<DB::print_trace(FH, skip[, count[, short]])> prints
+=item *
+
+C<DB::print_trace(FH, skip[, count[, short]])> prints
 formatted info about caller frames.  The last two functions may be
 convenient as arguments to C<< < >>, C<< << >> commands.
+
+=back
 
 Note that any variables and functions that are not documented in
 this manpages (or in L<perldebug>) are considered for internal   

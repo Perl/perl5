@@ -1,6 +1,6 @@
 /*    toke.c
  *
- *    Copyright (c) 1991-2001, Larry Wall
+ *    Copyright (c) 1991-2002, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1424,7 +1424,9 @@ S_scan_const(pTHX_ char *start)
 		/* FALL THROUGH */
 	    default:
 	        {
-		    if (ckWARN(WARN_MISC) && isALNUM(*s))
+		    if (ckWARN(WARN_MISC) &&
+			isALNUM(*s) && 
+			*s != '_')
 			Perl_warner(aTHX_ WARN_MISC,
 			       "Unrecognized escape \\%c passed through",
 			       *s);

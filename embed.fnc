@@ -1080,6 +1080,7 @@ s	|I32	|dopoptosub_at	|PERL_CONTEXT* cxstk|I32 startingblock
 s	|void	|save_lines	|AV *array|SV *sv
 s	|OP*	|doeval		|int gimme|OP** startop
 s	|PerlIO *|doopen_pmc	|const char *name|const char *mode
+s	|bool	|path_is_absolute|char *name
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
@@ -1278,7 +1279,7 @@ s	|I32	|cr_textfilter	|int idx|SV *sv|int maxlen
 #endif
 
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
-s	|SV*|isa_lookup	|HV *stash|const char *name|int len|int level
+s	|SV*|isa_lookup	|HV *stash|const char *name|HV *name_stash|int len|int level
 #endif
 
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)

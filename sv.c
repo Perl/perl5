@@ -1,6 +1,6 @@
 /*    sv.c
  *
- *    Copyright (c) 1991-2001, Larry Wall
+ *    Copyright (c) 1991-2002, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -3372,28 +3372,6 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 	    if (!utf8_to_bytes(s, &len)) {
 	        if (fail_ok)
 		    return FALSE;
-#ifdef USE_BYTES_DOWNGRADES
-		else if (IN_BYTES) {
-		    U8 *d = s;
-		    U8 *e = (U8 *) SvEND(sv);
-		    int first = 1;
-		    while (s < e) {
-			UV ch = utf8n_to_uvchr(s,(e-s),&len,0);
-			if (first && ch > 255) {
-			    if (PL_op)
-				Perl_warner(aTHX_ WARN_UTF8, "Wide character in byte %s",
-					   OP_DESC(PL_op);
-			    else
-			        Perl_warner(aTHX_ WARN_UTF8, "Wide character in byte");
-			    first = 0;
-			}
-			*d++ = ch;
-			s += len;
-		    }
-		    *d = '\0';
-		    len = (d - (U8 *) SvPVX(sv));
-		}
-#endif
 		else {
 		    if (PL_op)
 		        Perl_croak(aTHX_ "Wide character in %s",

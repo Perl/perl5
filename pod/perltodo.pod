@@ -54,8 +54,8 @@ Possible options, controlled by the flags:
 - append a "..." to the produced string if the maximum length is exceeded
 - really fancy: print unicode characters as \N{...}
 
-NOTE: pv_display(), pv_uni_display(), sv_uni_display() are doing
-something like the above.
+NOTE: pv_display(), pv_uni_display(), sv_uni_display() are already
+doing something like the above.
 
 =head2 Overloadable regex assertions
 
@@ -480,10 +480,6 @@ garbage detector into Perl; Alan Burlison has some ideas about this.
 
 Mark-Jason Dominus has the beginnings of one of these.
 
-=head2 pack/unpack tutorial
-
-Simon Cozens has the beginnings of one of these.
-
 =head2 Rewrite perldoc
 
 There are a few suggestions for what to do with C<perldoc>: maybe a
@@ -886,5 +882,12 @@ on this topic.
 One can emulate ftruncate() using F_FREESP and F_CHSIZ fcntls
 (see the UNIX FAQ for details).  This needs to go somewhere near
 pp_sys.c:pp_truncate().
+
+One can emulate truncate() easily if one has ftruncate().
+This emulation should also go near pp_sys.pp_truncate().
+
+=head2 pack/unpack tutorial
+
+Wolfgang Laun finished what Simon Cozens started.
 
 =cut

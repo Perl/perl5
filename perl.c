@@ -1,6 +1,6 @@
 /*    perl.c
  *
- *    Copyright (c) 1987-2001 Larry Wall
+ *    Copyright (c) 1987-2002 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -2450,10 +2450,10 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 
 	PerlIO_printf(PerlIO_stdout(),
-		      "\n\nCopyright 1987-2001, Larry Wall\n");
+		      "\n\nCopyright 1987-2002, Larry Wall\n");
 #ifdef MACOS_TRADITIONAL
 	PerlIO_printf(PerlIO_stdout(),
-		      "\nMac OS port Copyright 1991-2001, Matthias Neeracher;\n"
+		      "\nMac OS port Copyright 1991-2002, Matthias Neeracher;\n"
 		      "maintained by Chris Nandor\n");
 #endif
 #ifdef MSDOS
@@ -2468,7 +2468,7 @@ Perl_moreswitches(pTHX_ char *s)
 #ifdef OS2
 	PerlIO_printf(PerlIO_stdout(),
 		      "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
-		      "Version 5 port Copyright (c) 1994-1999, Andreas Kaiser, Ilya Zakharevich\n");
+		      "Version 5 port Copyright (c) 1994-2002, Andreas Kaiser, Ilya Zakharevich\n");
 #endif
 #ifdef atarist
 	PerlIO_printf(PerlIO_stdout(),
@@ -2480,7 +2480,7 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 #ifdef MPE
 	PerlIO_printf(PerlIO_stdout(),
-		      "MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-2001\n");
+		      "MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-2002\n");
 #endif
 #ifdef OEMVS
 	PerlIO_printf(PerlIO_stdout(),
@@ -2488,7 +2488,7 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 #ifdef __VOS__
 	PerlIO_printf(PerlIO_stdout(),
-		      "Stratus VOS port by Paul_Green@stratus.com, 1997-1999\n");
+		      "Stratus VOS port by Paul_Green@stratus.com, 1997-2002\n");
 #endif
 #ifdef __OPEN_VM
 	PerlIO_printf(PerlIO_stdout(),
@@ -2504,10 +2504,10 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 #ifdef EPOC
 	PerlIO_printf(PerlIO_stdout(),
-		      "EPOC port by Olaf Flebbe, 1999-2000\n");
+		      "EPOC port by Olaf Flebbe, 1999-2002\n");
 #endif
 #ifdef UNDER_CE
-	printf("WINCE port by Rainer Keuchel, 2001\n");
+	printf("WINCE port by Rainer Keuchel, 2001-2002\n");
 	printf("Built on " __DATE__ " " __TIME__ "\n\n");
 	wce_hitreturn();
 #endif

@@ -1,3 +1,12 @@
+/*    taint.c
+ *
+ *    Copyright (c) 1997-2002, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
 /*
  * "...we will have peace, when you and all your works have perished--and
  * the works of your dark master to whom you would deliver us.  You are a

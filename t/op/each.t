@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 34;
+plan tests => 39;
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -167,4 +167,23 @@ for (keys %u) {
 }
 {
     { use bytes; ok (bytes::length($d) == $ol) }
+}
+
+{
+    my %u;
+    my $u0 = pack("U0U", 0x00FF);
+    my $b0 = "\xC3\xBF";          # 0xCB 0xBF is U+00FF in UTF-8
+    my $u1 = pack("U0U", 0x0100);
+    my $b1 = "\xC4\x80";          # 0xC4 0x80 is U+0100 in UTF-8
+
+    $u{$u0} = 1;
+    $u{$b0} = 2; 
+    $u{$u1} = 3;
+    $u{$b1} = 4;
+
+    is(scalar keys %u, 4, "four different Unicode keys"); 
+    is($u{$u0}, 1, "U+00FF        -> 1");
+    is($u{$b0}, 2, "U+00C3 U+00BF -> 2");
+    is($u{$u1}, 3, "U+0100        -> 3 ");
+    is($u{$b1}, 4, "U+00C4 U+0080 -> 4");
 }

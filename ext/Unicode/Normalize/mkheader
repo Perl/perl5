@@ -32,7 +32,7 @@ our %Exclus; # $codepoint => 1            : composition exclusions
   my($f, $fh);
   foreach my $d (@INC) {
     use File::Spec;
-    $f = File::Spec->catfile($d, "unicore", "CompExcl.txt");
+    $f = File::Spec->catfile($d, "unicore", "CompositionExclusions.txt");
     last if open($fh, $f);
     $f = File::Spec->catfile($d, "unicode", "CompExcl.txt");
     last if open($fh, $f);

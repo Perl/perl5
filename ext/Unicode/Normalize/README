@@ -48,9 +48,9 @@ Carp
 Exporter
 File::Copy
 File::Spec
-unicore/CombiningClass.pl or unicode/CombiningClass.pl
-unicore/Decomposition.pl  or unicode/Decomposition.pl
-unicore/CompExcl.txt      or unicode/CompExcl.txt
+unicore/CombiningClass.pl         or unicode/CombiningClass.pl
+unicore/Decomposition.pl          or unicode/Decomposition.pl
+unicore/CompositionExclusions.txt or unicode/CompExcl.txt
 
 and for the Non-XS version, in addition to the above,
 Lingua::KO::Hangul::Util 0.06

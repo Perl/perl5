@@ -291,7 +291,7 @@ sub bits {
 	    $mask |= $DeadBits{$word} if $fatal ;
 	}
 	else
-          { croak("unknown warnings category '$word'")}
+          { croak("Unknown warnings category '$word'")}
     }
 
     return $mask ;
@@ -328,12 +328,12 @@ sub __chk
         $category = shift ;
         if (ref $category) {
             croak ("not an object")
-                if $category !~ /^([^=]+)=/ ;+
+                if $category !~ /^([^=]+)=/ ;
 	    $category = $1 ;
             $isobj = 1 ;
         }
         $offset = $Offsets{$category};
-        croak("unknown warnings category '$category'")
+        croak("Unknown warnings category '$category'")
 	    unless defined $offset;
     }
     else {

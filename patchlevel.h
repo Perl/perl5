@@ -1,3 +1,12 @@
+/*    patchlevel.h
+ *
+ *    Copyright (c) 1997-2002, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
 #ifndef __PATCHLEVEL_H_INCLUDED__
 
 /* do not adjust the whitespace! Configure expects the numbers to be
@@ -70,7 +79,7 @@
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
 static	char	*local_patches[] = {
         NULL
-	,"DEVEL14330"
+	,"DEVEL14388"
 	,NULL
 };
 

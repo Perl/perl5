@@ -1,3 +1,12 @@
+/*    cc_runtime.h
+ *
+ *    Copyright (c) 1998-2002, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
 #define DOOP(ppname) PUTBACK; PL_op = ppname(aTHX); SPAGAIN
 #define CCPP(s)   OP * s(pTHX)
 

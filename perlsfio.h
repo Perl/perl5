@@ -1,3 +1,12 @@
+/*    perlsfio.h
+ *
+ *    Copyright (c) 1987-2002, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
 /* The next #ifdef should be redundant if Configure behaves ... */
 #ifndef FILE
 #define FILE FILE

@@ -93,7 +93,7 @@ else {
     rmdir $dir;
     if (scalar(@a) != 0 || GLOB_ERROR == 0) {
 	if ($^O eq 'vos') {
-	    print "not ok 6 -- hit VOS bug posix-956\n";
+	    print "not ok 6 # TODO hit VOS bug posix-956\n";
 	} else {
 	    print "not ok 6\n";
 	}

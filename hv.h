@@ -1,6 +1,6 @@
 /*    hv.h
  *
- *    Copyright (c) 1991-2001, Larry Wall
+ *    Copyright (c) 1991-2002, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -144,8 +144,8 @@ C<SV*>.
 /* The number of placeholders in the enumerated-keys hash */
 #define XHvPLACEHOLDERS(xhv)	((xhv)->xhv_placeholders)
 
-/* the number of keys that exist() (i.e. excluding placeholers) */
-#define XHvUSEDKEYS(xhv)      (XHvTOTALKEYS(xhv) - XHvPLACEHOLDERS(xhv))
+/* the number of keys that exist() (i.e. excluding placeholders) */
+#define XHvUSEDKEYS(xhv)      (XHvTOTALKEYS(xhv) - (IV)XHvPLACEHOLDERS(xhv))
 
 /*
  * HvKEYS gets the number of keys that actually exist(), and is provided

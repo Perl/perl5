@@ -517,7 +517,7 @@
 /* HAS_SHMAT_PROTOTYPE:
  *	This symbol, if defined, indicates that the sys/shm.h includes
  *	a prototype for shmat().  Otherwise, it is up to the program to
- *	guess one.  Shmat_t shmat _((int, Shmat_t, int)) is a good guess,
+ *	guess one.  Shmat_t shmat(int, Shmat_t, int) is a good guess,
  *	but not always right so it should be emitted by the program only
  *	when HAS_SHMAT_PROTOTYPE is not defined to avoid conflicting defs.
  */
@@ -908,19 +908,7 @@
  *	If defined, this macro indicates that the C compiler can handle
  *	function prototypes.
  */
-/* _:
- *	This macro is used to declare function parameters for folks who want
- *	to make declarations with prototypes using a different style than
- *	the above macros.  Use double parentheses.  For example:
- *
- *		int main _((int argc, char *argv[]));
- */
 #define	CAN_PROTOTYPE	/**/
-#ifdef CAN_PROTOTYPE
-#define	_(args) args
-#else
-#define	_(args) ()
-#endif
 
 /* SH_PATH:
  *	This symbol contains the full pathname to the shell used on this
@@ -1241,7 +1229,7 @@
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the drand48() function.  Otherwise, it is up
  *	to the program to supply one.  A good guess is
- *		extern double drand48 _((void));
+ *		extern double drand48(void);
  */
 /*#define	HAS_DRAND48_PROTO	/**/
 
@@ -1847,8 +1835,8 @@
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the sbrk() function.  Otherwise, it is up
  *	to the program to supply one.  Good guesses are
- *		extern void* sbrk _((int));
- *		extern void* sbrk _((size_t));
+ *		extern void* sbrk(int);
+ *		extern void* sbrk(size_t);
  */
 /*#define	HAS_SBRK_PROTO	/**/
 
@@ -2206,7 +2194,7 @@
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the telldir() function.  Otherwise, it is up
  *	to the program to supply one.  A good guess is
- *		extern long telldir _((DIR*));
+ *		extern long telldir(DIR*);
  */
 #define	HAS_TELLDIR_PROTO	/**/
 
@@ -3386,7 +3374,7 @@
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the sockatmark() function.  Otherwise, it is up
  *	to the program to supply one.  A good guess is
- *		extern int sockatmark _((int));
+ *		extern int sockatmark(int);
  */
 /*#define	HAS_SOCKATMARK_PROTO	/**/
 

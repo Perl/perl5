@@ -1,3 +1,12 @@
+/*    unixish.h
+ *
+ *    Copyright (c) 1997-2002, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
 /*
  * The following symbols are defined if your operating system supports
  * functions by that name.  All Unixes I know of support them, thus they

@@ -1,4 +1,10 @@
 /*    regcomp.h
+ *
+ *    Copyright (c) 1997-2002, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
  */
 
 typedef OP OP_4tree;			/* Will be redefined later. */

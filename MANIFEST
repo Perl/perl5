@@ -1388,18 +1388,18 @@ lib/Unicode/UCD.pm		Unicode character database
 lib/Unicode/UCD.t		See if Unicode character database works
 lib/unicore/ArabLink.pl		Unicode character database
 lib/unicore/ArabLnkGrp.pl	Unicode character database
-lib/unicore/ArabShap.txt	Unicode character database
-lib/unicore/BidiMirr.txt	Unicode character database
+lib/unicore/ArabicShaping.txt	Unicode character database
+lib/unicore/BidiMirroring.txt	Unicode character database
 lib/unicore/Bidirectional.pl	Unicode character database
 lib/unicore/Blocks.pl		Unicode character database
 lib/unicore/Blocks.txt		Unicode character database
 lib/unicore/Canonical.pl	Unicode character database
-lib/unicore/CaseFold.txt	Unicode character database
+lib/unicore/CaseFolding.txt	Unicode character database
 lib/unicore/Category.pl		Unicode character database
 lib/unicore/CombiningClass.pl	Unicode character database
-lib/unicore/CompExcl.txt	Unicode character database
+lib/unicore/CompositionExclusions.txt	Unicode character database
 lib/unicore/Decomposition.pl	Unicode character database
-lib/unicore/EAWidth.txt		Unicode character database
+lib/unicore/EastAsianWidth.txt	Unicode character database
 lib/unicore/Exact.pl		Unicode character database
 lib/unicore/Index.txt		Unicode character database
 lib/unicore/Jamo.txt		Unicode character database
@@ -1662,30 +1662,25 @@ lib/unicore/lib/Zs.pl		Unicode character database
 lib/unicore/lib/_CanonDC.pl	Unicode character database
 lib/unicore/lib/_CaseIgn.pl	Unicode character database
 lib/unicore/lib/_CombAbo.pl	Unicode character database
-lib/unicore/LineBrk.txt		Unicode character database
+lib/unicore/LineBreak.txt	Unicode character database
 lib/unicore/Makefile		Unicode character database
 lib/unicore/mktables		Unicode character database generator
 lib/unicore/Name.pl		Unicode character database
-lib/unicore/NamesList.html	Unicode character database
 lib/unicore/NamesList.txt	Unicode character database
 lib/unicore/Number.pl		Unicode character database
 lib/unicore/Properties		Built-in \p{...} / \P{...} property list
-lib/unicore/PropList.html	Unicode character database
 lib/unicore/PropList.txt	Unicode character database
 lib/unicore/README.perl		Unicode character database
 lib/unicore/ReadMe.txt		Unicode character database info
-lib/unicore/rename		Filename mappings used
 lib/unicore/Scripts.pl		Unicode character database
 lib/unicore/Scripts.txt		Unicode character database
-lib/unicore/SpecCase.txt	Unicode character database
+lib/unicore/SpecialCasing.txt	Unicode character database
 lib/unicore/To/Digit.pl		Unicode character database
 lib/unicore/To/Fold.pl		Unicode character database
 lib/unicore/To/Lower.pl		Unicode character database
 lib/unicore/To/Title.pl		Unicode character database
 lib/unicore/To/Upper.pl		Unicode character database
-lib/unicore/UCD.html		Unicode character database
-lib/unicore/Unicode.html	Unicode character database
-lib/unicore/Unicode.txt		Unicode character database
+lib/unicore/UnicodeData.txt	Unicode character database
 lib/unicore/version		The version of the Unicode
 lib/UNIVERSAL.pm		Base class for ALL classes
 lib/User/grent.pm		By-name interface to Perl's builtin getgr*
@@ -2442,6 +2437,7 @@ vos/install_perl.cm		VOS command macro to install perl after building
 vos/Makefile			A helper for maintaining the config.*.* in UNIX
 vos/perl.bind			VOS bind control file
 vos/test_vos_dummies.c		Test program for "vos_dummies.c"
+vos/vos.c			VOS emulations for missing POSIX functions
 vos/vosish.h			VOS-specific header file
 vos/vos_dummies.c		Wrappers to soak up undefined functions
 warnings.h			The warning numbers

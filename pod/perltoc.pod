@@ -10158,7 +10158,8 @@ C<full_sed>
 =item g
 
 C<gccosandvers>, C<gccversion>, C<gidformat>, C<gidsign>, C<gidsize>,
-C<gidtype>, C<glibpth>, C<grep>, C<groupcat>, C<groupstype>, C<gzip>
+C<gidtype>, C<glibpth>, C<gmake>, C<grep>, C<groupcat>, C<groupstype>,
+C<gzip>
 
 =item h
 

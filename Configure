@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Jan 19 05:47:21 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Thu Jan 24 16:12:51 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -13504,7 +13504,7 @@ $signal_t bletch(s) int s; { exit(4); }
 #endif
 int main() {
 #if BYTEORDER == 0x1234 || BYTEORDER == 0x4321
-    U8 buf[] = "\0\0\0\1\0\0\0\0";
+    U8 *buf = (U8*)"\0\0\0\1\0\0\0\0";
     U32 *up;
     int i;
 

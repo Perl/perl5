@@ -317,8 +317,8 @@ but the most recommendable way is to upgrade to at least Perl 5.6.1.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997, 1998, 1999, 2000, 2001 Tom Christiansen and Nathan
-Torkington.  All rights reserved.
+Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002 Tom Christiansen and
+Nathan Torkington.  All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
 under the same terms as Perl itself.
