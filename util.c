@@ -2543,7 +2543,7 @@ new_struct_thread(struct perl_thread *t)
     
     /* Initialise all per-thread SVs that the template thread used */
     svp = AvARRAY(t->threadsv);
-    for (i = 0; i <= AvFILL(t->threadsv); i++, svp++) {
+    for (i = 0; i <= AvFILLp(t->threadsv); i++, svp++) {
 	if (*svp && *svp != &sv_undef) {
 	    SV *sv = newSVsv(*svp);
 	    av_store(thr->threadsv, i, sv);

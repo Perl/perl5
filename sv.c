@@ -785,7 +785,7 @@ sv_upgrade(register SV *sv, U32 mt)
 	    Safefree(pv);
 	SvPVX(sv)	= 0;
 	AvMAX(sv)	= -1;
-	AvFILL(sv)	= -1;
+	AvFILLp(sv)	= -1;
 	SvIVX(sv)	= 0;
 	SvNVX(sv)	= 0.0;
 	SvMAGIC(sv)	= magic;
@@ -4772,7 +4772,7 @@ sv_dump(SV *sv)
     case SVt_PVAV:
 	PerlIO_printf(Perl_debug_log, "  ARRAY = 0x%lx\n", (long)AvARRAY(sv));
 	PerlIO_printf(Perl_debug_log, "  ALLOC = 0x%lx\n", (long)AvALLOC(sv));
-	PerlIO_printf(Perl_debug_log, "  FILL = %ld\n", (long)AvFILL(sv));
+	PerlIO_printf(Perl_debug_log, "  FILL = %ld\n", (long)AvFILLp(sv));
 	PerlIO_printf(Perl_debug_log, "  MAX = %ld\n", (long)AvMAX(sv));
 	PerlIO_printf(Perl_debug_log, "  ARYLEN = 0x%lx\n", (long)AvARYLEN(sv));
 	flags = AvFLAGS(sv);

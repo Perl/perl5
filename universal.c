@@ -48,7 +48,8 @@ isa_lookup(HV *stash, char *name, int len, int level)
 	}
 	if(hv) {
 	    SV** svp = AvARRAY(av);
-	    I32 items = AvFILL(av) + 1;
+	    /* NOTE: No support for tied ISA */
+	    I32 items = AvFILLp(av) + 1;
 	    while (items--) {
 		SV* sv = *svp++;
 		HV* basestash = gv_stashsv(sv, FALSE);

@@ -108,9 +108,9 @@ pad_allocmy(char *name)
 	}
 	croak("Can't use global %s in \"my\"",name);
     }
-    if (dowarn && AvFILL(comppad_name) >= 0) {
+    if (dowarn && AvFILLp(comppad_name) >= 0) {
 	SV **svp = AvARRAY(comppad_name);
-	for (off = AvFILL(comppad_name); off > comppad_name_floor; off--) {
+	for (off = AvFILLp(comppad_name); off > comppad_name_floor; off--) {
 	    if ((sv = svp[off])
 		&& sv != &sv_undef
 		&& SvIVX(sv) == 999999999       /* var is in open scope */
@@ -176,7 +176,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 	    continue;
 	curname = (AV*)*svp;
 	svp = AvARRAY(curname);
-	for (off = AvFILL(curname); off > 0; off--) {
+	for (off = AvFILLp(curname); off > 0; off--) {
 	    if ((sv = svp[off]) &&
 		sv != &sv_undef &&
 		seq <= SvIVX(sv) &&
@@ -307,7 +307,7 @@ pad_findmy(char *name)
 #endif /* USE_THREADS */
 
     /* The one we're looking for is probably just before comppad_name_fill. */
-    for (off = AvFILL(comppad_name); off > 0; off--) {
+    for (off = AvFILLp(comppad_name); off > 0; off--) {
 	if ((sv = svp[off]) &&
 	    sv != &sv_undef &&
 	    (!SvIVX(sv) ||
@@ -345,7 +345,7 @@ pad_leavemy(I32 fill)
 	}
     }
     /* "Deintroduce" my variables that are leaving with this scope. */
-    for (off = AvFILL(comppad_name); off > fill; off--) {
+    for (off = AvFILLp(comppad_name); off > fill; off--) {
 	if ((sv = svp[off]) && sv != &sv_undef && SvIVX(sv) == 999999999)
 	    SvIVX(sv) = cop_seqmax;
     }
@@ -364,13 +364,13 @@ pad_alloc(I32 optype, U32 tmptype)
 	pad_reset();
     if (tmptype & SVs_PADMY) {
 	do {
-	    sv = *av_fetch(comppad, AvFILL(comppad) + 1, TRUE);
+	    sv = *av_fetch(comppad, AvFILLp(comppad) + 1, TRUE);
 	} while (SvPADBUSY(sv));		/* need a fresh one */
-	retval = AvFILL(comppad);
+	retval = AvFILLp(comppad);
     }
     else {
 	SV **names = AvARRAY(comppad_name);
-	SSize_t names_fill = AvFILL(comppad_name);
+	SSize_t names_fill = AvFILLp(comppad_name);
 	for (;;) {
 	    /*
 	     * "foreach" index vars temporarily become aliases to non-"my"
@@ -1502,7 +1502,7 @@ block_start(int full)
     int retval = savestack_ix;
     SAVEI32(comppad_name_floor);
     if (full) {
-	if ((comppad_name_fill = AvFILL(comppad_name)) > 0)
+	if ((comppad_name_fill = AvFILLp(comppad_name)) > 0)
 	    comppad_name_floor = comppad_name_fill;
 	else
 	    comppad_name_floor = 0;
@@ -3026,7 +3026,7 @@ cv_undef(CV *cv)
     if (CvPADLIST(cv)) {
 	/* may be during global destruction */
 	if (SvREFCNT(CvPADLIST(cv))) {
-	    I32 i = AvFILL(CvPADLIST(cv));
+	    I32 i = AvFILLp(CvPADLIST(cv));
 	    while (i >= 0) {
 		SV** svp = av_fetch(CvPADLIST(cv), i--, FALSE);
 		SV* sv = svp ? *svp : Nullsv;
@@ -3080,7 +3080,7 @@ CV* cv;
     pname = AvARRAY(pad_name);
     ppad = AvARRAY(pad);
 
-    for (ix = 1; ix <= AvFILL(pad_name); ix++) {
+    for (ix = 1; ix <= AvFILLp(pad_name); ix++) {
 	if (SvPOK(pname[ix]))
 	    PerlIO_printf(Perl_debug_log, "\t%4d. 0x%lx (%s\"%s\" %ld-%ld)\n",
 			  ix, ppad[ix],
@@ -3103,8 +3103,8 @@ cv_clone2(CV *proto, CV *outside)
     AV* protopad = (AV*)*av_fetch(protopadlist, 1, FALSE);
     SV** pname = AvARRAY(protopad_name);
     SV** ppad = AvARRAY(protopad);
-    I32 fname = AvFILL(protopad_name);
-    I32 fpad = AvFILL(protopad);
+    I32 fname = AvFILLp(protopad_name);
+    I32 fpad = AvFILLp(protopad);
     AV* comppadlist;
     CV* cv;
 
@@ -3149,7 +3149,7 @@ cv_clone2(CV *proto, CV *outside)
     av_store(comppadlist, 0, (SV*)comppad_name);
     av_store(comppadlist, 1, (SV*)comppad);
     CvPADLIST(cv) = comppadlist;
-    av_fill(comppad, AvFILL(protopad));
+    av_fill(comppad, AvFILLp(protopad));
     curpad = AvARRAY(comppad);
 
     av = newAV();           /* will be @_ */
@@ -3386,12 +3386,12 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	return cv;
     }
 
-    if (AvFILL(comppad_name) < AvFILL(comppad))
-	av_store(comppad_name, AvFILL(comppad), Nullsv);
+    if (AvFILLp(comppad_name) < AvFILLp(comppad))
+	av_store(comppad_name, AvFILLp(comppad), Nullsv);
 
     if (CvCLONE(cv)) {
 	SV **namep = AvARRAY(comppad_name);
-	for (ix = AvFILL(comppad); ix > 0; ix--) {
+	for (ix = AvFILLp(comppad); ix > 0; ix--) {
 	    SV *namesv;
 
 	    if (SvIMMORTAL(curpad[ix]))
@@ -3417,7 +3417,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	av_store(comppad, 0, (SV*)av);
 	AvFLAGS(av) = AVf_REIFY;
 
-	for (ix = AvFILL(comppad); ix > 0; ix--) {
+	for (ix = AvFILLp(comppad); ix > 0; ix--) {
 	    if (SvIMMORTAL(curpad[ix]))
 		continue;
 	    if (!SvPADMY(curpad[ix]))
@@ -3606,7 +3606,7 @@ newFORM(I32 floor, OP *o, OP *block)
     CvGV(cv) = (GV*)SvREFCNT_inc(gv);
     CvFILEGV(cv) = curcop->cop_filegv;
 
-    for (ix = AvFILL(comppad); ix > 0; ix--) {
+    for (ix = AvFILLp(comppad); ix > 0; ix--) {
 	if (!SvPADMY(curpad[ix]) && !SvIMMORTAL(curpad[ix]))
 	    SvPADTMP_on(curpad[ix]);
     }

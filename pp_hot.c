@@ -443,8 +443,17 @@ PP(pp_rv2av)
 
     if (GIMME == G_ARRAY) {
 	I32 maxarg = AvFILL(av) + 1;
-	EXTEND(SP, maxarg);
-	Copy(AvARRAY(av), SP+1, maxarg, SV*);
+	EXTEND(SP, maxarg);          
+	if (SvRMAGICAL(av)) {
+	    U32 i; 
+	    for (i=0; i < maxarg; i++) {
+		SV **svp = av_fetch(av, i, FALSE);
+		SP[i+1] = (svp) ? *svp : &sv_undef;
+	    }
+	} 
+	else {
+	    Copy(AvARRAY(av), SP+1, maxarg, SV*);
+	}
 	SP += maxarg;
     }
     else {
@@ -1378,7 +1387,9 @@ PP(pp_iter)
 
     SvREFCNT_dec(*cx->blk_loop.itervar);
 
-    if (sv = AvARRAY(av)[++cx->blk_loop.iterix])
+    if (sv = (SvMAGICAL(av)) 
+	    ? *av_fetch(av, ++cx->blk_loop.iterix, FALSE) 
+	    : AvARRAY(av)[++cx->blk_loop.iterix])
 	SvTEMP_off(sv);
     else
 	sv = &sv_undef;
@@ -2038,7 +2049,7 @@ PP(pp_entersub)
 #else
 		av = GvAV(defgv);
 #endif /* USE_THREADS */		
-		items = AvFILL(av) + 1;
+		items = AvFILLp(av) + 1;   /* @_ is not tieable */
 
 		if (items) {
 		    /* Mark is at the end of the stack. */
@@ -2085,11 +2096,11 @@ PP(pp_entersub)
 	    if (CvDEPTH(cv) == 100 && dowarn 
 		  && !(PERLDB_SUB && cv == GvCV(DBsub)))
 		sub_crush_depth(cv);
-	    if (CvDEPTH(cv) > AvFILL(padlist)) {
+	    if (CvDEPTH(cv) > AvFILLp(padlist)) {
 		AV *av;
 		AV *newpad = newAV();
 		SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
-		I32 ix = AvFILL((AV*)svp[1]);
+		I32 ix = AvFILLp((AV*)svp[1]);
 		svp = AvARRAY(svp[0]);
 		for ( ;ix > 0; ix--) {
 		    if (svp[ix] != &sv_undef) {
@@ -2119,7 +2130,7 @@ PP(pp_entersub)
 		av_store(newpad, 0, (SV*)av);
 		AvFLAGS(av) = AVf_REIFY;
 		av_store(padlist, CvDEPTH(cv), (SV*)newpad);
-		AvFILL(padlist) = CvDEPTH(cv);
+		AvFILLp(padlist) = CvDEPTH(cv);
 		svp = AvARRAY(padlist);
 	    }
 	}
@@ -2127,7 +2138,7 @@ PP(pp_entersub)
 	if (!hasargs) {
 	    AV* av = (AV*)curpad[0];
 
-	    items = AvFILL(av) + 1;
+	    items = AvFILLp(av) + 1;
 	    if (items) {
 		/* Mark is at the end of the stack. */
 		EXTEND(sp, items);
@@ -2176,7 +2187,7 @@ PP(pp_entersub)
 		}
 	    }
 	    Copy(MARK,AvARRAY(av),items,SV*);
-	    AvFILL(av) = items - 1;
+	    AvFILLp(av) = items - 1;
 	    
 	    while (items--) {
 		if (*MARK)

@@ -314,6 +314,7 @@
 #define magic_settaint		Perl_magic_settaint
 #define magic_setuvar		Perl_magic_setuvar
 #define magic_setvec		Perl_magic_setvec
+#define magic_sizepack		Perl_magic_sizepack
 #define magic_wipepack		Perl_magic_wipepack
 #define magicname		Perl_magicname
 #define markstack_grow		Perl_markstack_grow
@@ -327,6 +328,7 @@
 #define mg_len			Perl_mg_len
 #define mg_magical		Perl_mg_magical
 #define mg_set			Perl_mg_set
+#define mg_size			Perl_mg_size
 #define mod			Perl_mod
 #define mod_amg			Perl_mod_amg
 #define mod_ass_amg		Perl_mod_ass_amg

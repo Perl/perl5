@@ -140,8 +140,17 @@ PP(pp_padav)
     }
     if (GIMME == G_ARRAY) {
 	I32 maxarg = AvFILL((AV*)TARG) + 1;
-	EXTEND(SP, maxarg);
-	Copy(AvARRAY((AV*)TARG), SP+1, maxarg, SV*);
+	EXTEND(SP, maxarg);                
+	if (SvMAGICAL(TARG)) {
+	    U32 i;
+	    for (i=0; i < maxarg; i++) {
+		SV **svp = av_fetch((AV*)TARG, i, FALSE);
+		SP[i+1] = (svp) ? *svp : &sv_undef;
+	    }
+	}
+	else {
+	    Copy(AvARRAY((AV*)TARG), SP+1, maxarg, SV*);
+	}
 	SP += maxarg;
     }
     else {
@@ -2446,13 +2455,23 @@ PP(pp_splice)
     I32 after;
     I32 diff;
     SV **tmparyval = 0;
+    MAGIC *mg;
+
+    if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
+	*MARK-- = mg->mg_obj;
+	PUSHMARK(MARK);
+	PUTBACK;
+	perl_call_method("SPLICE",GIMME_V);
+	SPAGAIN;
+	RETURN;
+    }
 
     SP++;
 
     if (++MARK < SP) {
 	offset = i = SvIVx(*MARK);
 	if (offset < 0)
-	    offset += AvFILL(ary) + 1;
+	    offset += AvFILLp(ary) + 1;
 	else
 	    offset -= curcop->cop_arybase;
 	if (offset < 0)
@@ -2469,9 +2488,9 @@ PP(pp_splice)
 	offset = 0;
 	length = AvMAX(ary) + 1;
     }
-    if (offset > AvFILL(ary) + 1)
-	offset = AvFILL(ary) + 1;
-    after = AvFILL(ary) + 1 - (offset + length);
+    if (offset > AvFILLp(ary) + 1)
+	offset = AvFILLp(ary) + 1;
+    after = AvFILLp(ary) + 1 - (offset + length);
     if (after < 0) {				/* not that much array */
 	length += after;			/* offset+length now in array */
 	after = 0;
@@ -2519,7 +2538,7 @@ PP(pp_splice)
 		    SvREFCNT_dec(*dst++);	/* free them now */
 	    }
 	}
-	AvFILL(ary) += diff;
+	AvFILLp(ary) += diff;
 
 	/* pull up or down? */
 
@@ -2540,7 +2559,7 @@ PP(pp_splice)
 		dst = src + diff;		/* diff is negative */
 		Move(src, dst, after, SV*);
 	    }
-	    dst = &AvARRAY(ary)[AvFILL(ary)+1];
+	    dst = &AvARRAY(ary)[AvFILLp(ary)+1];
 						/* avoid later double free */
 	}
 	i = -diff;
@@ -2574,15 +2593,15 @@ PP(pp_splice)
 		}
 		SvPVX(ary) = (char*)(AvARRAY(ary) - diff);/* diff is positive */
 		AvMAX(ary) += diff;
-		AvFILL(ary) += diff;
+		AvFILLp(ary) += diff;
 	    }
 	    else {
-		if (AvFILL(ary) + diff >= AvMAX(ary))	/* oh, well */
-		    av_extend(ary, AvFILL(ary) + diff);
-		AvFILL(ary) += diff;
+		if (AvFILLp(ary) + diff >= AvMAX(ary))	/* oh, well */
+		    av_extend(ary, AvFILLp(ary) + diff);
+		AvFILLp(ary) += diff;
 
 		if (after) {
-		    dst = AvARRAY(ary) + AvFILL(ary);
+		    dst = AvARRAY(ary) + AvFILLp(ary);
 		    src = dst - diff;
 		    for (i = after; i; i--) {
 			*dst-- = *src--;
@@ -2632,8 +2651,19 @@ PP(pp_push)
 {
     djSP; dMARK; dORIGMARK; dTARGET;
     register AV *ary = (AV*)*++MARK;
-    register SV *sv = &sv_undef;
+    register SV *sv = &sv_undef; 
+    MAGIC *mg;
+                  
+    if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
+	*MARK-- = mg->mg_obj;
+	PUSHMARK(MARK);
+	PUTBACK;
+	perl_call_method("PUSH",GIMME_V);
+	SPAGAIN;
+	RETURN;
+    }
 
+    /* Why no pre-extend of ary here ? */
     for (++MARK; MARK <= SP; MARK++) {
 	sv = NEWSV(51, 0);
 	if (*MARK)
@@ -2676,14 +2706,23 @@ PP(pp_unshift)
     register AV *ary = (AV*)*++MARK;
     register SV *sv;
     register I32 i = 0;
+    MAGIC *mg;
 
+    if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
+	*MARK-- = mg->mg_obj;
+	PUSHMARK(MARK);
+	PUTBACK;
+	perl_call_method("UNSHIFT",GIMME_V);
+	SPAGAIN;
+	RETURN;
+    }
+    
     av_unshift(ary, SP - MARK);
     while (MARK < SP) {
 	sv = NEWSV(27, 0);
 	sv_setsv(sv, *++MARK);
 	(void)av_store(ary, i++, sv);
     }
-
     SP = ORIGMARK;
     PUSHi( AvFILL(ary) + 1 );
     RETURN;
@@ -4070,7 +4109,7 @@ PP(pp_split)
 	realarray = 1;
 	if (!AvREAL(ary)) {
 	    AvREAL_on(ary);
-	    for (i = AvFILL(ary); i >= 0; i--)
+	    for (i = AvFILLp(ary); i >= 0; i--)
 		AvARRAY(ary)[i] = &sv_undef;	/* don't free mere refs */
 	}
 	av_extend(ary,0);
