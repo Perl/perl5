@@ -302,14 +302,17 @@ while (defined (my $file = next_file())) {
 			       "unless defined(\&$enum_name);\n");
 		}
 	    }
-	} elsif (/^(?:__extension__\s+)?(?:extern|static)\s+(?:__)?inline(?:__)?\s+/) { # { for vi
+	} elsif (/^(?:__extension__\s+)?(?:extern|static)\s+(?:__)?inline(?:__)?\s+/
+	    and !/;\s*$/ and !/{\s*}\s*$/)
+	{ # { for vi
 	    # This is a hack to parse the inline functions in the glibc headers.
-	    # Warning: massive kludge ahead. We suppose inline functions are mainly
-	    # constructed like macros.
+	    # Warning: massive kludge ahead. We suppose inline functions
+	    # are mainly constructed like macros.
 	    while (1) {
 		last unless defined ($next = next_line($file));
 		chomp $next;
-		undef $_, last if $next =~ /__THROW\s*;/;
+		undef $_, last if $next =~ /__THROW\s*;/
+			       or $next =~ /^(__extension__|extern|static)\b/;
 		$_ .= " $next";
 		print OUT "# $next\n" if $opt_D;
 		last if $next =~ /^}|^{.*}\s*$/;
