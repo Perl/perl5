@@ -37,8 +37,12 @@ echo "Archname is $archname"
 
 ### HP-UX OS specific behaviour
 
-set `echo " $ccflags " | sed -e 's/ -A[ea] / /' -e 's/ -D_HPUX_SOURCE / /'`
-cc_cppflags="$* -D_HPUX_SOURCE"
+case "$ccflags" in
+'') cc_cppflags='' ;;
+*)  set `echo " $ccflags " | sed -e 's/ -A[ea] / /g' -e 's/ -D_HPUX_SOURCE / /'`
+    cc_cppflags="$* -D_HPUX_SOURCE"
+    ;;
+esac
 ccflags="-Ae $cc_cppflags"
 cppflags="-Aa -D__STDC_EXT__ $cc_cppflags"
 
