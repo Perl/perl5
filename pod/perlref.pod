@@ -450,7 +450,7 @@ symbolic references.  Lexical variables (declared with my()) aren't in
 a symbol table, and thus are invisible to this mechanism.  For example:
 
     local $value = 10;
-    $ref = \$value;
+    $ref = "value";
     {
 	my $value = 20;
 	print $$ref;
