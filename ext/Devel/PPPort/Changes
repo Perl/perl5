@@ -1,3 +1,9 @@
+2.005 - 2nd September 2003
+
+    * Some tweaks to grok_(hex|oct|bin) to make compiler warnings
+      go away for older perls
+    * grok_number and grok_numeric_radix added
+
 2.004 - 22th August 2003
 
     * Added grok_(hex|oct|bin) and related constants
