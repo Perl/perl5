@@ -589,6 +589,165 @@ lib/syslog.pl		Perl library supporting syslogging
 lib/tainted.pl		Old code for tainting
 lib/termcap.pl		Perl library supporting termcap usage
 lib/timelocal.pl	Perl library supporting inverse of localtime, gmtime
+lib/unicode/ArabLink.pl				Unicode character database
+lib/unicode/ArabLnkGrp.pl			Unicode character database
+lib/unicode/Bidirectional.pl			Unicode character database
+lib/unicode/Block.pl				Unicode character database
+lib/unicode/Category.pl				Unicode character database
+lib/unicode/CombiningClass.pl			Unicode character database
+lib/unicode/Decomposition.pl			Unicode character database
+lib/unicode/In/AlphabeticPresentationForms.pl	Unicode character database
+lib/unicode/In/Arabic.pl			Unicode character database
+lib/unicode/In/ArabicPresentationForms-A.pl	Unicode character database
+lib/unicode/In/ArabicPresentationForms-B.pl	Unicode character database
+lib/unicode/In/Armenian.pl			Unicode character database
+lib/unicode/In/Arrows.pl			Unicode character database
+lib/unicode/In/BasicLatin.pl			Unicode character database
+lib/unicode/In/Bengali.pl			Unicode character database
+lib/unicode/In/BlockElements.pl			Unicode character database
+lib/unicode/In/Bopomofo.pl			Unicode character database
+lib/unicode/In/BoxDrawing.pl			Unicode character database
+lib/unicode/In/CJKCompatibility.pl		Unicode character database
+lib/unicode/In/CJKCompatibilityForms.pl		Unicode character database
+lib/unicode/In/CJKCompatibilityIdeographs.pl	Unicode character database
+lib/unicode/In/CJKSymbolsandPunctuation.pl	Unicode character database
+lib/unicode/In/CJKUnifiedIdeographs.pl		Unicode character database
+lib/unicode/In/CombiningDiacriticalMarks.pl	Unicode character database
+lib/unicode/In/CombiningHalfMarks.pl		Unicode character database
+lib/unicode/In/CombiningMarksforSymbols.pl	Unicode character database
+lib/unicode/In/ControlPictures.pl		Unicode character database
+lib/unicode/In/CurrencySymbols.pl		Unicode character database
+lib/unicode/In/Cyrillic.pl			Unicode character database
+lib/unicode/In/Devanagari.pl			Unicode character database
+lib/unicode/In/Dingbats.pl			Unicode character database
+lib/unicode/In/EnclosedAlphanumerics.pl		Unicode character database
+lib/unicode/In/EnclosedCJKLettersandMonths.pl	Unicode character database
+lib/unicode/In/GeneralPunctuation.pl		Unicode character database
+lib/unicode/In/GeometricShapes.pl		Unicode character database
+lib/unicode/In/Georgian.pl			Unicode character database
+lib/unicode/In/Greek.pl				Unicode character database
+lib/unicode/In/GreekExtended.pl			Unicode character database
+lib/unicode/In/Gujarati.pl			Unicode character database
+lib/unicode/In/Gurmukhi.pl			Unicode character database
+lib/unicode/In/HalfwidthandFullwidthForms.pl	Unicode character database
+lib/unicode/In/HangulCompatibilityJamo.pl	Unicode character database
+lib/unicode/In/HangulJamo.pl			Unicode character database
+lib/unicode/In/HangulSyllables.pl		Unicode character database
+lib/unicode/In/Hebrew.pl			Unicode character database
+lib/unicode/In/HighPrivateUseSurrogates.pl	Unicode character database
+lib/unicode/In/HighSurrogates.pl		Unicode character database
+lib/unicode/In/Hiragana.pl			Unicode character database
+lib/unicode/In/IPAExtensions.pl			Unicode character database
+lib/unicode/In/Kanbun.pl			Unicode character database
+lib/unicode/In/Kannada.pl			Unicode character database
+lib/unicode/In/Katakana.pl			Unicode character database
+lib/unicode/In/Lao.pl				Unicode character database
+lib/unicode/In/Latin-1Supplement.pl		Unicode character database
+lib/unicode/In/LatinExtended-A.pl		Unicode character database
+lib/unicode/In/LatinExtended-B.pl		Unicode character database
+lib/unicode/In/LatinExtendedAdditional.pl	Unicode character database
+lib/unicode/In/LetterlikeSymbols.pl		Unicode character database
+lib/unicode/In/LowSurrogates.pl			Unicode character database
+lib/unicode/In/Malayalam.pl			Unicode character database
+lib/unicode/In/MathematicalOperators.pl		Unicode character database
+lib/unicode/In/MiscellaneousSymbols.pl		Unicode character database
+lib/unicode/In/MiscellaneousTechnical.pl	Unicode character database
+lib/unicode/In/NumberForms.pl			Unicode character database
+lib/unicode/In/OpticalCharacterRecognition.pl	Unicode character database
+lib/unicode/In/Oriya.pl				Unicode character database
+lib/unicode/In/PrivateUse.pl			Unicode character database
+lib/unicode/In/SmallFormVariants.pl		Unicode character database
+lib/unicode/In/SpacingModifierLetters.pl	Unicode character database
+lib/unicode/In/Specials.pl			Unicode character database
+lib/unicode/In/SuperscriptsandSubscripts.pl	Unicode character database
+lib/unicode/In/Tamil.pl				Unicode character database
+lib/unicode/In/Telugu.pl			Unicode character database
+lib/unicode/In/Thai.pl				Unicode character database
+lib/unicode/In/Tibetan.pl			Unicode character database
+lib/unicode/Is/Alnum.pl				Unicode character database
+lib/unicode/Is/Alpha.pl				Unicode character database
+lib/unicode/Is/BidiAN.pl			Unicode character database
+lib/unicode/Is/BidiB.pl				Unicode character database
+lib/unicode/Is/BidiCS.pl			Unicode character database
+lib/unicode/Is/BidiEN.pl			Unicode character database
+lib/unicode/Is/BidiES.pl			Unicode character database
+lib/unicode/Is/BidiET.pl			Unicode character database
+lib/unicode/Is/BidiL.pl				Unicode character database
+lib/unicode/Is/BidiON.pl			Unicode character database
+lib/unicode/Is/BidiR.pl				Unicode character database
+lib/unicode/Is/BidiS.pl				Unicode character database
+lib/unicode/Is/BidiWS.pl			Unicode character database
+lib/unicode/Is/C.pl				Unicode character database
+lib/unicode/Is/Cc.pl				Unicode character database
+lib/unicode/Is/Cn.pl				Unicode character database
+lib/unicode/Is/Co.pl				Unicode character database
+lib/unicode/Is/DCcircle.pl			Unicode character database
+lib/unicode/Is/DCcompat.pl			Unicode character database
+lib/unicode/Is/DCfinal.pl			Unicode character database
+lib/unicode/Is/DCfont.pl			Unicode character database
+lib/unicode/Is/DCinital.pl			Unicode character database
+lib/unicode/Is/DCinitial.pl			Unicode character database
+lib/unicode/Is/DCisolated.pl			Unicode character database
+lib/unicode/Is/DCnarrow.pl			Unicode character database
+lib/unicode/Is/DCnoBreak.pl			Unicode character database
+lib/unicode/Is/DCsmall.pl			Unicode character database
+lib/unicode/Is/DCsquare.pl			Unicode character database
+lib/unicode/Is/DCsub.pl				Unicode character database
+lib/unicode/Is/DCsuper.pl			Unicode character database
+lib/unicode/Is/DCvertical.pl			Unicode character database
+lib/unicode/Is/DCwide.pl			Unicode character database
+lib/unicode/Is/DecoCanon.pl			Unicode character database
+lib/unicode/Is/DecoCompat.pl			Unicode character database
+lib/unicode/Is/Digit.pl				Unicode character database
+lib/unicode/Is/L.pl				Unicode character database
+lib/unicode/Is/Ll.pl				Unicode character database
+lib/unicode/Is/Lm.pl				Unicode character database
+lib/unicode/Is/Lo.pl				Unicode character database
+lib/unicode/Is/Lower.pl				Unicode character database
+lib/unicode/Is/Lt.pl				Unicode character database
+lib/unicode/Is/Lu.pl				Unicode character database
+lib/unicode/Is/M.pl				Unicode character database
+lib/unicode/Is/Mc.pl				Unicode character database
+lib/unicode/Is/Mirrored.pl			Unicode character database
+lib/unicode/Is/Mn.pl				Unicode character database
+lib/unicode/Is/N.pl				Unicode character database
+lib/unicode/Is/Nd.pl				Unicode character database
+lib/unicode/Is/No.pl				Unicode character database
+lib/unicode/Is/P.pl				Unicode character database
+lib/unicode/Is/Pd.pl				Unicode character database
+lib/unicode/Is/Pe.pl				Unicode character database
+lib/unicode/Is/Po.pl				Unicode character database
+lib/unicode/Is/Print.pl				Unicode character database
+lib/unicode/Is/Ps.pl				Unicode character database
+lib/unicode/Is/S.pl				Unicode character database
+lib/unicode/Is/Sc.pl				Unicode character database
+lib/unicode/Is/Sm.pl				Unicode character database
+lib/unicode/Is/So.pl				Unicode character database
+lib/unicode/Is/Space.pl				Unicode character database
+lib/unicode/Is/Upper.pl				Unicode character database
+lib/unicode/Is/Z.pl				Unicode character database
+lib/unicode/Is/Zl.pl				Unicode character database
+lib/unicode/Is/Zp.pl				Unicode character database
+lib/unicode/Is/Zs.pl				Unicode character database
+lib/unicode/JamoShort.pl			Unicode character database
+lib/unicode/Makefile				Unicode character database
+lib/unicode/Name.pl				Unicode character database
+lib/unicode/Number.pl				Unicode character database
+lib/unicode/To/Digit.pl				Unicode character database
+lib/unicode/To/Lower.pl				Unicode character database
+lib/unicode/To/Title.pl				Unicode character database
+lib/unicode/To/Upper.pl				Unicode character database
+lib/unicode/UnicodeData-Latest.txt		Unicode character database
+lib/unicode/arabshp.txt				Unicode character database
+lib/unicode/blocks.txt				Unicode character database
+lib/unicode/index2.txt				Unicode character database
+lib/unicode/jamo2.txt				Unicode character database
+lib/unicode/mktables.PL				Unicode character database generator
+lib/unicode/names2.txt				Unicode character database
+lib/unicode/props2.txt				Unicode character database
+lib/unicode/readme.txt				Unicode character database info
+lib/utf8.pm					Pragma to control Unicode support
+lib/utf8_heavy.pl				Support routines for utf8 pragma
 lib/validate.pl		Perl library supporting wholesale file mode validation
 lib/vars.pm		Declare pseudo-imported global variables
 makeaperl.SH		perl script that produces a new perl binary
@@ -769,6 +928,7 @@ sv.c			Scalar value code
 sv.h			Scalar value header
 t/README		Instructions for regression tests
 t/TEST			The regression tester
+t/UTEST			Run regression tests with -Mutf8
 t/base/cond.t		See if conditionals work
 t/base/if.t		See if if works
 t/base/lex.t		See if lexical items work
@@ -971,6 +1131,8 @@ thread.sym		Symbols for threads
 toke.c			The tokener
 universal.c		The default UNIVERSAL package methods
 unixish.h		Defines that are assumed on Unix
+utf8.c			Unicode routines
+utf8.h			Unicode header
 util.c			Utility routines
 util.h			Dummy header
 utils/Makefile		Extract the utility scripts

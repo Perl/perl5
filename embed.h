@@ -1063,6 +1063,7 @@
 #define utf8_distance		Perl_utf8_distance
 #define utf8_hop		Perl_utf8_hop
 #define utf8_to_uv		Perl_utf8_to_uv
+#define utf8skip		Perl_utf8skip
 #define utilize			Perl_utilize
 #define uv_to_utf8		Perl_uv_to_utf8
 #define varies			Perl_varies

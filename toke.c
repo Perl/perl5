@@ -915,7 +915,7 @@ scan_const(char *start)
 	    /* range begins (ignore - as first or last char) */
 	    else if (*s == '-' && s+1 < send  && s != start) {
 		if (utf) {
-		    *d++ = 0xff;	/* use illegal utf8 byte--see pmtrans */
+		    *d++ = (char)0xff;	/* use illegal utf8 byte--see pmtrans */
 		    s++;
 		    continue;
 		}

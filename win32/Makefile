@@ -354,6 +354,7 @@ MICROCORE_SRC	=		\
 		..\taint.c	\
 		..\toke.c	\
 		..\universal.c	\
+		..\utf8.c	\
 		..\util.c
 
 !IF "$(PERL_MALLOC)" == "define"
@@ -427,6 +428,7 @@ CORE_NOCFG_H	=		\
 		..\sv.h		\
 		..\thread.h	\
 		..\unixish.h	\
+		..\utf8.h	\
 		..\util.h	\
 		..\XSUB.h	\
 		..\EXTERN.h	\
