@@ -1213,13 +1213,13 @@ See L<perlsub/"Constant Functions"> and L<constant>.
 
 =item Constant subroutine %s redefined
 
-(S) You redefined a subroutine which had previously been eligible for
+(S|W) You redefined a subroutine which had previously been eligible for
 inlining.  See L<perlsub/"Constant Functions"> for commentary and
 workarounds.
 
 =item Constant subroutine %s undefined
 
-(S) You undefined a subroutine which had previously been eligible for
+(W) You undefined a subroutine which had previously been eligible for
 inlining.  See L<perlsub/"Constant Functions"> for commentary and
 workarounds.
 
@@ -2156,7 +2156,7 @@ See also L<perlport> for writing portable code.
 
 =item Odd number of elements in hash assignment
 
-(S) You specified an odd number of elements to initialize a hash, which
+(W) You specified an odd number of elements to initialize a hash, which
 is odd, because hashes come in key/value pairs.
 
 =item Offset outside string
