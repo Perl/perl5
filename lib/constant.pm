@@ -80,6 +80,7 @@ B<necessarily> that value in the current implementation.
 
 Magical values, tied values, and references can be made into
 constants at compile time, allowing for way cool stuff like this.
+(These error numbers aren't totally portable, alas.)
 
     use constant E2BIG => ($! = 7);
     print   E2BIG, "\n";	# something like "Arg list too long"
@@ -126,7 +127,7 @@ use vars qw($VERSION);
 #=======================================================================
 
 # Some of this stuff didn't work in version 5.003, alas.
-require 5.003_20;
+require 5.003_96;
 
 #=======================================================================
 # import() - import symbols into user's namespace
