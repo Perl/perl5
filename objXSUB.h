@@ -498,12 +498,16 @@
 #define PL_reg_eval_set		pPerl->PL_reg_eval_set
 #undef  PL_reg_flags
 #define PL_reg_flags		pPerl->PL_reg_flags
+#undef  PL_reg_ganch
+#define PL_reg_ganch		pPerl->PL_reg_ganch
 #undef  PL_reg_re
 #define PL_reg_re		pPerl->PL_reg_re
 #undef  PL_reg_start_tmp
 #define PL_reg_start_tmp	pPerl->PL_reg_start_tmp
 #undef  PL_reg_start_tmpl
 #define PL_reg_start_tmpl	pPerl->PL_reg_start_tmpl
+#undef  PL_reg_sv
+#define PL_reg_sv		pPerl->PL_reg_sv
 #undef  PL_regbol
 #define PL_regbol		pPerl->PL_regbol
 #undef  PL_regcc

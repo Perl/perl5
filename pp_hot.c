@@ -832,7 +832,7 @@ PP(pp_match)
     register char *s;
     char *strend;
     I32 global;
-    I32 safebase;
+    I32 r_flags;
     char *truebase;
     register REGEXP *rx = pm->op_pmregexp;
     bool rxtainted;
@@ -841,7 +841,6 @@ PP(pp_match)
     I32 minmatch = 0;
     I32 oldsave = PL_savestack_ix;
     I32 update_minmatch = 1;
-    SV *screamer;
 
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
@@ -871,10 +870,6 @@ PP(pp_match)
     }
     if (rx->minlen > len) goto failure;
 
-    screamer = ( (SvSCREAM(TARG) && rx->check_substr
-		  && SvTYPE(rx->check_substr) == SVt_PVBM
-		  && SvVALID(rx->check_substr)) 
-		? TARG : Nullsv);
     truebase = t = s;
     if (global = pm->op_pmflags & PMf_GLOBAL) {
 	rx->startp[0] = 0;
@@ -887,9 +882,14 @@ PP(pp_match)
 	    }
 	}
     }
-    safebase = ((gimme != G_ARRAY && !global && rx->nparens)
+    r_flags = ((gimme != G_ARRAY && !global && rx->nparens)
 		|| SvTEMP(TARG) || PL_sawampersand)
 		? REXEC_COPY_STR : 0;
+    if (SvSCREAM(TARG) && rx->check_substr
+	&& SvTYPE(rx->check_substr) == SVt_PVBM
+	&& SvVALID(rx->check_substr)) 
+	r_flags |= REXEC_SCREAM;
+
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
 	SAVEINT(PL_multiline);
 	PL_multiline = pm->op_pmflags & PMf_MULTILINE;
@@ -905,7 +905,7 @@ play_it_again:
     }
     if (rx->check_substr) {
 	if (!(rx->reganch & ROPT_NOSCAN)) { /* Floating checkstring. */
-	    if ( screamer ) {
+	    if (r_flags & REXEC_SCREAM) {
 		I32 p = -1;
 		char *b;
 		
@@ -950,8 +950,7 @@ play_it_again:
 	    rx->float_substr = Nullsv;
 	}
     }
-    if (CALLREGEXEC(rx, s, strend, truebase, minmatch,
-		      screamer, NULL, safebase))
+    if (CALLREGEXEC(rx, s, strend, truebase, minmatch, TARG, NULL, r_flags))
     {
 	PL_curpm = pm;
 	if (pm->op_pmflags & PMf_ONCE)
@@ -1602,13 +1601,12 @@ PP(pp_subst)
     bool once;
     bool rxtainted;
     char *orig;
-    I32 safebase;
+    I32 r_flags;
     register REGEXP *rx = pm->op_pmregexp;
     STRLEN len;
     int force_on_match = 0;
     I32 oldsave = PL_savestack_ix;
     I32 update_minmatch = 1;
-    SV *screamer;
 
     /* known replacement string? */
     dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
@@ -1646,12 +1644,12 @@ PP(pp_subst)
 	pm = PL_curpm;
 	rx = pm->op_pmregexp;
     }
-    screamer = ( (SvSCREAM(TARG) && rx->check_substr
-		  && SvTYPE(rx->check_substr) == SVt_PVBM
-		  && SvVALID(rx->check_substr)) 
-		? TARG : Nullsv);
-    safebase = (rx->nparens || SvTEMP(TARG) || PL_sawampersand)
+    r_flags = (rx->nparens || SvTEMP(TARG) || PL_sawampersand)
 		? REXEC_COPY_STR : 0;
+    if (SvSCREAM(TARG) && rx->check_substr
+		  && SvTYPE(rx->check_substr) == SVt_PVBM
+		  && SvVALID(rx->check_substr))
+	r_flags |= REXEC_SCREAM;
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
 	SAVEINT(PL_multiline);
 	PL_multiline = pm->op_pmflags & PMf_MULTILINE;
@@ -1659,7 +1657,7 @@ PP(pp_subst)
     orig = m = s;
     if (rx->check_substr) {
 	if (!(rx->reganch & ROPT_NOSCAN)) { /* It floats. */
-	    if (screamer) {
+	    if (r_flags & REXEC_SCREAM) {
 		I32 p = -1;
 		char *b;
 		
@@ -1706,9 +1704,9 @@ PP(pp_subst)
     c = dstr ? SvPV(dstr, clen) : Nullch;
 
     /* can do inplace substitution? */
-    if (c && clen <= rx->minlen && (once || !(safebase & REXEC_COPY_STR))
+    if (c && clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
 	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
-	if (!CALLREGEXEC(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
+	if (!CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL, r_flags)) {
 	    SPAGAIN;
 	    PUSHs(&PL_sv_no);
 	    LEAVE_SCOPE(oldsave);
@@ -1808,7 +1806,7 @@ PP(pp_subst)
 	RETURN;
     }
 
-    if (CALLREGEXEC(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
+    if (CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL, r_flags)) {
 	if (force_on_match) {
 	    force_on_match = 0;
 	    s = SvPV_force(TARG, len);
@@ -1842,7 +1840,7 @@ PP(pp_subst)
 		sv_catpvn(dstr, c, clen);
 	    if (once)
 		break;
-	} while (CALLREGEXEC(rx, s, strend, orig, s == m, Nullsv, NULL, safebase));
+	} while (CALLREGEXEC(rx, s, strend, orig, s == m, Nullsv, NULL, r_flags));
 	sv_catpvn(dstr, s, strend - s);
 
 	(void)SvOOK_off(TARG);

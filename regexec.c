@@ -259,13 +259,13 @@ cache_re(regexp *prog)
     PL_regdata = prog->data;    
     PL_reg_re = prog;    
 }
-  
+
 /*
  - regexec_flags - match a regexp against a string
  */
 I32
 regexec_flags(register regexp *prog, char *stringarg, register char *strend,
-	      char *strbeg, I32 minend, SV *screamer, void *data, U32 flags)
+	      char *strbeg, I32 minend, SV *sv, void *data, U32 flags)
 /* strend: pointer to null at end of string */
 /* strbeg: real beginning of string */
 /* minend: end of match must be >=minend after stringarg. */
@@ -349,9 +349,9 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	start_shift = prog->check_offset_min;	/* okay to underestimate on CC */
 	/* Should be nonnegative! */
 	end_shift = minlen - start_shift - CHR_SVLEN(prog->check_substr);
-	if (screamer) {
+	if (flags & REXEC_SCREAM) {
 	    if (PL_screamfirst[BmRARE(prog->check_substr)] >= 0)
-		    s = screaminstr(screamer, prog->check_substr, 
+		    s = screaminstr(sv, prog->check_substr, 
 				    start_shift + (stringarg - strbeg),
 				    end_shift, &scream_pos, 0);
 	    else
@@ -401,14 +401,23 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		      (strend - startpos > 60 ? "..." : ""))
 	);
 
+    if (prog->reganch & ROPT_GPOS_SEEN) {
+	MAGIC *mg;
+	int pos = 0;
+
+	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) 
+	    && (mg = mg_find(sv, 'g')) && mg->mg_len >= 0)
+	    pos = mg->mg_len;
+	PL_reg_ganch = startpos + pos;
+    }
+
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
-    if (prog->reganch & ROPT_ANCH) {
+    if (prog->reganch & (ROPT_ANCH & ~ROPT_ANCH_GPOS)) {
 	if (regtry(prog, startpos))
 	    goto got_it;
-	else if (!(prog->reganch & ROPT_ANCH_GPOS) &&
-		 (PL_multiline || (prog->reganch & ROPT_IMPLICIT)
-		  || (prog->reganch & ROPT_ANCH_MBOL)))
+	else if (PL_multiline || (prog->reganch & ROPT_IMPLICIT)
+		 || (prog->reganch & ROPT_ANCH_MBOL)) /* XXXX SBOL? */
 	{
 	    if (minlen)
 		dontbother = minlen - 1;
@@ -423,6 +432,10 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		}
 	    }
 	}
+	goto phooey;
+    } else if (prog->reganch & ROPT_ANCH_GPOS) {
+	if (regtry(prog, PL_reg_ganch))
+	    goto got_it;
 	goto phooey;
     }
 
@@ -479,8 +492,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	dontbother = end_shift;
 	strend = HOPc(strend, -dontbother);
 	while ( (s <= last) &&
-		(screamer 
-		 ? (s = screaminstr(screamer, must, HOPc(s, back_min) - strbeg,
+		((flags & REXEC_SCREAM) 
+		 ? (s = screaminstr(sv, must, HOPc(s, back_min) - strbeg,
 				    end_shift, &scream_pos, 0))
 		 : (s = fbm_instr((unsigned char*)HOP(s, back_min),
 				  (unsigned char*)strend, must, 0))) ) {
@@ -912,8 +925,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    char *last;
 	    I32 oldpos = scream_pos;
 
-	    if (screamer) {
-		last = screaminstr(screamer, prog->float_substr, s - strbeg,
+	    if (flags & REXEC_SCREAM) {
+		last = screaminstr(sv, prog->float_substr, s - strbeg,
 				   end_shift, &scream_pos, 1); /* last one */
 		if (!last) {
 		    last = scream_olds; /* Only one occurence. */
@@ -1159,7 +1172,7 @@ regmatch(regnode *prog)
 		break;
 	    sayNO;
 	case GPOS:
-	    if (locinput == PL_regbol)
+	    if (locinput == PL_reg_ganch)
 		break;
 	    sayNO;
 	case EOL:

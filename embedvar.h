@@ -55,9 +55,11 @@
 #define PL_reg_call_cc		(PL_curinterp->Treg_call_cc)
 #define PL_reg_eval_set		(PL_curinterp->Treg_eval_set)
 #define PL_reg_flags		(PL_curinterp->Treg_flags)
+#define PL_reg_ganch		(PL_curinterp->Treg_ganch)
 #define PL_reg_re		(PL_curinterp->Treg_re)
 #define PL_reg_start_tmp	(PL_curinterp->Treg_start_tmp)
 #define PL_reg_start_tmpl	(PL_curinterp->Treg_start_tmpl)
+#define PL_reg_sv		(PL_curinterp->Treg_sv)
 #define PL_regbol		(PL_curinterp->Tregbol)
 #define PL_regcc		(PL_curinterp->Tregcc)
 #define PL_regcode		(PL_curinterp->Tregcode)
@@ -439,9 +441,11 @@
 #define PL_Treg_call_cc		PL_reg_call_cc
 #define PL_Treg_eval_set	PL_reg_eval_set
 #define PL_Treg_flags		PL_reg_flags
+#define PL_Treg_ganch		PL_reg_ganch
 #define PL_Treg_re		PL_reg_re
 #define PL_Treg_start_tmp	PL_reg_start_tmp
 #define PL_Treg_start_tmpl	PL_reg_start_tmpl
+#define PL_Treg_sv		PL_reg_sv
 #define PL_Tregbol		PL_regbol
 #define PL_Tregcc		PL_regcc
 #define PL_Tregcode		PL_regcode
@@ -566,9 +570,11 @@
 #define PL_reg_call_cc		(thr->Treg_call_cc)
 #define PL_reg_eval_set		(thr->Treg_eval_set)
 #define PL_reg_flags		(thr->Treg_flags)
+#define PL_reg_ganch		(thr->Treg_ganch)
 #define PL_reg_re		(thr->Treg_re)
 #define PL_reg_start_tmp	(thr->Treg_start_tmp)
 #define PL_reg_start_tmpl	(thr->Treg_start_tmpl)
+#define PL_reg_sv		(thr->Treg_sv)
 #define PL_regbol		(thr->Tregbol)
 #define PL_regcc		(thr->Tregcc)
 #define PL_regcode		(thr->Tregcode)
