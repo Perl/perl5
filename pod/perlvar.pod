@@ -1095,6 +1095,17 @@ lexical scope.  See L<bytes>.
 The name that the Perl binary itself was executed as, from C's C<argv[0]>.
 This may not be a full pathname, nor even necessarily in your path.
 
+=item ARGV
+
+The special filehandle that iterates over command-line filenames in
+C<@ARGV>. Usually written as the null filehandle in the angle operator
+C<< <> >>. Note that currently C<ARGV> only has its magical effect
+within the C<< <> >> operator; elsewhere it is just a plain filehandle
+corresponding to the last file opened by C<< <> >>. In particular,
+passing C<\*ARGV> as a parameter to a function that expects a filehandle
+may not cause your function to automatically read the contents of all the
+files in C<@ARGV>.
+
 =item $ARGV
 
 contains the name of the current file when reading from <>.

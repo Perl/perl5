@@ -330,6 +330,8 @@ has changed. Detecting a change is perhaps the difficult bit.
 
 =head2 All ARGV input should act like E<lt>E<gt>
 
+eg C<read(ARGV, ...)> doesn't currently read across multiple files.
+
 =head2 Support for rerunning debugger
 
 There should be a way of restarting the debugger on demand.
