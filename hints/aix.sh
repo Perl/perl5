@@ -145,7 +145,7 @@ case "$cc" in
      gccversion=`$cc --version | sed 's/.*(GCC) *//'`
      fi
    ;;
-*) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | grep -v '\.msg\.[A-Za-z_]*\.' | awk '{print $1,$2}'`
+*) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | grep -v '\.msg\.[A-Za-z_]*\.' | head -1 | awk '{print $1,$2}'`
    case "$ccversion" in
      '') ccversion=`lslpp -L | grep 'IBM C and C++ Compilers LUM$'`
 	 ;;
@@ -403,10 +403,10 @@ libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@
 	esac
 	case "$gccversion" in
 	'') ;;
-	*) # Remove xlc-spefific -qflags.
+	*) # Remove xlc-specific -qflags.
 	   ccflags="`echo $ccflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
 	   ldflags="`echo $ldflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
-	   # Move xld-spefific -bflags.
+	   # Move xlc-specific -bflags.
 	   ccflags="`echo $ccflags | sed -e 's@ -b@ -Wl,-b@g'`"
 	   ldflags="`echo ' '$ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
 	   lddlflags="`echo ' '$lddlflags | sed -e 's@ -b@ -Wl,-b@g'`"

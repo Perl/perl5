@@ -24,7 +24,7 @@
 d_suidsafe=${d_suidsafe:-define}
 
 # Be paranoid about nm failing to find symbols
-mistrustnm=run
+mistrustnm=${mistrustnm:-run}
 
 # Several people reported problems with perl's malloc, especially
 # when use64bitall is defined or when using gcc.
@@ -210,7 +210,7 @@ if echo "$verbose" | grep '^Reading specs from' >/dev/null 2>&1; then
 	#
 	# Using gcc.
 	#
-	ccversion='gcc'
+	cc_name='gcc'
 
 	# See if as(1) is GNU as(1).  GNU as(1) might not work for this job.
 	if echo "$verbose" | grep ' /usr/ccs/bin/as ' >/dev/null 2>&1; then
@@ -294,9 +294,12 @@ return(0);
 EOM
 	tryworkshopcc="${cc:-cc} try.c -o try"
 	if $tryworkshopcc >/dev/null 2>&1; then
-		ccversion=`./try`
-		if test "$ccversion" = "workshop" -a ! "$use64bitall_done"; then
-			loclibpth="/usr/lib /usr/ccs/lib `$getworkshoplibs` $loclibpth"
+		cc_name=`./try`
+		if test "$cc_name" = "workshop"; then
+			ccversion="`${cc:-cc} -V 2>&1|sed -n -e '1s/^cc: //p'`"
+			if test ! "$use64bitall_done"; then
+				loclibpth="/usr/lib /usr/ccs/lib `$getworkshoplibs` $loclibpth"
+			fi
 		fi
 	fi
 
@@ -567,7 +570,7 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 # after it has prompted the user for whether to use long doubles.
 case "$uselongdouble" in
 "$define"|true|[yY]*)
-	if test "$ccversion" = "workshop"; then
+	if test "$cc_name" = "workshop"; then
 		cat > try.c << 'EOM'
 #include <sunmath.h>
 int main() { (void) powl(2, 256); return(0); }
