@@ -1668,10 +1668,9 @@ S_sv_2iuv_non_preserve (pTHX_ register SV *sv, I32 numtype)
 	}
 	return IS_NUMBER_OVERFLOW_IV;
     }
-    return S_sv_2inuv_non_preserve (sv, numtype);
+    return S_sv_2inuv_non_preserve(aTHX_ sv, numtype);
 }
 #endif /* NV_PRESERVES_UV*/
-
 
 IV
 Perl_sv_2iv(pTHX_ register SV *sv)
