@@ -2051,7 +2051,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
     return PerlIO_fdopen(p[This], mode);
 }
 #else
-#if defined(atarist) || defined(DJGPP)
+#if defined(atarist)
 FILE *popen();
 PerlIO *
 Perl_my_popen(pTHX_ char *cmd, char *mode)
@@ -2063,6 +2063,20 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
     */
     return PerlIO_importFILE(popen(cmd, mode), 0);
 }
+#else
+#if defined(DJGPP)
+FILE *djgpp_popen();
+PerlIO *
+Perl_my_popen(pTHX_ char *cmd, char *mode)
+{
+    PERL_FLUSHALL_FOR_CHILD;
+    /* Call system's popen() to get a FILE *, then import it.
+       used 0 for 2nd parameter to PerlIO_importFILE;
+       apparently not used
+    */
+    return PerlIO_importFILE(djgpp_popen(cmd, mode), 0);
+}
+#endif
 #endif
 
 #endif /* !DOSISH */
@@ -2367,7 +2381,7 @@ Perl_pidgone(pTHX_ Pid_t pid, int status)
     return;
 }
 
-#if defined(atarist) || defined(OS2) || defined(DJGPP)
+#if defined(atarist) || defined(OS2)
 int pclose();
 #ifdef HAS_FORK
 int					/* Cannot prototype with I32
@@ -2381,9 +2395,20 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     /* Needs work for PerlIO ! */
     FILE *f = PerlIO_findFILE(ptr);
     I32 result = pclose(f);
-#if defined(DJGPP)
-    result = (result << 8) & 0xff00;
+    PerlIO_releaseFILE(ptr,f);
+    return result;
+}
 #endif
+
+#if defined(DJGPP)
+int djgpp_pclose();
+I32
+Perl_my_pclose(pTHX_ PerlIO *ptr)
+{
+    /* Needs work for PerlIO ! */
+    FILE *f = PerlIO_findFILE(ptr);
+    I32 result = djgpp_pclose(f);
+    result = (result << 8) & 0xff00;
     PerlIO_releaseFILE(ptr,f);
     return result;
 }

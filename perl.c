@@ -226,8 +226,8 @@ perl_construct(pTHXx)
 	 * space.  The other alternative would be to provide STDAUX and STDPRN
 	 * filehandles.
 	 */
-	(void)fclose(stdaux);
-	(void)fclose(stdprn);
+	(void)PerlIO_close(PerlIO_importFILE(stdaux, 0));
+	(void)PerlIO_close(PerlIO_importFILE(stdprn, 0));
 #endif
     }
 
