@@ -1450,13 +1450,12 @@ incl_perldb(void)
  * Note that IoTOP_NAME, IoFMT_NAME, IoBOTTOM_NAME, if set for
  * private use must be set using malloc'd pointers.
  */
-static int filter_debug = 0;
 
 SV *
 filter_add(filter_t funcp, SV *datasv)
 {
     if (!funcp){ /* temporary handy debugging hack to be deleted */
-	filter_debug = atoi((char*)datasv);
+	PL_filter_debug = atoi((char*)datasv);
 	return NULL;
     }
     if (!PL_rsfp_filters)
@@ -1466,7 +1465,7 @@ filter_add(filter_t funcp, SV *datasv)
     if (!SvUPGRADE(datasv, SVt_PVIO))
         die("Can't upgrade filter_add data to SVt_PVIO");
     IoDIRP(datasv) = (DIR*)funcp; /* stash funcp into spare field */
-    if (filter_debug) {
+    if (PL_filter_debug) {
 	STRLEN n_a;
 	warn("filter_add func %p (%s)", funcp, SvPV(datasv, n_a));
     }
@@ -1480,7 +1479,7 @@ filter_add(filter_t funcp, SV *datasv)
 void
 filter_del(filter_t funcp)
 {
-    if (filter_debug)
+    if (PL_filter_debug)
 	warn("filter_del func %p", funcp);
     if (!PL_rsfp_filters || AvFILLp(PL_rsfp_filters)<0)
 	return;
@@ -1510,7 +1509,7 @@ filter_read(int idx, SV *buf_sv, int maxlen)
     if (idx > AvFILLp(PL_rsfp_filters)){       /* Any more filters?	*/
 	/* Provide a default input filter to make life easy.	*/
 	/* Note that we append to the line. This is handy.	*/
-	if (filter_debug)
+	if (PL_filter_debug)
 	    warn("filter_read %d: from rsfp\n", idx);
 	if (maxlen) { 
  	    /* Want a block */
@@ -1539,13 +1538,13 @@ filter_read(int idx, SV *buf_sv, int maxlen)
     }
     /* Skip this filter slot if filter has been deleted	*/
     if ( (datasv = FILTER_DATA(idx)) == &PL_sv_undef){
-	if (filter_debug)
+	if (PL_filter_debug)
 	    warn("filter_read %d: skipped (filter deleted)\n", idx);
 	return FILTER_READ(idx+1, buf_sv, maxlen); /* recurse */
     }
     /* Get function pointer hidden within datasv	*/
     funcp = (filter_t)IoDIRP(datasv);
-    if (filter_debug) {
+    if (PL_filter_debug) {
 	STRLEN n_a;
 	warn("filter_read %d: via function %p (%s)\n",
 		idx, funcp, SvPV(datasv,n_a));
@@ -2134,7 +2133,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    else
 			newargv = PL_origargv;
 		    newargv[0] = ipath;
-		    execv(ipath, newargv);
+		    PerlProc_execv(ipath, newargv);
 		    croak("Can't exec %s", ipath);
 		}
 		if (d) {

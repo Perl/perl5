@@ -667,6 +667,7 @@
 #define PL_Yes			(PL_Vars.GYes)
 #define PL_amagic_generation	(PL_Vars.Gamagic_generation)
 #define PL_an			(PL_Vars.Gan)
+#define PL_bitcount		(PL_Vars.Gbitcount)
 #define PL_bufend		(PL_Vars.Gbufend)
 #define PL_bufptr		(PL_Vars.Gbufptr)
 #define PL_collation_ix		(PL_Vars.Gcollation_ix)
@@ -683,6 +684,8 @@
 #define PL_curthr		(PL_Vars.Gcurthr)
 #define PL_debug		(PL_Vars.Gdebug)
 #define PL_do_undump		(PL_Vars.Gdo_undump)
+#define PL_efloatbuf		(PL_Vars.Gefloatbuf)
+#define PL_efloatsize		(PL_Vars.Gefloatsize)
 #define PL_egid			(PL_Vars.Gegid)
 #define PL_error_count		(PL_Vars.Gerror_count)
 #define PL_euid			(PL_Vars.Geuid)
@@ -691,7 +694,9 @@
 #define PL_eval_owner		(PL_Vars.Geval_owner)
 #define PL_evalseq		(PL_Vars.Gevalseq)
 #define PL_expect		(PL_Vars.Gexpect)
+#define PL_filter_debug		(PL_Vars.Gfilter_debug)
 #define PL_gid			(PL_Vars.Ggid)
+#define PL_glob_index		(PL_Vars.Gglob_index)
 #define PL_he_root		(PL_Vars.Ghe_root)
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
 #define PL_hints		(PL_Vars.Ghints)
@@ -757,6 +762,7 @@
 #define PL_sh_path		(PL_Vars.Gsh_path)
 #define PL_sighandlerp		(PL_Vars.Gsighandlerp)
 #define PL_specialsv_list	(PL_Vars.Gspecialsv_list)
+#define PL_srand_called		(PL_Vars.Gsrand_called)
 #define PL_subline		(PL_Vars.Gsubline)
 #define PL_subname		(PL_Vars.Gsubname)
 #define PL_sv_mutex		(PL_Vars.Gsv_mutex)
@@ -781,6 +787,7 @@
 #define PL_utf8_totitle		(PL_Vars.Gutf8_totitle)
 #define PL_utf8_toupper		(PL_Vars.Gutf8_toupper)
 #define PL_utf8_upper		(PL_Vars.Gutf8_upper)
+#define PL_uudmap		(PL_Vars.Guudmap)
 #define PL_xiv_arenaroot	(PL_Vars.Gxiv_arenaroot)
 #define PL_xiv_root		(PL_Vars.Gxiv_root)
 #define PL_xnv_root		(PL_Vars.Gxnv_root)
@@ -799,6 +806,7 @@
 #define PL_GYes			PL_Yes
 #define PL_Gamagic_generation	PL_amagic_generation
 #define PL_Gan			PL_an
+#define PL_Gbitcount		PL_bitcount
 #define PL_Gbufend		PL_bufend
 #define PL_Gbufptr		PL_bufptr
 #define PL_Gcollation_ix	PL_collation_ix
@@ -815,6 +823,8 @@
 #define PL_Gcurthr		PL_curthr
 #define PL_Gdebug		PL_debug
 #define PL_Gdo_undump		PL_do_undump
+#define PL_Gefloatbuf		PL_efloatbuf
+#define PL_Gefloatsize		PL_efloatsize
 #define PL_Gegid		PL_egid
 #define PL_Gerror_count		PL_error_count
 #define PL_Geuid		PL_euid
@@ -823,7 +833,9 @@
 #define PL_Geval_owner		PL_eval_owner
 #define PL_Gevalseq		PL_evalseq
 #define PL_Gexpect		PL_expect
+#define PL_Gfilter_debug	PL_filter_debug
 #define PL_Ggid			PL_gid
+#define PL_Gglob_index		PL_glob_index
 #define PL_Ghe_root		PL_he_root
 #define PL_Ghexdigit		PL_hexdigit
 #define PL_Ghints		PL_hints
@@ -889,6 +901,7 @@
 #define PL_Gsh_path		PL_sh_path
 #define PL_Gsighandlerp		PL_sighandlerp
 #define PL_Gspecialsv_list	PL_specialsv_list
+#define PL_Gsrand_called	PL_srand_called
 #define PL_Gsubline		PL_subline
 #define PL_Gsubname		PL_subname
 #define PL_Gsv_mutex		PL_sv_mutex
@@ -913,6 +926,7 @@
 #define PL_Gutf8_totitle	PL_utf8_totitle
 #define PL_Gutf8_toupper	PL_utf8_toupper
 #define PL_Gutf8_upper		PL_utf8_upper
+#define PL_Guudmap		PL_uudmap
 #define PL_Gxiv_arenaroot	PL_xiv_arenaroot
 #define PL_Gxiv_root		PL_xiv_root
 #define PL_Gxnv_root		PL_xnv_root

@@ -4763,10 +4763,8 @@ ck_glob(OP *o)
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
 
     if (gv && GvIMPORTED_CV(gv)) {
-	static int glob_index;
-
 	append_elem(OP_GLOB, o,
-		    newSVOP(OP_CONST, 0, newSViv(glob_index++)));
+		    newSVOP(OP_CONST, 0, newSViv(PL_glob_index++)));
 	o->op_type = OP_LIST;
 	o->op_ppaddr = PL_ppaddr[OP_LIST];
 	cLISTOPo->op_first->op_type = OP_PUSHMARK;

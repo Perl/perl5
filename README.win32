@@ -107,7 +107,7 @@ make for building extensions using MakeMaker.
 
 =item Mingw32 with EGCS or GCC
 
-ECGS-1.0.2 binaries can be downloaded from:
+ECGS binaries can be downloaded from:
 
     ftp://ftp.xraylith.wisc.edu/pub/khan/gnu-win32/mingw32/
 
@@ -151,7 +151,12 @@ a perl interpreter that supports the Perl Object abstraction (courtesy
 ActiveState Tool Corp.)  PERL_OBJECT uses C++, and the binaries are
 therefore incompatible with the regular C build.  However, the
 PERL_OBJECT build does provide something called the C-API, for linking
-it with extensions that won't compile under PERL_OBJECT.  PERL_OBJECT
+it with extensions that won't compile under PERL_OBJECT. Using the C_API
+is typically requested through:
+
+    perl Makefile.PL CAPI=TRUE
+
+PERL_OBJECT requires VC++ 5.0 (Service Pack 3 recommended) or later. It
 is not yet supported under GCC or EGCS.  WARNING:  Binaries built with
 PERL_OBJECT enabled are B<not> compatible with binaries built without.
 Perl installs PERL_OBJECT binaries under a distinct architecture name,
@@ -187,10 +192,7 @@ Perl will also build without des_fcrypt(), but the crypt() builtin will
 fail at run time.
 
 You will also have to make sure CCHOME points to wherever you installed
-your compiler.  Make sure this path has no spaces in it.  If you
-insist on spaces in your path names, there is no telling what else
-will fail, but you can try putting the path in double quotes.  Some
-parts of perl try to accomodate that, but not all pieces do.
+your compiler.
 
 The default value for CCHOME in the makefiles for Visual C++
 may not be correct for some versions.  Make sure the default exists
@@ -261,7 +263,7 @@ you will need to add two components to your PATH environment variable,
 C<$INST_TOP\$VERSION\bin>, and C<$INST_TOP\$VERSION\bin\$ARCHNAME>.
 For example:
 
-    set PATH c:\perl\5.005\bin;c:\perl\5.005\bin\MSWin32-x6;%PATH%
+    set PATH c:\perl\5.005\bin;c:\perl\5.005\bin\MSWin32-x86;%PATH%
 
 
 =head2 Usage Hints
@@ -745,7 +747,9 @@ Borland support was added in 5.004_01 (Gurusamy Sarathy).
 
 GCC/mingw32 support was added in 5.005 (Nick Ing-Simmons).
 
-Last updated: 29 November 1998
+Support for PERL_OBJECT was added in 5.005 (ActiveState Tool Corp).
+
+Last updated: 18 January 1999
 
 =cut
 
