@@ -10,7 +10,7 @@
 package Pod::Parser;
 
 use vars qw($VERSION);
-$VERSION = 1.085;  ## Current version of this package
+$VERSION = 1.091;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 #############################################################################
@@ -164,7 +164,7 @@ the POD sections of the input. Input paragraphs that are not part
 of the POD-format documentation are not made available to the caller
 (not even using B<preprocess_paragraph()>). Setting this option to a
 non-empty, non-zero value will allow B<preprocess_paragraph()> to see
-non-POD sectioins of the input as well as POD sections. The B<cutting()>
+non-POD sections of the input as well as POD sections. The B<cutting()>
 method can be used to determine if the corresponding paragraph is a POD
 paragraph, or some other input paragraph.
 
@@ -587,18 +587,20 @@ The value returned should correspond to the new text to use in its
 place If the empty string is returned or an undefined value is
 returned, then the given C<$text> is ignored (not processed).
 
-This method is invoked after gathering up all thelines in a paragraph
+This method is invoked after gathering up all the lines in a paragraph
+and after determining the cutting state of the paragraph,
 but before trying to further parse or interpret them. After
 B<preprocess_paragraph()> returns, the current cutting state (which
 is returned by C<$self-E<gt>cutting()>) is examined. If it evaluates
-to false then input text (including the given C<$text>) is cut (not
+to true then input text (including the given C<$text>) is cut (not
 processed) until the next POD directive is encountered.
 
 Please note that the B<preprocess_line()> method is invoked I<before>
 the B<preprocess_paragraph()> method. After all (possibly preprocessed)
-lines in a paragraph have been assembled together and it has been
+lines in a paragraph have been assembled together and either it has been
 determined that the paragraph is part of the POD documentation from one
-of the selected sections, then B<preprocess_paragraph()> is invoked.
+of the selected sections or the C<-want_nonPODs> option is true, 
+then B<preprocess_paragraph()> is invoked.
 
 The base class implementation of this method returns the given text.
 
@@ -876,17 +878,16 @@ sub parse_paragraph {
     local $_;
 
     ## See if we want to preprocess nonPOD paragraphs as well as POD ones.
-    my $wantNonPods = $myOpts{'-want_nonPODs'} || 0;
+    my $wantNonPods = $myOpts{'-want_nonPODs'};
+
+    ## Update cutting status
+    $myData{_CUTTING} = 0 if $text =~ /^={1,2}\S/;
 
     ## Perform any desired preprocessing if we wanted it this early
     $wantNonPods  and  $text = $self->preprocess_paragraph($text, $line_num);
 
-    ## This is the end of a non-empty paragraph
     ## Ignore up until next POD directive if we are cutting
-    if ($myData{_CUTTING}) {
-       return  unless ($text =~ /^={1,2}\S/);
-       $myData{_CUTTING} = 0;
-    }
+    return if $myData{_CUTTING};
 
     ## Now we know this is block of text in a POD section!
 
@@ -1196,7 +1197,7 @@ builtin is used to issue error messages (this is the default behavior).
             my $errorsub = $parser->errorsub()
             my $errmsg = "This is an error message!\n"
             (ref $errorsub) and &{$errorsub}($errmsg)
-                or (defined $errmsg) and $parser->$errorsub($errmsg)
+                or (defined $errorsub) and $parser->$errorsub($errmsg)
                     or  warn($errmsg);
 
 Returns a method name, or else a reference to the user-supplied subroutine

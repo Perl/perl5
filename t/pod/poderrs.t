@@ -36,4 +36,81 @@ Camps is very,
 entertaining.
 And they say we'll have some fun if it stops raining!
 
+=head1 Additional tests
+
+=head2 item without over
+
+=item oops
+
+=head2 back without over
+
+=back
+
+=head2 over without back
+
+=over 4
+
+=item oops
+
+=head2 end without begin
+
+=end
+
+=head2 begin and begin
+
+=begin html
+
+=begin text
+
+=end
+
+=end
+
+=head2 Nested sequences of the same type
+
+C<code I<italic C<code again!>>>
+
+=head2 Garbled entities
+
+E<alea iacta est>
+E<C<auml>>
+E<abcI<bla>>
+
+=head2 Unresolved internal links
+
+L</"begin or begin">
+L<"end with begin">
+L</OoPs>
+
+=head2 Garbled (almost) links
+
+L<s s / s s / ss>
+L<".".":">
+L<"h"/"hh">
+L<a|b|c>
+
+=head2 Warnings
+
+L<passwd(5)>
+L<   some text|page/"section"   >
+
+=over 4
+
+=item bla
+
+=back 200
+
+=begin html
+
+What?
+
+=end xml
+
+=over 4
+
+=back
+
+see these unescaped < and > in the text?
+
 =cut
+
