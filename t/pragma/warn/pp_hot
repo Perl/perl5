@@ -151,6 +151,7 @@ open (FH, ">./xcv") ;
 my $a = <FH> ;
 no warnings 'io' ;
 $a = <FH> ;
+close (FH) ;
 unlink $file ;
 EXPECT
 Filehandle FH opened only for output at - line 5.
