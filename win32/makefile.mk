@@ -807,7 +807,7 @@ EXTENSION_C	=		\
 		$(THREAD).c	\
 		$(RE).c		\
 		$(DUMPER).c	\
-		$(SCALARR).c	\
+		$(SCALAR).c	\
 		$(PEEK).c	\
 		$(B).c		\
 		$(BYTELOADER).c	\
