@@ -673,7 +673,7 @@ leave_scope(I32 base)
 	case SAVEt_GP:				/* scalar reference */
 	    ptr = SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
-            if (SvPOK(gv) && SvLEN(gv) > 0) {
+            if (SvPVX(gv) && SvLEN(gv) > 0) {
                 Safefree(SvPVX(gv));
             }
             SvPVX(gv) = (char *)SSPOPPTR;
