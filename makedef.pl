@@ -330,6 +330,8 @@ elsif ($PLATFORM eq 'MacOS') {
 		    Perl_safexmalloc
 		    Perl_safexrealloc
 		    Perl_unlnk
+		    Perl_sys_intern_clear
+		    Perl_sys_intern_init
 		    )];
 }
 

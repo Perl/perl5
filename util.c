@@ -4004,6 +4004,9 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 }
 
 #ifdef EBCDIC
+/* in ASCII order, not that it matters */
+static const char controllablechars[] = "?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
+
 int
 Perl_ebcdic_control(pTHX_ int ch)
 {

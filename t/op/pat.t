@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..231\n";
+print "1..240\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1129,3 +1129,56 @@ print "not " unless "A \x{263a} B z C" =~ /A . B (??{ "z" }) C/;
 print "ok $test\n";
 $test++;
 
+$_ = "a\x{100}b";
+if (/(.)(\C)(\C)(.)/) {
+  print "ok 232\n";
+  if ($1 eq "a") {
+    print "ok 233\n";
+  } else {
+    print "not ok 233\n";
+  }
+  if ($2 eq "\xC4") {
+    print "ok 234\n";
+  } else {
+    print "not ok 234\n";
+  }
+  if ($3 eq "\x80") {
+    print "ok 235\n";
+  } else {
+    print "not ok 235\n";
+  }
+  if ($4 eq "b") {
+    print "ok 236\n";
+  } else {
+    print "not ok 236\n";
+  }
+} else {
+  for (232..236) {
+    print "not ok $_\n";
+  }
+}
+$_ = "\x{100}";
+if (/(\C)/g) {
+  print "ok 237\n";
+  if ($1 eq "\xC4") {
+    print "ok 238\n";
+  } else {
+    print "not ok 238\n";
+  }
+} else {
+  for (237..238) {
+    print "not ok $_\n";
+  }
+}
+if (/(\C)/g) {
+  print "ok 239\n";
+  if ($1 eq "\x80") {
+    print "ok 240\n";
+  } else {
+    print "not ok 240\n";
+  }
+} else {
+  for (239..240) {
+    print "not ok $_\n";
+  }
+}

@@ -3185,9 +3185,6 @@ Perl_yylex(pTHX)
 		if (*d == '}') {
 		    char minus = (PL_tokenbuf[0] == '-');
 		    s = force_word(s + minus, WORD, FALSE, TRUE, FALSE);
-		    if (UTF && !IN_BYTE && is_utf8_string((U8*)PL_tokenbuf, 0) &&
-			PL_nextval[PL_nexttoke-1].opval)
-		      SvUTF8_on(((SVOP*)PL_nextval[PL_nexttoke-1].opval)->op_sv);
 		    if (minus)
 			force_next('-');
 		}

@@ -1578,19 +1578,19 @@ There are several I/O operators you should know about.
 A string enclosed by backticks (grave accents) first undergoes
 double-quote interpolation.  It is then interpreted as an external
 command, and the output of that command is the value of the
-pseudo-literal, j
-string consisting of all output is returned.  In list context, a
-list of values is returned, one per line of output.  (You can set
-C<$/> to use a different line terminator.)  The command is executed
-each time the pseudo-literal is evaluated.  The status value of the
-command is returned in C<$?> (see L<perlvar> for the interpretation
-of C<$?>).  Unlike in B<csh>, no translation is done on the return
-data--newlines remain newlines.  Unlike in any of the shells, single
-quotes do not hide variable names in the command from interpretation.
-To pass a literal dollar-sign through to the shell you need to hide
-it with a backslash.  The generalized form of backticks is C<qx//>.
-(Because backticks always undergo shell expansion as well, see
-L<perlsec> for security concerns.)
+backtick string, like in a shell.  In scalar context, a single string
+consisting of all output is returned.  In list context, a list of
+values is returned, one per line of output.  (You can set C<$/> to use
+a different line terminator.)  The command is executed each time the
+pseudo-literal is evaluated.  The status value of the command is
+returned in C<$?> (see L<perlvar> for the interpretation of C<$?>).
+Unlike in B<csh>, no translation is done on the return data--newlines
+remain newlines.  Unlike in any of the shells, single quotes do not
+hide variable names in the command from interpretation.  To pass a
+literal dollar-sign through to the shell you need to hide it with a
+backslash.  The generalized form of backticks is C<qx//>.  (Because
+backticks always undergo shell expansion as well, see L<perlsec> for
+security concerns.)
 
 In scalar context, evaluating a filehandle in angle brackets yields
 the next line from that file (the newline, if any, included), or

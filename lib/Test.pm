@@ -4,7 +4,7 @@ use Test::Harness 1.1601 ();
 use Carp;
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $ntest, $TestLevel); #public-ish
 our($TESTOUT, $ONFAIL, %todo, %history, $planned, @FAILDETAIL); #private-ish
-$VERSION = '1.14';
+$VERSION = '1.15';
 require Exporter;
 @ISA=('Exporter');
 @EXPORT=qw(&plan &ok &skip);
@@ -81,8 +81,16 @@ sub ok ($;$$) {
 	$context .= ' TODO?!' if $todo;
 	print $TESTOUT "ok $ntest # ($context)\n";
     } else {
-	print $TESTOUT "not " if !$ok;
-	print $TESTOUT "ok $ntest\n";
+	# Issuing two separate print()s causes severe trouble with 
+	# Test::Harness on VMS.  The "not "'s for failed tests occur
+	# on a separate line and would not get counted as failures.
+	#print $TESTOUT "not " if !$ok;
+	#print $TESTOUT "ok $ntest\n";
+	# Replace with a single print() as a workaround:
+	my $okline = '';
+	$okline = "not " if !$ok;
+	$okline .= "ok $ntest\n";
+	print $TESTOUT $okline;
 	
 	if (!$ok) {
 	    my $detail = { 'repetition' => $repetition, 'package' => $pkg,

@@ -3946,10 +3946,20 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     }
     Newz(702,mg, 1, MAGIC);
     mg->mg_moremagic = SvMAGIC(sv);
-
     SvMAGIC(sv) = mg;
-    if (!obj || obj == sv || how == '#' || how == 'r')
+
+    /* Some magic sontains a reference loop, where the sv and object refer to
+       each other.  To prevent a avoid a reference loop that would prevent such
+       objects being freed, we look for such loops and if we find one we avoid
+       incrementing the object refcount. */
+    if (!obj || obj == sv || how == '#' || how == 'r' ||
+	(SvTYPE(obj) == SVt_PVGV &&
+	    (GvSV(obj) == sv || GvHV(obj) == (HV*)sv || GvAV(obj) == (AV*)sv ||
+	    GvCV(obj) == (CV*)sv || GvIOp(obj) == (IO*)sv ||
+	    GvFORM(obj) == (CV*)sv)))
+    {
 	mg->mg_obj = obj;
+    }
     else {
 	mg->mg_obj = SvREFCNT_inc(obj);
 	mg->mg_flags |= MGf_REFCOUNTED;
@@ -5620,8 +5630,12 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
         len = -len;
         is_utf8 = TRUE;
     }
-    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
-	src = (char*)bytes_from_utf8((U8*)src, (STRLEN*)&len, &is_utf8);
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT)) {
+	STRLEN tmplen = len;
+	/* See the note in hv.c:hv_fetch() --jhi */
+	src = (char*)bytes_from_utf8((U8*)src, &tmplen, &is_utf8);
+	len = tmplen;
+    }
     if (!hash)
 	PERL_HASH(hash, src, len);
     new_SV(sv);
@@ -6345,6 +6359,25 @@ SV*
 Perl_sv_setref_iv(pTHX_ SV *rv, const char *classname, IV iv)
 {
     sv_setiv(newSVrv(rv,classname), iv);
+    return rv;
+}
+
+/*
+=for apidoc sv_setref_uv
+
+Copies an unsigned integer into a new SV, optionally blessing the SV.  The C<rv>
+argument will be upgraded to an RV.  That RV will be modified to point to
+the new SV.  The C<classname> argument indicates the package for the
+blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+will be returned and will have a reference count of 1.
+
+=cut
+*/
+
+SV*
+Perl_sv_setref_uv(pTHX_ SV *rv, const char *classname, UV uv)
+{
+    sv_setuv(newSVrv(rv,classname), uv);
     return rv;
 }
 

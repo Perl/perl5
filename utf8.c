@@ -121,12 +121,12 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 /*
 =for apidoc A|STRLEN|is_utf8_char|U8 *s
 
-Tests if some arbitrary number of bytes begins in a valid UTF-8 character.
-The actual number of bytes in the UTF-8 character will be returned if it
-is valid, otherwise 0. 
+Tests if some arbitrary number of bytes begins in a valid UTF-8
+character.  Note that an ASCII character is a valid UTF-8 character.
+The actual number of bytes in the UTF-8 character will be returned if
+it is valid, otherwise 0.
  
-=cut
-*/
+=cut */
 STRLEN
 Perl_is_utf8_char(pTHX_ U8 *s)
 {
@@ -168,8 +168,10 @@ Perl_is_utf8_char(pTHX_ U8 *s)
 /*
 =for apidoc A|bool|is_utf8_string|U8 *s|STRLEN len
 
-Returns true if first C<len> bytes of the given string form valid a UTF8
-string, false otherwise.
+Returns true if first C<len> bytes of the given string form a valid UTF8
+string, false otherwise.  Note that 'a valid UTF8 string' does not mean
+'a string that contains UTF8' because a valid ASCII string is a valid
+UTF8 string.
 
 =cut
 */

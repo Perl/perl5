@@ -197,8 +197,13 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 	    return 0;
     }
 
-    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
-	key = (char*)bytes_from_utf8((U8*)key, (STRLEN*)&klen, &is_utf8);
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT)) {
+	STRLEN tmplen = klen;
+	/* Just casting the &klen to (STRLEN) won't work well
+	 * if STRLEN and I32 are of different widths. --jhi */
+	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
+	klen = tmplen;
+    }
 
     PERL_HASH(hash, key, klen);
 
@@ -437,8 +442,12 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 #endif
 	}
     }
-    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
-	key = (char*)bytes_from_utf8((U8*)key, (STRLEN*)&klen, &is_utf8);
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT)) {
+	STRLEN tmplen = klen;
+	/* See the note in hv_fetch(). --jhi */
+	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
+	klen = tmplen;
+    }
 
     if (!hash)
 	PERL_HASH(hash, key, klen);
@@ -656,8 +665,12 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
     if (!xhv->xhv_array)
 	return Nullsv;
 
-    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
-	key = (char*)bytes_from_utf8((U8*)key, (STRLEN*)&klen, &is_utf8);
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT)) {
+	STRLEN tmplen = klen;
+	/* See the note in hv_fetch(). --jhi */
+	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
+	klen = tmplen;
+    }
 
     PERL_HASH(hash, key, klen);
 
@@ -843,8 +856,12 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
 	return 0;
 #endif
 
-    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
-	key = (char*)bytes_from_utf8((U8*)key, (STRLEN*)&klen, &is_utf8);
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT)) {
+	STRLEN tmplen = klen;
+	/* See the note in hv_fetch(). --jhi */
+	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
+	klen = tmplen;
+    }
 
     PERL_HASH(hash, key, klen);
 
@@ -1547,8 +1564,12 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
     if (len < 0) {
       len = -len;
       is_utf8 = TRUE;
-      if (!(PL_hints & HINT_UTF8_DISTINCT))
-	  str = (char*)bytes_from_utf8((U8*)str, (STRLEN*)&len, &is_utf8);
+      if (!(PL_hints & HINT_UTF8_DISTINCT)) {
+	  STRLEN tmplen = len;
+	  /* See the note in hv_fetch(). --jhi */
+	  str = (char*)bytes_from_utf8((U8*)str, &tmplen, &is_utf8);
+	  len = tmplen;
+      }
     }
 
     /* what follows is the moral equivalent of:
@@ -1605,8 +1626,12 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
     if (len < 0) {
       len = -len;
       is_utf8 = TRUE;
-      if (!(PL_hints & HINT_UTF8_DISTINCT))
-	  str = (char*)bytes_from_utf8((U8*)str, (STRLEN*)&len, &is_utf8);
+      if (!(PL_hints & HINT_UTF8_DISTINCT)) {
+	  STRLEN tmplen = len;
+	  /* See the note in hv_fetch(). --jhi */
+	  str = (char*)bytes_from_utf8((U8*)str, &tmplen, &is_utf8);
+	  len = tmplen;
+      }
     }
 
     /* what follows is the moral equivalent of:

@@ -1035,9 +1035,10 @@ Found in file handy.h
 
 =item is_utf8_char
 
-Tests if some arbitrary number of bytes begins in a valid UTF-8 character.
-The actual number of bytes in the UTF-8 character will be returned if it
-is valid, otherwise 0. 
+Tests if some arbitrary number of bytes begins in a valid UTF-8
+character.  Note that an ASCII character is a valid UTF-8 character.
+The actual number of bytes in the UTF-8 character will be returned if
+it is valid, otherwise 0.
  
 	STRLEN	is_utf8_char(U8 *p)
 
@@ -1046,8 +1047,10 @@ Found in file utf8.c
 
 =item is_utf8_string
 
-Returns true if first C<len> bytes of the given string form valid a UTF8
-string, false otherwise.
+Returns true if first C<len> bytes of the given string form a valid UTF8
+string, false otherwise.  Note that 'a valid UTF8 string' does not mean
+'a string that contains UTF8' because a valid ASCII string is a valid
+UTF8 string.
 
 	bool	is_utf8_string(U8 *s, STRLEN len)
 
@@ -3004,6 +3007,19 @@ a reference count of 1.
 Note that C<sv_setref_pv> copies the pointer while this copies the string.
 
 	SV*	sv_setref_pvn(SV* rv, const char* classname, char* pv, STRLEN n)
+
+=for hackers
+Found in file sv.c
+
+=item sv_setref_uv
+
+Copies an unsigned integer into a new SV, optionally blessing the SV.  The C<rv>
+argument will be upgraded to an RV.  That RV will be modified to point to
+the new SV.  The C<classname> argument indicates the package for the
+blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+will be returned and will have a reference count of 1.
+
+	SV*	sv_setref_uv(SV* rv, const char* classname, UV uv)
 
 =for hackers
 Found in file sv.c

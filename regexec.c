@@ -398,7 +398,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	      DEBUG_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
 	      goto fail;
 	  }
-	  if (prog->check_offset_min == prog->check_offset_max) {
+	  if (prog->check_offset_min == prog->check_offset_max &&
+	      !(prog->reganch & ROPT_SANY_SEEN)) {
 	    /* Substring at constant offset from beg-of-str... */
 	    I32 slen;
 
@@ -474,6 +475,10 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	if (data)
 	    *data->scream_olds = s;
     }
+    else if (prog->reganch & ROPT_SANY_SEEN)
+	s = fbm_instr((U8*)(s + start_shift),
+		      (U8*)(strend - end_shift),
+		      check, PL_multiline ? FBMrf_MULTILINE : 0);
     else
 	s = fbm_instr(HOP3(s, start_shift, strend),
 		      HOP3(strend, -end_shift, strbeg),
@@ -1407,7 +1412,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 
     minlen = prog->minlen;
     if (do_utf8) {
-      if (utf8_distance((U8*)strend, (U8*)startpos) < minlen) goto phooey;
+      if (!(prog->reganch & ROPT_SANY_SEEN))
+        if (utf8_distance((U8*)strend, (U8*)startpos) < minlen) goto phooey;
     }
     else {
       if (strend - startpos < minlen) goto phooey;
@@ -2075,13 +2081,6 @@ S_regmatch(pTHX_ regnode *prog)
 		sayNO;
 	    break;
 	case SANY:
-	    if (do_utf8) {
-		locinput += PL_utf8skip[nextchr];
-		if (locinput > PL_regeol)
-		    sayNO;
-		nextchr = UCHARAT(locinput);
-		break;
-	    }
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -3563,15 +3562,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 	}
 	break;
     case SANY:
-	if (do_utf8) {
-	    loceol = PL_regeol;
-	    while (hardcount < max && scan < loceol) {
-		scan += UTF8SKIP(scan);
-		hardcount++;
-	    }
-	} else {
-	    scan = loceol;
-	}
+	scan = loceol;
 	break;
     case EXACT:		/* length of string is 1 */
 	c = (U8)*STRING(p);
