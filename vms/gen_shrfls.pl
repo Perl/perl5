@@ -257,6 +257,14 @@ if ($isvaxc) {
     print STDERR "Unrecognized enum constant \"$_\" ignored\n";
   }
 }
+elsif ($isgcc) {
+  # gcc creates this as a SHR,WRT psect in globals.c, but we
+  # don't see it in the perl.h scan, since it's only declared
+  # if DOINIT is #defined.  Bleah.  It's cheaper to just add
+  # it by hand than to add /Define=DOINIT to the preprocessing
+  # run and wade through all the extra junk.
+  $vars{'Error'}++;
+}
 
 # Eventually, we'll check against existing copies here, so we can add new
 # symbols to an existing options file in an upwardly-compatible manner.
