@@ -2286,7 +2286,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		    /* Copy string and check for compliance */
 		    from = SvPV(fromstr, len);
 		    if ((norm = is_an_int(from, len)) == NULL)
-			Perl_croak(aTHX_ "can compress only unsigned integer");
+			Perl_croak(aTHX_ "Can only compress unsigned integers");
 
 		    New('w', result, len, char);
 		    in = result + len;
@@ -2299,15 +2299,25 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		    SvREFCNT_dec(norm);	/* free norm */
                 }
 		else if (SvNOKp(fromstr)) {
-		    char   buf[sizeof(NV) * 2];	/* 8/7 <= 2 */
+		    /* 10**NV_MAX_10_EXP is the largest power of 10
+		       so 10**(NV_MAX_10_EXP+1) is definately unrepresentable
+		       given 10**(NV_MAX_10_EXP+1) == 128 ** x solve for x:
+		       x = (NV_MAX_10_EXP+1) * log (10) / log (128)
+		       And with that many bytes only Inf can overflow.
+		    */
+#ifdef NV_MAX_10_EXP
+		    char   buf[1 + (int)((NV_MAX_10_EXP + 1) * 0.47456)];
+#else
+		    char   buf[1 + (int)((308 + 1) * 0.47456)];
+#endif
 		    char  *in = buf + sizeof(buf);
 
                     anv = Perl_floor(anv);
 		    do {
 			NV next = Perl_floor(anv / 128);
-			*--in = (unsigned char)(anv - (next * 128)) | 0x80;
 			if (in <= buf)  /* this cannot happen ;-) */
 			    Perl_croak(aTHX_ "Cannot compress integer");
+			*--in = (unsigned char)(anv - (next * 128)) | 0x80;
 			anv = next;
 		    } while (anv > 0);
 		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
@@ -2322,7 +2332,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		    /* Copy string and check for compliance */
 		    from = SvPV(fromstr, len);
 		    if ((norm = is_an_int(from, len)) == NULL)
-			Perl_croak(aTHX_ "can compress only unsigned integer");
+			Perl_croak(aTHX_ "Can only compress unsigned integers");
 
 		    New('w', result, len, char);
 		    in = result + len;

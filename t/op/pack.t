@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 5819;
+plan tests => 5825;
 
 use strict;
 use warnings;
@@ -170,6 +170,44 @@ sub list_eq ($$) {
 
   eval { $x = unpack 'w', pack 'C*', 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
   like($@, qr/^Unterminated compressed integer/);
+
+  eval { $x = pack 'w', -1 };
+  like ($@, qr/^Cannot compress negative numbers/);
+
+  eval { $x = pack 'w', '1'x(1 + length ~0) . 'e0' };
+  like ($@, qr/^Can only compress unsigned integers/);
+
+ SKIP: {
+    # Is this a stupid thing to do on VMS, VOS and other unusual platforms?
+    my $inf = eval '2**10000';
+
+    skip "Couldn't generate infinity - got error '$@'"
+      unless defined $inf and $inf == $inf / 2;
+
+    eval { $x = pack 'w', $inf };
+    like ($@, qr/^Cannot compress integer/);
+  }
+
+ SKIP: {
+    # This should be about the biggest thing possible on an IEEE double
+    my $big = eval '2**1023';
+
+    skip "Couldn't generate 2**1023 - got error '$@'"
+      unless defined $big and $big != $big / 2;
+
+    eval { $x = pack 'w', $big };
+    is ($@, '', "Should be able to pack 'w', $big # 2**1023");
+
+    my $y = eval {unpack 'w', $x};
+    is ($@, '',
+	"Should be able to unpack 'w' the result of pack 'w', $big # 2**1023");
+
+    # I'm getting about 1e-16 on FreeBSD
+    my $quotient = int (100 * ($y - $big) / $big);
+    ok($quotient < 2 && $quotient > -2,
+       "Round trip pack, unpack 'w' of $big is withing 1% ($quotient%)");
+  }
+
 }
 
 #

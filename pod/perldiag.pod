@@ -466,6 +466,24 @@ checking.  Alternatively, if you are certain that you're calling the
 function correctly, you may put an ampersand before the name to avoid
 the warning.  See L<perlsub>.
 
+=item Can only compress unsigned integers
+
+(F) An argument to pack("w",...) was not an integer.  The BER compressed
+integer format can only be used with positive integers, and you attempted
+to compress something else.  See L<perlfunc/pack>.
+
+=item Cannot compress integer
+
+(F) An argument to pack("w",...) was too large to compress.  The BER
+compressed integer format can only be used with positive integers, and you
+attempted to compress Infinity or a very large number (> 1e308).
+See L<perlfunc/pack>.
+
+=item Cannot compress negative numbers
+
+(F) An argument to pack("w",...) was negative.  The BER compressed integer
+format can only be used with positive integers.  See L<perlfunc/pack>.
+
 =item / cannot take a count
 
 (F) You had an unpack template indicating a counted-length string, but
