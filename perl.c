@@ -2288,7 +2288,7 @@ Perl_moreswitches(pTHX_ char *s)
 	    PL_debug = atoi(s+1);
 	    for (s++; isDIGIT(*s); s++) ;
 	}
-#if defined(EBCDIC) || defined(VMS)
+#ifdef EBCDIC
 	if (DEBUG_p_TEST_ && ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
 		    "-Dp not implemented on this platform\n");
