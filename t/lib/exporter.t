@@ -11,7 +11,7 @@ sub ok ($;$) {
     my($test, $name) = @_;
     print "not " unless $test;
     print "ok $test_num";
-    print " - $name" if defined $name;
+    print " - $name" if (defined $name && ! $^O eq 'VMS');
     print "\n";
     $test_num++;
 }
