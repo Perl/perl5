@@ -2682,7 +2682,9 @@ PP(pp_unpack)
     }
     while (pat < patend) {
       reparse:
-	datumtype = *pat++;
+	datumtype = *pat++ & 0xFF;
+	if (isSPACE(datumtype))
+	    continue;
 	if (pat >= patend)
 	    len = 1;
 	else if (*pat == '*') {
@@ -2698,7 +2700,7 @@ PP(pp_unpack)
 	    len = (datumtype != '@');
 	switch(datumtype) {
 	default:
-	    croak("Invalid type in unpack: '%c'", datumtype);
+	    croak("Invalid type in unpack: '%c'", (int)datumtype);
 	case '%':
 	    if (len == 1 && pat[-1] != '1')
 		len = 16;
@@ -3460,7 +3462,9 @@ PP(pp_pack)
     sv_setpvn(cat, "", 0);
     while (pat < patend) {
 #define NEXTFROM (items-- > 0 ? *MARK++ : &sv_no)
-	datumtype = *pat++;
+	datumtype = *pat++ & 0xFF;
+	if (isSPACE(datumtype))
+	    continue;
 	if (*pat == '*') {
 	    len = strchr("@Xxu", datumtype) ? 0 : items;
 	    pat++;
@@ -3474,7 +3478,7 @@ PP(pp_pack)
 	    len = 1;
 	switch(datumtype) {
 	default:
-	    croak("Invalid type in pack: '%c'", datumtype);
+	    croak("Invalid type in pack: '%c'", (int)datumtype);
 	case '%':
 	    DIE("%% may only be used in unpack");
 	case '@':
