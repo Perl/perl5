@@ -91,7 +91,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.27";
+my $Version = "1.28";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -123,6 +123,7 @@ my $Version = "1.27";
 # Changed in 1.25 Warn on failure to open save file. HVDS 98-07-12
 # Changed in 1.26 Don't require -t STDIN for -ok. HVDS 98-07-15
 # Changed in 1.27 Added Mac OS and File::Spec support CNANDOR 99-07-27
+# Changed in 1.28 Additional questions for Perlbugtron RFOLEY 20.03.2000
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -130,7 +131,7 @@ my $Version = "1.27";
 #       - Test -b option
 
 my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
-    $subject, $from, $verbose, $ed, $outfile, $Is_MacOS,
+    $subject, $from, $verbose, $ed, $outfile, $Is_MacOS, $category, $severity, 
     $fh, $me, $Is_MSWin32, $Is_VMS, $msg, $body, $andcc, %REP, $ok);
 
 my $perl_version = $^V ? sprintf("v%vd", $^V) : $];
@@ -156,6 +157,33 @@ NowWhat();
 Send();
 
 exit;
+
+sub ask_for_alternatives {
+    my $name = shift;
+    my $default = shift;
+    my @alts = @_;
+    my $alt = "";
+    paraprint <<EOF;
+Please pick a \u$name from the following:
+
+    @alts
+
+EOF
+    my $err = 0;
+    my $joined_alts = join('|', @alts);
+    do {
+	if ($err++ > 5) {
+	    die "Invalid $name: aborting.\n";
+	}
+	print "Please enter a \u$name [$default]: ";
+	$alt = <>;
+	chomp $alt;
+	if ($alt =~ /^\s*$/) {
+	    $alt = $default;
+	}
+    } while ($alt !~ /^($joined_alts)$/i);
+    lc $alt;
+}
 
 sub Init {
     # -------- Setup --------
@@ -437,6 +465,16 @@ EOF
 	}
     }
 
+    # Prompt for category of bug
+    $category ||= ask_for_alternatives("category", "core",
+				     qw(core docs install
+					library utilities));
+
+    # Prompt for severity of bug
+    $severity ||= ask_for_alternatives("severity", "low",
+				       qw(critical high medium
+					  low wishlist none));
+
     # Generate scratch file to edit report in
     $filename = filename();
 
@@ -516,8 +554,14 @@ EOF
 sub Dump {
     local(*OUT) = @_;
 
-    print REP "\n---\n";
-    print REP "This perlbug was built using Perl $config_tag1\n",
+    print OUT <<EFF;
+---
+Flags:
+    category=$category
+    severity=$severity
+---
+EFF
+    print OUT "This perlbug was built using Perl $config_tag1\n",
 	    "It is being executed now by  Perl $config_tag2.\n\n"
 	if $config_tag2 ne $config_tag1;
 
@@ -1130,8 +1174,9 @@ by Gurusamy Sarathy (E<lt>gsar@activestate.comE<gt>), Tom Christiansen
 Charles F. Randall (E<lt>cfr@pobox.comE<gt>), Mike Guy
 (E<lt>mjtg@cam.a.ukE<gt>), Dominic Dunlop (E<lt>domo@computer.orgE<gt>),
 Hugo van der Sanden (E<lt>hv@crypt0.demon.co.ukE<gt>),
-Jarkko Hietaniemi (E<lt>jhi@iki.fiE<gt>), hris Nandor
-(E<lt>pudge@pobox.comE<gt>), and Jon Orwant (E<lt>orwant@media.mit.eduE<gt>).
+Jarkko Hietaniemi (E<lt>jhi@iki.fiE<gt>), Chris Nandor
+(E<lt>pudge@pobox.comE<gt>), Jon Orwant (E<lt>orwant@media.mit.eduE<gt>,
+and Richard Foley (E<lt>richard@rfi.netE<gt>).
 
 =head1 SEE ALSO
 
