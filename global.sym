@@ -68,6 +68,7 @@ Perl_sv_setpvf_nocontext
 Perl_sv_catpvf_mg_nocontext
 Perl_sv_setpvf_mg_nocontext
 Perl_fprintf_nocontext
+Perl_printf_nocontext
 Perl_cv_const_sv
 Perl_cv_undef
 Perl_cx_dump

@@ -228,6 +228,10 @@
 #define Perl_fprintf_nocontext	pPerl->Perl_fprintf_nocontext
 #undef  fprintf_nocontext
 #define fprintf_nocontext	Perl_fprintf_nocontext
+#undef  Perl_printf_nocontext
+#define Perl_printf_nocontext	pPerl->Perl_printf_nocontext
+#undef  printf_nocontext
+#define printf_nocontext	Perl_printf_nocontext
 #endif
 #undef  Perl_cv_const_sv
 #define Perl_cv_const_sv	pPerl->Perl_cv_const_sv
