@@ -1821,7 +1821,7 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 	break;
     case '\017':   /* $^O & $^OPEN */
 	if (len == 1
-	    || (len == 4 && strEQ(name, "\027PEN")))
+	    || (len == 4 && strEQ(name, "\017PEN")))
 	{
 	    goto yes;
 	}
