@@ -312,7 +312,7 @@ S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
         if (flags & HVhek_FREEKEY)
             Safefree(key);
 	/* if we find a placeholder, we pretend we haven't found anything */
-	if (HeVAL(entry) == &PL_sv_undef)
+	if (HeVAL(entry) == &PL_sv_placeholder)
 	    break;
 	return &HeVAL(entry);
 
@@ -482,7 +482,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	if (key != keysave)
 	    Safefree(key);
 	/* if we find a placeholder, we pretend we haven't found anything */
-	if (HeVAL(entry) == &PL_sv_undef)
+	if (HeVAL(entry) == &PL_sv_placeholder)
 	    break;
 	return entry;
     }
@@ -645,7 +645,7 @@ Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
 	    continue;
 	if ((HeKFLAGS(entry) ^ flags) & HVhek_UTF8)
 	    continue;
-	if (HeVAL(entry) == &PL_sv_undef)
+	if (HeVAL(entry) == &PL_sv_placeholder)
 	    xhv->xhv_placeholders--; /* yes, can store into placeholder slot */
 	else
 	    SvREFCNT_dec(HeVAL(entry));
@@ -653,7 +653,7 @@ Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
             /* We have been requested to insert a placeholder. Currently
                only Storable is allowed to do this.  */
             xhv->xhv_placeholders++;
-            HeVAL(entry) = &PL_sv_undef;
+            HeVAL(entry) = &PL_sv_placeholder;
         } else
             HeVAL(entry) = val;
 
@@ -696,7 +696,7 @@ Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
         /* We have been requested to insert a placeholder. Currently
            only Storable is allowed to do this.  */
         xhv->xhv_placeholders++;
-        HeVAL(entry) = &PL_sv_undef;
+        HeVAL(entry) = &PL_sv_placeholder;
     } else
         HeVAL(entry) = val;
     HeNEXT(entry) = *oentry;
@@ -820,7 +820,7 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
 	    continue;
 	if ((HeKFLAGS(entry) ^ flags) & HVhek_UTF8)
 	    continue;
-	if (HeVAL(entry) == &PL_sv_undef)
+	if (HeVAL(entry) == &PL_sv_placeholder)
 	    xhv->xhv_placeholders--; /* yes, can store into placeholder slot */
 	else
 	    SvREFCNT_dec(HeVAL(entry));
@@ -964,7 +964,7 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	if (k_flags & HVhek_FREEKEY)
 	    Safefree(key);
 	/* if placeholder is here, it's already been deleted.... */
-	if (HeVAL(entry) == &PL_sv_undef)
+	if (HeVAL(entry) == &PL_sv_placeholder)
 	{
 	    if (SvREADONLY(hv))
 		return Nullsv;  /* if still SvREADONLY, leave it deleted. */
@@ -994,7 +994,7 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	    sv = Nullsv;
 	else {
 	    sv = sv_2mortal(HeVAL(entry));
-	    HeVAL(entry) = &PL_sv_undef;
+	    HeVAL(entry) = &PL_sv_placeholder;
 	}
 
 	/*
@@ -1004,7 +1004,7 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	 * an error.
 	 */
 	if (SvREADONLY(hv)) {
-	    HeVAL(entry) = &PL_sv_undef;
+	    HeVAL(entry) = &PL_sv_placeholder;
 	    /* We'll be saving this slot, so the number of allocated keys
 	     * doesn't go down, but the number placeholders goes up */
 	    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
@@ -1123,7 +1123,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
             Safefree(key);
 
 	/* if placeholder is here, it's already been deleted.... */
-	if (HeVAL(entry) == &PL_sv_undef)
+	if (HeVAL(entry) == &PL_sv_placeholder)
 	{
 	    if (SvREADONLY(hv))
 		return Nullsv; /* if still SvREADONLY, leave it deleted. */
@@ -1152,7 +1152,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	    sv = Nullsv;
 	else {
 	    sv = sv_2mortal(HeVAL(entry));
-	    HeVAL(entry) = &PL_sv_undef;
+	    HeVAL(entry) = &PL_sv_placeholder;
 	}
 
 	/*
@@ -1162,7 +1162,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	 * an error.
 	 */
 	if (SvREADONLY(hv)) {
-	    HeVAL(entry) = &PL_sv_undef;
+	    HeVAL(entry) = &PL_sv_placeholder;
 	    /* We'll be saving this slot, so the number of allocated keys
 	     * doesn't go down, but the number placeholders goes up */
 	    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
@@ -1271,7 +1271,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
 	if (k_flags & HVhek_FREEKEY)
 	    Safefree(key);
 	/* If we find the key, but the value is a placeholder, return false. */
-	if (HeVAL(entry) == &PL_sv_undef)
+	if (HeVAL(entry) == &PL_sv_placeholder)
 	    return FALSE;
 
 	return TRUE;
@@ -1376,7 +1376,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	if (k_flags & HVhek_FREEKEY)
 	    Safefree(key);
 	/* If we find the key, but the value is a placeholder, return false. */
-	if (HeVAL(entry) == &PL_sv_undef)
+	if (HeVAL(entry) == &PL_sv_placeholder)
 	    return FALSE;
 	return TRUE;
     }
@@ -1713,7 +1713,7 @@ Perl_hv_clear(pTHX_ HV *hv)
 	    entry = ((HE**)xhv->xhv_array)[i];
 	    for (; entry; entry = HeNEXT(entry)) {
 		/* not already placeholder */
-		if (HeVAL(entry) != &PL_sv_undef) {
+		if (HeVAL(entry) != &PL_sv_placeholder) {
 		    if (HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
 			SV* keysv = hv_iterkeysv(entry);
 			Perl_croak(aTHX_
@@ -1721,7 +1721,7 @@ Perl_hv_clear(pTHX_ HV *hv)
 				   keysv);
 		    }
 		    SvREFCNT_dec(HeVAL(entry));
-		    HeVAL(entry) = &PL_sv_undef;
+		    HeVAL(entry) = &PL_sv_placeholder;
 		    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
 		}
 	    }
@@ -1875,9 +1875,8 @@ Returns entries from a hash iterator.  See C<hv_iterinit> and C<hv_iternext>.
 The C<flags> value will normally be zero; if HV_ITERNEXT_WANTPLACEHOLDERS is
 set the placeholders keys (for restricted hashes) will be returned in addition
 to normal keys. By default placeholders are automatically skipped over.
-Currently a placeholder is implemented with a value that is literally
-<&Perl_sv_undef> (a regular C<undef> value is a normal read-write SV for which
-C<!SvOK> is false). Note that the implementation of placeholders and
+Currently a placeholder is implemented with a value that is
+C<&Perl_sv_placeholder>. Note that the implementation of placeholders and
 restricted hashes may change, and the implementation currently is
 insufficiently abstracted for any change to be tidy.
 
@@ -1946,7 +1945,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
              * Skip past any placeholders -- don't want to include them in
              * any iteration.
              */
-            while (entry && HeVAL(entry) == &PL_sv_undef) {
+            while (entry && HeVAL(entry) == &PL_sv_placeholder) {
                 entry = HeNEXT(entry);
             }
 	}
@@ -1966,7 +1965,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
         if (!(flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
             /* If we have an entry, but it's a placeholder, don't count it.
 	       Try the next.  */
-	    while (entry && HeVAL(entry) == &PL_sv_undef)
+	    while (entry && HeVAL(entry) == &PL_sv_placeholder)
 		entry = HeNEXT(entry);
 	}
 	/* Will loop again if this linked list starts NULL

@@ -531,6 +531,9 @@ PERLVAR(IDBassertion,   SV *)
 
 PERLVARI(Icv_has_eval, I32, 0) /* PL_compcv includes an entereval or similar */
 
+/* Restricted hashes placeholder value */
+PERLVAR(Isv_placeholder, SV)
+
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * (Don't forget to add your variable also to perl_clone()!)

@@ -181,6 +181,9 @@ perl_construct(pTHXx)
 	    SvNV(&PL_sv_yes);
 	    SvREADONLY_on(&PL_sv_yes);
 	    SvREFCNT(&PL_sv_yes) = (~(U32)0)/2;
+
+	    SvREADONLY_on(&PL_sv_placeholder);
+	    SvREFCNT(&PL_sv_placeholder) = (~(U32)0)/2;
 	}
 
 	PL_sighandlerp = Perl_sighandler;
@@ -782,6 +785,9 @@ perl_destruct(pTHXx)
      */
     SvREFCNT(&PL_sv_undef) = 0;
     SvREADONLY_off(&PL_sv_undef);
+
+    SvREFCNT(&PL_sv_placeholder) = 0;
+    SvREADONLY_off(&PL_sv_placeholder);
 
     Safefree(PL_origfilename);
     Safefree(PL_reg_start_tmp);

@@ -160,7 +160,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 	sv_catpv(t, "WILD");
 	goto finish;
     }
-    else if (sv == &PL_sv_undef || sv == &PL_sv_no || sv == &PL_sv_yes) {
+    else if (sv == &PL_sv_undef || sv == &PL_sv_no || sv == &PL_sv_yes || sv == &PL_sv_placeholder) {
 	if (sv == &PL_sv_undef) {
 	    sv_catpv(t, "SV_UNDEF");
 	    if (!(SvFLAGS(sv) & (SVf_OK|SVf_OOK|SVs_OBJECT|
@@ -178,7 +178,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 		SvNVX(sv) == 0.0)
 		goto finish;
 	}
-	else {
+	else if (sv == &PL_sv_yes) {
 	    sv_catpv(t, "SV_YES");
 	    if (!(SvFLAGS(sv) & (SVf_ROK|SVf_OOK|SVs_OBJECT|
 				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
@@ -187,6 +187,13 @@ Perl_sv_peek(pTHX_ SV *sv)
 		SvCUR(sv) == 1 &&
 		SvPVX(sv) && *SvPVX(sv) == '1' &&
 		SvNVX(sv) == 1.0)
+		goto finish;
+	}
+	else {
+	    sv_catpv(t, "SV_PLACEHOLDER");
+	    if (!(SvFLAGS(sv) & (SVf_OK|SVf_OOK|SVs_OBJECT|
+				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
+		SvREADONLY(sv))
 		goto finish;
 	}
 	sv_catpv(t, ":");

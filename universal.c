@@ -755,7 +755,7 @@ XS(XS_Internals_hv_clear_placehold)
             && items) {
             SV *val = hv_iterval(hv, entry);
 
-            if (val == &PL_sv_undef) {
+            if (val == &PL_sv_placeholder) {
 
                 /* It seems that I have to go back in the front of the hash
                    API to delete a hash, even though I have a HE structure
