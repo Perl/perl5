@@ -20,7 +20,7 @@ C<"#"> character until the end of the line is a comment, and is
 ignored.  If you attempt to use C</* */> C-style comments, it will be
 interpreted either as division or pattern matching, depending on the
 context, and C++ C<//> comments just look like a null regular
-expression, so don't do that.
+expression or defined-or operator, so don't do that.
 
 =head2 Declarations
 
