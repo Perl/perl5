@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: encoding.xs,v 0.3 2002/04/21 22:14:41 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -50,12 +50,6 @@ typedef struct {
 
 #define NEEDS_LINES	1
 
-#if 0
-#define OUR_ENCODE_FB "Encode::FB_PERLQQ"
-#else
-#define OUR_ENCODE_FB "Encode::FB_QUIET"
-#endif
-
 SV *
 PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
 {
@@ -82,9 +76,16 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
     dSP;
-    IV code;
+    IV  code = PerlIOBuf_pushed(aTHX_ f, mode, Nullsv);
     SV *result = Nullsv;
-    code = PerlIOBuf_pushed(aTHX_ f, mode, Nullsv);
+
+    /*
+     * we now "use Encode qw(:fallbacks)" here instead of
+     * PerlIO/encoding.pm.  This avoids SEGV when ":encoding()"
+     * is invoked without prior "use Encode". -- dankogai
+     */
+    require_pv("Encode.pm");
+
     ENTER;
     SAVETMPS;
 
@@ -103,7 +104,7 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
     if (!SvROK(result) || !SvOBJECT(SvRV(result))) {
 	e->enc = Nullsv;
 	Perl_warner(aTHX_ packWARN(WARN_IO), "Cannot find encoding \"%" SVf "\"",
-		    arg);
+		    arg); 
 	errno = EINVAL;
 	code = -1;
     }
@@ -141,8 +142,21 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
 	PerlIOBase(f)->flags |= PERLIO_F_UTF8;
     }
 
-    e->chk = newSVsv(get_sv("PerlIO::encoding::check",0));
-
+    if (SvIV(result = get_sv("PerlIO::encoding::check", 1)) == 0){
+	PUSHMARK(sp);
+	PUTBACK;
+	if (call_pv("Encode::FB_QUIET", G_SCALAR|G_NOARGS) != 1) {
+	    /* should never happen */
+	    Perl_die(aTHX_ "Encode::FB_QUIET did not return a value");
+	    return -1;
+	}
+	SPAGAIN;
+	e->chk = newSVsv(POPs);
+	PUTBACK;
+	sv_setsv(result, e->chk);
+    }else{
+	e->chk = newSVsv(result);
+    }
     FREETMPS;
     LEAVE;
     return code;
@@ -216,6 +230,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
     IV code = 0;
     PerlIO *n;
     SSize_t avail;
+
     if (PerlIO_flush(f) != 0)
 	return -1;
     n  = PerlIONext(f);
@@ -292,8 +307,8 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 		    PerlIOEncode_get_base(aTHX_ f);
 		}
 		else {
-		    use = e->base.bufsiz - SvCUR(e->dataSV);
-		}
+	       use = e->base.bufsiz - SvCUR(e->dataSV);
+	    }
 	    }
 	    sv_catpvn(e->dataSV,(char*)ptr,use);
 	}
@@ -302,15 +317,15 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	    if (SvLEN(e->dataSV) && SvPVX(e->dataSV)) {
 		Safefree(SvPVX(e->dataSV));
 	    }
-	    if (use > (SSize_t)e->base.bufsiz) {
+	    if (use > e->base.bufsiz) {
 		if (e->flags & NEEDS_LINES) {
 		    /* Have to grow buffer */
 		    e->base.bufsiz = use;
 		    PerlIOEncode_get_base(aTHX_ f);
 		}
 		else {
-		    use = e->base.bufsiz;
-		}
+	       use = e->base.bufsiz;
+	    }
 	    }
 	    SvPVX(e->dataSV) = (char *) ptr;
 	    SvLEN(e->dataSV) = 0;  /* Hands off sv.c - it isn't yours */
@@ -386,6 +401,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
     IV code = 0;
+
     if (e->bufsv && (e->base.ptr > e->base.buf)) {
 	dSP;
 	SV *str;
@@ -480,6 +496,7 @@ PerlIOEncode_close(pTHX_ PerlIO * f)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
     IV code = PerlIOBase_close(aTHX_ f);
+
     if (e->bufsv) {
 	if (e->base.buf && e->base.ptr > e->base.buf) {
 	    Perl_croak(aTHX_ "Close with partial character");
@@ -590,19 +607,6 @@ PROTOTYPES: ENABLE
 
 BOOT:
 {
-    SV *sv = get_sv("PerlIO::encoding::check", GV_ADD|GV_ADDMULTI);
-    sv_setiv(sv,0);
-    PUSHMARK(sp);
-    PUTBACK;
-    if (call_pv(OUR_ENCODE_FB, G_SCALAR) != 1) {
-	Perl_warner(aTHX_ packWARN(WARN_IO),
-		    "Call to %s failed!",OUR_ENCODE_FB);
-    }
-    else {
-	SPAGAIN;
-	sv_setsv(sv,POPs);
-	PUTBACK;
-    }
 #ifdef PERLIO_LAYERS
  PerlIO_define_layer(aTHX_ &PerlIO_encode);
 #endif
