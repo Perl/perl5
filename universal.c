@@ -232,7 +232,8 @@ XS(XS_UNIVERSAL_isa)
     if (SvGMAGICAL(sv))
 	mg_get(sv);
 
-    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))))
+    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))
+		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
 	XSRETURN_UNDEF;
 
     name = (char *)SvPV(ST(1),n_a);
@@ -258,7 +259,8 @@ XS(XS_UNIVERSAL_can)
     if (SvGMAGICAL(sv))
 	mg_get(sv);
 
-    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))))
+    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))
+		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
 	XSRETURN_UNDEF;
 
     name = (char *)SvPV(ST(1),n_a);
