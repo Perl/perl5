@@ -250,6 +250,13 @@ sub unwrap {
     }
 }
 
+sub matchlex {
+  (my $var = $_[0]) =~ s/.//;
+  $var eq $_[1] or 
+    ($_[1] =~ /^([!~])(.)([\x00-\xff]*)/) and 
+      ($1 eq '!') ^ (eval { $var =~ /$2$3/ });
+}
+
 sub matchvar {
   $_[0] eq $_[1] or 
     ($_[1] =~ /^([!~])(.)([\x00-\xff]*)/) and 
@@ -324,6 +331,36 @@ sub dumpglob {
 	dumpsub($off, $key);
       }
     }
+}
+
+sub dumplex {
+  return if $DB::signal;
+  my ($key, $val, $m, @vars) = @_;
+  return if @vars && !grep( matchlex($key, $_), @vars );
+  local %address;
+  my $off = 0;  # It reads better this way
+  my $fileno;
+  if (UNIVERSAL::isa($val,'ARRAY')) {
+    print( (' ' x $off) . "$key = (\n" );
+    unwrap($val,3+$off,$m) ;
+    print( (' ' x $off) .  ")\n" );
+  }
+  elsif (UNIVERSAL::isa($val,'HASH')) {
+    print( (' ' x $off) . "$key = (\n" );
+    unwrap($val,3+$off,$m) ;
+    print( (' ' x $off) .  ")\n" );
+  }
+  elsif (UNIVERSAL::isa($val,'IO')) {
+    print( (' ' x $off) .  "FileHandle($key) => fileno($fileno)\n" );
+  }
+  #  No lexical subroutines yet...
+  #  elsif (UNIVERSAL::isa($val,'CODE')) {
+  #    dumpsub($off, $$val);
+  #  }
+  else {
+    print( (' ' x $off) . &unctrl($key), " = " );
+    DumpElem $$val, 3+$off, $m;
+  }
 }
 
 sub CvGV_name_or_bust {

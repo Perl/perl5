@@ -2809,6 +2809,7 @@ I<Data Examination:>     B<expr>     Execute perl code, also see: B<s>,B<n>,B<t>
   B<S> [[B<!>]I<pat>]     List subroutine names [not] matching pattern
   B<V> [I<Pk> [I<Vars>]]  List Variables in Package.  Vars can be ~pattern or !pattern.
   B<X> [I<Vars>]       Same as \"B<V> I<current_package> [I<Vars>]\".
+  B<y> [I<n> [I<Vars>]]   List lexicals in higher scope <n>.  Vars same as B<V>.
 For more help, type B<h> I<cmd_letter>, or run B<$doccmd perldebug> for all docs.
 END_SUM
 				# ')}}; # Fix balance of vi % matching
@@ -2976,6 +2977,7 @@ I<Data Examination:>     B<expr>     Execute perl code, also see: B<s>,B<n>,B<t>
   B<S> [[B<!>]I<pat>]     List subroutine names [not] matching pattern
   B<V> [I<Pk> [I<Vars>]]  List Variables in Package.  Vars can be ~pattern or !pattern.
   B<X> [I<Vars>]       Same as \"B<V> I<current_package> [I<Vars>]\".
+  B<y> [I<n> [I<Vars>]]   List lexicals in higher scope <n>.  Vars same as B<V>.
 For more help, type B<h> I<cmd_letter>, or run B<$doccmd perldebug> for all docs.
 END_SUM
 				# ')}}; # Fix balance of vi % matching
