@@ -145,30 +145,44 @@ SKIP: {
     unlink "linktest";
 }
 
-chdir '../ext/Cwd/t' if $ENV{PERL_CORE};
+if ($ENV{PERL_CORE}) {
+    chdir '../ext/Cwd/t';
+    unshift @INC, '../../../lib';
+}
 
 # Make sure we can run abs_path() on files, not just directories
 my $path = 'cwd.t';
-dir_ends_with(Cwd::abs_path($path), 'cwd.t', 'abs_path() can be invoked on a file');
-dir_ends_with(Cwd::fast_abs_path($path), 'cwd.t', 'fast_abs_path() can be invoked on a file');
+path_ends_with(Cwd::abs_path($path), 'cwd.t', 'abs_path() can be invoked on a file');
+path_ends_with(Cwd::fast_abs_path($path), 'cwd.t', 'fast_abs_path() can be invoked on a file');
 
 $path = File::Spec->catfile(File::Spec->updir, 't', $path);
-dir_ends_with(Cwd::abs_path($path), 'cwd.t', 'abs_path() can be invoked on a file');
-dir_ends_with(Cwd::fast_abs_path($path), 'cwd.t', 'fast_abs_path() can be invoked on a file');
+path_ends_with(Cwd::abs_path($path), 'cwd.t', 'abs_path() can be invoked on a file');
+path_ends_with(Cwd::fast_abs_path($path), 'cwd.t', 'fast_abs_path() can be invoked on a file');
 
 
 #############################################
-# These two routines give us sort of a poor-man's cross-platform
-# directory comparison routine.
+# These routines give us sort of a poor-man's cross-platform
+# directory or path comparison capability.
 
-sub bracketed_form {
+sub bracketed_form_dir {
   return join '', map "[$_]", 
     grep length, File::Spec->splitdir(File::Spec->canonpath( shift() ));
 }
 
 sub dir_ends_with {
   my ($dir, $expect) = (shift, shift);
-  my $bracketed_expect = quotemeta bracketed_form($expect);
-  like( bracketed_form($dir), qr|$bracketed_expect$|i, (@_ ? shift : ()) );
+  my $bracketed_expect = quotemeta bracketed_form_dir($expect);
+  like( bracketed_form_dir($dir), qr|$bracketed_expect$|i, (@_ ? shift : ()) );
+}
+
+sub bracketed_form_path {
+  return join '', map "[$_]", 
+    grep length, File::Spec->splitpath(File::Spec->canonpath( shift() ));
+}
+
+sub path_ends_with {
+  my ($dir, $expect) = (shift, shift);
+  my $bracketed_expect = quotemeta bracketed_form_path($expect);
+  like( bracketed_form_path($dir), qr|$bracketed_expect$|i, (@_ ? shift : ()) );
 }
 
