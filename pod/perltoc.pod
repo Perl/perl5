@@ -4639,6 +4639,15 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Performance Enhancements
 
+sort() has been changed to use mergesort internally as opposed to the
+earlier quicksort.  For very small lists this may result in slightly slower
+sorting times, but in general the speedup should be at least 20%.
+Additional bonuses are that the worst case behaviour of sort() is now
+better (in computer science terms it now runs in time O(N log N), as
+opposed to quicksorts Theta(N**2) worst-case run time behaviour), and that
+sort() is now stable (meaning that elements with identical keys will stay
+ordered as they were before the sort)
+
 =item Installation and Configuration Improvements
 
 =over
@@ -6195,6 +6204,18 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 
 =back
 
+=head2 attrs - set/get attributes of a subroutine (deprecated)
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+method, locked
+
+=back
+
 =head2 autouse - postpone load of modules until a function is used
 
 =over
@@ -6409,6 +6430,18 @@ operations
 =item DESCRIPTION
 
 =item UNIMPLEMENTED FUNCTIONALITY
+
+=item SEE ALSO
+
+=back
+
+=head2 ops - Perl pragma to restrict unsafe operations when compiling
+
+=over
+
+=item SYNOPSIS	
+
+=item DESCRIPTION
 
 =item SEE ALSO
 
@@ -8457,6 +8490,22 @@ arrays
 
 =back
 
+=head2 Errno - System errno constants
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEATS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
 =head2 Exporter - Implements default import method for modules
 
 =over
@@ -10334,6 +10383,28 @@ hostpath(), peerpath()
 
 =back
 
+=head2 IPC::Msg - SysV Msg IPC object class
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+new ( KEY , FLAGS ), id, rcv ( BUF, LEN [, TYPE [, FLAGS ]] ), remove, set
+( STAT ), set ( NAME => VALUE [, NAME => VALUE ...] ), snd ( TYPE, MSG [,
+FLAGS ] ), stat
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
 =head2 IPC::Open2, open2 - open a process for both reading and writing
 
 =over
@@ -10358,6 +10429,29 @@ handling
 =item DESCRIPTION
 
 =item WARNING
+
+=back
+
+=head2 IPC::Semaphore - SysV Semaphore IPC object class
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+new ( KEY , NSEMS , FLAGS ), getall, getncnt ( SEM ), getpid ( SEM ),
+getval ( SEM ), getzcnt ( SEM ), id, op ( OPLIST ), remove, set ( STAT ),
+set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
+, VALUE ), stat
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
 
 =back
 
@@ -12012,6 +12106,39 @@ C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
 
 =back
 
+=head2 Safe - Compile and execute code in restricted compartments
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+a new namespace, an operator mask
+
+=item WARNING
+
+=over
+
+=item RECENT CHANGES
+
+=item Methods in class Safe
+
+permit (OP, ...), permit_only (OP, ...), deny (OP, ...), deny_only (OP,
+...), trap (OP, ...), untrap (OP, ...), share (NAME, ...), share_from
+(PACKAGE, ARRAYREF), varglob (VARNAME), reval (STRING), rdo (FILENAME),
+root (NAMESPACE), mask (MASK)
+
+=item Some Safety Issues
+
+Memory, CPU, Snooping, Signals, State Changes
+
+=item AUTHOR
+
+=back
+
+=back
+
 =head2 Search::Dict, look - search for key in dictionary file
 
 =over
@@ -12164,6 +12291,27 @@ C<Storable::is_retrieving>
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item AUTHOR
+
+=back
+
+=head2 Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog - Perl
+interface to the UNIX syslog(3) calls
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+openlog $ident, $logopt, $facility, syslog $priority, $format, @args,
+setlogmask $mask_priority, setlogsock $sock_type (added in 5.004_02),
+closelog
+
+=item EXAMPLES
+
+=item SEE ALSO
 
 =item AUTHOR
 
