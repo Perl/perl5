@@ -333,6 +333,9 @@ EOM
 esac
 EOCBU
 
+# This script UU/useuselargefiles.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use large files.
+cat > UU/useuselargefiles.cbu <<'EOCBU'
 case "$uselargefiles" in
 ''|$define|true|[yY]*)
     ccflags="$ccflags `getconf LFS_CFLAGS 2>/dev/null`"
@@ -340,6 +343,7 @@ case "$uselargefiles" in
     libswanted="$libswanted `getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
     ;;
 esac
+EOCBU
 
 # This script UU/use64bitint.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
