@@ -943,10 +943,15 @@ PP(pp_flop)
 	if (SvGMAGICAL(right))
 	    mg_get(right);
 
+	/* This code tries to decide if "$left .. $right" should use the
+	   magical string increment, or if the range is numeric (we make
+	   an exception for .."0" [#18165]). AMS 20021031. */
+
 	if (SvNIOKp(left) || !SvPOKp(left) ||
 	    SvNIOKp(right) || !SvPOKp(right) ||
 	    (looks_like_number(left) && *SvPVX(left) != '0' &&
-	     looks_like_number(right) && *SvPVX(right) != '0'))
+	     looks_like_number(right) && (*SvPVX(right) != '0' ||
+					  SvCUR(right) == 1)))
 	{
 	    if (SvNV(left) < IV_MIN || SvNV(right) > IV_MAX)
 		DIE(aTHX_ "Range iterator outside integer range");

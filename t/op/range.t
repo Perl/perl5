@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..15\n";
+print "1..16\n";
 
 print join(':',1..5) eq '1:2:3:4:5' ? "ok 1\n" : "not ok 1\n";
 
@@ -73,3 +73,7 @@ for my $x ("0"..-1) {
     print "not ";
 }
 print "ok 15\n";
+
+# [#18165] Should allow "-4".."0", broken by #4730. (AMS 20021031)
+print "not " unless 5 == (() = "-4".."0");
+print "ok 16\n";
