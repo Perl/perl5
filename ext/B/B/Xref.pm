@@ -251,7 +251,7 @@ sub pp_gvsv {
     }
     else {
 	$gv = $op->gv;
-	$top = [$gv->STASH->NAME, '$', $gv->NAME];
+	$top = [$gv->STASH->NAME, '$', $gv->SAFENAME];
     }
     process($top, $op->private & OPpLVAL_INTRO ||
                   $op->private & OPpOUR_INTRO   ? "intro" : "used");
@@ -267,7 +267,7 @@ sub pp_gv {
     }
     else {
 	$gv = $op->gv;
-	$top = [$gv->STASH->NAME, "*", $gv->NAME];
+	$top = [$gv->STASH->NAME, "*", $gv->SAFENAME];
     }
     process($top, $op->private & OPpLVAL_INTRO ? "intro" : "used");
 }
@@ -329,7 +329,8 @@ sub xref_definitions {
     return if $nodefs;
     $subname = "(definitions)";
     foreach $pack (qw(B O AutoLoader DynaLoader XSLoader Config DB VMS
-		      strict vars FileHandle Exporter Carp)) {
+		      strict vars FileHandle Exporter Carp PerlIO::Layer
+		      attributes utf8 warnings)) {
         $exclude{$pack."::"} = 1;
     }
     no strict qw(vars refs);
