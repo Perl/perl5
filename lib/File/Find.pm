@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 require Exporter;
 require Cwd;
 
@@ -591,7 +591,8 @@ sub _find_opt {
     local ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
 	$follow_skip, $full_check, $untaint, $untaint_skip, $untaint_pat,
 	$pre_process, $post_process, $dangling_symlinks);
-    local($dir, $name, $fullname, $prune, $_);
+    my @_args = @_;
+    local($dir, $name, $fullname, $prune, *_);
 
     my $cwd            = $wanted->{bydepth} ? Cwd::fastcwd() : Cwd::getcwd();
     my $cwd_untainted  = $cwd;
@@ -618,7 +619,7 @@ sub _find_opt {
     my ($abs_dir, $Is_Dir);
 
     Proc_Top_Item:
-    foreach my $TOP (@_) {
+    foreach my $TOP (@_args) {
 	my $top_item = $TOP;
 
 	if ($Is_MacOS) {
