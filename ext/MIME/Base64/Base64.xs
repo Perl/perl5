@@ -1,4 +1,4 @@
-/* $Id: Base64.xs,v 1.37 2003/05/13 18:20:18 gisle Exp $
+/* $Id: Base64.xs,v 1.38 2003/10/09 11:26:12 gisle Exp $
 
 Copyright 1997-2003 Gisle Aas
 
@@ -159,7 +159,7 @@ encode_base64(sv,...)
 		chunk = 0;
 	    }
 	    c1 = *str++;
-	    c2 = *str++;
+	    c2 = len > 1 ? *str++ : '\0';
 	    *r++ = basis_64[c1>>2];
 	    *r++ = basis_64[((c1 & 0x3)<< 4) | ((c2 & 0xF0) >> 4)];
 	    if (len > 2) {
@@ -298,7 +298,7 @@ encode_qp(sv,...)
 	    while (p < end && qp_isplain(*p)) {
 	        p++;
 	    }
-	    if (*p == '\n' || p == end) {
+	    if (p == end || *p == '\n') {
 		/* whitespace at end of line must be encoded */
 		while (p > p_beg && (*(p - 1) == '\t' || *(p - 1) == ' '))
 		    p--;
@@ -308,9 +308,9 @@ encode_qp(sv,...)
 	    if (p_len) {
 	        /* output plain text (with line breaks) */
 	        if (eol_len) {
-		    STRLEN max_last_line = (*p == '\n' || p == end)
+		    STRLEN max_last_line = (p == end || *p == '\n')
 					      ? MAX_LINE         /* .......\n */
-					      : (*(p + 1) == '\n' || (p + 1) == end)
+					      : ((p + 1) == end || *(p + 1) == '\n')
 	                                        ? MAX_LINE - 3   /* ....=XX\n */
 	                                        : MAX_LINE - 4;  /* ...=XX=\n */
 		    while (p_len + linelen > max_last_line) {
@@ -331,13 +331,17 @@ encode_qp(sv,...)
 		}
 	    }
 
-	    if (*p == '\n' && eol_len) {
+	    if (p == end) {
+		break;
+            }
+	    else if (*p == '\n' && eol_len) {
 	        sv_catpvn(RETVAL, eol, eol_len);
 	        p++;
 		linelen = 0;
 	    }
-	    else if (p < end) {
+	    else {
 		/* output escaped char (with line breaks) */
+	        assert(p < end)
 		if (eol_len && linelen > MAX_LINE - 4) {
 		    sv_catpvn(RETVAL, "=", 1);
 		    sv_catpvn(RETVAL, eol, eol_len);
@@ -346,10 +350,6 @@ encode_qp(sv,...)
 	        sv_catpvf(RETVAL, "=%02X", (unsigned char)*p);
 	        p++;
 	        linelen += 3;
-	    }
-	    else {
-		assert(p == end);
-	        break;
 	    }
 
 	    /* optimize reallocs a bit */

@@ -13,7 +13,7 @@ use strict;
 use Digest::MD5 qw(md5_hex);
 
 my $str = "\100" x 20;
-substr($str, 0, 1, "");  # chopping off first char makes the string unaligned
+substr($str, 0, 1) = "";  # chopping off first char makes the string unaligned
 
 #use Devel::Peek; Dump($str); 
 

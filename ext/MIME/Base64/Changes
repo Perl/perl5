@@ -1,3 +1,19 @@
+2003-10-09   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.21
+
+   Documentation tweaks.
+
+   Don't rely on SvEND(sv) == '\0' as discussed in the perl5-porters
+   mailing list thread that starts with
+   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2003-10/msg00258.html
+
+   Should now pass test suite even without XS support.
+
+   Perl v5.005 or better is now required.
+
+
+
 2003-05-13   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.20
