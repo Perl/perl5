@@ -830,7 +830,7 @@ for more discussion of the issues.
 
 =head2 Locales
 
-Usually locale settins and Unicode do not affect each other, but
+Usually locale settings and Unicode do not affect each other, but
 there are a couple of exceptions:
 
 =over 4
@@ -847,7 +847,7 @@ B<any subsequent file open>, is UTF-8.
 Perl tries really hard to work both with Unicode and the old byte
 oriented world: most often this is nice, but sometimes this causes
 problems.  See L</BUGS> for example how sometimes using locales
-with Unicode can be a good thing.
+with Unicode can help with these problems.
 
 =back
 
