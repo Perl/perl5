@@ -109,7 +109,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..174\n";
+print "1..175\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -838,4 +838,37 @@ else {
 
     print "ok 174\n";
 }
+
+
+{
+    # Bug ID 20010730.010
+
+    my $i = 0;
+
+    sub Tie::TIESCALAR {
+        my $class =  shift;
+        my $arg   =  shift;
+
+        bless \$arg => $class;
+    }
+
+    sub Tie::FETCH {
+        $i ++;
+        ${$_ [0]}
+    }
+
+ 
+    package main;
+ 
+    my $bar = "The Big Bright Green Pleasure Machine";
+    taint_these $bar;
+    tie my ($foo), Tie => $bar;
+
+    my $baz = $foo;
+
+    print $i == 1 ? "ok 175\n" : "not ok 175\n"
+
+}
+
+
 
