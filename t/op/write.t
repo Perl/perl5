@@ -531,23 +531,27 @@ ok @<<<<<
 $test
 .
 
-$= = 10;
 
 # [ID 20020227.005] format bug with undefined _TOP
+
+open STDOUT_DUP, ">&STDOUT";
+my $oldfh = select STDOUT_DUP;
+$= = 10;
 {   local $~ = "Comment";
     write;
     $test++;
     print $- == 9
 	? "ok $test # TODO\n" : "not ok $test # TODO \$- = $- instead of 9\n";
     $test++;
-    print $^ ne "Comment_TOP"
-	? "ok $test\n" : "not ok $test # TODO \$^ = $^ instead of 'STDOUT_TOP'\n";
+    print $^ eq "STDOUT_DUP_TOP"
+	? "ok $test\n" : "not ok $test\n# \$^ = $^ instead of 'STDOUT_DUP_TOP'\n";
     $test++;
-    }
+}
+select $oldfh;
 
-   $^  = "STDOUT_TOP";
-   $=  =  7;		# Page length
-   $-  =  0;		# Lines left
+$^  = "STDOUT_TOP";
+$=  =  7;		# Page length
+$-  =  0;		# Lines left
 my $ps = $^L; $^L = "";	# Catch the page separator
 my $tm =  1;		# Top margin (empty lines before first output)
 my $bm =  2;		# Bottom marging (empty lines between last text and footer)

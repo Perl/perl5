@@ -1327,7 +1327,7 @@ PP(pp_leavewrite)
 	    if (!IoTOP_NAME(io)) {
 		if (!IoFMT_NAME(io))
 		    IoFMT_NAME(io) = savepv(GvNAME(gv));
-		topname = sv_2mortal(Perl_newSVpvf(aTHX_ "%s_TOP", IoFMT_NAME(io)));
+		topname = sv_2mortal(Perl_newSVpvf(aTHX_ "%s_TOP", GvNAME(gv)));
 		topgv = gv_fetchpv(SvPVX(topname), FALSE, SVt_PVFM);
 		if ((topgv && GvFORM(topgv)) ||
 		  !gv_fetchpv("top",FALSE,SVt_PVFM))
