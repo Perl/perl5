@@ -1,3 +1,32 @@
+Please note: This file provides a complete, temporally ordered log of
+changes that went into every version of Perl.  If you'd like more
+detailed information, please consult the comments in the individual
+patches posted to the perl5-porters mailing list.  Patches for each
+individual change may also be obtained through ftp and rsync--see
+pod/perlhack.pod for the details.
+
+For information on what's new in this release, see pod/perldelta.pod.
+
+[The "CAST AND CREW" list has been moved to AUTHORS.]
+
+NOTE: Each change entry shows the change number; who checked it into the
+repository; when; description of the change; which branch the change
+happened in; and the affected files.  The file lists have a short symbolic
+indicator:
+
+    	    !	    modified
+    	    +	    added
+    	    -	    deleted
+    	    +>	    branched (from elsewhere)
+    	    !>	    merged changes (from elsewhere)
+
+The Message-Ids in the change entries refer to the email messages sent
+to the perl5-porters mailing list.  You can retrieve the messages for
+example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
+
+--------------
+Version v5.8.2		Maintenance release working toward v5.8.2
+--------------
 ____________________________________________________________________________
 [ 21499] By: nicholas                              on 2003/10/19  19:14:43
         Log: If you add files you must add them to the MANIFEST
@@ -494,35 +523,6 @@ ____________________________________________________________________________
              successful escape, er release, of 5.8.1)
      Branch: maint-5.8/perl
 	   ! Changes patchlevel.h
-Please note: This file provides a complete, temporally ordered log of
-changes that went into every version of Perl.  If you'd like more
-detailed information, please consult the comments in the individual
-patches posted to the perl5-porters mailing list.  Patches for each
-individual change may also be obtained through ftp and rsync--see
-pod/perlhack.pod for the details.
-
-For information on what's new in this release, see pod/perldelta.pod.
-
-[The "CAST AND CREW" list has been moved to AUTHORS.]
-
-NOTE: Each change entry shows the change number; who checked it into the
-repository; when; description of the change; which branch the change
-happened in; and the affected files.  The file lists have a short symbolic
-indicator:
-
-    	    !	    modified
-    	    +	    added
-    	    -	    deleted
-    	    +>	    branched (from elsewhere)
-    	    !>	    merged changes (from elsewhere)
-
-The Message-Ids in the change entries refer to the email messages sent
-to the perl5-porters mailing list.  You can retrieve the messages for
-example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
-
---------------
-Version v5.8.2		Maintenance release working toward v5.8.2
---------------
 ____________________________________________________________________________
 [ 21379] By: chip                                  on 2003/09/25  18:10:01
         Log: Relocate the mention of safe signals with POSIX::SigAction.
