@@ -323,16 +323,9 @@ sub runtests {
 my $tried_devel_corestack;
 sub corestatus {
     my($st) = @_;
-    my($ret);
 
     eval {require 'wait.ph'};
-    if ($@) {
-      SWITCH: {
-	    $ret = ($st & 0200); # Tim says, this is for 90%
-	}
-    } else {
-	$ret = WCOREDUMP($st);
-    }
+    my $ret = defined &WCOREDUMP ? WCOREDUMP($st) : $st & 0200;
 
     eval { require Devel::CoreStack; $have_devel_corestack++ } 
       unless $tried_devel_corestack++;
