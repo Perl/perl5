@@ -47,7 +47,7 @@ extern int	_stdprintf _ARG_((const char*, ...));
 #define PerlIO_rewind(f)		(void) sfseek((f),0L,0)
 #define PerlIO_tmpfile()		sftmp(0)
 
-#define PerlIO_importFILE(f,fl)		Perl_croak(aTHX_ "Import from FILE * unimplemeted")
+#define PerlIO_importFILE(f,fl)		((void) Perl_croak(aTHX_ "Import from FILE * unimplemeted"), NULL)
 #define PerlIO_exportFILE(f,fl)		Perl_croak(aTHX_ "Export to FILE * unimplemeted")
 #define PerlIO_findFILE(f)		NULL
 #define PerlIO_releaseFILE(p,f)		Perl_croak(aTHX_ "Release of FILE * unimplemeted")
