@@ -130,6 +130,8 @@ malloc_cflags='ccflags="-DSTRICT_ALIGNMENT $ccflags"'
 		ldflags="$ldflags -mabi=64 -L/usr/lib64"
 		lddlflags="$lddlflags -mabi=64"
 		;;
+	*)	ccflags="$ccflags -DIRIX32_SEMUN_BROKEN_BY_GCC"
+		;;
 	esac
 	;;
 *)

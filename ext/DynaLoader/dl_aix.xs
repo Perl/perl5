@@ -29,6 +29,21 @@
 #include <a.out.h>
 #include <ldfcn.h>
 
+/* When using Perl extensions written in C++ the longer versions
+ * of load() and unload() from libC and libC_r need to be used,
+ * otherwise statics in the extensions won't get initialized right.
+ * -- Stephanie Beals <bealzy@us.ibm.com> */
+#ifdef USE_libC /* The define comes, when it comes, from hints/aix.pl. */
+#   define LOAD   loadAndInit
+#   define UNLOAD terminateAndUnload
+#   ifdef USE_load_h
+#       include <load.h>
+#   endif
+#else
+#   define LOAD   load
+#   define UNLOAD unload
+#endif
+
 /*
  * AIX 4.3 does remove some useful definitions from ldfcn.h. Define
  * these here to compensate for that lossage.
@@ -193,7 +208,7 @@ void *dlopen(char *path, int mode)
 	 * load should be declared load(const char *...). Thus we
 	 * cast the path to a normal char *. Ugly.
 	 */
-	if ((mp->entry = (void *)load((char *)path,
+	if ((mp->entry = (void *)LOAD((char *)path,
 #ifdef L_LIBPATH_EXEC
 				      L_LIBPATH_EXEC |
 #endif
@@ -324,7 +339,7 @@ int dlclose(void *handle)
 
 	if (--mp->refCnt > 0)
 		return 0;
-	result = unload(mp->entry);
+	result = UNLOAD(mp->entry);
 	if (result == -1) {
 		errvalid++;
 		strerrorcpy(errbuf, errno);
@@ -426,7 +441,7 @@ static int readExports(ModulePtr mp)
 		}
 		/*
 		 * Traverse the list of loaded modules. The entry point
-		 * returned by load() does actually point to the data
+		 * returned by LOAD() does actually point to the data
 		 * segment origin.
 		 */
 		lp = (struct ld_info *)buf;
