@@ -51,11 +51,12 @@ my @s;
 
 print "# @s\n";
 
+my $BLOCKSIZE = 512; # is this really correct everywhere?
+
 unless (@s == 13 &&
 	$s[7] == 1_000_003 &&
-	defined $s[11] &&
 	defined $s[12] &&
-       $s[11] * $s[12] < 1000_003) {
+	$BLOCKSIZE * $s[12] < 1_000_003) {
     print "1..0\n# no sparse files?\n";
     bye();
 }
