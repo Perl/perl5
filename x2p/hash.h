@@ -1,4 +1,4 @@
-/* $Header: hash.h,v 3.0 89/10/18 15:34:57 lwall Locked $
+/* $Header: hash.h,v 4.0 91/03/20 01:57:53 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,8 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	hash.h,v $
- * Revision 3.0  89/10/18  15:34:57  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:57:53  lwall
+ * 4.0 baseline.
  * 
  */
 

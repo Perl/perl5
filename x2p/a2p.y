@@ -1,5 +1,5 @@
 %{
-/* $Header: a2p.y,v 3.0.1.3 91/01/11 18:35:57 lwall Locked $
+/* $Header: a2p.y,v 4.0 91/03/20 01:57:21 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -7,18 +7,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2p.y,v $
- * Revision 3.0.1.3  91/01/11  18:35:57  lwall
- * patch42: a2p didn't recognize split with regular expression
- * patch42: a2p didn't handle > redirection right
- * 
- * Revision 3.0.1.2  90/08/09  05:47:26  lwall
- * patch19: a2p didn't handle {foo = (bar == 123)}
- * 
- * Revision 3.0.1.1  90/03/01  10:30:08  lwall
- * patch9: a2p didn't allow logical expressions everywhere it should
- * 
- * Revision 3.0  89/10/18  15:34:29  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:57:21  lwall
+ * 4.0 baseline.
  * 
  */
 

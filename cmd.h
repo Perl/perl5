@@ -1,4 +1,4 @@
-/* $Header: cmd.h,v 3.0.1.4 90/10/15 15:34:50 lwall Locked $
+/* $Header: cmd.h,v 4.0 91/03/20 01:04:34 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,21 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.h,v $
- * Revision 3.0.1.4  90/10/15  15:34:50  lwall
- * patch29: scripts now run at almost full speed under the debugger
- * patch29: added caller
- * 
- * Revision 3.0.1.3  90/08/09  02:29:58  lwall
- * patch19: did preliminary work toward debugging packages and evals
- * 
- * Revision 3.0.1.2  90/02/28  16:39:36  lwall
- * patch9: volatilized some more variables for super-optimizing compilers
- * 
- * Revision 3.0.1.1  89/10/26  23:05:43  lwall
- * patch1: unless was broken when run under the debugger
- * 
- * Revision 3.0  89/10/18  15:09:15  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:04:34  lwall
+ * 4.0 baseline.
  * 
  */
 

@@ -7,40 +7,11 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regcomp.c,v 3.0.1.8 90/11/10 01:57:46 lwall Locked $
+/* $Header: regcomp.c,v 4.0 91/03/20 01:39:01 lwall Locked $
  *
  * $Log:	regcomp.c,v $
- * Revision 3.0.1.8  90/11/10  01:57:46  lwall
- * patch38: patterns with multiple constant strings occasionally malfed
- * patch38: patterns like /foo.*foo/ sped up some
- * 
- * Revision 3.0.1.7  90/10/20  02:18:32  lwall
- * patch37: /foo.*bar$/ wrongly optimized to do tail matching on "foo"
- * 
- * Revision 3.0.1.6  90/10/16  10:17:33  lwall
- * patch29: patterns with multiple short literal strings sometimes failed
- * 
- * Revision 3.0.1.5  90/08/13  22:23:29  lwall
- * patch28: /x{m}/ didn't work right
- * 
- * Revision 3.0.1.4  90/08/09  05:05:33  lwall
- * patch19: sped up /x+y/ patterns greatly by not retrying on every x
- * patch19: inhibited backoff on patterns anchored to the end like /\s+$/
- * patch19: sped up {m,n} on simple items
- * patch19: optimized /.*whatever/ to /^.*whatever/
- * patch19: fixed character classes to allow backslashing hyphen
- * 
- * Revision 3.0.1.3  90/03/12  16:59:22  lwall
- * patch13: pattern matches can now use \0 to mean \000
- * 
- * Revision 3.0.1.2  90/02/28  18:08:35  lwall
- * patch9: /[\200-\377]/ didn't work on machines with signed chars
- * 
- * Revision 3.0.1.1  89/11/11  04:51:04  lwall
- * patch2: /[\000]/ didn't work
- * 
- * Revision 3.0  89/10/18  15:22:29  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:39:01  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -81,6 +52,15 @@
 #include "INTERN.h"
 #include "regcomp.h"
 
+#ifdef MSDOS
+# if defined(BUGGY_MSC6)
+ /* MSC 6.00A breaks on op/regexp.t test 85 unless we turn this off */
+ # pragma optimize("a",off)
+ /* But MSC 6.00A is happy with 'w', for aliases only across function calls*/
+ # pragma optimize("w",on )
+# endif /* BUGGY_MSC6 */
+#endif /* MSDOS */
+
 #ifndef STATIC
 #define	STATIC	static
 #endif
@@ -120,6 +100,7 @@ STATIC char *regpiece();
 STATIC char *regatom();
 STATIC char *regclass();
 STATIC char *regnode();
+STATIC char *reganode();
 STATIC void regc();
 STATIC void reginsert();
 STATIC void regtail();
@@ -175,6 +156,7 @@ int fold;
 	regc(MAGIC);
 	if (reg(0, &flags) == NULL) {
 		Safefree(regprecomp);
+		regprecomp = Nullch;
 		return(NULL);
 	}
 
@@ -210,14 +192,14 @@ int fold;
 		scan = NEXTOPER(scan);
 
 		first = scan;
-		while ((OP(first) > OPEN && OP(first) < CLOSE) ||
+		while (OP(first) == OPEN ||
 		    (OP(first) == BRANCH && OP(regnext(first)) != BRANCH) ||
 		    (OP(first) == PLUS) ||
 		    (OP(first) == CURLY && ARG1(first) > 0) ) {
-			if (OP(first) == CURLY)
-			    first += 4;
-			else if (OP(first) == PLUS)
+			if (OP(first) == PLUS)
 			    sawplus = 2;
+			else
+			    first += regarglen[OP(first)];
 			first = NEXTOPER(first);
 		}
 
@@ -270,9 +252,11 @@ int fold;
 				scan = NEXTOPER(scan);
 			}
 			if (OP(scan) == EXACTLY) {
+			    char *t;
+
 			    first = scan;
-			    while (OP(regnext(scan)) >= CLOSE)
-				scan = regnext(scan);
+			    while (OP(t = regnext(scan)) == CLOSE)
+				scan = t;
 			    if (curback - backish == len) {
 				str_ncat(longish, OPERAND(first)+1,
 				    *OPERAND(first));
@@ -340,13 +324,17 @@ int fold;
 			if (OP(first) == EOL && longish->str_cur)
 			    r->regmust->str_pok |= SP_TAIL;
 		}
-		else
+		else {
 			str_free(longest);
+			longest = Nullstr;
+		}
 		str_free(longish);
 	}
 
 	r->do_folding = fold;
 	r->nparens = regnpar - 1;
+	New(1002, r->startp, regnpar, char*);
+	New(1002, r->endp, regnpar, char*);
 #ifdef DEBUGGING
 	if (debug & 512)
 		regdump(r);
@@ -378,11 +366,9 @@ int *flagp;
 
 	/* Make an OPEN node, if parenthesized. */
 	if (paren) {
-		if (regnpar >= NSUBEXP)
-			FAIL("too many () in regexp");
 		parno = regnpar;
 		regnpar++;
-		ret = regnode(OPEN+parno);
+		ret = reganode(OPEN, parno);
 	} else
 		ret = NULL;
 
@@ -409,7 +395,10 @@ int *flagp;
 	}
 
 	/* Make a closing node, and hook it on the end. */
-	ender = regnode((paren) ? CLOSE+parno : END);	
+	if (paren)
+	    ender = reganode(CLOSE, parno);
+	else
+	    ender = regnode(END);
 	regtail(ret, ender);
 
 	/* Hook the tails of the branches to the closing node. */
@@ -523,6 +512,8 @@ int *flagp;
 		    int tmp;
 
 		    reginsert(CURLY, ret);
+		    if (iter > 0)
+			*flagp = (WORST|HASWIDTH);
 		    if (*max == ',')
 			max++;
 		    else
@@ -730,14 +721,25 @@ int *flagp;
 		case 'r':
 		case 't':
 		case 'f':
+		case 'e':
+		case 'a':
+		case 'x':
+		case 'c':
+		case '0':
 			goto defchar;
-		case '0': case '1': case '2': case '3': case '4':
+		case '1': case '2': case '3': case '4':
 		case '5': case '6': case '7': case '8': case '9':
-			if (isdigit(regparse[1]) || *regparse == '0')
+			{
+			    int num = atoi(regparse);
+
+			    if (num > 9 && num >= regnpar)
 				goto defchar;
-			else {
-				ret = regnode(REF + *regparse++ - '0');
+			    else {
+				ret = reganode(REF, num);
+				while (isascii(*regparse) && isdigit(*regparse))
+				    regparse++;
 				*flagp |= SIMPLE;
+			    }
 			}
 			break;
 		case '\0':
@@ -753,7 +755,7 @@ int *flagp;
 			register char ender;
 			register char *p;
 			char *oldp;
-			int foo;
+			int numlen;
 
 		    defchar:
 			ret = regnode(EXACTLY);
@@ -800,16 +802,31 @@ int *flagp;
 					ender = '\f';
 					p++;
 					break;
+				case 'e':
+					ender = '\033';
+					p++;
+					break;
+				case 'a':
+					ender = '\007';
+					p++;
+					break;
+				case 'x':
+				    ender = scanhex(++p, 2, &numlen);
+				    p += numlen;
+				    break;
+				case 'c':
+				    p++;
+				    ender = *p++;
+				    if (islower(ender))
+					ender = toupper(ender);
+				    ender ^= 64;
+				    break;
 				case '0': case '1': case '2': case '3':case '4':
 				case '5': case '6': case '7': case '8':case '9':
-				    if (isdigit(p[1]) || *p == '0') {
-					foo = *p - '0';
-					if (isdigit(p[1]))
-					    foo = (foo<<3) + *++p - '0';
-					if (isdigit(p[1]))
-					    foo = (foo<<3) + *++p - '0';
-					ender = foo;
-					p++;
+				    if (*p == '0' ||
+				      (isdigit(p[1]) && atoi(p) >= regnpar) ) {
+					ender = scanoct(p, 3, &numlen);
+					p += numlen;
 				    }
 				    else {
 					--p;
@@ -883,6 +900,7 @@ regclass()
 	register int range = 0;
 	register char *ret;
 	register int def;
+	int numlen;
 
 	ret = regnode(ANYOF);
 	if (*regparse == '^') {	/* Complement of range. */
@@ -940,17 +958,26 @@ regclass()
 			case 'b':
 				class = '\b';
 				break;
+			case 'e':
+				class = '\033';
+				break;
+			case 'a':
+				class = '\007';
+				break;
+			case 'x':
+				class = scanhex(regparse, 2, &numlen);
+				regparse += numlen;
+				break;
+			case 'c':
+				class = *regparse++;
+				if (islower(class))
+				    class = toupper(class);
+				class ^= 64;
+				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
-				class -= '0';
-				if (isdigit(*regparse)) {
-					class <<= 3;
-					class += *regparse++ - '0';
-				}
-				if (isdigit(*regparse)) {
-					class <<= 3;
-					class += *regparse++ - '0';
-				}
+				class = scanoct(--regparse, 3, &numlen);
+				regparse += numlen;
 				break;
 			}
 		}
@@ -1011,6 +1038,48 @@ char op;
 	*ptr++ = op;
 	*ptr++ = '\0';		/* Null "next" pointer. */
 	*ptr++ = '\0';
+	regcode = ptr;
+
+	return(ret);
+}
+
+/*
+ - reganode - emit a node with an argument
+ */
+static char *			/* Location. */
+reganode(op, arg)
+char op;
+unsigned short arg;
+{
+	register char *ret;
+	register char *ptr;
+
+	ret = regcode;
+	if (ret == &regdummy) {
+#ifdef REGALIGN
+		if (!(regsize & 1))
+			regsize++;
+#endif
+		regsize += 5;
+		return(ret);
+	}
+
+#ifdef REGALIGN
+#ifndef lint
+	if (!((long)ret & 1))
+	    *ret++ = 127;
+#endif
+#endif
+	ptr = ret;
+	*ptr++ = op;
+	*ptr++ = '\0';		/* Null "next" pointer. */
+	*ptr++ = '\0';
+#ifdef REGALIGN
+	*(unsigned short *)(ret+3) = arg;
+#else
+	ret[3] = arg >> 8; ret[4] = arg & 0377;
+#endif
+	ptr += 2;
 	regcode = ptr;
 
 	return(ret);
@@ -1160,7 +1229,6 @@ regexp *r;
 	register char *s;
 	register char op = EXACTLY;	/* Arbitrary non-END op. */
 	register char *next;
-	extern char *index();
 
 
 	s = r->program + 1;
@@ -1171,9 +1239,8 @@ regexp *r;
 #endif
 		op = OP(s);
 		fprintf(stderr,"%2d%s", s-r->program, regprop(s));	/* Where, what. */
-		if (op == CURLY)
-		    s += 4;
 		next = regnext(s);
+		s += regarglen[op];
 		if (next == NULL)		/* Next ptr. */
 			fprintf(stderr,"(0)");
 		else 
@@ -1278,40 +1345,15 @@ char *op;
 		p = NULL;
 		break;
 	case REF:
-	case REF+1:
-	case REF+2:
-	case REF+3:
-	case REF+4:
-	case REF+5:
-	case REF+6:
-	case REF+7:
-	case REF+8:
-	case REF+9:
-		(void)sprintf(buf+strlen(buf), "REF%d", OP(op)-REF);
+		(void)sprintf(buf+strlen(buf), "REF%d", ARG1(op));
 		p = NULL;
 		break;
-	case OPEN+1:
-	case OPEN+2:
-	case OPEN+3:
-	case OPEN+4:
-	case OPEN+5:
-	case OPEN+6:
-	case OPEN+7:
-	case OPEN+8:
-	case OPEN+9:
-		(void)sprintf(buf+strlen(buf), "OPEN%d", OP(op)-OPEN);
+	case OPEN:
+		(void)sprintf(buf+strlen(buf), "OPEN%d", ARG1(op));
 		p = NULL;
 		break;
-	case CLOSE+1:
-	case CLOSE+2:
-	case CLOSE+3:
-	case CLOSE+4:
-	case CLOSE+5:
-	case CLOSE+6:
-	case CLOSE+7:
-	case CLOSE+8:
-	case CLOSE+9:
-		(void)sprintf(buf+strlen(buf), "CLOSE%d", OP(op)-CLOSE);
+	case CLOSE:
+		(void)sprintf(buf+strlen(buf), "CLOSE%d", ARG1(op));
 		p = NULL;
 		break;
 	case STAR:
@@ -1332,13 +1374,23 @@ char *op;
 regfree(r)
 struct regexp *r;
 {
-	if (r->precomp)
+	if (r->precomp) {
 		Safefree(r->precomp);
-	if (r->subbase)
+		r->precomp = Nullch;
+	}
+	if (r->subbase) {
 		Safefree(r->subbase);
-	if (r->regmust)
+		r->subbase = Nullch;
+	}
+	if (r->regmust) {
 		str_free(r->regmust);
-	if (r->regstart)
+		r->regmust = Nullstr;
+	}
+	if (r->regstart) {
 		str_free(r->regstart);
+		r->regstart = Nullstr;
+	}
+	Safefree(r->startp);
+	Safefree(r->endp);
 	Safefree(r);
 }

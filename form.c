@@ -1,4 +1,4 @@
-/* $Header: form.c,v 3.0.1.4 91/01/11 18:04:07 lwall Locked $
+/* $Header: form.c,v 4.0 91/03/20 01:19:23 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,21 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	form.c,v $
- * Revision 3.0.1.4  91/01/11  18:04:07  lwall
- * patch42: the @* format counted lines wrong
- * patch42: the @* format didn't handle lines with nulls or without newline
- * 
- * Revision 3.0.1.3  90/10/15  17:26:24  lwall
- * patch29: added @###.## fields to format
- * 
- * Revision 3.0.1.2  90/08/09  03:38:40  lwall
- * patch19: did preliminary work toward debugging packages and evals
- * 
- * Revision 3.0.1.1  90/02/28  17:39:34  lwall
- * patch9: ... in format threw off subsequent field
- * 
- * Revision 3.0  89/10/18  15:17:26  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:19:23  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -119,6 +106,8 @@ int sp;
 			}
 			else if (fcmd->f_flags & FC_REPEAT)
 			    nextfcmd = linebeg;
+			else
+			    linebeg = fcmd->f_next;
 		    }
 		    else
 			linebeg = fcmd->f_next;

@@ -1,0 +1,60 @@
+#!/bin/sh
+
+input=$1
+output=$2
+tmp=/tmp/f$$
+
+egrep 'YYSTYPE[ 	]*yyv\[ *YYMAXDEPTH *\];
+short[ 	]*yys\[ *YYMAXDEPTH *\] *;
+yyps *= *&yys\[ *-1 *\];
+yypv *= *&yyv\[ *-1 *\];
+if *\( *\+\+yyps *> *&yys\[ *YYMAXDEPTH *\] *\)' $input >$tmp
+set `wc -l $tmp`
+
+case "$1" in
+5) echo "Patching perly.c to allow dynamic yacc stack allocation";;
+*) mv $input $output; rm -f $tmp; exit;;
+esac
+
+cat >$tmp <<'END'
+/YYSTYPE[ 	]*yyv\[ *YYMAXDEPTH *\];/c\
+int yymaxdepth = YYMAXDEPTH;\
+YYSTYPE *yyv; /* where the values are stored */\
+short *yys;\
+short *maxyyps;
+
+/short[ 	]*yys\[ *YYMAXDEPTH *\] *;/d
+
+/yyps *= *&yys\[ *-1 *\];/d
+
+/yypv *= *&yyv\[ *-1 *\];/c\
+\	if (!yyv) {\
+\	    yyv = (YYSTYPE*) malloc(yymaxdepth * sizeof(YYSTYPE));\
+\	    yys = (short*) malloc(yymaxdepth * sizeof(short));\
+\	    maxyyps = &yys[yymaxdepth];\
+\	}\
+\	yyps = &yys[-1];\
+\	yypv = &yyv[-1];
+
+
+/if *( *\+\+yyps *> *&yys\[ *YYMAXDEPTH *\] *)/c\
+\		if( ++yyps >= maxyyps ) {\
+\		    int tv = yypv - yyv;\
+\		    int ts = yyps - yys;\
+\
+\		    yymaxdepth *= 2;\
+\		    yyv = (YYSTYPE*)realloc((char*)yyv,\
+\		      yymaxdepth*sizeof(YYSTYPE));\
+\		    yys = (short*)realloc((char*)yys,\
+\		      yymaxdepth*sizeof(short));\
+\		    yyps = yys + ts;\
+\		    yypv = yyv + tv;\
+\		    maxyyps = &yys[yymaxdepth];\
+\		}
+
+/yacc stack overflow.*}/d
+/yacc stack overflow/,/}/d
+END
+
+sed -f $tmp <$input >$output
+rm -rf $tmp $input

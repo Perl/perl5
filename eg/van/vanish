@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: vanish,v 3.0 89/10/18 15:16:46 lwall Locked $
+# $Header: vanish,v 4.0 91/03/20 01:16:05 lwall Locked $
 
 sub it {
     if ($olddir ne '.') {

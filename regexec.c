@@ -7,38 +7,11 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regexec.c,v 3.0.1.6 90/11/10 02:00:57 lwall Locked $
+/* $Header: regexec.c,v 4.0 91/03/20 01:39:16 lwall Locked $
  *
  * $Log:	regexec.c,v $
- * Revision 3.0.1.6  90/11/10  02:00:57  lwall
- * patch38: patterns like /^foo.*bar/ sped up some
- * patch38: /[^whatever]+/ could scan past end of string
- * 
- * Revision 3.0.1.5  90/10/16  10:25:36  lwall
- * patch29: /^pat/ occasionally matched in middle of string when $* = 0
- * patch29: /.{n,m}$/ could match with fewer than n characters remaining
- * patch29: /\d{9}/ could match more than 9 characters
- * 
- * Revision 3.0.1.4  90/08/09  05:12:03  lwall
- * patch19: sped up /x+y/ patterns greatly by not retrying on every x
- * patch19: inhibited backoff on patterns anchored to the end like /\s+$/
- * patch19: sped up {m,n} on simple items
- * patch19: $' broke on embedded nulls
- * patch19: $ will now only match at end of string if $* == 0
- * 
- * Revision 3.0.1.3  90/02/28  18:14:39  lwall
- * patch9: /[\200-\377]/ didn't work on machines with signed chars
- * patch9: \d, \w, and \s could misfire on characters with high bit set
- * patch9: /\bfoo/i didn't work
- * 
- * Revision 3.0.1.2  89/12/21  20:16:27  lwall
- * patch7: certain patterns didn't match correctly at end of string
- * 
- * Revision 3.0.1.1  89/11/11  04:52:04  lwall
- * patch2: /\b$foo/ didn't work
- * 
- * Revision 3.0  89/10/18  15:22:53  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:39:16  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -494,7 +467,7 @@ char *string;
 	sp = prog->startp;
 	ep = prog->endp;
 	if (prog->nparens) {
-		for (i = NSUBEXP; i > 0; i--) {
+		for (i = prog->nparens; i >= 0; i--) {
 			*sp++ = NULL;
 			*ep++ = NULL;
 		}
@@ -559,7 +532,7 @@ char *prog;
 			    ((nextchar || locinput < regeol) &&
 			      locinput[-1] == '\n') )
 			{
-				regtill = regbol;
+				/* regtill = regbol; */
 				break;
 			}
 			return(0);
@@ -568,7 +541,7 @@ char *prog;
 				return(0);
 			if (!multiline && regeol - locinput > 1)
 				return 0;
-			regtill = regbol;
+			/* regtill = regbol; */
 			break;
 		case ANY:
 			if ((nextchar == '\0' && locinput >= regeol) ||
@@ -650,16 +623,7 @@ char *prog;
 			nextchar = *++locinput;
 			break;
 		case REF:
-		case REF+1:
-		case REF+2:
-		case REF+3:
-		case REF+4:
-		case REF+5:
-		case REF+6:
-		case REF+7:
-		case REF+8:
-		case REF+9:
-			n = OP(scan) - REF;
+			n = ARG1(scan);  /* which paren pair */
 			s = regmystartp[n];
 			if (!s)
 			    return(0);
@@ -683,16 +647,8 @@ char *prog;
 			break;
 		case BACK:
 			break;
-		case OPEN+1:
-		case OPEN+2:
-		case OPEN+3:
-		case OPEN+4:
-		case OPEN+5:
-		case OPEN+6:
-		case OPEN+7:
-		case OPEN+8:
-		case OPEN+9:
-			n = OP(scan) - OPEN;
+		case OPEN:
+			n = ARG1(scan);  /* which paren pair */
 			reginput = locinput;
 
 			regmystartp[n] = locinput;	/* for REF */
@@ -708,16 +664,8 @@ char *prog;
 			} else
 				return(0);
 			/* NOTREACHED */
-		case CLOSE+1:
-		case CLOSE+2:
-		case CLOSE+3:
-		case CLOSE+4:
-		case CLOSE+5:
-		case CLOSE+6:
-		case CLOSE+7:
-		case CLOSE+8:
-		case CLOSE+9: {
-				n = OP(scan) - CLOSE;
+		case CLOSE: {
+				n = ARG1(scan);  /* which paren pair */
 				reginput = locinput;
 
 				regmyendp[n] = locinput;	/* for REF */

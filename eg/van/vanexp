@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: vanexp,v 3.0 89/10/18 15:16:41 lwall Locked $
+# $Header: vanexp,v 4.0 91/03/20 01:15:54 lwall Locked $
 
 # This is for running from a find at night to expire old .deleteds
 

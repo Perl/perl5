@@ -1,15 +1,12 @@
-/* $Header: usersub.c,v 3.0.1.2 90/10/16 11:22:04 lwall Locked $
+/* $Header: usersub.c,v 4.0 91/03/20 01:55:56 lwall Locked $
  *
  *  This file contains stubs for routines that the user may define to
  *  set up glue routines for C libraries or to decrypt encrypted scripts
  *  for execution.
  *
  * $Log:	usersub.c,v $
- * Revision 3.0.1.2  90/10/16  11:22:04  lwall
- * patch29: added waitpid
- * 
- * Revision 3.0.1.1  90/08/09  05:40:45  lwall
- * patch19: Initial revision
+ * Revision 4.0  91/03/20  01:55:56  lwall
+ * 4.0 baseline.
  * 
  */
 

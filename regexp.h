@@ -5,22 +5,17 @@
  * not the System V one.
  */
 
-/* $Header: regexp.h,v 3.0.1.1 90/08/09 05:12:55 lwall Locked $
+/* $Header: regexp.h,v 4.0 91/03/20 01:39:23 lwall Locked $
  *
  * $Log:	regexp.h,v $
- * Revision 3.0.1.1  90/08/09  05:12:55  lwall
- * patch19: $' broke on embedded nulls
- * 
- * Revision 3.0  89/10/18  15:22:46  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:39:23  lwall
+ * 4.0 baseline.
  * 
  */
 
-#define NSUBEXP  10
-
 typedef struct regexp {
-	char *startp[NSUBEXP];
-	char *endp[NSUBEXP];
+	char **startp;
+	char **endp;
 	STR *regstart;		/* Internal use only. */
 	char *regstclass;
 	STR *regmust;		/* Internal use only. */

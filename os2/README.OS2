@@ -325,6 +325,8 @@ director.c        directory routines
 os2.c             kernel of OS/2 port (see below)
 popen.c           new popen.c
 mktemp.c          enhanced mktemp(), uses TMP env. variable, used by popen.c
+alarm.c           PD implementation for alarm()
+alarm.h		  header for alarm.c
 
 perl.cs           Compiler Shell script for perl itself
 perl.def          linker definition file for perl
@@ -352,9 +354,10 @@ especially not with -DDEBUGGING
 
                                 Kai Uwe Rommel
                                 rommel@lan.informatik.tu-muenchen.dbp.de
-                                Breslauer Str. 25
-                                D-8756 Kahl/Main
-  
+                                Zennerstr. 1
+                                D-8000 Muenchen 70
+
+
 + I have verified with patchlevel 37, that the OS/2 port compiles,
   after doing two minor changes. HPFS filenames support was also added.
   Some bugs were fixed.
@@ -379,3 +382,25 @@ especially not with -DDEBUGGING
  				October 1990
 				Kai Uwe Rommel
 				rommel@lan.informatik.tu-muenchen.dbp.de
+
+
+Verified patchlevel 40.
+Some bugs were fixed. Added alarm() support (using PD implementation).
+
+
+ 				November 1990
+
+                                Kai Uwe Rommel
+                                rommel@lan.informatik.tu-muenchen.dbp.de
+
+
+Verified patchlevel 44.
+Only two #ifdefs added to eval.c. Stack size for A2P had to be corrected.
+PERLGLOB separated from DOS version because of HPFS support.
+
+[Note: instead of #ifdef'ing eval.c I fixed it in perl.h--lwall]
+
+				January 1991
+
+                                Kai Uwe Rommel
+                                  rommel@lan.informatik.tu-muenchen.dbp.de

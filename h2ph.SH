@@ -5,7 +5,7 @@ case $CONFIG in
 	ln ../../config.sh . || \
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
-    fi
+    fi 2>/dev/null
     . ./config.sh
     ;;
 esac
@@ -32,19 +32,35 @@ $spitshell >>h2ph <<'!NO!SUBS!'
 
 chdir '/usr/include' || die "Can't cd /usr/include";
 
-%isatype = ('char',1,'short',1,'int',1,'long',1);
+@isatype = split(' ',<<END);
+	char	uchar	u_char
+	short	ushort	u_short
+	int	uint	u_int
+	long	ulong	u_long
+	FILE
+END
+
+$isatype{@isatype} = (1) x @isatype;
+
+@ARGV = ('-') unless @ARGV;
 
 foreach $file (@ARGV) {
-    ($outfile = $file) =~ s/\.h$/.ph/ || next;
-    print "$file -> $outfile\n";
-    if ($file =~ m|^(.*)/|) {
-	$dir = $1;
-	if (!-d "$perlincl/$dir") {
-	    mkdir("$perlincl/$dir",0777);
-	}
+    if ($file eq '-') {
+	open(IN, "-");
+	open(OUT, ">-");
     }
-    open(IN,"$file") || ((warn "Can't open $file: $!\n"),next);
-    open(OUT,">$perlincl/$outfile") || die "Can't create $outfile: $!\n";
+    else {
+	($outfile = $file) =~ s/\.h$/.ph/ || next;
+	print "$file -> $outfile\n";
+	if ($file =~ m|^(.*)/|) {
+	    $dir = $1;
+	    if (!-d "$perlincl/$dir") {
+		mkdir("$perlincl/$dir",0777);
+	    }
+	}
+	open(IN,"$file") || ((warn "Can't open $file: $!\n"),next);
+	open(OUT,">$perlincl/$outfile") || die "Can't create $outfile: $!\n";
+    }
     while (<IN>) {
 	chop;
 	while (/\\$/) {
@@ -163,13 +179,22 @@ sub expr {
 	    }
 	    next;
 	};
-	s/^(struct\s+\w+)//	&& do {$new .= "'$1'"; next;};
 	s/^sizeof\s*\(([^)]+)\)/{$1}/ && do {
 	    $new .= '$sizeof';
 	    next;
 	};
 	s/^([_a-zA-Z]\w*)//	&& do {
 	    $id = $1;
+	    if ($id eq 'struct') {
+		s/^\s+(\w+)//;
+		$id .= ' ' . $1;
+		$isatype{$id} = 1;
+	    }
+	    elsif ($id eq 'unsigned') {
+		s/^\s+(\w+)//;
+		$id .= ' ' . $1;
+		$isatype{$id} = 1;
+	    }
 	    if ($curargs{$id}) {
 		$new .= '$' . $id;
 	    }
@@ -181,7 +206,16 @@ sub expr {
 		$new .= " &$id";
 	    }
 	    elsif ($isatype{$id}) {
-		$new .= "'$id'";
+		if ($new =~ /{\s*$/) {
+		    $new .= "'$id'";
+		}
+		elsif ($new =~ /\(\s*$/ && /^[\s*]*\)/) {
+		    $new =~ s/\(\s*$//;
+		    s/^[\s*]*\)//;
+		}
+		else {
+		    $new .= $id;
+		}
 	    }
 	    else {
 		$new .= ' &' . $id;
@@ -217,6 +251,7 @@ It is most easily run while in /usr/include:
 	cd /usr/include; h2ph * sys/*
 
 .fi
+If run with no arguments, filters standard input to standard output.
 .SH ENVIRONMENT
 No environment variables are used.
 .SH FILES

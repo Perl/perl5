@@ -1,4 +1,4 @@
-/* $Header: dir.h,v 3.0.1.1 90/03/27 16:07:08 lwall Locked $
+/* $Header: dir.h,v 4.0 91/03/20 01:34:20 lwall Locked $
  *
  *    (C) Copyright 1987, 1990 Diomidis Spinellis.
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dir.h,v $
+ * Revision 4.0  91/03/20  01:34:20  lwall
+ * 4.0 baseline.
+ * 
  * Revision 3.0.1.1  90/03/27  16:07:08  lwall
  * patch16: MSDOS support
  * 

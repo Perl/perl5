@@ -1,4 +1,4 @@
-;# $Header: termcap.pl,v 3.0.1.3 90/08/09 04:02:53 lwall Locked $
+;# $Header: termcap.pl,v 4.0 91/03/20 01:26:33 lwall Locked $
 ;#
 ;# Usage:
 ;#	require 'ioctl.pl';

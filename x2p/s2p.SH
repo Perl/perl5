@@ -11,7 +11,7 @@ case $CONFIG in
 	ln ../../config.sh . || \
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
-    fi
+    fi 2>/dev/null
     . ./config.sh
     ;;
 esac
@@ -29,40 +29,11 @@ $spitshell >s2p <<!GROK!THIS!
 : In the following dollars and backticks do not need the extra backslash.
 $spitshell >>s2p <<'!NO!SUBS!'
 
-# $Header: s2p.SH,v 3.0.1.7 91/01/11 18:36:44 lwall Locked $
+# $Header: s2p.SH,v 4.0 91/03/20 01:57:59 lwall Locked $
 #
 # $Log:	s2p.SH,v $
-# Revision 3.0.1.7  91/01/11  18:36:44  lwall
-# patch42: x2p/s2p.SH blew up on /afs misfeature
-# 
-# Revision 3.0.1.6  90/10/20  02:21:43  lwall
-# patch37: changed some ". config.sh" to ". ./config.sh"
-# 
-# Revision 3.0.1.5  90/10/16  11:32:40  lwall
-# patch29: s2p modernized
-# 
-# Revision 3.0.1.4  90/08/09  05:50:43  lwall
-# patch19: s2p didn't translate \n right
-# 
-# Revision 3.0.1.3  90/03/01  10:31:21  lwall
-# patch9: s2p didn't handle \< and \>
-# 
-# Revision 3.0.1.2  89/11/17  15:51:27  lwall
-# patch5: in s2p, line labels without a subsequent statement were done wrong
-# patch5: s2p left residue in /tmp
-# 
-# Revision 3.0.1.1  89/11/11  05:08:25  lwall
-# patch2: in s2p, + within patterns needed backslashing
-# patch2: s2p was printing out some debugging info to the output file
-# 
-# Revision 3.0  89/10/18  15:35:02  lwall
-# 3.0 baseline
-# 
-# Revision 2.0.1.1  88/07/11  23:26:23  root
-# patch2: s2p didn't put a proper prologue on output script
-# 
-# Revision 2.0  88/06/05  00:15:55  root
-# Baseline version 2.0.
+# Revision 4.0  91/03/20  01:57:59  lwall
+# 4.0 baseline.
 # 
 #
 

@@ -1,4 +1,5 @@
 extproc C:\binp\misc\perl.exe -S
+#!perl
 
 # os2.pl:  Demonstrates the OS/2 system calls and shows off some of the
 # features in common with the UNIX version.

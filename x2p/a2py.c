@@ -1,4 +1,4 @@
-/* $Header: a2py.c,v 3.0.1.2 90/10/16 11:30:34 lwall Locked $
+/* $Header: a2py.c,v 4.0 91/03/20 01:57:26 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,14 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2py.c,v $
- * Revision 3.0.1.2  90/10/16  11:30:34  lwall
- * patch29: various portability fixes
- * 
- * Revision 3.0.1.1  90/08/09  05:48:53  lwall
- * patch19: a2p didn't emit a chop when NF was referenced though split needs it
- * 
- * Revision 3.0  89/10/18  15:34:35  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:57:26  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -1115,7 +1109,10 @@ STR *str;
 		    d--;
 	    }
 	    if (d > t+3) {
-		*d = '\0';
+                char save[2048];
+                strcpy(save, d);
+		*d = '\n';
+                d[1] = '\0';
 		putone();
 		putchar('\n');
 		if (d[-1] != ';' && !(newpos % 4)) {
@@ -1123,7 +1120,7 @@ STR *str;
 		    *t++ = ' ';
 		    newpos += 2;
 		}
-		strcpy(t,d+1);
+		strcpy(t,save+1);
 		newpos += strlen(t);
 		d = t + strlen(t);
 		pos = newpos;

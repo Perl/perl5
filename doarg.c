@@ -1,4 +1,4 @@
-/* $Header: doarg.c,v 3.0.1.10 91/01/11 17:41:39 lwall Locked $
+/* $Header: doarg.c,v 4.0 91/03/20 01:06:42 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,66 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doarg.c,v $
- * Revision 3.0.1.10  91/01/11  17:41:39  lwall
- * patch42: added binary and hex pack/unpack options
- * patch42: fixed casting problem with n and N pack options
- * patch42: fixed printf("%c", 0)
- * patch42: the perl debugger was dumping core frequently
- * 
- * Revision 3.0.1.9  90/11/10  01:14:31  lwall
- * patch38: random cleanup
- * patch38: optimized join('',...)
- * patch38: printf cleaned up
- * 
- * Revision 3.0.1.8  90/10/15  16:04:04  lwall
- * patch29: @ENV = () now works
- * patch29: added caller
- * patch29: tr/// now understands c, d and s options, and handles nulls right
- * patch29: *foo now prints as *package'foo
- * patch29: added caller
- * patch29: local() without initialization now creates undefined values
- * 
- * Revision 3.0.1.7  90/08/13  22:14:15  lwall
- * patch28: the NSIG hack didn't work on Xenix
- * patch28: defined(@array) and defined(%array) didn't work right
- * 
- * Revision 3.0.1.6  90/08/09  02:48:38  lwall
- * patch19: fixed double include of <signal.h>
- * patch19: pack/unpack can now do native float and double
- * patch19: pack/unpack can now have absolute and negative positioning
- * patch19: pack/unpack can now have use * to specify all the rest of input
- * patch19: unpack can do checksumming
- * patch19: $< and $> better supported on machines without setreuid
- * patch19: Added support for linked-in C subroutines
- * 
- * Revision 3.0.1.5  90/03/27  15:39:03  lwall
- * patch16: MSDOS support
- * patch16: support for machines that can't cast negative floats to unsigned ints
- * patch16: sprintf($s,...,$s,...) didn't work
- * 
- * Revision 3.0.1.4  90/03/12  16:28:42  lwall
- * patch13: pack of ascii strings could call str_ncat() with negative length
- * patch13: printf("%s", *foo) was busted
- * 
- * Revision 3.0.1.3  90/02/28  16:56:58  lwall
- * patch9: split now can split into more than 10000 elements
- * patch9: sped up pack and unpack
- * patch9: pack of unsigned ints and longs blew up some places
- * patch9: sun3 can't cast negative float to unsigned int or long
- * patch9: local($.) didn't work
- * patch9: grep(s/foo/bar/, @abc = @xyz) modified @xyz rather than @abc
- * patch9: syscall returned stack size rather than value of system call
- * 
- * Revision 3.0.1.2  89/12/21  19:52:15  lwall
- * patch7: a pattern wouldn't match a null string before the first character
- * patch7: certain patterns didn't match correctly at end of string
- * 
- * Revision 3.0.1.1  89/11/11  04:17:20  lwall
- * patch2: printf %c, %D, %X and %O didn't work right
- * patch2: printf of unsigned vs signed needed separate casts on some machines
- * 
- * Revision 3.0  89/10/18  15:10:41  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:06:42  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -78,7 +20,9 @@
 
 extern unsigned char fold[];
 
+#ifndef __STDC__
 extern char **environ;
+#endif /* ! __STDC__ */
 
 #ifdef BUGGY_MSC
  #pragma function(memcmp)
@@ -114,8 +58,10 @@ int sp;
 	(void)eval(spat->spat_runtime,G_SCALAR,sp);
 	m = str_get(dstr = stack->ary_array[sp+1]);
 	nointrp = "";
-	if (spat->spat_regexp)
+	if (spat->spat_regexp) {
 	    regfree(spat->spat_regexp);
+	    spat->spat_regexp = Null(REGEXP*);	/* required if regcomp pukes */
+	}
 	spat->spat_regexp = regcomp(m,m+dstr->str_cur,
 	    spat->spat_flags & SPAT_FOLD);
 	if (spat->spat_flags & SPAT_KEEP) {
@@ -186,7 +132,7 @@ int sp;
 	}
 	c = str_get(dstr);
 	clen = dstr->str_cur;
-	if (clen <= spat->spat_slen + spat->spat_regexp->regback) {
+	if (clen <= spat->spat_slen + (int)spat->spat_regexp->regback) {
 					/* can do inplace substitution */
 	    if (regexec(spat->spat_regexp, s, strend, orig, 0,
 	      str->str_pok & SP_STUDIED ? str : Nullstr, safebase)) {
@@ -308,8 +254,14 @@ int sp;
 		    str_ncat(dstr,c,clen);
 	    }
 	    else {
+		char *mysubbase = spat->spat_regexp->subbase;
+
+		spat->spat_regexp->subbase = Nullch;	/* so recursion works */
 		(void)eval(rspat->spat_repl,G_SCALAR,sp);
 		str_scat(dstr,stack->ary_array[sp+1]);
+		if (spat->spat_regexp->subbase)
+		    Safefree(spat->spat_regexp->subbase);
+		spat->spat_regexp->subbase = mysubbase;
 	    }
 	    if (once)
 		break;
@@ -407,7 +359,7 @@ int *arglast;
 
     st += ++sp;
     if (items-- > 0)
-	str_sset(str,*st++);
+	str_sset(str, *st++);
     else
 	str_set(str,"");
     if (delimlen) {
@@ -666,7 +618,7 @@ int *arglast;
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		ashort = (short)str_gnum(fromstr);
-#ifdef HTONS
+#ifdef HAS_HTONS
 		ashort = htons(ashort);
 #endif
 		str_ncat(str,(char*)&ashort,sizeof(short));
@@ -698,7 +650,7 @@ int *arglast;
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		aulong = U_L(str_gnum(fromstr));
-#ifdef HTONL
+#ifdef HAS_HTONL
 		aulong = htonl(aulong);
 #endif
 		str_ncat(str,(char*)&aulong,sizeof(unsigned long));
@@ -770,6 +722,10 @@ register int len;
 	str_ncat(str, hunk, 4);
 	s += 3;
 	len -= 3;
+    }
+    for (s = str->str_ptr; *s; s++) {
+	if (*s == ' ')
+	    *s = '`';
     }
     str_ncat(str, "\n", 1);
 }
@@ -929,7 +885,7 @@ int *arglast;
     return str;
 }
 
-int
+void
 do_unshift(ary,arglast)
 register ARRAY *ary;
 int *arglast;
@@ -978,7 +934,7 @@ int *arglast;
     }
     if (!stab)
 	fatal("Undefined subroutine called");
-    if (arg->arg_type == O_DBSUBR) {
+    if (arg->arg_type == O_DBSUBR && !sub->usersub) {
 	str = stab_val(DBsub);
 	saveitem(str);
 	stab_fullname(str,stab);
@@ -1032,7 +988,7 @@ int *arglast;
 
     tmps_base = oldtmps_base;
     for (items = arglast[0] + 1; items <= sp; items++)
-	st[items] = str_static(st[items]);
+	st[items] = str_mortal(st[items]);
 	    /* in case restore wipes old str */
     restorelist(oldsave);
     return sp;
@@ -1070,7 +1026,7 @@ int *arglast;
     if (arg->arg_flags & AF_COMMON) {
 	for (relem = firstrelem; relem <= lastrelem; relem++) {
 	    if (str = *relem)
-		*relem = str_static(str);
+		*relem = str_mortal(str);
 	}
     }
     relem = firstrelem;
@@ -1173,7 +1129,7 @@ int *arglast;
     }
     if (delaymagic > 1) {
 	if (delaymagic & DM_REUID) {
-#ifdef SETREUID
+#ifdef HAS_SETREUID
 	    setreuid(uid,euid);
 #else
 	    if (uid != euid || setuid(uid) < 0)
@@ -1181,7 +1137,7 @@ int *arglast;
 #endif
 	}
 	if (delaymagic & DM_REGID) {
-#ifdef SETREGID
+#ifdef HAS_SETREGID
 	    setregid(gid,egid);
 #else
 	    if (gid != egid || setgid(gid) < 0)
@@ -1350,10 +1306,13 @@ int *arglast;
     }
     else if (type == O_SUBR || type == O_DBSUBR) {
 	stab = arg[1].arg_ptr.arg_stab;
-	cmd_free(stab_sub(stab)->cmd);
-	afree(stab_sub(stab)->tosave);
-	Safefree(stab_sub(stab));
-	stab_sub(stab) = Null(SUBR*);
+	if (stab_sub(stab)) {
+	    cmd_free(stab_sub(stab)->cmd);
+	    stab_sub(stab)->cmd = Nullcmd;
+	    afree(stab_sub(stab)->tosave);
+	    Safefree(stab_sub(stab));
+	    stab_sub(stab) = Null(SUBR*);
+	}
     }
     else
 	fatal("Can't undefine that kind of object");
@@ -1492,6 +1451,7 @@ register STR *str;
     *tmps = '\0';				/* wipe it out */
     str->str_cur = tmps - str->str_ptr;
     str->str_nok = 0;
+    STABSET(str);
 }
 
 do_vop(optype,str,left,right)
@@ -1499,7 +1459,7 @@ STR *str;
 STR *left;
 STR *right;
 {
-    register char *s = str_get(str);
+    register char *s;
     register char *l = str_get(left);
     register char *r = str_get(right);
     register int len;
@@ -1513,7 +1473,11 @@ STR *right;
 	STR_GROW(str,len);
 	(void)bzero(str->str_ptr + str->str_cur, len - str->str_cur);
 	str->str_cur = len;
-	s = str_get(str);
+    }
+    s = str->str_ptr;
+    if (!s) {
+	str_nset(str,"",0);
+	s = str->str_ptr;
     }
     switch (optype) {
     case O_BIT_AND:
@@ -1548,7 +1512,7 @@ int *arglast;
     register int i = 0;
     int retval = -1;
 
-#ifdef SYSCALL
+#ifdef HAS_SYSCALL
 #ifdef TAINT
     for (st += ++sp; items--; st++)
 	tainted |= (*st)->str_tainted;

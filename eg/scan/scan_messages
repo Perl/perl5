@@ -1,6 +1,6 @@
 #!/usr/bin/perl -P
 
-# $Header: scan_messages,v 3.0 89/10/18 15:15:38 lwall Locked $
+# $Header: scan_messages,v 4.0 91/03/20 01:13:01 lwall Locked $
 
 # This prints out extraordinary console messages.  You'll need to customize.
 

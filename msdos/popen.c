@@ -1,4 +1,4 @@
-/* $Header: popen.c,v 3.0.1.2 90/08/09 04:04:42 lwall Locked $
+/* $Header: popen.c,v 4.0 91/03/20 01:34:50 lwall Locked $
  *
  *    (C) Copyright 1988, 1990 Diomidis Spinellis.
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	popen.c,v $
+ * Revision 4.0  91/03/20  01:34:50  lwall
+ * 4.0 baseline.
+ * 
  * Revision 3.0.1.2  90/08/09  04:04:42  lwall
  * patch19: various MSDOS and OS/2 patches folded in
  * 
@@ -83,12 +86,12 @@ mypopen(const char *command, const char *t)
 		else
 			init++;
 
-	if ((name = tempnam(getenv("TMP"), "pp")) == NULL)
+	if ((name = tempnam((char*)NULL, "pp")) == NULL)
 		return NULL;
 
 	switch (*t) {
 	case 'r':
-		sprintf(buff, "%s>%s", command, name);
+		sprintf(buff, "%s >%s", command, name);
 		if (system(buff) || (f = fopen(name, "r")) == NULL) {
 			free(name);
 			return NULL;
@@ -140,22 +143,22 @@ mypclose(FILE *f)
 					status = EOF;
 				else
 					status = 0;
-				free(name);
+				free((void*)name);
 				return status;
 			case execute:
 				(void)sprintf(buff, "%s <%s", p->command, p->name);
 				free(p);
-				if (system(buff)) {
+				if (fclose(f) == EOF) {
 					(void)unlink(name);
 					status = EOF;
-				} else if (fclose(f) == EOF) {
+				} else if (system(buff)) {
 					(void)unlink(name);
 					status = EOF;
 				} else if (unlink(name) < 0)
 					status = EOF;
 				else
 					status = 0;
-				free(name);
+				free((void*)name);
 				return status;
 			default:
 				return EOF;

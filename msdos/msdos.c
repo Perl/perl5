@@ -1,4 +1,4 @@
-/* $Header: msdos.c,v 3.0.1.1 90/03/27 16:10:41 lwall Locked $
+/* $Header: msdos.c,v 4.0 91/03/20 01:34:46 lwall Locked $
  *
  *    (C) Copyright 1989, 1990 Diomidis Spinellis.
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	msdos.c,v $
+ * Revision 4.0  91/03/20  01:34:46  lwall
+ * 4.0 baseline.
+ * 
  * Revision 3.0.1.1  90/03/27  16:10:41  lwall
  * patch16: MSDOS support
  * 
@@ -18,14 +21,11 @@
  * Various Unix compatibility functions for MS-DOS.
  */
 
-#include <stdio.h>
-#include <errno.h>
-#include <dos.h>
-#include <time.h>
-#include <process.h>
-
 #include "EXTERN.h"
 #include "perl.h"
+
+#include <dos.h>
+#include <process.h>
 
 /*
  * Interface to the MS-DOS ioctl system call.
@@ -58,7 +58,7 @@ ioctl(int handle, unsigned int function, char *data)
 	struct SREGS    segregs;
 
 	srv.h.ah = 0x44;
-	srv.h.al = function & 0xf;
+	srv.h.al = (unsigned char)(function & 0x0F);
 	srv.x.bx = handle;
 	srv.x.cx = function >> 4;
 	segread(&segregs);
@@ -138,29 +138,39 @@ sleep(unsigned len)
 /*
  * Just pretend that everyone is a superuser
  */
+#define ROOT_UID	0
+#define ROOT_GID	0
 int
 getuid(void)
 {
-	return 0;
+	return ROOT_UID;
 }
 
 int
 geteuid(void)
 {
-	return 0;
+	return ROOT_UID;
 }
 
 int
 getgid(void)
 {
-	return 0;
+	return ROOT_GID;
 }
 
 int
 getegid(void)
 {
-	return 0;
+	return ROOT_GID;
 }
+
+int
+setuid(int uid)
+{ return (uid==ROOT_UID?0:-1); }
+
+int
+setgid(int gid)
+{ return (gid==ROOT_GID?0:-1); }
 
 /*
  * The following code is based on the do_exec and do_aexec functions
@@ -198,7 +208,6 @@ int *arglast;
     return status;
 }
 
-char *getenv(char *name);
 
 int
 do_spawn(cmd)

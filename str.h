@@ -1,4 +1,4 @@
-/* $Header: str.h,v 3.0.1.4 90/11/10 02:07:52 lwall Locked $
+/* $Header: str.h,v 4.0 91/03/20 01:40:04 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,21 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.h,v $
- * Revision 3.0.1.4  90/11/10  02:07:52  lwall
- * patch38: temp string values are now copied less often
- * 
- * Revision 3.0.1.3  90/10/16  10:44:04  lwall
- * patch29: added caller
- * patch29: scripts now run at almost full speed under the debugger
- * 
- * Revision 3.0.1.2  90/08/09  05:23:24  lwall
- * patch19: various MSDOS and OS/2 patches folded in
- * 
- * Revision 3.0.1.1  89/10/26  23:24:42  lwall
- * patch1: rearranged some structures to align doubles better on Gould
- * 
- * Revision 3.0  89/10/18  15:23:49  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:40:04  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -132,8 +119,8 @@ EXT int tmps_base INIT(-1);
 
 char *str_2ptr();
 double str_2num();
-STR *str_static();
-STR *str_2static();
+STR *str_mortal();
+STR *str_2mortal();
 STR *str_make();
 STR *str_nmake();
 STR *str_smake();

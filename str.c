@@ -1,4 +1,5 @@
-/* $Header: str.c,v 3.0.1.12 91/01/11 18:26:54 lwall Locked $
+#undef STDSTDIO
+/* $Header: str.c,v 4.0 91/03/20 01:39:55 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,61 +7,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
- * Revision 3.0.1.12  91/01/11  18:26:54  lwall
- * patch42: s/^foo/bar/ occasionally brought on core dumps
- * patch42: undid unwarranted assumptions about memcmp() return value
- * patch42: ('a' .. 'z') could lose its value in a loop
- * 
- * Revision 3.0.1.11  90/11/13  15:27:14  lwall
- * patch41: fixed a couple of malloc/free problems
- * 
- * Revision 3.0.1.10  90/11/10  02:06:29  lwall
- * patch38: temp string values are now copied less often
- * patch38: array slurps are now faster and take less memory
- * patch38: fixed a memory leakage on local(*foo)
- * 
- * Revision 3.0.1.9  90/10/16  10:41:21  lwall
- * patch29: the undefined value could get defined by devious means
- * patch29: undefined values compared inconsistently 
- * patch29: taintperl now checks for world writable PATH components
- * 
- * Revision 3.0.1.8  90/08/09  05:22:18  lwall
- * patch19: the number to string converter wasn't allocating enough space
- * patch19: tainting didn't work on setgid scripts
- * 
- * Revision 3.0.1.7  90/03/27  16:24:11  lwall
- * patch16: strings with prefix chopped off sometimes freed wrong
- * patch16: taint check blows up on undefined array element
- * 
- * Revision 3.0.1.6  90/03/12  17:02:14  lwall
- * patch13: substr as lvalue didn't invalidate old numeric value
- * 
- * Revision 3.0.1.5  90/02/28  18:30:38  lwall
- * patch9: you may now undef $/ to have no input record separator
- * patch9: nested evals clobbered their longjmp environment
- * patch9: sometimes perl thought ordinary data was a symbol table entry
- * patch9: insufficient space allocated for numeric string on sun4
- * patch9: underscore in an array name in a double-quoted string not recognized
- * patch9: "@foo{}" not recognized unless %foo defined
- * patch9: "$foo[$[]" gives error
- * 
- * Revision 3.0.1.4  89/12/21  20:21:35  lwall
- * patch7: errno may now be a macro with an lvalue
- * patch7: made nested or recursive foreach work right
- * 
- * Revision 3.0.1.3  89/11/17  15:38:23  lwall
- * patch5: some machines typedef unchar too
- * patch5: substitution on leading components occasionally caused <> corruption
- * 
- * Revision 3.0.1.2  89/11/11  04:56:22  lwall
- * patch2: uchar gives Crays fits
- * 
- * Revision 3.0.1.1  89/10/26  23:23:41  lwall
- * patch1: string ordering tests were wrong
- * patch1: $/ now works even when STDSTDIO undefined
- * 
- * Revision 3.0  89/10/18  15:23:38  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:39:55  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -68,7 +16,9 @@
 #include "perl.h"
 #include "perly.h"
 
+#ifndef __STDC__
 extern char **environ;
+#endif /* ! __STDC__ */
 
 #ifndef str_get
 char *
@@ -379,8 +329,8 @@ register char *ptr;
 {
     register STRLEN delta;
 
-    if (!(str->str_pok))
-	fatal("str_chop: internal inconsistency");
+    if (!ptr || !(str->str_pok))
+	return;
     delta = ptr - str->str_ptr;
     str->str_len -= delta;
     str->str_cur -= delta;
@@ -667,9 +617,12 @@ register STR *str;
     }
     if (str->str_magic)
 	str_free(str->str_magic);
+    str->str_magic = freestrroot;
 #ifdef LEAKTEST
-    if (str->str_len)
+    if (str->str_len) {
 	Safefree(str->str_ptr);
+	str->str_ptr = Nullch;
+    }
     if ((str->str_pok & SP_INTRP) && str->str_u.str_args)
 	arg_free(str->str_u.str_args);
     Safefree(str);
@@ -692,7 +645,6 @@ register STR *str;
 #ifdef TAINT
     str->str_tainted = 0;
 #endif
-    str->str_magic = freestrroot;
     freestrroot = str;
 #endif /* LEAKTEST */
 }
@@ -770,20 +722,13 @@ int append;
     register char *bp;		/* we're going to steal some values */
     register int cnt;		/*  from the stdio struct and put EVERYTHING */
     register STDCHAR *ptr;	/*   in the innermost loop into registers */
-    register int newline = record_separator;/* (assuming >= 6 registers) */
+    register int newline = rschar;/* (assuming >= 6 registers) */
     int i;
     STRLEN bpx;
-    STRLEN obpx;
-    register int get_paragraph;
-    register char *oldbp;
     int shortbuffered;
 
     if (str == &str_undef)
 	return Nullch;
-    if (get_paragraph = !rslen) {	/* yes, that's an assignment */
-	newline = '\n';
-	oldbp = Nullch;			/* remember last \n position (none) */
-    }
 #ifdef STDSTDIO		/* Here is some breathtakingly efficient cheating */
     cnt = fp->_cnt;			/* get count into register */
     str->str_nok = 0;			/* invalidate number */
@@ -812,14 +757,10 @@ int append;
 	if (shortbuffered) {			/* oh well, must extend */
 	    cnt = shortbuffered;
 	    shortbuffered = 0;
-	    if (get_paragraph && oldbp)
-		obpx = oldbp - str->str_ptr;
 	    bpx = bp - str->str_ptr;	/* prepare for possible relocation */
 	    str->str_cur = bpx;
 	    STR_GROW(str, str->str_len + append + cnt + 2);
 	    bp = str->str_ptr + bpx;	/* reconstitute our pointer */
-	    if (get_paragraph && oldbp)
-		oldbp = str->str_ptr + obpx;
 	    continue;
 	}
 
@@ -830,13 +771,9 @@ int append;
 	ptr = fp->_ptr;			/* reregisterize cnt and ptr */
 
 	bpx = bp - str->str_ptr;	/* prepare for possible relocation */
-	if (get_paragraph && oldbp)
-	    obpx = oldbp - str->str_ptr;
 	str->str_cur = bpx;
 	STR_GROW(str, bpx + cnt + 2);
 	bp = str->str_ptr + bpx;	/* reconstitute our pointer */
-	if (get_paragraph && oldbp)
-	    oldbp = str->str_ptr + obpx;
 
 	if (i == newline) {		/* all done for now? */
 	    *bp++ = i;
@@ -848,10 +785,8 @@ int append;
     }
 
 thats_all_folks:
-    if (get_paragraph && bp - 1 != oldbp) {
-	oldbp = bp;	/* remember where this newline was */
-	goto screamer;	/* and go back to the fray */
-    }
+    if (rslen > 1 && (bp - str->str_ptr < rslen || bcmp(bp - rslen, rs, rslen)))
+	goto screamer;	/* go back to the fray */
 thats_really_all_folks:
     if (shortbuffered)
 	cnt += shortbuffered;
@@ -868,18 +803,27 @@ thats_really_all_folks:
 
 screamer:
 	bp = buf;
-filler:
-	while ((i = getc(fp)) != EOF && (*bp++ = i) != newline && bp < bpe);
-	if (i == newline && get_paragraph &&
-	    (i = getc(fp)) != EOF && (*bp++ = i) != newline && bp < bpe)
-	    goto filler;
+	while ((i = getc(fp)) != EOF && (*bp++ = i) != newline && bp < bpe) ;
 
 	*bp = '\0';
 	if (append)
 	    str_cat(str, buf);
 	else
 	    str_set(str, buf);
-	if (i != newline && i != EOF) {
+	if (i != EOF			/* joy */
+	    &&
+	    (i != newline
+	     ||
+	     (rslen > 1
+	      &&
+	      (str->str_cur < rslen
+	       ||
+	       bcmp(str->str_ptr + str->str_cur - rslen, rs, rslen)
+	      )
+	     )
+	    )
+	   )
+	{
 	    append = -1;
 	    goto screamer;
 	}
@@ -945,6 +889,7 @@ STR *str;
 	fatal("panic: error in parselist %d %x %d", cmd->c_type,
 	  cmd->c_next, arg ? arg->arg_type : -1);
     Safefree(cmd);
+    eval_root = Nullcmd;
     return arg;
 }
 
@@ -962,6 +907,7 @@ STR *src;
     register char *d;
     STAB *stab;
     char *checkpoint;
+    int sawcase = 0;
 
     toparse = Str_new(76,0);
     str = Str_new(77,0);
@@ -970,13 +916,19 @@ STR *src;
     str_nset(toparse,"",0);
     t = s;
     while (s < send) {
-	if (*s == '\\' && s[1] && index("$@[{\\]}",s[1])) {
+	if (*s == '\\' && s[1] && index("$@[{\\]}lLuUE",s[1])) {
 	    str_ncat(str, t, s - t);
 	    ++s;
-	    if (*nointrp && s+1 < send)
-		if (*s != '@' && (*s != '$' || index(nointrp,s[1])))
-		    str_ncat(str,s-1,1);
-	    str_ncat(str, "$b", 2);
+	    if (isalpha(*s)) {
+		str_ncat(str, "$c", 2);
+		sawcase = (*s != 'E');
+	    }
+	    else {
+		if (*nointrp && s+1 < send)
+		    if (*s != '@' && (*s != '$' || index(nointrp,s[1])))
+			str_ncat(str,s-1,1);
+		str_ncat(str, "$b", 2);
+	    }
 	    str_ncat(str, s, 1);
 	    ++s;
 	    t = s;
@@ -987,7 +939,7 @@ STR *src;
 	    t = s;
 	    if (*s == '$' && s[1] == '#' && (isalpha(s[2]) || s[2] == '_'))
 		s++;
-	    s = scanreg(s,send,tokenbuf);
+	    s = scanident(s,send,tokenbuf);
 	    if (*t == '@' &&
 	      (!(stab = stabent(tokenbuf,FALSE)) || 
 		 (*s == '{' ? !stab_xhash(stab) : !stab_xarray(stab)) )) {
@@ -1072,7 +1024,7 @@ STR *src;
 				weight -= seen[un_char] * 10;
 				if (isalpha(d[1]) || isdigit(d[1]) ||
 				  d[1] == '_') {
-				    d = scanreg(d,s,tokenbuf);
+				    d = scanident(d,s,tokenbuf);
 				    if (stabent(tokenbuf,FALSE))
 					weight -= 100;
 				    else
@@ -1155,6 +1107,8 @@ STR *src;
 	    s++;
     }
     str_ncat(str,t,s-t);
+    if (sawcase)
+	str_ncat(str, "$cE", 3);
     if (toparse->str_ptr && *toparse->str_ptr == ',') {
 	*toparse->str_ptr = '(';
 	str_ncat(toparse,",$$);",5);
@@ -1179,6 +1133,11 @@ int sp;
     register char *t;
     register char *send;
     register STR **elem;
+    int docase = 0;
+    int l = 0;
+    int u = 0;
+    int L = 0;
+    int U = 0;
 
     if (str == &str_undef)
 	return Nullstr;
@@ -1203,7 +1162,8 @@ int sp;
     str_nset(str,"",0);
     while (s < send) {
 	if (*s == '$' && s+1 < send) {
-	    str_ncat(str,t,s-t);
+	    if (s-t > 0)
+		str_ncat(str,t,s-t);
 	    switch(*++s) {
 	    case 'a':
 		str_scat(str,*++elem);
@@ -1211,14 +1171,75 @@ int sp;
 	    case 'b':
 		str_ncat(str,++s,1);
 		break;
+	    case 'c':
+		if (docase && str->str_cur >= docase) {
+		    char *b = str->str_ptr + --docase;
+
+		    if (L)
+			lcase(b, str->str_ptr + str->str_cur);
+		    else if (U)
+			ucase(b, str->str_ptr + str->str_cur);
+
+		    if (u)	/* note that l & u are independent of L & U */
+			ucase(b, b+1);
+		    else if (l)
+			lcase(b, b+1);
+		    l = u = 0;
+		}
+		docase = str->str_cur + 1;
+		switch (*++s) {
+		case 'u':
+		    u = 1;
+		    l = 0;
+		    break;
+		case 'U':
+		    U = 1;
+		    L = 0;
+		    break;
+		case 'l':
+		    l = 1;
+		    u = 0;
+		    break;
+		case 'L':
+		    L = 1;
+		    U = 0;
+		    break;
+		case 'E':
+		    docase = L = U = l = u = 0;
+		    break;
+		}
+		break;
 	    }
 	    t = ++s;
 	}
 	else
 	    s++;
     }
-    str_ncat(str,t,s-t);
+    if (s-t > 0)
+	str_ncat(str,t,s-t);
     return str;
+}
+
+ucase(s,send)
+register char *s;
+register char *send;
+{
+    while (s < send) {
+	if (isascii(*s) && islower(*s))
+	    *s = toupper(*s);
+	s++;
+    }
+}
+
+lcase(s,send)
+register char *s;
+register char *send;
+{
+    while (s < send) {
+	if (isascii(*s) && isupper(*s))
+	    *s = tolower(*s);
+	s++;
+    }
 }
 
 void
@@ -1299,7 +1320,7 @@ register STR *str;
 static long tmps_size = -1;
 
 STR *
-str_static(oldstr)
+str_mortal(oldstr)
 STR *oldstr;
 {
     register STR *str = Str_new(78,0);
@@ -1323,7 +1344,7 @@ STR *oldstr;
 /* same thing without the copying */
 
 STR *
-str_2static(str)
+str_2mortal(str)
 register STR *str;
 {
     if (str == &str_undef)

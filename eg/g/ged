@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: ged,v 3.0 89/10/18 15:14:22 lwall Locked $
+# $Header: ged,v 4.0 91/03/20 01:10:22 lwall Locked $
 
 # Does inplace edits on a set of files on a set of machines.
 #

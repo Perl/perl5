@@ -1,4 +1,4 @@
-/* $Header: consarg.c,v 3.0.1.8 91/01/11 17:37:31 lwall Locked $
+/* $Header: consarg.c,v 4.0 91/03/20 01:06:15 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,38 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	consarg.c,v $
- * Revision 3.0.1.8  91/01/11  17:37:31  lwall
- * patch42: assignment to a slice didn't supply an array context to RHS
- * patch42: suppressed variable suicide on local($a,$b) = @_
- * 
- * Revision 3.0.1.7  90/10/15  15:55:28  lwall
- * patch29: defined @foo was behaving inconsistently
- * patch29: -5 % 5 was wrong
- * patch29: package behavior is now more consistent
- * 
- * Revision 3.0.1.6  90/08/09  02:38:51  lwall
- * patch19: fixed problem with % of negative number
- * 
- * Revision 3.0.1.5  90/03/27  15:36:45  lwall
- * patch16: support for machines that can't cast negative floats to unsigned ints
- * 
- * Revision 3.0.1.4  90/03/12  16:24:40  lwall
- * patch13: return (@array) did counter-intuitive things
- * 
- * Revision 3.0.1.3  90/02/28  16:47:54  lwall
- * patch9: the x operator is now up to 10 times faster
- * patch9: @_ clobbered by ($foo,$bar) = split
- * 
- * Revision 3.0.1.2  89/11/17  15:11:34  lwall
- * patch5: defined $foo{'bar'} should not create element
- * 
- * Revision 3.0.1.1  89/11/11  04:14:30  lwall
- * patch2: '-' x 26 made warnings about undefined value
- * patch2: eval with no args caused strangeness
- * patch2: local(@foo) didn't work, but local(@foo,$bar) did
- * 
- * Revision 3.0  89/10/18  15:10:30  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:06:15  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -135,14 +105,16 @@ register ARG *pat;
 	if (pat->arg_len >= 2) {
 	    newarg[2].arg_type = pat[2].arg_type;
 	    newarg[2].arg_ptr = pat[2].arg_ptr;
+	    newarg[2].arg_len = pat[2].arg_len;
 	    newarg[2].arg_flags = pat[2].arg_flags;
 	    if (pat->arg_len >= 3) {
 		newarg[3].arg_type = pat[3].arg_type;
 		newarg[3].arg_ptr = pat[3].arg_ptr;
+		newarg[3].arg_len = pat[3].arg_len;
 		newarg[3].arg_flags = pat[3].arg_flags;
 	    }
 	}
-	Safefree(pat);
+	free_arg(pat);
     }
     else {
 	Newz(202,spat,1,SPAT);
@@ -303,7 +275,7 @@ register ARG *arg;
 	return;
 
     if ((arg[1].arg_type == A_SINGLE || arg->arg_type == O_AELEM) &&
-        (arg->arg_len == 1 || arg[2].arg_type == A_SINGLE) ) {
+	(arg->arg_len == 1 || arg[2].arg_type == A_SINGLE) ) {
 	str = Str_new(20,0);
 	s1 = arg[1].arg_ptr.arg_str;
 	if (arg->arg_len > 1)
@@ -319,6 +291,8 @@ register ARG *arg;
 		arg[1].arg_type = A_ARYSTAB;	/* $abc[123] is hoistable now */
 		arg[1].arg_len = i;
 		str_free(s2);
+		arg[2].arg_type = A_NULL;
+		arg[2].arg_ptr.arg_str = Nullstr;
 	    }
 	    /* FALL THROUGH */
 	default:
@@ -347,7 +321,24 @@ register ARG *arg;
 	    if (value == 0.0)
 		yyerror("Illegal division by constant zero");
 	    else
-		str_numset(str,str_gnum(s1) / value);
+#ifdef cray
+	    /* insure that 20./5. == 4. */
+	    {
+		double x;
+		int    k;
+		x =  str_gnum(s1);
+		if ((double)(int)x     == x &&
+		    (double)(int)value == value &&
+		    (k = (int)x/(int)value)*(int)value == (int)x) {
+		    value = k;
+		} else {
+		    value = x/value;
+		}
+		str_numset(str,value);
+	    }
+#else
+	    str_numset(str,str_gnum(s1) / value);
+#endif
 	    break;
 	case O_MODULO:
 	    tmplong = (unsigned long)str_gnum(s2);
@@ -466,6 +457,7 @@ register ARG *arg;
 		else
 		    str_sset(str,arg[3].arg_ptr.arg_str);
 		str_free(arg[3].arg_ptr.arg_str);
+		arg[3].arg_ptr.arg_str = Nullstr;
 	    }
 	    break;
 	case O_NEGATE:
@@ -518,7 +510,7 @@ register ARG *arg;
 	    str_numset(str,(double)(str_cmp(s1,s2)));
 	    break;
 	case O_CRYPT:
-#ifdef CRYPT
+#ifdef HAS_CRYPT
 	    tmps = str_get(s1);
 	    str_set(str,crypt(tmps,str_get(s2)));
 #else
@@ -565,6 +557,8 @@ register ARG *arg;
 	    str_free(s1);
 	    str_free(s2);
 	    arg[1].arg_ptr.arg_str = str;
+	    arg[2].arg_ptr.arg_str = Nullstr;
+	    arg[2].arg_type = A_NULL;
 	}
     }
 }
@@ -686,8 +680,10 @@ register ARG *arg;
 		      nothing_in_common(arg1,spat->spat_repl)) {
 			spat->spat_repl[1].arg_ptr.arg_stab =
 			    arg1[1].arg_ptr.arg_stab;
+			arg1[1].arg_ptr.arg_stab = Nullstab;
 			spat->spat_flags |= SPAT_ONCE;
 			arg_free(arg1);	/* recursive */
+			arg[1].arg_ptr.arg_arg = Nullarg;
 			free_arg(arg);	/* non-recursive */
 			return arg2;	/* split has builtin assign */
 		    }
@@ -748,7 +744,7 @@ register ARG *arg;
 			/* grow string struct to hold an lstring struct */
 	}
 	else if (arg1->arg_type == O_ASSIGN) {
-	    if (arg->arg_type == O_CHOP)
+/*	    if (arg->arg_type == O_CHOP)
 		arg[1].arg_flags &= ~AF_ARYOK;	/* grandfather chop idiom */
 	}
 	else {
@@ -868,6 +864,7 @@ register ARG *arg;
     if (arg->arg_type != O_COMMA) {
 	if (arg->arg_type != O_ARRAY)
 	    arg->arg_flags |= AF_LISTISH;	/* see listish() below */
+	    arg->arg_flags |= AF_LISTISH;	/* see listish() below */
 	return arg;
     }
     for (i = 2, node = arg; ; i++) {
@@ -964,11 +961,16 @@ ARG *
 rcatmaybe(arg)
 ARG *arg;
 {
-    if (arg->arg_type == O_CONCAT && arg[2].arg_type == A_READ) {
-	arg->arg_type = O_RCAT;	
-	arg[2].arg_type = arg[2].arg_ptr.arg_arg[1].arg_type;
-	arg[2].arg_ptr = arg[2].arg_ptr.arg_arg[1].arg_ptr;
-	free_arg(arg[2].arg_ptr.arg_arg);
+    ARG *arg2;
+
+    if (arg->arg_type == O_CONCAT && arg[2].arg_type == A_EXPR) {
+	arg2 = arg[2].arg_ptr.arg_arg;
+	if (arg2->arg_type == O_ITEM && arg2[1].arg_type == A_READ) {
+	    arg->arg_type = O_RCAT;	
+	    arg[2].arg_type = arg2[1].arg_type;
+	    arg[2].arg_ptr = arg2[1].arg_ptr;
+	    free_arg(arg2);
+	}
     }
     return arg;
 }
@@ -1123,7 +1125,7 @@ int marking;
 
 		while (*s) {
 		    if (*s == '$' && s[1]) {
-			s = scanreg(s,send,tokenbuf);
+			s = scanident(s,send,tokenbuf);
 			stab = stabent(tokenbuf,TRUE);
 			if (marking)
 			    stab_lastexpr(stab) = exprnum;

@@ -1,4 +1,4 @@
-.\" $Header: gcp.man,v 3.0 89/10/18 15:14:09 lwall Locked $
+.\" $Header: gcp.man,v 4.0 91/03/20 01:10:13 lwall Locked $
 .TH GCP 1C "13 May 1988"
 .SH NAME
 gcp \- global file copy

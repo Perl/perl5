@@ -1,4 +1,4 @@
-/* $Header: array.c,v 3.0.1.3 90/10/15 14:56:17 lwall Locked $
+/* $Header: array.c,v 4.0 91/03/20 01:03:32 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,17 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	array.c,v $
- * Revision 3.0.1.3  90/10/15  14:56:17  lwall
- * patch29: non-existent array values no longer cause core dumps
- * 
- * Revision 3.0.1.2  90/08/13  21:52:20  lwall
- * patch28: defined(@array) and defined(%array) didn't work right
- * 
- * Revision 3.0.1.1  89/11/17  15:02:52  lwall
- * patch5: nested foreach on same array didn't work
- * 
- * Revision 3.0  89/10/18  15:08:33  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:03:32  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -36,7 +27,7 @@ int lval;
 	    if (ar->ary_flags & ARF_REAL)
 		str = Str_new(5,0);
 	    else
-		str = str_static(&str_undef);
+		str = str_mortal(&str_undef);
 	    (void)astore(ar,key,str);
 	    return str;
 	}
@@ -126,8 +117,8 @@ STAB *stab;
 ARRAY *
 afake(stab,size,strp)
 STAB *stab;
-int size;
-STR **strp;
+register int size;
+register STR **strp;
 {
     register ARRAY *ar;
 
@@ -140,6 +131,9 @@ STR **strp;
     ar->ary_fill = size - 1;
     ar->ary_max = size - 1;
     ar->ary_flags = 0;
+    while (size--) {
+	(*strp++)->str_pok &= ~SP_TEMP;
+    }
     return ar;
 }
 
@@ -222,8 +216,14 @@ register int num;
 	(void)astore(ar,ar->ary_fill+num,(STR*)0);	/* maybe extend array */
 	dstr = ar->ary_array + ar->ary_fill;
 	sstr = dstr - num;
+#ifdef BUGGY_MSC5
+ # pragma loop_opt(off)	/* don't loop-optimize the following code */
+#endif /* BUGGY_MSC5 */
 	for (i = ar->ary_fill; i >= 0; i--) {
 	    *dstr-- = *sstr--;
+#ifdef BUGGY_MSC5
+ # pragma loop_opt()	/* loop-optimization back to command-line setting */
+#endif /* BUGGY_MSC5 */
 	}
 	Zero(ar->ary_array, num, STR*);
     }

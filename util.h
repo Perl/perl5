@@ -1,4 +1,4 @@
-/* $Header: util.h,v 3.0.1.2 89/11/17 15:48:01 lwall Locked $
+/* $Header: util.h,v 4.0 91/03/20 01:56:48 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,14 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.h,v $
- * Revision 3.0.1.2  89/11/17  15:48:01  lwall
- * patch5: BZERO separate from BCOPY now
- * 
- * Revision 3.0.1.1  89/10/26  23:28:25  lwall
- * patch1: declared bcopy if necessary
- * 
- * Revision 3.0  89/10/18  15:33:18  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:56:48  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -36,11 +30,13 @@ char	*rninstr();
 char	*nsavestr();
 FILE	*mypopen();
 int	mypclose();
-#ifndef MEMCPY
-#ifndef BCOPY
+#ifndef HAS_MEMCPY
+#ifndef HAS_BCOPY
 char	*bcopy();
 #endif
-#ifndef BZERO
+#ifndef HAS_BZERO
 char	*bzero();
 #endif
 #endif
+unsigned long scanoct();
+unsigned long scanhex();

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: scanner,v 3.0.1.1 90/03/12 16:35:15 lwall Locked $
+# $Header: scanner,v 4.0 91/03/20 01:14:11 lwall Locked $
 
 # This runs all the scan_* routines on all the machines in /etc/ghosts.
 # We run this every morning at about 6 am:

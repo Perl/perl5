@@ -1,4 +1,4 @@
-;# $Header: validate.pl,v 3.0.1.1 90/08/09 04:03:10 lwall Locked $
+;# $Header: validate.pl,v 4.0 91/03/20 01:26:56 lwall Locked $
 
 ;# The validate routine takes a single multiline string consisting of
 ;# lines containing a filename plus a file test to try on it.  (The

@@ -1,4 +1,4 @@
-;# $Header: getopt.pl,v 3.0.1.1 90/02/28 17:41:59 lwall Locked $
+;# $Header: getopt.pl,v 4.0 91/03/20 01:25:11 lwall Locked $
 
 ;# Process single-character switches with switch clustering.  Pass one argument
 ;# which is a string containing all switches that take an argument.  For each

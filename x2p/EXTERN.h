@@ -1,4 +1,4 @@
-/* $Header: EXTERN.h,v 3.0 89/10/18 15:33:37 lwall Locked $
+/* $Header: EXTERN.h,v 4.0 91/03/20 01:56:53 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,8 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	EXTERN.h,v $
- * Revision 3.0  89/10/18  15:33:37  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:56:53  lwall
+ * 4.0 baseline.
  * 
  */
 

@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0.1.11 91/01/11 18:33:10 lwall Locked $
+/* $Header: util.c,v 4.0 91/03/20 01:56:39 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,55 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
- * Revision 3.0.1.11  91/01/11  18:33:10  lwall
- * patch42: die could exit with 0 value on some machines
- * patch42: Configure checks typecasting behavior better
- * 
- * Revision 3.0.1.10  90/11/10  02:19:28  lwall
- * patch38: random cleanup
- * patch38: sequence of s/^x//; s/x$//; could screw up malloc
- * 
- * Revision 3.0.1.9  90/10/20  02:21:01  lwall
- * patch37: tried to take strlen of integer on systems without wait4 or waitpid
- * patch37: unreachable return eliminated
- * 
- * Revision 3.0.1.8  90/10/16  11:26:57  lwall
- * patch29: added waitpid
- * patch29: various portability fixes
- * patch29: scripts now run at almost full speed under the debugger
- * 
- * Revision 3.0.1.7  90/08/13  22:40:26  lwall
- * patch28: the NSIG hack didn't work right on Xenix
- * patch28: rename was busted on systems without rename system call
- * 
- * Revision 3.0.1.6  90/08/09  05:44:55  lwall
- * patch19: fixed double include of <signal.h>
- * patch19: various MSDOS and OS/2 patches folded in
- * patch19: open(STDOUT,"|command") left wrong descriptor attached to STDOUT
- * 
- * Revision 3.0.1.5  90/03/27  16:35:13  lwall
- * patch16: MSDOS support
- * patch16: support for machines that can't cast negative floats to unsigned ints
- * patch16: tail anchored pattern could dump if string to search was shorter
- * 
- * Revision 3.0.1.4  90/03/01  10:26:48  lwall
- * patch9: fbminstr() called instr() rather than ninstr()
- * patch9: nested evals clobbered their longjmp environment
- * patch9: piped opens returned undefined rather than 0 in child
- * patch9: the x operator is now up to 10 times faster
- * 
- * Revision 3.0.1.3  89/12/21  20:27:41  lwall
- * patch7: errno may now be a macro with an lvalue
- * 
- * Revision 3.0.1.2  89/11/17  15:46:35  lwall
- * patch5: BZERO separate from BCOPY now
- * patch5: byteorder now is a hex value
- * 
- * Revision 3.0.1.1  89/11/11  05:06:13  lwall
- * patch2: made dup2 a little better
- * 
- * Revision 3.0  89/10/18  15:32:43  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:56:39  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -71,6 +24,13 @@
 
 #ifdef I_VARARGS
 #  include <varargs.h>
+#endif
+
+#ifdef I_FCNTL
+#  include <fcntl.h>
+#endif
+#ifdef I_SYS_FILE
+#  include <sys/file.h>
 #endif
 
 #define FLUSH
@@ -97,7 +57,9 @@ MEM_SIZE size;
 #endif /* MSDOS */
 {
     char *ptr;
+#ifndef __STDC__
     char *malloc();
+#endif /* ! __STDC__ */
 
 #ifdef MSDOS
 	if (size > 0xffff) {
@@ -143,7 +105,9 @@ unsigned long size;
 #endif /* MSDOS */
 {
     char *ptr;
+#ifndef __STDC__
     char *realloc();
+#endif /* ! __STDC__ */
 
 #ifdef MSDOS
 	if (size > 0xffff) {
@@ -991,8 +955,9 @@ va_dcl
 }
 #endif
 
-static bool firstsetenv = TRUE;
+#ifndef __STDC__
 extern char **environ;
+#endif
 
 void
 setenv(nam,val)
@@ -1000,6 +965,18 @@ char *nam, *val;
 {
     register int i=envix(nam);		/* where does it go? */
 
+    if (environ == origenviron) {	/* need we copy environment? */
+	int j;
+	int max;
+	char **tmpenv;
+
+	for (max = i; environ[max]; max++) ;
+	New(901,tmpenv, max+2, char*);
+	for (j=0; j<max; j++)		/* copy environment */
+	    tmpenv[j] = savestr(environ[j]);
+	tmpenv[max] = Nullch;
+	environ = tmpenv;		/* tell exec where it is now */
+    }
     if (!val) {
 	while (environ[i]) {
 	    environ[i] = environ[i+1];
@@ -1008,28 +985,21 @@ char *nam, *val;
 	return;
     }
     if (!environ[i]) {			/* does not exist yet */
-	if (firstsetenv) {		/* need we copy environment? */
-	    int j;
-	    char **tmpenv;
-
-	    New(901,tmpenv, i+2, char*);
-	    firstsetenv = FALSE;
-	    for (j=0; j<i; j++)		/* copy environment */
-		tmpenv[j] = environ[j];
-	    environ = tmpenv;		/* tell exec where it is now */
-	}
-	else
-	    Renew(environ, i+2, char*);	/* just expand it a bit */
+	Renew(environ, i+2, char*);	/* just expand it a bit */
 	environ[i+1] = Nullch;	/* make sure it's null terminated */
     }
+    else
+	Safefree(environ[i]);
     New(904, environ[i], strlen(nam) + strlen(val) + 2, char);
-					/* this may or may not be in */
-					/* the old environ structure */
 #ifndef MSDOS
     (void)sprintf(environ[i],"%s=%s",nam,val);/* all that work just for this */
 #else
     /* MS-DOS requires environment variable names to be in uppercase */
-    strcpy(environ[i],nam); strupr(environ[i],nam);
+    /* [Tom Dinger, 27 August 1990: Well, it doesn't _require_ it, but
+     * some utilities and applications may break because they only look
+     * for upper case strings. (Fixed strupr() bug here.)]
+     */
+    strcpy(environ[i],nam); strupr(environ[i]);
     (void)sprintf(environ[i] + strlen(nam),"=%s",val);
 #endif /* MSDOS */
 }
@@ -1058,8 +1028,8 @@ char *f;
 }
 #endif
 
-#ifndef MEMCPY
-#ifndef BCOPY
+#ifndef HAS_MEMCPY
+#ifndef HAS_BCOPY
 char *
 bcopy(from,to,len)
 register char *from;
@@ -1074,7 +1044,7 @@ register int len;
 }
 #endif
 
-#ifndef BZERO
+#ifndef HAS_BZERO
 char *
 bzero(loc,len)
 register char *loc;
@@ -1090,7 +1060,7 @@ register int len;
 #endif
 
 #ifdef VARARGS
-#ifndef VPRINTF
+#ifndef HAS_VPRINTF
 
 #ifdef CHARVSPRINTF
 char *
@@ -1124,7 +1094,7 @@ char *pat, *args;
     return 0;		/* wrong, but perl doesn't use the return value */
 }
 #endif
-#endif /* VPRINTF */
+#endif /* HAS_VPRINTF */
 #endif /* VARARGS */
 
 #ifdef MYSWAP
@@ -1206,7 +1176,7 @@ register long l;
 }
 
 #endif /* BYTEORDER != 0x4321 */
-#endif /* HTONS */
+#endif /* HAS_HTONS */
 
 #ifndef MSDOS
 FILE *
@@ -1242,7 +1212,7 @@ char	*mode;
 	    close(p[THIS]);
 	}
 	if (doexec) {
-#if !defined(FCNTL) || !defined(F_SETFD)
+#if !defined(I_FCNTL) || !defined(F_SETFD)
 	    int fd;
 
 #ifndef NOFILE
@@ -1257,7 +1227,7 @@ char	*mode;
 	if (tmpstab = stabent("$",allstabs))
 	    str_numset(STAB_STR(tmpstab),(double)getpid());
 	forkprocess = 0;
-	hclear(pidstatus);	/* we have no children */
+	hclear(pidstatus, FALSE);	/* we have no children */
 	return Nullfp;
 #undef THIS
 #undef THAT
@@ -1292,12 +1262,12 @@ char *s;
 }
 #endif
 
-#ifndef DUP2
+#ifndef HAS_DUP2
 dup2(oldfd,newfd)
 int oldfd;
 int newfd;
 {
-#if defined(FCNTL) && defined(F_DUPFD)
+#if defined(HAS_FCNTL) && defined(F_DUPFD)
     close(newfd);
     fcntl(oldfd, F_DUPFD, newfd);
 #else
@@ -1305,6 +1275,8 @@ int newfd;
     int fdx = 0;
     int fd;
 
+    if (oldfd == newfd)
+	return 0;
     close(newfd);
     while ((fd = dup(oldfd)) != newfd)	/* good enough for low fd's */
 	fdtmp[fdx++] = fd;
@@ -1354,10 +1326,10 @@ int flags;
 
     if (!pid)
 	return -1;
-#ifdef WAIT4
-    return wait4(pid,statusp,flags,Null(struct rusage *));
+#ifdef HAS_WAIT4
+    return wait4((pid==-1)?0:pid,statusp,flags,Null(struct rusage *));
 #else
-#ifdef WAITPID
+#ifdef HAS_WAITPID
     return waitpid(pid,statusp,flags);
 #else
     if (pid > 0) {
@@ -1385,9 +1357,6 @@ int flags;
     if (flags)
 	fatal("Can't do waitpid with flags");
     else {
-	register int count;
-	register STR *str;
-
 	while ((result = wait(statusp)) != pid && pid > 0 && result >= 0)
 	    pidgone(result,*statusp);
 	if (result < 0)
@@ -1397,13 +1366,12 @@ int flags;
 #endif
 #endif
 }
-#endif /* !MSDOS */
 
 pidgone(pid,status)
 int pid;
 int status;
 {
-#if defined(WAIT4) || defined(WAITPID)
+#if defined(HAS_WAIT4) || defined(HAS_WAITPID)
 #else
     register STR *str;
     char spid[16];
@@ -1414,8 +1382,9 @@ int status;
 #endif
     return;
 }
+#endif /* !MSDOS */
 
-#ifndef MEMCMP
+#ifndef HAS_MEMCMP
 memcmp(s1,s2,len)
 register unsigned char *s1;
 register unsigned char *s2;
@@ -1429,7 +1398,7 @@ register int len;
     }
     return 0;
 }
-#endif /* MEMCMP */
+#endif /* HAS_MEMCMP */
 
 void
 repeatcpy(to,from,len,count)
@@ -1474,7 +1443,7 @@ double f;
 }
 #endif
 
-#ifndef RENAME
+#ifndef HAS_RENAME
 int
 same_dirent(a,b)
 char *a;
@@ -1514,4 +1483,40 @@ char *b;
     return tmpstatbuf1.st_dev == tmpstatbuf2.st_dev &&
 	   tmpstatbuf1.st_ino == tmpstatbuf2.st_ino;
 }
-#endif /* !RENAME */
+#endif /* !HAS_RENAME */
+
+unsigned long
+scanoct(start, len, retlen)
+char *start;
+int len;
+int *retlen;
+{
+    register char *s = start;
+    register unsigned long retval = 0;
+
+    while (len-- && *s >= '0' && *s <= '7') {
+	retval <<= 3;
+	retval |= *s++ - '0';
+    }
+    *retlen = s - start;
+    return retval;
+}
+
+unsigned long
+scanhex(start, len, retlen)
+char *start;
+int len;
+int *retlen;
+{
+    register char *s = start;
+    register unsigned long retval = 0;
+    char *tmp;
+
+    while (len-- && *s && (tmp = index(hexdigit, *s))) {
+	retval <<= 4;
+	retval |= (tmp - hexdigit) & 15;
+	s++;
+    }
+    *retlen = s - start;
+    return retval;
+}

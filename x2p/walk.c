@@ -1,4 +1,4 @@
-/* $Header: walk.c,v 3.0.1.6 90/10/16 11:35:51 lwall Locked $
+/* $Header: walk.c,v 4.0 91/03/20 01:58:36 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,28 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	walk.c,v $
- * Revision 3.0.1.6  90/10/16  11:35:51  lwall
- * patch29: a2p mistranslated certain weird field separators
- * 
- * Revision 3.0.1.5  90/08/09  05:55:01  lwall
- * patch19: a2p emited local($_) without a semicolon
- * patch19: a2p didn't make explicit split on whitespace skip leading whitespace
- * patch19: foreach on a normal array was iterating on values instead of indexes
- * 
- * Revision 3.0.1.4  90/03/01  10:32:45  lwall
- * patch9: a2p didn't put a $ on ExitValue
- * 
- * Revision 3.0.1.3  89/12/21  20:32:35  lwall
- * patch7: in a2p, user-defined functions didn't work on some machines
- * 
- * Revision 3.0.1.2  89/11/17  15:53:00  lwall
- * patch5: on Pyramids, index(s, '}' + 128) doesn't find meta-}
- * 
- * Revision 3.0.1.1  89/11/11  05:09:33  lwall
- * patch2: in a2p, awk script with no line actions still needs main loop
- * 
- * Revision 3.0  89/10/18  15:35:48  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:58:36  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -938,7 +918,7 @@ sub Pick {\n\
 		s = "\"";
 		*d++ = *t++ + 128;
 		switch (*t) {
-		case '\\': case '"': case 'n': case 't':
+		case '\\': case '"': case 'n': case 't': case '$':
 		    break;
 		default:	/* hide this from perl */
 		    *d++ = '\\' + 128;
@@ -1290,7 +1270,7 @@ sub Pick {\n\
 	    tmpstr = walk(1,level,ops[node+1].ival,&numarg,P_MIN);
 	else
 	    tmpstr = str_new(0);;
-	if (!*tmpstr->str_ptr) {
+	if (!tmpstr->str_ptr || !*tmpstr->str_ptr) {
 	    if (lval_field) {
 		t = saw_OFS ? "$," : "' '";
 		if (split_to_array) {

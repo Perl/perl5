@@ -2,12 +2,15 @@
 # syslog.pl
 #
 # $Log:	syslog.pl,v $
+# Revision 4.0  91/03/20  01:26:24  lwall
+# 4.0 baseline.
+# 
 # Revision 3.0.1.4  90/11/10  01:41:11  lwall
 # patch38: syslog.pl was referencing an absolute path
 # 
 # Revision 3.0.1.3  90/10/15  17:42:18  lwall
 # patch29: various portability fixes
-#
+# 
 # Revision 3.0.1.1  90/08/09  03:57:17  lwall
 # patch19: Initial revision
 # 

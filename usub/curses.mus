@@ -1,6 +1,9 @@
-/* $Header: curses.mus,v 3.0.1.1 90/08/09 04:05:21 lwall Locked $
+/* $Header: curses.mus,v 4.0 91/03/20 01:56:13 lwall Locked $
  *
  * $Log:	curses.mus,v $
+ * Revision 4.0  91/03/20  01:56:13  lwall
+ * 4.0 baseline.
+ * 
  * Revision 3.0.1.1  90/08/09  04:05:21  lwall
  * patch19: Initial revision
  * 

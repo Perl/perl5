@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: myrup,v 3.0 89/10/18 15:15:06 lwall Locked $
+# $Header: myrup,v 4.0 91/03/20 01:11:16 lwall Locked $
 
 # This was a customization of ruptime requested by someone here who wanted
 # to be able to find the least loaded machine easily.  It uses the

@@ -1,4 +1,4 @@
-/* $Header: handy.h,v 3.0 89/10/18 15:34:44 lwall Locked $
+/* $Header: handy.h,v 4.0 91/03/20 01:57:45 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,8 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	handy.h,v $
- * Revision 3.0  89/10/18  15:34:44  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:57:45  lwall
+ * 4.0 baseline.
  * 
  */
 

@@ -1,4 +1,4 @@
-/* $Header: dump.c,v 3.0.1.2 90/10/15 16:22:10 lwall Locked $
+/* $Header: dump.c,v 4.0 91/03/20 01:08:25 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,14 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dump.c,v $
- * Revision 3.0.1.2  90/10/15  16:22:10  lwall
- * patch29: *foo now prints as *package'foo
- * 
- * Revision 3.0.1.1  90/03/27  15:49:58  lwall
- * patch16: changed unsigned to unsigned int
- * 
- * Revision 3.0  89/10/18  15:11:16  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:08:25  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -28,7 +22,7 @@ dump_all()
     register int i;
     register STAB *stab;
     register HENT *entry;
-    STR *str = str_static(&str_undef);
+    STR *str = str_mortal(&str_undef);
 
     dump_cmd(main_root,Nullcmd);
     for (i = 0; i <= 127; i++) {
@@ -187,6 +181,17 @@ register ARG *arg;
 	}
 	switch (arg[i].arg_type & A_MASK) {
 	case A_NULL:
+	    if (arg->arg_type == O_TRANS) {
+		short *tbl = (short*)arg[2].arg_ptr.arg_cval;
+		int i;
+
+		for (i = 0; i < 256; i++) {
+		    if (tbl[i] >= 0)
+			dump("   %d -> %d\n", i, tbl[i]);
+		    else if (tbl[i] == -2)
+			dump("   %d -> DELETE\n", i);
+		}
+	    }
 	    break;
 	case A_LEXPR:
 	case A_EXPR:
@@ -238,8 +243,8 @@ unsigned int flags;
 	(void)strcat(b,"UP,");
     if (flags & AF_COMMON)
 	(void)strcat(b,"COMMON,");
-    if (flags & AF_UNUSED)
-	(void)strcat(b,"UNUSED,");
+    if (flags & AF_DEPR)
+	(void)strcat(b,"DEPR,");
     if (flags & AF_LISTISH)
 	(void)strcat(b,"LISTISH,");
     if (flags & AF_LOCAL)
@@ -257,7 +262,7 @@ register STAB *stab;
 	fprintf(stderr,"{}\n");
 	return;
     }
-    str = str_static(&str_undef);
+    str = str_mortal(&str_undef);
     dumplvl++;
     fprintf(stderr,"{\n");
     stab_fullname(str,stab);

@@ -1,4 +1,4 @@
-/* $Header: cmd.c,v 3.0.1.10 90/10/20 02:01:56 lwall Locked $
+/* $Header: cmd.c,v 4.0 91/03/20 01:04:18 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,52 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.c,v $
- * Revision 3.0.1.10  90/10/20  02:01:56  lwall
- * patch37: cray has weird restrictions on setjmp locations
- * 
- * Revision 3.0.1.9  90/10/15  15:32:39  lwall
- * patch29: non-existent array values no longer cause core dumps
- * patch29: scripts now run at almost full speed under the debugger
- * patch29: @ENV = () now works
- * patch29: added caller
- * 
- * Revision 3.0.1.8  90/08/09  02:28:49  lwall
- * patch19: did preliminary work toward debugging packages and evals
- * patch19: conditionals now always supply a scalar context to expression
- * patch19: switch optimizer was confused by negative fractional values
- * 
- * Revision 3.0.1.7  90/03/27  15:32:37  lwall
- * patch16: non-terminal blocks should never have arrays requested of them
- * 
- * Revision 3.0.1.6  90/03/12  16:21:09  lwall
- * patch13: fixed some backwards VOLATILE declarations
- * patch13: while (s/x//) {} still caused some anomolies
- * patch13: greater-than test of numeric switch structures did less-than action
- * 
- * Revision 3.0.1.5  90/02/28  16:38:31  lwall
- * patch9: volatilized some more variables for super-optimizing compilers
- * patch9: nested foreach loops didn't reset inner loop on next to outer loop
- * patch9: returned values were read from obsolete stack
- * patch9: added sanity check on longjmp() return value
- * patch9: substitutions that almost always succeed can corrupt label stack
- * patch9: subs which return by both mechanisms can clobber local return data
- * 
- * Revision 3.0.1.4  89/12/21  19:17:41  lwall
- * patch7: arranged for certain registers to be restored after longjmp()
- * patch7: made nested or recursive foreach work right
- * 
- * Revision 3.0.1.3  89/11/17  15:04:36  lwall
- * patch5: nested foreach on same array didn't work
- * 
- * Revision 3.0.1.2  89/11/11  04:08:56  lwall
- * patch2: non-BSD machines required two ^D's for <>
- * patch2: grow_dlevel() not inside #ifdef DEBUGGING
- * 
- * Revision 3.0.1.1  89/10/26  23:04:21  lwall
- * patch1: heuristically disabled optimization could cause core dump
- * 
- * Revision 3.0  89/10/18  15:09:02  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:04:18  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -388,6 +344,8 @@ until_loop:
 			      retstr->str_ptr + cmd->c_slen,
 			      retstr->str_cur - cmd->c_slen);
 		    }
+		    if (cmd->c_spat)
+			lastspat = cmd->c_spat;
 		    match = !(cmdflags & CF_FIRSTNEG);
 		    retstr = &str_yes;
 		    goto flipmaybe;
@@ -422,6 +380,8 @@ until_loop:
 					 retstr->str_ptr + cmd->c_slen,
 					 retstr->str_cur - cmd->c_slen);
 			}
+			if (cmd->c_spat)
+			    lastspat = cmd->c_spat;
 		 	match = !(cmdflags & CF_FIRSTNEG);
 		 	retstr = &str_yes;
 		 	goto flipmaybe;
@@ -461,13 +421,15 @@ until_loop:
 			    str_nset(stab_val(leftstab),retstr->str_ptr,
 			      tmps - retstr->str_ptr);
 			if (amperstab)
-			    str_sset(stab_val(amperstab),cmd->c_short);
+			    str_nset(stab_val(amperstab),
+			      tmps, cmd->c_short->str_cur);
 			if (rightstab)
 			    str_nset(stab_val(rightstab),
 			      tmps + cmd->c_short->str_cur,
 			      retstr->str_cur - (tmps - retstr->str_ptr) -
 				cmd->c_short->str_cur);
 		    }
+		    lastspat = cmd->c_spat;
 		    match = !(cmdflags & CF_FIRSTNEG);
 		    retstr = &str_yes;
 		    goto flipmaybe;
@@ -567,8 +529,10 @@ until_loop:
 	case CFT_EVAL:
 	    break;
 	case CFT_UNFLIP:
-	    while (tmps_max > tmps_base)	/* clean up after last eval */
-		str_free(tmps_list[tmps_max--]);
+	    while (tmps_max > tmps_base) {	/* clean up after last eval */
+		str_free(tmps_list[tmps_max]);
+		tmps_list[tmps_max--] = Nullstr;
+	    }
 	    newsp = eval(cmd->c_expr,gimme && (cmdflags & CF_TERM),sp);
 	    st = stack->ary_array;	/* possibly reallocated */
 	    retstr = st[newsp];
@@ -586,6 +550,7 @@ until_loop:
 	    *tmps = '\0';
 	    retstr->str_nok = 0;
 	    retstr->str_cur = tmps - retstr->str_ptr;
+	    STABSET(retstr);
 	    retstr = &str_chop;
 	    goto flipmaybe;
 	case CFT_ARRAY:
@@ -637,11 +602,15 @@ until_loop:
 	    lastretstr = Nullstr;
 	    lastspbase = sp;
 	    lastsize = newsp - sp;
+	    if (lastsize < 0)
+		lastsize = 0;
 	}
 	else
 	    lastretstr = retstr;
-	while (tmps_max > tmps_base)	/* clean up after last eval */
-	    str_free(tmps_list[tmps_max--]);
+	while (tmps_max > tmps_base) {	/* clean up after last eval */
+	    str_free(tmps_list[tmps_max]);
+	    tmps_list[tmps_max--] = Nullstr;
+	}
 	newsp = eval(cmd->c_expr,
 	  gimme && (cmdflags & CF_TERM) && cmd->c_type == C_EXPR &&
 		!cmd->ucmd.acmd.ac_expr,
@@ -658,8 +627,10 @@ until_loop:
 
     flipmaybe:
 	if (match && cmdflags & CF_FLIP) {
-	    while (tmps_max > tmps_base)	/* clean up after last eval */
-		str_free(tmps_list[tmps_max--]);
+	    while (tmps_max > tmps_base) {	/* clean up after last eval */
+		str_free(tmps_list[tmps_max]);
+		tmps_list[tmps_max--] = Nullstr;
+	    }
 	    if (cmd->c_expr->arg_type == O_FLOP) {	/* currently toggled? */
 		newsp = eval(cmd->c_expr,G_SCALAR,sp);/*let eval undo it*/
 		cmdflags = copyopt(cmd,cmd->c_expr[3].arg_ptr.arg_cmd);
@@ -699,11 +670,15 @@ until_loop:
 		lastretstr = Nullstr;
 		lastspbase = sp;
 		lastsize = newsp - sp;
+		if (lastsize < 0)
+		    lastsize = 0;
 	    }
 	    else
 		lastretstr = retstr;
-	    while (tmps_max > tmps_base)	/* clean up after last eval */
-		str_free(tmps_list[tmps_max--]);
+	    while (tmps_max > tmps_base) {	/* clean up after last eval */
+		str_free(tmps_list[tmps_max]);
+		tmps_list[tmps_max--] = Nullstr;
+	    }
 	    newsp = eval(cmd->ucmd.acmd.ac_expr,gimme && (cmdflags&CF_TERM),sp);
 	    st = stack->ary_array;	/* possibly reallocated */
 	    retstr = st[newsp];
@@ -897,7 +872,7 @@ until_loop:
 	if (savestack->ary_fill > oldsave) {
 	    if (cmdflags & CF_TERM) {
 		for (match = sp + 1; match <= newsp; match++)
-		    st[match] = str_static(st[match]);
+		    st[match] = str_mortal(st[match]);
 		retstr = st[newsp];
 	    }
 	    restorelist(oldsave);
@@ -989,6 +964,7 @@ STAB *stab;
     str->str_u.str_stab = stab;
     if (str->str_ptr) {
 	Safefree(str->str_ptr);
+	str->str_ptr = Nullch;
 	str->str_len = 0;
     }
     str->str_ptr = (char*)stab_array(stab);
@@ -1008,6 +984,7 @@ STAB *stab;
     str->str_u.str_stab = stab;
     if (str->str_ptr) {
 	Safefree(str->str_ptr);
+	str->str_ptr = Nullch;
 	str->str_len = 0;
     }
     str->str_ptr = (char*)stab_hash(stab);

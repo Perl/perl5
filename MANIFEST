@@ -1,4 +1,3 @@
-Changes			Differences between 2.0 level 18 and 3.0 level 0
 Configure		Run this first
 Copying			The GNU General Public License
 EXTERN.h		Included before foreign .h files
@@ -8,6 +7,7 @@ Makefile.SH		Precursor to Makefile
 PACKINGLIST		Which files came from which kits
 README			The Instructions
 README.uport		Special instructions for Microports
+README.xenix		Special instructions for Xenix
 Wishlist		Some things that may or may not happen
 arg.h			Public declarations for the above
 array.c			Numerically subscripted arrays
@@ -62,8 +62,11 @@ eg/van/unvanish		A program to undo what vanish does
 eg/van/vanexp		A program to expire vanished files
 eg/van/vanish		A program to put files in a trashcan
 eg/who			A sample who program
+emacs/perldb.pl		Emacs debugging
+emacs/perldb.el		Emacs debugging
+emacs/perl-mode.el	Emacs major mode for perl
+emacs/tedstuff		Some optional patches
 eval.c			The expression evaluator
-evalargs.xc		The arg evaluator of eval.c
 form.c			Format processing
 form.h			Public declarations for the above
 gettest			A little script to test the get* routines
@@ -103,16 +106,17 @@ lib/pwd.pl		Routines to keep track of PWD environment variable
 lib/stat.pl		Perl library supporting stat function
 lib/syslog.pl		Perl library supporting syslogging
 lib/termcap.pl		Perl library supporting termcap usage
+lib/timelocal.pl	Perl library supporting inverse of localtime, gmtime
 lib/validate.pl		Perl library supporting wholesale file mode validation
 makedepend.SH		Precursor to makedepend
 makedir.SH		Precursor to makedir
-makelib.SH		Deprecated (renamed to h2ph)
 malloc.c		A version of malloc you might not want
 msdos/Changes.dds	Expanation of MS-DOS patches by Diomidis Spinellis
 msdos/Makefile		MS-DOS makefile
 msdos/README.msdos	Compiling and usage information
 msdos/Wishlist.dds	My wishlist
 msdos/config.h		Definitions for msdos
+msdos/chdir.c		A chdir that can change drives
 msdos/dir.h		MS-DOS header for directory access functions
 msdos/directory.c	MS-DOS directory access functions.
 msdos/eg/crlf.bat	Convert files from unix to MS-DOS line termination
@@ -121,15 +125,20 @@ msdos/eg/lf.bat		Convert files from MS-DOS to Unix line termination
 msdos/glob.c		A command equivalent to csh glob
 msdos/msdos.c		MS-DOS ioctl, sleep, gete?[gu]if, spawn, aspawn
 msdos/popen.c		My_popen and my_pclose for MS-DOS
+msdos/usage.c		How to invoke perl under MS-DOS
 os2/Makefile		Makefile for OS/2
 os2/README.OS2		Notes for OS/2
 os2/a2p.cs		Compiler script for a2p
 os2/a2p.def		Linker defs for a2p
+os2/alarm.c		An implementation of alarm()
+os2/alarm.h		Header file for same
 os2/config.h		Configuration file for OS/2
 os2/dir.h		Directory header
 os2/director.c		Directory routines
+os2/eg/alarm.pl		Example of alarm code
 os2/eg/os2.pl		Sample script for OS/2
 os2/eg/syscalls.pl	Example of syscall on OS/2
+os2/glob.c		Globbing routines
 os2/makefile		Make file
 os2/mktemp.c		Mktemp() using TMP
 os2/os2.c		Unix compatibility functions
@@ -137,21 +146,22 @@ os2/perl.bad		names of protect-only API calls for BIND
 os2/perl.cs		Compiler script for perl
 os2/perl.def		Linker defs for perl
 os2/perldb.dif		Changes to make the debugger work
+os2/perlglob.bad	names of protect-only API calls for BIND
 os2/perlglob.cs		Compiler script for perlglob
 os2/perlglob.def	Linker defs for perlglob
 os2/perlsh.cmd		Poor man's shell for os2
 os2/popen.c		Code for opening pipes
+os2/s2p.cmd		s2p as command file
+os2/selfrun.bat		A self running perl script for DOS
 os2/selfrun.cmd		Example of extproc feature
 os2/suffix.c		Code for creating backup filenames
 patchlevel.h		The current patch level of perl
+perl.c			main()
 perl.h			Global declarations
-perl.y			Yacc grammar for perl
-perl_man.1		The manual page(s), first fourth
-perl_man.2		The manual page(s), second fourth
-perl_man.3		The manual page(s), third fourth
-perl_man.4		The manual page(s), fourth fourth
+perl.man		The manual page(s)
 perlsh			A poor man's perl shell
-perly.c			main()
+perly.y			Yacc grammar for perl
+perly.fixer		A program to remove yacc stack limitations
 regcomp.c		Regular expression compiler
 regcomp.h		Private declarations for above
 regexec.c		Regular expression evaluator
@@ -164,80 +174,82 @@ str.c			String handling package
 str.h			Public declarations for the above
 t/README		Instructions for regression tests
 t/TEST			The regression tester
-t/base.cond		See if conditionals work
-t/base.if		See if if works
-t/base.lex		See if lexical items work
-t/base.pat		See if pattern matching works
-t/base.term		See if various terms work
-t/cmd.elsif		See if else-if works
-t/cmd.for		See if for loops work
-t/cmd.mod		See if statement modifiers work
-t/cmd.subval		See if subroutine values work
-t/cmd.switch		See if switch optimizations work
-t/cmd.while		See if while loops work
-t/comp.cmdopt		See if command optimization works
-t/comp.cpp		See if C preprocessor works
-t/comp.decl		See if declarations work
-t/comp.multiline	See if multiline strings work
-t/comp.package		See if packages work
-t/comp.script		See if script invokation works
-t/comp.term		See if more terms work
-t/io.argv		See if ARGV stuff works
-t/io.dup		See if >& works right
-t/io.fs			See if directory manipulations work
-t/io.inplace		See if inplace editing works
-t/io.pipe		See if secure pipes work
-t/io.print		See if print commands work
-t/io.tell		See if file seeking works
-t/lib.big		See if lib/bigint.pl works
-t/op.append		See if . works
-t/op.array		See if array operations work
-t/op.auto		See if autoincrement et all work
-t/op.chop		See if chop works
-t/op.cond		See if conditional expressions work
-t/op.dbm		See if dbm binding works
-t/op.delete		See if delete works
-t/op.do			See if subroutines work
-t/op.each		See if associative iterators work
-t/op.eval		See if eval operator works
-t/op.exec		See if exec and system work
-t/op.exp		See if math functions work
-t/op.flip		See if range operator works
-t/op.fork		See if fork works
-t/op.glob		See if <*> works
-t/op.goto		See if goto works
-t/op.index		See if index works
-t/op.int		See if int works
-t/op.join		See if join works
-t/op.list		See if array lists work
-t/op.local		See if local works
-t/op.magic		See if magic variables work
-t/op.mkdir		See if mkdir works
-t/op.oct		See if oct and hex work
-t/op.ord		See if ord works
-t/op.pack		See if pack and unpack work
-t/op.pat		See if esoteric patterns work
-t/op.push		See if push and pop work
-t/op.range		See if .. works
-t/op.read		See if read() works
-t/op.regexp		See if regular expressions work
-t/op.repeat		See if x operator works
-t/op.s			See if substitutions work
-t/op.sleep		See if sleep works
-t/op.sort		See if sort works
-t/op.split		See if split works
-t/op.sprintf		See if sprintf works
-t/op.stat		See if stat works
-t/op.study		See if study works
-t/op.substr		See if substr works
-t/op.time		See if time functions work
-t/op.undef		See if undef works
-t/op.unshift		See if unshift works
-t/op.vec		See if vectors work
-t/op.write		See if write works
-t/re_tests		Input file for op.regexp
+t/base/cond.t		See if conditionals work
+t/base/if.t		See if if works
+t/base/lex.t		See if lexical items work
+t/base/pat.t		See if pattern matching works
+t/base/term.t		See if various terms work
+t/cmd/elsif.t		See if else-if works
+t/cmd/for.t		See if for loops work
+t/cmd/mod.t		See if statement modifiers work
+t/cmd/subval.t		See if subroutine values work
+t/cmd/switch.t		See if switch optimizations work
+t/cmd/while.t		See if while loops work
+t/comp/cmdopt.t		See if command optimization works
+t/comp/cpp.t		See if C preprocessor works
+t/comp/decl.t		See if declarations work
+t/comp/multiline.t	See if multiline strings work
+t/comp/package.t	See if packages work
+t/comp/script.t		See if script invokation works
+t/comp/term.t		See if more terms work
+t/io/argv.t		See if ARGV stuff works
+t/io/dup.t		See if >& works right
+t/io/fs.t		See if directory manipulations work
+t/io/inplace.t		See if inplace editing works
+t/io/pipe.t		See if secure pipes work
+t/io/print.t		See if print commands work
+t/io/tell.t		See if file seeking works
+t/lib/big.t		See if lib/bigint.pl works
+t/op/append.t		See if . works
+t/op/array.t		See if array operations work
+t/op/auto.t		See if autoincrement et all work
+t/op/chop.t		See if chop works
+t/op/cond.t		See if conditional expressions work
+t/op/dbm.t		See if dbm binding works
+t/op/delete.t		See if delete works
+t/op/do.t		See if subroutines work
+t/op/each.t		See if associative iterators work
+t/op/eval.t		See if eval operator works
+t/op/exec.t		See if exec and system work
+t/op/exp.t		See if math functions work
+t/op/flip.t		See if range operator works
+t/op/fork.t		See if fork works
+t/op/glob.t		See if <*> works
+t/op/goto.t		See if goto works
+t/op/groups.t		See if $( works
+t/op/index.t		See if index works
+t/op/int.t		See if int works
+t/op/join.t		See if join works
+t/op/list.t		See if array lists work
+t/op/local.t		See if local works
+t/op/magic.t		See if magic variables work
+t/op/mkdir.t		See if mkdir works
+t/op/oct.t		See if oct and hex work
+t/op/ord.t		See if ord works
+t/op/pack.t		See if pack and unpack work
+t/op/pat.t		See if esoteric patterns work
+t/op/push.t		See if push and pop work
+t/op/range.t		See if .. works
+t/op/read.t		See if read() works
+t/op/regexp.t		See if regular expressions work
+t/op/repeat.t		See if x operator works
+t/op/s.t		See if substitutions work
+t/op/sleep.t		See if sleep works
+t/op/sort.t		See if sort works
+t/op/split.t		See if split works
+t/op/sprintf.t		See if sprintf works
+t/op/stat.t		See if stat works
+t/op/study.t		See if study works
+t/op/substr.t		See if substr works
+t/op/time.t		See if time functions work
+t/op/undef.t		See if undef works
+t/op/unshift.t		See if unshift works
+t/op/vec.t		See if vectors work
+t/op/write.t		See if write works
+t/op/re_tests		Input file for op.regexp
 toke.c			The tokener
 usersub.c		User supplied (possibly proprietary) subroutines
+usub/README		Instructions for user supplied subroutines
 usub/Makefile		Makefile for curseperl
 usub/curses.mus		Glue routines for BSD curses
 usub/man2mus		A manual page to .mus translator
@@ -253,6 +265,7 @@ x2p/a2p.h		Global declarations
 x2p/a2p.man		Manual page for awk to perl translator
 x2p/a2p.y		A yacc grammer for awk
 x2p/a2py.c		Awk compiler, sort of
+x2p/find2perl.SH	A find to perl translator
 x2p/handy.h		Handy definitions
 x2p/hash.c		Associative arrays again
 x2p/hash.h		Public declarations for the above

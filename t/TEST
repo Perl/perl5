@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: TEST,v 3.0.1.3 91/01/11 18:28:17 lwall Locked $
+# $Header: TEST,v 4.0 91/03/20 01:40:22 lwall Locked $
 
 # This is written in a peculiar style, since we're trying to avoid
 # most of the constructs we'll be testing for.
@@ -15,7 +15,8 @@ if ($ARGV[0] eq '-v') {
 chdir 't' if -f 't/TEST';
 
 if ($ARGV[0] eq '') {
-    @ARGV = split(/[ \n]/,`echo base.* comp.* cmd.* io.* op.* lib.*`);
+    @ARGV = split(/[ \n]/,
+      `echo base/*.t comp/*.t cmd/*.t io/*.t; echo op/*.t lib/*.t`);
 }
 
 open(CONFIG,"../config.sh");
@@ -27,16 +28,12 @@ while (<CONFIG>) {
 }
 $bad = 0;
 while ($test = shift) {
-    if ($test =~ /\.orig$/) {
+    if ($test =~ /^$/) {
 	next;
     }
-    if ($test =~ /\.rej$/) {
-	next;
-    }
-    if ($test =~ /~$/) {
-	next;
-    }
-    print "$test" . '.' x (16 - length($test));
+    $te = $test;
+    chop($te);
+    print "$te" . '.' x (15 - length($te));
     if ($sharpbang) {
 	open(results,"./$test|") || (print "can't run.\n");
     } else {

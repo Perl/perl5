@@ -1,7 +1,8 @@
 #!./curseperl
 
-eval <<'EndOfMain';   $evaloffset = 3;	# line number of this line
+eval <<'EndOfMain';   $evaloffset = __LINE__;
 
+    $SIG{'INT'} = 'endit';
     $| = 1;		# command buffering on stdout
     &initterm;
     &inithelp;
@@ -9,15 +10,7 @@ eval <<'EndOfMain';   $evaloffset = 3;	# line number of this line
 
 EndOfMain
 
-&endwin;
-
-if ($@) {
-    print "";		# force flush of stdout
-    $@ =~ s/\(eval\)/$0/ && $@ =~ s/line (\d+)/'line ' . ($1 + $evaloffset)/e;
-    die $@;
-}
-
-exit;
+&endit;
 
 ################################################################################
 
@@ -76,7 +69,7 @@ sub pagearray {
     for (&drawscreen;;&drawscreen) {
 
 	$ch = &getch;
-	$ch = "j" if $ch eq "\n";
+	$ch = 'j' if $ch eq "\n";
 
 	if ($ch eq ' ') {
 	    last if $percent >= 100;
@@ -88,9 +81,10 @@ sub pagearray {
 	    &move(0,0);
 	    $line = 0 if $line < 0;
 	}
-	elsif ($ch eq "j") {
+	elsif ($ch eq 'j') {
+	    next if $percent >= 100;
 	    $line += 1;
-	    if ($dl) {
+	    if ($dl && $ho) {
 		print $ho, $dl;
 		&mvcur(0,0,$lines2,0);
 		print $ce,$lines[$line+$lines2],$ce;
@@ -107,10 +101,10 @@ sub pagearray {
 	    &refresh;
 	    redo;
 	}
-	elsif ($ch eq "k") {
+	elsif ($ch eq 'k') {
 	    next if $line <= 0;
 	    $line -= 1;
-	    if ($al) {
+	    if ($al && $ho && $ce) {
 		print $ho, $al, $ce, $lines[$line];
 		&wmove($curscr,0,0);
 		&winsertln($curscr);
@@ -126,10 +120,10 @@ sub pagearray {
 	elsif ($ch eq "\f") {
 	    &clear;
 	}
-	elsif ($ch eq "q") {
+	elsif ($ch eq 'q') {
 	    last;
 	}
-	elsif ($ch eq "h") {
+	elsif ($ch eq 'h') {
 	    &clear;
 	    &help;
 	    &clear;
@@ -157,42 +151,14 @@ sub help {
 sub inithelp {
     @helplines = split(/\n/,<<'EOT');
 
-      Commands marked with * may be preceeded by a number, N.
-
   h              Display this help.
   q              Exit.
 
-  f, SPACE    *  Forward  N lines, default one screen.
-  b           *  Backward N lines, default one screen.
-  e, j, CR    *  Forward  N lines, default 1 line.
-  y, k        *  Backward N lines, default 1 line.
-  d           *  Forward  N lines, default 10 or last N to d or u command.
-  u           *  Backward N lines, default 10 or last N to d or u command.
-  r              Repaint screen.
-  R              Repaint screen, discarding buffered input.
-
-  /pattern    *  Search forward for N-th line containing the pattern.
-  ?pattern    *  Search backward for N-th line containing the pattern.
-  n           *  Repeat previous search (for N-th occurence).
-
-  g           *  Go to line N, default 1.
-  G           *  Like g, but default is last line in file.
-  p, %        *  Position to N percent into the file.
-  m<letter>      Mark the current position with <letter>.
-  '<letter>      Return to a previously marked position.
-  ''             Return to previous position.
-
-  E [file]       Examine a new file.
-  N           *  Examine the next file (from the command line).
-  P           *  Examine the previous file (from the command line).
-  =              Print current file name.
-  V              Print version number of "less".
-
-  -<flag>        Toggle a command line flag.
-  +cmd           Execute the less cmd each time a new file is examined.
-
-  !command       Passes the command to a shell to be executed.
-  v              Edit the current file with $EDITOR.
+  SPACE          Forward  screen.
+  b              Backward screen.
+  j, CR          Forward  1 line.
+  k              Backward 1 line.
+  FF             Repaint screen.
 EOT
     for (@helplines) {
 	s/$/\n/;
@@ -206,4 +172,19 @@ sub percent {
       &addstr("($percent%)");
     &standend;
     &clrtoeol;
+}
+
+sub endit {
+    &move($lines1,0);
+    &clrtoeol;
+    &refresh;
+    &endwin;
+
+    if ($@) {
+	print "";				# force flush of stdout
+	$@ =~ s/\(eval\)/$0/ && $@ =~ s/line (\d+)/'line ' . ($1 + $evaloffset)/e;
+	die $@;
+    }
+
+    exit;
 }

@@ -1,0 +1,33 @@
+#!./perl
+
+# $Header: regexp.t,v 4.0 91/03/20 01:54:22 lwall Locked $
+
+open(TESTS,'op/re_tests') || open(TESTS,'t/op/re_tests')
+    || die "Can't open re_tests";
+while (<TESTS>) { }
+$numtests = $.;
+close(TESTS);
+
+print "1..$numtests\n";
+open(TESTS,'op/re_tests') || open(TESTS,'t/op/re_tests')
+    || die "Can't open re_tests";
+while (<TESTS>) {
+    ($pat, $subject, $result, $repl, $expect) = split(/[\t\n]/,$_);
+    $input = join(':',$pat,$subject,$result,$repl,$expect);
+    eval "\$match = (\$subject =~ \$pat); \$got = \"$repl\";";
+    if ($result eq 'c') {
+	if ($@ ne '') {print "ok $.\n";} else {print "not ok $.\n";}
+    }
+    elsif ($result eq 'n') {
+	if (!$match) {print "ok $.\n";} else {print "not ok $. $input => $got\n";}
+    }
+    else {
+	if ($match && $got eq $expect) {
+	    print "ok $.\n";
+	}
+	else {
+	    print "not ok $. $input => $got\n";
+	}
+    }
+}
+close(TESTS);

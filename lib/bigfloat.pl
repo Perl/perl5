@@ -73,7 +73,7 @@ sub main'fneg { #(fnum_str) return fnum_str
 # absolute value
 sub main'fabs { #(fnum_str) return fnum_str
     local($_) = &'fnorm($_[0]);
-    substr($_,0,1) = '+';                       # mash sign
+    substr($_,0,1) = '+' unless $_ eq 'NaN';                       # mash sign
     $_;
 }
 

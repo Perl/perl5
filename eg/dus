@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: dus,v 3.0 89/10/18 15:13:43 lwall Locked $
+# $Header: dus,v 4.0 91/03/20 01:09:20 lwall Locked $
 
 # This script does a du -s on any directories in the current directory that
 # are not mount points for another filesystem.

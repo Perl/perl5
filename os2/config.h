@@ -12,8 +12,8 @@
 #ifdef OS2
 #define PIPE
 #define GETPPID
-#define GETPRIORITY
-#define SETPRIORITY
+#define HAS_GETPRIORITY
+#define HAS_SETPRIORITY
 #define KILL
 #endif /* OS2 */
 
@@ -68,18 +68,18 @@
 #define CPPSTDIN "cc -{"
 #define CPPMINUS ""
 
-/* BCMP:
+/* HAS_BCMP:
  *	This symbol, if defined, indicates that the bcmp routine is available
  *	to compare blocks of memory.  If undefined, use memcmp.  If that's
  *	not available, roll your own.
  */
-/*#define	BCMP		/**/
+/*#define	HAS_BCMP		/**/
 
-/* BCOPY:
+/* HAS_BCOPY:
  *	This symbol, if defined, indicates that the bcopy routine is available
  *	to copy blocks of memory.  Otherwise you should probably use memcpy().
  */
-/*#define	BCOPY		/**/
+/*#define	HAS_BCOPY		/**/
 
 /* CHARSPRINTF:
  *	This symbol is defined if this system declares "char *sprintf()" in
@@ -89,12 +89,12 @@
  */
 /*#define	CHARSPRINTF 	/**/
 
-/* CRYPT:
+/* HAS_CRYPT:
  *	This symbol, if defined, indicates that the crypt routine is available
  *	to encrypt passwords and the like.
  */
 /* TODO */
-/*#define	CRYPT		/**/
+/*#define	HAS_CRYPT		/**/
 
 /* DOSUID:
  *	This symbol, if defined, indicates that the C program should
@@ -111,81 +111,81 @@
  */
 /*#define DOSUID		/**/
 
-/* DUP2:
+/* HAS_DUP2:
  *	This symbol, if defined, indicates that the dup2 routine is available
  *	to dup file descriptors.  Otherwise you should use dup().
  */
-#define	DUP2		/**/
+#define	HAS_DUP2		/**/
 
-/* FCHMOD:
+/* HAS_FCHMOD:
  *	This symbol, if defined, indicates that the fchmod routine is available
  *	to change mode of opened files.  If unavailable, use chmod().
  */
-/*#define	FCHMOD		/**/
+/*#define	HAS_FCHMOD		/**/
 
-/* FCHOWN:
+/* HAS_FCHOWN:
  *	This symbol, if defined, indicates that the fchown routine is available
  *	to change ownership of opened files.  If unavailable, use chown().
  */
-/*#define	FCHOWN		/**/
+/*#define	HAS_FCHOWN		/**/
 
-/* FCNTL:
+/* I_FCNTL:
  *	This symbol, if defined, indicates to the C program that it should
  *	include fcntl.h.
  */
-/*#define	FCNTL		/**/
+/*#define	I_FCNTL		/**/
 
-/* FLOCK:
+/* HAS_FLOCK:
  *	This symbol, if defined, indicates that the flock() routine is
  *	available to do file locking.
  */
-/*#define	FLOCK		/**/
+/*#define	HAS_FLOCK		/**/
 
-/* GETGROUPS:
+/* HAS_GETGROUPS:
  *	This symbol, if defined, indicates that the getgroups() routine is
  *	available to get the list of process groups.  If unavailable, multiple
  *	groups are probably not supported.
  */
-/*#define	GETGROUPS		/**/
+/*#define	HAS_GETGROUPS		/**/
 
-/* GETHOSTENT:
+/* HAS_GETHOSTENT:
  *	This symbol, if defined, indicates that the gethostent() routine is
  *	available to lookup host names in some data base or other.
  */
-/*#define	GETHOSTENT		/**/
+/*#define	HAS_GETHOSTENT		/**/
 
-/* GETPGRP:
+/* HAS_GETPGRP:
  *	This symbol, if defined, indicates that the getpgrp() routine is
  *	available to get the current process group.
  */
-/*#define	GETPGRP		/**/
+/*#define	HAS_GETPGRP		/**/
 
-/* GETPRIORITY:
+/* HAS_GETPRIORITY:
  *	This symbol, if defined, indicates that the getpriority() routine is
  *	available to get a process's priority.
  */
-/*#define	GETPRIORITY		/**/
+/*#define	HAS_GETPRIORITY		/**/
 
-/* HTONS:
+/* HAS_HTONS:
  *	This symbol, if defined, indicates that the htons routine (and friends)
  *	are available to do network order byte swapping.
  */
-/* HTONL:
+/* HAS_HTONL:
  *	This symbol, if defined, indicates that the htonl routine (and friends)
  *	are available to do network order byte swapping.
  */
-/* NTOHS:
+/* HAS_NTOHS:
  *	This symbol, if defined, indicates that the ntohs routine (and friends)
  *	are available to do network order byte swapping.
  */
-/* NTOHL:
+/* HAS_NTOHL:
  *	This symbol, if defined, indicates that the ntohl routine (and friends)
  *	are available to do network order byte swapping.
  */
-/*#define	HTONS		/**/
-/*#define	HTONL		/**/
-/*#define	NTOHS		/**/
-/*#define	NTOHL		/**/
+/*#define	HAS_HTONS		/**/
+/*#define	HAS_HTONL		/**/
+/*#define	HAS_NTOHS		/**/
+/*#define	HAS_NTOHL		/**/
 
 /* index:
  *	This preprocessor symbol is defined, along with rindex, if the system
@@ -198,124 +198,124 @@
 #define	index strchr	/* cultural */
 #define	rindex strrchr	/*  differences? */
 
-/* IOCTL:
+/* I_SYSIOCTL:
  *	This symbol, if defined, indicates that sys/ioctl.h exists and should
  *	be included.
  */
-/*#define	IOCTL		/**/
+/*#define	I_SYSIOCTL		/**/
 
-/* KILLPG:
+/* HAS_KILLPG:
  *	This symbol, if defined, indicates that the killpg routine is available
  *	to kill process groups.  If unavailable, you probably should use kill
  *	with a negative process number.
  */
-/*#define	KILLPG		/**/
+/*#define	HAS_KILLPG		/**/
 
-/* MEMCMP:
+/* HAS_MEMCMP:
  *	This symbol, if defined, indicates that the memcmp routine is available
  *	to compare blocks of memory.  If undefined, roll your own.
  */
-#define	MEMCMP		/**/
+#define	HAS_MEMCMP		/**/
 
-/* MEMCPY:
+/* HAS_MEMCPY:
  *	This symbol, if defined, indicates that the memcpy routine is available
  *	to copy blocks of memory.  Otherwise you should probably use bcopy().
  *	If neither is defined, roll your own.
  */
-#define	MEMCPY		/**/
+#define	HAS_MEMCPY		/**/
 
-/* MKDIR:
+/* HAS_MKDIR:
  *	This symbol, if defined, indicates that the mkdir routine is available
  *	to create directories.  Otherwise you should fork off a new process to
  *	exec /bin/mkdir.
  */
-#define	MKDIR		/**/
+#define	HAS_MKDIR		/**/
 
-/* NDBM:
+/* HAS_NDBM:
  *	This symbol, if defined, indicates that ndbm.h exists and should
  *	be included.
  */
-/*#define	NDBM		/**/
+#define	HAS_NDBM		/**/
 
-/* ODBM:
+/* HAS_ODBM:
  *	This symbol, if defined, indicates that dbm.h exists and should
  *	be included.
  */
-/*#define	ODBM		/**/
+/*#define	HAS_ODBM		/**/
 
-/* READDIR:
+/* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is available
  *	from the C library to create directories.
  */
-#define	READDIR		/**/
+#define	HAS_READDIR		/**/
 
-/* RENAME:
+/* HAS_RENAME:
  *	This symbol, if defined, indicates that the rename routine is available
  *	to rename files.  Otherwise you should do the unlink(), link(), unlink()
  *	trick.
  */
-#define	RENAME		/**/
+#define	HAS_RENAME		/**/
 
-/* RMDIR:
+/* HAS_RMDIR:
  *	This symbol, if defined, indicates that the rmdir routine is available
  *	to remove directories.  Otherwise you should fork off a new process to
  *	exec /bin/rmdir.
  */
-#define	RMDIR		/**/
+#define	HAS_RMDIR		/**/
 
-/* SETEGID:
+/* HAS_SETEGID:
  *	This symbol, if defined, indicates that the setegid routine is available
  *	to change the effective gid of the current program.
  */
-/*#define	SETEGID		/**/
+/*#define	HAS_SETEGID		/**/
 
-/* SETEUID:
+/* HAS_SETEUID:
  *	This symbol, if defined, indicates that the seteuid routine is available
  *	to change the effective uid of the current program.
  */
-/*#define	SETEUID		/**/
+/*#define	HAS_SETEUID		/**/
 
-/* SETPGRP:
+/* HAS_SETPGRP:
  *	This symbol, if defined, indicates that the setpgrp() routine is
  *	available to set the current process group.
  */
-/*#define	SETPGRP		/**/
+/*#define	HAS_SETPGRP		/**/
 
-/* SETPRIORITY:
+/* HAS_SETPRIORITY:
  *	This symbol, if defined, indicates that the setpriority() routine is
  *	available to set a process's priority.
  */
-/*#define	SETPRIORITY		/**/
+/*#define	HAS_SETPRIORITY		/**/
 
-/* SETREGID:
+/* HAS_SETREGID:
  *	This symbol, if defined, indicates that the setregid routine is available
  *	to change the real and effective gid of the current program.
  */
-/*#define	SETREGID		/**/
+/*#define	HAS_SETREGID		/**/
 
-/* SETREUID:
+/* HAS_SETREUID:
  *	This symbol, if defined, indicates that the setreuid routine is available
  *	to change the real and effective uid of the current program.
  */
-/*#define	SETREUID		/**/
+/*#define	HAS_SETREUID		/**/
 
-/* SETRGID:
+/* HAS_SETRGID:
  *	This symbol, if defined, indicates that the setrgid routine is available
  *	to change the real gid of the current program.
  */
-/*#define	SETRGID		/**/
+/*#define	HAS_SETRGID		/**/
 
-/* SETRUID:
+/* HAS_SETRUID:
  *	This symbol, if defined, indicates that the setruid routine is available
  *	to change the real uid of the current program.
  */
-/*#define	SETRUID		/**/
+/*#define	HAS_SETRUID		/**/
 
-/* SOCKET:
+/* HAS_SOCKET:
  *      This symbol, if defined, indicates that the BSD socket interface is
  *      supported.
  */
-/* SOCKETPAIR:
+/* HAS_SOCKETPAIR:
  *      This symbol, if defined, indicates that the BSD socketpair call is
  *      supported.
  */
@@ -323,9 +323,9 @@
  *      This symbol, if defined, indicates that the 4.1c BSD socket interface
  *      is supported instead of the 4.2/4.3 BSD socket interface.
  */
-/*#undef SOCKET          /**/
+/*#undef HAS_SOCKET          /**/
 
-/*#undef SOCKETPAIR      /**/
+/*#undef HAS_SOCKETPAIR      /**/
 
 /*#undef        OLDSOCKET       /**/
 
@@ -348,33 +348,33 @@
  */
 #define	STRUCTCOPY	/**/
 
-/* SYMLINK:
+/* HAS_SYMLINK:
  *	This symbol, if defined, indicates that the symlink routine is available
  *	to create symbolic links.
  */
-/*#define	SYMLINK		/**/
+/*#define	HAS_SYMLINK		/**/
 
-/* SYSCALL:
+/* HAS_SYSCALL:
  *	This symbol, if defined, indicates that the syscall routine is available
  *	to call arbitrary system calls.  If undefined, that's tough.
  */
-/*#define	SYSCALL		/**/
+/*#define	HAS_SYSCALL		/**/
 
-/* TMINSYS:
+/* s_tm:
  *	This symbol is defined if this system declares "struct tm" in
  *	in <sys/time.h> rather than <time.h>.  We can't just say
  *	-I/usr/include/sys because some systems have both time files, and
  *	the -I trick gets the wrong one.
  */
-/* I_SYSTIME:
+/* I_SYS_TIME:
  *	This symbol is defined if this system has the file <sys/time.h>.
  */
 /*
  * I_TIME:
  *	This symbol is defined if time this  system has the file <time.h>.
  */
-/*#undef	TMINSYS 	/**/
-/*#define	I_SYSTIME 	/**/
+/*#undef	s_tm 	/**/
+/*#define	I_SYS_TIME 	/**/
 #define I_TIME
 
 /* VARARGS:
@@ -397,7 +397,7 @@
  */
 #define	VOIDSIG 	/**/
 
-/* VPRINTF:
+/* HAS_VPRINTF:
  *	This symbol, if defined, indicates that the vprintf routine is available
  *	to printf with a pointer to an argument list.  If unavailable, you
  *	may need to write your own, probably in terms of _doprnt().
@@ -408,7 +408,7 @@
  *	is up to the package author to declare vsprintf correctly based on the
  *	symbol.
  */
-#define	VPRINTF		/**/
+#define	HAS_VPRINTF		/**/
 /*#undef	CHARVSPRINTF 	/**/
 
 /* GIDTYPE:
@@ -458,11 +458,11 @@
 /*#define	PWQUOTA		/**/
 /*#undef	PWAGE		/**/
 
-/* I_SYSDIR:
+/* I_SYS_DIR:
  *	This symbol, if defined, indicates to the C program that it should
  *	include sys/dir.h.
  */
-#define	I_SYSDIR		/**/
+#define	I_SYS_DIR		/**/
 
 /* I_SYSIOCTL:
  *	This symbol, if defined, indicates that sys/ioctl.h exists and should
@@ -494,7 +494,7 @@
 #ifdef OS2
 #define SIG_NAME "ZERO","HUP","INT","QUIT","ILL","TRAP","IOT","EMT","FPE",\
 	  /*      0      1     2     3      4      5     6     7    8 */\
-   "KILL","BUS","SEGV","SYS","PIPE","ALRM","TERM","USR1","USR2","CLD",\
+   "KILL","BUS","SEGV","SYS","PIPE","UALRM","TERM","ALRM","USR2","CLD",\
   /* 9     10     11    12    13     14     15     16     17    18 */\
    "PWR","USR3","BREAK","ABRT"
   /*19     20     21    22   */

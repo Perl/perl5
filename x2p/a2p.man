@@ -1,7 +1,10 @@
 .rn '' }`
-''' $Header: a2p.man,v 3.0 89/10/18 15:34:22 lwall Locked $
+''' $Header: a2p.man,v 4.0 91/03/20 01:57:11 lwall Locked $
 ''' 
 ''' $Log:	a2p.man,v $
+''' Revision 4.0  91/03/20  01:57:11  lwall
+''' 4.0 baseline.
+''' 
 ''' Revision 3.0  89/10/18  15:34:22  lwall
 ''' 3.0 baseline
 ''' 

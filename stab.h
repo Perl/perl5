@@ -1,4 +1,4 @@
-/* $Header: stab.h,v 3.0.1.4 90/10/16 10:33:08 lwall Locked $
+/* $Header: stab.h,v 4.0 91/03/20 01:39:49 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,21 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.h,v $
- * Revision 3.0.1.4  90/10/16  10:33:08  lwall
- * patch29: *foo now prints as *package'foo
- * patch29: package behavior is now more consistent
- * 
- * Revision 3.0.1.3  90/08/09  05:18:42  lwall
- * patch19: Added support for linked-in C subroutines
- * 
- * Revision 3.0.1.2  90/03/12  17:00:43  lwall
- * patch13: did some ndir straightening up for Xenix
- * 
- * Revision 3.0.1.1  89/12/21  20:19:53  lwall
- * patch7: in stab.h, added some CRIPPLED_CC support for Microport
- * 
- * Revision 3.0  89/10/18  15:23:30  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:39:49  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -75,7 +62,7 @@ HASH *stab_hash();
 struct stio {
     FILE	*ifp;		/* ifp and ofp are normally the same */
     FILE	*ofp;		/* but sockets need separate streams */
-#ifdef READDIR
+#ifdef HAS_READDIR
     DIR		*dirp;		/* for opendir, readdir, etc */
 #endif
     long	lines;		/* $. */

@@ -1,4 +1,4 @@
-/* $Header: hash.c,v 3.0.1.7 90/10/20 02:10:00 lwall Locked $
+/* $Header: hash.c,v 4.0 91/03/20 01:22:26 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,32 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	hash.c,v $
- * Revision 3.0.1.7  90/10/20  02:10:00  lwall
- * patch37: hash.c called ndbm function on dbm system
- * 
- * Revision 3.0.1.6  90/10/15  17:32:52  lwall
- * patch29: non-existent array values no longer cause core dumps
- * patch29: %foo = () will now clear dbm files
- * patch29: dbm files couldn't be opened read only
- * patch29: the cache array for dbm files wasn't correctly created on fetches
- * 
- * Revision 3.0.1.5  90/08/13  22:18:27  lwall
- * patch28: defined(@array) and defined(%array) didn't work right
- * 
- * Revision 3.0.1.4  90/08/09  03:50:22  lwall
- * patch19: dbmopen(name, 'filename', undef) now refrains from creating
- * 
- * Revision 3.0.1.3  90/03/27  15:59:09  lwall
- * patch16: @dbmvalues{'foo','bar'} could use the same cache entry for both values
- * 
- * Revision 3.0.1.2  89/12/21  20:03:39  lwall
- * patch7: errno may now be a macro with an lvalue
- * 
- * Revision 3.0.1.1  89/11/11  04:34:18  lwall
- * patch2: CX/UX needed to set the key each time in associative iterators
- * 
- * Revision 3.0  89/10/18  15:18:32  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:22:26  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -111,7 +87,11 @@ int lval;
     if (tb->tbl_dbm) {
 	dkey.dptr = key;
 	dkey.dsize = klen;
+#ifdef HAS_GDBM
+	dcontent = gdbm_fetch(tb->tbl_dbm,dkey);
+#else
 	dcontent = dbm_fetch(tb->tbl_dbm,dkey);
+#endif
 	if (dcontent.dptr) {			/* found one */
 	    str = Str_new(60,dcontent.dsize);
 	    str_nset(str,dcontent.dptr,dcontent.dsize);
@@ -260,7 +240,7 @@ unsigned int klen;
 	if (bcmp(entry->hent_key,key,klen))	/* is this it? */
 	    continue;
 	*oentry = entry->hent_next;
-	str = str_static(entry->hent_val);
+	str = str_mortal(entry->hent_val);
 	hentfree(entry);
 	if (i)
 	    tb->tbl_fill--;
@@ -269,7 +249,11 @@ unsigned int klen;
 	if (tb->tbl_dbm) {
 	    dkey.dptr = key;
 	    dkey.dsize = klen;
+#ifdef HAS_GDBM
+	    gdbm_delete(tb->tbl_dbm,dkey);
+#else
 	    dbm_delete(tb->tbl_dbm,dkey);
+#endif
 	}
 #endif
 	return str;
@@ -362,7 +346,7 @@ register HENT *hent;
 {
     if (!hent)
 	return;
-    str_2static(hent->hent_val);	/* free between statements */
+    str_2mortal(hent->hent_val);	/* free between statements */
     Safefree(hent->hent_key);
     Safefree(hent);
 }
@@ -392,10 +376,14 @@ int dodbm;
 #ifdef SOME_DBM
     datum dkey;
     datum nextdkey;
-#ifdef NDBM
+#ifdef HAS_GDBM
+    GDBM_FILE old_dbm;
+#else
+#ifdef HAS_NDBM
     DBM *old_dbm;
 #else
     int old_dbm;
+#endif
 #endif
 #endif
 
@@ -403,9 +391,16 @@ int dodbm;
 	return;
 #ifdef SOME_DBM
     if ((old_dbm = tb->tbl_dbm) && dodbm) {
+#ifdef HAS_GDBM
+	while (dkey = gdbm_firstkey(tb->tbl_dbm), dkey.dptr) {
+#else
 	while (dkey = dbm_firstkey(tb->tbl_dbm), dkey.dptr) {
+#endif
 	    do {
-#ifdef NDBM
+#ifdef HAS_GDBM
+		nextdkey = gdbm_nextkey(tb->tbl_dbm, dkey);
+#else
+#ifdef HAS_NDBM
 #ifdef _CX_UX
 		nextdkey = dbm_nextkey(tb->tbl_dbm, dkey);
 #else
@@ -414,7 +409,12 @@ int dodbm;
 #else
 		nextdkey = nextkey(dkey);
 #endif
+#endif
+#ifdef HAS_GDBM
+		gdbm_delete(tb->tbl_dbm,dkey);
+#else
 		dbm_delete(tb->tbl_dbm,dkey);
+#endif
 		dkey = nextdkey;
 	    } while (dkey.dptr);	/* one way or another, this works */
 	}
@@ -466,7 +466,12 @@ register HASH *tb;
 #ifdef SOME_DBM
     if (tb->tbl_dbm) {
 	if (entry) {
-#ifdef NDBM
+#ifdef HAS_GDBM
+	    key.dptr = entry->hent_key;
+	    key.dsize = entry->hent_klen;
+	    key = gdbm_nextkey(tb->tbl_dbm, key);
+#else
+#ifdef HAS_NDBM
 #ifdef _CX_UX
 	    key.dptr = entry->hent_key;
 	    key.dsize = entry->hent_klen;
@@ -479,11 +484,16 @@ register HASH *tb;
 	    key.dsize = entry->hent_klen;
 	    key = nextkey(key);
 #endif
+#endif
 	}
 	else {
 	    Newz(504,entry, 1, HENT);
 	    tb->tbl_eiter = entry;
+#ifdef HAS_GDBM
+	    key = gdbm_firstkey(tb->tbl_dbm);
+#else
 	    key = dbm_firstkey(tb->tbl_dbm);
+#endif
 	}
 	entry->hent_key = key.dptr;
 	entry->hent_klen = key.dsize;
@@ -536,7 +546,11 @@ register HENT *entry;
     if (tb->tbl_dbm) {
 	key.dptr = entry->hent_key;
 	key.dsize = entry->hent_klen;
+#ifdef HAS_GDBM
+	content = gdbm_fetch(tb->tbl_dbm,key);
+#else
 	content = dbm_fetch(tb->tbl_dbm,key);
+#endif
 	if (!entry->hent_val)
 	    entry->hent_val = Str_new(62,0);
 	str_nset(entry->hent_val,content.dptr,content.dsize);
@@ -546,8 +560,14 @@ register HENT *entry;
 }
 
 #ifdef SOME_DBM
-#if	defined(FCNTL) && ! defined(O_CREAT)
-#include <fcntl.h>
+
+#ifndef O_CREAT
+#  ifdef I_FCNTL
+#    include <fcntl.h>
+#  endif
+#  ifdef I_SYS_FILE
+#    include <sys/file.h>
+#  endif
 #endif
 
 #ifndef O_RDONLY
@@ -560,7 +580,7 @@ register HENT *entry;
 #define O_CREAT 01000
 #endif
 
-#ifndef NDBM
+#ifdef HAS_ODBM
 static int dbmrefcnt = 0;
 #endif
 
@@ -572,7 +592,7 @@ int mode;
 {
     if (!tb)
 	return FALSE;
-#ifndef NDBM
+#ifdef HAS_ODBM
     if (tb->tbl_dbm)	/* never really closed it */
 	return TRUE;
 #endif
@@ -581,7 +601,15 @@ int mode;
 	tb->tbl_dbm = 0;
     }
     hclear(tb, FALSE);	/* clear cache */
-#ifdef NDBM
+#ifdef HAS_GDBM
+    if (mode >= 0)
+	tb->tbl_dbm = gdbm_open(fname, 0, GDBM_WRCREAT,mode, (void *) NULL);
+    if (!tb->tbl_dbm)
+	tb->tbl_dbm = gdbm_open(fname, 0, GDBM_WRITER, mode, (void *) NULL);
+    if (!tb->tbl_dbm)
+	tb->tbl_dbm = gdbm_open(fname, 0, GDBM_READER, mode, (void *) NULL);
+#else
+#ifdef HAS_NDBM
     if (mode >= 0)
 	tb->tbl_dbm = dbm_open(fname, O_RDWR|O_CREAT, mode);
     if (!tb->tbl_dbm)
@@ -601,6 +629,7 @@ int mode;
     }
     tb->tbl_dbm = dbminit(fname) >= 0;
 #endif
+#endif
     if (!tb->tbl_array && tb->tbl_dbm != 0)
 	Newz(507,tb->tbl_array, tb->tbl_max + 1, HENT*);
     return tb->tbl_dbm != 0;
@@ -611,11 +640,16 @@ hdbmclose(tb)
 register HASH *tb;
 {
     if (tb && tb->tbl_dbm) {
-#ifdef NDBM
+#ifdef HAS_GDBM
+	gdbm_close(tb->tbl_dbm);
+	tb->tbl_dbm = 0;
+#else
+#ifdef HAS_NDBM
 	dbm_close(tb->tbl_dbm);
 	tb->tbl_dbm = 0;
 #else
 	/* dbmrefcnt--;  */	/* doesn't work, rats */
+#endif
 #endif
     }
     else if (dowarn)
@@ -638,12 +672,16 @@ register STR *str;
     dkey.dsize = klen;
     dcontent.dptr = str_get(str);
     dcontent.dsize = str->str_cur;
+#ifdef HAS_GDBM
+    error = gdbm_store(tb->tbl_dbm, dkey, dcontent, GDBM_REPLACE);
+#else
     error = dbm_store(tb->tbl_dbm, dkey, dcontent, DBM_REPLACE);
+#endif
     if (error) {
 	if (errno == EPERM)
 	    fatal("No write permission to dbm file");
 	warn("dbm store returned %d, errno %d, key \"%s\"",error,errno,key);
-#ifdef NDBM
+#ifdef HAS_NDBM
         dbm_clearerr(tb->tbl_dbm);
 #endif
     }

@@ -1,0 +1,42 @@
+#!./perl
+
+# $Header: eval.t,v 4.0 91/03/20 01:52:20 lwall Locked $
+
+print "1..10\n";
+
+eval 'print "ok 1\n";';
+
+if ($@ eq '') {print "ok 2\n";} else {print "not ok 2\n";}
+
+eval "\$foo\n    = # this is a comment\n'ok 3';";
+print $foo,"\n";
+
+eval "\$foo\n    = # this is a comment\n'ok 4\n';";
+print $foo;
+
+print eval '
+$foo =';		# this tests for a call through yyerror()
+if ($@ =~ /line 2/) {print "ok 5\n";} else {print "not ok 5\n";}
+
+print eval '$foo = /';	# this tests for a call through fatal()
+if ($@ =~ /Search/) {print "ok 6\n";} else {print "not ok 6\n";}
+
+print eval '"ok 7\n";';
+
+# calculate a factorial with recursive evals
+
+$foo = 5;
+$fact = 'if ($foo <= 1) {1;} else {push(@x,$foo--); (eval $fact) * pop(@x);}';
+$ans = eval $fact;
+if ($ans == 120) {print "ok 8\n";} else {print "not ok 8\n";}
+
+$foo = 5;
+$fact = 'local($foo)=$foo; $foo <= 1 ? 1 : $foo-- * (eval $fact);';
+$ans = eval $fact;
+if ($ans == 120) {print "ok 9\n";} else {print "not ok 9 $ans\n";}
+
+open(try,'>Op.eval');
+print try 'print "ok 10\n"; unlink "Op.eval";',"\n";
+close try;
+
+do 'Op.eval'; print $@;

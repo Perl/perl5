@@ -9,7 +9,7 @@ case $CONFIG in
 	ln ../../config.sh . || \
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
-    fi
+    fi 2>/dev/null
     . ./config.sh
     ;;
 esac
@@ -19,44 +19,11 @@ case "$mallocsrc" in
 esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.8 91/01/11 18:34:40 lwall Locked $
+# $Header: Makefile.SH,v 4.0 91/03/20 01:57:03 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
-# Revision 3.0.1.8  91/01/11  18:34:40  lwall
-# patch42: x2p/Makefile.SH blew up on /afs misfeature
-# 
-# Revision 3.0.1.7  90/11/10  02:20:15  lwall
-# patch38: random cleanup
-# 
-# Revision 3.0.1.6  90/10/16  11:28:18  lwall
-# patch29: various portability fixes
-# 
-# Revision 3.0.1.5  90/08/13  22:41:05  lwall
-# patch28: shift/reduce count was off for a2p's Makefile
-# 
-# Revision 3.0.1.4  90/03/01  10:28:09  lwall
-# patch9: a2p didn't allow logical expressions everywhere it should
-# 
-# Revision 3.0.1.3  89/12/21  20:29:00  lwall
-# patch7: Configure now lets you pick between yacc or bison
-# 
-# Revision 3.0.1.2  89/11/17  15:49:55  lwall
-# patch: in x2p/Makefile.SH, removed reference to nm library
-# 
-# Revision 3.0.1.1  89/10/26  23:29:11  lwall
-# patch1: in x2p/Makefile.SH, added dependency on ../config.sh
-# 
-# Revision 3.0  89/10/18  15:33:52  lwall
-# 3.0 baseline
-# 
-# Revision 2.0.1.2  88/09/07  17:13:30  lwall
-# patch14: added redirection of stderr to /dev/null
-# 
-# Revision 2.0.1.1  88/07/11  23:13:39  root
-# patch2: now expects more shift/reduce errors
-# 
-# Revision 2.0  88/06/05  00:15:31  root
-# Baseline version 2.0.
+# Revision 4.0  91/03/20  01:57:03  lwall
+# 4.0 baseline.
 # 
 # 
 
@@ -78,7 +45,7 @@ libs = $libs
 
 cat >>Makefile <<'!NO!SUBS!'
 
-public = a2p s2p
+public = a2p s2p find2perl
 
 private = 
 

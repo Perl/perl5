@@ -1,4 +1,4 @@
-/* $Header: os2.c,v 3.0.1.2 90/11/10 01:42:38 lwall Locked $
+/* $Header: os2.c,v 4.0 91/03/20 01:36:21 lwall Locked $
  *
  *    (C) Copyright 1989, 1990 Diomidis Spinellis.
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	os2.c,v $
+ * Revision 4.0  91/03/20  01:36:21  lwall
+ * 4.0 baseline.
+ * 
  * Revision 3.0.1.2  90/11/10  01:42:38  lwall
  * patch38: more msdos/os2 upgrades
  * 
@@ -245,7 +248,7 @@ char *cmd;
 usage(char *myname)
 {
 #ifdef MSDOS
-  printf("\nUsage: %s [-acdnpsSvw] [-Dnumber] [-i[extension]] [-Idirectory]"
+  printf("\nUsage: %s [-acdnpsSvw] [-0[octal]] [-Dnumber] [-i[extension]] [-Idirectory]"
 #else
   printf("\nUsage: %s [-acdnpPsSuUvw] [-Dnumber] [-i[extension]] [-Idirectory]"
 #endif
@@ -267,7 +270,8 @@ usage(char *myname)
 #endif
   printf("\n  -v  print version number and patchlevel of perl"
          "\n  -w  turn warnings on for compilation of your script\n"
-         "\n  -Dnumber        set debugging flags"
+         "\n  -0[octal]       specify record separator (0, if no argument)"
+         "\n  -Dnumber        set debugging flags (argument is a bit mask)"
          "\n  -i[extension]   edit <> files in place (make backup if extension supplied)"
          "\n  -Idirectory     specify include directory in conjunction with -P"
          "\n  -e command      one line of script, multiple -e options are allowed"

@@ -113,3 +113,83 @@ front of %0.bat).
 				Myrsinis 1
 				GR-145 62 Kifissia
 				Greece
+
+--------------------------------------------------------------------------
+
+	Revisions to the MS-DOS support in Perl 4.0
+	Tom Dinger, 18 March 1991
+
+The DOS compatibility added to Perl sometime in release 3.x was not
+maintained, and Perl as distributed could not be built without changes.
+
+Both myself and Len Reed more or less "rediscovered" how to get Perl built
+and running reliably for MS-DOS, using the Microsoft C compiler.  He and I
+have communicated, and will be putting together additional patches for the
+DOS version of Perl.
+
+1. Compiling Perl
+
+    For now, I have not supplied a makefile, as there is no standard for
+    make utilities under DOS.  All the files can be compiled with Microsoft
+    C 5.1, using the switches "-AL -Ox" for Large memory model, maximum
+    optimization (this turned out a few code generation bugs in MSC 5.1).
+    The code will also compile with MSC 6.00A, with the optimization
+    "-Oacegils /Gs" for all files (regcomp.c has special case code to change
+    the aliasing optimizations).
+
+    Generally, you follow the instructions given above to compile and build
+    Perl 4.0 for DOS.  I used the output of SunOS yacc run on perly.y,
+    without modification, but I expect both Bison and Berkeley-YACC will work
+    also.  From inspection of the generated code, however, I believe AT&T
+    derived YACC produces the smallest tables, i.e. uses the least memory.
+    This is important for a 300K executable file.
+
+2. Editing in-place.
+
+    You will need the file suffix.c from the os2 subdirectory -- it will
+    create a backup file with much less danger for DOS.
+
+3. A "Smarter" chdir() function.
+
+    I have added to the DOS version of Perl 4.0 a replacement chdir()
+    function.  Unlike the "normal" behavior, it is aware of drive letters
+    at the start of paths for DOS.  So for example:
+
+    perl_chdir( "B:" )      changes to the default directory, on drive B:
+    perl_chdir( "C:\FOO" )  changes to the specified directory, on drive C:
+    perl_chdir( "\BAR" )    changes to the specified directory on the
+                            current drive.
+
+4. *.BAT Scripts as Perl scripts
+
+    The strategy described above for turning a Perl script into a *.BAT
+    script do not work.  I have been using the following lines at the
+    beginning of a Perl *.BAT script:
+
+        @REM=(qq!
+        @perl -S %0.bat %1 %2 %3 %4 %5 %6 %7 %8 %9
+        @goto end !) if 0 ;
+
+    and the following at the end of the *.BAT script:
+
+        @REM=(qq!
+        :end !) if 0 ;
+
+    If you like, with the proper editor you can replace the four '!'
+    characters with some untypeable character, such as Ctrl-A.  This will
+    allow you to pass any characters, including ".." strings as arguments.
+
+4. Things to Come
+
+     *  Better temporary file handling.
+     *  A real Makefile -- Len Reed has one for Dmake 3.6
+     *  Swapping code -- swaps most of Perl out of memory (to EMS, XMS or
+	disk) before running a sub-program or pipe.
+     *	MKS command line support, both into Perl, and to other programs
+	spawned by Perl.
+     *	Smarter pipe functions, not using COMMAND.COM.
+
+
+					Tom Dinger
+					tdinger@East.Sun.COM
+					Martch 18, 1991

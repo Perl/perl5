@@ -1,4 +1,4 @@
-/* $Header: directory.c,v 3.0.1.1 90/03/27 16:07:37 lwall Locked $
+/* $Header: directory.c,v 4.0 91/03/20 01:34:24 lwall Locked $
  *
  *    (C) Copyright 1987, 1988, 1990 Diomidis Spinellis.
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	directory.c,v $
+ * Revision 4.0  91/03/20  01:34:24  lwall
+ * 4.0 baseline.
+ * 
  * Revision 3.0.1.1  90/03/27  16:07:37  lwall
  * patch16: MSDOS support
  * 
@@ -41,8 +44,7 @@
 #define PATHLEN 65
 
 #ifndef lint
-static char     rcsid[] = "$Header: director.c;v 1.3 90/03/16 22:39:40 dds Exp
- $";
+static char rcsid[] = "$Header: directory.c,v 4.0 91/03/20 01:34:24 lwall Locked $";
 #endif
 
 DIR *

@@ -5,7 +5,7 @@ case $CONFIG in
 	ln ../../config.sh . || \
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
-    fi
+    fi 2>/dev/null
     . ./config.sh
     ;;
 esac
@@ -25,58 +25,19 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.12 91/01/11 17:05:17 lwall Locked $
+# $Header: Makefile.SH,v 4.0 91/03/20 00:58:54 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
-# Revision 3.0.1.12  91/01/11  17:05:17  lwall
-# patch42: added installperl script
+# Revision 4.0  91/03/20  00:58:54  lwall
+# 4.0 baseline.
 # 
-# Revision 3.0.1.11  90/11/10  01:25:51  lwall
-# patch38: new arbitrary precision libraries from Mark Biggar
-# 
-# Revision 3.0.1.10  90/10/20  01:59:21  lwall
-# patch37: added cryptlib support to Makefile
-# 
-# Revision 3.0.1.9  90/10/15  14:41:34  lwall
-# patch29: various portability fixes
-# 
-# Revision 3.0.1.8  90/08/13  21:50:49  lwall
-# patch28: not all yaccs are the same
-# 
-# Revision 3.0.1.7  90/08/09  02:19:56  lwall
-# patch19: Configure now asks where you want to put scripts
-# patch19: Added support for linked-in C subroutines
-# 
-# Revision 3.0.1.6  90/03/27  15:27:15  lwall
-# patch16: MSDOS support
-# 
-# Revision 3.0.1.5  90/03/12  16:15:17  lwall
-# patch13: some dependencies missing on perly.h
-# patch13: some relief for buggy parallel makes
-# patch13: bison doesn't declare extern YYSTYPE yylval;
-# 
-# Revision 3.0.1.4  90/02/28  16:19:43  lwall
-# patch9: extraneous $ on suidperl in Makefile
-# 
-# Revision 3.0.1.3  89/12/21  19:09:26  lwall
-# patch7: Configure now lets you pick between yacc or bison
-# 
-# Revision 3.0.1.2  89/11/11  04:07:30  lwall
-# patch2: $sockethdr incorporated into $ccflags
-# patch2: $libs now has most of the -l libraries
-# 
-# Revision 3.0.1.1  89/10/26  23:00:38  lwall
-# patch1: Makefile.SH needed some more .h dependecies
-# 
-# Revision 3.0  89/10/18  15:06:43  lwall
-# 3.0 baseline
 # 
 
 CC = $cc
 YACC = $yacc
-bin = $bin
+bin = $installbin
 scriptdir = $scriptdir
-privlib = $privlib
+privlib = $installprivlib
 mansrc = $mansrc
 manext = $manext
 CFLAGS = $ccflags $optimize
@@ -113,13 +74,13 @@ h2 = hash.h perl.h regcomp.h regexp.h spat.h stab.h str.h util.h
 h = $(h1) $(h2)
 
 c1 = array.c cmd.c cons.c consarg.c doarg.c doio.c dolist.c dump.c
-c2 = eval.c form.c hash.c $(mallocsrc) perly.c regcomp.c regexec.c
+c2 = eval.c form.c hash.c $(mallocsrc) perl.c regcomp.c regexec.c
 c3 = stab.c str.c toke.c util.c usersub.c
 
 c = $(c1) $(c2) $(c3)
 
 obj1 = array.o cmd.o cons.o consarg.o doarg.o doio.o dolist.o dump.o
-obj2 = eval.o form.o hash.o $(mallocobj) perly.o regcomp.o regexec.o
+obj2 = eval.o form.o hash.o $(mallocobj) perl.o regcomp.o regexec.o
 obj3 = stab.o str.o toke.o util.o
 
 obj = $(obj1) $(obj2) $(obj3)
@@ -140,29 +101,29 @@ SHELL = /bin/sh
 .c.o:
 	$(CC) -c $(CFLAGS) $(LARGE) $*.c
 
-all: $(public) $(private) $(util) perl.man uperl.o $(scripts)
+all: $(public) $(private) $(util) uperl.o $(scripts)
 	cd x2p; $(MAKE) all
 	touch all
 
 # This is the standard version that contains no "taint" checks and is
 # used for all scripts that aren't set-id or running under something set-id.
 
-perl: perl.o $(obj) usersub.o
-	$(CC) $(LARGE) $(CLDFLAGS) $(obj) perl.o usersub.o $(libs) -o perl
+perl: $& perly.o $(obj) usersub.o
+	$(CC) $(LARGE) $(CLDFLAGS) $(obj) perly.o usersub.o $(libs) -o perl
 
-uperl.o: perl.o $(obj)
-	-ld $(LARGE) $(LDFLAGS) -r $(obj) perl.o $(libs) -o uperl.o
+uperl.o: $& perly.o $(obj)
+	-ld $(LARGE) $(LDFLAGS) -r $(obj) perly.o $(libs) -o uperl.o
 
-saber: perl.c
-	# load $(c) perl.c
+saber: perly.c
+	# load $(c) perly.c
 
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
 # checks as well as the special code to validate that the script in question
 # has been invoked correctly.
 
-suidperl: tperl.o sperly.o $(tobj) usersub.o
-	$(CC) $(LARGE) $(CLDFLAGS) sperly.o $(tobj) tperl.o usersub.o $(libs) \
+suidperl: $& tperly.o sperl.o $(tobj) usersub.o
+	$(CC) $(LARGE) $(CLDFLAGS) sperl.o $(tobj) tperly.o usersub.o $(libs) \
 	    -o suidperl
 
 # This version interprets scripts that are already set-id either via a wrapper
@@ -170,17 +131,11 @@ suidperl: tperl.o sperly.o $(tobj) usersub.o
 # NOT be setuid to root or anything else.  The only difference between it
 # and normal perl is the presence of the "taint" checks.
 
-taintperl: tperl.o tperly.o $(tobj) usersub.o
-	$(CC) $(LARGE) $(CLDFLAGS) tperly.o $(tobj) tperl.o usersub.o $(libs) \
+taintperl: $& tperly.o tperl.o $(tobj) usersub.o
+	$(CC) $(LARGE) $(CLDFLAGS) tperl.o $(tobj) tperly.o usersub.o $(libs) \
 	    -o taintperl
 
 # Replicating all this junk is yucky, but I don't see a portable way to fix it.
-
-tperl.o: perl.c perly.h $(h)
-	/bin/rm -f tperl.c
-	$(SLN) perl.c tperl.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tperl.c
-	/bin/rm -f tperl.c
 
 tperly.o: perly.c perly.h $(h)
 	/bin/rm -f tperly.c
@@ -188,11 +143,17 @@ tperly.o: perly.c perly.h $(h)
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tperly.c
 	/bin/rm -f tperly.c
 
-sperly.o: perly.c perly.h patchlevel.h $(h)
-	/bin/rm -f sperly.c
-	$(SLN) perly.c sperly.c
-	$(CC) -c -DTAINT -DIAMSUID $(CFLAGS) $(LARGE) sperly.c
-	/bin/rm -f sperly.c
+tperl.o: perl.c perly.h patchlevel.h perl.h $(h)
+	/bin/rm -f tperl.c
+	$(SLN) perl.c tperl.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tperl.c
+	/bin/rm -f tperl.c
+
+sperl.o: perl.c perly.h patchlevel.h $(h)
+	/bin/rm -f sperl.c
+	$(SLN) perl.c sperl.c
+	$(CC) -c -DTAINT -DIAMSUID $(CFLAGS) $(LARGE) sperl.c
+	/bin/rm -f sperl.c
 
 tarray.o: array.c $(h)
 	/bin/rm -f tarray.c
@@ -296,38 +257,33 @@ tutil.o: util.c $(h)
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tutil.c
 	/bin/rm -f tutil.c
 
-perly.h: perl.c
+perly.h: perly.c
 	@ echo Dummy dependency for dumb parallel make
 	touch perly.h
 
-perl.c: perl.y
+perly.c: perly.y
 	@ echo 'Expect either' 29 shift/reduce and 59 reduce/reduce conflicts...
 	@ echo '           or' 27 shift/reduce and 61 reduce/reduce conflicts...
-	$(YACC) -d perl.y
-	mv y.tab.c perl.c
+	$(YACC) -d perly.y
+	sh perly.fixer y.tab.c perly.c
 	mv y.tab.h perly.h
 	echo 'extern YYSTYPE yylval;' >>perly.h
 
-perl.o: perl.c perly.h $(h)
-	$(CC) -c $(CFLAGS) $(LARGE) perl.c
-
-perl.man: perl_man.1 perl_man.2 perl_man.3 perl_man.4 patchlevel.h perl
-	./perl  -e '($$r,$$p)=$$]=~/(\d+\.\d+).*\n\D*(\d+)/;' \
-		-e 'print ".ds RP Release $$r Patchlevel $$p\n";' >perl.man
-	cat perl_man.[1-4] >>perl.man
+perly.o: perly.c perly.h $(h)
+	$(CC) -c $(CFLAGS) $(LARGE) perly.c
 
 install: all
 	./perl installperl
 	cd x2p; $(MAKE) install
 
 clean:
-	rm -f *.o all perl taintperl suidperl perl.man
+	rm -f *.o all perl taintperl suidperl
 	cd x2p; $(MAKE) clean
 
 realclean: clean
 	cd x2p; $(MAKE) realclean
 	rm -f *.orig */*.orig *~ */*~ core $(addedbyconf) h2ph h2ph.man
-	rm -f perl.c perly.h t/perl Makefile config.h makedepend makedir
+	rm -f perly.c perly.h t/perl Makefile config.h makedepend makedir
 	rm -f x2p/Makefile
 
 # The following lint has practically everything turned on.  Unfortunately,
@@ -335,8 +291,8 @@ realclean: clean
 # If the source file has a /*NOSTRICT*/ somewhere, ignore the lint message
 # for that spot.
 
-lint: perl.c $(c)
-	lint $(lintflags) $(defs) perl.c $(c) > perl.fuzz
+lint: perly.c $(c)
+	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
 
 depend: makedepend
 	- test -f perly.h || cp /dev/null perly.h
@@ -345,8 +301,8 @@ depend: makedepend
 	cd x2p; $(MAKE) depend
 
 test: perl
-	- chmod +x t/TEST t/base.* t/comp.* t/cmd.* t/io.* t/op.* t/lib.*; \
-	cd t && (rm -f perl; $(SLN) ../perl .) && ./perl TEST
+	- cd t && chmod +x TEST */*.t
+	- cd t && (rm -f perl; $(SLN) ../perl .) && ./perl TEST </dev/tty
 
 clist:
 	echo $(c) | tr ' ' '\012' >.clist

@@ -1,4 +1,4 @@
-.\" $Header: gsh.man,v 3.0 89/10/18 15:14:42 lwall Locked $
+.\" $Header: gsh.man,v 4.0 91/03/20 01:10:46 lwall Locked $
 .TH GSH 8 "13 May 1988"
 .SH NAME
 gsh \- global shell

@@ -1,4 +1,4 @@
-/* $Header: spat.h,v 3.0 89/10/18 15:23:14 lwall Locked $
+/* $Header: spat.h,v 4.0 91/03/20 01:39:36 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,8 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	spat.h,v $
- * Revision 3.0  89/10/18  15:23:14  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:39:36  lwall
+ * 4.0 baseline.
  * 
  */
 

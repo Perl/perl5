@@ -2,196 +2,288 @@ After all the perl kits are run you should have the following files:
 
 Filename		Kit Description
 --------		--- -----------
-Changes                 20 Differences between 2.0 level 18 and 3.0 level 0
-Configure                2 Run this first
-Copying                 10 The GNU General Public License
-EXTERN.h                24 Included before foreign .h files
-INTERN.h                24 Included before domestic .h files
-MANIFEST                20 This list of files
-Makefile.SH             19 Precursor to Makefile
-PACKINGLIST             18 Which files came from which kits
+Configure:AA             3 Run this first
+Configure:AB            20 
+Copying                 26 The GNU General Public License
+EXTERN.h                36 Included before foreign .h files
+INTERN.h                36 Included before domestic .h files
+MANIFEST                13 This list of files
+Makefile.SH             28 Precursor to Makefile
+PACKINGLIST             16 Which files came from which kits
 README                   1 The Instructions
-Wishlist                24 Some things that may or may not happen
-arg.h                   11 Public declarations for the above
-array.c                 21 Numerically subscripted arrays
-array.h                 24 Public declarations for the above
-client                  24 A client to test sockets
-cmd.c                   15 Command interpreter
-cmd.h                   21 Public declarations for the above
-config.H                15 Sample config.h
-config.h.SH             14 Produces config.h
-cons.c                  10 Routines to construct cmd nodes of a parse tree
-consarg.c               14 Routines to construct arg nodes of a parse tree
-doarg.c                 11 Scalar expression evaluation
-doio.c                   7 I/O operations
-dolist.c                16 Array expression evaluation
-dump.c                  20 Debugging output
-eg/ADB                  24 An adb wrapper to put in your crash dir
+README.uport             1 Special instructions for Microports
+README.xenix             1 Special instructions for Xenix
+Wishlist                36 Some things that may or may not happen
+arg.h                   19 Public declarations for the above
+array.c                 30 Numerically subscripted arrays
+array.h                 35 Public declarations for the above
+client                  35 A client to test sockets
+cmd.c                   18 Command interpreter
+cmd.h                   30 Public declarations for the above
+config.H                25 Sample config.h
+config_h.SH             24 Produces config.h
+cons.c                  13 Routines to construct cmd nodes of a parse tree
+consarg.c               19 Routines to construct arg nodes of a parse tree
+doarg.c                 12 Scalar expression evaluation
+doio.c:AA                5 I/O operations
+doio.c:AB               28 
+dolist.c                11 Array expression evaluation
+dump.c                  25 Debugging output
+eg/ADB                  36 An adb wrapper to put in your crash dir
 eg/README                1 Intro to example perl scripts
-eg/changes              23 A program to list recently changed files
-eg/down                 24 A program to do things to subdirectories
-eg/dus                  24 A program to do du -s on non-mounted dirs
-eg/findcp               17 A find wrapper that implements a -cp switch
-eg/findtar              24 A find wrapper that pumps out a tar file
-eg/g/gcp                22 A program to do a global rcp
-eg/g/gcp.man            23 Manual page for gcp
-eg/g/ged                24 A program to do a global edit
-eg/g/ghosts             22 A sample /etc/ghosts file
-eg/g/gsh                22 A program to do a global rsh
-eg/g/gsh.man            21 Manual page for gsh
-eg/muck                 22 A program to find missing make dependencies
-eg/muck.man             24 Manual page for muck
-eg/myrup                23 A program to find lightly loaded machines
-eg/nih                  24 Script to insert #! workaround
-eg/rename               24 A program to rename files
-eg/rmfrom               24 A program to feed doomed filenames to
-eg/scan/scan_df         23 Scan for filesystem anomalies
-eg/scan/scan_last       23 Scan for login anomalies
-eg/scan/scan_messages   21 Scan for console message anomalies
-eg/scan/scan_passwd      6 Scan for passwd file anomalies
-eg/scan/scan_ps         24 Scan for process anomalies
-eg/scan/scan_sudo       23 Scan for sudo anomalies
-eg/scan/scan_suid       22 Scan for setuid anomalies
-eg/scan/scanner         23 An anomaly reporter
-eg/shmkill              23 A program to remove unused shared memory
-eg/van/empty            24 A program to empty the trashcan
-eg/van/unvanish         23 A program to undo what vanish does
-eg/van/vanexp           24 A program to expire vanished files
-eg/van/vanish           23 A program to put files in a trashcan
-eg/who                  24 A sample who program
-eval.c                   3 The expression evaluator
-evalargs.xc             19 The arg evaluator of eval.c
-form.c                  20 Format processing
-form.h                  24 Public declarations for the above
-gettest                 24 A little script to test the get* routines
-handy.h                 22 Handy definitions
-hash.c                  18 Associative arrays
-hash.h                  23 Public declarations for the above
-ioctl.pl                21 Sample ioctl.pl
-lib/abbrev.pl           24 An abbreviation table builder
-lib/complete.pl         23 A command completion subroutine
-lib/dumpvar.pl          24 A variable dumper
-lib/getopt.pl           23 Perl library supporting option parsing
-lib/getopts.pl          24 Perl library supporting option parsing
-lib/importenv.pl        24 Perl routine to get environment into variables
-lib/look.pl             23 A "look" equivalent
-lib/perldb.pl           18 Perl debugging routines
-lib/stat.pl             24 Perl library supporting stat function
-lib/termcap.pl          22 Perl library supporting termcap usage
-lib/validate.pl         21 Perl library supporting wholesale file mode validation
-makedepend.SH           21 Precursor to makedepend
-makedir.SH              23 Precursor to makedir
-makelib.SH              21 A thing to turn C .h file into perl .h files
-malloc.c                19 A version of malloc you might not want
-patchlevel.h            10 The current patch level of perl
-perl.h                   8 Global declarations
-perl.man.1               1 The manual page(s), first fourth
-perl.man.2               9 The manual page(s), second fourth
-perl.man.3               8 The manual page(s), third fourth
-perl.man.4               6 The manual page(s), fourth fourth
-perl.y                  12 Yacc grammar for perl
-perlsh                  24 A poor man's perl shell
-perly.c                 17 main()
-regcomp.c               12 Regular expression compiler
-regcomp.h                7 Private declarations for above
-regexec.c               13 Regular expression evaluator
-regexp.h                23 Public declarations for the above
-server                  24 A server to test sockets
-spat.h                  23 Search pattern declarations
-stab.c                   9 Symbol table stuff
-stab.h                  20 Public declarations for the above
-str.c                   13 String handling package
-str.h                   14 Public declarations for the above
+eg/changes              35 A program to list recently changed files
+eg/down                 36 A program to do things to subdirectories
+eg/dus                  35 A program to do du -s on non-mounted dirs
+eg/findcp               34 A find wrapper that implements a -cp switch
+eg/findtar              22 A find wrapper that pumps out a tar file
+eg/g/gcp                33 A program to do a global rcp
+eg/g/gcp.man            34 Manual page for gcp
+eg/g/ged                15 A program to do a global edit
+eg/g/ghosts             35 A sample /etc/ghosts file
+eg/g/gsh                32 A program to do a global rsh
+eg/g/gsh.man            33 Manual page for gsh
+eg/muck                 33 A program to find missing make dependencies
+eg/muck.man             35 Manual page for muck
+eg/myrup                35 A program to find lightly loaded machines
+eg/nih                  36 Script to insert #! workaround
+eg/relink               33 A program to change symbolic links
+eg/rename               34 A program to rename files
+eg/rmfrom               20 A program to feed doomed filenames to
+eg/scan/scan_df         34 Scan for filesystem anomalies
+eg/scan/scan_last       34 Scan for login anomalies
+eg/scan/scan_messages   30 Scan for console message anomalies
+eg/scan/scan_passwd     35 Scan for passwd file anomalies
+eg/scan/scan_ps         10 Scan for process anomalies
+eg/scan/scan_sudo       33 Scan for sudo anomalies
+eg/scan/scan_suid       33 Scan for setuid anomalies
+eg/scan/scanner         33 An anomaly reporter
+eg/shmkill              35 A program to remove unused shared memory
+eg/sysvipc/README        1 Intro to Sys V IPC examples
+eg/sysvipc/ipcmsg       35 Example of SYS V IPC message queues
+eg/sysvipc/ipcsem       35 Example of Sys V IPC semaphores
+eg/sysvipc/ipcshm       35 Example of Sys V IPC shared memory
+eg/travesty             35 A program to print travesties of its input text
+eg/van/empty            35 A program to empty the trashcan
+eg/van/unvanish         34 A program to undo what vanish does
+eg/van/vanexp           36 A program to expire vanished files
+eg/van/vanish           34 A program to put files in a trashcan
+eg/who                  36 A sample who program
+emacs/perl-mode.el      21 Emacs major mode for perl
+emacs/perldb.el         17 Emacs debugging
+emacs/perldb.pl         15 Emacs debugging
+emacs/tedstuff          27 Some optional patches
+eval.c:AA                2 The expression evaluator
+eval.c:AB               20 
+form.c                  28 Format processing
+form.h                  35 Public declarations for the above
+gettest                 35 A little script to test the get* routines
+h2ph.SH                 11 A thing to turn C .h file into perl .ph files
+h2pl/README              1 How to turn .ph files into .pl files
+h2pl/cbreak.pl          35 cbreak routines using .ph
+h2pl/cbreak2.pl         35 cbreak routines using .pl
+h2pl/eg/sizeof.ph       36 Sample sizeof array initialization
+h2pl/eg/sys/errno.pl    31 Sample translated errno.pl
+h2pl/eg/sys/ioctl.pl    31 Sample translated ioctl.pl
+h2pl/eg/sysexits.pl     36 Sample translated sysexits.pl
+h2pl/getioctlsizes      36 Program to extract types from ioctl.h
+h2pl/mksizes            35 Program to make %sizeof array.
+h2pl/mkvars             35 Program to make .pl from .ph files
+h2pl/tcbreak            36 cbreak test routine using .ph
+h2pl/tcbreak2           14 cbreak test routine using .pl
+handy.h                 32 Handy definitions
+hash.c                  26 Associative arrays
+hash.h                  34 Public declarations for the above
+installperl             31 Perl script to do "make install" dirty work
+ioctl.pl                31 Sample ioctl.pl
+lib/abbrev.pl           35 An abbreviation table builder
+lib/bigfloat.pl         26 An arbitrary precision floating point package
+lib/bigint.pl           29 An arbitrary precision integer arithmetic package
+lib/bigrat.pl           31 An arbitrary precision rational arithmetic package
+lib/cacheout.pl         35 Manages output filehandles when you need too many
+lib/complete.pl         33 A command completion subroutine
+lib/ctime.pl            29 A ctime workalike
+lib/dumpvar.pl          35 A variable dumper
+lib/flush.pl            36 Routines to do single flush
+lib/getopt.pl           34 Perl library supporting option parsing
+lib/getopts.pl          35 Perl library supporting option parsing
+lib/importenv.pl        36 Perl routine to get environment into variables
+lib/look.pl             34 A "look" equivalent
+lib/perldb.pl           25 Perl debugging routines
+lib/pwd.pl              34 Routines to keep track of PWD environment variable
+lib/stat.pl             35 Perl library supporting stat function
+lib/syslog.pl           29 Perl library supporting syslogging
+lib/termcap.pl          32 Perl library supporting termcap usage
+lib/timelocal.pl        33 Perl library supporting inverse of localtime, gmtime
+lib/validate.pl         32 Perl library supporting wholesale file mode validation
+makedepend.SH           31 Precursor to makedepend
+makedir.SH              34 Precursor to makedir
+malloc.c                12 A version of malloc you might not want
+msdos/Changes.dds       33 Expanation of MS-DOS patches by Diomidis Spinellis
+msdos/Makefile          33 MS-DOS makefile
+msdos/README.msdos       1 Compiling and usage information
+msdos/Wishlist.dds      18 My wishlist
+msdos/chdir.c           33 A chdir that can change drives
+msdos/config.h          22 Definitions for msdos
+msdos/dir.h             34 MS-DOS header for directory access functions
+msdos/directory.c       31 MS-DOS directory access functions.
+msdos/eg/crlf.bat       35 Convert files from unix to MS-DOS line termination
+msdos/eg/drives.bat     34 List the system drives and their characteristics
+msdos/eg/lf.bat         35 Convert files from MS-DOS to Unix line termination
+msdos/glob.c            36 A command equivalent to csh glob
+msdos/msdos.c           30 MS-DOS ioctl, sleep, gete?[gu]if, spawn, aspawn
+msdos/popen.c           32 My_popen and my_pclose for MS-DOS
+msdos/usage.c           34 How to invoke perl under MS-DOS
+os2/Makefile            32 Makefile for OS/2
+os2/README.OS2           1 Notes for OS/2
+os2/a2p.cs              13 Compiler script for a2p
+os2/a2p.def             36 Linker defs for a2p
+os2/alarm.c             31 An implementation of alarm()
+os2/alarm.h             36 Header file for same
+os2/config.h            18 Configuration file for OS/2
+os2/dir.h               33 Directory header
+os2/director.c          30 Directory routines
+os2/eg/alarm.pl         36 Example of alarm code
+os2/eg/os2.pl           33 Sample script for OS/2
+os2/eg/syscalls.pl      36 Example of syscall on OS/2
+os2/glob.c              36 Globbing routines
+os2/makefile            32 Make file
+os2/mktemp.c            36 Mktemp() using TMP
+os2/os2.c               29 Unix compatibility functions
+os2/perl.bad            36 names of protect-only API calls for BIND
+os2/perl.cs             35 Compiler script for perl
+os2/perl.def            19 Linker defs for perl
+os2/perldb.dif          34 Changes to make the debugger work
+os2/perlglob.bad        36 names of protect-only API calls for BIND
+os2/perlglob.cs         36 Compiler script for perlglob
+os2/perlglob.def        36 Linker defs for perlglob
+os2/perlsh.cmd          36 Poor man's shell for os2
+os2/popen.c             29 Code for opening pipes
+os2/s2p.cmd             27 s2p as command file
+os2/selfrun.bat         36 A self running perl script for DOS
+os2/selfrun.cmd         26 Example of extproc feature
+os2/suffix.c            31 Code for creating backup filenames
+patchlevel.h            36 The current patch level of perl
+perl.c                  15 main()
+perl.h                  24 Global declarations
+perl.man:AA              6 The manual page(s)
+perl.man:AB              7 
+perl.man:AC              8 
+perl.man:AD             10 
+perlsh                  36 A poor man's perl shell
+perly.fixer             34 A program to remove yacc stack limitations
+perly.y                 22 Yacc grammar for perl
+regcomp.c               17 Regular expression compiler
+regcomp.h               29 Private declarations for above
+regexec.c               21 Regular expression evaluator
+regexp.h                35 Public declarations for the above
+server                  35 A server to test sockets
+spat.h                  34 Search pattern declarations
+stab.c                  23 Symbol table stuff
+stab.h                  31 Public declarations for the above
+str.c                   14 String handling package
+str.h                   30 Public declarations for the above
 t/README                 1 Instructions for regression tests
-t/TEST                  23 The regression tester
-t/base.cond             24 See if conditionals work
-t/base.if               24 See if if works
-t/base.lex              23 See if lexical items work
-t/base.pat              24 See if pattern matching works
-t/base.term             24 See if various terms work
-t/cmd.elsif             24 See if else-if works
-t/cmd.for               23 See if for loops work
-t/cmd.mod               24 See if statement modifiers work
-t/cmd.subval            22 See if subroutine values work
-t/cmd.switch            12 See if switch optimizations work
-t/cmd.while             22 See if while loops work
-t/comp.cmdopt           22 See if command optimization works
-t/comp.cpp              24 See if C preprocessor works
-t/comp.decl             24 See if declarations work
-t/comp.multiline        24 See if multiline strings work
-t/comp.package          24 See if packages work
-t/comp.script           24 See if script invokation works
-t/comp.term             23 See if more terms work
-t/io.argv               23 See if ARGV stuff works
-t/io.dup                24 See if >& works right
-t/io.fs                 22 See if directory manipulations work
-t/io.inplace            24 See if inplace editing works
-t/io.pipe               24 See if secure pipes work
-t/io.print              24 See if print commands work
-t/io.tell               23 See if file seeking works
-t/op.append             24 See if . works
-t/op.array              22 See if array operations work
-t/op.auto               18 See if autoincrement et all work
-t/op.chop               24 See if chop works
-t/op.cond               24 See if conditional expressions work
-t/op.dbm                22 See if dbm binding works
-t/op.delete             24 See if delete works
-t/op.do                 23 See if subroutines work
-t/op.each               23 See if associative iterators work
-t/op.eval               23 See if eval operator works
-t/op.exec               24 See if exec and system work
-t/op.exp                 1 See if math functions work
-t/op.flip               24 See if range operator works
-t/op.fork               24 See if fork works
-t/op.glob               24 See if <*> works
-t/op.goto               24 See if goto works
-t/op.index              24 See if index works
-t/op.int                24 See if int works
-t/op.join               24 See if join works
-t/op.list               10 See if array lists work
-t/op.local              24 See if local works
-t/op.magic              23 See if magic variables work
-t/op.mkdir              24 See if mkdir works
-t/op.oct                24 See if oct and hex work
-t/op.ord                24 See if ord works
-t/op.pack               24 See if pack and unpack work
-t/op.pat                22 See if esoteric patterns work
-t/op.push               15 See if push and pop work
-t/op.range              24 See if .. works
-t/op.read               24 See if read() works
-t/op.regexp             24 See if regular expressions work
-t/op.repeat             23 See if x operator works
-t/op.sleep               8 See if sleep works
-t/op.sort               24 See if sort works
-t/op.split              13 See if split works
-t/op.sprintf            24 See if sprintf works
-t/op.stat               21 See if stat works
-t/op.study              23 See if study works
-t/op.subst              21 See if substitutions work
-t/op.substr             23 See if substr works
-t/op.time               23 See if time functions work
-t/op.undef              23 See if undef works
-t/op.unshift            24 See if unshift works
-t/op.vec                24 See if vectors work
-t/op.write              23 See if write works
-t/re_tests              22 Input file for op.regexp
-toke.c                   5 The tokener
-util.c                  17 Utility routines
-util.h                  24 Public declarations for the above
-x2p/EXTERN.h            24 Same as above
-x2p/INTERN.h            24 Same as above
-x2p/Makefile.SH         22 Precursor to Makefile
-x2p/a2p.h               20 Global declarations
-x2p/a2p.man             20 Manual page for awk to perl translator
-x2p/a2p.y               19 A yacc grammer for awk
-x2p/a2py.c              16 Awk compiler, sort of
-x2p/handy.h             24 Handy definitions
-x2p/hash.c              21 Associative arrays again
-x2p/hash.h              23 Public declarations for the above
-x2p/s2p.SH              18 Sed to perl translator
-x2p/s2p.man             22 Manual page for sed to perl translator
-x2p/str.c               19 String handling package
-x2p/str.h               23 Public declarations for the above
-x2p/util.c              15 Utility routines
-x2p/util.h              24 Public declarations for the above
-x2p/walk.c               4 Parse tree walker
+t/TEST                  34 The regression tester
+t/base/cond.t           36 See if conditionals work
+t/base/if.t             36 See if if works
+t/base/lex.t            34 See if lexical items work
+t/base/pat.t            36 See if pattern matching works
+t/base/term.t           17 See if various terms work
+t/cmd/elsif.t           35 See if else-if works
+t/cmd/for.t             35 See if for loops work
+t/cmd/mod.t             35 See if statement modifiers work
+t/cmd/subval.t          32 See if subroutine values work
+t/cmd/switch.t          34 See if switch optimizations work
+t/cmd/while.t            1 See if while loops work
+t/comp/cmdopt.t         33 See if command optimization works
+t/comp/cpp.t            35 See if C preprocessor works
+t/comp/decl.t           36 See if declarations work
+t/comp/multiline.t      35 See if multiline strings work
+t/comp/package.t        35 See if packages work
+t/comp/script.t         35 See if script invokation works
+t/comp/term.t           34 See if more terms work
+t/io/argv.t             35 See if ARGV stuff works
+t/io/dup.t              35 See if >& works right
+t/io/fs.t               32 See if directory manipulations work
+t/io/inplace.t          12 See if inplace editing works
+t/io/pipe.t             35 See if secure pipes work
+t/io/print.t            36 See if print commands work
+t/io/tell.t             34 See if file seeking works
+t/lib/big.t             31 See if lib/bigint.pl works
+t/op/append.t           36 See if . works
+t/op/array.t            31 See if array operations work
+t/op/auto.t             23 See if autoincrement et all work
+t/op/chop.t             35 See if chop works
+t/op/cond.t             36 See if conditional expressions work
+t/op/dbm.t              33 See if dbm binding works
+t/op/delete.t           16 See if delete works
+t/op/do.t               27 See if subroutines work
+t/op/each.t             34 See if associative iterators work
+t/op/eval.t             21 See if eval operator works
+t/op/exec.t             35 See if exec and system work
+t/op/exp.t              35 See if math functions work
+t/op/flip.t             35 See if range operator works
+t/op/fork.t             36 See if fork works
+t/op/glob.t             36 See if <*> works
+t/op/goto.t             35 See if goto works
+t/op/groups.t           35 See if $( works
+t/op/index.t            34 See if index works
+t/op/int.t              36 See if int works
+t/op/join.t             36 See if join works
+t/op/list.t             33 See if array lists work
+t/op/local.t            35 See if local works
+t/op/magic.t            35 See if magic variables work
+t/op/mkdir.t            36 See if mkdir works
+t/op/oct.t              36 See if oct and hex work
+t/op/ord.t              36 See if ord works
+t/op/pack.t             35 See if pack and unpack work
+t/op/pat.t              28 See if esoteric patterns work
+t/op/push.t             34 See if push and pop work
+t/op/range.t            35 See if .. works
+t/op/re_tests           32 Input file for op.regexp
+t/op/read.t             36 See if read() works
+t/op/regexp.t           35 See if regular expressions work
+t/op/repeat.t           34 See if x operator works
+t/op/s.t                30 See if substitutions work
+t/op/sleep.t            36 See if sleep works
+t/op/sort.t             35 See if sort works
+t/op/split.t            34 See if split works
+t/op/sprintf.t          34 See if sprintf works
+t/op/stat.t             30 See if stat works
+t/op/study.t            30 See if study works
+t/op/substr.t           32 See if substr works
+t/op/time.t             35 See if time functions work
+t/op/undef.t            34 See if undef works
+t/op/unshift.t          36 See if unshift works
+t/op/vec.t              35 See if vectors work
+t/op/write.t            33 See if write works
+toke.c:AA                4 The tokener
+toke.c:AB               28 
+usersub.c               32 User supplied (possibly proprietary) subroutines
+usub/Makefile           36 Makefile for curseperl
+usub/README              1 Instructions for user supplied subroutines
+usub/curses.mus         26 Glue routines for BSD curses
+usub/man2mus            34 A manual page to .mus translator
+usub/mus                33 A .mus to .c translator
+usub/pager              32 A sample pager in curseperl
+usub/usersub.c          36 An initialization file to call curses glue routines
+util.c                  16 Utility routines
+util.h                  35 Public declarations for the above
+x2p/EXTERN.h            36 Same as above
+x2p/INTERN.h            36 Same as above
+x2p/Makefile.SH         32 Precursor to Makefile
+x2p/a2p.h               29 Global declarations
+x2p/a2p.man             29 Manual page for awk to perl translator
+x2p/a2p.y               28 A yacc grammer for awk
+x2p/a2py.c              23 Awk compiler, sort of
+x2p/find2perl.SH        14 A find to perl translator
+x2p/handy.h             35 Handy definitions
+x2p/hash.c              30 Associative arrays again
+x2p/hash.h              34 Public declarations for the above
+x2p/s2p.SH              27 Sed to perl translator
+x2p/s2p.man             33 Manual page for sed to perl translator
+x2p/str.c               27 String handling package
+x2p/str.h               34 Public declarations for the above
+x2p/util.c              24 Utility routines
+x2p/util.h              35 Public declarations for the above
+x2p/walk.c               9 Parse tree walker

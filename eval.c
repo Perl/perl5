@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 3.0.1.11 91/01/11 17:58:30 lwall Locked $
+/* $Header: eval.c,v 4.0 91/03/20 01:16:48 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,84 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
- * Revision 3.0.1.11  91/01/11  17:58:30  lwall
- * patch42: ANSIfied the stat mode checking
- * patch42: perl -D14 crashed on ..
- * patch42: waitpid() emulation was useless because of #ifdef WAITPID
- * 
- * Revision 3.0.1.10  90/11/10  01:33:22  lwall
- * patch38: random cleanup
- * patch38: couldn't return from sort routine
- * patch38: added hooks for unexec()
- * patch38: added alarm function
- * 
- * Revision 3.0.1.9  90/10/15  16:46:13  lwall
- * patch29: added caller
- * patch29: added scalar
- * patch29: added cmp and <=>
- * patch29: added sysread and syswrite
- * patch29: added -M, -A and -C
- * patch29: index and substr now have optional 3rd args
- * patch29: you can now read into the middle string
- * patch29: ~ now works on vector string
- * patch29: non-existent array values no longer cause core dumps
- * patch29: eof; core dumped
- * patch29: oct and hex now produce unsigned result
- * patch29: unshift did not return the documented value
- * 
- * Revision 3.0.1.8  90/08/13  22:17:14  lwall
- * patch28: the NSIG hack didn't work right on Xenix
- * patch28: defined(@array) and defined(%array) didn't work right
- * patch28: rename was busted on systems without rename system call
- * 
- * Revision 3.0.1.7  90/08/09  03:33:44  lwall
- * patch19: made ~ do vector operation on strings like &, | and ^
- * patch19: dbmopen(%name...) didn't work right
- * patch19: dbmopen(name, 'filename', undef) now refrains from creating
- * patch19: empty %array now returns 0 in scalar context
- * patch19: die with no arguments no longer exits unconditionally
- * patch19: return outside a subroutine now returns a reasonable message
- * patch19: rename done with unlink()/link()/unlink() now checks for clobbering
- * patch19: -s now returns size of file
- * 
- * Revision 3.0.1.6  90/03/27  15:53:51  lwall
- * patch16: MSDOS support
- * patch16: support for machines that can't cast negative floats to unsigned ints
- * patch16: ioctl didn't return values correctly
- * 
- * Revision 3.0.1.5  90/03/12  16:37:40  lwall
- * patch13: undef $/ didn't work as advertised
- * patch13: added list slice operator (LIST)[LIST]
- * patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
- * 
- * Revision 3.0.1.4  90/02/28  17:36:59  lwall
- * patch9: added pipe function
- * patch9: a return in scalar context wouldn't return array
- * patch9: !~ now always returns scalar even in array context
- * patch9: some machines can't cast float to long with high bit set
- * patch9: piped opens returned undef in child
- * patch9: @array in scalar context now returns length of array
- * patch9: chdir; coredumped
- * patch9: wait no longer ignores signals
- * patch9: mkdir now handles odd versions of /bin/mkdir
- * patch9: -l FILEHANDLE now disallowed
- * 
- * Revision 3.0.1.3  89/12/21  20:03:05  lwall
- * patch7: errno may now be a macro with an lvalue
- * patch7: ANSI strerror() is now supported
- * patch7: send() didn't allow a TO argument
- * patch7: ord() now always returns positive even on signed char machines
- * 
- * Revision 3.0.1.2  89/11/17  15:19:34  lwall
- * patch5: constant numeric subscripts get lost inside ?:
- * 
- * Revision 3.0.1.1  89/11/11  04:31:51  lwall
- * patch2: mkdir and rmdir needed to quote argument when passed to shell
- * patch2: mkdir and rmdir now return better error codes
- * patch2: fileno, seekdir, rewinddir and closedir now disallow defaults
- * 
- * Revision 3.0  89/10/18  15:17:04  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:16:48  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -96,6 +20,9 @@
 
 #ifdef I_FCNTL
 #include <fcntl.h>
+#endif
+#ifdef I_SYS_FILE
+#include <sys/file.h>
 #endif
 #ifdef I_VFORK
 #   include <vfork.h>
@@ -114,7 +41,8 @@ STR str_args;
 static STAB *stab2;
 static STIO *stio;
 static struct lstring *lstr;
-static int old_record_separator;
+static int old_rschar;
+static int old_rslen;
 
 double sin(), cos(), atan2(), pow();
 
@@ -172,9 +100,420 @@ register int sp;
     }
 #endif
 
-#include "evalargs.xc"
+    for (anum = 1; anum <= maxarg; anum++) {
+	argflags = arg[anum].arg_flags;
+	argtype = arg[anum].arg_type;
+	argptr = arg[anum].arg_ptr;
+      re_eval:
+	switch (argtype) {
+	default:
+	    st[++sp] = &str_undef;
+#ifdef DEBUGGING
+	    tmps = "NULL";
+#endif
+	    break;
+	case A_EXPR:
+#ifdef DEBUGGING
+	    if (debug & 8) {
+		tmps = "EXPR";
+		deb("%d.EXPR =>\n",anum);
+	    }
+#endif
+	    sp = eval(argptr.arg_arg,
+		(argflags & AF_ARYOK) ? G_ARRAY : G_SCALAR, sp);
+	    if (sp + (maxarg - anum) > stack->ary_max)
+		astore(stack, sp + (maxarg - anum), Nullstr);
+	    st = stack->ary_array;	/* possibly reallocated */
+	    break;
+	case A_CMD:
+#ifdef DEBUGGING
+	    if (debug & 8) {
+		tmps = "CMD";
+		deb("%d.CMD (%lx) =>\n",anum,argptr.arg_cmd);
+	    }
+#endif
+	    sp = cmd_exec(argptr.arg_cmd, gimme, sp);
+	    if (sp + (maxarg - anum) > stack->ary_max)
+		astore(stack, sp + (maxarg - anum), Nullstr);
+	    st = stack->ary_array;	/* possibly reallocated */
+	    break;
+	case A_LARYSTAB:
+	    ++sp;
+	    switch (optype) {
+		case O_ITEM2: argtype = 2; break;
+		case O_ITEM3: argtype = 3; break;
+		default:      argtype = anum; break;
+	    }
+	    str = afetch(stab_array(argptr.arg_stab),
+		arg[argtype].arg_len - arybase, TRUE);
+#ifdef DEBUGGING
+	    if (debug & 8) {
+		(void)sprintf(buf,"LARYSTAB $%s[%d]",stab_name(argptr.arg_stab),
+		    arg[argtype].arg_len);
+		tmps = buf;
+	    }
+#endif
+	    goto do_crement;
+	case A_ARYSTAB:
+	    switch (optype) {
+		case O_ITEM2: argtype = 2; break;
+		case O_ITEM3: argtype = 3; break;
+		default:      argtype = anum; break;
+	    }
+	    st[++sp] = afetch(stab_array(argptr.arg_stab),
+		arg[argtype].arg_len - arybase, FALSE);
+#ifdef DEBUGGING
+	    if (debug & 8) {
+		(void)sprintf(buf,"ARYSTAB $%s[%d]",stab_name(argptr.arg_stab),
+		    arg[argtype].arg_len);
+		tmps = buf;
+	    }
+#endif
+	    break;
+	case A_STAR:
+	    stab = argptr.arg_stab;
+	    st[++sp] = (STR*)stab;
+	    if (!stab_xarray(stab))
+		aadd(stab);
+	    if (!stab_xhash(stab))
+		hadd(stab);
+	    if (!stab_io(stab))
+		stab_io(stab) = stio_new();
+#ifdef DEBUGGING
+	    if (debug & 8) {
+		(void)sprintf(buf,"STAR *%s",stab_name(argptr.arg_stab));
+		tmps = buf;
+	    }
+#endif
+	    break;
+	case A_LSTAR:
+	    str = st[++sp] = (STR*)argptr.arg_stab;
+#ifdef DEBUGGING
+	    if (debug & 8) {
+		(void)sprintf(buf,"LSTAR *%s",stab_name(argptr.arg_stab));
+		tmps = buf;
+	    }
+#endif
+	    break;
+	case A_STAB:
+	    st[++sp] = STAB_STR(argptr.arg_stab);
+#ifdef DEBUGGING
+	    if (debug & 8) {
+		(void)sprintf(buf,"STAB $%s",stab_name(argptr.arg_stab));
+		tmps = buf;
+	    }
+#endif
+	    break;
+	case A_LEXPR:
+#ifdef DEBUGGING
+	    if (debug & 8) {
+		tmps = "LEXPR";
+		deb("%d.LEXPR =>\n",anum);
+	    }
+#endif
+	    if (argflags & AF_ARYOK) {
+		sp = eval(argptr.arg_arg, G_ARRAY, sp);
+		if (sp + (maxarg - anum) > stack->ary_max)
+		    astore(stack, sp + (maxarg - anum), Nullstr);
+		st = stack->ary_array;	/* possibly reallocated */
+	    }
+	    else {
+		sp = eval(argptr.arg_arg, G_SCALAR, sp);
+		st = stack->ary_array;	/* possibly reallocated */
+		str = st[sp];
+		goto do_crement;
+	    }
+	    break;
+	case A_LVAL:
+#ifdef DEBUGGING
+	    if (debug & 8) {
+		(void)sprintf(buf,"LVAL $%s",stab_name(argptr.arg_stab));
+		tmps = buf;
+	    }
+#endif
+	    ++sp;
+	    str = STAB_STR(argptr.arg_stab);
+	    if (!str)
+		fatal("panic: A_LVAL");
+	  do_crement:
+	    assigning = TRUE;
+	    if (argflags & AF_PRE) {
+		if (argflags & AF_UP)
+		    str_inc(str);
+		else
+		    str_dec(str);
+		STABSET(str);
+		st[sp] = str;
+		str = arg->arg_ptr.arg_str;
+	    }
+	    else if (argflags & AF_POST) {
+		st[sp] = str_mortal(str);
+		if (argflags & AF_UP)
+		    str_inc(str);
+		else
+		    str_dec(str);
+		STABSET(str);
+		str = arg->arg_ptr.arg_str;
+	    }
+	    else
+		st[sp] = str;
+	    break;
+	case A_LARYLEN:
+	    ++sp;
+	    stab = argptr.arg_stab;
+	    str = stab_array(argptr.arg_stab)->ary_magic;
+	    if (optype != O_SASSIGN || argflags & (AF_PRE|AF_POST))
+		str_numset(str,(double)(stab_array(stab)->ary_fill+arybase));
+#ifdef DEBUGGING
+	    tmps = "LARYLEN";
+#endif
+	    if (!str)
+		fatal("panic: A_LEXPR");
+	    goto do_crement;
+	case A_ARYLEN:
+	    stab = argptr.arg_stab;
+	    st[++sp] = stab_array(stab)->ary_magic;
+	    str_numset(st[sp],(double)(stab_array(stab)->ary_fill+arybase));
+#ifdef DEBUGGING
+	    tmps = "ARYLEN";
+#endif
+	    break;
+	case A_SINGLE:
+	    st[++sp] = argptr.arg_str;
+#ifdef DEBUGGING
+	    tmps = "SINGLE";
+#endif
+	    break;
+	case A_DOUBLE:
+	    (void) interp(str,argptr.arg_str,sp);
+	    st = stack->ary_array;
+	    st[++sp] = str;
+#ifdef DEBUGGING
+	    tmps = "DOUBLE";
+#endif
+	    break;
+	case A_BACKTICK:
+	    tmps = str_get(interp(str,argptr.arg_str,sp));
+	    st = stack->ary_array;
+#ifdef TAINT
+	    taintproper("Insecure dependency in ``");
+#endif
+	    fp = mypopen(tmps,"r");
+	    str_set(str,"");
+	    if (fp) {
+		if (gimme == G_SCALAR) {
+		    while (str_gets(str,fp,str->str_cur) != Nullch)
+			;
+		}
+		else {
+		    for (;;) {
+			if (++sp > stack->ary_max) {
+			    astore(stack, sp, Nullstr);
+			    st = stack->ary_array;
+			}
+			str = st[sp] = Str_new(56,80);
+			if (str_gets(str,fp,0) == Nullch) {
+			    sp--;
+			    break;
+			}
+			if (str->str_len - str->str_cur > 20) {
+			    str->str_len = str->str_cur+1;
+			    Renew(str->str_ptr, str->str_len, char);
+			}
+			str_2mortal(str);
+		    }
+		}
+		statusvalue = mypclose(fp);
+	    }
+	    else
+		statusvalue = -1;
+
+	    if (gimme == G_SCALAR)
+		st[++sp] = str;
+#ifdef DEBUGGING
+	    tmps = "BACK";
+#endif
+	    break;
+	case A_WANTARRAY:
+	    {
+		if (curcsv->wantarray == G_ARRAY)
+		    st[++sp] = &str_yes;
+		else
+		    st[++sp] = &str_no;
+	    }
+#ifdef DEBUGGING
+	    tmps = "WANTARRAY";
+#endif
+	    break;
+	case A_INDREAD:
+	    last_in_stab = stabent(str_get(STAB_STR(argptr.arg_stab)),TRUE);
+	    old_rschar = rschar;
+	    old_rslen = rslen;
+	    goto do_read;
+	case A_GLOB:
+	    argflags |= AF_POST;	/* enable newline chopping */
+	    last_in_stab = argptr.arg_stab;
+	    old_rschar = rschar;
+	    old_rslen = rslen;
+	    rslen = 1;
+#ifdef MSDOS
+	    rschar = 0;
+#else
+#ifdef CSH
+	    rschar = 0;
+#else
+	    rschar = '\n';
+#endif	/* !CSH */
+#endif	/* !MSDOS */
+	    goto do_read;
+	case A_READ:
+	    last_in_stab = argptr.arg_stab;
+	    old_rschar = rschar;
+	    old_rslen = rslen;
+	  do_read:
+	    if (anum > 1)		/* assign to scalar */
+		gimme = G_SCALAR;	/* force context to scalar */
+	    if (gimme == G_ARRAY)
+		str = Str_new(57,0);
+	    ++sp;
+	    fp = Nullfp;
+	    if (stab_io(last_in_stab)) {
+		fp = stab_io(last_in_stab)->ifp;
+		if (!fp) {
+		    if (stab_io(last_in_stab)->flags & IOF_ARGV) {
+			if (stab_io(last_in_stab)->flags & IOF_START) {
+			    stab_io(last_in_stab)->flags &= ~IOF_START;
+			    stab_io(last_in_stab)->lines = 0;
+			    if (alen(stab_array(last_in_stab)) < 0) {
+				tmpstr = str_make("-",1); /* assume stdin */
+				(void)apush(stab_array(last_in_stab), tmpstr);
+			    }
+			}
+			fp = nextargv(last_in_stab);
+			if (!fp) { /* Note: fp != stab_io(last_in_stab)->ifp */
+			    (void)do_close(last_in_stab,FALSE); /* now it does*/
+			    stab_io(last_in_stab)->flags |= IOF_START;
+			}
+		    }
+		    else if (argtype == A_GLOB) {
+			(void) interp(str,stab_val(last_in_stab),sp);
+			st = stack->ary_array;
+			tmpstr = Str_new(55,0);
+#ifdef MSDOS
+			str_set(tmpstr, "perlglob ");
+			str_scat(tmpstr,str);
+			str_cat(tmpstr," |");
+#else
+#ifdef CSH
+			str_nset(tmpstr,cshname,cshlen);
+			str_cat(tmpstr," -cf 'set nonomatch; glob ");
+			str_scat(tmpstr,str);
+			str_cat(tmpstr,"'|");
+#else
+			str_set(tmpstr, "echo ");
+			str_scat(tmpstr,str);
+			str_cat(tmpstr,
+			  "|tr -s ' \t\f\r' '\\012\\012\\012\\012'|");
+#endif /* !CSH */
+#endif /* !MSDOS */
+			(void)do_open(last_in_stab,tmpstr->str_ptr,
+			  tmpstr->str_cur);
+			fp = stab_io(last_in_stab)->ifp;
+			str_free(tmpstr);
+		    }
+		}
+	    }
+	    if (!fp && dowarn)
+		warn("Read on closed filehandle <%s>",stab_name(last_in_stab));
+	    when = str->str_len;	/* remember if already alloced */
+	    if (!when)
+		Str_Grow(str,80);	/* try short-buffering it */
+	  keepgoing:
+	    if (!fp)
+		st[sp] = &str_undef;
+	    else if (!str_gets(str,fp, optype == O_RCAT ? str->str_cur : 0)) {
+		clearerr(fp);
+		if (stab_io(last_in_stab)->flags & IOF_ARGV) {
+		    fp = nextargv(last_in_stab);
+		    if (fp)
+			goto keepgoing;
+		    (void)do_close(last_in_stab,FALSE);
+		    stab_io(last_in_stab)->flags |= IOF_START;
+		}
+		else if (argflags & AF_POST) {
+		    (void)do_close(last_in_stab,FALSE);
+		}
+		st[sp] = &str_undef;
+		rschar = old_rschar;
+		rslen = old_rslen;
+		if (gimme == G_ARRAY) {
+		    --sp;
+		    str_2mortal(str);
+		    goto array_return;
+		}
+		break;
+	    }
+	    else {
+		stab_io(last_in_stab)->lines++;
+		st[sp] = str;
+#ifdef TAINT
+		str->str_tainted = 1; /* Anything from the outside world...*/
+#endif
+		if (argflags & AF_POST) {
+		    if (str->str_cur > 0)
+			str->str_cur--;
+		    if (str->str_ptr[str->str_cur] == rschar)
+			str->str_ptr[str->str_cur] = '\0';
+		    else
+			str->str_cur++;
+		    for (tmps = str->str_ptr; *tmps; tmps++)
+			if (!isalpha(*tmps) && !isdigit(*tmps) &&
+			    index("$&*(){}[]'\";\\|?<>~`",*tmps))
+				break;
+		    if (*tmps && stat(str->str_ptr,&statbuf) < 0)
+			goto keepgoing;		/* unmatched wildcard? */
+		}
+		if (gimme == G_ARRAY) {
+		    if (str->str_len - str->str_cur > 20) {
+			str->str_len = str->str_cur+1;
+			Renew(str->str_ptr, str->str_len, char);
+		    }
+		    str_2mortal(str);
+		    if (++sp > stack->ary_max) {
+			astore(stack, sp, Nullstr);
+			st = stack->ary_array;
+		    }
+		    str = Str_new(58,80);
+		    goto keepgoing;
+		}
+		else if (!when && str->str_len - str->str_cur > 80) {
+		    /* try to reclaim a bit of scalar space on 1st alloc */
+		    if (str->str_cur < 60)
+			str->str_len = 80;
+		    else
+			str->str_len = str->str_cur+40;	/* allow some slop */
+		    Renew(str->str_ptr, str->str_len, char);
+		}
+	    }
+	    rschar = old_rschar;
+	    rslen = old_rslen;
+#ifdef DEBUGGING
+	    tmps = "READ";
+#endif
+	    break;
+	}
+#ifdef DEBUGGING
+	if (debug & 8)
+	    deb("%d.%s = '%s'\n",anum,tmps,str_peek(st[sp]));
+#endif
+	if (anum < 8)
+	    arglast[anum] = sp;
+    }
 
     st += arglast[0];
+#ifdef SMALLSWITCHES
+    if (optype < O_CHOWN)
+#endif
     switch (optype) {
     case O_RCAT:
 	STABSET(str);
@@ -207,16 +546,23 @@ register int sp;
 	STABSET(str);
 	break;
     case O_REPEAT:
-	STR_SSET(str,st[1]);
-	anum = (int)str_gnum(st[2]);
+	if (gimme == G_ARRAY && arg[1].arg_flags & AF_ARYOK) {
+	    sp = do_repeatary(arglast);
+	    goto array_return;
+	}
+	STR_SSET(str,st[arglast[1] - arglast[0]]);
+	anum = (int)str_gnum(st[arglast[2] - arglast[0]]);
 	if (anum >= 1) {
 	    tmpstr = Str_new(50, 0);
-	    str_sset(tmpstr,str);
+	    tmps = str_get(str);
+	    str_nset(tmpstr,tmps,str->str_cur);
 	    tmps = str_get(tmpstr);	/* force to be string */
 	    STR_GROW(str, (anum * str->str_cur) + 1);
 	    repeatcpy(str->str_ptr, tmps, tmpstr->str_cur, anum);
 	    str->str_cur *= anum;
 	    str->str_ptr[str->str_cur] = '\0';
+	    str->str_nok = 0;
+	    str_free(tmpstr);
 	}
 	else
 	    str_sset(str,&str_no);
@@ -295,6 +641,13 @@ register int sp;
 	    goto array_return;
 	}
 	else if (str != stab_val(defstab)) {
+	    if (str->str_len) {
+		if (str->str_state == SS_INCR)
+		    Str_Grow(str,0);
+		Safefree(str->str_ptr);
+		str->str_ptr = Nullch;
+		str->str_len = 0;
+	    }
 	    str->str_pok = str->str_nok = 0;
 	    STABSET(str);
 	}
@@ -312,9 +665,25 @@ register int sp;
 	value *= str_gnum(st[2]);
 	goto donumset;
     case O_DIVIDE:
-    	if ((value = str_gnum(st[2])) == 0.0)
-    	    fatal("Illegal division by zero");
+	if ((value = str_gnum(st[2])) == 0.0)
+	    fatal("Illegal division by zero");
+#ifdef cray
+	/* insure that 20./5. == 4. */
+	{
+	    double x;
+	    int    k;
+	    x =  str_gnum(st[1]);
+	    if ((double)(int)x     == x &&
+		(double)(int)value == value &&
+		(k = (int)x/(int)value)*(int)value == (int)x) {
+		value = k;
+	    } else {
+		value = x/value;
+	    }
+	}
+#else
 	value = str_gnum(st[1]) / value;
+#endif
 	goto donumset;
     case O_MODULO:
 	tmplong = (long) str_gnum(st[2]);
@@ -562,7 +931,11 @@ register int sp;
 	break;
     case O_DBMOPEN:
 #ifdef SOME_DBM
-	stab = arg[1].arg_ptr.arg_stab;
+	anum = arg[1].arg_type & A_MASK;
+	if (anum == A_WORD || anum == A_STAB)
+	    stab = arg[1].arg_ptr.arg_stab;
+	else
+	    stab = stabent(str_get(st[1]),TRUE);
 	if (st[3]->str_nok || st[3]->str_pok)
 	    anum = (int)str_gnum(st[3]);
 	else
@@ -574,7 +947,10 @@ register int sp;
 #endif
     case O_DBMCLOSE:
 #ifdef SOME_DBM
-	stab = arg[1].arg_ptr.arg_stab;
+	if ((arg[1].arg_type & A_MASK) == A_WORD)
+	    stab = arg[1].arg_ptr.arg_stab;
+	else
+	    stab = stabent(str_get(st[1]),TRUE);
 	hdbmclose(stab_hash(stab));
 	goto say_yes;
 #else
@@ -754,7 +1130,7 @@ register int sp;
 	if (!str)
 	    goto say_undef;
 	if (ary->ary_flags & ARF_REAL)
-	    (void)str_2static(str);
+	    (void)str_2mortal(str);
 	break;
     case O_UNPACK:
 	sp = do_unpack(str,gimme,arglast);
@@ -866,7 +1242,7 @@ register int sp;
     case O_WARN:
 	if (arglast[2] - arglast[1] != 1) {
 	    do_join(str,arglast);
-	    tmps = str_get(st[1]);
+	    tmps = str_get(str);
 	}
 	else {
 	    str = st[2];
@@ -879,7 +1255,7 @@ register int sp;
     case O_DIE:
 	if (arglast[2] - arglast[1] != 1) {
 	    do_join(str,arglast);
-	    tmps = str_get(st[1]);
+	    tmps = str_get(str);
 	}
 	else {
 	    str = st[2];
@@ -1028,9 +1404,10 @@ register int sp;
 	    maxarg = 0;
 	if (!stab_io(stab) || !stab_io(stab)->ifp)
 	    goto say_undef;
-#ifdef SOCKET
+#ifdef HAS_SOCKET
 	if (optype == O_RECV) {
 	    argtype = sizeof buf;
+	    STR_GROW(st[2], anum+1), (tmps = str_get(st[2]));  /* sneaky */
 	    anum = recvfrom(fileno(stab_io(stab)->ifp), tmps, anum, maxarg,
 		buf, &argtype);
 	    if (anum >= 0) {
@@ -1047,7 +1424,7 @@ register int sp;
 	    goto badsock;
 #endif
 	STR_GROW(st[2], anum+maxarg+1), (tmps = str_get(st[2]));  /* sneaky */
-#ifdef SOCKET
+#ifdef HAS_SOCKET
 	if (stab_io(stab)->type == 's') {
 	    argtype = sizeof buf;
 	    anum = recvfrom(fileno(stab_io(stab)->ifp), tmps+maxarg, anum, 0,
@@ -1095,7 +1472,7 @@ register int sp;
 		optype = 0;
 	    anum = write(fileno(stab_io(stab)->ifp), tmps+optype, anum);
 	}
-#ifdef SOCKET
+#ifdef HAS_SOCKET
 	else if (maxarg >= 4) {
 	    if (maxarg > 4)
 		warn("Too many args on send");
@@ -1132,7 +1509,7 @@ register int sp;
 	    lastsize = arglast[2] - arglast[1];
 	}
 	else
-	    lastretstr = str_static(st[arglast[2] - arglast[0]]);
+	    lastretstr = str_mortal(st[arglast[2] - arglast[0]]);
 	goto dopop;
     case O_REDO:
     case O_NEXT:
@@ -1168,7 +1545,7 @@ register int sp;
 	    optype = loop_stack[loop_ptr].loop_sp - lastspbase; /* negative */
 	    if (optype) {
 		for (anum = lastsize; anum > 0; anum--,st++)
-		    st[optype] = str_static(st[0]);
+		    st[optype] = str_mortal(st[0]);
 	    }
 	    longjmp(loop_stack[loop_ptr].loop_env, O_LAST);
 	}
@@ -1260,7 +1637,7 @@ register int sp;
 	  gimme,arglast);
 	goto array_return;
     case O_CRYPT:
-#ifdef CRYPT
+#ifdef HAS_CRYPT
 	tmps = str_get(st[1]);
 #ifdef FCRYPT
 	str_set(str,fcrypt(tmps,str_get(st[2])));
@@ -1332,6 +1709,8 @@ register int sp;
 	    value = str_gnum(stab_val(defstab));
 	else
 	    value = str_gnum(st[1]);
+	if (value <= 0.0)
+	    fatal("Can't take log of %g\n", value);
 	value = log(value);
 	goto donumset;
     case O_SQRT:
@@ -1339,6 +1718,8 @@ register int sp;
 	    value = str_gnum(stab_val(defstab));
 	else
 	    value = str_gnum(st[1]);
+	if (value < 0.0)
+	    fatal("Can't take sqrt of %g\n", value);
 	value = sqrt(value);
 	goto donumset;
     case O_INT:
@@ -1366,6 +1747,7 @@ register int sp;
 #endif
 	goto donumset;
     case O_ALARM:
+#ifdef HAS_ALARM
 	if (maxarg < 1)
 	    tmps = str_get(stab_val(defstab));
 	else
@@ -1377,6 +1759,10 @@ register int sp;
 	    goto say_undef;
 	value = (double)anum;
 	goto donumset;
+#else
+	fatal("Unsupported function alarm");
+	break;
+#endif
     case O_SLEEP:
 	if (maxarg < 1)
 	    tmps = Nullch;
@@ -1406,7 +1792,9 @@ register int sp;
 		st = stack->ary_array;
 		maxarg = sp - arglast[0];
 		str_free(arg[1].arg_ptr.arg_str);
+		arg[1].arg_ptr.arg_str = Nullstr;
 		str_free(arg[2].arg_ptr.arg_str);
+		arg[2].arg_ptr.arg_str = Nullstr;
 		arg->arg_type = O_ARRAY;
 		arg[1].arg_type = A_STAB|A_DONT;
 		arg->arg_len = 1;
@@ -1467,7 +1855,7 @@ register int sp;
 	}
 	break;
     case O_FORK:
-#ifdef FORK
+#ifdef HAS_FORK
 	anum = fork();
 	if (!anum) {
 	    if (tmpstab = stabent("$",allstabs))
@@ -1481,7 +1869,7 @@ register int sp;
 	break;
 #endif
     case O_WAIT:
-#ifdef WAIT
+#ifdef HAS_WAIT
 #ifndef lint
 	anum = wait(&argflags);
 	if (anum > 0)
@@ -1495,7 +1883,7 @@ register int sp;
 	break;
 #endif
     case O_WAITPID:
-#ifdef WAIT
+#ifdef HAS_WAIT
 #ifndef lint
 	anum = (int)str_gnum(st[1]);
 	optype = (int)str_gnum(st[2]);
@@ -1509,7 +1897,7 @@ register int sp;
 	break;
 #endif
     case O_SYSTEM:
-#ifdef FORK
+#ifdef HAS_FORK
 #ifdef TAINT
 	if (arglast[2] - arglast[1] == 1) {
 	    taintenv();
@@ -1548,7 +1936,7 @@ register int sp;
 	else if (arglast[2] - arglast[1] != 1)
 	    value = (double)do_aexec(Nullstr,arglast);
 	else {
-	    value = (double)do_exec(str_get(str_static(st[2])));
+	    value = (double)do_exec(str_get(str_mortal(st[2])));
 	}
 	_exit(-1);
 #else /* ! FORK */
@@ -1557,7 +1945,7 @@ register int sp;
 	else if (arglast[2] - arglast[1] != 1)
 	    value = (double)do_aspawn(Nullstr,arglast);
 	else {
-	    value = (double)do_spawn(str_get(str_static(st[2])));
+	    value = (double)do_spawn(str_get(str_mortal(st[2])));
 	}
 	goto donumset;
 #endif /* FORK */
@@ -1567,53 +1955,36 @@ register int sp;
 	else if (arglast[2] - arglast[1] != 1)
 	    value = (double)do_aexec(Nullstr,arglast);
 	else {
-	    value = (double)do_exec(str_get(str_static(st[2])));
+	    value = (double)do_exec(str_get(str_mortal(st[2])));
 	}
 	goto donumset;
     case O_HEX:
-	argtype = 4;
-	goto snarfnum;
-
-    case O_OCT:
-	argtype = 3;
-
-      snarfnum:
-	tmplong = 0;
 	if (maxarg < 1)
 	    tmps = str_get(stab_val(defstab));
 	else
 	    tmps = str_get(st[1]);
-	for (;;) {
-	    switch (*tmps) {
-	    default:
-		goto out;
-	    case '8': case '9':
-		if (argtype != 4)
-		    goto out;
-		/* FALL THROUGH */
-	    case '0': case '1': case '2': case '3': case '4':
-	    case '5': case '6': case '7':
-		tmplong <<= argtype;
-		tmplong += *tmps++ & 15;
-		break;
-	    case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-	    case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-		if (argtype != 4)
-		    goto out;
-		tmplong <<= 4;
-		tmplong += (*tmps++ & 7) + 9;
-		break;
-	    case 'x':
-		argtype = 4;
-		tmps++;
-		break;
-	    }
-	}
-      out:
-	value = (double)tmplong;
+	value = (double)scanhex(tmps, 99, &argtype);
 	goto donumset;
+
+    case O_OCT:
+	if (maxarg < 1)
+	    tmps = str_get(stab_val(defstab));
+	else
+	    tmps = str_get(st[1]);
+	while (*tmps && isascii(*tmps) && (isspace(*tmps) || *tmps == '0'))
+	    tmps++;
+	if (*tmps == 'x')
+	    value = (double)scanhex(++tmps, 99, &argtype);
+	else
+	    value = (double)scanoct(tmps, 99, &argtype);
+	goto donumset;
+#ifdef SMALLSWITCHES
+    }
+    else
+    switch (optype) {
+#endif
     case O_CHOWN:
-#ifdef CHOWN
+#ifdef HAS_CHOWN
 	value = (double)apply(optype,arglast);
 	goto donumset;
 #else
@@ -1621,7 +1992,7 @@ register int sp;
 	break;
 #endif
     case O_KILL:
-#ifdef KILL
+#ifdef HAS_KILL
 	value = (double)apply(optype,arglast);
 	goto donumset;
 #else
@@ -1634,7 +2005,7 @@ register int sp;
 	value = (double)apply(optype,arglast);
 	goto donumset;
     case O_UMASK:
-#ifdef UMASK
+#ifdef HAS_UMASK
 	if (maxarg < 1) {
 	    anum = umask(0);
 	    (void)umask(anum);
@@ -1650,7 +2021,7 @@ register int sp;
 	fatal("Unsupported function umask");
 	break;
 #endif
-#ifdef SYSVIPC
+#if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     case O_MSGGET:
     case O_SHMGET:
     case O_SEMGET:
@@ -1704,7 +2075,7 @@ register int sp;
 #ifdef TAINT
 	taintproper("Insecure dependency in rename");
 #endif
-#ifdef RENAME
+#ifdef HAS_RENAME
 	value = (double)(rename(tmps,tmps2) >= 0);
 #else
 	if (same_dirent(tmps2, tmps))	/* can always rename to same name */
@@ -1719,7 +2090,7 @@ register int sp;
 #endif
 	goto donumset;
     case O_LINK:
-#ifdef LINK
+#ifdef HAS_LINK
 	tmps = str_get(st[1]);
 	tmps2 = str_get(st[2]);
 #ifdef TAINT
@@ -1737,13 +2108,13 @@ register int sp;
 #ifdef TAINT
 	taintproper("Insecure dependency in mkdir");
 #endif
-#ifdef MKDIR
+#ifdef HAS_MKDIR
 	value = (double)(mkdir(tmps,anum) >= 0);
 	goto donumset;
 #else
 	(void)strcpy(buf,"mkdir ");
 #endif
-#if !defined(MKDIR) || !defined(RMDIR)
+#if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
       one_liner:
 	for (tmps2 = buf+6; *tmps; ) {
 	    *tmps2++ = '\\';
@@ -1806,15 +2177,15 @@ register int sp;
 #ifdef TAINT
 	taintproper("Insecure dependency in rmdir");
 #endif
-#ifdef RMDIR
+#ifdef HAS_RMDIR
 	value = (double)(rmdir(tmps) >= 0);
 	goto donumset;
 #else
 	(void)strcpy(buf,"rmdir ");
-	goto one_liner;		/* see above in MKDIR */
+	goto one_liner;		/* see above in HAS_MKDIR */
 #endif
     case O_GETPPID:
-#ifdef GETPPID
+#ifdef HAS_GETPPID
 	value = (double)getppid();
 	goto donumset;
 #else
@@ -1822,7 +2193,7 @@ register int sp;
 	break;
 #endif
     case O_GETPGRP:
-#ifdef GETPGRP
+#ifdef HAS_GETPGRP
 	if (maxarg < 1)
 	    anum = 0;
 	else
@@ -1834,7 +2205,7 @@ register int sp;
 	break;
 #endif
     case O_SETPGRP:
-#ifdef SETPGRP
+#ifdef HAS_SETPGRP
 	argtype = (int)str_gnum(st[1]);
 	anum = (int)str_gnum(st[2]);
 #ifdef TAINT
@@ -1847,7 +2218,7 @@ register int sp;
 	break;
 #endif
     case O_GETPRIORITY:
-#ifdef GETPRIORITY
+#ifdef HAS_GETPRIORITY
 	argtype = (int)str_gnum(st[1]);
 	anum = (int)str_gnum(st[2]);
 	value = (double)getpriority(argtype,anum);
@@ -1857,7 +2228,7 @@ register int sp;
 	break;
 #endif
     case O_SETPRIORITY:
-#ifdef SETPRIORITY
+#ifdef HAS_SETPRIORITY
 	argtype = (int)str_gnum(st[1]);
 	anum = (int)str_gnum(st[2]);
 	optype = (int)str_gnum(st[3]);
@@ -1871,7 +2242,7 @@ register int sp;
 	break;
 #endif
     case O_CHROOT:
-#ifdef CHROOT
+#ifdef HAS_CHROOT
 	if (maxarg < 1)
 	    tmps = str_get(stab_val(defstab));
 	else
@@ -1908,7 +2279,7 @@ register int sp;
 	STABSET(str);
 	break;
     case O_FLOCK:
-#ifdef FLOCK
+#ifdef HAS_FLOCK
 	if (maxarg <= 0)
 	    stab = last_in_stab;
 	else if ((arg[1].arg_type & A_MASK) == A_WORD)
@@ -2071,7 +2442,7 @@ register int sp;
 	    goto say_yes;
 	goto say_no;
     case O_SYMLINK:
-#ifdef SYMLINK
+#ifdef HAS_SYMLINK
 	tmps = str_get(st[1]);
 	tmps2 = str_get(st[2]);
 #ifdef TAINT
@@ -2083,7 +2454,7 @@ register int sp;
 	fatal("Unsupported function symlink");
 #endif
     case O_READLINK:
-#ifdef SYMLINK
+#ifdef HAS_SYMLINK
 	if (maxarg < 1)
 	    tmps = str_get(stab_val(defstab));
 	else
@@ -2094,7 +2465,7 @@ register int sp;
 	str_nset(str,buf,anum);
 	break;
 #else
-	fatal("Unsupported function readlink");
+	goto say_undef;		/* just pretend it's a normal file */
 #endif
     case O_FTSUID:
 #ifdef S_ISUID
@@ -2142,7 +2513,7 @@ register int sp;
     case O_FTBINARY:
 	str = do_fttext(arg,st[1]);
 	break;
-#ifdef SOCKET
+#ifdef HAS_SOCKET
     case O_SOCKET:
 	if ((arg[1].arg_type & A_MASK) == A_WORD)
 	    stab = arg[1].arg_ptr.arg_stab;
@@ -2300,7 +2671,7 @@ register int sp;
 	sp = do_getsockname(optype,stab,arglast);
 	goto array_return;
 
-#else /* SOCKET not defined */
+#else /* HAS_SOCKET not defined */
     case O_SOCKET:
     case O_BIND:
     case O_CONNECT:
@@ -2334,9 +2705,9 @@ register int sp;
     case O_GETPEERNAME:
       badsock:
 	fatal("Unsupported socket function");
-#endif /* SOCKET */
+#endif /* HAS_SOCKET */
     case O_SSELECT:
-#ifdef SELECT
+#ifdef HAS_SELECT
 	sp = do_select(gimme,arglast);
 	goto array_return;
 #else
@@ -2375,7 +2746,7 @@ register int sp;
     case O_GPWNAM:
     case O_GPWUID:
     case O_GPWENT:
-#ifdef PASSWD
+#ifdef HAS_PASSWD
 	sp = do_gpwent(optype,
 	  gimme,arglast);
 	goto array_return;
@@ -2394,7 +2765,7 @@ register int sp;
     case O_GGRNAM:
     case O_GGRGID:
     case O_GGRENT:
-#ifdef GROUP
+#ifdef HAS_GROUP
 	sp = do_ggrent(optype,
 	  gimme,arglast);
 	goto array_return;
@@ -2411,7 +2782,7 @@ register int sp;
 	break;
 #endif
     case O_GETLOGIN:
-#ifdef GETLOGIN
+#ifdef HAS_GETLOGIN
 	if (!(tmps = getlogin()))
 	    goto say_undef;
 	str_set(str,tmps);
@@ -2439,7 +2810,7 @@ register int sp;
 	value = (double)do_syscall(arglast);
 	goto donumset;
     case O_PIPE:
-#ifdef PIPE
+#ifdef HAS_PIPE
 	if ((arg[1].arg_type & A_MASK) == A_WORD)
 	    stab = arg[1].arg_ptr.arg_stab;
 	else

@@ -2,8 +2,8 @@
 ;#
 ;# Waldemar Kebsch, Federal Republic of Germany, November 1988
 ;# kebsch.pad@nixpbe.UUCP
-;# Modified March 1990 to better handle timezones
-;#  $Id: ctime.pl,v 1.3 90/03/22 10:49:10 hakanson Exp $
+;# Modified March 1990, Feb 1991 to properly handle timezones
+;#  $Id: ctime.pl,v 1.8 91/02/04 18:28:12 hakanson Exp $
 ;#   Marion Hakanson (hakanson@cse.ogi.edu)
 ;#   Oregon Graduate Institute of Science and Technology
 ;#
@@ -26,15 +26,23 @@ sub ctime {
     local($time) = @_;
     local($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst);
 
-    # Use GMT if can't find local TZ
-    $TZ = defined($ENV{'TZ'}) ? $ENV{'TZ'} : 'GMT';
+    # Determine what time zone is in effect.
+    # Use GMT if TZ is defined as null, local time if TZ undefined.
+    # There's no portable way to find the system default timezone.
+
+    $TZ = defined($ENV{'TZ'}) ? ( $ENV{'TZ'} ? $ENV{'TZ'} : 'GMT' ) : '';
     ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) =
         ($TZ eq 'GMT') ? gmtime($time) : localtime($time);
+
     # Hack to deal with 'PST8PDT' format of TZ
-    if ( $TZ =~ /-?\d+/ ) {
-        $TZ = $isdst ? $' : $`;
+    # Note that this can't deal with all the esoteric forms, but it
+    # does recognize the most common: [:]STDoff[DST[off][,rule]]
+
+    if($TZ=~/^([^:\d+\-,]{3,})([+-]?\d{1,2}(:\d{1,2}){0,2})([^\d+\-,]{3,})?/){
+        $TZ = $isdst ? $4 : $1;
     }
-    $TZ .= " " unless $TZ eq "";
+    $TZ .= ' ' unless $TZ eq '';
+
     $year += ($year < 70) ? 2000 : 1900;
     sprintf("%s %s %2d %2d:%02d:%02d %s%4d\n",
       $DoW[$wday], $MoY[$mon], $mday, $hour, $min, $sec, $TZ, $year);

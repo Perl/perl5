@@ -23,6 +23,7 @@
 #include <os2.h>
 
 
+#ifndef PERLGLOB
 int attributes = A_DIR | A_HIDDEN;
 
 
@@ -179,7 +180,9 @@ static void free_dircontents(struct _dircontents * dp)
 }
 
 
-static int IsFileSystemFAT(char *dir)
+static
+#endif
+int IsFileSystemFAT(char *dir)
 {
   USHORT nDrive;
   ULONG lMap;
@@ -216,7 +219,7 @@ static int IsFileSystemFAT(char *dir)
   }
 }
 
-
+#ifndef PERLGLOB
 static char *getdirent(char *dir)
 {
   int done;
@@ -244,3 +247,4 @@ static char *getdirent(char *dir)
     return NULL;
   }
 }
+#endif

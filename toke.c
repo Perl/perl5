@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0.1.12 91/01/11 18:31:45 lwall Locked $
+/* $Header: toke.c,v 4.0 91/03/20 01:42:14 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,78 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
- * Revision 3.0.1.12  91/01/11  18:31:45  lwall
- * patch42: eval'ed formats without proper termination blew up
- * patch42: whitespace now allowed after terminating . of format
- * 
- * Revision 3.0.1.11  90/11/10  02:13:44  lwall
- * patch38: added alarm function
- * patch38: tr was busted in metacharacters on signed char machines
- * 
- * Revision 3.0.1.10  90/10/16  11:20:46  lwall
- * patch29: the length of a search pattern was limited
- * patch29: added DATA filehandle to read stuff after __END__
- * patch29: added -M, -A and -C
- * patch29: added cmp and <=>
- * patch29: added caller
- * patch29: added scalar
- * patch29: added sysread and syswrite
- * patch29: added SysV IPC
- * patch29: added waitpid
- * patch29: tr/// now understands c, d and s options, and handles nulls right
- * patch29: 0x80000000 now makes unsigned value
- * patch29: Null could not be used as a delimiter
- * patch29: added @###.## fields to format
- * 
- * Revision 3.0.1.9  90/08/13  22:37:25  lwall
- * patch28: defined(@array) and defined(%array) didn't work right
- * 
- * Revision 3.0.1.8  90/08/09  05:39:58  lwall
- * patch19: added require operator
- * patch19: added -x switch to extract script from input trash
- * patch19: bare @name didn't add array to symbol table
- * patch19: Added __LINE__ and __FILE__ tokens
- * patch19: Added __END__ token
- * patch19: Numeric literals are now stored only in floating point
- * patch19: some support for FPS compiler misfunction
- * patch19: "\\$foo" not handled right
- * patch19: program and data can now both come from STDIN
- * patch19: "here" strings caused warnings about uninitialized variables
- * 
- * Revision 3.0.1.7  90/03/27  16:32:37  lwall
- * patch16: MSDOS support
- * patch16: formats didn't work inside eval
- * patch16: final semicolon in program wasn't optional with -p or -n
- * 
- * Revision 3.0.1.6  90/03/12  17:06:36  lwall
- * patch13: last semicolon of program is now optional, just for Randal
- * patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
- * 
- * Revision 3.0.1.5  90/02/28  18:47:06  lwall
- * patch9: return grandfathered to never be function call
- * patch9: non-existent perldb.pl now gives reasonable error message
- * patch9: perl can now start up other interpreters scripts
- * patch9: line numbers were bogus during certain portions of foreach evaluation
- * patch9: null hereis core dumped
- * 
- * Revision 3.0.1.4  89/12/21  20:26:56  lwall
- * patch7: -d switch incompatible with -p or -n
- * patch7: " ''$foo'' " didn't parse right
- * patch7: grandfathered m'pat' and s'pat'repl' to not be package qualifiers
- * 
- * Revision 3.0.1.3  89/11/17  15:43:15  lwall
- * patch5: IBM PC/RT compiler can't deal with UNI() and LOP() macros
- * patch5: } misadjusted expection of subsequent term or operator
- * patch5: y/abcde// didn't work
- * 
- * Revision 3.0.1.2  89/11/11  05:04:42  lwall
- * patch2: fixed a CLINE macro conflict
- * 
- * Revision 3.0.1.1  89/10/26  23:26:21  lwall
- * patch1: disambiguated word after "sort" better
- * 
- * Revision 3.0  89/10/18  15:32:33  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:42:14  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -88,12 +18,17 @@
 #ifdef I_FCNTL
 #include <fcntl.h>
 #endif
+#ifdef I_SYS_FILE
+#include <sys/file.h>
+#endif
 
 /* which backslash sequences to keep in m// or s// */
 
 static char *patleave = "\\.^$@dDwWsSbB+*?|()-nrtf0123456789[{]}";
 
-char *reparse;		/* if non-null, scanreg found ${foo[$bar]} */
+char *reparse;		/* if non-null, scanident found ${foo[$bar]} */
+
+void checkcomma();
 
 #ifdef CLINE
 #undef CLINE
@@ -225,7 +160,7 @@ yylex()
 	if ((*s & 127) == '(')
 	    *s++ = '(';
 	else
-	    warn("Unrecognized character \\%03o ignored", *s++);
+	    warn("Unrecognized character \\%03o ignored", *s++ & 255);
 	goto retry;
     }
 #endif
@@ -234,7 +169,7 @@ yylex()
 	if ((*s & 127) == '(')
 	    *s++ = '(';
 	else
-	    warn("Unrecognized character \\%03o ignored", *s++);
+	    warn("Unrecognized character \\%03o ignored", *s++ & 255);
 	goto retry;
     case 4:
     case 26:
@@ -257,6 +192,8 @@ yylex()
 		}
 		if (minus_n || minus_p) {
 		    str_cat(linestr,"line: while (<>) {");
+		    if (minus_l)
+			str_cat(linestr,"chop;");
 		    if (minus_a)
 			str_cat(linestr,"@F=split(' ');");
 		}
@@ -356,7 +293,7 @@ yylex()
 	    }
 	}
 	goto retry;
-    case ' ': case '\t': case '\f':
+    case ' ': case '\t': case '\f': case '\r': case 013:
 	s++;
 	goto retry;
     case '#':
@@ -464,7 +401,7 @@ yylex()
 
     case '*':
 	if (expectterm) {
-	    s = scanreg(s,bufend,tokenbuf);
+	    s = scanident(s,bufend,tokenbuf);
 	    yylval.stabval = stabent(tokenbuf,TRUE);
 	    TERM(STAR);
 	}
@@ -476,7 +413,7 @@ yylex()
 	MOP(O_MULTIPLY);
     case '%':
 	if (expectterm) {
-	    s = scanreg(s,bufend,tokenbuf);
+	    s = scanident(s,bufend,tokenbuf);
 	    yylval.stabval = hadd(stabent(tokenbuf,TRUE));
 	    TERM(HSH);
 	}
@@ -589,12 +526,12 @@ yylex()
     case '$':
 	if (s[1] == '#' && (isalpha(s[2]) || s[2] == '_')) {
 	    s++;
-	    s = scanreg(s,bufend,tokenbuf);
+	    s = scanident(s,bufend,tokenbuf);
 	    yylval.stabval = aadd(stabent(tokenbuf,TRUE));
 	    TERM(ARYLEN);
 	}
 	d = s;
-	s = scanreg(s,bufend,tokenbuf);
+	s = scanident(s,bufend,tokenbuf);
 	if (reparse) {		/* turn ${foo[bar]} into ($foo[bar]) */
 	  do_reparse:
 	    s[-1] = ')';
@@ -608,7 +545,7 @@ yylex()
 
     case '@':
 	d = s;
-	s = scanreg(s,bufend,tokenbuf);
+	s = scanident(s,bufend,tokenbuf);
 	if (reparse)
 	    goto do_reparse;
 	yylval.stabval = aadd(stabent(tokenbuf,TRUE));
@@ -669,7 +606,7 @@ yylex()
 		    stab->str_pok |= SP_MULTI;
 		    stab_io(stab) = stio_new();
 		    stab_io(stab)->ifp = rsfp;
-#if defined(FCNTL) && defined(F_SETFD)
+#if defined(HAS_FCNTL) && defined(F_SETFD)
 		    fd = fileno(rsfp);
 		    fcntl(fd,F_SETFD,fd >= 3);
 #endif
@@ -1041,6 +978,10 @@ yylex()
 	    s = scanstr(s-2);
 	    TERM(RSTRING);
 	}
+	if (strEQ(d,"qx")) {
+	    s = scanstr(s-2);
+	    TERM(RSTRING);
+	}
 	break;
     case 'r': case 'R':
 	SNARFWORD;
@@ -1380,31 +1321,31 @@ yylex()
     return (CLINE, bufptr = s, (int)WORD);
 }
 
-int
+void
 checkcomma(s,what)
 register char *s;
 char *what;
 {
-    char *word;
+    char *someword;
 
     if (*s == '(')
 	s++;
     while (s < bufend && isascii(*s) && isspace(*s))
 	s++;
     if (isascii(*s) && (isalpha(*s) || *s == '_')) {
-	word = s++;
+	someword = s++;
 	while (isalpha(*s) || isdigit(*s) || *s == '_')
 	    s++;
 	while (s < bufend && isspace(*s))
 	    s++;
 	if (*s == ',') {
 	    *s = '\0';
-	    word = instr(
+	    someword = instr(
 	      "tell eof times getlogin wait length shift umask getppid \
 	      cos exp int log rand sin sqrt ord wantarray",
-	      word);
+	      someword);
 	    *s = ',';
-	    if (word)
+	    if (someword)
 		return;
 	    fatal("No comma allowed after %s", what);
 	}
@@ -1412,7 +1353,7 @@ char *what;
 }
 
 char *
-scanreg(s,send,dest)
+scanident(s,send,dest)
 register char *s;
 register char *send;
 char *dest;
@@ -1466,8 +1407,8 @@ char *dest;
 	else
 	    d[1] = '\0';
     }
-    if (*d == '^' && !isspace(*s))
-	*d = *s++ & 31;
+    if (*d == '^' && (isupper(*s) || index("[\\]^_?",*s)))
+	*d = *s++ ^ 64;
     return s;
 }
 
@@ -1501,7 +1442,7 @@ int len;
 	    e = d;
 	    break;
 	case '\\':
-	    if (d[1] && index("wWbB0123456789sSdD",d[1])) {
+	    if (d[1] && index("wWbB0123456789sSdDlLuUE",d[1])) {
 		e = d;
 		break;
 	    }
@@ -1519,6 +1460,12 @@ int len;
 		break;
 	    case 'r':
 		*d = '\r';
+		break;
+	    case 'e':
+		*d = '\033';
+		break;
+	    case 'a':
+		*d = '\007';
 		break;
 	    }
 	    /* FALL THROUGH */
@@ -1599,17 +1546,17 @@ register char *s;
 	    arg->arg_type = O_ITEM;
 	    arg[1].arg_type = A_DOUBLE;
 	    arg[1].arg_ptr.arg_str = str_smake(str);
-	    d = scanreg(d,bufend,buf);
+	    d = scanident(d,bufend,buf);
 	    (void)stabent(buf,TRUE);		/* make sure it's created */
 	    for (; d < e; d++) {
 		if (*d == '\\')
 		    d++;
 		else if (*d == '$' && d[1] && d[1] != '|' && d[1] != ')') {
-		    d = scanreg(d,bufend,buf);
+		    d = scanident(d,bufend,buf);
 		    (void)stabent(buf,TRUE);
 		}
 		else if (*d == '@') {
-		    d = scanreg(d,bufend,buf);
+		    d = scanident(d,bufend,buf);
 		    if (strEQ(buf,"ARGV") || strEQ(buf,"ENV") ||
 		      strEQ(buf,"SIG") || strEQ(buf,"INC"))
 			(void)stabent(buf,TRUE);
@@ -1659,7 +1606,7 @@ register char *s;
 	if (spat->spat_short)
 	    fbmcompile(spat->spat_short, spat->spat_flags & SPAT_FOLD);
 	spat->spat_regexp = regcomp(str->str_ptr,str->str_ptr+len,
-	    spat->spat_flags & SPAT_FOLD,1);
+	    spat->spat_flags & SPAT_FOLD);
 	hoistmust(spat);
     }
   got_pat:
@@ -1702,15 +1649,15 @@ register char *s;
 	    arg->arg_type = O_ITEM;
 	    arg[1].arg_type = A_DOUBLE;
 	    arg[1].arg_ptr.arg_str = str_smake(str);
-	    d = scanreg(d,bufend,buf);
+	    d = scanident(d,bufend,buf);
 	    (void)stabent(buf,TRUE);		/* make sure it's created */
 	    for (; *d; d++) {
 		if (*d == '$' && d[1] && d[-1] != '\\' && d[1] != '|') {
-		    d = scanreg(d,bufend,buf);
+		    d = scanident(d,bufend,buf);
 		    (void)stabent(buf,TRUE);
 		}
 		else if (*d == '@' && d[-1] != '\\') {
-		    d = scanreg(d,bufend,buf);
+		    d = scanident(d,bufend,buf);
 		    if (strEQ(buf,"ARGV") || strEQ(buf,"ENV") ||
 		      strEQ(buf,"SIG") || strEQ(buf,"INC"))
 			(void)stabent(buf,TRUE);
@@ -1789,7 +1736,7 @@ get_repl:
 	fbmcompile(spat->spat_short, spat->spat_flags & SPAT_FOLD);
     if (!spat->spat_runtime) {
 	spat->spat_regexp = regcomp(str->str_ptr,str->str_ptr+len,
-	  spat->spat_flags & SPAT_FOLD,1);
+	  spat->spat_flags & SPAT_FOLD);
 	hoistmust(spat);
     }
     yylval.arg = make_match(O_SUBST,stab2arg(A_STAB,defstab),spat);
@@ -1838,7 +1785,7 @@ int *retlen;
 
     while (s < send && d - t <= 256) {
 	if (s[1] == '-' && s+2 < send) {
-	    for (i = s[0]; i <= s[2]; i++)
+	    for (i = (s[0] & 0377); i <= (s[2] & 0377); i++)
 		*d++ = i;
 	    s += 3;
 	}
@@ -1877,7 +1824,7 @@ register char *s;
     }
     t = expand_charset(yylval.arg[1].arg_ptr.arg_str->str_ptr,
 	yylval.arg[1].arg_ptr.arg_str->str_cur,&tlen);
-    free_arg(yylval.arg);
+    arg_free(yylval.arg);
     s = scanstr(s-1);
     if (s >= bufend) {
 	yyerror("Translation replacement not terminated");
@@ -1896,7 +1843,7 @@ register char *s;
     }
     r = expand_charset(yylval.arg[1].arg_ptr.arg_str->str_ptr,
 	yylval.arg[1].arg_ptr.arg_str->str_cur,&rlen);
-    free_arg(yylval.arg);
+    arg_free(yylval.arg);
     arg[2].arg_len = delete|squash;
     yylval.arg = arg;
     if (!rlen && !delete) {
@@ -1907,16 +1854,16 @@ register char *s;
 	Zero(tbl, 256, short);
 	for (i = 0; i < tlen; i++)
 	    tbl[t[i] & 0377] = -1;
-	for (i = 0, j = 0; i < 256; i++,j++) {
+	for (i = 0, j = 0; i < 256; i++) {
 	    if (!tbl[i]) {
 		if (j >= rlen) {
-		    if (delete) {
+		    if (delete)
 			tbl[i] = -2;
-			continue;
-		    }
-		    --j;
+		    else
+			tbl[i] = r[j-1];
 		}
-		tbl[i] = r[j];
+		else
+		    tbl[i] = r[j++];
 	    }
 	}
     }
@@ -1956,7 +1903,7 @@ register char *s;
     bool hereis = FALSE;
     STR *herewas;
     STR *str;
-    char *leave = "\\$@nrtfb0123456789[{]}"; /* which backslash sequences to keep */
+    char *leave = "\\$@nrtfbeacx0123456789[{]}lLuUE"; /* which backslash sequences to keep */
     int len;
 
     arg = op_new(1);
@@ -2138,6 +2085,10 @@ register char *s;
 	    s++;
 	    goto do_double;
 	}
+	if (*s == 'x') {
+	    s++;
+	    goto do_back;
+	}
 	/* FALL THROUGH */
     case '\'':
       do_single:
@@ -2252,6 +2203,8 @@ register char *s;
 		    makesingle = FALSE;	/* force interpretation */
 		}
 		else if (*s == '\\' && s+1 < send) {
+		    if (index("lLuUE",s[1]))
+			makesingle = FALSE;
 		    s++;
 		}
 		s++;
@@ -2261,7 +2214,7 @@ register char *s;
 		if ((*s == '$' && s+1 < send &&
 		    (alwaysdollar || /*(*/ (s[1] != ')' && s[1] != '|')) ) ||
 		    (*s == '@' && s+1 < send) ) {
-		    len = scanreg(s,send,tokenbuf) - s;
+		    len = scanident(s,send,tokenbuf) - s;
 		    if (*s == '$' || strEQ(tokenbuf,"ARGV")
 		      || strEQ(tokenbuf,"ENV")
 		      || strEQ(tokenbuf,"SIG")
@@ -2281,16 +2234,19 @@ register char *s;
 			continue;
 		    case '0': case '1': case '2': case '3':
 		    case '4': case '5': case '6': case '7':
-			*d = *s++ - '0';
-			if (s < send && *s && index("01234567",*s)) {
-			    *d <<= 3;
-			    *d += *s++ - '0';
-			}
-			if (s < send && *s && index("01234567",*s)) {
-			    *d <<= 3;
-			    *d += *s++ - '0';
-			}
-			d++;
+			*d++ = scanoct(s, 3, &len);
+			s += len;
+			continue;
+		    case 'x':
+			*d++ = scanhex(++s, 2, &len);
+			s += len;
+			continue;
+		    case 'c':
+			s++;
+			*d = *s++;
+			if (islower(*d))
+			    *d = toupper(*d);
+			*d++ ^= 64;
 			continue;
 		    case 'b':
 			*d++ = '\b';
@@ -2306,6 +2262,12 @@ register char *s;
 			break;
 		    case 't':
 			*d++ = '\t';
+			break;
+		    case 'e':
+			*d++ = '\033';
+			break;
+		    case 'a':
+			*d++ = '\007';
 			break;
 		    }
 		    s++;
@@ -2518,7 +2480,7 @@ load_format()
 		    case '$':
 			str_ncat(str, t, s - t);
 			t = s;
-			s = scanreg(s,eol,tokenbuf);
+			s = scanident(s,eol,tokenbuf);
 			str_ncat(str, t, s - t);
 			t = s;
 			if (s < eol && *s && index("$'\"",*s))

@@ -1,4 +1,4 @@
-/* $Header: stab.c,v 3.0.1.11 91/01/11 18:23:44 lwall Locked $
+/* $Header: stab.c,v 4.0 91/03/20 01:39:41 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,57 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.c,v $
- * Revision 3.0.1.11  91/01/11  18:23:44  lwall
- * patch42: added -0 option
- * 
- * Revision 3.0.1.10  90/11/10  02:02:05  lwall
- * patch38: random cleanup
- * 
- * Revision 3.0.1.9  90/10/16  10:32:05  lwall
- * patch29: added -M, -A and -C
- * patch29: taintperl now checks for world writable PATH components
- * patch29: *foo now prints as *package'foo
- * patch29: scripts now run at almost full speed under the debugger
- * patch29: package behavior is now more consistent
- * 
- * Revision 3.0.1.8  90/08/13  22:30:17  lwall
- * patch28: the NSIG hack didn't work right on Xenix
- * 
- * Revision 3.0.1.7  90/08/09  05:17:48  lwall
- * patch19: fixed double include of <signal.h>
- * patch19: $' broke on embedded nulls
- * patch19: $< and $> better supported on machines without setreuid
- * patch19: Added support for linked-in C subroutines
- * patch19: %ENV wasn't forced to be global like it should
- * patch19: $| didn't work before the filehandle was opened
- * patch19: $! now returns "" in string context if errno == 0
- * 
- * Revision 3.0.1.6  90/03/27  16:22:11  lwall
- * patch16: support for machines that can't cast negative floats to unsigned ints
- * 
- * Revision 3.0.1.5  90/03/12  17:00:11  lwall
- * patch13: undef $/ didn't work as advertised
- * 
- * Revision 3.0.1.4  90/02/28  18:19:14  lwall
- * patch9: $0 is now always the command name
- * patch9: you may now undef $/ to have no input record separator
- * patch9: local($.) didn't work
- * patch9: sometimes perl thought ordinary data was a symbol table entry
- * patch9: stab_array() and stab_hash() weren't defined on MICROPORT
- * 
- * Revision 3.0.1.3  89/12/21  20:18:40  lwall
- * patch7: ANSI strerror() is now supported
- * patch7: errno may now be a macro with an lvalue
- * patch7: in stab.c, sighandler() may now return either void or int
- * 
- * Revision 3.0.1.2  89/11/17  15:35:37  lwall
- * patch5: sighandler() needed to be static
- * 
- * Revision 3.0.1.1  89/11/11  04:55:07  lwall
- * patch2: sys_errlist[sys_nerr] is illegal
- * 
- * Revision 3.0  89/10/18  15:23:23  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:39:41  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -79,6 +30,8 @@ static char *sig_name[] = {
 
 static handlertype sighandler();
 
+static int origalen = 0;
+
 STR *
 stab_str(str)
 STR *str;
@@ -92,8 +45,22 @@ STR *str;
 	return stab_val(stab);
 
     switch (*stab->str_magic->str_ptr) {
+    case '\004':		/* ^D */
+#ifdef DEBUGGING
+	str_numset(stab_val(stab),(double)(debug & 32767));
+#endif
+	break;
+    case '\t':			/* ^I */
+	if (inplace)
+	    str_set(stab_val(stab), inplace);
+	else
+	    str_sset(stab_val(stab),&str_undef);
+	break;
     case '\024':		/* ^T */
 	str_numset(stab_val(stab),(double)basetime);
+	break;
+    case '\027':		/* ^W */
+	str_numset(stab_val(stab),(double)dowarn);
 	break;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
@@ -173,11 +140,6 @@ STR *str;
 	break;
 #endif
     case '/':
-	if (record_separator != 0777) {
-	    *tokenbuf = record_separator;
-	    tokenbuf[1] = '\0';
-	    str_nset(stab_val(stab),tokenbuf,rslen);
-	}
 	break;
     case '[':
 	str_numset(stab_val(stab),(double)arybase);
@@ -217,7 +179,7 @@ STR *str;
 	(void)sprintf(s,"%d",(int)egid);
       add_groups:
 	while (*s) s++;
-#ifdef GETGROUPS
+#ifdef HAS_GETGROUPS
 #ifndef NGROUPS
 #define NGROUPS 32
 #endif
@@ -232,6 +194,10 @@ STR *str;
 	}
 #endif
 	str_set(stab_val(stab),buf);
+	break;
+    case '*':
+	break;
+    case '0':
 	break;
     default:
 	{
@@ -250,7 +216,7 @@ register STR *mstr;
 STR *str;
 {
     STAB *stab = mstr->str_u.str_stab;
-    char *s;
+    register char *s;
     int i;
 
     switch (mstr->str_rare) {
@@ -329,6 +295,7 @@ STR *str;
 		strcpy(stab_magic(stab),"StB");
 		stab_val(stab) = Str_new(70,0);
 		stab_line(stab) = curcmd->c_line;
+		stab_stash(stab) = curcmd->c_stash;
 	    }
 	    else {
 		stab = stabent(s,TRUE);
@@ -344,11 +311,13 @@ STR *str;
 	break;
     case 's': {
 	    struct lstring *lstr = (struct lstring*)str;
+	    char *tmps;
 
 	    mstr->str_rare = 0;
 	    str->str_magic = Nullstr;
+	    tmps = str_get(str);
 	    str_insert(mstr,lstr->lstr_offset,lstr->lstr_len,
-	      str->str_ptr,str->str_cur);
+	      tmps,str->str_cur);
 	}
 	break;
 
@@ -358,8 +327,24 @@ STR *str;
 
     case 0:
 	switch (*stab->str_magic->str_ptr) {
+	case '\004':	/* ^D */
+#ifdef DEBUGGING
+	    debug = (int)(str_gnum(str)) | 32768;
+#endif
+	    break;
+	case '\t':	/* ^I */
+	    if (inplace)
+		Safefree(inplace);
+	    if (str->str_pok || str->str_nok)
+		inplace = savestr(str_get(str));
+	    else
+		inplace = Nullch;
+	    break;
 	case '\024':	/* ^T */
 	    basetime = (long)str_gnum(str);
+	    break;
+	case '\027':	/* ^W */
+	    dowarn = (bool)str_gnum(str);
 	    break;
 	case '.':
 	    if (localizing)
@@ -400,11 +385,16 @@ STR *str;
 	    break;
 	case '/':
 	    if (str->str_pok) {
-		record_separator = *str_get(str);
+		rs = str_get(str);
 		rslen = str->str_cur;
+		if (!rslen) {
+		    rs = "\n\n";
+		    rslen = 2;
+		}
+		rschar = rs[rslen - 1];
 	    }
 	    else {
-		record_separator = 0777;	/* fake a non-existent char */
+		rschar = 0777;	/* fake a non-existent char */
 		rslen = 1;
 	    }
 	    break;
@@ -436,17 +426,17 @@ STR *str;
 	    break;
 	case '<':
 	    uid = (int)str_gnum(str);
-#ifdef SETREUID
+#ifdef HAS_SETREUID
 	    if (delaymagic) {
 		delaymagic |= DM_REUID;
 		break;				/* don't do magic till later */
 	    }
-#endif /* SETREUID */
-#ifdef SETRUID
+#endif /* HAS_SETREUID */
+#ifdef HAS_SETRUID
 	    if (setruid((UIDTYPE)uid) < 0)
 		uid = (int)getuid();
 #else
-#ifdef SETREUID
+#ifdef HAS_SETREUID
 	    if (setreuid((UIDTYPE)uid, (UIDTYPE)-1) < 0)
 		uid = (int)getuid();
 #else
@@ -459,17 +449,17 @@ STR *str;
 	    break;
 	case '>':
 	    euid = (int)str_gnum(str);
-#ifdef SETREUID
+#ifdef HAS_SETREUID
 	    if (delaymagic) {
 		delaymagic |= DM_REUID;
 		break;				/* don't do magic till later */
 	    }
-#endif /* SETREUID */
-#ifdef SETEUID
+#endif /* HAS_SETREUID */
+#ifdef HAS_SETEUID
 	    if (seteuid((UIDTYPE)euid) < 0)
 		euid = (int)geteuid();
 #else
-#ifdef SETREUID
+#ifdef HAS_SETREUID
 	    if (setreuid((UIDTYPE)-1, (UIDTYPE)euid) < 0)
 		euid = (int)geteuid();
 #else
@@ -482,16 +472,16 @@ STR *str;
 	    break;
 	case '(':
 	    gid = (int)str_gnum(str);
-#ifdef SETREGID
+#ifdef HAS_SETREGID
 	    if (delaymagic) {
 		delaymagic |= DM_REGID;
 		break;				/* don't do magic till later */
 	    }
-#endif /* SETREGID */
-#ifdef SETRGID
+#endif /* HAS_SETREGID */
+#ifdef HAS_SETRGID
 	    (void)setrgid((GIDTYPE)gid);
 #else
-#ifdef SETREGID
+#ifdef HAS_SETREGID
 	    (void)setregid((GIDTYPE)gid, (GIDTYPE)-1);
 #else
 	    fatal("setrgid() not implemented");
@@ -500,16 +490,16 @@ STR *str;
 	    break;
 	case ')':
 	    egid = (int)str_gnum(str);
-#ifdef SETREGID
+#ifdef HAS_SETREGID
 	    if (delaymagic) {
 		delaymagic |= DM_REGID;
 		break;				/* don't do magic till later */
 	    }
-#endif /* SETREGID */
-#ifdef SETEGID
+#endif /* HAS_SETREGID */
+#ifdef HAS_SETEGID
 	    (void)setegid((GIDTYPE)egid);
 #else
-#ifdef SETREGID
+#ifdef HAS_SETREGID
 	    (void)setregid((GIDTYPE)-1, (GIDTYPE)egid);
 #else
 	    fatal("setegid() not implemented");
@@ -518,6 +508,39 @@ STR *str;
 	    break;
 	case ':':
 	    chopset = str_get(str);
+	    break;
+	case '0':
+	    if (!origalen) {
+		s = origargv[0];
+		s += strlen(s);
+		/* See if all the arguments are contiguous in memory */
+		for (i = 1; i < origargc; i++) {
+		    if (origargv[i] == s + 1)
+			s += strlen(++s);	/* this one is ok too */
+		}
+		if (origenviron[0] == s + 1) {	/* can grab env area too? */
+		    setenv("NoNeSuCh", Nullch);	/* force copy of environment */
+		    for (i = 0; origenviron[i]; i++)
+			if (origenviron[i] == s + 1)
+			    s += strlen(++s);
+		}
+		origalen = s - origargv[0];
+	    }
+	    s = str_get(str);
+	    i = str->str_cur;
+	    if (i >= origalen) {
+		i = origalen;
+		str->str_cur = i;
+		str->str_ptr[i] = '\0';
+		bcopy(s, origargv[0], i);
+	    }
+	    else {
+		bcopy(s, origargv[0], i);
+		s = origargv[0]+i;
+		*s++ = '\0';
+		while (++i < origalen)
+		    *s++ = ' ';
+	    }
 	    break;
 	default:
 	    {
@@ -604,6 +627,7 @@ int sig;
 
     sub->depth--;	/* assuming no longjumps out of here */
     str_free(stack->ary_array[0]);	/* free the one real string */
+    stack->ary_array[0] = Nullstr;
     afree(stab_xarray(defstab));  /* put back old $_[] */
     stab_xarray(defstab) = savearray;
     stack = oldstack;
@@ -740,6 +764,10 @@ int add;
 	stab_line(stab) = curcmd->c_line;
 	str_magic(stab,stab,'*',name,len);
 	stab_stash(stab) = stash;
+	if (isdigit(*name) && *name != '0') {
+	    stab_flags(stab) = SF_VMAGIC;
+	    str_magic(stab_val(stab), stab, 0, Nullch, 0);
+	}
 	return stab;
     }
 }
@@ -748,7 +776,11 @@ stab_fullname(str,stab)
 STR *str;
 STAB *stab;
 {
-    str_set(str,stab_stash(stab)->tbl_name);
+    HASH *tb = stab_stash(stab);
+
+    if (!tb)
+	return;
+    str_set(str,tb->tbl_name);
     str_ncat(str,"'", 1);
     str_scat(str,stab->str_magic);
 }
@@ -801,8 +833,11 @@ register STAB *stab;
     SUBR *sub;
 
     afree(stab_xarray(stab));
+    stab_xarray(stab) = Null(ARRAY*);
     (void)hfree(stab_xhash(stab), FALSE);
+    stab_xhash(stab) = Null(HASH*);
     str_free(stab_val(stab));
+    stab_val(stab) = Nullstr;
     if (stio = stab_io(stab)) {
 	do_close(stab,FALSE);
 	Safefree(stio->top_name);

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: gcp,v 3.0 89/10/18 15:13:59 lwall Locked $
+# $Header: gcp,v 4.0 91/03/20 01:10:05 lwall Locked $
 
 # Here is a script to do global rcps.  See man page.
 

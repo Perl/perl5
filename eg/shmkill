@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: shmkill,v 3.0 89/10/18 15:16:09 lwall Locked $
+# $Header: shmkill,v 4.0 91/03/20 01:14:20 lwall Locked $
 
 # A script to call from crontab periodically when people are leaving shared
 # memory sitting around unattached.

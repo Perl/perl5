@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.14 91/01/11 17:51:04 lwall Locked $
+/* $Header: doio.c,v 4.0 91/03/20 01:07:06 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,106 +6,40 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
- * Revision 3.0.1.14  91/01/11  17:51:04  lwall
- * patch42: ANSIfied the stat mode checking
- * patch42: the -i switch is now much more robust and informative
- * patch42: close on a pipe didn't return failure correctly
- * patch42: stat on temp values could wipe them out prematurely, i.e. grep(-d,<*>)
- * patch42: -l didn't work right with _
- * 
- * Revision 3.0.1.13  90/11/10  01:17:37  lwall
- * patch38: -e _ was wrong if last stat failed
- * patch38: more msdos/os2 upgrades
- * 
- * Revision 3.0.1.12  90/10/20  02:04:18  lwall
- * patch37: split out separate Sys V IPC features
- * 
- * Revision 3.0.1.11  90/10/15  16:16:11  lwall
- * patch29: added SysV IPC
- * patch29: file - didn't auto-close cleanly
- * patch29: close; core dumped
- * patch29: more MSDOS and OS/2 updates, from Kai Uwe Rommel
- * patch29: various portability fixes
- * patch29: *foo now prints as *package'foo
- * 
- * Revision 3.0.1.10  90/08/13  22:14:29  lwall
- * patch28: close-on-exec problems on dup'ed file descriptors
- * patch28: F_FREESP wasn't implemented the way I thought
- * 
- * Revision 3.0.1.9  90/08/09  02:56:19  lwall
- * patch19: various MSDOS and OS/2 patches folded in
- * patch19: prints now check error status better
- * patch19: printing a list with null elements only printed front of list
- * patch19: on machines with vfork child would allocate memory in parent
- * patch19: getsockname and getpeername gave bogus warning on error
- * patch19: MACH doesn't have seekdir or telldir
- * 
- * Revision 3.0.1.8  90/03/27  15:44:02  lwall
- * patch16: MSDOS support
- * patch16: support for machines that can't cast negative floats to unsigned ints
- * patch16: system() can lose arguments passed to shell scripts on SysV machines
- * 
- * Revision 3.0.1.7  90/03/14  12:26:24  lwall
- * patch15: commands involving execs could cause malloc arena corruption
- * 
- * Revision 3.0.1.6  90/03/12  16:30:07  lwall
- * patch13: system 'FOO=bar command' didn't invoke sh as it should
- * 
- * Revision 3.0.1.5  90/02/28  17:01:36  lwall
- * patch9: open(FOO,"$filename\0") will now protect trailing spaces in filename
- * patch9: removed obsolete checks to avoid opening block devices
- * patch9: removed references to acusec and modusec that some utime.h's have
- * patch9: added pipe function
- * 
- * Revision 3.0.1.4  89/12/21  19:55:10  lwall
- * patch7: select now works on big-endian machines
- * patch7: errno may now be a macro with an lvalue
- * patch7: ANSI strerror() is now supported
- * patch7: Configure now detects DG/UX thingies like [sg]etpgrp2 and utime.h
- * 
- * Revision 3.0.1.3  89/11/17  15:13:06  lwall
- * patch5: some systems have symlink() but not lstat()
- * patch5: some systems have dirent.h but not readdir()
- * 
- * Revision 3.0.1.2  89/11/11  04:25:51  lwall
- * patch2: orthogonalized the file modes some so we can have <& +<& etc.
- * patch2: do_open() now detects sockets passed to process from parent
- * patch2: fd's above 2 are now closed on exec
- * patch2: csh code can now use csh from other than /bin
- * patch2: getsockopt, get{sock,peer}name didn't define result properly
- * patch2: warn("shutdown") was replicated
- * patch2: gethostbyname was misdeclared
- * patch2: telldir() is sometimes a macro
- * 
- * Revision 3.0.1.1  89/10/26  23:10:05  lwall
- * patch1: Configure now checks for BSD shadow passwords
- * 
- * Revision 3.0  89/10/18  15:10:54  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:07:06  lwall
+ * 4.0 baseline.
  * 
  */
 
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifdef SOCKET
+#ifdef HAS_SOCKET
 #include <sys/socket.h>
 #include <netdb.h>
 #endif
 
-#if defined(SELECT) && (defined(M_UNIX) || defined(M_XENIX))
+#ifdef M_UNIX
+#if defined(HAS_SELECT) && !defined(I_SYS_TIME)
 #include <sys/select.h>
 #endif
+#endif
 
-#ifdef SYSVIPC
+#ifdef M_XENIX
+#ifdef HAS_SELECT
+#include <sys/select.h>
+#endif
+#endif
+
+#if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 #include <sys/ipc.h>
-#ifdef IPCMSG
+#ifdef HAS_MSG
 #include <sys/msg.h>
 #endif
-#ifdef IPCSEM
+#ifdef HAS_SEM
 #include <sys/sem.h>
 #endif
-#ifdef IPCSHM
+#ifdef HAS_SHM
 #include <sys/shm.h>
 #endif
 #endif
@@ -122,8 +56,12 @@
 #ifdef I_FCNTL
 #include <fcntl.h>
 #endif
+#ifdef I_SYS_FILE
+#include <sys/file.h>
+#endif
 
 int laststatval = -1;
+int laststype = O_STAT;
 
 bool
 do_open(stab,name,len)
@@ -216,7 +154,9 @@ int len;
 		else
 		    fd = -1;
 	    }
-	    fp = fdopen(dup(fd),mode);
+	    if (!(fp = fdopen(fd = dup(fd),mode))) {
+		close(fd);
+	    }
 	}
 	else {
 	    while (isspace(*name))
@@ -284,7 +224,7 @@ int len;
 	    stio->type = 's';	/* some OS's return 0 on fstat()ed socket */
 #endif
     }
-#if defined(FCNTL) && defined(F_SETFD)
+#if defined(HAS_FCNTL) && defined(F_SETFD)
     fd = fileno(fp);
     fcntl(fd,F_SETFD,fd >= 3);
 #endif
@@ -293,7 +233,10 @@ int len;
 	if (stio->type != 's')
 	    stio->ofp = fp;
 	else
-	    stio->ofp = fdopen(fileno(fp),"w");
+	    if (!(stio->ofp = fdopen(fileno(fp),"w"))) {
+		fclose(fp);
+		stio->ifp = Nullfp;
+	    }
     }
     return TRUE;
 }
@@ -303,13 +246,25 @@ nextargv(stab)
 register STAB *stab;
 {
     register STR *str;
-    char *oldname;
     int filedev;
     int fileino;
-    int filemode;
     int fileuid;
     int filegid;
+    static int filemode = 0;
+    static int lastfd;
+    static char *oldname;
 
+    if (!argvoutstab)
+	argvoutstab = stabent("ARGVOUT",TRUE);
+    if (filemode & (S_ISUID|S_ISGID)) {
+	fflush(stab_io(argvoutstab)->ifp);  /* chmod must follow last write */
+#ifdef HAS_FCHMOD
+	(void)fchmod(lastfd,filemode);
+#else
+	(void)chmod(oldname,filemode);
+#endif
+    }
+    filemode = 0;
     while (alen(stab_xarray(stab)) >= 0) {
 	str = ashift(stab_xarray(stab));
 	str_sset(stab_val(stab),str);
@@ -354,7 +309,7 @@ register STAB *stab;
 			continue;
 		    }
 #endif
-#ifdef RENAME
+#ifdef HAS_RENAME
 #ifndef MSDOS
 		    if (rename(oldname,str->str_ptr) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
@@ -383,7 +338,13 @@ register STAB *stab;
 		}
 		else {
 #ifndef MSDOS
-		    (void)UNLINK(oldname);
+		    if (UNLINK(oldname) < 0) {
+			warn("Can't rename %s to %s: %s, skipping file",
+			  oldname, str->str_ptr, strerror(errno) );
+			do_close(stab,FALSE);
+			str_free(str);
+			continue;
+		    }
 #else
 		    fatal("Can't do inplace edit without backup");
 #endif
@@ -392,22 +353,30 @@ register STAB *stab;
 		str_nset(str,">",1);
 		str_cat(str,oldname);
 		errno = 0;		/* in case sprintf set errno */
-		if (!do_open(argvoutstab,str->str_ptr,str->str_cur))
+		if (!do_open(argvoutstab,str->str_ptr,str->str_cur)) {
 		    warn("Can't do inplace edit on %s: %s",
 		      oldname, strerror(errno) );
+		    do_close(stab,FALSE);
+		    str_free(str);
+		    continue;
+		}
 		defoutstab = argvoutstab;
-#ifdef FCHMOD
-		(void)fchmod(fileno(stab_io(argvoutstab)->ifp),filemode);
+		lastfd = fileno(stab_io(argvoutstab)->ifp);
+		(void)fstat(lastfd,&statbuf);
+#ifdef HAS_FCHMOD
+		(void)fchmod(lastfd,filemode);
 #else
 		(void)chmod(oldname,filemode);
 #endif
-#ifdef FCHOWN
-		(void)fchown(fileno(stab_io(argvoutstab)->ifp),fileuid,filegid);
+		if (fileuid != statbuf.st_uid || filegid != statbuf.st_gid) {
+#ifdef HAS_FCHOWN
+		    (void)fchown(lastfd,fileuid,filegid);
 #else
-#ifdef CHOWN
-		(void)chown(oldname,fileuid,filegid);
+#ifdef HAS_CHOWN
+		    (void)chown(oldname,fileuid,filegid);
 #endif
 #endif
+		}
 	    }
 	    str_free(str);
 	    return stab_io(stab)->ifp;
@@ -423,7 +392,7 @@ register STAB *stab;
     return Nullfp;
 }
 
-#ifdef PIPE
+#ifdef HAS_PIPE
 void
 do_pipe(str, rstab, wstab)
 STR *str;
@@ -458,6 +427,13 @@ STAB *wstab;
     wstio->ifp = wstio->ofp;
     rstio->type = '<';
     wstio->type = '>';
+    if (!rstio->ifp || !wstio->ofp) {
+	if (rstio->ifp) fclose(rstio->ifp);
+	else close(fd[0]);
+	if (wstio->ofp) fclose(wstio->ofp);
+	else close(fd[1]);
+	goto badexit;
+    }
 
     str_sset(str,&str_yes);
     return;
@@ -542,6 +518,10 @@ STAB *stab;
 	    (void)ungetc(ch, stio->ifp);
 	    return FALSE;
 	}
+#ifdef STDSTDIO
+	if (stio->ifp->_cnt < -1)
+	    stio->ifp->_cnt = -1;
+#endif
 	if (!stab) {			/* not necessarily a real EOF yet? */
 	    if (!nextargv(argvstab))	/* get another fp handy */
 		return TRUE;
@@ -657,7 +637,7 @@ STR *argstr;
 #ifdef MSDOS
 	fatal("fcntl is not implemented");
 #else
-#ifdef I_FCNTL
+#ifdef HAS_FCNTL
 	retval = fcntl(fileno(stio->ifp), func, s);
 #else
 	fatal("fcntl is not implemented");
@@ -689,6 +669,7 @@ int *arglast;
     if ((arg[1].arg_type & A_MASK) == A_WORD) {
 	tmpstab = arg[1].arg_ptr.arg_stab;
 	if (tmpstab != defstab) {
+	    laststype = O_STAT;
 	    statstab = tmpstab;
 	    str_set(statname,"");
 	    if (!stab_io(tmpstab) || !stab_io(tmpstab)->ifp ||
@@ -703,7 +684,8 @@ int *arglast;
     else {
 	str_set(statname,str_get(ary->ary_array[sp]));
 	statstab = Nullstab;
-#ifdef LSTAT
+#ifdef HAS_LSTAT
+	laststype = arg->arg_type;
 	if (arg->arg_type == O_LSTAT)
 	    laststatval = lstat(str_get(statname),&statcache);
 	else
@@ -726,37 +708,37 @@ int *arglast;
     if (max) {
 #ifndef lint
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_dev)));
+	  str_2mortal(str_nmake((double)statcache.st_dev)));
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_ino)));
+	  str_2mortal(str_nmake((double)statcache.st_ino)));
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_mode)));
+	  str_2mortal(str_nmake((double)statcache.st_mode)));
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_nlink)));
+	  str_2mortal(str_nmake((double)statcache.st_nlink)));
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_uid)));
+	  str_2mortal(str_nmake((double)statcache.st_uid)));
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_gid)));
+	  str_2mortal(str_nmake((double)statcache.st_gid)));
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_rdev)));
+	  str_2mortal(str_nmake((double)statcache.st_rdev)));
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_size)));
+	  str_2mortal(str_nmake((double)statcache.st_size)));
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_atime)));
+	  str_2mortal(str_nmake((double)statcache.st_atime)));
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_mtime)));
+	  str_2mortal(str_nmake((double)statcache.st_mtime)));
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_ctime)));
+	  str_2mortal(str_nmake((double)statcache.st_ctime)));
 #ifdef STATBLOCKS
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_blksize)));
+	  str_2mortal(str_nmake((double)statcache.st_blksize)));
 	(void)astore(ary,++sp,
-	  str_2static(str_nmake((double)statcache.st_blocks)));
+	  str_2mortal(str_nmake((double)statcache.st_blocks)));
 #else
 	(void)astore(ary,++sp,
-	  str_2static(str_make("",0)));
+	  str_2mortal(str_make("",0)));
 	(void)astore(ary,++sp,
-	  str_2static(str_make("",0)));
+	  str_2mortal(str_make("",0)));
 #endif
 #else /* lint */
 	(void)astore(ary,++sp,str_nmake(0.0));
@@ -765,9 +747,9 @@ int *arglast;
     return sp;
 }
 
-#if !defined(TRUNCATE) && !defined(CHSIZE) && defined(F_FREESP)
+#if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 	/* code courtesy of William Kucharski */
-#define CHSIZE
+#define HAS_CHSIZE
 
 int chsize(fd, length)
 int fd;			/* file descriptor */
@@ -830,8 +812,8 @@ int *arglast;
     int result = 1;
     STAB *tmpstab;
 
-#if defined(TRUNCATE) || defined(CHSIZE)
-#ifdef TRUNCATE
+#if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE)
+#ifdef HAS_TRUNCATE
     if ((arg[1].arg_type & A_MASK) == A_WORD) {
 	tmpstab = arg[1].arg_ptr.arg_stab;
 	if (!stab_io(tmpstab) ||
@@ -939,7 +921,7 @@ FILE *fp;
 	tmps = str_get(str);
 	if (*tmps == 'S' && tmps[1] == 't' && tmps[2] == 'B' && tmps[3] == '\0'
 	  && str->str_cur == sizeof(STBP) && strlen(tmps) < str->str_cur) {
-	    STR *tmpstr = str_static(&str_undef);
+	    STR *tmpstr = str_mortal(&str_undef);
 	    stab_fullname(tmpstr,((STAB*)str));/* a stab value, be nice */
 	    str = tmpstr;
 	    tmps = str->str_ptr;
@@ -998,6 +980,7 @@ STR *str;
 {
     STIO *stio;
 
+    laststype = O_STAT;
     if (arg[1].arg_type & A_DONT) {
 	stio = stab_io(arg[1].arg_ptr.arg_stab);
 	if (stio && stio->ifp) {
@@ -1028,12 +1011,19 @@ mylstat(arg,str)
 ARG *arg;
 STR *str;
 {
-    if (arg[1].arg_type & A_DONT)
-	fatal("You must supply explicit filename with -l");
+    if (arg[1].arg_type & A_DONT) {
+	if (arg[1].arg_ptr.arg_stab == defstab) {
+	    if (laststype != O_LSTAT)
+		fatal("The stat preceding -l _ wasn't an lstat");
+	    return laststatval;
+	}
+	fatal("You can't use -l on a filehandle");
+    }
 
+    laststype = O_LSTAT;
     statstab = Nullstab;
     str_set(statname,str_get(str));
-#ifdef LSTAT
+#ifdef HAS_LSTAT
     return (laststatval = lstat(str_get(str),&statcache));
 #else
     return (laststatval = stat(str_get(str),&statcache));
@@ -1098,9 +1088,9 @@ STR *str;
 	    return &str_undef;
 	fstat(i,&statcache);
 	len = read(i,tbuf,512);
+	(void)close(i);
 	if (len <= 0)		/* null file is anything */
 	    return &str_yes;
-	(void)close(i);
 	s = tbuf;
     }
 
@@ -1163,7 +1153,7 @@ int *arglast;
 static char **Argv = Null(char **);
 static char *Cmd = Nullch;
 
-int
+void
 do_execfree()
 {
     if (Argv) {
@@ -1257,7 +1247,7 @@ char *cmd;
     return FALSE;
 }
 
-#ifdef SOCKET
+#ifdef HAS_SOCKET
 int
 do_socket(stab, arglast)
 STAB *stab;
@@ -1289,6 +1279,12 @@ int *arglast;
     stio->ifp = fdopen(fd, "r");	/* stdio gets confused about sockets */
     stio->ofp = fdopen(fd, "w");
     stio->type = 's';
+    if (!stio->ifp || !stio->ofp) {
+	if (stio->ifp) fclose(stio->ifp);
+	if (stio->ofp) fclose(stio->ofp);
+	if (!stio->ifp && !stio->ofp) close(fd);
+	return FALSE;
+    }
 
     return TRUE;
 }
@@ -1411,6 +1407,12 @@ STAB *gstab;
     nstio->ifp = fdopen(fd, "r");
     nstio->ofp = fdopen(fd, "w");
     nstio->type = 's';
+    if (!nstio->ifp || !nstio->ofp) {
+	if (nstio->ifp) fclose(nstio->ifp);
+	if (nstio->ofp) fclose(nstio->ofp);
+	if (!nstio->ifp && !nstio->ofp) close(fd);
+	goto badexit;
+    }
 
     str_nset(str, buf, len);
     return;
@@ -1475,7 +1477,7 @@ int *arglast;
     optname = (int)str_gnum(st[sp+2]);
     switch (optype) {
     case O_GSOCKOPT:
-	st[sp] = str_2static(str_new(257));
+	st[sp] = str_2mortal(str_new(257));
 	st[sp]->str_cur = 256;
 	st[sp]->str_pok = 1;
 	if (getsockopt(fd, lvl, optname, st[sp]->str_ptr, &st[sp]->str_cur) < 0)
@@ -1517,7 +1519,7 @@ int *arglast;
     if (!stio || !stio->ifp)
 	goto nuts;
 
-    st[sp] = str_2static(str_new(257));
+    st[sp] = str_2mortal(str_new(257));
     st[sp]->str_cur = 256;
     st[sp]->str_pok = 1;
     fd = fileno(stio->ifp);
@@ -1555,14 +1557,14 @@ int *arglast;
     register STR *str;
     struct hostent *gethostbyname();
     struct hostent *gethostbyaddr();
-#ifdef GETHOSTENT
+#ifdef HAS_GETHOSTENT
     struct hostent *gethostent();
 #endif
     struct hostent *hent;
     unsigned long len;
 
     if (gimme != G_ARRAY) {
-	astore(ary, ++sp, str_static(&str_undef));
+	astore(ary, ++sp, str_mortal(&str_undef));
 	return sp;
     }
 
@@ -1579,39 +1581,39 @@ int *arglast;
 	hent = gethostbyaddr(addr,addrstr->str_cur,addrtype);
     }
     else
-#ifdef GETHOSTENT
+#ifdef HAS_GETHOSTENT
 	hent = gethostent();
 #else
 	fatal("gethostent not implemented");
 #endif
     if (hent) {
 #ifndef lint
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_set(str, hent->h_name);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	for (elem = hent->h_aliases; *elem; elem++) {
 	    str_cat(str, *elem);
 	    if (elem[1])
 		str_ncat(str," ",1);
 	}
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_numset(str, (double)hent->h_addrtype);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	len = hent->h_length;
 	str_numset(str, (double)len);
 #ifdef h_addr
 	for (elem = hent->h_addr_list; *elem; elem++) {
-	    (void)astore(ary, ++sp, str = str_static(&str_no));
+	    (void)astore(ary, ++sp, str = str_mortal(&str_no));
 	    str_nset(str, *elem, len);
 	}
 #else
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_nset(str, hent->h_addr, len);
 #endif /* h_addr */
 #else /* lint */
 	elem = Nullch;
 	elem = elem;
-	(void)astore(ary, ++sp, str_static(&str_no));
+	(void)astore(ary, ++sp, str_mortal(&str_no));
 #endif /* lint */
     }
 
@@ -1634,7 +1636,7 @@ int *arglast;
     struct netent *nent;
 
     if (gimme != G_ARRAY) {
-	astore(ary, ++sp, str_static(&str_undef));
+	astore(ary, ++sp, str_mortal(&str_undef));
 	return sp;
     }
 
@@ -1644,33 +1646,32 @@ int *arglast;
 	nent = getnetbyname(name);
     }
     else if (which == O_GNBYADDR) {
-	STR *addrstr = ary->ary_array[sp+1];
+	unsigned long addr = U_L(str_gnum(ary->ary_array[sp+1]));
 	int addrtype = (int)str_gnum(ary->ary_array[sp+2]);
-	char *addr = str_get(addrstr);
 
-	nent = getnetbyaddr(addr,addrtype);
+	nent = getnetbyaddr((long)addr,addrtype);
     }
     else
 	nent = getnetent();
 
     if (nent) {
 #ifndef lint
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_set(str, nent->n_name);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	for (elem = nent->n_aliases; *elem; elem++) {
 	    str_cat(str, *elem);
 	    if (elem[1])
 		str_ncat(str," ",1);
 	}
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_numset(str, (double)nent->n_addrtype);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_numset(str, (double)nent->n_net);
 #else /* lint */
 	elem = Nullch;
 	elem = elem;
-	(void)astore(ary, ++sp, str_static(&str_no));
+	(void)astore(ary, ++sp, str_mortal(&str_no));
 #endif /* lint */
     }
 
@@ -1693,7 +1694,7 @@ int *arglast;
     struct protoent *pent;
 
     if (gimme != G_ARRAY) {
-	astore(ary, ++sp, str_static(&str_undef));
+	astore(ary, ++sp, str_mortal(&str_undef));
 	return sp;
     }
 
@@ -1712,20 +1713,20 @@ int *arglast;
 
     if (pent) {
 #ifndef lint
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_set(str, pent->p_name);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	for (elem = pent->p_aliases; *elem; elem++) {
 	    str_cat(str, *elem);
 	    if (elem[1])
 		str_ncat(str," ",1);
 	}
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_numset(str, (double)pent->p_proto);
 #else /* lint */
 	elem = Nullch;
 	elem = elem;
-	(void)astore(ary, ++sp, str_static(&str_no));
+	(void)astore(ary, ++sp, str_mortal(&str_no));
 #endif /* lint */
     }
 
@@ -1748,7 +1749,7 @@ int *arglast;
     struct servent *sent;
 
     if (gimme != G_ARRAY) {
-	astore(ary, ++sp, str_static(&str_undef));
+	astore(ary, ++sp, str_mortal(&str_undef));
 	return sp;
     }
 
@@ -1771,35 +1772,35 @@ int *arglast;
 	sent = getservent();
     if (sent) {
 #ifndef lint
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_set(str, sent->s_name);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	for (elem = sent->s_aliases; *elem; elem++) {
 	    str_cat(str, *elem);
 	    if (elem[1])
 		str_ncat(str," ",1);
 	}
-	(void)astore(ary, ++sp, str = str_static(&str_no));
-#ifdef NTOHS
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
+#ifdef HAS_NTOHS
 	str_numset(str, (double)ntohs(sent->s_port));
 #else
 	str_numset(str, (double)(sent->s_port));
 #endif
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_set(str, sent->s_proto);
 #else /* lint */
 	elem = Nullch;
 	elem = elem;
-	(void)astore(ary, ++sp, str_static(&str_no));
+	(void)astore(ary, ++sp, str_mortal(&str_no));
 #endif /* lint */
     }
 
     return sp;
 }
 
-#endif /* SOCKET */
+#endif /* HAS_SOCKET */
 
-#ifdef SELECT
+#ifdef HAS_SELECT
 int
 do_select(gimme,arglast)
 int gimme;
@@ -1919,19 +1920,19 @@ int *arglast;
     }
 #endif
 
-    st[++sp] = str_static(&str_no);
+    st[++sp] = str_mortal(&str_no);
     str_numset(st[sp], (double)nfound);
     if (gimme == G_ARRAY && tbuf) {
 	value = (double)(timebuf.tv_sec) +
 		(double)(timebuf.tv_usec) / 1000000.0;
-	st[++sp] = str_static(&str_no);
+	st[++sp] = str_mortal(&str_no);
 	str_numset(st[sp], value);
     }
     return sp;
 }
 #endif /* SELECT */
 
-#ifdef SOCKET
+#ifdef HAS_SOCKET
 int
 do_spair(stab1, stab2, arglast)
 STAB *stab1;
@@ -1964,7 +1965,7 @@ int *arglast;
 #ifdef TAINT
     taintproper("Insecure dependency in socketpair");
 #endif
-#ifdef SOCKETPAIR
+#ifdef HAS_SOCKETPAIR
     if (socketpair(domain,type,protocol,fd) < 0)
 	return FALSE;
 #else
@@ -1976,11 +1977,20 @@ int *arglast;
     stio2->ifp = fdopen(fd[1], "r");
     stio2->ofp = fdopen(fd[1], "w");
     stio2->type = 's';
+    if (!stio1->ifp || !stio1->ofp || !stio2->ifp || !stio2->ofp) {
+	if (stio1->ifp) fclose(stio1->ifp);
+	if (stio1->ofp) fclose(stio1->ofp);
+	if (!stio1->ifp && !stio1->ofp) close(fd[0]);
+	if (stio2->ifp) fclose(stio2->ifp);
+	if (stio2->ofp) fclose(stio2->ofp);
+	if (!stio2->ifp && !stio2->ofp) close(fd[1]);
+	return FALSE;
+    }
 
     return TRUE;
 }
 
-#endif /* SOCKET */
+#endif /* HAS_SOCKET */
 
 int
 do_gpwent(which,gimme,arglast)
@@ -1998,7 +2008,7 @@ int *arglast;
     struct passwd *pwent;
 
     if (gimme != G_ARRAY) {
-	astore(ary, ++sp, str_static(&str_undef));
+	astore(ary, ++sp, str_mortal(&str_undef));
 	return sp;
     }
 
@@ -2016,15 +2026,15 @@ int *arglast;
 	pwent = getpwent();
 
     if (pwent) {
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_set(str, pwent->pw_name);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_set(str, pwent->pw_passwd);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_numset(str, (double)pwent->pw_uid);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_numset(str, (double)pwent->pw_gid);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 #ifdef PWCHANGE
 	str_numset(str, (double)pwent->pw_change);
 #else
@@ -2036,7 +2046,7 @@ int *arglast;
 #endif
 #endif
 #endif
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 #ifdef PWCLASS
 	str_set(str,pwent->pw_class);
 #else
@@ -2044,14 +2054,14 @@ int *arglast;
 	str_set(str, pwent->pw_comment);
 #endif
 #endif
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_set(str, pwent->pw_gecos);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_set(str, pwent->pw_dir);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_set(str, pwent->pw_shell);
 #ifdef PWEXPIRE
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_numset(str, (double)pwent->pw_expire);
 #endif
     }
@@ -2079,7 +2089,7 @@ int *arglast;
     struct group *grent;
 
     if (gimme != G_ARRAY) {
-	astore(ary, ++sp, str_static(&str_undef));
+	astore(ary, ++sp, str_mortal(&str_undef));
 	return sp;
     }
 
@@ -2097,13 +2107,13 @@ int *arglast;
 	grent = getgrent();
 
     if (grent) {
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_set(str, grent->gr_name);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_set(str, grent->gr_passwd);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	str_numset(str, (double)grent->gr_gid);
-	(void)astore(ary, ++sp, str = str_static(&str_no));
+	(void)astore(ary, ++sp, str = str_mortal(&str_no));
 	for (elem = grent->gr_mem; *elem; elem++) {
 	    str_cat(str, *elem);
 	    if (elem[1])
@@ -2124,7 +2134,7 @@ STAB *stab;
 int gimme;
 int *arglast;
 {
-#if defined(DIRENT) && defined(READDIR)
+#if defined(DIRENT) && defined(HAS_READDIR)
     register ARRAY *ary = stack;
     register STR **st = ary->ary_array;
     register int sp = arglast[1];
@@ -2156,17 +2166,17 @@ int *arglast;
 	    while (dp = readdir(stio->dirp)) {
 #ifdef DIRNAMLEN
 		(void)astore(ary,++sp,
-		  str_2static(str_make(dp->d_name,dp->d_namlen)));
+		  str_2mortal(str_make(dp->d_name,dp->d_namlen)));
 #else
 		(void)astore(ary,++sp,
-		  str_2static(str_make(dp->d_name,0)));
+		  str_2mortal(str_make(dp->d_name,0)));
 #endif
 	    }
 	}
 	else {
 	    if (!(dp = readdir(stio->dirp)))
 		goto nope;
-	    st[sp] = str_static(&str_undef);
+	    st[sp] = str_mortal(&str_undef);
 #ifdef DIRNAMLEN
 	    str_nset(st[sp], dp->d_name, dp->d_namlen);
 #else
@@ -2180,21 +2190,21 @@ int *arglast;
         goto nope;
 #else
     case O_TELLDIR:
-	st[sp] = str_static(&str_undef);
+	st[sp] = str_mortal(&str_undef);
 	str_numset(st[sp], (double)telldir(stio->dirp));
 	break;
     case O_SEEKDIR:
-	st[sp] = str_static(&str_undef);
+	st[sp] = str_mortal(&str_undef);
 	along = (long)str_gnum(st[sp+1]);
 	(void)seekdir(stio->dirp,along);
 	break;
 #endif
     case O_REWINDDIR:
-	st[sp] = str_static(&str_undef);
+	st[sp] = str_mortal(&str_undef);
 	(void)rewinddir(stio->dirp);
 	break;
     case O_CLOSEDIR:
-	st[sp] = str_static(&str_undef);
+	st[sp] = str_mortal(&str_undef);
 	(void)closedir(stio->dirp);
 	stio->dirp = 0;
 	break;
@@ -2243,7 +2253,7 @@ int *arglast;
 	    }
 	}
 	break;
-#ifdef CHOWN
+#ifdef HAS_CHOWN
     case O_CHOWN:
 #ifdef TAINT
 	taintproper("Insecure dependency in chown");
@@ -2260,7 +2270,7 @@ int *arglast;
 	}
 	break;
 #endif
-#ifdef KILL
+#ifdef HAS_KILL
     case O_KILL:
 #ifdef TAINT
 	taintproper("Insecure dependency in kill");
@@ -2280,7 +2290,7 @@ int *arglast;
 		val = -val;
 		while (items--) {
 		    int proc = (int)str_gnum(st[++sp]);
-#ifdef KILLPG
+#ifdef HAS_KILLPG
 		    if (killpg(proc,val))	/* BSD */
 #else
 		    if (kill(-proc,val))	/* SYSV */
@@ -2309,7 +2319,7 @@ int *arglast;
 		    tot--;
 	    }
 	    else {	/* don't let root wipe out directories without -U */
-#ifdef LSTAT
+#ifdef HAS_LSTAT
 		if (lstat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
 #else
 		if (stat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
@@ -2363,6 +2373,28 @@ int bit;
 int effective;
 register struct stat *statbufp;
 {
+#ifdef MSDOS
+    /* [Comments and code from Len Reed]
+     * MS-DOS "user" is similar to UNIX's "superuser," but can't write
+     * to write-protected files.  The execute permission bit is set
+     * by the Miscrosoft C library stat() function for the following:
+     *		.exe files
+     *		.com files
+     *		.bat files
+     *		directories
+     * All files and directories are readable.
+     * Directories and special files, e.g. "CON", cannot be
+     * write-protected.
+     * [Comment by Tom Dinger -- a directory can have the write-protect
+     *		bit set in the file system, but DOS permits changes to
+     *		the directory anyway.  In addition, all bets are off
+     *		here for networked software, such as Novell and
+     *		Sun's PC-NFS.]
+     */
+
+     return (bit & statbufp->st_mode) ? TRUE : FALSE;
+
+#else /* ! MSDOS */
     if ((effective ? euid : uid) == 0) {	/* root is special */
 	if (bit == S_IXUSR) {
 	    if (statbufp->st_mode & 0111 || S_ISDIR(statbufp->st_mode))
@@ -2383,6 +2415,7 @@ register struct stat *statbufp;
     else if (statbufp->st_mode & bit >> 6)
 	return TRUE;	/* ok as "other" */
     return FALSE;
+#endif /* ! MSDOS */
 }
 
 int
@@ -2392,7 +2425,7 @@ int effective;
 {
     if (testgid == (effective ? egid : gid))
 	return TRUE;
-#ifdef GETGROUPS
+#ifdef HAS_GETGROUPS
 #ifndef NGROUPS
 #define NGROUPS 32
 #endif
@@ -2409,7 +2442,7 @@ int effective;
     return FALSE;
 }
 
-#ifdef SYSVIPC
+#if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 
 int
 do_ipcget(optype, arglast)
@@ -2427,19 +2460,19 @@ int *arglast;
     errno = 0;
     switch (optype)
     {
-#ifdef IPCMSG
+#ifdef HAS_MSG
     case O_MSGGET:
 	return msgget(key, flags);
 #endif
-#ifdef IPCSEM
+#ifdef HAS_SEM
     case O_SEMGET:
 	return semget(key, n, flags);
 #endif
-#ifdef IPCSHM
+#ifdef HAS_SHM
     case O_SHMGET:
 	return shmget(key, n, flags);
 #endif
-#if !defined(IPCMSG) || !defined(IPCSEM) || !defined(IPCSHM)
+#if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
 	fatal("%s not implemented", opname[optype]);
 #endif
@@ -2468,19 +2501,19 @@ int *arglast;
 
     switch (optype)
     {
-#ifdef IPCMSG
+#ifdef HAS_MSG
     case O_MSGCTL:
 	if (cmd == IPC_STAT || cmd == IPC_SET)
 	    infosize = sizeof(struct msqid_ds);
 	break;
 #endif
-#ifdef IPCSHM
+#ifdef HAS_SHM
     case O_SHMCTL:
 	if (cmd == IPC_STAT || cmd == IPC_SET)
 	    infosize = sizeof(struct shmid_ds);
 	break;
 #endif
-#ifdef IPCSEM
+#ifdef HAS_SEM
     case O_SEMCTL:
 	if (cmd == IPC_STAT || cmd == IPC_SET)
 	    infosize = sizeof(struct semid_ds);
@@ -2490,11 +2523,15 @@ int *arglast;
 	    if (semctl(id, 0, IPC_STAT, &semds) == -1)
 		return -1;
 	    getinfo = (cmd == GETALL);
+#ifdef _POSIX_SOURCE
+	    infosize = semds.sem_nsems * sizeof(ushort_t);
+#else
 	    infosize = semds.sem_nsems * sizeof(ushort);
+#endif
 	}
 	break;
 #endif
-#if !defined(IPCMSG) || !defined(IPCSEM) || !defined(IPCSHM)
+#if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
 	fatal("%s not implemented", opname[optype]);
 #endif
@@ -2525,17 +2562,17 @@ int *arglast;
     errno = 0;
     switch (optype)
     {
-#ifdef IPCMSG
+#ifdef HAS_MSG
     case O_MSGCTL:
 	ret = msgctl(id, cmd, a);
 	break;
 #endif
-#ifdef IPCSEM
+#ifdef HAS_SEM
     case O_SEMCTL:
 	ret = semctl(id, n, cmd, a);
 	break;
 #endif
-#ifdef IPCSHM
+#ifdef HAS_SHM
     case O_SHMCTL:
 	ret = shmctl(id, cmd, a);
 	break;
@@ -2552,7 +2589,7 @@ int
 do_msgsnd(arglast)
 int *arglast;
 {
-#ifdef IPCMSG
+#ifdef HAS_MSG
     register STR **st = stack->ary_array;
     register int sp = arglast[0];
     STR *mstr;
@@ -2578,7 +2615,7 @@ int
 do_msgrcv(arglast)
 int *arglast;
 {
-#ifdef IPCMSG
+#ifdef HAS_MSG
     register STR **st = stack->ary_array;
     register int sp = arglast[0];
     STR *mstr;
@@ -2612,7 +2649,7 @@ int
 do_semop(arglast)
 int *arglast;
 {
-#ifdef IPCSEM
+#ifdef HAS_SEM
     register STR **st = stack->ary_array;
     register int sp = arglast[0];
     STR *opstr;
@@ -2640,7 +2677,7 @@ do_shmio(optype, arglast)
 int optype;
 int *arglast;
 {
-#ifdef IPCSHM
+#ifdef HAS_SHM
     register STR **st = stack->ary_array;
     register int sp = arglast[0];
     STR *mstr;
@@ -2688,4 +2725,4 @@ int *arglast;
 #endif
 }
 
-#endif /* SYSVIPC */
+#endif /* SYSV IPC */

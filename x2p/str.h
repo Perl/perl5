@@ -1,4 +1,4 @@
-/* $Header: str.h,v 3.0 89/10/18 15:35:27 lwall Locked $
+/* $Header: str.h,v 4.0 91/03/20 01:58:21 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,8 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.h,v $
- * Revision 3.0  89/10/18  15:35:27  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:58:21  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -34,7 +34,7 @@ EXT long tmps_max INIT(-1);
 
 char *str_2ptr();
 double str_2num();
-STR *str_static();
+STR *str_mortal();
 STR *str_make();
 STR *str_nmake();
 char *str_gets();

@@ -5,4 +5,4 @@ setargv.obj
 ..\os2\a2p.def
 a2p.exe
 
--AL -LB -S0xA000
+-AL -LB -S0x9000

@@ -134,13 +134,14 @@ char *s;
 
     switch(DosOpen(s, &hf, &usAction, 0L, 0, FILE_OPEN,
 	OPEN_ACCESS_READONLY | OPEN_SHARE_DENYNONE, 0L)) {
+    case ERROR_INVALID_NAME:
+    case ERROR_FILENAME_EXCED_RANGE:
+	return 0;
     case NO_ERROR:
 	DosClose(hf);
 	/*FALLTHROUGH*/
     default:
 	return 1;
-    case ERROR_FILENAME_EXCED_RANGE:
-	return 0;
     }
 }
 #endif /* OS2 */

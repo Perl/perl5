@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0 89/10/18 15:35:18 lwall Locked $
+/* $Header: str.c,v 4.0 91/03/20 01:58:15 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,8 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
- * Revision 3.0  89/10/18  15:35:18  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:58:15  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -419,7 +419,7 @@ register STR *str;
 /* make a string that will exist for the duration of the expression eval */
 
 STR *
-str_static(oldstr)
+str_mortal(oldstr)
 STR *oldstr;
 {
     register STR *str = str_new(0);

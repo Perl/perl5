@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: findcp,v 3.0 89/10/18 15:13:47 lwall Locked $
+# $Header: findcp,v 4.0 91/03/20 01:09:37 lwall Locked $
 
 # This is a wrapper around the find command that pretends find has a switch
 # of the form -cp host:destination.  It presumes your find implements -ls.

@@ -1,4 +1,4 @@
-/* $Header: dolist.c,v 3.0.1.12 91/01/11 17:54:58 lwall Locked $
+/* $Header: dolist.c,v 4.0 91/03/20 01:08:03 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,71 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dolist.c,v $
- * Revision 3.0.1.12  91/01/11  17:54:58  lwall
- * patch42: added binary and hex pack/unpack options
- * patch42: sort subroutines didn't allow copying $a or $b to other variables.
- * patch42: caller() coredumped when called outside the debugger.
- * 
- * Revision 3.0.1.11  90/11/10  01:29:49  lwall
- * patch38: temp string values are now copied less often
- * patch38: sort parameters are now in the right package
- * 
- * Revision 3.0.1.10  90/10/15  16:19:48  lwall
- * patch29: added caller
- * patch29: added scalar reverse
- * patch29: sort undefined_subroutine @array is now a fatal error
- * 
- * Revision 3.0.1.9  90/08/13  22:15:35  lwall
- * patch28: defined(@array) and defined(%array) didn't work right
- * 
- * Revision 3.0.1.8  90/08/09  03:15:56  lwall
- * patch19: certain kinds of matching cause "panic: hint"
- * patch19: $' broke on embedded nulls
- * patch19: split on /\s+/, /^/ and ' ' is now special cased for speed
- * patch19: split on /x/i didn't work
- * patch19: couldn't unpack an 'A' or 'a' field in a scalar context
- * patch19: unpack called bcopy on each character of a C/c field
- * patch19: pack/unpack know about uudecode lines
- * patch19: fixed sort on undefined strings and sped up slightly
- * patch19: each and keys returned garbage on null key in DBM file
- * 
- * Revision 3.0.1.7  90/03/27  15:48:42  lwall
- * patch16: MSDOS support
- * patch16: use of $`, $& or $' sometimes causes memory leakage
- * patch16: splice(@array,0,$n) case cause duplicate free
- * patch16: grep blows up on undefined array values
- * patch16: .. now works using magical string increment
- * 
- * Revision 3.0.1.6  90/03/12  16:33:02  lwall
- * patch13: added list slice operator (LIST)[LIST]
- * patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
- * patch13: made split('') act like split(//) rather than split(' ')
- * 
- * Revision 3.0.1.5  90/02/28  17:09:44  lwall
- * patch9: split now can split into more than 10000 elements
- * patch9: @_ clobbered by ($foo,$bar) = split
- * patch9: sped up pack and unpack
- * patch9: unpack of single item now works in a scalar context
- * patch9: slices ignored value of $[
- * patch9: grep now returns number of items matched in scalar context
- * patch9: grep iterations no longer in the regexp context of previous iteration
- * 
- * Revision 3.0.1.4  89/12/21  19:58:46  lwall
- * patch7: grep(1,@array) didn't work
- * patch7: /$pat/; //; wrongly freed runtime pattern twice
- * 
- * Revision 3.0.1.3  89/11/17  15:14:45  lwall
- * patch5: grep() occasionally loses arguments or dumps core
- * 
- * Revision 3.0.1.2  89/11/11  04:28:17  lwall
- * patch2: non-existent slice values are now undefined rather than null
- * 
- * Revision 3.0.1.1  89/10/26  23:11:51  lwall
- * patch1: split in a subroutine wrongly freed referenced arguments
- * patch1: reverse didn't work
- * 
- * Revision 3.0  89/10/18  15:11:02  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:08:03  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -133,8 +70,10 @@ int *arglast;
 	if (debug & 8)
 	    deb("2.SPAT /%s/\n",t);
 #endif
-	if (spat->spat_regexp)
+	if (spat->spat_regexp) {
 	    regfree(spat->spat_regexp);
+	    spat->spat_regexp = Null(REGEXP*);	/* crucial if regcomp aborts */
+	}
 	spat->spat_regexp = regcomp(t,t+tmpstr->str_cur,
 	    spat->spat_flags & SPAT_FOLD);
 	if (!*spat->spat_regexp->precomp && lastspat)
@@ -258,7 +197,7 @@ int *arglast;
 	}
 
 	for (i = 1; i <= iters; i++) {
-	    st[++sp] = str_static(&str_no);
+	    st[++sp] = str_mortal(&str_no);
 	    if (s = spat->spat_regexp->startp[i]) {
 		len = spat->spat_regexp->endp[i] - s;
 		if (len > 0)
@@ -344,8 +283,10 @@ int *arglast;
 	    m = dstr->str_ptr;
 	    spat->spat_flags |= SPAT_SKIPWHITE;
 	}
-	if (spat->spat_regexp)
+	if (spat->spat_regexp) {
 	    regfree(spat->spat_regexp);
+	    spat->spat_regexp = Null(REGEXP*);	/* avoid possible double free */
+	}
 	spat->spat_regexp = regcomp(m,m+dstr->str_cur,
 	    spat->spat_flags & SPAT_FOLD);
 	if (spat->spat_flags & SPAT_KEEP ||
@@ -375,22 +316,22 @@ int *arglast;
 	ary = stack;
     orig = s;
     if (spat->spat_flags & SPAT_SKIPWHITE) {
-	while (isspace(*s))
+	while (isascii(*s) && isspace(*s))
 	    s++;
     }
     if (!limit)
 	limit = maxiters + 2;
     if (strEQ("\\s+",spat->spat_regexp->precomp)) {
 	while (--limit) {
-	    for (m = s; m < strend && !isspace(*m); m++) ;
+	    for (m = s; m < strend && !(isascii(*m)&&isspace(*m)); m++) ;
 	    if (m >= strend)
 		break;
 	    dstr = Str_new(30,m-s);
 	    str_nset(dstr,s,m-s);
 	    if (!realarray)
-		str_2static(dstr);
+		str_2mortal(dstr);
 	    (void)astore(ary, ++sp, dstr);
-	    for (s = m + 1; s < strend && isspace(*s); s++) ;
+	    for (s = m + 1; s < strend && isascii(*s) && isspace(*s); s++) ;
 	}
     }
     else if (strEQ("^",spat->spat_regexp->precomp)) {
@@ -402,7 +343,7 @@ int *arglast;
 	    dstr = Str_new(30,m-s);
 	    str_nset(dstr,s,m-s);
 	    if (!realarray)
-		str_2static(dstr);
+		str_2mortal(dstr);
 	    (void)astore(ary, ++sp, dstr);
 	    s = m;
 	}
@@ -430,7 +371,7 @@ int *arglast;
 		dstr = Str_new(30,m-s);
 		str_nset(dstr,s,m-s);
 		if (!realarray)
-		    str_2static(dstr);
+		    str_2mortal(dstr);
 		(void)astore(ary, ++sp, dstr);
 		s = m + 1;
 	    }
@@ -445,7 +386,7 @@ int *arglast;
 		dstr = Str_new(31,m-s);
 		str_nset(dstr,s,m-s);
 		if (!realarray)
-		    str_2static(dstr);
+		    str_2mortal(dstr);
 		(void)astore(ary, ++sp, dstr);
 		s = m + i;
 	    }
@@ -467,7 +408,7 @@ int *arglast;
 	    dstr = Str_new(32,m-s);
 	    str_nset(dstr,s,m-s);
 	    if (!realarray)
-		str_2static(dstr);
+		str_2mortal(dstr);
 	    (void)astore(ary, ++sp, dstr);
 	    if (spat->spat_regexp->nparens) {
 		for (i = 1; i <= spat->spat_regexp->nparens; i++) {
@@ -476,7 +417,7 @@ int *arglast;
 		    dstr = Str_new(33,m-s);
 		    str_nset(dstr,s,m-s);
 		    if (!realarray)
-			str_2static(dstr);
+			str_2mortal(dstr);
 		    (void)astore(ary, ++sp, dstr);
 		}
 	    }
@@ -493,7 +434,7 @@ int *arglast;
 	dstr = Str_new(34,strend-s);
 	str_nset(dstr,s,strend-s);
 	if (!realarray)
-	    str_2static(dstr);
+	    str_2mortal(dstr);
 	(void)astore(ary, ++sp, dstr);
 	iters++;
     }
@@ -555,7 +496,6 @@ int *arglast;
     int datumtype;
     register int len;
     register int bits;
-    static char hexchar[] = "0123456789abcdef";
 
     /* These must not be in registers: */
     short ashort;
@@ -637,13 +577,13 @@ int *arglast;
 	    if (datumtype == 'A') {
 		aptr = s;	/* borrow register */
 		s = str->str_ptr + len - 1;
-		while (s >= str->str_ptr && (!*s || isspace(*s)))
+		while (s >= str->str_ptr && (!*s || (isascii(*s)&&isspace(*s))))
 		    s--;
 		*++s = '\0';
 		str->str_cur = s - str->str_ptr;
 		s = aptr;	/* unborrow register */
 	    }
-	    (void)astore(stack, ++sp, str_2static(str));
+	    (void)astore(stack, ++sp, str_2mortal(str));
 	    break;
 	case 'B':
 	case 'b':
@@ -676,13 +616,13 @@ int *arglast;
 	    }
 	    *pat = '\0';
 	    pat = aptr;			/* unborrow register */
-	    (void)astore(stack, ++sp, str_2static(str));
+	    (void)astore(stack, ++sp, str_2mortal(str));
 	    break;
 	case 'H':
 	case 'h':
 	    if (pat[-1] == '*' || len > (strend - s) * 2)
 		len = (strend - s) * 2;
-	    str = Str_new(35, len);
+	    str = Str_new(35, len + 1);
 	    str->str_cur = len;
 	    str->str_pok = 1;
 	    aptr = pat;			/* borrow register */
@@ -694,7 +634,7 @@ int *arglast;
 			bits >>= 4;
 		    else
 			bits = *s++;
-		    *pat++ = hexchar[bits & 15];
+		    *pat++ = hexdigit[bits & 15];
 		}
 	    }
 	    else {
@@ -704,12 +644,12 @@ int *arglast;
 			bits <<= 4;
 		    else
 			bits = *s++;
-		    *pat++ = hexchar[(bits >> 4) & 15];
+		    *pat++ = hexdigit[(bits >> 4) & 15];
 		}
 	    }
 	    *pat = '\0';
 	    pat = aptr;			/* unborrow register */
-	    (void)astore(stack, ++sp, str_2static(str));
+	    (void)astore(stack, ++sp, str_2mortal(str));
 	    break;
 	case 'c':
 	    if (len > strend - s)
@@ -729,7 +669,7 @@ int *arglast;
 			aint -= 256;
 		    str = Str_new(36,0);
 		    str_numset(str,(double)aint);
-		    (void)astore(stack, ++sp, str_2static(str));
+		    (void)astore(stack, ++sp, str_2mortal(str));
 		}
 	    }
 	    break;
@@ -748,7 +688,7 @@ int *arglast;
 		    auint = *s++ & 255;
 		    str = Str_new(37,0);
 		    str_numset(str,(double)auint);
-		    (void)astore(stack, ++sp, str_2static(str));
+		    (void)astore(stack, ++sp, str_2mortal(str));
 		}
 	    }
 	    break;
@@ -769,7 +709,7 @@ int *arglast;
 		    s += sizeof(short);
 		    str = Str_new(38,0);
 		    str_numset(str,(double)ashort);
-		    (void)astore(stack, ++sp, str_2static(str));
+		    (void)astore(stack, ++sp, str_2mortal(str));
 		}
 	    }
 	    break;
@@ -782,7 +722,7 @@ int *arglast;
 		while (len-- > 0) {
 		    bcopy(s,(char*)&aushort,sizeof(unsigned short));
 		    s += sizeof(unsigned short);
-#ifdef NTOHS
+#ifdef HAS_NTOHS
 		    if (datumtype == 'n')
 			aushort = ntohs(aushort);
 #endif
@@ -794,12 +734,12 @@ int *arglast;
 		    bcopy(s,(char*)&aushort,sizeof(unsigned short));
 		    s += sizeof(unsigned short);
 		    str = Str_new(39,0);
-#ifdef NTOHS
+#ifdef HAS_NTOHS
 		    if (datumtype == 'n')
 			aushort = ntohs(aushort);
 #endif
 		    str_numset(str,(double)aushort);
-		    (void)astore(stack, ++sp, str_2static(str));
+		    (void)astore(stack, ++sp, str_2mortal(str));
 		}
 	    }
 	    break;
@@ -823,7 +763,7 @@ int *arglast;
 		    s += sizeof(int);
 		    str = Str_new(40,0);
 		    str_numset(str,(double)aint);
-		    (void)astore(stack, ++sp, str_2static(str));
+		    (void)astore(stack, ++sp, str_2mortal(str));
 		}
 	    }
 	    break;
@@ -847,7 +787,7 @@ int *arglast;
 		    s += sizeof(unsigned int);
 		    str = Str_new(41,0);
 		    str_numset(str,(double)auint);
-		    (void)astore(stack, ++sp, str_2static(str));
+		    (void)astore(stack, ++sp, str_2mortal(str));
 		}
 	    }
 	    break;
@@ -871,7 +811,7 @@ int *arglast;
 		    s += sizeof(long);
 		    str = Str_new(42,0);
 		    str_numset(str,(double)along);
-		    (void)astore(stack, ++sp, str_2static(str));
+		    (void)astore(stack, ++sp, str_2mortal(str));
 		}
 	    }
 	    break;
@@ -884,7 +824,7 @@ int *arglast;
 		while (len-- > 0) {
 		    bcopy(s,(char*)&aulong,sizeof(unsigned long));
 		    s += sizeof(unsigned long);
-#ifdef NTOHL
+#ifdef HAS_NTOHL
 		    if (datumtype == 'N')
 			aulong = ntohl(aulong);
 #endif
@@ -899,12 +839,12 @@ int *arglast;
 		    bcopy(s,(char*)&aulong,sizeof(unsigned long));
 		    s += sizeof(unsigned long);
 		    str = Str_new(43,0);
-#ifdef NTOHL
+#ifdef HAS_NTOHL
 		    if (datumtype == 'N')
 			aulong = ntohl(aulong);
 #endif
 		    str_numset(str,(double)aulong);
-		    (void)astore(stack, ++sp, str_2static(str));
+		    (void)astore(stack, ++sp, str_2mortal(str));
 		}
 	    }
 	    break;
@@ -922,7 +862,7 @@ int *arglast;
 		str = Str_new(44,0);
 		if (aptr)
 		    str_set(str,aptr);
-		(void)astore(stack, ++sp, str_2static(str));
+		(void)astore(stack, ++sp, str_2mortal(str));
 	    }
 	    break;
 	/* float and double added gnb@melba.bby.oz.au 22/11/89 */
@@ -944,7 +884,7 @@ int *arglast;
 		    s += sizeof(float);
 		    str = Str_new(47, 0);
 		    str_numset(str, (double)afloat);
-		    (void)astore(stack, ++sp, str_2static(str));
+		    (void)astore(stack, ++sp, str_2mortal(str));
 		}
 	    }
 	    break;
@@ -966,7 +906,7 @@ int *arglast;
 		    s += sizeof(double);
 		    str = Str_new(48, 0);
 		    str_numset(str, (double)adouble);
-		    (void)astore(stack, ++sp, str_2static(str));
+		    (void)astore(stack, ++sp, str_2mortal(str));
 		}
 	    }
 	    break;
@@ -1007,7 +947,7 @@ int *arglast;
 		else if (s[1] == '\n')		/* possible checksum byte */
 		    s += 2;
 	    }
-	    (void)astore(stack, ++sp, str_2static(str));
+	    (void)astore(stack, ++sp, str_2mortal(str));
 	    break;
 	}
 	if (checksum) {
@@ -1035,11 +975,13 @@ int *arglast;
 		str_numset(str,cdouble);
 	    }
 	    else {
-		along = (1 << checksum) - 1;
-		culong &= (unsigned long)along;
+		if (checksum < 32) {
+		    along = (1 << checksum) - 1;
+		    culong &= (unsigned long)along;
+		}
 		str_numset(str,(double)culong);
 	    }
-	    (void)astore(stack, ++sp, str_2static(str));
+	    (void)astore(stack, ++sp, str_2mortal(str));
 	    checksum = 0;
 	}
     }
@@ -1213,14 +1155,14 @@ int *arglast;
 	    Copy(ary->ary_array+offset, st+sp, length, STR*);
 	    if (ary->ary_flags & ARF_REAL) {
 		for (i = length, dst = st+sp; i; i--)
-		    str_2static(*dst++);	/* free them eventualy */
+		    str_2mortal(*dst++);	/* free them eventualy */
 	    }
 	    sp += length - 1;
 	}
 	else {
 	    st[sp] = ary->ary_array[offset+length-1];
 	    if (ary->ary_flags & ARF_REAL)
-		str_2static(st[sp]);
+		str_2mortal(st[sp]);
 	}
 	ary->ary_fill += diff;
 
@@ -1303,7 +1245,7 @@ int *arglast;
 		Copy(tmparyval, st+sp, length, STR*);
 		if (ary->ary_flags & ARF_REAL) {
 		    for (i = length, dst = st+sp; i; i--)
-			str_2static(*dst++);	/* free them eventualy */
+			str_2mortal(*dst++);	/* free them eventualy */
 		}
 		Safefree(tmparyval);
 	    }
@@ -1312,7 +1254,7 @@ int *arglast;
 	else if (length) {
 	    st[sp] = tmparyval[length-1];
 	    if (ary->ary_flags & ARF_REAL)
-		str_2static(st[sp]);
+		str_2mortal(st[sp]);
 	    Safefree(tmparyval);
 	}
 	else
@@ -1349,7 +1291,7 @@ int *arglast;
 	if (st[src])
 	    stab_val(defstab) = st[src];
 	else
-	    stab_val(defstab) = str_static(&str_undef);
+	    stab_val(defstab) = str_mortal(&str_undef);
 	(void)eval(arg,G_SCALAR,sp);
 	st = stack->ary_array;
 	if (str_true(st[sp+1]))
@@ -1544,29 +1486,57 @@ int *arglast;
     if (gimme != G_ARRAY)
 	fatal("panic: do_range");
 
-    if (st[sp+1]->str_nok ||
+    if (st[sp+1]->str_nok || !st[sp+1]->str_pok ||
       (looks_like_number(st[sp+1]) && *st[sp+1]->str_ptr != '0') ) {
 	i = (int)str_gnum(st[sp+1]);
 	max = (int)str_gnum(st[sp+2]);
 	while (i <= max) {
-	    (void)astore(ary, ++sp, str = str_static(&str_no));
+	    (void)astore(ary, ++sp, str = str_mortal(&str_no));
 	    str_numset(str,(double)i++);
 	}
     }
     else {
-	STR *final = str_static(st[sp+2]);
+	STR *final = str_mortal(st[sp+2]);
 	char *tmps = str_get(final);
 
-	str = str_static(st[sp+1]);
+	str = str_mortal(st[sp+1]);
 	while (!str->str_nok && str->str_cur <= final->str_cur &&
 	    strNE(str->str_ptr,tmps) ) {
 	    (void)astore(ary, ++sp, str);
-	    str = str_2static(str_smake(str));
+	    str = str_2mortal(str_smake(str));
 	    str_inc(str);
 	}
 	if (strEQ(str->str_ptr,tmps))
 	    (void)astore(ary, ++sp, str);
     }
+    return sp;
+}
+
+int
+do_repeatary(arglast)
+int *arglast;
+{
+    STR **st = stack->ary_array;
+    register int sp = arglast[0];
+    register int items = arglast[1] - sp;
+    register int count = (int) str_gnum(st[arglast[2]]);
+    register ARRAY *ary = stack;
+    register int i;
+    int max;
+
+    max = items * count;
+    if (max > 0 && sp + max > stack->ary_max) {
+	astore(stack, sp + max, Nullstr);
+	st = stack->ary_array;
+    }
+    if (count > 1) {
+	for (i = arglast[1]; i > sp; i--)
+	    st[i]->str_pok &= ~SP_TEMP;
+	repeatcpy((char*)&st[arglast[1]+1], (char*)&st[sp+1],
+	    items * sizeof(STR*), count);
+    }
+    sp += max;
+
     return sp;
 }
 
@@ -1606,20 +1576,20 @@ int *arglast;
 
 #ifndef lint
     (void)astore(stack,++sp,
-      str_2static(str_make(csv->curcmd->c_stash->tbl_name,0)) );
+      str_2mortal(str_make(csv->curcmd->c_stash->tbl_name,0)) );
     (void)astore(stack,++sp,
-      str_2static(str_make(stab_val(csv->curcmd->c_filestab)->str_ptr,0)) );
+      str_2mortal(str_make(stab_val(csv->curcmd->c_filestab)->str_ptr,0)) );
     (void)astore(stack,++sp,
-      str_2static(str_nmake((double)csv->curcmd->c_line)) );
+      str_2mortal(str_nmake((double)csv->curcmd->c_line)) );
     if (!maxarg)
 	return sp;
     str = Str_new(49,0);
     stab_fullname(str, csv->stab);
-    (void)astore(stack,++sp, str_2static(str));
+    (void)astore(stack,++sp, str_2mortal(str));
     (void)astore(stack,++sp,
-      str_2static(str_nmake((double)csv->hasargs)) );
+      str_2mortal(str_nmake((double)csv->hasargs)) );
     (void)astore(stack,++sp,
-      str_2static(str_nmake((double)csv->wantarray)) );
+      str_2mortal(str_nmake((double)csv->wantarray)) );
     if (csv->hasargs) {
 	ARRAY *ary = csv->argarray;
 
@@ -1630,7 +1600,7 @@ int *arglast;
     }
 #else
     (void)astore(stack,++sp,
-      str_2static(str_make("",0)));
+      str_2mortal(str_make("",0)));
 #endif
     return sp;
 }
@@ -1661,16 +1631,16 @@ int *arglast;
 
 #ifndef lint
     (void)astore(stack,++sp,
-      str_2static(str_nmake(((double)timesbuf.tms_utime)/HZ)));
+      str_2mortal(str_nmake(((double)timesbuf.tms_utime)/HZ)));
     (void)astore(stack,++sp,
-      str_2static(str_nmake(((double)timesbuf.tms_stime)/HZ)));
+      str_2mortal(str_nmake(((double)timesbuf.tms_stime)/HZ)));
     (void)astore(stack,++sp,
-      str_2static(str_nmake(((double)timesbuf.tms_cutime)/HZ)));
+      str_2mortal(str_nmake(((double)timesbuf.tms_cutime)/HZ)));
     (void)astore(stack,++sp,
-      str_2static(str_nmake(((double)timesbuf.tms_cstime)/HZ)));
+      str_2mortal(str_nmake(((double)timesbuf.tms_cstime)/HZ)));
 #else
     (void)astore(stack,++sp,
-      str_2static(str_nmake(0.0)));
+      str_2mortal(str_nmake(0.0)));
 #endif
     return sp;
 #endif
@@ -1693,15 +1663,15 @@ int *arglast;
 	st[++sp] = str;
 	return sp;
     }
-    (void)astore(ary,++sp,str_2static(str_nmake((double)tmbuf->tm_sec)));
-    (void)astore(ary,++sp,str_2static(str_nmake((double)tmbuf->tm_min)));
-    (void)astore(ary,++sp,str_2static(str_nmake((double)tmbuf->tm_hour)));
-    (void)astore(ary,++sp,str_2static(str_nmake((double)tmbuf->tm_mday)));
-    (void)astore(ary,++sp,str_2static(str_nmake((double)tmbuf->tm_mon)));
-    (void)astore(ary,++sp,str_2static(str_nmake((double)tmbuf->tm_year)));
-    (void)astore(ary,++sp,str_2static(str_nmake((double)tmbuf->tm_wday)));
-    (void)astore(ary,++sp,str_2static(str_nmake((double)tmbuf->tm_yday)));
-    (void)astore(ary,++sp,str_2static(str_nmake((double)tmbuf->tm_isdst)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_sec)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_min)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_hour)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_mday)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_mon)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_year)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_wday)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_yday)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_isdst)));
     return sp;
 }
 
@@ -1735,7 +1705,7 @@ int *arglast;
 	    tmps = hiterkey(entry,&i);
 	    if (!i)
 		tmps = "";
-	    (void)astore(ary,++sp,str_2static(str_make(tmps,i)));
+	    (void)astore(ary,++sp,str_2mortal(str_make(tmps,i)));
 	}
 	if (dovalues) {
 	    tmpstr = Str_new(45,0);
@@ -1748,7 +1718,7 @@ int *arglast;
 	    else
 #endif
 	    str_sset(tmpstr,hiterval(hash,entry));
-	    (void)astore(ary,++sp,str_2static(tmpstr));
+	    (void)astore(ary,++sp,str_2mortal(tmpstr));
 	}
     }
     return sp;

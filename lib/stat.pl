@@ -1,4 +1,4 @@
-;# $Header: stat.pl,v 3.0.1.1 90/08/09 04:01:34 lwall Locked $
+;# $Header: stat.pl,v 4.0 91/03/20 01:26:16 lwall Locked $
 
 ;# Usage:
 ;#	require 'stat.pl';

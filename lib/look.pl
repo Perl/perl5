@@ -4,7 +4,7 @@
 ;# (stringwise) to $key.  Pass flags for dictionary order and case folding.
 
 sub look {
-    local(*FH,$key,$fold) = @_;
+    local(*FH,$key,$dict,$fold) = @_;
     local($max,$min,$mid,$_);
     local($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
        $blksize,$blocks) = stat(FH);

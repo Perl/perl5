@@ -1,14 +1,8 @@
-/* $Header: regcomp.h,v 3.0.1.2 90/11/10 01:58:28 lwall Locked $
+/* $Header: regcomp.h,v 4.0 91/03/20 01:39:09 lwall Locked $
  *
  * $Log:	regcomp.h,v $
- * Revision 3.0.1.2  90/11/10  01:58:28  lwall
- * patch38: random cleanup
- * 
- * Revision 3.0.1.1  90/08/09  05:06:49  lwall
- * patch19: sped up {m,n} on simple items
- * 
- * Revision 3.0  89/10/18  15:22:39  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:39:09  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -79,11 +73,9 @@
 #define NSPACE	17	/* no	Match any non-whitespace character */
 #define DIGIT	18	/* no	Match any numeric character */
 #define NDIGIT	19	/* no	Match any non-numeric character */
-#define REF	20	/* no	Match some already matched string */
-#define	OPEN	30	/* no	Mark this point in input as start of #n. */
-			/*	OPEN+1 is number 1, etc. */
-#define	CLOSE	40	/* no	Analogous to OPEN. */
-/* CLOSE must be last one! see regmust finder */
+#define REF	20	/* num	Match some already matched string */
+#define	OPEN	21	/* num	Mark this point in input as start of #n. */
+#define	CLOSE	22	/* num	Analogous to OPEN. */
 
 /*
  * Opcode notes:
@@ -107,12 +99,17 @@
  * OPEN,CLOSE	...are numbered at compile time.
  */
 
+#ifndef DOINIT
+extern char regarglen[];
+#else
+char regarglen[] = {0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2};
+#endif
+
 /* The following have no fixed length. */
 #ifndef DOINIT
 extern char varies[];
 #else
-char varies[] = {BRANCH,BACK,STAR,PLUS,CURLY,
-	REF+1,REF+2,REF+3,REF+4,REF+5,REF+6,REF+7,REF+8,REF+9,0};
+char varies[] = {BRANCH,BACK,STAR,PLUS,CURLY,REF,0};
 #endif
 
 /* The following always have a length of 1. */

@@ -75,7 +75,7 @@ sub main'rneg { #(rat_num) return rat_num
 # absolute value
 sub main'rabs { #(rat_num) return $rat_num
     local($_) = &'rnorm($_[0]);
-    substr($_,0,1) = '+';
+    substr($_,0,1) = '+' unless $_ eq 'NaN';
     $_;
 }
 

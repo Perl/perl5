@@ -1,4 +1,4 @@
-/* $Header: cons.c,v 3.0.1.10 91/01/11 17:33:33 lwall Locked $
+/* $Header: cons.c,v 4.0 91/03/20 01:05:51 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,50 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cons.c,v $
- * Revision 3.0.1.10  91/01/11  17:33:33  lwall
- * patch42: the perl debugger was dumping core frequently
- * patch42: the postincrement to preincrement optimizer was overzealous
- * patch42: foreach didn't localize its temp array properly
- * 
- * Revision 3.0.1.9  90/11/10  01:10:50  lwall
- * patch38: random cleanup
- * 
- * Revision 3.0.1.8  90/10/15  15:41:09  lwall
- * patch29: added caller
- * patch29: scripts now run at almost full speed under the debugger
- * patch29: the debugger now understands packages and evals
- * patch29: package behavior is now more consistent
- * 
- * Revision 3.0.1.7  90/08/09  02:35:52  lwall
- * patch19: did preliminary work toward debugging packages and evals
- * patch19: Added support for linked-in C subroutines
- * patch19: Numeric literals are now stored only in floating point
- * patch19: Added -c switch to do compilation only
- * 
- * Revision 3.0.1.6  90/03/27  15:35:21  lwall
- * patch16: formats didn't work inside eval
- * patch16: $foo++ now optimized to ++$foo where value not required
- * 
- * Revision 3.0.1.5  90/03/12  16:23:10  lwall
- * patch13: perl -d coredumped on scripts with subs that did explicit return
- * 
- * Revision 3.0.1.4  90/02/28  16:44:00  lwall
- * patch9: subs which return by both mechanisms can clobber local return data
- * patch9: changed internal SUB label to _SUB_
- * patch9: line numbers were bogus during certain portions of foreach evaluation
- * 
- * Revision 3.0.1.3  89/12/21  19:20:25  lwall
- * patch7: made nested or recursive foreach work right
- * 
- * Revision 3.0.1.2  89/11/17  15:08:53  lwall
- * patch5: nested foreach on same array didn't work
- * 
- * Revision 3.0.1.1  89/10/26  23:09:01  lwall
- * patch1: numeric switch optimization was broken
- * patch1: unless was broken when run under the debugger
- * 
- * Revision 3.0  89/10/18  15:10:23  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:05:51  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -86,10 +44,12 @@ CMD *cmd;
 	}
 	if (stab_sub(stab)->cmd) {
 	    cmd_free(stab_sub(stab)->cmd);
+	    stab_sub(stab)->cmd = Nullcmd;
 	    afree(stab_sub(stab)->tosave);
 	}
 	Safefree(stab_sub(stab));
     }
+    stab_sub(stab) = sub;
     sub->filestab = curcmd->c_filestab;
     saw_return = FALSE;
     tosave = anew(Nullstab);
@@ -106,10 +66,9 @@ CMD *cmd;
 	cmd->c_flags |= CF_TERM;
     }
     sub->cmd = cmd;
-    stab_sub(stab) = sub;
     if (perldb) {
 	STR *str;
-	STR *tmpstr = str_static(&str_undef);
+	STR *tmpstr = str_mortal(&str_undef);
 
 	sprintf(buf,"%s:%ld",stab_val(curcmd->c_filestab)->str_ptr,
 	  (long)subline);
@@ -137,21 +96,22 @@ char *filename;
     STAB *stab = stabent(name,allstabs);
 
     if (!stab)				/* unused function */
-	return;
+	return Null(SUBR*);
     Newz(101,sub,1,SUBR);
     if (stab_sub(stab)) {
 	if (dowarn)
 	    warn("Subroutine %s redefined",name);
 	if (stab_sub(stab)->cmd) {
 	    cmd_free(stab_sub(stab)->cmd);
+	    stab_sub(stab)->cmd = Nullcmd;
 	    afree(stab_sub(stab)->tosave);
 	}
 	Safefree(stab_sub(stab));
     }
+    stab_sub(stab) = sub;
     sub->filestab = fstab(filename);
     sub->usersub = subaddr;
     sub->userindex = ix;
-    stab_sub(stab) = sub;
     return sub;
 }
 
@@ -698,10 +658,12 @@ int acmd;
 	else if ((arg[flp].arg_type & A_MASK) == A_STAB ||
 	  (arg[flp].arg_type & A_MASK) == A_LVAL) {
 	    cmd->c_stab  = arg[flp].arg_ptr.arg_stab;
+	    if (!context)
+		arg[flp].arg_ptr.arg_stab = Nullstab;
 	    opt = CFT_REG;
 	  literal:
 	    if (!context) {	/* no && or ||? */
-		free_arg(arg);
+		arg_free(arg);
 		cmd->c_expr = Nullarg;
 	    }
 	    if (!(context & 1))
@@ -754,6 +716,8 @@ int acmd;
 		    spat_free(arg[2].arg_ptr.arg_spat);
 		    arg[2].arg_ptr.arg_spat = Nullspat;	/* don't do twice */
 		}
+		else
+		    cmd->c_spat = arg[2].arg_ptr.arg_spat;
 		cmd->c_flags |= sure;
 	    }
 	}
@@ -836,6 +800,7 @@ int acmd;
 	    cmd->c_stab = arg2[1].arg_ptr.arg_stab;
 	    if (!(stab_io(arg2[1].arg_ptr.arg_stab)->flags & IOF_ARGV)) {
 		free_arg(arg2);
+		arg[2].arg_ptr.arg_arg = Nullarg;
 		free_arg(arg);
 		cmd->c_expr = Nullarg;
 	    }
@@ -908,7 +873,8 @@ register ARG *arg;
 	arg = cmd->ucmd.acmd.ac_expr;
 	if (arg && arg->arg_type == O_ITEM && arg[1].arg_type == A_CMD)
 	    cmd->c_flags &= ~CF_COND;  /* "do {} while" happens at least once */
-	if (arg && arg->arg_type == O_SUBR)
+	if (arg && (arg->arg_flags & AF_DEPR) &&
+	  (arg->arg_type == O_SUBR || arg->arg_type == O_DBSUBR) )
 	    cmd->c_flags &= ~CF_COND;  /* likewise for "do subr() while" */
     }
     return cmd;
@@ -1045,6 +1011,7 @@ register CMD *cmd;
 		    tail->ucmd.acmd.ac_expr[1].arg_ptr.arg_str->str_ptr) )))
 	{
 	    arg_free(tail->ucmd.acmd.ac_expr);
+	    tail->ucmd.acmd.ac_expr = Nullarg;
 	    tail->c_type = C_NEXT;
 	    if (cmd->ucmd.ccmd.cc_alt != Nullcmd)
 		tail->ucmd.ccmd.cc_alt = cmd->ucmd.ccmd.cc_alt;
@@ -1092,6 +1059,7 @@ register CMD *cmd;
 			tail->ucmd.acmd.ac_expr[1].arg_ptr.arg_str->str_ptr) )))
 	    {
 		arg_free(tail->ucmd.acmd.ac_expr);
+		tail->ucmd.acmd.ac_expr = Nullarg;
 		tail->c_type = C_NEXT;
 		tail->ucmd.ccmd.cc_alt = newtail;
 		tail->ucmd.ccmd.cc_true = Nullcmd;
@@ -1158,26 +1126,34 @@ register CMD *cmd;
 
     while (cmd) {
 	if (cmd->c_type != C_WHILE) {	/* WHILE block is duplicated */
-	    if (cmd->c_label)
+	    if (cmd->c_label) {
 		Safefree(cmd->c_label);
-	    if (cmd->c_short)
+		cmd->c_label = Nullch;
+	    }
+	    if (cmd->c_short) {
 		str_free(cmd->c_short);
-	    if (cmd->c_spat)
-		spat_free(cmd->c_spat);
-	    if (cmd->c_expr)
+		cmd->c_short = Nullstr;
+	    }
+	    if (cmd->c_expr) {
 		arg_free(cmd->c_expr);
+		cmd->c_expr = Nullarg;
+	    }
 	}
 	switch (cmd->c_type) {
 	case C_WHILE:
 	case C_BLOCK:
 	case C_ELSE:
 	case C_IF:
-	    if (cmd->ucmd.ccmd.cc_true)
+	    if (cmd->ucmd.ccmd.cc_true) {
 		cmd_free(cmd->ucmd.ccmd.cc_true);
+		cmd->ucmd.ccmd.cc_true = Nullcmd;
+	    }
 	    break;
 	case C_EXPR:
-	    if (cmd->ucmd.acmd.ac_expr)
+	    if (cmd->ucmd.acmd.ac_expr) {
 		arg_free(cmd->ucmd.acmd.ac_expr);
+		cmd->ucmd.acmd.ac_expr = Nullarg;
+	    }
 	    break;
 	}
 	tofree = cmd;
@@ -1198,6 +1174,10 @@ register ARG *arg;
     for (i = 1; i <= arg->arg_len; i++) {
 	switch (arg[i].arg_type & A_MASK) {
 	case A_NULL:
+	    if (arg->arg_type == O_TRANS) {
+		Safefree(arg[i].arg_ptr.arg_cval);
+		arg[i].arg_ptr.arg_cval = Nullch;
+	    }
 	    break;
 	case A_LEXPR:
 	    if (arg->arg_type == O_AASSIGN &&
@@ -1211,9 +1191,11 @@ register ARG *arg;
 	    /* FALL THROUGH */
 	case A_EXPR:
 	    arg_free(arg[i].arg_ptr.arg_arg);
+	    arg[i].arg_ptr.arg_arg = Nullarg;
 	    break;
 	case A_CMD:
 	    cmd_free(arg[i].arg_ptr.arg_cmd);
+	    arg[i].arg_ptr.arg_cmd = Nullcmd;
 	    break;
 	case A_WORD:
 	case A_STAB:
@@ -1229,9 +1211,11 @@ register ARG *arg;
 	case A_DOUBLE:
 	case A_BACKTICK:
 	    str_free(arg[i].arg_ptr.arg_str);
+	    arg[i].arg_ptr.arg_str = Nullstr;
 	    break;
 	case A_SPAT:
 	    spat_free(arg[i].arg_ptr.arg_spat);
+	    arg[i].arg_ptr.arg_spat = Nullspat;
 	    break;
 	}
     }
@@ -1244,16 +1228,21 @@ register SPAT *spat;
     register SPAT *sp;
     HENT *entry;
 
-    if (spat->spat_runtime)
+    if (spat->spat_runtime) {
 	arg_free(spat->spat_runtime);
+	spat->spat_runtime = Nullarg;
+    }
     if (spat->spat_repl) {
 	arg_free(spat->spat_repl);
+	spat->spat_repl = Nullarg;
     }
     if (spat->spat_short) {
 	str_free(spat->spat_short);
+	spat->spat_short = Nullstr;
     }
     if (spat->spat_regexp) {
 	regfree(spat->spat_regexp);
+	spat->spat_regexp = Null(REGEXP*);
     }
 
     /* now unlink from spat list */
@@ -1296,8 +1285,6 @@ int willsave;				/* willsave passes down the tree */
     register CMD *lastcmd = Nullcmd;
 
     while (cmd) {
-	if (cmd->c_spat)
-	    shouldsave |= spat_tosave(cmd->c_spat);
 	if (cmd->c_expr)
 	    shouldsave |= arg_tosave(cmd->c_expr,willsave);
 	switch (cmd->c_type) {

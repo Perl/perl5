@@ -9,6 +9,10 @@ while (@ARGV) {
 @scripts = 'h2ph';
 @manpages = ('perl.man', 'h2ph.man');
 
+$version = sprintf("%5.3f", $]);
+$release = substr($version,0,3);
+$patchlevel = substr($version,3,2);
+
 # Read in the config file.
 
 open(CONFIG, "config.sh") || die "You haven't run Configure yet!\n";
@@ -25,56 +29,58 @@ while (<CONFIG>) {
 
 if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 
-   $bin		|| die "No bin directory in config.sh\n";
--d $bin		|| die "$bin is not a directory\n";
--w $bin		|| die "$bin is not writable by you\n";
+   $installbin		|| die "No installbin directory in config.sh\n";
+-d $installbin		|| die "$installbin is not a directory\n";
+-w $installbin		|| die "$installbin is not writable by you\n"
+	unless $installbin =~ m#^/afs/#;
 
--x 'perl'	|| die "perl isn't executable!\n";
--x 'taintperl'	|| die "taintperl isn't executable!\n";
--x 'suidperl'	|| die "suidperl isn't executable!\n" if $d_dosuid;
+-x 'perl'		|| die "perl isn't executable!\n";
+-x 'taintperl'		|| die "taintperl isn't executable!\n";
+-x 'suidperl'		|| die "suidperl isn't executable!\n" if $d_dosuid;
 
--x 't/TEST'	|| die "You've never run 'make test'!\n";
+-x 't/TEST'		|| warn "WARNING: You've never run 'make test'!!!",
+	"  (Installing anyway.)\n";
 
 # First we install the version-numbered executables.
 
 $ver = sprintf("%5.3f", $]);
 
-&unlink("$bin/perl$ver");
-&cmd("cp perl $bin/perl$ver");
+&unlink("$installbin/perl$ver");
+&cmd("cp perl $installbin/perl$ver");
 
-&unlink("$bin/tperl$ver");
-&cmd("cp taintperl $bin/tperl$ver");
-&chmod(0755, "$bin/tperl$ver");		# force non-suid for security
+&unlink("$installbin/tperl$ver");
+&cmd("cp taintperl $installbin/tperl$ver");
+&chmod(0755, "$installbin/tperl$ver");		# force non-suid for security
 
-&unlink("$bin/sperl$ver");
+&unlink("$installbin/sperl$ver");
 if ($d_dosuid) {
-    &cmd("cp suidperl $bin/sperl$ver");
-    &chmod(04711, "$bin/sperl$ver");
+    &cmd("cp suidperl $installbin/sperl$ver");
+    &chmod(04711, "$installbin/sperl$ver");
 }
 
 exit 0 if $versiononly;
 
-# Make links to ordinary names if bin directory isn't current directory.
+# Make links to ordinary names if installbin directory isn't current directory.
 
-($bdev,$bino) = stat($bin);
+($bdev,$bino) = stat($installbin);
 ($ddev,$dino) = stat('.');
 
 if ($bdev != $ddev || $bino != $dino) {
-    &unlink("$bin/perl", "$bin/taintperl", "$bin/suidperl");
-    &link("$bin/perl$ver", "$bin/perl");
-    &link("$bin/tperl$ver", "$bin/taintperl");
-    &link("$bin/sperl$ver", "$bin/suidperl") if $d_dosuid;
+    &unlink("$installbin/perl", "$installbin/taintperl", "$installbin/suidperl");
+    &link("$installbin/perl$ver", "$installbin/perl");
+    &link("$installbin/tperl$ver", "$installbin/taintperl");
+    &link("$installbin/sperl$ver", "$installbin/suidperl") if $d_dosuid;
 }
 
 # Make some enemies in the name of standardization.   :-)
 
 ($udev,$uino) = stat("/usr/bin");
 
-if (($udev != $ddev || $uino != $dino) && !$nonono) {
+if (-w _ && ($udev != $ddev || $uino != $dino) && !$nonono) {
     unlink "/usr/bin/perl";
-    eval 'symlink("$bin/perl", "/usr/bin/perl")' ||
-    eval 'link("$bin/perl", "/usr/bin/perl")' ||
-    &cmd("cp $bin/perl /usr/bin");
+    eval 'symlink("$installbin/perl", "/usr/bin/perl")' ||
+    eval 'link("$installbin/perl", "/usr/bin/perl")' ||
+    &cmd("cp $installbin/perl /usr/bin");
 }
 
 # Install scripts.
@@ -82,29 +88,40 @@ if (($udev != $ddev || $uino != $dino) && !$nonono) {
 &makedir($scriptdir);
 
 for (@scripts) {
-    &chmod(0755, $_);
     &cmd("cp $_ $scriptdir");
+    &chmod(0755, "$scriptdir/$_");
 }
 
 # Install library files.
 
-&makedir($privlib);
+&makedir($installprivlib);
 
-($pdev,$pino) = stat($privlib);
+($pdev,$pino) = stat($installprivlib);
 
 if ($pdev != $ddev || $pino != $dino) {
-    &cmd("cd lib && cp *.pl $privlib");
+    &cmd("cd lib && cp *.pl $installprivlib");
 }
 
 # Install man pages.
 
-&makedir($mansrc);
+if ($mansrc ne '') {
+    &makedir($mansrc);
 
-($mdev,$mino) = stat($mansrc);
-if ($mdev != $ddev || $mino != $dino) {
-    for (@manpages) {
-	($new = $_) =~ s/man$/$manext/;
-	&cmd("cp $_ $mansrc/$new");
+    ($mdev,$mino) = stat($mansrc);
+    if ($mdev != $ddev || $mino != $dino) {
+	for (@manpages) {
+	    ($new = $_) =~ s/man$/$manext/;
+	    print STDERR "  Installing $mansrc/$new\n";
+	    next if $nonono;
+	    open(MI,$_);
+	    open(MO,">$mansrc/$new");
+	    print MO ".ds RP Release $release Patchlevel $patchlevel\n";
+	    while (<MI>) {
+		print MO;
+	    }
+	    close MI;
+	    close MO;
+	}
     }
 }
 

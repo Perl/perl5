@@ -2,9 +2,12 @@
 'di';
 'ig00';
 #
-# $Header: rename,v 3.0.1.2 90/08/09 03:17:57 lwall Locked $
+# $Header: rename,v 4.0 91/03/20 01:11:53 lwall Locked $
 #
 # $Log:	rename,v $
+# Revision 4.0  91/03/20  01:11:53  lwall
+# 4.0 baseline.
+# 
 # Revision 3.0.1.2  90/08/09  03:17:57  lwall
 # patch19: added man page for relink and rename
 # 

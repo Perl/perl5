@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 3.0.1.11 91/01/11 18:10:57 lwall Locked $
+/* $Header: perl.h,v 4.0 91/03/20 01:37:56 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,61 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
- * Revision 3.0.1.11  91/01/11  18:10:57  lwall
- * patch42: ANSIfied the stat mode checking
- * 
- * Revision 3.0.1.10  90/11/10  01:44:13  lwall
- * patch38: more msdos/os2 upgrades
- * 
- * Revision 3.0.1.9  90/10/15  17:59:41  lwall
- * patch29: some machines didn't like unsigned C preprocessor values
- * 
- * Revision 3.0.1.8  90/08/09  04:10:53  lwall
- * patch19: various MSDOS and OS/2 patches folded in
- * patch19: did preliminary work toward debugging packages and evals
- * patch19: added -x switch to extract script from input trash
- * 
- * Revision 3.0.1.7  90/03/27  16:12:52  lwall
- * patch16: MSDOS support
- * patch16: support for machines that can't cast negative floats to unsigned ints
- * 
- * Revision 3.0.1.6  90/03/12  16:40:43  lwall
- * patch13: did some ndir straightening up for Xenix
- * 
- * Revision 3.0.1.5  90/02/28  17:52:28  lwall
- * patch9: Configure now determines whether volatile is supported
- * patch9: volatilized some more variables for super-optimizing compilers
- * patch9: unused VREG symbol deleted
- * patch9: perl can now start up other interpreters scripts  
- * patch9: you may now undef $/ to have no input record separator
- * patch9: nested evals clobbered their longjmp environment
- * 
- * Revision 3.0.1.4  89/12/21  20:07:35  lwall
- * patch7: arranged for certain registers to be restored after longjmp()
- * patch7: Configure now compiles a test program to figure out time.h fiasco
- * patch7: Configure now detects DG/UX thingies like [sg]etpgrp2 and utime.h
- * patch7: memcpy() and memset() return void in __STDC__
- * patch7: errno may now be a macro with an lvalue
- * patch7: ANSI strerror() is now supported
- * patch7: Xenix support for sys/ndir.h, cross compilation
- * 
- * Revision 3.0.1.3  89/11/17  15:28:57  lwall
- * patch5: byteorder now is a hex value
- * patch5: Configure now looks for <time.h> including <sys/time.h>
- * 
- * Revision 3.0.1.2  89/11/11  04:39:38  lwall
- * patch2: Configure may now set -DDEBUGGING
- * patch2: netinet/in.h needed sys/types.h some places
- * patch2: more <sys/time.h> and <time.h> wrangling
- * patch2: yydebug moved to where type doesn't matter  
- * 
- * Revision 3.0.1.1  89/10/26  23:17:08  lwall
- * patch1: vfork now conditionally defined based on VFORK
- * patch1: DEC risc machines have a buggy memcmp
- * patch1: perl.h now includes <netinet/in.h> if it exists
- * 
- * Revision 3.0  89/10/18  15:21:21  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:37:56  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -68,25 +15,7 @@
 #include "config.h"
 
 #ifdef MSDOS
-/*
- * BUGGY_MSC:
- *	This symbol is defined if you are the unfortunate owner of a buggy
- *	Microsoft C compiler and want to use intrinsic functions.  Versions
- *	up to 5.1 are known conform to this definition.  This is not needed
- *	under Unix.
- */
-#define BUGGY_MSC			/**/
-/*
- * BINARY:
- *	This symbol is defined if you run under an operating system that
- *	distinguishes between binary and text files.  If so the function
- *	setmode will be used to set the file into binary mode.  Unix
- *	doesn't distinguish.
- */
-#define BINARY				/**/
-
-#define I_FCNTL
-
+/* This stuff now in the MS-DOS config.h file. */
 #else /* !MSDOS */
 
 /*
@@ -95,22 +24,23 @@
  * are not checked by the configuration script, but are directly defined
  * here.
  */
-#define CHOWN
-#define CHROOT
-#define FORK
-#define GETLOGIN
-#define GETPPID
-#define KILL
-#define LINK
-#define PIPE
-#define WAIT
-#define UMASK
+#define HAS_ALARM
+#define HAS_CHOWN
+#define HAS_CHROOT
+#define HAS_FORK
+#define HAS_GETLOGIN
+#define HAS_GETPPID
+#define HAS_KILL
+#define HAS_LINK
+#define HAS_PIPE
+#define HAS_WAIT
+#define HAS_UMASK
 /*
  * The following symbols are defined if your operating system supports
  * password and group functions in general.  All Unix systems do.
  */
-#define GROUP
-#define PASSWD
+#define HAS_GROUP
+#define HAS_PASSWD
 
 #endif /* !MSDOS */
 
@@ -126,42 +56,22 @@
 #   endif
 #endif
 
-#ifndef VFORK
+#ifndef HAS_VFORK
 #   define vfork fork
 #endif
 
-#ifdef GETPGRP2
-#   ifndef GETPGRP
-#	define GETPGRP
+#ifdef HAS_GETPGRP2
+#   ifndef HAS_GETPGRP
+#	define HAS_GETPGRP
 #   endif
 #   define getpgrp getpgrp2
 #endif
 
-#ifdef SETPGRP2
-#   ifndef SETPGRP
-#	define SETPGRP
+#ifdef HAS_SETPGRP2
+#   ifndef HAS_SETPGRP
+#	define HAS_SETPGRP
 #   endif
 #   define setpgrp setpgrp2
-#endif
-
-#if defined(MEMCMP) && defined(mips) && BYTEORDER == 0x1234
-#undef MEMCMP
-#endif
-
-#ifdef MEMCPY
-#ifndef memcpy
-#if defined(__STDC__ ) || defined(MSDOS)
-extern void *memcpy(), *memset();
-#else
-extern char *memcpy(), *memset();
-#endif
-extern int memcmp();
-#endif
-#define bcopy(s1,s2,l) memcpy(s2,s1,l)
-#define bzero(s,l) memset(s,0,l)
-#endif
-#ifndef BCMP		/* prefer bcmp slightly 'cuz it doesn't order */
-#define bcmp(s1,s2,l) memcmp(s1,s2,l)
 #endif
 
 #include <stdio.h>
@@ -169,6 +79,32 @@ extern int memcmp();
 #include <setjmp.h>
 #ifndef MSDOS
 #include <sys/param.h>	/* if this needs types.h we're still wrong */
+#endif
+#ifdef __STDC__
+/* Use all the "standard" definitions */
+#include <stdlib.h>
+#include <string.h>
+#endif /* __STDC__ */
+
+#if defined(HAS_MEMCMP) && defined(mips) && BYTEORDER == 0x1234
+#undef HAS_MEMCMP
+#endif
+
+#ifdef HAS_MEMCPY
+
+#  ifndef __STDC__
+#    ifndef memcpy
+extern char * memcpy(), *memset();
+extern int memcmp();
+#    endif /* ndef memcpy */
+#  endif /* ndef __STDC__ */
+
+#define bcopy(s1,s2,l) memcpy(s2,s1,l)
+#define bzero(s,l) memset(s,0,l)
+#endif /* HAS_MEMCPY */
+
+#ifndef HAS_BCMP		/* prefer bcmp slightly 'cuz it doesn't order */
+#define bcmp(s1,s2,l) memcmp(s1,s2,l)
 #endif
 
 #ifndef _TYPES_		/* If types.h defines this it's easy. */
@@ -187,7 +123,7 @@ extern int memcmp();
 #   include <time.h>
 #endif
 
-#ifdef I_SYSTIME
+#ifdef I_SYS_TIME
 #   ifdef SYSTIMEKERNEL
 #	define KERNEL
 #   endif
@@ -201,8 +137,8 @@ extern int memcmp();
 #include <sys/times.h>
 #endif
 
-#if defined(STRERROR) && (!defined(MKDIR) || !defined(RMDIR))
-#undef STRERROR
+#if defined(HAS_STRERROR) && (!defined(HAS_MKDIR) || !defined(HAS_RMDIR))
+#undef HAS_STRERROR
 #endif
 
 #include <errno.h>
@@ -212,7 +148,7 @@ extern int errno;     /* ANSI allows errno to be an lvalue expr */
 #endif
 #endif
 
-#ifdef STRERROR
+#ifdef HAS_STRERROR
 char *strerror();
 #else
 extern int sys_nerr;
@@ -227,22 +163,34 @@ extern char *sys_errlist[];
 #endif
 
 #if defined(mc300) || defined(mc500) || defined(mc700)	/* MASSCOMP */
-#ifdef SOCKETPAIR
-#undef SOCKETPAIR
+#ifdef HAS_SOCKETPAIR
+#undef HAS_SOCKETPAIR
 #endif
-#ifdef NDBM
-#undef NDBM
+#ifdef HAS_NDBM
+#undef HAS_NDBM
 #endif
 #endif
 
-#ifdef NDBM
-#include <ndbm.h>
+#ifdef HAS_GDBM
+#ifdef I_GDBM
+#include <gdbm.h>
+#endif
 #define SOME_DBM
-#ifdef ODBM
-#undef ODBM
+#ifdef HAS_NDBM
+#undef HAS_NDBM
+#endif
+#ifdef HAS_ODBM
+#undef HAS_ODBM
 #endif
 #else
-#ifdef ODBM
+#ifdef HAS_NDBM
+#include <ndbm.h>
+#define SOME_DBM
+#ifdef HAS_ODBM
+#undef HAS_ODBM
+#endif
+#else
+#ifdef HAS_ODBM
 #ifdef NULL
 #undef NULL		/* suppress redefinition message */
 #endif
@@ -257,8 +205,9 @@ extern char *sys_errlist[];
 #define dbm_store(db,dkey,dcontent,flags) store(dkey,dcontent)
 #define dbm_close(db) dbmclose()
 #define dbm_firstkey(db) firstkey()
-#endif /* ODBM */
-#endif /* NDBM */
+#endif /* HAS_ODBM */
+#endif /* HAS_NDBM */
+#endif /* HAS_GDBM */
 #ifdef SOME_DBM
 EXT char *dbmkey;
 EXT int dbmlen;
@@ -276,11 +225,11 @@ EXT int dbmlen;
 #   include <dirent.h>
 #   define DIRENT dirent
 #else
-#   ifdef I_SYSNDIR
+#   ifdef I_SYS_NDIR
 #	include <sys/ndir.h>
 #	define DIRENT direct
 #   else
-#	ifdef I_SYSDIR
+#	ifdef I_SYS_DIR
 #	    ifdef hp9000s500
 #		include <ndir.h>	/* may be wrong in the future */
 #	    else
@@ -314,7 +263,11 @@ EXT int dbmlen;
 #endif
 
 #ifndef S_ISBLK
-#   define S_ISBLK(m) ((m & S_IFMT) == S_IFBLK)
+#   ifdef S_IFBLK
+#	define S_ISBLK(m) ((m & S_IFMT) == S_IFBLK)
+#   else
+#	define S_ISBLK(m) (0)
+#   endif
 #endif
 
 #ifndef S_ISREG
@@ -322,7 +275,11 @@ EXT int dbmlen;
 #endif
 
 #ifndef S_ISFIFO
-#   define S_ISFIFO(m) ((m & S_IFMT) == S_IFIFO)
+#   ifdef S_IFIFO
+#	define S_ISFIFO(m) ((m & S_IFMT) == S_IFIFO)
+#   else
+#	define S_ISFIFO(m) (0)
+#   endif
 #endif
 
 #ifndef S_ISLNK
@@ -493,24 +450,24 @@ EXT STR *Str;
 #define BYTEORDER 0x1234
 #endif
 
-#if defined(htonl) && !defined(HTONL)
-#define HTONL
+#if defined(htonl) && !defined(HAS_HTONL)
+#define HAS_HTONL
 #endif
-#if defined(htons) && !defined(HTONS)
-#define HTONS
+#if defined(htons) && !defined(HAS_HTONS)
+#define HAS_HTONS
 #endif
-#if defined(ntohl) && !defined(NTOHL)
-#define NTOHL
+#if defined(ntohl) && !defined(HAS_NTOHL)
+#define HAS_NTOHL
 #endif
-#if defined(ntohs) && !defined(NTOHS)
-#define NTOHS
+#if defined(ntohs) && !defined(HAS_NTOHS)
+#define HAS_NTOHS
 #endif
-#ifndef HTONL
+#ifndef HAS_HTONL
 #if (BYTEORDER & 0xffff) != 0x4321
-#define HTONS
-#define HTONL
-#define NTOHS
-#define NTOHL
+#define HAS_HTONS
+#define HAS_HTONL
+#define HAS_NTOHS
+#define HAS_NTOHL
 #define MYSWAP
 #define htons my_swap
 #define htonl my_htonl
@@ -519,10 +476,10 @@ EXT STR *Str;
 #endif
 #else
 #if (BYTEORDER & 0xffff) == 0x4321
-#undef HTONS
-#undef HTONL
-#undef NTOHS
-#undef NTOHL
+#undef HAS_HTONS
+#undef HAS_HTONL
+#undef HAS_NTOHS
+#undef HAS_NTOHL
 #endif
 #endif
 
@@ -591,7 +548,7 @@ char *scanpat();
 char *scansubst();
 char *scantrans();
 char *scanstr();
-char *scanreg();
+char *scanident();
 char *str_append_till();
 char *str_gets();
 char *str_grow();
@@ -617,6 +574,10 @@ void do_sprintf();
 void do_accept();
 void do_pipe();
 void do_vecset();
+void do_unshift();
+void do_execfree();
+void magicalize();
+void magicname();
 void savelist();
 void saveitem();
 void saveint();
@@ -630,6 +591,7 @@ ARRAY *saveary();
 
 EXT char **origargv;
 EXT int origargc;
+EXT char **origenviron;
 EXT line_t subline INIT(0);
 EXT STR *subname INIT(Nullstr);
 EXT int arybase INIT(0);
@@ -675,6 +637,7 @@ EXT STR *DBsignal INIT(Nullstr);
 EXT int lastspbase;
 EXT int lastsize;
 
+EXT char *hexdigit INIT("0123456789abcdef0123456789ABCDEF");
 EXT char *origfilename;
 EXT FILE * VOLATILE rsfp;
 EXT char buf[1024];
@@ -685,7 +648,8 @@ EXT char *bufend;
 
 EXT STR *linestr INIT(Nullstr);
 
-EXT int record_separator INIT('\n');
+EXT char *rs INIT("\n");
+EXT int rschar INIT('\n');	/* final char of rs, or 0777 if none */
 EXT int rslen INIT(1);
 EXT char *ofs INIT(Nullch);
 EXT int ofslen INIT(0);
@@ -698,6 +662,7 @@ EXT char *nointrp INIT("");
 EXT bool preprocess INIT(FALSE);
 EXT bool minus_n INIT(FALSE);
 EXT bool minus_p INIT(FALSE);
+EXT bool minus_l INIT(FALSE);
 EXT bool minus_a INIT(FALSE);
 EXT bool doswitches INIT(FALSE);
 EXT bool dowarn INIT(FALSE);
@@ -770,6 +735,7 @@ EXT char *debdelim;
 #define YYDEBUG 1
 #endif
 EXT int perldb INIT(0);
+#define YYMAXDEPTH 300
 
 EXT line_t cmdline INIT(NOLINE);
 
@@ -814,13 +780,17 @@ EXT int *di;			/* for tmp use in debuggers */
 EXT char *dc;
 EXT short *ds;
 
+/* Fix these up for __STDC__ */
+EXT long basetime INIT(0);
+char *mktemp();
+#ifndef __STDC__
+/* All of these are in stdlib.h or time.h for ANSI C */
 double atof();
 long time();
-EXT long basetime INIT(0);
 struct tm *gmtime(), *localtime();
-char *mktemp();
 char *index(), *rindex();
 char *strcpy(), *strcat();
+#endif /* ! __STDC__ */
 
 #ifdef EUNICE
 #define UNLINK unlnk
@@ -829,15 +799,15 @@ int unlnk();
 #define UNLINK unlink
 #endif
 
-#ifndef SETREUID
-#ifdef SETRESUID
+#ifndef HAS_SETREUID
+#ifdef HAS_SETRESUID
 #define setreuid(r,e) setresuid(r,e,-1)
-#define SETREUID
+#define HAS_SETREUID
 #endif
 #endif
-#ifndef SETREGID
-#ifdef SETRESGID
+#ifndef HAS_SETREGID
+#ifdef HAS_SETRESGID
 #define setregid(r,e) setresgid(r,e,-1)
-#define SETREGID
+#define HAS_SETREGID
 #endif
 #endif

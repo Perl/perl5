@@ -1,4 +1,4 @@
-.\" $Header: muck.man,v 3.0 89/10/18 15:14:55 lwall Locked $
+.\" $Header: muck.man,v 4.0 91/03/20 01:11:04 lwall Locked $
 .TH MUCK 1 "10 Jan 1989"
 .SH NAME
 muck \- make usage checker

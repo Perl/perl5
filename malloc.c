@@ -1,24 +1,8 @@
-/* $Header: malloc.c,v 3.0.1.5 91/01/11 18:09:52 lwall Locked $
+/* $Header: malloc.c,v 4.0 91/03/20 01:28:52 lwall Locked $
  *
  * $Log:	malloc.c,v $
- * Revision 3.0.1.5  91/01/11  18:09:52  lwall
- * patch42: Configure now checks alignment requirements
- * 
- * Revision 3.0.1.4  90/11/13  15:23:45  lwall
- * patch41: added hp malloc union overhead strut (that sounds very blue collar)
- * 
- * Revision 3.0.1.3  90/10/16  15:27:47  lwall
- * patch29: various portability fixes
- * 
- * Revision 3.0.1.2  89/11/11  04:36:37  lwall
- * patch2: malloc pointer corruption check made more portable
- * 
- * Revision 3.0.1.1  89/10/26  23:15:05  lwall
- * patch1: some declarations were missing from malloc.c
- * patch1: sparc machines had alignment problems in malloc.c
- * 
- * Revision 3.0  89/10/18  15:20:39  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:28:52  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -242,6 +226,7 @@ morecore(bucket)
   	}
 }
 
+void
 free(cp)
 	char *cp;
 {   

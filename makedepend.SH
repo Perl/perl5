@@ -5,7 +5,7 @@ case $CONFIG in
 	ln ../../config.sh . || \
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
-    fi
+    fi 2>/dev/null
     . ./config.sh
     ;;
 esac
@@ -15,14 +15,12 @@ esac
 echo "Extracting makedepend (with variable substitutions)"
 $spitshell >makedepend <<!GROK!THIS!
 $startsh
-# $Header: makedepend.SH,v 3.0.1.1 89/11/11 04:35:32 lwall Locked $
+# $Header: makedepend.SH,v 4.0 91/03/20 01:27:04 lwall Locked $
 #
 # $Log:	makedepend.SH,v $
-# Revision 3.0.1.1  89/11/11  04:35:32  lwall
-# patch2: makedepend now uses cppflags determined by Configure
+# Revision 4.0  91/03/20  01:27:04  lwall
+# 4.0 baseline.
 # 
-# Revision 3.0  89/10/18  15:20:19  lwall
-# 3.0 baseline
 # 
 
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)

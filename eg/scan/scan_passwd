@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: scan_passwd,v 3.0 89/10/18 15:15:43 lwall Locked $
+# $Header: scan_passwd,v 4.0 91/03/20 01:13:18 lwall Locked $
 
 # This scans passwd file for security holes.
 

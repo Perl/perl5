@@ -1,4 +1,4 @@
-/* $Header: hash.c,v 3.0 89/10/18 15:34:50 lwall Locked $
+/* $Header: hash.c,v 4.0 91/03/20 01:57:49 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,8 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	hash.c,v $
- * Revision 3.0  89/10/18  15:34:50  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:57:49  lwall
+ * 4.0 baseline.
  * 
  */
 
@@ -73,10 +73,12 @@ STR *val;
 	    continue;
 	if (strNE(entry->hent_key,key))	/* is this it? */
 	    continue;
+	/*NOSTRICT*/
 	safefree((char*)entry->hent_val);
 	entry->hent_val = val;
 	return TRUE;
     }
+    /*NOSTRICT*/
     entry = (HENT*) safemalloc(sizeof(HENT));
 
     entry->hent_key = savestr(key);

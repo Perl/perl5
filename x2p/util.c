@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0.1.1 90/10/16 11:34:06 lwall Locked $
+/* $Header: util.c,v 4.0 91/03/20 01:58:25 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,11 +6,8 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
- * Revision 3.0.1.1  90/10/16  11:34:06  lwall
- * patch29: removed #ifdef undef
- * 
- * Revision 3.0  89/10/18  15:35:35  lwall
- * 3.0 baseline
+ * Revision 4.0  91/03/20  01:58:25  lwall
+ * 4.0 baseline.
  * 
  */
 

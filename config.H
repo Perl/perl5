@@ -1,3 +1,5 @@
+#ifndef config_h
+#define config_h
 /* config.h
  * This file was produced by running the config.h.SH script, which
  * gets its values from config.sh, which is generally produced by
@@ -9,61 +11,88 @@
  */
 
 
-/* EUNICE:
+/* EUNICE
  *	This symbol, if defined, indicates that the program is being compiled
  *	under the EUNICE package under VMS.  The program will need to handle
  *	things like files that don't go away the first time you unlink them,
  *	due to version numbering.  It will also need to compensate for lack
  *	of a respectable link() command.
  */
-/* VMS:
+/* VMS
  *	This symbol, if defined, indicates that the program is running under
  *	VMS.  It is currently only set in conjunction with the EUNICE symbol.
  */
 /*#undef	EUNICE		/**/
 /*#undef	VMS		/**/
 
-/* BIN:
+/* ALIGNBYTES
+ *	This symbol contains the number of bytes required to align a double.
+ *	Usual values are 2, 4, and 8.
+ */
+#define ALIGNBYTES 4		/**/
+
+/* BIN
  *	This symbol holds the name of the directory in which the user wants
- *	to put publicly executable images for the package in question.  It
+ *	to keep publicly executable images for the package in question.  It
  *	is most often a local directory such as /usr/local/bin.
  */
 #define BIN "/usr/local/bin"             /**/
 
-/* BYTEORDER:
+/* BYTEORDER
  *	This symbol contains an encoding of the order of bytes in a long.
  *	Usual values (in octal) are 01234, 04321, 02143, 03412...
  */
-#define BYTEORDER 01234		/**/
+#define BYTEORDER 0x1234		/**/
 
-/* CPPSTDIN:
+/* CPPSTDIN
  *	This symbol contains the first part of the string which will invoke
  *	the C preprocessor on the standard input and produce to standard
  *	output.	 Typical value of "cc -E" or "/lib/cpp".
  */
-/* CPPMINUS:
+/* CPPMINUS
  *	This symbol contains the second part of the string which will invoke
  *	the C preprocessor on the standard input and produce to standard
  *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
  *	to specify standard input, otherwise the value is "".
  */
-#define CPPSTDIN "/lib/cpp"
-#define CPPMINUS ""
+#define CPPSTDIN "cc -E"
+#define CPPMINUS "-"
 
-/* BCMP:
+/* HAS_BCMP
  *	This symbol, if defined, indicates that the bcmp routine is available
  *	to compare blocks of memory.  If undefined, use memcmp.  If that's
  *	not available, roll your own.
  */
-#define	BCMP		/**/
+#define	HAS_BCMP		/**/
 
-/* BCOPY:
+/* HAS_BCOPY
  *	This symbol, if defined, indicates that the bcopy routine is available
  *	to copy blocks of memory.  Otherwise you should probably use memcpy().
  */
-#define	BCOPY		/**/
+#define	HAS_BCOPY		/**/
 
-/* CHARSPRINTF:
+/* HAS_BZERO
+ *	This symbol, if defined, indicates that the bzero routine is available
+ *	to zero blocks of memory.  Otherwise you should probably use memset()
+ *	or roll your own.
+ */
+#define	HAS_BZERO		/**/
+
+/* CASTNEGFLOAT
+ *	This symbol, if defined, indicates that this C compiler knows how to
+ *	cast negative or large floating point numbers to unsigned longs, ints
+ *	and shorts.
+ */
+/* CASTFLAGS
+ *	This symbol contains flags that say what difficulties the compiler
+ *	has casting odd floating values to unsigned long:
+ *		1 = couldn't cast < 0
+ *		2 = couldn't cast >= 0x80000000
+ */
+#define	CASTNEGFLOAT	/**/
+#define	CASTFLAGS 0	/**/
+
+/* CHARSPRINTF
  *	This symbol is defined if this system declares "char *sprintf()" in
  *	stdio.h.  The trend seems to be to declare it as "int sprintf()".  It
  *	is up to the package author to declare sprintf correctly based on the
@@ -71,13 +100,25 @@
  */
 #define	CHARSPRINTF 	/**/
 
-/* CRYPT:
+/* HAS_CHSIZE
+ *	This symbol, if defined, indicates that the chsize routine is available
+ *	to truncate files.  You might need a -lx to get this routine.
+ */
+/*#undef	HAS_CHSIZE		/**/
+
+/* HAS_CRYPT
  *	This symbol, if defined, indicates that the crypt routine is available
  *	to encrypt passwords and the like.
  */
-#define	CRYPT		/**/
+#define	HAS_CRYPT		/**/
 
-/* DOSUID:
+/* CSH
+ *	This symbol, if defined, indicates that the C-shell exists.
+ *	If defined, contains the full pathname of csh.
+ */
+#define CSH "/bin/csh"		/**/
+
+/* DOSUID
  *	This symbol, if defined, indicates that the C program should
  *	check the script that it is executing for setuid/setgid bits, and
  *	attempt to emulate setuid/setgid on systems that have disabled
@@ -90,397 +131,632 @@
  *	subprocesses to which it must pass the filename rather than the
  *	file descriptor of the script to be executed.
  */
-#define DOSUID		/**/
+/*#undef DOSUID		/**/
 
-/* DUP2:
+/* HAS_DUP2
  *	This symbol, if defined, indicates that the dup2 routine is available
  *	to dup file descriptors.  Otherwise you should use dup().
  */
-#define	DUP2		/**/
+#define	HAS_DUP2		/**/
 
-/* FCHMOD:
+/* HAS_FCHMOD
  *	This symbol, if defined, indicates that the fchmod routine is available
  *	to change mode of opened files.  If unavailable, use chmod().
  */
-#define	FCHMOD		/**/
+#define	HAS_FCHMOD		/**/
 
-/* FCHOWN:
+/* HAS_FCHOWN
  *	This symbol, if defined, indicates that the fchown routine is available
  *	to change ownership of opened files.  If unavailable, use chown().
  */
-#define	FCHOWN		/**/
+#define	HAS_FCHOWN		/**/
 
-/* FCNTL:
- *	This symbol, if defined, indicates to the C program that it should
- *	include fcntl.h.
+/* HAS_FCNTL
+ *	This symbol, if defined, indicates to the C program that
+ *	the fcntl() function exists.
  */
-#define	FCNTL		/**/
+#define	HAS_FCNTL		/**/
 
-/* FLOCK:
+/* FLEXFILENAMES
+ *	This symbol, if defined, indicates that the system supports filenames
+ *	longer than 14 characters.
+ */
+#define	FLEXFILENAMES		/**/
+
+/* HAS_FLOCK
  *	This symbol, if defined, indicates that the flock() routine is
  *	available to do file locking.
  */
-#define	FLOCK		/**/
+#define	HAS_FLOCK		/**/
 
-/* GETGROUPS:
+/* HAS_GETGROUPS
  *	This symbol, if defined, indicates that the getgroups() routine is
  *	available to get the list of process groups.  If unavailable, multiple
  *	groups are probably not supported.
  */
-#define	GETGROUPS		/**/
+#define	HAS_GETGROUPS		/**/
 
-/* GETHOSTENT:
+/* HAS_GETHOSTENT
  *	This symbol, if defined, indicates that the gethostent() routine is
  *	available to lookup host names in some data base or other.
  */
-#define	GETHOSTENT		/**/
+#define	HAS_GETHOSTENT		/**/
 
-/* GETPGRP:
+/* HAS_GETPGRP
  *	This symbol, if defined, indicates that the getpgrp() routine is
  *	available to get the current process group.
  */
-#define	GETPGRP		/**/
+#define	HAS_GETPGRP		/**/
 
-/* GETPRIORITY:
+/* HAS_GETPGRP2
+ *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)
+ *	routine is available to get the current process group.
+ */
+/*#undef	HAS_GETPGRP2		/**/
+
+/* HAS_GETPRIORITY
  *	This symbol, if defined, indicates that the getpriority() routine is
  *	available to get a process's priority.
  */
-#define	GETPRIORITY		/**/
+#define	HAS_GETPRIORITY		/**/
 
-/* HTONS:
+/* HAS_HTONS
  *	This symbol, if defined, indicates that the htons routine (and friends)
  *	are available to do network order byte swapping.
  */
-/* HTONL:
+/* HAS_HTONL
  *	This symbol, if defined, indicates that the htonl routine (and friends)
  *	are available to do network order byte swapping.
  */
-/* NTOHS:
+/* HAS_NTOHS
  *	This symbol, if defined, indicates that the ntohs routine (and friends)
  *	are available to do network order byte swapping.
  */
-/* NTOHL:
+/* HAS_NTOHL
  *	This symbol, if defined, indicates that the ntohl routine (and friends)
  *	are available to do network order byte swapping.
  */
-#define	HTONS		/**/
-#define	HTONL		/**/
-#define	NTOHS		/**/
-#define	NTOHL		/**/
+#define	HAS_HTONS	/**/
+#define	HAS_HTONL	/**/
+#define	HAS_NTOHS	/**/
+#define	HAS_NTOHL	/**/
 
-/* index:
+/* index
  *	This preprocessor symbol is defined, along with rindex, if the system
  *	uses the strchr and strrchr routines instead.
  */
-/* rindex:
+/* rindex
  *	This preprocessor symbol is defined, along with index, if the system
  *	uses the strchr and strrchr routines instead.
  */
 /*#undef	index strchr	/* cultural */
 /*#undef	rindex strrchr	/*  differences? */
 
-/* IOCTL:
- *	This symbol, if defined, indicates that sys/ioctl.h exists and should
- *	be included.
- */
-#define	IOCTL		/**/
-
-/* KILLPG:
+/* HAS_KILLPG
  *	This symbol, if defined, indicates that the killpg routine is available
  *	to kill process groups.  If unavailable, you probably should use kill
  *	with a negative process number.
  */
-#define	KILLPG		/**/
+#define	HAS_KILLPG		/**/
 
-/* MEMCMP:
+/* HAS_LSTAT
+ *	This symbol, if defined, indicates that the lstat() routine is
+ *	available to stat symbolic links.
+ */
+#define	HAS_LSTAT		/**/
+
+/* HAS_MEMCMP
  *	This symbol, if defined, indicates that the memcmp routine is available
  *	to compare blocks of memory.  If undefined, roll your own.
  */
-#define	MEMCMP		/**/
+#define	HAS_MEMCMP		/**/
 
-/* MEMCPY:
+/* HAS_MEMCPY
  *	This symbol, if defined, indicates that the memcpy routine is available
  *	to copy blocks of memory.  Otherwise you should probably use bcopy().
  *	If neither is defined, roll your own.
  */
-#define	MEMCPY		/**/
+#define	HAS_MEMCPY		/**/
 
-/* MKDIR:
+/* HAS_MKDIR
  *	This symbol, if defined, indicates that the mkdir routine is available
  *	to create directories.  Otherwise you should fork off a new process to
  *	exec /bin/mkdir.
  */
-#define	MKDIR		/**/
+#define	HAS_MKDIR		/**/
 
-/* NDBM:
+/* HAS_MSG
+ *	This symbol, if defined, indicates that the entire msg*(2) library is
+ *	supported.
+ */
+#define	HAS_MSG		/**/
+
+/* HAS_MSGCTL
+ *	This symbol, if defined, indicates that the msgctl() routine is
+ *	available to stat symbolic links.
+ */
+#define	HAS_MSGCTL		/**/
+
+/* HAS_MSGGET
+ *	This symbol, if defined, indicates that the msgget() routine is
+ *	available to stat symbolic links.
+ */
+#define	HAS_MSGGET		/**/
+
+/* HAS_MSGRCV
+ *	This symbol, if defined, indicates that the msgrcv() routine is
+ *	available to stat symbolic links.
+ */
+#define	HAS_MSGRCV		/**/
+
+/* HAS_MSGSND
+ *	This symbol, if defined, indicates that the msgsnd() routine is
+ *	available to stat symbolic links.
+ */
+#define	HAS_MSGSND		/**/
+
+/* HAS_NDBM
  *	This symbol, if defined, indicates that ndbm.h exists and should
  *	be included.
  */
-#define	NDBM		/**/
+#define	HAS_NDBM		/**/
 
-/* ODBM:
+/* HAS_ODBM
  *	This symbol, if defined, indicates that dbm.h exists and should
  *	be included.
  */
-#define	ODBM		/**/
+#define	HAS_ODBM		/**/
 
-/* READDIR:
- *	This symbol, if defined, indicates that the readdir routine is available
- *	from the C library to create directories.
+/* HAS_OPEN3
+ *	This manifest constant lets the C program know that the three
+ *	argument form of open(2) is available.
  */
-#define	READDIR		/**/
+#define	HAS_OPEN3		/**/
 
-/* RENAME:
+/* HAS_READDIR
+ *	This symbol, if defined, indicates that the readdir routine is available
+ *	from the C library to read directories.
+ */
+#define	HAS_READDIR		/**/
+
+/* HAS_RENAME
  *	This symbol, if defined, indicates that the rename routine is available
  *	to rename files.  Otherwise you should do the unlink(), link(), unlink()
  *	trick.
  */
-#define	RENAME		/**/
+#define	HAS_RENAME		/**/
 
-/* RMDIR:
+/* HAS_RMDIR
  *	This symbol, if defined, indicates that the rmdir routine is available
  *	to remove directories.  Otherwise you should fork off a new process to
  *	exec /bin/rmdir.
  */
-#define	RMDIR		/**/
+#define	HAS_RMDIR		/**/
 
-/* SETEGID:
+/* HAS_SELECT
+ *	This symbol, if defined, indicates that the select() subroutine
+ *	exists.
+ */
+#define	HAS_SELECT	/**/
+
+/* HAS_SEM
+ *	This symbol, if defined, indicates that the entire sem*(2) library is
+ *	supported.
+ */
+#define	HAS_SEM		/**/
+
+/* HAS_SEMCTL
+ *	This symbol, if defined, indicates that the semctl() routine is
+ *	available to stat symbolic links.
+ */
+#define	HAS_SEMCTL		/**/
+
+/* HAS_SEMGET
+ *	This symbol, if defined, indicates that the semget() routine is
+ *	available to stat symbolic links.
+ */
+#define	HAS_SEMGET		/**/
+
+/* HAS_SEMOP
+ *	This symbol, if defined, indicates that the semop() routine is
+ *	available to stat symbolic links.
+ */
+#define	HAS_SEMOP		/**/
+
+/* HAS_SETEGID
  *	This symbol, if defined, indicates that the setegid routine is available
  *	to change the effective gid of the current program.
  */
-#define	SETEGID		/**/
+#define	HAS_SETEGID		/**/
 
-/* SETEUID:
+/* HAS_SETEUID
  *	This symbol, if defined, indicates that the seteuid routine is available
  *	to change the effective uid of the current program.
  */
-#define	SETEUID		/**/
+#define	HAS_SETEUID		/**/
 
-/* SETPGRP:
+/* HAS_SETPGRP
  *	This symbol, if defined, indicates that the setpgrp() routine is
  *	available to set the current process group.
  */
-#define	SETPGRP		/**/
+#define	HAS_SETPGRP		/**/
 
-/* SETPRIORITY:
+/* HAS_SETPGRP2
+ *	This symbol, if defined, indicates that the setpgrp2() (as in DG/UX)
+ *	routine is available to set the current process group.
+ */
+/*#undef	HAS_SETPGRP2		/**/
+
+/* HAS_SETPRIORITY
  *	This symbol, if defined, indicates that the setpriority() routine is
  *	available to set a process's priority.
  */
-#define	SETPRIORITY		/**/
+#define	HAS_SETPRIORITY		/**/
 
-/* SETREGID:
- *	This symbol, if defined, indicates that the setregid routine is available
- *	to change the real and effective gid of the current program.
+/* HAS_SETREGID
+ *	This symbol, if defined, indicates that the setregid routine is
+ *	available to change the real and effective gid of the current program.
  */
-#define	SETREGID		/**/
-
-/* SETREUID:
- *	This symbol, if defined, indicates that the setreuid routine is available
- *	to change the real and effective uid of the current program.
+/* HAS_SETRESGID
+ *	This symbol, if defined, indicates that the setresgid routine is
+ *	available to change the real, effective and saved gid of the current
+ *	program.
  */
-#define	SETREUID		/**/
+#define	HAS_SETREGID		/**/
+/*#undef	HAS_SETRESGID		/**/
 
-/* SETRGID:
+/* HAS_SETREUID
+ *	This symbol, if defined, indicates that the setreuid routine is
+ *	available to change the real and effective uid of the current program.
+ */
+/* HAS_SETRESUID
+ *	This symbol, if defined, indicates that the setresuid routine is
+ *	available to change the real, effective and saved uid of the current
+ *	program.
+ */
+#define	HAS_SETREUID		/**/
+/*#undef	HAS_SETRESUID		/**/
+
+/* HAS_SETRGID
  *	This symbol, if defined, indicates that the setrgid routine is available
  *	to change the real gid of the current program.
  */
-#define	SETRGID		/**/
+#define	HAS_SETRGID		/**/
 
-/* SETRUID:
+/* HAS_SETRUID
  *	This symbol, if defined, indicates that the setruid routine is available
  *	to change the real uid of the current program.
  */
-#define	SETRUID		/**/
+#define	HAS_SETRUID		/**/
 
-/* SOCKET:
+/* HAS_SHM
+ *	This symbol, if defined, indicates that the entire shm*(2) library is
+ *	supported.
+ */
+#define	HAS_SHM		/**/
+
+/* HAS_SHMAT
+ *	This symbol, if defined, indicates that the shmat() routine is
+ *	available to stat symbolic links.
+ */
+#define	HAS_SHMAT		/**/
+
+/* HAS_SHMCTL
+ *	This symbol, if defined, indicates that the shmctl() routine is
+ *	available to stat symbolic links.
+ */
+#define	HAS_SHMCTL		/**/
+
+/* HAS_SHMDT
+ *	This symbol, if defined, indicates that the shmdt() routine is
+ *	available to stat symbolic links.
+ */
+#define	HAS_SHMDT		/**/
+
+/* HAS_SHMGET
+ *	This symbol, if defined, indicates that the shmget() routine is
+ *	available to stat symbolic links.
+ */
+#define	HAS_SHMGET		/**/
+
+/* HAS_SOCKET
  *	This symbol, if defined, indicates that the BSD socket interface is
  *	supported.
  */
-/* SOCKETPAIR:
+/* HAS_SOCKETPAIR
  *	This symbol, if defined, indicates that the BSD socketpair call is
  *	supported.
  */
-/* OLDSOCKET:
+/* OLDSOCKET
  *	This symbol, if defined, indicates that the 4.1c BSD socket interface
  *	is supported instead of the 4.2/4.3 BSD socket interface.
  */
-#define	SOCKET		/**/
+#define	HAS_SOCKET		/**/
 
-#define	SOCKETPAIR	/**/
+#define	HAS_SOCKETPAIR	/**/
 
 /*#undef	OLDSOCKET	/**/
 
-/* STATBLOCKS:
+/* STATBLOCKS
  *	This symbol is defined if this system has a stat structure declaring
  *	st_blksize and st_blocks.
  */
 #define	STATBLOCKS 	/**/
 
-/* STDSTDIO:
+/* STDSTDIO
  *	This symbol is defined if this system has a FILE structure declaring
  *	_ptr and _cnt in stdio.h.
  */
 #define	STDSTDIO 	/**/
 
-/* STRUCTCOPY:
+/* STRUCTCOPY
  *	This symbol, if defined, indicates that this C compiler knows how
  *	to copy structures.  If undefined, you'll need to use a block copy
  *	routine of some sort instead.
  */
 #define	STRUCTCOPY	/**/
 
-/* SYMLINK:
+/* HAS_STRERROR
+ *	This symbol, if defined, indicates that the strerror() routine is
+ *	available to translate error numbers to strings.
+ */
+/*#undef	HAS_STRERROR		/**/
+
+/* HAS_SYMLINK
  *	This symbol, if defined, indicates that the symlink routine is available
  *	to create symbolic links.
  */
-#define	SYMLINK		/**/
+#define	HAS_SYMLINK		/**/
 
-/* SYSCALL:
+/* HAS_SYSCALL
  *	This symbol, if defined, indicates that the syscall routine is available
  *	to call arbitrary system calls.  If undefined, that's tough.
  */
-#define	SYSCALL		/**/
+#define	HAS_SYSCALL		/**/
 
-/* TMINSYS:
- *	This symbol is defined if this system declares "struct tm" in
- *	in <sys/time.h> rather than <time.h>.  We can't just say
- *	-I/usr/include/sys because some systems have both time files, and
- *	the -I trick gets the wrong one.
+/* HAS_TRUNCATE
+ *	This symbol, if defined, indicates that the truncate routine is
+ *	available to truncate files.
  */
-/* I_SYSTIME:
- *	This symbol is defined if this system has the file <sys/time.h>.
- */
-/*#undef	TMINSYS 	/**/
-#define	I_SYSTIME 	/**/
+#define	HAS_TRUNCATE		/**/
 
-/* VARARGS:
- *	This symbol, if defined, indicates to the C program that it should
- *	include varargs.h.
+/* HAS_VFORK
+ *	This symbol, if defined, indicates that vfork() exists.
  */
-#define	VARARGS		/**/
+#define	HAS_VFORK	/**/
 
-/* vfork:
- *	This symbol, if defined, remaps the vfork routine to fork if the
- *	vfork() routine isn't supported here.
- */
-/*#undef	vfork fork	/**/
-
-/* VOIDSIG:
+/* VOIDSIG
  *	This symbol is defined if this system declares "void (*signal())()" in
  *	signal.h.  The old way was to declare it as "int (*signal())()".  It
  *	is up to the package author to declare things correctly based on the
  *	symbol.
  */
+/* TO_SIGNAL
+ *	This symbol's value is either "void" or "int", corresponding to the
+ *	appropriate return "type" of a signal handler.  Thus, one can declare
+ *	a signal handler using "TO_SIGNAL (*handler())()", and define the
+ *	handler using "TO_SIGNAL handler(sig)".
+ */
 /*#undef	VOIDSIG 	/**/
+#define	TO_SIGNAL	 	/**/
 
-/* VPRINTF:
+/* HASVOLATILE
+ *	This symbol, if defined, indicates that this C compiler knows about
+ *	the volatile declaration.
+ */
+/*#undef	HASVOLATILE	/**/
+
+/* HAS_VPRINTF
  *	This symbol, if defined, indicates that the vprintf routine is available
  *	to printf with a pointer to an argument list.  If unavailable, you
  *	may need to write your own, probably in terms of _doprnt().
  */
-/* CHARVSPRINTF:
+/* CHARVSPRINTF
  *	This symbol is defined if this system has vsprintf() returning type
  *	(char*).  The trend seems to be to declare it as "int vsprintf()".  It
  *	is up to the package author to declare vsprintf correctly based on the
  *	symbol.
  */
-/*#undef	VPRINTF		/**/
+/*#undef	HAS_VPRINTF	/**/
 /*#undef	CHARVSPRINTF 	/**/
 
-/* GIDTYPE:
+/* HAS_WAIT4
+ *	This symbol, if defined, indicates that wait4() exists.
+ */
+#define	HAS_WAIT4	/**/
+
+/* HAS_WAITPID
+ *	This symbol, if defined, indicates that waitpid() exists.
+ */
+/*#undef	HAS_WAITPID	/**/
+
+/* GIDTYPE
  *	This symbol has a value like gid_t, int, ushort, or whatever type is
  *	used to declare group ids in the kernel.
  */
-#define GIDTYPE gid_t		/**/
+#define GIDTYPE int		/**/
 
-/* I_DIRENT:
- *	This symbol, if defined, indicates to the C program that it should
- *	include dirent.h.
+/* I_FCNTL
+ *	This manifest constant tells the C program to include <fcntl.h>.
  */
-/* DIRNAMLEN:
- *	This symbol, if defined, indicates to the C program that the length
- *	of directory entry names is provided by a d_namlen field.  Otherwise
- *	you need to do strlen() on the d_name field.
- */
-/*#undef	I_DIRENT		/**/
-#define	DIRNAMLEN		/**/
+/*#undef	I_FCNTL	/**/
 
-/* I_FCNTL:
- *	This symbol, if defined, indicates to the C program that it should
- *	include fcntl.h.
+/* I_GDBM
+ *	This symbol, if defined, indicates that gdbm.h exists and should
+ *	be included.
  */
-#define	I_FCNTL		/**/
+/*#undef	I_GDBM		/**/
 
-/* I_GRP:
+/* I_GRP
  *	This symbol, if defined, indicates to the C program that it should
  *	include grp.h.
  */
 #define	I_GRP		/**/
 
-/* I_PWD:
+/* I_NETINET_IN
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include netinet/in.h.
+ */
+/* I_SYS_IN
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include sys/in.h.
+ */
+#define	I_NETINET_IN		/**/
+/*#undef	I_SYS_IN		/**/
+
+/* I_PWD
  *	This symbol, if defined, indicates to the C program that it should
  *	include pwd.h.
  */
-/* PWQUOTA:
+/* PWQUOTA
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_quota.
  */
-/* PWAGE:
+/* PWAGE
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_age.
  */
-#define	I_PWD		/**/
-#define	PWQUOTA		/**/
-/*#undef	PWAGE		/**/
-
-/* I_SYSDIR:
- *	This symbol, if defined, indicates to the C program that it should
- *	include sys/dir.h.
+/* PWCHANGE
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_change.
  */
-#define	I_SYSDIR		/**/
+/* PWCLASS
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_class.
+ */
+/* PWEXPIRE
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_expire.
+ */
+/* PWCOMMENT
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_comment.
+ */
+#define	I_PWD		/**/
+/*#undef	PWQUOTA		/**/
+/*#undef	PWAGE		/**/
+/*#undef	PWCHANGE	/**/
+/*#undef	PWCLASS		/**/
+/*#undef	PWEXPIRE	/**/
+/*#undef	PWCOMMENT	/**/
 
-/* I_SYSIOCTL:
+/* I_SYS_FILE
+ *	This manifest constant tells the C program to include <sys/file.h>.
+ */
+#define	I_SYS_FILE	/**/
+
+/* I_SYSIOCTL
  *	This symbol, if defined, indicates that sys/ioctl.h exists and should
  *	be included.
  */
 #define	I_SYSIOCTL		/**/
 
-/* I_VARARGS:
+/* I_TIME
+ *	This symbol is defined if the program should include <time.h>.
+ */
+/* I_SYS_TIME
+ *	This symbol is defined if the program should include <sys/time.h>.
+ */
+/* SYSTIMEKERNEL
+ *	This symbol is defined if the program should include <sys/time.h>
+ *	with KERNEL defined.
+ */
+/* I_SYS_SELECT
+ *	This symbol is defined if the program should include <sys/select.h>.
+ */
+/*#undef	I_TIME	 	/**/
+#define	I_SYS_TIME 	/**/
+/*#undef	SYSTIMEKERNEL 	/**/
+/*#undef	I_SYS_SELECT 	/**/
+
+/* I_UTIME
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include utime.h.
+ */
+/*#undef	I_UTIME		/**/
+
+/* I_VARARGS
  *	This symbol, if defined, indicates to the C program that it should
  *	include varargs.h.
  */
 #define	I_VARARGS		/**/
 
-/* INTSIZE:
+/* I_VFORK
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include vfork.h.
+ */
+/*#undef	I_VFORK		/**/
+
+/* INTSIZE
  *	This symbol contains the size of an int, so that the C preprocessor
  *	can make decisions based on it.
  */
 #define INTSIZE 4		/**/
 
-/* RANDBITS:
+/* I_DIRENT
+ *	This symbol, if defined, indicates that the program should use the
+ *	P1003-style directory routines, and include <dirent.h>.
+ */
+/* I_SYS_DIR
+ *	This symbol, if defined, indicates that the program should use the
+ *	directory functions by including <sys/dir.h>.
+ */
+/* I_NDIR
+ *	This symbol, if defined, indicates that the program should include the
+ *	system's version of ndir.h, rather than the one with this package.
+ */
+/* I_SYS_NDIR
+ *	This symbol, if defined, indicates that the program should include the
+ *	system's version of sys/ndir.h, rather than the one with this package.
+ */
+/* I_MY_DIR
+ *	This symbol, if defined, indicates that the program should compile
+ *	the ndir.c code provided with the package.
+ */
+/* DIRNAMLEN
+ *	This symbol, if defined, indicates to the C program that the length
+ *	of directory entry names is provided by a d_namlen field.  Otherwise
+ *	you need to do strlen() on the d_name field.
+ */
+#define	I_DIRENT	/**/
+/*#undef	I_SYS_DIR	/**/
+/*#undef	I_NDIR		/**/
+/*#undef	I_SYS_NDIR	/**/
+/*#undef	I_MY_DIR	/**/
+/*#undef	DIRNAMLEN	/**/
+
+
+/* RANDBITS
  *	This symbol contains the number of bits of random number the rand()
  *	function produces.  Usual values are 15, 16, and 31.
  */
 #define RANDBITS 31		/**/
 
-/* SIG_NAME:
+/* SCRIPTDIR
+ *	This symbol holds the name of the directory in which the user wants
+ *	to put publicly executable scripts for the package in question.  It
+ *	is often a directory that is mounted across diverse architectures.
+ */
+#define SCRIPTDIR "/usr/local/bin"             /**/
+
+/* SIG_NAME
  *	This symbol contains an list of signal names in order.
  */
-#define SIG_NAME "ZERO","HUP","INT","QUIT","ILL","TRAP","IOT","EMT","FPE","KILL","BUS","SEGV","SYS","PIPE","ALRM","TERM","URG","STOP","TSTP","CONT","CHLD","TTIN","TTOU","IO","XCPU","XFSZ","VTALRM","PROF","WINCH","USR1","USR2"		/**/
+#define SIG_NAME "ZERO","HUP","INT","QUIT","ILL","TRAP","IOT","EMT","FPE","KILL","BUS","SEGV","SYS","PIPE","ALRM","TERM","URG","STOP","TSTP","CONT","CHLD","TTIN","TTOU","IO","XCPU","XFSZ","VTALRM","PROF","WINCH","LOST","USR1","USR2"		/**/
 
-/* STDCHAR:
+/* STDCHAR
  *	This symbol is defined to be the type of char used in stdio.h.
  *	It has the values "unsigned char" or "char".
  */
 #define STDCHAR char	/**/
 
-/* UIDTYPE:
+/* UIDTYPE
  *	This symbol has a value like uid_t, int, ushort, or whatever type is
  *	used to declare user ids in the kernel.
  */
 #define UIDTYPE uid_t		/**/
 
-/* VOIDFLAGS:
+/* VOIDHAVE
  *	This symbol indicates how much support of the void type is given by this
  *	compiler.  What various bits mean:
  *
@@ -489,22 +765,43 @@
  *	    4 = supports comparisons between pointers to void functions and
  *		    addresses of void functions
  *
- *	The package designer should define VOIDUSED to indicate the requirements
- *	of the package.  This can be done either by #defining VOIDUSED before
- *	including config.h, or by defining defvoidused in Myinit.U.  If the
- *	latter approach is taken, only those flags will be tested.  If the
- *	level of void support necessary is not present, defines void to int.
+ *	The package designer should define VOIDWANT to indicate the requirements
+ *	of the package.  This can be done either by #defining VOIDWANT before
+ *	including config.h, or by defining voidwant in Myinit.U.  If the level
+ *	of void support necessary is not present, config.h defines void to "int",
+ *	VOID to the empty string, and VOIDP to "char *".
  */
-#ifndef VOIDUSED
-#define VOIDUSED 7
+/* void
+ *	This symbol is used for void casts.  On implementations which support
+ *	void appropriately, its value is "void".  Otherwise, its value maps
+ *	to "int".
+ */
+/* VOID
+ *	This symbol's value is "void" if the implementation supports void
+ *	appropriately.  Otherwise, its value is the empty string.  The primary
+ *	use of this symbol is in specifying void parameter lists for function
+ *	prototypes.
+ */
+/* VOIDP
+ *	This symbol is used for casting generic pointers.  On implementations
+ *	which support void appropriately, its value is "void *".  Otherwise,
+ *	its value is "char *".
+ */
+#ifndef VOIDWANT
+#define VOIDWANT 1
 #endif
-#define VOIDFLAGS 7
-#if (VOIDFLAGS & VOIDUSED) != VOIDUSED
+#define VOIDHAVE 1
+#if (VOIDHAVE & VOIDWANT) != VOIDWANT
 #define void int		/* is void to be avoided? */
+#define VOID
+#define VOIDP (char *)
 #define M_VOID		/* Xenix strikes again */
+#else
+#define VOID void
+#define VOIDP (void *)
 #endif
 
-/* PRIVLIB:
+/* PRIVLIB
  *	This symbol contains the name of the private library for this package.
  *	The library is private in the sense that it needn't be in anyone's
  *	execution path, but it should be accessible by the world.  The program
@@ -512,3 +809,4 @@
  */
 #define PRIVLIB "/usr/local/lib/perl"		/**/
 
+#endif

@@ -1,7 +1,7 @@
 
-			Perl Kit, Version 3.0
+			Perl Kit, Version 4.0
 
-		 Copyright (c) 1989,1990, Larry Wall
+		Copyright (c) 1989,1990,1991, Larry Wall
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,7 +55,8 @@ Installation
 1)  Run Configure.  This will figure out various things about your system.
     Some things Configure will figure out for itself, other things it will
     ask you about.  It will then proceed to make config.h, config.sh, and
-    Makefile.
+    Makefile.  If you're a hotshot, run Configure -d to take all the
+    defaults and then edit config.sh to patch up any flaws.
 
     You might possibly have to trim # comments from the front of Configure
     if your sh doesn't handle them, but all other # comments will be taken
@@ -95,20 +96,23 @@ Installation
     absence of a specific rule.
 
     The 3b2 needs to turn off -O.
+    Compilers with limited switch tables may have to define -DSMALLSWITCHES
     Domain/OS 10.3 (at least) native C 6.7 may need -opt 2 for eval.c
     AIX/RT may need a -a switch and -DCRIPPLED_CC.
+    AIX RS/6000 needs to use system malloc and avoid -O on eval.c and toke.c.
+    AIX RS/6000 needs -D_NO_PROTO.
     SUNOS 4.0.[12] needs #define fputs(str,fp) fprintf(fp,"%s",str) in perl.h
     SUNOS 3.[45] should use the system malloc.
-    SGI machines may need -Ddouble="long float".
-    Ultrix (2.3) may need to hand assemble teval.s with a -J switch.
+    SGI machines may need -Ddouble="long float" and -O1.
+    Vax-based systems may need to hand assemble teval.s with a -J switch.
     Ultrix on MIPS machines may need -DLANGUAGE_C.
     Ultrix 4.0 on MIPS machines may need -Olimit 2820 or so.
     Ultrix 3.[01] on MIPS needs to undefine WAITPID--the system call is busted.
     MIPS machines may need to undef d_volatile.
-    MIPS machines may need to turn off -O on perly.c and tperly.c.
+    MIPS machines may need to turn off -O on cmd.c, perl.c and tperl.c.
     Some MIPS machines may need to undefine CASTNEGFLOAT.
-    SCO Xenix may need -m25000 for yacc.
     Xenix 386 needs -Sm11000 for yacc, and may need -UM_I86.
+    SCO Xenix may need -m25000 for yacc.  See also README.xenix.
     Genix needs to use libc rather than libc_s, or #undef VARARGS.
     NCR Tower 32 (OS 2.01.01) may need -W2,-Sl,2000 and #undef MKDIR.
     A/UX may appears to work with -O -B/usr/lib/big/ optimizer flags.
@@ -116,10 +120,14 @@ Installation
     A/UX may need -ZP -DPOSIX, and -g if big cc is used.
     FPS machines may need -J and -DBADSWITCH.
     UTS may need one or more of -DCRIPPLED_CC, -K or -g, and undef LSTAT.
+    dynix may need to undefine CASTNEGFLOAT (d_castneg='undef' in config.sh).
     Dnix (not dynix) may need to remove -O.
     IRIX 3.3 may need to undefine VFORK.
+    HP/UX may need to pull cerror.o and syscall.o out of libc.a and link
+	them in explicitly.
     If you get syntax errors on '(', try -DCRIPPLED_CC or -DBADSWITCH or both.
     Machines with half-implemented dbm routines will need to #undef ODBM & NDBM.
+    If you have GDBM available and want it instead of NDBM, say -DHAS_GDBM.
     C's that don't try to restore registers on longjmp() may need -DJMPCLOBBER.
 	(Try this if you get random glitches.)
 
@@ -143,7 +151,7 @@ Installation
 7)  Read the manual entry before running perl.
 
 8)  IMPORTANT!  Help save the world!  Communicate any problems and suggested
-    patches to me, lwall@jpl-devvax.jpl.nasa.gov (Larry Wall), so we can
+    patches to me, lwall@netlabs.com (Larry Wall), so we can
     keep the world in sync.  If you have a problem, there's someone else
     out there who either has had or will have the same problem.
 
