@@ -118,6 +118,27 @@ sub B::NV::terse {
     printf "%s (0x%lx) %s\n", class($sv), $$sv, $sv->NV;
 }
 
+sub B::RV::terse {
+    my ($rv, $level) = @_;
+    print indent($level);
+    printf "%s (0x%lx) %s\n", class($rv), $$rv, printref($rv);
+}
+
+sub printref {
+    my $rv = shift;
+    my $rcl = class($rv->RV);
+    if ($rcl eq 'PV') {
+	return "\\" . cstring($rv->RV->$rcl);
+    } elsif ($rcl eq 'NV') {
+	return "\\" . $rv->RV->$rcl;
+    } elsif ($rcl eq 'IV') {
+	return sprintf "\\%" . ($rv->RV->FLAGS & SVf_IVisUV ? "u" : "d"),
+	    $rv->RV->int_value;
+    } elsif ($rcl eq 'RV') {
+	return "\\" . printref($rv->RV);
+    }
+}
+
 sub B::NULL::terse {
     my ($sv, $level) = @_;
     print indent($level);
