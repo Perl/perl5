@@ -1,0 +1,28 @@
+int
+do_shutdown(stab, arglast)
+STAB *stab;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[1];
+    register STIO *stio;
+    int how;
+
+    if (!stab)
+	goto nuts;
+
+    stio = stab_io(stab);
+    if (!stio || !stio->ifp)
+	goto nuts;
+
+    how = (int)str_gnum(st[++sp]);
+    return shutdown(fileno(stio->ifp), how) >= 0;
+
+nuts:
+    if (dowarn)
+	warn("shutdown() on closed fd");
+    errno = EBADF;
+    return FALSE;
+
+}
+

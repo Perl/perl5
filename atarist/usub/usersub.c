@@ -1,6 +1,9 @@
-/* $RCSfile: usersub.c,v $$Revision: 4.0.1.1 $$Date: 92/06/08 11:54:52 $
+/* $RCSfile: usersub.c,v $$Revision: 4.1 $$Date: 92/08/07 17:19:07 $
  *
  * $Log:	usersub.c,v $
+ * Revision 4.1  92/08/07  17:19:07  lwall
+ * Stage 6 Snapshot
+ * 
  * Revision 4.0.1.1  92/06/08  11:54:52  lwall
  * Initial revision
  * 

@@ -1,4 +1,4 @@
-;# $Header: stat.pl,v 4.0 91/03/20 01:26:16 lwall Locked $
+;# $RCSfile: stat.pl,v $$Revision: 4.1 $$Date: 92/08/07 18:24:13 $
 
 ;# Usage:
 ;#	require 'stat.pl';

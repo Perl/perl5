@@ -1,0 +1,18 @@
+Set KEEP on constant split
+Optimize foreach on array.
+Execute all BEGINs and ENDs.
+Make a good way to determine if *.pl is being executed directly.
+Make specialized allocators.
+Optimize switches.
+Do debugger
+Cache eval tree
+Implement eval once
+Cache m//g state
+rcatmaybe
+Fix length($&)
+eval {} coredump
+
+make tr/// return histogram in list context?
+Do anything with "hint"?
+When does split() go to @_?
+undef wantarray in void context?

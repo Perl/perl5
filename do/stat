@@ -1,0 +1,95 @@
+int
+do_stat(TARG,arg,gimme,arglast)
+STR *TARG;
+register ARG *arg;
+int gimme;
+int *arglast;
+{
+    register ARRAY *ary = stack;
+    register int sp = arglast[0] + 1;
+    int max = 13;
+
+    if ((arg[1].arg_type & A_MASK) == A_WORD) {
+	tmpstab = arg[1].arg_ptr.arg_stab;
+	if (tmpstab != defstab) {
+	    laststype = O_STAT;
+	    statstab = tmpstab;
+	    str_set(statname,"");
+	    if (!stab_io(tmpstab) || !stab_io(tmpstab)->ifp ||
+	      fstat(fileno(stab_io(tmpstab)->ifp),&statcache) < 0) {
+		max = 0;
+		laststatval = -1;
+	    }
+	}
+	else if (laststatval < 0)
+	    max = 0;
+    }
+    else {
+	str_set(statname,str_get(ary->ary_array[sp]));
+	statstab = Nullstab;
+#ifdef HAS_LSTAT
+	laststype = arg->arg_type;
+	if (arg->arg_type == O_LSTAT)
+	    laststatval = lstat(str_get(statname),&statcache);
+	else
+#endif
+	    laststatval = stat(str_get(statname),&statcache);
+	if (laststatval < 0) {
+	    if (dowarn && index(str_get(statname), '\n'))
+		warn(warn_nl, "stat");
+	    max = 0;
+	}
+    }
+
+    if (gimme != G_ARRAY) {
+	if (max)
+	    str_sset(TARG,&str_yes);
+	else
+	    str_sset(TARG,&str_undef);
+	STABSET(TARG);
+	ary->ary_array[sp] = TARG;
+	return sp;
+    }
+    sp--;
+    if (max) {
+#ifndef lint
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_dev)));
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_ino)));
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_mode)));
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_nlink)));
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_uid)));
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_gid)));
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_rdev)));
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_size)));
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_atime)));
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_mtime)));
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_ctime)));
+#ifdef STATBLOCKS
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_blksize)));
+	(void)astore(ary,++sp,
+	  str_2mortal(str_nmake((double)statcache.st_blocks)));
+#else
+	(void)astore(ary,++sp,
+	  str_2mortal(str_make("",0)));
+	(void)astore(ary,++sp,
+	  str_2mortal(str_make("",0)));
+#endif
+#else /* lint */
+	(void)astore(ary,++sp,str_nmake(0.0));
+#endif /* lint */
+    }
+    return sp;
+}
+

@@ -1,0 +1,25 @@
+int
+do_sreverse(TARG,arglast)
+STR *TARG;
+int *arglast;
+{
+    STR **st = stack->ary_array;
+    register char *up;
+    register char *down;
+    register int tmp;
+
+    str_sset(TARG,st[arglast[2]]);
+    up = str_get(TARG);
+    if (TARG->str_cur > 1) {
+	down = TARG->str_ptr + TARG->str_cur - 1;
+	while (down > up) {
+	    tmp = *up;
+	    *up++ = *down;
+	    *down-- = tmp;
+	}
+    }
+    STABSET(TARG);
+    st[arglast[0]+1] = TARG;
+    return arglast[0]+1;
+}
+

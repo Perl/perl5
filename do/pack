@@ -1,0 +1,399 @@
+void
+do_pack(TARG,arglast)
+register STR *TARG;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[1];
+    register int items;
+    register char *pat = str_get(st[sp]);
+    register char *patend = pat + st[sp]->str_cur;
+    register int len;
+    int datumtype;
+    STR *fromstr;
+    /*SUPPRESS 442*/
+    static char *null10 = "\0\0\0\0\0\0\0\0\0\0";
+    static char *space10 = "          ";
+
+    /* These must not be in registers: */
+    char achar;
+    short ashort;
+    int aint;
+    unsigned int auint;
+    long along;
+    unsigned long aulong;
+#ifdef QUAD
+    quad aquad;
+    unsigned quad auquad;
+#endif
+    char *aptr;
+    float afloat;
+    double adouble;
+
+    items = arglast[2] - sp;
+    st += ++sp;
+    str_nset(TARG,"",0);
+    while (pat < patend) {
+#define NEXTFROM (items-- > 0 ? *st++ : &str_no)
+	datumtype = *pat++;
+	if (*pat == '*') {
+	    len = index("@Xxu",datumtype) ? 0 : items;
+	    pat++;
+	}
+	else if (isDIGIT(*pat)) {
+	    len = *pat++ - '0';
+	    while (isDIGIT(*pat))
+		len = (len * 10) + (*pat++ - '0');
+	}
+	else
+	    len = 1;
+	switch(datumtype) {
+	default:
+	    break;
+	case '%':
+	    fatal("% may only be used in unpack");
+	case '@':
+	    len -= TARG->str_cur;
+	    if (len > 0)
+		goto grow;
+	    len = -len;
+	    if (len > 0)
+		goto shrink;
+	    break;
+	case 'X':
+	  shrink:
+	    if (TARG->str_cur < len)
+		fatal("X outside of string");
+	    TARG->str_cur -= len;
+	    TARG->str_ptr[TARG->str_cur] = '\0';
+	    break;
+	case 'x':
+	  grow:
+	    while (len >= 10) {
+		str_ncat(TARG,null10,10);
+		len -= 10;
+	    }
+	    str_ncat(TARG,null10,len);
+	    break;
+	case 'A':
+	case 'a':
+	    fromstr = NEXTFROM;
+	    aptr = str_get(fromstr);
+	    if (pat[-1] == '*')
+		len = fromstr->str_cur;
+	    if (fromstr->str_cur > len)
+		str_ncat(TARG,aptr,len);
+	    else {
+		str_ncat(TARG,aptr,fromstr->str_cur);
+		len -= fromstr->str_cur;
+		if (datumtype == 'A') {
+		    while (len >= 10) {
+			str_ncat(TARG,space10,10);
+			len -= 10;
+		    }
+		    str_ncat(TARG,space10,len);
+		}
+		else {
+		    while (len >= 10) {
+			str_ncat(TARG,null10,10);
+			len -= 10;
+		    }
+		    str_ncat(TARG,null10,len);
+		}
+	    }
+	    break;
+	case 'B':
+	case 'b':
+	    {
+		char *savepat = pat;
+		int saveitems;
+
+		fromstr = NEXTFROM;
+		saveitems = items;
+		aptr = str_get(fromstr);
+		if (pat[-1] == '*')
+		    len = fromstr->str_cur;
+		pat = aptr;
+		aint = TARG->str_cur;
+		TARG->str_cur += (len+7)/8;
+		STR_GROW(TARG, TARG->str_cur + 1);
+		aptr = TARG->str_ptr + aint;
+		if (len > fromstr->str_cur)
+		    len = fromstr->str_cur;
+		aint = len;
+		items = 0;
+		if (datumtype == 'B') {
+		    for (len = 0; len++ < aint;) {
+			items |= *pat++ & 1;
+			if (len & 7)
+			    items <<= 1;
+			else {
+			    *aptr++ = items & 0xff;
+			    items = 0;
+			}
+		    }
+		}
+		else {
+		    for (len = 0; len++ < aint;) {
+			if (*pat++ & 1)
+			    items |= 128;
+			if (len & 7)
+			    items >>= 1;
+			else {
+			    *aptr++ = items & 0xff;
+			    items = 0;
+			}
+		    }
+		}
+		if (aint & 7) {
+		    if (datumtype == 'B')
+			items <<= 7 - (aint & 7);
+		    else
+			items >>= 7 - (aint & 7);
+		    *aptr++ = items & 0xff;
+		}
+		pat = TARG->str_ptr + TARG->str_cur;
+		while (aptr <= pat)
+		    *aptr++ = '\0';
+
+		pat = savepat;
+		items = saveitems;
+	    }
+	    break;
+	case 'H':
+	case 'h':
+	    {
+		char *savepat = pat;
+		int saveitems;
+
+		fromstr = NEXTFROM;
+		saveitems = items;
+		aptr = str_get(fromstr);
+		if (pat[-1] == '*')
+		    len = fromstr->str_cur;
+		pat = aptr;
+		aint = TARG->str_cur;
+		TARG->str_cur += (len+1)/2;
+		STR_GROW(TARG, TARG->str_cur + 1);
+		aptr = TARG->str_ptr + aint;
+		if (len > fromstr->str_cur)
+		    len = fromstr->str_cur;
+		aint = len;
+		items = 0;
+		if (datumtype == 'H') {
+		    for (len = 0; len++ < aint;) {
+			if (isALPHA(*pat))
+			    items |= ((*pat++ & 15) + 9) & 15;
+			else
+			    items |= *pat++ & 15;
+			if (len & 1)
+			    items <<= 4;
+			else {
+			    *aptr++ = items & 0xff;
+			    items = 0;
+			}
+		    }
+		}
+		else {
+		    for (len = 0; len++ < aint;) {
+			if (isALPHA(*pat))
+			    items |= (((*pat++ & 15) + 9) & 15) << 4;
+			else
+			    items |= (*pat++ & 15) << 4;
+			if (len & 1)
+			    items >>= 4;
+			else {
+			    *aptr++ = items & 0xff;
+			    items = 0;
+			}
+		    }
+		}
+		if (aint & 1)
+		    *aptr++ = items & 0xff;
+		pat = TARG->str_ptr + TARG->str_cur;
+		while (aptr <= pat)
+		    *aptr++ = '\0';
+
+		pat = savepat;
+		items = saveitems;
+	    }
+	    break;
+	case 'C':
+	case 'c':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		aint = (int)str_gnum(fromstr);
+		achar = aint;
+		str_ncat(TARG,&achar,sizeof(char));
+	    }
+	    break;
+	/* Float and double added by gnb@melba.bby.oz.au  22/11/89 */
+	case 'f':
+	case 'F':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		afloat = (float)str_gnum(fromstr);
+		str_ncat(TARG, (char *)&afloat, sizeof (float));
+	    }
+	    break;
+	case 'd':
+	case 'D':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		adouble = (double)str_gnum(fromstr);
+		str_ncat(TARG, (char *)&adouble, sizeof (double));
+	    }
+	    break;
+	case 'n':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		ashort = (short)str_gnum(fromstr);
+#ifdef HAS_HTONS
+		ashort = htons(ashort);
+#endif
+		str_ncat(TARG,(char*)&ashort,sizeof(short));
+	    }
+	    break;
+	case 'v':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		ashort = (short)str_gnum(fromstr);
+#ifdef HAS_HTOVS
+		ashort = htovs(ashort);
+#endif
+		str_ncat(TARG,(char*)&ashort,sizeof(short));
+	    }
+	    break;
+	case 'S':
+	case 's':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		ashort = (short)str_gnum(fromstr);
+		str_ncat(TARG,(char*)&ashort,sizeof(short));
+	    }
+	    break;
+	case 'I':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		auint = U_I(str_gnum(fromstr));
+		str_ncat(TARG,(char*)&auint,sizeof(unsigned int));
+	    }
+	    break;
+	case 'i':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		aint = (int)str_gnum(fromstr);
+		str_ncat(TARG,(char*)&aint,sizeof(int));
+	    }
+	    break;
+	case 'N':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		aulong = U_L(str_gnum(fromstr));
+#ifdef HAS_HTONL
+		aulong = htonl(aulong);
+#endif
+		str_ncat(TARG,(char*)&aulong,sizeof(unsigned long));
+	    }
+	    break;
+	case 'V':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		aulong = U_L(str_gnum(fromstr));
+#ifdef HAS_HTOVL
+		aulong = htovl(aulong);
+#endif
+		str_ncat(TARG,(char*)&aulong,sizeof(unsigned long));
+	    }
+	    break;
+	case 'L':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		aulong = U_L(str_gnum(fromstr));
+		str_ncat(TARG,(char*)&aulong,sizeof(unsigned long));
+	    }
+	    break;
+	case 'l':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		along = (long)str_gnum(fromstr);
+		str_ncat(TARG,(char*)&along,sizeof(long));
+	    }
+	    break;
+#ifdef QUAD
+	case 'Q':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		auquad = (unsigned quad)str_gnum(fromstr);
+		str_ncat(TARG,(char*)&auquad,sizeof(unsigned quad));
+	    }
+	    break;
+	case 'q':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		aquad = (quad)str_gnum(fromstr);
+		str_ncat(TARG,(char*)&aquad,sizeof(quad));
+	    }
+	    break;
+#endif /* QUAD */
+	case 'p':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		aptr = str_get(fromstr);
+		str_ncat(TARG,(char*)&aptr,sizeof(char*));
+	    }
+	    break;
+	case 'u':
+	    fromstr = NEXTFROM;
+	    aptr = str_get(fromstr);
+	    aint = fromstr->str_cur;
+	    STR_GROW(TARG,aint * 4 / 3);
+	    if (len <= 1)
+		len = 45;
+	    else
+		len = len / 3 * 3;
+	    while (aint > 0) {
+		int todo;
+
+		if (aint > len)
+		    todo = len;
+		else
+		    todo = aint;
+		doencodes(TARG, aptr, todo);
+		aint -= todo;
+		aptr += todo;
+	    }
+	    break;
+	}
+    }
+    STABSET(TARG);
+}
+#undef NEXTFROM
+
+static void
+doencodes(TARG, s, len)
+register STR *TARG;
+register char *s;
+register int len;
+{
+    char hunk[5];
+
+    *hunk = len + ' ';
+    str_ncat(TARG, hunk, 1);
+    hunk[4] = '\0';
+    while (len > 0) {
+	hunk[0] = ' ' + (077 & (*s >> 2));
+	hunk[1] = ' ' + (077 & ((*s << 4) & 060 | (s[1] >> 4) & 017));
+	hunk[2] = ' ' + (077 & ((s[1] << 2) & 074 | (s[2] >> 6) & 03));
+	hunk[3] = ' ' + (077 & (s[2] & 077));
+	str_ncat(TARG, hunk, 4);
+	s += 3;
+	len -= 3;
+    }
+    for (s = TARG->str_ptr; *s; s++) {
+	if (*s == ' ')
+	    *s = '`';
+    }
+    str_ncat(TARG, "\n", 1);
+}
+

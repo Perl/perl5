@@ -1,4 +1,4 @@
-/* $RCSfile: os2.c,v $$Revision: 4.0.1.2 $$Date: 92/06/08 14:32:30 $
+/* $RCSfile: os2.c,v $$Revision: 4.1 $$Date: 92/08/07 18:25:20 $
  *
  *    (C) Copyright 1989, 1990 Diomidis Spinellis.
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	os2.c,v $
+ * Revision 4.1  92/08/07  18:25:20  lwall
+ * 
  * Revision 4.0.1.2  92/06/08  14:32:30  lwall
  * patch20: new OS/2 support
  * 

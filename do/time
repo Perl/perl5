@@ -1,0 +1,29 @@
+int
+do_time(TARG,tmbuf,gimme,arglast)
+STR *TARG;
+struct tm *tmbuf;
+int gimme;
+int *arglast;
+{
+    register ARRAY *ary = stack;
+    STR **st = ary->ary_array;
+    register int sp = arglast[0];
+
+    if (!tmbuf || gimme != G_ARRAY) {
+	str_sset(TARG,&str_undef);
+	STABSET(TARG);
+	st[++sp] = TARG;
+	return sp;
+    }
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_sec)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_min)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_hour)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_mday)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_mon)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_year)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_wday)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_yday)));
+    (void)astore(ary,++sp,str_2mortal(str_nmake((double)tmbuf->tm_isdst)));
+    return sp;
+}
+

@@ -1,0 +1,41 @@
+bool
+do_aprint(arg,fp,arglast)
+register ARG *arg;
+register FILE *fp;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[1];
+    register int retval;
+    register int items = arglast[2] - sp;
+
+    if (!fp) {
+	if (dowarn)
+	    warn("print to unopened file");
+	errno = EBADF;
+	return FALSE;
+    }
+    st += ++sp;
+    if (arg->arg_type == O_PRTF) {
+	do_sprintf(ARGTARG,items,st);
+	retval = do_print(ARGTARG,fp);
+    }
+    else {
+	retval = (items <= 0);
+	for (; items > 0; items--,st++) {
+	    if (retval && ofslen) {
+		if (fwrite(ofs, 1, ofslen, fp) == 0 || ferror(fp)) {
+		    retval = FALSE;
+		    break;
+		}
+	    }
+	    if (!(retval = do_print(*st, fp)))
+		break;
+	}
+	if (retval && orslen)
+	    if (fwrite(ors, 1, orslen, fp) == 0 || ferror(fp))
+		retval = FALSE;
+    }
+    return retval;
+}
+

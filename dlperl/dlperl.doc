@@ -1,0 +1,264 @@
+
+
+
+DLPERL(1)                USER COMMANDS                  DLPERL(1)
+
+
+
+NAME
+     dlperl - dynamic link-editor subroutines for perl
+
+SYNOPSIS
+     $dl_so = &dl_open($file)
+     $dl_func = &dl_sym($dl_so, $symbol)
+     @vals = &dl_call($dl_func, $parms_desc, $return_desc, @parms)
+     $dl_err = &dl_close($dl_so)
+
+     $DL_VERSION
+     $DL_WARN
+     $dl_errno
+     $dl_errstr
+
+DESCRIPTION
+     _D_l_p_e_r_l is _p_e_r_l plus user defined  subroutines  (_u_s_u_b_s)  that
+     interface to the dynamic link-editor and can call most C and
+     Fortran functions whose object code has been linked  into  a
+     shared object file.
+
+     Subroutines
+
+     All  _d_l_p_e_r_l  subroutines  set  the  two   predefined   names
+     $dl_errno  and  $dl_errstr.   Only  partial  descriptions of
+     &dl_open, &dl_sym and &dl_close appear below, see _d_l_o_p_e_n(_3_x)
+     for  a  complete description.  The following subroutines are
+     defined by _d_l_p_e_r_l:
+
+     &dl_open($file)
+             Adds the shared object  $_f_i_l_e  to  _d_l_p_e_r_l's  address
+             space.   Returns  a  descriptor that can be used for
+             later reference to the object in  calls  to  &dl_sym
+             and  &dl_close.  When an error occurs an undef value
+             is returned.
+
+     &dl_sym($dl_so, $symbol)
+             Obtains an address binding for the function  $_s_y_m_b_o_l
+             as  it  occurs  in  the  shared object identified by
+             $_d_l__s_o.  When an error  occurs  an  undef  value  is
+             returned.
+
+     &dl_call($dl_func, $parms_desc, $return_desc, @parms)
+             Calls the  function  identified  by  $_d_l__f_u_n_c.   The
+             function's   entry   parameters   are  described  by
+             $_p_a_r_m_s__d_e_s_c and assigned values  from  @_p_a_r_m_s.   The
+             function's  exit value is described by $_r_e_t_u_r_n__d_e_s_c.
+             An array is returned that contains the values of any
+             result  parameters  and  the  return value.  When an
+             error  occurs  because  of  a  problem  parsing  the
+             descriptions  or  because  of an incorrect parameter
+             count no values are returned (although the  underly-
+             ing function may have been called).
+
+
+
+Sun Release 4.1       Last change: 10/16/92                     1
+
+
+
+
+
+
+DLPERL(1)                USER COMMANDS                  DLPERL(1)
+
+
+
+             The descriptions are sequences  of  characters  that
+             give the order and type of parameters:
+
+                  c    A signed char value.
+                  C    An unsigned char value.
+                  s    A signed short value.
+                  S    An unsigned short value.
+                  i    A signed integer value.
+                  I    An unsigned integer value.
+                  l    A signed long value.
+                  L    An unsigned long value.
+                  f    A single-precision float.
+                  d    A double-precision float.
+                  a    An ascii (null-terminated) string.
+                  p    A pointer to <length> buffer.
+
+             Each letter may optionally be preceded by  a  number
+             that gives a repeat count.  An array is specified by
+             a preceding [_a_r_r_a_y__s_i_z_e] (or & as  a  shorthand  for
+             [_1]).   (Multi-dimension  arrays  are  not currently
+             supported.)  Each scalar or array  element  is  ini-
+             tialized  from  @_p_a_r_m_s.   A  preceding  - leaves the
+             parameter uninitialized.  Type _p expects a preceding
+             <_b_u_f_f_e_r__l_e_n_g_t_h>.  A preceding + specifies that after
+             the function is called that  particular  parameter's
+             value   is  to  be  returned  (multiple  values  are
+             returned for array types, a + with a  integral  type
+             like  _i  returns  an undef value).  The $_r_e_t_u_r_n__d_e_s_c
+             contains only one letter with no repeat count, -  or
+             +.
+
+             An undef or zero-length $_p_a_r_m__d_e_s_c means  the  func-
+             tion  has  no parameters.  An undef or a zero-length
+             $_r_e_t_u_r_n__d_e_s_c  means  the  function   returns   void.
+             Strings  or  buffers  that must be a specific length
+             (because the values are overwritten)  must  be  pre-
+             extended.   Although  type _f is supported, compilers
+             typically pass floats as doubles.
+
+     &dl_close($dl_so)
+             Removes the shared object identified by $_d_l__s_o  from
+             _d_l_p_e_r_l's  address  space.  If successful, a value of
+             zero is returned.  When an error occurs  a  non-zero
+             value is returned.
+
+     Predefined Names
+
+     The following names have special meaning to _d_l_p_e_r_l.
+
+     $DL_VERSION
+             The version of _d_l_p_e_r_l.  This variable is read-only.
+
+
+
+
+Sun Release 4.1       Last change: 10/16/92                     2
+
+
+
+
+
+
+DLPERL(1)                USER COMMANDS                  DLPERL(1)
+
+
+
+     $DL_WARN
+             The  current  value  of  the  _d_l_p_e_r_l  warning  flag.
+             Default  is 1.  If non-zero, when errors occur warn-
+             ings are sent to standard error.  The warning is the
+             same information that is stored in $dl_errstr.
+
+     $dl_errno
+             The error number for the error that occurred.  If  a
+             _d_l_p_e_r_l  subroutine  completes successfully $dl_errno
+             is set to zero.  This variable is read-only.
+
+     $dl_errstr
+             The error message for the error that occurred.  If a
+             _d_l_p_e_r_l  subroutine completes successfully $dl_errstr
+             is set to a zero length string.   This  variable  is
+             read-only.
+
+EXAMPLES
+     This is an example of calling a simple C function:
+
+          open(OUT, ">example.c");
+          print OUT <<'EOC';
+               void
+               example(a1, a2, i1, d1, a3)
+               char *a1[2];
+               char *a2[2];
+               int  i1;
+               double    *d1;
+               char *a3[4];
+               {
+                    a3[i1 + (int) *d1] = a1[0];
+                    a3[i1 * (int) *d1] = a1[1];
+                    a3[(int) *d1 - i1] = a2[0];
+                    a3[(int) *d1 - 2 * i1] = a2[1];
+               }
+          EOC
+          close(OUT);
+
+          system("cc -c example.c;ld -o example.so example.o");
+
+          $dl_so = &dl_open("example.so");
+          die "$0: $dl_errstr" if($dl_errno);
+
+          $dl_func = &dl_sym($dl_so, "example");
+          die "$0: $dl_errstr" if($dl_errno);
+
+          $dl_func =~ s/(['\\])/\\$1/g;
+          eval <<EOC;
+               sub example {
+                    &dl_call('$dl_func', "2[2]a i &d -+[4]a", undef, @_);
+               }
+          EOC
+
+
+
+Sun Release 4.1       Last change: 10/16/92                     3
+
+
+
+
+
+
+DLPERL(1)                USER COMMANDS                  DLPERL(1)
+
+
+
+          @vals = &example("hacker,", "Perl", "another", "Just", 1, 2);
+          print "@vals\n";
+
+          &dl_close($dl_so);
+          die "$0: $dl_errstr" if($dl_errno);
+
+          unlink('example.c', 'example.o', 'example.so');
+
+     If a more complicated interface is needed,  the  dynamically
+     linked  function  can  define _u_s_u_b_s by calling internal _p_e_r_l
+     functions.
+
+AUTHOR
+     Eric Fifer <egf@sbi.com>
+
+SEE ALSO
+     perl(1), dlopen(3X), ld(1)
+
+BUGS
+     Additional parameter types should be implemented to  support
+     structures,  multi-dimension  arrays,  pointers  to  arrays,
+     pointers to functions, etc.
+
+     Unlike the _p_a_c_k operator,  the  repeat  count  precedes  the
+     letter  in  the $_p_a_r_m__d_e_s_c syntax.  The array size preceding
+     the parameter letter is also unconventional.
+
+     All errors set $dl_errno to 1.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sun Release 4.1       Last change: 10/16/92                     4
+
+
+

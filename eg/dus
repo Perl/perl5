@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: dus,v 4.0 91/03/20 01:09:20 lwall Locked $
+# $RCSfile: dus,v $$Revision: 4.1 $$Date: 92/08/07 17:20:11 $
 
 # This script does a du -s on any directories in the current directory that
 # are not mount points for another filesystem.

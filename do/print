@@ -1,0 +1,37 @@
+bool
+do_print(TARG,fp)
+register STR *TARG;
+FILE *fp;
+{
+    register char *tmps;
+
+    if (!fp) {
+	if (dowarn)
+	    warn("print to unopened file");
+	errno = EBADF;
+	return FALSE;
+    }
+    if (!TARG)
+	return TRUE;
+    if (ofmt &&
+      ((TARG->str_nok && TARG->str_u.str_nval != 0.0)
+       || (looks_like_number(TARG) && str_gnum(TARG) != 0.0) ) ) {
+	fprintf(fp, ofmt, TARG->str_u.str_nval);
+	return !ferror(fp);
+    }
+    else {
+	tmps = str_get(TARG);
+	if (*tmps == 'S' && tmps[1] == 't' && tmps[2] == 'B' && tmps[3] == '\0'
+	  && TARG->str_cur == sizeof(STBP) && strlen(tmps) < TARG->str_cur) {
+	    STR *tmpstr = str_mortal(&str_undef);
+	    stab_efullname(tmpstr,((STAB*)TARG));/* a stab value, be nice */
+	    TARG = tmpstr;
+	    tmps = TARG->str_ptr;
+	    putc('*',fp);
+	}
+	if (TARG->str_cur && (fwrite(tmps,1,TARG->str_cur,fp) == 0 || ferror(fp)))
+	    return FALSE;
+    }
+    return TRUE;
+}
+

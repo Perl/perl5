@@ -1,0 +1,12 @@
+#!/usr/bin/perl -00
+
+$* = 1;
+while (<>) {
+    if (/^do_(\w+)/) {
+	open(OUT, ">>do/$1");
+    }
+    print OUT;
+    chop;
+    chop;
+    close OUT if chop eq '}' && chop eq "\n";
+}

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: join.t,v 4.0 91/03/20 01:53:17 lwall Locked $
+# $RCSfile: join.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:01 $
 
 print "1..3\n";
 

@@ -1,6 +1,8 @@
-/* $RCSfile: malloc.c,v $$Revision: 4.0.1.4 $$Date: 92/06/08 14:28:38 $
+/* $RCSfile: malloc.c,v $$Revision: 4.1 $$Date: 92/08/07 18:24:25 $
  *
  * $Log:	malloc.c,v $
+ * Revision 4.1  92/08/07  18:24:25  lwall
+ * 
  * Revision 4.0.1.4  92/06/08  14:28:38  lwall
  * patch20: removed implicit int declarations on functions
  * patch20: hash tables now split only if the memory is available to do so
@@ -42,7 +44,8 @@ static char sccsid[] = "@(#)malloc.c	4.3 (Berkeley) 9/16/83";
 #include "EXTERN.h"
 #include "perl.h"
 
-static findbucket(), morecore();
+static int findbucket();
+static int morecore();
 
 /* I don't much care whether these are defined in sys/types.h--LAW */
 
@@ -119,10 +122,6 @@ botch(s)
 #define	ASSERT(p)
 #endif
 
-#ifdef safemalloc
-static int an = 0;
-#endif
-
 MALLOCPTRTYPE *
 malloc(nbytes)
 	register MEM_SIZE nbytes;
@@ -139,7 +138,7 @@ malloc(nbytes)
 #ifdef MSDOS
 	if (nbytes > 0xffff) {
 		fprintf(stderr, "Allocation too large: %lx\n", (long)nbytes);
-		exit(1);
+		my_exit(1);
 	}
 #endif /* MSDOS */
 #ifdef DEBUGGING
@@ -170,7 +169,7 @@ malloc(nbytes)
 #ifdef safemalloc
 		if (!nomemok) {
 		    fputs("Out of memory!\n", stderr);
-		    exit(1);
+		    my_exit(1);
 		}
 #else
   		return (NULL);
@@ -178,14 +177,10 @@ malloc(nbytes)
 	}
 
 #ifdef safemalloc
-#ifdef DEBUGGING
-#  if !(defined(I286) || defined(atarist))
-    if (debug & 128)
-        fprintf(stderr,"0x%x: (%05d) malloc %ld bytes\n",p+1,an++,(long)size);
-#  else
-    if (debug & 128)
-        fprintf(stderr,"0x%lx: (%05d) malloc %ld bytes\n",p+1,an++,(long)size);
-#  endif
+#if !(defined(I286) || defined(atarist))
+    DEBUG_m(fprintf(stderr,"0x%x: (%05d) malloc %ld bytes\n",p+1,an++,(long)size));
+#else
+    DEBUG_m(fprintf(stderr,"0x%lx: (%05d) malloc %ld bytes\n",p+1,an++,(long)size));
 #endif
 #endif /* safemalloc */
 
@@ -294,14 +289,10 @@ free(mp)
 	char *cp = (char*)mp;
 
 #ifdef safemalloc
-#ifdef DEBUGGING
-#  if !(defined(I286) || defined(atarist))
-	if (debug & 128)
-		fprintf(stderr,"0x%x: (%05d) free\n",cp,an++);
-#  else
-	if (debug & 128)
-		fprintf(stderr,"0x%lx: (%05d) free\n",cp,an++);
-#  endif
+#if !(defined(I286) || defined(atarist))
+	DEBUG_m(fprintf(stderr,"0x%x: (%05d) free\n",cp,an++));
+#else
+	DEBUG_m(fprintf(stderr,"0x%lx: (%05d) free\n",cp,an++));
 #endif
 #endif /* safemalloc */
 
@@ -365,7 +356,7 @@ realloc(mp, nbytes)
 #ifdef MSDOS
 	if (nbytes > 0xffff) {
 		fprintf(stderr, "Reallocation too large: %lx\n", size);
-		exit(1);
+		my_exit(1);
 	}
 #endif /* MSDOS */
 	if (!cp)

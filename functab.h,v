@@ -1,0 +1,2854 @@
+head     20301.49;
+access   ;
+symbols  r03_01_13:20301.49 r03_01_12:20301.47 r03_01_11:20301.47 r03_01_10:20301.47 r03_01_09:20301.47 r03_01_08:20301.47 r03_01_07:20301.47 r03_01_06:20301.46 r03_01_05:20301.46 trout-farm:20301.43.1.1 r03_01_04:20301.45 r03_01_03:20301.43.1.1 r03_01_02:20301.43 r03_01_01:20301.43 r03_01_00:20301.43 r03_00_02:20301.41.1.1 r03_00_01:20301.38 r03_00_00:20301.37 r02_02_03_hp:20301.6 r02_02_02_hp:20301.2 r02_02_01_hp:20201.35 stage_02:20201.35 stage_01:20201.35 r02_01_09_hp:20103.1.1.1.1.1 r02_01_08_hp:20103.1.1.1.1.1 r02_01_07_hp:20103.1.1.1 r02_01_06_hp:20103.1.1.1 r02_01_05_hp:20103.1 r02_02_00_hp:20201.28 r02_01_04_hp:20103.1 r02_01_03_hp:20103.1 r02_01_02_hp:20102.3 r02_01_01_hp:1.4 r02_01_00_hp:1.2 stage:1.2 r01_00_41_hp:1.1;
+locks    ; strict;
+comment  @ * @;
+
+
+20301.49
+date     91.07.15.11.01.55;  author twood;  state r03_01_13;
+branches ;
+next     20301.48;
+
+20301.48
+date     91.07.11.16.16.43;  author twood;  state Exp;
+branches ;
+next     20301.47;
+
+20301.47
+date     91.05.31.15.16.41;  author twood;  state r03_01_12;
+branches ;
+next     20301.46;
+
+20301.46
+date     91.05.16.13.14.38;  author twood;  state r03_01_06;
+branches ;
+next     20301.45;
+
+20301.45
+date     91.05.08.16.32.02;  author twood;  state r03_01_04;
+branches ;
+next     20301.44;
+
+20301.44
+date     91.05.07.15.56.50;  author twood;  state Exp;
+branches ;
+next     20301.43;
+
+20301.43
+date     91.04.09.09.15.58;  author twood;  state r03_01_03;
+branches 20301.43.1.1;
+next     20301.42;
+
+20301.42
+date     91.03.27.15.42.43;  author twood;  state Exp;
+branches ;
+next     20301.41;
+
+20301.41
+date     91.03.27.10.35.38;  author twood;  state Exp;
+branches 20301.41.1.1;
+next     20301.40;
+
+20301.40
+date     91.03.25.14.36.14;  author twood;  state Exp;
+branches ;
+next     20301.39;
+
+20301.39
+date     91.03.21.10.47.45;  author melodi;  state Exp;
+branches ;
+next     20301.38;
+
+20301.38
+date     91.03.19.09.59.42;  author twood;  state r03_00_01;
+branches ;
+next     20301.37;
+
+20301.37
+date     91.03.05.13.03.52;  author melodi;  state Exp;
+branches ;
+next     20301.36;
+
+20301.36
+date     91.03.05.10.46.57;  author melodi;  state Exp;
+branches ;
+next     20301.35;
+
+20301.35
+date     91.02.19.09.32.29;  author twood;  state Exp;
+branches ;
+next     20301.34;
+
+20301.34
+date     91.02.13.16.19.01;  author twood;  state Exp;
+branches ;
+next     20301.33;
+
+20301.33
+date     91.02.08.12.33.50;  author melodi;  state Exp;
+branches ;
+next     20301.32;
+
+20301.32
+date     91.02.05.14.40.10;  author melodi;  state Exp;
+branches ;
+next     20301.31;
+
+20301.31
+date     91.01.25.11.41.11;  author melodi;  state Exp;
+branches ;
+next     20301.30;
+
+20301.30
+date     91.01.25.08.54.11;  author twood;  state Exp;
+branches ;
+next     20301.29;
+
+20301.29
+date     91.01.25.08.47.41;  author melodi;  state Exp;
+branches ;
+next     20301.28;
+
+20301.28
+date     91.01.23.15.18.20;  author twood;  state Exp;
+branches ;
+next     20301.27;
+
+20301.27
+date     91.01.22.16.30.23;  author melodi;  state Exp;
+branches ;
+next     20301.26;
+
+20301.26
+date     91.01.22.11.51.03;  author pepler;  state Exp;
+branches ;
+next     20301.25;
+
+20301.25
+date     91.01.17.14.03.19;  author greg;  state Exp;
+branches ;
+next     20301.24;
+
+20301.24
+date     91.01.17.11.05.36;  author pepler;  state Exp;
+branches ;
+next     20301.23;
+
+20301.23
+date     91.01.16.16.20.24;  author greg;  state Exp;
+branches ;
+next     20301.22;
+
+20301.22
+date     91.01.15.12.35.53;  author greg;  state Exp;
+branches ;
+next     20301.21;
+
+20301.21
+date     91.01.11.12.16.03;  author greg;  state Exp;
+branches ;
+next     20301.20;
+
+20301.20
+date     91.01.11.10.41.39;  author melodi;  state Exp;
+branches ;
+next     20301.19;
+
+20301.19
+date     91.01.03.14.31.49;  author twood;  state Exp;
+branches ;
+next     20301.18;
+
+20301.18
+date     91.01.02.11.02.45;  author greg;  state Exp;
+branches ;
+next     20301.17;
+
+20301.17
+date     90.12.28.17.21.08;  author greg;  state Exp;
+branches ;
+next     20301.16;
+
+20301.16
+date     90.12.21.10.18.52;  author greg;  state Exp;
+branches ;
+next     20301.15;
+
+20301.15
+date     90.12.19.17.38.10;  author greg;  state Exp;
+branches ;
+next     20301.14;
+
+20301.14
+date     90.12.19.08.40.09;  author twood;  state Exp;
+branches ;
+next     20301.13;
+
+20301.13
+date     90.12.17.08.20.40;  author greg;  state Exp;
+branches ;
+next     20301.12;
+
+20301.12
+date     90.12.13.08.11.32;  author greg;  state Exp;
+branches ;
+next     20301.11;
+
+20301.11
+date     90.12.10.09.32.39;  author greg;  state Exp;
+branches ;
+next     20301.10;
+
+20301.10
+date     90.12.10.08.59.12;  author twood;  state Exp;
+branches ;
+next     20301.9;
+
+20301.9
+date     90.12.03.11.56.24;  author pepler;  state Exp;
+branches ;
+next     20301.8;
+
+20301.8
+date     90.11.29.12.06.14;  author melodi;  state Exp;
+branches ;
+next     20301.7;
+
+20301.7
+date     90.11.29.11.37.42;  author twood;  state Exp;
+branches ;
+next     20301.6;
+
+20301.6
+date     90.11.16.14.46.42;  author pepler;  state r02_02_03_hp;
+branches ;
+next     20301.5;
+
+20301.5
+date     90.11.16.13.47.22;  author melodi;  state Exp;
+branches ;
+next     20301.4;
+
+20301.4
+date     90.11.15.14.45.11;  author melodi;  state Exp;
+branches ;
+next     20301.3;
+
+20301.3
+date     90.11.14.15.18.28;  author twood;  state Exp;
+branches ;
+next     20301.2;
+
+20301.2
+date     90.11.14.08.13.16;  author greg;  state r02_02_02_hp;
+branches ;
+next     20301.1;
+
+20301.1
+date     90.11.13.09.55.08;  author greg;  state Exp;
+branches ;
+next     20201.38;
+
+20201.38
+date     90.11.07.17.00.01;  author melodi;  state Exp;
+branches ;
+next     20201.37;
+
+20201.37
+date     90.11.07.16.58.34;  author greg;  state Exp;
+branches ;
+next     20201.36;
+
+20201.36
+date     90.11.07.16.09.07;  author twood;  state Exp;
+branches ;
+next     20201.35;
+
+20201.35
+date     90.10.25.10.40.53;  author melodi;  state r02_02_01_hp;
+branches ;
+next     20201.34;
+
+20201.34
+date     90.10.24.17.31.46;  author melodi;  state Exp;
+branches ;
+next     20201.33;
+
+20201.33
+date     90.10.23.16.22.21;  author greg;  state Exp;
+branches ;
+next     20201.32;
+
+20201.32
+date     90.10.23.09.06.11;  author twood;  state Exp;
+branches ;
+next     20201.31;
+
+20201.31
+date     90.10.22.12.18.42;  author melodi;  state Exp;
+branches ;
+next     20201.30;
+
+20201.30
+date     90.10.22.11.40.59;  author twood;  state Exp;
+branches ;
+next     20201.29;
+
+20201.29
+date     90.10.19.11.59.03;  author greg;  state Exp;
+branches ;
+next     20201.28;
+
+20201.28
+date     90.10.16.14.10.59;  author greg;  state r02_02_00_hp;
+branches ;
+next     20201.27;
+
+20201.27
+date     90.10.15.08.51.32;  author greg;  state Exp;
+branches ;
+next     20201.26;
+
+20201.26
+date     90.10.12.11.29.14;  author twood;  state Exp;
+branches ;
+next     20201.25;
+
+20201.25
+date     90.10.02.12.28.18;  author greg;  state sandbox;
+branches ;
+next     20201.24;
+
+20201.24
+date     90.10.02.11.06.06;  author greg;  state Exp;
+branches ;
+next     20201.23;
+
+20201.23
+date     90.09.28.11.13.27;  author greg;  state Exp;
+branches ;
+next     20201.22;
+
+20201.22
+date     90.09.28.10.17.28;  author twood;  state Exp;
+branches ;
+next     20201.21;
+
+20201.21
+date     90.09.25.13.05.13;  author greg;  state Exp;
+branches ;
+next     20201.20;
+
+20201.20
+date     90.09.24.16.26.29;  author twood;  state Exp;
+branches ;
+next     20201.19;
+
+20201.19
+date     90.09.10.10.53.22;  author twood;  state Exp;
+branches ;
+next     20201.18;
+
+20201.18
+date     90.09.10.10.39.48;  author greg;  state Exp;
+branches ;
+next     20201.17;
+
+20201.17
+date     90.08.29.14.27.40;  author twood;  state Exp;
+branches ;
+next     20201.16;
+
+20201.16
+date     90.08.29.13.03.02;  author melodi;  state Exp;
+branches ;
+next     20201.15;
+
+20201.15
+date     90.08.17.15.52.55;  author twood;  state Exp;
+branches ;
+next     20201.14;
+
+20201.14
+date     90.08.14.13.11.15;  author twood;  state Exp;
+branches ;
+next     20201.13;
+
+20201.13
+date     90.08.14.12.39.43;  author melodi;  state Exp;
+branches ;
+next     20201.12;
+
+20201.12
+date     90.08.10.10.15.52;  author melodi;  state Exp;
+branches ;
+next     20201.11;
+
+20201.11
+date     90.08.08.15.13.21;  author greg;  state Exp;
+branches ;
+next     20201.10;
+
+20201.10
+date     90.08.08.14.22.52;  author greg;  state Exp;
+branches ;
+next     20201.9;
+
+20201.9
+date     90.08.07.09.22.07;  author melodi;  state Exp;
+branches ;
+next     20201.8;
+
+20201.8
+date     90.08.07.08.29.22;  author melodi;  state Exp;
+branches ;
+next     20201.7;
+
+20201.7
+date     90.08.06.12.21.43;  author twood;  state Exp;
+branches ;
+next     20201.6;
+
+20201.6
+date     90.07.26.15.49.03;  author melodi;  state Exp;
+branches ;
+next     20201.5;
+
+20201.5
+date     90.07.26.13.37.53;  author melodi;  state Exp;
+branches ;
+next     20201.4;
+
+20201.4
+date     90.07.24.11.11.21;  author melodi;  state Exp;
+branches ;
+next     20201.3;
+
+20201.3
+date     90.07.17.13.41.20;  author melodi;  state Exp;
+branches ;
+next     20201.2;
+
+20201.2
+date     90.06.14.10.43.29;  author greg;  state Exp;
+branches ;
+next     20201.1;
+
+20201.1
+date     90.06.12.10.37.36;  author greg;  state Exp;
+branches ;
+next     20103.1;
+
+20103.1
+date     90.05.17.08.57.08;  author melodi;  state r02_01_05_hp;
+branches 20103.1.1.1;
+next     20102.3;
+
+20102.3
+date     90.05.08.08.56.46;  author ricks;  state r02_01_02_hp;
+branches ;
+next     20102.2;
+
+20102.2
+date     90.05.03.08.00.21;  author greg;  state r02_01_02_hp;
+branches ;
+next     20102.1;
+
+20102.1
+date     90.04.30.14.22.39;  author greg;  state r02_01_02_hp;
+branches ;
+next     1.5;
+
+1.5
+date     90.04.30.09.53.46;  author greg;  state Exp;
+branches ;
+next     1.4;
+
+1.4
+date     90.04.20.16.43.05;  author greg;  state r02_01_02_hp;
+branches ;
+next     1.3;
+
+1.3
+date     90.04.17.15.03.42;  author greg;  state Exp;
+branches ;
+next     1.2;
+
+1.2
+date     90.03.14.15.23.08;  author admin;  state r02_01_00_hp;
+branches ;
+next     1.1;
+
+1.1
+date     90.03.12.11.58.44;  author rampson;  state Exp;
+branches ;
+next     ;
+
+20103.1.1.1
+date     90.07.26.14.56.36;  author twood;  state r02_01_07_hp;
+branches 20103.1.1.1.1.1;
+next     20103.1.1.2;
+
+20103.1.1.2
+date     90.08.13.11.13.31;  author melodi;  state Exp;
+branches ;
+next     ;
+
+20103.1.1.1.1.1
+date     90.08.16.14.19.32;  author greg;  state r02_01_09_hp;
+branches ;
+next     ;
+
+20301.41.1.1
+date     91.03.27.15.46.26;  author twood;  state r03_00_02;
+branches ;
+next     ;
+
+20301.43.1.1
+date     91.05.08.12.56.08;  author rfullmer;  state trout-farm;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+20301.49
+log
+@CR#10427:M:added sr08load.
+@
+text
+@/*****************************************************************************
+*
+*                               CONFIDENTIAL
+*           Disclose And Distribute Solely To Employees Of 
+*           U S WEST And It's Affiliates Having A Need To Know.
+*
+*------------------------------------------------------------------------
+*
+*        (c)Copyright 1990, U S WEST Information Technologies Group
+*                          All Rights Reserved
+*
+******************************************************************************/
+@
+
+
+20301.48
+log
+@CR#10488:M:changed upent9/10 & downent9/10 to upent11/12 & downent11/12
+@
+text
+@d24 3
+d570 1
+@
+
+
+20301.47
+log
+@CR#10237:M:added sr16 ???NextPagePart functions.
+@
+text
+@d24 3
+d473 2
+a474 2
+    {"downent10",              (caddr_t)downent10},
+    {"downent9",               (caddr_t)downent9},
+d580 2
+a581 2
+    {"upent10",                (caddr_t)upent10},
+    {"upent9",                 (caddr_t)upent9},
+@
+
+
+20301.46
+log
+@ CR#9586:M:added slider bars to screendisp
+@
+text
+@d24 3
+d303 1
+d306 1
+d313 1
+d326 1
+d345 1
+@
+
+
+20301.45
+log
+@CR#9912:M:changed BOSSCSBlIbal to BOSSCSBLIbal (capitalized the first L)
+@
+text
+@d24 3
+d281 1
+d352 1
+@
+
+
+20301.44
+log
+@ CR#9912:M:added BOSSCSBlIbal
+@
+text
+@d24 3
+d275 1
+a275 1
+    {"BOSSCSBlIbal",           (caddr_t)BOSSCSBlIbal},
+d369 1
+@
+
+
+20301.43
+log
+@CR#9279:M:removed collections
+@
+text
+@d24 3
+d272 1
+a321 1
+    {"MakeTreatTypeText",      (caddr_t)MakeTreatTypeText},
+@
+
+
+20301.43.1.1
+log
+@CR#9904:M:Remove MakeTreatTypeText reference
+@
+text
+@a23 3
+ * Revision 20301.43  91/04/09  09:15:58  09:15:58  twood (Tim Woodward)
+ * CR#9279:M:removed collections
+ * 
+d318 1
+@
+
+
+20301.42
+log
+@ CR#9279:M:deleted change_trfuuid and change_hostid
+@
+text
+@d24 3
+a426 2
+    {"collectdcback",          (caddr_t)collectdcback},
+    {"collections",            (caddr_t)collections},
+@
+
+
+20301.41
+log
+@CR#9532:M:deleted Check Exit
+@
+text
+@d276 1
+a400 2
+    {"change_hostid",          (caddr_t)change_hostid},
+    {"change_trfuuid",         (caddr_t)change_trfuuid},
+@
+
+
+20301.41.1.1
+log
+@ CR#9596:M:deleted change_trfuuid and change_hostid
+@
+text
+@a23 3
+ * Revision 20301.41  91/03/27  10:35:38  10:35:38  twood (Tim Woodward)
+ * CR#9532:M:deleted Check Exit
+ * 
+d400 2
+@
+
+
+20301.40
+log
+@CR#9532:M:added CheckExit
+@
+text
+@d24 3
+a262 1
+    {"CheckExit",              (caddr_t)CheckExit},
+@
+
+
+20301.39
+log
+@CR#9492:M:Bring up UBIC Summary when UBIC flup selected from QTFU/TRFU
+@
+text
+@d24 3
+d260 1
+@
+
+
+20301.38
+log
+@ CR#9458:M: added BuildDialog funcs
+@
+text
+@d24 3
+d270 1
+a398 1
+    {"checklock",              (caddr_t)checklock},
+@
+
+
+20301.37
+log
+@add AmtTtlDpstAccnt
+@
+text
+@d24 3
+d259 2
+@
+
+
+20301.36
+log
+@remove obsolete nextserfunc
+@
+text
+@d24 3
+d246 1
+@
+
+
+20301.35
+log
+@added OTCEntAmt1 and OTCEntAmt2
+@
+text
+@d24 3
+a479 1
+    {"nextserfunc",            (caddr_t)nextserfunc},
+@
+
+
+20301.34
+log
+@added requestcpal and change_hostid
+@
+text
+@d24 3
+d305 2
+@
+
+
+20301.33
+log
+@remove follow through actions, add new traversable buttons & window ID
+indicator 
+@
+text
+@d24 4
+d329 1
+d373 1
+@
+
+
+20301.32
+log
+@add NextPayFill()
+@
+text
+@d24 3
+d287 1
+@
+
+
+20301.31
+log
+@work on prev bill & Forward for pay/adj
+@
+text
+@d24 3
+d287 1
+@
+
+
+20301.30
+log
+@CR#7187:M:removed GetCPAL
+@
+text
+@d24 3
+d309 1
+@
+
+
+20301.29
+log
+@added NextPay()
+@
+text
+@d24 3
+a257 1
+    {"GetCPAL",          	   (caddr_t)GetCPAL},
+@
+
+
+20301.28
+log
+@CR#7588:M: added GetCPAL and CSBlIbal
+@
+text
+@d24 3
+d278 1
+@
+
+
+20301.27
+log
+@added ShowPayAdj
+@
+text
+@d24 3
+d230 1
+d252 1
+@
+
+
+20301.26
+log
+@CR#8822:M:remove natmodes
+@
+text
+@d24 3
+d263 1
+a263 1
+    {"LowEnttyID",             (caddr_t)LowEnttyID},
+d304 2
+a313 2
+    {"SONARpsw",               (caddr_t)SONARpsw},
+    {"SOPADpsw",               (caddr_t)SOPADpsw},
+d315 1
+@
+
+
+20301.25
+log
+@CR#7170:M: Added getdefaultval function
+@
+text
+@d24 3
+a433 1
+    {"natmodes",               (caddr_t)natmodes},
+@
+
+
+20301.24
+log
+@CR#8822:M:added autologon functions
+@
+text
+@d24 3
+d398 1
+@
+
+
+20301.23
+log
+@CR#7170:M: Worked on note cooperation
+@
+text
+@d24 3
+d206 3
+d214 1
+d224 1
+d232 1
+d249 3
+d303 2
+d428 1
+@
+
+
+20301.22
+log
+@CR#7170:M: Made LoadFollowUpKeys() function
+@
+text
+@d24 3
+d225 1
+d246 1
+d263 1
+d280 1
+a376 1
+    {"fix_buttons",            (caddr_t)fix_buttons},
+@
+
+
+20301.21
+log
+@CR#7170:M: Added StippleButton function
+@
+text
+@d24 3
+d236 1
+@
+
+
+20301.20
+log
+@CR#8718:M:New payments & adjustments functionality
+@
+text
+@d24 3
+d281 1
+@
+
+
+20301.19
+log
+@CR#7187:M: added sr14load
+@
+text
+@d24 3
+d221 1
+d231 1
+d250 1
+d260 1
+@
+
+
+20301.18
+log
+@CR#7169:M: Worked on genericizing lists
+@
+text
+@d24 3
+d444 1
+@
+
+
+20301.17
+log
+@CR#7170:M: Generalized the Trfu and Qtfu shared functions for all lists
+@
+text
+@d24 3
+d200 1
+d213 1
+d242 1
+@
+
+
+20301.16
+log
+@CR#7192:M: Worked on TRFU and QTFU follow thru code
+@
+text
+@d24 3
+d185 4
+d194 1
+d220 2
+a221 1
+    {"MakeTreatText",          (caddr_t)MakeTreatText},
+a236 1
+    {"Prev_month_valuator",    (caddr_t)Prev_month_valuator},
+d239 1
+d250 2
+a252 7
+    {"RequestTSUM",            (caddr_t)RequestTSUM},
+    {"SaveFollowUpVariables",  (caddr_t)SaveFollowUpVariables},
+    {"SelectFollowUpItem",     (caddr_t)SelectFollowUpItem},
+    {"SendDataToCLSA",         (caddr_t)SendDataToCLSA},
+    {"Set120LineList",         (caddr_t)Set120LineList},
+    {"SetDataFields",          (caddr_t)SetDataFields},
+    {"ShortenFollowUpList",    (caddr_t)ShortenFollowUpList},
+d258 4
+d266 1
+d294 1
+d296 1
+a297 1
+    {"checkpi",                (caddr_t)checkpi},
+d300 2
+a312 2
+    {"closeRestCallback",      (caddr_t)closeRestCallback},
+    {"closeWinCallback",       (caddr_t)closeWinCallback},
+a316 1
+    {"crtranhead",             (caddr_t)crtranhead},
+d333 1
+d340 1
+a341 1
+    {"downent10",              (caddr_t)downent10},
+d370 1
+a371 1
+    {"list_deposit",           (caddr_t)list_deposit},
+d418 1
+a424 1
+    {"send_refund",            (caddr_t)send_refund},
+d447 1
+a448 1
+    {"upent10",                (caddr_t)upent10},
+@
+
+
+20301.15
+log
+@CR#7192:M: Worked on QTFU
+@
+text
+@d23 4
+a26 1
+* $Log:    functab.h,v $
+d244 1
+d248 1
+@
+
+
+20301.14
+log
+@CR#7174:M: added requestTSUM
+@
+text
+@d3 3
+a5 3
+*							   CONFIDENTIAL
+*		   Disclose And Distribute Solely To Employees Of 
+*		   U S WEST And It's Affiliates Having A Need To Know.
+d9 2
+a10 2
+*		(c)Copyright 1990, U S WEST Information Technologies Group
+*						  All Rights Reserved
+d23 4
+a26 1
+* $Log:	functab.h,v $
+d160 1
+a160 1
+*	THIS CODE HAS NOT BEEN MADE TO COMPLY WITH NEW STANDARDS !
+d177 1
+a177 1
+Tabfunc	functable[]	=
+d179 261
+a439 252
+	{"BOSSDateEffctv",		(caddr_t)BOSSDateEffctv},
+	{"CB",					(caddr_t)CB},
+	{"CBED",				(caddr_t)CBED},
+	{"CSRData",				(caddr_t)CSRData},
+	{"CancelTRFU",			(caddr_t)CancelTRFU},
+	{"CchEnttySmmry",		(caddr_t)CchEnttySmmry},
+	{"ClearEnd",			(caddr_t)ClearEnd},
+	{"CloseUbic",           (caddr_t)CloseUbic},
+	{"CpalCodeEntity",      (caddr_t)CpalCodeEntity},
+	{"CustPayAmt",      	(caddr_t)CustPayAmt},
+	{"DADGenericImage",		(caddr_t)DADGenericImage},
+	{"DETAILUbicImage",     (caddr_t)DETAILUbicImage},
+	{"DOAGenericImage",		(caddr_t)DOAGenericImage},
+	{"DS",					(caddr_t)DS},
+	{"Deposits",			(caddr_t)Deposits},
+	{"EnterObject",			(caddr_t)EnterObject},
+	{"FYIGenericImage",		(caddr_t)FYIGenericImage},
+	{"FindDataSource",		(caddr_t)FindDataSource},
+	{"FixTeList",			(caddr_t)FixTeList},
+	{"HashGetObject",		(caddr_t)HashGetObject},
+	{"IdEnttySmmry",		(caddr_t)IdEnttySmmry},
+	{"InfoPrntImg",			(caddr_t)InfoPrntImg},
+	{"InfoPrntImge",		(caddr_t)InfoPrntImge},
+	{"InsertToggle",		(caddr_t)InsertToggle},
+	{"LP",					(caddr_t)LP},
+	{"LPED",				(caddr_t)LPED},
+	{"LUDGenericImage",		(caddr_t)LUDGenericImage},
+	{"LeaveObject",			(caddr_t)LeaveObject},
+	{"MakeTranUsable",		(caddr_t)MakeTranUsable},
+	{"MakeTreatText",		(caddr_t)MakeTreatText},
+	{"MoveNextEditor",		(caddr_t)MoveNextEditor},
+	{"MovePreviousEditor",	(caddr_t)MovePreviousEditor},
+	{"NextTRFU",			(caddr_t)NextTRFU},
+	{"OCDGenericImage",		(caddr_t)OCDGenericImage},
+	{"OTCDiscChrg",			(caddr_t)OTCDiscChrg},
+	{"OTCDiscCodes",		(caddr_t)OTCDiscCodes},
+	{"OTCDscrtnryAr",		(caddr_t)OTCDscrtnryAr},
+	{"OpenTRFU",			(caddr_t)OpenTRFU},
+	{"OpenTreatment",		(caddr_t)OpenTreatment},
+	{"PB",					(caddr_t)PB},
+	{"PBED",				(caddr_t)PBED},
+	{"PE",					(caddr_t)PE},
+	{"PEED",				(caddr_t)PEED},
+	{"Prev_month_valuator",	(caddr_t)Prev_month_valuator},
+	{"PrevTRFU",			(caddr_t)PrevTRFU},
+	{"QtfuLoad",            (caddr_t)QtfuLoad},
+	{"RB",					(caddr_t)RB},
+	{"RBED",				(caddr_t)RBED},
+    {"RaiseCLSA",           (caddr_t)RaiseCLSA},
+    {"RaiseQtfu",           (caddr_t)RaiseQtfu},
+    {"RaiseTreatment",      (caddr_t)RaiseTreatment},
+    {"RaiseUbicDetail",     (caddr_t)RaiseUbicDetail},
+    {"RaiseUbicSummary",    (caddr_t)RaiseUbicSummary},
+	{"RequestTRFU",			(caddr_t)RequestTRFU},
+	{"RequestTSUM",			(caddr_t)RequestTSUM},
+	{"SendDataToCLSA",      (caddr_t)SendDataToCLSA},
+	{"SetDataFields",		(caddr_t)SetDataFields},
+	{"SR",					(caddr_t)SR},
+	{"SRED",				(caddr_t)SRED},
+	{"SUMMARYUbicImage",    (caddr_t)SUMMARYUbicImage},
+	{"SW",					(caddr_t)SW},
+	{"SWED",				(caddr_t)SWED},
+	{"TB",					(caddr_t)TB},
+	{"TBED",				(caddr_t)TBED},
+	{"TE",					(caddr_t)TE},
+	{"TEED",				(caddr_t)TEED},
+	{"TreatPayLoad",		(caddr_t)TreatPayLoad},
+	{"TrfuFill",			(caddr_t)TrfuFill},
+	{"TrfuLoad",			(caddr_t)TrfuLoad},
+	{"TsumInfo",			(caddr_t)TsumInfo},
+	{"TtlsEnttySmmry",		(caddr_t)TtlsEnttySmmry},
+	{"UbicSelect",          (caddr_t)UbicSelect},
+	{"WindowID",			(caddr_t)WindowID},
+	{"activate",			(caddr_t)activate},
+	{"addlcarrier",			(caddr_t)addlcarrier},
+	{"adjustitem",			(caddr_t)adjustitem},
+	{"adlitem",				(caddr_t)adlitem},
+	{"allocmem",			(caddr_t)allocmem},
+	{"billcarrier",			(caddr_t)billcarrier},
+	{"cancelallrefs",		(caddr_t)cancelallrefs},
+	{"candshdhist",			(caddr_t)candshdhist},
+	{"canpi",				(caddr_t)canpi},
+	{"canref",				(caddr_t)canref},
+	{"cansi",				(caddr_t)cansi},
+	{"cantrthist",			(caddr_t)cantrthist},
+	{"carrierlst",			(caddr_t)carrierlst},
+	{"cartask",				(caddr_t)cartask},
+	{"carvals",				(caddr_t)carvals},
+	{"change_trfuuid",		(caddr_t)change_trfuuid},
+	{"checkdb",				(caddr_t)checkdb},
+	{"checkentinfo",		(caddr_t)checkentinfo},
+	{"checkind",			(caddr_t)checkind},
+	{"checknote",			(caddr_t)checknote},
+	{"checkscreen",			(caddr_t)checkscreen},
+	{"checkpi",				(caddr_t)checkpi},
+	{"checksi",				(caddr_t)checksi},
+	{"client_ret",			(caddr_t)client_ret},
+	{"closeaccnt",			(caddr_t)closeaccnt},
+	{"closecarrierd",		(caddr_t)closecarrierd},
+	{"closedep",			(caddr_t)closedep},
+	{"closedoa",			(caddr_t)closedoa},
+	{"closeitem",			(caddr_t)closeitem},
+	{"closenotes",			(caddr_t)closenotes},
+	{"closeocc",			(caddr_t)closeocc},
+	{"closepad",			(caddr_t)closepad},
+	{"closeph",				(caddr_t)closeph},
+	{"closeser",			(caddr_t)closeser},
+	{"closesvw",			(caddr_t)closesvw},
+	{"closeRestCallback",	(caddr_t)closeRestCallback},
+	{"closeWinCallback",	(caddr_t)closeWinCallback},
+	{"closew",				(caddr_t)closew},
+	{"cnacustcd",			(caddr_t)cnacustcd},
+	{"collectdcback",		(caddr_t)collectdcback},
+	{"collections",			(caddr_t)collections},
+	{"crtranhead",			(caddr_t)crtranhead},
+	{"crcb",				(caddr_t)crcb},
+	{"crdataval",			(caddr_t)crdataval},
+	{"crds",				(caddr_t)crds},
+	{"createed",			(caddr_t)createed},
+	{"createrb",			(caddr_t)createrb},
+	{"createwind",			(caddr_t)createwind},
+	{"crhistnode",			(caddr_t)crhistnode},
+	{"crlp",				(caddr_t)crlp},
+	{"crpb",				(caddr_t)crpb},
+	{"crpe",				(caddr_t)crpe},
+	{"crrb",				(caddr_t)crrb},
+	{"crsr",				(caddr_t)crsr},
+	{"crsw",				(caddr_t)crsw},
+	{"crtask",				(caddr_t)crtask},
+	{"crtb",				(caddr_t)crtb},
+	{"crte",				(caddr_t)crte},
+	{"curnames",			(caddr_t)curnames},
+	{"curwinds",			(caddr_t)curwinds},
+	{"dad_list",			(caddr_t)dad_list},
+	{"deposits",			(caddr_t)deposits},
+	{"displabel",			(caddr_t)displabel},
+	{"downent",				(caddr_t)downent},
+	{"downent9",			(caddr_t)downent9},
+	{"downent10",			(caddr_t)downent10},
+	{"erasepad",			(caddr_t)erasepad},
+	{"exitsr",				(caddr_t)exitsr},
+	{"extractinfo",			(caddr_t)extractinfo},
+	{"findtranhead",		(caddr_t)findtranhead},
+	{"fix_buttons",			(caddr_t)fix_buttons},
+	{"freesi",				(caddr_t)freesi},
+	{"freetext",			(caddr_t)freetext},
+	{"getcuscode",			(caddr_t)getcuscode},
+	{"getdataval",			(caddr_t)getdataval},
+	{"getdupt",				(caddr_t)getdupt},
+	{"getent",				(caddr_t)getent},
+	{"getinputstring",		(caddr_t)getinputstring},
+	{"getnames",			(caddr_t)getnames},
+	{"getph",				(caddr_t)getph},
+	{"getrealval",			(caddr_t)getrealval},
+	{"getreftype",			(caddr_t)getreftype},
+	{"gettar",				(caddr_t)gettar},
+	{"gettext",				(caddr_t)gettext},
+	{"getvalue",			(caddr_t)getvalue},
+	{"gotoitem",			(caddr_t)gotoitem},
+	{"helpindex",			(caddr_t)helpindex},
+	{"helpnames",			(caddr_t)helpnames},
+	{"initdicts",			(caddr_t)initdicts},
+	{"initentities",		(caddr_t)initentities},
+	{"initscr",				(caddr_t)initscr},
+	{"initwind",			(caddr_t)initwind},
+	{"itemcarrier",			(caddr_t)itemcarrier},
+	{"lineitem",			(caddr_t)lineitem},
+	{"listrefs",			(caddr_t)listrefs},
+	{"list_deposit",		(caddr_t)list_deposit},
+	{"load_cust_cred",		(caddr_t)load_cust_cred},
+	{"loaddata",			(caddr_t)loaddata},
+	{"loadpsw",				(caddr_t)loadpsw},
+	{"lud_list",			(caddr_t)lud_list},
+	{"main",				(caddr_t)main},
+	{"makedatatag",			(caddr_t)makedatatag},
+	{"makeentity",			(caddr_t)makeentity},
+	{"manipulate_spa",		(caddr_t)manipulate_spa},
+	{"mkref",				(caddr_t)mkref},
+	{"modverify",			(caddr_t)modverify},
+	{"municarrier",			(caddr_t)municarrier},
+	{"natmodes",			(caddr_t)natmodes},
+	{"nextcarrier",			(caddr_t)nextcarrier},
+	{"nextcsr",				(caddr_t)nextcsr},
+	{"nextfunc",			(caddr_t)nextfunc},
+	{"nexthelp",			(caddr_t)nexthelp},
+	{"nextserfunc",			(caddr_t)nextserfunc},
+	{"nexttext",			(caddr_t)nexttext},
+	{"nextwinds",			(caddr_t)nextwinds},
+	{"no_close_halt",		(caddr_t)no_close_halt},
+	{"nodata",				(caddr_t)nodata},
+	{"note",				(caddr_t)note},
+	{"notescback",			(caddr_t)notescback},
+	{"occcarrier",			(caddr_t)occcarrier},
+	{"ocd_list",			(caddr_t)ocd_list},
+	{"order",				(caddr_t)order},
+	{"padjcarrier",			(caddr_t)padjcarrier},
+	{"phonecna",			(caddr_t)phonecna},
+	{"phonenum",			(caddr_t)phonenum},
+	{"piupdate",			(caddr_t)piupdate},
+	{"prevcarrier",			(caddr_t)prevcarrier},
+	{"prevcsr",				(caddr_t)prevcsr},
+	{"prevhelp",			(caddr_t)prevhelp},
+	{"prevtext",			(caddr_t)prevtext},
+	{"prevwinds",			(caddr_t)prevwinds},
+	{"putval",				(caddr_t)putval},
+	{"quitiws",				(caddr_t)quitiws},
+	{"raisenative",			(caddr_t)raisenative},
+	{"raisewind",			(caddr_t)raisewind},
+	{"refund",				(caddr_t)refund},
+	{"relayer",				(caddr_t)relayer},
+	{"rewindtext",			(caddr_t)rewindtext},
+	{"rmtasks",				(caddr_t)rmtasks},
+	{"screendisplay",		(caddr_t)screendisplay},
+	{"searchcur",			(caddr_t)searchcur},
+	{"searchhelp",			(caddr_t)searchhelp},
+	{"sendlabel",			(caddr_t)sendlabel},
+	{"sendphone",			(caddr_t)sendphone},
+	{"sendphtoBOSS",		(caddr_t)sendphtoBOSS},
+	{"sendphtofilesvr",		(caddr_t)sendphtofilesvr},
+	{"sendreq",				(caddr_t)sendreq},
+	{"sendscreen",			(caddr_t)sendscreen},
+	{"send_refund",			(caddr_t)send_refund},
+	{"servcarrier",			(caddr_t)servcarrier},
+	{"servdcback",			(caddr_t)servdcback},
+	{"setbutton",			(caddr_t)setbutton},
+	{"setcuscode",			(caddr_t)setcuscode},
+	{"setnatsys",			(caddr_t)setnatsys},
+	{"showsel",				(caddr_t)showsel},
+	{"siupdate",			(caddr_t)siupdate},
+	{"sr01load",			(caddr_t)sr01load},
+	{"sr02load",			(caddr_t)sr02load},
+	{"sr05load",			(caddr_t)sr05load},
+	{"sr16carrier",			(caddr_t)sr16carrier},
+	{"taxcarrier",			(caddr_t)taxcarrier},
+	{"tcnv",				(caddr_t)tcnv},
+	{"textdcback",			(caddr_t)textdcback},
+	{"textptrinit",			(caddr_t)textptrinit},
+	{"textvalinit",			(caddr_t)textvalinit},
+	{"tranfeat",			(caddr_t)tranfeat},
+	{"updatecback",			(caddr_t)updatecback},
+	{"updatenote",			(caddr_t)updatenote},
+	{"upddshdhist",			(caddr_t)upddshdhist},
+	{"updtrthist",			(caddr_t)updtrthist},
+	{"upent",				(caddr_t)upent},
+	{"upent9",				(caddr_t)upent9},
+	{"upent10",				(caddr_t)upent10},
+	{"usoctran",			(caddr_t)usoctran},
+	{"validnumber",			(caddr_t)validnumber},
+	{"varsican",			(caddr_t)varsican},
+	{"varsiup",				(caddr_t)varsiup},
+	{"windraise",			(caddr_t)windraise},
+	{"END",					(caddr_t)NULL}
+@
+
+
+20301.13
+log
+@CR#7192:M: Worked on treatment
+@
+text
+@d24 3
+d230 1
+d264 1
+d348 1
+@
+
+
+20301.12
+log
+@CR#7192:M: Worked on Treatment
+@
+text
+@d24 3
+d201 2
+d211 1
+@
+
+
+20301.11
+log
+@CR#7169:M: Added Treatment functionality
+@
+text
+@d24 3
+d175 1
+d217 1
+@
+
+
+20301.10
+log
+@CR#7187:M: added cpal functions.
+@
+text
+@d24 3
+d227 1
+@
+
+
+20301.9
+log
+@CR#7175:M:added lista-deposit & send_refund
+@
+text
+@d24 3
+d172 1
+d238 1
+d250 1
+d353 1
+@
+
+
+20301.8
+log
+@CR#7170:M:Temporary check-in of QTFU work in progress
+@
+text
+@d24 3
+d318 1
+d369 1
+@
+
+
+20301.7
+log
+@CR#7187:M: added cpal loading fctn.
+@
+text
+@d24 3
+d198 1
+d202 1
+@
+
+
+20301.6
+log
+@CR#8227:M:added getreftype
+@
+text
+@d24 3
+d162 1
+d278 3
+d381 3
+@
+
+
+20301.5
+log
+@CR#7182:M:Added function to close all UBIC associated windows when UBIC
+detail is closed
+@
+text
+@d24 4
+d289 1
+@
+
+
+20301.4
+log
+@CR#7182:M:Add UBIC detail processing
+@
+text
+@d24 3
+d154 1
+@
+
+
+20301.3
+log
+@CR#7180:M: added ocd_list.
+@
+text
+@d24 3
+a150 1
+	{"DS",					(caddr_t)DS},
+d152 1
+d154 1
+d186 1
+d204 1
+@
+
+
+20301.2
+log
+@CR#7169:M: Worked on TRFU
+@
+text
+@d24 3
+d311 1
+@
+
+
+20301.1
+log
+@CR#7169:M: Worked on TRFU Request
+@
+text
+@d24 3
+d164 1
+d169 1
+d175 1
+d192 2
+@
+
+
+20201.38
+log
+@CR#8102:M:Added functions for UBIC Summary
+@
+text
+@d24 3
+d140 1
+d174 1
+@
+
+
+20201.37
+log
+@CR#7977:M: Fixed Entrance window workings
+@
+text
+@d24 3
+d169 1
+d174 1
+@
+
+
+20201.36
+log
+@CR#7180:M:added sr16 data loading functions.
+@
+text
+@d24 3
+d141 1
+@
+
+
+20201.35
+log
+@CR#7843:M:Remove unneeded SetupDataForCLSA
+@
+text
+@d24 3
+d133 2
+d137 1
+a138 1
+	{"GenericImage",		(caddr_t)GenericImage},
+d146 1
+d150 1
+d199 1
+d232 1
+@
+
+
+20201.34
+log
+@CR#7843:M:stage build for CGI integration
+@
+text
+@d24 3
+a155 1
+	{"SetupDataForCLSA",    (caddr_t)SetupDataForCLSA},
+@
+
+
+20201.33
+log
+@CR#7977:M: Worked on SetDataFields
+@
+text
+@d24 3
+a130 1
+	{"GetSaSR07",           (caddr_t)GetSaSR07},
+d152 2
+@
+
+
+20201.32
+log
+@CR#7180:M:uncommented Tsuminfo
+@
+text
+@d24 3
+d150 1
+a150 1
+	{"SetDataField",		(caddr_t)SetDataField},
+a300 1
+	{"setdata",				(caddr_t)setdata},
+@
+
+
+20201.31
+log
+@CR#7843:M:Added RaiseCLSA & GetSaSR07 for CLSA Integration, commented TsumInfo
+out since it was not defined.
+@
+text
+@d24 4
+d156 1
+a156 1
+/*	{"TsumInfo",			(caddr_t)TsumInfo},*/
+@
+
+
+20201.30
+log
+@added TsumInfo
+@
+text
+@d24 3
+d121 1
+d142 1
+d152 1
+a152 1
+	{"TsumInfo",			(caddr_t)TsumInfo},
+@
+
+
+20201.29
+log
+@CR#7977:M: Worked on transaction aliasing
+@
+text
+@d24 3
+d147 1
+@
+
+
+20201.28
+log
+@CR#7717:M: Added collectdcback
+@
+text
+@d24 3
+a112 1
+	{"Error",				(caddr_t)Error},
+a151 3
+	{"binaryfind",			(caddr_t)binaryfind},
+	{"buildsrc",			(caddr_t)buildsrc},
+	{"buildtd",				(caddr_t)buildtd},
+a185 1
+	{"createdata",			(caddr_t)createdata},
+a201 1
+	{"ddcheck",				(caddr_t)ddcheck},
+d225 1
+a225 1
+	{"initdata",			(caddr_t)initdata},
+a234 1
+	{"loadtd",				(caddr_t)loadtd},
+@
+
+
+20201.27
+log
+@CR#7717:M: Fixed lots of stuff
+@
+text
+@d24 3
+d182 1
+@
+
+
+20201.26
+log
+@added collections.
+@
+text
+@d24 3
+d127 1
+d140 1
+@
+
+
+20201.25
+log
+@CR#7717:M: Fixed enter and leave handlers
+@
+text
+@d24 3
+d174 1
+@
+
+
+20201.24
+log
+@CR#7717:M: Removed curform global and enterform() and leaveform()
+@
+text
+@d24 3
+d100 1
+d111 1
+a193 1
+	{"enterTE",				(caddr_t)enterTE},
+a219 1
+	{"leaveTE",				(caddr_t)leaveTE},
+@
+
+
+20201.23
+log
+@CR#7717:M: Worked on fonts and pixmaps
+@
+text
+@d24 3
+a189 1
+	{"enterform",			(caddr_t)enterform},
+a216 1
+	{"leaveform",			(caddr_t)leaveform},
+@
+
+
+20201.22
+log
+@CR#7181:M: added sr16carrier
+@
+text
+@d24 1
+a24 1
+ * Revision 20201.21  90/09/25  13:05:13  13:05:13  greg ( Greg DeMent)
+d97 1
+a97 1
+	{"HashGetFont",			(caddr_t)HashGetFont},
+@
+
+
+20201.21
+log
+@CR#7717:M: Worked on font loading
+@
+text
+@d24 3
+d279 1
+@
+
+
+20201.20
+log
+@CR#7180:M: added GenericImage for SR16 processing.
+@
+text
+@d24 3
+d94 1
+@
+
+
+20201.19
+log
+@CR#7581:M: added closeRestCallback()
+@
+text
+@d24 3
+d90 1
+@
+
+
+20201.18
+log
+@CR#7717:M:Added scrolled window functions
+@
+text
+@d24 3
+d148 1
+@
+
+
+20201.17
+log
+@CR#7581:M: removed dispserpg, prevser, nextser, and servinfo.
+@
+text
+@d3 3
+a5 3
+*                               CONFIDENTIAL
+*           Disclose And Distribute Solely To Employees Of 
+*           U S WEST And It's Affiliates Having A Need To Know.
+d9 2
+a10 2
+*        (c)Copyright 1990, U S WEST Information Technologies Group
+*                          All Rights Reserved
+d24 3
+d56 1
+a56 1
+*    THIS CODE HAS NOT BEEN MADE TO COMPLY WITH NEW STANDARDS !
+a61 1
+
+d73 1
+a73 3
+
+
+Tabfunc functable[] =
+d75 205
+a279 205
+   {"BOSSDateEffctv",			(caddr_t)BOSSDateEffctv},
+   {"CB",				(caddr_t)CB},
+   {"CBED",				(caddr_t)CBED},
+   {"CSRData",				(caddr_t)CSRData},
+   {"ClearEnd",				(caddr_t)ClearEnd},
+   {"DS",				(caddr_t)DS},
+   {"Deposits",				(caddr_t)Deposits},
+   {"Error",				(caddr_t)Error},
+   {"IdEnttySmmry",			(caddr_t)IdEnttySmmry},
+   {"InfoPrntImg",			(caddr_t)InfoPrntImg},
+   {"InfoPrntImge",			(caddr_t)InfoPrntImge},
+   {"InsertToggle",			(caddr_t)InsertToggle},
+   {"LP",				(caddr_t)LP},
+   {"LPED",				(caddr_t)LPED},
+   {"MoveNextEditor",		(caddr_t)MoveNextEditor},
+   {"MovePreviousEditor",		(caddr_t)MovePreviousEditor},
+   {"OTCDiscChrg",			(caddr_t)OTCDiscChrg},
+   {"OTCDiscCodes",			(caddr_t)OTCDiscCodes},
+   {"OTCDscrtnryAr",			(caddr_t)OTCDscrtnryAr},
+   {"PB",				(caddr_t)PB},
+   {"PBED",				(caddr_t)PBED},
+   {"PE",				(caddr_t)PE},
+   {"PEED",				(caddr_t)PEED},
+   {"RB",				(caddr_t)RB},
+   {"RBED",				(caddr_t)RBED},
+   {"SetDataField",                     (caddr_t)SetDataField},
+   {"SR",				(caddr_t)SR},
+   {"SRED",				(caddr_t)SRED},
+   {"SW",                               (caddr_t)SW},
+   {"SWED",                             (caddr_t)SWED},
+   {"TB",				(caddr_t)TB},
+   {"TBED",				(caddr_t)TBED},
+   {"TE",				(caddr_t)TE},
+   {"TEED",				(caddr_t)TEED},
+   {"TtlsEnttySmmry",			(caddr_t)TtlsEnttySmmry},
+   {"activate",				(caddr_t)activate},
+   {"addlcarrier",			(caddr_t)addlcarrier},
+   {"adjustitem",			(caddr_t)adjustitem},
+   {"adlitem",				(caddr_t)adlitem},
+   {"allocmem",				(caddr_t)allocmem},
+   {"billcarrier",			(caddr_t)billcarrier},
+   {"binaryfind",			(caddr_t)binaryfind},
+   {"buildsrc",				(caddr_t)buildsrc},
+   {"buildtd",				(caddr_t)buildtd},
+   {"cancelallrefs",			(caddr_t)cancelallrefs},
+   {"candshdhist",			(caddr_t)candshdhist},
+   {"canref",				(caddr_t)canref},
+   {"cansi",				(caddr_t)cansi},
+   {"cantrthist",			(caddr_t)cantrthist},
+   {"carrierlst",			(caddr_t)carrierlst},
+   {"cartask",				(caddr_t)cartask},
+   {"carvals",				(caddr_t)carvals},
+   {"checkdb",				(caddr_t)checkdb},
+   {"checkentinfo",			(caddr_t)checkentinfo},
+   {"checkind",				(caddr_t)checkind},
+   {"checknote",			(caddr_t)checknote},
+   {"checkscreen",			(caddr_t)checkscreen},
+   {"checksi",				(caddr_t)checksi},
+   {"client_ret",			(caddr_t)client_ret},
+   {"closeaccnt",			(caddr_t)closeaccnt},
+   {"closecarrierd",			(caddr_t)closecarrierd},
+   {"closedep",				(caddr_t)closedep},
+   {"closeitem",			(caddr_t)closeitem},
+   {"closenotes",			(caddr_t)closenotes},
+   {"closeocc",				(caddr_t)closeocc},
+   {"closepad",				(caddr_t)closepad},
+   {"closeph",				(caddr_t)closeph},
+   {"closeser",				(caddr_t)closeser},
+   {"closesvw",				(caddr_t)closesvw},
+   {"closeWinCallback",     (caddr_t)closeWinCallback},
+   {"closew",				(caddr_t)closew},
+   {"cnacustcd",			(caddr_t)cnacustcd},
+   {"crtranhead",			(caddr_t)crtranhead},
+   {"crcb",				(caddr_t)crcb},
+   {"crdataval",			(caddr_t)crdataval},
+   {"createdata",			(caddr_t)createdata},
+   {"createds",				(caddr_t)createds},
+   {"createed",				(caddr_t)createed},
+   {"createrb",				(caddr_t)createrb},
+   {"createwind",			(caddr_t)createwind},
+   {"crhistnode",			(caddr_t)crhistnode},
+   {"crlp",				(caddr_t)crlp},
+   {"crpb",				(caddr_t)crpb},
+   {"crpe",				(caddr_t)crpe},
+   {"crrb",				(caddr_t)crrb},
+   {"crsr",				(caddr_t)crsr},
+   {"crsw",                             (caddr_t)crsw},
+   {"crtask",				(caddr_t)crtask},
+   {"crtb",				(caddr_t)crtb},
+   {"crte",				(caddr_t)crte},
+   {"curnames",				(caddr_t)curnames},
+   {"curwinds",				(caddr_t)curwinds},
+   {"ddcheck",				(caddr_t)ddcheck},
+   {"deposits",				(caddr_t)deposits},
+   {"displabel",			(caddr_t)displabel},
+   {"enterTE",				(caddr_t)enterTE},
+   {"enterform",			(caddr_t)enterform},
+   {"erasepad",				(caddr_t)erasepad},
+   {"exitsr",				(caddr_t)exitsr},
+   {"extractinfo",			(caddr_t)extractinfo},
+   {"findtranhead",			(caddr_t)findtranhead},
+   {"fix_buttons",			(caddr_t)fix_buttons},
+   {"freesi",				(caddr_t)freesi},
+   {"freetext",				(caddr_t)freetext},
+   {"getcuscode",			(caddr_t)getcuscode},
+   {"getdataval",			(caddr_t)getdataval},
+   {"getdupt",				(caddr_t)getdupt},
+   {"getent",				(caddr_t)getent},
+   {"getinputstring",			(caddr_t)getinputstring},
+   {"getnames",				(caddr_t)getnames},
+   {"getph",				(caddr_t)getph},
+   {"getrealval",			(caddr_t)getrealval},
+   {"gettar",				(caddr_t)gettar},
+   {"gettext",				(caddr_t)gettext},
+   {"getvalue",				(caddr_t)getvalue},
+   {"gotoitem",				(caddr_t)gotoitem},
+   {"helpindex",			(caddr_t)helpindex},
+   {"helpnames",			(caddr_t)helpnames},
+   {"initdata",				(caddr_t)initdata},
+   {"initentities",			(caddr_t)initentities},
+   {"initscr",				(caddr_t)initscr},
+   {"initwind",				(caddr_t)initwind},
+   {"itemcarrier",			(caddr_t)itemcarrier},
+   {"leaveTE",				(caddr_t)leaveTE},
+   {"leaveform",			(caddr_t)leaveform},
+   {"lineitem",				(caddr_t)lineitem},
+   {"listrefs",				(caddr_t)listrefs},
+   {"load_cust_cred",			(caddr_t)load_cust_cred},
+   {"loaddata",				(caddr_t)loaddata},
+   {"loadpsw",				(caddr_t)loadpsw},
+   {"loadtd",				(caddr_t)loadtd},
+   {"main",				(caddr_t)main},
+   {"makedatatag",			(caddr_t)makedatatag},
+   {"makeentity",			(caddr_t)makeentity},
+   {"manipulate_spa",			(caddr_t)manipulate_spa},
+   {"mkref",				(caddr_t)mkref},
+   {"modverify",			(caddr_t)modverify},
+   {"municarrier",			(caddr_t)municarrier},
+   {"natmodes",				(caddr_t)natmodes},
+   {"nextcarrier",			(caddr_t)nextcarrier},
+   {"nextcsr",				(caddr_t)nextcsr},
+   {"nextfunc",				(caddr_t)nextfunc},
+   {"nexthelp",				(caddr_t)nexthelp},
+   {"nextserfunc",			(caddr_t)nextserfunc},
+   {"nexttext",				(caddr_t)nexttext},
+   {"nextwinds",			(caddr_t)nextwinds},
+   {"no_close_halt",			(caddr_t)no_close_halt},
+   {"nodata",				(caddr_t)nodata},
+   {"note",				(caddr_t)note},
+   {"notescback",			(caddr_t)notescback},
+   {"occcarrier",			(caddr_t)occcarrier},
+   {"order",				(caddr_t)order},
+   {"padjcarrier",			(caddr_t)padjcarrier},
+   {"phonecna",				(caddr_t)phonecna},
+   {"phonenum",				(caddr_t)phonenum},
+   {"prevcarrier",			(caddr_t)prevcarrier},
+   {"prevcsr",				(caddr_t)prevcsr},
+   {"prevhelp",				(caddr_t)prevhelp},
+   {"prevtext",				(caddr_t)prevtext},
+   {"prevwinds",			(caddr_t)prevwinds},
+   {"putval",				(caddr_t)putval},
+   {"quitiws",				(caddr_t)quitiws},
+   {"raisenative",			(caddr_t)raisenative},
+   {"raisewind",			(caddr_t)raisewind},
+   {"refund",				(caddr_t)refund},
+   {"relayer",				(caddr_t)relayer},
+   {"rewindtext",			(caddr_t)rewindtext},
+   {"rmprevwind",			(caddr_t)rmprevwind},
+   {"rmtasks",				(caddr_t)rmtasks},
+   {"screendisplay",			(caddr_t)screendisplay},
+   {"searchcur",			(caddr_t)searchcur},
+   {"searchhelp",			(caddr_t)searchhelp},
+   {"sendlabel",			(caddr_t)sendlabel},
+   {"sendphone",			(caddr_t)sendphone},
+   {"sendphtoBOSS",			(caddr_t)sendphtoBOSS},
+   {"sendphtofilesvr",			(caddr_t)sendphtofilesvr},
+   {"sendreq",				(caddr_t)sendreq},
+   {"sendscreen",			(caddr_t)sendscreen},
+   {"servcarrier",			(caddr_t)servcarrier},
+   {"servdcback",			(caddr_t)servdcback},
+   {"setbutton",			(caddr_t)setbutton},
+   {"setcuscode",			(caddr_t)setcuscode},
+   {"setdata",				(caddr_t)setdata},
+   {"setnatsys",			(caddr_t)setnatsys},
+   {"showsel",				(caddr_t)showsel},
+   {"siupdate",				(caddr_t)siupdate},
+   {"sr01load",				(caddr_t)sr01load},
+   {"sr02load",				(caddr_t)sr02load},
+   {"sr05load",				(caddr_t)sr05load},
+   {"taxcarrier",			(caddr_t)taxcarrier},
+   {"tcnv",				(caddr_t)tcnv},
+   {"textdcback",			(caddr_t)textdcback},
+   {"textptrinit",			(caddr_t)textptrinit},
+   {"textvalinit",			(caddr_t)textvalinit},
+   {"tranfeat",				(caddr_t)tranfeat},
+   {"updatecback",			(caddr_t)updatecback},
+   {"updatenote",			(caddr_t)updatenote},
+   {"upddshdhist",			(caddr_t)upddshdhist},
+   {"updtrthist",			(caddr_t)updtrthist},
+   {"usoctran",				(caddr_t)usoctran},
+   {"validnumber",			(caddr_t)validnumber},
+   {"varsican",				(caddr_t)varsican},
+   {"varsiup",				(caddr_t)varsiup},
+   {"windraise",			(caddr_t)windraise},
+   {"END",				(caddr_t)NULL}
+@
+
+
+20201.16
+log
+@CR#7581:M:Change noexit() to closeWinCallback() so name will reflect
+wider usage by dialogs
+@
+text
+@d24 4
+a169 1
+   {"dispserpg",			(caddr_t)dispserpg},
+a217 1
+   {"nextser",				(caddr_t)nextser},
+a232 1
+   {"prevser",				(caddr_t)prevser},
+a254 1
+   {"servinfo",				(caddr_t)servinfo},
+@
+
+
+20201.15
+log
+@CR#7581:M: deleted serinit and service funtions.
+@
+text
+@d24 3
+d140 1
+a220 1
+   {"noexit",				(caddr_t)noexit},
+@
+
+
+20201.14
+log
+@CR#7581:M: removed serheadings
+@
+text
+@d24 3
+a248 1
+   {"serinit",				(caddr_t)serinit},
+a250 1
+   {"service",				(caddr_t)service},
+@
+
+
+20201.13
+log
+@CR#7581:M:Remove Ref Mgr at the Motif port level
+@
+text
+@d24 3
+a245 1
+   {"serheadings",			(caddr_t)serheadings},
+@
+
+
+20201.12
+log
+@CR#7581:M:Added new translations for cursor movement with text edits
+@
+text
+@d24 3
+a86 1
+   {"RemoveRefEntity",			(caddr_t)RemoveRefEntity},
+a97 3
+   {"add_file_to_list",			(caddr_t)add_file_to_list},
+   {"add_new_sections",			(caddr_t)add_new_sections},
+   {"add_paperclip_to_list",		(caddr_t)add_paperclip_to_list},
+a103 2
+   {"build_file_page_index",		(caddr_t)build_file_page_index},
+   {"build_sec_notes",			(caddr_t)build_sec_notes},
+a106 1
+   {"cancel_paperclip",			(caddr_t)cancel_paperclip},
+a113 3
+   {"changefont",			(caddr_t)changefont},
+   {"check_concurrent_update",		(caddr_t)check_concurrent_update},
+   {"check_for_note",			(caddr_t)check_for_note},
+a119 2
+   {"clean_up_section",			(caddr_t)clean_up_section},
+   {"cleanup_deleted_sections",		(caddr_t)cleanup_deleted_sections},
+a120 1
+   {"close_note_and_pc_win",		(caddr_t)close_note_and_pc_win},
+a132 4
+   {"comp",				(caddr_t)comp},
+   {"cont_update_notes",		(caddr_t)cont_update_notes},
+   {"cont_update_pc",			(caddr_t)cont_update_pc},
+   {"cpfile",				(caddr_t)cpfile},
+a135 3
+   {"create_admin_lists",		(caddr_t)create_admin_lists},
+   {"create_user_dir",			(caddr_t)create_user_dir},
+   {"create_user_lists",		(caddr_t)create_user_lists},
+a153 4
+   {"decide_menu",			(caddr_t)decide_menu},
+   {"del_outdated_pc",			(caddr_t)del_outdated_pc},
+   {"delete_note",			(caddr_t)delete_note},
+   {"delete_paperclip",			(caddr_t)delete_paperclip},
+a155 2
+   {"display_data_to_screen",		(caddr_t)display_data_to_screen},
+   {"display_search_pg_to_screen",	(caddr_t)display_search_pg_to_screen},
+a160 3
+   {"extract_section",			(caddr_t)extract_section},
+   {"extract_update_pc",		(caddr_t)extract_update_pc},
+   {"extract_update_sec",		(caddr_t)extract_update_sec},
+a161 2
+   {"find_outdated_paperclps",		(caddr_t)find_outdated_paperclps},
+   {"find_str",				(caddr_t)find_str},
+a163 1
+   {"free_user_adm_lists",		(caddr_t)free_usr_adm_lists},
+a165 10
+   {"get_ava_sec_entity",		(caddr_t)get_ava_sec_entity},
+   {"get_entity",			(caddr_t)get_entity},
+   {"get_file_pg_offset",		(caddr_t)get_file_pg_offset},
+   {"get_max_char",			(caddr_t)get_max_char},
+   {"get_max_line",			(caddr_t)get_max_line},
+   {"get_node_ptr",			(caddr_t)get_node_ptr},
+   {"get_sec_alpha_entity",		(caddr_t)get_sec_alpha_entity},
+   {"get_sec_index",			(caddr_t)get_sec_index},
+   {"get_te_string",			(caddr_t)get_te_string},
+   {"get_total_pages",			(caddr_t)get_total_pages},
+a176 1
+   {"gotoindex",			(caddr_t)gotoindex},
+a177 2
+   {"gotopage",				(caddr_t)gotopage},
+   {"handbook",				(caddr_t)handbook},
+a183 4
+   {"insert_alpha_numeric",		(caddr_t)insert_alpha_numeric},
+   {"insert_lead_alpha_numeric",	(caddr_t)insert_lead_alpha_numeric},
+   {"insert_numeric",			(caddr_t)insert_numeric},
+   {"is_number",			(caddr_t)is_number},
+a185 1
+   {"leave_note",			(caddr_t)leave_note},
+a189 4
+   {"load_paperclip_file",		(caddr_t)load_paperclip_file},
+   {"load_paperclips",			(caddr_t)load_paperclips},
+   {"load_sections",			(caddr_t)load_sections},
+   {"load_updated_sections",		(caddr_t)load_updated_sections},
+a192 3
+   {"log_pc",				(caddr_t)log_pc},
+   {"log_sec",				(caddr_t)log_sec},
+   {"look_up_page",			(caddr_t)look_up_page},
+a198 1
+   {"move_note_to",			(caddr_t)move_note_to},
+a200 3
+   {"new_log_item",			(caddr_t)new_log_item},
+   {"new_user",				(caddr_t)new_user},
+   {"next",				(caddr_t)next},
+a208 1
+   {"no_change",			(caddr_t)no_change},
+a213 2
+   {"note_exists",			(caddr_t)note_exists},
+   {"notes_in_section",			(caddr_t)notes_in_section},
+a214 1
+   {"odd_page",				(caddr_t)odd_page},
+a215 1
+   {"outdated_paperclips",		(caddr_t)outdated_paperclips},
+a216 1
+   {"paperclip",			(caddr_t)paperclip},
+a218 4
+   {"place_date_node",			(caddr_t)place_date_node},
+   {"place_note_node",			(caddr_t)place_note_node},
+   {"prepare_hb_screen",		(caddr_t)prepare_hb_screen},
+   {"prev",				(caddr_t)prev},
+a228 7
+   {"read_file_into_index",		(caddr_t)read_file_into_index},
+   {"ref_abend",			(caddr_t)ref_abend},
+   {"ref_close_window",			(caddr_t)ref_close_window},
+   {"ref_update_pc",			(caddr_t)ref_update_pc},
+   {"ref_update_stop",			(caddr_t)ref_update_stop},
+   {"ref_update_win_list",		(caddr_t)ref_update_win_list},
+   {"refresh_updt_pc_screen",		(caddr_t)refresh_updt_pc_screen},
+a230 5
+   {"relocate_delete_note",		(caddr_t)relocate_delete_note},
+   {"relocate_note_exists",		(caddr_t)relocate_note_exists},
+   {"relocate_note_to",			(caddr_t)relocate_note_to},
+   {"remove_clip_from_list",		(caddr_t)remove_clip_from_list},
+   {"removedir",			(caddr_t)removedir},
+a231 1
+   {"rm_old_paperclip",			(caddr_t)rm_old_paperclip},
+a233 2
+   {"save_note",			(caddr_t)save_note},
+   {"save_paperclip",			(caddr_t)save_paperclip},
+a234 2
+   {"search_dn",			(caddr_t)search_dn},
+   {"search_up",			(caddr_t)search_up},
+a236 2
+   {"sec_entity_available",		(caddr_t)sec_entity_available},
+   {"sec_ind_displayed",		(caddr_t)sec_ind_displayed},
+a262 1
+   {"too_many_paperclips",		(caddr_t)too_many_paperclips},
+a263 7
+   {"two_paperclips_one_page",		(caddr_t)two_paperclips_one_page},
+   {"unique_paperclip_name",		(caddr_t)unique_paperclip_name},
+   {"update_entity_sec_list",		(caddr_t)update_entity_sec_list},
+   {"update_notes",			(caddr_t)update_notes},
+   {"update_paperclips",		(caddr_t)update_paperclips},
+   {"update_section_notes",		(caddr_t)update_section_notes},
+   {"update_user_notes_list",		(caddr_t)update_user_notes_list},
+a265 1
+   {"updates_exist",			(caddr_t)updates_exist},
+a268 2
+   {"valid_page_number",		(caddr_t)valid_page_number},
+   {"valid_section",			(caddr_t)valid_section},
+a272 2
+   {"write_list_to_file",		(caddr_t)write_list_to_file},
+   {"write_user_notes_file",		(caddr_t)write_user_notes_file},
+@
+
+
+20201.11
+log
+@CR#7173:M: Fixed compile problem with get_item_list
+@
+text
+@d24 3
+d73 1
+@
+
+
+20201.10
+log
+@CR#7173:M: Put in scrolled window stub functions and structures
+@
+text
+@d24 3
+d81 1
+a81 1
+   {"SetDataField",     (caddr_t)SetDataField},
+d84 2
+a85 2
+   {"SW",                             (caddr_t)SW},
+   {"SWED",                           (caddr_t)SWED},
+d106 1
+a106 1
+   {"cancel_paperclip",		(caddr_t)cancel_paperclip},
+a193 1
+   {"get_item_list",        (caddr_t)get_item_list},
+@
+
+
+20201.9
+log
+@CR#7581:M:Removed accidental redefine of RCSid
+@
+text
+@d24 3
+d81 2
+d157 1
+@
+
+
+20201.8
+log
+@CR#7581:M:Added SetDataField()
+@
+text
+@d23 4
+a26 1
+* $Log$
+a31 1
+static char *sRCS_ID_s = "$Header$";
+@
+
+
+20201.7
+log
+@CR#7581:M:
+@
+text
+@d1 12
+a12 6
+/*   @@(#)                                                                  "*/
+/*   @@(#)Copyright U S WEST Information Technologies Group, 1989.          "*/
+/*   @@(#)                                                                  "*/
+/*   @@(#)Proprietary: Not for use or disclosure outside U S WEST and its   "*/
+/*   @@(#)affiliates exceptr under written agreement.                       "*/
+/*   @@(#)                                                                  "*/
+d14 16
+d73 1
+d183 1
+a183 1
+   {"get_item_list",                    (caddr_t)get_item_list},
+@
+
+
+20201.6
+log
+@CR#7581:M:Motif Port
+@
+text
+@d160 1
+@
+
+
+20201.5
+log
+@Motif Port
+@
+text
+@a118 1
+   {"createicon",			(caddr_t)createicon},
+a185 1
+   {"initicons",			(caddr_t)initicons},
+@
+
+
+20201.4
+log
+@CR#7553:M:Remove Sales Advisor
+@
+text
+@a52 2
+  /* {"ST",				(caddr_t)ST},*/
+   {"STED",				(caddr_t)STED},
+a127 1
+   {"crst",				(caddr_t)crst},
+@
+
+
+20201.3
+log
+@Motif port.
+@
+text
+@a64 1
+   {"addons",				(caddr_t)addons},
+a66 2
+   {"akas",				(caddr_t)akas},
+   {"alalac",				(caddr_t)alalac},
+a67 2
+   {"alplac",				(caddr_t)alplac},
+   {"benefits",				(caddr_t)benefits},
+a69 1
+   {"bndle",				(caddr_t)bndle},
+a73 2
+   {"callknlg",				(caddr_t)callknlg},
+   {"caloc",				(caddr_t)caloc},
+a106 6
+   {"clpit",				(caddr_t)clpit},
+   {"clz",				(caddr_t)clz},
+   {"clzbnft",				(caddr_t)clzbnft},
+   {"clzprfl",				(caddr_t)clzprfl},
+   {"clzrcmnd",				(caddr_t)clzrcmnd},
+   {"clzum",				(caddr_t)clzum},
+a110 1
+   {"cost",				(caddr_t)cost},
+a113 1
+   {"crcursoc",				(caddr_t)crcursoc},
+a128 1
+   {"crsaleusoc",			(caddr_t)crsaleusoc},
+a133 1
+   {"cualoc",				(caddr_t)cualoc},
+a135 1
+   {"custbenes",			(caddr_t)custbenes},
+a141 1
+   {"dispbenes",			(caddr_t)dispbenes},
+a145 1
+   {"dsply",				(caddr_t)dsply},
+a153 1
+   {"fakeit",				(caddr_t)fakeit},
+a157 4
+   {"fndit",				(caddr_t)fndit},
+   {"fnsh",				(caddr_t)fnsh},
+   {"fre",				(caddr_t)fre},
+   {"frealac",				(caddr_t)frealac},
+a160 1
+   {"frmt",				(caddr_t)frmt},
+a170 2
+   {"getall",				(caddr_t)getall},
+   {"getcr",				(caddr_t)getcr},
+a176 1
+   {"getoffice",			(caddr_t)getoffice},
+a178 1
+   {"getstd",				(caddr_t)getstd},
+a180 1
+   {"getuscs",				(caddr_t)getuscs},
+a184 1
+   {"gtit",				(caddr_t)gtit},
+a187 1
+   {"init",				(caddr_t)init},
+a190 1
+   {"initsales",			(caddr_t)initsales},
+a197 1
+   {"ksrspnscr",			(caddr_t)ksrspnscr},
+a213 1
+   {"lrgr",				(caddr_t)lrgr},
+a218 1
+   {"mng",				(caddr_t)mng},
+a219 1
+   {"motset",				(caddr_t)motset},
+a221 2
+   {"mvit",				(caddr_t)mvit},
+   {"mxmch",				(caddr_t)mxmch},
+a227 1
+   {"nextcusts",			(caddr_t)nextcusts},
+a241 3
+   {"nxtbnprd",				(caddr_t)nxtbnprd},
+   {"nxtcustpg",			(caddr_t)nxtcustpg},
+   {"nxtcustscroll",			(caddr_t)nxtcustscroll},
+a244 1
+   {"out",				(caddr_t)out},
+a249 1
+   {"pkit",				(caddr_t)pkit},
+a251 4
+   {"play",				(caddr_t)play},
+   {"pldwn",				(caddr_t)pldwn},
+   {"pooaloc",				(caddr_t)pooaloc},
+   {"prdsort",				(caddr_t)prdsort},
+a255 1
+   {"prevcusts",			(caddr_t)prevcusts},
+a259 6
+   {"pricit",				(caddr_t)pricit},
+   {"prvbnprd",				(caddr_t)prvbnprd},
+   {"prvcustpg",			(caddr_t)prvcustpg},
+   {"prvcustscroll",			(caddr_t)prvcustscroll},
+   {"ptup",				(caddr_t)ptup},
+   {"pupaloc",				(caddr_t)pupaloc},
+a263 1
+   {"rankit",				(caddr_t)rankit},
+a277 1
+   {"rerun",				(caddr_t)rerun},
+a281 7
+   {"rnctb",				(caddr_t)rnctb},
+   {"rnitb",				(caddr_t)rnitb},
+   {"rnmtb",				(caddr_t)rnmtb},
+   {"rnstb",				(caddr_t)rnstb},
+   {"safrmt",				(caddr_t)safrmt},
+   {"sales",				(caddr_t)sales},
+   {"salesinfo",			(caddr_t)salesinfo},
+a305 1
+   {"setlnpr",				(caddr_t)setlnpr},
+a306 1
+   {"shft",				(caddr_t)shft},
+a308 1
+   {"smlr",				(caddr_t)smlr},
+a316 1
+   {"tkit",				(caddr_t)tkit},
+a336 1
+   {"waloc",				(caddr_t)waloc},
+a337 1
+   {"wldcrd",				(caddr_t)wldcrd},
+a339 1
+   {"xactm",				(caddr_t)xactm},
+@
+
+
+20201.2
+log
+@CR#7188:M:Made Carrier Information work
+@
+text
+@d53 1
+a53 1
+   {"ST",				(caddr_t)ST},
+@
+
+
+20201.1
+log
+@CR#7166:M:Made EntityTable load from a file instead of being compiled in
+@
+text
+@d95 1
+@
+
+
+20103.1
+log
+@CR#7019:M:Add cancel_paperclip() function.
+@
+text
+@d222 1
+@
+
+
+20103.1.1.1
+log
+@CR#7103:M:
+@
+text
+@a120 1
+   {"collections",			(caddr_t)collections},
+@
+
+
+20103.1.1.1.1.1
+log
+@CR#7610:M: Fixed memory leaks
+@
+text
+@d50 1
+d61 3
+d65 1
+d68 5
+d75 3
+d80 2
+d83 1
+d91 3
+d99 2
+d102 1
+d114 6
+d122 5
+d129 1
+d131 3
+d145 1
+d151 1
+d154 1
+d156 4
+d161 1
+d163 2
+d166 1
+d171 3
+d175 3
+d180 5
+d187 13
+d206 1
+d209 1
+d212 1
+d214 1
+d216 3
+d221 1
+d224 1
+d227 4
+d232 1
+d234 1
+d239 4
+d246 4
+d255 1
+d257 2
+d260 2
+d263 3
+d268 1
+d275 1
+d281 5
+d287 1
+d289 2
+d292 1
+d295 9
+d306 1
+d311 6
+d321 8
+d331 6
+d338 1
+d341 9
+d351 2
+d355 2
+d372 1
+d374 1
+d377 1
+d386 2
+d389 7
+d398 1
+d402 2
+d407 1
+d409 4
+@
+
+
+20103.1.1.2
+log
+@CR#7610:M:Remove Sales Advisor & Ref Mgr code
+@
+text
+@d50 1
+d61 3
+d65 1
+d68 2
+d71 2
+d75 3
+d80 2
+d83 1
+d91 3
+d99 2
+d102 1
+d114 6
+d122 5
+d129 1
+d131 3
+d145 1
+d151 1
+d154 1
+d156 4
+d161 1
+d163 2
+d166 1
+d171 3
+d175 3
+d180 5
+d187 13
+d206 1
+d209 1
+d212 1
+d214 1
+d216 3
+d221 1
+d224 1
+d227 4
+d232 1
+d234 1
+d239 4
+d246 4
+d255 1
+d257 2
+d260 2
+d263 3
+d268 1
+d275 1
+d281 5
+d287 1
+d289 2
+d292 1
+d295 9
+d306 1
+d311 6
+d321 8
+d331 6
+d338 1
+d341 9
+d351 2
+d355 2
+d372 1
+d374 1
+d377 1
+d386 2
+d389 7
+d398 1
+d402 2
+d407 1
+d409 4
+@
+
+
+20102.3
+log
+@CR#6879:M:Added entries for prevcsr() and nextcsr()
+CR#6939:M:Added entries for closenotes() and notescback()
+@
+text
+@d83 1
+@
+
+
+20102.2
+log
+@Removed the datechk function, which is not used
+@
+text
+@d106 1
+d265 1
+d278 1
+d303 1
+@
+
+
+20102.1
+log
+@Initial correction of RCS revision numbers
+@
+text
+@a151 1
+   {"datechk",				(caddr_t)datechk},
+@
+
+
+1.5
+log
+@CR#6881:M: Fixed SR01 processing partially
+@
+text
+@@
+
+
+1.4
+log
+@rm phchk, add sr02load, sr05load
+@
+text
+@d198 1
+@
+
+
+1.3
+log
+@modified to support multiple phone numbers
+@
+text
+@a287 1
+   {"phchk",				(caddr_t)phchk},
+d373 2
+@
+
+
+1.2
+log
+@Initial 2.0 release
+@
+text
+@d124 1
+a124 1
+   {"crabi",				(caddr_t)crabi},
+d176 1
+a176 1
+   {"findscreen",			(caddr_t)findscreen},
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+a6 6
+/*  @@(#)                                                                  "*/
+/*  @@(#)Copyright U S WEST Information Technologies Group, 1989.          "*/
+/*  @@(#)                                                                  "*/
+/*  @@(#)Proprietary: Not for use or disclosure outside U S WEST and its   "*/
+/*  @@(#)affiliates exceptr under written agreement.                        "*/
+/*  @@(#)                                                                  "*/
+d9 15
+a25 100
+   {"getbuttons",			(caddr_t)getbuttons},
+   {"crdataval",			(caddr_t)crdataval},
+   {"getent",				(caddr_t)getent},
+   {"crhistnode",			(caddr_t)crhistnode},
+   {"get_ava_sec_entity",		(caddr_t)get_ava_sec_entity},
+   {"get_node_ptr",			(caddr_t)get_node_ptr},
+   {"gettar",				(caddr_t)gettar},
+   {"gettext",				(caddr_t)gettext},
+   {"rewindtext",			(caddr_t)rewindtext},
+   {"textptrinit",			(caddr_t)textptrinit},
+   {"crabi",				(caddr_t)crabi},
+   {"findscreen",			(caddr_t)findscreen},
+   {"allocmem",				(caddr_t)allocmem},
+   {"get_search_string",		(caddr_t)get_search_string},
+   {"getdataval",			(caddr_t)getdataval},
+   {"getinputstring",			(caddr_t)getinputstring},
+   {"getrealval",			(caddr_t)getrealval},
+   {"getvalue",				(caddr_t)getvalue},
+   {"search",				(caddr_t)search},
+   {"get_file_pg_offset",		(caddr_t)get_file_pg_offset},
+   {"get_total_pages",			(caddr_t)get_total_pages},
+   {"look_up_page",			(caddr_t)look_up_page},
+   {"add_new_sections",			(caddr_t)add_new_sections},
+   {"cleanup_deleted_sections",		(caddr_t)cleanup_deleted_sections},
+   {"addons",				(caddr_t)addons},
+   {"akas",				(caddr_t)akas},
+   {"alalac",				(caddr_t)alalac},
+   {"alplac",				(caddr_t)alplac},
+   {"bndle",				(caddr_t)bndle},
+   {"caloc",				(caddr_t)caloc},
+   {"checkdb",				(caddr_t)checkdb},
+   {"closeph",				(caddr_t)closeph},
+   {"clpit",				(caddr_t)clpit},
+   {"clz",				(caddr_t)clz},
+   {"comp",				(caddr_t)comp},
+   {"cualoc",				(caddr_t)cualoc},
+   {"deposits",				(caddr_t)deposits},
+   {"dsply",				(caddr_t)dsply},
+   {"fakeit",				(caddr_t)fakeit},
+   {"find_str",				(caddr_t)find_str},
+   {"fndit",				(caddr_t)fndit},
+   {"fnsh",				(caddr_t)fnsh},
+   {"fre",				(caddr_t)fre},
+   {"frealac",				(caddr_t)frealac},
+   {"frmt",				(caddr_t)frmt},
+   {"get_numeric_day",			(caddr_t)get_numeric_day},
+   {"get_numeric_month",		(caddr_t)get_numeric_month},
+   {"get_numeric_year",			(caddr_t)get_numeric_year},
+   {"getall",				(caddr_t)getall},
+   {"getcr",				(caddr_t)getcr},
+   {"getstd",				(caddr_t)getstd},
+   {"getuscs",				(caddr_t)getuscs},
+   {"gtit",				(caddr_t)gtit},
+   {"helpinfo",				(caddr_t)helpinfo},
+   {"init",				(caddr_t)init},
+   {"is_number",			(caddr_t)is_number},
+   {"loaddata",				(caddr_t)loaddata},
+   {"main",				(caddr_t)main},
+   {"makedatatag",			(caddr_t)makedatatag},
+   {"mvit",				(caddr_t)mvit},
+   {"mxmch",				(caddr_t)mxmch},
+   {"new_user",				(caddr_t)new_user},
+   {"nodata",				(caddr_t)nodata},
+   {"no_close_halt",			(caddr_t)no_close_halt},
+   {"note_exists",			(caddr_t)note_exists},
+   {"notes_in_section",			(caddr_t)notes_in_section},
+   {"odd_page",				(caddr_t)odd_page},
+   {"out",				(caddr_t)out},
+   {"pkit",				(caddr_t)pkit},
+   {"play",				(caddr_t)play},
+   {"pldwn",				(caddr_t)pldwn},
+   {"pooaloc",				(caddr_t)pooaloc},
+   {"pricit",				(caddr_t)pricit},
+   {"ptrup",				(caddr_t)ptup},
+   {"pupaloc",				(caddr_t)pupaloc},
+   {"putval",				(caddr_t)putval},
+   {"rankit",				(caddr_t)rankit},
+   {"relocate_note_exists",		(caddr_t)relocate_note_exists},
+   {"rerun",				(caddr_t)rerun},
+   {"rnctb",				(caddr_t)rnctb},
+   {"rnitb",				(caddr_t)rnitb},
+   {"rnmtb",				(caddr_t)rnmtb},
+   {"rnstb",				(caddr_t)rnstb},
+   {"safrmt",				(caddr_t)safrmt},
+   {"sales",				(caddr_t)sales},
+   {"sales",				(caddr_t)sales},
+   {"sec_entity_available",		(caddr_t)sec_entity_available},
+   {"sec_ind_displayed",		(caddr_t)sec_ind_displayed},
+   {"serheadings",			(caddr_t)serheadings},
+   {"service",				(caddr_t)service},
+   {"setlnpr",				(caddr_t)setlnpr},
+   {"shft",				(caddr_t)shft},
+   {"tkit",				(caddr_t)tkit},
+   {"update_entity_sec_list",		(caddr_t)update_entity_sec_list},
+   {"updates_exist",			(caddr_t)updates_exist},
+   {"valid_page_number",		(caddr_t)valid_page_number},
+   {"waloc",				(caddr_t)waloc},
+   {"windfunc",				(caddr_t)windfunc},
+   {"wldcrd",				(caddr_t)wldcrd},
+   {"xactm",				(caddr_t)xactm},
+d30 1
+a30 1
+   {"CodeEnttyID",			(caddr_t)CodeEnttyID},
+d37 1
+d40 1
+d61 3
+d65 1
+d68 4
+d74 2
+d78 2
+d81 1
+d91 1
+d93 1
+d97 1
+d99 1
+d101 1
+a101 1
+   {"close_note_window",		(caddr_t)close_note_window},
+d108 1
+d112 2
+d119 1
+d121 1
+d123 2
+d127 2
+a128 1
+   {"create_user_admin_lists",		(caddr_t)create_user_admin_lists},
+d130 1
+d137 1
+d148 2
+d153 3
+d157 2
+d164 1
+a165 1
+   {"enteract",				(caddr_t)enteract},
+d170 1
+d173 9
+a181 1
+   {"footnote",				(caddr_t)footnote},
+d183 1
+d185 4
+d191 1
+d194 5
+a198 1
+   {"get_string",			(caddr_t)get_string},
+d200 2
+a201 1
+   {"gethelp",				(caddr_t)gethelp},
+d205 6
+d214 1
+d217 2
+d221 1
+d227 1
+d236 3
+d240 1
+d242 7
+d252 1
+d254 1
+d257 2
+d260 2
+d265 1
+d268 1
+d272 2
+d276 3
+d282 1
+d284 2
+a285 1
+   {"openhelp",				(caddr_t)openhelp},
+d287 1
+d291 6
+d306 2
+d310 3
+a312 1
+   {"putvarput",			(caddr_t)putvarput},
+d314 1
+d316 1
+d320 1
+d323 1
+d325 1
+d327 1
+d329 5
+a333 1
+   {"rmactlist",			(caddr_t)rmactlist},
+d336 6
+d344 1
+d348 1
+d350 2
+d354 2
+d358 1
+a359 1
+   {"serv_ret",				(caddr_t)serv_ret},
+d362 1
+d367 1
+d369 1
+d372 1
+a375 1
+   {"testsi",				(caddr_t)testsi},
+d377 1
+d379 2
+d382 3
+d386 1
+d391 1
+d395 3
+a397 2
+   {"varcopytable",			(caddr_t)varcopytable},
+   {"varputval",			(caddr_t)varputval},
+d400 4
+d405 2
+a406 2
+   {"windraise",			(caddr_t)windraise},
+   {"END",				(caddr_t)NULL},
+@

@@ -1,7 +1,9 @@
 .rn '' }`
-''' $RCSfile: perl.man,v $$Revision: 4.0.1.6 $$Date: 92/06/08 15:07:29 $
+''' $RCSfile: perl.man,v $$Revision: 4.1 $$Date: 92/08/07 18:25:59 $
 ''' 
 ''' $Log:	perl.man,v $
+''' Revision 4.1  92/08/07  18:25:59  lwall
+''' 
 ''' Revision 4.0.1.6  92/06/08  15:07:29  lwall
 ''' patch20: documented that numbers may contain underline
 ''' patch20: clarified that DATA may only be read from main script
@@ -1837,7 +1839,8 @@ If you don't know what it does, don't worry about it.
 If FILENAME is omitted, does chroot to $_.
 .Ip "close(FILEHANDLE)" 8 5
 .Ip "close FILEHANDLE" 8
-Closes the file or pipe associated with the file handle.
+Closes the file or pipe associated with the file handle, returning true only
+if stdio successfully flushes buffers and closes the system file descriptor.
 You don't have to close FILEHANDLE if you are immediately going to
 do another open on it, since open will close it for you.
 (See
@@ -2341,8 +2344,9 @@ Here's a mailbox appender for BSD systems.
 
 .fi
 .Ip "fork" 8 4
-Does a fork() call.
-Returns the child pid to the parent process and 0 to the child process.
+Does a fork() system call.
+Returns the child pid to the parent process and 0 to the child process,
+or undef if the fork is unsuccessful.
 Note: unflushed buffers remain unflushed in both processes, which means
 you may need to set $| to avoid duplicate output.
 .Ip "getc(FILEHANDLE)" 8 4
@@ -2624,6 +2628,7 @@ See
 .Ip "keys ASSOC_ARRAY" 8
 Returns a normal array consisting of all the keys of the named associative
 array.
+(In a scalar context, returns the number of keys.)
 The keys are returned in an apparently random order, but it is the same order
 as either the values() or each() function produces (given that the associative array
 has not been modified).
@@ -3254,7 +3259,7 @@ Has the same effect as
     }
 
 .fi
-but is more efficient.
+but is more efficient.  Returns the new number of elements in the array.
 .Ip "q/STRING/" 8 5
 .Ip "qq/STRING/" 8
 .Ip "qx/STRING/" 8
@@ -3588,7 +3593,7 @@ Calls the System V IPC function semctl.  If CMD is &IPC_STAT or
 semid_ds structure or semaphore value array.  Returns like ioctl: the
 undefined value for error, "0 but true" for zero, or the actual return
 value otherwise.
-.Ip "semget(KEY,NSEMS,SIZE,FLAGS)" 8 4
+.Ip "semget(KEY,NSEMS,FLAGS)" 8 4
 Calls the System V IPC function semget.  Returns the semaphore id, or
 the undefined value if there is an error.
 .Ip "semop(KEY,OPSTRING)" 8 4
@@ -4205,19 +4210,27 @@ For example, the following computes the same number as the System V sum program:
 	$checksum %= 65536;
 
 .fi
+The following efficiently counts the number of set bits in a bit vector:
+.nf
+
+	$setbits = unpack("%32b*", $selectmask);
+
+.fi
 .Ip "unshift(ARRAY,LIST)" 8 4
 Does the opposite of a
 .IR shift .
 Or the opposite of a
 .IR push ,
 depending on how you look at it.
-Prepends list to the front of the array, and returns the number of elements
-in the new array.
+Prepends list to the front of the array, and returns the new number of elements
+in the array.
 .nf
 
 	unshift(ARGV, \'\-e\') unless $ARGV[0] =~ /^\-/;
 
 .fi
+Note the LIST is prepended whole, not one element at a time, so the prepended
+elements stay in the same order.  Use reverse to do the reverse.
 .Ip "utime(LIST)" 8 2
 .Ip "utime LIST" 8 2
 Changes the access and modification times on each file of a list of files.
@@ -4238,6 +4251,7 @@ Example of a \*(L"touch\*(R" command:
 .Ip "values ASSOC_ARRAY" 8
 Returns a normal array consisting of all the values of the named associative
 array.
+(In a scalar context, returns the number of values.)
 The values are returned in an apparently random order, but it is the same order
 as either the keys() or each() function would produce on the same array.
 See also keys() and each().

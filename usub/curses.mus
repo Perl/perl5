@@ -1,6 +1,8 @@
-/* $RCSfile: curses.mus,v $$Revision: 4.0.1.2 $$Date: 92/06/08 16:06:12 $
+/* $RCSfile: curses.mus,v $$Revision: 4.1 $$Date: 92/08/07 18:28:53 $
  *
  * $Log:	curses.mus,v $
+ * Revision 4.1  92/08/07  18:28:53  lwall
+ * 
  * Revision 4.0.1.2  92/06/08  16:06:12  lwall
  * patch20: function key support added to curses.mus
  * 
@@ -730,7 +732,7 @@ END
 	    int retval;
 	    STR*	str =		str_new(0);
 
-	    do_sprintf(str, items - 1, st + 1);
+	    do_sprintf(str, items, st + 1);
 	    retval = addstr(str->str_ptr);
 	    str_numset(st[0], (double) retval);
 	    str_free(str);

@@ -1,0 +1,44 @@
+AV *
+save_ary(av)
+AV *av;
+{
+    register SV *sv;
+
+    sv = NEWSV(10,0);
+    sv->sv_state = SVs_SARY;
+    sv_setpv(sv, (char*)av, sizeof(AV));
+
+    av->av_sv.sv_rare = AVf_REAL;
+    av->av_magic = NEWSV(7,0);
+    av->av_alloc = av->av_array = 0;
+    /* sv_magic(av->av_magic, gv, '#', Nullch, 0); */
+    av->av_max = av->av_fill = -1;
+
+    sv->sv_u.sv_av = av;
+    (void)av_push(savestack,sv); /* save array ptr */
+    return av;
+}
+
+HV *
+save_hash(hv)
+HV *hv;
+{
+    register SV *sv;
+
+    sv = NEWSV(11,0);
+    sv->sv_state = SVs_SHASH;
+    sv_setpv(sv, (char*)hv, sizeof(HV));
+
+    hv->hv_array = 0;
+    hv->hv_max = 7;
+    hv->hv_dosplit = hv->hv_max * FILLPCT / 100;
+    hv->hv_fill = 0;
+#ifdef SOME_DBM
+    hv->hv_dbm = 0;
+#endif
+    (void)hv_iterinit(hv);      /* so each() will start off right */
+
+    sv->sv_u.sv_hv = hv;
+    (void)av_push(savestack,sv); /* save hash ptr */
+    return hv;
+}

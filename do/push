@@ -1,0 +1,19 @@
+STR *
+do_push(ary,arglast)
+register ARRAY *ary;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[1];
+    register int items = arglast[2] - sp;
+    register STR *TARG = &str_undef;
+
+    for (st += ++sp; items > 0; items--,st++) {
+	TARG = Str_new(26,0);
+	if (*st)
+	    str_sset(TARG,*st);
+	(void)apush(ary,TARG);
+    }
+    return TARG;
+}
+

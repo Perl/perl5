@@ -1,0 +1,56 @@
+#ifdef HAS_SOCKET
+int
+do_spair(stab1, stab2, arglast)
+STAB *stab1;
+STAB *stab2;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[2];
+    register STIO *stio1;
+    register STIO *stio2;
+    int domain, type, protocol, fd[2];
+
+    if (!stab1 || !stab2)
+	return FALSE;
+
+    stio1 = stab_io(stab1);
+    stio2 = stab_io(stab2);
+    if (!stio1)
+	stio1 = stab_io(stab1) = stio_new();
+    else if (stio1->ifp)
+	do_close(stab1,FALSE);
+    if (!stio2)
+	stio2 = stab_io(stab2) = stio_new();
+    else if (stio2->ifp)
+	do_close(stab2,FALSE);
+
+    domain = (int)str_gnum(st[++sp]);
+    type = (int)str_gnum(st[++sp]);
+    protocol = (int)str_gnum(st[++sp]);
+TAINT_PROPER("in socketpair");
+#ifdef HAS_SOCKETPAIR
+    if (socketpair(domain,type,protocol,fd) < 0)
+	return FALSE;
+#else
+    fatal("Socketpair unimplemented");
+#endif
+    stio1->ifp = fdopen(fd[0], "r");
+    stio1->ofp = fdopen(fd[0], "w");
+    stio1->type = 's';
+    stio2->ifp = fdopen(fd[1], "r");
+    stio2->ofp = fdopen(fd[1], "w");
+    stio2->type = 's';
+    if (!stio1->ifp || !stio1->ofp || !stio2->ifp || !stio2->ofp) {
+	if (stio1->ifp) fclose(stio1->ifp);
+	if (stio1->ofp) fclose(stio1->ofp);
+	if (!stio1->ifp && !stio1->ofp) close(fd[0]);
+	if (stio2->ifp) fclose(stio2->ifp);
+	if (stio2->ofp) fclose(stio2->ofp);
+	if (!stio2->ifp && !stio2->ofp) close(fd[1]);
+	return FALSE;
+    }
+
+    return TRUE;
+}
+

@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: s.t,v 4.0 91/03/20 01:54:30 lwall Locked $
+# $RCSfile: s.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:22 $
 
-print "1..51\n";
+print "1..56\n";
 
 $x = 'foo';
 $_ = "x";
@@ -21,7 +21,7 @@ print "#3\t:$_: eq :\$x foo:\n";
 if ($_ eq '$x foo') {print "ok 3\n";} else {print "not ok 3\n";}
 
 $b = 'cd';
-($a = 'abcdef') =~ s'(b${b}e)'\n$1';
+($a = 'abcdef') =~ s<(b${b}e)>'\n$1';
 print "#4\t:$1: eq :bcde:\n";
 print "#4\t:$a: eq :a\\n\$1f:\n";
 if ($1 eq 'bcde' && $a eq 'a\n$1f') {print "ok 4\n";} else {print "not ok 4\n";}
@@ -177,3 +177,24 @@ $_ = "Now is the %#*! time for all good men...";
 print (($x=(y/a-zA-Z //cd)) == 7 ? "ok 50\n" : "not ok 50\n");
 print y/ / /s == 8 ? "ok 51\n" : "not ok 51\n";
 
+$_ = 'abcdefghijklmnopqrstuvwxyz0123456789';
+tr/a-z/A-Z/;
+
+print $_ eq 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' ? "ok 52\n" : "not ok 52\n";
+
+# same as tr/A-Z/a-z/;
+y[\101-\132][\141-\172];
+
+print $_ eq 'abcdefghijklmnopqrstuvwxyz0123456789' ? "ok 53\n" : "not ok 53\n";
+
+$_ = '+,-';
+tr/+--/a-c/;
+print $_ eq 'abc' ? "ok 54\n" : "not ok 54\n";
+
+$_ = '+,-';
+tr/+\--/a\/c/;
+print $_ eq 'a,/' ? "ok 55\n" : "not ok 55\n";
+
+$_ = '+,-';
+tr/-+,/ab\-/;
+print $_ eq 'b-a' ? "ok 56\n" : "not ok 56\n";

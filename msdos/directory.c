@@ -1,4 +1,4 @@
-/* $RCSfile: directory.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:22:24 $
+/* $RCSfile: directory.c,v $$Revision: 4.1 $$Date: 92/08/07 18:24:42 $
  *
  *    (C) Copyright 1987, 1988, 1990 Diomidis Spinellis.
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	directory.c,v $
+ * Revision 4.1  92/08/07  18:24:42  lwall
+ * 
  * Revision 4.0.1.1  91/06/07  11:22:24  lwall
  * patch4: new copyright notice
  * 
@@ -47,7 +49,7 @@
 #define PATHLEN 65
 
 #ifndef lint
-static char rcsid[] = "$RCSfile: directory.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:22:24 $";
+static char rcsid[] = "$RCSfile: directory.c,v $$Revision: 4.1 $$Date: 92/08/07 18:24:42 $";
 #endif
 
 DIR *

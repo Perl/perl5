@@ -1,0 +1,18 @@
+
+    s'$lhs'$rhs' now does no interpolation on either side.  It used to
+    interplolate $lhs but not $rhs.
+
+    The second and third arguments of splice are now evaluated in scalar
+    context (like the book says) rather than list context.
+
+    Saying shift @foo + 20 is now a semantic error.
+
+    The elements of argument lists for formats are now evaluated in list
+    context.
+
+    You can't do a goto into a block that is optimized away.
+
+    It is no longer syntactically legal to use whitespace as the name
+    of a variable.
+
+    Some error messages will be different.

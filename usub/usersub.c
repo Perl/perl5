@@ -1,6 +1,8 @@
-/* $RCSfile: usersub.c,v $$Revision: 4.0.1.1 $$Date: 91/11/05 19:07:24 $
+/* $RCSfile: usersub.c,v $$Revision: 4.1 $$Date: 92/08/07 18:28:59 $
  *
  * $Log:	usersub.c,v $
+ * Revision 4.1  92/08/07  18:28:59  lwall
+ * 
  * Revision 4.0.1.1  91/11/05  19:07:24  lwall
  * patch11: there are now subroutines for calling back from C into Perl
  * 

@@ -1,0 +1,86 @@
+int
+do_gpwent(which,gimme,arglast)
+int which;
+int gimme;
+int *arglast;
+{
+#ifdef I_PWD
+    register ARRAY *ary = stack;
+    register int sp = arglast[0];
+    register STR *TARG;
+    struct passwd *getpwnam();
+    struct passwd *getpwuid();
+    struct passwd *getpwent();
+    struct passwd *pwent;
+
+    if (which == O_GPWNAM) {
+	char *name = str_get(ary->ary_array[sp+1]);
+
+	pwent = getpwnam(name);
+    }
+    else if (which == O_GPWUID) {
+	int uid = (int)str_gnum(ary->ary_array[sp+1]);
+
+	pwent = getpwuid(uid);
+    }
+    else
+	pwent = getpwent();
+
+    if (gimme != G_ARRAY) {
+	astore(ary, ++sp, TARG = str_mortal(&str_undef));
+	if (pwent) {
+	    if (which == O_GPWNAM)
+		str_numset(TARG, (double)pwent->pw_uid);
+	    else
+		str_set(TARG, pwent->pw_name);
+	}
+	return sp;
+    }
+
+    if (pwent) {
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_set(TARG, pwent->pw_name);
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_set(TARG, pwent->pw_passwd);
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_numset(TARG, (double)pwent->pw_uid);
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_numset(TARG, (double)pwent->pw_gid);
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+#ifdef PWCHANGE
+	str_numset(TARG, (double)pwent->pw_change);
+#else
+#ifdef PWQUOTA
+	str_numset(TARG, (double)pwent->pw_quota);
+#else
+#ifdef PWAGE
+	str_set(TARG, pwent->pw_age);
+#endif
+#endif
+#endif
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+#ifdef PWCLASS
+	str_set(TARG,pwent->pw_class);
+#else
+#ifdef PWCOMMENT
+	str_set(TARG, pwent->pw_comment);
+#endif
+#endif
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_set(TARG, pwent->pw_gecos);
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_set(TARG, pwent->pw_dir);
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_set(TARG, pwent->pw_shell);
+#ifdef PWEXPIRE
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_numset(TARG, (double)pwent->pw_expire);
+#endif
+    }
+
+    return sp;
+#else
+    fatal("password routines not implemented");
+#endif
+}
+

@@ -1,0 +1,13 @@
+../makedepend
+make: Warning: Both `makefile' and `Makefile' exists
+Current working directory /usr/src/local/lwall/perl5/x2p
+echo hash.c malloc.c str.c util.c walk.c | tr ' ' '\012' >.clist
+Finding dependencies for hash.o.
+Finding dependencies for malloc.o.
+Finding dependencies for str.o.
+Finding dependencies for util.o.
+Finding dependencies for walk.o.
+make: Warning: Both `makefile' and `Makefile' exists
+Current working directory /usr/src/local/lwall/perl5/x2p
+echo Makefile.SH makedepend.SH | tr ' ' '\012' >.shlist
+Updating makefile...

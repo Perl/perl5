@@ -1,0 +1,92 @@
+int
+do_ghent(which,gimme,arglast)
+int which;
+int gimme;
+int *arglast;
+{
+    register ARRAY *ary = stack;
+    register int sp = arglast[0];
+    register char **elem;
+    register STR *TARG;
+    struct hostent *gethostbyname();
+    struct hostent *gethostbyaddr();
+#ifdef HAS_GETHOSTENT
+    struct hostent *gethostent();
+#endif
+    struct hostent *hent;
+    unsigned long len;
+
+    if (which == O_GHBYNAME) {
+	char *name = str_get(ary->ary_array[sp+1]);
+
+	hent = gethostbyname(name);
+    }
+    else if (which == O_GHBYADDR) {
+	STR *addrstr = ary->ary_array[sp+1];
+	int addrtype = (int)str_gnum(ary->ary_array[sp+2]);
+	char *addr = str_get(addrstr);
+
+	hent = gethostbyaddr(addr,addrstr->str_cur,addrtype);
+    }
+    else
+#ifdef HAS_GETHOSTENT
+	hent = gethostent();
+#else
+	fatal("gethostent not implemented");
+#endif
+
+#ifdef HOST_NOT_FOUND
+    if (!hent)
+	statusvalue = (unsigned short)h_errno & 0xffff;
+#endif
+
+    if (gimme != G_ARRAY) {
+	astore(ary, ++sp, TARG = str_mortal(&str_undef));
+	if (hent) {
+	    if (which == O_GHBYNAME) {
+#ifdef h_addr
+		str_nset(TARG, *hent->h_addr, hent->h_length);
+#else
+		str_nset(TARG, hent->h_addr, hent->h_length);
+#endif
+	    }
+	    else
+		str_set(TARG, hent->h_name);
+	}
+	return sp;
+    }
+
+    if (hent) {
+#ifndef lint
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_set(TARG, hent->h_name);
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	for (elem = hent->h_aliases; *elem; elem++) {
+	    str_cat(TARG, *elem);
+	    if (elem[1])
+		str_ncat(TARG," ",1);
+	}
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_numset(TARG, (double)hent->h_addrtype);
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	len = hent->h_length;
+	str_numset(TARG, (double)len);
+#ifdef h_addr
+	for (elem = hent->h_addr_list; *elem; elem++) {
+	    (void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	    str_nset(TARG, *elem, len);
+	}
+#else
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_nset(TARG, hent->h_addr, len);
+#endif /* h_addr */
+#else /* lint */
+	elem = Nullch;
+	elem = elem;
+	(void)astore(ary, ++sp, str_mortal(&str_no));
+#endif /* lint */
+    }
+
+    return sp;
+}
+

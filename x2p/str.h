@@ -1,4 +1,4 @@
-/* $RCSfile: str.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:20:22 $
+/* $RCSfile: str.h,v $$Revision: 4.1 $$Date: 92/08/07 18:29:27 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	str.h,v $
+ * Revision 4.1  92/08/07  18:29:27  lwall
+ * 
  * Revision 4.0.1.1  91/06/07  12:20:22  lwall
  * patch4: new copyright notice
  * 

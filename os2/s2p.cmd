@@ -3,9 +3,11 @@ extproc perl -Sx
 
 $bin = 'c:/bin';
 
-# $Header: s2p.cmd,v 4.0 91/03/20 01:37:09 lwall Locked $
+# $RCSfile: s2p.cmd,v $$Revision: 4.1 $$Date: 92/08/07 18:25:37 $
 #
 # $Log:	s2p.cmd,v $
+# Revision 4.1  92/08/07  18:25:37  lwall
+# 
 # Revision 4.0  91/03/20  01:37:09  lwall
 # 4.0 baseline.
 # 

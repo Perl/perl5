@@ -1,10 +1,10 @@
 #!./perl
 
-# $RCSfile: goto.t,v $$Revision: 4.0.1.1 $$Date: 92/06/08 15:43:25 $
+# $RCSfile: goto.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:56 $
 
-print "1..3\n";
+print "1..5\n";
 
-while (0) {
+while ($?) {
     $foo = 1;
   label1:
     $foo = 2;
@@ -31,3 +31,23 @@ if ($foo == 4) {print "ok 2\n";} else {print "not ok 2\n";}
 
 $x = `./perl -e 'goto foo;' 2>&1`;
 if ($x =~ /label/) {print "ok 3\n";} else {print "not ok 3\n";}
+
+sub foo {
+    goto bar;
+    print "not ok 4\n";
+    return;
+bar:
+    print "ok 4\n";
+}
+
+&foo;
+
+sub bar {
+    $x = 'exitcode';
+    eval "goto $x";	# Do not take this as exemplary code!!!
+}
+
+&bar;
+exit;
+exitcode:
+print "ok 5\n";

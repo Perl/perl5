@@ -1,0 +1,41 @@
+int
+do_tms(TARG,gimme,arglast)
+STR *TARG;
+int gimme;
+int *arglast;
+{
+#ifdef MSDOS
+    return -1;
+#else
+    STR **st = stack->ary_array;
+    register int sp = arglast[0];
+
+    if (gimme != G_ARRAY) {
+	str_sset(TARG,&str_undef);
+	STABSET(TARG);
+	st[++sp] = TARG;
+	return sp;
+    }
+    (void)times(&timesbuf);
+
+#ifndef HZ
+#define HZ 60
+#endif
+
+#ifndef lint
+    (void)astore(stack,++sp,
+      str_2mortal(str_nmake(((double)timesbuf.tms_utime)/HZ)));
+    (void)astore(stack,++sp,
+      str_2mortal(str_nmake(((double)timesbuf.tms_stime)/HZ)));
+    (void)astore(stack,++sp,
+      str_2mortal(str_nmake(((double)timesbuf.tms_cutime)/HZ)));
+    (void)astore(stack,++sp,
+      str_2mortal(str_nmake(((double)timesbuf.tms_cstime)/HZ)));
+#else
+    (void)astore(stack,++sp,
+      str_2mortal(str_nmake(0.0)));
+#endif
+    return sp;
+#endif
+}
+

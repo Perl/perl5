@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: fork.t,v 4.0 91/03/20 01:52:43 lwall Locked $
+# $RCSfile: fork.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:53 $
 
 $| = 1;
 print "1..2\n";

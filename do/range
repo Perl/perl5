@@ -1,0 +1,43 @@
+int
+do_range(gimme,arglast)
+int gimme;
+int *arglast;
+{
+    STR **st = stack->ary_array;
+    register int sp = arglast[0];
+    register int i;
+    register ARRAY *ary = stack;
+    register STR *TARG;
+    int max;
+
+    if (gimme != G_ARRAY)
+	fatal("panic: do_range");
+
+    if (st[sp+1]->str_nok || !st[sp+1]->str_pok ||
+      (looks_like_number(st[sp+1]) && *st[sp+1]->str_ptr != '0') ) {
+	i = (int)str_gnum(st[sp+1]);
+	max = (int)str_gnum(st[sp+2]);
+	if (max > i)
+	    (void)astore(ary, sp + max - i + 1, Nullstr);
+	while (i <= max) {
+	    (void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	    str_numset(TARG,(double)i++);
+	}
+    }
+    else {
+	STR *final = str_mortal(st[sp+2]);
+	char *tmps = str_get(final);
+
+	TARG = str_mortal(st[sp+1]);
+	while (!TARG->str_nok && TARG->str_cur <= final->str_cur &&
+	    strNE(TARG->str_ptr,tmps) ) {
+	    (void)astore(ary, ++sp, TARG);
+	    TARG = str_2mortal(str_smake(TARG));
+	    str_inc(TARG);
+	}
+	if (strEQ(TARG->str_ptr,tmps))
+	    (void)astore(ary, ++sp, TARG);
+    }
+    return sp;
+}
+

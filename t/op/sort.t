@@ -1,6 +1,6 @@
 #!./perl
 
-# $RCSfile: sort.t,v $$Revision: 4.0.1.2 $$Date: 91/11/11 16:43:47 $
+# $RCSfile: sort.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:24 $
 
 print "1..10\n";
 

@@ -1,0 +1,47 @@
+OP *
+newFOROP(label,forline,scalar,expr,block,cont)
+char *label;
+line_t forline;
+OP *scalar;
+OP *expr
+OP *block
+OP *cont;
+{
+    OP *newop;
+
+    copline = forline;
+
+    /*
+     * The following gobbledygook catches EXPRs that
+     * aren't explicit array refs and translates
+     *		foreach VAR (EXPR)
+     * into
+     *		@ary = EXPR;
+     *		foreach VAR (@ary)
+     * where @ary is a hidden array made by newGVgen().
+     * (Note that @ary may become a local array if
+     * it is determined that it might be called
+     * recursively.  See cmd_tosave().)
+     */
+    if (expr->op_type != OP_ARRAY) {
+	scrstab = gv_AVadd(newGVgen());
+	newop = append_elem(OP_LINESEQ,
+	    newSTATEOP(label,
+	      newBINOP(OP_ASSIGN,
+		listref(newUNOP(OP_ARRAY,
+		  gv_to_op(A_STAB,scrstab))),
+		forcelist(expr))),
+	    loopscope(over(scalar,newSTATEOP(label,
+	      newLOOPOP( 0,
+		newUNOP(OP_ARRAY,
+		  gv_to_op(A_STAB,scrstab)),
+		block,cont)))));
+	newop->cop_line = forline;
+	newop->cop_head->cop_line = forline;
+    }
+    else {
+	newop = loopscope(over(scalar,newSTATEOP(label,
+	newLOOPOP(1,expr,block,cont) )));
+    }
+    return newop;
+}

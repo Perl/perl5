@@ -1,4 +1,4 @@
-/* $RCSfile: dump.c,v $$Revision: 4.0.1.2 $$Date: 92/06/08 13:14:22 $
+/* $RCSfile: dump.c,v $$Revision: 4.1 $$Date: 92/08/07 17:20:03 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	dump.c,v $
+ * Revision 4.1  92/08/07  17:20:03  lwall
+ * Stage 6 Snapshot
+ * 
  * Revision 4.0.1.2  92/06/08  13:14:22  lwall
  * patch20: removed implicit int declarations on funcions
  * patch20: fixed confusion between a *var's real name and its effective name
@@ -22,268 +25,254 @@
 #include "perl.h"
 
 #ifdef DEBUGGING
-static int dumplvl = 0;
 
 static void dump();
 
 void
+dump_sequence(op)
+register OP *op;
+{
+    extern I32 op_seq;
+
+    for (; op; op = op->op_next) {
+	if (op->op_seq)
+	    return;
+	op->op_seq = ++op_seq;
+    }
+}
+
+void
 dump_all()
 {
-    register int i;
-    register STAB *stab;
-    register HENT *entry;
-    STR *str = str_mortal(&str_undef);
+    register I32 i;
+    register GV *gv;
+    register HE *entry;
+    SV *sv = sv_mortalcopy(&sv_undef);
 
-    dump_cmd(main_root,Nullcmd);
+    setlinebuf(stderr);
+    dump_sequence(main_start);
+    dump_op(main_root);
     for (i = 0; i <= 127; i++) {
-	for (entry = defstash->tbl_array[i]; entry; entry = entry->hent_next) {
-	    stab = (STAB*)entry->hent_val;
-	    if (stab_sub(stab)) {
-		stab_fullname(str,stab);
-		dump("\nSUB %s = ", str->str_ptr);
-		dump_cmd(stab_sub(stab)->cmd,Nullcmd);
-	    }
-	}
-    }
-}
-
-void
-dump_cmd(cmd,alt)
-register CMD *cmd;
-register CMD *alt;
-{
-    fprintf(stderr,"{\n");
-    while (cmd) {
-	dumplvl++;
-	dump("C_TYPE = %s\n",cmdname[cmd->c_type]);
-	dump("C_ADDR = 0x%lx\n",cmd);
-	dump("C_NEXT = 0x%lx\n",cmd->c_next);
-	if (cmd->c_line)
-	    dump("C_LINE = %d (0x%lx)\n",cmd->c_line,cmd);
-	if (cmd->c_label)
-	    dump("C_LABEL = \"%s\"\n",cmd->c_label);
-	dump("C_OPT = CFT_%s\n",cmdopt[cmd->c_flags & CF_OPTIMIZE]);
-	*buf = '\0';
-	if (cmd->c_flags & CF_FIRSTNEG)
-	    (void)strcat(buf,"FIRSTNEG,");
-	if (cmd->c_flags & CF_NESURE)
-	    (void)strcat(buf,"NESURE,");
-	if (cmd->c_flags & CF_EQSURE)
-	    (void)strcat(buf,"EQSURE,");
-	if (cmd->c_flags & CF_COND)
-	    (void)strcat(buf,"COND,");
-	if (cmd->c_flags & CF_LOOP)
-	    (void)strcat(buf,"LOOP,");
-	if (cmd->c_flags & CF_INVERT)
-	    (void)strcat(buf,"INVERT,");
-	if (cmd->c_flags & CF_ONCE)
-	    (void)strcat(buf,"ONCE,");
-	if (cmd->c_flags & CF_FLIP)
-	    (void)strcat(buf,"FLIP,");
-	if (cmd->c_flags & CF_TERM)
-	    (void)strcat(buf,"TERM,");
-	if (*buf)
-	    buf[strlen(buf)-1] = '\0';
-	dump("C_FLAGS = (%s)\n",buf);
-	if (cmd->c_short) {
-	    dump("C_SHORT = \"%s\"\n",str_peek(cmd->c_short));
-	    dump("C_SLEN = \"%d\"\n",cmd->c_slen);
-	}
-	if (cmd->c_stab) {
-	    dump("C_STAB = ");
-	    dump_stab(cmd->c_stab);
-	}
-	if (cmd->c_spat) {
-	    dump("C_SPAT = ");
-	    dump_spat(cmd->c_spat);
-	}
-	if (cmd->c_expr) {
-	    dump("C_EXPR = ");
-	    dump_arg(cmd->c_expr);
-	} else
-	    dump("C_EXPR = NULL\n");
-	switch (cmd->c_type) {
-	case C_NEXT:
-	case C_WHILE:
-	case C_BLOCK:
-	case C_ELSE:
-	case C_IF:
-	    if (cmd->ucmd.ccmd.cc_true) {
-		dump("CC_TRUE = ");
-		dump_cmd(cmd->ucmd.ccmd.cc_true,cmd->ucmd.ccmd.cc_alt);
-	    }
-	    else
-		dump("CC_TRUE = NULL\n");
-	    if (cmd->c_type == C_IF && cmd->ucmd.ccmd.cc_alt) {
-		dump("CC_ENDELSE = 0x%lx\n",cmd->ucmd.ccmd.cc_alt);
-	    }
-	    else if (cmd->c_type == C_NEXT && cmd->ucmd.ccmd.cc_alt) {
-		dump("CC_NEXT = 0x%lx\n",cmd->ucmd.ccmd.cc_alt);
-	    }
-	    else
-		dump("CC_ALT = NULL\n");
-	    break;
-	case C_EXPR:
-	    if (cmd->ucmd.acmd.ac_stab) {
-		dump("AC_STAB = ");
-		dump_stab(cmd->ucmd.acmd.ac_stab);
-	    } else
-		dump("AC_STAB = NULL\n");
-	    if (cmd->ucmd.acmd.ac_expr) {
-		dump("AC_EXPR = ");
-		dump_arg(cmd->ucmd.acmd.ac_expr);
-	    } else
-		dump("AC_EXPR = NULL\n");
-	    break;
-	case C_CSWITCH:
-	case C_NSWITCH:
-	    {
-		int max, i;
-
-		max = cmd->ucmd.scmd.sc_max;
-		dump("SC_MIN = (%d)\n",cmd->ucmd.scmd.sc_offset + 1);
-		dump("SC_MAX = (%d)\n", max + cmd->ucmd.scmd.sc_offset - 1);
-		dump("SC_NEXT[LT] = 0x%lx\n", cmd->ucmd.scmd.sc_next[0]);
-		for (i = 1; i < max; i++)
-		    dump("SC_NEXT[%d] = 0x%lx\n", i + cmd->ucmd.scmd.sc_offset,
-		      cmd->ucmd.scmd.sc_next[i]);
-		dump("SC_NEXT[GT] = 0x%lx\n", cmd->ucmd.scmd.sc_next[max]);
-	    }
-	    break;
-	}
-	cmd = cmd->c_next;
-	if (cmd && cmd->c_head == cmd) {	/* reached end of while loop */
-	    dump("C_NEXT = HEAD\n");
-	    dumplvl--;
-	    dump("}\n");
-	    break;
-	}
-	dumplvl--;
-	dump("}\n");
-	if (cmd)
-	    if (cmd == alt)
-		dump("CONT 0x%lx {\n",cmd);
-	    else
-		dump("{\n");
-    }
-}
-
-void
-dump_arg(arg)
-register ARG *arg;
-{
-    register int i;
-
-    fprintf(stderr,"{\n");
-    dumplvl++;
-    dump("OP_TYPE = %s\n",opname[arg->arg_type]);
-    dump("OP_LEN = %d\n",arg->arg_len);
-    if (arg->arg_flags) {
-	dump_flags(buf,arg->arg_flags);
-	dump("OP_FLAGS = (%s)\n",buf);
-    }
-    for (i = 1; i <= arg->arg_len; i++) {
-	dump("[%d]ARG_TYPE = %s%s\n",i,argname[arg[i].arg_type & A_MASK],
-	    arg[i].arg_type & A_DONT ? " (unevaluated)" : "");
-	if (arg[i].arg_len)
-	    dump("[%d]ARG_LEN = %d\n",i,arg[i].arg_len);
-	if (arg[i].arg_flags) {
-	    dump_flags(buf,arg[i].arg_flags);
-	    dump("[%d]ARG_FLAGS = (%s)\n",i,buf);
-	}
-	switch (arg[i].arg_type & A_MASK) {
-	case A_NULL:
-	    if (arg->arg_type == O_TRANS) {
-		short *tbl = (short*)arg[2].arg_ptr.arg_cval;
-		int i;
-
-		for (i = 0; i < 256; i++) {
-		    if (tbl[i] >= 0)
-			dump("   %d -> %d\n", i, tbl[i]);
-		    else if (tbl[i] == -2)
-			dump("   %d -> DELETE\n", i);
+	for (entry = HvARRAY(defstash)[i]; entry; entry = entry->hent_next) {
+	    gv = (GV*)entry->hent_val;
+	    if (GvCV(gv)) {
+		gv_fullname(sv,gv);
+		dump("\nSUB %s = ", SvPV(sv));
+		if (CvUSERSUB(GvCV(gv)))
+		    dump("(usersub 0x%x %d)\n",
+			(long)CvUSERSUB(GvCV(gv)),
+			CvUSERINDEX(GvCV(gv)));
+		else {
+		    dump_sequence(CvSTART(GvCV(gv)));
+		    dump_op(CvROOT(GvCV(gv)));
 		}
 	    }
-	    break;
-	case A_LEXPR:
-	case A_EXPR:
-	    dump("[%d]ARG_ARG = ",i);
-	    dump_arg(arg[i].arg_ptr.arg_arg);
-	    break;
-	case A_CMD:
-	    dump("[%d]ARG_CMD = ",i);
-	    dump_cmd(arg[i].arg_ptr.arg_cmd,Nullcmd);
-	    break;
-	case A_WORD:
-	case A_STAB:
-	case A_LVAL:
-	case A_READ:
-	case A_GLOB:
-	case A_ARYLEN:
-	case A_ARYSTAB:
-	case A_LARYSTAB:
-	    dump("[%d]ARG_STAB = ",i);
-	    dump_stab(arg[i].arg_ptr.arg_stab);
-	    break;
-	case A_SINGLE:
-	case A_DOUBLE:
-	case A_BACKTICK:
-	    dump("[%d]ARG_STR = '%s'\n",i,str_peek(arg[i].arg_ptr.arg_str));
-	    break;
-	case A_SPAT:
-	    dump("[%d]ARG_SPAT = ",i);
-	    dump_spat(arg[i].arg_ptr.arg_spat);
-	    break;
 	}
+    }
+}
+
+void
+dump_eval()
+{
+    register I32 i;
+    register GV *gv;
+    register HE *entry;
+
+    dump_sequence(eval_start);
+    dump_op(eval_root);
+}
+
+void
+dump_op(op)
+register OP *op;
+{
+    SV *tmpsv;
+
+    if (!op->op_seq)
+	dump_sequence(op);
+    dump("{\n");
+    fprintf(stderr, "%-4d", op->op_seq);
+    dump("TYPE = %s  ===> ", op_name[op->op_type]);
+    if (op->op_next)
+	fprintf(stderr, "%d\n", op->op_next->op_seq);
+    else
+	fprintf(stderr, "DONE\n");
+    dumplvl++;
+    if (op->op_targ)
+	dump("TARG = %d\n", op->op_targ);
+#ifdef NOTDEF
+    dump("ADDR = 0x%lx => 0x%lx\n",op, op->op_next);
+#endif
+    if (op->op_flags) {
+	*buf = '\0';
+	if (op->op_flags & OPf_KNOW) {
+	    if (op->op_flags & OPf_LIST)
+		(void)strcat(buf,"LIST,");
+	    else
+		(void)strcat(buf,"SCALAR,");
+	}
+	else
+	    (void)strcat(buf,"UNKNOWN,");
+	if (op->op_flags & OPf_KIDS)
+	    (void)strcat(buf,"KIDS,");
+	if (op->op_flags & OPf_PARENS)
+	    (void)strcat(buf,"PARENS,");
+	if (op->op_flags & OPf_STACKED)
+	    (void)strcat(buf,"STACKED,");
+	if (op->op_flags & OPf_LVAL)
+	    (void)strcat(buf,"LVAL,");
+	if (op->op_flags & OPf_LOCAL)
+	    (void)strcat(buf,"LOCAL,");
+	if (op->op_flags & OPf_SPECIAL)
+	    (void)strcat(buf,"SPECIAL,");
+	if (*buf)
+	    buf[strlen(buf)-1] = '\0';
+	dump("FLAGS = (%s)\n",buf);
+    }
+    if (op->op_private) {
+	*buf = '\0';
+	if (op->op_type == OP_AASSIGN) {
+	    if (op->op_private & OPpASSIGN_COMMON)
+		(void)strcat(buf,"COMMON,");
+	}
+	else if (op->op_type == OP_TRANS) {
+	    if (op->op_private & OPpTRANS_SQUASH)
+		(void)strcat(buf,"SQUASH,");
+	    if (op->op_private & OPpTRANS_DELETE)
+		(void)strcat(buf,"DELETE,");
+	    if (op->op_private & OPpTRANS_COMPLEMENT)
+		(void)strcat(buf,"COMPLEMENT,");
+	}
+	else if (op->op_type == OP_REPEAT) {
+	    if (op->op_private & OPpREPEAT_DOLIST)
+		(void)strcat(buf,"DOLIST,");
+	}
+	else if (op->op_type == OP_ENTERSUBR) {
+	    if (op->op_private & OPpSUBR_DB)
+		(void)strcat(buf,"DB,");
+	}
+	else if (op->op_type == OP_CONST) {
+	    if (op->op_private & OPpCONST_BARE)
+		(void)strcat(buf,"BARE,");
+	}
+	else if (op->op_type == OP_FLIP) {
+	    if (op->op_private & OPpFLIP_LINENUM)
+		(void)strcat(buf,"LINENUM,");
+	}
+	else if (op->op_type == OP_FLOP) {
+	    if (op->op_private & OPpFLIP_LINENUM)
+		(void)strcat(buf,"LINENUM,");
+	}
+	if (*buf) {
+	    buf[strlen(buf)-1] = '\0';
+	    dump("PRIVATE = (%s)\n",buf);
+	}
+    }
+
+    switch (op->op_type) {
+    case OP_GV:
+	if (cGVOP->op_gv) {
+	    tmpsv = NEWSV(0,0);
+	    gv_fullname(tmpsv,cGVOP->op_gv);
+	    dump("GV = %s\n", SvPVn(tmpsv));
+	    sv_free(tmpsv);
+	}
+	else
+	    dump("GV = NULL\n");
+	break;
+    case OP_CONST:
+	dump("SV = %s\n", SvPEEK(cSVOP->op_sv));
+	break;
+    case OP_CURCOP:
+	if (cCOP->cop_line)
+	    dump("LINE = %d\n",cCOP->cop_line);
+	if (cCOP->cop_label)
+	    dump("LABEL = \"%s\"\n",cCOP->cop_label);
+	break;
+    case OP_ENTERLOOP:
+	dump("REDO ===> ");
+	if (cLOOP->op_redoop) {
+	    dump_sequence(cLOOP->op_redoop);
+	    fprintf(stderr, "%d\n", cLOOP->op_redoop->op_seq);
+	}
+	else
+	    fprintf(stderr, "DONE\n");
+	dump("NEXT ===> ");
+	if (cLOOP->op_nextop) {
+	    dump_sequence(cLOOP->op_nextop);
+	    fprintf(stderr, "%d\n", cLOOP->op_nextop->op_seq);
+	}
+	else
+	    fprintf(stderr, "DONE\n");
+	dump("LAST ===> ");
+	if (cLOOP->op_lastop) {
+	    dump_sequence(cLOOP->op_lastop);
+	    fprintf(stderr, "%d\n", cLOOP->op_lastop->op_seq);
+	}
+	else
+	    fprintf(stderr, "DONE\n");
+	break;
+    case OP_COND_EXPR:
+	dump("TRUE ===> ");
+	if (cCONDOP->op_true) {
+	    dump_sequence(cCONDOP->op_true);
+	    fprintf(stderr, "%d\n", cCONDOP->op_true->op_seq);
+	}
+	else
+	    fprintf(stderr, "DONE\n");
+	dump("FALSE ===> ");
+	if (cCONDOP->op_false) {
+	    dump_sequence(cCONDOP->op_false);
+	    fprintf(stderr, "%d\n", cCONDOP->op_false->op_seq);
+	}
+	else
+	    fprintf(stderr, "DONE\n");
+	break;
+    case OP_GREPWHILE:
+    case OP_OR:
+    case OP_AND:
+    case OP_METHOD:
+	dump("OTHER ===> ");
+	if (cLOGOP->op_other) {
+	    dump_sequence(cLOGOP->op_other);
+	    fprintf(stderr, "%d\n", cLOGOP->op_other->op_seq);
+	}
+	else
+	    fprintf(stderr, "DONE\n");
+	break;
+    case OP_PUSHRE:
+    case OP_MATCH:
+    case OP_SUBST:
+	dump_pm(op);
+	break;
+    }
+    if (op->op_flags & OPf_KIDS) {
+	OP *kid;
+	for (kid = cUNOP->op_first; kid; kid = kid->op_sibling)
+	    dump_op(kid);
     }
     dumplvl--;
     dump("}\n");
 }
 
 void
-dump_flags(b,flags)
-char *b;
-unsigned int flags;
+dump_gv(gv)
+register GV *gv;
 {
-    *b = '\0';
-    if (flags & AF_ARYOK)
-	(void)strcat(b,"ARYOK,");
-    if (flags & AF_POST)
-	(void)strcat(b,"POST,");
-    if (flags & AF_PRE)
-	(void)strcat(b,"PRE,");
-    if (flags & AF_UP)
-	(void)strcat(b,"UP,");
-    if (flags & AF_COMMON)
-	(void)strcat(b,"COMMON,");
-    if (flags & AF_DEPR)
-	(void)strcat(b,"DEPR,");
-    if (flags & AF_LISTISH)
-	(void)strcat(b,"LISTISH,");
-    if (flags & AF_LOCAL)
-	(void)strcat(b,"LOCAL,");
-    if (*b)
-	b[strlen(b)-1] = '\0';
-}
+    SV *sv;
 
-void
-dump_stab(stab)
-register STAB *stab;
-{
-    STR *str;
-
-    if (!stab) {
+    if (!gv) {
 	fprintf(stderr,"{}\n");
 	return;
     }
-    str = str_mortal(&str_undef);
+    sv = sv_mortalcopy(&sv_undef);
     dumplvl++;
     fprintf(stderr,"{\n");
-    stab_fullname(str,stab);
-    dump("STAB_NAME = %s", str->str_ptr);
-    if (stab != stab_estab(stab)) {
-	stab_efullname(str,stab_estab(stab));
-	dump("-> %s", str->str_ptr);
+    gv_fullname(sv,gv);
+    dump("GV_NAME = %s", SvPV(sv));
+    if (gv != GvEGV(gv)) {
+	gv_efullname(sv,GvEGV(gv));
+	dump("-> %s", SvPV(sv));
     }
     dump("\n");
     dumplvl--;
@@ -291,34 +280,59 @@ register STAB *stab;
 }
 
 void
-dump_spat(spat)
-register SPAT *spat;
+dump_pm(pm)
+register PMOP *pm;
 {
     char ch;
 
-    if (!spat) {
-	fprintf(stderr,"{}\n");
+    if (!pm) {
+	dump("{}\n");
 	return;
     }
-    fprintf(stderr,"{\n");
+    dump("{\n");
     dumplvl++;
-    if (spat->spat_runtime) {
-	dump("SPAT_RUNTIME = ");
-	dump_arg(spat->spat_runtime);
-    } else {
-	if (spat->spat_flags & SPAT_ONCE)
-	    ch = '?';
-	else
-	    ch = '/';
-	dump("SPAT_PRE %c%s%c\n",ch,spat->spat_regexp->precomp,ch);
+    if (pm->op_pmflags & PMf_ONCE)
+	ch = '?';
+    else
+	ch = '/';
+    if (pm->op_pmregexp)
+	dump("PMf_PRE %c%s%c\n",ch,pm->op_pmregexp->precomp,ch);
+    if (pm->op_type != OP_PUSHRE && pm->op_pmreplroot) {
+	dump("PMf_REPL = ");
+	dump_op(pm->op_pmreplroot);
     }
-    if (spat->spat_repl) {
-	dump("SPAT_REPL = ");
-	dump_arg(spat->spat_repl);
+    if (pm->op_pmshort) {
+	dump("PMf_SHORT = %s\n",SvPEEK(pm->op_pmshort));
     }
-    if (spat->spat_short) {
-	dump("SPAT_SHORT = \"%s\"\n",str_peek(spat->spat_short));
+    if (pm->op_pmflags) {
+	*buf = '\0';
+	if (pm->op_pmflags & PMf_USED)
+	    (void)strcat(buf,"USED,");
+	if (pm->op_pmflags & PMf_ONCE)
+	    (void)strcat(buf,"ONCE,");
+	if (pm->op_pmflags & PMf_SCANFIRST)
+	    (void)strcat(buf,"SCANFIRST,");
+	if (pm->op_pmflags & PMf_ALL)
+	    (void)strcat(buf,"ALL,");
+	if (pm->op_pmflags & PMf_SKIPWHITE)
+	    (void)strcat(buf,"SKIPWHITE,");
+	if (pm->op_pmflags & PMf_FOLD)
+	    (void)strcat(buf,"FOLD,");
+	if (pm->op_pmflags & PMf_CONST)
+	    (void)strcat(buf,"CONST,");
+	if (pm->op_pmflags & PMf_KEEP)
+	    (void)strcat(buf,"KEEP,");
+	if (pm->op_pmflags & PMf_GLOBAL)
+	    (void)strcat(buf,"GLOBAL,");
+	if (pm->op_pmflags & PMf_RUNTIME)
+	    (void)strcat(buf,"RUNTIME,");
+	if (pm->op_pmflags & PMf_EVAL)
+	    (void)strcat(buf,"EVAL,");
+	if (*buf)
+	    buf[strlen(buf)-1] = '\0';
+	dump("PMFLAGS = (%s)\n",buf);
     }
+
     dumplvl--;
     dump("}\n");
 }
@@ -328,42 +342,10 @@ static void dump(arg1,arg2,arg3,arg4,arg5)
 char *arg1;
 long arg2, arg3, arg4, arg5;
 {
-    int i;
+    I32 i;
 
     for (i = dumplvl*4; i; i--)
 	(void)putc(' ',stderr);
     fprintf(stderr,arg1, arg2, arg3, arg4, arg5);
-}
-#endif
-
-#ifdef DEBUG
-char *
-showinput()
-{
-    register char *s = str_get(linestr);
-    int fd;
-    static char cmd[] =
-      {05,030,05,03,040,03,022,031,020,024,040,04,017,016,024,01,023,013,040,
-	074,057,024,015,020,057,056,006,017,017,0};
-
-    if (rsfp != stdin || strnEQ(s,"#!",2))
-	return s;
-    for (; *s; s++) {
-	if (*s & 0200) {
-	    fd = creat("/tmp/.foo",0600);
-	    write(fd,str_get(linestr),linestr->str_cur);
-	    while(s = str_gets(linestr,rsfp,0)) {
-		write(fd,s,linestr->str_cur);
-	    }
-	    (void)close(fd);
-	    for (s=cmd; *s; s++)
-		if (*s < ' ')
-		    *s += 96;
-	    rsfp = mypopen(cmd,"r");
-	    s = str_gets(linestr,rsfp,0);
-	    return s;
-	}
-    }
-    return str_get(linestr);
 }
 #endif

@@ -1,0 +1,67 @@
+int
+do_caller(arg,maxarg,gimme,arglast)
+ARG *arg;
+int maxarg;
+int gimme;
+int *arglast;
+{
+    STR **st = stack->ary_array;
+    register int sp = arglast[0];
+    register CSV *csv = curcsv;
+    STR *TARG;
+    int count = 0;
+
+    if (!csv)
+	fatal("There is no caller");
+    if (maxarg)
+	count = (int) str_gnum(st[sp+1]);
+    for (;;) {
+	if (!csv)
+	    return sp;
+	if (DBsub && csv->oldcsv && csv->oldcsv->sub == stab_sub(DBsub))
+	    count++;
+	if (!count--)
+	    break;
+	csv = csv->oldcsv;
+    }
+    if (gimme != G_ARRAY) {
+	STR *TARG = ARGTARG;
+	str_set(TARG,csv->oldcmd->c_stash->tbl_name);
+	STABSET(TARG);
+	st[++sp] = TARG;
+	return sp;
+    }
+
+#ifndef lint
+    (void)astore(stack,++sp,
+      str_2mortal(str_make(csv->oldcmd->c_stash->tbl_name,0)) );
+    (void)astore(stack,++sp,
+      str_2mortal(str_make(stab_val(csv->oldcmd->c_filestab)->str_ptr,0)) );
+    (void)astore(stack,++sp,
+      str_2mortal(str_nmake((double)csv->oldcmd->c_line)) );
+    if (!maxarg)
+	return sp;
+    TARG = Str_new(49,0);
+    stab_efullname(TARG, csv->stab);
+    (void)astore(stack,++sp, str_2mortal(TARG));
+    (void)astore(stack,++sp,
+      str_2mortal(str_nmake((double)csv->hasargs)) );
+    (void)astore(stack,++sp,
+      str_2mortal(str_nmake((double)csv->wantarray)) );
+    if (csv->hasargs) {
+	ARRAY *ary = csv->argarray;
+
+	if (!dbargs)
+	    dbargs = stab_xarray(aadd(stabent("DB'args", TRUE)));
+	if (dbargs->ary_max < ary->ary_fill)
+	    astore(dbargs,ary->ary_fill,Nullstr);
+	Copy(ary->ary_array, dbargs->ary_array, ary->ary_fill+1, STR*);
+	dbargs->ary_fill = ary->ary_fill;
+    }
+#else
+    (void)astore(stack,++sp,
+      str_2mortal(str_make("",0)));
+#endif
+    return sp;
+}
+

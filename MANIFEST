@@ -53,12 +53,14 @@ cmd.c			Command interpreter
 cmd.h			Public declarations for the above
 config.H		Sample config.h
 config_h.SH		Produces config.h
+config_c++.h		TEMP FILE
 cons.c			Routines to construct cmd nodes of a parse tree
 consarg.c		Routines to construct arg nodes of a parse tree
 doSH			Script to run all the *.SH files
 doarg.c			Scalar expression evaluation
 doio.c			I/O operations
 dolist.c		Array expression evaluation
+dosish.h
 dump.c			Debugging output
 eg/ADB			An adb wrapper to put in your crash dir
 eg/README		Intro to example perl scripts
@@ -103,10 +105,12 @@ emacs/perl-mode.el	Emacs major mode for perl
 emacs/perldb.el		Emacs debugging
 emacs/perldb.pl		Emacs debugging
 emacs/tedstuff		Some optional patches
+embed_h.SH
 eval.c			The expression evaluator
 form.c			Format processing
 form.h			Public declarations for the above
 gettest			A little script to test the get* routines
+global.var
 h2ph.SH			A thing to turn C .h file into perl .ph files
 h2pl/README		How to turn .ph files into .pl files
 h2pl/cbreak.pl		cbreak routines using .ph
@@ -178,7 +182,9 @@ hints/utekv.sh
 hints/uts.sh
 hints/vax.sh
 installperl		Perl script to do "make install" dirty work
+interp.var
 ioctl.pl		Sample ioctl.pl
+keywords.h
 lib/abbrev.pl		An abbreviation table builder
 lib/assert.pl		assertion and panic with stack trace
 lib/bigfloat.pl		An arbitrary precision floating point package
@@ -209,8 +215,10 @@ lib/syslog.pl		Perl library supporting syslogging
 lib/termcap.pl		Perl library supporting termcap usage
 lib/timelocal.pl	Perl library supporting inverse of localtime, gmtime
 lib/validate.pl		Perl library supporting wholesale file mode validation
+main.c
 makedepend.SH		Precursor to makedepend
 makedir.SH		Precursor to makedir
+makefile.lib		make libperl.a
 malloc.c		A version of malloc you might not want
 msdos/Changes.dds	Expanation of MS-DOS patches by Diomidis Spinellis
 msdos/Makefile		MS-DOS makefile
@@ -265,6 +273,9 @@ perl.man		The manual page(s)
 perlsh			A poor man's perl shell
 perly.fixer		A program to remove yacc stack limitations
 perly.y			Yacc grammar for perl
+pp.h			Push/Pop code defs
+pp.c			Push/Pop code
+proto.h
 regcomp.c		Regular expression compiler
 regcomp.h		Private declarations for above
 regexec.c		Regular expression evaluator
@@ -352,6 +363,7 @@ t/op/unshift.t		See if unshift works
 t/op/vec.t		See if vectors work
 t/op/write.t		See if write works
 toke.c			The tokener
+unixish.h
 usersub.c		User supplied (possibly proprietary) subroutines
 usub/Makefile		Makefile for curseperl
 usub/README		Instructions for user supplied subroutines

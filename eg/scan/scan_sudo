@@ -1,6 +1,6 @@
 #!/usr/bin/perl -P
 
-# $Header: scan_sudo,v 4.0 91/03/20 01:13:44 lwall Locked $
+# $RCSfile: scan_sudo,v $$Revision: 4.1 $$Date: 92/08/07 17:20:42 $
 
 # Analyze the sudo log.
 

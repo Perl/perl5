@@ -1,0 +1,55 @@
+int					/*SUPPRESS 590*/
+do_truncate(TARG,arg,gimme,arglast)
+STR *TARG;
+register ARG *arg;
+int gimme;
+int *arglast;
+{
+    register ARRAY *ary = stack;
+    register int sp = arglast[0] + 1;
+    off_t len = (off_t)str_gnum(ary->ary_array[sp+1]);
+    int result = 1;
+    STAB *tmpstab;
+
+#if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE)
+#ifdef HAS_TRUNCATE
+    if ((arg[1].arg_type & A_MASK) == A_WORD) {
+	tmpstab = arg[1].arg_ptr.arg_stab;
+	if (!stab_io(tmpstab) || !stab_io(tmpstab)->ifp ||
+	  ftruncate(fileno(stab_io(tmpstab)->ifp), len) < 0)
+	    result = 0;
+    }
+    else if (truncate(str_get(ary->ary_array[sp]), len) < 0)
+	result = 0;
+#else
+    if ((arg[1].arg_type & A_MASK) == A_WORD) {
+	tmpstab = arg[1].arg_ptr.arg_stab;
+	if (!stab_io(tmpstab) || !stab_io(tmpstab)->ifp ||
+	  chsize(fileno(stab_io(tmpstab)->ifp), len) < 0)
+	    result = 0;
+    }
+    else {
+	int tmpfd;
+
+	if ((tmpfd = open(str_get(ary->ary_array[sp]), 0)) < 0)
+	    result = 0;
+	else {
+	    if (chsize(tmpfd, len) < 0)
+		result = 0;
+	    close(tmpfd);
+	}
+    }
+#endif
+
+    if (result)
+	str_sset(TARG,&str_yes);
+    else
+	str_sset(TARG,&str_undef);
+    STABSET(TARG);
+    ary->ary_array[sp] = TARG;
+    return sp;
+#else
+    fatal("truncate not implemented");
+#endif
+}
+

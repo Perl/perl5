@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: array.t,v 4.0 91/03/20 01:51:31 lwall Locked $
+# $RCSfile: array.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:37 $
 
 print "1..36\n";
 

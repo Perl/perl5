@@ -5,9 +5,11 @@
  * not the System V one.
  */
 
-/* $RCSfile: regexp.h,v $$Revision: 4.0.1.2 $$Date: 91/11/05 18:24:31 $
+/* $RCSfile: regexp.h,v $$Revision: 4.1 $$Date: 92/08/07 18:26:35 $
  *
  * $Log:	regexp.h,v $
+ * Revision 4.1  92/08/07  18:26:35  lwall
+ * 
  * Revision 4.0.1.2  91/11/05  18:24:31  lwall
  * patch11: minimum match length calculation in regexp is now cumulative
  * patch11: initial .* in pattern had dependency on value of $*
@@ -25,12 +27,12 @@
 typedef struct regexp {
 	char **startp;
 	char **endp;
-	STR *regstart;		/* Internal use only. */
+	SV *regstart;		/* Internal use only. */
 	char *regstclass;
-	STR *regmust;		/* Internal use only. */
-	int regback;		/* Can regmust locate first try? */
-	int minlen;		/* mininum possible length of $& */
-	int prelen;		/* length of precomp */
+	SV *regmust;		/* Internal use only. */
+	I32 regback;		/* Can regmust locate first try? */
+	I32 minlen;		/* mininum possible length of $& */
+	I32 prelen;		/* length of precomp */
 	char *precomp;		/* pre-compilation regular expression */
 	char *subbase;		/* saved string so \digit works forever */
 	char *subbeg;		/* same, but not responsible for allocation */
@@ -45,6 +47,3 @@ typedef struct regexp {
 #define ROPT_ANCH 1
 #define ROPT_SKIP 2
 #define ROPT_IMPLICIT 4
-
-regexp *regcomp();
-int regexec();

@@ -1,0 +1,96 @@
+int
+do_slice(stab,TARG,numarray,lval,gimme,arglast)
+STAB *stab;
+STR *TARG;
+int numarray;
+int lval;
+int gimme;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[1];
+    register int max = arglast[2];
+    register char *tmps;
+    register int len;
+    register int magic = 0;
+    register ARRAY *ary;
+    register HASH *hash;
+    int oldarybase = arybase;
+
+    if (numarray) {
+	if (numarray == 2) {		/* a slice of a LIST */
+	    ary = stack;
+	    ary->ary_fill = arglast[3];
+	    arybase -= max + 1;
+	    st[sp] = TARG;		/* make stack size available */
+	    str_numset(TARG,(double)(sp - 1));
+	}
+	else
+	    ary = stab_array(stab);	/* a slice of an array */
+    }
+    else {
+	if (lval) {
+	    if (stab == envstab)
+		magic = 'E';
+	    else if (stab == sigstab)
+		magic = 'S';
+#ifdef SOME_DBM
+	    else if (stab_hash(stab)->tbl_dbm)
+		magic = 'D';
+#endif /* SOME_DBM */
+	}
+	hash = stab_hash(stab);		/* a slice of an associative array */
+    }
+
+    if (gimme == G_ARRAY) {
+	if (numarray) {
+	    while (sp < max) {
+		if (st[++sp]) {
+		    st[sp-1] = afetch(ary,
+		      ((int)str_gnum(st[sp])) - arybase, lval);
+		}
+		else
+		    st[sp-1] = &str_undef;
+	    }
+	}
+	else {
+	    while (sp < max) {
+		if (st[++sp]) {
+		    tmps = str_get(st[sp]);
+		    len = st[sp]->str_cur;
+		    st[sp-1] = hfetch(hash,tmps,len, lval);
+		    if (magic)
+			str_magic(st[sp-1],stab,magic,tmps,len);
+		}
+		else
+		    st[sp-1] = &str_undef;
+	    }
+	}
+	sp--;
+    }
+    else {
+	if (sp == max)
+	    st[sp] = &str_undef;
+	else if (numarray) {
+	    if (st[max])
+		st[sp] = afetch(ary,
+		  ((int)str_gnum(st[max])) - arybase, lval);
+	    else
+		st[sp] = &str_undef;
+	}
+	else {
+	    if (st[max]) {
+		tmps = str_get(st[max]);
+		len = st[max]->str_cur;
+		st[sp] = hfetch(hash,tmps,len, lval);
+		if (magic)
+		    str_magic(st[sp],stab,magic,tmps,len);
+	    }
+	    else
+		st[sp] = &str_undef;
+	}
+    }
+    arybase = oldarybase;
+    return sp;
+}
+

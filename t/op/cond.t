@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: cond.t,v 4.0 91/03/20 01:51:47 lwall Locked $
+# $RCSfile: cond.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:41 $
 
 print "1..4\n";
 

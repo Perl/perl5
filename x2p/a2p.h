@@ -1,4 +1,4 @@
-/* $RCSfile: a2p.h,v $$Revision: 4.0.1.2 $$Date: 92/06/08 16:12:23 $
+/* $RCSfile: a2p.h,v $$Revision: 4.1 $$Date: 92/08/07 18:29:09 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	a2p.h,v $
+ * Revision 4.1  92/08/07  18:29:09  lwall
+ * 
  * Revision 4.0.1.2  92/06/08  16:12:23  lwall
  * patch20: hash tables now split only if the memory is available to do so
  * 
@@ -336,3 +338,5 @@ EXT HASH *curarghash;
 #define P_POW		95
 #define P_AUTO		100
 #define P_MAX		999
+
+EXT int an;

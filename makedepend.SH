@@ -16,9 +16,11 @@ echo "Extracting makedepend (with variable substitutions)"
 rm -f makedepend
 $spitshell >makedepend <<!GROK!THIS!
 $startsh
-# $RCSfile: makedepend.SH,v $$Revision: 4.0.1.4 $$Date: 92/06/08 13:51:24 $
+# $RCSfile: makedepend.SH,v $$Revision: 4.1 $$Date: 92/08/07 18:24:20 $
 #
 # $Log:	makedepend.SH,v $
+# Revision 4.1  92/08/07  18:24:20  lwall
+# 
 # Revision 4.0.1.4  92/06/08  13:51:24  lwall
 # patch20: various and sundry fixes
 # 

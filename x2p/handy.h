@@ -1,4 +1,4 @@
-/* $RCSfile: handy.h,v $$Revision: 4.0.1.2 $$Date: 91/06/07 12:15:43 $
+/* $RCSfile: handy.h,v $$Revision: 4.1 $$Date: 92/08/07 18:29:19 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	handy.h,v $
+ * Revision 4.1  92/08/07  18:29:19  lwall
+ * 
  * Revision 4.0.1.2  91/06/07  12:15:43  lwall
  * patch4: new copyright notice
  * 

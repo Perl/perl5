@@ -1,12 +1,28 @@
-## chat.pl: chat with a server
-## V2.01.alpha.7 91/06/16
-## Randal L. Schwartz
+# chat.pl: chat with a server
+# Based on: V2.01.alpha.7 91/06/16
+# Randal L. Schwartz (was <merlyn@iwarp.intel.com>)
+# multihome additions by A.Macpherson@bnr.co.uk
+# allow for /dev/pts based systems by Joe Doupnik <JRD@CC.USU.EDU>
 
 package chat;
 
+if( defined( &main'PF_INET ) ){
+	$pf_inet = &main'PF_INET;
+	$sock_stream = &main'SOCK_STREAM;
+	local($name, $aliases, $proto) = getprotobyname( 'tcp' );
+	$tcp_proto = $proto;
+}
+else {
+	# XXX hardwired $PF_INET, $SOCK_STREAM, 'tcp'
+	# but who the heck would change these anyway? (:-)
+	$pf_inet = 2;
+	$sock_stream = 1;
+	$tcp_proto = 6;
+}
+
+
 $sockaddr = 'S n a4 x8';
-chop($thishost = `hostname`); $thisaddr = (gethostbyname($thishost))[4];
-$thisproc = pack($sockaddr, 2, 0, $thisaddr);
+chop($thishost = `hostname`);
 
 # *S = symbol for current I/O, gets assigned *chatsymbol....
 $next = "chatsymbol000000"; # next one
@@ -21,6 +37,10 @@ sub open_port { ## public
 
 	local($serveraddr,$serverproc);
 
+	# We may be multi-homed, start with 0, fixup once connexion is made
+	$thisaddr = "\0\0\0\0" ;
+	$thisproc = pack($sockaddr, 2, 0, $thisaddr);
+
 	*S = ++$next;
 	if ($server =~ /^(\d+)+\.(\d+)\.(\d+)\.(\d+)$/) {
 		$serveraddr = pack('C4', $1, $2, $3, $4);
@@ -30,9 +50,7 @@ sub open_port { ## public
 		$serveraddr = $x[4];
 	}
 	$serverproc = pack($sockaddr, 2, $port, $serveraddr);
-	unless (socket(S, 2, 1, 6)) {
-		# XXX hardwired $AF_SOCKET, $SOCK_STREAM, 'tcp'
-		# but who the heck would change these anyway? (:-)
+	unless (socket(S, $pf_inet, $sock_stream, $tcp_proto)) {
 		($!) = ($!, close(S)); # close S while saving $!
 		return undef;
 	}
@@ -44,6 +62,13 @@ sub open_port { ## public
 		($!) = ($!, close(S)); # close S while saving $!
 		return undef;
 	}
+# We opened with the local address set to ANY, at this stage we know
+# which interface we are using.  This is critical if our machine is
+# multi-homed, with IP forwarding off, so fix-up.
+	local($fam,$lport);
+	($fam,$lport,$thisaddr) = unpack($sockaddr, getsockname(S));
+	$thisproc = pack($sockaddr, 2, 0, $thisaddr);
+# end of post-connect fixup
 	select((select(S), $| = 1)[0]);
 	$next; # return symbol for switcharound
 }
@@ -59,9 +84,7 @@ sub open_listen { ## public
 	local($thisport) = shift || 0;
 	local($thisproc_local) = pack($sockaddr, 2, $thisport, $thisaddr);
 	local(*NS) = "__" . time;
-	unless (socket(NS, 2, 1, 6)) {
-		# XXX hardwired $AF_SOCKET, $SOCK_STREAM, 'tcp'
-		# but who the heck would change these anyway? (:-)
+	unless (socket(NS, $pf_inet, $sock_stream, $tcp_proto)) {
 		($!) = ($!, close(NS));
 		return undef;
 	}
@@ -90,7 +113,7 @@ sub open_proc { ## public
 	local(*TTY) = "__TTY" . time;
 	local($pty,$tty) = &_getpty(S,TTY);
 	die "Cannot find a new pty" unless defined $pty;
-	local($pid) = fork;
+	$pid = fork;
 	die "Cannot fork: $!" unless defined $pid;
 	unless ($pid) {
 		close STDIN; close STDOUT; close STDERR;
@@ -108,7 +131,6 @@ sub open_proc { ## public
 		die "Cannot exec @cmd: $!";
 	}
 	close(TTY);
-	$PID{$next} = $pid;
 	$next; # return symbol for switcharound
 }
 
@@ -252,6 +274,10 @@ sub print { ## public
 		*S = shift;
 	}
 	print S @_;
+	if( $chat'debug ){
+		print STDERR "printed:";
+		print STDERR @_;
+	}
 }
 
 ## &chat'close([$handle,])
@@ -259,15 +285,10 @@ sub print { ## public
 ## like close $handle
 
 sub close { ## public
-	local($pid);
 	if ($_[0] =~ /$nextpat/) {
-		$pid = $PID{$_[0]};
 	 	*S = shift;
-	} else {
-		$pid = $PID{$next};
 	}
 	close(S);
-	waitpid($pid,0);
 	if (defined $S{"needs_close"}) { # is it a listen socket?
 		local(*NS) = $S{"needs_close"};
 		delete $S{"needs_close"};
@@ -314,16 +335,22 @@ sub select { ## public
 # internal procedure to get the next available pty.
 # opens pty on handle PTY, and matching tty on handle TTY.
 # returns undef if can't find a pty.
+# Modify "/dev/pty" to "/dev/pts" for Dell Unix v2.2 (aka SVR4.04). Joe Doupnik.
 
 sub _getpty { ## private
 	local($_PTY,$_TTY) = @_;
 	$_PTY =~ s/^([^']+)$/(caller)[$[]."'".$1/e;
 	$_TTY =~ s/^([^']+)$/(caller)[$[]."'".$1/e;
-	local($pty,$tty);
+	local($pty, $tty, $kind);
+	if( -e "/dev/pts000" ){		## mods by Joe Doupnik Dec 1992
+		$kind = "pts";		## SVR4 Streams
+	} else {
+		$kind = "pty";		## BSD Clist stuff
+	}
 	for $bank (112..127) {
-		next unless -e sprintf("/dev/pty%c0", $bank);
+		next unless -e sprintf("/dev/$kind%c0", $bank);
 		for $unit (48..57) {
-			$pty = sprintf("/dev/pty%c%c", $bank, $unit);
+			$pty = sprintf("/dev/$kind%c%c", $bank, $unit);
 			open($_PTY,"+>$pty") || next;
 			select((select($_PTY), $| = 1)[0]);
 			($tty = $pty) =~ s/pty/tty/;

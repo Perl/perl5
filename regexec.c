@@ -7,9 +7,11 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $RCSfile: regexec.c,v $$Revision: 4.0.1.4 $$Date: 92/06/08 15:25:50 $
+/* $RCSfile: regexec.c,v $$Revision: 4.1 $$Date: 92/08/07 18:26:32 $
  *
  * $Log:	regexec.c,v $
+ * Revision 4.1  92/08/07  18:26:32  lwall
+ * 
  * Revision 4.0.1.4  92/06/08  15:25:50  lwall
  * patch20: pattern modifiers i and g didn't interact right
  * patch20: in some cases $` and $' didn't get set by match
@@ -71,7 +73,7 @@
 #endif
 
 #ifdef DEBUGGING
-int regnarrate = 0;
+I32 regnarrate = 0;
 #endif
 
 /*
@@ -79,51 +81,32 @@ int regnarrate = 0;
  */
 
 /*
- * Global work variables for regexec().
- */
-static char *regprecomp;
-static char *reginput;		/* String-input pointer. */
-static char regprev;		/* char before regbol, \n if none */
-static char *regbol;		/* Beginning of input, for ^ check. */
-static char *regeol;		/* End of input, for $ check. */
-static char **regstartp;	/* Pointer to startp array. */
-static char **regendp;		/* Ditto for endp. */
-static char *reglastparen;	/* Similarly for lastparen. */
-static char *regtill;
-
-static int regmyp_size = 0;
-static char **regmystartp = Null(char**);
-static char **regmyendp   = Null(char**);
-
-/*
  * Forwards.
  */
-STATIC int regtry();
-STATIC int regmatch();
-STATIC int regrepeat();
-
-extern int multiline;
+STATIC I32 regtry();
+STATIC I32 regmatch();
+STATIC I32 regrepeat();
 
 /*
  - regexec - match a regexp against a string
  */
-int
+I32
 regexec(prog, stringarg, strend, strbeg, minend, screamer, safebase)
 register regexp *prog;
 char *stringarg;
 register char *strend;	/* pointer to null at end of string */
 char *strbeg;	/* real beginning of string */
-int minend;	/* end of match must be at least minend after stringarg */
-STR *screamer;
-int safebase;	/* no need to remember string in subbase */
+I32 minend;	/* end of match must be at least minend after stringarg */
+SV *screamer;
+I32 safebase;	/* no need to remember string in subbase */
 {
 	register char *s;
-	register int i;
+	register I32 i;
 	register char *c;
 	register char *string = stringarg;
-	register int tmp;
-	int minlen = 0;		/* must match at least this many chars */
-	int dontbother = 0;	/* how many characters not to try at end */
+	register I32 tmp;
+	I32 minlen = 0;		/* must match at least this many chars */
+	I32 dontbother = 0;	/* how many characters not to try at end */
 
 	/* Be paranoid... */
 	if (prog == NULL || string == NULL) {
@@ -157,38 +140,38 @@ int safebase;	/* no need to remember string in subbase */
 
 	/* If there is a "must appear" string, look for it. */
 	s = string;
-	if (prog->regmust != Nullstr &&
+	if (prog->regmust != Nullsv &&
 	    (!(prog->reganch & ROPT_ANCH)
 	     || (multiline && prog->regback >= 0)) ) {
 		if (stringarg == strbeg && screamer) {
-			if (screamfirst[prog->regmust->str_rare] >= 0)
+			if (screamfirst[BmRARE(prog->regmust)] >= 0)
 				s = screaminstr(screamer,prog->regmust);
 			else
 				s = Nullch;
 		}
 #ifndef lint
 		else
-			s = fbminstr((unsigned char*)s, (unsigned char*)strend,
+			s = fbm_instr((unsigned char*)s, (unsigned char*)strend,
 			    prog->regmust);
 #endif
 		if (!s) {
-			++prog->regmust->str_u.str_useful;	/* hooray */
+			++BmUSEFUL(prog->regmust);	/* hooray */
 			goto phooey;	/* not present */
 		}
 		else if (prog->regback >= 0) {
 			s -= prog->regback;
 			if (s < string)
 			    s = string;
-			minlen = prog->regback + prog->regmust->str_cur;
+			minlen = prog->regback + SvCUR(prog->regmust);
 		}
-		else if (--prog->regmust->str_u.str_useful < 0) { /* boo */
-			str_free(prog->regmust);
-			prog->regmust = Nullstr;	/* disable regmust */
+		else if (--BmUSEFUL(prog->regmust) < 0) { /* boo */
+			sv_free(prog->regmust);
+			prog->regmust = Nullsv;	/* disable regmust */
 			s = string;
 		}
 		else {
 			s = string;
-			minlen = prog->regmust->str_cur;
+			minlen = SvCUR(prog->regmust);
 		}
 	}
 
@@ -245,7 +228,7 @@ int safebase;	/* no need to remember string in subbase */
 	if (prog->regstart) {
 		if (prog->reganch & ROPT_SKIP) {  /* we have /x+whatever/ */
 		    /* it must be a one character string */
-		    i = prog->regstart->str_ptr[0];
+		    i = SvPV(prog->regstart)[0];
 		    while (s < strend) {
 			    if (*s == i) {
 				    if (regtry(prog, s))
@@ -257,10 +240,10 @@ int safebase;	/* no need to remember string in subbase */
 			    s++;
 		    }
 		}
-		else if (prog->regstart->str_pok == 3) {
+		else if (SvPOK(prog->regstart) == 3) {
 		    /* We know what string it must start with. */
 #ifndef lint
-		    while ((s = fbminstr((unsigned char*)s,
+		    while ((s = fbm_instr((unsigned char*)s,
 		      (unsigned char*)strend, prog->regstart)) != NULL)
 #else
 		    while (s = Nullch)
@@ -272,9 +255,9 @@ int safebase;	/* no need to remember string in subbase */
 		    }
 		}
 		else {
-		    c = prog->regstart->str_ptr;
+		    c = SvPV(prog->regstart);
 		    while ((s = ninstr(s, strend,
-		      c, c + prog->regstart->str_cur )) != NULL) {
+		      c, c + SvCUR(prog->regstart) )) != NULL) {
 			    if (regtry(prog, s))
 				    goto got_it;
 			    s++;
@@ -284,7 +267,7 @@ int safebase;	/* no need to remember string in subbase */
 	}
 	/*SUPPRESS 560*/
 	if (c = prog->regstclass) {
-		int doevery = (prog->reganch & ROPT_SKIP) == 0;
+		I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
 
 		if (minlen)
 		    dontbother = minlen - 1;
@@ -485,12 +468,12 @@ int safebase;	/* no need to remember string in subbase */
 /*
  - regtry - try match at specific point
  */
-static int			/* 0 failure, 1 success */
+static I32			/* 0 failure, 1 success */
 regtry(prog, string)
 regexp *prog;
 char *string;
 {
-	register int i;
+	register I32 i;
 	register char **sp;
 	register char **ep;
 
@@ -530,15 +513,15 @@ char *string;
  * maybe save a little bit of pushing and popping on the stack.  It also takes
  * advantage of machines that use a register save mask on subroutine entry.
  */
-static int			/* 0 failure, 1 success */
+static I32			/* 0 failure, 1 success */
 regmatch(prog)
 char *prog;
 {
 	register char *scan;	/* Current node. */
 	char *next;		/* Next node. */
-	register int nextchar;
-	register int n;		/* no or next */
-	register int ln;        /* len or last */
+	register I32 nextchar;
+	register I32 n;		/* no or next */
+	register I32 ln;        /* len or last */
 	register char *s;	/* operand or save */
 	register char *locinput = reginput;
 
@@ -744,6 +727,13 @@ char *prog;
 				}
 			}
 			break;
+#ifdef NOTYET
+		case MINCURLY:
+			ln = ARG1(scan);  /* min to match */
+			n  = -ARG2(scan);  /* max to match */
+			scan = NEXTOPER(scan) + 4;
+			goto repeat;
+#endif
 		case CURLY:
 			ln = ARG1(scan);  /* min to match */
 			n  = ARG2(scan);  /* max to match */
@@ -768,17 +758,33 @@ char *prog;
 			else
 				nextchar = -1000;
 			reginput = locinput;
-			n = regrepeat(scan, n);
-			if (!multiline && OP(next) == EOL && ln < n)
-			    ln = n;			/* why back off? */
-			while (n >= ln) {
-				/* If it could work, try it. */
-				if (nextchar == -1000 || *reginput == nextchar)
-					if (regmatch(next))
-						return(1);
-				/* Couldn't or didn't -- back up. */
-				n--;
-				reginput = locinput + n;
+			if (n < 0) {
+			    n = -n;
+			    while (n >= ln) {
+				    /* If it could work, try it. */
+				    if (nextchar == -1000 ||
+					*reginput == nextchar)
+					    if (regmatch(next))
+						    return(1);
+				    /* Couldn't or didn't -- back up. */
+				    ln++;
+				    reginput = locinput + ln;
+			    }
+			}
+			else {
+			    n = regrepeat(scan, n);
+			    if (!multiline && OP(next) == EOL && ln < n)
+				ln = n;			/* why back off? */
+			    while (n >= ln) {
+				    /* If it could work, try it. */
+				    if (nextchar == -1000 ||
+					*reginput == nextchar)
+					    if (regmatch(next))
+						    return(1);
+				    /* Couldn't or didn't -- back up. */
+				    n--;
+				    reginput = locinput + n;
+			    }
 			}
 			return(0);
 		case END:
@@ -811,14 +817,14 @@ char *prog;
  * That was true before, but now we assume scan - reginput is the count,
  * rather than incrementing count on every character.]
  */
-static int
+static I32
 regrepeat(p, max)
 char *p;
-int max;
+I32 max;
 {
 	register char *scan;
 	register char *opnd;
-	register int c;
+	register I32 c;
 	register char *loceol = regeol;
 
 	scan = reginput;
@@ -887,7 +893,7 @@ char *
 regnext(p)
 register char *p;
 {
-	register int offset;
+	register I32 offset;
 
 	if (p == &regdummy)
 		return(NULL);

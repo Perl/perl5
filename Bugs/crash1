@@ -1,0 +1,23 @@
+#!./perl
+# These filenames doesn't seem to matter, as long as the first one exists,
+# and we have permission to create the second one.
+open(OLD_FILE, "/etc/passwd");
+open(NEW_FILE, ">/tmp/foobar");
+
+# This line is unnecessary to trigger death, but it helps to show where
+# we crash and burn.
+$| = 1;
+
+#  Seemingly, this loop is necessary to activate the bug.  If I just say
+#     $_ = <OLD_FILE>
+#  instead of the loop, everything works as expected.
+while (<OLD_FILE>) {
+  #  This was originally just a random typing spaz on my part, but it causes
+  #  perl to crash later.
+  print <NEW_FILE>;
+}
+
+print "About to die...\n";
+print "dest = '$dest'\n";
+print "Didn't die!\n";
+

@@ -1,0 +1,56 @@
+int
+do_kv(TARG,hash,kv,gimme,arglast)
+STR *TARG;
+HASH *hash;
+int kv;
+int gimme;
+int *arglast;
+{
+    register ARRAY *ary = stack;
+    STR **st = ary->ary_array;
+    register int sp = arglast[0];
+    int i;
+    register HENT *entry;
+    char *tmps;
+    STR *tmpstr;
+    int dokeys = (kv == O_KEYS || kv == O_HASH);
+    int dovalues = (kv == O_VALUES || kv == O_HASH);
+
+    if (gimme != G_ARRAY) {
+	i = 0;
+	(void)hiterinit(hash);
+	/*SUPPRESS 560*/
+	while (entry = hiternext(hash)) {
+	    i++;
+	}
+	str_numset(TARG,(double)i);
+	STABSET(TARG);
+	st[++sp] = TARG;
+	return sp;
+    }
+    (void)hiterinit(hash);
+    /*SUPPRESS 560*/
+    while (entry = hiternext(hash)) {
+	if (dokeys) {
+	    tmps = hiterkey(entry,&i);
+	    if (!i)
+		tmps = "";
+	    (void)astore(ary,++sp,str_2mortal(str_make(tmps,i)));
+	}
+	if (dovalues) {
+	    tmpstr = Str_new(45,0);
+#ifdef DEBUGGING
+	    if (debug & 8192) {
+		sprintf(buf,"%d%%%d=%d\n",entry->hent_hash,
+		    hash->tbl_max+1,entry->hent_hash & hash->tbl_max);
+		str_set(tmpstr,buf);
+	    }
+	    else
+#endif
+	    str_sset(tmpstr,hiterval(hash,entry));
+	    (void)astore(ary,++sp,str_2mortal(tmpstr));
+	}
+    }
+    return sp;
+}
+

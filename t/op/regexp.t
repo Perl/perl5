@@ -1,6 +1,6 @@
 #!./perl
 
-# $RCSfile: regexp.t,v $$Revision: 4.0.1.1 $$Date: 91/06/10 01:30:29 $
+# $RCSfile: regexp.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:20 $
 
 open(TESTS,'op/re_tests') || open(TESTS,'t/op/re_tests')
     || die "Can't open re_tests";

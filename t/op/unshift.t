@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: unshift.t,v 4.0 91/03/20 01:55:21 lwall Locked $
+# $RCSfile: unshift.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:35 $
 
 print "1..2\n";
 

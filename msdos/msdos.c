@@ -1,4 +1,4 @@
-/* $RCSfile: msdos.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:22:37 $
+/* $RCSfile: msdos.c,v $$Revision: 4.1 $$Date: 92/08/07 18:24:49 $
  *
  *    (C) Copyright 1989, 1990 Diomidis Spinellis.
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	msdos.c,v $
+ * Revision 4.1  92/08/07  18:24:49  lwall
+ * 
  * Revision 4.0.1.1  91/06/07  11:22:37  lwall
  * patch4: new copyright notice
  * 

@@ -1,4 +1,4 @@
-/*  $Revision: 4.0.1.1 $
+/*  $Revision: 4.1 $
 **
 **  Do shell-style pattern matching for ?, \, [], and * characters.
 **  Might not be robust in face of malformed patterns; e.g., "foo[a-"

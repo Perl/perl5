@@ -1,0 +1,235 @@
+int
+do_split(TARG,spat,limit,gimme,arglast)
+STR *TARG;
+register SPAT *spat;
+register int limit;
+int gimme;
+int *arglast;
+{
+    register ARRAY *ary = stack;
+    STR **st = ary->ary_array;
+    register int sp = arglast[0] + 1;
+    register char *s = str_get(st[sp]);
+    char *strend = s + st[sp--]->str_cur;
+    register STR *dstr;
+    register char *m;
+    int iters = 0;
+    int maxiters = (strend - s) + 10;
+    int i;
+    char *orig;
+    int origlimit = limit;
+    int realarray = 0;
+
+    if (!spat || !s)
+	fatal("panic: do_split");
+    else if (spat->spat_runtime) {
+	nointrp = "|)";
+	sp = eval(spat->spat_runtime,G_SCALAR,sp);
+	st = stack->ary_array;
+	m = str_get(dstr = st[sp--]);
+	nointrp = "";
+	if (*m == ' ' && dstr->str_cur == 1) {
+	    str_set(dstr,"\\s+");
+	    m = dstr->str_ptr;
+	    spat->spat_flags |= SPAT_SKIPWHITE;
+	}
+	if (spat->spat_regexp) {
+	    regfree(spat->spat_regexp);
+	    spat->spat_regexp = Null(REGEXP*);	/* avoid possible double free */
+	}
+	spat->spat_regexp = regcomp(m,m+dstr->str_cur,
+	    spat->spat_flags & SPAT_FOLD);
+	if (spat->spat_flags & SPAT_KEEP ||
+	    (spat->spat_runtime->arg_type == O_ITEM &&
+	      (spat->spat_runtime[1].arg_type & A_MASK) == A_SINGLE) ) {
+	    arg_free(spat->spat_runtime);	/* it won't change, so */
+	    spat->spat_runtime = Nullarg;	/* no point compiling again */
+	}
+    }
+#ifdef DEBUGGING
+    if (debug & 8) {
+	deb("2.SPAT /%s/\n",spat->spat_regexp->precomp);
+    }
+#endif
+    ary = stab_xarray(spat->spat_repl[1].arg_ptr.arg_stab);
+    if (ary && (gimme != G_ARRAY || (spat->spat_flags & SPAT_ONCE))) {
+	realarray = 1;
+	if (!(ary->ary_flags & ARF_REAL)) {
+	    ary->ary_flags |= ARF_REAL;
+	    for (i = ary->ary_fill; i >= 0; i--)
+		ary->ary_array[i] = Nullstr;	/* don't free mere refs */
+	}
+	ary->ary_fill = -1;
+	sp = -1;	/* temporarily switch stacks */
+    }
+    else
+	ary = stack;
+    orig = s;
+    if (spat->spat_flags & SPAT_SKIPWHITE) {
+	while (isSPACE(*s))
+	    s++;
+    }
+    if (!limit)
+	limit = maxiters + 2;
+    if (strEQ("\\s+",spat->spat_regexp->precomp)) {
+	while (--limit) {
+	    /*SUPPRESS 530*/
+	    for (m = s; m < strend && !isSPACE(*m); m++) ;
+	    if (m >= strend)
+		break;
+	    dstr = Str_new(30,m-s);
+	    str_nset(dstr,s,m-s);
+	    if (!realarray)
+		str_2mortal(dstr);
+	    (void)astore(ary, ++sp, dstr);
+	    /*SUPPRESS 530*/
+	    for (s = m + 1; s < strend && isSPACE(*s); s++) ;
+	}
+    }
+    else if (strEQ("^",spat->spat_regexp->precomp)) {
+	while (--limit) {
+	    /*SUPPRESS 530*/
+	    for (m = s; m < strend && *m != '\n'; m++) ;
+	    m++;
+	    if (m >= strend)
+		break;
+	    dstr = Str_new(30,m-s);
+	    str_nset(dstr,s,m-s);
+	    if (!realarray)
+		str_2mortal(dstr);
+	    (void)astore(ary, ++sp, dstr);
+	    s = m;
+	}
+    }
+    else if (spat->spat_short) {
+	i = spat->spat_short->str_cur;
+	if (i == 1) {
+	    int fold = (spat->spat_flags & SPAT_FOLD);
+
+	    i = *spat->spat_short->str_ptr;
+	    if (fold && isUPPER(i))
+		i = tolower(i);
+	    while (--limit) {
+		if (fold) {
+		    for ( m = s;
+			  m < strend && *m != i &&
+			    (!isUPPER(*m) || tolower(*m) != i);
+			  m++)			/*SUPPRESS 530*/
+			;
+		}
+		else				/*SUPPRESS 530*/
+		    for (m = s; m < strend && *m != i; m++) ;
+		if (m >= strend)
+		    break;
+		dstr = Str_new(30,m-s);
+		str_nset(dstr,s,m-s);
+		if (!realarray)
+		    str_2mortal(dstr);
+		(void)astore(ary, ++sp, dstr);
+		s = m + 1;
+	    }
+	}
+	else {
+#ifndef lint
+	    while (s < strend && --limit &&
+	      (m=fbminstr((unsigned char*)s, (unsigned char*)strend,
+		    spat->spat_short)) )
+#endif
+	    {
+		dstr = Str_new(31,m-s);
+		str_nset(dstr,s,m-s);
+		if (!realarray)
+		    str_2mortal(dstr);
+		(void)astore(ary, ++sp, dstr);
+		s = m + i;
+	    }
+	}
+    }
+    else {
+	maxiters += (strend - s) * spat->spat_regexp->nparens;
+	while (s < strend && --limit &&
+	    regexec(spat->spat_regexp, s, strend, orig, 1, Nullstr, TRUE) ) {
+	    if (spat->spat_regexp->subbase
+	      && spat->spat_regexp->subbase != orig) {
+		m = s;
+		s = orig;
+		orig = spat->spat_regexp->subbase;
+		s = orig + (m - s);
+		strend = s + (strend - m);
+	    }
+	    m = spat->spat_regexp->startp[0];
+	    dstr = Str_new(32,m-s);
+	    str_nset(dstr,s,m-s);
+	    if (!realarray)
+		str_2mortal(dstr);
+	    (void)astore(ary, ++sp, dstr);
+	    if (spat->spat_regexp->nparens) {
+		for (i = 1; i <= spat->spat_regexp->nparens; i++) {
+		    s = spat->spat_regexp->startp[i];
+		    m = spat->spat_regexp->endp[i];
+		    dstr = Str_new(33,m-s);
+		    str_nset(dstr,s,m-s);
+		    if (!realarray)
+			str_2mortal(dstr);
+		    (void)astore(ary, ++sp, dstr);
+		}
+	    }
+	    s = spat->spat_regexp->endp[0];
+	}
+    }
+    if (realarray)
+	iters = sp + 1;
+    else
+	iters = sp - arglast[0];
+    if (iters > maxiters)
+	fatal("Split loop");
+    if (s < strend || origlimit) {	/* keep field after final delim? */
+	dstr = Str_new(34,strend-s);
+	str_nset(dstr,s,strend-s);
+	if (!realarray)
+	    str_2mortal(dstr);
+	(void)astore(ary, ++sp, dstr);
+	iters++;
+    }
+    else {
+#ifndef I286x
+	while (iters > 0 && ary->ary_array[sp]->str_cur == 0)
+	    iters--,sp--;
+#else
+	char *zaps;
+	int   zapb;
+
+	if (iters > 0) {
+		zaps = str_get(afetch(ary,sp,FALSE));
+		zapb = (int) *zaps;
+	}
+	
+	while (iters > 0 && (!zapb)) {
+	    iters--,sp--;
+	    if (iters > 0) {
+		zaps = str_get(afetch(ary,iters-1,FALSE));
+		zapb = (int) *zaps;
+	    }
+	}
+#endif
+    }
+    if (realarray) {
+	ary->ary_fill = sp;
+	if (gimme == G_ARRAY) {
+	    sp++;
+	    astore(stack, arglast[0] + 1 + sp, Nullstr);
+	    Copy(ary->ary_array, stack->ary_array + arglast[0] + 1, sp, STR*);
+	    return arglast[0] + sp;
+	}
+    }
+    else {
+	if (gimme == G_ARRAY)
+	    return sp;
+    }
+    sp = arglast[0] + 1;
+    str_numset(TARG,(double)iters);
+    STABSET(TARG);
+    st[sp] = TARG;
+    return sp;
+}
+

@@ -33,9 +33,11 @@ eval 'exec $bin/perl -S \$0 \${1+"\$@"}'
 : In the following dollars and backticks do not need the extra backslash.
 $spitshell >>s2p <<'!NO!SUBS!'
 
-# $RCSfile: s2p.SH,v $$Revision: 4.0.1.2 $$Date: 92/06/08 17:26:31 $
+# $RCSfile: s2p.SH,v $$Revision: 4.1 $$Date: 92/08/07 18:29:23 $
 #
 # $Log:	s2p.SH,v $
+# Revision 4.1  92/08/07  18:29:23  lwall
+# 
 # Revision 4.0.1.2  92/06/08  17:26:31  lwall
 # patch20: s2p didn't output portable startup code
 # patch20: added ... as variant on ..

@@ -1,0 +1,27 @@
+int
+do_listen(stab, arglast)
+STAB *stab;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[1];
+    register STIO *stio;
+    int backlog;
+
+    if (!stab)
+	goto nuts;
+
+    stio = stab_io(stab);
+    if (!stio || !stio->ifp)
+	goto nuts;
+
+    backlog = (int)str_gnum(st[++sp]);
+    return listen(fileno(stio->ifp), backlog) >= 0;
+
+nuts:
+    if (dowarn)
+	warn("listen() on closed fd");
+    errno = EBADF;
+    return FALSE;
+}
+

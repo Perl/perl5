@@ -4,7 +4,7 @@ package DB;
 # Ray Lischner (uunet!mntgfx!lisch) as of 5 Nov 1990
 # Johan Vromans -- upgrade to 4.0 pl 10
 
-$header = '$RCSfile: perldb.pl,v $$Revision: 4.0.1.3 $$Date: 92/06/08 13:43:57 $';
+$header = '$RCSfile: perldb.pl,v $$Revision: 4.1 $$Date: 92/08/07 18:24:07 $';
 #
 # This file is automatically included if you do perl -d.
 # It's probably not useful to include this yourself.
@@ -14,6 +14,8 @@ $header = '$RCSfile: perldb.pl,v $$Revision: 4.0.1.3 $$Date: 92/06/08 13:43:57 $
 # have a breakpoint.  It also inserts a do 'perldb.pl' before the first line.
 #
 # $Log:	perldb.pl,v $
+# Revision 4.1  92/08/07  18:24:07  lwall
+# 
 # Revision 4.0.1.3  92/06/08  13:43:57  lwall
 # patch20: support for MSDOS folded into perldb.pl
 # patch20: perldb couldn't debug file containing '-', such as STDIN designator
@@ -199,8 +201,9 @@ command		Execute as a perl statement in current package.
 		    next CMD; };
 		$cmd =~ s/^X\b/V $package/;
 		$cmd =~ /^V$/ && do {
-		    $cmd = 'V $package'; };
+		    $cmd = "V $package"; };
 		$cmd =~ /^V\b\s*(\S+)\s*(.*)/ && do {
+		    local ($savout) = select(OUT);
 		    $packname = $1;
 		    @vars = split(' ',$2);
 		    do 'dumpvar.pl' unless defined &main'dumpvar;
@@ -210,6 +213,7 @@ command		Execute as a perl statement in current package.
 		    else {
 			print DB'OUT "dumpvar.pl not available.\n";
 		    }
+		    select ($savout);
 		    next CMD; };
 		$cmd =~ /^f\b\s*(.*)/ && do {
 		    $file = $1;

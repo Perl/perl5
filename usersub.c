@@ -1,10 +1,12 @@
-/* $RCSfile: usersub.c,v $$Revision: 4.0.1.2 $$Date: 92/06/08 16:04:24 $
+/* $RCSfile: usersub.c,v $$Revision: 4.1 $$Date: 92/08/07 18:28:45 $
  *
  *  This file contains stubs for routines that the user may define to
  *  set up glue routines for C libraries or to decrypt encrypted scripts
  *  for execution.
  *
  * $Log:	usersub.c,v $
+ * Revision 4.1  92/08/07  18:28:45  lwall
+ * 
  * Revision 4.0.1.2  92/06/08  16:04:24  lwall
  * patch20: removed implicit int declarations on functions
  * 
@@ -74,12 +76,12 @@ static int	pipepid;
 #endif
 
 FILE *
-mypfiopen(fil,func)		/* open a pipe to function call for input */
+my_pfiopen(fil,func)		/* open a pipe to function call for input */
 FILE	*fil;
 VOID	(*func)();
 {
     int p[2];
-    STR *str;
+    SV *sv;
 
     if (pipe(p) < 0) {
 	fclose( fil );
@@ -113,8 +115,8 @@ VOID	(*func)();
     close(p[1]);
     close(fileno(fil));
     fclose(fil);
-    str = afetch(fdpid,p[0],TRUE);
-    str->str_u.str_useful = pipepid;
+    sv = *av_fetch(fdpid,p[0],TRUE);
+    sv->sv_u.sv_useful = pipepid;
     return fdopen(p[0], "r");
 }
 
@@ -131,11 +133,11 @@ cryptswitch()
     if (ch == CRYPT_MAGIC_1) {
 	if (getc(rsfp) == CRYPT_MAGIC_2) {
 	    if( perldb ) fatal("can't debug an encrypted script");
-	    rsfp = mypfiopen( rsfp, cryptfilter );
+	    rsfp = my_pfiopen( rsfp, cryptfilter );
 	    preprocess = 1;	/* force call to pclose when done */
 	}
 	else
-	    fatal( "bad encryption format" );
+	    fatal( "bad encryption run_format" );
     }
     else
 	ungetc(ch,rsfp);

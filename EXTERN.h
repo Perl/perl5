@@ -1,4 +1,4 @@
-/* $RCSfile: EXTERN.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 10:10:32 $
+/* $RCSfile: EXTERN.h,v $$Revision: 4.1 $$Date: 92/08/07 17:18:03 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	EXTERN.h,v $
+ * Revision 4.1  92/08/07  17:18:03  lwall
+ * Stage 6 Snapshot
+ * 
  * Revision 4.0.1.1  91/06/07  10:10:32  lwall
  * patch4: new copyright notice
  * 

@@ -1,4 +1,4 @@
-/* $RCSfile: perl.h,v $$Revision: 4.0.1.6 $$Date: 92/06/08 14:55:10 $
+/* $RCSfile: perl.h,v $$Revision: 4.1 $$Date: 92/08/07 18:25:56 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perl.h,v $
+ * Revision 4.1  92/08/07  18:25:56  lwall
+ * 
  * Revision 4.0.1.6  92/06/08  14:55:10  lwall
  * patch20: added Atari ST portability
  * patch20: bcopy() and memcpy() now tested for overlap safety
@@ -39,8 +41,31 @@
  * 
  */
 
+#include "embed.h"
+
 #define VOIDWANT 1
+#ifdef __cplusplus
+#include "config_c++.h"
+#else
 #include "config.h"
+#endif
+
+#ifndef BYTEORDER
+#   define BYTEORDER 0x1234
+#endif
+
+/* Overall memory policy? */
+#ifndef CONSERVATIVE
+#   define LIBERAL 1
+#endif
+
+/*
+ * The following contortions are brought to you on behalf of all the
+ * standards, semi-standards, de facto standards, not-so-de-facto standards
+ * of the world, as well as all the other botches anyone ever thought of.
+ * The basic theory is that if we work hard enough here, the rest of the
+ * code can be a lot prettier.  Well, so much for theory.  Sorry, Henry...
+ */
 
 #ifdef MYMALLOC
 #   ifdef HIDEMYMALLOC
@@ -64,50 +89,41 @@ char Error[1];
 #define DOSISH 1
 #endif
 
-#ifdef DOSISH
-/* This stuff now in the MS-DOS config.h file. */
-#else /* !MSDOS */
-
-/*
- * The following symbols are defined if your operating system supports
- * functions by that name.  All Unixes I know of support them, thus they
- * are not checked by the configuration script, but are directly defined
- * here.
- */
-#define HAS_ALARM
-#define HAS_CHOWN
-#define HAS_CHROOT
-#define HAS_FORK
-#define HAS_GETLOGIN
-#define HAS_GETPPID
-#define HAS_KILL
-#define HAS_LINK
-#define HAS_PIPE
-#define HAS_WAIT
-#define HAS_UMASK
-/*
- * The following symbols are defined if your operating system supports
- * password and group functions in general.  All Unix systems do.
- */
-#define HAS_GROUP
-#define HAS_PASSWD
-
-#endif /* !MSDOS */
-
-#if defined(__STDC__) || defined(_AIX) || defined(__stdc__)
+#if defined(__STDC__) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus)
 # define STANDARD_C 1
 #endif
 
-#if defined(HASVOLATILE) || defined(STANDARD_C)
-#define VOLATILE volatile
+#if defined(STANDARD_C)
+#   define P(args) args
 #else
-#define VOLATILE
+#   define P(args) ()
+#endif
+
+#if defined(HASVOLATILE) || defined(STANDARD_C)
+#   ifdef __cplusplus
+#	define VOL		// to temporarily suppress warnings
+#   else
+#	define VOL volatile
+#   endif
+#else
+#   define VOL
 #endif
 
 #ifdef IAMSUID
 #   ifndef TAINT
 #	define TAINT
 #   endif
+#endif
+#ifdef TAINT
+#   define TAINT_IF(c)		(tainted |= (c))
+#   define TAINT_NOT		(tainted = 0)
+#   define TAINT_PROPER(s)	taint_proper(no_security, s)
+#   define TAINT_ENV()		taint_env()
+#else
+#   define TAINT_IF(c)
+#   define TAINT_NOT
+#   define TAINT_PROPER(s)
+#   define TAINT_ENV()
 #endif
 
 #ifndef HAS_VFORK
@@ -131,29 +147,32 @@ char Error[1];
 #include <stdio.h>
 #include <ctype.h>
 #include <setjmp.h>
+
 #ifndef MSDOS
-#ifdef PARAM_NEEDS_TYPES
-#include <sys/types.h>
+#   ifdef PARAM_NEEDS_TYPES
+#	include <sys/types.h>
+#   endif
+#   include <sys/param.h>
 #endif
-#include <sys/param.h>
-#endif
+
+
+/* Use all the "standard" definitions? */
 #ifdef STANDARD_C
-/* Use all the "standard" definitions */
-#include <stdlib.h>
-#include <string.h>
-#define MEM_SIZE size_t
+#   include <stdlib.h>
+#   include <string.h>
+#   define MEM_SIZE size_t
 #else
-typedef unsigned int MEM_SIZE;
+    typedef unsigned int MEM_SIZE;
 #endif /* STANDARD_C */
 
 #if defined(HAS_MEMCMP) && defined(mips) && defined(ultrix)
-#undef HAS_MEMCMP
+#   undef HAS_MEMCMP
 #endif
 
 #ifdef HAS_MEMCPY
 #  ifndef STANDARD_C
 #    ifndef memcpy
-	extern char * memcpy();
+	extern char * memcpy P((char*, char*, int));
 #    endif
 #  endif
 #else
@@ -169,7 +188,7 @@ typedef unsigned int MEM_SIZE;
 #ifdef HAS_MEMSET
 #  ifndef STANDARD_C
 #    ifndef memset
-	extern char *memset();
+	extern char *memset P((char*, int, int));
 #    endif
 #  endif
 #  define memzero(d,l) memset(d,0,l)
@@ -186,7 +205,7 @@ typedef unsigned int MEM_SIZE;
 #ifdef HAS_MEMCMP
 #  ifndef STANDARD_C
 #    ifndef memcmp
-	extern int memcmp();
+	extern int memcmp P((char*, char*, int));
 #    endif
 #  endif
 #else
@@ -203,43 +222,44 @@ typedef unsigned int MEM_SIZE;
 #endif /* HAS_BCMP */
 
 #ifndef HAS_MEMMOVE
-#if defined(HAS_BCOPY) && defined(SAFE_BCOPY)
-#define memmove(d,s,l) bcopy(s,d,l)
-#else
-#if defined(HAS_MEMCPY) && defined(SAFE_MEMCPY)
-#define memmove(d,s,l) memcpy(d,s,l)
-#else
-#define memmove(d,s,l) my_bcopy(s,d,l)
-#endif
-#endif
+#   if defined(HAS_BCOPY) && defined(SAFE_BCOPY)
+#	define memmove(d,s,l) bcopy(s,d,l)
+#   else
+#	if defined(HAS_MEMCPY) && defined(SAFE_MEMCPY)
+#	    define memmove(d,s,l) memcpy(d,s,l)
+#	else
+#	    define memmove(d,s,l) my_bcopy(s,d,l)
+#	endif
+#   endif
 #endif
 
 #ifndef _TYPES_		/* If types.h defines this it's easy. */
-#ifndef major		/* Does everyone's types.h define this? */
-#include <sys/types.h>
-#endif
+#   ifndef major		/* Does everyone's types.h define this? */
+#	include <sys/types.h>
+#   endif
 #endif
 
 #ifdef I_NETINET_IN
-#include <netinet/in.h>
+#   include <netinet/in.h>
 #endif
 
 #include <sys/stat.h>
+
 #if defined(uts) || defined(UTekV)
-#undef S_ISDIR
-#undef S_ISCHR
-#undef S_ISBLK
-#undef S_ISREG
-#undef S_ISFIFO
-#undef S_ISLNK
-#define S_ISDIR(P) (((P)&S_IFMT)==S_IFDIR)
-#define S_ISCHR(P) (((P)&S_IFMT)==S_IFCHR)
-#define S_ISBLK(P) (((P)&S_IFMT)==S_IFBLK)
-#define S_ISREG(P) (((P)&S_IFMT)==S_IFREG)
-#define S_ISFIFO(P) (((P)&S_IFMT)==S_IFIFO)
-#ifdef S_IFLNK
-#define S_ISLNK(P) (((P)&S_IFMT)==S_IFLNK)
-#endif
+#   undef S_ISDIR
+#   undef S_ISCHR
+#   undef S_ISBLK
+#   undef S_ISREG
+#   undef S_ISFIFO
+#   undef S_ISLNK
+#   define S_ISDIR(P) (((P)&S_IFMT)==S_IFDIR)
+#   define S_ISCHR(P) (((P)&S_IFMT)==S_IFCHR)
+#   define S_ISBLK(P) (((P)&S_IFMT)==S_IFBLK)
+#   define S_ISREG(P) (((P)&S_IFMT)==S_IFREG)
+#   define S_ISFIFO(P) (((P)&S_IFMT)==S_IFIFO)
+#   ifdef S_IFLNK
+#	define S_ISLNK(P) (((P)&S_IFMT)==S_IFLNK)
+#   endif
 #endif
 
 #ifdef I_TIME
@@ -261,107 +281,104 @@ typedef unsigned int MEM_SIZE;
 #endif
 
 #if defined(HAS_STRERROR) && (!defined(HAS_MKDIR) || !defined(HAS_RMDIR))
-#undef HAS_STRERROR
+#   undef HAS_STRERROR
 #endif
 
 #include <errno.h>
 #ifndef MSDOS
-#ifndef errno
-extern int errno;     /* ANSI allows errno to be an lvalue expr */
-#endif
+#   ifndef errno
+	extern int errno;     /* ANSI allows errno to be an lvalue expr */
+#   endif
 #endif
 
 #ifndef strerror
-#ifdef HAS_STRERROR
-char *strerror();
-#else
-extern int sys_nerr;
-extern char *sys_errlist[];
-#define strerror(e) ((e) < 0 || (e) >= sys_nerr ? "(unknown)" : sys_errlist[e])
-#endif
+#   ifdef HAS_STRERROR
+	char *strerror P((int));
+#   else
+	extern int sys_nerr;
+	extern char *sys_errlist[];
+#       define strerror(e) \
+		((e) < 0 || (e) >= sys_nerr ? "(unknown)" : sys_errlist[e])
+#   endif
 #endif
 
 #ifdef I_SYSIOCTL
-#ifndef _IOCTL_
-#include <sys/ioctl.h>
-#endif
+#   ifndef _IOCTL_
+#	include <sys/ioctl.h>
+#   endif
 #endif
 
 #if defined(mc300) || defined(mc500) || defined(mc700) || defined(mc6000)
-#ifdef HAS_SOCKETPAIR
-#undef HAS_SOCKETPAIR
-#endif
-#ifdef HAS_NDBM
-#undef HAS_NDBM
-#endif
+#   ifdef HAS_SOCKETPAIR
+#	undef HAS_SOCKETPAIR
+#   endif
+#   ifdef HAS_NDBM
+#	undef HAS_NDBM
+#   endif
 #endif
 
 #ifdef WANT_DBZ
-#include <dbz.h>
-#define SOME_DBM
-#define dbm_fetch(db,dkey) fetch(dkey)
-#define dbm_delete(db,dkey) fatal("dbz doesn't implement delete")
-#define dbm_store(db,dkey,dcontent,flags) store(dkey,dcontent)
-#define dbm_close(db) dbmclose()
-#define dbm_firstkey(db) (fatal("dbz doesn't implement traversal"),fetch())
-#define nextkey() (fatal("dbz doesn't implement traversal"),fetch())
-#define dbm_nextkey(db) (fatal("dbz doesn't implement traversal"),fetch())
-#ifdef HAS_NDBM
-#undef HAS_NDBM
-#endif
-#ifndef HAS_ODBM
-#define HAS_ODBM
-#endif
+#   include <dbz.h>
+#   define SOME_DBM
+#   define dbm_fetch(db,dkey) fetch(dkey)
+#   define dbm_delete(db,dkey) fatal("dbz doesn't implement delete")
+#   define dbm_store(db,dkey,dcontent,flags) store(dkey,dcontent)
+#   define dbm_close(db) dbmclose()
+#   define dbm_firstkey(db) (fatal("dbz doesn't implement traversal"),fetch())
+#   define nextkey() (fatal("dbz doesn't implement traversal"),fetch())
+#   define dbm_nextkey(db) (fatal("dbz doesn't implement traversal"),fetch())
+#   ifdef HAS_NDBM
+#	undef HAS_NDBM
+#   endif
+#   ifndef HAS_ODBM
+#	define HAS_ODBM
+#   endif
 #else
-#ifdef HAS_GDBM
-#ifdef I_GDBM
-#include <gdbm.h>
-#endif
-#define SOME_DBM
-#ifdef HAS_NDBM
-#undef HAS_NDBM
-#endif
-#ifdef HAS_ODBM
-#undef HAS_ODBM
-#endif
-#else
-#ifdef HAS_NDBM
-#include <ndbm.h>
-#define SOME_DBM
-#ifdef HAS_ODBM
-#undef HAS_ODBM
-#endif
-#else
-#ifdef HAS_ODBM
-#ifdef NULL
-#undef NULL		/* suppress redefinition message */
-#endif
-#include <dbm.h>
-#ifdef NULL
-#undef NULL
-#endif
-#define NULL 0		/* silly thing is, we don't even use this */
-#define SOME_DBM
-#define dbm_fetch(db,dkey) fetch(dkey)
-#define dbm_delete(db,dkey) delete(dkey)
-#define dbm_store(db,dkey,dcontent,flags) store(dkey,dcontent)
-#define dbm_close(db) dbmclose()
-#define dbm_firstkey(db) firstkey()
-#endif /* HAS_ODBM */
-#endif /* HAS_NDBM */
-#endif /* HAS_GDBM */
+#   ifdef HAS_GDBM
+#	ifdef I_GDBM
+#	    include <gdbm.h>
+#	endif
+#	define SOME_DBM
+#	ifdef HAS_NDBM
+#	    undef HAS_NDBM
+#	endif
+#	ifdef HAS_ODBM
+#	    undef HAS_ODBM
+#	endif
+#   else
+#	ifdef HAS_NDBM
+#	    include <ndbm.h>
+#	    define SOME_DBM
+#	    ifdef HAS_ODBM
+#		undef HAS_ODBM
+#	    endif
+#	else
+#	    ifdef HAS_ODBM
+#		ifdef NULL
+#		    undef NULL		/* suppress redefinition message */
+#		endif
+#		include <dbm.h>
+#		ifdef NULL
+#		    undef NULL
+#		endif
+#		define NULL 0	/* silly thing is, we don't even use this... */
+#		define SOME_DBM
+#		define dbm_fetch(db,dkey) fetch(dkey)
+#		define dbm_delete(db,dkey) delete(dkey)
+#		define dbm_store(db,dkey,dcontent,flags) store(dkey,dcontent)
+#		define dbm_close(db) dbmclose()
+#		define dbm_firstkey(db) firstkey()
+#	    endif /* HAS_ODBM */
+#	endif /* HAS_NDBM */
+#   endif /* HAS_GDBM */
 #endif /* WANT_DBZ */
-#ifdef SOME_DBM
-EXT char *dbmkey;
-EXT int dbmlen;
-#endif
 
 #if INTSIZE == 2
-#define htoni htons
-#define ntohi ntohs
+#   define htoni htons
+#   define ntohi ntohs
 #else
-#define htoni htonl
-#define ntohi ntohl
+#   define htoni htonl
+#   define ntohi ntohl
 #endif
 
 #if defined(I_DIRENT)
@@ -386,7 +403,7 @@ EXT int dbmlen;
 #ifdef FPUTS_BOTCH
 /* work around botch in SunOS 4.0.1 and 4.0.2 */
 #   ifndef fputs
-#	define fputs(str,fp) fprintf(fp,"%s",str)
+#	define fputs(sv,fp) fprintf(fp,"%s",sv)
 #   endif
 #endif
 
@@ -490,8 +507,8 @@ EXT int dbmlen;
 #   define S_ISGID 02000
 #endif
 
-#ifdef f_next
-#undef f_next
+#ifdef ff_next
+#   undef ff_next
 #endif
 
 #if defined(cray) || defined(gould) || defined(i860)
@@ -514,114 +531,108 @@ EXT int dbmlen;
 #   endif
 #endif
 
+#ifdef VOIDSIG
+#   define VOIDRET void
+#else
+#   define VOIDRET int
+#endif
+
+#ifdef DOSISH
+#   include "dosish.h"
+#else
+#   include "unixish.h"
+#endif
+
+#ifndef HAS_PAUSE
+#define pause() sleep((32767<<16)+32767)
+#endif
+
+#ifndef IOCPARM_LEN
+#   ifdef IOCPARM_MASK
+	/* on BSDish systes we're safe */
+#	define IOCPARM_LEN(x)  (((x) >> 16) & IOCPARM_MASK)
+#   else
+	/* otherwise guess at what's safe */
+#	define IOCPARM_LEN(x)	256
+#   endif
+#endif
+
 typedef MEM_SIZE STRLEN;
 
-typedef struct arg ARG;
-typedef struct cmd CMD;
-typedef struct formcmd FCMD;
-typedef struct scanpat SPAT;
-typedef struct stio STIO;
-typedef struct sub SUBR;
-typedef struct string STR;
-typedef struct atbl ARRAY;
-typedef struct htbl HASH;
+typedef struct op OP;
+typedef struct cop COP;
+typedef struct unop UNOP;
+typedef struct binop BINOP;
+typedef struct listop LISTOP;
+typedef struct logop LOGOP;
+typedef struct condop CONDOP;
+typedef struct pmop PMOP;
+typedef struct svop SVOP;
+typedef struct gvop GVOP;
+typedef struct pvop PVOP;
+typedef struct cvop CVOP;
+typedef struct loop LOOP;
+
+typedef struct Outrec Outrec;
+typedef struct lstring Lstring;
+typedef struct interpreter Interpreter;
+typedef struct ff FF;
+typedef struct io IO;
+typedef struct sv SV;
+typedef struct av AV;
+typedef struct hv HV;
+typedef struct cv CV;
 typedef struct regexp REGEXP;
-typedef struct stabptrs STBP;
-typedef struct stab STAB;
-typedef struct callsave CSV;
+typedef struct gp GP;
+typedef struct sv GV;
+typedef struct context CONTEXT;
+typedef struct block BLOCK;
+
+typedef struct magic MAGIC;
+typedef struct xpv XPV;
+typedef struct xpviv XPVIV;
+typedef struct xpvnv XPVNV;
+typedef struct xpvmg XPVMG;
+typedef struct xpvlv XPVLV;
+typedef struct xpvav XPVAV;
+typedef struct xpvhv XPVHV;
+typedef struct xpvgv XPVGV;
+typedef struct xpvcv XPVCV;
+typedef struct xpvbm XPVBM;
+typedef struct xpvfm XPVFM;
+typedef struct mgvtbl MGVTBL;
+typedef union any ANY;
 
 #include "handy.h"
+union any {
+    void*	any_ptr;
+    I32		any_i32;
+};
+
 #include "regexp.h"
-#include "str.h"
+#include "sv.h"
 #include "util.h"
 #include "form.h"
-#include "stab.h"
-#include "spat.h"
-#include "arg.h"
-#include "cmd.h"
-#include "array.h"
-#include "hash.h"
+#include "gv.h"
+#include "cv.h"
+#include "opcode.h"
+#include "op.h"
+#include "cop.h"
+#include "av.h"
+#include "hv.h"
+#include "mg.h"
+#include "scope.h"
 
 #if defined(iAPX286) || defined(M_I286) || defined(I80286)
 #   define I286
 #endif
 
 #ifndef	STANDARD_C
-#ifdef CHARSPRINTF
-    char *sprintf();
-#else
-    int sprintf();
-#endif
-#endif
-
-EXT char *Yes INIT("1");
-EXT char *No INIT("");
-
-/* "gimme" values */
-
-/* Note: cmd.c assumes that it can use && to produce one of these values! */
-#define G_SCALAR 0
-#define G_ARRAY 1
-
-#ifdef CRIPPLED_CC
-int str_true();
-#else /* !CRIPPLED_CC */
-#define str_true(str) (Str = (str), \
-	(Str->str_pok ? \
-	    ((*Str->str_ptr > '0' || \
-	      Str->str_cur > 1 || \
-	      (Str->str_cur && *Str->str_ptr != '0')) ? 1 : 0) \
-	: \
-	    (Str->str_nok ? (Str->str_u.str_nval != 0.0) : 0 ) ))
-#endif /* CRIPPLED_CC */
-
-#ifdef DEBUGGING
-#define str_peek(str) (Str = (str), \
-	(Str->str_pok ? \
-	    Str->str_ptr : \
-	    (Str->str_nok ? \
-		(sprintf(tokenbuf,"num(%g)",Str->str_u.str_nval), \
-		    (char*)tokenbuf) : \
-		"" )))
-#endif
-
-#ifdef CRIPPLED_CC
-char *str_get();
-#else
-#ifdef TAINT
-#define str_get(str) (Str = (str), tainted |= Str->str_tainted, \
-	(Str->str_pok ? Str->str_ptr : str_2ptr(Str)))
-#else
-#define str_get(str) (Str = (str), (Str->str_pok ? Str->str_ptr : str_2ptr(Str)))
-#endif /* TAINT */
-#endif /* CRIPPLED_CC */
-
-#ifdef CRIPPLED_CC
-double str_gnum();
-#else /* !CRIPPLED_CC */
-#ifdef TAINT
-#define str_gnum(str) (Str = (str), tainted |= Str->str_tainted, \
-	(Str->str_nok ? Str->str_u.str_nval : str_2num(Str)))
-#else /* !TAINT */
-#define str_gnum(str) (Str = (str), (Str->str_nok ? Str->str_u.str_nval : str_2num(Str)))
-#endif /* TAINT*/
-#endif /* CRIPPLED_CC */
-EXT STR *Str;
-
-#define GROWSTR(pp,lp,len) if (*(lp) < (len)) growstr(pp,lp,len)
-
-#ifndef DOSISH
-#define STR_GROW(str,len) if ((str)->str_len < (len)) str_grow(str,len)
-#define Str_Grow str_grow
-#else
-/* extra parentheses intentionally NOT placed around "len"! */
-#define STR_GROW(str,len) if ((str)->str_len < (unsigned long)len) \
-		str_grow(str,(unsigned long)len)
-#define Str_Grow(str,len) str_grow(str,(unsigned long)(len))
-#endif /* DOSISH */
-
-#ifndef BYTEORDER
-#define BYTEORDER 0x1234
+#   ifdef CHARSPRINTF
+	char *sprintf P((char *, ...));
+#   else
+	int sprintf P((char *, ...));
+#   endif
 #endif
 
 #if defined(htonl) && !defined(HAS_HTONL)
@@ -679,362 +690,133 @@ EXT STR *Str;
 #endif
 
 #ifdef CASTNEGFLOAT
-#define U_S(what) ((unsigned short)(what))
+#define U_S(what) ((U16)(what))
 #define U_I(what) ((unsigned int)(what))
-#define U_L(what) ((unsigned long)(what))
+#define U_L(what) ((U32)(what))
 #else
-unsigned long castulong();
-#define U_S(what) ((unsigned int)castulong(what))
-#define U_I(what) ((unsigned int)castulong(what))
-#define U_L(what) (castulong(what))
+U32 cast_ulong P((double));
+#define U_S(what) ((U16)cast_ulong(what))
+#define U_I(what) ((unsigned int)cast_ulong(what))
+#define U_L(what) (cast_ulong(what))
 #endif
 
-CMD *add_label();
-CMD *block_head();
-CMD *append_line();
-CMD *make_acmd();
-CMD *make_ccmd();
-CMD *make_icmd();
-CMD *invert();
-CMD *addcond();
-CMD *addloop();
-CMD *wopt();
-CMD *over();
-
-STAB *stabent();
-STAB *genstab();
-
-ARG *stab2arg();
-ARG *op_new();
-ARG *make_op();
-ARG *make_match();
-ARG *make_split();
-ARG *rcatmaybe();
-ARG *listish();
-ARG *maybelistish();
-ARG *localize();
-ARG *fixeval();
-ARG *jmaybe();
-ARG *l();
-ARG *fixl();
-ARG *mod_match();
-ARG *make_list();
-ARG *cmd_to_arg();
-ARG *addflags();
-ARG *hide_ary();
-ARG *cval_to_arg();
-
-STR *str_new();
-STR *stab_str();
-
-int apply();
-int do_each();
-int do_subr();
-int do_match();
-int do_unpack();
-int eval();		/* this evaluates expressions */
-int do_eval();		/* this evaluates eval operator */
-int do_assign();
-
-SUBR *make_sub();
-
-FCMD *load_format();
-
-char *scanpat();
-char *scansubst();
-char *scantrans();
-char *scanstr();
-char *scanident();
-char *str_append_till();
-char *str_gets();
-char *str_grow();
-
-bool do_open();
-bool do_close();
-bool do_print();
-bool do_aprint();
-bool do_exec();
-bool do_aexec();
-
-int do_subst();
-int cando();
-int ingroup();
-int whichsig();
-int userinit();
-#ifdef CRYPTSCRIPT
-void cryptswitch();
-#endif
-
-void str_replace();
-void str_inc();
-void str_dec();
-void str_free();
-void cmd_free();
-void arg_free();
-void spat_free();
-void regfree();
-void stab_clear();
-void do_chop();
-void do_vop();
-void do_write();
-void do_join();
-void do_sprintf();
-void do_accept();
-void do_pipe();
-void do_vecset();
-void do_unshift();
-void do_execfree();
-void magicalize();
-void magicname();
-void savelist();
-void saveitem();
-void saveint();
-void savelong();
-void savesptr();
-void savehptr();
-void restorelist();
-void repeatcpy();
-void make_form();
-void dehoist();
-void format();
-void my_unexec();
-void fatal();
-void warn();
-#ifdef DEBUGGING
-void dump_all();
-void dump_cmd();
-void dump_arg();
-void dump_flags();
-void dump_stab();
-void dump_spat();
-#endif
-#ifdef MSTATS
-void mstats();
-#endif
-
-HASH *savehash();
-ARRAY *saveary();
-
-EXT char **origargv;
-EXT int origargc;
-EXT char **origenviron;
-extern char **environ;
-
-EXT long subline INIT(0);
-EXT STR *subname INIT(Nullstr);
-EXT int arybase INIT(0);
-
-struct outrec {
-    long	o_lines;
+struct Outrec {
+    I32		o_lines;
     char	*o_str;
-    int		o_len;
+    U32		o_len;
 };
-
-EXT struct outrec outrec;
-EXT struct outrec toprec;
-
-EXT STAB *stdinstab INIT(Nullstab);
-EXT STAB *last_in_stab INIT(Nullstab);
-EXT STAB *defstab INIT(Nullstab);
-EXT STAB *argvstab INIT(Nullstab);
-EXT STAB *envstab INIT(Nullstab);
-EXT STAB *sigstab INIT(Nullstab);
-EXT STAB *defoutstab INIT(Nullstab);
-EXT STAB *curoutstab INIT(Nullstab);
-EXT STAB *argvoutstab INIT(Nullstab);
-EXT STAB *incstab INIT(Nullstab);
-EXT STAB *leftstab INIT(Nullstab);
-EXT STAB *amperstab INIT(Nullstab);
-EXT STAB *rightstab INIT(Nullstab);
-EXT STAB *DBstab INIT(Nullstab);
-EXT STAB *DBline INIT(Nullstab);
-EXT STAB *DBsub INIT(Nullstab);
-
-EXT HASH *defstash;		/* main symbol table */
-EXT HASH *curstash;		/* symbol table for current package */
-EXT HASH *debstash;		/* symbol table for perldb package */
-
-EXT STR *curstname;		/* name of current package */
-
-EXT STR *freestrroot INIT(Nullstr);
-EXT STR *lastretstr INIT(Nullstr);
-EXT STR *DBsingle INIT(Nullstr);
-EXT STR *DBtrace INIT(Nullstr);
-EXT STR *DBsignal INIT(Nullstr);
-EXT STR *formfeed INIT(Nullstr);
-
-EXT int lastspbase;
-EXT int lastsize;
-
-EXT char *hexdigit INIT("0123456789abcdef0123456789ABCDEFx");
-EXT char *origfilename;
-EXT FILE * VOLATILE rsfp INIT(Nullfp);
-EXT char buf[1024];
-EXT char *bufptr;
-EXT char *oldbufptr;
-EXT char *oldoldbufptr;
-EXT char *bufend;
-
-EXT STR *linestr INIT(Nullstr);
-
-EXT char *rs INIT("\n");
-EXT int rschar INIT('\n');	/* final char of rs, or 0777 if none */
-EXT int rslen INIT(1);
-EXT bool rspara INIT(FALSE);
-EXT char *ofs INIT(Nullch);
-EXT int ofslen INIT(0);
-EXT char *ors INIT(Nullch);
-EXT int orslen INIT(0);
-EXT char *ofmt INIT(Nullch);
-EXT char *inplace INIT(Nullch);
-EXT char *nointrp INIT("");
-
-EXT bool preprocess INIT(FALSE);
-EXT bool minus_n INIT(FALSE);
-EXT bool minus_p INIT(FALSE);
-EXT bool minus_l INIT(FALSE);
-EXT bool minus_a INIT(FALSE);
-EXT bool doswitches INIT(FALSE);
-EXT bool dowarn INIT(FALSE);
-EXT bool doextract INIT(FALSE);
-EXT bool allstabs INIT(FALSE);	/* init all customary symbols in symbol table?*/
-EXT bool sawampersand INIT(FALSE);	/* must save all match strings */
-EXT bool sawstudy INIT(FALSE);		/* do fbminstr on all strings */
-EXT bool sawi INIT(FALSE);		/* study must assume case insensitive */
-EXT bool sawvec INIT(FALSE);
-EXT bool localizing INIT(FALSE);	/* are we processing a local() list? */
 
 #ifndef MAXSYSFD
 #   define MAXSYSFD 2
 #endif
-EXT int maxsysfd INIT(MAXSYSFD);	/* top fd to pass to subprocesses */
-
-#ifdef CSH
-EXT char *cshname INIT(CSH);
-EXT int cshlen INIT(0);
-#endif /* CSH */
-
-#ifdef TAINT
-EXT bool tainted INIT(FALSE);		/* using variables controlled by $< */
-EXT bool taintanyway INIT(FALSE);	/* force taint checks when !set?id */
-#endif
-
-EXT bool nomemok INIT(FALSE);		/* let malloc context handle nomem */
 
 #ifndef DOSISH
 #define TMPPATH "/tmp/perl-eXXXXXX"
 #else
 #define TMPPATH "plXXXXXX"
 #endif /* MSDOS */
-EXT char *e_tmpname;
-EXT FILE *e_fp INIT(Nullfp);
 
-EXT char tokenbuf[256];
-EXT int expectterm INIT(TRUE);		/* how to interpret ambiguous tokens */
-EXT VOLATILE int in_eval INIT(FALSE);	/* trap fatal errors? */
-EXT int multiline INIT(0);		/* $*--do strings hold >1 line? */
-EXT int forkprocess;			/* so do_open |- can return proc# */
-EXT int do_undump INIT(0);		/* -u or dump seen? */
-EXT int error_count INIT(0);		/* how many errors so far, max 10 */
-EXT int multi_start INIT(0);		/* 1st line of multi-line string */
-EXT int multi_end INIT(0);		/* last line of multi-line string */
-EXT int multi_open INIT(0);		/* delimiter of said string */
-EXT int multi_close INIT(0);		/* delimiter of said string */
-
-FILE *popen();
-/* char *str_get(); */
-STR *interp();
-void free_arg();
-STIO *stio_new();
-void hoistmust();
-void scanconst();
-
-EXT struct stat statbuf;
-EXT struct stat statcache;
-EXT STAB *statstab INIT(Nullstab);
-EXT STR *statname INIT(Nullstr);
-#ifndef MSDOS
-EXT struct tms timesbuf;
+#ifndef __cplusplus
+UIDTYPE getuid P(());
+UIDTYPE geteuid P(());
+GIDTYPE getgid P(());
+GIDTYPE getegid P(());
 #endif
-EXT int uid;
-EXT int euid;
-EXT int gid;
-EXT int egid;
-UIDTYPE getuid();
-UIDTYPE geteuid();
-GIDTYPE getgid();
-GIDTYPE getegid();
-EXT int unsafe;
 
 #ifdef DEBUGGING
-EXT VOLATILE int debug INIT(0);
-EXT int dlevel INIT(0);
-EXT int dlmax INIT(128);
-EXT char *debname;
-EXT char *debdelim;
 #define YYDEBUG 1
+#define DEB(a)     			a
+#define DEBUG(a)   if (debug)		a
+#define DEBUG_p(a) if (debug & 1)	a
+#define DEBUG_s(a) if (debug & 2)	a
+#define DEBUG_l(a) if (debug & 4)	a
+#define DEBUG_t(a) if (debug & 8)	a
+#define DEBUG_o(a) if (debug & 16)	a
+#define DEBUG_c(a) if (debug & 32)	a
+#define DEBUG_P(a) if (debug & 64)	a
+#define DEBUG_m(a) if (debug & 128)	a
+#define DEBUG_f(a) if (debug & 256)	a
+#define DEBUG_r(a) if (debug & 512)	a
+#define DEBUG_x(a) if (debug & 1024)	a
+#define DEBUG_u(a) if (debug & 2048)	a
+#define DEBUG_L(a) if (debug & 4096)	a
+#define DEBUG_H(a) if (debug & 8192)	a
+#define DEBUG_X(a) if (debug & 16384)	a
+#else
+#define DEB(a)
+#define DEBUG(a)
+#define DEBUG_p(a)
+#define DEBUG_s(a)
+#define DEBUG_l(a)
+#define DEBUG_t(a)
+#define DEBUG_o(a)
+#define DEBUG_c(a)
+#define DEBUG_P(a)
+#define DEBUG_m(a)
+#define DEBUG_f(a)
+#define DEBUG_r(a)
+#define DEBUG_x(a)
+#define DEBUG_u(a)
+#define DEBUG_L(a)
+#define DEBUG_H(a)
+#define DEBUG_X(a)
 #endif
-EXT int perldb INIT(0);
 #define YYMAXDEPTH 300
 
-EXT line_t cmdline INIT(NOLINE);
-
-EXT STR str_undef;
-EXT STR str_no;
-EXT STR str_yes;
-
-/* runtime control stuff */
-
-EXT struct loop {
-    char *loop_label;		/* what the loop was called, if anything */
-    int loop_sp;		/* stack pointer to copy stuff down to */
-    jmp_buf loop_env;
-} *loop_stack;
-
-EXT int loop_ptr INIT(-1);
-EXT int loop_max INIT(128);
-
-EXT jmp_buf top_env;
-
-EXT char * VOLATILE goto_targ INIT(Nullch); /* cmd_exec gets strange when set */
+#define assert(what)	DEB( {						\
+	if (!(what)) {							\
+	    fatal("Assertion failed: file \"%s\", line %d",		\
+		__FILE__, __LINE__);					\
+	    exit(1);							\
+	}})
 
 struct ufuncs {
-    int (*uf_val)();
-    int (*uf_set)();
-    int uf_index;
+    I32 (*uf_val)P((I32, SV*));
+    I32 (*uf_set)P((I32, SV*));
+    I32 uf_index;
 };
 
-EXT ARRAY *stack;		/* THE STACK */
-
-EXT ARRAY * VOLATILE savestack;		/* to save non-local values on */
-
-EXT ARRAY *tosave;		/* strings to save on recursive subroutine */
-
-EXT ARRAY *lineary;		/* lines of script for debugger */
-EXT ARRAY *dbargs;		/* args to call listed by caller function */
-
-EXT ARRAY *fdpid;		/* keep fd-to-pid mappings for mypopen */
-EXT HASH *pidstatus;		/* keep pid-to-status mappings for waitpid */
-
-EXT int *di;			/* for tmp use in debuggers */
-EXT char *dc;
-EXT short *ds;
-
 /* Fix these up for __STDC__ */
-EXT time_t basetime INIT(0);
-char *mktemp();
+char *mktemp P((char*));
+double atof P((const char*));
+
 #ifndef STANDARD_C
 /* All of these are in stdlib.h or time.h for ANSI C */
-double atof();
 long time();
 struct tm *gmtime(), *localtime();
 char *index(), *rindex();
 char *strcpy(), *strcat();
 #endif /* ! STANDARD_C */
 
+
+#ifdef I_MATH
+#    include <math.h>
+#else
+#   ifdef __cplusplus
+	extern "C" {
+#   endif
+	    double exp P((double));
+	    double log P((double));
+	    double sqrt P((double));
+	    double modf P((double,int*));
+	    double sin P((double));
+	    double cos P((double));
+	    double atan2 P((double,double));
+	    double pow P((double,double));
+#   ifdef __cplusplus
+	};
+#   endif
+#endif
+
+
+char *crypt P((const char*, const char*));
+char *getenv P((const char*));
+long lseek P((int,int,int));
+char *getlogin P((void));
+
 #ifdef EUNICE
 #define UNLINK unlnk
-int unlnk();
+int unlnk P((char*));
 #else
 #define UNLINK unlink
 #endif
@@ -1055,3 +837,508 @@ int unlnk();
 #define SCAN_DEF 0
 #define SCAN_TR 1
 #define SCAN_REPL 2
+
+#ifdef DEBUGGING
+#define PAD_SV(po) pad_sv(po)
+#else
+#define PAD_SV(po) curpad[po]
+#endif
+
+/****************/
+/* Truly global */
+/****************/
+
+/* global state */
+EXT Interpreter *curinterp;	/* currently running interpreter */
+extern char **	environ;	/* environment variables supplied via exec */
+EXT int		uid;		/* current real user id */
+EXT int		euid;		/* current effective user id */
+EXT int		gid;		/* current real group id */
+EXT int		egid;		/* current effective group id */
+EXT bool	nomemok;	/* let malloc context handle nomem */
+EXT U32		an;		/* malloc sequence number */
+EXT char **	origenviron;
+EXT U32		origalen;
+
+/* Stack for currently executing thread--context switch must handle this.     */
+EXT SV **	stack_base;	/* stack->array_ary */
+EXT SV **	stack_sp;	/* stack pointer now */
+EXT SV **	stack_max;	/* stack->array_ary + stack->array_max */
+
+/* likewise for these */
+
+EXT OP *	op;		/* current op--oughta be in a global register */
+
+EXT I32 *	scopestack;	/* blocks we've entered */
+EXT I32		scopestack_ix;
+EXT I32		scopestack_max;
+
+EXT ANY*	savestack;	/* to save non-local values on */
+EXT I32		savestack_ix;
+EXT I32		savestack_max;
+
+EXT OP **	retstack;	/* returns we've pushed */
+EXT I32		retstack_ix;
+EXT I32		retstack_max;
+
+EXT I32 *	markstack;	/* stackmarks we're remembering */
+EXT I32 *	markstack_ptr;	/* stackmarks we're remembering */
+EXT I32 *	markstack_max;	/* stackmarks we're remembering */
+
+EXT SV **	curpad;
+
+/* temp space */
+EXT SV *	Sv;
+EXT XPV *	Xpv;
+EXT char	buf[1024];
+EXT char	tokenbuf[256];
+EXT struct stat	statbuf;
+#ifndef MSDOS
+EXT struct tms	timesbuf;
+#endif
+
+/* for tmp use in stupid debuggers */
+EXT int *	di;
+EXT short *	ds;
+EXT char *	dc;
+
+/* handy constants */
+EXT char *	Yes INIT("1");
+EXT char *	No INIT("");
+EXT char *	hexdigit INIT("0123456789abcdef0123456789ABCDEFx");
+EXT char *	warn_nl INIT("Unsuccessful %s on filename containing newline");
+EXT char	no_modify[] INIT("Modification of a read-only value attempted");
+EXT char	no_mem[] INIT("Out of memory!\n");
+EXT char	no_security[] INIT("Insecure dependency in %s");
+EXT char	no_sock_func[]
+			INIT("Unsupported socket function \"%s\" called");
+EXT char	no_dir_func[]
+			INIT("Unsupported directory function \"%s\" called");
+EXT char	no_func[] INIT("The %s function is unimplemented");
+EXT char *	patleave INIT("\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}");
+EXT char *	vert INIT("|");
+
+EXT SV		sv_undef;
+EXT SV		sv_no;
+EXT SV		sv_yes;
+#ifdef CSH
+    EXT char *	cshname INIT(CSH);
+    EXT I32	cshlen;
+#endif
+
+#ifdef DOINIT
+EXT char *sig_name[] = {
+    SIG_NAME,0
+};
+#else
+EXT char *sig_name[];
+#endif
+
+#ifdef DOINIT
+    EXT char	coeff[] = {	/* hash function coefficients */
+                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1};
+#else
+    EXT char	coeff[];
+#endif
+
+#ifdef DOINIT
+EXT unsigned char fold[] = {	/* fast case folding table */
+	0,	1,	2,	3,	4,	5,	6,	7,
+	8,	9,	10,	11,	12,	13,	14,	15,
+	16,	17,	18,	19,	20,	21,	22,	23,
+	24,	25,	26,	27,	28,	29,	30,	31,
+	32,	33,	34,	35,	36,	37,	38,	39,
+	40,	41,	42,	43,	44,	45,	46,	47,
+	48,	49,	50,	51,	52,	53,	54,	55,
+	56,	57,	58,	59,	60,	61,	62,	63,
+	64,	'a',	'b',	'c',	'd',	'e',	'f',	'g',
+	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
+	'p',	'q',	'r',	's',	't',	'u',	'v',	'w',
+	'x',	'y',	'z',	91,	92,	93,	94,	95,
+	96,	'A',	'B',	'C',	'D',	'E',	'F',	'G',
+	'H',	'I',	'J',	'K',	'L',	'M',	'N',	'O',
+	'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',
+	'X',	'Y',	'Z',	123,	124,	125,	126,	127,
+	128,	129,	130,	131,	132,	133,	134,	135,
+	136,	137,	138,	139,	140,	141,	142,	143,
+	144,	145,	146,	147,	148,	149,	150,	151,
+	152,	153,	154,	155,	156,	157,	158,	159,
+	160,	161,	162,	163,	164,	165,	166,	167,
+	168,	169,	170,	171,	172,	173,	174,	175,
+	176,	177,	178,	179,	180,	181,	182,	183,
+	184,	185,	186,	187,	188,	189,	190,	191,
+	192,	193,	194,	195,	196,	197,	198,	199,
+	200,	201,	202,	203,	204,	205,	206,	207,
+	208,	209,	210,	211,	212,	213,	214,	215,
+	216,	217,	218,	219,	220,	221,	222,	223,	
+	224,	225,	226,	227,	228,	229,	230,	231,
+	232,	233,	234,	235,	236,	237,	238,	239,
+	240,	241,	242,	243,	244,	245,	246,	247,
+	248,	249,	250,	251,	252,	253,	254,	255
+};
+#else
+EXT unsigned char fold[];
+#endif
+
+#ifdef DOINIT
+EXT unsigned char freq[] = {	/* letter frequencies for mixed English/C */
+	1,	2,	84,	151,	154,	155,	156,	157,
+	165,	246,	250,	3,	158,	7,	18,	29,
+	40,	51,	62,	73,	85,	96,	107,	118,
+	129,	140,	147,	148,	149,	150,	152,	153,
+	255,	182,	224,	205,	174,	176,	180,	217,
+	233,	232,	236,	187,	235,	228,	234,	226,
+	222,	219,	211,	195,	188,	193,	185,	184,
+	191,	183,	201,	229,	181,	220,	194,	162,
+	163,	208,	186,	202,	200,	218,	198,	179,
+	178,	214,	166,	170,	207,	199,	209,	206,
+	204,	160,	212,	216,	215,	192,	175,	173,
+	243,	172,	161,	190,	203,	189,	164,	230,
+	167,	248,	227,	244,	242,	255,	241,	231,
+	240,	253,	169,	210,	245,	237,	249,	247,
+	239,	168,	252,	251,	254,	238,	223,	221,
+	213,	225,	177,	197,	171,	196,	159,	4,
+	5,	6,	8,	9,	10,	11,	12,	13,
+	14,	15,	16,	17,	19,	20,	21,	22,
+	23,	24,	25,	26,	27,	28,	30,	31,
+	32,	33,	34,	35,	36,	37,	38,	39,
+	41,	42,	43,	44,	45,	46,	47,	48,
+	49,	50,	52,	53,	54,	55,	56,	57,
+	58,	59,	60,	61,	63,	64,	65,	66,
+	67,	68,	69,	70,	71,	72,	74,	75,
+	76,	77,	78,	79,	80,	81,	82,	83,
+	86,	87,	88,	89,	90,	91,	92,	93,
+	94,	95,	97,	98,	99,	100,	101,	102,
+	103,	104,	105,	106,	108,	109,	110,	111,
+	112,	113,	114,	115,	116,	117,	119,	120,
+	121,	122,	123,	124,	125,	126,	127,	128,
+	130,	131,	132,	133,	134,	135,	136,	137,
+	138,	139,	141,	142,	143,	144,	145,	146
+};
+#else
+EXT unsigned char freq[];
+#endif
+
+/*****************************************************************************/
+/* This lexer/parser stuff is currently global since yacc is hard to reenter */
+/*****************************************************************************/
+
+typedef enum {
+    XOPERATOR,
+    XTERM,
+    XBLOCK,
+    XREF,
+} expectation;
+
+EXT FILE * VOL	rsfp INIT(Nullfp);
+EXT SV *	linestr;
+EXT char *	bufptr;
+EXT char *	oldbufptr;
+EXT char *	oldoldbufptr;
+EXT char *	bufend;
+EXT expectation expect INIT(XBLOCK);	/* how to interpret ambiguous tokens */
+
+EXT I32		multi_start;	/* 1st line of multi-line string */
+EXT I32		multi_end;	/* last line of multi-line string */
+EXT I32		multi_open;	/* delimiter of said string */
+EXT I32		multi_close;	/* delimiter of said string */
+
+EXT GV *	scrgv;
+EXT I32		error_count;	/* how many errors so far, max 10 */
+EXT I32		subline;	/* line this subroutine began on */
+EXT SV *	subname;	/* name of current subroutine */
+
+EXT AV *	pad;		/* storage for lexically scoped temporaries */
+EXT AV *	comppad;	/* same for currently compiling routine */
+EXT I32		padix;		/* max used index in current "register" pad */
+EXT COP		compiling;
+
+EXT SV *	evstr;		/* op_fold_const() temp string cache */
+EXT I32		thisexpr;	/* name id for nothing_in_common() */
+EXT char *	last_uni;	/* position of last named-unary operator */
+EXT char *	last_lop;	/* position of last list operator */
+EXT bool	in_format;	/* we're compiling a run_format */
+#ifdef FCRYPT
+EXT I32		cryptseen;	/* has fast crypt() been initialized? */
+#endif
+
+/**************************************************************************/
+/* This regexp stuff is global since it always happens within 1 expr eval */
+/**************************************************************************/
+
+EXT char *	regprecomp;	/* uncompiled string. */
+EXT char *	regparse;	/* Input-scan pointer. */
+EXT char *	regxend;	/* End of input for compile */
+EXT I32		regnpar;	/* () count. */
+EXT char *	regcode;	/* Code-emit pointer; &regdummy = don't. */
+EXT I32		regsize;	/* Code size. */
+EXT I32		regfold;	/* are we folding? */
+EXT I32		regsawbracket;	/* Did we do {d,d} trick? */
+EXT I32		regsawback;	/* Did we see \1, ...? */
+
+EXT char *	reginput;	/* String-input pointer. */
+EXT char	regprev;	/* char before regbol, \n if none */
+EXT char *	regbol;		/* Beginning of input, for ^ check. */
+EXT char *	regeol;		/* End of input, for $ check. */
+EXT char **	regstartp;	/* Pointer to startp array. */
+EXT char **	regendp;	/* Ditto for endp. */
+EXT char *	reglastparen;	/* Similarly for lastparen. */
+EXT char *	regtill;	/* How far we are required to go. */
+EXT I32		regmyp_size;
+EXT char **	regmystartp;
+EXT char **	regmyendp;
+
+/***********************************************/
+/* Global only to current interpreter instance */
+/***********************************************/
+
+#ifdef EMBEDDED
+#define IEXT
+#define IINIT(x)
+struct interpreter {
+#else
+#define IEXT EXT
+#define IINIT(x) INIT(x)
+#endif
+
+/* pseudo environmental stuff */
+IEXT int	Iorigargc;
+IEXT char **	Iorigargv;
+IEXT GV *	Ienvgv;
+IEXT GV *	Isiggv;
+IEXT GV *	Iincgv;
+IEXT char *	Iorigfilename;
+
+/* switches */
+IEXT char *	Icddir;
+IEXT bool	Iminus_c;
+IEXT char	Ipatchlevel[6];
+IEXT char *	Inrs IINIT("\n");
+IEXT U32	Inrschar IINIT('\n');   /* final char of rs, or 0777 if none */
+IEXT I32	Inrslen IINIT(1);
+IEXT bool	Ipreprocess;
+IEXT bool	Iminus_n;
+IEXT bool	Iminus_p;
+IEXT bool	Iminus_l;
+IEXT bool	Iminus_a;
+IEXT bool	Idoswitches;
+IEXT bool	Idowarn;
+IEXT bool	Idoextract;
+IEXT bool	Iallgvs;	/* init all customary symbols in symbol table?*/
+IEXT bool	Isawampersand;	/* must save all match strings */
+IEXT bool	Isawstudy;	/* do fbm_instr on all strings */
+IEXT bool	Isawi;		/* study must assume case insensitive */
+IEXT bool	Isawvec;
+IEXT bool	Iunsafe;
+IEXT bool	Ido_undump;		/* -u or dump seen? */
+IEXT char *	Iinplace;
+IEXT char *	Ie_tmpname;
+IEXT FILE *	Ie_fp;
+IEXT VOL U32	Idebug;
+IEXT U32	Iperldb;
+
+/* magical thingies */
+IEXT time_t	Ibasetime;		/* $^T */
+IEXT I32	Iarybase;		/* $[ */
+IEXT SV *	Iformfeed;		/* $^L */
+IEXT char *	Ichopset IINIT(" \n-");	/* $: */
+IEXT char *	Irs IINIT("\n");	/* $/ */
+IEXT U32	Irschar IINIT('\n');	/* final char of rs, or 0777 if none */
+IEXT I32	Irslen IINIT(1);
+IEXT bool	Irspara;
+IEXT char *	Iofs;			/* $, */
+IEXT I32	Iofslen;
+IEXT char *	Iors;			/* $\ */
+IEXT I32	Iorslen;
+IEXT char *	Iofmt;			/* $# */
+IEXT I32	Imaxsysfd IINIT(MAXSYSFD); /* top fd to pass to subprocesses */
+IEXT int	Imultiline;	  /* $*--do strings hold >1 line? */
+IEXT U16	Istatusvalue;	/* $? */
+
+IEXT struct stat Istatcache;		/* _ */
+IEXT GV *	Istatgv;
+IEXT SV *	Istatname IINIT(Nullsv);
+
+/* shortcuts to various I/O objects */
+IEXT GV *	Istdingv;
+IEXT GV *	Ilast_in_gv;
+IEXT GV *	Idefgv;
+IEXT GV *	Iargvgv;
+IEXT GV *	Idefoutgv;
+IEXT GV *	Icuroutgv;
+IEXT GV *	Iargvoutgv;
+
+/* shortcuts to regexp stuff */
+IEXT GV *	Ileftgv;
+IEXT GV *	Iampergv;
+IEXT GV *	Irightgv;
+IEXT PMOP *	Icurpm;		/* what to do \ interps from */
+IEXT char *	Ihint;		/* hint from cop_exec to do_match et al */
+IEXT I32 *	Iscreamfirst;
+IEXT I32 *	Iscreamnext;
+IEXT I32	Imaxscream IINIT(-1);
+IEXT SV *	Ilastscream;
+
+/* shortcuts to debugging objects */
+IEXT GV *	IDBgv;
+IEXT GV *	IDBline;
+IEXT GV *	IDBsub;
+IEXT SV *	IDBsingle;
+IEXT SV *	IDBtrace;
+IEXT SV *	IDBsignal;
+IEXT AV *	Ilineary;	/* lines of script for debugger */
+IEXT AV *	Idbargs;	/* args to call listed by caller function */
+
+/* symbol tables */
+IEXT HV *	Idefstash;	/* main symbol table */
+IEXT HV *	Icurstash;	/* symbol table for current package */
+IEXT HV *	Idebstash;	/* symbol table for perldb package */
+IEXT SV *	Icurstname;	/* name of current package */
+
+/* memory management */
+IEXT SV *	Ifreestrroot;
+IEXT SV **	Itmps_stack;
+IEXT I32	Itmps_ix IINIT(-1);
+IEXT I32	Itmps_floor IINIT(-1);
+IEXT I32	Itmps_max IINIT(-1);
+
+/* funky return mechanisms */
+IEXT I32	Ilastspbase;
+IEXT I32	Ilastsize;
+IEXT int	Iforkprocess;	/* so do_open |- can return proc# */
+
+/* subprocess state */
+IEXT AV *	Ifdpid;		/* keep fd-to-pid mappings for my_popen */
+IEXT HV *	Ipidstatus;	/* keep pid-to-status mappings for waitpid */
+
+/* internal state */
+IEXT VOL int	Iin_eval;	/* trap fatal errors? */
+IEXT OP *	Irestartop;	/* Are we propagating an error from fatal? */
+IEXT int	Idelaymagic;	/* ($<,$>) = ... */
+IEXT bool	Idirty;		/* clean before rerunning */
+IEXT bool	Ilocalizing;	/* are we processing a local() list? */
+#ifdef TAINT
+IEXT bool	Itainted;	/* using variables controlled by $< */
+IEXT bool	Itaintanyway;	/* force taint checks when !set?id */
+#endif
+
+/* trace state */
+IEXT I32	Idlevel;
+IEXT I32	Idlmax IINIT(128);
+IEXT char *	Idebname;
+IEXT char *	Idebdelim;
+
+/* current interpreter roots */
+IEXT OP * VOL	Imain_root;
+IEXT OP * VOL	Imain_start;
+IEXT OP * VOL	Ieval_root;
+IEXT OP * VOL	Ieval_start;
+IEXT OP *	Ilast_root;
+IEXT char *	Ilast_eval;
+IEXT I32	Ilast_elen;
+
+/* runtime control stuff */
+IEXT COP * VOL	Icurcop IINIT(&compiling);
+IEXT line_t	Icopline IINIT(NOLINE);
+IEXT CONTEXT *	Icxstack;
+IEXT I32	Icxstack_ix IINIT(-1);
+IEXT I32	Icxstack_max IINIT(128);
+IEXT jmp_buf	Itop_env;
+
+/* stack stuff */
+IEXT AV *	Istack;		/* THE STACK */
+IEXT AV *	Imainstack;	/* the stack when nothing funny is happening */
+IEXT SV **	Imystack_base;	/* stack->array_ary */
+IEXT SV **	Imystack_sp;	/* stack pointer now */
+IEXT SV **	Imystack_max;	/* stack->array_ary + stack->array_max */
+
+/* format accumulators */
+IEXT SV *	formtarget;
+IEXT SV *	bodytarget;
+IEXT SV *	toptarget;
+
+/* statics moved here for shared library purposes */
+IEXT SV	Istrchop;	/* return value from chop */
+IEXT int	Ifilemode;	/* so nextargv() can preserve mode */
+IEXT int	Ilastfd;	/* what to preserve mode on */
+IEXT char *	Ioldname;	/* what to preserve mode on */
+IEXT char **	IArgv;		/* stuff to free from do_aexec, vfork safe */
+IEXT char *	ICmd;		/* stuff to free from do_aexec, vfork safe */
+IEXT OP *	Isortcop;	/* user defined sort routine */
+IEXT HV *	Isortstash;	/* which is in some package or other */
+IEXT GV *	Ifirstgv;	/* $a */
+IEXT GV *	Isecondgv;	/* $b */
+IEXT AV *	Isortstack;	/* temp stack during pp_sort() */
+IEXT AV *	Isignalstack;	/* temp stack during sighandler() */
+IEXT SV *	Imystrk;	/* temp key string for do_each() */
+IEXT I32	Idumplvl;	/* indentation level on syntax tree dump */
+IEXT I32	Idbmrefcnt;	/* safety check for old dbm */
+IEXT PMOP *	Ioldlastpm;	/* for saving regexp context during debugger */
+IEXT I32	Igensym;	/* next symbol for getsym() to define */
+IEXT bool	Ipreambled;
+IEXT int	Ilaststatval IINIT(-1);
+IEXT I32	Ilaststype IINIT(OP_STAT);
+
+#undef IEXT
+#undef IINIT
+
+#ifdef EMBEDDED
+};
+#else
+struct interpreter {
+    char broiled;
+};
+#endif
+
+#include "pp.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "proto.h"
+
+#ifdef __cplusplus
+};
+#endif
+
+/* The follow must follow proto.h */
+
+#ifdef DOINIT
+MGVTBL vtbl_sv =	{magic_get, magic_set, 0, 0, 0};
+MGVTBL vtbl_env =	{0,		0,		 0, 0, 0};
+MGVTBL vtbl_envelem =	{0,		magic_setenv,    0, 0, 0};
+MGVTBL vtbl_sig =	{0,		0,		 0, 0, 0};
+MGVTBL vtbl_sigelem =	{0,		magic_setsig,    0, 0, 0};
+MGVTBL vtbl_dbm =	{0,		0,		 0, 0, 0};
+MGVTBL vtbl_dbmelem =	{0,		magic_setdbm,    0, 0, 0};
+MGVTBL vtbl_dbline =	{0,		magic_setdbline, 0, 0, 0};
+MGVTBL vtbl_arylen =	{magic_getarylen,magic_setarylen, 0, 0, 0};
+MGVTBL vtbl_glob =	{magic_getglob,	magic_setglob,   0, 0, 0};
+MGVTBL vtbl_substr =	{0,		magic_setsubstr, 0, 0, 0};
+MGVTBL vtbl_vec =	{0,		magic_setvec,    0, 0, 0};
+MGVTBL vtbl_bm =	{0,		magic_setbm,     0, 0, 0};
+MGVTBL vtbl_uvar =	{magic_getuvar, magic_setuvar,   0, 0, 0};
+#else
+EXT MGVTBL vtbl_sv;
+EXT MGVTBL vtbl_env;
+EXT MGVTBL vtbl_envelem;
+EXT MGVTBL vtbl_sig;
+EXT MGVTBL vtbl_sigelem;
+EXT MGVTBL vtbl_dbm;
+EXT MGVTBL vtbl_dbmelem;
+EXT MGVTBL vtbl_dbline;
+EXT MGVTBL vtbl_arylen;
+EXT MGVTBL vtbl_glob;
+EXT MGVTBL vtbl_substr;
+EXT MGVTBL vtbl_vec;
+EXT MGVTBL vtbl_bm;
+EXT MGVTBL vtbl_uvar;
+#endif

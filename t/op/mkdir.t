@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: mkdir.t,v 4.0 91/03/20 01:53:39 lwall Locked $
+# $RCSfile: mkdir.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:06 $
 
 print "1..7\n";
 

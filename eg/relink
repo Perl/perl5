@@ -2,9 +2,12 @@
 'di';
 'ig00';
 #
-# $Header: relink,v 4.0 91/03/20 01:11:40 lwall Locked $
+# $RCSfile: relink,v $$Revision: 4.1 $$Date: 92/08/07 17:20:29 $
 #
 # $Log:	relink,v $
+# Revision 4.1  92/08/07  17:20:29  lwall
+# Stage 6 Snapshot
+# 
 # Revision 4.0  91/03/20  01:11:40  lwall
 # 4.0 baseline.
 # 

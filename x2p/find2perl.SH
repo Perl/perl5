@@ -89,18 +89,18 @@ while (@ARGV) {
 	$out .= &tab;
 	$type = shift;
 	if ($type eq 'nfs')
-	    { $out .= '$dev < 0'; }
+	    { $out .= '($dev < 0)'; }
 	else
-	    { $out .= '$dev >= 0'; }
+	    { $out .= '($dev >= 0)'; }
     }
     elsif ($_ eq 'user') {
 	$uname = shift;
-	$out .= &tab . "\$uid == \$uid{'$uname'}";
+	$out .= &tab . "(\$uid == \$uid{'$uname'})";
 	$inituser++;
     }
     elsif ($_ eq 'group') {
 	$gname = shift;
-	$out .= &tab . "\$gid == \$gid{'$gname'}";
+	$out .= &tab . "(\$gid == \$gid{'$gname'})";
 	$initgroup++;
     }
     elsif ($_ eq 'nouser') {
@@ -112,22 +112,22 @@ while (@ARGV) {
 	$initgroup++;
     }
     elsif ($_ eq 'links') {
-	$out .= &tab . '$nlink ' . &n(shift);
+	$out .= &tab . '($nlink ' . &n(shift);
     }
     elsif ($_ eq 'inum') {
-	$out .= &tab . '$ino ' . &n(shift);
+	$out .= &tab . '($ino ' . &n(shift);
     }
     elsif ($_ eq 'size') {
-	$out .= &tab . 'int((-s _ + 511) / 512) ' . &n(shift);
+	$out .= &tab . '(int((-s _ + 511) / 512) ' . &n(shift);
     }
     elsif ($_ eq 'atime') {
-	$out .= &tab . 'int(-A _) ' . &n(shift);
+	$out .= &tab . '(int(-A _) ' . &n(shift);
     }
     elsif ($_ eq 'mtime') {
-	$out .= &tab . 'int(-M _) ' . &n(shift);
+	$out .= &tab . '(int(-M _) ' . &n(shift);
     }
     elsif ($_ eq 'ctime') {
-	$out .= &tab . 'int(-C _) ' . &n(shift);
+	$out .= &tab . '(int(-C _) ' . &n(shift);
     }
     elsif ($_ eq 'exec') {
 	for (@cmd = (); @ARGV && $ARGV[0] ne ';'; push(@cmd,shift)) { }
@@ -173,7 +173,7 @@ while (@ARGV) {
 	$newername = 'AGE_OF' . $file;
 	$newername =~ s/[^\w]/_/g;
 	$newername = '$' . $newername;
-	$out .= "-M _ < $newername";
+	$out .= "(-M _ < $newername)";
 	$initnewer .= "$newername = -M " . &quote($file) . ";\n";
     }
     elsif ($_ eq 'eval') {
@@ -575,7 +575,7 @@ ENDOFSTAT
 sub fileglob_to_re {
     local($tmp) = @_;
 
-    $tmp =~ s/([.^\$()])/\\$1/g;
+    $tmp =~ s#([./^\$()])#\\$1#g;
     $tmp =~ s/([?*])/.$1/g;
     "^$tmp$";
 }
@@ -585,7 +585,7 @@ sub n {
 
     $n =~ s/^-/< / || $n =~ s/^\+/> / || $n =~ s/^/== /;
     $n =~ s/ 0*(\d)/ $1/;
-    $n;
+    $n . ')';
 }
 
 sub quote {

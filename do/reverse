@@ -1,0 +1,19 @@
+int
+do_reverse(arglast)
+int *arglast;
+{
+    STR **st = stack->ary_array;
+    register STR **up = &st[arglast[1]];
+    register STR **down = &st[arglast[2]];
+    register int i = arglast[2] - arglast[1];
+
+    while (i-- > 0) {
+	*up++ = *down;
+	if (i-- > 0)
+	    *down-- = *up;
+    }
+    i = arglast[2] - arglast[1];
+    Move(down+1,up,i/2,STR*);
+    return arglast[2] - 1;
+}
+

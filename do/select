@@ -1,0 +1,133 @@
+#ifdef HAS_SELECT
+int
+do_select(gimme,arglast)
+int gimme;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[0];
+    register int i;
+    register int j;
+    register char *s;
+    register STR *TARG;
+    double value;
+    int maxlen = 0;
+    int nfound;
+    struct timeval timebuf;
+    struct timeval *tbuf = &timebuf;
+    int growsize;
+#if BYTEORDER != 0x1234 && BYTEORDER != 0x12345678
+    int masksize;
+    int offset;
+    char *fd_sets[4];
+    int k;
+
+#if BYTEORDER & 0xf0000
+#define ORDERBYTE (0x88888888 - BYTEORDER)
+#else
+#define ORDERBYTE (0x4444 - BYTEORDER)
+#endif
+
+#endif
+
+    for (i = 1; i <= 3; i++) {
+	j = st[sp+i]->str_cur;
+	if (maxlen < j)
+	    maxlen = j;
+    }
+
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+    growsize = maxlen;		/* little endians can use vecs directly */
+#else
+#ifdef NFDBITS
+
+#ifndef NBBY
+#define NBBY 8
+#endif
+
+    masksize = NFDBITS / NBBY;
+#else
+    masksize = sizeof(long);	/* documented int, everyone seems to use long */
+#endif
+    growsize = maxlen + (masksize - (maxlen % masksize));
+    Zero(&fd_sets[0], 4, char*);
+#endif
+
+    for (i = 1; i <= 3; i++) {
+	TARG = st[sp+i];
+	j = TARG->str_len;
+	if (j < growsize) {
+	    if (TARG->str_pok) {
+		Str_Grow(TARG,growsize);
+		s = str_get(TARG) + j;
+		while (++j <= growsize) {
+		    *s++ = '\0';
+		}
+	    }
+	    else if (TARG->str_ptr) {
+		Safefree(TARG->str_ptr);
+		TARG->str_ptr = Nullch;
+	    }
+	}
+#if BYTEORDER != 0x1234 && BYTEORDER != 0x12345678
+	s = TARG->str_ptr;
+	if (s) {
+	    New(403, fd_sets[i], growsize, char);
+	    for (offset = 0; offset < growsize; offset += masksize) {
+		for (j = 0, k=ORDERBYTE; j < masksize; j++, (k >>= 4))
+		    fd_sets[i][j+offset] = s[(k % masksize) + offset];
+	    }
+	}
+#endif
+    }
+    TARG = st[sp+4];
+    if (TARG->str_nok || TARG->str_pok) {
+	value = str_gnum(TARG);
+	if (value < 0.0)
+	    value = 0.0;
+	timebuf.tv_sec = (long)value;
+	value -= (double)timebuf.tv_sec;
+	timebuf.tv_usec = (long)(value * 1000000.0);
+    }
+    else
+	tbuf = Null(struct timeval*);
+
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+    nfound = select(
+	maxlen * 8,
+	st[sp+1]->str_ptr,
+	st[sp+2]->str_ptr,
+	st[sp+3]->str_ptr,
+	tbuf);
+#else
+    nfound = select(
+	maxlen * 8,
+	fd_sets[1],
+	fd_sets[2],
+	fd_sets[3],
+	tbuf);
+    for (i = 1; i <= 3; i++) {
+	if (fd_sets[i]) {
+	    TARG = st[sp+i];
+	    s = TARG->str_ptr;
+	    for (offset = 0; offset < growsize; offset += masksize) {
+		for (j = 0, k=ORDERBYTE; j < masksize; j++, (k >>= 4))
+		    s[(k % masksize) + offset] = fd_sets[i][j+offset];
+	    }
+	    Safefree(fd_sets[i]);
+	}
+    }
+#endif
+
+    st[++sp] = str_mortal(&str_no);
+    str_numset(st[sp], (double)nfound);
+    if (gimme == G_ARRAY && tbuf) {
+	value = (double)(timebuf.tv_sec) +
+		(double)(timebuf.tv_usec) / 1000000.0;
+	st[++sp] = str_mortal(&str_no);
+	str_numset(st[sp], value);
+    }
+    return sp;
+}
+#endif /* SELECT */
+

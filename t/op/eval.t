@@ -1,6 +1,6 @@
 #!./perl
 
-# $RCSfile: eval.t,v $$Revision: 4.0.1.1 $$Date: 91/11/05 18:43:19 $
+# $RCSfile: eval.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:48 $
 
 print "1..16\n";
 
@@ -15,7 +15,7 @@ eval "\$foo\n    = # this is a comment\n'ok 4\n';";
 print $foo;
 
 print eval '
-$foo =';		# this tests for a call through yyerror()
+$foo =;';		# this tests for a call through yyerror()
 if ($@ =~ /line 2/) {print "ok 5\n";} else {print "not ok 5\n";}
 
 print eval '$foo = /';	# this tests for a call through fatal()

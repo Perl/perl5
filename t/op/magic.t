@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: magic.t,v 4.0 91/03/20 01:53:35 lwall Locked $
+# $RCSfile: magic.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:05 $
 
 $| = 1;		# command buffering
 
@@ -17,14 +17,24 @@ if ($! == 2) {print "ok 2\n";} else {print "not ok 2\n";}
 # the next tests are embedded inside system simply because sh spits out
 # a newline onto stderr when a child process kills itself with SIGINT.
 
-system './perl',
-'-e', '$| = 1;		# command buffering',
+system './perl', '-e', <<'END';
 
-'-e', '$SIG{"INT"} = "ok3"; kill 2,$$;',
-'-e', '$SIG{"INT"} = "IGNORE"; kill 2,$$; print "ok 4\n";',
-'-e', '$SIG{"INT"} = "DEFAULT"; kill 2,$$; print "not ok\n";',
+    $| = 1;		# command buffering
 
-'-e', 'sub ok3 { print "ok 3\n" if pop(@_) eq "INT"; }';
+    $SIG{"INT"} = "ok3"; kill "INT",$$;
+    $SIG{"INT"} = "IGNORE"; kill 2,$$; print "ok 4\n";
+    $SIG{"INT"} = "DEFAULT"; kill 2,$$; print "not ok\n";
+
+    sub ok3 {
+	if (($x = pop(@_)) eq "INT") {
+	    print "ok 3\n";
+	}
+	else {
+	    print "not ok 3 $a\n";
+	}
+    }
+
+END
 
 @val1 = @ENV{keys(%ENV)};	# can we slice ENV?
 @val2 = values(%ENV);

@@ -1,0 +1,102 @@
+int
+do_sort(TARG,arg,gimme,arglast)
+STR *TARG;
+ARG *arg;
+int gimme;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    int sp = arglast[1];
+    register STR **up;
+    register int max = arglast[2] - sp;
+    register int i;
+    int sortcmp();
+    int sortsub();
+    STR *oldfirst;
+    STR *oldsecond;
+    ARRAY *oldstack;
+    HASH *stash;
+    STR *sortsubvar;
+
+    if (gimme != G_ARRAY) {
+	str_sset(TARG,&str_undef);
+	STABSET(TARG);
+	st[sp] = TARG;
+	return sp;
+    }
+    up = &st[sp];
+    sortsubvar = *up;
+    st += sp;		/* temporarily make st point to args */
+    for (i = 1; i <= max; i++) {
+	/*SUPPRESS 560*/
+	if (*up = st[i]) {
+	    if (!(*up)->str_pok)
+		(void)str_2ptr(*up);
+	    else
+		(*up)->str_pok &= ~SP_TEMP;
+	    up++;
+	}
+    }
+    st -= sp;
+    max = up - &st[sp];
+    sp--;
+    if (max > 1) {
+	STAB *stab;
+
+	if (arg[1].arg_type == (A_CMD|A_DONT)) {
+	    sortcmd = arg[1].arg_ptr.arg_cmd;
+	    stash = curcmd->c_stash;
+	}
+	else {
+	    if ((arg[1].arg_type & A_MASK) == A_WORD)
+		stab = arg[1].arg_ptr.arg_stab;
+	    else
+		stab = stabent(str_get(sortsubvar),TRUE);
+
+	    if (stab) {
+		if (!stab_sub(stab) || !(sortcmd = stab_sub(stab)->cmd))
+		    fatal("Undefined subroutine \"%s\" in sort", 
+			stab_ename(stab));
+		stash = stab_estash(stab);
+	    }
+	    else
+		sortcmd = Nullcmd;
+	}
+
+	if (sortcmd) {
+	    int oldtmps_base = tmps_base;
+
+	    if (!sortstack) {
+		sortstack = anew(Nullstab);
+		astore(sortstack, 0, Nullstr);
+		aclear(sortstack);
+		sortstack->ary_flags = 0;
+	    }
+	    oldstack = stack;
+	    stack = sortstack;
+	    tmps_base = tmps_max;
+	    if (sortstash != stash) {
+		firststab = stabent("a",TRUE);
+		secondstab = stabent("b",TRUE);
+		sortstash = stash;
+	    }
+	    oldfirst = stab_val(firststab);
+	    oldsecond = stab_val(secondstab);
+#ifndef lint
+	    qsort((char*)(st+sp+1),max,sizeof(STR*),sortsub);
+#else
+	    qsort(Nullch,max,sizeof(STR*),sortsub);
+#endif
+	    stab_val(firststab) = oldfirst;
+	    stab_val(secondstab) = oldsecond;
+	    tmps_base = oldtmps_base;
+	    stack = oldstack;
+	}
+#ifndef lint
+	else
+	    qsort((char*)(st+sp+1),max,sizeof(STR*),sortcmp);
+#endif
+    }
+    return sp+max;
+}
+

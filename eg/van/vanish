@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: vanish,v 4.0 91/03/20 01:16:05 lwall Locked $
+# $RCSfile: vanish,v $$Revision: 4.1 $$Date: 92/08/07 17:20:54 $
 
 sub it {
     if ($olddir ne '.') {

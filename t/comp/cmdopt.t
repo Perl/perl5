@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: cmdopt.t,v 4.0 91/03/20 01:49:58 lwall Locked $
+# $RCSfile: cmdopt.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:17 $
 
 print "1..40\n";
 
@@ -73,7 +73,7 @@ if ($a =~ /a/ && $x) { print "ok 33\n";} else { print "not ok 33\n";}
 if ($a !~ /a/ && $x) { print "not ok 34\n";} else { print "ok 34\n";}
 $x = '';
 if ($a =~ /a/ && $x) { print "not ok 35\n";} else { print "ok 35\n";}
-    if ($a !~ /a/ && $x) { print "not ok 36\n";} else { print "ok 36\n";}
+if ($a !~ /a/ && $x) { print "not ok 36\n";} else { print "ok 36\n";}
 
 $x = 1;
 if ($a =~ /a/ || $x) { print "ok 37\n";} else { print "not ok 37\n";}

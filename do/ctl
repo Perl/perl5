@@ -1,0 +1,72 @@
+int
+do_ctl(optype,stab,func,argstr)
+int optype;
+STAB *stab;
+int func;
+STR *argstr;
+{
+    register STIO *stio;
+    register char *s;
+    int retval;
+
+    if (!stab || !argstr || !(stio = stab_io(stab)) || !stio->ifp) {
+	errno = EBADF;	/* well, sort of... */
+	return -1;
+    }
+
+    if (argstr->str_pok || !argstr->str_nok) {
+	if (!argstr->str_pok)
+	    s = str_get(argstr);
+
+#ifdef IOCPARM_MASK
+#ifndef IOCPARM_LEN
+#define IOCPARM_LEN(x)  (((x) >> 16) & IOCPARM_MASK)
+#endif
+#endif
+#ifdef IOCPARM_LEN
+	retval = IOCPARM_LEN(func);	/* on BSDish systes we're safe */
+#else
+	retval = 256;			/* otherwise guess at what's safe */
+#endif
+	if (argstr->str_cur < retval) {
+	    Str_Grow(argstr,retval+1);
+	    argstr->str_cur = retval;
+	}
+
+	s = argstr->str_ptr;
+	s[argstr->str_cur] = 17;	/* a little sanity check here */
+    }
+    else {
+	retval = (int)str_gnum(argstr);
+#ifdef DOSISH
+	s = (char*)(long)retval;		/* ouch */
+#else
+	s = (char*)retval;		/* ouch */
+#endif
+    }
+
+#ifndef lint
+    if (optype == O_IOCTL)
+	retval = ioctl(fileno(stio->ifp), func, s);
+    else
+#ifdef DOSISH
+	fatal("fcntl is not implemented");
+#else
+#ifdef HAS_FCNTL
+	retval = fcntl(fileno(stio->ifp), func, s);
+#else
+	fatal("fcntl is not implemented");
+#endif
+#endif
+#else /* lint */
+    retval = 0;
+#endif /* lint */
+
+    if (argstr->str_pok) {
+	if (s[argstr->str_cur] != 17)
+	    fatal("Return value overflowed string");
+	s[argstr->str_cur] = 0;		/* put our null back */
+    }
+    return retval;
+}
+

@@ -1,0 +1,239 @@
+bool
+do_open(stab,name,len)
+STAB *stab;
+register char *name;
+int len;
+{
+    FILE *fp;
+    register STIO *stio = stab_io(stab);
+    char *myname = savestr(name);
+    int result;
+    int fd;
+    int writing = 0;
+    char mode[3];		/* stdio file mode ("r\0" or "r+\0") */
+    FILE *saveifp = Nullfp;
+    FILE *saveofp = Nullfp;
+    char savetype = ' ';
+
+    mode[0] = mode[1] = mode[2] = '\0';
+    name = myname;
+    forkprocess = 1;		/* assume true if no fork */
+    while (len && isSPACE(name[len-1]))
+	name[--len] = '\0';
+    if (!stio)
+	stio = stab_io(stab) = stio_new();
+    else if (stio->ifp) {
+	fd = fileno(stio->ifp);
+	if (stio->type == '-')
+	    result = 0;
+	else if (fd <= maxsysfd) {
+	    saveifp = stio->ifp;
+	    saveofp = stio->ofp;
+	    savetype = stio->type;
+	    result = 0;
+	}
+	else if (stio->type == '|')
+	    result = mypclose(stio->ifp);
+	else if (stio->ifp != stio->ofp) {
+	    if (stio->ofp) {
+		result = fclose(stio->ofp);
+		fclose(stio->ifp);	/* clear stdio, fd already closed */
+	    }
+	    else
+		result = fclose(stio->ifp);
+	}
+	else
+	    result = fclose(stio->ifp);
+	if (result == EOF && fd > maxsysfd)
+	    fprintf(stderr,"Warning: unable to close filehandle %s properly.\n",
+	      stab_ename(stab));
+	stio->ofp = stio->ifp = Nullfp;
+    }
+    if (*name == '+' && len > 1 && name[len-1] != '|') {	/* scary */
+	mode[1] = *name++;
+	mode[2] = '\0';
+	--len;
+	writing = 1;
+    }
+    else  {
+	mode[1] = '\0';
+    }
+    stio->type = *name;
+    if (*name == '|') {
+	/*SUPPRESS 530*/
+	for (name++; isSPACE(*name); name++) ;
+	TAINT_ENV();
+	TAINT_PROPER("piped open");
+	fp = mypopen(name,"w");
+	writing = 1;
+    }
+    else if (*name == '>') {
+	TAINT_PROPER("open");
+	name++;
+	if (*name == '>') {
+	    mode[0] = stio->type = 'a';
+	    name++;
+	}
+	else
+	    mode[0] = 'w';
+	writing = 1;
+	if (*name == '&') {
+	  duplicity:
+	    name++;
+	    while (isSPACE(*name))
+		name++;
+	    if (isDIGIT(*name))
+		fd = atoi(name);
+	    else {
+		stab = stabent(name,FALSE);
+		if (!stab || !stab_io(stab)) {
+#ifdef EINVAL
+		    errno = EINVAL;
+#endif
+		    goto say_false;
+		}
+		if (stab_io(stab) && stab_io(stab)->ifp) {
+		    fd = fileno(stab_io(stab)->ifp);
+		    if (stab_io(stab)->type == 's')
+			stio->type = 's';
+		}
+		else
+		    fd = -1;
+	    }
+	    if (!(fp = fdopen(fd = dup(fd),mode))) {
+		close(fd);
+	    }
+	}
+	else {
+	    while (isSPACE(*name))
+		name++;
+	    if (strEQ(name,"-")) {
+		fp = stdout;
+		stio->type = '-';
+	    }
+	    else  {
+		fp = fopen(name,mode);
+	    }
+	}
+    }
+    else {
+	if (*name == '<') {
+	    mode[0] = 'r';
+	    name++;
+	    while (isSPACE(*name))
+		name++;
+	    if (*name == '&')
+		goto duplicity;
+	    if (strEQ(name,"-")) {
+		fp = stdin;
+		stio->type = '-';
+	    }
+	    else
+		fp = fopen(name,mode);
+	}
+	else if (name[len-1] == '|') {
+	    TAINT_ENV();
+	    TAINT_PROPER("piped open");
+	    name[--len] = '\0';
+	    while (len && isSPACE(name[len-1]))
+		name[--len] = '\0';
+	    /*SUPPRESS 530*/
+	    for (; isSPACE(*name); name++) ;
+	    fp = mypopen(name,"r");
+	    stio->type = '|';
+	}
+	else {
+	    stio->type = '<';
+	    /*SUPPRESS 530*/
+	    for (; isSPACE(*name); name++) ;
+	    if (strEQ(name,"-")) {
+		fp = stdin;
+		stio->type = '-';
+	    }
+	    else
+		fp = fopen(name,"r");
+	}
+    }
+    if (!fp) {
+	if (dowarn && stio->type == '<' && index(name, '\n'))
+	    warn(warn_nl, "open");
+	Safefree(myname);
+	goto say_false;
+    }
+    Safefree(myname);
+    if (stio->type &&
+      stio->type != '|' && stio->type != '-') {
+	if (fstat(fileno(fp),&statbuf) < 0) {
+	    (void)fclose(fp);
+	    goto say_false;
+	}
+	if (S_ISSOCK(statbuf.st_mode))
+	    stio->type = 's';	/* in case a socket was passed in to us */
+#ifdef HAS_SOCKET
+	else if (
+#ifdef S_IFMT
+	    !(statbuf.st_mode & S_IFMT)
+#else
+	    !statbuf.st_mode
+#endif
+	) {
+	    int buflen = sizeof tokenbuf;
+	    if (getsockname(fileno(fp), tokenbuf, &buflen) >= 0
+		|| errno != ENOTSOCK)
+		stio->type = 's'; /* some OS's return 0 on fstat()ed socket */
+				/* but some return 0 for streams too, sigh */
+	}
+#endif
+    }
+    if (saveifp) {		/* must use old fp? */
+	fd = fileno(saveifp);
+	if (saveofp) {
+	    fflush(saveofp);		/* emulate fclose() */
+	    if (saveofp != saveifp) {	/* was a socket? */
+		fclose(saveofp);
+		if (fd > 2)
+		    Safefree(saveofp);
+	    }
+	}
+	if (fd != fileno(fp)) {
+	    int pid;
+	    STR *TARG;
+
+	    dup2(fileno(fp), fd);
+	    TARG = afetch(fdpid,fileno(fp),TRUE);
+	    pid = TARG->str_u.str_useful;
+	    TARG->str_u.str_useful = 0;
+	    TARG = afetch(fdpid,fd,TRUE);
+	    TARG->str_u.str_useful = pid;
+	    fclose(fp);
+
+	}
+	fp = saveifp;
+	clearerr(fp);
+    }
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+    fd = fileno(fp);
+    fcntl(fd,F_SETFD,fd > maxsysfd);
+#endif
+    stio->ifp = fp;
+    if (writing) {
+	if (stio->type == 's'
+	  || (stio->type == '>' && S_ISCHR(statbuf.st_mode)) ) {
+	    if (!(stio->ofp = fdopen(fileno(fp),"w"))) {
+		fclose(fp);
+		stio->ifp = Nullfp;
+		goto say_false;
+	    }
+	}
+	else
+	    stio->ofp = fp;
+    }
+    return TRUE;
+
+say_false:
+    stio->ifp = saveifp;
+    stio->ofp = saveofp;
+    stio->type = savetype;
+    return FALSE;
+}
+

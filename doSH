@@ -3,7 +3,15 @@
 : if this fails, just run all the .SH files by hand
 . ./config.sh
 
-rm -f x2p/config.sh
+(
+    cd x2p
+    rm -f config.sh
+    case "$d_symlink" in
+    *define*) ln -s ../config.sh . || ln ../config.sh .;;
+    *) ln ../config.sh . || ln -s ../config.sh .
+    esac
+)
+
 cp cppstdin x2p
 
 echo " "

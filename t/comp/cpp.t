@@ -1,13 +1,13 @@
 #!./perl -P
 
-# $RCSfile: cpp.t,v $$Revision: 4.0.1.1 $$Date: 92/06/08 15:42:08 $
+# $RCSfile: cpp.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:18 $
 
 open(CONFIG,"../config.sh") || die;
 while (<CONFIG>) {
     if (/^cppstdin/) {
 	if (/^cppstdin='(.*cppstdin)'/ && ! -e $1) {
 	    print "1..0\n";
-	    exit; 		# Can't test till after install, alas.
+	    exit; 		# Cannot test till after install, alas.
 	}
 	last;
     }

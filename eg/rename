@@ -2,9 +2,12 @@
 'di';
 'ig00';
 #
-# $Header: rename,v 4.0 91/03/20 01:11:53 lwall Locked $
+# $RCSfile: rename,v $$Revision: 4.1 $$Date: 92/08/07 17:20:30 $
 #
 # $Log:	rename,v $
+# Revision 4.1  92/08/07  17:20:30  lwall
+# Stage 6 Snapshot
+# 
 # Revision 4.0  91/03/20  01:11:53  lwall
 # 4.0 baseline.
 # 

@@ -1,4 +1,4 @@
-/* $RCSfile: a2py.c,v $$Revision: 4.0.1.2 $$Date: 92/06/08 16:15:16 $
+/* $RCSfile: a2py.c,v $$Revision: 4.1 $$Date: 92/08/07 18:29:14 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	a2py.c,v $
+ * Revision 4.1  92/08/07  18:29:14  lwall
+ * 
  * Revision 4.0.1.2  92/06/08  16:15:16  lwall
  * patch20: in a2p, now warns about spurious backslashes
  * patch20: in a2p, now allows [ to be backslashed in pattern
@@ -1295,4 +1297,3 @@ int prevargs;
     }
     return numargs;
 }
-

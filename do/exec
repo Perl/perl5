@@ -1,0 +1,77 @@
+bool
+do_exec(cmd)
+char *cmd;
+{
+    register char **a;
+    register char *s;
+    char flags[10];
+
+    /* save an extra exec if possible */
+
+#ifdef CSH
+    if (strnEQ(cmd,cshname,cshlen) && strnEQ(cmd+cshlen," -c",3)) {
+	strcpy(flags,"-c");
+	s = cmd+cshlen+3;
+	if (*s == 'f') {
+	    s++;
+	    strcat(flags,"f");
+	}
+	if (*s == ' ')
+	    s++;
+	if (*s++ == '\'') {
+	    char *ncmd = s;
+
+	    while (*s)
+		s++;
+	    if (s[-1] == '\n')
+		*--s = '\0';
+	    if (s[-1] == '\'') {
+		*--s = '\0';
+		execl(cshname,"csh", flags,ncmd,(char*)0);
+		*s = '\'';
+		return FALSE;
+	    }
+	}
+    }
+#endif /* CSH */
+
+    /* see if there are shell metacharacters in it */
+
+    /*SUPPRESS 530*/
+    for (s = cmd; *s && isALPHA(*s); s++) ;	/* catch VAR=val gizmo */
+    if (*s == '=')
+	goto doshell;
+    for (s = cmd; *s; s++) {
+	if (*s != ' ' && !isALPHA(*s) && index("$&*(){}[]'\";\\|?<>~`\n",*s)) {
+	    if (*s == '\n' && !s[1]) {
+		*s = '\0';
+		break;
+	    }
+	  doshell:
+	    execl("/bin/sh","sh","-c",cmd,(char*)0);
+	    return FALSE;
+	}
+    }
+    New(402,Argv, (s - cmd) / 2 + 2, char*);
+    Cmd = nsavestr(cmd, s-cmd);
+    a = Argv;
+    for (s = Cmd; *s;) {
+	while (*s && isSPACE(*s)) s++;
+	if (*s)
+	    *(a++) = s;
+	while (*s && !isSPACE(*s)) s++;
+	if (*s)
+	    *s++ = '\0';
+    }
+    *a = Nullch;
+    if (Argv[0]) {
+	execvp(Argv[0],Argv);
+	if (errno == ENOEXEC) {		/* for system V NIH syndrome */
+	    do_execfree();
+	    goto doshell;
+	}
+    }
+    do_execfree();
+    return FALSE;
+}
+

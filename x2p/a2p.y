@@ -1,5 +1,5 @@
 %{
-/* $RCSfile: a2p.y,v $$Revision: 4.0.1.2 $$Date: 92/06/08 16:13:03 $
+/* $RCSfile: a2p.y,v $$Revision: 4.1 $$Date: 92/08/07 18:29:12 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -7,6 +7,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	a2p.y,v $
+ * Revision 4.1  92/08/07  18:29:12  lwall
+ * 
  * Revision 4.0.1.2  92/06/08  16:13:03  lwall
  * patch20: in a2p, getline should allow variable to be array element
  * 

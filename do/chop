@@ -1,0 +1,40 @@
+void
+do_chop(astr,TARG)
+register STR *astr;
+register STR *TARG;
+{
+    register char *tmps;
+    register int i;
+    ARRAY *ary;
+    HASH *hash;
+    HENT *entry;
+
+    if (!TARG)
+	return;
+    if (TARG->str_state == SS_ARY) {
+	ary = stab_array(TARG->str_u.str_stab);
+	for (i = 0; i <= ary->ary_fill; i++)
+	    do_chop(astr,ary->ary_array[i]);
+	return;
+    }
+    if (TARG->str_state == SS_HASH) {
+	hash = stab_hash(TARG->str_u.str_stab);
+	(void)hiterinit(hash);
+	/*SUPPRESS 560*/
+	while (entry = hiternext(hash))
+	    do_chop(astr,hiterval(hash,entry));
+	return;
+    }
+    tmps = str_get(TARG);
+    if (tmps && TARG->str_cur) {
+	tmps += TARG->str_cur - 1;
+	str_nset(astr,tmps,1);	/* remember last char */
+	*tmps = '\0';				/* wipe it out */
+	TARG->str_cur = tmps - TARG->str_ptr;
+	TARG->str_nok = 0;
+	STABSET(TARG);
+    }
+    else
+	str_nset(astr,"",0);
+}
+

@@ -1,6 +1,8 @@
-/* $RCSfile: regcomp.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:49:40 $
+/* $RCSfile: regcomp.h,v $$Revision: 4.1 $$Date: 92/08/07 18:26:31 $
  *
  * $Log:	regcomp.h,v $
+ * Revision 4.1  92/08/07  18:26:31  lwall
+ * 
  * Revision 4.0.1.1  91/06/07  11:49:40  lwall
  * patch4: no change
  * 
@@ -14,10 +16,10 @@
  * compile to execute that permits the execute phase to run lots faster on
  * simple cases.  They are:
  *
- * regstart	str that must begin a match; Nullch if none obvious
+ * regstart	sv that must begin a match; Nullch if none obvious
  * reganch	is the match anchored (at beginning-of-line only)?
  * regmust	string (pointer into program) that match must include, or NULL
- *  [regmust changed to STR* for bminstr()--law]
+ *  [regmust changed to SV* for bminstr()--law]
  * regmlen	length of regmust string
  *  [regmlen not used currently]
  *
@@ -60,11 +62,11 @@
 #define	BOL	1	/* no	Match "" at beginning of line. */
 #define	EOL	2	/* no	Match "" at end of line. */
 #define	ANY	3	/* no	Match any one character. */
-#define	ANYOF	4	/* str	Match character in (or not in) this class. */
-#define	CURLY	5	/* str	Match this simple thing {n,m} times. */
+#define	ANYOF	4	/* sv	Match character in (or not in) this class. */
+#define	CURLY	5	/* sv	Match this simple thing {n,m} times. */
 #define	BRANCH	6	/* node	Match this alternative, or the next... */
 #define	BACK	7	/* no	Match "", "next" ptr points backward. */
-#define	EXACTLY	8	/* str	Match this string (preceded by length). */
+#define	EXACTLY	8	/* sv	Match this string (preceded by length). */
 #define	NOTHING	9	/* no	Match empty string. */
 #define	STAR	10	/* node	Match this (simple) thing 0 or more times. */
 #define	PLUS	11	/* node	Match this (simple) thing 1 or more times. */
@@ -188,10 +190,3 @@ EXT char regdummy;
 #endif /* lint */
 
 #define	FAIL(m)	fatal("/%s/: %s",regprecomp,m)
-
-char *regnext();
-#ifdef DEBUGGING
-void regdump();
-char *regprop();
-#endif
-

@@ -1,4 +1,4 @@
-/* $RCSfile: dir.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:22:10 $
+/* $RCSfile: dir.h,v $$Revision: 4.1 $$Date: 92/08/07 18:24:41 $
  *
  *    (C) Copyright 1987, 1990 Diomidis Spinellis.
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	dir.h,v $
+ * Revision 4.1  92/08/07  18:24:41  lwall
+ * 
  * Revision 4.0.1.1  91/06/07  11:22:10  lwall
  * patch4: new copyright notice
  * 

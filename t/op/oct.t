@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: oct.t,v 4.0 91/03/20 01:53:43 lwall Locked $
+# $RCSfile: oct.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:08 $
 
 print "1..3\n";
 

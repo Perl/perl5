@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 
-# $Header: gsh,v 4.0 91/03/20 01:10:40 lwall Locked $
+# $RCSfile: gsh,v $$Revision: 4.1 $$Date: 92/08/07 17:20:20 $
 
 # Do rsh globally--see man page
 

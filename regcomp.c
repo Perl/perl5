@@ -7,9 +7,11 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $RCSfile: regcomp.c,v $$Revision: 4.0.1.5 $$Date: 92/06/08 15:23:36 $
+/* $RCSfile: regcomp.c,v $$Revision: 4.1 $$Date: 92/08/07 18:26:28 $
  *
  * $Log:	regcomp.c,v $
+ * Revision 4.1  92/08/07  18:26:28  lwall
+ * 
  * Revision 4.0.1.5  92/06/08  15:23:36  lwall
  * patch20: Perl now distinguishes overlapped copies from non-overlapped
  * patch20: /^stuff/ wrongly assumed an implicit $* == 1
@@ -110,22 +112,9 @@
 #define	WORST		0	/* Worst case. */
 
 /*
- * Global work variables for regcomp().
- */
-static char *regprecomp;		/* uncompiled string. */
-static char *regparse;		/* Input-scan pointer. */
-static char *regxend;		/* End of input for compile */
-static int regnpar;		/* () count. */
-static char *regcode;		/* Code-emit pointer; &regdummy = don't. */
-static long regsize;		/* Code size. */
-static int regfold;
-static int regsawbracket;	/* Did we do {d,d} trick? */
-static int regsawback;		/* Did we see \1, ...? */
-
-/*
  * Forward declarations for regcomp()'s friends.
  */
-STATIC int regcurly();
+STATIC I32 regcurly();
 STATIC char *reg();
 STATIC char *regbranch();
 STATIC char *regpiece();
@@ -157,21 +146,21 @@ regexp *
 regcomp(exp,xend,fold)
 char *exp;
 char *xend;
-int fold;
+I32 fold;
 {
 	register regexp *r;
 	register char *scan;
-	register STR *longish;
-	STR *longest;
-	register int len;
+	register SV *longish;
+	SV *longest;
+	register I32 len;
 	register char *first;
-	int flags;
-	int backish;
-	int backest;
-	int curback;
-	int minlen;
-	int sawplus = 0;
-	int sawopen = 0;
+	I32 flags;
+	I32 backish;
+	I32 backest;
+	I32 curback;
+	I32 minlen;
+	I32 sawplus = 0;
+	I32 sawopen = 0;
 
 	if (exp == NULL)
 		fatal("NULL regexp argument");
@@ -216,9 +205,9 @@ int fold;
 		return(NULL);
 
 	/* Dig out information for optimizations. */
-	r->regstart = Nullstr;	/* Worst-case defaults. */
+	r->regstart = Nullsv;	/* Worst-case defaults. */
 	r->reganch = 0;
-	r->regmust = Nullstr;
+	r->regmust = Nullsv;
 	r->regback = -1;
 	r->regstclass = Nullch;
 	scan = r->program+1;			/* First BRANCH. */
@@ -241,9 +230,11 @@ int fold;
 	    again:
 		if (OP(first) == EXACTLY) {
 			r->regstart =
-			    str_make(OPERAND(first)+1,*OPERAND(first));
-			if (r->regstart->str_cur > !(sawstudy|fold))
-				fbmcompile(r->regstart,fold);
+			    newSVpv(OPERAND(first)+1,*OPERAND(first));
+			if (SvCUR(r->regstart) > !(sawstudy|fold))
+				fbm_compile(r->regstart,fold);
+			else
+				sv_upgrade(r->regstart, SVt_PVBM);
 		}
 		else if ((exp = index(simple,OP(first))) && exp > simple)
 			r->regstclass = first;
@@ -264,11 +255,8 @@ int fold;
 		if (sawplus && (!sawopen || !regsawback))
 		    r->reganch |= ROPT_SKIP;	/* x+ must match 1st of run */
 
-#ifdef DEBUGGING
-		if (debug & 512)
-		    fprintf(stderr,"first %d next %d offset %d\n",
-		      OP(first), OP(NEXTOPER(first)), first - scan);
-#endif
+		DEBUG_r(fprintf(stderr,"first %d next %d offset %d\n",
+		      OP(first), OP(NEXTOPER(first)), first - scan));
 		/*
 		 * If there's something expensive in the r.e., find the
 		 * longest literal string that must appear and make it the
@@ -280,8 +268,8 @@ int fold;
 		 * it happens that curback has been invalidated, since the
 		 * earlier string may buy us something the later one won't.]
 		 */
-		longish = str_make("",0);
-		longest = str_make("",0);
+		longish = newSVpv("",0);
+		longest = newSVpv("",0);
 		len = 0;
 		minlen = 0;
 		curback = 0;
@@ -305,7 +293,7 @@ int fold;
 				scan = t;
 			    minlen += *OPERAND(first);
 			    if (curback - backish == len) {
-				str_ncat(longish, OPERAND(first)+1,
+				sv_catpvn(longish, OPERAND(first)+1,
 				    *OPERAND(first));
 				len += *OPERAND(first);
 				curback += *OPERAND(first);
@@ -313,7 +301,7 @@ int fold;
 			    }
 			    else if (*OPERAND(first) >= len + (curback >= 0)) {
 				len = *OPERAND(first);
-				str_nset(longish, OPERAND(first)+1,len);
+				sv_setpvn(longish, OPERAND(first)+1,len);
 				backish = curback;
 				curback += len;
 				first = regnext(scan);
@@ -324,11 +312,11 @@ int fold;
 			else if (index(varies,OP(scan))) {
 			    curback = -30000;
 			    len = 0;
-			    if (longish->str_cur > longest->str_cur) {
-				str_sset(longest,longish);
+			    if (SvCUR(longish) > SvCUR(longest)) {
+				sv_setsv(longest,longish);
 				backest = backish;
 			    }
-			    str_nset(longish,"",0);
+			    sv_setpvn(longish,"",0);
 			    if (OP(scan) == PLUS &&
 			      index(simple,OP(NEXTOPER(scan))))
 				minlen++;
@@ -340,30 +328,30 @@ int fold;
 			    curback++;
 			    minlen++;
 			    len = 0;
-			    if (longish->str_cur > longest->str_cur) {
-				str_sset(longest,longish);
+			    if (SvCUR(longish) > SvCUR(longest)) {
+				sv_setsv(longest,longish);
 				backest = backish;
 			    }
-			    str_nset(longish,"",0);
+			    sv_setpvn(longish,"",0);
 			}
 			scan = regnext(scan);
 		}
 
 		/* Prefer earlier on tie, unless we can tail match latter */
 
-		if (longish->str_cur + (OP(first) == EOL) > longest->str_cur) {
-		    str_sset(longest,longish);
+		if (SvCUR(longish) + (OP(first) == EOL) > SvCUR(longest)) {
+		    sv_setsv(longest,longish);
 		    backest = backish;
 		}
 		else
-		    str_nset(longish,"",0);
-		if (longest->str_cur
+		    sv_setpvn(longish,"",0);
+		if (SvCUR(longest)
 		    &&
 		    (!r->regstart
 		     ||
-		     !fbminstr((unsigned char*) r->regstart->str_ptr,
-			  (unsigned char *) r->regstart->str_ptr
-			    + r->regstart->str_cur,
+		     !fbm_instr((unsigned char*) SvPV(r->regstart),
+			  (unsigned char *) SvPV(r->regstart)
+			    + SvCUR(r->regstart),
 			  longest)
 		    )
 		   )
@@ -372,18 +360,19 @@ int fold;
 			if (backest < 0)
 				backest = -1;
 			r->regback = backest;
-			if (longest->str_cur
+			if (SvCUR(longest)
 			  > !(sawstudy || fold || OP(first) == EOL) )
-				fbmcompile(r->regmust,fold);
-			r->regmust->str_u.str_useful = 100;
-			if (OP(first) == EOL && longish->str_cur)
-			    r->regmust->str_pok |= SP_TAIL;
+				fbm_compile(r->regmust,fold);
+			SvUPGRADE(r->regmust, SVt_PVBM);
+			BmUSEFUL(r->regmust) = 100;
+			if (OP(first) == EOL && SvCUR(longish))
+			    SvTAIL_on(r->regmust);
 		}
 		else {
-			str_free(longest);
-			longest = Nullstr;
+			sv_free(longest);
+			longest = Nullsv;
 		}
-		str_free(longish);
+		sv_free(longish);
 	}
 
 	r->do_folding = fold;
@@ -391,10 +380,7 @@ int fold;
 	r->minlen = minlen;
 	Newz(1002, r->startp, regnpar, char*);
 	Newz(1002, r->endp, regnpar, char*);
-#ifdef DEBUGGING
-	if (debug & 512)
-		regdump(r);
-#endif
+	DEBUG_r(regdump(r));
 	return(r);
 }
 
@@ -409,14 +395,14 @@ int fold;
  */
 static char *
 reg(paren, flagp)
-int paren;			/* Parenthesized? */
-int *flagp;
+I32 paren;			/* Parenthesized? */
+I32 *flagp;
 {
 	register char *ret;
 	register char *br;
 	register char *ender;
-	register int parno;
-	int flags;
+	register I32 parno;
+	I32 flags;
 
 	*flagp = HASWIDTH;	/* Tentatively. */
 
@@ -482,12 +468,12 @@ int *flagp;
  */
 static char *
 regbranch(flagp)
-int *flagp;
+I32 *flagp;
 {
 	register char *ret;
 	register char *chain;
 	register char *latest;
-	int flags;
+	I32 flags;
 
 	*flagp = WORST;		/* Tentatively. */
 
@@ -521,16 +507,16 @@ int *flagp;
  */
 static char *
 regpiece(flagp)
-int *flagp;
+I32 *flagp;
 {
 	register char *ret;
 	register char op;
 	register char *next;
-	int flags;
+	I32 flags;
 	char *origparse = regparse;
-	int orignpar = regnpar;
+	I32 orignpar = regnpar;
 	char *max;
-	int iter;
+	I32 iter;
 	char ch;
 
 	ret = regatom(&flags);
@@ -565,7 +551,7 @@ int *flagp;
 		regparse++;
 		iter = atoi(regparse);
 		if (flags&SIMPLE) {	/* we can do it right after all */
-		    int tmp;
+		    I32 tmp;
 
 		    reginsert(CURLY, ret);
 		    if (iter > 0)
@@ -696,10 +682,10 @@ int *flagp;
  */
 static char *
 regatom(flagp)
-int *flagp;
+I32 *flagp;
 {
 	register char *ret;
-	int flags;
+	I32 flags;
 
 	*flagp = WORST;		/* Tentatively. */
 
@@ -788,7 +774,7 @@ int *flagp;
 		case '1': case '2': case '3': case '4':
 		case '5': case '6': case '7': case '8': case '9':
 			{
-			    int num = atoi(regparse);
+			    I32 num = atoi(regparse);
 
 			    if (num > 9 && num >= regnpar)
 				goto defchar;
@@ -810,11 +796,11 @@ int *flagp;
 		}
 		break;
 	default: {
-			register int len;
+			register I32 len;
 			register char ender;
 			register char *p;
 			char *oldp;
-			int numlen;
+			I32 numlen;
 
 		    defchar:
 			ret = regnode(EXACTLY);
@@ -870,7 +856,7 @@ int *flagp;
 					p++;
 					break;
 				case 'x':
-				    ender = scanhex(++p, 2, &numlen);
+				    ender = scan_hex(++p, 2, &numlen);
 				    p += numlen;
 				    break;
 				case 'c':
@@ -884,7 +870,7 @@ int *flagp;
 				case '5': case '6': case '7': case '8':case '9':
 				    if (*p == '0' ||
 				      (isDIGIT(p[1]) && atoi(p) >= regnpar) ) {
-					ender = scanoct(p, 3, &numlen);
+					ender = scan_oct(p, 3, &numlen);
 					p += numlen;
 				    }
 				    else {
@@ -938,8 +924,8 @@ int *flagp;
 static void
 regset(bits,def,c)
 char *bits;
-int def;
-register int c;
+I32 def;
+register I32 c;
 {
 	if (regcode == &regdummy)
 	    return;
@@ -954,12 +940,12 @@ static char *
 regclass()
 {
 	register char *bits;
-	register int class;
-	register int lastclass;
-	register int range = 0;
+	register I32 class;
+	register I32 lastclass;
+	register I32 range = 0;
 	register char *ret;
-	register int def;
-	int numlen;
+	register I32 def;
+	I32 numlen;
 
 	ret = regnode(ANYOF);
 	if (*regparse == '^') {	/* Complement of range. */
@@ -1037,7 +1023,7 @@ regclass()
 				class = '\007';
 				break;
 			case 'x':
-				class = scanhex(regparse, 2, &numlen);
+				class = scan_hex(regparse, 2, &numlen);
 				regparse += numlen;
 				break;
 			case 'c':
@@ -1048,7 +1034,7 @@ regclass()
 				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
-				class = scanoct(--regparse, 3, &numlen);
+				class = scan_oct(--regparse, 3, &numlen);
 				regparse += numlen;
 				break;
 			}
@@ -1225,7 +1211,7 @@ char *val;
 {
 	register char *scan;
 	register char *temp;
-	register int offset;
+	register I32 offset;
 
 	if (p == &regdummy)
 		return;
@@ -1273,7 +1259,7 @@ char *val;
 /*
  - regcurly - a little FSA that accepts {\d+,?\d*}
  */
-STATIC int
+STATIC I32
 regcurly(s)
 register char *s;
 {
@@ -1328,17 +1314,17 @@ regexp *r;
 			/* Literal string, where present. */
 			s++;
 			while (*s != '\0') {
-				(void)putchar(*s);
+				(void)putc(*s, stderr);
 				s++;
 			}
 			s++;
 		}
-		(void)putchar('\n');
+		(void)putc('\n', stderr);
 	}
 
 	/* Header fields of interest. */
 	if (r->regstart)
-		fprintf(stderr,"start `%s' ", r->regstart->str_ptr);
+		fprintf(stderr,"start `%s' ", SvPV(r->regstart));
 	if (r->regstclass)
 		fprintf(stderr,"stclass `%s' ", regprop(r->regstclass));
 	if (r->reganch & ROPT_ANCH)
@@ -1348,7 +1334,7 @@ regexp *r;
 	if (r->reganch & ROPT_IMPLICIT)
 		fprintf(stderr,"implicit ");
 	if (r->regmust != NULL)
-		fprintf(stderr,"must have \"%s\" back %d ", r->regmust->str_ptr,
+		fprintf(stderr,"must have \"%s\" back %d ", SvPV(r->regmust),
 		  r->regback);
 	fprintf(stderr, "minlen %d ", r->minlen);
 	fprintf(stderr,"\n");
@@ -1462,12 +1448,12 @@ struct regexp *r;
 		r->subbase = Nullch;
 	}
 	if (r->regmust) {
-		str_free(r->regmust);
-		r->regmust = Nullstr;
+		sv_free(r->regmust);
+		r->regmust = Nullsv;
 	}
 	if (r->regstart) {
-		str_free(r->regstart);
-		r->regstart = Nullstr;
+		sv_free(r->regstart);
+		r->regstart = Nullsv;
 	}
 	Safefree(r->startp);
 	Safefree(r->endp);

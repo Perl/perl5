@@ -1,0 +1,2 @@
+print STDERR "Can't open $mib_name: $!\n"
+&objviews'Exit;

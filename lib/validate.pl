@@ -1,4 +1,4 @@
-;# $Header: validate.pl,v 4.0 91/03/20 01:26:56 lwall Locked $
+;# $RCSfile: validate.pl,v $$Revision: 4.1 $$Date: 92/08/07 18:24:19 $
 
 ;# The validate routine takes a single multiline string consisting of
 ;# lines containing a filename plus a file test to try on it.  (The

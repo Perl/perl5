@@ -1,6 +1,6 @@
 #!/usr/bin/perl -P
 
-# $Header: scan_suid,v 4.0 91/03/20 01:14:00 lwall Locked $
+# $RCSfile: scan_suid,v $$Revision: 4.1 $$Date: 92/08/07 17:20:43 $
 
 # Look for new setuid root files.
 

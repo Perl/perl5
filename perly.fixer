@@ -148,7 +148,7 @@ END
 
     ######################################################
     # Plan still unknown
-    *) mv $input $output;
+    *) sed -e 's/Received token/ *** Received token/' $input >$output;
 esac
 
 rm -rf $tmp $input

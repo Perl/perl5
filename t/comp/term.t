@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: term.t,v 4.0 91/03/20 01:50:36 lwall Locked $
+# $RCSfile: term.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:24 $
 
 # tests that aren't important enough for base.term
 

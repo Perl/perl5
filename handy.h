@@ -1,4 +1,4 @@
-/* $RCSfile: handy.h,v $$Revision: 4.0.1.4 $$Date: 92/06/08 13:23:17 $
+/* $RCSfile: handy.h,v $$Revision: 4.1 $$Date: 92/08/07 18:21:46 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	handy.h,v $
+ * Revision 4.1  92/08/07  18:21:46  lwall
+ * 
  * Revision 4.0.1.4  92/06/08  13:23:17  lwall
  * patch20: isascii() may now be supplied by a library routine
  * patch20: Perl now distinguishes overlapped copies from non-overlapped
@@ -35,6 +37,7 @@
 #define Null(type) ((type)NULL)
 #define Nullch Null(char*)
 #define Nullfp Null(FILE*)
+#define Nullsv Null(SV*)
 
 #ifdef UTS
 #define bool int
@@ -51,6 +54,20 @@
 #define TRUE (1)
 #define FALSE (0)
 
+typedef char		I8;
+typedef unsigned char	U8;
+
+typedef short		I16;
+typedef unsigned short	U16;
+
+#if INTSIZE == 4
+typedef int		I32;
+typedef unsigned int	U32;
+#else
+typedef long		I32;
+typedef unsigned long	U32;
+#endif
+
 #define Ctl(ch) (ch & 037)
 
 #define strNE(s1,s2) (strcmp(s1,s2))
@@ -63,23 +80,25 @@
 #define strnEQ(s1,s2,l) (!strncmp(s1,s2,l))
 
 #if defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
-#define isALNUM(c) (isalpha(c) || isdigit(c) || c == '_')
-#define isALPHA(c) isalpha(c)
-#define isSPACE(c) isspace(c)
-#define isDIGIT(c) isdigit(c)
-#define isUPPER(c) isupper(c)
-#define isLOWER(c) islower(c)
+#define isALNUM(c)   (isalpha(c) || isdigit(c) || c == '_')
+#define isIDFIRST(c) (isalpha(c) || (c) == '_')
+#define isALPHA(c)   isalpha(c)
+#define isSPACE(c)   isspace(c)
+#define isDIGIT(c)   isdigit(c)
+#define isUPPER(c)   isupper(c)
+#define isLOWER(c)   islower(c)
 #else
-#define isALNUM(c) (isascii(c) && (isalpha(c) || isdigit(c) || c == '_'))
-#define isALPHA(c) (isascii(c) && isalpha(c))
-#define isSPACE(c) (isascii(c) && isspace(c))
-#define isDIGIT(c) (isascii(c) && isdigit(c))
-#define isUPPER(c) (isascii(c) && isupper(c))
-#define isLOWER(c) (isascii(c) && islower(c))
+#define isALNUM(c)   (isascii(c) && (isalpha(c) || isdigit(c) || c == '_'))
+#define isIDFIRST(c) (isascii(c) && (isalpha(c) || (c) == '_'))
+#define isALPHA(c)   (isascii(c) && isalpha(c))
+#define isSPACE(c)   (isascii(c) && isspace(c))
+#define isDIGIT(c)   (isascii(c) && isdigit(c))
+#define isUPPER(c)   (isascii(c) && isupper(c))
+#define isLOWER(c)   (isascii(c) && islower(c))
 #endif
 
 /* Line numbers are unsigned, 16 bits. */
-typedef unsigned short line_t;
+typedef U16 line_t;
 #ifdef lint
 #define NOLINE ((line_t)0)
 #else
@@ -109,7 +128,7 @@ void safefree();
 #define Renewc(v,n,t,c) (v = (c*)saferealloc((char*)(v),((unsigned long)(n)*sizeof(t))))
 #endif /* MSDOS */
 #define Safefree(d) safefree((char*)d)
-#define Str_new(x,len) str_new(len)
+#define NEWSV(x,len) newSV(len)
 #else /* LEAKTEST */
 char *safexmalloc();
 char *safexrealloc();
@@ -121,7 +140,7 @@ void safexfree();
 #define Renew(v,n,t) (v = (t*)safexrealloc((char*)(v),(MEM_SIZE)((n)*sizeof(t))))
 #define Renewc(v,n,t,c) (v = (c*)safexrealloc((char*)(v),(MEM_SIZE)((n)*sizeof(t))))
 #define Safefree(d) safexfree((char*)d)
-#define Str_new(x,len) str_new(x,len)
+#define NEWSV(x,len) newSV(x,len)
 #define MAXXCOUNT 1200
 long xcount[MAXXCOUNT];
 long lastxcount[MAXXCOUNT];

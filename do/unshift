@@ -1,0 +1,20 @@
+void
+do_unshift(ary,arglast)
+register ARRAY *ary;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[1];
+    register int items = arglast[2] - sp;
+    register STR *TARG;
+    register int i;
+
+    aunshift(ary,items);
+    i = 0;
+    for (st += ++sp; i < items; i++,st++) {
+	TARG = Str_new(27,0);
+	str_sset(TARG,*st);
+	(void)astore(ary,i,TARG);
+    }
+}
+

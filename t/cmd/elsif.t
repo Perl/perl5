@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: elsif.t,v 4.0 91/03/20 01:49:21 lwall Locked $
+# $RCSfile: elsif.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:08 $
 
 sub foo {
     if ($_[0] == 1) {

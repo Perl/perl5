@@ -1,0 +1,40 @@
+void
+do_vecset(mstr,TARG)
+STR *mstr;
+STR *TARG;
+{
+    struct lstring *lstr = (struct lstring*)TARG;
+    register int offset;
+    register int size;
+    register unsigned char *s = (unsigned char*)mstr->str_ptr;
+    register unsigned long lval = U_L(str_gnum(TARG));
+    int mask;
+
+    mstr->str_rare = 0;
+    TARG->str_magic = Nullstr;
+    offset = lstr->lstr_offset;
+    size = lstr->lstr_len;
+    if (size < 8) {
+	mask = (1 << size) - 1;
+	size = offset & 7;
+	lval &= mask;
+	offset >>= 3;
+	s[offset] &= ~(mask << size);
+	s[offset] |= lval << size;
+    }
+    else {
+	if (size == 8)
+	    s[offset] = lval & 255;
+	else if (size == 16) {
+	    s[offset] = (lval >> 8) & 255;
+	    s[offset+1] = lval & 255;
+	}
+	else if (size == 32) {
+	    s[offset] = (lval >> 24) & 255;
+	    s[offset+1] = (lval >> 16) & 255;
+	    s[offset+2] = (lval >> 8) & 255;
+	    s[offset+3] = lval & 255;
+	}
+    }
+}
+

@@ -1,0 +1,61 @@
+int
+do_gpent(which,gimme,arglast)
+int which;
+int gimme;
+int *arglast;
+{
+    register ARRAY *ary = stack;
+    register int sp = arglast[0];
+    register char **elem;
+    register STR *TARG;
+    struct protoent *getprotobyname();
+    struct protoent *getprotobynumber();
+    struct protoent *getprotoent();
+    struct protoent *pent;
+
+    if (which == O_GPBYNAME) {
+	char *name = str_get(ary->ary_array[sp+1]);
+
+	pent = getprotobyname(name);
+    }
+    else if (which == O_GPBYNUMBER) {
+	int proto = (int)str_gnum(ary->ary_array[sp+1]);
+
+	pent = getprotobynumber(proto);
+    }
+    else
+	pent = getprotoent();
+
+    if (gimme != G_ARRAY) {
+	astore(ary, ++sp, TARG = str_mortal(&str_undef));
+	if (pent) {
+	    if (which == O_GPBYNAME)
+		str_numset(TARG, (double)pent->p_proto);
+	    else
+		str_set(TARG, pent->p_name);
+	}
+	return sp;
+    }
+
+    if (pent) {
+#ifndef lint
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_set(TARG, pent->p_name);
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	for (elem = pent->p_aliases; *elem; elem++) {
+	    str_cat(TARG, *elem);
+	    if (elem[1])
+		str_ncat(TARG," ",1);
+	}
+	(void)astore(ary, ++sp, TARG = str_mortal(&str_no));
+	str_numset(TARG, (double)pent->p_proto);
+#else /* lint */
+	elem = Nullch;
+	elem = elem;
+	(void)astore(ary, ++sp, str_mortal(&str_no));
+#endif /* lint */
+    }
+
+    return sp;
+}
+

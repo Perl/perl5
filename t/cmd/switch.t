@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: switch.t,v 4.0 91/03/20 01:49:44 lwall Locked $
+# $RCSfile: switch.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:14 $
 
 print "1..18\n";
 
@@ -40,7 +40,7 @@ sub foo2 {
     return $_;
 }
 
-print do foo2(0) == 20 ? "ok 7\n" : "not ok 1\n";
+print do foo2(0) == 20 ? "ok 7\n" : "not ok 7\n";
 print do foo2(1) == 1 ? "ok 8\n" : "not ok 8\n";
 print do foo2(2) == 2 ? "ok 9\n" : "not ok 9\n";
 print do foo2(3) == 3 ? "ok 10\n" : "not ok 10\n";

@@ -1,0 +1,13 @@
+void
+do_execfree()
+{
+    if (Argv) {
+	Safefree(Argv);
+	Argv = Null(char **);
+    }
+    if (Cmd) {
+	Safefree(Cmd);
+	Cmd = Nullch;
+    }
+}
+

@@ -1,6 +1,6 @@
 #!./perl
 
-# $RCSfile: dbm.t,v $$Revision: 4.0.1.1 $$Date: 92/06/08 15:43:02 $
+# $RCSfile: dbm.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:43 $
 
 if (!-r '/usr/include/dbm.h' && !-r '/usr/include/ndbm.h'
     && !-r '/usr/include/rpcsvc/dbm.h') {
@@ -11,10 +11,18 @@ if (!-r '/usr/include/dbm.h' && !-r '/usr/include/ndbm.h'
 print "1..12\n";
 
 unlink <Op.dbmx.*>;
+unlink Op.dbmx;		# in case we're running gdbm
+
 umask(0);
 print (dbmopen(h,'Op.dbmx',0640) ? "ok 1\n" : "not ok 1\n");
+
+$Dfile = "Op.dbmx.pag";
+if (! -e $Dfile) {
+	$Dfile = "Op.dbmx";
+	print "# Probably a gdbm database\n";
+}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
-   $blksize,$blocks) = stat('Op.dbmx.pag');
+   $blksize,$blocks) = stat($Dfile);
 print (($mode & 0777) == 0640 ? "ok 2\n" : "not ok 2\n");
 while (($key,$value) = each(h)) {
     $i++;
@@ -93,7 +101,7 @@ for ($i = 1; $i < 200; $i++) { $ok = 0 unless $h{$i} == $i; }
 print ($ok ? "ok 8\n" : "not ok 8\n");
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
-   $blksize,$blocks) = stat('Op.dbmx.pag');
+   $blksize,$blocks) = stat($Dfile);
 print ($size > 0 ? "ok 9\n" : "not ok 9\n");
 
 @h{0..200} = 200..400;
@@ -103,4 +111,4 @@ print join(':',200..400) eq join(':',@foo) ? "ok 10\n" : "not ok 10\n";
 print ($h{'foo'} eq '' ? "ok 11\n" : "not ok 11\n");
 print ($h{''} eq 'bar' ? "ok 12\n" : "not ok 12\n");
 
-unlink 'Op.dbmx.dir', 'Op.dbmx.pag';
+unlink 'Op.dbmx.dir', $Dfile;

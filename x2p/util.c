@@ -1,4 +1,4 @@
-/* $RCSfile: util.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:20:35 $
+/* $RCSfile: util.c,v $$Revision: 4.1 $$Date: 92/08/07 18:29:29 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.c,v $
+ * Revision 4.1  92/08/07  18:29:29  lwall
+ * 
  * Revision 4.0.1.1  91/06/07  12:20:35  lwall
  * patch4: new copyright notice
  * 

@@ -1,0 +1,27 @@
+long
+do_tell(stab)
+STAB *stab;
+{
+    register STIO *stio;
+
+    if (!stab)
+	goto phooey;
+
+    stio = stab_io(stab);
+    if (!stio || !stio->ifp)
+	goto phooey;
+
+#ifdef ULTRIX_STDIO_BOTCH
+    if (feof(stio->ifp))
+	(void)fseek (stio->ifp, 0L, 2);		/* ultrix 1.2 workaround */
+#endif
+
+    return ftell(stio->ifp);
+
+phooey:
+    if (dowarn)
+	warn("tell() on unopened file");
+    errno = EBADF;
+    return -1L;
+}
+

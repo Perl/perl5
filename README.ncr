@@ -95,7 +95,7 @@ X  /*	time.h	6.1	83/07/29	*/
 X  /* " @(#)time.h (TWG) 2.2 88/05/17 " */
 X  
 X! /*
-X  HDEF( "@(#)$RCSfile: README.ncr,v $$Revision: 4.0.1.1 $$Date: 92/06/08 11:41:41 $" )
+X  HDEF( "@(#)$RCSfile: README.ncr,v $$Revision: 4.1 $$Date: 92/08/07 17:18:12 $" )
 X- */
 X  
 X  /*
@@ -111,7 +111,7 @@ X! 	*/
 X! # include <sys/twg_config.h>
 X! #endif
 X! 
-X  HDEF( "@(#)$RCSfile: README.ncr,v $$Revision: 4.0.1.1 $$Date: 92/06/08 11:41:41 $" )
+X  HDEF( "@(#)$RCSfile: README.ncr,v $$Revision: 4.1 $$Date: 92/08/07 17:18:12 $" )
 X  
 X  /*
 X   * Structure returned by gettimeofday(2) system call,

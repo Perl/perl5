@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: multiline.t,v 4.0 91/03/20 01:50:15 lwall Locked $
+# $RCSfile: multiline.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:20 $
 
 print "1..5\n";
 

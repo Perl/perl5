@@ -1,0 +1,197 @@
+void
+do_sprintf(TARG,len,sarg)
+register STR *TARG;
+register int len;
+register STR **sarg;
+{
+    register char *s;
+    register char *t;
+    register char *f;
+    bool dolong;
+#ifdef QUAD
+    bool doquad;
+#endif /* QUAD */
+    char ch;
+    register char *send;
+    register STR *arg;
+    char *xs;
+    int xlen;
+    int pre;
+    int post;
+    double value;
+
+    str_set(TARG,"");
+    len--;			/* don't count pattern string */
+    t = s = str_get(*sarg);
+    send = s + (*sarg)->str_cur;
+    sarg++;
+    for ( ; ; len--) {
+
+	/*SUPPRESS 560*/
+	if (len <= 0 || !(arg = *sarg++))
+	    arg = &str_no;
+
+	/*SUPPRESS 530*/
+	for ( ; t < send && *t != '%'; t++) ;
+	if (t >= send)
+	    break;		/* end of format string, ignore extra args */
+	f = t;
+	*buf = '\0';
+	xs = buf;
+#ifdef QUAD
+	doquad =
+#endif /* QUAD */
+	dolong = FALSE;
+	pre = post = 0;
+	for (t++; t < send; t++) {
+	    switch (*t) {
+	    default:
+		ch = *(++t);
+		*t = '\0';
+		(void)sprintf(xs,f);
+		len++, sarg--;
+		xlen = strlen(xs);
+		break;
+	    case '0': case '1': case '2': case '3': case '4':
+	    case '5': case '6': case '7': case '8': case '9': 
+	    case '.': case '#': case '-': case '+': case ' ':
+		continue;
+	    case 'l':
+#ifdef QUAD
+		if (dolong) {
+		    dolong = FALSE;
+		    doquad = TRUE;
+		} else
+#endif
+		dolong = TRUE;
+		continue;
+	    case 'c':
+		ch = *(++t);
+		*t = '\0';
+		xlen = (int)str_gnum(arg);
+		if (strEQ(f,"%c")) { /* some printfs fail on null chars */
+		    *xs = xlen;
+		    xs[1] = '\0';
+		    xlen = 1;
+		}
+		else {
+		    (void)sprintf(xs,f,xlen);
+		    xlen = strlen(xs);
+		}
+		break;
+	    case 'D':
+		dolong = TRUE;
+		/* FALL THROUGH */
+	    case 'd':
+		ch = *(++t);
+		*t = '\0';
+#ifdef QUAD
+		if (doquad)
+		    (void)sprintf(buf,s,(quad)str_gnum(arg));
+		else
+#endif
+		if (dolong)
+		    (void)sprintf(xs,f,(long)str_gnum(arg));
+		else
+		    (void)sprintf(xs,f,(int)str_gnum(arg));
+		xlen = strlen(xs);
+		break;
+	    case 'X': case 'O':
+		dolong = TRUE;
+		/* FALL THROUGH */
+	    case 'x': case 'o': case 'u':
+		ch = *(++t);
+		*t = '\0';
+		value = str_gnum(arg);
+#ifdef QUAD
+		if (doquad)
+		    (void)sprintf(buf,s,(unsigned quad)value);
+		else
+#endif
+		if (dolong)
+		    (void)sprintf(xs,f,U_L(value));
+		else
+		    (void)sprintf(xs,f,U_I(value));
+		xlen = strlen(xs);
+		break;
+	    case 'E': case 'e': case 'f': case 'G': case 'g':
+		ch = *(++t);
+		*t = '\0';
+		(void)sprintf(xs,f,str_gnum(arg));
+		xlen = strlen(xs);
+		break;
+	    case 's':
+		ch = *(++t);
+		*t = '\0';
+		xs = str_get(arg);
+		xlen = arg->str_cur;
+		if (*xs == 'S' && xs[1] == 't' && xs[2] == 'B' && xs[3] == '\0'
+		  && xlen == sizeof(STBP)) {
+		    STR *tmpstr = Str_new(24,0);
+
+		    stab_efullname(tmpstr, ((STAB*)arg)); /* a stab value! */
+		    sprintf(tokenbuf,"*%s",tmpstr->str_ptr);
+					/* reformat to non-binary */
+		    xs = tokenbuf;
+		    xlen = strlen(tokenbuf);
+		    str_free(tmpstr);
+		}
+		if (strEQ(f,"%s")) {	/* some printfs fail on >128 chars */
+		    break;		/* so handle simple cases */
+		}
+		else if (f[1] == '-') {
+		    char *mp = index(f, '.');
+		    int min = atoi(f+2);
+
+		    if (mp) {
+			int max = atoi(mp+1);
+
+			if (xlen > max)
+			    xlen = max;
+		    }
+		    if (xlen < min)
+			post = min - xlen;
+		    break;
+		}
+		else if (isDIGIT(f[1])) {
+		    char *mp = index(f, '.');
+		    int min = atoi(f+1);
+
+		    if (mp) {
+			int max = atoi(mp+1);
+
+			if (xlen > max)
+			    xlen = max;
+		    }
+		    if (xlen < min)
+			pre = min - xlen;
+		    break;
+		}
+		strcpy(tokenbuf+64,f);	/* sprintf($s,...$s...) */
+		*t = ch;
+		(void)sprintf(buf,tokenbuf+64,xs);
+		xs = buf;
+		xlen = strlen(xs);
+		break;
+	    }
+	    /* end of switch, copy results */
+	    *t = ch;
+	    STR_GROW(TARG, TARG->str_cur + (f - s) + xlen + 1 + pre + post);
+	    str_ncat(TARG, s, f - s);
+	    if (pre) {
+		repeatcpy(TARG->str_ptr + TARG->str_cur, " ", 1, pre);
+		TARG->str_cur += pre;
+	    }
+	    str_ncat(TARG, xs, xlen);
+	    if (post) {
+		repeatcpy(TARG->str_ptr + TARG->str_cur, " ", 1, post);
+		TARG->str_cur += post;
+	    }
+	    s = t;
+	    break;		/* break from for loop */
+	}
+    }
+    str_ncat(TARG, s, t - s);
+    STABSET(TARG);
+}
+

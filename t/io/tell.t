@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: tell.t,v 4.0 91/03/20 01:51:14 lwall Locked $
+# $RCSfile: tell.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:33 $
 
 print "1..13\n";
 

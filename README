@@ -1,8 +1,15 @@
+[This is an unsupported, pre-release version of Perl 5.0.  It is expected
+to work only on a Sparc architecture machine.  No Configure support is
+provided.  In fact, if you succeed in configuring and making a new
+makefile, you'll probably overwrite the only makefile that works.  Note
+that a Sparc executable comes with the kit, so you may not need to
+compile at all.  There is no list of new features yet, but if you look
+at t/op/ref.t you'll see some of them in use.  perl -Dxst is also fun.]
 
-			Perl Kit, Version 4.0
+			   Perl Kit, Version 5.0
 
-		Copyright (c) 1989,1990,1991, Larry Wall
-			  All rights reserved.
+	    Copyright (c) 1989,1990,1991,1992,1993, Larry Wall
+			    All rights reserved.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of either:
@@ -49,12 +56,11 @@
 
 --------------------------------------------------------------------------
 
-Perl is a language that combines some of the features of C, sed, awk and shell.
-See the manual page for more hype.  There's also a Nutshell Handbook published
-by O'Reilly & Assoc.  Their U.S. number is 1-800-338-6887 (dev-nuts) and
-their international number is 1-707-829-0515.  E-mail to nuts@ora.com.
-
-Perl will probably not run on machines with a small address space.
+Perl is a language that combines some of the features of C, sed, awk
+and shell.  See the manual page for more hype.  There's also a Nutshell
+Handbook published by O'Reilly & Assoc.  Their U.S. number is
+1-800-998-9938 and their international number is 1-707-829-0515.
+E-mail to nuts@ora.com.
 
 Please read all the directions below before you proceed any further, and
 then follow them carefully.

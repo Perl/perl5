@@ -1,0 +1,9 @@
+#!/usr/bin/perl
+
+print sort byfuncname <>;
+
+sub byfuncname {
+    ($A) = $a =~ /\b(\w+) P\(/;
+    ($B) = $b =~ /\b(\w+) P\(/;
+    $A cmp $B;
+}

@@ -1,0 +1,21 @@
+
+void
+package(OP *name)
+{ char tmpbuf[256];
+  GV *tmpgv;
+
+  save_hptr(&curstash);
+  save_item(curstname);
+  sv_setpv(curstname,$2);
+  sprintf(tmpbuf,"'_%s",$2);
+  tmpgv = gv_fetchpv(tmpbuf,TRUE);
+  if (!GvHV(tmpgv))
+      GvHV(tmpgv) = newHV(0);
+  curstash = GvHV(tmpgv);
+  if (!curstash->hv_name)
+      curstash->hv_name = savestr($2);
+  curstash->hv_coeffsize = 0;
+  op_free($2);
+  copline = NOLINE;
+  expectterm = 2;
+}

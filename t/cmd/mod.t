@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: mod.t,v 4.0 91/03/20 01:49:33 lwall Locked $
+# $RCSfile: mod.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:11 $
 
 print "1..7\n";
 
@@ -20,7 +20,7 @@ do {$x[$x] = $x;} while ($x++) < 10;
 if (join(' ',@x) eq '0 1 2 3 4 5 6 7 8 9 10') {
 	print "ok 5\n";
 } else {
-	print "not ok 5\n";
+	print "not ok 5 @x\n";
 }
 
 $x = 15;

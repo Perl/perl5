@@ -1,6 +1,9 @@
 # : Makefile.SH,v 9820Revision: 4.0.1.2 9820Date: 91/06/07 10:14:43 $
 #
 # $Log:	makefile.st,v $
+# Revision 4.1  92/08/07  17:18:40  lwall
+# Stage 6 Snapshot
+# 
 # Revision 4.0.1.1  92/06/08  11:50:13  lwall
 # Initial revision
 # 

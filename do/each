@@ -1,0 +1,33 @@
+int
+do_each(TARG,hash,gimme,arglast)
+STR *TARG;
+HASH *hash;
+int gimme;
+int *arglast;
+{
+    STR **st = stack->ary_array;
+    register int sp = arglast[0];
+    HENT *entry = hiternext(hash);
+    int i;
+    char *tmps;
+
+    if (mystrk) {
+	str_free(mystrk);
+	mystrk = Nullstr;
+    }
+
+    if (entry) {
+	if (gimme == G_ARRAY) {
+	    tmps = hiterkey(entry, &i);
+	    if (!i)
+		tmps = "";
+	    st[++sp] = mystrk = str_make(tmps,i);
+	}
+	st[++sp] = TARG;
+	str_sset(TARG,hiterval(hash,entry));
+	STABSET(TARG);
+	return sp;
+    }
+    else
+	return sp;
+}

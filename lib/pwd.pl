@@ -1,8 +1,10 @@
 ;# pwd.pl - keeps track of current working directory in PWD environment var
 ;#
-;# $RCSfile: pwd.pl,v $$Revision: 4.0.1.1 $$Date: 92/06/08 13:45:22 $
+;# $RCSfile: pwd.pl,v $$Revision: 4.1 $$Date: 92/08/07 18:24:11 $
 ;#
 ;# $Log:	pwd.pl,v $
+;# Revision 4.1  92/08/07  18:24:11  lwall
+;# 
 ;# Revision 4.0.1.1  92/06/08  13:45:22  lwall
 ;# patch20: support added to pwd.pl to strip automounter crud
 ;# 

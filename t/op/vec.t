@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: vec.t,v 4.0 91/03/20 01:55:28 lwall Locked $
+# $RCSfile: vec.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:36 $
 
 print "1..13\n";
 

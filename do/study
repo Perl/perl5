@@ -1,0 +1,73 @@
+int					/*SUPPRESS 590*/
+do_study(TARG,arg,gimme,arglast)
+STR *TARG;
+ARG *arg;
+int gimme;
+int *arglast;
+{
+    register unsigned char *s;
+    register int pos = TARG->str_cur;
+    register int ch;
+    register int *sfirst;
+    register int *snext;
+    int retval;
+    int retarg = arglast[0] + 1;
+
+#ifndef lint
+    s = (unsigned char*)(str_get(TARG));
+#else
+    s = Null(unsigned char*);
+#endif
+    if (lastscream)
+	lastscream->str_pok &= ~SP_STUDIED;
+    lastscream = TARG;
+    if (pos <= 0) {
+	retval = 0;
+	goto ret;
+    }
+    if (pos > maxscream) {
+	if (maxscream < 0) {
+	    maxscream = pos + 80;
+	    New(301,screamfirst, 256, int);
+	    New(302,screamnext, maxscream, int);
+	}
+	else {
+	    maxscream = pos + pos / 4;
+	    Renew(screamnext, maxscream, int);
+	}
+    }
+
+    sfirst = screamfirst;
+    snext = screamnext;
+
+    if (!sfirst || !snext)
+	fatal("do_study: out of memory");
+
+    for (ch = 256; ch; --ch)
+	*sfirst++ = -1;
+    sfirst -= 256;
+
+    while (--pos >= 0) {
+	ch = s[pos];
+	if (sfirst[ch] >= 0)
+	    snext[pos] = sfirst[ch] - pos;
+	else
+	    snext[pos] = -pos;
+	sfirst[ch] = pos;
+
+	/* If there were any case insensitive searches, we must assume they
+	 * all are.  This speeds up insensitive searches much more than
+	 * it slows down sensitive ones.
+	 */
+	if (sawi)
+	    sfirst[fold[ch]] = pos;
+    }
+
+    TARG->str_pok |= SP_STUDIED;
+    retval = 1;
+  ret:
+    str_numset(ARGTARG,(double)retval);
+    stack->ary_array[retarg] = ARGTARG;
+    return retarg;
+}
+

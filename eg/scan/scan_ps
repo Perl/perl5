@@ -1,6 +1,6 @@
 #!/usr/bin/perl -P
 
-# $Header: scan_ps,v 4.0 91/03/20 01:13:29 lwall Locked $
+# $RCSfile: scan_ps,v $$Revision: 4.1 $$Date: 92/08/07 17:20:40 $
 
 # This looks for looping processes.
 

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: study.t,v 4.0 91/03/20 01:54:59 lwall Locked $
+# $RCSfile: study.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:30 $
 
 print "1..24\n";
 

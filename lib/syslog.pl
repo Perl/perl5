@@ -2,6 +2,8 @@
 # syslog.pl
 #
 # $Log:	syslog.pl,v $
+# Revision 4.1  92/08/07  18:24:15  lwall
+# 
 # Revision 4.0.1.1  92/06/08  13:48:05  lwall
 # patch20: new warning for ambiguous use of unary operators
 # 

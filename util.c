@@ -1,4 +1,4 @@
-/* $RCSfile: util.c,v $$Revision: 4.0.1.6 $$Date: 92/06/11 21:18:47 $
+/* $RCSfile: util.c,v $$Revision: 4.1 $$Date: 92/08/07 18:29:00 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.c,v $
+ * Revision 4.1  92/08/07  18:29:00  lwall
+ * 
  * Revision 4.0.1.6  92/06/11  21:18:47  lwall
  * patch34: boneheaded typo in my_bcopy()
  * 
@@ -68,13 +70,7 @@
 
 #ifndef safemalloc
 
-static char nomem[] = "Out of memory!\n";
-
 /* paranoid version of malloc */
-
-#ifdef DEBUGGING
-static int an = 0;
-#endif
 
 /* NOTE:  Do not call the next three routines directly.  Use the macros
  * in handy.h, so that we can easily redefine everything to do tracking of
@@ -97,7 +93,7 @@ MEM_SIZE size;
 #ifdef MSDOS
 	if (size > 0xffff) {
 		fprintf(stderr, "Allocation too large: %lx\n", size) FLUSH;
-		exit(1);
+		my_exit(1);
 	}
 #endif /* MSDOS */
 #ifdef DEBUGGING
@@ -105,27 +101,20 @@ MEM_SIZE size;
 	fatal("panic: malloc");
 #endif
     ptr = malloc(size?size:1);	/* malloc(0) is NASTY on our system */
-#ifdef DEBUGGING
-#  if !(defined(I286) || defined(atarist))
-    if (debug & 128)
-	fprintf(stderr,"0x%x: (%05d) malloc %ld bytes\n",ptr,an++,(long)size);
-#  else
-    if (debug & 128)
-	fprintf(stderr,"0x%lx: (%05d) malloc %ld bytes\n",ptr,an++,(long)size);
-#  endif
+#if !(defined(I286) || defined(atarist))
+    DEBUG_m(fprintf(stderr,"0x%x: (%05d) malloc %ld bytes\n",ptr,an++,(long)size));
+#else
+    DEBUG_m(fprintf(stderr,"0x%lx: (%05d) malloc %ld bytes\n",ptr,an++,(long)size));
 #endif
     if (ptr != Nullch)
 	return ptr;
     else if (nomemok)
 	return Nullch;
     else {
-	fputs(nomem,stderr) FLUSH;
-	exit(1);
+	fputs(no_mem,stderr) FLUSH;
+	my_exit(1);
     }
     /*NOTREACHED*/
-#ifdef lint
-    return ptr;
-#endif
 }
 
 /* paranoid version of realloc */
@@ -147,7 +136,7 @@ unsigned long size;
 #ifdef MSDOS
 	if (size > 0xffff) {
 		fprintf(stderr, "Reallocation too large: %lx\n", size) FLUSH;
-		exit(1);
+		my_exit(1);
 	}
 #endif /* MSDOS */
     if (!where)
@@ -157,31 +146,28 @@ unsigned long size;
 	fatal("panic: realloc");
 #endif
     ptr = realloc(where,size?size:1);	/* realloc(0) is NASTY on our system */
-#ifdef DEBUGGING
-#  if !(defined(I286) || defined(atarist))
-    if (debug & 128) {
+
+#if !(defined(I286) || defined(atarist))
+    DEBUG_m( {
 	fprintf(stderr,"0x%x: (%05d) rfree\n",where,an++);
 	fprintf(stderr,"0x%x: (%05d) realloc %ld bytes\n",ptr,an++,(long)size);
-    }
-#  else
-    if (debug & 128) {
+    } )
+#else
+    DEBUG_m( {
 	fprintf(stderr,"0x%lx: (%05d) rfree\n",where,an++);
 	fprintf(stderr,"0x%lx: (%05d) realloc %ld bytes\n",ptr,an++,(long)size);
-    }
-#  endif
+    } )
 #endif
+
     if (ptr != Nullch)
 	return ptr;
     else if (nomemok)
 	return Nullch;
     else {
-	fputs(nomem,stderr) FLUSH;
-	exit(1);
+	fputs(no_mem,stderr) FLUSH;
+	my_exit(1);
     }
     /*NOTREACHED*/
-#ifdef lint
-    return ptr;
-#endif
 }
 
 /* safe version of free */
@@ -190,14 +176,10 @@ void
 safefree(where)
 char *where;
 {
-#ifdef DEBUGGING
-#  if !(defined(I286) || defined(atarist))
-    if (debug & 128)
-	fprintf(stderr,"0x%x: (%05d) free\n",where,an++);
-#  else
-    if (debug & 128)
-	fprintf(stderr,"0x%lx: (%05d) free\n",where,an++);
-#  endif
+#if !(defined(I286) || defined(atarist))
+    DEBUG_m( fprintf(stderr,"0x%x: (%05d) free\n",where,an++));
+#else
+    DEBUG_m( fprintf(stderr,"0x%lx: (%05d) free\n",where,an++));
 #endif
     if (where) {
 	/*SUPPRESS 701*/
@@ -213,7 +195,7 @@ char *where;
 
 char *
 safexmalloc(x,size)
-int x;
+I32 x;
 MEM_SIZE size;
 {
     register char *where;
@@ -237,7 +219,7 @@ void
 safexfree(where)
 char *where;
 {
-    int x;
+    I32 x;
 
     if (!where)
 	return;
@@ -250,7 +232,7 @@ char *where;
 static void
 xstat()
 {
-    register int i;
+    register I32 i;
 
     for (i = 0; i < MAXXCOUNT; i++) {
 	if (xcount[i] > lastxcount[i]) {
@@ -269,8 +251,8 @@ cpytill(to,from,fromend,delim,retlen)
 register char *to;
 register char *from;
 register char *fromend;
-register int delim;
-int *retlen;
+register I32 delim;
+I32 *retlen;
 {
     char *origto = to;
 
@@ -299,7 +281,7 @@ register char *big;
 register char *little;
 {
     register char *s, *x;
-    register int first;
+    register I32 first;
 
     if (!little)
 	return big;
@@ -333,7 +315,7 @@ char *little;
 char *lend;
 {
     register char *s, *x;
-    register int first = *little;
+    register I32 first = *little;
     register char *littleend = lend;
 
     if (!first && little > littleend)
@@ -367,7 +349,7 @@ char *lend;
 {
     register char *bigbeg;
     register char *s, *x;
-    register int first = *little;
+    register I32 first = *little;
     register char *littleend = lend;
 
     if (!first && little > littleend)
@@ -389,102 +371,26 @@ char *lend;
     return Nullch;
 }
 
-unsigned char fold[] = {
-	0,	1,	2,	3,	4,	5,	6,	7,
-	8,	9,	10,	11,	12,	13,	14,	15,
-	16,	17,	18,	19,	20,	21,	22,	23,
-	24,	25,	26,	27,	28,	29,	30,	31,
-	32,	33,	34,	35,	36,	37,	38,	39,
-	40,	41,	42,	43,	44,	45,	46,	47,
-	48,	49,	50,	51,	52,	53,	54,	55,
-	56,	57,	58,	59,	60,	61,	62,	63,
-	64,	'a',	'b',	'c',	'd',	'e',	'f',	'g',
-	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
-	'p',	'q',	'r',	's',	't',	'u',	'v',	'w',
-	'x',	'y',	'z',	91,	92,	93,	94,	95,
-	96,	'A',	'B',	'C',	'D',	'E',	'F',	'G',
-	'H',	'I',	'J',	'K',	'L',	'M',	'N',	'O',
-	'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',
-	'X',	'Y',	'Z',	123,	124,	125,	126,	127,
-	128,	129,	130,	131,	132,	133,	134,	135,
-	136,	137,	138,	139,	140,	141,	142,	143,
-	144,	145,	146,	147,	148,	149,	150,	151,
-	152,	153,	154,	155,	156,	157,	158,	159,
-	160,	161,	162,	163,	164,	165,	166,	167,
-	168,	169,	170,	171,	172,	173,	174,	175,
-	176,	177,	178,	179,	180,	181,	182,	183,
-	184,	185,	186,	187,	188,	189,	190,	191,
-	192,	193,	194,	195,	196,	197,	198,	199,
-	200,	201,	202,	203,	204,	205,	206,	207,
-	208,	209,	210,	211,	212,	213,	214,	215,
-	216,	217,	218,	219,	220,	221,	222,	223,	
-	224,	225,	226,	227,	228,	229,	230,	231,
-	232,	233,	234,	235,	236,	237,	238,	239,
-	240,	241,	242,	243,	244,	245,	246,	247,
-	248,	249,	250,	251,	252,	253,	254,	255
-};
-
-static unsigned char freq[] = {
-	1,	2,	84,	151,	154,	155,	156,	157,
-	165,	246,	250,	3,	158,	7,	18,	29,
-	40,	51,	62,	73,	85,	96,	107,	118,
-	129,	140,	147,	148,	149,	150,	152,	153,
-	255,	182,	224,	205,	174,	176,	180,	217,
-	233,	232,	236,	187,	235,	228,	234,	226,
-	222,	219,	211,	195,	188,	193,	185,	184,
-	191,	183,	201,	229,	181,	220,	194,	162,
-	163,	208,	186,	202,	200,	218,	198,	179,
-	178,	214,	166,	170,	207,	199,	209,	206,
-	204,	160,	212,	216,	215,	192,	175,	173,
-	243,	172,	161,	190,	203,	189,	164,	230,
-	167,	248,	227,	244,	242,	255,	241,	231,
-	240,	253,	169,	210,	245,	237,	249,	247,
-	239,	168,	252,	251,	254,	238,	223,	221,
-	213,	225,	177,	197,	171,	196,	159,	4,
-	5,	6,	8,	9,	10,	11,	12,	13,
-	14,	15,	16,	17,	19,	20,	21,	22,
-	23,	24,	25,	26,	27,	28,	30,	31,
-	32,	33,	34,	35,	36,	37,	38,	39,
-	41,	42,	43,	44,	45,	46,	47,	48,
-	49,	50,	52,	53,	54,	55,	56,	57,
-	58,	59,	60,	61,	63,	64,	65,	66,
-	67,	68,	69,	70,	71,	72,	74,	75,
-	76,	77,	78,	79,	80,	81,	82,	83,
-	86,	87,	88,	89,	90,	91,	92,	93,
-	94,	95,	97,	98,	99,	100,	101,	102,
-	103,	104,	105,	106,	108,	109,	110,	111,
-	112,	113,	114,	115,	116,	117,	119,	120,
-	121,	122,	123,	124,	125,	126,	127,	128,
-	130,	131,	132,	133,	134,	135,	136,	137,
-	138,	139,	141,	142,	143,	144,	145,	146
-};
-
 void
-fbmcompile(str, iflag)
-STR *str;
-int iflag;
+fbm_compile(sv, iflag)
+SV *sv;
+I32 iflag;
 {
     register unsigned char *s;
     register unsigned char *table;
-    register unsigned int i;
-    register unsigned int len = str->str_cur;
-    int rarest = 0;
-    unsigned int frequency = 256;
+    register U32 i;
+    register U32 len = SvCUR(sv);
+    I32 rarest = 0;
+    U32 frequency = 256;
 
-    Str_Grow(str,len+258);
-#ifndef lint
-    table = (unsigned char*)(str->str_ptr + len + 1);
-#else
-    table = Null(unsigned char*);
-#endif
+    Sv_Grow(sv,len+258);
+    table = (unsigned char*)(SvPV(sv) + len + 1);
     s = table - 2;
     for (i = 0; i < 256; i++) {
 	table[i] = len;
     }
     i = 0;
-#ifndef lint
-    while (s >= (unsigned char*)(str->str_ptr))
-#endif
+    while (s >= (unsigned char*)(SvPV(sv)))
     {
 	if (table[*s] == len) {
 #ifndef pdp11
@@ -492,7 +398,7 @@ int iflag;
 		table[*s] = table[fold[*s]] = i;
 #else
 	    if (iflag) {
-		int j;
+		I32 j;
 		j = fold[*s];
 		table[j] = i;
 		table[*s] = i;
@@ -503,16 +409,14 @@ int iflag;
 	}
 	s--,i++;
     }
-    str->str_pok |= SP_FBM;		/* deep magic */
+    sv_upgrade(sv, SVt_PVBM);
+    sv_magic(sv, 0, 'B', 0, 0);			/* deep magic */
+    SvVALID_on(sv);
 
-#ifndef lint
-    s = (unsigned char*)(str->str_ptr);		/* deeper magic */
-#else
-    s = Null(unsigned char*);
-#endif
+    s = (unsigned char*)(SvPV(sv));		/* deeper magic */
     if (iflag) {
-	register unsigned int tmp, foldtmp;
-	str->str_pok |= SP_CASEFOLD;
+	register U32 tmp, foldtmp;
+	SvCASEFOLD_on(sv);
 	for (i = 0; i < len; i++) {
 	    tmp=freq[s[i]];
 	    foldtmp=freq[fold[s[i]]];
@@ -531,44 +435,38 @@ int iflag;
 	    }
 	}
     }
-    str->str_rare = s[rarest];
-    str->str_state = rarest;
-#ifdef DEBUGGING
-    if (debug & 512)
-	fprintf(stderr,"rarest char %c at %d\n",str->str_rare, str->str_state);
-#endif
+    BmRARE(sv) = s[rarest];
+    BmPREVIOUS(sv) = rarest;
+    DEBUG_r(fprintf(stderr,"rarest char %c at %d\n",BmRARE(sv),BmPREVIOUS(sv)));
 }
 
 char *
-fbminstr(big, bigend, littlestr)
+fbm_instr(big, bigend, littlestr)
 unsigned char *big;
 register unsigned char *bigend;
-STR *littlestr;
+SV *littlestr;
 {
     register unsigned char *s;
-    register int tmp;
-    register int littlelen;
+    register I32 tmp;
+    register I32 littlelen;
     register unsigned char *little;
     register unsigned char *table;
     register unsigned char *olds;
     register unsigned char *oldlittle;
 
-#ifndef lint
-    if (!(littlestr->str_pok & SP_FBM)) {
-	if (!littlestr->str_ptr)
+    if (SvTYPE(littlestr) != SVt_PVBM || !SvVALID(littlestr)) {
+	if (!SvPOK(littlestr) || !SvPV(littlestr))
 	    return (char*)big;
 	return ninstr((char*)big,(char*)bigend,
-		littlestr->str_ptr, littlestr->str_ptr + littlestr->str_cur);
+		SvPV(littlestr), SvPV(littlestr) + SvCUR(littlestr));
     }
-#endif
 
-    littlelen = littlestr->str_cur;
-#ifndef lint
-    if (littlestr->str_pok & SP_TAIL && !multiline) {	/* tail anchored? */
+    littlelen = SvCUR(littlestr);
+    if (SvTAIL(littlestr) && !multiline) {	/* tail anchored? */
 	if (littlelen > bigend - big)
 	    return Nullch;
-	little = (unsigned char*)littlestr->str_ptr;
-	if (littlestr->str_pok & SP_CASEFOLD) {	/* oops, fake it */
+	little = (unsigned char*)SvPV(littlestr);
+	if (SvCASEFOLD(littlestr)) {	/* oops, fake it */
 	    big = bigend - littlelen;		/* just start near end */
 	    if (bigend[-1] == '\n' && little[littlelen-1] != '\n')
 		big--;
@@ -586,15 +484,12 @@ STR *littlestr;
 	    return Nullch;
 	}
     }
-    table = (unsigned char*)(littlestr->str_ptr + littlelen + 1);
-#else
-    table = Null(unsigned char*);
-#endif
+    table = (unsigned char*)(SvPV(littlestr) + littlelen + 1);
     if (--littlelen >= bigend - big)
 	return Nullch;
     s = big + littlelen;
     oldlittle = little = table - 2;
-    if (littlestr->str_pok & SP_CASEFOLD) {	/* case insensitive? */
+    if (SvCASEFOLD(littlestr)) {	/* case insensitive? */
 	if (s < bigend) {
 	  top1:
 	    /*SUPPRESS 560*/
@@ -622,9 +517,7 @@ STR *littlestr;
 			goto top1;
 		    return Nullch;
 		}
-#ifndef lint
 		return (char *)s;
-#endif
 	    }
 	}
     }
@@ -656,9 +549,7 @@ STR *littlestr;
 			goto top2;
 		    return Nullch;
 		}
-#ifndef lint
 		return (char *)s;
-#endif
 	    }
 	}
     }
@@ -667,42 +558,32 @@ STR *littlestr;
 
 char *
 screaminstr(bigstr, littlestr)
-STR *bigstr;
-STR *littlestr;
+SV *bigstr;
+SV *littlestr;
 {
     register unsigned char *s, *x;
     register unsigned char *big;
-    register int pos;
-    register int previous;
-    register int first;
+    register I32 pos;
+    register I32 previous;
+    register I32 first;
     register unsigned char *little;
     register unsigned char *bigend;
     register unsigned char *littleend;
 
-    if ((pos = screamfirst[littlestr->str_rare]) < 0) 
+    if ((pos = screamfirst[BmRARE(littlestr)]) < 0) 
 	return Nullch;
-#ifndef lint
-    little = (unsigned char *)(littlestr->str_ptr);
-#else
-    little = Null(unsigned char *);
-#endif
-    littleend = little + littlestr->str_cur;
+    little = (unsigned char *)(SvPV(littlestr));
+    littleend = little + SvCUR(littlestr);
     first = *little++;
-    previous = littlestr->str_state;
-#ifndef lint
-    big = (unsigned char *)(bigstr->str_ptr);
-#else
-    big = Null(unsigned char*);
-#endif
-    bigend = big + bigstr->str_cur;
+    previous = BmPREVIOUS(littlestr);
+    big = (unsigned char *)(SvPV(bigstr));
+    bigend = big + SvCUR(bigstr);
     while (pos < previous) {
-#ifndef lint
 	if (!(pos += screamnext[pos]))
-#endif
 	    return Nullch;
     }
 #ifdef POINTERRIGOR
-    if (littlestr->str_pok & SP_CASEFOLD) {	/* case insignificant? */
+    if (SvCASEFOLD(littlestr)) {	/* case insignificant? */
 	do {
 	    if (big[pos-previous] != first && big[pos-previous] != fold[first])
 		continue;
@@ -715,17 +596,9 @@ STR *littlestr;
 		}
 	    }
 	    if (s == littleend)
-#ifndef lint
 		return (char *)(big+pos-previous);
-#else
-		return Nullch;
-#endif
 	} while (
-#ifndef lint
 		pos += screamnext[pos]	/* does this goof up anywhere? */
-#else
-		pos += screamnext[0]
-#endif
 	    );
     }
     else {
@@ -741,22 +614,12 @@ STR *littlestr;
 		}
 	    }
 	    if (s == littleend)
-#ifndef lint
 		return (char *)(big+pos-previous);
-#else
-		return Nullch;
-#endif
-	} while (
-#ifndef lint
-		pos += screamnext[pos]
-#else
-		pos += screamnext[0]
-#endif
-	    );
+	} while ( pos += screamnext[pos] );
     }
 #else /* !POINTERRIGOR */
     big -= previous;
-    if (littlestr->str_pok & SP_CASEFOLD) {	/* case insignificant? */
+    if (SvCASEFOLD(littlestr)) {	/* case insignificant? */
 	do {
 	    if (big[pos] != first && big[pos] != fold[first])
 		continue;
@@ -769,17 +632,9 @@ STR *littlestr;
 		}
 	    }
 	    if (s == littleend)
-#ifndef lint
 		return (char *)(big+pos);
-#else
-		return Nullch;
-#endif
 	} while (
-#ifndef lint
 		pos += screamnext[pos]	/* does this goof up anywhere? */
-#else
-		pos += screamnext[0]
-#endif
 	    );
     }
     else {
@@ -795,47 +650,57 @@ STR *littlestr;
 		}
 	    }
 	    if (s == littleend)
-#ifndef lint
 		return (char *)(big+pos);
-#else
-		return Nullch;
-#endif
 	} while (
-#ifndef lint
 		pos += screamnext[pos]
-#else
-		pos += screamnext[0]
-#endif
 	    );
     }
 #endif /* POINTERRIGOR */
     return Nullch;
 }
 
+I32
+ibcmp(a,b,len)
+register char *a;
+register char *b;
+register I32 len;
+{
+    while (len--) {
+	if (*a == *b) {
+	    a++,b++;
+	    continue;
+	}
+	if (fold[*a++] == *b++)
+	    continue;
+	return 1;
+    }
+    return 0;
+}
+
 /* copy a string to a safe spot */
 
 char *
-savestr(str)
-char *str;
+savestr(sv)
+char *sv;
 {
     register char *newaddr;
 
-    New(902,newaddr,strlen(str)+1,char);
-    (void)strcpy(newaddr,str);
+    New(902,newaddr,strlen(sv)+1,char);
+    (void)strcpy(newaddr,sv);
     return newaddr;
 }
 
 /* same thing but with a known length */
 
 char *
-nsavestr(str, len)
-char *str;
-register int len;
+nsavestr(sv, len)
+char *sv;
+register I32 len;
 {
     register char *newaddr;
 
     New(903,newaddr,len+1,char);
-    Copy(str,newaddr,len,char);		/* might not be null terminated */
+    Copy(sv,newaddr,len,char);		/* might not be null terminated */
     newaddr[len] = '\0';		/* is now */
     return newaddr;
 }
@@ -843,10 +708,10 @@ register int len;
 /* grow a static string to at least a certain length */
 
 void
-growstr(strptr,curlen,newlen)
+pv_grow(strptr,curlen,newlen)
 char **strptr;
-int *curlen;
-int newlen;
+I32 *curlen;
+I32 newlen;
 {
     if (newlen > *curlen) {		/* need more room? */
 	if (*curlen)
@@ -865,14 +730,14 @@ char *pat;
 long a1, a2, a3, a4;
 {
     char *s;
-    int usermess = strEQ(pat,"%s");
-    STR *tmpstr;
+    I32 usermess = strEQ(pat,"%s");
+    SV *tmpstr;
 
     s = buf;
     if (usermess) {
-	tmpstr = str_mortal(&str_undef);
-	str_set(tmpstr, (char*)a1);
-	*s++ = tmpstr->str_ptr[tmpstr->str_cur-1];
+	tmpstr = sv_mortalcopy(&sv_undef);
+	sv_setpv(tmpstr, (char*)a1);
+	*s++ = SvPV(tmpstr)[SvCUR(tmpstr)-1];
     }
     else {
 	(void)sprintf(s,pat,a1,a2,a3,a4);
@@ -880,25 +745,26 @@ long a1, a2, a3, a4;
     }
 
     if (s[-1] != '\n') {
-	if (curcmd->c_line) {
+	if (curcop->cop_line) {
 	    (void)sprintf(s," at %s line %ld",
-	      stab_val(curcmd->c_filestab)->str_ptr, (long)curcmd->c_line);
+	      SvPV(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
 	    s += strlen(s);
 	}
-	if (last_in_stab &&
-	    stab_io(last_in_stab) &&
-	    stab_io(last_in_stab)->lines ) {
-	    (void)sprintf(s,", <%s> line %ld",
-	      last_in_stab == argvstab ? "" : stab_ename(last_in_stab),
-	      (long)stab_io(last_in_stab)->lines);
+	if (last_in_gv &&
+	    GvIO(last_in_gv) &&
+	    GvIO(last_in_gv)->lines ) {
+	    (void)sprintf(s,", <%s> %s %ld",
+	      last_in_gv == argvgv ? "" : GvENAME(last_in_gv),
+	      strEQ(rs,"\n") ? "line" : "chunk", 
+	      (long)GvIO(last_in_gv)->lines);
 	    s += strlen(s);
 	}
 	(void)strcpy(s,".\n");
 	if (usermess)
-	    str_cat(tmpstr,buf+1);
+	    sv_catpv(tmpstr,buf+1);
     }
     if (usermess)
-	return tmpstr->str_ptr;
+	return SvPV(tmpstr);
     else
 	return buf;
 }
@@ -908,43 +774,17 @@ void fatal(pat,a1,a2,a3,a4)
 char *pat;
 long a1, a2, a3, a4;
 {
-    extern FILE *e_fp;
-    extern char *e_tmpname;
     char *tmps;
     char *message;
 
     message = mess(pat,a1,a2,a3,a4);
-    if (in_eval) {
-	str_set(stab_val(stabent("@",TRUE)),message);
-	tmps = "_EVAL_";
-	while (loop_ptr >= 0 && (!loop_stack[loop_ptr].loop_label ||
-	  strNE(tmps,loop_stack[loop_ptr].loop_label) )) {
-#ifdef DEBUGGING
-	    if (debug & 4) {
-		deb("(Skipping label #%d %s)\n",loop_ptr,
-		    loop_stack[loop_ptr].loop_label);
-	    }
-#endif
-	    loop_ptr--;
-	}
-#ifdef DEBUGGING
-	if (debug & 4) {
-	    deb("(Found label #%d %s)\n",loop_ptr,
-		loop_stack[loop_ptr].loop_label);
-	}
-#endif
-	if (loop_ptr < 0) {
-	    in_eval = 0;
-	    fatal("Bad label: %s", tmps);
-	}
-	longjmp(loop_stack[loop_ptr].loop_env, 1);
-    }
+    XXX
     fputs(message,stderr);
     (void)fflush(stderr);
     if (e_fp)
 	(void)UNLINK(e_tmpname);
     statusvalue >>= 8;
-    exit((int)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
+    my_exit((I32)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
 }
 
 /*VARARGS1*/
@@ -957,10 +797,7 @@ long a1, a2, a3, a4;
     message = mess(pat,a1,a2,a3,a4);
     fputs(message,stderr);
 #ifdef LEAKTEST
-#ifdef DEBUGGING
-    if (debug & 4096)
-	xstat();
-#endif
+    DEBUG_L(xstat());
 #endif
     (void)fflush(stderr);
 }
@@ -972,27 +809,23 @@ va_list args;
 {
     char *pat;
     char *s;
-    STR *tmpstr;
-    int usermess;
+    SV *tmpstr;
+    I32 usermess;
 #ifndef HAS_VPRINTF
 #ifdef CHARVSPRINTF
     char *vsprintf();
 #else
-    int vsprintf();
+    I32 vsprintf();
 #endif
 #endif
 
-#ifdef lint
-    pat = Nullch;
-#else
     pat = va_arg(args, char *);
-#endif
     s = buf;
     usermess = strEQ(pat, "%s");
     if (usermess) {
-	tmpstr = str_mortal(&str_undef);
-	str_set(tmpstr, va_arg(args, char *));
-	*s++ = tmpstr->str_ptr[tmpstr->str_cur-1];
+	tmpstr = sv_mortalcopy(&sv_undef);
+	sv_setpv(tmpstr, va_arg(args, char *));
+	*s++ = SvPV(tmpstr)[SvCUR(tmpstr)-1];
     }
     else {
 	(void) vsprintf(s,pat,args);
@@ -1000,78 +833,51 @@ va_list args;
     }
 
     if (s[-1] != '\n') {
-	if (curcmd->c_line) {
+	if (curcop->cop_line) {
 	    (void)sprintf(s," at %s line %ld",
-	      stab_val(curcmd->c_filestab)->str_ptr, (long)curcmd->c_line);
+	      SvPV(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
 	    s += strlen(s);
 	}
-	if (last_in_stab &&
-	    stab_io(last_in_stab) &&
-	    stab_io(last_in_stab)->lines ) {
-	    (void)sprintf(s,", <%s> line %ld",
-	      last_in_stab == argvstab ? "" : last_in_stab->str_magic->str_ptr,
-	      (long)stab_io(last_in_stab)->lines);
+	if (last_in_gv &&
+	    GvIO(last_in_gv) &&
+	    GvIO(last_in_gv)->lines ) {
+	    (void)sprintf(s,", <%s> %s %ld",
+	      last_in_gv == argvgv ? "" : GvNAME(last_in_gv),
+	      strEQ(rs,"\n") ? "line" : "chunk", 
+	      (long)GvIO(last_in_gv)->lines);
 	    s += strlen(s);
 	}
 	(void)strcpy(s,".\n");
 	if (usermess)
-	    str_cat(tmpstr,buf+1);
+	    sv_catpv(tmpstr,buf+1);
     }
 
     if (usermess)
-	return tmpstr->str_ptr;
+	return SvPV(tmpstr);
     else
 	return buf;
 }
 
 /*VARARGS0*/
-void fatal(va_alist)
+void
+fatal(va_alist)
 va_dcl
 {
     va_list args;
-    extern FILE *e_fp;
-    extern char *e_tmpname;
     char *tmps;
     char *message;
 
-#ifndef lint
     va_start(args);
-#else
-    args = 0;
-#endif
     message = mess(args);
     va_end(args);
-    if (in_eval) {
-	str_set(stab_val(stabent("@",TRUE)),message);
-	tmps = "_EVAL_";
-	while (loop_ptr >= 0 && (!loop_stack[loop_ptr].loop_label ||
-	  strNE(tmps,loop_stack[loop_ptr].loop_label) )) {
-#ifdef DEBUGGING
-	    if (debug & 4) {
-		deb("(Skipping label #%d %s)\n",loop_ptr,
-		    loop_stack[loop_ptr].loop_label);
-	    }
-#endif
-	    loop_ptr--;
-	}
-#ifdef DEBUGGING
-	if (debug & 4) {
-	    deb("(Found label #%d %s)\n",loop_ptr,
-		loop_stack[loop_ptr].loop_label);
-	}
-#endif
-	if (loop_ptr < 0) {
-	    in_eval = 0;
-	    fatal("Bad label: %s", tmps);
-	}
-	longjmp(loop_stack[loop_ptr].loop_env, 1);
-    }
+    if (restartop = die_where(message))
+	longjmp(top_env, 3);
     fputs(message,stderr);
     (void)fflush(stderr);
     if (e_fp)
 	(void)UNLINK(e_tmpname);
     statusvalue >>= 8;
-    exit((int)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
+    my_exit((I32)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
 }
 
 /*VARARGS0*/
@@ -1081,20 +887,13 @@ va_dcl
     va_list args;
     char *message;
 
-#ifndef lint
     va_start(args);
-#else
-    args = 0;
-#endif
     message = mess(args);
     va_end(args);
 
     fputs(message,stderr);
 #ifdef LEAKTEST
-#ifdef DEBUGGING
-    if (debug & 4096)
-	xstat();
-#endif
+    DEBUG_L(xstat());
 #endif
     (void)fflush(stderr);
 }
@@ -1104,11 +903,11 @@ void
 my_setenv(nam,val)
 char *nam, *val;
 {
-    register int i=envix(nam);		/* where does it go? */
+    register I32 i=setenv_getix(nam);		/* where does it go? */
 
     if (environ == origenviron) {	/* need we copy environment? */
-	int j;
-	int max;
+	I32 j;
+	I32 max;
 	char **tmpenv;
 
 	/*SUPPRESS 530*/
@@ -1146,11 +945,11 @@ char *nam, *val;
 #endif /* MSDOS */
 }
 
-int
-envix(nam)
+I32
+setenv_getix(nam)
 char *nam;
 {
-    register int i, len = strlen(nam);
+    register I32 i, len = strlen(nam);
 
     for (i = 0; environ[i]; i++) {
 	if (strnEQ(environ[i],nam,len) && environ[i][len] == '=')
@@ -1160,11 +959,11 @@ char *nam;
 }
 
 #ifdef EUNICE
-int
+I32
 unlnk(f)	/* unlink all versions of a file */
 char *f;
 {
-    int i;
+    I32 i;
 
     for (i = 0; unlink(f) >= 0; i++) ;
     return i ? 0 : -1;
@@ -1176,7 +975,7 @@ char *
 my_bcopy(from,to,len)
 register char *from;
 register char *to;
-register int len;
+register I32 len;
 {
     char *retval = to;
 
@@ -1198,7 +997,7 @@ register int len;
 char *
 my_bzero(loc,len)
 register char *loc;
-register int len;
+register I32 len;
 {
     char *retval = loc;
 
@@ -1209,13 +1008,13 @@ register int len;
 #endif
 
 #ifndef HAS_MEMCMP
-int
+I32
 my_memcmp(s1,s2,len)
 register unsigned char *s1;
 register unsigned char *s2;
-register int len;
+register I32 len;
 {
-    register int tmp;
+    register I32 tmp;
 
     while (len--) {
 	if (tmp = *s1++ - *s2++)
@@ -1253,7 +1052,6 @@ char *dest, *pat, *args;
 #endif
 }
 
-#ifdef DEBUGGING
 int
 vfprintf(fd, pat, args)
 FILE *fd;
@@ -1262,7 +1060,6 @@ char *pat, *args;
     _doprnt(pat, args, fd);
     return 0;		/* wrong, but perl doesn't use the return value */
 }
-#endif
 #endif /* HAS_VPRINTF */
 #endif /* I_VARARGS */
 
@@ -1309,8 +1106,8 @@ register long l;
 #if ((BYTEORDER - 0x1111) & 0x444) || !(BYTEORDER & 0xf)
     fatal("Unknown BYTEORDER\n");
 #else
-    register int o;
-    register int s;
+    register I32 o;
+    register I32 s;
 
     for (o = BYTEORDER - 0x1111, s = 0; s < (sizeof(long)*8); o >>= 4, s += 8) {
 	u.c[o & 0xf] = (l >> s) & 255;
@@ -1339,8 +1136,8 @@ register long l;
 #if ((BYTEORDER - 0x1111) & 0x444) || !(BYTEORDER & 0xf)
     fatal("Unknown BYTEORDER\n");
 #else
-    register int o;
-    register int s;
+    register I32 o;
+    register I32 s;
 
     u.l = l;
     l = 0;
@@ -1372,8 +1169,8 @@ register long l;
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    register int i;					\
-	    register int s;					\
+	    register I32 i;					\
+	    register I32 s;					\
 	    for (i = 0, s = 0; i < sizeof(u.c); i++, s += 8) {	\
 		u.c[i] = (n >> s) & 0xFF;			\
 	    }							\
@@ -1389,8 +1186,8 @@ register long l;
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    register int i;					\
-	    register int s;					\
+	    register I32 i;					\
+	    register I32 s;					\
 	    u.value = n;					\
 	    n = 0;						\
 	    for (i = 0, s = 0; i < sizeof(u.c); i++, s += 8) {	\
@@ -1414,15 +1211,15 @@ VTOH(vtohl,long)
 
 #ifndef DOSISH
 FILE *
-mypopen(cmd,mode)
+my_popen(cmd,mode)
 char	*cmd;
 char	*mode;
 {
     int p[2];
-    register int this, that;
-    register int pid;
-    STR *str;
-    int doexec = strNE(cmd,"-");
+    register I32 this, that;
+    register I32 pid;
+    SV *sv;
+    I32 doexec = strNE(cmd,"-");
 
     if (pipe(p) < 0)
 	return Nullfp;
@@ -1430,8 +1227,8 @@ char	*mode;
     that = !this;
 #ifdef TAINT
     if (doexec) {
-	taintenv();
-	taintproper("Insecure dependency in exec");
+	taint_env();
+	TAINT_PROPER("exec");
     }
 #endif
     while ((pid = (doexec?vfork():fork())) < 0) {
@@ -1444,6 +1241,8 @@ char	*mode;
 	sleep(5);
     }
     if (pid == 0) {
+	GV* tmpgv;
+
 #define THIS that
 #define THAT this
 	close(p[THAT]);
@@ -1452,7 +1251,7 @@ char	*mode;
 	    close(p[THIS]);
 	}
 	if (doexec) {
-#if !defined(HAS_FCNTL) || !defined(F_SETFD)
+#if !defined(HAS_FCNTL) || !defined(FFt_SETFD)
 	    int fd;
 
 #ifndef NOFILE
@@ -1466,10 +1265,10 @@ char	*mode;
 	    _exit(1);
 	}
 	/*SUPPRESS 560*/
-	if (tmpstab = stabent("$",allstabs))
-	    str_numset(STAB_STR(tmpstab),(double)getpid());
+	if (tmpgv = gv_fetchpv("$",allgvs))
+	    sv_setiv(GvSV(tmpgv),(I32)getpid());
 	forkprocess = 0;
-	hclear(pidstatus, FALSE);	/* we have no children */
+	hv_clear(pidstatus, FALSE);	/* we have no children */
 	return Nullfp;
 #undef THIS
 #undef THAT
@@ -1481,8 +1280,9 @@ char	*mode;
 	close(p[this]);
 	p[this] = p[that];
     }
-    str = afetch(fdpid,p[this],TRUE);
-    str->str_u.str_useful = pid;
+    sv = *av_fetch(fdpid,p[this],TRUE);
+    SvUPGRADE(sv,SVt_IV);
+    SvIV(sv) = pid;
     forkprocess = pid;
     return fdopen(p[this], mode);
 }
@@ -1490,7 +1290,7 @@ char	*mode;
 #ifdef atarist
 FILE *popen();
 FILE *
-mypopen(cmd,mode)
+my_popen(cmd,mode)
 char	*cmd;
 char	*mode;
 {
@@ -1501,7 +1301,7 @@ char	*mode;
 #endif /* !DOSISH */
 
 #ifdef NOTDEF
-dumpfds(s)
+dump_fds(s)
 char *s;
 {
     int fd;
@@ -1521,12 +1321,12 @@ dup2(oldfd,newfd)
 int oldfd;
 int newfd;
 {
-#if defined(HAS_FCNTL) && defined(F_DUPFD)
+#if defined(HAS_FCNTL) && defined(FFt_DUPFD)
     close(newfd);
-    fcntl(oldfd, F_DUPFD, newfd);
+    fcntl(oldfd, FFt_DUPFD, newfd);
 #else
     int fdtmp[256];
-    int fdx = 0;
+    I32 fdx = 0;
     int fd;
 
     if (oldfd == newfd)
@@ -1541,8 +1341,8 @@ int newfd;
 #endif
 
 #ifndef DOSISH
-int
-mypclose(ptr)
+I32
+my_pclose(ptr)
 FILE *ptr;
 {
 #ifdef VOIDSIG
@@ -1551,12 +1351,12 @@ FILE *ptr;
     int (*hstat)(), (*istat)(), (*qstat)();
 #endif
     int status;
-    STR *str;
+    SV *sv;
     int pid;
 
-    str = afetch(fdpid,fileno(ptr),TRUE);
-    pid = (int)str->str_u.str_useful;
-    astore(fdpid,fileno(ptr),Nullstr);
+    sv = *av_fetch(fdpid,fileno(ptr),TRUE);
+    pid = SvIV(sv);
+    av_store(fdpid,fileno(ptr),Nullsv);
     fclose(ptr);
 #ifdef UTS
     if(kill(pid, 0) < 0) { return(pid); }   /* HOM 12/23/91 */
@@ -1571,48 +1371,47 @@ FILE *ptr;
     return(pid < 0 ? pid : status);
 }
 
-int
+I32
 wait4pid(pid,statusp,flags)
 int pid;
 int *statusp;
 int flags;
 {
-#if !defined(HAS_WAIT4) && !defined(HAS_WAITPID)
-    int result;
-    STR *str;
+    I32 result;
+    SV *sv;
+    SV** svp;
     char spid[16];
-#endif
 
     if (!pid)
 	return -1;
+    if (pid > 0) {
+	sprintf(spid, "%d", pid);
+	svp = hv_fetch(pidstatus,spid,strlen(spid),FALSE);
+	if (svp && *svp != &sv_undef) {
+	    *statusp = SvIV(*svp);
+	    hv_delete(pidstatus,spid,strlen(spid));
+	    return pid;
+	}
+    }
+    else {
+	HE *entry;
+
+	hv_iterinit(pidstatus);
+	if (entry = hv_iternext(pidstatus)) {
+	    pid = atoi(hv_iterkey(entry,statusp));
+	    sv = hv_iterval(pidstatus,entry);
+	    *statusp = SvIV(sv);
+	    sprintf(spid, "%d", pid);
+	    hv_delete(pidstatus,spid,strlen(spid));
+	    return pid;
+	}
+    }
 #ifdef HAS_WAIT4
     return wait4((pid==-1)?0:pid,statusp,flags,Null(struct rusage *));
 #else
 #ifdef HAS_WAITPID
     return waitpid(pid,statusp,flags);
 #else
-    if (pid > 0) {
-	sprintf(spid, "%d", pid);
-	str = hfetch(pidstatus,spid,strlen(spid),FALSE);
-	if (str != &str_undef) {
-	    *statusp = (int)str->str_u.str_useful;
-	    hdelete(pidstatus,spid,strlen(spid));
-	    return pid;
-	}
-    }
-    else {
-	HENT *entry;
-
-	hiterinit(pidstatus);
-	if (entry = hiternext(pidstatus)) {
-	    pid = atoi(hiterkey(entry,statusp));
-	    str = hiterval(pidstatus,entry);
-	    *statusp = (int)str->str_u.str_useful;
-	    sprintf(spid, "%d", pid);
-	    hdelete(pidstatus,spid,strlen(spid));
-	    return pid;
-	}
-    }
     if (flags)
 	fatal("Can't do waitpid with flags");
     else {
@@ -1633,22 +1432,20 @@ pidgone(pid,status)
 int pid;
 int status;
 {
-#if defined(HAS_WAIT4) || defined(HAS_WAITPID)
-#else
-    register STR *str;
+    register SV *sv;
     char spid[16];
 
     sprintf(spid, "%d", pid);
-    str = hfetch(pidstatus,spid,strlen(spid),TRUE);
-    str->str_u.str_useful = status;
-#endif
+    sv = *hv_fetch(pidstatus,spid,strlen(spid),TRUE);
+    SvUPGRADE(sv,SVt_IV);
+    SvIV(sv) = status;
     return;
 }
 
 #ifdef atarist
 int pclose();
-int
-mypclose(ptr)
+I32
+my_pclose(ptr)
 FILE *ptr;
 {
     return pclose(ptr);
@@ -1659,10 +1456,10 @@ void
 repeatcpy(to,from,len,count)
 register char *to;
 register char *from;
-int len;
-register int count;
+I32 len;
+register I32 count;
 {
-    register int todo;
+    register I32 todo;
     register char *frombase = from;
 
     if (len == 1) {
@@ -1681,7 +1478,7 @@ register int count;
 
 #ifndef CASTNEGFLOAT
 unsigned long
-castulong(f)
+cast_ulong(f)
 double f;
 {
     long along;
@@ -1699,7 +1496,7 @@ double f;
 #endif
 
 #ifndef HAS_RENAME
-int
+I32
 same_dirent(a,b)
 char *a;
 char *b;
@@ -1741,10 +1538,10 @@ char *b;
 #endif /* !HAS_RENAME */
 
 unsigned long
-scanoct(start, len, retlen)
+scan_oct(start, len, retlen)
 char *start;
-int len;
-int *retlen;
+I32 len;
+I32 *retlen;
 {
     register char *s = start;
     register unsigned long retval = 0;
@@ -1758,10 +1555,10 @@ int *retlen;
 }
 
 unsigned long
-scanhex(start, len, retlen)
+scan_hex(start, len, retlen)
 char *start;
-int len;
-int *retlen;
+I32 len;
+I32 *retlen;
 {
     register char *s = start;
     register unsigned long retval = 0;

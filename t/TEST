@@ -1,6 +1,6 @@
 #!./perl
 
-# $RCSfile: TEST,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:59:30 $
+# $RCSfile: TEST,v $$Revision: 4.1 $$Date: 92/08/07 18:27:00 $
 
 # This is written in a peculiar style, since we're trying to avoid
 # most of the constructs we'll be testing for.
@@ -27,6 +27,8 @@ while (<CONFIG>) {
     }
 }
 $bad = 0;
+$good = 0;
+$total = @ARGV;
 while ($test = shift) {
     if ($test =~ /^$/) {
 	next;
@@ -73,6 +75,7 @@ while ($test = shift) {
     $next = $next - 1;
     if ($ok && $next == $max) {
 	print "ok\n";
+	$good = $good + 1;
     } else {
 	$next += 1;
 	print "FAILED on test $next\n";
@@ -91,10 +94,11 @@ if ($bad == 0) {
 	die "FAILED--no tests were run for some reason.\n";
     }
 } else {
+    $pct = sprintf("%.2f", $good / $total * 100);
     if ($bad == 1) {
-	die "Failed 1 test.\n";
+	warn "Failed 1 test, $pct% okay.\n";
     } else {
-	die "Failed $bad tests.\n";
+	die "Failed $bad/$total tests, $pct% okay.\n";
     }
 }
 ($user,$sys,$cuser,$csys) = times;

@@ -26,7 +26,7 @@ for (split(' ', $()) {
 
 $gr1 = join(' ', sort @gr);
 
-$gr2 = join(' ', grep(!$basegroup{$_}, sort split(' ',`/usr/ucb/groups`)));
+$gr2 = join(' ', grep(!$basegroup{$_}++, sort split(' ',`/usr/ucb/groups`)));
 
 if ($gr1 eq $gr2) {
     print "ok 1\n";

@@ -1,0 +1,3 @@
+#!./perl -Dx
+
+$foo !~ /foo/;

@@ -1,0 +1,99 @@
+int
+do_syscall(arglast)
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[1];
+    register int items = arglast[2] - sp;
+#ifdef atarist
+    unsigned long arg[14]; /* yes, we really need that many ! */
+#else
+    unsigned long arg[8];
+#endif
+    register int i = 0;
+    int retval = -1;
+
+#ifdef HAS_SYSCALL
+#ifdef TAINT
+    for (st += ++sp; items--; st++)
+	tainted |= (*st)->str_tainted;
+    st = stack->ary_array;
+    sp = arglast[1];
+    items = arglast[2] - sp;
+#endif
+    TAINT_PROPER("syscall");
+    /* This probably won't work on machines where sizeof(long) != sizeof(int)
+     * or where sizeof(long) != sizeof(char*).  But such machines will
+     * not likely have syscall implemented either, so who cares?
+     */
+    while (items--) {
+	if (st[++sp]->str_nok || !i)
+	    arg[i++] = (unsigned long)str_gnum(st[sp]);
+#ifndef lint
+	else
+	    arg[i++] = (unsigned long)st[sp]->str_ptr;
+#endif /* lint */
+    }
+    sp = arglast[1];
+    items = arglast[2] - sp;
+    switch (items) {
+    case 0:
+	fatal("Too few args to syscall");
+    case 1:
+	retval = syscall(arg[0]);
+	break;
+    case 2:
+	retval = syscall(arg[0],arg[1]);
+	break;
+    case 3:
+	retval = syscall(arg[0],arg[1],arg[2]);
+	break;
+    case 4:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3]);
+	break;
+    case 5:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4]);
+	break;
+    case 6:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5]);
+	break;
+    case 7:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6]);
+	break;
+    case 8:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7]);
+	break;
+#ifdef atarist
+    case 9:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7], arg[8]);
+	break;
+    case 10:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7], arg[8], arg[9]);
+	break;
+    case 11:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7], arg[8], arg[9], arg[10]);
+	break;
+    case 12:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7], arg[8], arg[9], arg[10], arg[11]);
+	break;
+    case 13:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7], arg[8], arg[9], arg[10], arg[11], arg[12]);
+	break;
+    case 14:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7], arg[8], arg[9], arg[10], arg[11], arg[12], arg[13]);
+	break;
+#endif /* atarist */
+    }
+    return retval;
+#else
+    fatal("syscall() unimplemented");
+#endif
+}
+

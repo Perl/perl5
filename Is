@@ -1,0 +1,15 @@
+#ifdef I_PWD
+#include <pwd.h>
+#endif
+#ifdef I_GRP
+#include <grp.h>
+#endif
+#ifdef I_UTIME
+#include <utime.h>
+#endif
+#ifdef I_FCNTL
+#include <fcntl.h>
+#endif
+#ifdef I_SYS_FILE
+#include <sys/file.h>
+#endif

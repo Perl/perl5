@@ -1,0 +1,50 @@
+void
+do_vop(optype,TARG,left,right)
+STR *TARG;
+STR *left;
+STR *right;
+{
+    register char *s;
+    register char *l = str_get(left);
+    register char *r = str_get(right);
+    register int len;
+
+    len = left->str_cur;
+    if (len > right->str_cur)
+	len = right->str_cur;
+    if (TARG->str_cur > len)
+	TARG->str_cur = len;
+    else if (TARG->str_cur < len) {
+	STR_GROW(TARG,len);
+	(void)memzero(TARG->str_ptr + TARG->str_cur, len - TARG->str_cur);
+	TARG->str_cur = len;
+    }
+    TARG->str_pok = 1;
+    TARG->str_nok = 0;
+    s = TARG->str_ptr;
+    if (!s) {
+	str_nset(TARG,"",0);
+	s = TARG->str_ptr;
+    }
+    switch (optype) {
+    case O_BIT_AND:
+	while (len--)
+	    *s++ = *l++ & *r++;
+	break;
+    case O_XOR:
+	while (len--)
+	    *s++ = *l++ ^ *r++;
+	goto mop_up;
+    case O_BIT_OR:
+	while (len--)
+	    *s++ = *l++ | *r++;
+      mop_up:
+	len = TARG->str_cur;
+	if (right->str_cur > len)
+	    str_ncat(TARG,right->str_ptr+len,right->str_cur - len);
+	else if (left->str_cur > len)
+	    str_ncat(TARG,left->str_ptr+len,left->str_cur - len);
+	break;
+    }
+}
+

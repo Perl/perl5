@@ -1,4 +1,4 @@
-/* $RCSfile: walk.c,v $$Revision: 4.0.1.3 $$Date: 92/06/08 17:33:46 $
+/* $RCSfile: walk.c,v $$Revision: 4.1 $$Date: 92/08/07 18:29:31 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,8 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	walk.c,v $
+ * Revision 4.1  92/08/07  18:29:31  lwall
+ * 
  * Revision 4.0.1.3  92/06/08  17:33:46  lwall
  * patch20: in a2p, simplified the filehandle model
  * patch20: in a2p, made RS="" translate to $/ = "\n\n"

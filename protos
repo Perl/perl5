@@ -1,0 +1,42 @@
+#!/usr/bin/perl
+
+$/ = "\n{\n";
+
+while (<>) {
+    chop; next unless chop($_) eq "{";
+    s/[^\0]*\n\n//;
+    $* = 1;
+    s/^#.*\n//g;
+    $* = 0;
+    tr/\n/ /;
+    s#\*/#\200#g;
+    s#/\*[^\200]*\200##g;
+    /\b\w+\(/ || next;
+    $funtype = $`;
+    $name = $&;
+    $_ = $';
+    /\)\s*/ || next;
+    $args = $`;
+    $types = $';
+    $args =~ tr/ \t//d;
+    @args = split(/,/,$args);
+    @types = split(/;\s*/, $types);
+    %type = ();
+    foreach $type (@types) {
+	$type =~ /.*\b(\w+)/;
+	$type{$1} = $type;
+    }
+    foreach $arg (@args) {
+	$arg = $type{$arg} || $arg;
+	$arg =~ s/register //;
+    }
+    $funtype =~ s/\* $/*/;
+    $funtype =~ s/^ *//;
+    chop $name;
+    if (@args) {
+	print $funtype, $name, " P((", join(', ', @args), "));\n";
+    }
+    else {
+	print $funtype, $name, " P((void));\n";
+    }
+}

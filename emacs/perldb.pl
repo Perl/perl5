@@ -3,7 +3,7 @@ package DB;
 # modified Perl debugger, to be run from Emacs in perldb-mode
 # Ray Lischner (uunet!mntgfx!lisch) as of 5 Nov 1990
 
-$header = '$Header: perldb.pl,v 4.0 91/03/20 01:18:58 lwall Locked $';
+$header = '$RCSfile: perldb.pl,v $$Revision: 4.1 $$Date: 92/08/07 17:20:59 $';
 #
 # This file is automatically included if you do perl -d.
 # It's probably not useful to include this yourself.
@@ -13,6 +13,9 @@ $header = '$Header: perldb.pl,v 4.0 91/03/20 01:18:58 lwall Locked $';
 # have a breakpoint.  It also inserts a do 'perldb.pl' before the first line.
 #
 # $Log:	perldb.pl,v $
+# Revision 4.1  92/08/07  17:20:59  lwall
+# Stage 6 Snapshot
+# 
 # Revision 4.0  91/03/20  01:18:58  lwall
 # 4.0 baseline.
 # 

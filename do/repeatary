@@ -1,0 +1,25 @@
+int
+do_repeatary(ARGS)
+ARGSdecl
+{
+    MSP;
+    register int count = POPi;
+    register int items = sp - mark;
+    register int i;
+    int max;
+
+    max = items * count;
+    MEXTEND(mark,max);
+    if (count > 1) {
+	while (sp > mark) {
+	    if (*sp)
+		(*sp)->str_pok &= ~SP_TEMP;
+	}
+	mark++;
+	repeatcpy(mark + items, mark, items * sizeof(STR*), count - 1);
+    }
+    sp += max;
+
+    MRETURN;
+}
+

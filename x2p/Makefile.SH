@@ -16,9 +16,11 @@ esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 rm -f Makefile
 cat >Makefile <<!GROK!THIS!
-# $RCSfile: Makefile.SH,v $$Revision: 4.0.1.3 $$Date: 92/06/08 16:11:32 $
+# $RCSfile: Makefile.SH,v $$Revision: 4.1 $$Date: 92/08/07 18:29:07 $
 #
 # $Log:	Makefile.SH,v $
+# Revision 4.1  92/08/07  18:29:07  lwall
+# 
 # Revision 4.0.1.3  92/06/08  16:11:32  lwall
 # patch20: SH files didn't work well with symbolic links
 # patch20: cray didn't give enough memory to /bin/sh
@@ -142,7 +144,9 @@ config.sh: ../config.sh
 	ln ../config.sh .
 
 malloc.c: ../malloc.c
-	sed 's/"perl.h"/"..\/perl.h"/' ../malloc.c >malloc.c
+	sed <../malloc.c >malloc.c \
+	    -e 's/"perl.h"/"..\/perl.h"/' \
+	    -e 's/my_exit/exit/'
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 $(obj):

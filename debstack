@@ -1,0 +1,14 @@
+    if (debug & 4) {
+/*	fprintf(stderr, "%8lx %8lx %8ld %8ld %8ld\n",
+	    stack, stack_base, *markstack_ptr, stack_sp-stack_base, stack_max-stack_base);
+	fprintf(stderr, "%8lx %8lx %8ld %l8d %8ld\n",
+	    curstack, stack->av_array, curstack, stack->av_fill, stack->av_max);
+*/
+	fprintf(stderr, "STACK");
+	for (i = 0; i <= 30; i++) {
+	    if (stack->av_array[i] || stack->av_array[i+1] || stack->av_array[i+2])
+		fprintf(stderr, "\t%s%s", SvPEEK(stack->av_array[i]),
+		    stack_sp == &stack->av_array[i] ? " *" : "");
+	}
+	fprintf(stderr, "\n");
+    }

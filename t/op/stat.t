@@ -1,6 +1,6 @@
 #!./perl
 
-# $RCSfile: stat.t,v $$Revision: 4.0.1.3 $$Date: 91/11/11 16:44:49 $
+# $RCSfile: stat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:28 $
 
 print "1..56\n";
 
@@ -122,7 +122,10 @@ while (defined($_ = <*>)) {
 chdir $cwd || die "Can't cd back to $cwd";
 
 # I suppose this is going to fail somewhere...
-if ($uid > 0 && $uid < $cnt) {print "ok 35\n";} else {print "not ok 35\n";}
+if ($uid > 0 && $uid < $cnt)
+    {print "ok 35\n";}
+else
+    {print "not ok 35 ($uid $cnt)\n";}
 
 unless (open(tty,"/dev/tty")) {
     print STDERR "Can't open /dev/tty--run t/TEST outside of make.\n";
