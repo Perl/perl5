@@ -133,6 +133,12 @@ Perl_mg_get(pTHX_ SV *sv)
 
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 	    CALL_FPTR(vtbl->svt_get)(aTHX_ sv, mg);
+
+	    /* guard against sv having been freed */
+	    if (SvTYPE(sv) == SVTYPEMASK) {
+		Perl_croak(aTHX_ "Tied variable freed while still in use");
+	    }
+
 	    /* Don't restore the flags for this entry if it was deleted. */
 	    if (mg->mg_flags & MGf_GSKIP)
 		(SSPTR(mgs_ix, MGS *))->mgs_flags = 0;
