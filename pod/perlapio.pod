@@ -315,6 +315,9 @@ code attempts to empirically determine the mode in which I<f> is open.
 Once called the FILE * should I<ONLY> be closed by calling
 C<PerlIO_close()> on the returned PerlIO *.
 
+The PerlIO is set to textmode. Use PerlIO_binmode if this is
+not the desired mode.
+
 =item B<PerlIO_exportFILE(f,flags)>
 
 Given a PerlIO * create a 'native' FILE * suitable for passing to code
