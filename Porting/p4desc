@@ -1,4 +1,4 @@
-#!/l/local/bin/perl -wpi.bak
+#!/usr/bin/perl -wpi.bak
 
 #
 # Munge "p4 describe ..." output to include new files.
@@ -90,12 +90,23 @@ sub newfiles {
     my $addfile;
     my $ret = "";
     for $addfile (@addfiles) {
+	my $type = `p4 -p $p4port files $addfile`;
+	if ($?) {
+	    warn "$0: `p4 -p $p4port print $addfile` failed, status[$?]\n";
+	    next;
+	}
+	$type =~ m|^//.*\((.+)\)$| or next;
+	$type = $1;
+	unless ($type =~ /text/) {
+	    $ret .= "\n==== $addfile ($type) ====\n\n";
+	    next;
+	}
 	my @new = `p4 -p $p4port print $addfile`;
 	if ($?) {
 	    die "$0: `p4 -p $p4port print $addfile` failed, status[$?]\n";
 	}
 	my $desc = shift @new;		# discard initial description
-	$ret .= "\n==== $addfile (text) ====\n\n";
+	$ret .= "\n==== $addfile ($type) ====\n\n";
 	my $lines = "," . @new;
 	$lines = "" if @new < 2;
 	$ret .= "\@\@ -0,0 +1$lines \@\@\n";

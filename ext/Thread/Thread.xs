@@ -238,6 +238,11 @@ newthread (SV *startsv, AV *initargs, char *classname)
 
     savethread = thr;
     thr = new_struct_thread(thr);
+    /* temporarily pretend to be the child thread in case the
+     * XPUSHs() below want to grow the child's stack.  This is
+     * safe, since the other thread is not yet created, and we
+     * are the only ones who know about it */
+    SET_THR(thr);
     SPAGAIN;
     DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			  "%p: newthread (%p), tid is %u, preparing stack\n",
@@ -251,6 +256,7 @@ newthread (SV *startsv, AV *initargs, char *classname)
     PUTBACK;
 
     /* On your marks... */
+    SET_THR(savethread);
     MUTEX_LOCK(&thr->mutex);
 
 #ifdef THREAD_CREATE
