@@ -439,16 +439,17 @@ sub __chk
 	$i -= 2 ;
     }
     else {
-        for ($i = 2 ; $pkg = (caller($i))[0] ; ++ $i) {
-            last if $pkg ne $this_pkg ;
-        }
-        $i = 2
-            if !$pkg || $pkg eq $this_pkg ;
+        $i = _error_loc(); # see where Carp will allocate the error
     }
 
     my $callers_bitmask = (caller($i))[9] ;
     return ($callers_bitmask, $offset, $i) ;
 }
+
+sub _error_loc {
+    require Carp::Heavy;
+    goto &Carp::short_error_loc; # don't introduce another stack frame
+}                                                             
 
 sub enabled
 {
