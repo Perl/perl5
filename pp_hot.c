@@ -1262,7 +1262,7 @@ do_readline(void)
 		    warner(WARN_CLOSED,
 			   "glob failed (child exited with status %d%s)",
 			   STATUS_CURRENT >> 8,
-			   (STATUS_CURRENT & 0xFF) ? ", core dumped" : "");
+			   (STATUS_CURRENT & 0x80) ? ", core dumped" : "");
 		}
 	    }
 	    if (gimme == G_SCALAR) {

@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..27\n";
+print "1..28\n";
 
 eval 'print "ok 1\n";';
 
