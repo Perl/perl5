@@ -61,7 +61,12 @@ our %winlatin2cp   = (
 sub encodings
 {
  my ($class) = @_;
- return keys %encoding;
+ return
+     map { $_->[0] }
+         sort { $a->[1] cmp $b->[1] }
+               map { [$_, lc $_] }
+                   grep { $_ ne 'Internal' }
+                        keys %encoding;
 }
 
 sub findAlias
