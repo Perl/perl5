@@ -64,7 +64,7 @@ fi
 # Since we just computed libc above, we'll use it here.  A typical 
 # value looks like libc='/lib/libc-2.0.6.so'
 # To be defensive, reject all unknown versions > 2.2.9.
-# A. Dougherty, May. 30, 2001
+# A. Dougherty, May. 30, 2002
 case "$libc" in
 *-2.[01]*)  ;;
 *-2.2.so) ;;
