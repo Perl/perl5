@@ -155,9 +155,9 @@ because all reentrancy of the runtime is handled using a "stack of stacks".
 This should improve reliability of cached stack pointers in the internals
 and in XSUBs.
 
-=head2 Behavior of local() on composites is now well-defined
+=head2 Behavior of local() on array and hash elements is now well-defined
 
-See L<perlfunc/local>.
+See L<perlsub/"Temporary Values via local()">.
 
 =head2 C<%!> is transparently tied to the L<Errno> module
 
@@ -170,10 +170,6 @@ See L<perlref>.
 =head2 C<EXPR foreach EXPR> is supported
 
 See L<perlsyn>.
-
-=head2 Slice notation on glob elements is supported
-
-[XXX See what?]
 
 =head2 Keywords can be globally overridden
 
@@ -276,6 +272,28 @@ substr() can now both return and replace in one operation.  The optional
 Splice() with a negative LENGTH argument now work similar to what the
 LENGTH did for substr().  Previously a negative LENGTH was treated as
 0.  See L<perlfunc/splice>.
+
+=head2 Magic lvalues are now more magical
+
+When you say something like C<substr($x, 5) = "hi">, the scalar returned
+by substr() is special, in that any modifications to it affect $x.
+(This is called a 'magic lvalue' because an 'lvalue' is something on
+the left side of an assignment.)  Normally, this is exactly what you
+would expect to happen, but Perl uses the same magic if you use substr(),
+pos(), or vec() in a context where they might be modified, like taking
+a reference with C<\> or as an argument to a sub that modifies C<@_>.
+In previous versions, this 'magic' only went one way, but now changes
+to the scalar the magic refers to ($x in the above example) affect the
+magic lvalue too. For instance, this code now acts differently:
+
+    $x = "hello";
+    sub printit {
+	$x = "g'bye";
+	print $_[0], "\n";
+    }
+    printit(substr($x, 0, 5));
+
+In previous versions, this would print "hello", but it now prints "g'bye".
 
 
 =head1 Supported Platforms
