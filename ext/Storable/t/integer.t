@@ -55,7 +55,7 @@ my @processes = (["dclone", \&do_clone],
                 );
 my @numbers =
   (# IV bounds of 8 bits
-   -1, 0, 1, -127, -128, -129, 42, 126, 127, 128, 129, 254, 255, 256, 256,
+   -1, 0, 1, -127, -128, -129, 42, 126, 127, 128, 129, 254, 255, 256, 257,
    # IV bounds of 32 bits
    -2147483647, -2147483648, -2147483649, 2147483646, 2147483647, 2147483648,
    # IV bounds
@@ -67,7 +67,7 @@ my @numbers =
    $max_iv_p1, $max_uv_m1, $max_uv, $lots_of_9C,
   );
 
-plan tests => @processes * @numbers * 4;
+plan tests => @processes * @numbers * 5;
 
 my $file = "integer.$$";
 die "Temporary file '$file' already exists" if -e $file;
@@ -125,15 +125,45 @@ foreach (@processes) {
     # conversion macros affecting later runs, so pass a copy to Storable:
     my $copy1 = my $copy0 = $number;
     my $copy_s = &$sub (\$copy0);
-    # use Devel::Peek; Dump $copy0;
     if (is (ref $copy_s, "SCALAR", "got back a scalar ref?")) {
       # Test inside use integer to see if the bit pattern is identical
       # and outside to see if the sign is right.
       # On 5.8 we don't need this trickery anymore.
-      my $eq = do {use integer; $$copy_s == $copy1} && $$copy_s == $copy1;
-      ok ($eq, "$process $copy1") or
-        printf "# Passed in $copy1, got back %s\n",
-          defined $$copy_s ? $$copy_s : undef;
+      # We really do need 2 copies here, as conversion may have side effect
+      # bugs. In particular, I know that this happens:
+      # perl5.00503 -le '$a = "-2147483649"; $a & 0; print $a; print $a+1'
+      # -2147483649
+      # 2147483648
+
+      my $copy_s1 = my $copy_s2 = $$copy_s;
+      # On 5.8 can do this with a straight ==, due to the integer/float maths
+      # on 5.6 can't do this with
+      # my $eq = do {use integer; $copy_s1 == $copy1} && $copy_s1 == $copy1;
+      # because on builds with IV as long long it tickles bugs.
+      # (Uncomment it and the Devel::Peek line below to see the messed up
+      # state of the scalar, with PV showing the correct string for the
+      # number, and IV holding a bogus value which has been truncated to 32 bits
+
+      # So, check the bit patterns are identical, and check that the sign is the
+      # same. This works on all the versions in all the sizes.
+      # $eq =  && (($copy_s1 <=> 0) == ($copy1 <=> 0));
+      # Split this into 2 tests, to cater for 5.005_03
+
+      my $bit =  ok (($copy_s1 ^ $copy1 == 0), "$process $copy1 (bitpattern)");
+      # This is sick. 5.005_03 survives without the IV/UV flag, and somehow
+      # gets it right, providing you don't have side effects of conversion.
+#      local $TODO;
+#      $TODO = "pre 5.6 doesn't have flag to distinguish IV/UV"
+#        if $[ < 5.005_56 and $copy1 > $max_iv;
+      my $sign = ok (($copy_s2 <=> 0) == ($copy1 <=> 0),
+                     "$process $copy1 (sign)");
+
+      unless ($bit and $sign) {
+        printf "# Passed in %s  (%#x, %i)\n# got back '%s' (%#x, %i)\n",
+          $copy1, $copy1, $copy1, $copy_s1, $copy_s1, $copy_s1;
+        # use Devel::Peek; Dump $copy_s1; Dump $$copy_s;
+      }
+      # unless ($bit) { use Devel::Peek; Dump $copy_s1; Dump $$copy_s; }
     } else {
       fail ("$process $copy1");
     }
