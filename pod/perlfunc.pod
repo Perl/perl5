@@ -1654,6 +1654,18 @@ Note that C<fcntl> will produce a fatal error if used on a machine that
 doesn't implement fcntl(2).  See the Fcntl module or your fcntl(2)
 manpage to learn what functions are available on your system.
 
+Here's an example of setting a filehandle named C<REMOTE> to be
+non-blocking at the system level.  You'll have to negotiate C<$|>
+on your own, though.
+
+    use Fcntl qw(F_GETFL F_SETFL O_NONBLOCK);
+
+    $flags = fcntl(REMOTE, F_GETFL, 0)
+                or die "Can't get flags for the socket: $!\n";
+
+    $flags = fcntl(REMOTE, F_SETFL, $flags | O_NONBLOCK)
+                or die "Can't set flags for the socket: $!\n";
+
 =item fileno FILEHANDLE
 
 Returns the file descriptor for a filehandle, or undefined if the
@@ -2286,20 +2298,8 @@ system:
     $retval = ioctl(...) || -1;
     printf "System returned %d\n", $retval;
 
-The special string "C<0> but true" is exempt from B<-w> complaints
+The special string C<"0 but true"> is exempt from B<-w> complaints
 about improper numeric conversions.
-
-Here's an example of setting a filehandle named C<REMOTE> to be
-non-blocking at the system level.  You'll have to negotiate C<$|>
-on your own, though.
-
-    use Fcntl qw(F_GETFL F_SETFL O_NONBLOCK);
-
-    $flags = fcntl(REMOTE, F_GETFL, 0)
-                or die "Can't get flags for the socket: $!\n";
-
-    $flags = fcntl(REMOTE, F_SETFL, $flags | O_NONBLOCK)
-                or die "Can't set flags for the socket: $!\n";
 
 =item join EXPR,LIST
 
