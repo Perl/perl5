@@ -990,13 +990,7 @@ in quoted-printable encoding, as defined in RFC 2045 - I<MIME
 
     print $encoded, "\n"; # "Smiley in Unicode: =263A"
 
-MIME::QuotedPrint has been enhanced to provide the basic methods
-necessary to use it with PerlIO::Via as in :
-
-    use MIME::QuotedPrint;
-    open($fh,">Via(MIME::QuotedPrint)",$path);
-
-See L<MIME::QuotedPrint>.
+See also L<PerlIO::Via::QuotedPrint>.
 
 =item *
 
@@ -1019,13 +1013,18 @@ include PerlIO::Array and PerlIO::Code.  See L<PerlIO::Scalar>.
 
 C<PerlIO::Via>, by Nick Ing-Simmons, acts as a PerlIO layer and wraps
 PerlIO layer functionality provided by a class (typically implemented
-in perl code).
+in Perl code).
 
-    use MIME::QuotedPrint;
-    open($fh,">Via(MIME::QuotedPrint)",$path);
+=item *
 
-This will automatically convert everything output to C<$fh>
-to Quoted-Printable.  See L<PerlIO::Via>.
+C<PerlIO::Via::QuotedPrint>, by Elizabeth Mattijsen, is an example
+of a C<PerlIO::Via> class:
+
+    use PerlIO::Via::QuotedPrint;
+    open($fh,">Via(PerlIO::Via::QuotedPrint)",$path);
+
+This will automatically convert everything output to C<$fh> to
+Quoted-Printable.  See L<PerlIO::Via> and L<PerlIO::Via::QuotedPrint>.
 
 =item *
 
