@@ -2181,21 +2181,20 @@ chcp, dataset access, OS/390 iconv, locales
 
 attributes, attrs, autouse, base, blib, bytes, charnames, constant,
 diagnostics, fields, filetest, integer, less, locale, open, ops, overload,
-perlio, re, sigtrap, strict, subs, unicode::distinct, utf8, vars, warnings,
-warnings::register
+perlio, re, sigtrap, strict, subs, utf8, vars, warnings, warnings::register
 
 =item Standard Modules
 
 AnyDBM_File, AutoLoader, AutoSplit, B, B::Asmdata, B::Assembler, B::Bblock,
-B::Bytecode, B::C, B::CC, B::Concise, B::Debug, B::Deparse,
-B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash, B::Terse,
-B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie,
-CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CPAN, CPAN::FirstTime,
-CPAN::Nox, Carp, Carp::Heavy, Class::Struct, Cwd, DB, DB_File,
-Devel::SelfStubber, DirHandle, Dumpvalue, Encode, English, Env, Exporter,
-Exporter::Heavy, ExtUtils::Command, ExtUtils::Embed, ExtUtils::Install,
-ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM_Cygwin,
-ExtUtils::MM_OS2, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
+B::Bytecode, B::C, B::CC, B::Debug, B::Deparse, B::Disassembler, B::Lint,
+B::Showlex, B::Stackobj, B::Stash, B::Terse, B::Xref, Benchmark,
+ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie, CGI::Fast,
+CGI::Pretty, CGI::Push, CGI::Switch, CPAN, CPAN::FirstTime, CPAN::Nox,
+Carp, Class::Struct, Cwd, DB, DB_File, Devel::SelfStubber, DirHandle,
+Dumpvalue, Encode, English, Env, Exporter, Exporter::Heavy,
+ExtUtils::Command, ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed,
+ExtUtils::Liblist, ExtUtils::MM_Cygwin, ExtUtils::MM_OS2,
+ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
 ExtUtils::MakeMaker, ExtUtils::Manifest, ExtUtils::Mkbootstrap,
 ExtUtils::Mksymlists, ExtUtils::Packlist, ExtUtils::testlib, Fatal, Fcntl,
 File::Basename, File::CheckTree, File::Compare, File::Copy, File::DosGlob,
@@ -2208,13 +2207,13 @@ Math::Complex, Math::Trig, NDBM_File, Net::Ping, Net::hostent, Net::netent,
 Net::protoent, Net::servent, O, ODBM_File, Opcode, Pod::Checker, Pod::Find,
 Pod::Html, Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseUtils,
 Pod::Parser, Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
-Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe,
-Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable, Symbol,
-Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
-Test::Harness, Text::Abbrev, Text::ParseWords, Text::Soundex, Text::Wrap,
-Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar,
-Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime, Time::tm,
-UNIVERSAL, User::grent, User::pwent
+Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver,
+SelfLoader, Shell, Socket, Storable, Symbol, Term::ANSIColor, Term::Cap,
+Term::Complete, Term::ReadLine, Test, Test::Harness, Text::Abbrev,
+Text::ParseWords, Text::Soundex, Text::Wrap, Tie::Array, Tie::Handle,
+Tie::Hash, Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local,
+Time::gmtime, Time::localtime, Time::tm, UNIVERSAL, User::grent,
+User::pwent
 
 =item Extension Modules
 
@@ -2222,20 +2221,8 @@ UNIVERSAL, User::grent, User::pwent
 
 =item CPAN
 
-Language Extensions and Documentation Tools, Development Support, Operating
-System Interfaces, Networking, Device Control (modems) and InterProcess
-Communication, Data Types and Data Type Utilities, Database Interfaces,
-User Interfaces, Interfaces to / Emulations of Other Programming Languages,
-File Names, File Systems and File Locking (see also File Handles), String
-Processing, Language Text Processing, Parsing, and Searching, Option,
-Argument, Parameter, and Configuration File Processing,
-Internationalization and Locale, Authentication, Security, and Encryption,
-World Wide Web, HTML, HTTP, CGI, MIME, Server and Daemon Utilities,
-Archiving and Compression, Images, Pixmap and Bitmap Manipulation, Drawing,
-and Graphing, Mail and Usenet News, Control Flow Utilities (callbacks and
-exceptions etc), File Handle and Input/Output Stream Utilities,
-Miscellaneous Modules, Africa, Asia, Australasia, Central America, Europe,
-North America, South America
+Africa, Asia, Australasia, Central America, Europe, North America, South
+America
 
 =item Modules: Creation, Use, and Abuse
 
@@ -2263,12 +2250,6 @@ Adds the standard Module prologue lines, Converts package specifiers from '
 to ::, Converts die(...) to croak(...), Several other minor changes
 
 =item Guidelines for Reusing Application Code
-
-Complete applications rarely belong in the Perl Module Library, Many
-applications contain some Perl code that could be reused, Break-out the
-reusable code into one or more separate module files, Take the opportunity
-to reconsider and redesign the interfaces, In some cases the 'application'
-can then be reduced to a small
 
 =back
 
@@ -6974,45 +6955,6 @@ B<-ffreetmps-each-bblock>, B<-ffreetmps-each-loop>, B<-fomit-taint>, B<-On>
 
 =back
 
-=head2 B::Concise - Walk Perl syntax tree, printing concise info about ops
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item OPTIONS
-
-B<-basic>, B<-exec>, B<-tree>, B<-compact>, B<-loose>, B<-vt>, B<-ascii>,
-B<-main>, B<-base>I<n>, B<-bigendian>, B<-littleendian>, B<-concise>,
-B<-terse>, B<-linenoise>, B<-debug>, B<-env>
-
-=item FORMATTING SPECIFICATIONS
-
-B<(x(>I<exec_text>B<;>I<basic_text>B<)x)>, B<(*(>I<text>B<)*)>,
-B<(*(>I<text1>B<;>I<text2>B<)*)>, B<(?(>I<text1>B<#>I<var>I<Text2>B<)?)>,
-B<#>I<var>, B<#>I<var>I<N>, B<~>, B<#addr>, B<#arg>, B<#class>,
-B<#classym>, B<#coplabel>, B<#exname>, B<#extarg>, B<#firstaddr>,
-B<#flags>, B<#flagval>, B<#hyphenseq>, B<#label>, B<#lastaddr>, B<#name>,
-B<#NAME>, B<#next>, B<#nextaddr>, B<#noise>, B<#private>, B<#privval>,
-B<#seq>, B<#seqnum>, B<#sibaddr>, B<#svaddr>, B<#svclass>, B<#svval>,
-B<#targ>, B<#targarg>, B<#targarglife>, B<#typenum>
-
-=item ABBREVIATIONS
-
-=over 4
-
-=item OP flags abbreviations
-
-=item OP class abbreviations
-
-=back
-
-=item AUTHOR
-
-=back
-
 =head2 B::Debug - Walk Perl syntax tree, printing debug info about ops
 
 =over 4
@@ -7965,23 +7907,23 @@ C<d_setproctitle>, C<d_setpwent>, C<d_setregid>, C<d_setresgid>,
 C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
 C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
 C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
-C<d_sigprocmask>, C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>,
-C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>,
-C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>,
-C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
-C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
-C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
-C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>,
-C<d_strtoq>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
-C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>,
-C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
-C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
-C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
-C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
-C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
-C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_xenix>, C<date>,
-C<db_hashtype>, C<db_prefixtype>, C<defvoidused>, C<direntrytype>,
-C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<dynamic_ext>
+C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
+C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>, C<d_statfs_f_flags>,
+C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
+C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
+C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
+C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strtod>,
+C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoq>, C<d_strtoul>,
+C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>,
+C<d_syscall>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>,
+C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>,
+C<d_times>, C<d_truncate>, C<d_tzname>, C<d_umask>, C<d_uname>,
+C<d_union_semun>, C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>,
+C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>,
+C<d_volatile>, C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>,
+C<d_wctomb>, C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>,
+C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>,
+C<drand01>, C<dynamic_ext>
 
 =item e
 

@@ -425,10 +425,6 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  include <pthread.h>
 #endif
 
-#ifdef I_FEATURES
-#  include <features.h>
-#endif
-
 #ifndef _TYPES_		/* If types.h defines this it's easy. */
 #   ifndef major		/* Does everyone's types.h define this? */
 #	include <sys/types.h>

@@ -3245,10 +3245,4 @@
  */
 /*#define HAS_SIGPROCMASK		/ **/
 
-/* I_FEATURES:
- *	This symbol, if defined, indicates that <features.h> exists and
- *	should be included.
- */
-/*#define	I_FEATURES		/ **/
-
 #endif

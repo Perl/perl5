@@ -3269,11 +3269,5 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_sigprocmask HAS_SIGPROCMASK		/**/
 
-/* I_FEATURES:
- *	This symbol, if defined, indicates that <features.h> exists and
- *	should be included.
- */
-#$i_features	I_FEATURES		/**/
-
 #endif
 !GROK!THIS!
