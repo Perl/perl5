@@ -302,12 +302,12 @@ $v
 
 {
     # Bug #24774 format without trailing \n failed assertion
+    # but this must not compile because we'd get a ';' into the format
+
     my @v = ('k');
     eval "format OUT14 = \n@\n\@v";
-    open(OUT14, '>Op_write.tmp') || die "Can't create Op_write.tmp";
-    write(OUT14);
-    close OUT14 or die "Could not close: $!";
-    print "ok 14\n";
+    print $@ ? "ok 14\n" : "not ok 14\n";
+
 }
 
 #######################################
