@@ -31,6 +31,379 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13282] By: jhi                                   on 2001/11/26  11:28:18
+        Log: Upgrade to podlators 1.16.
+     Branch: perl
+	   + lib/Pod/t/basic.cap
+	   ! MANIFEST lib/Pod/Man.pm lib/Pod/Text/Termcap.pm
+	   ! lib/Pod/t/basic.t pod/pod2man.PL
+____________________________________________________________________________
+[ 13281] By: jhi                                   on 2001/11/26  11:11:08
+        Log: Pass 6 at perldelta - sort enhancements, generic and
+             platform specific bug fixes.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13280] By: jhi                                   on 2001/11/26  10:35:56
+        Log: PROPAGATE documentation from Tony Cook.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 13279] By: jhi                                   on 2001/11/25  23:45:27
+        Log: DJGPP cannot do signals that well.
+     Branch: perl
+	   ! ext/POSIX/t/sigaction.t
+____________________________________________________________________________
+[ 13278] By: jhi                                   on 2001/11/25  23:43:30
+        Log: Can't do subsecond alarms without ualarm; and break out
+             early if alarms do not seem to be coming in as expected.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.t
+____________________________________________________________________________
+[ 13277] By: jhi                                   on 2001/11/25  23:01:39
+        Log: No Socket, little Net.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 13276] By: jhi                                   on 2001/11/25  22:58:44
+        Log: Take the taint brush to the getcwds.
+     Branch: perl
+	   ! djgpp/djgpp.c epoc/epoc.c os2/os2.c wince/wince.c
+____________________________________________________________________________
+[ 13275] By: jhi                                   on 2001/11/25  21:42:02
+        Log: Subject: [PATCH perl@13227] Socket::my_inet_aton() tweak
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 25 Nov 2001 16:20:45 -0600
+             Message-Id: <5.1.0.14.2.20011125160848.01c59690@exchi01>
+     Branch: perl
+	   ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 13274] By: jhi                                   on 2001/11/25  21:32:17
+        Log: Since in some DOS filesystems the timestamp granularity
+             may be only two seconds, better sleep for three to play safe.
+             (Helps CygWin, at least.)
+     Branch: perl
+	   ! lib/Memoize/t/expire_file.t
+____________________________________________________________________________
+[ 13273] By: jhi                                   on 2001/11/25  21:22:10
+        Log: For some reason CygWin wasn't collapsing multiple
+             slashes into one, which made some Spec.t tests to fail.
+             Either CygWin was being too prudish or the collapsing
+             logic needs to be rethunk.
+     Branch: perl
+	   ! lib/File/Spec/Unix.pm
+____________________________________________________________________________
+[ 13272] By: jhi                                   on 2001/11/25  20:40:23
+        Log: Cygwin needs to have libperl.dll around if trying to link
+             with -lperl.  Note: this change cures the test but whether
+             it cures CygPerl installation, I don't know: hopefully the
+             libperl5_7_2.dll, or the version equivalent, gets installed
+             also as libperl.dll to the proper place(s).
+     Branch: perl
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 13271] By: jhi                                   on 2001/11/25  20:18:53
+        Log: -I../lib/.. and -L../lib/..?  Strange.
+     Branch: perl
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 13270] By: jhi                                   on 2001/11/25  19:57:54
+        Log: $MM?
+     Branch: perl
+	   ! lib/ExtUtils/Embed.pm
+____________________________________________________________________________
+[ 13269] By: jhi                                   on 2001/11/25  19:46:55
+        Log: Subject: [PATCH] Further replacement of EU::MM with File::Spec
+             From: Dave Rolsky <autarch@urth.org>
+             Date: Mon, 19 Nov 2001 18:17:09 -0600 (CST)
+             Message-ID: <Pine.LNX.4.40.0111191750440.22189-100000@urth.org>
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm lib/ExtUtils/Embed.pm
+	   ! lib/ExtUtils/Install.pm lib/ExtUtils/Installed.pm
+____________________________________________________________________________
+[ 13268] By: jhi                                   on 2001/11/25  19:44:38
+        Log: Subject: [REPATCH lib/DB.pm MANIFEST lib/DB.t] Rework DB.pm tests
+             From: chromatic <chromatic@rmci.net>
+             Date: Sat, 24 Nov 2001 14:56:57 -0700
+             Message-ID: <20011124220430.97697.qmail@onion.perl.org>
+             
+             plus a tweak for ithreads builds.
+     Branch: perl
+	   + lib/DB.t
+	   ! MANIFEST lib/DB.pm
+____________________________________________________________________________
+[ 13267] By: jhi                                   on 2001/11/25  19:38:50
+        Log: Win32 compilation tweaks for Blair Zajac.
+     Branch: perl
+	   ! ext/IO/IO.xs ext/POSIX/POSIX.xs win32/win32.h
+____________________________________________________________________________
+[ 13266] By: jhi                                   on 2001/11/25  19:11:38
+        Log: I don't think trying to bracket the hires time with lores
+             times is going to be portable enough: Cygwin seems to be
+             capable of getting hires ones rather consistently lower
+             than the lores ones.  So let's try average difference instead.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.t
+____________________________________________________________________________
+[ 13265] By: jhi                                   on 2001/11/25  18:28:04
+        Log: Subject: Re: benchmarks, sorts and reproducibility
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Sun, 25 Nov 2001 14:25:18 -0500 (EST)
+             Message-Id: <200111251925.OAA77172@raptor.research.att.com>
+             
+             Randomize large partitions for quicksort to dodge the
+             angry gods of quadratic.
+     Branch: perl
+	   ! pp_sort.c
+____________________________________________________________________________
+[ 13264] By: jhi                                   on 2001/11/25  18:23:54
+        Log: The joys of portable quoting.
+     Branch: perl
+	   ! ext/Devel/PPPort/harness/Makefile.PL
+____________________________________________________________________________
+[ 13263] By: jhi                                   on 2001/11/25  18:12:31
+        Log: sort pragma tweaks.
+     Branch: perl
+	   ! lib/sort.pm
+____________________________________________________________________________
+[ 13262] By: jhi                                   on 2001/11/25  17:10:09
+        Log: Skip the link= directives of utils.lst if no mandir
+             (if no manpages).
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[ 13260] By: gsar                                  on 2001/11/25  16:37:29
+        Log: change#3373 introduced a handle leak in backticks and piped open()s
+             that fail
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 13258] By: jhi                                   on 2001/11/25  05:58:30
+        Log: Extraenous breaks noticed by David Dyck.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13257] By: jhi                                   on 2001/11/25  05:32:18
+        Log: Revert the /proc/self/auxv experiment for now.
+     Branch: perl
+	   ! lib/ExtUtils.t perl.c t/lib/1_compile.t
+____________________________________________________________________________
+[ 13256] By: jhi                                   on 2001/11/25  04:59:31
+        Log: Also ExtUtils.t had $^X assumptions.
+     Branch: perl
+	   ! lib/ExtUtils.t
+____________________________________________________________________________
+[ 13255] By: jhi                                   on 2001/11/25  04:20:02
+        Log: Now is Solaris if you start the t/perl in the t/
+             as "./perl", the $^X will be "../perl", not "./perl".
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 13254] By: jhi                                   on 2001/11/25  03:59:06
+        Log: The new way of finding out $^X in Solaris
+             requires a little tweak if the executable
+             pathname is *not* absolute: prepend "./"
+             (otherwise `$^X ...` will start perl from PATH...)
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 13253] By: jhi                                   on 2001/11/25  03:18:05
+        Log: Avoid "will not stay shared" warnings.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 13252] By: jhi                                   on 2001/11/25  03:00:49
+        Log: Subject: [PATCH perl.c util.c pp_sys.c t/op/magic.t] $$ readonly, take two
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 24 Nov 2001 19:56:18 -0500
+             Message-ID: <20011124195618.A14614@blackrider>            
+     Branch: perl
+	   ! perl.c pp_sys.c t/op/magic.t util.c
+____________________________________________________________________________
+[ 13251] By: jhi                                   on 2001/11/25  02:48:04
+        Log: In the MakeMaker pm_to_blib target don't copy all
+             the files in one fell swppo, deal with them hunkwise,
+             helps for CLIs with limited line lengths.
+             (This seems to help for DJGPP building Encode,
+             where there are dozens of files to copy.)
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 13250] By: gsar                                  on 2001/11/25  00:50:10
+        Log: testsuite leaves stray files behind on windows
+     Branch: perl
+	   ! lib/ExtUtils/Embed.t lib/ExtUtils/Mkbootstrap.t lib/Shell.t
+____________________________________________________________________________
+[ 13249] By: gsar                                  on 2001/11/25  00:32:36
+        Log: xsubpp produces a spurious warning on directories called 'typemap'
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[ 13248] By: gsar                                  on 2001/11/25  00:17:28
+        Log: xsubpp treats invalid (indented) cpp directives as comments
+     Branch: perl
+	   ! ext/IO/IO.xs
+____________________________________________________________________________
+[ 13247] By: gsar                                  on 2001/11/25  00:02:37
+        Log: $(MAKE) distclean shouldn't blow away ../lib/Thread.pm
+     Branch: perl
+	   ! win32/Makefile win32/Makefile.win64 win32/makefile.mk
+____________________________________________________________________________
+[ 13246] By: jhi                                   on 2001/11/24  21:45:32
+        Log: The debug_pag needs to be visible at all times
+             because of the re extension.
+     Branch: perl
+	   ! intrpvar.h makedef.pl perl.c perl.h regexec.c
+____________________________________________________________________________
+[ 13245] By: jhi                                   on 2001/11/24  20:09:20
+        Log: Subject: Re: [PATCH] Tests are good
+             From: Philip Newton <Philip.Newton@gmx.net>
+             Date: Sat, 24 Nov 2001 21:24:00 +0100
+             Message-ID: <4c000us22s27871hrsqnvjmtnvtd4r85u1@4ax.com>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 13244] By: jhi                                   on 2001/11/24  19:06:29
+        Log: Subject: [PATCH perl@13227] make PPPort/harness build on VMS
+             From: "Craig A. Berry" <craigberry@mac.com> 
+             Date: Sat, 24 Nov 2001 12:45:44 -0600
+             Message-Id: <5.1.0.14.2.20011124030253.01bd4b98@exchi01>
+             
+             (with tweaks, and combined with Sarathy's #13242)
+     Branch: perl
+	   ! configure.com ext/Devel/PPPort/harness/Makefile.PL
+____________________________________________________________________________
+[ 13243] By: jhi                                   on 2001/11/24  18:46:31
+        Log: Subject: Re: [PATCH] Make Exporter::Heavy use Universal->VERSION()
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Sat, 24 Nov 2001 14:27:46 -0500
+             Message-ID: <3BFFF4B2.40509@rowman.com> 
+     Branch: perl
+	   ! lib/Exporter/Heavy.pm
+____________________________________________________________________________
+[ 13242] By: gsar                                  on 2001/11/24  17:16:18
+        Log: use portable quotes
+     Branch: perl
+	   ! ext/Devel/PPPort/harness/Makefile.PL
+____________________________________________________________________________
+[ 13241] By: jhi                                   on 2001/11/24  17:09:25
+        Log: Subject: [PATCH] Re: [ID 20011118.128] installman chdir stuffs INC
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 24 Nov 2001 18:06:26 +0000
+             Message-ID: <20011124180626.T37621@plum.flirble.org>
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[ 13240] By: jhi                                   on 2001/11/24  17:06:11
+        Log: Subject: [PATCH] perl5005delta.pod L<>
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 24 Nov 2001 18:04:21 +0000
+             Message-ID: <20011124180421.S37621@plum.flirble.org>
+     Branch: perl
+	   ! pod/perl5005delta.pod
+____________________________________________________________________________
+[ 13239] By: gsar                                  on 2001/11/24  17:01:17
+        Log: fix typo in config.vc; regenerate win32 config_H.* files
+     Branch: perl
+	   ! win32/config.vc win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc
+____________________________________________________________________________
+[ 13238] By: jhi                                   on 2001/11/24  16:16:01
+        Log: Mention the charnames::vianame().
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 13237] By: jhi                                   on 2001/11/24  16:12:31
+        Log: Add charnames::vianame() in case people want to access
+             the codes in run-time (as opposed to the compile-timeness
+             of \N{...}).
+     Branch: perl
+	   ! lib/charnames.pm lib/charnames.t
+____________________________________________________________________________
+[ 13236] By: jhi                                   on 2001/11/24  16:11:04
+        Log: Subject: [PATCH] memset() is cheaper than a loop of 256 bit-a-a-times
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 24 Nov 2001 16:30:42 +0000
+             Message-ID: <20011124163042.R37621@plum.flirble.org>
+     Branch: perl
+	   ! regcomp.c regcomp.h
+____________________________________________________________________________
+[ 13235] By: jhi                                   on 2001/11/24  15:26:37
+        Log: Subject: [PATCH] Re: Smoke 13191 /pro/3gl/CPAN/perl-current
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 24 Nov 2001 16:24:33 +0000
+             Message-ID: <20011124162433.Q37621@plum.flirble.org>
+             
+             cmp fixes.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 13234] By: jhi                                   on 2001/11/24  15:23:34
+        Log: Use /proc/self/auxv in Solaris to figure out the $^X.
+             (It seems that "./perl" gets resolved to "perl" now.)
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 13233] By: jhi                                   on 2001/11/24  14:58:52
+        Log: Subject: [PATCH] DB_File 1.800        
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>               
+             Date: Sat, 24 Nov 2001 11:41:41 -0000
+             Message-ID: <AIEAJICLCBDNAAOLLOKLIEPMDFAA.paul_marquess@yahoo.co.uk>
+     Branch: perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+	   ! ext/DB_File/DB_File.xs ext/DB_File/Makefile.PL
+	   ! ext/DB_File/t/db-btree.t ext/DB_File/t/db-hash.t
+	   ! ext/DB_File/t/db-recno.t
+____________________________________________________________________________
+[ 13232] By: jhi                                   on 2001/11/24  14:48:34
+        Log: Tweak the PUSHED documentation.
+     Branch: perl
+	   ! ext/PerlIO/Via/Via.pm
+____________________________________________________________________________
+[ 13231] By: jhi                                   on 2001/11/24  04:09:41
+        Log: Update 1_compile for new known tests.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 13230] By: jhi                                   on 2001/11/24  04:07:39
+        Log: Move the MBF/MBI test modules to t/lib.
+     Branch: perl
+	   + t/lib/Math/BigFloat/Subclass.pm t/lib/Math/BigInt/Subclass.pm
+	   - lib/Math/BigInt/t/Math/BigFloat/Subclass.pm
+	   - lib/Math/BigInt/t/Math/BigInt/Subclass.pm
+	   ! MANIFEST lib/Math/BigInt/t/sub_mbf.t
+	   ! lib/Math/BigInt/t/sub_mbi.t
+____________________________________________________________________________
+[ 13229] By: jhi                                   on 2001/11/23  23:09:27
+        Log: Subject: [PATCH perl@13227] configure.com follow-up to 13218
+             From: "Craig A. Berry" <craigberry@mac.com> 
+             Date: Fri, 23 Nov 2001 18:05:35 -0600
+             Message-Id: <5.1.0.14.2.20011123175131.01abe358@exchi01>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 13228] By: jhi                                   on 2001/11/23  21:11:56
+        Log: Subject: [PATCH: perl@13169] switch unfcmb.h to employ 'STDCHAR' in place of char    
+             From: PPrymmer@factset.com 
+             Date: Fri, 23 Nov 2001 17:03:07 -0500
+             Message-ID: <OFA09CCF98.F3E93041-ON85256B0D.00787706@55.25.11>                 
+     Branch: perl
+	   ! ext/Unicode/Normalize/mkheader
+____________________________________________________________________________
+[ 13227] By: jhi                                   on 2001/11/23  20:09:36
+        Log: Here are the right helper files.
+     Branch: perl
+	   + t/lib/Filter/Simple/ExportTest.pm
+	   + t/lib/Filter/Simple/FilterOnlyTest.pm
+	   + t/lib/Filter/Simple/FilterTest.pm
+	   + t/lib/Filter/Simple/ImportTest.pm
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13226] By: jhi                                   on 2001/11/23  20:03:28
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13225] By: jhi                                   on 2001/11/23  19:53:53
         Log: Never mind.
      Branch: perl
