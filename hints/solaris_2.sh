@@ -478,7 +478,15 @@ EOCBU
 # because we need to fix up things right now.
 case "$use64bitall" in
 "$define"|true|[yY]*)
-	. ./UU/use64bitall.cbu
+        # Need to be double smart because we can be either here or there.
+	if test -f UU/use64bitall.cbu; then
+		. ./UU/use64bitall.cbu
+	else
+		if test -f use64bitall.cbu; then
+			. ./use64bitall.cbu
+		fi
+	fi
+	;;
 	;;
 esac
 
