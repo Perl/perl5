@@ -19,8 +19,8 @@ ok( !-d 'TEST' );
 ok( -r 'TEST' );
 
 # make sure TEST is r-x
-eval { chmod 0555, 'TEST' };
-$bad_chmod = $@;
+eval { chmod 0555, 'TEST' or die "chmod 0555, 'TEST' failed: $!" };
+chomp ($bad_chmod = $@);
 
 $oldeuid = $>;		# root can read and write anything
 eval '$> = 1';		# so switch uid (may not be implemented)
@@ -35,7 +35,7 @@ SKIP: {
 	skip('we cannot chmod symlinks');
     }
     elsif ($bad_chmod) {
-	skip( $@ );
+	skip( $bad_chmod );
     }
     else {
 	ok( !-w 'TEST' );
