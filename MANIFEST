@@ -802,6 +802,7 @@ lib/CGI/Switch.pm		Simple interface for multiple server types
 lib/CGI/t/apache.t              See if CGI::Apache still loads
 lib/CGI/t/carp.t                See if CGI::Carp works
 lib/CGI/t/cookie.t              See if CGI::Cookie works
+lib/CGI/t/fast.t		See if CGI::Fast works (if FCGI is installed)
 lib/CGI/t/form.t		See if CGI.pm works
 lib/CGI/t/function.t		See if CGI.pm works
 lib/CGI/t/html.t		See if CGI.pm works
