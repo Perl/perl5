@@ -176,6 +176,7 @@ perl_construct(register PerlInterpreter *sv_interp)
 #endif
     }
 
+    init_stacks(ARGS);
 #ifdef MULTIPLICITY
     I_REINIT;
     perl_destruct_level = 1; 
@@ -211,7 +212,6 @@ perl_construct(register PerlInterpreter *sv_interp)
 
     fdpid = newAV();	/* for remembering popen pids by fd */
 
-    init_stacks(ARGS);
     DEBUG( {
 	New(51,debname,128,char);
 	New(52,debdelim,128,char);
