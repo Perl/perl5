@@ -2913,199 +2913,28 @@ regprop(SV *sv, regnode *o)
 {
 #ifdef DEBUGGING
     dTHR;
-    register char *p = 0;
+    register int k;
 
     sv_setpvn(sv, "", 0);
-    switch (OP(o)) {
-    case BOL:
-	p = "BOL";
-	break;
-    case MBOL:
-	p = "MBOL";
-	break;
-    case SBOL:
-	p = "SBOL";
-	break;
-    case EOL:
-	p = "EOL";
-	break;
-    case EOS:
-	p = "EOS";
-	break;
-    case MEOL:
-	p = "MEOL";
-	break;
-    case SEOL:
-	p = "SEOL";
-	break;
-    case REG_ANY:
-	p = "ANY";
-	break;
-    case SANY:
-	p = "SANY";
-	break;
-    case ANYUTF8:
-	p = "ANYUTF8";
-	break;
-    case SANYUTF8:
-	p = "SANYUTF8";
-	break;
-    case ANYOFUTF8:
-	p = "ANYOFUTF8";
-	break;
-    case ANYOF:
-	p = "ANYOF";
-	break;
-    case BRANCH:
-	p = "BRANCH";
-	break;
-    case EXACT:
-	sv_catpvf(sv, "EXACT <%s%s%s>", PL_colors[0], OPERAND(o) + 1, PL_colors[1]);
-	break;
-    case EXACTF:
-	sv_catpvf(sv, "EXACTF <%s%s%s>", PL_colors[0], OPERAND(o) + 1, PL_colors[1]);
-	break;
-    case EXACTFL:
-	sv_catpvf(sv, "EXACTFL <%s%s%s>", PL_colors[0], OPERAND(o) + 1, PL_colors[1]);
-	break;
-    case NOTHING:
-	p = "NOTHING";
-	break;
-    case TAIL:
-	p = "TAIL";
-	break;
-    case BACK:
-	p = "BACK";
-	break;
-    case END:
-	p = "END";
-	break;
-    case BOUND:
-	p = "BOUND";
-	break;
-    case BOUNDL:
-	p = "BOUNDL";
-	break;
-    case NBOUND:
-	p = "NBOUND";
-	break;
-    case NBOUNDL:
-	p = "NBOUNDL";
-	break;
-    case CURLY:
-	sv_catpvf(sv, "CURLY {%d,%d}", ARG1(o), ARG2(o));
-	break;
-    case CURLYM:
-	sv_catpvf(sv, "CURLYM[%d] {%d,%d}", o->flags, ARG1(o), ARG2(o));
-	break;
-    case CURLYN:
-	sv_catpvf(sv, "CURLYN[%d] {%d,%d}", o->flags, ARG1(o), ARG2(o));
-	break;
-    case CURLYX:
-	sv_catpvf(sv, "CURLYX {%d,%d}", ARG1(o), ARG2(o));
-	break;
-    case REF:
-	sv_catpvf(sv, "REF%d", ARG(o));
-	break;
-    case REFF:
-	sv_catpvf(sv, "REFF%d", ARG(o));
-	break;
-    case REFFL:
-	sv_catpvf(sv, "REFFL%d", ARG(o));
-	break;
-    case OPEN:
-	sv_catpvf(sv, "OPEN%d", ARG(o));
-	break;
-    case CLOSE:
-	sv_catpvf(sv, "CLOSE%d", ARG(o));
-	p = NULL;
-	break;
-    case STAR:
-	p = "STAR";
-	break;
-    case PLUS:
-	p = "PLUS";
-	break;
-    case MINMOD:
-	p = "MINMOD";
-	break;
-    case GPOS:
-	p = "GPOS";
-	break;
-    case UNLESSM:
-	sv_catpvf(sv, "UNLESSM[-%d]", o->flags);
-	break;
-    case IFMATCH:
-	sv_catpvf(sv, "IFMATCH[-%d]", o->flags);
-	break;
-    case SUCCEED:
-	p = "SUCCEED";
-	break;
-    case WHILEM:
-	p = "WHILEM";
-	break;
-    case DIGIT:
-	p = "DIGIT";
-	break;
-    case NDIGIT:
-	p = "NDIGIT";
-	break;
-    case ALNUM:
-	p = "ALNUM";
-	break;
-    case NALNUM:
-	p = "NALNUM";
-	break;
-    case SPACE:
-	p = "SPACE";
-	break;
-    case NSPACE:
-	p = "NSPACE";
-	break;
-    case ALNUML:
-	p = "ALNUML";
-	break;
-    case NALNUML:
-	p = "NALNUML";
-	break;
-    case SPACEL:
-	p = "SPACEL";
-	break;
-    case NSPACEL:
-	p = "NSPACEL";
-	break;
-    case EVAL:
-	p = "EVAL";
-	break;
-    case LONGJMP:
-	p = "LONGJMP";
-	break;
-    case BRANCHJ:
-	p = "BRANCHJ";
-	break;
-    case IFTHEN:
-	p = "IFTHEN";
-	break;
-    case GROUPP:
-	sv_catpvf(sv, "GROUPP%d", ARG(o));
-	break;
-    case LOGICAL:
-	sv_catpvf(sv, "LOGICAL[%d]", o->flags);
-	break;
-    case SUSPEND:
-	p = "SUSPEND";
-	break;
-    case RENUM:
-	p = "RENUM";
-	break;
-    case OPTIMIZED:
-	p = "OPTIMIZED";
-	break;
-    default:
+    if (OP(o) >= reg_num)		/* regnode.type is unsigned */
 	FAIL("corrupted regexp opcode");
+    sv_catpv(sv, (char*)reg_name[OP(o)]); /* Take off const! */
+
+    k = PL_regkind[(U8)OP(o)];
+
+    if (k == EXACT)
+	sv_catpvf(sv, " <%s%s%s>", PL_colors[0], OPERAND(o) + 1, PL_colors[1]);
+    else if (k == CURLY) {
+	if (OP(o) == CURLYM || OP(o) == CURLYN)
+	    sv_catpvf(sv, "[%d]", o->flags); /* Parenth number */
+	sv_catpvf(sv, " {%d,%d}", ARG1(o), ARG2(o));
     }
-    if (p)
-	sv_catpv(sv, p);
+    else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP )
+	sv_catpvf(sv, "%d", ARG(o));	/* Parenth number */
+    else if (k == LOGICAL)
+	sv_catpvf(sv, "[%d]", ARG(o));	/* 2: embedded, otherwise 1 */
+    else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
+	sv_catpvf(sv, "[-%d]", o->flags);
 #endif	/* DEBUGGING */
 }
 
