@@ -430,6 +430,17 @@ will not look for a filename in the argument list.  Multiple B<-e>
 commands may be given to build up a multi-line script.  Make sure
 to use semicolons where you would in a normal program.
 
+=item B<-f>
+
+Disable executing F<$Config{siteperl}/sitecustomize.pl> at
+startup.
+
+Perl can be built so that it by default will try to execute
+F<$Config{siteperl}/sitecustomize.pl> at startup.  This is a hook that
+allows the sysadmin to customize how perl behaves.  It can for
+instance be used to add entries to the @INC array to make perl find
+modules in non-standard locations.
+
 =item B<-F>I<pattern>
 
 specifies the pattern to split on if B<-a> is also in effect.  The

@@ -845,6 +845,16 @@ present, at run time.  Of course, you can still search other @INC
 directories ahead of those in APPLLIB_EXP by using any of the standard
 run-time methods: $PERLLIB, $PERL5LIB, -I, use lib, etc.
 
+=item USE_SITECUSTOMIZE
+
+Run-time customization of @INC can be enabled with:
+
+	sh Configure -Accflags=-DUSE_SITECUSTOMIZE
+
+When enabled, make perl run F<$sitelibexp/sitecustomize.pl> before
+anything else.  This script can then be set up to add additional
+entries to @INC.
+
 =item Man Pages
 
 In versions 5.005_57 and earlier, the default was to store module man

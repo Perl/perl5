@@ -1229,6 +1229,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     register SV *sv;
     register char *s;
     char *cddir = Nullch;
+    bool minus_f = FALSE;
 
     PL_fdscript = -1;
     PL_suidscript = -1;
@@ -1322,6 +1323,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    sv_catpv(PL_e_script, "\n");
 	    break;
 
+	case 'f':
+	    minus_f = TRUE;
+	    s++;
+	    goto reswitch;
+
 	case 'I':	/* -I handled both here and in moreswitches() */
 	    forbid_setid("-I");
 	    if (!*++s && (s=argv[1]) != Nullch) {
@@ -1389,6 +1395,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef USE_SOCKS
 		sv_catpv(PL_Sv," USE_SOCKS");
 #  endif
+#  ifdef USE_SITECUSTOMIZE
+		sv_catpv(PL_Sv," USE_SITECUSTOMIZE");
+#  endif	       
 #  ifdef PERL_IMPLICIT_CONTEXT
 		sv_catpv(PL_Sv," PERL_IMPLICIT_CONTEXT");
 #  endif
@@ -1518,6 +1527,15 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	    }
 	}
     }
+
+#ifdef USE_SITECUSTOMIZE
+    if (!minus_f) {
+	if (!PL_preambleav)
+	    PL_preambleav = newAV();
+	av_unshift(PL_preambleav, 1);
+	(void)av_store(PL_preambleav, 0, Perl_newSVpvf(aTHX_ "BEGIN { do '%s/sitecustomize.pl' }", SITELIB_EXP));
+    }
+#endif
 
     if (PL_taint_warn && PL_dowarn != G_WARN_ALL_OFF) {
        PL_compiling.cop_warnings = newSVpvn(WARN_TAINTstring, WARNsize);
@@ -2342,6 +2360,7 @@ S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
 "-d[:debugger]   run program under debugger",
 "-D[number/list] set debugging flags (argument is a bit mask or alphabets)",
 "-e program      one line of program (several -e's allowed, omit programfile)",
+"-f              don't do $sitelib/sitecustomize.pl at startup",
 "-F/pattern/     split() pattern for -a switch (//'s are optional)",
 "-i[extension]   edit <> files in place (makes backup if extension supplied)",
 "-Idirectory     specify @INC/#include directory (several -I's allowed)",
