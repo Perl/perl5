@@ -2,8 +2,8 @@ package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
 
-$VERSION = '6.10_04';
-($Revision) = q$Revision: 1.111 $ =~ /Revision:\s+(\S+)/;
+$VERSION = '6.10_05';
+($Revision) = q$Revision: 1.115 $ =~ /Revision:\s+(\S+)/;
 
 require Exporter;
 use Config;
@@ -1721,6 +1721,13 @@ Defaults to C<@>.
 
 Boolean.  Attribute to inhibit descending into subdirectories.
 
+=item NO_META
+
+When true, suppresses the generation and addition to the MANIFEST of
+the META.yml module meta-data file during 'make distdir'.
+
+Defaults to false.
+
 =item NO_VC
 
 In general, any generated Makefile checks for the current version of
@@ -2022,7 +2029,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = sprintf "%d.%03d", q$Revision: 1.111 $ =~ /(\d+)/g;
+    $VERSION = sprintf "%d.%03d", q$Revision: 1.115 $ =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
@@ -2262,6 +2269,10 @@ Copies all the files that are in the MANIFEST file to a newly created
 directory with the name C<$(DISTNAME)-$(VERSION)>. If that directory
 exists, it will be removed first.
 
+Additionally, it will create a META.yml module meta-data file and add
+this to your MANFIEST.  You can shut this behavior off with the NO_META
+flag.
+
 =item   make disttest
 
 Makes a distdir first, and runs a C<perl Makefile.PL>, a make, and
@@ -2325,6 +2336,27 @@ following parameters are recognized:
 An example:
 
     WriteMakefile( 'dist' => { COMPRESS=>"bzip2", SUFFIX=>".bz2" })
+
+
+=head2 Module Meta-Data
+
+Long plaguing users of MakeMaker based modules has been the problem of
+getting basic information about the module out of the sources
+I<without> running the F<Makefile.PL> and doing a bunch of messy
+heuristics on the resulting F<Makefile>.  To this end a simple module
+meta-data file has been introduced, F<META.yml>.
+
+F<META.yml> is a YAML document (see http://www.yaml.org) containing
+basic information about the module (name, version, prerequisites...)
+in an easy to read format.  The format is developed and defined by the
+Module::Build developers.
+
+MakeMaker will automatically generate a F<META.yml> file for you and
+add it to your F<MANIFEST> as part of the 'distdir' target (and thus
+the 'dist' target).  This is intended to seamlessly and rapidly
+populate CPAN with module meta-data.  If you wish to shut this feature
+off, set the C<NO_META> C<WriteMakefile()> flag to true.
+
 
 =head2 Disabling an extension
 

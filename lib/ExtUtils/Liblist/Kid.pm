@@ -8,6 +8,7 @@ package ExtUtils::Liblist::Kid;
 use 5.00503;
 # Broken out of MakeMaker from version 4.11
 
+use strict;
 use vars qw($VERSION);
 $VERSION = 1.30;
 
@@ -456,7 +457,7 @@ sub _vms_ext {
       $lib = $libmap{$lib};
     }
 
-    my(@variants,$variant,$name,$test,$cand);
+    my(@variants,$variant,$cand);
     my($ctype) = '';
 
     # If we don't have a file type, consider it a possibly abbreviated name and
@@ -470,44 +471,49 @@ sub _vms_ext {
     push(@variants,$lib);
     warn "Looking for $lib\n" if $verbose;
     foreach $variant (@variants) {
+      my($fullname, $name);
+
       foreach $dir (@dirs) {
         my($type);
 
         $name = "$dir$variant";
         warn "\tChecking $name\n" if $verbose > 2;
-        if (-f ($test = VMS::Filespec::rmsexpand($name))) {
+        $fullname = VMS::Filespec::rmsexpand($name);
+        if (defined $fullname and -f $fullname) {
           # It's got its own suffix, so we'll have to figure out the type
-          if    ($test =~ /(?:$so|exe)$/i)      { $type = 'SHR'; }
-          elsif ($test =~ /(?:$lib_ext|olb)$/i) { $type = 'OLB'; }
-          elsif ($test =~ /(?:$obj_ext|obj)$/i) {
+          if    ($fullname =~ /(?:$so|exe)$/i)      { $type = 'SHR'; }
+          elsif ($fullname =~ /(?:$lib_ext|olb)$/i) { $type = 'OLB'; }
+          elsif ($fullname =~ /(?:$obj_ext|obj)$/i) {
             warn "Note (probably harmless): "
-			 ."Plain object file $test found in library list\n";
+                ."Plain object file $fullname found in library list\n";
             $type = 'OBJ';
           }
           else {
             warn "Note (probably harmless): "
-			 ."Unknown library type for $test; assuming shared\n";
+                ."Unknown library type for $fullname; assuming shared\n";
             $type = 'SHR';
           }
         }
-        elsif (-f ($test = VMS::Filespec::rmsexpand($name,$so))      or
-               -f ($test = VMS::Filespec::rmsexpand($name,'.exe')))     {
+        elsif (-f ($fullname = VMS::Filespec::rmsexpand($name,$so))      or
+               -f ($fullname = VMS::Filespec::rmsexpand($name,'.exe')))     {
           $type = 'SHR';
-          $name = $test unless $test =~ /exe;?\d*$/i;
+          $name = $fullname unless $fullname =~ /exe;?\d*$/i;
         }
-        elsif (not length($ctype) and  # If we've got a lib already, don't bother
-               ( -f ($test = VMS::Filespec::rmsexpand($name,$lib_ext)) or
-                 -f ($test = VMS::Filespec::rmsexpand($name,'.olb'))))  {
+        elsif (not length($ctype) and  # If we've got a lib already, 
+                                       # don't bother
+               ( -f ($fullname = VMS::Filespec::rmsexpand($name,$lib_ext)) or
+                 -f ($fullname = VMS::Filespec::rmsexpand($name,'.olb'))))  {
           $type = 'OLB';
-          $name = $test unless $test =~ /olb;?\d*$/i;
+          $name = $fullname unless $fullname =~ /olb;?\d*$/i;
         }
-        elsif (not length($ctype) and  # If we've got a lib already, don't bother
-               ( -f ($test = VMS::Filespec::rmsexpand($name,$obj_ext)) or
-                 -f ($test = VMS::Filespec::rmsexpand($name,'.obj'))))  {
+        elsif (not length($ctype) and  # If we've got a lib already, 
+                                       # don't bother
+               ( -f ($fullname = VMS::Filespec::rmsexpand($name,$obj_ext)) or
+                 -f ($fullname = VMS::Filespec::rmsexpand($name,'.obj'))))  {
           warn "Note (probably harmless): "
-		       ."Plain object file $test found in library list\n";
+		       ."Plain object file $fullname found in library list\n";
           $type = 'OBJ';
-          $name = $test unless $test =~ /obj;?\d*$/i;
+          $name = $fullname unless $fullname =~ /obj;?\d*$/i;
         }
         if (defined $type) {
           $ctype = $type; $cand = $name;
@@ -518,7 +524,8 @@ sub _vms_ext {
         # This has to precede any other CRTLs, so just make it first
         if ($cand eq 'VAXCCURSE') { unshift @{$found{$ctype}}, $cand; }  
         else                      { push    @{$found{$ctype}}, $cand; }
-        warn "\tFound as $cand (really $test), type $ctype\n" if $verbose > 1;
+        warn "\tFound as $cand (really $fullname), type $ctype\n" 
+          if $verbose > 1;
 	push @flibs, $name unless $libs_seen{$fullname}++;
         next LIB;
       }

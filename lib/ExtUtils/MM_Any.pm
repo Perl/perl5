@@ -605,7 +605,8 @@ metafile_addtomanifest:
 MAKE_FRAG
 
     my $add_meta = $self->oneliner(<<'CODE', ['-MExtUtils::Manifest=maniadd']);
-maniadd({q{META.yml} => q{Module meta-data (added by MakeMaker)}});
+eval { maniadd({q{META.yml} => q{Module meta-data (added by MakeMaker)}}) } 
+    or warn "Could not add META.yml to MANIFEST: $@\n"
 CODE
 
     return sprintf <<'MAKE_FRAG', $add_meta;

@@ -17,7 +17,7 @@ use TieOut;
 use File::Path;
 use File::Spec;
 
-use Test::More tests => 21;
+use Test::More tests => 29;
 
 BEGIN { use_ok('ExtUtils::Install') }
 
@@ -33,6 +33,8 @@ my $stdout = tie *STDOUT, 'TieOut';
 pm_to_blib( { 'lib/Big/Dummy.pm' => 'blib/lib/Big/Dummy.pm' },
             'blib/lib/auto'
           );
+END { rmtree 'blib' }
+
 ok( -d 'blib/lib',              'pm_to_blib created blib dir' );
 ok( -r 'blib/lib/Big/Dummy.pm', '  copied .pm file' );
 ok( -r 'blib/lib/auto',         '  created autosplit dir' );
@@ -74,4 +76,37 @@ my $native_dummy = File::Spec->catfile(qw(install-test lib perl Big Dummy.pm));
 is( keys %packlist, 1 );
 is( lc((keys %packlist)[0]), lc $native_dummy, 'packlist written' );
 
-END { rmtree 'blib' }
+
+# Test UNINST=1 preserving same versions in other dirs.
+install( { 'blib/lib' => 'install-test/other_lib/perl',
+           read   => 'install-test/packlist',
+           write  => 'install-test/packlist'
+         },
+       0, 0, 1);
+ok( -d 'install-test/other_lib/perl',        'install made other dir' );
+ok( -r 'install-test/other_lib/perl/Big/Dummy.pm', '  .pm file installed' );
+ok( -r 'install-test/packlist',              '  packlist exists' );
+ok( -r 'install-test/lib/perl/Big/Dummy.pm', '  UNINST=1 preserved same' );
+
+
+
+# Test UNINST=1 removing other versions in other dirs.
+chmod 0644, 'blib/lib/Big/Dummy.pm' or die $!;
+open(DUMMY, ">>blib/lib/Big/Dummy.pm") or die $!;
+print DUMMY "Extra stuff\n";
+close DUMMY;
+
+{
+  local @INC = ('install-test/lib/perl');
+  local $ENV{PERL5LIB} = '';
+  install( { 'blib/lib' => 'install-test/other_lib/perl',
+           read   => 'install-test/packlist',
+           write  => 'install-test/packlist'
+         },
+       0, 0, 1);
+  ok( -d 'install-test/other_lib/perl',        'install made other dir' );
+  ok( -r 'install-test/other_lib/perl/Big/Dummy.pm', '  .pm file installed' );
+  ok( -r 'install-test/packlist',              '  packlist exists' );
+  ok( !-r 'install-test/lib/perl/Big/Dummy.pm',
+                                             '  UNINST=1 removed different' );
+}
