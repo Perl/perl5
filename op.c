@@ -3800,8 +3800,8 @@ OP *op;
 		    OP *newop = newAVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVAV) ));
 		    if (dowarn)
-			warn("Array @%s missing the @ in argument %d of %s()",
-			    name, numargs, op_desc[type]);
+			warn("Array @%s missing the @ in argument %ld of %s()",
+			    name, (long)numargs, op_desc[type]);
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;
@@ -3818,8 +3818,8 @@ OP *op;
 		    OP *newop = newHVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVHV) ));
 		    if (dowarn)
-			warn("Hash %%%s missing the %% in argument %d of %s()",
-			    name, numargs, op_desc[type]);
+			warn("Hash %%%s missing the %% in argument %ld of %s()",
+			    name, (long)numargs, op_desc[type]);
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;

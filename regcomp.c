@@ -456,7 +456,7 @@ I32 *flagp;
 		break;
 	    case '$':
 	    case '@':
-		croak("Sequence (?%c...) not implemented", paren);
+		croak("Sequence (?%c...) not implemented", (int)paren);
 		break;
 	    case '#':
 		while (*regparse && *regparse != ')')

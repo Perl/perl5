@@ -341,7 +341,7 @@ I32 create;
 #ifdef VMS
 	warn("Weird package name \"%s\" truncated", name);
 #else
-	warn("Weird package name \"%.*s...\" truncated", namelen, name);
+	warn("Weird package name \"%.*s...\" truncated", (int)namelen, name);
 #endif
     }
     Copy(name,tmpbuf,namelen,char);

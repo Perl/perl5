@@ -523,8 +523,8 @@ PP(pp_untie)
                 mg = mg_find(sv, 'q') ;
     
             if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
-		warn("untie attempted while %d inner references still exist",
-			SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
+		warn("untie attempted while %lu inner references still exist",
+			(unsigned long)SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
         }
     }
  

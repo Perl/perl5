@@ -2200,7 +2200,7 @@ PP(pp_entereval)
     /* switch to eval mode */
 
     SAVESPTR(compiling.cop_filegv);
-    sprintf(tmpbuf, "_<(eval %d)", ++evalseq);
+    sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++evalseq);
     compiling.cop_filegv = gv_fetchfile(tmpbuf+2);
     compiling.cop_line = 1;
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
