@@ -452,7 +452,7 @@ op_pmreplroot	cPMOP->op_pmreplroot			opindex
 op_pmreplstart	cPMOP->op_pmreplstart			opindex
 op_pmnext	*(OP**)&cPMOP->op_pmnext		opindex
 #ifdef USE_ITHREADS
-op_pmstashpv	cPMOP->op_pmstashpv			pvindex
+op_pmstashpv	cPMOP					pvindex		x
 op_pmreplrootpo	cPMOP->op_pmreplroot			OP*/PADOFFSET
 #else
 op_pmstash	*(SV**)&cPMOP->op_pmstash		svindex

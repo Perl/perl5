@@ -215,6 +215,8 @@ typedef char *pvindex;
 	return 0;				\
     } STMT_END
 
+#define BSET_op_pmstashpv(op, arg)	PmopSTASHPV_set(op, arg)
+
 /* 
  * stolen from toke.c: better if that was a function.
  * in toke.c there are also #ifdefs for dosish systems and i/o layers

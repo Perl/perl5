@@ -817,7 +817,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		pvindex arg;
 		BGET_pvindex(arg);
-		cPMOP->op_pmstashpv = arg;
+		BSET_op_pmstashpv(cPMOP, arg);
 		break;
 	    }
 	  case INSN_OP_PMREPLROOTPO:		/* 109 */

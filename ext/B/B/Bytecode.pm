@@ -735,15 +735,17 @@ sub compile {
     }
     if ($scan) {
 	my $f;
-	open $f, $scan
-	    or bwarn("cannot rescan '$_'"), next;
-	while (<$f>) {
-	    /^#\s*line\s+\d+\s+("?)(.*)\1/ and $files{$2} = 1;
-	    /^#/ and next;
-	    if (/\bgoto\b/ && !$keep_syn) {
-		bwarn "keeping the syntax tree: \"goto\" op found";
-		keep_syn;
+	if (open $f, $scan) {
+	    while (<$f>) {
+		/^#\s*line\s+\d+\s+("?)(.*)\1/ and $files{$2} = 1;
+		/^#/ and next;
+		if (/\bgoto\b\s*[^&]/ && !$keep_syn) {
+		    bwarn "keeping the syntax tree: \"goto\" op found";
+		    keep_syn;
+		}
 	    }
+	} else {
+	    bwarn "cannot rescan '$scan'";
 	}
 	close $f;
     }
