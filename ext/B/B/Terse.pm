@@ -15,7 +15,7 @@ sub terse {
 }
 
 sub compile {
-    my $order = shift;
+    my $order = @_ ? shift : "";
     my @options = @_;
     B::clearsym();
     if (@options) {
@@ -37,7 +37,7 @@ sub compile {
 }
 
 sub indent {
-    my $level = shift;
+    my $level = @_ ? shift : 0;
     return "    " x $level;
 }
 

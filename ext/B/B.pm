@@ -131,6 +131,7 @@ sub objsym {
 
 sub walkoptree_exec {
     my ($op, $method, $level) = @_;
+    $level ||= 0;
     my ($sym, $ppname);
     my $prefix = "    " x $level;
     for (; $$op; $op = $op->next) {
