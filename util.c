@@ -1372,6 +1372,7 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
 #endif
   {
 #ifndef PERL_USE_SAFE_PUTENV
+    if (!PL_use_safe_putenv) {
     /* most putenv()s leak, so we manipulate environ directly */
     register I32 i=setenv_getix(nam);		/* where does it go? */
     int nlen, vlen;
@@ -1412,8 +1413,8 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
     environ[i] = (char*)safesysmalloc((nlen+vlen+2) * sizeof(char));
     /* all that work just for this */
     my_setenv_format(environ[i], nam, nlen, val, vlen);
-
-#else   /* PERL_USE_SAFE_PUTENV */
+    } else {
+# endif
 #   if defined(__CYGWIN__) || defined( EPOC)
     setenv(nam, val, 1);
 #   else
@@ -1428,7 +1429,9 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
     my_setenv_format(new_env, nam, nlen, val, vlen);
     (void)putenv(new_env);
 #   endif /* __CYGWIN__ */
-#endif  /* PERL_USE_SAFE_PUTENV */
+#ifndef PERL_USE_SAFE_PUTENV
+    }
+#endif
   }
 }
 

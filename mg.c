@@ -1082,6 +1082,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 #      endif
     {
 #      ifndef PERL_USE_SAFE_PUTENV
+    if (!PL_use_safe_putenv) {
     I32 i;
 
     if (environ == PL_origenviron)
@@ -1089,6 +1090,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     else
 	for (i = 0; environ[i]; i++)
 	    safesysfree(environ[i]);
+    }
 #      endif /* PERL_USE_SAFE_PUTENV */
 
     environ[0] = Nullch;

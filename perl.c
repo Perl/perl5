@@ -471,7 +471,7 @@ perl_destruct(pTHXx)
      */
 #ifndef PERL_MICRO
 #if defined(USE_ENVIRON_ARRAY) && !defined(PERL_USE_SAFE_PUTENV)
-    if (environ != PL_origenviron
+    if (environ != PL_origenviron && !PL_use_safe_putenv
 #ifdef USE_ITHREADS
 	/* only main thread can free environ[0] contents */
 	&& PL_curinterp == aTHX
