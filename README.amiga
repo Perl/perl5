@@ -214,6 +214,10 @@ emulate some Unixisms with the standard Amiga filesystem.
 These tests will be skipped because they use the fork() function, which is not
 supported under AmigaOS.
 
+=item F<op/magic.t>
+
+The ixemul.library doesn't set the expected values for $0 and $^X.
+
 =back
 
 =head2 Installing the built perl

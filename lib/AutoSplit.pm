@@ -149,7 +149,10 @@ sub autosplit_file{
 
     # where to write output files
     $autodir = "lib/auto" unless $autodir;
-    ($autodir = VMS::Filespec::unixpath($autodir)) =~ s#/$## if $Is_VMS;
+    if ($Is_VMS) {
+	($autodir = VMS::Filespec::unixpath($autodir)) =~ s{/$}{};
+	$filename = VMS::Filespec::unixify($filename); # may have dirs
+    }
     unless (-d $autodir){
 	local($", @p)="/";
 	foreach(split(/\//,$autodir)){

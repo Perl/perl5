@@ -60,7 +60,7 @@ HOME, LOGDIR, PATH, PERL5LIB, PERL5DB, PERL_DESTRUCT_LEVEL, PERLLIB
 
 =item New and Changed Built-in Variables
 
-$^E, $^H, $^M
+$^E, $^H, $^M, $^S
 
 =item New and Changed Built-in Functions
 
@@ -88,6 +88,8 @@ use blib, use blib 'dir', use locale, use ops
 =item Modules
 
 =over
+
+=item Installation Directories
 
 =item Fcntl
 
@@ -391,19 +393,20 @@ SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, sort SUBNAME LIST, sort BLOCK LIST,
 sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice ARRAY,OFFSET,LENGTH,
 splice ARRAY,OFFSET, split /PATTERN/,EXPR,LIMIT, split /PATTERN/,EXPR,
 split /PATTERN/, split, sprintf FORMAT, LIST, sqrt EXPR, sqrt, srand EXPR,
-stat EXPR, stat, study SCALAR, study, sub BLOCK, sub NAME, sub NAME BLOCK,
-substr EXPR,OFFSET,LEN, substr EXPR,OFFSET, symlink OLDFILE,NEWFILE,
-syscall LIST, sysopen FILEHANDLE,FILENAME,MODE, sysopen
+stat FILEHANDLE, stat EXPR, stat, study SCALAR, study, sub BLOCK, sub NAME,
+sub NAME BLOCK, substr EXPR,OFFSET,LEN, substr EXPR,OFFSET, symlink
+OLDFILE,NEWFILE, syscall LIST, sysopen FILEHANDLE,FILENAME,MODE, sysopen
 FILEHANDLE,FILENAME,MODE,PERMS, sysread FILEHANDLE,SCALAR,LENGTH,OFFSET,
 sysread FILEHANDLE,SCALAR,LENGTH, system LIST, syswrite
-FILEHANDLE,SCALAR,LENGTH, tell FILEHANDLE, tell, telldir DIRHANDLE, tie
-VARIABLE,CLASSNAME,LIST, tied VARIABLE, time, times, tr///, truncate
-FILEHANDLE,LENGTH, truncate EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR,
-ucfirst, umask EXPR, umask, undef EXPR, undef, unlink LIST, unlink, unpack
-TEMPLATE,EXPR, untie VARIABLE, unshift ARRAY,LIST, use Module LIST, use
-Module, use Module VERSION LIST, use VERSION, utime LIST, values
-ASSOC_ARRAY, vec EXPR,OFFSET,BITS, wait, waitpid PID,FLAGS, wantarray, warn
-LIST, write FILEHANDLE, write EXPR, write, y///
+FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite FILEHANDLE,SCALAR,LENGTH, tell
+FILEHANDLE, tell, telldir DIRHANDLE, tie VARIABLE,CLASSNAME,LIST, tied
+VARIABLE, time, times, tr///, truncate FILEHANDLE,LENGTH, truncate
+EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR, ucfirst, umask EXPR, umask, undef
+EXPR, undef, unlink LIST, unlink, unpack TEMPLATE,EXPR, untie VARIABLE,
+unshift ARRAY,LIST, use Module LIST, use Module, use Module VERSION LIST,
+use VERSION, utime LIST, values ASSOC_ARRAY, vec EXPR,OFFSET,BITS, wait,
+waitpid PID,FLAGS, wantarray, warn LIST, write FILEHANDLE, write EXPR,
+write, y///
 
 =back
 
@@ -428,13 +431,14 @@ format_lines_left HANDLE EXPR, $FORMAT_LINES_LEFT, $-, format_name HANDLE
 EXPR, $FORMAT_NAME, $~, format_top_name HANDLE EXPR, $FORMAT_TOP_NAME, $^,
 format_line_break_characters HANDLE EXPR, $FORMAT_LINE_BREAK_CHARACTERS,
 $:, format_formfeed HANDLE EXPR, $FORMAT_FORMFEED, $^L, $ACCUMULATOR, $^A,
-$CHILD_ERROR, $?, $OS_ERROR, $ERRNO, $!, $EXTENDED_OS_ERROR, $^E,
-$EVAL_ERROR, $@, $PROCESS_ID, $PID, $$, $REAL_USER_ID, $UID, $<,
-$EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID, $GID, $(,
-$EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $PERL_VERSION, $],
-$DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, $INPLACE_EDIT, $^I, $OSNAME,
-$^O, $PERLDB, $^P, $BASETIME, $^T, $WARNING, $^W, $EXECUTABLE_NAME, $^X,
-$ARGV, @ARGV, @INC, %INC, $ENV{expr}, $SIG{expr}
+$CHILD_ERROR, $?, $SYSTEM_CHILD_STATUS, $^S, $OS_ERROR, $ERRNO, $!,
+$EXTENDED_OS_ERROR, $^E, $EVAL_ERROR, $@, $PROCESS_ID, $PID, $$,
+$REAL_USER_ID, $UID, $<, $EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID,
+$GID, $(, $EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[,
+$PERL_VERSION, $], $DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H,
+$INPLACE_EDIT, $^I, $OSNAME, $^O, $PERLDB, $^P, $BASETIME, $^T, $WARNING,
+$^W, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC, %INC, $ENV{expr},
+$SIG{expr}
 
 =back
 
@@ -1231,6 +1235,8 @@ program
 
 =item AUTHOR
 
+=item COPYRIGHT
+
 =head2 perlapio - perl's IO abstraction interface.
 
 =item SYNOPSIS
@@ -1671,14 +1677,6 @@ operations
 
 =item DESCRIPTION
 
-=head2 ops - Perl pragma to restrict unsafe operations when compiling
-
-=item SYNOPSIS	
-
-=item DESCRIPTION
-
-=item SEE ALSO
-
 =head2 overload - Package for overloading perl operations
 
 =item SYNOPSIS
@@ -1871,6 +1869,16 @@ timeit(COUNT, CODE), timethis, timethese, timediff, timestr
 =item AUTHORS
 
 =item MODIFICATION HISTORY
+
+=head2 Bundle::CPAN - A bundle to play with all the other modules on CPAN
+
+=item SYNOPSIS
+
+=item CONTENTS
+
+=item DESCRIPTION
+
+=item AUTHOR
 
 =head2 CPAN - query, download and build perl modules from CPAN sites
 
@@ -2354,14 +2362,6 @@ C<Added to MANIFEST:> I<file>
 
 =item AUTHOR
 
-=head2 ExtUtils::Miniperl, writemain - write the C code for perlmain.c
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item SEE ALSO
-
 =head2 ExtUtils::Mkbootstrap - make a bootstrap file for use by DynaLoader
 
 =item SYNOPSIS
@@ -2576,139 +2576,6 @@ locale
 =item SYNOPSIS
 
 =item DESCRIPTION
-
-=head2 IO::File - supply object methods for filehandles
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CONSTRUCTOR
-
-new ([ ARGS ] )
-
-=item METHODS
-
-open( FILENAME [,MODE [,PERMS]] )
-
-=item SEE ALSO
-
-=item HISTORY
-
-=head2 IO::Handle - supply object methods for I/O handles
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CONSTRUCTOR
-
-new (), new_from_fd ( FD, MODE )
-
-=item METHODS
-
-$fh->getline, $fh->getlines, $fh->fdopen ( FD, MODE ), $fh->write ( BUF,
-LEN [, OFFSET }\] ), $fh->opened, $fh->untaint
-
-=item NOTE
-
-=item SEE ALSO
-
-=item BUGS
-
-=item HISTORY
-
-=head2 IO::Pipe, IO::pipe - supply object methods for pipes
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CONSTRCUTOR
-
-new ( [READER, WRITER] )
-
-=item METHODS
-
-reader ([ARGS]), writer ([ARGS]), handles ()
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT
-
-=head2 IO::Seekable - supply seek based methods for I/O objects
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item SEE ALSO
-
-=item HISTORY
-
-=head2 IO::Select - OO interface to the select system call
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CONSTRUCTOR
-
-new ( [ HANDLES ] )
-
-=item METHODS
-
-add ( HANDLES ), remove ( HANDLES ), exists ( HANDLE ), handles, can_read (
-[ TIMEOUT ] ), can_write ( [ TIMEOUT ] ), has_error ( [ TIMEOUT ] ), count
-(), bits(), bits(), select ( READ, WRITE, ERROR [, TIMEOUT ] )
-
-=item EXAMPLE
-
-=item AUTHOR
-
-=item COPYRIGHT
-
-=head2 IO::Socket - Object interface to socket communications
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CONSTRUCTOR
-
-new ( [ARGS] )
-
-=item METHODS
-
-accept([PKG]), timeout([VAL]), sockopt(OPT [, VAL]), sockdomain, socktype,
-protocol
-
-=item SUB-CLASSES
-
-=over
-
-=item IO::Socket::INET
-
-=item METHODS
-
-sockaddr (), sockport (), sockhost (), peeraddr (), peerport (), peerhost
-()
-
-=item IO::Socket::UNIX
-
-=item METHODS
-
-hostpath(), peerpath()
-
-=back
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT
 
 =head2 IO::lib::IO::File, IO::File - supply object methods for filehandles
 
@@ -3209,35 +3076,6 @@ Constants, Macros
 =item SYNOPSIS
 
 =item DESCRIPTION
-
-=head2 Safe - Compile and execute code in restricted compartments
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-a new namespace, an operator mask
-
-=item WARNING
-
-=over
-
-=item RECENT CHANGES
-
-=item Methods in class Safe
-
-permit (OP, ...), permit_only (OP, ...), deny (OP, ...), deny_only (OP,
-...), trap (OP, ...), untrap (OP, ...), share (NAME, ...), share_from
-(PACKAGE, ARRAYREF), varglob (VARNAME), reval (STRING), rdo (FILENAME),
-root (NAMESPACE), mask (MASK)
-
-=item Some Safety Issues
-
-Memory, CPU, Snooping, Signals, State Changes
-
-=item AUTHOR
-
-=back
 
 =head2 Search::Dict, look - search for key in dictionary file
 

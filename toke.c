@@ -445,10 +445,15 @@ char *s;
 #define LOP(f,x) return lop(f,x,s)
 
 static I32
-lop(f,x,s)
+lop
+#ifdef CAN_PROTOTYPE
+   (I32 f, expectation x, char *s)
+#else
+   (f,x,s)
 I32 f;
 expectation x;
 char *s;
+#endif /* CAN_PROTOTYPE */
 {
     yylval.ival = f;
     CLINE;

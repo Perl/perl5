@@ -1268,21 +1268,7 @@ croak(pat, va_alist)
     }
     PerlIO_puts(PerlIO_stderr(),message);
     (void)PerlIO_flush(PerlIO_stderr());
-    if (e_tmpname) {
-	if (e_fp) {
-	    PerlIO_close(e_fp);
-	    e_fp = Nullfp;
-	}
-	(void)UNLINK(e_tmpname);
-	Safefree(e_tmpname);
-	e_tmpname = Nullch;
-    }
-    statusvalue = SHIFTSTATUS(statusvalue);
-#ifdef VMS
-    my_exit((U32)(vaxc$errno?vaxc$errno:(statusvalue?statusvalue:44)));
-#else
-    my_exit((U32)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
-#endif
+    my_failure_exit();
 }
 
 void

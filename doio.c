@@ -578,7 +578,7 @@ IO* io;
 	if (IoTYPE(io) == '|') {
 	    status = my_pclose(IoIFP(io));
 	    retval = (status == 0);
-	    statusvalue = FIXSTATUS(status);
+	    STATUS_NATIVE_SET(status);
 	}
 	else if (IoTYPE(io) == '-')
 	    retval = TRUE;

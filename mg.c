@@ -386,6 +386,12 @@ MAGIC *mg;
     case '\020':		/* ^P */
 	sv_setiv(sv, (IV)perldb);
 	break;
+    case '\023':		/* ^S */
+	if (STATUS_NATIVE == -1)
+	    sv_setiv(sv, (IV)-1);
+	else
+	    sv_setuv(sv, (UV)STATUS_NATIVE);
+	break;
     case '\024':		/* ^T */
 #ifdef BIG_TIME
  	sv_setnv(sv, basetime);
@@ -456,7 +462,10 @@ MAGIC *mg;
 #endif
 	break;
     case '?':
-	sv_setiv(sv, (IV)statusvalue);
+	if (STATUS_POSIX == -1)
+	    sv_setiv(sv, (IV)-1);
+	else
+	    sv_setuv(sv, (UV)STATUS_POSIX);
 	break;
     case '^':
 	s = IoTOP_NAME(GvIOp(defoutgv));
@@ -1036,12 +1045,6 @@ MAGIC* mg;
     if (GvGP(sv))
 	gp_free((GV*)sv);
     GvGP(sv) = gp_ref(GvGP(gv));
-    if (!GvAV(gv))
-	gv_AVadd(gv);
-    if (!GvHV(gv))
-	gv_HVadd(gv);
-    if (!GvIOp(gv))
-	GvIOp(gv) = newIO();
     return 0;
 }
 
@@ -1233,7 +1236,8 @@ MAGIC* mg;
 #ifdef VMS
 	set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #else
-	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv),4);		/* will anyone ever use this? */
+	/* will anyone ever use this? */
+	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv), 4);
 #endif
 	break;
     case '\006':	/* ^F */
@@ -1267,6 +1271,9 @@ MAGIC* mg;
 		curpm = oldlastpm;
 	}
 	perldb = i;
+	break;
+    case '\023':	/* ^S */
+	STATUS_NATIVE_SET(SvIOK(sv) ? SvUVX(sv) : sv_2uv(sv));
 	break;
     case '\024':	/* ^T */
 #ifdef BIG_TIME
@@ -1347,10 +1354,11 @@ MAGIC* mg;
 	compiling.cop_arybase = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
     case '?':
-	statusvalue = FIXSTATUS(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	STATUS_POSIX_SET(SvIOK(sv) ? SvUVX(sv) : sv_2uv(sv));
 	break;
     case '!':
-	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv),SvIV(sv) == EVMSERR ? 4 : vaxc$errno);		/* will anyone ever use this? */
+	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv),
+		 (SvIV(sv) == EVMSERR) ? 4 : vaxc$errno);
 	break;
     case '<':
 	uid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);

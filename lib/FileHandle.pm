@@ -130,7 +130,7 @@ FileHandle - supply object methods for filehandles
     }
 
     $pos = $fh->getpos;
-    $fh->setpos $pos;
+    $fh->setpos($pos);
 
     $fh->setvbuf($buffer_var, _IOLBF, 1024);
 

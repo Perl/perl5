@@ -224,8 +224,8 @@ dl_expandspec(filespec)
     }
 
 void
-dl_load_file(filename, flags)
-    char *	filename
+dl_load_file(filespec, flags)
+    char *	filespec
     int		flags
     PREINIT:
     char vmsspec[NAM$C_MAXRSS];
@@ -244,9 +244,7 @@ dl_load_file(filename, flags)
     void (*entry)();
     CODE:
 
-    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filename,flags));
-    if (flags & 0x01)
-	warn("Can't make loaded symbols global on this platform while loading %s",filename);
+    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filespec,flags));
     specdsc.dsc$a_pointer = tovmsspec(filespec,vmsspec);
     specdsc.dsc$w_length = strlen(specdsc.dsc$a_pointer);
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "\tVMS-ified filespec is %s\n",

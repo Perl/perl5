@@ -769,6 +769,7 @@ PP(pp_match)
     STRLEN len;
     I32 minmatch = 0;
     I32 oldsave = savestack_ix;
+    I32 update_minmatch = 1;
 
     if (op->op_flags & OPf_STACKED)
 	TARG = POPs;
@@ -799,6 +800,7 @@ PP(pp_match)
 	    if (mg && mg->mg_len >= 0) {
 		rx->endp[0] = rx->startp[0] = s + mg->mg_len; 
 		minmatch = (mg->mg_flags & MGf_MINMATCH);
+		update_minmatch = 0;
 	    }
 	}
     }
@@ -815,7 +817,8 @@ play_it_again:
 	t = s = rx->endp[0];
 	if (s >= strend)
 	    goto nope;
-	minmatch = (s == rx->startp[0]);
+	if (update_minmatch++)
+	    minmatch = (s == rx->startp[0]);
     }
     if (pm->op_pmshort) {
 	if (pm->op_pmflags & PMf_SCANFIRST) {
@@ -1052,7 +1055,7 @@ do_readline()
 		            *(end++) = '\n';  *end = '\0';
 		            for (cp = rstr; *cp; cp++) *cp = _tolower(*cp);
 		            if (hasdir) {
-		              if (isunix) trim_unixpath(rstr,SvPVX(tmpglob));
+		              if (isunix) trim_unixpath(rstr,SvPVX(tmpglob),1);
 		              begin = rstr;
 		            }
 		            else {
@@ -1654,37 +1657,33 @@ PP(pp_leavesub)
     PMOP *newpm;
     I32 gimme;
     register CONTEXT *cx;
+    struct block_sub cxsub;
 
     POPBLOCK(cx,newpm);
-    /* Delay POPSUB until stack values are safe */
-
+    POPSUB1(cx);	/* Delay POPSUB2 until stack values are safe */
+ 
     if (gimme == G_SCALAR) {
 	MARK = newsp + 1;
 	if (MARK <= SP)
-	    if (SvFLAGS(TOPs) & SVs_TEMP)
-		*MARK = TOPs;
-	    else
-		*MARK = sv_mortalcopy(TOPs);
+	    *MARK = SvTEMP(TOPs) ? TOPs : sv_mortalcopy(TOPs);
 	else {
-	    MEXTEND(mark,0);
+	    MEXTEND(MARK, 0);
 	    *MARK = &sv_undef;
 	}
 	SP = MARK;
     }
     else {
-	for (mark = newsp + 1; mark <= SP; mark++)
-	    if (!(SvFLAGS(*mark) & SVs_TEMP))
-		*mark = sv_mortalcopy(*mark);
-		/* in case LEAVE wipes old return values */
+	for (MARK = newsp + 1; MARK <= SP; MARK++) {
+	    if (!SvTEMP(*MARK))
+		*MARK = sv_mortalcopy(*MARK);
+	}
     }
-
-    /* Now that stack values are safe, release CV and @_ */
-    POPSUB(cx);
-
-    curpm = newpm;	/* Don't pop $1 et al till now */
+    PUTBACK;
+    
+    POPSUB2();		/* Stack values are safe: release CV and @_ ... */
+    curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVE;
-    PUTBACK;
     return pop_return();
 }
 

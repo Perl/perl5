@@ -36,18 +36,30 @@ some:[where.over]the.rainbow	unixify	/some/where/over/the.rainbow
 [.some.where.over]the.rainbow	unixify	some/where/over/the.rainbow
 [-.some.where.over]the.rainbow	unixify	../some/where/over/the.rainbow
 [.some.--.where.over]the.rainbow	unixify	some/../../where/over/the.rainbow
+[.some...where.over]the.rainbow	unixify	some/.../where/over/the.rainbow
+[...some.where.over]the.rainbow	unixify	.../some/where/over/the.rainbow
+[.some.where.over...]the.rainbow	unixify	some/where/over/.../the.rainbow
+[.some.where.over...]	unixify	some/where/over/.../
+[.some.where.over.-]	unixify	some/where/over/../
 []	unixify		./
 [-]	unixify		../
 [--]	unixify		../../
+[...]	unixify		.../
 
 # and back again
 /some/where/over/the.rainbow	vmsify	some:[where.over]the.rainbow
 some/where/over/the.rainbow	vmsify	[.some.where.over]the.rainbow
 ../some/where/over/the.rainbow	vmsify	[-.some.where.over]the.rainbow
 some/../../where/over/the.rainbow	vmsify	[-.where.over]the.rainbow
+.../some/where/over/the.rainbow	vmsify	[...some.where.over]the.rainbow
+some/.../where/over/the.rainbow	vmsify	[.some...where.over]the.rainbow
+/some/.../where/over/the.rainbow	vmsify	some:[...where.over]the.rainbow
+some/where/...	vmsify	[.some.where...]
+/where/...	vmsify	where:[...]
 .	vmsify	[]
 ..	vmsify	[-]
 ../..	vmsify	[--]
+.../	vmsify	[...]
 
 # Fileifying directory specs
 down:[the.garden.path]	fileify	down:[the.garden]path.dir;1
@@ -73,12 +85,16 @@ down:[the]garden.path	pathify
 /down/the/garden.path	pathify	
 down:[the.garden]path.dir;2	pathify	#N.B. ;2
 path	pathify	path/
+/down/the/garden/.	pathify	/down/the/garden/./
+/down/the/garden/..	pathify	/down/the/garden/../
+/down/the/garden/...	pathify	/down/the/garden/.../
 path.notdir	pathify	
 
 # Both VMS/Unix and file/path conversions
 down:[the.garden]path.dir;1	unixpath	/down/the/garden/path/
 /down/the/garden/path	vmspath	down:[the.garden.path]
 down:[the.garden.path]	unixpath	/down/the/garden/path/
+down:[the.garden.path...]	unixpath	/down/the/garden/path/.../
 /down/the/garden/path.dir	vmspath	down:[the.garden.path]
 [.down.the.garden]path.dir	unixpath	down/the/garden/path/
 down/the/garden/path	vmspath	[.down.the.garden.path]

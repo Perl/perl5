@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00324#
+PERL_VERSION = 5_00325#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -499,7 +499,7 @@ IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]S
 	@ If F$Search("[.lib]VMS.Dir").eqs."" Then Create/Directory [.lib.VMS]
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
-[.lib.pod]perldoc : [.utils]perldoc.PL $(ARCHDIR)Config.pm
+[.lib.pod]perldoc.com : [.utils]perldoc.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) $(MMS$SOURCE)
 	Copy/Log [.utils]perldoc.com $(MMS$TARGET)
@@ -533,7 +533,10 @@ IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]S
 [.x2p]s2p.com : [.x2p]s2p.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 
+# Rename catches problem with some DECC versions in which object file is
+# placed in current default dir, not same one as source file.
 [.x2p]$(DBG)a2p$(E) : [.x2p]a2p$(O), [.x2p]hash$(O), [.x2p]str$(O), [.x2p]util$(O), [.x2p]walk$(O)
+	@ If F$Search("a2p$(O)").nes."" Then Rename/NoLog a2p$(O),hash$(O),str$(O),util$(O),walk$(O) [.x2p]
 	Link $(LINKFLAGS) /Exe=$(MMS$TARGET) $(MMS$SOURCE_LIST) $(CRTLOPTS)
 
 [.lib.pod]pod2html.com : [.pod]pod2html.PL $(ARCHDIR)Config.pm
@@ -765,7 +768,7 @@ perly$(O) : perly.c, perly.h, $(h)
 [.t.lib]vmsfspec.t : [.vms.ext]filespec.t
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
-test : all
+test : all [.t.lib]vmsfspec.t
 	- @[.VMS]Test.Com "$(E)"
 
 # CORE subset for MakeMaker, so we can build Perl without sources
@@ -1632,8 +1635,9 @@ tidy : cleanlis
 	- If F$Search("[.Lib.VMS]*.*;-1").nes."" Then Purge/NoConfirm/Log [.Lib.VMS]*.*
 	- If F$Search("[.Lib.Pod]*.Pod;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Pod]*.Pod
 	- If F$Search("$(ARCHCORE)*.*").nes."" Then Purge/NoConfirm/Log $(ARCHCORE)*.*
-	- If F$Search("[.utils]*.;-1").nes."" Then Purge/NoConfirm/Log [.utils]*./Exclude=Makefile.
-	- If F$Search("[.lib]perlbug.;-1").nes."" Then Purge/NoConfirm/Log [.lib]perlbug.
+	- If F$Search("[.lib]*.com;-1").nes."" Then Purge/NoConfirm/Log [.lib]*.com
+	- If F$Search("[.utils]*.com;-1").nes."" Then Purge/NoConfirm/Log [.utils]*.com
+	- If F$Search("[.x2p]*.com;-1").nes."" Then Purge/NoConfirm/Log [.x2p]*.com
 	- If F$Search("[.lib.pod]*.;-1").nes."" Then Purge/NoConfirm/Log [.lib.pod]*.
 
 clean : tidy
@@ -1698,14 +1702,15 @@ realclean : clean
 	- If F$Search("[.Lib]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]DynaLoader.pm;*
 	- If F$Search("[.Lib]Socket.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Socket.pm;*
 	- If F$Search("[.Lib]Config.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Config.pm;*
-	- If F$Search("[.Lib]perlbug.").nes."" Then Delete/NoConfirm/Log [.Lib]perlbug.;*
+	- If F$Search("[.Lib]*.com").nes."" Then Delete/NoConfirm/Log [.Lib]*.com;*
+	- If F$Search("[.utils]*.com").nes."" Then Delete/NoConfirm/Log [.utils]*.com;*
+	- If F$Search("[.x2p]*.com").nes."" Then Delete/NoConfirm/Log [.x2p]*.com;*
 	- If F$Search("$(ARCHDIR)Config.pm").nes."" Then Delete/NoConfirm/Log $(ARCHDIR)Config.pm;*
 	- If F$Search("[.lib.ExtUtils]Miniperl.pm").nes."" Then Delete/NoConfirm/Log [.lib.ExtUtils]Miniperl.pm;*
-	- If F$Search("[.utils]*.").nes."" Then Delete/NoConfirm/Log [.utils]*.;*/Exclude=Makefile.
-	- If F$Search("[.x2p]*.").nes."" Then Delete/NoConfirm/Log [.x2p]*.;*/Exclude=Makefile.
 	- If F$Search("[.lib.pod]*.pod").nes."" Then Delete/NoConfirm/Log [.lib.pod]*.pod;*
-	- If F$Search("[.lib.pod]perldoc.").nes."" Then Delete/NoConfirm/Log [.lib.pod]perldoc.;*
+	- If F$Search("[.lib.pod]perldoc.com").nes."" Then Delete/NoConfirm/Log [.lib.pod]perldoc.com;*
 	- If F$Search("[.lib.pod]pod2*.com").nes."" Then Delete/NoConfirm/Log [.lib.pod]pod2*.com;*
+	- If F$Search("[.t.lib]vmsfspec.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsfspec.t;*
 	- If F$Search("[...]*$(E)").nes."" Then Delete/NoConfirm/Log [...]*$(E);*
 
 cleansrc : clean

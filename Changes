@@ -9,6 +9,173 @@ releases.)
 
 
 ----------------
+Version 5.003_25
+----------------
+
+This release is beta candidate #3.  Here's hoping...
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Make $] read-only"
+   From:  Chip Salzenberg
+  Files:  gv.c
+
+  Title:  "New variable C<$^S> is a native version of C<$?>"
+   From:  Chip Salzenberg
+  Files:  doio.c global.sym gv.c interp.sym lib/English.pm mg.c perl.c
+          perl.h pod/perldelta.pod pod/perlfunc.pod pod/perlvar.pod
+          pp_ctl.c pp_sys.c proto.h util.c
+
+  Title:  "Make $^T work with undump, and don't taint it"
+   From:  Chip Salzenberg
+  Files:  perl.c
+
+ CORE PORTABILITY
+
+  Title:  "VMS patches for _24"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IEUIFP5038004GQP@hmivax.humgen.upenn.edu>
+   Date:  Fri, 31 Jan 1997 02:34:37 -0500 (EST)
+  Files:  ext/DynaLoader/DynaLoader.pm ext/DynaLoader/dl_vms.xs
+          lib/AutoSplit.pm lib/ExtUtils/MM_VMS.pm
+          lib/ExtUtils/MakeMaker.pm perl.h pp_hot.c t/lib/filehand.t
+          t/op/closure.t vms/Makefile vms/config.vms vms/descrip.mms
+          vms/ext/filespec.t vms/vms.c vms/vmsish.h
+
+  Title:  "hints/dec_osf.sh: polishing the comments"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+ Msg-ID:  <199701301958.VAA08992@alpha.hut.fi>
+   Date:  Thu, 30 Jan 1997 21:58:10 +0200 (EET)
+  Files:  hints/dec_osf.sh
+
+  Title:  "amigaos.sh"
+   From:  "Norbert Pueschel" <pueschel@imsdd.meb.uni-bonn.de>
+ Msg-ID:  <77724724@Armageddon.meb.uni-bonn.de>
+   Date:  Wed, 29 Jan 1997 11:39:49 +0100
+  Files:  hints/amigaos.sh
+
+ OTHER CORE CHANGES
+
+  Title:  "Require '-T' in argv[], not just on #! line"
+   From:  Chip Salzenberg
+  Files:  perl.c pod/perldiag.pod
+
+  Title:  "Fix C<return @_> and associated stack bugs"
+   From:  Chip Salzenberg
+  Files:  cop.h pp_ctl.c pp_hot.c t/op/misc.t
+
+  Title:  "Fix never-closing handle after C<select>"
+   From:  Chip Salzenberg
+  Files:  pp_sys.c
+
+  Title:  "Fix /\G/g with patterns that match empty string"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+  Files:  pp_hot.c
+
+  Title:  "Fix scalar leak in av_unshift"
+   From:  Chip Salzenberg
+  Files:  av.c
+
+  Title:  "Ignore refs to lexicals when making refs to lexicals"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "Don't create AV, HV, IO when assigning glob"
+   From:  Chip Salzenberg
+  Files:  mg.c
+
+ BUILD PROCESS
+
+  Title:  "Configure updates for intsize and ssizetype"
+   From:  Andy Dougherty
+  Files:  Configure MANIFEST config_H config_h.SH handy.h
+
+  Title:  "Ask about /usr/bin/perl iff STDIN and STDERR are terminals"
+   From:  Chip Salzenberg
+  Files:  installperl
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Refresh CPAN to 1.19"
+   From:  Andreas Koenig <a.koenig@mind.de>
+  Files:  lib/Bundle/CPAN.pm lib/CPAN.pm lib/CPAN/FirstTime.pm
+
+  Title:  "Debugger update"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199702030406.XAA23029@monk.mps.ohio-state.edu>
+   Date:  Sun, 2 Feb 1997 23:06:34 -0500 (EST)
+  Files:  lib/perl5db.pl
+
+  Title:  "In Symbol::gensym, don't make glob fake by copying it"
+   From:  John Hughes <john@AtlanTech.COM>
+  Files:  lib/Symbol.pm
+
+  Title:  "Make POSIX::is*() eight-bit-clean"
+   From:  Chip Salzenberg
+  Files:  ext/POSIX/POSIX.xs
+
+  Title:  "Make IO::Handle::gets() an alias of getline"
+   From:  Gisle Aas <aas@bergen.sn.no>
+ Msg-ID:  <199701301103.MAA11291@bergen.sn.no>
+   Date:  Thu, 30 Jan 1997 12:03:15 +0100
+  Files:  ext/IO/lib/IO/Handle.pm lib/IO/Handle.pm
+
+ TESTS
+
+  Title:  "More Amiga test patches"
+   From:  "Norbert Pueschel" <pueschel@imsdd.meb.uni-bonn.de>
+ Msg-ID:  <77724725@Armageddon.meb.uni-bonn.de>
+   Date:  Wed, 29 Jan 1997 16:07:33 +0100
+  Files:  README.amiga t/lib/safe2.t t/op/closure.t
+
+ UTILITIES
+
+  Title:  "c2ph.PL fix"
+   From:  lvirden@cas.org (Larry W. Virden)
+ Msg-ID:  <199701301349.IAA16724@cas.org>
+   Date:  Thu, 30 Jan 1997 08:49:19 -0500
+  Files:  utils/c2ph.PL
+
+  Title:  "Make pod2man a little laxer for perltoc.pod"
+   From:  Chip Salzenberg
+  Files:  pod/pod2man.PL
+
+ DOCUMENTATION
+
+  Title:  "Update to perl INSTALL file"
+   From:  lvirden@cas.org (Larry W. Virden)
+ Msg-ID:  <199701301338.IAA15878@cas.org>
+   Date:  Thu, 30 Jan 1997 08:38:23 -0500
+  Files:  INSTALL
+
+  Title:  "Update to perl.pod suggested"
+   From:  lvirden@cas.org (Larry W. Virden)
+ Msg-ID:  <199701301345.IAA16514@cas.org>
+   Date:  Thu, 30 Jan 1997 08:45:59 -0500
+  Files:  pod/perl.pod
+
+  Title:  "Document how extension pms go in $archlib"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod
+
+  Title:  "perlfunc.pod tweaks"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <20526.854659255@eeyore.ibcinc.com>
+   Date:  Thu, 30 Jan 1997 16:20:55 -0500
+  Files:  pod/perlfunc.pod
+
+  Title:  "new (Feb 1) perlembed.pod"
+   From:  Jon Orwant <orwant@media.mit.edu>
+ Msg-ID:  <9702012334.AA15747@fahrenheit-451.media.mit.edu>
+   Date:  Sat, 1 Feb 1997 18:34:59 -0500
+  Files:  pod/perlembed.pod
+
+  Title:  "Error lines must not have trialing periods"
+   From:  Chip Salzenberg
+  Files:  pod/perldiag.pod
+
+
+----------------
 Version 5.003_24
 ----------------
 

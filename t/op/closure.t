@@ -5,6 +5,13 @@
 #   Greatly extended by Tom Phoenix <rootbeer@teleport.com> on 28 Jan 1997.
 #
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
+use Config;
+
 print "1..167\n";
 
 my $test = 1;
@@ -123,16 +130,11 @@ test {
   &{$foo[4]}() == 0
   };
 
+exit 0 unless $Config{'d_fork'};
+
 # Additional tests by Tom Phoenix <rootbeer@teleport.com>.
 
 {
-    BEGIN {
-      if (-d 't') {
-	unshift @INC, "lib"
-      } else {
-	unshift @INC, '../lib'
-      }
-    }
     use strict;
 
     use vars qw!$test!;
@@ -377,38 +379,64 @@ END
 	    $test++;
 	  }
 
-	  # Fork off a new perl to run the tests.
-	  # (This is so we can catch spurious warnings.)
-	  $| = 1; print ""; $| = 0; # flush output before forking
-	  pipe READ, WRITE or die "Can't make pipe: $!";
-	  pipe READ2, WRITE2 or die "Can't make second pipe: $!";
-	  die "Can't fork: $!" unless defined($pid = open PERL, "|-");
-	  unless ($pid) {
-	    # Child process here. We're going to send errors back
-	    # through the extra pipe.
-	    close READ;
-	    close READ2;
-	    open STDOUT, ">&WRITE"  or die "Can't redirect STDOUT: $!";
-	    open STDERR, ">&WRITE2" or die "Can't redirect STDERR: $!";
-	    exec './perl', '-w', '-'
+	  if ($Config{d_fork} and $^O ne 'VMS') {
+	    # Fork off a new perl to run the tests.
+	    # (This is so we can catch spurious warnings.)
+	    $| = 1; print ""; $| = 0; # flush output before forking
+	    pipe READ, WRITE or die "Can't make pipe: $!";
+	    pipe READ2, WRITE2 or die "Can't make second pipe: $!";
+	    die "Can't fork: $!" unless defined($pid = open PERL, "|-");
+	    unless ($pid) {
+	      # Child process here. We're going to send errors back
+	      # through the extra pipe.
+	      close READ;
+	      close READ2;
+	      open STDOUT, ">&WRITE"  or die "Can't redirect STDOUT: $!";
+	      open STDERR, ">&WRITE2" or die "Can't redirect STDERR: $!";
+	      exec './perl', '-w', '-'
 		or die "Can't exec ./perl: $!";
+	    } else {
+	      # Parent process here.
+	      close WRITE;
+	      close WRITE2;
+	      print PERL $code;
+	      close PERL;
+	      { local $/;
+	        $output = join '', <READ>;
+	        $errors = join '', <READ2>; }
+	      close READ;
+	      close READ2;
+	    }
+	  } else {
+	    # No fork().  Do it the hard way.
+	    my $cmdfile = "tcmd$$";  $cmdfile++ while -e $cmdfile;
+	    my $outfile = "tout$$";  $outfile++ while -e $outfile;
+	    my $errfile = "terr$$";  $errfile++ while -e $errfile;
+	    open CMD, ">$cmdfile"; print CMD $code; close CMD;
+	    my $cmd = ($^O eq 'VMS') ? "MCR $^X" : "./perl";
+	    $cmd .= " -w $cmdfile >$outfile 2>$errfile";
+	    system $cmd;
+	    $? = 0 if $^O eq 'VMS' and $? & 1;  # Keep Unix-minded code below happy
+	    if ($?) {
+	      printf "not ok: exited with error code %04X\n", $?;
+	      $debugging or do { 1 while unlink $cmdfile, $outfile, $errfile };
+	      exit;
+	    }
+	    { local $/;
+	      open IN, $outfile; $output = <IN>; close IN;
+	      open IN, $errfile; $errors = <IN>; close IN; }
+	    1 while unlink $cmdfile, $outfile, $errfile;
 	  }
-	  # Parent process here.
-	  close WRITE;
-	  close WRITE2;
-	  print PERL $code;
-	  close PERL;
-	  $output = join '', <READ>;
-	  $errors = join '', <READ2>;
-	  print $output, $errors;
+	  print $output;
+	  print STDERR $errors;
 	  if ($debugging && ($errors || $? || ($output =~ /not ok/))) {
 	    my $lnum = 0;
 	    for $line (split '\n', $code) {
 	      printf "%3d:  %s\n", ++$lnum, $line;
 	    }
 	  }
-	  printf "not ok: exited with error code %04lX\n",$? if $?;
-	  print "-" x 30, $/ if $debugging;
+	  printf "not ok: exited with error code %04X\n", $? if $?;
+	  print "-" x 30, "\n" if $debugging;
 
 	}	# End of foreach $within
       }	# End of foreach $where_declared

@@ -293,3 +293,12 @@ print "eat flaming death\n" unless ($s == 7);
 sub foo { local $_ = shift; split; @_ }
 @x = foo(' x  y  z ');
 print "you die joe!\n" unless "@x" eq 'x y z';
+########
+sub foo { local(@_) = ('p', 'q', 'r'); }
+sub bar { unshift @_, 'D'; @_ }
+sub baz { push @_, 'E'; return @_ }
+for (1..3) { print foo('a', 'b', 'c'), bar('d'), baz('e'), "\n" }
+EXPECT
+pqrDdeE
+pqrDdeE
+pqrDdeE

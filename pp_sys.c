@@ -177,10 +177,10 @@ PP(pp_backtick)
 		}
 	    }
 	}
-	statusvalue = FIXSTATUS(my_pclose(fp));
+	STATUS_NATIVE_SET(my_pclose(fp));
     }
     else {
-	statusvalue = -1;
+	STATUS_NATIVE_SET(-1);
 	if (GIMME == G_SCALAR)
 	    RETPUSHUNDEF;
     }
@@ -798,11 +798,13 @@ PP(pp_select)
 	XPUSHs(&sv_undef);
     else {
 	GV **gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
-	if (gvp && *gvp == egv)
+	if (gvp && *gvp == egv) {
 	    gv_efullname3(TARG, defoutgv, Nullch);
-	else
-	    sv_setsv(TARG, sv_2mortal(newRV((SV*)egv)));
-	XPUSHTARG;
+	    XPUSHTARG;
+	}
+	else {
+	    XPUSHs(sv_2mortal(newRV((SV*)egv)));
+	}
     }
 
     if (newdefout) {
@@ -2880,7 +2882,7 @@ PP(pp_wait)
     int argflags;
 
     childpid = wait4pid(-1, &argflags, 0);
-    statusvalue = (childpid > 0) ? FIXSTATUS(argflags) : -1;
+    STATUS_NATIVE_SET((childpid > 0) ? argflags : -1);
     XPUSHi(childpid);
     RETURN;
 #else
@@ -2899,7 +2901,7 @@ PP(pp_waitpid)
     optype = POPi;
     childpid = TOPi;
     childpid = wait4pid(childpid, &argflags, optype);
-    statusvalue = (childpid > 0) ? FIXSTATUS(argflags) : -1;
+    STATUS_NATIVE_SET((childpid > 0) ? argflags : -1);
     SETi(childpid);
     RETURN;
 #else
@@ -2941,12 +2943,8 @@ PP(pp_system)
 	} while (result == -1 && errno == EINTR);
 	(void)rsignal_restore(SIGINT, &ihand);
 	(void)rsignal_restore(SIGQUIT, &qhand);
-	statusvalue = FIXSTATUS(status);
-	if (result < 0)
-	    value = -1;
-	else {
-	    value = (I32)((unsigned int)status & 0xffff);
-	}
+	STATUS_NATIVE_SET(status);
+	value = (result == -1) ? -1 : status;
 	do_execfree();	/* free any memory child malloced on vfork */
 	SP = ORIGMARK;
 	PUSHi(value);
@@ -2972,7 +2970,7 @@ PP(pp_system)
     else {
 	value = (I32)do_spawn(SvPVx(sv_mortalcopy(*SP), na));
     }
-    statusvalue = FIXSTATUS(value);
+    STATUS_NATIVE_SET(value);
     do_execfree();
     SP = ORIGMARK;
     PUSHi(value);
@@ -3450,7 +3448,7 @@ PP(pp_ghostent)
 
 #ifdef HOST_NOT_FOUND
     if (!hent)
-	statusvalue = FIXSTATUS(h_errno);
+	STATUS_NATIVE_SET(h_errno);
 #endif
 
     if (GIMME != G_ARRAY) {

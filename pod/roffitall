@@ -69,7 +69,7 @@ toroff=`
     $libdir/integer.3	\
     $libdir/less.3	\
     $libdir/lib.3	\
-    $libdir/localle.3	\
+    $libdir/locale.3	\
     $libdir/overload.3	\
     $libdir/sigtrap.3	\
     $libdir/strict.3	\

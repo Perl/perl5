@@ -432,7 +432,7 @@ sub ExtUtils::MakeMaker::new {
 		# into a filespec.
 	    $self->{$key} = $self->catdir("..",$self->{$key})
 		unless $self->file_name_is_absolute($self->{$key})
-		|| ($^O eq 'VMS' and ($key =~ /PERL$/ && $self->{key} =~ /^[\w\-\$]$/));
+		|| ($^O eq 'VMS' and ($key =~ /PERL$/ && $self->{$key} =~ /^[\w\-\$]+$/));
 	}
 	$self->{PARENT}->{CHILDREN}->{$newclass} = $self if $self->{PARENT};
     } else {

@@ -589,8 +589,14 @@ sub constants {
 	my(@defs) = split(/\s+/,$self->{DEFINE});
 	foreach $def (@defs) {
 	    next unless $def;
-	    $def =~ s/^-D//;
-	    $def = "\"$def\"" if $def =~ /=/;
+	    if ($def =~ s/^-D//) {       # If it was a Unix-style definition
+		$def =~ /='(.*)'$/=$1/;  # then remove shell-protection ''
+		$def =~ /^'(.*)'$/$1/;   # from entire term or argument
+	    }
+	    if ($def =~ /=/) {
+		$def =~ s/"/""/g;  # Protect existing " from DCL
+		$def = qq["$def"]; # and quote to prevent parsing of =
+	    }
 	}
 	$self->{DEFINE} = join ',',@defs;
     }
@@ -708,6 +714,7 @@ MAN3PODS = ',$self->wraplist(', ', sort keys %{$self->{MAN3PODS}}),'
     }
 
 push @m,"
+.SUFFIXES :
 .SUFFIXES : \$(OBJ_EXT) .c .cpp .cxx .xs
 
 # Here is the Config.pm that we are using/depend on
@@ -1576,7 +1583,7 @@ clean ::
 ';
     foreach $dir (@{$self->{DIR}}) { # clean subdirectories first
 	my($vmsdir) = $self->fixpath($dir,1);
-	push( @m, '	If F$Search("'.$vmsdir.'$(MAKEFILE)") Then \\',"\n\t",
+	push( @m, '	If F$Search("'.$vmsdir.'$(MAKEFILE)").nes."" Then \\',"\n\t",
 	      '$(PERL) -e "chdir ',"'$vmsdir'",'; print `$(MMS) clean`;"',"\n");
     }
     push @m, '	$(RM_F) *.Map *.Dmp *.Lis *.cpp *.$(DLEXT) *$(OBJ_EXT) *$(LIB_EXT) *.Opt $(BOOTSTRAP) $(BASEEXT).bso .MM_Tmp

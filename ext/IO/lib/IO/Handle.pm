@@ -75,7 +75,6 @@ corresponding built-in functions:
     close
     fileno
     getc
-    gets
     eof
     read
     truncate
@@ -187,7 +186,7 @@ use SelectSaver;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.1501";
+$VERSION = "1.1502";
 $XS_VERSION = "1.15";
 
 @EXPORT_OK = qw(
@@ -336,12 +335,6 @@ sub getc {
     getc($_[0]);
 }
 
-sub gets {
-    @_ == 1 or croak 'usage: $fh->gets()';
-    my ($handle) = @_;
-    scalar <$handle>;
-}
-
 sub eof {
     @_ == 1 or croak 'usage: $fh->eof()';
     eof($_[0]);
@@ -364,6 +357,8 @@ sub getline {
     my $this = shift;
     return scalar <$this>;
 } 
+
+*gets = \&getline;  # deprecated
 
 sub getlines {
     @_ == 1 or croak 'usage: $fh->getline()';

@@ -31,6 +31,7 @@ $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
 # Flags to alter dl_load_file behaviour.  Assigned bits:
 #   0x01  make symbols available for linking later dl_load_file's.
 #         (only known to work on Solaris 2 using dlopen(RTLD_GLOBAL))
+#         (ignored under VMS; effect is built-in to image linking)
 #
 # This is called as a class method $module->dl_load_flags.  The
 # definition here will be inherited and result on "default" loading
@@ -511,6 +512,7 @@ Assigned bits:
 
  0x01  make symbols available for linking later dl_load_file's.
        (only known to work on Solaris 2 using dlopen(RTLD_GLOBAL))
+       (ignored under VMS; this is a normal part of image linking)
 
 (On systems that provide a handle for the loaded object such as SunOS
 and HPUX, $libref will be that handle.  On other systems $libref will

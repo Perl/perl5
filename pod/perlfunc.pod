@@ -191,11 +191,9 @@ operator which can be used in expressions.
 
 dbmclose, dbmopen
 
-
 =back
 
 =head2 Alphabetical Listing of Perl Functions
-
 
 =over 8
 
@@ -1061,7 +1059,10 @@ are called before exit.)  Example:
     $ans = <STDIN>;
     exit 0 if $ans =~ /^[Xx]/;
 
-See also die().  If EXPR is omitted, exits with 0 status.
+See also die().  If EXPR is omitted, exits with 0 status.  The only
+univerally portable values for EXPR are 0 for success and 1 for error;
+all other values are subject to unpredictable interpretation depending
+on the environment in which the Perl program is running.
 
 You shouldn't use exit() to abort a subroutine if there's any chance that
 someone might want to trap whatever error happened.  Use die() instead,
@@ -1249,7 +1250,7 @@ single-characters, however.  For that, try something more like:
     }
     print "\n";
 
-Determination of whether to whether $BSD_STYLE should be set 
+Determination of whether $BSD_STYLE should be set 
 is left as an exercise to the reader.  
 
 The POSIX::getattr() function can do this more portably on systems
@@ -1262,7 +1263,7 @@ details on CPAN can be found on L<perlmod/CPAN>.
 Returns the current login from F</etc/utmp>, if any.  If null, use
 getpwuid().  
 
-    $login = getlogin || (getpwuid($<))[0] || "Kilroy";
+    $login = getlogin || getpwuid($<) || "Kilroy";
 
 Do not consider getlogin() for authentication: it is not as
 secure as getpwuid().
@@ -3066,7 +3067,7 @@ for a seed can fall prey to the mathematical property that
     a^b == (a+1)^(b+1)
 
 one-third of the time.  So don't do that.
-  
+
 =item stat FILEHANDLE
 
 =item stat EXPR
@@ -3313,7 +3314,7 @@ signals and coredumps.
 	print "signal $rc\n"
     } 
     $ok = ($rc != 0);
-  
+
 =item syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET
 
 =item syswrite FILEHANDLE,SCALAR,LENGTH

@@ -96,11 +96,11 @@ sees what it knows to be a term when it was expecting to see an operator,
 it gives you this warning.  Usually it indicates that an operator or
 delimiter was omitted, such as a semicolon.
 
-=item %s had compilation errors.
+=item %s had compilation errors
 
 (F) The final summary message when a C<perl -c> fails.
 
-=item %s has too many errors.
+=item %s has too many errors
 
 (F) The parser has given up trying to parse the program after 10 errors.
 Further error messages would likely be uninformative.
@@ -119,19 +119,19 @@ before it could possibly have been used.
 
 (F) The final summary message when a C<perl -c> succeeds.
 
-=item %s: Command not found.
+=item %s: Command not found
 
 (A) You've accidentally run your script through B<csh> instead
 of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
 into Perl yourself.
 
-=item %s: Expression syntax.
+=item %s: Expression syntax
 
 (A) You've accidentally run your script through B<csh> instead
 of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
 into Perl yourself.
 
-=item %s: Undefined variable.
+=item %s: Undefined variable
 
 (A) You've accidentally run your script through B<csh> instead
 of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
@@ -195,7 +195,7 @@ a missing quote, operator, parenthesis pair or declaration.
 (F) The setuid emulator requires that the arguments Perl was invoked
 with match the arguments specified on the #! line.
 
-=item Argument "%s" isn't numeric
+=item Argument "%s" isn't numeric%s
 
 (W) The indicated string was fed as an argument to an operator that
 expected a numeric value instead.  If you're fortunate the message
@@ -920,7 +920,7 @@ single form when it must operate on them directly.  Either you've
 passed an invalid file specification to Perl, or you've found a
 case the conversion routines don't handle.  Drat.
 
-=item Execution of %s aborted due to compilation errors.
+=item Execution of %s aborted due to compilation errors
 
 (F) The final summary message when a Perl compilation fails.
 
@@ -2011,7 +2011,7 @@ because the world might have written on it already.
 
 (W) You tried to do a shutdown on a closed socket.  Seems a bit superfluous.
 
-=item SIG%s handler "%s" not defined.
+=item SIG%s handler "%s" not defined
 
 (W) The signal handler named in %SIG doesn't, in fact, exist.  Perhaps you
 put it into the wrong package?
@@ -2089,7 +2089,7 @@ construct.  Remember that bracketing delimiters count nesting level.
 That is, the absolute value of the offset was larger than the length of
 the string.  See L<perlfunc/substr>.
 
-=item suidperl is no longer needed since...
+=item suidperl is no longer needed since %s
 
 (F) Your Perl was compiled with B<-D>SETUID_SCRIPTS_ARE_SECURE_NOW, but a
 version of the setuid emulator somehow got run anyway.
@@ -2161,7 +2161,7 @@ out from under another module inadvertently.  See L<perlvar/$[>.
 The function indicated isn't implemented on this architecture, according
 to the probings of Configure.
 
-=item The crypt() function is unimplemented due to excessive paranoia.
+=item The crypt() function is unimplemented due to excessive paranoia
 
 (F) Configure couldn't find the crypt() function on your machine,
 probably because your vendor didn't supply it, probably because they
@@ -2184,6 +2184,19 @@ you're not running on Unix.
 
 (F) There has to be at least one argument to syscall() to specify the
 system call to call, silly dilly.
+
+=item Too late for "-T" option (try putting it first)
+
+(X) The #! line in a Perl script contains the "-T" option, but Perl
+was not invoked with "-T" in its argument list.  Due to the way Perl
+handles tainting, by the time Perl discovers a "-T" in a script, it's
+too late to properly taint everything from the environment.  So Perl
+gives up.
+
+This error can usually be fixed by editing the "#!" line so that the
+"-T" option is in the Perl program's first argument.  (Many operating
+systems that implement the "#!" feature only pick up one argument from
+it, so Perl has to get the rest on its own.)
 
 =item Too many ('s
 
@@ -2500,7 +2513,7 @@ reference variables in outer subroutines are called or referenced,
 they are automatically re-bound to the current values of such
 variables.
 
-=item Variable syntax.
+=item Variable syntax
 
 (A) You've accidentally run your script through B<csh> instead
 of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
@@ -2511,7 +2524,7 @@ into Perl yourself.
 (W) You passed warn() an empty string (the equivalent of C<warn "">) or
 you called it with no args and C<$_> was empty.
 
-=item Warning: unable to close filehandle %s properly.
+=item Warning: unable to close filehandle %s properly
 
 (S) The implicit close() done by an open() got an error indication on the
 close().  This usually indicates your file system ran out of disk space.

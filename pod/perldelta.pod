@@ -54,8 +54,8 @@ the F<INSTALL> file for how to use it.
 
 =item $^E
 
-Extended error message under some platforms ($EXTENDED_OS_ERROR
-if you C<use English>).
+Extended error message on some platforms.  (Also known as
+$EXTENDED_OS_ERROR if you C<use English>).
 
 =item $^H
 
@@ -78,6 +78,15 @@ would allocate a 64K buffer for use when in emergency.
 See the F<INSTALL> file for information on how to enable this option.
 As a disincentive to casual use of this advanced feature,
 there is no C<use English> long name for this variable.
+
+=item $^S
+
+The status returned by the last pipe close, back-tick (C<``>) command, or
+system() operator, in the native system format.  On UNIX and UNIX-like
+systems, C<$^S> is a synonym for C<$?>.  Elsewhere, C<$^S> can be used to
+determine aspects of child status that are system-specific.  Check C<$^O>
+before using this variable.  (Mnemonic: System-Specific Subprocess Status.
+Also known as $SYSTEM_CHILD_STATUS if you C<use English>.)
 
 =back
 
@@ -404,6 +413,16 @@ Disable unsafe opcodes, or any named opcodes, when compiling Perl code.
 =back
 
 =head1 Modules
+
+=head2 Installation Directories
+
+The I<installperl> script now places the Perl source files for
+extensions in the architecture-specific library directory, which is
+where the shared libraries for extensions have always been.  This
+change is intended to allow administrators to keep the Perl 5.004
+library directory unchanged from a previous version, without running
+the risk of binary incompatibility between extensions' Perl source and
+shared libraries.
 
 =head2 Fcntl
 

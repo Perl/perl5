@@ -65,6 +65,7 @@ sub import {
 	*FORMAT_LINE_BREAK_CHARACTERS
 	*FORMAT_FORMFEED
 	*CHILD_ERROR
+	*SYSTEM_CHILD_STATUS
 	*OS_ERROR
 	*ERRNO
 	*EXTENDED_OS_ERROR
@@ -137,9 +138,10 @@ sub import {
 # Error status.
 
 	*CHILD_ERROR				= *?	;
+	*SYSTEM_CHILD_STATUS			= *^S	;
 	*OS_ERROR				= *!	;
-	*EXTENDED_OS_ERROR			= *^E	;
 	    *ERRNO				= *!	;
+	*EXTENDED_OS_ERROR			= *^E	;
 	*EVAL_ERROR				= *@	;
 
 # Process info.

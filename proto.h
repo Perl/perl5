@@ -243,6 +243,7 @@ char*	my_bcopy _((char* from, char* to, I32 len));
 char*	my_bzero _((char* loc, I32 len));
 #endif
 void	my_exit _((U32 status)) __attribute__((noreturn));
+void	my_failure_exit _((void)) __attribute__((noreturn));
 I32	my_lstat _((void));
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 I32	my_memcmp _((char* s1, char* s2, I32 len));

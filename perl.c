@@ -68,6 +68,7 @@ static void init_perllib _((void));
 static void init_postdump_symbols _((int, char **, char **));
 static void init_predump_symbols _((void));
 static void init_stacks _((void));
+static void my_exit_jump _((void)) __attribute__((noreturn));
 static void nuke_stacks _((void));
 static void open_script _((char *, bool, SV *));
 static void usage _((char *));
@@ -138,6 +139,8 @@ register PerlInterpreter *sv_interp;
 #endif
 
     init_ids();
+
+    STATUS_ALL_SUCCESS;
 
     SET_NUMERIC_STANDARD();
 #if defined(SUBVERSION) && SUBVERSION > 0
@@ -477,18 +480,18 @@ setuid perl scripts securely.\n");
 	op_free(main_root);
     main_root = 0;
 
+    time(&basetime);
+
     switch (Sigsetjmp(top_env,1)) {
     case 1:
-#ifdef VMS
-	statusvalue = 255;
-#else
-	statusvalue = 1;
-#endif
+	STATUS_ALL_FAILURE;
+	/* FALL THROUGH */
     case 2:
+	/* my_exit() was called */
 	curstash = defstash;
 	if (endav)
 	    calllist(endav);
-	return(statusvalue);	/* my_exit() was called */
+	return STATUS_NATIVE_EXPORT;
     case 3:
 	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");
 	return 1;
@@ -524,7 +527,6 @@ setuid perl scripts securely.\n");
 	case 'n':
 	case 'p':
 	case 's':
-	case 'T':
 	case 'u':
 	case 'U':
 	case 'v':
@@ -532,6 +534,11 @@ setuid perl scripts securely.\n");
 	    if (s = moreswitches(s))
 		goto reswitch;
 	    break;
+
+	case 'T':
+	    tainting = TRUE;
+	    s++;
+	    goto reswitch;
 
 	case 'e':
 	    if (euid != uid || egid != gid)
@@ -766,6 +773,7 @@ PerlInterpreter *sv_interp;
 	cxstack_ix = -1;		/* start context stack again */
 	break;
     case 2:
+	/* my_exit() was called */
 	curstash = defstash;
 	if (endav)
 	    calllist(endav);
@@ -774,7 +782,7 @@ PerlInterpreter *sv_interp;
 	if (getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
-	return(statusvalue);		/* my_exit() was called */
+	return STATUS_NATIVE_EXPORT;
     case 3:
 	if (!restartop) {
 	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
@@ -817,24 +825,6 @@ PerlInterpreter *sv_interp;
 
     my_exit(0);
     return 0;
-}
-
-void
-my_exit(status)
-U32 status;
-{
-    register CONTEXT *cx;
-    I32 gimme;
-    SV **newsp;
-
-    statusvalue = FIXSTATUS(status);
-    if (cxstack_ix >= 0) {
-	if (cxstack_ix > 0)
-	    dounwind(0);
-	POPBLOCK(cx,curpm);
-	LEAVE;
-    }
-    Siglongjmp(top_env, 2);
 }
 
 SV*
@@ -1006,11 +996,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	case 0:
 	    break;
 	case 1:
-#ifdef VMS
-	    statusvalue = 255;	/* XXX I don't think we use 1 anymore. */
-#else
-	statusvalue = 1;
-#endif
+	    STATUS_ALL_FAILURE;
 	    /* FALL THROUGH */
 	case 2:
 	    /* my_exit() was called */
@@ -1019,7 +1005,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	    Copy(oldtop, top_env, 1, Sigjmp_buf);
 	    if (statusvalue)
 		croak("Callback called exit");
-	    my_exit(statusvalue);
+	    my_exit_jump();
 	    /* NOTREACHED */
 	case 3:
 	    if (restartop) {
@@ -1115,11 +1101,7 @@ restart:
     case 0:
 	break;
     case 1:
-#ifdef VMS
-	statusvalue = 255;	/* XXX I don't think we use 1 anymore. */
-#else
-    statusvalue = 1;
-#endif
+	STATUS_ALL_FAILURE;
 	/* FALL THROUGH */
     case 2:
 	/* my_exit() was called */
@@ -1128,7 +1110,7 @@ restart:
 	Copy(oldtop, top_env, 1, Sigjmp_buf);
 	if (statusvalue)
 	    croak("Callback called exit");
-	my_exit(statusvalue);
+	my_exit_jump();
 	/* NOTREACHED */
     case 3:
 	if (restartop) {
@@ -1386,7 +1368,8 @@ char *s;
 	s++;
 	return s;
     case 'T':
-	tainting = TRUE;
+	if (!tainting)
+	    croak("Too late for \"-T\" option (try putting it first)");
 	s++;
 	return s;
     case 'u':
@@ -2201,8 +2184,6 @@ register char **env;
 	sv_setpv(GvSV(tmpgv),origfilename);
 	magicname("0", "0", 1);
     }
-    if (tmpgv = gv_fetchpv("\024",TRUE, SVt_PV))
-	time(&basetime);
     if (tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))
 	sv_setpv(GvSV(tmpgv),origargv[0]);
     if (argvgv = gv_fetchpv("ARGV",TRUE, SVt_PVAV)) {
@@ -2425,11 +2406,7 @@ AV* list;
 	    }
 	    break;
 	case 1:
-#ifdef VMS
-	    statusvalue = 255;	/* XXX I don't think we use 1 anymore. */
-#else
-	statusvalue = 1;
-#endif
+	    STATUS_ALL_FAILURE;
 	    /* FALL THROUGH */
 	case 2:
 	    /* my_exit() was called */
@@ -2446,9 +2423,8 @@ AV* list;
 		else
 		    croak("END failed--cleanup aborted");
 	    }
-	    my_exit(statusvalue);
+	    my_exit_jump();
 	    /* NOTREACHED */
-	    return;
 	case 3:
 	    if (!restartop) {
 		PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
@@ -2465,3 +2441,69 @@ AV* list;
     Copy(oldtop, top_env, 1, Sigjmp_buf);
 }
 
+void
+my_exit(status)
+U32 status;
+{
+    switch (status) {
+    case 0:
+	STATUS_ALL_SUCCESS;
+	break;
+    case 1:
+	STATUS_ALL_FAILURE;
+	break;
+    default:
+	STATUS_NATIVE_SET(status);
+	break;
+    }
+    my_exit_jump();
+}
+
+void
+my_failure_exit()
+{
+#ifdef VMS
+    if (vaxc$errno & 1) {
+	if (GETSTATUS_NATIVE & 1)	/* fortuitiously includes "-1" */
+	    SETSTATUS_NATIVE(44);
+    }
+    else {
+	if (!vaxc$errno && errno)	/* someone must have set $^E = 0 */
+	    SETSTATUS_NATIVE(44);
+	else
+	    SETSTATUS_NATIVE(vaxc$errno);
+    }
+#else
+    if (errno & 255)
+	STATUS_POSIX_SET(errno);
+    else if (STATUS_POSIX == 0)
+	STATUS_POSIX_SET(255);
+#endif
+    my_exit_jump();
+}
+
+static void
+my_exit_jump()
+{
+    register CONTEXT *cx;
+    I32 gimme;
+    SV **newsp;
+
+    if (e_tmpname) {
+	if (e_fp) {
+	    PerlIO_close(e_fp);
+	    e_fp = Nullfp;
+	}
+	(void)UNLINK(e_tmpname);
+	Safefree(e_tmpname);
+	e_tmpname = Nullch;
+    }
+
+    if (cxstack_ix >= 0) {
+	if (cxstack_ix > 0)
+	    dounwind(0);
+	POPBLOCK(cx,curpm);
+	LEAVE;
+    }
+    Siglongjmp(top_env, 2);
+}

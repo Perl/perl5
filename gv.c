@@ -666,6 +666,7 @@ I32 sv_type;
     case '\017':
     case '\t':
     case '\020':
+    case '\023':
     case '\024':
     case '\027':
 	if (len > 1)
@@ -701,10 +702,11 @@ I32 sv_type;
 	break;
     case ']':
 	if (len == 1) {
-	    SV *sv;
-	    sv = GvSV(gv);
+	    SV *sv = GvSV(gv);
 	    sv_upgrade(sv, SVt_PVNV);
 	    sv_setpv(sv, patchlevel);
+	    (void)sv_2nv(sv);
+	    SvREADONLY_on(sv);
 	}
 	break;
     }

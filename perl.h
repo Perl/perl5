@@ -408,14 +408,15 @@
 #     include <net/errno.h>
 #   endif
 #endif
-#ifndef VMS
-#   define FIXSTATUS(sts)  (U_L((sts) & 0xffff))
-#   define SHIFTSTATUS(sts) ((sts) >> 8)
-#   define SETERRNO(errcode,vmserrcode) errno = (errcode)
+
+#ifdef VMS
+#   define SETERRNO(errcode,vmserrcode) \
+	STMT_START {			\
+	    set_errno(errcode);		\
+	    set_vaxc_errno(vmserrcode);	\
+	} STMT_END
 #else
-#   define FIXSTATUS(sts)  (U_L(sts))
-#   define SHIFTSTATUS(sts) (sts)
-#   define SETERRNO(errcode,vmserrcode) STMT_START {set_errno(errcode); set_vaxc_errno(vmserrcode);} STMT_END
+#   define SETERRNO(errcode,vmserrcode) errno = (errcode)
 #endif
 
 #ifndef errno
@@ -440,6 +441,35 @@
 		((e) < 0 || (e) >= sys_nerr ? "(unknown)" : sys_errlist[e])
 #       endif
 #   endif
+#endif
+
+#define STATUS_POSIX		statusvalue
+#define STATUS_POSIX_SET(n)	(statusvalue = (n))
+
+#ifdef VMS
+#   define STATUS_NATIVE	statusvalue_vms
+#   define STATUS_NATIVE_EXPORT \
+	((I32)statusvalue_vms == -1 ? 4 : statusvalue_vms)
+#   define STATUS_NATIVE_SET(n)						\
+	STMT_START {							\
+	    statusvalue_vms = (n);					\
+	    if ((I32)statusvalue_vms == -1)				\
+		statusvalue = -1;					\
+	    else if (statusvalue_vms & STS$M_SUCCESS)			\
+		statusvalue = 0;					\
+	    else if ((statusvalue_vms & STS$M_SEVERITY) == 0)		\
+		statusvalue = 1 << 8;					\
+	    else							\
+		statusvalue = (statusvalue_vms & STS$M_SEVERITY) << 8;	\
+	} STMT_END
+#   define STATUS_ALL_SUCCESS	(statusvalue = 0, statusvalue_vms = 1)
+#   define STATUS_ALL_FAILURE	(statusvalue = 1, statusvalue_vms = 4)
+#else
+#   define STATUS_NATIVE	STATUS_POSIX
+#   define STATUS_NATIVE_EXPORT	STATUS_POSIX
+#   define STATUS_NATIVE_SET	STATUS_POSIX_SET
+#   define STATUS_ALL_SUCCESS	STATUS_POSIX_SET(0)
+#   define STATUS_ALL_FAILURE	STATUS_POSIX_SET(1)
 #endif
 
 #ifdef I_SYS_IOCTL
@@ -600,10 +630,6 @@
 #   define SLOPPYDIVIDE
 #endif
 
-#if defined(cray) || defined(convex) || BYTEORDER > 0xffff
-#   define HAS_QUAD
-#endif
-
 #ifdef UV
 #undef UV
 #endif
@@ -621,16 +647,24 @@
     --Andy Dougherty	August 1996
 */
 
-#ifdef HAS_QUAD
-#   ifdef cray
-#	define Quad_t int
+#ifdef cray
+#   define Quad_t int
+#else
+#   ifdef convex
+#	define Quad_t long long
 #   else
-#	if defined(convex)
-#	    define Quad_t long long
+#	if defined(VMS) && defined(__ALPHA)
+#	    define Quad_t __int64
 #	else
-#	    define Quad_t long
+#	    if BYTEORDER > 0xFFFF
+#		define Quad_t long
+#	    endif
 #	endif
 #   endif
+#endif
+
+#ifdef Quad_t
+#   define HAS_QUAD
     typedef Quad_t IV;
     typedef unsigned Quad_t UV;
 #   define IV_MAX PERL_QUAD_MAX
@@ -1677,8 +1711,11 @@ IEXT char *	Iors;			/* $\ */
 IEXT STRLEN	Iorslen;
 IEXT char *	Iofmt;			/* $# */
 IEXT I32	Imaxsysfd IINIT(MAXSYSFD); /* top fd to pass to subprocesses */
-IEXT int	Imultiline;	  /* $*--do strings hold >1 line? */
-IEXT U32	Istatusvalue;	/* $? */
+IEXT int	Imultiline;		/* $*--do strings hold >1 line? */
+IEXT U32	Istatusvalue;		/* $? */
+#ifdef VMS
+IEXT U32	Istatusvalue_vms;	/* $^S */
+#endif
 
 IEXT struct stat Istatcache;		/* _ */
 IEXT GV *	Istatgv;

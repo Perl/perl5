@@ -46,23 +46,26 @@ struct block_sub {
 	cx->blk_sub.dfoutgv = defoutgv;					\
 	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
 
-/* We muck with cxstack_ix since _dec may call a DESTROY, overwriting cx. */
-
 #define POPSUB(cx)							\
-	if (cx->blk_sub.hasargs) {					\
+	{ struct block_sub cxsub;					\
+	  POPSUB1(cx);							\
+	  POPSUB2(); }
+
+#define POPSUB1(cx)							\
+	cxsub = cx->blk_sub;	/* because DESTROY may clobber *cx */
+
+#define POPSUB2()							\
+	if (cxsub.hasargs) {						\
 	    /* put back old @_ */					\
 	    SvREFCNT_dec(GvAV(defgv));					\
-	    GvAV(defgv) = cx->blk_sub.savearray;			\
+	    GvAV(defgv) = cxsub.savearray;				\
 	    /* destroy arg array */					\
-	    av_clear(cx->blk_sub.argarray);				\
-	    AvREAL_off(cx->blk_sub.argarray);				\
+	    av_clear(cxsub.argarray);					\
+	    AvREAL_off(cxsub.argarray);					\
 	}								\
-	if (cx->blk_sub.cv) {						\
-	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth)) {	\
-		cxstack_ix++;						\
-		SvREFCNT_dec((SV*)cx->blk_sub.cv);			\
-		cxstack_ix--;						\
-	    }								\
+	if (cxsub.cv) {							\
+	    if (!(CvDEPTH(cxsub.cv) = cxsub.olddepth))			\
+		SvREFCNT_dec(cxsub.cv);					\
 	}
 
 #define POPFORMAT(cx)							\
@@ -117,14 +120,22 @@ struct block_loop {
 	cx->blk_loop.iterix = -1;
 
 #define POPLOOP(cx)							\
-	newsp		= stack_base + cx->blk_loop.resetsp;		\
-	SvREFCNT_dec(cx->blk_loop.iterlval);				\
-	if (cx->blk_loop.itervar) {					\
-	    SvREFCNT_dec(*cx->blk_loop.itervar);			\
-	    *cx->blk_loop.itervar = cx->blk_loop.itersave;		\
+	{ struct block_loop cxloop;					\
+	  POPLOOP1(cx);							\
+	  POPLOOP2(); }
+
+#define POPLOOP1(cx)							\
+	cxloop = cx->blk_loop;	/* because DESTROY may clobber *cx */
+
+#define POPLOOP2()							\
+	newsp = stack_base + cxloop.resetsp;				\
+	SvREFCNT_dec(cxloop.iterlval);					\
+	if (cxloop.itervar) {						\
+	    SvREFCNT_dec(*cxloop.itervar);				\
+	    *cxloop.itervar = cxloop.itersave;				\
 	}								\
-	if (cx->blk_loop.iterary && cx->blk_loop.iterary != curstack)	\
-	    SvREFCNT_dec(cx->blk_loop.iterary);
+	if (cxloop.iterary && cxloop.iterary != curstack)		\
+	    SvREFCNT_dec(cxloop.iterary);
 
 /* context common to subroutines, evals and loops */
 struct block {

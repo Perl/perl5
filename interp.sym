@@ -129,6 +129,7 @@ statcache
 statgv
 statname
 statusvalue
+statusvalue_vms
 stdingv
 strchop
 strtab

@@ -976,21 +976,8 @@ char *message;
     }
     PerlIO_printf(PerlIO_stderr(), "%s",message);
     PerlIO_flush(PerlIO_stderr());
-    if (e_tmpname) {
-	if (e_fp) {
-	    PerlIO_close(e_fp);
-	    e_fp = Nullfp;
-	}
-	(void)UNLINK(e_tmpname);
-	Safefree(e_tmpname);
-	e_tmpname = Nullch;
-    }
-    statusvalue = SHIFTSTATUS(statusvalue);
-#ifdef VMS
-    my_exit((U32)vaxc$errno?vaxc$errno:errno?errno:statusvalue?statusvalue:SS$_ABORT);
-#else
-    my_exit((I32)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
-#endif
+    my_failure_exit();
+    /* NOTREACHED */
     return 0;
 }
 
@@ -1293,14 +1280,16 @@ PP(pp_leaveloop)
 {
     dSP;
     register CONTEXT *cx;
+    struct block_loop cxloop;
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
     SV **mark;
 
     POPBLOCK(cx,newpm);
+    POPLOOP1(cx);	/* Delay POPLOOP2 until stack values are safe */
+
     mark = newsp;
-    POPLOOP(cx);
     if (gimme == G_SCALAR) {
 	if (op->op_private & OPpLEAVE_VOID)
 	    ;
@@ -1315,12 +1304,16 @@ PP(pp_leaveloop)
 	while (mark < SP)
 	    *++newsp = sv_mortalcopy(*++mark);
     }
-    curpm = newpm;	/* Don't pop $1 et al till now */
-    sp = newsp;
+    SP = newsp;
+    PUTBACK;
+
+    POPLOOP2();		/* Stack values are safe: release loop vars ... */
+    curpm = newpm;	/* ... and pop $1 et al */
+
     LEAVE;
     LEAVE;
 
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_return)
@@ -1328,6 +1321,8 @@ PP(pp_return)
     dSP; dMARK;
     I32 cxix;
     register CONTEXT *cx;
+    struct block_sub cxsub;
+    bool popsub2 = FALSE;
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
@@ -1352,7 +1347,8 @@ PP(pp_return)
     POPBLOCK(cx,newpm);
     switch (cx->cx_type) {
     case CXt_SUB:
-	POPSUB(cx);
+	POPSUB1(cx);	/* Delay POPSUB2 until stack values are safe */
+	popsub2 = TRUE;
 	break;
     case CXt_EVAL:
 	POPEVAL(cx);
@@ -1371,16 +1367,23 @@ PP(pp_return)
 
     if (gimme == G_SCALAR) {
 	if (MARK < SP)
-	    *++newsp = sv_mortalcopy(*SP);
+	    *++newsp = (popsub2 && SvTEMP(*SP))
+			? *SP : sv_mortalcopy(*SP);
 	else
 	    *++newsp = &sv_undef;
     }
     else {
-	while (MARK < SP)
-	    *++newsp = sv_mortalcopy(*++MARK);
+	while (++MARK <= SP)
+	    *++newsp = (popsub2 && SvTEMP(*MARK))
+			? *MARK : sv_mortalcopy(*MARK);
     }
-    curpm = newpm;	/* Don't pop $1 et al till now */
     stack_sp = newsp;
+
+    /* Stack values are safe: */
+    if (popsub2) {
+	POPSUB2();	/* release CV and @_ ... */
+    }
+    curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVE;
     return pop_return();
@@ -1391,6 +1394,9 @@ PP(pp_last)
     dSP;
     I32 cxix;
     register CONTEXT *cx;
+    struct block_loop cxloop;
+    struct block_sub cxsub;
+    I32 pop2 = 0;
     I32 gimme;
     I32 optype;
     OP *nextop;
@@ -1414,16 +1420,18 @@ PP(pp_last)
     POPBLOCK(cx,newpm);
     switch (cx->cx_type) {
     case CXt_LOOP:
-	POPLOOP(cx);
+	POPLOOP1(cx);	/* Delay POPLOOP2 until stack values are safe */
+	pop2 = CXt_LOOP;
 	nextop = cx->blk_loop.last_op->op_next;
 	LEAVE;
 	break;
-    case CXt_EVAL:
-	POPEVAL(cx);
+    case CXt_SUB:
+	POPSUB1(cx);	/* Delay POPSUB2 until stack values are safe */
+	pop2 = CXt_SUB;
 	nextop = pop_return();
 	break;
-    case CXt_SUB:
-	POPSUB(cx);
+    case CXt_EVAL:
+	POPEVAL(cx);
 	nextop = pop_return();
 	break;
     default:
@@ -1432,20 +1440,33 @@ PP(pp_last)
     }
 
     if (gimme == G_SCALAR) {
-	if (mark < SP)
-	    *++newsp = sv_mortalcopy(*SP);
+	if (MARK < SP)
+	    *++newsp = ((pop2 == CXt_SUB) && SvTEMP(*SP))
+			? *SP : sv_mortalcopy(*SP);
 	else
 	    *++newsp = &sv_undef;
     }
     else {
-	while (mark < SP)
-	    *++newsp = sv_mortalcopy(*++mark);
+	while (++MARK <= SP)
+	    *++newsp = ((pop2 == CXt_SUB) && SvTEMP(*MARK))
+			? *MARK : sv_mortalcopy(*MARK);
     }
-    curpm = newpm;	/* Don't pop $1 et al till now */
-    sp = newsp;
+    SP = newsp;
+    PUTBACK;
+
+    /* Stack values are safe: */
+    switch (pop2) {
+    case CXt_LOOP:
+	POPLOOP2();	/* release loop vars ... */
+	break;
+    case CXt_SUB:
+	POPSUB2();	/* release CV and @_ ... */
+	break;
+    }
+    curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVE;
-    RETURNOP(nextop);
+    return nextop;
 }
 
 PP(pp_next)

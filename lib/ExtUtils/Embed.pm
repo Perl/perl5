@@ -1,4 +1,4 @@
-# $Id: Embed.pm,v 1.21 1996/11/29 17:26:23 dougm Exp $
+# $Id: Embed.pm,v 1.22 1997/01/30 00:37:09 dougm Exp $
 require 5.002;
 
 package ExtUtils::Embed;
@@ -17,7 +17,7 @@ use vars qw(@ISA @EXPORT $VERSION
 	    );
 use strict;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.21 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.22 $ =~ /(\d+)\.(\d+)/);
 #for the namespace change
 $Devel::embed::VERSION = "99.99";
 
@@ -206,7 +206,7 @@ sub ldopts {
 
     my $ld_or_bs = $bsloadlibs || $ldloadlibs;
     print STDERR "bs: $bsloadlibs ** ld: $ldloadlibs" if $Verbose;
-    my $linkage = "$Config{ldflags} @archives $ld_or_bs";
+    my $linkage = "$Config{ccdlflags} $Config{ldflags} @archives $ld_or_bs";
     print STDERR "ldopts: '$linkage'\n" if $Verbose;
 
     return $linkage if scalar @_;
@@ -227,7 +227,6 @@ sub perl_inc {
 
 sub ccopts {
    ccflags;
-   ccdlflags;
    perl_inc;
 }
 

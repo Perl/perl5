@@ -13,6 +13,7 @@
 #include <libdef.h>  /* status codes for various places */
 #include <rmsdef.h>  /* at which errno and vaxc$errno are */
 #include <ssdef.h>   /* explicitly set in the perl source code */
+#include <stsdef.h>
 
 /* Suppress compiler warnings from DECC for VMS-specific extensions:
  * GLOBALEXT, NOSHAREEXT, READONLYEXT: global[dr]ef declarations
@@ -483,7 +484,7 @@ struct tm *my_gmtime _((const time_t *));
 I32	cando_by_name _((I32, I32, char *));
 int	flex_fstat _((int, struct stat *));
 int	flex_stat _((char *, struct stat *));
-int	trim_unixpath _((char *, char*));
+int	trim_unixpath _((char *, char*, int));
 int	my_vfork _(());
 bool	vms_do_aexec _((SV *, SV **, SV **));
 bool	vms_do_exec _((char *));

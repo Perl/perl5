@@ -375,6 +375,7 @@
 #define my_bzero		Perl_my_bzero
 #define my_chsize		Perl_my_chsize
 #define my_exit			Perl_my_exit
+#define my_failure_exit		Perl_my_failure_exit
 #define my_htonl		Perl_my_htonl
 #define my_lstat		Perl_my_lstat
 #define my_memcmp		Perl_my_memcmp
@@ -1299,6 +1300,7 @@
 #define statgv			(curinterp->Istatgv)
 #define statname		(curinterp->Istatname)
 #define statusvalue		(curinterp->Istatusvalue)
+#define statusvalue_vms		(curinterp->Istatusvalue_vms)
 #define stdingv			(curinterp->Istdingv)
 #define strchop			(curinterp->Istrchop)
 #define strtab			(curinterp->Istrtab)
@@ -1450,6 +1452,7 @@
 #define Istatgv			statgv
 #define Istatname		statname
 #define Istatusvalue		statusvalue
+#define Istatusvalue_vms	statusvalue_vms
 #define Istdingv		stdingv
 #define Istrchop		strchop
 #define Istrtab			strtab
@@ -1609,6 +1612,7 @@
 #define statgv			Perl_statgv
 #define statname		Perl_statname
 #define statusvalue		Perl_statusvalue
+#define statusvalue_vms		Perl_statusvalue_vms
 #define stdingv			Perl_stdingv
 #define strchop			Perl_strchop
 #define strtab			Perl_strtab

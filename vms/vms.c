@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 14-Oct-1996 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.3.7
+ * Last revised: 29-Jan-1997 by Charles Bailey  bailey@genetics.upenn.edu
+ * Version: 5.3.24
  */
 
 #include <acedef.h>
@@ -28,7 +28,8 @@
 #include <shrdef.h>
 #include <ssdef.h>
 #include <starlet.h>
-#include <stsdef.h>
+#include <strdef.h>
+#include <str$routines.h>
 #include <syidef.h>
 #include <uaidef.h>
 #include <uicdef.h>
@@ -1339,7 +1340,11 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
         if ( !(cp1 = strrchr(dir,'/')) &&
              !(cp1 = strrchr(dir,']')) &&
              !(cp1 = strrchr(dir,'>')) ) cp1 = dir;
-        if ((cp2 = strchr(cp1,'.')) != NULL) {
+        if ((cp2 = strchr(cp1,'.')) != NULL &&
+            (*(cp2-1) != '/' ||                /* Trailing '.', '..', */
+             !(*(cp2+1) == '\0' ||             /* or '...' are dirs.  */
+              (*(cp2+1) == '.' && *(cp2+2) == '\0') ||
+              (*(cp2+1) == '.' && *(cp2+2) == '.' && *(cp2+3) == '\0')))) {
           int ver; char *cp3;
           if (!*(cp2+1) || toupper(*(cp2+1)) != 'D' ||  /* Wrong type. */
               !*(cp2+2) || toupper(*(cp2+2)) != 'I' ||  /* Bzzt. */
@@ -1482,7 +1487,7 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
 {
   static char __tounixspec_retbuf[NAM$C_MAXRSS+1];
   char *dirend, *rslt, *cp1, *cp2, *cp3, tmp[NAM$C_MAXRSS+1];
-  int devlen, dirlen, retlen = NAM$C_MAXRSS+1, dashes = 0;
+  int devlen, dirlen, retlen = NAM$C_MAXRSS+1, expand = 0;
 
   if (spec == NULL) return NULL;
   if (strlen(spec) > NAM$C_MAXRSS) return NULL;
@@ -1492,9 +1497,13 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
     cp1 = strchr(spec,'[');
     if (!cp1) cp1 = strchr(spec,'<');
     if (cp1) {
-      for (cp1++; *cp1 == '-'; cp1++) dashes++; /* VMS  '-' ==> Unix '../' */
+      for (cp1++; *cp1; cp1++) {
+        if (*cp1 == '-') expand++; /* VMS  '-' ==> Unix '../' */
+        if (*cp1 == '.' && *(cp1+1) == '.' && *(cp1+2) == '.')
+          { expand++; cp1 +=2; } /* VMS '...' ==> Unix '/.../' */
+      }
     }
-    New(7015,rslt,retlen+2+2*dashes,char);
+    New(7015,rslt,retlen+2+2*expand,char);
   }
   else rslt = __tounixspec_retbuf;
   if (strchr(spec,'/') != NULL) {
@@ -1517,11 +1526,10 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
   else {  /* the VMS spec begins with directories */
     cp2++;
     if (*cp2 == ']' || *cp2 == '>') {
-      strcpy(rslt,"./");
+      *(cp1++) = '.'; *(cp1++) = '/'; *(cp1++) = '\0';
       return rslt;
     }
-    else if ( *cp2 != '.' && *cp2 != '-') {
-      *(cp1++) = '/';           /* add the implied device into the Unix spec */
+    else if ( *cp2 != '.' && *cp2 != '-') { /* add the implied device */
       if (getcwd(tmp,sizeof tmp,1) == NULL) {
         if (ts) Safefree(rslt);
         return NULL;
@@ -1532,26 +1540,36 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
         *(cp3++) = '\0';
         if (strchr(cp3,']') != NULL) break;
       } while (((cp3 = my_getenv(tmp)) != NULL) && strcpy(tmp,cp3));
-      cp3 = tmp;
-      while (*cp3) *(cp1++) = *(cp3++);
-      *(cp1++) = '/';
-      if (ts &&
+      if (ts && !buf &&
           ((devlen = strlen(tmp)) + (dirlen = strlen(cp2)) + 1 > retlen)) {
-        int offset = cp1 - rslt;
-
         retlen = devlen + dirlen;
-        Renew(rslt,retlen+1+2*dashes,char);
-        cp1 = rslt + offset;
+        Renew(rslt,retlen+1+2*expand,char);
+        cp1 = rslt;
       }
+      cp3 = tmp;
+      *(cp1++) = '/';
+      while (*cp3) {
+        *(cp1++) = *(cp3++);
+        if (cp1 - rslt > NAM$C_MAXRSS && !ts && !buf) return NULL; /* No room */
+      }
+      *(cp1++) = '/';
     }
-    else if (*cp2 == '.') cp2++;
+    else if ( *cp2 == '.') {
+      if (*(cp2+1) == '.' && *(cp2+2) == '.') {
+        *(cp1++) = '.'; *(cp1++) = '.'; *(cp1++) = '.'; *(cp1++) = '/';
+        cp2 += 3;
+      }
+      else cp2++;
+    }
   }
   for (; cp2 <= dirend; cp2++) {
     if (*cp2 == ':') {
       *(cp1++) = '/';
       if (*(cp2+1) == '[') cp2++;
     }
-    else if (*cp2 == ']' || *cp2 == '>') *(cp1++) = '/';
+    else if (*cp2 == ']' || *cp2 == '>') {
+      if (*(cp1-1) != '/') *(cp1++) = '/'; /* Don't double after ellipsis */
+    }
     else if (*cp2 == '.') {
       *(cp1++) = '/';
       if (*(cp2+1) == ']' || *(cp2+1) == '>') {
@@ -1559,6 +1577,10 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
                *(cp2+1) == '[' || *(cp2+1) == '<') cp2++;
         if (!strncmp(cp2,"[000000",7) && (*(cp2+7) == ']' ||
             *(cp2+7) == '>' || *(cp2+7) == '.')) cp2 += 7;
+      }
+      else if ( *(cp2+1) == '.' && *(cp2+2) == '.') {
+        *(cp1++) = '.'; *(cp1++) = '.'; *(cp1++) = '.'; *(cp1++) ='/';
+        cp2 += 2;
       }
     }
     else if (*cp2 == '-') {
@@ -1609,9 +1631,10 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
     else strcpy(rslt,path);
     return rslt;
   }
-  if (*(dirend+1) == '.') {  /* do we have trailing "/." or "/.."? */
+  if (*(dirend+1) == '.') {  /* do we have trailing "/." or "/.." or "/..."? */
     if (!*(dirend+2)) dirend +=2;
     if (*(dirend+2) == '.' && !*(dirend+3)) dirend += 3;
+    if (*(dirend+2) == '.' && *(dirend+3) == '.' && !*(dirend+4)) dirend += 4;
   }
   cp1 = rslt;
   cp2 = path;
@@ -1660,6 +1683,12 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
         *(cp1++) = '-';                                 /* "../" --> "-" */
         cp2 += 3;
       }
+      else if (*(cp2+1) == '.' && *(cp2+2) == '.' &&
+               (*(cp2+3) == '/' || *(cp2+3) == '\0')) {
+        *(cp1++) = '.'; *(cp1++) = '.'; *(cp1++) = '.'; /* ".../" --> "..." */
+        if (!*(cp2+4)) *(cp1++) = '.'; /* Simulate trailing '/' for later */
+        cp2 += 4;
+      }
       if (cp2 > dirend) cp2 = dirend;
     }
     else *(cp1++) = '.';
@@ -1686,6 +1715,16 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
         }
         cp2 += 2;
         if (cp2 == dirend) break;
+      }
+      else if ( *(cp2+1) == '.' && *(cp2+2) == '.' &&
+                (*(cp2+3) == '/' || *(cp2+3) == '\0') ) {
+        if (*(cp1-1) != '.') *(cp1++) = '.'; /* May already have 1 from '/' */
+        *(cp1++) = '.'; *(cp1++) = '.'; /* ".../" --> "..." */
+        if (!*(cp2+3)) { 
+          *(cp1++) = '.';  /* Simulate trailing '/' */
+          cp2 += 2;  /* for loop will incr this to == dirend */
+        }
+        else cp2 += 3;  /* Trailing '/' was there, so skip it, too */
       }
       else *(cp1++) = '_';  /* fix up syntax - '.' in name not allowed */
     }
@@ -2132,7 +2171,7 @@ unsigned long int zero = 0, sts;
 	for (c = string; *c; ++c)
 	    if (isupper(*c))
 		*c = tolower(*c);
-	if (isunix) trim_unixpath(string,item);
+	if (isunix) trim_unixpath(string,item,1);
 	add_item(head, tail, string, count);
 	++expcount;
 	}
@@ -2289,23 +2328,26 @@ unsigned long int flags = 17, one = 1, retsts;
  * of whether input filespec was VMS-style or Unix-style.
  *
  * fspec is filespec to be trimmed, and wildspec is wildcard spec used to
- * determine prefix (both may be in VMS or Unix syntax).
+ * determine prefix (both may be in VMS or Unix syntax).  opts is a bit
+ * vector of options; at present, only bit 0 is used, and if set tells
+ * trim unixpath to try the current default directory as a prefix when
+ * presented with a possibly ambiguous ... wildcard.
  *
  * Returns !=0 on success, with trimmed filespec replacing contents of
  * fspec, and 0 on failure, with contents of fpsec unchanged.
  */
-/*{{{int trim_unixpath(char *fspec, char *wildspec)*/
+/*{{{int trim_unixpath(char *fspec, char *wildspec, int opts)*/
 int
-trim_unixpath(char *fspec, char *wildspec)
+trim_unixpath(char *fspec, char *wildspec, int opts)
 {
   char unixified[NAM$C_MAXRSS+1], unixwild[NAM$C_MAXRSS+1],
-       *template, *base, *cp1, *cp2;
-  register int tmplen, reslen = 0;
+       *template, *base, *end, *cp1, *cp2;
+  register int tmplen, reslen = 0, dirs = 0;
 
   if (!wildspec || !fspec) return 0;
   if (strpbrk(wildspec,"]>:") != NULL) {
     if (do_tounixspec(wildspec,unixwild,0) == NULL) return 0;
-    else template = unixified;
+    else template = unixwild;
   }
   else template = wildspec;
   if (strpbrk(fspec,"]>:") != NULL) {
@@ -2327,63 +2369,112 @@ trim_unixpath(char *fspec, char *wildspec)
     return 1;
   }
 
-  /* Find prefix to template consisting of path elements without wildcards */
-  if ((cp1 = strpbrk(template,"*%?")) == NULL)
-    for (cp1 = template; *cp1; cp1++) ;
-  else while (cp1 > template && *cp1 != '/') cp1--;
-  for (cp2 = base; *cp2; cp2++) ;  /* Find end of resultant filespec */
-
-  /* Wildcard was in first element, so we don't have a reliable string to
-   * match against.  Guess where to trim resultant filespec by counting
-   * directory levels in the Unix template.  (We could do this instead of
-   * string matching in all cases, since Unix doesn't have a ... wildcard
-   * that can expand into multiple levels of subdirectory, but we try for
-   * the string match so our caller can interpret foo/.../bar.* as
-   * [.foo...]bar.* if it wants, and only get burned if there was a
-   * wildcard in the first word (in which case, caveat caller). */
-  if (cp1 == template) { 
-    int subdirs = 0;
-    for ( ; *cp1; cp1++) if (*cp1 == '/') subdirs++;
-    /* need to back one more '/' than in template, to pick up leading dirname */
-    subdirs++;
-    while (cp2 > base) {
-      if (*cp2 == '/') subdirs--;
-      if (!subdirs) break;  /* quit without decrement when we hit last '/' */
-      cp2--;
-    }
-    /* ran out of directories on resultant; allow for already trimmed
-     * resultant, which hits start of string looking for leading '/' */
-    if (subdirs && (cp2 != base || subdirs != 1)) return 0;
-    /* Move past leading '/', if there is one */
-    base = cp2 + (*cp2 == '/' ? 1 : 0);
-    tmplen = strlen(base);
-    if (reslen && tmplen > reslen) return 0;  /* not enough space */
-    memmove(fspec,base,tmplen+1);  /* copy result to fspec, with trailing NUL */
+  for (end = base; *end; end++) ;  /* Find end of resultant filespec */
+  if ((cp1 = strstr(template,".../")) == NULL) { /* No ...; just count elts */
+    for (cp1 = template; *cp1; cp1++) if (*cp1 == '/') dirs++;
+    for (cp1 = end ;cp1 >= base; cp1--)
+      if ((*cp1 == '/') && !dirs--) /* postdec so we get front of rel path */
+        { cp1++; break; }
+    if (cp1 != fspec) memmove(fspec,cp1, end - cp1 + 1);
     return 1;
   }
-  /* We have a prefix string of complete directory names, so we
-   * try to find it on the resultant filespec */
-  else { 
-    tmplen = cp1 - template;
-    if (!memcmp(base,template,tmplen)) { /* Nothing before prefix; we're done */
-      if (reslen) { /* we converted to Unix syntax; copy result over */
-        tmplen = cp2 - base;
-        if (tmplen > reslen) return 0;  /* not enough space */
-        memmove(fspec,base,tmplen+1);  /* Copy trimmed spec + trailing NUL */
-      }
-      return 1; 
-    }
-    for ( ; cp2 - base > tmplen; base++) {
-       if (*base != '/') continue;
-       if (!memcmp(base + 1,template,tmplen)) break;
-    }
+  else {
+    char tpl[NAM$C_MAXRSS+1], lcres[NAM$C_MAXRSS+1];
+    char *front, *nextell, *lcend, *lcfront, *ellipsis = cp1;
+    int ells = 1, totells, segdirs, match;
+    struct dsc$descriptor_s wilddsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, tpl},
+                            resdsc =  {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
 
-    if (cp2 - base == tmplen) return 0;  /* Not there - not good */
-    base++;  /* Move past leading '/' */
-    if (reslen && cp2 - base > reslen) return 0;  /* not enough space */
-    /* Copy down remaining portion of filespec, including trailing NUL */
-    memmove(fspec,base,cp2 - base + 1);
+    while ((cp1 = strstr(ellipsis+4,".../")) != NULL) {ellipsis = cp1; ells++;}
+    totells = ells;
+    for (cp1 = ellipsis+4; *cp1; cp1++) if (*cp1 == '/') dirs++;
+    if (ellipsis == template && opts & 1) {
+      /* Template begins with an ellipsis.  Since we can't tell how many
+       * directory names at the front of the resultant to keep for an
+       * arbitrary starting point, we arbitrarily choose the current
+       * default directory as a starting point.  If it's there as a prefix,
+       * clip it off.  If not, fall through and act as if the leading
+       * ellipsis weren't there (i.e. return shortest possible path that
+       * could match template).
+       */
+      if (getcwd(tpl, sizeof tpl,0) == NULL) return 0;
+      for (cp1 = tpl, cp2 = base; *cp1 && *cp2; cp1++,cp2++)
+        if (_tolower(*cp1) != _tolower(*cp2)) break;
+      segdirs = dirs - totells;  /* Min # of dirs we must have left */
+      for (front = cp2+1; *front; front++) if (*front == '/') segdirs--;
+      if (*cp1 == '\0' && *cp2 == '/' && segdirs < 1) {
+        memcpy(fspec,cp2+1,end - cp2);
+        return 1;
+      }
+    }
+    /* First off, back up over constant elements at end of path */
+    if (dirs) {
+      for (front = end ; front >= base; front--)
+         if (*front == '/' && !dirs--) { front++; break; }
+    }
+    for (cp1=template,cp2=lcres; *cp1 && cp2 <= lcend + sizeof lcend; 
+         cp1++,cp2++) *cp2 = _tolower(*cp1);  /* Make lc copy for match */
+    if (cp1 != '\0') return 0;  /* Path too long. */
+    lcend = cp2;
+    *cp2 = '\0';  /* Pick up with memcpy later */
+    lcfront = lcres + (front - base);
+    /* Now skip over each ellipsis and try to match the path in front of it. */
+    while (ells--) {
+      for (cp1 = ellipsis - 2; cp1 >= template; cp1--)
+        if (*(cp1)   == '.' && *(cp1+1) == '.' &&
+            *(cp1+2) == '.' && *(cp1+3) == '/'    ) break;
+      if (cp1 < template) break; /* template started with an ellipsis */
+      if (cp1 + 4 == ellipsis) { /* Consecutive ellipses */
+        ellipsis = cp1; continue;
+      }
+      wilddsc.dsc$w_length = resdsc.dsc$w_length = ellipsis - 1 - cp1;
+      nextell = cp1;
+      for (segdirs = 0, cp2 = tpl;
+           cp1 <= ellipsis - 1 && cp2 <= tpl + sizeof tpl;
+           cp1++, cp2++) {
+         if (*cp1 == '?') *cp2 = '%'; /* Substitute VMS' wildcard for Unix' */
+         else *cp2 = _tolower(*cp1);  /* else lowercase for match */
+         if (*cp2 == '/') segdirs++;
+      }
+      if (cp1 != ellipsis - 1) return 0; /* Path too long */
+      /* Back up at least as many dirs as in template before matching */
+      for (cp1 = lcfront - 1; segdirs && cp1 >= lcres; cp1--)
+        if (*cp1 == '/' && !segdirs--) { cp1++; break; }
+      for (match = 0; cp1 > lcres;) {
+        resdsc.dsc$a_pointer = cp1;
+        if (str$match_wild(&wilddsc,&resdsc) == STR$_MATCH) { 
+          match++;
+          if (match == 1) lcfront = cp1;
+        }
+        for ( ; cp1 >= lcres; cp1--) if (*cp1 == '/') { cp1++; break; }
+      }
+      if (!match) return 0;  /* Can't find prefix ??? */
+      if (match > 1 && opts & 1) {
+        /* This ... wildcard could cover more than one set of dirs (i.e.
+         * a set of similar dir names is repeated).  If the template
+         * contains more than 1 ..., upstream elements could resolve the
+         * ambiguity, but it's not worth a full backtracking setup here.
+         * As a quick heuristic, clip off the current default directory
+         * if it's present to find the trimmed spec, else use the
+         * shortest string that this ... could cover.
+         */
+        char def[NAM$C_MAXRSS+1], *st;
+
+        if (getcwd(def, sizeof def,0) == NULL) return 0;
+        for (cp1 = def, cp2 = base; *cp1 && *cp2; cp1++,cp2++)
+          if (_tolower(*cp1) != _tolower(*cp2)) break;
+        segdirs = dirs - totells;  /* Min # of dirs we must have left */
+        for (st = cp2+1; *st; st++) if (*st == '/') segdirs--;
+        if (*cp1 == '\0' && *cp2 == '/') {
+          memcpy(fspec,cp2+1,end - cp2);
+          return 1;
+        }
+        /* Nope -- stick with lcfront from above and keep going. */
+      }
+    }
+    memcpy(fspec,base + (lcfront - lcres), lcend - lcfront + 1);
     return 1;
+    ellipsis = nextell;
   }
 
 }  /* end of trim_unixpath() */
