@@ -477,7 +477,7 @@ recv		recv			ck_fun		imst	F R S S
 eof		eof			ck_eof		is	F?
 tell		tell			ck_fun		st	F?
 seek		seek			ck_fun		s	F S S
-truncate	truncate		ck_trunc	is	S S
+truncate	truncate		ck_trunc	is	F S
 
 fcntl		fcntl			ck_fun		st	F S S
 ioctl		ioctl			ck_fun		st	F S S
