@@ -1793,7 +1793,7 @@ Perl_sbrk(int size)
 #  endif
       got = (IV)SYSTEM_ALLOC(size);
 #  if NEEDED_ALIGNMENT > SYSTEM_ALLOC_ALIGNMENT
-      got = (got + NEEDED_ALIGNMENT - 1) & (NEEDED_ALIGNMENT - 1);
+      got = (got + NEEDED_ALIGNMENT - 1) & ~(NEEDED_ALIGNMENT - 1);
 #  endif
       if (small) {
 	/* Chunk is small, register the rest for future allocs. */
