@@ -161,6 +161,9 @@ char *s;
 
 	db.dsize = 0;
 	db.dptr = (char *) malloc(strlen(s) * sizeof(char));
+	if (!db.dptr)
+	    oops("cannot get memory");
+
 	for (p = db.dptr; *s != '\0'; p++, db.dsize++, s++) {
 		if (*s == '\\') {
 			if (*++s == 'n')
@@ -198,6 +201,8 @@ datum db;
 	char *p1, *p2;
 
 	buf = (char *) malloc((db.dsize + 1) * sizeof(char));
+	if (!buf)
+	    oops("cannot get memory");
 	for (p1 = buf, p2 = db.dptr; *p2 != '\0'; *p1++ = *p2++);
 	*p1 = '\0';
 	return buf;
@@ -285,7 +290,7 @@ char **argv;
 		}
 	}
 
-	if (giveusage | what == YOW | argn < 1) {
+	if (giveusage || what == YOW || argn < 1) {
 		fprintf(stderr, "Usage: %s databse [-m r|w|rw] [-crtx] -a|-d|-f|-F|-s [key [content]]\n", argv[0]);
 		exit(-1);
 	}

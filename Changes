@@ -79,6 +79,248 @@ Version 5.005_57        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3438] By: gsar                                  on 1999/05/20  16:41:01
+        Log: perlport 1.41 update from Chris Nandor <pudge@pobox.com>
+     Branch: perl
+           ! pod/perlport.pod
+____________________________________________________________________________
+[  3437] By: jhi                                   on 1999/05/20  07:14:39
+        Log: Patches to fflushing in SunOS 4 from Andy Dougherty
+             (via private email).
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+           ! config_h.SH hints/sunos_4_1.sh
+____________________________________________________________________________
+[  3436] By: gsar                                  on 1999/05/20  05:18:26
+        Log: various little nits
+     Branch: perl
+	   ! doop.c ext/SDBM_File/sdbm/dba.c ext/SDBM_File/sdbm/dbd.c
+	   ! ext/SDBM_File/sdbm/dbe.c os2/os2.c pod/perldiag.pod pp.c
+           ! win32/perlhost.h win32/win32.c x2p/walk.c
+____________________________________________________________________________
+[  3435] By: jhi                                   on 1999/05/18  16:25:49
+        Log: From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             To: perl5-porters@perl.org
+             Subject: installperl
+             Date: Fri, 14 May 1999 21:34:58 +0100
+             Message-Id: <199905142034.VAA00865@crypt.compulink.co.uk>
+     Branch: cfgperl
+           ! installperl
+____________________________________________________________________________
+[  3434] By: jhi                                   on 1999/05/17  21:25:54
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          +> lib/ExtUtils/MM_Cygwin.pm
+           - cygwin32/impure_ptr.c
+	  !> MANIFEST README.cygwin32 XSUB.h cygwin32/Makefile.SHs
+	  !> cygwin32/perlld.in dosish.h ext/DynaLoader/dl_cygwin32.xs
+	  !> ext/POSIX/POSIX.xs gv.c hints/cygwin32.sh installman
+	  !> installperl perl.h pod/perldiag.pod pp.c pp_hot.c util.c
+          !> x2p/find2perl.PL
+____________________________________________________________________________
+[  3433] By: gsar                                  on 1999/05/17  09:49:01
+        Log: integrate cfgperl changes into mainline
+     Branch: perl
+	  !> Configure INSTALL config_h.SH configure.com embed.h
+	  !> ext/Devel/Peek/Peek.xs ext/Socket/Socket.xs global.sym
+	  !> hints/dec_osf.sh objXSUB.h perl.h pod/perldiag.pod proto.h
+          !> util.c
+____________________________________________________________________________
+[  3432] By: gsar                                  on 1999/05/17  09:06:45
+        Log: emit more appropriate diagnostic for failed glob (variant
+             of patch suggested by Graham Barr)
+     Branch: perl
+           ! gv.c pod/perldiag.pod pp.c pp_hot.c
+____________________________________________________________________________
+[  3431] By: gsar                                  on 1999/05/17  08:38:09
+        Log: From: "Todd C. Miller" <Todd.Miller@courtesan.com>
+             Date: Thu, 13 May 1999 22:18:43 -0600 (MDT)
+             Message-Id: <199905140418.WAA18826@xerxes.courtesan.com>
+             Subject: find2perl does not grok the 'c' suffix to the -size argument
+     Branch: perl
+           ! x2p/find2perl.PL
+____________________________________________________________________________
+[  3430] By: gsar                                  on 1999/05/17  08:26:21
+        Log: additional cleanups for cygwin32 port
+             From: "Fifer, Eric" <EFifer@sanwaint.com>
+             Date: Wed, 12 May 1999 20:25:54 +0100
+             Message-ID: <71E287AB0D94D111BBD600600849EC8185EDAF@POST>
+             Subject: [PATCH]perl5.005_03 (CORE) cygwin32 port
+     Branch: perl
+           + lib/ExtUtils/MM_Cygwin.pm
+           - cygwin32/impure_ptr.c
+	   ! MANIFEST README.cygwin32 XSUB.h cygwin32/Makefile.SHs
+	   ! cygwin32/perlld.in dosish.h ext/DynaLoader/dl_cygwin32.xs
+	   ! ext/POSIX/POSIX.xs hints/cygwin32.sh installman installperl
+           ! perl.h util.c
+____________________________________________________________________________
+[  3429] By: gsar                                  on 1999/05/17  08:01:04
+        Log: From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 12 May 1999 11:44:11 -0400 (EDT)
+             Message-Id: <Pine.GSU.4.05.9905121136520.25150-100000@newton.phys>
+             Subject: [PATCH] (Was Re: SunOS4.1 compilation error)
+     Branch: perl
+           ! INSTALL
+____________________________________________________________________________
+[  3428] By: jhi                                   on 1999/05/17  07:03:26
+        Log: Integrate from mainperl modulo the Socket.xs change.
+     Branch: cfgperl
+	  !> ext/Socket/Socket.xs op.c win32/include/sys/socket.h
+          !> win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  3427] By: jhi                                   on 1999/05/16  22:09:11
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: perl5-porters@perl.org (Mailing list Perl5)
+             Subject: [PATCH 5.005_56] Devel::Peek::mstat not working
+             Date: Sun, 16 May 1999 01:28:18 -0400 (EDT)
+             Message-Id: <199905160528.BAA23376@monk.mps.ohio-state.edu>
+     Branch: cfgperl
+           ! ext/Devel/Peek/Peek.xs
+____________________________________________________________________________
+[  3426] By: jhi                                   on 1999/05/16  22:07:11
+        Log: From: Mark-Jason Dominus <mjd@plover.com>
+             To: perl5-porters@perl.com
+             Subject: DOC PATCH (5.005_55): Error message missing from perldiag.pod
+             Date: Sat, 15 May 1999 12:43:47 -0400
+             Message-ID: <19990515164348.7313.qmail@plover.com>
+     Branch: cfgperl
+           ! pod/perldiag.pod
+____________________________________________________________________________
+[  3425] By: nick                                  on 1999/05/15  15:56:10
+        Log: Mingw32 + w32api-0.1.5 tweaks
+             - now more like other Win32 compilers
+     Branch: perl
+	   ! ext/Socket/Socket.xs win32/include/sys/socket.h win32/win32.c
+           ! win32/win32.h
+____________________________________________________________________________
+[  3424] By: nick                                  on 1999/05/14  21:04:22
+        Log: Experimental "slab" allocator for ops.
+             To try it -DPL_OP_SLAB_ALLOC for op.c 
+             This is for proof of concept only, it leaks memory 
+             (ops are not free'd) so don't use in embedded apps.
+             If this minimalist version does not show performance 
+             gain then whole idea is worthless. 
+             Nick see's approx 12% speed up vs perlmalloc running
+             perl -Ilib -MCPAN -e '' 
+             Solaris2.6, gcc-2.8.1 but numbers are not repeatable.
+     Branch: perl
+           ! op.c
+____________________________________________________________________________
+[  3423] By: gsar                                  on 1999/05/14  19:55:04
+        Log: on win32, look for "site/5.XXX/lib" if "site/5.XXXYY/lib" isn't
+             found (brings sitelib intuition in line with privlib)
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  3422] By: jhi                                   on 1999/05/14  08:08:01
+        Log: From: pvhp@forte.com (Peter Prymmer)
+             To: perl5-porters@perl.org, vmsperl@perl.org
+             Subject: [PATCH: 5.005_56] add config.msg to VMS configure.com
+             Date: Thu, 13 May 99 15:29:57 PDT
+             Message-Id: <9905132229.AA15854@forte.com>
+     Branch: cfgperl
+           ! configure.com
+____________________________________________________________________________
+[  3421] By: jhi                                   on 1999/05/14  07:34:20
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          !> lib/ExtUtils/MM_Unix.pm win32/win32.c
+____________________________________________________________________________
+[  3420] By: jhi                                   on 1999/05/14  07:33:26
+        Log: Still fflushing.
+     Branch: cfgperl
+           ! Configure config_h.SH util.c
+____________________________________________________________________________
+[  3419] By: gsar                                  on 1999/05/14  03:08:29
+        Log: mortalize string allocations by win32_get_{priv,site}lib()
+             (fixes small memory leak in interpreter)
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  3418] By: gsar                                  on 1999/05/14  03:06:50
+        Log: make win32_longname() preserve kind of slashes in argument
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  3417] By: gsar                                  on 1999/05/14  03:04:44
+        Log: canonicalize path for $(FULLPERL) and $(PERL) in MakeMaker
+     Branch: perl
+           ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  3416] By: jhi                                   on 1999/05/13  21:18:06
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          !> pp_ctl.c
+____________________________________________________________________________
+[  3415] By: jhi                                   on 1999/05/13  21:16:49
+        Log: Fixes from Andy Dougherty (via private email).
+     Branch: cfgperl
+           ! Configure config_h.SH
+____________________________________________________________________________
+[  3414] By: nick                                  on 1999/05/13  20:04:26
+        Log: valist vs va_list typo
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  3413] By: jhi                                   on 1999/05/13  15:04:05
+        Log: From: Andy Dougherty <doughera@lafayette.edu>
+             To: perlbug@perl.com
+             Subject: [PATCH] (Was Re: SunOS4.1 compilation error)
+             Date: Wed, 12 May 1999 11:44:11 -0400 (EDT)
+             Message-Id: <Pine.GSU.4.05.9905121136520.25150-100000@newton.phys>
+     Branch: cfgperl
+           ! INSTALL
+____________________________________________________________________________
+[  3412] By: jhi                                   on 1999/05/13  14:20:17
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          !> pp_ctl.c
+____________________________________________________________________________
+[  3411] By: gsar                                  on 1999/05/13  14:16:56
+        Log: docatch_body() declaration mismatch
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  3410] By: jhi                                   on 1999/05/13  13:51:44
+        Log: Add HAS_MEMCHR and make memchr into a cpp macro if it already isn't.
+     Branch: cfgperl
+           ! Configure config_h.SH perl.h
+____________________________________________________________________________
+[  3409] By: jhi                                   on 1999/05/13  13:31:53
+        Log: Still fflushing strong.
+     Branch: cfgperl
+	   ! Configure config_h.SH embed.h global.sym objXSUB.h perl.h
+           ! proto.h util.c
+____________________________________________________________________________
+[  3408] By: jhi                                   on 1999/05/12  14:30:23
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          !> (integrate 30 files)
+____________________________________________________________________________
+[  3407] By: jhi                                   on 1999/05/12  12:28:31
+        Log: Be tidier with fflush(NULL) testing.
+     Branch: cfgperl
+           ! Configure config_h.SH
+____________________________________________________________________________
+[  3406] By: gsar                                  on 1999/05/12  11:26:03
+        Log: better range-checking on list slices, with test
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Sun, 02 May 1999 17:02:53 +0100
+             Message-Id: <199905021602.RAA13905@crypt.compulink.co.uk>
+             Subject: Re: List slice of undefs returns 0 items 
+     Branch: perl
+           ! pp.c t/op/list.t
+____________________________________________________________________________
+[  3405] By: gsar                                  on 1999/05/12  11:22:27
+        Log: change#3397 needs test tweak
+     Branch: perl
+           ! Changes t/pragma/warn/sv
+____________________________________________________________________________
+[  3404] By: gsar                                  on 1999/05/12  11:07:44
+        Log: typo in change#3397
+     Branch: perl
+           ! doop.c
+____________________________________________________________________________
 [  3403] By: gsar                                  on 1999/05/12  10:49:01
         Log: From: Stephen Zander <gibreel@pobox.com>
              Date: 12 May 1999 01:22:31 -0700

@@ -23,6 +23,9 @@ char **argv;
 
 	if (p = argv[1]) {
 		name = (char *) malloc((n = strlen(p)) + 5);
+		if (!name)
+		    oops("cannot get memory");
+
 		strcpy(name, p);
 		strcpy(name + n, ".pag");
 

@@ -1240,10 +1240,12 @@ settmppath()
     if (!p) return;
     len = strlen(p);
     tpath = (char *)malloc(len + strlen(TMPPATH1) + 2);
-    strcpy(tpath, p);
-    tpath[len] = '/';
-    strcpy(tpath + len + 1, TMPPATH1);
-    tmppath = tpath;
+    if (tpath) {
+	strcpy(tpath, p);
+	tpath[len] = '/';
+	strcpy(tpath + len + 1, TMPPATH1);
+	tmppath = tpath;
+    }
 }
 
 #include "XSUB.h"
