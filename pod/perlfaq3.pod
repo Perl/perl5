@@ -184,11 +184,6 @@ in beta (http://www.ActiveState.com/Products/VisualPerl/index.html)).
 (http://www.castlelink.co.uk/object_system/) is a Perl web
 applications development IDE.
 
-=item PerlBuilder
-
-(http://www.solutionsoft.com/perl.htm) is an integrated development
-environment for Windows that supports Perl development.
-
 =item Perl code magic
 
 (http://www.petes-place.com/codemagic.html).
