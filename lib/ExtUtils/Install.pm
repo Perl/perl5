@@ -191,7 +191,6 @@ sub uninstall {
 	forceunlink($_) unless $nonono;
     }
     print "unlink $fil\n" if $verbose;
-    close P;
     forceunlink($fil) unless $nonono;
 }
 

@@ -4390,9 +4390,9 @@ meaning of the fields:
   5 gid      numeric group ID of file's owner
   6 rdev     the device identifier (special files only)
   7 size     total size of file, in bytes
-  8 atime    last access time since the epoch
-  9 mtime    last modify time since the epoch
- 10 ctime    inode change time (NOT creation time!) since the epoch
+  8 atime    last access time in seconds since the epoch
+  9 mtime    last modify time in seconds since the epoch
+ 10 ctime    inode change time (NOT creation time!) in seconds since the epoch
  11 blksize  preferred block size for file system I/O
  12 blocks   actual number of blocks allocated
 
