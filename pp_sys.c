@@ -5208,6 +5208,12 @@ PP(pp_gpwent)
      * --jhi
      */
 
+#   if defined(__CYGWIN__) && defined(USE_REENTRANT_API)
+    /* Cygwin 1.5.3-1 has buggy getpwnam_r() and getpwuid_r():
+     * the pw_comment is left uninitialized. */
+    PL_reentrant_buffer->_pwent_struct.pw_comment = NULL;
+#   endif
+
     switch (which) {
     case OP_GPWNAM:
       {
