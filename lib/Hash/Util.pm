@@ -7,7 +7,7 @@ use Carp;
 require Exporter;
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(lock_keys unlock_keys lock_value unlock_value
-                     lock_hash unlock_hash hashes_random
+                     lock_hash unlock_hash hash_seed
                     );
 our $VERSION    = 0.05;
 
@@ -20,7 +20,7 @@ Hash::Util - A selection of general-utility hash subroutines
   use Hash::Util qw(lock_keys   unlock_keys
                     lock_value  unlock_value
                     lock_hash   unlock_hash
-                    hashes_random);
+                    hash_seed);
 
   %hash = (foo => 42, bar => 23);
   lock_keys(%hash);
@@ -33,7 +33,7 @@ Hash::Util - A selection of general-utility hash subroutines
   lock_hash  (%hash);
   unlock_hash(%hash);
 
-  my $hashes_random = hashes_random();
+  my $hashes_are_randomised = hash_seed() != 0;
 
 =head1 DESCRIPTION
 
@@ -179,18 +179,18 @@ sub unlock_hash (\%) {
 }
 
 
-=item B<hashes_random>
+=item B<hash_seed>
 
-    my $hashes_random = hashes_random();
+    my $hash_seed = hash_seed();
 
-hashes_random() returns true if Perl hashes are randomised as in Perl
-5.8.1 and later, false if Perl hashes have a predictable order as in
-Perl 5.8.0 and earlier.
+hash_seed() returns the seed number used to randomise hash ordering.
+Zero means the "traditional" random hash ordering, non-zero means the
+new even more random hash ordering introduced in Perl 5.8.1.
 
 =cut
 
-sub hashes_random () {
-    Internals::hashes_random();
+sub hash_seed () {
+    Internals::hash_seed();
 }
 
 =back

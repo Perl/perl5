@@ -1143,7 +1143,7 @@ seed is sensitive information>: by knowing it one can craft a
 denial-of-service attack against Perl code, even remotely, see
 L<perlsec/"Algorithmic Complexity Attacks"> for more information.
 B<Do not disclose the hash seed> to people who don't need to know it.
-See also hashes_random() of L<Hash::Util>.
+See also hash_seed() of L<Hash::Util>.
 
 =item PERL_ROOT (specific to the VMS port)
 
