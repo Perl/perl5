@@ -3,16 +3,17 @@
 BEGIN {
     chdir 't' if -d 't';
     require Config; import Config;
-    if ($Config{'extensions'} !~ m!\bI18N/Langinfo\b!) {
+    if ($Config{'extensions'} !~ m!\bI18N/Langinfo\b! &&
+	$Config{'extensions'} !~ m!\bPOSIX\b!) {
 	print "1..0\n";
 	exit 0;
     }
 }
 
-
 use I18N::Langinfo qw(langinfo ABDAY_1 DAY_1 ABMON_1 MON_1 RADIXCHAR);
+use POSIX qw(setlocale LC_ALL);
 
-# use the "C" locale
+setlocale(LC_ALL, "C");
 
 print "1..5\n";
 
@@ -30,6 +31,4 @@ print "ok 4\n";
 
 print "not " unless langinfo(RADIXCHAR) eq ".";
 print "ok 5\n";
-
-
 
