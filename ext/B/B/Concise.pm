@@ -189,7 +189,8 @@ sub walk_topdown {
 	    walk_topdown($kid, $sub, $level + 1);
 	}
     }
-    if (class($op) eq "PMOP" and $ {$op->pmreplroot}) {
+    if (class($op) eq "PMOP" and $ {$op->pmreplroot}
+	and $op->pmreplroot->isa("B::OP")) {
 	walk_topdown($op->pmreplroot, $sub, $level + 1);
     }
 }
@@ -339,8 +340,13 @@ sub concise_op {
     if ($h{class} eq "PMOP") {
 	my $precomp = $op->precomp;
 	$precomp = defined($precomp) ? "/$precomp/" : "";
-	my $pmreplstart;
-	if ($ {$op->pmreplstart}) {
+	my $pmreplroot = $op->pmreplroot;
+	my ($pmreplroot, $pmreplstart);
+	if ($ {$pmreplroot = $op->pmreplroot} && $pmreplroot->isa("B::GV")) {
+	    # with C<@stash_array = split(/pat/, str);>,
+	    #  *stash_array is stored in pmreplroot.
+	    $h{arg} = "($precomp => \@" . $pmreplroot->NAME . ")";
+	} elsif ($ {$op->pmreplstart}) {
 	    undef $lastnext;
 	    $pmreplstart = "replstart->" . seq($op->pmreplstart);
 	    $h{arg} = "(" . join(" ", $precomp, $pmreplstart) . ")";
