@@ -34,9 +34,9 @@ INST_TOP	*= $(INST_DRV)\perl
 # Visual C++ >= 5.x SP3
 #CCTYPE		*= MSVC60
 # Borland 5.02 or later
-CCTYPE		*= BORLAND
+#CCTYPE		*= BORLAND
 # mingw32+gcc-2.95.2 or better
-#CCTYPE		*= GCC
+CCTYPE		*= GCC
 
 #
 # uncomment this if your Borland compiler is older than v5.5.
@@ -50,9 +50,9 @@ CCTYPE		*= BORLAND
 # If such is the case you may have to set CCHOME explicitly.  Spaces in
 # the path name should not be quoted.
 #
-CCHOME		*= F:\Borland\BC5
+#CCHOME		*= F:\Borland\BC5
 #CCHOME		*= $(MSVCDIR)
-#CCHOME		*= c:\gcc-2.95.2-msvcrt
+CCHOME		*= c:\gcc-2.95.2-msvcrt
 
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
