@@ -2368,19 +2368,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
-
-=for hackers
-Found in file sv.h
-
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
@@ -3226,9 +3226,10 @@ If C<s> does not point to a well-formed UTF8 character, the behaviour
 is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
 it is assumed that the caller will raise a warning, and this function
 will set C<retlen> to C<-1> and return.  The C<flags> can also contain
-various flags to allow deviations from the strict UTF-8 encoding.
+various flags to allow deviations from the strict UTF-8 encoding 
+(see F<utf8.h>).
 
-	U8* s	utf8_to_uv(STRLEN curlen, I32 *retlen, U32 flags)
+	U8* s	utf8_to_uv(STRLEN curlen, STRLEN *retlen, U32 flags)
 
 =for hackers
 Found in file utf8.c

@@ -171,7 +171,7 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 }
 
 /*
-=for apidoc Am|U8* s|utf8_to_uv|STRLEN curlen|I32 *retlen|U32 flags
+=for apidoc Am|U8* s|utf8_to_uv|STRLEN curlen|STRLEN *retlen|U32 flags
 
 Returns the character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding and no longer than C<curlen>;
@@ -182,7 +182,8 @@ If C<s> does not point to a well-formed UTF8 character, the behaviour
 is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
 it is assumed that the caller will raise a warning, and this function
 will set C<retlen> to C<-1> and return.  The C<flags> can also contain
-various flags to allow deviations from the strict UTF-8 encoding.
+various flags to allow deviations from the strict UTF-8 encoding 
+(see F<utf8.h>).
 
 =cut */
 
