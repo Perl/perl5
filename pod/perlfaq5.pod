@@ -343,8 +343,8 @@ and use it as though it were a normal filehandle.
 Then use any of those as you would a normal filehandle.  Anywhere that
 Perl is expecting a filehandle, an indirect filehandle may be used
 instead. An indirect filehandle is just a scalar variable that contains
-a filehandle.  Functions like C<print>, C<open>, C<seek>, or the functions or
-the C<E<lt>FHE<gt>> diamond operator will accept either a read filehandle
+a filehandle.  Functions like C<print>, C<open>, C<seek>, or
+the C<E<lt>FHE<gt>> diamond operator will accept either a real filehandle
 or a scalar variable containing one:
 
     ($ifh, $ofh, $efh) = (*STDIN, *STDOUT, *STDERR);
@@ -352,7 +352,7 @@ or a scalar variable containing one:
     $got = <$ifh>
     print $efh "What was that: $got";
 
-Of you're passing a filehandle to a function, you can write
+If you're passing a filehandle to a function, you can write
 the function in two ways:
 
     sub accept_fh {

@@ -449,8 +449,8 @@ http://www.perl.com/CPAN/doc/misc/ancient/tutorial/eg/itimers.pl .
 
 =head2 How can I measure time under a second?
 
-In general, you may not be able to.  The Time::HiRes module (available
-from CPAN) provides this functionality for some systems.
+The Time::HiRes module (available from CPAN) provides this
+functionality for some systems.
 
 In general, you may not be able to.  But if your system supports both the
 syscall() function in Perl as well as a system call like gettimeofday(2),

@@ -313,7 +313,7 @@ caller's scope.
 
 Variable suicide is when you (temporarily or permanently) lose the
 value of a variable.  It is caused by scoping through my() and local()
-interacting with either closures or aliased foreach() interator
+interacting with either closures or aliased foreach() iterator
 variables and subroutine arguments.  It used to be easy to
 inadvertently lose a variable's value this way, but now it's much
 harder.  Take this code:
