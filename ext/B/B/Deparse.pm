@@ -796,7 +796,8 @@ sub deparse_format {
 		= @$self{qw'curstash warnings hints'};
     my $op = $form->ROOT;
     my $kid;
-    return "\f." if $op->first->name eq 'stub';
+    return "\f." if $op->first->name eq 'stub'
+                || $op->first->name eq 'nextstate';
     $op = $op->first->first; # skip leavewrite, lineseq
     while (not null $op) {
 	$op = $op->sibling; # skip nextstate
@@ -1969,6 +1970,7 @@ sub listop {
     my $kid = $op->first->sibling;
     return $name if null $kid;
     my $first;
+    $name = "socketpair" if $name eq "sockpair";
     if (defined prototype("CORE::$name")
 	&& prototype("CORE::$name") =~ /^;?\*/
 	&& $kid->name eq "rv2gv") {
