@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 use warnings;
-print "1..99\n";
+print "1..105\n";
 
 # these shouldn't hang
 {
@@ -444,6 +444,7 @@ ok join(" ", map {0+$_} @output), "6 7 8 3 4 5 0 1 2", 'stable $b cmp $a sort';
 ok join(" ", map {0+$_} @input), "6 7 8 3 4 5 0 1 2",
     'stable $b cmp $a in place sort';
 
+@input = &generate;
 @output = reverse sort @input;
 ok join(" ", map {0+$_} @output), "8 7 6 5 4 3 2 1 0", "Reversed stable sort";
 
@@ -451,6 +452,10 @@ ok join(" ", map {0+$_} @output), "8 7 6 5 4 3 2 1 0", "Reversed stable sort";
 @input = reverse sort @input;
 ok join(" ", map {0+$_} @input), "8 7 6 5 4 3 2 1 0",
     "Reversed stable in place sort";
+
+@input = &generate;
+my $output = reverse sort @input;
+ok $output, "CCCBBBAAA", "Reversed stable sort in scalar context";
 
 
 @input = &generate;
@@ -464,6 +469,10 @@ ok join(" ", map {0+$_} @input), "8 7 6 5 4 3 2 1 0",
     'revesed stable $a cmp $b in place sort';
 
 @input = &generate;
+$output = reverse sort @input;
+ok $output, "CCCBBBAAA", 'Reversed stable $a cmp $b sort in scalar context';
+
+@input = &generate;
 @output = reverse sort {$b cmp $a} @input;
 ok join(" ", map {0+$_} @output), "2 1 0 5 4 3 8 7 6",
     'reversed stable $b cmp $a sort';
@@ -472,6 +481,10 @@ ok join(" ", map {0+$_} @output), "2 1 0 5 4 3 8 7 6",
 @input = reverse sort {$b cmp $a} @input;
 ok join(" ", map {0+$_} @input), "2 1 0 5 4 3 8 7 6",
     'revesed stable $b cmp $a in place sort';
+
+@input = &generate;
+$output = reverse sort {$b cmp $a} @input;
+ok $output, "AAABBBCCC", 'Reversed stable $b cmp $a sort in scalar context';
 
 
 # And now with numbers
@@ -503,12 +516,17 @@ ok "@output", "G H I D E F A B C", 'stable $b <=> $a sort';
 ok "@input", "G H I D E F A B C", 'stable $b <=> $a in place sort';
 
 # These two are actually doing string cmp on 0 1 and 2
+@input = &generate1;
 @output = reverse sort @input;
 ok "@output", "I H G F E D C B A", "Reversed stable sort";
 
 @input = &generate1;
 @input = reverse sort @input;
 ok "@input", "I H G F E D C B A", "Reversed stable in place sort";
+
+@input = &generate1;
+$output = reverse sort @input;
+ok $output, "IHGFEDCBA", "Reversed stable sort in scalar context";
 
 @input = &generate1;
 @output = reverse sort {$a <=> $b} @input;
@@ -519,9 +537,17 @@ ok "@output", "I H G F E D C B A", 'reversed stable $a <=> $b sort';
 ok "@input", "I H G F E D C B A", 'revesed stable $a <=> $b in place sort';
 
 @input = &generate1;
+$output = reverse sort {$a <=> $b} @input;
+ok $output, "IHGFEDCBA", 'reversed stable $a <=> $b sort in scalar context';
+
+@input = &generate1;
 @output = reverse sort {$b <=> $a} @input;
 ok "@output", "C B A F E D I H G", 'reversed stable $b <=> $a sort';
 
 @input = &generate1;
 @input = reverse sort {$b <=> $a} @input;
 ok "@input", "C B A F E D I H G", 'revesed stable $b <=> $a in place sort';
+
+@input = &generate1;
+$output = reverse sort {$b <=> $a} @input;
+ok $output, "CBAFEDIHG", 'reversed stable $b <=> $a sort in scalar context';
