@@ -1,4 +1,4 @@
-# $Id: enc_module.t,v 1.3 2003/03/09 20:07:37 dankogai Exp dankogai $
+# $Id: enc_module.t,v 1.4 2003/03/31 03:27:27 dankogai Exp $
 # This file is in euc-jp
 BEGIN {
     require Config; import Config;
@@ -38,11 +38,9 @@ open STDOUT, ">", $file1 or die "$file1:$!";
 print $obj->str, "\n";
 $obj->set("テスト文字列");
 print $obj->str, "\n";
-close STDOUT;
 
 my $cmp = compare_text($file0, $file1);
 is($cmp, 0, "encoding vs. STDOUT");
-unlink $file1 unless $cmp;
 
 my @cmp = qw/初期文字列 テスト文字列/;
 open STDIN, "<", $file0 or die "$file0:$!";
@@ -53,5 +51,7 @@ while(<STDIN>){
     is ($cmp[$i++], $_, "encoding vs. STDIN - $i");
 }
 
+close STDOUT;
+unlink $file1 unless $cmp;
 __END__
 

@@ -1,8 +1,39 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.91 2003/03/09 20:07:37 dankogai Exp dankogai $
+# $Id: Changes,v 1.92 2003/03/31 03:27:27 dankogai Exp $
 #
-$Revision: 1.91 $ $Date: 2003/03/09 20:07:37 $
+$Revision: 1.92 $ $Date: 2003/03/31 03:27:27 $
+! ucm/big5-eten.ucm ucm/big5-hkscs.ucm
+  Extraneous single-byte chars in range \x80-\xA0 and \xFA-\xFF
+  removed.  FYI, IBM's ICU has none of these for java-Big5-1.3_P.ucm
+  but glibc-BIG5-2.1.2.ucm does.
+  Message-Id: <20030325215213.4CA1.BQW10602@nifty.com>
+! ucm/cp932.ucm ucm/cp936.ucm ucm/cp949.ucm ucm/cp950.ucm
+  Maps regenerated again but this time based upon
+  http://oss.software.ibm.com/cvs/icu/charset/data/ucm/
+  (But where is THE DOCUMENT by MICROSOFT?)
+! t/enc_module.t AUTHORS
+  failure with threaded Perl on FreeBSD addressed.
+  Enache Adrian <enache@rdslink.ro> is added to AUTHORS for this.
+  Message-Id: <20030322230131.GA813@ratsnest.hole>  
+! lib/Encode/Guess.pm
+  Some POD fixes.
+! t/CJKT.t
+  Change 18989: Make the :bytes conditional on PerlIO.
+  further Modified by Dan Kogai
+  <200303161730.h2GHU5B16265@smtp3.ActiveState.com>
+! t/enc_module.t
+  Chnage 18966: another fix for failing test on windows ("use encoding" 
+  puts  STDIN in :raw mode, so chomp() wasn't stripping the CR), by gsar
+  Message-Id: <200303140545.h2E5j5B08856@smtp3.ActiveState.com>
+! t/CJKT.t
+  Change 18970: Hopefully this works also in Win32, by jhi
+  Message-Id: <200303140745.h2E7j6B22729@smtp3.ActiveState.com>
+  Change 18965: fix CJKT.t failures on windows due to incorrect 
+  binmode(), by gsar
+  Message-Id: <200303140530.h2E5U5B07046@smtp3.ActiveState.com>
+
+1.91 2003/03/09 20:07:37
 ! encoding.pm
   even more proofread by jhi.
   Message-Id: <20030309194323.GT20843@kosh.hut.fi>
