@@ -3,7 +3,8 @@ package Tie::File;
 require 5.005;
 use Carp;
 use POSIX 'SEEK_SET';
-use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'O_ACCMODE', 'O_RDONLY';
+use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'O_WRONLY', 'O_RDONLY';
+sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
 $VERSION = "0.91";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
