@@ -99,7 +99,7 @@ if ($foo == 1) {print "ok 16\n";} else {print "not ok 16 $foo\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('b');
 if ($ino) {print "ok 17\n";} else {print "not ok 17\n";}
-if ($wd =~ m#/afs/# || $^O eq 'amigaos')
+if ($wd =~ m#/afs/# || $^O eq 'amigaos' || $^O eq 'dos')
     {print "ok 18 # skipped: granularity of the filetime\n";}
 elsif ($atime == 500000000 && $mtime == 500000000 + $delta)
     {print "ok 18\n";}
