@@ -6,7 +6,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 10; }
+BEGIN { plan tests => 12; }
 
 BEGIN {
     require autouse;
@@ -55,3 +55,13 @@ ok( !exists $INC{$mod_file} );
 ok( soundex('Basset'), 'B230' );
 ok( exists $INC{$mod_file} );
 
+use autouse Env => "something";
+eval { something() };
+ok( $@, qr/^\Qautoused module Env has unique import() method/ );
+
+# Check that UNIVERSAL.pm doesn't interfere with modules that don't use
+# Exporter and have no import() of their own.
+require UNIVERSAL;
+autouse->import("Class::ISA" => 'self_and_super_versions');
+my %versions = self_and_super_versions("Class::ISA");
+ok( $versions{"Class::ISA"}, $Class::ISA::VERSION );

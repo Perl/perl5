@@ -73,9 +73,10 @@ sub import {
 sub vet_import ($) {
     my $module = shift;
     if (my $import = $module->can('import')) {
-	croak "autoused module has unique import() method"
+	croak "autoused module $module has unique import() method"
 	    unless defined(&Exporter::import)
-		   && $import == \&Exporter::import;
+		   && ($import == \&Exporter::import ||
+		       $import == \&UNIVERSAL::import)
     }
 }
 
