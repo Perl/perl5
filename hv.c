@@ -1803,7 +1803,7 @@ Perl_hv_clear(pTHX_ HV *hv)
 
     xhv = (XPVHV*)SvANY(hv);
 
-    if (SvREADONLY(hv)) {
+    if (SvREADONLY(hv) && xhv->xhv_array != NULL) {
 	/* restricted hash: convert all keys to placeholders */
 	I32 i;
 	HE* entry;
