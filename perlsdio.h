@@ -24,7 +24,17 @@
 #define PerlIO_close(f)			fclose(f)
 #define PerlIO_puts(f,s)		fputs(s,f)
 #define PerlIO_putc(f,c)		fputc(c,f)
-#define PerlIO_ungetc(f,c)		ungetc(c,f)
+#if defined(VMS) && defined(__DECC)
+   /* Unusual definition of ungetc() here to accomodate fast_sv_gets()'
+    * belief that it can mix getc/ungetc with reads from stdio buffer */
+   int decc$ungetc(int __c, FILE *__stream);
+#  define PerlIO_ungetc(f,c) ((c) == EOF ? EOF : \
+          ((*(f) && !((*(f))->_flag & _IONBF) && \
+          ((*(f))->_ptr > (*(f))->_base)) ? \
+          ((*(f))->_cnt++, *(--(*(f))->_ptr) = (c)) : decc$ungetc(c,f)))
+#else
+#  define PerlIO_ungetc(f,c)		ungetc(c,f)
+#endif
 #define PerlIO_getc(f)			getc(f)
 #define PerlIO_eof(f)			feof(f)
 #define PerlIO_getname(f,b)		fgetname(f,b)
@@ -142,6 +152,8 @@
 #undef setvbuf
 #undef fscanf
 #undef fgets
+#undef getc_unlocked
+#undef putc_unlocked
 #define fprintf    _CANNOT _fprintf_
 #define stdin      _CANNOT _stdin_
 #define stdout     _CANNOT _stdout_
