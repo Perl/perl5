@@ -18,6 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
+# This is a patched v1.60, containing a fix for the "1234567890\n" bug
 $VERSION = '1.60';
 use Exporter;
 @ISA =       qw( Exporter );
@@ -406,7 +407,7 @@ sub new
   my $self = bless {}, $class;
 
   # shortcut for "normal" numbers
-  if ((!ref $wanted) && ($wanted =~ /^([+-]?)[1-9][0-9]*$/))
+  if ((!ref $wanted) && ($wanted =~ /^([+-]?)[1-9][0-9]*\z/))
     {
     $self->{sign} = $1 || '+';
     my $ref = \$wanted;
@@ -2523,7 +2524,7 @@ sub _split
   $$x =~ s/\s+$//g;			# strip white space at end
 
   # shortcut, if nothing to split, return early
-  if ($$x =~ /^[+-]?\d+$/)
+  if ($$x =~ /^[+-]?\d+\z/)
     {
     $$x =~ s/^([+-])0*([0-9])/$2/; my $sign = $1 || '+';
     return (\$sign, $x, \'', \'', \0);
@@ -3895,11 +3896,6 @@ versions to a more sophisticated scheme):
 =head1 BUGS
 
 =over 2
-
-=item Input with trailing newlines
-
-Input with trailing newlines is handled wrong (e.g. lead to corrupted numbers)
-in some cases, for instance "123\n" or "123456789\n".
 
 =item Out of Memory!
 
