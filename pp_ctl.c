@@ -1059,8 +1059,10 @@ die_where(char *message)
 	else
 	    sv_setpv(ERRSV, message);
 	
-	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && curstackinfo->si_prev)
+	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && curstackinfo->si_prev) {
+	    dounwind(-1);
 	    POPSTACK();
+	}
 
 	if (cxix >= 0) {
 	    I32 optype;

@@ -357,6 +357,8 @@ typedef struct stackinfo PERL_SI;
 
 #define POPSTACK_TO(s) \
     STMT_START {							\
-	while (curstack != s)						\
+	while (curstack != s) {						\
+	    dounwind(-1);						\
 	    POPSTACK();							\
+	}								\
     } STMT_END

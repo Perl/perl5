@@ -327,6 +327,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 	op_free(main_root);
 	main_root = Nullop;
     }
+    curcop = &compiling;
     main_start = Nullop;
     SvREFCNT_dec(main_cv);
     main_cv = Nullcv;
@@ -2491,7 +2492,7 @@ nuke_stacks(void)
 	curstackinfo = curstackinfo->si_next;
     while (curstackinfo) {
 	PERL_SI *p = curstackinfo->si_prev;
-	SvREFCNT_dec(curstackinfo->si_stack);
+	/* curstackinfo->si_stack got nuked by sv_free_arenas() */
 	Safefree(curstackinfo->si_cxstack);
 	Safefree(curstackinfo);
 	curstackinfo = p;
@@ -2978,7 +2979,7 @@ my_failure_exit(void)
 static void
 my_exit_jump(void)
 {
-    dTHR;
+    dSP;
     register PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
@@ -2993,6 +2994,7 @@ my_exit_jump(void)
 	e_tmpname = Nullch;
     }
 
+    POPSTACK_TO(mainstack);
     if (cxstack_ix >= 0) {
 	if (cxstack_ix > 0)
 	    dounwind(0);
