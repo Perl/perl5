@@ -393,6 +393,7 @@
 #define PL_sh_path		(PERL_GET_INTERP->Ish_path)
 #define PL_sig_pending		(PERL_GET_INTERP->Isig_pending)
 #define PL_sighandlerp		(PERL_GET_INTERP->Isighandlerp)
+#define PL_signals		(PERL_GET_INTERP->Isignals)
 #define PL_sort_RealCmp		(PERL_GET_INTERP->Isort_RealCmp)
 #define PL_splitstr		(PERL_GET_INTERP->Isplitstr)
 #define PL_srand_called		(PERL_GET_INTERP->Isrand_called)

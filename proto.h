@@ -1388,5 +1388,11 @@ PERL_CALLCONV PerlIO *	Perl_PerlIO_stdout(pTHX);
 PERL_CALLCONV PerlIO *	Perl_PerlIO_stderr(pTHX);
 #endif /* PERLIO_LAYERS */
 
+PERL_CALLCONV void	Perl_deb_stack_all(pTHX);
+#ifdef PERL_IN_DEB_C
+STATIC void	S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max, I32 mark_min, I32 mark_max);
+#endif
+
+
 END_EXTERN_C
 

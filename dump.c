@@ -1420,7 +1420,16 @@ Perl_runops_debug(pTHX)
 			      "WARNING: %"UVxf" changed from %"UVxf" to %"UVxf"\n",
 			      PTR2UV(PL_watchaddr), PTR2UV(PL_watchok),
 			      PTR2UV(*PL_watchaddr));
-	    if (DEBUG_s_TEST_) debstack();
+	    if (DEBUG_s_TEST_) {
+		if (DEBUG_v_TEST_) {
+		    PerlIO_printf(Perl_debug_log, "\n");
+		    deb_stack_all();
+		}
+		else
+		    debstack();
+	    }
+
+
 	    if (DEBUG_t_TEST_) debop(PL_op);
 	    if (DEBUG_P_TEST_) debprof(PL_op);
 	}
