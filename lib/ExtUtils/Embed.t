@@ -80,7 +80,9 @@ if ($^O eq 'VMS') {
    }
 }
 my $status;
-print "# @cmd\n"; # where is the newline coming from? ldopts()?
+my $display_cmd = "@cmd";
+chomp($display_cmd); # where is the newline coming from? ldopts()?
+print "# $display_cmd\n"; 
 $status = system(join(' ',@cmd));
 if ($^O eq 'VMS' && !$status) {
   print "# @cmd2\n";
