@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..634\n";
+print "1..639\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1795,4 +1795,23 @@ if(test_o('abc','..(.)') eq 'a') {
 } else {
     print "not ok 634\n";
 }
+
+# 635..639: ID 20010619.003 (only the space character is
+# supposed to be [:print:], not the whole isprint()).
+
+print "not " if "\n"     =~ /[[:print:]]/;
+print "ok 635\n";
+
+print "not " if "\t"     =~ /[[:print:]]/;
+print "ok 636\n";
+
+# Amazingly verrical tabulator is the same in ASCII and EBCDIC.
+print "not " if "\014"  =~ /[[:print:]]/;
+print "ok 637\n";
+
+print "not " if "\r"    =~ /[[:print:]]/;
+print "ok 638\n";
+
+print "not " unless " " =~ /[[:print:]]/;
+print "ok 639\n";
 
