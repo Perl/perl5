@@ -1898,6 +1898,7 @@ $ rp = "[''dflt'] "
 $ GOSUB myread
 $ if ans.eqs."" then ans = "''dflt'"
 $ extensions = "''ans'"
+$ perl_known_extensions = "''dflt'"
 $!
 $! %Config-I-VMS, determine build/make utility here (make gmake mmk mms)
 $ echo ""
