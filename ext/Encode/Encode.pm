@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.61 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.62 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load 'Encode';
@@ -53,17 +53,21 @@ eval { require Encode::ConfigLocal };
 sub encodings
 {
     my $class = shift;
-    my @modules = (@_ and $_[0] eq ":all") ? values %ExtModule : @_;
-    for my $mod (@modules){
-	$mod =~ s,::,/,g or $mod = "Encode/$mod";
-	$mod .= '.pm';
-	$DEBUG and warn "about to require $mod;";
-	eval { require $mod; };
+    my %enc;
+    if (@_ and $_[0] eq ":all"){
+	%enc = ( %Encoding, %ExtModule );
+    }else{
+	%enc = %Encoding;
+	for my $mod (map {m/::/o ? $_ : "Encode::$_" } @_){
+	    $DEBUG and warn $mod;
+	    for my $enc (keys %ExtModule){
+		$ExtModule{$enc} eq $mod and $enc{$enc} = $mod;
+	    }
+	}
     }
-    my %modules = map {$_ => 1} @modules;
     return
 	sort { lc $a cmp lc $b }
-             grep {!/^(?:Internal|Unicode)$/o} keys %Encoding;
+             grep {!/^(?:Internal|Unicode|Guess)$/o} keys %enc;
 }
 
 sub perlio_ok{

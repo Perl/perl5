@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.39 2002/04/26 03:02:04 dankogai Exp $
+ $Id: Encode.xs,v 1.40 2002/04/27 11:17:39 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -169,21 +169,23 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	    else {           
 		if (check & ENCODE_DIE_ON_ERR){
 		    Perl_croak(
-			aTHX_ "%s \"\\x%02X\" does not map to Unicode (%d)",
+			aTHX_ "%s \"\\x%02" UVXf 
+			"\" does not map to Unicode (%d)",
 			enc->name[0], (U8) s[slen], code);
 		}else{
 		    if (check & ENCODE_RETURN_ON_ERR){
 			if (check & ENCODE_WARN_ON_ERR){
 			    Perl_warner(
 				aTHX_ packWARN(WARN_UTF8),
-				"%s \"\\x%02X\" does not map to Unicode (%d)",
+				"%s \"\\x%02" UVXf 
+				"\" does not map to Unicode (%d)",
 				enc->name[0], (U8) s[slen], code);
 			}
 			goto ENCODE_SET_SRC;
 		    }else if (check & 
 			      (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
 			SV* perlqq = 
-			    sv_2mortal(newSVpvf("\\x%02X", s[slen]));
+			    sv_2mortal(newSVpvf("\\x%02" UVXf, s[slen]));
 			sdone += slen + 1;
 			ddone += dlen + SvCUR(perlqq);
 			sv_catsv(dst, perlqq);
