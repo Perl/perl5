@@ -258,6 +258,15 @@ struct perl_thread;
 #  define dTHXx		dTHX
 #endif
 
+/* Under PERL_IMPLICIT_SYS (used in Windows for fork emulation)
+ * PerlIO_foo() expands to PL_StdIO->pFOO(PL_StdIO, ...).
+ * dTHXs is therefore needed for all functions using PerlIO_foo(). */
+#ifdef PERL_IMPLICIT_SYS
+#  define dTHXs		dTHX
+#else
+#  define dTHXs		dNOOP
+#endif
+
 #undef START_EXTERN_C
 #undef END_EXTERN_C
 #undef EXTERN_C

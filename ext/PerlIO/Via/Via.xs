@@ -391,7 +391,7 @@ PerlIOVia_get_base(PerlIO *f)
 {
  if (PerlIOBase(f)->flags & PERLIO_F_CANREAD)
   {
-   dTHX;
+   dTHXs;
    PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
    if (s->var)
     {
@@ -409,6 +409,7 @@ PerlIOVia_get_ptr(PerlIO *f)
    PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
    if (s->var)
     {
+     dTHXs;
      STDCHAR *p = (STDCHAR *)(SvEND(s->var) - s->cnt);
      return p;
     }
