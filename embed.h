@@ -822,7 +822,6 @@
 #define pp_socket		Perl_pp_socket
 #define pp_sockpair		Perl_pp_sockpair
 #define pp_sort			Perl_pp_sort
-#define pp_specific		Perl_pp_specific
 #define pp_splice		Perl_pp_splice
 #define pp_split		Perl_pp_split
 #define pp_sprintf		Perl_pp_sprintf
@@ -851,6 +850,7 @@
 #define pp_syswrite		Perl_pp_syswrite
 #define pp_tell			Perl_pp_tell
 #define pp_telldir		Perl_pp_telldir
+#define pp_threadsv		Perl_pp_threadsv
 #define pp_tie			Perl_pp_tie
 #define pp_tied			Perl_pp_tied
 #define pp_time			Perl_pp_time
