@@ -754,6 +754,184 @@ get_from_bigger_buckets(int bucket, MEM_SIZE size)
     return NULL;
 }
 
+static union overhead *
+getpages(int needed, int *nblksp, int bucket)
+{
+    /* Need to do (possibly expensive) system call. Try to
+       optimize it for rare calling. */
+    MEM_SIZE require = needed - sbrked_remains;
+    char *cp;
+    union overhead *ovp;
+    int slack = 0;
+
+    if (sbrk_good > 0) {
+	if (!last_sbrk_top && require < FIRST_SBRK) 
+	    require = FIRST_SBRK;
+	else if (require < MIN_SBRK) require = MIN_SBRK;
+
+	if (require < goodsbrk * MIN_SBRK_FRAC / 100)
+	    require = goodsbrk * MIN_SBRK_FRAC / 100;
+	require = ((require - 1 + MIN_SBRK) / MIN_SBRK) * MIN_SBRK;
+    } else {
+	require = needed;
+	last_sbrk_top = 0;
+	sbrked_remains = 0;
+    }
+
+    DEBUG_m(PerlIO_printf(Perl_debug_log, 
+			  "sbrk(%ld) for %ld-byte-long arena\n",
+			  (long)require, (long) needed));
+    cp = (char *)sbrk(require);
+#ifdef DEBUGGING_MSTATS
+    sbrks++;
+#endif 
+    if (cp == last_sbrk_top) {
+	/* Common case, anything is fine. */
+	sbrk_good++;
+	ovp = (union overhead *) (cp - sbrked_remains);
+	sbrked_remains = require - (needed - sbrked_remains);
+    } else if (cp == (char *)-1) { /* no more room! */
+	ovp = (union overhead *)emergency_sbrk(needed);
+	if (ovp == (union overhead *)-1)
+	    return 0;
+	return ovp;
+    } else {			/* Non-continuous or first sbrk(). */
+	long add = sbrked_remains;
+	char *newcp;
+
+	if (sbrked_remains) {	/* Put rest into chain, we
+				   cannot use it right now. */
+	    add_to_chain((void*)(last_sbrk_top - sbrked_remains),
+			 sbrked_remains, 0);
+	}
+
+	/* Second, check alignment. */
+	slack = 0;
+
+#ifndef atarist /* on the atari we dont have to worry about this */
+#  ifndef I286 	/* The sbrk(0) call on the I286 always returns the next segment */
+
+	/* CHUNK_SHIFT is 1 for PACK_MALLOC, 0 otherwise. */
+	if ((UV)cp & (0x7FF >> CHUNK_SHIFT)) { /* Not aligned. */
+	    slack = (0x800 >> CHUNK_SHIFT)
+		- ((UV)cp & (0x7FF >> CHUNK_SHIFT));
+	    add += slack;
+	}
+#  endif
+#endif /* atarist */
+		
+	if (add) {
+	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
+				  "sbrk(%ld) to fix non-continuous/off-page sbrk:\n\t%ld for alignement,\t%ld were assumed to come from the tail of the previous sbrk\n",
+				  (long)add, (long) slack,
+				  (long) sbrked_remains));
+	    newcp = (char *)sbrk(add);
+#if defined(DEBUGGING_MSTATS)
+	    sbrks++;
+	    sbrk_slack += add;
+#endif
+	    if (newcp != cp + require) {
+		/* Too bad: even rounding sbrk() is not continuous.*/
+		DEBUG_m(PerlIO_printf(Perl_debug_log, 
+				      "failed to fix bad sbrk()\n"));
+#ifdef PACK_MALLOC
+		if (slack) {
+		    MUTEX_UNLOCK(&malloc_mutex);
+		    croak("%s", "panic: Off-page sbrk");
+		}
+#endif
+		if (sbrked_remains) {
+		    /* Try again. */
+#if defined(DEBUGGING_MSTATS)
+		    sbrk_slack += require;
+#endif
+		    require = needed;
+		    DEBUG_m(PerlIO_printf(Perl_debug_log, 
+					  "straight sbrk(%ld)\n",
+					  (long)require));
+		    cp = (char *)sbrk(require);
+#ifdef DEBUGGING_MSTATS
+		    sbrks++;
+#endif 
+		    if (cp == (char *)-1)
+			return 0;
+		}
+		sbrk_good = -1;	/* Disable optimization!
+				   Continue with not-aligned... */
+	    } else {
+		cp += slack;
+		require += sbrked_remains;
+	    }
+	}
+
+	if (last_sbrk_top) {
+	    sbrk_good -= SBRK_FAILURE_PRICE;
+	}
+
+	ovp = (union overhead *) cp;
+	/*
+	 * Round up to minimum allocation size boundary
+	 * and deduct from block count to reflect.
+	 */
+
+#ifndef I286	/* Again, this should always be ok on an 80286 */
+	if ((UV)ovp & 7) {
+	    ovp = (union overhead *)(((UV)ovp + 8) & ~7);
+	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
+				  "fixing sbrk(): %d bytes off machine alignement\n",
+				  (int)((UV)ovp & 7)));
+	    (*nblksp)--;
+# if defined(DEBUGGING_MSTATS)
+	    /* This is only approx. if TWO_POT_OPTIMIZE: */
+	    sbrk_slack += (1 << bucket);
+# endif
+	}
+#endif
+	sbrked_remains = require - needed;
+    }
+    last_sbrk_top = cp + require;
+    last_op = (char*) cp;
+#ifdef DEBUGGING_MSTATS
+    goodsbrk += require;
+#endif	
+    return ovp;
+}
+
+static int
+getpages_adjacent(int require)
+{	    
+    if (require <= sbrked_remains) {
+	sbrked_remains -= require;
+    } else {
+	char *cp;
+
+	require -= sbrked_remains;
+	/* We do not try to optimize sbrks here, we go for place. */
+	cp = (char*) sbrk(require);
+#ifdef DEBUGGING_MSTATS
+	sbrks++;
+	goodsbrk += require;
+#endif 
+	if (cp == last_sbrk_top) {
+	    sbrked_remains = 0;
+	    last_sbrk_top = cp + require;
+	} else {
+	    /* Report the failure: */
+	    if (sbrked_remains)
+		add_to_chain((void*)(last_sbrk_top - sbrked_remains),
+			     sbrked_remains, 0);
+	    add_to_chain((void*)cp, require, 0);
+	    sbrk_good -= SBRK_FAILURE_PRICE;
+	    sbrked_remains = 0;
+	    last_sbrk_top = 0;
+	    last_op = 0;
+	    return 0;
+	}
+    }
+	    
+    return 1;
+}
+
 /*
  * Allocate more memory to the indicated bucket.
  */
@@ -762,9 +940,8 @@ morecore(register int bucket)
 {
   	register union overhead *ovp;
   	register int rnu;       /* 2^rnu bytes will be requested */
-  	register int nblks;     /* become nblks blocks of the desired size */
+  	int nblks;		/* become nblks blocks of the desired size */
 	register MEM_SIZE siz, needed;
-	int slack = 0;
 
   	if (nextf[bucket])
   		return;
@@ -807,145 +984,12 @@ morecore(register int bucket)
 	    ovp = (union overhead *)(last_sbrk_top - sbrked_remains);
 	    sbrked_remains -= needed;
 	    last_op = (char*)ovp;
-	} else {
-	    /* Need to do (possibly expensive) system call. Try to
-	       optimize it for rare calling. */
-	    MEM_SIZE require = needed - sbrked_remains;
-	    char *cp;
+	} else 
+	    ovp = getpages(needed, &nblks, bucket);
 
-	    if (sbrk_good > 0) {
-		if (!last_sbrk_top && require < FIRST_SBRK) 
-		    require = FIRST_SBRK;
-		else if (require < MIN_SBRK) require = MIN_SBRK;
+	if (!ovp)
+	    return;
 
-		if (require < goodsbrk * MIN_SBRK_FRAC / 100)
-		    require = goodsbrk * MIN_SBRK_FRAC / 100;
-		require = ((require - 1 + MIN_SBRK) / MIN_SBRK) * MIN_SBRK;
-	    } else {
-		require = needed;
-		last_sbrk_top = 0;
-		sbrked_remains = 0;
-	    }
-
-	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
-				  "sbrk(%ld) for %ld-byte-long arena\n",
-				  (long)require, (long) needed));
-	    cp = (char *)sbrk(require);
-#ifdef DEBUGGING_MSTATS
-	    sbrks++;
-#endif 
-	    if (cp == last_sbrk_top) {
-		/* Common case, anything is fine. */
-		sbrk_good++;
-		ovp = (union overhead *) (cp - sbrked_remains);
-		sbrked_remains = require - (needed - sbrked_remains);
-	    } else if (cp == (char *)-1) { /* no more room! */
-		ovp = (union overhead *)emergency_sbrk(needed);
-		if (ovp == (union overhead *)-1)
-		    return;
-		goto gotit;
-	    } else {			/* Non-continuous or first sbrk(). */
-		long add = sbrked_remains;
-		char *newcp;
-
-		if (sbrked_remains) {	/* Put rest into chain, we
-					   cannot use it right now. */
-		    add_to_chain((void*)(last_sbrk_top - sbrked_remains),
-				 sbrked_remains, 0);
-		}
-
-		/* Second, check alignment. */
-		slack = 0;
-
-#ifndef atarist /* on the atari we dont have to worry about this */
-#  ifndef I286 	/* The sbrk(0) call on the I286 always returns the next segment */
-
-		/* CHUNK_SHIFT is 1 for PACK_MALLOC, 0 otherwise. */
-		if ((UV)cp & (0x7FF >> CHUNK_SHIFT)) { /* Not aligned. */
-		    slack = (0x800 >> CHUNK_SHIFT)
-			- ((UV)cp & (0x7FF >> CHUNK_SHIFT));
-		    add += slack;
-		}
-#  endif
-#endif /* atarist */
-		
-		if (add) {
-		    DEBUG_m(PerlIO_printf(Perl_debug_log, 
-"sbrk(%ld) to fix non-continuous/off-page sbrk:\n\t%ld for alignement,\t%ld were assumed to come from the tail of the previous sbrk\n",
-					  (long)add, (long) slack,
-					  (long) sbrked_remains));
-		    newcp = (char *)sbrk(add);
-#if defined(DEBUGGING_MSTATS)
-		    sbrks++;
-		    sbrk_slack += add;
-#endif
-		    if (newcp != cp + require) {
-			/* Too bad: even rounding sbrk() is not continuous.*/
-			DEBUG_m(PerlIO_printf(Perl_debug_log, 
-					      "failed to fix bad sbrk()\n"));
-#ifdef PACK_MALLOC
-			if (slack) {
-			    MUTEX_UNLOCK(&malloc_mutex);
-			    croak("%s", "panic: Off-page sbrk");
-			}
-#endif
-			if (sbrked_remains) {
-			    /* Try again. */
-#if defined(DEBUGGING_MSTATS)
-			    sbrk_slack += require;
-#endif
-			    require = needed;
-			    DEBUG_m(PerlIO_printf(Perl_debug_log, 
-						  "straight sbrk(%ld)\n",
-						  (long)require));
-			    cp = (char *)sbrk(require);
-#ifdef DEBUGGING_MSTATS
-			    sbrks++;
-#endif 
-			    if (cp == (char *)-1)
-				return;
-			}
-			sbrk_good = -1;	/* Disable optimization!
-					   Continue with not-aligned... */
-		    } else {
-			cp += slack;
-			require += sbrked_remains;
-		    }
-		}
-
-		if (last_sbrk_top) {
-		    sbrk_good -= SBRK_FAILURE_PRICE;
-		}
-
-		ovp = (union overhead *) cp;
-		/*
-		 * Round up to minimum allocation size boundary
-		 * and deduct from block count to reflect.
-		 */
-
-#ifndef I286	/* Again, this should always be ok on an 80286 */
-		if ((UV)ovp & 7) {
-		    ovp = (union overhead *)(((UV)ovp + 8) & ~7);
-		    DEBUG_m(PerlIO_printf(Perl_debug_log, 
-					  "fixing sbrk(): %d bytes off machine alignement\n",
-					  (int)((UV)ovp & 7)));
-		    nblks--;
-# if defined(DEBUGGING_MSTATS)
-		    /* This is only approx. if TWO_POT_OPTIMIZE: */
-		    sbrk_slack += (1 << bucket);
-# endif
-		}
-#endif
-		sbrked_remains = require - needed;
-	    }
-	    last_sbrk_top = cp + require;
-	    last_op = (char*) cp;
-#ifdef DEBUGGING_MSTATS
-	    goodsbrk += require;
-#endif	
-	}
-
-  gotit:
 	/*
 	 * Add new memory allocated to that on
 	 * free list for this hash bucket.
@@ -1207,41 +1251,15 @@ realloc(void *mp, size_t nbytes)
 	    newarena = (1 << pow) + POW2_OPTIMIZE_SURPLUS(pow * BUCKETS_PER_POW2);
 	    require = newarena - onb - M_OVERHEAD;
 	    
-	    if (require <= sbrked_remains) {
-		sbrked_remains -= require;
-	    } else {
-		char *cp;
-
-		require -= sbrked_remains;
-		/* We do not try to optimize sbrks here, we go for place. */
-		cp = (char*) sbrk(require);
+	    if (getpages_adjacent(require)) {
 #ifdef DEBUGGING_MSTATS
-		sbrks++;
-		goodsbrk += require;
-#endif 
-		if (cp == last_sbrk_top) {
-		    sbrked_remains = 0;
-		    last_sbrk_top = cp + require;
-		} else {
-		    /* Report the failure: */
-		    if (sbrked_remains)
-			add_to_chain((void*)(last_sbrk_top - sbrked_remains),
-				     sbrked_remains, 0);
-		    add_to_chain((void*)cp, require, 0);
-		    sbrk_good -= SBRK_FAILURE_PRICE;
-		    sbrked_remains = 0;
-		    last_sbrk_top = 0;
-		    last_op = 0;
-		    goto hard_way;
-		}
-	    }
-	    
-#ifdef DEBUGGING_MSTATS
-	    nmalloc[bucket]--;
-	    nmalloc[pow * BUCKETS_PER_POW2]++;
+		nmalloc[bucket]--;
+		nmalloc[pow * BUCKETS_PER_POW2]++;
 #endif 	    
-	    *(cp - M_OVERHEAD) = pow * BUCKETS_PER_POW2; /* Fill index. */
-	    goto inplace_label;
+		*(cp - M_OVERHEAD) = pow * BUCKETS_PER_POW2; /* Fill index. */
+		goto inplace_label;
+	    } else
+		goto hard_way;
 	} else {
 	  hard_way:
 	    MUTEX_UNLOCK(&malloc_mutex);
