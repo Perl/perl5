@@ -995,8 +995,9 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			UV f;
 
 			uvchr_to_utf8(tmpbuf, c);
-			f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);
-
+			to_utf8_fold(tmpbuf, foldbuf, &foldlen);
+			f = utf8_to_uvchr(foldbuf, 0);
+			
 			if (c == (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA ||
 			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
 			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;

@@ -3991,7 +3991,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			 UV f;
 
 			 uvchr_to_utf8(tmpbuf, value);
-			 f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);
+			 to_utf8_fold(tmpbuf, foldbuf, &foldlen);
+			 f = utf8_to_uvchr(foldbuf, 0);
 
 			 if (f != value)
 			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", f);
