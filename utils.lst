@@ -1,17 +1,18 @@
 utils/c2ph      # link = utils/pstruct
+utils/dproffpp
 utils/h2ph
 utils/h2xs
+utils/perlbug
 utils/perlcc
 utils/perldoc
-utils/perlbug
 utils/pl2pm
 utils/splain
-utils/dproffpp
-x2p/s2p         # link = x2p/psed
-x2p/findperl
 x2p/a2p         # pod = x2p/a2p.pod
-pod/pod2man
+x2p/findperl
+x2p/s2p         # link = x2p/psed
 pod/pod2html
+pod/pod2latex
+pod/pod2man
 pod/pod2text
 pod/pod2usage
 pod/podchecker
