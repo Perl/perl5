@@ -724,5 +724,10 @@ sub DESTROY {
 EXPECT
 Bar=ARRAY(0x...)
 ########
+printf "%x %x", unpack "U*", sprintf "\x{1234}%s", "\x{5678}"
+EXPECT
+1234 5678
+########
+# keep this last - doesn't seem to work otherwise?
 eval "a.b.c.d.e.f;sub"
 EXPECT
