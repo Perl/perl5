@@ -1840,7 +1840,7 @@ PP(pp_vec)
 	}
     }
 
-    sv_setiv(TARG, (IV)retnum);
+    sv_setuv(TARG, (UV)retnum);
     PUSHs(TARG);
     RETURN;
 }
