@@ -103,6 +103,43 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7001] By: jhi                                   on 2000/09/01  23:00:13
+        Log: Subject: [PATCH: 6996] minimal removal of 8 bit chrs from perlebcdic.pod
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 1 Sep 2000 15:50:57 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10009011542550.147696-100000@aspara.forte.com>
+             
+             plus rework the http: spots as suggested by Tom Christiansen,
+             plus regen perltoc.
+     Branch: perl
+	   ! README.os2 pod/perl56delta.pod pod/perlebcdic.pod
+	   ! pod/perlguts.pod pod/perltoc.pod pod/perlxs.pod
+____________________________________________________________________________
+[  7000] By: jhi                                   on 2000/09/01  22:36:01
+        Log: Only the first line, thank you very much.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  6999] By: gsar                                  on 2000/09/01  22:16:40
+        Log: change#6791 accidentally clobbered change#6710, put it back
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  6998] By: jhi                                   on 2000/09/01  22:14:16
+        Log: Mention the HP-UX LP64 freak failure.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6997] By: jhi                                   on 2000/09/01  21:48:32
+        Log: Detypo.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  6996] By: jhi                                   on 2000/09/01  21:27:10
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6995] By: jhi                                   on 2000/09/01  21:14:24
         Log: Mi splgn s gnin.g
      Branch: perl
