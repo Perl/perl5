@@ -676,8 +676,7 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
 
     sv_setpvn(sv, "", 0);
     /* sv_setpv retains old UTF8ness [perl #24846] */
-    if (SvUTF8(sv))
-	SvUTF8_off(sv);
+    SvUTF8_off(sv);
 
     if (PL_tainting && SvMAGICAL(sv))
 	SvTAINTED_off(sv);

@@ -1428,4 +1428,6 @@ p	|int	|get_debug_opts_flags	|char **s|int flags
 
 Ap	|void	|op_refcnt_lock
 Ap	|void	|op_refcnt_unlock
+Apd	|char*	|savesvpv	|SV* sv
+
 END_EXTERN_C

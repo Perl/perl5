@@ -819,6 +819,25 @@ Perl_savesharedpv(pTHX_ const char *pv)
     return strcpy(newaddr,pv);
 }
 
+/*
+=for apidoc savesvpv
+
+A version of C<savepv()>/C<savepvn() which gets the string to duplicate from
+the passed in SV using C<SvPV()>
+
+=cut
+*/
+
+char *
+Perl_savesvpv(pTHX_ SV *sv)
+{
+    STRLEN len;
+    const char *pv = SvPV(sv, len);
+    register char *newaddr;
+
+    New(903,newaddr,++len,char);
+    return CopyD(pv,newaddr,len,char);
+}
 
 
 /* the SV for Perl_form() and mess() is not kept in an arena */

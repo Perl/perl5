@@ -1369,4 +1369,6 @@ PERL_CALLCONV int	Perl_get_debug_opts_flags(pTHX_ char **s, int flags);
 
 PERL_CALLCONV void	Perl_op_refcnt_lock(pTHX);
 PERL_CALLCONV void	Perl_op_refcnt_unlock(pTHX);
+PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv);
+
 END_EXTERN_C
