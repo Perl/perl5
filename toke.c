@@ -3082,7 +3082,7 @@ Perl_yylex(pTHX)
 		       process, and shouldn't bother appending recognized
 		       flags. To experiment with that, uncomment the
 		       following "else": */
-		    /* else */
+		    else
 		        attrs = append_elem(OP_LIST, attrs,
 					    newSVOP(OP_CONST, 0,
 					      	    newSVpvn(s, len)));

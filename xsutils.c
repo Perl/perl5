@@ -84,12 +84,30 @@ modify_SV_attributes(pTHXo_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 			continue;
 		    }
 		    break;
+		case 's':
+		    if (strEQ(name, "shared")) {
+			if (negated)
+			    GvSHARED_off(CvGV((CV*)sv));
+			else
+			    GvSHARED_on(CvGV((CV*)sv));
+			continue;
+		    }
+		    break;
 		}
 		break;
 	    }
 	    break;
 	default:
-	    /* nothing, yet */
+	    switch ((int)len) {
+              case 6:
+		switch (*name) {
+                  case 's':
+		    if (strEQ(name, "shared")) {
+                        /* toke.c has already marked as GvSHARED */
+                        continue;
+                    }
+                }
+            }
 	    break;
 	}
 	/* anything recognized had a 'continue' above */
@@ -168,6 +186,8 @@ usage:
 #endif
 	if (cvflags & CVf_METHOD)
 	    XPUSHs(sv_2mortal(newSVpvn("method", 6)));
+        if (GvSHARED(CvGV((CV*)sv)))
+	    XPUSHs(sv_2mortal(newSVpvn("shared", 6)));
 	break;
     default:
 	break;

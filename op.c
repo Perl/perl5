@@ -1956,6 +1956,16 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
     } else if (type == OP_RV2SV ||	/* "our" declaration */
 	       type == OP_RV2AV ||
 	       type == OP_RV2HV) { /* XXX does this let anything illegal in? */
+        if (attrs) {
+            GV *gv = cGVOPx_gv(cUNOPo->op_first);
+            PL_in_my = FALSE;
+            PL_in_my_stash = Nullhv;
+            apply_attrs(GvSTASH(gv),
+                        (type == OP_RV2SV ? GvSV(gv) :
+                         type == OP_RV2AV ? (SV*)GvAV(gv) :
+                         type == OP_RV2HV ? (SV*)GvHV(gv) : (SV*)gv),
+                        attrs);
+        }
 	o->op_private |= OPpOUR_INTRO;
 	return o;
     } else if (type != OP_PADSV &&
