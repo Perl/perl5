@@ -2176,7 +2176,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
                    against UV_MAX_P1.  */
 		if (SvIOK(fromstr) || adouble < UV_MAX_P1)
 		{
-		    char   buf[1 + sizeof(UV)];
+		    char   buf[(sizeof(UV)*8)/7+1];
 		    char  *in = buf + sizeof(buf);
 		    UV     auv = SvUV(fromstr);
 

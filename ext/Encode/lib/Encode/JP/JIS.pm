@@ -5,7 +5,7 @@ use base 'Encode::Encoding';
 use strict;
 
 use vars qw($VERSION);
-$VERSION = do { my @r = (q$Revision: 0.94 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 0.98 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # Just for the time being, we implement jis-7bit
 # encoding via EUC
@@ -75,6 +75,12 @@ sub euc_jis{
 	s/\Q$ESC{ASC}\E
 	    (\Q$ESC{KANA}\E|\Q$ESC{JIS_0212}\E|\Q$ESC{JIS_0208}\E)/$1/gox;
     $$r_str;
+}
+
+sub euc_jis_nox0212{
+    my $r_str = shift;
+    $$r_str =~ s/$RE{EUC_0212}/$CHARCODE{UNDEF_EUC}/go;
+    euc_jis($r_str);
 }
 
 1;

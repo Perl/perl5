@@ -1,7 +1,7 @@
 #
 # Locale::Country - ISO codes for country identification (ISO 3166)
 #
-# $Id: Country.pm,v 2.2 2002/03/06 10:45:38 neilb Exp $
+# $Id: Country.pm,v 2.3 2002/03/23 23:39:21 neilb Exp $
 #
 
 package Locale::Country;
@@ -17,7 +17,7 @@ use Locale::Constants;
 #	Public Global Variables
 #-----------------------------------------------------------------------
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = sprintf("%d.%02d", q$Revision: 2.2 $ =~ /(\d+)\.(\d+)/);
+$VERSION   = sprintf("%d.%02d", q$Revision: 2.3 $ =~ /(\d+)\.(\d+)/);
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2country country2code
                 all_country_codes all_country_names
@@ -437,7 +437,7 @@ lv:lva:428:Latvia
 ly:lby:434:Libyan Arab Jamahiriya:Libya
 ma:mar:504:Morocco
 mc:mco:492:Monaco
-md:mda:498:Moldova, Republic of
+md:mda:498:Moldova, Republic of:Moldova
 mg:mdg:450:Madagascar
 mh:mhl:584:Marshall Islands
 mk:mkd:807:Macedonia, the Former Yugoslav Republic of:Macedonia, Former Yugoslav Republic of:Macedonia
@@ -529,7 +529,7 @@ um:::United States Minor Outlying Islands
 us:usa:840:United States:USA:United States of America
 uy:ury:858:Uruguay
 uz:uzb:860:Uzbekistan
-va:vat:336:Holy See (Vatican City State):Hole See (Vatican City)
+va:vat:336:Holy See (Vatican City State):Holy See (Vatican City)
 vc:vct:670:Saint Vincent and the Grenadines
 ve:ven:862:Venezuela
 vg:vgb:092:Virgin Islands, British:British Virgin Islands

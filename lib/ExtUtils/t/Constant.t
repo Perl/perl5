@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-print "1..27\n";
+print "1..48\n";
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -37,10 +37,13 @@ mkdir $dir, 0777 or die "mkdir: $!\n";
 
 my $output = "output";
 
+# For debugging set this to 1.
+my $keep_files = 0;
+
 END {
     use File::Path;
     print "# $dir being removed...\n";
-    rmtree($dir);
+    rmtree($dir) unless $keep_files;
 }
 
 my $package = "ExtTest";
@@ -52,6 +55,13 @@ N => 0, 'NE' => 45, E => 90, SE => 135, S => 180, SW => 225, W => 270, NW => 315
 
 my $parent_rfc1149 =
   'A Standard for the Transmission of IP Datagrams on Avian Carriers';
+# Check that 8 bit and unicode names don't cause problems.
+my $pound = chr 163; # A pound sign. (Currency)
+my $inf = chr 0x221E;
+# Check that we can distiguish the pathological case of a string, and the
+# utf8 representation of that string.
+my $pound_bytes = my $pound_utf8 = $pound . '1';
+utf8::encode ($pound_bytes);
 
 my @names = ("FIVE", {name=>"OK6", type=>"PV",},
              {name=>"OK7", type=>"PVN",
@@ -71,11 +81,44 @@ my @names = ("FIVE", {name=>"OK6", type=>"PV",},
               pre=>"SV *temp_sv = newSVpv(RFC1149, 0); "
               	   . "(void) SvUPGRADE(temp_sv,SVt_PVIV); SvIOK_on(temp_sv); "
                    . "SvIVX(temp_sv) = 1149;"},
+             {name=>"perl", type=>"PV",},
 );
 
 push @names, $_ foreach keys %compass;
 
+# Automatically compile the list of all the macro names, and make them
+# exported constants.
 my @names_only = map {(ref $_) ? $_->{name} : $_} @names;
+
+# Exporter::Heavy (currently) isn't able to export these names:
+push @names, ({name=>"*/", type=>"PV", value=>'"CLOSE"', macro=>1},
+              {name=>"/*", type=>"PV", value=>'"OPEN"', macro=>1},
+              {name=>$pound, type=>"PV", value=>'"Sterling"', macro=>1},
+              {name=>$inf, type=>"PV", value=>'"Infinity"', macro=>1},
+              {name=>$pound_utf8, type=>"PV", value=>'"1 Pound"', macro=>1},
+              {name=>$pound_bytes, type=>"PV", value=>'"1 Pound (as bytes)"',
+               macro=>1},
+             );
+
+=pod
+
+The above set of names seems to produce a suitably bad set of compile
+problems on a Unicode naive version of ExtUtils::Constant (ie 0.11):
+
+nick@thinking-cap 15439-32-utf$ PERL_CORE=1 ./perl lib/ExtUtils/t/Constant.t
+1..33
+# perl=/stuff/perl5/15439-32-utf/perl
+# ext-30370 being created...
+Wide character in print at lib/ExtUtils/t/Constant.t line 140.
+ok 1
+ok 2
+# make = 'make'
+ExtTest.xs: In function `constant_1':
+ExtTest.xs:80: warning: multi-character character constant
+ExtTest.xs:80: warning: case value out of range
+ok 3
+
+=cut
 
 my $types = {};
 my $constant_types = constant_types(); # macro defs
@@ -98,7 +141,7 @@ print FH <<"EOT";
 #define Undef 1
 #define RFC1149 "$parent_rfc1149"
 #undef NOTDEF
-
+#define perl "rules"
 EOT
 
 while (my ($point, $bearing) = each %compass) {
@@ -149,8 +192,10 @@ $VERSION = '0.01';
 @EXPORT_OK = qw(
 EOT
 
+# Print the names of all our autoloaded constants
 print FH "\t$_\n" foreach (@names_only);
 print FH ");\n";
+# Print the AUTOLOAD subroutine ExtUtils::Constant generated for us
 print FH autoload ($package, $]);
 print FH "bootstrap $package \$VERSION;\n1;\n__END__\n";
 close FH or die "close $pm: $!\n";
@@ -163,6 +208,8 @@ open FH, ">$testpl" or die "open >$testpl: $!\n";
 print FH "use strict;\n";
 print FH "use $package qw(@names_only);\n";
 print FH <<"EOT";
+
+use utf8;
 
 print "1..1\n";
 if (open OUTPUT, ">$output") {
@@ -350,7 +397,97 @@ if ($open eq '/*') {
   print "not ok 22 # \$open='$open'\n";
 }
 EOT
+
+# Do this in 7 bit in case someone is testing with some settings that cause
+# 8 bit files incapable of storing this character.
+my @values
+ = map {"'" . join (",", unpack "U*", $_) . "'"}
+ ($pound, $inf, $pound_bytes, $pound_utf8);
+# Values is a list of strings, such as ('194,163,49', '163,49')
+
+print FH <<'EOT';
+
+# I can see that this child test program might be about to use parts of
+# Test::Builder
+
+my $test = 23;
+my ($pound, $inf, $pound_bytes, $pound_utf8) = map {eval "pack 'U*', $_"}
+EOT
+
+print FH join ",", @values;
+
+print FH << 'EOT';
+;
+
+foreach (["perl", "rules", "rules"],
+	 ["/*", "OPEN", "OPEN"],
+	 ["*/", "CLOSE", "CLOSE"],
+	 [$pound, 'Sterling', []],
+         [$inf, 'Infinity', []],
+	 [$pound_utf8, '1 Pound', '1 Pound (as bytes)'],
+	 [$pound_bytes, '1 Pound (as bytes)', []],
+        ) {
+  # Flag an expected error with a reference for the expect string.
+  my ($string, $expect, $expect_bytes) = @$_;
+  (my $name = $string) =~ s/([^ -~])/sprintf '\x{%X}', ord $1/ges;
+  print "# \"$name\" => \'$expect\'\n";
+  # Try to force this to be bytes if possible.
+  utf8::downgrade ($string, 1);
+EOT
+
+print FH  "my (\$error, \$got) = ${package}::constant (\$string);\n";
+
+print FH <<'EOT';
+  if ($error or $got ne $expect) {
+    print "not ok $test # error '$error', got '$got'\n";
+  } else {
+    print "ok $test\n";
+  }
+  $test++;
+  print "# Now upgrade '$name' to utf8\n";
+  utf8::upgrade ($string);
+EOT
+
+print FH  "my (\$error, \$got) = ${package}::constant (\$string);\n";
+
+print FH <<'EOT';
+  if ($error or $got ne $expect) {
+    print "not ok $test # error '$error', got '$got'\n";
+  } else {
+    print "ok $test\n";
+  }
+  $test++;
+  if (defined $expect_bytes) {
+    print "# And now with the utf8 byte sequence for name\n";
+    # Try the encoded bytes.
+    utf8::encode ($string);
+EOT
+
+print FH "my (\$error, \$got) = ${package}::constant (\$string);\n";
+
+print FH <<'EOT';
+    if (ref $expect_bytes) {
+      # Error expected.
+      if ($error) {
+        print "ok $test # error='$error' (as expected)\n";
+      } else {
+        print "not ok $test # expected error, got no error and '$got'\n";
+      }
+    } elsif ($got ne $expect_bytes) {
+      print "not ok $test # error '$error', expect '$expect_bytes', got '$got'\n";
+    } else {
+      print "ok $test\n";
+    }
+    $test++;
+  }
+}
+EOT
+
 close FH or die "close $testpl: $!\n";
+
+# This is where the test numbers carry on after the test number above are
+# relayed
+my $test = 44;
 
 ################ Makefile.PL
 # We really need a Makefile.PL because make test for a no dynamic linking perl
@@ -446,8 +583,6 @@ if (open OUTPUT, "<$output") {
   print "# Open <$output failed: $!\n";
 }
 
-my $test = 23;
-
 if ($?) {
   print "not ok $test # $maketest failed: $?\n";
   print "# $_" foreach @makeout;
@@ -504,8 +639,10 @@ if ($?) {
 }
 $test++;
 
-foreach (@files) {
-  unlink $_ or warn "unlink $_: $!";
+unless ($keep_files) {
+  foreach (@files) {
+    unlink $_ or warn "unlink $_: $!";
+  }
 }
 
 my $fail;

@@ -481,6 +481,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	     (ibcmp(codeset,  "UTF-8", 5) == 0 ||
 	      ibcmp(codeset,  "UTF8",  4) == 0))
 	      wantutf8 = TRUE;
+#if defined(USE_LOCALE)
 #ifdef __GLIBC__
 	 if (!wantutf8 && language &&
 	     (ibcmp(language, "UTF-8", 5) == 0 ||
@@ -501,6 +502,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	     (ibcmp(lang,     "UTF-8", 5) == 0 ||
 	      ibcmp(lang,     "UTF8",  4) == 0))
 	      wantutf8 = TRUE;
+#endif /* USE_LOCALE */
 	 if (wantutf8)
 	      PL_wantutf8 = TRUE;
     }

@@ -1,7 +1,61 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 0.97 2002/03/23 20:24:42 dankogai Exp dankogai $
+# $Id: Changes,v 0.98 2002/03/24 15:43:37 dankogai Exp dankogai $
 #
+
+0.98  Mon Mar 25 2002
+! lib/Encode/Supported.pod
+  Further pod fixes
++ lib/Encode/JP/ISO_2022_JP_1.pm
+! lib/Encode/JP/ISO_2022_JP.pm
+! lib/Encode/JP/JIS.pm
+! JP/JP.pm
+  Now Encode::JP is more strict on the difference between ISO-2022-JP
+  and ISO-2022-JP-1.  See JP/JP.pm for details.  I hope this move
+  makes Anton happier :)  FYI the previous version implements 
+  ISO-2022-JP as ISO-2022-JP-1 since it had X0212 support.
+! lib/Encode/Supported.pod
+  Further pod fixes
+! Encode.xs
+  Avoid core-dump in Encode with PERLIO=mmap by NI-S
+  Message-Id: <20020324104139.1326.7@bactrian.ni-s.u-net.com>
+! CN/CN.pm
+! JP/JP.pm
+! KR/KR.pm
+! TW/TW.pm
+! lib/Encode/Suppoted.pod
+  pod fixes to replace F<http://...> to L<http://...>, 
+  as suggested by Autrijius in:
+  Message-Id: <20020324083943.GA14901@not.autrijus.org>
+! lib/Encode/Suppoted.pod
+  fixes and enhancements by Anton
+  Message-Id: <10632060120.20020324103753@motor.ru>
+! lib/Encode/Alias.pm
+  > define_alias( qr/^GB[- ]?(\d+)$/i => '"gb$1"' );
+  added.  Suggested by Anton then deobfuscated by Autrijius
+  Message-Id: <20020324064455.GA3667@not.autrijus.org>
+! compile
+  Further fix by Nicholas Clark
+  Message-Id: <20020323145840.GD304@Bagpuss.unfortu.net>
+- lib/EncodeFormat.pod
++ lib/Encode/EncFormat.pod
+! MANIFEST
+  File renamed as suggested by Autrijius
+! Encode.pm
+! lib/Encode/Details.pod
+! lib/Encode/Supported.pod    Sun Mar 24 13:29:35 2002
+! Encode.pm   Sun Mar 24 13:43:47 2002
+  pod fixes by Autrijius.
+  Message-Id: <20020324062804.GA3595@not.autrijus.org>
+  Message-Id: <20020324075627.GB11986@not.autrijus.org>
+! t/Alias.t
+! lib/Encode/Alias.pm
+! Encode.pm
+  now more EBCDIC conscious;
+  %ExtModules on EBCDIC system excludes CJK so that you don't
+  have to worry about the matched alias resulting cloaking.
+  t/Alias.t also revised to reflect changes.  Verified by jhi
+  Message-Id: <20020324022929.D22596@alpha.hut.fi>
 
 0.97  Sun Mar 24 2002
 ! CN/CN.pm

@@ -1,4 +1,4 @@
-package Encode::JP::ISO_2022_JP;
+package Encode::JP::ISO_2022_JP_1;
 use Encode::JP;
 use Encode::JP::JIS;
 use Encode::JP::H2Z;
@@ -7,7 +7,7 @@ use base 'Encode::Encoding';
 use vars qw($VERSION);
 $VERSION = do { my @r = (q$Revision: 0.98 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
-my $canon = 'iso-2022-jp';
+my $canon = 'iso-2022-jp-1';
 my $obj = bless {name => $canon}, __PACKAGE__;
 $obj->Define($canon);
 
@@ -31,7 +31,7 @@ sub encode
     my ($obj,$str,$chk) = @_;
     my $euc =  Encode::encode('euc-jp', $str, $chk);
     &Encode::JP::H2Z::h2z(\$euc);
-    return &Encode::JP::JIS::euc_jis_nox0212(\$euc);
+    return &Encode::JP::JIS::euc_jis(\$euc);
 }
 
 1;

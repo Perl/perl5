@@ -24,7 +24,7 @@ once an operation is in progress.
 
 As of Perl 5.8.0, at least the following encodings are recognized.
 Note that unless otherwise specified, they are all case insensitive
-(via alias) and all occurance of spaces are replaced with '-'.  In
+(via alias) and all occurrance of spaces are replaced with '-'.  In
 other words, "ISO 8859 1" and "iso-8859-1" are identical.
 
 Encodings are categorized and implemented in several different modules
@@ -51,12 +51,12 @@ extended ASCII.  For most cases it uses \x80-\xff (upper half) to map
 non-ASCII characters.
 
   -----------------------
-  iso-8859-1	latin
+  (iso-8859-1	is in built-in)
   iso-8859-2	latin2
   iso-8859-3	latin3
   iso-8859-4	latin4
-  iso-8859-5	latin
-  iso-8859-6	latin
+  iso-8859-5
+  iso-8859-6
   iso-8859-7
   iso-8859-8
   iso-8859-9	latin5
@@ -102,8 +102,9 @@ non-ASCII characters.
 =head2 The CJK: Chinese, Japanese, Korean (Multibyte)
 
 Note Vietnamese is listed above.  Also read "Encoding vs Charset"
-below.  Also note these are impelemented in distinct module by
-languages, due the the size concerns.  See these perldocs also.
+below.  Also note these are implemented in distinct module by
+languages, due the the size concerns.  Please also refer to their
+respective document pages.
 
 =over 4
 
@@ -125,6 +126,7 @@ languages, due the the size concerns.  See these perldocs also.
   cp932
   euc-jp	  ujis
   iso-2022-jp
+  iso-2022-jp-1
   macjapan
   shiftjis	  Shift_JIS, sjis
   -----------------------
@@ -172,7 +174,7 @@ See perlebcdic for details.
   posix-bc
   -----------------------
 
-=item Enocode::Symbols
+=item Encode::Symbols
 
 For symbols  and dingbats.
 
@@ -193,70 +195,105 @@ Charset determines which characters to be included in a given text.
 
 Encoding actually maps charset(s) to stream of bits.
 
-Note a given encoding contains multiple charsets.  For instance,
-euc-jp contains ASCII, JIS X 0201 (Hankaku Kana), JIS X 0208 (Zenkaku
-Kana and Kanji) and JIS X 0212 (Extended Kanji) in a single encoding.
+Note a given encoding may contain multiple charsets and complex CJK 
+encodings are usually implemented that way.
+
+For instance, euc-jp contains ASCII, JIS X 0201-1978 (Hankaku Kana),
+JIS X 0208-1997 (ZenkakuKana and Kanji) and JIS X 0212-1990 (Extended
+Kanji) in a single encoding.
 
 As the name suggests, the Encode module supports encodings, not
 individual charsets.
 
-=head1 Encoding Classification (by Anton Tagunov)
+=head1 Encoding Classification (by Anton Tagunov and Dan Kogai)
 
-Encodings
+This section tries to classify the supported encodings by their 
+applicability for information exchange over the Internet and to 
+choose the most suitable aliases to name them in the context of 
+such communication.
 
-  US-ASCII    UTF-8       KOI8-R      ISO-8859-*
-  ISO-2022-CN ISO-2022-JP Big5
-  EUC-CN      EUC-JP      EUC-KR
+Encoding names
 
-are <http://www.iana.org/assignments/character-sets>-registered as
-preferred MIME names and may probably be used  over the Internet.  So is
+  US-ASCII    UTF-8       
+  ISO-8859-*  KOI8-R
+  Shift_JIS   EUC-JP  ISO-2022-JP ISO-2022-JP-1
+  EUC-KR 
+  Big5
 
-  Shift_JIS
+are L<http://www.iana.org/assignments/character-sets>-registered as
+preferred MIME names and may probably be used over the Internet.
 
-but despite its wide spread it bears the label of being
-Microsft proprietary -- was.  Now Shift JIS is official as of
-JIS X 0208-1997.
+C<Shift_JIS> is no longer Microsft proprietary since it has been
+officialized by JIS X 0208-1997. It is probably the most wide
+spread encoding for Japanese on the Internet.
 
-         UTF-16 KOI8-U
+  EUC-CN
 
-are IANA-registered preferred MIME names but probably
-shoule be avoided as encoding for web pages due to lack of
-browser support.
+has not been registered with IANA (as of march 2002) but
+seems to be supported by major web browsers. (IANA has registered
+this encoding as C<GB2312>, but C<gb2312> currently has a different
+meaning to the C<Encode> module. It will probably become alias to 
+C<EUC-CN> in the future; until then it is safer to avoid using 
+C<gb2312> as encoding name within Perl). 
 
-  ISO-2022      (http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM)
-  ISO-2022-JP-1 (http://www.faqs.org/rfcs/rfc2237.html)
+  UTF-16 
+  KOI8-U        (http://www.faqs.org/rfcs/rfc2319.html)
+
+are IANA-registered (C<UTF-16> even as a preferred MIME name)
+but probably should be avoided as encoding for web pages due to 
+lack of browser support.
+
   ISO-IR-165    (http://www.faqs.org/rfcs/rfc1345.html)
   GBK
   VISCII
-  GB 12345      (only plains 1 and 2 available)
-  GB 18030
-  CNS 11643
+  GB 12345
+  GB 18030 (*)  (see links bellow)
+  EUC-TW   (*)
 
 are totally valid encodings but not registered at IANA.
+The names under which they are listed here are probably the
+most widely-known names for these encodings and are recommended
+names.
 
-   BIG5PLUS
-   EUC-JP-0212   (Encode::lib::Encode::Tcl::Extended)
 
-are a bit proprietary
+=for comment this used to be listed as supported but
+
+do not work @15457 when it's clear they will be uncommented 
+or deleted - Anton
+ISO-2022      (http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM)
+CNS 11643     (only plains 1 and 2 available)
+
+  BIG5PLUS (*)
+
+is a bit proprietary name. C<(*)>-marked encodings belong to
+C<Encode::HanExtra> available from CPAN.
 
 You may probably get some info on CJK encodings at
 
 brief description for most of the mentioned CJK encodings
-
-F<http://www.debian.org.ru/doc/manuals/intro-i18n/ch-codes.html>
+L<http://www.debian.org.ru/doc/manuals/intro-i18n/ch-codes.html>
 
 several years old, but still useful
-
-F<http://www.oreilly.com/people/authors/lunde/cjk_inf.html>
+L<http://www.oreilly.com/people/authors/lunde/cjk_inf.html>
 
 and some in-depth reading for the heroes :-)
-F<http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM> (eq ISO-2022)
+L<http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM> (eq C<ISO-2022>)
+
+gives brief info on C<EUC-CN>, C<GBK> and mostly on C<GB 18030>
+F<ftp://ftp.oreilly.com/pub/examples/nutshell/cjkv/pdf/GB18030_Summary.pdf>
+
+The nature of information in this section is most fragile and
+error-prone; I<probably> is the most popular adverb :)
+Please feel free to send your comments, disagreements and 
+additions to L<...>. (Note however,
+that the mission of this document is to cover the
+C<Encode>-supported encodings only.
 
 =head1 See Also
 
 L<Encode>, 
 L<Encode::Byte>, 
-L<Encode::CN>, L<Encode::JP>, L<Encode::KR>, L<Encode::TW>
+L<Encode::CN>, L<Encode::JP>, L<Encode::KR>, L<Encode::TW>,
 L<Encode::EBCDIC>, L<Encode::Symbol>
 
 =cut

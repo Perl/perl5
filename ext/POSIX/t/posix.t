@@ -178,10 +178,6 @@ try_strftime("Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
 	my $foo  = $!;
 	my $errno = POSIX::errno();
 
-        local $TODO;
-        $TODO = 'POSIX::errno() munged by autoloading on VMS' 
-            if $Is_VMS && $test == 0;
-
         # Force numeric context.
 	is( $errno + 0, $foo + 0,     'autoloading and errno() mix' );
     }

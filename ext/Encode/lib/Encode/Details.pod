@@ -1,11 +1,6 @@
-
 =head1 NAME
 
-Encode - character encodings
-
-=head1 SYNOPSIS
-
-    use Encode;
+Encode::Details - implementation details of Encode.pm
 
 =head1 DESCRIPTION
 
@@ -19,7 +14,7 @@ codepoint" for the character (the exceptions are those platforms where
 the legacy encoding is some variant of EBCDIC rather than a super-set
 of ASCII - see L<perlebcdic>).
 
-Traditionaly computer data has been moved around in 8-bit chunks
+Traditionally computer data has been moved around in 8-bit chunks
 often called "bytes". These chunks are also known as "octets" in
 networking standards. Perl is widely used to manipulate data of
 many types - not only strings of characters representing human or
@@ -92,7 +87,7 @@ encodings for East Asian languages.
 Not really very "encoded" encodings. The Unicode code points
 are just represented as 4-octet integers. None the less because
 different architectures use different representations of integers
-(so called "endian") there at least two disctinct encodings.
+(so called "endian") there at least two distinct encodings.
 
 =item * Multi-byte encodings
 
@@ -265,7 +260,7 @@ Microsft proprietary.
 
   UTF-16 KOI8-U ISO-2022-JP-2 
 
-are IANA-registered preferred MIME names but probably shoule
+are IANA-registered preferred MIME names but probably should
 be avoided as encoding for web pages due to lack of browser 
 support.
 
@@ -412,25 +407,21 @@ Index into the string could be pos($str) allowing s/\G...//.
 =head2 UTF-8 / utf8
 
 The Unicode consortium defines the UTF-8 standard as a way of encoding
-the entire Unicode repertiore as sequences of octets.  This encoding is
-expected to become very widespread. Perl can use this form internaly
+the entire Unicode repertoire as sequences of octets.  This encoding is
+expected to become very widespread. Perl can use this form internally
 to represent strings, so conversions to and from this form are
 particularly efficient (as octets in memory do not have to change,
 just the meta-data that tells Perl how to treat them).
 
 =over 4
 
-=item *
-
-        $bytes = encode_utf8($string);
+=item $bytes = encode_utf8($string);
 
 The characters that comprise string are encoded in Perl's superset of UTF-8
 and the resulting octets returned as a sequence of bytes. All possible
 characters have a UTF-8 representation so this function cannot fail.
 
-=item *
-
-        $string = decode_utf8($bytes [,CHECK]);
+=item $string = decode_utf8($bytes [,CHECK]);
 
 The sequence of octets represented by $bytes is decoded from UTF-8
 into a sequence of logical characters. Not all sequences of octets
@@ -505,10 +496,10 @@ Currently I<newName> can be specified in the following ways:
   define_alias( qr/^iso8859-(\d+)$/i => '"iso-8859-$1"' );
 
 In this case if I<ENCODING> is not a reference it is C<eval>-ed to
-allow C<$1> etc. to be subsituted.  The example is one way to names as
+allow C<$1> etc. to be substituted.  The example is one way to names as
 used in X11 font names to alias the MIME names for the iso-8859-*
 family.  Note the double quote inside the single quote.  If you are
-using regex here, y ou have to do so or it won't work in this case.
+using regex here, you have to do so or it won't work in this case.
 
 =item As a code reference, e.g.:
 
@@ -622,15 +613,13 @@ implementation.  As such they are efficient, but may change.
 
 =over 4
 
-=item * is_utf8(STRING [, CHECK])
+=item is_utf8(STRING [, CHECK])
 
 [INTERNAL] Test whether the UTF-8 flag is turned on in the STRING.
 If CHECK is true, also checks the data in STRING for being well-formed
 UTF-8.  Returns true if successful, false otherwise.
 
-=item *
-
-        _utf8_on(STRING)
+=item _utf8_on(STRING)
 
 [INTERNAL] Turn on the UTF-8 flag in STRING.  The data in STRING is
 B<not> checked for being well-formed UTF-8.  Do not use unless you
@@ -638,9 +627,7 @@ B<know> that the STRING is well-formed UTF-8.  Returns the previous
 state of the UTF-8 flag (so please don't test the return value as
 I<not> success or failure), or C<undef> if STRING is not a string.
 
-=item *
-
-        _utf8_off(STRING)
+=item _utf8_off(STRING)
 
 [INTERNAL] Turn off the UTF-8 flag in STRING.  Do not use frivolously.
 Returns the previous state of the UTF-8 flag (so please don't test the
@@ -816,6 +803,4 @@ to be rationalized.
 L<perlunicode>, L<perlebcdic>, L<perlfunc/open>, L<PerlIO>, L<encoding>,
 L<utf8>, the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
 
-
 =cut
-

@@ -140,3 +140,16 @@ extern key_t ftok (char *pathname, char id);
 extern char *gcvt (double value, int ndigit, char *buf);
 extern int isnan (double value);
 extern void srand48(long int seedval);
+
+/* various missing constants -- define 'em */
+
+#define PF_UNSPEC 0
+
+/* declarations for wrappers in mpeix.c */
+
+#include <time.h>
+#include <sys/time.h>
+
+extern int ftruncate(int fd, long wantsize);
+extern int gettimeofday( struct timeval *tp, struct timezone *tpz );
+extern int truncate(const char *pathname, off_t length);

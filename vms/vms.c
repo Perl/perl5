@@ -6706,8 +6706,10 @@ Perl_flex_stat(pTHX_ const char *fspec, Stat_t *statbufp)
     char fileified[NAM$C_MAXRSS+1];
     char temp_fspec[NAM$C_MAXRSS+300];
     int retval = -1;
+    int saved_errno, saved_vaxc_errno;
 
     if (!fspec) return retval;
+    saved_errno = errno; saved_vaxc_errno = vaxc$errno;
     strcpy(temp_fspec, fspec);
     if (statbufp == (Stat_t *) &PL_statcache)
       do_tovmsspec(temp_fspec,namecache,0);
@@ -6758,6 +6760,8 @@ Perl_flex_stat(pTHX_ const char *fspec, Stat_t *statbufp)
       }
 #     endif
     }
+    /* If we were successful, leave errno where we found it */
+    if (retval == 0) { errno = saved_errno; vaxc$errno = saved_vaxc_errno; }
     return retval;
 
 }  /* end of flex_stat() */
