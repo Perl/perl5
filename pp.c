@@ -3419,6 +3419,24 @@ PP(pp_crypt)
 	 sv_utf8_downgrade(tsv, FALSE);
 	 tmps = SvPVX(tsv);
     }
+#   ifdef USE_ITHREADS
+#     ifdef HAS_CRYPT_R
+    if (!PL_reentrant_buffer->_crypt_struct_buffer) {
+      /* This should be threadsafe because in ithreads there is only
+       * one thread per interpreter.  If this would not be true,
+       * we would need a mutex to protect this malloc. */
+        PL_reentrant_buffer->_crypt_struct_buffer =
+	  (struct crypt_data *)safemalloc(sizeof(struct crypt_data));
+#if defined(__GLIBC__) || defined(__EMX__)
+	if (PL_reentrant_buffer->_crypt_struct_buffer) {
+	    PL_reentrant_buffer->_crypt_struct_buffer->initialized = 0;
+	    /* work around glibc-2.2.5 bug */
+	    PL_reentrant_buffer->_crypt_struct_buffer->current_saltbits = 0;
+	}
+    }
+#endif
+#     endif /* HAS_CRYPT_R */
+#   endif /* USE_ITHREADS */
 #   ifdef FCRYPT
     sv_setpv(TARG, fcrypt(tmps, SvPV(right, n_a)));
 #   else
