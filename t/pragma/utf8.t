@@ -482,7 +482,7 @@ sub nok_bytes {
 
     my $X = chr(1448);
     my ($Y) = $X =~ /(.*)/;
-    print "not " unless length $Y == 1;
+    print "not " unless $Y eq v1448 && length($Y) == 1;
     print "ok $test\n";
     $test++;					# 98
 }
@@ -494,7 +494,7 @@ sub nok_bytes {
     my $X = "Szab\x{f3},Bal\x{e1}zs";
     my $Y = $X;
     $Y =~ s/(B)/$1/ for 0..3;
-    print "not " unless $Y eq $X;
+    print "not " unless $Y eq $X && $X eq "Szab\x{f3},Bal\x{e1}zs";
     print "ok $test\n";
     $test++;					# 99
 }
@@ -505,7 +505,7 @@ sub nok_bytes {
     use utf8;
     use charnames ':full';
     my $text = "\N{LATIN CAPITAL LETTER A WITH DIAERESIS}";
-    print "not " unless ord($text) == 0xc4;
+    print "not " unless $text eq "\xc4" && ord($text) == 0xc4;
     print "ok $test\n";
     $test++;                                    # 100
 }
@@ -523,12 +523,12 @@ sub nok_bytes {
     print "ok $test\n";
     $test++;                                    # 101
 
-    print "not " unless length($b[3]) == 1;
+    print "not " unless length($b[3]) == 1 && $b[3] eq "\x{263A}";
     print "ok $test\n";
     $test++;                                    # 102
 
     $a =~ s/^A/Z/;
-    print "not " unless length($a) == 4;
+    print "not " unless length($a) == 4 && $a eq "ZBC\x{263A}";
     print "ok $test\n";
     $test++;                                    # 103
 }
@@ -538,7 +538,7 @@ sub nok_bytes {
 
     use utf8;
     $X =~ s/^/chr(1488)/e;
-    print "not " unless length $X == 1;
+    print "not " unless length $X == 1 && ord($X) == 1488;
     print "ok $test\n";
     $test++;					# 104
 }
