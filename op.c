@@ -6520,7 +6520,16 @@ Perl_my_tmpfp(pTHX)
 #ifdef PERL_EXTERNAL_GLOB
      /* File::Temp pulls in Fcntl, which may not be available with
       *  e.g. miniperl, use mkstemp() or stdio tmpfile() instead. */
-#   ifdef HAS_MKSTEMP
+#   if defined(WIN32) || !defined(HAS_MKSTEMP)
+     FILE *stdio = PerlSIO_tmpfile();
+     if (stdio) {
+	  if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)),
+			       &PerlIO_stdio, "w+", Nullsv))) {
+	       PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
+	       s->stdio = stdio;
+	  }
+     }
+#   else /* !WIN32 && HAS_MKSTEMP */
      SV *sv = newSVpv("/tmp/PerlIO_XXXXXX", 0);
      fd = mkstemp(SvPVX(sv));
      if (fd >= 0) {
@@ -6530,16 +6539,7 @@ Perl_my_tmpfp(pTHX)
 	       SvREFCNT_dec(sv);
 	  }
      }
-#   else
-     FILE *stdio = PerlSIO_tmpfile();
-     if (stdio) {
-	  if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)),
-			       &PerlIO_stdio, "w+", Nullsv))) {
-	       PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
-	       s->stdio = stdio;
-	  }
-     }
-#   endif /* HAS_MKSTEMP */
+#   endif /* WIN32 || !HAS_MKSTEMP */
 #else
      /* We have internal glob, which probably also means that we 
       * can also use File::Temp (which uses Fcntl) with impunity. */
