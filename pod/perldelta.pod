@@ -360,6 +360,9 @@ making it easier for modules to refer to it.
 perlgpl has been added: it is the GNU General Public License in pod
 format, making it easier for modules to refer to it.
 
+perlmacosx has been added to tell about the installation and use
+of Perl in Mac OS X.
+
 perlos400 has been added to tell about the installation and use
 of Perl in OS/400 PASE.
 
