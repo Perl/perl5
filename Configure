@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Jun  1 19:18:28 EET DST 2002 [metaconfig 3.0 PL70]
+# Generated on Wed Jun  5 04:17:01 EET DST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -495,6 +495,7 @@ d_getsbyport=''
 d_gmtime_r=''
 gmtime_r_proto=''
 d_gnulibc=''
+gnulibc_version=''
 d_hasmntopt=''
 d_htonl=''
 d_inetaton=''
@@ -5303,26 +5304,43 @@ esac
 
 echo " "
 echo "Checking for GNU C Library..." >&4
-cat >try.c <<EOM
+cat >try.c <<'EOCP'
+/* Find out version of GNU C library.  __GLIBC__ and __GLIBC_MINOR__
+   alone are insufficient to distinguish different versions, such as
+   2.0.6 and 2.0.7.  The function gnu_get_libc_version() appeared in
+   libc version 2.1.0.      A. Dougherty,  June 3, 2002.
+*/
 #include <stdio.h>
-int main()
+int main(void)
 {
 #ifdef __GLIBC__
-    exit(0);
+#   ifdef __GLIBC_MINOR__
+#       if __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 1
+#           include <gnu/libc-version.h>
+	    printf("%s\n",  gnu_get_libc_version());
+#       else
+	    printf("%d.%d\n",  __GLIBC__, __GLIBC_MINOR__);
+#       endif
+#   else
+	printf("%d\n",  __GLIBC__);
+#   endif
+    return 0;
 #else
-    exit(1);
+    return 1;
 #endif
 }
-EOM
+EOCP
 set try
-if eval $compile_ok && $run ./try; then
+if eval $compile_ok && $run ./try > glibc.ver; then
 	val="$define"
-	echo "You are using the GNU C Library"
+	gnulibc_version=`$cat glibc.ver`
+	echo "You are using the GNU C Library version $gnulibc_version"
 else
 	val="$undef"
+	gnulibc_version=''
 	echo "You are not using the GNU C Library"
 fi
-$rm -f try try.*
+$rm -f try try.* glibc.ver
 set d_gnulibc
 eval $setvar
 
@@ -15358,6 +15376,26 @@ else
 	echo "Your stdio doesn't appear very std."
 fi
 $rm -f try.c try
+
+# glibc 2.2.90 and above apparently change stdio streams so Perl's
+# direct buffer manipulation no longer works.  The Configure tests
+# should be changed to correctly detect this, but until then,
+# the following check should at least let perl compile and run.
+# (This quick fix should be updated before 5.8.1.)
+# To be defensive, reject all unknown versions, and all versions  > 2.2.9.
+# A. Dougherty, June 3, 2002.
+case "$d_gnulibc" in
+$define)
+	case "$gnulibc_version" in
+	2.[01]*)  ;;
+	2.2) ;;
+	2.2.[0-9]) ;;
+	*)  echo "But I will not snoop inside glibc $gnulibc_version stdio buffers."
+		val="$undef"
+		;;
+	esac
+	;;
+esac
 set d_stdstdio
 eval $setvar
 
@@ -20104,6 +20142,7 @@ gidtype='$gidtype'
 glibpth='$glibpth'
 gmake='$gmake'
 gmtime_r_proto='$gmtime_r_proto'
+gnulibc_version='$gnulibc_version'
 grep='$grep'
 groupcat='$groupcat'
 groupstype='$groupstype'
