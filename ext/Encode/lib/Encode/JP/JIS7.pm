@@ -1,7 +1,7 @@
 package Encode::JP::JIS7;
 use strict;
 
-our $VERSION = do { my @r = (q$Revision: 1.11 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.12 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
@@ -23,8 +23,6 @@ use base qw(Encode::Encoding);
 sub needs_lines { 1 }
 
 use Encode::CJKConstants qw(:all);
-
-our $DEBUG = 0;
 
 #
 # decode is identical for all 2022 variants

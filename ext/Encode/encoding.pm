@@ -1,10 +1,10 @@
-# $Id: encoding.pm,v 1.45 2003/06/18 09:29:02 dankogai Exp $
+# $Id: encoding.pm,v 1.46 2003/07/08 21:52:14 dankogai Exp $
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.45 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.46 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
-our $DEBUG = 0;
+sub DEBUG () { 0 }
 
 BEGIN {
     if (ord("A") == 193) {
@@ -42,7 +42,7 @@ sub import {
     }
     $name = $enc->name; # canonize
     unless ($arg{Filter}) {
-	$DEBUG and warn "_exception($name) = ", _exception($name);
+	DEBUG and warn "_exception($name) = ", _exception($name);
 	_exception($name) or ${^ENCODING} = $enc;
 	$HAS_PERLIO or return 1;
     }else{
@@ -56,14 +56,13 @@ sub import {
 	    filter_add(sub{
 			   my $status = filter_read();
                            if ($status > 0){
-			       # $DEBUG and warn $_;
 			       $_ = $enc->decode($_, 1);
-			       $DEBUG and warn $_;
+			       DEBUG and warn $_;
 			   }
 			   $status ;
 		       });
 	};
-    }	$DEBUG and warn "Filter installed";
+    }	DEBUG and warn "Filter installed";
     defined ${^UNICODE} and ${^UNICODE} != 0 and return 1;
     for my $h (qw(STDIN STDOUT)){
 	if ($arg{$h}){

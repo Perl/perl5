@@ -2,10 +2,10 @@ package Encode::Guess;
 use strict;
 
 use Encode qw(:fallbacks find_encoding);
-our $VERSION = do { my @r = (q$Revision: 1.8 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.9 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 my $Canon = 'Guess';
-our $DEBUG = 0;
+sub DEBUG () { 0 }
 our %DEF_SUSPECTS = map { $_ => find_encoding($_) } qw(ascii utf8);
 $Encode::Encoding{$Canon} = 
     bless { 
@@ -42,7 +42,7 @@ sub add_suspects{
     for my $c (@_){
 	my $e = find_encoding($c) or die "Unknown encoding: $c";
 	$self->{Suspects}{$e->name} = $e;
-	$DEBUG and warn "Added: ", $e->name;
+	DEBUG and warn "Added: ", $e->name;
     }
 }
 
@@ -100,7 +100,7 @@ sub guess {
 		    $char & 0xff00 and $le++;
 		}
 	    }
-	    $DEBUG and warn "$utf, be == $be, le == $le";
+	    DEBUG and warn "$utf, be == $be, le == $le";
 	    $be == $le 
 		and return
 		    "Encodings ambiguous between $utf BE and LE ($be, $le)";
@@ -112,7 +112,7 @@ sub guess {
     for my $c (@_){
 	my $e = find_encoding($c) or die "Unknown encoding: $c";
 	$try{$e->name} = $e;
-	$DEBUG and warn "Added: ", $e->name;
+	DEBUG and warn "Added: ", $e->name;
     }
     my $nline = 1;
     for my $line (split /\r\n?|\n/, $octet){
@@ -130,10 +130,10 @@ sub guess {
 	    my $scratch = $line;
 	    $try{$k}->decode($scratch, FB_QUIET);
 	    if ($scratch eq ''){
-		$DEBUG and warn sprintf("%4d:%-24s ok\n", $nline, $k);
+		DEBUG and warn sprintf("%4d:%-24s ok\n", $nline, $k);
 	    }else{
 		use bytes ();
-		$DEBUG and 
+		DEBUG and 
 		    warn sprintf("%4d:%-24s not ok; %d bytes left\n", 
 				 $nline, $k, bytes::length($scratch));
 		delete $ok{$k};
