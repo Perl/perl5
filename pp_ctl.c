@@ -1959,11 +1959,12 @@ PP(pp_next)
     if (cxix < cxstack_ix)
 	dounwind(cxix);
 
-    TOPBLOCK(cx);
+    cx = &cxstack[cxstack_ix];
     {
 	OP *nextop = cx->blk_loop.next_op;
 	/* clean scope, but only if there's no continue block */
 	if (nextop == cUNOPx(cx->blk_loop.last_op)->op_first->op_next) {
+	    TOPBLOCK(cx);
 	    oldsave = PL_scopestack[PL_scopestack_ix - 1];
 	    LEAVE_SCOPE(oldsave);
 	}

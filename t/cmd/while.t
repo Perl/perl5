@@ -1,8 +1,6 @@
 #!./perl
 
-# $RCSfile: while.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:15 $
-
-print "1..17\n";
+print "1..19\n";
 
 open (tmp,'>Cmd_while.tmp') || die "Can't create Cmd_while.tmp.";
 print tmp "tvi925\n";
@@ -139,5 +137,26 @@ print "ok $i\n";
     }
     continue {
         print "ok ", $var-1, "\nok $i\n";
+    }
+}
+
+{
+    local $l = 18;
+    {
+        local $l = 0
+    }
+    continue {
+        print "ok $l\n"
+    }
+}
+
+{
+    local $l = 19;
+    my $x = 0;
+    while (!$x++) {
+        local $l = 0
+    }
+    continue {
+        print "ok $l\n"
     }
 }

@@ -3753,6 +3753,9 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 
     if (!block)
 	block = newOP(OP_NULL, 0);
+    else if (cont) {
+	block = scope(block);
+    }
 
     if (cont)
 	next = LINKLIST(cont);
