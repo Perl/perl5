@@ -322,6 +322,7 @@ avhv_iterinit
 avhv_iternext
 avhv_iternextsv
 avhv_iterval
+avhv_keys
 avhv_store
 avhv_store_ent
 av_clear

@@ -61,6 +61,7 @@
 #define avhv_iternext		Perl_avhv_iternext
 #define avhv_iternextsv		Perl_avhv_iternextsv
 #define avhv_iterval		Perl_avhv_iterval
+#define avhv_keys		Perl_avhv_keys
 #define avhv_store		Perl_avhv_store
 #define avhv_store_ent		Perl_avhv_store_ent
 #define band_amg		Perl_band_amg

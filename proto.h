@@ -24,6 +24,7 @@ I32	avhv_iterinit _((AV *ar));
 HE*	avhv_iternext _((AV *ar));
 SV *	avhv_iternextsv _((AV *ar, char** key, I32* retlen));
 SV*	avhv_iterval _((AV *ar, HE* entry));
+HV*	avhv_keys _((AV *ar));
 SV**	avhv_store _((AV *ar, char* key, U32 klen, SV* val, U32 hash));
 void	av_clear _((AV* ar));
 void	av_extend _((AV* ar, I32 key));
