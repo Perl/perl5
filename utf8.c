@@ -610,7 +610,7 @@ Perl_bytes_from_utf8(pTHX_ U8* s, STRLEN *len, bool *is_utf8)
 	U8 c = *s++;
         if (!UTF8_IS_ASCII(c)) {
 	    if (UTF8_IS_CONTINUATION(c) || s >= send ||
-		!UTF8_IS_CONTINUATION(*s) || (c & 0xfc) != 0xc0)
+		!UTF8_IS_CONTINUATION(*s) || UTF8_IS_DOWNGRADEABLE_START(c))
 		return start;
 	    s++, count++;
         }
