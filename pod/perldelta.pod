@@ -910,16 +910,20 @@ CPANPLUS, Inline, and Module::Build will become core modules.
 
 =item *
 
+True lexically scoped pragmas will be introduced.
+
+=item *
+
+The bytecompiler and byteloader will be fixed.
+
+=item *
+
 The v-strings as such may be removed.  What will keep working is
 the v-less form (1.2.3) when used with C<use>, C<require>, and
 C<$VERSION>.  The v-ful version (v1.2.3) may become obsolete.
 The equivalence of strings and v-strings (e.g. that currently 5.8.0
 is equal to "\5\8\0") will go away, and instead the 1.2.3 will be
 a "version object", as will be the C<$^V>.
-
-=item *
-
-The bytecompiler and byteloader will be fixed.
 
 =item *
 
