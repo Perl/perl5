@@ -2078,7 +2078,7 @@ available at http://www.cpan.org/src/index.html
         IRIX
         Linux
         MacOS Classic
-        Mac OS X        (Darwin)
+        MacOS X         (Darwin)
         MPE/iX
         NetBSD
         NetWare
@@ -2096,13 +2096,14 @@ available at http://www.cpan.org/src/index.html
         UTS
         VOS
         Win32/NT/2K     2)
+        WinCE
         z/OS            (OS/390)
         VM/ESA
 
         1) in DOS mode either the DOS or OS/2 ports can be used
-        2) compilers: Borland, Cygwin, Mingw32 GCC, VC++
+        2) compilers: Borland, Cygwin (GCC), MinGW (GCC), VC6
 
-The following platforms worked for the previous releases (5.6 and
+The following platforms worked with the previous releases (5.6 and
 5.7), but we did not manage either to fix or to test these in time
 for the 5.8.0 release.  There is a very good chance that many of these
 will work fine with the 5.8.0.  The only one known for certain to be
