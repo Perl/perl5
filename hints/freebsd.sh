@@ -210,7 +210,13 @@ EOM
 		 exit 1
 	      fi
 	      ldflags="-pthread $ldflags"
-	      ccflags="-D_THREAD_SAFE $ccflags"
+	      case "$osvers" in
+	      4.5*)	# 4.5 has gethostbyaddr_r but it is
+			# "Temporary function, not threadsafe"...
+			d_gethostbyaddr_r="undef"
+			d_gethostbyaddr_r_proto="undef"
+			;;
+	      esac
 	      ;;
 
 	esac
