@@ -18,7 +18,6 @@ package Pod::Text::Termcap;
 
 require 5.004;
 
-use Config;
 use Pod::Text ();
 use POSIX ();
 use Term::Cap;
@@ -31,7 +30,7 @@ use vars qw(@ISA $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.05;
+$VERSION = 1.06;
 
 
 ##############################################################################
@@ -42,25 +41,30 @@ $VERSION = 1.05;
 # do all the stuff we normally do.
 sub initialize {
     my $self = shift;
+    my ($ospeed, $term, $termios);
 
     # The default Term::Cap path won't work on Solaris.
     $ENV{TERMPATH} = "$ENV{HOME}/.termcap:/etc/termcap"
         . ":/usr/share/misc/termcap:/usr/share/lib/termcap";
 
-    my $ospeed = '9600';
-    if (defined $Config{'i_termios'}) {
-      my $termios = POSIX::Termios->new;
-      $termios->getattr;
-      $ospeed = $termios->getospeed;
+    # Fall back on a hard-coded terminal speed if POSIX::Termios isn't
+    # available.
+    eval { $termios = POSIX::Termios->new };
+    if ($@) {
+        $ospeed = '9600';
+    } else {
+        $termios->getattr;
+        $ospeed = $termios->getospeed;
     }
-    my $term;
+
+    # Fall back on the ANSI escape sequences if Term::Cap doesn't work.
     eval { $term = Tgetent Term::Cap { TERM => undef, OSPEED => $ospeed } };
     $$self{BOLD} = $$term{_md} || "\e[1m";
     $$self{UNDL} = $$term{_us} || "\e[4m";
     $$self{NORM} = $$term{_me} || "\e[m";
 
     unless (defined $$self{width}) {
-        $$self{width} = $ENV{COLUMNS} || $$term{_co} || 78;
+        $$self{width} = $ENV{COLUMNS} || $$term{_co} || 80;
         $$self{width} -= 2;
     }
 
