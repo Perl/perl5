@@ -253,12 +253,17 @@ a scalar is encoded internally in UTF-8 (Unicode).
 
 base
 
+B::Bytecode - in much better shape than it used to be.  Still far
+from perfect, but maybe worth a try.
+
 B::Concise
 
 B::Deparse
 
 Benchmark - an optional feature, C<:hireswallclock>, now allows
 for high resolution wall clock times (uses Time::HiRes).
+
+ByteLoader - see B::Bytecode.
 
 bytes - now has bytes::substr.
 
@@ -349,6 +354,10 @@ documented and bugs found while documenting have been fixed.
 
 C<perldoc> has been rewritten from scratch to be more robust and
 featureful.
+
+C<perlcc -B> works now at least somewhat better, while C<perlcc -c>
+is rather more broken.  (The Perl compiler suite as a whole continues
+to be experimental.)
 
 =head1 New Documentation
 
@@ -685,7 +694,8 @@ The embedding examples of L<perlembed> have been reviewed to be
 uptodate and consistent: for example, the correct use of
 PERL_SYS_INIT3() and PERL_SYS_TERM().
 
-Extensive reworking of the pad code has been conducted by Dave Mitchell.
+Extensive reworking of the pad code (the code responsible
+for lexical variables) has been conducted by Dave Mitchell.
 
 Extensive work on the v-strings by John Peacock.
 
@@ -773,6 +783,13 @@ tied hashes to implement the behaviour of a hash in scalar context.
 The subtest 2 of lib/Net/Ping/t/510_ping_udp.t might fail if you have
 an unusual networking setup.  The test is trying to send a UDP ping to
 the IP address 127.0.0.1.
+
+=head2 B::C
+
+The C-generating compiler backend B::C (the frontend being
+C<perlcc -c>) is even more broken than it used to be because of
+the extenstive lexical variable changes.  (The good news is that
+B::Bytecode and ByteLoader are better than they used to be.)
 
 =head1 Platform Specific Problems
 
@@ -924,7 +941,7 @@ The ability to write true lexically scoped pragmas will be introduced.
 
 =item *
 
-The bytecompiler and byteloader will be fixed.
+Work will continue on the bytecompiler and byteloader.
 
 =item *
 
