@@ -595,6 +595,9 @@ PERL_CALLCONV PerlIO*	Perl_start_glob(pTHX_ SV* pattern, IO *io);
 #if defined(USE_5005THREADS)
 PERL_CALLCONV struct perl_thread*	Perl_new_struct_thread(pTHX_ struct perl_thread *t);
 #endif
+#if defined(USE_REENTRANT_API)
+PERL_CALLCONV void	Perl_reentrant_init(pTHX);
+#endif
 PERL_CALLCONV void	Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr);
 PERL_CALLCONV I32	Perl_call_argv(pTHX_ const char* sub_name, I32 flags, char** argv);
 PERL_CALLCONV I32	Perl_call_method(pTHX_ const char* methname, I32 flags);

@@ -533,6 +533,9 @@
 #if defined(USE_5005THREADS)
 #define new_struct_thread	Perl_new_struct_thread
 #endif
+#if defined(USE_REENTRANT_API)
+#define reentrant_init		Perl_reentrant_init
+#endif
 #define call_atexit		Perl_call_atexit
 #define call_argv		Perl_call_argv
 #define call_method		Perl_call_method
@@ -2088,6 +2091,9 @@
 #define peep(a)			Perl_peep(aTHX_ a)
 #if defined(USE_5005THREADS)
 #define new_struct_thread(a)	Perl_new_struct_thread(aTHX_ a)
+#endif
+#if defined(USE_REENTRANT_API)
+#define reentrant_init()	Perl_reentrant_init(aTHX)
 #endif
 #define call_atexit(a,b)	Perl_call_atexit(aTHX_ a,b)
 #define call_argv(a,b,c)	Perl_call_argv(aTHX_ a,b,c)

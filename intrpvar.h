@@ -487,7 +487,7 @@ PERLVAR(Iregex_pad,     SV**)		/* All regex objects */
 PERLVAR(Iregex_padav,   AV*)		/* All regex objects */
 
 #ifdef USE_REENTRANT_API
-PERLVAR(Ireentrant_buffer, REBUF*)	/* here we store the _r buffers */
+PERLVAR(Ireentrant_buffer, REENTBUF*)	/* here we store the _r buffers */
 #endif
 
 #endif

@@ -554,6 +554,9 @@ dopM	|PerlIO*|start_glob	|SV* pattern|IO *io
 #if defined(USE_5005THREADS)
 Ap	|struct perl_thread*	|new_struct_thread|struct perl_thread *t
 #endif
+#if defined(USE_REENTRANT_API)
+Ap	|void	|reentrant_init
+#endif
 Ap	|void	|call_atexit	|ATEXIT_t fn|void *ptr
 Apd	|I32	|call_argv	|const char* sub_name|I32 flags|char** argv
 Apd	|I32	|call_method	|const char* methname|I32 flags

@@ -321,6 +321,7 @@ Perl_ninstr
 Perl_op_free
 Perl_pad_sv
 Perl_new_struct_thread
+Perl_reentrant_init
 Perl_call_atexit
 Perl_call_argv
 Perl_call_method
