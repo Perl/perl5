@@ -250,7 +250,7 @@ PPCODE:
     save_aptr(&PL_endav);
     PL_endav = (AV*)sv_2mortal((SV*)newAV()); /* ignore END blocks for now	*/
 
-    save_hptr(&PL_defstash);		/* save current default stack	*/
+    save_hptr(&PL_defstash);		/* save current default stash	*/
     /* the assignment to global defstash changes our sense of 'main'	*/
     PL_defstash = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
     save_hptr(&PL_curstash);
@@ -262,6 +262,10 @@ PPCODE:
     gv = gv_fetchpv("main::", GV_ADDWARN, SVt_PVHV);
     sv_free((SV*)GvHV(gv));
     GvHV(gv) = (HV*)SvREFCNT_inc(PL_defstash);
+
+    /* %INC must be clean for use/require in compartment */
+    save_hash(PL_incgv);
+    GvHV(PL_incgv) = (HV*)SvREFCNT_inc(GvHV(gv_HVadd(gv_fetchpv("INC",TRUE,SVt_PVHV))));
 
     PUSHMARK(SP);
     perl_call_sv(codesv, GIMME|G_EVAL|G_KEEPERR); /* use callers context */
