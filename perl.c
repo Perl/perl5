@@ -3113,15 +3113,15 @@ S_init_perllib(pTHX)
     incpush(PRIVLIB_EXP, FALSE);
 #endif
 
-#ifdef SITEARCH_EXP
-    incpush(SITEARCH_EXP, FALSE);
-#endif
 #ifdef SITELIB_EXP
-#if defined(WIN32) 
-    incpush(SITELIB_EXP, TRUE);
-#else
-    incpush(SITELIB_EXP, FALSE);
-#endif
+    {
+	char buf[MAXPATHLEN];
+
+	strcpy(buf,SITELIB_EXP);
+	if (strrchr(buf,'/'))		/* XXX Hack, Configure var needed */
+	    *strrchr(buf,'/') = '\0';
+	incpush(buf, TRUE);
+    }
 #endif
 #if defined(PERL_VENDORLIB_EXP)
 #if defined(WIN32) 
@@ -3186,6 +3186,10 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 	 * archname-specific sub-directories.
 	 */
 	if (addsubdirs) {
+#ifdef PERL_INC_VERSION_LIST
+	    const char *incverlist[] = { PERL_INC_VERSION_LIST, NULL };
+	    const char **incver;
+#endif
 	    struct stat tmpstatbuf;
 #ifdef VMS
 	    char *unix;
@@ -3201,21 +3205,33 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 		              "Failed to unixify @INC element \"%s\"\n",
 			      SvPV(libdir,len));
 #endif
-	    /* .../archname/version if -d .../archname/version/auto */
-	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s/"PERL_FS_VER_FMT"/auto", libdir,
-			   ARCHNAME, (int)PERL_REVISION,
-			   (int)PERL_VERSION, (int)PERL_SUBVERSION);
+	    /* .../version/archname if -d .../version/archname */
+	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/"PERL_FS_VER_FMT"/%s", libdir,
+			   (int)PERL_REVISION, (int)PERL_VERSION,
+			   (int)PERL_SUBVERSION, ARCHNAME);
 	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
-		av_push(GvAVn(PL_incgv),
-			newSVpvn(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
+		av_push(GvAVn(PL_incgv), newSVsv(subdir));
 
-	    /* .../archname if -d .../archname/auto */
-	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s/auto", libdir, ARCHNAME);
+	    /* .../version if -d .../version */
+	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/"PERL_FS_VER_FMT, libdir,
+			   (int)PERL_REVISION, (int)PERL_VERSION,
+			   (int)PERL_SUBVERSION);
 	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
-		av_push(GvAVn(PL_incgv),
-			newSVpvn(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
+		av_push(GvAVn(PL_incgv), newSVsv(subdir));
+
+#ifdef PERL_INC_VERSION_LIST
+	    for (incver = incverlist; *incver; incver++)
+	    {
+		/* .../xxx if -d .../xxx */
+		Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s", libdir, *incver);
+		if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
+		      S_ISDIR(tmpstatbuf.st_mode))
+		    av_push(GvAVn(PL_incgv), newSVsv(subdir));
+   
+	    }
+#endif
 	}
 
 	/* finally push this lib directory on the end of @INC */

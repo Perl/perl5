@@ -5,6 +5,7 @@ use Config;
 
 my $archname = $Config{'archname'};
 my $ver = $Config{'version'};
+my @inc_version_list = reverse split / /, $Config{'inc_version_list'};
 
 our @ORIG_INC = @INC;	# take a handy copy of 'original' value
 our $VERSION = '0.5564';
@@ -23,12 +24,15 @@ sub import {
 	    Carp::carp("Parameter to use lib must be directory, not file");
 	}
 	unshift(@INC, $_);
+        # Add any previous version directories we found at configure time
+        foreach my $incver (@inc_version_list)
+        {
+            unshift(@INC, "$_/$incver") if -d "$_/$incver";
+        }
 	# Put a corresponding archlib directory infront of $_ if it
 	# looks like $_ has an archlib directory below it.
-	if (-d "$_/$archname") {
-	    unshift(@INC, "$_/$archname")    if -d "$_/$archname/auto";
-	    unshift(@INC, "$_/$archname/$ver") if -d "$_/$archname/$ver/auto";
-	}
+	unshift(@INC, "$_/$ver") if -d "$_/$ver";
+	unshift(@INC, "$_/$ver/$archname") if -d "$_/$ver/$archname";
     }
 
     # remove trailing duplicates
