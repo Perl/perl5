@@ -54,7 +54,7 @@ To change the value of an *already-existing* SV, there are seven routines:
     void  sv_setpv(SV*, const char*);
     void  sv_setpvn(SV*, const char*, int)
     void  sv_setpvf(SV*, const char*, ...);
-    void  sv_vsetpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool);
+    void  sv_vsetpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool *);
     void  sv_setsv(SV*, SV*);
 
 Notice that you can choose to specify the length of the string to be
