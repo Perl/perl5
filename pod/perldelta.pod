@@ -256,7 +256,9 @@ implemented differently.  Not only is the current interface rather
 ugly, but the current implementation slows down normal array and hash
 use quite noticeably. The C<fields> pragma interface will remain
 available.  The I<restricted hashes> interface is expected to
-be the replacement interface (see L<Hash::Util>).
+be the replacement interface (see L<Hash::Util>).  If your existing
+programs depends on the underlying implementation, consider using
+L<Class::PseudoHash> from CPAN.
 
 =item *
 
