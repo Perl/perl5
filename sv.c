@@ -2064,9 +2064,14 @@ register SV *sstr;
 				if (cv_const_sv(cv))
 				    warn("Constant subroutine %s redefined",
 					 GvENAME((GV*)dstr));
-				else if (dowarn)
-				    warn("Subroutine %s redefined",
-					 GvENAME((GV*)dstr));
+				else if (dowarn) {
+				    if (!(CvGV(cv) && GvSTASH(CvGV(cv))
+					  && HvNAME(GvSTASH(CvGV(cv)))
+					  && strEQ(HvNAME(GvSTASH(CvGV(cv))),
+						   "autouse")))
+					warn("Subroutine %s redefined",
+					     GvENAME((GV*)dstr));
+				}
 			    }
 			    cv_ckproto(cv, (GV*)dstr,
 				       SvPOK(sref) ? SvPVX(sref) : Nullch);
