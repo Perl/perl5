@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 1.20 $, $Date: 1999/01/08 04:22:09 $)
+perlfaq1 - General Questions About Perl ($Revision: 1.23 $, $Date: 1999/05/23 16:08:30 $)
 
 =head1 DESCRIPTION
 
@@ -56,13 +56,13 @@ You should definitely use version 5.  Version 4 is old, limited, and
 no longer maintained; its last patch (4.036) was in 1992, long ago and
 far away.  Sure, it's stable, but so is anything that's dead; in fact,
 perl4 had been called a dead, flea-bitten camel carcass.  The most recent
-production release is 5.005_02 (although 5.004_04 is still supported).
-The most cutting-edge development release is 5.005_54.  Further references
+production release is 5.005_03 (although 5.004_05 is still supported).
+The most cutting-edge development release is 5.005_57.  Further references
 to the Perl language in this document refer to the production release
-unless otherwise specified.  There may be one or more official bug
-fixes for 5.005_02 by the time you read this, and also perhaps some
-experimental versions on the way to the next release.  All releases
-prior to 5.004 were subject to buffer overruns, a grave security issue.
+unless otherwise specified.  There may be one or more official bug fixes
+by the time you read this, and also perhaps some experimental versions
+on the way to the next release.  All releases prior to 5.004 were subject
+to buffer overruns, a grave security issue.
 
 =head2 What are perl4 and perl5?
 
@@ -96,7 +96,7 @@ found in release 5.  Written in nominally portable C++, Topaz hopes to
 maintain 100% source-compatibility with previous releases of Perl but to
 run significantly faster and smaller.  The Topaz team hopes to provide
 an XS compatibility interface to allow most XS modules to work unchanged,
-albeit perhaps without the efficiency that the new interface uowld allow.
+albeit perhaps without the efficiency that the new interface would allow.
 New features in Topaz are as yet undetermined, and will be addressed
 once compatibility and performance goals are met.
 
@@ -309,11 +309,11 @@ as soon as possible.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-1999 Tom Christiansen and Nathan Torkington.
+Copyright (c) 1997, 1998 Tom Christiansen and Nathan Torkington.
 All rights reserved.
 
 When included as an integrated part of the Standard Distribution
-of Perl or of its documentation (printed or otherwise), this work is
+of Perl or of its documentation (printed or otherwise), this works is
 covered under Perl's Artistic Licence.  For separate distributions of
 all or part of this FAQ outside of that, see L<perlfaq>.
 
@@ -322,4 +322,3 @@ domain.  You are permitted and encouraged to use this code and any
 derivatives thereof in your own programs for fun or for profit as you
 see fit.  A simple comment in the code giving credit to the FAQ would
 be courteous but is not required.
-

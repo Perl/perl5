@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - Perl Language Issues ($Revision: 1.24 $, $Date: 1999/01/08 05:32:11 $)
+perlfaq7 - Perl Language Issues ($Revision: 1.28 $, $Date: 1999/05/23 20:36:18 $)
 
 =head1 DESCRIPTION
 
@@ -18,18 +18,16 @@ In the words of Chaim Frenkel: "Perl's grammar can not be reduced to BNF.
 The work of parsing perl is distributed between yacc, the lexer, smoke
 and mirrors."
 
-=head2 What are all these $@%* punctuation signs, and how do I know when to use them?
+=head2 What are all these $@%&* punctuation signs, and how do I know when to use them?
 
 They are type specifiers, as detailed in L<perldata>:
 
     $ for scalar values (number, string or reference)
     @ for arrays
     % for hashes (associative arrays)
+    & for subroutines (aka functions, procedures, methods)
     * for all types of that symbol name.  In version 4 you used them like
       pointers, but in modern perls you can just use references.
-
-While there are a few places where you don't actually need these type
-specifiers, you should always use them.
 
 A couple of others that you're likely to encounter that aren't
 really type specifiers are:
@@ -180,7 +178,7 @@ own module.  Make sure to change the names appropriately.
 
 	# if using RCS/CVS, this next line may be preferred,
 	# but beware two-digit versions.
-	$VERSION = do{my@r=q$Revision: 1.24 $=~/\d+/g;sprintf '%d.'.'%02d'x$#r,@r};
+	$VERSION = do{my@r=q$Revision: 1.28 $=~/\d+/g;sprintf '%d.'.'%02d'x$#r,@r};
 
 	@ISA         = qw(Exporter);
 	@EXPORT      = qw(&func1 &func2 &func3);
@@ -330,12 +328,13 @@ harder.  Take this code:
     print "Finally $f\n";
 
 The $f that has "bar" added to it three times should be a new C<$f>
-(C<my $f> should create a new local variable each time through the
-loop).  It isn't, however.  This is a bug, and will be fixed.
+(C<my $f> should create a new local variable each time through the loop).
+It isn't, however.  This was a bug, now fixed in the latest releases
+(tested against 5.004_05, 5.005_03, and 5.005_56).
 
-=head2 How can I pass/return a {Function, FileHandle, Array, Hash, Method, Regexp}?
+=head2 How can I pass/return a {Function, FileHandle, Array, Hash, Method, Regex}?
 
-With the exception of regexps, you need to pass references to these
+With the exception of regexes, you need to pass references to these
 objects.  See L<perlsub/"Pass by Reference"> for this particular
 question, and L<perlref> for information on references.
 
@@ -391,28 +390,42 @@ If you're planning on generating new filehandles, you could do this:
     $fh = openit('< /etc/motd');
     print <$fh>;
 
-=item Passing Regexps
+=item Passing Regexes
 
-To pass regexps around, you'll need to either use one of the highly
-experimental regular expression modules from CPAN (Nick Ing-Simmons's
-Regexp or Ilya Zakharevich's Devel::Regexp), pass around strings
-and use an exception-trapping eval, or else be very, very clever.
-Here's an example of how to pass in a string to be regexp compared:
+To pass regexes around, you'll need to be using a release of Perl
+sufficiently recent as to support the C<qr//> construct, pass around
+strings and use an exception-trapping eval, or else be very, very clever.
+
+Here's an example of how to pass in a string to be regex compared
+using C<qr//>:
 
     sub compare($$) {
-        my ($val1, $regexp) = @_;
-        my $retval = eval { $val =~ /$regexp/ };
+        my ($val1, $regex) = @_;
+        my $retval = $val1 =~ /$regex/;
+	return $retval;
+    }
+    $match = compare("old McDonald", qr/d.*D/i);
+
+Notice how C<qr//> allows flags at the end.  That pattern was compiled
+at compile time, although it was executed later.  The nifty C<qr//>
+notation wasn't introduced until the 5.005 release.  Before that, you
+had to approach this problem much less intuitively.  For example, here
+it is again if you don't have C<qr//>:
+
+    sub compare($$) {
+        my ($val1, $regex) = @_;
+        my $retval = eval { $val1 =~ /$regex/ };
 	die if $@;
 	return $retval;
     }
 
-    $match = compare("old McDonald", q/d.*D/);
+    $match = compare("old McDonald", q/($?i)d.*D/);
 
 Make sure you never say something like this:
 
-    return eval "\$val =~ /$regexp/";   # WRONG
+    return eval "\$val =~ /$regex/";   # WRONG
 
-or someone can sneak shell escapes into the regexp due to the double
+or someone can sneak shell escapes into the regex due to the double
 interpolation of the eval and the double-quoted string.  For example:
 
     $pattern_of_evil = 'danger ${ system("rm -rf * &") } danger';
@@ -630,7 +643,7 @@ where they don't belong.
 This is explained in more depth in the L<perlsyn>.  Briefly, there's
 no official case statement, because of the variety of tests possible
 in Perl (numeric comparison, string comparison, glob comparison,
-regexp matching, overloaded comparisons, ...).  Larry couldn't decide
+regex matching, overloaded comparisons, ...).  Larry couldn't decide
 how best to do this, so he left it out, even though it's been on the
 wish list since perl1.
 
@@ -826,6 +839,106 @@ Use this code, provided by Mark-Jason Dominus:
 Or, if you're using a recent release of Perl, you can 
 just use the Symbol::delete_package() function instead.
 
+=head2 How can I use a variable as a variable name?
+
+Beginners often think they want to have a variable contain the name
+of a variable.
+
+    $fred    = 23;
+    $varname = "fred";
+    ++$$varname;         # $fred now 24
+
+This works I<sometimes>, but it is a very bad idea for two reasons.
+
+The first reason is that they I<only work on global variables>.
+That means above that if $fred is a lexical variable created with my(),
+that the code won't work at all: you'll accidentally access the global
+and skip right over the private lexical altogether.  Global variables
+are bad because they can easily collide accidentally and in general make
+for non-scalable and confusing code.
+
+Symbolic references are forbidden under the C<use strict> pragma.
+They are not true references and consequently are not reference counted
+or garbage collected.
+
+The other reason why using a variable to hold the name of another
+variable a bad idea is that the question often stems from a lack of
+understanding of Perl data structures, particularly hashes.  By using
+symbolic references, you are just using the package's symbol-table hash
+(like C<%main::>) instead of a user-defined hash.  The solution is to
+use your own hash or a real reference instead.
+
+    $fred    = 23;
+    $varname = "fred";
+    $USER_VARS{$varname}++;  # not $$varname++
+
+There we're using the %USER_VARS hash instead of symbolic references.
+Sometimes this comes up in reading strings from the user with variable
+references and wanting to expand them to the values of your perl
+program's variables.  This is also a bad idea because it conflates the
+program-addressable namespace and the user-addressable one.  Instead of
+reading a string and expanding it to the actual contents of your program's
+own variables:
+
+    $str = 'this has a $fred and $barney in it';
+    $str =~ s/(\$\w+)/$1/eeg;		  # need double eval
+
+Instead, it would be better to keep a hash around like %USER_VARS and have
+variable references actually refer to entries in that hash:
+
+    $str =~ s/\$(\w+)/$USER_VARS{$1}/g;   # no /e here at all
+
+That's faster, cleaner, and safer than the previous approach.  Of course,
+you don't need to use a dollar sign.  You could use your own scheme to
+make it less confusing, like bracketed percent symbols, etc.
+
+    $str = 'this has a %fred% and %barney% in it';
+    $str =~ s/%(\w+)%/$USER_VARS{$1}/g;   # no /e here at all
+
+Another reason that folks sometimes think they want a variable to contain
+the name of a variable is because they don't know how to build proper
+data structures using hashes.  For example, let's say they wanted two
+hashes in their program: %fred and %barney, and to use another scalar
+variable to refer to those by name.
+
+    $name = "fred";
+    $$name{WIFE} = "wilma";     # set %fred
+
+    $name = "barney";           
+    $$name{WIFE} = "betty";	# set %barney
+
+This is still a symbolic reference, and is still saddled with the
+problems enumerated above.  It would be far better to write:
+
+    $folks{"fred"}{WIFE}   = "wilma";
+    $folks{"barney"}{WIFE} = "betty";
+
+And just use a multilevel hash to start with.
+
+The only times that you absolutely I<must> use symbolic references are
+when you really must refer to the symbol table.  This may be because it's
+something that can't take a real reference to, such as a format name.
+Doing so may also be important for method calls, since these always go
+through the symbol table for resolution.
+
+In those cases, you would turn off C<strict 'refs'> temporarily so you
+can play around with the symbol table.  For example:
+
+    @colors = qw(red blue green yellow orange purple violet);
+    for my $name (@colors) {
+        no strict 'refs';  # renege for the block
+        *$name = sub { "<FONT COLOR='$name'>@_</FONT>" };
+    } 
+
+All those functions (red(), blue(), green(), etc.) appear to be separate,
+but the real code in the closure actually was compiled only once.
+
+So, sometimes you might want to use symbolic references to directly
+manipulate the symbol table.  This doesn't matter for formats, handles, and
+subroutines, because they are always global -- you can't use my() on them.
+But for scalars, arrays, and hashes -- and usually for subroutines --
+you probably want to use hard references only.
+
 =head1 AUTHOR AND COPYRIGHT
 
 Copyright (c) 1997-1999 Tom Christiansen and Nathan Torkington.
@@ -833,7 +946,7 @@ All rights reserved.
 
 When included as part of the Standard Version of Perl, or as part of
 its complete documentation whether printed or otherwise, this work
-may be distributed only under the terms of Perl's Artistic Licence.
+may be distributed only under the terms of Perl's Artistic License.
 Any distribution of this file or derivatives thereof I<outside>
 of that package require that special arrangements be made with
 copyright holder.
@@ -843,4 +956,3 @@ are hereby placed into the public domain.  You are permitted and
 encouraged to use this code in your own programs for fun
 or for profit as you see fit.  A simple comment in the code giving
 credit would be courteous but is not required.
-
