@@ -2652,7 +2652,7 @@ esac'
 
 cat <<EOM
 
-Perl can be built to take advantage of threads, on some systems.
+Perl can be built to take advantage of threads on some systems.
 To do so, Configure must be run with -Dusethreads.
 
 Note that threading is a highly experimental feature, and
@@ -2683,6 +2683,10 @@ the 5.005 version (5005threads) and an interpreter-based version
 (ithreads) that has one interpreter per thread.  Both are very 
 experimental.  This arrangement exists to help developers work out
 which one is better.
+
+If you're a casual user, you probably don't want interpreter-threads
+at this time.  There doesn't yet exist a way to create threads from
+within Perl in this model, i.e., "use Thread;" will NOT work.
 EOM
 	: Default to ithreads unless overridden on command line or with
 	: old config.sh

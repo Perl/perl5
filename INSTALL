@@ -917,7 +917,7 @@ to turn off each extension:
     SDBM_File		(Always included by default)
     Opcode		useopcode
     Socket		d_socket
-    Threads		usethreads
+    Threads		use5005threads
     attrs		(Always included by default)
 
 Thus to skip the NDBM_File extension, you can use

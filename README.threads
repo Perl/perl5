@@ -1,7 +1,20 @@
-NOTE
+NOTE: This documentation describes the style of threading that was
+available in 5.005.  Perl v5.6 also has the early beginnings of
+interpreter-based threads support (which is what will be enabled by
+default when you simply ask for -Dusethreads).  However, be advised
+that interpreter threads cannot as yet be created from the Perl level
+yet.  If you're looking to create threads from within Perl, chances
+are you _don't_ want interpreter threads, but want the older support
+for threads described below, enabled with:
 
-Threading is a highly experimental feature.  There are still a 
-few race conditions that show up under high contention on SMP
+    sh Configure -Dusethreads -Duse5005threads
+
+The rest of this document only applies to the use5005threads style of
+threads.
+---------------------------------------------------------------------------
+
+Support for threading is still in the highly experimental stages.  There
+are known race conditions that show up under high contention on SMP
 machines.  Internal implementation is still subject to changes.
 It is not recommended for production use at this time.
 
@@ -11,7 +24,7 @@ Building
 
 If your system is in the following list you should be able to just:
 
-    ./Configure -Dusethreads -des
+    ./Configure -Dusethreads -Duse5005threads -des
     make
 
 and ignore the rest of this "Building" section.  If not, continue
@@ -58,7 +71,7 @@ subdirectory.
 On platforms that use Configure to build perl, omit the -d from your
 ./Configure arguments. For example, use:
 
-    ./Configure -Dusethreads
+    ./Configure -Dusethreads -Duse5005threads
 
 When Configure prompts you for ccflags, insert any other arguments in
 there that your compiler needs to use POSIX threads (-D_REENTRANT,
@@ -168,8 +181,8 @@ has this fixed but the following patch can be applied to 0.5 for now:
 Building the Thread extension
 
 The Thread extension is now part of the main perl distribution tree.
-If you did Configure -Dusethreads then it will have been added to
-the list of extensions automatically.
+If you did Configure -Dusethreads -Duse5005threads then it will have been
+added to the list of extensions automatically.
 
 You can try some of the tests with
     cd ext/Thread
