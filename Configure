@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat May 11 22:27:01 EET DST 2002 [metaconfig 3.0 PL70]
+# Generated on Thu May 16 17:03:39 EET DST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1856,6 +1856,11 @@ if test X"$trnl" = X; then
 	case "`echo foo|tr '\012' x 2>/dev/null`" in
 	foox) trnl='\012' ;;
 	esac
+fi
+if test X"$trnl" = X; then
+       case "`echo foo|tr '\r\n' xy 2>/dev/null`" in
+       fooxy) trnl='\n\r' ;;
+       esac
 fi
 if test X"$trnl" = X; then
 	cat <<EOM >&2
