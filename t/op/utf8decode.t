@@ -3,7 +3,19 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+}
 
+{
+    my $wide = v256;
+    use bytes;
+    print STDERR ord($wide),"\n";
+    if (ord($wide) == 140) {
+	print "1..0 # Skip: UTF-EBCDIC (not UTF-8) used here\n";
+	exit 0;
+    }
+    elsif (ord($wide) != 196) {
+	warn sprintf("v256 starts with %02X\n",ord($wide));
+    }
 }
 
 {
