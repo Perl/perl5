@@ -88,8 +88,8 @@ eval {
     close($fh);
   }
   seek($tfh,0,0);
-  $donetests[0] = compare($tfh,'README');
-  $donetests[1] = compare("$filename",'README');
+  $donetests[0] = compare($tfh, 'README');
+  $donetests[1] = compare($filename, 'README');
   unlink0($tfh,$filename);
 };
 print "# problems when testing with a tempory file\n" if $@;
