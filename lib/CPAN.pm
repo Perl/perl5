@@ -1668,11 +1668,6 @@ sub _u_r_common {
     for $module (@expand) {
 	my $file  = $module->cpan_file;
 	next unless defined $file; # ??
-        # Don't offer to upgrade the core base.pm with the base.pm of
-        # the Class::Fields.  Don't autobundle the core base.pm, either.
-        # This is a horrible hack but hopefully cases like this are very,
-        # very rare indeed.
-        next if $module->id eq 'base' && $file =~ m{/Class-Fields-};
 	my($latest) = $module->cpan_version;
 	my($inst_file) = $module->inst_file;
 	my($have);
