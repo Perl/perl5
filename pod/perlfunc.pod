@@ -5232,7 +5232,7 @@ it's an anonymous function declaration, and does actually return
 a value: the CODE ref of the closure you just created.
 
 See L<perlsub> and L<perlref> for details about subroutines and
-references, and L<attributes> and L<Attributed::Handlers> for more
+references, and L<attributes> and L<Attribute::Handlers> for more
 information about attributes.
 
 =item substr EXPR,OFFSET,LENGTH,REPLACEMENT
