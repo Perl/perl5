@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 
-print "1..125\n";
+print "1..130\n";
 
 my $i = 1;
 
@@ -506,3 +506,24 @@ print "ok ", $i++, "\n";
 # recv takes a scalar reference for its second argument
 print "not " unless prototype "CORE::recv" eq '*\\$$$';
 print "ok ", $i++, "\n";
+
+{
+    my $myvar;
+    my @myarray;
+    my %myhash;
+    sub mysub { print "not calling mysub I hope\n" }
+    local *myglob;
+
+    sub myref (\[$@%&*]) { print "# $_[0]\n"; return "$_[0]" }
+
+    print "not " unless myref($myvar)   =~ /^SCALAR\(/;
+    print "ok ", $i++, "\n";
+    print "not " unless myref(@myarray) =~ /^ARRAY\(/;
+    print "ok ", $i++, "\n";
+    print "not " unless myref(%myhash)  =~ /^HASH\(/;
+    print "ok ", $i++, "\n";
+    print "not " unless myref(&mysub)   =~ /^CODE\(/;
+    print "ok ", $i++, "\n";
+    print "not " unless myref(*myglob)  =~ /^GLOB\(/;
+    print "ok ", $i++, "\n";
+}

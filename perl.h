@@ -2020,6 +2020,14 @@ typedef pthread_key_t	perl_key;
 #  endif
 #endif
 
+#ifndef Nullformat
+#  ifdef CHECK_FORMAT
+#    define Nullformat "%s",""
+#  else
+#    define Nullformat Nullch
+#  endif
+#endif
+
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
    below to be rejected by the compiler.  Sigh.
@@ -3849,6 +3857,12 @@ int flock(int fd, int op);
 #define IS_NUMBER_NAN                 0x20 /* this is not */
 
 #define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
+
+/* Input flags: */
+#define PERL_SCAN_ALLOW_UNDERSCORES   0x01 /* grok_??? accept _ in numbers */
+#define PERL_SCAN_DISALLOW_PREFIX     0x02 /* grok_??? reject 0x in hex etc */
+/* Output flags: */
+#define PERL_SCAN_GREATER_THAN_UV_MAX 0x02 /* should this merge with above? */
 
 /* to let user control profiling */
 #ifdef PERL_GPROF_CONTROL

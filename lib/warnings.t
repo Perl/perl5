@@ -101,7 +101,13 @@ for (@prgs){
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN
     $results =~ s/tmp\d+/-/g;
-    $results =~ s/\n%[A-Z]+-[SIWEF]-.*$// if $Is_VMS;  # clip off DCL status msg
+    if ($^O eq 'VMS') {
+        # some tests will trigger VMS messages that won't be expected
+        $results =~ s/\n?%[A-Z]+-[SIWEF]-[A-Z]+,.*//;
+
+        # pipes double these sometimes
+        $results =~ s/\n\n/\n/g;
+    }
 # bison says 'parse error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
     $results =~ s/^(syntax|parse) error/syntax error/mig;

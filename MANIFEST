@@ -103,9 +103,10 @@ ext/ByteLoader/byterun.c	Runtime support for bytecode loader
 ext/ByteLoader/byterun.h	Header for byterun.c
 ext/ByteLoader/hints/sunos.pl	Hints for named architecture
 ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
-ext/Cwd/Cwd.t		See if Cwd works
-ext/Cwd/Cwd.xs		Cwd extension external subroutines
-ext/Cwd/Makefile.PL	Cwd extension makefile maker
+ext/Cwd/Cwd.xs			Cwd extension external subroutines
+ext/Cwd/Makefile.PL		Cwd extension makefile maker
+ext/Cwd/t/cwd.t			See if Cwd works
+ext/Cwd/t/taint.t		See if Cwd works with taint
 ext/Data/Dumper/Changes		Data pretty printer, changelog
 ext/Data/Dumper/Dumper.pm	Data pretty printer, module
 ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
@@ -267,6 +268,7 @@ ext/Encode/Encode/iso8859-8.enc	Encoding tables
 ext/Encode/Encode/iso8859-8.ucm	Encoding tables
 ext/Encode/Encode/iso8859-9.enc	Encoding tables
 ext/Encode/Encode/iso8859-9.ucm	Encoding tables
+ext/Encode/Encode/isoir-197.enc	Encoding tables
 ext/Encode/Encode/jis0201.enc	Encoding tables
 ext/Encode/Encode/jis0208.enc	Encoding tables
 ext/Encode/Encode/jis0212.enc	Encoding tables
@@ -282,6 +284,7 @@ ext/Encode/Encode/macIceland.enc	Encoding tables
 ext/Encode/Encode/macJapan.enc	Encoding tables
 ext/Encode/Encode/macRoman.enc	Encoding tables
 ext/Encode/Encode/macRomania.enc	Encoding tables
+ext/Encode/Encode/macSami.enc	Encoding tables
 ext/Encode/Encode/macThai.enc	Encoding tables
 ext/Encode/Encode/macTurkish.enc	Encoding tables
 ext/Encode/Encode/macUkraine.enc	Encoding tables
@@ -299,10 +302,10 @@ ext/Errno/Errno.t	See if Errno works
 ext/Errno/Errno_pm.PL	Errno perl module create script
 ext/Errno/Makefile.PL	Errno extension makefile writer
 ext/Fcntl/Fcntl.pm	Fcntl extension Perl module
-ext/Fcntl/Fcntl.t	See if Fcntl works
 ext/Fcntl/Fcntl.xs	Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL	Fcntl extension makefile writer
-ext/Fcntl/syslfs.t	See if large files work for sysio
+ext/Fcntl/t/fcntl.t	See if Fcntl works
+ext/Fcntl/t/syslfs.t	See if large files work for sysio
 ext/File/Glob/bsd_glob.c	File::Glob extension run time code
 ext/File/Glob/bsd_glob.h	File::Glob extension header file
 ext/File/Glob/Changes		File::Glob extension changelog
@@ -387,6 +390,7 @@ ext/List/Util/t/minstr.t	List::Util
 ext/List/Util/t/readonly.t	Scalar::Util
 ext/List/Util/t/reduce.t	List::Util
 ext/List/Util/t/reftype.t	Scalar::Util
+ext/List/Util/t/shuffle.t	List::Util
 ext/List/Util/t/sum.t		List::Util
 ext/List/Util/t/tainted.t	Scalar::Util
 ext/List/Util/t/weak.t		Scalar::Util
@@ -454,9 +458,9 @@ ext/POSIX/hints/uts.pl		Hint for POSIX for named architecture
 ext/POSIX/Makefile.PL		POSIX extension makefile writer
 ext/POSIX/POSIX.pm		POSIX extension Perl module
 ext/POSIX/POSIX.pod		POSIX extension documentation
-ext/POSIX/POSIX.t		See if POSIX works
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
-ext/POSIX/sigaction.t		See if POSIX::sigaction works
+ext/POSIX/t/posix.t		See if POSIX works
+ext/POSIX/t/sigaction.t		See if POSIX::sigaction works
 ext/POSIX/typemap		POSIX extension interface types
 ext/re/hints/mpeix.pl		Hints for re for named architecture
 ext/re/Makefile.PL		re extension makefile writer
@@ -744,8 +748,8 @@ lib/Attribute/Handlers/demo/demo_range.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
-lib/Attribute/Handlers/README	Attribute::Handlers
-lib/Attribute/Handlers/test.pl		See if Attribute::Handlers works
+lib/Attribute/Handlers/README		Attribute::Handlers
+lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
 lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader.t		See if AutoLoader works
@@ -761,6 +765,7 @@ lib/bigint.pl			An arbitrary precision integer arithmetic package
 lib/bigint.t			See if bigint.pl works
 lib/bigrat.pl			An arbitrary precision rational arithmetic package
 lib/blib.pm			For "use blib"
+lib/blib.t                      blib.pm test
 lib/bytes.pm			Pragma to enable byte operations
 lib/bytes_heavy.pl		Support routines for byte pragma
 lib/cacheout.pl			Manages output filehandles when you need too many
@@ -797,11 +802,17 @@ lib/CGI/Fast.pm			Support for FastCGI (persistent server process)
 lib/CGI/Pretty.pm		Output nicely formatted HTML
 lib/CGI/Push.pm			Support for server push
 lib/CGI/Switch.pm		Simple interface for multiple server types
+lib/CGI/t/apache.t              See if CGI::Apache still loads
+lib/CGI/t/carp.t                See if CGI::Carp works
+lib/CGI/t/cookie.t              See if CGI::Cookie works
+lib/CGI/t/fast.t		See if CGI::Fast works (if FCGI is installed)
 lib/CGI/t/form.t		See if CGI.pm works
 lib/CGI/t/function.t		See if CGI.pm works
 lib/CGI/t/html.t		See if CGI.pm works
 lib/CGI/t/pretty.t		See if CGI.pm works
+lib/CGI/t/push.t		See if CGI::Push works
 lib/CGI/t/request.t		See if CGI.pm works
+lib/CGI/t/switch.t              See if CGI::Switch still loads
 lib/CGI/t/util.t		See if CGI.pm works
 lib/CGI/Util.pm			Utility functions
 lib/charnames.pm		Character names
@@ -835,14 +846,15 @@ lib/dumpvar.pl			A variable dumper
 lib/English.pm			Readable aliases for short variables
 lib/English.t			See if English works
 lib/Env.pm			Map environment into ordinary variables
-lib/Env/array.t			See if Env works
-lib/Env/env.t			See if Env works for arrays
+lib/Env/t/array.t		See if Env works for arrays
+lib/Env/t/env.t			See if Env works
 lib/exceptions.pl		catch and throw routines
 lib/Exporter.pm			Exporter base class
 lib/Exporter.t			See if Exporter works
 lib/Exporter/Heavy.pm		Complicated routines for Exporter
 lib/ExtUtils.t			See if extutils work
 lib/ExtUtils/Command.pm		Utilities for Make on non-UNIX platforms
+lib/ExtUtils/Command.t		See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs
 lib/ExtUtils/inst		Give information about installed extensions
@@ -852,6 +864,7 @@ lib/ExtUtils/Liblist.pm		Locates libraries
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
+lib/ExtUtils/Manifest.t		See if ExtUtils::Manifest works
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
@@ -862,6 +875,7 @@ lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
+lib/ExtUtils/testlib.t		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
 lib/fastcwd.pl			a faster but more dangerous getcwd
@@ -880,8 +894,8 @@ lib/File/Copy.t			See if File::Copy works
 lib/File/DosGlob.pm		Win32 DOS-globbing module
 lib/File/DosGlob.t		See if File::DosGlob works
 lib/File/Find.pm		Routines to do a find
-lib/File/Find/find.t		See if File::Find works
-lib/File/Find/taint.t		See if File::Find works with taint
+lib/File/Find/t/find.t		See if File::Find works
+lib/File/Find/t/taint.t		See if File::Find works with taint
 lib/File/Path.pm		Do things like `mkdir -p' and `rm -r'
 lib/File/Path.t			See if File::Path works
 lib/File/Spec.pm		portable operations on file names
@@ -907,7 +921,9 @@ lib/FileHandle.pm		Backward-compatible front end to IO extension
 lib/FileHandle.t		See if FileHandle works
 lib/filetest.pm			For "use filetest"
 lib/Filter/Simple.pm		Simple frontend to Filter::Util::Call
-lib/Filter/Simple/test.pl	See if Filter::Simple works
+lib/Filter/Simple/Changes	Filter::Simple
+lib/Filter/Simple/README	Filter::Simple
+lib/Filter/Simple/t/filter.t	See if Filter::Simple works
 lib/find.pl			A find emulator--used by find2perl
 lib/FindBin.pm			Find name of currently executing program
 lib/FindBin.t			See if FindBin works
@@ -938,17 +954,19 @@ lib/I18N/LangTags/README	I18N::LangTags
 lib/I18N/LangTags/test.pl	See if I18N::LangTags works
 lib/importenv.pl		Perl routine to get environment into variables
 lib/integer.pm			For "use integer"
+lib/integer.t			For "use integer" testing
 lib/IPC/Open2.pm		Open a two-ended pipe
 lib/IPC/Open2.t			See if IPC::Open2 works
 lib/IPC/Open3.pm		Open a three-ended pipe!
 lib/IPC/Open3.t			See if IPC::Open3 works
 lib/IPC/SysV.t			See if IPC::SysV works
 lib/less.pm			For "use less"
+lib/less.t			See if less support works
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
+lib/Lingua/KO/Hangul/Util.pm		Lingua::KO::Hangul::Util
 lib/Lingua/KO/Hangul/Util/Changes	Lingua::KO::Hangul::Util
 lib/Lingua/KO/Hangul/Util/README	Lingua::KO::Hangul::Util
 lib/Lingua/KO/Hangul/Util/t/test.t		Lingua::KO::Hangul::Util
-lib/Lingua/KO/Hangul/Util.pm		Lingua::KO::Hangul::Util
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/Locale/Codes/t/all.t	See if Locale::Codes work
@@ -1050,7 +1068,9 @@ lib/Net/t/require.t		libnet
 lib/Net/t/smtp.t		libnet
 lib/Net/Time.pm			libnet
 lib/newgetopt.pl		A perl library supporting long option parsing
-lib/NEXT.pm		Pseudo-class NEXT for method redispatch
+lib/NEXT.pm			Pseudo-class NEXT for method redispatch
+lib/NEXT/Changes		NEXT
+lib/NEXT/README			NEXT
 lib/NEXT/test.pl		See if NEXT works
 lib/open.pm			Pragma to specify default I/O disciplines
 lib/open2.pl			Open a two-ended pipe (uses IPC::Open2)
@@ -1093,10 +1113,11 @@ lib/strict.t			See if strictures work
 lib/subs.pm			Declare overriding subs
 lib/subs.t			See if subroutine pseudo-importation works
 lib/Switch.pm			Switch for Perl
-lib/Switch/Changes	Switch for Perl
-lib/Switch/README	Switch for Perl
-lib/Switch/t/given_when.t	See if Perl 6 given (switch) works
-lib/Switch/t/switch_case.t	See if Perl 5 switch works
+lib/Switch/Changes		Switch
+lib/Switch/README		Switch
+lib/Switch/t/given.t		See if Perl 6 given (switch) works
+lib/Switch/t/nested.t		See if nested switch works
+lib/Switch/t/switch.t		See if Perl 5 switch works
 lib/Symbol.pm			Symbol table manipulation routines
 lib/Symbol.t			See if Symbol works
 lib/syslog.pl			Perl library supporting syslogging
@@ -1107,27 +1128,33 @@ lib/Term/ANSIColor/README	Term::ANSIColor
 lib/Term/ANSIColor/test.pl	See if Term::ANSIColor works
 lib/Term/Cap.pm			Perl module supporting termcap usage
 lib/Term/Complete.pm		A command completion subroutine
+lib/Term/Complete.t		See if Term::Complete works
 lib/Term/ReadLine.pm		Stub readline library
 lib/termcap.pl			Perl library supporting termcap usage
 lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Harness.pm		A test harness
-lib/Test/Harness.t		See if Test::Harness works
+lib/Test/Harness/Changes	Test::Harness
+lib/Test/Harness/t/base.t	Test::Harness
+lib/Test/Harness/t/ok.t		Test::Harness
+lib/Test/Harness/t/test-harness.t	Test::Harness test
 lib/Test/More.pm                More utilities for writing tests
-lib/Test/More/Changes		Test::More changes
-lib/Test/More/t/fail-like.t     Test::More test, like() and qr// bug
-lib/Test/More/t/fail.t          Test::More test, failing tests
-lib/Test/More/t/More.t          Test::More test, basic operation
-lib/Test/More/t/plan_is_noplan.t        Test::More test, noplan
-lib/Test/More/t/skipall.t       Test::More test, skipping all tests
 lib/Test/Simple.pm              Basic utility for writing tests
 lib/Test/Simple/Changes		Test::Simple changes
 lib/Test/Simple/t/exit.t        Test::Simple test, exit codes
 lib/Test/Simple/t/extra.t       Test::Simple test
+lib/Test/Simple/t/fail-like.t   Test::More test, like() failures
+lib/Test/Simple/t/fail-more.t   Test::More test, tests failing
 lib/Test/Simple/t/fail.t        Test::Simple test, test failures
 lib/Test/Simple/t/missing.t     Test::Simple test, missing tests
+lib/Test/Simple/t/More.t        Test::More test, basic stuff
 lib/Test/Simple/t/no_plan.t     Test::Simple test, forgot the plan
 lib/Test/Simple/t/plan_is_noplan.t      Test::Simple test, no_plan
-lib/Test/Simple/t/simple.t                              for exit.t
+lib/Test/Simple/t/simple.t      Test::Simple test, basic stuff
+lib/Test/Simple/t/skip.t        Test::More test, SKIP tests
+lib/Test/Simple/t/skipall.t     Test::More test, skip all tests
+lib/Test/Simple/t/todo.t        Test::More test, TODO tests
+lib/Test/Simple/t/undef.t       Test::More test, undefs don't cause warnings
+lib/Test/Simple/t/useing.t      Test::More test, compile test
 lib/Test/t/fail.t		See if Test works
 lib/Test/t/mix.t		See if Test works
 lib/Test/t/onfail.t		See if Test works
@@ -1135,18 +1162,21 @@ lib/Test/t/qr.t			See if Test works
 lib/Test/t/skip.t		See if Test works
 lib/Test/t/success.t		See if Test works
 lib/Test/t/todo.t		See if Test works
+lib/Test/Tutorial.pod           A tutorial on writing tests
+lib/Test/Utils.pm               Utility module for Test::Simple/More
 lib/Text/Abbrev.pm		An abbreviation table builder
 lib/Text/Abbrev.t		Test Text::Abbrev
 lib/Text/Balanced.pm		Text::Balanced
-lib/Text/Balanced.pod		Text::Balanced
-lib/Text/Balanced/t/genxt.t	See if Text::Balanced works
-lib/Text/Balanced/t/xbrak.t	See if Text::Balanced works
-lib/Text/Balanced/t/xcode.t	See if Text::Balanced works
-lib/Text/Balanced/t/xdeli.t	See if Text::Balanced works
-lib/Text/Balanced/t/xmult.t	See if Text::Balanced works
-lib/Text/Balanced/t/xquot.t	See if Text::Balanced works
-lib/Text/Balanced/t/xtagg.t	See if Text::Balanced works
-lib/Text/Balanced/t/xvari.t	See if Text::Balanced works
+lib/Text/Balanced/Changes	Text::Balanced
+lib/Text/Balanced/README	Text::Balanced
+lib/Text/Balanced/t/extbrk.t	See if Text::Balanced works
+lib/Text/Balanced/t/extcbk.t	See if Text::Balanced works
+lib/Text/Balanced/t/extdel.t	See if Text::Balanced works
+lib/Text/Balanced/t/extmul.t	See if Text::Balanced works
+lib/Text/Balanced/t/extqlk.t	See if Text::Balanced works
+lib/Text/Balanced/t/exttag.t	See if Text::Balanced works
+lib/Text/Balanced/t/extvar.t	See if Text::Balanced works
+lib/Text/Balanced/t/gentag.t	See if Text::Balanced works
 lib/Text/ParseWords.pm		Perl module to split words on arbitrary delimiter
 lib/Text/ParseWords.t		See if Text::ParseWords works
 lib/Text/Soundex.pm		Perl module to implement Soundex
@@ -1755,6 +1785,7 @@ pod/perlnumber.pod		Semantics of numbers and numeric operations
 pod/perlobj.pod			Object info
 pod/perlop.pod			Operator info
 pod/perlopentut.pod		open() tutorial
+pod/perlothrtut.pod		Threads old tutorial
 pod/perlpod.pod			Pod info
 pod/perlport.pod		Portability guide
 pod/perlre.pod			Regular expression info
@@ -1924,29 +1955,32 @@ t/lib/dprof/test6_t		Perl code profiler tests
 t/lib/dprof/test6_v		Perl code profiler tests
 t/lib/dprof/V.pm		Perl code profiler tests
 t/lib/filter-util.pl		See if Filter::Util::Call works
+t/lib/FilterTest.pm		Helper file for lib/Filter/Simple/t/filter.t
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
-t/lib/MyFilter.pm		Helper file for t/lib/filter-simple.t
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness
 t/lib/sample-tests/duplicates		Test data for Test::Harness
 t/lib/sample-tests/header_at_end	Test data for Test::Harness
+t/lib/sample-tests/header_at_end_fail	Test::Harness
 t/lib/sample-tests/no_nums		Test data for Test::Harness
 t/lib/sample-tests/simple		Test data for Test::Harness
 t/lib/sample-tests/simple_fail		Test data for Test::Harness
 t/lib/sample-tests/skip			Test data for Test::Harness
 t/lib/sample-tests/skip_all		Test data for Test::Harness
+t/lib/sample-tests/skip_no_msg	Test::Harness
 t/lib/sample-tests/todo			Test data for Test::Harness
+t/lib/sample-tests/todo_inline	Test::Harness
 t/lib/sample-tests/with_comments	Test data for Test::Harness
 t/lib/st-dump.pl		See if Storable works
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
-t/lib/Test/More/Catch.pm        Utility module for testing Test::More
 t/lib/Test/Simple/Catch.pm      Utility module for testing Test::Simple
+t/lib/Test/Simple/Catch/More.pm Utility module for testing Test::More
 t/lib/Test/Simple/sample_tests/death.plx                for exit.t
 t/lib/Test/Simple/sample_tests/death_in_eval.plx        for exit.t
 t/lib/Test/Simple/sample_tests/extras.plx               for exit.t
@@ -2010,6 +2044,7 @@ t/op/cmp.t			See if the various string and numeric compare work
 t/op/concat.t			See if string concatenation works
 t/op/cond.t			See if conditional expressions work
 t/op/context.t			See if context propagation works
+t/op/crypt.t			See if crypt works
 t/op/defins.t			See if auto-insert of defined() works
 t/op/delete.t			See if delete works
 t/op/die.t			See if die works
@@ -2061,6 +2096,7 @@ t/op/pat.t			See if esoteric patterns work
 t/op/pos.t			See if pos works
 t/op/push.t			See if push and pop work
 t/op/pwent.t			See if getpw*() functions work
+t/op/qq.t			See if qq works
 t/op/quotemeta.t		See if quotemeta works
 t/op/rand.t			See if rand works
 t/op/range.t			See if .. works
@@ -2080,6 +2116,7 @@ t/op/sort.t			See if sort works
 t/op/splice.t			See if splice works
 t/op/split.t			See if split works
 t/op/sprintf.t			See if sprintf works
+t/op/srand.t                    See if srand works
 t/op/stat.t			See if stat works
 t/op/study.t			See if study works
 t/op/subst.t			See if substitution works
@@ -2289,7 +2326,7 @@ wince/include/sys/types.h		WinCE port
 wince/include/sys/utime.h		WinCE port
 wince/include/time.h			WinCE port
 wince/Makefile.ce			WinCE port
-wince/perl.ico				WinCE port
+wince/makeico.pl			WinCE port
 wince/perl.rc				WinCE port
 wince/perldll.def			WinCE port
 wince/perllib.c				WinCE port

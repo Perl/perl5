@@ -864,10 +864,13 @@ Perl_str_to_version(pTHX_ SV *sv)
 /*
  * S_force_version
  * Forces the next token to be a version number.
+ * If the next token appears to be an invalid version number, (e.g. "v2b"),
+ * and if "guessing" is TRUE, then no new token is created (and the caller
+ * must use an alternative parsing method).
  */
 
 STATIC char *
-S_force_version(pTHX_ char *s)
+S_force_version(pTHX_ char *s, int guessing)
 {
     OP *version = Nullop;
     char *d;
@@ -878,7 +881,8 @@ S_force_version(pTHX_ char *s)
     if (*d == 'v')
 	d++;
     if (isDIGIT(*d)) {
-        for (; isDIGIT(*d) || *d == '_' || *d == '.'; d++);
+	while (isDIGIT(*d) || *d == '_' || *d == '.')
+	    d++;
         if (*d == ';' || isSPACE(*d) || *d == '}' || !*d) {
 	    SV *ver;
             s = scan_num(s, &yylval);
@@ -890,13 +894,15 @@ S_force_version(pTHX_ char *s)
 		SvNOK_on(ver);		/* hint that it is a version */
 	    }
         }
+	else if (guessing)
+	    return s;
     }
 
     /* NOTE: The parser sees the package name and the VERSION swapped */
     PL_nextval[PL_nexttoke].opval = version;
     force_next(WORD);
 
-    return (s);
+    return s;
 }
 
 /*
@@ -1434,8 +1440,9 @@ S_scan_const(pTHX_ char *start)
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
 		{
-		    STRLEN len = 0;	/* disallow underscores */
-		    uv = (UV)scan_oct(s, 3, &len);
+                    I32 flags = 0;
+                    STRLEN len = 3;
+		    uv = grok_oct(s, &len, &flags, NULL);
 		    s += len;
 		}
 		goto NUM_ESCAPE_INSERT;
@@ -1445,20 +1452,24 @@ S_scan_const(pTHX_ char *start)
 		++s;
 		if (*s == '{') {
 		    char* e = strchr(s, '}');
-		    STRLEN len = 1;		/* allow underscores */
+                    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES |
+                      PERL_SCAN_DISALLOW_PREFIX;
+		    STRLEN len;
 
+                    ++s;
 		    if (!e) {
 			yyerror("Missing right brace on \\x{}");
-			++s;
 			continue;
 		    }
-		    uv = (UV)scan_hex(s + 1, e - s - 1, &len);
+                    len = e - s;
+		    uv = grok_hex(s, &len, &flags, NULL);
 		    s = e + 1;
 		}
 		else {
 		    {
-			STRLEN len = 0;		/* disallow underscores */
-			uv = (UV)scan_hex(s, 2, &len);
+			STRLEN len = 2;
+                        I32 flags = PERL_SCAN_DISALLOW_PREFIX;
+			uv = grok_hex(s, &len, &flags, NULL);
 			s += len;
 		    }
 		}
@@ -3996,7 +4007,7 @@ Perl_yylex(pTHX)
 		    if (ckWARN(WARN_RESERVED)) {
 			if (lastchar != '-') {
 			    for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
-			    if (!*d)
+			    if (!*d && strNE(PL_tokenbuf,"main"))
 				Perl_warner(aTHX_ WARN_RESERVED, PL_warn_reserved,
 				       PL_tokenbuf);
 			}
@@ -4530,7 +4541,7 @@ Perl_yylex(pTHX)
 	    if (PL_expect != XSTATE)
 		yyerror("\"no\" not allowed in expression");
 	    s = force_word(s,WORD,FALSE,TRUE,FALSE);
-	    s = force_version(s);
+	    s = force_version(s, FALSE);
 	    yylval.ival = 0;
 	    OPERATOR(USE);
 
@@ -4682,10 +4693,12 @@ Perl_yylex(pTHX)
 
 	case KEY_require:
 	    s = skipspace(s);
-	    if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
-		s = force_version(s);
+	    if (isDIGIT(*s)) {
+		s = force_version(s, FALSE);
 	    }
-	    else {
+	    else if (*s != 'v' || !isDIGIT(s[1])
+		    || (s = force_version(s, TRUE), *s == 'v'))
+	    {
 		*PL_tokenbuf = '\0';
 		s = force_word(s,WORD,TRUE,TRUE,FALSE);
 		if (isIDFIRST_lazy_if(PL_tokenbuf,UTF))
@@ -5045,15 +5058,19 @@ Perl_yylex(pTHX)
 		yyerror("\"use\" not allowed in expression");
 	    s = skipspace(s);
 	    if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
-		s = force_version(s);
+		s = force_version(s, TRUE);
 		if (*s == ';' || (s = skipspace(s), *s == ';')) {
 		    PL_nextval[PL_nexttoke].opval = Nullop;
 		    force_next(WORD);
 		}
+		else if (*s == 'v') {
+		    s = force_word(s,WORD,FALSE,TRUE,FALSE);
+		    s = force_version(s, FALSE);
+		}
 	    }
 	    else {
 		s = force_word(s,WORD,FALSE,TRUE,FALSE);
-		s = force_version(s);
+		s = force_version(s, FALSE);
 	    }
 	    yylval.ival = 1;
 	    OPERATOR(USE);

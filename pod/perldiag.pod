@@ -261,7 +261,7 @@ avoid this warning.
 used as an lvalue, which is pretty strange.  Perhaps you forgot to
 dereference it first.  See L<perlfunc/substr>.
 
-=item Bad arg length for %s, is %d, should be %d
+=item Bad arg length for %s, is %d, should be %s
 
 (F) You passed a buffer of the wrong size to one of msgctl(), semctl()
 or shmctl().  In C parlance, the correct sizes are, respectively,

@@ -25,7 +25,8 @@ This distribution provides
   weaken   (5.005_57 and later only)
   isweak   (5.005_57 and later only)
   dualvar
+  shuffle
 
-Copyright (c) 1997-2000 Graham Barr <gbarr@pobox.com>. All rights reserved.
+Copyright (c) 1997-2001 Graham Barr <gbarr@pobox.com>. All rights reserved.
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

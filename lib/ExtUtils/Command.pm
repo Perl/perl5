@@ -71,7 +71,7 @@ sub eqtime
  utime((stat($src))[8,9],$dst);
 }
 
-=item rm_f files....
+=item rm_rf files....
 
 Removes directories - recursively (even if readonly)
 

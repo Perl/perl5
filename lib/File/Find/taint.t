@@ -44,8 +44,6 @@ use File::Spec;
 use Cwd;
 
 
-my $NonTaintedCwd = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'os2';
-
 cleanup();
 
 find({wanted => sub { print "ok 1\n" if $_ eq 'commonsense.t'; },
@@ -333,12 +331,8 @@ eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
 
 print "# $@" if $@;
 #$^D = 8;
-if ($NonTaintedCwd) {
-	Skip("$^O does not taint cwd");
-    } 
-else {
-	Check( $@ =~ m|insecure cwd| );
-}
+Check( $@ =~ m|insecure cwd| );
+
 chdir($cwd_untainted);
 
 
@@ -406,12 +400,8 @@ if ( $symlink_exists ) {
     eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
                              untaint_skip => 1, untaint_pattern =>
                              qr|^(NO_MATCH)$|}, topdir('fa') );};
-    if ($NonTaintedCwd) {
-	Skip("$^O does not taint cwd");
-    } 
-    else {
-	Check( $@ =~ m|insecure cwd| );
-    }
+    Check( $@ =~ m|insecure cwd| );
+
     chdir($cwd_untainted);
 } 
 

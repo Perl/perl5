@@ -171,7 +171,7 @@ Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv)
         switch (SvTYPE(sv)) {
         case SVt_RV:
             if (SvROK(sv))
-            Perl_sharedsv_thrcnt_dec(aTHX_ (shared_sv *)SvIV(SvRV(sv)));
+            Perl_sharedsv_thrcnt_dec(aTHX_ INT2PTR(shared_sv *, SvIV(SvRV(sv))));
             break;
         case SVt_PVAV: {
             SV **src_ary  = AvARRAY((AV *)sv);
@@ -179,7 +179,7 @@ Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv)
 
             while (items-- > 0) {
             if(SvTYPE(*src_ary))
-                Perl_sharedsv_thrcnt_dec(aTHX_ (shared_sv *)SvIV(*src_ary++));
+                Perl_sharedsv_thrcnt_dec(aTHX_ INT2PTR(shared_sv *, SvIV(*src_ary++)));
             }
             break;
         }
@@ -188,7 +188,7 @@ Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv)
             (void)hv_iterinit((HV *)sv);
             while ((entry = hv_iternext((HV *)sv)))
                 Perl_sharedsv_thrcnt_dec(
-                    aTHX_ (shared_sv *)SvIV(hv_iterval((HV *)sv, entry))
+                    aTHX_ INT2PTR(shared_sv *, SvIV(hv_iterval((HV *)sv, entry)))
                 );
             break;
         }

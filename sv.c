@@ -6721,6 +6721,19 @@ Perl_sv_pvn(pTHX_ SV *sv, STRLEN *lp)
     return sv_2pv(sv, lp);
 }
 
+/* For -DCRIPPLED_CC only. See also C<sv_2pv_flags()>.
+ */
+
+char *
+Perl_sv_pvn_nomg(pTHX_ register SV *sv, STRLEN *lp)
+{
+    if (SvPOK(sv)) {
+	*lp = SvCUR(sv);
+	return SvPVX(sv);
+    }
+    return sv_2pv_flags(sv, lp, 0);
+}
+
 /*
 =for apidoc sv_pvn_force
 
@@ -7942,13 +7955,15 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (!veclen)
 		    continue;
 		if (vec_utf)
-		    iv = (IV)utf8n_to_uvchr(vecstr, veclen, &ulen, 0);
+		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen, UTF8_ALLOW_ANYUV);
 		else {
-		    iv = *vecstr;
+		    uv = *vecstr;
 		    ulen = 1;
 		}
 		vecstr += ulen;
 		veclen -= ulen;
+		if (plus)
+		     esignbuf[esignlen++] = plus;
 	    }
 	    else if (args) {
 		switch (intsize) {
@@ -7973,14 +7988,17 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #endif
 		}
 	    }
-	    if (iv >= 0) {
-		uv = iv;
-		if (plus)
-		    esignbuf[esignlen++] = plus;
-	    }
-	    else {
-		uv = -iv;
-		esignbuf[esignlen++] = '-';
+	    if ( !vectorize )	/* we already set uv above */
+	    {
+		if (iv >= 0) {
+		    uv = iv;
+		    if (plus)
+			esignbuf[esignlen++] = plus;
+		}
+		else {
+		    uv = -iv;
+		    esignbuf[esignlen++] = '-';
+		}
 	    }
 	    base = 10;
 	    goto integer;
@@ -8022,7 +8040,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (!veclen)
 		    continue;
 		if (vec_utf)
-		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen, 0);
+		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen, UTF8_ALLOW_ANYUV);
 		else {
 		    uv = *vecstr;
 		    ulen = 1;
@@ -9427,7 +9445,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, clone_params* param)
 	    TOPPTR(nss,ix) = gp = gp_dup(gp, param);
 	    (void)GpREFCNT_inc(gp);
 	    gv = (GV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = gv_dup_inc(c, param);
+	    TOPPTR(nss,ix) = gv_dup_inc(gv, param);
             c = (char*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = pv_dup(c);
 	    iv = POPIV(ss,ix);
@@ -9786,8 +9804,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	for(i = 0; i <= len; i++) {                             
 	    av_push(PL_regex_padav,
             SvREFCNT_inc(
-                        newSViv((IV)re_dup((REGEXP *)
-                             SvIVX(regexen[i]), param))
+                        newSViv(PTR2IV(re_dup(INT2PTR(REGEXP *, 
+                             SvIVX(regexen[i])), param)))
                     ));
 	}
     }
@@ -9881,6 +9899,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     else
 	PL_exitlist	= (PerlExitListEntry*)NULL;
     PL_modglobal	= hv_dup_inc(proto_perl->Imodglobal, param);
+    PL_custom_op_names  = hv_dup_inc(proto_perl->Icustom_op_names,param);
+    PL_custom_op_descs  = hv_dup_inc(proto_perl->Icustom_op_descs,param);
 
     PL_profiledata	= NULL;
     PL_rsfp		= fp_dup(proto_perl->Irsfp, '<');

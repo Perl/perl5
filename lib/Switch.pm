@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = '2.04';
+$VERSION = '2.05';
 
 
 # LOAD FILTERING MODULE...
@@ -473,8 +473,8 @@ Switch - A switch statement for Perl
 
 =head1 VERSION
 
-This document describes version 2.04 of Switch,
-released July 30, 2001.
+This document describes version 2.05 of Switch,
+released September  3, 2001.
 
 =head1 SYNOPSIS
 
@@ -827,6 +827,6 @@ Bug reports and other feedback are most welcome.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2000, Damian Conway. All Rights Reserved.
-This module is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
+    Copyright (c) 1997-2001, Damian Conway. All Rights Reserved.
+    This module is free software. It may be used, redistributed
+        and/or modified under the same terms as Perl itself.

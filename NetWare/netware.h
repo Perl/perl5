@@ -48,6 +48,7 @@ struct tms {
 #define HAVE_INTERP_INTERN
 struct interp_intern {
     void *	internal_host;
+    long	perlshell_items;	// For system() ;  Ananth, 3 Sept 2001
 };
 
 /*
@@ -66,6 +67,7 @@ typedef u_int           SOCKET;
 #endif
 
 #define nw_internal_host		(PL_sys_intern.internal_host)
+#define nw_perlshell_items	(PL_sys_intern.perlshell_items)		// For system() ;  Ananth, 3 Sept 2001
 
 EXTERN_C void	Perl_nw5_init(int *argcp, char ***argvp);
 

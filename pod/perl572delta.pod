@@ -163,6 +163,14 @@ C<eval "v200"> now works.
 
 VMS now works under PerlIO.
 
+=item *
+
+END blocks are now run even if you exit/die in a BEGIN block.
+The execution of END blocks is now controlled by 
+PL_exit_flags & PERL_EXIT_DESTRUCT_END. This enables the new
+behaviour for perl embedders. This will default in 5.10. See
+L<perlembed>.
+
 =back
 
 =head1 Modules and Pragmata

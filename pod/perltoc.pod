@@ -883,21 +883,21 @@ listing
 
 $ARG, $_, $a, $b, $<I<digits>>, $MATCH, $&, $PREMATCH, $`, $POSTMATCH, $',
 $LAST_PAREN_MATCH, $+, $^N, @LAST_MATCH_END, @+, $MULTILINE_MATCHING, $*,
-input_line_number HANDLE EXPR, $INPUT_LINE_NUMBER, $NR, $,
-IO::Handle->input_record_separator EXPR, $INPUT_RECORD_SEPARATOR, $RS, $/,
-autoflush HANDLE EXPR, $OUTPUT_AUTOFLUSH, $|,
+HANDLE->input_line_number(EXPR), $INPUT_LINE_NUMBER, $NR, $,
+IO::Handle->input_record_separator(EXPR), $INPUT_RECORD_SEPARATOR, $RS, $/,
+HANDLE->autoflush(EXPR), $OUTPUT_AUTOFLUSH, $|,
 IO::Handle->output_field_separator EXPR, $OUTPUT_FIELD_SEPARATOR, $OFS, $,,
 IO::Handle->output_record_separator EXPR, $OUTPUT_RECORD_SEPARATOR, $ORS,
 $\, $LIST_SEPARATOR, $", $SUBSCRIPT_SEPARATOR, $SUBSEP, $;, $OFMT, $#,
-format_page_number HANDLE EXPR, $FORMAT_PAGE_NUMBER, $%,
-format_lines_per_page HANDLE EXPR, $FORMAT_LINES_PER_PAGE, $=,
-format_lines_left HANDLE EXPR, $FORMAT_LINES_LEFT, $-, @LAST_MATCH_START,
+HANDLE->format_page_number(EXPR), $FORMAT_PAGE_NUMBER, $%,
+HANDLE->format_lines_per_page(EXPR), $FORMAT_LINES_PER_PAGE, $=,
+HANDLE->format_lines_left(EXPR), $FORMAT_LINES_LEFT, $-, @LAST_MATCH_START,
 @-, C<$`> is the same as C<substr($var, 0, $-[0])>, C<$&> is the same as
 C<substr($var, $-[0], $+[0] - $-[0])>, C<$'> is the same as C<substr($var,
 $+[0])>, C<$1> is the same as C<substr($var, $-[1], $+[1] - $-[1])>, C<$2>
 is the same as C<substr($var, $-[2], $+[2] - $-[2])>, C<$3> is the same as
-C<substr $var, $-[3], $+[3] - $-[3])>, format_name HANDLE EXPR,
-$FORMAT_NAME, $~, format_top_name HANDLE EXPR, $FORMAT_TOP_NAME, $^,
+C<substr $var, $-[3], $+[3] - $-[3])>, HANDLE->format_name(EXPR),
+$FORMAT_NAME, $~, HANDLE->format_top_name(EXPR), $FORMAT_TOP_NAME, $^,
 IO::Handle->format_line_break_characters EXPR,
 $FORMAT_LINE_BREAK_CHARACTERS, $:, IO::Handle->format_formfeed EXPR,
 $FORMAT_FORMFEED, $^L, $ACCUMULATOR, $^A, $CHILD_ERROR, $?, $OS_ERROR,
@@ -1651,6 +1651,14 @@ string
 =back
 
 =head2 perlthrtut - tutorial on threads in Perl
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=head2 perlothrtut - old tutorial on threads in Perl
 
 =over 4
 
@@ -3251,6 +3259,8 @@ Perl?>, B<Use C from C?>, B<Use Perl from C?>
 
 =item Maintaining a persistent interpreter
 
+=item Execution of END blocks
+
 =item Maintaining multiple interpreter instances
 
 =item Using Perl modules, which themselves use C libraries, from your C
@@ -3702,6 +3712,8 @@ A, p, d, s, n, r, f, M, o, j, x
 
 =back
 
+=item Custom Operators
+
 =item AUTHORS
 
 =item SEE ALSO
@@ -3899,39 +3911,42 @@ ax, bytes_from_utf8, bytes_to_utf8, call_argv, call_method, call_pv,
 call_sv, CLASS, Copy, croak, CvSTASH, cv_const_sv, dAX, dITEMS, dMARK,
 dORIGMARK, dSP, dXSARGS, dXSI32, ENTER, eval_pv, eval_sv, EXTEND,
 fbm_compile, fbm_instr, FREETMPS, getcwd_sv, get_av, get_cv, get_hv,
-get_sv, GIMME, GIMME_V, grok_number, grok_numeric_radix, GvSV,
-gv_fetchmeth, gv_fetchmethod, gv_fetchmethod_autoload, gv_stashpv,
-gv_stashsv, G_ARRAY, G_DISCARD, G_EVAL, G_NOARGS, G_SCALAR, G_VOID,
-HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force,
-HeSVKEY_set, HeVAL, HvNAME, hv_clear, hv_delete, hv_delete_ent, hv_exists,
-hv_exists_ent, hv_fetch, hv_fetch_ent, hv_iterinit, hv_iterkey,
-hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iterval, hv_magic, hv_store,
-hv_store_ent, hv_undef, isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE,
-isUPPER, is_utf8_char, is_utf8_string, items, ix, LEAVE, load_module,
-looks_like_number, MARK, mg_clear, mg_copy, mg_find, mg_free, mg_get,
-mg_length, mg_magical, mg_set, Move, New, newAV, Newc, newCONSTSUB, newHV,
-newRV_inc, newRV_noinc, NEWSV, newSV, newSViv, newSVnv, newSVpv, newSVpvf,
-newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv, newXS, newXSproto,
-Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc,
-perl_clone, perl_construct, perl_destruct, perl_free, perl_parse, perl_run,
-PL_modglobal, PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn,
-POPp, POPpbytex, POPpx, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu,
-PUTBACK, Renew, Renewc, require_pv, RETVAL, Safefree, savepv, savepvn,
-SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE,
-strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW,
-SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV,
-SvIOK_UV, SvIV, SvIVx, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK,
-SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx, SvNVX, SvOK, SvOOK,
-SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV,
-SvPVbyte, SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen,
-SvPVutf8, SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen,
-SvPVx, SvPVX, SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT,
-SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC,
-SvSetMagicSV, SvSetMagicSV_nosteal, SvSetSV, SvSetSV_nosteal, SvSTASH,
-SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, svtype,
-SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK,
-SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, SvUVx, sv_2bool,
-sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
+get_sv, GIMME, GIMME_V, grok_bin, grok_hex, grok_number,
+grok_numeric_radix, grok_oct, GvSV, gv_fetchmeth, gv_fetchmethod,
+gv_fetchmethod_autoload, gv_stashpv, gv_stashsv, G_ARRAY, G_DISCARD,
+G_EVAL, G_NOARGS, G_SCALAR, G_VOID, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV,
+HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, HvNAME, hv_clear, hv_delete,
+hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
+hv_iterinit, hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv,
+hv_iterval, hv_magic, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA,
+isDIGIT, isLOWER, isSPACE, isUPPER, is_utf8_char, is_utf8_string, items,
+ix, LEAVE, load_module, looks_like_number, MARK, mg_clear, mg_copy,
+mg_find, mg_free, mg_get, mg_length, mg_magical, mg_set, Move, New, newAV,
+Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc, newSV, NEWSV, newSViv,
+newSVnv, newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv,
+newSVuv, newXS, newXSproto, Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv,
+ORIGMARK, perl_alloc, perl_clone, perl_construct, perl_destruct, perl_free,
+perl_parse, perl_run, PL_modglobal, PL_na, PL_sv_no, PL_sv_undef,
+PL_sv_yes, POPi, POPl, POPn, POPp, POPpbytex, POPpx, POPs, PUSHi, PUSHMARK,
+PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc, require_pv, RETVAL,
+Safefree, savepv, savepvn, SAVETMPS, scan_bin, scan_hex, scan_oct,
+sharedsv_find, sharedsv_init, sharedsv_lock, sharedsv_new,
+sharedsv_thrcnt_dec, sharedsv_thrcnt_inc, sharedsv_unlock, SP, SPAGAIN, ST,
+strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE, StructCopy,
+SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_notUV,
+SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVX,
+SvIVx, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off,
+SvNOK_on, SvNOK_only, SvNV, SvNVx, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp,
+SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVbyte,
+SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen, SvPVutf8,
+SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx,
+SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT, SvREFCNT_dec,
+SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC, SvSetMagicSV,
+SvSetMagicSV_nosteal, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
+SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV,
+SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE,
+SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, SvUVx, sv_2bool, sv_2cv,
+sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
 sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags, sv_2pv_nolen, sv_2uv,
 sv_backoff, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
 sv_catpvn_flags, sv_catpvn_mg, sv_catpv_mg, sv_catsv, sv_catsv_flags,
@@ -4096,17 +4111,13 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Support for I/O disciplines
 
-=item Eliminate need for "use utf8";
-
-=item Create a char *sv_pvprintify(sv, STRLEN *lenp, UV flags)
-
-=item Autoload byte.pm
+=item Autoload bytes.pm
 
 =item Make "\u{XXXX}" et al work
 
-=item Overloadable regex assertions
+=item Create a char *sv_pvprintify(sv, STRLEN *lenp, UV flags)
 
-=item Unicode collation and normalization
+=item Overloadable regex assertions
 
 =item Unicode case mappings 
 
@@ -4282,7 +4293,7 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item ref() in list context
 
-=item Make tr/// return histogram
+=item Make tr/// return histogram of characters in list context
 
 =item Compile to real threaded code
 
@@ -4434,6 +4445,8 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Make "use utf8" the default
 
+=item Unicode collation and normalization
+
 =back
 
 =back
@@ -4503,6 +4516,8 @@ finish, 'enter', print
 =item Patching
 
 =item Patching a core module
+
+=item Adding a new function to the core
 
 =item Writing a test
 
@@ -6003,50 +6018,6 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
-=head2 perldos - Perl under DOS, W31, W95.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Prerequisites for Compiling Perl on DOS
-
-DJGPP, Pthreads
-
-=item Shortcomings of Perl under DOS
-
-=item Building Perl on DOS
-
-=item Testing Perl on DOS
-
-=item Installation of Perl on DOS
-
-=back
-
-=item BUILDING AND INSTALLING MODULES ON DOS
-
-=over 4
-
-=item Building Prerequisites for Perl on DOS
-
-=item Unpacking CPAN Modules on DOS
-
-=item Building Non-XS Modules on DOS
-
-=item Building XS Modules on DOS
-
-=back
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -6914,48 +6885,6 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
-
-=back
-
-=head2 perlwin32 - Perl under Win32
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Setting Up Perl on Win32
-
-Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
-
-=item Building
-
-=item Testing Perl on Win32
-
-=item Installation of Perl on Win32
-
-=item Usage Hints for Perl on Win32
-
-Environment Variables, File Globbing, Using perl from the command line,
-Building Extensions, Command-line Wildcard Expansion, Win32 Specific
-Extensions, Running Perl Scripts, Miscellaneous Things
-
-=back
-
-=item BUGS AND CAVEATS
-
-=item AUTHORS
-
-Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
-E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
-E<lt>nick@ing-simmons.netE<gt>
-
-=item SEE ALSO
-
-=item HISTORY
 
 =back
 
@@ -8472,6 +8401,10 @@ B<name()>, B<value()>, B<domain()>, B<path()>, B<expires()>
 
 =item USING FASTCGI SCRIPTS AS CGI SCRIPTS
 
+=item EXTERNAL FASTCGI SERVER INVOCATION
+
+FCGI_SOCKET_PATH, FCGI_LISTEN_QUEUE
+
 =item CAVEATS
 
 =item AUTHOR INFORMATION
@@ -9077,7 +9010,23 @@ C<zcat>, C<zip>
 
 =item DESCRIPTION
 
+=over 4
+
+=item getcwd and friends
+
+getcwd, cwd, fastcwd, fastgetcwd
+
+=item abs_path and friends
+
+abs_path, realpath, fast_abs_path
+
+=item $ENV{PWD}
+
+=back
+
 =item NOTES
+
+=item SEE ALSO
 
 =back
 
@@ -10362,7 +10311,7 @@ pasthru (o)
 
 =item Using Attributes and Parameters
 
-ABSTRACT, ABSTRACT_FROM, AUTHOR, BINARY_LOCATION, C, CAPI, CCFLAGS, CONFIG,
+ABSTRACT, ABSTRACT_FROM, AUTHOR, BINARY_LOCATION, C, CCFLAGS, CONFIG,
 CONFIGURE, DEFINE, DIR, DISTNAME, DL_FUNCS, DL_VARS, EXCLUDE_EXT,
 EXE_FILES, FIRST_MAKEFILE, FULLPERL, FUNCLIST, H, HTMLLIBPODS,
 HTMLSCRIPTPODS, IMPORTS, INC, INCLUDE_EXT, INSTALLARCHLIB, INSTALLBIN,
@@ -10677,6 +10626,12 @@ C<GLOB_NOSPACE>, C<GLOB_ABEND>
 
 =item DESCRIPTION
 
+=item METHODS
+
+canonpath, catdir, catfile, curdir, devnull, rootdir, tmpdir, updir,
+no_upwards, case_tolerant, file_name_is_absolute, path, join, splitpath,
+splitdir, catpath, abs2rel, rel2abs
+
 =item SEE ALSO
 
 =item AUTHORS
@@ -10793,7 +10748,8 @@ rel2abs
 
 =back
 
-=head2 File::Spec::Unix - methods used by File::Spec
+=head2 File::Spec::Unix - File::Spec for Unix, base for other File::Spec
+modules
 
 =over 4
 
@@ -11082,6 +11038,8 @@ $fh->print, $fh->printf, $fh->getline, $fh->getlines
 =item Disabling or changing <no> behaviour
 
 =item All-in-one interface
+
+=item Using Filter::Simple and Exporter together
 
 =item How it works
 
@@ -12120,6 +12078,40 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 
 =back
 
+=head2 Lingua::KO::Hangul::Util - utility functions for Hangul Syllables
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Composition and Decomposition
+
+C<$string_decomposed = decomposeHangul($codepoint)>, C<@codepoints =
+decomposeHangul($codepoint)>, C<$string_composed =
+composeHangul($src_string)>, C<@codepoints_composed =
+composeHangul($src_string)>
+
+=item Hangul Syllable Name
+
+C<$name = getHangulName($codepoint)>, C<$codepoint =
+parseHangulName($name)>
+
+=item EXPORT
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+http://www.unicode.org/unicode/reports/tr15
+
+=back
+
 =head2 List::Util - A selection of general-utility list subroutines
 
 =over 4
@@ -12129,7 +12121,7 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 =item DESCRIPTION
 
 first BLOCK LIST, max LIST, maxstr LIST, min LIST, minstr LIST, reduce
-BLOCK LIST, sum LIST
+BLOCK LIST, shuffle LIST, sum LIST
 
 =item SUGGESTED ADDITIONS
 
@@ -12147,7 +12139,7 @@ general-utility list subroutines
 =item DESCRIPTION
 
 first BLOCK LIST, max LIST, maxstr LIST, min LIST, minstr LIST, reduce
-BLOCK LIST, sum LIST
+BLOCK LIST, shuffle LIST, sum LIST
 
 =item SUGGESTED ADDITIONS
 
@@ -12593,8 +12585,8 @@ Out of Memory!, Fails to load Calc on Perl prior 5.6.0
 
 =item CAVEATS
 
-stringify, bstr(), bsstr() and 'cmp', int(), bdiv, Modifying and =, bpow,
-Overloading -$x, Mixing different object types, bsqrt()
+stringify, bstr(), bsstr() and 'cmp', int(), bdiv, bdiv, Modifying and =,
+bpow, Overloading -$x, Mixing different object types, bsqrt()
 
 =item LICENSE
 
@@ -12935,8 +12927,8 @@ requires_firewall HOST
 =item NetConfig VALUES
 
 nntp_hosts, snpp_hosts, pop3_hosts, smtp_hosts, ph_hosts, daytime_hosts,
-time_hosts, inet_domain, ftp_firewall, ftp_ext_passive, ftp_int_pasive,
-local_netmask, test_hosts, test_exists
+time_hosts, inet_domain, ftp_firewall, ftp_firewall_type, ftp_ext_passive,
+ftp_int_pasive, local_netmask, test_hosts, test_exists
 
 =back
 
@@ -12976,16 +12968,16 @@ new (HOST [,OPTIONS])
 login ([LOGIN [,PASSWORD [, ACCOUNT] ] ]), authorize ( [AUTH [, RESP]]),
 site (ARGS), type (TYPE [, ARGS]), ascii ([ARGS]) binary([ARGS])
 ebcdic([ARGS]) byte([ARGS]), rename ( OLDNAME, NEWNAME ), delete ( FILENAME
-), cwd ( [ DIR ] ), cdup (), pwd (), rmdir ( DIR ), mkdir ( DIR [, RECURSE
-]), ls ( [ DIR ] ), dir ( [ DIR ] ), get ( REMOTE_FILE [, LOCAL_FILE [,
-WHERE]] ), put ( LOCAL_FILE [, REMOTE_FILE ] ), put_unique ( LOCAL_FILE [,
-REMOTE_FILE ] ), append ( LOCAL_FILE [, REMOTE_FILE ] ), unique_name (),
-mdtm ( FILE ), size ( FILE ), supported ( CMD ), hash (
-[FILEHANDLE_GLOB_REF],[ BYTES_PER_HASH_MARK] ), nlst ( [ DIR ] ), list ( [
-DIR ] ), retr ( FILE ), stor ( FILE ), stou ( FILE ), appe ( FILE ), port (
-[ PORT ] ), pasv (), pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ),
-pasv_xfer_unique ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait (
-NON_PASV_SERVER ), abort (), quit ()
+), cwd ( [ DIR ] ), cdup (), pwd (), restart ( WHERE ), rmdir ( DIR ),
+mkdir ( DIR [, RECURSE ]), ls ( [ DIR ] ), dir ( [ DIR ] ), get (
+REMOTE_FILE [, LOCAL_FILE [, WHERE]] ), put ( LOCAL_FILE [, REMOTE_FILE ]
+), put_unique ( LOCAL_FILE [, REMOTE_FILE ] ), append ( LOCAL_FILE [,
+REMOTE_FILE ] ), unique_name (), mdtm ( FILE ), size ( FILE ), supported (
+CMD ), hash ( [FILEHANDLE_GLOB_REF],[ BYTES_PER_HASH_MARK] ), nlst ( [ DIR
+] ), list ( [ DIR ] ), retr ( FILE ), stor ( FILE ), stou ( FILE ), appe (
+FILE ), port ( [ PORT ] ), pasv (), pasv_xfer ( SRC_FILE, DEST_SERVER [,
+DEST_FILE ] ), pasv_xfer_unique ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ),
+pasv_wait ( NON_PASV_SERVER ), abort (), quit ()
 
 =over 4
 
@@ -12998,7 +12990,7 @@ quot (CMD [,ARGS])
 =item THE dataconn CLASS
 
 read ( BUFFER, SIZE [, TIMEOUT ] ), write ( BUFFER, SIZE [, TIMEOUT ] ),
-abort (), close ()
+bytes_read (), abort (), close ()
 
 =item UNIMPLEMENTED
 
@@ -13009,6 +13001,10 @@ B<ALLO>, B<SMNT>, B<HELP>, B<MODE>, B<SYST>, B<STAT>, B<STRU>, B<REIN>
 =item AUTHOR
 
 =item SEE ALSO
+
+=item USE EXAMPLES
+
+http://www.csh.rit.edu/~adam/Progs/autoftp-2.0.tar.gz
 
 =item CREDITS
 
@@ -13136,8 +13132,9 @@ new Net::SMTP [ HOST, ] [ OPTIONS ]
 banner (), domain (), hello ( DOMAIN ), etrn ( DOMAIN ), mail ( ADDRESS [,
 OPTIONS] ), send ( ADDRESS ), send_or_mail ( ADDRESS ), send_and_mail (
 ADDRESS ), reset (), recipient ( ADDRESS [, ADDRESS [ ...]] [, OPTIONS ] ),
-to ( ADDRESS [, ADDRESS [...]] ), data ( [ DATA ] ), expand ( ADDRESS ),
-verify ( ADDRESS ), help ( [ $subject ] ), quit ()
+to ( ADDRESS [, ADDRESS [...]] ), cc ( ADDRESS [, ADDRESS [...]] ), bcc (
+ADDRESS [, ADDRESS [...]] ), data ( [ DATA ] ), expand ( ADDRESS ), verify
+( ADDRESS ), help ( [ $subject ] ), quit ()
 
 =item SEE ALSO
 
@@ -15242,6 +15239,8 @@ B<runtests>
 
 =back
 
+B<_all_ok>
+
 B<_globdir>
 
 B<_run_all_tests>
@@ -15303,25 +15302,31 @@ B<is>, B<isnt>
 
 B<like>
 
+B<can_ok>
+
+B<isa_ok>
+
 B<pass>, B<fail>
 
 =over 4
 
 =item Module tests
 
-B<use_ok>, B<require_ok>
+B<use_ok>
 
 =back
+
+B<require_ok>
 
 =over 4
 
 =item Conditional tests
 
-B<skip>   * UNIMPLEMENTED *
+B<SKIP: BLOCK>
 
 =back
 
-B<todo>  * UNIMPLEMENTED *
+B<TODO: BLOCK>
 
 =over 4
 
@@ -15337,7 +15342,12 @@ B<eq_set>
 
 =over 4
 
+=item NOTES
+
 =item BUGS and CAVEATS
+
+Making your own ok(), The eq_* family have some caveats, Test::Harness
+upgrades
 
 =item AUTHOR
 
@@ -15370,6 +15380,8 @@ B<_my_exit>
 =item EXAMPLE
 
 =item CAVEATS
+
+=item NOTES
 
 =item HISTORY
 
@@ -15797,6 +15809,70 @@ function
 
 isa ( TYPE ), can ( METHOD ), VERSION ( [ REQUIRE ] ), UNIVERSAL::isa (
 VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
+
+=back
+
+=head2 Unicode::Collate - use UCA (Unicode Collation Algorithm)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Constructor and Tailoring
+
+alternate, backwards, entry, ignoreName, ignoreChar, level, normalization,
+overrideCJK, overrideHangul, preprocess, rearrange, table, undefName,
+undefChar, katakana_before_hiragana, upper_before_lower
+
+=item Other methods
+
+C<@sorted = $UCA-E<gt>sort(@not_sorted)>, C<$result = $UCA-E<gt>cmp($a,
+$b)>, C<$sortKey = $UCA-E<gt>getSortKey($string)>, C<$position =
+$UCA-E<gt>index($string, $substring)>, C<($position, $length) =
+$UCA-E<gt>index($string, $substring)>
+
+=item EXPORT
+
+=item CAVEAT
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+L<Lingua::KO::Hangul::Util>, L<Unicode::Normalize>, Unicode Collation
+Algorithm - Unicode TR #10
+
+=back
+
+=head2 Unicode::Normalize - normalized forms of Unicode text
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+C<$string_NFD = NFD($raw_string)>, C<$string_NFC = NFC($raw_string)>,
+C<$string_NFKD = NFKD($raw_string)>, C<$string_NFKC = NFKC($raw_string)>,
+C<$normalized_string = normalize($form_name, $raw_string)>
+
+=over 4
+
+=item EXPORT
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+L<Lingua::KO::Hangul::Util>, http://www.unicode.org/unicode/reports/tr15/
 
 =back
 

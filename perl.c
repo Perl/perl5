@@ -287,7 +287,7 @@ Shuts down a Perl interpreter.  See L<perlembed>.
 int
 perl_destruct(pTHXx)
 {
-    int destruct_level;  /* 0=none, 1=full, 2=full with checks */
+    volatile int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     HV *hv;
 #ifdef USE_5005THREADS
     Thread t;
@@ -470,7 +470,7 @@ perl_destruct(pTHXx)
 
         while (i) {
             SV *resv = ary[--i];
-            REGEXP *re = (REGEXP *)SvIVX(resv);
+            REGEXP *re = INT2PTR(REGEXP *,SvIVX(resv));
 
             if (SvFLAGS(resv) & SVf_BREAK) {
                 /* this is PL_reg_curpm, already freed
@@ -864,7 +864,9 @@ perl_free(pTHXx)
 #    endif
 #    ifndef NETWARE
     if (PerlProc_lasthost()) {
+#      ifdef USE_PERLIO
 	PerlIO_cleanup();
+#      endif
     }
 #    endif
     PerlMem_free(aTHXx);
@@ -874,7 +876,9 @@ perl_free(pTHXx)
     win32_delete_internal_host(host);
 #    endif
 #  else
+#    ifdef USE_PERLIO
     PerlIO_cleanup();
+#    endif
     PerlMem_free(aTHXx);
 #  endif
 #else
@@ -2144,8 +2148,9 @@ Perl_moreswitches(pTHX_ char *s)
     switch (*s) {
     case '0':
     {
-	numlen = 0;			/* disallow underscores */
-	rschar = (U32)scan_oct(s, 4, &numlen);
+        I32 flags = 0;
+	numlen = 4;
+	rschar = (U32)grok_oct(s, &numlen, &flags, NULL);
 	SvREFCNT_dec(PL_nrs);
 	if (rschar & ~((U8)~0))
 	    PL_nrs = &PL_sv_undef;
@@ -2276,9 +2281,10 @@ Perl_moreswitches(pTHX_ char *s)
 	    PL_ors_sv = Nullsv;
 	}
 	if (isDIGIT(*s)) {
+            I32 flags = 0;
 	    PL_ors_sv = newSVpvn("\n",1);
-	    numlen = 0;			/* disallow underscores */
-	    *SvPVX(PL_ors_sv) = (char)scan_oct(s, 3 + (*s == '0'), &numlen);
+	    numlen = 3 + (*s == '0');
+	    *SvPVX(PL_ors_sv) = (char)grok_oct(s, &numlen, &flags, NULL);
 	    s += numlen;
 	}
 	else {

@@ -729,15 +729,33 @@ produced by this process.
 
 A more accurate approach is the following commands:
 
-    sh Configure -des -Dccflags=-Wformat ...
-    make miniperl		# without -DCHECK_FORMAT
-    perl -i.orig -pwe 's/-Wformat/-DCHECK_FORMAT $&/' config.sh
-    sh Configure -S
-    make >& make.log		# build from correct miniperl
+=over 4
+
+=item *
+
+build miniperl with -DCHECK_FORMAT 
+
     make clean
-    make miniperl >& mini.log	# build miniperl with -DCHECK_FORMAT 
-    perl -nwe 'print if /^\S+:/ and not /^make\b/' mini.log make.log
+    make miniperl OPTIMIZE=-DCHECK_FORMAT >& mini.log	
+
+=item *
+
+build a clean miniperl,
+and build everything else from that with -DCHECK_FORMAT
+
     make clean
+    make miniperl	
+    make all OPTIMIZE=-DCHECK_FORMAT >& make.log  
+		
+=item *
+
+clean up, and print warnings from the log files
+
+    make clean
+    perl -nwe 'print if /^\S+:/ and not /^make\b/' \
+	mini.log make.log
+
+=back
 
 (-Wformat support by Robin Barker.)
 

@@ -813,10 +813,10 @@ Perl_op_clear(pTHX_ OP *o)
 	goto clear_pmop;
     case OP_PUSHRE:
 #ifdef USE_ITHREADS
-	if ((PADOFFSET)cPMOPo->op_pmreplroot) {
+        if (INT2PTR(PADOFFSET, cPMOPo->op_pmreplroot)) {
 	    if (PL_curpad) {
-		GV *gv = (GV*)PL_curpad[(PADOFFSET)cPMOPo->op_pmreplroot];
-		pad_swipe((PADOFFSET)cPMOPo->op_pmreplroot);
+		GV *gv = (GV*)PL_curpad[INT2PTR(PADOFFSET, cPMOPo->op_pmreplroot)];
+		pad_swipe(INT2PTR(PADOFFSET, cPMOPo->op_pmreplroot));
 		/* No GvIN_PAD_off(gv) here, because other references may still
 		 * exist on the pad */
 		SvREFCNT_dec(gv);
@@ -1431,7 +1431,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		if (kid->op_type != OP_NULL || kid->op_targ != OP_LIST)
 		    Perl_croak(aTHX_
 			       "panic: unexpected lvalue entersub "
-			       "args: type/targ %ld:%ld",
+			       "args: type/targ %ld:%"UVuf,
 			       (long)kid->op_type,kid->op_targ);
 		kid = kLISTOP->op_first;
 	      skip_kids:
@@ -1462,7 +1462,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		    if (kid->op_type != OP_RV2CV)
 			Perl_croak(aTHX_
 				   "panic: unexpected lvalue entersub "
-				   "entry via type/targ %ld:%ld",
+				   "entry via type/targ %ld:%"UVuf,
 				   (long)kid->op_type,kid->op_targ);
 		    kid->op_private |= OPpLVAL_INTRO;
 		    break;	/* Postpone until runtime */
@@ -1475,7 +1475,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		if (kid->op_type == OP_NULL)		
 		    Perl_croak(aTHX_
 			       "Unexpected constant lvalue entersub "
-			       "entry via type/targ %ld:%ld",
+			       "entry via type/targ %ld:%"UVuf,
 			       (long)kid->op_type,kid->op_targ);
 		if (kid->op_type != OP_GV) {
 		    /* Restore RV2CV to check lvalueness */
@@ -3553,7 +3553,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		    else if (curop->op_type == OP_PUSHRE) {
 			if (((PMOP*)curop)->op_pmreplroot) {
 #ifdef USE_ITHREADS
-			    GV *gv = (GV*)PL_curpad[(PADOFFSET)((PMOP*)curop)->op_pmreplroot];
+			    GV *gv = (GV*)PL_curpad[INT2PTR(PADOFFSET,((PMOP*)curop)->op_pmreplroot)];
 #else
 			    GV *gv = (GV*)((PMOP*)curop)->op_pmreplroot;
 #endif
@@ -3583,7 +3583,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		    tmpop = ((UNOP*)left)->op_first;
 		    if (tmpop->op_type == OP_GV && !pm->op_pmreplroot) {
 #ifdef USE_ITHREADS
-			pm->op_pmreplroot = (OP*)cPADOPx(tmpop)->op_padix;
+			pm->op_pmreplroot = INT2PTR(OP*, cPADOPx(tmpop)->op_padix);
 			cPADOPx(tmpop)->op_padix = 0;	/* steal it */
 #else
 			pm->op_pmreplroot = (OP*)cSVOPx(tmpop)->op_sv;
@@ -6545,6 +6545,8 @@ Perl_ck_subr(pTHX_ OP *o)
     GV *namegv = 0;
     int optional = 0;
     I32 arg = 0;
+    I32 contextclass = 0;
+    char *e = 0;
     STRLEN n_a;
 
     o->op_private |= OPpENTERSUB_HASTARG;
@@ -6641,36 +6643,67 @@ Perl_ck_subr(pTHX_ OP *o)
 		}
 		scalar(o2);
 		break;
+	    case '[': case ']':
+		 goto oops;
+		 break;
 	    case '\\':
 		proto++;
 		arg++;
+	    again:
 		switch (*proto++) {
+		case '[':
+		     if (contextclass++ == 0) {
+		          e = strchr(proto, ']');
+			  if (!e || e == proto)
+			       goto oops;
+		     }
+		     else
+			  goto oops;
+		     goto again;
+		     break;
+		case ']':
+		     if (contextclass)
+			  contextclass = 0;
+		     else
+			  goto oops;
+		     break;
 		case '*':
-		    if (o2->op_type != OP_RV2GV)
-			bad_type(arg, "symbol", gv_ename(namegv), o2);
-		    goto wrapref;
+		     if (o2->op_type == OP_RV2GV)
+			  goto wrapref;
+		     if (!contextclass)
+			  bad_type(arg, "symbol", gv_ename(namegv), o2);
+		     break;
 		case '&':
-		    if (o2->op_type != OP_ENTERSUB)
-			bad_type(arg, "subroutine entry", gv_ename(namegv), o2);
-		    goto wrapref;
+		     if (o2->op_type == OP_ENTERSUB)
+			  goto wrapref;
+		     if (!contextclass)
+			  bad_type(arg, "subroutine entry", gv_ename(namegv), o2);
+		     break;
 		case '$':
-		    if (o2->op_type != OP_RV2SV
-			&& o2->op_type != OP_PADSV
-			&& o2->op_type != OP_HELEM
-			&& o2->op_type != OP_AELEM
-			&& o2->op_type != OP_THREADSV)
-		    {
+		    if (o2->op_type == OP_RV2SV ||
+			o2->op_type == OP_PADSV ||
+			o2->op_type == OP_HELEM ||
+			o2->op_type == OP_AELEM ||
+			o2->op_type == OP_THREADSV)
+			 goto wrapref;
+		    if (!contextclass)
 			bad_type(arg, "scalar", gv_ename(namegv), o2);
-		    }
-		    goto wrapref;
+		     break;
 		case '@':
-		    if (o2->op_type != OP_RV2AV && o2->op_type != OP_PADAV)
+		    if (o2->op_type == OP_RV2AV ||
+			o2->op_type == OP_PADAV)
+			 goto wrapref;
+		    if (!contextclass)
 			bad_type(arg, "array", gv_ename(namegv), o2);
-		    goto wrapref;
+		    break;
 		case '%':
-		    if (o2->op_type != OP_RV2HV && o2->op_type != OP_PADHV)
-			bad_type(arg, "hash", gv_ename(namegv), o2);
-		  wrapref:
+		    if (o2->op_type == OP_RV2HV ||
+			o2->op_type == OP_PADHV)
+			 goto wrapref;
+		    if (!contextclass)
+			 bad_type(arg, "hash", gv_ename(namegv), o2);
+		    break;
+		wrapref:
 		    {
 			OP* kid = o2;
 			OP* sib = kid->op_sibling;
@@ -6679,9 +6712,15 @@ Perl_ck_subr(pTHX_ OP *o)
 			o2->op_sibling = sib;
 			prev->op_sibling = o2;
 		    }
+		    if (contextclass && e) {
+			 proto = e + 1;
+			 contextclass = 0;
+		    }
 		    break;
 		default: goto oops;
 		}
+		if (contextclass)
+		     goto again;
 		break;
 	    case ' ':
 		proto++;
@@ -6689,7 +6728,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	    default:
 	      oops:
 		Perl_croak(aTHX_ "Malformed prototype for %s: %s",
-			gv_ename(namegv), SvPV((SV*)cv, n_a));
+			   gv_ename(namegv), SvPV((SV*)cv, n_a));
 	    }
 	}
 	else
@@ -7104,8 +7143,9 @@ Perl_peep(pTHX_ register OP *o)
     LEAVE;
 }
 
-#ifdef PERL_CUSTOM_OPS
-char* custom_op_name(pTHX_ OP* o)
+
+
+char* Perl_custom_op_name(pTHX_ OP* o)
 {
     IV  index = PTR2IV(o->op_ppaddr);
     SV* keysv;
@@ -7123,7 +7163,7 @@ char* custom_op_name(pTHX_ OP* o)
     return SvPV_nolen(HeVAL(he));
 }
 
-char* custom_op_desc(pTHX_ OP* o)
+char* Perl_custom_op_desc(pTHX_ OP* o)
 {
     IV  index = PTR2IV(o->op_ppaddr);
     SV* keysv;
@@ -7140,7 +7180,7 @@ char* custom_op_desc(pTHX_ OP* o)
 
     return SvPV_nolen(HeVAL(he));
 }
-#endif
+
 
 #include "XSUB.h"
 

@@ -1,5 +1,5 @@
 use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME    => 'Cwd',
-    VERSION => '2.05',
+    VERSION_FROM => '../../lib/Cwd.pm',
 );

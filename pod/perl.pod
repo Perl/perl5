@@ -57,7 +57,9 @@ For ease of access, the Perl manual has been split up into several sections:
     perlipc		Perl interprocess communication
     perlfork		Perl fork() information
     perlnumber		Perl number semantics
+
     perlthrtut		Perl threads tutorial
+    perlothrtut		Perl old threads tutorial
 
     perlport		Perl portability guide
     perllocale		Perl locale support

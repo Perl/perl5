@@ -125,10 +125,7 @@ nearby CPAN mirror, and included in Perl starting from the release 5.8.0.
 Or you may be able to use the following I<is_tainted()> function.
 
     sub is_tainted {
-	return ! eval {
-	    join('',@_), kill 0;
-	    1;
-	};
+        return ! eval { eval("#" . substr(join("", @_), 0, 0)); 1 };
     }
 
 This function makes use of the fact that the presence of tainted data

@@ -333,13 +333,13 @@ anything more complicated in the subscript will be interpreted as
 an expression.
 
 A literal of the form C<v1.20.300.4000> is parsed as a string composed
-of characters with the specified ordinals.  This provides an alternative,
-more readable way to construct strings, rather than use the somewhat less
-readable interpolation form C<"\x{1}\x{14}\x{12c}\x{fa0}">.  This is useful
-for representing Unicode strings, and for comparing version "numbers"
-using the string comparison operators, C<cmp>, C<gt>, C<lt> etc.
-If there are two or more dots in the literal, the leading C<v> may be
-omitted.
+of characters with the specified ordinals.  This form, known as
+v-strings, provides an alternative, more readable way to construct
+strings, rather than use the somewhat less readable interpolation form
+C<"\x{1}\x{14}\x{12c}\x{fa0}">.  This is useful for representing
+Unicode strings, and for comparing version "numbers" using the string
+comparison operators, C<cmp>, C<gt>, C<lt> etc.  If there are two or
+more dots in the literal, the leading C<v> may be omitted.
 
     print v9786;              # prints UTF-8 encoded SMILEY, "\x{263a}"
     print v102.111.111;       # prints "foo"
@@ -348,6 +348,8 @@ omitted.
 Such literals are accepted by both C<require> and C<use> for
 doing a version check.  The C<$^V> special variable also contains the
 running Perl interpreter's version in this form.  See L<perlvar/$^V>.
+Note that using the v-strings for IPv4 addresses is not portable unless
+you also use the inet_aton()/inet_ntoa() routines of the Socket package.
 
 The special literals __FILE__, __LINE__, and __PACKAGE__
 represent the current filename, line number, and package name at that

@@ -1,6 +1,6 @@
 # perl makefile for wince
 #
-# Time-stamp: <01/08/01 21:11:35 keuchel@w2k>
+# Time-stamp: <07/09/01 15:46:36 keuchel@keuchelnt>
 
 SRCDIR     = ..
 PV         = 57
@@ -847,7 +847,7 @@ $(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
 	$(MAKE)
 	cd ..\..\wince
 
-$(PERLEXE_RES): perl.rc
+$(PERLEXE_RES): perl.rc perl.ico
 	rc $(RCDEFS) perl.rc
 
 clean: 
@@ -1066,3 +1066,6 @@ install:
 	cecopy pc:$(MACHINE)/perl.exe ce:/speicherkarte2/bin
 	cecopy pc:$(MACHINE)/perl$(PV).dll ce:/speicherkarte2/bin
 !endif
+
+perl.ico:
+	perl makeico.pl

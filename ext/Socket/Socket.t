@@ -13,7 +13,7 @@ BEGIN {
 	
 use Socket;
 
-print "1..13\n";
+print "1..14\n";
 
 if (socket(T,PF_INET,SOCK_STREAM,6)) {
   print "ok 1\n";
@@ -33,8 +33,8 @@ if (socket(T,PF_INET,SOCK_STREAM,6)) {
 	print(($read == 0 || $buff eq "hello") ? "ok 3\n" : "not ok 3\n");
   }
   else {
-	print "# You're allowed to fail tests 2 and 3 if.\n";
-	print "# The echo service has been disabled.\n";
+	print "# You're allowed to fail tests 2 and 3 if\n";
+	print "# the echo service has been disabled.\n";
 	print "# $!\n";
 	print "ok 2\n";
 	print "ok 3\n";
@@ -63,8 +63,8 @@ if( socket(S,PF_INET,SOCK_STREAM,6) ){
 	print(($read == 0 || $buff eq "olleh") ? "ok 6\n" : "not ok 6\n");
   }
   else {
-	print "# You're allowed to fail tests 5 and 6 if.\n";
-	print "# The echo service has been disabled.\n";
+	print "# You're allowed to fail tests 5 and 6 if\n";
+	print "# the echo service has been disabled.\n";
 	print "# $!\n";
 	print "ok 5\n";
 	print "ok 6\n";
@@ -93,11 +93,13 @@ if((inet_ntoa((unpack_sockaddr_in(pack_sockaddr_in(100,inet_aton("10.250.230.10"
 } else {
     print "not ok 9\n"; 
 }
-print ((inet_aton("10.10.10.10") eq v10.10.10.10) ? "ok 10\n" : "not ok 10\n");
-print ((inet_ntoa(v10.10.10.10) eq '10.10.10.10') ? "ok 11\n" : "not ok 11\n");
+print ((inet_ntoa(inet_aton("10.20.30.40")) eq "10.20.30.40") ? "ok 10\n" : "not ok 10\n");
+print ((inet_ntoa(v10.20.30.40) eq "10.20.30.40") ? "ok 11\n" : "not ok 11\n");
 {
     my ($port,$addr) = unpack_sockaddr_in(pack_sockaddr_in(100,v10.10.10.10));
     print (($port == 100) ? "ok 12\n" : "not ok 12\n");
-    print (($addr eq v10.10.10.10) ? "ok 13\n" : "not ok 13\n");
+    print ((inet_ntoa($addr) eq "10.10.10.10") ? "ok 13\n" : "not ok 13\n");
 }
 				     
+eval { inet_ntoa(v10.20.30.400) };
+print (($@ =~ /^Wide character in Socket::inet_ntoa at/) ? "ok 14\n" : "not ok 14\n");

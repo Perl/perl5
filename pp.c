@@ -2727,40 +2727,54 @@ PP(pp_abs)
     RETURN;
 }
 
+
 PP(pp_hex)
 {
     dSP; dTARGET;
     char *tmps;
-    STRLEN argtype;
+    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
     STRLEN len;
+    NV result_nv;
+    UV result_uv;
 
     tmps = (SvPVx(POPs, len));
-    argtype = 1;		/* allow underscores */
-    XPUSHn(scan_hex(tmps, len, &argtype));
+    result_uv = grok_hex (tmps, &len, &flags, &result_nv);
+    if (flags & PERL_SCAN_GREATER_THAN_UV_MAX) {
+        XPUSHn(result_nv);
+    }
+    else {
+        XPUSHu(result_uv);
+    }
     RETURN;
 }
 
 PP(pp_oct)
 {
     dSP; dTARGET;
-    NV value;
-    STRLEN argtype;
     char *tmps;
+    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
     STRLEN len;
+    NV result_nv;
+    UV result_uv;
 
     tmps = (SvPVx(POPs, len));
     while (*tmps && len && isSPACE(*tmps))
-       tmps++, len--;
+        tmps++, len--;
     if (*tmps == '0')
-       tmps++, len--;
-    argtype = 1;		/* allow underscores */
+        tmps++, len--;
     if (*tmps == 'x')
-       value = scan_hex(++tmps, --len, &argtype);
+        result_uv = grok_hex (tmps, &len, &flags, &result_nv);
     else if (*tmps == 'b')
-       value = scan_bin(++tmps, --len, &argtype);
+        result_uv = grok_bin (tmps, &len, &flags, &result_nv);
     else
-       value = scan_oct(tmps, len, &argtype);
-    XPUSHn(value);
+        result_uv = grok_oct (tmps, &len, &flags, &result_nv);
+
+    if (flags & PERL_SCAN_GREATER_THAN_UV_MAX) {
+        XPUSHn(result_nv);
+    }
+    else {
+        XPUSHu(result_uv);
+    }
     RETURN;
 }
 
@@ -3095,12 +3109,28 @@ PP(pp_crypt)
     dSP; dTARGET; dPOPTOPssrl;
     STRLEN n_a;
 #ifdef HAS_CRYPT
-    char *tmps = SvPV(left, n_a);
+    STRLEN len;
+    char *tmps = SvPV(left, len);
+    char *t    = 0;
+    if (DO_UTF8(left)) {
+         /* If Unicode take the crypt() of the low 8 bits
+	  * of the characters of the string. */
+	 char *s    = tmps;
+	 char *send = tmps + len;
+	 STRLEN i   = 0;
+	 Newz(688, t, len, char);
+	 while (s < send) {
+	      t[i++] = utf8_to_uvchr((U8*)s, 0) & 0xFF;
+	      s += UTF8SKIP(s);
+	 }
+	 tmps = t;
+    }
 #ifdef FCRYPT
     sv_setpv(TARG, fcrypt(tmps, SvPV(right, n_a)));
 #else
     sv_setpv(TARG, PerlProc_crypt(tmps, SvPV(right, n_a)));
 #endif
+    Safefree(t);
 #else
     DIE(aTHX_
       "The crypt() function is unimplemented due to excessive paranoia.");
@@ -4169,7 +4199,7 @@ PP(pp_split)
 
     if (pm->op_pmreplroot) {
 #ifdef USE_ITHREADS
-	ary = GvAVn((GV*)PL_curpad[(PADOFFSET)pm->op_pmreplroot]);
+	ary = GvAVn((GV*)PL_curpad[INT2PTR(PADOFFSET, pm->op_pmreplroot)]);
 #else
 	ary = GvAVn((GV*)pm->op_pmreplroot);
 #endif

@@ -1,0 +1,79 @@
+Revision history for Perl extension Test::Harness
+
+1.25  Tue Aug  7 08:51:09 EDT 2001
+    * Fixed a bug with tests failing if they're all skipped
+      reported by Stas Bekman.
+    - Fixed a very minor warning in 5.004_04
+    - Fixed displaying filenames not from @ARGV
+    - Merging with bleadperl
+    -  minor fixes to the filename in the report
+    -  '[no reason given]' skip reason
+
+1.24  2001/08/07 12:52:47   *UNRELEASED*
+    - Added internal information about number of todo tests
+
+1.23  Tue Jul 31 15:06:47 EDT 2001
+    - Merged in Ilya's "various reasons" patch
+    * Fixed "not ok 23 - some name # TODO" style tests
+
+1.22  Mon Jun 25 02:00:02 EDT 2001
+    * Fixed bug with failing tests using header at end.
+    - Documented how Test::Harness deals with garbage input
+    - Turned on test counter mismatch warning
+
+1.21  Wed May 23 19:22:53 BST 2001
+    * No longer considered unstable.  Merging back with the perl core.
+    - Fixed minor nit about the report summary
+    - Added docs on the meaning of the failure report
+    - Minor POD nits fixed mirroring perl change 9176
+    - TODO and SEE ALSO expanded
+
+1.20  Wed Mar 14 23:09:20 GMT 2001 by Michael G Schwern    *UNSTABLE*
+    * Fixed and tested with 5.004!
+    - Added EXAMPLE docs
+    - Added TODO docs
+    - Now uneffected by -l, $\ or $,
+
+1.19  Sat Mar 10 00:43:29 GMT 2001 by Michael G Schwern    *UNSTABLE*
+    - More internal reworking
+    * Removed use of experimental /(?>...)/ feature for backwards compat
+    * Removed use of open(my $fh, $file) for backwards compatibility
+    * Removed use of Tie::StdHandle in tests for backwards compat
+    * Added dire warning that this is unstable.
+    - Added some tests from the old CPAN release
+
+1.18  Mon Mar  5 17:35:11 GMT 2001 by Michael G Schwern
+    * Under new management!
+    * Test::Harness is now being concurrently shipped on CPAN as well
+      as in the core.
+    - Switched "our" for "use vars" and moved the minimum version back
+      to 5.004.  This may be optimistic.
+
+
+*** Missing version history to be extracted from Perl changes ***
+
+
+1.07  Fri Feb 23 1996 by Andreas Koenig
+    - Gisle sent me a documentation patch that showed me, that the
+      unless(/^#/) is unnessessary. Applied the patch and deleted the block
+      checking for "comment" lines. -- All lines are comment lines that do
+      not match /^1\.\.([0-9]+)/ or /^(not\s+)?ok\b/.
+    - Ilyaz request to print "ok (empty test case)" whenever we say 1..0
+      implemented.
+    - Harness now doesn't abort anymore if we received confused test output,
+      just warns instead.
+
+1.05  Wed Jan 31 1996 by Andreas Koenig
+    - More updates on docu and introduced the liberality that the script
+      output may omit the test numbers.
+
+1.03  Mon January 28 1996 by Andreas Koenig
+    - Added the statistics for subtests. Updated the documentation.
+
+1.02  by Andreas Koenig
+    - This version reports a list of the tests that failed accompanied by
+      some trivial statistics. The older (unnumbered) version stopped
+      processing after the first failed test.
+    - Additionally it reports the exit status if there is one.
+
+

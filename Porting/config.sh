@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Sat Aug 11 03:31:31 EET DST 2001
+# Configuration time: Tue Sep 11 04:09:55 EET DST 2001
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -56,14 +56,14 @@ cat='cat'
 cc='cc'
 cccdlflags=' '
 ccdlflags='  -Wl,-rpath,/opt/perl/lib/5.7.2/alpha-dec_osf/CORE'
-ccflags='-std -D_INTRINSICS -DLANGUAGE_C'
+ccflags='-std -D_INTRINSICS -fprm d -ieee -DLANGUAGE_C'
 ccflags_uselargefiles=''
 ccname='cc'
 ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_BSD=1 SYSTYPE_BSD=1 unix=1'
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Sat Aug 11 03:31:31 EET DST 2001'
+cf_time='Tue Sep 11 04:09:55 EET DST 2001'
 charsize='1'
 chgrp=''
 chmod='chmod'
@@ -77,7 +77,7 @@ cpio=''
 cpp='cpp'
 cpp_stuff='42'
 cppccsymbols='LANGUAGE_C=1'
-cppflags='-std -D_INTRINSICS -DLANGUAGE_C'
+cppflags='-std -D_INTRINSICS -ieee -DLANGUAGE_C'
 cpplast=''
 cppminus=''
 cpprun='/usr/bin/cpp'
@@ -233,7 +233,7 @@ d_locconv='define'
 d_lockf='define'
 d_longdbl='define'
 d_longlong='define'
-d_lseekproto='define'
+d_lseekproto=''
 d_lstat='define'
 d_madvise='define'
 d_mblen='define'
@@ -686,7 +686,7 @@ patchlevel='7'
 path_sep=':'
 perl5='perl'
 perl=''
-perl_patchlevel='11625'
+perl_patchlevel='11978'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lm -liconv -lutil'
 perlpath='/opt/perl/bin/perl'
@@ -854,7 +854,7 @@ vendorlibexp=''
 vendorprefix=''
 vendorprefixexp=''
 version='5.7.2'
-version_patchlevel_string='version 7 subversion 2 patch 11625'
+version_patchlevel_string='version 7 subversion 2 patch 11978'
 versiononly='define'
 vi=''
 voidflags='15'
@@ -884,7 +884,7 @@ PERL_SUBVERSION=2
 PERL_API_REVISION=5
 PERL_API_VERSION=5
 PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=11625
+PERL_PATCHLEVEL=11978
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'

@@ -137,7 +137,7 @@ esc_q_utf8(pTHX_ SV* sv, register char *src, register STRLEN slen)
       r[0] = r[j++] = '"';
     else
       r[0] = r[j++] = '\'';
-    r[j++] = '\0';
+    r[j] = '\0';
     SvCUR_set(sv, SvCUR(sv) + j);
 
     return j;

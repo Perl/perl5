@@ -1,12 +1,6 @@
 #! /usr/local/bin/perl -w
 
-
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
-
-BEGIN { print "1..20\n"; }
+BEGIN { print "1..25\n"; }
 
 use NEXT;
 
@@ -18,29 +12,32 @@ sub A::DESTROY  { $_[0]->NEXT::DESTROY() }
 
 package B;
 use base qw( A );
-sub B::AUTOLOAD { return ( 9, $_[0]->NEXT::AUTOLOAD() ) }
+sub B::AUTOLOAD { return ( 9, $_[0]->NEXT::AUTOLOAD() )
+			if $AUTOLOAD =~ /.*(missing_method|secondary)/ }
 sub B::DESTROY  { $_[0]->NEXT::DESTROY() }
 
 package C;
-sub C::DESTROY  { print "ok 18\n"; $_[0]->NEXT::DESTROY() }
+sub C::DESTROY  { print "ok 23\n"; $_[0]->NEXT::DESTROY() }
 
 package D;
 @D::ISA = qw( B C E );
 sub D::method   { return ( 2, $_[0]->NEXT::method() ) }
 sub D::AUTOLOAD { return ( 8, $_[0]->NEXT::AUTOLOAD() ) }
-sub D::DESTROY  { print "ok 17\n"; $_[0]->NEXT::DESTROY() }
+sub D::DESTROY  { print "ok 22\n"; $_[0]->NEXT::DESTROY() }
 sub D::oops     { $_[0]->NEXT::method() }
+sub D::secondary { return ( 17, 18, map { $_+10 } $_[0]->NEXT::secondary() ) }
 
 package E;
 @E::ISA = qw( F G );
 sub E::method   { return ( 4,  $_[0]->NEXT::method(), $_[0]->NEXT::method() ) }
-sub E::AUTOLOAD { return ( 10, $_[0]->NEXT::AUTOLOAD() ) }
-sub E::DESTROY  { print "ok 19\n"; $_[0]->NEXT::DESTROY() }
+sub E::AUTOLOAD { return ( 10, $_[0]->NEXT::AUTOLOAD() ) 
+			if $AUTOLOAD =~ /.*(missing_method|secondary)/ }
+sub E::DESTROY  { print "ok 24\n"; $_[0]->NEXT::DESTROY() }
 
 package F;
 sub F::method   { return ( 5  ) }
-sub F::AUTOLOAD { return ( 11 ) }
-sub F::DESTROY  { print "ok 20\n" }
+sub F::AUTOLOAD { return ( 11 ) if $AUTOLOAD =~ /.*(missing_method|secondary)/ }
+sub F::DESTROY  { print "ok 25\n" }
 
 package G;
 sub G::method   { return ( 6 ) }
@@ -71,19 +68,20 @@ eval { $obj->oops() } && print "not ";
 print "ok 12\n";
 
 # AUTOLOAD'ED METHOD CAN'T REDISPATCH TO NAMED METHOD (ok 13)
-eval q{
-	package C;
-	sub AUTOLOAD { $_[0]->NEXT::method() };
+
+eval {
+	local *C::AUTOLOAD = sub { $_[0]->NEXT::method() };
+	*C::AUTOLOAD = *C::AUTOLOAD;
+	eval { $obj->missing_method(); } && print "not ";
 };
-eval { $obj->missing_method(); } && print "not ";
 print "ok 13\n";
 
 # NAMED METHOD CAN'T REDISPATCH TO AUTOLOAD'ED METHOD (ok 14)
-eval q{ 
-	package C;
-	sub method { $_[0]->NEXT::AUTOLOAD() };
+eval { 
+	*C::method = sub{ $_[0]->NEXT::AUTOLOAD() };
+	*C::method = *C::method;
+	eval { $obj->method(); } && print "not ";
 };
-eval { $obj->method(); } && print "not ";
 print "ok 14\n";
 
 # BASE CLASS METHODS ONLY REDISPATCHED WITHIN HIERARCHY (ok 15..16)
@@ -96,4 +94,8 @@ print "ok 15\n";
 print "not " unless @val==1 && $val[0]==9;
 print "ok 16\n";
 
-# CAN REDISPATCH DESTRUCTORS (ok 17..20)
+# TEST SECONDARY AUTOLOAD REDISPATCH (ok 17..21)
+@vals = $obj->secondary();
+print map "ok $_\n", @vals;
+
+# CAN REDISPATCH DESTRUCTORS (ok 22..25)

@@ -61,11 +61,11 @@ sub TEST {
 
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 186; $XS = 1;
+  $TMAX = 192; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 93; $XS = 0;
+  $TMAX = 96; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -807,4 +807,17 @@ EOT
 TEST q(Data::Dumper->new([$b],['b'])->Purity(1)->Dump;);
 TEST q(Data::Dumper->new([$b],['b'])->Purity(1)->Dumpxs;)
 	if $XS;
+}
+
+{
+  $a = "\x{09c10}";
+############# 187
+## XS code was adding an extra \0
+  $WANT = <<'EOT';
+#$a = "\x{9c10}";
+EOT
+
+  TEST q(Data::Dumper->Dump([$a], ['a']));
+  TEST q(Data::Dumper->Dumpxs([$a], ['a']));
+
 }

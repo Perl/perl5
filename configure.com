@@ -1134,8 +1134,8 @@ $ THEN
 $   prefix = F$ENVIRONMENT("DEFAULT") - ".UU]" + "]"
 $   prefix = F$PARSE(prefix,,,,"NO_CONCEAL") - "][" - ".;"
 $   prefixbase = prefix - "]"
-$!  Add ROOT to make install PERL_ROOT differ from build directory.
-$   prefix = prefixbase + "ROOT.]"
+$!  Add _ROOT to make install PERL_ROOT differ from build directory.
+$   prefix = prefixbase + "_ROOT.]"
 $ ENDIF
 $ src = prefix
 $!: determine root of directory hierarchy where package will be installed.

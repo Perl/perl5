@@ -42,8 +42,9 @@ extern "C" {
 }
 #endif
 
-/* Define this to turn on verbose debugging prints */
-#undef MD5_DEBUG
+#ifndef SvPVbyte
+   #define SvPVbyte SvPV
+#endif
 
 /* Perl does not guarantee that U32 is exactly 32 bits.  Some system
  * has no integral type with exactly 32 bits.  For instance, A Cray has
@@ -618,6 +619,14 @@ md5(...)
 	unsigned char digeststr[16];
     PPCODE:
 	MD5Init(&ctx);
+	if (PL_dowarn && items > 1) {
+	    data = (unsigned char *)SvPVbyte(ST(0), len);
+	    if (len == 11 && memEQ("Digest::MD5", data, 11)) {
+	         char *f = (ix == F_BIN) ? "md5" :
+                           (ix == F_HEX) ? "md5_hex" : "md5_base64";
+	         warn("&Digest::MD5::%s function probably called as method", f);
+            }
+	}
 	for (i = 0; i < items; i++) {
 	    data = (unsigned char *)(SvPVbyte(ST(i), len));
 	    MD5Update(&ctx, data, len);

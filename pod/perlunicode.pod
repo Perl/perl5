@@ -456,7 +456,9 @@ outside of the utf8 pragma too.)
 The C<chr()> and C<ord()> functions work on characters.  This is like
 C<pack("U")> and C<unpack("U")>, not like C<pack("C")> and
 C<unpack("C")>.  In fact, the latter are how you now emulate
-byte-oriented C<chr()> and C<ord()> under utf8.
+byte-oriented C<chr()> and C<ord()> for Unicode strings.
+(Note that this reveals the internal UTF-8 encoding of strings and
+you are not supposed to do that unless you know what you are doing.)
 
 =item *
 

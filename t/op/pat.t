@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..686\n";
+print "1..714\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2007,4 +2007,114 @@ print "ok 683\n" if @a == 9 && "@a" eq "f o o \n $a $b b a r";
     x  =~ /(..)/; $y = $1;
     print "not " unless length($y) == 2 && $y eq $x;
     print "ok 686\n";
+}
+
+my $test = 687;
+
+# Force scalar context on the patern match
+sub ok ($$) {
+    my($ok, $name) = @_;
+
+    printf "%sok %d - %s\n", ($ok ? "" : "not "), $test, $name;
+
+    printf "# Failed test at line %d\n", (caller)[2] unless $ok;
+
+    $test++;
+    return $ok;
+}
+
+{
+    # Check that \x## works. 5.6.1 and 5.005_03 fail some of these.
+    $x = "\x4e" . "E";
+    ok ($x =~ /^\x4EE$/, "Check only 2 bytes of hex are matched.");
+
+    $x = "\x4e" . "i";
+    ok ($x =~ /^\x4Ei$/, "Check that invalid hex digit stops it (2)");
+
+    $x = "\x4" . "j";
+    ok ($x =~ /^\x4j$/,  "Check that invalid hex digit stops it (1)");
+
+    $x = "\x0" . "k";
+    ok ($x =~ /^\xk$/,   "Check that invalid hex digit stops it (0)");
+
+    $x = "\x0" . "x";
+    ok ($x =~ /^\xx$/, "\\xx isn't to be treated as \\0");
+
+    $x = "\x0" . "xa";
+    ok ($x =~ /^\xxa$/, "\\xxa isn't to be treated as \\xa");
+
+    $x = "\x9" . "_b";
+    ok ($x =~ /^\x9_b$/, "\\x9_b isn't to be treated as \\x9b");
+
+    print "# and now again in [] ranges\n";
+
+    $x = "\x4e" . "E";
+    ok ($x =~ /^[\x4EE]{2}$/, "Check only 2 bytes of hex are matched.");
+
+    $x = "\x4e" . "i";
+    ok ($x =~ /^[\x4Ei]{2}$/, "Check that invalid hex digit stops it (2)");
+
+    $x = "\x4" . "j";
+    ok ($x =~ /^[\x4j]{2}$/,  "Check that invalid hex digit stops it (1)");
+
+    $x = "\x0" . "k";
+    ok ($x =~ /^[\xk]{2}$/,   "Check that invalid hex digit stops it (0)");
+
+    $x = "\x0" . "x";
+    ok ($x =~ /^[\xx]{2}$/, "\\xx isn't to be treated as \\0");
+
+    $x = "\x0" . "xa";
+    ok ($x =~ /^[\xxa]{3}$/, "\\xxa isn't to be treated as \\xa");
+
+    $x = "\x9" . "_b";
+    ok ($x =~ /^[\x9_b]{3}$/, "\\x9_b isn't to be treated as \\x9b");
+
+}
+
+{
+    # Check that \x{##} works. 5.6.1 fails quite a few of these.
+
+    $x = "\x9b";
+    ok ($x =~ /^\x{9_b}$/, "\\x{9_b} is to be treated as \\x9b");
+
+    $x = "\x9b" . "y";
+    ok ($x =~ /^\x{9_b}y$/, "\\x{9_b} is to be treated as \\x9b (again)");
+
+    $x = "\x9b" . "y";
+    ok ($x =~ /^\x{9b_}y$/, "\\x{9b_} is to be treated as \\x9b");
+
+    $x = "\x9b" . "y";
+    ok ($x =~ /^\x{9_bq}y$/, "\\x{9_bc} is to be treated as \\x9b");
+
+    $x = "\x0" . "y";
+    ok ($x =~ /^\x{x9b}y$/, "\\x{x9b} is to be treated as \\x0");
+
+    $x = "\x0" . "y";
+    ok ($x =~ /^\x{0x9b}y$/, "\\x{0x9b} is to be treated as \\x0");
+
+    $x = "\x9b" . "y";
+    ok ($x =~ /^\x{09b}y$/, "\\x{09b} is to be treated as \\x9b");
+
+    print "# and now again in [] ranges\n";
+
+    $x = "\x9b";
+    ok ($x =~ /^[\x{9_b}]$/, "\\x{9_b} is to be treated as \\x9b");
+
+    $x = "\x9b" . "y";
+    ok ($x =~ /^[\x{9_b}y]{2}$/, "\\x{9_b} is to be treated as \\x9b (again)");
+
+    $x = "\x9b" . "y";
+    ok ($x =~ /^[\x{9b_}y]{2}$/, "\\x{9b_} is to be treated as \\x9b");
+
+    $x = "\x9b" . "y";
+    ok ($x =~ /^[\x{9_bq}y]{2}$/, "\\x{9_bc} is to be treated as \\x9b");
+
+    $x = "\x0" . "y";
+    ok ($x =~ /^[\x{x9b}y]{2}$/, "\\x{x9b} is to be treated as \\x0");
+
+    $x = "\x0" . "y";
+    ok ($x =~ /^[\x{0x9b}y]{2}$/, "\\x{0x9b} is to be treated as \\x0");
+
+    $x = "\x9b" . "y";
+    ok ($x =~ /^[\x{09b}y]{2}$/, "\\x{09b} is to be treated as \\x9b");
 }

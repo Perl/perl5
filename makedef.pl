@@ -200,7 +200,6 @@ sub emit_symbols {
     }
 }
 
-skip_symbols [qw(Perl_custom_op_name Perl_custom_op_desc PL_custom_op_descs PL_custom_op_names)] unless $define{'PERL_CUSTOM_OPS'};
 
 if ($PLATFORM eq 'win32') {
     skip_symbols [qw(
@@ -1153,6 +1152,7 @@ perl_destruct
 perl_free
 perl_parse
 perl_run
+Perl_cxinc
 PerlIO_define_layer
 PerlIOBuf_set_ptrcnt
 PerlIOBuf_get_cnt

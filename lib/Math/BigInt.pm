@@ -19,7 +19,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.41';
+$VERSION = '1.42';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( bneg babs bcmp badd bmul bdiv bmod bnorm bsub
@@ -69,8 +69,8 @@ use overload
 '**='	=>	sub { $_[0]->bpow($_[1]); },
 
 '<=>'	=>	sub { $_[2] ?
-                      $class->bcmp($_[1],$_[0]) : 
-                      $class->bcmp($_[0],$_[1])},
+                      ref($_[0])->bcmp($_[1],$_[0]) : 
+                      ref($_[0])->bcmp($_[0],$_[1])},
 'cmp'	=>	sub { 
          $_[2] ? 
                $_[1] cmp $_[0]->bstr() :
@@ -1224,6 +1224,7 @@ sub _trailing_zeros
   my $x = shift;
   $x = $class->new($x) unless ref $x;
 
+  #return 0 if $x->is_zero() || $x->is_odd() || $x->{sign} !~ /^[+-]$/;
   return 0 if $x->is_zero() || $x->{sign} !~ /^[+-]$/;
 
   return $CALC->_zeros($x->{value}) if $CALC->can('_zeros');
@@ -1638,13 +1639,13 @@ sub import
       # used in the same script, or eval inside import().
       (my $mod = $lib . '.pm') =~ s!::!/!g;
       # require does not automatically :: => /, so portability problems arise
-      eval { require $mod; $lib->import(); }
+      eval { require $mod; $lib->import( @c ); }
       }
     else
       {
-      eval "use $lib;";
+      eval "use $lib @c;";
       }
-    $CALC = $lib, last if $@ eq '';
+    $CALC = $lib, last if $@ eq '';	# no error in loading lib?
     }
   }
 
@@ -1799,6 +1800,66 @@ sub as_number
   $self->copy();
   }
 
+sub as_hex
+  {
+  # return as hex string, with prefixed 0x
+  my $x = shift; $x = $class->new($x) if !ref($x);
+
+  return $x->bstr() if $x->{sign} !~ /^[+-]$/;	# inf, nan etc
+  return '0x0' if $x->is_zero();
+
+  my $es = ''; my $s = '';
+  $s = $x->{sign} if $x->{sign} eq '-';
+  $s .= '0x';
+  if ($CALC->can('_as_hex'))
+    {
+    $es = $CALC->_as_hex($x->{value});
+    }
+  else
+    {
+    my $x1 = $x->copy()->babs(); my $xr;
+    my $x100 = Math::BigInt->new (0x100);
+    while (!$x1->is_zero())
+      {
+      ($x1, $xr) = bdiv($x1,$x100);
+      $es .= unpack('h2',pack('C',$xr->numify()));
+      }
+    $es = reverse $es;
+    $es =~ s/^[0]+//; 	# strip leading zeros
+    }
+  $s . $es;
+  }
+
+sub as_bin
+  {
+  # return as binary string, with prefixed 0b
+  my $x = shift; $x = $class->new($x) if !ref($x);
+
+  return $x->bstr() if $x->{sign} !~ /^[+-]$/;	# inf, nan etc
+  return '0b0' if $x->is_zero();
+
+  my $es = ''; my $s = '';
+  $s = $x->{sign} if $x->{sign} eq '-';
+  $s .= '0b';
+  if ($CALC->can('_as_bin'))
+    {
+    $es = $CALC->_as_bin($x->{value});
+    }
+  else
+    {
+    my $x1 = $x->copy()->babs(); my $xr;
+    my $x100 = Math::BigInt->new (0x100);
+    while (!$x1->is_zero())
+      {
+      ($x1, $xr) = bdiv($x1,$x100);
+      $es .= unpack('b8',pack('C',$xr->numify()));
+      }
+    $es = reverse $es; 
+    $es =~ s/^[0]+//; 	# strip leading zeros
+    }
+  $s . $es;
+  }
+
 ##############################################################################
 # internal calculation routines (others are in Math::BigInt::Calc etc)
 
@@ -1941,17 +2002,23 @@ Math::BigInt - Arbitrary size integer math package
 
   bgcd(@values);		# greatest common divisor
   blcm(@values);		# lowest common multiplicator
-  
-  $x->bstr();			# normalized string
-  $x->bsstr();			# normalized string in scientific notation
+ 
   $x->length();			# return number of digits in number
-  ($x,$f) = $x->length();	# length of number and length of fraction part
+  ($x,$f) = $x->length();	# length of number and length of fraction part,
+				# latter is always 0 digits long for BigInt's
 
   $x->exponent();		# return exponent as BigInt
   $x->mantissa();		# return mantissa as BigInt
   $x->parts();			# return (mantissa,exponent) as BigInt
   $x->copy();			# make a true copy of $x (unlike $y = $x;)
   $x->as_number();		# return as BigInt (in BigInt: same as copy())
+  
+  # conversation to string 
+  $x->bstr();			# normalized string
+  $x->bsstr();			# normalized string in scientific notation
+  $x->as_hex();			# as signed hexadecimal string with prefixed 0x
+  $x->as_bin();			# as signed binary string with prefixed 0b
+
 
 =head1 DESCRIPTION
 
@@ -2440,6 +2507,11 @@ Examples for rounding:
   print $x->copy()->bnorm(),"\n";       # 123.46
   print $x->copy()->fround(),"\n";      # 123.46
 
+Examples for converting:
+
+  my $x = Math::BigInt->new('0b1'.'01' x 123);
+  print "bin: ",$x->as_bin()," hex:",$x->as_hex()," dec: ",$x,"\n";
+
 =head1 Autocreating constants
 
 After C<use Math::BigInt ':constant'> all the B<integer> decimal constants
@@ -2604,6 +2676,18 @@ In all Perl versions you can use C<as_number()> for the same effect:
 This also works for other subclasses, like Math::String.
 
 It is yet unlcear whether overloaded int() should return a scalar or a BigInt.
+
+=item bdiv
+
+The following will probably not do what you expect:
+
+	$c = Math::BigInt->new(123);
+	print $c->length(),"\n";		# prints 30
+
+It prints both the number of digits in the number and in the fraction part
+since print calls C<length()> in list context. Use something like: 
+	
+	print scalar $c->length(),"\n";		# prints 3 
 
 =item bdiv
 

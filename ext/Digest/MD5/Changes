@@ -1,3 +1,38 @@
+2001-09-07   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.16
+
+   Sync up with the bleadperl version:
+      - use SvPVbyte() if avaiable
+      - fixes to make the code 'gcc -Wall'-clean
+
+
+
+2001-08-27   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.15
+
+   Avoid exit() in Makefile.PL and bleedperls redefinition of printf
+   in the alignment test program.
+   Patch by Doug MacEachern <dougm@covalent.net>.
+
+
+
+2001-07-18   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.14
+
+   Try to warn if the functional interface is used as methods,
+   i.e. Digest::MD5->md5_hex("foo") will make noise if -w is
+   enabled.
+
+   Document the missing padding for the base64 digests.
+
+   If both XS bootstrap and locating Digest::Perl::MD5 fails
+   reraise the original XS bootstrap exception.
+
+
+
 2001-03-13   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.13

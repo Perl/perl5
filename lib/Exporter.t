@@ -5,25 +5,25 @@ BEGIN {
     @INC = '../lib';
 }
 
-# Utility testing functions.
-my $test_num = 1;
+# Can't use Test::Simple/More, they depend on Exporter.
+my $test = 1;
 sub ok ($;$) {
-    my($test, $name) = @_;
-    print "not " unless $test;
-    print "ok $test_num";
-    print " - $name" if (defined $name && ! $^O eq 'VMS');
-    print "\n";
-    $test_num++;
+    my($ok, $name) = @_;
+
+    # You have to do it this way or VMS will get confused.
+    printf "%sok %d%s\n", ($ok ? '' : 'not '), $test,
+      (defined $name ? " - $name" : '');
+
+    printf "# Failed test at line %d\n", (caller)[2] unless $ok;
+    
+    $test++;
+    return $ok;
 }
 
 
-my $loaded;
-BEGIN { $| = 1; $^W = 1; }
-END {print "not ok $test_num\n" unless $loaded;}
-print "1..$Total_tests\n";
-use Exporter;
-$loaded = 1;
-ok(1, 'compile');
+print "1..19\n";
+require Exporter;
+ok( 1, 'Exporter compiled' );
 
 
 BEGIN {
@@ -35,7 +35,6 @@ BEGIN {
                           );
 }
 
-BEGIN { $Total_tests = 14 + @Exporter_Methods }
 
 package Testing;
 require Exporter;
@@ -143,3 +142,19 @@ package Yet::More::Testing;
 $VERSION = 0;
 eval { Yet::More::Testing->require_version(10); 1 };
 ::ok($@ !~ /\(undef\)/,       'require_version(10) and $VERSION = 0');
+
+
+my $warnings;
+BEGIN {
+    $SIG{__WARN__} = sub { $warnings = join '', @_ };
+    package Testing::Unused::Vars;
+    @ISA = qw(Exporter);
+    @EXPORT = qw(this $TODO that);
+
+    package Foo;
+    Testing::Unused::Vars->import;
+}
+
+::ok( !$warnings, 'Unused variables can be exported without warning' ) ||
+  print "# $warnings\n";
+

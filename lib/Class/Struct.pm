@@ -14,7 +14,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(struct);
 
-$VERSION = '0.60';
+$VERSION = '0.61';
 
 ## Tested on 5.002 and 5.003 without class membership tests:
 my $CHECK_CLASS_MEMBERSHIP = ($] >= 5.003_95);
@@ -163,10 +163,13 @@ sub struct {
             $out .= "    \$r->$elem = $init undef;$cmt\n";
         }
         elsif( $type =~ /^\w+(?:::\w+)*$/ ){
-            $init = "defined(\$init{'$name'}) ? \%{\$init{'$name'}} : ()";
-            $out .= "    croak 'Initializer for $name must be hash reference'\n";
-            $out .= "        if defined(\$init{'$name'}) && ref(\$init{'$name'}) ne 'HASH';\n";
-            $out .= "    \$r->$elem = '${type}'->new($init);$cmt\n";
+            $out .= "    if (defined(\$init{'$name'})) {\n";
+           $out .= "       if (ref \$init{'$name'} eq 'HASH')\n";
+            $out .= "            { \$r->$elem = $type->new(\%{\$init{'$name'}}) } $cmt\n";
+           $out .= "       elsif (UNIVERSAL::isa(\$init{'$name'}, '$type'))\n";
+            $out .= "            { \$r->$elem = \$init{'$name'} } $cmt\n";
+            $out .= "       else { croak 'Initializer for $name must be hash or $type reference' }\n";
+            $out .= "    }\n";
             $classes{$name} = $type;
             $got_class = 1;
         }
@@ -416,8 +419,8 @@ The object reference is returned.
 =item Class (C<'Class_Name'> or C<'*Class_Name'>)
 
 The element's value must be a reference blessed to the named
-class or to one of its subclasses. The element is initialized to
-the result of calling the C<new> constructor of the named class.
+class or to one of its subclasses. The element is not initialized
+by default.
 
 The accessor's argument, if any, is assigned to the element. The
 accessor will C<croak> if this is not an appropriate object
@@ -440,8 +443,9 @@ The initializer value for a scalar element is just a scalar value. The
 initializer for an array element is an array reference. The initializer
 for a hash is a hash reference.
 
-The initializer for a class element is also a hash reference, and the
-contents of that hash are passed to the element's own constructor.
+The initializer for a class element is an object of the corresponding class,
+or of one of it's subclasses, or a reference to a hash containing named 
+arguments to be passed to the element's constructor.
 
 See Example 3 below for an example of initialization.
 
@@ -521,9 +525,9 @@ If no initializer is specified for a particular element, its default
 initialization is performed instead. Initializers for non-existent
 elements are silently ignored.
 
-Note that the initializer for a nested struct is specified
-as an anonymous hash of initializers, which is passed on to the nested
-struct's constructor.
+Note that the initializer for a nested class may be specified as
+an object of that class, or as a reference to a hash of initializers
+that are passed on to the nested struct's constructor.
 
     use Class::Struct;
 
@@ -545,7 +549,8 @@ struct's constructor.
     my $cat = Cat->new( name     => 'Socks',
                         kittens  => ['Monica', 'Kenneth'],
                         markings => { socks=>1, blaze=>"white" },
-                        breed    => { name=>'short-hair', cross=>1 },
+                        breed    => Breed->new(name=>'short-hair', cross=>1),
+                   or:  breed    => {name=>'short-hair', cross=>1},
                       );
 
     print "Once a cat called ", $cat->name, "\n";
@@ -555,6 +560,21 @@ struct's constructor.
 =back
 
 =head1 Author and Modification History
+
+Modified by Damian Conway, 2001-09-10, v0.62.
+
+   Modified implicit construction of nested objects.
+   Now will also take an object ref instead of requiring a hash ref.
+   Also default initializes nested object attributes to undef, rather
+   than calling object constructor without args
+   Original over-helpfulness was fraught with problems:
+       * the class's constructor might not be called 'new'
+       * the class might not have a hash-like-arguments constructor
+       * the class might not have a no-argument constructor
+       * "recursive" data structures didn't work well:
+                 package Person;
+                 struct { mother => 'Person', father => 'Person'};
+
 
 Modified by Casey West, 2000-11-08, v0.59.
 

@@ -26,7 +26,7 @@ sub ok {
 }
 
 
-print "1..161\n";
+print "1..169\n";
 
 # Note: All test numbers in comments are off by 1 after the comment below..
 
@@ -457,7 +457,46 @@ print 'not ' unless v1.20.300.4000 ne
                     sprintf "%vd", pack("C0U*",1,20,300,4000);
 print "ok $test\n"; $test++;
 
-# 160
+# 161
 print "not " unless join(" ", unpack("C*", chr(0x1e2)))
         eq ((ord(A) == 193) ? "156 67" : "199 162");
 print "ok $test\n"; $test++;
+
+# 162: does pack U create Unicode?
+print "not " unless ord(pack('U', 300)) == 300;
+print "ok $test\n"; $test++;
+
+# 163: does unpack U deref Unicode?
+print "not " unless (unpack('U', chr(300)))[0] == 300;
+print "ok $test\n"; $test++;
+
+# 164: is unpack U the reverse of pack U for Unicode string?
+print "not "
+    unless "@{[unpack('U*', pack('U*', 100, 200, 300))]}" eq "100 200 300";
+print "ok $test\n"; $test++;
+
+# 165: is unpack U the reverse of pack U for byte string?
+print "not "
+    unless "@{[unpack('U*', pack('U*', 100, 200))]}" eq "100 200";
+print "ok $test\n"; $test++;
+
+# 166: does unpack C unravel pack U?
+print "not " unless "@{[unpack('C*', pack('U*', 100, 200))]}" eq "100 195 136";
+print "ok $test\n"; $test++;
+
+# 167: does pack U0C create Unicode?
+print "not " unless "@{[pack('U0C*', 100, 195, 136)]}" eq v100.v200;
+print "ok $test\n"; $test++;
+
+# 168: does pack C0U create characters?
+print "not " unless "@{[pack('C0U*', 100, 200)]}" eq pack("C*", 100, 195, 136);
+print "ok $test\n"; $test++;
+
+# 169: does unpack U0U on byte data warn?
+{
+    local $SIG{__WARN__} = sub { $@ = "@_" };
+    my @null = unpack('U0U', chr(255));
+    print "not " unless $@ =~ /^Malformed UTF-8 character /;
+    print "ok $test\n"; $test++;
+}
+

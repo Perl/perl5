@@ -89,7 +89,13 @@ foreach my $prog (@prgs) {
     # various yaccs may or may not capitalize 'syntax'.
     $results =~ s/^(syntax|parse) error/syntax error/mig;
 
-    $results =~ s/\n\n/\n/ if $^O eq 'VMS'; # pipes double these sometimes
+    if ($^O eq 'VMS') {
+        # some tests will trigger VMS messages that won't be expected
+        $results =~ s/\n?%[A-Z]+-[SIWEF]-[A-Z]+,.*//;
+
+        # pipes double these sometimes
+        $results =~ s/\n\n/\n/g;
+    }
 
     $expected =~ s/\n+$//;
     my $ok = $results eq $expected;
@@ -718,8 +724,6 @@ EXPECT
 ########
 -w
 "x" =~ /(\G?x)?/;	# core dump in 20000716.007
-EXPECT
-Quantifier unexpected on zero-length expression in regex; marked by <-- HERE in m/(\G?x)? <-- HERE / at - line 2.
 ########
 # Bug 20010515.004
 my @h = 1 .. 10;
@@ -787,4 +791,14 @@ EXPECT
 ($a, b) = (1, 2);
 EXPECT
 Can't modify constant item in list assignment at - line 1, near ");"
+Execution of - aborted due to compilation errors.
+######## tying a bareword causes a segfault in 5.6.1
+tie FOO, "Foo";
+EXPECT
+Can't modify constant item in tie at - line 1, near ""Foo";"
+Execution of - aborted due to compilation errors.
+######## undefing constant causes a segfault in 5.6.1 [ID 20010906.019]
+undef foo;
+EXPECT
+Can't modify constant item in undef operator at - line 1, near "foo;"
 Execution of - aborted due to compilation errors.

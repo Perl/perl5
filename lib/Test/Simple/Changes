@@ -1,5 +1,48 @@
 Revision history for Perl extension Test::Simple
 
+0.18  Wed Sep  5 20:35:24 EDT 2001
+    * ***API CHANGE*** can_ok() only counts as one test
+    - can_ok() has better diagnostics
+    - Minor POD fixes from mjd
+    - adjusting the internal layout to make it easier to put it into
+      the core
+
+0.17  Wed Aug 29 20:16:28 EDT 2001
+    * Added can_ok() and isa_ok() to Test::More
+
+0.16  Tue Aug 28 19:52:11 EDT 2001
+    * vmsperl foiled my sensisble exit codes.  Reverting to a much more
+      coarse scheme.
+
+0.15  Tue Aug 28 06:18:35 EDT 2001  *UNRELEASED*
+    * Now using sensible exit codes on VMS.
+
+0.14  Wed Aug 22 17:26:28 EDT 2001
+    * Added a first cut at Test::Tutorial
+
+0.13  Tue Aug 14 15:30:10 EDT 2001
+    * Added a reason to the skip_all interface
+    - Fixed a bug to allow 'use Test::More;' to work.
+      (Thanks to Tatsuhiko Miyagawa again)
+    - Now always testing backwards compatibility.
+
+0.12  Tue Aug 14 11:02:39 EDT 2001
+    * Fixed some compatibility bugs with older Perls
+      (Thanks to Tatsuhiko Miyagawa)
+
+0.11  Sat Aug 11 23:05:19 EDT 2001
+    * Will no longer warn about testing undef values
+    - Escaping # in test names
+    - Ensuring that ok() returns true or false and not undef
+    - Minor doc typo in the example
+
+0.10  Tue Jul 31 15:01:11 EDT 2001
+    * Test::More is now distributed in this tarball.
+    * skip and todo tests work!
+    * Extended use_ok() so it can import
+    - A little internal rejiggering
+    - Added a TODO file
+
 0.09  Wed Jun 27 02:55:54 EDT 2001
     - VMS fixes
 

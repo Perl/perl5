@@ -167,6 +167,7 @@ PP(pp_unpack)
     int natint;		/* native integer */
     int unatint;	/* unsigned native integer */
 #endif
+    bool do_utf8 = DO_UTF8(right);
 
     if (gimme != G_ARRAY) {		/* arrange to do first one only */
 	/*SUPPRESS 530*/
@@ -205,7 +206,7 @@ PP(pp_unpack)
 		DIE(aTHX_ "'!' allowed only after types %s", natstr);
 	}
 	star = 0;
-	if (pat >= patend)
+	if (pat > patend)
 	    len = 1;
 	else if (*pat == '*') {
 	    len = strend - strbeg;	/* long enough */
@@ -416,6 +417,11 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 'C':
+	unpack_C: /* unpack U will jump here if not UTF-8 */
+            if (len == 0) {
+		do_utf8 = FALSE;
+		break;
+	    }
 	    if (len > strend - s)
 		len = strend - s;
 	    if (checksum) {
@@ -437,6 +443,12 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 'U':
+	    if (len == 0) {
+		do_utf8 = TRUE;
+		break;
+	    }
+	    if (!do_utf8)
+		 goto unpack_C;
 	    if (len > strend - s)
 		len = strend - s;
 	    if (checksum) {

@@ -508,9 +508,12 @@ EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\perlio.c
 
 WIN32_SRC	=		\
 		.\win32.c	\
-		.\win32io.c	\
 		.\win32sck.c	\
 		.\win32thread.c
+
+!IF "$(USE_PERLIO)" == "define"
+WIN32_SRC	= $(WIN32_SRC) .\win32io.c
+!ENDIF
 
 !IF "$(CRYPT_SRC)" != ""
 WIN32_SRC	= $(WIN32_SRC) .\$(CRYPT_SRC)
@@ -574,7 +577,7 @@ WIN32_OBJ	= $(WIN32_SRC:.c=.obj)
 MINICORE_OBJ	= $(MICROCORE_OBJ:..\=.\mini\)	\
 		  $(MINIDIR)\miniperlmain$(o)	\
 		  $(MINIDIR)\perlio$(o)
-MINIWIN32_OBJ	= $(WIN32_OBJ:.\=.\mini\)
+MINIWIN32_OBJ	= $(WIN32_OBJ:.\=.\mini\) $(MINIDIR)\win32io$(o)
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 DLL_OBJ		= $(DLL_SRC:.c=.obj)
 X2P_OBJ		= $(X2P_SRC:.c=.obj)

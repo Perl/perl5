@@ -17,7 +17,7 @@ BEGIN {
 use warnings;
 no warnings qw(overflow portable);
 
-print "1..63\n";
+print "1..67\n";
 
 # as 6 * 6 = 36, the last digit of 6**n will always be six. Hence the last
 # digit of 16**n will always be six. Hence 16**n - 1 will always end in 5.
@@ -377,6 +377,41 @@ if ($q == -9223372036854775806) {
   print "ok 63\n";
 } else {
   print "not ok 63 # 0x8000000000000000 % -9223372036854775807 => $q\n";
+}
+
+{
+  use integer;
+  $q = hex "0x123456789abcdef0";
+  if ($q == 0x123456789abcdef0 and $q != 0x123456789abcdef1) {
+    print "ok 64\n";
+  } else {
+    printf "not ok 64 # hex \"0x123456789abcdef0\" = $q (%X)\n", $q;
+    print "# Should not be floating point\n" if $q =~ tr/e.//;
+  }
+
+  $q = oct "0x123456789abcdef0";
+  if ($q == 0x123456789abcdef0 and $q != 0x123456789abcdef1) {
+    print "ok 65\n";
+  } else {
+    printf "not ok 65 # oct \"0x123456789abcdef0\" = $q (%X)\n", $q;
+    print "# Should not be floating point\n" if $q =~ tr/e.//;
+  }
+
+  $q = oct "765432176543217654321";
+  if ($q == 0765432176543217654321 and $q != 0765432176543217654322) {
+    print "ok 66\n";
+  } else {
+    printf "not ok 66 # oct \"765432176543217654321\" = $q (%o)\n", $q;
+    print "# Should not be floating point\n" if $q =~ tr/e.//;
+  }
+
+  $q = oct "0b0101010101010101010101010101010101010101010101010101010101010101";
+  if ($q == 0x5555555555555555 and $q != 0x5555555555555556) {
+    print "ok 67\n";
+  } else {
+    printf "not ok 67 # oct \"0b0101010101010101010101010101010101010101010101010101010101010101\" = $q (%b)\n", $q;
+    print "# Should not be floating point\n" if $q =~ tr/e.//;
+  }
 }
 
 # eof

@@ -1,4 +1,10 @@
 # Can't use Test.pm, that's a 5.005 thing.
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 package My::Test;
 
 print "1..12\n";
@@ -21,9 +27,9 @@ package main;
 
 require Test::Simple;
 
-@INC = ('../lib', 'lib/Test/Simple');
-require Catch;
-my($out, $err) = Catch::caught();
+push @INC, '../t/lib';
+require Test::Simple::Catch;
+my($out, $err) = Test::Simple::Catch::caught();
 
 eval {
     Test::Simple->import;
