@@ -199,6 +199,18 @@ always coerced simple scalar arguments to a typeglob, which wasn't useful
 in situations where the subroutine must distinguish between a simple
 scalar and a typeglob.  See L<perlsub/Prototypes>.
 
+=head2 On 64-bit platforms the semantics of bit operators have changed
+
+If your platform is either natively 64-bit or your Perl has been
+configured to used 64-bit integers (say C<perl -V> and see what is
+your ivsize: if it is 8, you are 64-bit) , be warned that the
+semantics of all the bitwise numeric operators (& | ^ ~ << >>) have
+been changed.  They used to be forced to be 32 bits wide, but now in
+the aforementioned platforms they are 64 bits wide.  Most dramatically
+this affects the unary ~: what used to be 32 bits wide, is now 64 bits
+wide.  If you depend on your integers being 32 bits wide, mask off the
+excess bits with C<& 0xffffffff>.
+
 =back
 
 =head2 C Source Incompatibilities
@@ -671,23 +683,22 @@ pack() and unpack() "q" and "Q" formats
 
 =item *
 
-in basic arithmetics: + - * / %
+in basic arithmetics: + - * / % (NOTE: operating close to the limits
+of the integer values may produce surprising results)
 
 =item *
 
-vec() (but see the below note about bit arithmetics)
+in bit arithmetics: & | ^ ~ << >> (NOTE: these used to be forced 
+to be 32 bits wide.)
+
+=item *
+
+vec()
 
 =back
 
 Note that unless you have the case (a) you will have to configure
 and compile Perl using the -Duse64bitint Configure flag.
-
-Unfortunately bit arithmetics (&, |, ^, ~, <<, >>) for numbers are not
-64-bit clean, they are explictly forced to be 32-bit because of
-tangled backward compatibility issues.  This limitation is subject to
-change.  Bit arithmetics for bit vector scalars (created by vec()) are
-not limited in their width, you can use the & | ^ ~ operators on such
-scalars.
 
 There are actually two modes of 64-bitness: the first one is achieved
 using Configure -Duse64bitint and the second one using Configure

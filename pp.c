@@ -28,37 +28,6 @@ static double UV_MAX_cxux = ((double)UV_MAX);
 #endif
 
 /*
- * Types used in bitwise operations.
- *
- * Normally we'd just use IV and UV.  However, some hardware and
- * software combinations (e.g. Alpha and current OSF/1) don't have a
- * floating-point type to use for NV that has adequate bits to fully
- * hold an IV/UV.  (In other words, sizeof(long) == sizeof(double).)
- *
- * It just so happens that "int" is the right size almost everywhere.
- */
-typedef int IBW;
-typedef unsigned UBW;
-
-/*
- * Mask used after bitwise operations.
- *
- * There is at least one realm (Cray word machines) that doesn't
- * have an integral type (except char) small enough to be represented
- * in a double without loss; that is, it has no 32-bit type.
- */
-#if LONGSIZE > 4  && defined(_CRAY)
-#  define BW_BITS  32
-#  define BW_MASK  ((1 << BW_BITS) - 1)
-#  define BW_SIGN  (1 << (BW_BITS - 1))
-#  define BWi(i)  (((i) & BW_SIGN) ? ((i) | ~BW_MASK) : ((i) & BW_MASK))
-#  define BWu(u)  ((u) & BW_MASK)
-#else
-#  define BWi(i)  (i)
-#  define BWu(u)  (u)
-#endif
-
-/*
  * Offset for integer pack/unpack.
  *
  * On architectures where I16 and I32 aren't really 16 and 32 bits,
@@ -1144,16 +1113,14 @@ PP(pp_left_shift)
 {
     djSP; dATARGET; tryAMAGICbin(lshift,opASSIGN);
     {
-      IBW shift = POPi;
+      IV shift = POPi;
       if (PL_op->op_private & HINT_INTEGER) {
-	IBW i = TOPi;
-	i = BWi(i) << shift;
-	SETi(BWi(i));
+	IV i = TOPi;
+	SETi(i << shift);
       }
       else {
-	UBW u = TOPu;
-	u <<= shift;
-	SETu(BWu(u));
+	UV u = TOPu;
+	SETu(u << shift);
       }
       RETURN;
     }
@@ -1163,16 +1130,14 @@ PP(pp_right_shift)
 {
     djSP; dATARGET; tryAMAGICbin(rshift,opASSIGN);
     {
-      IBW shift = POPi;
+      IV shift = POPi;
       if (PL_op->op_private & HINT_INTEGER) {
-	IBW i = TOPi;
-	i = BWi(i) >> shift;
-	SETi(BWi(i));
+	IV i = TOPi;
+	SETi(i >> shift);
       }
       else {
-	UBW u = TOPu;
-	u >>= shift;
-	SETu(BWu(u));
+	UV u = TOPu;
+	SETu(u >> shift);
       }
       RETURN;
     }
@@ -1342,12 +1307,12 @@ PP(pp_bit_and)
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  IBW value = SvIV(left) & SvIV(right);
-	  SETi(BWi(value));
+	  IV i = SvIV(left) & SvIV(right);
+	  SETi(i);
 	}
 	else {
-	  UBW value = SvUV(left) & SvUV(right);
-	  SETu(BWu(value));
+	  UV u = SvUV(left) & SvUV(right);
+	  SETu(u);
 	}
       }
       else {
@@ -1365,12 +1330,12 @@ PP(pp_bit_xor)
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right);
-	  SETi(BWi(value));
+	  IV i = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right);
+	  SETi(i);
 	}
 	else {
-	  UBW value = (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right);
-	  SETu(BWu(value));
+	  UV u = (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right);
+	  SETu(u);
 	}
       }
       else {
@@ -1388,12 +1353,12 @@ PP(pp_bit_or)
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right);
-	  SETi(BWi(value));
+	  IV i = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right);
+	  SETi(i);
 	}
 	else {
-	  UBW value = (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right);
-	  SETu(BWu(value));
+	  UV u = (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right);
+	  SETu(u);
 	}
       }
       else {
@@ -1454,12 +1419,12 @@ PP(pp_complement)
       dTOPss;
       if (SvNIOKp(sv)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  IBW value = ~SvIV(sv);
-	  SETi(BWi(value));
+	  IV i = ~SvIV(sv);
+	  SETi(i);
 	}
 	else {
-	  UBW value = ~SvUV(sv);
-	  SETu(BWu(value));
+	  UV u = ~SvUV(sv);
+	  SETu(u);
 	}
       }
       else {
@@ -4749,14 +4714,10 @@ PP(pp_pack)
 		    DIE(aTHX_ "Cannot compress negative numbers");
 
 		if (
-#ifdef BW_BITS
-		    adouble <= BW_MASK
-#else
 #ifdef CXUX_BROKEN_CONSTANT_CONVERT
 		    adouble <= UV_MAX_cxux
 #else
 		    adouble <= UV_MAX
-#endif
 #endif
 		    )
 		{

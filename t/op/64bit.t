@@ -14,10 +14,10 @@ BEGIN {
 # See the beginning of pp.c and the explanation next to IBW/UBW.
 
 # so that using > 0xfffffff constants and
-# 32+ bit vector sizes doesn't cause noise
+# 32+ bit integers don't cause noise
 no warnings qw(overflow portable);
 
-print "1..34\n";
+print "1..42\n";
 
 my $q = 12345678901;
 my $r = 23456789012;
@@ -178,5 +178,30 @@ print "ok 33\n";
 
 print "not " unless vec($x, 0, 64) == 0 && vec($x, 2, 64) == 0;
 print "ok 34\n";
+
+
+print "not " unless ~0 == 0xffffffffffffffff;
+print "ok 35\n";
+
+print "not " unless (0xffffffff<<32) == 0xffffffff00000000;
+print "ok 36\n";
+
+print "not " unless ((0xffffffff)<<32)>>32 == 0xffffffff;
+print "ok 37\n";
+
+print "not " unless 1<<63 == 0x8000000000000000;
+print "ok 38\n";
+
+print "not " unless (sprintf "%#Vx", 1<<63) eq '0x8000000000000000';
+print "ok 39\n";
+
+print "not " unless (0x8000000000000000 | 1) == 0x8000000000000001;
+print "ok 40\n";
+
+print "not " unless (0xf000000000000000 & 0x8000000000000000) == 0x8000000000000000;
+print "ok 41\n";
+
+print "not " unless (0xf000000000000000 ^ 0xfffffffffffffff0) == 0x0ffffffffffffff0;
+print "ok 42\n";
 
 # eof
