@@ -1722,8 +1722,8 @@ http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 I32
 Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2, bool u2, register I32 len2)
 {
-     register U8 *p1  = (U8*)s1, *q1;
-     register U8 *p2  = (U8*)s2, *q2;
+     register U8 *p1  = (U8*)s1, *q1 = 0;
+     register U8 *p2  = (U8*)s2, *q2 = 0;
      register U8 *e1 = p1 + len1;
      register U8 *e2 = p2 + len2;
      STRLEN l1 = 0, l2 = 0;
