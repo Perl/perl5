@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.68 2003-09-23 15:24:53+02 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.68 2003-09-23 15:24:53+02 jv Exp jv $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Sep 23 15:21:23 2003
-# Update Count    : 1364
+# Last Modified On: Wed Dec 31 20:48:15 2003
+# Update Count    : 1440
 # Status          : Released
 
 ################ Copyright ################
@@ -35,10 +35,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.34;
+$VERSION        =  2.3401;
 # For testing versions only.
-#use vars qw($VERSION_STRING);
-#$VERSION_STRING = "2.33_03";
+use vars qw($VERSION_STRING);
+$VERSION_STRING = "2.34_01";
 
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -73,6 +73,7 @@ sub ConfigDefaults();
 sub ParseOptionSpec($$);
 sub OptCtl($);
 sub FindOption($$$$);
+sub ValidValue ($$$$$);
 
 ################ Local Variables ################
 
@@ -230,7 +231,7 @@ use constant CTL_TYPE    => 0;
 
 use constant CTL_CNAME   => 1;
 
-use constant CTL_MAND    => 2;
+use constant CTL_DEFAULT => 2;
 
 use constant CTL_DEST    => 3;
  use constant   CTL_DEST_SCALAR => 0;
@@ -238,7 +239,8 @@ use constant CTL_DEST    => 3;
  use constant   CTL_DEST_HASH   => 2;
  use constant   CTL_DEST_CODE   => 3;
 
-use constant CTL_DEFAULT => 4;
+use constant CTL_AMIN    => 4;
+use constant CTL_AMAX    => 5;
 
 # FFU.
 #use constant CTL_RANGE   => ;
@@ -474,7 +476,8 @@ sub GetOptions(@) {
 	    # FindOption undefines $opt in case of errors.
 	    next unless defined $opt;
 
-	    if ( defined $arg ) {
+	    my $argcnt = 0;
+	    while ( defined $arg ) {
 
 		# Get the canonical name.
 		print STDERR ("=> cname for \"$opt\" is ") if $debug;
@@ -606,6 +609,36 @@ sub GetOptions(@) {
 			$userlinkage->{$opt} = $arg;
 		    }
 		}
+
+		$argcnt++;
+		last if $argcnt >= $ctl->[CTL_AMAX];
+		undef($arg);
+
+		# Need more args?
+		if ( $argcnt < $ctl->[CTL_AMIN] ) {
+		    if ( @ARGV ) {
+			if ( ValidValue($ctl, $ARGV[0], 1, $argend, $prefix) ) {
+			    $arg = shift(@ARGV);
+			    ($key,$arg) = $arg =~ /^([^=]+)=(.*)/
+			      if $ctl->[CTL_DEST] == CTL_DEST_HASH;
+			    next;
+			}
+			warn("Value \"$ARGV[0]\" invalid for option $opt\n");
+			$error++;
+		    }
+		    else {
+			warn("Insufficient arguments for option $opt\n");
+			$error++;
+		    }
+		}
+
+		# Any more args?
+		if ( @ARGV && ValidValue($ctl, $ARGV[0], 0, $argend, $prefix) ) {
+		    $arg = shift(@ARGV);
+		    ($key,$arg) = $arg =~ /^([^=]+)=(.*)/
+		      if $ctl->[CTL_DEST] == CTL_DEST_HASH;
+		    next;
+		}
 	    }
 	}
 
@@ -670,9 +703,10 @@ sub OptCtl ($) {
       join(",",
 	   "\"$v[CTL_TYPE]\"",
 	   "\"$v[CTL_CNAME]\"",
-	   $v[CTL_MAND] ? "O" : "M",
-	   ("\$","\@","\%","\&")[$v[CTL_DEST] || 0],
 	   "\"$v[CTL_DEFAULT]\"",
+	   ("\$","\@","\%","\&")[$v[CTL_DEST] || 0],
+	   $v[CTL_AMIN] || '',
+	   $v[CTL_AMAX] || '',
 #	   $v[CTL_RANGE] || '',
 #	   $v[CTL_REPEAT] || '',
 	  ). "]";
@@ -694,8 +728,8 @@ sub ParseOptionSpec ($$) {
 		     # Either modifiers ...
 		     [!+]
 		     |
-		     # ... or a value/dest specification
-		     [=:] [ionfs] [@%]?
+		     # ... or a value/dest/repeat specification
+		     [=:] [ionfs] [@%]? (?: \{\d*,?\d*\} )?
 		     |
 		     # ... or an optional-with-default spec
 		     : (?: -?\d+ | \+ ) [@%]?
@@ -729,9 +763,9 @@ sub ParseOptionSpec ($$) {
     my $entry;
     if ( $spec eq '' || $spec eq '+' || $spec eq '!' ) {
 	# Fields are hard-wired here.
-	$entry = [$spec,$orig,0,CTL_DEST_SCALAR,undef];
+	$entry = [$spec,$orig,undef,CTL_DEST_SCALAR,0,0];
     }
-    elsif ( $spec =~ /:(-?\d+|\+)([@%])?/ ) {
+    elsif ( $spec =~ /^:(-?\d+|\+)([@%])?$/ ) {
 	my $def = $1;
 	my $dest = $2;
 	my $type = $def eq '+' ? 'I' : 'i';
@@ -739,16 +773,35 @@ sub ParseOptionSpec ($$) {
 	$dest = $dest eq '@' ? CTL_DEST_ARRAY
 	  : $dest eq '%' ? CTL_DEST_HASH : CTL_DEST_SCALAR;
 	# Fields are hard-wired here.
-	$entry = [$type,$orig,0,$dest,$def eq '+' ? undef : $def];
+	$entry = [$type,$orig,$def eq '+' ? undef : $def,
+		  $dest,0,1];
     }
     else {
-	my ($mand, $type, $dest) = $spec =~ /([=:])([ionfs])([@%])?/;
+	my ($mand, $type, $dest) =
+	  $spec =~ /^([=:])([ionfs])([@%])?(\{(\d+)?(,)?(\d+)?\})?$/;
+	return (undef, "Cannot repeat while bundling: \"$opt\"\n")
+	  if $bundling && defined($4);
+	my ($mi, $cm, $ma) = ($5, $6, $7);
+	return (undef, "{0} is useless in option spec: \"$opt\"\n")
+	  if defined($mi) && !$mi && !defined($ma) && !defined($cm);
+
 	$type = 'i' if $type eq 'n';
 	$dest ||= '$';
 	$dest = $dest eq '@' ? CTL_DEST_ARRAY
 	  : $dest eq '%' ? CTL_DEST_HASH : CTL_DEST_SCALAR;
+	# Default minargs to 1/0 depending on mand status.
+	$mi = $mand eq '=' ? 1 : 0 unless defined $mi;
+	# Adjust mand status according to minargs.
+	$mand = $mi ? '=' : ':';
+	# Adjust maxargs.
+	$ma = $mi ? $mi : 1 unless defined $ma || defined $cm;
+	return (undef, "Max must be greater than zero in option spec: \"$opt\"\n")
+	  if defined($ma) && !$ma;
+	return (undef, "Max less than min in option spec: \"$opt\"\n")
+	  if defined($ma) && $ma < $mi;
+
 	# Fields are hard-wired here.
-	$entry = [$type,$orig,$mand eq '=',$dest,undef];
+	$entry = [$type,$orig,undef,$dest,$mi,$ma||-1];
     }
 
     # Process all names. First is canonical, the rest are aliases.
@@ -942,7 +995,7 @@ sub FindOption ($$$$) {
     }
 
     # Get mandatory status and type info.
-    my $mand = $ctl->[CTL_MAND];
+    my $mand = $ctl->[CTL_AMIN];
 
     # Check if there is an option argument available.
     if ( $gnu_compat && defined $optarg && $optarg eq '' ) {
@@ -1099,6 +1152,47 @@ sub FindOption ($$$$) {
 	die("Getopt::Long internal error (Can't happen)\n");
     }
     return (1, $opt, $ctl, $arg, $key);
+}
+
+sub ValidValue ($$$$$) {
+    my ($ctl, $arg, $mand, $argend, $prefix) = @_;
+
+    if ( $ctl->[CTL_DEST] == CTL_DEST_HASH ) {
+	return 0 unless $arg =~ /[^=]+=(.*)/;
+	$arg = $1;
+    }
+
+    my $type = $ctl->[CTL_TYPE];
+
+    if ( $type eq 's' ) {	# string
+	# A mandatory string takes anything.
+	return (1) if $mand;
+
+	return (1) if $arg eq "-";
+
+	# Check for option or option list terminator.
+	return 0 if $arg eq $argend || $arg =~ /^$prefix.+/;
+	return 1;
+    }
+
+    elsif ( $type eq 'i'	# numeric/integer
+            || $type eq 'I'	# numeric/integer w/ incr default
+	    || $type eq 'o' ) { # dec/oct/hex/bin value
+
+	my $o_valid =
+	  $type eq 'o' ? "[-+]?[1-9][0-9]*|0x[0-9a-f]+|0b[01]+|0[0-7]*"
+	    : "[-+]?[0-9]+";
+
+	return $arg =~ /^$o_valid$/si;
+    }
+
+    elsif ( $type eq 'f' ) { # real number, int is also ok
+	# We require at least one digit before a point or 'e',
+	# and at least one digit following the point and 'e'.
+	# [-]NN[.NN][eNN]
+	return $arg =~ /^[-+]?[0-9.]+(\.[0-9]+)?([eE][-+]?[0-9]+)?$/;
+    }
+    die("ValidValue: Cannot happen\n");
 }
 
 # Getopt::Long Configuration.
@@ -1523,6 +1617,26 @@ and join() operators:
 Of course, it is important to choose the right separator string for
 each purpose.
 
+Warning: What follows is an experimental feature.
+
+Options can take multiple values at once, for example
+
+    --coordinates 52.2 16.4 --rgbcolor 255 255 149
+
+This can be accomplished by adding a repeat specifier to the option
+specification. Repeat specifiers are very similar to the C<{...}>
+repeat specifiers that can be used with regular expression patterns.
+For example, the above command line would be handled as follows:
+
+    GetOptions('coordinates=f{2}' => \@coor, 'rgbcolor=i{3}' => \@color);
+
+The destination for the option must be an array or array reference.
+
+It is also possible to specify the minimal and maximal number of
+arguments an option takes. C<foo=s{2,4}> indicates an option that
+takes at least two and at most 4 arguments. C<foo=s{,}> indicates one
+or more values; C<foo:s{,}> indicates zero or more option values.
+
 =head2 Options with hash values
 
 If the option destination is a reference to a hash, the option will
@@ -1641,7 +1755,7 @@ resulting in a value of 3 (provided it was 0 or undefined at first).
 
 The C<+> specifier is ignored if the option destination is not a scalar.
 
-=item = I<type> [ I<desttype> ]
+=item = I<type> [ I<desttype> ] [ I<repeat> ]
 
 The option requires an argument of the given type. Supported types
 are:
@@ -1677,6 +1791,17 @@ The I<desttype> can be C<@> or C<%> to specify that the option is
 list or a hash valued. This is only needed when the destination for
 the option value is not otherwise specified. It should be omitted when
 not needed.
+
+The I<repeat> specifies the number of values this option takes per
+occurrence on the command line. It has the format C<{> [ I<min> ] [ C<,> [ I<max> ] ] C<}>.
+
+I<min> denotes the minimal number of arguments. It defaults to 1 for
+options with C<=> and to 0 for options with C<:>, see below. Note that
+I<min> overrules the C<=> / C<:> semantics.
+
+I<max> denotes the maximum number of arguments. It must be at least
+I<min>. If I<max> is omitted, I<but the comma is not>, there is no
+upper bound to the number of argument values taken.
 
 =item : I<type> [ I<desttype> ]
 

@@ -1,3 +1,19 @@
+Changes in version 2.35
+-----------------------
+
+* [Experimental] Options can take multiple values at once. E.g.,
+
+    --coordinates 52.2 16.4 --rgbcolor 255 255 149
+
+  To handle the above command line, the following call to GetOptions
+  can be used:
+
+    GetOptions('coordinates=f{2}' => \@coor, 'rgbcolor=i{3}' => \@color);
+
+  You can specify the minimum and maximum number of values desired.
+  The syntax for this is similar to that of regular expression
+  patterns: { min , max }. 
+
 Changes in version 2.34
 -----------------------
 
