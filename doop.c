@@ -1067,10 +1067,9 @@ do_kv(ARGSproto)
 	if (dokeys)
 	    XPUSHs(hv_iterkeysv(entry));	/* won't clobber stack_sp */
 	if (dovalues) {
-	    tmpstr = sv_newmortal();
 	    PUTBACK;
-	    sv_setsv(tmpstr,realhv ?
-		     hv_iterval(hv,entry) : avhv_iterval((AV*)hv,entry));
+	    tmpstr = realhv ?
+		     hv_iterval(hv,entry) : avhv_iterval((AV*)hv,entry);
 	    DEBUG_H(sv_setpvf(tmpstr, "%lu%%%d=%lu",
 			    (unsigned long)HeHASH(entry),
 			    HvMAX(keys)+1,
