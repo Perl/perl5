@@ -1356,18 +1356,24 @@ S_scan_const(pTHX_ char *start)
 		++s;
 		if (*s == '{') {
 		    char* e = strchr(s, '}');
+		    UV uv;
 
 		    if (!e) {
 			yyerror("Missing right brace on \\x{}");
 			e = s;
 		    }
 		    /* note: utf always shorter than hex */
-		    d = (char*)uv_to_utf8((U8*)d,
-					  (UV)scan_hex(s + 1, e - s - 1, &len));
+		    uv = (UV)scan_hex(s + 1, e - s - 1, &len);
+		    if (uv > 127) {
+			d = (char*)uv_to_utf8((U8*)d, uv);
+			has_utf = TRUE;
+		    }
+		    else
+			*d++ = (char)uv;
 		    s = e + 1;
-		    has_utf = TRUE;
 		}
 		else {
+		    /* XXX collapse this branch into the one above */
 		    UV uv = (UV)scan_hex(s, 2, &len);
 		    if (utf && PL_lex_inwhat == OP_TRANS &&
 			utf != (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))

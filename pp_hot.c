@@ -87,6 +87,8 @@ PP(pp_stringify)
     char *s;
     s = SvPV(TOPs,len);
     sv_setpvn(TARG,s,len);
+    if (SvUTF8(TOPs) && !IN_BYTE)
+	SvUTF8_on(TARG);
     SETTARG;
     RETURN;
 }
