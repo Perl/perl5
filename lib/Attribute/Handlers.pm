@@ -217,8 +217,8 @@ Attribute::Handlers - Simpler definition of attribute handlers
 
 =head1 VERSION
 
-This document describes version 0.76 of Attribute::Handlers,
-released November 15, 2001.
+This document describes version 0.77 of Attribute::Handlers,
+released June 8, 2002.
 
 =head1 SYNOPSIS
 
