@@ -172,7 +172,7 @@ paragraph, or some other input paragraph.
 
 Normally (by default) B<Pod::Parser> handles the C<=cut> POD directive
 by itself and does not pass it on to the caller for processing. Setting
-this option to non-empty, non-zero value will cause B<Pod::Parser> to
+this option to a non-empty, non-zero value will cause B<Pod::Parser> to
 pass the C<=cut> directive to the caller just like any other POD command
 (and hence it may be processed by the B<command()> method).
 
@@ -180,6 +180,15 @@ B<Pod::Parser> will still interpret the C<=cut> directive to mean that
 "cutting mode" has been (re)entered, but the caller will get a chance
 to capture the actual C<=cut> paragraph itself for whatever purpose
 it desires.
+
+=item B<-warnings> (default: unset)
+
+Normally (by default) B<Pod::Parser> recognizes a bare minimum of
+pod syntax errors and warnings and issues diagnostic messages
+for errors, but not for warnings. (Use B<Pod::Checker> to do more
+thorough checking of POD syntax.) Setting this option to a non-empty,
+non-zero value will cause B<Pod::Parser> to issue diagnostics for
+the few warnings it recognizes as well as the errors.
 
 =back
 
@@ -838,7 +847,7 @@ sub parse_text {
        ($rdelim = $ldelim) =~ tr/</>/;
        $rdelim  =~ s/^(\S+)(\s*)$/$2$1/;
        pop @seq_stack;
-       my $errmsg = "*** WARNING: unterminated ${cmd}${ldelim}...${rdelim}".
+       my $errmsg = "*** ERROR: unterminated ${cmd}${ldelim}...${rdelim}".
                     " at line $line in file $file\n";
        (ref $errorsub) and &{$errorsub}($errmsg)
            or (defined $errorsub) and $self->$errorsub($errmsg)
@@ -1027,6 +1036,8 @@ sub parse_from_filehandle {
     my %opts = (ref $_[0] eq 'HASH') ? %{ shift() } : ();
     my ($in_fh, $out_fh) = @_;
     $in_fh = \*STDIN  unless ($in_fh);
+    local *myData = $self;  ## alias to avoid deref-ing overhead
+    local *myOpts = ($myData{_PARSEOPTS} ||= {});  ## get parse-options
     local $_;
 
     ## Put this stream at the top of the stack and do beginning-of-input
@@ -1061,20 +1072,20 @@ sub parse_from_filehandle {
 
         ## See if this line is blank and ends the current paragraph.
         ## If it isnt, then keep iterating until it is.
-        next unless (($textline =~ /^(\s*)$/) && (length $paragraph));
+        next unless (($textline =~ /^([^\S\r\n]*)[\r\n]*$/)
+                                     && (length $paragraph));
 
         ## Issue a warning about any non-empty blank lines
-# XXX avoid warning until Brad has a chance to make this optional --GSAR
-#        if (length($1) > 1  and  ! $self->{_CUTTING}) {
-#            my $errorsub = $self->errorsub();
-#            my $file = $self->input_file();
-#            $file = VMS::Filespec::unixify($file) if $^O eq 'VMS';
-#            my $errmsg = "*** WARNING: line containing nothing but whitespace".
-#                         " in paragraph at line $nlines in file $file\n";
-#            (ref $errorsub) and &{$errorsub}($errmsg)
-#                or (defined $errorsub) and $self->$errorsub($errmsg)
-#                    or  warn($errmsg);
-#        }
+        if (length($1) > 1 and $myOpts{'-warnings'} and ! $myData{_CUTTING}) {
+            my $errorsub = $self->errorsub();
+            my $file = $self->input_file();
+            $file = VMS::Filespec::unixify($file) if $^O eq 'VMS';
+            my $errmsg = "*** WARNING: line containing nothing but whitespace".
+                         " in paragraph at line $nlines in file $file\n";
+            (ref $errorsub) and &{$errorsub}($errmsg)
+                or (defined $errorsub) and $self->$errorsub($errmsg)
+                    or  warn($errmsg);
+        }
 
         ## Now process the paragraph
         parse_paragraph($self, $paragraph, ($nlines - $plines) + 1);
@@ -1295,7 +1306,7 @@ key/value pairs and the specified parse-option names are set to the
 given values. Any unspecified parse-options are unaffected.
 
             ## Set them back to the default
-            $parser->parseopts(-process_cut_cmd => 0);
+            $parser->parseopts(-warnings => 0);
 
 When passed a single hash-ref, B<parseopts> uses that hash to completely
 reset the existing parse-options, all previous parse-option values
@@ -1304,7 +1315,7 @@ are lost.
             ## Reset all options to default 
             $parser->parseopts( { } );
 
-See L<"PARSING OPTIONS"> for more for the name and meaning of each
+See L<"PARSING OPTIONS"> for more information on the name and meaning of each
 parse-option currently recognized.
 
 =cut
