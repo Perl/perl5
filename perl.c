@@ -1600,15 +1600,12 @@ my_unexec()
     int    status;
     extern int etext;
 
-    prog = newSVpv(BIN_EXP);
+    prog = newSVpv(BIN_EXP, 0);
     sv_catpv(prog, "/perl");
-    file = newSVpv(origfilename);
+    file = newSVpv(origfilename, 0);
     sv_catpv(file, ".perldump");
 
-    status = unexec(SvPVX(file), SvPVX(prog), &etext, sbrk(0), 0);
-    if (status)
-	PerlIO_printf(PerlIO_stderr(), "unexec of %s into %s failed!\n",
-		      SvPVX(prog), SvPVX(file));
+    unexec(SvPVX(file), SvPVX(prog), &etext, sbrk(0), 0);
     exit(status);
 #else
 #  ifdef VMS
