@@ -18,6 +18,7 @@ print "1..5\n";
 use IO::Socket;
 
 $port = 4002 + int(rand(time) & 0xff);
+$SIG{ALRM} = sub {};
 
 $pid =  fork();
 
@@ -51,7 +52,6 @@ if($pid) {
     # Wait for a small pause, so that we can ensure the listen socket is setup
     # the parent will awake us with a SIGALRM
 
-    $SIG{ALRM} = sub {};
     sleep(10);
 
     $sock = IO::Socket::INET->new(PeerPort => $port,
