@@ -284,8 +284,13 @@ sub corestatus {
     my($st) = @_;
     my($ret);
 
+    # The require 'wait.ph' may generate warnings (depending on how
+    # well p2ph dealt with the original wait.h file).
+    # These warnings can confuse people doing a "make test" on an
+    # extension they're trying to build. We should probably use
+    # __WARN__ here to catch them and give a useful context message.
     eval {require 'wait.ph'};
-    if ($@) {
+    if ($@ || !defined(&WCOREDUMP)) {
       SWITCH: {
 	    $ret = ($st & 0200); # Tim says, this is for 90%
 	}

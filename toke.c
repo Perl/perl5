@@ -1293,7 +1293,7 @@ filter_del(funcp)
     if (!rsfp_filters || AvFILLp(rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
-    if (IoDIRP(FILTER_DATA(AvFILLp(rsfp_filters))) == (void*)funcp){
+    if (IoDIRP(FILTER_DATA(AvFILLp(rsfp_filters))) == (DIR*)funcp){
 	sv_free(av_pop(rsfp_filters));
 
         return;
