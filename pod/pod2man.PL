@@ -608,10 +608,21 @@ END
 
 $indent = 0;
 
+$begun = "";
+
 while (<>) {
     if ($cutting) {
 	next unless /^=/;
 	$cutting = 0;
+    }
+    if ($begun) {
+	if (/^=end\s+$begun/) {
+            $begun = "";
+	}
+	elsif ($begun =~ /^(roff|man)$/) {
+	    print STDOUT $_;
+        }
+	next;
     }
     chomp;
 
@@ -636,6 +647,22 @@ while (<>) {
     }
 
     $verbatim = 0;
+
+    if (/^=for\s+(\S+)\s*/s) {
+	if ($1 eq "man" or $1 eq "roff") {
+	    print STDOUT $',"\n\n";
+	} else {
+	    # ignore unknown for
+	}
+	next;
+    }
+    elsif (/^=begin\s+(\S+)\s*/s) {
+	$begun = $1;
+	if ($1 eq "man" or $1 eq "roff") {
+	    print STDOUT $'."\n\n";
+	}
+	next;
+    }
 
     # check for things that'll hosed our noremap scheme; affects $_
     init_noremap();

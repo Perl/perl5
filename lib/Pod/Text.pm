@@ -86,6 +86,7 @@ $cutting = 1;
 $DEF_INDENT = 4;
 $indent = $DEF_INDENT;
 $needspace = 0;
+$begun = "";
 
 open(IN, $file) || die "Couldn't open $file: $!";
 
@@ -93,6 +94,15 @@ POD_DIRECTIVE: while (<IN>) {
     if ($cutting) {
 	next unless /^=/;
 	$cutting = 0;
+    }
+    if ($begun) {
+        if (/^=end\s+$begun/) {
+             $begun = "";
+        }
+        elsif ($begun eq "text") {
+            print STDOUT $_;
+        }
+        next;
     }
     1 while s{^(.*?)(\t+)(.*)$}{
 	$1
@@ -104,6 +114,22 @@ POD_DIRECTIVE: while (<IN>) {
 	$needspace = 1;
 	output($_);
 	next;
+    }
+
+    if (/^=for\s+(\S+)\s*/s) {
+        if ($1 eq "text") {
+            print STDOUT $',"";
+        } else {
+            # ignore unknown for
+        }
+        next;
+    }
+    elsif (/^=begin\s+(\S+)\s*/s) {
+        $begun = $1;
+        if ($1 eq "text") {
+            print STDOUT $'."";
+        }
+        next;
     }
 
 sub prepare_for_output {
