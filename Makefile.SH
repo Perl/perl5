@@ -105,7 +105,7 @@ true)
 	case "$osname" in
 	linux)
 		rm -f preload
-		cat <<EOT > preload
+		cat <<'EOT' > preload
 #! /bin/sh
 lib=$1
 shift
