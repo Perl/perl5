@@ -214,7 +214,7 @@ if ($^O eq 'MacOS') {
 [ "Win32->canonpath('/a/b/c/../../d')", '\\a\\d'              ],
 [ "Win32->canonpath('/a/b/c/.../d')",   '\\a\\d'              ],
 [ "Win32->canonpath('\\../temp\\')",    '\\temp'              ],
-[ "Win32->can('cwd')",                  qr/CODE/              ],
+[ "Win32->can('_cwd')",                 qr/CODE/              ],
 
 # FakeWin32 subclass (see below) just sets CWD to C:\one\two
 
@@ -540,7 +540,7 @@ plan tests => scalar @tests;
 
 {
     @File::Spec::FakeWin32::ISA = qw(File::Spec::Win32);
-    sub File::Spec::FakeWin32::cwd { 'C:\\one\\two' }
+    sub File::Spec::FakeWin32::_cwd { 'C:\\one\\two' }
 }
 
 
