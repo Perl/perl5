@@ -44,8 +44,8 @@ case "$prefix" in
 	man1dir='/usr/share/man/man1';
 	man3dir='/usr/share/man/man3';
 	# But users' installs shouldn't touch the system man pages.
-	installsiteman1='/usr/local/share/man/man1';
-	installsiteman3='/usr/local/share/man/man3';
+	siteman1='/usr/local/share/man/man1';
+	siteman3='/usr/local/share/man/man3';
 	;;
   *)	# Anything else; use non-system directories, use Configure defaults
 	;;
