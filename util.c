@@ -3604,35 +3604,47 @@ Fill the sv with current working directory
  *     because you might chdir out of a directory that you can't chdir
  *     back into. */
 
-/* XXX: this needs more porting #ifndef HAS_GETCWD */
 int
 Perl_sv_getcwd(pTHX_ register SV *sv)
 {
 #ifndef PERL_MICRO
 
-#ifndef HAS_GETCWD
+#ifdef HAS_GETCWD
+    {
+	char* buf;
+
+	SvPOK_off(sv);
+	New(0, buf, MAXPATHLEN, char);
+	if (buf) {
+	    buf[MAXPATHLEN] = 0;
+	    /* Yes, some getcwd()s automatically allocate a buffer
+	     * if given a NULL one.  Portability is the problem.
+	     * XXX Configure probe needed. */
+	    if (getcwd(buf, MAXPATHLEN - 1)) {
+	        STRLEN len = strlen(buf);
+	        sv_setpvn(sv, buf, len);
+		SvPOK_only(sv);
+		SvCUR_set(sv, len);
+	    }
+	    else
+	        sv_setsv(sv, &PL_sv_undef);
+	    Safefree(buf);
+	}
+	else
+	    sv_setsv(sv, &PL_sv_undef);
+
+	return SvPOK(sv) ? TRUE : FALSE;
+    }
+
+#else
+
     struct stat statbuf;
     int orig_cdev, orig_cino, cdev, cino, odev, oino, tdev, tino;
     int namelen, pathlen=0;
     DIR *dir;
     Direntry_t *dp;
-#endif
 
     (void)SvUPGRADE(sv, SVt_PV);
-
-#ifdef HAS_GETCWD
-
-    SvGROW(sv, 128);
-    while ((getcwd(SvPVX(sv), SvLEN(sv)-1) == NULL) && errno == ERANGE) {
-        if (SvLEN(sv) + 128 >= MAXPATHLEN) {
-            SV_CWD_RETURN_UNDEF;
-	}
-        SvGROW(sv, SvLEN(sv) + 128);
-    }
-    SvCUR_set(sv, strlen(SvPVX(sv)));
-    SvPOK_only(sv);
-
-#else
 
     if (PerlLIO_lstat(".", &statbuf) < 0) {
         SV_CWD_RETURN_UNDEF;
@@ -3738,153 +3750,6 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
     return TRUE;
 #else
     return FALSE;
-#endif
-}
-
-/*
-=for apidoc sv_realpath
-
-Emulate realpath(3).
-
-The real realpath() is not used because it's a known can of worms.
-We may have bugs but hey, they are our very own.
-
-=cut
- */
-int
-Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN maxlen)
-{
-#ifndef PERL_MICRO
-    char name[MAXPATHLEN]    = { 0 };
-    char dotdots[MAXPATHLEN] = { 0 };
-    char *s;
-    STRLEN pathlen, namelen;
-    DIR *parent;
-    Direntry_t *dp;
-    struct stat cst, pst, tst;
-
-    if (!sv || !path || !maxlen) {
-        Perl_warn(aTHX_ "sv_realpath: realpath(0x%x, 0x%x, "")",
-                  sv, path, maxlen);
-        SV_CWD_RETURN_UNDEF;
-    }
-
-    /* Is the source buffer too long?
-     * Don't use strlen() to avoid running off the end. */
-    if (maxlen >= MAXPATHLEN)
-        pathlen = maxlen;
-    else {
-        s = memchr(path, '\0', MAXPATHLEN);
-	pathlen = s ? s - path : MAXPATHLEN;
-    }
-    if (pathlen >= MAXPATHLEN) {
-        Perl_warn(aTHX_ "sv_realpath: source too large");
-        SV_CWD_RETURN_UNDEF;
-    }
-
-    if (PerlLIO_stat(path, &cst) < 0) {
-        Perl_warn(aTHX_ "sv_realpath: stat(\"%s\"): %s",
-                  path, Strerror(errno));
-        SV_CWD_RETURN_UNDEF;
-    }
-
-    (void)SvUPGRADE(sv, SVt_PV);
-
-    Copy(path, dotdots, maxlen, char);
-
-    pathlen = 0;
-
-    for (;;) {
-        strcat(dotdots, "/..");
-        StructCopy(&cst, &pst, struct stat);
-
-        if (PerlLIO_stat(dotdots, &cst) < 0) {
-            Perl_warn(aTHX_ "sv_realpath: stat(\"%s\"): %s",
-                      dotdots, Strerror(errno));
-            SV_CWD_RETURN_UNDEF;
-        }
-
-        if (pst.st_dev == cst.st_dev && pst.st_ino == cst.st_ino) {
-            /* We've reached the root: previous is same as current */
-            break;
-        } else {
-            STRLEN dotdotslen = strlen(dotdots);
-
-            /* Scan through the dir looking for name of previous */
-            if (!(parent = PerlDir_open(dotdots))) {
-                Perl_warn(aTHX_ "sv_realpath: opendir(\"%s\"): %s",
-                          dotdots, Strerror(errno));
-                SV_CWD_RETURN_UNDEF;
-            }
-
-            SETERRNO(0,SS$_NORMAL); /* for readdir() */
-            while ((dp = PerlDir_read(parent)) != NULL) {
-                if (SV_CWD_ISDOT(dp)) {
-                    continue;
-                }
-
-                Copy(dotdots, name, dotdotslen, char);
-                name[dotdotslen] = '/';
-#ifdef DIRNAMLEN
-                namelen = dp->d_namlen;
-#else
-                namelen = strlen(dp->d_name);
-#endif
-                Copy(dp->d_name, name + dotdotslen + 1, namelen, char);
-                name[dotdotslen + 1 + namelen] = 0;
-
-                if (PerlLIO_lstat(name, &tst) < 0) {
-                    PerlDir_close(parent);
-                    Perl_warn(aTHX_ "sv_realpath: lstat(\"%s\"): %s",
-                              name, Strerror(errno));
-                    SV_CWD_RETURN_UNDEF;
-                }
-
-                if (tst.st_dev == pst.st_dev && tst.st_ino == pst.st_ino)
-                    break;
-
-                SETERRNO(0,SS$_NORMAL); /* for readdir() */
-            }
-
-            if (!dp && errno) {
-                Perl_warn(aTHX_ "sv_realpath: readdir(\"%s\"): %s",
-                          dotdots, Strerror(errno));
-                SV_CWD_RETURN_UNDEF;
-            }
-
-	    if (pathlen + namelen + 1 >= MAXPATHLEN) {
-	        Perl_warn(aTHX_ "sv_realpath: too long name");
-                SV_CWD_RETURN_UNDEF;
-	    }
-
-            SvGROW(sv, pathlen + namelen + 1);
-            if (pathlen) {
-                /* shift down */
-                Move(SvPVX(sv), SvPVX(sv) + namelen + 1, pathlen, char);
-            }
-
-            *SvPVX(sv) = '/';
-            Move(dp->d_name, SvPVX(sv)+1, namelen, char);
-            pathlen += (namelen + 1);
-
-#ifdef VOID_CLOSEDIR
-            PerlDir_close(parent);
-#else
-            if (PerlDir_close(parent) < 0) {
-                Perl_warn(aTHX_ "sv_realpath: closedir(\"%s\"): %s",
-                          dotdots, Strerror(errno));
-                SV_CWD_RETURN_UNDEF;
-            }
-#endif
-        }
-    }
-
-    SvCUR_set(sv, pathlen);
-    SvPOK_only(sv);
-
-    return TRUE;
-#else
-    return FALSE; /* MICROPERL */
 #endif
 }
 

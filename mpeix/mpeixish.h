@@ -138,4 +138,10 @@
 #undef PWAGE
 #undef PWCOMMENT
 
-#define ITIMER_REAL 0
+/* various missing external function declarations */
+
+#include <sys/ipc.h>
+extern key_t ftok (char *pathname, char id);
+extern char *gcvt (double value, int ndigit, char *buf);
+extern int isnan (double value);
+extern void srand48(long int seedval);

@@ -3170,13 +3170,6 @@ Perl_sv_pvbyten_force(pTHXo_ SV* sv, STRLEN* lp)
     return ((CPerlObj*)pPerl)->Perl_sv_pvbyten_force(sv, lp);
 }
 
-#undef  Perl_sv_realpath
-int
-Perl_sv_realpath(pTHXo_ SV* sv, char *path, STRLEN maxlen)
-{
-    return ((CPerlObj*)pPerl)->Perl_sv_realpath(sv, path, maxlen);
-}
-
 #undef  Perl_sv_reftype
 char*
 Perl_sv_reftype(pTHXo_ SV* sv, int ob)

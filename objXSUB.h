@@ -1753,10 +1753,6 @@
 #define Perl_sv_pvbyten_force	pPerl->Perl_sv_pvbyten_force
 #undef  sv_pvbyten_force
 #define sv_pvbyten_force	Perl_sv_pvbyten_force
-#undef  Perl_sv_realpath
-#define Perl_sv_realpath	pPerl->Perl_sv_realpath
-#undef  sv_realpath
-#define sv_realpath		Perl_sv_realpath
 #undef  Perl_sv_reftype
 #define Perl_sv_reftype		pPerl->Perl_sv_reftype
 #undef  sv_reftype

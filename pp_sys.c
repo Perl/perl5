@@ -3515,7 +3515,7 @@ PP(pp_readlink)
     TAINT;
 #endif
     tmps = POPpx;
-    len = readlink(tmps, buf, sizeof buf);
+    len = readlink(tmps, buf, sizeof(buf) - 1);
     EXTEND(SP, 1);
     if (len < 0)
 	RETPUSHUNDEF;
