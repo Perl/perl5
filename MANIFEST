@@ -106,6 +106,7 @@ ext/B/t/lint.t		See if B::Lint works
 ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/stash.t		See if B::Stash works
 ext/B/t/terse.t		See if B::Terse works
+ext/B/t/xref.t		See if B::Xref works
 ext/B/TESTS		Compiler backend test data
 ext/B/Todo		Compiler backend Todo list
 ext/B/typemap			Compiler backend interface types
