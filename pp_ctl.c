@@ -707,7 +707,6 @@ PP(pp_sort)
     max = --up - myorigmark;
     if (sortcop) {
 	if (max > 1) {
-	    AV *oldstack;
 	    PERL_CONTEXT *cx;
 	    SV** newsp;
 	    bool oldcatch = CATCH_GET;
@@ -715,14 +714,8 @@ PP(pp_sort)
 	    SAVETMPS;
 	    SAVEOP();
 
-	    oldstack = curstack;
-	    if (!sortstack) {
-		sortstack = newAV();
-		AvREAL_off(sortstack);
-		av_extend(sortstack, 32);
-	    }
 	    CATCH_SET(TRUE);
-	    SWITCHSTACK(curstack, sortstack);
+	    PUSHSTACK(SI_SORT);
 	    if (sortstash != stash) {
 		firstgv = gv_fetchpv("a", TRUE, SVt_PV);
 		secondgv = gv_fetchpv("b", TRUE, SVt_PV);
@@ -745,7 +738,7 @@ PP(pp_sort)
 	    qsortsv((myorigmark+1), max, FUNC_NAME_TO_PTR(sortcv));
 
 	    POPBLOCK(cx,curpm);
-	    SWITCHSTACK(sortstack, oldstack);
+	    POPSTACK();
 	    CATCH_SET(oldcatch);
 	}
 	LEAVE;
@@ -1039,7 +1032,7 @@ dounwind(I32 cxix)
 OP *
 die_where(char *message)
 {
-    dTHR;
+    dSP;
     if (in_eval) {
 	I32 cxix;
 	register PERL_CONTEXT *cx;
@@ -1069,7 +1062,11 @@ die_where(char *message)
 	else
 	    sv_setpv(ERRSV, message);
 	
-	cxix = dopoptoeval(cxstack_ix);
+	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && curstackinfo->si_prev) {
+	    dounwind(-1);
+	    POPSTACK();
+	}
+
 	if (cxix >= 0) {
 	    I32 optype;
 
@@ -1439,7 +1436,7 @@ PP(pp_return)
     PMOP *newpm;
     I32 optype = 0;
 
-    if (curstack == sortstack) {
+    if (curstackinfo->si_type == SI_SORT) {
 	if (cxstack_ix == sortcxix || dopoptosub(cxstack_ix) <= sortcxix) {
 	    if (cxstack_ix > sortcxix)
 		dounwind(sortcxix);
@@ -1992,7 +1989,7 @@ PP(pp_goto)
 	do_undump = FALSE;
     }
 
-    if (curstack == signalstack) {
+    if (top_env->je_prev) {
         restartop = retop;
         JMPENV_JUMP(3);
     }

@@ -2838,7 +2838,8 @@ yylex(void)
 		    s = scan_word(s, tokenbuf + len, sizeof tokenbuf - len,
 				  TRUE, &morelen);
 		    if (!morelen)
-			croak("Bad name after %s::", tokenbuf);
+			croak("Bad name after %s%s", tokenbuf,
+				*s == '\'' ? "'" : "::");
 		    len += morelen;
 		}
 

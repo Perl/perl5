@@ -319,6 +319,7 @@ VIRTUAL OP*	newANONHASH _((OP* o));
 VIRTUAL OP*	newANONSUB _((I32 floor, OP* proto, OP* block));
 VIRTUAL OP*	newASSIGNOP _((I32 flags, OP* left, I32 optype, OP* right));
 VIRTUAL OP*	newCONDOP _((I32 flags, OP* expr, OP* trueop, OP* falseop));
+VIRTUAL void	newCONSTSUB _((HV* stash, char* name, SV* sv));
 VIRTUAL void	newFORM _((I32 floor, OP* o, OP* block));
 VIRTUAL OP*	newFOROP _((I32 flags, char* label, line_t forline, OP* scalar, OP* expr, OP*block, OP*cont));
 VIRTUAL OP*	newLOGOP _((I32 optype, I32 flags, OP* left, OP* right));
@@ -368,6 +369,7 @@ VIRTUAL OP*	newWHILEOP _((I32 flags, I32 debuggable, LOOP* loop,
 #ifdef USE_THREADS
 VIRTUAL struct perl_thread *	new_struct_thread _((struct perl_thread *t));
 #endif
+VIRTUAL PERL_SI *	new_stackinfo _((I32 stitems, I32 cxitems));
 VIRTUAL PerlIO*	nextargv _((GV* gv));
 VIRTUAL char*	ninstr _((char* big, char* bigend, char* little, char* lend));
 VIRTUAL OP*	oopsCV _((OP* o));

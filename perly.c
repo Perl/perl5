@@ -1284,7 +1284,7 @@ YYSTYPE yyval;
 YYSTYPE yylval;
 #line 636 "perly.y"
  /* PROGRAM */
-#line 1349 "y.tab.c"
+#line 1349 "perly.c"
 #define YYABORT goto yyabort
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
@@ -2290,7 +2290,7 @@ case 176:
 #line 633 "perly.y"
 { yyval.opval = yyvsp[0].opval; }
 break;
-#line 2267 "y.tab.c"
+#line 2267 "perly.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

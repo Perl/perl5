@@ -17,7 +17,12 @@
 # Additional 2.2 defines from
 # Mark Murray <mark@grondar.za>
 # Date: Wed, 6 Nov 1996 09:44:58 +0200 (MET)
-# 
+#
+# Modified to ensure we replace -lc with -lc_r, and
+# to put in place-holders for various specific hints.
+# Andy Dougherty <doughera@lafcol.lafayette.edu>
+# Date: Tue Mar 10 16:07:00 EST 1998
+#
 # The two flags "-fpic -DPIC" are used to indicate a
 # will-be-shared object.  Configure will guess the -fpic, (and the
 # -DPIC is not used by perl proper) but the full define is included to 
@@ -104,9 +109,14 @@ problem.  Try
 
 EOM
 
-if [ "X$usethreads" != "X" ]; then
+# XXX EXPERIMENTAL  A.D.  03/09/1998
+# XXX This script UU/usethreads.cbu will get 'called-back' by Configure
+# XXX after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOSH'
+case "$usethreads" in
+$define)
     if [ ! -r /usr/lib/libc_r.a ]; then
-        cat <<'EOM'
+        cat <<'EOM' >&4
 
 The re-entrant C library /usr/lib/libc_r.a does not exist; cannot build
 threaded Perl.  Consider upgrading to a newer FreeBSD snapshot or release:
@@ -115,5 +125,23 @@ at least the FreeBSD 3.0-971225-SNAP is known to have the libc_r.a.
 EOM
         exit 1
     fi
-    libswanted="$libswanted c_r"
-fi
+    # Patches to libc_r may be required.
+    # Print out a note about them here.
+
+    # These checks by Andy Dougherty <doughera@lafcol.lafayette.edu>
+    # Please update or change them as you learn more!
+    # -lc_r must REPLACE -lc.  AD  03/10/1998
+    set `echo X "$libswanted "| sed -e 's/ c / c_r /'`
+    shift
+    libswanted="$*"
+    # Configure will probably pick the wrong libc to use for nm scan.
+    # The safest quick-fix is just to not use nm at all.
+    usenm=false
+    # Is vfork buggy in 3.0?
+    case "$osvers" in
+	3.0) usevfork=false ;;
+    esac
+    ;;
+esac
+EOSH
+# XXX EXPERIMENTAL  --end of call-back

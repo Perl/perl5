@@ -68,6 +68,7 @@ if ($docc) {
   if (($prefix,$defines,$suffix) =
          ($cc_cmd =~ m#(.*)/Define=(.*?)([/\s].*)#i)) {
     $defines =~ s/^\((.*)\)$/$1/;
+    $debugging_enabled = $defines =~ /\bDEBUGGING\b/;
     @defines = split(/,/,$defines);
     $cc_cmd = "$prefix/Define=(" . join(',',grep($_ = "\"$_\"",@defines)) 
               . ')' . $suffix;
@@ -85,6 +86,7 @@ if ($docc) {
             or 0; # again, make debug output nice
   print "\$isgcc: $isgcc\n" if $debug;
   print "\$isvaxc: $isvaxc\n" if $debug;
+  print "\$debugging_enabled: $debugging_enabled\n" if $debug;
 
   if (-f 'perl.h') { $dir = '[]'; }
   elsif (-f '[-]perl.h') { $dir = '[-]'; }
@@ -96,8 +98,10 @@ else {
            or 0;  # for nice debug output
   $isvaxc = (!$isgcc && $cc_cmd !~ /standard=/i)
             or 0;  # again, for nice debug output
+  $debugging_enabled = $cc_cmd =~ /\bdebugging\b/i;
   print "\$isgcc: \\$isgcc\\\n" if $debug;
   print "\$isvaxc: \\$isvaxc\\\n" if $debug;
+  print "\$debugging_enabled: \\$debugging_enabled\\\n" if $debug;
   print "Not running cc, preprocesor output in \\$cpp_file\\\n" if $debug;
 }
 
@@ -192,44 +196,51 @@ if ($docc) {
 else {
   open(CPP,"$cpp_file") or die "$0: Can't read preprocessed file $cpp_file: $!\n";
 }
+%checkh = map { $_,1 } qw( thread bytecode byterun proto );
+$ckfunc = 0;
 LINE: while (<CPP>) {
   while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {
     while (/__VMS_PROTOTYPES__/i .. /__VMS_SEPYTOTORP__/i) {
       print "vms_proto>> $_" if $debug > 2;
       if (/^\s*EXT/) { &scan_var($_);  }
       else        { &scan_func($_); }
-      last LINE unless $_ = <CPP>;
+      last LINE unless defined($_ = <CPP>);
     }
     print "vmsish.h>> $_" if $debug > 2;
     if (/^\s*EXT/) { &scan_var($_); }
-    last LINE unless $_ = <CPP>;
+    last LINE unless defined($_ = <CPP>);
   }    
   while (/^#.*opcode\.h/i .. /^#.*perl\.h/i) {
     print "opcode.h>> $_" if $debug > 2;
     if (/^OP \*\s/) { &scan_func($_); }
     if (/^\s*EXT/) { &scan_var($_); }
     if (/^\s+OP_/) { &scan_enum($_); }
-    last LINE unless $_ = <CPP>;
+    last LINE unless defined($_ = <CPP>);
   }
-  while (/^typedef enum/ .. /^\}/) {
+  while (/^typedef enum/ .. /^\s*\}/) {
     print "global enum>> $_" if $debug > 2;
     &scan_enum($_);
-    last LINE unless $_ = <CPP>;
+    last LINE unless defined($_ = <CPP>);
   }
-  while (/^#.*thread\.h/i .. /^#.*perl\.h/i) {
-    print "thread.h>> $_" if $debug > 2;
+  # Check for transition to new header file
+  if (/^# \d+ "(\S+)"/) {
+    my $spec = $1;
+    # Pull name from library module or header filespec
+    $spec =~ /^(\w+)$/ or $spec =~ /(\w+)\.h/i;
+    my $name = lc $1;
+    $ckfunc = exists $checkh{$name} ? 1 : 0;
+    $scanname = $name if $ckfunc;
+    print "Header file transition: ckfunc = $ckfunc for $name.h\n" if $debug > 1;
+  }
+  if ($ckfunc) {
+    print "$scanname>> $_" if $debug > 2;
     if (/\s*^EXT/) { &scan_var($_);  }
-    else        { &scan_func($_); }
-    last LINE unless $_ = <CPP>;
+    else           { &scan_func($_); }
   }
-  while (/^#.*proto\.h/i .. /^#.*perl\.h/i) {
-    print "proto.h>> $_" if $debug > 2;
-    if (/\s*^EXT/) { &scan_var($_);  }
-    else        { &scan_func($_); }
-    last LINE unless $_ = <CPP>;
+  else {
+    print $_ if $debug > 3 && ($debug > 5 || length($_));
+    if (/^\s*EXT/) { &scan_var($_); }
   }
-  print $_ if $debug > 3 && ($debug > 5 || length($_));
-  if (/^\s*EXT/) { &scan_var($_); }
 }
 close CPP;
 
@@ -248,6 +259,7 @@ while (<DATA>) {
   print "Adding $key to \%$array list\n" if $debug > 1;
   ${$array}{$key}++;
 }
+if ($debugging_enabled and ($isvaxc or $isgcc)) { $vars{'colors'}++ }
 foreach (split /\s+/, $extnames) {
   my($pkgname) = $_;
   $pkgname =~ s/::/__/g;
@@ -378,9 +390,8 @@ if ($ENV{PERLSHR_USE_GSMATCH}) {
   my $major = int($] * 1000)                        & 0xFF;  # range 0..255
   my $minor = int(($] * 1000 - $major) * 100 + 0.5) & 0xFF;  # range 0..255
   print OPTBLD "GSMATCH=LEQUAL,$major,$minor\n";
-  foreach (@symfiles) {
-    print OPTBLD "CLUSTER=\$\$TRANSFER_VECTOR,,,$_$objsuffix\n";
-  }
+  print OPTBLD 'CLUSTER=$$TRANSFER_VECTOR,,',
+               map(",$_$objsuffix",@symfiles), "\n";
 }
 elsif (@symfiles) { $incstr .= ',' . join(',',@symfiles); }
 # Include object modules and RTLs in options file

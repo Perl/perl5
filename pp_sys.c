@@ -54,7 +54,11 @@ extern "C" int syscall(unsigned long,...);
 #endif
 #endif
 
-#ifdef HOST_NOT_FOUND
+/* XXX Configure test needed.
+   h_errno might not be a simple 'int', especially for multi-threaded
+   applications.  HOST_NOT_FOUND is typically defined in <netdb.h>.
+*/
+#if defined(HOST_NOT_FOUND) && !defined(h_errno)
 extern int h_errno;
 #endif
 
@@ -521,16 +525,17 @@ PP(pp_binmode)
 PP(pp_tie)
 {
     djSP;
+    dMARK;
     SV *varsv;
     HV* stash;
     GV *gv;
     SV *sv;
-    SV **mark = stack_base + ++*markstack_ptr;	/* reuse in entersub */
-    I32 markoff = mark - stack_base - 1;
+    I32 markoff = MARK - stack_base;
     char *methname;
     int how = 'P';
+    U32 items;
 
-    varsv = mark[0];  
+    varsv = *++MARK;
     switch(SvTYPE(varsv)) {
 	case SVt_PVHV:
 	    methname = "TIEHASH";
@@ -547,26 +552,39 @@ PP(pp_tie)
 	    how = 'q';
 	    break;
     }
-
-    if (sv_isobject(mark[1])) {
+    items = SP - MARK++;
+    if (sv_isobject(*MARK)) {
 	ENTER;
+	PUSHSTACK(SI_MAGIC);
+	PUSHMARK(SP);
+	EXTEND(SP,items);
+	while (items--)
+	    PUSHs(*MARK++);
+	PUTBACK;
 	perl_call_method(methname, G_SCALAR);
     } 
     else {
 	/* Not clear why we don't call perl_call_method here too.
 	 * perhaps to get different error message ?
 	 */
-	stash = gv_stashsv(mark[1], FALSE);
+	stash = gv_stashsv(*MARK, FALSE);
 	if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
 	    DIE("Can't locate object method \"%s\" via package \"%s\"",
-		 methname, SvPV(mark[1],na));                   
+		 methname, SvPV(*MARK,na));                   
 	}
 	ENTER;
+	PUSHSTACK(SI_MAGIC);
+	PUSHMARK(SP);
+	EXTEND(SP,items);
+	while (items--)
+	    PUSHs(*MARK++);
+	PUTBACK;
 	perl_call_sv((SV*)GvCV(gv), G_SCALAR);
     }
     SPAGAIN;
 
     sv = TOPs;
+    POPSTACK();
     if (sv_isobject(sv)) {
 	sv_unmagic(varsv, how);            
 	sv_magic(varsv, sv, how, Nullch, 0);
@@ -2664,11 +2682,11 @@ PP(pp_rename)
 #ifdef HAS_RENAME
     anum = rename(tmps, tmps2);
 #else
-    if (!(anum = Stat(tmps, &statbuf))) {
+    if (!(anum = PerlLIO_stat(tmps, &statbuf))) {
 	if (same_dirent(tmps2, tmps))	/* can always rename to same name */
 	    anum = 1;
 	else {
-	    if (euid || Stat(tmps2, &statbuf) < 0 || !S_ISDIR(statbuf.st_mode))
+	    if (euid || PerlLIO_stat(tmps2, &statbuf) < 0 || !S_ISDIR(statbuf.st_mode))
 		(void)UNLINK(tmps2);
 	    if (!(anum = link(tmps, tmps2)))
 		anum = UNLINK(tmps);
@@ -2805,7 +2823,7 @@ char *filename;
 	    return 0;
 	}
 	else {	/* some mkdirs return no failure indication */
-	    anum = (Stat(save_filename, &statbuf) >= 0);
+	    anum = (PerlLIO_stat(save_filename, &statbuf) >= 0);
 	    if (op->op_type == OP_RMDIR)
 		anum = !anum;
 	    if (anum)
@@ -3607,33 +3625,38 @@ PP(pp_ghostent)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
-#if defined(HAS_GETHOSTENT) && !defined(DONT_DECLARE_STD)
+#ifndef HAS_GETHOST_PROTOS /* XXX Do we need individual probes? */
     struct hostent *PerlSock_gethostbyaddr(Netdb_host_t, Netdb_hlen_t, int);
     struct hostent *PerlSock_gethostbyname(Netdb_name_t);
-#ifndef PerlSock_gethostent
     struct hostent *PerlSock_gethostent(void);
-#endif
 #endif
     struct hostent *hent;
     unsigned long len;
 
     EXTEND(SP, 10);
-    if (which == OP_GHBYNAME) {
+    if (which == OP_GHBYNAME)
+#ifdef HAS_GETHOSTBYNAME
 	hent = PerlSock_gethostbyname(POPp);
-    }
+#else
+	DIE(no_sock_func, "gethostbyname");
+#endif
     else if (which == OP_GHBYADDR) {
+#ifdef HAS_GETHOSTBYADDR
 	int addrtype = POPi;
 	SV *addrsv = POPs;
 	STRLEN addrlen;
 	Netdb_host_t addr = (Netdb_host_t) SvPV(addrsv, addrlen);
 
 	hent = PerlSock_gethostbyaddr(addr, (Netdb_hlen_t) addrlen, addrtype);
+#else
+	DIE(no_sock_func, "gethostbyaddr");
+#endif
     }
     else
 #ifdef HAS_GETHOSTENT
 	hent = PerlSock_gethostent();
 #else
-	DIE("gethostent not implemented");
+	DIE(no_sock_func, "gethostent");
 #endif
 
 #ifdef HOST_NOT_FOUND
@@ -3710,22 +3733,34 @@ PP(pp_gnetent)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
-#ifdef NETDB_H_OMITS_GETNET
-    struct netent *getnetbyaddr(Netdb_net_t, int);
-    struct netent *getnetbyname(Netdb_name_t);
-    struct netent *getnetent(void);
+#ifndef HAS_GETNET_PROTOS /* XXX Do we need individual probes? */
+    struct netent *PerlSock_getnetbyaddr(Netdb_net_t, int);
+    struct netent *PerlSock_getnetbyname(Netdb_name_t);
+    struct netent *PerlSock_getnetent(void);
 #endif
     struct netent *nent;
 
     if (which == OP_GNBYNAME)
+#ifdef HAS_GETNETBYNAME
 	nent = PerlSock_getnetbyname(POPp);
+#else
+        DIE(no_sock_func, "getnetbyname");
+#endif
     else if (which == OP_GNBYADDR) {
+#ifdef HAS_GETNETBYADDR
 	int addrtype = POPi;
 	Netdb_net_t addr = (Netdb_net_t) U_L(POPn);
 	nent = PerlSock_getnetbyaddr(addr, addrtype);
+#else
+	DIE(no_sock_func, "getnetbyaddr");
+#endif
     }
     else
+#ifdef HAS_GETNETENT
 	nent = PerlSock_getnetent();
+#else
+        DIE(no_sock_func, "getnetent");
+#endif
 
     EXTEND(SP, 4);
     if (GIMME != G_ARRAY) {
@@ -3785,21 +3820,31 @@ PP(pp_gprotoent)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;  
-#ifndef DONT_DECLARE_STD
+#ifndef HAS_GETPROTO_PROTOS /* XXX Do we need individual probes? */
     struct protoent *PerlSock_getprotobyname(Netdb_name_t);
     struct protoent *PerlSock_getprotobynumber(int);
-#ifndef PerlSock_getprotoent
     struct protoent *PerlSock_getprotoent(void);
-#endif
 #endif
     struct protoent *pent;
 
     if (which == OP_GPBYNAME)
+#ifdef HAS_GETPROTOBYNAME
 	pent = PerlSock_getprotobyname(POPp);
+#else
+	DIE(no_sock_func, "getprotobyname");
+#endif
     else if (which == OP_GPBYNUMBER)
+#ifdef HAS_GETPROTOBYNUMBER
 	pent = PerlSock_getprotobynumber(POPi);
+#else
+    DIE(no_sock_func, "getprotobynumber");
+#endif
     else
+#ifdef HAS_GETPROTOENT
 	pent = PerlSock_getprotoent();
+#else
+	DIE(no_sock_func, "getprotoent");
+#endif
 
     EXTEND(SP, 3);
     if (GIMME != G_ARRAY) {
@@ -3834,7 +3879,7 @@ PP(pp_gprotoent)
 
 PP(pp_gsbyname)
 {
-#ifdef HAS_GETSERVICEBYNAME
+#ifdef HAS_GETSERVBYNAME
     return pp_gservent(ARGS);
 #else
     DIE(no_sock_func, "getservbyname");
@@ -3843,7 +3888,7 @@ PP(pp_gsbyname)
 
 PP(pp_gsbyport)
 {
-#ifdef HAS_GETSERVICEBYPORT
+#ifdef HAS_GETSERVBYPORT
     return pp_gservent(ARGS);
 #else
     DIE(no_sock_func, "getservbyport");
@@ -3857,16 +3902,15 @@ PP(pp_gservent)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
-#ifndef DONT_DECLARE_STD
+#ifndef HAS_GETSERV_PROTOS /* XXX Do we need individual probes? */
     struct servent *PerlSock_getservbyname(Netdb_name_t, Netdb_name_t);
     struct servent *PerlSock_getservbyport(int, Netdb_name_t);
-#ifndef PerlSock_getservent
     struct servent *PerlSock_getservent(void);
-#endif
 #endif
     struct servent *sent;
 
     if (which == OP_GSBYNAME) {
+#ifdef HAS_GETSERVBYNAME
 	char *proto = POPp;
 	char *name = POPp;
 
@@ -3874,8 +3918,12 @@ PP(pp_gservent)
 	    proto = Nullch;
 
 	sent = PerlSock_getservbyname(name, proto);
+#else
+	DIE(no_sock_func, "getservbyname");
+#endif
     }
     else if (which == OP_GSBYPORT) {
+#ifdef HAS_GETSERVBYPORT
 	char *proto = POPp;
 	unsigned short port = POPu;
 
@@ -3883,9 +3931,16 @@ PP(pp_gservent)
 	port = PerlSock_htons(port);
 #endif
 	sent = PerlSock_getservbyport(port, proto);
+#else
+	DIE(no_sock_func, "getservbyport");
+#endif
     }
     else
+#ifdef HAS_GETSERVENT
 	sent = PerlSock_getservent();
+#else
+	DIE(no_sock_func, "getservent");
+#endif
 
     EXTEND(SP, 4);
     if (GIMME != G_ARRAY) {

@@ -28,7 +28,6 @@ ln='cp'             # no REAL ln on dos
 lns='cp'
 
 usenm='true'
-d_bincompat3='undef'
 
 d_link='undef'      # these are empty functions in libc.a
 d_symlink='undef'
@@ -52,9 +51,12 @@ archlib=$privlib
 sitelib=$privlib/site
 sitearch=$sitelib
 
+eagain='EAGAIN'
+rd_nodata='-1'
+
 : set up the translation script tr
 
-cat >../UU/tr <<EOSC
+cat > UU/tr <<EOSC
 $startsh
 case "\$1\$2" in
 '[A-Z][a-z]') exec tr.exe '[:upper:]' '[:lower:]';;
@@ -63,9 +65,7 @@ esac
 exec tr.exe "\$@"
 EOSC
 
-if [ "X$usethreads" != "X" ]; then
-    ccflags="-DUSE_THREADS $ccflags"
-    cppflags="-DUSE_THREADS $cppflags"
+if [ "X$usethreads" = "X$define" ]; then
     set `echo X "$libswanted "| sed -e 's/ c / gthreads c /'`
     shift
     libswanted="$*"

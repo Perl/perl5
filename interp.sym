@@ -26,9 +26,6 @@ curpm
 curstack
 curstash
 curstname
-cxstack
-cxstack_ix
-cxstack_max
 dbargs
 debdelim
 debname
@@ -157,10 +154,8 @@ screamnext
 secondgv
 seen_zerolen
 siggv
-signalstack
 sortcop
 sortcxix
-sortstack
 sortstash
 splitstr
 start_env

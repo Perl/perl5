@@ -367,6 +367,7 @@
 #define newAVREF		Perl_newAVREF
 #define newBINOP		Perl_newBINOP
 #define newCONDOP		Perl_newCONDOP
+#define newCONSTSUB		Perl_newCONSTSUB
 #define newCVREF		Perl_newCVREF
 #define newFORM			Perl_newFORM
 #define newFOROP		Perl_newFOROP
@@ -405,6 +406,7 @@
 #define newWHILEOP		Perl_newWHILEOP
 #define newXS			Perl_newXS
 #define newXSUB			Perl_newXSUB
+#define new_stackinfo		Perl_new_stackinfo
 #define new_struct_thread	Perl_new_struct_thread
 #define nextargv		Perl_nextargv
 #define ninstr			Perl_ninstr

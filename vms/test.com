@@ -74,6 +74,7 @@ $   Delete/Log/NoConfirm Echo.Obj;*
 $   echo = "$" + F$Parse("Echo.Exe")
 $
 $!  And do it
+$   Show Process/Accounting
 $   testdir = "Directory/NoHead/NoTrail/Column=1"
 $   Define/User Perlshr Sys$Disk:[-]PerlShr'exe'
 $   MCR Sys$Disk:[]Perl. "-I[-.lib]" - "''p2'" "''p3'" "''p4'" "''p5'" "''p6'"
@@ -93,7 +94,7 @@ use Config;
 @ioexcl=('argv.t','dup.t','fs.t','inplace.t','pipe.t');
 @libexcl=('db-btree.t','db-hash.t','db-recno.t',
           'gdbm.t','io_dup.t', 'io_pipe.t', 'io_sel.t', 'io_sock.t',
-          'ndbm.t','odbm.t','open2.t','open3.t','posix.t');
+          'ndbm.t','odbm.t','open2.t','open3.t', 'ph.t', 'posix.t');
 
 # Note: POSIX is not part of basic build, but can be built
 # separately if you're using DECC
@@ -217,6 +218,7 @@ print sprintf("u=%g  s=%g  cu=%g  cs=%g  files=%d  tests=%d\n",
     $user,$sys,$cuser,$csys,$files,$totmax);
 $$END-OF-TEST$$
 $ wrapup:
+$   Show Process/Accounting
 $   If F$Search("Echo.Exe").nes."" Then Delete/Log/NoConfirm Echo.Exe;*
 $   Set Default &olddef
 $   Set Message 'oldmsg'

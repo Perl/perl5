@@ -105,18 +105,14 @@
 #define curpm			pPerl->Perl_curpm
 #undef  curstack
 #define curstack		pPerl->Perl_curstack
+#undef  curstackinfo
+#define curstackinfo		pPerl->Perl_curstackinfo
 #undef  curstash
 #define curstash		pPerl->Perl_curstash
 #undef  curstname
 #define curstname		pPerl->Perl_curstname
 #undef  curthr
 #define curthr			pPerl->Perl_curthr
-#undef  cxstack
-#define cxstack			pPerl->Perl_cxstack
-#undef  cxstack_ix
-#define cxstack_ix		pPerl->Perl_cxstack_ix
-#undef  cxstack_max
-#define cxstack_max		pPerl->Perl_cxstack_max
 #undef  dbargs
 #define dbargs			pPerl->Perl_dbargs
 #undef  debdelim
@@ -551,14 +547,10 @@
 #define siggv			pPerl->Perl_siggv
 #undef  sighandlerp
 #define sighandlerp		pPerl->Perl_sighandlerp
-#undef  signalstack
-#define signalstack		pPerl->Perl_signalstack
 #undef  sortcop
 #define sortcop			pPerl->Perl_sortcop
 #undef  sortcxix
 #define sortcxix		pPerl->Perl_sortcxix
-#undef  sortstack
-#define sortstack		pPerl->Perl_sortstack
 #undef  sortstash
 #define sortstash		pPerl->Perl_sortstash
 #undef  splitstr
@@ -1228,6 +1220,8 @@
 #define newASSIGNOP         pPerl->Perl_newASSIGNOP
 #undef  newCONDOP
 #define newCONDOP           pPerl->Perl_newCONDOP
+#undef  newCONSTSUB
+#define newCONSTSUB         pPerl->Perl_newCONSTSUB
 #undef  newFORM
 #define newFORM             pPerl->Perl_newFORM
 #undef  newFOROP
@@ -1315,6 +1309,8 @@
 #define newWHILEOP          pPerl->Perl_newWHILEOP
 #undef  new_struct_thread
 #define new_struct_thread   pPerl->Perl_new_struct_thread
+#undef  new_stackinfo
+#define new_stackinfo       pPerl->Perl_new_stackinfo
 #undef  new_sv
 #define new_sv              pPerl->new_sv
 #undef  new_xnv

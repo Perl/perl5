@@ -4,6 +4,7 @@ Changes5.000		Differences between 4.x and 5.000
 Changes5.001		Differences between 5.000 and 5.001
 Changes5.002		Differences between 5.001 and 5.002
 Changes5.003		Differences between 5.002 and 5.003
+Changes5.004		Differences between 5.003 and 5.004
 Configure		Portability tool
 Copying			The GNU General Public License
 EXTERN.h		Included before foreign .h files
@@ -268,6 +269,7 @@ ext/Thread/Thread.pm	Thread extension Perl module
 ext/Thread/Thread.xs	Thread extension external subroutines
 ext/Thread/Thread/Queue.pm	Thread synchronised queue objects
 ext/Thread/Thread/Semaphore.pm	Thread semaphore objects
+ext/Thread/Thread/Signal.pm	Start a thread to run signal handlers
 ext/Thread/Thread/Specific.pm	Thread specific data access
 ext/Thread/create.t	Test thread creation
 ext/Thread/die.t	Test thread die()
@@ -423,6 +425,7 @@ lib/Exporter.pm		Exporter base class
 lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
 lib/ExtUtils/Embed.pm	Utilities for embedding Perl in C programs
 lib/ExtUtils/Install.pm	Handles 'make install' on extensions
+lib/ExtUtils/Installed.pm	Information on installed extensions
 lib/ExtUtils/Liblist.pm	Locates libraries
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
@@ -432,6 +435,8 @@ lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
+lib/ExtUtils/Packlist.pm	Manipulates .packlist files
+lib/ExtUtils/inst	Give information about installed extensions
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
@@ -832,6 +837,7 @@ t/op/glob.t		See if <*> works
 t/op/goto.t		See if goto works
 t/op/groups.t		See if $( works
 t/op/gv.t		See if typeglobs work
+t/op/hashwarn.t		See if warnings for bad hash assignments work
 t/op/inc.t		See if inc/dec of integers near 32 bit limit work
 t/op/index.t		See if index works
 t/op/int.t		See if int works

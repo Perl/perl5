@@ -725,6 +725,8 @@
 #define newASSIGNOP       CPerlObj::Perl_newASSIGNOP
 #undef  newCONDOP
 #define newCONDOP         CPerlObj::Perl_newCONDOP
+#undef  newCONSTSUB
+#define newCONSTSUB       CPerlObj::Perl_newCONSTSUB
 #undef  newDEFSVOP
 #define newDEFSVOP        CPerlObj::newDEFSVOP
 #undef  newFORM

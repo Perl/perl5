@@ -71,7 +71,7 @@ lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).
 ;;
 esac
 
-if [ "X$usethreads" != "X" ]; then
+if [ "X$usethreads" = "X$define" ]; then
     ccflags="-DNEED_PTHREAD_INIT $ccflags"
     case "$cc" in
     xlc_r | cc_r)

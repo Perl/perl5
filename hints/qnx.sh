@@ -143,7 +143,7 @@ if [ -z "`which nm 2>/dev/null`" ]; then
 	Creating a quick-and-dirty nm cover for	Configure to use:
 
 	EOF
-  cat >../UU/nm <<-'EOF'
+  cat >./UU/nm <<-'EOF'
 	#! /bin/sh
 	#__USAGE
 	#%C	<lib> [<lib> ...]
@@ -159,7 +159,7 @@ if [ -z "`which nm 2>/dev/null`" ]; then
 	      }
 	    }'
 	EOF
-  chmod +x ../UU/nm
+  chmod +x ./UU/nm
 fi
 
 cppstdin=`which cpp 2>/dev/null`

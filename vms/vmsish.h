@@ -16,12 +16,11 @@
 #include <stsdef.h>  /* bitmasks for exit status testing */
 
 /* Suppress compiler warnings from DECC for VMS-specific extensions:
- * GLOBALEXT, NOSHAREEXT, READONLYEXT: global[dr]ef declarations
  * ADDRCONSTEXT,NEEDCONSTEXT: initialization of data with non-constant values
  *                            (e.g. pointer fields of descriptors)
  */
 #ifdef __DECC
-#  pragma message disable (GLOBALEXT,NOSHAREEXT,READONLYEXT,ADDRCONSTEXT,NEEDCONSTEXT)
+#  pragma message disable (ADDRCONSTEXT,NEEDCONSTEXT)
 #endif
 
 /* DEC's C compilers and gcc use incompatible definitions of _to(upp|low)er() */
@@ -56,6 +55,11 @@
 #  include <unistd.h> /* DECC has this; VAXC and gcc don't */
 #endif
 
+/* VAXC doesn't have a unary plus operator, so we need to get there indirectly */
+#if defined(VAXC) && !defined(__DECC)
+#  define NO_UNARY_PLUS
+#endif
+
 #ifdef NO_PERL_TYPEDEFS /* a2p; we don't want Perl's special routines */
 #  define DONT_MASK_RTL_CALLS
 #endif
@@ -70,11 +74,6 @@
 
 /* DECC introduces this routine in the RTL as of VMS 7.0; for now,
  * we'll use ours, since it gives us the full VMS exit status. */
-#ifdef __PID_T
-#  define Pid_t pid_t
-#else
-#  define Pid_t unsigned int
-#endif
 #define waitpid my_waitpid
 
 /* Don't redeclare standard RTL routines in Perl's header files;
@@ -166,12 +165,6 @@
  *	This symbol is defined if Time_t is an unsigned type on this system.
  */
 #define BIG_TIME
-
-/* USE_STAT_RDEV:
- *	This symbol is defined if this system has a stat structure declaring
- *	st_rdev
- */
-#define USE_STAT_RDEV 	/**/
 
 /* ACME_MESS:
  *	This symbol, if defined, indicates that error messages should be 
@@ -381,7 +374,9 @@ struct utimbuf {
 #  define sigdelset(t, u) my_sigdelset(t, u)
 #  define sigismember(t, u) my_sigismember(t, u)
 #  define sigprocmask(t, u, v) my_sigprocmask(t, u, v)
+#  ifndef _SIGSET_T
    typedef int sigset_t;
+#  endif
    /* The tools for sigprocmask() are there, just not the routine itself */
 #  ifndef SIG_UNBLOCK
 #    define SIG_UNBLOCK 1

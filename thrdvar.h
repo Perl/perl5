@@ -68,14 +68,16 @@ PERLVAR(Tdelaymagic,	int)		/* ($<,$>) = ... */
 PERLVAR(Tdirty,		bool)		/* In the middle of tearing things down? */
 PERLVAR(Tlocalizing,	int)		/* are we processing a local() list? */
 
-PERLVAR(Tcxstack,	PERL_CONTEXT *)		
-PERLVARI(Tcxstack_ix,	I32,	-1)	
-PERLVARI(Tcxstack_max,	I32,	128)	
-
 PERLVAR(Tcurstack,	AV *)			/* THE STACK */
+PERLVAR(Tcurstackinfo,	PERL_SI *)		/* current stack + context */
 PERLVAR(Tmainstack,	AV *)			/* the stack when nothing funny is happening */
 PERLVAR(Ttop_env,	JMPENV *)		/* ptr. to current sigjmp() environment */
 PERLVAR(Tstart_env,	JMPENV)			/* empty startup sigjmp() environment */
+
+/* statics "owned" by various functions */
+PERLVAR(Tav_fetch_sv,	SV *)
+PERLVAR(Thv_fetch_sv,	SV *)
+PERLVAR(Thv_fetch_ent_mh, HE)
 
 /* XXX Sort stuff, firstgv secongv and so on? */
 /* XXX What about regexp stuff? */

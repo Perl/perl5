@@ -20,6 +20,18 @@
 #endif
 #include <windows.h>
 
+#ifndef __MINGW32__
+#include <lmcons.h>
+#include <lmerr.h>
+/* ugliness to work around a buggy struct definition in lmwksta.h */
+#undef LPTSTR
+#define LPTSTR LPWSTR
+#include <lmwksta.h>
+#undef LPTSTR
+#define LPTSTR LPSTR
+#include <lmapibuf.h>
+#endif /* __MINGW32__ */
+
 /* #include "config.h" */
 
 #define PERLIO_NOT_STDIO 0 
@@ -112,11 +124,11 @@ HANDLE	w32_child_pids[MAXIMUM_WAIT_OBJECTS];
 #endif
 
 #ifndef FOPEN_MAX
-#  ifdef _NSTREAM_
+#  if defined(_NSTREAM_)
 #    define FOPEN_MAX _NSTREAM_
-#  elsif _NFILE_
+#  elsif defined(_NFILE_)
 #    define FOPEN_MAX _NFILE_
-#  elsif _NFILE
+#  elsif defined(_NFILE)
 #    define FOPEN_MAX _NFILE
 #  endif
 #endif
@@ -164,17 +176,17 @@ GetRegStrFromKey(HKEY hkey, const char *lpszValueName, char** ptr, DWORD* lpData
     long retval;
 
     retval = RegOpenKeyEx(hkey, subkey, 0, KEY_READ, &handle);
-    if(retval == ERROR_SUCCESS){
+    if (retval == ERROR_SUCCESS){
 	retval = RegQueryValueEx(handle, lpszValueName, 0, &type, NULL, lpDataLen);
-	if(retval == ERROR_SUCCESS && type == REG_SZ) {
-	    if(*ptr != NULL) {
+	if (retval == ERROR_SUCCESS && type == REG_SZ) {
+	    if (*ptr != NULL) {
 		Renew(*ptr, *lpDataLen, char);
 	    }
 	    else {
 		New(1312, *ptr, *lpDataLen, char);
 	    }
 	    retval = RegQueryValueEx(handle, lpszValueName, 0, NULL, (PBYTE)*ptr, lpDataLen);
-	    if(retval != ERROR_SUCCESS) {
+	    if (retval != ERROR_SUCCESS) {
 		Safefree(ptr);
 		ptr = NULL;
 	    }
@@ -188,7 +200,7 @@ char*
 GetRegStr(const char *lpszValueName, char** ptr, DWORD* lpDataLen)
 {
     *ptr = GetRegStrFromKey(HKEY_CURRENT_USER, lpszValueName, ptr, lpDataLen);
-    if(*ptr == NULL)
+    if (*ptr == NULL)
     {
 	*ptr = GetRegStrFromKey(HKEY_LOCAL_MACHINE, lpszValueName, ptr, lpDataLen);
     }
@@ -210,23 +222,23 @@ win32_get_stdlib(char *pl)
     /* $stdlib = $HKCU{"lib-$]"} || $HKLM{"lib-$]"} || $HKCU{"lib"} || $HKLM{"lib"} || "";  */
     sprintf(szBuffer, "%s-%s", szStdLib, pl);
     lpPath = GetRegStr(szBuffer, &lpPath, &dwDataLen);
-    if(lpPath == NULL)
+    if (lpPath == NULL)
 	lpPath = GetRegStr(szStdLib, &lpPath, &dwDataLen);
 
     /* $stdlib .= ";$EMD/../../lib" */
     GetModuleFileName(GetModuleHandle(NULL), szModuleName, sizeof(szModuleName));
     ptr = strrchr(szModuleName, '\\');
-    if(ptr != NULL)
+    if (ptr != NULL)
     {
 	*ptr = '\0';
 	ptr = strrchr(szModuleName, '\\');
-	if(ptr != NULL)
+	if (ptr != NULL)
 	{
 	    *ptr = '\0';
 	    ptr = strrchr(szModuleName, '\\');
 	}
     }
-    if(ptr == NULL)
+    if (ptr == NULL)
     {
 	ptr = szModuleName;
 	*ptr = '\\';
@@ -237,16 +249,16 @@ win32_get_stdlib(char *pl)
     GetCurrentDirectory(sizeof(szBuffer), szBuffer);
     result = SetCurrentDirectory(szModuleName);
     SetCurrentDirectory(szBuffer);
-    if(result == 0)
+    if (result == 0)
     {
 	GetModuleFileName(GetModuleHandle(NULL), szModuleName, sizeof(szModuleName));
 	ptr = strrchr(szModuleName, '\\');
-	if(ptr != NULL)
+	if (ptr != NULL)
 	    strcpy(++ptr, szStdLib);
     }
 
     newSize = strlen(szModuleName) + 1;
-    if(lpPath != NULL)
+    if (lpPath != NULL)
     {
 	len = strlen(lpPath);
 	newSize += len + 1; /* plus 1 for ';' */
@@ -255,9 +267,9 @@ win32_get_stdlib(char *pl)
     else
 	New(1310, lpPath, newSize, char);
 
-    if(lpPath != NULL)
+    if (lpPath != NULL)
     {
-	if(len != 0)
+	if (len != 0)
 	    lpPath[len++] = ';';
 	strcpy(&lpPath[len], szModuleName);
     }
@@ -280,22 +292,22 @@ get_sitelib_part(char* lpRegStr, char* lpPathStr)
     /* $sitelib .= ";$EMD/../../../<lpPathStr>" */
     GetModuleFileName(GetModuleHandle(NULL), szModuleName, sizeof(szModuleName));
     ptr = strrchr(szModuleName, '\\');
-    if(ptr != NULL)
+    if (ptr != NULL)
     {
 	*ptr = '\0';
 	ptr = strrchr(szModuleName, '\\');
-	if(ptr != NULL)
+	if (ptr != NULL)
 	{
 	    *ptr = '\0';
 	    ptr = strrchr(szModuleName, '\\');
-	    if(ptr != NULL)
+	    if (ptr != NULL)
 	    {
 		*ptr = '\0';
 		ptr = strrchr(szModuleName, '\\');
 	    }
 	}
     }
-    if(ptr == NULL)
+    if (ptr == NULL)
     {
 	ptr = szModuleName;
 	*ptr = '\\';
@@ -307,10 +319,10 @@ get_sitelib_part(char* lpRegStr, char* lpPathStr)
     result = SetCurrentDirectory(szModuleName);
     SetCurrentDirectory(szBuffer);
 
-    if(result)
+    if (result)
     {
 	int newSize = strlen(szModuleName) + 1;
-	if(lpPath != NULL)
+	if (lpPath != NULL)
 	{
 	    len = strlen(lpPath);
 	    newSize += len + 1; /* plus 1 for ';' */
@@ -319,9 +331,9 @@ get_sitelib_part(char* lpRegStr, char* lpPathStr)
 	else
 	    New(1311, lpPath, newSize, char);
 
-	if(lpPath != NULL)
+	if (lpPath != NULL)
 	{
-	    if(len != 0)
+	    if (len != 0)
 		lpPath[len++] = ';';
 	    strcpy(&lpPath[len], szModuleName);
 	}
@@ -345,17 +357,17 @@ win32_get_sitelib(char *pl)
 
     /* $HKCU{'sitelib'} || $HKLM{'sitelib'} . ---; */
     lpPath2 = get_sitelib_part(szSiteLib, "site\\lib");
-    if(lpPath1 == NULL)
+    if (lpPath1 == NULL)
 	return lpPath2;
 
-    if(lpPath2 == NULL)
+    if (lpPath2 == NULL)
 	return lpPath1;
 
     int len = strlen(lpPath1);
     int newSize = len + strlen(lpPath2) + 2; /* plus one for ';' */
 
     lpPath1 = Renew(lpPath1, newSize, char);
-    if(lpPath1 != NULL)
+    if (lpPath1 != NULL)
     {
 	lpPath1[len++] = ';';
 	strcpy(&lpPath1[len], lpPath2);
@@ -375,12 +387,12 @@ has_redirection(char *ptr)
      * Scan string looking for redirection (< or >) or pipe
      * characters (|) that are not in a quoted string
      */
-    while(*ptr) {
+    while (*ptr) {
 	switch(*ptr) {
 	case '\'':
 	case '\"':
-	    if(inquote) {
-		if(quote == *ptr) {
+	    if (inquote) {
+		if (quote == *ptr) {
 		    inquote = 0;
 		    quote = '\0';
 		}
@@ -393,7 +405,7 @@ has_redirection(char *ptr)
 	case '>':
 	case '<':
 	case '|':
-	    if(!inquote)
+	    if (!inquote)
 		return TRUE;
 	default:
 	    break;
@@ -546,7 +558,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 	flag = SvIVx(*mark);
     }
 
-    while(++mark <= sp) {
+    while (++mark <= sp) {
 	if (*mark && (str = SvPV(*mark, na)))
 	    argv[index++] = str;
 	else
@@ -598,7 +610,7 @@ do_spawn2(char *cmd, int exectype)
 
     /* Save an extra exec if possible. See if there are shell
      * metacharacters in it */
-    if(!has_redirection(cmd)) {
+    if (!has_redirection(cmd)) {
 	New(1301,argv, strlen(cmd) / 2 + 2, char*);
 	New(1302,cmd2, strlen(cmd) + 1, char);
 	strcpy(cmd2, cmd);
@@ -608,9 +620,9 @@ do_spawn2(char *cmd, int exectype)
 		s++;
 	    if (*s)
 		*(a++) = s;
-	    while(*s && !isspace(*s))
+	    while (*s && !isspace(*s))
 		s++;
-	    if(*s)
+	    if (*s)
 		*s++ = '\0';
 	}
 	*a = Nullch;
@@ -693,9 +705,6 @@ do_exec(char *cmd)
     return FALSE;
 }
 
-
-#define PATHLEN 1024
-
 /* The idea here is to read all the directory names into a string table
  * (separated by nulls) and when one of the other dir functions is called
  * return the pointer to the current file name.
@@ -703,19 +712,17 @@ do_exec(char *cmd)
 DIR *
 opendir(char *filename)
 {
-    DIR            *p;
-    long            len;
-    long            idx;
-    char            scannamespc[PATHLEN];
-    char       *scanname = scannamespc;
-    struct stat     sbuf;
-    WIN32_FIND_DATA FindData;
-    HANDLE          fh;
-/*  char            root[_MAX_PATH];*/
-/*  char            volname[_MAX_PATH];*/
-/*  DWORD           serial, maxname, flags;*/
-/*  BOOL            downcase;*/
-/*  char           *dummy;*/
+    DIR			*p;
+    long		len;
+    long		idx;
+    char		scanname[MAX_PATH+3];
+    struct stat		sbuf;
+    WIN32_FIND_DATA	FindData;
+    HANDLE		fh;
+
+    len = strlen(filename);
+    if (len > MAX_PATH)
+	return NULL;
 
     /* check to see if filename is a directory */
     if (win32_stat(filename, &sbuf) < 0 || (sbuf.st_mode & S_IFDIR) == 0) {
@@ -725,35 +732,21 @@ opendir(char *filename)
 	    return NULL;
     }
 
-    /* get the file system characteristics */
-/*  if(GetFullPathName(filename, MAX_PATH, root, &dummy)) {
- *	if(dummy = strchr(root, '\\'))
- *	    *++dummy = '\0';
- *	if(GetVolumeInformation(root, volname, MAX_PATH, &serial,
- *				&maxname, &flags, 0, 0)) {
- *	    downcase = !(flags & FS_CASE_IS_PRESERVED);
- *	}
- *  }
- *  else {
- *	downcase = TRUE;
- *  }
- */
     /* Get us a DIR structure */
     Newz(1303, p, 1, DIR);
-    if(p == NULL)
+    if (p == NULL)
 	return NULL;
 
     /* Create the search pattern */
     strcpy(scanname, filename);
-
-    if(index("/\\", *(scanname + strlen(scanname) - 1)) == NULL)
-	strcat(scanname, "/*");
-    else
-	strcat(scanname, "*");
+    if (scanname[len-1] != '/' && scanname[len-1] != '\\')
+	scanname[len++] = '/';
+    scanname[len++] = '*';
+    scanname[len] = '\0';
 
     /* do the FindFirstFile call */
     fh = FindFirstFile(scanname, &FindData);
-    if(fh == INVALID_HANDLE_VALUE) {
+    if (fh == INVALID_HANDLE_VALUE) {
 	return NULL;
     }
 
@@ -762,13 +755,9 @@ opendir(char *filename)
      */
     idx = strlen(FindData.cFileName)+1;
     New(1304, p->start, idx, char);
-    if(p->start == NULL) {
+    if (p->start == NULL)
 	croak("opendir: malloc failed!\n");
-    }
     strcpy(p->start, FindData.cFileName);
-/*  if(downcase)
- *	strlwr(p->start);
- */
     p->nfiles++;
 
     /* loop finding all the files that match the wildcard
@@ -782,20 +771,16 @@ opendir(char *filename)
 	 * new name and it's null terminator
 	 */
 	Renew(p->start, idx+len+1, char);
-	if(p->start == NULL) {
+	if (p->start == NULL)
 	    croak("opendir: malloc failed!\n");
-	}
 	strcpy(&p->start[idx], FindData.cFileName);
-/*	if (downcase) 
- *	    strlwr(&p->start[idx]);
- */
-		p->nfiles++;
-		idx += len+1;
-	}
-	FindClose(fh);
-	p->size = idx;
-	p->curr = p->start;
-	return p;
+	p->nfiles++;
+	idx += len+1;
+    }
+    FindClose(fh);
+    p->size = idx;
+    p->curr = p->start;
+    return p;
 }
 
 
@@ -1018,9 +1003,9 @@ win32_getenv(const char *name)
 	curlen = needlen;
 	needlen = GetEnvironmentVariable(name,curitem,curlen);
     }
-    if(curitem == NULL)
+    if (curitem == NULL)
     {
-	if(strcmp("PERL5DB", name) == 0)
+	if (strcmp("PERL5DB", name) == 0)
 	    curitem = GetRegStr(name, &curitem, &curlen);
     }
     return curitem;
@@ -1288,14 +1273,14 @@ my_open_osfhandle(long osfhandle, int flags)
     /* copy relevant flags from second parameter */
     fileflags = FDEV;
 
-    if(flags & O_APPEND)
+    if (flags & O_APPEND)
 	fileflags |= FAPPEND;
 
-    if(flags & O_TEXT)
+    if (flags & O_TEXT)
 	fileflags |= FTEXT;
 
     /* attempt to allocate a C Runtime file handle */
-    if((fh = _alloc_osfhnd()) == -1) {
+    if ((fh = _alloc_osfhnd()) == -1) {
 	errno = EMFILE;		/* too many open files */
 	_doserrno = 0L;		/* not an OS error */
 	return -1;		/* return error to caller */
@@ -1430,12 +1415,12 @@ win32_strerror(int e)
 #endif
     DWORD source = 0;
 
-    if(e < 0 || e > sys_nerr) {
+    if (e < 0 || e > sys_nerr) {
         dTHR;
-	if(e < 0)
+	if (e < 0)
 	    e = GetLastError();
 
-	if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, &source, e, 0,
+	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, &source, e, 0,
 			 strerror_buffer, sizeof(strerror_buffer), NULL) == 0) 
 	    strcpy(strerror_buffer, "Unknown Error");
 
@@ -2158,6 +2143,8 @@ static
 XS(w32_DomainName)
 {
     dXSARGS;
+#ifndef HAS_NETWKSTAGETINFO
+    /* mingw32 (and Win95) don't have NetWksta*(), so do it the old way */
     char name[256];
     DWORD size = sizeof(name);
     if (GetUserName(name,&size)) {
@@ -2166,11 +2153,31 @@ XS(w32_DomainName)
 	char dname[256];
 	DWORD dnamelen = sizeof(dname);
 	SID_NAME_USE snu;
-	if (LookupAccountName(NULL, name, (PSID)&sid, &sidlen,
+	if (LookupAccountName(NULL, name, &sid, &sidlen,
 			      dname, &dnamelen, &snu)) {
 	    XSRETURN_PV(dname);		/* all that for this */
 	}
     }
+#else
+    /* this way is more reliable, in case user has a local account.
+     * XXX need dynamic binding of netapi32.dll symbols or this will fail on
+     * Win95. Probably makes more sense to move it into libwin32. */
+    char dname[256];
+    DWORD dnamelen = sizeof(dname);
+    PWKSTA_INFO_100 pwi;
+    if (NERR_Success == NetWkstaGetInfo(NULL, 100, (LPBYTE*)&pwi)) {
+	if (pwi->wki100_langroup && *(pwi->wki100_langroup)) {
+	    WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_langroup,
+				-1, (LPSTR)dname, dnamelen, NULL, NULL);
+	}
+	else {
+	    WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_computername,
+				-1, (LPSTR)dname, dnamelen, NULL, NULL);
+	}
+	NetApiBufferFree(pwi);
+	XSRETURN_PV(dname);
+    }
+#endif
     XSRETURN_UNDEF;
 }
 
@@ -2254,7 +2261,7 @@ XS(w32_Spawn)
     STARTUPINFO stStartInfo;
     BOOL bSuccess = FALSE;
 
-    if(items != 3)
+    if (items != 3)
 	croak("usage: Win32::Spawn($cmdName, $args, $PID)");
 
     cmd = SvPV(ST(0),na);
@@ -2265,7 +2272,7 @@ XS(w32_Spawn)
     stStartInfo.dwFlags = STARTF_USESHOWWINDOW;	    /* Enable wShowWindow control */
     stStartInfo.wShowWindow = SW_SHOWMINNOACTIVE;   /* Start min (normal) */
 
-    if(CreateProcess(
+    if (CreateProcess(
 		cmd,			/* Image path */
 		args,	 		/* Arguments for command line */
 		NULL,			/* Default process security */
@@ -2298,7 +2305,7 @@ XS(w32_GetShortPathName)
     SV *shortpath;
     DWORD len;
 
-    if(items != 1)
+    if (items != 1)
 	croak("usage: Win32::GetShortPathName($longPathName)");
 
     shortpath = sv_mortalcopy(ST(0));
@@ -2362,7 +2369,7 @@ XS(w32_RegCloseKey)
 {
     dXSARGS;
 
-    if(items != 1) 
+    if (items != 1) 
     {
 	croak("usage: Win32::RegCloseKey($hkey);\n");
     }
@@ -2376,12 +2383,12 @@ XS(w32_RegConnectRegistry)
     dXSARGS;
     HKEY handle;
 
-    if(items != 3) 
+    if (items != 3) 
     {
 	croak("usage: Win32::RegConnectRegistry($machine, $hkey, $handle);\n");
     }
 
-    if(SUCCESSRETURNED(RegConnectRegistry((char *)SvPV(ST(0), na), SvHKEY(ST(1)), &handle))) 
+    if (SUCCESSRETURNED(RegConnectRegistry((char *)SvPV(ST(0), na), SvHKEY(ST(1)), &handle))) 
     {
 	SETHKEY(2,handle);
 	XSRETURN_YES;
@@ -2397,7 +2404,7 @@ XS(w32_RegCreateKey)
     DWORD disposition;
     long retval;
 
-    if(items != 3) 
+    if (items != 3) 
     {
 	croak("usage: Win32::RegCreateKey($hkey, $subkey, $handle);\n");
     }
@@ -2405,7 +2412,7 @@ XS(w32_RegCreateKey)
     retval =  RegCreateKeyEx(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS,
 					NULL, &handle, &disposition);
 
-    if(SUCCESSRETURNED(retval)) 
+    if (SUCCESSRETURNED(retval)) 
     {
 	SETHKEY(2,handle);
 	XSRETURN_YES;
@@ -2427,7 +2434,7 @@ XS(w32_RegCreateKeyEx)
     REGSAM sam;
     SECURITY_ATTRIBUTES sa, *psa;
 
-    if(items != 9) 
+    if (items != 9) 
     {
 	croak("usage: Win32::RegCreateKeyEx($hkey, $subkey, $reserved, $class, $options, $sam, "
 			"$security, $handle, $disposition);\n");
@@ -2439,7 +2446,7 @@ XS(w32_RegCreateKeyEx)
     options = (DWORD) ((unsigned long)SvIV(ST(4)));
     sam = (REGSAM) ((unsigned long)SvIV(ST(5)));
     psa = (SECURITY_ATTRIBUTES*)SvPV(ST(6), length);
-    if(length != sizeof(SECURITY_ATTRIBUTES))
+    if (length != sizeof(SECURITY_ATTRIBUTES))
     {
 	psa = &sa;
 	memset(&sa, 0, sizeof(SECURITY_ATTRIBUTES));
@@ -2449,9 +2456,9 @@ XS(w32_RegCreateKeyEx)
     retval =  RegCreateKeyEx(hkey, subkey, 0, keyclass, options, sam,
 					psa, &handle, &disposition);
 
-    if(SUCCESSRETURNED(retval)) 
+    if (SUCCESSRETURNED(retval)) 
     {
-	if(psa == &sa)
+	if (psa == &sa)
 	    SETPVN(6, &sa, sizeof(sa));
 
 	SETHKEY(7,handle);
@@ -2466,7 +2473,7 @@ XS(w32_RegDeleteKey)
 {
     dXSARGS;
 
-    if(items != 2) 
+    if (items != 2) 
     {
 	croak("usage: Win32::RegDeleteKey($hkey, $subkey);\n");
     }
@@ -2479,7 +2486,7 @@ XS(w32_RegDeleteValue)
 {
     dXSARGS;
 
-    if(items != 2) 
+    if (items != 2) 
     {
 	croak("usage: Win32::RegDeleteValue($hkey, $valname);\n");
     }
@@ -2494,12 +2501,12 @@ XS(w32_RegEnumKey)
 
     char keybuffer[TMPBUFSZ];
 
-    if(items != 3) 
+    if (items != 3) 
     {
 	croak("usage: Win32::RegEnumKey($hkey, $idx, $subkeyname);\n");
     }
 
-    if(SUCCESSRETURNED(RegEnumKey(SvHKEY(ST(0)), SvIV(ST(1)), keybuffer, sizeof(keybuffer)))) 
+    if (SUCCESSRETURNED(RegEnumKey(SvHKEY(ST(0)), SvIV(ST(1)), keybuffer, sizeof(keybuffer)))) 
     {
 	SETPV(2, keybuffer);
 	XSRETURN_YES;
@@ -2519,7 +2526,7 @@ XS(w32_RegEnumKeyEx)
     long retval;
     FILETIME filetime;
 
-    if(items != 6) 			
+    if (items != 6) 			
     {
 	croak("usage: Win32::RegEnumKeyEx($hkey, $idx, $subkeyname, $reserved, $class, $time);\n");
     }
@@ -2528,7 +2535,7 @@ XS(w32_RegEnumKeyEx)
     classsz = sizeof(classbuffer);
     retval = RegEnumKeyEx(SvHKEY(ST(0)), SvIV(ST(1)), keybuffer, &keysz, 0,
 						classbuffer, &classsz, &filetime);
-    if(SUCCESSRETURNED(retval)) 
+    if (SUCCESSRETURNED(retval)) 
     {
 	SETPV(2, keybuffer);
 	SETPV(4, classbuffer);
@@ -2549,7 +2556,7 @@ XS(w32_RegEnumValue)
     char  myvalbuf[MAX_LENGTH];
     char  mynambuf[MAX_LENGTH];
 
-    if(items != 6) 
+    if (items != 6) 
     {
 	croak("usage: Win32::RegEnumValue($hkey, $i, $name, $reserved, $type, $value);\n");
     }
@@ -2560,7 +2567,7 @@ XS(w32_RegEnumValue)
     // allocate space for them. Free any old storage and set the old key value to the
     // current key.
 
-    if(hkey != (HKEY)last_hkey) 
+    if (hkey != (HKEY)last_hkey) 
     {
 	char keyclass[TMPBUFSZ];
 	DWORD classsz, subkeys, maxsubkey, maxclass, values, salen, maxnamesz, maxvalsz;
@@ -2569,7 +2576,7 @@ XS(w32_RegEnumValue)
 	retval = RegQueryInfoKey(hkey, keyclass, &classsz, 0, &subkeys, &maxsubkey, &maxclass,
 						&values, &maxnamesz, &maxvalsz, &salen, &ft);
 
-	if(!SUCCESSRETURNED(retval)) 
+	if (!SUCCESSRETURNED(retval)) 
 	{
 	    XSRETURN_NO;
 	}
@@ -2581,7 +2588,7 @@ XS(w32_RegEnumValue)
     namesz = MAX_LENGTH;
     valsz = MAX_LENGTH;
     retval = RegEnumValue(hkey, SvIV(ST(1)), mynambuf, &namesz, 0, &type, (LPBYTE) myvalbuf, &valsz);
-    if(!SUCCESSRETURNED(retval)) 
+    if (!SUCCESSRETURNED(retval)) 
     {
 	XSRETURN_NO;
     }
@@ -2596,7 +2603,7 @@ XS(w32_RegEnumValue)
 	    case REG_SZ:
 	    case REG_MULTI_SZ:
 	    case REG_EXPAND_SZ:
-		if(valsz)
+		if (valsz)
 		    --valsz;
 	    case REG_BINARY:
 		SETPVN(5, myvalbuf, valsz);
@@ -2628,7 +2635,7 @@ XS(w32_RegFlushKey)
 {
     dXSARGS;
 
-    if(items != 1) 
+    if (items != 1) 
     {
 	croak("usage: Win32::RegFlushKey($hkey);\n");
     }
@@ -2643,12 +2650,12 @@ XS(w32_RegGetKeySecurity)
     SECURITY_DESCRIPTOR sd;
     DWORD sdsz;
 
-    if(items != 3) 
+    if (items != 3) 
     {
 	croak("usage: Win32::RegGetKeySecurity($hkey, $security_info, $security_descriptor);\n");
     }
 
-    if(SUCCESSRETURNED(RegGetKeySecurity(SvHKEY(ST(0)), SvIV(ST(1)), &sd, &sdsz))) 
+    if (SUCCESSRETURNED(RegGetKeySecurity(SvHKEY(ST(0)), SvIV(ST(1)), &sd, &sdsz))) 
     {
 	SETPVN(2, &sd, sdsz);
 	XSRETURN_YES;
@@ -2661,7 +2668,7 @@ XS(w32_RegLoadKey)
 {
     dXSARGS;
 
-    if(items != 3) 
+    if (items != 3) 
     {
 	croak("usage: Win32::RegLoadKey($hkey, $subkey, $filename);\n");
     }
@@ -2681,12 +2688,12 @@ XS(w32_RegOpenKey)
     dXSARGS;
     HKEY handle;
 
-    if(items != 3) 
+    if (items != 3) 
     {
 	croak("usage: Win32::RegOpenKey($hkey, $subkey, $handle);\n");
     }
 
-    if(SUCCESSRETURNED(RegOpenKey(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), &handle))) 
+    if (SUCCESSRETURNED(RegOpenKey(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), &handle))) 
     {
 	SETHKEY(2,handle);
 	XSRETURN_YES;
@@ -2700,12 +2707,12 @@ XS(w32_RegOpenKeyEx)
     dXSARGS;
     HKEY handle;
 
-    if(items != 5) 
+    if (items != 5) 
     {
 	croak("usage: Win32::RegOpenKeyEx($hkey, $subkey, $reserved, $sam, $handle);\n");
     }
 
-    if(SUCCESSRETURNED(RegOpenKeyEx(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), 
+    if (SUCCESSRETURNED(RegOpenKeyEx(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), 
 				0, (REGSAM) ((unsigned long)SvIV(ST(3))), &handle))) 
     {
 	SETHKEY(4,handle);
@@ -2727,7 +2734,7 @@ XS(w32_RegQueryInfoKey)
     FILETIME ft;
     long retval;
 
-    if(items != 10) 
+    if (items != 10) 
     {
 	croak("usage: Win32::RegQueryInfoKey($hkey, $class, $numsubkeys, $maxsubkey,"
 		"$maxclass, $values, $maxvalname, $maxvaldata, $secdesclen,"
@@ -2738,7 +2745,7 @@ XS(w32_RegQueryInfoKey)
     retval = RegQueryInfoKey(SvHKEY(ST(0)), keyclass, &classsz, 0, &subkeys, &maxsubkey,
 				&maxclass, &values, &maxvalname, &maxvaldata,
 					&seclen, &ft);
-    if(SUCCESSRETURNED(retval)) 
+    if (SUCCESSRETURNED(retval)) 
     {
 	SETPV(1, keyclass);
 	SETIV(2, subkeys);
@@ -2763,12 +2770,12 @@ XS(w32_RegQueryValue)
     unsigned char databuffer[TMPBUFSZ*2];
     long datasz = sizeof(databuffer);
 
-    if(items != 3) 
+    if (items != 3) 
     {
 	croak("usage: Win32::RegQueryValue($hkey, $valuename, $data);\n");
     }
 
-    if(SUCCESSRETURNED(RegQueryValue(SvHKEY(ST(0)), SvPV(ST(1), na), (char*)databuffer, &datasz))) 
+    if (SUCCESSRETURNED(RegQueryValue(SvHKEY(ST(0)), SvPV(ST(1), na), (char*)databuffer, &datasz))) 
     {
 	// return includes the null terminator so delete it
 	SETPVN(2, databuffer, --datasz);
@@ -2788,18 +2795,18 @@ XS(w32_RegQueryValueEx)
     LONG result;
     LPBYTE ptr = databuffer;
 
-    if(items != 5) 
+    if (items != 5) 
     {
 	croak("usage: Win32::RegQueryValueEx($hkey, $valuename, $reserved, $type, $data);\n");
     }
 
     result = RegQueryValueEx(SvHKEY(ST(0)), SvPV(ST(1), na), 0, &type, ptr, &datasz);
-    if(result == ERROR_MORE_DATA)
+    if (result == ERROR_MORE_DATA)
     {
 	New(0, ptr, datasz+1, BYTE);
 	result = RegQueryValueEx(SvHKEY(ST(0)), SvPV(ST(1), na), 0, &type, ptr, &datasz);
     }
-    if(SUCCESSRETURNED(result)) 
+    if (SUCCESSRETURNED(result)) 
     {
 	SETIV(3, type);
 
@@ -2831,12 +2838,12 @@ XS(w32_RegQueryValueEx)
 		break;
 	}
 
-	if(ptr != databuffer)
+	if (ptr != databuffer)
 	    safefree(ptr);
 
 	XSRETURN_YES;
     }
-    if(ptr != databuffer)
+    if (ptr != databuffer)
 	safefree(ptr);
 
     XSRETURN_NO;
@@ -2847,7 +2854,7 @@ XS(w32_RegReplaceKey)
 {
     dXSARGS;
 
-    if(items != 4) 
+    if (items != 4) 
     {
 	croak("usage: Win32::RegReplaceKey($hkey, $subkey, $newfile, $oldfile);\n");
     }
@@ -2860,7 +2867,7 @@ XS(w32_RegRestoreKey)
 {
     dXSARGS;
 
-    if(items < 2 || items > 3) 
+    if (items < 2 || items > 3) 
     {
 	croak("usage: Win32::RegRestoreKey($hkey, $filename [, $flags]);\n");
     }
@@ -2873,7 +2880,7 @@ XS(w32_RegSaveKey)
 {
     dXSARGS;
 
-    if(items != 2) 
+    if (items != 2) 
     {
 	croak("usage: Win32::RegSaveKey($hkey, $filename);\n");
     }
@@ -2886,7 +2893,7 @@ XS(w32_RegSetKeySecurity)
 {
     dXSARGS;
 
-    if(items != 3) 
+    if (items != 3) 
     {
 	croak("usage: Win32::RegSetKeySecurity($hkey, $security_info, $security_descriptor);\n");
     }
@@ -2902,13 +2909,13 @@ XS(w32_RegSetValue)
     unsigned int size;
     char *buffer;
 
-    if(items != 4) 
+    if (items != 4) 
     {
 	croak("usage: Win32::RegSetValue($hkey, $subKey, $type, $data);\n");
     }
 
     DWORD type = SvIV(ST(2));
-    if(type != REG_SZ && type != REG_EXPAND_SZ)
+    if (type != REG_SZ && type != REG_EXPAND_SZ)
     {
 	croak("Win32::RegSetValue: Type was not REG_SZ or REG_EXPAND_SZ, cannot set %s\n", (char *)SvPV(ST(1), na));
     }
@@ -2927,7 +2934,7 @@ XS(w32_RegSetValueEx)
     unsigned int size;
     char *buffer;
 
-    if(items != 5) 
+    if (items != 5) 
     {
 	croak("usage: Win32::RegSetValueEx($hkey, $valname, $reserved, $type, $data);\n");
     }
@@ -2940,7 +2947,7 @@ XS(w32_RegSetValueEx)
 	case REG_MULTI_SZ:
 	case REG_EXPAND_SZ:
 	    buffer = (char *)SvPV(ST(4), size);
-	    if(type != REG_BINARY)
+	    if (type != REG_BINARY)
 		size++; // include null terminator in size
 
 	    REGRETURN(RegSetValueEx(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), 0, type, (PBYTE) buffer, size));
@@ -2962,7 +2969,7 @@ XS(w32_RegUnloadKey)
 {
     dXSARGS;
 
-    if(items != 2) 
+    if (items != 2) 
     {
 	croak("usage: Win32::RegUnLoadKey($hkey, $subkey);\n");
     }
@@ -2979,23 +2986,23 @@ XS(w32_RegisterServer)
     unsigned int length;
     FARPROC sFunc;
 
-    if(items != 1) 
+    if (items != 1) 
     {
 	croak("usage: Win32::RegisterServer($LibraryName)\n");
     }
 
     hInstance = LoadLibrary((char *)SvPV(ST(0), length));
-    if(hInstance != NULL)
+    if (hInstance != NULL)
     {
 	sFunc = GetProcAddress(hInstance, "DllRegisterServer");
-	if(sFunc != NULL)
+	if (sFunc != NULL)
 	{
 	    bSuccess = (sFunc() == 0);
 	}
 	FreeLibrary(hInstance);
     }
 
-    if(bSuccess)
+    if (bSuccess)
     {
 	XSRETURN_YES;
     }
@@ -3011,23 +3018,23 @@ XS(w32_UnregisterServer)
     unsigned int length;
     FARPROC sFunc;
 
-    if(items != 1) 
+    if (items != 1) 
     {
 	croak("usage: Win32::UnregisterServer($LibraryName)\n");
     }
 
     hInstance = LoadLibrary((char *)SvPV(ST(0), length));
-    if(hInstance != NULL)
+    if (hInstance != NULL)
     {
 	sFunc = GetProcAddress(hInstance, "DllUnregisterServer");
-	if(sFunc != NULL)
+	if (sFunc != NULL)
 	{
 	    bSuccess = (sFunc() == 0);
 	}
 	FreeLibrary(hInstance);
     }
 
-    if(bSuccess)
+    if (bSuccess)
     {
 	XSRETURN_YES;
     }

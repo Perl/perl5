@@ -3336,7 +3336,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 		goto done;
 	    }
 	    /* ahem, death to those who redefine active sort subs */
-	    if (curstack == sortstack && sortcop == CvSTART(cv))
+	    if (curstackinfo->si_type == SI_SORT && sortcop == CvSTART(cv))
 		croak("Can't redefine active sort subroutine %s", name);
 	    const_sv = cv_const_sv(cv);
 	    if (const_sv || dowarn && !(CvGV(cv) && GvSTASH(CvGV(cv))
@@ -3520,6 +3520,33 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
     copline = NOLINE;
     LEAVE_SCOPE(floor);
     return cv;
+}
+
+void
+newCONSTSUB(HV *stash, char *name, SV *sv)
+{
+    dTHR;
+    U32 oldhints = hints;
+    HV *old_cop_stash = curcop->cop_stash;
+    HV *old_curstash = curstash;
+    line_t oldline = curcop->cop_line;
+    curcop->cop_line = copline;
+
+    hints &= ~HINT_BLOCK_SCOPE;
+    if(stash)
+	curstash = curcop->cop_stash = stash;
+
+    newSUB(
+	start_subparse(FALSE, 0),
+	newSVOP(OP_CONST, 0, newSVpv(name,0)),
+	newSVOP(OP_CONST, 0, &sv_no),	/* SvPV(&sv_no) == "" -- GMB */
+	newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
+    );
+
+    hints = oldhints;
+    curcop->cop_stash = old_cop_stash;
+    curstash = old_curstash;
+    curcop->cop_line = oldline;
 }
 
 CV *

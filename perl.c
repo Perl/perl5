@@ -24,6 +24,13 @@
 char *getenv _((char *)); /* Usually in <stdlib.h> */
 #endif
 
+#ifdef I_FCNTL
+#include <fcntl.h>
+#endif
+#ifdef I_SYS_FILE
+#include <sys/file.h>
+#endif
+
 dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
 
 #ifdef IAMSUID
@@ -192,6 +199,7 @@ perl_construct(register PerlInterpreter *sv_interp)
 #endif
     }
 
+    init_stacks(ARGS);
 #ifdef MULTIPLICITY
     I_REINIT;
     perl_destruct_level = 1; 
@@ -227,7 +235,6 @@ perl_construct(register PerlInterpreter *sv_interp)
 
     fdpid = newAV();	/* for remembering popen pids by fd */
 
-    init_stacks(ARGS);
     DEBUG( {
 	New(51,debname,128,char);
 	New(52,debdelim,128,char);
@@ -349,6 +356,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 	op_free(main_root);
 	main_root = Nullop;
     }
+    curcop = &compiling;
     main_start = Nullop;
     SvREFCNT_dec(main_cv);
     main_cv = Nullcv;
@@ -451,10 +459,6 @@ perl_destruct(register PerlInterpreter *sv_interp)
     beginav = Nullav;
     endav = Nullav;
     initav = Nullav;
-
-    /* temp stack during pp_sort() */
-    SvREFCNT_dec(sortstack);
-    sortstack = Nullav;
 
     /* shortcuts just get cleared */
     envgv = Nullgv;
@@ -600,6 +604,7 @@ perl_parse(PerlInterpreter *sv_interp, void (*xsinit) (void), int argc, char **a
     char *validarg = "";
     I32 oldscope;
     AV* comppadlist;
+    int e_tmpfd = -1;
     dJMPENV;
     int ret;
     int fdscript = -1;
@@ -722,13 +727,36 @@ setuid perl scripts securely.\n");
 	    if (euid != uid || egid != gid)
 		croak("No -e allowed in setuid scripts");
 	    if (!e_fp) {
+#ifdef HAS_UMASK
+		int oldumask = PerlLIO_umask(0177);
+#endif
 	        e_tmpname = savepv(TMPPATH);
+#ifdef HAS_MKSTEMP
+		e_tmpfd = PerlLIO_mkstemp(e_tmpname);
+#else /* use mktemp() */
 		(void)PerlLIO_mktemp(e_tmpname);
 		if (!*e_tmpname)
-		    croak("Can't mktemp()");
+		    croak("Cannot generate temporary filename");
+# if defined(HAS_OPEN3) && defined(O_EXCL)
+		e_tmpfd = open(e_tmpname,
+			       O_WRONLY | O_CREAT | O_EXCL,
+			       0600);
+# else
+		(void)UNLINK(e_tmpname);
+		/* Yes, potential race.  But at least we can say we tried. */
 		e_fp = PerlIO_open(e_tmpname,"w");
-		if (!e_fp)
-		    croak("Cannot open temporary file");
+# endif
+#endif /* ifdef HAS_MKSTEMP */
+#if defined(HAS_MKSTEMP) || (defined(HAS_OPEN3) && defined(O_EXCL))
+		if (e_tmpfd < 0)
+		    croak("Cannot create temporary file \"%s\"", e_tmpname);
+		e_fp = PerlIO_fdopen(e_tmpfd,"w");
+#endif
+  		if (!e_fp)
+ 		    croak("Cannot create temporary file \"%s\"", e_tmpname);
+#ifdef HAS_UMASK
+		(void)PerlLIO_umask(oldumask);
+#endif
 	    }
 	    if (*++s)
 		PerlIO_puts(e_fp,s);
@@ -961,6 +989,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	(void)UNLINK(e_tmpname);
 	Safefree(e_tmpname);
 	e_tmpname = Nullch;
+	e_tmpfd = -1;
     }
 
     /* now that script is parsed, we can modify record separator */
@@ -994,7 +1023,7 @@ CPerlObj::perl_run(void)
 perl_run(PerlInterpreter *sv_interp)
 #endif
 {
-    dTHR;
+    dSP;
     I32 oldscope;
     dJMPENV;
     int ret;
@@ -1032,10 +1061,7 @@ perl_run(PerlInterpreter *sv_interp)
 	    JMPENV_POP;
 	    return 1;
 	}
-	if (curstack != mainstack) {
-	    dSP;
-	    SWITCHSTACK(curstack, mainstack);
-	}
+	POPSTACK_TO(mainstack);
 	break;
     }
 
@@ -2441,26 +2467,30 @@ init_debugger(void)
     curstash = defstash;
 }
 
+#ifndef STRESS_REALLOC
+#define REASONABLE(size) (size)
+#else
+#define REASONABLE(size) (1) /* unreasonable */
+#endif
+
 void
 init_stacks(ARGSproto)
 {
-    curstack = newAV();
+    /* start with 128-item stack and 8K cxstack */
+    curstackinfo = new_stackinfo(REASONABLE(128),
+				 REASONABLE(8192/sizeof(PERL_CONTEXT) - 1));
+    curstackinfo->si_type = SI_MAIN;
+    curstack = curstackinfo->si_stack;
     mainstack = curstack;		/* remember in case we switch stacks */
-    AvREAL_off(curstack);		/* not a real array */
-    av_extend(curstack,127);
 
     stack_base = AvARRAY(curstack);
     stack_sp = stack_base;
-    stack_max = stack_base + 127;
+    stack_max = stack_base + AvMAX(curstack);
 
-    cxstack_max = 8192 / sizeof(PERL_CONTEXT) - 2;	/* Use most of 8K. */
-    New(50,cxstack,cxstack_max + 1,PERL_CONTEXT);
-    cxstack_ix	= -1;
-
-    New(50,tmps_stack,128,SV*);
+    New(50,tmps_stack,REASONABLE(128),SV*);
     tmps_floor = -1;
     tmps_ix = -1;
-    tmps_max = 128;
+    tmps_max = REASONABLE(128);
 
     /*
      * The following stacks almost certainly should be per-interpreter,
@@ -2470,41 +2500,53 @@ init_stacks(ARGSproto)
     if (markstack) {
 	markstack_ptr = markstack;
     } else {
-	New(54,markstack,64,I32);
+	New(54,markstack,REASONABLE(32),I32);
 	markstack_ptr = markstack;
-	markstack_max = markstack + 64;
+	markstack_max = markstack + REASONABLE(32);
     }
+
+    SET_MARKBASE;
 
     if (scopestack) {
 	scopestack_ix = 0;
     } else {
-	New(54,scopestack,32,I32);
+	New(54,scopestack,REASONABLE(32),I32);
 	scopestack_ix = 0;
-	scopestack_max = 32;
+	scopestack_max = REASONABLE(32);
     }
 
     if (savestack) {
 	savestack_ix = 0;
     } else {
-	New(54,savestack,128,ANY);
+	New(54,savestack,REASONABLE(128),ANY);
 	savestack_ix = 0;
-	savestack_max = 128;
+	savestack_max = REASONABLE(128);
     }
 
     if (retstack) {
 	retstack_ix = 0;
     } else {
-	New(54,retstack,16,OP*);
+	New(54,retstack,REASONABLE(16),OP*);
 	retstack_ix = 0;
-	retstack_max = 16;
+	retstack_max = REASONABLE(16);
     }
 }
+
+#undef REASONABLE
 
 STATIC void
 nuke_stacks(void)
 {
     dTHR;
-    Safefree(cxstack);
+    while (curstackinfo->si_next)
+	curstackinfo = curstackinfo->si_next;
+    while (curstackinfo) {
+	PERL_SI *p = curstackinfo->si_prev;
+	/* curstackinfo->si_stack got nuked by sv_free_arenas() */
+	Safefree(curstackinfo->si_cxstack);
+	Safefree(curstackinfo);
+	curstackinfo = p;
+    }
     Safefree(tmps_stack);
     DEBUG( {
 	Safefree(debname);
@@ -2999,7 +3041,7 @@ my_failure_exit(void)
 STATIC void
 my_exit_jump(void)
 {
-    dTHR;
+    dSP;
     register PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
@@ -3014,6 +3056,7 @@ my_exit_jump(void)
 	e_tmpname = Nullch;
     }
 
+    POPSTACK_TO(mainstack);
     if (cxstack_ix >= 0) {
 	if (cxstack_ix > 0)
 	    dounwind(0);

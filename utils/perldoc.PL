@@ -206,7 +206,11 @@ sub minus_f_nocase {
 
 sub check_file {
     my($file) = @_;
-    return minus_f_nocase($file) && containspod($file) ? $file : "";
+    if ($opt_m) {
+	return minus_f_nocase($file) ? $file : "";
+    } else {
+	return minus_f_nocase($file) && containspod($file) ? $file : "";
+    }
 }
 
 
@@ -284,6 +288,7 @@ foreach (@pages) {
 		for ($i = 0; $trn = $ENV{'DCL$PATH'.$i}; $i++) {
 		    push(@searchdirs,$trn);
 		}
+	    push(@dirs,'perl_root:[lib.pod]')  # installed pods
 	    } else {
 	        push(@searchdirs, grep(-d, split($Config{path_sep}, 
 						 $ENV{'PATH'})));

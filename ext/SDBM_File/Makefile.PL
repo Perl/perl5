@@ -6,13 +6,8 @@ use ExtUtils::MakeMaker;
 # which perform the corresponding actions in the subdirectory.
 
 $define = ($^O eq 'MSWin32') ? '-DMSDOS' : '';
-if ($^O eq 'MSWin32') {
-  $myextlib = 'sdbm\\libsdbm$(LIB_EXT)';
-} elsif ($^O eq 'VMS') {
-  $myextlib = 'sdbm/libsdbm$(LIB_EXT)';
-} else {
-  $myextlib = 'sdbm/libsdbm$(LIB_EXT)';  
-}
+if ($^O eq 'MSWin32') { $myextlib = 'sdbm\\libsdbm$(LIB_EXT)'; }
+else                  { $myextlib = 'sdbm/libsdbm$(LIB_EXT)';  }
 
 WriteMakefile(
               NAME	=> 'SDBM_File',
@@ -21,8 +16,6 @@ WriteMakefile(
               XSPROTOARG => '-noprototypes', 		# XXX remove later?
               VERSION_FROM => 'SDBM_File.pm',
               DEFINE => $define,
-#              NORECURS => $^O eq 'VMS',
-#              SKIP => $^O eq 'VMS' ? 'subdirs' : '', # Don't do the subdirs section for VMS
              );
 
 sub MY::postamble {
@@ -33,7 +26,7 @@ $(MYEXTLIB): sdbm/Makefile
 ';
   } else {
   '   
-$(MYEXTLIB): [.sdbm]descrip.mms
+$(MYEXTLIB) : [.sdbm]descrip.mms
 	set def [.sdbm]
     $(MMS) all
     set def [-]

@@ -472,6 +472,9 @@ while (<POD>) {
 	  noindex:
 	    ;
 	}
+	elsif ($cmd eq 'pod') {
+	    ;	# recognise the pod directive, as no op (hs)
+	}
 	else {
 	    warn "Unrecognized directive: $cmd\n";
 	}
@@ -676,7 +679,7 @@ BEGIN {
     "otilde"	=>	"\\~{o}",	#   small o, tilde
     "Ouml"	=>	'\\"{O}',	#   capital O, dieresis or umlaut mark
     "ouml"	=>	'\\"{o}',	#   small o, dieresis or umlaut mark
-    "szlig"	=>	'\\ss',		#   small sharp s, German (sz ligature)
+    "szlig"	=>	'\\ss{}',	#   small sharp s, German (sz ligature)
     "THORN"	=>	'\\L',		#   capital THORN, Icelandic
     "thorn"	=>	'\\l',,		#   small thorn, Icelandic
     "Uacute"	=>	"\\'{U}",	#   capital U, acute accent

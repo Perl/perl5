@@ -644,8 +644,15 @@ PP(pp_aassign)
 		    }
 		    TAINT_NOT;
 		}
-		if (relem == lastrelem && dowarn)
-		    warn("Odd number of elements in hash list");
+		if (relem == lastrelem && dowarn) {
+		    if (relem == firstrelem &&
+			SvROK(*relem) &&
+			( SvTYPE(SvRV(*relem)) == SVt_PVAV ||
+			  SvTYPE(SvRV(*relem)) == SVt_PVHV ) )
+			warn("Reference found where even-sized list expected");
+		    else
+			warn("Odd number of elements in hash assignment");
+		}
 	    }
 	    break;
 	default:
@@ -1077,7 +1084,10 @@ do_readline(void)
 		       }
 		    }
 		    if ((tmpfp = PerlIO_open(tmpfnam,"w+","fop=dlt")) != NULL) {
-		        ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec)) != NULL);
+		        Stat_t st;
+		        if (!PerlLIO_stat(SvPVX(tmpglob),&st) && S_ISDIR(st.st_mode))
+		          ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX(tmpglob),vmsspec)) != NULL);
+		        else ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec)) != NULL);
 		        if (ok) wilddsc.dsc$w_length = (unsigned short int) strlen(wilddsc.dsc$a_pointer);
 		        while (ok && ((sts = lib$find_file(&wilddsc,&rsdsc,&cxt,
 		                                    &dfltdsc,NULL,NULL,NULL))&1)) {

@@ -1273,13 +1273,6 @@ die(pat, va_alist)
 			  "%p: die: curstack = %p, mainstack = %p\n",
 			  thr, curstack, mainstack));
 #endif /* USE_THREADS */
-    /* We have to switch back to mainstack or die_where may try to pop
-     * the eval block from the wrong stack if die is being called from a
-     * signal handler.  - dkindred@cs.cmu.edu */
-    if (curstack != mainstack) {
-        dSP;
-        SWITCHSTACK(curstack, mainstack);
-    }
 
 #ifdef I_STDARG
     va_start(args, pat);
@@ -1311,11 +1304,12 @@ die(pat, va_alist)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
+	    PUSHSTACK(SI_DIEHOOK);
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
-
+	    POPSTACK();
 	    LEAVE;
 	}
     }
@@ -1376,11 +1370,12 @@ croak(pat, va_alist)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
+	    PUSHSTACK(SI_DIEHOOK);
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
-
+	    POPSTACK();
 	    LEAVE;
 	}
     }
@@ -1435,11 +1430,12 @@ warn(pat,va_alist)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
+	    PUSHSTACK(SI_WARNHOOK);
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
-
+	    POPSTACK();
 	    LEAVE;
 	    return;
 	}
@@ -2352,13 +2348,13 @@ char *b;
 	sv_setpv(tmpsv, ".");
     else
 	sv_setpvn(tmpsv, a, fa - a);
-    if (Stat(SvPVX(tmpsv), &tmpstatbuf1) < 0)
+    if (PerlLIO_stat(SvPVX(tmpsv), &tmpstatbuf1) < 0)
 	return FALSE;
     if (fb == b)
 	sv_setpv(tmpsv, ".");
     else
 	sv_setpvn(tmpsv, b, fb - b);
-    if (Stat(SvPVX(tmpsv), &tmpstatbuf2) < 0)
+    if (PerlLIO_stat(SvPVX(tmpsv), &tmpstatbuf2) < 0)
 	return FALSE;
     return tmpstatbuf1.st_dev == tmpstatbuf2.st_dev &&
 	   tmpstatbuf1.st_ino == tmpstatbuf2.st_ino;

@@ -268,7 +268,13 @@ init_tm(ptm)		/* see mktime, strftime and asctime	*/
 #endif
 
 
-#ifndef HAS_LONG_DOUBLE /* XXX What to do about long doubles? */
+#ifdef HAS_LONG_DOUBLE
+#  if LONG_DOUBLESIZE > DOUBLESIZE
+#    undef HAS_LONG_DOUBLE  /* XXX until we figure out how to use them */
+#  endif
+#endif
+
+#ifndef HAS_LONG_DOUBLE 
 #ifdef LDBL_MAX
 #undef LDBL_MAX
 #endif
@@ -287,7 +293,12 @@ not_here(char *s)
     return -1;
 }
 
-static double
+static
+#ifdef HAS_LONG_DOUBLE
+long double
+#else
+double
+#endif
 constant(char *name, int arg)
 {
     errno = 0;
@@ -2549,6 +2560,7 @@ new(packname = "POSIX::Termios", ...)
 	    RETVAL = (struct termios*)safemalloc(sizeof(struct termios));
 #else
 	    not_here("termios");
+        RETVAL = 0;
 #endif
 	}
     OUTPUT:
@@ -2598,7 +2610,8 @@ getiflag(termios_ref)
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
 	RETVAL = termios_ref->c_iflag;
 #else
-	    not_here("getiflag");
+     not_here("getiflag");
+     RETVAL = 0;
 #endif
     OUTPUT:
 	RETVAL
@@ -2610,7 +2623,8 @@ getoflag(termios_ref)
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
 	RETVAL = termios_ref->c_oflag;
 #else
-	    not_here("getoflag");
+     not_here("getoflag");
+     RETVAL = 0;
 #endif
     OUTPUT:
 	RETVAL
@@ -2622,7 +2636,8 @@ getcflag(termios_ref)
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
 	RETVAL = termios_ref->c_cflag;
 #else
-	    not_here("getcflag");
+     not_here("getcflag");
+     RETVAL = 0;
 #endif
     OUTPUT:
 	RETVAL
@@ -2634,7 +2649,8 @@ getlflag(termios_ref)
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
 	RETVAL = termios_ref->c_lflag;
 #else
-	    not_here("getlflag");
+     not_here("getlflag");
+     RETVAL = 0;
 #endif
     OUTPUT:
 	RETVAL
@@ -2649,7 +2665,8 @@ getcc(termios_ref, ccix)
 	    croak("Bad getcc subscript");
 	RETVAL = termios_ref->c_cc[ccix];
 #else
-	    not_here("getcc");
+     not_here("getcc");
+     RETVAL = 0;
 #endif
     OUTPUT:
 	RETVAL

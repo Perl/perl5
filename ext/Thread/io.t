@@ -1,5 +1,13 @@
 use Thread;
 
+sub counter {
+$count = 10;
+while ($count--) {
+    sleep 1;
+    print "ping $count\n";
+}
+}
+
 sub reader {
     my $line;
     while ($line = <STDIN>) {
@@ -17,7 +25,13 @@ finished counting down and the I/O thread has seen end-of-file on
 the terminal/stdin.
 EOT
 
-$r = new Thread \&reader;
+$r = new Thread \&counter;
+
+&reader;
+
+__END__
+
+
 $count = 10;
 while ($count--) {
     sleep 1;

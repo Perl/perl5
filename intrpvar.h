@@ -138,8 +138,6 @@ PERLVAR(Isortcop,	OP *)		/* user defined sort routine */
 PERLVAR(Isortstash,	HV *)		/* which is in some package or other */
 PERLVAR(Ifirstgv,	GV *)		/* $a */
 PERLVAR(Isecondgv,	GV *)		/* $b */
-PERLVAR(Isortstack,	AV *)		/* temp stack during pp_sort() */
-PERLVAR(Isignalstack,	AV *)		/* temp stack during sighandler() */
 PERLVAR(Imystrk,	SV *)		/* temp key string for do_each() */
 PERLVAR(Idumplvl,	I32)		/* indentation level on syntax tree dump */
 PERLVAR(Ioldlastpm,	PMOP *)		/* for saving regexp context during debugger */
