@@ -3,11 +3,10 @@ use strict;
 use ExtUtils::MakeMaker;
 
 my %tables = (EUC_JP  => [
-                'euc-jp.ucm',
-#               'jis0201.enc',
-#               'jis0212.enc',
-#               'jis0208.enc',
-#               'shiftjis.enc',
+               'euc-jp.ucm',
+               'jis0208.enc',
+               'jis0212.enc',
+               'shiftjis.enc',
               ]);
 
 

@@ -296,6 +296,7 @@ ext/Encode/Encode/gsm0338.enc		Encode table
 ext/Encode/Encode/HZ.enc		Encode table
 ext/Encode/Encode/ir-197.enc		Encode table
 ext/Encode/Encode/jis0201.enc		Encode table
+ext/Encode/Encode/jis0201.ucm		Encode table
 ext/Encode/Encode/jis0208.enc		Encode table
 ext/Encode/Encode/jis0212.enc		Encode table
 ext/Encode/Encode/koi8-f.enc		Encode table

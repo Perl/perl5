@@ -46,7 +46,7 @@ sub encode_M
 eval "\@ARGV = map(glob(\$_),\@ARGV)" if ($^O eq 'MSWin32');
 
 my %opt;
-getopts('qo:f:n:',\%opt);
+getopts('qOo:f:n:',\%opt);
 my $cname = (exists $opt{'o'}) ? $opt{'o'} : shift(@ARGV);
 chmod(0666,$cname) if -f $cname && !-w $cname;
 open(C,">$cname") || die "Cannot open $cname:$!";
@@ -434,17 +434,20 @@ sub outstring
   }
  else
   {
-   foreach my $o (keys %strings)
-    {
-     my $i = index($o,$s);
-     if ($i >= 0)
-      {
-       $sym = $strings{$o};
-       $sym .= sprintf("+0x%02x",$i) if ($i);
-       $subsave += length($s);
-       return $sym;
-      }
-    }
+   if ($opt{'O'}) {
+       foreach my $o (keys %strings)
+        {
+         my $i = index($o,$s);
+         if ($i >= 0)
+          {
+           $sym = $strings{$o};
+           $sym .= sprintf("+0x%02x",$i) if ($i);
+           $subsave += length($s);
+           $strings{$s} = $sym;
+           return $sym;
+          }
+        }
+   }
    $strings{$s} = $sym = $name;
    $strings += length($s);
    printf $fh "\nstatic const U8 %s[%d] =\n",$name,length($s);

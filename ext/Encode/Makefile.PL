@@ -2,7 +2,7 @@ use 5.7.2;
 use strict;
 use ExtUtils::MakeMaker;
 
-my %tables = (8859 => ['ascii.ucm', 'cp1250.ucm', 'koi8-r.ucm' ],
+my %tables = (8859 => ['ascii.ucm', 'cp1250.ucm', 'koi8-r.ucm', 'jis0201.ucm' ],
               EBCDIC  => ['cp1047.ucm','cp37.ucm','posix-bc.ucm'],
               Symbols => ['symbol.ucm','dingbats.ucm'],
 	      );
@@ -93,7 +93,7 @@ sub postamble
 		$continuator = '';
 	    }
 	}
-	$str .= "\n\t\$(PERL) compile -o \$\@ -f $table.fnm\n\n";
+	$str .= "\n\t\$(PERL) compile -O -o \$\@ -f $table.fnm\n\n";
 	open (FILELIST, ">$table.fnm")
 	    || die "Could not open $table.fnm: $!";
 	foreach my $file (@{$tables{$table}})
