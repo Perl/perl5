@@ -46,21 +46,32 @@ if ($f eq 'baeak') {print "ok 6\n";} else {print "# '$f'\nnot ok 6\n";}
 };
 
 { my $s = join("", chr(1234),chr(255));
-  print "not " unless length($s) == 2;
+  print "not " unless length($s) == 2 &&
+                      ord(substr($s,0,1)) == 1234 &&
+                      ord(substr($s,1,1)) ==  255;
   print "ok 11\n";
 }
 
 { my $s = join(chr(2345), chr(1234),chr(255));
-  print "not " unless length($s) == 3;
+  print "not " unless length($s) == 3 &&
+                      ord(substr($s,0,1)) == 1234 &&
+                      ord(substr($s,1,1)) == 2345 &&
+                      ord(substr($s,2,1)) ==  255;
   print "ok 12\n";
 }
 
 { my $s = join(chr(2345), chr(1234),chr(3456));
-  print "not " unless length($s) == 3;
+  print "not " unless length($s) == 3 &&
+                      ord(substr($s,0,1)) == 1234 &&
+                      ord(substr($s,1,1)) == 2345 &&
+                      ord(substr($s,2,1)) == 3456;
   print "ok 13\n";
 }
 
 { my $s = join(chr(255), chr(1234),chr(2345));
-  print "not " unless length($s) == 3;
+  print "not " unless length($s) == 3 &&
+                      ord(substr($s,0,1)) == 1234 &&
+                      ord(substr($s,1,1)) ==  255 &&
+                      ord(substr($s,2,1)) == 2345;
   print "ok 14\n";
 }

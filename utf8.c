@@ -183,8 +183,7 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 
 Returns the character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding and no longer than C<curlen>;
-C<retlen> will be set to the length, in bytes, of that character,
-and the pointer C<s> will be advanced to the end of the character.
+C<retlen> will be set to the length, in bytes, of that character.
 
 If C<s> does not point to a well-formed UTF8 character, the behaviour
 is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
@@ -351,8 +350,7 @@ malformed:
 
 Returns the character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding; C<retlen> will be set to the
-length, in bytes, of that character, and the pointer C<s> will be
-advanced to the end of the character.
+length, in bytes, of that character.
 
 If C<s> does not point to a well-formed UTF8 character, zero is
 returned and retlen is set, if possible, to -1.

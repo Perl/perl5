@@ -2942,17 +2942,11 @@ PP(pp_sprintf)
 PP(pp_ord)
 {
     djSP; dTARGET;
-    UV value;
-    SV *tmpsv = POPs;
+    SV *argsv = POPs;
     STRLEN len;
-    U8 *tmps = (U8*)SvPVx(tmpsv, len);
-    STRLEN retlen;
+    U8 *s = (U8*)SvPVx(argsv, len);
 
-    if ((*tmps & 0x80) && DO_UTF8(tmpsv))
-	value = utf8_to_uv(tmps, len, &retlen, 0);
-    else
-	value = (UV)(*tmps & 255);
-    XPUSHu(value);
+    XPUSHu(DO_UTF8(argsv) ? utf8_to_uv_simple(s, 0) : (*s & 0xff));
     RETURN;
 }
 

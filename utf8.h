@@ -69,10 +69,10 @@ END_EXTERN_C
 
 #define UTF8_CONTINUATION_MASK		((U8)0x3f)
 #define UTF8_ACCUMULATION_SHIFT		6
-#define UTF8_ACCUMULATE(old, new)	((old) << UTF8_ACCUMULATION_SHIFT | ((new) & UTF8_CONTINUATION_MASK))
+#define UTF8_ACCUMULATE(old, new)	((old) << UTF8_ACCUMULATION_SHIFT | (((U8)new) & UTF8_CONTINUATION_MASK))
 
-#define UTF8_EIGHT_BIT_HI(c)	( (((U8)c)>>6)      |0xc0)
-#define UTF8_EIGHT_BIT_LO(c)	(((((U8)c)>>6)&0x3f)|0x80)
+#define UTF8_EIGHT_BIT_HI(c)	( (((U8)(c))>>6)      |0xc0)
+#define UTF8_EIGHT_BIT_LO(c)	(((((U8)(c))   )&0x3f)|0x80)
 
 #ifdef HAS_QUAD
 #define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \
