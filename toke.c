@@ -5239,7 +5239,7 @@ static int
 S_pending_ident(pTHX)
 {
     register char *d;
-    register I32 tmp;
+    register I32 tmp = 0;
     /* pit holds the identifier we read and pending_ident is reset */
     char pit = PL_pending_ident;
     PL_pending_ident = 0;
