@@ -1272,7 +1272,7 @@ guaranteed to be in the same order as either the C<keys> or C<values>
 function would produce on the same (unmodified) hash.  Since Perl
 5.8.1 the ordering is different even between different runs of Perl
 because of security reasons (see L<perlsec/"Algorithmic Complexity
-Attacks".)
+Attacks">)
 
 When the hash is entirely read, a null array is returned in list context
 (which when assigned produces a false (C<0>) value), and C<undef> in
@@ -2323,7 +2323,7 @@ is guaranteed to be the same order as either the C<values> or C<each>
 function produces (given that the hash has not been modified).
 Since Perl 5.8.1 the ordering is different even between different
 runs of Perl because of security reasons (see L<perlsec/"Algorithmic
-Complexity Attacks".)
+Complexity Attacks">)
 
 As a side effect, calling keys() resets the HASH's internal iterator,
 see L</each>.
@@ -6223,7 +6223,7 @@ is guaranteed to be the same order as either the C<keys> or C<each>
 function would produce on the same (unmodified) hash.  Since Perl
 5.8.1 the ordering is different even between different runs of Perl
 because of security reasons (see L<perlsec/"Algorithmic Complexity
-Attacks".)
+Attacks">)
 
 As a side effect, calling values() resets the HASH's internal iterator,
 see L</each>.
