@@ -1422,8 +1422,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvPVX(sv)	= 0;
 	HvFILL(sv)	= 0;
 	HvMAX(sv)	= 0;
-	HvKEYS(sv)	= 0;
-	SvNVX(sv)	= 0.0;
+	HvTOTALKEYS(sv)	= 0;
+	HvPLACEHOLDERS(sv) = 0;
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	HvRITER(sv)	= 0;
