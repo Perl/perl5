@@ -2486,7 +2486,6 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
     if (SvPOK(sv)) {
         char *c;
         char *e;
-        bool has_utf = FALSE;
         if (!sv_utf8_downgrade(sv, TRUE))
 	    return FALSE;
 

@@ -2661,9 +2661,11 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
+#if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
     SV *sv;
     SV** svp;
     char spid[TYPE_CHARS(int)];
+#endif
 
     if (!pid)
 	return -1;

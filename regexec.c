@@ -1906,7 +1906,9 @@ S_regmatch(pTHX_ regnode *prog)
     register I32 c1, c2, paren;	/* case fold search, parenth */
     int minmod = 0, sw = 0, logical = 0;
     I32 unwind = 0;
+#if 0
     I32 firstcp = PL_savestack_ix;
+#endif
 
 #ifdef DEBUGGING
     PL_regindent++;
@@ -2915,7 +2917,6 @@ S_regmatch(pTHX_ regnode *prog)
 	    inner = NEXTOPER(scan);
 	  do_branch:
 	    {
-		CHECKPOINT lastcp;
 		c1 = OP(scan);
 		if (OP(next) != c1)	/* No choice. */
 		    next = inner;	/* Avoid recursion. */
