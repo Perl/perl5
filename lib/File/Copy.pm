@@ -31,13 +31,11 @@ sub copy {
 
     my $from = shift;
     my $to = shift;
-    my $recsep = $\;
     my $closefrom=0;
     my $closeto=0;
     my ($size, $status, $r, $buf);
     local(*FROM, *TO);
-
-    $\ = '';
+    local($\) = '';
 
     if (ref(\$from) eq 'GLOB') {
 	*FROM = $from;
@@ -81,7 +79,7 @@ sub copy {
     goto fail_inner unless(defined($r));
     close(TO) || goto fail_open2 if $closeto;
     close(FROM) || goto fail_open1 if $closefrom;
-    $\ = $recsep;
+    # Use this idiom to avoid uninitialized value warning.
     return 1;
     
     # All of these contortions try to preserve error messages...
@@ -100,7 +98,6 @@ sub copy {
 	$! = $status unless $!;
     }
   fail_open1:
-    $\ = $recsep;
     return 0;
 }
 
