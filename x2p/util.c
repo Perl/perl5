@@ -183,6 +183,7 @@ croak(char *pat,...)
 
     va_start(args, pat);
     vfprintf(stderr,pat,args);
+    va_end(args);
 #else
     fprintf(stderr,pat,a1,a2,a3,a4);
 #endif
@@ -197,6 +198,7 @@ fatal(char *pat,...)
 
     va_start(args, pat);
     vfprintf(stderr,pat,args);
+    va_end(args);
 #else
     fprintf(stderr,pat,a1,a2,a3,a4);
 #endif
@@ -214,6 +216,7 @@ warn(char *pat,...)
 
     va_start(args, pat);
     vfprintf(stderr,pat,args);
+    va_end(args);
 #else
     fprintf(stderr,pat,a1,a2,a3,a4);
 #endif
