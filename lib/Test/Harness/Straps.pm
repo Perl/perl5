@@ -328,8 +328,11 @@ sub _switches {
 
     # When taint mode is on, PERL5LIB is ignored.  So we need to put
     # all that on the command line as -Is.
-    $s .= join " ", qq[ "-$1"], map {qq["-I$_"]} $self->_filtered_INC
-      if $first =~ /^#!.*\bperl.*\s-\w*([Tt]+)/;
+    if ($first =~ /^#!.*\bperl.*\s-\w*([Tt]+)/) {
+      $s .= join " ", qq[ "-$1"], map {qq["-I$_"]} $self->_filtered_INC;
+    } elsif ($^O eq 'MacOS') {
+      $s .= join " ", map {qq["-I$_"]} $self->_filtered_INC;
+    }
 
     close(TEST) or print "can't close $file. $!\n";
 

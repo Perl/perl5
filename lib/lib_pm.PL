@@ -74,7 +74,7 @@ sub import {
 	    Carp::carp("Empty compile time value given to use lib");
 	}
 
-	$_ = _nativize($_);
+	local $_ = _nativize($_);
 
 	if (-e && ! -d _) {
 	    require Carp;
@@ -109,7 +109,7 @@ sub unimport {
 
     my %names;
     foreach (@_) {
-	$_ = _nativize($_);
+	local $_ = _nativize($_);
 
 	my($arch_auto_dir, $arch_dir, $version_dir, $version_arch_dir)
 	    = _get_dirs($_);
