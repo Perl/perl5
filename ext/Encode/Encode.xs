@@ -366,7 +366,7 @@ PerlIO_funcs PerlIO_encode = {
 #endif /* encode layer */
 
 void
-Encode_Define(pTHX_ encode_t *enc)
+Encode_XSEncoding(pTHX_ encode_t *enc)
 {
  dSP;
  HV *stash = gv_stashpv("Encode::XS", TRUE);
