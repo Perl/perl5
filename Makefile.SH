@@ -837,31 +837,55 @@ depend: makedepend
 makedepend: makedepend.SH config.sh
 	sh ./makedepend.SH
 
-# Cannot delegate rebuilding of t/perl to make to allow interlaced
-# test and minitest
-test-prep: miniperl perl preplibrary utilities $(dynamic_ext) $(nonxs_ext) $(TEST_PERL_DLL)
-	cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT))
+# Cannot delegate rebuilding of t/perl to make
+# to allow interlaced test and minitest
 
-# Second branch is for testing without a tty or controling terminal.
-# See t/op/stat.t
-test check: test-prep
+_test-prep: miniperl $(PERL)$(EXE_EXT) preplibrary utilities $(dynamic_ext) $(nonxs_ext) $(TEST_PERL_DLL)
+	cd t && (rm -f $(PERL)$(EXE_EXT); $(LNS) ../$(PERL)$(EXE_EXT) $(PERL)$(EXE_EXT))
+
+test-prep: 
+	PERL=./perl $(MAKE) _test-prep
+
+_test-tty:
+	cd t && $(LDLIBPTH) $(PERL_DEBUG) $(PERL) TEST $(UTF8) </dev/tty
+
+_test-notty:
+	cd t && $(LDLIBPTH) $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(PERL) TEST $(UTF8)
+
+# The second branch is for testing without a tty or controlling terminal,
+# see t/op/stat.t
+_test:
 	if (true </dev/tty) >/dev/null 2>&1; then \
-	  cd t && $(LDLIBPTH) ./perl TEST </dev/tty; \
+	  $(MAKE) _test-tty; \
 	else \
-	  cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl TEST; \
+	  $(MAKE) _test-notty; \
 	fi
-	@echo "Ran tests" > t/rantests
+
+test check: test-prep
+	PERL=./perl $(MAKE) _test
+
+test-tty: test-prep
+	PERL=./perl $(MAKE) _test-tty
+
+test-notty: test-prep
+	PERL=./perl $(MAKE) _test-notty
 
 utest ucheck: test-prep
-	if (true </dev/tty) >/dev/null 2>&1; then \
-	  cd t && $(LDLIBPTH) ./perl TEST -utf8 </dev/tty; \
-	else \
-	  cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl TEST -utf8; \
-	fi
+	PERL=./perl UTF8=-utf8 $(MAKE) _test
 
-# For testing without a tty or controling terminal. See t/op/stat.t
-test-notty: test-prep
-	cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl TEST
+# Targets for Third Degree testing.
+
+test-prep.third:
+	PERL=./perl.third $(MAKE) _test-prep
+
+test.third check.third:	test-prep.third perl.third
+	PERL=./perl.third PERL_DEBUG=PERL_3LOG=1 $(MAKE) _test
+
+utest.third ucheck.third: test-prep.third perl.third
+	PERL=./perl.third PERL_DEBUG=PERL_3LOG=1UTF=-utf8 $(MAKE) _test
+
+test-notty.third: test-prep.third perl.third
+	PERL=./perl.third $(MAKE) PERL_DEBUG=PERL_3LOG=1 _test-notty
 
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.
@@ -870,27 +894,6 @@ minitest: miniperl lib/re.pm
 	@echo "to build lib/Config.pm."
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
 		&& $(LDLIBPTH) ./perl TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t pragma/*.t </dev/tty
-
-# Targets for Third Degree testing.
-
-test.third check.third:	test-prep perl.third
-	if (true </dev/tty) >/dev/null 2>&1; then \
-	  cd t && $(LDLIBPTH) PERL_3LOG=1 ./perl.third TEST </dev/tty; \
-	else \
-	  cd t && PERL_SKIP_TTY_TEST=1 PERL_3LOG=1 $(LDLIBPTH) ./perl TEST; \
-	fi
-	@echo "Ran tests" > t/rantests
-
-utest.third ucheck.third: test-prep perl.third
-	if (true </dev/tty) >/dev/null 2>&1; then \
-	  cd t && $(LDLIBPTH) PERL_3LOG=1 ./perl.third TEST -utf8 </dev/tty; \
-	else \
-	  cd t && PERL_SKIP_TTY_TEST=1 PERL_3LOG=1 $(LDLIBPTH) ./perl TEST -utf8; \
-	fi
-
-# For testing without a tty or controling terminal. See t/op/stat.t
-test-notty.third: test-prep perl.third
-	cd t && PERL_SKIP_TTY_TEST=1 PERL_3LOG=1 $(LDLIBPTH) ./perl.third TEST
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
