@@ -969,7 +969,7 @@ PP(pp_modulo)
 	NV dright;
 	NV dleft;
 
-	if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
+	if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
 	    IV i = SvIVX(POPs);
 	    right = (right_neg = (i < 0)) ? -i : i;
 	}
@@ -981,7 +981,7 @@ PP(pp_modulo)
 		dright = -dright;
 	}
 
-	if (!use_double && SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
+	if (!use_double && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
 	    IV i = SvIVX(POPs);
 	    left = (left_neg = (i < 0)) ? -i : i;
 	}
