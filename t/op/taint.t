@@ -109,7 +109,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..175\n";
+print "1..176\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -121,7 +121,7 @@ print "1..175\n";
     delete @ENV{@MoreEnv};
     $ENV{TERM} = 'dumb';
 
-    if ($Is_Cygwin) {
+    if ($Is_Cygwin && ! -f 'cygwin1.dll') {
 	system("/usr/bin/cp /usr/bin/cygwin1.dll .") &&
 	    die "$0: failed to cp cygwin1.dll: $!\n";
 	END { unlink "cygwin1.dll" } # yes, done for all platforms...
@@ -870,5 +870,18 @@ else {
 
 }
 
+{
+    # Check that all environment variables are tainted.
+    my @untainted;
+    while (my ($k, $v) = each %ENV) {
+	if (!tainted($v) &&
+	    # These we have untainted explicitly earlier.
+	    $k !~ /^(BASH_ENV|CDPATH|ENV|IFS|PATH|TEMP|TERM|TMP)$/) {
+	    push @untainted, "# '$k' = '$v'\n";
+	}
+    }
+    print @untainted == 0 ? "ok 176\n" : "not ok 176\n";
+    print "# untainted:\n", @untainted if @untainted; 
+}
 
 

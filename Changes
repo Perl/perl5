@@ -31,6 +31,524 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12256] By: jhi                                   on 2001/09/28  12:18:29
+        Log: Move the B tests to B/t.
+     Branch: perl
+	   + ext/B/t/b.t ext/B/t/debug.t ext/B/t/deparse.t
+	   + ext/B/t/showlex.t ext/B/t/stash.t ext/B/t/terse.t
+	   - ext/B/B.t ext/B/B/Terse.t ext/B/Debug.t ext/B/Deparse.t
+	   - ext/B/Showlex.t ext/B/Stash.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12255] By: jhi                                   on 2001/09/28  12:09:40
+        Log: Forgot from #12254.
+     Branch: perl
+	   + ext/B/B/Terse.t
+____________________________________________________________________________
+[ 12254] By: jhi                                   on 2001/09/28  12:09:06
+        Log: Subject: [PATCH MANIFEST ext/B/B/Terse.t] Add tests for B::Terse
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Thu, 27 Sep 2001 23:22:17 -0600
+             Message-ID: <20010928052747.56587.qmail@onion.perl.org>   
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12253] By: jhi                                   on 2001/09/28  02:31:49
+        Log: Test numbering mismatch.
+     Branch: perl
+	   ! t/op/chdir.t
+____________________________________________________________________________
+[ 12252] By: jhi                                   on 2001/09/27  22:46:42
+        Log: Subject: [PATCH perl@12239] slightly less broken chdir.t for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 26 Sep 2001 17:43:14 -0500
+             Message-Id: <5.1.0.14.0.20010926173048.01aac5b0@exchi01>
+     Branch: perl
+	   ! iperlsys.h t/op/chdir.t
+____________________________________________________________________________
+[ 12251] By: jhi                                   on 2001/09/27  22:44:35
+        Log: Subject: [PATCH gv.c] make __ANON__ global
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Wed, 26 Sep 2001 17:56:28 +0100 (BST)
+             Message-Id: <200109261656.RAA27762@tempest.npl.co.uk>
+     Branch: perl
+	   ! gv.c t/op/anonsub.t t/op/runlevel.t
+____________________________________________________________________________
+[ 12250] By: jhi                                   on 2001/09/27  22:33:11
+        Log: Subject: Re: [BUG] B::Terse can't handle constant scalar refs
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 27 Sep 2001 22:34:32 +0200
+             Message-ID: <20010927223432.A1485@rafael>
+     Branch: perl
+	   ! ext/B/B/Terse.pm
+____________________________________________________________________________
+[ 12249] By: jhi                                   on 2001/09/27  22:29:32
+        Log: Subject: [PATCH] Cleanup of perldsc.pod      
+             From: Casey West <casey@geeknest.com>
+             Date: Thu, 27 Sep 2001 11:13:17 -0400
+             Message-ID: <20010927111317.A1942@stupid.geeknest.com>
+     Branch: perl
+	   ! pod/perldsc.pod
+____________________________________________________________________________
+[ 12248] By: jhi                                   on 2001/09/27  22:23:24
+        Log: Not everyone is using ithreads...
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.t
+____________________________________________________________________________
+[ 12247] By: jhi                                   on 2001/09/27  13:39:39
+        Log: Document the nss_delete core dump workaround for HP-UX
+             and Solaris, bug IDs 20010805.018 and 20010629.004.
+     Branch: perl
+	   ! README.hpux README.solaris
+____________________________________________________________________________
+[ 12246] By: jhi                                   on 2001/09/27  12:05:36
+        Log: Dump Unicode hash keys also as Unicode,
+             not just as a byte string.
+     Branch: perl
+	   ! dump.c ext/Devel/Peek/Peek.t
+____________________________________________________________________________
+[ 12245] By: jhi                                   on 2001/09/27  11:15:51
+        Log: Integrate changes #12241 and #12242 from macperl:
+             
+             Remove unneeded disabling of umask() calls
+             
+             Note (get|set)sockopt are available.
+     Branch: perl
+	  !> lib/File/Temp.pm pod/perlport.pod
+____________________________________________________________________________
+[ 12244] By: sky                                   on 2001/09/27  08:53:00
+        Log: Flush buffers on thread closedown.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 12243] By: jhi                                   on 2001/09/27  02:20:06
+        Log: Dump SvUTF8(sv)s also as \x{...}.
+             
+             TODO: dump the SvUTF8() hash keys similarly. 
+     Branch: perl
+	   ! dump.c embed.h embed.pl ext/Devel/Peek/Peek.t proto.h
+____________________________________________________________________________
+[ 12242] By: pudge                                 on 2001/09/26  20:41:35
+        Log: Note (get|set)sockopt are available.
+     Branch: maint-5.6/macperl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 12241] By: pudge                                 on 2001/09/26  20:28:49
+        Log: Remove unneeded disabling of umask() calls
+     Branch: maint-5.6/macperl
+	   ! lib/File/Temp.pm
+____________________________________________________________________________
+[ 12240] By: sky                                   on 2001/09/26  18:44:56
+        Log: Documention update
+     Branch: perl
+	   ! ext/threads/threads.pm
+____________________________________________________________________________
+[ 12239] By: jhi                                   on 2001/09/26  13:49:05
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 12238] By: jhi                                   on 2001/09/26  13:40:53
+        Log: Check that all environment variables are tainted.
+     Branch: perl
+	   ! t/op/taint.t
+____________________________________________________________________________
+[ 12237] By: jhi                                   on 2001/09/26  13:02:07
+        Log: Manual integration error in #12235.
+     Branch: perl
+	   ! lib/File/DosGlob.t
+____________________________________________________________________________
+[ 12236] By: jhi                                   on 2001/09/26  12:57:11
+        Log: Subject: Re: binmode(STDOUT, ":unix") busted when STDOUT is piped.
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Tue, 25 Sep 2001 23:57:07 -0600
+             Message-ID: <20010926060233.7554.qmail@onion.perl.org>
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 12235] By: jhi                                   on 2001/09/26  12:53:16
+        Log: Integrate macperl changes from Chris Nandor:
+             12192 11817 11815 11813 11778 11775
+             
+             Update CPAN.pm to work with new Mac::BuildTools instead
+             of ExtUtils::MM_MacOS "orphan" functions
+             
+             Fix test
+             
+             Make syntax check report in MPW style, fix tests
+             to use Mac::err=unix to get normal-style error
+             messages.
+             
+             More module and test ports from Thomas Wegner et al
+             
+             Fix open of /dev/null for Mac OS
+             
+             Allow for platforms to override formatting of errors
+             on output from Matthias Neeracher (core files)
+     Branch: perl
+	   ! ext/B/Deparse.t lib/File/DosGlob.pm lib/File/DosGlob.t
+	   ! lib/File/Spec.t lib/File/Temp/t/security.t lib/strict.t
+	   ! lib/subs.t lib/warnings.t t/op/magic.t t/run/kill_perl.t
+	  !> ext/File/Glob/Glob.pm ext/File/Glob/bsd_glob.c lib/CPAN.pm
+	  !> lib/File/Spec/Mac.pm lib/File/Temp.pm perl.c perl.h pp_ctl.c
+	  !> t/base/term.t t/op/runlevel.t t/pod/testp2pt.pl util.c
+____________________________________________________________________________
+[ 12234] By: jhi                                   on 2001/09/26  11:58:11
+        Log: grrr.
+     Branch: perl
+	   ! t/op/gv.t
+____________________________________________________________________________
+[ 12233] By: jhi                                   on 2001/09/26  11:56:09
+        Log: Retract #12232.
+     Branch: perl
+	   ! t/op/gv.t
+____________________________________________________________________________
+[ 12232] By: jhi                                   on 2001/09/26  11:53:37
+        Log: (Retracted by #12233.)
+     Branch: perl
+	   ! t/op/gv.t
+____________________________________________________________________________
+[ 12231] By: jhi                                   on 2001/09/26  11:52:09
+        Log: Detypo.
+     Branch: perl
+	   ! ext/Encode/Makefile.PL
+____________________________________________________________________________
+[ 12230] By: sky                                   on 2001/09/26  11:36:23
+        Log: Increase the amount of time we spend in each thread, and add one that uses an anonymous sub.
+             We are using a "delay" here because we do not want to depend on thread synchronization issues.
+     Branch: perl
+	   + ext/threads/t/stress_cv.t
+	   ! MANIFEST ext/threads/t/stress_string.t
+____________________________________________________________________________
+[ 12229] By: jhi                                   on 2001/09/26  11:27:54
+        Log: NetWare tweak from Ananth Kesari.
+     Branch: perl
+	   ! NetWare/t/Readme.txt
+____________________________________________________________________________
+[ 12228] By: jhi                                   on 2001/09/26  11:26:26
+        Log: Trick to fool case-blind filesystems.
+     Branch: perl
+	   ! ext/Encode/Makefile.PL
+____________________________________________________________________________
+[ 12227] By: sky                                   on 2001/09/26  11:06:50
+        Log: Threads can start executing in a different order than they were
+             created.... so we cannot ok() inside the threadstarter.
+     Branch: perl
+	   ! ext/threads/t/stress_string.t
+____________________________________________________________________________
+[ 12226] By: sky                                   on 2001/09/26  07:41:45
+        Log: Add in stress_string.t to stress test threads a bit more.
+     Branch: perl
+	   + ext/threads/t/stress_string.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12225] By: sky                                   on 2001/09/26  07:04:21
+        Log: Fix negative refcount introduced by #12223.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 12224] By: sky                                   on 2001/09/26  06:57:58
+        Log: Update documentation to match change #12223
+     Branch: perl
+	   ! sharedsv.c
+____________________________________________________________________________
+[ 12223] By: sky                                   on 2001/09/26  06:54:32
+        Log: Use a separate interpreter for the sharedsv space. Another
+             negative sv leak. Sigh.
+     Branch: perl
+	   ! sharedsv.c
+____________________________________________________________________________
+[ 12222] By: sky                                   on 2001/09/26  05:58:35
+        Log: Do the environ assignment in perl_contruct to match perl_destruct.
+             Now we don't need to perl_parse/perl_run. However environ is a
+             global....
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 12221] By: sky                                   on 2001/09/26  05:41:02
+        Log: Move the creation of PL_strtab to perl_construct so we can work
+             with HV and HEs without running perl_parse.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 12220] By: gsar                                  on 2001/09/26  02:18:26
+        Log: integrate macperl changes into maint-5.6
+     Branch: maint-5.6/perl
+	  !> (integrate 26 files)
+____________________________________________________________________________
+[ 12219] By: pudge                                 on 2001/09/26  00:19:35
+        Log: Fix just a few of the bugs in Mac::InternetConfig (Bug #462999, Axel Rose);
+             fix doc in Mac::Fonts (Patch #447221, Andreas Marcel Riechert).
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Fonts/Fonts.xs
+	   ! macos/ext/Mac/InternetConfig/InternetConfig.pm
+____________________________________________________________________________
+[ 12218] By: ams                                   on 2001/09/25  23:31:33
+        Log: Subject: Re: [PATCH] AutoSplit.t (was Re: Untested libraries update)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 26 Sep 2001 01:20:20 +0100
+             Message-Id: <20010926012020.B48092@plum.flirble.org>
+     Branch: perl
+	   ! lib/AutoSplit.t
+____________________________________________________________________________
+[ 12217] By: ams                                   on 2001/09/25  22:33:05
+        Log: Subject: [PATCH perl@12180] angle bracket filespec problem on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 25 Sep 2001 18:08:42 -0500
+             Message-Id: <5.1.0.14.0.20010925154848.036887d8@exchi01>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 12216] By: ams                                   on 2001/09/25  21:41:01
+        Log: Subject: [PATCH lib/AutoSplit.t]  Fixing mysterious TEST failure. (was
+             Re: binmode(STDOUT, ":unix") busted when STDOUT is piped.)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 26 Sep 2001 00:38:21 -0400
+             Message-Id: <20010926003821.A627@blackrider>
+     Branch: perl
+	   ! lib/AutoSplit.t
+____________________________________________________________________________
+[ 12215] By: jhi                                   on 2001/09/25  21:40:04
+        Log: Subject: [PATCH lib/Test/Simple.pm lib/Test/Utils.pm] fix test.deparse
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 25 Sep 2001 17:43:49 -0400
+             Message-ID: <20010925174349.B19534@blackrider>
+     Branch: perl
+	   ! lib/Test/Simple.pm lib/Test/Utils.pm
+____________________________________________________________________________
+[ 12214] By: pudge                                 on 2001/09/25  21:11:21
+        Log: Integrate changes from bleadperl.
+     Branch: maint-5.6/macperl
+	  !> pod/perlport.pod
+____________________________________________________________________________
+[ 12213] By: jhi                                   on 2001/09/25  20:37:14
+        Log: skip($mess) should result in one skip.
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 12212] By: pudge                                 on 2001/09/25  20:21:06
+        Log: Integrate change #12200 from maintperl.
+     Branch: maint-5.6/macperl
+	  !> win32/perlhost.h
+____________________________________________________________________________
+[ 12211] By: pudge                                 on 2001/09/25  20:11:56
+        Log: Fix file types to "apple"
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Menus/t/MenuBar.rsrc
+	   ! macos/ext/Mac/SAT/t/Collision.rsrc
+____________________________________________________________________________
+[ 12210] By: pudge                                 on 2001/09/25  19:28:20
+        Log: Fix rsrc file as snd file; fix path in t file.
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Notification/t/Notification.rsrc
+	   ! macos/ext/Mac/Notification/t/Notification.t
+____________________________________________________________________________
+[ 12209] By: pudge                                 on 2001/09/25  19:15:57
+        Log: Sync up with File::Find from bleadperl.
+     Branch: maint-5.6/macperl
+	   ! lib/File/Find.pm t/lib/filefind-taint.t
+____________________________________________________________________________
+[ 12208] By: pudge                                 on 2001/09/25  19:06:48
+        Log: Ignore SIGPIPE being set to IGNORE.  Temporary fix until we upgrade
+             to new version of libnet.  (Axel Rose, Paul Schinder, and a cast
+             of hundreds)
+     Branch: maint-5.6/macperl
+	   ! macos/bundled_lib/blib/lib/Net/Cmd.pm
+	   ! macos/bundled_lib/blib/lib/Net/FTP/A.pm
+	   ! macos/bundled_lib/blib/lib/Net/FTP/I.pm
+____________________________________________________________________________
+[ 12207] By: nick                                  on 2001/09/25  19:04:36
+        Log: Integrate mainline (untested while modem is up)
+     Branch: perlio
+	  +> lib/AutoSplit.t t/test.pl
+	   - lib/warnings/register.t
+	  !> (integrate 28 files)
+____________________________________________________________________________
+[ 12206] By: jhi                                   on 2001/09/25  17:21:00
+        Log: perldiag entry for #12205.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 12205] By: jhi                                   on 2001/09/25  17:20:38
+        Log: Subject: [PATCH] warning on v-string in use/require
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Mon, 24 Sep 2001 17:29:03 -0400
+             Message-ID: <3BAFA59F.9C0E0339@rowman.com>
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket.pm pp_ctl.c t/lib/warnings/pp_ctl
+____________________________________________________________________________
+[ 12204] By: jhi                                   on 2001/09/25  17:11:02
+        Log: perltooc et al updates.
+     Branch: perl
+	   ! plan9/mkfile pod/roffitall
+____________________________________________________________________________
+[ 12203] By: jhi                                   on 2001/09/25  17:05:19
+        Log: Subject: [PATCH pp_sys.c t/op/chdir.t ...] Deprecating chdir(undef)/chdir('')
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 23 Sep 2001 00:07:12 -0400
+             Message-ID: <20010923000712.A7005@blackrider>
+     Branch: perl
+	   ! pod/perl572delta.pod pod/perldiag.pod pp_sys.c t/op/chdir.t
+____________________________________________________________________________
+[ 12202] By: jhi                                   on 2001/09/25  16:55:29
+        Log: Subject: [PATCH perl@12185] Some Encode/*.enc files needs to be corrected
+             From: SADAHIRO Tomoyuki <BQW10602@nifty.com>
+             Date: Wed, 26 Sep 2001 01:25:10 +0900
+             Message-Id: <20010926012410.5B86.BQW10602@nifty.com>
+     Branch: perl
+	   ! ext/Encode/Encode/cp932.enc ext/Encode/Encode/cp936.enc
+	   ! ext/Encode/Encode/cp949.enc ext/Encode/Encode/cp950.enc
+	   ! ext/Encode/Encode/euc-cn.enc ext/Encode/Encode/shiftjis.enc
+____________________________________________________________________________
+[ 12201] By: jhi                                   on 2001/09/25  16:52:03
+        Log: Integrate change #12200 from maintperl;
+             on windows, virtualized environment could propagate deleted variables
+             into children if they happen to be at the very end of the table
+     Branch: perl
+	  !> win32/perlhost.h
+____________________________________________________________________________
+[ 12200] By: gsar                                  on 2001/09/25  16:36:01
+        Log: on windows, virtualized environment could propagate deleted variables
+             into children if they happen to be at the very end of the table
+             (thanks for succinct test case from Johan Holmberg, and fix from
+             Doug Lankshear)
+     Branch: maint-5.6/perl
+	   ! win32/perlhost.h
+____________________________________________________________________________
+[ 12199] By: gsar                                  on 2001/09/25  15:19:13
+        Log: avoid the use of ftime() (it does a useless, potentially
+             expensive call to GetTimeZoneInformation()); this potentially
+             also results in three more digits of precision from
+             Time::HiRes::time()
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12198] By: jhi                                   on 2001/09/25  14:27:01
+        Log: Replace the use Test::More in t/{op,io,run} with t/test.pl.
+             
+             Note: io/binmode is failing, have to figure out why.
+     Branch: perl
+	   + t/test.pl
+	   ! MANIFEST t/io/binmode.t t/op/chdir.t t/op/crypt.t
+	   ! t/op/inccode.t t/op/rand.t t/op/srand.t t/op/ver.t
+	   ! t/run/exit.t
+____________________________________________________________________________
+[ 12197] By: ams                                   on 2001/09/25  13:48:55
+        Log: Subject: [PATCH] AutoSplit.t (was Re: Untested libraries update)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 25 Sep 2001 00:37:40 +0100
+             Message-Id: <20010925003740.S4971@plum.flirble.org>
+             (Further changes expected.)
+     Branch: perl
+	   + lib/AutoSplit.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12196] By: sky                                   on 2001/09/25  13:37:12
+        Log: Second attempt at fixing Time::HiRes::time on win32. Apperently if ENV{TZ} is wrong we fail. New attempt uses 
+             _ftime to try and be more robust.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12194] By: ams                                   on 2001/09/25  11:40:00
+        Log: Subject: [PATCH perl@12180] perltootc -> perltooc in vms/descrip_mms.template
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 24 Sep 2001 17:54:20 -0500
+             Message-Id: <5.1.0.14.0.20010924171225.01bb0428@exchi01>
+     Branch: perl
+	   ! vms/descrip_mms.template
+____________________________________________________________________________
+[ 12193] By: pudge                                 on 2001/09/25  02:53:42
+        Log: Fixes for multiline error parsing (Bug #459263); cmd-.
+             not working, cursor not spinning (Bug #422129); external
+             editor problems (Bug #456329); escape/cmd-. not activating
+             "Cancel" in Save dialog box (Bug #446960); Runtimes not
+             executing on launch (Bug #464441).
+     Branch: maint-5.6/macperl
+	   ! macos/macish.c macos/macish.h macos/macperl/MPEditor.c
+	   ! macos/macperl/MPGlobals.h macos/macperl/MPScript.c
+	   ! macos/macperl/MacPerl.r
+____________________________________________________________________________
+[ 12192] By: pudge                                 on 2001/09/25  02:42:49
+        Log: Update CPAN.pm to work with new Mac::BuildTools instead
+             of ExtUtils::MM_MacOS "orphan" functions
+     Branch: maint-5.6/macperl
+	   ! lib/CPAN.pm
+____________________________________________________________________________
+[ 12191] By: pudge                                 on 2001/09/25  02:37:58
+        Log: Fix up another xsubpp problem (Matthias Neeracher)
+     Branch: maint-5.6/macperl
+	   ! macos/xsubpp
+____________________________________________________________________________
+[ 12190] By: pudge                                 on 2001/09/25  02:37:38
+        Log: Remove literal tabs from source in MM_MacOS.pm (Thomas Wegner)
+     Branch: maint-5.6/macperl
+	   ! macos/lib/ExtUtils/MM_MacOS.pm
+____________________________________________________________________________
+[ 12189] By: pudge                                 on 2001/09/25  02:37:08
+        Log: Fix up Makefiles for more Mac:: modules (and prepare for
+             static build ...?)
+     Branch: maint-5.6/macperl
+	   ! macos/Makefile.mk macos/ext/Mac/Makefile.mk
+	   ! macos/macperl/Makefile.mk
+____________________________________________________________________________
+[ 12188] By: pudge                                 on 2001/09/25  02:36:19
+        Log: Fix up tests
+     Branch: maint-5.6/macperl
+	   ! macos/MacPerlTests.cmd macos/MacPerlTests.plx
+____________________________________________________________________________
+[ 12187] By: pudge                                 on 2001/09/25  02:11:13
+        Log: Make malloc smarter, fix bugs.  (Bug #404030)
+     Branch: maint-5.6/macperl
+	   ! macos/icemalloc.c macos/icemalloc.h
+____________________________________________________________________________
+[ 12186] By: nick                                  on 2001/09/24  19:18:17
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/I18N/Langinfo/fallback.c ext/I18N/Langinfo/fallback.xs
+	  +> lib/filetest.t
+	  !> (integrate 30 files)
+____________________________________________________________________________
+[ 12185] By: jhi                                   on 2001/09/24  18:56:40
+        Log: Retract #12136, the warnings::register is already
+             tested by t/lib/warnings/9enabled, as pointed out
+             by Paul Marquess.
+     Branch: perl
+	   - lib/warnings/register.t
+	   ! MANIFEST lib/warnings/register.pm t/lib/1_compile.t
+____________________________________________________________________________
+[ 12184] By: gsar                                  on 2001/09/24  18:39:58
+        Log: fix Time::HiRes implementation of gettimeofday() on windows
+             (HiRes.t#14 now passes)
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12183] By: gsar                                  on 2001/09/24  18:13:23
+        Log: File::Spec::catfile() canonifies everything to blackslashes on
+             windows :-(
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.t
+____________________________________________________________________________
+[ 12182] By: gsar                                  on 2001/09/24  17:59:54
+        Log: test number mismatch
+     Branch: perl
+	   ! t/op/magic.t
+____________________________________________________________________________
+[ 12181] By: jhi                                   on 2001/09/24  17:10:41
+        Log: ok().
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 12180] By: jhi                                   on 2001/09/24  16:09:37
+        Log: unpack("Z*Z*", pack("Z*Z*", ..)) bug, patch and test from
+             Wolfgang Laun <Wolfgang.Laun@alcatel.at>
+     Branch: perl
+	   ! pp_pack.c t/op/pack.t
+____________________________________________________________________________
+[ 12179] By: jhi                                   on 2001/09/24  15:46:49
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12178] By: jhi                                   on 2001/09/24  14:12:06
         Log: Subject: [REPATCH] Re: [PATCH lib/ExtUtils/Manifest.pm] Minor bug in comment logic in maniread() on VMS
              From: Michael G Schwern <schwern@pobox.com>

@@ -151,6 +151,8 @@ please join perl-ithreads@perl.org for more information
 
 =item creating a thread from within a thread is unsafe under win32
 
+=item PERL_OLD_SIGNALS are not threadsafe, will not be.
+
 =back
 
 =head1 SEE ALSO

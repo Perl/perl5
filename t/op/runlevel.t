@@ -33,12 +33,14 @@ for (@prgs){
     print TEST "$prog\n";
     close TEST;
     my $results = $Is_VMS ?
-                  `MCR $^X "-I[-.lib]" $switch $tmpfile 2>&1` :
-		      $Is_MSWin32 ?  
-			  `.\\perl -I../lib $switch $tmpfile 2>&1` :
-		      $Is_NetWare ?  
-			  `perl -I../lib $switch $tmpfile 2>&1` :
-			      `./perl $switch $tmpfile 2>&1`;
+                      `MCR $^X "-I[-.lib]" $switch $tmpfile 2>&1` :
+		  $Is_MSWin32 ?  
+		      `.\\perl -I../lib $switch $tmpfile 2>&1` :
+		  $Is_NetWare ?  
+		      `perl -I../lib $switch $tmpfile 2>&1` :
+		  $Is_MacOS ?
+		      `$^X -I::lib -MMac::err=unix $switch $tmpfile` :
+		  `./perl $switch $tmpfile 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN
@@ -309,6 +311,7 @@ $SIG{__DIE__} = sub {
 eval { die };
 &{sub { eval 'die' }}();
 sub foo { eval { die } } foo();
+{package rmb; sub{ eval{die} } ->() };	# check __ANON__ is global	
 EXPECT
 In DIE
 main|-|8|(eval)
@@ -318,6 +321,9 @@ main|-|9|main::__ANON__
 In DIE
 main|-|10|(eval)
 main|-|10|main::foo
+In DIE
+rmb|-|11|(eval)
+rmb|-|11|main::__ANON__
 ########
 package TEST;
  

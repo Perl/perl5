@@ -91,11 +91,13 @@ for (@prgs){
     print TEST $prog,"\n";
     close TEST;
     my $results = $Is_VMS ?
-                  `./perl "-I../lib" $switch $tmpfile` :
+	              `./perl "-I../lib" $switch $tmpfile` :
 		  $Is_MSWin32 ?
-                  `.\\perl -I../lib $switch $tmpfile` :
+		      `.\\perl -I../lib $switch $tmpfile` :
 		  $Is_NetWare ?
-                  `perl -I../lib $switch $tmpfile` :
+		      `perl -I../lib $switch $tmpfile` :
+		  $Is_MacOS ?
+		      `$^X -I::lib $switch -MMac::err=unix $tmpfile` :
                   `./perl -I../lib $switch $tmpfile`;
     my $status = $?;
     $results =~ s/\n+$//;

@@ -15,23 +15,33 @@ print "1..10\n";
 use File::DosGlob 'glob';
 
 # test if $_ takes as the default
+my $expected;
+if ($^O eq 'MacOS') {
+    $expected = $_ = ":op:a*.t";
+} else {
+    $expected = $_ = "op/a*.t";
+}
 $_ = "op/a*.t";
 my @r = glob;
-print "not " if $_ ne 'op/a*.t';
+print "not " if $_ ne $expected;
 print "ok 1\n";
 print "# |@r|\nnot " if @r < 9;
 print "ok 2\n";
 
 # check if <*/*> works
-@r = <*/a*.t>;
+if ($^O eq 'MacOS') {
+    @r = <:*:a*.t>;
+} else {
+    @r = <*/a*.t>;
+}
 # atleast {argv,abbrev,anydbm,autoloader,append,arith,array,assignwarn,auto}.t
-print "not " if @r < 9;
+print "# |@r|\nnot " if @r < 9;
 print "ok 3\n";
 my $r = scalar @r;
 
 # check if scalar context works
 @r = ();
-while (defined($_ = <*/a*.t>)) {
+while (defined($_ = ($^O eq 'MacOS') ? <:*:a*.t> : <*/a*.t>)) {
     print "# $_\n";
     push @r, $_;
 }
@@ -40,25 +50,40 @@ print "ok 4\n";
 
 # check if list context works
 @r = ();
-for (<*/a*.t>) {
-    print "# $_\n";
-    push @r, $_;
+if ($^O eq 'MacOS') {
+    for (<:*:a*.t>) {
+    	print "# $_\n";
+    	push @r, $_;
+    }
+} else {
+    for (<*/a*.t>) {
+    	print "# $_\n";
+    	push @r, $_;
+    }
 }
 print "not " if @r != $r;
 print "ok 5\n";
 
 # test if implicit assign to $_ in while() works
 @r = ();
-while (<*/a*.t>) {
-    print "# $_\n";
-    push @r, $_;
+if ($^O eq 'MacOS') {
+    while (<:*:a*.t>) {
+    	print "# $_\n";
+	push @r, $_;
+    }
+} else {
+    while (<*/a*.t>) {
+    	print "# $_\n";
+	push @r, $_;
+    }
 }
 print "not " if @r != $r;
 print "ok 6\n";
 
 # test if explicit glob() gets assign magic too
 my @s = ();
-while (glob '*/a*.t') {
+my $pat = ($^O eq 'MacOS') ? ':*:a*.t': '*/a*.t';
+while (glob ($pat)) {
     print "# $_\n";
     push @s, $_;
 }

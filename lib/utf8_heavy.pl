@@ -26,11 +26,20 @@ sub SWASHNEW {
     while (($caller = caller($i)) eq __PACKAGE__) { $i++ }
     my $encoding = $enc{$caller} || "unicore";
     (my $file = $type) =~ s!::!/!g;
-    if ($file =~ /^In(.+)/) {
+    if ($file =~ /^In[- ]?(.+)/i) {
 	my $In = $1;
 	defined %utf8::In || do "$encoding/In.pl";
-	if (exists $utf8::In{$In}) {
-	    $file = "$encoding/In/$utf8::In{$In}";
+	my $prefix = substr(lc($In), 0, 3);
+	if (exists $utf8::InPat{$prefix}) {
+	    for my $k (keys %{$utf8::InPat{$prefix}}) {
+		if ($In =~ /^$k$/i) {
+		    $In = $utf8::InPat{$prefix}->{$k};
+		    if (exists $utf8::In{$In}) {
+			$file = "$encoding/In/$utf8::In{$In}";
+			last;
+		    }
+		}
+	    }
 	}
     } else {
 	$file =~ s#^(Is|To)([A-Z].*)#$1/$2#;
@@ -43,7 +52,7 @@ sub SWASHNEW {
 	    || do "$file.pl"
 	    || do "$encoding/$file.pl"
 	    || do "$encoding/Is/${type}.pl"
-	    || croak("Can't find $encoding character property \"$type\"");
+	    || croak("Can't find Unicode character property \"$type\"");
     }
 
     $| = 1;

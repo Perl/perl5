@@ -272,6 +272,27 @@ perl_construct(pTHXx)
     New(31337, PL_reentrant_buffer,1, REBUF);
     New(31337, PL_reentrant_buffer->tmbuff,1, struct tm);
 #endif
+
+    /* Note that strtab is a rather special HV.  Assumptions are made
+       about not iterating on it, and not adding tie magic to it.
+       It is properly deallocated in perl_destruct() */
+    PL_strtab = newHV();
+
+#ifdef USE_5005THREADS
+    MUTEX_INIT(&PL_strtab_mutex);
+#endif
+    HvSHAREKEYS_off(PL_strtab);			/* mandatory */
+    hv_ksplit(PL_strtab, 512);
+
+#if defined(__DYNAMIC__) && (defined(NeXT) || defined(__NeXT__))
+    _dyld_lookup_and_bind
+	("__environ", (unsigned long *) &environ_pointer, NULL);
+#endif /* environ */
+
+#ifdef  USE_ENVIRON_ARRAY
+    PL_origenviron = environ;
+#endif
+
     ENTER;
 }
 
@@ -450,6 +471,7 @@ perl_destruct(pTHXx)
 
 	for (i = 0; environ[i]; i++)
 	    safesysfree(environ[i]);
+
 	/* Must use safesysfree() when working with environ. */
 	safesysfree(environ);		
 
@@ -919,11 +941,6 @@ setuid perl scripts securely.\n");
 #endif
 #endif
 
-#if defined(__DYNAMIC__) && (defined(NeXT) || defined(__NeXT__))
-    _dyld_lookup_and_bind
-	("__environ", (unsigned long *) &environ_pointer, NULL);
-#endif /* environ */
-
     PL_origargc = argc;
     {
         /* we copy rather than point to argv
@@ -939,9 +956,7 @@ setuid perl scripts securely.\n");
         }
     }
 
-#ifdef  USE_ENVIRON_ARRAY
-    PL_origenviron = environ;
-#endif
+
 
     if (PL_do_undump) {
 
@@ -1547,7 +1562,7 @@ S_run_body(pTHX_ I32 oldscope)
 
 	if (PL_minus_c) {
 #ifdef MACOS_TRADITIONAL
-	    PerlIO_printf(Perl_error_log, "%s syntax OK\n", MacPerl_MPWFileName(PL_origfilename));
+	    PerlIO_printf(Perl_error_log, "# %s syntax OK\n", MacPerl_MPWFileName(PL_origfilename));
 #else
 	    PerlIO_printf(Perl_error_log, "%s syntax OK\n", PL_origfilename);
 #endif
@@ -2586,15 +2601,7 @@ S_init_main_stash(pTHX)
 {
     GV *gv;
 
-    /* Note that strtab is a rather special HV.  Assumptions are made
-       about not iterating on it, and not adding tie magic to it.
-       It is properly deallocated in perl_destruct() */
-    PL_strtab = newHV();
-#ifdef USE_5005THREADS
-    MUTEX_INIT(&PL_strtab_mutex);
-#endif
-    HvSHAREKEYS_off(PL_strtab);			/* mandatory */
-    hv_ksplit(PL_strtab, 512);
+
 
     PL_curstash = PL_defstash = newHV();
     PL_curstname = newSVpvn("main",4);

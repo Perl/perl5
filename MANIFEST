@@ -56,7 +56,6 @@ ext/attrs/attrs.pm		attrs extension Perl module
 ext/attrs/attrs.xs		attrs extension external subroutines
 ext/attrs/Makefile.PL		attrs extension makefile writer
 ext/B/B.pm		Compiler backend support functions and methods
-ext/B/B.t		See if B works
 ext/B/B.xs		Compiler backend external subroutines
 ext/B/B/Asmdata.pm	Compiler backend data for assembler
 ext/B/B/assemble	Assemble compiler bytecode
@@ -78,9 +77,7 @@ ext/B/B/Stackobj.pm	Compiler stack objects support functions
 ext/B/B/Stash.pm	Compiler module to identify stashes
 ext/B/B/Terse.pm	Compiler Terse backend
 ext/B/B/Xref.pm		Compiler Xref backend
-ext/B/Debug.t		See if B::Debug works
 ext/B/defsubs_h.PL	Generator for constant subroutines
-ext/B/Deparse.t		See if B::Deparse works
 ext/B/Makefile.PL	Compiler backend makefile writer
 ext/B/NOTES		Compiler backend notes
 ext/B/O.pm		Compiler front-end module (-MO=...)
@@ -91,8 +88,12 @@ ext/B/ramblings/magic		Compiler ramblings: notes on magic
 ext/B/ramblings/reg.alloc	Compiler ramblings: register allocation
 ext/B/ramblings/runtime.porting	Compiler ramblings: porting PP enging
 ext/B/README		Compiler backend README
-ext/B/Showlex.t		See if B::ShowLex works
-ext/B/Stash.t		See if B::Stash works
+ext/B/t/b.t		See if B works
+ext/B/t/debug.t		See if B::Debug works
+ext/B/t/deparse.t	See if B::Deparse works
+ext/B/t/showlex.t	See if B::ShowLex works
+ext/B/t/stash.t		See if B::Stash works
+ext/B/t/terse.t		See if B::Terse works
 ext/B/TESTS		Compiler backend test data
 ext/B/Todo		Compiler backend Todo list
 ext/B/typemap			Compiler backend interface types
@@ -574,6 +575,8 @@ ext/threads/Changes		ithreads
 ext/threads/Makefile.PL		ithreads
 ext/threads/README		ithreads
 ext/threads/t/basic.t		ithreads
+ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
+ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
 ext/threads/threads.h		ithreads
 ext/threads/threads.pm          ithreads
 ext/threads/threads.xs		ithreads
@@ -1097,6 +1100,7 @@ lib/NEXT/Changes		NEXT
 lib/NEXT/README			NEXT
 lib/NEXT/test.pl		See if NEXT works
 lib/open.pm			Pragma to specify default I/O disciplines
+lib/open.t			See if the open pragma works
 lib/open2.pl			Open a two-ended pipe (uses IPC::Open2)
 lib/open3.pl			Open a three-ended pipe (uses IPC::Open3)
 lib/overload.pm			Module for overloading perl operators
@@ -1221,6 +1225,7 @@ lib/Tie/Hash.pm			Base class for tied hashes
 lib/Tie/RefHash.pm		Base class for tied hashes with references as keys
 lib/Tie/RefHash.t		Test for Tie::RefHash and Tie::RefHash::Nestable
 lib/Tie/Scalar.pm		Base class for tied scalars
+lib/Tie/Scalar.t		See if Tie::Scalar works
 lib/Tie/SubstrHash.pm		Compact hash for known key, value and table size
 lib/Tie/SubstrHash.t		Test for Tie::SubstrHash
 lib/Time/gmtime.pm		By-name interface to Perl's builtin gmtime

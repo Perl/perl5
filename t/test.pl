@@ -110,7 +110,8 @@ sub fail {
 # Note: can't pass multipart messages since we try to
 # be compatible with Test::More::skip().
 sub skip {
-    my ($mess, $n) = @_;
+    my $mess = shift;
+    my $n    = @_ ? shift : 1;
     for (1..$n) {
 	ok(1, "# skip:", $mess);
     }

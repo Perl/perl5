@@ -25,6 +25,8 @@ use File::Spec;
 no lib "."; # we need to run chdir all over and we would get at wrong
             # libraries there
 
+require Mac::BuildTools if $^O eq 'MacOS';
+
 END { $End++; &cleanup; }
 
 %CPAN::DEBUG = qw[
@@ -3964,7 +3966,7 @@ sub look {
     my($self) = @_;
 
     if ($^O eq 'MacOS') {
-      $self->ExtUtils::MM_MacOS::look;
+      $self->Mac::BuildTools::look;
       return;
     }
 
@@ -4055,7 +4057,7 @@ sub readme {
 	or $CPAN::Frontend->mydie(qq{No $sans.readme found});;
 
     if ($^O eq 'MacOS') {
-        ExtUtils::MM_MacOS::launch_file($local_file);
+        Mac::BuildTools::launch_file($local_file);
         return;
     }
 
@@ -4357,7 +4359,7 @@ or
     $self->debug("Changed directory to $builddir") if $CPAN::DEBUG;
 
     if ($^O eq 'MacOS') {
-        ExtUtils::MM_MacOS::make($self);
+        Mac::BuildTools::make($self);
         return;
     }
 
@@ -4603,7 +4605,7 @@ sub test {
 	if $CPAN::DEBUG;
 
     if ($^O eq 'MacOS') {
-        ExtUtils::MM_MacOS::make_test($self);
+        Mac::BuildTools::make_test($self);
         return;
     }
 
@@ -4634,7 +4636,7 @@ sub clean {
     $self->debug("Changed directory to $self->{'build_dir'}") if $CPAN::DEBUG;
 
     if ($^O eq 'MacOS') {
-        ExtUtils::MM_MacOS::make_clean($self);
+        Mac::BuildTools::make_clean($self);
         return;
     }
 
@@ -4709,7 +4711,7 @@ sub install {
 	if $CPAN::DEBUG;
 
     if ($^O eq 'MacOS') {
-        ExtUtils::MM_MacOS::make_install($self);
+        Mac::BuildTools::make_install($self);
         return;
     }
 
@@ -4875,7 +4877,7 @@ sub find_bundle_file {
     my $what2 = $what;
     if ($^O eq 'MacOS') {
       $what =~ s/^://;
-      $what2 =~ tr|:|/|;
+      $what =~ tr|:|/|;
       $what2 =~ s/:Bundle://;
       $what2 =~ tr|:|/|;
     } else {
@@ -5722,7 +5724,7 @@ is available. Can\'t continue.
         $tar->extract(@af);
     }
 
-    ExtUtils::MM_MacOS::convert_files([$tar->list_files], 1)
+    Mac::BuildTools::convert_files([$tar->list_files], 1)
         if ($^O eq 'MacOS');
 
     return 1;

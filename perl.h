@@ -1813,6 +1813,10 @@ typedef struct ptr_tbl PTR_TBL_t;
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
 #endif
 
+#ifndef PERL_WRITE_MSG_TO_CONSOLE
+#  define PERL_WRITE_MSG_TO_CONSOLE(io, msg, len) PerlIO_write(io, msg, len)
+#endif
+
 #ifndef MAXPATHLEN
 #  ifdef PATH_MAX
 #    ifdef _POSIX_PATH_MAX

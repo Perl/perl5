@@ -69,11 +69,11 @@ for (@prgs){
     print TEST $prog,"\n";
     close TEST;
     my $results = $Is_MSWin32 ?
-                  `.\\perl -I../lib $switch $tmpfile 2>&1` :
-                  $^O eq 'MacOS' ?
-                  `$^X -I::lib $switch $tmpfile` :
+	              `.\\perl -I../lib $switch $tmpfile 2>&1` :
                   $^O eq 'NetWare' ?
-                  `perl -I../lib $switch $tmpfile 2>&1` :
+		      `perl -I../lib $switch $tmpfile 2>&1` :
+                  $^O eq 'MacOS' ?
+		      `$^X -I::lib -MMac::err=unix $switch $tmpfile` :
                   `./perl $switch $tmpfile 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;
