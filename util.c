@@ -4940,10 +4940,9 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
 #ifndef PERL_MICRO
     char name[MAXPATHLEN] = { 0 }, *s;
     STRLEN pathlen, namelen;
-    const char zero = '\0';
 
     /* Don't use strlen() to avoid running off the end. */
-    s = memchr(path, zero, MAXPATHLEN);
+    s = memchr(path, '\0', MAXPATHLEN);
     pathlen = s ? s - path : MAXPATHLEN;
 
 #ifdef HAS_REALPATH
@@ -4967,7 +4966,7 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
 
     /* Is the destination buffer too long?
      * Don't use strlen() to avoid running off the end. */
-    s = memchr(name, zero, MAXPATHLEN);
+    s = memchr(name, '\0', MAXPATHLEN);
     namelen = s ? s - name : MAXPATHLEN;
     if (namelen == MAXPATHLEN) {
         Perl_warn(aTHX_ "sv_realpath: realpath(\"%s\"): %c= (MAXPATHLEN = %d)",

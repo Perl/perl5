@@ -3654,7 +3654,7 @@ $ WS "#include <string.h>"
 $ WS "int main()"
 $ WS "{"
 $ WS "char * place;"
-$ WS "place = memchr(""foo"", 47, 3)"
+$ WS "place = memchr(""foo"", 47, 3);"
 $ WS "exit(0);"
 $ WS "}"
 $ CS
