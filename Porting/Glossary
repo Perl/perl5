@@ -1339,10 +1339,6 @@ d_mymalloc (mallocsrc.U):
 	of the source want to take special action if MYMALLOC is used.
 	This may include different sorts of profiling or error detection.
 
-d_nanosleep (d_nanosleep.U):
-	This variable conditionally defines HAS_NANOSLEEP
-	if nanosleep() is available to sleep with 1E-9 sec accuracy.
-
 d_nice (d_nice.U):
 	This variable conditionally defines the HAS_NICE symbol, which
 	indicates to the C program that the nice() routine is available.
@@ -3508,7 +3504,7 @@ mips_type (usrinc.U):
 	This variable holds the environment type for the mips system.
 	Possible values are "BSD 4.3" and "System V".
 
-mistrustnm (usenm.U):
+mistrustnm (Csym.U):
 	This variable can be used to establish a fallthrough for the cases
 	where nm fails to find a symbol.  If usenm is false or usenm is true
 	and mistrustnm is false, this variable has no effect.  If usenm is true
