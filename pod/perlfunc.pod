@@ -1813,10 +1813,18 @@ In a scalar context, returns the ctime(3) value:
 
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
-This scalar value is B<not> locale dependent, see L<perllocale>,
-but instead a Perl builtin.
-Also see the Time::Local module, and the strftime(3) and mktime(3)
-function available via the POSIX module.
+This scalar value is B<not> locale dependent, see L<perllocale>, but
+instead a Perl builtin.  Also see the Time::Local module, and the
+strftime(3) and mktime(3) function available via the POSIX module.  To
+get somewhat similar but locale dependent date strings, set up your
+locale environment variables appropriately (please see L<perllocale>)
+and try for example
+
+	use POSIX qw(strftime)
+	$now_string = strftime "%a %b %e %H:%M:%S %Y", localtime;
+
+Note that the C<%a> and C<%b>, the short forms of the day of the week
+and the month of the year, may not necessarily be three characters wide.
 
 =item log EXPR
 
