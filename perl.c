@@ -2090,8 +2090,10 @@ read_e_script(idx, buf_sv, maxlen)
     p  = SvPVX(e_script);
     nl = strchr(p, '\n');
     nl = (nl) ? nl+1 : SvEND(e_script);
-    if (nl-p == 0)
+    if (nl-p == 0) {
+	filter_del(read_e_script);
 	return 0;
+    }
     sv_catpvn(buf_sv, p, nl-p);
     sv_chop(e_script, nl);
     return 1;

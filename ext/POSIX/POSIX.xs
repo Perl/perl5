@@ -2989,7 +2989,6 @@ localeconv()
 #ifdef HAS_LOCALECONV
 	struct lconv *lcbuf;
 	RETVAL = newHV();
-	SET_NUMERIC_LOCAL();
 	if (lcbuf = localeconv()) {
 	    /* the strings */
 	    if (lcbuf->decimal_point && *lcbuf->decimal_point)

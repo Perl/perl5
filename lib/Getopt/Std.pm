@@ -57,7 +57,7 @@ the argument or 1 if no argument is specified.
 sub getopt ($;$) {
     local($argumentative, $hash) = @_;
     local($_,$first,$rest);
-    local $Exporter::ExportLevel;
+    local @EXPORT;
 
     while (@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
 	($first,$rest) = ($1,$2);
@@ -93,8 +93,10 @@ sub getopt ($;$) {
 	    }
 	}
     }
-    $Exporter::ExportLevel++;
-    import Getopt::Std;
+    unless (ref $hash) { 
+	local $Exporter::ExportLevel = 1;
+	import Getopt::Std;
+    }
 }
 
 # Usage:
@@ -105,7 +107,7 @@ sub getopts ($;$) {
     local($argumentative, $hash) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local $Exporter::ExportLevel;
+    local @EXPORT;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
@@ -153,8 +155,10 @@ sub getopts ($;$) {
 	    }
 	}
     }
-    $Exporter::ExportLevel++;
-    import Getopt::Std;
+    unless (ref $hash) { 
+	local $Exporter::ExportLevel = 1;
+	import Getopt::Std;
+    }
     $errs == 0;
 }
 
