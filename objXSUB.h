@@ -1737,6 +1737,10 @@
 #define Perl_sv_vsetpvfn	pPerl->Perl_sv_vsetpvfn
 #undef  sv_vsetpvfn
 #define sv_vsetpvfn		Perl_sv_vsetpvfn
+#undef  Perl_str_to_version
+#define Perl_str_to_version	pPerl->Perl_str_to_version
+#undef  str_to_version
+#define str_to_version		Perl_str_to_version
 #undef  Perl_swash_init
 #define Perl_swash_init		pPerl->Perl_swash_init
 #undef  swash_init

@@ -431,6 +431,7 @@ Perl_sv_upgrade
 Perl_sv_usepvn
 Perl_sv_vcatpvfn
 Perl_sv_vsetpvfn
+Perl_str_to_version
 Perl_swash_init
 Perl_swash_fetch
 Perl_taint_env
