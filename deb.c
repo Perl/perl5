@@ -30,12 +30,12 @@ deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
     register I32 i;
     GV* gv = curcop->cop_filegv;
 
-    fprintf(stderr,"(%s:%ld)\t",
+    fprintf(Perl_debug_log,"(%s:%ld)\t",
 	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
 	(long)curcop->cop_line);
     for (i=0; i<dlevel; i++)
-	fprintf(stderr,"%c%c ",debname[i],debdelim[i]);
-    fprintf(stderr,pat,a1,a2,a3,a4,a5,a6,a7,a8);
+	fprintf(Perl_debug_log,"%c%c ",debname[i],debdelim[i]);
+    fprintf(Perl_debug_log,pat,a1,a2,a3,a4,a5,a6,a7,a8);
 }
 
 #else /* !defined(I_STDARG) && !defined(I_VARARGS) */
@@ -55,18 +55,18 @@ deb(pat, va_alist)
     register I32 i;
     GV* gv = curcop->cop_filegv;
 
-    fprintf(stderr,"(%s:%ld)\t",
+    fprintf(Perl_debug_log,"(%s:%ld)\t",
 	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
 	(long)curcop->cop_line);
     for (i=0; i<dlevel; i++)
-	fprintf(stderr,"%c%c ",debname[i],debdelim[i]);
+	fprintf(Perl_debug_log,"%c%c ",debname[i],debdelim[i]);
 
 #  ifdef I_STDARG
     va_start(args, pat);
 #  else
     va_start(args);
 #  endif
-    (void) vfprintf(stderr,pat,args);
+    (void) vfprintf(Perl_debug_log,pat,args);
     va_end( args );
 }
 #endif /* !defined(I_STDARG) && !defined(I_VARARGS) */
@@ -82,13 +82,13 @@ deb_growlevel()
 I32
 debstackptrs()
 {
-    fprintf(stderr, "%8lx %8lx %8ld %8ld %8ld\n",
-	(unsigned long)stack, (unsigned long)stack_base,
+    fprintf(Perl_debug_log, "%8lx %8lx %8ld %8ld %8ld\n",
+	(unsigned long)curstack, (unsigned long)stack_base,
 	(long)*markstack_ptr, (long)(stack_sp-stack_base),
 	(long)(stack_max-stack_base));
-    fprintf(stderr, "%8lx %8lx %8ld %8ld %8ld\n",
-	(unsigned long)mainstack, (unsigned long)AvARRAY(stack),
-	(long)mainstack, (long)AvFILL(stack), (long)AvMAX(stack));
+    fprintf(Perl_debug_log, "%8lx %8lx %8ld %8ld %8ld\n",
+	(unsigned long)mainstack, (unsigned long)AvARRAY(curstack),
+	(long)mainstack, (long)AvFILL(curstack), (long)AvMAX(curstack));
     return 0;
 }
 
@@ -106,25 +106,25 @@ debstack()
 	if (*markscan >= i)
 	    break;
 
-    fprintf(stderr, i ? "    =>  ...  " : "    =>  ");
+    fprintf(Perl_debug_log, i ? "    =>  ...  " : "    =>  ");
     if (stack_base[0] != &sv_undef || stack_sp < stack_base)
-	fprintf(stderr, " [STACK UNDERFLOW!!!]\n");
+	fprintf(Perl_debug_log, " [STACK UNDERFLOW!!!]\n");
     do {
 	++i;
 	if (markscan <= markstack_ptr && *markscan < i) {
 	    do {
 		++markscan;
-		putc('*', stderr);
+		putc('*', Perl_debug_log);
 	    }
 	    while (markscan <= markstack_ptr && *markscan < i);
-	    fprintf(stderr, "  ");
+	    fprintf(Perl_debug_log, "  ");
 	}
 	if (i > top)
 	    break;
-	fprintf(stderr, "%-4s  ", SvPEEK(stack_base[i]));
+	fprintf(Perl_debug_log, "%-4s  ", SvPEEK(stack_base[i]));
     }
     while (1);
-    fprintf(stderr, "\n");
+    fprintf(Perl_debug_log, "\n");
     return 0;
 }
 #else
