@@ -31,6 +31,171 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9528] By: jhi                                   on 2001/04/03  01:27:57
+        Log: Subject: [PATCH: 9508] perlfaq3: extend the silly long list even further
+             Date: Mon, 2 Apr 2001 18:24:53 -0700 (PDT)
+             To: perl5-porters@perl.org
+             Message-ID: <Pine.OSF.4.10.10104021823330.279908-100000@aspara.forte.com>
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[  9527] By: jhi                                   on 2001/04/03  01:22:09
+        Log: Subject: [PATCH: 9508] build && test XS::Typemap on VMS, glob-basic insensitivity training
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 2 Apr 2001 17:40:27 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10104021727250.278825-100000@aspara.forte.com>      
+     Branch: perl
+	   ! configure.com t/lib/glob-basic.t t/lib/xs-typemap.t
+____________________________________________________________________________
+[  9526] By: jhi                                   on 2001/04/03  01:18:25
+        Log: The metaconfig unit changes for #9525.
+     Branch: metaconfig
+	   ! U/a_dvisory/quadtype.U U/modified/mallocsrc.U
+     Branch: metaconfig/U/perl
+	   ! use64bits.U
+____________________________________________________________________________
+[  9525] By: jhi                                   on 2001/04/03  01:17:30
+        Log: Configure sanity checks:
+             * if use64bitall is attempted but pointers are only 32-bit,
+             'downgrade' to use64bitint
+             * if use64bitint is attempted but there's no quad type,
+             forget about use64bitint (well, the default for it is 'n',
+             the user can still override this)
+             * if pointers are 64 bits, do not try to use Perl's malloc
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  9524] By: gsar                                  on 2001/04/03  01:09:12
+        Log: EPOC fix for lib/io_udp.t failure (from Olaf Flebbe)
+     Branch: maint-5.6/perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  9523] By: jhi                                   on 2001/04/03  00:02:31
+        Log: Make it harder for parallel makes to enter 'test' before
+             Dynaloader and File::Glob are happy.  (In principle 'make_ext'
+             should be unhappy enough, but sometimes parallel makes seem
+             to sneak past both in Tru64 and AIX.)
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9522] By: jhi                                   on 2001/04/02  22:35:31
+        Log: Subject: [PATCH B::Concise] padname values may have bogus SvCUR
+             Date: Mon, 2 Apr 2001 22:54:10 +0100
+             From: Robin Houston <robin@kitsite.com>
+             Message-ID: <20010402225410.A8273@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B.xs ext/B/B/Concise.pm ext/B/B/Showlex.pm
+____________________________________________________________________________
+[  9521] By: jhi                                   on 2001/04/02  22:32:23
+        Log: Subject: [PATCH B::Concise] @stash_array = split(/pat/, str);
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 2 Apr 2001 20:24:03 +0100
+             Message-ID: <20010402202402.A8005@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Concise.pm
+____________________________________________________________________________
+[  9520] By: jhi                                   on 2001/04/02  22:30:43
+        Log: Subject: [PATCH] REALLY pedantic hv.h nit
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Mon, 2 Apr 2001 15:43:06 +0100
+             Message-ID: <20010402154306.A21711@netthink.co.uk>
+     Branch: perl
+	   ! hv.h
+____________________________________________________________________________
+[  9519] By: jhi                                   on 2001/04/02  22:28:04
+        Log: Based on
+             
+             Subject: [foolperl] EPOC fix
+             From: Olaf Flebbe <O.Flebbe@science-computing.de>
+             Date: Mon, 2 Apr 2001 23:36:51 +0200 (CEST)
+             Message-ID: <Pine.LNX.4.02.10104022335380.5547-100000@milkyway.science-computing.de>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  9518] By: jhi                                   on 2001/04/02  22:22:34
+        Log: Integrate changes #9511,9514,9517 from maintperl into mainline.
+             
+             README.win32 tweaks; add a note about alternative location for
+             getting a gcc-2.95.2 that will build perl properly on windows
+             
+             add some notes about gutsy threading matters
+             
+             many of the utilities interpolate literal paths within doublequotes
+             (fails on dosish platforms where path contains backslashes)
+     Branch: perl
+	  !> README.win32 pod/perlguts.pod utils/perldoc.PL
+	  !> x2p/find2perl.PL x2p/s2p.PL
+____________________________________________________________________________
+[  9517] By: gsar                                  on 2001/04/02  19:52:21
+        Log: many of the utilities interpolate literal paths within doublequotes
+             (fails on dosish platforms where path contains backslashes)
+     Branch: maint-5.6/perl
+	   ! utils/perldoc.PL x2p/find2perl.PL x2p/s2p.PL
+____________________________________________________________________________
+[  9516] By: gsar                                  on 2001/04/02  05:49:37
+        Log: a foolish release
+     Branch: maint-5.6/perl
+	   ! Changes patchlevel.h pod/perldelta.pod pod/perlhist.pod
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  9515] By: gsar                                  on 2001/04/02  05:04:29
+        Log: add missing changelog summaries
+     Branch: maint-5.6/perl
+	   ! Changes
+____________________________________________________________________________
+[  9514] By: gsar                                  on 2001/04/02  04:07:13
+        Log: add some notes about gutsy threading matters
+     Branch: maint-5.6/perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[  9513] By: gsar                                  on 2001/04/02  03:25:21
+        Log: add more prominent caveat notices about experimental features
+     Branch: maint-5.6/perl
+	   ! pod/perlfork.pod pod/perlunicode.pod
+____________________________________________________________________________
+[  9512] By: gsar                                  on 2001/04/02  02:54:33
+        Log: integrate changes#9479,9509 from mainline
+             
+             [PATCH] File::Glob stuff for Mac OS
+             
+             [PATH bsd_glob.c perl@9472] Shut up gcc warning in bsd_glob.c
+     Branch: maint-5.6/perl
+	  !> ext/File/Glob/Glob.pm ext/File/Glob/bsd_glob.c
+	  !> t/lib/glob-basic.t t/lib/glob-case.t t/lib/glob-global.t
+	  !> t/lib/glob-taint.t
+____________________________________________________________________________
+[  9511] By: gsar                                  on 2001/04/02  02:38:24
+        Log: README.win32 tweaks; add a note about alternative location for
+             getting a gcc-2.95.2 that will build perl properly on windows
+     Branch: maint-5.6/perl
+	   ! README.win32
+____________________________________________________________________________
+[  9510] By: jhi                                   on 2001/04/01  20:45:10
+        Log: An ambiguosity warning.
+     Branch: perl
+	   ! t/lib/trig.t
+____________________________________________________________________________
+[  9509] By: jhi                                   on 2001/04/01  19:53:47
+        Log: Subject: [PATH bsd_glob.c perl@9472] Shut up gcc warning in bsd_glob.c
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Sun, 1 Apr 2001 10:04:55 +0100 (BST)
+             Message-ID: <Pine.LNX.4.30.0104010958250.7703-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! ext/File/Glob/bsd_glob.c
+____________________________________________________________________________
+[  9508] By: jhi                                   on 2001/04/01  19:35:03
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  9507] By: jhi                                   on 2001/04/01  19:24:01
+        Log: Integrate changes #9378,9458,9469,9475,9489,9490,9505,9506
+             from mainline to maintperl: pod tweaks.
+     Branch: maint-5.6/perl
+	  !> pod/perldebug.pod pod/perldiag.pod pod/perlfaq1.pod
+	  !> pod/perlguts.pod pod/perlhack.pod pod/perlop.pod
+	  !> pod/perlvar.pod
+____________________________________________________________________________
 [  9506] By: jhi                                   on 2001/04/01  19:11:53
         Log: Commit Sarathy to April release of 5.6.1 :-)
      Branch: perl
