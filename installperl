@@ -256,7 +256,8 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
 
 my $mainperl_is_instperl = 0;
 
-if (!$versiononly && !$nonono && !$Is_W32 && !$Is_VMS && -t STDIN && -t STDERR
+if ($Config{installusrbinperl} eq 'define' &&
+    !$versiononly && !$nonono && !$Is_W32 && !$Is_VMS && -t STDIN && -t STDERR
 	&& -w $mainperldir && ! samepath($mainperldir, $installbin)) {
     my($usrbinperl)	= "$mainperldir/$perl$exe_ext";
     my($instperl)	= "$installbin/$perl$exe_ext";

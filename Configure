@@ -718,6 +718,8 @@ undef='undef'
 smallmach='pdp11 i8086 z8000 i80286 iAPX286'
 rmlist=''
 
+installusrbinperl=''
+
 : We must find out about Eunice early
 eunicefix=':'
 if test -f /etc/unixtovms; then
@@ -4315,6 +4317,31 @@ EOM
 else
 	installbin="$binexp"
 fi
+
+echo " "
+case "$installusrbinperl" in
+'') if test -d /usr/bin -a "X$installbin" != X/usr/bin; then
+	$cat <<EOM
+Many scripts expect to perl to be installed as /usr/bin/perl.
+I can install the perl you are about to compile also as /usr/bin/perl
+(in addition to $installbin/perl).
+EOM
+	dflt='y'
+	rp="Do you want to install perl as /usr/bin/perl?"
+	. ./myread
+	case "$ans" in
+	[yY]*)	val="$define";;
+	*)	val="$undef";;
+	esac
+    fi
+    ;;
+esac
+case "$installusrbinperl" in
+"$undef"|[nN]*)	val="$undef";;
+*)		val="$define";;
+esac
+set installusrbinperl
+eval $setvar
 
 : define a shorthand compile call
 compile='
@@ -11957,6 +11984,7 @@ installprivlib='$installprivlib'
 installscript='$installscript'
 installsitearch='$installsitearch'
 installsitelib='$installsitelib'
+installusrbinperl='$installusrbinperl'
 intsize='$intsize'
 known_extensions='$known_extensions'
 ksh='$ksh'
