@@ -1586,6 +1586,7 @@ t/lib/open3.t		See if IPC::Open3 works
 t/lib/ops.t		See if Opcode works
 t/lib/parsewords.t	See if Text::ParseWords works
 t/lib/peek.t		See if Devel::Peek works
+t/lib/perlio.t		See if PerlIO works
 t/lib/ph.t		See if h2ph works
 t/lib/posix.t		See if POSIX works
 t/lib/safe1.t		See if Safe works

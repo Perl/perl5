@@ -39,8 +39,8 @@ PerlIO - On demand loader for PerlIO layers and root of PerlIO::* name space
 
 =head1 DESCRIPTION
 
-When an undefined layer 'foo' is encountered in an C<open> or C<binmode> layer
-specification then C code performs the equivalent of:
+When an undefined layer 'foo' is encountered in an C<open> or
+C<binmode> layer specification then C code performs the equivalent of:
 
   use PerlIO 'foo';
 
@@ -99,7 +99,7 @@ and then read it back in.
 =item raw
 
 A pseudo-layer which performs two functions (which is messy, but
-necessary to maintain compatibility with non-PerlIO builds of perl
+necessary to maintain compatibility with non-PerlIO builds of Perl
 and their way things have been documented elsewhere).
 
 Firstly it forces the file handle to be considered binary at that
@@ -118,8 +118,8 @@ which would interfere with binary nature of the stream.
 
 =head2 Defaults and how to override them
 
-If the platform is MS-DOS like and normally does CRLF to "\n" translation
-for text files then the default layers are :
+If the platform is MS-DOS like and normally does CRLF to "\n"
+translation for text files then the default layers are :
 
   unix crlf
 
