@@ -3428,7 +3428,8 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname)
 	/* Sanity check on buffer end */
 	while ((*s) && !isSPACE(*s)) s++;
 	for (s2 = s;  (s2 > SvPV(PL_linestr,n_a)+2 &&
-		       (isDIGIT(s2[-1]) || strchr("._-", s2[-1])));  s2--) ;
+		       (isDIGIT(s2[-1]) || s2[-1] == '.' || s2[-1] == '_'
+			|| s2[-1] == '-'));  s2--) ;
 	/* Sanity check on buffer start */
 	if ( (s2-4 < SvPV(PL_linestr,n_a)+2 || strnNE(s2-4,"perl",4)) &&
 	      (s-9 < SvPV(PL_linestr,n_a)+2 || strnNE(s-9,"perl",4)) )
@@ -3715,7 +3716,8 @@ S_find_beginning(pTHX)
 	    s2 = s;
 	    while (*s == ' ' || *s == '\t') s++;
 	    if (*s++ == '-') {
-		while (isDIGIT(s2[-1]) || strchr("-._", s2[-1])) s2--;
+		while (isDIGIT(s2[-1]) || s2[-1] == '-' || s2[-1] == '.'
+		       || s2[-1] == '_') s2--;
 		if (strnEQ(s2-4,"perl",4))
 		    /*SUPPRESS 530*/
 		    while ((s = moreswitches(s)))

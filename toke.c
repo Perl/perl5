@@ -1966,8 +1966,10 @@ S_intuit_more(pTHX_ register char *s)
 		    weight -= 5;	/* cope with negative subscript */
 		break;
 	    default:
-		if (!isALNUM(last_un_char) && !strchr("$@&",last_un_char) &&
-			isALPHA(*s) && s[1] && isALPHA(s[1])) {
+		if (!isALNUM(last_un_char)
+		    && !(last_un_char == '$' || last_un_char == '@'
+			 || last_un_char == '&')
+		    && isALPHA(*s) && s[1] && isALPHA(s[1])) {
 		    char *d = tmpbuf;
 		    while (isALPHA(*s))
 			*d++ = *s++;
@@ -2358,7 +2360,8 @@ Perl_yylex(pTHX)
 		oldmod = PL_lex_casestack[--PL_lex_casemods];
 		PL_lex_casestack[PL_lex_casemods] = '\0';
 
-		if (PL_bufptr != PL_bufend && strchr("LUQ", oldmod)) {
+		if (PL_bufptr != PL_bufend
+		    && (oldmod == 'L' || oldmod == 'U' || oldmod == 'Q')) {
 		    PL_bufptr += 2;
 		    PL_lex_state = LEX_INTERPCONCAT;
 		}
@@ -2381,7 +2384,7 @@ Perl_yylex(pTHX)
 	    else {
 	        if (strnEQ(s, "L\\u", 3) || strnEQ(s, "U\\l", 3))
 		    tmp = *s, *s = s[2], s[2] = (char)tmp;	/* misordered... */
-		if (strchr("LU", *s) &&
+		if ((*s == 'L' || *s == 'U') &&
 		    (strchr(PL_lex_casestack, 'L') || strchr(PL_lex_casestack, 'U'))) {
 		    PL_lex_casestack[--PL_lex_casemods] = '\0';
 		    return REPORT(')');
@@ -2582,7 +2585,8 @@ Perl_yylex(pTHX)
 		    sv_catpv(PL_linestr,"chomp;");
 		if (PL_minus_a) {
 		    if (PL_minus_F) {
-			if (strchr("/'\"", *PL_splitstr)
+			if ((*PL_splitstr == '/' || *PL_splitstr == '\''
+			     || *PL_splitstr == '"')
 			      && strchr(PL_splitstr + 1, *PL_splitstr))
 			    Perl_sv_catpvf(aTHX_ PL_linestr, "our @F=split(%s);", PL_splitstr);
 			else {
@@ -3714,7 +3718,8 @@ Perl_yylex(pTHX)
 		PL_expect = XTERM;		/* e.g. print $fh 3 */
 	    else if (*s == '.' && isDIGIT(s[1]))
 		PL_expect = XTERM;		/* e.g. print $fh .3 */
-	    else if (strchr("?-+", *s) && !isSPACE(s[1]) && s[1] != '=')
+	    else if ((*s == '?' || *s == '-' || *s == '+')
+		     && !isSPACE(s[1]) && s[1] != '=')
  		PL_expect = XTERM;		/* e.g. print $fh -1 */
 	    else if (*s == '/' && !isSPACE(s[1]) && s[1] != '=' && s[1] != '/')
 		PL_expect = XTERM;		/* e.g. print $fh /.../
@@ -4281,7 +4286,8 @@ Perl_yylex(pTHX)
 		}
 
 	    safe_bareword:
-		if (lastchar && strchr("*%&", lastchar) && ckWARN_d(WARN_AMBIGUOUS)) {
+		if ((lastchar == '*' || lastchar == '%' || lastchar == '&')
+		    && ckWARN_d(WARN_AMBIGUOUS)) {
 		    Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
 		  	"Operator or semicolon missing before %c%s",
 			lastchar, PL_tokenbuf);
@@ -6406,7 +6412,7 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 	return s;
     }
     if (*s == '$' && s[1] &&
-	(isALNUM_lazy_if(s+1,UTF) || strchr("${", s[1]) || strnEQ(s+1,"::",2)) )
+	(isALNUM_lazy_if(s+1,UTF) || s[1] == '$' || s[1] == '{' || strnEQ(s+1,"::",2)) )
     {
 	return s;
     }
@@ -6700,7 +6706,7 @@ S_scan_heredoc(pTHX_ register char *s)
     if (!outer)
 	*d++ = '\n';
     for (peek = s; SPACE_OR_TAB(*peek); peek++) ;
-    if (*peek && strchr("`'\"",*peek)) {
+    if (*peek == '`' || *peek == '\'' || *peek =='"') {
 	s = peek;
 	term = *s++;
 	s = delimcpy(d, e, s, PL_bufend, term, &len);
@@ -7659,7 +7665,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	}
 
 	/* read exponent part, if present */
-	if (*s && strchr("eE",*s) && strchr("+-0123456789_", s[1])) {
+	if ((*s == 'e' || *s == 'E') && strchr("+-0123456789_", s[1])) {
 	    floatit = TRUE;
 	    s++;
 
