@@ -553,6 +553,8 @@ my %esc = (
 sub qquote {
   local($_) = shift;
   s/([\\\"\@\$])/\\$1/g;
+  my $bytes; { use bytes; $bytes = length }
+  s/([^\x00-\x7f])/'\x{'.sprintf("%x",ord($1)).'}'/ge if $bytes > length;
   return qq("$_") unless 
     /[^ !"\#\$%&'()*+,\-.\/0-9:;<=>?\@A-Z[\\\]^_`a-z{|}~]/;  # fast exit
 
