@@ -1,5 +1,13 @@
 Revision history for Perl extension Cwd.
 
+2.13  Fri Jan  2 22:29:42 CST 2004
+
+ - Changed a '//' comment to a '/* */' comment in the XS code, so that
+   it'll compile properly under ANSI C rules. [Jarkko Hietaniemi]
+
+ - Fixed a 1-character buffer overrun problem in the C code. [The BSD
+   people]
+
 2.12  Fri Dec 19 17:04:52 CST 2003
 
  - Fixed a bug on Cygwin - the output of realpath() should have been

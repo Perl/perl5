@@ -90,20 +90,11 @@ SKIP: {
 }
 
 my $Top_Test_Dir = '_ptrslt_';
-my $Test_Dir     = "$Top_Test_Dir/_path_/_to_/_a_/_dir_";
-my $want = "t/$Test_Dir";
-if( $IsVMS ) {
-    # translate the unixy path to VMSish
-    $want =~ s|/|\.|g;
-    $want .= '\]';
-    $want = '((?i)' . $want . ')';  # might be ODS-2 or ODS-5
-} elsif ( $IsMacOS ) {
-    $_ = ":$_" for ($Top_Test_Dir, $Test_Dir);
-    s|/|:|g, s|$|:| for ($want, $Test_Dir);
-}
+my $Test_Dir     = File::Spec->catdir($Top_Test_Dir, qw/_path_ _to_ _a_ _dir_/);
+my $want = File::Spec->catdir('t', $Test_Dir);
 
-mkpath(["$Test_Dir"], 0, 0777);
-Cwd::chdir "$Test_Dir";
+mkpath([$Test_Dir], 0, 0777);
+Cwd::chdir $Test_Dir;
 
 like(cwd(),        qr|$want$|, 'chdir() + cwd()');
 like(getcwd(),     qr|$want$|, '        + getcwd()');    
@@ -126,14 +117,12 @@ print "#$ENV{PWD}\n";
 
 rmtree([$Top_Test_Dir], 0, 0);
 
-if ($IsVMS) {
-    like($ENV{PWD}, qr|\b((?i)t)\]$|);
-}
-elsif ($IsMacOS) {
-    like($ENV{PWD}, qr|\bt:$|);
-}
-else {
-    like($ENV{PWD}, qr|\bt$|);
+{
+  my $check = ($IsVMS   ? qr|\b((?i)t)\]$| :
+	       $IsMacOS ? qr|\bt:$| :
+			  qr|\bt$| );
+  
+  like($ENV{PWD}, $check);
 }
 
 SKIP: {
