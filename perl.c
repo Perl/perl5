@@ -965,7 +965,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     AV* comppadlist;
     register SV *sv;
     register char *s;
-    char *cddir = Nullch;
+    char *popts, *cddir = Nullch;
 
     sv_setpvn(PL_linestr,"",0);
     sv = newSVpvn("",0);		/* first used for -I flags */
@@ -1190,8 +1190,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #ifndef SECURE_INTERNAL_GETENV
         !PL_tainting &&
 #endif
-	(s = PerlEnv_getenv("PERL5OPT")))
+	(popts = PerlEnv_getenv("PERL5OPT")))
     {
+    	s = savepv(popts);
 	while (isSPACE(*s))
 	    s++;
 	if (*s == '-' && *(s+1) == 'T')
