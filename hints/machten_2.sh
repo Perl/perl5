@@ -15,6 +15,10 @@
 #  Original version was for MachTen 2.1.1.
 #  Last modified by Andy Dougherty   <doughera@lafcol.lafayette.edu>
 #  Tue Aug 13 12:31:01 EDT 1996
+#
+#  Warning about tests which no longer fail
+#    fixed by Tom Phoenix <rootbeer@teleport.com>
+#  March 5, 1997
 
 # I don't know why this is needed.  It might be similar to NeXT's
 # problem.  See hints/next_3.sh.
@@ -38,14 +42,10 @@ i_db=$undef
 # This will generate a harmless message:
 # Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
 #	Propagating recommended variable dont_use_nlink
+# Without this, tests io/fs #4 and op/stat #3 will fail.
 dont_use_nlink=define
 
 cat <<'EOM' >&4
-
-Tests
-	io/fs test 4  and
-	op/stat test 3
-may fail since MachTen versions 2.X have no hard links.
 
 At the end of Configure, you will see a harmless message
 
