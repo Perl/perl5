@@ -33,7 +33,10 @@ while( <DATA> ) {
     printf "ok %d\n", ++$test; 
 }
 
-END { unlink $input, $output }
+END { 
+    1 while unlink $input;
+    1 while unlink $output;
+}
 
 __END__
 =head <> now reads in records
