@@ -2022,6 +2022,7 @@ t/op/inc.t			See if inc/dec of integers near 32 bit limit work
 t/op/index.t			See if index works
 t/op/int.t			See if int works
 t/op/join.t			See if join works
+t/op/lc.t			See if lc, uc, lcfirst, ucfirst, quotemeta work
 t/op/length.t			See if length works
 t/op/lex_assign.t		See if ops involving lexicals or pad temps work
 t/op/lfs.t			See if large files work for perlio
