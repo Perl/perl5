@@ -540,10 +540,6 @@ Perl_safesysmalloc
 Perl_safesyscalloc
 Perl_safesysrealloc
 Perl_safesysfree
-Perl_safexmalloc
-Perl_safexcalloc
-Perl_safexrealloc
-Perl_safexfree
 Perl_GetVars
 Perl_runops_standard
 Perl_runops_debug

@@ -528,6 +528,10 @@ PERLVARI(Iclocktick, long, 0)	/* this many times() ticks in a second */
 
 PERLVARI(Iin_load_module, int, 0)	/* to prevent recursions in PerlIO_find_layer */
 
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+PERLVAR(Idollarzero_mutex, perl_mutex)	/* $0 */
+#endif
+
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * XSUB.h provides wrapper functions via perlapi.h that make this

@@ -193,6 +193,10 @@ perl_construct(pTHXx)
 	thr = init_main_thread();
 #endif /* USE_5005THREADS */
 
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+	MUTEX_INIT(&PL_dollarzero_mutex);
+#endif
+
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
 #endif
@@ -603,11 +607,6 @@ perl_destruct(pTHXx)
 	SvREFCNT_dec(PL_e_script);
 	PL_e_script = Nullsv;
     }
-
-    while (--PL_origargc >= 0) {
-        Safefree(PL_origargv[PL_origargc]);
-    }
-    Safefree(PL_origargv);
 
     /* magical thingies */
 
@@ -1028,22 +1027,8 @@ setuid perl scripts securely.\n");
 #endif
 #endif
 
+    PL_origargv = argv;
     PL_origargc = argc;
-    {
-        /* we copy rather than point to argv
-         * since perl_clone will copy and perl_destruct
-         * has no way of knowing if we've made a copy or
-         * just point to argv
-         */
-        int i = PL_origargc;
-        New(0, PL_origargv, i+1, char*);
-        PL_origargv[i] = '\0';
-        while (i-- > 0) {
-            PL_origargv[i] = savepv(argv[i]);
-        }
-    }
-
-
 
     if (PL_do_undump) {
 
@@ -2373,7 +2358,7 @@ Perl_moreswitches(pTHX_ char *s)
 	forbid_setid("-D");
 	if (isALPHA(s[1])) {
 	    /* if adding extra options, remember to update DEBUG_MASK */
-	    static char debopts[] = "psltocPmfrxuLHXDSTRJ";
+	    static char debopts[] = "psltocPmfrxu HXDSTRJ";
 	    char *d;
 
 	    for (s++; *s && (d = strchr(debopts,*s)); s++)

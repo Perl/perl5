@@ -38,15 +38,6 @@
 
 #define FLUSH
 
-#ifdef LEAKTEST
-
-long xcount[MAXXCOUNT];
-long lastxcount[MAXXCOUNT];
-long xycount[MAXXCOUNT][MAXYCOUNT];
-long lastxycount[MAXXCOUNT][MAXYCOUNT];
-
-#endif
-
 #if defined(HAS_FCNTL) && defined(F_SETFD) && !defined(FD_CLOEXEC)
 #  define FD_CLOEXEC 1			/* NeXT needs this */
 #endif
@@ -188,148 +179,6 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     }
     /*NOTREACHED*/
 }
-
-#ifdef LEAKTEST
-
-struct mem_test_strut {
-    union {
-	long type;
-	char c[2];
-    } u;
-    long size;
-};
-
-#    define ALIGN sizeof(struct mem_test_strut)
-
-#    define sizeof_chunk(ch) (((struct mem_test_strut*) (ch))->size)
-#    define typeof_chunk(ch) \
-	(((struct mem_test_strut*) (ch))->u.c[0] + ((struct mem_test_strut*) (ch))->u.c[1]*100)
-#    define set_typeof_chunk(ch,t) \
-	(((struct mem_test_strut*) (ch))->u.c[0] = t % 100, ((struct mem_test_strut*) (ch))->u.c[1] = t / 100)
-#define SIZE_TO_Y(size) ( (size) > MAXY_SIZE				\
-			  ? MAXYCOUNT - 1 				\
-			  : ( (size) > 40 				\
-			      ? ((size) - 1)/8 + 5			\
-			      : ((size) - 1)/4))
-
-Malloc_t
-Perl_safexmalloc(I32 x, MEM_SIZE size)
-{
-    register char* where = (char*)safemalloc(size + ALIGN);
-
-    xcount[x] += size;
-    xycount[x][SIZE_TO_Y(size)]++;
-    set_typeof_chunk(where, x);
-    sizeof_chunk(where) = size;
-    return (Malloc_t)(where + ALIGN);
-}
-
-Malloc_t
-Perl_safexrealloc(Malloc_t wh, MEM_SIZE size)
-{
-    char *where = (char*)wh;
-
-    if (!wh)
-	return safexmalloc(0,size);
-
-    {
-	MEM_SIZE old = sizeof_chunk(where - ALIGN);
-	int t = typeof_chunk(where - ALIGN);
-	register char* new = (char*)saferealloc(where - ALIGN, size + ALIGN);
-
-	xycount[t][SIZE_TO_Y(old)]--;
-	xycount[t][SIZE_TO_Y(size)]++;
-	xcount[t] += size - old;
-	sizeof_chunk(new) = size;
-	return (Malloc_t)(new + ALIGN);
-    }
-}
-
-void
-Perl_safexfree(Malloc_t wh)
-{
-    I32 x;
-    char *where = (char*)wh;
-    MEM_SIZE size;
-
-    if (!where)
-	return;
-    where -= ALIGN;
-    size = sizeof_chunk(where);
-    x = where[0] + 100 * where[1];
-    xcount[x] -= size;
-    xycount[x][SIZE_TO_Y(size)]--;
-    safefree(where);
-}
-
-Malloc_t
-Perl_safexcalloc(I32 x,MEM_SIZE count, MEM_SIZE size)
-{
-    register char * where = (char*)safexmalloc(x, size * count + ALIGN);
-    xcount[x] += size;
-    xycount[x][SIZE_TO_Y(size)]++;
-    memset((void*)(where + ALIGN), 0, size * count);
-    set_typeof_chunk(where, x);
-    sizeof_chunk(where) = size;
-    return (Malloc_t)(where + ALIGN);
-}
-
-STATIC void
-S_xstat(pTHX_ int flag)
-{
-    register I32 i, j, total = 0;
-    I32 subtot[MAXYCOUNT];
-
-    for (j = 0; j < MAXYCOUNT; j++) {
-	subtot[j] = 0;
-    }
-
-    PerlIO_printf(Perl_debug_log, "   Id  subtot   4   8  12  16  20  24  28  32  36  40  48  56  64  72  80 80+\n", total);
-    for (i = 0; i < MAXXCOUNT; i++) {
-	total += xcount[i];
-	for (j = 0; j < MAXYCOUNT; j++) {
-	    subtot[j] += xycount[i][j];
-	}
-	if (flag == 0
-	    ? xcount[i]			/* Have something */
-	    : (flag == 2
-	       ? xcount[i] != lastxcount[i] /* Changed */
-	       : xcount[i] > lastxcount[i])) { /* Growed */
-	    PerlIO_printf(Perl_debug_log,"%2d %02d %7ld ", i / 100, i % 100,
-			  flag == 2 ? xcount[i] - lastxcount[i] : xcount[i]);
-	    lastxcount[i] = xcount[i];
-	    for (j = 0; j < MAXYCOUNT; j++) {
-		if ( flag == 0
-		     ? xycount[i][j]	/* Have something */
-		     : (flag == 2
-			? xycount[i][j] != lastxycount[i][j] /* Changed */
-			: xycount[i][j] > lastxycount[i][j])) {	/* Growed */
-		    PerlIO_printf(Perl_debug_log,"%3ld ",
-				  flag == 2
-				  ? xycount[i][j] - lastxycount[i][j]
-				  : xycount[i][j]);
-		    lastxycount[i][j] = xycount[i][j];
-		} else {
-		    PerlIO_printf(Perl_debug_log, "  . ", xycount[i][j]);
-		}
-	    }
-	    PerlIO_printf(Perl_debug_log, "\n");
-	}
-    }
-    if (flag != 2) {
-	PerlIO_printf(Perl_debug_log, "Total %7ld ", total);
-	for (j = 0; j < MAXYCOUNT; j++) {
-	    if (subtot[j]) {
-		PerlIO_printf(Perl_debug_log, "%3ld ", subtot[j]);
-	    } else {
-		PerlIO_printf(Perl_debug_log, "  . ");
-	    }
-	}
-	PerlIO_printf(Perl_debug_log, "\n");	
-    }
-}
-
-#endif /* LEAKTEST */
 
 /* These must be defined when not using Perl's malloc for binary
  * compatibility */
@@ -1413,14 +1262,6 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 	PerlIO *serr = Perl_error_log;
 
 	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-#ifdef LEAKTEST
-	DEBUG_L(*message == '!'
-		? (xstat(message[1]=='!'
-			 ? (message[2]=='!' ? 2 : 1)
-			 : 0)
-		   , 0)
-		: 0);
-#endif
 	(void)PerlIO_flush(serr);
     }
 }
@@ -1564,14 +1405,6 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 	{
 	    PerlIO *serr = Perl_error_log;
 	    PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-#ifdef LEAKTEST
-	    DEBUG_L(*message == '!'
-		? (xstat(message[1]=='!'
-			? (message[2]=='!' ? 2 : 1)
-			: 0)
-		    , 0)
-		: 0);
-#endif
 	    (void)PerlIO_flush(serr);
 	}
     }

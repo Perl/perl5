@@ -2221,6 +2221,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
 #ifndef MACOS_TRADITIONAL
     case '0':
+        MUTEX_LOCK(&PL_dollarzero_mutex);
 #ifdef HAS_SETPROCTITLE
 	/* The BSDs don't show the argv[] in ps(1) output, they
 	 * show a string from the process struct and provide
@@ -2300,6 +2301,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    for (i = 1; i < PL_origargc; i++)
 		PL_origargv[i] = Nullch;
 	}
+        MUTEX_UNLOCK(&PL_dollarzero_mutex);
 	break;
 #endif
 #ifdef USE_5005THREADS

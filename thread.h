@@ -381,6 +381,10 @@ typedef struct condpair {
 #define MgOWNER(mg) ((condpair_t *)(mg->mg_ptr))->owner
 
 #endif /* USE_5005THREADS */
+
+#  define LOCK_ARGV_MUTEX	MUTEX_LOCK(&PL_dollarzero_mutex)
+#  define UNLOCK_ARGV_MUTEX	MUTEX_UNLOCK(&PL_dollarzero_mutex)
+
 #endif /* USE_5005THREADS || USE_ITHREADS */
 
 #ifndef MUTEX_LOCK
@@ -457,6 +461,14 @@ typedef struct condpair {
 
 #ifndef UNLOCK_SV_LOCK_MUTEX
 #  define UNLOCK_SV_LOCK_MUTEX
+#endif
+
+#ifndef LOCK_ARGV_MUTEX
+#  define LOCK_ARGV_MUTEX
+#endif
+
+#ifndef UNLOCK_ARGV_MUTEX
+#  define UNLOCK_ARGV_MUTEX
 #endif
 
 /* THR, SET_THR, and dTHR are there for compatibility with old versions */
