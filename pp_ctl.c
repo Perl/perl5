@@ -4180,7 +4180,13 @@ sortcv_stacked(pTHXo_ SV *a, SV *b)
     I32 oldsaveix = PL_savestack_ix;
     I32 oldscopeix = PL_scopestack_ix;
     I32 result;
-    AV *av = GvAV(PL_defgv);
+    AV *av;
+
+#ifdef USE_THREADS
+    av = (AV*)PL_curpad[0];
+#else
+    av = GvAV(PL_defgv);
+#endif
 
     if (AvMAX(av) < 1) {
 	SV** ary = AvALLOC(av);
