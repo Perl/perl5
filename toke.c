@@ -36,11 +36,14 @@ static I32 utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
 #define XFAKEBRACK 128
 #define XENUMMASK 127
 
-#ifdef EBCDIC
-/* For now 'use utf8' does not affect tokenizer on EBCDIC */
-#define UTF (PL_linestr && DO_UTF8(PL_linestr))
+#ifdef USE_UTF8_SCRIPTS
+#   define UTF (!IN_BYTES)
 #else
-#define UTF ((PL_linestr && DO_UTF8(PL_linestr)) || (PL_hints & HINT_UTF8))
+#   ifdef EBCDIC /* For now 'use utf8' does not affect tokenizer on EBCDIC */
+#       define UTF (PL_linestr && DO_UTF8(PL_linestr))
+#   else
+#       define UTF ((PL_linestr && DO_UTF8(PL_linestr)) || (PL_hints & HINT_UTF8))
+#   endif
 #endif
 
 /* In variables named $^X, these are the legal values for X.

@@ -7,6 +7,15 @@
  *
  */
 
+/* Use UTF-8 as the default script encoding?
+ * Turning this on will break scripts having non-UTF8 binary
+ * data (such as Latin-1) in string literals. */
+#ifdef USE_UTF8_SCRIPTS
+#    define USE_UTF8_IN_NAMES (!IN_BYTES)
+#else
+#    define USE_UTF8_IN_NAMES (PL_hints & HINT_UTF8)
+#endif
+
 #ifdef EBCDIC
 /* The equivalent of these macros but implementing UTF-EBCDIC
    are in the following header file:

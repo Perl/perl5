@@ -115,7 +115,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 
     if (!(PL_in_my == KEY_our ||
 	  isALPHA(name[1]) ||
-	  (PL_hints & HINT_UTF8 && UTF8_IS_START(name[1])) ||
+	  (USE_UTF8_IN_NAMES && UTF8_IS_START(name[1])) ||
 	  (name[1] == '_' && (int)strlen(name) > 2)))
     {
 	if (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1])) {
