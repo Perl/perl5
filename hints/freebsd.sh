@@ -237,6 +237,11 @@ EOM
         esac
 
         unset lc_r
+
+	# Even with the malloc mutexes the Perl malloc does not
+	# seem to be threadsafe in FreeBSD?
+	usemymalloc=n
+
 esac
 EOCBU
 
