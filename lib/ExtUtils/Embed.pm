@@ -139,6 +139,24 @@ sub static_ext {
     @Extensions;
 }
 
+sub _ldflags {
+    my $ldflags = $Config{ldflags};
+    $ldflags =~ s/([\(\)])/\\$1/g;
+    return $ldflags;
+}
+
+sub _ccflags {
+    my $ccflags = $Config{ccflags};
+    $ccflags =~ s/([\(\)])/\\$1/g;
+    return $ccflags;
+}
+
+sub _ccdlflags {
+    my $ccdlflags = $Config{ccdlflags};
+    $ccdlflags =~ s/([\(\)])/\\$1/g;
+    return $ccdlflags;
+}
+
 sub ldopts {
     require ExtUtils::MakeMaker;
     require ExtUtils::Liblist;
@@ -213,7 +231,9 @@ sub ldopts {
 
     my $ld_or_bs = $bsloadlibs || $ldloadlibs;
     print STDERR "bs: $bsloadlibs ** ld: $ldloadlibs" if $Verbose;
-    my $linkage = "$Config{ccdlflags} $Config{ldflags} @archives $ld_or_bs";
+    my $ccdlflags = _ccdlflags();
+    my $ldflags   = _ldflags();
+    my $linkage = "$ccdlflags $ldflags @archives $ld_or_bs";
     print STDERR "ldopts: '$linkage'\n" if $Verbose;
 
     return $linkage if scalar @_;
@@ -221,11 +241,13 @@ sub ldopts {
 }
 
 sub ccflags {
-    my_return(" $Config{ccflags} ");
+    my $ccflags = _ccflags();
+    my_return(" $ccflags ");
 }
 
 sub ccdlflags {
-    my_return(" $Config{ccdlflags} ");
+    my $ccdlflags = _ccdlflags();
+    my_return(" $ccdlflags ");
 }
 
 sub perl_inc {
