@@ -213,6 +213,8 @@ typedef struct condpair {
 #undef	cxstack
 #undef	cxstack_ix
 #undef	cxstack_max
+#undef	defstash
+#undef	curstash
 #undef	tmps_stack
 #undef	tmps_floor
 #undef	tmps_ix
@@ -223,6 +225,10 @@ typedef struct condpair {
 #undef	top_env
 #undef	runlevel
 #undef	in_eval
+#undef	restartop
+#undef	delaymagic
+#undef	dirty
+#undef	localizing
 
 #define self		(thr->Tself)
 #define stack_base	(thr->Tstack_base)
@@ -236,6 +242,7 @@ typedef struct condpair {
 #endif
 #define	curcop		(thr->Tcurcop)
 #define	stack		(thr->Tstack)
+#define curstack	(thr->Tcurstack)
 #define	mainstack	(thr->Tmainstack)
 #define	markstack	(thr->Tmarkstack)
 #define	markstack_ptr	(thr->Tmarkstack_ptr)

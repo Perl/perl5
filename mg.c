@@ -454,11 +454,14 @@ MAGIC *mg;
 #endif
 	break;
     case '?':
-	sv_setiv(sv, (IV)STATUS_CURRENT);
+	{
+	    dTHR;
+	    sv_setiv(sv, (IV)STATUS_CURRENT);
 #ifdef COMPLEX_STATUS
-	LvTARGOFF(sv) = statusvalue;
-	LvTARGLEN(sv) = statusvalue_vms;
+	    LvTARGOFF(sv) = statusvalue;
+	    LvTARGLEN(sv) = statusvalue_vms;
 #endif
+	}
 	break;
     case '^':
 	s = IoTOP_NAME(GvIOp(defoutgv));

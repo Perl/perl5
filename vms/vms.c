@@ -2655,6 +2655,7 @@ vms_execfree() {
 static char *
 setup_argstr(SV *really, SV **mark, SV **sp)
 {
+  dTHR;
   char *junk, *tmps = Nullch;
   register size_t cmdlen = 0;
   size_t rlen;
@@ -3179,6 +3180,7 @@ static long int utc_offset_secs;
 /*{{{time_t my_time(time_t *timep)*/
 time_t my_time(time_t *timep)
 {
+  dTHR;
   time_t when;
 
   if (gmtime_emulation_type == 0) {
@@ -3226,6 +3228,7 @@ time_t my_time(time_t *timep)
 struct tm *
 my_gmtime(const time_t *timep)
 {
+  dTHR;
   char *p;
   time_t when;
 
@@ -3251,6 +3254,7 @@ my_gmtime(const time_t *timep)
 struct tm *
 my_localtime(const time_t *timep)
 {
+  dTHR;
   time_t when;
 
   if (timep == NULL) {
@@ -3296,6 +3300,7 @@ static const long int utime_baseadjust[2] = { 0x4beb4000, 0x7c9567 };
 /*{{{int my_utime(char *path, struct utimbuf *utimes)*/
 int my_utime(char *file, struct utimbuf *utimes)
 {
+  dTHR;
   register int i;
   long int bintime[2], len = 2, lowbit, unixtime,
            secscale = 10000000; /* seconds --> 100 ns intervals */
@@ -3680,6 +3685,8 @@ cando_by_name(I32 bit, I32 effective, char *fname)
 int
 flex_fstat(int fd, struct mystat *statbufp)
 {
+  dTHR;
+
   if (!fstat(fd,(stat_t *) statbufp)) {
     if (statbufp == (struct mystat *) &statcache) *namecache == '\0';
     statbufp->st_dev = encode_dev(statbufp->st_devnam);
@@ -3704,6 +3711,7 @@ flex_fstat(int fd, struct mystat *statbufp)
 int
 flex_stat(char *fspec, struct mystat *statbufp)
 {
+    dTHR;
     char fileified[NAM$C_MAXRSS+1];
     int retval = -1;
 
