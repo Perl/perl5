@@ -2754,6 +2754,35 @@ C<"P"> is C<undef>.
 
 =item *
 
+The C<"#"> character allows packing and unpacking of strings where the
+packed structure contains a byte count followed by the string itself.
+You write I<length-item>C<#>I<string-item>.
+
+The I<length-item> can be any C<pack> template letter,
+and describes how the length value is packed.
+The ones likely to be of most use are integer-packing ones like
+C<"n"> (for Java strings), C<"w"> (for ASN.1 or SNMP)
+and C<"N"> (for Sun XDR).
+
+The I<string-item> must, at present, be C<"A*">, C<"a*"> or C<"Z*">.
+For C<unpack> the length of the string is obtained from the I<length-item>,
+but if you put in the '*' it will be ignored.
+
+    unpack 'C#a', "\04Gurusamy";        gives 'Guru'
+    unpack 'a3#A* A*', '007 Bond  J ';  gives (' Bond','J')
+    pack 'n#a* w#a*','hello,','world';  gives "\000\006hello,\005world"
+
+The I<length-item> is not returned explicitly from C<unpack>.
+
+Adding a count to the I<length-item> letter
+is unlikely to do anything useful,
+unless that letter is C<"A">, C<"a"> or C<"Z">.
+Packing with a I<length-item> of C<"a"> or C<"Z">
+may introduce C<"\000"> characters,
+which Perl does not regard as legal in numeric strings.
+
+=item *
+
 The integer types C<"s">, C<"S">, C<"l">, and C<"L"> may be
 immediately followed by a C<"!"> to signify native shorts or longs--as
 you can see from above for example a bare C<"l"> does mean exactly 32
