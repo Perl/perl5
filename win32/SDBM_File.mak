@@ -67,10 +67,10 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I ".\include" /I "." /I ".." /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /YX /c
-CPP_PROJ=/nologo /MT /W3 /GX /O2 /I ".\include" /I "." /I ".." /D "NDEBUG" /D\
- "WIN32" /D "_WINDOWS" /D "MSDOS" /Fp"$(INTDIR)/SDBM_File.pch" /YX\
+# ADD BASE CPP /nologo /MT /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /c
+# ADD CPP /nologo /MT /W3 /O2 /I ".\include" /I "." /I ".." /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /c
+CPP_PROJ=/nologo /MT /W3 /O2 /I ".\include" /I "." /I ".." /D "NDEBUG" /D\
+ "WIN32" /D "_WINDOWS" /D "MSDOS" \
  /Fo"$(INTDIR)/" /c 
 CPP_OBJS=.\Release/
 CPP_SBRS=
@@ -136,10 +136,10 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /I ".\include" /I "." /I ".." /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /YX /c
-CPP_PROJ=/nologo /MTd /W3 /Gm /GX /Zi /Od /I ".\include" /I "." /I ".." /D\
- "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /Fp"$(INTDIR)/SDBM_File.pch" /YX\
+# ADD BASE CPP /nologo /MTd /W3 /Gm /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /c
+# ADD CPP /nologo /MTd /W3 /Gm /Zi /Od /I ".\include" /I "." /I ".." /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /c
+CPP_PROJ=/nologo /MTd /W3 /Gm /Zi /Od /I ".\include" /I "." /I ".." /D\
+ "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" \
  /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c 
 CPP_OBJS=.\Debug/
 CPP_SBRS=

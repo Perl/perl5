@@ -22,7 +22,7 @@ esac
 # Then run "sh5 Configure.sh5 [your options]"
 
 case "$myuname" in
-*risc*) cat <<EOF
+*risc*) cat <<EOF >&4
 Note that there is a bug in some versions of NFS on the DECStation that
 may cause utime() to work incorrectly.  If so, regression test io/fs
 may fail if run under NFS.  Ignore the failure.

@@ -5324,8 +5324,17 @@ EOH
 		rp='What shall I put after the #! to start up perl ("none" to not use #!)?'
 		. ./myread
 		case "$ans" in
-		none) startperl=": # use perl";;
-		*) startperl="#!$ans";;
+		none)	startperl=": # use perl";;
+		*)	startperl="#!$ans"
+			if $test 33 -lt `echo "$ans" | wc -c`; then
+				$cat >&4 <<EOM
+
+WARNING:  Some systems limit the #! command to 32 characters.
+If you experience difficulty running Perl scripts with #!, try
+installing Perl in a directory with a shorter pathname.
+
+EOM
+			fi ;;
 		esac
 		;;
 	*) startperl=": # use perl"
@@ -8222,6 +8231,51 @@ set db.h i_db
 eval $inhdr
 
 case "$i_db" in
+$define)
+	: Check db version.  We can not use version 2.
+	echo " "
+	echo "Checking Berkeley DB version ..." >&4
+	$cat >try.c <<EOCP
+#$d_const HASCONST
+#ifndef HASCONST
+#define const
+#endif
+#include <sys/types.h>
+#include <stdio.h>
+#include <db.h>
+main()
+{
+#ifdef DB_VERSION_MAJOR
+    printf("You have Berkeley DB Version %d.%d\n",
+		DB_VERSION_MAJOR, DB_VERSION_MINOR);
+    printf("Perl currently only supports up to version 1.86.\n");
+    exit(1);
+#else
+    exit(0);
+#endif
+}
+EOCP
+	if $cc $optimize $ccflags $ldflags -o try try.c $libs && ./try; then
+		echo 'Looks OK.  (Perl supports up to version 1.86).' >&4
+	else
+		echo "I can't use your Berkeley DB.  I'll disable it." >&4
+		i_db=$undef
+		case " $libs " in
+		*"-ldb "*)
+			: Remove db from list of libraries to use
+			echo "Removing unusable -ldb from library list" >&4
+			set `echo X $libs | $sed -e 's/-ldb / /' -e 's/-ldb$//'`
+			shift
+			libs="$*"
+			echo "libs = $libs" >&4
+			;;
+		esac
+	fi
+	$rm -f try.*
+	;;
+esac
+
+case "$i_db" in
 define)
 	: Check the return type needed for hash 
 	echo " "
@@ -8251,13 +8305,15 @@ EOCP
 			db_hashtype='u_int32_t'
 		fi
 	else
-		echo "I can't seem to compile the test program." >&4
-		db_hashtype=int
+		: XXX Maybe we should just give up here.
+		db_hashtype=u_int32_t
+		echo "Help:  I can't seem to compile the db test program." >&4
+		echo "Something's wrong, but I'll assume you use $db_hashtype." >&4
 	fi
 	$rm -f try.*
 	echo "Your version of Berkeley DB uses $db_hashtype for hash."
 	;;
-*)	db_hashtype=int
+*)	db_hashtype=u_int32_t
 	;;
 esac
 
@@ -8291,13 +8347,15 @@ EOCP
 			db_prefixtype='size_t'
 		fi
 	else
-		echo "I can't seem to compile the test program." >&4
-		db_prefixtype='int'
+		db_prefixtype='size_t'
+		: XXX Maybe we should just give up here.
+		echo "Help:  I can't seem to compile the db test program." >&4
+		echo "Something's wrong, but I'll assume you use $db_prefixtype." >&4
 	fi
 	$rm -f try.*
 	echo "Your version of Berkeley DB uses $db_prefixtype for prefix."
 	;;
-*)	db_prefixtype='int'
+*)	db_prefixtype='size_t'
 	;;
 esac
 

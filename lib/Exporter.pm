@@ -2,21 +2,31 @@ package Exporter;
 
 require 5.001;
 
+#
+# We go to a lot of trouble not to 'require Carp' at file scope,
+#  because Carp requires Exporter, and something has to give.
+#
+
 $ExportLevel = 0;
 $Verbose = 0 unless $Verbose;
-
-require Carp;
 
 sub export {
 
     # First make import warnings look like they're coming from the "use".
     local $SIG{__WARN__} = sub {
 	my $text = shift;
-	$text =~ s/ at \S*Exporter.pm line \d+.*\n//;
-	local $Carp::CarpLevel = 1;	# ignore package calling us too.
-	Carp::carp($text);
+	if ($text =~ s/ at \S*Exporter.pm line \d+.*\n//) {
+	    require Carp;
+	    local $Carp::CarpLevel = 1;	# ignore package calling us too.
+	    Carp::carp($text);
+	}
+	else {
+	    warn $text;
+	}
     };
     local $SIG{__DIE__} = sub {
+	require Carp;
+	local $Carp::CarpLevel = 1;	# ignore package calling us too.
 	Carp::croak("$_[0]Illegal null symbol in \@${1}::EXPORT")
 	    if $_[0] =~ /^Unable to create sub named "(.*?)::"/;
     };
@@ -103,7 +113,10 @@ sub export {
 		}
 	    }
 	}
-	Carp::croak("Can't continue after import errors") if $oops;
+	if ($oops) {
+	    require Carp;
+	    Carp::croak("Can't continue after import errors");
+	}
     }
     else {
 	@imports = @exports;
@@ -127,7 +140,10 @@ sub export {
 		warn qq["$sym" is not implemented by the $pkg module ],
 			"on this architecture";
 	    }
-	    Carp::croak("Can't continue after import errors") if @failed;
+	    if (@failed) {
+		require Carp;
+		Carp::croak("Can't continue after import errors");
+	    }
 	}
     }
 
@@ -145,7 +161,7 @@ sub export {
 	    $type eq '@' ? \@{"${pkg}::$sym"} :
 	    $type eq '%' ? \%{"${pkg}::$sym"} :
 	    $type eq '*' ?  *{"${pkg}::$sym"} :
-		Carp::croak("Can't export symbol: $type$sym");
+	    do { require Carp; Carp::croak("Can't export symbol: $type$sym") };
     }
 }
 
@@ -165,8 +181,11 @@ sub _push_tags {
     push(@{"${pkg}::$var"},
 	map { $export_tags{$_} ? @{$export_tags{$_}} : scalar(++$nontag,$_) }
 		(@$syms) ? @$syms : keys %export_tags);
-    # This may change to a die one day
-    Carp::carp("Some names are not tags") if $nontag and $^W;
+    if ($nontag and $^W) {
+	# This may change to a die one day
+	require Carp;
+	Carp::carp("Some names are not tags");
+    }
 }
 
 sub export_tags    { _push_tags((caller)[0], "EXPORT",    \@_) }
@@ -188,6 +207,7 @@ sub require_version {
 	$version ||= "(undef)";
 	my $file = $INC{"$pkg.pm"};
 	$file &&= " ($file)";
+	require Carp;
 	Carp::croak("$pkg $wanted required--this is only version $version$file")
     }
     $version;
@@ -246,7 +266,7 @@ In other files which wish to use ModuleName:
 =head1 DESCRIPTION
 
 The Exporter module implements a default C<import> method which
-many modules choose inherit rather than implement their own.
+many modules choose to inherit rather than implement their own.
 
 Perl automatically calls the C<import> method when processing a
 C<use> statement for a module. Modules and C<use> are documented

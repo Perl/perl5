@@ -49,6 +49,13 @@ $sel->remove([\*STDOUT, 5]);
 print "not " unless $sel->count == 0 && !defined($sel->bits);
 print "ok 9\n";
 
+if ($^O eq 'MSWin32') {  # 4-arg select is only valid on sockets
+    print "# skipping tests 10..15\n";
+    for (10 .. 15) { print "ok $_\n" }
+    $sel->add(\*STDOUT);  # update
+    goto POST_SOCKET;
+}
+
 @a = $sel->can_read();  # should return imediately
 print "not " unless @a == 0;
 print "ok 10\n";
@@ -77,6 +84,7 @@ print "ok 14\n";
 $fd = $w->[0];
 print $fd "ok 15\n";
 
+POST_SOCKET:
 # Test new exists() method
 $sel->exists(\*STDIN) and print "not ";
 print "ok 16\n";

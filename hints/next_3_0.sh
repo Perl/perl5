@@ -6,15 +6,15 @@
 # <klwhite@magnus.acs.ohio-state.edu>, based on suggestions by Andreas
 # Koenig and Andy Dougherty.
 
-echo With NS 3.0 you won\'t be able to use the POSIX module.
-echo Be aware that some of the tests that are run during "make test"
-echo will fail due to the lack of POSIX support on this system.
-echo
-echo Also, if you have the GDBM installed, make sure the header file
-echo is located at a place on the system where the C compiler will
-echo find it.  By default, it is placed in /usr/local/include/gdbm.h.
-echo It will not be found there.  Try moving it to
-echo /NextDeveloper/Headers/bsd/gdbm.h.
+echo With NS 3.0 you won\'t be able to use the POSIX module.		>&4
+echo Be aware that some of the tests that are run during \"make test\"	>&4
+echo will fail due to the lack of POSIX support on this system.		>&4
+echo									>&4
+echo Also, if you have the GDBM installed, make sure the header file	>&4
+echo is located at a place on the system where the C compiler will	>&4
+echo find it.  By default, it is placed in /usr/local/include/gdbm.h.	>&4
+echo It will not be found there.  Try moving it to			>&4
+echo /NextDeveloper/Headers/bsd/gdbm.h.					>&4
 
 ccflags='-DUSE_NEXT_CTYPE -DNEXT30_NO_ATTRIBUTE'
 POSIX_cflags='ccflags="-posix $ccflags"'

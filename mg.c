@@ -286,7 +286,6 @@ MAGIC *mg;
 	    }
 	}
 	return 0;
-	break;
     case '+':
 	if (curpm && (rx = curpm->op_pmregexp)) {
 	    paren = rx->lastparen;
@@ -294,7 +293,6 @@ MAGIC *mg;
 		goto getparen;
 	}
 	return 0;
-	break;
     case '`':
 	if (curpm && (rx = curpm->op_pmregexp)) {
 	    if ((s = rx->subbeg) && rx->startp[0]) {
@@ -607,7 +605,7 @@ MAGIC* mg;
     }
 #endif
 
-#if !defined(OS2) && !defined(AMIGAOS)
+#if !defined(OS2) && !defined(AMIGAOS) && !defined(_WIN32)
 			    /* And you'll never guess what the dog had */
 			    /*   in its mouth... */
     if (tainting) {
@@ -653,7 +651,7 @@ MAGIC* mg;
 	    }
 	}
     }
-#endif /* neither OS2 nor AMIGAOS */
+#endif /* neither OS2 nor AMIGAOS nor _WIN32 */
 
     return 0;
 }
@@ -1129,15 +1127,32 @@ MAGIC* mg;
 }
 
 int
-magic_getitervar(sv,mg)
+magic_getdefelem(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
     SV *targ = Nullsv;
     if (LvTARGLEN(sv)) {
-	AV* av = (AV*)LvTARG(sv);
-	if (LvTARGOFF(sv) <= AvFILL(av))
-	    targ = AvARRAY(av)[LvTARGOFF(sv)];
+	if (mg->mg_obj) {
+	    HV* hv = (HV*)LvTARG(sv);
+	    HE* he = hv_fetch_ent(hv, mg->mg_obj, FALSE, 0);
+	    if (he)
+		targ = HeVAL(he);
+	}
+	else {
+	    AV* av = (AV*)LvTARG(sv);
+	    if ((I32)LvTARGOFF(sv) <= AvFILL(av))
+		targ = AvARRAY(av)[LvTARGOFF(sv)];
+	}
+	if (targ && targ != &sv_undef) {
+	    /* somebody else defined it for us */
+	    SvREFCNT_dec(LvTARG(sv));
+	    LvTARG(sv) = SvREFCNT_inc(targ);
+	    LvTARGLEN(sv) = 0;
+	    SvREFCNT_dec(mg->mg_obj);
+	    mg->mg_obj = Nullsv;
+	    mg->mg_flags &= ~MGf_REFCOUNTED;
+	}
     }
     else
 	targ = LvTARG(sv);
@@ -1146,19 +1161,21 @@ MAGIC* mg;
 }
 
 int
-magic_setitervar(sv,mg)
+magic_setdefelem(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
     if (LvTARGLEN(sv))
-	vivify_itervar(sv);
-    if (LvTARG(sv))
+	vivify_defelem(sv);
+    if (LvTARG(sv)) {
 	sv_setsv(LvTARG(sv), sv);
+	SvSETMAGIC(LvTARG(sv));
+    }
     return 0;
 }
 
 int
-magic_freeitervar(sv,mg)
+magic_freedefelem(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
@@ -1167,24 +1184,37 @@ MAGIC* mg;
 }
 
 void
-vivify_itervar(sv)
+vivify_defelem(sv)
 SV* sv;
 {
-    AV* av;
+    MAGIC* mg;
+    SV* value;
 
-    if (!LvTARGLEN(sv))
+    if (!LvTARGLEN(sv) || !(mg = mg_find(sv, 'y')))
 	return;
-    av = (AV*)LvTARG(sv);
-    if (LvTARGOFF(sv) <= AvFILL(av)) {
-	SV** svp = AvARRAY(av) + LvTARGOFF(sv);
-	LvTARG(sv) = newSVsv(*svp);
-	SvREFCNT_dec(*svp);
-	*svp = SvREFCNT_inc(LvTARG(sv));
+    if (mg->mg_obj) {
+	HV* hv = (HV*)LvTARG(sv);
+	HE* he = hv_fetch_ent(hv, mg->mg_obj, TRUE, 0);
+	if (!he || (value = HeVAL(he)) == &sv_undef)
+	    croak(no_helem, SvPV(mg->mg_obj, na));
     }
-    else
-	LvTARG(sv) = Nullsv;
-    SvREFCNT_dec(av);
+    else {
+	AV* av = (AV*)LvTARG(sv);
+	if (LvTARGLEN(sv) < 0 && (I32)LvTARGOFF(sv) > AvFILL(av))
+	    LvTARG(sv) = Nullsv;	/* array can't be extended */
+	else {
+	    SV** svp = av_fetch(av, LvTARGOFF(sv), TRUE);
+	    if (!svp || (value = *svp) == &sv_undef)
+		croak(no_aelem, (I32)LvTARGOFF(sv));
+	}
+    }
+    SvREFCNT_inc(value);
+    SvREFCNT_dec(LvTARG(sv));
+    LvTARG(sv) = value;
     LvTARGLEN(sv) = 0;
+    SvREFCNT_dec(mg->mg_obj);
+    mg->mg_obj = Nullsv;
+    mg->mg_flags &= ~MGf_REFCOUNTED;
 }
 
 int

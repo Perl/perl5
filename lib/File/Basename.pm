@@ -34,7 +34,7 @@ pieces using the syntax of different operating systems.
 You select the syntax via the routine fileparse_set_fstype().
 
 If the argument passed to it contains one of the substrings
-"VMS", "MSDOS", "MacOS", or "AmigaOS", the file specification 
+"VMS", "MSDOS", "MacOS", "AmigaOS" or "MSWin32", the file specification 
 syntax of that operating system is used in future calls to 
 fileparse(), basename(), and dirname().  If it contains none of
 these substrings, UNIX syntax is used.  This pattern matching is
@@ -44,7 +44,7 @@ they assume you are using UNIX emulation and apply the UNIX syntax
 rules instead, for that function call only.
 
 If the argument passed to it contains one of the substrings "VMS",
-"MSDOS", "MacOS", "AmigaOS", "os2", or "RISCOS", then the pattern
+"MSDOS", "MacOS", "AmigaOS", "os2", "MSWin32" or "RISCOS", then the pattern
 matching for suffix removal is performed without regard for case,
 since those systems are not case-sensitive when opening existing files
 (though some of them preserve case on file creation).
@@ -128,7 +128,7 @@ require Exporter;
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
 #use strict;
 #use vars qw($VERSION $Fileparse_fstype $Fileparse_igncase);
-$VERSION = "2.4";
+$VERSION = "2.5";
 
 
 #   fileparse_set_fstype() - specify OS-based rules used in future
@@ -141,7 +141,7 @@ sub fileparse_set_fstype {
   my @old = ($Fileparse_fstype, $Fileparse_igncase);
   if (@_) {
     $Fileparse_fstype = $_[0];
-    $Fileparse_igncase = ($_[0] =~ /^(?:MacOS|VMS|AmigaOS|os2|RISCOS)/i);
+    $Fileparse_igncase = ($_[0] =~ /^(?:MacOS|VMS|AmigaOS|os2|RISCOS|MSWin32)/i);
   }
   wantarray ? @old : $old[0];
 }
@@ -172,6 +172,10 @@ sub fileparse {
   elsif ($fstype =~ /^AmigaOS/i) {
     ($dirpath,$basename) = ($fullname =~ /(.*[:\/])?(.*)/);
     $dirpath = './' unless $dirpath;
+  }
+  elsif ($fstype =~ /^MSWin32/i) {
+    ($dirpath,$basename) = ($fullname =~ /^(.*[:\\\/])?(.*)/);
+    $dirpath .= ".\\" unless $dirpath =~ /[\\\/]$/;
   }
   elsif ($fstype !~ /^VMS/i) {  # default to Unix
     ($dirpath,$basename) = ($fullname =~ m#^(.*/)?(.*)#);
@@ -217,6 +221,13 @@ sub dirname {
     }
     if ($fstype =~ /MacOS/i) { return $dirname }
     elsif ($fstype =~ /MSDOS/i) { 
+        $dirname =~ s/([^:])[\\\/]*$/$1/;
+        unless( length($basename) ) {
+	    ($basename,$dirname) = fileparse $dirname;
+	    $dirname =~ s/([^:])[\\\/]*$/$1/;
+	}
+    }
+    elsif ($fstype =~ /MSWin32/i) { 
         $dirname =~ s/([^:])[\\\/]*$/$1/;
         unless( length($basename) ) {
 	    ($basename,$dirname) = fileparse $dirname;

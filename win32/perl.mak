@@ -59,9 +59,9 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /YX /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "." /I ".\include" /I ".." /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /YX /c
-CPP_PROJ=/nologo /MT /W3 /GX /O2 /I "." /I ".\include" /I ".." /D "WIN32" /D\
+# ADD BASE CPP /nologo /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /YX /c
+# ADD CPP /nologo /MT /W3 /O2 /I "." /I ".\include" /I ".." /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /YX /c
+CPP_PROJ=/nologo /MT /W3 /O2 /I "." /I ".\include" /I ".." /D "WIN32" /D\
  "NDEBUG" /D "_CONSOLE" /Fp"$(INTDIR)/perl.pch" /YX /Fo"$(INTDIR)/" /c 
 CPP_OBJS=.\Release/
 CPP_SBRS=.\.
@@ -119,9 +119,9 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-# ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /YX /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /I "." /I ".\include" /I ".." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /YX /c
-CPP_PROJ=/nologo /MTd /W3 /Gm /GX /Zi /Od /I "." /I ".\include" /I ".." /D\
+# ADD BASE CPP /nologo /W3 /Gm /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /YX /c
+# ADD CPP /nologo /MTd /W3 /Gm /Zi /Od /I "." /I ".\include" /I ".." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /YX /c
+CPP_PROJ=/nologo /MTd /W3 /Gm /Zi /Od /I "." /I ".\include" /I ".." /D\
  "WIN32" /D "_DEBUG" /D "_CONSOLE" /Fp"$(INTDIR)/perl.pch" /YX /Fo"$(INTDIR)/"\
  /Fd"$(INTDIR)/" /c 
 CPP_OBJS=.\Debug/
@@ -210,7 +210,7 @@ SOURCE=..\perl.lib
 ################################################################################
 # Begin Source File
 
-SOURCE=.\win32io.cpp
+SOURCE=.\win32io.c
 DEP_CPP_WIN32=\
 	".\include\sys/socket.h"\
 	".\win32io.h"\

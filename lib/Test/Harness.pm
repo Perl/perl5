@@ -11,7 +11,7 @@ use vars qw($VERSION $verbose $switches $have_devel_corestack $curtest
 	    @ISA @EXPORT @EXPORT_OK);
 $have_devel_corestack = 0;
 
-$VERSION = "1.1501";
+$VERSION = "1.1502";
 
 @ISA=('Exporter');
 @EXPORT= qw(&runtests);
@@ -58,12 +58,13 @@ sub runtests {
     while ($test = shift(@tests)) {
 	$te = $test;
 	chop($te);
+	if ($^O eq 'VMS') { $te =~ s/^.*\.t\./[.t./; }
 	print "$te" . '.' x (20 - length($te));
 	my $fh = new FileHandle;
 	$fh->open($test) or print "can't open $test. $!\n";
 	my $first = <$fh>;
 	my $s = $switches;
-	$s .= " -T" if $first =~ /^#!.*\bperl.*-\w*T/;
+	$s .= q[ "-T"] if $first =~ /^#!.*\bperl.*-\w*T/;
 	$fh->close or print "can't close $test. $!\n";
 	my $cmd = "$^X $s $test|";
 	$cmd = "MCR $cmd" if $^O eq 'VMS';
@@ -103,10 +104,13 @@ sub runtests {
 	}
 	$fh->close; # must close to reap child resource values
 	my $wstatus = $?;
-	my $estatus = $^O eq 'VMS' ? $wstatus : $wstatus >> 8;
-	if ($^O eq 'VMS' ? !($wstatus & 1) : $wstatus) {
+	my $estatus = ($^O eq 'VMS'
+		       ? eval 'use vmsish "status"; $estatus = $?'
+		       : $wstatus >> 8);
+	if ($wstatus) {
 	    my ($failed, $canon, $percent) = ('??', '??');
 	    print "dubious\n\tTest returned status $estatus (wstat $wstatus)\n";
+	    print "\t\t(VMS status is $estatus)\n" if $^O eq 'VMS';
 	    if (corestatus($wstatus)) { # until we have a wait module
 		if ($have_devel_corestack) {
 		    Devel::CoreStack::stack($^X);

@@ -11,10 +11,11 @@ use Config;
 
 print "1..26\n";
 
-$wd = `pwd`;
+$wd = (($^O eq 'MSWin32') ? `cd` : `pwd`);
 chop($wd);
 
-`rm -f tmp 2>/dev/null; mkdir tmp 2>/dev/null`;
+if ($^O eq 'MSWin32') { `del tmp`; `mkdir tmp`; }
+else {  `rm -f tmp 2>/dev/null; mkdir tmp 2>/dev/null`; }
 chdir './tmp';
 `/bin/rm -rf a b c x` if -x '/bin/rm';
 
@@ -87,7 +88,8 @@ chdir $wd || die "Can't cd back to $wd";
 rmdir 'tmp';
 
 unlink 'c';
-if (`ls -l perl 2>/dev/null` =~ /^l.*->/) {  # we have symbolic links
+if ($^O ne 'MSWin32' and `ls -l perl 2>/dev/null` =~ /^l.*->/) {
+    # we have symbolic links
     if (symlink("TEST","c")) {print "ok 21\n";} else {print "not ok 21\n";}
     $foo = `grep perl c`;
     if ($foo) {print "ok 22\n";} else {print "not ok 22\n";}

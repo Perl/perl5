@@ -83,13 +83,16 @@ typedef U32 PADOFFSET;
 #define OPpREPEAT_DOLIST	64	/* List replication. */
 
 /* Private for OP_ENTERSUB, OP_RV2?V, OP_?ELEM */
-  /* (lower bits carry hints) */
-#define OPpENTERSUB_AMPER	8	/* Used & form to call. */
-#define OPpENTERSUB_DB		16	/* Debug subroutine. */
 #define OPpDEREF		(32|64)	/* Want ref to something: */
 #define OPpDEREF_AV		32	/*   Want ref to AV. */
 #define OPpDEREF_HV		64	/*   Want ref to HV. */
 #define OPpDEREF_SV		(32|64)	/*   Want ref to SV. */
+  /* OP_ENTERSUB only */
+#define OPpENTERSUB_DB		16	/* Debug subroutine. */
+#define OPpENTERSUB_AMPER	8	/* Used & form to call. */
+  /* OP_?ELEM only */
+#define OPpLVAL_DEFER		16	/* Defer creation of array/hash elem */
+  /* for OP_RV2?V, lower bits carry hints */
 
 /* Private for OP_CONST */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */

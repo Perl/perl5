@@ -30,7 +30,7 @@ cc='gcc'
 usrinc='/emx/include'
 libemx="`../UU/loc . X c:/emx/lib d:/emx/lib e:/emx/lib f:/emx/lib g:/emx/lib h:/emx/lib /emx/lib`"
 
-if test "$libemx" = "X"; then echo "Cannot find C library!"; fi
+if test "$libemx" = "X"; then echo "Cannot find C library!" >&2; fi
 
 # Acute backslashitis:
 libpth="`echo \"$LIBRARY_PATH\" | tr ';\\\' ' /'`"

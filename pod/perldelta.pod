@@ -27,7 +27,7 @@ might have symbol conflicts if you embed Perl in another application,
 just as in the 5.003 release.  By default, binary compatibility
 is preserved at the expense of symbol table pollution.
 
-=head2 Subroutine Parameters Are Not Autovivified
+=head2 No Autovivification of Subroutine Parameters
 
 In Perl versions 5.002 and 5.003, array and hash elements used as
 subroutine parameters were "autovivified"; that is, they were brought
@@ -47,6 +47,13 @@ fixed.  As a result, the string "$$0" is no longer equivalent to
 C<$$."0">, but rather to C<${$0}>.  To get the old behavior, change
 "$$" followed by a digit to "${$}".
 
+=head2 No Resetting of $. on Implicit Close
+
+The documentation for Perl 5.0 has always stated that C<$.> is I<not>
+reset when an already-open file handle is re-opened with no intervening
+call to C<close>.  Due to a bug, perl versions 5.000 through 5.0003
+I<did> reset C<$.> under that circumstance; Perl 5.004 does not.
+
 =head2 Changes to Tainting Checks
 
 A bug in previous versions may have failed to detect some insecure
@@ -63,6 +70,15 @@ A new Opcode module supports the creation, manipulation and
 application of opcode masks.  The revised Safe module has a new API
 and is implemented using the new Opcode module.  Please read the new
 Opcode and Safe documentation.
+
+=head2 Embedding Improvements
+
+In older versions of Perl it was not possible to create more than one
+Perl interpreter instance inside a single process without leaking like a
+sieve and/or crashing.  The bugs that caused this behavior have all been
+fixed.  However, you still must take care when embedding Perl in a C
+program.  See the updated perlembed manpage for tips on how to manage
+your interpreters.
 
 =head2 Internal Change: FileHandle Class Based on IO::* Classes
 
@@ -124,8 +140,8 @@ This now works.  (e.g. C<delete @ENV{'PATH', 'MANPATH'}>)
 
 =item flock
 
-is now supported on more platforms, and prefers fcntl
-to lockf when emulating.
+is now supported on more platforms, prefers fcntl to lockf when
+emulating, and always flushes before (un)locking.
 
 =item printf and sprintf
 
@@ -283,7 +299,7 @@ are inherited by all other classes:
 
 =item isa(CLASS)
 
-C<isa> returns I<true> if its object is blessed into a sub-class of C<CLASS>
+C<isa> returns I<true> if its object is blessed into a subclass of C<CLASS>
 
 C<isa> is also exportable and can be called as a sub with two arguments. This
 allows the ability to check what a reference points to. Example:
@@ -459,7 +475,7 @@ a fixed value are now inlined (e.g. C<sub PI () { 3.14159 }>).
 
 Each unique hash key is only allocated once, no matter how many hashes
 have an entry with that key.  So even if you have 100 copies of the
-same hash, the hash keys never have to be re-allocated.
+same hash, the hash keys never have to be reallocated.
 
 =head1 Pragmata
 

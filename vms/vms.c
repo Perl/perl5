@@ -3172,6 +3172,11 @@ my_gmtime(const time_t *timep)
   char *p;
   time_t when;
 
+  if (timep == NULL) {
+    set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
+    return NULL;
+  }
+  if (*timep == 0) gmtime_emulation_type = 0;  /* possibly reset TZ */
   if (gmtime_emulation_type == 0) (void) my_time(NULL); /* Init UTC */
 
   when = *timep;
@@ -3191,6 +3196,11 @@ my_localtime(const time_t *timep)
 {
   time_t when;
 
+  if (timep == NULL) {
+    set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
+    return NULL;
+  }
+  if (*timep == 0) gmtime_emulation_type = 0;  /* possibly reset TZ */
   if (gmtime_emulation_type == 0) (void) my_time(NULL); /* Init UTC */
 
   when = *timep;

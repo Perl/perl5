@@ -22,15 +22,16 @@ BEGIN {
     );
 }
 
+sub opset (;@);
+sub opset_to_hex ($);
+sub opdump (;$);
 use subs @EXPORT_OK;
 
 bootstrap Opcode $VERSION;
 
 _init_optags();
 
-
-*ops_to_opset = \&opset;	# alias for old name
-
+sub ops_to_opset { opset @_ }	# alias for old name
 
 sub opset_to_hex ($) {
     return "(invalid opset)" unless verify_opset($_[0]);

@@ -5,11 +5,13 @@ use Text::Wrap;
 sub output ($);
 
 @pods = qw(
-	    perl perldelta perldata perlsyn perlop perlre perlrun perlfunc
-	    perlvar perlsub perlmod perlform perllocale perlref perldsc
-	    perllol perltoot perlobj perltie perlbot perlipc perldebug
-	    perldiag perlsec perltrap perlstyle perlpod perlbook perlembed
-	    perlapio perlxs perlxstut perlguts perlcall
+	   perl perlfaq perlfaq1 perlfaq2 perlfaq3 perlfaq4 perlfaq5
+	   perlfaq6 perlfaq7 perlfaq8 perlfaq9 perldelta perldata
+	   perlsyn perlop perlre perlrun perlfunc perlvar perlsub
+	   perlmod perlform perllocale perlref perldsc perllol perltoot
+	   perlobj perltie perlbot perlipc perldebug perldiag perlsec
+	   perltrap perlstyle perlpod perlbook perlembed perlapio perlxs
+	   perlxstut perlguts perlcall
 	  );
 
 for (@pods) { s/$/.pod/ }

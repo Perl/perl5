@@ -7,7 +7,12 @@ print "1..6\n";
 @oops = @ops = <op/*>;
 
 map { $files{$_}++ } <op/*>;
-map { delete $files{$_} } split /[\s\n]/, `echo op/*`;
+if ($^O eq 'MSWin32') {
+  map { delete $files{"op/$_"} } split /[\s\n]/, `cmd /c "dir /b /l op"`;
+}
+else {
+  map { delete $files{$_} } split /[\s\n]/, `echo op/*`;
+}
 if (keys %files) {
 	print "not ok 1\t(",join(' ', sort keys %files),"\n";
 } else { print "ok 1\n"; }

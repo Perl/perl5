@@ -63,6 +63,16 @@ toroff=`
     $mandir/perlembed.1	\
     $mandir/perlpod.1	\
     $mandir/perlbook.1	\
+    $mandir/perlfaq.1	\
+    $mandir/perlfaq1.1	\
+    $mandir/perlfaq2.1	\
+    $mandir/perlfaq3.1	\
+    $mandir/perlfaq4.1	\
+    $mandir/perlfaq5.1	\
+    $mandir/perlfaq6.1	\
+    $mandir/perlfaq7.1	\
+    $mandir/perlfaq8.1	\
+    $mandir/perlfaq9.1	\
 	\
     $libdir/blib.3	\
     $libdir/diagnostics.3	\

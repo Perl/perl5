@@ -1,0 +1,16 @@
+You will need this patch to win32.c when compiling with VC++ ver. 2.0.
+
+
+diff -ur /y/src/perl5.003_93/win32/win32.c perl5.003_93-w32/win32/win32.c
+--- /y/src/perl5.003_93/win32/win32.c	Fri Jan 31 21:38:10 1997
++++ perl5.003_93-w32/win32/win32.c	Tue Mar 11 01:51:08 1997
+@@ -41,7 +41,8 @@
+ char  szPerlLibRoot[MAX_PATH+1];
+ HANDLE PerlDllHandle = INVALID_HANDLE_VALUE;
+ 
+-#define IsWin95()	(Win32System == VER_PLATFORM_WIN32_WINDOWS)
++/* #define IsWin95()	(Win32System == VER_PLATFORM_WIN32_WINDOWS) */
++#define IsWin95()	(0)
+ #define IsWinNT()	(Win32System == VER_PLATFORM_WIN32_NT)
+ 
+ void *

@@ -80,12 +80,16 @@
  */
 
 /* define this once if either system, instead of cluttering up the src */
-#if defined(MSDOS) || defined(atarist)
+#if defined(MSDOS) || defined(atarist) || defined(WIN32)
 #define DOSISH 1
 #endif
 
 #if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus)
 # define STANDARD_C 1
+#endif
+
+#if defined(__cplusplus) || defined(WIN32)
+# define DONT_DECLARE_STD 1
 #endif
 
 #if defined(HASVOLATILE) || defined(STANDARD_C)
@@ -433,7 +437,9 @@
 #       ifdef VMS
 	char *strerror _((int,...));
 #       else
+#ifndef DONT_DECLARE_STD
 	char *strerror _((int));
+#endif
 #       endif
 #       ifndef Strerror
 #           define Strerror strerror
@@ -447,55 +453,6 @@
 		((e) < 0 || (e) >= sys_nerr ? "(unknown)" : sys_errlist[e])
 #       endif
 #   endif
-#endif
-
-#ifdef VMS
-#   define STATUS_NATIVE	statusvalue_vms
-#   define STATUS_NATIVE_EXPORT \
-	((I32)statusvalue_vms == -1 ? 44 : statusvalue_vms)
-#   define STATUS_NATIVE_SET(n)						\
-	STMT_START {							\
-	    statusvalue_vms = (n);					\
-	    if ((I32)statusvalue_vms == -1)				\
-		statusvalue = -1;					\
-	    else if (statusvalue_vms & STS$M_SUCCESS)			\
-		statusvalue = 0;					\
-	    else if ((statusvalue_vms & STS$M_SEVERITY) == 0)		\
-		statusvalue = 1 << 8;					\
-	    else							\
-		statusvalue = (statusvalue_vms & STS$M_SEVERITY) << 8;	\
-	} STMT_END
-#   define STATUS_POSIX	statusvalue
-#   ifdef VMSISH_STATUS
-#	define STATUS_CURRENT	(VMSISH_STATUS ? STATUS_NATIVE : STATUS_POSIX)
-#   else
-#	define STATUS_CURRENT	STATUS_POSIX
-#   endif
-#   define STATUS_POSIX_SET(n)				\
-	STMT_START {					\
-	    statusvalue = (n);				\
-	    if (statusvalue != -1) {			\
-		statusvalue &= 0xFFFF;			\
-		statusvalue_vms = statusvalue ? 44 : 1;	\
-	    }						\
-	    else statusvalue_vms = -1;			\
-	} STMT_END
-#   define STATUS_ALL_SUCCESS	(statusvalue = 0, statusvalue_vms = 1)
-#   define STATUS_ALL_FAILURE	(statusvalue = 1, statusvalue_vms = 44)
-#else
-#   define STATUS_NATIVE	STATUS_POSIX
-#   define STATUS_NATIVE_EXPORT	STATUS_POSIX
-#   define STATUS_NATIVE_SET	STATUS_POSIX_SET
-#   define STATUS_POSIX		statusvalue
-#   define STATUS_POSIX_SET(n)		\
-	STMT_START {			\
-	    statusvalue = (n);		\
-	    if (statusvalue != -1)	\
-		statusvalue &= 0xFFFF;	\
-	} STMT_END
-#   define STATUS_CURRENT STATUS_POSIX
-#   define STATUS_ALL_SUCCESS	(statusvalue = 0)
-#   define STATUS_ALL_FAILURE	(statusvalue = 1)
 #endif
 
 #ifdef I_SYS_IOCTL
@@ -955,6 +912,55 @@ typedef I32 (*filter_t) _((int, SV *, int));
 # endif
 #endif
   
+#ifdef VMS
+#   define STATUS_NATIVE	statusvalue_vms
+#   define STATUS_NATIVE_EXPORT \
+	((I32)statusvalue_vms == -1 ? 44 : statusvalue_vms)
+#   define STATUS_NATIVE_SET(n)						\
+	STMT_START {							\
+	    statusvalue_vms = (n);					\
+	    if ((I32)statusvalue_vms == -1)				\
+		statusvalue = -1;					\
+	    else if (statusvalue_vms & STS$M_SUCCESS)			\
+		statusvalue = 0;					\
+	    else if ((statusvalue_vms & STS$M_SEVERITY) == 0)		\
+		statusvalue = 1 << 8;					\
+	    else							\
+		statusvalue = (statusvalue_vms & STS$M_SEVERITY) << 8;	\
+	} STMT_END
+#   define STATUS_POSIX	statusvalue
+#   ifdef VMSISH_STATUS
+#	define STATUS_CURRENT	(VMSISH_STATUS ? STATUS_NATIVE : STATUS_POSIX)
+#   else
+#	define STATUS_CURRENT	STATUS_POSIX
+#   endif
+#   define STATUS_POSIX_SET(n)				\
+	STMT_START {					\
+	    statusvalue = (n);				\
+	    if (statusvalue != -1) {			\
+		statusvalue &= 0xFFFF;			\
+		statusvalue_vms = statusvalue ? 44 : 1;	\
+	    }						\
+	    else statusvalue_vms = -1;			\
+	} STMT_END
+#   define STATUS_ALL_SUCCESS	(statusvalue = 0, statusvalue_vms = 1)
+#   define STATUS_ALL_FAILURE	(statusvalue = 1, statusvalue_vms = 44)
+#else
+#   define STATUS_NATIVE	STATUS_POSIX
+#   define STATUS_NATIVE_EXPORT	STATUS_POSIX
+#   define STATUS_NATIVE_SET	STATUS_POSIX_SET
+#   define STATUS_POSIX		statusvalue
+#   define STATUS_POSIX_SET(n)		\
+	STMT_START {			\
+	    statusvalue = (n);		\
+	    if (statusvalue != -1)	\
+		statusvalue &= 0xFFFF;	\
+	} STMT_END
+#   define STATUS_CURRENT STATUS_POSIX
+#   define STATUS_ALL_SUCCESS	(statusvalue = 0)
+#   define STATUS_ALL_FAILURE	(statusvalue = 1)
+#endif
+
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
    below to be rejected by the compmiler.  Sigh.
@@ -1178,7 +1184,7 @@ struct ufuncs {
 };
 
 /* Fix these up for __STDC__ */
-#ifndef __cplusplus
+#ifndef DONT_DECLARE_STD
 char *mktemp _((char*));
 double atof _((const char*));
 #endif
@@ -1217,10 +1223,12 @@ char *crypt ();       /* Maybe more hosts will need the unprototyped version */
 #else
 char *crypt _((const char*, const char*));
 #endif
+#ifndef DONT_DECLARE_STD
 #ifndef getenv
 char *getenv _((const char*));
 #endif
 Off_t lseek _((int,Off_t,int));
+#endif
 char *getlogin _((void));
 #endif
 
@@ -1278,7 +1286,9 @@ typedef Sighandler_t Sigsave_t;
 EXT PerlInterpreter *	curinterp;	/* currently running interpreter */
 /* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
 #if !defined(VMS) && !(defined(NeXT) && defined(__DYNAMIC__))
+#ifndef DONT_DECLARE_STD
 extern char **	environ;	/* environment variables supplied via exec */
+#endif
 #else
 #  if defined(NeXT) && defined(__DYNAMIC__)
 
@@ -1957,8 +1967,8 @@ EXT MGVTBL vtbl_fm =	{0,	magic_setfm,
 EXT MGVTBL vtbl_uvar =	{magic_getuvar,
 				magic_setuvar,
 					0,	0,	0};
-EXT MGVTBL vtbl_itervar = {magic_getitervar,magic_setitervar,
-					0,	0,	magic_freeitervar};
+EXT MGVTBL vtbl_defelem = {magic_getdefelem,magic_setdefelem,
+					0,	0,	magic_freedefelem};
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm = {0,
@@ -1996,7 +2006,7 @@ EXT MGVTBL vtbl_pos;
 EXT MGVTBL vtbl_bm;
 EXT MGVTBL vtbl_fm;
 EXT MGVTBL vtbl_uvar;
-EXT MGVTBL vtbl_itervar;
+EXT MGVTBL vtbl_defelem;
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm;

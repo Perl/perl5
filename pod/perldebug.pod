@@ -11,7 +11,7 @@ First of all, have you tried using the B<-w> switch?
 If you invoke Perl with the B<-d> switch, your script runs under the
 Perl source debugger.  This works like an interactive Perl
 environment, prompting for debugger commands that let you examine
-source code, set breakpoints, get stack back-traces, change the values of
+source code, set breakpoints, get stack backtraces, change the values of
 variables, etc.  This is so convenient that you often fire up
 the debugger all by itself just to test out Perl constructs 
 interactively to see what they do.  For example:
@@ -102,7 +102,7 @@ Same as C<V currentpackage [vars]>.
 
 =item T
 
-Produce a stack back-trace.  See below for details on its output.
+Produce a stack backtrace.  See below for details on its output.
 
 =item s [expr]
 
@@ -620,7 +620,7 @@ commands typed into the debugger.
 
 =item Stack backtrace
 
-Here's an example of what a stack back-trace via C<T> command might
+Here's an example of what a stack backtrace via C<T> command might
 look like:
 
     $ = main::infested called from file `Ambulation.pm' line 10
@@ -1056,4 +1056,4 @@ You cannot get the stack frame information or otherwise debug functions
 that were not compiled by Perl, such as C or C++ extensions.
 
 If you alter your @_ arguments in a subroutine (such as with B<shift>
-or B<pop>, the stack back-trace will not show the original values.
+or B<pop>, the stack backtrace will not show the original values.

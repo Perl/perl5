@@ -66,7 +66,7 @@ print "ok 10\n";
 
 ($rd,$wr) = FileHandle::pipe;
 
-if ($^O eq 'VMS' || $^O eq 'os2' || $^O eq 'amigaos') {
+if ($^O eq 'VMS' || $^O eq 'os2' || $^O eq 'amigaos' || $^O eq 'MSWin32') {
   $wr->autoflush;
   $wr->printf("ok %d\n",11);
   print $rd->getline;

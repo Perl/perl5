@@ -25,8 +25,8 @@ if ($ARGV[0] eq '') {
     push( @ARGV, `dir/s/b cmd` );
     push( @ARGV, `dir/s/b io` );
     push( @ARGV, `dir/s/b op` );
+    push( @ARGV, `dir/s/b pragma` );
     push( @ARGV, `dir/s/b lib` );
-    push( @ARGV, `dir/s/b nt` );
 
     grep( chomp, @ARGV );
     @ARGV = grep( /\.t$/, @ARGV );
@@ -35,7 +35,7 @@ if ($ARGV[0] eq '') {
 #      `echo base/*.t comp/*.t cmd/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t`);
 }
 
-if ($^O eq 'os2' || $^O eq 'qnx' || 1) {
+if ($^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'qnx' || 1) {
     $sharpbang = 0;
 }
 else {

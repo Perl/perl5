@@ -1520,6 +1520,7 @@ PP(pp_flock)
     else
 	fp = Nullfp;
     if (fp) {
+	(void)PerlIO_flush(fp);
 	value = (I32)(FLOCK(PerlIO_fileno(fp), argtype) >= 0);
     }
     else

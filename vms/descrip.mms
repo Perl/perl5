@@ -1,5 +1,5 @@
 # Descrip.MMS for perl5 on VMS
-# Last revised 22-Mar-1996 by Charles Bailey  bailey@genetics.upenn.edu
+# Last revised 20-Mar-1997 by Charles Bailey  bailey@genetics.upenn.edu
 #
 #: This file uses MMS syntax, and can be processed using DEC's MMS product,
 #: or the free MMK clone (available by ftp at ftp.spc.edu).  If you want to
@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00393#
+PERL_VERSION = 5_00394#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -810,7 +810,10 @@ perly$(O) : perly.c, perly.h, $(h)
 [.t.lib]vmsfspec.t : [.vms.ext]filespec.t
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
-test : all [.t.lib]vmsfspec.t
+[.t.lib]vmsish.t : [.vms.ext]vmsish.t
+	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
+
+test : all [.t.lib]vmsfspec.t [.t.lib]vmsish.t
 	- @[.VMS]Test.Com "$(E)"
 
 archify : all
@@ -935,6 +938,10 @@ $(ARCHAUTO)time.stamp :
 
 .ifdef LINK_ONLY
 .else
+# We need an action line here for broken older versions of MMS which
+# otherwise conclude that they should be compiling [.x2p]utils.c :-(
+util$(O) : util.c
+	$(CC) $(CFLAGS) util.c
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 av$(O) : EXTERN.h
 av$(O) : av.c
@@ -1628,9 +1635,7 @@ globals$(O) : util.h
 [.x2p]str$(O) : [.x2p]str.h
 [.x2p]str$(O) : handy.h
 [.x2p]str$(O) : [.x2p]util.h
-.ifdef __MMK__
 [.x2p]util$(O) : [.x2p]util.c
-.endif
 [.x2p]util$(O) : [.x2p]EXTERN.h
 [.x2p]util$(O) : [.x2p]a2p.h
 [.x2p]util$(O) : [.x2p]hash.h
@@ -1696,7 +1701,7 @@ tidy : cleanlis
 	- If F$Search("[.lib]*.com;-1").nes."" Then Purge/NoConfirm/Log [.lib]*.com
 	- If F$Search("[.utils]*.com;-1").nes."" Then Purge/NoConfirm/Log [.utils]*.com
 	- If F$Search("[.x2p]*.com;-1").nes."" Then Purge/NoConfirm/Log [.x2p]*.com
-	- If F$Search("[.lib.pod]*.;-1").nes."" Then Purge/NoConfirm/Log [.lib.pod]*.
+	- If F$Search("[.lib.pod]*.com;-1").nes."" Then Purge/NoConfirm/Log [.lib.pod]*.com
 
 clean : tidy
 	Set Default [.ext.Fcntl]
@@ -1763,7 +1768,7 @@ realclean : clean
 	- If F$Search("[.lib.pod]*.pod").nes."" Then Delete/NoConfirm/Log [.lib.pod]*.pod;*
 	- If F$Search("[.lib.pod]perldoc.com").nes."" Then Delete/NoConfirm/Log [.lib.pod]perldoc.com;*
 	- If F$Search("[.lib.pod]pod2*.com").nes."" Then Delete/NoConfirm/Log [.lib.pod]pod2*.com;*
-	- If F$Search("[.t.lib]vmsfspec.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsfspec.t;*
+	- If F$Search("[.t.lib]vms*.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vms*.t;*
 	- If F$Search("[...]*$(E)").nes."" Then Delete/NoConfirm/Log [...]*$(E);*
 
 cleansrc : clean

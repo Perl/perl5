@@ -258,6 +258,57 @@ handle.  Consider:
     print FH "bang\n";
     close FH;
 
+=head2 Filehandles
+
+Both the main process and the child process share the same STDIN,
+STDOUT and STDERR filehandles.  If both processes try to access them
+at once, strange things can happen.  You may want to close or reopen
+the filehandles for the child.  You can get around this by opening
+your pipe with open(), but on some systems this means that the child
+process cannot outlive the parent.
+
+=head2 Background Processes
+
+You can run a command in the background with:
+
+    system("cmd&");
+
+The command's STDOUT and STDERR (and possibly STDIN, depending on your
+shell) will be the same as the parent's.  You won't need to catch
+SIGCHLD because of the double-fork taking place (see below for more
+details).
+
+=head2 Complete Dissociation of Child from Parent
+
+In some cases (starting server processes, for instance) you'll want to
+complete dissociate the child process from the parent.  The following
+process is reported to work on most Unixish systems.  Non-Unix users
+should check their Your_OS::Process module for other solutions.
+
+=over 4
+
+=item *
+
+Open /dev/tty and use the the TIOCNOTTY ioctl on it.  See L<tty(4)>
+for details.
+
+=item *
+
+Change directory to /
+
+=item *
+
+Reopen STDIN, STDOUT, and STDERR so they're not connected to the old
+tty.
+
+=item *
+
+Background yourself like this:
+
+    fork && exit;
+
+=back
+
 =head2 Safe Pipe Opens
 
 Another interesting approach to IPC is making your single program go
@@ -427,6 +478,14 @@ portability.  If you ever see code that does anything like explicitly
 setting C<$AF_INET = 2>, you know you're in for big trouble:  An
 immeasurably superior approach is to use the C<Socket> module, which more
 reliably grants access to various constants and functions you'll need.
+
+If you're not writing a server/client for an existing protocol like
+NNTP or SMTP, you should give some thought to how your server will
+know when the client has finished talking, and vice-versa.  Most
+protocols are based on one-line messages and responses (so one party
+knows the other has finished when a "\n" is received) or multiline
+messages and responses that end with a period on an empty line
+("\n.\n" terminates a message/response).
 
 =head2 Internet TCP Clients and Servers
 

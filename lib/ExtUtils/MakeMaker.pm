@@ -68,9 +68,10 @@ package ExtUtils::MakeMaker;
 #
 # Now we can can pull in the friends
 #
-$Is_VMS = $^O eq 'VMS';
-$Is_OS2 = $^O eq 'os2';
-$Is_Mac = $^O eq 'MacOS';
+$Is_VMS   = $^O eq 'VMS';
+$Is_OS2   = $^O eq 'os2';
+$Is_Mac   = $^O eq 'MacOS';
+$Is_Win32 = $^O eq 'MSWin32';
 
 require ExtUtils::MM_Unix;
 
@@ -83,6 +84,9 @@ if ($Is_OS2) {
 }
 if ($Is_Mac) {
     require ExtUtils::MM_Mac;
+}
+if ($Is_Win32) {
+    require ExtUtils::MM_Win32;
 }
 
 # The SelfLoader would bring a lot of overhead for MakeMaker, because
@@ -150,7 +154,7 @@ sub ExtUtils::MakeMaker::mksymlists ;
 sub ExtUtils::MakeMaker::neatvalue ;
 sub ExtUtils::MakeMaker::selfdocument ;
 sub ExtUtils::MakeMaker::WriteMakefile ;
-sub ExtUtils::MakeMaker::prompt ;
+sub ExtUtils::MakeMaker::prompt ($;$) ;
 
 1;
 
@@ -449,9 +453,10 @@ sub ExtUtils::MakeMaker::new {
     $self->init_main();
 
     if (! $self->{PERL_SRC} ) {
-	my($pthinks) = $INC{'Config.pm'};
+	my($pthinks) = $self->canonpath($INC{'Config.pm'});
 	$pthinks = VMS::Filespec::vmsify($pthinks) if $Is_VMS;
 	if ($pthinks ne $self->catfile($Config{archlibexp},'Config.pm')){
+            print "Have $pthinks expected ",$self->catfile($Config{archlibexp},'Config.pm'),"\n";
 	    $pthinks =~ s!/Config\.pm$!!;
 	    $pthinks =~ s!.*/!!;
 	    print STDOUT <<END;

@@ -86,9 +86,9 @@ CLEAN :
 "$(INTDIR)" :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MT /W3 /GX /Od /I ".\include" /I ".." /I "." /D "WIN32" /D "NDEBUG" /D "PERLDLL" /D "_WINDOWS" /YX /c
-CPP_PROJ=/nologo /MT /W3 /GX /Od /I ".\include" /I ".." /I "." /D "WIN32" /D\
+# ADD BASE CPP /nologo /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
+# ADD CPP /nologo /MT /W3 /Od /I ".\include" /I ".." /I "." /D "WIN32" /D "NDEBUG" /D "PERLDLL" /D "_WINDOWS" /YX /c
+CPP_PROJ=/nologo /MT /W3 /Od /I ".\include" /I ".." /I "." /D "WIN32" /D\
  "NDEBUG" /D "PERLDLL" /D "_WINDOWS" /Fp"$(INTDIR)/libperl.pch" /YX\
  /Fo"$(INTDIR)/" /c 
 CPP_OBJS=.\Release/
@@ -188,9 +188,9 @@ CLEAN :
 "$(INTDIR)" :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
-# ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MTd /W3 /GX /Z7 /Od /I ".\include" /I ".." /I "." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-CPP_PROJ=/nologo /MTd /W3 /GX /Z7 /Od /I ".\include" /I ".." /I "." /D "WIN32"\
+# ADD BASE CPP /nologo /W3 /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
+# ADD CPP /nologo /MTd /W3 /Z7 /Od /I ".\include" /I ".." /I "." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
+CPP_PROJ=/nologo /MTd /W3 /Z7 /Od /I ".\include" /I ".." /I "." /D "WIN32"\
  /D "_DEBUG" /D "_WINDOWS" /Fp"$(INTDIR)/libperl.pch" /YX /Fo"$(INTDIR)/" /c 
 CPP_OBJS=.\Debug/
 CPP_SBRS=.\.

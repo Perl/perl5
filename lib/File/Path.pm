@@ -83,20 +83,24 @@ Charles Bailey E<lt>F<bailey@genetics.upenn.edu>E<gt>
 
 =head1 REVISION
 
-This module was last revised 14-Feb-1996, for perl 5.002. $VERSION is
-1.01.
+This module was last revised 14-Feb-1996, for perl 5.002.
+$VERSION is 1.0101.
 
 =cut
 
-$VERSION = "1.01"; # That's my hobby-horse, A.K.
-
 require 5.000;
 use Carp;
+use File::Basename;
 require Exporter;
+
+use vars qw( $VERSION @ISA @EXPORT );
+$VERSION = "1.0101";
 @ISA = qw( Exporter );
 @EXPORT = qw( mkpath rmtree );
 
-$Is_VMS = $^O eq 'VMS';
+my $Is_VMS = $^O eq 'VMS';
+my $force_writeable = ($^O eq 'os2' || $^O eq 'msdos' || $^O eq 'MSWin32'
+		       || $^O eq 'amigaos');
 
 sub mkpath {
     my($paths, $verbose, $mode) = @_;
@@ -107,16 +111,13 @@ sub mkpath {
     $mode = 0777 unless defined($mode);
     $paths = [$paths] unless ref $paths;
     my(@created);
-    foreach $path (@$paths){
+    foreach $path (@$paths) {
         next if -d $path;
-        my(@p);
-        foreach(split(/\//, $path)){
-            push(@p, $_);
-            next if -d "@p/";
-            print "mkdir @p\n" if $verbose;
-	    mkdir("@p",$mode) || croak "mkdir @p: $!";
-            push(@created, "@p");
-        }
+        my $parent = dirname($path);
+        push(@created,mkpath($parent, $verbose, $mode)) unless (-d $parent);
+        print "mkdir $path\n" if $verbose;
+        mkdir($path,$mode) || croak "mkdir $path: $!";
+        push(@created, $path);
     }
     @created;
 }
@@ -144,6 +145,8 @@ sub rmtree {
                print "skipped $root\n" if $verbose;
                next;
            }
+	   chmod 0777, $root or carp "Can't make directory $root writeable: $!"
+	       if $force_writeable;
            print "rmdir $root\n" if $verbose;
            (rmdir $root && ++$count) or carp "Can't remove directory $root: $!";
         }
@@ -153,6 +156,8 @@ sub rmtree {
                print "skipped $root\n" if $verbose;
                next;
            }
+	   chmod 0666, $root or carp "Can't make file $root writeable: $!"
+	       if $force_writeable;
            print "unlink $root\n" if $verbose;
            while (-e $root || -l $root) { # delete all versions under VMS
                (unlink($root) && ++$count)

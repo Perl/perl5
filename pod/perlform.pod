@@ -194,7 +194,7 @@ If you use the English module, you can even read the variable names:
     select($ofh);
 
 But you still have those funny select()s.  So just use the FileHandle
-module.  Now, you can access these special variables using lower-case
+module.  Now, you can access these special variables using lowercase
 method names instead:
 
     use FileHandle;
@@ -315,12 +315,12 @@ is to printf(), do this:
 
 =head1 WARNINGS
 
-The lone dot that ends a format can also prematurely end an E-Mail
+The lone dot that ends a format can also prematurely end an email
 message passing through a misconfigured Internet mailer (and based on
 experience, such misconfiguration is the rule, not the exception).  So
-when sending format code through E-Mail, you should indent it so that
+when sending format code through email, you should indent it so that
 the format-ending dot is not on the left margin; this will prevent
-E-Mail cutoff.
+email cutoff.
 
 Lexical variables (declared with "my") are not visible within a
 format unless the format is declared within the scope of the lexical

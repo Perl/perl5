@@ -25,8 +25,9 @@ sub tab {
 __END__
 
 NULL
-__LINE__
 __FILE__
+__LINE__
+__PACKAGE__
 __DATA__
 __END__
 AUTOLOAD

@@ -452,7 +452,7 @@ this behavior is tolerated.  The next example will show how to do this.
 
 =head2 EXAMPLE 4
 
-In this example, we'll now begin to write XSUB's that will interact with
+In this example, we'll now begin to write XSUBs that will interact with
 pre-defined C libraries.  To begin with, we will build a small library of
 our own, then let h2xs write our .pm and .xs files for us.
 

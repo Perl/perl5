@@ -204,7 +204,10 @@ PP(pp_concat)
 	s = SvPV_force(TARG, len);
     }
     s = SvPV(right,len);
-    sv_catpvn(TARG,s,len);
+    if (SvOK(TARG))
+	sv_catpvn(TARG,s,len);
+    else
+	sv_setpvn(TARG,s,len);	/* suppress warning */
     SETTARG;
     RETURN;
   }
@@ -218,7 +221,7 @@ PP(pp_padsv)
 	if (op->op_private & OPpLVAL_INTRO)
 	    SAVECLEARSV(curpad[op->op_targ]);
         else if (op->op_private & OPpDEREF)
-	    provide_ref(op, curpad[op->op_targ]);
+	    vivify_ref(curpad[op->op_targ], op->op_flags & OPpDEREF);
     }
     RETURN;
 }
@@ -242,7 +245,7 @@ PP(pp_eq)
 PP(pp_preinc)
 {
     dSP;
-    if (SvREADONLY(TOPs))
+    if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(no_modify);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MAX)
@@ -330,17 +333,22 @@ PP(pp_print)
     else
 	gv = defoutgv;
     if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
-	SV *sv;
-
-	PUSHMARK(MARK-1);
+	if (MARK == ORIGMARK) {
+	    EXTEND(SP, 1);
+	    ++MARK;
+	    Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
+	    ++SP;
+	}
+	PUSHMARK(MARK - 1);
 	*MARK = mg->mg_obj;
+	PUTBACK;
 	ENTER;
 	perl_call_method("PRINT", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
-	sv = POPs;
-	SP = ORIGMARK;
-	PUSHs(sv);
+	MARK = ORIGMARK + 1;
+	*MARK = *SP;
+	SP = MARK;
 	RETURN;
     }
     if (!(io = GvIO(gv))) {
@@ -1247,14 +1255,28 @@ PP(pp_helem)
     HE* he;
     SV *keysv = POPs;
     HV *hv = (HV*)POPs;
-    I32 lval = op->op_flags & OPf_MOD;
+    U32 lval = op->op_flags & OPf_MOD;
+    U32 defer = op->op_private & OPpLVAL_DEFER;
 
     if (SvTYPE(hv) != SVt_PVHV)
 	RETPUSHUNDEF;
-    he = hv_fetch_ent(hv, keysv, lval, 0);
+    he = hv_fetch_ent(hv, keysv, lval && !defer, 0);
     if (lval) {
-	if (!he || HeVAL(he) == &sv_undef)
-	    DIE(no_helem, SvPV(keysv, na));
+	if (!he || HeVAL(he) == &sv_undef) {
+	    SV* lv;
+	    SV* key2;
+	    if (!defer)
+		DIE(no_helem, SvPV(keysv, na));
+	    lv = sv_newmortal();
+	    sv_upgrade(lv, SVt_PVLV);
+	    LvTYPE(lv) = 'y';
+	    sv_magic(lv, key2 = newSVsv(keysv), 'y', Nullch, 0);
+	    SvREFCNT_dec(key2);	/* sv_magic() increments refcount */
+	    LvTARG(lv) = SvREFCNT_inc(hv);
+	    LvTARGLEN(lv) = 1;
+	    PUSHs(lv);
+	    RETURN;
+	}
 	if (op->op_private & OPpLVAL_INTRO) {
 	    if (HvNAME(hv) && isGV(HeVAL(he)))
 		save_gp((GV*)HeVAL(he), !(op->op_flags & OPf_SPECIAL));
@@ -1262,7 +1284,7 @@ PP(pp_helem)
 		save_svref(&HeVAL(he));
 	}
 	else if (op->op_private & OPpDEREF)
-	    provide_ref(op, HeVAL(he));
+	    vivify_ref(HeVAL(he), op->op_private & OPpDEREF);
     }
     PUSHs(he ? HeVAL(he) : &sv_undef);
     RETURN;
@@ -1352,14 +1374,14 @@ PP(pp_iter)
 	if (lv)
 	    SvREFCNT_dec(LvTARG(lv));
 	else {
-	    lv = cx->blk_loop.iterlval = newSVsv(sv);
+	    lv = cx->blk_loop.iterlval = NEWSV(26, 0);
 	    sv_upgrade(lv, SVt_PVLV);
-	    sv_magic(lv, Nullsv, 'y', Nullch, 0);
 	    LvTYPE(lv) = 'y';
+	    sv_magic(lv, Nullsv, 'y', Nullch, 0);
 	}
 	LvTARG(lv) = SvREFCNT_inc(av);
 	LvTARGOFF(lv) = cx->blk_loop.iterix;
-	LvTARGLEN(lv) = 1;
+	LvTARGLEN(lv) = -1;
 	sv = (SV*)lv;
     }
 
@@ -1399,8 +1421,12 @@ PP(pp_subst)
 	TARG = GvSV(defgv);
 	EXTEND(SP,1);
     }
+    if (SvREADONLY(TARG)
+	|| (SvTYPE(TARG) > SVt_PVLV
+	    && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG))))
+	croak(no_modify);
     s = SvPV(TARG, len);
-    if (!SvPOKp(TARG) || SvREADONLY(TARG) || (SvTYPE(TARG) == SVt_PVGV))
+    if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
     TAINT_NOT;
 
@@ -1969,30 +1995,43 @@ PP(pp_aelem)
     dSP;
     SV** svp;
     I32 elem = POPi;
-    AV *av = (AV*)POPs;
-    I32 lval = op->op_flags & OPf_MOD;
+    AV* av = (AV*)POPs;
+    U32 lval = op->op_flags & OPf_MOD;
+    U32 defer = (op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));
 
     if (elem > 0)
 	elem -= curcop->cop_arybase;
     if (SvTYPE(av) != SVt_PVAV)
 	RETPUSHUNDEF;
-    svp = av_fetch(av, elem, lval);
+    svp = av_fetch(av, elem, lval && !defer);
     if (lval) {
-	if (!svp || *svp == &sv_undef)
-	    DIE(no_aelem, elem);
+	if (!svp || *svp == &sv_undef) {
+	    SV* lv;
+	    if (!defer)
+		DIE(no_aelem, elem);
+	    lv = sv_newmortal();
+	    sv_upgrade(lv, SVt_PVLV);
+	    LvTYPE(lv) = 'y';
+	    sv_magic(lv, Nullsv, 'y', Nullch, 0);
+	    LvTARG(lv) = SvREFCNT_inc(av);
+	    LvTARGOFF(lv) = elem;
+	    LvTARGLEN(lv) = 1;
+	    PUSHs(lv);
+	    RETURN;
+	}
 	if (op->op_private & OPpLVAL_INTRO)
 	    save_svref(svp);
 	else if (op->op_private & OPpDEREF)
-	    provide_ref(op, *svp);
+	    vivify_ref(*svp, op->op_private & OPpDEREF);
     }
     PUSHs(svp ? *svp : &sv_undef);
     RETURN;
 }
 
 void
-provide_ref(op, sv)
-OP* op;
+vivify_ref(sv, to_what)
 SV* sv;
+U32 to_what;
 {
     if (SvGMAGICAL(sv))
 	mg_get(sv);
@@ -2006,8 +2045,7 @@ SV* sv;
 	    Safefree(SvPVX(sv));
 	    SvLEN(sv) = SvCUR(sv) = 0;
 	}
-	switch (op->op_private & OPpDEREF)
-	{
+	switch (to_what) {
 	case OPpDEREF_SV:
 	    SvRV(sv) = newSV(0);
 	    break;

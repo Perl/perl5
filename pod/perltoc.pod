@@ -38,6 +38,769 @@ expression enhancements, Innumerable Unbundled Modules, Compilability
 
 =item NOTES
 
+=head2 perlfaq - frequently asked questions about Perl ($Date: 1997/03/17
+22:17:56 $)
+
+=item DESCRIPTION
+
+perlfaq: Structural overview of the FAQ, L<perlfaq1>: General Questions
+About Perl, L<perlfaq2>: Obtaining and Learning about Perl, L<perlfaq3>:
+Programming Tools, L<perlfaq4>: Data Manipulation, L<perlfaq5>: Files and
+Formats, L<perlfaq6>: Regexps, L<perlfaq7>: General Perl Language Issues,
+L<perlfaq8>: System Interaction, L<perlfaq9>: Networking
+
+=over
+
+=item Where to get this document
+
+=item How to contribute to this document
+
+=item What will happen if you mail your Perl programming problems to the
+authors
+
+=back
+
+=item Credits
+
+=item Author and Copyright Information
+
+=over
+
+=item Non-commercial Reproduction
+
+=item Commercial Reproduction
+
+=item Disclaimer
+
+=back
+
+=item Changes
+
+17/March/97 Version, Initial Release: 11/March/97
+
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.10 $)
+
+=item DESCRIPTION
+
+=over
+
+=item What is Perl?
+
+=item Who supports Perl?  Who develops it?  Why is it free?
+
+=item Which version of Perl should I use?
+
+=item What are perl4 and perl5?
+
+=item How stable is Perl?
+
+=item Is Perl difficult to learn?
+
+=item How does Perl compare with other languages like Java, Python, REXX,
+Scheme, or Tcl?
+
+=item Can I do [task] in Perl?
+
+=item When shouldn't I program in Perl?
+
+=item What's the difference between "perl" and "Perl"?
+
+=item Is it a Perl program or a Perl script?
+
+=item What is a JAPH?
+
+=item Where can I get a list of Larry Wall witticisms?
+
+=item How can I convince my sysadmin/supervisor/employees to use version
+(5/5.004/Perl instead of some other language)?
+
+=back
+
+=item AUTHOR AND COPYRIGHT
+
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.13 $)
+
+=item DESCRIPTION
+
+=over
+
+=item What machines support Perl?  Where do I get it?
+
+=item How can I get a binary version of Perl?
+
+=item I copied the Perl binary from one machine to another, but scripts
+don't work.
+
+=item I grabbed the sources and tried to compile but gdbm/dynamic
+loading/malloc/linking/... failed.  How do I make it work?
+
+=item What modules and extensions are available for Perl?  What is CPAN? 
+What does CPAN/src/... mean?
+
+=item Is there an ISO or ANSI certified version of Perl?
+
+=item Where can I get information on Perl?
+
+=item What are the Perl newsgroups on USENET?  Where do I post questions?
+
+=item Where should I post source code?
+
+=item Perl Books
+
+=item Perl in Magazines
+
+=item Perl on the Net: FTP and WWW Access
+
+=item What mailing lists are there for perl?
+
+MacPerl, Perl5-Porters, NTPerl, Perl-Packrats
+
+=item Archives of comp.lang.perl.misc
+
+=item Perl Training
+
+=item Where can I buy a commercial version of Perl?
+
+=item Where do I send bug reports?
+
+=item What is perl.com?  perl.org?  The Perl Institute?
+
+=item How do I learn about object-oriented Perl programming?
+
+=back
+
+=item AUTHOR AND COPYRIGHT
+
+=head2 perlfaq3 - Programming Tools ($Revision: 1.19 $)
+
+=item DESCRIPTION
+
+=over
+
+=item How do I do (anything)?
+
+=item How can I use Perl interactively?
+
+=item Is there a Perl shell?
+
+=item How do I debug my Perl programs?
+
+=item How do I profile my Perl programs?
+
+=item How do I cross-reference my Perl programs?
+
+=item Is there a pretty-printer (formatter) for Perl?
+
+=item Is there a ctags for Perl?
+
+=item Where can I get Perl macros for vi?
+
+=item Where can I get perl-mode for emacs?
+
+=item How can I use curses with Perl?
+
+=item How can I use X or Tk with Perl?
+
+=item How can I generate simple menus without using CGI or Tk?
+
+=item Can I dynamically load C routines into Perl?
+
+=item What is undump?
+
+=item How can I make my Perl program run faster?
+
+=item How can I make my Perl program take less memory?
+
+=item Is it unsafe to return a pointer to local data?
+
+=item How can I free an array or hash so my program shrinks?
+
+=item How can I make my CGI script more efficient?
+
+=item How can I hide the source for my Perl program?
+
+=item How can I compile my Perl program into byte-code or C?
+
+=item How can I get '#!perl' to work on [MSDOS,NT,...]?
+
+=item Can I write useful perl programs on the command line?
+
+=item Why don't perl one-liners work on my DOS/Mac/VMS system?
+
+=item Where can I learn about CGI or Web programming in Perl?
+
+=item Where can I learn about object-oriented Perl programming?
+
+=item Where can I learn about linking C with Perl? [h2xs, xsubpp]
+
+=item I've read perlembed, perlguts, etc., but I can't embed perl in
+my C program, what am I doing wrong?
+
+=item When I tried to run my script, I got this message. What does it
+mean?
+
+=item What's MakeMaker?
+
+=back
+
+=item AUTHOR AND COPYRIGHT
+
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.15 $)
+
+=item DESCRIPTION
+
+=item Data: Numbers
+
+=over
+
+=item Why isn't my octal data interpreted correctly?
+
+=item Does perl have a round function?	What about ceil() and floor()?
+Trig functions?
+
+=item How do I convert bits into ints?
+
+=item How do I multiply matrices?
+
+=item How do I perform an operation on a series of integers?
+
+=item How can I output Roman numerals?
+
+=item Why aren't my random numbers random?
+
+=back
+
+=item Data: Dates
+
+=over
+
+=item How do I find the week-of-the-year/day-of-the-year?
+
+=item How can I compare two date strings?
+
+=item How can I take a string and turn it into epoch seconds?
+
+=item How can I find the Julian Day?
+
+=item Does Perl have a year 2000 problem?
+
+=back
+
+=item Data: Strings
+
+=over
+
+=item How do I validate input?
+
+=item How do I unescape a string?
+
+=item How do I remove consecutive pairs of characters?
+
+=item How do I expand function calls in a string?
+
+=item How do I find matching/nesting anything?
+
+=item How do I reverse a string?
+
+=item How do I expand tabs in a string?
+
+=item How do I reformat a paragraph?
+
+=item How can I access/change the first N letters of a string?
+
+=item How do I change the Nth occurrence of something?
+
+=item How can I count the number of occurrences of a substring within a
+string?
+
+=item How do I capitalize all the words on one line?
+
+=item How can I split a [character] delimited string except when inside
+[character]? (Comma-separated files)
+
+=item How do I strip blank space from the beginning/end of a string?
+
+=item How do I extract selected columns from a string?
+
+=item How do I find the soundex value of a string?
+
+=item How can I expand variables in text strings?
+
+=item What's wrong with always quoting "$vars"?
+
+=item Why don't my <<HERE documents work?
+
+1. There must be no space after the << part, 2. There (probably) should be
+a semicolon at the end, 3. You can't (easily) have any space in front of
+the tag
+
+=back
+
+=item Data: Arrays
+
+=over
+
+=item What is the difference between $array[1] and @array[1]?
+
+=item How can I extract just the unique elements of an array?
+
+a) If @in is sorted, and you want @out to be sorted:, b) If you don't know
+whether @in is sorted:, c) Like (b), but @in contains only small integers:,
+d) A way to do (b) without any loops or greps:, e) Like (d), but @in
+contains only small positive integers:
+
+=item How can I tell whether an array contains a certain element?
+
+=item How do I compute the difference of two arrays?  How do I compute the
+intersection of two arrays?
+
+=item How do I find the first array element for which a condition is true?
+
+=item How do I handle linked lists?
+
+=item How do I handle circular lists?
+
+=item How do I shuffle an array randomly?
+
+=item How do I process/modify each element of an array?
+
+=item How do I select a random element from an array?
+
+=item How do I permute N elements of a list?
+
+=item How do I sort an array by (anything)?
+
+=item How do I manipulate arrays of bits?
+
+=item Why does defined() return true on empty arrays and hashes?
+
+=back
+
+=item Data: Hashes (Associative Arrays)
+
+=over
+
+=item How do I process an entire hash?
+
+=item What happens if I add or remove keys from a hash while iterating over
+it?
+
+=item How do I look up a hash element by value?
+
+=item How can I know how many entries are in a hash?
+
+=item How do I sort a hash (optionally by value instead of key)?
+
+=item How can I always keep my hash sorted?
+
+=item What's the difference between "delete" and "undef" with hashes?
+
+=item Why don't my tied hashes make the defined/exists distinction?
+
+=item How do I reset an each() operation part-way through?
+
+=item How can I get the unique keys from two hashes?
+
+=item How can I store a multidimensional array in a DBM file?
+
+=item How can I make my hash remember the order I put elements into it?
+
+=item Why does passing a subroutine an undefined element in a hash create
+it?
+
+=item How can I make the Perl equivalent of a C structure/C++ class/hash 
+or array of hashes or arrays?
+
+=item How can I use a reference as a hash key?
+
+=back
+
+=item Data: Misc
+
+=over
+
+=item How do I handle binary data correctly?
+
+=item How do I determine whether a scalar is a number/whole/integer/float?
+
+=item How do I keep persistent data across program calls?
+
+=item How do I print out or copy a recursive data structure?
+
+=item How do I define methods for every class/object?
+
+=item How do I verify a credit card checksum?
+
+=back
+
+=item AUTHOR AND COPYRIGHT
+
+=head2 perlfaq5 - Files and Formats ($Revision: 1.19 $)
+
+=item DESCRIPTION
+
+=over
+
+=item How do I flush/unbuffer a filehandle?  Why must I do this?
+
+=item How do I change one line in a file/delete a line in a file/insert a
+line in the middle of a file/append to the beginning of a file?
+
+=item How do I count the number of lines in a file?
+
+=item How do I make a temporary file name?
+
+=item How can I manipulate fixed-record-length files?
+
+=item How can I make a filehandle local to a subroutine?  How do I pass
+filehandles between subroutines?  How do I make an array of filehandles?
+
+=item How can I set up a footer format to be used with write()?
+
+=item How can I write() into a string?
+
+=item How can I output my numbers with commas added?
+
+=item How can I translate tildes (~) in a filename?
+
+=item How come when I open the file read-write it wipes it out?
+
+=item Why do I sometimes get an "Argument list too long" when I use <*>?
+
+=item Is there a leak/bug in glob()?
+
+=item How can I open a file with a leading "E<gt>" or trailing blanks?
+
+=item How can I reliably rename a file?
+
+=item How can I lock a file?
+
+=item What can't I just open(FH, ">file.lock")?
+
+=item I still don't get locking.  I just want to increment the number 
+in the file.  How can I do this?
+
+=item How do I randomly update a binary file?
+
+=item How do I get a file's timestamp in perl?
+
+=item How do I set a file's timestamp in perl?
+
+=item How do I print to more than one file at once?
+
+=item How can I read in a file by paragraphs?
+
+=item How can I read a single character from a file?  From the keyboard?
+
+=item How can I tell if there's a character waiting on a filehandle?
+
+=item How do I open a file without blocking?
+
+=item How do I create a file only if it doesn't exist?
+
+=item How do I do a C<tail -f> in perl?
+
+=item How do I dup() a filehandle in Perl?
+
+=item How do I close a file descriptor by number?
+
+=item Why can't I use "C:\temp\foo" in DOS paths?  What doesn't
+`C:\temp\foo.exe` work?
+
+=item Why doesn't glob("*.*") get all the files?
+
+=item Why does Perl let me delete read-only files?  Why does C<-i> clobber
+protected files?  Isn't this a bug in Perl?
+
+=item How do I select a random line from a file?
+
+=back
+
+=item AUTHOR AND COPYRIGHT
+
+=head2 perlfaq6 - Regexps ($Revision: 1.14 $)
+
+=item DESCRIPTION
+
+=over
+
+=item How can I hope to use regular expressions without creating illegible
+and unmaintainable code?  
+
+Comments Outside the Regexp, Comments Inside the Regexp, Different
+Delimiters
+
+=item I'm having trouble matching over more than one line.  What's wrong?
+
+=item How can I pull out lines between two patterns that are themselves on
+different lines?
+
+=item I put a regular expression into $/ but it didn't work. What's wrong?
+
+=item How do I substitute case insensitively on the LHS, but preserving
+case on the RHS?
+
+=item How can I make C<\w> match accented characters?
+
+=item How can I match a locale-smart version of C</[a-zA-Z]/>?
+
+=item How can I quote a variable to use in a regexp?  
+
+=item What is C</o> really for?
+
+=item How do I use a regular expression to strip C style comments from a
+file?
+
+=item Can I use Perl regular expressions to match balanced text?
+
+=item What does it mean that regexps are greedy?  How can I get around it?
+
+=item  How do I process each word on each line?
+
+=item How can I print out a word-frequency or line-frequency summary?
+
+=item How can I do approximate matching?
+
+=item How do I efficiently match many regular expressions at once?
+
+=item Why don't word-boundary searches with C<\b> work for me?
+
+=item Why does using $&, $`, or $' slow my program down?
+
+=item What good is C<\G> in a regular expression?
+
+=item Are Perl regexps DFAs or NFAs?  Are they POSIX compliant?
+
+=item What's wrong with using grep or map in a void context?
+
+=item How can I match strings with multi-byte characters?
+
+=back
+
+=item AUTHOR AND COPYRIGHT
+
+=head2 perlfaq7 - Perl Language Issues ($Revision: 1.15 $)
+
+=item DESCRIPTION
+
+=over
+
+=item Can I get a BNF/yacc/RE for the Perl language?
+
+=item What are all these $@%* punctuation signs, and how do I know when to
+use them?
+
+=item Do I always/never have to quote my strings or use semicolons and
+commas?
+
+=item How do I skip some return values?
+
+=item How do I temporarily block warnings?
+
+=item What's an extension?
+
+=item Why do Perl operators have different precedence than C operators?
+
+=item How do I declare/create a structure?
+
+=item How do I create a module?
+
+=item How do I create a class?
+
+=item How can I tell if a variable is tainted?
+
+=item What's a closure?
+
+=item How can I pass/return a {Function, FileHandle, Array, Hash, Method,
+Regexp}?
+
+Passing Variables and Functions, Passing Filehandles, Passing Regexps,
+Passing Methods
+
+=item How do I create a static variable?
+
+=item What's the difference between dynamic and lexical (static) scoping? 
+Between local() and my()?
+
+=item How can I access a dynamic variable while a similarly named lexical
+is in scope?
+
+=item What's the difference between deep and shallow binding?
+
+=item Why doesn't "local($foo) = <FILE>;" work right?
+
+=item How do I redefine a built-in function, operator, or method?
+
+=item What's the difference between calling a function as &foo and foo()?
+
+=item How do I create a switch or case statement?
+
+=item How can I catch accesses to undefined variables/functions/methods?
+
+=item Why can't a method included in this same file be found?
+
+=item How can I find out my current package?
+
+=back
+
+=item AUTHOR AND COPYRIGHT
+
+=head2 perlfaq8 - System Interaction ($Revision: 1.15 $)
+
+=item DESCRIPTION
+
+=over
+
+=item How do I find out which operating system I'm running under?
+
+=item How come exec() doesn't return?
+
+=item How do I do fancy stuff with the keyboard/screen/mouse?
+
+Keyboard, Screen, Mouse
+
+=item How do I ask the user for a password?
+
+=item How do I read and write the serial port?
+
+lockfiles, open mode, end of line, flushing output, non-blocking input
+
+=item How do I decode encrypted password files?
+
+=item How do I start a process in the background?
+
+STDIN, STDOUT and STDERR are shared, Signals, Zombies
+
+=item How do I trap control characters/signals?
+
+=item How do I modify the shadow password file on a Unix system?
+
+=item How do I set the time and date?
+
+=item How can I sleep() or alarm() for under a second?
+
+=item How can I measure time under a second?
+
+=item How can I do an atexit() or setjmp()/longjmp()? (Exception handling)
+
+=item Why doesn't my sockets program work under System V (Solaris)? What
+does the error message "Protocol not supported" mean?
+
+=item How can I call my system's unique C functions from Perl?
+
+=item Where do I get the include files to do ioctl() or syscall()?
+
+=item Why do setuid perl scripts complain about kernel problems?
+
+=item How can I open a pipe both to and from a command?
+
+=item How can I capture STDERR from an external command?
+
+=item Why doesn't open() return an error when a pipe open fails?
+
+=item What's wrong with using backticks in a void context?
+
+=item How can I call backticks without shell processing?
+
+=item Why can't my script read from STDIN after I gave it EOF (^D on Unix,
+^Z on MSDOS)?
+
+=item How can I convert my shell script to perl?
+
+=item Can I use perl to run a telnet or ftp session?
+
+=item How can I write expect in Perl?
+
+=item Is there a way to hide perl's command line from programs such as
+"ps"?
+
+=item I {changed directory, modified my environment} in a perl script.	How
+come the change disappeared when I exited the script?  How do I get my
+changes to be visible?
+
+Unix, VMS
+
+=item How do I close a process's filehandle without waiting for it to
+complete?
+
+=item How do I fork a daemon process?
+
+=item How do I make my program run with sh and csh?
+
+=item How do I keep my own module/library directory?
+
+=item How do I find out if I'm running interactively or not?
+
+=item How do I timeout a slow event?
+
+=item How do I set CPU limits?
+
+=item How do I avoid zombies on a Unix system?
+
+=item How do I use an SQL database?
+
+=item How do I make a system() exit on control-C?
+
+=item How do I open a file without blocking?
+
+=item How do I install a CPAN module?
+
+=back
+
+=item AUTHOR AND COPYRIGHT
+
+=head2 perlfaq9 - Networking ($Revision: 1.13 $)
+
+=item DESCRIPTION
+
+=over
+
+=item My CGI script runs from the command line but not the browser.  Can
+you help me fix it?
+
+=item How do I remove HTML from a string?
+
+=item How do I extract URLs?
+
+=item How do I download a file from the user's machine?  How do I open a
+file on another machine?
+
+=item How do I make a pop-up menu in HTML?
+
+=item How do I fetch an HTML file?
+
+=item how do I decode or create those %-encodings on the web?
+
+=item How do I redirect to another page?
+
+=item How do I put a password on my web pages?
+
+=item How do I edit my .htpasswd and .htgroup files with Perl?
+
+=item How do I parse an email header?
+
+=item How do I decode a CGI form?
+
+=item How do I check a valid email address?
+
+=item How do I decode a MIME/BASE64 string?
+
+=item How do I return the user's email address?
+
+=item How do I send/read mail?
+
+=item How do I find out my hostname/domainname/IP address?
+
+=item How do I fetch a news article or the active newsgroups?
+
+=item How do I fetch/put an FTP file?
+
+=item How can I do RPC in Perl?
+
+=back
+
+=item AUTHOR AND COPYRIGHT
+
 =head2 perldelta - what's new for perl5.004
 
 =item DESCRIPTION
@@ -50,13 +813,17 @@ expression enhancements, Innumerable Unbundled Modules, Compilability
 
 =item Compilation Option: Binary Compatibility With 5.003
 
-=item Subroutine Parameters Are Not Autovivified
+=item No Autovivification of Subroutine Parameters
 
 =item Fixed Parsing of $$<digit>, &$<digit>, etc.
+
+=item No Resetting of $. on Implicit Close
 
 =item Changes to Tainting Checks
 
 =item New Opcode Module and Revised Safe Module
+
+=item Embedding Improvements
 
 =item Internal Change: FileHandle Class Based on IO::* Classes
 
@@ -285,6 +1052,8 @@ y/SEARCHLIST/REPLACEMENTLIST/cds
 
 =item Integer Arithmetic
 
+=item Floating-point Arithmetic
+
 =back
 
 =head2 perlre - Perl regular expressions
@@ -314,6 +1083,10 @@ i, m, s, x
 =item DESCRIPTION
 
 =over
+
+=item #! and quoting on non-Unix systems
+
+OS/2, DOS, Win95/NT, Macintosh
 
 =item Switches
 
@@ -452,7 +1225,7 @@ $EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID, $GID, $(,
 $EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $PERL_VERSION, $],
 $DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, $INPLACE_EDIT, $^I, $OSNAME,
 $^O, $PERLDB, $^P, $BASETIME, $^T, $WARNING, $^W, $EXECUTABLE_NAME, $^X,
-$ARGV, @ARGV, @INC, %INC, $ENV{expr}, $SIG{expr}
+$ARGV, @ARGV, @INC, %INC, $ENV{expr}, $SIG{expr}, $^M
 
 =back
 
@@ -1017,6 +1790,12 @@ safe subprocesses, sockets, and semaphores)
 
 =over
 
+=item Filehandles
+
+=item Background Processes
+
+=item Complete Dissociation of Child from Parent
+
 =item Safe Pipe Opens
 
 =item Bidirectional Communication
@@ -1115,6 +1894,8 @@ Prompt, Multi-line commands, Stack backtrace, Listing, Frame listing
 
 =item Security Bugs
 
+=item Protecting Your Programs
+
 =back
 
 =head2 perltrap - Perl traps for the unwary
@@ -1144,7 +1925,7 @@ Subroutine, Signal, Sorting Traps, OS Traps, DBM Traps, Unclassified Traps
 
 Discontinuance, Deprecation, BugFix, Discontinuance, Discontinuance,
 Discontinuance, BugFix, Discontinuance, Discontinuance, BugFix,
-Discontinuance, Deprecation, Discontinuance
+Discontinuance, Discontinuance, Deprecation, Discontinuance
 
 =item Parsing Traps
 
@@ -1172,7 +1953,7 @@ Precedence
 
 Regular Expression, Regular Expression, Regular Expression, Regular
 Expression, Regular Expression, Regular Expression, Regular Expression,
-Regular Expression
+Regular Expression, Regular Expression
 
 =item Subroutine, Signal, Sorting Traps
 
@@ -1471,7 +2252,7 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 
 =over
 
-=item XSUB's and the Argument Stack
+=item XSUBs and the Argument Stack
 
 =item Calling Perl Routines from within C Programs
 
@@ -1512,10 +2293,10 @@ av_shift, av_store, av_undef, av_unshift, CLASS, Copy, croak, CvSTASH,
 DBsingle, DBsub, DBtrace, dMARK, dORIGMARK, dowarn, dSP, dXSARGS, dXSI32,
 dXSI32, ENTER, EXTEND, FREETMPS, G_ARRAY, G_DISCARD, G_EVAL, GIMME,
 G_NOARGS, G_SCALAR, gv_fetchmeth, gv_fetchmethod, gv_stashpv, gv_stashsv,
-GvSV, he_delayfree, HEf_SVKEY, he_free, HeHASH, HeKEY, HeKLEN, HePV,
-HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, hv_clear, hv_delete,
-hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
-hv_iterinit, hv_iterkey, hv_iterkeysv	 
+GvSV, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force,
+HeSVKEY_set, HeVAL, hv_clear, hv_delayfree_ent, hv_delete, hv_delete_ent,
+hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent, hv_free_ent, hv_iterinit,
+hv_iterkey, hv_iterkeysv    
 Returns the key as an C<SV*> from the current position of the hash
 iterator.  The return value will always be a mortal copy of the
 key.  Also see C<hv_iterinit>, hv_iternext, hv_iternextsv, hv_iterval,
@@ -1631,6 +2412,20 @@ callback
 =item DATE
 
 =head1 PRAGMA DOCUMENTATION
+
+=head2 autouse - postpone load of modules until a function is used
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item WARNING
+
+=item BUGS
+
+=item AUTHOR
+
+=item SEE ALSO
 
 =head2 blib - Use MakeMaker's uninstalled version of a package
 
@@ -2030,7 +2825,7 @@ B<DB_HASH>, B<DB_BTREE>, B<DB_RECNO>
 
 =over
 
-=item How does DB_File interface to Berkeley DB?
+=item Interface to Berkeley DB
 
 =item Opening a Berkeley DB Database File
 
@@ -2044,7 +2839,7 @@ B<DB_HASH>, B<DB_BTREE>, B<DB_RECNO>
 
 =over
 
-=item A Simple Example.
+=item A Simple Example
 
 =back
 
@@ -2054,9 +2849,9 @@ B<DB_HASH>, B<DB_BTREE>, B<DB_RECNO>
 
 =item Changing the BTREE sort order
 
-=item Handling duplicate keys 
+=item Handling Duplicate Keys 
 
-=item The get_dup method.
+=item The get_dup() Method
 
 =item Matching Partial Keys 
 
@@ -2066,7 +2861,7 @@ B<DB_HASH>, B<DB_BTREE>, B<DB_RECNO>
 
 =over
 
-=item The bval option
+=item The 'bval' Option
 
 =item A Simple Example
 
@@ -2092,9 +2887,9 @@ $value, $flags) ;>, B<$status = $X-E<gt>sync([$flags]) ;>
 
 =item Locking Databases
 
-=item Sharing databases with C applications
+=item Sharing Databases With C Applications
 
-=item The untie gotcha
+=item The untie() Gotcha
 
 =back
 
@@ -2182,6 +2977,23 @@ variables
 =item Tag Handling Utility Functions
 
 =back
+
+=head2 ExtUtils::Command - utilities to replace common UNIX commands in
+Makefiles etc.
+
+=item SYNOPSYS
+
+=item DESCRIPTION
+
+cat, eqtime src dst, rm_f files..., rm_f files..., touch files .., mv
+source... destination, cp source... destination, chmod mode files.., mkpath
+directory.., test_f file
+
+=item BUGS
+
+=item SEE ALSO 
+
+=item AUTHOR
 
 =head2 ExtUtils::Embed - Utilities for embedding Perl in C/C++ applications
 
@@ -2276,7 +3088,7 @@ post_initialize (o), postamble (o), prefixify, processPL (o), realclean
 (o), replace_manpage_separator, static (o), static_lib (o), staticmake (o),
 subdir_x (o), subdirs (o), test (o), test_via_harness (o), test_via_script
 (o), tool_autosplit (o), tools_other (o), tool_xsubpp (o), top_targets (o),
-writedoc, xs_c (o), xs_o (o)
+writedoc, xs_c (o), xs_o (o), perl_archive, export_list
 
 =back
 
@@ -2315,6 +3127,17 @@ dist_dir (override), dist_test (override), install (override), perldepend
 (override)
 
 =back
+
+=head2 ExtUtils::MM_Win32 - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+catfile, static_lib (o), dynamic_lib (o), canonpath, perl_script,
+pm_to_blib, test_via_harness (o), tool_autosplit (override), tools_other
+(o), manifypods (o), dist_ci (o), dist_core (o), pasthru (o)
 
 =head2 ExtUtils::MakeMaker - create an extension Makefile
 
@@ -2951,7 +3774,7 @@ functions
 
 =item BUGS
 
-=item AUTHOR
+=item AUTHORS
 
 =head2 NDBM_File - Tied access to ndbm files
 

@@ -185,10 +185,12 @@ register OP *op;
 		 op->op_type == OP_AELEM ||
 		 op->op_type == OP_HELEM )
 	{
-	    if (op->op_private & OPpENTERSUB_AMPER)
-		(void)strcat(buf,"AMPER,");
-	    if (op->op_private & OPpENTERSUB_DB)
-		(void)strcat(buf,"DB,");
+	    if (op->op_type == OP_ENTERSUB) {
+		if (op->op_private & OPpENTERSUB_AMPER)
+		    (void)strcat(buf,"AMPER,");
+		if (op->op_private & OPpENTERSUB_DB)
+		    (void)strcat(buf,"DB,");
+	    }
 	    switch (op->op_private & OPpDEREF) {
 	    case OPpDEREF_SV:
 		(void)strcat(buf, "SV,");
@@ -200,8 +202,14 @@ register OP *op;
 		(void)strcat(buf, "HV,");
 		break;
 	    }
-	    if (op->op_private & HINT_STRICT_REFS)
-		(void)strcat(buf,"STRICT_REFS,");
+	    if (op->op_type == OP_AELEM || op->op_type == OP_HELEM) {
+		if (op->op_private & OPpLVAL_DEFER)
+		    (void)strcat(buf,"LVAL_DEFER,");
+	    }
+	    else {
+		if (op->op_private & HINT_STRICT_REFS)
+		    (void)strcat(buf,"STRICT_REFS,");
+	    }
 	}
 	else if (op->op_type == OP_CONST) {
 	    if (op->op_private & OPpCONST_BARE)

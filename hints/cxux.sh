@@ -1,3 +1,4 @@
+#! /local/gnu/bin/bash
 # Hints for the CX/UX 7.1 operating system running on Concurrent (formerly
 # Harris) NightHawk machines.  written by Tom.Horsley@mail.ccur.com
 #
@@ -7,27 +8,27 @@
 #
 case ${SDE_TARGET:-ELF} in
    [Cc][Oo][Ff][Ff]|[Oo][Cc][Ss]) echo ''
-      echo ''
-      echo WARNING: Do not build perl 5 with the SDE_TARGET set to
-      echo generate coff object - perl 5 must be built in the ELF
-      echo environment.
-      echo ''
+      echo ''								>&2
+      echo WARNING: Do not build perl 5 with the SDE_TARGET set to	>&2
+      echo generate coff object - perl 5 must be built in the ELF	>&2
+      echo environment.							>&2
+      echo ''								>&2
       echo '';;
    [Ee][Ll][Ff]) : ;;
-   *) echo ''
-      echo 'Unknown SDE_TARGET value: '$SDE_TARGET
-      echo '';;
+   *) echo ''								>&2
+      echo 'Unknown SDE_TARGET value: '$SDE_TARGET			>&2
+      echo ''								>&2 ;;
 esac
 
 case `uname -r` in
    [789]*) : ;;
    *) echo ''
-      echo ''
-      echo WARNING: Perl 5 requires shared library support, it cannot
-      echo be built on releases of CX/UX prior to 7.0 with this hints
-      echo file. You\'ll have to do a separate port for the statically
-      echo linked COFF environment.
-      echo ''
+      echo ''								>&2
+      echo WARNING: Perl 5 requires shared library support, it cannot	>&2
+      echo be built on releases of CX/UX prior to 7.0 with this hints	>&2
+      echo file. You\'ll have to do a separate port for the statically	>&2
+      echo linked COFF environment.					>&2
+      echo ''								>&2
       echo '';;
 esac
 
@@ -91,7 +92,7 @@ i_ndbm='undef'
 d_mymalloc='undef'
 usemymalloc='n'
 
-cat <<'EOM'
+cat <<'EOM' >&4
 
 WARNING: If you are using ksh to run the Configure script, you may find it
 failing in mysterious ways (such as failing to find library routines which

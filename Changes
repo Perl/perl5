@@ -9,6 +9,396 @@ releases.)
 
 
 ----------------
+Version 5.003_94
+----------------
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Defer creation of array and hash elements as parameters"
+   From:  Chip Salzenberg
+  Files:  dump.c global.sym mg.c op.c op.h perl.h pp.c pp_hot.c proto.h
+          sv.c
+
+  Title:  "New special literal: __PACKAGE__"
+   From:  Chip Salzenberg
+  Files:  keywords.pl pod/perldata.pod toke.c
+
+  Title:  "Ignore whitespace before +*? in //x"
+   From:  Chip Salzenberg
+  Files:  regcomp.c
+
+  Title:  "Abort compilation at C<BEGIN{}> or C<use> after errors"
+   From:  Chip Salzenberg
+  Files:  op.c pod/perldiag.pod t/pragma/subs.t
+
+  Title:  "allow C<substr 'hello', -10>"
+   From:  David Dyck <dcd@tc.fluke.com>
+ Msg-ID:  <97Mar10.155517pst.35716-2@gateway.fluke.com>
+   Date:  Mon, 10 Mar 1997 15:55:44 -0800
+  Files:  pp.c
+
+  Title:  "Regularize C<x % y>, esp. when y is negative"
+   From:  Chip Salzenberg
+  Files:  pp.c
+
+  Title:  "Flush before C<flock(FOO, LOCK_UN)>"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod pod/perlfunc.pod pp_sys.c
+
+  Title:  "Close loopholes in prototype mismatch warning"
+   From:  Chip Salzenberg
+  Files:  op.c sv.c toke.c
+
+  Title:  "Warn on C<while ($x = each %y) {}>"
+   From:  Chip Salzenberg
+  Files:  op.c pod/perldiag.pod
+
+  Title:  "Don't warn on C<print $fh func()>"
+   From:  Chip Salzenberg
+  Files:  toke.c
+
+ CORE PORTABILITY
+
+  Title:  "Don't say 'static var = 1'"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199703091319.PAA24714@alpha.hut.fi>
+   Date:  Sun, 9 Mar 1997 15:19:57 +0200 (EET)
+  Files:  malloc.c
+
+  Title:  "BSD/OS 3.0 hints"
+   From:  Christopher Davis <ckd@loiosh.kei.com>
+ Msg-ID:  <w47mjakw5t.fsf@loiosh.kei.com>
+   Date:  14 Mar 1997 16:20:46 -0500
+  Files:  hints/bsdos.sh
+
+  Title:  "More MachTen hints"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.95q.970316133852.27997A-100000@kelly.teleport.com
+   Date:  Sun, 16 Mar 1997 13:40:35 -0800 (PST)
+  Files:  hints/machten_2.sh
+
+  Title:  "HP/UX hint comments"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970321153918.28770B-100000@fractal.lafayette.
+   Date:  Fri, 21 Mar 1997 15:43:07 -0500 (EST)
+  Files:  hints/hpux.sh
+
+  Title:  "VMS update"
+   From:  bailey@hmivax.humgen.upenn.edu (Charles Bailey)
+ Msg-ID:  <1997Mar11.220056.1873182@hmivax.humgen.upenn.edu>
+   Date:  Tue, 11 Mar 1997 22:00:55 -0500 (EST)
+  Files:  lib/ExtUtils/MM_VMS.pm lib/Test/Harness.pm t/op/taint.t
+          utils/perlbug.PL vms/descrip.mms
+
+  Title:  "vmsish.t and related patches"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IGQW3IP1KK005VFB@hmivax.humgen.upenn.edu>
+   Date:  Fri, 21 Mar 1997 01:32:47 -0500 (EST)
+  Files:  MANIFEST perl.h vms/descrip.mms vms/ext/vmsish.t vms/vms.c
+ 
+  Title:  "Win32 update (four patches)"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu> and
+	  Nick Ing-Simmons <nik@tiuk.ti.com>
+  Files:  MANIFEST README.win32 lib/AutoSplit.pm lib/Cwd.pm
+          lib/ExtUtils/Command.pm lib/ExtUtils/Install.pm
+          lib/ExtUtils/MM_OS2.pm lib/ExtUtils/MM_Unix.pm
+          lib/ExtUtils/MM_Win32.pm lib/ExtUtils/MakeMaker.pm
+          lib/ExtUtils/Mksymlists.pm lib/File/Basename.pm
+          lib/File/Path.pm mg.c t/comp/cpp.t t/comp/script.t t/harness
+          t/io/argv.t t/io/dup.t t/io/fs.t t/io/inplace.t
+          t/lib/filehand.t t/lib/io_dup.t t/lib/io_sel.t
+          t/lib/io_taint.t t/op/closure.t t/op/exec.t t/op/glob.t
+          t/op/goto.t t/op/magic.t t/op/misc.t t/op/rand.t
+          t/op/split.t t/op/stat.t t/op/sysio.t t/op/taint.t
+          t/pragma/strict.t t/pragma/subs.t t/pragma/warning.t util.c
+          win32/*
+
+ OTHER CORE CHANGES
+
+  Title:  "Guard against buffer overflow in yyerror() and related funcs"
+   From:  Chip Salzenberg
+  Files:  toke.c
+
+  Title:  "For bin compat, rename calllist() and he_{,delay}free"
+   From:  Chip Salzenberg
+  Files:  global.sym hv.c op.c perl.c pod/perlguts.pod proto.h
+
+  Title:  "Fix C<print> on tied default handle"
+   From:  Chip Salzenberg
+  Files:  pp_hot.c
+
+  Title:  "Fix C<local($a, undef, $b) = (1,2,3)>"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "Improve diagnostic on C<@a++>, C<--%a>, @a =~ s/a/b/"
+   From:  Chip Salzenberg
+  Files:  pp.c pp_hot.c
+
+  Title:  "Don't warn on C<$x{y} .= "z"> when %x is tied"
+   From:  Chip Salzenberg
+  Files:  pp_hot.c
+
+  Title:  "Eliminate 'unreachable code' warnings"
+   From:  Chip Salzenberg
+  Files:  ext/POSIX/POSIX.xs mg.c pp_ctl.c toke.c
+
+  Title:  "printf format corrections for -DDEBUGGING"
+   From:  Roderick Schertler <roderick@argon.org>
+ Msg-ID:  <26592.858793370@eeyore.ibcinc.com>
+   Date:  Wed, 19 Mar 1997 12:42:50 -0500
+  Files:  doop.c malloc.c op.c pp_ctl.c regexec.c sv.c x2p/str.c
+          x2p/util.c
+
+  Title:  "Warn about missing -DMULTIPLICITY if likely a problem"
+   From:  Doug MacEachern <dougm@opengroup.org>
+ Msg-ID:  <199703192345.SAA15070@postman.osf.org>
+   Date:  Wed, 19 Mar 1997 18:45:53 -0500
+  Files:  perl.c
+
+ BUILD PROCESS
+
+  Title:  "Don't use $(LIBS) when creating shared libperl"
+   From:  Chip Salzenberg
+  Files:  Makefile.SH
+
+  Title:  "Don't use db 2.x, we're not yet ready for it"
+   From:  Paul Marquess and Andy Dougherty
+  Files:  Configure
+
+  Title:  "Warn if #! command is longer than 32 chars"
+   From:  Chip Salzenberg
+  Files:  Configure
+
+  Title:  "patches re perl -wc install{perl,man}"
+   From:  Robin Barker <rmb1@cise.npl.co.uk>
+ Msg-ID:  <21544.9703111313@tempest.cise.npl.co.uk>
+   Date:  Tue, 11 Mar 97 13:13:16 GMT
+  Files:  installman installperl
+
+  Title:  "3_93 doesn't install pods"
+   From:  Spider Boardman <spider@orb.nashua.nh.us>
+ Msg-ID:  <199703160721.CAA08339@Orb.Nashua.NH.US>
+   Date:  Sun, 16 Mar 1997 02:21:35 -0500
+  Files:  installperl
+
+  Title:  "When installing, use File::Copy instead of `cp`"
+   From:  Chip Salzenberg
+  Files:  installperl
+
+  Title:  "Make hint files' warnings more visible"
+   From:  Hallvard B Furuseth <h.b.furuseth@usit.uio.no>
+ Msg-ID:  <199703202218.XAA09041@bombur2.uio.no>
+   Date:  Thu, 20 Mar 1997 23:18:03 +0100 (MET)
+  Files:  hints/3b1.sh hints/apollo.sh hints/cxux.sh hints/dcosx.sh
+          hints/dgux.sh hints/esix4.sh hints/freebsd.sh hints/hpux.sh
+          hints/irix_4.sh hints/mips.sh hints/next_3_0.sh hints/os2.sh
+          hints/qnx.sh hints/sco_2_3_3.sh hints/sco_2_3_4.sh
+          hints/solaris_2.sh hints/ultrix_4.sh hints/utekv.sh
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "New module: autouse.pm"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199703210034.TAA13469@monk.mps.ohio-state.edu>
+   Date:  Thu, 20 Mar 1997 19:34:30 -0500 (EST)
+  Files:  MANIFEST lib/autouse.pm
+
+  Title:  "Math::Complex update"
+   From:  Jarkko Hietaniemi
+  Files:  lib/Math/Complex.pm t/lib/complex.t
+
+  Title:  "Refresh DB_File to 1.12"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9703121551.AA07435@claudius.bfsec.bt.co.uk>
+   Date:  Wed, 12 Mar 97 15:51:14 GMT
+  Files:  ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs
+
+  Title:  "New subroutine Symbol::qualify_to_ref()"
+   From:  Roderick Schertler <roderick@argon.org>
+ Msg-ID:  <pzlo7ut03b.fsf@eeyore.ibcinc.com>
+   Date:  11 Mar 1997 19:39:36 -0500
+  Files:  lib/Symbol.pm
+
+  Title:  "In debugger, don't reference %{$f{$g}} if $f{$g} doesn't exist"
+   From:  Chip Salzenberg
+  Files:  lib/perl5db.pl
+
+  Title:  "In File::Path, some systems can't remove read-only files"
+   From:  Chip Salzenberg
+  Files:  lib/File/Path.pm
+
+  Title:  "Fix typo in -l*perl* pattern"
+   From:  Doug MacEachern <dougm@opengroup.org>
+ Msg-ID:  <199703110414.XAA12884@berlin.atlantic.net>
+   Date:  Mon, 10 Mar 1997 22:58:38 -0500
+  Files:  lib/ExtUtils/Embed.pm
+
+  Title:  "Fix bugs revealed by prototype warnings"
+   From:  Chip Salzenberg
+  Files:  ext/Opcode/Opcode.pm lib/ExtUtils/MakeMaker.pm
+          lib/Getopt/Long.pm
+
+  Title:  "Problems with SKIP in makemaker"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199703210413.XAA21601@monk.mps.ohio-state.edu>
+   Date:  Thu, 20 Mar 1997 23:13:31 -0500 (EST)
+  Files:  lib/ExtUtils/MM_Unix.pm
+
+  Title:  "In Exporter, don't C<require Carp> at file scope"
+   From:  Chip Salzenberg
+  Files:  lib/Exporter.pm
+
+  Title:  "fix for Exporter's $SIG{__WARN__} handler"
+   From:  Roderick Schertler <roderick@argon.org>
+ Msg-ID:  <2282.858296451@eeyore.ibcinc.com>
+   Date:  Thu, 13 Mar 1997 18:40:51 -0500
+  Files:  lib/Exporter.pm
+
+  Title:  "Don't try to substr() refs in Carp"
+   From:  Chip Salzenberg
+  Files:  lib/Carp.pm
+
+  Title:  "Re: NUL in die and other messages"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0w815V-0005xs-00@ursa.cus.cam.ac.uk>
+   Date:  Fri, 21 Mar 1997 09:58:17 +0000
+  Files:  lib/Carp.pm
+
+  Title:  "Add entry for prototype() in Pod::Functions"
+   From:  Chip Salzenberg
+  Files:  lib/Pod/Functions.pm
+
+  Title:  "Fix typos in IO::Socket documentation"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0w75po-0003yh-00@taurus.cus.cam.ac.uk>
+   Date:  Tue, 18 Mar 1997 20:50:16 +0000
+  Files:  ext/IO/lib/IO/Socket.pm
+
+ TESTS
+
+   (no changes)
+
+ UTILITIES
+
+  Title:  "Re: bug in pod2man (5.00326): section=3 for .pm modules"
+   From:  Roderick Schertler <roderick@argon.org>
+ Msg-ID:  <pzn2sat1hg.fsf@eeyore.ibcinc.com>
+   Date:  11 Mar 1997 19:09:31 -0500
+  Files:  pod/pod2man.PL
+
+ DOCUMENTATION
+
+  Title:  "perlfaq.pod"
+   From:  Tom Christiansen <tchrist@jhereg.perl.com>
+ Msg-ID:  <199703172301.QAA12566@jhereg.perl.com>
+   Date:  Mon, 17 Mar 1997 16:01:40 -0700
+  Files:  MANIFEST pod/Makefile pod/buildtoc pod/perl.pod
+          pod/perlfaq*.pod pod/roffitall
+
+  Title:  "*.pod changes based on the FAQ"
+   From:  gnat@frii.com
+ Msg-ID:  <199703171650.JAA02655@elara.frii.com>
+   Date:  Mon, 17 Mar 1997 09:50:14 -0700 (MST)
+  Files:  pod/perldata.pod pod/perlfunc.pod pod/perlipc.pod
+          pod/perlop.pod pod/perlre.pod pod/perlrun.pod
+          pod/perlsec.pod pod/perlvar.pod
+
+  Title:  "INSTALL:  How to enable debugging"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970321112326.1414A-100000@fractal.lafayette.e
+   Date:  Fri, 21 Mar 1997 11:25:32 -0500 (EST)
+  Files:  INSTALL
+
+  Title:  "Document that $. is not reset on implicit open"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod
+
+  Title:  "Re: Embedding success with _93 "
+   From:  Doug MacEachern <dougm@opengroup.org>
+ Msg-ID:  <199703112255.RAA22775@postman.osf.org>
+   Date:  Tue, 11 Mar 1997 17:55:05 -0500
+  Files:  pod/perldelta.pod
+
+  Title:  "Update site list"
+   From:  lvirden@cas.org (Larry W. Virden, x2487)
+ Msg-ID:  <9703111053.AA20051@cas.org>
+   Date:  Tue, 11 Mar 1997 10:53:49 -0500
+  Files:  pod/perlmod.pod
+
+  Title:  "Patch to document illegal characters"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.96.970314090558.15346J-100000@kelly.teleport.com>
+   Date:  Fri, 14 Mar 1997 09:08:10 -0800 (PST)
+  Files:  pod/perldiag.pod pod/perltrap.pod
+
+  Title:  "Document trap with //o and closures"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IGCHWRNSEU00661G@hmivax.humgen.upenn.edu>
+   Date:  Mon, 10 Mar 1997 18:08:08 -0500 (EST)
+  Files:  pod/perltrap.pod
+
+  Title:  "Re: Inline PI function"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.95q.970310143125.22489V-100000@kelly.teleport.com
+   Date:  Mon, 10 Mar 1997 14:33:20 -0800 (PST)
+  Files:  pod/perlsub.pod
+
+  Title:  "Illegal character in input"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.95q.970310151512.22489a-100000@kelly.teleport.com
+   Date:  Mon, 10 Mar 1997 15:21:21 -0800 (PST)
+  Files:  pod/perldiag.pod
+
+  Title:  "Patch for docs Re: Lost backslash"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.96.970319071438.24834G-100000@kelly.teleport.com>
+   Date:  Wed, 19 Mar 1997 07:28:57 -0800 (PST)
+  Files:  pod/perlop.pod
+
+  Title:  "XSUB's doc fix"
+   From:  Roderick Schertler <roderick@argon.org>
+ Msg-ID:  <28804.858012126@eeyore.ibcinc.com>
+   Date:  Mon, 10 Mar 1997 11:42:06 -0500
+  Files:  pod/perlcall.pod pod/perlguts.pod pod/perlxstut.pod
+
+  Title:  "Document return from do FILE"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0w70DK-0001yJ-00@ursa.cus.cam.ac.uk>
+   Date:  Tue, 18 Mar 1997 14:50:10 +0000
+  Files:  pod/perlfunc.pod
+
+  Title:  "Document $^M in perlvar"
+   From:  Robin Barker <rmb1@cise.npl.co.uk>
+ Msg-ID:  <6153.9703202108@tempest.cise.npl.co.uk>
+   Date:  Thu, 20 Mar 97 21:08:33 GMT
+  Files:  pod/perlvar.pod
+
+  Title:  "typos in pods of 5.003_93"
+   From:  Jim Meyering <meyering@asic.sc.ti.com>
+ Msg-ID:  <wpgendbzvhx.fsf@asic.sc.ti.com>
+   Date:  19 Mar 1997 10:39:38 -0600
+  Files:  pod/perlfunc.pod pod/perlguts.pod pod/perlre.pod
+          pod/perltoot.pod pod/perlxs.pod
+
+  Title:  "Re: Updates to pod punctuations"
+   From:  lvirden@cas.org (Larry W. Virden, x2487)
+ Msg-ID:  <9703141700.AA22911@cas.org>
+   Date:  Fri, 14 Mar 1997 17:00:12 -0500
+  Files:  pod/*.pod
+
+  Title:  "clarify example in perlfunc"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199703201746.TAA25195@alpha.hut.fi>
+   Date:  Thu, 20 Mar 1997 19:46:01 +0200 (EET)
+  Files:  pod/perlfunc.pod
+
+  Title:  "Regularize headings in DB_File documentation"
+   From:  Chip Salzenberg
+  Files:  ext/DB_File/DB_File.pm
+
+
+----------------
 Version 5.003_93
 ----------------
 

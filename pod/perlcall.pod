@@ -565,7 +565,7 @@ Next, we come to XPUSHs. This is where the parameters actually get
 pushed onto the stack. In this case we are pushing a string and an
 integer.
 
-See the L<perlguts/"XSUB's and the Argument Stack"> for details
+See the L<perlguts/"XSUBs and the Argument Stack"> for details
 on how the XPUSH macros work.
 
 =item 6.
@@ -668,7 +668,7 @@ an alternative to using these macros.
 
 The purpose of the macro C<SPAGAIN> is to refresh the local copy of the
 stack pointer. This is necessary because it is possible that the memory
-allocated to the Perl stack has been re-allocated whilst in the
+allocated to the Perl stack has been reallocated whilst in the
 I<perl_call_pv> call.
 
 If you are making use of the Perl stack pointer in your code you must

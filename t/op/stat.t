@@ -13,14 +13,16 @@ use Config;
 
 print "1..56\n";
 
-chop($cwd = `pwd`);
+$Is_MSWin32 = $^O eq 'MSWin32';
+chop($cwd = ($Is_MSWin32 ? `cd` : `pwd`));
 
-$DEV = `ls -l /dev`;
+$DEV = `ls -l /dev` unless $Is_MSWin32;
 
 unlink "Op.stat.tmp";
 open(FOO, ">Op.stat.tmp");
 
-$junk = `ls Op.stat.tmp`;	# hack to make Apollo update link count
+# hack to make Apollo update link count:
+$junk = `ls Op.stat.tmp` unless $Is_MSWin32;
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat(FOO);
@@ -86,7 +88,7 @@ if (! -d 'Op.stat.tmp') {print "ok 22\n";} else {print "not ok 22\n";}
 if (-d '.') {print "ok 23\n";} else {print "not ok 23\n";}
 if (! -f '.') {print "ok 24\n";} else {print "not ok 24\n";}
 
-if (`ls -l perl` =~ /^l.*->/) {
+if (!$Is_MSWin32 and `ls -l perl` =~ /^l.*->/) {
     if (-l 'perl') {print "ok 25\n";} else {print "not ok 25\n";}
 }
 else {
@@ -99,7 +101,9 @@ if (-e 'Op.stat.tmp') {print "ok 27\n";} else {print "not ok 27\n";}
 `rm -f Op.stat.tmp Op.stat.tmp2`;
 if (! -e 'Op.stat.tmp') {print "ok 28\n";} else {print "not ok 28\n";}
 
-if ($DEV !~ /\nc.* (\S+)\n/)
+if ($Is_MSWin32)
+    {print "ok 29\n";}
+elsif ($DEV !~ /\nc.* (\S+)\n/)
     {print "ok 29\n";}
 elsif (-c "/dev/$1")
     {print "ok 29\n";}
@@ -107,7 +111,9 @@ else
     {print "not ok 29\n";}
 if (! -c '.') {print "ok 30\n";} else {print "not ok 30\n";}
 
-if ($DEV !~ /\ns.* (\S+)\n/)
+if ($Is_MSWin32)
+    {print "ok 31\n";}
+elsif ($DEV !~ /\ns.* (\S+)\n/)
     {print "ok 31\n";}
 elsif (-S "/dev/$1")
     {print "ok 31\n";}
@@ -115,7 +121,9 @@ else
     {print "not ok 31\n";}
 if (! -S '.') {print "ok 32\n";} else {print "not ok 32\n";}
 
-if ($DEV !~ /\nb.* (\S+)\n/)
+if ($Is_MSWin32)
+    {print "ok 33\n";}
+elsif ($DEV !~ /\nb.* (\S+)\n/)
     {print "ok 33\n";}
 elsif (-b "/dev/$1")
     {print "ok 33\n";}
@@ -123,7 +131,7 @@ else
     {print "not ok 33\n";}
 if (! -b '.') {print "ok 34\n";} else {print "not ok 34\n";}
 
-if ($^O eq 'amigaos') {print "ok 35\n"; goto tty_test;}
+if ($^O eq 'amigaos' or $Is_MSWin32) {print "ok 35\n"; goto tty_test;}
 
 $cnt = $uid = 0;
 
@@ -147,12 +155,18 @@ else
 
 tty_test:
 
-unless (open(tty,"/dev/tty")) {
-    print STDERR "Can't open /dev/tty--run t/TEST outside of make.\n";
+if ($Is_MSWin32) {
+    print "ok 36\n";
+    print "ok 37\n";
 }
-if (-t tty) {print "ok 36\n";} else {print "not ok 36\n";}
-if (-c tty) {print "ok 37\n";} else {print "not ok 37\n";}
-close(tty);
+else {
+    unless (open(tty,"/dev/tty")) {
+	print STDERR "Can't open /dev/tty--run t/TEST outside of make.\n";
+    }
+    if (-t tty) {print "ok 36\n";} else {print "not ok 36\n";}
+    if (-c tty) {print "ok 37\n";} else {print "not ok 37\n";}
+    close(tty);
+}
 if (! -t tty) {print "ok 38\n";} else {print "not ok 38\n";}
 open(null,"/dev/null");
 if (! -t null || -e '/xenix' || -e '/MachTen')

@@ -1,11 +1,12 @@
-// NTSock.C
-
-// (c) 1995 Microsoft Corporation. All rights reserved. 
-// 		Developed by hip communications inc., http://info.hip.com/info/
-// Portions (c) 1993 Intergraph Corporation. All rights reserved.
-
-//    You may distribute under the terms of either the GNU General Public
-//    License or the Artistic License, as specified in the README file.
+/* NTSock.C
+ *
+ * (c) 1995 Microsoft Corporation. All rights reserved. 
+ * 		Developed by hip communications inc., http://info.hip.com/info/
+ * Portions (c) 1993 Intergraph Corporation. All rights reserved.
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ */
 
 #include <windows.h>
 #define WIN32_LEAN_AND_MEAN
@@ -19,10 +20,10 @@
 #define CROAK croak
 
 #ifdef USE_SOCKETS_AS_HANDLES
-// thanks to Beverly Brown	(beverly@datacube.com)
+/* thanks to Beverly Brown	(beverly@datacube.com) */
 
 #	if defined(_WIN32) && !defined(WIN95_OSFHANDLE_FIXED) && defined(_M_IX86)
-//#		define OPEN_SOCKET(x)	_patch_open_osfhandle(x, _O_RDWR | _O_BINARY)
+/*#		define OPEN_SOCKET(x)	_patch_open_osfhandle(x, _O_RDWR | _O_BINARY) */
 #		define OPEN_SOCKET(x)	_open_osfhandle(x,_O_RDWR|_O_BINARY)
 #	else
 #		define OPEN_SOCKET(x)	_open_osfhandle(x,_O_RDWR|_O_BINARY)
@@ -34,17 +35,18 @@
 #	define OPEN_SOCKET(x)	(x)
 #	define TO_SOCKET(x)	(x)
 
-#endif	// USE_SOCKETS_AS_HANDLES
+#endif	/* USE_SOCKETS_AS_HANDLES */
 
-//
-// This is a clone of fdopen so that we can handle the version of sockets that NT gets to use.
-//
-// The problem is that sockets are not real file handles and 
-// cannot be fdopen'ed. This causes problems in the do_socket
-// routine in doio.c, since it tries to create two file pointers
-// for the socket just created. We'll fake out an fdopen and see
-// if we can prevent perl from trying to do stdio on sockets.
-//
+/*
+ * This is a clone of fdopen so that we can handle the version of
+ * sockets that NT gets to use.
+ *
+ * The problem is that sockets are not real file handles and 
+ * cannot be fdopen'ed. This causes problems in the do_socket
+ * routine in doio.c, since it tries to create two file pointers
+ * for the socket just created. We'll fake out an fdopen and see
+ * if we can prevent perl from trying to do stdio on sockets.
+ */
 
 #if defined(_WIN32) && !defined(WIN95_OSFHANDLE_FIXED) && defined(_M_IX86)
 
@@ -59,38 +61,38 @@ EXT_C_FUNC int __cdecl _set_osfhnd(int fh, long value);
 EXT_C_FUNC void __cdecl _lock_fhandle(int);
 EXT_C_FUNC void __cdecl _unlock_fhandle(int);
 EXT_C_FUNC void __cdecl _unlock(int);
-EXT_C_FUNC struct servent* win32_savecopyservent(struct servent*d, struct servent*s, const char *proto);
+EXT_C_FUNC struct servent* win32_savecopyservent(struct servent*d, 
+						 struct servent*s, const char *proto);
 
 #if	(_MSC_VER >= 1000)
-	typedef struct
-	{
-		long osfhnd;    /* underlying OS file HANDLE */
-		char osfile;    /* attributes of file (e.g., open in text mode?) */
-		char pipech;    /* one char buffer for handles opened on pipes */
+typedef struct 	{
+    long osfhnd;    /* underlying OS file HANDLE */
+    char osfile;    /* attributes of file (e.g., open in text mode?) */
+    char pipech;    /* one char buffer for handles opened on pipes */
 #if defined (_MT) && !defined (DLL_FOR_WIN32S)
-        int lockinitflag;
-        CRITICAL_SECTION lock;
+    int lockinitflag;
+    CRITICAL_SECTION lock;
 #endif  /* defined (_MT) && !defined (DLL_FOR_WIN32S) */
-	}	ioinfo;
+}	ioinfo;
 
-	EXT_C_FUNC ioinfo * __pioinfo[];
+EXT_C_FUNC ioinfo * __pioinfo[];
 
-	#define IOINFO_L2E			5
-	#define IOINFO_ARRAY_ELTS	(1 << IOINFO_L2E)
-	#define _pioinfo(i)	(__pioinfo[i >> IOINFO_L2E] + (i & (IOINFO_ARRAY_ELTS - 1)))
-	#define _osfile(i)	(_pioinfo(i)->osfile)
-#else
-	extern "C" extern char _osfile[];
-#endif	// (_MSC_VER >= 1000)
+#define IOINFO_L2E			5
+#define IOINFO_ARRAY_ELTS	(1 << IOINFO_L2E)
+#define _pioinfo(i)	(__pioinfo[i >> IOINFO_L2E] + (i & (IOINFO_ARRAY_ELTS - 1)))
+#define _osfile(i)	(_pioinfo(i)->osfile)
+#else	/* (_MSC_VER >= 1000) */
+	extern char _osfile[];
+#endif	/* (_MSC_VER >= 1000) */
 
-#define FOPEN			0x01	// file handle open
-#define FAPPEND			0x20	// file handle opened O_APPEND
-#define FDEV			0x40	// file handle refers to device
-#define FTEXT			0x80	// file handle is in text mode
+#define FOPEN			0x01	/* file handle open */
+#define FAPPEND			0x20	/* file handle opened O_APPEND */
+#define FDEV			0x40	/* file handle refers to device */
+#define FTEXT			0x80	/* file handle is in text mode */
 
-#define _STREAM_LOCKS   26		// Table of stream locks
-#define _LAST_STREAM_LOCK  (_STREAM_LOCKS+_NSTREAM_-1)	// Last stream lock
-#define _FH_LOCKS          (_LAST_STREAM_LOCK+1)		// Table of fh locks
+#define _STREAM_LOCKS   26		/* Table of stream locks */
+#define _LAST_STREAM_LOCK  (_STREAM_LOCKS+_NSTREAM_-1)	/* Last stream lock */
+#define _FH_LOCKS          (_LAST_STREAM_LOCK+1)	/* Table of fh locks */
 
 /***
 *int _patch_open_osfhandle(long osfhandle, int flags) - open C Runtime file handle
@@ -98,8 +100,8 @@ EXT_C_FUNC struct servent* win32_savecopyservent(struct servent*d, struct serven
 *Purpose:
 *       This function allocates a free C Runtime file handle and associates
 *       it with the Win32 HANDLE specified by the first parameter. This is a
-*		temperary fix for WIN95's brain damage GetFileType() error on socket
-*		we just bypass that call for socket
+*	temperary fix for WIN95's brain damage GetFileType() error on socket
+*	we just bypass that call for socket
 *
 *Entry:
 *       long osfhandle - Win32 HANDLE to associate with C Runtime file handle.
@@ -113,45 +115,44 @@ EXT_C_FUNC struct servent* win32_savecopyservent(struct servent*d, struct serven
 *
 *******************************************************************************/
 
-int __cdecl _patch_open_osfhandle(long osfhandle, int flags)
+int __cdecl
+_patch_open_osfhandle(long osfhandle, int flags)
 {
-	int fh;
-	char fileflags;		// _osfile flags 
+    int fh;
+    char fileflags;		/* _osfile flags */
 
-	// copy relevant flags from second parameter 
-	fileflags = FDEV;
+    /* copy relevant flags from second parameter */
+    fileflags = FDEV;
 
-	if(flags & _O_APPEND)
-		fileflags |= FAPPEND;
+    if(flags & _O_APPEND)
+	fileflags |= FAPPEND;
 
-	if(flags & _O_TEXT)
-		fileflags |= FTEXT;
+    if(flags & _O_TEXT)
+	fileflags |= FTEXT;
 
-	// attempt to allocate a C Runtime file handle
-	if((fh = _alloc_osfhnd()) == -1)
-	{
-		errno = EMFILE;		// too many open files 
-		_doserrno = 0L;		// not an OS error
-		return -1;			// return error to caller
-	}
+    /* attempt to allocate a C Runtime file handle */
+    if((fh = _alloc_osfhnd()) == -1) {
+	errno = EMFILE;		/* too many open files */
+	_doserrno = 0L;		/* not an OS error */
+	return -1;		/* return error to caller */
+    }
 
-	// the file is open. now, set the info in _osfhnd array
-	_set_osfhnd(fh, osfhandle);
+    /* the file is open. now, set the info in _osfhnd array */
+    _set_osfhnd(fh, osfhandle);
 
-	fileflags |= FOPEN;			// mark as open
+    fileflags |= FOPEN;		/* mark as open */
 
 #if (_MSC_VER >= 1000)
-	_osfile(fh) = fileflags;	// set osfile entry
-	_unlock_fhandle(fh);
+    _osfile(fh) = fileflags;	/* set osfile entry */
+    _unlock_fhandle(fh);
 #else
-	_osfile[fh] = fileflags;	// set osfile entry
-	_unlock(fh+_FH_LOCKS);		// unlock handle
+    _osfile[fh] = fileflags;	/* set osfile entry */
+    _unlock(fh+_FH_LOCKS);		/* unlock handle */
 #endif
 
-
-	return fh;					// return handle
+    return fh;			/* return handle */
 }
-#endif	// _M_IX86
+#endif	/* _M_IX86 */
 
 #define SOCKETAPI PASCAL 
 
@@ -196,7 +197,7 @@ typedef int (SOCKETAPI *LPSOCKWSAGETLASTERROR)(void);
 typedef int (SOCKETAPI *LPWSAFDIsSet)(SOCKET, fd_set *);
 
 static HINSTANCE hWinSockDll = 0;
-// extern CRITICAL_SECTION csSock;
+/* extern CRITICAL_SECTION csSock; */
 
 static LPSOCKACCEPT paccept = 0;
 static LPSOCKBIND pbind = 0;
@@ -236,526 +237,573 @@ static LPSOCKINETADDR pinet_addr = 0;
 __declspec(thread) struct servent myservent;
 
 
-void *GetAddress(HINSTANCE hInstance, char *lpFunctionName)
+void *
+GetAddress(HINSTANCE hInstance, char *lpFunctionName)
 {
-	char buffer[512];
-	FARPROC proc = GetProcAddress(hInstance, lpFunctionName);
-	if(proc == 0)
-	{
-		sprintf(buffer, "Unable to get address of %s in WSock32.dll", lpFunctionName);
-		CROAK(buffer);
-	}
-	return proc;
+    char buffer[512];
+    FARPROC proc = GetProcAddress(hInstance, lpFunctionName);
+    if(proc == 0) {
+	sprintf(buffer, "Unable to get address of %s in WSock32.dll", lpFunctionName);
+	CROAK(buffer);
+    }
+    return proc;
 }
 
-void LoadWinSock(void)
+void
+LoadWinSock(void)
 {
-//	EnterCriticalSection(&csSock);
-	if(hWinSockDll == NULL)
-	{
-		HINSTANCE hLib = LoadLibrary("WSock32.DLL");
-		if(hLib == NULL)
-			CROAK("Could not load WSock32.dll\n");
+/*  EnterCriticalSection(&csSock); */
+    if(hWinSockDll == NULL) {
+	HINSTANCE hLib = LoadLibrary("WSock32.DLL");
+	if(hLib == NULL)
+	    CROAK("Could not load WSock32.dll\n");
 
-		paccept = (LPSOCKACCEPT)GetAddress(hLib, "accept");
-		pbind = (LPSOCKBIND)GetAddress(hLib, "bind");
-		pclosesocket = (LPSOCKCLOSESOCKET)GetAddress(hLib, "closesocket");
-		pconnect = (LPSOCKCONNECT)GetAddress(hLib, "connect");
-		pioctlsocket = (LPSOCKIOCTLSOCKET)GetAddress(hLib, "ioctlsocket");
-		pgetpeername = (LPSOCKGETPEERNAME)GetAddress(hLib, "getpeername");
-		pgetsockname = (LPSOCKGETSOCKNAME)GetAddress(hLib, "getsockname");
-		pgetsockopt = (LPSOCKGETSOCKOPT)GetAddress(hLib, "getsockopt");
-		phtonl = (LPSOCKHTONL)GetAddress(hLib, "htonl");
-		phtons = (LPSOCKHTONS)GetAddress(hLib, "htons");
-		plisten = (LPSOCKLISTEN)GetAddress(hLib, "listen");
-		pntohl = (LPSOCKNTOHL)GetAddress(hLib, "ntohl");
-		pntohs = (LPSOCKNTOHS)GetAddress(hLib, "ntohs");
-		precv = (LPSOCKRECV)GetAddress(hLib, "recv");
-		precvfrom = (LPSOCKRECVFROM)GetAddress(hLib, "recvfrom");
-		pselect = (LPSOCKSELECT)GetAddress(hLib, "select");
-		psend = (LPSOCKSEND)GetAddress(hLib, "send");
-		psendto = (LPSOCKSENDTO)GetAddress(hLib, "sendto");
-		psetsockopt = (LPSOCKSETSOCKOPT)GetAddress(hLib, "setsockopt");
-		pshutdown = (LPSOCKSHUTDOWN)GetAddress(hLib, "shutdown");
-		psocket = (LPSOCKSOCKET)GetAddress(hLib, "socket");
-		pgethostbyaddr = (LPSOCKGETHOSTBYADDR)GetAddress(hLib, "gethostbyaddr");
-		pgethostbyname = (LPSOCKGETHOSTBYNAME)GetAddress(hLib, "gethostbyname");
-		pgethostname = (LPSOCKGETHOSTNAME)GetAddress(hLib, "gethostname");
-		pgetservbyport = (LPSOCKGETSERVBYPORT)GetAddress(hLib, "getservbyport");
-		pgetservbyname = (LPSOCKGETSERVBYNAME)GetAddress(hLib, "getservbyname");
-		pgetprotobynumber = (LPSOCKGETPROTOBYNUMBER)GetAddress(hLib, "getprotobynumber");
-		pgetprotobyname = (LPSOCKGETPROTOBYNAME)GetAddress(hLib, "getprotobyname");
-		pWSAStartup = (LPSOCKWSASTARTUP)GetAddress(hLib, "WSAStartup");
-		pWSACleanup = (LPSOCKWSACLEANUP)GetAddress(hLib, "WSACleanup");
-		pWSAGetLastError = (LPSOCKWSAGETLASTERROR)GetAddress(hLib, "WSAGetLastError");
-		pWSAFDIsSet = (LPWSAFDIsSet)GetAddress(hLib, "__WSAFDIsSet");
-		pinet_addr = (LPSOCKINETADDR)GetAddress(hLib,"inet_addr");
-		pinet_ntoa = (LPSOCKINETNTOA)GetAddress(hLib,"inet_ntoa");
+	paccept = (LPSOCKACCEPT)GetAddress(hLib, "accept");
+	pbind = (LPSOCKBIND)GetAddress(hLib, "bind");
+	pclosesocket = (LPSOCKCLOSESOCKET)GetAddress(hLib, "closesocket");
+	pconnect = (LPSOCKCONNECT)GetAddress(hLib, "connect");
+	pioctlsocket = (LPSOCKIOCTLSOCKET)GetAddress(hLib, "ioctlsocket");
+	pgetpeername = (LPSOCKGETPEERNAME)GetAddress(hLib, "getpeername");
+	pgetsockname = (LPSOCKGETSOCKNAME)GetAddress(hLib, "getsockname");
+	pgetsockopt = (LPSOCKGETSOCKOPT)GetAddress(hLib, "getsockopt");
+	phtonl = (LPSOCKHTONL)GetAddress(hLib, "htonl");
+	phtons = (LPSOCKHTONS)GetAddress(hLib, "htons");
+	plisten = (LPSOCKLISTEN)GetAddress(hLib, "listen");
+	pntohl = (LPSOCKNTOHL)GetAddress(hLib, "ntohl");
+	pntohs = (LPSOCKNTOHS)GetAddress(hLib, "ntohs");
+	precv = (LPSOCKRECV)GetAddress(hLib, "recv");
+	precvfrom = (LPSOCKRECVFROM)GetAddress(hLib, "recvfrom");
+	pselect = (LPSOCKSELECT)GetAddress(hLib, "select");
+	psend = (LPSOCKSEND)GetAddress(hLib, "send");
+	psendto = (LPSOCKSENDTO)GetAddress(hLib, "sendto");
+	psetsockopt = (LPSOCKSETSOCKOPT)GetAddress(hLib, "setsockopt");
+	pshutdown = (LPSOCKSHUTDOWN)GetAddress(hLib, "shutdown");
+	psocket = (LPSOCKSOCKET)GetAddress(hLib, "socket");
+	pgethostbyaddr = (LPSOCKGETHOSTBYADDR)GetAddress(hLib, "gethostbyaddr");
+	pgethostbyname = (LPSOCKGETHOSTBYNAME)GetAddress(hLib, "gethostbyname");
+	pgethostname = (LPSOCKGETHOSTNAME)GetAddress(hLib, "gethostname");
+	pgetservbyport = (LPSOCKGETSERVBYPORT)GetAddress(hLib, "getservbyport");
+	pgetservbyname = (LPSOCKGETSERVBYNAME)GetAddress(hLib, "getservbyname");
+	pgetprotobynumber = (LPSOCKGETPROTOBYNUMBER)GetAddress(hLib, "getprotobynumber");
+	pgetprotobyname = (LPSOCKGETPROTOBYNAME)GetAddress(hLib, "getprotobyname");
+	pWSAStartup = (LPSOCKWSASTARTUP)GetAddress(hLib, "WSAStartup");
+	pWSACleanup = (LPSOCKWSACLEANUP)GetAddress(hLib, "WSACleanup");
+	pWSAGetLastError = (LPSOCKWSAGETLASTERROR)GetAddress(hLib, "WSAGetLastError");
+	pWSAFDIsSet = (LPWSAFDIsSet)GetAddress(hLib, "__WSAFDIsSet");
+	pinet_addr = (LPSOCKINETADDR)GetAddress(hLib,"inet_addr");
+	pinet_ntoa = (LPSOCKINETNTOA)GetAddress(hLib,"inet_ntoa");
 
-		hWinSockDll = hLib;
-	}
-//	LeaveCriticalSection(&csSock);
+	hWinSockDll = hLib;
+    }
+/*  LeaveCriticalSection(&csSock); */
 }
 
-void EndSockets(void)
+void
+EndSockets(void)
 {
-	if(hWinSockDll != NULL)
-	{
-		pWSACleanup();
-		FreeLibrary(hWinSockDll);
-	}
-	hWinSockDll = NULL;
+    if(hWinSockDll != NULL) {
+	pWSACleanup();
+	FreeLibrary(hWinSockDll);
+    }
+    hWinSockDll = NULL;
 }
 
-void StartSockets(void) 
+void
+StartSockets(void) 
 {
-	unsigned short version;
-	WSADATA retdata;
-	int ret;
-	int iSockOpt = SO_SYNCHRONOUS_NONALERT;
+    unsigned short version;
+    WSADATA retdata;
+    int ret;
+    int iSockOpt = SO_SYNCHRONOUS_NONALERT;
 
-	LoadWinSock();
-	//
-	// initalize the winsock interface and insure that it is
-	// cleaned up at exit.
-	//
-	version = 0x101;
-	if(ret = pWSAStartup(version, &retdata))
-		CROAK("Unable to locate winsock library!\n");
-	if(retdata.wVersion != version)
-		CROAK("Could not find version 1.1 of winsock dll\n");
+    LoadWinSock();
+    /*
+     * initalize the winsock interface and insure that it is
+     * cleaned up at exit.
+     */
+    version = 0x101;
+    if(ret = pWSAStartup(version, &retdata))
+	CROAK("Unable to locate winsock library!\n");
+    if(retdata.wVersion != version)
+	CROAK("Could not find version 1.1 of winsock dll\n");
 
-	// atexit((void (*)(void)) EndSockets);
+    /* atexit((void (*)(void)) EndSockets); */
 
 #ifdef USE_SOCKETS_AS_HANDLES
-	//
-	// Enable the use of sockets as filehandles
-	//
-	psetsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE, (char *)&iSockOpt, sizeof(iSockOpt));
-#endif	// USE_SOCKETS_AS_HANDLES
+    /*
+     * Enable the use of sockets as filehandles
+     */
+    psetsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE,
+		(char *)&iSockOpt, sizeof(iSockOpt));
+#endif	/* USE_SOCKETS_AS_HANDLES */
 }
 
 
 #ifndef USE_SOCKETS_AS_HANDLES
-FILE *myfdopen(int fd, char *mode)
+FILE *
+myfdopen(int fd, char *mode)
 {
-	FILE *fp;
-	char sockbuf[256];
-	int optlen = sizeof(sockbuf);
-	int retval;
+    FILE *fp;
+    char sockbuf[256];
+    int optlen = sizeof(sockbuf);
+    int retval;
 
-	
-	if(hWinSockDll == 0)
-		LoadWinSock();
+    if (hWinSockDll == 0)
+	LoadWinSock();
 
-	retval = pgetsockopt((SOCKET)fd, SOL_SOCKET, SO_TYPE, sockbuf, &optlen);
-	if(retval == SOCKET_ERROR && pWSAGetLastError() == WSAENOTSOCK) 
-	{
-		return(_fdopen(fd, mode));
-	}
+    retval = pgetsockopt((SOCKET)fd, SOL_SOCKET, SO_TYPE, sockbuf, &optlen);
+    if(retval == SOCKET_ERROR && pWSAGetLastError() == WSAENOTSOCK) {
+	return(_fdopen(fd, mode));
+    }
 
-	//
-	// If we get here, then fd is actually a socket.
-	//
-	Newz(1601, fp, 1, FILE);
-	if(fp == NULL)
-	{
-		errno = ENOMEM;
-		return NULL;
-	}
+    /*
+     * If we get here, then fd is actually a socket.
+     */
+    Newz(1601, fp, 1, FILE);
+    if(fp == NULL) {
+	errno = ENOMEM;
+	return NULL;
+    }
 
-	fp->_file = fd;
-	if(*mode == 'r')
-		fp->_flag = _IOREAD;
-	else
-		fp->_flag = _IOWRT;
-
-	return fp;
+    fp->_file = fd;
+    if(*mode == 'r')
+	fp->_flag = _IOREAD;
+    else
+	fp->_flag = _IOWRT;
+   
+    return fp;
 }
-#endif	// USE_SOCKETS_AS_HANDLES
+#endif	/* USE_SOCKETS_AS_HANDLES */
 
 
-u_long win32_htonl(u_long hostlong)
+u_long
+win32_htonl(u_long hostlong)
 {
-	if(hWinSockDll == 0)
-		LoadWinSock();
+    if(hWinSockDll == 0)
+	LoadWinSock();
 
-	return phtonl(hostlong);
-}
-
-u_short win32_htons(u_short hostshort)
-{
-	if(hWinSockDll == 0)
-		LoadWinSock();
-
-	return phtons(hostshort);
+    return phtonl(hostlong);
 }
 
-u_long win32_ntohl(u_long netlong)
+u_short
+win32_htons(u_short hostshort)
 {
-	if(hWinSockDll == 0)
-		LoadWinSock();
+    if(hWinSockDll == 0)
+	LoadWinSock();
 
-	return pntohl(netlong);
+    return phtons(hostshort);
 }
 
-u_short win32_ntohs(u_short netshort)
+u_long
+win32_ntohl(u_long netlong)
 {
-	if(hWinSockDll == 0)
-		LoadWinSock();
+    if(hWinSockDll == 0)
+	LoadWinSock();
 
-	return pntohs(netshort);
+    return pntohl(netlong);
+}
+
+u_short
+win32_ntohs(u_short netshort)
+{
+    if(hWinSockDll == 0)
+	LoadWinSock();
+
+    return pntohs(netshort);
 }
 
 
 #define SOCKET_TEST(x, y)	if(hWinSockDll == 0) StartSockets();\
-							if((x) == (y)) errno = pWSAGetLastError()
+				if((x) == (y)) errno = pWSAGetLastError()
 
-#define SOCKET_TEST_ERROR(x) SOCKET_TEST(x,	SOCKET_ERROR)
+#define SOCKET_TEST_ERROR(x) SOCKET_TEST(x, SOCKET_ERROR)
 
-SOCKET win32_accept(SOCKET s, struct sockaddr *addr, int *addrlen)
+SOCKET
+win32_accept(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
-	SOCKET r;
+    SOCKET r;
 
-	SOCKET_TEST((r = paccept(TO_SOCKET(s), addr, addrlen)), INVALID_SOCKET);
-	return OPEN_SOCKET(r);
+    SOCKET_TEST((r = paccept(TO_SOCKET(s), addr, addrlen)), INVALID_SOCKET);
+    return OPEN_SOCKET(r);
 }
 
-int win32_bind(SOCKET s, const struct sockaddr *addr, int addrlen)
+int
+win32_bind(SOCKET s, const struct sockaddr *addr, int addrlen)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = pbind(TO_SOCKET(s), addr, addrlen));
-	return r;
+    SOCKET_TEST_ERROR(r = pbind(TO_SOCKET(s), addr, addrlen));
+    return r;
 }
 
-int win32_connect(SOCKET s, const struct sockaddr *addr, int addrlen)
+int
+win32_connect(SOCKET s, const struct sockaddr *addr, int addrlen)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = pconnect(TO_SOCKET(s), addr, addrlen));
-	return r;
+    SOCKET_TEST_ERROR(r = pconnect(TO_SOCKET(s), addr, addrlen));
+    return r;
 }
 
 
-int win32_getpeername(SOCKET s, struct sockaddr *addr, int *addrlen)
+int
+win32_getpeername(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = pgetpeername(TO_SOCKET(s), addr, addrlen));
-	return r;
+    SOCKET_TEST_ERROR(r = pgetpeername(TO_SOCKET(s), addr, addrlen));
+    return r;
 }
 
-int win32_getsockname(SOCKET s, struct sockaddr *addr, int *addrlen)
+int
+win32_getsockname(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = pgetsockname(TO_SOCKET(s), addr, addrlen));
-	return r;
+    SOCKET_TEST_ERROR(r = pgetsockname(TO_SOCKET(s), addr, addrlen));
+    return r;
 }
 
-int win32_getsockopt(SOCKET s, int level, int optname, char *optval, int *optlen)
+int
+win32_getsockopt(SOCKET s, int level, int optname, char *optval, int *optlen)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = pgetsockopt(TO_SOCKET(s), level, optname, optval, optlen));
-	return r;
+    SOCKET_TEST_ERROR(r = pgetsockopt(TO_SOCKET(s), level, optname, optval, optlen));
+    return r;
 }
 
-int win32_ioctlsocket(SOCKET s, long cmd, u_long *argp)
+int
+win32_ioctlsocket(SOCKET s, long cmd, u_long *argp)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = pioctlsocket(TO_SOCKET(s), cmd, argp));
-	return r;
+    SOCKET_TEST_ERROR(r = pioctlsocket(TO_SOCKET(s), cmd, argp));
+    return r;
 }
 
-int win32_listen(SOCKET s, int backlog)
+int
+win32_listen(SOCKET s, int backlog)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = plisten(TO_SOCKET(s), backlog));
-	return r;
+    SOCKET_TEST_ERROR(r = plisten(TO_SOCKET(s), backlog));
+    return r;
 }
 
-int win32_recv(SOCKET s, char *buf, int len, int flags)
+int
+win32_recv(SOCKET s, char *buf, int len, int flags)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = precv(TO_SOCKET(s), buf, len, flags));
-	return r;
+    SOCKET_TEST_ERROR(r = precv(TO_SOCKET(s), buf, len, flags));
+    return r;
 }
 
-int win32_recvfrom(SOCKET s, char *buf, int len, int flags, struct sockaddr *from, int *fromlen)
+int
+win32_recvfrom(SOCKET s, char *buf, int len, int flags, struct sockaddr *from, int *fromlen)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = precvfrom(TO_SOCKET(s), buf, len, flags, from, fromlen));
-	return r;
+    SOCKET_TEST_ERROR(r = precvfrom(TO_SOCKET(s), buf, len, flags, from, fromlen));
+    return r;
 }
 
-// select contributed by Vincent R. Slyngstad (vrs@ibeam.intel.com)
-int win32_select(int nfds, int* rd, int* wr, int* ex, const struct timeval* timeout)
+/* select contributed by Vincent R. Slyngstad (vrs@ibeam.intel.com) */
+int
+win32_select(int nfds, int* rd, int* wr, int* ex, const struct timeval* timeout)
 {
-	long r;
-	int dummy = 0;
-	int i, fd, bit, offset;
-	FD_SET nrd, nwr, nex,*prd,*pwr,*pex;
+    long r;
+    int dummy = 0;
+    int i, fd, bit, offset;
+    FD_SET nrd, nwr, nex,*prd,*pwr,*pex;
 
-	if (!rd) rd = &dummy, prd = NULL;
-	else prd = &nrd;
-	if (!wr) wr = &dummy, pwr = NULL;
-	else pwr = &nwr;
-	if (!ex) ex = &dummy, pex = NULL;
-	else pex = &nex;
+    if (!rd)
+	rd = &dummy, prd = NULL;
+    else
+	prd = &nrd;
+    if (!wr)
+	wr = &dummy, pwr = NULL;
+    else
+	pwr = &nwr;
+    if (!ex)
+	ex = &dummy, pex = NULL;
+    else
+	pex = &nex;
 
-	FD_ZERO(&nrd);
-	FD_ZERO(&nwr);
-	FD_ZERO(&nex);
-	for (i = 0; i < nfds; i++) 
-	{
-		fd = TO_SOCKET(i);
-		bit = 1L<<(i % (sizeof(int)*8));
-		offset = i / (sizeof(int)*8);
-		if (rd[offset] & bit)
-			FD_SET(fd, &nrd);
-		if (wr[offset] & bit)
-			FD_SET(fd, &nwr);
-		if (ex[offset] & bit)
-			FD_SET(fd, &nex);
+    FD_ZERO(&nrd);
+    FD_ZERO(&nwr);
+    FD_ZERO(&nex);
+    for (i = 0; i < nfds; i++) {
+	fd = TO_SOCKET(i);
+	bit = 1L<<(i % (sizeof(int)*8));
+	offset = i / (sizeof(int)*8);
+	if (rd[offset] & bit)
+	    FD_SET(fd, &nrd);
+	if (wr[offset] & bit)
+	    FD_SET(fd, &nwr);
+	if (ex[offset] & bit)
+	    FD_SET(fd, &nex);
+    }
+
+    SOCKET_TEST_ERROR(r = pselect(nfds, prd, pwr, pex, timeout));
+
+    for (i = 0; i < nfds; i++) {
+	fd = TO_SOCKET(i);
+	bit = 1L<<(i % (sizeof(int)*8));
+	offset = i / (sizeof(int)*8);
+	if (rd[offset] & bit) {
+	    if (!pWSAFDIsSet(fd, &nrd))
+		rd[offset] &= ~bit;
 	}
-
-	SOCKET_TEST_ERROR(r = pselect(nfds, prd, pwr, pex, timeout));
-
-	for (i = 0; i < nfds; i++) 
-	{
-		fd = TO_SOCKET(i);
-		bit = 1L<<(i % (sizeof(int)*8));
-		offset = i / (sizeof(int)*8);
-		if (rd[offset] & bit) 
-		{
-			if (!pWSAFDIsSet(fd, &nrd))
-				rd[offset] &= ~bit;
-		}
-		if (wr[offset] & bit) 
-		{
-			if (!pWSAFDIsSet(fd, &nwr))
-				wr[offset] &= ~bit;
-		}
-		if (ex[offset] & bit) 
-		{
-			if (!pWSAFDIsSet(fd, &nex))
-				ex[offset] &= ~bit;
-		}
+	if (wr[offset] & bit) {
+	    if (!pWSAFDIsSet(fd, &nwr))
+		wr[offset] &= ~bit;
 	}
-	return r;
+	if (ex[offset] & bit) {
+	    if (!pWSAFDIsSet(fd, &nex))
+		ex[offset] &= ~bit;
+	}
+    }
+    return r;
 }
 
-int win32_send(SOCKET s, const char *buf, int len, int flags)
+int
+win32_send(SOCKET s, const char *buf, int len, int flags)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = psend(TO_SOCKET(s), buf, len, flags));
-	return r;
+    SOCKET_TEST_ERROR(r = psend(TO_SOCKET(s), buf, len, flags));
+    return r;
 }
 
-int win32_sendto(SOCKET s, const char *buf, int len, int flags, const struct sockaddr *to, int tolen)
+int
+win32_sendto(SOCKET s, const char *buf, int len, int flags,
+	     const struct sockaddr *to, int tolen)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = psendto(TO_SOCKET(s), buf, len, flags, to, tolen));
-	return r;
+    SOCKET_TEST_ERROR(r = psendto(TO_SOCKET(s), buf, len, flags, to, tolen));
+    return r;
 }
 
-int win32_setsockopt(SOCKET s, int level, int optname, const char *optval, int optlen)
+int
+win32_setsockopt(SOCKET s, int level, int optname, const char *optval, int optlen)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = psetsockopt(TO_SOCKET(s), level, optname, optval, optlen));
-	return r;
+    SOCKET_TEST_ERROR(r = psetsockopt(TO_SOCKET(s), level, optname, optval, optlen));
+    return r;
 }
     
-int win32_shutdown(SOCKET s, int how)
+int
+win32_shutdown(SOCKET s, int how)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = pshutdown(TO_SOCKET(s), how));
-	return r;
+    SOCKET_TEST_ERROR(r = pshutdown(TO_SOCKET(s), how));
+    return r;
 }
 
-SOCKET win32_socket(int af, int type, int protocol)
+SOCKET
+win32_socket(int af, int type, int protocol)
 {
-	SOCKET s;
+    SOCKET s;
 
 #ifndef USE_SOCKETS_AS_HANDLES
-	SOCKET_TEST(s = psocket(af, type, protocol), INVALID_SOCKET);
+    SOCKET_TEST(s = psocket(af, type, protocol), INVALID_SOCKET);
 #else
-	if(hWinSockDll == 0)
-		StartSockets();
+    if(hWinSockDll == 0)
+	StartSockets();
 
-	if((s = psocket(af, type, protocol)) == INVALID_SOCKET)
-		errno = pWSAGetLastError();
-	else
-		s = OPEN_SOCKET(s);
-#endif	// USE_SOCKETS_AS_HANDLES
+    if((s = psocket(af, type, protocol)) == INVALID_SOCKET)
+	errno = pWSAGetLastError();
+    else
+	s = OPEN_SOCKET(s);
+#endif	/* USE_SOCKETS_AS_HANDLES */
 
-	return s;
+    return s;
 }
 
-struct hostent *win32_gethostbyaddr(const char *addr, int len, int type)
+struct hostent *
+win32_gethostbyaddr(const char *addr, int len, int type)
 {
-	struct hostent *r;
+    struct hostent *r;
 
-	SOCKET_TEST(r = pgethostbyaddr(addr, len, type), NULL);
-	return r;
+    SOCKET_TEST(r = pgethostbyaddr(addr, len, type), NULL);
+    return r;
 }
 
-struct hostent *win32_gethostbyname(const char *name)
+struct hostent *
+win32_gethostbyname(const char *name)
 {
-	struct hostent *r;
+    struct hostent *r;
 
-	SOCKET_TEST(r = pgethostbyname(name), NULL);
-	return r;
+    SOCKET_TEST(r = pgethostbyname(name), NULL);
+    return r;
 }
 
-int win32_gethostname(char *name, int len)
+int
+win32_gethostname(char *name, int len)
 {
-	int r;
+    int r;
 
-	SOCKET_TEST_ERROR(r = pgethostname(name, len));
-	return r;
+    SOCKET_TEST_ERROR(r = pgethostname(name, len));
+    return r;
 }
 
-struct protoent *win32_getprotobyname(const char *name)
+struct protoent *
+win32_getprotobyname(const char *name)
 {
-	struct protoent *r;
+    struct protoent *r;
 
-	SOCKET_TEST(r = pgetprotobyname(name), NULL);
-	return r;
+    SOCKET_TEST(r = pgetprotobyname(name), NULL);
+    return r;
 }
 
-struct protoent *win32_getprotobynumber(int num)
+struct protoent *
+win32_getprotobynumber(int num)
 {
-	struct protoent *r;
+    struct protoent *r;
 
-	SOCKET_TEST(r = pgetprotobynumber(num), NULL);
-	return r;
+    SOCKET_TEST(r = pgetprotobynumber(num), NULL);
+    return r;
 }
 
-struct servent *win32_getservbyname(const char *name, const char *proto)
+struct servent *
+win32_getservbyname(const char *name, const char *proto)
 {
-	struct servent *r;
-
-	SOCKET_TEST(r = pgetservbyname(name, proto), NULL);
-	if (r) {
-		r = win32_savecopyservent(&myservent, r, proto);
-		}
-	return r;
+    struct servent *r;
+   
+    SOCKET_TEST(r = pgetservbyname(name, proto), NULL);
+    if (r) {
+	r = win32_savecopyservent(&myservent, r, proto);
+    }
+    return r;
 }
 
-struct servent *win32_getservbyport(int port, const char *proto)
+struct servent *
+win32_getservbyport(int port, const char *proto)
 {
-	struct servent *r;
+    struct servent *r;
 
-	SOCKET_TEST(r = pgetservbyport(port, proto), NULL);
-	if (r) {
-		r = win32_savecopyservent(&myservent, r, proto);
-		}
-	return r;
+    SOCKET_TEST(r = pgetservbyport(port, proto), NULL);
+    if (r) {
+	r = win32_savecopyservent(&myservent, r, proto);
+    }
+    return r;
 }
 
-char FAR *win32_inet_ntoa(struct in_addr in)
+char FAR *
+win32_inet_ntoa(struct in_addr in)
 {
-	if(hWinSockDll == 0) LoadWinSock();
+    if(hWinSockDll == 0)
+	LoadWinSock();
 
-	return pinet_ntoa(in);
+    return pinet_ntoa(in);
 }
 
-unsigned long win32_inet_addr(const char FAR *cp)
+unsigned long
+win32_inet_addr(const char FAR *cp)
 {
-	if(hWinSockDll == 0) LoadWinSock();
+    if(hWinSockDll == 0)
+	LoadWinSock();
 
-	return pinet_addr(cp);
+    return pinet_addr(cp);
 
 }
-//
-// Networking stubs
-//
+
+/*
+ * Networking stubs
+ */
 #undef CROAK 
 #define CROAK croak
 
-void win32_endhostent() 
+void
+win32_endhostent() 
 {
-	CROAK("endhostent not implemented!\n");
+    CROAK("endhostent not implemented!\n");
 }
 
-void win32_endnetent()
+void
+win32_endnetent()
 {
-	CROAK("endnetent not implemented!\n");
+    CROAK("endnetent not implemented!\n");
 }
 
-void win32_endprotoent()
+void
+win32_endprotoent()
 {
-	CROAK("endprotoent not implemented!\n");
+    CROAK("endprotoent not implemented!\n");
 }
 
-void win32_endservent()
+void
+win32_endservent()
 {
-	CROAK("endservent not implemented!\n");
-}
-
-
-struct netent *win32_getnetent(void) 
-{
-	CROAK("getnetent not implemented!\n");
-	return (struct netent *) NULL;
-}
-
-struct netent *win32_getnetbyname(char *name) 
-{
-	CROAK("getnetbyname not implemented!\n");
-	return (struct netent *)NULL;
-}
-
-struct netent *win32_getnetbyaddr(long net, int type) 
-{
-	CROAK("getnetbyaddr not implemented!\n");
-	return (struct netent *)NULL;
-}
-
-struct protoent *win32_getprotoent(void) 
-{
-	CROAK("getprotoent not implemented!\n");
-	return (struct protoent *) NULL;
-}
-
-struct servent *win32_getservent(void) 
-{
-	CROAK("getservent not implemented!\n");
-	return (struct servent *) NULL;
-}
-
-void win32_sethostent(int stayopen)
-{
-	CROAK("sethostent not implemented!\n");
+    CROAK("endservent not implemented!\n");
 }
 
 
-void win32_setnetent(int stayopen)
+struct netent *
+win32_getnetent(void) 
 {
-	CROAK("setnetent not implemented!\n");
+    CROAK("getnetent not implemented!\n");
+    return (struct netent *) NULL;
+}
+
+struct netent *
+win32_getnetbyname(char *name) 
+{
+    CROAK("getnetbyname not implemented!\n");
+    return (struct netent *)NULL;
+}
+
+struct netent *
+win32_getnetbyaddr(long net, int type) 
+{
+    CROAK("getnetbyaddr not implemented!\n");
+    return (struct netent *)NULL;
+}
+
+struct protoent *
+win32_getprotoent(void) 
+{
+    CROAK("getprotoent not implemented!\n");
+    return (struct protoent *) NULL;
+}
+
+struct servent *
+win32_getservent(void) 
+{
+    CROAK("getservent not implemented!\n");
+    return (struct servent *) NULL;
+}
+
+void
+win32_sethostent(int stayopen)
+{
+    CROAK("sethostent not implemented!\n");
 }
 
 
-void win32_setprotoent(int stayopen)
+void
+win32_setnetent(int stayopen)
 {
-	CROAK("setprotoent not implemented!\n");
+    CROAK("setnetent not implemented!\n");
 }
 
 
-void win32_setservent(int stayopen)
+void
+win32_setprotoent(int stayopen)
 {
-	CROAK("setservent not implemented!\n");
+    CROAK("setprotoent not implemented!\n");
+}
+
+
+void
+win32_setservent(int stayopen)
+{
+    CROAK("setservent not implemented!\n");
 }
 
 

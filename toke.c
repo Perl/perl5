@@ -157,12 +157,15 @@ no_op(what, s)
 char *what;
 char *s;
 {
-    char tmpbuf[128];
     char *oldbp = bufptr;
     bool is_first = (oldbufptr == linestart);
+    char *msg;
+
     bufptr = s;
-    sprintf(tmpbuf, "%s found where operator expected", what);
-    yywarn(tmpbuf);
+    New(890, msg, strlen(what) + 40, char);
+    sprintf(msg, "%s found where operator expected", what);
+    yywarn(msg);
+    Safefree(msg);
     if (is_first)
 	warn("\t(Missing semicolon on previous line?)\n");
     else if (oldoldbufptr && isIDFIRST(*oldoldbufptr)) {
@@ -1385,9 +1388,7 @@ yylex()
 	    s = bufptr;
 	    Aop(OP_CONCAT);
 	}
-	else
-	    return yylex();
-	break;
+	return yylex();
 
     case LEX_INTERPENDMAYBE:
 	if (intuit_more(bufptr)) {
@@ -1920,7 +1921,6 @@ yylex()
 	    else
 		lex_brackstack[lex_brackets++] = XOPERATOR;
 	    OPERATOR(HASHBRACK);
-	    break;
 	case XOPERATOR:
 	    while (s < bufend && (*s == ' ' || *s == '\t'))
 		s++;
@@ -2233,6 +2233,17 @@ yylex()
 		expect = XTERM;		/* e.g. print $fh "foo" */
 	    else if (strchr("&*<%", *s) && isIDFIRST(s[1]))
 		expect = XTERM;		/* e.g. print $fh &sub */
+	    else if (isIDFIRST(*s)) {
+		char tmpbuf[1024];
+		scan_word(s, tmpbuf, TRUE, &len);
+		if (keyword(tmpbuf, len))
+		    expect = XTERM;	/* e.g. print $fh length() */
+		else {
+		    GV *gv = gv_fetchpv(tmpbuf, FALSE, SVt_PVCV);
+		    if (gv && GvCVu(gv))
+			expect = XTERM;	/* e.g. print $fh subr() */
+		}
+	    }
 	    else if (isDIGIT(*s))
 		expect = XTERM;		/* e.g. print $fh 3 */
 	    else if (*s == '.' && isDIGIT(s[1]))
@@ -2641,15 +2652,21 @@ yylex()
 		TOKEN(WORD);
 	    }
 
+	case KEY___FILE__:
 	case KEY___LINE__:
-	case KEY___FILE__: {
 	    if (tokenbuf[2] == 'L')
 		(void)sprintf(tokenbuf,"%ld",(long)curcop->cop_line);
 	    else
 		strcpy(tokenbuf, SvPVX(GvSV(curcop->cop_filegv)));
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
 	    TERM(THING);
-	}
+
+	case KEY___PACKAGE__:
+	    yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+					(curstash
+					 ? newSVsv(curstname)
+					 : &sv_undef));
+	    TERM(THING);
 
 	case KEY___DATA__:
 	case KEY___END__: {
@@ -3432,6 +3449,8 @@ yylex()
 
 	    /* Look for a prototype */
 	    if (*s == '(') {
+		char *p;
+
 		s = scan_str(s);
 		if (!s) {
 		    if (lex_stuff)
@@ -3439,6 +3458,16 @@ yylex()
 		    lex_stuff = Nullsv;
 		    croak("Prototype not terminated");
 		}
+		/* strip spaces */
+		d = SvPVX(lex_stuff);
+		tmp = 0;
+		for (p = d; *p; ++p) {
+		    if (!isSPACE(*p))
+			d[tmp++] = *p;
+		}
+		d[tmp] = '\0';
+		SvCUR(lex_stuff) = tmp;
+
 		nexttoke++;
 		nextval[1] = nextval[0];
 		nexttype[1] = nexttype[0];
@@ -3613,8 +3642,9 @@ I32 len;
     switch (*d) {
     case '_':
 	if (d[1] == '_') {
-	    if (strEQ(d,"__LINE__"))		return -KEY___LINE__;
 	    if (strEQ(d,"__FILE__"))		return -KEY___FILE__;
+	    if (strEQ(d,"__LINE__"))		return -KEY___LINE__;
+	    if (strEQ(d,"__PACKAGE__"))		return -KEY___PACKAGE__;
 	    if (strEQ(d,"__DATA__"))		return KEY___DATA__;
 	    if (strEQ(d,"__END__"))		return KEY___END__;
 	}
@@ -5136,40 +5166,52 @@ int
 yyerror(s)
 char *s;
 {
-    char tmpbuf[258];
-    char *tname = tmpbuf;
+    char wbuf[40];
+    char *where = NULL;
+    char *context = NULL;
+    int contlen = -1;
 
     if (bufptr > oldoldbufptr && bufptr - oldoldbufptr < 200 &&
       oldoldbufptr != oldbufptr && oldbufptr != bufptr) {
 	while (isSPACE(*oldoldbufptr))
 	    oldoldbufptr++;
-	sprintf(tname,"near \"%.*s\"",bufptr - oldoldbufptr, oldoldbufptr);
+	context = oldoldbufptr;
+	contlen = bufptr - oldoldbufptr;
     }
     else if (bufptr > oldbufptr && bufptr - oldbufptr < 200 &&
       oldbufptr != bufptr) {
 	while (isSPACE(*oldbufptr))
 	    oldbufptr++;
-	sprintf(tname,"near \"%.*s\"",bufptr - oldbufptr, oldbufptr);
+	context = oldbufptr;
+	contlen = bufptr - oldbufptr;
     }
     else if (yychar > 255)
-	tname = "next token ???";
+	where = "next token ???";
     else if (!yychar || (yychar == ';' && !rsfp))
-	(void)strcpy(tname,"at EOF");
+	where = "at EOF";
     else if ((yychar & 127) == 127) {
 	if (lex_state == LEX_NORMAL ||
 	   (lex_state == LEX_KNOWNEXT && lex_defer == LEX_NORMAL))
-	    (void)strcpy(tname,"at end of line");
+	    where = "at end of line";
 	else if (lex_inpat)
-	    (void)strcpy(tname,"within pattern");
+	    where = "within pattern";
 	else
-	    (void)strcpy(tname,"within string");
+	    where = "within string";
     }
     else if (yychar < 32)
-	(void)sprintf(tname,"next char ^%c",toCTRL(yychar));
+	(void)sprintf(where = wbuf, "next char ^%c", toCTRL(yychar));
+    else if (isPRINT_LC(yychar))
+	(void)sprintf(where = wbuf, "next char %c", yychar);
     else
-	(void)sprintf(tname,"next char %c",yychar);
-    (void)sprintf(buf, "%s at %s line %d, %s\n",
-      s,SvPVX(GvSV(curcop->cop_filegv)),curcop->cop_line,tname);
+	(void)sprintf(where = wbuf, "next char \\%03o", yychar & 255);
+    if (contlen == -1)
+	contlen = strlen(where);
+    (void)sprintf(buf, "%s at %s line %d, ",
+		  s, SvPVX(GvSV(curcop->cop_filegv)), curcop->cop_line);
+    if (context)
+	(void)sprintf(buf+strlen(buf), "near \"%.*s\"\n", contlen, context);
+    else
+	(void)sprintf(buf+strlen(buf), "%s\n", where);
     if (multi_start < multi_end && (U32)(curcop->cop_line - multi_end) <= 1) {
 	sprintf(buf+strlen(buf),
 	"  (Might be a runaway multi-line %c%c string starting on line %ld)\n",

@@ -120,7 +120,7 @@ selecttype='fd_set *'
 libswanted="$libswanted unix"
 
 if [ -z "`which ar 2>/dev/null`" ]; then
-  cat <<-'EOF'
+  cat <<-'EOF' >&4
 	I don't see an 'ar', so I'm guessing you are running
 	Watcom 9.5 or earlier. You may want to install the ar
 	cover found in the qnx subdirectory of this distribution.
@@ -158,7 +158,7 @@ fi
 
 cppstdin=`which cpp 2>/dev/null`
 if [ -n "$cppstdin" ]; then
-  cat <<-EOF
+  cat <<-EOF >&4
 	I found a cpp at $cppstdin and will assume it is a good
 	thing to use. If this proves to be false, there is a
 	thin cover for cpp in the qnx subdirectory of this
@@ -166,7 +166,7 @@ if [ -n "$cppstdin" ]; then
 	EOF
   cpprun="$cppstdin"
 else
-  cat <<-EOF
+  cat <<-EOF >&4
 	
 	There is a cpp cover in the qnx subdirectory of this
 	distribution which works a little better than the

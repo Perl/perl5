@@ -273,7 +273,7 @@ context than they do in a scalar one.  See L<perldata> for details.
 
 =item *
 
-Avoid barewords if you can, especially all lower-case ones.
+Avoid barewords if you can, especially all lowercase ones.
 You can't tell by just looking at it whether a bareword is 
 a function or a string.  By using quotes on strings and 
 parentheses on function calls, you won't ever get them confused.
@@ -577,6 +577,24 @@ number of elements in the resulting list.
     
     # perl4 prints: second new
     # perl5 prints: 3
+
+=item * Discontinuance
+
+In Perl 4 (and versions of Perl 5 before 5.004), C<'\r'> characters in
+Perl code were silently allowed, although they could cause (mysterious!)
+failures in certain constructs, particularly here documents.  Now,
+C<'\r'> characters cause an immediate fatal error.  (Note: In this
+example, the notation B<\015> represents the incorrect line
+ending. Depending upon your text viewer, it will look different.)
+
+    print "foo";\015
+    print "bar";
+
+    # perl4     prints: foobar
+    # perl5.003 prints: foobar
+    # perl5.004 dies: Illegal character \015 (carriage return)
+
+See L<perldiag> for full details.
 
 =item * Deprecation
 
@@ -1028,6 +1046,24 @@ state of the searched string is lost)
  
     # perl4 prints: blah blah blah
     # perl5 prints: infinite loop blah...
+
+=item * Regular Expression
+
+Currently, if you use the C<m//o> qualifier on a regular expression
+within an anonymous sub, I<all> closures generated from that anonymous
+sub will use the regular expression as it was compiled when it was used
+the very first time in any such closure.  For instance, if you say
+
+    sub build_match {
+        my($left,$right) = @_;
+        return sub { $_[0] =~ /$left stuff $right/o; };
+    }
+
+build_match() will always return a sub which matches the contents of
+C<$left> and C<$right> as they were the I<first> time that build_match()
+was called, not as they are in the current call.
+
+This is probably a bug, and may change in future versions of Perl.
 
 =item * Regular Expression
 

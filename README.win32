@@ -1,0 +1,275 @@
+If you read this file _as_is_, just ignore the funny characters you
+see. It is written in the POD format (see pod/perlpod.pod) which is
+specially designed to be readable as is.
+
+=head1 NAME
+
+perlwin32 - Perl under WindowsNT [XXX and perhaps under Windows95]
+
+=head1 SYNOPSIS
+
+These are instructions for building Perl under WindowsNT (versions
+3.51 or 4.0), using Visual C++.
+
+=head1 DESCRIPTION
+
+Before you start, you should glance through the README file found
+found in the top-level directory where the Perl distribution
+was extracted.  Make sure you read and understand the terms under
+which this software is being distributed.
+
+Make sure you read the L<BUGS AND CAVEATS> section below for the
+known limitations of this port.
+
+The INSTALL file in the perl top-level has much information that is
+only relevant to people building Perl on Unix-like systems.  In
+particular, you can safely ignore any information that talks about
+"Configure".
+
+You should probably also read the README.os2 file, which gives a
+different set of rules to build a Perl that will work on Win32
+platforms.  That method will probably enable you to build a more
+Unix-compatible perl, but you will also need to download and use
+various other support software described in that file.
+
+This set of instructions is meant to describe a so-called "native"
+port of Perl to Win32 platforms.  The resulting Perl requires no
+additional software to run (other than what came with your operating
+system).  Currently, this port is only capable of using Microsoft's
+Visual C++ compiler.  The ultimate goal is to support the other major
+compilers that can be used on the platforms.
+
+=head2 Setting Up
+
+=over 4
+
+=item *
+
+Use the default "cmd" shell that comes with NT.  In particular, do
+*not* use the 4DOS/NT shell.  The Makefile has commands that are not
+compatible with that shell.
+
+=item *
+
+Run the VCVARS32.BAT file usually found somewhere like C:\MSDEV4.2\BIN.
+This will set your build environment.
+
+=item *
+
+Depending on how you extracted the distribution, you have to make sure
+all the files are writable by you.  The easiest way to make sure of
+this is to execute:
+
+	attrib -R *.* /S
+
+from the perl toplevel directory.  You don't I<have> to do this if you
+used the right tools to extract the files in the standard distribution,
+but it doesn't hurt to do so.
+
+=back
+
+=head2 Building and Installation
+
+=over 4
+
+=item *
+
+The "win32" directory contains *.mak files for use with the NMAKE that
+comes with Visual C++ ver. 4.0 and above.  If you wish to build perl
+using Visual C++ versions between 2.0 and 4.0, do the following three
+additional steps (these three steps are not required if you are
+using Visual C++ versions 4.0 and above):
+
+=over 8
+
+=item 1.
+
+Overwrite the *.mak files in the win32 subdirectory with the versions
+in the win32\VC-2.0 directory.  (The only difference in those makefiles
+is in how the $(INCLUDE) variable is handled--VC 2.0 NMAKE does not
+grok a path list in $(INCLUDE)).
+
+=item 2.
+
+Reset your INCLUDE environment variable to the MSVC include directory.
+For example:
+
+	set INCLUDE=E:\MSVC20\INCLUDE
+
+This must have only one directory (a list of directories will not work).
+VCVARS32.BAT may put multiple locations in there, which is why this step
+is required.
+
+=item 3.
+
+Apply the patch found in win32\VC-2.0\vc2.patch, like so:
+
+	cd win32
+	patch -p2 -N < VC-2.0\vc2.patch
+
+You may have to edit win32\win32.c manually if you don't have GNU patch.
+
+=back
+
+=item * 
+
+Make sure you are in the "win32" subdirectory under the perl toplevel.
+
+=item *
+
+Type "nmake" while in the "win32" subdirectory.  This should build
+everything.  Specifically, it will create perl.exe, perl.dll, and
+perlglob.exe at the perl toplevel, and various other extension dll's
+under the lib\auto directory.  If the make fails for any reason, make
+sure you have done the previous steps correctly.
+
+=item *
+
+Type "nmake install".  This will put the newly built perl and the
+libraries under C:\PERL.  If you want to alter this location, to say,
+D:\FOO\PERL, you will have to say:
+
+	nmake install INST_TOP=D:\FOO\PERL
+
+instead.  To use the Perl you just installed, make sure you set your
+PATH environment variable to C:\PERL\BIN (or D:\FOO\PERL\BIN).
+
+=back
+
+=head2 Testing
+
+Type "nmake test".  This will run most of the tests from the
+testsuite (many tests will be skipped, and some tests will fail).
+Most failures are due to UNIXisms in the standard perl testsuite.
+
+To get a more detailed breakdown of the tests that failed, say:
+
+       cd ..\t
+       .\perl harness
+
+This should produce a summary very similar to the following:
+
+    Failed Test  Status Wstat Total Fail  Failed  List of failed
+    ------------------------------------------------------------------------------
+    io/fs.t                      26   16  61.54%  1-5, 7-11, 16-18, 23-25
+    io/tell.t                    13    1   7.69%  10
+    lib/anydbm.t                 12    1   8.33%  2
+    lib/findbin.t                 1    1 100.00%  1
+    lib/sdbm.t                   12    1   8.33%  2
+    op/mkdir.t                    7    2  28.57%  3, 7
+    op/runlevel.t                 8    1  12.50%  4
+    op/stat.t                    56    3   5.36%  3-4, 20
+    op/taint.t                   98   20  20.41%  1-6, 14, 16, 19-21, 24, 26, 35-3
+    pragma/locale.t              98   40  40.82%  1, 13-14, 21-27, 33, 39, 45-53,
+    Failed 10/149 test scripts, 93.29% okay. 86/3506 subtests failed, 97.55% okay.
+
+Check if any additional tests other than the ones shown here
+failed.  The standard testsuite will ultimately be modified so
+that the testsuite avoids running irrelevant tests on Win32.
+
+=head1 BUGS AND CAVEATS
+
+This is still very much an experimental port, and should be considered
+alpha quality software.  You can expect changes in virtually all of
+these areas: build process, installation structure, supported
+utilities/modules, and supported perl functionality.  Specifically,
+functionality that supports the Win32 environment may be ultimately
+be supported as either core modules or extensions.
+
+Many tests from the standard testsuite either fail or produce different
+results under this port.  Most of the problems fall under one of these
+categories
+
+=over 8
+
+=item *
+
+C<stat()> and C<lstat()> functions may not behave as documented.  They
+may return values that bear no resemblance to those reported on Unix
+platforms, and some fields may be completely bogus.
+
+=item *
+
+The following functions are currently unavailable: C<fork()>, C<exec()>,
+C<dump()>, C<kill()>, C<chown()>, C<link()>, C<symlink()>, C<chroot()>,
+C<setpgrp()>, C<getpgrp()>, C<setpriority()>, C<getpriority()>,
+C<syscall()>, C<fcntl()>, C<flock()>.  This list is possibly incomplete.
+
+=item *
+
+Various C<socket()> related calls are supported, but they may not
+behave as on Unix platforms.
+
+=item *
+
+The four-argument C<select()> call is only supported on sockets.
+
+=item *
+
+The behavior of C<system()> or the C<qx[]> operator (a.k.a. "backticks"),
+when used to call interactive commands, is ill-defined.
+
+=item *
+
+C<$!> doesn't work reliably yet.
+
+=item *
+
+Building modules available on CPAN is mostly supported, but this
+hasn't been tested much yet.  Expect strange problems, and be
+prepared to deal with the consequences.
+
+=item *
+
+C<utime()>, C<times()> and process-related functions may not
+behave as described in the documentation, and some of the
+returned values or effects may be bogus.
+
+=item *
+
+Signal handling may not behave as on Unix platforms.
+
+=item *
+
+File globbing may not behave as on Unix platforms.
+
+=item *
+
+Not all of the utilities that come with the Perl distribution
+are supported yet.
+
+=back
+
+Please send detailed descriptions of any problems and solutions that 
+you may find to <F<perlbug@perl.com>>, along with the output produced
+by C<perl -V>.
+
+=head1 AUTHORS
+
+=over 4
+
+=item Gary Ng <F<71564.1743@CompuServe.COM>>
+
+=item Gurusamy Sarathy <F<gsar@umich.edu>>
+
+=item Nick Ing-Simmons <F<nick@ni-s.u-net.com>>
+
+=back
+
+=head1 SEE ALSO
+
+L<perl>
+
+=head1 HISTORY
+
+This port was originally contributed by Gary Ng around 5.003_24,
+and borrowed from the Hip Communications port that was available
+at the time.
+
+Nick Ing-Simmons and Gurusamy Sarathy have made numerous and
+sundry hacks since then.
+
+Last updated: 19 March 1997
+
+=cut
+

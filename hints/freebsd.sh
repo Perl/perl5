@@ -97,7 +97,7 @@ esac
 # Configure should test for this.  Volunteers?
 pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
 
-cat <<'EOM'
+cat <<'EOM' >&4
 
 Some users have reported that Configure halts when testing for
 the O_NONBLOCK symbol with a syntax error.  This is apparently a

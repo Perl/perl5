@@ -377,7 +377,7 @@ END
 	    $test++;
 	  }
 
-	  if ($Config{d_fork} and $^O ne 'VMS') {
+	  if ($Config{d_fork} and $^O ne 'VMS' and $^O ne 'MSWin32') {
 	    # Fork off a new perl to run the tests.
 	    # (This is so we can catch spurious warnings.)
 	    $| = 1; print ""; $| = 0; # flush output before forking
@@ -411,9 +411,11 @@ END
 	    my $errfile = "terr$$";  $errfile++ while -e $errfile;
 	    my @tmpfiles = ($cmdfile, $errfile);
 	    open CMD, ">$cmdfile"; print CMD $code; close CMD;
-	    my $cmd = ($^O eq 'VMS') ? "MCR $^X" : "./perl";
+	    my $cmd = (($^O eq 'VMS') ? "MCR $^X"
+		       : ($^O eq 'MSWin32') ? '.\perl'
+		       : './perl');
 	    $cmd .= " -w $cmdfile 2>$errfile";
-	    if ($^O eq 'VMS') {
+	    if ($^O eq 'VMS' or $^O eq 'MSWin32') {
 	      # Use pipe instead of system so we don't inherit STD* from
 	      # this process, and then foul our pipe back to parent by
 	      # redirecting output in the child.

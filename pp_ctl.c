@@ -798,11 +798,11 @@ char *label;
 	case CXt_LOOP:
 	    if (!cx->blk_loop.label ||
 	      strNE(label, cx->blk_loop.label) ) {
-		DEBUG_l(deb("(Skipping label #%d %s)\n",
-			i, cx->blk_loop.label));
+		DEBUG_l(deb("(Skipping label #%ld %s)\n",
+			(long)i, cx->blk_loop.label));
 		continue;
 	    }
-	    DEBUG_l( deb("(Found label #%d %s)\n", i, label));
+	    DEBUG_l( deb("(Found label #%ld %s)\n", (long)i, label));
 	    return i;
 	}
     }
@@ -837,7 +837,7 @@ I32 startingblock;
 	    continue;
 	case CXt_EVAL:
 	case CXt_SUB:
-	    DEBUG_l( deb("(Found sub #%d)\n", i));
+	    DEBUG_l( deb("(Found sub #%ld)\n", (long)i));
 	    return i;
 	}
     }
@@ -856,7 +856,7 @@ I32 startingblock;
 	default:
 	    continue;
 	case CXt_EVAL:
-	    DEBUG_l( deb("(Found eval #%d)\n", i));
+	    DEBUG_l( deb("(Found eval #%ld)\n", (long)i));
 	    return i;
 	}
     }
@@ -889,7 +889,7 @@ I32 startingblock;
 		warn("Exiting pseudo-block via %s", op_name[op->op_type]);
 	    return -1;
 	case CXt_LOOP:
-	    DEBUG_l( deb("(Found loop #%d)\n", i));
+	    DEBUG_l( deb("(Found loop #%ld)\n", (long)i));
 	    return i;
 	}
     }
@@ -1369,7 +1369,6 @@ PP(pp_return)
 	break;
     default:
 	DIE("panic: return");
-	break;
     }
 
     if (gimme == G_SCALAR) {
@@ -1442,7 +1441,6 @@ PP(pp_last)
 	break;
     default:
 	DIE("panic: last");
-	break;
     }
 
     if (gimme == G_SCALAR) {
@@ -1791,12 +1789,10 @@ PP(pp_goto)
 		break;
 	    case CXt_NULL:
 		DIE("Can't \"goto\" outside a block");
-		break;
 	    default:
 		if (ix)
 		    DIE("panic: goto");
-		else
-		    gotoprobe = main_root;
+		gotoprobe = main_root;
 		break;
 	    }
 	    retop = dofindlabel(gotoprobe, label, enterops);

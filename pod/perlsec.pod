@@ -287,3 +287,38 @@ SysVr4 and BSD 4.4 use this approach to avoid the kernel race condition.
 Prior to release 5.003 of Perl, a bug in the code of B<suidperl> could
 introduce a security hole in systems compiled with strict POSIX
 compliance.
+
+=head2 Protecting Your Programs
+
+There are a number of ways to hide the source to your Perl programs,
+with varying levels of "security".
+
+First of all, however, you I<can't> take away read permission, because
+the source code has to be readable in order to be compiled and
+interpreted.  (That doesn't mean that a CGI script's source is
+readable by people on the web, though.)  So you have to leave the
+permissions at the socially friendly 0755 level.
+
+Some people regard this as a security problem.  If your program does
+insecure things, and relies on people not knowing how to exploit those
+insecurities, it is not secure.  It is often possible for someone to
+determine the insecure things and exploit them without viewing the
+source.  Security through obscurity, the name for hiding your bugs
+instead of fixing them, is little security indeed.
+
+You can try using encryption via source filters (Filter::* from CPAN).
+But crackers might be able to decrypt it.  You can try using the
+byte-code compiler and interpreter described below, but crackers might
+be able to de-compile it.  You can try using the native-code compiler
+described below, but crackers might be able to disassemble it.  These
+pose varying degrees of difficulty to people wanting to get at your
+code, but none can definitively conceal it (this is true of every
+language, not just Perl).
+
+If you're concerned about people profiting from your code, then the
+bottom line is that nothing but a restrictive licence will give you
+legal security.  License your software and pepper it with threatening
+statements like "This is unpublished proprietary software of XYZ Corp.
+Your access to it does not give you permission to use it blah blah
+blah."  You should see a lawyer to be sure your licence's wording will
+stand up in court.

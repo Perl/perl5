@@ -247,6 +247,11 @@ The usual Unix backslash rules apply for making characters such as
 newline, tab, etc., as well as some more exotic forms.  See
 L<perlop/Quote and Quotelike Operators> for a list.
 
+Octal or hex representations in string literals (e.g. '0xffff') are not
+automatically converted to their integer representation.  The hex() and
+oct() functions make these conversions for you.  See L<perlfunc/hex> and
+L<perlfunc/oct> for more details.
+
 You can also embed newlines directly in your strings, i.e., they can end
 on a different line than they begin.  This is nice, but if you forget
 your trailing quote, the error will not be reported until Perl finds
@@ -279,16 +284,19 @@ single-quoted string must be separated from a preceding word by a
 space, because single quote is a valid (though deprecated) character in
 a variable name (see L<perlmod/Packages>).
 
-Two special literals are __LINE__ and __FILE__, which represent the
-current line number and filename at that point in your program.  They
-may be used only as separate tokens; they will not be interpolated into
-strings.  In addition, the token __END__ may be used to indicate the
-logical end of the script before the actual end of file.  Any following
-text is ignored, but may be read via the DATA filehandle.  (The DATA
-filehandle may read data from only the main script, but not from any
-required file or evaluated string.)  The two control characters ^D and
-^Z are synonyms for __END__ (or __DATA__ in a module; see L<SelfLoader> for 
-details on __DATA__).
+Three special literals are __FILE__, __LINE__, and __PACKAGE__, which
+represent the current filename, line number, and package name at that
+point in your program.  They may be used only as separate tokens; they
+will not be interpolated into strings.  If there is no current package
+(due to a C<package;> directive), __PACKAGE__ is the undefined value.
+
+The tokens __END__ and __DATA__ may be used to indicate the logical end
+of the script before the actual end of file.  Any following text is
+ignored, but may be read via a DATA filehandle: main::DATA for __END__,
+or PACKNAME::DATA (where PACKNAME is the current package) for __DATA__.
+The two control characters ^D and ^Z are synonyms for __END__ (or
+__DATA__ in a module).  See L<SelfLoader> for more description of
+__DATA__, and an example of its use.
 
 A word that has no other interpretation in the grammar will
 be treated as if it were a quoted string.  These are known as
@@ -439,6 +447,11 @@ put the list in parentheses to avoid ambiguity.  Examples:
 
     # A "reverse comma operator".
     return (pop(@foo),pop(@foo))[0];
+
+You may assign to C<undef> in a list.  This is useful for throwing
+away some of the return values of a function:
+
+    ($dev, $ino, undef, undef, $uid, $gid) = stat($file);
 
 Lists may be assigned to if and only if each element of the list
 is legal to assign to:

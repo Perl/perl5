@@ -389,7 +389,7 @@ pad_sv(PADOFFSET po)
 {
     if (!po)
 	croak("panic: pad_sv po");
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad sv %d\n", po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad sv %lu\n", (unsigned long)po));
     return curpad[po];		/* eventually we'll turn this into a macro */
 }
 
@@ -407,7 +407,7 @@ pad_free(PADOFFSET po)
 	croak("panic: pad_free curpad");
     if (!po)
 	croak("panic: pad_free po");
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad free %d\n", po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad free %lu\n", (unsigned long)po));
     if (curpad[po] && !SvIMMORTAL(curpad[po]))
 	SvPADTMP_off(curpad[po]);
     if ((I32)po < padix)
@@ -426,7 +426,7 @@ pad_swipe(PADOFFSET po)
 	croak("panic: pad_swipe curpad");
     if (!po)
 	croak("panic: pad_swipe po");
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad swipe %d\n", po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad swipe %lu\n", (unsigned long)po));
     SvPADTMP_off(curpad[po]);
     curpad[po] = NEWSV(1107,0);
     SvPADTMP_on(curpad[po]);
@@ -950,6 +950,8 @@ I32 type;
 	return op;
 
     switch (op->op_type) {
+    case OP_UNDEF:
+	return op;
     case OP_CONST:
 	if (!(op->op_private & (OPpCONST_ARYBASE)))
 	    goto nomod;
@@ -1045,7 +1047,6 @@ I32 type;
 	    croak("Can't localize a reference");
 	ref(cUNOP->op_first, op->op_type); 
 	/* FALL THROUGH */
-    case OP_UNDEF:
     case OP_GV:
     case OP_AV2ARYLEN:
     case OP_SASSIGN:
@@ -1086,6 +1087,9 @@ I32 type;
     case OP_AELEM:
     case OP_HELEM:
 	ref(cBINOP->op_first, op->op_type);
+	if (type == OP_ENTERSUB &&
+	     !(op->op_private & (OPpLVAL_INTRO | OPpDEREF)))
+	    op->op_private |= OPpLVAL_DEFER;
 	modcount++;
 	break;
 
@@ -2510,16 +2514,20 @@ OP* other;
 	    break;
 
 	case OP_SASSIGN:
-	    if (k1->op_type == OP_READDIR || k1->op_type == OP_GLOB)
+	    if (k1->op_type == OP_READDIR
+		  || k1->op_type == OP_GLOB
+		  || k1->op_type == OP_EACH)
 		warnop = k1->op_type;
 	    break;
 	}
 	if (warnop) {
 	    line_t oldline = curcop->cop_line;
 	    curcop->cop_line = copline;
-	    warn("Value of %s construct can be \"0\"; test with defined()",
-		 op_desc[warnop]);
-		curcop->cop_line = oldline;
+	    warn("Value of %s%s can be \"0\"; test with defined()",
+		 op_desc[warnop],
+		 ((warnop == OP_READLINE || warnop == OP_GLOB)
+		  ? " construct" : "() operator"));
+	    curcop->cop_line = oldline;
 	}
     }
 
@@ -2951,6 +2959,9 @@ CV* outside;
     if (outside)
 	CvOUTSIDE(cv)	= (CV*)SvREFCNT_inc(outside);
 
+    if (SvPOK(proto))
+	sv_setpvn((SV*)cv, SvPVX(proto), SvCUR(proto));
+
     comppad = newAV();
 
     comppadlist = newAV();
@@ -3079,37 +3090,33 @@ OP *block;
 
     if (op)
 	SAVEFREEOP(op);
-    if (cv = (name ? GvCV(gv) : Nullcv)) {
-	if (GvCVGEN(gv)) {
-	    /* just a cached method */
-	    SvREFCNT_dec(cv);
-	    cv = 0;
+    if (!name || GvCVGEN(gv))
+	cv = Nullcv;
+    else if (cv = GvCV(gv)) {
+	/* prototype mismatch? */
+	char *p = proto ? SvPVx(((SVOP*)proto)->op_sv, na) : Nullch;
+	if ((!proto != !SvPOK(cv)) || (p && strNE(p, SvPVX(cv)))) {
+	    warn("Prototype mismatch: (%s) vs (%s)",
+		 SvPOK(cv) ? SvPVX(cv) : "none", p ? p : "none");
 	}
-	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
-	    /* already defined (or promised) */
-
-	    SV* const_sv = cv_const_sv(cv);
-	    char *p = proto ? SvPVx(((SVOP*)proto)->op_sv, na) : Nullch;
-
-	    if((!proto != !SvPOK(cv)) || (p && strNE(SvPV((SV*)cv,na), p))) {
-		warn("Prototype mismatch: (%s) vs (%s)",
-			SvPOK(cv) ? SvPV((SV*)cv,na) : "none",
-			p ? p : "none");
-	    }
+	/* already defined (or promised)? */
+	if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
+	    SV* const_sv;
 	    if (!block) {
 		/* just a "sub foo;" when &foo is already defined */
 		SAVEFREESV(compcv);
 		goto done;
 	    }
+	    const_sv = cv_const_sv(cv);
 	    if (const_sv || dowarn) {
 		line_t oldline = curcop->cop_line;
 		curcop->cop_line = copline;
 		warn(const_sv ? "Constant subroutine %s redefined"
-			      : "Subroutine %s redefined",name);
+		     : "Subroutine %s redefined", name);
 		curcop->cop_line = oldline;
 	    }
 	    SvREFCNT_dec(cv);
-	    cv = 0;
+	    cv = Nullcv;
 	}
     }
     if (cv) {				/* must reuse cv if autoloaded */
@@ -3144,6 +3151,12 @@ OP *block;
     if (error_count) {
 	op_free(block);
 	block = Nullop;
+	if (name) {
+	    char *s = strrchr(name, ':');
+	    s = s ? s+1 : name;
+	    if (strEQ(s, "BEGIN"))
+		croak("BEGIN not safe after errors--compilation aborted");
+	}
     }
     if (!block) {
 	copline = NOLINE;
@@ -3205,7 +3218,7 @@ OP *block;
 	    s++;
 	else
 	    s = name;
-	if (strEQ(s, "BEGIN") && !error_count) {
+	if (strEQ(s, "BEGIN")) {
 	    I32 oldscope = scopestack_ix;
 	    ENTER;
 	    SAVESPTR(compiling.cop_filegv);
@@ -3219,7 +3232,7 @@ OP *block;
 	    DEBUG_x( dump_sub(gv) );
 	    av_push(beginav, (SV *)cv);
 	    GvCV(gv) = 0;
-	    calllist(oldscope, beginav);
+	    call_list(oldscope, beginav);
 
 	    curcop = &compiling;
 	    LEAVE;
@@ -4414,6 +4427,7 @@ OP *op;
 	}
 	else
 	    list(o);
+	mod(o, OP_ENTERSUB);
 	prev = o;
 	o = o->op_sibling;
     }
@@ -4520,7 +4534,8 @@ register OP* o;
 		if (pop->op_type == OP_CONST &&
 		    (op = pop->op_next) &&
 		    pop->op_next->op_type == OP_AELEM &&
-		    !(pop->op_next->op_private & (OPpDEREF|OPpLVAL_INTRO)) &&
+		    !(pop->op_next->op_private &
+		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF)) &&
 		    (i = SvIV(((SVOP*)pop)->op_sv) - compiling.cop_arybase)
 				<= 255 &&
 		    i >= 0)

@@ -198,7 +198,7 @@ PP(pp_rv2sv)
 	if (op->op_private & OPpLVAL_INTRO)
 	    sv = save_scalar((GV*)TOPs);
 	else if (op->op_private & OPpDEREF)
-	    provide_ref(op, sv);
+	    vivify_ref(sv, op->op_private & OPpDEREF);
     }
     SETs(sv);
     RETURN;
@@ -321,9 +321,9 @@ SV* sv;
 
     if (SvTYPE(sv) == SVt_PVLV && LvTYPE(sv) == 'y') {
 	if (LvTARGLEN(sv))
-	    vivify_itervar(sv);
-	if (LvTARG(sv))
-	    sv = LvTARG(sv);
+	    vivify_defelem(sv);
+	if (!(sv = LvTARG(sv)))
+	    sv = &sv_undef;
     }
     else if (SvPADTMP(sv))
 	sv = newSVsv(sv);
@@ -578,7 +578,7 @@ PP(pp_undef)
 PP(pp_predec)
 {
     dSP;
-    if (SvREADONLY(TOPs))
+    if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(no_modify);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
@@ -595,7 +595,7 @@ PP(pp_predec)
 PP(pp_postinc)
 {
     dSP; dTARGET;
-    if (SvREADONLY(TOPs))
+    if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
@@ -616,7 +616,7 @@ PP(pp_postinc)
 PP(pp_postdec)
 {
     dSP; dTARGET;
-    if(SvREADONLY(TOPs))
+    if(SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
@@ -686,26 +686,36 @@ PP(pp_modulo)
 {
     dSP; dATARGET; tryAMAGICbin(mod,opASSIGN);
     {
-      register UV right;
+      UV left;
+      UV right;
+      bool negate;
+      UV ans;
 
-      right = POPu;
+      if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
+	IV i = SvIVX(POPs);
+	right = (i < 0) ? -i : i;
+      }
+      else {
+	double n = POPn;
+	right = U_V((n < 0) ? -n : n);
+      }
+
+      if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
+	IV i = SvIVX(POPs);
+	left = (negate = (i < 0)) ? -i : i;
+      }
+      else {
+	double n = POPn;
+	left = U_V((negate = (n < 0)) ? -n : n);
+      }
+
       if (!right)
 	DIE("Illegal modulus zero");
 
-      if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
-	register IV left = SvIVX(TOPs);
-	if (left < 0)
-	  SETu( (right - ((UV)(-left) - 1) % right) - 1 );
-	else
-	  SETi( left % right );
-      }
-      else {
-	register double left = TOPn;
-	if (left < 0.0)
-	  SETu( (right - (U_V(-left) - 1) % right) - 1 );
-	else
-	  SETu( U_V(left) % right );
-      }
+      ans = left % right;
+      if (negate && ans)
+	ans = right - ans;
+      PUSHu(ans);
       RETURN;
     }
 }
@@ -1521,8 +1531,11 @@ PP(pp_substr)
     pos = POPi - arybase;
     sv = POPs;
     tmps = SvPV(sv, curlen);
-    if (pos < 0)
+    if (pos < 0) {
 	pos += curlen + arybase;
+	if (pos < 0 && MAXARG < 3)
+	    pos = 0;
+    }
     if (pos < 0 || pos > curlen) {
 	if (dowarn || lvalue)
 	    warn("substr outside of string");

@@ -104,7 +104,7 @@ do
     do
 	[ -d "$sde_path/$sde" ] && break 2
     done
-    cat <<END
+    cat <<END >&2
 
 NOTE:  I can't figure out what SDE is used by default on this machine (I
 didn't find a likely directory under $sde_path).  This is bad news.  If

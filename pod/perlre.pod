@@ -9,9 +9,10 @@ description of how to I<use> regular expressions in matching
 operations, plus various examples of the same, see C<m//> and C<s///> in
 L<perlop>.
 
-The matching operations can
-have various modifiers, some of which relate to the interpretation of
-the regular expression inside.  These are:
+The matching operations can have various modifiers.  The modifiers
+which relate to the interpretation of the regular expression inside
+are listed below.  For the modifiers that alter the behaviour of the
+operation, see L<perlop/"m//"> and L<perlop/"s//">.
 
 =over 4
 
@@ -167,7 +168,7 @@ Perl defines the following zero-width assertions:
     \G	Match only where previous m//g left off
 
 A word boundary (C<\b>) is defined as a spot between two characters that
-has a C<\w> on one side of it and and a C<\W> on the other side of it (in
+has a C<\w> on one side of it and a C<\W> on the other side of it (in
 either order), counting the imaginary characters off the beginning and
 end of the string as matching a C<\W>.  (Within character classes C<\b>
 represents backspace rather than a word boundary.)  The C<\A> and C<\Z> are
@@ -213,6 +214,17 @@ everything after the matched string.  Examples:
 	$minutes = $2;
 	$seconds = $3;
     }
+
+Once perl sees that you need one of C<$&>, C<$`> or C<$'> anywhere in
+the program, it has to provide them on each and every pattern match.
+This can slow your program down.  The same mechanism that handles
+these provides for the use of $1, $2, etc., so you pay the same price
+for each regexp that contains capturing parentheses. But if you never
+use $&, etc., in your script, then regexps I<without> capturing
+parentheses won't be penalized. So avoid $&, $', and $` if you can,
+but if you can't (and some algorithms really appreciate them), once
+you've used them once, use them at will, because you've already paid
+the price.
 
 You will note that all backslashed metacharacters in Perl are
 alphanumeric, such as C<\b>, C<\w>, C<\n>.  Unlike some other regular expression
@@ -326,7 +338,7 @@ When the match runs, the first part of the regular expression (C<\b(foo)>)
 finds a possible match right at the beginning of the string, and loads up
 $1 with "Foo".  However, as soon as the matching engine sees that there's
 no whitespace following the "Foo" that it had saved in $1, it realizes its
-mistake and starts over again one character after where it had had the
+mistake and starts over again one character after where it had the
 tentative match.  This time it goes all the way until the next occurrence
 of "foo". The complete regular expression matches this time, and you get
 the expected output of "table follows foo."

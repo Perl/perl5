@@ -504,8 +504,8 @@ EOF
 	
 tryagain:
 	if(!$usefile and !$body) {
-		my($sts) = system("$ed $filename");
-		if( $Is_VMS ? !($sts & 1) : $sts ) {
+		my $sts = system("$ed $filename");
+		if($sts) {
 			#print "\nUnable to run editor!\n";
 			paraprint <<EOF;
 
@@ -683,7 +683,7 @@ sub Send {
 			}
 			$subject =~ s/"/""/g; $address =~ s/"/""/g; $cc =~ s/"/""/g;
 			my($sts) = system(qq[mail/Subject="$subject" $filename. "$address","$cc"]);
-			if (!($sts & 1)) { die "Can't spawn off mail\n\t(leaving bug report in $filename): $sts\n;" }
+			if ($sts) { die "Can't spawn off mail\n\t(leaving bug report in $filename): $sts\n;" }
 		} else {
 			my($sendmail) = "";
 			

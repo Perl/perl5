@@ -9,6 +9,7 @@ BEGIN {
 $| = 1;
 
 my $Is_VMS = $^O eq 'VMS';
+my $Is_MSWin32 = $^O eq 'MSWin32';
 my $tmpfile = "tmp0000";
 my $i = 0 ;
 1 while -f ++$tmpfile;
@@ -66,6 +67,8 @@ for (@prgs){
     close TEST;
     my $results = $Is_VMS ?
                   `MCR $^X $switch $tmpfile` :
+		  $Is_MSWin32 ?
+                  `.\\perl -I../lib $switch $tmpfile 2>&1` :
                   `sh -c './perl $switch $tmpfile' 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;

@@ -70,9 +70,9 @@ CLEAN :
 "$(INTDIR)" :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
-# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "." /I ".\include" /I ".." /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "PERLDLL" /YX /c
-CPP_PROJ=/nologo /MT /W3 /GX /O2 /I "." /I ".\include" /I ".." /D "NDEBUG" /D\
+# ADD BASE CPP /nologo /MT /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
+# ADD CPP /nologo /MT /W3 /O2 /I "." /I ".\include" /I ".." /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "PERLDLL" /YX /c
+CPP_PROJ=/nologo /MT /W3 /O2 /I "." /I ".\include" /I ".." /D "NDEBUG" /D\
  "WIN32" /D "_WINDOWS" /D "PERLDLL" /Fp"$(INTDIR)/perldll.pch" /YX\
  /Fo"$(INTDIR)/" /c 
 CPP_OBJS=.\release/
@@ -145,9 +145,9 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /I "." /I ".\include" /I ".." /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "PERLDLL" /YX /c
-CPP_PROJ=/nologo /MTd /W3 /Gm /GX /Zi /Od /I "." /I ".\include" /I ".." /D\
+# ADD BASE CPP /nologo /MTd /W3 /Gm /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
+# ADD CPP /nologo /MTd /W3 /Gm /Zi /Od /I "." /I ".\include" /I ".." /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "PERLDLL" /YX /c
+CPP_PROJ=/nologo /MTd /W3 /Gm /Zi /Od /I "." /I ".\include" /I ".." /D\
  "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "PERLDLL" /Fp"$(INTDIR)/perldll.pch" /YX\
  /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c 
 CPP_OBJS=.\debug/
@@ -390,7 +390,7 @@ DEP_CPP_WIN32_=\
 ################################################################################
 # Begin Source File
 
-SOURCE=.\win32aux.cpp
+SOURCE=.\win32aux.c
 DEP_CPP_WIN32A=\
 	".\include\sys/socket.h"\
 	".\win32io.h"\
@@ -418,7 +418,7 @@ SOURCE=.\modules.lib
 ################################################################################
 # Begin Source File
 
-SOURCE=.\win32io.cpp
+SOURCE=.\win32io.c
 DEP_CPP_WIN32I=\
 	".\include\sys/socket.h"\
 	".\win32io.h"\

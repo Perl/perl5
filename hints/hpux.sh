@@ -1,3 +1,4 @@
+#! /local/gnu/bin/bash
 # hints/hpux.sh
 # Perl Configure hints file for Hewlett Packard HP-UX 9.x and 10.x
 # This file is based on 
@@ -8,14 +9,19 @@
 # hints/hpux_10.sh, Perl Configure hints file for Hewlett Packard HP-UX 10.x
 # From: Giles Lean <giles@nemeton.com.au>
 
-# This version: December 27, 1996
+# This version: March 21, 1997
 # Current maintainer: Jeff Okamoto <okamoto@corp.hp.com>
 
+#--------------------------------------------------------------------
 # Use Configure -Dcc=gcc to use gcc.
 # Use Configure -Dprefix=/usr/local to install in /usr/local.
-
+#
 # Some users have reported problems with dynamic loading if the 
 # environment variable LDOPTS='-a archive' .
+#
+# If you get a message about "too much defining", you might have to
+# add the following to your ccflags: '-Wp,-H256000'
+#--------------------------------------------------------------------
 
 # Turn on the _HPUX_SOURCE flag to get many of the HP add-ons
 ccflags="$ccflags -D_HPUX_SOURCE"
@@ -32,7 +38,7 @@ case "$cc" in
     then
 	case "$usedl" in
 	 '') usedl="$undef"
-	     cat <<'EOM'
+	     cat <<'EOM' >&4
 
 The bundled C compiler can not produce shared libraries, so you will
 not be able to use dynamic loading. 
@@ -66,7 +72,7 @@ then
 	then
 		archname='PA-RISC2'
 	else
-		echo "This 10.0 system is of a PA-RISC type I don't recognize."
+		echo "This 10.0 system is of a PA-RISC type I don't recognize." >&2
 		echo "Debugging output: $xxcontext"
 		archname=''
 	fi
@@ -83,7 +89,7 @@ else
 	then
 		archname='HP-MC68K'
 	else
-		echo "I cannot recognize what chip set this system is using."
+		echo "I cannot recognize what chip set this system is using." >&2
 		echo "Debugging output: $xxcontext"
 		archname=''
 	fi

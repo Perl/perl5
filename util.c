@@ -1329,6 +1329,7 @@ warn(pat,va_alist)
 }
 
 #ifndef VMS  /* VMS' my_setenv() is in VMS.c */
+#ifndef _WIN32
 void
 my_setenv(nam,val)
 char *nam, *val;
@@ -1387,6 +1388,36 @@ char *nam;
     }					/* potential SEGV's */
     return i;
 }
+
+#else /* if _WIN32 */
+
+void
+my_setenv(nam,val)
+char *nam, *val;
+{
+    register char *envstr;
+    STRLEN namlen = strlen(nam);
+    STRLEN vallen = strlen(val ? val : "");
+
+    New(9040, envstr, namlen + vallen + 3, char);
+    (void)sprintf(envstr,"%s=%s",nam,val);
+    if (!vallen) {
+        /* An attempt to delete the entry.
+	 * We try to fix a Win32 process handling goof: Children
+	 * of the current process will end up seeing the
+	 * grandparent's entry if the current process has never
+	 * modified the entry being deleted. So we call _putenv()
+	 * twice: once to pretend to modify the entry, and the
+	 * second time to actually delete it. GSAR 97-03-19
+	 */
+        envstr[namlen+1] = 'X'; envstr[namlen+2] = '\0';
+	(void)_putenv(envstr);
+	envstr[namlen+1] = '\0';
+    }
+    (void)_putenv(envstr);
+}
+
+#endif /* _WIN32 */
 #endif /* !VMS */
 
 #ifdef UNLINK_ALL_VERSIONS

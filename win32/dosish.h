@@ -80,10 +80,10 @@ void Perl_DJGPP_init();
 #define Fflush(fp)         fflush(fp)
 
 #define my_getenv(var)  getenv(var)
-//
-// the following are standard library calls (stdio in particular)
-// that is being redirected to the perl DLL. This is needed for 
-// Dynaloading any modules that called stdio functions
-//
+/*
+ * the following are standard library calls (stdio in particular)
+ * that is being redirected to the perl DLL. This is needed for 
+ * Dynaloading any modules that called stdio functions
+ */
 
 #include <win32iop.h>

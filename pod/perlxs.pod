@@ -731,7 +731,7 @@ prototypes.
 
 =head2 The ALIAS: Keyword
 
-The ALIAS: keyword allows an XSUB to have two more more unique Perl names
+The ALIAS: keyword allows an XSUB to have two more unique Perl names
 and to know which of those names was used when it was invoked.  The Perl
 names may be fully-qualified with package names.  Each alias is given an
 index.  The compiler will setup a variable called C<ix> which contain the

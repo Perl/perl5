@@ -14,17 +14,24 @@ $tmpfile = "misctmp000";
 1 while -f ++$tmpfile;
 END { unlink $tmpfile if $tmpfile; }
 
+$CAT = (($^O eq 'MSWin32') ? '.\perl -e "print <>"' : 'cat');
+
 for (@prgs){
     my $switch;
     if (s/^\s*-\w+//){
 	$switch = $&;
     }
     my($prog,$expected) = split(/\nEXPECT\n/, $_);
-    open TEST, "| sh -c './perl $switch' >$tmpfile 2>&1";
+    if ($^O eq 'MSWin32') {
+      open TEST, "| .\\perl -I../lib $switch >$tmpfile 2>&1";
+    }
+    else {
+      open TEST, "| sh -c './perl $switch' >$tmpfile 2>&1";
+    }
     print TEST $prog, "\n";
     close TEST;
     $status = $?;
-    $results = `cat $tmpfile`;
+    $results = `$CAT $tmpfile`;
     $results =~ s/\n+$//;
     $expected =~ s/\n+$//;
     if ( $results ne $expected){
@@ -74,7 +81,7 @@ EXPECT
 ########
 eval {sub bar {print "In bar";}}
 ########
-system "./perl -ne 'print if eof' /dev/null"
+system './perl -ne "print if eof" /dev/null'
 ########
 chop($file = <>);
 ########

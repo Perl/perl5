@@ -268,7 +268,7 @@ Destruction happens automatically via Perl's garbage collection (GC)
 system, which is a quick but somewhat lazy reference-based GC system.
 To know what to call, Perl insists that the destructor be named DESTROY.
 
-Why is DESTROY in all caps?  Perl on occasion uses purely upper-case
+Why is DESTROY in all caps?  Perl on occasion uses purely uppercase
 function names as a convention to indicate that the function will
 be automatically called by Perl in some way.  Others that are called
 implicitly include BEGIN, END, AUTOLOAD, plus all methods used by
@@ -886,7 +886,7 @@ This is a form of Laziness.  (Getting polymorphed is also what happens
 when the wizard decides you'd look better as a frog.)
 
 Every now and then you'll want to have a method call trigger both its
-derived class (also know as "subclass") version as well as its base class
+derived class (also known as "subclass") version as well as its base class
 (also known as "superclass") version.  In practice, constructors and
 destructors are likely to want to do this, and it probably also makes
 sense in the debug() method we showed previously.
@@ -1112,7 +1112,7 @@ class) has a package global called $VERSION that's high enough, as in:
     $his_vers = $ob->VERSION();
 
 However, we don't usually call VERSION ourselves.  (Remember that an all
-upper-case function name is a Perl convention that indicates that the
+uppercase function name is a Perl convention that indicates that the
 function will be automatically used by Perl in some way.)  In this case,
 it happens when you say
 
@@ -1163,7 +1163,7 @@ instead of a hash reference to represent the object.
     sub new {
         my $self = [];
         $self->[$NAME]   = undef;  # this is unnecessary
-        $self->[$AGE]    = undef;  # as it this
+        $self->[$AGE]    = undef;  # as is this
         $self->[$PEERS]  = [];     # but this isn't, really
         bless($self);
         return $self;
@@ -1623,7 +1623,7 @@ You can look at other object-based, struct-like overrides of core
 functions in the 5.004 release of Perl in File::stat, Net::hostent,
 Net::netent, Net::protoent, Net::servent, Time::gmtime, Time::localtime,
 User::grent, and User::pwent.  These modules have a final component
-that's all lower-case, by convention reserved for compiler pragmas,
+that's all lowercase, by convention reserved for compiler pragmas,
 because they affect the compilation and change a built-in function.
 They also have the type names that a C programmer would most expect.
 

@@ -5,7 +5,7 @@ perllocale - Perl locale handling (internationalization and localization)
 =head1 DESCRIPTION
 
 Perl supports language-specific notions of data such as "is this a
-letter", "what is the upper-case equivalent of this letter", and "which
+letter", "what is the uppercase equivalent of this letter", and "which
 of these letters comes first".  These are important issues, especially
 for languages other than English - but also for English: it would be
 very naE<iuml>ve to think that C<A-Za-z> defines all the "letters". Perl
@@ -371,7 +371,7 @@ setting, characters like 'E<aelig>', 'E<eth>', 'E<szlig>', and
 'E<oslash>' may be understood as C<\w> characters.
 
 The C<LC_CTYPE> locale also provides the map used in translating
-characters between lower- and upper-case.  This affects the case-mapping
+characters between lower and uppercase.  This affects the case-mapping
 functions - lc(), lcfirst, uc() and ucfirst(); case-mapping
 interpolation with C<\l>, C<\L>, C<\u> or <\U> in double-quoted strings
 and in C<s///> substitutions; and case-independent regular expression

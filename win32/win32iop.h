@@ -5,9 +5,10 @@
 /*
  * Make this as close to original stdio as possible.
  */
-//
-// function prototypes for our own win32io layer
-//
+
+/*
+ * function prototypes for our own win32io layer
+ */
 EXT int * 	win32_errno();
 EXT FILE*	win32_stdin(void);
 EXT FILE*	win32_stdout(void);
@@ -16,9 +17,9 @@ EXT int		win32_ferror(FILE *fp);
 EXT int		win32_feof(FILE *fp);
 EXT char*	win32_strerror(int e);
 
-EXT	int		win32_fprintf(FILE *pf, const char *format, ...);
-EXT	int		win32_printf(const char *format, ...);
-EXT	int		win32_vfprintf(FILE *pf, const char *format, va_list arg);
+EXT int		win32_fprintf(FILE *pf, const char *format, ...);
+EXT int		win32_printf(const char *format, ...);
+EXT int		win32_vfprintf(FILE *pf, const char *format, va_list arg);
 EXT size_t	win32_fread(void *buf, size_t size, size_t count, FILE *pf);
 EXT size_t	win32_fwrite(const void *buf, size_t size, size_t count, FILE *pf);
 EXT FILE*	win32_fopen(const char *path, const char *mode);
@@ -28,17 +29,17 @@ EXT int		win32_fclose(FILE *pf);
 EXT int		win32_fputs(const char *s,FILE *pf);
 EXT int		win32_fputc(int c,FILE *pf);
 EXT int		win32_ungetc(int c,FILE *pf);
-EXT	int		win32_getc(FILE *pf);
+EXT int		win32_getc(FILE *pf);
 EXT int		win32_fileno(FILE *pf);
-EXT	void	win32_clearerr(FILE *pf);
+EXT void	win32_clearerr(FILE *pf);
 EXT int		win32_fflush(FILE *pf);
 EXT long	win32_ftell(FILE *pf);
-EXT	int		win32_fseek(FILE *pf,long offset,int origin);
-EXT	int		win32_fgetpos(FILE *pf,fpos_t *p);
-EXT	int		win32_fsetpos(FILE *pf,const fpos_t *p);
-EXT	void	win32_rewind(FILE *pf);
-EXT	FILE*	win32_tmpfile(void);
-EXT	void	win32_abort(void);
+EXT int		win32_fseek(FILE *pf,long offset,int origin);
+EXT int		win32_fgetpos(FILE *pf,fpos_t *p);
+EXT int		win32_fsetpos(FILE *pf,const fpos_t *p);
+EXT void	win32_rewind(FILE *pf);
+EXT FILE*	win32_tmpfile(void);
+EXT void	win32_abort(void);
 EXT int  	win32_fstat(int fd,struct stat *bufptr);
 EXT int  	win32_stat(const char *name,struct stat *bufptr);
 EXT int		win32_pipe( int *phandles, unsigned int psize, int textmode );
@@ -54,22 +55,23 @@ EXT int		win32_close(int fd);
 EXT int		win32_eof(int fd);
 EXT int		win32_read(int fd, void *buf, unsigned int cnt);
 EXT int		win32_write(int fd, const void *buf, unsigned int cnt);
-EXT int		win32_spawnvpe(int mode, const char *cmdname, const char *const *argv, const char *const *envp);
+EXT int		win32_spawnvpe(int mode, const char *cmdname,
+			       const char *const *argv, const char *const *envp);
 EXT int		win32_spawnle(int mode, const char *cmdname, const char *,...);
 
-//
-// these two are win32 specific but still io related
-//
+/*
+ * these two are win32 specific but still io related
+ */
 int		stolen_open_osfhandle(long handle, int flags);
-long	stolen_get_osfhandle(int fd);
+long		stolen_get_osfhandle(int fd);
 
-#include <win32io.h>	// pull in the io sub system structure
+#include <win32io.h>	/* pull in the io sub system structure */
 
 void *	SetIOSubSystem(void	*piosubsystem);
-//
-// the following six(6) is #define in stdio.h
-//
-//
+
+/*
+ * the following six(6) is #define in stdio.h
+ */
 #ifndef WIN32IO_IS_STDIO
 #undef errno
 #undef stderr
@@ -86,9 +88,9 @@ void *	SetIOSubSystem(void	*piosubsystem);
 #define errno 				(*win32_errno())
 #define strerror			win32_strerror
 
-//
-// redirect to our own version
-//
+/*
+ * redirect to our own version
+ */
 #define	fprintf			win32_fprintf
 #define	vfprintf		win32_vfprintf
 #define	printf			win32_printf
@@ -125,8 +127,8 @@ void *	SetIOSubSystem(void	*piosubsystem);
 #define write(fd,b,s)		win32_write(fd,b,s)
 #define _open_osfhandle		stolen_open_osfhandle
 #define _get_osfhandle		stolen_get_osfhandle
-#define spawnvpe			win32_spawnvpe
-#define spawnle				win32_spawnle
-#endif //WIN32IO_IS_STDIO
+#define spawnvpe		win32_spawnvpe
+#define spawnle			win32_spawnle
+#endif /* WIN32IO_IS_STDIO */
 
-#endif // WIN32IOP_H
+#endif /* WIN32IOP_H */

@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 6th Feb 1997
-# version 1.11
+# last modified 12th Mar 1997
+# version 1.12
 #
 #     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -146,7 +146,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
 use Carp;
 
 
-$VERSION = "1.11" ;
+$VERSION = "1.12" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -326,6 +326,10 @@ module you should really have a copy of the Berkeley DB manual pages at
 hand. The interface defined here mirrors the Berkeley DB interface
 closely.
 
+Please note that this module will only work with version 1.x of
+Berkeley DB. Once Berkeley DB version 2 is released, B<DB_File> will be
+upgraded to work with it.
+
 Berkeley DB is a C library which provides a consistent interface to a
 number of database formats.  B<DB_File> provides an interface to all
 three of the database types currently supported by Berkeley DB.
@@ -365,7 +369,7 @@ number.
 
 =back
 
-=head2 How does DB_File interface to Berkeley DB?
+=head2 Interface to Berkeley DB
 
 B<DB_File> allows access to Berkeley DB files using the tie() mechanism
 in Perl 5 (for full details, see L<perlfunc/tie()>). This facility
@@ -533,7 +537,7 @@ The DB_HASH file format is probably the most commonly used of the three
 file formats that B<DB_File> supports. It is also very straightforward
 to use.
 
-=head2 A Simple Example.
+=head2 A Simple Example
 
 This example shows how to create a database, add key/value pairs to the
 database, delete keys/value pairs and finally how to enumerate the
@@ -645,7 +649,7 @@ database.
 
 =back 
 
-=head2 Handling duplicate keys 
+=head2 Handling Duplicate Keys 
 
 The BTREE file type optionally allows a single key to be associated
 with an arbitrary number of values. This option is enabled by setting
@@ -752,7 +756,7 @@ that prints:
 This time we have got all the key/value pairs, including the multiple
 values associated with the key C<Wall>.
 
-=head2 The get_dup method.
+=head2 The get_dup() Method
 
 B<DB_File> comes with a utility method, called C<get_dup>, to assist in
 reading duplicate values from BTREE databases. The method can take the
@@ -893,7 +897,7 @@ negative indexes. The index -1 refers to the last element of the array,
 -2 the second last, and so on. Attempting to access an element before
 the start of the array will raise a fatal run-time error.
 
-=head2 The bval option
+=head2 The 'bval' Option
 
 The operation of the bval option warrants some discussion. Here is the
 definition of bval from the Berkeley DB 1.85 recno manual page:
@@ -1144,7 +1148,7 @@ destroyed.
     undef $db ;
     untie %hash ;
 
-See L<The untie Gotcha> for more details.
+See L<The untie gotcha> for more details.
 
 All the functions defined in L<dbopen> are available except for
 close() and dbopen() itself. The B<DB_File> method interface to the
@@ -1333,7 +1337,7 @@ in the background to watch the locks granted in proper order.
     close(DB_FH);
     print "$$: Updated db to $key=$value\n";
 
-=head2 Sharing databases with C applications
+=head2 Sharing Databases With C Applications
 
 There is no technical reason why a Berkeley DB database cannot be
 shared by both a Perl and a C application.
@@ -1391,10 +1395,10 @@ F<authors/id/TOMC/scripts/nshist.gz>).
 
     untie %hist_db ;
 
-=head2 The untie gotcha
+=head2 The untie() Gotcha
 
 If you make use of the Berkeley DB API, it is is I<very> strongly
-recommended that you read L<perltie/The untie gotcha>. 
+recommended that you read L<perltie/The untie Gotcha>. 
 
 Even if you don't currently make use of the API interface, it is still
 worth reading it.
@@ -1642,6 +1646,10 @@ Fixed fd method so that it still returns -1 for in-memory files when db
 
 Documented the untie gotcha.
 
+=item 1.12
+
+Documented the incompatibility with version 2 of Berkeley DB.
+
 =back
 
 =head1 BUGS
@@ -1658,7 +1666,10 @@ suggest any enhancements, I would welcome your comments.
 B<DB_File> comes with the standard Perl source distribution. Look in
 the directory F<ext/DB_File>.
 
-Berkeley DB is available at your nearest CPAN archive (see
+This version of B<DB_File> will only work with version 1.x of Berkeley
+DB. It is I<not> yet compatible with version 2.
+
+Version 1 of Berkeley DB is available at your nearest CPAN archive (see
 L<perlmod/"CPAN"> for a list) in F<src/misc/db.1.85.tar.gz>, or via the
 host F<ftp.cs.berkeley.edu> in F</ucb/4bsd/db.tar.gz>.  Alternatively,
 check out the Berkeley DB home page at F<http://www.bostic.com/db>. It

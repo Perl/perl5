@@ -777,9 +777,9 @@ The current kinds of Magic Virtual Tables are:
     .        vtbl_pos	         $. scalar variable
     ~        None                Used by certain extensions
 
-When an upper-case and lower-case letter both exist in the table, then the
-upper-case letter is used to represent some kind of composite type (a list
-or a hash), and the lower-case letter is used to represent an element of
+When an uppercase and lowercase letter both exist in the table, then the
+uppercase letter is used to represent some kind of composite type (a list
+or a hash), and the lowercase letter is used to represent an element of
 that composite type.
 
 The '~' magic type is defined specifically for use by extensions and
@@ -805,12 +805,12 @@ if the SV is not of type SVt_PVMG, Perl may core-dump.
     int mg_copy(SV* sv, SV* nsv, char* key, STRLEN klen);
 
 This routine checks to see what types of magic C<sv> has.  If the mg_type
-field is an upper-case letter, then the mg_obj is copied to C<nsv>, but
-the mg_type field is changed to be the lower-case letter.
+field is an uppercase letter, then the mg_obj is copied to C<nsv>, but
+the mg_type field is changed to be the lowercase letter.
 
 =head1 Subroutines
 
-=head2 XSUB's and the Argument Stack
+=head2 XSUBs and the Argument Stack
 
 The XSUB mechanism is a simple way for Perl programs to access C subroutines.
 An XSUB routine will have a stack that contains the arguments from the Perl
@@ -954,7 +954,7 @@ The most recent development releases of Perl has been experimenting with
 removing Perl's dependency on the "normal" standard I/O suite and allowing
 other stdio implementations to be used.  This involves creating a new
 abstraction layer that then calls whichever implementation of stdio Perl
-was compiled with.  All XSUB's should now use the functions in the PerlIO
+was compiled with.  All XSUBs should now use the functions in the PerlIO
 abstraction layer and not make any assumptions about what kind of stdio
 is being used.
 
@@ -1396,7 +1396,7 @@ be the glob for "AUTOLOAD".  In this case the corresponing variable
 $AUTOLOAD is already setup.
 
 Note that if you want to keep this glob for a long time, you need to
-check for it being "AUTOLOAD", since at the later time the the call
+check for it being "AUTOLOAD", since at the later time the call
 may load a different subroutine due to $AUTOLOAD changing its value.
 Use the glob created via a side effect to do this.
 
@@ -1427,26 +1427,11 @@ Returns a pointer to the stash for a specified package.  See C<gv_stashpv>.
 
 Return the SV from the GV.
 
-=item he_delayfree
-
-Releases a hash entry, such as while iterating though the hash, but
-delays actual freeing of key and value until the end of the current
-statement (or thereabouts) with C<sv_2mortal>.  See C<hv_iternext>.
-
-	void    he_delayfree _((HV* hv, HE* hent));
-
 =item HEf_SVKEY
 
 This flag, used in the length slot of hash entries and magic
 structures, specifies the structure contains a C<SV*> pointer where a
 C<char*> pointer is to be expected. (For information only--not to be used).
-
-=item he_free
-
-Releases a hash entry, such as while iterating though the hash.  See
-C<hv_iternext>.
-
-	void    he_free _((HV* hv, HE* hent));
 
 =item HeHASH
 
@@ -1519,6 +1504,15 @@ Clears a hash, making it empty.
 
 	void	hv_clear _((HV* tb));
 
+=item hv_delayfree_ent
+
+Releases a hash entry, such as while iterating though the hash, but
+delays actual freeing of key and value until the end of the current
+statement (or thereabouts) with C<sv_2mortal>.  See C<hv_iternext>
+and C<hv_free_ent>.
+
+	void    hv_delayfree_ent _((HV* hv, HE* entry));
+
 =item hv_delete
 
 Deletes a key/value pair in the hash.  The value SV is removed from the hash
@@ -1571,6 +1565,13 @@ is a pointer to a static location, so be sure to make a copy of the
 structure if you need to store it somewhere.
 
 	HE*     hv_fetch_ent  _((HV* tb, SV* key, I32 lval, U32 hash));
+
+=item hv_free_ent
+
+Releases a hash entry, such as while iterating though the hash.  See
+C<hv_iternext> and C<hv_delayfree_ent>.
+
+	void    hv_free_ent _((HV* hv, HE* entry));
 
 =item hv_iterinit
 
@@ -1821,7 +1822,7 @@ SV is B<not> incremented.
 =item newSV
 
 Creates a new SV.  The C<len> parameter indicates the number of bytes of
-pre-allocated string space the SV should have.  The reference count for the
+preallocated string space the SV should have.  The reference count for the
 new SV is set to 1.
 
 	SV*	newSV _((STRLEN len));
@@ -2909,4 +2910,4 @@ API Listing by Dean Roehrich <F<roehrich@cray.com>>.
 
 =head1 DATE
 
-Version 31.2: 1997/3/5
+Version 31.3: 1997/3/14

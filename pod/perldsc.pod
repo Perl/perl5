@@ -324,7 +324,7 @@ example, given the assignment to $LoL above, here's the debugger output:
 	  2  'elroy'
 	  3  'judy'
 
-There's also a lower-case B<x> command which is nearly the same.
+There's also a lowercase B<x> command which is nearly the same.
 
 =head1 CODE EXAMPLES
 

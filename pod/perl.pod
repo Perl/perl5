@@ -20,6 +20,7 @@ of sections:
 
     perl	Perl overview (this section)
     perldelta	Perl changes since previous version
+    perlfaq	Perl frequently asked questions
 
     perldata	Perl data structures
     perlsyn	Perl syntax
@@ -219,7 +220,7 @@ optimized C code.
 
 =back
 
-Ok, that's I<definitely> enough hype.
+Okay, that's I<definitely> enough hype.
 
 =head1 ENVIRONMENT
 

@@ -186,7 +186,7 @@ next unless -e $name;
 chmod 0777, $name if $^O eq 'os2';
 print STDERR "  unlink $name\n";
 ( CORE::unlink($name) and ++$cnt 
-    or warn "Couldn't unlink $name: $!\n" ) unless $nonono;
+    or warn "Couldn't unlink $name: $!\n" ) unless $notify;
     }
     return $cnt;
 }

@@ -17,7 +17,7 @@ esac
 # I don't know if they affect versions of perl other than 5.000 or
 # versions of IRIX other than 4.0.4.
 #
-cat <<'EOM'
+cat <<'EOM' >&4
 If you have problems, you might have try including
 	-DSTANDARD_C -cckr 
 in ccflags.

@@ -283,7 +283,7 @@ are inherited by all other classes:
 
 =item isa(CLASS)
 
-C<isa> returns I<true> if its object is blessed into a sub-class of C<CLASS>
+C<isa> returns I<true> if its object is blessed into a subclass of C<CLASS>
 
 C<isa> is also exportable and can be called as a sub with two arguments. This
 allows the ability to check what a reference points to. Example

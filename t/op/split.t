@@ -47,7 +47,8 @@ $_ = join(':', split(/:/,'1:2:3:4:5:6:::', 999));
 print $_ eq '1:2:3:4:5:6:::' ? "ok 10\n" : "not ok 10 $_\n";
 
 # Does assignment to a list imply split to one more field than that?
-$foo = `./perl -D1024 -e '(\$a,\$b) = split;' 2>&1`;
+if ($^O eq 'MSWin32') { $foo = `.\\perl -D1024 -e "(\$a,\$b) = split;" 2>&1` }
+else                  { $foo = `./perl -D1024 -e '(\$a,\$b) = split;' 2>&1` }
 if ($foo =~ /DCL-W-NOCOMD/) {
   $foo = `\$ mcr sys\$disk:[]perl. "-D1024" -e "(\$a,\$b) = split;"`;
 }

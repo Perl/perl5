@@ -8,7 +8,7 @@ if (defined $d) {
 	while (defined($_ = $d->read)) {
 		next if $_ eq ".";
 		next if $_ eq "..";
-		my $entry = "$base/$_";
+		my $entry = "$base\\$_";
 		my $entrywithouttop = $entry;
 		$entrywithouttop =~ s/^$top//;
 		if (-d $entry) {splitthis ($top,$entry,$dest);}

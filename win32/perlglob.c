@@ -31,7 +31,7 @@ main(int argc, char *argv[])
 	}
     }
 
-	_setmode(_fileno(stdout), _O_BINARY);
+    _setmode(_fileno(stdout), _O_BINARY);
     for (i = 1; i < argc; i++) {
 	len = strlen(argv[i]);
 	if (downcase)

@@ -53,22 +53,14 @@ ALL : ".\modules.lib"
 
 CLEAN : 
 	-@erase "$(INTDIR)\Dynaloader.obj"
-	-@erase "$(INTDIR)\Fcntl.obj"
-	-@erase "$(INTDIR)\hash.obj"
-	-@erase "$(INTDIR)\IO.obj"
-	-@erase "$(INTDIR)\Opcode.obj"
-	-@erase "$(INTDIR)\pair.obj"
-	-@erase "$(INTDIR)\sdbm.obj"
-	-@erase "$(INTDIR)\SDBM_File.obj"
-	-@erase "$(INTDIR)\Socket.obj"
 	-@erase ".\modules.lib"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I ".\include" /I "." /I ".." /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /YX /c
-CPP_PROJ=/nologo /MT /W3 /GX /O2 /I ".\include" /I "." /I ".." /D "NDEBUG" /D\
+# ADD BASE CPP /nologo /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
+# ADD CPP /nologo /MT /W3 /O2 /I ".\include" /I "." /I ".." /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /YX /c
+CPP_PROJ=/nologo /MT /W3 /O2 /I ".\include" /I "." /I ".." /D "NDEBUG" /D\
  "WIN32" /D "_WINDOWS" /D "MSDOS" /Fp"$(INTDIR)/modules.pch" /YX /Fo"$(INTDIR)/"\
  /c 
 CPP_OBJS=.\Release/
@@ -84,15 +76,7 @@ LIB32=link.exe -lib
 # ADD LIB32 /nologo /out:"modules.lib"
 LIB32_FLAGS=/nologo /out:"modules.lib" 
 LIB32_OBJS= \
-	"$(INTDIR)\Dynaloader.obj" \
-	"$(INTDIR)\Fcntl.obj" \
-	"$(INTDIR)\hash.obj" \
-	"$(INTDIR)\IO.obj" \
-	"$(INTDIR)\Opcode.obj" \
-	"$(INTDIR)\pair.obj" \
-	"$(INTDIR)\sdbm.obj" \
-	"$(INTDIR)\SDBM_File.obj" \
-	"$(INTDIR)\Socket.obj"
+	"$(INTDIR)\Dynaloader.obj"
 
 ".\modules.lib" : "$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
     $(LIB32) @<<
@@ -118,22 +102,14 @@ ALL : ".\modules.lib"
 
 CLEAN : 
 	-@erase "$(INTDIR)\Dynaloader.obj"
-	-@erase "$(INTDIR)\Fcntl.obj"
-	-@erase "$(INTDIR)\hash.obj"
-	-@erase "$(INTDIR)\IO.obj"
-	-@erase "$(INTDIR)\Opcode.obj"
-	-@erase "$(INTDIR)\pair.obj"
-	-@erase "$(INTDIR)\sdbm.obj"
-	-@erase "$(INTDIR)\SDBM_File.obj"
-	-@erase "$(INTDIR)\Socket.obj"
 	-@erase ".\modules.lib"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-# ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MTd /W3 /GX /Z7 /Od /I ".\include" /I "." /I ".." /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /YX /c
-CPP_PROJ=/nologo /MTd /W3 /GX /Z7 /Od /I ".\include" /I "." /I ".." /D "_DEBUG"\
+# ADD BASE CPP /nologo /W3 /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
+# ADD CPP /nologo /MTd /W3 /Z7 /Od /I ".\include" /I "." /I ".." /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /YX /c
+CPP_PROJ=/nologo /MTd /W3 /Z7 /Od /I ".\include" /I "." /I ".." /D "_DEBUG"\
  /D "WIN32" /D "_WINDOWS" /D "MSDOS" /Fp"$(INTDIR)/modules.pch" /YX\
  /Fo"$(INTDIR)/" /c 
 CPP_OBJS=.\Debug/
@@ -149,15 +125,7 @@ LIB32=link.exe -lib
 # ADD LIB32 /nologo /out:"modules.lib"
 LIB32_FLAGS=/nologo /out:"modules.lib" 
 LIB32_OBJS= \
-	"$(INTDIR)\Dynaloader.obj" \
-	"$(INTDIR)\Fcntl.obj" \
-	"$(INTDIR)\hash.obj" \
-	"$(INTDIR)\IO.obj" \
-	"$(INTDIR)\Opcode.obj" \
-	"$(INTDIR)\pair.obj" \
-	"$(INTDIR)\sdbm.obj" \
-	"$(INTDIR)\SDBM_File.obj" \
-	"$(INTDIR)\Socket.obj"
+	"$(INTDIR)\Dynaloader.obj"
 
 ".\modules.lib" : "$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
     $(LIB32) @<<

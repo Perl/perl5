@@ -329,12 +329,10 @@ AUTOSRAND:
 
     my($pid, $first);
     for (1..5) {
-	if ($^O eq 'VMS') {
-	    $pid = open PERL, qq[MCR $^X -e "print rand"|];
-	}
-	else {
-	    $pid = open PERL, "./perl -e 'print rand'|";
-	}
+	my $PERL = (($^O eq 'VMS') ? "MCR $^X"
+		    : ($^O eq 'MSWin32') ? '.\perl'
+		    : './perl');
+	$pid = open PERL, qq[$PERL -e "print rand"|];
 	die "Couldn't pipe from perl: $!" unless defined $pid;
 	if (defined $first) {
 	    if ($first ne <PERL>) {

@@ -888,8 +888,8 @@ char *prog;
 
 #ifdef DEBUGGING
 		if (regnarrate)
-		    PerlIO_printf(Perl_debug_log, "%*s  %d  %lx\n", regindent*2, "",
-			n, (long)cc);
+		    PerlIO_printf(Perl_debug_log, "%*s  %ld  %lx\n", regindent*2, "",
+			(long)n, (long)cc);
 #endif
 
 		/* If degenerate scan matches "", assume scan done. */

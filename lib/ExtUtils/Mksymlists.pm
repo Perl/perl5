@@ -49,6 +49,7 @@ sub Mksymlists {
     if    ($osname eq 'aix') { _write_aix(\%spec); }
     elsif ($osname eq 'VMS') { _write_vms(\%spec) }
     elsif ($osname eq 'os2') { _write_os2(\%spec) }
+    elsif ($osname eq 'MSWin32') { _write_win32(\%spec) }
     else { croak("Don't know how to create linker option file for $osname\n"); }
 }
 
@@ -89,6 +90,33 @@ my ($name, $exp);
 while (($name, $exp)= each %{$data->{IMPORTS}}) {
   print DEF "  $name=$exp\n";
 }
+    }
+    close DEF;
+}
+
+sub _write_win32 {
+    my($data) = @_;
+
+    if (not $data->{DLBASE}) {
+        ($data->{DLBASE} = $data->{NAME}) =~ s/.*:://;
+        $data->{DLBASE} = substr($data->{DLBASE},0,7) . '_';
+    }
+    rename "$data->{FILE}.def", "$data->{FILE}_def.old";
+
+    open(DEF,">$data->{FILE}.def")
+        or croak("Can't create $data->{FILE}.def: $!\n");
+    print DEF "LIBRARY $data->{DLBASE}\n";
+    print DEF "CODE LOADONCALL\n";
+    print DEF "DATA LOADONCALL NONSHARED MULTIPLE\n";
+    print DEF "EXPORTS\n  ";
+    print DEF join("\n  ",@{$data->{DL_VARS}}, "\n") if @{$data->{DL_VARS}};
+    print DEF join("\n  ",@{$data->{FUNCLIST}}, "\n") if @{$data->{FUNCLIST}};
+    if (%{$data->{IMPORTS}}) {
+        print DEF "IMPORTS\n";
+        my ($name, $exp);
+        while (($name, $exp)= each %{$data->{IMPORTS}}) {
+            print DEF "  $name=$exp\n";
+        }
     }
     close DEF;
 }

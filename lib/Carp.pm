@@ -68,9 +68,16 @@ sub longmess {
 	      }
 	      for (@a) {
 		$_ = "undef", next unless defined $_;
-		s/'/\\'/g;
-		substr($_,$MaxArgLen) = '...' if $MaxArgLen and $MaxArgLen < length;
-		s/([^\0]*)/'$1'/ unless /^-?[\d.]+$/;
+		if (ref $_) {
+		  $_ .= '';
+		  s/'/\\'/g;
+		}
+		else {
+		  s/'/\\'/g;
+		  substr($_,$MaxArgLen) = '...'
+		    if $MaxArgLen and $MaxArgLen < length;
+		}
+		$_ = "'$_'" unless /^-?[\d.]+$/;
 		s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
 		s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
 	      }
@@ -81,7 +88,10 @@ sub longmess {
 	}
 	$error = "called";
     }
-    $mess || $error;
+    # this kludge circumvents die's incorrect handling of NUL
+    my $msg = \($mess || $error);
+    $$msg =~ tr/\0//d;
+    $$msg;
 }
 
 sub shortmess {	# Short-circuit &longmess if called via multiple packages
@@ -113,7 +123,9 @@ sub shortmess {	# Short-circuit &longmess if called via multiple packages
 		if(defined @{$pack . "::ISA"});
 	}
 	else {
-	    return "$error at $file line $line\n";
+	    # this kludge circumvents die's incorrect handling of NUL
+	    (my $msg = "$error at $file line $line\n") =~ tr/\0//d;
+	    return $msg;
 	}
     }
     continue {

@@ -230,12 +230,15 @@ sub chdir {
 sub _vms_cwd {
     return $ENV{'DEFAULT'}
 }
+
 sub _os2_cwd {
     $ENV{'PWD'} = `cmd /c cd`;
     chop $ENV{'PWD'};
     $ENV{'PWD'} =~ s:\\:/:g ;
     return $ENV{'PWD'};
 }
+
+*_NT_cwd = \&_os2_cwd unless defined &_NT_cwd;
 
 sub _msdos_cwd {
     $ENV{'PWD'} = `command /c cd`;
@@ -255,6 +258,7 @@ sub _msdos_cwd {
     }
     elsif ($^O eq 'NT' or $^O eq 'MSWin32') {
         # We assume that &_NT_cwd is defined as an XSUB or in the core.
+        *cwd        = \&_NT_cwd;
         *getcwd     = \&_NT_cwd;
         *fastcwd    = \&_NT_cwd;
         *fastgetcwd = \&_NT_cwd;

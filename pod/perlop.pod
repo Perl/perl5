@@ -767,12 +767,13 @@ Here is the output (split into several lines):
 
 =item C<'STRING'>
 
-A single-quoted, literal string.  Backslashes are ignored, unless
-followed by the delimiter or another backslash, in which case the
-delimiter or backslash is interpolated.
+A single-quoted, literal string. A backslash represents a backslash
+unless followed by the delimiter or another backslash, in which case
+the delimiter or backslash is interpolated.
 
     $foo = q!I said, "You said, 'She said it.'"!;
     $bar = q('This is it.');
+    $baz = '\n';		# a two-character string
 
 =item qq/STRING/
 
@@ -783,6 +784,7 @@ A double-quoted, interpolated string.
     $_ .= qq
      (*** The previous line contains the naughty word "$1".\n)
 		if /(tcl|rexx|python)/;      # :-)
+    $baz = "\n";		# a one-character string
 
 =item qx/STRING/
 
@@ -1190,3 +1192,23 @@ for them.  By default, their results are interpreted as unsigned
 integers.  However, if C<use integer> is in effect, their results are
 interpreted as signed integers.  For example, C<~0> usually evaluates
 to a large integral value.  However, C<use integer; ~0> is -1.
+
+=head2 Floating-point Arithmetic
+
+While C<use integer> provides integer-only arithmetic, there is no
+similar ways to provide rounding or truncation at a certain number of
+decimal places.  For rounding to a certain number of digits, sprintf()
+or printf() is usually the easiest route.
+
+The POSIX module (part of the standard perl distribution) implements
+ceil(), floor(), and a number of other mathematical and trigonometric
+functions.  The Math::Complex module (part of the standard perl
+distribution) defines a number of mathematical functions that can also
+work on real numbers.  Math::Complex not as efficient as POSIX, but
+POSIX can't work with complex numbers.
+
+Rounding in financial applications can have serious implications, and
+the rounding method used should be specified precisely.  In these
+cases, it probably pays not to trust whichever system rounding is
+being used by Perl, but to instead implement the rounding function you
+need yourself.

@@ -12,6 +12,7 @@ my @prgs = split "\n########\n", <DATA>;
 print "1..", scalar @prgs, "\n";
 
 my $Is_VMS = $^O eq 'VMS';
+my $Is_MSWin32 = $^O eq 'MSWin32';
 my $tmpfile = "tmp0000";
 my $i = 0 ;
 1 while -f ++$tmpfile;
@@ -46,6 +47,8 @@ for (@prgs){
     close TEST;
     my $results = $Is_VMS ?
                   `MCR $^X $switch $tmpfile` :
+		  $Is_MSWin32 ?
+                  `.\\perl -I../lib $switch $tmpfile 2>&1` :
                   `sh -c './perl $switch $tmpfile' 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;
@@ -89,7 +92,7 @@ EXPECT
 Number found where operator expected at - line 3, near "Fred 1"
 	(Do you need to predeclare Fred?)
 syntax error at - line 3, near "Fred 1"
-Execution of - aborted due to compilation errors.
+BEGIN not safe after errors--compilation aborted at - line 4.
 ########
 
 # AOK

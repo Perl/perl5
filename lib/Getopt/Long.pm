@@ -535,7 +535,7 @@ BEGIN {
 
 use vars @EXPORT, @EXPORT_OK;
 # User visible variables.
-use vars qw(&config $error $debug $major_version $minor_version);
+use vars qw($error $debug $major_version $minor_version);
 # Deprecated visible variables.
 use vars qw($autoabbrev $getopt_compat $ignorecase $bundling $order
 	    $passthrough);

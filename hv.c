@@ -426,7 +426,7 @@ I32 flags;
 	if (entry == xhv->xhv_eiter)
 	    HvLAZYDEL_on(hv);
 	else
-	    he_free(hv, entry);
+	    hv_free_ent(hv, entry);
 	--xhv->xhv_keys;
 	return sv;
     }
@@ -488,7 +488,7 @@ U32 hash;
 	if (entry == xhv->xhv_eiter)
 	    HvLAZYDEL_on(hv);
 	else
-	    he_free(hv, entry);
+	    hv_free_ent(hv, entry);
 	--xhv->xhv_keys;
 	return sv;
     }
@@ -749,45 +749,45 @@ newHV()
 }
 
 void
-he_free(hv, hent)
+hv_free_ent(hv, entry)
 HV *hv;
-register HE *hent;
+register HE *entry;
 {
-    if (!hent)
+    if (!entry)
 	return;
-    if (isGV(HeVAL(hent)) && GvCVu(HeVAL(hent)) && HvNAME(hv))
+    if (isGV(HeVAL(entry)) && GvCVu(HeVAL(entry)) && HvNAME(hv))
 	sub_generation++;	/* may be deletion of method from stash */
-    SvREFCNT_dec(HeVAL(hent));
-    if (HeKLEN(hent) == HEf_SVKEY) {
-	SvREFCNT_dec(HeKEY_sv(hent));
-        Safefree(HeKEY_hek(hent));
+    SvREFCNT_dec(HeVAL(entry));
+    if (HeKLEN(entry) == HEf_SVKEY) {
+	SvREFCNT_dec(HeKEY_sv(entry));
+        Safefree(HeKEY_hek(entry));
     }
     else if (HvSHAREKEYS(hv))
-	unshare_hek(HeKEY_hek(hent));
+	unshare_hek(HeKEY_hek(entry));
     else
-	Safefree(HeKEY_hek(hent));
-    del_he(hent);
+	Safefree(HeKEY_hek(entry));
+    del_he(entry);
 }
 
 void
-he_delayfree(hv, hent)
+hv_delayfree_ent(hv, entry)
 HV *hv;
-register HE *hent;
+register HE *entry;
 {
-    if (!hent)
+    if (!entry)
 	return;
-    if (isGV(HeVAL(hent)) && GvCVu(HeVAL(hent)) && HvNAME(hv))
+    if (isGV(HeVAL(entry)) && GvCVu(HeVAL(entry)) && HvNAME(hv))
 	sub_generation++;	/* may be deletion of method from stash */
-    sv_2mortal(HeVAL(hent));	/* free between statements */
-    if (HeKLEN(hent) == HEf_SVKEY) {
-	sv_2mortal(HeKEY_sv(hent));
-	Safefree(HeKEY_hek(hent));
+    sv_2mortal(HeVAL(entry));	/* free between statements */
+    if (HeKLEN(entry) == HEf_SVKEY) {
+	sv_2mortal(HeKEY_sv(entry));
+	Safefree(HeKEY_hek(entry));
     }
     else if (HvSHAREKEYS(hv))
-	unshare_hek(HeKEY_hek(hent));
+	unshare_hek(HeKEY_hek(entry));
     else
-	Safefree(HeKEY_hek(hent));
-    del_he(hent);
+	Safefree(HeKEY_hek(entry));
+    del_he(entry);
 }
 
 void
@@ -813,8 +813,8 @@ hfreeentries(hv)
 HV *hv;
 {
     register HE **array;
-    register HE *hent;
-    register HE *ohent = Null(HE*);
+    register HE *entry;
+    register HE *oentry = Null(HE*);
     I32 riter;
     I32 max;
 
@@ -826,17 +826,17 @@ HV *hv;
     riter = 0;
     max = HvMAX(hv);
     array = HvARRAY(hv);
-    hent = array[0];
+    entry = array[0];
     for (;;) {
-	if (hent) {
-	    ohent = hent;
-	    hent = HeNEXT(hent);
-	    he_free(hv, ohent);
+	if (entry) {
+	    oentry = entry;
+	    entry = HeNEXT(entry);
+	    hv_free_ent(hv, oentry);
 	}
-	if (!hent) {
+	if (!entry) {
 	    if (++riter > max)
 		break;
-	    hent = array[riter];
+	    entry = array[riter];
 	} 
     }
     (void)hv_iterinit(hv);
@@ -882,7 +882,7 @@ HV *hv;
 #endif
     if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
 	HvLAZYDEL_off(hv);
-	he_free(hv, entry);
+	hv_free_ent(hv, entry);
     }
     xhv->xhv_riter = -1;
     xhv->xhv_eiter = Null(HE*);
@@ -949,7 +949,7 @@ HV *hv;
 
     if (oldentry && HvLAZYDEL(hv)) {		/* was deleted earlier? */
 	HvLAZYDEL_off(hv);
-	he_free(hv, oldentry);
+	hv_free_ent(hv, oldentry);
     }
 
     xhv->xhv_eiter = entry;

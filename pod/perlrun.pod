@@ -87,6 +87,84 @@ If the script is syntactically correct, it is executed.  If the script
 runs off the end without hitting an exit() or die() operator, an implicit
 C<exit(0)> is provided to indicate successful completion.
 
+=head2 #! and quoting on non-Unix systems
+
+Unix's #! technique can be simulated on other systems:
+
+=over 4
+
+=item OS/2
+
+Put
+
+    extproc perl -S -your_switches
+
+as the first line in C<*.cmd> file (C<-S> due to a bug in cmd.exe's
+`extproc' handling).
+
+=item DOS
+
+Create a batch file to run your script, and codify it in
+C<ALTERNATIVE_SHEBANG> (see the F<dosish.h> file in the source
+distribution for more information).
+
+=item Win95/NT
+
+The Win95/NT installation, when using the Activeware port of Perl,
+will modify the Registry to associate the .pl extension with the perl
+interpreter.  If you install another port of Perl, including the one
+in the win32 directory of the Perl distribution, then you'll have to
+modify the Registry yourself.
+
+=item Macintosh
+
+Macintosh perl scripts will have the the appropriate Creator and
+Type, so that double-clicking them will invoke the perl application.
+
+=back
+
+Command-interpreters on non-Unix systems have rather different ideas
+on quoting than Unix shells.  You'll need to learn the special
+characters in your command-interpreter (C<*>, C<\> and C<"> are
+common) and how to protect whitespace and these characters to run
+one-liners (see C<-e> below).
+
+On some systems, you may have to change single-quotes to double ones,
+which you must I<NOT> do on Unix or Plan9 systems.  You might also
+have to change a single % to a %%.
+
+For example:
+
+    # Unix
+    perl -e 'print "Hello world\n"'
+
+    # DOS, etc.
+    perl -e "print \"Hello world\n\""
+
+    # Mac
+    print "Hello world\n"
+     (then Run "Myscript" or Shift-Command-R)
+
+    # VMS
+    perl -e "print ""Hello world\n"""
+
+The problem is that none of this is reliable: it depends on the command
+tirely possible neither works.  If 4DOS was the command shell, this would
+probably work better:
+
+    perl -e "print <Ctrl-x>"Hello world\n<Ctrl-x>""
+
+CMD.EXE in Windows NT slipped a lot of standard Unix functionality in
+when nobody was looking, but just try to find documentation for its
+quoting rules.
+
+Under the Mac, it depends which environment you are using.  The MacPerl
+shell, or MPW, is much like Unix shells in its support for several
+quoting variants, except that it makes free use of the Mac's non-ASCII
+characters as control characters.
+
+There is no general solution to all of this.  It's just a mess.
+
 =head2 Switches
 
 A single-character switch may be combined with the following switch, if

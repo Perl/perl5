@@ -1731,13 +1731,13 @@ int arg;
 		    goto not_there;
 #endif
 #ifdef SIG_DFL
-		if (strEQ(name, "SIG_DFL")) return (int)SIG_DFL;
+		if (strEQ(name, "SIG_DFL")) return (IV)SIG_DFL;
 #endif
 #ifdef SIG_ERR
-		if (strEQ(name, "SIG_ERR")) return (int)SIG_ERR;
+		if (strEQ(name, "SIG_ERR")) return (IV)SIG_ERR;
 #endif
 #ifdef SIG_IGN
-		if (strEQ(name, "SIG_IGN")) return (int)SIG_IGN;
+		if (strEQ(name, "SIG_IGN")) return (IV)SIG_IGN;
 #endif
 		if (strEQ(name, "SIG_SETMASK"))
 #ifdef SIG_SETMASK

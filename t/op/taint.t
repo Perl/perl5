@@ -16,14 +16,18 @@ use strict;
 use Config;
 
 my $Is_VMS = $^O eq 'VMS';
-my $Invoke_Perl = $Is_VMS ? 'MCR Sys$Disk:[]Perl.' : './perl';
+my $Is_MSWin32 = $^O eq 'MSWin32';
+my $Invoke_Perl = $Is_VMS ? 'MCR Sys$Disk:[]Perl.' :
+                  $Is_MSWin32 ? '.\perl' : './perl';
 if ($Is_VMS) {
+    my ($olddcl) = $ENV{'DCL$PATH'} =~ /^(.*)$/;
+    my ($oldifs) = $ENV{IFS} =~ /^(.*)$/;
     eval <<EndOfCleanup;
 	END {
 	    \$ENV{PATH} = '';
 	    warn "# Note: logical name 'PATH' may have been deleted\n";
-	    \$ENV{IFS} =  "$ENV{IFS}";
-	    \$ENV{'DCL\$PATH'} = "$ENV{'DCL$PATH'}";
+	    \$ENV{IFS} =  \$oldifs;
+	    \$ENV{'DCL\$PATH'} = \$olddcl;
 	}
 EndOfCleanup
 }
