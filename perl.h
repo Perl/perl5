@@ -1800,6 +1800,11 @@ typedef struct clone_params CLONE_PARAMS;
 #   define ISHISH "macos classic"
 #endif
 
+#if defined(__BEOS__)
+#   include "beos/beosish.h"
+#   define ISHISH "beos"
+#endif
+
 #ifndef ISHISH
 #   include "unixish.h"
 #   define ISHISH "unix"

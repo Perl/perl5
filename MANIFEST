@@ -3,6 +3,8 @@ Artistic		The "Artistic License"
 AUTHORS			Contact info for contributors
 av.c			Array value code
 av.h			Array value header
+beos/beosish.h		BeOS port
+beos/beos.c		BeOS port
 beos/nm.c		BeOS port
 bytecode.pl		Produces ext/ByteLoader/byterun.h, ext/ByteLoader/byterun.c and ext/B/Asmdata.pm
 cc_runtime.h		Macros need by runtime of compiler-generated code
