@@ -1411,13 +1411,10 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    break;
 	case 'p':
 	    while (len-- > 0) {
-		if (sizeof(char*) > strend - s)
-		    break;
-		else {
-		    Copy(s, &aptr, 1, char*);
-		    DO_BO_UNPACK_P(aptr);
-		    s += sizeof(char*);
-		}
+		assert (sizeof(char*) <= strend - s);
+		Copy(s, &aptr, 1, char*);
+		DO_BO_UNPACK_P(aptr);
+		s += sizeof(char*);
 		/* newSVpv generates undef if aptr is NULL */
 		PUSHs(sv_2mortal(newSVpv(aptr, 0)));
 	    }
