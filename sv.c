@@ -3683,8 +3683,16 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    goto glob_assign;
 	}
 	break;
-    case SVt_PV:
     case SVt_PVFM:
+#ifdef PERL_COPY_ON_WRITE
+	if ((SvFLAGS(sstr) & CAN_COW_MASK) == CAN_COW_FLAGS) {
+	    if (dtype < SVt_PVIV)
+		sv_upgrade(dstr, SVt_PVIV);
+	    break;
+	}
+	/* Fall through */
+#endif
+    case SVt_PV:
 	if (dtype < SVt_PV)
 	    sv_upgrade(dstr, SVt_PV);
 	break;
@@ -4006,6 +4014,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                 /* making another shared SV.  */
                 STRLEN cur = SvCUR(sstr);
                 STRLEN len = SvLEN(sstr);
+		assert (SvTYPE(dstr) >= SVt_PVIV);
                 if (len) {
                     /* SvIsCOW_normal */
                     /* splice us in between source and next-after-source.  */
