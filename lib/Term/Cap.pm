@@ -173,7 +173,11 @@ sub Tgetent { ## public -- static method
     {
 	# last resort--fake up a termcap from terminfo 
 	local $ENV{TERM} = $term;
-	$entry = `infocmp -C 2>/dev/null`;
+	if ($^O ne 'VMS') {
+	    $entry = `infocmp -C 2>/dev/null`;
+	} else {
+	    $entry = undef;
+	}
     }
 
     croak "Can't find a valid termcap file" unless @termcap_path || $entry;
