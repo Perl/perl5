@@ -246,16 +246,14 @@ Note that both C<\x{...}> and C<\N{...}> are compile-time string
 constants: you cannot use variables in them.  if you want similar
 run-time functionality, use C<chr()> and C<charnames::vianame()>.
 
-Also note that if all the code points for pack "U" are below 0x100,
-bytes will be generated, just like if you were using C<chr()>.
-
-   my $bytes = pack("U*", 0x80, 0xFF);
-
 If you want to force the result to Unicode characters, use the special
 C<"U0"> prefix.  It consumes no arguments but forces the result to be
 in Unicode characters, instead of bytes.
 
-   my $chars = pack("U0U*", 0x80, 0xFF);
+   my $chars = pack("U0C*", 0x80, 0x42);
+
+Likewise, you can force the result to be bytes by using the special
+C<"C0"> prefix.
 
 =head2 Handling Unicode
 
