@@ -162,7 +162,7 @@ CRYPT_SRC	*= fcrypt.c
 # This must be enabled to use the Devel::Peek::mstat() function.  This cannot
 # be enabled without PERL_MALLOC as well.
 #
-#DEBUG_MSTATS  = define
+#DEBUG_MSTATS  *= define
 
 #
 # set the install locations of the compiler include/libraries
