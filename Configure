@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Feb  4 20:55:50 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Feb  4 21:06:42 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -2598,7 +2598,7 @@ esac'
 
 cat <<EOM
 
-Perl can be built to take advantage of threads, on some systems.
+Perl can be built to take advantage of threads on some systems.
 To do so, Configure must be run with -Dusethreads.
 
 Note that threading is a highly experimental feature, and
@@ -2629,6 +2629,10 @@ the 5.005 version (5005threads) and an interpreter-based version
 (ithreads) that has one interpreter per thread.  Both are very 
 experimental.  This arrangement exists to help developers work out
 which one is better.
+
+If you're a casual user, you probably don't want interpreter-threads
+at this time.  There doesn't yet exist a way to create threads from
+within Perl in this model, i.e., "use Thread;" will NOT work.
 EOM
 	: Default to ithreads unless overridden on command line or with
 	: old config.sh
@@ -4635,7 +4639,7 @@ $echo $n " patchlevel $patchlevel" $c
 test 0 -eq "$subversion" || $echo $n " subversion $subversion" $c
 echo ".)"
 case "$osname" in
-dos|cygwin|vms|win32)
+dos|vms)
 	: XXX Should be a Configure test for double-dots in filenames.
 	version=`echo $baserev $patchlevel $subversion | \
 		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
