@@ -41,8 +41,17 @@ CONFIG_ARGS	= $config_args
 !GROK!THIS!
 
 $spitshell >>Makefile <<'!NO!SUBS!'
-$(LIBPERL): perl.imp $(PERL_DLL) perl5.def
+$(LIBPERL): perl.imp $(PERL_DLL) perl5.def libperl_override.lib
 	emximp -o $(LIBPERL) perl.imp
+
+libperl_override.imp: os2/os2add.sym
+	./miniperl -wnle 'print "$$_\t$(PERL_DLL_BASE)\t$$_\t?"' os2/os2add.sym > tmp.imp
+	echo	'strdup	$(PERL_DLL_BASE)	Perl_strdup	?' >> tmp.imp
+	echo	'putenv	$(PERL_DLL_BASE)	Perl_putenv	?' >> tmp.imp
+	sh mv-if-diff tmp.imp $@
+
+libperl_override.lib: libperl_override.imp
+	emximp -o $@ libperl_override.imp
 
 $(AOUT_LIBPERL_DLL): perl.imp $(PERL_DLL) perl5.def
 	emximp -o $(AOUT_LIBPERL_DLL) perl.imp
