@@ -1030,17 +1030,21 @@ Perl_do_eof(pTHX_ GV *gv)
 	report_evil_fh(gv, io, OP_phoney_OUTPUT_ONLY);
 
     while (IoIFP(io)) {
+        int saverrno;
 
         if (PerlIO_has_cntptr(IoIFP(io))) {	/* (the code works without this) */
 	    if (PerlIO_get_cnt(IoIFP(io)) > 0)	/* cheat a little, since */
 		return FALSE;			/* this is the most usual case */
         }
 
+	saverrno = errno; /* getc and ungetc can stomp on errno */
 	ch = PerlIO_getc(IoIFP(io));
 	if (ch != EOF) {
 	    (void)PerlIO_ungetc(IoIFP(io),ch);
+	    errno = saverrno;
 	    return FALSE;
 	}
+	errno = saverrno;
 
         if (PerlIO_has_cntptr(IoIFP(io)) && PerlIO_canset_cnt(IoIFP(io))) {
 	    if (PerlIO_get_cnt(IoIFP(io)) < -1)

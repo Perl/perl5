@@ -124,8 +124,7 @@ SKIP: {
   ok (eof RIGHT, "right is at EOF");
   local $TODO = "Known problems with unix sockets on $^O"
       if $^O eq 'unicos' || $^O eq 'unicosmk';
-  # is ($!, '', 'and $! should report no error');
-  ok(1, 'skip this $! test for now');
+  is ($!, '', 'and $! should report no error');
   alarm 60;
 }
 
