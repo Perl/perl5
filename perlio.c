@@ -3227,16 +3227,16 @@ PerlIO_funcs PerlIO_stdio = {
 #ifdef USE_STDIO_PTR
     PerlIOStdio_get_ptr,
     PerlIOStdio_get_cnt,
-#if (defined(STDIO_PTR_LVALUE) && (defined(STDIO_CNT_LVALUE) || defined(STDIO_PTR_LVAL_SETS_CNT)))
-    PerlIOStdio_set_ptrcnt
-#else                           /* STDIO_PTR_LVALUE */
-    NULL
-#endif                          /* STDIO_PTR_LVALUE */
-#else                           /* USE_STDIO_PTR */
+#   if defined(HAS_FAST_STDIO) && defined(USE_FAST_STDIO)
+    PerlIOStdio_get_ptr,
+#   else
+    NULL,
+#   endif /* HAS_FAST_STDIO && USE_FAST_STDIO */
+#else
     NULL,
     NULL,
-    NULL
-#endif                          /* USE_STDIO_PTR */
+    NULL,
+#endif /* USE_STDIO_PTR */
 };
 
 /* Note that calls to PerlIO_exportFILE() are reversed using

@@ -25,12 +25,8 @@ plan tests => 43;
 use Config;
 
 my $DOSISH    = $^O =~ /^(?:MSWin32|cygwin|os2|dos|NetWare|mint)$/ ? 1 : 0;
-my $NONSTDIO  = exists $ENV{PERLIO} && $ENV{PERLIO} ne 'stdio' ? 1 : 0;
-my $FASTSTDIO =
-    $Config{d_stdstdio} &&
-    $Config{d_stdio_ptr_lval} &&
-    ($Config{d_stdio_cnt_lval} ||
-     $Config{d_stdio_ptr_lval_sets_cnt}) ? 1 : 0;
+my $NONSTDIO  = exists $ENV{PERLIO} && $ENV{PERLIO} ne 'stdio'     ? 1 : 0;
+my $FASTSTDIO = $Config{d_faststdio} && $Config{usefaststdio}      ? 1 : 0;
 
 print <<__EOH__;
 # PERLIO    = $PERLIO
