@@ -3253,7 +3253,25 @@ screamer2:
 	     memNE(SvPVX(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
 	{
 	    append = -1;
-	    goto screamer2;
+	    /*
+	      If we're reading from a TTY and we get a short read,
+	      indicating that the user hit his EOF character, we need
+	      to notice it now, because if we try to read from the TTY
+	      again, the EOF condition will disappear.
+
+	      The "(cnt == sizeof(buf))" check is an optimization to
+	      prevent unnecessary calls to feof().  It seems safe
+	      because as far as I can tell, whenever fread() returns a
+	      full buffer, right before EOF, it will correctly return
+	      0 bytes on the next call, even when reading from a TTY.
+	      However, I've only tested this on Linux; other platforms
+	      may vary, so it might be easier just to remove the
+	      optimization and just check for "! feof(fp)".
+
+	        - jik 9/25/96
+	    */
+	    if ((cnt == sizeof(buf)) || ! PerlIO_eof(fp))
+		goto screamer2;
 	}
     }
 
