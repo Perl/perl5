@@ -230,7 +230,7 @@ sub dump_names {
         and !defined ($_->{macro}) and !defined ($_->{value})
         and !defined ($_->{default}) and !defined ($_->{pre})
         and !defined ($_->{post}) and !defined ($_->{def_pre})
-        and !defined ($_->{def_post})) {
+        and !defined ($_->{def_post}) and !defined ($_->{weight})) {
       # It's the default type, and the name consists only of A-Za-z0-9_
       push @simple, $_->{name};
     } else {
@@ -298,7 +298,8 @@ of a block, so variables may be defined in it.
 sub assign {
   my $self = shift;
   my $args = shift;
-  my ($indent, $type, $pre, $post) = @{$args}{qw(indent type pre post)};
+  my ($indent, $type, $pre, $post, $item)
+      = @{$args}{qw(indent type pre post item)};
   $post ||= '';
   my $clause;
   my $close;
@@ -316,7 +317,7 @@ sub assign {
     unless $self->valid_type($type);
 
   $clause .= join '', map {"$indent$_\n"}
-    $self->assignment_clause_for_type($type, @_);
+    $self->assignment_clause_for_type({type=>$type,item=>$item}, @_);
   chomp $post;
   if (length $post) {
     $clause .= "$post";
@@ -372,8 +373,8 @@ sub return_clause {
   #      *iv_return = thingy;
   #      return PERL_constant_ISIV;
   $clause
-    .= $self->assign ({indent=>$indent, type=>$type, pre=>$pre, post=>$post},
-		      ref $value ? @$value : $value);
+    .= $self->assign ({indent=>$indent, type=>$type, pre=>$pre, post=>$post,
+		       item=>$item}, ref $value ? @$value : $value);
 
   if (ref $macro or $macro ne "1") {
     ##else
@@ -387,7 +388,7 @@ sub return_clause {
       my @default = ref $default ? @$default : $default;
       $type = shift @default;
       $clause .= $self->assign ({indent=>$indent, type=>$type, pre=>$pre,
-				 post=>$post}, @default);
+				 post=>$post, item=>$item}, @default);
     }
 
     ##endif
@@ -552,8 +553,19 @@ sub switch_clause {
       if length ($char) != 1;
     confess sprintf "char %#X is out of range", ord $char if ord ($char) > 255;
     $body .= $indent . "case '" . C_stringify ($char) . "':\n";
-    foreach my $name (sort @{$best->{$char}}) {
-      my $thisone = $items->{$name};
+    # If this looks evil, maybe it is.
+    # $items is a hashref, and we're doing a hash slice on it
+    my @items = @{$items}{@{$best->{$char}}};
+    # use Data::Dumper; warn Dumper \@items;
+    foreach my $thisone (sort {
+	# Deal with the case of an item actually being an array ref to 1 or 2
+	# hashrefs
+	my $l = ref $a eq 'ARRAY' ? ($a->[0] || $->[1]) : $a;
+	my $r = ref $b eq 'ARRAY' ? ($b->[0] || $->[1]) : $b;
+	# Sort by name first
+	($r->{weight} || 0) <=> ($l->{weight} || 0)
+	    # Sort equal weights by name
+	    or $l->{name} cmp $r->{name}} @items) {
       # warn "You are here";
       if ($do_front_chop) {
         $body .= $self->match_clause ({indent => 2 + length $indent,
@@ -709,6 +721,12 @@ The internals automatically clone any name with characters 128-255 but none
 256+ (ie one that could be either in bytes or utf8) into a second entry
 which is utf8 encoded.
 
+=item weight
+
+Optional sorting weight for names, to determine the order of
+linear testing when multiple names fall in the same case of a switch clause.
+Higher comes earlier, undefined defaults to zero.
+
 =back
 
 In the argument hashref, I<package> is the name of the package, and is only
@@ -791,7 +809,7 @@ sub C_constant {
         $item->{macro} = $macro if defined $macro;
         undef $value if defined $value and $value eq $name;
         $item->{value} = $value if defined $value;
-        foreach my $key (qw(default pre post def_pre def_post)) {
+        foreach my $key (qw(default pre post def_pre def_post weight)) {
           my $value = $orig->{$key};
           $item->{$key} = $value if defined $value;
           # warn "$key $value";

@@ -100,9 +100,8 @@ sub valid_type {
 # This might actually be a return statement
 sub assignment_clause_for_type {
   my $self = shift;
-  # In the future may pass in an options hash
-  my $type = shift;
-  $type = $type->{type} if ref $type;
+  my $args = shift;
+  my $type = $args->{type};
   my $typeset = $XS_TypeSet{$type};
   if (ref $typeset) {
     die "Type $type is aggregate, but only single value given"
@@ -118,6 +117,7 @@ sub assignment_clause_for_type {
 
 sub return_statement_for_type {
   my ($self, $type) = @_;
+  # In the future may pass in an options hash
   $type = $type->{type} if ref $type;
   "return PERL_constant_IS$type;";
 }
