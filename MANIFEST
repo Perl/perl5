@@ -738,7 +738,7 @@ t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap works
 t/lib/tie-push.t	Test for Tie::Array
 t/lib/tie-stdarray.t	Test for Tie::StdArray
-lib/tie-stdpush.t	Test for Tie::StdArray
+t/lib/tie-stdpush.t	Test for Tie::StdArray
 t/lib/thread.t		Basic test of threading (skipped if no threads) 
 t/lib/trig.t		See if Math::Trig works
 t/op/append.t		See if . works

@@ -183,8 +183,11 @@ PP(pp_padsv)
     if (op->op_flags & OPf_MOD) {
 	if (op->op_private & OPpLVAL_INTRO)
 	    SAVECLEARSV(curpad[op->op_targ]);
-        else if (op->op_private & OPpDEREF)
+        else if (op->op_private & OPpDEREF) {
+	    PUTBACK;
 	    vivify_ref(curpad[op->op_targ], op->op_private & OPpDEREF);
+	    SPAGAIN;
+	}
     }
     RETURN;
 }
@@ -1453,11 +1456,13 @@ PP(pp_subst)
     else {
 	TARG = DEFSV;
 	EXTEND(SP,1);
-    }
+    }                  
     if (SvREADONLY(TARG)
 	|| (SvTYPE(TARG) > SVt_PVLV
 	    && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG))))
 	croak(no_modify);
+    PUTBACK;
+
     s = SvPV(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
@@ -1533,6 +1538,7 @@ PP(pp_subst)
     if (c && clen <= rx->minlen && (once || !(safebase & REXEC_COPY_STR))
 	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
 	if (!regexec_flags(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
+	    SPAGAIN;
 	    PUSHs(&sv_no);
 	    LEAVE_SCOPE(oldsave);
 	    RETURN;
@@ -1588,6 +1594,7 @@ PP(pp_subst)
 		sv_chop(TARG, d);
 	    }
 	    TAINT_IF(rxtainted);
+	    SPAGAIN;
 	    PUSHs(&sv_yes);
 	}
 	else {
@@ -1616,10 +1623,15 @@ PP(pp_subst)
 		Move(s, d, i+1, char);		/* include the NUL */
 	    }
 	    TAINT_IF(rxtainted);
+	    SPAGAIN;
 	    PUSHs(sv_2mortal(newSViv((I32)iters)));
 	}
 	(void)SvPOK_only(TARG);
-	SvSETMAGIC(TARG);
+	if (SvSMAGICAL(TARG)) {
+	    PUTBACK;
+	    mg_set(TARG);
+	    SPAGAIN;
+	}
 	SvTAINT(TARG);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
@@ -1632,11 +1644,12 @@ PP(pp_subst)
 	    goto force_it;
 	}
 	rxtainted = RX_MATCH_TAINTED(rx);
-	dstr = NEWSV(25, sv_len(TARG));
+	dstr = NEWSV(25, len);
 	sv_setpvn(dstr, m, s-m);
 	curpm = pm;
 	if (!c) {
 	    register PERL_CONTEXT *cx;
+	    SPAGAIN;
 	    PUSHSUBST(cx);
 	    RETURNOP(cPMOP->op_pmreplroot);
 	}
@@ -1674,6 +1687,7 @@ PP(pp_subst)
 	(void)SvPOK_only(TARG);
 	SvSETMAGIC(TARG);
 	SvTAINT(TARG);
+	SPAGAIN;
 	PUSHs(sv_2mortal(newSViv((I32)iters)));
 	LEAVE_SCOPE(oldsave);
 	RETURN;
@@ -1683,7 +1697,8 @@ PP(pp_subst)
 nope:
     ++BmUSEFUL(rx->check_substr);
 
-ret_no:
+ret_no:         
+    SPAGAIN;
     PUSHs(&sv_no);
     LEAVE_SCOPE(oldsave);
     RETURN;
