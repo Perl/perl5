@@ -13,7 +13,6 @@
 #define PerlIO_stdout()			stdout
 #define PerlIO_stdin()			stdin
 
-#define PerlIO_fdupopen(f)		(f)
 #define PerlIO_isutf8(f)		0
 
 #define PerlIO_printf			fprintf
