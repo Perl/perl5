@@ -25,9 +25,13 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.6 90/03/27 15:27:15 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.7 90/08/09 02:19:56 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.7  90/08/09  02:19:56  lwall
+# patch19: Configure now asks where you want to put scripts
+# patch19: Added support for linked-in C subroutines
+# 
 # Revision 3.0.1.6  90/03/27  15:27:15  lwall
 # patch16: MSDOS support
 # 
@@ -56,6 +60,7 @@ cat >Makefile <<!GROK!THIS!
 CC = $cc
 YACC = $yacc
 bin = $bin
+scriptdir = $scriptdir
 privlib = $privlib
 mansrc = $mansrc
 manext = $manext
@@ -76,13 +81,15 @@ public = perl taintperl $suidperl
 cat >>Makefile <<'!NO!SUBS!'
 private = 
 
+scripts = h2ph
+
 MAKE = make
 
-manpages = perl.man
+manpages = perl.man h2ph.man
 
 util =
 
-sh = Makefile.SH makedepend.SH
+sh = Makefile.SH makedepend.SH h2ph.SH
 
 h1 = EXTERN.h INTERN.h arg.h array.h cmd.h config.h form.h handy.h
 h2 = hash.h perl.h regcomp.h regexp.h spat.h stab.h str.h util.h
@@ -117,31 +124,39 @@ SHELL = /bin/sh
 .c.o:
 	$(CC) -c $(CFLAGS) $(LARGE) $*.c
 
-all: $(public) $(private) $(util) perl.man
+all: $(public) $(private) $(util) perl.man uperl.o $(scripts)
 	cd x2p; $(MAKE) all
 	touch all
 
 # This is the standard version that contains no "taint" checks and is
 # used for all scripts that aren't set-id or running under something set-id.
 
-perl: perl.o $(obj)
-	$(CC) $(LARGE) $(LDFLAGS) $(obj) perl.o $(libs) -o perl
+perl: perl.o $(obj) usersub.o
+	$(CC) $(LARGE) $(LDFLAGS) $(obj) perl.o usersub.o $(libs) -o perl
+
+uperl.o: perl.o $(obj)
+	ld $(LARGE) $(LDFLAGS) -r $(obj) perl.o $(libs) -o uperl.o
+
+saber: perl.c
+	# load $(c) perl.c
 
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
 # checks as well as the special code to validate that the script in question
 # has been invoked correctly.
 
-suidperl: tperl.o sperly.o $(tobj)
-	$(CC) $(LARGE) $(LDFLAGS) sperly.o $(tobj) tperl.o $(libs) -o suidperl
+suidperl: tperl.o sperly.o $(tobj) usersub.o
+	$(CC) $(LARGE) $(LDFLAGS) sperly.o $(tobj) tperl.o usersub.o $(libs) \
+	    -o suidperl
 
 # This version interprets scripts that are already set-id either via a wrapper
 # or through the kernel allowing set-id scripts (bad idea).  Taintperl must
 # NOT be setuid to root or anything else.  The only difference between it
 # and normal perl is the presence of the "taint" checks.
 
-taintperl: tperl.o tperly.o $(tobj)
-	$(CC) $(LARGE) $(LDFLAGS) tperly.o $(tobj) tperl.o $(libs) -o taintperl
+taintperl: tperl.o tperly.o $(tobj) usersub.o
+	$(CC) $(LARGE) $(LDFLAGS) tperly.o $(tobj) tperl.o usersub.o $(libs) \
+	    -o taintperl
 
 # Replicating all this junk is yucky, but I don't see a portable way to fix it.
 
@@ -270,7 +285,7 @@ perly.h: perl.c
 	touch perly.h
 
 perl.c: perl.y
-	@ echo Expect 25 shift/reduce errors...
+	@ echo Expect 29 shift/reduce and 59 reduce/reduce conflicts...
 	$(YACC) -d perl.y
 	mv y.tab.c perl.c
 	mv y.tab.h perly.h
@@ -308,6 +323,8 @@ esac
 cat >>Makefile <<'!NO!SUBS!'
 	- test $(bin) = /usr/bin || rm -f /usr/bin/perl
 	- test $(bin) = /usr/bin || $(SLN) $(bin)/perl /usr/bin || cp $(bin)/perl /usr/bin
+	- chmod +x $(scripts)
+	- cp $(scripts) $(scriptdir)
 	- sh ./makedir $(privlib)
 	- \
 if test `pwd` != $(privlib); then \
