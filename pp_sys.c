@@ -3765,20 +3765,20 @@ PP(pp_getpgrp)
 #ifdef HAS_GETPGRP
     djSP; dTARGET;
     Pid_t pid;
-    I32 value;
+    Pid_t pgrp;
 
     if (MAXARG < 1)
 	pid = 0;
     else
 	pid = SvIVx(POPs);
 #ifdef BSD_GETPGRP
-    value = (I32)BSD_GETPGRP(pid);
+    pgrp = (I32)BSD_GETPGRP(pid);
 #else
     if (pid != 0 && pid != getpid())
 	DIE(aTHX_ "POSIX getpgrp can't take an argument");
-    value = (I32)getpgrp();
+    pgrp = getpgrp();
 #endif
-    XPUSHi(value);
+    XPUSHi(pgrp);
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "getpgrp()");
