@@ -1276,7 +1276,7 @@ S_scan_const(pTHX_ char *start)
 	    /* range begins (ignore - as first or last char) */
 	    else if (*s == '-' && s+1 < send  && s != start) {
                 if (didrange) { 
-                  croak("Ambiguous range in transliteration operator");
+		    Perl_croak(aTHX_ "Ambiguous range in transliteration operator");
                 }
 		if (utf) {
 		    *d++ = (char)0xff;	/* use illegal utf8 byte--see pmtrans */
