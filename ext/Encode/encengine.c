@@ -106,7 +106,7 @@ do_encode(encpage_t *enc, const U8 *src, STRLEN *slen, U8 *dst, STRLEN dlen, STR
    U8 byte = *s;
    while (byte > e->max)
     e++;
-   if (byte >= e->min && e->slen && (approx || !e->slen & 0x80))
+   if (byte >= e->min && e->slen && (approx || !(e->slen & 0x80)))
     {
      const U8 *cend = s + (e->slen & 0x7f);
      if (cend <= send)
