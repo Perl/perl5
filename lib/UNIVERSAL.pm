@@ -67,12 +67,12 @@ of the following statements is true.
 
 =over 8
 
-=item
+=item *
 
 C<VAL> is a blessed reference and is blessed into package C<TYPE>
 or inherits from package C<TYPE>
 
-=item
+=item *
 
 C<VAL> is a reference to a C<TYPE> of perl variable (er 'HASH')
 

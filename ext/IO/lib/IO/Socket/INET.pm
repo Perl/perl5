@@ -332,6 +332,8 @@ by default. This was not the case with earlier releases.
 
  NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
 
+=back
+
 =head2 METHODS
 
 =over 4

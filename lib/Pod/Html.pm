@@ -466,7 +466,7 @@ END_OF_HEAD
 		    process_over();
 		} elsif (/^=back/) {		# =back
 		    process_back();
-		} elsif (/^=for\s+(\S+)\s+(.*)/si) {# =for
+		} elsif (/^=for\s+(\S+)\s*(.*)/si) {# =for
 		    process_for($1,$2);
 		} else {
 		    /^=(\S*)\s*/;

@@ -520,6 +520,7 @@ struct's constructor.
     print "(which was a ", $cat->breed->name, ")\n";
     print "had two kittens: ", join(' and ', @{$cat->kittens}), "\n";
 
+=back
 
 =head1 Author and Modification History
 

@@ -297,6 +297,8 @@ subject on perl5-porters.
 
 Ronald Kimball (rjk@linguist.dartmouth.edu) has volunteered.
 
+=back
+
 =head2 Include a search tool
 
 perldoc should be able to 'grep' fulltext indices of installed POD
