@@ -558,7 +558,10 @@ PP(pp_print)
 	gv = (GV*)*++MARK;
     else
 	gv = PL_defoutgv;
-    if ((mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
+
+    if (gv && (io = GvIO(gv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+    {
       had_magic:
 	if (MARK == ORIGMARK) {
 	    /* If using default handle then we need to make space to
@@ -570,7 +573,7 @@ PP(pp_print)
 	    ++SP;
 	}
 	PUSHMARK(MARK - 1);
-	*MARK = SvTIED_obj((SV*)gv, mg);
+	*MARK = SvTIED_obj((SV*)io, mg);
 	PUTBACK;
 	ENTER;
 	call_method("PRINT", G_SCALAR);
@@ -582,8 +585,8 @@ PP(pp_print)
 	RETURN;
     }
     if (!(io = GvIO(gv))) {
-        if ((GvEGV(gv))
-		&& (mg = SvTIED_mg((SV*)GvEGV(gv), PERL_MAGIC_tiedscalar)))
+        if ((GvEGV(gv)) && (io = GvIO(GvEGV(gv)))
+	    && (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
             goto had_magic;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
@@ -1434,9 +1437,9 @@ Perl_do_readline(pTHX)
     I32 gimme = GIMME_V;
     MAGIC *mg;
 
-    if ((mg = SvTIED_mg((SV*)PL_last_in_gv, PERL_MAGIC_tiedscalar))) {
+    if (io && (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
 	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)PL_last_in_gv, mg));
+	XPUSHs(SvTIED_obj((SV*)io, mg));
 	PUTBACK;
 	ENTER;
 	call_method("READLINE", gimme);

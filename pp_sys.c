@@ -492,6 +492,7 @@ PP(pp_open)
     dTARGET;
     GV *gv;
     SV *sv;
+    IO *io;
     char *tmps;
     STRLEN len;
     MAGIC *mg;
@@ -500,13 +501,13 @@ PP(pp_open)
     gv = (GV *)*++MARK;
     if (!isGV(gv))
 	DIE(aTHX_ PL_no_usym, "filehandle");
-    if (GvIOp(gv))
+    if ((io = GvIOp(gv)))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
-    if ((mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
+    if (io && (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
 	/* Method's args are same as ours ... */
 	/* ... except handle is replaced by the object */
-	*MARK-- = SvTIED_obj((SV*)gv, mg);
+	*MARK-- = SvTIED_obj((SV*)io, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
@@ -539,6 +540,7 @@ PP(pp_close)
 {
     dSP;
     GV *gv;
+    IO *io;
     MAGIC *mg;
 
     if (MAXARG == 0)
@@ -546,9 +548,11 @@ PP(pp_close)
     else
 	gv = (GV*)POPs;
 
-    if ((mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
+    if (gv && (io = GvIO(gv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+    {
 	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	XPUSHs(SvTIED_obj((SV*)io, mg));
 	PUTBACK;
 	ENTER;
 	call_method("CLOSE", G_SCALAR);
@@ -628,9 +632,11 @@ PP(pp_fileno)
 	RETPUSHUNDEF;
     gv = (GV*)POPs;
 
-    if (gv && (mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
+    if (gv && (io = GvIO(gv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+    {
 	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	XPUSHs(SvTIED_obj((SV*)io, mg));
 	PUTBACK;
 	ENTER;
 	call_method("FILENO", G_SCALAR);
@@ -694,9 +700,11 @@ PP(pp_binmode)
 
     gv = (GV*)POPs;
 
-    if (gv && (mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
+    if (gv && (io = GvIO(gv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+    {
 	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	XPUSHs(SvTIED_obj((SV*)io, mg));
 	if (discp)
 	    XPUSHs(discp);
 	PUTBACK;
@@ -752,6 +760,11 @@ PP(pp_tie)
 #endif
 	    methname = "TIEHANDLE";
 	    how = PERL_MAGIC_tiedscalar;
+	    /* For tied filehandles, we apply tiedscalar magic to the IO
+	       slot of the GP rather than the GV itself. AMS 20010812 */
+	    if (!GvIOp(varsv))
+		GvIOp(varsv) = newIO();
+	    varsv = (SV *)GvIOp(varsv);
 	    break;
 	default:
 	    methname = "TIESCALAR";
@@ -810,12 +823,15 @@ PP(pp_tie)
 PP(pp_untie)
 {
     dSP;
+    MAGIC *mg;
     SV *sv = POPs;
     char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
 		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
 
-        MAGIC * mg ;
-        if ((mg = SvTIED_mg(sv, how))) {
+    if (SvTYPE(sv) == SVt_PVGV && !(sv = (SV *)GvIOp(sv)))
+	RETPUSHYES;
+
+    if ((mg = SvTIED_mg(sv, how))) {
 	SV *obj = SvRV(mg->mg_obj);
 	GV *gv;
 	CV *cv = NULL;
@@ -836,18 +852,21 @@ PP(pp_untie)
 		    "untie attempted while %"UVuf" inner references still exist",
 		    (UV)SvREFCNT(obj) - 1 ) ;
         }
+	sv_unmagic(sv, how);
     }
-    sv_unmagic(sv, how);
     RETPUSHYES;
 }
 
 PP(pp_tied)
 {
     dSP;
+    MAGIC *mg;
     SV *sv = POPs;
     char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
 		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
-    MAGIC *mg;
+
+    if (SvTYPE(sv) == SVt_PVGV && !(sv = (SV *)GvIOp(sv)))
+	RETPUSHUNDEF;
 
     if ((mg = SvTIED_mg(sv, how))) {
 	SV *osv = SvTIED_obj(sv, mg);
@@ -1110,6 +1129,7 @@ PP(pp_getc)
 {
     dSP; dTARGET;
     GV *gv;
+    IO *io;
     MAGIC *mg;
 
     if (MAXARG == 0)
@@ -1117,10 +1137,12 @@ PP(pp_getc)
     else
 	gv = (GV*)POPs;
 
-    if ((mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
+    if (gv && (io = GvIO(gv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+    {
 	I32 gimme = GIMME_V;
 	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	XPUSHs(SvTIED_obj((SV*)io, mg));
 	PUTBACK;
 	ENTER;
 	call_method("GETC", gimme);
@@ -1374,7 +1396,9 @@ PP(pp_prtf)
     else
 	gv = PL_defoutgv;
 
-    if ((mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
+    if (gv && (io = GvIO(gv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+    {
 	if (MARK == ORIGMARK) {
 	    MEXTEND(SP, 1);
 	    ++MARK;
@@ -1382,7 +1406,7 @@ PP(pp_prtf)
 	    ++SP;
 	}
 	PUSHMARK(MARK - 1);
-	*MARK = SvTIED_obj((SV*)gv, mg);
+	*MARK = SvTIED_obj((SV*)io, mg);
 	PUTBACK;
 	ENTER;
 	call_method("PRINTF", G_SCALAR);
@@ -1492,13 +1516,14 @@ PP(pp_sysread)
     Size_t wanted;
 
     gv = (GV*)*++MARK;
-    if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD) &&
-	(mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar)))
+    if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD)
+	&& gv && (io = GvIO(gv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
     {
 	SV *sv;
 	
 	PUSHMARK(MARK-1);
-	*MARK = SvTIED_obj((SV*)gv, mg);
+	*MARK = SvTIED_obj((SV*)io, mg);
 	ENTER;
 	call_method("READ", G_SCALAR);
 	LEAVE;
@@ -1720,12 +1745,13 @@ PP(pp_send)
 
     gv = (GV*)*++MARK;
     if (PL_op->op_type == OP_SYSWRITE
-		&& (mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar)))
+	&& gv && (io = GvIO(gv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
     {
 	SV *sv;
 	
 	PUSHMARK(MARK-1);
-	*MARK = SvTIED_obj((SV*)gv, mg);
+	*MARK = SvTIED_obj((SV*)io, mg);
 	ENTER;
 	call_method("WRITE", G_SCALAR);
 	LEAVE;
@@ -1841,6 +1867,7 @@ PP(pp_eof)
 {
     dSP;
     GV *gv;
+    IO *io;
     MAGIC *mg;
 
     if (MAXARG == 0) {
@@ -1866,9 +1893,11 @@ PP(pp_eof)
     else
 	gv = PL_last_in_gv = (GV*)POPs;		/* eof(FH) */
 
-    if (gv && (mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
+    if (gv && (io = GvIO(gv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+    {
 	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	XPUSHs(SvTIED_obj((SV*)io, mg));
 	PUTBACK;
 	ENTER;
 	call_method("EOF", G_SCALAR);
@@ -1885,6 +1914,7 @@ PP(pp_tell)
 {
     dSP; dTARGET;
     GV *gv;
+    IO *io;
     MAGIC *mg;
 
     if (MAXARG == 0)
@@ -1892,9 +1922,11 @@ PP(pp_tell)
     else
 	gv = PL_last_in_gv = (GV*)POPs;
 
-    if (gv && (mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
+    if (gv && (io = GvIO(gv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+    {
 	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	XPUSHs(SvTIED_obj((SV*)io, mg));
 	PUTBACK;
 	ENTER;
 	call_method("TELL", G_SCALAR);
@@ -1920,6 +1952,7 @@ PP(pp_sysseek)
 {
     dSP;
     GV *gv;
+    IO *io;
     int whence = POPi;
 #if LSEEKSIZE > IVSIZE
     Off_t offset = (Off_t)SvNVx(POPs);
@@ -1930,9 +1963,11 @@ PP(pp_sysseek)
 
     gv = PL_last_in_gv = (GV*)POPs;
 
-    if (gv && (mg = SvTIED_mg((SV*)gv, PERL_MAGIC_tiedscalar))) {
+    if (gv && (io = GvIO(gv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+    {
 	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	XPUSHs(SvTIED_obj((SV*)io, mg));
 #if LSEEKSIZE > IVSIZE
 	XPUSHs(sv_2mortal(newSVnv((NV) offset)));
 #else
