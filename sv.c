@@ -1,7 +1,7 @@
 /*    sv.c
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -12403,3 +12403,12 @@ Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
     return ret;
 }
 
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * vim: expandtab shiftwidth=4:
+*/
