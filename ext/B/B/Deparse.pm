@@ -205,6 +205,13 @@ use warnings ();
 #  1             statement modifiers
 #  0             statement level
 
+# Also, lineseq may pass a fourth parameter to the pp_ routines:
+# if present, the fourth parameter is passed on by deparse.
+#
+# If present and true, it means that the op exists directly as
+# part of a lineseq. Currently it's only used by pp_scope to
+# decide whether its results need to be enclosed in a do {} block.
+
 # Nonprinting characters with special meaning:
 # \cS - steal parens (see maybe_parens_unop)
 # \n - newline and indent
@@ -291,7 +298,6 @@ sub begin_is_use {
 
 	return unless $self->const_sv($constop)->PV eq $module;
 	$constop = $constop->sibling;
-
 	$version = $self->const_sv($constop)->int_value;
 	$constop = $constop->sibling;
 	return if $constop->name ne "method_named";
@@ -310,18 +316,18 @@ sub begin_is_use {
     # See if there are import arguments
     my $args = '';
 
-    my $constop = $entersub->first->sibling; # Skip over pushmark
-    return unless $self->const_sv($constop)->PV eq $module;
+    my $svop = $entersub->first->sibling; # Skip over pushmark
+    return unless $self->const_sv($svop)->PV eq $module;
 
     # Pull out the arguments
-    for ($constop=$constop->sibling; $constop->name eq "const";
-		$constop = $constop->sibling) {
+    for ($svop=$svop->sibling; $svop->name ne "method_named";
+		$svop = $svop->sibling) {
 	$args .= ", " if length($args);
-	$args .= $self->deparse($constop, 6);
+	$args .= $self->deparse($svop, 6);
     }
 
     my $use = 'use';
-    my $method_named = $constop;
+    my $method_named = $svop;
     return if $method_named->name ne "method_named";
     my $method_name = $self->const_sv($method_named)->PV;
 
@@ -642,11 +648,14 @@ sub ambient_pragmas {
 
 sub deparse {
     my $self = shift;
-    my($op, $cx) = @_;
+    my($op, $cx, $flags) = @_;
 
     Carp::confess("Null op in deparse") if !defined($op)
 					|| class($op) eq "NULL";
     my $meth = "pp_" . $op->name;
+    if ($meth eq "pp_scope") {
+	return $self->pp_scope($op, $cx, $flags);
+    }
     return $self->$meth($op, $cx);
 }
 
@@ -978,7 +987,7 @@ sub lineseq {
 	    $i++;
 	    next;
 	}
-	$expr .= $self->deparse($ops[$i], 0);
+	$expr .= $self->deparse($ops[$i], 0, (@ops != 1));
 	$expr =~ s/;\n?\z//;
 	push @exprs, $expr;
     }
@@ -1024,20 +1033,10 @@ sub scopeop {
     }
 }
 
-sub invoker {
-    my $caller = (caller(2))[3];
-    if ($caller eq "B::Deparse::deparse") {
-	return (caller(3))[3];
-    }
-    else {
-	return $caller;
-    }
-}
-
 sub pp_scope {
-    my ($self, $op, $cx) = @_;
+    my ($self, $op, $cx, $flags) = @_;
     my $body = scopeop(0, @_);
-    return $body if $cx > 0 || invoker() ne "B::Deparse::lineseq";
+    return $body if $cx > 0 || !defined $flags || !$flags;
     return "do {\n\t$body\n\b};";
 }
 sub pp_lineseq { scopeop(0, @_); }
@@ -1090,6 +1089,7 @@ sub lex_in_scope {
     my ($self, $name) = @_;
     $self->populate_curcvlex() if !defined $self->{'curcvlex'};
 
+    return 0 if !defined($self->{'curcop'});
     my $seq = $self->{'curcop'}->cop_seq;
     return 0 if !exists $self->{'curcvlex'}{$name};
     for my $a (@{$self->{'curcvlex'}{$name}}) {
@@ -1215,10 +1215,10 @@ sub pp_nextstate {
 
 sub declare_warnings {
     my ($from, $to) = @_;
-    if ($to eq warnings::bits("all")) {
+    if (($to & WARN_MASK) eq warnings::bits("all")) {
 	return "use warnings;\n";
     }
-    elsif ($to eq "\0"x12) {
+    elsif (($to & WARN_MASK) eq "\0"x length($to)) {
 	return "no warnings;\n";
     }
     return "BEGIN {\${^WARNING_BITS} = ".cstring($to)."}\n";
