@@ -159,14 +159,11 @@ PP(pp_substcont)
     char *orig = cx->sb_orig;
     register REGEXP *rx = cx->sb_rx;
     SV *nsv = Nullsv;
-
-    { 
-      REGEXP *old = PM_GETRE(pm);
-      if(old != rx) {
+    REGEXP *old = PM_GETRE(pm);
+    if(old != rx) {
 	if(old) 
-	  ReREFCNT_dec(old);
+	    ReREFCNT_dec(old);
 	PM_SETRE(pm,rx);
-      }
     }
 
     rxres_restore(&cx->sb_rxres, rx);
@@ -259,7 +256,8 @@ PP(pp_substcont)
 	    sv_pos_b2u(sv, &i);
 	mg->mg_len = i;
     }
-    ReREFCNT_inc(rx);
+    if (old != rx)
+	ReREFCNT_inc(rx);
     cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
     rxres_save(&cx->sb_rxres, rx);
     RETURNOP(pm->op_pmreplstart);
