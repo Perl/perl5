@@ -46,6 +46,7 @@ static void init_postdump_symbols _((int, char **, char **));
 static void init_predump_symbols _((void));
 static void init_stacks _((void));
 static void open_script _((char *, bool, SV *));
+static void usage _((char *));
 static void validate_suid _((char *));
 
 PerlInterpreter *
@@ -120,6 +121,10 @@ register PerlInterpreter *sv_interp;
 				     + (SUBVERSION / 100000.0));
 #else
     sprintf(patchlevel, "%5.3f", 5.0 + (PATCHLEVEL / 1000.0));
+#endif
+
+#if defined(LOCAL_PATCH_COUNT)
+    Ilocalpatches = local_patches;	/* For possible -v */
 #endif
 
     fdpid = newAV();	/* for remembering popen pids by fd */
@@ -252,6 +257,7 @@ setuid perl scripts securely.\n");
 #ifndef VMS  /* VMS doesn't have environ array */
     origenviron = environ;
 #endif
+    e_tmpname = Nullch;
 
     if (do_undump) {
 
@@ -405,6 +411,7 @@ setuid perl scripts securely.\n");
     if (e_fp) {
 	if (Fflush(e_fp) || ferror(e_fp) || fclose(e_fp))
 	    croak("Can't write to temp file for -e: %s", Strerror(errno));
+	e_fp = Nullfp;
 	argc++,argv--;
 	scriptname = e_tmpname;
     }
@@ -470,10 +477,10 @@ setuid perl scripts securely.\n");
     curcop->cop_line = 0;
     curstash = defstash;
     preprocess = FALSE;
-    if (e_fp) {
-	fclose(e_fp);
-	e_fp = Nullfp;
+    if (e_tmpname) {
 	(void)UNLINK(e_tmpname);
+	Safefree(e_tmpname);
+	e_tmpname = Nullch;
     }
 
     /* now that script is parsed, we can modify record separator */
@@ -550,11 +557,11 @@ PerlInterpreter *sv_interp;
     if (restartop) {
 	op = restartop;
 	restartop = 0;
-	run();
+	runops();
     }
     else if (main_start) {
 	op = main_start;
-	run();
+	runops();
     }
 
     my_exit(0);
@@ -774,7 +781,7 @@ I32 flags;		/* See G_* flags in cop.h */
     if (op == (OP*)&myop)
 	op = pp_entersub();
     if (op)
-	run();
+	runops();
     retval = stack_sp - (stack_base + oldmark);
     if ((flags & G_EVAL) && !(flags & G_KEEPERR))
 	sv_setpv(GvSV(errgv),"");
@@ -879,7 +886,7 @@ restart:
     if (op == (OP*)&myop)
 	op = pp_entereval();
     if (op)
-	run();
+	runops();
     retval = stack_sp - (stack_base + oldmark);
     if ((flags & G_EVAL) && !(flags & G_KEEPERR))
 	sv_setpv(GvSV(errgv),"");
@@ -957,22 +964,24 @@ char *p;
     }
 }
 
-void
+static void
 usage(name)		/* XXX move this out into a module ? */
 char *name;
 {
-    printf("\nUsage: %s [switches] [filename] [arguments]\n",name);
+    /* This message really ought to be max 23 lines.
+     * Removed -h because the user already knows that opton. Others? */
+    printf("\nUsage: %s [switches] [--] [programfile] [arguments]", name);
     printf("\n  -0[octal]       specify record separator (\\0, if no argument)");
-    printf("\n  -a              autosplit mode with -n or -p");
+    printf("\n  -a              autosplit mode with -n or -p (splits $_ into @F)");
     printf("\n  -c              check syntax only (runs BEGIN and END blocks)");
     printf("\n  -d[:debugger]   run scripts under debugger");
     printf("\n  -D[number/list] set debugging flags (argument is a bit mask or flags)");
-    printf("\n  -e command      one line of script, multiple -e options are allowed");
-    printf("\n                  [filename] can be ommitted when -e is used");
-    printf("\n  -F regexp       regular expression for autosplit (-a)");
+    printf("\n  -e 'command'    one line of script. Several -e's allowed. Omit [programfile].");
+    printf("\n  -F/pattern/     split() pattern for autosplit (-a). The //'s are optional.");
     printf("\n  -i[extension]   edit <> files in place (make backup if extension supplied)");
-    printf("\n  -Idirectory     specify include directory (may be used more then once)");
+    printf("\n  -Idirectory     specify @INC/#include directory (may be used more then once)");
     printf("\n  -l[octal]       enable line ending processing, specifies line teminator");
+    printf("\n  -[mM][-]module.. executes `use/no module...' before executing your script.");
     printf("\n  -n              assume 'while (<>) { ... }' loop arround your script");
     printf("\n  -p              assume loop like -n but print line also like sed");
     printf("\n  -P              run script through C preprocessor before compilation");
@@ -986,7 +995,7 @@ char *name;
     printf("\n  -U              allow unsafe operations");
     printf("\n  -v              print version number and patchlevel of perl");
     printf("\n  -V[:variable]   print perl configuration information");
-    printf("\n  -w              turn warnings on for compilation of your script");
+    printf("\n  -w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT.");
     printf("\n  -x[directory]   strip off text before #!perl line and perhaps cd to directory\n");
 }
 
@@ -1182,6 +1191,24 @@ char *s;
 #endif
 #endif
 
+#if defined(LOCAL_PATCH_COUNT)
+    if (LOCAL_PATCH_COUNT > 0)
+    {	int i;
+	fputs("\n\tLocally applied patches:\n", stdout);
+	for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
+		if (Ilocalpatches[i])
+			fprintf(stdout, "\t  %s\n", Ilocalpatches[i]);
+	}
+    }
+#endif
+    printf("\n\tbuilt under %s",OSNAME);
+#ifdef __DATE__
+#  ifdef __TIME__
+	printf(" at %s %s",__DATE__,__TIME__);
+#  else
+	printf(" on %s",__DATE__);
+#  endif
+#endif
 	fputs("\n\nCopyright 1987-1996, Larry Wall\n",stdout);
 #ifdef MSDOS
 	fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",
@@ -1295,6 +1322,9 @@ SV *sv;
 #if defined(DOSISH) && !defined(OS2) && !defined(atarist)
 #define SEARCH_EXTS ".bat", ".cmd", NULL
 #endif
+#ifdef VMS
+#  define SEARCH_EXTS ".pl", ".com", NULL
+#endif
     /* additional extensions to try in each dir if scriptname not found */
 #ifdef SEARCH_EXTS
     char *ext[] = { SEARCH_EXTS };
@@ -1369,7 +1399,7 @@ SV *sv;
 	scriptname = xfound;
     }
 
-    origfilename = savepv(e_fp ? "-e" : scriptname);
+    origfilename = savepv(e_tmpname ? "-e" : scriptname);
     curcop->cop_filegv = gv_fetchfile(origfilename);
     if (strEQ(origfilename,"-"))
 	scriptname = "";
@@ -1821,6 +1851,8 @@ init_predump_symbols()
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(othergv));
 
     statname = NEWSV(66,0);		/* last filename we did stat on */
+
+    osname = savepv(OSNAME);
 }
 
 static void
