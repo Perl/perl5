@@ -31,8 +31,12 @@ my $DOSISH    = $^O =~ /^(?:MSWin32|os2|dos|NetWare|mint)$/ ? 1 : 0;
    $DOSISH    = 1 if !$DOSISH and $^O =~ /^uwin/;
 my $NONSTDIO  = exists $ENV{PERLIO} && $ENV{PERLIO} ne 'stdio'     ? 1 : 0;
 my $FASTSTDIO = $Config{d_faststdio} && $Config{usefaststdio}      ? 1 : 0;
-
-my $NTEST = 43 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 5 : 0);
+# FIXME. I think that we'll be needing ${^UTF8_LOCALE}
+# This is a hack that assumes that no-one will use -C or -C65 (etc)
+# without also having a UTF8 locale. Hopefully the smoke tests will pass.
+my $UNICODE_STDIN = ${^UNICODE} & 1;
+my $NTEST = 43 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 5 : 0)
+    + $UNICODE_STDIN;
 
 sub PerlIO::F_UTF8 () { 0x00008000 } # from perliol.h
 
@@ -43,6 +47,8 @@ print <<__EOH__;
 # DOSISH    = $DOSISH
 # NONSTDIO  = $NONSTDIO
 # FASTSTDIO = $FASTSTDIO
+# UNICODE   = ${^UNICODE}
+# UNICODE_STDIN = $UNICODE_STDIN
 __EOH__
 
 SKIP: {
@@ -107,7 +113,7 @@ SKIP: {
     }
 
     check([ PerlIO::get_layers(STDIN) ],
-	  [ "stdio" ],
+	  $UNICODE_STDIN ? [ "stdio", "utf8" ] : [ "stdio" ],
 	  "STDIN");
 
     open(F, ">:crlf", "afile");
