@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: Sun Oct 31 02:10:33 1999
+ * Configuration time: Sun Jan  9 15:13:13 2000
  * Configured by     : gsar
  * Target system     : 
  */
@@ -980,52 +980,6 @@
  */
 #define STDCHAR unsigned char	/**/
 
-/* HAS_QUAD:
- *	This symbol, if defined, tells that there's a 64-bit integer type,
- *	Quad_t.
- */
-/* Quad_t:
- *	This symbol holds the type used for 64-bit integers.
- *	It can be int, long, long long, int64_t etc...
- */
-/* QUADCASE:
- *	This symbol, if defined, encodes the type of a quad:
- *	1 = int, 2 = long, 3 = long long, 4 = int64_t.
- */
-/* Uquad_t:
- *	This symbol holds the type used for unsigned 64-bit integers.
- *	It can be unsigned int, unsigned long, unsigned long long,
- *	uint64_t etc...
- */
-/*#define HAS_QUAD	/**/
-/*#define Quad_t __int64	/**/
-/*#define Uquad_t unsigned __int64	/**/
-/*#define QUADCASE 5	/**/
-
-/* HAS_ACCESSX:
- *	This symbol, if defined, indicates that the accessx routine is
- *	available to do extended access checks.
- */
-/*#define HAS_ACCESSX		/**/
-
-/* HAS_EACCESS:
- *	This symbol, if defined, indicates that the eaccess routine is
- *	available to do extended access checks.
- */
-/*#define HAS_EACCESS		/**/
-
-/* I_SYS_ACCESS:
- *     This symbol, if defined, indicates to the C program that it should
- *     include <sys/access.h>.
- */
-/*#define   I_SYS_ACCESS                /**/
-
-/* I_SYS_SECURITY:
- *     This symbol, if defined, indicates to the C program that it should
- *     include <sys/security.h>.
- */
-/*#define   I_SYS_SECURITY	/**/
-
 /* CROSSCOMPILE:
  *	This symbol, if defined, signifies that we our
  *	build process is a cross-compilation.
@@ -1056,6 +1010,46 @@
  *	for several CPUs.
  */
 /*#define MULTIARCH		/**/
+
+/* HAS_QUAD:
+ *	This symbol, if defined, tells that there's a 64-bit integer type,
+ *	Quad_t, and its unsigned counterpar, Uquad_t. QUADKIND will be one
+ *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, or QUAD_IS_INT64_T.
+ */
+/*#define HAS_QUAD	/**/
+#ifdef HAS_QUAD
+#   define Quad_t __int64	/**/
+#   define Uquad_t unsigned __int64	/**/
+#   define QUADKIND undef	/**/
+#   define QUAD_IS_INT	1
+#   define QUAD_IS_LONG	2
+#   define QUAD_IS_LONG_LONG	3
+#   define QUAD_IS_INT64_T	4
+#endif
+
+/* HAS_ACCESSX:
+ *	This symbol, if defined, indicates that the accessx routine is
+ *	available to do extended access checks.
+ */
+/*#define HAS_ACCESSX		/**/
+
+/* HAS_EACCESS:
+ *	This symbol, if defined, indicates that the eaccess routine is
+ *	available to do extended access checks.
+ */
+/*#define HAS_EACCESS		/**/
+
+/* I_SYS_ACCESS:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <sys/access.h>.
+ */
+/*#define   I_SYS_ACCESS                /**/
+
+/* I_SYS_SECURITY:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <sys/security.h>.
+ */
+/*#define   I_SYS_SECURITY	/**/
 
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
@@ -2202,6 +2196,13 @@
  */
 /*#define HAS_HASMNTOPT		/**/
 
+/* HAS_INT64_T:
+ *     This symbol will defined if the C compiler supports int64_t.
+ *     Usually the <inttypes.h> needs to be included, but sometimes
+ *	<sys/types.h> is enough.
+ */
+/*#define     HAS_INT64_T               /**/
+
 /* HAS_LDBL_DIG:
  *	This symbol, if defined, indicates that this system's <float.h>
  *	or <limits.h> defines the symbol LDBL_DIG, which is the number
@@ -2302,13 +2303,7 @@
  *     This symbol, if defined, indicates to the C program that it should
  *     include <inttypes.h>.
  */
-/* HAS_INT64_T:
- *     This symbol will defined if the C compiler supports int64_t.
- *     Usually the <inttypes.h> needs to be included, but sometimes
- *	<sys/types.h> is enough.
- */
 /*#define   I_INTTYPES                /**/
-/*#define     HAS_INT64_T               /**/
 
 /* I_MNTENT:
  *	This symbol, if defined, indicates that <mntent.h> exists and
@@ -2452,9 +2447,6 @@
 /* U64SIZE:
  *	This symbol contains the sizeof(U64).
  */
-/* NVSIZE:
- *	This symbol contains the sizeof(NV).
- */
 #define	IVTYPE		long		/**/
 #define	UVTYPE		unsigned long		/**/
 #define	I8TYPE		char		/**/
@@ -2480,7 +2472,6 @@
 #define	I64SIZE		8	/**/
 #define	U64SIZE		8	/**/
 #endif
-#define	NVSIZE		8		/**/
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV
@@ -2537,8 +2528,8 @@
 /*#define HAS_STRTOULL		/**/
 
 /* USE_64_BITS:
- *	This symbol, if defined, indicates that 64-bit interfaces should
- *	be used when available.  If not defined, the native default interfaces
+ *	This symbol, if defined, indicates that 64-bit integers should
+ *	be used when available.  If not defined, the native integers
  *	will be used (be they 32 or 64 bits).
  */
 #ifndef USE_64_BITS
@@ -2717,16 +2708,22 @@
  */
 /*#define   I_PTHREAD	/**/
 
-/* USE_THREADS:
- *	This symbol, if defined, indicates that Perl should
- *	be built to use threads.
+/* USE_ITHREADS:
+ *	This symbol, if defined, indicates that Perl should be built to
+ *	use the interpreter-based threading implementation.
+ */
+/* USE_5005THREADS:
+ *	This symbol, if defined, indicates that Perl should be built to
+ *	use the 5.005-based threading implementation.
  */
 /* OLD_PTHREADS_API:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use the old draft POSIX threads API.
  */
-#ifndef USE_TTHREADS
-/*#define	USE_THREADS		/**/
+/*#define	USE_5005THREADS		/**/
+/*#define	USE_ITHREADS		/**/
+#if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
+#define		USE_THREADS		/* until src is revised*/
 #endif
 /*#define	OLD_PTHREADS_API		/**/
 
@@ -2756,6 +2753,11 @@
  */
 #define	Gid_t_f		"d"		/**/
 
+/* Gid_t_size:
+ *	This symbol holds the size of a Gid_t in bytes.
+ */
+#define Gid_t_size 4		/* GID size */
+
 /* Gid_t:
  *	This symbol holds the return type of getgid() and the type of
  *	argument to setrgid() and related functions.  Typically,
@@ -2773,8 +2775,12 @@
 /* LSEEKSIZE:
  *	This symbol holds the number of bytes used by the Off_t.
  */
+/* Off_t_size:
+ *	This symbol holds the number of bytes used by the Off_t.
+ */
 #define Off_t off_t		/* <offset> type */
 #define LSEEKSIZE 4		/* <offset> size */
+#define Off_t_size 4	/* <offset> size */
 
 /* Mode_t:
  *	This symbol holds the type used to declare file modes 
@@ -2803,6 +2809,11 @@
  *	This symbol defines the format string used for printing a Uid_t.
  */
 #define	Uid_t_f		"d"		/**/
+
+/* Uid_t_size:
+ *	This symbol holds the size of a Uid_t in bytes.
+ */
+#define Uid_t_size 4		/* UID size */
 
 /* Uid_t:
  *	This symbol holds the type used to declare user ids in the kernel.

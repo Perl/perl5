@@ -512,11 +512,13 @@ sub link {
 	    ? $success++
 	    : ($from =~ m#^/afs/# || $to =~ m#^/afs/#)
 	      ? die "AFS"  # okay inside eval {}
-	      : warn "Couldn't link $from to $to: $!\n"
+	      : die "Couldn't link $from to $to: $!\n"
 	  unless $nonono;
         $packlist->{$to} = { from => $from, type => 'link' };
     };
     if ($@) {
+	warn $@;
+	print "  cp $from $to\n";
 	print "  creating new version of $to\n" if $Is_VMS and -e $to;
 	File::Copy::copy($from, $to)
 	    ? $success++

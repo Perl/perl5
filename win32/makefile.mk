@@ -250,10 +250,6 @@ USE_IMP_SYS	*= undef
 BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT
 .ENDIF
 
-.IF "$(USE_ITHREADS)" != "undef"
-BUILDOPT	+= -DUSE_ITHREADS
-.ENDIF
-
 .IF "$(USE_IMP_SYS)" != "undef"
 BUILDOPT	+= -DPERL_IMPLICIT_SYS
 .ENDIF
@@ -954,7 +950,8 @@ config.w32 : $(CFGSH_TMPL)
 # edit config.{b,v,g}c and make this target once for each supported
 # compiler (e.g. `dmake CCTYPE=BORLAND regen_config_h`)
 regen_config_h:
-	perl config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
+	perl config_sh.PL --cfgsh-option-file $(mktmp $(CFG_VARS)) \
+	    $(CFGSH_TMPL) > ..\config.sh
 	-cd .. && del /f perl.exe
 	cd .. && perl configpm
 	-del /f $(CFGH_TMPL)

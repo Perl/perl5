@@ -91,7 +91,8 @@ unless ($PLATFORM eq 'win32') {
 open(CFG,$config_h) || die "Cannot open $config_h: $!\n";
 while (<CFG>) {
     $define{$1} = 1 if /^\s*#\s*define\s+(MYMALLOC)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(USE_THREADS)\b/;
+    $define{$1} = 1 if /^\s*#\s*define\s+(USE_5005THREADS)\b/;
+    $define{$1} = 1 if /^\s*#\s*define\s+(USE_ITHREADS)\b/;
     $define{$1} = 1 if /^\s*#\s*define\s+(USE_PERLIO)\b/;
     $define{$1} = 1 if /^\s*#\s*define\s+(MULTIPLICITY)\b/;
     $define{$1} = 1 if /^\s*#\s*define\s+(PERL_BINCOMPAT_5005)\b/;
@@ -332,7 +333,7 @@ if ($define{'MYMALLOC'}) {
 		    Perl_realloc
 		    Perl_calloc
 		    )];
-    if ($define{'USE_THREADS'} || $define{'USE_ITHREADS'}) {
+    if ($define{'USE_5005THREADS'} || $define{'USE_ITHREADS'}) {
 	emit_symbols [qw(
 			PL_malloc_mutex
 			)];
@@ -350,7 +351,7 @@ else {
 		    )];
 }
 
-unless ($define{'USE_THREADS'}) {
+unless ($define{'USE_5005THREADS'}) {
     skip_symbols [qw(
 		    PL_thr_key
 		    PL_sv_mutex
@@ -445,7 +446,7 @@ sub readvar {
     return \@syms;
 }
 
-if ($define{'USE_THREADS'} || $define{'MULTIPLICITY'}) {
+if ($define{'USE_5005THREADS'} || $define{'MULTIPLICITY'}) {
     my $thrd = readvar($thrdvar_h);
     skip_symbols $thrd;
 }
@@ -501,7 +502,7 @@ else {
 	my $glob = readvar($intrpvar_h);
 	emit_symbols $glob;
     } 
-    unless ($define{'MULTIPLICITY'} || $define{'USE_THREADS'}) {
+    unless ($define{'MULTIPLICITY'} || $define{'USE_5005THREADS'}) {
 	my $glob = readvar($thrdvar_h);
 	emit_symbols $glob;
     } 
