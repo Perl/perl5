@@ -17,6 +17,7 @@
 :       o		has no compatibility macro (#define foo Perl_foo)
 :       x		not exported
 :       M		may change
+:       E		visible to Perl core extensions
 :
 : Individual flags may be separated by whitespace.
 :
@@ -140,7 +141,7 @@ Ap	|char**	|get_op_names
 p	|char*	|get_no_modify
 p	|U32*	|get_opargs
 Ap	|PPADDR_t*|get_ppaddr
-p	|I32	|cxinc
+Ap	|I32	|cxinc
 Afp	|void	|deb		|const char* pat|...
 Ap	|void	|vdeb		|const char* pat|va_list* args
 Ap	|void	|debprofdump
@@ -412,6 +413,7 @@ p	|int	|magic_setsubstr|SV* sv|MAGIC* mg
 p	|int	|magic_settaint	|SV* sv|MAGIC* mg
 p	|int	|magic_setuvar	|SV* sv|MAGIC* mg
 p	|int	|magic_setvec	|SV* sv|MAGIC* mg
+p	|int	|magic_setutf8	|SV* sv|MAGIC* mg
 p	|int	|magic_set_all_env|SV* sv|MAGIC* mg
 p	|U32	|magic_sizepack	|SV* sv|MAGIC* mg
 p	|int	|magic_wipepack	|SV* sv|MAGIC* mg
@@ -604,7 +606,7 @@ Ap	|I32	|regexec_flags	|regexp* prog|char* stringarg \
 				|char* strend|char* strbeg|I32 minend \
 				|SV* screamer|void* data|U32 flags
 Ap	|regnode*|regnext	|regnode* p
-p	|void	|regprop	|SV* sv|regnode* o
+Ep	|void	|regprop	|SV* sv|regnode* o
 Ap	|void	|repeatcpy	|char* to|const char* from|I32 len|I32 count
 Ap	|char*	|rninstr	|const char* big|const char* bigend \
 				|const char* little|const char* lend
@@ -1091,60 +1093,60 @@ s	|int	|dooneliner	|char *cmd|char *filename
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
-s	|regnode*|reg		|struct RExC_state_t*|I32|I32 *
-s	|regnode*|reganode	|struct RExC_state_t*|U8|U32
-s	|regnode*|regatom	|struct RExC_state_t*|I32 *
-s	|regnode*|regbranch	|struct RExC_state_t*|I32 *|I32
-s	|void	|reguni		|struct RExC_state_t*|UV|char *|STRLEN*
-s	|regnode*|regclass	|struct RExC_state_t*
-s	|I32	|regcurly	|char *
-s	|regnode*|reg_node	|struct RExC_state_t*|U8
-s	|regnode*|regpiece	|struct RExC_state_t*|I32 *
-s	|void	|reginsert	|struct RExC_state_t*|U8|regnode *
-s	|void	|regoptail	|struct RExC_state_t*|regnode *|regnode *
-s	|void	|regtail	|struct RExC_state_t*|regnode *|regnode *
-s	|char*|regwhite	|char *|char *
-s	|char*|nextchar	|struct RExC_state_t*
+Es	|regnode*|reg		|struct RExC_state_t*|I32|I32 *
+Es	|regnode*|reganode	|struct RExC_state_t*|U8|U32
+Es	|regnode*|regatom	|struct RExC_state_t*|I32 *
+Es	|regnode*|regbranch	|struct RExC_state_t*|I32 *|I32
+Es	|void	|reguni		|struct RExC_state_t*|UV|char *|STRLEN*
+Es	|regnode*|regclass	|struct RExC_state_t*
+Es	|I32	|regcurly	|char *
+Es	|regnode*|reg_node	|struct RExC_state_t*|U8
+Es	|regnode*|regpiece	|struct RExC_state_t*|I32 *
+Es	|void	|reginsert	|struct RExC_state_t*|U8|regnode *
+Es	|void	|regoptail	|struct RExC_state_t*|regnode *|regnode *
+Es	|void	|regtail	|struct RExC_state_t*|regnode *|regnode *
+Es	|char*|regwhite	|char *|char *
+Es	|char*|nextchar	|struct RExC_state_t*
 #  ifdef DEBUGGING
-s	|regnode*|dumpuntil	|regnode *start|regnode *node \
+Es	|regnode*|dumpuntil	|regnode *start|regnode *node \
 				|regnode *last|SV* sv|I32 l
-s	|void	|put_byte	|SV* sv|int c
+Es	|void	|put_byte	|SV* sv|int c
 #  endif
-s	|void	|scan_commit	|struct RExC_state_t*|struct scan_data_t *data
-s	|void	|cl_anything	|struct RExC_state_t*|struct regnode_charclass_class *cl
-s	|int	|cl_is_anything	|struct regnode_charclass_class *cl
-s	|void	|cl_init	|struct RExC_state_t*|struct regnode_charclass_class *cl
-s	|void	|cl_init_zero	|struct RExC_state_t*|struct regnode_charclass_class *cl
-s	|void	|cl_and		|struct regnode_charclass_class *cl \
+Es	|void	|scan_commit	|struct RExC_state_t*|struct scan_data_t *data
+Es	|void	|cl_anything	|struct RExC_state_t*|struct regnode_charclass_class *cl
+Es	|int	|cl_is_anything	|struct regnode_charclass_class *cl
+Es	|void	|cl_init	|struct RExC_state_t*|struct regnode_charclass_class *cl
+Es	|void	|cl_init_zero	|struct RExC_state_t*|struct regnode_charclass_class *cl
+Es	|void	|cl_and		|struct regnode_charclass_class *cl \
 				|struct regnode_charclass_class *and_with
-s	|void	|cl_or		|struct RExC_state_t*|struct regnode_charclass_class *cl \
+Es	|void	|cl_or		|struct RExC_state_t*|struct regnode_charclass_class *cl \
 				|struct regnode_charclass_class *or_with
-s	|I32	|study_chunk	|struct RExC_state_t*|regnode **scanp|I32 *deltap \
+Es	|I32	|study_chunk	|struct RExC_state_t*|regnode **scanp|I32 *deltap \
 				|regnode *last|struct scan_data_t *data \
 				|U32 flags
-s	|I32	|add_data	|struct RExC_state_t*|I32 n|char *s
+Es	|I32	|add_data	|struct RExC_state_t*|I32 n|char *s
 rs	|void|re_croak2	|const char* pat1|const char* pat2|...
-s	|I32	|regpposixcc	|struct RExC_state_t*|I32 value
-s	|void	|checkposixcc	|struct RExC_state_t*
+Es	|I32	|regpposixcc	|struct RExC_state_t*|I32 value
+Es	|void	|checkposixcc	|struct RExC_state_t*
 #endif
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
-s	|I32	|regmatch	|regnode *prog
-s	|I32	|regrepeat	|regnode *p|I32 max
-s	|I32	|regrepeat_hard	|regnode *p|I32 max|I32 *lp
-s	|I32	|regtry		|regexp *prog|char *startpos
-s	|bool	|reginclass	|regnode *n|U8 *p|STRLEN *lenp|bool do_utf8sv_is_utf8
-s	|CHECKPOINT|regcppush	|I32 parenfloor
-s	|char*|regcppop
-s	|char*|regcp_set_to	|I32 ss
-s	|void	|cache_re	|regexp *prog
-s	|U8*	|reghop		|U8 *pos|I32 off
-s	|U8*	|reghop3	|U8 *pos|I32 off|U8 *lim
-s	|U8*	|reghopmaybe	|U8 *pos|I32 off
-s	|U8*	|reghopmaybe3	|U8 *pos|I32 off|U8 *lim
-s	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *startpos|I32 norun
-s	|void	|to_utf8_substr	|regexp * prog
-s	|void	|to_byte_substr	|regexp * prog
+Es	|I32	|regmatch	|regnode *prog
+Es	|I32	|regrepeat	|regnode *p|I32 max
+Es	|I32	|regrepeat_hard	|regnode *p|I32 max|I32 *lp
+Es	|I32	|regtry		|regexp *prog|char *startpos
+Es	|bool	|reginclass	|regnode *n|U8 *p|STRLEN *lenp|bool do_utf8sv_is_utf8
+Es	|CHECKPOINT|regcppush	|I32 parenfloor
+Es	|char*|regcppop
+Es	|char*|regcp_set_to	|I32 ss
+Es	|void	|cache_re	|regexp *prog
+Es	|U8*	|reghop		|U8 *pos|I32 off
+Es	|U8*	|reghop3	|U8 *pos|I32 off|U8 *lim
+Es	|U8*	|reghopmaybe	|U8 *pos|I32 off
+Es	|U8*	|reghopmaybe3	|U8 *pos|I32 off|U8 *lim
+Es	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *startpos|I32 norun
+Es	|void	|to_utf8_substr	|regexp * prog
+Es	|void	|to_byte_substr	|regexp * prog
 #endif
 
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
@@ -1212,6 +1214,8 @@ s	|I32	|expect_number	|char** pattern
 #  if defined(USE_ITHREADS)
 s	|SV*	|gv_share	|SV *sv|CLONE_PARAMS *param
 #  endif
+s	|bool	|utf8_mg_pos	|SV *sv|MAGIC **mgp|STRLEN **cachep|I32 i|I32 *offsetp|I32 uoff|U8 **sp|U8 *start|U8 *send
+s	|bool	|utf8_mg_pos_init	|SV *sv|MAGIC **mgp|STRLEN **cachep|I32 i|I32 *offsetp|U8 *s|U8 *start
 #if defined(PERL_COPY_ON_WRITE)
 sM	|void	|sv_release_COW	|SV *sv|char *pvx|STRLEN cur|STRLEN len \
 				|U32 hash|SV *after

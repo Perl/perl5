@@ -11,7 +11,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.07';
+$VERSION = '3.08';
 #..........................................................................
 
 BEGIN {  # Make a DEBUG constant very first thing...
@@ -29,7 +29,7 @@ use Pod::Perldoc::GetOptsOO; # uses the DEBUG.
 
 #..........................................................................
 { my $pager = $Config{'pager'};
-  push @Pagers, $pager if -x (split /\\s+/, $pager)[0];
+  push @Pagers, $pager if -x (split /\s+/, $pager)[0];
 }
 $Bindir  = $Config{'scriptdirexp'};
 $Pod2man = "pod2man" . ( $Config{'versiononly'} ? $Config{'version'} : '' );
@@ -1626,10 +1626,8 @@ __END__
 # is embedded in the perl installation tree.
 # 
 #~~~~~~
-# Version 3.06: Sunday November 17 2002 -- 14:05:28
-#       Sean M. Burke <sburke@cpan.org>
-#       Added -V to report version
-#       Restore -U as a no-op legacy switch.
+#
+# See ChangeLog in CPAN dist for Pod::Perldoc for later notes.
 #
 # Version 3.01: Sun Nov 10 21:38:09 MST 2002
 #       Sean M. Burke <sburke@cpan.org>

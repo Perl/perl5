@@ -183,8 +183,6 @@ refers to the innermost enclosing loop.  This may include dynamically
 looking back your call-stack at run time to find the LABEL.  Such
 desperate behavior triggers a warning if you use the C<use warnings>
 pragma or the B<-w> flag.
-Unlike a C<foreach> statement, a C<while> statement never implicitly
-localises any variables.
 
 If there is a C<continue> BLOCK, it is always executed just before the
 conditional is about to be evaluated again, just like the third part of a
@@ -319,7 +317,8 @@ is therefore visible only within the loop.  Otherwise, the variable is
 implicitly local to the loop and regains its former value upon exiting
 the loop.  If the variable was previously declared with C<my>, it uses
 that variable instead of the global one, but it's still localized to
-the loop.  
+the loop.  This implicit localisation occurs I<only> in a C<foreach>
+loop.
 
 The C<foreach> keyword is actually a synonym for the C<for> keyword, so
 you can use C<foreach> for readability or C<for> for brevity.  (Or because

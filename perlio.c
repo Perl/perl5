@@ -2831,6 +2831,7 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	}
 	return result;
     } 
+
 }
 
 SSize_t

@@ -1,3 +1,12 @@
+2003 Jan 8
+
+ Blair Zajac:
+  DProf.xs:
+    - To avoid core dumps, increase stack size by 10 instead of 5.
+    - Assert that g_profstack is large enough when DEBUGGING is defined
+  DProf.pm:
+    - Bump VERSION.
+
 1999 Jan 8
 
  Ilya Zakharevich:

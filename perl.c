@@ -216,12 +216,9 @@ perl_construct(pTHXx)
 	*s = '\0';
 	SvCUR_set(PL_patchlevel, s - (U8*)SvPVX(PL_patchlevel));
 	SvPOK_on(PL_patchlevel);
-	SvNVX(PL_patchlevel) = (NV)PERL_REVISION
-				+ ((NV)PERL_VERSION / (NV)1000)
-#if defined(PERL_SUBVERSION) && PERL_SUBVERSION > 0
-				+ ((NV)PERL_SUBVERSION / (NV)1000000)
-#endif
-				;
+	SvNVX(PL_patchlevel) = (NV)PERL_REVISION +
+			      ((NV)PERL_VERSION / (NV)1000) +
+			      ((NV)PERL_SUBVERSION / (NV)1000000);
 	SvNOK_on(PL_patchlevel);	/* dual valued */
 	SvUTF8_on(PL_patchlevel);
 	SvREADONLY_on(PL_patchlevel);
@@ -2159,6 +2156,10 @@ Perl_moreswitches(pTHX_ char *s)
     case 'C':
         PL_wantutf8 = TRUE; /* Can be set earlier by $ENV{PERL_UTF8_LOCALE}. */
 	s++;
+	if (*s == ':') {
+	     PL_wantutf8 = (bool) atoi(s + 1);
+	     for (s++; isDIGIT(*s); s++) ;
+	}
 	return s;
     case 'F':
 	PL_minus_F = TRUE;

@@ -340,6 +340,13 @@ walk_table {
 		$ret .= hide($func,"Perl_$func");
 	    }
 	}
+         unless ($flags =~ /A/) {
+	    if ($flags =~ /E/) {
+		$ret = "#if defined(PERL_CORE) || defined(PERL_EXT)\n$ret#endif\n";
+	    } else {
+		$ret = "#ifdef PERL_CORE\n$ret#endif\n";
+	    }
+        }
     }
     $ret;
 } \*EM, "";
@@ -393,6 +400,13 @@ walk_table {
 		$ret .= $alist . ")\n";
 	    }
 	}
+         unless ($flags =~ /A/) {
+	    if ($flags =~ /E/) {
+		$ret = "#if defined(PERL_CORE) || defined(PERL_EXT)\n$ret#endif\n";
+	    } else {
+		$ret = "#ifdef PERL_CORE\n$ret#endif\n";
+	    }
+        }
     }
     $ret;
 } \*EM, "";
