@@ -137,7 +137,7 @@ print "1..149\n";
     }
     else {
 	$tmp = (grep { defined and -d and (stat _)[2] & 2 }
-		     qw(/tmp /var/tmp /usr/tmp /sys$scratch),
+		     qw(sys$scratch /tmp /var/tmp /usr/tmp),
 		     @ENV{qw(TMP TEMP)})[0]
 	    or print "# can't find world-writeable directory to test PATH\n";
     }
