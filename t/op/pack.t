@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 1493;
+plan tests => 3943;
 
 use strict;
 use warnings;
@@ -749,3 +749,62 @@ foreach (
     @a = unpack '(SL)3 SL',   pack '(SL)*', 67..74;
     is("@a", "@b");
 }
+
+{  # Repeat count [SUBEXPR]
+   my @codes = qw( x A Z a c C B b H h s v n S i I l V N L p P f F d D
+		   s! S! i! I! l! L! );
+   if (eval { pack 'q', 1 } ) {
+     push @codes, qw(q Q);
+   } else {
+     push @codes, qw(c C);	# Keep the count the same
+   }
+
+   my %val;
+   @val{@codes} = map { / [Xx]  (?{ undef })
+			| [AZa] (?{ 'something' })
+			| C     (?{ 214 })
+			| c     (?{ 114 })
+			| [Bb]  (?{ '101' })
+			| [Hh]  (?{ 'b8' })
+			| [svnSiIlVNLqQ]  (?{ 10111 })
+			| [FfDd]  (?{ 1.36514538e67 })
+			| [pP]  (?{ "try this buffer" })
+			/x; $^R } @codes;
+   my @end = (0x12345678, 0x23456781, 0x35465768, 0x15263748);
+   my $end = "N4";
+
+   for my $type (@codes) {
+     my @list = $val{$type};
+     @list = () unless defined $list[0];
+     for my $count ('', '3', '[11]') {
+       my $c = 1;
+       $c = $1 if $count =~ /(\d+)/;
+       my @list1 = @list;
+       @list1 = (@list1) x $c unless $type =~ /[XxAaZBbHhP]/;
+       for my $groupend ('', ')2', ')[8]') {
+	   my $groupbegin = ($groupend ? '(' : '');
+	   $c = 1;
+	   $c = $1 if $groupend =~ /(\d+)/;
+	   my @list2 = (@list1) x $c;
+
+	   my $junk1 = "$groupbegin $type$count $groupend";
+	   # print "# junk1=$junk1\n";
+	   my $p = pack $junk1, @list2;
+	   my $half = int( (length $p)/2 );
+	   for my $move ('', "X$half", 'x1', "x$half") {
+	     my $junk = "$junk1 $move";
+	     # print "# junk=$junk list=(@list2)\n";
+	     $p = pack "$junk $end", @list2, @end;
+	     my @l = unpack "x[$junk] $end", $p;
+	     is(scalar @l, scalar @end);
+	     is("@l", "@end", "skipping x[$junk]");
+	   }
+       }
+     }
+   }
+}
+
+# / is recognized after spaces in scalar context
+# XXXX no spaces are allowed in pack...  In pack only before the slash...
+is(scalar unpack('A /A Z20', pack 'A/A* Z20', 'bcde', 'xxxxx'), 'bcde');
+is(scalar unpack('A /A /A Z20', '3004bcde'), 'bcde');

@@ -1067,6 +1067,7 @@ s	|int	|div128		|SV *pnum|bool *done
 s	|char *	|next_symbol	|char *pat|char *patend
 s	|I32	|find_count	|char **ppat|char *patend|int *star
 s	|char *	|group_end	|char *pat|char *patend|char ender
+s	|I32	|measure_struct	|char *pat|char *patend
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)

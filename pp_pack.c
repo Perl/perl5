@@ -142,8 +142,175 @@ S_group_end(pTHX_ register char *pat, register char *patend, char ender)
 	    continue;
 	} else if (c == '(')
 	    pat = group_end(pat, patend, ')') + 1;
+	else if (c == '[')
+	    pat = group_end(pat, patend, ']') + 1;
     }
     croak("No group ending character `%c' found", ender);
+}
+
+/* Returns the sizeof() struct described by pat */
+I32
+S_measure_struct(pTHX_ char *pat, register char *patend)
+{
+    I32 datumtype;
+    register I32 len;
+    register I32 total = 0;
+    int commas = 0;
+    int star;		/* 1 if count is *, -1 if no count given, -2 for / */
+#ifdef PERL_NATINT_PACK
+    int natint;		/* native integer */
+    int unatint;	/* unsigned native integer */
+#endif
+    char buf[2];
+    register int size;
+
+    while ((pat = next_symbol(pat, patend)) < patend) {
+	datumtype = *pat++ & 0xFF;
+#ifdef PERL_NATINT_PACK
+	natint = 0;
+#endif
+	if (*pat == '!') {
+	    static const char *natstr = "sSiIlL";
+
+	    if (strchr(natstr, datumtype)) {
+#ifdef PERL_NATINT_PACK
+		natint = 1;
+#endif
+		pat++;
+	    }
+	    else
+		croak("'!' allowed only after types %s", natstr);
+	}
+	len = find_count(&pat, patend, &star);
+	if (star > 0)			/*  */
+		croak("%s not allowed in length fields", "count *");
+	else if (star < 0)		/* No explicit len */
+		len = datumtype != '@';
+
+	switch(datumtype) {
+	default:
+	    croak("Invalid type in unpack: '%c'", (int)datumtype);
+	case '@':
+	case '/':
+	case 'U':			/* XXXX Is it correct? */
+	case 'w':
+	case 'u':
+	    buf[0] = datumtype;
+	    buf[1] = 0;
+	    croak("%s not allowed in length fields", buf);
+	case ',': /* grandfather in commas but with a warning */
+	    if (commas++ == 0 && ckWARN(WARN_UNPACK))
+		Perl_warner(aTHX_ WARN_UNPACK,
+			    "Invalid type in unpack: '%c'", (int)datumtype);
+	    /* FALL THROUGH */
+	case '%':
+	    size = 0;
+	    break;
+	case '(':
+	{
+	    char *beg = pat, *end;
+
+	    if (star >= 0)
+		croak("()-group starts with a count");
+	    end = group_end(beg, patend, ')');
+	    pat = end + 1;
+	    len = find_count(&pat, patend, &star);
+	    if (star < 0)		/* No count */
+		len = 1;
+	    else if (star > 0)	/* Star */
+		croak("%s not allowed in length fields", "count *");
+	    size = measure_struct(beg, end);
+	    break;
+	}
+	case 'X':
+	    size = -1;
+	    if (total < len)
+		croak("X outside of string");
+	    break;
+	case 'x':
+	case 'A':
+	case 'Z':
+	case 'a':
+	case 'c':
+	case 'C':
+	    size = 1;
+	    break;
+	case 'B':
+	case 'b':
+	    len = (len + 7)/8;
+	    size = 1;
+	    break;
+	case 'H':
+	case 'h':
+	    len = (len + 1)/2;
+	    size = 1;
+	    break;
+	case 's':
+#if SHORTSIZE == SIZE16
+	    size = SIZE16;
+#else
+	    size = (natint ? sizeof(short) : SIZE16);
+#endif
+	    break;
+	case 'v':
+	case 'n':
+	case 'S':
+#if SHORTSIZE == SIZE16
+	    size = SIZE16;
+#else
+	    unatint = natint && datumtype == 'S';
+	    size = (unatint ? sizeof(unsigned short) : SIZE16);
+#endif
+	    break;
+	case 'i':
+	    size = sizeof(int);
+	    break;
+	case 'I':
+	    size = sizeof(unsigned int);
+	    break;
+	case 'l':
+#if LONGSIZE == SIZE32
+	    size = SIZE32;
+#else
+	    size = (natint ? sizeof(long) : SIZE32);
+#endif
+	    break;
+	case 'V':
+	case 'N':
+	case 'L':
+#if LONGSIZE == SIZE32
+	    size = SIZE32;
+#else
+	    unatint = natint && datumtype == 'L';
+	    size = (unatint ? sizeof(unsigned long) : SIZE32);
+#endif
+	    break;
+	case 'P':
+	    len = 1;
+	    /* FALL THROUGH */
+	case 'p':
+	    size = sizeof(char*);
+	    break;
+#ifdef HAS_QUAD
+	case 'q':
+	    size = sizeof(Quad_t);
+	    break;
+	case 'Q':
+	    size = sizeof(Uquad_t);
+	    break;
+#endif
+	case 'f':
+	case 'F':
+	    size = sizeof(float);
+	    break;
+	case 'd':
+	case 'D':
+	    size = sizeof(double);
+	    break;
+	}
+	total += len * size;
+    }
+    return total;
 }
 
 /* Returns -1 on no count or on star */
@@ -164,8 +331,15 @@ S_find_count(pTHX_ char **ppat, register char *patend, int *star)
     else if (isDIGIT(*pat) || *pat == '[') {
 	bool brackets = *pat == '[';
 
-	if (brackets)
+	if (brackets) {
 	    ++pat, len = 0;
+	    if (!isDIGIT(*pat)) {
+		char *end = group_end(pat, patend, ']');
+
+		*ppat = end + 1;
+		return measure_struct(pat, end);
+	    }
+	}	
 	else
 	    len = *pat++ - '0';
 	while (isDIGIT(*pat)) {
@@ -200,7 +374,6 @@ S_next_symbol(pTHX_ register char *pat, register char *patend)
     }
     return pat;
 }
-
 
 /*
 =for apidoc unpack_str
@@ -253,8 +426,15 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 #ifdef PERL_NATINT_PACK
 	natint = 0;
 #endif
+	/* do first one only unless in list context
+	   / is implemented by unpacking the count, then poping it from the
+	   stack, so must check that we're not in the middle of a /  */
+        if ( (flags & UNPACK_ONLY_ONE)
+	     && (SP - PL_stack_base == start_sp_offset + 1)
+	     && (datumtype != '/') )
+            break;
 	if (*pat == '!') {
-	    char *natstr = "sSiIlL";
+	    static const char natstr[] = "sSiIlL";
 
 	    if (strchr(natstr, datumtype)) {
 #ifdef PERL_NATINT_PACK
@@ -269,7 +449,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	if (star > 0)
 		len = strend - strbeg;	/* long enough */
 	else if (star < 0)		/* No explicit len */
-		len = datumtype != '@';	    
+		len = datumtype != '@';
 
       redo_switch:
 	switch(datumtype) {
@@ -1055,7 +1235,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
             }
 	    break;
 	case 'Q':
-	    along = (strend - s) / sizeof(Quad_t);
+	    along = (strend - s) / sizeof(Uquad_t);
 	    if (len > along)
 		len = along;
 	    if (checksum) {
@@ -1222,14 +1402,6 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	    XPUSHs(sv_2mortal(sv));
 	    checksum = 0;
 	}
-        if ((flags & UNPACK_ONLY_ONE)
-	    && SP - PL_stack_base == start_sp_offset + 1) {
-	    /* do first one only unless in list context
-             / is implmented by unpacking the count, then poping it from the
-             stack, so must check that we're not in the middle of a /  */
-          if ((pat >= patend) || *pat != '/')
-            break;
-        }
     }
     if (new_s)
 	*new_s = s;
@@ -1426,7 +1598,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	natint = 0;
 #endif
         if (*pat == '!') {
-	    char *natstr = "sSiIlL";
+	    static const char natstr[] = "sSiIlL";
 
 	    if (strchr(natstr, datumtype)) {
 #ifdef PERL_NATINT_PACK

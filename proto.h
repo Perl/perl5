@@ -1109,6 +1109,7 @@ STATIC int	S_div128(pTHX_ SV *pnum, bool *done);
 STATIC char *	S_next_symbol(pTHX_ char *pat, char *patend);
 STATIC I32	S_find_count(pTHX_ char **ppat, char *patend, int *star);
 STATIC char *	S_group_end(pTHX_ char *pat, char *patend, char ender);
+STATIC I32	S_measure_struct(pTHX_ char *pat, char *patend);
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)

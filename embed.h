@@ -1000,6 +1000,7 @@
 #define next_symbol		S_next_symbol
 #define find_count		S_find_count
 #define group_end		S_group_end
+#define measure_struct		S_measure_struct
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #define docatch			S_docatch
@@ -2544,6 +2545,7 @@
 #define next_symbol(a,b)	S_next_symbol(aTHX_ a,b)
 #define find_count(a,b,c)	S_find_count(aTHX_ a,b,c)
 #define group_end(a,b,c)	S_group_end(aTHX_ a,b,c)
+#define measure_struct(a,b)	S_measure_struct(aTHX_ a,b)
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #define docatch(a)		S_docatch(aTHX_ a)

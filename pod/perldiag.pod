@@ -2313,6 +2313,12 @@ supplied.  See L<perlform>.
 of Perl.  Check the #! line, or manually feed your script into Perl
 yourself.
 
+=item %s not allowed in length fields
+
+(F) The count in the (un)pack template may be replaced by C<[TEMPLATE]> only if
+C<TEMPLATE> always matches the same amount of packed bytes.  Redesign
+the template.
+
 =item no UTC offset information; assuming local time is UTC
 
 (S) A warning peculiar to VMS.  Perl was unable to find the local
