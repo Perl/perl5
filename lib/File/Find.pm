@@ -216,7 +216,7 @@ sub contract_name {
     my $abs_name= $cdir . $fn;
 
     if (substr($fn,0,3) eq '../') {
-	do 1 while ($abs_name=~ s|/(?>[^/]+)/\.\./|/|);
+       1 while $abs_name =~ s!/[^/]*/\.\./!/!;
     }
 
     return $abs_name;

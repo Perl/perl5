@@ -669,6 +669,7 @@ jpl/install-jpl		JPL install utility
 keywords.h		The keyword numbers
 keywords.pl		Program to write keywords.h
 lib/AnyDBM_File.pm	Perl module to emulate dbmopen
+lib/Attribute/Handlers.pm	Attribute::Handlers
 lib/AutoLoader.pm	Autoloader base class
 lib/AutoSplit.pm	Split up autoload functions
 lib/Benchmark.pm	Measure execution time
@@ -1463,6 +1464,7 @@ t/lib/Test/todo.t	See if Test works
 t/lib/abbrev.t		See if Text::Abbrev works
 t/lib/ansicolor.t	See if Term::ANSIColor works
 t/lib/anydbm.t		See if AnyDBM_File works
+t/lib/attrhand.t	See if Attribute::Handlers works
 t/lib/attrs.t		See if attrs works with C<sub : attrs>
 t/lib/autoloader.t	See if AutoLoader works
 t/lib/b-debug.t         See if B::Debug works
