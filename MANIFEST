@@ -1,3 +1,4 @@
+Artistic		The "Artistic License"
 Configure		Run this first
 Copying			The GNU General Public License
 EXTERN.h		Included before foreign .h files
@@ -20,6 +21,7 @@ config.H		Sample config.h
 config_h.SH		Produces config.h
 cons.c			Routines to construct cmd nodes of a parse tree
 consarg.c		Routines to construct arg nodes of a parse tree
+doSH			Script to run all the *.SH files
 doarg.c			Scalar expression evaluation
 doio.c			I/O operations
 dolist.c		Array expression evaluation
@@ -87,6 +89,7 @@ h2pl/tcbreak2		cbreak test routine using .pl
 handy.h			Handy definitions
 hash.c			Associative arrays
 hash.h			Public declarations for the above
+hints/3b1.sh
 hints/3b2.sh
 hints/aix_rs.sh
 hints/aix_rt.sh
@@ -114,9 +117,11 @@ hints/sunos_3_4.sh
 hints/sunos_3_5.sh
 hints/sunos_4_0_1.sh
 hints/sunos_4_0_2.sh
+hints/svr4.sh
 hints/ultrix_3.sh
 hints/ultrix_4.sh
 hints/uts.sh
+hints/vax.sh
 installperl		Perl script to do "make install" dirty work
 ioctl.pl		Sample ioctl.pl
 lib/abbrev.pl		An abbreviation table builder
@@ -127,13 +132,17 @@ lib/cacheout.pl		Manages output filehandles when you need too many
 lib/complete.pl		A command completion subroutine
 lib/ctime.pl		A ctime workalike
 lib/dumpvar.pl		A variable dumper
+lib/find.pl		A find emulator--used by find2perl
+lib/finddepth.pl	A depth-first find emulator--used by find2perl
 lib/flush.pl		Routines to do single flush
 lib/getopt.pl		Perl library supporting option parsing
 lib/getopts.pl		Perl library supporting option parsing
 lib/importenv.pl	Perl routine to get environment into variables
 lib/look.pl		A "look" equivalent
+lib/newgetopt.pl	A perl library supporting long option parsing
 lib/perldb.pl		Perl debugging routines
 lib/pwd.pl		Routines to keep track of PWD environment variable
+lib/shellwords.pl	Perl library to split into words with shell quoting
 lib/stat.pl		Perl library supporting stat function
 lib/syslog.pl		Perl library supporting syslogging
 lib/termcap.pl		Perl library supporting termcap usage
@@ -296,6 +305,7 @@ x2p/a2p.h		Global declarations
 x2p/a2p.man		Manual page for awk to perl translator
 x2p/a2p.y		A yacc grammer for awk
 x2p/a2py.c		Awk compiler, sort of
+x2p/cflags.SH		A script that emits C compilation flags per file
 x2p/find2perl.SH	A find to perl translator
 x2p/handy.h		Handy definitions
 x2p/hash.c		Associative arrays again

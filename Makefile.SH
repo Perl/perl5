@@ -25,9 +25,15 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $RCSfile: Makefile.SH,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:30:39 $
+# $RCSfile: Makefile.SH,v $$Revision: 4.0.1.2 $$Date: 91/06/07 10:14:43 $
 #
 # $Log:	Makefile.SH,v $
+# Revision 4.0.1.2  91/06/07  10:14:43  lwall
+# patch4: cflags now emits entire cc command except for the filename
+# patch4: alternate make programs are now semi-supported
+# patch4: uperl.o no longer tries to link in libraries prematurely
+# patch4: installperl now installs x2p stuff too
+# 
 # Revision 4.0.1.1  91/04/11  17:30:39  lwall
 # patch1: C flags are now settable on a per-file basis
 # 
@@ -55,17 +61,18 @@ libs = $libs $cryptlib
 
 public = perl taintperl $suidperl
 
+# To use an alternate make, set $altmake in config.sh.
+MAKE = ${altmake-make}
+
 !GROK!THIS!
 
 cat >>Makefile <<'!NO!SUBS!'
 
-CFLAGS = `sh cflags.SH $@`
+CCCMD = `sh cflags $@`
 
 private = 
 
 scripts = h2ph
-
-MAKE = make
 
 manpages = perl.man h2ph.man
 
@@ -104,7 +111,7 @@ addedbyconf = Makefile.old bsd eunice filexp loc pdp11 usg v7
 SHELL = /bin/sh
 
 .c.o:
-	$(CC) -c $(CFLAGS) $*.c
+	$(CCCMD) $*.c
 
 all: $(public) $(private) $(util) uperl.o $(scripts)
 	cd x2p; $(MAKE) all
@@ -119,7 +126,7 @@ perl: $& perly.o $(obj) usersub.o
 	$(CC) $(LARGE) $(CLDFLAGS) $(obj) perly.o usersub.o $(libs) -o perl
 
 uperl.o: $& perly.o $(obj)
-	-ld $(LARGE) $(LDFLAGS) -r $(obj) perly.o $(libs) -o uperl.o
+	-ld $(LARGE) $(LDFLAGS) -r $(obj) perly.o -o uperl.o
 
 saber: perly.c
 	# load $(c) perly.c
@@ -147,141 +154,140 @@ taintperl: $& tperly.o tperl.o $(tobj) usersub.o
 tperly.o: perly.c perly.h $(h)
 	/bin/rm -f tperly.c
 	$(SLN) perly.c tperly.c
-	$(CC) -c -DTAINT $(CFLAGS) tperly.c
+	$(CCCMD) -DTAINT tperly.c
 	/bin/rm -f tperly.c
 
 tperl.o: perl.c perly.h patchlevel.h perl.h $(h)
 	/bin/rm -f tperl.c
 	$(SLN) perl.c tperl.c
-	$(CC) -c -DTAINT $(CFLAGS) tperl.c
+	$(CCCMD) -DTAINT tperl.c
 	/bin/rm -f tperl.c
 
 sperl.o: perl.c perly.h patchlevel.h $(h)
 	/bin/rm -f sperl.c
 	$(SLN) perl.c sperl.c
-	$(CC) -c -DTAINT -DIAMSUID $(CFLAGS) sperl.c
+	$(CCCMD) -DTAINT -DIAMSUID sperl.c
 	/bin/rm -f sperl.c
 
 tarray.o: array.c $(h)
 	/bin/rm -f tarray.c
 	$(SLN) array.c tarray.c
-	$(CC) -c -DTAINT $(CFLAGS) tarray.c
+	$(CCCMD) -DTAINT tarray.c
 	/bin/rm -f tarray.c
 
 tcmd.o: cmd.c $(h)
 	/bin/rm -f tcmd.c
 	$(SLN) cmd.c tcmd.c
-	$(CC) -c -DTAINT $(CFLAGS) tcmd.c
+	$(CCCMD) -DTAINT tcmd.c
 	/bin/rm -f tcmd.c
 
 tcons.o: cons.c $(h) perly.h
 	/bin/rm -f tcons.c
 	$(SLN) cons.c tcons.c
-	$(CC) -c -DTAINT $(CFLAGS) tcons.c
+	$(CCCMD) -DTAINT tcons.c
 	/bin/rm -f tcons.c
 
 tconsarg.o: consarg.c $(h)
 	/bin/rm -f tconsarg.c
 	$(SLN) consarg.c tconsarg.c
-	$(CC) -c -DTAINT $(CFLAGS) tconsarg.c
+	$(CCCMD) -DTAINT tconsarg.c
 	/bin/rm -f tconsarg.c
 
 tdoarg.o: doarg.c $(h)
 	/bin/rm -f tdoarg.c
 	$(SLN) doarg.c tdoarg.c
-	$(CC) -c -DTAINT $(CFLAGS) tdoarg.c
+	$(CCCMD) -DTAINT tdoarg.c
 	/bin/rm -f tdoarg.c
 
 tdoio.o: doio.c $(h)
 	/bin/rm -f tdoio.c
 	$(SLN) doio.c tdoio.c
-	$(CC) -c -DTAINT $(CFLAGS) tdoio.c
+	$(CCCMD) -DTAINT tdoio.c
 	/bin/rm -f tdoio.c
 
 tdolist.o: dolist.c $(h)
 	/bin/rm -f tdolist.c
 	$(SLN) dolist.c tdolist.c
-	$(CC) -c -DTAINT $(CFLAGS) tdolist.c
+	$(CCCMD) -DTAINT tdolist.c
 	/bin/rm -f tdolist.c
 
 tdump.o: dump.c $(h)
 	/bin/rm -f tdump.c
 	$(SLN) dump.c tdump.c
-	$(CC) -c -DTAINT $(CFLAGS) tdump.c
+	$(CCCMD) -DTAINT tdump.c
 	/bin/rm -f tdump.c
 
 teval.o: eval.c $(h)
 	/bin/rm -f teval.c
 	$(SLN) eval.c teval.c
-	$(CC) -c -DTAINT $(CFLAGS) teval.c
+	$(CCCMD) -DTAINT teval.c
 	/bin/rm -f teval.c
 
 tform.o: form.c $(h)
 	/bin/rm -f tform.c
 	$(SLN) form.c tform.c
-	$(CC) -c -DTAINT $(CFLAGS) tform.c
+	$(CCCMD) -DTAINT tform.c
 	/bin/rm -f tform.c
 
 thash.o: hash.c $(h)
 	/bin/rm -f thash.c
 	$(SLN) hash.c thash.c
-	$(CC) -c -DTAINT $(CFLAGS) thash.c
+	$(CCCMD) -DTAINT thash.c
 	/bin/rm -f thash.c
 
 tregcomp.o: regcomp.c $(h)
 	/bin/rm -f tregcomp.c
 	$(SLN) regcomp.c tregcomp.c
-	$(CC) -c -DTAINT $(CFLAGS) tregcomp.c
+	$(CCCMD) -DTAINT tregcomp.c
 	/bin/rm -f tregcomp.c
 
 tregexec.o: regexec.c $(h)
 	/bin/rm -f tregexec.c
 	$(SLN) regexec.c tregexec.c
-	$(CC) -c -DTAINT $(CFLAGS) tregexec.c
+	$(CCCMD) -DTAINT tregexec.c
 	/bin/rm -f tregexec.c
 
 tstab.o: stab.c $(h)
 	/bin/rm -f tstab.c
 	$(SLN) stab.c tstab.c
-	$(CC) -c -DTAINT $(CFLAGS) tstab.c
+	$(CCCMD) -DTAINT tstab.c
 	/bin/rm -f tstab.c
 
 tstr.o: str.c $(h) perly.h
 	/bin/rm -f tstr.c
 	$(SLN) str.c tstr.c
-	$(CC) -c -DTAINT $(CFLAGS) tstr.c
+	$(CCCMD) -DTAINT tstr.c
 	/bin/rm -f tstr.c
 
 ttoke.o: toke.c $(h) perly.h
 	/bin/rm -f ttoke.c
 	$(SLN) toke.c ttoke.c
-	$(CC) -c -DTAINT $(CFLAGS) ttoke.c
+	$(CCCMD) -DTAINT ttoke.c
 	/bin/rm -f ttoke.c
 
 tutil.o: util.c $(h)
 	/bin/rm -f tutil.c
 	$(SLN) util.c tutil.c
-	$(CC) -c -DTAINT $(CFLAGS) tutil.c
+	$(CCCMD) -DTAINT tutil.c
 	/bin/rm -f tutil.c
 
 perly.h: perly.c
 	@ echo Dummy dependency for dumb parallel make
 	touch perly.h
 
-perly.c: perly.y
+perly.c: perly.y perly.fixer
 	@ echo 'Expect either' 29 shift/reduce and 59 reduce/reduce conflicts...
 	@ echo '           or' 27 shift/reduce and 61 reduce/reduce conflicts...
 	$(YACC) -d perly.y
-	sh perly.fixer y.tab.c perly.c
+	sh ./perly.fixer y.tab.c perly.c
 	mv y.tab.h perly.h
 	echo 'extern YYSTYPE yylval;' >>perly.h
 
 perly.o: perly.c perly.h $(h)
-	$(CC) -c $(CFLAGS) perly.c
+	$(CCCMD) perly.c
 
 install: all
 	./perl installperl
-	cd x2p; $(MAKE) install
 
 clean:
 	rm -f *.o all perl taintperl suidperl
@@ -291,7 +297,7 @@ realclean: clean
 	cd x2p; $(MAKE) realclean
 	rm -f *.orig */*.orig *~ */*~ core $(addedbyconf) h2ph h2ph.man
 	rm -f perly.c perly.h t/perl Makefile config.h makedepend makedir
-	rm -f x2p/Makefile
+	rm -f makefile x2p/Makefile x2p/makefile cflags x2p/cflags
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.

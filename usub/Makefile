@@ -1,10 +1,10 @@
-SRC = /usr/local/src/perl
+SRC = ..
 GLOBINCS = 
 LOCINCS = 
-LIBS = -lcurses -ltermlib
+LIBS = -lcurses -ltermlib `. $(SRC)/config.sh; echo $$libs`
 
 curseperl: $(SRC)/uperl.o usersub.o curses.o
-	cc $(SRC)/uperl.o usersub.o curses.o $(LIBS) -lm -o curseperl
+	cc $(SRC)/uperl.o usersub.o curses.o $(LIBS) -o curseperl
 
 usersub.o: usersub.c
 	cc -c -I$(SRC) $(GLOBINCS) -DDEBUGGING -g usersub.c

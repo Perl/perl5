@@ -1,11 +1,14 @@
-/* $Header: EXTERN.h,v 4.0 91/03/20 01:56:53 lwall Locked $
+/* $RCSfile: EXTERN.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:11:15 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	EXTERN.h,v $
+ * Revision 4.0.1.1  91/06/07  12:11:15  lwall
+ * patch4: new copyright notice
+ * 
  * Revision 4.0  91/03/20  01:56:53  lwall
  * 4.0 baseline.
  * 
