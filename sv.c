@@ -8440,6 +8440,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_scopestack = 0;
     PL_savestack = 0;
     PL_retstack = 0;
+    PL_sig_pending = 0;
 #    else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);
 #    endif	/* DEBUGGING */
@@ -8466,6 +8467,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_scopestack = 0;
     PL_savestack = 0;
     PL_retstack = 0;
+    PL_sig_pending = 0;
 #    else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);
 #    endif	/* DEBUGGING */
@@ -8865,10 +8867,16 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_uudmap['M']	= 0;		/* reinits on demand */
     PL_bitcount		= Nullch;	/* reinits on demand */
 
+    if (proto_perl->Ipsig_pend) {
+	Newz(0, PL_psig_pend, SIG_SIZE, int);
+    } 
+    else {
+	PL_psig_pend	= (int*)NULL;
+    }
+
     if (proto_perl->Ipsig_ptr) {
 	Newz(0, PL_psig_ptr,  SIG_SIZE, SV*);
 	Newz(0, PL_psig_name, SIG_SIZE, SV*);
-	Newz(0, PL_psig_pend, SIG_SIZE, int);
 	for (i = 1; i < SIG_SIZE; i++) {
 	    PL_psig_ptr[i]  = sv_dup_inc(proto_perl->Ipsig_ptr[i]);
 	    PL_psig_name[i] = sv_dup_inc(proto_perl->Ipsig_name[i]);
@@ -8877,7 +8885,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     else {
 	PL_psig_ptr	= (SV**)NULL;
 	PL_psig_name	= (SV**)NULL;
-	PL_psig_pend	= (int*)NULL;
     }
 
     /* thrdvar.h stuff */
