@@ -48,6 +48,10 @@ for most things.  Some things to watch out for are
 	  /etc/proto has been renamed to /etc/protocol (NOT
 	  /etc/protocols, as used by other Unix systems).
 
+	- Some of the parser default files in /sample are needed in /etc.
+	  In particular be sure that you at least copy /sample/yy* to /etc
+	  before running perl's Configure.
+
 When using perl on OS/390 please keep in mind that the EBCDIC and ASCII
 character sets are different.  Perl builtin functions that may behave
 differently under EBCDIC are mentioned in the perlport.pod document.
