@@ -10,6 +10,7 @@ use warnings;
 use Config;
 
 my %Core_Modules;
+my %Test;
 
 unless (open(MANIFEST, "MANIFEST")) {
     die "$0: failed to open 'MANIFEST': $!\n";
@@ -20,10 +21,20 @@ sub add_by_name {
 }
 
 while (<MANIFEST>) {
-    next unless m!^lib/(\S+?)\.pm!;
-    my $module = $1;
-    $module =~ s!/!::!g;
-    add_by_name($module);
+    if (m!^(lib)/(\S+?)\.pm\s!) {
+	# Collecting modules names from under ext/ would be
+	# rather painful since the mapping from filenames
+	# to module names is not 100%.
+	my ($dir, $module) = ($1, $2);
+	$module =~ s!/!::!g;
+	add_by_name($module);
+    } elsif (m!^(lib|ext)/(\S+?)(?:\.t|/test.pl)\s!) {
+	my ($dir, $test) = ($1, $2);
+	$test =~ s!(\w+)/\1$!$1! if $dir eq 'ext';
+	$test =~ s!/t/[^/]+$!!;
+	$test =~ s!/!::!g;
+	$Test{$test}++;
+    }
 }
 
 close(MANIFEST);
@@ -83,8 +94,12 @@ delete_by_prefix('unicode::');
 
 # Delete all modules which have their own tests.
 # This makes this test a lot faster.
+foreach my $mod (sort keys %Test) {
+    delete_by_name($mod);
+}
 foreach my $mod (<DATA>) {
     chomp $mod;
+    print "### $mod\n" if exists $Test{$mod};
     delete_by_name($mod);
 }
 
@@ -115,16 +130,7 @@ sub compile_module {
 # Add here modules that have their own test scripts and therefore
 # need not be test-compiled by 1_compile.t.
 __DATA__
-AnyDBM_File
-Attribute::Handlers
-AutoLoader
-B
-B::Debug
-B::Deparse
 B::ShowLex
-B::Stash
-Benchmark
-CGI
 CGI::Apache
 CGI::Carp
 CGI::Cookie
@@ -132,55 +138,15 @@ CGI::Form
 CGI::Pretty
 CGI::Switch
 CGI::Util
-Carp
 Carp::Heavy
-Class::ISA
-Class::Struct
-CPAN
-Cwd
-DB_File
-Data::Dumper
 Devel::DProf
-Devel::Peek
-Devel::SelfStubber
-Digest
-Digest::MD5
-DirHandle
 Dumpvalue
-Encode
-English
-Env
-Errno
-Exporter
 Exporter::Heavy
 ExtUtils::Constant
 ExtUtils::MakeMaker
-Fatal
-Fcntl
-File::Basename
-File::CheckTree
-File::Compare
-File::Copy
-File::DosGlob
-File::Find
-File::Glob
-File::Path
-File::Spec
-File::Spec::Functions
-File::Temp
-File::stat
-FileCache
-FileHandle
-Filter::Simple
 Filter::Util::Call
-FindBin
 GDBM_File
-Getopt::Long
-Getopt::Std
-I18N::Langinfo
-I18N::LangTags
 I18N::LangTags::List
-I18N::Collate
 IO::Dir
 IO::File
 IO::Handle
@@ -191,24 +157,13 @@ IO::Select
 IO::Socket
 IO::Socket::INET
 IO::Socket::UNIX
-IPC::Open2
-IPC::Open3
-IPC::SysV
-Lingua::KO::Hangul::Util
-List::Util
 Locale::Constants
 Locale::Country
 Locale::Currency
 Locale::Language
-Locale::Maketext
-MIME::Base64
 MIME::QuotedPrint
 Math::BigFloat
-Math::BigInt
 Math::BigInt::Calc
-Math::Complex
-Math::Trig
-Memoize
 Memoize::AnyDBM_File
 Memoize::Expire
 Memoize::ExpireFile
@@ -217,15 +172,7 @@ Memoize::NDBM_File
 Memoize::SDBM_File
 Memoize::Storable
 NDBM_File
-NEXT
-Net::hostent
-Net::netent
-Net::protoent
-Net::servent
 ODBM_File
-Opcode
-PerlIO
-POSIX
 Pod::Checker
 Pod::Find
 Pod::Text
@@ -233,64 +180,20 @@ Pod::Usage
 SDBM_File
 Safe
 Scalar::Util
-Search::Dict
-SelectSaver
-SelfLoader
-Shell
-Socket
-Storable
-Switch
-Symbol
-Sys::Hostname
 Sys::Syslog
-Term::ANSIColor
-Test
-Test::Harness
 Test::More
-Test::Simple
 Test::ParseWords
-Text::Abbrev
-Text::Balanced
-Text::ParseWords
-Text::Soundex
 Text::Tabs
 Text::Wrap
 Thread
 Tie::Array
 Tie::Handle
 Tie::Hash
-Tie::RefHash
 Tie::Scalar
-Tie::SubstrHash
-Time::HiRes
-Time::Local
-Time::gmtime
-Time::localtime
 Time::tm
-Unicode::Collate
-Unicode::Normalize
-Unicode::UCD
 UNIVERSAL
-User::grent
-User::pwent
-XS::Typemap
 attributes
-attrs
-autouse
 base
 bytes
-charnames
-constant
-diagnostics
-fields
-integer
-less
-locale
 ops
-overload
-strict
-subs
-utf8
-vars
-warnings
 warnings::register

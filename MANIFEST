@@ -300,10 +300,10 @@ ext/Errno/Errno.t	See if Errno works
 ext/Errno/Errno_pm.PL	Errno perl module create script
 ext/Errno/Makefile.PL	Errno extension makefile writer
 ext/Fcntl/Fcntl.pm	Fcntl extension Perl module
-ext/Fcntl/Fcntl.t	See if Fcntl works
 ext/Fcntl/Fcntl.xs	Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL	Fcntl extension makefile writer
-ext/Fcntl/syslfs.t	See if large files work for sysio
+ext/Fcntl/t/fcntl.t	See if Fcntl works
+ext/Fcntl/t/syslfs.t	See if large files work for sysio
 ext/File/Glob/bsd_glob.c	File::Glob extension run time code
 ext/File/Glob/bsd_glob.h	File::Glob extension header file
 ext/File/Glob/Changes		File::Glob extension changelog
@@ -456,9 +456,9 @@ ext/POSIX/hints/uts.pl		Hint for POSIX for named architecture
 ext/POSIX/Makefile.PL		POSIX extension makefile writer
 ext/POSIX/POSIX.pm		POSIX extension Perl module
 ext/POSIX/POSIX.pod		POSIX extension documentation
-ext/POSIX/POSIX.t		See if POSIX works
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
-ext/POSIX/sigaction.t		See if POSIX::sigaction works
+ext/POSIX/t/posix.t		See if POSIX works
+ext/POSIX/t/sigaction.t		See if POSIX::sigaction works
 ext/POSIX/typemap		POSIX extension interface types
 ext/re/hints/mpeix.pl		Hints for re for named architecture
 ext/re/Makefile.PL		re extension makefile writer
@@ -841,8 +841,8 @@ lib/dumpvar.pl			A variable dumper
 lib/English.pm			Readable aliases for short variables
 lib/English.t			See if English works
 lib/Env.pm			Map environment into ordinary variables
-lib/Env/array.t			See if Env works
-lib/Env/env.t			See if Env works for arrays
+lib/Env/t/array.t		See if Env works for arrays
+lib/Env/t/env.t			See if Env works
 lib/exceptions.pl		catch and throw routines
 lib/Exporter.pm			Exporter base class
 lib/Exporter.t			See if Exporter works
@@ -886,8 +886,8 @@ lib/File/Copy.t			See if File::Copy works
 lib/File/DosGlob.pm		Win32 DOS-globbing module
 lib/File/DosGlob.t		See if File::DosGlob works
 lib/File/Find.pm		Routines to do a find
-lib/File/Find/find.t		See if File::Find works
-lib/File/Find/taint.t		See if File::Find works with taint
+lib/File/Find/t/find.t		See if File::Find works
+lib/File/Find/t/taint.t		See if File::Find works with taint
 lib/File/Path.pm		Do things like `mkdir -p' and `rm -r'
 lib/File/Path.t			See if File::Path works
 lib/File/Spec.pm		portable operations on file names
@@ -946,6 +946,7 @@ lib/I18N/LangTags/README	I18N::LangTags
 lib/I18N/LangTags/test.pl	See if I18N::LangTags works
 lib/importenv.pl		Perl routine to get environment into variables
 lib/integer.pm			For "use integer"
+lib/integer.t			For "use integer" testing
 lib/IPC/Open2.pm		Open a two-ended pipe
 lib/IPC/Open2.t			See if IPC::Open2 works
 lib/IPC/Open3.pm		Open a three-ended pipe!
