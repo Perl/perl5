@@ -788,11 +788,13 @@ by saying
 (You can't just say C<$ENV{$key} = $ENV{$key}>, since the
 Perl optimizer is smart enough to elide the expression.)
 
-Don't try to clear C<%ENV> by saying C<%ENV = ();> Bad things will
-happen because parts of C<%ENV> are per-process, parts of it are
-per-group, and parts of it are system-wide.  Without some serious
-rights, it won't work, or with the rights, it does, but the system
-will effectively die.
+Don't try to clear C<%ENV> by saying C<%ENV = ();>, it will throw
+a fatal error.  This is equivalent to doing the following from DCL:
+
+    DELETE/LOGICAL *
+
+You can imagine how bad things would be if, for example, the SYS$MANAGER
+or SYS$SYSTEM logicals were deleted.
 
 At present, the first time you iterate over %ENV using
 C<keys>, or C<values>,  you will incur a time penalty as all
