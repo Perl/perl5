@@ -2,7 +2,7 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..97\n";
+print "1..100\n";
 
 $x = "abc\ndef\n";
 
@@ -328,3 +328,23 @@ print "not " if $blah != 45;
 print "ok $test\n";
 $test++;
 
+$x = 'banana';
+$x =~ /.a/g;
+print "not " unless pos($x) == 2;
+print "ok $test\n";
+$test++;
+
+$x =~ /.z/gc;
+print "not " unless pos($x) == 2;
+print "ok $test\n";
+$test++;
+
+sub f {
+    my $p = $_[0];
+    return $p;
+}
+
+$x =~ /.a/g;
+print "not " unless f(pos($x)) == 4;
+print "ok $test\n";
+$test++;

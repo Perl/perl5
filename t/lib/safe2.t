@@ -124,6 +124,7 @@ my $t = 30;
 $cpt->rdo('/non/existant/file.name');
 print +(($! =~ /No such file/ || $! =~ /file specification syntax error/) ||
       $! =~ /A file or directory in the path name does not exist/ ||
+      $! =~ /Invalid argument/ ||
       $! =~ /Device not configured/ ?
       "ok $t\n" : "not ok $t # $!\n"); $t++;
 print 1 ? "ok $t\n" : "not ok $t\n#$@/$!\n"; $t++;

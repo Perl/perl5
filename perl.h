@@ -1359,6 +1359,14 @@ typedef Sighandler_t Sigsave_t;
 #  define MALLOC_TERM
 #endif
 
+#ifdef MYMALLOC
+#  define MALLOC_INIT MUTEX_INIT(&malloc_mutex)
+#  define MALLOC_TERM MUTEX_DESTROY(&malloc_mutex)
+#else
+#  define MALLOC_INIT
+#  define MALLOC_TERM
+#endif
+
 /*
  * These need prototyping here because <proto.h> isn't
  * included until after runops is initialised.
@@ -2010,6 +2018,17 @@ START_EXTERN_C
 END_EXTERN_C
 
 /* The following must follow proto.h */
+
+#if defined(HASATTRIBUTE) && defined(WIN32)
+/*
+ * This provides a layer of functions and macros to ensure extensions will
+ * get to use the same RTL functions as the core.
+ * It has to go here or #define of printf messes up __attribute__
+ * stuff in proto.h  
+ */
+#  include <win32iop.h>
+#endif	/* WIN32 */
+
 
 #if defined(HASATTRIBUTE) && defined(WIN32)
 /*

@@ -15,10 +15,6 @@ RunPerl(int argc, char **argv, char **env, void *iosubsystem)
     int exitstatus;
     PerlInterpreter *my_perl;
 
-#ifdef USE_THREADS
-    MUTEX_INIT(&malloc_mutex); 
-#endif
-
     PERL_SYS_INIT(&argc,&argv);
 
     perl_init_i18nl10n(1);

@@ -136,6 +136,12 @@ The following IRIX patches must, however, be installed:
         1645 IRIX 6.2 & 6.3 POSIX header file updates
         2000 Irix 6.2 Posix 1003.1b support modules
         2254 Pthread library fixes
+	2401 6.2 all platform kernel rollup
+IMPORTANT:
+	Without patch 2401, a kernel bug in IRIX 6.2 will
+	cause your machine to panic and crash when running
+	threaded perl. IRIX 6.3 and up should be OK.
+
 
 Cannot continue, aborting.
 EOF
