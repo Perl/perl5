@@ -1402,6 +1402,9 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	    if (optype == OP_REQUIRE) {
 		char* msg = SvPVx(ERRSV, n_a);
+               SV *nsv = cx->blk_eval.old_namesv;
+               (void)hv_store(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv),
+                               &PL_sv_undef, 0);
 		DIE(aTHX_ "%sCompilation failed in require",
 		    *msg ? msg : "Unknown error\n");
 	    }
@@ -2842,7 +2845,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	sv_setpv(ERRSV,"");
     if (yyparse() || PL_error_count || !PL_eval_root) {
 	SV **newsp;			/* Used by POPBLOCK. */
-	PERL_CONTEXT *cx;
+       PERL_CONTEXT *cx = &cxstack[cxstack_ix];
 	I32 optype = 0;			/* Might be reset by POPEVAL. */
 	STRLEN n_a;
 	
@@ -2861,6 +2864,9 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	LEAVE;
 	if (optype == OP_REQUIRE) {
 	    char* msg = SvPVx(ERRSV, n_a);
+           SV *nsv = cx->blk_eval.old_namesv;
+           (void)hv_store(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv),
+                          &PL_sv_undef, 0);
 	    DIE(aTHX_ "%sCompilation failed in require",
 		*msg ? msg : "Unknown error\n");
 	}
@@ -3049,9 +3055,12 @@ PP(pp_require)
 	DIE(aTHX_ "Null filename used");
     TAINT_PROPER("require");
     if (PL_op->op_type == OP_REQUIRE &&
-      (svp = hv_fetch(GvHVn(PL_incgv), name, len, 0)) &&
-      *svp != &PL_sv_undef)
-	RETPUSHYES;
+       (svp = hv_fetch(GvHVn(PL_incgv), name, len, 0))) {
+       if (*svp != &PL_sv_undef)
+           RETPUSHYES;
+       else
+           DIE(aTHX_ "Compilation failed in require");
+    }
 
     /* prepare to compile file */
 
