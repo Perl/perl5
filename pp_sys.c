@@ -1517,7 +1517,7 @@ PP(pp_sysread)
     int fp_utf8;
     Size_t got = 0;
     Size_t wanted;
-    bool charstart = NULL;
+    bool charstart = FALSE;
     STRLEN skip;
     STRLEN charskip;
 
