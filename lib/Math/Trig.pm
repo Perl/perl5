@@ -21,7 +21,7 @@ $VERSION = 1.00;
 
 my @angcnv = qw(rad_to_deg rad_to_grad
 	     deg_to_rad deg_to_grad
-	     grad_to_rad grad_to_dec);
+	     grad_to_rad grad_to_deg);
 
 @EXPORT = (@{$Math::Complex::EXPORT_TAGS{'trig'}},
 	   @angcnv);
@@ -78,7 +78,7 @@ Math::Trig - trigonometric functions
 =head1 DESCRIPTION
 
 C<Math::Trig> defines many trigonometric functions not defined by the
-core Perl (which defines only the C<sin()> and C<cos()>.  The constant
+core Perl which defines only the C<sin()> and C<cos()>.  The constant
 B<pi> is also defined as are a few convenience functions for angle
 conversions.
 
