@@ -59,14 +59,15 @@ users the informal support will more than suffice.  See the answer to
 You should definitely use version 5.  Version 4 is old, limited, and
 no longer maintained; its last patch (4.036) was in 1992, long ago and
 far away.  Sure, it's stable, but so is anything that's dead; in fact,
-perl4 had been called a dead, flea-bitten camel carcass.  The most recent
-production release is 5.6 (although 5.005_03 is still supported).
-The most cutting-edge development release is 5.7.  Further references
-to the Perl language in this document refer to the production release
-unless otherwise specified.  There may be one or more official bug fixes
-by the time you read this, and also perhaps some experimental versions
-on the way to the next release.  All releases prior to 5.004 were subject
-to buffer overruns, a grave security issue.
+perl4 had been called a dead, flea-bitten camel carcass.  The most
+recent production release is 5.8.0 (although 5.005_03 and 5.6.1 are
+still supported). The most cutting-edge development release is 5.9.
+Further references to the Perl language in this document refer to the
+production release unless otherwise specified.  There may be one or
+more official bug fixes by the time you read this, and also perhaps
+some experimental versions on the way to the next release.
+All releases prior to 5.004 were subject to buffer overruns, a grave
+security issue.
 
 =head2 What are perl4 and perl5?
 
@@ -296,11 +297,12 @@ for any given task.  Also mention that the difference between version
 (Well, OK, maybe it's not quite that distinct, but you get the idea.)
 If you want support and a reasonable guarantee that what you're
 developing will continue to work in the future, then you have to run
-the supported version.  As of January 2002 that probably means
-running either of the releases 5.6.1 (released in April 2001) or
-5.005_03 (released in March 1999), although 5.004_05 isn't that bad
-if you B<absolutely> need such an old version (released in April 1999)
-for stability reasons.  Anything older than 5.004_05 shouldn't be used.
+the supported version.  As of August 2002 that means running either
+5.8.0 (released in July 2002), or one of the older releases like
+5.6.1 (released in April 2001) or 5.005_03 (released in March 1999),
+although 5.004_05 isn't that bad if you B<absolutely> need such an old
+version (released in April 1999) for stability  reasons.
+Anything older than 5.004_05 shouldn't be used.
 
 Of particular note is the massive bug hunt for buffer overflow
 problems that went into the 5.004 release.  All releases prior to
