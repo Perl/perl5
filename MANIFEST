@@ -424,6 +424,7 @@ lib/Sys/Syslog.pm	Perl module supporting syslogging
 lib/Term/Cap.pm		Perl module supporting termcap usage
 lib/Term/Complete.pm	A command completion subroutine
 lib/Term/ReadLine.pm	Stub readline library
+lib/Test.pm		A simple framework for writing test scripts
 lib/Test/Harness.pm	A test harness
 lib/Text/Abbrev.pm	An abbreviation table builder
 lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
