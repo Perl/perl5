@@ -1,0 +1,13 @@
+call compile.bat MACHINE=wince-arm-hpc-wce300     
+call compile.bat MACHINE=wince-arm-hpc-wce211     
+call compile.bat MACHINE=wince-sh3-hpc-wce211     
+call compile.bat MACHINE=wince-mips-hpc-wce211    
+call compile.bat MACHINE=wince-sh3-hpc-wce200     
+call compile.bat MACHINE=wince-mips-hpc-wce200    
+call compile.bat MACHINE=wince-arm-pocket-wce300  
+call compile.bat MACHINE=wince-mips-pocket-wce300 
+call compile.bat MACHINE=wince-sh3-pocket-wce300  
+call compile.bat MACHINE=wince-x86em-pocket-wce300
+call compile.bat MACHINE=wince-mips-palm-wce211   
+call compile.bat MACHINE=wince-sh3-palm-wce211    
+call compile.bat MACHINE=wince-x86em-palm-wce211  
