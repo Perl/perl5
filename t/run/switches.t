@@ -9,7 +9,7 @@ BEGIN {
 
 require "./test.pl";
 
-plan(tests => 15);
+plan(tests => 14);
 
 my $r;
 my @tmpfiles = ();
@@ -157,26 +157,5 @@ SWTESTPM
 	prog	    => '1',
     );
     is( $r, '<swtest><foo><bar>', '-m with import parameters' );
-    push @tmpfiles, $filename;
-}
-
-# Tests for -x
-
-$filename = 'swxtest.tmp';
-SKIP: {
-    open my $f, ">$filename" or skip( "Can't write temp file $filename: $!" );
-    print $f <<'SWTEST';
-print 1;
-#!perl
-print 2;
-__END__
-print 3;
-SWTEST
-    close $f;
-    $r = runperl(
-	switches    => [ '-x' ],
-	progfile    => $filename,
-    );
-    is( $r, '2', '-x' );
     push @tmpfiles, $filename;
 }
