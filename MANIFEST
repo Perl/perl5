@@ -951,7 +951,7 @@ lib/Term/ReadLine.pm	Stub readline library
 lib/Test.pm		A simple framework for writing test scripts
 lib/Test/Harness.pm	A test harness
 lib/Text/Abbrev.pm	An abbreviation table builder
-lib/Text/Abbrev/t/abbrev.t	Text::Abbrev
+lib/Text/Abbrev.t	Test Text::Abbrev
 lib/Text/Balanced.pm	Text::Balanced
 lib/Text/Balanced.pod	Text::Balanced
 lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
