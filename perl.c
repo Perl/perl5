@@ -2354,7 +2354,7 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 #ifdef MPE
 	PerlIO_printf(PerlIO_stdout(),
-		      "MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-1999\n");
+		      "MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-2001\n");
 #endif
 #ifdef OEMVS
 	PerlIO_printf(PerlIO_stdout(),

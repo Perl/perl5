@@ -1305,6 +1305,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_endsent HAS_ENDSERVENT		/**/
 
+/* HAS_FCHDIR:
+ *	This symbol, if defined, indicates that the fchdir routine is
+ *	available to change directory using a file descriptor.
+ */
+#$d_fchdir HAS_FCHDIR		/**/
+
 /* FCNTL_CAN_LOCK:
  *	This symbol, if defined, indicates that fcntl() can be used
  *	for file locking.  Normally on Unix systems this is defined.

@@ -1281,6 +1281,12 @@
  */
 #define HAS_ENDSERVENT		/**/
 
+/* HAS_FCHDIR:
+ *	This symbol, if defined, indicates that the fchdir routine is
+ *	available to change directory using a file descriptor.
+ */
+/*#define HAS_FCHDIR		/**/
+
 /* FCNTL_CAN_LOCK:
  *	This symbol, if defined, indicates that fcntl() can be used
  *	for file locking.  Normally on Unix systems this is defined.

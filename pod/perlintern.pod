@@ -153,7 +153,7 @@ Found in file sv.c
 
 Decrement the refcnt of each remaining SV, possibly triggering a
 cleanup. This function may have to be called multiple times to free
-SVs which are in complex self-referential heirarchies.
+SVs which are in complex self-referential hierarchies.
 
 	I32	sv_clean_all()
 

@@ -2,6 +2,10 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#ifdef I_UNISTD
+#   include <unistd.h>
+#endif
+
 /* The realpath() implementation from OpenBSD 2.9 (realpath.c 1.4)
  * Renamed here to bsd_realpath() to avoid library conflicts.
  * --jhi 2000-06-20 */
@@ -65,16 +69,28 @@ bsd_realpath(path, resolved)
 	const char *path;
 	char *resolved;
 {
+#ifdef VMS
+       return Perl_rmsexpand((char*)path, resolved, NULL, 0);
+#else
 	struct stat sb;
 	int fd, n, rootd, serrno;
 	char *p, *q, wbuf[MAXPATHLEN];
 	int symlinks = 0;
 
 	/* Save the starting point. */
+#ifdef HAS_FCHDIR
 	if ((fd = open(".", O_RDONLY)) < 0) {
 		(void)strcpy(resolved, ".");
 		return (NULL);
 	}
+#else
+	char wd[MAXPATHLEN];
+
+	if (getcwd(wd, MAXPATHLEN - 1) == NULL) {
+		(void)strcpy(resolved, ".");
+		return (NULL);
+	}
+#endif
 
 	/*
 	 * Find the dirname and basename from the path to be resolved.
@@ -104,6 +120,7 @@ loop:
 	} else
 		p = resolved;
 
+#ifdef HAS_LSTAT
 	/* Deal with the last component. */
 	if (lstat(p, &sb) == 0) {
 		if (S_ISLNK(sb.st_mode)) {
@@ -123,6 +140,7 @@ loop:
 			p = "";
 		}
 	}
+#endif
 
 	/*
 	 * Save the last component name and get the full pathname of
@@ -152,20 +170,32 @@ loop:
 	}
 
 	/* Go back to where we came from. */
+#ifdef HAS_FCHDIR
 	if (fchdir(fd) < 0) {
 		serrno = errno;
 		goto err2;
 	}
+#else
+	if (chdir(wd) < 0) {
+		serrno = errno;
+		goto err2;
+	}
+#endif
 
 	/* It's okay if the close fails, what's an fd more or less? */
 	(void)close(fd);
 	return (resolved);
 
 err1:	serrno = errno;
+#ifdef HAS_FCHDIR
 	(void)fchdir(fd);
+#else
+	(void)chdir(wd);
+#endif
 err2:	(void)close(fd);
 	errno = serrno;
 	return (NULL);
+#endif
 }
 
 MODULE = Cwd		PACKAGE = Cwd
@@ -189,29 +219,21 @@ PPCODE:
     dXSTARG;
     char *path;
     STRLEN len;
-    char *buf;
+    char buf[MAXPATHLEN];
 
-    New(0, buf, MAXPATHLEN, char);
-    if (buf) {
-        buf[MAXPATHLEN] = 0;
-        if (pathsv)
-	    path = SvPV(pathsv, len);
-	else {
-	    path = ".";
-	    len  = 1;
-	}
+    if (pathsv)
+      path = SvPV(pathsv, len);
+    else {
+        path = ".";
+        len  = 1;
+    }
 
-	if (bsd_realpath(path, buf)) {
-	    sv_setpvn(TARG, buf, strlen(buf));
-	    SvPOK_only(TARG);
-	}
-	else
-	    sv_setsv(TARG, &PL_sv_undef);
-
-	Safefree(buf);
+    if (bsd_realpath(path, buf)) {
+        sv_setpvn(TARG, buf, strlen(buf));
+        SvPOK_only(TARG);
     }
     else
-        sv_setsv(TARG, &PL_sv_undef);
+      sv_setsv(TARG, &PL_sv_undef);
 
     XSprePUSH; PUSHTARG;
 }

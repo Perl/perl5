@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed Jun 20 08:48:18 EET DST 2001
+ * Configuration time: Thu Jun 21 23:32:02 EET DST 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1284,6 +1284,12 @@
  *	available to close whatever was being used for service queries.
  */
 #define HAS_ENDSERVENT		/**/
+
+/* HAS_FCHDIR:
+ *	This symbol, if defined, indicates that the fchdir routine is
+ *	available to change directory using a file descriptor.
+ */
+#define HAS_FCHDIR		/**/
 
 /* FCNTL_CAN_LOCK:
  *	This symbol, if defined, indicates that fcntl() can be used

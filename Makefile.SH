@@ -288,6 +288,8 @@ lintflags = -hbvxac
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
+.PHONY: all compile translators utilities
+
 all: $(FIRSTMAKEFILE) miniperl extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext)
 	@echo " ";
 	@echo "	Everything is up to date. 'make test' to run test suite."
@@ -310,6 +312,7 @@ utilities:	miniperl lib/Config.pm $(plextract) lib/lib.pm FORCE
 
 # Phony target to force checking subdirectories.
 # Apparently some makes require an action for the FORCE target.
+.PHONY: FORCE
 FORCE:
 	@sh -c true
 !NO!SUBS!
@@ -549,13 +552,14 @@ perl.pixie: /usr/bin/pixie perl.pixie.config perl
 perl.config.dashpg:
 	@echo "Checking optimize='-pg' in config.sh..."
 	@grep "^optimize="      config.sh
-	@grep "^optimize='-pg'" config.sh >/dev/null || exit 1
+	@grep "^optimize='.*-pg.*'" config.sh >/dev/null || exit 1
 
 perl.gprof.config: config.sh
 	@echo "To build perl.gprof you must Configure -Doptimize=-pg, checking..."
 	@$(MAKE) perl.config.dashpg
 
 perl.gprof: /usr/bin/gprof perl.gprof.config
+	@-rm -f perl
 	$(MAKE) PERL_SUFFIX=.gprof PERL_PROFILING=-pg perl
 	@echo "Now you may run perl.gprof and then run gprof perl.gprof."
 
@@ -563,6 +567,7 @@ perl.gprof: /usr/bin/gprof perl.gprof.config
 # build also the full Perl and therefore the real big Makefile:
 # usually one should manually explicitly issue the below command.
 
+.PHONY: microperl
 microperl:
 	$(MAKE) -f Makefile.micro
 
@@ -589,6 +594,7 @@ sperl$(OBJ_EXT): perl.c $(h)
 # We have to call our ./makedir because Ultrix 4.3 make can't handle the line
 #	test -d lib/auto || mkdir lib/auto
 #
+.PHONY: preplibrary
 preplibrary: miniperl lib/Config.pm lib/lib.pm lib/re.pm
 	@sh ./makedir lib/auto
 	@echo "	AutoSplitting perl library"
@@ -627,6 +633,9 @@ extra.pods: miniperl
 	    echo "pod/perl"$$nx".pod" >> extra.pods ; \
 	done
 	-@test -f vms/perlvms.pod && cd pod && $(LNS) ../vms/perlvms.pod perlvms.pod && cd .. && echo "pod/perlvms.pod" >> extra.pods
+
+.PHONY: install install-strip install-all install-verbose install-silent \
+	no-install install.perl install.man installman install.html installhtml
 
 install-strip:
 	$(MAKE) STRIPFLAGS=-s install
@@ -676,6 +685,8 @@ install.html: all installhtml
 # Since we patch up the byacc output, the perly.fixer script needs
 # to run with precisely the same version of byacc as I use.  You
 # normally shouldn't remake perly.[ch].
+
+.PHONY: check_byacc run_byacc
 
 check_byacc:
 	@$(BYACC) -V 2>&1 | grep 'version 1\.8\.2'
@@ -762,6 +773,8 @@ AUTOGEN_FILES = keywords.h opcode.h opnames.h pp_proto.h pp.sym proto.h \
 		ext/ByteLoader/byterun.c ext/B/B/Asmdata.pm regnodes.h \
 		warnings.h lib/warnings.pm
 
+.PHONY: regen_headers regen_pods regen_all
+
 regen_headers:	FORCE
 	-$(CHMOD_W) $(AUTOGEN_FILES)
 	-perl keywords.pl
@@ -797,6 +810,10 @@ s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 
 n_dummy $(nonxs_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+
+.PHONY: clean _tidy _mopup _cleaner1 _cleaner2 \
+	realclean _realcleaner clobber _clobber \
+	distclean veryclean _verycleaner
 
 clean:		_tidy _mopup
 
@@ -873,6 +890,7 @@ _verycleaner:
 # If the source file has a /*NOSTRICT*/ somewhere, ignore the lint message
 # for that spot.
 
+.PHONY: lint
 lint: $(c)
 	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
 
@@ -889,6 +907,7 @@ config.h: config_h.SH config.sh
 	$(SHELL) config_h.SH
 
 # When done, touch perlmain.c so that it doesn't get remade each time.
+.PHONY: depend
 depend: makedepend
 	sh ./makedepend MAKE=$(MAKE)
 	- test -s perlmain.c && touch perlmain.c
@@ -897,6 +916,13 @@ depend: makedepend
 # Cannot postpone this until $firstmakefile is ready ;-)
 makedepend: makedepend.SH config.sh
 	sh ./makedepend.SH
+
+.PHONY: test check test_prep _test_prep \
+	test_tty test-tty _test_tty test_notty test-notty _test_notty \
+	utest ucheck test.utf8 check.utf8 \
+	test.third check.third utest.third ucheck.third test_notty.third \
+	test.deparse test_notty.deparse \
+	minitest
 
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
@@ -975,6 +1001,9 @@ minitest: miniperl lib/re.pm
 # installed perlbug. We don't re-run the tests here - we trust the user.
 # Please *don't* use this unless all tests pass.
 # If you want to report test failures, use "make nok" instead.
+
+.PHONY: ok okfile oknack okfilenack nok nokfile noknack nokfilenack
+
 ok:	utilities
 	$(LDLIBPTH) ./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)'
 
@@ -999,6 +1028,8 @@ noknack:	utilities
 nokfilenack:	utilities
 	$(LDLIBPTH) ./perl -Ilib utils/perlbug -nok -s '(UNINSTALLED)' -F perl.nok -A
 
+.PHONY: clist hlist shlist pllist
+
 clist:	$(c)
 	echo $(c) | tr ' ' $(TRNL) >.clist
 
@@ -1014,13 +1045,17 @@ pllist: $(pl)
 Makefile: Makefile.SH ./config.sh
 	$(SHELL) Makefile.SH
 
+.PHONY: distcheck
 distcheck: FORCE
 	perl '-MExtUtils::Manifest=&fullcheck' -e 'fullcheck()'
 
+.PHONY: elc
 elc:	emacs/cperl-mode.elc
 
 emacs/cperl-mode.elc: emacs/cperl-mode.el
 	-cd emacs; emacs -batch -q -no-site-file -f batch-byte-compile cperl-mode.el
+
+.PHONY: etags ctags tags
 
 etags:	TAGS
 

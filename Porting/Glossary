@@ -543,6 +543,10 @@ d_eunice (Guess.U):
 	This variable conditionally defines the symbols EUNICE and VAX, which
 	alerts the C program that it must deal with ideosyncracies of VMS.
 
+d_fchdir (d_fchdir.U):
+	This variable conditionally defines the HAS_FCHDIR symbol, which
+	indicates to the C program that the fchdir() routine is available.
+
 d_fchmod (d_fchmod.U):
 	This variable conditionally defines the HAS_FCHMOD symbol, which
 	indicates to the C program that the fchmod() routine is available

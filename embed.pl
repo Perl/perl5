@@ -1752,7 +1752,7 @@ Apd	|int	|mg_get		|SV* sv
 Apd	|U32	|mg_length	|SV* sv
 Apd	|void	|mg_magical	|SV* sv
 Apd	|int	|mg_set		|SV* sv
-Ap	|IV	|mg_size	|SV* sv
+Ap	|I32	|mg_size	|SV* sv
 Ap	|void	|mini_mktime	|struct tm *pm
 p	|OP*	|mod		|OP* o|I32 type
 p	|int	|mode_from_discipline|SV* discp
@@ -2285,7 +2285,7 @@ s	|void	|hv_magic_check	|HV *hv|bool *needs_copy|bool *needs_store
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
-s	|void	|save_magic	|IV mgs_ix|SV *sv
+s	|void	|save_magic	|I32 mgs_ix|SV *sv
 s	|int	|magic_methpack	|SV *sv|MAGIC *mg|char *meth
 s	|int	|magic_methcall	|SV *sv|MAGIC *mg|char *meth|I32 f \
 				|int n|SV *val

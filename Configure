@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Jun 21 18:44:48 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Jun 22 05:07:22 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -353,6 +353,7 @@ d_endnent=''
 d_endpent=''
 d_endpwent=''
 d_endsent=''
+d_fchdir=''
 d_fchmod=''
 d_fchown=''
 d_fcntl=''
@@ -9824,6 +9825,10 @@ EOCP
 esac
 $rm -f try try.* .out core head.c mtry
 
+: see if fchdir exists
+set fchdir d_fchdir
+eval $inlibc
+
 : see if fchmod exists
 set fchmod d_fchmod
 eval $inlibc
@@ -10794,7 +10799,7 @@ EOCP
 		d_modfl="$undef"
 	fi
 	case "$osname:$gccversion" in
-	aix:)	$ccflags="saveccflags" ;; # restore
+	aix:)	$ccflags="$saveccflags" ;; # restore
 	esac
 	;;
 esac
@@ -12094,10 +12099,15 @@ esac
 case "$d_sfio" in
 $define) ;;
 *)	: Remove sfio from list of libraries to use
-	set `echo X $libs | $sed -e 's/-lsfio / /' -e 's/-lsfio$//'`
-	shift
-	libs="$*"
-	echo "libs = $libs" >&4
+	case "$libs" in
+	*-lsfio*)
+		echo "Removing unneeded -lsfio from library list" >&4
+		set `echo X $libs | $sed -e 's/-lsfio / /' -e 's/-lsfio$//'`
+		shift
+		libs="$*"
+		echo "libs = $libs" >&4
+		;;
+	esac
 ;;
 esac
 
@@ -16615,6 +16625,7 @@ d_endpwent='$d_endpwent'
 d_endsent='$d_endsent'
 d_eofnblk='$d_eofnblk'
 d_eunice='$d_eunice'
+d_fchdir='$d_fchdir'
 d_fchmod='$d_fchmod'
 d_fchown='$d_fchown'
 d_fcntl='$d_fcntl'
