@@ -2396,28 +2396,25 @@ Convert the PV of an SV to its UTF8-encoded form.
 void
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
-    int hicount;
-    char *c;
-    char *s;
+    char *s, *t;
+    bool hibit;
 
     if (!sv || !SvPOK(sv) || SvUTF8(sv))
 	return;
 
-    /* This function could be much more efficient if we had a FLAG
-     * to signal if there are any hibit chars in the string
+    /* This function could be much more efficient if we had a FLAG in SVs
+     * to signal if there are any hibit chars in the PV.
      */
-    hicount = 0;
-    for (c = s = SvPVX(sv); c < SvEND(sv); c++) {
-	if (*c & 0x80)
-	    hicount++;
-    }
+    for (s = t = SvPVX(sv), hibit = FALSE; t < SvEND(sv) && !hibit; t++)
+	if (*t & 0x80)
+	    hibit = TRUE;
 
-    if (hicount) {
+    if (hibit) {
 	STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
 	SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
 	SvCUR(sv) = len - 1;
-	Safefree(s); /* No longer using what was there before */
 	SvUTF8_on(sv);
+	Safefree(s); /* No longer using what was there before */
     }
 }
 
