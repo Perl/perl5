@@ -684,8 +684,10 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
               return -1;
             }
           }
-         else
+         else {
           Perl_warn(aTHX_ "perlio: unknown layer \"%.*s\"",(int)llen,s);
+	  return -1;
+	 }
         }
        s = e;
       }
@@ -1696,6 +1698,7 @@ PerlIOStdio_fdopen(PerlIO_funcs *self, int fd,const char *mode)
 IV
 PerlIOStdio_pushed(PerlIO *f, const char *mode, const char *arg, STRLEN len)
 {
+ dTHX;
  if (*PerlIONext(f))
   {
    PerlIOStdio *s = PerlIOSelf(f,PerlIOStdio);

@@ -1255,6 +1255,7 @@ to use the macros:
 
 These macros automatically adjust the stack for you, if needed.  Thus, you
 do not need to call C<EXTEND> to extend the stack.
+However, see L</Putting a C value on Perl stack>
 
 For more information, consult L<perlxs> and L<perlxstut>.
 
@@ -1383,6 +1384,23 @@ corresponding parts of its I<target> and puts the I<target> on stack.
 The macro to put this target on stack is C<PUSHTARG>, and it is
 directly used in some opcodes, as well as indirectly in zillions of
 others, which use it via C<(X)PUSH[pni]>.
+
+Because the target is reused, you must be careful when pushing multiple
+values on the stack. The following code will not do what you think:
+
+    XPUSHi(10);
+    XPUSHi(20);
+
+This translates as "set C<TARG> to 10, push a pointer to C<TARG> onto
+the stack; set C<TARG> to 20, push a pointer to C<TARG> onto the stack".
+At the end of the operation, the stack does not contain the values 10
+and 20, but actually contains two pointers to C<TARG>, which we have set
+to 20. If you need to push multiple different values, use C<XPUSHs>,
+which bypasses C<TARG>.
+
+On a related note, if you do use C<(X)PUSH[npi]>, then you're going to
+need a C<dTARG> in your variable declarations so that the C<*PUSH*>
+macros can make use of the local variable C<TARG>. 
 
 =head2 Scratchpads
 

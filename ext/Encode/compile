@@ -1,5 +1,8 @@
 #!../../perl -w
-BEGIN { @INC = '../../lib' };
+BEGIN {
+    @INC = '../../lib';
+    $ENV{PATH} .= ';../..' if $^O eq 'MSWin32';
+}
 use strict;
 use Getopt::Std;
 my @orig_ARGV = @ARGV;

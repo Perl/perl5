@@ -4154,7 +4154,6 @@ Perl_cv_undef(pTHX_ CV *cv)
 	LEAVE;
     }
     SvPOK_off((SV*)cv);		/* forget prototype */
-    CvFLAGS(cv) = 0;
     CvGV(cv) = Nullgv;
     SvREFCNT_dec(CvOUTSIDE(cv));
     CvOUTSIDE(cv) = Nullcv;
@@ -4183,6 +4182,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	}
 	CvPADLIST(cv) = Nullav;
     }
+    CvFLAGS(cv) = 0;
 }
 
 #ifdef DEBUG_CLOSURES
@@ -5799,7 +5799,6 @@ Perl_ck_glob(pTHX_ OP *o)
     gv = newGVgen("main");
     gv_IOadd(gv);
     append_elem(OP_GLOB, o, newGVOP(OP_GV, 0, gv));
-    SvREFCNT_dec((SV*)gv); /* had excess refcnt */
     scalarkids(o);
     return o;
 }

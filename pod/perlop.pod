@@ -1605,7 +1605,7 @@ of a C<while> statement (even if disguised as a C<for(;;)> loop),
 the value is automatically assigned to the global variable $_,
 destroying whatever was there previously.  (This may seem like an
 odd thing to you, but you'll use the construct in almost every Perl
-script you write.)  The $_ variables is not implicitly localized.
+script you write.)  The $_ variable is not implicitly localized.
 You'll have to put a C<local $_;> before the loop if you want that
 to happen.
 

@@ -3166,7 +3166,10 @@ trylocal: {
 		    PUSHs(dirsv);
 		    PUSHs(sv);
 		    PUTBACK;
-		    count = call_sv(loader, G_ARRAY);
+		    if (sv_isobject(loader))
+			count = call_method("INC", G_ARRAY);
+		    else
+			count = call_sv(loader, G_ARRAY);
 		    SPAGAIN;
 
 		    if (count > 0) {
