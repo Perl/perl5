@@ -22,7 +22,7 @@ like($@, 'Modification of a read-only value attempted', '[perl #19566]');
 # 82 is chosen to exceed the length for sv_grow in do_readline (80)
 foreach my $k (1, 82) {
   my $result
-    = runperl (switches => '-l', stdin => '', stderr => 1,
+    = runperl (stdin => '', stderr => 1,
               prog => "\$x = q(k) x $k; \$a{\$x} = qw(v); \$_ = <> foreach keys %a; print qw(end)",
 	      );
   $result =~ s/\n\z// if $^O eq 'VMS';
@@ -32,7 +32,7 @@ foreach my $k (1, 82) {
 
 foreach my $k (1, 21) {
   my $result
-    = runperl (switches => '-l', stdin => ' rules', stderr => 1,
+    = runperl (stdin => ' rules', stderr => 1,
               prog => "\$x = q(perl) x $k; \$a{\$x} = q(v); foreach (keys %a) {\$_ .= <>; print}",
 	      );
   $result =~ s/\n\z// if $^O eq 'VMS';
