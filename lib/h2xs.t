@@ -8,6 +8,7 @@
 #
 # We are now checking that the correct use $version; is present in
 # Makefile.PL and $module.pm
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -28,13 +29,16 @@ if (!(-e $extracted_program)) {
 # You might also wish to bail out if your perl platform does not
 # do `$^X -e 'warn "Writing h2xst"' 2>&1`; duplicity.
 
-my $dupe = '2>&1'; # ok on unix, nt, VMS, ...
-my $lib = '"-I../lib"'; # ok on unix, nt, The extra \" are for VMS
+# ok on unix, nt, VMS, ...
+my $dupe = '2>&1';
+# ok on unix, nt, The extra \" are for VMS
+my $lib = '"-I../lib" "-I../../lib"';
 # The >&1 would create a file named &1 on MPW (STDERR && STDOUT are
 # already merged).
 if ($^O eq 'MacOS') {
     $dupe = '';
-    $lib = '-x -I::lib:'; # -x overcomes MPW $Config{startperl} anomaly
+    # -x overcomes MPW $Config{startperl} anomaly
+    $lib = '-x -I::lib: -I:::lib:';
 }
 # $name should differ from system header file names and must
 # not already be found in the t/ subdirectory for perl.
@@ -145,7 +149,7 @@ while (my ($args, $version, $expectation) = splice @tests, 0, 3) {
   # does it run?
   my $prog = "$^X $lib $extracted_program $args $dupe";
   @result = `$prog`;
-  ok ($?, 0, "running $prog");
+  ok ($?, 0, "running $prog ");
   $result = join("",@result);
 
   # accomodate MPW # comment character prependage
