@@ -944,6 +944,7 @@ lib/ExtUtils/MM_Cygwin.t	See if ExtUtils::MM_Cygwin works
 lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
+lib/ExtUtils/MM_Unix.t		see if ExtUtils::MM_Unix works
 lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MM_VMS.t		See if ExtUtils::MM_VMS works
 lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
