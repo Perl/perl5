@@ -4773,6 +4773,50 @@ PP(pp_gpwent)
     register SV *sv;
     STRLEN n_a;
     struct passwd *pwent  = NULL;
+    /* 
+     * We currently support only the SysV getsp* shadow password interface.
+     * The interface is declared in <shadow.h> and often one needs to link
+     * with -lsecurity or some such.
+     * This interface is used at least by Solaris, HP-UX, IRIX, and Linux.
+     * (and SCO?)
+     *
+     * AIX getpwnam() is clever enough to return the encrypted password
+     * only if the caller (euid?) is root.
+     *
+     * There are at least two other shadow password APIs.  Many platforms
+     * seem to contain more than one interface for accessing the shadow
+     * password databases, possibly for compatibility reasons.
+     * The getsp*() is tby far he simplest one, the other two interfaces
+     * are much more complicated, but also very similar to each other.
+     *
+     * <sys/types.h>
+     * <sys/security.h>
+     * <prot.h>
+     * struct pr_passwd *getprpw*();
+     * The password is in
+     * char getprpw*(...).ufld.fd_encrypt[AUTH_MAX_CIPHERTEXT_LENGTH]
+     *
+     * <sys/types.h>
+     * <sys/security.h>
+     * <prot.h>
+     * struct es_passwd *getespw*();
+     * The password is in
+     * char *(getespw*(...).ufld.fd_encrypt)
+     *
+     * XXX Configure test needed for getprpwnam XXX
+     * XXX Configure test needed for getespwnam XXX
+     *
+     * In HP-UX for getprpw*() the manual page claims that one should include
+     * <hpsecurity.h> instead of <sys/security.h>, but that is not needed
+     * if one includes <shadow.h> as that includes <hpsecurity.h>,
+     * and pp_sys.c already includes <shadow.h> if there is such.
+     * 
+     * In Digital UNIX/Tru64 if using the getespw*() (which seems to be
+     * be preferred interface, even though also the getprpw*() interface
+     * is available) one needs to link with -lsecurity -ldb -laud -lm.
+     *
+     * --jhi
+     */
 #  ifdef HAS_GETSPNAM
     struct spwd   *spwent = NULL;
 #  endif

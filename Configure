@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun May  7 18:52:04 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Mon May  8 19:06:18 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -792,6 +792,7 @@ version=''
 perl5=''
 perladmin=''
 perlpath=''
+d_nv_preserved_bits=''
 d_nv_preserves_uv=''
 i16size=''
 i16type=''
@@ -10190,6 +10191,39 @@ esac
 
 $rm -f try.* try
 
+case "$d_nv_preserves_uv" in
+"$define") d_nv_preserved_bits=`expr $uvsize \* 8` ;;
+*)	$echo "Checking how many bits of your UVs your NVs can preserve..." >&4
+	$cat <<EOP >try.c
+#include <stdio.h>
+int main() {
+    $uvtype u = 0;
+    int     n = 8 * $uvsize;
+    int     i;
+    for (i = 0; i < n; i++) {
+      u = u << 1 | ($uvtype)1;
+      if (($uvtype)($nvtype)u != u)
+        break;
+    }
+    printf("%d\n", i);
+    exit(0);
+}
+EOP
+	set try
+	if eval $compile; then
+		d_nv_preserved_bits="`./try$exe_ext`"
+	fi
+	case "$d_nv_preserved_bits" in
+	[1-9]*)	$echo "Your NVs can preserve $d_nv_preserved_bits of your NVs."  2>&1 ;;
+	*)	$echo "Can't figure out how many bits your NVs preserve." 2>&1
+		d_nv_preserved_bits="$undef"
+		;;
+	esac
+	$rm -f try.* try
+	;;
+esac
+
+
 
 : check for off64_t
 echo " "
@@ -15315,6 +15349,7 @@ d_msync='$d_msync'
 d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
 d_nice='$d_nice'
+d_nv_preserved_bits='$d_nv_preserved_bits'
 d_nv_preserves_uv='$d_nv_preserves_uv'
 d_off64_t='$d_off64_t'
 d_old_pthread_create_joinable='$d_old_pthread_create_joinable'

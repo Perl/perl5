@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sun May  7 18:54:35 EET DST 2000
+ * Configuration time: Mon May  8 19:17:48 EET DST 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2652,7 +2652,7 @@
  */
 /* NV_PRESERVES_UV:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
- *	can preserve all the bit of a variable of type UVSIZE.
+ *	can preserve all the bits of a variable of type UVTYPE.
  */
 #define	IVTYPE		long		/**/
 #define	UVTYPE		unsigned long		/**/
