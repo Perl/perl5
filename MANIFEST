@@ -647,7 +647,9 @@ ext/threads/shared/t/no_share.t	Tests for disabled share on variables.
 ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
+ext/threads/shared/t/queue.t	thread shared variables
 ext/threads/shared/typemap	thread::shared types
+ext/threads/shared/queue.pm	Threadsafe queue.
 ext/threads/t/basic.t		ithreads
 ext/threads/t/end.t		Test end functions
 ext/threads/t/join.t		Testing the join function
