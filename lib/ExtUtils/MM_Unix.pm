@@ -2327,6 +2327,15 @@ sub init_PERL {
     $thisperl = $self->abs2rel($thisperl) if $self->{PERL_CORE};
 
     my @perls = ($thisperl);
+    my $ndbg = '';
+    if ( $Is_VMS ) {
+        if ( defined( $Config{usevmsdebug} ) ) {
+            if ( $Config{usevmsdebug} eq 'define' ) {
+                push @perls, map { "$_$Config{exe_ext}" } ('ndbgperl');
+                $ndbg = 'ndbg';
+            }
+        }
+    }
     push @perls, map { "$_$Config{exe_ext}" }
                      ('perl', 'perl5', "perl$Config{version}");
 
@@ -2346,7 +2355,7 @@ sub init_PERL {
     # supply switches with perl
 
     # Define 'FULLPERL' to be a non-miniperl (used in test: target)
-    ($self->{FULLPERL} = $self->{PERL}) =~ s/miniperl/perl/i
+    ($self->{FULLPERL} = $self->{PERL}) =~ s/miniperl/${ndbg}perl/i
 	unless $self->{FULLPERL};
 
     # Little hack to get around VMS's find_perl putting "MCR" in front
