@@ -610,15 +610,6 @@ kill(int pid, int sig)
  * File system stuff
  */
 
-#if 0
-int
-ioctl(int i, unsigned int u, char *data)
-{
-    croak("ioctl not implemented!\n");
-    return -1;
-}
-#endif
-
 DllExport unsigned int
 win32_sleep(unsigned int t)
 {

@@ -507,6 +507,7 @@ win32_times
 win32_alarm
 win32_open_osfhandle
 win32_get_osfhandle
+win32_ioctl
 Perl_win32_init
 Perl_init_os_extras
 Perl_getTHR

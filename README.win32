@@ -503,7 +503,7 @@ The following functions are currently unavailable: C<fork()>,
 C<dump()>, C<chown()>, C<link()>, C<symlink()>, C<chroot()>,
 C<setpgrp()> and related security functions, C<setpriority()>,
 C<getpriority()>, C<syscall()>, C<fcntl()>, C<getpw*()>,
-C<wait*()>, C<msg*()>, C<shm*()>, C<sem*()>, C<ioctl()>, C<alarm()>,
+C<wait*()>, C<msg*()>, C<shm*()>, C<sem*()>, C<alarm()>,
 C<socketpair()>, C<*netent()>, C<*protoent()>, C<*servent()>,
 C<*hostent()>, C<getnetby*()>.
 This list is possibly incomplete.
@@ -516,6 +516,11 @@ behave as on Unix platforms.
 =item *
 
 The four-argument C<select()> call is only supported on sockets.
+
+=item *
+
+The C<ioctl()> call is only supported on sockets (where it provides the
+functionality of ioctlsocket() in the Winsock API).
 
 =item *
 

@@ -223,7 +223,7 @@ win32_getsockopt(SOCKET s, int level, int optname, char *optval, int *optlen)
     return r;
 }
 
-int
+DllExport int
 win32_ioctlsocket(SOCKET s, long cmd, u_long *argp)
 {
     int r;
@@ -464,6 +464,28 @@ win32_getservbyport(int port, const char *proto)
 	r = win32_savecopyservent(&myservent, r, proto);
     }
     return r;
+}
+
+int
+win32_ioctl(int i, unsigned int u, char *data)
+{
+    u_long argp = (u_long)data;
+    int retval;
+
+    if (!wsock_started) {
+	croak("ioctl implemented only on sockets");
+	/* NOTREACHED */
+    }
+
+    retval = ioctlsocket(TO_SOCKET(i), (long)u, &argp);
+    if (retval == SOCKET_ERROR) {
+	if (WSAGetLastError() == WSAENOTSOCK) {
+	    croak("ioctl implemented only on sockets");
+	    /* NOTREACHED */
+	}
+	errno = WSAGetLastError();
+    }
+    return retval;
 }
 
 char FAR *
