@@ -25,6 +25,7 @@ sub Complete {
     local ($prompt) = shift (@_);
     local ($c, $cmp, $l, $r, $ret, $return, $test);
     @_cmp_lst = sort @_;
+    local($[) = 0;
     system 'stty raw -echo';
     loop: {
 	print $prompt, $return;

@@ -1,4 +1,4 @@
-/* $Header: cons.c,v 3.0.1.3 89/12/21 19:20:25 lwall Locked $
+/* $Header: cons.c,v 3.0.1.4 90/02/28 16:44:00 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cons.c,v $
+ * Revision 3.0.1.4  90/02/28  16:44:00  lwall
+ * patch9: subs which return by both mechanisms can clobber local return data
+ * patch9: changed internal SUB label to _SUB_
+ * patch9: line numbers were bogus during certain portions of foreach evaluation
+ * 
  * Revision 3.0.1.3  89/12/21  19:20:25  lwall
  * patch7: made nested or recursive foreach work right
  * 
@@ -67,8 +72,12 @@ CMD *cmd;
 
 	mycompblock.comp_true = cmd;
 	mycompblock.comp_alt = Nullcmd;
-	cmd = add_label(savestr("SUB"),make_ccmd(C_BLOCK,Nullarg,mycompblock));
+	cmd = add_label(savestr("_SUB_"),make_ccmd(C_BLOCK,Nullarg,mycompblock));
 	saw_return = FALSE;
+	if (perldb)
+	    cmd->c_next->c_flags |= CF_TERM;
+	else
+	    cmd->c_flags |= CF_TERM;
     }
     sub->cmd = cmd;
     stab_sub(stab) = sub;
@@ -412,7 +421,9 @@ ARG *arg;
     cmd->c_expr = cond;
     if (cond)
 	cmd->c_flags |= CF_COND;
-    if (cmdline != NOLINE) {
+    if (cmdline == NOLINE)
+	cmd->c_line = line;
+    else {
 	cmd->c_line = cmdline;
 	cmdline = NOLINE;
     }
@@ -437,7 +448,9 @@ struct compcmd cblock;
     cmd->ucmd.ccmd.cc_alt = cblock.comp_alt;
     if (arg)
 	cmd->c_flags |= CF_COND;
-    if (cmdline != NOLINE) {
+    if (cmdline == NOLINE)
+	cmd->c_line = line;
+    else {
 	cmd->c_line = cmdline;
 	cmdline = NOLINE;
     }
@@ -466,7 +479,9 @@ struct compcmd cblock;
     cmd->ucmd.ccmd.cc_alt = cblock.comp_alt;
     if (arg)
 	cmd->c_flags |= CF_COND;
-    if (cmdline != NOLINE) {
+    if (cmdline == NOLINE)
+	cmd->c_line = line;
+    else {
 	cmd->c_line = cmdline;
 	cmdline = NOLINE;
     }

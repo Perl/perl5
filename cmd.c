@@ -1,4 +1,4 @@
-/* $Header: cmd.c,v 3.0.1.4 89/12/21 19:17:41 lwall Locked $
+/* $Header: cmd.c,v 3.0.1.5 90/02/28 16:38:31 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,14 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.c,v $
+ * Revision 3.0.1.5  90/02/28  16:38:31  lwall
+ * patch9: volatilized some more variables for super-optimizing compilers
+ * patch9: nested foreach loops didn't reset inner loop on next to outer loop
+ * patch9: returned values were read from obsolete stack
+ * patch9: added sanity check on longjmp() return value
+ * patch9: substitutions that almost always succeed can corrupt label stack
+ * patch9: subs which return by both mechanisms can clobber local return data
+ * 
  * Revision 3.0.1.4  89/12/21  19:17:41  lwall
  * patch7: arranged for certain registers to be restored after longjmp()
  * patch7: made nested or recursive foreach work right
@@ -50,11 +58,12 @@ void grow_dlevel();
 int
 cmd_exec(cmdparm,gimme,sp)
 CMD *VOLATILE cmdparm;
-int gimme;
-int sp;
+VOLATILE int gimme;
+VOLATILE int sp;
 {
     register CMD *cmd = cmdparm;
     SPAT *VOLATILE oldspat;
+    VOLATILE int firstsave = savestack->ary_fill;
     VOLATILE int oldsave;
     VOLATILE int aryoptsave;
 #ifdef DEBUGGING
@@ -178,12 +187,16 @@ tail_recursion_entry:
 		cmdparm = cmd;
 #endif
 		if (match = setjmp(loop_stack[loop_ptr].loop_env)) {
-#ifdef JMPCLOBBER
 		    st = stack->ary_array;	/* possibly reallocated */
+#ifdef JMPCLOBBER
 		    cmd = cmdparm;
 		    cmdflags = cmd->c_flags|CF_ONCE;
 #endif
+		    if (savestack->ary_fill > oldsave)
+			restorelist(oldsave);
 		    switch (match) {
+		    default:
+			fatal("longjmp returned bad value (%d)",match);
 		    case O_LAST:	/* not done unless go_to found */
 			go_to = Nullch;
 			if (lastretstr) {
@@ -198,8 +211,6 @@ tail_recursion_entry:
 			olddlevel = dlevel;
 #endif
 			curspat = oldspat;
-			if (savestack->ary_fill > oldsave)
-			    restorelist(oldsave);
 			goto next_cmd;
 		    case O_NEXT:	/* not done unless go_to found */
 			go_to = Nullch;
@@ -450,7 +461,7 @@ until_loop:
 		}
 	    }
 	    if (--cmd->c_short->str_u.str_useful < 0) {
-		cmdflags &= ~CF_OPTIMIZE;
+		cmdflags &= ~(CF_OPTIMIZE|CF_ONCE);
 		cmdflags |= CFT_EVAL;	/* never try this optimization again */
 		cmd->c_flags = cmdflags;
 	    }
@@ -563,8 +574,11 @@ until_loop:
 		savesptr(&stab_val(cmd->c_stab));
 		savelong(&cmd->c_short->str_u.str_useful);
 	    }
-	    else
+	    else {
 		ar = stab_xarray(cmd->c_expr[1].arg_ptr.arg_stab);
+		if (cmd->c_type != C_WHILE && savestack->ary_fill > firstsave)
+		    restorelist(firstsave);
+	    }
 
 	    if (match >= ar->ary_fill) {	/* we're in LAST, probably */
 		retstr = &str_undef;
@@ -753,13 +767,17 @@ until_loop:
 	cmdparm = cmd;
 #endif
 	if (match = setjmp(loop_stack[loop_ptr].loop_env)) {
-#ifdef JMPCLOBBER
 	    st = stack->ary_array;	/* possibly reallocated */
+#ifdef JMPCLOBBER
 	    cmd = cmdparm;
 	    cmdflags = cmd->c_flags|CF_ONCE;
 	    go_to = goto_targ;
 #endif
+	    if (savestack->ary_fill > oldsave)
+		restorelist(oldsave);
 	    switch (match) {
+	    default:
+		fatal("longjmp returned bad value (%d)",match);
 	    case O_LAST:
 		if (lastretstr) {
 		    retstr = lastretstr;
@@ -770,8 +788,6 @@ until_loop:
 		    retstr = st[newsp];
 		}
 		curspat = oldspat;
-		if (savestack->ary_fill > oldsave)
-		    restorelist(oldsave);
 		goto next_cmd;
 	    case O_NEXT:
 #ifdef JMPCLOBBER
@@ -831,8 +847,14 @@ until_loop:
 	}
       finish_while:
 	curspat = oldspat;
-	if (savestack->ary_fill > oldsave)
+	if (savestack->ary_fill > oldsave) {
+	    if (cmdflags & CF_TERM) {
+		for (match = sp + 1; match <= newsp; match++)
+		    st[match] = str_static(st[match]);
+		retstr = st[newsp];
+	    }
 	    restorelist(oldsave);
+	}
 #ifdef DEBUGGING
 	dlevel = olddlevel - 1;
 #endif
@@ -855,7 +877,8 @@ until_loop:
 	}
 #endif
 	loop_ptr--;
-	if ((cmdflags & CF_OPTIMIZE) == CFT_ARRAY)
+	if ((cmdflags & CF_OPTIMIZE) == CFT_ARRAY &&
+	  savestack->ary_fill > aryoptsave)
 	    restorelist(aryoptsave);
     }
     cmd = cmd->c_next;

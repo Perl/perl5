@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.4 89/12/21 19:55:10 lwall Locked $
+/* $Header: doio.c,v 3.0.1.5 90/02/28 17:01:36 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.5  90/02/28  17:01:36  lwall
+ * patch9: open(FOO,"$filename\0") will now protect trailing spaces in filename
+ * patch9: removed obsolete checks to avoid opening block devices
+ * patch9: removed references to acusec and modusec that some utime.h's have
+ * patch9: added pipe function
+ * 
  * Revision 3.0.1.4  89/12/21  19:55:10  lwall
  * patch7: select now works on big-endian machines
  * patch7: errno may now be a macro with an lvalue
@@ -53,12 +59,12 @@
 #endif
 
 bool
-do_open(stab,name)
+do_open(stab,name,len)
 STAB *stab;
 register char *name;
+int len;
 {
     FILE *fp;
-    int len = strlen(name);
     register STIO *stio = stab_io(stab);
     char *myname = savestr(name);
     int result;
@@ -202,21 +208,6 @@ register char *name;
 	    return FALSE;
 	}
 	result = (statbuf.st_mode & S_IFMT);
-	if (result != S_IFREG &&
-#ifdef S_IFSOCK
-	    result != S_IFSOCK &&
-#endif
-#ifdef S_IFFIFO
-	    result != S_IFFIFO &&
-#endif
-#ifdef S_IFIFO
-	    result != S_IFIFO &&
-#endif
-	    result != 0 &&		/* socket? */
-	    result != S_IFCHR) {
-	    (void)fclose(fp);
-	    return FALSE;
-	}
 #ifdef S_IFSOCK
 	if (result == S_IFSOCK || result == 0)
 	    stio->type = 's';	/* in case a socket was passed in to us */
@@ -250,7 +241,7 @@ register STAB *stab;
 	str_sset(stab_val(stab),str);
 	STABSET(stab_val(stab));
 	oldname = str_get(stab_val(stab));
-	if (do_open(stab,oldname)) {
+	if (do_open(stab,oldname,stab_val(stab)->str_cur)) {
 	    if (inplace) {
 #ifdef TAINT
 		taintproper("Insecure dependency in inplace open");
@@ -275,7 +266,7 @@ register STAB *stab;
 		str_nset(str,">",1);
 		str_cat(str,oldname);
 		errno = 0;		/* in case sprintf set errno */
-		if (!do_open(argvoutstab,str->str_ptr))
+		if (!do_open(argvoutstab,str->str_ptr,str->str_cur))
 		    fatal("Can't do inplace edit");
 		defoutstab = argvoutstab;
 #ifdef FCHMOD
@@ -301,6 +292,49 @@ register STAB *stab;
 	defoutstab = stabent("STDOUT",TRUE);
     }
     return Nullfp;
+}
+
+void
+do_pipe(str, rstab, wstab)
+STR *str;
+STAB *rstab;
+STAB *wstab;
+{
+    register STIO *rstio;
+    register STIO *wstio;
+    int fd[2];
+
+    if (!rstab)
+	goto badexit;
+    if (!wstab)
+	goto badexit;
+
+    rstio = stab_io(rstab);
+    wstio = stab_io(wstab);
+
+    if (!rstio)
+	rstio = stab_io(rstab) = stio_new();
+    else if (rstio->ifp)
+	do_close(rstab,FALSE);
+    if (!wstio)
+	wstio = stab_io(wstab) = stio_new();
+    else if (wstio->ifp)
+	do_close(wstab,FALSE);
+
+    if (pipe(fd) < 0)
+	goto badexit;
+    rstio->ifp = fdopen(fd[0], "r");
+    wstio->ofp = fdopen(fd[1], "w");
+    wstio->ifp = wstio->ofp;
+    rstio->type = '<';
+    wstio->type = '>';
+
+    str_sset(str,&str_yes);
+    return;
+
+badexit:
+    str_sset(str,&str_undef);
+    return;
 }
 
 bool
@@ -1991,12 +2025,9 @@ int *arglast;
 	    } utbuf;
 #endif
 
+	    Zero(&utbuf, sizeof utbuf, char);
 	    utbuf.actime = (long)str_gnum(st[++sp]);    /* time accessed */
 	    utbuf.modtime = (long)str_gnum(st[++sp]);    /* time modified */
-#ifdef I_UTIME
-	    utbuf.acusec = 0;		/* hopefully I_UTIME implies these */
-	    utbuf.modusec = 0;
-#endif
 	    items -= 2;
 #ifndef lint
 	    tot = items;

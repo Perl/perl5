@@ -422,6 +422,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  */
 #$d_voidsig	VOIDSIG 	/**/
 
+/* HASVOLATILE:
+ *	This symbol, if defined, indicates that this C compiler knows about
+ *	the volatile declaration.
+ */
+#$d_volatile	HASVOLATILE	/**/
+
 /* VPRINTF:
  *	This symbol, if defined, indicates that the vprintf routine is available
  *	to printf with a pointer to an argument list.  If unavailable, you
@@ -542,7 +548,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
 
 /* I_UTIME:
  *	This symbol, if defined, indicates to the C program that it should
- *	include utime.h (a DG/UX thingie).
+ *	include utime.h.
  */
 #$i_utime	I_UTIME		/**/
 

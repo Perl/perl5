@@ -1,4 +1,4 @@
-/* $Header: consarg.c,v 3.0.1.2 89/11/17 15:11:34 lwall Locked $
+/* $Header: consarg.c,v 3.0.1.3 90/02/28 16:47:54 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	consarg.c,v $
+ * Revision 3.0.1.3  90/02/28  16:47:54  lwall
+ * patch9: the x operator is now up to 10 times faster
+ * patch9: @_ clobbered by ($foo,$bar) = split
+ * 
  * Revision 3.0.1.2  89/11/17  15:11:34  lwall
  * patch5: defined $foo{'bar'} should not create element
  * 
@@ -312,9 +316,12 @@ register ARG *arg;
 	    break;
 	case O_REPEAT:
 	    i = (int)str_gnum(s2);
+	    tmps = str_get(s1);
 	    str_nset(str,"",0);
-	    while (i-- > 0)
-		str_scat(str,s1);
+	    STR_GROW(str, i * s1->str_cur + 1);
+	    repeatcpy(str->str_ptr, tmps, s1->str_cur, i);
+	    str->str_cur = i * s1->str_cur;
+	    str->str_ptr[str->str_cur] = '\0';
 	    break;
 	case O_MULTIPLY:
 	    value = str_gnum(s1);
@@ -648,10 +655,11 @@ register ARG *arg;
 		arg2 = arg[2].arg_ptr.arg_arg;
 		if (arg2->arg_type == O_SPLIT) { /* use split's builtin =?*/
 		    spat = arg2[2].arg_ptr.arg_spat;
-		    if (spat->spat_repl[1].arg_ptr.arg_stab == defstab &&
+		    if (!(spat->spat_flags & SPAT_ONCE) &&
 		      nothing_in_common(arg1,spat->spat_repl)) {
 			spat->spat_repl[1].arg_ptr.arg_stab =
 			    arg1[1].arg_ptr.arg_stab;
+			spat->spat_flags |= SPAT_ONCE;
 			arg_free(arg1);	/* recursive */
 			free_arg(arg);	/* non-recursive */
 			return arg2;	/* split has builtin assign */

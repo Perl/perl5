@@ -1,4 +1,4 @@
-/* $Header: dolist.c,v 3.0.1.4 89/12/21 19:58:46 lwall Locked $
+/* $Header: dolist.c,v 3.0.1.5 90/02/28 17:09:44 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,15 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dolist.c,v $
+ * Revision 3.0.1.5  90/02/28  17:09:44  lwall
+ * patch9: split now can split into more than 10000 elements
+ * patch9: @_ clobbered by ($foo,$bar) = split
+ * patch9: sped up pack and unpack
+ * patch9: unpack of single item now works in a scalar context
+ * patch9: slices ignored value of $[
+ * patch9: grep now returns number of items matched in scalar context
+ * patch9: grep iterations no longer in the regexp context of previous iteration
+ * 
  * Revision 3.0.1.4  89/12/21  19:58:46  lwall
  * patch7: grep(1,@array) didn't work
  * patch7: /$pat/; //; wrongly freed runtime pattern twice
@@ -264,6 +273,7 @@ int *arglast;
     register STR *dstr;
     register char *m;
     int iters = 0;
+    int maxiters = (strend - s) + 10;
     int i;
     char *orig;
     int origlimit = limit;
@@ -299,7 +309,7 @@ int *arglast;
     }
 #endif
     ary = stab_xarray(spat->spat_repl[1].arg_ptr.arg_stab);
-    if (ary && ((ary->ary_flags & ARF_REAL) || gimme != G_ARRAY)) {
+    if (ary && (gimme != G_ARRAY || (spat->spat_flags & SPAT_ONCE))) {
 	realarray = 1;
 	if (!(ary->ary_flags & ARF_REAL)) {
 	    ary->ary_flags |= ARF_REAL;
@@ -317,7 +327,7 @@ int *arglast;
 	    s++;
     }
     if (!limit)
-	limit = 10001;
+	limit = maxiters + 2;
     if (spat->spat_short) {
 	i = spat->spat_short->str_cur;
 	if (i == 1) {
@@ -353,6 +363,7 @@ int *arglast;
 	}
     }
     else {
+	maxiters += (strend - s) * spat->spat_regexp->nparens;
 	while (s < strend && --limit &&
 	    regexec(spat->spat_regexp, s, strend, orig, 1, Nullstr, TRUE) ) {
 	    if (spat->spat_regexp->subbase
@@ -389,7 +400,7 @@ int *arglast;
 	iters = sp + 1;
     else
 	iters = sp - arglast[0];
-    if (iters > 9999)
+    if (iters > maxiters)
 	fatal("Split loop");
     if (s < strend || origlimit) {	/* keep field after final delim? */
 	if (realarray)
@@ -468,19 +479,20 @@ int *arglast;
     unsigned long aulong;
     char *aptr;
 
-    if (gimme != G_ARRAY) {
-	str_sset(str,&str_undef);
-	STABSET(str);
-	st[sp] = str;
-	return sp;
+    if (gimme != G_ARRAY) {		/* arrange to do first one only */
+	patend = pat+1;
+	if (*pat == 'a' || *pat == 'A') {
+	    while (isdigit(*patend))
+		patend++;
+	}
     }
     sp--;
     while (pat < patend) {
 	datumtype = *pat++;
 	if (isdigit(*pat)) {
-	    len = atoi(pat);
+	    len = *pat++ - '0';
 	    while (isdigit(*pat))
-		pat++;
+		len = (len * 10) + (*pat++ - '0');
 	}
 	else
 	    len = 1;
@@ -675,8 +687,8 @@ int *arglast;
 	if (numarray) {
 	    while (sp < max) {
 		if (st[++sp]) {
-		    st[sp-1] = afetch(stab_array(stab),(int)str_gnum(st[sp]),
-			lval);
+		    st[sp-1] = afetch(stab_array(stab),
+		      ((int)str_gnum(st[sp])) - arybase, lval);
 		}
 		else
 		    st[sp-1] = &str_undef;
@@ -700,7 +712,8 @@ int *arglast;
     else {
 	if (numarray) {
 	    if (st[max])
-		st[sp] = afetch(stab_array(stab),(int)str_gnum(st[max]), lval);
+		st[sp] = afetch(stab_array(stab),
+		  ((int)str_gnum(st[max])) - arybase, lval);
 	    else
 		st[sp] = &str_undef;
 	}
@@ -732,6 +745,7 @@ int *arglast;
     register int sp = arglast[2];
     register int i = sp - arglast[1];
     int oldsave = savestack->ary_fill;
+    SPAT *oldspat = curspat;
 
     savesptr(&stab_val(defstab));
     if ((arg[1].arg_type & A_MASK) != A_EXPR) {
@@ -747,10 +761,11 @@ int *arglast;
 	if (str_true(st[sp+1]))
 	    st[dst++] = st[src];
 	src++;
+	curspat = oldspat;
     }
     restorelist(oldsave);
     if (gimme != G_ARRAY) {
-	str_sset(str,&str_undef);
+	str_numset(str,(double)(dst - arglast[1]));
 	STABSET(str);
 	st[arglast[0]+1] = str;
 	return arglast[0]+1;

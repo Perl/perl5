@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: base.term,v 3.0 89/10/18 15:24:34 lwall Locked $
+# $Header: base.term,v 3.0.1.1 90/02/28 18:31:56 lwall Locked $
 
 print "1..6\n";
 
@@ -30,7 +30,13 @@ if ($x == '1') {print "ok 4\n";} else {print "not ok 4\n";}
 # check <> pseudoliteral
 
 open(try, "/dev/null") || (die "Can't open /dev/null.");
-if (<try> eq '') {print "ok 5\n";} else {print "not ok 5\n";}
+if (<try> eq '') {
+    print "ok 5\n";
+}
+else {
+    print "not ok 5\n";
+    die "/dev/null IS NOT A CHARACTER SPECIAL FILE!!!!\n" unless -c '/dev/null';
+}
 
 open(try, "../Makefile") || (die "Can't open ../Makefile.");
 if (<try> ne '') {print "ok 6\n";} else {print "not ok 6\n";}

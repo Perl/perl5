@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 3.0.1.3 89/12/21 20:03:05 lwall Locked $
+/* $Header: eval.c,v 3.0.1.4 90/02/28 17:36:59 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,18 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
+ * Revision 3.0.1.4  90/02/28  17:36:59  lwall
+ * patch9: added pipe function
+ * patch9: a return in scalar context wouldn't return array
+ * patch9: !~ now always returns scalar even in array context
+ * patch9: some machines can't cast float to long with high bit set
+ * patch9: piped opens returned undef in child
+ * patch9: @array in scalar context now returns length of array
+ * patch9: chdir; coredumped
+ * patch9: wait no longer ignores signals
+ * patch9: mkdir now handles odd versions of /bin/mkdir
+ * patch9: -l FILEHANDLE now disallowed
+ * 
  * Revision 3.0.1.3  89/12/21  20:03:05  lwall
  * patch7: errno may now be a macro with an lvalue
  * patch7: ANSI strerror() is now supported
@@ -48,6 +60,7 @@ static STAB *stab2;
 static STIO *stio;
 static struct lstring *lstr;
 static char old_record_separator;
+extern int wantarray;
 
 double sin(), cos(), atan2(), pow();
 
@@ -141,10 +154,12 @@ register int sp;
 	STR_SSET(str,st[1]);
 	anum = (int)str_gnum(st[2]);
 	if (anum >= 1) {
-	    tmpstr = Str_new(50,0);
+	    tmpstr = Str_new(50, 0);
 	    str_sset(tmpstr,str);
-	    while (--anum > 0)
-		str_scat(str,tmpstr);
+	    tmps = str_get(tmpstr);	/* force to be string */
+	    STR_GROW(str, (anum * str->str_cur) + 1);
+	    repeatcpy(str->str_ptr, tmps, tmpstr->str_cur, anum);
+	    str->str_cur *= anum; str->str_ptr[str->str_cur] = '\0';
 	}
 	else
 	    str_sset(str,&str_no);
@@ -159,9 +174,7 @@ register int sp;
 	break;
     case O_NMATCH:
 	sp = do_match(str,arg,
-	  gimme,arglast);
-	if (gimme == G_ARRAY)
-	    goto array_return;
+	  G_SCALAR,arglast);
 	str_sset(str, str_true(str) ? &str_no : &str_yes);
 	STABSET(str);
 	break;
@@ -270,14 +283,14 @@ register int sp;
 	value = str_gnum(st[1]);
 	anum = (int)str_gnum(st[2]);
 #ifndef lint
-	value = (double)(((long)value) << anum);
+	value = (double)(((unsigned long)value) << anum);
 #endif
 	goto donumset;
     case O_RIGHT_SHIFT:
 	value = str_gnum(st[1]);
 	anum = (int)str_gnum(st[2]);
 #ifndef lint
-	value = (double)(((long)value) >> anum);
+	value = (double)(((unsigned long)value) >> anum);
 #endif
 	goto donumset;
     case O_LT:
@@ -313,7 +326,8 @@ register int sp;
 	if (!sawvec || st[1]->str_nok || st[2]->str_nok) {
 	    value = str_gnum(st[1]);
 #ifndef lint
-	    value = (double)(((long)value) & (long)str_gnum(st[2]));
+	    value = (double)(((unsigned long)value) &
+			(unsigned long)str_gnum(st[2]));
 #endif
 	    goto donumset;
 	}
@@ -324,7 +338,8 @@ register int sp;
 	if (!sawvec || st[1]->str_nok || st[2]->str_nok) {
 	    value = str_gnum(st[1]);
 #ifndef lint
-	    value = (double)(((long)value) ^ (long)str_gnum(st[2]));
+	    value = (double)(((unsigned long)value) ^
+			(unsigned long)str_gnum(st[2]));
 #endif
 	    goto donumset;
 	}
@@ -335,7 +350,8 @@ register int sp;
 	if (!sawvec || st[1]->str_nok || st[2]->str_nok) {
 	    value = str_gnum(st[1]);
 #ifndef lint
-	    value = (double)(((long)value) | (long)str_gnum(st[2]));
+	    value = (double)(((unsigned long)value) |
+			(unsigned long)str_gnum(st[2]));
 #endif
 	    goto donumset;
 	}
@@ -414,7 +430,7 @@ register int sp;
 	goto donumset;
     case O_COMPLEMENT:
 #ifndef lint
-	value = (double) ~(long)str_gnum(st[1]);
+	value = (double) ~(unsigned long)str_gnum(st[1]);
 #endif
 	goto donumset;
     case O_SELECT:
@@ -502,11 +518,14 @@ register int sp;
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
 	    stab = stabent(str_get(st[1]),TRUE);
-	if (do_open(stab,str_get(st[2]))) {
+	tmps = str_get(st[2]);
+	if (do_open(stab,tmps,st[2]->str_cur)) {
 	    value = (double)forkprocess;
 	    stab_io(stab)->lines = 0;
 	    goto donumset;
 	}
+	else if (forkprocess == 0)		/* we are a new child */
+	    goto say_zero;
 	else
 	    goto say_undef;
 	break;
@@ -556,9 +575,10 @@ register int sp;
 	    sp += maxarg;
 	    goto array_return;
 	}
-	else
-	    str = afetch(ary,maxarg - 1,FALSE);
-	break;
+	else {
+	    value = (double)maxarg;
+	    goto donumset;
+	}
     case O_AELEM:
 	anum = ((int)str_gnum(st[2])) - arybase;
 	str = afetch(stab_array(arg[1].arg_ptr.arg_stab),anum,FALSE);
@@ -824,7 +844,7 @@ register int sp;
 	goto donumset;
     case O_CHDIR:
 	if (maxarg < 1)
-	    tmps = str_get(stab_val(defstab));
+	    tmps = Nullch;
 	else
 	    tmps = str_get(st[1]);
 	if (!tmps || !*tmps) {
@@ -993,9 +1013,9 @@ register int sp;
 	STABSET(str);
 	break;
     case O_RETURN:
-	tmps = "SUB";		/* just fake up a "last SUB" */
+	tmps = "_SUB_";		/* just fake up a "last _SUB_" */
 	optype = O_LAST;
-	if (gimme == G_ARRAY) {
+	if (wantarray == G_ARRAY) {
 	    lastretstr = Nullstr;
 	    lastspbase = arglast[1];
 	    lastsize = arglast[2] - arglast[1];
@@ -1304,17 +1324,17 @@ register int sp;
 	goto donumset;
     case O_WAIT:
 #ifndef lint
-	ihand = signal(SIGINT, SIG_IGN);
-	qhand = signal(SIGQUIT, SIG_IGN);
+	/* ihand = signal(SIGINT, SIG_IGN); */
+	/* qhand = signal(SIGQUIT, SIG_IGN); */
 	anum = wait(&argflags);
 	if (anum > 0)
 	    pidgone(anum,argflags);
 	value = (double)anum;
 #else
-	ihand = qhand = 0;
+	/* ihand = qhand = 0; */
 #endif
-	(void)signal(SIGINT, ihand);
-	(void)signal(SIGQUIT, qhand);
+	/* (void)signal(SIGINT, ihand); */
+	/* (void)signal(SIGQUIT, qhand); */
 	statusvalue = (unsigned short)argflags;
 	goto donumset;
     case O_SYSTEM:
@@ -1491,6 +1511,8 @@ register int sp;
 		    errno = EEXIST;
 		else if (instr(buf,"non-exist"))
 		    errno = ENOENT;
+		else if (instr(buf,"does not exist"))
+		    errno = ENOENT;
 		else if (instr(buf,"not empty"))
 		    errno = EBUSY;
 		else if (instr(buf,"cannot access"))
@@ -1600,7 +1622,7 @@ register int sp;
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
 	    stab = stabent(str_get(st[1]),TRUE);
-	argtype = (int)str_gnum(st[2]);
+	argtype = (unsigned int)str_gnum(st[2]);
 #ifdef TAINT
 	taintproper("Insecure dependency in ioctl");
 #endif
@@ -1748,6 +1770,8 @@ register int sp;
 	goto say_no;
 #endif
     case O_FTLINK:
+	if (arg[1].arg_type & A_DONT)
+	    fatal("You must supply explicit filename with -l");
 #ifdef LSTAT
 	if (lstat(str_get(st[1]),&statcache) < 0)
 	    goto say_undef;
@@ -2070,6 +2094,18 @@ register int sp;
     case O_SYSCALL:
 	value = (double)do_syscall(arglast);
 	goto donumset;
+    case O_PIPE:
+	if ((arg[1].arg_type & A_MASK) == A_WORD)
+	    stab = arg[1].arg_ptr.arg_stab;
+	else
+	    stab = stabent(str_get(st[1]),TRUE);
+	if ((arg[2].arg_type & A_MASK) == A_WORD)
+	    stab2 = arg[2].arg_ptr.arg_stab;
+	else
+	    stab2 = stabent(str_get(st[2]),TRUE);
+	do_pipe(str,stab,stab2);
+	STABSET(str);
+	break;
     }
 
   normal_return:
@@ -2087,8 +2123,21 @@ array_return:
 #ifdef DEBUGGING
     if (debug) {
 	dlevel--;
-	if (debug & 8)
-	    deb("%s RETURNS ARRAY OF %d ARGS\n",opname[optype],sp - arglast[0]);
+	if (debug & 8) {
+	    anum = sp - arglast[0];
+	    switch (anum) {
+	    case 0:
+		deb("%s RETURNS ()\n",opname[optype]);
+		break;
+	    case 1:
+		deb("%s RETURNS (\"%s\")\n",opname[optype],str_get(st[1]));
+		break;
+	    default:
+		deb("%s RETURNS %d ARGS (\"%s\",%s\"%s\"\n",opname[optype],anum,
+		  str_get(st[1]),anum==2?"":"...,",str_get(st[anum]));
+		break;
+	    }
+	}
     }
 #endif
     return sp;

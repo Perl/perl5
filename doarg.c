@@ -1,4 +1,4 @@
-/* $Header: doarg.c,v 3.0.1.2 89/12/21 19:52:15 lwall Locked $
+/* $Header: doarg.c,v 3.0.1.3 90/02/28 16:56:58 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,15 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doarg.c,v $
+ * Revision 3.0.1.3  90/02/28  16:56:58  lwall
+ * patch9: split now can split into more than 10000 elements
+ * patch9: sped up pack and unpack
+ * patch9: pack of unsigned ints and longs blew up some places
+ * patch9: sun3 can't cast negative float to unsigned int or long
+ * patch9: local($.) didn't work
+ * patch9: grep(s/foo/bar/, @abc = @xyz) modified @xyz rather than @abc
+ * patch9: syscall returned stack size rather than value of system call
+ * 
  * Revision 3.0.1.2  89/12/21  19:52:15  lwall
  * patch7: a pattern wouldn't match a null string before the first character
  * patch7: certain patterns didn't match correctly at end of string
@@ -44,6 +53,7 @@ int sp;
     register char *d;
     int clen;
     int iters = 0;
+    int maxiters = (strend - s) + 10;
     register int i;
     bool once;
     char *orig;
@@ -192,7 +202,7 @@ int sp;
 		    /* NOTREACHED */
 		}
 		do {
-		    if (iters++ > 10000)
+		    if (iters++ > maxiters)
 			fatal("Substitution loop");
 		    m = spat->spat_regexp->startp[0];
 		    if (i = m - s) {
@@ -233,7 +243,7 @@ int sp;
 	    curspat = spat;
 	lastspat = spat;
 	do {
-	    if (iters++ > 10000)
+	    if (iters++ > maxiters)
 		fatal("Substitution loop");
 	    if (spat->spat_regexp->subbase
 	      && spat->spat_regexp->subbase != orig) {
@@ -351,7 +361,9 @@ int *arglast;
     char achar;
     short ashort;
     int aint;
+    unsigned int auint;
     long along;
+    unsigned long aulong;
     char *aptr;
 
     items = arglast[2] - sp;
@@ -361,9 +373,9 @@ int *arglast;
 #define NEXTFROM (items-- > 0 ? *st++ : &str_no)
 	datumtype = *pat++;
 	if (isdigit(*pat)) {
-	    len = atoi(pat);
+	    len = *pat++ - '0';
 	    while (isdigit(*pat))
-		pat++;
+		len = (len * 10) + (*pat++ - '0');
 	}
 	else
 	    len = 1;
@@ -429,6 +441,12 @@ int *arglast;
 	    }
 	    break;
 	case 'I':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		auint = (unsigned int)str_gnum(fromstr);
+		str_ncat(str,(char*)&auint,sizeof(unsigned int));
+	    }
+	    break;
 	case 'i':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
@@ -447,6 +465,12 @@ int *arglast;
 	    }
 	    break;
 	case 'L':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		aulong = (unsigned long)str_gnum(fromstr);
+		str_ncat(str,(char*)&aulong,sizeof(unsigned long));
+	    }
+	    break;
 	case 'l':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
@@ -481,6 +505,7 @@ register STR **sarg;
     register char *send;
     char *xs;
     int xlen;
+    double value;
 
     str_set(str,"");
     len--;			/* don't count pattern string */
@@ -547,10 +572,20 @@ register STR **sarg;
 	    case 'x': case 'o': case 'u':
 		ch = *(++t);
 		*t = '\0';
-		if (dolong)
-		    (void)sprintf(buf,s,(unsigned long)str_gnum(*(sarg++)));
+		value = str_gnum(*(sarg++));
+#if defined(sun) && !defined(sparc)
+		if (value < 0.0) {		/* sigh */
+		    if (dolong)
+			(void)sprintf(buf,s,(long)value);
+		    else
+			(void)sprintf(buf,s,(int)value);
+		}
 		else
-		    (void)sprintf(buf,s,(unsigned int)str_gnum(*(sarg++)));
+#endif
+		if (dolong)
+		    (void)sprintf(buf,s,(unsigned long)value);
+		else
+		    (void)sprintf(buf,s,(unsigned int)value);
 		s = t;
 		*(t--) = ch;
 		break;
@@ -798,6 +833,7 @@ int *arglast;
     int i;
 
     makelocal = (arg->arg_flags & AF_LOCAL);
+    localizing = makelocal;
     delaymagic = DM_DELAY;		/* catch simultaneous items */
 
     /* If there's a common identifier on both sides we have to take
@@ -828,9 +864,8 @@ int *arglast;
 		while (relem <= lastrelem) {	/* gobble up all the rest */
 		    str = Str_new(28,0);
 		    if (*relem)
-			str_sset(str,*(relem++));
-		    else
-			relem++;
+			str_sset(str,*relem);
+		    *(relem++) = str;
 		    (void)astore(ary,i++,str);
 		}
 	    }
@@ -852,9 +887,8 @@ int *arglast;
 		    tmps = str_get(str);
 		    tmpstr = Str_new(29,0);
 		    if (*relem)
-			str_sset(tmpstr,*(relem++));	/* value */
-		    else
-			relem++;
+			str_sset(tmpstr,*relem);	/* value */
+		    *(relem++) = tmpstr;
 		    (void)hstore(hash,tmps,str->str_cur,tmpstr,0);
 		}
 	    }
@@ -864,10 +898,26 @@ int *arglast;
 	else {
 	    if (makelocal)
 		saveitem(str);
-	    if (relem <= lastrelem)
-		str_sset(str, *(relem++));
-	    else
+	    if (relem <= lastrelem) {
+		str_sset(str, *relem);
+		*(relem++) = str;
+	    }
+	    else {
 		str_nset(str, "", 0);
+		if (gimme == G_ARRAY) {
+		    i = ++lastrelem - firstrelem;
+		    relem++;		/* tacky, I suppose */
+		    astore(stack,i,str);
+		    if (st != stack->ary_array) {
+			st = stack->ary_array;
+			firstrelem = st + arglast[1] + 1;
+			firstlelem = st + arglast[0] + 1;
+			lastlelem = st + arglast[1];
+			lastrelem = st + i;
+			relem = lastrelem + 1;
+		    }
+		}
+	    }
 	    STABSET(str);
 	}
     }
@@ -882,6 +932,7 @@ int *arglast;
 #endif
     }
     delaymagic = 0;
+    localizing = FALSE;
     if (gimme == G_ARRAY) {
 	i = lastrelem - firstrelem + 1;
 	if (ary || hash)
@@ -1283,9 +1334,7 @@ int *arglast;
 	  arg[7]);
 	break;
     }
-    st[sp] = str_static(&str_undef);
-    str_numset(st[sp], (double)retval);
-    return sp;
+    return retval;
 #else
     fatal("syscall() unimplemented");
 #endif
