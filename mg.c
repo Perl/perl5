@@ -1545,23 +1545,10 @@ int sig;
     SV *sv;
     CV *cv;
     AV *oldstack;
-    bool long_savestack = (savestack_ix + 14) < savestack_max;
-    bool long_cxstack = (cxstack_ix + 1) < cxstack_max;
-
-    /* Protect PUSHXXX in progress. */
-    if (long_cxstack)
-	cxstack_ix++;
 
     if (!psig_ptr[sig])
 	die("Signal SIG%s received, but no signal handler set.\n",
 	    sig_name[sig]);
-
-    /*
-     * Protect save in progress.  Max number of items pushed there is
-     * 3*n or 4. We cannot fix infinity, so we fix 4 (in fact 5).
-     */
-    if (long_savestack)
-	savestack_ix += 5;
 
     cv = sv_2cv(psig_ptr[sig],&st,&gv,TRUE);
     if (!cv || !CvROOT(cv)) {
@@ -1589,10 +1576,6 @@ int sig;
     perl_call_sv((SV*)cv, G_DISCARD);
 
     SWITCHSTACK(signalstack, oldstack);
-    if (long_savestack)
-	savestack_ix -= 5;	/* Unprotect save in progress. */
-    if (long_cxstack)
-	cxstack_ix--;		/* Unprotect PUSHXXX in progress. */
-    
+
     return;
 }
