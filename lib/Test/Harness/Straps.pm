@@ -374,7 +374,7 @@ sub _switches {
 
     # Quote all switches to prevent shell interference, or VMS downcasing
     for ( @derived_switches ) {
-	$_ = qq["$_"] if /\s/ && !/^".*"$/;
+	$_ = qq["$_"] if /\S/ && !/^".*"$/;
     }
     return join( " ", @existing_switches, @derived_switches );
 }
