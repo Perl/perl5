@@ -25,6 +25,14 @@ $got = read(FOO,$buf,4);
 is ($got, 0);
 is ($buf, "");
 
+# This is true if Config is not built, or if PerlIO is enabled
+# ie assume that PerlIO is present, unless we know for sure otherwise.
+my $has_perlio = !eval {
+    no warnings;
+    require Config;
+    !$Config::Config{useperlio}
+};
+
 my $tmpfile = 'Op_read.tmp';
 
 1 while unlink $tmpfile;
@@ -35,6 +43,8 @@ foreach (65, 161, 253, 9786) {
     push @values, join "", map {chr $_} $_ .. $_ + 4;
     push @buffers, join "", map {chr $_} $_ + 5 .. $_ + 20;
 }
+my @offsets = (0, 3, 7, 22, -1, -3, -5, -7);
+my @lengths = (0, 2, 5, 10);
 
 foreach my $value (@values) {
     foreach my $initial_buffer (@buffers) {
@@ -43,14 +53,18 @@ foreach my $value (@values) {
 	    # It's all 8 bit
 	    unshift @utf8, 0;
 	}
+      SKIP:
 	foreach my $utf8 (@utf8) {
+	    skip "Needs :utf8 layer but no perlio", 2 * @offsets * @lengths
+	      if $utf8 and !$has_perlio;
+
 	    1 while unlink $tmpfile;
 	    open FH, ">$tmpfile" or die "Can't open $tmpfile: $!";
 	    binmode FH, "utf8" if $utf8;
 	    print FH $value;
 	    close FH;
-	    foreach my $offset (0, 3, 7, 22, -1, -3, -5, -7) {
-		foreach my $length (0, 2, 5, 10) {
+	    foreach my $offset (@offsets) {
+		foreach my $length (@lengths) {
 		    # Will read the lesser of the length of the file and the
 		    # read length
 		    my $will_read = $value;
