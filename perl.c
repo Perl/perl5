@@ -395,6 +395,7 @@ perl_destruct(pTHXx)
     LEAVE;
     FREETMPS;
 
+
     /* We must account for everything.  */
 
     /* Destroy the main CV and syntax tree */
@@ -408,6 +409,13 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_main_cv);
     PL_main_cv = Nullcv;
     PL_dirty = TRUE;
+
+    /* Tell PerlIO we are about to tear things apart in case
+       we have layers which are using resources that should
+       be cleaned up now.
+     */
+
+    PerlIO_destruct(aTHX);
 
     if (PL_sv_objcount) {
 	/*

@@ -93,6 +93,11 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
  return -1;
 }
 
+void
+PerlIO_destruct(pTHX)
+{
+}
+
 int
 PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 {
@@ -310,6 +315,37 @@ PerlIO_cleanup()
 {
  dTHX;
  PerlIO_cleantable(aTHX_ &_perlio);
+}
+
+void
+PerlIO_destruct(pTHX)
+{
+ PerlIO **table = &_perlio;
+ PerlIO *f;
+ while ((f = *table))
+  {
+   int i;
+   table = (PerlIO **)(f++);
+   for (i=1; i < PERLIO_TABLE_SIZE; i++)
+    {
+     PerlIO *x = f;
+     PerlIOl *l;
+     while ((l = *x))
+      {
+       if (l->tab->kind & PERLIO_K_DESTRUCT)
+        {
+         PerlIO_debug("Destruct popping %s\n",l->tab->name);
+         PerlIO_flush(x);
+         PerlIO_pop(aTHX_ x);
+        }
+       else
+        {
+         x = PerlIONext(x);
+        }
+      }
+     f++;
+    }
+  }
 }
 
 void
@@ -888,11 +924,11 @@ PerlIO_resolve_layers(pTHX_ const char *layers,const char *mode,int narg, SV **a
   PerlIO_stdstreams(aTHX);
  if (narg)
   {
-   if (SvROK(*args))
+   if (SvROK(*args) && !sv_isobject(*args))
     {
-     if (sv_isobject(*args))
+     if (SvTYPE(SvRV(*args)) < SVt_PVAV)
       {
-       SV *handler = PerlIO_find_layer(aTHX_ "object",6);
+       SV *handler = PerlIO_find_layer(aTHX_ "Scalar",6);
        if (handler)
         {
          def    = newAV();
@@ -903,21 +939,7 @@ PerlIO_resolve_layers(pTHX_ const char *layers,const char *mode,int narg, SV **a
       }
      else
       {
-       if (SvTYPE(SvRV(*args)) < SVt_PVAV)
-        {
-         SV *handler = PerlIO_find_layer(aTHX_ "Scalar",6);
-         if (handler)
-          {
-           def    = newAV();
-           av_push(def,handler);
-           av_push(def,&PL_sv_undef);
-           incdef = 0;
-          }
-        }
-       else
-        {
-         Perl_croak(aTHX_ "Unsupported reference arg to open()");
-        }
+       Perl_croak(aTHX_ "Unsupported reference arg to open()");
       }
     }
   }

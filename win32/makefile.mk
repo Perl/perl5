@@ -1254,9 +1254,9 @@ $(MD5_DLL): $(PERLDEP) $(MD5).xs
 	cd $(EXTDIR)\Digest\MD5 && $(MAKE)
 
 $(MIMEBASE64_DLL): $(PERLDEP) $(MIMEBASE64).xs
-	cd $(EXTDIR)\Digest\Mime\Base64 && \
+	cd $(EXTDIR)\MIME\Base64 && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\Digest\MIMEBASE64 && $(MAKE)
+	cd $(EXTDIR)\MIME\Base64 && $(MAKE)
 
 $(ERRNO_PM): $(PERLDEP) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B) && \

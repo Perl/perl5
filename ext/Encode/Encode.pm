@@ -273,7 +273,7 @@ use base 'Encode::Encoding';
 # Encoding is 16-bit network order Unicode (no surogates)
 # Used for X font encodings
 
-__PACKAGE__->Define(qw(UCS-2 iso10646-1));
+__PACKAGE__->Define(qw(UCS-2 iso-10646-1));
 
 sub decode
 {
@@ -285,7 +285,7 @@ sub decode
    $uni .= chr($code);
   }
  $_[1] = $str if $chk;
- Encode::utf8_upgrade($uni);
+ utf8::upgrade($uni);
  return $uni;
 }
 
@@ -586,7 +586,7 @@ UTF-16 is similar to UCS-2, 16 bit or 2-byte chunks.
 UCS-2 can only represent 0..0xFFFF, while UTF-16 has a "surogate pair"
 scheme which allows it to cover the whole Unicode range.
 
-Encode implements big-endian UCS-2 aliased to "iso10646-1" as that
+Encode implements big-endian UCS-2 aliased to "iso-10646-1" as that
 happens to be the name used by that representation when used with X11 fonts.
 
 UTF-32 or UCS-4 is 32-bit or 4-byte chunks.  Perl's logical characters

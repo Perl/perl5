@@ -219,9 +219,11 @@ PerlIOEncode_flush(PerlIO *f)
 {
  PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
  IV code = 0;
- dTHX;
- if (e->bufsv && (PerlIOBase(f)->flags & (PERLIO_F_RDBUF|PERLIO_F_WRBUF)))
+ if (e->bufsv && (PerlIOBase(f)->flags & (PERLIO_F_RDBUF|PERLIO_F_WRBUF))
+     &&(e->base.ptr > e->base.buf)
+    )
   {
+   dTHX;
    dSP;
    SV *str;
    char *s;
@@ -451,6 +453,11 @@ encode_method(pTHX_ encode_t *enc, encpage_t *dir, SV *src, int check)
       }
      SvCUR_set(src,SvCUR(src)-slen);
     }
+  }
+ else
+  {
+   SvCUR_set(dst,slen);
+   SvPOK_on(dst);
   }
  return dst;
 }

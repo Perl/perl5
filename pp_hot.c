@@ -1511,6 +1511,7 @@ Perl_do_readline(pTHX)
      || (IoFLAGS(io) & IOf_NOLINE) || !RsSNARF(rs))
 
     for (;;) {
+	PUTBACK;
 	if (!sv_gets(sv, fp, offset)
 	    && (type == OP_GLOB || SNARF_EOF(gimme, PL_rs, io, sv)))
 	{
@@ -1531,6 +1532,7 @@ Perl_do_readline(pTHX)
 	    }
 	    if (gimme == G_SCALAR) {
 		(void)SvOK_off(TARG);
+		SPAGAIN;
 		PUSHTARG;
 	    }
 	    MAYBE_TAINT_LINE(io, sv);
@@ -1540,6 +1542,7 @@ Perl_do_readline(pTHX)
 	IoLINES(io)++;
 	IoFLAGS(io) |= IOf_NOLINE;
 	SvSETMAGIC(sv);
+	SPAGAIN;
 	XPUSHs(sv);
 	if (type == OP_GLOB) {
 	    char *tmps;
