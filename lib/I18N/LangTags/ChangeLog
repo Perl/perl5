@@ -1,6 +1,16 @@
 Revision history for Perl module I18N::LangTags.
-                                        Time-stamp: "2004-06-20 21:50:16 ADT"
+                                        Time-stamp: "2004-07-01 14:28:23 ADT"
 
+2004-07-01  Sean M. Burke  sburke@cpan.org
+
+	* Release 0.33
+
+	Minor bugfix version:
+	The test 80_all_env.t was erroneously failing for people with
+	LC_ALL or LC_MESSAGES set.  Fixed.  Thanks to everyone, especially
+	Nicholas Clark, who patiently helped out with this.
+
+	
 2004-06-20  Sean M. Burke  sburke@cpan.org
 
 	* Release 0.32

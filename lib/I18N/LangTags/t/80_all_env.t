@@ -1,8 +1,8 @@
 
 require 5;
 use Test;
-# Time-stamp: "2004-06-20 21:51:11 ADT"
-BEGIN { plan tests => 14; }
+# Time-stamp: "2004-07-01 14:33:50 ADT"
+BEGIN { plan tests => 20; }
 use I18N::LangTags::Detect 1.01;
 print "# Hi there...\n";
 ok 1;
@@ -35,20 +35,61 @@ sub printenv {
 
 $ENV{'IGNORE_WIN32_LOCALE'} = 1; # a hack, just for testing's sake.
 
-print "# Test LANG...\n";
+
+print "# Test LANGUAGE...\n";
 $ENV{'REQUEST_METHOD'} = '';
-$ENV{'LANG'}        = 'Eu_MT';
-$ENV{'LC_ALL'}      = '';
-$ENV{'LANGUAGE'}    = '';
-$ENV{'LC_MESSAGES'} = '';
+$ENV{'LANGUAGE'}       = 'Eu-MT';
+$ENV{'LC_ALL'}         = '';
+$ENV{'LC_MESSAGES'}    = '';
+$ENV{'LANG'}           = '';
 ok show( scalar I18N::LangTags::Detect::detect()),    "eu-mt";
 ok show( j      I18N::LangTags::Detect::detect()), q{["eu-mt"]};
 
-print "# Test LANGUAGE...\n";
-$ENV{'LANG'}     = '';
-$ENV{'LANGUAGE'} = 'Eu-MT';
+
+print "# Test LC_ALL...\n";
+$ENV{'REQUEST_METHOD'} = '';
+$ENV{'LANGUAGE'}       = '';
+$ENV{'LC_ALL'}         = 'Eu-MT';
+$ENV{'LC_MESSAGES'}    = '';
+$ENV{'LANG'}           = '';
+
 ok show( scalar I18N::LangTags::Detect::detect()),    "eu-mt";
 ok show( j      I18N::LangTags::Detect::detect()), q{["eu-mt"]};
+
+print "# Test LC_MESSAGES...\n";
+$ENV{'REQUEST_METHOD'} = '';
+$ENV{'LANGUAGE'}       = '';
+$ENV{'LC_ALL'}         = '';
+$ENV{'LC_MESSAGES'}    = 'Eu-MT';
+$ENV{'LANG'}           = '';
+
+ok show( scalar I18N::LangTags::Detect::detect()),    "eu-mt";
+ok show( j      I18N::LangTags::Detect::detect()), q{["eu-mt"]};
+
+
+print "# Test LANG...\n";
+$ENV{'REQUEST_METHOD'} = '';
+$ENV{'LANGUAGE'}       = '';
+$ENV{'LC_ALL'}         = '';
+$ENV{'LC_MESSAGES'}    = '';
+$ENV{'LANG'}           = 'Eu_MT';
+
+ok show( scalar I18N::LangTags::Detect::detect()),    "eu-mt";
+ok show( j      I18N::LangTags::Detect::detect()), q{["eu-mt"]};
+
+
+
+print "# Test LANG...\n";
+$ENV{'LANGUAGE'} = '';
+$ENV{'REQUEST_METHOD'} = '';
+$ENV{'LC_ALL'} = '';
+$ENV{'LC_MESSAGES'} = '';
+$ENV{'LANG'}     = 'Eu_MT';
+
+ok show( scalar I18N::LangTags::Detect::detect()),    "eu-mt";
+ok show( j      I18N::LangTags::Detect::detect()), q{["eu-mt"]};
+
+
 
 
 print "# Test HTTP_ACCEPT_LANGUAGE...\n";
