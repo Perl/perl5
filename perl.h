@@ -1,6 +1,9 @@
-/* $Header: perl.h,v 1.0.1.3 88/01/28 10:24:17 root Exp $
+/* $Header: perl.h,v 1.0.1.4 88/01/30 08:54:00 root Exp $
  *
  * $Log:	perl.h,v $
+ * Revision 1.0.1.4  88/01/30  08:54:00  root
+ * patch9: changed #define YYDEBUG; to #define YYDEBUG 1
+ * 
  * Revision 1.0.1.3  88/01/28  10:24:17  root
  * patch8: added eval operator.
  * 
@@ -184,7 +187,7 @@ EXT int debug INIT(0);
 EXT int dlevel INIT(0);
 EXT char debname[40];
 EXT char debdelim[40];
-#define YYDEBUG;
+#define YYDEBUG 1
 extern int yydebug;
 #endif
 

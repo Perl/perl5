@@ -1,6 +1,9 @@
-/* $Header: arg.c,v 1.0.1.4 88/01/28 10:22:06 root Exp $
+/* $Header: arg.c,v 1.0.1.5 88/01/30 08:53:16 root Exp $
  *
  * $Log:	arg.c,v $
+ * Revision 1.0.1.5  88/01/30  08:53:16  root
+ * patch9: fixed some missing right parens introduced (?) by patch 2
+ * 
  * Revision 1.0.1.4  88/01/28  10:22:06  root
  * patch8: added eval operator.
  * 
@@ -552,8 +555,8 @@ STR ***retary;
 	    apush(ary,str_nmake((double)statbuf.st_blksize));
 	    apush(ary,str_nmake((double)statbuf.st_blocks));
 #else
-	    apush(ary,str_make("");
-	    apush(ary,str_make("");
+	    apush(ary,str_make(""));
+	    apush(ary,str_make(""));
 #endif
 	}
 	sarg = (STR**)safemalloc((max+2)*sizeof(STR*));
