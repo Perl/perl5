@@ -276,6 +276,9 @@ ext/Encode/Encode/macUkraine.enc	Encoding tables
 ext/Encode/Encode/posix-bc.enc		Encoding tables
 ext/Encode/Encode/shiftjis.enc		Encoding tables
 ext/Encode/Encode/symbol.enc		Encoding tables
+ext/Encode/compile		Encode extension
+ext/Encode/encengine.c		Encode extension
+ext/Encode/encode.h		Encode extension
 ext/Errno/ChangeLog		Errno perl module change log
 ext/Errno/Errno_pm.PL		Errno perl module create script
 ext/Errno/Makefile.PL		Errno extension makefile writer
