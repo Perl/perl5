@@ -189,7 +189,9 @@ now do localise variables, given that the $x is a valid variable name.
 
 =head2 Unicode Character Database 4.0.0
 
-Unicode Character Database has been updated to 4.0.0 from 3.2.0.
+The copy of the Unicode Character Database included in Perl 5.8 has
+been updated to 4.0.0 from 3.2.0.  This means for example that the
+Unicode character properties are as in Unicode 4.0.0.
 
 =head2 Deprecation Warnings
 
@@ -197,7 +199,7 @@ There is one new feature deprecation.  Perl 5.8.0 forgot to add
 some deprecation warnings, these warnings have now been added.
 Finally, a reminder of an impending feature removal.
 
-=head3 (New) Version Strings (v-strings) Are Deprecated
+=head3 (New) Version strings (v-strings) are deprecated
 
 Version Strings (v-strings) have been deprecated and they will be
 removed in some future release of Perl.  Each v-string will trigger
@@ -231,7 +233,7 @@ using the 5.005 threads but not to see the deprecation warnings, use:
 
     no warnings 'deprecated';
 
-=head3 (Reminder) The $* Variable Really Is Deprecated
+=head3 (Reminder) The $* variable really is deprecated
 
 The C<$*> variable controlling multi-line matching has been deprecated
 and will be removed after 5.8.  The variable has been deprecated for a
@@ -334,6 +336,8 @@ Unicode::Normalize
 
 Win32::GetFolderPath
 
+Win32::GetOSVersion
+
 =head1 Utility Changes
 
 The Perl debugger (F<lib/perl5db.pl>) has now been extensively
@@ -397,8 +401,9 @@ Perl is now known to build also in Hitachi HI-UXMPP.
 Mac OS X now installs with Perl version number embedded in
 installation directory names for easier upgrading of user-compiled
 Perl, and the installation directories in general are more standard.
-(In other words, the default installation no longer breaks the
-Apple-provided Perl.)
+In other words, the default installation no longer breaks the
+Apple-provided Perl.  On the other hand, with C<Configure -Dprefix=/usr>
+you can now really replace the Apple-supplied Perl (please be careful).
 
 Mac OS X now builds Perl statically by default.  This change was done
 mainly for faster startup times.  The Apple-provided Perl is still
@@ -861,7 +866,16 @@ in CPAN as F<authors/id/H/HM/HMBRAND/dor-5.8.1.diff>.
 
 =item *
 
-C<unpack()> can be default to unpacking the C<$_>.
+C<unpack()> will default to unpacking the C<$_>.
+
+=item *
+
+Various Copy-On-Write techniques will be investigated in hopes
+of speeding up Perl.
+
+=item *
+
+CPANPLUS, Inline, and Module::Build will become core modules.
 
 =item *
 
