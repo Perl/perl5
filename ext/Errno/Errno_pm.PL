@@ -5,7 +5,7 @@ use strict;
 
 use vars qw($VERSION);
 
-$VERSION = "1.08";
+$VERSION = "1.09";
 
 my %err = ();
 
@@ -38,7 +38,7 @@ sub process_file {
     }
     while(<FH>) {
 	$err{$1} = 1
-	   if /^\s*#\s*define\s+(E\w+)\s+/;
+	    if /^\s*#\s*define\s+(E\w+)\s+/;
    }
    close(FH);
 }
@@ -99,14 +99,17 @@ sub write_errno_pm {
     close(CPPI);
 
     # invoke CPP and read the output
+
     if ($^O eq 'VMS') {
 	my $cpp = "$Config{cppstdin} $Config{cppflags} $Config{cppminus}";
 	$cpp =~ s/sys\$input//i;
 	open(CPPO,"$cpp  errno.c |") or
           die "Cannot exec $Config{cppstdin}";
-    } elsif ($^O eq 'next') {
+    } elsif($^O eq 'next') {
+	# NeXT will do syntax checking unless it is reading from stdin
 	my $cpp = "$Config{cppstdin} $Config{cppflags} $Config{cppminus}";
-	open(CPPO,"$cpp < errno.c |") or die "Cannot exec $cpp";
+	open(CPPO,"$cpp < errno.c |")
+	    or die "Cannot exec $cpp";
     } else {
 	open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
 	    die "Cannot exec $Config{cpprun}";
