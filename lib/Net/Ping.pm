@@ -3,33 +3,31 @@ package Net::Ping;
 # Authors: karrer@bernina.ethz.ch (Andreas Karrer)
 #          pmarquess@bfsec.bt.co.uk (Paul Marquess)
 
+require 5.002 ;
 require Exporter;
+
+use strict ;
+use vars qw(@ISA @EXPORT $VERSION $tcp_proto $echo_port) ;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(ping pingecho);
-$VERSION = 1.00;
+$VERSION = 1.01;
 
 use Socket 'PF_INET', 'AF_INET', 'SOCK_STREAM';
-require Carp ;
+use Carp ;
 
-use strict ;
-
-$Net::Ping::tcp_proto = (getprotobyname('tcp'))[2];
-$Net::Ping::echo_port = (getservbyname('echo', 'tcp'))[2];
-
-# keep -w happy
-$Net::Ping::tcp_proto = $Net::Ping::tcp_proto ;
-$Net::Ping::echo_port = $Net::Ping::echo_port ;
+$tcp_proto = (getprotobyname('tcp'))[2];
+$echo_port = (getservbyname('echo', 'tcp'))[2];
 
 sub ping {
-    Carp::croak "ping not implemented yet. Use pingecho()";
+    croak "ping not implemented yet. Use pingecho()";
 }
 
 
 sub pingecho {
 
-    Carp::croak "usage: pingecho host [timeout]" 
-        unless @_ == 1 || @_ == 2 ;
+    croak "usage: pingecho host [timeout]" 
+        unless @_ == 1 or @_ == 2 ;
 
     my ($host, $timeout) = @_;
     my ($saddr, $ip);
@@ -48,13 +46,13 @@ sub pingecho {
 
     return 0 unless $ip;		# "no such host"
 
-    $saddr = pack('S n a4 x8', AF_INET, $Net::Ping::echo_port, $ip);
+    $saddr = pack('S n a4 x8', AF_INET, $echo_port, $ip);
     $SIG{'ALRM'} = sub { die } ;
     alarm($timeout);
     
     $ret = 0;
     eval <<'EOM' ;
-    return unless socket(PINGSOCK, PF_INET, SOCK_STREAM, $Net::Ping::tcp_proto) ;
+    return unless socket(PINGSOCK, PF_INET, SOCK_STREAM, $tcp_proto) ;
     return unless connect(PINGSOCK, $saddr) ;
     $ret=1 ;
 EOM
