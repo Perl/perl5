@@ -95,6 +95,14 @@ use strict;
 @Config::EXPORT = qw(%%Config);
 @Config::EXPORT_OK = qw(myconfig config_sh config_vars config_re);
 
+# Need to stub all the functions to make code such as print Config::config_sh
+# keep working
+
+sub myconfig;
+sub config_sh;
+sub config_vars;
+sub config_re;
+
 my %%Export_Cache = map {($_ => 1)} (@Config::EXPORT, @Config::EXPORT_OK);
 
 our %%Config;
@@ -298,7 +306,8 @@ print CONFIG_HEAVY join("", @v_fast, sort @v_others);
 print CONFIG_HEAVY <<'EOT';
 !END!
 s/(byteorder=)(['"]).*?\2/$1$2$Config::byteorder$2/m;
-our $Config_SH : unique = $_;
+
+my $config_sh_len = length $_;
 
 our $Config_SH_expanded : unique = "\n$_" . << 'EOVIRTUAL';
 EOT
@@ -379,7 +388,7 @@ sub STORE  { die "\%Config::Config is read-only\n" }
 
 
 sub config_sh {
-    $Config_SH
+    substr $Config_SH_expanded, 1, $config_sh_len;
 }
 
 sub config_re {
