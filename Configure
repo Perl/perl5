@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Dec 19 02:24:52 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Dec 19 03:02:32 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1124,6 +1124,9 @@ case "$sh" in
 			if test -f "$xxx"; then
 				sh="$xxx";
 				break
+			elif test "X$_exe" != X -a -f "$xxx$_exe"; then
+				sh="$xxx";
+				break
 			elif test -f "$xxx.exe"; then
 				sh="$xxx";
 				break
@@ -2025,6 +2028,9 @@ for dir in \$*; do
 	if test -f \$thisthing; then
 		echo \$thisthing
 		exit 0
+	elif test "X$_exe" != X -a -f \$thisthing$_exe; then
+		echo \$thisthing
+        	exit 0
 	elif test -f \$dir/\$thing.exe; then
 		if test -n "$DJGPP"; then
 			echo \$dir/\$thing.exe
@@ -2097,7 +2103,7 @@ for file in $loclist; do
 	'') xxx=`./loc $file $file $pth`;;
 	*) xxx=`./loc $xxx $xxx $pth`;;
 	esac
-	eval $file=$xxx
+	eval $file=$xxx$_exe
 	eval _$file=$xxx
 	case "$xxx" in
 	/*)
@@ -2146,15 +2152,24 @@ for file in $trylist; do
 	esac
 done
 case "$egrep" in
-egrep)
+*egrep*)
 	echo "Substituting grep for egrep."
 	egrep=$grep
 	;;
 esac
 case "$ln" in
-ln)
+*ln*)
 	echo "Substituting cp for ln."
 	ln=$cp
+	;;
+esac
+case "$make$gmake" in
+*make*)
+	;;
+*)
+	echo "I can't find make or gmake, and my life depends on it." >&4
+	echo "Go find a public domain implementation or fix your PATH setting!" >&4
+	exit 1
 	;;
 esac
 case "$test" in
@@ -4840,6 +4855,10 @@ $rm -f try.* try
 : determine filename position in cpp output
 echo " "
 echo "Computing filename position in cpp output for #include directives..." >&4
+case "$osname" in
+vos) testaccess=-e ;;
+*)   testaccess=-r ;;
+esac
 echo '#include <stdio.h>' > foo.c
 $cat >fieldn <<EOF
 $startsh
@@ -4849,7 +4868,7 @@ while read cline; do
 	pos=1
 	set \$cline
 	while $test \$# -gt 0; do
-		if $test -r \`echo \$1 | $tr -d '"'\`; then
+		if $test $testaccess \`echo \$1 | $tr -d '"'\`; then
 			echo "\$pos"
 			exit 0
 		fi
@@ -9336,36 +9355,42 @@ eval $setvar
 
 : see if crypt exists
 echo " "
-if set crypt val -f d_crypt; eval $csym; $val; then
-	echo 'crypt() found.' >&4
-	val="$define"
-	cryptlib=''
-else
-	cryptlib=`./loc Slibcrypt$_a "" $xlibpth`
-	if $test -z "$cryptlib"; then
-		cryptlib=`./loc Mlibcrypt$_a "" $xlibpth`
-	else
-		cryptlib=-lcrypt
-	fi
-	if $test -z "$cryptlib"; then
-		cryptlib=`./loc Llibcrypt$_a "" $xlibpth`
-	else
-		cryptlib=-lcrypt
-	fi
-	if $test -z "$cryptlib"; then
-		cryptlib=`./loc libcrypt$_a "" $libpth`
-	else
-		cryptlib=-lcrypt
-	fi
-	if $test -z "$cryptlib"; then
-		echo 'crypt() NOT found.' >&4
-		val="$undef"
-	else
+set crypt d_crypt
+eval $inlibc
+case "$d_crypt" in
+$define) cryptlib='' ;;
+*)	if set crypt val -f d_crypt; eval $csym; $val; then
+		echo 'crypt() found.' >&4
 		val="$define"
+		cryptlib=''
+	else
+		cryptlib=`./loc Slibcrypt$_a "" $xlibpth`
+		if $test -z "$cryptlib"; then
+			cryptlib=`./loc Mlibcrypt$_a "" $xlibpth`
+		else
+			cryptlib=-lcrypt
+		fi
+		if $test -z "$cryptlib"; then
+			cryptlib=`./loc Llibcrypt$_a "" $xlibpth`
+		else
+			cryptlib=-lcrypt
+		fi
+		if $test -z "$cryptlib"; then
+			cryptlib=`./loc libcrypt$_a "" $libpth`
+		else
+			cryptlib=-lcrypt
+		fi
+		if $test -z "$cryptlib"; then
+			echo 'crypt() NOT found.' >&4
+			val="$undef"
+		else
+			val="$define"
+		fi
 	fi
-fi
-set d_crypt
-eval $setvar
+	set d_crypt
+	eval $setvar
+	;;
+esac
 
 : get csh whereabouts
 case "$csh" in
