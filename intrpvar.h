@@ -502,6 +502,10 @@ PERLVARI(Idef_layerlist, PerlIO_list_t *,NULL)
 
 PERLVARI(Iencoding,	SV*, Nullsv)		/* character encoding */
 
+#ifdef DEBUGGING
+PERLVAR(Idebug_pad,	struct perl_debug_pad)
+#endif
+
 /* New variables must be added to the very end for binary compatibility.
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h. */

@@ -1,3 +1,10 @@
+BEGIN {
+    if ($ENV{PERL_CORE}) {
+        chdir('t') if -d 't';
+        @INC = qw(../lib);
+    }
+}
+
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
@@ -172,7 +179,7 @@ expect [ $text ], [ substr($stdtext2,4) ];
 # TESTS 38-40
 $text = $stdtext2;
 expect	[ extract_multiple($text,[\&extract_bracketed]) ],
-	[ substr($stdtext2,0,15), substr($stdtext2,16,7), substr($stdtext2,23) ];
+	[ substr($stdtext2,0,16), substr($stdtext2,16,7), substr($stdtext2,23) ];
 
 expect [ pos $text], [ 24 ];
 expect [ $text ], [ $stdtext2 ];
@@ -180,7 +187,7 @@ expect [ $text ], [ $stdtext2 ];
 # TESTS 41-43
 $text = $stdtext2;
 expect	[ scalar extract_multiple($text,[\&extract_bracketed]) ],
-	[ substr($stdtext2,0,15) ];
+	[ substr($stdtext2,0,16) ];
 
 expect [ pos $text], [ 0 ];
 expect [ $text ], [ substr($stdtext2,15) ];
@@ -206,7 +213,7 @@ expect [ $text ], [ substr($stdtext2,4) ];
 # TESTS 50-52
 $text = $stdtext2;
 expect	[ extract_multiple($text,[\&extract_quotelike]) ],
-	[ substr($stdtext2,0,6), substr($stdtext2,7,5), substr($stdtext2,12) ];
+	[ substr($stdtext2,0,7), substr($stdtext2,7,5), substr($stdtext2,12) ];
 
 expect [ pos $text], [ length($text) ];
 expect [ $text ], [ $stdtext2 ];
@@ -214,7 +221,7 @@ expect [ $text ], [ $stdtext2 ];
 # TESTS 53-55
 $text = $stdtext2;
 expect	[ scalar extract_multiple($text,[\&extract_quotelike]) ],
-	[ substr($stdtext2,0,6) ];
+	[ substr($stdtext2,0,7) ];
 
 expect [ pos $text], [ 0 ];
 expect [ $text ], [ substr($stdtext2,6) ];

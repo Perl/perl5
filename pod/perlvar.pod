@@ -965,6 +965,12 @@ built, as determined during the configuration process.  The value
 is identical to C<$Config{'osname'}>.  See also L<Config> and the 
 B<-V> command-line switch documented in L<perlrun>.
 
+=item ${^OPEN}
+
+An internal variable used by PerlIO.  A string in two parts, separated
+by a C<\0> byte, the first part is the input disciplines, the second
+part is the output disciplines.
+
 =item $PERLDB
 
 =item $^P

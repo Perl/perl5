@@ -252,49 +252,40 @@ PP(pp_eq)
 	    bool auvok = SvUOK(TOPm1s);
 	    bool buvok = SvUOK(TOPs);
 	
-	    if (!auvok && !buvok) { /* ## IV == IV ## */
-		IV aiv = SvIVX(TOPm1s);
-		IV biv = SvIVX(TOPs);
+	    if (auvok == buvok) { /* ## IV == IV or UV == UV ## */
+                /* Casting IV to UV before comparison isn't going to matter
+                   on 2s complement. On 1s complement or sign&magnitude
+                   (if we have any of them) it could to make negative zero
+                   differ from normal zero. As I understand it. (Need to
+                   check - is negative zero implementation defined behaviour
+                   anyway?). NWC  */
+		UV buv = SvUVX(POPs);
+		UV auv = SvUVX(TOPs);
 		
-		SP--;
-		SETs(boolSV(aiv == biv));
-		RETURN;
-	    }
-	    if (auvok && buvok) { /* ## UV == UV ## */
-		UV auv = SvUVX(TOPm1s);
-		UV buv = SvUVX(TOPs);
-		
-		SP--;
 		SETs(boolSV(auv == buv));
 		RETURN;
 	    }
 	    {			/* ## Mixed IV,UV ## */
+                SV *ivp, *uvp;
 		IV iv;
-		UV uv;
 		
-		/* == is commutative so swap if needed (save code) */
+		/* == is commutative so doesn't matter which is left or right */
 		if (auvok) {
-		    /* swap. top of stack (b) is the iv */
-		    iv = SvIVX(TOPs);
-		    SP--;
-		    if (iv < 0) {
-			/* As (a) is a UV, it's >0, so it cannot be == */
-			SETs(&PL_sv_no);
-			RETURN;
-		    }
-		    uv = SvUVX(TOPs);
-		} else {
-		    iv = SvIVX(TOPm1s);
-		    SP--;
-		    if (iv < 0) {
-			/* As (b) is a UV, it's >0, so it cannot be == */
-			SETs(&PL_sv_no);
-			RETURN;
-		    }
-		    uv = SvUVX(*(SP+1)); /* Do I want TOPp1s() ? */
-		}
+		    /* top of stack (b) is the iv */
+                    ivp = *SP;
+                    uvp = *--SP;
+                } else {
+                    uvp = *SP;
+                    ivp = *--SP;
+                }
+                iv = SvIVX(ivp);
+                if (iv < 0) {
+                    /* As uv is a UV, it's >0, so it cannot be == */
+                    SETs(&PL_sv_no);
+                    RETURN;
+                }
 		/* we know iv is >= 0 */
-		SETs(boolSV((UV)iv == uv));
+		SETs(boolSV((UV)iv == SvUVX(uvp)));
 		RETURN;
 	    }
 	}

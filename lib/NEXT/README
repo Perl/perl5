@@ -1,5 +1,5 @@
 ==============================================================================
-                       Release of version 0.02 of NEXT
+                       Release of version 0.50 of NEXT
 ==============================================================================
 
 
@@ -31,10 +31,9 @@ DESCRIPTION
     redispatch that call, in the hope that some other C<AUTOLOAD>
     (above it, or to its left) might do better.
 
-    Note that it is a fatal error for any method (including C<AUTOLOAD>)
-    to attempt to redispatch any method except itself. For example:
-
-            sub D::oops { $_[0]->NEXT::other_method() } # BANG!
+    The module also allows you to specify that multiply inherited
+    methods should only be redispatched once, and what should
+    happen if no redispatch is possible.
 
 
 AUTHOR
@@ -51,12 +50,22 @@ COPYRIGHT
 
 ==============================================================================
 
-CHANGES IN VERSION 0.02
+CHANGES IN VERSION 0.50
 
 
-	- Fixed setting of $AUTOLOAD in NEXT'd AUTOLOADS (thanks Leonid)
+	- Added a $VERSION (oops!)
 
-	- Changed licence for inclusion in core distribution
+	- Fixed handling of diamond patterns (thanks Paul)
+
+	- Added NEXT::ACTUAL to require existence of next method (thanks Paul)
+
+	- Added NEXT::UNSEEN to avoid calling multiply inherited
+	  methods twice (thanks Paul)
+
+	- Re-fixed setting of $AUTOLOAD in NEXT'd AUTOLOADS to be
+	  consistent with more useful SUPER:: behaviour
+
+	- Corified tests
 
 
 ==============================================================================

@@ -6,15 +6,6 @@ my $object = 're_exec$(OBJ_EXT) re_comp$(OBJ_EXT) re$(OBJ_EXT)';
 
 my $defines = '-DPERL_EXT_RE_BUILD -DPERL_EXT_RE_DEBUG';
 
-# We need to pretend that DEBUGGING is in effect even if it's
-# not but we need to remember that we pretended so we can avoid
-# linking to things that aren't there.
-
-if ( (($Config{'ccflags'} !~ /DEBUGGING/) && $^O ne 'VMS') || 
-     (exists($Config{'usedebugging_perl'}) && $Config{'usedebugging_perl'} ne 'Y') ) {
-  $defines .= ' -DDEBUGGING -DWAS_NOT_DEBUGGING';
-}
-
 WriteMakefile(
     NAME		=> 're',
     VERSION_FROM	=> 're.pm',

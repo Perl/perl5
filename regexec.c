@@ -390,7 +390,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     char *check_at = Nullch;		/* check substr found at this pos */
 #ifdef DEBUGGING
     char *i_strpos = strpos;
-    SV *dsv = sv_2mortal(newSVpvn("", 0));
+    SV *dsv = PERL_DEBUG_PAD_ZERO(0);
 #endif
 
     DEBUG_r({
@@ -1465,7 +1465,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     SV* oreplsv = GvSV(PL_replgv);
     bool do_utf8 = DO_UTF8(sv);
 #ifdef DEBUGGING
-    SV *dsv = sv_2mortal(newSVpvn("", 0));
+    SV *dsv = PERL_DEBUG_PAD_ZERO(0);
 #endif
 
     PL_regcc = 0;
@@ -2050,9 +2050,9 @@ S_regmatch(pTHX_ regnode *prog)
 #endif
     register bool do_utf8 = PL_reg_match_utf8;
 #ifdef DEBUGGING
-    SV *dsv0 = sv_2mortal(newSVpvn("", 0));
-    SV *dsv1 = sv_2mortal(newSVpvn("", 0));
-    SV *dsv2 = sv_2mortal(newSVpvn("", 0));
+    SV *dsv0 = PERL_DEBUG_PAD_ZERO(0);
+    SV *dsv1 = PERL_DEBUG_PAD_ZERO(1);
+    SV *dsv2 = PERL_DEBUG_PAD_ZERO(2);
 #endif
 
 #ifdef DEBUGGING

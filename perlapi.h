@@ -183,6 +183,8 @@ END_EXTERN_C
 #define PL_debstash		(*Perl_Idebstash_ptr(aTHX))
 #undef  PL_debug
 #define PL_debug		(*Perl_Idebug_ptr(aTHX))
+#undef  PL_debug_pad
+#define PL_debug_pad		(*Perl_Idebug_pad_ptr(aTHX))
 #undef  PL_def_layerlist
 #define PL_def_layerlist	(*Perl_Idef_layerlist_ptr(aTHX))
 #undef  PL_defgv

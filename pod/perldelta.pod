@@ -9,6 +9,84 @@ This document describes differences between the 5.6.0 release and the
 
 =head1 Incompatible Changes
 
+=head2 64-bit platforms and malloc
+
+If your pointers are 64 bits wide, the Perl malloc is no more being
+used because it simply does not work with 8-byte pointers.  Also,
+usually the system mallocs on such platforms are much better optimized
+for such large memory models than the Perl malloc.  Such platforms
+include 64-bit Alpha, MIPS, HPPA, PPC, and Sparc.
+
+=head2 AIX Dynaloading
+
+The AIX dynaloading now uses in AIX releases 4.3 and newer the native
+dlopen interface of AIX instead of the old emulated interface.  This
+change will probably break backward compatibility with compiled
+modules.  The change was made to make Perl more compliant with other
+applications like modperl which are using the AIX native interface.
+
+=head2 Socket Extension Dynamic in VMS
+
+The Socket extension is now dynamically loaded instead of being
+statically built in.  This may or may not be a problem with ancient
+TCP/IP stacks of VMS: we do not know since we weren't able to test
+Perl in such configurations.
+
+=head2 Different Definition of the Unicode Character Classes \p{In...}
+
+As suggested by the Unicode consortium, the Unicode character classes
+now prefer I<scripts> as opposed to I<blocks> (as defined by Unicode);
+in Perl, when the C<\p{In....}> and the C<\p{In....}> regular expression
+constructs are used.  This has changed the definition of some of those
+character classes.
+
+The difference between scripts and blocks is that scripts are the
+glyphs used by a language or a group of languages, while the blocks
+are more artificial groupings of 256 characters based on the Unicode
+numbering.
+
+In general this change results in more inclusive Unicode character
+classes, but changes to the other direction also do take place:
+for example while the script C<Latin> includes all the Latin
+characters and their various diacritic-adorned versions, it
+does not include the various punctuation or digits (since they
+are not solely C<Latin>).
+
+Changes in the character class semantics may have happened if a script
+and a block happen to have the same name, for example C<Hebrew>.
+In such cases the script wins and C<\p{InHebrew}> now means the script
+definition of Hebrew.  The block definition in still available,
+though, by appending C<Block> to the name: C<\p{InHebrewBlock}> means
+what C<\p{InHebrew}> meant in perl 5.6.0.  For the full list
+of affected character classes, see L<perlunicode/Blocks>.
+
+=head2 Perl Parser Stress Tested
+
+The Perl parser has been stress tested using both random input and
+Markov chain input and the few found crashes and lockups have been
+fixed.
+
+=head2 Deprecations
+
+The current user-visible implementation of pseudo-hashes (the weird
+use of the first array element) is deprecated starting from Perl 5.8.0
+and will be removed in Perl 5.10.0, and the feature will be
+implemented differently.  Not only is the current interface rather
+ugly, but the current implementation slows down normal array and hash
+use quite noticeably. The C<fields> pragma interface will remain
+available.
+
+The syntaxes C<@a->[...]> and  C<@h->{...}> have now been deprecated.
+
+After years of trying the suidperl is considered to be too complex to
+ever be considered truly secure.  The suidperl functionality is likely
+to be removed in a future release.
+
+The C<package;> syntax (C<package> without an argument has been
+deprecated.  Its semantics were never that clear and its
+implementation even less so.  If you have used that feature to
+disallow all but fully qualified variables, C<use strict;> instead.
+
 =over 4
 
 =item *
@@ -84,116 +162,7 @@ natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.)
 
 =back
 
-=head2 64-bit platforms and malloc
-
-If your pointers are 64 bits wide, the Perl malloc is no more being
-used because it simply does not work with 8-byte pointers.  Also,
-usually the system malloc on such platforms are much better optimized
-for such large memory models than the Perl malloc.
-
-=head2 AIX Dynaloading
-
-The AIX dynaloading now uses in AIX releases 4.3 and newer the native
-dlopen interface of AIX instead of the old emulated interface.  This
-change will probably break backward compatibility with compiled
-modules.  The change was made to make Perl more compliant with other
-applications like modperl which are using the AIX native interface.
-
-=head2 Socket Extension Dynamic in VMS
-
-The Socket extension is now dynamically loaded instead of being
-statically built in.  This may or may not be a problem with ancient
-TCP/IP stacks of VMS: we do not know since we weren't able to test
-Perl in such configurations.
-
-=head2 Different Definition of the Unicode Character Classes \p{In...}
-
-As suggested by the Unicode consortium, the Unicode character classes
-now prefer I<scripts> as opposed to I<blocks> (as defined by Unicode);
-in Perl, when the C<\p{In....}> and the C<\p{In....}> regular expression
-constructs are used.  This has changed the definition of some of those
-character classes.
-
-The difference between scripts and blocks is that scripts are the
-glyphs used by a language or a group of languages, while the blocks
-are more artificial groupings of 256 characters based on the Unicode
-numbering.
-
-In general this change results in more inclusive Unicode character
-classes, but changes to the other direction also do take place:
-for example while the script C<Latin> includes all the Latin
-characters and their various diacritic-adorned versions, it
-does not include the various punctuation or digits (since they
-are not solely C<Latin>).
-
-Changes in the character class semantics may have happened if a script
-and a block happen to have the same name, for example C<Hebrew>.
-In such cases the script wins and C<\p{InHebrew}> now means the script
-definition of Hebrew.  The block definition in still available,
-though, by appending C<Block> to the name: C<\p{InHebrewBlock}> means
-what C<\p{InHebrew}> meant in perl 5.6.0.  For the full list
-of affected character classes, see L<perlunicode/Blocks>.
-
-=head2 Deprecations
-
-The current user-visible implementation of pseudo-hashes (the weird
-use of the first array element) is deprecated starting from Perl 5.8.0
-and will be removed in Perl 5.10.0, and the feature will be
-implemented differently.  Not only is the current interface rather
-ugly, but the current implementation slows down normal array and hash
-use quite noticeably. The C<fields> pragma interface will remain
-available.
-
-The syntaxes C<@a->[...]> and  C<@h->{...}> have now been deprecated.
-
-The suidperl is also considered to be too much a risk to continue
-maintaining and the suidperl code is likely to be removed in a future
-release.
-
-The C<package;> syntax (C<package> without an argument has been
-deprecated.  Its semantics were never that clear and its
-implementation even less so.  If you have used that feature to
-disallow all but fully qualified variables, C<use strict;> instead.
-
-The chdir(undef) and chdir('') behaviors to match chdir() has been
-deprecated.  In future versions, chdir(undef) and chdir('') will
-simply fail.
-
 =head1 Core Enhancements
-
-=over 4
-
-=item *
-
-C<perl -d:Module=arg,arg,arg> now works (previously one couldn't pass
-in multiple arguments.)
-
-=item *
-
-my __PACKAGE__ $obj now works.
-
-=item *
-
-C<no Module;> now works even if there is no "sub unimport" in the Module.
-
-=item *
-
-The numerical comparison operators return C<undef> if either operand
-is a NaN.  Previously the behaviour was unspecified.
-
-=item *
-
-C<pack('U0a*', ...)> can now be used to force a string to UTF8.
-
-=item *
-
-prototype(\&) is now available.
-
-=item *
-
-There is now an UNTIE method.
-
-=back
 
 =head2 AUTOLOAD Is Now Lvaluable
 
@@ -344,14 +313,16 @@ deficiencies.  This results hopefully in more accurate numbers.
 
 =item *
 
-The rules for allowing underscores (underbars) in numeric constants
-have been relaxed and simplified: now you can have an underscore
-B<between digits>.
+C<perl -d:Module=arg,arg,arg> now works (previously one couldn't pass
+in multiple arguments.)
 
 =item *
 
-GMAGIC (right-hand side magic) could in many cases such as string
-concatenation be invoked too many times.
+END blocks are now run even if you exit/die in a BEGIN block.
+Internally, the execution of END blocks is now controlled by 
+PL_exit_flags & PERL_EXIT_DESTRUCT_END. This enables the new
+behaviour for Perl embedders. This will default in 5.10. See
+L<perlembed>.
 
 =item *
 
@@ -370,12 +341,44 @@ Lvalue subroutines can now return C<undef> in list context.
 
 =item *
 
-The C<op_clear> and C<op_null> are now exported.
+A new special regular expression variable has been introduced:
+C<$^N>, which contains the most-recently closed group (submatch).
 
 =item *
 
-A new special regular expression variable has been introduced:
-C<$^N>, which contains the most-recently closed group (submatch).
+C<no Module;> now works even if there is no "sub unimport" in the Module.
+
+=item *
+
+The numerical comparison operators return C<undef> if either operand
+is a NaN.  Previously the behaviour was unspecified.
+
+=item *
+
+C<pack('U0a*', ...)> can now be used to force a string to UTF8.
+
+=item *
+
+my __PACKAGE__ $obj now works.
+
+=item *
+
+prototype(\&) is now available.
+
+=item *
+
+Right-hand side magic (GMAGIC) could in many cases such as string
+concatenation be invoked too many times.
+
+=item *
+
+The rules for allowing underscores (underbars) in numeric constants
+have been relaxed and simplified: now you can have an underscore
+simply B<between digits>.
+
+=item *
+
+An UNTIE method is now available.
 
 =item *
 
@@ -384,24 +387,7 @@ file timestamps to the current time.
 
 =item *
 
-The Perl parser has been stress tested using both random input and
-Markov chain input.
-
-=item *
-
 C<eval "v200"> now works.
-
-=item *
-
-VMS now works under PerlIO.
-
-=item *
-
-END blocks are now run even if you exit/die in a BEGIN block.
-The execution of END blocks is now controlled by 
-PL_exit_flags & PERL_EXIT_DESTRUCT_END. This enables the new
-behaviour for perl embedders. This will default in 5.10. See
-L<perlembed>.
 
 =back
 
@@ -413,47 +399,46 @@ L<perlembed>.
 
 =item *
 
-File::Temp allows one to create temporary files and directories in an
-easy, portable, and secure way.
+C<Attribute::Handlers> allows a class to define attribute handlers.
+
+    package MyPack;
+    use Attribute::Handlers;
+    sub Wolf :ATTR(SCALAR) { print "howl!\n" }
+
+    # later, in some package using or inheriting from MyPack...
+
+    my MyPack $Fluffy : Wolf; # the attribute handler Wolf will be called
+
+Both variables and routines can have attribute handlers.  Handlers can
+be specific to type (SCALAR, ARRAY, HASH, or CODE), or specific to the
+exact compilation phase (BEGIN, CHECK, INIT, or END).
 
 =item *
 
-Storable gives persistence to Perl data structures by allowing the
-storage and retrieval of Perl data to and from files in a fast and
-compact binary format.
+B<B::Concise> is a new compiler backend for walking the Perl syntax
+tree, printing concise info about ops, from Stephen McCamant.  The
+output is highly customisable.  See L<B::Concise>.
 
 =item *
 
-B::Concise, by Stephen McCamant, is a new compiler backend for
-walking the Perl syntax tree, printing concise info about ops.
-The output is highly customisable.
-
-See L<B::Concise> for more information.
+C<Class::ISA> for reporting the search path for a class's ISA tree,
+by Sean Burke, has been added.  See L<Class::ISA>.
 
 =item *
 
-Class::ISA, by Sean Burke, for reporting the search path for a
-class's ISA tree, has been added.
-
-See L<Class::ISA> for more information.
-
-=item *
-
-Cwd has now a split personality: if possible, an extension is used,
-(this will hopefully be both faster and more secure and robust) but
-if not possible, the familiar Perl library implementation is used.
+C<Cwd> has now a split personality: if possible, an XS extension is
+used, (this will hopefully be faster, more secure, and more robust)
+but if not possible, the familiar Perl implementation is used.
 
 =item *
 
-Digest, a frontend module for calculating digests (checksums),
-from Gisle Aas, has been added.
-
-See L<Digest> for more information.
+C<Digest>, frontend module for calculating digests (checksums), from
+Gisle Aas, has been added.  See L<Digest>.
 
 =item *
 
-Digest::MD5 for calculating MD5 digests (checksums), by Gisle Aas,
-has been added.
+C<Digest::MD5> for calculating MD5 digests (checksums) as defined in
+RFC 1321, from Gisle Aas, has been added.  See L<Digest::MD5>.
 
     use Digest::MD5 'md5_hex';
 
@@ -461,29 +446,41 @@ has been added.
 
     print $digest, "\n"; # 01d19d9d2045e005c3f1b80e8b164de1
 
-NOTE: the MD5 backward compatibility module is deliberately not
+NOTE: the C<MD5> backward compatibility module is deliberately not
 included since its use is discouraged.
-
-See L<Digest::MD5> for more information.
 
 =item *
 
-Encode, by Nick Ing-Simmons, provides a mechanism to translate
+C<Encode>, by Nick Ing-Simmons, provides a mechanism to translate
 between different character encodings.  Support for Unicode,
 ISO-8859-*, ASCII, CP*, KOI8-R, and three variants of EBCDIC are
 compiled in to the module.  Several other encodings (like Japanese,
 Chinese, and MacIntosh encodings) are included and will be loaded at
-runtime.
+runtime.  See L<Encode>.
 
 Any encoding supported by Encode module is also available to the
 ":encoding()" layer if PerlIO is used.
 
-See L<Encode> for more information.
+=item *
+
+C<I18N::Langinfo> can be use to query locale information.
+See L<I18N::Langinfo>.
 
 =item *
 
-Filter::Simple is an easy-to-use frontend to Filter::Util::Call,
-from Damian Conway.
+C<I18N::LangTags> has functions for dealing with RFC3066-style
+language tags, by Sean Burke.  See <I18N::LangTags>.
+
+=item *
+
+C<ExtUtils::Constant> is a new tool for extension writers for
+generating XS code to import C header constants, by Nicholas Clark.
+See L<ExtUtils::Constant>.
+
+=item *
+
+C<Filter::Simple> is an easy-to-use frontend to Filter::Util::Call,
+from Damian Conway.  See L<Filter::Simple>.
 
     # in MyFilter.pm:
 
@@ -508,21 +505,36 @@ from Damian Conway.
 
     print "red\n";   # this code is not filtered, will print "red\n"
 
-See L<Filter::Simple> for more information.
+=item *
+
+C<File::Temp> allows one to create temporary files and directories in
+an easy, portable, and secure way, by Tim Jenness.  See L<File::Temp>.
 
 =item *
 
-Filter::Util::Call, by Paul Marquess, provides you with the
-framework to write I<Source Filters> in Perl.  For most uses
-the frontend Filter::Simple is to be preferred.
-See L<Filter::Util::Call> for more information.
+C<Filter::Util::Call> provides you with the framework to write
+I<Source Filters> in Perl, from Paul Marquess.  For most uses the
+frontend Filter::Simple is to be preferred.  See L<Filter::Util::Call>.
 
 =item *
 
-Locale::Constants, Locale::Country, Locale::Currency, and Locale::Language,
-from Neil Bowers, have been added.  They provide the codes for various
-locale standards, such as "fr" for France, "usd" for US Dollar, and
-"jp" for Japanese.
+L<libnet> is a collection of perl5 modules related to network
+programming, from Graham Barr.  See L<Net::FTP>, L<Net::NNTP>,
+L<Net::Ping>, L<Net::POP3>, L<Net::SMTP>, and L<Net::Time>.
+
+Perl installation leaves libnet unconfigured, use F<libnetcfg> to configure.
+
+=item *
+
+C<List::Util> is a selection of general-utility list subroutines, like
+sum(), min(), first(), and shuffle(), by Graham barr.  See L<List::Util>.
+
+=item *
+
+C<Locale::Constants>, C<Locale::Country>, C<Locale::Currency>, and
+C<Locale::Language>, from Neil Bowers, have been added.  They provide the
+codes for various locale standards, such as "fr" for France, "usd" for
+US Dollar, and "jp" for Japanese.
 
     use Locale::Country;
 
@@ -530,11 +542,25 @@ locale standards, such as "fr" for France, "usd" for US Dollar, and
     $code    = country2code('Norway');           # $code gets 'no'
 
 See L<Locale::Constants>, L<Locale::Country>, L<Locale::Currency>,
-and L<Locale::Language> for more information.
+and L<Locale::Language>.
 
 =item *
 
-MIME::Base64, by Gisle Aas, allows you to encode data in base64.
+C<Locale::Maketext> is localization framework from Sean Burke.  See
+L<Locale::Maketext>, and L<Locale::Maketext::TPJ13>.  The latter is an
+article about software localization, originally published in The Perl
+Journal #13, republished here with kind permission.
+
+=item *
+
+C<Memoize> can make your functions faster by trading space for time,
+from Mark-Jason Dominus.  See L<Memoize>.
+
+=item *
+
+C<MIME::Base64> allows you to encode data in base64, from Gisle Aas,
+as defined in RFC 2045 - I<MIME (Multipurpose Internet Mail
+Extensions)>.
 
     use MIME::Base64;
 
@@ -543,12 +569,13 @@ MIME::Base64, by Gisle Aas, allows you to encode data in base64.
 
     print $encoded, "\n"; # "QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
 
-See L<MIME::Base64> for more information.
+See L<MIME::Base64>.
 
 =item *
 
-MIME::QuotedPrint, by Gisle Aas, allows you to encode data in
-quoted-printable encoding.
+C<MIME::QuotedPrint> allows you to encode data in quoted-printable
+encoding, as defined in RFC 2045 - I<MIME (Multipurpose Internet Mail
+Extensions)>, from Gisle Aas.
 
     use MIME::QuotedPrint;
 
@@ -563,37 +590,53 @@ necessary to use it with PerlIO::Via as in :
     use MIME::QuotedPrint;
     open($fh,">Via(MIME::QuotedPrint)",$path)
 
-See L<MIME::QuotedPrint> for more information.
+See L<MIME::QuotedPrint>.
 
 =item *
 
-PerlIO::Scalar, by Nick Ing-Simmons, provides the implementation of
-IO to "in memory" Perl scalars as discussed above.  It also serves as
-an example of a loadable layer.  Other future possibilities include
-PerlIO::Array and PerlIO::Code.  See L<PerlIO::Scalar> for more
-information.
+C<NEXT> is pseudo-class for method redispatch, from Damian Conway.
+See L<NEXT>.
 
 =item *
 
-PerlIO::Via, by Nick Ing-Simmons, acts as a PerlIO layer and wraps
-PerlIO layer functionality provided by a class (typically implemented
-in perl code).
+C<PerlIO::Scalar> provides the implementation of IO to "in memory"
+Perl scalars as discussed above, from Nick Ing-Simmons.  It also
+serves as an example of a loadable PerlIO layer.  Other future
+possibilities include PerlIO::Array and PerlIO::Code.
+See L<PerlIO::Scalar>.
+
+=item *
+
+C<PerlIO::Via> acts as a PerlIO layer and wraps PerlIO layer
+functionality provided by a class (typically implemented in perl
+code), from Nick Ing-Simmons.
 
     use MIME::QuotedPrint;
     open($fh,">Via(MIME::QuotedPrint)",$path)
 
 This will automatically convert everything output to C<$fh>
-to Quoted-Printable.  See L<PerlIO::Via> for more information.
+to Quoted-Printable.  See L<PerlIO::Via>.
 
 =item *
 
-Pod::Text::Overstrike, by Joe Smith, has been added.
+C<Pod::Text::Overstrike>, by Joe Smith, has been added.
 It converts POD data to formatted overstrike text.
-See L<Pod::Text::Overstrike> for more information.
+See L<Pod::Text::Overstrike>.
 
 =item *
 
-Switch from Damian Conway has been added.  Just by saying
+C<Scalar::Util> is a selection of general-utility scalar subroutines,
+like blessed(), reftype(), and tainted().  See L<Scalar::Util>.
+
+=item *
+
+C<Storable> gives persistence to Perl data structures by allowing the
+storage and retrieval of Perl data to and from files in a fast and
+compact binary format, from Raphael Manfredi.  See L<Storable>.
+
+=item *
+
+C<Switch>, from Damian Conway, has been added.  Just by saying
 
     use Switch;
 
@@ -615,12 +658,22 @@ you have C<switch> and C<case> available in Perl.
 		else		{ print "previous case not true" }
     }
 
-See L<Switch> for more information.
+See L<Switch>.
 
 =item *
 
-Text::Balanced from Damian Conway has been added, for
-extracting delimited text sequences from strings.
+C<Test::More> is yet another framework for writing test scripts,
+more extensive than Test::Simple, by Michael Schwern.  See L<Test::More>.
+
+=item *
+
+C<Test::Simple> has the- basic utilities for writing tests, by Michael
+Schwern.   See L<Test::Simple>.
+
+=item *
+
+C<Text::Balanced> has been added, for extracting delimited text
+sequences from strings, from Damian Conway.
 
     use Text::Balanced 'extract_delimited';
 
@@ -632,87 +685,53 @@ In addition to extract_delimited() there are also extract_bracketed(),
 extract_quotelike(), extract_codeblock(), extract_variable(),
 extract_tagged(), extract_multiple(), gen_delimited_pat(), and
 gen_extract_tagged().  With these you can implement rather advanced
-parsing algorithms.  See L<Text::Balanced> for more information.
+parsing algorithms.  See L<Text::Balanced>.
 
 =item *
 
-Tie::RefHash::Nestable, by Edward Avis, allows storing hash references
-(unlike the standard Tie::RefHash)  The module is contained within
-Tie::RefHash.
+C<threads> is an interface interpreter threads, by Arthur Bergman.
+Interpreter threads (ithreads) is the new thread model introduced in
+Perl 5.6 but then available only as an internal interface for
+extension writers.  See L<threads>.
 
 =item *
 
-XS::Typemap, by Tim Jenness, is a test extension that exercises XS
+C<threads::shared> allows data sharing for interpreter threads, from
+Arthur Bergman.  In the ithreads model any data sharing between
+threads must be explicit, as opposed to the old 5.005 thread model
+where data sharing was implicit.  See L<threads::shared>.
+
+=item *
+
+C<Tie::RefHash::Nestable>, by Edward Avis, allows storing hash
+references (unlike the standard Tie::RefHash)  The module is contained
+within Tie::RefHash, see L<Tie::RefHash>.
+
+=item *
+
+C<Time::HiRes> provides high resolution timing (ualarm, usleep,
+and gettimeofday), from Douglas E. Wegscheid.  See L<Time::HiRes>.
+
+=item *
+
+C<Unicode::UCD> offers a querying interface to the Unicode Character
+Database.  See L<Unicode::UCD>.
+
+=item *
+
+C<Unicode::Collate> implements the UCA (Unicode Collation Algorithm)
+for sorting Unicode strings, by SADAHIRO Tomoyuki.  See L<Unicode::Collate>.
+
+=item *
+
+C<Unicode::Normalize> implements the various Unicode normalization
+forms, by SADAHIRO Tomoyuki.  See L<Unicode::Normalize>.
+
+=item *
+
+C<XS::Typemap>, by Tim Jenness, is a test extension that exercises XS
 typemaps.  Nothing gets installed but for extension writers the code
 is worth studying.
-
-=item *
-
-L<Attribute::Handlers> - Simpler definition of attribute handlers
-
-=item *
-
-L<ExtUtils::Constant> - generate XS code to import C header constants
-
-=item *
-
-L<I18N::Langinfo> - query locale information
-
-=item *
-
-L<I18N::LangTags> - functions for dealing with RFC3066-style language tags
-
-=item *
-
-L<libnet> - a collection of perl5 modules related to network programming
-
-Perl installation leaves libnet unconfigured, use F<libnetcfg> to configure.
-
-=item *
-
-L<List::Util> - selection of general-utility list subroutines
-
-=item *
-
-L<Locale::Maketext> - framework for localization
-
-=item *
-
-L<Memoize> - Make your functions faster by trading space for time
-
-=item *
-
-L<NEXT> - pseudo-class for method redispatch
-
-=item *
-
-L<Scalar::Util> - selection of general-utility scalar subroutines
-
-=item *
-
-L<Test::More> - yet another framework for writing test scripts
-
-=item *
-
-L<Test::Simple> - Basic utilities for writing tests
-
-=item *
-
-L<Time::HiRes> - high resolution ualarm, usleep, and gettimeofday
-
-=item *
-
-L<Time::Piece> - Object Oriented time objects
-
-(Previously known as L<Time::Object>.)
-
-=item *
-
-L<Time::Seconds> - a simple API to convert seconds to other date values
-
-=item *
-
-L<UnicodeCD> - Unicode Character Database
 
 =back
 
@@ -722,17 +741,11 @@ L<UnicodeCD> - Unicode Character Database
 
 =item *
 
-The following independently supported modules have been updated to
-newer versions from CPAN: CGI, CPAN, DB_File, File::Spec, Getopt::Long,
-the podlators bundle, Pod::LaTeX, Pod::Parser, Term::ANSIColor, Test.
-
-=item *
-
-Bug fixes and minor enhancements have been applied to B::Deparse,
-Data::Dumper, IO::Poll, IO::Socket::INET, Math::BigFloat,
-Math::Complex, Math::Trig, Net::protoent, the re pragma, SelfLoader,
-Sys::SysLog, Test::Harness, Text::Wrap, UNIVERSAL, and the warnings
-pragma.
+The following independently supported modules have been updated to the
+newest versions from CPAN: CGI, CPAN, DB_File, File::Spec, File::Temp,
+Getopt::Long, Math::BigFloat, Math::BigInt, the podlators bundle
+(Pod::Man, Pod::Text), Pod::LaTeX, Pod::Parser, Storable,
+Term::ANSIColor, Test, Text-Tabs+Wrap.
 
 =item *
 
@@ -741,6 +754,10 @@ The attributes::reftype() now works on tied arguments.
 =item *
 
 AutoLoader can now be disabled with C<no AutoLoader;>,
+
+=item *
+
+Data::Dumper has now an option to sort hashes.
 
 =item *
 
@@ -783,9 +800,9 @@ The Shell module now has an OO interface.
 
 =item *
 
-B::Deparse should be now more robust.  It still far from providing a full
-round trip for any random piece of Perl code, though, and is under active
-development: expect more robustness in 5.7.2.
+B::Deparse has been significantly enhanced.  It now can deparse almost
+all of the standard test suite (so that the tests still succeed).
+There is a make target "test.deparse" for trying this out.
 
 =item *
 
@@ -793,11 +810,23 @@ Class::Struct can now define the classes in compile time.
 
 =item *
 
-Math::BigFloat has undergone much fixing, and in addition the fmod()
-function now supports modulus operations.
+Class::Struct now assigns the array/hash element if the accessor
+is called with an array/hash element as the B<sole> argument.
 
-(The fixed Math::BigFloat module is also available in CPAN for those
-who can't upgrade their Perl: http://www.cpan.org/authors/id/J/JP/JPEACOCK/)
+=item *
+
+Fcntl, Socket, and Sys::Syslog have been rewritten to use the
+new-style constant dispatch section (see L<ExtUtils::Constant>).
+
+=item *
+
+File::Find is now (again) reentrant.  It also has been made
+more portable.
+
+=item *
+
+File::Glob now supports C<GLOB_LIMIT> constant to limit the size of
+the returned list of filenames.
 
 =item *
 
@@ -819,6 +848,17 @@ you may want to prefer ReuseAddr.
 
 =item *
 
+IO::Socket::INET now supports C<LocalPort> of zero (usually meaning
+that the operating system will make one up.)
+
+=item *
+
+Math::BigFloat and Math::BigInt have undergone much fixing,
+they are now magnitudes faster, and they support various
+bignum libraries such as GMP and PARI as their backends.
+
+=item *
+
 Net::Ping has been enhanced.  There is now "external" protocol which
 uses Net::Ping::External module which runs external ping(1) and parses
 the output.  An alpha version of Net::Ping::External is available in
@@ -837,8 +877,12 @@ handlers, installing new handlers was not atomic.
 
 =item *
 
-The Test module has been significantly enhanced.  Its use is
-greatly recommended for module writers.
+The Test module has been significantly enhanced.
+
+=item *
+
+The C<vars> pragma now supports declaring fully qualified variables.
+(Something that C<our()> does not and will not support.)
 
 =item *
 
@@ -849,97 +893,22 @@ has been implemented.
 
 =back
 
-The following modules have been upgraded from the versions at CPAN:
-CPAN, CGI, DB_File, File::Temp, Getopt::Long, Pod::Man, Pod::Text,
-Storable, Text-Tabs+Wrap.
-
-=item *
-
-L<B::Deparse> module has been significantly enhanced.  It now
-can deparse almost all of the standard test suite (so that the
-tests still succeed).  There is a make target "test.deparse"
-for trying this out.
-
-=item *
-
-L<Class::Struct> now assigns the array/hash element if the accessor
-is called with an array/hash element as the B<sole> argument.
-
-=item *
-
-L<Cwd> extension is now (even) faster.
-
-=item *
-
-L<DB_File> extension has been updated to version 1.77.
-
-=item *
-
-L<Fcntl>, L<Socket>, and L<Sys::Syslog> have been rewritten to use the
-new-style constant dispatch section (see L<ExtUtils::Constant>).
-
-=item *
-
-L<File::Find> is now (again) reentrant.  It also has been made
-more portable.
-
-=item *
-
-L<File::Glob> now supports C<GLOB_LIMIT> constant to limit the
-size of the returned list of filenames.
-
-=item *
-
-L<IO::Socket::INET> now supports C<LocalPort> of zero (usually meaning
-that the operating system will make one up.)
-
-=item *
-
-The L<vars> pragma now supports declaring fully qualified variables.
-(Something that C<our()> does not and will not support.)
-
-=back
-
 =head1 Utility Changes
 
 =over 4
 
 =item *
 
-The Emacs perl mode (emacs/cperl-mode.el) has been updated to version
+Emacs perl mode (emacs/cperl-mode.el) has been updated to version
 4.31.
 
 =item *
 
-Perlbug is now much more robust.  It also sends the bug report to
-perl.org, not perl.com.
+F<emacs/e2ctags.pl> is now much faster.
 
 =item *
 
-The perlcc utility has been rewritten and its user interface (that is,
-command line) is much more like that of the UNIX C compiler, cc.
-
-=item *
-
-The xsubpp utility for extension writers now understands POD
-documentation embedded in the *.xs files.
-
-=item *
-
-h2xs now produces template README.
-
-=item *
-
-s2p has been completely rewritten in Perl.  (It is in fact a full
-implementation of sed in Perl.)
-
-=item *
-
-xsubpp now supports OUT keyword.
-
-=item *
-
-The F<emacs/e2ctags.pl> is now much faster.
+h2xs now produces a template README.
 
 =item *
 
@@ -963,8 +932,35 @@ L<libnetcfg> has been added to configure the libnet.
 
 =item *
 
-The F<Pod::Html> (and thusly L<pod2html>) now allows specifying
-a cache directory.
+perlbug is now much more robust.  It also sends the bug report to
+perl.org, not perl.com.
+
+=item *
+
+perlcc has been rewritten and its user interface (that is,
+command line) is much more like that of the UNIX C compiler, cc.
+
+=item *
+
+perlivp is a new utility for doing Installation Verification
+Procedure after installing Perl.
+
+=item *
+
+pod2html now allows specifying a cache directory.
+
+=item *
+
+s2p has been completely rewritten in Perl.  (It is in fact a full
+implementation of sed in Perl.)
+
+=item *
+
+xsubpp now understands POD documentation embedded in the *.xs files.
+
+=item *
+
+xsubpp now supports OUT keyword.
 
 =back
 
@@ -979,6 +975,12 @@ perl56delta details the changes between the 5.005 release and the
 
 =item *
 
+perlclib documents the internal replacements for standard C library
+functions.  (Interesting only for extension writers and Perl core
+hackers.)
+
+=item *
+
 perldebtut is a Perl debugging tutorial.
 
 =item *
@@ -990,7 +992,30 @@ bring them back to the fold.
 
 =item *
 
+perlintro is a gentle introduction to Perl.
+
+=item *
+
+perliol documents the internals of PerlIO with layers.
+
+=item *
+
+perlmodstyle is a style guide for writing modules.
+
+=item *
+
 perlnewmod tells about writing and submitting a new module.
+
+=item *
+
+perlpod has been rewritten to be clearer and to record the best
+practices gathered over the years.
+
+=item *
+
+perlpodstyle is a more formal specification of the pod format,
+mainly of interest for writers of pod applications, not to
+people writing in pod.
 
 =item *
 
@@ -1008,89 +1033,46 @@ Yes, much quicker than perlretut.
 
 =item *
 
+perltodo has been updated.
+
+=item *
+
+perltootc has been renamed as perltooc (to not to conflict
+with perltoot in filesystems restricted to "8.3" names)
+
+=item *
+
+perluniintro is an introduction to using Unicode in Perl
+(perlunicode is more of a reference)
+
+=item *
+
 perlutil explains the command line utilities packaged with the Perl
 distribution.
 
 =back
 
-=head2 perlclib
+The following platform-specific documents are available before
+the installation as README.I<platform>, and after the installation
+as perlI<platform>:
 
-Internal replacements for standard C library functions.
-(Interesting only for extension writers and Perl core hackers.)
-
-=head2 perliol
-
-Internals of PerlIO with layers.
-
-=head2 README.aix
-
-Documentation on compiling Perl on AIX has been added.  AIX has
-several different C compilers and getting the right patch level
-is essential.  On install README.aix will be installed as L<perlaix>.
-
-=head2 README.bs2000
-
-Documentation on compiling Perl on the POSIX-BC platform (an EBCDIC
-mainframe environment) has been added.
-
-This was formerly known as README.posix-bc but the name was considered
-to be too confusing (it has nothing to do with the POSIX module or the
-POSIX standard).  On install README.bs2000 will be installed as L<perlbs2000>.
-
-=head2 README.macos
-
-In perl 5.7.1 (and in the 5.6.1) the MacPerl sources have been
-synchronised with the standard Perl sources.  To compile MacPerl
-some additional steps are required, and this file documents those
-steps.  On install README.macos will be installed as L<perlmacos>.
-
-=head2 README.mpeix
-
-The README.mpeix has been podified, which means that this information
-about compiling and using Perl on the MPE/iX miniframe platform will
-be installed as L<perlmpeix>.
-
-=head2 README.solaris
-
-README.solaris has been created and Solaris wisdom from elsewhere
-in the Perl documentation has been collected there.  On install
-README.solaris will be installed as L<perlsolaris>.
-
-=head2 README.vos
-
-The README.vos has been podified, which means that this information
-about compiling and using Perl on the Stratus VOS miniframe platform
-will be installed as L<perlvos>.
-
-=head2 Porting/repository.pod
-
-Documentation on how to use the Perl source repository has been added.
+    perlaix perlamiga perlapollo perlbeos perlbs2000
+    perlce perlcygwin perldgux perldos perlepoc perlhpux
+    perlhurd perlmachten perlmacos perlmint perlmpeix
+    perlnetware perlos2 perlos390 perlplan9 perlqnx perlsolaris
+    perltru64 perluts perlvmesa perlvms perlvos perlwin32
 
 =over 4
 
 =item *
 
-L<Locale::Maketext::TPJ13> is an article about software localization,
-originally published in The Perl Journal #13, republished here with
-kind permission.
+The documentation for the POSIX-BC platform is called "BS2000", to avoid
+confusion with the Perl POSIX module.
 
 =item *
 
-More README.$PLATFORM files have been converted into pod, which also
-means that they also be installed as perl$PLATFORM documentation
-files.  The new files are L<perlapollo>, L<perlbeos>, L<perldgux>,
-L<perlhurd>, L<perlmint>, L<perlnetware>, L<perlplan9>, L<perlqnx>,
-and L<perltru64>.
-
-=item *
-
-The F<Todo> and F<Todo-5.6> files have been merged into L<perltodo>.
-
-=item *
-
-Use of the F<gprof> tool to profile Perl has been documented in
-L<perlhack>.  There is a make target "perl.gprof" for generating a
-gprofiled Perl executable.
+The documentation for the WinCE platform is called "CE", to avoid
+confusion with the perlwin32 documentation on 8.3-restricted filesystems.
 
 =back
 
@@ -1208,26 +1190,15 @@ pointers are 64 bits wide.  (To be exact, the use64bitall is ignored.)
 
 =item *
 
-APPLLIB_EXP, a less-know configuration-time definition, has been
-documented.  It can be used to prepend site-specific directories
-to Perl's default search path (@INC), see INSTALL for information.
-
-=item *
-
-Building Berkeley DB3 for compatibility modes for DB, NDBM, and ODBM
-has been documented in INSTALL.
-
-=item *
-
-If you are on IRIX or Tru64 platforms, new profiling/debugging options
-have been added, see L<perlhack> for more information about pixie and
-Third Degree.
-
-=item *
-
 In AFS installations one can configure the root of the AFS to be
 somewhere else than the default F</afs> by using the Configure
 parameter C<-Dafsroot=/some/where/else>.
+
+=item *
+
+APPLLIB_EXP, a less-know configuration-time definition, has been
+documented.  It can be used to prepend site-specific directories
+to Perl's default search path (@INC), see INSTALL for information.
 
 =item *
 
@@ -1239,15 +1210,63 @@ DB_VERSION_PATCH_CFG> from C.
 
 =item *
 
+Building Berkeley DB3 for compatibility modes for DB, NDBM, and ODBM
+has been documented in INSTALL.
+
+=item *
+
+If you have CPAN access (either network or a local copy such as a
+CD-ROM) you can during specify extra modules to Configure to build and
+install with Perl using the -Dextras=...  option.  See INSTALL for
+more details.
+
+=item *
+
+In addition to config.over a new override file, config.arch, is
+available.  That is supposed to be used by hints file writers for
+architecture-wide changes (as opposed to config.over which is for
+site-wide changes).
+
+=item *
+
+For Perl developers several new make targets for profiling
+and debugging have been added, see L<perlhack>.
+
+=over 8
+
+=item *
+
+Use of the F<gprof> tool to profile Perl has been documented in
+L<perlhack>.  There is a make target called "perl.gprof" for
+generating a gprofiled Perl executable.
+
+=item *
+
+If you have GCC 3, there is a make target called "perl.gcov" for
+creating a gcoved Perl executable for coverage analysis.  See
+L<perlhack>.
+
+=item *
+
+If you are on IRIX or Tru64 platforms, new profiling/debugging options
+have been added, see L<perlhack> for more information about pixie and
+Third Degree.
+
+=back
+
+=item *
+
+Guidelines of how to construct minimal Perl installations have
+been added to INSTALL.
+
+=item *
+
 The Thread extension is now not built at all under ithreads
 (C<Configure -Duseithreads>) because it wouldn't work anyway (the
 Thread extension requires being Configured with C<-Duse5005threads>).
 
-=item *
-
-The C<B::Deparse> compiler backend has been so significantly improved
-that almost the whole Perl test suite passes after being deparsed.  A
-make target has been added to help in further testing: C<make test.deparse>.
+But note that the Thread.pm interface is now shared by both
+thread models.
 
 =back
 
@@ -1264,7 +1283,24 @@ AIX dynamic loading should be now better supported.
 
 =item *
 
+AIX should now work better with gcc, threads, and 64-bitness.  Also the
+long doubles support in AIX should be better now.  See L<perlaix>.
+
+=item *
+
 After a long pause, AmigaOS has been verified to be happy with Perl.
+
+=item *
+
+AtheOS (http://www.atheos.cx/) is a new platform.
+
+=item *
+
+DG/UX platform now supports the 5.005-style threads.  See L<perldgux>.
+
+=item *
+
+DYNIX/ptx platform (a.k.a. dynixptx) is supported at or near osvers 4.5.2.
 
 =item *
 
@@ -1288,49 +1324,12 @@ and MacPerl have been synchronised)
 
 =item *
 
-NCR MP-RAS is now supported.
-
-=item *
-
-NonStop-UX is now supported.
-
-=item *
-
-Amdahl UTS is now supported.
-
-=item *
-
-z/OS (formerly known as OS/390, formerly known as MVS OE) has now
-support for dynamic loading.  This is not selected by default,
-however, you must specify -Dusedl in the arguments of Configure.
-
-=item *
-
-AIX should now work better with gcc, threads, and 64-bitness.  Also the
-long doubles support in AIX should be better now.  See L<perlaix>.
-
-=item *
-
-AtheOS (http://www.atheos.cx/) is a new platform.
-
-=item *
-
-DG/UX platform now supports the 5.005-style threads.  See L<perldgux>.
-
-=item *
-
-DYNIX/ptx platform (a.k.a. dynixptx) is supported at or near osvers 4.5.2.
-
-=item *
-
-Several MacOS (Classic) portability patches have been applied.  We
-hope to get a fully working port by 5.8.0.  (The remaining problems
-relate to the changed IO model of Perl.)  See L<perlmacos>.
-
-=item *
-
 MacOS X (or Darwin) should now be able to build Perl even on HFS+
 filesystems.  (The case-insensitivity confused the Perl build process.)
+
+=item *
+
+NCR MP-RAS is now supported.
 
 =item *
 
@@ -1338,11 +1337,28 @@ NetWare from Novell is now supported.  See L<perlnetware>.
 
 =item *
 
-The Amdahl UTS UNIX mainframe platform is now supported.
+NonStop-UX is now supported.
+
+=item *
+
+Amdahl UTS UNIX mainframe platform is now supported.
+
+=item *
+
+WinCE is now supported.  See L<perlce>.
+
+=item *
+
+z/OS (formerly known as OS/390, formerly known as MVS OE) has now
+support for dynamic loading.  This is not selected by default,
+however, you must specify -Dusedl in the arguments of Configure.
 
 =back
 
 =head1 Selected Bug Fixes
+
+Numerous memory leaks and uninitialized memory accesses have been hunted down.
+Most importantly anonymous subs used to leak quite a bit.
 
 =over 4
 
@@ -1485,6 +1501,122 @@ vec() now refuses to deal with characters >255.
 
 Zero entries were missing from the Unicode classes like C<IsDigit>.
 
+=item *
+
+chop(@list) in list context returned the characters chopped in
+reverse order.  This has been reversed to be in the right order.
+
+=item *
+
+The order of DESTROYs has been made more predictable.
+
+=item *
+
+mkdir() now ignores trailing slashes in the directory name,
+as mandated by POSIX.
+
+=item *
+
+Attributes (like :shared) didn't work with our().
+
+=item *
+
+The PERL5OPT environment variable (for passing command line arguments
+to Perl) didn't work for more than a single group of options.
+
+=item *
+
+The tainting behaviour of sprintf() has been rationalized.  It does
+not taint the result of floating point formats anymore, making the
+behaviour consistent with that of string interpolation.
+
+=item *
+
+All but the first argument of the IO syswrite() method are now optional.
+
+=item *
+
+Tie::ARRAY SPLICE method was broken.
+
+=item *
+
+vec() now tries to work with characters <= 255 when possible, but it leaves
+higher character values in place.  In that case, if vec() was used to modify
+the string, it is no longer considered to be utf8-encoded.
+
+=item *
+
+The autouse pragma didn't work for Multi::Part::Function::Names.
+
+=item *
+
+The behaviour of non-decimal but numeric string constants such as
+"0x23" was platform-dependent: in some platforms that was seen as 35,
+in some as 0, in some as a floating point number (don't ask).  This
+was caused by Perl using the operating system libraries in a situation
+where the result of the string to number conversion is undefined: now
+Perl consistently handles such strings as zero in numeric contexts.
+
+=item *
+
+L<dprofpp> -R didn't work.
+
+=item *
+
+PERL5OPT with embedded spaces didn't work.
+
+=item *
+
+L<Sys::Syslog> ignored the C<LOG_AUTH> constant.
+
+=item *
+
+Some versions of glibc have a broken modfl().  This affects builds
+with C<-Duselongdouble>.  This version of Perl detects this brokenness
+and has a workaround for it.  The glibc release 2.2.2 is known to have
+fixed the modfl() bug.
+
+=item *
+
+Linux previously had problems related to sockaddrlen when using
+accept(), revcfrom() (in Perl: recv()), getpeername(), and getsockname().
+
+=item *
+
+Previously DYNIX/ptx had problems in its Configure probe for non-blocking I/O.
+
+=item *
+
+Windows
+
+=over 8
+
+=item *
+
+Borland C++ v5.5 is now a supported compiler that can build Perl.
+However, the generated binaries continue to be incompatible with those
+generated by the other supported compilers (GCC and Visual C++).
+
+=item *
+
+Win32::GetCwd() correctly returns C:\ instead of C: when at the drive root.
+Other bugs in chdir() and Cwd::cwd() have also been fixed.
+
+=item *
+
+Duping socket handles with open(F, ">&MYSOCK") now works under Windows 9x.
+
+=item *
+
+HTML files will be installed in c:\perl\html instead of c:\perl\lib\pod\html
+
+=item *
+
+The makefiles now provide a single switch to bulk-enable all the features
+enabled in ActiveState ActivePerl (a popular Win32 binary distribution).
+
+=back
+
 =back
 
 =item *
@@ -1497,65 +1629,6 @@ the Tk extension with 5.6.0.)
 Configure no longer includes the DBM libraries (dbm, gdbm, db, ndbm)
 when building the Perl binary.  The only exception to this is SunOS 4.x,
 which needs them.
-
-=item *
-
-Some new Configure symbols, useful for extension writers:
-
-=over 8
-
-=item d_cmsghdr
-
-For struct cmsghdr.
-
-=item d_fcntl_can_lock
-
-Whether fcntl() can be used for file locking.
-
-=item d_fsync
-
-=item d_getitimer
-
-=item d_getpagsz
-
-For getpagesize(), though you should prefer POSIX::sysconf(_SC_PAGE_SIZE))
-
-=item d_msghdr_s
-
-For struct msghdr.
-
-=item need_va_copy
-
-Whether one needs to use Perl_va_copy() to copy varargs.
-
-=item d_readv
-
-=item d_recvmsg
-
-=item d_sendmsg
-
-=item sig_size
-
-The number of elements in an array needed to hold all the available signals.
-
-=item d_sockatmark
-
-=item d_strtoq
-
-=item d_u32align
-
-Whether one needs to access character data aligned by U32 sized pointers.
-
-=item d_ualarm
-
-=item d_usleep
-
-=back
-
-=item *
-
-Removed Configure symbols: the PDP-11 memory model settings: huge,
-large, medium, models.
 
 =item *
 
@@ -1757,19 +1830,27 @@ winsock handle leak fixed.
 
 =head1 New or Changed Diagnostics
 
+=over 4
+
+=item *
+
 All regular expression compilation error messages are now hopefully
 easier to understand both because the error message now comes before
 the failed regex and because the point of failure is now clearly
-marked.
+marked by a C<E<lt>-- HERE> marker.
+
+=item *
 
 The various "opened only for", "on closed", "never opened" warnings
 drop the C<main::> prefix for filehandles in the C<main> package,
 for example C<STDIN> instead of <main::STDIN>. 
 
+=item *
+
 The "Unrecognized escape" warning has been extended to include C<\8>,
 C<\9>, and C<\_>.  There is no need to escape any of the C<\w> characters.
 
-=over 4
+=item *
 
 Two new debugging options have been added: if you have compiled your
 Perl with debugging, you can use the -DT and -DR options to trace
@@ -1786,6 +1867,22 @@ is made, a warning is given.
 C<push @a;> and C<unshift @a;> (with no values to push or unshift)
 now give a warning.  This may be a problem for generated and evaled
 code.
+
+=item *
+
+If you try to L<perlfunc/pack> a number less than 0 or larger than 255
+using the C<"C"> format you will get an optional warning.  Similarly
+for the C<"c"> format and a number less than -128 or more than 127.
+
+=item *
+
+Certain regex modifiers such as C<(?o)> make sense only if applied to
+the entire regex.  You will an optional warning if you try to do otherwise.
+
+=item *
+
+Using arrays or hashes as references (e.g. C<%foo->{bar}> has been
+deprecated for a while.  Now you will get an optional warning.
 
 =back
 
@@ -1835,12 +1932,45 @@ a no-op) and the latter replaced with dSP.
 
 =item *
 
-Perl now uses system malloc instead of Perl malloc on all 64-bit
-platforms, and even in some not-always-64-bit platforms like AIX,
-IRIX, and Solaris.  This change breaks backward compatibility but
-Perl's malloc has problems with large address spaces and also the
-speed of vendors' malloc is generally better in large address space
-machines (Perl's malloc is mostly tuned for space).
+PERL_OBJECT has been completely removed.
+
+=item *
+
+The MAGIC constants (e.g. C<'P'>) have been macrofied
+(e.g. C<PERL_MAGIC_TIED>) for better source code readability
+and maintainability.
+
+=item *
+
+The regex compiler now maintains a structure that identifies nodes in
+the compiled bytecode with the corresponding syntactic features of the
+original regex expression.  The information is attached to the new
+C<offsets> member of the C<struct regexp>. See L<perldebguts> for more
+complete information.
+
+=item *
+
+The C code has been made much more C<gcc -Wall> clean.  Some warning
+messages still remain in some platforms, so if you are compiling with
+gcc you may see some warnings about dubious practices.  The warnings
+are being worked on.
+
+=item *
+
+F<perly.c>, F<sv.c>, and F<sv.h> have now been extensively commented.
+
+=item *
+
+Documentation on how to use the Perl source repository has been added
+to F<Porting/repository.pod>.
+
+=item *
+
+There are now several profiling make targets 
+
+=item *
+
+The C<op_clear> and C<op_null> are now exported.
 
 =back
 
@@ -1868,147 +1998,11 @@ The exploit attempt reporting feature has been completely removed from
 Perl 5.8.0 (and the maintenance release 5.6.1, and it was removed also
 from all the Perl 5.7 releases), so that particular vulnerability
 isn't there anymore.  However, further security vulnerabilities are,
-unfortunately, always possible.  The suidperl code is being reviewed
-and if deemed too risky to continue to be supported, it may be
-completely removed from future releases.  In any case, suidperl should
-only be used by security experts who know exactly what they are doing
-and why they are using suidperl instead of some other solution such as
-sudo (see http://www.courtesan.com/sudo/).
-
-=head1 Selected Bug Fixes
-
-Numerous memory leaks and uninitialized memory accesses have been hunted down.
-Most importantly anonymous subs used to leak quite a bit.
-
-=over 4
-
-=item *
-
-chop(@list) in list context returned the characters chopped in
-reverse order.  This has been reversed to be in the right order.
-
-=item *
-
-The order of DESTROYs has been made more predictable.
-
-=item *
-
-mkdir() now ignores trailing slashes in the directory name,
-as mandated by POSIX.
-
-=item *
-
-Attributes (like :shared) didn't work with our().
-
-=item *
-
-The PERL5OPT environment variable (for passing command line arguments
-to Perl) didn't work for more than a single group of options.
-
-=item *
-
-The tainting behaviour of sprintf() has been rationalized.  It does
-not taint the result of floating point formats anymore, making the
-behaviour consistent with that of string interpolation.
-
-=item *
-
-All but the first argument of the IO syswrite() method are now optional.
-
-=item *
-
-Tie::ARRAY SPLICE method was broken.
-
-=item *
-
-vec() now tries to work with characters <= 255 when possible, but it leaves
-higher character values in place.  In that case, if vec() was used to modify
-the string, it is no longer considered to be utf8-encoded.
-
-=item *
-
-The autouse pragma didn't work for Multi::Part::Function::Names.
-
-=item *
-
-The behaviour of non-decimal but numeric string constants such as
-"0x23" was platform-dependent: in some platforms that was seen as 35,
-in some as 0, in some as a floating point number (don't ask).  This
-was caused by Perl using the operating system libraries in a situation
-where the result of the string to number conversion is undefined: now
-Perl consistently handles such strings as zero in numeric contexts.
-
-=item *
-
-L<dprofpp> -R didn't work.
-
-=item *
-
-PERL5OPT with embedded spaces didn't work.
-
-=item *
-
-L<Sys::Syslog> ignored the C<LOG_AUTH> constant.
-
-=back
-
-=head2 Platform Specific Changes and Fixes
-
-=over 4
-
-=item *
-
-Some versions of glibc have a broken modfl().  This affects builds
-with C<-Duselongdouble>.  This version of Perl detects this brokenness
-and has a workaround for it.  The glibc release 2.2.2 is known to have
-fixed the modfl() bug.
-
-=back
-
-=head2 Platform Specific Changes and Fixes
-
-=over 4
-
-=item *
-
-Linux previously had problems related to sockaddrlen when using
-accept(), revcfrom() (in Perl: recv()), getpeername(), and getsockname().
-
-=item *
-
-Previously DYNIX/ptx had problems in its Configure probe for non-blocking I/O.
-
-=item *
-
-Windows
-
-=over 8
-
-=item *
-
-Borland C++ v5.5 is now a supported compiler that can build Perl.
-However, the generated binaries continue to be incompatible with those
-generated by the other supported compilers (GCC and Visual C++).
-
-=item *
-
-Win32::GetCwd() correctly returns C:\ instead of C: when at the drive root.
-Other bugs in chdir() and Cwd::cwd() have also been fixed.
-
-=item *
-
-Duping socket handles with open(F, ">&MYSOCK") now works under Windows 9x.
-
-=item *
-
-HTML files will be installed in c:\perl\html instead of c:\perl\lib\pod\html
-
-=item *
-
-The makefiles now provide a single switch to bulk-enable all the features
-enabled in ActiveState ActivePerl (a popular binary distribution).
-
-=back
+unfortunately, always possible.  The suidperl functionality is most
+probably going to be removed in Perl 5.10.  In any case, suidperl
+should only be used by security experts who know exactly what they are
+doing and why they are using suidperl instead of some other solution
+such as sudo (see http://www.courtesan.com/sudo/).
 
 =head1 New Tests
 
@@ -2017,62 +2011,6 @@ Several new tests have been added, especially for the F<lib> subsection.
 The tests are now reported in a different order than in earlier Perls.
 (This happens because the test scripts from under t/lib have been moved
 to be closer to the library/extension they are testing.)
-
-=head1 New or Changed Diagnostics
-
-=over 4
-
-=item *
-
-In the regular expression diagnostics the C<E<lt>E<lt> HERE> marker
-introduced in 5.7.0 has been changed to be C<E<lt>-- HERE> since too
-many people found the C<E<lt>E<lt>> to be too similar to here-document
-starters.
-
-=item *
-
-If you try to L<perlfunc/pack> a number less than 0 or larger than 255
-using the C<"C"> format you will get an optional warning.  Similarly
-for the C<"c"> format and a number less than -128 or more than 127.
-
-=item *
-
-Certain regex modifiers such as C<(?o)> make sense only if applied to
-the entire regex.  You will an optional warning if you try to do otherwise.
-
-=item *
-
-Using arrays or hashes as references (e.g. C<%foo->{bar}> has been
-deprecated for a while.  Now you will get an optional warning.
-
-=back
-
-=head1 Source Code Enhancements
-
-=head2 MAGIC constants
-
-The MAGIC constants (e.g. C<'P'>) have been macrofied
-(e.g. C<PERL_MAGIC_TIED>) for better source code readability
-and maintainability.
-
-=head2 Better commented code
-
-F<perly.c>, F<sv.c>, and F<sv.h> have now been extensively commented.
-
-=head2 Regex pre-/post-compilation items matched up
-
-The regex compiler now maintains a structure that identifies nodes in
-the compiled bytecode with the corresponding syntactic features of the
-original regex expression.  The information is attached to the new
-C<offsets> member of the C<struct regexp>. See L<perldebguts> for more
-complete information.
-
-=head2 gcc -Wall
-
-The C code has been made much more C<gcc -Wall> clean.  Some warning
-messages still remain, though, so if you are compiling with gcc you
-will see some warnings about dubious practices.  The warnings are
-being worked on.
 
 =head1 Known Problems
 
@@ -2227,7 +2165,7 @@ many more tests than there used to be.
 Here are the known failures from some compiler/platform combinations.
 
 DEC C V5.3-006 on OpenVMS VAX V6.2
- 
+
   [-.ext.list.util.t]tainted..............FAILED on test 3
   [-.ext.posix]sigaction..................FAILED on test 7
   [-.ext.time.hires]hires.................FAILED on test 14

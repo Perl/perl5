@@ -10,6 +10,7 @@ $VERSION = 1.04;
 use Carp;
 use Config;
 use Cwd;
+use File::Spec;
 use File::Spec::Unix;
 use Getopt::Long;
 
@@ -220,7 +221,7 @@ my $htmlfileurl = "" ;		# The url that other files would use to
 				# other files.
 my $podfile = "";		# read from stdin by default
 my @podpath = ();		# list of directories containing library pods.
-my $podroot = ".";		# filesystem base directory from which all
+my $podroot = File::Spec->curdir;		# filesystem base directory from which all
 				#   relative paths in $podpath stem.
 my $css = '';                   # Cascading style sheet
 my $recurse = 1;		# recurse on subdirectories in $podpath.
@@ -267,7 +268,7 @@ $htmldir = "";	    	# The directory to which the html pages
 $htmlfile = "";		# write to stdout by default
 $podfile = "";		# read from stdin by default
 @podpath = ();		# list of directories containing library pods.
-$podroot = ".";		# filesystem base directory from which all
+$podroot = File::Spec->curdir;		# filesystem base directory from which all
 				#   relative paths in $podpath stem.
 $css = '';                   # Cascading style sheet
 $recurse = 1;		# recurse on subdirectories in $podpath.

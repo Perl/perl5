@@ -1128,7 +1128,10 @@ lib/newgetopt.pl		A perl library supporting long option parsing
 lib/NEXT.pm			Pseudo-class NEXT for method redispatch
 lib/NEXT/Changes		NEXT
 lib/NEXT/README			NEXT
-lib/NEXT/test.pl		See if NEXT works
+lib/NEXT/t/actual.t		NEXT
+lib/NEXT/t/actuns.t		NEXT
+lib/NEXT/t/next.t		NEXT
+lib/NEXT/t/unseen.t		NEXT
 lib/open.pm			Pragma to specify default I/O disciplines
 lib/open.t			See if the open pragma works
 lib/open2.pl			Open a two-ended pipe (uses IPC::Open2)
