@@ -1584,6 +1584,9 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 		SvREADONLY_off(sv);
 	    }
 	    New(703, s, newlen, char);
+	    if (SvPVX(sv) && SvCUR(sv)) {
+	        Move(SvPVX(sv), s, SvCUR(sv), char);
+	    }
 	}
 	SvPV_set(sv, s);
         SvLEN_set(sv, newlen);
