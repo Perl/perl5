@@ -158,7 +158,11 @@ PerlIO_intmode2str(int rawmode, char *mode, int *writing)
 int
 PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 {
-    if (!names || !*names || strEQ(names, ":crlf") || strEQ(names, ":raw")) {
+    if (!names || !*names
+        || strEQ(names, ":crlf")
+        || strEQ(names, ":raw")
+        || strEQ(names, ":bytes")
+       ) {
 	return 0;
     }
     Perl_croak(aTHX_ "Cannot apply \"%s\" in non-PerlIO perl", names);
@@ -1099,6 +1103,12 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 	return PerlIO_apply_layers(aTHX_ f, NULL, names) == 0 ? TRUE : FALSE;
     }
     else {
+	if (*f) {
+	    /* Turn off UTF-8-ness, to undo UTF-8 locale effects
+	       This may be too simplistic!
+	     */
+	    PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
+	}
 	/* FIXME?: Looking down the layer stack seems wrong,
 	   but is a way of reaching past (say) an encoding layer
 	   to flip CRLF-ness of the layer(s) below
@@ -1686,7 +1696,7 @@ PerlIOUtf8_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
 PerlIO_funcs PerlIO_utf8 = {
     "utf8",
     sizeof(PerlIOl),
-    PERLIO_K_DUMMY | PERLIO_F_UTF8,
+    PERLIO_K_DUMMY | PERLIO_K_UTF8,
     PerlIOUtf8_pushed,
     NULL,
     NULL,
