@@ -2310,8 +2310,8 @@ PP(pp_bind)
     dSP;
 #ifdef HAS_SOCKET
 #ifdef MPE /* Requires PRIV mode to bind() to ports < 1024 */
-    extern GETPRIVMODE();
-    extern GETUSERMODE();
+    extern void GETPRIVMODE();
+    extern void GETUSERMODE();
 #endif
     SV *addrsv = POPs;
     char *addr;
