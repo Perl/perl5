@@ -1334,6 +1334,7 @@ lib/Locale/Maketext/t/02get.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/03http.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/04super.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/05super.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/06super.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/90utf8.t	Locale::Maketext
 lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 lib/locale.pm			For "use locale"

@@ -1,6 +1,17 @@
 Revision history for Perl suite Locale::Maketext
-                                        Time-stamp: "2004-01-11 18:30:43 AST"
+                                        Time-stamp: "2004-01-19 15:11:56 AST"
 
+2004-01-19  Sean M. Burke  sburke@cpan.org
+	
+	* Release 1.08:
+	
+	* Corrected a one-line code bug in v1.07 that accidentally demoted
+	all en-* tags in cases of lexicon-groups that had an en.pm but no
+	en_*.pm.  Thanks to Robert Spier for spotting this.  Test added.
+	So don't use v1.07!
+
+	* Autrijus found some typoes in the TPJ article.  Fixed.1
+	
 2004-01-11  Sean M. Burke  sburke@cpan.org
 	
 	* Release 1.07:  Now uses a new and different rule for implicating

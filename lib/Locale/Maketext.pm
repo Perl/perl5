@@ -1,5 +1,5 @@
 
-# Time-stamp: "2004-01-11 19:02:37 AST"
+# Time-stamp: "2004-01-19 15:11:14 AST"
 
 require 5;
 package Locale::Maketext;
@@ -14,7 +14,7 @@ use I18N::LangTags 0.21 ();
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
  # define the constant 'DEBUG' at compile-time
 
-$VERSION = "1.07";
+$VERSION = "1.08";
 @ISA = ();
 
 $MATCH_SUPERS = 1;
@@ -283,14 +283,14 @@ sub _langtag_munging {
                       @languages;    # catch alternation
     DEBUG and print "Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
 
+    @languages     = $base_class->_add_supers( @languages );
+
     if( defined &I18N::LangTags::panic_languages ) {
       push @languages, I18N::LangTags::panic_languages(@languages);
       DEBUG and print "After adding panic languages:\n", 
         " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
     }
 
-    @languages     = $base_class->_add_supers( @languages );
-    
     push @languages, $base_class->fallback_languages;
      # You are free to override fallback_languages to return empty-list!
     DEBUG and print "Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
@@ -559,3 +559,4 @@ you could easily halve or double the amount of cumin, or use chopped mint
 leaves instead of dill, or lime juice instead of lemon, et cetera.
 
 [end]
+
