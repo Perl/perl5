@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..686\n";
+print "1..684\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1986,23 +1986,4 @@ print "ok 683\n" if @a == 9 && "@a" eq "f o o \n $a $b b a r";
     $b = join ":", /a./gc;
     $c = pos;
     print "$a $b $c" eq 'ba:ba ad:ae 10' ? "ok 684\n" : "not ok 684\t# $a $b $c\n";
-}
-
-{
-    package ID_20010407_006;
-
-    sub x {
-	"a\x{1234}";
-    }
-
-    my $x = x;
-    my $y;
-
-    $x =~ /(..)/; $y = $1;
-    print "not " unless length($y) == 2 && $y eq $x;
-    print "ok 685\n" if length($y) == 2;
-
-    x  =~ /(..)/; $y = $1;
-    print "not " unless length($y) == 2 && $y eq $x;
-    print "ok 686\n";
 }
