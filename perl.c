@@ -2839,6 +2839,7 @@ init_main_thread()
     sv_setpvn(bodytarget, "", 0);
     formtarget = bodytarget;
     thr->errsv = newSVpv("", 0);
+    (void) find_threadsv("@");	/* Ensure $@ is initialised early */
     return thr;
 }
 #endif /* USE_THREADS */
