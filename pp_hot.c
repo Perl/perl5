@@ -626,7 +626,6 @@ PP(pp_aassign)
 		hv_clear(hash);
 
 		while (relem < lastrelem) {	/* gobble up all the rest */
-		    STRLEN len;
 		    HE *didstore;
 		    if (*relem)
 			sv = *(relem++);
@@ -645,14 +644,29 @@ PP(pp_aassign)
 		    }
 		    TAINT_NOT;
 		}
-		if (relem == lastrelem && dowarn) {
-		    if (relem == firstrelem &&
-			SvROK(*relem) &&
-			( SvTYPE(SvRV(*relem)) == SVt_PVAV ||
-			  SvTYPE(SvRV(*relem)) == SVt_PVHV ) )
-			warn("Reference found where even-sized list expected");
-		    else
-			warn("Odd number of elements in hash assignment");
+		if (relem == lastrelem) {
+		    if (*relem) {
+			HE *didstore;
+			if (dowarn) {
+			    if (relem == firstrelem &&
+				SvROK(*relem) &&
+				( SvTYPE(SvRV(*relem)) == SVt_PVAV ||
+				  SvTYPE(SvRV(*relem)) == SVt_PVHV ) )
+				warn("Reference found where even-sized list expected");
+			    else
+				warn("Odd number of elements in hash assignment");
+			}
+			tmpstr = NEWSV(29,0);
+			didstore = hv_store_ent(hash,*relem,tmpstr,0);
+			if (magic) {
+			    if (SvSMAGICAL(tmpstr))
+				mg_set(tmpstr);
+			    if (!didstore)
+				SvREFCNT_dec(tmpstr);
+			}
+			TAINT_NOT;
+		    }
+		    relem++;
 		}
 	    }
 	    break;
