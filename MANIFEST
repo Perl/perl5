@@ -1084,14 +1084,14 @@ lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
 lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
 lib/Math/BigInt/t/bigintpm.inc	Shared tests for bigintpm.t and sub_mbi.t
 lib/Math/BigInt/t/bigintpm.t	See if BigInt.pm works
-lib/Math/BigInt/t/require.t	Test if require Math::BigInt works
-lib/Math/BigInt/t/use.t		Test if use Math::BigInt(); works
 lib/Math/BigInt/t/calling.t	Test calling conventions
-lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precicion and fallback, round_mode
 lib/Math/BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precicion and fallback, round_mode tests
+lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precicion and fallback, round_mode
+lib/Math/BigInt/t/require.t	Test if require Math::BigInt works
 lib/Math/BigInt/t/sub_mbf.t	Empty subclass test of BigFloat
 lib/Math/BigInt/t/sub_mbi.t	Empty subclass test of BigInt
 lib/Math/BigInt/t/sub_mif.t	Test A & P with subclasses using mbimbf.inc
+lib/Math/BigInt/t/use.t		Test if use Math::BigInt(); works
 lib/Math/Complex.pm		A Complex package
 lib/Math/Complex.t		See if Math::Complex works
 lib/Math/Trig.pm		A simple interface to complex trigonometry
@@ -1214,10 +1214,10 @@ lib/Pod/t/basic.ovr		podlators test
 lib/Pod/t/basic.pod		podlators test
 lib/Pod/t/basic.t		podlators test
 lib/Pod/t/basic.txt		podlators test
-lib/Pod/t/man.t    		podlators test
 lib/Pod/t/Functions.t		See if Pod::Functions works
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/latex.t		Test for Pod::LaTeX
+lib/Pod/t/man.t    		podlators test
 lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/text-errors.t		podlators test
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
@@ -1702,7 +1702,6 @@ lib/unicore/UCD.html		Unicode character database
 lib/unicore/Unicode.html	Unicode character database
 lib/unicore/Unicode.txt		Unicode character database
 lib/unicore/version		The version of the Unicode
-lib/unifold.t			See if Unicode folding works
 lib/UNIVERSAL.pm		Base class for ALL classes
 lib/User/grent.pm		By-name interface to Perl's builtin getgr*
 lib/User/grent.t		See if User::grwent works
@@ -2316,6 +2315,7 @@ t/op/tiehandle.t		See if tie for handles works
 t/op/time.t			See if time functions work
 t/op/tr.t			See if tr works
 t/op/undef.t			See if undef works
+t/op/unifold.t			See if Unicode folding works
 t/op/universal.t		See if UNIVERSAL class works
 t/op/unshift.t			See if unshift works
 t/op/utf8decode.t		See if UTF-8 decoding works
