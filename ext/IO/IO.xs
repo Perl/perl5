@@ -268,8 +268,8 @@ setvbuf(handle, buf, type, size)
 	int		type
 	int		size
     CODE:
-#ifdef PERLIO_IS_STDIO
-#ifdef _IOFBF   /* Should be HAS_SETVBUF once Configure tests for that */
+/* Should check HAS_SETVBUF once Configure tests for that */
+#if defined(PERLIO_IS_STDIO) && defined(_IOFBF)
 	if (handle)
 	    RETVAL = setvbuf(handle, buf, type, size);
 	else {
@@ -277,10 +277,7 @@ setvbuf(handle, buf, type, size)
 	    errno = EINVAL;
 	}
 #else
-	    RETVAL = (SysRet) not_here("IO::Handle::setvbuf");
-#endif /* _IOFBF */
-#else
-	    not_here("IO::Handle::setvbuf");
+	RETVAL = (SysRet) not_here("IO::Handle::setvbuf");
 #endif
     OUTPUT:
 	RETVAL
