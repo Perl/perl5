@@ -6992,6 +6992,9 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max)
 		ncx->blk_loop.iterdata	= (CxPADLOOP(cx)
 					   ? cx->blk_loop.iterdata
 					   : gv_dup((GV*)cx->blk_loop.iterdata));
+		ncx->blk_loop.oldcurpad
+		    = (SV**)ptr_table_fetch(PL_ptr_table,
+					    cx->blk_loop.oldcurpad);
 		ncx->blk_loop.itersave	= sv_dup_inc(cx->blk_loop.itersave);
 		ncx->blk_loop.iterlval	= sv_dup_inc(cx->blk_loop.iterlval);
 		ncx->blk_loop.iterary	= av_dup_inc(cx->blk_loop.iterary);
