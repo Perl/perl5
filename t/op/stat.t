@@ -284,7 +284,11 @@ SKIP: {
         close(TTY);
     }
     ok(! -t TTY,    '!-t on closed TTY filehandle');
-    ok(-t,          '-t on STDIN');
+
+    {
+        local $TODO = 'STDIN not a tty when output is to pipe' if $Is_VMS;
+        ok(-t,          '-t on STDIN');
+    }
 }
 
 my $Null = File::Spec->devnull;
