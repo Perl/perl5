@@ -23,7 +23,11 @@
  *			which may or may not check number of children).
  */
 
-typedef UV PADOFFSET;
+#if PTRSIZE == 8
+typedef U64TYPE PADOFFSET;
+#else
+typedef U32TYPE PADOFFSET;
+#endif
 #define NOT_IN_PAD ((PADOFFSET) -1)
 
 #ifdef DEBUGGING_OPS
