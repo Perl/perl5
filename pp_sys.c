@@ -290,10 +290,11 @@ PP(pp_warn)
 	tmps = SvPV(TOPs, na);
     }
     if (!tmps || !*tmps) {
-	(void)SvUPGRADE(ERRSV, SVt_PV);
-	if (SvPOK(ERRSV) && SvCUR(ERRSV))
-	    sv_catpv(ERRSV, "\t...caught");
-	tmps = SvPV(ERRSV, na);
+  	SV *error = ERRSV;
+	(void)SvUPGRADE(error, SVt_PV);
+	if (SvPOK(error) && SvCUR(error))
+	    sv_catpv(error, "\t...caught");
+	tmps = SvPV(error, na);
     }
     if (!tmps || !*tmps)
 	tmps = "Warning: something's wrong";
@@ -305,6 +306,8 @@ PP(pp_die)
 {
     djSP; dMARK;
     char *tmps;
+    SV *tmpsv = Nullsv;
+    char *pat = "%s";
     if (SP - MARK != 1) {
 	dTARGET;
 	do_join(TARG, &sv_no, MARK, SP);
@@ -312,17 +315,26 @@ PP(pp_die)
 	SP = MARK + 1;
     }
     else {
-	tmps = SvPV(TOPs, na);
+	tmpsv = TOPs;
+	tmps = SvROK(tmpsv) ? Nullch : SvPV(tmpsv, na);
     }
     if (!tmps || !*tmps) {
-	(void)SvUPGRADE(ERRSV, SVt_PV);
-	if (SvPOK(ERRSV) && SvCUR(ERRSV))
-	    sv_catpv(ERRSV, "\t...propagated");
-	tmps = SvPV(ERRSV, na);
+  	SV *error = ERRSV;
+	(void)SvUPGRADE(error, SVt_PV);
+	if(tmpsv ? SvROK(tmpsv) : SvROK(error)) {
+	    if(tmpsv)
+		SvSetSV(error,tmpsv);
+	    pat = Nullch;
+	}
+	else {
+	    if (SvPOK(error) && SvCUR(error))
+		sv_catpv(error, "\t...propagated");
+	    tmps = SvPV(error, na);
+	}
     }
     if (!tmps || !*tmps)
 	tmps = "Died";
-    DIE("%s", tmps);
+    DIE(pat, tmps);
 }
 
 /* I/O. */

@@ -1279,7 +1279,7 @@ die(pat, va_alist)
 #else
     va_start(args);
 #endif
-    message = mess(pat, &args);
+    message = pat ? mess(pat, &args) : Nullch;
     va_end(args);
 
 #ifdef USE_THREADS
@@ -1300,9 +1300,14 @@ die(pat, va_alist)
 	    SV *msg;
 
 	    ENTER;
-	    msg = newSVpv(message, 0);
-	    SvREADONLY_on(msg);
-	    SAVEFREESV(msg);
+	    if(message) {
+		msg = newSVpv(message, 0);
+		SvREADONLY_on(msg);
+		SAVEFREESV(msg);
+	    }
+	    else {
+		msg = ERRSV;
+	    }
 
 	    PUSHSTACK(SI_DIEHOOK);
 	    PUSHMARK(SP);

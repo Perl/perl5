@@ -1041,29 +1041,33 @@ die_where(char *message)
 	I32 gimme;
 	SV **newsp;
 
-	if (in_eval & 4) {
-	    SV **svp;
-	    STRLEN klen = strlen(message);
-	    
-	    svp = hv_fetch(ERRHV, message, klen, TRUE);
-	    if (svp) {
-		if (!SvIOK(*svp)) {
-		    static char prefix[] = "\t(in cleanup) ";
-		    SV *err = ERRSV;
-		    sv_upgrade(*svp, SVt_IV);
-		    (void)SvIOK_only(*svp);
-		    if (!SvPOK(err))
-			sv_setpv(err,"");
-		    SvGROW(err, SvCUR(err)+sizeof(prefix)+klen);
-		    sv_catpvn(err, prefix, sizeof(prefix)-1);
-		    sv_catpvn(err, message, klen);
+	if (message) {
+	    if (in_eval & 4) {
+		SV **svp;
+		STRLEN klen = strlen(message);
+		
+		svp = hv_fetch(ERRHV, message, klen, TRUE);
+		if (svp) {
+		    if (!SvIOK(*svp)) {
+			static char prefix[] = "\t(in cleanup) ";
+			SV *err = ERRSV;
+			sv_upgrade(*svp, SVt_IV);
+			(void)SvIOK_only(*svp);
+			if (!SvPOK(err))
+			    sv_setpv(err,"");
+			SvGROW(err, SvCUR(err)+sizeof(prefix)+klen);
+			sv_catpvn(err, prefix, sizeof(prefix)-1);
+			sv_catpvn(err, message, klen);
+		    }
+		    sv_inc(*svp);
 		}
-		sv_inc(*svp);
 	    }
+	    else
+		sv_setpv(ERRSV, message);
 	}
 	else
-	    sv_setpv(ERRSV, message);
-	
+	    message = SvPVx(ERRSV, na);
+
 	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && curstackinfo->si_prev) {
 	    dounwind(-1);
 	    POPSTACK();
