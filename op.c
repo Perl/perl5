@@ -4299,6 +4299,11 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 			     mod(scalarseq(block), OP_LEAVESUBLV));
     }
     else {
+	/* This makes sub {}; work as expected.  */
+	if (block->op_type == OP_STUB) {
+	    op_free(block);
+	    block = newSTATEOP(0, Nullch, 0);
+	}
 	CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
     }
     CvROOT(cv)->op_private |= OPpREFCOUNTED;
@@ -6369,17 +6374,6 @@ Perl_peep(pTHX_ register OP *o)
 	    o->op_seq = PL_op_seqmax++;
 	    break;
 	case OP_STUB:
-	    if(!oldop &&
-	       o->op_next &&
-	       o->op_next->op_type == OP_LEAVESUB) {
-	      OP* newop = newSTATEOP(0, Nullch, 0);
-	       newop->op_next = o->op_next;
-	       o->op_next = 0;
-       	       op_free(o);
-	       o = newop;
-       	       ((UNOP*)o->op_next)->op_first = newop;	
-	       CvSTART(PL_compcv) = newop;	
-	    }
 	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
 		o->op_seq = PL_op_seqmax++;
 		break; /* Scalar stub must produce undef.  List stub is noop */
