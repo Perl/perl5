@@ -2522,11 +2522,7 @@ try_autoload:
 	    			  "%p entersub preparing @_\n", thr));
 #endif
 	    av = (AV*)PL_curpad[0];
-	    if (AvREAL(av)) {
-		av_clear(av);
-		AvREAL_off(av);
-		AvREIFY_on(av);
-	    }
+	    assert(!AvREAL(av));
 #ifndef USE_THREADS
 	    cx->blk_sub.savearray = GvAV(PL_defgv);
 	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
