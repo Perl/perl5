@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw(prompt);
 use FileHandle ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.18 $, 10;
+$VERSION = substr q$Revision: 1.20 $, 10;
 
 =head1 NAME
 
@@ -126,20 +126,33 @@ those.
 
 };
 
-    my(@path) = split($Config{path_sep},$ENV{PATH});
+    my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
     my $prog;
     for $prog (qw/gzip tar unzip make lynx ncftp ftp/){
-	my $path = $CPAN::Config->{$prog} || find_exe($prog,[@path]) || $prog;
+	my $path = $CPAN::Config->{$prog} || "";
+	if (MM->file_name_is_absolute($path)) {
+	    warn "Warning: configured $path does not exist\n" unless -e $path;
+	    $path = "";
+	} else {
+	    $path = '';
+	}
+	$path ||= find_exe($prog,[@path]);
+	warn "Warning: $prog not found in PATH\n" unless -e $path;
 	$ans = prompt("Where is your $prog program?",$path) || $path;
 	$CPAN::Config->{$prog} = $ans;
     }
     my $path = $CPAN::Config->{'pager'} || 
 	$ENV{PAGER} || find_exe("less",[@path]) || 
 	    find_exe("more",[@path]) || "more";
-    $ans = prompt("What is your favorite pager program?",$path) || $path;
+    $ans = prompt("What is your favorite pager program?",$path);
     $CPAN::Config->{'pager'} = $ans;
-    $path = $CPAN::Config->{'shell'} || $ENV{SHELL} || "";
-    $ans = prompt("What is your favorite shell?",$path) || $path;
+    $path = $CPAN::Config->{'shell'};
+    if (MM->file_name_is_absolute($path)) {
+	warn "Warning: configured $path does not exist\n" unless -e $path;
+	$path = "";
+    }
+    $path ||= $ENV{SHELL};
+    $ans = prompt("What is your favorite shell?",$path);
     $CPAN::Config->{'shell'} = $ans;
 
     #
@@ -185,7 +198,7 @@ the default and recommended setting.
 
     $default = $CPAN::Config->{inactivity_timeout} || 0;
     $CPAN::Config->{inactivity_timeout} =
-	prompt("Timout for inacivity during Makefile.PL?",$default);
+	prompt("Timeout for inacivity during Makefile.PL?",$default);
 
 
     #
@@ -268,12 +281,11 @@ the \$CPAN::Config takes precedence.
 
 sub find_exe {
     my($exe,$path) = @_;
-    my($dir,$MY);
-    $MY = {};
-    bless $MY, 'MY';
+    my($dir);
+    #warn "in find_exe exe[$exe] path[@$path]";
     for $dir (@$path) {
-	my $abs = $MY->catfile($dir,$exe);
-	if ($MY->maybe_command($abs)) {
+	my $abs = MM->catfile($dir,$exe);
+	if (MM->maybe_command($abs)) {
 	    return $abs;
 	}
     }
