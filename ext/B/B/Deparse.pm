@@ -97,7 +97,6 @@ use strict;
 # - left/right context
 # - recognize `use utf8', `use integer', etc
 # - treat top-level block specially for incremental output
-# - interpret high bit chars in string as utf8 \x{...} (when?)
 # - copy comments (look at real text with $^P?)
 # - avoid semis in one-statement blocks
 # - associativity of &&=, ||=, ?:
@@ -361,6 +360,7 @@ sub new {
 
     $self->{'ambient_arybase'} = 0;
     $self->{'ambient_warnings'} = "\0"x12;
+    $self->{'ambient_hints'} = 0;
     $self->init();
 
     while (my $arg = shift @_) {
@@ -389,6 +389,7 @@ sub init {
 
     $self->{'arybase'}  = $self->{'ambient_arybase'};
     $self->{'warnings'} = $self->{'ambient_warnings'};
+    $self->{'hints'}    = $self->{'ambient_hints'} & 0xFF;
 
     # also a convenient place to clear out subs_declared
     delete $self->{'subs_declared'};
@@ -447,7 +448,7 @@ sub ambient_pragmas {
 		@names = @$val;
 	    }
 	    else {
-		@names = split/\s+/, $val;
+		@names = split' ', $val;
 	    }
 	    $hint_bits |= strict::bits(@names);
 	}
@@ -456,14 +457,36 @@ sub ambient_pragmas {
 	    $arybase = $val;
 	}
 
-	elsif ($name eq 'integer') {
-	    require integer;
+	elsif ($name eq 'integer'
+	    || $name eq 'bytes'
+	    || $name eq 'utf8') {
+	    require "$name.pm";
 	    if ($val) {
-		$hint_bits |= $integer::hint_bits;
+		$hint_bits |= ${$::{"${name}::"}{"hint_bits"}};
 	    }
 	    else {
-		$hint_bits &= ~$integer::hint_bits;
+		$hint_bits &= ~${$::{"${name}::"}{"hint_bits"}};
 	    }
+	}
+
+	elsif ($name eq 're') {
+	    require re;
+	    if ($val eq 'none') {
+		$hint_bits &= ~re::bits(qw/taint eval asciirange/);
+		next();
+	    }
+
+	    my @names;
+	    if ($val eq 'all') {
+		@names = qw/taint eval asciirange/;
+	    }
+	    elsif (ref $val) {
+		@names = @$val;
+	    }
+	    else {
+		@names = split' ',$val;
+	    }
+	    $hint_bits |= re::bits(@names);
 	}
 
 	elsif ($name eq 'warnings') {
@@ -502,8 +525,7 @@ sub ambient_pragmas {
 
     $self->{'ambient_arybase'} = $arybase;
     $self->{'ambient_warnings'} = $warning_bits;
-
-    # $^H pragmas not yet implemented here
+    $self->{'ambient_hints'} = $hint_bits;
 }
 
 sub deparse {
@@ -561,7 +583,8 @@ sub deparse_sub {
     }
 
     local($self->{'curcv'}) = $cv;
-    local($self->{'curstash'}) = $self->{'curstash'};
+    local(@$self{qw'curstash warnings hints'})
+		= @$self{qw'curstash warnings hints'};
     if (not null $cv->ROOT) {
 	# skip leavesub
 	return $proto . "{\n\t" . 
@@ -581,7 +604,8 @@ sub deparse_format {
     my $form = shift;
     my @text;
     local($self->{'curcv'}) = $form;
-    local($self->{'curstash'}) = $self->{'curstash'};
+    local(@$self{qw'curstash warnings hints'})
+		= @$self{'curstash warnings hints'};
     my $op = $form->ROOT;
     my $kid;
     $op = $op->first->first; # skip leavewrite, lineseq
@@ -841,7 +865,9 @@ sub scopeop {
     my($real_block, $self, $op, $cx) = @_;
     my $kid;
     my @kids;
-    local($self->{'curstash'}) = $self->{'curstash'} if $real_block;
+
+    local(@$self{qw'curstash warnings hints'})
+		= @$self{qw'curstash warnings hints'} if $real_block;
     if ($real_block) {
 	$kid = $op->first->sibling; # skip enter
 	if (is_miniwhile($kid)) {
@@ -903,7 +929,7 @@ sub gv_name {
 }
 
 # Notice how subs and formats are inserted between statements here;
-# also $[ assignments and the warnings pragma.
+# also $[ assignments and pragmas.
 sub pp_nextstate {
     my $self = shift;
     my($op, $cx) = @_;
@@ -946,12 +972,30 @@ sub pp_nextstate {
 	$self->{'warnings'} = $warning_bits;
     }
 
+    if ($self->{'hints'} != $op->private) {
+	push @text, declare_hints($self->{'hints'}, $op->private);
+	$self->{'hints'} = $op->private;
+    }
+
     return join("", @text);
 }
 
 sub declare_warnings {
     my ($from, $to) = @_;
-    return "BEGIN {\${^WARNING_BITS} = ".cstring($to)."};\n";
+    require warnings;
+    if ($to eq warnings::bits("all")) {
+	return "use warnings;\n";
+    }
+    elsif ($to eq "\0"x12) {
+	return "no warnings;\n";
+    }
+    return "BEGIN {\${^WARNING_BITS} = ".cstring($to)."}\n";
+}
+
+sub declare_hints {
+    my ($from, $to) = @_;
+    my $bits = $to;
+    return sprintf "BEGIN {\$^H &= ~0xFF; \$^H |= %x}\n", $bits;
 }
 
 sub pp_dbstate { pp_nextstate(@_) }
@@ -1876,7 +1920,8 @@ sub loop_common {
     my($op, $cx, $init) = @_;
     my $enter = $op->first;
     my $kid = $enter->sibling;
-    local($self->{'curstash'}) = $self->{'curstash'};
+    local(@$self{qw'curstash warnings hints'})
+		= @$self{qw'curstash warnings hints'};
     my $head = "";
     my $bare = 0;
     my $body;
@@ -3323,6 +3368,18 @@ Assigning to the special variable $[
 
 use integer;
 
+=item *
+
+use bytes;
+
+=item *
+
+use utf8;
+
+=item *
+
+use re;
+
 =back
 
 Ordinarily, if you use B::Deparse on a subroutine which has
@@ -3352,10 +3409,23 @@ expect.
 
 Takes a number, the value of the array base $[.
 
+=item bytes
+
+=item utf8
+
 =item integer
 
-If the value is true, then the B<integer> pragma is assumed to
+If the value is true, then the appropriate pragma is assumed to
 be in the ambient scope, otherwise not.
+
+=item re
+
+Takes a string, possibly containing a whitespace-separated list of
+values. The values "all" and "none" are special. It's also permissible
+to pass an array reference here.
+
+    $deparser->ambient_pragmas(re => 'eval');
+
 
 =item warnings
 
