@@ -15,8 +15,6 @@ Todo			The Wishlist
 XSUB.h			Include file for extension subroutines
 av.c			Array value code
 av.h			Array value header
-c2ph.PL			program to translate dbx stabs to perl
-c2ph.doc		documentation for c2ph
 cflags.SH		A script that emits C compilation flags per file
 config_H		Sample config.h
 config_h.SH		Produces config.h
@@ -145,7 +143,10 @@ ext/SDBM_File/sdbm/sdbm.c		SDBM kit
 ext/SDBM_File/sdbm/sdbm.h		SDBM kit
 ext/SDBM_File/sdbm/tune.h		SDBM kit
 ext/SDBM_File/sdbm/util.c		SDBM kit
-ext/SDBM_File/typemap	SDBM extension interface types
+ext/SDBM_File/typemap		SDBM extension interface types
+ext/Safe/Makefile.PL		Safe extension makefile writer
+ext/Safe/Safe.pm		Safe extension Perl module
+ext/Safe/Safe.xs		Safe extension external subroutines
 ext/Socket/Makefile.PL	Socket extension makefile writer
 ext/Socket/Socket.pm	Socket extension Perl module
 ext/Socket/Socket.xs	Socket extension external subroutines
@@ -157,7 +158,6 @@ global.sym		Symbols that need hiding when embedded
 globals.c		File to declare global symbols (for shared library)
 gv.c			Glob value code
 gv.h			Glob value header
-h2ph.PL			A thing to turn C .h files into perl .ph files
 h2pl/README		How to turn .ph files into .pl files
 h2pl/cbreak.pl		cbreak routines using .ph
 h2pl/cbreak2.pl		cbreak routines using .pl
@@ -170,7 +170,6 @@ h2pl/mksizes		Program to make %sizeof array
 h2pl/mkvars		Program to make .pl from .ph files
 h2pl/tcbreak		cbreak test routine using .ph
 h2pl/tcbreak2		cbreak test routine using .pl
-h2xs.PL			Program to make .xs files from C header files
 handy.h			Handy definitions
 hints/3b1.sh		Hints for named architecture
 hints/3b1cc		Hints for named architecture
@@ -179,7 +178,7 @@ hints/aix.sh		Hints for named architecture
 hints/altos486.sh	Hints for named architecture
 hints/apollo.sh		Hints for named architecture
 hints/aux.sh		Hints for named architecture
-hints/bsdi_bsdos.sh	Hints for named architecture
+hints/bsdos.sh		Hints for named architecture
 hints/convexos.sh	Hints for named architecture
 hints/cxux.sh		Hints for named architecture
 hints/dec_osf.sh	Hints for named architecture
@@ -248,6 +247,7 @@ lib/English.pm		Readable aliases for short variables
 lib/Env.pm		Map environment into ordinary variables
 lib/Exporter.pm		Exporter base class
 lib/ExtUtils/Liblist.pm	Locates libraries
+lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS.
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
@@ -267,6 +267,7 @@ lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
 lib/Net/Ping.pm		Ping methods
+lib/Pod/Text.pm		Convert POD data to formatted ASCII text
 lib/Search/Dict.pm	A module to do binary search on dictionaries
 lib/SelfLoader.pm	A module to load functions only on demand.
 lib/Shell.pm		A module to make AUTOLOADEed system() calls
@@ -342,28 +343,34 @@ op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
 opcode.h		Automatically generated opcode header
 opcode.pl		Opcode header generatore
-os2/Makefile.SH		Shared library generation for OS/2
+os2/Makefile.SHs	Shared library generation for OS/2
 os2/POSIX.mkfifo	POSIX.xs patch.
 os2/README		OS/2 info.
+os2/diff.MANIFEST	MANIFEST patch
 os2/diff.Makefile	Patches to Makefile.SH
-os2/diff.configure	Patches to Makefile.SH
+os2/diff.c2ph		c2ph patch
+os2/diff.configure	Patches to Configure
+os2/diff.db_file	patch to DB_File
+os2/diff.init		Suggested patch to move initialization code to headers.
+os2/diff.installman	Patches to installman
 os2/diff.installperl	Patches to installperl
 os2/diff.mkdep		Patches to makedepend.SH
+os2/diff.rest		old patch to t/TEST which was not applied yet
 os2/diff.x2pMakefile	Patches to x2p/Makefile.SH
-os2/os2.c		Missing code for OS/2
+os2/notes		Notes for perl maintainer
+os2/os2.c		Additional code for OS/2
 os2/os2ish.h		Header for OS/2
+os2/perl2cmd.pl		Corrects installed binaries under OS/2
 patchlevel.h		The current patch level of perl
 perl.c			main()
 perl.h			Global declarations
 perl_exp.SH		Creates list of exported symbols for AIX.
-perldoc.PL		A simple tool to find & display perl's documentation
 perlsh			A poor man's perl shell
 perly.c			A byacc'ed perly.y
 perly.c.diff		Fixup perly.c to allow recursion
 perly.fixer		A program to remove yacc stack limitations
 perly.h			The header file for perly.c
 perly.y			Yacc grammar for perl
-pl2pm			A pl to pm translator
 pod/Makefile		Make pods into something else
 pod/PerlDoc/Functions.pm	used by splitpod
 pod/buildtoc		generate perltoc.pod
@@ -393,7 +400,8 @@ pod/perlsec.pod		Security info
 pod/perlstyle.pod	Style info
 pod/perlsub.pod		Subroutine info
 pod/perlsyn.pod		Syntax info
-pod/perltoc.pod		TOC info
+pod/perltie.pod		Tieing an object class into a simple variable
+pod/perltoc.pod		Table of Contents info
 pod/perltrap.pod	Trap info
 pod/perlvar.pod		Variable info
 pod/perlxs.pod		XS api info
@@ -401,7 +409,7 @@ pod/perlxstut.pod	XS tutorial
 pod/pod2html.PL		Precursor for translator to turn pod into HTML
 pod/pod2latex.PL	Precursor for translator to turn pod into LaTeX
 pod/pod2man.PL		Precursor for translator to turn pod into manpage
-pod/pod2text	        Precursor for translator to turn pod into text
+pod/pod2text.PL	        Precursor for translator to turn pod into text
 pod/roffitall		troff the whole man page set
 pod/splitman		Splits perlfunc into multiple man pages
 pod/splitpod		Splits perlfunc into multiple pod pages
@@ -459,6 +467,7 @@ t/lib/gdbm.t		See if GDBM_File works
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/posix.t		See if POSIX works
+t/lib/safe.t		See if Safe works
 t/lib/sdbm.t		See if SDBM_File works
 t/lib/socket.t		See if Socket works
 t/lib/soundex.t		See if Soundex works
@@ -521,6 +530,13 @@ toke.c			The tokener
 unixish.h		Defines that are assumed on Unix
 util.c			Utility routines
 util.h			Public declarations for the above
+utils/Makefile		Extract the utility scripts.
+utils/c2ph.PL		program to translate dbx stabs to perl
+utils/h2ph.PL		A thing to turn C .h files into perl .ph files
+utils/h2xs.PL		Program to make .xs files from C header files
+utils/perlbug.PL	A simple tool to submit a bug report
+utils/perldoc.PL	A simple tool to find & display perl's documentation
+utils/pl2pm.PL		A pl to pm translator
 vms/Makefile		VMS port
 vms/config.vms		default config.h for VMS
 vms/descrip.mms		MM[SK] description file for build
