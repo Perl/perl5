@@ -307,6 +307,19 @@ static int findbucket _((union overhead *freep, int srchlen));
 #  define BUCKETS_PER_POW2 1
 #endif 
 
+#if !defined(MEM_ALIGNBYTES) || ((MEM_ALIGNBYTES > 4) && !defined(STRICT_ALIGNMENT))
+/* Figure out the alignment of void*. */
+struct aligner {
+  char c;
+  void *p;
+};
+#  define ALIGN_SMALL ((int)((caddr_t)&(((struct aligner*)0)->p)))
+#else
+#  define ALIGN_SMALL MEM_ALIGNBYTES
+#endif
+
+#define IF_ALIGN_8(yes,no)	((ALIGN_SMALL>4) ? (yes) : (no))
+
 #ifdef BUCKETS_ROOT2
 #  define MAX_BUCKET_BY_TABLE 13
 static u_short buck_size[MAX_BUCKET_BY_TABLE + 1] = 
@@ -451,7 +464,7 @@ static char bucket_of[] =
       /* 0 to 15 in 4-byte increments. */
       (sizeof(void*) > 4 ? 6 : 5),	/* 4/8, 5-th bucket for better reports */
       6,				/* 8 */
-      7, 8,				/* 12, 16 */
+      IF_ALIGN_8(8,7), 8,		/* 16/12, 16 */
       9, 9, 10, 10,			/* 24, 32 */
       11, 11, 11, 11,			/* 48 */
       12, 12, 12, 12,			/* 64 */
