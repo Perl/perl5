@@ -1,6 +1,7 @@
 #!./miniperl -w
 
-$config_pm = $ARGV[0] || 'lib/Config.pm';
+my $config_pm = $ARGV[0] || 'lib/Config.pm';
+my $glossary = $ARGV[1] || 'Porting/Glossary';
 @ARGV = "./config.sh";
 
 # list names to put first (and hence lookup fastest)
@@ -278,6 +279,51 @@ The Config module is installed into the architecture and version
 specific library directory ($Config{installarchlib}) and it checks the
 perl version number when loaded.
 
+=head1 GLOSSARY
+
+Most C<Config> variables are determined by the C<Configure> script
+on platforms supported by it (which is most UNIX platforms).  Some
+platforms have custom-made C<Config> variables, and may thus not have
+some of the variables described below, or may have extraneous variables
+specific to that particular port.  See the port specific documentation
+in such cases.
+
+=over 4
+
+ENDOFTAIL
+
+open(GLOS, "<$glossary") or die "Can't open $glossary: $!";
+
+my ($var,$unit,$indentpara);
+my $text = "";
+while (<GLOS>) {
+    if (/^\s*(.*)\s*\(\s*(.+\.U)\s*\):\s*$/) {
+	print CONFIG "\n=item $var\n\n$text\n" if $var and $text;
+        ($var,$unit,$text) = ($1,$2,"");
+    }
+    else {
+        # bite off exactly one tab-width
+        s/^([ ]{8}|[ ]{0,7}\t)//;
+
+	# indented stuff starts a separate paragraph
+	if (/^\s/) {
+	    $text .= "\n" unless $indentpara;
+	    $indentpara = 1;
+	}
+	else {
+	    $text .= "\n" if $indentpara;
+	    $indentpara = 0;
+	}
+	$text .= $_;
+    }
+}
+
+print CONFIG "\n=item $var\n\n$text\n" if $var and $text;
+
+print CONFIG <<'ENDOFTAIL';
+
+=back
+
 =head1 NOTE
 
 This module contains a good example of how to use tie to implement a
@@ -289,6 +335,7 @@ outside of it.
 ENDOFTAIL
 
 close(CONFIG);
+close(GLOS);
 
 # Now do some simple tests on the Config.pm file we have created
 unshift(@INC,'lib');
