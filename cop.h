@@ -46,6 +46,8 @@ struct block_sub {
 	cx->blk_sub.dfoutgv = defoutgv;					\
 	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
 
+/* We muck with cxstack_ix since _dec may call a DESTROY, overwriting cx. */
+
 #define POPSUB(cx)							\
 	if (cx->blk_sub.hasargs) {   /* put back old @_ */		\
 	    GvAV(defgv) = cx->blk_sub.savearray;			\
@@ -55,7 +57,9 @@ struct block_sub {
 	        if (cx->blk_sub.hasargs) {				\
 	    	    SvREFCNT_inc((SV*)cx->blk_sub.argarray);		\
 		}							\
+		cxstack_ix++;						\
 		SvREFCNT_dec((SV*)cx->blk_sub.cv);			\
+		cxstack_ix--;						\
 	    }								\
 	}
 
