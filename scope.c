@@ -501,6 +501,7 @@ Perl_save_threadsv(pTHX_ PADOFFSET i)
     return svp;
 #else
     Perl_croak(aTHX_ "panic: save_threadsv called in non-threaded perl");
+    (void)i;
     return 0;
 #endif /* USE_5005THREADS */
 }

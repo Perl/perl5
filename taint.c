@@ -91,7 +91,7 @@ Perl_taint_env(pTHX)
     if (!GvHV(PL_envgv) || !(SvRMAGICAL(GvHV(PL_envgv))
 	    && mg_find((SV*)GvHV(PL_envgv), PERL_MAGIC_env))) {
 	const bool was_tainted = PL_tainted;
-	char *name = GvENAME(PL_envgv);
+        const char *name = GvENAME(PL_envgv);
 	PL_tainted = TRUE;
 	if (strEQ(name,"ENV"))
 	    /* hash alias */
@@ -144,7 +144,7 @@ Perl_taint_env(pTHX)
     svp = hv_fetch(GvHVn(PL_envgv),"TERM",4,FALSE);
     if (svp && *svp && SvTAINTED(*svp)) {
 	STRLEN n_a;
-	bool was_tainted = PL_tainted;
+	const bool was_tainted = PL_tainted;
 	char *t = SvPV(*svp, n_a);
 	char *e = t + n_a;
 	PL_tainted = was_tainted;

@@ -414,7 +414,7 @@ p	|int	|magic_mutexfree|SV* sv|MAGIC* mg
 p	|int	|magic_nextpack	|SV* sv|MAGIC* mg|SV* key
 p	|U32	|magic_regdata_cnt|SV* sv|MAGIC* mg
 p	|int	|magic_regdatum_get|SV* sv|MAGIC* mg
-p	|int	|magic_regdatum_set|SV* sv|MAGIC* mg
+pr	|int	|magic_regdatum_set|SV* sv|MAGIC* mg
 p	|int	|magic_set	|SV* sv|MAGIC* mg
 p	|int	|magic_setamagic|SV* sv|MAGIC* mg
 p	|int	|magic_setarylen|SV* sv|MAGIC* mg
@@ -556,7 +556,7 @@ Ap	|char*	|scan_vstring	|char *vstr|SV *sv
 p	|PerlIO*|nextargv	|GV* gv
 Ap	|char*	|ninstr		|const char* big|const char* bigend \
 				|const char* little|const char* lend
-p	|OP*	|oopsCV		|OP* o
+pr	|OP*	|oopsCV		|OP* o
 Ap	|void	|op_free	|OP* arg
 p	|void	|package	|OP* o
 pd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
@@ -666,7 +666,7 @@ Ap	|void	|save_shared_pvref|char** str
 Ap	|void	|save_gp	|GV* gv|I32 empty
 Ap	|HV*	|save_hash	|GV* gv
 Ap	|void	|save_helem	|HV* hv|SV *key|SV **sptr
-Ap	|void	|save_hints
+Apr	|void	|save_hints
 Ap	|void	|save_hptr	|HV** hptr
 Ap	|void	|save_I16	|I16* intp
 Ap	|void	|save_I32	|I32* intp
@@ -686,7 +686,7 @@ Ap	|void	|save_re_context
 Ap	|void	|save_padsv	|PADOFFSET off
 Ap	|void	|save_sptr	|SV** sptr
 Ap	|SV*	|save_svref	|SV** sptr
-Ap	|SV**	|save_threadsv	|PADOFFSET i
+Apr	|SV**	|save_threadsv	|PADOFFSET i
 p	|OP*	|sawparens	|OP* o
 p	|OP*	|scalar		|OP* o
 p	|OP*	|scalarkids	|OP* o
@@ -945,7 +945,7 @@ Apd	|SV*	|sv_rvweaken	|SV *sv
 p	|int	|magic_killbackrefs|SV *sv|MAGIC *mg
 Ap	|OP*	|newANONATTRSUB	|I32 floor|OP *proto|OP *attrs|OP *block
 Ap	|CV*	|newATTRSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
-Ap	|void	|newMYSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
+Apr	|void	|newMYSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
 p	|OP *	|my_attrs	|OP *o|OP *attrs
 p	|void	|boot_core_xsutils
 #if defined(USE_ITHREADS)
@@ -1015,7 +1015,7 @@ s	|HEK*	|save_hek_flags	|const char *str|I32 len|U32 hash|int flags
 s	|void	|hv_magic_check	|HV *hv|bool *needs_copy|bool *needs_store
 s	|void	|unshare_hek_or_pvn|HEK* hek|const char* sv|I32 len|U32 hash
 s	|HEK*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
-s	|void	|hv_notallowed	|int flags|const char *key|I32 klen|const char *msg
+rs	|void	|hv_notallowed	|int flags|const char *key|I32 klen|const char *msg
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -1171,7 +1171,7 @@ Es	|I32	|study_chunk	|struct RExC_state_t*|regnode **scanp|I32 *deltap \
 				|regnode *last|struct scan_data_t *data \
 				|U32 flags
 Es	|I32	|add_data	|struct RExC_state_t*|I32 n|const char *s
-rs	|void|re_croak2	|const char* pat1|const char* pat2|...
+rs	|void	|re_croak2	|const char* pat1|const char* pat2|...
 Es	|I32	|regpposixcc	|struct RExC_state_t*|I32 value
 Es	|void	|checkposixcc	|struct RExC_state_t*
 #endif
@@ -1292,7 +1292,7 @@ s	|void	|incline	|char *s
 s	|int	|intuit_method	|char *s|GV *gv
 s	|int	|intuit_more	|char *s
 s	|I32	|lop		|I32 f|int x|char *s
-s	|void	|missingterm	|char *s
+rs	|void	|missingterm	|char *s
 s	|void	|no_op		|const char *what|char *s
 s	|void	|set_csh
 s	|I32	|sublex_done
