@@ -15,7 +15,7 @@ $VERSION = 0.02;
              make make_run make_macro calibrate_mtime
             );
 
-my $Is_VMS = $^O eq 'VMS';
+my $Is_VMS   = $^O eq 'VMS';
 my $Is_MacOS = $^O eq 'MacOS';
 
 
