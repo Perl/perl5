@@ -13,6 +13,8 @@ BEGIN {
 	exit 0;
     }
 
+    require Socket;
+
     # This code inspired by Sys::Syslog::connect():
     require Sys::Hostname;
     my ($host_uniq) = Sys::Hostname::hostname();
