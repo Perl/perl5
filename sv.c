@@ -1320,7 +1320,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    (void)SvNOK_on(sv);
 	    (void)SvIOK_on(sv);
 #if defined(USE_LONG_DOUBLE)
-	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIg64 ")\n",
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIgldbl ")\n",
 				  (unsigned long)sv, SvNVX(sv)));
 #else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%g)\n",
@@ -1438,7 +1438,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 #if defined(USE_LONG_DOUBLE)
 	DEBUG_c({
 	    RESTORE_NUMERIC_STANDARD();
-	    PerlIO_printf(Perl_debug_log, "0x%lx num(%" PERL_PRIg64 ")\n",
+	    PerlIO_printf(Perl_debug_log, "0x%lx num(%" PERL_PRIgldbl ")\n",
 			  (unsigned long)sv, SvNVX(sv));
 	    RESTORE_NUMERIC_LOCAL();
 	});
@@ -1477,7 +1477,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 #if defined(USE_LONG_DOUBLE)
     DEBUG_c({
 	RESTORE_NUMERIC_STANDARD();
-	PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIg64 ")\n",
+	PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIgldbl ")\n",
 		      (unsigned long)sv, SvNVX(sv));
 	RESTORE_NUMERIC_LOCAL();
     });
@@ -5129,8 +5129,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    *--eptr = c;
 #ifdef USE_LONG_DOUBLE
 	    {
-		char* p = PRIfldbl + sizeof(PRIfldbl) - 3;
-		while (p >= PRIfldbl) { *--eptr = *p-- }
+		char* p = PERL_PRIfldbl + sizeof(PERL_PRIfldbl) - 3;
+		while (p >= PERL_PRIfldbl) { *--eptr = *p-- }
 	    }
 #endif
 	    if (has_precis) {
