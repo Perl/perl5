@@ -976,7 +976,7 @@ HV *hv;
     }
     xhv->xhv_riter = -1;
     xhv->xhv_eiter = Null(HE*);
-    return xhv->xhv_fill;	/* should be xhv->xhv_keys? May change later */
+    return xhv->xhv_keys;	/* used to be xhv->xhv_fill before 5.004_65 */
 }
 
 HE *
