@@ -645,6 +645,10 @@ sub qquote {
   return qq("$_");
 }
 
+# helper sub to sort hash keys in Perl < 5.8.0 where we don't have
+# access to sortsv() from XS
+sub _sortkeys { [ sort keys %{$_[0]} ] }
+
 1;
 __END__
 
@@ -1193,6 +1197,9 @@ XSUB implementation does not support them.
 
 SCALAR objects have the weirdest looking C<bless> workaround.
 
+Pure Perl version of C<Data::Dumper> escapes UTF-8 strings correctly
+only in Perl 5.8.0 and later.
+
 =head2 NOTE
 
 Starting from Perl 5.8.1 different runs of Perl will have different
@@ -1215,7 +1222,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.12   (unreleased)
+Version 2.121  (Aug 24 2003)
 
 =head1 SEE ALSO
 

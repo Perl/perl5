@@ -4,12 +4,14 @@
 #
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
-      print "1..0 # Skip: Data::Dumper was not built\n";
-      exit 0;
+    if ($ENV{PERL_CORE}){
+        chdir 't' if -d 't';
+        @INC = '../lib';
+        require Config; import Config;
+        if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
+            print "1..0 # Skip: Data::Dumper was not built\n";
+            exit 0;
+        }
     }
 }
 
@@ -62,6 +64,13 @@ sub TEST {
   }
   print( ($t eq $WANT and not $@) ? "ok $TNUM\n"
 	: "not ok $TNUM\n--Expected--\n$WANT\n--Got--\n$@$t\n");
+}
+
+sub SKIP_TEST {
+  my $reason = shift;
+  ++$TNUM; print "ok $TNUM # skip $reason\n";
+  ++$TNUM; print "ok $TNUM # skip $reason\n";
+  ++$TNUM; print "ok $TNUM # skip $reason\n";
 }
 
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
@@ -827,10 +836,13 @@ TEST q(Data::Dumper->new([$b],['b'])->Purity(1)->Dumpxs;)
 #$a = "\x{9c10}";
 EOT
 
-  TEST q(Data::Dumper->Dump([$a], ['a'])), "\\x{9c10}";
+  if($] >= 5.007) {
+    TEST q(Data::Dumper->Dump([$a], ['a'])), "\\x{9c10}";
+  } else {
+    SKIP_TEST "Incomplete support for UTF-8 in old perls";
+  }
   TEST q(Data::Dumper->Dumpxs([$a], ['a'])), "XS \\x{9c10}"
 	if $XS;
-
 }
 
 {
@@ -1332,8 +1344,13 @@ EOT
   $ping = 5;
   %ping = (chr (0xDECAF) x 4  =>\$ping);
   for $Data::Dumper::Sortkeys (0, 1) {
-    TEST q(Data::Dumper->Dump([\\*ping, \\%ping], ['*ping', '*pong']));
-    TEST q(Data::Dumper->Dumpxs([\\*ping, \\%ping], ['*ping', '*pong'])) if $XS;
+    if($] >= 5.007) {
+      TEST q(Data::Dumper->Dump([\\*ping, \\%ping], ['*ping', '*pong']));
+      TEST q(Data::Dumper->Dumpxs([\\*ping, \\%ping], ['*ping', '*pong'])) if $XS;
+    } else {
+      SKIP_TEST "Incomplete support for UTF-8 in old perls";
+      SKIP_TEST "Incomplete support for UTF-8 in old perls";
+    }
   }
 }
 
