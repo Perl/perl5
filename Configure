@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Oct 27 14:23:10 EET 1998 [metaconfig 3.0 PL70]
+# Generated on Wed Oct 28 11:58:44 EET 1998 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -11161,12 +11161,14 @@ $eunicefix signal_cmd
 
 : generate list of signal names
 echo " "
-case "$sig_num" in
-*,*)	sig_num="" # Ignore old-style sig_num with commas from config.sh.
-	;;
-esac
 case "$sig_name_init" in
-'')
+'') doinit=yes ;;
+*)  case "$sig_num_init" in
+    ''|*,*) doinit=yes ;;
+    esac ;;
+esac
+case "$doinit" in
+yes)
 	echo "Generating a list of signal names and numbers..." >&4
 	. ./signal_cmd
 	sig_name=`$awk '{printf "%s ", $1}' signal.lst`
