@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 22 15:19:20 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Feb 23 03:39:53 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1803,6 +1803,9 @@ $define|true|[yY]*) ;;
 
     It is most seriously suggested that you do not continue any further
     unless you want to help in developing and debugging Perl.
+
+    If you *still* want to build perl, you can answer 'y' now,
+    or pass -Dusedevel to Configure.
 
 EOH
 	rp='Do you really want to continue?'
