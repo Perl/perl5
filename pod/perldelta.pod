@@ -1067,9 +1067,16 @@ AutoLoader can now be disabled with C<no AutoLoader;>.
 
 =item *
 
-B::Deparse has been significantly enhanced.  It now can deparse almost
-all of the standard test suite (so that the tests still succeed).
-There is a make target "test.deparse" for trying this out.
+B::Deparse has been significantly enhanced by Robin Houston.  It now
+can deparse almost all of the standard test suite (so that the tests
+still succeed).  There is a make target "test.deparse" for trying this
+out.
+
+=item *
+
+Carp has now better interface documentation, and the @CARP_NOT
+interface has been added to get optional control over where errors
+are reported independently of @ISA, by Ben Tilly.
 
 =item *
 
@@ -1122,8 +1129,8 @@ leads to better portability.
 
 =item *
 
-Fcntl, Socket, and Sys::Syslog have been rewritten to use the
-new-style constant dispatch section (see L<ExtUtils::Constant>).
+Fcntl, Socket, and Sys::Syslog have been rewritten by Nicholas Clark 
+to use the new-style constant dispatch section (see L<ExtUtils::Constant>).
 This means that they will be more robust and hopefully faster.
 
 =item *
@@ -1184,9 +1191,9 @@ with 'no lib' now works.
 
 =item *
 
-Math::BigFloat and Math::BigInt have undergone a full rewrite.
-They are now magnitudes faster, and they support various
-bignum libraries such as GMP and PARI as their backends.
+Math::BigFloat and Math::BigInt have undergone a full rewrite by Tels.
+They are now magnitudes faster, and they support various bignum
+libraries such as GMP and PARI as their backends.
 
 =item *
 
@@ -1194,12 +1201,13 @@ Math::Complex handles inf, NaN etc., better.
 
 =item *
 
-Net::Ping has been considerably enhanced: multihoming is now supported,
-Win32 functionality is better, there is now time measuring
-functionality (optionally high-resolution using Time::HiRes),
-and there is now "external" protocol which uses Net::Ping::External
-module which runs your external ping utility and parses the output.
-A version of Net::Ping::External is available in CPAN.
+Net::Ping has been considerably enhanced by Rob Brown: multihoming is
+now supported, Win32 functionality is better, there is now time
+measuring functionality (optionally high-resolution using
+Time::HiRes), and there is now "external" protocol which uses
+Net::Ping::External module which runs your external ping utility and
+parses the output.  A version of Net::Ping::External is available in
+CPAN.
 
 Note that some of the Net::Ping tests are disabled when running
 under the Perl distribution since one cannot assume one or more
@@ -2923,7 +2931,7 @@ Please remember to set your environment variable LC_ALL to "C"
 (setenv LC_ALL C) before running "make test" to avoid a lot of
 warnings about the broken locales of Mac OS X.
 
-The following tests are known to fail in Mac OS X 10.1.4 because of
+The following tests are known to fail in Mac OS X 10.1.5 because of
 buggy (old) implementations of Berkeley DB included in Mac OS X:
 
  Failed Test                 Stat Wstat Total Fail  Failed  List of Failed

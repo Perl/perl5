@@ -254,6 +254,10 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		name = type;
 		len = tend-type;
 	    }
+	    else {
+	      if (*type)
+		  goto unknown_desr;
+	    }
 	    if (*name == '\0') {
 		/* command is missing 19990114 */
 		if (ckWARN(WARN_PIPE))

@@ -2359,7 +2359,7 @@ Perl_moreswitches(pTHX_ char *s)
     }	
     case 'h':
 	usage(PL_origargv[0]);
-	PerlProc_exit(0);
+	my_exit(0);
     case 'i':
 	if (PL_inplace)
 	    Safefree(PL_inplace);
@@ -2597,7 +2597,7 @@ GNU General Public License, which may be found in the Perl 5 source kit.\n\n\
 Complete documentation for Perl, including FAQ lists, should be found on\n\
 this system using `man perl' or `perldoc perl'.  If you have access to the\n\
 Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
-	PerlProc_exit(0);
+	my_exit(0);
     case 'w':
 	if (! (PL_dowarn & G_WARN_ALL_MASK))
 	    PL_dowarn |= G_WARN_ON;
