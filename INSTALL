@@ -54,7 +54,22 @@ re-use your old config.sh.  Simply remove it or rename it, e.g.
 
 	mv config.sh config.sh.old
 
-Then run Configure.
+If you wish to use your old config.sh, be especially attentive to the
+version and architecture-specific questions and answers.  For example,
+the default directory for architecture-dependent library modules
+includes the version name.  By default, Configure will reuse your old
+name (e.g. /opt/perl/lib/i86pc-solaris/5.003) even if you're running
+Configure for a different version, e.g. 5.004.  Yes, Configure should
+probably check and correct for this, but it doesn't, presently.
+Similarly, if you used a shared libperl.so (see below) with version
+numbers, you will probably want to adjust them as well.
+
+Also, be careful to check your architecture name.  Some Linux systems
+call themselves i486, while others use i586.  If you pick up a
+precompiled binary, it might not use the same name.
+
+In short, if you wish to use your old config.sh, I recommend running
+Configure interactively rather than blindly accepting the defaults.
 
 =head1 Run Configure.
 
@@ -672,6 +687,13 @@ during the building of extensions, you should run
 
 to test your version of miniperl.
 
+=item locale
+
+If you have any locale-related environment variables set, try
+unsetting them.  I have some reports that some versions of IRIX hang
+while running B<./miniperl configpm> with locales other than the C
+locale.  See the discussion under L<make test> below about locales.
+
 =item *
 
 If you get duplicates upon linking for malloc et al, say -DHIDEMYMALLOC.
@@ -864,15 +886,17 @@ may be broken due to the combination of your environment and the way
 C<make test> exercises them.  For example, this may happen if you have
 one or more of these environment variables set: C<LC_ALL LC_CTYPE
 LC_COLLATE LANG>.  In some versions of UNIX, the non-English locales
-are known to cause programs to exhibit mysterious errors.  If you have
-any of the above environment variables set, please try
-C<setenv LC_ALL C> (for C shell) or <LC_ALL=C;export LC_ALL>
-(for Bourne or Korn shell) from the command line and then retry C<make test>.
-If the tests then succeed, you may have a broken program that is confusing the
-testing. Please run the troublesome test by hand as shown above and
-see whether you can locate the program.  Look for things like: C<exec,
-`backquoted command`, system, open("|...")> or C<open("...|")>.
-All these mean that Perl is trying to run some external program.
+are known to cause programs to exhibit mysterious errors.
+
+If you have any of the above environment variables set, please try
+C<setenv LC_ALL C> (for C shell) or <LC_ALL=C;export LC_ALL> (for
+Bourne or Korn shell) from the command line and then retry C<make
+test>.  If the tests then succeed, you may have a broken program that
+is confusing the testing. Please run the troublesome test by hand as
+shown above and see whether you can locate the program.  Look for
+things like: C<exec, `backquoted command`, system, open("|...")> or
+C<open("...|")>.  All these mean that Perl is trying to run some
+external program.
 
 =head1 INSTALLING PERL5
 
@@ -1045,4 +1069,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-8 October 1996
+9 October 1996
