@@ -31,6 +31,262 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14750] By: ams                                   on 2002/02/18  17:36:05
+        Log: Subject: Re: IO::Poll: Removing Handles
+             From: Matthew Sachs <matthewg@zevils.com>
+             Date: Mon, 18 Feb 2002 13:19:01 -0500
+             Message-Id: <20020218181901.GA19377@allevil.dhcp.zevils.com>
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_poll.t
+____________________________________________________________________________
+[ 14749] By: jhi                                   on 2002/02/18  16:49:51
+        Log: Subject: VMS test fix-ups (alarm.t and glob.t)
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 18 Feb 2002 11:52:21 -0600
+             Message-Id: <5.1.0.14.2.20020218114540.01b2b458@exchi01>
+     Branch: perl
+	   ! t/op/alarm.t t/op/glob.t
+____________________________________________________________________________
+[ 14748] By: ams                                   on 2002/02/18  15:53:36
+        Log: s/load_module/Perl_load_module/
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[ 14747] By: jhi                                   on 2002/02/18  15:43:06
+        Log: Unused in ASCII, used in EBCDIC.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14746] By: jhi                                   on 2002/02/18  15:26:32
+        Log: Upgrade to Locale::Codes 2.00.
+     Branch: perl
+	   + lib/Locale/Codes/ChangeLog lib/Locale/Codes/README
+	   + lib/Locale/Codes/t/script.t lib/Locale/Script.pm
+	   ! MANIFEST lib/Locale/Codes/t/all.t lib/Locale/Codes/t/country.t
+	   ! lib/Locale/Constants.pm lib/Locale/Country.pm
+	   ! lib/Locale/Currency.pm lib/Locale/Language.pm
+____________________________________________________________________________
+[ 14745] By: ams                                   on 2002/02/18  15:20:44
+        Log: Subject: Re: [ID 20020213.001] "Unknown error" as a message from compilation
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sat, 16 Feb 2002 00:06:01 +0100
+             Message-Id: <20020216000601.A17249@rafael>
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[ 14744] By: jhi                                   on 2002/02/18  14:54:47
+        Log: More Unicode casing checks.
+     Branch: perl
+	   + t/uni/case.pl t/uni/lower.t t/uni/title.t t/uni/upper.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14743] By: ams                                   on 2002/02/18  14:35:38
+        Log: Subject: IO::Poll: Removing Handles
+             From: Matthew Sachs <matthewg@zevils.com>
+             Date: Sun, 17 Feb 2002 04:49:46 -0500
+             Message-Id: <20020217094946.GA13130@allevil.dhcp.zevils.com>
+     Branch: perl
+	   ! ext/IO/lib/IO/Poll.pm
+____________________________________________________________________________
+[ 14741] By: ams                                   on 2002/02/18  13:59:48
+        Log: Subject: [PATCH pp_ctl.c] bug on "do NUMBER"
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 18 Feb 2002 15:41:26 +0100
+             Message-Id: <20020218154126.A692@rafael>
+     Branch: perl
+	   ! pp_ctl.c t/op/do.t
+____________________________________________________________________________
+[ 14739] By: jhi                                   on 2002/02/18  05:02:47
+        Log: EBCDIC: now the worst seems to be over for
+             the "Malformed" warnings.  Still a few of them,
+             and plenty of test failures, but getting better.
+     Branch: perl
+	   ! regcomp.c utf8.c
+____________________________________________________________________________
+[ 14738] By: jhi                                   on 2002/02/18  02:31:05
+        Log: Upgrade to Net::Ping 2.12.
+     Branch: perl
+	   ! lib/Net/Ping.pm lib/Net/Ping/CHANGES lib/Net/Ping/README
+	   ! lib/Net/Ping/t/110_icmp_inst.t
+____________________________________________________________________________
+[ 14737] By: jhi                                   on 2002/02/18  02:24:31
+        Log: After much rewriting we are now pretty much
+             back to where we started.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14736] By: ams                                   on 2002/02/18  01:23:00
+        Log: Subject: [PATCH B::Deparse] two fixes
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sun, 17 Feb 2002 23:58:59 +0100
+             Message-Id: <20020217235859.A32513@rafael>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 14735] By: jhi                                   on 2002/02/17  21:24:26
+        Log: Buglet.
+     Branch: perl
+	   ! ext/Encode/lib/Encode/JP/JIS.pm
+____________________________________________________________________________
+[ 14734] By: jhi                                   on 2002/02/17  20:44:59
+        Log: Clearing up to_utf8_case() continues: this time use
+             a single return, and EBCDICification for all paths.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14733] By: jhi                                   on 2002/02/17  19:51:01
+        Log: Small tweaks to get the test running (fix @INC and
+             do not overwrite the table.utf8 and table.rnd).
+     Branch: perl
+	   ! ext/Encode/t/JP.t
+____________________________________________________________________________
+[ 14732] By: jhi                                   on 2002/02/17  18:40:24
+        Log: Tiny tweak.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14731] By: jhi                                   on 2002/02/17  16:56:17
+        Log: Redundant casts.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14730] By: jhi                                   on 2002/02/17  16:50:34
+        Log: More filename portability tips.
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 14729] By: jhi                                   on 2002/02/17  16:25:06
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq3.pod pod/perlfaq5.pod
+____________________________________________________________________________
+[ 14728] By: ams                                   on 2002/02/17  16:15:09
+        Log: Subject: podlators 1.21 released
+             From: Russ Allbery <rra@stanford.edu>
+             Date: Sat, 16 Feb 2002 21:42:56 -0800
+             Message-Id: <yladu8irz3.fsf@windlord.stanford.edu>
+     Branch: perl
+	   ! lib/Pod/Text/Overstrike.pm
+____________________________________________________________________________
+[ 14727] By: sky                                   on 2002/02/17  11:36:52
+        Log: Subject: [PATCH] Tied STDERR should catch messages from warn() and die()
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Sun, 17 Feb 2002 19:46:47 +0800
+             Message-ID: <20020217194647.A1410@not.autrijus.org>
+     Branch: perl
+	   ! pp_ctl.c t/op/tiehandle.t util.c
+____________________________________________________________________________
+[ 14726] By: jhi                                   on 2002/02/17  03:13:30
+        Log: EBCDIC: to_utf8_case() is supposed to get its low 256
+             input in native code points, not Unicode.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14725] By: jhi                                   on 2002/02/17  01:43:42
+        Log: Regen Glossary.
+     Branch: perl
+	   ! Porting/Glossary Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[ 14724] By: jhi                                   on 2002/02/17  01:12:37
+        Log: The #14175 and #14176 were okay: they just revealed
+             a bug in the EXACTF matching.
+     Branch: perl
+	   ! regexec.c utf8.c
+____________________________________________________________________________
+[ 14723] By: jhi                                   on 2002/02/16  16:14:19
+        Log: Retreat, retreat! (retract #14715 and #14716)
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14722] By: jhi                                   on 2002/02/16  16:06:00
+        Log: Encode 0.40, from Dan Kogai.
+     Branch: perl
+	   + ext/Encode/CN/CN.pm ext/Encode/CN/Makefile.PL
+	   + ext/Encode/JP/JP.pm ext/Encode/JP/Makefile.PL
+	   + ext/Encode/KR/KR.pm ext/Encode/KR/Makefile.PL
+	   + ext/Encode/TW/Makefile.PL ext/Encode/TW/TW.pm
+	   + ext/Encode/lib/Encode/JP/Constants.pm
+	   + ext/Encode/lib/Encode/JP/H2Z.pm
+	   + ext/Encode/lib/Encode/JP/ISO_2022_JP.pm
+	   + ext/Encode/lib/Encode/JP/JIS.pm ext/Encode/lib/Encode/JP/Tr.pm
+	   + ext/Encode/t/JP.t ext/Encode/t/japanese.pl
+	   + ext/Encode/t/table.rnd ext/Encode/t/table.utf8
+	   - ext/Encode/EUC_JP/Japanese.pm ext/Encode/EUC_JP/Makefile.PL
+	   - ext/Encode/t/Japanese.t
+	   ! MANIFEST ext/Encode/Encode.pm ext/Encode/MANIFEST
+	   ! ext/Encode/t/Encode.t
+____________________________________________________________________________
+[ 14721] By: jhi                                   on 2002/02/16  15:37:40
+        Log: metaconfig unit change for #14720.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14719] By: ams                                   on 2002/02/16  14:11:01
+        Log: Subject: Re: [proof-of-concept PATCH] d_Gconvert and Configure
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Thu, 14 Feb 2002 22:27:33 -0800
+             Message-Id: <VpKb8gzkgCdK092yn@efn.org>
+             (Applied by hand.)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14718] By: ams                                   on 2002/02/16  13:45:28
+        Log: Subject: [DOC PATCH perlport.pod] Typo fix and three-arg open
+             From: Philip Newton <Philip.Newton@gmx.net>
+             Date: Sat, 16 Feb 2002 10:05:05 +0100
+             Message-Id: <558s6u4djrbk46q44fvqs5mfviq9311lj1@4ax.com>
+             (Applied by hand.)
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 14717] By: ams                                   on 2002/02/16  04:30:23
+        Log: Remove dubious test.
+     Branch: perl
+	   ! t/io/open.t
+____________________________________________________________________________
+[ 14716] By: jhi                                   on 2002/02/16  04:24:45
+        Log: Tiny tweak.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14715] By: jhi                                   on 2002/02/16  03:49:14
+        Log: Restructure to_utf8_case() for simpler execution paths.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14714] By: ams                                   on 2002/02/16  02:43:59
+        Log: Absorb #14701 by Sarathy from maint-5.6.
+     Branch: perl
+	   ! doio.c t/io/open.t
+____________________________________________________________________________
+[ 14713] By: ams                                   on 2002/02/16  01:51:27
+        Log: Subject: [PATCH] VOS patches for perl 5.8
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Fri, 15 Feb 02 17:41 est
+             Message-Id: <200202152243.RAA01195@mailhub1.stratus.com>
+     Branch: perl
+	   ! README.vos vos/Changes vos/build.cm vos/config.alpha.def
+	   ! vos/config.alpha.h vos/config.ga.def vos/config.ga.h
+	   ! vos/install_perl.cm
+____________________________________________________________________________
+[ 14712] By: jhi                                   on 2002/02/15  21:08:13
+        Log: Subject: [PATCH B::Deparse] Fix another bug introduced by #14615
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 15 Feb 2002 23:05:44 +0100
+             Message-ID: <20020215230544.A690@rafael>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 14711] By: jhi                                   on 2002/02/15  19:26:07
+        Log: Add $VERSION.
+     Branch: perl
+	   ! lib/Tie/Memoize.pm
+____________________________________________________________________________
+[ 14710] By: jhi                                   on 2002/02/15  15:40:30
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14709] By: jhi                                   on 2002/02/15  15:01:54
         Log: Subject: [PATCH hints/solaris_2.sh]; was Re: [PATCH Configure] Interaction of cc.cbu and checkcc
              From: Robin Barker <rmb1@cise.npl.co.uk>
