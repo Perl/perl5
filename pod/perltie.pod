@@ -736,6 +736,11 @@ Here's how to use our little example:
     print FOO $a, " plus ", $b, " equals ", $a + $b, "\n";
     print <FOO>;
 
+=head2 UNTIE this
+
+You can define for all tie types an UNTIE method that will be called
+at untie().
+
 =head2 The C<untie> Gotcha
 
 If you intend making use of the object returned from either tie() or

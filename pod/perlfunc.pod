@@ -5091,6 +5091,7 @@ A class implementing a hash should have the following methods:
     FIRSTKEY this
     NEXTKEY this, lastkey
     DESTROY this
+    UNTIE this
 
 A class implementing an ordinary array should have the following methods:
 
@@ -5107,6 +5108,7 @@ A class implementing an ordinary array should have the following methods:
     SPLICE this, offset, length, LIST
     EXTEND this, count
     DESTROY this
+    UNTIE this
 
 A class implementing a file handle should have the following methods:
 
@@ -5119,6 +5121,7 @@ A class implementing a file handle should have the following methods:
     PRINTF this, format, LIST
     CLOSE this
     DESTROY this
+    UNTIE this
 
 A class implementing a scalar should have the following methods:
 
@@ -5126,6 +5129,7 @@ A class implementing a scalar should have the following methods:
     FETCH this,
     STORE this, value
     DESTROY this
+    UNTIE this
 
 Not all methods indicated above need be implemented.  See L<perltie>,
 L<Tie::Hash>, L<Tie::Array>, L<Tie::Scalar>, and L<Tie::Handle>.
