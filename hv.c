@@ -126,6 +126,25 @@ Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
 }
 #endif	/* USE_ITHREADS */
 
+static void
+Perl_hv_notallowed(pTHX_ bool is_utf8, const char *key, I32 klen,
+		   const char *keysave)
+{
+    SV *sv = sv_newmortal();
+    if (key == keysave) {
+	sv_setpvn(sv, key, klen);
+    }
+    else {
+	/* Need to free saved eventually assign to mortal SV */
+	SV *sv = sv_newmortal();
+	sv_usepvn(sv, (char *) key, klen);
+    }
+    if (is_utf8) {
+	SvUTF8_on(sv);
+    }
+    Perl_croak(aTHX_ "Attempt to access to key '%_' in fixed hash",sv);
+}
+
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
  * contains an SV* */
 
@@ -237,6 +256,9 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 	}
     }
 #endif
+    if (SvREADONLY(hv)) {
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+    }
     if (lval) {		/* gonna assign to this, so it better be there */
 	sv = NEWSV(61,0);
 	if (key != keysave) { /* must be is_utf8 == 0 */
@@ -365,6 +387,9 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	}
     }
 #endif
+    if (SvREADONLY(hv)) {
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+    }
     if (key != keysave)
 	Safefree(key);
     if (lval) {		/* gonna assign to this, so it better be there */
@@ -482,6 +507,10 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 	return &HeVAL(entry);
     }
 
+    if (SvREADONLY(hv)) {
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+    }
+
     entry = new_HE();
     if (HvSHAREKEYS(hv))
 	HeKEY_hek(entry) = share_hek(key, is_utf8?-klen:klen, hash);
@@ -596,6 +625,10 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 	return entry;
     }
 
+    if (SvREADONLY(hv)) {
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+    }
+
     entry = new_HE();
     if (HvSHAREKEYS(hv))
 	HeKEY_hek(entry) = share_hek(key, is_utf8?-(I32)klen:klen, hash);
@@ -680,6 +713,10 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	/* See the note in hv_fetch(). --jhi */
 	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
 	klen = tmplen;
+    }
+
+    if (SvREADONLY(hv)) {
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
     }
 
     PERL_HASH(hash, key, klen);
@@ -781,6 +818,10 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 
     if (is_utf8)
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
+
+    if (SvREADONLY(hv)) {
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+    }
 
     if (!hash)
 	PERL_HASH(hash, key, klen);
