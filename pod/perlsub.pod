@@ -179,7 +179,7 @@ when just naming the subroutine, such as when it's used as
 an argument to defined() or undef().  Nor is it optional when you
 want to do an indirect subroutine call with a subroutine name or
 reference using the C<&$subref()> or C<&{$subref}()> constructs,
-although the C<$subref-E<gt>()> notation solves that problem.
+although the C<< $subref->() >> notation solves that problem.
 See L<perlref> for more about all that.
 
 Subroutines may be called recursively.  If a subroutine is called
@@ -891,7 +891,7 @@ like a built-in function.  If you call it like an old-fashioned
 subroutine, then it behaves like an old-fashioned subroutine.  It
 naturally falls out from this rule that prototypes have no influence
 on subroutine references like C<\&foo> or on indirect subroutine
-calls like C<&{$subref}> or C<$subref-E<gt>()>.
+calls like C<&{$subref}> or C<< $subref->() >>.
 
 Method calls are not influenced by prototypes either, because the
 function to be called is indeterminate at compile time, since

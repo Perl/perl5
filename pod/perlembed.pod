@@ -280,32 +280,32 @@ the first, a C<float> from the second, and a C<char *> from the third.
 
    #include <EXTERN.h>
    #include <perl.h>
-   
+
    static PerlInterpreter *my_perl;
-   
+
    main (int argc, char **argv, char **env)
    {
        STRLEN n_a;
        char *embedding[] = { "", "-e", "0" };
-   
+
        my_perl = perl_alloc();
        perl_construct( my_perl );
-   
+
        perl_parse(my_perl, NULL, 3, embedding, NULL);
        perl_run(my_perl);
-   
+
        /** Treat $a as an integer **/
        eval_pv("$a = 3; $a **= 2", TRUE);
        printf("a = %d\n", SvIV(get_sv("a", FALSE)));
-   
+
        /** Treat $a as a float **/
        eval_pv("$a = 3.14; $a **= 2", TRUE);
        printf("a = %f\n", SvNV(get_sv("a", FALSE)));
-   
+
        /** Treat $a as a string **/
        eval_pv("$a = 'rekcaH lreP rehtonA tsuJ'; $a = reverse($a);", TRUE);
        printf("a = %s\n", SvPV(get_sv("a", FALSE), n_a));
-   
+
        perl_destruct(my_perl);
        perl_free(my_perl);
    }
@@ -364,7 +364,7 @@ been wrapped here):
 
  #include <EXTERN.h>
  #include <perl.h>
- 
+
  /** my_eval_sv(code, error_check)
  ** kinda like eval_sv(), 
  ** but we pop the return value off the stack 
@@ -374,41 +374,41 @@ been wrapped here):
      dSP;
      SV* retval;
      STRLEN n_a;
- 
+
      PUSHMARK(SP);
      eval_sv(sv, G_SCALAR);
- 
+
      SPAGAIN;
      retval = POPs;
      PUTBACK;
- 
+
      if (croak_on_error && SvTRUE(ERRSV))
  	croak(SvPVx(ERRSV, n_a));
- 
+
      return retval;
  }
- 
+
  /** match(string, pattern)
  **
  ** Used for matches in a scalar context.
  **
  ** Returns 1 if the match was successful; 0 otherwise.
  **/
- 
+
  I32 match(SV *string, char *pattern)
  {
      SV *command = NEWSV(1099, 0), *retval;
      STRLEN n_a;
- 
+
      sv_setpvf(command, "my $string = '%s'; $string =~ %s",
  	      SvPV(string,n_a), pattern);
- 
+
      retval = my_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
- 
+
      return SvIV(retval);
  }
- 
+
  /** substitute(string, pattern)
  **
  ** Used for =~ operations that modify their left-hand side (s/// and tr///)
@@ -416,22 +416,22 @@ been wrapped here):
  ** Returns the number of successful matches, and
  ** modifies the input string if there were any.
  **/
- 
+
  I32 substitute(SV **string, char *pattern)
  {
      SV *command = NEWSV(1099, 0), *retval;
      STRLEN n_a;
- 
+
      sv_setpvf(command, "$string = '%s'; ($string =~ %s)",
  	      SvPV(*string,n_a), pattern);
- 
+
      retval = my_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
- 
+
      *string = get_sv("string", FALSE);
      return SvIV(retval);
  }
- 
+
  /** matches(string, pattern, matches)
  **
  ** Used for matches in an array context.
@@ -439,25 +439,25 @@ been wrapped here):
  ** Returns the number of matches,
  ** and fills in **matches with the matching substrings
  **/
- 
+
  I32 matches(SV *string, char *pattern, AV **match_list)
  {
      SV *command = NEWSV(1099, 0);
      I32 num_matches;
      STRLEN n_a;
- 
+
      sv_setpvf(command, "my $string = '%s'; @array = ($string =~ %s)",
  	      SvPV(string,n_a), pattern);
- 
+
      my_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
- 
+
      *match_list = get_av("array", FALSE);
      num_matches = av_len(*match_list) + 1; /** assume $[ is 0 **/
- 
+
      return num_matches;
  }
- 
+
  main (int argc, char **argv, char **env)
  {
      PerlInterpreter *my_perl = perl_alloc();
@@ -466,30 +466,30 @@ been wrapped here):
      I32 num_matches, i;
      SV *text = NEWSV(1099,0);
      STRLEN n_a;
- 
+
      perl_construct(my_perl);
      perl_parse(my_perl, NULL, 3, embedding, NULL);
- 
+
      sv_setpv(text, "When he is at a convenience store and the bill comes to some amount like 76 cents, Maynard is aware that there is something he *should* do, something that will enable him to get back a quarter, but he has no idea *what*.  He fumbles through his red squeezey changepurse and gives the boy three extra pennies with his dollar, hoping that he might luck into the correct amount.  The boy gives him back two of his own pennies and then the big shiny quarter that is his prize. -RICHH");
- 
+
      if (match(text, "m/quarter/")) /** Does text contain 'quarter'? **/
  	printf("match: Text contains the word 'quarter'.\n\n");
      else
  	printf("match: Text doesn't contain the word 'quarter'.\n\n");
- 
+
      if (match(text, "m/eighth/")) /** Does text contain 'eighth'? **/
  	printf("match: Text contains the word 'eighth'.\n\n");
      else
  	printf("match: Text doesn't contain the word 'eighth'.\n\n");
- 
+
      /** Match all occurrences of /wi../ **/
      num_matches = matches(text, "m/(wi..)/g", &match_list);
      printf("matches: m/(wi..)/g found %d matches...\n", num_matches);
- 
+
      for (i = 0; i < num_matches; i++)
  	printf("match: %s\n", SvPV(*av_fetch(match_list, i, FALSE),n_a));
      printf("\n");
- 
+
      /** Remove all vowels from text **/
      num_matches = substitute(&text, "s/[aeiou]//gi");
      if (num_matches) {
@@ -497,12 +497,12 @@ been wrapped here):
  	       num_matches);
  	printf("Now text is: %s\n\n", SvPV(text,n_a));
      }
- 
+
      /** Attempt a substitution **/
      if (!substitute(&text, "s/Perl/C/")) {
  	printf("substitute: s/Perl/C...No substitution made.\n\n");
      }
- 
+
      SvREFCNT_dec(text);
      PL_perl_destruct_level = 1;
      perl_destruct(my_perl);

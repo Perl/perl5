@@ -99,7 +99,7 @@ The implicit iterator variable in the grep() and map() functions.
 
 =item *
 
-The default place to put an input record when a C<E<lt>FHE<gt>>
+The default place to put an input record when a C<< <FH> >>
 operation's result is tested by itself as the sole criterion of a C<while>
 test.  Outside a C<while> test, this will not happen.
 
@@ -111,7 +111,7 @@ test.  Outside a C<while> test, this will not happen.
 
 =over 8
 
-=item $E<lt>I<digits>E<gt>
+=item $<I<digits>>
 
 Contains the subpattern from the corresponding set of capturing
 parentheses from the last pattern match, not counting patterns
@@ -215,7 +215,7 @@ you just read() (or called a C<seek> or C<tell> on).  The value
 may be different from the actual physical line number in the file,
 depending on what notion of "line" is in effect--see C<$/> on how
 to change that.  An explicit close on a filehandle resets the line
-number.  Because C<E<lt>E<gt>> never does an explicit close, line
+number.  Because C<< <> >> never does an explicit close, line
 numbers increase across ARGV files (but see examples in L<perlfunc/eof>).
 Consider this variable read-only: setting it does not reposition
 the seek pointer; you'll have to do that on your own.  Localizing C<$.>
@@ -421,7 +421,7 @@ I<n>-th subpattern, or undef if the subpattern did not match.
 Thus after a match against $_, $& coincides with C<substr $_, $-[0],
 $+[0] - $-[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
 $+[>I<n>C<] - $-[>I<n>C<]> if C<$-[>I<n>C<]> is defined, and $+ coincides with
-C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#E<45>> to find the last
+C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#-> to find the last
 matched subgroup in the last successful match.  Contrast with
 C<$#+>, the number of subgroups in the regular expression.  Compare
 with C<@+>.
@@ -511,7 +511,7 @@ The status returned by the last pipe close, backtick (C<``>) command,
 successful call to wait() or waitpid(), or from the system()
 operator.  This is just the 16-bit status word returned by the
 wait() system call (or else is made up to look like it).  Thus, the
-exit value of the subprocess is really (C<$? E<gt>E<gt> 8>), and
+exit value of the subprocess is really (C<<< $? >> 8 >>>), and
 C<$? & 127> gives which signal, if any, the process died from, and
 C<$? & 128> reports whether there was a core dump.  (Mnemonic:
 similar to B<sh> and B<ksh>.)
@@ -629,7 +629,7 @@ The effective uid of this process.  Example:
     ($<,$>) = ($>,$<);	# swap real and effective uid
 
 (Mnemonic: it's the uid you went I<to>, if you're running setuid.)
-C<$E<lt>> and C<$E<gt>> can be swapped only on machines
+C<< $< >> and C<< $> >> can be swapped only on machines
 supporting setreuid().
 
 =item $REAL_GROUP_ID
@@ -673,7 +673,7 @@ list, say C< $) = "5 5" >.
 (Mnemonic: parentheses are used to I<group> things.  The effective gid
 is the group that's I<right> for you, if you're running setgid.)
 
-C<$E<lt>>, C<$E<gt>>, C<$(> and C<$)> can be set only on
+C<< $< >>, C<< $> >>, C<$(> and C<$)> can be set only on
 machines that support the corresponding I<set[re][ug]id()> routine.  C<$(>
 and C<$)> can be swapped only on machines supporting setregid().
 
@@ -964,7 +964,7 @@ This may not be a full pathname, nor even necessarily in your path.
 
 =item $ARGV
 
-contains the name of the current file when reading from E<lt>E<gt>.
+contains the name of the current file when reading from <>.
 
 =item @ARGV
 
@@ -1134,7 +1134,7 @@ the value of $@ is the compile error, or the argument to C<die>
 (which will interpolate C<$!> and C<$?>!).  (See also L<Fatal>,
 though.)
 
-When the eval() expression above is executed, open(), C<<PIPEE<gt>>,
+When the eval() expression above is executed, open(), C<< <PIPE> >>,
 and C<close> are translated to calls in the C run-time library and
 thence to the operating system kernel.  C<$!> is set to the C library's
 C<errno> if one of these calls fails. 

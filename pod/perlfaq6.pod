@@ -533,8 +533,8 @@ pos() point.  A failed match resets the position of C<\G> unless the
 C</c> modifier is in effect.
 
 For example, suppose you had a line of text quoted in standard mail
-and Usenet notation, (that is, with leading C<E<gt>> characters), and
-you want change each leading C<E<gt>> into a corresponding C<:>.  You
+and Usenet notation, (that is, with leading C<< > >> characters), and
+you want change each leading C<< > >> into a corresponding C<:>.  You
 could do so in this way:
 
      s/^(>+)/':' x length($1)/gem;

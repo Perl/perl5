@@ -465,7 +465,7 @@ really does work:
     # $_ contains the string to parse
     # BEGIN and END are the opening and closing markers for the
     # nested text.
- 
+
     @( = ('(','');
     @) = (')','');
     ($re=$_)=~s/((BEGIN)|(END)|.)/$)[!$3]\Q$1\E$([!$2]/gs;
@@ -821,7 +821,7 @@ Stringification also destroys arrays.
     print "@lines";		# WRONG - extra blanks
     print @lines;		# right
 
-=head2 Why don't my E<lt>E<lt>HERE documents work?
+=head2 Why don't my <<HERE documents work?
 
 Check for these three things:
 
@@ -1282,7 +1282,7 @@ Supply a comparison function to sort() (described in L<perlfunc/sort>):
     @list = sort { $a <=> $b } @list;
 
 The default sort function is cmp, string comparison, which would
-sort C<(1, 2, 10)> into C<(1, 10, 2)>.  C<E<lt>=E<gt>>, used above, is
+sort C<(1, 2, 10)> into C<(1, 10, 2)>.  C<< <=> >>, used above, is
 the numerical comparison operator.
 
 If you have a complicated function needed to pull out the part you

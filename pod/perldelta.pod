@@ -590,10 +590,10 @@ C<oct()>:
 
 Perl now allows the arrow to be omitted in many constructs
 involving subroutine calls through references.  For example,
-C<$foo[10]-E<gt>('foo')> may now be written C<$foo[10]('foo')>.
+C<< $foo[10]->('foo') >> may now be written C<$foo[10]('foo')>.
 This is rather similar to how the arrow may be omitted from
-C<$foo[10]-E<gt>{'foo'}>.  Note however, that the arrow is still
-required for C<foo(10)-E<gt>('bar')>.
+C<< $foo[10]->{'foo'} >>.  Note however, that the arrow is still
+required for C<< foo(10)->('bar') >>.
 
 =head2 exists() is supported on subroutine names
 
@@ -627,7 +627,7 @@ The length argument of C<syswrite()> has become optional.
 
 =head2 File and directory handles can be autovivified
 
-Similar to how constructs such as C<$x-E<gt>[0]> autovivify a reference,
+Similar to how constructs such as C<< $x->[0] >> autovivify a reference,
 handle constructors (open(), opendir(), pipe(), socketpair(), sysopen(),
 socket(), and accept()) now autovivify a file or directory handle
 if the handle passed to them is an uninitialized scalar variable.  This
@@ -943,7 +943,7 @@ See F<INSTALL> and F<README.Y2K>.
 
 =head1 Significant bug fixes
 
-=head2 E<lt>HANDLEE<gt> on empty files
+=head2 <HANDLE> on empty files
 
 With C<$/> set to C<undef>, "slurping" an empty file returns a string of
 zero length (instead of C<undef>, as it used to) the first time the
@@ -1001,14 +1001,14 @@ handles I/O.
 
 =head2 Better diagnostics on meaningless filehandle operations
 
-Constructs such as C<open(E<lt>FHE<gt>)> and C<close(E<lt>FHE<gt>)>
+Constructs such as C<< open(<FH>) >> and C<< close(<FH>) >>
 are compile time errors.  Attempting to read from filehandles that
 were opened only for writing will now produce warnings (just as
 writing to read-only filehandles does).
 
 =head2 Where possible, buffered data discarded from duped input filehandle
 
-C<open(NEW, "E<lt>&OLD")> now attempts to discard any data that
+C<< open(NEW, "<&OLD") >> now attempts to discard any data that
 was previously read and buffered in C<OLD> before duping the handle.
 On platforms where doing this is allowed, the next read operation
 on C<NEW> will return the same data as the corresponding operation
@@ -1017,9 +1017,9 @@ of the following disk block instead.
 
 =head2 eof() has the same old magic as <>
 
-C<eof()> would return true if no attempt to read from C<E<lt>E<gt>> had
+C<eof()> would return true if no attempt to read from C<< <> >> had
 yet been made.  C<eof()> has been changed to have a little magic of its
-own, it now opens the C<E<lt>E<gt>> files.
+own, it now opens the C<< <> >> files.
 
 =head2 system(), backticks and pipe open now reflect exec() failure
 
@@ -1046,7 +1046,7 @@ array element in that slot.
 =head2 Pseudo-hashes work better
 
 Dereferencing some types of reference values in a pseudo-hash,
-such as C<$ph-E<gt>{foo}[1]>, was accidentally disallowed.  This has
+such as C<< $ph->{foo}[1] >>, was accidentally disallowed.  This has
 been corrected.
 
 When applied to a pseudo-hash element, exists() now reports whether
@@ -1645,12 +1645,11 @@ messages. For example:
 
 See L<Pod::Usage> for details.
 
-A bug that prevented the non-option call-back E<lt>E<gt> from being
+A bug that prevented the non-option call-back <> from being
 specified as the first argument has been fixed.
 
-To specify the characters E<lt> and E<gt> as option starters, use
-E<gt>E<lt>. Note, however, that changing option starters is strongly
-deprecated. 
+To specify the characters < and > as option starters, use ><. Note,
+however, that changing option starters is strongly deprecated. 
 
 =item IO
 
@@ -1685,7 +1684,7 @@ C<no lib> removes all named entries.
 
 =item Math::BigInt
 
-The bitwise operations C<E<lt>E<lt>>, C<E<gt>E<gt>>, C<&>, C<|>,
+The bitwise operations C<<< << >>>, C<<< >> >>>, C<&>, C<|>,
 and C<~> are now supported on bigints.
 
 =item Math::Complex
@@ -1733,7 +1732,7 @@ translators.  L<Pod::Find|Pod::Find> traverses directory structures and
 returns found pod files, along with their canonical names (like
 C<File::Spec::Unix>).  L<Pod::ParseUtils|Pod::ParseUtils> contains
 B<Pod::List> (useful for storing pod list information), B<Pod::Hyperlink>
-(for parsing the contents of C<LE<gt>E<lt>> sequences) and B<Pod::Cache>
+(for parsing the contents of C<LE<lt>E<gt>> sequences) and B<Pod::Cache>
 (for caching information about pod files, e.g. link nodes).
 
 =item Pod::Select, podselect
@@ -2038,7 +2037,7 @@ could also result in this warning.  See L<perlcall/G_KEEPERR>.
 
 =item <> should be quotes
 
-(F) You wrote C<require E<lt>fileE<gt>> when you should have written
+(F) You wrote C<< require <file> >> when you should have written
 C<require 'file'>.
 
 =item Attempt to join self
@@ -2216,8 +2215,8 @@ See L<perlre>.
 
 (W) You tried to read from a filehandle opened only for writing.  If you
 intended it to be a read/write filehandle, you needed to open it with
-"+E<lt>" or "+E<gt>" or "+E<gt>E<gt>" instead of with "E<lt>" or nothing.  If
-you intended only to read from the file, use "E<lt>".  See
+"+<" or "+>" or "+>>" instead of with "<" or nothing.  If
+you intended only to read from the file, use "<".  See
 L<perlfunc/open>.
 
 =item flock() on closed filehandle %s
@@ -2455,8 +2454,8 @@ L<perlvms>) so that the environ array isn't the target of the change to
 =item Unknown open() mode '%s'
 
 (F) The second argument of 3-argument open() is not among the list
-of valid modes: C<E<lt>>, C<E<gt>>, C<E<gt>E<gt>>, C<+E<lt>>,
-C<+E<gt>>, C<+E<gt>E<gt>>, C<-|>, C<|E<45>>.
+of valid modes: C<< < >>, C<< > >>, C<<< >> >>>, C<< +< >>,
+C<< +> >>, C<<< +>> >>>, C<-|>, C<|->.
 
 =item Unknown process %x sent message to prime_env_iter: %s
 

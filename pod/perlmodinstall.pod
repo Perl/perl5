@@ -285,7 +285,7 @@ in the Perl distribution.
 While still in that directory, type:
 
      make install	
-     
+
 You will need the packages mentioned in F<README.dos> in the Perl distribution.
 
 =item *

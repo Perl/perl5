@@ -201,11 +201,11 @@ example only, we'll create our own test script.  Create a file called hello
 that looks like this:
 
 	#! /opt/perl5/bin/perl
-	
+
 	use ExtUtils::testlib;
-	
+
 	use Mytest;
-	
+
 	Mytest::hello();
 
 Now we make the script executable (C<chmod -x hello>), run the script
@@ -504,7 +504,7 @@ Also create a file mylib.c that looks like this:
 
 	#include <stdlib.h>
 	#include "./mylib.h"
-	
+
 	double
 	foo(int a, long b, const char *c)
 	{
