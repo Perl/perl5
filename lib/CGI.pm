@@ -18,7 +18,7 @@ require 5.004;
 #   http://stein.cshl.org/WWW/software/CGI/
 
 $CGI::revision = '$Id: CGI.pm,v 1.42 2000/08/13 16:04:43 lstein Exp $';
-$CGI::VERSION='2.71';
+$CGI::VERSION='2.72';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -86,6 +86,8 @@ sub initialize_globals {
     $BEEN_THERE = 0;
     undef @QUERY_PARAM;
     undef %EXPORT;
+    undef $QUERY_CHARSET;
+    undef %QUERY_FIELDNAMES;
 
     # prevent complaints by mod_perl
     1;
@@ -350,10 +352,12 @@ sub init {
     # if we get called more than once, we want to initialize
     # ourselves from the original query (which may be gone
     # if it was read from STDIN originally.)
-    if (@QUERY_PARAM && !defined($initializer)) {
+    if (defined(@QUERY_PARAM) && !defined($initializer)) {
 	foreach (@QUERY_PARAM) {
 	    $self->param('-name'=>$_,'-value'=>$QUERY_PARAM{$_});
 	}
+	$self->charset($QUERY_CHARSET);
+	$self->{'.fieldnames'} = {%QUERY_FIELDNAMES};
 	return;
     }
 
@@ -526,6 +530,8 @@ sub save_request {
       next unless defined $_;
       $QUERY_PARAM{$_}=$self->{$_};
     }
+    $QUERY_CHARSET = $self->charset;
+    %QUERY_FIELDNAMES = %{$self->{'.fieldnames'}};
 }
 
 sub parse_params {
@@ -1052,6 +1058,9 @@ sub save {
 	foreach $value ($self->param($param)) {
 	    print $filehandle "$escaped_param=",escape("$value"),"\n";
 	}
+    }
+    foreach (keys %{$self->{'.fieldnames'}}) {
+          print $filehandle ".cgifields=",escape("$_"),"\n";
     }
     print $filehandle "=\n";    # end of record
 }
@@ -1728,7 +1737,7 @@ sub defaults {
     $label = $label || "Defaults";
     my($value) = qq/ value="$label"/;
     my($other) = @other ? " @other" : '';
-    return $XHTML ? qq(<input type="submit" value".defaults"$value$other />)
+    return $XHTML ? qq(<input type="submit" name=".defaults"$value$other />)
                   : qq/<input type="submit" NAME=".defaults"$value$other>/;
 }
 END_OF_FUNC
@@ -2212,20 +2221,22 @@ sub url {
     $full++ if !($relative || $absolute);
 
     my $path = $self->path_info;
-    my $script_name;
-    if (exists($ENV{REQUEST_URI})) {
-        my $index;
-	$script_name = $ENV{REQUEST_URI};
-        # strip query string
-        substr($script_name,$index) = '' if ($index = index($script_name,'?')) >= 0;
-        # and path
-        if (exists($ENV{PATH_INFO})) {
-           my $decoded_path = unescape($ENV{PATH_INFO});
-           substr($script_name,$index) = '' if ($index = rindex($script_name,$decoded_path)) >= 0;
-         }
-    } else {
-	$script_name = $self->script_name;
-    }
+    my $script_name = $self->script_name;
+
+# If anybody knows why I ever wrote this please tell me!
+#    if (exists($ENV{REQUEST_URI})) {
+#        my $index;
+#	$script_name = $ENV{REQUEST_URI};
+#        # strip query string
+#        substr($script_name,$index) = '' if ($index = index($script_name,'?')) >= 0;
+#        # and path
+#        if (exists($ENV{PATH_INFO})) {
+#           (my $encoded_path = $ENV{PATH_INFO}) =~ s!([^a-zA-Z0-9_./-])!uc sprintf("%%%02x",ord($1))!eg;;
+#           substr($script_name,$index) = '' if ($index = rindex($script_name,$encoded_path)) >= 0;
+#         }
+#    } else {
+#	$script_name = $self->script_name;
+#    }
 
     if ($full) {
 	my $protocol = $self->protocol();
@@ -2398,6 +2409,9 @@ sub query_string {
             next unless defined $value;
 	    push(@pairs,"$eparam=$value");
 	}
+    }
+    foreach (keys %{$self->{'.fieldnames'}}) {
+      push(@pairs,".cgifields=".escape("$_"));
     }
     return join($USE_PARAM_SEMICOLONS ? ';' : '&',@pairs);
 }
@@ -2982,7 +2996,6 @@ sub new {
     my($pack,$name,$file,$delete) = @_;
     require Fcntl unless defined &Fcntl::O_RDWR;
     my $fv = ++$FH . quotemeta($name);
-    warn unless *{"Fh::$fv"};
     my $ref = \*{"Fh::$fv"};
     sysopen($ref,$file,Fcntl::O_RDWR()|Fcntl::O_CREAT()|Fcntl::O_EXCL(),0600) || return;
     unlink($file) if $delete;
