@@ -3768,8 +3768,6 @@ Perl_sv_catsv(pTHX_ SV *dsv, register SV *ssv)
 	    bool sutf8 = DO_UTF8(ssv);
 	    
 	    if (dutf8 != sutf8) {
-		char *s = spv;
-		char *send = s + slen;
 		STRLEN dlen;
 		char *dpv;
 		char *d;
@@ -3780,20 +3778,28 @@ Perl_sv_catsv(pTHX_ SV *dsv, register SV *ssv)
 		    sv_utf8_upgrade(dsv);
 		dpv = SvPV(dsv, dlen);
 		/* Overguestimate on the slen. */
-		SvGROW(dsv, dlen + (sutf8 ? 2 * slen : slen) + 1);
+		/* (Why +2 and not +1 is needed?
+		 * (Try PERL_DESTRUCT_LEVEL=2 ./perl t/op/join.t)
+		 * Can't figure out right now. --jhi) */
+		SvGROW(dsv, dlen + (sutf8 ? 2 * slen : slen) + 2);
 		d = dpv + dlen;
 		if (dutf8) /* && !sutf8 */ {
+		    char *s = spv;
+		    char *send = s + slen;
+
 		    while (s < send) {
-			if (UTF8_IS_ASCII(*s))
-			    *d++ = *s++;
+			U8 c = *s++;
+
+			if (UTF8_IS_ASCII(c))
+			    *d++ = c;
 			else {
-			    *d++ = UTF8_EIGHT_BIT_HI(*s);
-			    *d++ = UTF8_EIGHT_BIT_LO(*s);
-			    s += 2;
+			    *d++ = UTF8_EIGHT_BIT_HI(c);
+			    *d++ = UTF8_EIGHT_BIT_LO(c);
+			    s++; /* skip the low byte */
 			}
 		    }
 		    SvCUR(dsv) += s - spv;
-		    *SvEND(dsv) = 0;
+		    *d = 0;
 		}
 		else /* !dutf8 (was) && sutf8 */ {
 		    sv_catpvn(dsv, spv, slen);
