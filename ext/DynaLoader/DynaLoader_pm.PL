@@ -39,7 +39,6 @@ require AutoLoader;
 # We'll let those bugs get found on the development track.
 require Carp if $] < 5.00450; 
 
-
 # enable debug/trace messages from DynaLoader perl code
 $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
 
@@ -97,6 +96,7 @@ if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
         my $dl_library_path = dquoted_comma_list(@dl_library_path);
         print OUT <<EOT;
 # This list has been expanded in Perl build time.
+# (%Config expanded, %ENV not)
 
 \@dl_library_path = ($dl_library_path);
 
@@ -113,18 +113,33 @@ $cfg_dl_library_path
 EOT
 }
 
-my $env_dl_library_path = <<'EOT';
-if (exists  $Config::Config{ldlibpthname}        &&
-	    $Config::Config{ldlibpthname}  ne '' &&
-    exists $ENV{$Config::Config{ldlibpthname}}) {
-    my $ldlibpthname = $Config::Config{ldlibpthname};
-    my $ldlibpth     = $ENV{$ldlibpthname};
-    my $pthsep       = $Config{path_sep};
-    push(@dl_library_path, split(/$pthsep/, $ldlibpth));
+my $ldlibpthname;
+my $pthsep;
+
+if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
+    $ldlibpthname = qq('$Config::Config{ldlibpthname}');
+    $pthsep       = qq('$Config::Config{path_sep}');
+}
+else {
+    $ldlibpthname = q($Config::Config{ldlibpthname});
+    $pthsep       = q($Config::Config{path_sep});
+    print OUT <<EOT;
+my \$ldlibpthname = $ldlibpthname;
+my \$pthsep       = $pthsep;
+
+EOT
+}
+
+
+my $env_dl_library_path = <<EOT;
+if (exists \$ENV{$ldlibpthname}) {
+    push(\@dl_library_path, split(/\$pthsep/, \$ENV{$ldlibpthname}));
+}
+
 # E.g. HP-UX supports both its native SHLIB_PATH *and* LD_LIBRARY_PATH.
-    if ($ldlibpthname ne 'LD_LIBRARY_PATH' && exists $ENV{LD_LIBRARY_PATH}) {
-        push(@dl_library_path, split(/$pthsep/, $ENV{LD_LIBRARY_PATH}))
-    }
+
+if ($ldlibpthname ne 'LD_LIBRARY_PATH' && exists \$ENV{LD_LIBRARY_PATH}) {
+    push(\@dl_library_path, split(/\$pthsep/, \$ENV{LD_LIBRARY_PATH}));
 }
 EOT
 
@@ -145,6 +160,7 @@ if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS} && $ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
     my $dl_library_path = dquoted_comma_list(@dl_library_path);
     print OUT <<EOT;
 # This list has been expanded in Perl build time.
+# (%Config expanded, %ENV expanded)
 
 \@dl_library_path = ($dl_library_path);
 
