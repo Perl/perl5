@@ -38,6 +38,8 @@ sub encode_M
  return &encode_S;
 }
 
+@ARGV = map(glob($_),@ARGV) if $^O eq 'MSWin32';
+
 my $cname = shift(@ARGV);
 chmod(0666,$cname) if -f $cname && !-w $cname;
 open(C,">$cname") || die "Cannot open $cname:$!";
@@ -230,15 +232,14 @@ sub outstring
  return $sym;
 }
 
-
-
 sub output
 {
  my ($fh,$name,$a) = @_;
  $name =~ s/\W+/_/g;
  $a->{Cname} = $name;
  my @keys = grep(ref($a->{$_}),sort keys %$a);
- print $fh "\nstatic encpage_t $name\[\];\n";
+ print $fh "\nextern encpage_t $name\[\];\n";
+ # print $fh "\nstatic encpage_t *$name;\n";
  # Sub-tables
  my %str;
  my $l;
@@ -284,7 +285,7 @@ sub output
   }
 
  print $fh "\n";
- print $fh "static encpage_t $name\[",scalar(@ent),"] = {\n";
+ print $fh "encpage_t $name\[",scalar(@ent),"] = {\n";
  foreach my $b (@ent)
   {
    my ($s,$e,$out,$t,$end,$l) = @{$a->{$b}};
