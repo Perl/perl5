@@ -101,8 +101,8 @@ sub _q {
     my $x = shift;
     return 'undef' unless defined $x;
     my $q = $x;
-    $q =~ s/\\/\\\\/;
-    $q =~ s/'/\\'/;
+    $q =~ s/\\/\\\\/g;
+    $q =~ s/'/\\'/g;
     return "'$q'";
 }
 

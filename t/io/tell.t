@@ -100,7 +100,7 @@ if (tell(ether) == -1)  { print "ok 23\n"; } else { print "not ok 23\n"; }
 
 my $written = "tell_write.txt";
 
-END { unlink($written) }
+END { 1 while unlink($written) }
 
 close($tst);
 open($tst,">$written")  || die "Cannot open $written:$!";
