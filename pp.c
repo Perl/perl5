@@ -3142,9 +3142,10 @@ PP(pp_chr)
 
 PP(pp_crypt)
 {
-    dSP; dTARGET; dPOPTOPssrl;
-    STRLEN n_a;
+    dSP; dTARGET;
 #ifdef HAS_CRYPT
+    dPOPTOPssrl;
+    STRLEN n_a;
     STRLEN len;
     char *tmps = SvPV(left, len);
     char *t    = 0;
@@ -3161,11 +3162,11 @@ PP(pp_crypt)
 	 }
 	 tmps = t;
     }
-#ifdef FCRYPT
+#   ifdef FCRYPT
     sv_setpv(TARG, fcrypt(tmps, SvPV(right, n_a)));
-#else
+#   else
     sv_setpv(TARG, PerlProc_crypt(tmps, SvPV(right, n_a)));
-#endif
+#   endif
     Safefree(t);
 #else
     DIE(aTHX_

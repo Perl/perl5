@@ -869,7 +869,6 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     register char *s;
     char *ptr;
     STRLEN len, klen;
-    I32 i;
 
     s = SvPV(sv,len);
     ptr = MgPV(mg,klen);
@@ -922,6 +921,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 	    while (s < strend) {
 		char tmpbuf[256];
 		struct stat st;
+		I32 i;
 		s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf,
 			     s, strend, ':', &i);
 		s++;
