@@ -9,7 +9,7 @@ my %alias_to = (
     U8 => [qw(char)],
 );
 
-my @optype= qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP GVOP PVOP LOOP COP);
+my @optype= qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP);
 
 # Nullsv *must* come first in the following so that the condition
 # ($$sv == 0) can continue to be used to test (sv == Nullsv).
@@ -393,7 +393,7 @@ pregcomp	PL_op					pvcontents	x
 op_pmflags	cPMOP->op_pmflags			U16
 op_pmpermflags	cPMOP->op_pmpermflags			U16
 op_sv		cSVOP->op_sv				svindex
-op_gv		*(SV**)&cGVOP->op_gv			svindex
+op_padix	cPADOP->op_padix			PADOFFSET
 op_pv		cPVOP->op_pv				pvcontents
 op_pv_tr	cPVOP->op_pv				op_tr_array
 op_redoop	cLOOP->op_redoop			opindex

@@ -1404,7 +1404,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    }
 	    break;
 	default:
-	    croak("panic: unknown regstclass %d", (int)OP(c));
+	    Perl_croak(aTHX_ "panic: unknown regstclass %d", (int)OP(c));
 	    break;
 	}
     }

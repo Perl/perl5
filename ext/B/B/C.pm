@@ -83,7 +83,7 @@ BEGIN {
 
 # Code sections
 my ($init, $decl, $symsect, $binopsect, $condopsect, $copsect, 
-    $gvopsect, $listopsect, $logopsect, $loopsect, $opsect, $pmopsect,
+    $padopsect, $listopsect, $logopsect, $loopsect, $opsect, $pmopsect,
     $pvopsect, $svopsect, $unopsect, $svsect, $xpvsect, $xpvavsect,
     $xpvhvsect, $xpvcvsect, $xpvivsect, $xpvnvsect, $xpvmgsect, $xpvlvsect,
     $xrvsect, $xpvbmsect, $xpviosect );
@@ -276,17 +276,17 @@ sub B::SVOP::save {
     savesym($op, sprintf("(OP*)&svop_list[%d]", $svopsect->index));
 }
 
-sub B::GVOP::save {
+sub B::PADOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    my $gvsym = $op->gv->save;
-    $gvopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, Nullgv",
+    $padopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, Nullgv",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private));
-    $init->add(sprintf("gvop_list[%d].op_gv = %s;", $gvopsect->index, $gvsym));
-    savesym($op, sprintf("(OP*)&gvop_list[%d]", $gvopsect->index));
+    $init->add(sprintf("padop_list[%d].op_padix = %ld;",
+		       $padopsect->index, $op->padix));
+    savesym($op, sprintf("(OP*)&padop_list[%d]", $padopsect->index));
 }
 
 sub B::COP::save {
@@ -951,7 +951,7 @@ sub output_all {
     my $init_name = shift;
     my $section;
     my @sections = ($opsect, $unopsect, $binopsect, $logopsect, $condopsect,
-		    $listopsect, $pmopsect, $svopsect, $gvopsect, $pvopsect,
+		    $listopsect, $pmopsect, $svopsect, $padopsect, $pvopsect,
 		    $loopsect, $copsect, $svsect, $xpvsect,
 		    $xpvavsect, $xpvhvsect, $xpvcvsect, $xpvivsect, $xpvnvsect,
 		    $xpvmgsect, $xpvlvsect, $xrvsect, $xpvbmsect, $xpviosect);
@@ -1399,7 +1399,7 @@ sub save_main {
 sub init_sections {
     my @sections = (init => \$init, decl => \$decl, sym => \$symsect,
 		    binop => \$binopsect, condop => \$condopsect,
-		    cop => \$copsect, gvop => \$gvopsect,
+		    cop => \$copsect, padop => \$padopsect,
 		    listop => \$listopsect, logop => \$logopsect,
 		    loop => \$loopsect, op => \$opsect, pmop => \$pmopsect,
 		    pvop => \$pvopsect, svop => \$svopsect, unop => \$unopsect,

@@ -512,11 +512,11 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     switch (o->op_type) {
     case OP_GVSV:
     case OP_GV:
-	if (cGVOPo->op_gv) {
+	if (cSVOPo->op_sv) {
 	    SV *tmpsv = NEWSV(0,0);
 	    ENTER;
 	    SAVEFREESV(tmpsv);
-	    gv_fullname3(tmpsv, cGVOPo->op_gv, Nullch);
+	    gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
 	    Perl_dump_indent(aTHX_ level, file, "GV = %s\n", SvPV(tmpsv, n_a));
 	    LEAVE;
 	}
@@ -569,6 +569,15 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     case OP_QR:
     case OP_SUBST:
 	do_pmop_dump(level, file, cPMOPo);
+	break;
+    case OP_LEAVE:
+    case OP_LEAVEEVAL:
+    case OP_LEAVESUB:
+    case OP_LEAVESUBLV:
+    case OP_LEAVEWRITE:
+    case OP_SCOPE:
+	if (o->op_private & OPpREFCOUNTED)
+	    Perl_dump_indent(aTHX_ level, file, "REFCNT = %"UVuf"\n", (UV)o->op_targ);
 	break;
     default:
 	break;

@@ -1389,7 +1389,7 @@ typedef struct listop LISTOP;
 typedef struct logop LOGOP;
 typedef struct pmop PMOP;
 typedef struct svop SVOP;
-typedef struct gvop GVOP;
+typedef struct padop PADOP;
 typedef struct pvop PVOP;
 typedef struct loop LOOP;
 

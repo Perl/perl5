@@ -34,7 +34,7 @@ static int optype_size[] = {
     sizeof(LISTOP),
     sizeof(PMOP),
     sizeof(SVOP),
-    sizeof(GVOP),
+    sizeof(PADOP),
     sizeof(PVOP),
     sizeof(LOOP),
     sizeof(COP)
@@ -779,11 +779,11 @@ byterun(pTHXo_ struct bytestream bs)
 		cSVOP->op_sv = arg;
 		break;
 	    }
-	  case INSN_OP_GV:		/* 102 */
+	  case INSN_OP_PADIX:		/* 102 */
 	    {
-		svindex arg;
-		BGET_svindex(arg);
-		*(SV**)&cGVOP->op_gv = arg;
+		PADOFFSET arg;
+		BGET_U32(arg);
+		cPADOP->op_padix = arg;
 		break;
 	    }
 	  case INSN_OP_PV:		/* 103 */

@@ -118,7 +118,7 @@ enum {
     INSN_OP_PMFLAGS,			/* 99 */
     INSN_OP_PMPERMFLAGS,			/* 100 */
     INSN_OP_SV,			/* 101 */
-    INSN_OP_GV,			/* 102 */
+    INSN_OP_PADIX,			/* 102 */
     INSN_OP_PV,			/* 103 */
     INSN_OP_PV_TR,			/* 104 */
     INSN_OP_REDOOP,			/* 105 */
@@ -145,7 +145,7 @@ enum {
     OPt_LISTOP,		/* 4 */
     OPt_PMOP,		/* 5 */
     OPt_SVOP,		/* 6 */
-    OPt_GVOP,		/* 7 */
+    OPt_PADOP,		/* 7 */
     OPt_PVOP,		/* 8 */
     OPt_LOOP,		/* 9 */
     OPt_COP		/* 10 */

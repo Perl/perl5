@@ -226,13 +226,11 @@ sub B::SVOP::bytecode {
     $sv->bytecode;
 }
 
-sub B::GVOP::bytecode {
+sub B::PADOP::bytecode {
     my $op = shift;
-    my $gv = $op->gv;
-    my $gvix = $gv->objix;
+    my $padix = $op->padix;
     $op->B::OP::bytecode;
-    print "op_gv $gvix\n";
-    $gv->bytecode;
+    print "op_padix $padix\n";
 }
 
 sub B::PVOP::bytecode {

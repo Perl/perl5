@@ -232,7 +232,7 @@ sub B::LOOP::lint {
     }
 }
 
-sub B::GVOP::lint {
+sub B::SVOP::lint {
     my $op = shift;
     if ($check{dollar_underscore} && $op->name eq "gvsv"
 	&& $op->gv->NAME eq "_")
@@ -241,11 +241,11 @@ sub B::GVOP::lint {
     }
     if ($check{private_names}) {
 	my $opname = $op->name;
-	my $gv = $op->gv;
-	if (($opname eq "gv" || $opname eq "gvsv")
-	    && $gv->NAME =~ /^_./ && $gv->STASH->NAME ne $curstash)
-	{
-	    warning('Illegal reference to private name %s', $gv->NAME);
+	if (($opname eq "gv" || $opname eq "gvsv") {
+	    my $gv = $op->gv;
+	    if ($gv->NAME =~ /^_./ && $gv->STASH->NAME ne $curstash) {
+		warning('Illegal reference to private name %s', $gv->NAME);
+	    }
 	}
     }
     if ($check{undefined_subs}) {

@@ -14,7 +14,7 @@ use Exporter;
 @EXPORT_OK = qw(%insn_data @insn_name @optype @specialsv_name);
 use vars qw(%insn_data @insn_name @optype @specialsv_name);
 
-@optype = qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP GVOP PVOP LOOP COP);
+@optype = qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP);
 @specialsv_name = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no);
 
 # XXX insn_data is initialised this way because with a large
@@ -122,7 +122,7 @@ $insn_data{pregcomp} = [98, \&PUT_pvcontents, "GET_pvcontents"];
 $insn_data{op_pmflags} = [99, \&PUT_U16, "GET_U16"];
 $insn_data{op_pmpermflags} = [100, \&PUT_U16, "GET_U16"];
 $insn_data{op_sv} = [101, \&PUT_svindex, "GET_svindex"];
-$insn_data{op_gv} = [102, \&PUT_svindex, "GET_svindex"];
+$insn_data{op_padix} = [102, \&PUT_U32, "GET_U32"];
 $insn_data{op_pv} = [103, \&PUT_pvcontents, "GET_pvcontents"];
 $insn_data{op_pv_tr} = [104, \&PUT_op_tr_array, "GET_op_tr_array"];
 $insn_data{op_redoop} = [105, \&PUT_opindex, "GET_opindex"];

@@ -1044,7 +1044,7 @@ Perl_my_stat(pTHX)
 
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	tmpgv = cGVOP->op_gv;
+	tmpgv = (GV*)cSVOP->op_sv;
       do_fstat:
 	io = GvIO(tmpgv);
 	if (io && IoIFP(io)) {
@@ -1097,7 +1097,7 @@ Perl_my_lstat(pTHX)
     STRLEN n_a;
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	if (cGVOP->op_gv == PL_defgv) {
+	if ((GV*)cSVOP->op_sv == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)
 		Perl_croak(aTHX_ "The stat preceding -l _ wasn't an lstat");
 	    return PL_laststatval;

@@ -86,11 +86,10 @@ sub B::PVOP::debug {
     printf "\top_pv\t\t0x%x\n", $op->pv;
 }
 
-sub B::GVOP::debug {
+sub B::PADOP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
-    printf "\top_gv\t\t0x%x\n", ${$op->gv};
-    $op->gv->debug;
+    printf "\top_padix\t\t%ld\n", $op->padix;
 }
 
 sub B::CVOP::debug {
