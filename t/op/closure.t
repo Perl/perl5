@@ -13,7 +13,7 @@ BEGIN {
 
 use Config;
 
-print "1..186\n";
+print "1..187\n";
 
 my $test = 1;
 sub test (&) {
@@ -677,6 +677,23 @@ __EOF__
     );
     test { $got eq 'ok' };
 }
+
+# After newsub is redefined outside the BEGIN, it's CvOUTSIDE should point
+# to main rather than BEGIN, and BEGIN should be freed.
+
+{
+    my $flag = 0;
+    sub  X::DESTROY { $flag = 1 }
+    {
+	my $x;
+	BEGIN {$x = \&newsub }
+	sub newsub {};
+	$x = bless {}, 'X';
+    }
+    test { $flag == 1 };
+}
+
+
 
 
 
