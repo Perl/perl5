@@ -29,17 +29,17 @@ sub BEGIN {
         exit 0;
     }
 
-    use Storable qw(lock_store lock_retrieve);
-
-    unless (&Storable::CAN_FLOCK) {
-	print "1..0 # Skip: fcntl/flock emulation broken on this platform\n";
-	exit 0;
-    }
-
     require 'lib/st-dump.pl';
 }
 
 sub ok;
+
+use Storable qw(lock_store lock_retrieve);
+
+unless (&Storable::CAN_FLOCK) {
+    print "1..0 # Skip: fcntl/flock emulation broken on this platform\n";
+	exit 0;
+}
 
 print "1..5\n";
 
