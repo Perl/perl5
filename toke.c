@@ -1400,6 +1400,12 @@ S_scan_const(pTHX_ char *start)
 		 * There will always enough room in sv since such
 		 * escapes will be longer than any UT-F8 sequence
 		 * they can end up as. */
+
+		/* This spot is wrong for EBCDIC.  Characters like
+		 * the lowercase letters and digits are >127 in EBCDIC,
+		 * so here they would need to be mapped to the Unicode
+		 * repertoire.   --jhi */
+		
 		if (uv > 127) {
 		    if (!has_utf8 && (to_be_utf8 || uv > 255)) {
 		        /* Might need to recode whatever we have
