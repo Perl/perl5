@@ -403,9 +403,7 @@ sub abs2rel {
 
     # Figure out the effective $base and clean it up.
     if ( !defined( $base ) || $base eq '' ) {
-        require Cwd;
-        $base = Cwd::cwd() ;
-        $base = $self->canonpath( $base ) ;
+        $base = $self->canonpath( $self->cwd ) ;
     }
     elsif ( ! $self->file_name_is_absolute( $base ) ) {
         $base = $self->rel2abs( $base ) ;
@@ -464,8 +462,7 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute( $path ) ) {
         # Figure out the effective $base and clean it up.
         if ( !defined( $base ) || $base eq '' ) {
-	    require Cwd;
-            $base = Cwd::cwd() ;
+            $base = $self->cwd;
         }
         elsif ( ! $self->file_name_is_absolute( $base ) ) {
             $base = $self->rel2abs( $base ) ;
