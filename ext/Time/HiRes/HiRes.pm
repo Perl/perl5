@@ -317,6 +317,17 @@ Here is an example of using NVtime from C:
   myNVtime = INT2PTR(double(*)(), SvIV(*svp));
   printf("The current time is: %f\n", (*myNVtime)());
 
+=head1 DIAGNOSTICS
+
+=head2 negative time not invented yet
+
+You tried to use a negative time argument.
+
+=head2 internal error: useconds < 0 (unsigned ... signed ...)
+
+Something went horribly wrong-- the number of microseconds that cannot
+become negative just became negative.  Maybe your compiler is broken?
+
 =head1 CAVEATS
 
 Notice that the core time() maybe rounding rather than truncating.

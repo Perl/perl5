@@ -36,9 +36,11 @@ typedef NVTYPE NV;
 #  ifdef IVSIZE
 #      if IVSIZE == LONGSIZE
 #           define	IVdf		"ld"
+#           define	UVuf		"lu"
 #       else
 #           if IVSIZE == INTSIZE
 #               define	IVdf	"d"
+#               define	UVuf	"u"
 #           endif
 #       endif
 #   else
@@ -683,6 +685,17 @@ sleep(...)
 	         UV useconds = (UV)(1E6 * (seconds - (UV)seconds));
 		 if (seconds >= 1.0)
 		     sleep((U32)seconds);
+		 if ((IV)useconds < 0) {
+#if defined(__sparc64__) && defined(__GNUC__)
+		   /* Sparc64 gcc 2.95.3 (e.g. on NetBSD) has a bug
+		    * where (0.5 - (UV)(0.5)) will under certain
+		    * circumstances (if the double is cast to UV more
+		    * than once?) evaluate to -0.5, instead of 0.5. */
+		   useconds = -(IV)useconds;
+#endif
+		   if ((IV)useconds < 0)
+		     croak("Time::HiRes::sleep(%"NVgf"): internal error: useconds < 0 (unsigned %"UVuf" signed %"IVdf")", seconds, useconds, (IV)useconds);
+		 }
 		 usleep(useconds);
 	    } else
 	        croak("Time::HiRes::sleep(%"NVgf"): negative time not invented yet", seconds);
