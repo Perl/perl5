@@ -356,7 +356,7 @@ if( $server_pid) {
 	last SERVER_LOOP unless $sock = $listen->accept;
 	# Do not print ok/not ok for this binmode() since there's
 	# a race condition with our client, just die if we fail.
-	binmode($sock, ":utf8") or die;
+	if ($has_perlio) { binmode($sock, ":utf8") or die }
 	while (<$sock>) {
 	    last SERVER_LOOP if /^quit/;
 	    last if /^done/;

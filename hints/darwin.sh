@@ -35,6 +35,18 @@ case "$prefix" in
     sitelib="/Library/Perl/${version}"; # FIXME: Want "/Network/Perl/${version}" also
     vendorlib="/System/Library/Perl/${version}"; # Apple-supplied modules
     ;;
+
+  *)
+    # Anything else; use non-system directories
+    # prefix=$prefix; # Built-in perl uses /usr
+    siteprefix=$prefix;
+    vendorprefix='/usr'; usevendorprefix='define';
+
+    # Where to put modules.
+    sitelib=$prefix/lib/perl5/site_perl/${version}
+    vendorlib="/System/Library/Perl/${version}"; # Apple-supplied modules
+    ;;
+
 esac
 
 # 4BSD uses ${prefix}/share/man, not ${prefix}/man.

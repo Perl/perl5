@@ -570,7 +570,7 @@ yelp at foo line 30.
 # toke.c
 my $a = rand + 4 ;
 EXPECT
-Warning: Use of "rand" without parens is ambiguous at - line 2.
+Warning: Use of "rand" without parentheses is ambiguous at - line 2.
 ########
 # toke.c
 $^W = 0 ;
@@ -583,9 +583,9 @@ my $a = rand + 4 ;
 }
 $a = rand + 4 ;
 EXPECT
-Warning: Use of "rand" without parens is ambiguous at - line 3.
-Warning: Use of "rand" without parens is ambiguous at - line 8.
-Warning: Use of "rand" without parens is ambiguous at - line 10.
+Warning: Use of "rand" without parentheses is ambiguous at - line 3.
+Warning: Use of "rand" without parentheses is ambiguous at - line 8.
+Warning: Use of "rand" without parentheses is ambiguous at - line 10.
 ########
 # toke.c
 sub fred {};

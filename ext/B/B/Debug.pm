@@ -73,7 +73,7 @@ sub B::COP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
     my $cop_io = class($op->io) eq 'SPECIAL' ? '' : $op->io->as_string;
-    printf <<'EOT', $op->label, $op->stashpv, $op->file, $op->seq, $op->arybase, $op->line, ${$op->warnings}, cstring($cop_io);
+    printf <<'EOT', $op->label, $op->stashpv, $op->file, $op->cop_seq, $op->arybase, $op->line, ${$op->warnings}, cstring($cop_io);
 	cop_label	%s
 	cop_stashpv	%s
 	cop_file	%s

@@ -858,25 +858,33 @@ and C<$)> can be swapped only on machines supporting setregid().
 
 =item $0
 
-Contains the name of the program being executed.  On some (read: not
-all) operating systems assigning to C<$0> modifies the argument area
-that the C<ps> program sees.  On some platforms you may have to use
-special C<ps> options or a different C<ps> to see the changes.
-Modifying the $0 is more useful as a way of indicating thecurrent
-program state than it is for hiding the program you're running.
-(Mnemonic: same as B<sh> and B<ksh>.)
+Contains the name of the program being executed.
+
+On some (read: not all) operating systems assigning to C<$0> modifies
+the argument area that the C<ps> program sees.  On some platforms you
+may have to use special C<ps> options or a different C<ps> to see the
+changes.  Modifying the $0 is more useful as a way of indicating the
+current program state than it is for hiding the program you're
+running.  (Mnemonic: same as B<sh> and B<ksh>.)
 
 Note that there are platform specific limitations on the the maximum
 length of C<$0>.  In the most extreme case it may be limited to the
 space occupied by the original C<$0>.
 
+In some platforms there may be arbitrary amount of padding, for
+example space characters, after the modified name as shown by C<ps>.
+
 Note for BSD users: setting C<$0> does not completely remove "perl"
-from the ps(1) output.  For example, setting C<$0> to C<"foobar"> will
-result in C<"perl: foobar (perl)">.  This is an operating system feature.
+from the ps(1) output.  For example, setting C<$0> to C<"foobar"> may
+result in C<"perl: foobar (perl)"> (whether both the C<"perl: "> prefix
+and the " (perl)" suffix are shown depends on your exact BSD variant
+and version).  This is an operating system feature, Perl cannot help it.
 
 In multithreaded scripts Perl coordinates the threads so that any
 thread may modify its copy of the C<$0> and the change becomes visible
-to ps(1) (assuming the operating system plays along).
+to ps(1) (assuming the operating system plays along).  Note that the
+the view of C<$0> the other threads have will not change since they
+have their own copies of it.
 
 =item $[
 

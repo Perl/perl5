@@ -156,7 +156,9 @@ This module defines a standard I<simplified> interface to the dynamic
 linking mechanisms available on many platforms.  Its primary purpose is
 to implement cheap automatic dynamic loading of Perl modules.
 
-For more complicated interface see L<DynaLoader>.
+For more complicated interface see L<DynaLoader>.  Many (most)
+features of DynaLoader are not implemented in XSLoader, like for
+example the dl_load_flags is not honored by XSLoader.
 
 =head1 AUTHOR
 

@@ -1,5 +1,9 @@
 #!/usr/bin/perl -w
 
+#
+# Modules - show information about modules and their maintainers
+#
+
 use strict;
 
 use vars qw($Maintainers $Modules);
@@ -26,8 +30,9 @@ $Maintainers =
 	'pmarquess'	=> 'Paul Marquess <Paul.Marquess@btinternet.com>',
 	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
 	'sburke'	=> 'Sean Burke <sburke@cpan.org>',
+	'smcc'		=> 'Stephen McCamant <smcc@CSUA.Berkeley.EDU>',
 	'schwern'	=> 'Michael Schwern <schwern@pobox.com>',
-	'tels'		=> 'Tels a t bloodgate.com',
+	'tels'		=> 'Tels a-t bloodgate.com',
 	'tjenness'	=> 'Tim Jenness <t.jenness@jach.hawaii.edu>'
 	};
 
@@ -38,6 +43,12 @@ $Modules = {
 		'MAINTAINER'	=> 'arthur',
 		'FILES'		=>
 			q[lib/Attribute/Handlers.pm lib/Attribute/Handlers],
+		},
+
+	'B::Concise' =>
+		{
+		'MAINTAINER'	=> 'smcc',
+		'FILES'		=> q[ext/B/B/Concise.pm ext/B/t/concise.t],
 		},
 
 	'bignum' =>
@@ -161,7 +172,7 @@ $Modules = {
 	'Locale::Codes' =>
 		{
 		'MAINTAINER'	=> 'neilb',
-		'FILES'		=> q[lib/Locale/{Country,Currency,Language}],
+		'FILES'		=> q[lib/Locale/{Codes,Constants,Country,Currency,Language,Script}*],
 		},
 
 	'Locale::Maketext' =>
@@ -313,114 +324,192 @@ $Modules = {
 		'FILES'		=> q[ext/Unicode/Normalize],
 		},
 
-	};
+	'warnings' =>
+		{
+		'MAINTAINER'	=> 'pmarquess',
+		'FILES'		=>
+		    q[warnings.pl lib/warnings.{pm,t}
+		      lib/warnings t/lib/warnings],
+		},
 
-# Sanity check.
+	};
 
 use Getopt::Long;
 use File::Find;
 
-my $All;
-my $Maintainer;
-my $Module;
-my %ModuleByFile;
-my %FilesByModule;
-
 sub usage {
     print <<__EOF__;
-$0: Usage: $0 [--all|--maintainer M|--module M|file ...]
-$0 --all		lists all the modules and their files
-$0 --maintainer M	lists all the modules of maintainer
-$0 --module M		lists all the files of the modules
-The matching of maintainer names is done both on the short name
-and the full name.
+$0: Usage: $0 [[--maintainer M --module M --files]|file ...]
+$0 --maintainer M	list all maintainers matching M
+$0 --module M		list all modules matching M
+$0 --files		list all files of the module
+Matching is case-ignoring regexp, author matching is both by
+the short id and by the full name and email.
+$0 file ...		list the module and maintainer
 __EOF__
     exit(0);
 }
 
-usage() unless
+my $Maintainer;
+my $Module;
+my $Files;
+
+usage()
+    unless
     GetOptions(
-	       'all'		=> \$All,
 	       'maintainer=s'	=> \$Maintainer,
 	       'module=s'	=> \$Module,
-	      );
-
-if (defined $Maintainer) {
-    unless (exists $Maintainers->{$Maintainer}) {
-	my @m;
-	for my $m (sort keys %$Maintainers) {
-	    if ($m =~ /$Maintainer/i ||
-		$Maintainers->{$m} =~ /$Maintainer/i) {
-		push @m, $m;
-	    }
-	}
-	if (@m) {
-	    if (@m == 1) {
-		$Maintainer = $m[0];
-	    } else {
-		die "$0: more than one match for '$Maintainer': @m\n";
-	    }
-	} else {
-	    die "$0: no matches for maintainer '$Maintainer'\n";
-	}
-    }
-}
-
-print "$0: maintainer '$Maintainers->{$Maintainer}'\n" if defined $Maintainer;
+	       'files'		=> \$Files,
+	       );
 
 my @Files = @ARGV;
 
-usage() unless @Files || $All || $Maintainer || $Module;
+usage() if @Files && ($Maintainer || $Module || $Files);
 
-for my $module (sort { lc $a cmp lc $b } keys %$Modules) {
-    next if defined $Module && $Module ne $module;
-    warn "$0: Module '$module' missing MAINTAINER\n"
-	unless exists $Modules->{$module}->{MAINTAINER};
-    my $maintainer = $Modules->{$module}->{MAINTAINER};
-    next if defined $Maintainer && $Maintainer ne $maintainer;
-    warn "$0: Module '$module' missing FILES\n"
-	unless exists $Modules->{$module}->{FILES};
-    my $files = $Modules->{$module}->{FILES};
-    warn "$0: Module '$module' maintainer '$maintainer' unknown\n"
-	unless exists $Maintainers->{$maintainer};
-    my @files =
-	sort { lc $a cmp lc $b }
-	    map { -d $_ ?
-		      do { my @files;
-			   find(sub{ push @files, $File::Find::name if -f $_ },
-				$_); @files } :
-		      -f $_ ? $_ : glob($_)
-		  } split(' ', $files);
-    $FilesByModule{$module} = [ @files ];
-    $ModuleByFile{$_} = $module for @files;
-    print "$module\n"		if $Maintainer;
-    print "$module @files\n"	if $All || $Module;
+for my $mean ($Maintainer, $Module) {
+    warn "$0: Did you mean '$0 $mean'?\n"
+	if $mean && -e $mean && $mean ne '.';
 }
 
-if (@Files) {
-    for my $file (@Files) {
-	my $module;
-	if (-f $file) {
-	    $module =
-		[ exists $ModuleByFile{$file} ? $ModuleByFile{$file} : '-' ];
-	} elsif (-d $file) {
-	    # Show the modules that have the most matches.
-	    my %m;
-	    for my $module (keys %$Modules) {
-		my @m = grep { m:^$file/:i } @{$FilesByModule{$module}};
-		$m{$module} = @m;
+warn "$0: Did you mean '$0 -mo $Maintainer'?\n"
+    if defined $Maintainer && exists $Modules->{$Maintainer};
+
+warn "$0: Did you mean '$0 -ma $Module'?\n"
+    if defined $Module     && exists $Maintainers->{$Module};
+
+sub get_module_pat {
+    my $m = shift;
+    split ' ', $Modules->{$m}->{FILES};
+}
+
+sub get_module_files {
+    my $m = shift;
+    sort { lc $a cmp lc $b }
+    map {
+	-f $_ ? # Files as-is.
+	    $_ :
+	    -d _ ? # Recurse into directories.
+	    do {
+		my @files;
+		find(
+		     sub {
+			 push @files, $File::Find::name
+			     if -f $_;
+		     }, $_);
+		@files;
 	    }
-	    my @m = sort { $m{$b} <=> $m{$a} } keys %m;
-	    if ($m{$m[0]}) {
-		$module = [ shift @m ];
-		push @$module, shift @m
-		    while @m && $m{$m[0]} == $m{$module->[0]};
+	: glob($_) # The rest are globbable patterns.
+	} get_module_pat($m);
+}
+
+sub get_maintainer_modules {
+    my $m = shift;
+    sort { lc $a cmp lc $b }
+    grep { $Modules->{$_}->{MAINTAINER} eq $m }
+    keys %$Modules;
+}
+
+if ($Maintainer) {
+    for my $m (sort keys %$Maintainers) {
+	if ($m =~ /$Maintainer/io) {
+	    my @modules = get_maintainer_modules($m);
+	    if ($Module) {
+		@modules = grep { /$Module/io } @modules;
+	    }
+	    if ($Files) {
+		my @files;
+		for my $module (@modules) {
+		    push @files, get_module_files($module);
+		}
+		printf "%-15s @files\n", $m;
+	    } else {
+		if ($Module) {
+		    printf "%-15s @modules\n", $m;
+		} else {
+		    printf "%-15s $Maintainers->{$m}\n", $m;
+		}
 	    }
 	}
-	if (defined $module) {
-	    print "$file @$module\n";
+    }
+} elsif ($Module) {
+    for my $m (sort { lc $a cmp lc $b } keys %$Modules) {
+	if ($m =~ /$Module/io) {
+	    if ($Files) {
+		my @files = get_module_files($m);
+		printf "%-15s @files\n", $m;
+	    } else {
+		printf "%-15s $Modules->{$m}->{MAINTAINER}\n", $m;
+	    }
+	}
+    }
+} elsif (@Files) {
+    my %ModuleByFile;
+
+    @ModuleByFile{@Files} = ();
+
+    # First try fast match.
+
+    my %ModuleByPat;
+    for my $module (keys %$Modules) {
+	for my $pat (get_module_pat($module)) {
+	    $ModuleByPat{$pat} = $module;
+	}
+    }
+    # Expand any globs.
+    my %ExpModuleByPat;
+    for my $pat (keys %ModuleByPat) {
+	if (-e $pat) {
+	    $ExpModuleByPat{$pat} = $ModuleByPat{$pat};
 	} else {
-	    warn "$0: no module matches for file '$file'\n";
+	    for my $exp (glob($pat)) {
+		$ExpModuleByPat{$exp} = $ModuleByPat{$pat};
+	    }
+	}
+    }
+    %ModuleByPat = %ExpModuleByPat;
+    for my $file (@Files) {
+	$ModuleByFile{$file} = $ModuleByPat{$file}
+	    if exists $ModuleByPat{$file};
+    }
+
+    # If still unresolved files..
+    if (my @ToDo = grep { !defined $ModuleByFile{$_} } keys %ModuleByFile) {
+
+	# Cannot match what isn't there.
+	@ToDo = grep { -e $_ } @ToDo;
+
+	if (@ToDo) {
+	    # Try prefix matching.
+
+	    # Remove trailing slashes.
+	    for (@ToDo) { s|/$|| }
+
+	    my %ToDo;
+	    @ToDo{@ToDo} = ();
+
+	    for my $pat (keys %ModuleByPat) {
+		last unless keys %ToDo;
+		if (-d $pat) {
+		    my @Done;
+		    for my $file (keys %ToDo) {
+			if ($file =~ m|^$pat|i) {
+			    $ModuleByFile{$file} = $ModuleByPat{$pat};
+			    push @Done, $file;
+			}
+		    }
+		    delete @ToDo{@Done};
+		}
+	    }
+	}
+    }
+
+    for my $file (@Files) {
+	if (defined $ModuleByFile{$file}) {
+	    my $module     = $ModuleByFile{$file};
+	    my $maintainer = $Modules->{$ModuleByFile{$file}}->{MAINTAINER};
+	    printf "%-15s $module $maintainer $Maintainers->{$maintainer}\n", $file;
+	} else {
+	    printf "%-15s ?\n", $file;
 	}
     }
 }

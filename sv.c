@@ -4852,7 +4852,9 @@ S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
     else {
 	av = newAV();
 	sv_magic(tsv, (SV*)av, PERL_MAGIC_backref, NULL, 0);
-	SvREFCNT_dec(av);           /* for sv_magic */
+	/* av now has a refcnt of 2, which avoids it getting freed
+	 * before us during global cleanup. The extra ref is removed
+	 * by magic_killbackrefs() when tsv is being freed */
     }
     if (AvFILLp(av) >= AvMAX(av)) {
         SV **svp = AvARRAY(av);
@@ -8377,7 +8379,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    vecsv = va_arg(*args, SV*);
 		else
 		    vecsv = (evix ? evix <= svmax : svix < svmax) ?
-			svargs[ewix ? ewix-1 : svix++] : &PL_sv_undef;
+			svargs[evix ? evix-1 : svix++] : &PL_sv_undef;
 		dotstr = SvPVx(vecsv, dotstrlen);
 		if (DO_UTF8(vecsv))
 		    is_utf8 = TRUE;

@@ -18,9 +18,11 @@ foreach my $const (qw(
 		      SVf_READONLY SVTYPEMASK
 		      GVf_IMPORTED_AV GVf_IMPORTED_HV
 		      GVf_IMPORTED_SV GVf_IMPORTED_CV
-		      CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_CONST
+		      CVf_CLONE CVf_CLONED CVf_ANON CVf_OLDSTYLE
+		      CVf_UNIQUE CVf_NODEBUG CVf_METHOD CVf_LOCKED
+		      CVf_LVALUE CVf_CONST CVf_WEAKOUTSIDE
                       SVpad_OUR SVf_FAKE SVf_IOK SVf_IVisUV SVf_NOK SVf_POK 
-		      SVf_ROK SVp_IOK SVp_POK SVp_NOK SVt_PVGV SVt_PVHV
+		      SVf_ROK SVp_IOK SVp_POK SVp_NOK SVt_PVGV SVt_PVHV SVs_RMG
 		      ))
  {
   doconst($const);

@@ -14,7 +14,7 @@ our @EXPORT_OK = qw(set_style set_style_standard add_callback
 		    concise_cv concise_main);
 
 use B qw(class ppname main_start main_root main_cv cstring svref_2object
-	 SVf_IOK SVf_NOK SVf_POK SVf_IVisUV OPf_KIDS);
+	 SVf_IOK SVf_NOK SVf_POK SVf_IVisUV SVf_FAKE OPf_KIDS CVf_ANON);
 
 my %style = 
   ("terse" =>
@@ -437,10 +437,19 @@ sub concise_op {
 	my $padname = (($curcv->PADLIST->ARRAY)[0]->ARRAY)[$h{targ}];
 	if (defined $padname and class($padname) ne "SPECIAL") {
 	    $h{targarg}  = $padname->PVX;
-	    my $intro = $padname->NVX - $cop_seq_base;
-	    my $finish = int($padname->IVX) - $cop_seq_base;
-	    $finish = "end" if $finish == 999999999 - $cop_seq_base;
-	    $h{targarglife} = "$h{targarg}:$intro,$finish";
+	    if ($padname->FLAGS & SVf_FAKE) {
+		my $fake = '';
+		$fake .= 'a' if $padname->IVX & 1; # PAD_FAKELEX_ANON
+		$fake .= 'm' if $padname->IVX & 2; # PAD_FAKELEX_MULTI
+		$fake .= ':' . $padname->NVX if $curcv->CvFLAGS & CVf_ANON;
+		$h{targarglife} = "$h{targarg}:FAKE:$fake";
+	    }
+	    else {
+		my $intro = $padname->NVX - $cop_seq_base;
+		my $finish = int($padname->IVX) - $cop_seq_base;
+		$finish = "end" if $finish == 999999999 - $cop_seq_base;
+		$h{targarglife} = "$h{targarg}:$intro,$finish";
+	    }
 	} else {
 	    $h{targarglife} = $h{targarg} = "t" . $h{targ};
 	}

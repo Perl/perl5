@@ -22,7 +22,7 @@
 #include "perl.h"
 
 #ifndef WORD_ALIGN
-#define WORD_ALIGN sizeof(U16)
+#define WORD_ALIGN sizeof(U32)
 #endif
 
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
@@ -322,7 +322,7 @@ PP(pp_formline)
 {
     dSP; dMARK; dORIGMARK;
     register SV *tmpForm = *++MARK;
-    register U16 *fpc;
+    register U32 *fpc;
     register char *t;
     register char *f;
     register char *s;
@@ -362,7 +362,7 @@ PP(pp_formline)
     /* need to jump to the next word */
     s = f + len + WORD_ALIGN - SvCUR(tmpForm) % WORD_ALIGN;
 
-    fpc = (U16*)s;
+    fpc = (U32*)s;
 
     for (;;) {
 	DEBUG_f( {
@@ -3545,9 +3545,9 @@ S_doparseform(pTHX_ SV *sv)
     bool noblank   = FALSE;
     bool repeat    = FALSE;
     bool postspace = FALSE;
-    U16 *fops;
-    register U16 *fpc;
-    U16 *linepc = 0;
+    U32 *fops;
+    register U32 *fpc;
+    U32 *linepc = 0;
     register I32 arg;
     bool ischop;
     int maxops = 2; /* FF_LINEMARK + FF_END) */
@@ -3563,7 +3563,7 @@ S_doparseform(pTHX_ SV *sv)
     s = base;
     base = Nullch;
 
-    New(804, fops, maxops, U16);
+    New(804, fops, maxops, U32);
     fpc = fops;
 
     if (s < send) {
@@ -3731,10 +3731,10 @@ S_doparseform(pTHX_ SV *sv)
     { /* need to jump to the next word */
         int z;
 	z = WORD_ALIGN - SvCUR(sv) % WORD_ALIGN;
-	SvGROW(sv, SvCUR(sv) + z + arg * sizeof(U16) + 4);
+	SvGROW(sv, SvCUR(sv) + z + arg * sizeof(U32) + 4);
 	s = SvPVX(sv) + SvCUR(sv) + z;
     }
-    Copy(fops, s, arg, U16);
+    Copy(fops, s, arg, U32);
     Safefree(fops);
     sv_magic(sv, Nullsv, PERL_MAGIC_fm, Nullch, 0);
     SvCOMPILED_on(sv);

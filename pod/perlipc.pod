@@ -35,7 +35,7 @@ and then raise an exception.  That's because on most systems,
 libraries are not re-entrant; particularly, memory allocation and I/O
 routines are not.  That meant that doing nearly I<anything> in your
 handler could in theory trigger a memory fault and subsequent core
-dump - see L<Deferred Signals> below.
+dump - see L</Deferred Signals (Safe Signals)> below.
 
 The names of the signals are the ones listed out by C<kill -l> on your
 system, or you can retrieve them from the Config module.  Set up an
