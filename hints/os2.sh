@@ -409,6 +409,22 @@ $define|true|[yY]*)
 esac
 EOCBU
 
+if test -z "$cryptlib"; then
+	cryptlib=`UU/loc crypt$lib_ext "" $libpth`
+	if $test -n "$cryptlib"; then
+		cryptlib=-lcrypt
+	else
+		cryptlib=`UU/loc ufc$lib_ext "" $libpth`
+		if $test -n "$cryptlib"; then
+			cryptlib=-lufc
+		fi
+	fi
+fi
+if test -n "$cryptlib"; then
+	libs="$libs $cryptlib"
+	# d_crypt=define
+fi
+
 # Now install the external modules. We are in the ./hints directory.
 
 cd ./os2/OS2
