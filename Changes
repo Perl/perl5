@@ -31,6 +31,208 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9864] By: jhi                                   on 2001/04/26  19:27:48
+        Log: Dethinko from Robin Houston.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9863] By: jhi                                   on 2001/04/26  19:10:35
+        Log: Subject: [PATCH B::Deparse] C<$x = /(.)/> ne C<($x) = /(.)/>
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 26 Apr 2001 21:08:32 +0100
+             Message-ID: <20010426210832.A28419@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9862] By: jhi                                   on 2001/04/26  19:04:23
+        Log: Subject: Re: [PATCH B::Deparse] fix string uninterpretation
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 26 Apr 2001 20:52:50 +0100
+             Message-ID: <20010426205249.A28328@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9861] By: jhi                                   on 2001/04/26  18:56:14
+        Log: Subject: Re: [PATCH] UNIVERSAL shouldn't require Exporter
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Thu, 26 Apr 2001 14:22:40 +0100
+             Message-Id: <E14sljE-0003X9-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! pod/perlobj.pod
+____________________________________________________________________________
+[  9860] By: jhi                                   on 2001/04/26  18:46:42
+        Log: Subject: Re: [PATCH B::Deparse] fix string uninterpretation
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 26 Apr 2001 20:34:29 +0100
+             Message-ID: <20010426203429.A28261@puffinry.freeserve.co.uk>
+             
+             Hashes do not interpolate.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9859] By: jhi                                   on 2001/04/26  18:43:51
+        Log: Subject: The Time::Piece conspiracy unmasked!!!
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Thu, 26 Apr 2001 19:02:50 +0100
+             Message-Id: <E14sq6M-0002g9-00@libra.cus.cam.ac.uk>
+             
+             Subject: [PATCH] that's enough UNIVERSAL stuff for one day ...
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Thu, 26 Apr 2001 19:08:21 +0100
+             Message-Id: <E14sqBh-0002mI-00@libra.cus.cam.ac.uk>
+             
+             Subject: Re: [PATCH] that's enough UNIVERSAL stuff for one day ...
+             From: Graham Barr <gbarr@pobox.com>
+             Date: Thu, 26 Apr 2001 19:12:03 +0100
+             Message-ID: <20010426191203.A70835@pobox.com>
+             
+             Eradicate UNIVERSAL (Mike) and remove the fallback Perl code (Graham)
+     Branch: perl
+	   ! ext/List/Util/lib/List/Util.pm
+	   ! ext/List/Util/lib/Scalar/Util.pm ext/Time/Piece/Piece.pm gv.c
+____________________________________________________________________________
+[  9858] By: jhi                                   on 2001/04/26  18:17:42
+        Log: Subject: [PATCH t/comp/proto.t] disable correct warning
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 26 Apr 2001 16:09:35 +0100
+             Message-ID: <20010426160934.A27140@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! t/comp/proto.t
+____________________________________________________________________________
+[  9857] By: jhi                                   on 2001/04/26  18:04:59
+        Log: Subject: Re: [PATCH perldiag.pod] Re: [PATCH] Re: Useless use of constants other than 0,1 in void context?
+             From: barries <barries@slaysys.com>
+             Date: Thu, 26 Apr 2001 12:01:10 -0400
+             Message-ID: <20010426120110.E29698@jester.slaysys.com>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  9856] By: jhi                                   on 2001/04/26  18:03:33
+        Log: Subject: [PATCH B::Deparse] fix string uninterpretation
+             Date: Thu, 26 Apr 2001 17:13:41 +0100
+             From: Robin Houston <robin@kitsite.com>
+             Message-ID: <20010426171341.A27299@puffinry.freeserve.co.uk>
+             
+             Subject: Re: [PATCH B::Deparse] fix string uninterpretation
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 26 Apr 2001 18:44:29 +0100
+             Message-ID: <20010426184429.A27734@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9855] By: jhi                                   on 2001/04/26  17:56:04
+        Log: Subject: [PATCH B::Deparse] filetests, open(my $x,...), warnings, formats &c
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 26 Apr 2001 17:04:08 +0100
+             Message-ID: <20010426170408.A27257@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9854] By: jhi                                   on 2001/04/26  17:47:26
+        Log: Subject: Re: Short test case for undef %stash:: crash
+             From: Benjamin Sugars <bsugars@canoe.ca> 
+             Date: Mon, 23 Apr 2001 16:59:33 -0400 (EDT) 
+             Message-ID: <Pine.LNX.4.21.0104231623520.790-100000@marmot.rim.canoe.ca>
+             Changed and moved the perldiag entry.
+     Branch: perl
+	   ! gv.c pod/perldiag.pod
+____________________________________________________________________________
+[  9853] By: jhi                                   on 2001/04/26  14:35:16
+        Log: Beginnings of strptime().  Do not touch the wet paint.
+     Branch: perl
+	   ! ext/Time/Piece/Piece.pm t/lib/time-piece.t
+____________________________________________________________________________
+[  9852] By: jhi                                   on 2001/04/26  13:17:21
+        Log: Retract #9851, core dumps from pod2man.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  9851] By: jhi                                   on 2001/04/26  11:54:41
+        Log: (Retracted by #9852.)
+             
+             Subject: [PATCH @9846] dumping ANYOF
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 26 Apr 2001 05:32:38 +0100
+             Message-Id: <200104260432.FAA12669@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  9850] By: jhi                                   on 2001/04/26  02:34:44
+        Log: If ccflags was empty the _previous_ $* containing all the
+             environment variables and Configure variables was used,
+             which lead, among other bad things, into $ccflags being your
+             uname -a output, which lead into test compile with cc failing,
+             which lead into gcc being selected, which didn't work that well
+             since gcc (ancient 2.8.1 in that particular box) wasn't too happy
+             with large files, et cetera.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9849] By: jhi                                   on 2001/04/26  01:44:57
+        Log: Make selfstubber test more portable.
+     Branch: perl
+	   ! t/lib/selfstubber.t
+____________________________________________________________________________
+[  9848] By: jhi                                   on 2001/04/26  00:50:26
+        Log: Subject: Re: [PATCH: perl@9841] fix a typo for Cwd.xs
+             From: Benjamin Sugars <ben.sugars@home.com>
+             Date: Wed, 25 Apr 2001 21:47:37 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0104252145280.30055-100000@localhost.localdomain>
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs
+____________________________________________________________________________
+[  9847] By: jhi                                   on 2001/04/26  00:46:58
+        Log: Subject: [PATCH: perl@9841] VMS updates
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 25 Apr 2001 18:43:27 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10104251842130.257877-100000@aspara.forte.com>
+     Branch: perl
+	   ! README.vms configure.com vms/descrip_mms.template
+	   ! vms/ext/filespec.t
+____________________________________________________________________________
+[  9846] By: jhi                                   on 2001/04/26  00:11:56
+        Log: re 'debug' was broken by #9084.
+     Branch: perl
+	   ! ext/re/re.xs
+____________________________________________________________________________
+[  9845] By: jhi                                   on 2001/04/25  22:33:17
+        Log: Subject: [PATCH] test for Devel::SelfStubber
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 26 Apr 2001 00:00:54 +0100
+             Message-ID: <20010426000054.D89026@plum.flirble.org>
+     Branch: perl
+	   + t/lib/selfstubber.t
+	   ! MANIFEST lib/Devel/SelfStubber.pm t/lib/1_compile.t
+____________________________________________________________________________
+[  9844] By: jhi                                   on 2001/04/25  22:29:32
+        Log: Subject: Re: [PATCH 5.7.1] B::Concise and extra variables
+             From: Paul Johnson <paul@pjcj.net>
+             Date: Thu, 26 Apr 2001 00:46:08 +0200
+             Message-ID: <20010426004608.H2338@pjcj.net>
+     Branch: perl
+	   ! ext/B/B/Concise.pm
+____________________________________________________________________________
+[  9843] By: jhi                                   on 2001/04/25  22:28:28
+        Log: Subject: [PATCH: perl@9841] fix a typo for Cwd.xs
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 25 Apr 2001 16:18:44 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10104251614200.257877-100000@aspara.forte.com>
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs
+____________________________________________________________________________
+[  9842] By: jhi                                   on 2001/04/25  20:58:12
+        Log: Subject: Re: [ID 20010422.002] 5.7.1 Breaks "use Module(version)"
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Wed, 25 Apr 2001 17:30:26 -0400
+             Message-ID: <3AE741F2.B3217464@rowman.com>
+     Branch: perl
+	   ! lib/Math/BigInt.pm t/lib/bigintpm.t
+____________________________________________________________________________
+[  9841] By: jhi                                   on 2001/04/25  20:07:05
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9840] By: jhi                                   on 2001/04/25  19:56:51
         Log: Yet another HP-UX hints version from Merijn.
      Branch: perl
