@@ -34,7 +34,8 @@ use Storable qw(store retrieve);
 print "1..8\n";
 
 my $test = 1;
-my $bad = ['foo', sub { 1 },  'bar'];
+*GLOB = *GLOB; # peacify -w
+my $bad = ['foo', \*GLOB,  'bar'];
 my $result;
 
 eval {$result = store ($bad , 'store')};
