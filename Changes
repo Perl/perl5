@@ -28,6 +28,114 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20132] By: jhi                                   on 2003/07/10  22:46:30
+        Log: Integrate:
+             [ 20129]
+             Subject: [comment patch]
+             From: Stas Bekman <stas@stason.org>
+             Date: Thu, 10 Jul 2003 14:19:22 -0700
+             Message-ID: <3F0DD85A.1070902@stason.org>
+             
+             [ 20130]
+             Subject: [PATCH} db-recno.t on Mac OS X
+             From: slaven@rezic.de
+             Date: Thu, 10 Jul 2003 12:41:05 +0000
+             Message-Id: <1057840865.9622@devpc01.iconmobile.de>
+             
+             [ 20131]
+             &Time::HiRes::d_nanosleep was broken.
+     Branch: maint-5.8/perl
+	  !> ext/DB_File/t/db-recno.t ext/Time/HiRes/Makefile.PL perl.c
+____________________________________________________________________________
+[ 20128] By: jhi                                   on 2003/07/10  22:23:08
+        Log: Integrate:
+             [ 20124]
+             Time travel noticed by Enache.
+             
+             [ 20127]
+             Be vague enough.
+     Branch: maint-5.8/perl
+	  !> embedvar.h pod/perldata.pod pod/perlhist.pod
+____________________________________________________________________________
+[ 20126] By: jhi                                   on 2003/07/10  22:20:02
+        Log: Add the deprecation warning for v-strings.
+             
+             (A Tale Of Caution: Originally I tried to use
+             "no warnings 'deprecated'; in configpm, but that
+             lead into whole lotta pain.  The warnings pragma
+             pulls in Carp, and then Carp somehow messes up Exporter,
+             and one ends up with several mysterious failures.
+             Just don't go there.)
+     Branch: maint-5.8/perl
+	   ! configpm pod/perldelta.pod pod/perldiag.pod
+	   ! t/lib/warnings/toke t/op/pack.t toke.c
+____________________________________________________________________________
+[ 20123] By: jhi                                   on 2003/07/10  18:07:49
+        Log: regen embed.pl.
+     Branch: maint-5.8/perl
+	   ! embedvar.h
+____________________________________________________________________________
+[ 20122] By: jhi                                   on 2003/07/10  18:06:05
+        Log: Integrate:
+             [ 20116]
+             The *right* way to make the csighandler visible.
+             
+             [ 20117]
+             Subject: [PATCH] Restore SIGFPE on exec()
+             From: Chip Salzenberg <chip@pobox.com>
+             Date: Thu, 10 Jul 2003 13:13:20 -0400
+             Message-ID: <20030710171319.GA21588@perlsupport.com>
+             
+             [ 20118]
+             malloc alignment patch from Spider, needed for Tru64 + longdouble.
+             
+             [ 20119]
+             Subject: [PATCH] configure.gnu --prefix
+             From: slaven@rezic.de
+             Date: Thu, 10 Jul 2003 09:33:27 +0000
+             Message-Id: <1057829607.9622@devpc01.iconmobile.de>
+             
+             [ 20120]
+             I can see the future.  It is cloudy.
+     Branch: maint-5.8/perl
+	  !> configure.gnu doio.c embed.fnc embed.h global.sym malloc.c
+	  !> perl.c perl.h perlapi.h perlvars.h pod/perlhist.pod toke.c
+____________________________________________________________________________
+[ 20121] By: jhi                                   on 2003/07/10  18:01:21
+        Log: perldelta tweaks.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20115] By: jhi                                   on 2003/07/10  15:11:29
+        Log: Retract #20113.
+     Branch: maint-5.8/perl
+	   ! embedvar.h intrpvar.h perlapi.h
+____________________________________________________________________________
+[ 20113] By: jhi                                   on 2003/07/10  14:19:22
+        Log: Missing symbol export.
+     Branch: maint-5.8/perl
+	  !> embed.fnc embedvar.h intrpvar.h perlapi.h
+____________________________________________________________________________
+[ 20111] By: jhi                                   on 2003/07/10  05:31:46
+        Log: Final perldelta (and perlport) sweep.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod pod/perlport.pod
+____________________________________________________________________________
+[ 20110] By: jhi                                   on 2003/07/10  05:06:10
+        Log: Make it the RC1.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 20109] By: jhi                                   on 2003/07/10  05:04:54
+        Log: Remove the maint tag.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 20108] By: jhi                                   on 2003/07/10  05:03:37
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20107] By: jhi                                   on 2003/07/10  04:55:03
         Log: Integrate:
              [ 20103]
