@@ -1552,7 +1552,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     else
 	PL_reg_flags = 0;
 
-    PL_regprecomp = savepvn(exp, xend - exp);
+    PL_regprecomp = exp;
     DEBUG_r(if (!PL_colorset) reginitcolors());
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%sCompiling REx%s `%s%*s%s'\n",
 		      PL_colors[4],PL_colors[5],PL_colors[0],
@@ -1578,7 +1578,6 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     REGC((U8)REG_MAGIC, (char*)PL_regcode);
 #endif
     if (reg(0, &flags) == NULL) {
-	Safefree(PL_regprecomp);
 	PL_regprecomp = Nullch;
 	return(NULL);
     }
@@ -1605,7 +1604,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 #endif
     r->refcnt = 1;
     r->prelen = xend - exp;
-    r->precomp = PL_regprecomp;
+    r->precomp = savepvn(PL_regprecomp, r->prelen);
     r->subbeg = NULL;
     r->reganch = pm->op_pmflags & PMf_COMPILETIME;
     r->nparens = PL_regnpar - 1;	/* set early to validate backrefs */
