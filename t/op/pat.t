@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..847\n";
+print "1..849\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2621,7 +2621,7 @@ print "# some Unicode properties\n";
 }
 
 {
-    print "# . with /s should work on characters, not bytes\n";
+    print "# . with /s should work on characters, as opposed to bytes\n";
 
     my $s = "\x{e4}\x{100}";
 
