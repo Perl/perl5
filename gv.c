@@ -928,7 +928,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '*':
 	if (len == 1 && sv_type == SVt_PV && ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
 	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-		    "The variable \"$*\" is no longer supported");
+		    "$* is no longer supported");
 	break;
     case '#':
 	if (len == 1 && sv_type == SVt_PV && ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
