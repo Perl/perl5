@@ -1,39 +1,29 @@
 package Sys::Hostname;
 
+use strict;
+
 use Carp;
+
 require Exporter;
-@ISA = qw(Exporter);
-@EXPORT = qw(hostname);
+use XSLoader ();
+require AutoLoader;
 
-=head1 NAME
+our @ISA     = qw/ Exporter AutoLoader /;
+our @EXPORT  = qw/ hostname /;
 
-Sys::Hostname - Try every conceivable way to get hostname
+our $VERSION = '1.1';
 
-=head1 SYNOPSIS
+our $host;
 
-    use Sys::Hostname;
-    $host = hostname;
-
-=head1 DESCRIPTION
-
-Attempts several methods of getting the system hostname and
-then caches the result.  It tries C<syscall(SYS_gethostname)>,
-C<`hostname`>, C<`uname -n`>, and the file F</com/host>.
-If all that fails it C<croak>s.
-
-All nulls, returns, and newlines are removed from the result.
-
-=head1 AUTHOR
-
-David Sundstrom E<lt>F<sunds@asictest.sc.ti.com>E<gt>
-
-Texas Instruments
-
-=cut
+XSLoader::load 'Sys::Hostname', $VERSION;
 
 sub hostname {
 
   # method 1 - we already know it
+  return $host if defined $host;
+
+  # method 1' - try to ask the system
+  $host = ghname();
   return $host if defined $host;
 
   if ($^O eq 'VMS') {
@@ -70,8 +60,10 @@ sub hostname {
     return $host;
   }
   else {  # Unix
+    # is anyone going to make it here?
 
     # method 2 - syscall is preferred since it avoids tainting problems
+    # XXX: is it such a good idea to return hostname untainted?
     eval {
 	local $SIG{__DIE__};
 	require "syscall.ph";
@@ -113,6 +105,7 @@ sub hostname {
     # method 6 - Apollo pre-SR10
     || eval {
 	local $SIG{__DIE__};
+        my($a,$b,$c,$d);
 	($host,$a,$b,$c,$d)=split(/[:\. ]/,`/com/host`,6);
     }
 
@@ -126,3 +119,35 @@ sub hostname {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Sys::Hostname - Try every conceivable way to get hostname
+
+=head1 SYNOPSIS
+
+    use Sys::Hostname;
+    $host = hostname;
+
+=head1 DESCRIPTION
+
+Attempts several methods of getting the system hostname and
+then caches the result.  It tries the first available of the C
+library's gethostname(), C<`$Config{aphostname}`>, uname(2),
+C<syscall(SYS_gethostname)>, C<`hostname`>, C<`uname -n`>,
+and the file F</com/host>.  If all that fails it C<croak>s.
+
+All NULs, returns, and newlines are removed from the result.
+
+=head1 AUTHOR
+
+David Sundstrom E<lt>F<sunds@asictest.sc.ti.com>E<gt>
+
+Texas Instruments
+
+XS code added by Greg Bacon E<lt>F<gbacon@cs.uah.edu>E<gt>
+
+=cut
+
