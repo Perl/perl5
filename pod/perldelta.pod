@@ -777,7 +777,16 @@ the IP address 127.0.0.1.
 =head2 EBCDIC Platforms
 
 IBM z/OS and other EBCDIC platforms continue to be problematic
-regarding Unicode support.
+regarding Unicode support.  Many Unicode tests are skipped when
+they really should be fixed.
+
+=head2 Cygwin 1.5
+
+Perl 5.8.1 does not build with Cygwin 1.5.  Perl 5.8.1 does
+build and work well with Cygwin 1.3, though: with (uname -a)
+C<Cygwin_NT-5.0 ... 1.3.22(0.78/3/2) 2003-03-18 09:20 i686 ...>
+a 99.88 "make test" result (only one subtest of ext/POSIX/t/sigaction.t
+failed) was achieved with C<Configure -des -Duseithreads>.
 
 =head2 FreeBSD: malloc dilemma
 
@@ -796,7 +805,8 @@ the Perl malloc.
 
 One could use Perl's malloc (Configure -Dusemymalloc), but that
 was found to cause random core dumps in FreeBSD with multithreaded
-programs.  No such problems were found in other platforms, however.
+programs.  No such problems were found in other multithreaded platforms,
+however.
 
 A decision was made to stick with the system malloc, regardless
 of the performance problems.
@@ -816,6 +826,12 @@ The test t/uni/tr_7jis.t is known to report failure under 'make test'
 or the test harness with certain releases of IRIX (at least IRIX 6.5
 and MIPSpro Compilers Version 7.3.1.1m), but if run manually the test
 fully passes.
+
+=head2 Mac OS X: no usemymalloc
+
+The Perl malloc (C<-Dusemymalloc>) does not work at all in Mac OS X.
+This is not that serious, though, since the native malloc works just
+fine.
 
 =head2 Tru64: No threaded builds with GNU cc (gcc)
 
@@ -893,6 +909,12 @@ of speeding up Perl.
 =item *
 
 CPANPLUS, Inline, and Module::Build will become core modules.
+
+=item *
+
+While the v-strings were deprecated now, we will think about
+new ways of supporting (again) version numbers of the "1.2.3"
+kind (as opposed to the "1.23" kind).
 
 =item *
 
