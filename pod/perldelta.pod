@@ -675,6 +675,12 @@ common Perl platforms (Unix and Unix-like, Microsoft platforms, and
 VMS) have large enough testing and expert population that they are
 doing well.
 
+=head2 lib/Net/Ping/t/510_ping_udp.t subtest 2
+
+The subtest 2 of lib/Net/Ping/t/510_ping_udp.t might fail if you have
+an unusual networking setup.  The test is trying to send a UDP ping to
+the IP address 127.0.0.1.
+
 =head1 Platform Specific Problems
 
 =head2 EBCDIC Platforms
