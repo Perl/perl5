@@ -146,11 +146,11 @@ C<goto>, C<last>, C<next>, C<redo>, C<return>, C<sub>, C<wantarray>
 
 =item Keywords related to scoping
 
-C<caller>, C<import>, C<local>, C<my>, C<package>, C<use>
+C<caller>, C<import>, C<local>, C<my>, C<our>, C<package>, C<use>
 
 =item Miscellaneous functions
 
-C<defined>, C<dump>, C<eval>, C<formline>, C<local>, C<my>, C<reset>,
+C<defined>, C<dump>, C<eval>, C<formline>, C<local>, C<my>, C<our>, C<reset>,
 C<scalar>, C<undef>, C<wantarray>
 
 =item Functions for processes and process groups
@@ -200,8 +200,8 @@ C<gmtime>, C<localtime>, C<time>, C<times>
 =item Functions new in perl5
 
 C<abs>, C<bless>, C<chomp>, C<chr>, C<exists>, C<formline>, C<glob>,
-C<import>, C<lc>, C<lcfirst>, C<map>, C<my>, C<no>, C<prototype>, C<qx>,
-C<qw>, C<readline>, C<readpipe>, C<ref>, C<sub*>, C<sysopen>, C<tie>,
+C<import>, C<lc>, C<lcfirst>, C<map>, C<my>, C<no>, C<our>, C<prototype>, 
+C<qx>, C<qw>, C<readline>, C<readpipe>, C<ref>, C<sub*>, C<sysopen>, C<tie>,
 C<tied>, C<uc>, C<ucfirst>, C<untie>, C<use>
 
 * - C<sub> was a keyword in perl4, but in perl5 it is an
@@ -488,7 +488,7 @@ files, but it can be disastrous for binary files.
 Another consequence of using binmode() (on some systems) is that
 special end-of-file markers will be seen as part of the data stream.
 For systems from the Microsoft family this means that if your binary
-data contains C<\cZ>, the I/O subsystem will ragard it as the end of
+data contains C<\cZ>, the I/O subsystem will regard it as the end of
 the file, unless you use binmode().
 
 binmode() is not only important for readline() and print() operations,
@@ -1055,7 +1055,7 @@ If C<$@> is empty then the string C<"Died"> is used.
 die() can also be called with a reference argument.  If this happens to be
 trapped within an eval(), $@ contains the reference.  This behavior permits
 a more elaborate exception handling implementation using objects that
-maintain arbitary state about the nature of the exception.  Such a scheme
+maintain arbitrary state about the nature of the exception.  Such a scheme
 is sometimes preferable to matching particular string values of $@ using
 regular expressions.  Here's an example:
 
@@ -1983,7 +1983,7 @@ itself, in the range C<0..11> with 0 indicating January and 11
 indicating December.  $year is the number of years since 1900.  That
 is, $year is C<123> in year 2023.  $wday is the day of the week, with
 0 indicating Sunday and 3 indicating Wednesday.  $yday is the day of
-the year, in the range C<1..365> (or C<1..366> in leap years.)  
+the year, in the range C<0..364> (or C<0..365> in leap years.)  
 
 Note that the $year element is I<not> simply the last two digits of
 the year.  If you assume it is, then you create non-Y2K-compliant
@@ -2351,7 +2351,7 @@ itself, in the range C<0..11> with 0 indicating January and 11
 indicating December.  $year is the number of years since 1900.  That
 is, $year is C<123> in year 2023.  $wday is the day of the week, with
 0 indicating Sunday and 3 indicating Wednesday.  $yday is the day of
-the year, in the range C<1..365> (or C<1..366> in leap years.)  $isdst
+the year, in the range C<0..364> (or C<0..365> in leap years.)  $isdst
 is true if the specified time occurs during daylight savings time,
 false otherwise.
 
@@ -2923,7 +2923,7 @@ sequence of characters that give the order and type of values, as
 follows:
 
     a	A string with arbitrary binary data, will be null padded.
-    A	An ascii string, will be space padded.
+    A	An ASCII string, will be space padded.
     Z	A null terminated (asciz) string, will be null padded.
 
     b	A bit string (ascending bit order inside each byte, like vec()).
@@ -3996,7 +3996,7 @@ C<@ARGV> array at file scopes or within the lexical scopes established by
 the C<eval ''>, C<BEGIN {}>, C<INIT {}>, C<CHECK {}>, and C<END {}>
 constructs.
 
-See also C<unshift>, C<push>, and C<pop>.  C<Shift()> and C<unshift> do the
+See also C<unshift>, C<push>, and C<pop>.  C<shift()> and C<unshift> do the
 same thing to the left end of an array that C<pop> and C<push> do to the
 right end.
 
@@ -4654,7 +4654,7 @@ The commonly available S_IF* constants are
 
 and the S_IF* functions are
 
-    S_IFMODE($mode)	the part of $mode containg the permission bits
+    S_IFMODE($mode)	the part of $mode containing the permission bits
 			and the setuid/setgid/sticky bits
 
     S_IFMT($mode)	the part of $mode containing the file type

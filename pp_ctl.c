@@ -1521,14 +1521,20 @@ PP(pp_caller)
     else
 	PUSHs(sv_2mortal(newSViv(gimme & G_ARRAY)));
     if (CxTYPE(cx) == CXt_EVAL) {
+	/* eval STRING */
 	if (cx->blk_eval.old_op_type == OP_ENTEREVAL) {
 	    PUSHs(cx->blk_eval.cur_text);
 	    PUSHs(&PL_sv_no);
 	}
-	/* try blocks have old_namesv == 0 */
+	/* require */
 	else if (cx->blk_eval.old_namesv) {
 	    PUSHs(sv_2mortal(newSVsv(cx->blk_eval.old_namesv)));
 	    PUSHs(&PL_sv_yes);
+	}
+	/* eval BLOCK (try blocks have old_namesv == 0) */
+	else {
+	    PUSHs(&PL_sv_undef);
+	    PUSHs(&PL_sv_undef);
 	}
     }
     else {
@@ -1979,7 +1985,7 @@ PP(pp_next)
 {
     I32 cxix;
     register PERL_CONTEXT *cx;
-    I32 oldsave;
+    I32 inner;
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
@@ -1994,13 +2000,12 @@ PP(pp_next)
     if (cxix < cxstack_ix)
 	dounwind(cxix);
 
+    /* clear off anything above the scope we're re-entering, but
+     * save the rest until after a possible continue block */
+    inner = PL_scopestack_ix;
     TOPBLOCK(cx);
-
-    /* clean scope, but only if there's no continue block */
-    if (!(cx->blk_loop.last_op->op_private & OPpLOOP_CONTINUE)) {
-	oldsave = PL_scopestack[PL_scopestack_ix - 1];
-	LEAVE_SCOPE(oldsave);
-    }
+    if (PL_scopestack_ix < inner)
+	leave_scope(PL_scopestack[PL_scopestack_ix]);
     return cx->blk_loop.next_op;
 }
 
@@ -2910,8 +2915,8 @@ PP(pp_require)
 
     sv = POPs;
     if (SvNIOKp(sv)) {
-	UV rev, ver, sver;
-	if (SvPOKp(sv)) {		/* require v5.6.1 */
+	if (SvPOK(sv) && SvNOK(sv)) {		/* require v5.6.1 */
+	    UV rev = 0, ver = 0, sver = 0;
 	    I32 len;
 	    U8 *s = (U8*)SvPVX(sv);
 	    U8 *end = (U8*)SvPVX(sv) + SvCUR(sv);
@@ -2923,14 +2928,8 @@ PP(pp_require)
 		    s += len;
 		    if (s < end)
 			sver = utf8_to_uv(s, &len);
-		    else
-			sver = 0;
 		}
-		else
-		    ver = 0;
 	    }
-	    else
-		rev = 0;
 	    if (PERL_REVISION < rev
 		|| (PERL_REVISION == rev
 		    && (PERL_VERSION < ver
@@ -2941,6 +2940,7 @@ PP(pp_require)
 		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
 		    PERL_VERSION, PERL_SUBVERSION);
 	    }
+	    RETPUSHYES;
 	}
 	else if (!SvPOKp(sv)) {			/* require 5.005_03 */
 	    if ((NV)PERL_REVISION + ((NV)PERL_VERSION/(NV)1000)
@@ -2969,8 +2969,8 @@ PP(pp_require)
 			PERL_SUBVERSION);
 		}
 	    }
+	    RETPUSHYES;
 	}
-	RETPUSHYES;
     }
     name = SvPV(sv, len);
     if (!(name && len > 0 && *name))
@@ -3261,9 +3261,11 @@ PP(pp_entereval)
     SAVEHINTS();
     PL_hints = PL_op->op_targ;
     SAVESPTR(PL_compiling.cop_warnings);
-    if (!specialWARN(PL_compiling.cop_warnings)) {
-        PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;
-        SAVEFREESV(PL_compiling.cop_warnings) ;
+    if (specialWARN(PL_curcop->cop_warnings))
+        PL_compiling.cop_warnings = PL_curcop->cop_warnings;
+    else {
+        PL_compiling.cop_warnings = newSVsv(PL_curcop->cop_warnings);
+        SAVEFREESV(PL_compiling.cop_warnings);
     }
 
     push_return(PL_op->op_next);

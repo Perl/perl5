@@ -13,8 +13,8 @@ intimate with Perl's guts to understand.  Caveat lector.
 
 Perl has special debugging hooks at compile-time and run-time used
 to create debugging environments.  These hooks are not to be confused
-with the I<perl -Dxxx> command described in L<perlrun>, which are
-usable only if a special Perl built per the instructions the
+with the I<perl -Dxxx> command described in L<perlrun>, which is
+usable only if a special Perl is built per the instructions in the
 F<INSTALL> podpage in the Perl source tree.
 
 For example, whenever you call Perl's built-in C<caller> function
@@ -630,7 +630,7 @@ Perl is a profligate wastrel when it comes to memory use.  There
 is a saying that to estimate memory usage of Perl, assume a reasonable
 algorithm for memory allocation, multiply that estimate by 10, and
 while you still may miss the mark, at least you won't be quite so
-astonished.  This is not absolutely true, but may prvide a good
+astonished.  This is not absolutely true, but may provide a good
 grasp of what happens.
 
 Assume that an integer cannot take less than 20 bytes of memory, a
@@ -666,7 +666,7 @@ the top level of the Perl source tree.
 
 If your perl is using Perl's malloc() and was compiled with the
 necessary switches (this is the default), then it will print memory
-usage statistics after compiling your code hwen C<< $ENV{PERL_DEBUG_MSTATS}
+usage statistics after compiling your code when C<< $ENV{PERL_DEBUG_MSTATS}
 > 1 >>, and before termination of the program when C<<
 $ENV{PERL_DEBUG_MSTATS} >= 1 >>.  The report format is similar to
 the following example:
@@ -720,7 +720,7 @@ of two--or possibly one page greater.  In the second row, if present,
 the memory footprints of the buckets are between the memory footprints
 of two buckets "above".
 
-For example, suppose under the pervious example, the memory footprints
+For example, suppose under the previous example, the memory footprints
 were
 
      free:    8     16    32    64    128  256 512 1024 2048 4096 8192
@@ -804,7 +804,7 @@ To see this list, insert two C<warn('!...')> statements around the call:
   do 'lib/auto/POSIX/autosplit.ix';
   warn('!!! "after"');
 
-and run it with PErl's B<-DL> option.  The first warn() will print
+and run it with Perl's B<-DL> option.  The first warn() will print
 memory allocation info before parsing the file and will memorize
 the statistics at this point (we ignore what it prints).  The second
 warn() prints increments with respect to these memorized data.  This
@@ -842,7 +842,7 @@ Here are explanations for other I<Id>s above:
 
 =item C<717> 
 
-CReates bigger C<XPV*> structures.  In the case above, it
+Creates bigger C<XPV*> structures.  In the case above, it
 creates 3 C<AV>s per subroutine, one for a list of lexical variable
 names, one for a scratchpad (which contains lexical variables and
 C<targets>), and one for the array of scratchpads needed for

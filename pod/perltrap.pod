@@ -392,7 +392,7 @@ Everything else.
 =back
 
 If you find an example of a conversion trap that is not listed here,
-please submit it to Bill Middleton <F<wjm@best.com>> for inclusion.
+please submit it to <F<perlbug@perl.org>> for inclusion.
 Also note that at least some of these can be caught with the
 C<use warnings> pragma or the B<-w> switch.
 

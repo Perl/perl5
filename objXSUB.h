@@ -313,6 +313,10 @@
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 #endif
+#undef  Perl_do_join
+#define Perl_do_join		pPerl->Perl_do_join
+#undef  do_join
+#define do_join			Perl_do_join
 #undef  Perl_do_open
 #define Perl_do_open		pPerl->Perl_do_open
 #undef  do_open
@@ -1279,6 +1283,10 @@
 #define Perl_rninstr		pPerl->Perl_rninstr
 #undef  rninstr
 #define rninstr			Perl_rninstr
+#undef  Perl_rsignal
+#define Perl_rsignal		pPerl->Perl_rsignal
+#undef  rsignal
+#define rsignal			Perl_rsignal
 #if !defined(HAS_RENAME)
 #endif
 #undef  Perl_savepv
@@ -1861,6 +1869,10 @@
 #define Perl_vwarner		pPerl->Perl_vwarner
 #undef  vwarner
 #define vwarner			Perl_vwarner
+#undef  Perl_whichsig
+#define Perl_whichsig		pPerl->Perl_whichsig
+#undef  whichsig
+#define whichsig		Perl_whichsig
 #if defined(USE_PURE_BISON)
 #else
 #endif

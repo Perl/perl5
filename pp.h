@@ -143,7 +143,7 @@ Pops a long off the stack.
 /*
 =for apidoc Am|void|EXTEND|SP|int nitems
 Used to extend the argument stack for an XSUB's return values. Once
-used, guarrantees that there is room for at least C<nitems> to be pushed
+used, guarantees that there is room for at least C<nitems> to be pushed
 onto the stack.
 
 =for apidoc Am|void|PUSHs|SV* sv

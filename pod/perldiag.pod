@@ -1610,7 +1610,7 @@ versions of Perl are likely to eliminate these arbitrary limitations.
 
 (W internal) A warning peculiar to VMS.  Perl tried to read the CRTL's internal
 environ array, and encountered an element without the C<=> delimiter
-used to spearate keys from values.  The element is ignored.
+used to separate keys from values.  The element is ignored.
 
 =item Ill-formed message in prime_env_iter: |%s|
 
@@ -2518,7 +2518,7 @@ Perl assumes that memory is now corrupted.  See L<perlfunc/ioctl>.
 
 =item pragma "attrs" is deprecated, use "sub NAME : ATTRS" instead
 
-(W deprecated) You have written somehing like this:
+(W deprecated) You have written something like this:
 
     sub doit
     {
@@ -2870,7 +2870,7 @@ repetitions of "xyz" is C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
 =item Stub found while resolving method `%s' overloading `%s' in package `%s'
 
 (P) Overloading resolution over @ISA tree may be broken by importation stubs.
-Stubs should never be implicitely created, but explicit calls to C<can>
+Stubs should never be implicitly created, but explicit calls to C<can>
 may break this.
 
 =item Subroutine %s redefined

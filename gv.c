@@ -520,7 +520,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     I32 len;
     register const char *namend;
     HV *stash = 0;
-    U32 add_gvflags = 0;
 
     if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
 	name++;
@@ -653,8 +652,10 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		  : sv_type == SVt_PVAV ? "@"
 		  : sv_type == SVt_PVHV ? "%"
 		  : ""), name));
+	    stash = PL_nullstash;
 	}
-	return Nullgv;
+	else
+	    return Nullgv;
     }
 
     if (!SvREFCNT(stash))	/* symbol table under destruction */
@@ -680,7 +681,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	Perl_warner(aTHX_ WARN_INTERNAL, "Had to create %s unexpectedly", nambeg);
     gv_init(gv, stash, name, len, add & GV_ADDMULTI);
     gv_init_sv(gv, sv_type);
-    GvFLAGS(gv) |= add_gvflags;
 
     if (isLEXWARN_on && isALPHA(name[0]) && ! ckWARN(WARN_ONCE))
         GvMULTI_on(gv) ;

@@ -39,7 +39,7 @@ the maximal and the minimal supported true integral quantities are close to
 powers of 2.  However, "native" floats have a most fundamental
 restriction: they may represent only those numbers which have a relatively
 "short" representation when converted to a binary fraction.  For example,
-0.9 cannot be respresented by a native float, since the binary fraction
+0.9 cannot be represented by a native float, since the binary fraction
 for 0.9 is infinite:
 
   binary0.1110011001100...

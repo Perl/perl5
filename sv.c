@@ -3920,10 +3920,19 @@ Perl_sv_eq(pTHX_ register SV *str1, register SV *str2)
     else
 	pv1 = SvPV(str1, cur1);
 
-    if (!str2)
-	return !cur1;
-    else
-	pv2 = SvPV(str2, cur2);
+    if (cur1) {
+	if (!str2)
+	    return 0;
+	if (SvUTF8(str1) != SvUTF8(str2)) {
+	    if (SvUTF8(str1)) {
+		sv_utf8_upgrade(str2);
+	    }
+	    else {
+		sv_utf8_upgrade(str1);
+	    }
+	}
+    }
+    pv2 = SvPV(str2, cur2);
 
     if (cur1 != cur2)
 	return 0;

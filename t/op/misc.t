@@ -545,3 +545,9 @@ ucfirst - World
 lcfirst - world
 uc - WORLD
 lc - world
+########
+sub f { my $a = 1; my $b = 2; my $c = 3; my $d = 4; next }
+my $x = "foo";
+{ f } continue { print $x, "\n" }
+EXPECT
+foo

@@ -439,17 +439,17 @@ After a match against some variable $var:
 
 =over 5
 
-=item C<$`> is the same as C<substr($var, 0, $-[0]>)
+=item C<$`> is the same as C<substr($var, 0, $-[0])>
 
-=item C<$&> is the same as C<substr($var, $-[0], $+[0] - $-[0]>) 
+=item C<$&> is the same as C<substr($var, $-[0], $+[0] - $-[0])>
 
-=item C<$'> is the same as C<substr($var, $+[0]>)
+=item C<$'> is the same as C<substr($var, $+[0])>
 
 =item C<$1> is the same as C<substr($var, $-[1], $+[1] - $-[1])>  
 
 =item C<$2> is the same as C<substr($var, $-[2], $+[2] - $-[2])>
 
-=item C<$3> is the same as C<substr $var, $-[3], $+[3] - $-[3]>) 
+=item C<$3> is the same as C<substr $var, $-[3], $+[3] - $-[3])>
 
 =back
 

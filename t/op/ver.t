@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, "../lib";
 }
 
-print "1..22\n";
+print "1..23\n";
 
 my $test = 1;
 
@@ -70,6 +70,11 @@ print "ok $test\n";  ++$test;
 
 print "not " unless sprintf("%*vb", "##", v1.22.333.4444)
     eq '1##10110##101001101##1000101011100';
+print "ok $test\n";  ++$test;
+
+print "not " unless sprintf("%vd", join("", map { chr }
+					    unpack "U*", v2001.2002.2003))
+		    eq '2001.2002.2003';
 print "ok $test\n";  ++$test;
 
 {

@@ -237,7 +237,7 @@ NOTE: the perl_ form of this function is deprecated.
 =item EXTEND
 
 Used to extend the argument stack for an XSUB's return values. Once
-used, guarrantees that there is room for at least C<nitems> to be pushed
+used, guarantees that there is room for at least C<nitems> to be pushed
 onto the stack.
 
 	void	EXTEND(SP, int nitems)
@@ -662,21 +662,21 @@ Undefines the hash.
 
 =item isALNUM
 
-Returns a boolean indicating whether the C C<char> is an ascii alphanumeric
+Returns a boolean indicating whether the C C<char> is an ASCII alphanumeric
 character or digit.
 
 	bool	isALNUM(char ch)
 
 =item isALPHA
 
-Returns a boolean indicating whether the C C<char> is an ascii alphabetic
+Returns a boolean indicating whether the C C<char> is an ASCII alphabetic
 character.
 
 	bool	isALPHA(char ch)
 
 =item isDIGIT
 
-Returns a boolean indicating whether the C C<char> is an ascii
+Returns a boolean indicating whether the C C<char> is an ASCII
 digit.
 
 	bool	isDIGIT(char ch)
@@ -1263,7 +1263,7 @@ wrapper for C<strncmp>).
 
 =item StructCopy
 
-This is an architecture-independant macro to copy one structure to another.
+This is an architecture-independent macro to copy one structure to another.
 
 	void	StructCopy(type src, type dest, type)
 

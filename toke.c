@@ -1510,7 +1510,8 @@ S_scan_const(pTHX_ char *start)
 		*d = *s++;
 		if (isLOWER(*d))
 		   *d = toUPPER(*d);
-		*d++ = toCTRL(*d); 
+		*d = toCTRL(*d); 
+		d++;
 #else
 		len = *s++;
 		*d++ = toCTRL(len);

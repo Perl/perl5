@@ -42,15 +42,21 @@ EOE
 $encoded_be = "\320\261";
 $encoded_alpha = "\316\261";
 $encoded_bet = "\327\221";
+
+sub to_bytes {
+    use bytes;
+    my $bytes = shift;
+}
+
 {
   use charnames ':full';
 
-  print "not " unless "\N{CYRILLIC SMALL LETTER BE}" eq $encoded_be;
+  print "not " unless to_bytes("\N{CYRILLIC SMALL LETTER BE}") eq $encoded_be;
   print "ok 4\n";
 
   use charnames qw(cyrillic greek :short);
 
-  print "not " unless "\N{be},\N{alpha},\N{hebrew:bet}" 
+  print "not " unless to_bytes("\N{be},\N{alpha},\N{hebrew:bet}")
     eq "$encoded_be,$encoded_alpha,$encoded_bet";
   print "ok 5\n";
 }
