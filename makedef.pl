@@ -163,7 +163,7 @@ sub emit_symbols {
     foreach my $symbol (@$list) {
 	my $skipsym = $symbol;
 	# XXX hack
-	if ($define{PERL_OBJECT}) {
+	if ($define{PERL_OBJECT} || $define{MULTIPLICITY}) {
 	    $skipsym =~ s/^Perl_[GIT](\w+)_ptr$/PL_$1/;
 	}
 	emit_symbol($symbol) unless exists $skip{$skipsym};
@@ -446,14 +446,9 @@ sub readvar {
     return \@syms;
 }
 
-if ($define{'USE_5005THREADS'} || $define{'MULTIPLICITY'}) {
+if ($define{'USE_5005THREADS'}) {
     my $thrd = readvar($thrdvar_h);
     skip_symbols $thrd;
-}
-
-if ($define{'MULTIPLICITY'}) {
-    my $interp = readvar($intrpvar_h);
-    skip_symbols $interp;
 }
 
 if ($define{'PERL_GLOBAL_STRUCT'}) {
@@ -487,7 +482,7 @@ for my $syms (@syms) {
 
 # variables
 
-if ($define{'PERL_OBJECT'}) {
+if ($define{'PERL_OBJECT'} || $define{'MULTIPLICITY'}) {
     for my $f ($perlvars_h, $intrpvar_h, $thrdvar_h) {
 	my $glob = readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
 	emit_symbols $glob;

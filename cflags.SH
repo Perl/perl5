@@ -105,6 +105,7 @@ for file do
     miniperlmain) ;;
     op) ;;
     perl) ;;
+    perlapi) ;;
     perlmain) ;;
     perly) ;;
     pp) ;;

@@ -73,14 +73,14 @@ INST_ARCH	*= \$(ARCHNAME)
 # XXX WARNING! This option currently undergoing changes.  May be broken.
 #
 # Beginnings of interpreter cloning/threads: still rather rough, fails
-# tests.  This should be enabled to get the fork() emulation.  Do not
-# enable unless you know what you're doing!
+# tests.  This should be enabled to get the fork() emulation.  This needs
+# one of USE_MULTI or USE_OBJECT enabled as well.
 #
 #USE_ITHREADS	*= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
-# made by perl.  This is needed and auto-enabled by USE_OBJECT above.
+# made by perl.  This needs one of USE_MULTI or USE_OBJECT above.
 # This is also needed to get fork().
 #
 #USE_IMP_SYS	*= define
@@ -248,6 +248,15 @@ USE_OBJECT	*= undef
 USE_ITHREADS	*= undef
 USE_IMP_SYS	*= undef
 USE_PERLCRT	*= undef
+
+.IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" == "defineundefundefundef"
+USE_MULTI	!= define
+.ENDIF
+
+.IF "$(USE_ITHREADS)$(USE_MULTI)$(USE_OBJECT)" == "defineundefundef"
+USE_MULTI	!= define
+USE_5005THREADS	!= undef
+.ENDIF
 
 .IF "$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" != "undefundefundef"
 BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT

@@ -7,7 +7,7 @@
 #include "perl.h"
 #include "perlapi.h"
 
-#if defined(PERL_OBJECT)
+#if defined(PERL_OBJECT) || defined (MULTIPLICITY)
 
 /* accessor functions for Perl variables (provides binary compatibility) */
 START_EXTERN_C
@@ -16,10 +16,19 @@ START_EXTERN_C
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
+
+#if defined(PERL_OBJECT)
 #define PERLVAR(v,t)	t* Perl_##v##_ptr(pTHXo)			\
 			{ return &(aTHXo->interp.v); }
 #define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHXo)		\
 			{ return &(aTHXo->interp.v); }
+#else	/* MULTIPLICITY */
+#define PERLVAR(v,t)	t* Perl_##v##_ptr(pTHX)				\
+			{ return &(aTHX->v); }
+#define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHX)		\
+			{ return &(aTHX->v); }
+#endif
+
 #define PERLVARI(v,t,i)	PERLVAR(v,t)
 #define PERLVARIC(v,t,i) PERLVAR(v, const t)
 
@@ -38,6 +47,10 @@ START_EXTERN_C
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
+
+#if defined(PERL_OBJECT)
+
+/* C-API layer for PERL_OBJECT */
 
 #if defined(PERL_IMPLICIT_SYS)
 #else
@@ -7849,3 +7862,4 @@ Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
 END_EXTERN_C
 
 #endif /* PERL_OBJECT */
+#endif /* PERL_OBJECT || MULTIPLICITY */
