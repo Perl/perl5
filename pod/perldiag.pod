@@ -542,7 +542,7 @@ so it was truncated to the string shown.
 (F) A subroutine invoked from an external package via perl_call_sv()
 exited by calling exit.
 
-=item Can't "goto" outside a block
+=item Can't "goto" out of a pseudo block
 
 (F) A "goto" statement was executed to jump out of what might look
 like a block, except that it isn't a proper block.  This usually
@@ -554,22 +554,24 @@ is a no-no.  See L<perlfunc/goto>.
 (F) A "goto" statement was executed to jump into the middle of a
 foreach loop.  You can't get there from here.  See L<perlfunc/goto>.
 
-=item Can't "last" outside a block
+=item Can't "last" outside a loop block
 
 (F) A "last" statement was executed to break out of the current block,
 except that there's this itty bitty problem called there isn't a
 current block.  Note that an "if" or "else" block doesn't count as a
-"loopish" block, as doesn't a block given to sort().  You can usually double
-the curlies to get the same effect though, because the inner curlies
-will be considered a block that loops once.  See L<perlfunc/last>.
+"loopish" block, as doesn't a block given to sort(), map() or grep().
+You can usually double the curlies to get the same effect though,
+because the inner curlies will be considered a block that loops once.
+See L<perlfunc/last>.
 
-=item Can't "next" outside a block
+=item Can't "next" outside a loop block
 
 (F) A "next" statement was executed to reiterate the current block, but
 there isn't a current block.  Note that an "if" or "else" block doesn't
-count as a "loopish" block, as doesn't a block given to sort().  You can
-usually double the curlies to get the same effect though, because the inner
-curlies will be considered a block that loops once.  See L<perlfunc/next>.
+count as a "loopish" block, as doesn't a block given to sort(), map()
+or grep().  You can usually double the curlies to get the same effect
+though, because the inner curlies will be considered a block that
+loops once.  See L<perlfunc/next>.
 
 =item Can't read CRTL environ
 
@@ -578,13 +580,14 @@ from the CRTL's internal environment array and discovered the array was
 missing.  You need to figure out where your CRTL misplaced its environ
 or define F<PERL_ENV_TABLES> (see L<perlvms>) so that environ is not searched.
 
-=item Can't "redo" outside a block
+=item Can't "redo" outside a loop block
 
 (F) A "redo" statement was executed to restart the current block, but
 there isn't a current block.  Note that an "if" or "else" block doesn't
-count as a "loopish" block, as doesn't a block given to sort().  You can
-usually double the curlies to get the same effect though, because the inner
-curlies will be considered a block that loops once.  See L<perlfunc/redo>.
+count as a "loopish" block, as doesn't a block given to sort(), map()
+or grep().  You can usually double the curlies to get the same effect
+though, because the inner curlies will be considered a block that
+loops once.  See L<perlfunc/redo>.
 
 =item Can't bless non-reference value
 

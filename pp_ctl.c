@@ -1861,7 +1861,7 @@ PP(pp_last)
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
 	if (cxix < 0)
-	    DIE(aTHX_ "Can't \"last\" outside a block");
+	    DIE(aTHX_ "Can't \"last\" outside a loop block");
     }
     else {
 	cxix = dopoptolabel(cPVOP->op_pv);
@@ -1939,7 +1939,7 @@ PP(pp_next)
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
 	if (cxix < 0)
-	    DIE(aTHX_ "Can't \"next\" outside a block");
+	    DIE(aTHX_ "Can't \"next\" outside a loop block");
     }
     else {
 	cxix = dopoptolabel(cPVOP->op_pv);
@@ -1964,7 +1964,7 @@ PP(pp_redo)
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
 	if (cxix < 0)
-	    DIE(aTHX_ "Can't \"redo\" outside a block");
+	    DIE(aTHX_ "Can't \"redo\" outside a loop block");
     }
     else {
 	cxix = dopoptolabel(cPVOP->op_pv);
@@ -2343,7 +2343,7 @@ PP(pp_goto)
 		/* FALL THROUGH */
 	    case CXt_FORMAT:
 	    case CXt_NULL:
-		DIE(aTHX_ "Can't \"goto\" outside a block");
+		DIE(aTHX_ "Can't \"goto\" out of a pseudo block");
 	    default:
 		if (ix)
 		    DIE(aTHX_ "panic: goto");
