@@ -78,10 +78,10 @@ lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).
 esac
 
 if [ "X$usethreads" != "X" ]; then
-    ccflags="-DUSE_THREADS $ccflags"
-    cppflags="-DUSE_THREADS $cppflags"
+    ccflags="-DUSE_THREADS -DNEED_PTHREAD_INIT $ccflags"
+    cppflags="-DUSE_THREADS -DNEED_PTHREAD_INIT $cppflags"
     case "$cc" in
-    xlc_r)
+    xlc_r | cc_r)
 	;;
     cc | '') 
 	cc=xlc_r
@@ -95,7 +95,7 @@ if [ "X$usethreads" != "X" ]; then
 	    echo >&4 "Unknown C compiler."
 	    ;;
 	esac
-	echo >&4 "You should use the AIX C compiler called xlc_r."
+	echo >&4 "You should use the AIX C compilers called xlc_r or cc_r."
 	echo >&4 "Cannot continue, aborting."
 	exit 1
 	;;
