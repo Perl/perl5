@@ -42,7 +42,7 @@ SKIP: {
 	ok( grep($file, Term::Cap::termcap_path()), 
 		'termcap_path() should find file from $ENV{TERMCAP}' );
 
-	$ENV{TERMCAP} = (grep { $^O eq $_ } qw( os2 MSWin32 dos )) ? 'a:/' : '/';
+	$ENV{TERMCAP} = '/';
 	ok( grep($file, Term::Cap::termcap_path()), 
 		'termcap_path() should find file from $ENV{TERMPATH}' );
 }
