@@ -21,8 +21,8 @@ esac
 # -D_XOPEN_SOURCE_EXTENDED alters system headers.
 # Prepend your favorites with Configure -Dccflags=your_favorites
 case "$ccflags" in
-'') ccflags='-K enum_long,llm_case_lower,llm_keep,no_integer_overflow -DPOSIX_BC -DUSE_PURE_BISON -D_XOPEN_SOURCE_EXTENDED' ;;
-*) ccflags='$ccflags -Kenum_long,llm_case_lower,llm_keep,no_integer_overflow -DPOSIX_BC -DUSE_PURE_BISON -D_XOPEN_SOURCE_EXTENDED' ;;
+'') ccflags='-K enum_long,llm_case_lower,llm_keep,no_integer_overflow -DPOSIX_BC -DUSE_PURE_BISON -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED' ;;
+*) ccflags='$ccflags -Kenum_long,llm_case_lower,llm_keep,no_integer_overflow -DPOSIX_BC -DUSE_PURE_BISON -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED' ;;
 esac
 
 # ccdlflags have yet to be determined.
