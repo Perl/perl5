@@ -602,7 +602,7 @@ welcome to reopen them if you'd like.
     open(STDOUT, "> output")
 	|| die "can't open output: $!";
 
-And then these can be read directly or passed on to subprocesses.
+And then these can be accessed directly or passed on to subprocesses.
 This makes it look as though the program were initially invoked
 with those redirections from the command line.
 
