@@ -1,5 +1,5 @@
 *** c2ph.PL~	Mon Nov 20 09:36:16 1995
---- c2ph.PL	Thu Dec 07 15:24:10 1995
+--- utils/c2ph.PL	Thu Dec 07 15:24:10 1995
 ***************
 *** 1180,1184 ****
   close OUT or die "Can't close $file: $!";

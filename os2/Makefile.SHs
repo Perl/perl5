@@ -19,6 +19,7 @@ perl5.def: perl.linkexp
 	echo DATA LOADONCALL NONSHARED MULTIPLE		>>$@
 	echo EXPORTS					>>$@
 	echo '  "ctermid"'				>>$@
+	echo '  "settmppath"'				>>$@
 !NO!SUBS!
 
 if [ ! -z "$myttyname" ] ; then

@@ -78,10 +78,11 @@ Notes on build on OS/2:
 ~~~~~~~~~~~~~~~~~~~~~~~
 The change of C code in this patch is based on the ak port of 5.001+.
 
-a) Make sure your sort is not the broken OS/2 one.
+a) Make sure your sort is not the broken OS/2 one, and that you have /tmp
+on the build partition.
 
 b) when extraction perl5.*.tar.gz you need to extract perl5.*/Configure
-separately, since by default perl5.001m/configure overwrites it;
+separately, since by default perl5.001m/configure may overwrite it;
 	like this:
 		tar vzxf perl5.004.tar.gz perl5.004/Configure
 
@@ -99,25 +100,24 @@ sh Configure -des -D prefix=f:/perl5.005
 make
 	# Will probably die after build of miniperl (unless you have DLL
 	# from previous compile). Need to move DLL where it belongs
+	#
+	# Somehow with 5.002b3 I needed to type another make after pod2man
 make
 	# some warnings in POSIX.c
 make test
-	# some tests fail, 9 on my system
+	# some tests fail, 9 or 10 on my system (see the list at end).
 	#
 	# before this you should create subdirs bin and lib in the 
 	# prefix directory (f:/perl5.005 above):
 make install
-	# man pages are not installed
 
 e) At the end of August GNU make and pdksh were too buggy for compile.
 Both maintainers have patches that make it possible to compile perl.
 The binaries are included in
 	ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2
 patches are available too.
-Note that the beta of pdksh5.2.4 can run Configure, but not build, since
-	sh file
-may actually call file.SH ! The maintainer is notified, I hope this will be
-fixed before actual release.
+Note that the pdksh5.2.4 broke builds with -Zexe option because of a
+changed order of executable extensions. A patch is sent to maintainer.
 
 !!!!!!!!!!!!!!!!!
 If you see that some '/' became '\' in pdksh 5.2.3, you did not apply
@@ -155,3 +155,74 @@ with dynamic extensions is:
 	c) You cannot export data from a .dll compiled with a.out style.
 On the other hand, aout-style compiled extension enjoys all the 
 (dis)advantages of fork().
+
+======================================================
+Tests which fail with OMF compile:
+
+io/fs.t: 2-5, 7-11, 18  as they should.
+io/pipe: all, since open("|-") is not working (even with fork, so far).
+lib/"all the dbm".t: 1 test should fail (file permission).
+op/fork all fail, as they should
+op/stat 3 20 35 as they should, 39 (-t on /dev/null) ???? Sometimes 4 ????
+
+Segfault in socket ????, only if run with Testing tools.
+
+A lot of `bad free'... in databases, bug in DB confirmed on other
+platforms.
+
+Fail: Total 30 subtests (if stat:4 fails) in 10 scripts (one of 10
+is socket, which runs OK standalone).
+
+=======================================================
+
+Changes to calls to external programs:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Due to a popular demand the perl external program calling has been changed.
+_If_ perl needs to call an external program via shell, the sh.exe will be
+called. The name of the shell is not overridable.
+
+Thus means that you need to pickup some copy of a sh.exe as well (I use one
+from pdksh).
+
+Reasons: a consensus on perl5-porters was that perl should use one 
+non-overridable shell per platform. The obvious choices for OS/2 are cmd.exe
+and sh.exe. Having perl build itself would be impossible with cmd.exe as
+a shell, thus I picked up sh.exe. Thus assures almost 100% compatibility
+with the scripts coming from *nix.
+
+Disadvantages: sh.exe calls external programs via fork/exec, and there is
+_no_ functioning exec on OS/2. exec is emulated by EMX by asyncroneous call
+while the caller waits for child completion (to pretend that pid did
+not change). This means that 1 _extra_ copy of sh.exe is made active via
+fork/exec, which may lead to some resources taken from the system.
+
+The long-term solution proposed on p5-p is to have a directive
+	use OS2::Cmd;
+which will override system(), exec(), ``, and open(,'   |'). With current
+perl you may override only system(), readpipe() - the explicit version
+of ``, and maybe exec(). The code will substitute a one-argument system
+by CORE::system('cmd.exe', '/c', shift).
+
+If you have some working code for OS2::Cmd.pm, please send it to me,
+I will include it into distribution. I have no need for such a module, so
+cannot test it.
+
+===================================================
+
+OS/2 extensions
+~~~~~~~~~~~~~~~
+I include 3 extensions by Andread Kaiser, OS2::REXX, OS2::UPM, and OS2::FTP, 
+with minor changes needed to compile them by standard tools. I cannot 
+test UPM and FTP, so I will appreciate your feedback.
+
+The -R switch of older perl is deprecated. If you need to call a REXX code
+which needs access to variables, include the call into a REXX compartment
+created by 
+	REXX_call {block};
+
+Two new functions are supported by REXX code, 
+	REXX_eval 'string';
+	REXX_eval_with 'string', REXX_function_name => \&perl_sub_reference;
+
+If you have some other extensions you want to share, send the code to me.
+Two jump to mind: tied access to EA's, and tied access to system databases.

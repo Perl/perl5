@@ -1,5 +1,5 @@
-*** Makefile.SH.orig	Mon Nov 20 12:56:12 1995
---- Makefile.SH	Fri Dec 08 00:02:46 1995
+*** Makefile.SH.orig	Fri Feb 02 16:38:32 1996
+--- Makefile.SH	Sat Feb 03 14:40:28 1996
 ***************
 *** 31,43 ****
        *[0-9]) plibsuf=.$so.$patchlevel;;
@@ -77,7 +77,7 @@
   
   ## In the following dollars and backticks do not need the extra backslash.
 ***************
-*** 180,190 ****
+*** 178,188 ****
   
   c = $(c1) $(c2) $(c3) miniperlmain.c perlmain.c
   
@@ -89,7 +89,7 @@
   obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
   
   # Once perl has been Configure'd and built ok you build different
---- 182,191 ----
+--- 180,189 ----
   
   c = $(c1) $(c2) $(c3) miniperlmain.c perlmain.c
   
@@ -101,7 +101,7 @@
   
   # Once perl has been Configure'd and built ok you build different
 ***************
-*** 203,209 ****
+*** 201,207 ****
   # grrr
   SHELL = /bin/sh
   
@@ -109,7 +109,7 @@
   	$(CCCMD) $(PLDLFLAGS) $*.c
   
   all: makefile miniperl $(private) $(plextract) $(public) $(dynamic_ext)
---- 204,210 ----
+--- 202,208 ----
   # grrr
   SHELL = /bin/sh
   
@@ -118,12 +118,13 @@
   
   all: makefile miniperl $(private) $(plextract) $(public) $(dynamic_ext)
 ***************
-*** 220,236 ****
-  # The $& notation tells Sequent machines that it can do a parallel make,
-  # and is harmless otherwise.
+*** 230,247 ****
+  # build problems but that's not obvious to the novice.
+  # The Module used here must not depend on Config or any extensions.
   
 ! miniperl: $& miniperlmain.o $(perllib)
 ! 	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain.o $(perllib) $(libs)
+  	@miniperl -w -MExporter -e 0 || $(MAKE) minitest
   
 ! miniperlmain.o: miniperlmain.c
   	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -136,12 +137,13 @@
   	$(CCCMD) $(PLDLFLAGS) $*.c
   
   # The file ext.libs is a list of libraries that must be linked in
---- 221,237 ----
-  # The $& notation tells Sequent machines that it can do a parallel make,
-  # and is harmless otherwise.
+--- 231,248 ----
+  # build problems but that's not obvious to the novice.
+  # The Module used here must not depend on Config or any extensions.
   
 ! miniperl: $& miniperlmain$(OBJ_EXT) $(perllib)
 ! 	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) $(perllib) $(libs)
+  	@miniperl -w -MExporter -e 0 || $(MAKE) minitest
   
 ! miniperlmain$(OBJ_EXT): miniperlmain.c
   	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -155,7 +157,7 @@
   
   # The file ext.libs is a list of libraries that must be linked in
 ***************
-*** 239,266 ****
+*** 250,277 ****
   ext.libs: $(static_ext)
   	-@test -f ext.libs || touch ext.libs
   
@@ -184,7 +186,7 @@
   	@$(ranlib) $(perllib)
   !NO!SUBS!
   ;;
---- 240,279 ----
+--- 251,290 ----
   ext.libs: $(static_ext)
   	-@test -f ext.libs || touch ext.libs
   
@@ -226,7 +228,7 @@
   !NO!SUBS!
   ;;
 ***************
-*** 273,282 ****
+*** 284,293 ****
   # checks as well as the special code to validate that the script in question
   # has been invoked correctly.
   
@@ -237,7 +239,7 @@
   	$(RMS) sperl.c
   	$(LNS) perl.c sperl.c
   	$(CCCMD) -DIAMSUID sperl.c
---- 286,295 ----
+--- 297,306 ----
   # checks as well as the special code to validate that the script in question
   # has been invoked correctly.
   
@@ -249,7 +251,7 @@
   	$(LNS) perl.c sperl.c
   	$(CCCMD) -DIAMSUID sperl.c
 ***************
-*** 286,292 ****
+*** 297,303 ****
   #	test -d lib/auto || mkdir lib/auto
   #
   preplibrary: miniperl lib/Config.pm $(plextract)
@@ -257,7 +259,7 @@
   	@echo "	AutoSplitting perl library"
   	@./miniperl -Ilib -e 'use AutoSplit; \
   		autosplit_lib_modules(@ARGV)' lib/*.pm lib/*/*.pm
---- 299,305 ----
+--- 310,316 ----
   #	test -d lib/auto || mkdir lib/auto
   #
   preplibrary: miniperl lib/Config.pm $(plextract)
@@ -266,7 +268,7 @@
   	@./miniperl -Ilib -e 'use AutoSplit; \
   		autosplit_lib_modules(@ARGV)' lib/*.pm lib/*/*.pm
 ***************
-*** 304,317 ****
+*** 315,328 ****
   
   install: all install.perl install.man
   
@@ -281,7 +283,7 @@
   #	./perl installhtml
   
   # I now supply perly.c with the kits, so the following section is
---- 317,330 ----
+--- 328,341 ----
   
   install: all install.perl install.man
   
@@ -297,27 +299,27 @@
   
   # I now supply perly.c with the kits, so the following section is
 ***************
-*** 371,378 ****
+*** 382,389 ****
   	@sh ext/util/make_ext static $@ LIBPERL_A=$(perllib)
   
   clean:
 ! 	rm -f *.o *.a all perlmain.c
   	rm -f perl.exp ext.libs
-  	-cd x2p; $(MAKE) clean
   	-cd pod; $(MAKE) clean
-  	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
---- 384,392 ----
+  	-cd utils; $(MAKE) clean
+  	-cd x2p; $(MAKE) clean
+--- 395,403 ----
   	@sh ext/util/make_ext static $@ LIBPERL_A=$(perllib)
   
   clean:
 ! 	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c
   	rm -f perl.exp ext.libs
 + 	-rm perl.export perl.dll perl.libexp perl.map perl.def
-  	-cd x2p; $(MAKE) clean
   	-cd pod; $(MAKE) clean
-  	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
+  	-cd utils; $(MAKE) clean
+  	-cd x2p; $(MAKE) clean
 ***************
-*** 389,395 ****
+*** 402,408 ****
   	done
   	rm -f *.orig */*.orig *~ */*~ core t/core t/c t/perl
   	rm -rf $(addedbyconf)
@@ -325,7 +327,7 @@
   	rm -f $(private)
   	rm -rf lib/auto
   	rm -f lib/.exists
---- 403,409 ----
+--- 416,422 ----
   	done
   	rm -f *.orig */*.orig *~ */*~ core t/core t/c t/perl
   	rm -rf $(addedbyconf)
@@ -334,7 +336,7 @@
   	rm -rf lib/auto
   	rm -f lib/.exists
 ***************
-*** 410,434 ****
+*** 423,447 ****
   lint: perly.c $(c)
   	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
   
@@ -360,7 +362,7 @@
   		&& ./perl TEST base/*.t comp/*.t cmd/*.t io/*.t op/*.t </dev/tty
   
   clist:	$(c)
---- 424,456 ----
+--- 437,469 ----
   lint: perly.c $(c)
   	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
   
@@ -395,7 +397,7 @@
   
   clist:	$(c)
 ***************
-*** 451,457 ****
+*** 464,470 ****
   case `pwd` in
   *SH)
       $rm -f ../Makefile
@@ -403,7 +405,7 @@
       ;;
   esac
 ! rm -f makefile
---- 473,479 ----
+--- 486,492 ----
   case `pwd` in
   *SH)
       $rm -f ../Makefile

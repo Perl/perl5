@@ -27,8 +27,13 @@
 
 #define PERL_SYS_INIT(argcp, argvp) do {	\
     _response(argcp, argvp);			\
-    _wildcard(argcp, argvp); } while (0)
+    _wildcard(argcp, argvp);			\
+    settmppath(); } while (0)
 
+#define TMPPATH tmppath
+#define TMPPATH1 "plXXXXXX"
+extern char *tmppath;
+void settmppath();
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
