@@ -504,6 +504,7 @@ $Text::Wrap::huge = 'overflow';
 $Text::Wrap::columns = 80;
 use ExtUtils::Constant qw (WriteConstants WriteMakefileSnippet autoload);
 use File::Compare;
+use File::Path;
 
 sub usage {
     warn "@_\n" if @_;
@@ -912,7 +913,6 @@ if( @path_h ){
 # Save current directory so that C::Scan can use it
 my $cwd = File::Spec->rel2abs( File::Spec->curdir );
 
-my ($ext, $nested, @modparts, $modfname, $modpname);
 # As Ilya suggested, use a name that contains - and then it can't clash with
 # the names of any packages. A directory 'fallback' will clash with any
 # new pragmata down the fallback:: tree, but that seems unlikely.
@@ -920,35 +920,21 @@ my $constscfname = 'const-c.inc';
 my $constsxsfname = 'const-xs.inc';
 my $fallbackdirname = 'fallback';
 
-$ext = chdir 'ext' ? 'ext/' : '';
-
-if( $module =~ /::/ ){
-	$nested = 1;
-	@modparts = split(/::/,$module);
-	$modfname = $modparts[-1];
-	$modpname = join('/',@modparts);
-}
-else {
-	$nested = 0;
-	@modparts = ();
-	$modfname = $modpname = $module;
-}
-
-
+my $ext = chdir 'ext' ? 'ext/' : '';
+  
+my @modparts  = split(/::/,$module);
+my $modpname  = join('-', @modparts);
+my $modfname  = pop @modparts;
+my $modpmdir  = join '/', 'lib', @modparts;
+my $modpmname = join '/', $modpmdir, $modfname.'.pm';
+  
 if ($opt_O) {
 	warn "Overwriting existing $ext$modpname!!!\n" if -e $modpname;
 }
 else {
 	die "Won't overwrite existing $ext$modpname\n" if -e $modpname;
 }
-if( $nested ){
-	my $modpath = "";
-	foreach (@modparts){
-		-d "$modpath$_" || mkdir("$modpath$_", 0777);
-		$modpath .= "$_/";
-	}
-}
--d "$modpname"   || mkdir($modpname, 0777);
+-d "$modpname"   || mkpath([$modpname], 0, 0775);
 chdir($modpname) || die "Can't chdir $ext$modpname: $!\n";
 
 my %types_seen;
@@ -1080,10 +1066,11 @@ if( ! $opt_X ){  # use XS, unless it was disabled
 }
 my @const_names = sort keys %const_names;
 
-open(PM, ">$modfname.pm") || die "Can't create $ext$modpname/$modfname.pm: $!\n";
+-d $modpmdir || mkpath([$modpmdir], 0, 0775);
+open(PM, ">$modpmname") || die "Can't create $ext$modpname/$modpmname: $!\n";
 
 $" = "\n\t";
-warn "Writing $ext$modpname/$modfname.pm\n";
+warn "Writing $ext$modpname/$modpmname\n";
 
 print PM <<"END";
 package $module;
@@ -1910,10 +1897,10 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     NAME              => '$module',
-    VERSION_FROM      => '$modfname.pm', # finds \$VERSION
+    VERSION_FROM      => '$modpmname', # finds \$VERSION
     PREREQ_PM         => {$prereq_pm}, # e.g., Module::Name => 1.1
     (\$] >= 5.005 ?     ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM  => '$modfname.pm', # retrieve abstract from module
+      (ABSTRACT_FROM  => '$modpmname', # retrieve abstract from module
        AUTHOR         => '$author <$email>') : ()),
 END
 if (!$opt_X) { # print C stuff, unless XS is disabled
@@ -2065,7 +2052,7 @@ _RMEND_
 close(RM) || die "Can't close $ext$modpname/README: $!\n";
 
 my $testdir  = "t";
-my $testfile = "$testdir/1.t";
+my $testfile = "$testdir/$modpname.t";
 unless (-d "$testdir") {
   mkdir "$testdir" or die "Cannot mkdir $testdir: $!\n";
 }
@@ -2076,7 +2063,7 @@ open EX, ">$testfile" or die "Can't create $ext$modpname/$testfile: $!\n";
 
 print EX <<_END_;
 # Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl 1.t'
+# `make test'. After `make install' it should work as `perl $modpname.t'
 
 #########################
 
@@ -2190,7 +2177,7 @@ EOP
 
 warn "Writing $ext$modpname/MANIFEST\n";
 open(MANI,'>MANIFEST') or die "Can't create MANIFEST: $!";
-my @files = grep { -f } (<*>, <t/*>, <$fallbackdirname/*>);
+my @files = grep { -f } (<*>, <t/*>, <$fallbackdirname/*>, <$modpmdir/*>);
 if (!@files) {
   eval {opendir(D,'.');};
   unless ($@) { @files = readdir(D); closedir(D); }
