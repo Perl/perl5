@@ -891,7 +891,7 @@ char *prog;
 
 		/* If degenerate scan matches "", assume scan done. */
 
-		if (locinput == cc->lastloc) {
+		if (locinput == cc->lastloc && n >= cc->min) {
 		    regcc = cc->oldcc;
 		    ln = regcc->cur;
 		    if (regmatch(cc->next))
