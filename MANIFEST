@@ -415,6 +415,7 @@ lib/Exporter.pm		Exporter base class
 lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
 lib/ExtUtils/Embed.pm	Utilities for embedding Perl in C programs
 lib/ExtUtils/Install.pm	Handles 'make install' on extensions
+lib/ExtUtils/Installed.pm	Information on installed extensions
 lib/ExtUtils/Liblist.pm	Locates libraries
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
@@ -424,6 +425,7 @@ lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
+lib/ExtUtils/inst	Give information about installed extensions
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
