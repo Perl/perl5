@@ -22,27 +22,19 @@ case "$d_dosuid" in
 *) suidperl='';;
 esac
 
-shrpdir=$archlibexp/CORE
-
 case "$useshrplib" in
 true)
     pldlflags="$cccdlflags"
-    case "$osname" in 
-    os2)	shrpenv='' ;;
-	*)		shrpenv="env LD_RUN_PATH=$shrpdir";;
-	esac
+	# NeXT-4 specific stuff.  Can't we do this in the hint file?
 	case "${osname}${osvers}" in
 	next4*)
-		# Can't we do this in the hint file?
 		ld='libtool -dynamic -undefined warning -framework System \
 		-compatibility_version 1 -current_version $(PATCHLEVEL) \
 		-prebind -seg1addr 0x27000000 -install_name $(SHRPDIR)/$@'
 		;;
 	esac
     ;;
-*)
-	pldlflags=''
-	shrpenv=''
+*)	pldlflags=''
 	;;
 esac
 
@@ -264,7 +256,7 @@ if test -r $osname/Makefile.SHs ; then
 Makefile: $osname/Makefile.SHs
 !GROK!THIS!
 else
-	$spitshell >>Makefile <<!NO!SUBS!
+	$spitshell >>Makefile <<'!NO!SUBS!'
 $(LIBPERL): $& perl$(OBJ_EXT) $(obj)
 !NO!SUBS!
 	case "$useshrplib" in
