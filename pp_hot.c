@@ -173,10 +173,8 @@ PP(pp_concat)
 		olds = s = (U8*)savepvn((char*)s, len);
 	    }
 	    if (!SvOK(left) && SvTYPE(left) <= SVt_PVMG) {
-	        if (SvREADONLY(left)) {
-		    left = sv_2mortal(newSVpvn("", 0));
-		    left_utf = FALSE;
-		}
+	        if (SvREADONLY(left))
+		    left = sv_2mortal(newSVsv(left));
 		else
 		    sv_setpv(left, "");	/* Suppress warning. */
 	    }
