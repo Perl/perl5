@@ -36,18 +36,8 @@
 #      Resolved in 970211 Beta
 #   lib/io_udp.t test hangs because of a bug in getsockname().
 #      Fixed in latest BETA socket3r.lib
-#   If there is a softlink in your path, Findbin will fail.
-#      This is a documented feature of perl's getpwd().
 #   There is currently no support for dynamically linked
 #      libraries.
-#   op/magic.t failure due to a feature of QNX which rewrites script
-#      names before they are executed. I think you'll find that if
-#      you cd `fullpath -t` before doing the make, the test will pass.
-#----------------------------------------------------------------
-# At present, all QNX systems are equivalent architectures,
-# so it might be reasonable to call archname=qnx rather than
-# making an unnecessary distinction between AT-qnx and PCI-qnx,
-# for example.
 #----------------------------------------------------------------
 # These hints were submitted by:
 #   Norton T. Allen
@@ -60,6 +50,14 @@
 echo ""
 echo "Some tests may fail. Please read the hints/qnx.sh file."
 echo ""
+
+#----------------------------------------------------------------
+# At present, all QNX systems are equivalent architectures,
+# so it is reasonable to call archname=x86-qnx rather than
+# making an unnecessary distinction between AT-qnx and PCI-qnx,
+# for example.
+#----------------------------------------------------------------
+archname='x86-qnx'
 
 #----------------------------------------------------------------
 # QNX doesn't come with a csh and the ports of tcsh I've used
