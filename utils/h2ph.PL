@@ -276,6 +276,8 @@ while (defined (my $file = next_file())) {
 		chomp $next;
 		# drop "#define FOO FOO" in enums
 		$next =~ s/^\s*#\s*define\s+(\w+)\s+\1\s*$//;
+		# #defines in enums (aliases)
+		$next =~ s/^\s*#\s*define\s+(\w+)\s+(\w+)\s*$/$1 = $2,/;
 		$_ .= $next;
 		print OUT "# $next\n" if $opt_D;
 	    }
@@ -288,6 +290,7 @@ while (defined (my $file = next_file())) {
 	    my $enum_val = -1;
 	    foreach my $enum (@enum_subs) {
 		my ($enum_name, $enum_value) = $enum =~ /^([a-zA-Z_]\w*)(=.+)?$/;
+		$enum_name or next;
 		$enum_value =~ s/^=//;
 		$enum_val = (length($enum_value) ? $enum_value : $enum_val + 1);
 		if ($opt_h) {
