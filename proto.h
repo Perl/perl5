@@ -104,7 +104,9 @@ int	dump_fds _((char* s));
 #endif
 void	dump_form _((GV* gv));
 void	dump_gv _((GV* gv));
+#ifdef MYMALLOC
 void	dump_mstats _((char* s));
+#endif
 void	dump_op _((OP* arg));
 void	dump_pm _((PMOP* pm));
 void	dump_packsubs _((HV* stash));
@@ -148,6 +150,7 @@ void	hv_undef _((HV* tb));
 I32	ibcmp _((U8* a, U8* b, I32 len));
 I32	ingroup _((I32 testgid, I32 effective));
 char*	instr _((char* big, char* little));
+bool	io_close _((IO* io));
 OP*	invert _((OP* cmd));
 OP*	jmaybe _((OP* arg));
 I32	keyword _((char* d, I32 len));
@@ -310,6 +313,7 @@ SV*	perl_get_sv _((char* name, I32 create));
 AV*	perl_get_av _((char* name, I32 create));
 HV*	perl_get_hv _((char* name, I32 create));
 CV*	perl_get_cv _((char* name, I32 create));
+int	perl_init_i18nl14n _((int printwarn));
 int	perl_parse _((PerlInterpreter* sv_interp, void(*xsinit)(void), int argc, char** argv, char** env));
 void	perl_require_pv _((char* pv));
 #define perl_requirepv perl_require_pv
@@ -321,6 +325,7 @@ OP*	pmtrans _((OP* op, OP* expr, OP* repl));
 OP*	pop_return _((void));
 void	pop_scope _((void));
 OP*	prepend_elem _((I32 optype, OP* head, OP* tail));
+void	provide_ref _((OP* op, SV* sv));
 void	push_return _((OP* op));
 void	push_scope _((void));
 regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
