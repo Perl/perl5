@@ -70,7 +70,7 @@ use strict;
 
 use Carp;
 
-our $VERSION = '2.03';
+our $VERSION = '2.04';
 
 use base qw/ Exporter /;
 our @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -99,6 +99,9 @@ unless(defined &cwd) {
     }
 }
 
+# set a reasonable (and very safe) default for fastgetcwd, in case it
+# isn't redefined later (20001212 rspier)
+*fastgetcwd = \&cwd;
 
 # By Brandon S. Allbery
 #
