@@ -21,7 +21,7 @@ sub ok ($;$) {
 }
 
 
-print "1..19\n";
+print "1..24\n";
 require Exporter;
 ok( 1, 'Exporter compiled' );
 
@@ -50,7 +50,7 @@ foreach my $meth (@::Exporter_Methods) {
                 That => [qw(Above the @wailing)],
                 tray => [qw(Fasten $seatbelt)],
                );
-@EXPORT    = qw(lifejacket);
+@EXPORT    = qw(lifejacket is);
 @EXPORT_OK = qw(under &your $seat);
 $VERSION = '1.05';
 
@@ -72,6 +72,8 @@ $seat     = 'seat';
 @wailing = qw(AHHHHHH);
 %left = ( left => "right" );
 
+BEGIN {*is = \&Is};
+sub Is { 'Is' };
 
 Exporter::export_ok_tags;
 
@@ -88,6 +90,24 @@ package Foo;
 Testing->import;
 
 ::ok( defined &lifejacket,      'simple import' );
+
+my $got = eval {&lifejacket};
+::ok ( $@ eq "", 'check we can call the imported subroutine')
+  or print STDERR "# \$\@ is $@\n";
+::ok ( $got eq 'lifejacket', 'and that it gave the correct result')
+  or print STDERR "# expected 'lifejacket', got " .
+  (defined $got ? "'$got'" : "undef") . "\n";
+
+# The string eval is important. It stops $Foo::{is} existing when
+# Testing->import is called.
+::ok( eval "defined &is",
+      "Import a subroutine where exporter must create the typeglob" );
+my $got = eval "&is";
+::ok ( $@ eq "", 'check we can call the imported autoloaded subroutine')
+  or chomp ($@), print STDERR "# \$\@ is $@\n";
+::ok ( $got eq 'Is', 'and that it gave the correct result')
+  or print STDERR "# expected 'Is', got " .
+  (defined $got ? "'$got'" : "undef") . "\n";
 
 
 package Bar;
