@@ -1334,7 +1334,9 @@ yyparse(void)
 #endif
 #endif
 
-    struct ysv *ysave = (struct ysv*)safemalloc(sizeof(struct ysv));
+    struct ysv *ysave;
+
+    New(73, ysave, 1, struct ysv);
     SAVEDESTRUCTOR(yydestruct, ysave);
     ysave->oldyydebug	= yydebug;
     ysave->oldyynerrs	= yynerrs;
@@ -1359,8 +1361,10 @@ yyparse(void)
     /*
     ** Initialize private stacks (yyparse may be called from an action)
     */
-    ysave->yyss = yyss = (short*)safemalloc(yystacksize*sizeof(short));
-    ysave->yyvs = yyvs = (YYSTYPE*)safemalloc(yystacksize*sizeof(YYSTYPE));
+    New(73, yyss, yystacksize, short);
+    New(73, yyvs, yystacksize, YYSTYPE);
+    ysave->yyss = yyss;
+    ysave->yyvs = yyvs;
     if (!yyvs || !yyss)
 	goto yyoverflow;
 

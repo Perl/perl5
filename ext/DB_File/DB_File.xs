@@ -560,12 +560,13 @@ SV *   sv ;
 {
     SV **	svp;
     HV *	action ;
-    DB_File	RETVAL = (DB_File)safemalloc(sizeof(DB_File_type)) ;
+    DB_File	RETVAL;
     void *	openinfo = NULL ;
-    INFO	* info  = &RETVAL->info ;
+    INFO	* info;
 
 /* printf("In ParseOpenInfo name=[%s] flags=[%d] mode = [%d]\n", name, flags, mode) ;  */
-    Zero(RETVAL, 1, DB_File_type) ;
+    Newz(777, RETVAL, 1, DB_File_type) ;
+    info  = &RETVAL->info ;
 
     /* Default to HASH */
     RETVAL->hash = RETVAL->compare = RETVAL->prefix = NULL ;

@@ -54,7 +54,13 @@
 #define FLUSH
 
 #ifdef LEAKTEST
-static void xstat _((void));
+
+static void xstat _((int));
+long xcount[MAXXCOUNT];
+long lastxcount[MAXXCOUNT];
+long xycount[MAXXCOUNT][MAXYCOUNT];
+long lastxycount[MAXXCOUNT][MAXYCOUNT];
+
 #endif
 
 #ifndef MYMALLOC
@@ -207,63 +213,141 @@ safecalloc(MEM_SIZE count, MEM_SIZE size)
 
 #ifdef LEAKTEST
 
-#define ALIGN sizeof(long)
+struct mem_test_strut {
+    union {
+	long type;
+	char c[2];
+    } u;
+    long size;
+};
+
+#    define ALIGN sizeof(struct mem_test_strut)
+
+#    define sizeof_chunk(ch) (((struct mem_test_strut*) (ch))->size)
+#    define typeof_chunk(ch) \
+	(((struct mem_test_strut*) (ch))->u.c[0] + ((struct mem_test_strut*) (ch))->u.c[1]*100)
+#    define set_typeof_chunk(ch,t) \
+	(((struct mem_test_strut*) (ch))->u.c[0] = t % 100, ((struct mem_test_strut*) (ch))->u.c[1] = t / 100)
+#define SIZE_TO_Y(size) ( (size) > MAXY_SIZE				\
+			  ? MAXYCOUNT - 1 				\
+			  : ( (size) > 40 				\
+			      ? ((size) - 1)/8 + 5			\
+			      : ((size) - 1)/4))
 
 Malloc_t
 safexmalloc(I32 x, MEM_SIZE size)
 {
-    register Malloc_t where;
+    register char* where = (char*)safemalloc(size + ALIGN);
 
-    where = safemalloc(size + ALIGN);
-    xcount[x]++;
-    where[0] = x % 100;
-    where[1] = x / 100;
-    return where + ALIGN;
+    xcount[x] += size;
+    xycount[x][SIZE_TO_Y(size)]++;
+    set_typeof_chunk(where, x);
+    sizeof_chunk(where) = size;
+    return (Malloc_t)(where + ALIGN);
 }
 
 Malloc_t
-safexrealloc(Malloc_t where, MEM_SIZE size)
+safexrealloc(Malloc_t wh, MEM_SIZE size)
 {
-    register Malloc_t new = saferealloc(where - ALIGN, size + ALIGN);
-    return new + ALIGN;
+    char *where = (char*)wh;
+
+    if (!wh)
+	return safexmalloc(0,size);
+    
+    {
+	MEM_SIZE old = sizeof_chunk(where - ALIGN);
+	int t = typeof_chunk(where - ALIGN);
+	register char* new = (char*)saferealloc(where - ALIGN, size + ALIGN);
+    
+	xycount[t][SIZE_TO_Y(old)]--;
+	xycount[t][SIZE_TO_Y(size)]++;
+	xcount[t] += size - old;
+	sizeof_chunk(new) = size;
+	return (Malloc_t)(new + ALIGN);
+    }
 }
 
 void
-safexfree(Malloc_t where)
+safexfree(Malloc_t wh)
 {
     I32 x;
-
+    char *where = (char*)wh;
+    MEM_SIZE size;
+    
     if (!where)
 	return;
     where -= ALIGN;
+    size = sizeof_chunk(where);
     x = where[0] + 100 * where[1];
-    xcount[x]--;
+    xcount[x] -= size;
+    xycount[x][SIZE_TO_Y(size)]--;
     safefree(where);
 }
 
 Malloc_t
 safexcalloc(I32 x,MEM_SIZE count, MEM_SIZE size)
 {
-    register Malloc_t where;
-
-    where = safexmalloc(x, size * count + ALIGN);
-    xcount[x]++;
-    memset((void*)where + ALIGN, 0, size * count);
-    where[0] = x % 100;
-    where[1] = x / 100;
-    return where + ALIGN;
+    register char * where = (char*)safexmalloc(x, size * count + ALIGN);
+    xcount[x] += size;
+    xycount[x][SIZE_TO_Y(size)]++;
+    memset((void*)(where + ALIGN), 0, size * count);
+    set_typeof_chunk(where, x);
+    sizeof_chunk(where) = size;
+    return (Malloc_t)(where + ALIGN);
 }
 
 static void
-xstat(void)
+xstat(int flag)
 {
-    register I32 i;
+    register I32 i, j, total = 0;
+    I32 subtot[MAXYCOUNT];
 
+    for (j = 0; j < MAXYCOUNT; j++) {
+	subtot[j] = 0;
+    }
+    
+    PerlIO_printf(PerlIO_stderr(), "   Id  subtot   4   8  12  16  20  24  28  32  36  40  48  56  64  72  80 80+\n", total);
     for (i = 0; i < MAXXCOUNT; i++) {
-	if (xcount[i] > lastxcount[i]) {
-	    PerlIO_printf(PerlIO_stderr(),"%2d %2d\t%ld\n", i / 100, i % 100, xcount[i]);
-	    lastxcount[i] = xcount[i];
+	total += xcount[i];
+	for (j = 0; j < MAXYCOUNT; j++) {
+	    subtot[j] += xycount[i][j];
 	}
+	if (flag == 0
+	    ? xcount[i]			/* Have something */
+	    : (flag == 2 
+	       ? xcount[i] != lastxcount[i] /* Changed */
+	       : xcount[i] > lastxcount[i])) { /* Growed */
+	    PerlIO_printf(PerlIO_stderr(),"%2d %02d %7ld ", i / 100, i % 100, 
+			  flag == 2 ? xcount[i] - lastxcount[i] : xcount[i]);
+	    lastxcount[i] = xcount[i];
+	    for (j = 0; j < MAXYCOUNT; j++) {
+		if ( flag == 0 
+		     ? xycount[i][j]	/* Have something */
+		     : (flag == 2 
+			? xycount[i][j] != lastxycount[i][j] /* Changed */
+			: xycount[i][j] > lastxycount[i][j])) {	/* Growed */
+		    PerlIO_printf(PerlIO_stderr(),"%3ld ", 
+				  flag == 2 
+				  ? xycount[i][j] - lastxycount[i][j] 
+				  : xycount[i][j]);
+		    lastxycount[i][j] = xycount[i][j];
+		} else {
+		    PerlIO_printf(PerlIO_stderr(), "  . ", xycount[i][j]);
+		}
+	    }
+	    PerlIO_printf(PerlIO_stderr(), "\n");
+	}
+    }
+    if (flag != 2) {
+	PerlIO_printf(PerlIO_stderr(), "Total %7ld ", total);
+	for (j = 0; j < MAXYCOUNT; j++) {
+	    if (subtot[j]) {
+		PerlIO_printf(PerlIO_stderr(), "%3ld ", subtot[j]);
+	    } else {
+		PerlIO_printf(PerlIO_stderr(), "  . ");
+	    }
+	}
+	PerlIO_printf(PerlIO_stderr(), "\n");	
     }
 }
 
@@ -1362,7 +1446,12 @@ warn(pat,va_alist)
     }
     PerlIO_puts(PerlIO_stderr(),message);
 #ifdef LEAKTEST
-    DEBUG_L(xstat());
+    DEBUG_L(*message == '!' 
+	    ? (xstat(message[1]=='!'
+		     ? (message[2]=='!' ? 2 : 1)
+		     : 0)
+	       , 0)
+	    : 0);
 #endif
     (void)PerlIO_flush(PerlIO_stderr());
 }

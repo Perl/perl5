@@ -2699,7 +2699,7 @@ incpush(char *p, int addsubdirs)
 	return;
 
     if (addsubdirs) {
-	subdir = newSV(0);
+	subdir = NEWSV(55,0);
 	if (!archpat_auto) {
 	    STRLEN len = (sizeof(ARCHNAME) + strlen(patchlevel)
 			  + sizeof("//auto"));
@@ -2715,7 +2715,7 @@ incpush(char *p, int addsubdirs)
 
     /* Break at all separators */
     while (p && *p) {
-	SV *libdir = newSV(0);
+	SV *libdir = NEWSV(55,0);
 	char *s;
 
 	/* skip any consecutive separators */

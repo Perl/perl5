@@ -2123,13 +2123,14 @@ SV is B<not> incremented.
 
 	SV*     newRV_noinc _((SV* ref));
 
-=item newSV
+=item NEWSV
 
 Creates a new SV.  The C<len> parameter indicates the number of bytes of
 preallocated string space the SV should have.  The reference count for the
-new SV is set to 1.
+new SV is set to 1.  C<id> is an integer id between 0 and 1299 (used to
+identify leaks).
 
-	SV*	newSV _((STRLEN len));
+	SV*	NEWSV _((int id, STRLEN len));
 
 =item newSViv
 

@@ -43,7 +43,7 @@ more_he(void)
 {
     register HE* he;
     register HE* heend;
-    he_root = (HE*)safemalloc(1008);
+    New(54, he_root, 1008/sizeof(HE), HE);
     he = he_root;
     heend = &he[1008 / sizeof(HE) - 1];
     while (he < heend) {

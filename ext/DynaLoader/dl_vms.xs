@@ -263,7 +263,7 @@ dl_load_file(filespec, flags)
       dlptr->name.dsc$w_length = namlst[0].len;
       dlptr->name.dsc$a_pointer = savepvn(namlst[0].string,namlst[0].len);
       dlptr->defspec.dsc$w_length = specdsc.dsc$w_length - namlst[0].len;
-      dlptr->defspec.dsc$a_pointer = safemalloc(dlptr->defspec.dsc$w_length + 1);
+      New(1097, dlptr->defspec.dsc$a_pointer, dlptr->defspec.dsc$w_length + 1, char);
       deflen = namlst[0].string - specdsc.dsc$a_pointer; 
       memcpy(dlptr->defspec.dsc$a_pointer,specdsc.dsc$a_pointer,deflen);
       memcpy(dlptr->defspec.dsc$a_pointer + deflen,

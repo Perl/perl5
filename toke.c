@@ -1121,7 +1121,7 @@ filter_add(filter_t funcp, SV *datasv)
     if (!rsfp_filters)
 	rsfp_filters = newAV();
     if (!datasv)
-	datasv = newSV(0);
+	datasv = NEWSV(255,0);
     if (!SvUPGRADE(datasv, SVt_PVIO))
         die("Can't upgrade filter_add data to SVt_PVIO");
     IoDIRP(datasv) = (DIR*)funcp; /* stash funcp into spare field */
