@@ -106,6 +106,117 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7461] By: jhi                                   on 2000/10/27  15:37:38
+        Log: Retract #7459, the script needs more work.
+     Branch: perl
+	   - mkreef
+	   ! MANIFEST
+____________________________________________________________________________
+[  7459] By: jhi                                   on 2000/10/27  15:02:07
+        Log: (Retracted by #7461)
+             
+             Add a shell script for creating/removing symbolic link farms,
+             useful for keeping the source code read-only and doing the
+             builds somewhere else.
+     Branch: perl
+	   + mkreef
+	   ! MANIFEST
+____________________________________________________________________________
+[  7458] By: jhi                                   on 2000/10/27  14:42:20
+        Log: Do away with the fix_pl.
+     Branch: perl
+	   - fix_pl
+	   ! MANIFEST Makefile.SH
+____________________________________________________________________________
+[  7457] By: jhi                                   on 2000/10/27  12:43:13
+        Log: Subject: [ID 20001027.002] Patch 7380 followup - Perl_modfl *must* be defined
+             From: Jens Hamisch <jens@Strawberry.COM>
+             Date: Fri, 27 Oct 2000 14:38:21 +0200
+             Message-Id: <20001027143821.B3366@Strawberry.COM>
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  7456] By: jhi                                   on 2000/10/27  12:33:42
+        Log: Subject: [PATCH] todo
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 26 Oct 2000 22:32:29 +0100
+             Message-ID: <20001026223229.A44540@plum.flirble.org>
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[  7455] By: jhi                                   on 2000/10/27  12:02:21
+        Log: Subject: Re: [PATCH bleadperl] ripples from constsub patch
+             From: John Tobey <jtobey@john-edwin-tobey.org>
+             Date: Thu, 26 Oct 2000 22:29:53 -0400 (EDT)
+             Message-Id: <m13ozHF-000FObC@feynman.localnet>
+     Branch: perl
+	   ! op.c t/pragma/sub_lval.t
+____________________________________________________________________________
+[  7454] By: jhi                                   on 2000/10/27  11:59:42
+        Log: Subject: [ID 20001026.006] C<use integer; $x += 1> gives uninitialized warning
+             From: sthoenna@efn.org
+             Date: Thu, 26 Oct 2000 14:00:03 -0700 (PDT)
+             Message-Id: <200010262100.e9QL03U06386@garcia.efn.org>
+     Branch: perl
+	   ! pp.c t/op/assignwarn.t
+____________________________________________________________________________
+[  7453] By: jhi                                   on 2000/10/27  00:15:08
+        Log: Upgrade to Storable 1.0.5, from Raphael Manfredi.
+     Branch: perl
+	   ! ext/Storable/ChangeLog ext/Storable/Storable.pm
+	   ! ext/Storable/Storable.xs t/lib/st-lock.t
+____________________________________________________________________________
+[  7452] By: jhi                                   on 2000/10/26  13:05:52
+        Log: Undo #7451, this seems to be a deficiency in Perforce,
+             there is no per-file line-terminator type, only per-client.
+     Branch: perl
+	   ! README.dos README.win32 djgpp/configure.bat win32/Makefile
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  7451] By: jhi                                   on 2000/10/26  04:56:03
+        Log: Experimenting in DOS arcana.
+     Branch: perl
+	   ! README.dos README.win32 djgpp/configure.bat win32/Makefile
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  7450] By: jhi                                   on 2000/10/26  04:50:52
+        Log: Subject: [ID 20001025.011] [PATCH] t/io/open.t perl@7369[  7350] breaks VMS perl
+             From: "Peter J. Farley III" <pjfarley@banet.net>            
+             Date: Wed, 25 Oct 2000 23:10:18 -0400
+             Message-Id: <4.3.1.0.20001025230222.00accba0@pop5.banet.net>
+     Branch: perl
+	   ! t/io/open.t
+____________________________________________________________________________
+[  7449] By: jhi                                   on 2000/10/26  04:49:16
+        Log: Subject: Re: [PATCH 5.6.0]Add non-blocking thread doneness checking
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 26 Oct 2000 01:55:17 +0100
+             Message-Id: <200010260055.BAA27869@crypt.compulink.co.uk>
+             
+             minus one unneeded mutex lock/unlock pointed out by Dan Sugalski.
+     Branch: perl
+	   ! ext/Thread/Thread.pm ext/Thread/Thread.xs t/lib/thr5005.t
+____________________________________________________________________________
+[  7448] By: jhi                                   on 2000/10/26  04:38:36
+        Log: Subject: [PATCH: perl@7446] restore missing d_stdio_cnt_lval to VMS
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 25 Oct 2000 18:23:56 -0700 (PDT)                          
+             Message-ID: <Pine.OSF.4.10.10010251816200.247618-100000@aspara.forte.com>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  7447] By: jhi                                   on 2000/10/25  23:20:02
+        Log: Remains of the old UTF-8 API, utf8_to_uv_chk(): didn't link
+             in platforms that strictly require all the symbols being present
+             at link time.
+     Branch: perl
+	   ! handy.h
+____________________________________________________________________________
+[  7446] By: jhi                                   on 2000/10/25  21:55:57
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7445] By: jhi                                   on 2000/10/25  21:27:08
         Log: Integrate with vmsperl #7430 by Charles Bailey:
              
