@@ -58,15 +58,22 @@ Long doubles
 
 Locales
     deprecate traditional/legacy locales?
+    How do locales work across packages?
     figure out how to support Unicode locales
 	suggestion: integrate the IBM Classes for Unicode (ICU)
-	http://www10.software.ibm.com/developerworks/opensource/icu/index.html
+	http://oss.software.ibm.com/developerworks/opensource/icu/project/
 	and check out also the Locale Converter:
 	http://alphaworks.ibm.com/tech/localeconverter
-    ICU has it all: locales and character sets, the 'iconv' seems to have
-    'only' the character sets.  Either would be valuable to get integrated
+    ICU is "portable, open-source Unicode library with:
+    charset-independent locales (with multiple locales simultaneously
+    supported in same thread; character conversions; formatting/parsing
+    for numbers, currencies, date/time and messages; message catalogs
+    (resources) ; transliteration, collation, normalization, and text
+    boundaries (grapheme, word, line-break))".
+    There is also 'iconv', either from XPG4 or GNU (glibc).
+    iconv is about character set conversions.
+    Either ICU or iconv would be valuable to get integrated
     into Perl, Configure already probes for libiconv and <iconv.h>. 
-    How do locales work across packages?
 
 Regexen
    make RE engine thread-safe
