@@ -4176,7 +4176,13 @@ Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** listsvp, SV 
 }
 
 /*
- - reginclass - determine if a character falls into a character class
+ - reginclasslen - determine if a character falls into a character class
+ 
+  The n is the ANYOF regnode, the p is the target string, lenp
+  is pointer to the maximum length of how far to go in the p
+  (if the lenp is zero, UTF8SKIP(p) is used),
+  do_utf8 tells whether the target string is in UTF-8.
+
  */
 
 STATIC bool
@@ -4300,6 +4306,14 @@ S_reginclasslen(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, registe
 
     return (flags & ANYOF_INVERT) ? !match : match;
 }
+
+/*
+ - reginclass - determine if a character falls into a character class
+
+  The n is the ANYOF regnode, the p is the target string, do_utf8 tells
+  whether the target string is in UTF-8.
+
+ */
 
 STATIC bool
 S_reginclass(pTHX_ register regnode *n, register U8* p, register bool do_utf8)
