@@ -47,9 +47,11 @@ if ($type eq "prog")
    {
    return($self->_is_prefix($path, $Config{prefix})
           &&
-          !$self->_is_prefix($path, $Config{installman1dir})
+          !($Config{installman1dir} && 
+		  	$self->_is_prefix($path, $Config{installman1dir}))
           &&
-          !$self->_is_prefix($path, $Config{installman3dir})
+          !($Config{installman3dir} && 
+		  	$self->_is_prefix($path, $Config{installman3dir}))
           ? 1 : 0);
    }
 return(0);
