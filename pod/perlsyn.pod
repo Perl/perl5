@@ -33,13 +33,13 @@ as C<0>; when used as a string, it is treated the empty string,
 C<"">; and when used as a reference that isn't being assigned
 to, it is treated as an error.  If you enable warnings, you'll
 be notified of an uninitialized value whenever you treat C<undef>
-as a string or a number.  Well, usually.  Boolean ("don't-care")
-contexts, such as:
+as a string or a number.  Well, usually.  Boolean contexts, such as:
 
     my $a;
     if ($a) {}
 
-are exempt from warnings.  Operators such as C<++>, C<-->, C<+=>,
+are exempt from warnings (because they care about truth rather than
+definedness).  Operators such as C<++>, C<-->, C<+=>,
 C<-=>, and C<.=>, that operate on undefined left values such as:
 
     my $a;
