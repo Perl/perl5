@@ -100,7 +100,7 @@ supply had better not give the same value every time forever!)
 
 Top-of-form processing is by default handled by a format with the 
 same name as the current filehandle with "_TOP" concatenated to it.
-It's triggered at the top of each page.  See <perlfunc/write()>.
+It's triggered at the top of each page.  See L<perlfunc/write>.
 
 Examples:
 
@@ -272,7 +272,7 @@ yourself if necessary.
 
 Here's another strategy; open a pipe to yourself, using C<open(MESELF, "|-")> 
 (see L<perlfunc/open()>) and always write() to MESELF instead of
-STDOUT.  Have your child process postprocesses its STDIN to rearrange
+STDOUT.  Have your child process massage its STDIN to rearrange
 headers and footers however you like.  Not very convenient, but doable.
 
 =head2 Accessing Formatting Internals

@@ -14,13 +14,13 @@ Perl uses a simple signal handling model: the %SIG hash contains names or
 references of user-installed signal handlers.  These handlers will be called
 with an argument which is the name of the signal that triggered it.  A
 signal may be generated intentionally from a particular keyboard sequence like
-control-C or control-Z, sent to you from an another process, or
+control-C or control-Z, sent to you from another process, or
 triggered automatically by the kernel when special events transpire, like
 a child process exiting, your process running out of stack space, or 
 hitting file size limit.
 
 For example, to trap an interrupt signal, set up a handler like this.
-Notice how all we do is set with a global variable and then raise an
+Notice how all we do is set a global variable and then raise an
 exception.  That's because on most systems libraries are not
 re-entrant, so calling any print() functions (or even anything that needs to
 malloc(3) more memory) could in theory trigger a memory fault
@@ -199,7 +199,7 @@ to find out whether anyone (or anything) has accidentally removed our fifo.
 
 Perl's basic open() statement can also be used for unidirectional interprocess
 communication by either appending or prepending a pipe symbol to the second
-argument to open().  Here's how to start something up a child process you
+argument to open().  Here's how to start something up in a child process you
 intend to write to:
 
     open(SPOOLER, "| cat -v | lpr -h 2>/dev/null") 
@@ -216,7 +216,7 @@ And here's how to start up a child process you intend to read from:
 	next if /^(tcp|udp)/;
 	print;
     } 
-    close SPOOLER || die "bad netstat: $! $?";
+    close STATUS || die "bad netstat: $! $?";
 
 If one can be sure that a particular program is a Perl script that is
 expecting filenames in @ARGV, the clever programmer can write something
@@ -296,7 +296,7 @@ you opened whatever your kid writes to his STDOUT.
 
 Another common use for this construct is when you need to execute
 something without the shell's interference.  With system(), it's
-straigh-forward, but you can't use a pipe open or backticks safely.
+straightforward, but you can't use a pipe open or backticks safely.
 That's because there's no way to stop the shell from getting its hands on
 your arguments.   Instead, use lower-level control to call exec() directly.
 
@@ -341,7 +341,7 @@ And here's a safe pipe open for writing:
 Note that these operations are full Unix forks, which means they may not be
 correctly implemented on alien systems.  Additionally, these are not true
 multithreading.  If you'd like to learn more about threading, see the
-F<modules> file mentioned below in the L<SEE ALSO> section.
+F<modules> file mentioned below in the L<"SEE ALSO"> section.
 
 =head2 Bidirectional Communication
 
@@ -627,7 +627,7 @@ differ from the system on which it's being run:
 
 =head2 Unix-Domain TCP Clients and Servers
 
-That's fine for Internet-domain clients and servers, but what local
+That's fine for Internet-domain clients and servers, but what about local
 communications?  While you can use the same setup, sometimes you don't
 want to.  Unix-domain sockets are local to the current host, and are often
 used internally to implement pipes.  Unlike Internet domain sockets, UNIX
@@ -808,7 +808,7 @@ Here's an example of a semaphore:
     die if !defined($key);
     print "$key\n";
 
-Put this code in a separate file to be run in more that one process
+Put this code in a separate file to be run in more than one process.
 Call the file F<take>:
 
     # create a semaphore
@@ -832,7 +832,7 @@ Call the file F<take>:
 
     semop($key,$opstring) || die "$!";
 
-Put this code in a separate file to be run in more that one process
+Put this code in a separate file to be run in more than one process.
 Call this file F<give>:
 
     # 'give' the semaphore
@@ -870,14 +870,14 @@ find them at a CPAN store near you.
 If you are running under version 5.000 (dubious) or 5.001, you can still
 use most of the examples in this document.  You may have to remove the
 C<use strict> and some of the my() statements for 5.000, and for both
-you'll have to load in version 1.2 of the F<Socket.pm> module, which
-was/is/shall-be included in I<perl5.001o>.
+you'll have to load in version 1.2 or older of the F<Socket.pm> module, which
+is included in I<perl5.002>.
 
 Most of these routines quietly but politely return C<undef> when they fail
 instead of causing your program to die right then and there due to an
 uncaught exception.  (Actually, some of the new I<Socket> conversion
 functions  croak() on bad arguments.)  It is therefore essential
-that you should check the return values fo these functions.  Always begin
+that you should check the return values of these functions.  Always begin
 your socket programs this way for optimal success, and don't forget to add
 B<-T> taint checking flag to the pound-bang line for servers:
 
@@ -893,7 +893,7 @@ All these routines create system-specific portability problems.  As noted
 elsewhere, Perl is at the mercy of your C libraries for much of its system
 behaviour.  It's probably safest to assume broken SysV semantics for
 signals and to stick with simple TCP and UDP socket operations; e.g. don't
-try to pass open filedescriptors over a local UDP datagram socket if you
+try to pass open file descriptors over a local UDP datagram socket if you
 want your code to stand a chance of being portable.
 
 Because few vendors provide C libraries that are safely 
