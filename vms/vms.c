@@ -4648,7 +4648,7 @@ vms_image_init(int *argcp, char ***argvp)
   if (tabidx) { tabvec[tabidx] = NULL; env_tables = tabvec; }
 
   getredirection(argcp,argvp);
-#if defined(USE_5005THREADS) && ( defined(__DECC) || defined(__DECCXX) )
+#if ( (defined(USE_5005THREADS) || defined(USE_ITHREADS) ) && ( defined(__DECC) || defined(__DECCXX) )
   {
 # include <reentrancy.h>
   (void) decc$set_reentrancy(C$C_MULTITHREAD);
