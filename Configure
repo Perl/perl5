@@ -20,8 +20,8 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jan 22 10:52:50 EET 1999 [metaconfig 3.0 PL70]
-# (with additional metaconfig patches by jhi@iki.fi)
+# Generated on Tue Feb  2 12:38:43 EET 1999 [metaconfig 3.0 PL70]
+# (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -960,7 +960,7 @@ case "$sh" in
 $me:  Fatal Error:  I can't find a Bourne Shell anywhere.  
 
 Usually it's in /bin/sh.  How did you even get this far?
-Please contact me (Jarkko Hietaniemi) at jhi@iki.fi and 
+Please contact me (Perl Maintainers) at perlbug@perl.com and 
 we'll try to straighten this all out.
 EOM
 	exit 1
@@ -1429,7 +1429,7 @@ THIS PACKAGE SEEMS TO BE INCOMPLETE.
 You have the option of continuing the configuration process, despite the
 distinct possibility that your kit is damaged, by typing 'y'es.  If you
 do, don't blame me if something goes wrong.  I advise you to type 'n'o
-and contact the author (jhi@iki.fi).
+and contact the author (perlbug@perl.com).
 
 EOM
 		echo $n "Continue? [n] $c" >&4
@@ -1654,7 +1654,7 @@ Much effort has been expended to ensure that this shell script will run on any
 Unix system.  If despite that it blows up on yours, your best bet is to edit
 Configure and run it again.  If you can't run Configure for some reason,
 you'll have to generate a config.sh file by hand.  Whatever problems you
-have, let me (jhi@iki.fi) know how I blew it.
+have, let me (perlbug@perl.com) know how I blew it.
 
 This installation script affects things in two ways:
 
@@ -2017,7 +2017,7 @@ EOM
 	(cd $src/hints; ls -C *.sh) | $sed 's/\.sh/   /g' >&4
 	dflt=''
 	: Half the following guesses are probably wrong... If you have better
-	: tests or hints, please send them to jhi@iki.fi
+	: tests or hints, please send them to perlbug@perl.com
 	: The metaconfig authors would also appreciate a copy...
 	$test -f /irix && osname=irix
 	$test -f /xenix && osname=sco_xenix
@@ -5169,6 +5169,7 @@ use no flags, say "none".
 EOM
     case "$lddlflags" in
     '') case "$osname" in
+  			beos) dflt='-nostart' ;;
 			hpux)  dflt='-b' ;;
 			linux|irix*)	dflt='-shared' ;;
 			next)  dflt='none' ;;
@@ -5249,7 +5250,7 @@ $undef)
 	;;
 *)	case "$useshrplib" in
 	'')	case "$osname" in
-		svr4*|dgux|dynixptx|esix|powerux)
+		svr4*|dgux|dynixptx|esix|powerux|beos)
 			dflt=y
 			also='Building a shared libperl is required for dynamic loading to work on your system.'
 			;;
@@ -5294,6 +5295,7 @@ EOM
 		case "${osname}${osvers}" in
 		next4*)	xxx='DYLD_LIBRARY_PATH' ;;
 		os2*)	xxx='' ;; # Nothing special needed.
+		beos*)  xxx='' ;;
 		*)		xxx='LD_LIBRARY_PATH' ;;
 		esac
 		if test X"$xxx" != "X"; then
@@ -5380,7 +5382,7 @@ case "$shrpdir" in
 *)	$cat >&4 <<EOM
 WARNING:  Use of the shrpdir variable for the installation location of
 the shared $libperl is not supported.  It was never documented and
-will not work in this version.  Let me (jhi@iki.fi)
+will not work in this version.  Let me (perlbug@perl.com)
 know of any problems this may cause.
 
 EOM
@@ -5425,6 +5427,9 @@ if "$useshrplib"; then
 		;;
 	next)
 		# next doesn't like the default...
+		;;
+	beos)
+		# beos doesn't like the default, either.
 		;;
 	*)
 		tmp_shrpenv="env LD_RUN_PATH=$shrpdir"

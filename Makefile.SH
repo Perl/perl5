@@ -68,6 +68,8 @@ true)
 	hpux10*|hpux11*)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+b$archlibexp/CORE -lperl"
 		;;
+	beos*)	ldlibpth="LIBRARY_PATH=`pwd`:$LIBRARY_PATH"
+		;;
 	esac
 	;;
 *)	pldlflags=''
