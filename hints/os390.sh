@@ -203,6 +203,14 @@ EOWARN
     fi
 fi
 
+# Most of the time gcvt() seems to work fine but
+# sometimes values like 0.1, 0.2, come out as "10", "20",
+# a trivial Perl demonstration snippet is 'print 0.1'.
+# Yes, a flagrant bug, but unfortunately not trivial to
+# reproduce in C using gcvt().
+# sprintf() seems to get things right(er).
+d_Gconvert='sprintf((b),"%.*g",(n),(x))'
+
 cat >config.arch<<'__CONFIG_ARCH__'
 # The '-W 0,float(ieee)' cannot be used during Configure as ldflags.
 
