@@ -615,7 +615,7 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 
 =back
 
-=head2 Defining your own character properties
+=head2 User-defined Character Properties
 
 You can define your own character properties by defining subroutines
 that have names beginning with "In" or "Is".  The subroutines must be
@@ -631,22 +631,28 @@ newline-separated lines.  Each line must be one of the following:
 =item *
 
 Two hexadecimal numbers separated by a tabulator denoting a range
-of Unicode codepoints.
+of Unicode codepoints to include.
 
 =item *
 
-An existing character property prefixed by "+utf8::" to include
-all the characters in that property.
+Something to include, prefixed by "+": either an built-in character
+property (prefixed by "utf8::"), for all the characters in that
+property; or two hexadecimal codepoints for a range; or a single
+hexadecimal codepoint.
 
 =item *
 
-An existing character property prefixed by "-utf8::" to exclude
-all the characters in that property.
+Something to exclude, prefixed by "-": either an existing character
+property (prefixed by "utf8::"), for all the characters in that
+property; or two hexadecimal codepoints for a range; or a single
+hexadecimal codepoint.
 
 =item *
 
-An existing character property prefixed by "!utf8::" to include
-all except the characters in that property.
+Something to negate, prefixed "!": either an existing character
+property (prefixed by "utf8::") for all the characters except the
+characters in the property; or two hexadecimal codepoints for a range;
+or a single hexadecimal codepoint.
 
 =back
 
@@ -724,7 +730,8 @@ Level 1 - Basic Unicode Support
         [ 3] . \p{...} \P{...}
         [ 4] now scripts (see UTR#24 Script Names) in addition to blocks
         [ 5] have negation
-        [ 6] can use look-ahead to emulate subtraction (*)
+        [ 6] can use regular expression look-ahead [a]
+             or user-defined character properties [b] to emulate subtraction
         [ 7] include Letters in word characters
         [ 8] note that perl does Full casefolding in matching, not Simple:
              for example U+1F88 is equivalent with U+1F000 U+03B9,
@@ -737,7 +744,7 @@ Level 1 - Basic Unicode Support
              (should also affect <>, $., and script line numbers)
              (the \x{85}, \x{2028} and \x{2029} do match \s)
 
-(*) You can mimic class subtraction using lookahead.
+[a] You can mimic class subtraction using lookahead.
 For example, what TR18 might write as
 
     [{Greek}-[{UNASSIGNED}]]
@@ -752,6 +759,8 @@ But in this particular example, you probably really want
     \p{Greek}
 
 which will match assigned characters known to be part of the Greek script.
+
+[b] See L</User-defined Character Properties>.
 
 =item *
 

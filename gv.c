@@ -1283,7 +1283,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 
   if (mg && amtp->was_ok_am == PL_amagic_generation
       && amtp->was_ok_sub == PL_sub_generation)
-      return AMT_OVERLOADED(amtp);
+      return (bool)AMT_OVERLOADED(amtp);
   sv_unmagic((SV*)stash, PERL_MAGIC_overload_table);
 
   DEBUG_o( Perl_deb(aTHX_ "Recalcing overload magic in package %s\n",HvNAME(stash)) );

@@ -506,7 +506,6 @@ globexp2(const Char *ptr, const Char *pattern,
 static const Char *
 globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 {
-	struct passwd *pwd;
 	char *h;
 	const Char *p;
 	Char *b, *eb;
@@ -534,6 +533,7 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 		 */
 		if ((h = getenv("HOME")) == NULL) {
 #ifdef HAS_PASSWD
+			struct passwd *pwd;
 			if ((pwd = getpwuid(getuid())) == NULL)
 				return pattern;
 			else
@@ -547,6 +547,7 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 		 * Expand a ~user
 		 */
 #ifdef HAS_PASSWD
+		struct passwd *pwd;
 		if ((pwd = getpwnam((char*) patbuf)) == NULL)
 			return pattern;
 		else

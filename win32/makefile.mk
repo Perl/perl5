@@ -467,14 +467,17 @@ OPTIMIZE	= -O1 -MD -Zi -DDEBUGGING
 .ENDIF
 LINK_DBG	= -debug
 .ELSE
-.IF "$(CFG)" == "Optimize"
-# -O1 yields smaller code, which turns out to be faster than -O2
-#OPTIMIZE	= -O2 -MD -DNDEBUG
-OPTIMIZE	= -O1 -MD -DNDEBUG
-.ELSE
-OPTIMIZE	= -Od -MD -DNDEBUG
-.ENDIF
+OPTIMIZE	= -MD -DNDEBUG
 LINK_DBG	= -release
+.IF "$(WIN64)" == "define"
+# enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG)
+OPTIMIZE	+= -Ox -GL
+LINK_DBG	+= -ltcg
+.ELSE
+# -O1 yields smaller code, which turns out to be faster than -O2 on x86
+OPTIMIZE	+= -O1
+#OPTIMIZE	+= -O2
+.ENDIF
 .ENDIF
 
 .IF "$(WIN64)" == "define"

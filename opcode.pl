@@ -406,7 +406,7 @@ sub tab {
 
 __END__
 
-# New ops always go at the very end
+# New ops always go at the end, just before 'custom'
 
 # A recapitulation of the format of this file:
 # The file consists of five columns: the name of the op, an English
@@ -923,5 +923,7 @@ threadsv	per-thread value	ck_null		ds0
 # Control (contd.)
 setstate	set statement info	ck_null		s;
 method_named	method with known name	ck_null		d$
+
+# Add new ops before this, before the custom operator.
 
 custom		unknown custom operator		ck_null		0

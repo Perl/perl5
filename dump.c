@@ -75,8 +75,8 @@ Perl_dump_sub(pTHX_ GV *gv)
     gv_fullname3(sv, gv, Nullch);
     Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB %s = ", SvPVX(sv));
     if (CvXSUB(GvCV(gv)))
-	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "(xsub 0x%lx %d)\n",
-	    (long)CvXSUB(GvCV(gv)),
+	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "(xsub 0x%"UVxf" %d)\n",
+	    PTR2UV(CvXSUB(GvCV(gv))),
 	    (int)CvXSUBANY(GvCV(gv)).any_i32);
     else if (CvROOT(GvCV(gv)))
 	op_dump(CvROOT(GvCV(gv)));
@@ -1181,7 +1181,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 
 	    PerlIO_printf(file, "  (");
 	    Zero(freq, FREQ_MAX + 1, int);
-	    for (i = 0; i <= HvMAX(sv); i++) {
+	    for (i = 0; (STRLEN)i <= HvMAX(sv); i++) {
 		HE* h; int count = 0;
                 for (h = HvARRAY(sv)[i]; h; h = HeNEXT(h))
 		    count++;

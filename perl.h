@@ -3611,14 +3611,14 @@ EXTCONST char * PL_AMG_names[NofAMmeth];
 END_EXTERN_C
 
 struct am_table {
-  long was_ok_sub;
+  U32 was_ok_sub;
   long was_ok_am;
   U32 flags;
   CV* table[NofAMmeth];
   long fallback;
 };
 struct am_table_short {
-  long was_ok_sub;
+  U32 was_ok_sub;
   long was_ok_am;
   U32 flags;
 };

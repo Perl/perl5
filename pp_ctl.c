@@ -93,7 +93,7 @@ PP(pp_regcomp)
 
 	/* Check against the last compiled regexp. */
 	if (!PM_GETRE(pm) || !PM_GETRE(pm)->precomp ||
-	    PM_GETRE(pm)->prelen != len ||
+	    PM_GETRE(pm)->prelen != (I32)len ||
 	    memNE(PM_GETRE(pm)->precomp, t, len))
 	{
 	    if (PM_GETRE(pm)) {
@@ -405,7 +405,7 @@ PP(pp_formline)
 	    itemsize = len;
 	    if (DO_UTF8(sv)) {
 		itemsize = sv_len_utf8(sv);
-		if (itemsize != len) {
+		if (itemsize != (I32)len) {
 		    I32 itembytes;
 		    if (itemsize > fieldsize) {
 			itemsize = fieldsize;
@@ -447,7 +447,7 @@ PP(pp_formline)
 	    itemsize = len;
 	    if (DO_UTF8(sv)) {
 		itemsize = sv_len_utf8(sv);
-		if (itemsize != len) {
+		if (itemsize != (I32)len) {
 		    I32 itembytes;
 		    if (itemsize <= fieldsize) {
 			send = chophere = s + itemsize;
@@ -1560,7 +1560,7 @@ PP(pp_dbstate)
 	register CV *cv;
 	register PERL_CONTEXT *cx;
 	I32 gimme = G_ARRAY;
-	I32 hasargs;
+	U8 hasargs;
 	GV *gv;
 
 	gv = PL_DBgv;
@@ -2170,7 +2170,7 @@ PP(pp_goto)
 		    cx->blk_sub.hasargs = 0;
 		}
 		cx->blk_sub.cv = cv;
-		cx->blk_sub.olddepth = CvDEPTH(cv);
+		cx->blk_sub.olddepth = (U16)CvDEPTH(cv);
 		CvDEPTH(cv)++;
 		if (CvDEPTH(cv) < 2)
 		    (void)SvREFCNT_inc(cv);
@@ -2656,7 +2656,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     *avp = (AV*)SvREFCNT_inc(PL_comppad);
     LEAVE;
     if (PL_curcop == &PL_compiling)
-	PL_compiling.op_private = PL_hints;
+	PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
 #ifdef OP_IN_REGISTER
     op = PL_opsave;
 #endif
@@ -3328,7 +3328,7 @@ PP(pp_entereval)
     MUTEX_UNLOCK(&PL_eval_mutex);
 #endif /* USE_5005THREADS */
     ret = doeval(gimme, NULL);
-    if (PERLDB_INTER && was != PL_sub_generation /* Some subs defined here. */
+    if (PERLDB_INTER && was != (I32)PL_sub_generation /* Some subs defined here. */
 	&& ret != PL_op->op_next) {	/* Successive compilation. */
 	strcpy(safestr, "_<(eval )");	/* Anything fake and short. */
     }
@@ -3526,14 +3526,14 @@ S_doparseform(pTHX_ SV *sv)
 		if (postspace)
 		    *fpc++ = FF_SPACE;
 		*fpc++ = FF_LITERAL;
-		*fpc++ = arg;
+		*fpc++ = (U16)arg;
 	    }
 	    postspace = FALSE;
 	    if (s <= send)
 		skipspaces--;
 	    if (skipspaces) {
 		*fpc++ = FF_SKIP;
-		*fpc++ = skipspaces;
+		*fpc++ = (U16)skipspaces;
 	    }
 	    skipspaces = 0;
 	    if (s <= send)
@@ -3544,7 +3544,7 @@ S_doparseform(pTHX_ SV *sv)
 		    arg = fpc - linepc + 1;
 		else
 		    arg = 0;
-		*fpc++ = arg;
+		*fpc++ = (U16)arg;
 	    }
 	    if (s < send) {
 		linepc = fpc;
@@ -3567,7 +3567,7 @@ S_doparseform(pTHX_ SV *sv)
 	    arg = (s - base) - 1;
 	    if (arg) {
 		*fpc++ = FF_LITERAL;
-		*fpc++ = arg;
+		*fpc++ = (U16)arg;
 	    }
 
 	    base = s - 1;
@@ -3592,7 +3592,7 @@ S_doparseform(pTHX_ SV *sv)
 		}
 		*fpc++ = s - base;		/* fieldsize for FETCH */
 		*fpc++ = FF_DECIMAL;
-                *fpc++ = arg;
+                *fpc++ = (U16)arg;
             }
             else if (*s == '0' && s[1] == '#') {  /* Zero padded decimals */
                 arg = ischop ? 512 : 0;
@@ -3610,7 +3610,7 @@ S_doparseform(pTHX_ SV *sv)
                 }
                 *fpc++ = s - base;                /* fieldsize for FETCH */
                 *fpc++ = FF_0DECIMAL;
-		*fpc++ = arg;
+		*fpc++ = (U16)arg;
 	    }
 	    else {
 		I32 prespace = 0;
@@ -3639,7 +3639,7 @@ S_doparseform(pTHX_ SV *sv)
 		*fpc++ = ischop ? FF_CHECKCHOP : FF_CHECKNL;
 
 		if (prespace)
-		    *fpc++ = prespace;
+		    *fpc++ = (U16)prespace;
 		*fpc++ = FF_ITEM;
 		if (ismore)
 		    *fpc++ = FF_MORE;

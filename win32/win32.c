@@ -208,7 +208,6 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
     char *ptr;
     char *optr;
     char *strip;
-    int oldsize, newsize;
     STRLEN baselen;
 
     va_start(ap, trailing_path);
@@ -286,8 +285,6 @@ win32_get_xlib(const char *pl, const char *xlib, const char *libname)
     dTHX;
     char regstr[40];
     char pathstr[MAX_PATH+1];
-    DWORD datalen;
-    int len, newsize;
     SV *sv1 = Nullsv;
     SV *sv2 = Nullsv;
 
@@ -1022,7 +1019,7 @@ find_pid(int pid)
     dTHX;
     long child = w32_num_children;
     while (--child >= 0) {
-	if (w32_child_pids[child] == pid)
+	if ((int)w32_child_pids[child] == pid)
 	    return child;
     }
     return -1;
@@ -1049,7 +1046,7 @@ find_pseudo_pid(int pid)
     dTHX;
     long child = w32_num_pseudo_children;
     while (--child >= 0) {
-	if (w32_pseudo_child_pids[child] == pid)
+	if ((int)w32_pseudo_child_pids[child] == pid)
 	    return child;
     }
     return -1;
@@ -1220,7 +1217,7 @@ win32_stat(const char *path, Stat_t *sbuf)
 #if defined(WIN64) || defined(USE_LARGE_FILES)
 	res = _wstati64(pwbuffer, sbuf);
 #else
-	res = _wstat(pwbuffer, sbuf);
+	res = _wstat(pwbuffer, (struct _stat*)sbuf);
 #endif
     }
     else {
@@ -1952,7 +1949,6 @@ win32_internal_wait(int *status, DWORD timeout)
 	}
     }
 
-FAILED:
     errno = GetLastError();
     return -1;
 }
@@ -3551,7 +3547,7 @@ qualified_path(const char *cmd)
 	    if (*pathstr == '"') {	/* foo;"baz;etc";bar */
 		pathstr++;		/* skip initial '"' */
 		while (*pathstr && *pathstr != '"') {
-		    if (curfullcmd-fullcmd < MAX_PATH-cmdlen-5)
+		    if ((STRLEN)(curfullcmd-fullcmd) < MAX_PATH-cmdlen-5)
 			*curfullcmd++ = *pathstr;
 		    pathstr++;
 		}
@@ -3559,7 +3555,7 @@ qualified_path(const char *cmd)
 		    pathstr++;		/* skip trailing '"' */
 	    }
 	    else {
-		if (curfullcmd-fullcmd < MAX_PATH-cmdlen-5)
+		if ((STRLEN)(curfullcmd-fullcmd) < MAX_PATH-cmdlen-5)
 		    *curfullcmd++ = *pathstr;
 		pathstr++;
 	    }
@@ -3572,7 +3568,7 @@ qualified_path(const char *cmd)
 	    *curfullcmd++ = '\\';
 	}
     }
-GIVE_UP:
+
     Safefree(fullcmd);
     return Nullch;
 }
@@ -3731,14 +3727,14 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     StartupInfo.hStdInput	= tbl.childStdIn;
     StartupInfo.hStdOutput	= tbl.childStdOut;
     StartupInfo.hStdError	= tbl.childStdErr;
-    if (StartupInfo.hStdInput != INVALID_HANDLE_VALUE &&
-	StartupInfo.hStdOutput != INVALID_HANDLE_VALUE &&
-	StartupInfo.hStdError != INVALID_HANDLE_VALUE)
+    if (StartupInfo.hStdInput == INVALID_HANDLE_VALUE &&
+	StartupInfo.hStdOutput == INVALID_HANDLE_VALUE &&
+	StartupInfo.hStdError == INVALID_HANDLE_VALUE)
     {
-	StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
+	create |= CREATE_NEW_CONSOLE;
     }
     else {
-	create |= CREATE_NEW_CONSOLE;
+	StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
     }
     if (w32_use_showwindow) {
         StartupInfo.dwFlags |= STARTF_USESHOWWINDOW;

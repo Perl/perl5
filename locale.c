@@ -216,7 +216,7 @@ Perl_new_collate(pTHX_ char *newcoll)
 	  SSize_t mult = fb - fa;
 	  if (mult < 1)
 	      Perl_croak(aTHX_ "strxfrm() gets absurd");
-	  PL_collxfrm_base = (fa > mult) ? (fa - mult) : 0;
+	  PL_collxfrm_base = (fa > (Size_t)mult) ? (fa - mult) : 0;
 	  PL_collxfrm_mult = mult;
 	}
     }
@@ -561,7 +561,7 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 	    xused = strxfrm(xbuf + xout, s + xin, xAlloc - xout);
 	    if (xused == -1)
 		goto bad;
-	    if (xused < xAlloc - xout)
+	    if ((STRLEN)xused < xAlloc - xout)
 		break;
 	    xAlloc = (2 * xAlloc) + 1;
 	    Renew(xbuf, xAlloc, char);

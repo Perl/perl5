@@ -87,7 +87,7 @@
 #define RF_evaled	4		/* Did an EVAL with setting? */
 #define RF_utf8		8		/* String contains multibyte chars? */
 
-#define UTF (PL_reg_flags & RF_utf8)
+#define UTF ((PL_reg_flags & RF_utf8) != 0)
 
 #define RS_init		1		/* eval environment created */
 #define RS_set		2		/* replsv value is set */
@@ -239,7 +239,7 @@ S_regcppop(pTHX)
 	);
     }
     DEBUG_r(
-	if (*PL_reglastparen + 1 <= PL_regnpar) {
+	if ((I32)(*PL_reglastparen + 1) <= PL_regnpar) {
 	    PerlIO_printf(Perl_debug_log,
 			  "     restoring \\%"IVdf"..\\%"IVdf" to undef\n",
 			  (IV)(*PL_reglastparen + 1), (IV)PL_regnpar);
@@ -256,8 +256,8 @@ S_regcppop(pTHX)
      * building DynaLoader will fail:
      * "Error: '*' not in typemap in DynaLoader.xs, line 164"
      * --jhi */
-    for (paren = *PL_reglastparen + 1; paren <= PL_regnpar; paren++) {
-	if (paren > PL_regsize)
+    for (paren = *PL_reglastparen + 1; (I32)paren <= PL_regnpar; paren++) {
+	if ((I32)paren > PL_regsize)
 	    PL_regstartp[paren] = -1;
 	PL_regendp[paren] = -1;
     }
@@ -1045,7 +1045,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			if ( c == c1
 			     && (ln == len ||
 				 ibcmp_utf8(s, (char **)0, 0,  do_utf8,
-					    m, (char **)0, ln, UTF))
+					    m, (char **)0, ln, (bool)UTF))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			else {
@@ -1057,7 +1057,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 				      !ibcmp_utf8((char *) foldbuf,
 						  (char **)0, foldlen, do_utf8,
 						  m,
-						  (char **)0, ln,      UTF))
+						  (char **)0, ln, (bool)UTF))
 				  && (norun || regtry(prog, s)) )
 				  goto got_it;
 			}
@@ -1084,7 +1084,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			if ( (c == c1 || c == c2)
 			     && (ln == len ||
 				 ibcmp_utf8(s, (char **)0, 0,  do_utf8,
-					    m, (char **)0, ln, UTF))
+					    m, (char **)0, ln, (bool)UTF))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			else {
@@ -1096,7 +1096,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 				      !ibcmp_utf8((char *) foldbuf,
 						  (char **)0, foldlen, do_utf8,
 						  m,
-						  (char **)0, ln,      UTF))
+						  (char **)0, ln, (bool)UTF))
 				  && (norun || regtry(prog, s)) )
 				  goto got_it;
 			}
@@ -2134,7 +2134,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
     sp = prog->startp;
     ep = prog->endp;
     if (prog->nparens) {
-	for (i = prog->nparens; i > *PL_reglastparen; i--) {
+	for (i = prog->nparens; i > (I32)*PL_reglastparen; i--) {
 	    *++sp = -1;
 	    *++ep = -1;
 	}
@@ -2384,7 +2384,7 @@ S_regmatch(pTHX_ regnode *prog)
 	case EXACT:
 	    s = STRING(scan);
 	    ln = STR_LEN(scan);
-	    if (do_utf8 != (UTF!=0)) {
+	    if (do_utf8 != UTF) {
 		/* The target and the pattern have differing utf8ness. */
 		char *l = locinput;
 		char *e = s + ln;
@@ -2445,7 +2445,7 @@ S_regmatch(pTHX_ regnode *prog)
 		char *l = locinput;
 		char *e = PL_regeol;
 
-		if (ibcmp_utf8(s, 0,  ln, UTF,
+		if (ibcmp_utf8(s, 0,  ln, (bool)UTF,
 			       l, &e, 0,  do_utf8)) {
 		     /* One more case for the sharp s:
 		      * pack("U0U*", 0xDF) =~ /ss/i,
@@ -2727,7 +2727,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    n = ARG(scan);  /* which paren pair */
 	    ln = PL_regstartp[n];
 	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
-	    if (*PL_reglastparen < n || ln == -1)
+	    if ((I32)*PL_reglastparen < n || ln == -1)
 		sayNO;			/* Do not match unless seen CLOSEn. */
 	    if (ln == PL_regendp[n])
 		break;
@@ -2926,13 +2926,13 @@ S_regmatch(pTHX_ regnode *prog)
 	    n = ARG(scan);  /* which paren pair */
 	    PL_regstartp[n] = PL_reg_start_tmp[n] - PL_bostr;
 	    PL_regendp[n] = locinput - PL_bostr;
-	    if (n > *PL_reglastparen)
+	    if (n > (I32)*PL_reglastparen)
 		*PL_reglastparen = n;
 	    *PL_reglastcloseparen = n;
 	    break;
 	case GROUPP:
 	    n = ARG(scan);  /* which paren pair */
-	    sw = (*PL_reglastparen >= n && PL_regendp[n] != -1);
+	    sw = ((I32)*PL_reglastparen >= n && PL_regendp[n] != -1);
 	    break;
 	case IFTHEN:
 	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
@@ -3034,7 +3034,7 @@ S_regmatch(pTHX_ regnode *prog)
 		PL_regcc = &cc;
 		/* XXXX Probably it is better to teach regpush to support
 		   parenfloor > PL_regsize... */
-		if (parenfloor > *PL_reglastparen)
+		if (parenfloor > (I32)*PL_reglastparen)
 		    parenfloor = *PL_reglastparen; /* Pessimization... */
 		cc.parenfloor = parenfloor;
 		cc.cur = -1;
@@ -3070,10 +3070,10 @@ S_regmatch(pTHX_ regnode *prog)
 
 		DEBUG_r(
 		    PerlIO_printf(Perl_debug_log,
-				  "%*s  %ld out of %ld..%ld  cc=%lx\n",
+				  "%*s  %ld out of %ld..%ld  cc=%"UVxf"\n",
 				  REPORT_CODE_OFF+PL_regindent*2, "",
 				  (long)n, (long)cc->min,
-				  (long)cc->max, (long)cc)
+				  (long)cc->max, (UV)cc)
 		    );
 
 		/* If degenerate scan matches "", assume scan done. */
@@ -3118,7 +3118,7 @@ S_regmatch(pTHX_ regnode *prog)
 		if (PL_reg_leftiter-- == 0) {
 		    I32 size = (PL_reg_maxiter + 7)/8;
 		    if (PL_reg_poscache) {
-			if (PL_reg_poscache_size < size) {
+			if ((I32)PL_reg_poscache_size < size) {
 			    Renew(PL_reg_poscache, size, char);
 			    PL_reg_poscache_size = size;
 			}
@@ -3303,7 +3303,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (paren) {
 		if (paren > PL_regsize)
 		    PL_regsize = paren;
-		if (paren > *PL_reglastparen)
+		if (paren > (I32)*PL_reglastparen)
 		    *PL_reglastparen = paren;
 	    }
 	    scan = NEXTOPER(scan) + NODE_STEP_REGNODE;
@@ -3337,7 +3337,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    ln = PL_regstartp[n];
 			    /* assume yes if we haven't seen CLOSEn */
 			    if (
-				*PL_reglastparen < n ||
+				(I32)*PL_reglastparen < n ||
 				ln == -1 ||
 				ln == PL_regendp[n]
 			    ) {
@@ -3419,7 +3419,7 @@ S_regmatch(pTHX_ regnode *prog)
 				ln = PL_regstartp[n];
 				/* assume yes if we haven't seen CLOSEn */
 				if (
-				    *PL_reglastparen < n ||
+				    (I32)*PL_reglastparen < n ||
 				    ln == -1 ||
 				    ln == PL_regendp[n]
 				) {
@@ -3479,7 +3479,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    paren = scan->flags;	/* Which paren to set */
 	    if (paren > PL_regsize)
 		PL_regsize = paren;
-	    if (paren > *PL_reglastparen)
+	    if (paren > (I32)*PL_reglastparen)
 		*PL_reglastparen = paren;
 	    ln = ARG1(scan);  /* min to match */
 	    n  = ARG2(scan);  /* max to match */
@@ -3528,7 +3528,7 @@ S_regmatch(pTHX_ regnode *prog)
 			ln = PL_regstartp[n];
 			/* assume yes if we haven't seen CLOSEn */
 			if (
-			    *PL_reglastparen < n ||
+			    (I32)*PL_reglastparen < n ||
 			    ln == -1 ||
 			    ln == PL_regendp[n]
 			) {
@@ -3627,7 +3627,7 @@ S_regmatch(pTHX_ regnode *prog)
 				       utf8n_to_uvchr((U8*)locinput,
 						      UTF8_MAXLEN, &len,
 						      ckWARN(WARN_UTF8) ?
-						      0 : UTF8_ALLOW_ANY) != c1) {
+						      0 : UTF8_ALLOW_ANY) != (UV)c1) {
 				    locinput += len;
 				    count++;
 				}
@@ -3639,7 +3639,7 @@ S_regmatch(pTHX_ regnode *prog)
 							  UTF8_MAXLEN, &len,
 							  ckWARN(WARN_UTF8) ?
 							  0 : UTF8_ALLOW_ANY);
-				    if (c == c1 || c == c2)
+				    if (c == (UV)c1 || c == (UV)c2)
 					break;
 				    locinput += len;
 				    count++;
@@ -3679,7 +3679,7 @@ S_regmatch(pTHX_ regnode *prog)
 			else
 			    c = UCHARAT(PL_reginput);
 			/* If it could work, try it. */
-		        if (c == c1 || c == c2)
+		        if (c == (UV)c1 || c == (UV)c2)
 		        {
 			    TRYPAREN(paren, n, PL_reginput);
 			    REGCP_UNWIND(lastcp);
@@ -3730,7 +3730,7 @@ S_regmatch(pTHX_ regnode *prog)
 				c = UCHARAT(PL_reginput);
 			}
 			/* If it could work, try it. */
-			if (c1 == -1000 || c == c1 || c == c2)
+			if (c1 == -1000 || c == (UV)c1 || c == (UV)c2)
 			    {
 				TRYPAREN(paren, n, PL_reginput);
 				REGCP_UNWIND(lastcp);
@@ -3753,7 +3753,7 @@ S_regmatch(pTHX_ regnode *prog)
 				c = UCHARAT(PL_reginput);
 			}
 			/* If it could work, try it. */
-			if (c1 == -1000 || c == c1 || c == c2)
+			if (c1 == -1000 || c == (UV)c1 || c == (UV)c2)
 			    {
 				TRYPAREN(paren, n, PL_reginput);
 				REGCP_UNWIND(lastcp);
@@ -4384,7 +4384,7 @@ S_reginclass(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, register b
 	if (ANYOF_BITMAP_TEST(n, c))
 	    match = TRUE;
 	else if (flags & ANYOF_FOLD) {
-	  I32 f;
+	    U8 f;
 
 	    if (flags & ANYOF_LOCALE) {
 		PL_reg_flags |= RF_tainted;

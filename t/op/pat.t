@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..908\n";
+print "1..910\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2869,4 +2869,18 @@ print "\x{3040}" =~ /\P{InKana3}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 
 print "\x{3040}" =~ /\p{InNotKana}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 print "\x{3041}" =~ /\P{InNotKana}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+
+sub InConsonant { # Not EBCDIC-aware.
+    return <<EOF;
+0061	007f
+-0061
+-0065
+-0069
+-006f
+-0075
+EOF
+}
+
+print "d" =~ /\p{InConsonant}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+print "e" =~ /\P{InConsonant}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 

@@ -302,7 +302,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	    if (SvLEN(e->dataSV) && SvPVX(e->dataSV)) {
 		Safefree(SvPVX(e->dataSV));
 	    }
-	    if (use > e->base.bufsiz) {
+	    if (use > (SSize_t)e->base.bufsiz) {
 		if (e->flags & NEEDS_LINES) {
 		    /* Have to grow buffer */
 		    e->base.bufsiz = use;

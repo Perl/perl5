@@ -184,7 +184,13 @@ sub SWASHNEW {
 	    print STDERR "$1 => $2\n" if DEBUG;
 	    if ($char =~ /[-+!]/) {
 		my ($c,$t) = split(/::/, $name, 2);	# bogus use of ::, really
-		my $subobj = $c->SWASHNEW($t, "", 0, 0, 0);
+		my $subobj;
+		if ($c eq 'utf8') {
+		    $subobj = $c->SWASHNEW($t, "", 0, 0, 0);
+		}
+		elsif ($c =~ /^([0-9a-fA-F]+)/) {
+		    $subobj = utf8->SWASHNEW("", $c, 0, 0, 0);
+		}
 		return $subobj unless ref $subobj;
 		push @extras, $name => $subobj;
 		$bits = $subobj->{BITS} if $bits < $subobj->{BITS};

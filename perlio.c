@@ -1205,7 +1205,7 @@ PerlIO_context_layers(pTHX_ const char *mode)
 		 * Skip to write part
 		 */
 		const char *s = strchr(type, 0);
-		if (s && (s - type) < len) {
+		if (s && (STRLEN)(s - type) < len) {
 		    type = s + 1;
 		}
 	    }
@@ -1896,7 +1896,7 @@ PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	    SSize_t avail = PerlIO_get_cnt(f);
 	    SSize_t take = 0;
 	    if (avail > 0)
-		take = (count < avail) ? count : avail;
+		take = ((SSize_t)count < avail) ? count : avail;
 	    if (take > 0) {
 		STDCHAR *ptr = PerlIO_get_ptr(f);
 		Copy(ptr, buf, take, STDCHAR);
@@ -3008,7 +3008,7 @@ PerlIOBuf_fill(pTHX_ PerlIO *f)
 	if (avail > 0) {
 	    STDCHAR *ptr = PerlIO_get_ptr(n);
 	    SSize_t cnt = avail;
-	    if (avail > b->bufsiz)
+	    if (avail > (SSize_t)b->bufsiz)
 		avail = b->bufsiz;
 	    Copy(ptr, b->buf, avail, STDCHAR);
 	    PerlIO_set_ptrcnt(n, ptr + avail, cnt - avail);
@@ -3367,11 +3367,11 @@ PerlIOPending_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
     SSize_t avail = PerlIO_get_cnt(f);
     SSize_t got = 0;
-    if (count < avail)
+    if ((SSize_t)count < avail)
 	avail = count;
     if (avail > 0)
 	got = PerlIOBuf_read(aTHX_ f, vbuf, avail);
-    if (got >= 0 && got < count) {
+    if (got >= 0 && got < (SSize_t)count) {
 	SSize_t more =
 	    PerlIO_read(f, ((STDCHAR *) vbuf) + got, count - got);
 	if (more >= 0 || got == 0)

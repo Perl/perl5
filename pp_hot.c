@@ -734,7 +734,7 @@ PP(pp_rv2av)
 	EXTEND(SP, maxarg);
 	if (SvRMAGICAL(av)) {
 	    U32 i;
-	    for (i=0; i < maxarg; i++) {
+	    for (i=0; i < (U32)maxarg; i++) {
 		SV **svp = av_fetch(av, i, FALSE);
 		SP[i+1] = (svp) ? *svp : &PL_sv_undef;
 	    }
@@ -1232,7 +1232,7 @@ PP(pp_match)
 	rx = PM_GETRE(pm);
     }
 
-    if (rx->minlen > len)
+    if (rx->minlen > (I32)len)
 	goto failure;
 
     truebase = t = s;
@@ -1975,7 +1975,7 @@ PP(pp_subst)
     }
     
     /* can do inplace substitution? */
-    if (c && clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
+    if (c && (I32)clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
 	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
 	if (!CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,
 			 r_flags | REXEC_CHECKED))

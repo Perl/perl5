@@ -580,7 +580,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		STRLEN keylen;
 		bool do_utf8 = FALSE;
 
-                if ((sortkeys && !(keys && i <= av_len(keys))) ||
+                if ((sortkeys && !(keys && (I32)i <= av_len(keys))) ||
                     !(entry = hv_iternext((HV *)ival)))
                     break;
 

@@ -64,12 +64,12 @@ not_here(char *s)
 static int
 io_blocking(pTHX_ InputStream f, int block)
 {
+#if defined(HAS_FCNTL)
     int RETVAL;
     if(!f) {
 	errno = EBADF;
 	return -1;
     }
-#if defined(HAS_FCNTL)
     RETVAL = fcntl(PerlIO_fileno(f), F_GETFL, 0);
     if (RETVAL >= 0) {
 	int mode = RETVAL;
@@ -145,7 +145,7 @@ io_blocking(pTHX_ InputStream f, int block)
     }
     return RETVAL;
 #else
- return -1;
+    return -1;
 #endif
 }
 

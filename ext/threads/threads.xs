@@ -198,7 +198,9 @@ ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
             MUTEX_UNLOCK(&thread->mutex);
             Perl_ithread_destruct(aTHX_ thread, "no reference");
        }
-       MUTEX_UNLOCK(&thread->mutex);
+       else {
+	    MUTEX_UNLOCK(&thread->mutex);
+       }    
     }
     else {
 	MUTEX_UNLOCK(&thread->mutex);
@@ -401,6 +403,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	    SvTEMP_off(thread->init_function);
 	    ptr_table_free(PL_ptr_table);
 	    PL_ptr_table = NULL;
+	    PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
 	}
 
 	PERL_SET_CONTEXT(aTHX);
@@ -439,6 +442,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	known_threads++;
 	active_threads++;
 	MUTEX_UNLOCK(&create_destruct_mutex);
+	sv_2mortal(params);
 	return ithread_to_SV(aTHX_ obj, thread, classname, FALSE);
 }
 
@@ -541,7 +545,7 @@ CODE:
     if (items > 2) {
 	int i;
 	for(i = 2; i < items ; i++) {
-	    av_push(params, ST(i));
+	    av_push(params, SvREFCNT_inc(ST(i)));
 	}
     }
     ST(0) = sv_2mortal(Perl_ithread_create(aTHX_ Nullsv, classname, function_to_call, newRV_noinc((SV*) params)));

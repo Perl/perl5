@@ -672,18 +672,24 @@ operands, or output from same.
 
 =item * Numerical
 
-Formatted output and significant digits
+Formatted output and significant digits.  In general, Perl 5
+tries to be more precise.  For example, on a Solaris Sparc:
 
     print 7.373504 - 0, "\n";
     printf "%20.18f\n", 7.373504 - 0;
 
     # Perl4 prints:
-    7.375039999999996141
-    7.37503999999999614
+    7.3750399999999996141
+    7.375039999999999614
 
     # Perl5 prints:
     7.373504
-    7.37503999999999614
+    7.375039999999999614
+
+Notice how the first result looks better in Perl 5.
+
+Your results may vary, since your floating point formatting routines
+and even floating point format may be slightly different.
 
 =item * Numerical
 

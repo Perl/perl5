@@ -104,8 +104,8 @@ S_mul128(pTHX_ SV *sv, U8 m)
     t--;
   while (t > s) {
     i = ((*t - '0') << 7) + m;
-    *(t--) = '0' + (i % 10);
-    m = i / 10;
+    *(t--) = '0' + (char)(i % 10);
+    m = (char)(i / 10);
   }
   return (sv);
 }
@@ -202,7 +202,7 @@ S_measure_struct(pTHX_ char *pat, register char *patend)
 	case 'U':			/* XXXX Is it correct? */
 	case 'w':
 	case 'u':
-	    buf[0] = datumtype;
+	    buf[0] = (char)datumtype;
 	    buf[1] = 0;
 	    Perl_croak(aTHX_ "%s not allowed in length fields", buf);
 	case ',': /* grandfather in commas but with a warning */
@@ -458,7 +458,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 #if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
     long double aldouble;
 #endif
-    bool do_utf8 = flags & UNPACK_DO_UTF8;
+    bool do_utf8 = (flags & UNPACK_DO_UTF8) != 0;
 
     while ((pat = next_symbol(pat, patend)) < patend) {
 	datumtype = *pat++ & 0xFF;
@@ -1299,7 +1299,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 
 			sv = Perl_newSVpvf(aTHX_ "%.*"UVf, (int)TYPE_DIGITS(UV), auv);
 			while (s < strend) {
-			    sv = mul128(sv, *s & 0x7f);
+			    sv = mul128(sv, (U8)(*s & 0x7f));
 			    if (!(*s++ & 0x80)) {
 				bytes = 0;
 				break;
@@ -1553,9 +1553,9 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 			d = PL_uudmap[*(U8*)s++] & 077;
 		    else
 			d = 0;
-		    hunk[0] = (a << 2) | (b >> 4);
-		    hunk[1] = (b << 4) | (c >> 2);
-		    hunk[2] = (c << 6) | d;
+		    hunk[0] = (char)((a << 2) | (b >> 4));
+		    hunk[1] = (char)((b << 4) | (c >> 2));
+		    hunk[2] = (char)((c << 6) | d);
 		    sv_catpvn(sv, hunk, (len > 3) ? 3 : len);
 		    len -= 3;
 		}
@@ -1876,7 +1876,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	    /* FALL THROUGH */
 	case 'X':
 	  shrink:
-	    if (SvCUR(cat) < len)
+	    if ((I32)SvCUR(cat) < len)
 		Perl_croak(aTHX_ "X outside of string");
 	    SvCUR(cat) -= len;
 	    *SvEND(cat) = '\0';
@@ -1908,7 +1908,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		if (datumtype == 'Z')
 		    ++len;
 	    }
-	    if (fromlen >= len) {
+	    if ((I32)fromlen >= len) {
 		sv_catpvn(cat, aptr, len);
 		if (datumtype == 'Z')
 		    *(SvEND(cat)-1) = '\0';
@@ -1947,7 +1947,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		SvCUR(cat) += (len+7)/8;
 		SvGROW(cat, SvCUR(cat) + 1);
 		aptr = SvPVX(cat) + aint;
-		if (len > fromlen)
+		if (len > (I32)fromlen)
 		    len = fromlen;
 		aint = len;
 		items = 0;
@@ -2003,7 +2003,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		SvCUR(cat) += (len+1)/2;
 		SvGROW(cat, SvCUR(cat) + 1);
 		aptr = SvPVX(cat) + aint;
-		if (len > fromlen)
+		if (len > (I32)fromlen)
 		    len = fromlen;
 		aint = len;
 		items = 0;
@@ -2249,7 +2249,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		    UV     auv = SvUV(fromstr);
 
 		    do {
-			*--in = (auv & 0x7f) | 0x80;
+			*--in = (char)((auv & 0x7f) | 0x80);
 			auv >>= 7;
 		    } while (auv);
 		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
@@ -2440,7 +2440,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	    while (fromlen > 0) {
 		I32 todo;
 
-		if (fromlen > len)
+		if ((I32)fromlen > len)
 		    todo = len;
 		else
 		    todo = fromlen;

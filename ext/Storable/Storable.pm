@@ -110,15 +110,19 @@ BEGIN {
 sub logcroak;
 sub logcarp;
 
+# Can't Autoload cleanly as this clashes 8.3 with &retrieve
 sub retrieve_fd { &fd_retrieve }		# Backward compatibility
+
+bootstrap Storable;
+1;
+__END__
 
 #
 # Determine whether locking is possible, but only when needed.
 #
 
-my $CAN_FLOCK;
-
 sub CAN_FLOCK {
+	my $CAN_FLOCK if 0;
 	return $CAN_FLOCK if defined $CAN_FLOCK;
 	require Config; import Config;
 	return $CAN_FLOCK =
@@ -149,9 +153,40 @@ sub show_file_magic {
 EOM
 }
 
-bootstrap Storable;
-1;
-__END__
+sub read_magic {
+  my $header = shift;
+  return unless defined $header and length $header > 11;
+  my $result;
+  if ($header =~ s/^perl-store//) {
+    die "Can't deal with version 0 headers";
+  } elsif ($header =~ s/^pst0//) {
+    $result->{file} = 1;
+  }
+  # Assume it's a string.
+  my ($major, $minor, $bytelen) = unpack "C3", $header;
+
+  my $net_order = $major & 1;
+  $major >>= 1;
+  @$result{qw(major minor netorder)} = ($major, $minor, $net_order);
+
+  return $result if $net_order;
+
+  # I assume that it is rare to find v1 files, so this is an intentionally
+  # inefficient way of doing it, to make the rest of the code constant.
+  if ($major < 2) {
+    delete $result->{minor};
+    $header = '.' . $header;
+    $bytelen = $minor;
+  }
+
+  @$result{qw(byteorder intsize longsize ptrsize)} =
+    unpack "x3 A$bytelen C3", $header;
+
+  if ($major >= 2 and $minor >= 2) {
+    $result->{nvsize} = unpack "x6 x$bytelen C", $header;
+  }
+  $result;
+}
 
 #
 # store
