@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed May 16 17:18:11 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Thu May 24 17:54:36 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -816,6 +816,7 @@ api_subversion=''
 api_version=''
 api_versionstring=''
 patchlevel=''
+perl_patchlevel=''
 revision=''
 subversion=''
 version=''
@@ -6001,6 +6002,7 @@ if $test -r $rsrc/patchlevel.h;then
 	api_revision=`awk '/define[ 	]+PERL_API_REVISION/ {print $3}' $rsrc/patchlevel.h`
 	api_version=`awk '/define[ 	]+PERL_API_VERSION/ {print $3}' $rsrc/patchlevel.h`
 	api_subversion=`awk '/define[ 	]+PERL_API_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+       perl_patchlevel=`grep ',"DEVEL[0-9][0-9]*"' $rsrc/patchlevel.h|sed 's/[^0-9]//g'`
 else
 	revision=0
 	patchlevel=0
@@ -6008,8 +6010,19 @@ else
 	api_revision=0
 	api_version=0
 	api_subversion=0
+	perl_patchlevel=0
+	$echo "(You do not have patchlevel.h.  Eek.)"
 fi
-$echo "(You have $package version $patchlevel subversion $subversion.)"
+if $test -r $rsrc/.patch ; then  
+	if $test "`cat $rsrc/.patch`" -gt "$perl_patchlevel" ; then
+		perl_patchlevel=`cat $rsrc/.patch`
+	fi
+fi
+case "$perl_patchlevel" in
+0)  ;;
+'') $echo "(You have $package version $patchlevel subversion $subversion.)" ;;
+*)  $echo "(You have $package version $patchlevel subversion $subversion patchlevel $perl_patchlevel.)" ;;
+esac
 case "$osname" in
 dos|vms)
 	: XXX Should be a Configure test for double-dots in filenames.
@@ -16713,6 +16726,7 @@ patchlevel='$patchlevel'
 path_sep='$path_sep'
 perl5='$perl5'
 perl='$perl'
+perl_patchlevel='$perl_patchlevel'
 perladmin='$perladmin'
 perllibs='$perllibs'
 perlpath='$perlpath'
@@ -16892,6 +16906,7 @@ $test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
 : add special variables
 $test -f $src/patchlevel.h && \
 awk '/^#define[ 	]+PERL_/ {printf "%s=%s\n",$2,$3}' $src/patchlevel.h >>config.sh
+echo "PERL_PATCHLEVEL=$perl_patchlevel" >>config.sh
 echo "PERL_CONFIG_SH=true" >>config.sh
 
 : propagate old symbols
