@@ -45,7 +45,7 @@ case "$archname" in
     ;;
 esac
 
-ccversion="`${cc:-cc} -V 2>&1|sed 's/^cc: //'`"
+ccversion="`${cc:-cc} -V 2>&1|head -1|sed 's/^cc: //'`"
 case "$ccversion" in
 *WorkShop*) ccname=workshop ;;
 *) ccversion='' ;;
