@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Oct  6 21:10:34 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Mon Oct  9 21:51:54 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -4152,7 +4152,7 @@ esac'
 compile='
 mc_file=$1;
 shift;
-$cc -o ${mc_file} $optimize $ccflags $ldflags$* ${mc_file}.c $libs > /dev/null 2>&1;'
+$cc -o ${mc_file} $optimize $ccflags $ldflags $* ${mc_file}.c $libs > /dev/null 2>&1;'
 : define a shorthand compile call for compilations that should be ok.
 compile_ok='
 mc_file=$1;
