@@ -12,35 +12,36 @@ BEGIN {
 use strict;
 
 $|=1;
-undef $/;
-my @prgs = split "########\n", <DATA>;
-close DATA;
-print "1..", scalar @prgs, "\n";
+
+my @prgs;
+{
+    local $/;
+    @prgs = split "########\n", <DATA>;
+    close DATA;
+}
+
+use Test::More;
+
+plan tests => scalar @prgs;
+
 require "dumpvar.pl";
 
-my $i = 0;
-for (@prgs){
-    my($prog,$expected) = split(/\nEXPECT\n?/, $_);
+for (@prgs) {
+    my($prog, $expected) = split(/\nEXPECT\n?/, $_);
     open my $select, ">", \my $got or die;
     select $select;
     eval $prog;
-    my $not = "";
-    my $why = "";
-    if ($@) {
-        $not = "not ";
-        $why = " # prog[$prog]\$\@[$@]";
-    } elsif ($got ne $expected) {
-        $not = "not ";
-        $why = " # prog[$prog]got[$got]expected[$expected]";
-    }
+    my $ERR = $@;
     close $select;
     select STDOUT;
-    print $not, "ok ", ++$i, $why, "\n";
+    if ($ERR) {
+        ok(0, "$prog - $ERR");
+    } else {
+        is($got, $expected, $prog);
+    }
 }
 
 __END__
-"";
-EXPECT
 ########
 dumpValue(1);
 EXPECT
