@@ -1,10 +1,7 @@
 package NDBM_File;
 
-BEGIN {
-    if ($] >= 5.002) {
-	use strict;
-    }
-}
+use strict;
+use warnings;
 
 require Tie::Hash;
 use XSLoader ();
