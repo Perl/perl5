@@ -12,7 +12,6 @@ use Config qw(%Config);
 $Is_VMS     = $^O eq 'VMS';
 $Is_MacPerl = $^O eq 'MacOS';
 
-my $splitchar = $^O eq 'VMS' ? '|' : ($^O eq 'os2' || $^O eq 'dos') ? ';' : ':';
 my $Inc_uninstall_warn_handler;
 
 # install relative to here
@@ -335,7 +334,7 @@ sub inc_uninstall {
     my $file = (File::Spec->splitpath($filepath))[2];
     my %seen_dir = ();
 
-    my @PERL_ENV_LIB = split $splitchar, defined $ENV{'PERL5LIB'} 
+    my @PERL_ENV_LIB = split $Config{path_sep}, defined $ENV{'PERL5LIB'} 
       ? $ENV{'PERL5LIB'} : $ENV{'PERLLIB'} || '';
 
     foreach $dir (@INC, @PERL_ENV_LIB, @Config{qw(archlibexp

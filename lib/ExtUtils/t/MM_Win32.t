@@ -112,7 +112,7 @@ delete $ENV{PATHEXT} unless $had_pathext;
 # init_others(): check if all keys are created and set?
 # qw( TOUCH CHMOD CP RM_F RM_RF MV NOOP TEST_F LD AR LDLOADLIBS DEV_NUL )
 {
-    my $mm_w32 = bless( {}, 'MM' );
+    my $mm_w32 = bless( { BASEEXT => 'Foo' }, 'MM' );
     $mm_w32->init_others();
     my @keys = qw( TOUCH CHMOD CP RM_F RM_RF MV NOOP 
                    TEST_F LD AR LDLOADLIBS DEV_NULL );

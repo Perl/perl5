@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.41';
+$VERSION = '1.42';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -1669,7 +1669,7 @@ sub init_DIRFILESEP {
 
 Initializes AR, AR_STATIC_ARGS, BASEEXT, CONFIG, DISTNAME, DLBASE,
 EXE_EXT, FULLEXT, FULLPERL, FULLPERLRUN, FULLPERLRUNINST, INST_*,
-INSTALL*, INSTALLDIRS, LD, LIB_EXT, LIBPERL_A, MAP_TARGET, NAME,
+INSTALL*, INSTALLDIRS, LIB_EXT, LIBPERL_A, MAP_TARGET, NAME,
 OBJ_EXT, PARENT_NAME, PERL, PERL_ARCHLIB, PERL_INC, PERL_LIB,
 PERL_SRC, PERLRUN, PERLRUNINST, PREFIX, VERSION,
 VERSION_SYM, XS_VERSION.
@@ -1870,7 +1870,6 @@ usually solves this kind of problem.
     $self->{AR_STATIC_ARGS} ||= "cr";
 
     # These should never be needed
-    $self->{LD} ||= 'ld';
     $self->{OBJ_EXT} ||= '.o';
     $self->{LIB_EXT} ||= '.a';
 
@@ -1887,7 +1886,7 @@ usually solves this kind of problem.
 
 =item init_others
 
-Initializes EXTRALIBS, BSLOADLIBS, LDLOADLIBS, LIBS, LD_RUN_PATH,
+Initializes EXTRALIBS, BSLOADLIBS, LDLOADLIBS, LIBS, LD_RUN_PATH, LD,
 OBJECT, BOOTDEP, PERLMAINCC, LDFROM, LINKTYPE, SHELL, NOOP,
 FIRST_MAKEFILE, MAKEFILE_OLD, NOECHO, RM_F, RM_RF, TEST_F,
 TOUCH, CP, MV, CHMOD, UMASK_NULL, ECHO, ECHO_N
@@ -1896,6 +1895,8 @@ TOUCH, CP, MV, CHMOD, UMASK_NULL, ECHO, ECHO_N
 
 sub init_others {	# --- Initialize Other Attributes
     my($self) = shift;
+
+    $self->{LD} ||= 'ld';
 
     # Compute EXTRALIBS, BSLOADLIBS and LDLOADLIBS from $self->{LIBS}
     # Lets look at $self->{LIBS} carefully: It may be an anon array, a string or
@@ -2321,21 +2322,15 @@ sub init_PERL {
 
     # Build up a set of file names (not command names).
     my $thisperl = $self->canonpath($^X);
-    $thisperl .= $Config{exe_ext} unless $thisperl =~ m/$Config{exe_ext}$/i;
+    $thisperl .= $Config{exe_ext} unless 
+                # VMS might have a file version # at the end
+      $Is_VMS ? $thisperl =~ m/$Config{exe_ext}(;\d+)?$/i
+              : $thisperl =~ m/$Config{exe_ext}$/i;
 
     # We need a relative path to perl when in the core.
     $thisperl = $self->abs2rel($thisperl) if $self->{PERL_CORE};
 
     my @perls = ($thisperl);
-    my $ndbg = '';
-    if ( $Is_VMS ) {
-        if ( defined( $Config{usevmsdebug} ) ) {
-            if ( $Config{usevmsdebug} eq 'define' ) {
-                push @perls, map { "$_$Config{exe_ext}" } ('ndbgperl');
-                $ndbg = 'ndbg';
-            }
-        }
-    }
     push @perls, map { "$_$Config{exe_ext}" }
                      ('perl', 'perl5', "perl$Config{version}");
 
@@ -2354,8 +2349,15 @@ sub init_PERL {
     # don't check if perl is executable, maybe they have decided to
     # supply switches with perl
 
+    # When built for debugging, VMS doesn't create perl.exe but ndbgperl.exe.
+    my $perl_name = 'perl';
+    $perl_name = 'ndbgperl' if $Is_VMS && 
+      defined $Config{usevmsdebug} && $Config{usevmsdebug} eq 'define';
+
+    # XXX This logic is flawed.  If "miniperl" is anywhere in the path
+    # it will get confused.  It should be fixed to work only on the filename.
     # Define 'FULLPERL' to be a non-miniperl (used in test: target)
-    ($self->{FULLPERL} = $self->{PERL}) =~ s/miniperl/${ndbg}perl/i
+    ($self->{FULLPERL} = $self->{PERL}) =~ s/miniperl/$perl_name/i
 	unless $self->{FULLPERL};
 
     # Little hack to get around VMS's find_perl putting "MCR" in front
