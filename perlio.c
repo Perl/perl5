@@ -4814,7 +4814,8 @@ PerlIO_stdoutf(const char *fmt, ...)
 PerlIO *
 PerlIO_tmpfile(void)
 {
-     PerlIO *f = Perl_my_tmpfp();
+     dTHX;
+     PerlIO *f = Perl_my_tmpfp(aTHX);
 
      if (f)
 	  PerlIOBase(f)->flags |= PERLIO_F_TEMP;
