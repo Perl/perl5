@@ -1,10 +1,9 @@
 CONVERTERS = pod2html pod2latex pod2man
 
 all: $(CONVERTERS) man
+PERL = perl
 
-#PERL = ../miniperl
-
-POD = \
+POD = 	\
 	perl.pod	\
 	perlbook.pod	\
 	perlbot.pod	\
@@ -21,8 +20,8 @@ POD = \
 	perllol.pod	\
 	perlmod.pod	\
 	perlobj.pod	\
-	perltie.pod	\
 	perlop.pod	\
+	perlovl.pod	\
 	perlpod.pod	\
 	perlre.pod	\
 	perlref.pod	\
@@ -31,13 +30,14 @@ POD = \
 	perlstyle.pod	\
 	perlsub.pod	\
 	perlsyn.pod	\
+	perltie.pod	\
 	perltoc.pod	\
 	perltrap.pod	\
 	perlvar.pod	\
 	perlxs.pod	\
-	perlxstut.pod 
+	perlxstut.pod
 
-MAN = \
+MAN = 	\
 	perl.man	\
 	perlbook.man	\
 	perlbot.man	\
@@ -54,8 +54,8 @@ MAN = \
 	perllol.man	\
 	perlmod.man	\
 	perlobj.man	\
-	perltie.man	\
 	perlop.man	\
+	perlovl.man	\
 	perlpod.man	\
 	perlre.man	\
 	perlref.man	\
@@ -64,13 +64,14 @@ MAN = \
 	perlstyle.man	\
 	perlsub.man	\
 	perlsyn.man	\
+	perltie.man	\
 	perltoc.man	\
 	perltrap.man	\
 	perlvar.man	\
 	perlxs.man	\
-	perlxstut.man 
+	perlxstut.man
 
-HTML = \
+HTML = 	\
 	perl.html	\
 	perlbook.html	\
 	perlbot.html	\
@@ -87,8 +88,8 @@ HTML = \
 	perllol.html	\
 	perlmod.html	\
 	perlobj.html	\
-	perltie.html	\
 	perlop.html	\
+	perlovl.html	\
 	perlpod.html	\
 	perlre.html	\
 	perlref.html	\
@@ -97,13 +98,14 @@ HTML = \
 	perlstyle.html	\
 	perlsub.html	\
 	perlsyn.html	\
+	perltie.html	\
 	perltoc.html	\
 	perltrap.html	\
 	perlvar.html	\
 	perlxs.html	\
-	perlxstut.html 
+	perlxstut.html
 
-TEX = \
+TEX = 	\
 	perl.tex	\
 	perlbook.tex	\
 	perlbot.tex	\
@@ -120,8 +122,8 @@ TEX = \
 	perllol.tex	\
 	perlmod.tex	\
 	perlobj.tex	\
-	perltie.tex	\
 	perlop.tex	\
+	perlovl.tex	\
 	perlpod.tex	\
 	perlre.tex	\
 	perlref.tex	\
@@ -130,44 +132,45 @@ TEX = \
 	perlstyle.tex	\
 	perlsub.tex	\
 	perlsyn.tex	\
+	perltie.tex	\
 	perltoc.tex	\
 	perltrap.tex	\
 	perlvar.tex	\
 	perlxs.tex	\
 	perlxstut.tex
 
-man:  pod2man $(MAN)
+man:  pod2man -I../lib $(MAN)
 
 # pod2html normally runs on all the pods at once in order to build up
 # cross-references.
-html: pod2html 
-	$(PERL) pod2html $(POD)
+html: pod2html
+	$(PERL) pod2html -I../lib $(POD)
 
 tex:	pod2latex $(TEX)
 
-.SUFFIXES: .pm .pod .man 
+.SUFFIXES: .pm .pod .man
 
 .pm.man:     pod2man
-	$(PERL) pod2man $*.pm >$*.man
+	$(PERL) pod2man -I../lib $*.pm >$*.man
 
 .pod.man:     pod2man
-	$(PERL) pod2man $*.pod >$*.man
+	$(PERL) pod2man -I../lib $*.pod >$*.man
 
 .SUFFIXES: .mp .pod .html
 
 .pm.html:    pod2html
-	$(PERL) pod2html $*.pod
+	$(PERL) pod2html -I../lib $*.pod
 
 .pod.html:    pod2html
-	$(PERL) pod2html $*.pod
+	$(PERL) pod2html -I../lib $*.pod
 
 .SUFFIXES: .pm .pod .tex
 
 .pod.tex: pod2latex
-	$(PERL) pod2latex $*.pod
+	$(PERL) pod2latex -I../lib $*.pod
 
 .pm.tex: pod2latex
-	$(PERL) pod2latex $*.pod
+	$(PERL) pod2latex -I../lib $*.pod
 
 clean:
 	rm -f $(MAN) $(HTML) $(TEX)
