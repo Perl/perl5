@@ -405,6 +405,11 @@ print EM <<'END';
 
 #endif	/* PERL_OBJECT */
 
+/* compatibility stubs */
+
+#define sv_setptrobj(rv,ptr,name)	sv_setref_iv(rv,name,(IV)ptr)
+#define sv_setptrref(rv,ptr)		sv_setref_iv(rv,Nullch,(IV)ptr)
+
 END
 
 close(EM);
@@ -541,7 +546,7 @@ END
 
 print EM <<'END';
 
-#ifdef PERL_POLLUTE		/* unsupported in 5.006 */
+#ifdef PERL_POLLUTE		/* disabled by default in 5.006 */
 
 END
 
@@ -551,7 +556,7 @@ for $sym (sort @extvars) {
 
 print EM <<'END';
 
-#endif /* MIN_PERL_DEFINE */
+#endif /* PERL_POLLUTE */
 END
 
 

@@ -943,7 +943,7 @@
 #endif /* PERL_GLOBAL_STRUCT */
 
 
-#ifdef PERL_POLLUTE		/* unsupported in 5.006 */
+#ifdef PERL_POLLUTE		/* disabled by default in 5.006 */
 
 #define DBsingle		PL_DBsingle
 #define DBsub			PL_DBsub
@@ -972,4 +972,4 @@
 #define tainted			PL_tainted
 #define tainting		PL_tainting
 
-#endif /* MIN_PERL_DEFINE */
+#endif /* PERL_POLLUTE */

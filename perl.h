@@ -1630,7 +1630,6 @@ typedef I32 CHECKPOINT;
 #define U_I(what) ((unsigned int)(what))
 #define U_L(what) ((U32)(what))
 #else
-EXTERN_C U32 cast_ulong _((double));
 #define U_S(what) ((U16)cast_ulong((double)(what)))
 #define U_I(what) ((unsigned int)cast_ulong((double)(what)))
 #define U_L(what) (cast_ulong((double)(what)))
@@ -1641,11 +1640,6 @@ EXTERN_C U32 cast_ulong _((double));
 #define I_V(what) ((IV)(what))
 #define U_V(what) ((UV)(what))
 #else
-START_EXTERN_C
-I32 cast_i32 _((double));
-IV cast_iv _((double));
-UV cast_uv _((double));
-END_EXTERN_C
 #define I_32(what) (cast_i32((double)(what)))
 #define I_V(what) (cast_iv((double)(what)))
 #define U_V(what) (cast_uv((double)(what)))
@@ -2347,9 +2341,6 @@ typedef void *Thread;
 #include "thread.h"
 #include "pp.h"
 #include "proto.h"
-
-#define Perl_sv_setptrobj(rv,ptr,name) Perl_sv_setref_iv(rv,name,(IV)ptr)
-#define Perl_sv_setptrref(rv,ptr) Perl_sv_setref_iv(rv,Nullch,(IV)ptr)
 
 /* The following must follow proto.h as #defines mess up syntax */
 
