@@ -3,7 +3,7 @@ package Safe;
 use 5.003_11;
 use strict;
 
-our $VERSION = "2.07";
+our $VERSION = "2.08";
 
 use Carp;
 
@@ -155,7 +155,7 @@ sub share_from {
     my $no_record = shift || 0;
     my $root = $obj->root();
     croak("vars not an array ref") unless ref $vars eq 'ARRAY';
-	no strict 'refs';
+    no strict 'refs';
     # Check that 'from' package actually exists
     croak("Package \"$pkg\" does not exist")
 	unless keys %{"$pkg\::"};
@@ -190,7 +190,7 @@ sub share_record {
 sub share_redo {
     my $obj = shift;
     my $shares = \%{$obj->{Shares} ||= {}};
-	my($var, $pkg);
+    my($var, $pkg);
     while(($var, $pkg) = each %$shares) {
 	# warn "share_redo $pkg\:: $var";
 	$obj->share_from($pkg,  [ $var ], 1);
@@ -228,7 +228,7 @@ sub rdo {
     my $root = $obj->{Root};
 
     my $evalsub = eval
-	    sprintf('package %s; sub { do $file }', $root);
+	    sprintf('package %s; sub { @_ = (); do $file }', $root);
     return Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
 }
 
