@@ -2934,7 +2934,7 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
     char *s, *t, *e;
     int  hibit = 0;
 
-    if (!sv || !SvPOK(sv) || SvUTF8(sv))
+    if (!sv || !SvPOK(sv) || !SvCUR(sv) || SvUTF8(sv))
 	return;
 
     /* This function could be much more efficient if we had a FLAG in SVs
@@ -3755,20 +3755,54 @@ C<dsv>.  Handles 'get' magic, but not 'set' magic.  See C<sv_catsv_mg>.
 */
 
 void
-Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
+Perl_sv_catsv(pTHX_ SV *dsv, register SV *ssv)
 {
-    char *s;
-    STRLEN len;
-    if (!sstr)
+    if (!ssv)
 	return;
-    if ((s = SvPV(sstr, len))) {
-	if (DO_UTF8(sstr)) {
-	    sv_utf8_upgrade(dstr);
-	    sv_catpvn(dstr,s,len);
-	    SvUTF8_on(dstr);
+    else {
+	STRLEN slen;
+	char *spv;
+
+	if ((spv = SvPV(ssv, slen))) {
+	    bool dutf8 = DO_UTF8(dsv);
+	    bool sutf8 = DO_UTF8(ssv);
+	    
+	    if (dutf8 != sutf8) {
+		char *s = spv;
+		char *send = s + slen;
+		STRLEN dlen;
+		char *dpv;
+		char *d;
+
+		/* We may modify dsv but not ssv. */
+
+		if (!dutf8)
+		    sv_utf8_upgrade(dsv);
+		dpv = SvPV(dsv, dlen);
+		/* Overguestimate on the slen. */
+		SvGROW(dsv, dlen + (sutf8 ? 2 * slen : slen) + 1);
+		d = dpv + dlen;
+		if (dutf8) /* && !sutf8 */ {
+		    while (s < send) {
+			if (UTF8_IS_ASCII(*s))
+			    *d++ = *s++;
+			else {
+			    *d++ = UTF8_EIGHT_BIT_HI(*s);
+			    *d++ = UTF8_EIGHT_BIT_LO(*s);
+			    s += 2;
+			}
+		    }
+		    SvCUR(dsv) += s - spv;
+		    *SvEND(dsv) = 0;
+		}
+		else /* !dutf8 (was) && sutf8 */ {
+		    sv_catpvn(dsv, spv, slen);
+		    SvUTF8_on(dsv);
+		}
+	    }
+	    else
+		sv_catpvn(dsv, spv, slen);
 	}
-	else
-	    sv_catpvn(dstr,s,len);
     }
 }
 
@@ -3781,10 +3815,10 @@ Like C<sv_catsv>, but also handles 'set' magic.
 */
 
 void
-Perl_sv_catsv_mg(pTHX_ SV *dstr, register SV *sstr)
+Perl_sv_catsv_mg(pTHX_ SV *dsv, register SV *ssv)
 {
-    sv_catsv(dstr,sstr);
-    SvSETMAGIC(dstr);
+    sv_catsv(dsv,ssv);
+    SvSETMAGIC(dsv);
 }
 
 /*
@@ -3797,20 +3831,20 @@ Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
 */
 
 void
-Perl_sv_catpv(pTHX_ register SV *sv, register const char *ptr)
+Perl_sv_catpv(pTHX_ register SV *sv, register const char *pv)
 {
     register STRLEN len;
     STRLEN tlen;
     char *junk;
 
-    if (!ptr)
+    if (!pv)
 	return;
     junk = SvPV_force(sv, tlen);
-    len = strlen(ptr);
+    len = strlen(pv);
     SvGROW(sv, tlen + len + 1);
-    if (ptr == junk)
-	ptr = SvPVX(sv);
-    Move(ptr,SvPVX(sv)+tlen,len+1,char);
+    if (pv == junk)
+	pv = SvPVX(sv);
+    Move(pv,SvPVX(sv)+tlen,len+1,char);
     SvCUR(sv) += len;
     (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
@@ -3825,9 +3859,9 @@ Like C<sv_catpv>, but also handles 'set' magic.
 */
 
 void
-Perl_sv_catpv_mg(pTHX_ register SV *sv, register const char *ptr)
+Perl_sv_catpv_mg(pTHX_ register SV *sv, register const char *pv)
 {
-    sv_catpv(sv,ptr);
+    sv_catpv(sv,pv);
     SvSETMAGIC(sv);
 }
 

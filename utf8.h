@@ -62,14 +62,17 @@ END_EXTERN_C
 
 #define UTF8_QUAD_MAX	UINT64_C(0x1000000000)
 
-#define UTF8_IS_ASCII(c) 		((c) <  0x80)
-#define UTF8_IS_START(c)		((c) >= 0xc0 && ((c) <= 0xfd))
-#define UTF8_IS_CONTINUATION(c)		((c) >= 0x80 && ((c) <= 0xbf))
-#define UTF8_IS_CONTINUED(c) 		((c) &  0x80)
+#define UTF8_IS_ASCII(c) 		(((U8)c) <  0x80)
+#define UTF8_IS_START(c)		(((U8)c) >= 0xc0 && (((U8)c) <= 0xfd))
+#define UTF8_IS_CONTINUATION(c)		(((U8)c) >= 0x80 && (((U8)c) <= 0xbf))
+#define UTF8_IS_CONTINUED(c) 		(((U8)c) &  0x80)
 
-#define UTF8_CONTINUATION_MASK		0x3f
+#define UTF8_CONTINUATION_MASK		((U8)0x3f)
 #define UTF8_ACCUMULATION_SHIFT		6
 #define UTF8_ACCUMULATE(old, new)	((old) << UTF8_ACCUMULATION_SHIFT | ((new) & UTF8_CONTINUATION_MASK))
+
+#define UTF8_EIGHT_BIT_HI(c)	( (((U8)c)>>6)      |0xc0)
+#define UTF8_EIGHT_BIT_LO(c)	(((((U8)c)>>6)&0x3f)|0x80)
 
 #ifdef HAS_QUAD
 #define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \

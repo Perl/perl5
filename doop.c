@@ -504,8 +504,6 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
     }
 
     if (items-- > 0) {
-	char *s;
-
 	sv_setpv(sv, "");
 	if (*mark)
 	    sv_catsv(sv, *mark);
@@ -513,10 +511,9 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
     }
     else
 	sv_setpv(sv,"");
-    len = delimlen;
-    if (len) {
+    if (delimlen) {
 	for (; items > 0; items--,mark++) {
-	    sv_catpvn(sv,delim,len);
+	    sv_catsv(sv,del);
 	    sv_catsv(sv,*mark);
 	}
     }

@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..10\n";
+print "1..14\n";
 
 @x = (1, 2, 3);
 if (join(':',@x) eq '1:2:3') {print "ok 1\n";} else {print "not ok 1\n";}
@@ -44,3 +44,23 @@ if ($f eq 'baeak') {print "ok 6\n";} else {print "# '$f'\nnot ok 6\n";}
   print "# expected 'a17b21c' got '$r'\nnot " if $r ne 'a17b21c';
   print "ok 10\n";
 };
+
+{ my $s = join("", chr(1234),chr(255));
+  print "not " unless length($s) == 2;
+  print "ok 11\n";
+}
+
+{ my $s = join(chr(2345), chr(1234),chr(255));
+  print "not " unless length($s) == 3;
+  print "ok 12\n";
+}
+
+{ my $s = join(chr(2345), chr(1234),chr(3456));
+  print "not " unless length($s) == 3;
+  print "ok 13\n";
+}
+
+{ my $s = join(chr(255), chr(1234),chr(2345));
+  print "not " unless length($s) == 3;
+  print "ok 14\n";
+}
