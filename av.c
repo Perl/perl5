@@ -637,11 +637,34 @@ Perl_avhv_fetch_ent(pTHX_ AV *av, SV *keysv, I32 lval, U32 hash)
     return av_fetch(av, avhv_index_sv(HeVAL(he)), lval);
 }
 
+/* Check for the existence of an element named by a given key.
+ *
+ * This relies on the fact that uninitialized array elements
+ * are set to &PL_sv_undef.
+ */
 bool
 Perl_avhv_exists_ent(pTHX_ AV *av, SV *keysv, U32 hash)
 {
     HV *keys = avhv_keys(av);
-    return hv_exists_ent(keys, keysv, hash);
+    HE *he;
+    IV ix;
+	
+    he = hv_fetch_ent(keys, keysv, FALSE, hash);
+    if (!he || !SvOK(HeVAL(he)))
+	return FALSE;
+
+    ix = SvIV(HeVAL(he));
+
+    /* If the array hasn't been extended to reach the key yet then
+     * it hasn't been accessed and thus does not exist.  We use
+     * AvFILL() rather than AvFILLp() to handle tied av. */
+    if (ix > 0 && ix <= AvFILL(av)
+	&& (SvRMAGICAL(av)
+	    || (AvARRAY(av)[ix] && AvARRAY(av)[ix] != &PL_sv_undef)))
+    {
+	return TRUE;
+    }
+    return FALSE;
 }
 
 HE *

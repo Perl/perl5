@@ -1,10 +1,7 @@
 #############################################################################
 # Pod/Usage.pm -- print usage messages for the running script.
 #
-# Based on Tom Christiansen's Pod::Text::pod2text() function
-# (with modifications).
-#
-# Copyright (C) 1994-1999 Tom Christiansen. All rights reserved.
+# Copyright (C) 1996-1999 by Bradford Appleton. All rights reserved.
 # This file is part of "PodParser". PodParser is free software;
 # you can redistribute it and/or modify it under the same terms
 # as Perl itself.
@@ -13,7 +10,7 @@
 package Pod::Usage;
 
 use vars qw($VERSION);
-$VERSION = 1.081;  ## Current version of this package
+$VERSION = 1.085;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 =head1 NAME
@@ -363,12 +360,21 @@ use strict;
 #use diagnostics;
 use Carp;
 use Exporter;
-use Pod::PlainText;
 use File::Spec;
 
 use vars qw(@ISA @EXPORT);
-@ISA = qw(Pod::PlainText);
 @EXPORT = qw(&pod2usage);
+BEGIN {
+    if ( $] >= 5.005_58 ) {
+       require Pod::Text;
+       @ISA = qw( Pod::Text );
+    }
+    else {
+       require Pod::PlainText;
+       @ISA = qw( Pod::PlainText );
+    }
+}
+
 
 ##---------------------------------------------------------------------------
 

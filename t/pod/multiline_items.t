@@ -14,10 +14,18 @@ exit( ($passed == 1) ? 0 : -1 )  unless $ENV{HARNESS_ACTIVE};
 __END__
 
 
-=pod
+=head1 Test multiline item lists
 
-The statement: C<This is dog kind's I<finest> hour!> is a parody of a
-quotation from Winston Churchill.
+This is a test to ensure that multiline =item paragraphs
+get indented appropriately.
+
+=over 4 
+
+=item This 
+is
+a
+test.
+
+=back
 
 =cut
-

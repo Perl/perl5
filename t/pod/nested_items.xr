@@ -1,6 +1,6 @@
 Test nested item lists
-    This is a test to ensure the nested =item paragraphs get
-    indented appropriately.
+    This is a test to ensure the nested =item paragraphs get indented
+    appropriately.
 
     1 First section.
 

@@ -13,8 +13,6 @@ BEGIN {
    push @INC, map { File::Spec->catfile($_, 'lib') } ($PARENTDIR, $THISDIR);
 }
 
-use Pod::PlainText;
-use vars qw(@ISA @EXPORT $MYPKG);
 #use strict;
 #use diagnostics;
 use Carp;
@@ -22,13 +20,23 @@ use Exporter;
 #use File::Compare;
 #use Cwd qw(abs_path);
 
-@ISA = qw(Pod::PlainText);
-@EXPORT = qw(&testpodplaintext);
+use vars qw($MYPKG @EXPORT @ISA);
 $MYPKG = eval { (caller)[0] };
+@EXPORT = qw(&testpodplaintext);
+BEGIN {
+    if ( $] >= 5.005_58 ) {
+       require Pod::Text;
+       @ISA = qw( Pod::Text );
+    }
+    else {
+       require Pod::PlainText;
+       @ISA = qw( Pod::PlainText );
+    }
+}
 
 ## Hardcode settings for TERMCAP and COLUMNS so we can try to get
 ## reproducible results between environments
-@ENV{qw(TERMCAP COLUMNS)} = ('co=72:do=^J', 72);
+@ENV{qw(TERMCAP COLUMNS)} = ('co=76:do=^J', 76);
 
 sub catfile(@) { File::Spec->catfile(@_); }
 
@@ -37,7 +45,7 @@ $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'xtra');
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'pod');
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 't');
 my @PODINCDIRS = ( catfile($INSTDIR, 'lib', 'Pod'),
-                   catfile($INSTDIR, 'scripts'),
+                   catfile($INSTDIR, 'pod'),
                    catfile($INSTDIR, 't', 'pod'),
                    catfile($INSTDIR, 't', 'pod', 'xtra')
                  );
@@ -111,7 +119,7 @@ sub testpodinc2plaintext( @ ) {
       return  $msg;
    }
 
-   print "+ Running testpodinc2plaintext for '$testname'...\n";
+   print "# Running testpodinc2plaintext for '$testname'...\n";
    ## Compare the output against the expected result
    podinc2plaintext($infile, $outfile);
    if ( testcmp($outfile, $cmpfile) ) {
@@ -145,12 +153,12 @@ sub testpodplaintext( @ ) {
       if ($opts{'-xrgen'}) {
           if ($opts{'-force'} or ! -e $cmpfile) {
              ## Create the comparison file
-             print "+ Creating expected result for \"$testname\"" .
+             print "# Creating expected result for \"$testname\"" .
                    " pod2plaintext test ...\n";
              podinc2plaintext($podfile, $cmpfile);
           }
           else {
-             print "+ File $cmpfile already exists" .
+             print "# File $cmpfile already exists" .
                    " (use '-force' to regenerate it).\n";
           }
           next;
@@ -162,13 +170,13 @@ sub testpodplaintext( @ ) {
                         -Cmp => $cmpfile;
       if ($failmsg) {
           ++$failed;
-          print "+\tFAILED. ($failmsg)\n";
+          print "#\tFAILED. ($failmsg)\n";
 	  print "not ok ", $failed+$passes, "\n";
       }
       else {
           ++$passes;
           unlink($outfile);
-          print "+\tPASSED.\n";
+          print "#\tPASSED.\n";
 	  print "ok ", $failed+$passes, "\n";
       }
    }

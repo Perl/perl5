@@ -10,8 +10,6 @@ get_flag(char *attr)
 	return CVf_METHOD;
     else if (strnEQ(attr, "locked", 6))
 	return CVf_LOCKED;
-    else if (strnEQ(attr, "lvalue", 6))
-	return CVf_LVALUE;
     else
 	return 0;
 }
@@ -29,6 +27,10 @@ char *	Class
     PPCODE:
 	if (!PL_compcv || !(cv = CvOUTSIDE(PL_compcv)))
 	    croak("can't set attributes outside a subroutine scope");
+	if (ckWARN(WARN_DEPRECATED))
+	    Perl_warner(aTHX_ WARN_DEPRECATED,
+			"pragma \"attrs\" is deprecated, "
+			"use \"sub NAME : ATTRS\" instead");
 	for (i = 1; i < items; i++) {
 	    STRLEN n_a;
 	    char *attr = SvPV(ST(i), n_a);

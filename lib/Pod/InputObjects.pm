@@ -2,7 +2,7 @@
 # Pod/InputObjects.pm -- package which defines objects for input streams
 # and paragraphs and commands when parsing POD docs.
 #
-# Copyright (C) 1996-1999 Tom Christiansen. All rights reserved.
+# Copyright (C) 1996-1999 by Bradford Appleton. All rights reserved.
 # This file is part of "PodParser". PodParser is free software;
 # you can redistribute it and/or modify it under the same terms
 # as Perl itself.
@@ -11,7 +11,7 @@
 package Pod::InputObjects;
 
 use vars qw($VERSION);
-$VERSION = 1.081;  ## Current version of this package
+$VERSION = 1.085;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 #############################################################################
@@ -434,6 +434,9 @@ It has the following methods/attributes:
                                                  -file => $filename,
                                                  -line => $line_number);
 
+        my $pod_seq4 = new Pod::InteriorSequence(-name => $cmd, $ptree);
+        my $pod_seq5 = new Pod::InteriorSequence($cmd, $ptree);
+
 This is a class method that constructs a C<Pod::InteriorSequence> object
 and returns a reference to the new interior sequence object. It should
 be given two keyword arguments.  The C<-ldelim> keyword indicates the
@@ -441,7 +444,10 @@ corresponding left-delimiter of the interior sequence (e.g. 'E<lt>').
 The C<-name> keyword indicates the name of the corresponding interior
 sequence command, such as C<I> or C<B> or C<C>. The C<-file> and
 C<-line> keywords indicate the filename and line number corresponding
-to the beginning of the interior sequence.
+to the beginning of the interior sequence. If the C<$ptree> argument is
+given, it must be the last argument, and it must be either string, or
+else an array-ref suitable for passing to B<Pod::ParseTree::new> (or
+it may be a reference to an Pod::ParseTree object).
 
 =cut
 
@@ -449,6 +455,18 @@ sub new {
     ## Determine if we were called via an object-ref or a classname
     my $this = shift;
     my $class = ref($this) || $this;
+
+    ## See if first argument has no keyword
+    if (((@_ <= 2) or (@_ % 2)) and $_[0] !~ /^-\w/) {
+       ## Yup - need an implicit '-name' before first parameter
+       unshift @_, '-name';
+    }
+
+    ## See if odd number of args
+    if ((@_ % 2) != 0) {
+       ## Yup - need an implicit '-ptree' before the last parameter
+       splice @_, $#_, 0, '-ptree';
+    }
 
     ## Any remaining arguments are treated as initial values for the
     ## hash that is used to represent this object. Note that we default
@@ -460,9 +478,17 @@ sub new {
           -line       => 0,
           -ldelim     => '<',
           -rdelim     => '>',
-          -ptree => new Pod::ParseTree(),
           @_
     };
+
+    ## Initialize contents if they havent been already
+    my $ptree = $self->{'-ptree'} || new Pod::ParseTree();
+    if ( ref $ptree =~ /^(ARRAY)?$/ ) {
+        ## We have an array-ref, or a normal scalar. Pass it as an
+        ## an argument to the ptree-constructor
+        $ptree = new Pod::ParseTree($1 ? [$ptree] : $ptree);
+    }
+    $self->{'-ptree'} = $ptree;
 
     ## Bless ourselves into the desired class and perform any initialization
     bless $self, $class;
@@ -496,7 +522,7 @@ sub _set_child2parent_links {
    my ($self, @children) = @_;
    ## Make sure any sequences know who their parent is
    for (@children) {
-      next unless ref;
+      next unless (ref || ref eq 'SCALAR');
       if ($_->isa('Pod::InteriorSequence') or $_->can('nested')) {
           $_->nested($self);
       }
@@ -510,8 +536,8 @@ sub _unset_child2parent_links {
    $self->{'-parent_sequence'} = undef;
    my $ptree = $self->{'-ptree'};
    for (@$ptree) {
-      next  unless (length  and  ref  and  $_->isa('Pod::InteriorSequence'));
-      $_->_unset_child2parent_links();
+      next  unless (length  and  ref  and  ref ne 'SCALAR');
+      $_->_unset_child2parent_links()  if $_->isa('Pod::InteriorSequence');
    }
 }
 
@@ -718,7 +744,7 @@ itself contain a parse-tree (since interior sequences may be nested).
 
 This is a class method that constructs a C<Pod::Parse_tree> object and
 returns a reference to the new parse-tree. If a single-argument is given,
-it mist be a reference to an array, and is used to initialize the root
+it must be a reference to an array, and is used to initialize the root
 (top) of the parse tree.
 
 =cut
@@ -863,8 +889,8 @@ sub _unset_child2parent_links {
    my $self = shift;
    local *ptree = $self;
    for (@ptree) {
-       next  unless (length  and  ref  and  $_->isa('Pod::InteriorSequence'));
-       $_->_unset_child2parent_links();
+       next  unless (length  and  ref  and  ref ne 'SCALAR');
+       $_->_unset_child2parent_links()  if $_->isa('Pod::InteriorSequence');
    }
 }
 
