@@ -47,14 +47,6 @@ The following pragmas are defined (and have their own documentation).
 
 =over 12
 
-=item assertions
-
-Selects assertions
-
-=item assertions::activate
-
-Assertions activation
-
 =item attributes
 
 Get/set subroutine or variable attributes
@@ -182,10 +174,6 @@ Enable/disable UTF-8 (or UTF-EBCDIC) in source code
 =item vars
 
 Predeclare global variable names (obsolete)
-
-=item version
-
-Perl extension for Version Objects
 
 =item vmsish
 
