@@ -39,12 +39,12 @@
 #	define TO_SOCKET(x)	(x)
 #endif	/* USE_SOCKETS_AS_HANDLES */
 
-#ifdef USE_THREADS
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
 #define StartSockets() \
     STMT_START {					\
 	if (!wsock_started)				\
 	    start_sockets();				\
-       set_socktype();                         \
+	set_socktype();                                 \
     } STMT_END
 #else
 #define StartSockets() \
@@ -104,7 +104,7 @@ void
 set_socktype(void)
 {
 #ifdef USE_SOCKETS_AS_HANDLES
-#ifdef USE_THREADS
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
     dTHX;
     if (!w32_init_socktype) {
 #endif
@@ -114,7 +114,7 @@ set_socktype(void)
 	 */
 	setsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE,
 		    (char *)&iSockOpt, sizeof(iSockOpt));
-#ifdef USE_THREADS
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
 	w32_init_socktype = 1;
     }
 #endif
@@ -143,7 +143,7 @@ my_fdopen(int fd, char *mode)
     /*
      * If we get here, then fd is actually a socket.
      */
-    Newz(1310, fp, 1, FILE);
+    Newz(1310, fp, 1, FILE);	/* XXX leak, good thing this code isn't used */
     if(fp == NULL) {
 	errno = ENOMEM;
 	return NULL;
@@ -422,18 +422,19 @@ win32_socket(int af, int type, int protocol)
 int
 my_fclose (FILE *pf)
 {
-    int osf, retval;
+    int osf;
     if (!wsock_started)		/* No WinSock? */
 	return(fclose(pf));	/* Then not a socket. */
     osf = TO_SOCKET(fileno(pf));/* Get it now before it's gone! */
-    retval = fclose(pf);	/* Must fclose() before closesocket() */
     if (osf != -1
 	&& closesocket(osf) == SOCKET_ERROR
 	&& WSAGetLastError() != WSAENOTSOCK)
     {
+	(void)fclose(pf);
 	return EOF;
     }
-    return retval;
+    else
+	return fclose(pf);
 }
 
 struct hostent *
