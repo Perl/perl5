@@ -1019,9 +1019,9 @@ STATIC void	S_init_postdump_symbols(pTHX_ int, char **, char **);
 STATIC void	S_init_predump_symbols(pTHX);
 STATIC void	S_my_exit_jump(pTHX) __attribute__((noreturn));
 STATIC void	S_nuke_stacks(pTHX);
-STATIC void	S_open_script(pTHX_ char *, bool, SV *, int *fd);
+STATIC void	S_open_script(pTHX_ char *, bool, SV *);
 STATIC void	S_usage(pTHX_ char *);
-STATIC void	S_validate_suid(pTHX_ char *, char*, int);
+STATIC void	S_validate_suid(pTHX_ char *, char*);
 #  if defined(IAMSUID)
 STATIC int	S_fd_on_nosuid_fs(pTHX_ int fd);
 #  endif
