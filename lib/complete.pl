@@ -7,6 +7,7 @@
 ;#     This routine provides word completion.
 ;#     (TAB) attempts word completion.
 ;#     (^D)  prints completion list.
+;#	(These may be changed by setting $Complete'complete, etc.)
 ;#
 ;# Diagnostics:
 ;#     Bell when word completion fails.
@@ -15,13 +16,23 @@
 ;#     The tty driver is put into raw mode.
 ;#
 ;# Bugs:
-;#     The erase and kill characters are hard coded.
 ;#
 ;# Usage:
 ;#     $input = do Complete('prompt_string', @completion_list);
 ;#
 
+CONFIG: {
+    package Complete;
+
+    $complete =	"\004";
+    $kill =	"\025";
+    $erase1 =	"\177";
+    $erase2 =	"\010";
+}
+
 sub Complete {
+    package Complete;
+
     local ($prompt) = shift (@_);
     local ($c, $cmp, $l, $r, $ret, $return, $test);
     @_cmp_lst = sort @_;
@@ -49,21 +60,21 @@ sub Complete {
     	    	print $test = substr ($test, $r, $l - $r);
     	    	$r = length ($return .= $test);
 	    }
-	    elsif ($c eq "\004") {		# (^D) completion list
+	    elsif ($c eq $complete) {		# (^D) completion list
 		print "\r\n";
 		foreach $cmp (@_cmp_lst) {
 		    print "$cmp\r\n" if $cmp =~ /^$return/;
 		}
 		redo loop;
 	    }
-    	    elsif ($c eq "\025" && $r) {	# (^U) kill
+    	    elsif ($c eq $kill && $r) {	# (^U) kill
     	    	$return = '';
     	    	$r = 0;
     	    	print "\r\n";
     	    	redo loop;
     	    }
 	    	    	    	    	    	# (DEL) || (BS) erase
-	    elsif ($c eq "\177" || $c eq "\010") {
+	    elsif ($c eq $erase1 || $c eq $erase2) {
 		if($r) {
 		    print "\b \b";
 		    chop ($return);

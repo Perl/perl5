@@ -1,4 +1,4 @@
-/* $Header: consarg.c,v 3.0.1.7 90/10/15 15:55:28 lwall Locked $
+/* $Header: consarg.c,v 3.0.1.8 91/01/11 17:37:31 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	consarg.c,v $
+ * Revision 3.0.1.8  91/01/11  17:37:31  lwall
+ * patch42: assignment to a slice didn't supply an array context to RHS
+ * patch42: suppressed variable suicide on local($a,$b) = @_
+ * 
  * Revision 3.0.1.7  90/10/15  15:55:28  lwall
  * patch29: defined @foo was behaving inconsistently
  * patch29: -5 % 5 was wrong
@@ -721,6 +725,7 @@ register ARG *arg;
 	else if (arg1->arg_type == O_ASLICE) {
 	    arg1->arg_type = O_LASLICE;
 	    if (arg->arg_type == O_ASSIGN) {
+		dehoist(arg,2);
 		arg[1].arg_flags |= AF_ARYOK;
 		arg[2].arg_flags |= AF_ARYOK;
 	    }
@@ -728,6 +733,7 @@ register ARG *arg;
 	else if (arg1->arg_type == O_HSLICE) {
 	    arg1->arg_type = O_LHSLICE;
 	    if (arg->arg_type == O_ASSIGN) {
+		dehoist(arg,2);
 		arg[1].arg_flags |= AF_ARYOK;
 		arg[2].arg_flags |= AF_ARYOK;
 	    }
@@ -1066,6 +1072,7 @@ ARG *arg2;
     thisexpr++;
     if (arg_common(arg1,thisexpr,1))
 	return 0;	/* hit eval or do {} */
+    stab_lastexpr(defstab) = thisexpr;		/* pretend to hit @_ */
     if (arg_common(arg2,thisexpr,0))
 	return 0;	/* hit identifier again */
     return 1;

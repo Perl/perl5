@@ -1,4 +1,4 @@
-/* $Header: doarg.c,v 3.0.1.9 90/11/10 01:14:31 lwall Locked $
+/* $Header: doarg.c,v 3.0.1.10 91/01/11 17:41:39 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doarg.c,v $
+ * Revision 3.0.1.10  91/01/11  17:41:39  lwall
+ * patch42: added binary and hex pack/unpack options
+ * patch42: fixed casting problem with n and N pack options
+ * patch42: fixed printf("%c", 0)
+ * patch42: the perl debugger was dumping core frequently
+ * 
  * Revision 3.0.1.9  90/11/10  01:14:31  lwall
  * patch38: random cleanup
  * patch38: optimized join('',...)
@@ -516,6 +522,120 @@ int *arglast;
 		}
 	    }
 	    break;
+	case 'B':
+	case 'b':
+	    {
+		char *savepat = pat;
+		int saveitems = items;
+
+		fromstr = NEXTFROM;
+		aptr = str_get(fromstr);
+		if (pat[-1] == '*')
+		    len = fromstr->str_cur;
+		pat = aptr;
+		aint = str->str_cur;
+		str->str_cur += (len+7)/8;
+		STR_GROW(str, str->str_cur + 1);
+		aptr = str->str_ptr + aint;
+		if (len > fromstr->str_cur)
+		    len = fromstr->str_cur;
+		aint = len;
+		items = 0;
+		if (datumtype == 'B') {
+		    for (len = 0; len++ < aint;) {
+			items |= *pat++ & 1;
+			if (len & 7)
+			    items <<= 1;
+			else {
+			    *aptr++ = items & 0xff;
+			    items = 0;
+			}
+		    }
+		}
+		else {
+		    for (len = 0; len++ < aint;) {
+			if (*pat++ & 1)
+			    items |= 128;
+			if (len & 7)
+			    items >>= 1;
+			else {
+			    *aptr++ = items & 0xff;
+			    items = 0;
+			}
+		    }
+		}
+		if (aint & 7) {
+		    if (datumtype == 'B')
+			items <<= 7 - (aint & 7);
+		    else
+			items >>= 7 - (aint & 7);
+		    *aptr++ = items & 0xff;
+		}
+		pat = str->str_ptr + str->str_cur;
+		while (aptr <= pat)
+		    *aptr++ = '\0';
+
+		pat = savepat;
+		items = saveitems;
+	    }
+	    break;
+	case 'H':
+	case 'h':
+	    {
+		char *savepat = pat;
+		int saveitems = items;
+
+		fromstr = NEXTFROM;
+		aptr = str_get(fromstr);
+		if (pat[-1] == '*')
+		    len = fromstr->str_cur;
+		pat = aptr;
+		aint = str->str_cur;
+		str->str_cur += (len+1)/2;
+		STR_GROW(str, str->str_cur + 1);
+		aptr = str->str_ptr + aint;
+		if (len > fromstr->str_cur)
+		    len = fromstr->str_cur;
+		aint = len;
+		items = 0;
+		if (datumtype == 'H') {
+		    for (len = 0; len++ < aint;) {
+			if (isalpha(*pat))
+			    items |= ((*pat++ & 15) + 9) & 15;
+			else
+			    items |= *pat++ & 15;
+			if (len & 1)
+			    items <<= 4;
+			else {
+			    *aptr++ = items & 0xff;
+			    items = 0;
+			}
+		    }
+		}
+		else {
+		    for (len = 0; len++ < aint;) {
+			if (isalpha(*pat))
+			    items |= (((*pat++ & 15) + 9) & 15) << 4;
+			else
+			    items |= (*pat++ & 15) << 4;
+			if (len & 1)
+			    items >>= 4;
+			else {
+			    *aptr++ = items & 0xff;
+			    items = 0;
+			}
+		    }
+		}
+		if (aint & 1)
+		    *aptr++ = items & 0xff;
+		pat = str->str_ptr + str->str_cur;
+		while (aptr <= pat)
+		    *aptr++ = '\0';
+
+		pat = savepat;
+		items = saveitems;
+	    }
+	    break;
 	case 'C':
 	case 'c':
 	    while (len-- > 0) {
@@ -577,11 +697,11 @@ int *arglast;
 	case 'N':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		along = (long)str_gnum(fromstr);
+		aulong = U_L(str_gnum(fromstr));
 #ifdef HTONL
-		along = htonl(along);
+		aulong = htonl(aulong);
 #endif
-		str_ncat(str,(char*)&along,sizeof(long));
+		str_ncat(str,(char*)&aulong,sizeof(unsigned long));
 	    }
 	    break;
 	case 'L':
@@ -696,6 +816,7 @@ register STR **sarg;
 		*t = '\0';
 		(void)sprintf(xs,f);
 		len++;
+		xlen = strlen(xs);
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9': 
@@ -711,9 +832,12 @@ register STR **sarg;
 		if (strEQ(f,"%c")) { /* some printfs fail on null chars */
 		    *xs = xlen;
 		    xs[1] = '\0';
+		    xlen = 1;
 		}
-		else
+		else {
 		    (void)sprintf(xs,f,xlen);
+		    xlen = strlen(xs);
+		}
 		break;
 	    case 'D':
 		dolong = TRUE;
@@ -725,6 +849,7 @@ register STR **sarg;
 		    (void)sprintf(xs,f,(long)str_gnum(*(sarg++)));
 		else
 		    (void)sprintf(xs,f,(int)str_gnum(*(sarg++)));
+		xlen = strlen(xs);
 		break;
 	    case 'X': case 'O':
 		dolong = TRUE;
@@ -737,11 +862,13 @@ register STR **sarg;
 		    (void)sprintf(xs,f,U_L(value));
 		else
 		    (void)sprintf(xs,f,U_I(value));
+		xlen = strlen(xs);
 		break;
 	    case 'E': case 'e': case 'f': case 'G': case 'g':
 		ch = *(++t);
 		*t = '\0';
 		(void)sprintf(xs,f,str_gnum(*(sarg++)));
+		xlen = strlen(xs);
 		break;
 	    case 's':
 		ch = *(++t);
@@ -767,11 +894,11 @@ register STR **sarg;
 		*t = ch;
 		(void)sprintf(buf,tokenbuf+64,xs);
 		xs = buf;
+		xlen = strlen(xs);
 		break;
 	    }
 	    /* end of switch, copy results */
 	    *t = ch;
-	    xlen = strlen(xs);
 	    STR_GROW(str, str->str_cur + (f - s) + len + 1);
 	    str_ncat(str, s, f - s);
 	    str_ncat(str, xs, xlen);
@@ -880,6 +1007,9 @@ int *arglast;
     csv->hasargs = hasargs;
     curcsv = csv;
     if (sub->usersub) {
+	csv->hasargs = 0;
+	csv->savearray = Null(ARRAY*);;
+	csv->argarray = Null(ARRAY*);
 	st[sp] = arg->arg_ptr.arg_str;
 	if (!hasargs)
 	    items = 0;

@@ -37,6 +37,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
 #$d_eunice	EUNICE		/**/
 #$d_eunice	VMS		/**/
 
+/* ALIGNBYTES:
+ *	This symbol contains the number of bytes required to align a double.
+ *	Usual values are 2, 4, and 8.
+ */
+#define ALIGNBYTES $alignbytes		/**/
+
 /* BIN:
  *	This symbol holds the name of the directory in which the user wants
  *	to put publicly executable images for the package in question.  It
@@ -87,7 +93,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	This symbol, if defined, indicates that this C compiler knows how to
  *	cast negative numbers to unsigned longs, ints and shorts.
  */
+/* CASTFLAGS:
+ *	This symbol contains flags that say what difficulties the compiler
+ *	has casting odd floating values to unsigned long:
+ *		1 = couldn't cast < 0
+ *		2 = couldn't cast >= 0x80000000
+ */
 #$d_castneg	CASTNEGFLOAT	/**/
+#define	CASTFLAGS $castflags	/**/
 
 /* CHARSPRINTF:
  *	This symbol is defined if this system declares "char *sprintf()" in
@@ -153,6 +166,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	include fcntl.h.
  */
 #$d_fcntl	FCNTL		/**/
+
+/* FLEXFILENAMES:
+ *	This symbol, if defined, indicates that the system supports filenames
+ *	longer than 14 characters.
+ */
+#$d_flexfnam	FLEXFILENAMES		/**/
 
 /* FLOCK:
  *	This symbol, if defined, indicates that the flock() routine is

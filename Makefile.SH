@@ -25,9 +25,12 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.11 90/11/10 01:25:51 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.12 91/01/11 17:05:17 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.12  91/01/11  17:05:17  lwall
+# patch42: added installperl script
+# 
 # Revision 3.0.1.11  90/11/10  01:25:51  lwall
 # patch38: new arbitrary precision libraries from Mark Biggar
 # 
@@ -314,45 +317,7 @@ perl.man: perl_man.1 perl_man.2 perl_man.3 perl_man.4 patchlevel.h perl
 	cat perl_man.[1-4] >>perl.man
 
 install: all
-# won't work with csh
-	export PATH || exit 1
-	- rm -f $(bin)/perl.old $(bin)/suidperl $(bin)/taintperl
-	- mv $(bin)/perl $(bin)/perl.old 2>/dev/null
-	- if test `pwd` != $(bin); then cp $(public) $(bin); fi
-	- cd $(bin); \
-for pub in $(public); do \
-chmod +x `basename $$pub`; \
-done
-	- chmod 755 $(bin)/taintperl 2>/dev/null
-!NO!SUBS!
-
-case "$d_dosuid" in
-*define*)
-    cat >>Makefile <<'!NO!SUBS!'
-	- chmod 4711 $(bin)/suidperl 2>/dev/null
-!NO!SUBS!
-    ;;
-esac
-
-cat >>Makefile <<'!NO!SUBS!'
-	- test $(bin) = /usr/bin || rm -f /usr/bin/perl
-	- test $(bin) = /usr/bin || $(SLN) $(bin)/perl /usr/bin || cp $(bin)/perl /usr/bin
-	- chmod +x $(scripts)
-	- cp $(scripts) $(scriptdir)
-	- sh ./makedir $(privlib)
-	- \
-if test `pwd` != $(privlib); then \
-cp $(private) lib/*.pl $(privlib); \
-fi
-#	cd $(privlib); \
-#for priv in $(private); do \
-#chmod +x `basename $$priv`; \
-#done
-	- if test `pwd` != $(mansrc); then \
-for page in $(manpages); do \
-cp $$page $(mansrc)/`basename $$page .man`.$(manext); \
-done; \
-fi
+	./perl installperl
 	cd x2p; $(MAKE) install
 
 clean:

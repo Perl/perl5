@@ -1,4 +1,4 @@
-/* $Header: cons.c,v 3.0.1.9 90/11/10 01:10:50 lwall Locked $
+/* $Header: cons.c,v 3.0.1.10 91/01/11 17:33:33 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cons.c,v $
+ * Revision 3.0.1.10  91/01/11  17:33:33  lwall
+ * patch42: the perl debugger was dumping core frequently
+ * patch42: the postincrement to preincrement optimizer was overzealous
+ * patch42: foreach didn't localize its temp array properly
+ * 
  * Revision 3.0.1.9  90/11/10  01:10:50  lwall
  * patch38: random cleanup
  * 
@@ -469,7 +474,7 @@ CMD *cur;
     cmd->c_type = C_EXPR;
     cmd->ucmd.acmd.ac_stab = Nullstab;
     cmd->ucmd.acmd.ac_expr = Nullarg;
-    cmd->c_expr = make_op(O_SUBR, 1,
+    cmd->c_expr = make_op(O_SUBR, 2,
 	stab2arg(A_WORD,DBstab),
 	Nullarg,
 	Nullarg);
@@ -675,7 +680,8 @@ int acmd;
 
     if (arg[flp].arg_flags & (AF_PRE|AF_POST)) {
 	cmd->c_flags |= opt;
-	if (acmd && !cmd->ucmd.acmd.ac_expr && !(cmd->c_flags & CF_TERM)) {
+	if (acmd && !cmd->ucmd.acmd.ac_expr && !(cmd->c_flags & CF_TERM)
+	  && cmd->c_expr->arg_type == O_ITEM) {
 	    arg[flp].arg_flags &= ~AF_POST;	/* prefer ++$foo to $foo++ */
 	    arg[flp].arg_flags |= AF_PRE;	/*  if value not wanted */
 	}
@@ -1305,8 +1311,8 @@ int willsave;				/* willsave passes down the tree */
 		if (tmpsave && (cmd->c_flags & CF_OPTIMIZE) == CFT_ARRAY) {
 		    if (lastcmd &&
 		      lastcmd->c_type == C_EXPR &&
-		      lastcmd->ucmd.acmd.ac_expr) {
-			ARG *arg = lastcmd->ucmd.acmd.ac_expr;
+		      lastcmd->c_expr) {
+			ARG *arg = lastcmd->c_expr;
 
 			if (arg->arg_type == O_ASSIGN &&
 			    arg[1].arg_type == A_LEXPR &&
@@ -1315,7 +1321,7 @@ int willsave;				/* willsave passes down the tree */
 			      stab_name(
 				arg[1].arg_ptr.arg_arg[1].arg_ptr.arg_stab),
 			      5)) {	/* array generated for foreach */
-			    (void)localize(arg[1].arg_ptr.arg_arg);
+			    (void)localize(arg);
 			}
 		    }
 

@@ -83,6 +83,7 @@ h2pl/tcbreak2		cbreak test routine using .pl
 handy.h			Handy definitions
 hash.c			Associative arrays
 hash.h			Public declarations for the above
+installperl		Perl script to do "make install" dirty work
 ioctl.pl		Sample ioctl.pl
 lib/abbrev.pl		An abbreviation table builder
 lib/bigfloat.pl		An arbitrary precision floating point package
@@ -262,4 +263,3 @@ x2p/str.h		Public declarations for the above
 x2p/util.c		Utility routines
 x2p/util.h		Public declarations for the above
 x2p/walk.c		Parse tree walker
-config_h.SH	Produces config.h.

@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 3.0.1.12 90/11/10 00:57:30 lwall Locked $
+# $Header: Configure,v 3.0.1.13 91/01/11 17:01:32 lwall Locked $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -94,6 +94,7 @@ date=''
 csh=''
 Log=''
 Header=''
+alignbytes=''
 bin=''
 byteorder=''
 contains=''
@@ -103,6 +104,7 @@ d_bcmp=''
 d_bcopy=''
 d_bzero=''
 d_castneg=''
+castflags=''
 d_charsprf=''
 d_chsize=''
 d_crypt=''
@@ -113,6 +115,7 @@ d_dup2=''
 d_fchmod=''
 d_fchown=''
 d_fcntl=''
+d_flexfnam=''
 d_flock=''
 d_getgrps=''
 d_gethent=''
@@ -639,39 +642,6 @@ EOSS
 chmod +x filexp
 $eunicefix filexp
 
-: determine where public executables go
-case "$bin" in
-'')
-    dflt=`./loc . /bin /usr/local/bin /usr/lbin /usr/local /usr/bin`
-    ;;
-*)  dflt="$bin"
-    ;;
-esac
-cont=true
-while $test "$cont" ; do
-    echo " "
-    rp="Where do you want to put the public executables? (~name ok) [$dflt]"
-    $echo $n "$rp $c"
-    . myread
-    bin="$ans"
-    bin=`./filexp "$bin"`
-    if test -d $bin; then
-	cont=''
-    else
-	case "$fastread" in
-	yes) dflt=y;;
-	*) dflt=n;;
-	esac
-	rp="Directory $bin doesn't exist.  Use that name anyway? [$dflt]"
-	$echo $n "$rp $c"
-	. myread
-	dflt=''
-	case "$ans" in
-	y*) cont='';;
-	esac
-    fi
-done
-
 : determine where manual pages go
 $cat <<EOM
   
@@ -1196,6 +1166,71 @@ none) ans='';
 esac
 libs="$ans"
 
+: check for size of random number generator
+echo " "
+case "$alignbytes" in
+'')
+    echo "Checking alignment constraints..."
+    $cat >try.c <<'EOCP'
+struct foobar {
+    char foo;
+    double bar;
+} try;
+main()
+{
+    printf("%d\n", (char*)&try.bar - (char*)&try.foo);
+}
+EOCP
+    if $cc $ccflags try.c -o try >/dev/null 2>&1 ; then
+	dflt=`./try`
+    else
+	dflt='?'
+	echo "(I can't seem to compile the test program...)"
+    fi
+    ;;
+*)
+    dflt="$alignbytes"
+    ;;
+esac
+rp="Doubles must be aligned on a how-many-byte boundary? [$dflt]"
+$echo $n "$rp $c"
+. myread
+alignbytes="$ans"
+$rm -f try.c try
+
+: determine where public executables go
+case "$bin" in
+'')
+    dflt=`./loc . /bin /usr/local/bin /usr/lbin /usr/local /usr/bin`
+    ;;
+*)  dflt="$bin"
+    ;;
+esac
+cont=true
+while $test "$cont" ; do
+    echo " "
+    rp="Where do you want to put the public executables? (~name ok) [$dflt]"
+    $echo $n "$rp $c"
+    . myread
+    bin="$ans"
+    bin=`./filexp "$bin"`
+    if test -d $bin; then
+	cont=''
+    else
+	case "$fastread" in
+	yes) dflt=y;;
+	*) dflt=n;;
+	esac
+	rp="Directory $bin doesn't exist.  Use that name anyway? [$dflt]"
+	$echo $n "$rp $c"
+	. myread
+	dflt=''
+	case "$ans" in
+	y*) cont='';;
+	esac
+    fi
+done
+
 : check for ordering of bytes in a long
 case "$byteorder" in
 '')
@@ -1248,6 +1283,54 @@ $echo $n "$rp $c"
 . myread
 byteorder="$ans"
 $rm -f try.c try
+
+: check for ability to cast negative floats to unsigned
+echo " "
+echo 'Checking to see if your C compiler can cast weird floats to unsigned'
+$cat >try.c <<'EOCP'
+main()
+{
+	double f = -123;
+	unsigned long along;
+	unsigned int aint;
+	unsigned short ashort;
+	int result = 0;
+
+	along = (unsigned long)f;
+	aint = (unsigned int)f;
+	ashort = (unsigned short)f;
+	if (along != (unsigned long)-123)
+	    result |= 1;
+	if (aint != (unsigned int)-123)
+	    result |= 1;
+	if (ashort != (unsigned short)-123)
+	    result |= 1;
+	f = (double)0x40000000;
+	f = f + f;
+	along = (unsigned long)f;
+	if (along != 0x80000000)
+	    result |= 2;
+	f -= 1;
+	along = (unsigned long)f;
+	if (along != 0x7fffffff)
+	    result |= 1;
+	f += 2;
+	along = (unsigned long)f;
+	if (along != 0x80000001)
+	    result |= 2;
+	exit(result);
+}
+EOCP
+if $cc -o try $ccflags try.c >/dev/null 2>&1 && ./try; then
+    d_castneg="$define"
+    castflags=0
+    echo "Yup, it does."
+else
+    d_castneg="$undef"
+    castflags=$?
+    echo "Nope, it doesn't."
+fi
+$rm -f try.*
 
 : see how we invoke the C preprocessor
 echo " "
@@ -1516,35 +1599,6 @@ eval $inlibc
 set bzero d_bzero
 eval $inlibc
 
-: check for ability to cast negative floats to unsigned
-echo " "
-echo 'Checking to see if your C compiler can cast negative float to unsigned'
-$cat >try.c <<'EOCP'
-main()
-{
-	double f = -123;
-	unsigned long along;
-	unsigned int aint;
-	unsigned short ashort;
-
-	along = (unsigned long)f;
-	aint = (unsigned int)f;
-	ashort = (unsigned short)f;
-	if (along == 0L || aint == 0 || ashort == 0)
-	    exit(1);
-	else
-	    exit(0);
-}
-EOCP
-if $cc -o try $ccflags try.c >/dev/null 2>&1 && ./try; then
-    d_castneg="$define"
-    echo "Yup, it does."
-else
-    d_castneg="$undef"
-    echo "Nope, it doesn't."
-fi
-$rm -f try.*
-
 : see if sprintf is declared as int or pointer to char
 echo " "
 cat >.ucbsprf.c <<'EOF'
@@ -1703,6 +1757,23 @@ else
     echo "No fcntl.h found, but that's ok."
 fi
 
+: see if we can have long filenames
+echo " "
+rm -f 123456789abcde
+if (echo hi >123456789abcdef) 2>/dev/null; then
+    : not version 8
+    if test -f 123456789abcde; then
+	echo 'You cannot have filenames longer than 14 characters.  Sigh.'
+	d_flexfnam="$undef"
+    else
+	echo 'You can have filenames longer than 14 characters.'
+	d_flexfnam="$define"
+    fi
+else
+    : version 8 probably
+    echo "You can't have filenames longer than 14 chars.  V8 can't even think about them!"
+    d_flexfnam="$undef"
+fi 
 : see if flock exists
 set flock d_flock
 eval $inlibc
@@ -2687,6 +2758,7 @@ date='$date'
 csh='$csh'
 Log='$Log'
 Header='$Header'
+alignbytes='$alignbytes'
 bin='$bin'
 byteorder='$byteorder'
 contains='$contains'
@@ -2696,6 +2768,7 @@ d_bcmp='$d_bcmp'
 d_bcopy='$d_bcopy'
 d_bzero='$d_bzero'
 d_castneg='$d_castneg'
+castflags='$castflags'
 d_charsprf='$d_charsprf'
 d_chsize='$d_chsize'
 d_crypt='$d_crypt'
@@ -2706,6 +2779,7 @@ d_dup2='$d_dup2'
 d_fchmod='$d_fchmod'
 d_fchown='$d_fchown'
 d_fcntl='$d_fcntl'
+d_flexfnam='$d_flexfnam'
 d_flock='$d_flock'
 d_getgrps='$d_getgrps'
 d_gethent='$d_gethent'

@@ -12,11 +12,17 @@
 ;#     #include <ctime.pl>          # see the -P and -I option in perl.man
 ;#     $Date = &ctime(time);
 
-@DoW = ('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
-@MoY = ('Jan','Feb','Mar','Apr','May','Jun',
-        'Jul','Aug','Sep','Oct','Nov','Dec');
+CONFIG: {
+    package ctime;
+
+    @DoW = ('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
+    @MoY = ('Jan','Feb','Mar','Apr','May','Jun',
+	    'Jul','Aug','Sep','Oct','Nov','Dec');
+}
 
 sub ctime {
+    package ctime;
+
     local($time) = @_;
     local($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst);
 

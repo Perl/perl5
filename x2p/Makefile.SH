@@ -5,6 +5,7 @@ case $CONFIG in
 '')
     if test ! -f config.sh; then
 	ln ../config.sh . || \
+	ln -s ../config.sh . || \
 	ln ../../config.sh . || \
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
@@ -18,9 +19,12 @@ case "$mallocsrc" in
 esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.7 90/11/10 02:20:15 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.8 91/01/11 18:34:40 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.8  91/01/11  18:34:40  lwall
+# patch42: x2p/Makefile.SH blew up on /afs misfeature
+# 
 # Revision 3.0.1.7  90/11/10  02:20:15  lwall
 # patch38: random cleanup
 # 

@@ -1,5 +1,5 @@
 %{
-/* $Header: a2p.y,v 3.0.1.2 90/08/09 05:47:26 lwall Locked $
+/* $Header: a2p.y,v 3.0.1.3 91/01/11 18:35:57 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -7,6 +7,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2p.y,v $
+ * Revision 3.0.1.3  91/01/11  18:35:57  lwall
+ * patch42: a2p didn't recognize split with regular expression
+ * patch42: a2p didn't handle > redirection right
+ * 
  * Revision 3.0.1.2  90/08/09  05:47:26  lwall
  * patch19: a2p didn't handle {foo = (bar == 123)}
  * 
@@ -219,6 +223,8 @@ term	: variable
 		{ $$ = oper2(OSUBSTR,$3,$5); }
 	| SPLIT '(' expr ',' VAR ',' expr ')'
 		{ $$ = oper3(OSPLIT,$3,aryrefarg(numary($5)),$7); }
+	| SPLIT '(' expr ',' VAR ',' REGEX ')'
+		{ $$ = oper3(OSPLIT,$3,aryrefarg(numary($5)),oper1(OREGEX,$7));}
 	| SPLIT '(' expr ',' VAR ')'
 		{ $$ = oper2(OSPLIT,$3,aryrefarg(numary($5))); }
 	| INDEX '(' expr ',' expr ')'
@@ -371,7 +377,7 @@ simple
 	;
 
 redir	: '>'	%prec FIELD
-		{ $$ = oper1(OREDIR,$1); }
+		{ $$ = oper1(OREDIR,string(">",1)); }
 	| GRGR
 		{ $$ = oper1(OREDIR,string(">>",2)); }
 	| '|'
