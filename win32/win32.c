@@ -1797,6 +1797,7 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 #ifdef USE_FIXED_OSFHANDLE
 
 #define FOPEN			0x01	/* file handle open */
+#define FNOINHERIT		0x10	/* file handle opened O_NOINHERIT */
 #define FAPPEND			0x20	/* file handle opened O_APPEND */
 #define FDEV			0x40	/* file handle refers to device */
 #define FTEXT			0x80	/* file handle is in text mode */
@@ -1837,7 +1838,8 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 
 /* create an ioinfo entry, kill its handle, and steal the entry */
 
-static int _alloc_osfhnd()
+static int
+_alloc_osfhnd(void)
 {
     HANDLE hF = CreateFile("NUL", 0, 0, NULL, OPEN_ALWAYS, 0, NULL);
     int fh = _open_osfhandle((long)hF, 0);
@@ -1862,6 +1864,9 @@ my_open_osfhandle(long osfhandle, int flags)
 
     if (flags & O_TEXT)
 	fileflags |= FTEXT;
+
+    if (flags & O_NOINHERIT)
+	fileflags |= FNOINHERIT;
 
     /* attempt to allocate a C Runtime file handle */
     if ((fh = _alloc_osfhnd()) == -1) {
@@ -2671,7 +2676,8 @@ win32_dup2(int fd1,int fd2)
 #define FTEXT		0x80	/* file handle is in text mode */
 #define MAX_DESCRIPTOR_COUNT	(64*32) /* this is the maximun that MSVCRT can handle */
 
-int __cdecl _fixed_read(int fh, void *buf, unsigned cnt)
+int __cdecl
+_fixed_read(int fh, void *buf, unsigned cnt)
 {
     int bytes_read;                 /* number of bytes read */
     char *buffer;                   /* buffer to read to */
