@@ -36,7 +36,7 @@ sub walk_table (&@) {
     while (<IN>) {
 	chomp;
 	next if /^:/;
-	while (s|\\$||) {
+	while (s|\\\s*$||) {
 	    $_ .= <IN>;
 	    chomp;
 	}
@@ -69,7 +69,7 @@ FUNC:
             next FUNC;
         }
 	$line++;
-	if ($in =~ /^=for\s+apidoc\s+(.*)\n/) {
+	if ($in =~ /^=for\s+apidoc\s+(.*?)\s*\n/) {
 	    my $proto = $1;
 	    $proto = "||$proto" unless $proto =~ /\|/;
 	    my($flags, $ret, $name, @args) = split /\|/, $proto;
@@ -155,16 +155,20 @@ walk_table {	# load documented functions into approriate hash
 	return "" unless $flags =~ /d/;
 	$func =~ s/\t//g; $flags =~ s/p//; # clean up fields from embed.pl
 	$retval =~ s/\t//;
-	if ($flags =~ /A/) {
-	    my $docref = delete $docfuncs{$func};
+	my $docref = delete $docfuncs{$func};
+	if ($docref and @$docref) {
+	    if ($flags =~ /A/) {
+		$docref->[0].="x" if $flags =~ /M/;
+		$apidocs{$docref->[4]}{$func} = 
+		    [$docref->[0] . 'A', $docref->[1], $retval,
+		    				$docref->[3], @args];
+	    } else {
+		$gutsdocs{$docref->[4]}{$func} = 
+		    [$docref->[0], $docref->[1], $retval, $docref->[3], @args];
+	    }
+	}
+	else {
 	    warn "no docs for $func\n" unless $docref and @$docref;
-            $docref->[0].="x" if $flags =~ /M/;
-	    $apidocs{$docref->[4]}{$func} = 
-                [$docref->[0] . 'A', $docref->[1], $retval, $docref->[3], @args];
-	} else {
-	    my $docref = delete $docfuncs{$func};
-	    $gutsdocs{$docref->[4]}{$func} = 
-                [$docref->[0], $docref->[1], $retval, $docref->[3], @args];
 	}
     }
     return "";
