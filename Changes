@@ -28,6 +28,90 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.4		Maintenance release working toward v5.8.4
 --------------
 ____________________________________________________________________________
+[ 22657] By: nicholas                              on 2004/04/05  16:15:56
+        Log: Integrate:
+             [ 22656]
+             Subject: Re: perldelta584
+             From: Craig Berry <craigberry@mac.com>
+             Message-ID: <12587569.1081180932766.JavaMail.craigberry@mac.com>
+             Date: Mon, 05 Apr 2004 11:02:12 -0500
+             
+             (makes malloc wrap the default on VMS)
+     Branch: maint-5.8/perl
+	  !> configure.com
+____________________________________________________________________________
+[ 22655] By: nicholas                              on 2004/04/05  15:29:40
+        Log: Tweaks from Hugo and Liz
+     Branch: maint-5.8/perl
+	   ! pod/perl584delta.pod
+____________________________________________________________________________
+[ 22653] By: nicholas                              on 2004/04/05  15:18:57
+        Log: Integrate:
+             [ 22649]
+             More AUTHORS who deserve credit for patches
+     Branch: maint-5.8/perl
+	  !> AUTHORS
+____________________________________________________________________________
+[ 22650] By: nicholas                              on 2004/04/05  10:31:03
+        Log: Updates from Stas Bekman, Brendan O'Dea and Hugo
+     Branch: maint-5.8/perl
+	   ! pod/perl584delta.pod
+____________________________________________________________________________
+[ 22648] By: nicholas                              on 2004/04/04  22:42:12
+        Log: # There is this special biologist word we use for 'stable'.
+             # It is 'dead'. -- Jack Cohen
+     Branch: maint-5.8/perl
+	   ! pod/perl584delta.pod
+____________________________________________________________________________
+[ 22647] By: nicholas                              on 2004/04/04  16:43:47
+        Log: D'oh. My integration test build is supposed to be configured with
+             threads enabled. (Committed another conflict)
+             
+             Integrate:
+             [ 22218]
+             Remove the caveat about detached threads crashing on Windows
+             (fixed by #22201). Bump up the version of threads.pm.
+     Branch: maint-5.8/perl
+	   ! ext/threads/threads.pm
+____________________________________________________________________________
+[ 22645] By: nicholas                              on 2004/04/04  14:05:24
+        Log: Missed one from 22643
+     Branch: maint-5.8/perl
+	   ! lib/Test/Harness.pm
+____________________________________________________________________________
+[ 22644] By: nicholas                              on 2004/04/04  13:50:28
+        Log: Integrate:
+             (the non dual-life modules from:)
+             [ 22258]
+             Subject: Re: [perl #15063] /tmp issues
+             From: Solar Designer <solar@openwall.com> 
+             Date: Mon, 26 Jan 2004 01:22:18 +0300
+             Message-ID: <20040125222218.GA13499@openwall.com>
+             
+             Remove insecure usage of /tmp from code and documentation
+             
+             [ 22409]
+             Bump version numbers of moules affected by change #22258
+             (removing /tmp and other insecurities)
+             
+             [ 22642]
+             Bump version numbers for modules that have changed since 5.8.3
+     Branch: maint-5.8/perl
+	   ! ext/B/B/Deparse.pm lib/ExtUtils/MM_NW5.pm
+	  !> (integrate 33 files)
+____________________________________________________________________________
+[ 22643] By: nicholas                              on 2004/04/04  13:10:27
+        Log: Revert my $foo if ... in maint for dual life modules where changes
+             have not yet been propagated out to their authors and then CPAN
+     Branch: maint-5.8/perl
+	   ! lib/Net/NNTP.pm lib/Net/POP3.pm lib/Net/SMTP.pm
+	   ! lib/Pod/Parser.pm
+____________________________________________________________________________
+[ 22640] By: nicholas                              on 2004/04/02  10:58:16
+        Log: Update changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 22639] By: nicholas                              on 2004/04/02  10:39:56
         Log: Integrate:
              [ 22636]
