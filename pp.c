@@ -2833,6 +2833,7 @@ PP(pp_hslice)
 	while (++MARK <= SP) {
 	    SV *keysv = *MARK;
 	    SV **svp;
+	    I32 preeminent = SvRMAGICAL(hv) ? 1 : hv_exists_ent(hv, keysv, 0);
 	    if (realhv) {
 		HE *he = hv_fetch_ent(hv, keysv, lval, 0);
 		svp = he ? &HeVAL(he) : 0;
@@ -2845,8 +2846,15 @@ PP(pp_hslice)
 		    STRLEN n_a;
 		    DIE(aTHX_ PL_no_helem, SvPV(keysv, n_a));
 		}
-		if (PL_op->op_private & OPpLVAL_INTRO)
-		    save_helem(hv, keysv, svp);
+		if (PL_op->op_private & OPpLVAL_INTRO) {
+		    if (preeminent) 
+		        save_helem(hv, keysv, svp);
+		    else {
+			STRLEN keylen;
+			char *key = SvPV(keysv, keylen);
+			save_delete(hv, key, keylen);
+		    }
+                }
 	    }
 	    *MARK = svp ? *svp : &PL_sv_undef;
 	}
