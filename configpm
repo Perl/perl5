@@ -142,54 +142,8 @@ my @v_others = ();
 my $in_v     = 0;
 my %Data     = ();
 
-# This is somewhat grim, but I want the code for parsing config.sh here and
-# now so that I can expand $Config{ivsize} and $Config{ivtype}
 
-my $fetch_string = <<'EOT';
-
-# Search for it in the big string 
-sub fetch_string {
-    my($self, $key) = @_;
-
-    my $quote_type = "'";
-    my $marker = "$key=";
-
-    # Check for the common case, ' delimited
-    my $start = index($Config_SH_expanded, "\n$marker$quote_type");
-    # If that failed, check for " delimited
-    if ($start == -1) {
-        $quote_type = '"';
-        $start = index($Config_SH_expanded, "\n$marker$quote_type");
-    }
-    # Start can never be -1 now, as we've rigged the long string we're
-    # searching with an initial dummy newline.
-    return undef if $start == -1;
-
-    $start += length($marker) + 2;
-
-    my $value = substr($Config_SH_expanded, $start, 
-                       index($Config_SH_expanded, "$quote_type\n", $start)
-		       - $start);
-
-    # If we had a double-quote, we'd better eval it so escape
-    # sequences and such can be interpolated. Since the incoming
-    # value is supposed to follow shell rules and not perl rules,
-    # we escape any perl variable markers
-    if ($quote_type eq '"') {
-	$value =~ s/\$/\\\$/g;
-	$value =~ s/\@/\\\@/g;
-	eval "\$value = \"$value\"";
-    }
-
-    # So we can say "if $Config{'foo'}".
-    $value = undef if $value eq 'undef';
-    $self->{$key} = $value; # cache it
-}
-EOT
-
-eval $fetch_string;
-die if $@;
-
+my %seen_quotes;
 {
   my ($name, $val);
   open(CONFIG_SH, 'config.sh') || die "Can't open config.sh: $!";
@@ -234,10 +188,83 @@ die if $@;
 
     my $line = "$name=$quote$val$quote\n";
     push(@v_others, $line);
+    $seen_quotes{$quote}++;
   }
   close CONFIG_SH;
 }
 
+# This is somewhat grim, but I want the code for parsing config.sh here and
+# now so that I can expand $Config{ivsize} and $Config{ivtype}
+
+my $fetch_string = <<'EOT';
+
+# Search for it in the big string
+sub fetch_string {
+    my($self, $key) = @_;
+
+EOT
+
+if ($seen_quotes{'"'}) {
+    # We need the full ' and " code
+    $fetch_string .= <<'EOT';
+    my $quote_type = "'";
+    my $marker = "$key=";
+
+    # Check for the common case, ' delimited
+    my $start = index($Config_SH_expanded, "\n$marker$quote_type");
+    # If that failed, check for " delimited
+    if ($start == -1) {
+        $quote_type = '"';
+        $start = index($Config_SH_expanded, "\n$marker$quote_type");
+    }
+EOT
+} else {
+    $fetch_string .= <<'EOT';
+    # We only have ' delimted.
+    my $start = index($Config_SH_expanded, "\n$key=\'");
+EOT
+}
+$fetch_string .= <<'EOT';
+    # Start can never be -1 now, as we've rigged the long string we're
+    # searching with an initial dummy newline.
+    return undef if $start == -1;
+
+    $start += length($key) + 3;
+
+EOT
+if (!$seen_quotes{'"'}) {
+    # Don't need the full ' and " code, or the eval expansion.
+    $fetch_string .= <<'EOT';
+    my $value = substr($Config_SH_expanded, $start,
+                       index($Config_SH_expanded, "'\n", $start)
+		       - $start);
+EOT
+} else {
+    $fetch_string .= <<'EOT';
+    my $value = substr($Config_SH_expanded, $start,
+                       index($Config_SH_expanded, "$quote_type\n", $start)
+		       - $start);
+
+    # If we had a double-quote, we'd better eval it so escape
+    # sequences and such can be interpolated. Since the incoming
+    # value is supposed to follow shell rules and not perl rules,
+    # we escape any perl variable markers
+    if ($quote_type eq '"') {
+	$value =~ s/\$/\\\$/g;
+	$value =~ s/\@/\\\@/g;
+	eval "\$value = \"$value\"";
+    }
+EOT
+}
+$fetch_string .= <<'EOT';
+    # So we can say "if $Config{'foo'}".
+    $value = undef if $value eq 'undef';
+    $self->{$key} = $value; # cache it
+}
+EOT
+
+eval $fetch_string;
+die if $@;
 
 # Calculation for the keys for byteorder
 # This is somewhat grim, but I need to run fetch_string here.
@@ -358,6 +385,7 @@ sub FETCH {
 ENDOFEND
 
 print CONFIG_HEAVY <<'ENDOFEND';
+
 my $prevpos = 0;
 
 sub FIRSTKEY {
@@ -366,10 +394,21 @@ sub FIRSTKEY {
 }
 
 sub NEXTKEY {
+ENDOFEND
+if ($seen_quotes{'"'}) {
+print CONFIG_HEAVY <<'ENDOFEND';
     # Find out how the current key's quoted so we can skip to its end.
     my $quote = substr($Config_SH_expanded,
 		       index($Config_SH_expanded, "=", $prevpos)+1, 1);
     my $pos = index($Config_SH_expanded, qq($quote\n), $prevpos) + 2;
+ENDOFEND
+} else {
+    # Just ' quotes, so it's much easier.
+print CONFIG_HEAVY <<'ENDOFEND';
+    my $pos = index($Config_SH_expanded, qq('\n), $prevpos) + 2;
+ENDOFEND
+}
+print CONFIG_HEAVY <<'ENDOFEND';
     my $len = index($Config_SH_expanded, "=", $pos) - $pos;
     $prevpos = $pos;
     $len > 0 ? substr($Config_SH_expanded, $pos, $len) : undef;
@@ -378,8 +417,14 @@ sub NEXTKEY {
 sub EXISTS {
     return 1 if exists($_[0]->{$_[1]});
 
-    return(index($Config_SH_expanded, "\n$_[1]='") != -1 or
-           index($Config_SH_expanded, "\n$_[1]=\"") != -1
+    return(index($Config_SH_expanded, "\n$_[1]='") != -1
+ENDOFEND
+if ($seen_quotes{'"'}) {
+print CONFIG_HEAVY <<'ENDOFEND';
+           or index($Config_SH_expanded, "\n$_[1]=\"") != -1
+ENDOFEND
+}
+print CONFIG_HEAVY <<'ENDOFEND';
           );
 }
 
