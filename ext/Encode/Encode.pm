@@ -57,6 +57,28 @@ our %winlatin2cp   = (
 		      'Vietnamese' => 1258,
 		     );
 
+our %external_tables = (
+    'euc-cn'		=> 'Encode/CN.pm',
+    gb2312		=> 'Encode/CN.pm',
+    gb12345		=> 'Encode/CN.pm',
+    gbk			=> 'Encode/CN.pm',
+    cp936		=> 'Encode/CN.pm',
+    'iso-ir-165'	=> 'Encode/CN.pm',
+    'euc-jp'		=> 'Encode/JP.pm',
+    shiftjis		=> 'Encode/JP.pm',
+    macjapan		=> 'Encode/JP.pm',
+    cp932		=> 'Encode/JP.pm',
+    'euc-kr'		=> 'Encode/KR.pm',
+    ksc5601		=> 'Encode/KR.pm',
+    cp949		=> 'Encode/KR.pm',
+    big5		=> 'Encode/TW.pm',
+    'big5-hkscs'	=> 'Encode/TW.pm',
+    cp950		=> 'Encode/TW.pm',
+    gb18030		=> 'Encode/CN.pm', # HanExtra
+    big5plus		=> 'Encode/TW.pm', # HanExtra
+    'euc-tw',		=> 'Encode/TW.pm', # HanExtra
+);
+
 sub encodings
 {
  my ($class) = @_;
@@ -220,6 +242,11 @@ sub getEncoding
     {
 	return $encoding{$lc};
     }
+    if (exists $external_tables{$lc})
+    {
+	require $external_tables{$lc};
+	return $encoding{$name} if exists $encoding{$name};
+    }
 
     my $oc = $class->findAlias($name);
     return $oc if defined $oc;
@@ -302,11 +329,6 @@ Encode - character encodings
 
     use Encode;
 
-    use Encode::TW; # for Taiwan-based Chinese encodings
-    use Encode::CN; # for China-based Chinese encodings
-    use Encode::JP; # for Japanese encodings
-    use Encode::KR; # for Korean encodings
-
 =head1 DESCRIPTION
 
 The C<Encode> module provides the interfaces between Perl's strings
@@ -330,9 +352,12 @@ When Perl is processing "binary data" the programmer wants Perl to process
 "sequences of bytes". This is not a problem for Perl - as a byte has 256
 possible values it easily fits in Perl's much larger "logical character".
 
-Due to size concerns, before using B<CJK> (Chinese, Japanese & Korean)
-encodings, you have to C<use> the corresponding
-B<Encode::>(B<TW>|B<CN>|B<JP>|B<KR>) modules first.
+Due to size concerns, each of B<CJK> (Chinese, Japanese & Korean) modules
+are not loaded in memory until the first time they're used. Although you
+don't have to C<use> the corresponding B<Encode::>(B<TW>|B<CN>|B<JP>|B<KR>)
+modules first, be aware that those encodings will not be in C<%encodings>
+until their module is loaded (either implicitly through using encodings
+contained in the same module, or via an explicit C<use>).
 
 =head2 TERMINOLOGY
 
