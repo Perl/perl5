@@ -97,31 +97,39 @@ sub test_security {
 
   # Create the tempfile
   my $template = "tmpXXXXX";
-  my ($fh1, $fname1) = tempfile ( $template, 
+  my ($fh1, $fname1) = eval { tempfile ( $template, 
 				  DIR => File::Spec->tmpdir,
 				  UNLINK => 1,
 				);
+			    };
+
   if (defined $fname1) {
       print "# fname1 = $fname1\n";
       ok( (-e $fname1) );
+      push(@files, $fname1); # store for end block
   } elsif (File::Temp->safe_level() != File::Temp::STANDARD) {
-      skip("system possibly insecure, see INSTALL, section 'make test'", 1);
+      my $skip2 = "Skip system possibly insecure, see INSTALL, section 'make test'";
+      skip($skip2, 1);
+      # plus we need an end block so the tests come out in the right order
+      eval q{ END { skip($skip2,1); } 1; } || die;
   } else {
       ok(0);
   }
 
   # Explicitly 
-  my ($fh2, $fname2) = tempfile ($template,  UNLINK => 1 );
+  my ($fh2, $fname2) = eval { tempfile ($template,  UNLINK => 1 ); };
   if (defined $fname2) {
       print "# fname2 = $fname2\n";
       ok( (-e $fname2) );
+      push(@files, $fname2); # store for end block
       close($fh2);
   } elsif (File::Temp->safe_level() != File::Temp::STANDARD) {
-      skip("system possibly insecure, see INSTALL, section 'make test'", 1);
+      my $skip2 = "Skip system possibly insecure, see INSTALL, section 'make test'";
+      skip($skip2, 1);
+      # plus we need an end block so the tests come out in the right order
+      eval q{ END { skip($skip2,1); } 1; } || die;
   } else {
       ok(0);
   }
 
-  # Store filenames for the end block
-  push(@files, $fname1, $fname2);
 }
