@@ -719,19 +719,28 @@ foreach $Locale (@Locale) {
             $utf8skip{117}++;
 	} else {
 	    use locale;
-	    use locale;
-	    no utf8; # so that the native 8-bit characters work
+	    no utf8;
 
 	    my @f = ();
 	    foreach my $x (keys %UPPER) {
 		my $y = lc $x;
 		next unless uc $y eq $x;
-		push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+		print "# UPPER $x lc $y ",
+			$x =~ /$y/i ? 1 : 0, " ",
+			$y =~ /$x/i ? 1 : 0, "\n" if 0;
+		# With utf8 both will fail since the locale concept
+		# of upper/lower does not work well in Unicode.
+		push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
 	    }
 	    foreach my $x (keys %lower) {
 		my $y = uc $x;
 		next unless lc $y eq $x;
-		push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+		print "# lower $x uc $y ",
+			$x =~ /$y/i ? 1 : 0, " ",
+			$y =~ /$x/i ? 1 : 0, "\n" if 0;
+		# With utf8 both will fail since the locale concept
+		# of upper/lower does not work well in Unicode.
+		push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
 	    }
 	    tryneoalpha($Locale, 117, @f == 0);
 	    if (@f) {

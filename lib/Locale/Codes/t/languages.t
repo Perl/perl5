@@ -10,7 +10,7 @@ BEGIN {
 
 use Locale::Language;
 
-no utf8; # so that the naked 8-bit characters won't gripe under use utf8
+no utf8; # we contain Latin-1
 
 #-----------------------------------------------------------------------
 # This is an array of tests. Each test is eval'd as an expression.

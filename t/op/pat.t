@@ -237,7 +237,7 @@ print "ok 63\n";
 $out = 1;
 'abc' =~ m'a(?{ $out = 3 })c';
 print "not " if $out != 1;
-print "ok 64\n";
+print "ok 64\n"; # this fails under use utf8 for no apparent reason --jhi
 
 $_ = 'foobar1 bar2 foobar3 barfoobar5 foobar6';
 @out = /(?<!foo)bar./g;
