@@ -142,6 +142,7 @@ else {
 $a = join ',', sort split /,/, $a;
 $a =~ s/-uWin32,// if $^O eq 'MSWin32';
 $a =~ s/-u(Cwd|File|File::Copy|OS2),//g if $^O eq 'os2';
+$a =~ s/-uCwd,// if $^O eq 'cygwin';
 if ($Config{static_ext} eq ' ') {
   $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'
      . '-umain,-uwarnings';
