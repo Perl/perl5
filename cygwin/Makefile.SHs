@@ -124,6 +124,7 @@ $(LIBPERL)$(LIB_EXT): $& perl$(OBJ_EXT) $(cwobj) ld2
 # build problems but that's not obvious to the novice.
 # The Module used here must not depend on Config or any extensions.
 
+miniperl.exe \
 miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)s$(LIB_EXT) opmini$(OBJ_EXT)
 	$(LDLIBPTH) $(CC) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(LLIBPERL)s $(libs)
 	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
@@ -146,6 +147,7 @@ $(LIBPERL)$(LIB_EXT): $& perl$(OBJ_EXT) $(cwobj)
 # build problems but that's not obvious to the novice.
 # The Module used here must not depend on Config or any extensions.
 
+miniperl.exe \
 miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)$(LIB_EXT) opmini$(OBJ_EXT)
 	$(LDLIBPTH) $(CC) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(LLIBPERL) $(libs)
 	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
@@ -164,6 +166,7 @@ esac
 #
 $spitshell >>Makefile <<'!NO!SUBS!'
 
+perl.exe \
 perl: $& perlmain$(OBJ_EXT) $(LIBPERL)$(LIB_EXT) $(DYNALOADER) $(static_ext) ext.libs
 	$(SHRPENV) $(LDLIBPTH) $(CC) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) -Wl,-Bstatic $(LLIBPERL) -Wl,-Bdynamic `cat ext.libs` $(libs)
 

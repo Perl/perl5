@@ -31,6 +31,248 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13989] By: jhi                                   on 2001/12/31  16:47:28
+        Log: Less unused ones.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 13988] By: jhi                                   on 2001/12/31  16:46:29
+        Log: Unused variable.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 13987] By: jhi                                   on 2001/12/31  16:41:15
+        Log: Forgotten file.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13986] By: jhi                                   on 2001/12/31  16:35:57
+        Log: Subject: Re: Cygwin: one down one to go 
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 31 Dec 2001 18:34:36 +0100
+             Message-Id: <20011231183002.E067.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! cygwin/Makefile.SHs
+____________________________________________________________________________
+[ 13985] By: jhi                                   on 2001/12/31  16:33:08
+        Log: Add some comments to the recent Unicode case-folding saga.
+     Branch: perl
+	   ! regcomp.c regexec.c
+____________________________________________________________________________
+[ 13984] By: jhi                                   on 2001/12/31  16:19:13
+        Log: Slight comment tweakage.
+     Branch: perl
+	   ! ext/I18N/Langinfo/Langinfo.t
+____________________________________________________________________________
+[ 13983] By: jhi                                   on 2001/12/31  16:05:18
+        Log: Clarify the BeOS O_TEXT/O_BINARY situation.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 13982] By: jhi                                   on 2001/12/31  15:05:36
+        Log: Subject: [ PATCH] Cygwin: one down one to go
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 31 Dec 2001 17:03:40 +0100
+             Message-Id: <20011231170025.E05B.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! lib/Pod/t/basic.t
+____________________________________________________________________________
+[ 13981] By: jhi                                   on 2001/12/31  14:44:03
+        Log: Tweak the dependencies not to recompile everytime,
+             as suggested by NI-S.
+     Branch: perl
+	   ! ext/Devel/PPPort/Makefile.PL
+____________________________________________________________________________
+[ 13980] By: jhi                                   on 2001/12/31  14:29:17
+        Log: Planning still not right.
+     Branch: perl
+	   ! lib/User/grent.t
+____________________________________________________________________________
+[ 13979] By: jhi                                   on 2001/12/31  14:19:55
+        Log: Subject: [PATCH lib/User/grent.t] Double double test test header header
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 30 Dec 2001 18:07:55 -0500
+             Message-ID: <20011230230755.GG12840@blackrider>
+             
+             (lib/User/grent, really)
+     Branch: perl
+	   ! lib/User/grent.t
+____________________________________________________________________________
+[ 13978] By: jhi                                   on 2001/12/31  14:17:55
+        Log: Integrate perlio; cleanup, in particular avoid accidental
+             PerlIO_flush(NULL) if PerlIONext is NULL.
+     Branch: perl
+	  !> ext/Devel/PPPort/MANIFEST perlio.c perliol.h
+____________________________________________________________________________
+[ 13977] By: jhi                                   on 2001/12/31  14:15:58
+        Log: Subject: typo in IO::Socket::INET.pm
+             From: mjd@plover.com
+             Date: 31 Dec 2001 14:31:10 -0000
+             Message-ID: <20011231143110.4989.qmail@plover.com>
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[ 13974] By: jhi                                   on 2001/12/31  04:59:53
+        Log: Subject: Re: [PATCH] Basic bad prototype detection
+             From: Sam Tregar <sam@tregar.com>
+             Date: Mon, 31 Dec 2001 00:50:30 -0500 (EST)
+             Message-ID: <Pine.LNX.4.33.0112310017090.9102-200000@localhost.localdomain>
+     Branch: perl
+	   ! t/comp/proto.t toke.c
+____________________________________________________________________________
+[ 13973] By: jhi                                   on 2001/12/31  04:14:45
+        Log: Subject: [PATCH] configure.com / scriptdirexp
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 30 Dec 2001 15:47:28 -0600
+             Message-Id: <a05101004b8553b205841@[172.16.52.1]>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 13972] By: jhi                                   on 2001/12/31  04:07:35
+        Log: Subject: [PATCH lib/ExtUtils/t/MM_Win32.t] resolve problems with tools_other() and htmlifypods
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Mon, 31 Dec 2001 03:55:27 +0100
+             Message-ID: <u0kv2ussgukot09trgjkosn8uootjkcebv@4ax.com>
+     Branch: perl
+	   ! lib/ExtUtils/t/MM_Win32.t
+____________________________________________________________________________
+[ 13971] By: jhi                                   on 2001/12/31  04:05:46
+        Log: Subject: [PATCH] Basic bad prototype detection
+             From: Sam Tregar <sam@tregar.com> 
+             Date: Sun, 30 Dec 2001 19:57:55 -0500 (EST) 
+             Message-ID: <Pine.LNX.4.33.0112301948270.9102-200000@localhost.localdomain>
+     Branch: perl
+	   ! pod/perldiag.pod t/comp/proto.t toke.c
+____________________________________________________________________________
+[ 13970] By: jhi                                   on 2001/12/31  03:53:54
+        Log: Makefiles are sloppy about the exe suffix
+             (from Paul Green)
+     Branch: perl
+	   ! Makefile.SH x2p/Makefile.SH
+____________________________________________________________________________
+[ 13969] By: jhi                                   on 2001/12/31  03:42:15
+        Log: Delay folding until necessary; start of handling
+             folding into several characters.
+     Branch: perl
+	   ! regcomp.c regexec.c
+____________________________________________________________________________
+[ 13968] By: jhi                                   on 2001/12/31  00:35:35
+        Log: gcc -Wall dewhine.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 13967] By: jhi                                   on 2001/12/31  00:29:37
+        Log: More Unicode folding tweaks, avoid potential false matches.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 13966] By: jhi                                   on 2001/12/30  23:30:56
+        Log: Make that six wrongs.
+     Branch: perl
+	   ! regexec.c utf8.c
+____________________________________________________________________________
+[ 13965] By: jhi                                   on 2001/12/30  23:12:17
+        Log: Four wrongs can make a right.
+     Branch: perl
+	   ! regexec.c utf8.c
+____________________________________________________________________________
+[ 13964] By: jhi                                   on 2001/12/30  21:12:25
+        Log: Fix all the I case foldings as per CaseFold.txt.
+     Branch: perl
+	   ! regcomp.c regexec.c
+____________________________________________________________________________
+[ 13963] By: jhi                                   on 2001/12/30  20:04:32
+        Log: Fix all the C(ommon) case foldings as per CaseFold.txt.
+     Branch: perl
+	   ! lib/unicore/To/Fold.pl lib/unicore/mktables regcomp.c
+	   ! regexec.c utf8.c
+____________________________________________________________________________
+[ 13961] By: jhi                                   on 2001/12/30  17:35:45
+        Log: Integrate perlio; more win32 stuff:
+             
+             A. Use Perl_my_socketpair()
+             B. Use PerlSock_xxxx() rather than raw xxxx() so we get to
+             load winsock.
+             C. (In passing) work round fact that $$ is now SvREADONLY
+             so we need to take special measures to set it during
+             pseudo-fork.
+     Branch: perl
+	  !> util.c win32/perlhost.h
+____________________________________________________________________________
+[ 13960] By: jhi                                   on 2001/12/30  17:33:24
+        Log: Fix ppport.h for Unix.
+     Branch: perl
+	   + ext/Devel/PPPort/ppport_h.PL
+	   - ext/Devel/PPPort/ppport.h.PL
+	   ! MANIFEST ext/Devel/PPPort/Makefile.PL
+____________________________________________________________________________
+[ 13958] By: jhi                                   on 2001/12/30  16:33:58
+        Log: Integrate perlio; win32 kicking.
+     Branch: perl
+	  +> ext/Devel/PPPort/ppport.h.PL
+	  !> embed.h embed.pl ext/Devel/PPPort/Makefile.PL
+	  !> ext/Devel/PPPort/t/test.t ext/Errno/Errno_pm.PL global.sym
+	  !> proto.h
+____________________________________________________________________________
+[ 13956] By: jhi                                   on 2001/12/30  16:32:11
+        Log: Must look for cat also in $PATH (noticed by Philip Newton).
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13955] By: jhi                                   on 2001/12/30  16:19:46
+        Log: Subject: [PATCH] POSIX to understand _SC_PAGESIZE
+             From: Blair Zajac <blair@orcaware.com>
+             Date: Sat, 29 Dec 2001 22:37:03 -0800
+             Message-ID: <3C2EB60F.BB4321DD@orcaware.com>
+     Branch: perl
+	   ! ext/POSIX/Makefile.PL ext/POSIX/POSIX.pm ext/POSIX/POSIX.pod
+____________________________________________________________________________
+[ 13954] By: jhi                                   on 2001/12/30  16:17:44
+        Log: Regen files.
+     Branch: perl
+	   ! embed.h global.sym pod/perlapi.pod uconfig.h
+____________________________________________________________________________
+[ 13953] By: jhi                                   on 2001/12/30  15:57:25
+        Log: Subject: [PATCH] -t without -w 
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 29 Dec 2001 23:46:25 -0500
+             Message-ID: <20011230044625.GA14386@blackrider>
+     Branch: perl
+	   ! perl.c pod/perlrun.pod pp_ctl.c t/run/switcht.t warnings.h
+	   ! warnings.pl
+____________________________________________________________________________
+[ 13952] By: jhi                                   on 2001/12/30  15:52:59
+        Log: Subject: Re: Win32 snag - File::Find File::Spec and Config.pm
+             From: Dave Rolsky <autarch@urth.org>               
+             Date: Sat, 29 Dec 2001 23:16:54 -0600 (CST) 
+             Message-ID: <Pine.LNX.4.43.0112292305270.16562-100000@urth.org>
+             
+             $^O is NetWare, not Netware.
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm lib/File/Spec.pm
+____________________________________________________________________________
+[ 13951] By: jhi                                   on 2001/12/30  15:51:19
+        Log: Sarathy thinks undoing C++ comments from C++ files
+             is a bit too zealous.
+     Branch: perl
+	   ! win32/perlhost.h win32/vmem.h
+____________________________________________________________________________
+[ 13947] By: nick                                  on 2001/12/30  11:35:51
+        Log: More Cwd tidy up
+     Branch: perl
+	   ! MANIFEST installperl
+____________________________________________________________________________
+[ 13946] By: nick                                  on 2001/12/30  11:12:42
+        Log: Undo a mess trying Cwd.pm in its ext directory
+     Branch: perl
+	   + lib/Cwd.pm
+	   - ext/Cwd/Cwd.pm
+____________________________________________________________________________
+[ 13943] By: jhi                                   on 2001/12/29  21:30:48
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13942] By: jhi                                   on 2001/12/29  21:12:02
         Log: Subject: [PATCH] cleaner close on tests, take 2
              From: andreas.koenig@anima.de (Andreas J. Koenig)

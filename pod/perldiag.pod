@@ -2726,7 +2726,7 @@ fine from VMS' perspective, it's probably not what you intended.
 
 marked by <-- HERE in m/%s/
 
-(W unsafe) The character class constructs [: :], [= =], and [. .]  go
+(W regexp) The character class constructs [: :], [= =], and [. .]  go
 I<inside> character classes, the [] are part of the construct, for example:
 /[012[:alpha:]345]/.  Note that [= =] and [. .] are not currently
 implemented; they are simply placeholders for future extensions and will
@@ -2889,7 +2889,7 @@ in L<perlos2>.
 
 =item Prototype mismatch: %s vs %s
 
-(S unsafe) The subroutine being declared or defined had previously been
+(S prototype) The subroutine being declared or defined had previously been
 declared or defined with a different function prototype.
 
 =item Quantifier in {,} bigger than %d in regex;
@@ -3502,10 +3502,10 @@ BEGIN block.
 
 =item Too many )'s
 
+=item Too many ('s
+
 (A) You've accidentally run your script through B<csh> instead of Perl.
 Check the #! line, or manually feed your script into Perl yourself.
-
-=item Too many ('s
 
 =item Trailing \ in regex m/%s/
 

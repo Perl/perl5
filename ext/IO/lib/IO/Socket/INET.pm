@@ -319,7 +319,7 @@ connect() is called.
 
 Although it is not illegal, the use of C<MultiHomed> on a socket
 which is in non-blocking mode is of little use. This is because the
-first connect will never fail with a timeout as the connaect call
+first connect will never fail with a timeout as the connect call
 will not block.
 
 The C<PeerAddr> can be a hostname or the IP-address on the

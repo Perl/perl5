@@ -1333,7 +1333,7 @@ Apd	|HE*	|hv_store_ent	|HV* tb|SV* key|SV* val|U32 hash
 Apd	|void	|hv_undef	|HV* tb
 Ap	|I32	|ibcmp		|const char* a|const char* b|I32 len
 Ap	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
-Apd	|I32	|ibcmp_utf8	|const char* a|bool ua|I32 len1|const char* b|bool ub|I32 len2
+Apd	|I32	|ibcmp_utf8	|const char* a|I32 len1|bool u1|char **ae|const char* b|I32 len2|bool u2|char **be
 p	|bool	|ingroup	|Gid_t testgid|Uid_t effective
 p	|void	|init_argv_symbols|int|char **
 p	|void	|init_debugger
@@ -1827,10 +1827,10 @@ Ap	|void	|taint_env
 Ap	|void	|taint_proper	|const char* f|const char* s
 Apd	|UV	|to_utf8_case	|U8 *p|U8* ustrp|STRLEN *lenp \
 				|SV **swash|char *normal|char *special
-Ap	|UV	|to_utf8_lower	|U8 *p|U8* ustrp|STRLEN *lenp
-Ap	|UV	|to_utf8_upper	|U8 *p|U8* ustrp|STRLEN *lenp
-Ap	|UV	|to_utf8_title	|U8 *p|U8* ustrp|STRLEN *lenp
-Ap	|UV	|to_utf8_fold	|U8 *p|U8* ustrp|STRLEN *lenp
+Apd	|UV	|to_utf8_lower	|U8 *p|U8* ustrp|STRLEN *lenp
+Apd	|UV	|to_utf8_upper	|U8 *p|U8* ustrp|STRLEN *lenp
+Apd	|UV	|to_utf8_title	|U8 *p|U8* ustrp|STRLEN *lenp
+Apd	|UV	|to_utf8_fold	|U8 *p|U8* ustrp|STRLEN *lenp
 #if defined(UNLINK_ALL_VERSIONS)
 Ap	|I32	|unlnk		|char* f
 #endif

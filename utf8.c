@@ -1315,7 +1315,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 		   ustrp[1] = UTF8_EIGHT_BIT_LO(c);
 		   *lenp = 2;
 	      }
-	      return 0;
+	      return utf8_to_uvchr(ustrp, 0);
 	 }
     }
     if (lenp)
@@ -1324,12 +1324,40 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
     return uv;
 }
 
+/*
+=for apidoc A|UV|to_utf8_upper|U8 *p|U8 *ustrp|STRLEN *lenp
+
+Convert the UTF-8 encoded character at p to its uppercase version and
+store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
+that the ustrp needs to be at least UTF8_MAXLEN_UCLC+1 bytes since the
+uppercase version may be longer than the original character (up to two
+characters).
+
+The first character of the uppercased version is returned
+(but note, as explained above, that there may be more.)
+
+=cut */
+
 UV
 Perl_to_utf8_upper(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 {
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
                              &PL_utf8_toupper, "ToUpper", "utf8::ToSpecUpper");
 }
+
+/*
+=for apidoc A|UV|to_utf8_title|U8 *p|U8 *ustrp|STRLEN *lenp
+
+Convert the UTF-8 encoded character at p to its titlecase version and
+store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
+that the ustrp needs to be at least UTF8_MAXLEN_UCLC+1 bytes since the
+titlecase version may be longer than the original character (up to two
+characters).
+
+The first character of the titlecased version is returned
+(but note, as explained above, that there may be more.)
+
+=cut */
 
 UV
 Perl_to_utf8_title(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
@@ -1338,12 +1366,40 @@ Perl_to_utf8_title(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
                              &PL_utf8_totitle, "ToTitle", "utf8::ToSpecTitle");
 }
 
+/*
+=for apidoc A|UV|to_utf8_lower|U8 *p|U8 *ustrp|STRLEN *lenp
+
+Convert the UTF-8 encoded character at p to its lowercase version and
+store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
+that the ustrp needs to be at least UTF8_MAXLEN_UCLC+1 bytes since the
+lowercase version may be longer than the original character (up to two
+characters).
+
+The first character of the lowercased version is returned
+(but note, as explained above, that there may be more.)
+
+=cut */
+
 UV
 Perl_to_utf8_lower(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 {
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
                              &PL_utf8_tolower, "ToLower", "utf8::ToSpecLower");
 }
+
+/*
+=for apidoc A|UV|to_utf8_fold|U8 *p|U8 *ustrp|STRLEN *lenp
+
+Convert the UTF-8 encoded character at p to its foldcase version and
+store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
+that the ustrp needs to be at least UTF8_MAXLEN_FOLD+1 bytes since the
+foldcase version may be longer than the original character (up to
+three characters).
+
+The first character of the foldcased version is returned
+(but note, as explained above, that there may be more.)
+
+=cut */
 
 UV
 Perl_to_utf8_fold(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
@@ -1651,7 +1707,7 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 }
 
 /*
-=for apidoc A|I32|ibcmp_utf8|const char *s1|bool u1|register I32 len1|const char *s2|bool u2|register I32 len2
+=for apidoc A|I32|ibcmp_utf8|const char *s1|register I32 len1|bool u1|char **f1|const char *s2|register I32 len2|bool u2|char **f2
 
 Return true if the strings s1 and s2 differ case-insensitively, false
 if not (if they are equal case-insensitively).  If u1 is true, the
@@ -1662,54 +1718,81 @@ For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
 http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 
+If either length is (STRLEN)-1 the scan will continue until a match is
+found.  If both lengths are (STRLEN)-1, true is returned (as a sign of
+non-match).  In the case of a match, the f1 and f2 are updated to record
+how far the comparison proceeded.
+
 =cut */
 I32
-Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2, bool u2, register I32 len2)
+Perl_ibcmp_utf8(pTHX_ const char *s1, register I32 len1, bool u1, char **f1, const char *s2, register I32 len2, bool u2, char **f2)
 {
-     register U8 *a  = (U8*)s1;
-     register U8 *b  = (U8*)s2;
-     register U8 *ae = a + len1;
-     register U8 *be = b + len2;
-     STRLEN la, lb;
-     UV ca, cb;
-     STRLEN ulen1, ulen2;
-     U8 tmpbuf1[UTF8_MAXLEN_FOLD+1];
-     U8 tmpbuf2[UTF8_MAXLEN_FOLD+1];
+     register U8 *p1  = (U8*)s1;
+     register U8 *p2  = (U8*)s2;
+     register U8 *e1, *q1 = 0;
+     register U8 *e2, *q2 = 0;
+     STRLEN l1 = 0, l2 = 0;
+     U8 foldbuf1[UTF8_MAXLEN_FOLD+1];
+     U8 foldbuf2[UTF8_MAXLEN_FOLD+1];
+     U8 natbuf[1+1];
+     STRLEN foldlen1, foldlen2;
+     bool inf1, inf2, match;
      
-     while (a < ae && b < be) {
-	  if (u1) {
-	       if (a + UTF8SKIP(a) > ae)
-		    break;
-	       ca = utf8_to_uvchr((U8*)a, &la);
-	  } else {
-	       ca = *a;
-	       la = 1;
-	  }
-	  if (u2) {
-	       if (b + UTF8SKIP(b) > be)
-		    break;
-	       cb = utf8_to_uvchr((U8*)b, &lb);
-	  } else {
-	       cb = *b;
-	       lb = 1;
-	  }
-	  if (ca != cb) {
+     inf1 = len1 == (STRLEN)-1;
+     inf2 = len2 == (STRLEN)-1;
+     if (inf1 && inf2)
+	  return 1; /* mismatch */
+     if (!inf1)
+	  e1 = p1 + len1;
+     if (!inf2)
+	  e2 = p2 + len2;
+
+     while ((p1 < e1 || inf1) && (p2 < e2 || inf2)) {
+	  if (l1 == 0) {
 	       if (u1)
-		    to_uni_fold(NATIVE_TO_UNI(ca), tmpbuf1, &ulen1);
-	       else
-		    ulen1 = 1;
-	       if (u2)
-		    to_uni_fold(NATIVE_TO_UNI(cb), tmpbuf2, &ulen2);
-	       else
-		    ulen2 = 1;
-	       if (ulen1 != ulen2
-		   || (ca < 256 && cb < 256 && ca != PL_fold[cb])
-		   || memNE((char *)tmpbuf1, (char *)tmpbuf2, ulen1))
-		    return 1; /* mismatch */
+		    to_utf8_fold(p1, foldbuf1, &foldlen1);
+	       else {
+		    natbuf[0] = NATIVE_TO_UNI(*p1);
+		    to_utf8_fold(natbuf, foldbuf1, &foldlen1);
+	       }
+	       q1 = foldbuf1;
+	       l1 = foldlen1;
 	  }
-	  a += la;
-	  b += lb;
+	  if (l2 == 0) {
+	       if (u2)
+		    to_utf8_fold(p2, foldbuf2, &foldlen2);
+	       else {
+		    natbuf[0] = NATIVE_TO_UNI(*p1);
+		    to_utf8_fold(natbuf, foldbuf2, &foldlen2);
+	       }
+	       q2 = foldbuf2;
+	       l2 = foldlen2;
+	  }
+	  while (l1 && l2) {
+	       if (UTF8SKIP(q1) != UTF8SKIP(q2) ||
+		   memNE((char*)q1, (char*)q2, UTF8SKIP(q1)))
+		   return 1; /* mismatch */
+	       l1 -= UTF8SKIP(q1);
+	       q1 += UTF8SKIP(q1);
+	       l2 -= UTF8SKIP(q2);
+	       q2 += UTF8SKIP(q2);
+	  }
+	  if (l1 == 0)
+	       p1 += u1 ? UTF8SKIP(p1) : 1;
+	  if (l2 == 0)
+	       p2 += u2 ? UTF8SKIP(p2) : 1;
+
      }
-     return a == ae && b == be ? 0 : 1; /* 0 match, 1 mismatch */
+
+     match = (inf1 ? 1 : p1 == e1) && (inf2 ? 1 : p2 == e2);
+
+     if (match) {
+	  if (f1)
+	       *f1 = (char *)p1;
+	  if (f2)
+	       *f2 = (char *)p2;
+     }
+
+     return match ? 0 : 1; /* 0 match, 1 mismatch */
 }
 

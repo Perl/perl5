@@ -2985,9 +2985,8 @@ tryagain:
 	    register char *p;
 	    char *oldp, *s;
 	    STRLEN numlen;
-	    STRLEN ulen;
 	    STRLEN foldlen;
-	    U8 tmpbuf[UTF8_MAXLEN_UCLC+1], *foldbuf;
+	    U8 tmpbuf[UTF8_MAXLEN_FOLD+1], *foldbuf;
 
             parse_start = RExC_parse - 1;
 
@@ -3131,13 +3130,16 @@ tryagain:
 		}
 		if (RExC_flags16 & PMf_EXTENDED)
 		    p = regwhite(p, RExC_end);
-		if (UTF && FOLD)
-		    toFOLD_uni(ender, tmpbuf, &foldlen);
+		if (UTF && FOLD) {
+		    /* Prime the casefolded buffer. */
+		    ender = toFOLD_uni(ender, tmpbuf, &foldlen);
+		}
 		if (ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)
 			p = oldp;
 		    else if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(ender)) && UTF) {
 			 if (FOLD) {
+			      /* Emit all the Unicode characters. */
 			      for (foldbuf = tmpbuf;
 				   foldlen;
 				   foldlen -= numlen) {
@@ -3162,6 +3164,7 @@ tryagain:
 		}
 		if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(ender)) && UTF) {
 		     if (FOLD) {
+		          /* Emit all the Unicode characters. */
 			  for (foldbuf = tmpbuf;
 			       foldlen;
 			       foldlen -= numlen) {
@@ -3206,6 +3209,8 @@ tryagain:
 	break;
     }
 
+    /* If the encoding pragma is in effect recode the text of
+     * any EXACT-kind nodes. */
     if (PL_encoding && PL_regkind[(U8)OP(ret)] == EXACT) {
 	 STRLEN oldlen = STR_LEN(ret);
 	 SV *sv        = sv_2mortal(newSVpvn(STRING(ret), oldlen));
@@ -4020,9 +4025,20 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			 to_utf8_fold(tmpbuf, foldbuf, &foldlen);
 			 f = utf8_to_uvchr(foldbuf, 0);
 
+			 /* If folding and foldable, insert also
+			  * the folded version to the charclass. */
 			 if (f != value)
 			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", f);
 
+			 /* If folding and the value is one of the Greek
+			  * sigmas insert a few more sigmas to make the
+			  * folding rules of the sigmas to work right.
+			  * Note that not all the possible combinations
+			  * are handled here: some of them are handled
+			  * handled by the standard folding rules, and
+			  * some of them (literal or EXACTF cases) are
+			  * handled during runtime in
+			  * regexec.c:S_find_byclass(). */
 			 if (value == UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA) {
 			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
 					     (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA);

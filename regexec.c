@@ -960,45 +960,45 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    c1 = *(U8*)m;
 	    c2 = PL_fold_locale[c1];
 	  do_exactf:
-	    e = strend - ln;
+	    e = do_utf8 ? s + ln - 1 : strend - ln;
 
 	    if (norun && e < s)
 		e = s;			/* Due to minlen logic of intuit() */
+
+	    /* The idea in the EXACTF* cases is to first find the
+	     * first character of the EXACTF* node and then, if
+	     * necessary, case-insensitively compare the full
+	     * text of the node.  The c1 and c2 are the first
+	     * characters (though in Unicode it gets a bit
+	     * more complicated because there are more cases
+	     * than just upper and lower: one is really supposed
+	     * to use the so-called folding case for case-insensitive
+	     * matching (called "loose matching" in Unicode).  */
 
 	    if (do_utf8) {
 	        UV c, f;
 	        U8 tmpbuf [UTF8_MAXLEN+1];
 		U8 foldbuf[UTF8_MAXLEN_FOLD+1];
 		STRLEN len, foldlen;
-
-		/* The ibcmp_utf8() uses to_uni_fold() which is more
-		 * correct folding for Unicode than using lowercase.
-		 * However, it doesn't work quite fully since the folding
-		 * is a one-to-many mapping and the regex optimizer is
-		 * unaware of this, so it may throw out good matches.
-		 * Fortunately, not getting this right is allowed
-		 * for Unicode Regular Expression Support level 1,
-		 * only one-to-one matching is required. --jhi */
-
+		
 		if (c1 == c2) {
 		    while (s <= e) {
 		        c = utf8_to_uvchr((U8*)s, &len);
 			if ( c == c1
 			     && (ln == len ||
-				 !ibcmp_utf8(s, do_utf8, strend - s,
-					     m, UTF, ln))
+				 !ibcmp_utf8(s, (STRLEN)-1, do_utf8,  0,
+					     m, ln,         UTF,      0))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			else {
 			     uvchr_to_utf8(tmpbuf, c);
-			     to_utf8_fold(tmpbuf, foldbuf, &foldlen);
-			     f = utf8_to_uvchr(foldbuf, 0);
+			     f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);
 			     if ( f != c
 				  && (f == c1 || f == c2)
 				  && (ln == foldlen ||
 				      !ibcmp_utf8((char *)foldbuf,
-						  do_utf8, foldlen,
-						  m, UTF, ln))
+						  (STRLEN)-1, do_utf8, 0,
+						  m, ln, UTF, 0))
 				  && (norun || regtry(prog, s)) )
 				  goto got_it;
 			}
@@ -1009,26 +1009,32 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		    while (s <= e) {
 		        c = utf8_to_uvchr((U8*)s, &len);
 
+			/* Handle some of the three Greek sigmas cases.
+			  * Note that not all the possible combinations
+			  * are handled here: some of them are handled
+			  * handled by the standard folding rules, and
+			  * some of them (the character class or ANYOF
+			  * cases) are handled during compiletime in
+			  * regexec.c:S_regclass(). */
 			if (c == (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA ||
 			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
 			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;
 
 			if ( (c == c1 || c == c2)
 			     && (ln == len ||
-				 !ibcmp_utf8(s, do_utf8, strend - s,
-					     m, UTF, ln))
+				 !ibcmp_utf8(s, (STRLEN)-1, do_utf8,  0,
+					     m, ln,         UTF,      0))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			else {
 			     uvchr_to_utf8(tmpbuf, c);
-			     to_utf8_fold(tmpbuf, foldbuf, &foldlen);
-			     f = utf8_to_uvchr(foldbuf, 0);
+			     f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);
 			     if ( f != c
 				  && (f == c1 || f == c2)
 				  && (ln == foldlen ||
 				      !ibcmp_utf8((char *)foldbuf,
-						  do_utf8, foldlen,
-						  m, UTF, ln))
+						  (STRLEN)-1, do_utf8, 0,
+						  m, ln, UTF, 0))
 				  && (norun || regtry(prog, s)) )
 				  goto got_it;
 			}
@@ -2333,85 +2339,13 @@ S_regmatch(pTHX_ regnode *prog)
 	    {
 		char *l = locinput;
 		char *e = s + ln;
-		U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
 
-		if (do_utf8 != (UTF!=0)) {
-		     /* The target and the pattern have differing utf8ness. */
-		     STRLEN ulen1, ulen2;
-		     UV cs, cl;
+		if (do_utf8 || UTF) {
+		     /* Either target or the pattern are utf8. */
 
-		     if (do_utf8) {
-			  /* The target is utf8, the pattern is not utf8. */
-			  while (s < e) {
-			       if (l >= PL_regeol)
-				    sayNO;
-
-			       cs = to_uni_fold(NATIVE_TO_UNI(*(U8*)s),
-						(U8*)s, &ulen1);
-			       cl = utf8_to_uvchr((U8*)l, &ulen2);
-
-			       if (cs != cl) {
-				    cl = to_uni_fold(cl, (U8*)l, &ulen2);
-				    if (ulen1 != ulen2 || cs != cl)
-					 sayNO;
-			       }
-			       l += ulen1;
-			       s ++;
-			  }
-		     }
-		     else {
-			  /* The target is not utf8, the pattern is utf8. */
-			  while (s < e) {
-			       if (l >= PL_regeol)
-				    sayNO;
-
-			       cs = utf8_to_uvchr((U8*)s, &ulen1);
-
-			       cl = to_uni_fold(NATIVE_TO_UNI(*(U8*)l),
-						(U8*)l, &ulen2);
-
-			       if (cs != cl) {
-				    cs = to_uni_fold(cs, (U8*)s, &ulen1);
-				    if (ulen1 != ulen2 || cs != cl)
-					 sayNO;
-			       }
-			       l ++;
-			       s += ulen1;
-			  }
-		     }
-		     locinput = l;
-		     nextchr = UCHARAT(locinput);
-		     break;
-		}
-
-		if (do_utf8 && UTF) {
-		     /* Both the target and the pattern are utf8. */
-		     STRLEN ulen;
-		     
-		     while (s < e) {
-			  if (l >= PL_regeol)
-			       sayNO;
-			  if (UTF8SKIP(s) != UTF8SKIP(l) ||
-			      memNE(s, (char*)l, UTF8SKIP(s))) {
-			       U8 lfoldbuf[UTF8_MAXLEN_FOLD+1];
-			       STRLEN lfoldlen;
-
-			       to_utf8_fold((U8*)l, lfoldbuf, &lfoldlen);
-			       if (UTF8SKIP(s) != lfoldlen ||
-				   memNE(s, (char*)lfoldbuf, lfoldlen)) {
-				    U8 sfoldbuf[UTF8_MAXLEN_FOLD+1];
-				    STRLEN sfoldlen;
-
-				    to_utf8_fold((U8*)s, sfoldbuf, &sfoldlen);
-				    if (sfoldlen != lfoldlen ||
-					memNE((char*)sfoldbuf,
-					      (char*)lfoldbuf, lfoldlen))
-				      sayNO;
-			       }
-			  }
-			  l += UTF8SKIP(l);
-			  s += UTF8SKIP(s);
-		     }
+		     if (ibcmp_utf8(s, e - s,      TRUE,  0,
+				    l, (STRLEN)-1, TRUE, &l))
+			  sayNO;
 		     locinput = l;
 		     nextchr = UCHARAT(locinput);
 		     break;
@@ -4233,14 +4167,14 @@ S_reginclass(pTHX_ register regnode *n, register U8* p, register bool do_utf8)
 		if (swash_fetch(sw, p, do_utf8))
 		    match = TRUE;
 		else if (flags & ANYOF_FOLD) {
-		    STRLEN ulen;
-		    U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
+		    U8 foldbuf[UTF8_MAXLEN_FOLD+1];
+		    STRLEN foldlen;
 
-		    to_utf8_fold(p, tmpbuf, &ulen);
-		    if (swash_fetch(sw, tmpbuf, do_utf8))
+		    to_utf8_fold(p, foldbuf, &foldlen);
+		    if (swash_fetch(sw, foldbuf, do_utf8))
 			match = TRUE;
-		    to_utf8_upper(p, tmpbuf, &ulen);
-		    if (swash_fetch(sw, tmpbuf, do_utf8))
+		    to_utf8_upper(p, foldbuf, &foldlen);
+		    if (swash_fetch(sw, foldbuf, do_utf8))
 			match = TRUE;
 		}
 	    }

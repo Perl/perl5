@@ -1208,6 +1208,7 @@ lib/Pod/t/basic.ovr		podlators test
 lib/Pod/t/basic.pod		podlators test
 lib/Pod/t/basic.t		podlators test
 lib/Pod/t/basic.txt		podlators test
+lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/latex.t		Test for Pod::LaTeX
 lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/utils.t		Test for Pod::ParseUtils

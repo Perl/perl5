@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 my ($Is_VMS, $Is_W32, $Is_OS2, $Is_Cygwin, $Is_Darwin,
     $nonono, $dostrip, $versiononly, $silent, $verbose,
-    $otherperls, $archname,$Is_NetWare, $nwinstall);
+    $otherperls, $archname,$Is_NetWare, $nwinstall, $nopods);
 use vars qw /$depth/;
 
 BEGIN {
@@ -72,6 +72,7 @@ while (@ARGV) {
     $verbose = 1 if $ARGV[0] eq '-V' || $ARGV [0] eq '-n';
     $archname = 1 if $ARGV[0] eq '-A';
 	$nwinstall = 1 if $ARGV[0] eq '-netware';
+    $nopods = 1 if $ARGV[0] eq '-p';
     if ($ARGV[0] eq '-?' or $ARGV[0] =~ /^-?-h/) {
       print <<"EOT";
 Usage $0: [switches]
@@ -86,6 +87,7 @@ Usage $0: [switches]
   -V        Verbose mode.
   -A        Also install perl with the architecture's name in the perl binary's
             name.
+  -p        Don't install the pod files. [This will break use diagnostics;]
   -netware  Install correctly on a Netware server.
 EOT
       exit;
@@ -111,7 +113,7 @@ close SCRIPTS;
 
 if ($scr_ext) { @scripts = map { "$_$scr_ext" } @scripts; }
 
-my @pods = (<pod/*.pod>);
+my @pods = (<pod/*.pod>) unless $nopods;
 
 # Specify here any .pm files that are actually architecture-dependent.
 # (Those included with XS extensions under ext/ are automatically

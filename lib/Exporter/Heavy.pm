@@ -215,11 +215,18 @@ sub _push_tags {
     }
 }
 
-
-sub require_version {
+sub heavy_require_version {
     my($self, $wanted) = @_;
     my $pkg = ref $self || $self;
     return ${pkg}->VERSION($wanted);
+}
+
+sub heavy_export_tags {
+  _push_tags((caller)[0], "EXPORT",    \@_);
+}
+
+sub heavy_export_ok_tags {
+  _push_tags((caller)[0], "EXPORT_OK", \@_);
 }
 
 1;

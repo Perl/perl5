@@ -2054,7 +2054,7 @@ usually solves this kind of problem.
     $self->{PERLRUN} .= ' -I$(PERL_LIB)' if $self->{UNINSTALLED_PERL};
 
     # How do we run perl when installing libraries?
-    $self->{PERLRUNINST} .= $self->{PERL}. ' -I$(INST_ARCHLIB) -I$(INST_LIB)';
+    $self->{PERLRUNINST} .= $self->{PERLRUN}. ' -I$(INST_ARCHLIB) -I$(INST_LIB)';
 
     # What extra library dirs do we need when running the tests?
     $self->{TEST_LIBS}   .= ' -I$(INST_ARCHLIB) -I$(INST_LIB)';
