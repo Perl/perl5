@@ -119,12 +119,31 @@ dlsrc='dl_dyld.xs'; usedl='define';
 cccdlflags=' '; # space, not empty, because otherwise we get -fpic
 # Perl bundles do not expect two-level namespace, added in Darwin 1.4.
 case "$osvers" in
-  1.[0-3].*) ;;
-  *) ldflags="${ldflags} -flat_namespace" ;;
+1.[0-3].*)
+  lddlflags="${ldflags} -bundle -undefined suppress"
+  ;;
+1.*|[2-6].*)
+  ldflags="${ldflags} -flat_namespace"
+  lddlflags="${ldflags} -bundle -undefined suppress"
+  ;;
+*)
+  lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
+  case "$ld" in
+  '') ld='MACOSX_DEPLOYMENT_TARGET=10.3 ld' ;;
+  esac
 esac
-lddlflags="${ldflags} -bundle -undefined suppress";
 ldlibpthname='DYLD_LIBRARY_PATH';
 useshrplib='true';
+
+cat > UU/archname.cbu <<'EOCBU'
+# This script UU/archname.cbu will get 'called-back' by Configure 
+# after it has otherwise determined the architecture name.
+case "$ldflags" in
+*"-flat_namespace"*) ;; # Backward compat.
+# If we are using two-level namespace, we will munge the archname to show it.
+*) archname="${archname}-2level" ;;
+esac
+EOCBU
 
 ##
 # System libraries
