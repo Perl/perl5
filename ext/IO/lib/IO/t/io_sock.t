@@ -270,6 +270,9 @@ if( $server_pid) {
     ### a recv(2) call on the socket, while ungetc(3) put back a character
     ### to an IO buffer, which never again was read.
     #
+    if ($^O eq 'mpeix') {
+	print "ok 19 # skipped: broken on MPE/iX\n";
+    } else {
     $sock = IO::Socket::INET->new("localhost:$serverport")
          || IO::Socket::INET->new("127.0.0.1:$serverport");
 
@@ -292,6 +295,7 @@ if( $server_pid) {
 	print "not ";
     }
     print "ok 19\n";
+    }
 
     ### TEST 20
     ### Stop the server
