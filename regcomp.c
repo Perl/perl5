@@ -2837,19 +2837,11 @@ tryagain:
 			p++;
 			break;
 		    case 'e':
-#ifdef ASCIIish
-			  ender = '\033';
-#else
-			  ender = '\047';
-#endif
+			  ender = ASCII_TO_NATIVE('\033');
 			p++;
 			break;
 		    case 'a':
-#ifdef ASCIIish
-			  ender = '\007';
-#else
-			  ender = '\057';
-#endif
+			  ender = ASCII_TO_NATIVE('\007');
 			p++;
 			break;
 		    case 'x':
@@ -3267,13 +3259,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    case 't':	value = '\t';			break;
 	    case 'f':	value = '\f';			break;
 	    case 'b':	value = '\b';			break;
-#ifdef ASCIIish
-	    case 'e':	value = '\033';			break;
-	    case 'a':	value = '\007';			break;
-#else
-	    case 'e':	value = '\047';			break;
-	    case 'a':	value = '\057';			break;
-#endif
+	    case 'e':	value = ASCII_TO_NATIVE('\033');break;
+	    case 'a':	value = ASCII_TO_NATIVE('\007');break;
 	    case 'x':
 		if (*RExC_parse == '{') {
 		    e = strchr(RExC_parse++, '}');
@@ -3417,7 +3404,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_ASCII);
 		    else {
-#ifdef ASCIIish
+#ifndef EBCDIC
 			for (value = 0; value < 128; value++)
 			    ANYOF_BITMAP_SET(ret, value);
 #else  /* EBCDIC */
@@ -3433,7 +3420,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_NASCII);
 		    else {
-#ifdef ASCIIish
+#ifndef EBCDIC
 			for (value = 128; value < 256; value++)
 			    ANYOF_BITMAP_SET(ret, value);
 #else  /* EBCDIC */
@@ -3733,7 +3720,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	/* now is the next time */
 	if (!SIZE_ONLY) {
 	    if (lastvalue < 256 && value < 256) {
-#ifndef ASCIIish /* EBCDIC, for example. */
+#ifdef EBCDIC /* EBCDIC, for example. */
 		if ((isLOWER(lastvalue) && isLOWER(value)) ||
 		    (isUPPER(lastvalue) && isUPPER(value)))
 		{

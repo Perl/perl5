@@ -1265,7 +1265,7 @@ S_scan_const(pTHX_ char *start)
 			       (char)min, (char)max);
                 }
 
-#ifndef ASCIIish
+#ifdef EBCDIC
 		if ((isLOWER(min) && isLOWER(max)) ||
 		    (isUPPER(min) && isUPPER(max))) {
 		    if (isLOWER(min)) {
@@ -1450,13 +1450,11 @@ S_scan_const(pTHX_ char *start)
 		 * There will always enough room in sv since such
 		 * escapes will be longer than any UT-F8 sequence
 		 * they can end up as. */
-
-		/* This spot is wrong for EBCDIC.  Characters like
-		 * the lowercase letters and digits are >127 in EBCDIC,
-		 * so here they would need to be mapped to the Unicode
-		 * repertoire.   --jhi */
 		
-		if (uv > 127) {
+		/* We need to map to chars to ASCII before doing the tests
+		   to cover EBCDIC
+		*/
+		if (NATIVE_TO_ASCII(uv) > 127) {
 		    if (!has_utf8 && uv > 255) {
 		        /* Might need to recode whatever we have
 			 * accumulated so far if it contains any
@@ -1465,11 +1463,11 @@ S_scan_const(pTHX_ char *start)
 			 * (Can't we keep track of that and avoid
 			 *  this rescan? --jhi)
 			 */
-		        int hicount = 0;
+			int hicount = 0;
 			char *c;
 
 			for (c = SvPVX(sv); c < d; c++) {
-			    if (UTF8_IS_CONTINUED(*c))
+			    if (UTF8_IS_CONTINUED(NATIVE_TO_ASCII(*c)))
 			        hicount++;
 			}
 			if (hicount) {
@@ -1485,13 +1483,15 @@ S_scan_const(pTHX_ char *start)
 			    dst = d - 1;
 
 			    while (src < dst) {
-			        if (UTF8_IS_CONTINUED(*src)) {
- 				    *dst-- = UTF8_EIGHT_BIT_LO(*src);
- 				    *dst-- = UTF8_EIGHT_BIT_HI(*src--);
+				U8 ch = NATIVE_TO_ASCII(*src);
+			        if (UTF8_IS_CONTINUED(ch)) {
+ 				    *dst-- = UTF8_EIGHT_BIT_LO(ch);
+ 				    *dst-- = UTF8_EIGHT_BIT_HI(ch);
 			        }
 			        else {
-				    *dst-- = *src--;
+				    *dst-- = ch;
 			        }
+				src--;
 			    }
                         }
                     }
@@ -1566,18 +1566,14 @@ S_scan_const(pTHX_ char *start)
 	    /* \c is a control character */
 	    case 'c':
 		s++;
-#ifdef EBCDIC
-		*d = *s++;
-		if (isLOWER(*d))
-		   *d = toUPPER(*d);
-		*d = toCTRL(*d);
-		d++;
-#else
 		{
 		    U8 c = *s++;
+#ifdef EBCDIC
+		    if (isLOWER(c))
+			c = toUPPER(c);
+#endif
 		    *d++ = toCTRL(c);
 		}
-#endif
 		continue;
 
 	    /* printf-style backslashes, formfeeds, newlines, etc */
@@ -1596,21 +1592,12 @@ S_scan_const(pTHX_ char *start)
 	    case 't':
 		*d++ = '\t';
 		break;
-#ifdef EBCDIC
 	    case 'e':
-		*d++ = '\047';  /* CP 1047 */
+		*d++ = ASCII_TO_NATIVE('\033');
 		break;
 	    case 'a':
-		*d++ = '\057';  /* CP 1047 */
+		*d++ = ASCII_TO_NATIVE('\007');
 		break;
-#else
-	    case 'e':
-		*d++ = '\033';
-		break;
-	    case 'a':
-		*d++ = '\007';
-		break;
-#endif
 	    } /* end switch */
 
 	    s++;
@@ -1618,7 +1605,7 @@ S_scan_const(pTHX_ char *start)
 	} /* end if (backslash) */
 
     default_action:
-       if (UTF8_IS_CONTINUED(*s) && (this_utf8 || has_utf8)) {
+       if (UTF8_IS_CONTINUED(NATIVE_TO_ASCII(*s)) && (this_utf8 || has_utf8)) {
            STRLEN len = (STRLEN) -1;
            UV uv;
            if (this_utf8) {
