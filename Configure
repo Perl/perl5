@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 26 10:02:07 MET 2004 [metaconfig 3.0 PL70]
+# Generated on Wed Mar 31 15:14:15 METDST 2004 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5454,10 +5454,10 @@ esac
 : Look for a hint-file generated 'call-back-unit'.  If the
 : user has specified that a 64-bit perl is to be built,
 : we may need to set or change some other defaults.
-	if $test -f use64bitint.cbu; then
+if $test -f use64bitint.cbu; then
 	echo "Your platform has some specific hints regarding 64-bit integers, using them..."
-		. ./use64bitint.cbu
-	fi
+	. ./use64bitint.cbu
+fi
 case "$use64bitint" in
 "$define"|true|[yY]*)
 	case "$longsize" in
@@ -5472,10 +5472,10 @@ esac
 : Look for a hint-file generated 'call-back-unit'.  If the
 : user has specified that a maximally 64-bit perl is to be built,
 : we may need to set or change some other defaults.
-	if $test -f use64bitall.cbu; then
+if $test -f use64bitall.cbu; then
 	echo "Your platform has some specific hints regarding 64-bit builds, using them..."
-		. ./use64bitall.cbu
-	fi
+	. ./use64bitall.cbu
+fi
 case "$use64bitall" in
 "$define"|true|[yY]*)
 	case "$longsize" in
@@ -5492,7 +5492,7 @@ $undef:$define)
 	cat >&4 <<EOF
 
 *** You have chosen to use 64-bit integers,
-*** but none cannot be found.
+*** but none can be found.
 *** Please rerun Configure without -Duse64bitint and/or -Dusemorebits.
 *** Cannot continue, aborting.
 
@@ -6258,6 +6258,7 @@ EOM
 	esac
 	;;
 esac
+
 
 : determine whether to use malloc wrapping
 echo " "
@@ -21164,7 +21165,6 @@ make_set_make='$make_set_make'
 mallocobj='$mallocobj'
 mallocsrc='$mallocsrc'
 malloctype='$malloctype'
-usemallocwrap='$usemallocwrap'
 man1dir='$man1dir'
 man1direxp='$man1direxp'
 man1ext='$man1ext'
@@ -21380,6 +21380,7 @@ usefaststdio='$usefaststdio'
 useithreads='$useithreads'
 uselargefiles='$uselargefiles'
 uselongdouble='$uselongdouble'
+usemallocwrap='$usemallocwrap'
 usemorebits='$usemorebits'
 usemultiplicity='$usemultiplicity'
 usemymalloc='$usemymalloc'
