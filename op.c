@@ -2710,7 +2710,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	I32 from_utf	= o->op_private & OPpTRANS_FROM_UTF;
 	I32 to_utf	= o->op_private & OPpTRANS_TO_UTF;
 	U8* tsave = from_utf ? NULL : trlist_upgrade(&t, &tend);
-	U8* rsave = to_utf   ? NULL : trlist_upgrade(&r, &rend);
+	U8* rsave = (to_utf || !rlen) ? NULL : trlist_upgrade(&r, &rend);
 
 	if (complement) {
 	    U8 tmpbuf[UTF8_MAXLEN+1];
@@ -2832,9 +2832,10 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
 		if (rfirst + diff > max)
 		    max = rfirst + diff;
-		rfirst += diff + 1;
 		if (!grows)
-		    grows = (UNISKIP(tfirst) < UNISKIP(rfirst));
+		    grows = (tfirst < rfirst &&
+			     UNISKIP(tfirst) < UNISKIP(rfirst + diff));
+		rfirst += diff + 1;
 	    }
 	    tfirst += diff + 1;
 	}
@@ -2856,7 +2857,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	if (transv)
 	    SvREFCNT_dec(transv);
 
-	if (!del && havefinal)
+	if (!del && havefinal && rlen)
 	    (void)hv_store((HV*)SvRV((cSVOPo->op_sv)), "FINAL", 5,
 			   newSVuv((UV)final), 0);
 

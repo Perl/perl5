@@ -402,6 +402,7 @@ S_do_trans_count_utf8(pTHX_ SV *sv)/* SPC - OK */
     HV* hv = (HV*)SvRV(rv);
     SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
     UV none = svp ? SvUV(*svp) : 0x7fffffff;
+    UV extra = none + 1;
     UV uv;
     U8 hibit = 0;
 
@@ -417,7 +418,7 @@ S_do_trans_count_utf8(pTHX_ SV *sv)/* SPC - OK */
     send = s + len;
 
     while (s < send) {
-	if ((uv = swash_fetch(rv, s)) < none)
+	if ((uv = swash_fetch(rv, s)) < none || uv == extra)
 	    matches++;
 	s += UTF8SKIP(s);
     }
@@ -443,6 +444,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
     UV none = svp ? SvUV(*svp) : 0x7fffffff;
     UV extra = none + 1;
     UV final;
+    bool havefinal = FALSE;
     UV uv;
     STRLEN len;
     U8 *dstart, *dend;
@@ -463,8 +465,10 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
     start = s;
 
     svp = hv_fetch(hv, "FINAL", 5, FALSE);
-    if (svp)
+    if (svp) {
 	final = SvUV(*svp);
+	havefinal = TRUE;
+    }
 
     if (grows) {
 	/* d needs to be bigger than s, in case e.g. upgrading is required */
@@ -510,10 +514,22 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    }
 	    else if (uv == extra && !del) {
 		matches++;
-		s += UTF8SKIP(s);
-		if (uv != puv) {
-		    d = uvchr_to_utf8(d, final);
-		    puv = final;
+		if (havefinal) {
+		    s += UTF8SKIP(s);
+		    if (puv != final) {
+			d = uvchr_to_utf8(d, final);
+			puv = final;
+		    }
+		}
+		else {
+		    STRLEN len;
+		    uv = utf8_to_uvchr(s, &len);
+		    if (uv != puv) {
+			Copy(s, d, len, U8);
+			d += len;
+			puv = uv;
+		    }
+		    s += len;
 		}
 		continue;
 	    }
