@@ -1070,6 +1070,19 @@ test-notty : test-prep
 	$(PERLEXE) -I..\lib harness
 	cd ..\win32
 
+test-wide : test-prep
+	set HARNESS_PERL_SWITCHES=-C
+	cd ..\t
+	$(PERLEXE) -I..\lib harness
+	cd ..\win32
+
+test-wide-notty : test-prep
+	set PERL_SKIP_TTY_TEST=1
+	set HARNESS_PERL_SWITCHES=-C
+	cd ..\t
+	$(PERLEXE) -I..\lib harness
+	cd ..\win32
+
 clean : 
 	-@erase miniperlmain$(o)
 	-@erase $(MINIPERL)

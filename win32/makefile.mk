@@ -1284,7 +1284,16 @@ test : $(RIGHTMAKE) test-prep
 
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1 && \
-	cd ..\t && $(PERLEXE) -I.\lib harness
+	    cd ..\t && $(PERLEXE) -I.\lib harness
+
+test-wide : test-prep
+	set HARNESS_PERL_SWITCHES=-C && \
+	    cd ..\t && $(PERLEXE) -I..\lib harness
+
+test-wide-notty : test-prep
+	set PERL_SKIP_TTY_TEST=1 && \
+	    set HARNESS_PERL_SWITCHES=-C && \
+	    cd ..\t && $(PERLEXE) -I..\lib harness
 
 clean : 
 	-@erase miniperlmain$(o)
