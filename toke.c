@@ -1,7 +1,7 @@
 /*    toke.c
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -3035,9 +3035,20 @@ Perl_yylex(pTHX)
 		    PL_lex_stuff = Nullsv;
 		}
 		else {
+		    if (len == 6 && strnEQ(s, "unique", len)) {
+			if (PL_in_my == KEY_our)
+#ifdef USE_ITHREADS
+			    GvUNIQUE_on(cGVOPx_gv(yylval.opval));
+#else
+			    ; /* skip to avoid loading attributes.pm */
+#endif
+			else 
+			    Perl_croak(aTHX_ "The 'unique' attribute may only be applied to 'our' variables");
+		    }
+
 		    /* NOTE: any CV attrs applied here need to be part of
 		       the CVf_BUILTIN_ATTRS define in cv.h! */
-		    if (!PL_in_my && len == 6 && strnEQ(s, "lvalue", len))
+		    else if (!PL_in_my && len == 6 && strnEQ(s, "lvalue", len))
 			CvLVALUE_on(PL_compcv);
 		    else if (!PL_in_my && len == 6 && strnEQ(s, "locked", len))
 			CvLOCKED_on(PL_compcv);
@@ -3045,13 +3056,6 @@ Perl_yylex(pTHX)
 			CvMETHOD_on(PL_compcv);
 		    else if (!PL_in_my && len == 9 && strnEQ(s, "assertion", len))
 		        CvASSERTION_on(PL_compcv);
-		    else if (PL_in_my == KEY_our && len == 6 &&
-			     strnEQ(s, "unique", len))
-#ifdef USE_ITHREADS
-			GvUNIQUE_on(cGVOPx_gv(yylval.opval));
-#else
-			; /* skip that case to avoid loading attributes.pm */
-#endif
 		    /* After we've set the flags, it could be argued that
 		       we don't need to do the attributes.pm-based setting
 		       process, and shouldn't bother appending recognized

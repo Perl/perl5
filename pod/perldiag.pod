@@ -3668,6 +3668,11 @@ linkhood if the last stat that wrote to the stat buffer already went
 past the symlink to get to the real file.  Use an actual filename
 instead.
 
+=item The 'unique' attribute may only be applied to 'our' variables
+
+(F) Currently this attribute is not supported on C<my> or C<sub>
+declarations.  See L<perlfunc/our>.
+
 =item This Perl can't reset CRTL environ elements (%s)
 
 =item This Perl can't set CRTL environ elements (%s=%s)
