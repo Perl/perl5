@@ -505,6 +505,8 @@ S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
 	    data->offset_float_max = (l
 				      ? data->last_start_max
 				      : data->pos_min + data->pos_delta);
+	    if ((U32)data->offset_float_max > (U32)I32_MAX)
+		data->offset_float_max = I32_MAX;
 	    if (data->flags & SF_BEFORE_EOL)
 		data->flags
 		    |= ((data->flags & SF_BEFORE_EOL) << SF_FL_SHIFT_EOL);
