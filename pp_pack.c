@@ -244,6 +244,8 @@ S_measure_struct(pTHX_ register tempsym_t* symptr)
 #else
             /* FALL THROUGH */
 #endif
+	case 'v' | TYPE_IS_SHRIEKING:
+	case 'n' | TYPE_IS_SHRIEKING:
 	case 'v':
 	case 'n':
 	case 'S':
@@ -280,6 +282,8 @@ S_measure_struct(pTHX_ register tempsym_t* symptr)
 #else
             /* FALL THROUGH */
 #endif
+	case 'V' | TYPE_IS_SHRIEKING:
+	case 'N' | TYPE_IS_SHRIEKING:
 	case 'V':
 	case 'N':
 	case 'L':
@@ -413,7 +417,7 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
 
       /* test for '!' modifier */
       if (patptr < patend && *patptr == '!') {
-	static const char natstr[] = "sSiIlLxX";
+	static const char natstr[] = "sSiIlLxXnNvV";
         patptr++;	        
         if (strchr(natstr, code))
  	  code |= TYPE_IS_SHRIEKING;
@@ -551,8 +555,10 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
     Quad_t aquad;
 #endif
     U16 aushort;
+    I16 asshort;
     unsigned int auint;
     U32 aulong;
+    I32 aslong;
 #ifdef HAS_QUAD
     Uquad_t auquad;
 #endif
@@ -1007,7 +1013,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)aushort;
 		    else
-		        cuv += aushort;
+			cuv += aushort;
 		}
 	    }
 	    else {
@@ -1028,6 +1034,51 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 			aushort = vtohs(aushort);
 #endif
 		    sv_setiv(sv, (UV)aushort);
+		    PUSHs(sv_2mortal(sv));
+		}
+	    }
+	    break;
+	case 'v' | TYPE_IS_SHRIEKING:
+	case 'n' | TYPE_IS_SHRIEKING:
+	    along = (strend - s) / SIZE16;
+	    if (len > along)
+		len = along;
+	    if (checksum) {
+		while (len-- > 0) {
+		    COPY16(s, &asshort);
+		    s += SIZE16;
+#ifdef HAS_NTOHS
+		    if (datumtype == ('n' | TYPE_IS_SHRIEKING))
+		        asshort = (I16)PerlSock_ntohs((U16)asshort);
+#endif
+#ifdef HAS_VTOHS
+		    if (datumtype == ('v' | TYPE_IS_SHRIEKING))
+			asshort = (I16)vtohs((U16)asshort);
+#endif
+		    if (checksum > bits_in_uv)
+			cdouble += (NV)asshort;
+		    else
+			cuv += asshort;
+		}
+	    }
+	    else {
+                if (len && unpack_only_one)
+                    len = 1;
+		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
+		while (len-- > 0) {
+		    COPY16(s, &asshort);
+		    s += SIZE16;
+#ifdef HAS_NTOHS
+		    if (datumtype == ('n' | TYPE_IS_SHRIEKING))
+			asshort = (I16)PerlSock_ntohs((U16)asshort);
+#endif
+#ifdef HAS_VTOHS
+		    if (datumtype == ('v' | TYPE_IS_SHRIEKING))
+			asshort = (I16)vtohs((U16)asshort);
+#endif
+		    sv = NEWSV(39, 0);
+		    sv_setiv(sv, (IV)asshort);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -1328,6 +1379,51 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 #endif
 		    sv = NEWSV(43, 0);
 		    sv_setuv(sv, (UV)aulong);
+		    PUSHs(sv_2mortal(sv));
+		}
+	    }
+	    break;
+	case 'V' | TYPE_IS_SHRIEKING:
+	case 'N' | TYPE_IS_SHRIEKING:
+	    along = (strend - s) / SIZE32;
+	    if (len > along)
+		len = along;
+	    if (checksum) {
+		while (len-- > 0) {
+		    COPY32(s, &aslong);
+		    s += SIZE32;
+#ifdef HAS_NTOHL
+		    if (datumtype == ('N' | TYPE_IS_SHRIEKING))
+			aslong = (I32)PerlSock_ntohl((U32)aslong);
+#endif
+#ifdef HAS_VTOHL
+		    if (datumtype == ('V' | TYPE_IS_SHRIEKING))
+			aslong = (I32)vtohl((U32)aslong);
+#endif
+		    if (checksum > bits_in_uv)
+			cdouble += (NV)aslong;
+		    else
+			cuv += aslong;
+		}
+	    }
+	    else {
+                if (len && unpack_only_one)
+                    len = 1;
+		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
+		while (len-- > 0) {
+		    COPY32(s, &aslong);
+		    s += SIZE32;
+#ifdef HAS_NTOHL
+		    if (datumtype == ('N' | TYPE_IS_SHRIEKING))
+			aslong = (I32)PerlSock_ntohl((U32)aslong);
+#endif
+#ifdef HAS_VTOHL
+		    if (datumtype == ('V' | TYPE_IS_SHRIEKING))
+			aslong = (I32)vtohl((U32)aslong);
+#endif
+		    sv = NEWSV(43, 0);
+		    sv_setiv(sv, (IV)aslong);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -2285,6 +2381,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    }
 	    break;
 #endif
+	case 'n' | TYPE_IS_SHRIEKING:
 	case 'n':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
@@ -2295,6 +2392,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		CAT16(cat, &ashort);
 	    }
 	    break;
+	case 'v' | TYPE_IS_SHRIEKING:
 	case 'v':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
@@ -2485,6 +2583,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		sv_catpvn(cat, (char*)&aint, sizeof(int));
 	    }
 	    break;
+	case 'N' | TYPE_IS_SHRIEKING:
 	case 'N':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
@@ -2495,6 +2594,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		CAT32(cat, &aulong);
 	    }
 	    break;
+	case 'V' | TYPE_IS_SHRIEKING:
 	case 'V':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;

@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 5852;
+plan tests => 6076;
 
 use strict;
 use warnings;
@@ -510,6 +510,10 @@ numbers ('n', 0, 1, 32767, 32768, 65535);
 numbers ('v', 0, 1, 32767, 32768, 65535);
 numbers ('N', 0, 1, 2147483647, 2147483648, 4294967295);
 numbers ('V', 0, 1, 2147483647, 2147483648, 4294967295);
+numbers ('n!', -32768, -1, 0, 1, 32767);
+numbers ('v!', -32768, -1, 0, 1, 32767);
+numbers ('N!', -2147483648, -1, 0, 1, 2147483647);
+numbers ('V!', -2147483648, -1, 0, 1, 2147483647);
 # All these should have exact binary representations:
 numbers ('f', -1, 0, 0.5, 42, 2**34);
 numbers ('d', -(2**34), -1, 0, 1, 2**34);
@@ -538,6 +542,11 @@ is(pack("n", 0xdead), "\xde\xad");
 is(pack("v", 0xdead), "\xad\xde");
 is(pack("N", 0xdeadbeef), "\xde\xad\xbe\xef");
 is(pack("V", 0xdeadbeef), "\xef\xbe\xad\xde");
+
+is(pack("n!", 0xdead), "\xde\xad");
+is(pack("v!", 0xdead), "\xad\xde");
+is(pack("N!", 0xdeadbeef), "\xde\xad\xbe\xef");
+is(pack("V!", 0xdeadbeef), "\xef\xbe\xad\xde");
 
 {
   # /

@@ -3305,7 +3305,11 @@ of values, as follows:
     v	An unsigned short in "VAX" (little-endian) order.
     V	An unsigned long in "VAX" (little-endian) order.
 	  (These 'shorts' and 'longs' are _exactly_ 16 bits and
-	   _exactly_ 32 bits, respectively.)
+	   _exactly_ 32 bits, respectively. If you want signed
+	   types instead of unsigned ones, use the '!' suffix.
+	   Note that this is _only_ safe if signed integers are
+	   stored in the same format on all platforms using the
+	   packed data.)
 
     q	A signed quad (64-bit) value.
     Q	An unsigned quad value.
@@ -3605,6 +3609,14 @@ aligned on the double's size.
 
 For alignment commands C<count> of 0 is equivalent to C<count> of 1;
 both result in no-ops.
+
+=item *
+
+C<n>, C<N>, C<v> and C<V> accept the C<!> modifier. In this case they
+will represent signed 16-/32-bit integers in big-/little-endian order.
+This is only portable if all platforms sharing the packed data use the
+same binary representation for signed integers (e.g. all platforms are
+using two's complement representation).
 
 =item *
 
