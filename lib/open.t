@@ -7,7 +7,7 @@ BEGIN {
 	require Config; import Config;
 }
 
-use Test::More tests => 16;
+use Test::More tests => 17;
 
 # open::import expects 'open' as its first argument, but it clashes with open()
 sub import {
@@ -169,6 +169,15 @@ EOE
     close G;
     ok($ok == @a,
        "checking syswrite() output on :utf8 streams by reading it back in");
+}
+
+{
+    use open IN => ':non-existent';
+    eval {
+	require Anything;
+    };
+    like($@, qr/Recursive call/i,
+	 "test for an endless loop in PerlIO_find_layer");
 }
 
 END {
