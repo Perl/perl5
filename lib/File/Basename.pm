@@ -182,6 +182,11 @@ sub fileparse {
     ($dirpath,$basename) = ($fullname =~ /^((?:.*[:\\\/])?)(.*)/s);
     $dirpath .= '.\\' unless $dirpath =~ /[\\\/]\z/;
   }
+  elsif ($fstype =~ /^os2/i) {
+    ($dirpath,$basename) = ($fullname =~ m#^((?:.*[:\\/])?)(.*)#s);
+    $dirpath = './' unless $dirpath;	# Can't be 0
+    $dirpath .= '/' unless $dirpath =~ m#[\\/]\z#;
+  }
   elsif ($fstype =~ /^MacOS/si) {
     ($dirpath,$basename) = ($fullname =~ /^(.*:)?(.*)/s);
     $dirpath = ':' unless $dirpath;
@@ -251,14 +256,7 @@ sub dirname {
 	}
 	$dirname .= ":" unless $dirname =~ /:\z/;
     }
-    elsif ($fstype =~ /MSDOS/i) { 
-        $dirname =~ s/([^:])[\\\/]*\z/$1/;
-        unless( length($basename) ) {
-	    ($basename,$dirname) = fileparse $dirname;
-	    $dirname =~ s/([^:])[\\\/]*\z/$1/;
-	}
-    }
-    elsif ($fstype =~ /MSWin32/i) { 
+    elsif ($fstype =~ /MS(DOS|Win32)|os2/i) { 
         $dirname =~ s/([^:])[\\\/]*\z/$1/;
         unless( length($basename) ) {
 	    ($basename,$dirname) = fileparse $dirname;
