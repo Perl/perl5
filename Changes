@@ -29,6 +29,768 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 22369] By: rgs                                   on 2004/02/24  19:53:51
+        Log: Subject: [PATCH] optimization for map in scalar context
+             From: Tassilo von Parseval <tassilo.parseval@post.rwth-aachen.de>
+             Date: Tue, 24 Feb 2004 12:02:57 +0100
+             Message-id: <20040224110257.GA5510@ethan>
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 22368] By: rgs                                   on 2004/02/24  19:30:12
+        Log: Subject: Bugfix for perlrequick and perlretut
+             From: Mark Kvale <kvale@phy.ucsf.edu>
+             Date: Tue, 24 Feb 2004 11:32:34 -0800
+             Message-Id: <200402241132.34656.kvale@phy.ucsf.edu>
+     Branch: perl
+	   ! pod/perlrequick.pod pod/perlretut.pod
+____________________________________________________________________________
+[ 22367] By: rgs                                   on 2004/02/23  22:08:33
+        Log: Instead of localising *_, use a dummy foreach loop to get
+             a local value of $_
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 22366] By: rgs                                   on 2004/02/23  21:40:02
+        Log: Subject: Re: [perl #24338] Attribute::Handlers will trash UNIVERSAL
+             From: alan <alan@pair.com>
+             Date: Tue, 17 Feb 2004 14:23:08 -0500 (EST)
+             Message-ID: <Pine.BSF.4.58.0402171418090.80983@smx.pair.com>
+     Branch: perl
+	   ! lib/Attribute/Handlers.pm
+____________________________________________________________________________
+[ 22365] By: rgs                                   on 2004/02/23  21:30:42
+        Log: Update perl591delta.
+     Branch: perl
+	   ! pod/perl591delta.pod
+____________________________________________________________________________
+[ 22364] By: rgs                                   on 2004/02/23  20:56:38
+        Log: Fix bug #26910: hints were not propagated into (?{...})
+             blocks, except the utf8 pragma.
+     Branch: perl
+	   ! pp_ctl.c t/lib/strict/refs t/lib/strict/subs t/lib/strict/vars
+____________________________________________________________________________
+[ 22363] By: rgs                                   on 2004/02/23  19:15:53
+        Log: Subject: Re: [perl #26905] "use bytes" doesn't apply byte semantics to concatenation 
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 22 Feb 2004 16:09:33 +0900
+             Message-Id: <20040222160505.98E5.BQW10602@nifty.com>
+             
+             Subject: [PATCH] Encode::CN::HZ (was Re: [perl #26905] "use bytes" doesn't apply byte semantics to concatenation)
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 22 Feb 2004 18:41:43 +0900
+             Message-Id: <20040222182357.6B39.BQW10602@nifty.com>
+             
+             Plus, add a "_01" to the theoretical version number of Encode::CN::HZ.
+     Branch: perl
+	   ! ext/Encode/lib/Encode/CN/HZ.pm pp_hot.c t/op/concat.t
+____________________________________________________________________________
+[ 22362] By: rgs                                   on 2004/02/23  18:31:31
+        Log: Subject: [PATCH] Benchmark for child processes
+             From: Chia-liang Kao <clkao@clkao.org>
+             Date: Mon, 23 Feb 2004 22:53:51 +0800
+             Message-ID: <20040223145351.GH94376@portege.clkao.org>
+     Branch: perl
+	   ! lib/Benchmark.pm
+____________________________________________________________________________
+[ 22359] By: merijn                                on 2004/02/23  11:55:08
+        Log: Subject: Re: Perl 5.8.1 on IRIX 5.3
+             Date: Thu, 22 Jan 2004 18:35:26 +0100 (CET)
+             From: Georg Schwarz <geos@epost.de>
+             Message-Id: <E1Ajijm-0006ya-LE@mikro.physik.TU-Berlin.DE>
+     Branch: perl
+	   ! hints/irix_5.sh
+____________________________________________________________________________
+[ 22358] By: rgs                                   on 2004/02/22  21:49:47
+        Log: Subject: initial patch for cygwin IPC via cygserver
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Thu, 19 Feb 2004 09:01:13 -0800
+             Message-ID: <20040219170113.GA2792@efn.org>
+     Branch: perl
+	   ! ext/IPC/SysV/hints/cygwin.pl hints/cygwin.sh
+____________________________________________________________________________
+[ 22357] By: davem                                 on 2004/02/22  15:43:53
+        Log: Extend OP_AELEMFAST optimisation to lexical arrays
+     Branch: perl
+	   ! ext/B/B/Concise.pm ext/B/B/Deparse.pm op.c op.h pp_hot.c
+____________________________________________________________________________
+[ 22356] By: rgs                                   on 2004/02/21  16:51:52
+        Log: We're not binary compatible with 5.8.
+             Change PERL_API_VERSION to 5.9.1.
+     Branch: perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 22355] By: rgs                                   on 2004/02/21  16:30:02
+        Log: Document change #22353 in perldelta.
+     Branch: perl
+	   ! pod/perl591delta.pod
+____________________________________________________________________________
+[ 22354] By: rgs                                   on 2004/02/21  16:23:54
+        Log: Increment the version number of B, due to the incompatible
+             API change introduced by #22353 (no more op_seq method.)
+     Branch: perl
+	   ! ext/B/B.pm
+____________________________________________________________________________
+[ 22353] By: rgs                                   on 2004/02/21  16:18:32
+        Log: Subject: Re: op_seq (was: Freeing code)
+             From: Paul Johnson <paul@pjcj.net>
+             Date: Sat, 21 Feb 2004 02:31:47 +0100
+             Message-ID: <20040221013147.GB6953@pjcj.net>
+             
+             Rework the OP structure to use less space.
+             Remove op_seq (and simulate it in dump.c),
+             replace it by op_opt and op_static,
+             shrink op_type, remove PL_op_seqmax.
+     Branch: perl
+	   ! bytecode.pl dump.c embed.h embedvar.h ext/B/B.xs
+	   ! ext/B/B/Asmdata.pm ext/B/B/C.pm ext/B/B/Concise.pm
+	   ! ext/B/B/Debug.pm ext/ByteLoader/byterun.c
+	   ! ext/ByteLoader/byterun.h intrpvar.h op.c op.h perlapi.h
+	   ! pod/perlintern.pod sv.c
+____________________________________________________________________________
+[ 22352] By: rgs                                   on 2004/02/20  17:29:32
+        Log: When you write C<my $_ ; for (...) {...}>, the lexical $_
+             is not actually introduced by the for statement.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 22351] By: davem                                 on 2004/02/20  15:38:10
+        Log: remove a split test's dependence on -Dx output
+             (needed after change #22343)
+     Branch: perl
+	   ! t/op/split.t
+____________________________________________________________________________
+[ 22350] By: davem                                 on 2004/02/20  15:34:27
+        Log: add Deparse/Concise support for inplace sort (change 22349)
+     Branch: perl
+	   ! ext/B/B/Concise.pm ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 22349] By: davem                                 on 2004/02/20  14:54:35
+        Log: optimise the sorting inplace of plain arrays: @a = sort @a
+     Branch: perl
+	   ! op.c op.h pp_sort.c t/op/sort.t
+____________________________________________________________________________
+[ 22348] By: davem                                 on 2004/02/20  14:18:13
+        Log: Document the SVf_PADSTALE flag
+     Branch: perl
+	   ! pad.c
+____________________________________________________________________________
+[ 22347] By: rgs                                   on 2004/02/20  10:46:51
+        Log: Delete lib/IPC/SysV.t (duplicate of ext/IPC/SysV/t/ipcsysv.t)
+     Branch: perl
+	   - lib/IPC/SysV.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 22346] By: rgs                                   on 2004/02/20  10:23:51
+        Log: Subject: [PATCH] genmk95.pl touchup for distclean on Win98
+             From: Greg Matheson <lang@ms.chinmin.edu.tw>
+             Date: Fri, 20 Feb 2004 15:34:59 +0800
+             Message-ID: <20040220153459.A30249@ms.chinmin.edu.tw>
+     Branch: perl
+	   ! win32/genmk95.pl
+____________________________________________________________________________
+[ 22345] By: rgs                                   on 2004/02/20  08:21:47
+        Log: Upgrade to Term::ANSIColor 1.08.
+     Branch: perl
+	   ! lib/Term/ANSIColor.pm lib/Term/ANSIColor/ChangeLog
+	   ! lib/Term/ANSIColor/README lib/Term/ANSIColor/test.pl
+____________________________________________________________________________
+[ 22344] By: rgs                                   on 2004/02/19  21:17:10
+        Log: Upgrade to prereleases of Math::BigInt 1.70 and
+             Math::BigRat 0.12, by Tels.
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/Calc.pm lib/Math/BigInt/CalcEmu.pm
+	   ! lib/Math/BigInt/t/bare_mbf.t lib/Math/BigInt/t/bare_mbi.t
+	   ! lib/Math/BigInt/t/bare_mif.t lib/Math/BigInt/t/bigfltpm.inc
+	   ! lib/Math/BigInt/t/bigfltpm.t lib/Math/BigInt/t/bigintc.t
+	   ! lib/Math/BigInt/t/bigintpm.inc lib/Math/BigInt/t/bigintpm.t
+	   ! lib/Math/BigInt/t/bigints.t lib/Math/BigInt/t/biglog.t
+	   ! lib/Math/BigInt/t/calling.t lib/Math/BigInt/t/config.t
+	   ! lib/Math/BigInt/t/mbimbf.inc lib/Math/BigInt/t/mbimbf.t
+	   ! lib/Math/BigInt/t/req_mbfw.t lib/Math/BigInt/t/sub_mbf.t
+	   ! lib/Math/BigInt/t/sub_mbi.t lib/Math/BigInt/t/sub_mif.t
+	   ! lib/Math/BigInt/t/upgrade.inc lib/Math/BigInt/t/upgrade.t
+	   ! lib/Math/BigInt/t/use_mbfw.t lib/Math/BigInt/t/with_sub.t
+	   ! lib/Math/BigRat.pm lib/Math/BigRat/t/bigfltpm.inc
+	   ! lib/Math/BigRat/t/bigfltrt.t lib/Math/BigRat/t/bigrat.t
+	   ! lib/bigint.pm t/lib/Math/BigInt/BareCalc.pm
+	   ! t/lib/Math/BigInt/Scalar.pm t/lib/Math/BigRat/Test.pm
+____________________________________________________________________________
+[ 22343] By: davem                                 on 2004/02/19  13:43:18
+        Log: -Dx could coredump on threaded builds because consts are now
+             stored in the pad
+     Branch: perl
+	   ! dump.c
+____________________________________________________________________________
+[ 22342] By: rgs                                   on 2004/02/18  21:38:13
+        Log: Add a tool to report dual-lived core modules that don't
+             have the same version than the corresponding module on CPAN.
+     Branch: perl
+	   + Porting/corecpan.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 22341] By: rgs                                   on 2004/02/18  14:04:11
+        Log: Document the removal of PERL_XS_APIVERSION and PERL_PM_APIVERSION.
+     Branch: perl
+	   ! pod/perl591delta.pod
+____________________________________________________________________________
+[ 22338] By: rgs                                   on 2004/02/18  13:32:17
+        Log: Add base.pm and fields.pm to the maintainer list.
+             Remove a duplicate file from this list.
+     Branch: perl
+	   ! Porting/Maintainers.pl
+____________________________________________________________________________
+[ 22337] By: davem                                 on 2004/02/18  13:22:13
+        Log: fix write test: -small_number may be displayed as 00.00 or -0.00
+     Branch: perl
+	   ! t/op/write.t
+____________________________________________________________________________
+[ 22334] By: merijn                                on 2004/02/18  12:18:52
+        Log: Removed pm_apiversion and xs_apiversion as requested by
+             the pumpkin. Chainsaw was still in perfect working order.
+     Branch: perl
+	   ! Configure Cross/config.sh-arm-linux NetWare/config.wc
+	   ! NetWare/config_H.wc Porting/Glossary Porting/config.sh
+	   ! Porting/config_H config_h.SH configure.com epoc/config.sh
+	   ! plan9/config.plan9 plan9/config_h.sample
+	   ! plan9/config_sh.sample uconfig.h uconfig.sh win32/config.bc
+	   ! win32/config.gc win32/config.vc win32/config.vc64
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/config_H.vc64 wince/config.ce wince/config_H.ce
+____________________________________________________________________________
+[ 22332] By: davem                                 on 2004/02/18  11:14:43
+        Log: Add tests for the C<my $x if foo> deprecation, and change the
+             warning text
+     Branch: perl
+	   ! op.c pod/perldiag.pod t/lib/warnings/op
+____________________________________________________________________________
+[ 22330] By: mhx                                   on 2004/02/18  08:53:03
+        Log: 1. Add section to perlxs.pod describing that the refcount of AVs/HVs
+             returned from XSUBs through RETVAL isn't decremented as it is for
+             SVs. This causes those XSUBs to leak memory and cannot be fixed
+             without breaking existing CPAN modules that work around this bug.
+             
+             2. Fix a memory leak of that kind in POSIX::localconv.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs pod/perlxs.pod
+____________________________________________________________________________
+[ 22329] By: rgs                                   on 2004/02/18  08:25:58
+        Log: Encode has local changes. Up-version it.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 22328] By: davem                                 on 2004/02/17  23:30:50
+        Log: add deprecation warning for C<my $x if foo> and C<foo && (my $x)>
+     Branch: perl
+	   ! op.c opcode.h opcode.pl pod/perldiag.pod pp.sym pp_proto.h
+____________________________________________________________________________
+[ 22327] By: rgs                                   on 2004/02/17  23:22:45
+        Log: It's better to localize *_ than $_, to avoid magic leakage
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 22326] By: rgs                                   on 2004/02/17  23:18:25
+        Log: One of the new tests of MIME::Base64 relies on a non-core module.
+     Branch: perl
+	   - ext/MIME/Base64/t/bad-sv.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 22325] By: rgs                                   on 2004/02/17  23:10:22
+        Log: Upgrade to MIME::Base64 3.00.
+             Fix t/warn.t so it works in the core.
+             Reintegrate change #22309 in it. Bump $VERSION to 3.00_01.
+     Branch: perl
+	   + ext/MIME/Base64/t/bad-sv.t ext/MIME/Base64/t/warn.t
+	   ! ext/MIME/Base64/Base64.pm ext/MIME/Base64/Base64.xs
+	   ! ext/MIME/Base64/Changes ext/MIME/Base64/QuotedPrint.pm
+	   ! ext/MIME/Base64/t/base64.t
+____________________________________________________________________________
+[ 22323] By: rgs                                   on 2004/02/17  22:20:25
+        Log: Be more clear. Use simple words.
+     Branch: perl
+	   ! pod/perl591delta.pod
+____________________________________________________________________________
+[ 22322] By: davem                                 on 2004/02/17  21:52:08
+        Log: remove C<my $x if foo> construct from core modules
+     Branch: perl
+	   ! ext/B/B/Deparse.pm ext/IO/lib/IO/Handle.pm
+	   ! ext/IO/lib/IO/Pipe.pm lib/ExtUtils/Liblist/Kid.pm
+	   ! lib/ExtUtils/MM_NW5.pm lib/ExtUtils/MM_Win95.pm
+	   ! lib/Net/NNTP.pm lib/Net/POP3.pm lib/Net/SMTP.pm
+	   ! lib/Pod/Parser.pm lib/Test/Harness.pm utils/h2xs.PL
+____________________________________________________________________________
+[ 22321] By: rgs                                   on 2004/02/17  21:22:17
+        Log: Dave Mitchell suggested this perldelta entry for the SVp_* reordering.
+     Branch: perl
+	   ! pod/perl591delta.pod
+____________________________________________________________________________
+[ 22320] By: rgs                                   on 2004/02/17  21:07:11
+        Log: Bump $B::VERSION (because of change #22315).
+     Branch: perl
+	   ! ext/B/B.pm
+____________________________________________________________________________
+[ 22319] By: rgs                                   on 2004/02/17  21:03:09
+        Log: Regenerate table of contents and other related files.
+     Branch: perl
+	   ! MANIFEST pod/perl.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 22318] By: rgs                                   on 2004/02/17  20:06:04
+        Log: Bump up perl's version number to 5.9.1.
+             Add perl591delta in perl.pod.
+             Update the sample config files in Porting/.
+     Branch: perl
+	   ! NetWare/Makefile NetWare/config_H.wc Porting/config.sh
+	   ! Porting/config_H epoc/config.sh epoc/createpkg.pl patchlevel.h
+	   ! plan9/config.plan9 pod/perl.pod win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/config_H.vc64 win32/makefile.mk wince/Makefile.ce
+____________________________________________________________________________
+[ 22317] By: davem                                 on 2004/02/17  19:28:58
+        Log: 22316 had stupid precedence thinkos
+     Branch: perl
+	   ! pp.c pp_hot.c
+____________________________________________________________________________
+[ 22316] By: davem                                 on 2004/02/17  18:23:27
+        Log: Slight update to #22315 ($lval=*FOO); optimise the hot tests,
+             and fix some incorrect indentation
+     Branch: perl
+	   ! pp.c pp_hot.c sv.c
+____________________________________________________________________________
+[ 22315] By: davem                                 on 2004/02/17  18:01:52
+        Log: Subject:  Re: [PATCH] GLOB to LVALUE assignment fix
+             From:  Tassilo von Parseval <tassilo.parseval@post.rwth-aachen.de>
+             Date:  Tue, 17 Feb 2004 17:32:16 +0100
+             Message-Id:  <20040217163216.GA6805@ethan>
+             
+             Make PVLV a superset of PVGV, so that $lvalue = *FOO works
+     Branch: perl
+	   ! dump.c ext/B/B.pm ext/B/B.xs pp.c pp_hot.c sv.c sv.h t/op/gv.t
+____________________________________________________________________________
+[ 22314] By: merijn                                on 2004/02/17  11:22:24
+        Log: 1. Creating backward compatibility for Configure after patches
+             #22227 and #22302 to still support 5.8.x and below
+             
+             2. Small change for building on GNU hurd
+             Date: Sun, 15 Feb 2004 23:27:17 +1100
+             From: "Brendan O'Dea" <bod@debian.org>
+             Message-ID: <20040215122717.GA26812@londo.c47.org>
+     Branch: perl
+	   ! Configure Makefile.SH hints/gnu.sh
+____________________________________________________________________________
+[ 22313] By: mhx                                   on 2004/02/16  20:27:40
+        Log: Fix for Win32 build failure caused by the byacc to bison switch.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 22312] By: rgs                                   on 2004/02/16  13:16:43
+        Log: Revert change 22308 (the patch was against maint, not blead)
+     Branch: perl
+	   ! lib/ExtUtils/instmodsh
+____________________________________________________________________________
+[ 22310] By: merijn                                on 2004/02/16  11:30:29
+        Log: Fix typo in doc for Encode
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Sun, 15 Feb 2004 23:27:17 +1100
+             Message-ID: <20040215122717.GA26812@londo.c47.org>
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 22309] By: merijn                                on 2004/02/16  11:27:34
+        Log: Missing semi-colon
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Sun, 15 Feb 2004 23:27:17 +1100
+             Message-ID: <20040215122717.GA26812@londo.c47.org>
+     Branch: perl
+	   ! ext/MIME/Base64/Base64.xs
+____________________________________________________________________________
+[ 22308] By: merijn                                on 2004/02/16  11:24:59
+        Log: Add some basic POD to lib/ExtUtils/instmodsh so that
+             it has a manpage.
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Sun, 15 Feb 2004 23:27:17 +1100
+             Message-ID: <20040215122717.GA26812@londo.c47.org>
+     Branch: perl
+	   ! lib/ExtUtils/instmodsh
+____________________________________________________________________________
+[ 22307] By: rgs                                   on 2004/02/15  11:02:49
+        Log: Subject: [patch perlguts.pod] save_item doesn't handle magic
+             From: Stas Bekman <stas@stason.org>
+             Date: Fri, 13 Feb 2004 20:18:59 -0800
+             Message-ID: <402DA1B3.2010608@stason.org>
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 22306] By: davem                                 on 2004/02/15  00:24:26
+        Log: Segmentation fault with
+             sub x { shift; @a = @b; eval +{ use } }
+     Branch: perl
+	   ! op.c perly.act perly.h perly.tab perly.y t/comp/parser.t
+____________________________________________________________________________
+[ 22305] By: davem                                 on 2004/02/14  23:52:09
+        Log: Enable v (verbose) switch on -Dp to display the top 8 elements
+             on the parser stack at each reduce.  Also,
+             
+             Subject: Re: switch from byacc to bison
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sat, 14 Feb 2004 13:26:45 -0600
+             Message-ID: <craigberry-8058A3.13264414022004@onion.develooper.com>
+             
+             change #if DEBUGGING to #ifdef ... in perly.c
+     Branch: perl
+	   ! perly.c pod/perlrun.pod
+____________________________________________________________________________
+[ 22304] By: davem                                 on 2004/02/14  13:33:26
+        Log: Subject:  Re: switch from byacc to bison
+             From:  Abe Timmerman <abeltje@cpan.org>
+             Date:  Sat, 14 Feb 2004 11:56:24 +0100
+             Message-Id:  <200402141156.58185.abeltje@cpan.org>
+             
+             Fix typos in pumpkin.pod
+     Branch: perl
+	   ! Porting/pumpkin.pod
+____________________________________________________________________________
+[ 22303] By: davem                                 on 2004/02/14  12:28:37
+        Log: remove binary compatibility stuff from the yacc -> bison switch
+             of change #22302
+     Branch: perl
+	   ! embedvar.h intrpvar.h
+____________________________________________________________________________
+[ 22302] By: davem                                 on 2004/02/14  02:06:53
+        Log: Switch from byacc to bison and simplify the perly.* regeneration
+             process
+     Branch: perl
+	   + perly.act perly.tab regen_perly.pl
+	   - perly.fixer perly_c.diff perlyline.pl vms/perly_c.vms
+	   - vms/perly_h.vms vms/vms_yfix.pl
+	   ! MANIFEST Makefile.SH Porting/pumpkin.pod embedvar.h intrpvar.h
+	   ! op.c perl.h perlapi.h perly.c perly.h perly.y sv.c toke.c
+	   ! vms/descrip_mms.template
+____________________________________________________________________________
+[ 22301] By: rgs                                   on 2004/02/13  21:11:25
+        Log: Fix an fcntl example in perlopentut, spotted by MJD.
+     Branch: perl
+	   ! pod/perlopentut.pod
+____________________________________________________________________________
+[ 22300] By: davem                                 on 2004/02/12  23:18:20
+        Log: The new -Dq option didn't actually work!
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 22299] By: merijn                                on 2004/02/12  14:32:15
+        Log: Subject: [comment patch] (ed: mg.c:mg_set() => mg.c:Perl_magic_set())
+             From: Stas Bekman <stas@stason.org>
+             Date: Wed, 11 Feb 2004 16:53:54 -0800
+             Message-ID: <402ACEA2.4020907@stason.org>
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 22298] By: rgs                                   on 2004/02/10  08:49:12
+        Log: Subject: Re: [PATCH] Add "Camel" logo icon to perl.exe on Windows
+             From: Greg Matheson <lang@ms.chinmin.edu.tw>
+             Date: Tue, 10 Feb 2004 12:36:33 +0800
+             Message-ID: <20040210043633.GA33671687@momotaro>
+     Branch: perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[ 22297] By: rgs                                   on 2004/02/10  08:05:16
+        Log: Add 5.005_04-RC1 and Leon in perlhist.
+     Branch: perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[ 22295] By: rgs                                   on 2004/02/09  22:48:54
+        Log: Add a note in Unicode::UCD about the _getcode() function
+             being copy-n-pasted in charnames.pm. (spotted by Merijn)
+     Branch: perl
+	   ! lib/Unicode/UCD.pm
+____________________________________________________________________________
+[ 22294] By: rgs                                   on 2004/02/09  21:48:15
+        Log: Implement stacked filetest operators (-f -w -x $file).
+     Branch: perl
+	   ! doio.c dump.c ext/B/B/Concise.pm op.c op.h
+	   ! pod/perl591delta.pod pod/perlfunc.pod pp_sys.c t/op/filetest.t
+____________________________________________________________________________
+[ 22292] By: rgs                                   on 2004/02/09  21:17:40
+        Log: Subject: Re: [perl #26073] sprintf miscounts padding when format is utf8 
+             From: hv@crypt.org
+             Date: Mon, 09 Feb 2004 03:21:21 +0000
+             Message-Id: <200402090321.i193LL907950@zen.crypt.org>
+     Branch: perl
+	   ! sv.c t/op/sprintf2.t
+____________________________________________________________________________
+[ 22291] By: rgs                                   on 2004/02/09  21:09:14
+        Log: Subject: reduce overhead of charnames.pm, make op/pat.t work under miniperl
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Mon, 9 Feb 2004 00:51:45 -0800
+             Message-ID: <20040209085145.GA3204@efn.org>
+             (plus an etymological notice)
+     Branch: perl
+	   ! lib/charnames.pm
+____________________________________________________________________________
+[ 22290] By: rgs                                   on 2004/02/08  21:34:27
+        Log: Add the new private flag OPpGREP_LEX in B::Concise.
+     Branch: perl
+	   ! ext/B/B/Concise.pm
+____________________________________________________________________________
+[ 22289] By: rgs                                   on 2004/02/08  21:21:28
+        Log: map and grep weren't working correctly with lexical $_ in
+             scalar context, because pp_mapwhile and pp_grepwhile were using
+             their target as a temporary slot to store the return value.
+     Branch: perl
+	   ! pp_ctl.c pp_hot.c t/op/mydef.t
+____________________________________________________________________________
+[ 22287] By: rgs                                   on 2004/02/08  12:01:35
+        Log: Subject: Re: [PATCH] Add "Camel" logo icon to perl.exe on Windows
+             From: Greg Matheson <lang@ms.chinmin.edu.tw>
+             Date: Mon, 2 Feb 2004 16:52:44 +0800
+             Message-ID: <20040202165244.A17415@ms.chinmin.edu.tw>
+     Branch: perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[ 22286] By: rgs                                   on 2004/02/08  11:48:09
+        Log: Subject: [PATCH] Correct some prototypes in perlapi.pod
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Fri, 06 Feb 2004 12:44:05 +0000
+             Message-ID: <40238C15.2090200@uk.radan.com>
+     Branch: perl
+	   ! pod/perlapi.pod sv.h
+____________________________________________________________________________
+[ 22285] By: rgs                                   on 2004/02/08  11:44:22
+        Log: Subject: [PATCH] Fix absolute path handling in installhtml
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Fri, 06 Feb 2004 16:14:14 +0000
+             Message-ID: <4023BD56.6090903@uk.radan.com>
+     Branch: perl
+	   ! installhtml
+____________________________________________________________________________
+[ 22284] By: rgs                                   on 2004/02/08  11:42:08
+        Log: Subject: [PATCH perlunicode.pod] chomp() cares about Unicode
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sat, 07 Feb 2004 00:08:36 +0900
+             Message-Id: <20040206235116.0E36.BQW10602@nifty.com>
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 22282] By: nicholas                              on 2004/02/07  22:32:44
+        Log: Comment to record why we can't clear placeholders in hsplit
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 22281] By: nicholas                              on 2004/02/07  21:46:59
+        Log: deleting keys in restricted hashes was leaking the entry. Yow!
+     Branch: perl
+	   ! hv.c lib/Hash/Util.t
+____________________________________________________________________________
+[ 22280] By: nicholas                              on 2004/02/07  21:20:16
+        Log: Now hv_delete is able to ingore placeholders.
+             (This is an XS visible change in the hash API. But not of documented
+             behaviour)
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 22279] By: nicholas                              on 2004/02/07  20:56:50
+        Log: All whitespace is equal, but some whitespace is more equal than others
+             (lib/DBM_Filter/Changes line had spaces. Spaces bad. Tabs better)
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 22278] By: nicholas                              on 2004/02/07  19:50:10
+        Log: hv_clear_placeholders now manipulates the linked lists directly, rather
+             than using the iterator interface and calling hv_delete
+             This will allow hv_delete to be simplified to remove most of the
+             special casing related to placeholders.
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 22273] By: merijn                                on 2004/02/06  11:47:14
+        Log: Added hints_4.sh for specific AIX 4 support
+             this is the next stage in the general cleanup process
+             for the AIX hints. More to come
+     Branch: perl
+	   + hints/aix_4.sh
+	   ! MANIFEST
+____________________________________________________________________________
+[ 22272] By: rgs                                   on 2004/02/06  07:32:15
+        Log: Fix a non-standard NAME pod section
+             (by Smylers and Casey West)
+     Branch: perl
+	   ! lib/Carp/Heavy.pm
+____________________________________________________________________________
+[ 22268] By: rgs                                   on 2004/02/04  19:50:05
+        Log: The "my $_" wasn't nice with foreach loops.
+     Branch: perl
+	   ! op.c t/op/mydef.t
+____________________________________________________________________________
+[ 22267] By: merijn                                on 2004/02/04  10:24:33
+        Log: AIX 3 support removed from default hints after its separation
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 22266] By: merijn                                on 2004/02/04  10:16:20
+        Log: AIX 3 hints split off from default hints in preparation
+             of a hint file cleanup. aix_4.sh will follow soon
+     Branch: perl
+	   + hints/aix_3.sh
+	   ! MANIFEST
+____________________________________________________________________________
+[ 22265] By: rgs                                   on 2004/02/03  21:54:23
+        Log: More docs and tests for "my $_".
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perlsub.pod t/op/mydef.t
+____________________________________________________________________________
+[ 22264] By: rgs                                   on 2004/02/03  20:33:02
+        Log: Subject: [PATCH] was Re: [Fwd: CPAN Upload: J/JP/JPEACOCK/version-0.36.tar.gz]
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Sun, 01 Feb 2004 21:10:07 -0500
+             Message-ID: <401DB17F.5060808@rowman.com>
+     Branch: perl
+	   ! embed.fnc embed.h lib/version.pm lib/version.t pod/perlapi.pod
+	   ! proto.h t/comp/use.t t/op/universal.t universal.c util.c
+____________________________________________________________________________
+[ 22263] By: rgs                                   on 2004/02/03  19:41:11
+        Log: Implement "my $_".
+     Branch: perl
+	   + t/op/mydef.t
+	   ! MANIFEST gv.c op.c op.h opcode.h opcode.pl
+	   ! pod/perl591delta.pod pod/perlapi.pod pod/perlvar.pod pp.c
+	   ! pp_ctl.c pp_hot.c regexec.c toke.c
+____________________________________________________________________________
+[ 22262] By: rgs                                   on 2004/02/03  16:38:25
+        Log: Regenerate perlapi.pod.
+     Branch: perl
+	   ! pod/perlapi.pod
+____________________________________________________________________________
+[ 22261] By: merijn                                on 2004/02/03  12:57:37
+        Log: If someone chooses xlc as default C compiler, threaded builds
+             will fail, unless converted to cc_r
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 22260] By: rgs                                   on 2004/02/01  20:47:35
+        Log: Subject: patch for IRIX/gcc link issues
+             From: Martin Pool <mbp@samba.org>
+             Date: Wed, 28 Jan 2004 10:56:25 +1100
+             Message-ID: <20040127235624.GA32612@hp.com>
+     Branch: perl
+	   ! hints/irix_6.sh
+____________________________________________________________________________
+[ 22259] By: davem                                 on 2004/02/01  17:42:44
+        Log: update fix to Shell.pm in change #22254: make /dev/null portable
+     Branch: perl
+	   ! lib/Shell.pm
+____________________________________________________________________________
+[ 22258] By: davem                                 on 2004/02/01  17:40:02
+        Log: Subject: Re: [perl #15063] /tmp issues
+             From: Solar Designer <solar@openwall.com> 
+             Date: Mon, 26 Jan 2004 01:22:18 +0300
+             Message-ID: <20040125222218.GA13499@openwall.com>
+             
+             Remove insecure usage of /tmp from code and documentation
+     Branch: perl
+	   ! ext/DB_File/DB_File.pm ext/DB_File/t/db-recno.t
+	   ! ext/Devel/PPPort/PPPort.pm ext/IO/t/io_unix.t
+	   ! ext/ODBM_File/ODBM_File.xs ext/POSIX/POSIX.pod
+	   ! ext/Socket/Socket.pm ext/Storable/Storable.pm
+	   ! ext/Time/HiRes/Makefile.PL lib/CGI/Cookie.pm
+	   ! lib/ExtUtils/MakeMaker.pm lib/ExtUtils/instmodsh
+	   ! lib/Memoize/t/tie.t lib/Memoize/t/tie_gdbm.t
+	   ! lib/Memoize/t/tie_ndbm.t lib/Memoize/t/tie_sdbm.t
+	   ! lib/Memoize/t/tie_storable.t lib/Shell.pm lib/dotsh.pl
+	   ! lib/perl5db.pl mpeix/nm mpeix/relink perly.fixer
+	   ! pod/perl571delta.pod pod/perl58delta.pod pod/perldbmfilter.pod
+	   ! pod/perldebug.pod pod/perlfaq5.pod pod/perlfaq8.pod
+	   ! pod/perlfunc.pod pod/perlipc.pod pod/perllexwarn.pod
+	   ! pod/perlobj.pod pod/perlop.pod pod/perlopentut.pod
+	   ! utils/c2ph.PL
+____________________________________________________________________________
+[ 22257] By: davem                                 on 2004/02/01  15:46:24
+        Log: threads documentation: fork on UNIX might not copy all threads.
+     Branch: perl
+	   ! pod/perlthrtut.pod
+____________________________________________________________________________
+[ 22256] By: davem                                 on 2004/02/01  15:34:59
+        Log: add test for Change 22194: 
+             [perl #25147] "stmt if BAREWORD" bypasses strict 'subs' checks
+     Branch: perl
+	   ! t/lib/strict/subs
+____________________________________________________________________________
+[ 22254] By: davem                                 on 2004/02/01  13:11:00
+        Log: Subject:  Patch for Shell.pm
+             From:  Manuel Valente <mvalente@idealx.com>
+             Date:  Tue, 27 Jan 2004 19:18:26 +0100
+             Message-Id:  <4016AB72.1080503@idealx.com>
+             
+             New option for Shell.pm to discard stderr instead of capturing it
+     Branch: perl
+	   ! lib/Shell.pm
+____________________________________________________________________________
+[ 22253] By: davem                                 on 2004/02/01  11:26:47
+        Log: Make Time/HiRes/t/HiRes.t die more gracefully if its watchdog
+             timeout triggers
+     Branch: perl
+	   ! ext/Time/HiRes/t/HiRes.t
+____________________________________________________________________________
+[ 22252] By: chip                                  on 2004/01/31  17:29:05
+        Log: Don't show code closing STD{IN,OUT} before reopening, because
+             doing so is unnecessary and occasionally harmful.
+     Branch: perl
+	   ! pod/perlfork.pod pod/perlfunc.pod
+____________________________________________________________________________
+[ 22248] By: rgs                                   on 2004/01/30  08:29:55
+        Log: Another undocumented use of $_ : with reverse().
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 22247] By: merijn                                on 2004/01/30  08:18:28
+        Log: Drop optimization for -O3 *and higher*
+     Branch: perl
+	   ! ext/Storable/hints/linux.pl
+____________________________________________________________________________
+[ 22246] By: rgs                                   on 2004/01/29  23:20:01
+        Log: Regenerate perlapi.pod.
+     Branch: perl
+	   ! pod/perlapi.pod
+____________________________________________________________________________
+[ 22245] By: rgs                                   on 2004/01/29  21:08:28
+        Log: Subject: Re: [perl #25269] panic: pp_match start/end pointers in m/^(?=.*(a)).*(bc)/ 
+             From: hv@crypt.org
+             Date: Thu, 29 Jan 2004 15:12:12 +0000
+             Message-Id: <200401291512.i0TFCCr23736@zen.crypt.org>
+     Branch: perl
+	   ! pp_hot.c t/op/pat.t
+____________________________________________________________________________
+[ 22244] By: rgs                                   on 2004/01/28  22:00:09
+        Log: I'm the new maintainer of Switch.
+             Sync with the CPAN version of Switch 2.10.
+     Branch: perl
+	   ! Porting/Maintainers.pl lib/Switch.pm lib/Switch/README
+____________________________________________________________________________
+[ 22243] By: merijn                                on 2004/01/28  20:30:40
+        Log: Message-ID: <40113F7B.6050701@davidfavor.com>
+             Date: Fri, 23 Jan 2004 09:36:27 -0600
+             From: David Favor <david@davidfavor.com>
+             Part I: In hints/aix.sh change -qmaxmem=16384 to -qmaxmem=-1
+             so no compilation stack limits are imposed.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 22242] By: rgs                                   on 2004/01/27  22:44:30
+        Log: Update perl591delta.pod with what we've done so far.
+     Branch: perl
+	   ! pod/perl591delta.pod
+____________________________________________________________________________
+[ 22239] By: rgs                                   on 2004/01/27  21:54:31
+        Log: Regenerate Changes.
+             Only include changes from the perl branch.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[ 22238] By: nicholas                              on 2004/01/27  21:51:27
+        Log: Storable's hints file shouldn't blanket set optimize to -O2 on Linux
+             Only *drop* optimize to -O2 if it's -O3 on gcc on Linux
+     Branch: perl
+	   ! ext/Storable/hints/linux.pl
+____________________________________________________________________________
 [ 22235] By: rgs                                   on 2004/01/27  21:19:03
         Log: More punctuation, good.
      Branch: perl

@@ -58,6 +58,7 @@ Andrew Wilcox                  <awilcox@maine.com>
 Andrey Sapozhnikov             <sapa@icb.chel.su>
 Andy Bussey                    <andybussey@yahoo.co.uk>
 Andy Dougherty                 <doughera@lafayette.edu>
+Andy Lester                    <andy@petdance.com>
 Anno Siegel                    <anno4000@lublin.zrz.tu-berlin.de>
 Anthony David                  <adavid@netinfo.com.au>
 Anton Berezin                  <tobez@tobez.org>
@@ -81,6 +82,7 @@ Bill Glicker                   <billg@burrelles.com>
 Billy Constantine              <wdconsta@cs.adelaide.edu.au>
 Blair Zajac                    <blair@orcaware.com>
 Bob Dalgleish                  <Robert.Dalgleish@sk.sympatico.ca>
+Bob Wilkinson
 Boyd Gerber                    <gerberb@zenez.com>
 Brad Appleton                  <bradapp@enteract.com>
 Brad Howerter                  <bhower@wgc.woodward.com>
@@ -119,7 +121,10 @@ Charles Lane                   <lane@DUPHY4.Physics.Drexel.Edu>
 Charles Randall                <cfriv@yahoo.com>
 Charles Wilson                 <cwilson@ece.gatech.edu>
 Chaskiel M Grundman
+Chia-liang Kao                 <clkao@clkao.org>
 Chip Salzenberg                <chip@pobox.com>
+Chip Turner                    <cturner@redhat.com>
+chocolateboy                   <chocolateboy@chocolatey.com>
 Chris Ball                     <chris@cpan.org>
 Chris Bongaarts                <cab@tc.umn.edu>
 Chris Faylor                   <cgf@bbc.com>
@@ -170,6 +175,7 @@ Darren/Torin/Who Ever...       <torin@daft.com>
 Dave Bianchi
 Dave Hartnoll                  <Dave_Hartnoll@3b2.com>
 Dave Liney                     <dave.liney@gbr.conoco.com>
+Dave Mitchell                  <davem@fdgroup.com>
 Dave Nelson                    <David.Nelson@bellcow.com>
 Dave Paris
 Dave Rolsky                    <autarch@urth.org>
@@ -198,10 +204,12 @@ Davin Milun                    <milun@cs.Buffalo.EDU>
 Dean Roehrich                  <roehrich@cray.com>
 deekoo                         <deekoo@tentacle.net>
 Dennis Marsa                   <dennism@cyrix.com>
+DH                             <crazyinsomniac@yahoo.com>
 Diab Jerius                    <dj@head-cfa.harvard.edu>
 dLux                           <dlux@spam.sch.bme.hu>
 Dominic Dunlop                 <domo@computer.org>
 Dominique Dumont               <Dominique_Dumont@grenoble.hp.com>
+Dominique Quatravaux
 Doug Campbell                  <soup@ampersand.com>
 Doug MacEachern                <dougm@covalent.net>
 Douglas E. Wegscheid           <dwegscheid@qtm.net>
@@ -224,6 +232,7 @@ Eric Bartley                   <bartley@icd.cc.purdue.edu>
 Eric E. Coe                    <Eric.Coe@oracle.com>
 Eric Fifer                     <egf7@columbia.edu>
 Eric Melville
+Eric Promislow                 <ericp@ActiveState.com>
 Erich Rickheit
 Eryq                           <eryq@zeegee.com>
 Etienne Grossman               <etienne@isr.isr.ist.utl.pt>
@@ -241,8 +250,10 @@ G. Del Merritt                 <del@intranetics.com>
 Gabe Schaffer
 Garry T. Williams              <garry@zvolve.com>
 Gary Clark                     <GaryC@mail.jeld-wen.com>
+Gary L. Armstrong
 Gary Ng                        <71564.1743@compuserve.com>
 Geoffrey F. Green              <geoff-public@stuebegreen.com>
+Georg Schwarz                  <geos@epost.de>
 George Necula                  <necula@eecs.berkeley.edu>
 Geraint A Edwards              <gedge@serf.org>
 Gerben Wierda                  <G.C.Th.Wierda@AWT.nl>
@@ -258,6 +269,7 @@ Greg Bacon                     <gbacon@itsc.uah.edu>
 Greg Chapman                   <glc@well.com>
 Greg Earle
 Greg Kuperberg
+Greg Matheson                  <lang@ms.chinmin.edu.tw>
 Greg Seibert                   <seibert@Lynx.COM>
 Greg Ward                      <gward@ase.com>
 Gregor Chrupala                <gregor.chrupala@star-group.net>
@@ -489,6 +501,7 @@ Mark Klein                     <mklein@dis.com>
 Mark Knutsen                   <knutsen@pilot.njin.net>
 Mark Kvale                     <kvale@phy.ucsf.edu>
 Mark Leighton Fisher           <mark-fisher@mindspring.com>
+Mark Mielke                    <mark@mark.mielke.cc>
 Mark Murray                    <mark@grondar.za>
 Mark P. Lutz                   <mark.p.lutz@boeing.com>
 Mark Pease                     <peasem@primenet.com>
@@ -502,6 +515,7 @@ Martin J. Bligh                <mbligh@us.ibm.com>
 Martin Jost                    <Martin.Jost@icn.siemens.de>
 Martin Lichtin                 <lichtin@bivio.com>
 Martin Plechsmid               <plechsmi@karlin.mff.cuni.cz>
+Martin Pool                    <mbp@samba.org>
 Martti Rahkila                 <martti.rahkila@hut.fi>
 Marty Lucich                   <marty@netcom.com>
 Marty Pauley                   <marty+p5p@kasei.com>
@@ -562,6 +576,7 @@ Norton T. Allen                <allen@huarp.harvard.edu>
 OKAIE Yutaka
 Olaf Flebbe                    <o.flebbe@science-computing.de>
 Olaf Titz                      <olaf@bigred.inka.de>
+Olli Savia
 Ollivier Robert                <roberto@keltia.freenix.fr>
 Owen Taylor                    <owt1@cornell.edu>
 parv                           <parv@pair.com>
@@ -659,8 +674,10 @@ SADAHIRO Tomoyuki              <BQW10602@nifty.com>
 SAKAI Kiyotaka                 <ksakai@netwk.ntt-at.co.jp>
 Salvador Fandiño               <sfandino@yahoo.com>
 Sam Tregar                     <sam@tregar.com>
+Sam Vilain                     <sam@vilain.net>
 Samuli Kärkkäinen              <skarkkai@woods.iki.fi>
 Schuyler Erle                  <schuyler@oreilly.com>
+Scott A Crosby                 <scrosby@cs.rice.edu>
 Scott Bronson                  <bronson@rinspin.com>
 Scott Gifford                  <sgifford@tir.com>
 Scott Henry                    <scotth@sgi.com>
@@ -743,6 +760,7 @@ Tom Horsley                    <Tom.Horsley@mail.ccur.com>
 Tom Hughes                     <tom@compton.nu>
 Tom Phoenix                    <rootbeer@teleport.com>
 Tom Spindler                   <dogcow@isi.net>
+Ton Hospel
 Tony Bowden                    <tony@kasei.com>
 Tony Camas
 Tony Cook                      <tony@develop-help.com>
