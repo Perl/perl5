@@ -273,6 +273,20 @@ inet_ntoa(ip_address_sv)
 	}
 
 void
+sockaddr_family(sockaddr)
+	SV *	sockaddr
+	PREINIT:
+	STRLEN sockaddr_len;
+	char *sockaddr_pv = SvPV(sockaddr, sockaddr_len);
+	CODE:
+	if (sockaddr_len < offsetof(struct sockaddr, sa_data)) {
+	    croak("Bad arg length for %s, length is %d, should be at least %d",
+	          "Socket::sockaddr_family", sockaddr_len,
+		  offsetof(struct sockaddr, sa_data));
+	}
+	ST(0) = sv_2mortal(newSViv(((struct sockaddr*)sockaddr_pv)->sa_family));
+
+void
 pack_sockaddr_un(pathname)
 	char *	pathname
 	CODE:
