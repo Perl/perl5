@@ -759,9 +759,9 @@ that must be passed around, as in the following example:
         # $f implicitly closed here
     }
 
-Note that if an initialized scalar variable is used instead the 
-result is different: C<my $fh='zzz'; open($h, ...)> is equivalent 
-to C<open( *{'kkk'}, ...)>. 
+Note that if an initialized scalar variable is used instead the
+result is different: C<my $fh='zzz'; open($fh, ...)> is equivalent
+to C<open( *{'zzz'}, ...)>.
 C<use strict 'refs'> forbids such practice.
 
 Another way to create anonymous filehandles is with the Symbol
