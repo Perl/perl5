@@ -278,16 +278,16 @@ matches a word followed by a tab, without including the tab in C<$&>.
 A zero-width negative lookahead assertion.  For example C</foo(?!bar)/>
 matches any occurrence of "foo" that isn't followed by "bar".  Note
 however that lookahead and lookbehind are NOT the same thing.  You cannot
-use this for lookbehind: C</(?!foo)bar/> will not find an occurrence of
-"bar" that is preceded by something which is not "foo".  That's because
+use this for lookbehind.  If you are looking for a "bar" which isn't preceeded
+"foo", C</(?!foo)bar/> will not do what you want.  That's because
 the C<(?!foo)> is just saying that the next thing cannot be "foo"--and
 it's not, it's a "bar", so "foobar" will match.  You would have to do
 something like C</(?!foo)...bar/> for that.   We say "like" because there's
 the case of your "bar" not having three characters before it.  You could
-cover that this way: C</(?:(?!foo)...|^..?)bar/>.  Sometimes it's still
+cover that this way: C</(?:(?!foo)...|^.{0,2})bar/>.  Sometimes it's still
 easier just to say:
 
-    if (/foo/ && $` =~ /bar$/)
+    if (/bar/ && $` !~ /foo$/)
 
 
 =item (?imsx)
