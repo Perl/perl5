@@ -36,7 +36,7 @@ sub skip {
     return 1;
 }
 
-print "1..43\n";
+print "1..44\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
@@ -143,6 +143,8 @@ eval { die "foo\n" };
 ok $@ eq "foo\n", $@;
 
 ok $$ > 0, $$;
+eval { $$++ };
+ok $@ =~ /^Modification of a read-only value attempted/;
 
 # $^X and $0
 {

@@ -3565,8 +3565,11 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 #endif /* USE_ENVIRON_ARRAY */
     }
     TAINT_NOT;
-    if ((tmpgv = gv_fetchpv("$",TRUE, SVt_PV)))
+    if ((tmpgv = gv_fetchpv("$",TRUE, SVt_PV))) {
+        SvREADONLY_off(GvSV(tmpgv));
 	sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
+        SvREADONLY_on(GvSV(tmpgv));
+    }
 }
 
 STATIC void

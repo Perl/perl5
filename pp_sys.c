@@ -3923,8 +3923,11 @@ PP(pp_fork)
 	RETSETUNDEF;
     if (!childpid) {
 	/*SUPPRESS 560*/
-	if ((tmpgv = gv_fetchpv("$", TRUE, SVt_PV)))
+	if ((tmpgv = gv_fetchpv("$", TRUE, SVt_PV))) {
+            SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
+            SvREADONLY_on(GvSV(tmpgv));
+        }
 	hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
     }
     PUSHi(childpid);
