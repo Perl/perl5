@@ -885,6 +885,8 @@ win32/win32io.c		Win32 port
 win32/win32io.h		Win32 port
 win32/win32iop.h	Win32 port
 win32/win32sck.c	Win32 port
+win32/win32thread.h	Win32 port mapping to threads
+win32/win32thread.c	Win32 functions for threads 
 writemain.SH		Generate perlmain.c from miniperlmain.c+extensions
 x2p/EXTERN.h		Same as above
 x2p/INTERN.h		Same as above
