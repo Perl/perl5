@@ -88,71 +88,6 @@ doop.c			Support code for various operations
 dosish.h		Some defines for MS/DOSish machines
 dump.c			Debugging output
 ebcdic.c		EBCDIC support routines
-eg/ADB			An adb wrapper to put in your crash dir
-eg/README		Intro to example perl scripts
-eg/cgi/RunMeFirst		Setup script for CGI examples
-eg/cgi/caution.xbm		CGI example
-eg/cgi/clickable_image.cgi	CGI example
-eg/cgi/cookie.cgi		CGI example
-eg/cgi/crash.cgi		CGI example
-eg/cgi/customize.cgi		CGI example
-eg/cgi/diff_upload.cgi		CGI example
-eg/cgi/dna_small_gif.uu		Small image for CGI examples
-eg/cgi/file_upload.cgi		CGI example
-eg/cgi/frameset.cgi		CGI example
-eg/cgi/index.html		Index page for CGI examples
-eg/cgi/internal_links.cgi	CGI example
-eg/cgi/javascript.cgi		CGI example
-eg/cgi/monty.cgi		CGI example
-eg/cgi/multiple_forms.cgi	CGI example
-eg/cgi/nph-clock.cgi		CGI example
-eg/cgi/nph-multipart.cgi	CGI example
-eg/cgi/popup.cgi		CGI example
-eg/cgi/save_state.cgi		CGI example
-eg/cgi/tryit.cgi		CGI example
-eg/cgi/wilogo_gif.uu		Small image for CGI examples
-eg/changes		A program to list recently changed files
-eg/client		A sample client
-eg/down			A program to do things to subdirectories
-eg/dus			A program to do du -s on non-mounted dirs
-eg/findcp		A find wrapper that implements a -cp switch
-eg/findtar		A find wrapper that pumps out a tar file
-eg/g/gcp		A program to do a global rcp
-eg/g/gcp.man		Manual page for gcp
-eg/g/ged		A program to do a global edit
-eg/g/ghosts		A sample /etc/ghosts file
-eg/g/gsh		A program to do a global rsh
-eg/g/gsh.man		Manual page for gsh
-eg/muck			A program to find missing make dependencies
-eg/muck.man		Manual page for muck
-eg/myrup		A program to find lightly loaded machines
-eg/nih			Script to insert #! workaround
-eg/relink		A program to change symbolic links
-eg/rename		A program to rename files
-eg/rmfrom		A program to feed doomed filenames to
-eg/scan/scan_df		Scan for filesystem anomalies
-eg/scan/scan_last	Scan for login anomalies
-eg/scan/scan_messages	Scan for console message anomalies
-eg/scan/scan_passwd	Scan for passwd file anomalies
-eg/scan/scan_ps		Scan for process anomalies
-eg/scan/scan_sudo	Scan for sudo anomalies
-eg/scan/scan_suid	Scan for setuid anomalies
-eg/scan/scanner		An anomaly reporter
-eg/server		A sample server
-eg/shmkill		A program to remove unused shared memory
-eg/sysvipc/README	Intro to Sys V IPC examples
-eg/sysvipc/ipcmsg	Example of SYS V IPC message queues
-eg/sysvipc/ipcsem	Example of Sys V IPC semaphores
-eg/sysvipc/ipcshm	Example of Sys V IPC shared memory
-eg/travesty		A program to print travesties of its input text
-eg/unuc			Un-uppercases an all-uppercase text
-eg/uudecode		A version of uudecode
-eg/van/empty		A program to empty the trashcan
-eg/van/unvanish		A program to undo what vanish does
-eg/van/vanexp		A program to expire vanished files
-eg/van/vanish		A program to put files in a trashcan
-eg/who			A sample who program
-eg/wrapsuid		A setuid script wrapper generator
 emacs/cperl-mode.el	An alternate perl-mode
 emacs/e2ctags.pl	etags to ctags converter
 emacs/ptags		Creates smart TAGS file
@@ -575,6 +510,27 @@ lib/CGI/Pretty.pm	Output nicely formatted HTML
 lib/CGI/Push.pm		Support for server push
 lib/CGI/Switch.pm	Simple interface for multiple server types
 lib/CGI/Util.pm		Utility functions
+lib/CGI/eg/RunMeFirst		Setup script for CGI examples
+lib/CGI/eg/caution.xbm		CGI example
+lib/CGI/eg/clickable_image.cgi	CGI example
+lib/CGI/eg/cookie.cgi		CGI example
+lib/CGI/eg/crash.cgi		CGI example
+lib/CGI/eg/customize.cgi	CGI example
+lib/CGI/eg/diff_upload.cgi	CGI example
+lib/CGI/eg/dna_small_gif.uu	Small image for CGI examples
+lib/CGI/eg/file_upload.cgi	CGI example
+lib/CGI/eg/frameset.cgi		CGI example
+lib/CGI/eg/index.html		Index page for CGI examples
+lib/CGI/eg/internal_links.cgi	CGI example
+lib/CGI/eg/javascript.cgi	CGI example
+lib/CGI/eg/monty.cgi		CGI example
+lib/CGI/eg/multiple_forms.cgi	CGI example
+lib/CGI/eg/nph-clock.cgi	CGI example
+lib/CGI/eg/nph-multipart.cgi	CGI example
+lib/CGI/eg/popup.cgi		CGI example
+lib/CGI/eg/save_state.cgi	CGI example
+lib/CGI/eg/tryit.cgi		CGI example
+lib/CGI/eg/wilogo_gif.uu	Small image for CGI examples
 lib/CPAN.pm		Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm	Utility for creating CPAN config files
 lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
