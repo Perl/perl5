@@ -32,6 +32,207 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7706] By: jhi                                   on 2000/11/16  01:35:59
+        Log: More #undefing of stdio.
+     Branch: perl
+	   ! fakesdio.h nostdio.h
+____________________________________________________________________________
+[  7705] By: jhi                                   on 2000/11/16  01:34:18
+        Log: Add fwalk() probe to the configuration files and regen perltoc.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh pod/perltoc.pod
+	   ! uconfig.h uconfig.sh util.c vos/config.alpha.def
+	   ! vos/config.alpha.h vos/config.ga.def vos/config.ga.h
+	   ! win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  7703] By: jhi                                   on 2000/11/16  01:09:22
+        Log: The type of the hash_cb() size argument is tricky.
+     Branch: perl
+	   ! ext/DB_File/DB_File.xs
+____________________________________________________________________________
+[  7702] By: jhi                                   on 2000/11/15  23:01:16
+        Log: Quick temporary fix for 20001114.008 as suggested by Nick Ing-Simmons.
+     Branch: perl
+	   ! nostdio.h
+____________________________________________________________________________
+[  7701] By: jhi                                   on 2000/11/15  22:52:32
+        Log: Detypo.
+     Branch: perl
+	   ! t/lib/bigfltpm.t
+____________________________________________________________________________
+[  7700] By: jhi                                   on 2000/11/15  22:51:56
+        Log: UINT64_C() work continues.
+     Branch: perl
+	   ! handy.h perl.h utf8.h
+____________________________________________________________________________
+[  7699] By: jhi                                   on 2000/11/15  14:13:04
+        Log: SOCKS has its own USE_THREADS, based on
+             
+             Subject: [ID 20001114.002] et. al. bugfix followup
+             From: Jens Hamisch <jens@Strawberry.COM> 
+             Date: Wed, 15 Nov 2000 14:23:11 +0100
+             Message-ID: <20001115142311.A21164@Strawberry.COM>
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  7698] By: jhi                                   on 2000/11/15  03:50:56
+        Log: Add few missing #undefs and sort them.
+     Branch: perl
+	   ! fakesdio.h
+____________________________________________________________________________
+[  7697] By: jhi                                   on 2000/11/15  03:39:14
+        Log: Linenumber fix.
+     Branch: perl
+	   ! t/pragma/warn/utf8
+____________________________________________________________________________
+[  7696] By: jhi                                   on 2000/11/15  02:55:26
+        Log: EBCDIC tweaks.
+             
+             Subject: [PATCH: perl@7674 ++] fixes for warnings and regmesg (reprise)
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 14 Nov 2000 17:05:11 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10011141653510.106218-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/op/regmesg.t t/pragma/warn/utf8
+____________________________________________________________________________
+[  7695] By: jhi                                   on 2000/11/15  02:53:58
+        Log: Subject: [PATCH: perl@7674 + Scott-Thoennes] hush warnings about malformed EBCDIC text
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 14 Nov 2000 15:09:41 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10011141500260.106218-100000@aspara.forte.com>
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  7694] By: jhi                                   on 2000/11/15  02:50:55
+        Log: Subject: [PATCH: perl@7674] updates to README.os390
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Tue, 14 Nov 2000 09:20:20 -0800 (PST)
+             Message-ID: <Pine.BSF.4.21.0011140913370.15162-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! README.os390
+____________________________________________________________________________
+[  7693] By: jhi                                   on 2000/11/15  02:48:37
+        Log: Quit utf8_to_uv() instantly if curlen == 0.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  7692] By: jhi                                   on 2000/11/15  02:24:29
+        Log: Use u_int32_t for the size of hash_cb(), not size_t.
+             
+             Subject: [ID 20001114.003] Solaris 8, 64 Bit DB_file patch
+             From: Jens Hamisch <jens@Strawberry.COM>     
+             Date: Tue, 14 Nov 2000 19:03:55 +0100
+             Message-Id: <20001114190355.A20559@Strawberry.COM>
+     Branch: perl
+	   ! ext/DB_File/DB_File.xs
+____________________________________________________________________________
+[  7691] By: jhi                                   on 2000/11/15  02:20:12
+        Log: Use UINT64_C().
+             
+             Subject: [ID 20001114.006] 5.7.0-7680 Solaris 8, 64 bit, utf8 patch
+             From: Jens Hamisch <jens@Strawberry.COM>
+             Date: Tue, 14 Nov 2000 19:16:23 +0100
+             Message-Id: <20001114191623.G20559@Strawberry.COM>
+     Branch: perl
+	   ! utf8.c utf8.h
+____________________________________________________________________________
+[  7690] By: jhi                                   on 2000/11/15  02:17:06
+        Log: Defined INT64_C() and UINT64_C() unless defined by <inttypes.h>
+             (a macro to define signed and unsigned integer constants).
+     Branch: perl
+	   ! handy.h
+____________________________________________________________________________
+[  7689] By: jhi                                   on 2000/11/15  01:56:51
+        Log: Regen Configure.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  7685] By: jhi                                   on 2000/11/14  17:54:56
+        Log: Integrate perlio.
+     Branch: perl
+	  +> fakesdio.h perliol.h
+	  !> MANIFEST iperlsys.h nostdio.h perl.c perlio.c perlio.h
+	  !> perlsdio.h perlsfio.h pod/perlfunc.pod
+____________________________________________________________________________
+[  7683] By: jhi                                   on 2000/11/14  15:42:40
+        Log: Hoist the duplicated socket/netdb include logic to perl.h;
+             undef SETERRNO in case SOCKS has defined it.  Based on:
+             
+             Subject: [ID 20001114.002] Code-Cleanups concerning SOCKS5 and Solaris   
+             From: Jens Hamisch <jens@Strawberry.COM> 
+             Date: Tue, 14 Nov 2000 11:34:40 +0100
+             Message-Id: <20001114113440.A20005@Strawberry.COM>
+     Branch: perl
+	   ! doio.c perl.h pp_sys.c
+____________________________________________________________________________
+[  7682] By: jhi                                   on 2000/11/14  14:07:28
+        Log: Subject: some additions for makefiles for win32 (for perl@7674)
+             From: "Konovalov, Vadim" <vkonovalov@lucent.com>
+             Date: Tue, 14 Nov 2000 09:31:13 +0300
+             Message-ID: <402099F49BEED211999700805FC7359F8254FC@ru0028exch01.spb.lucent.com>
+     Branch: perl
+	   ! win32/Makefile win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  7681] By: jhi                                   on 2000/11/14  14:01:41
+        Log: Subject: tiny typo in perl5db.pl
+             From: "Konovalov, Vadim" <vkonovalov@lucent.com>
+             Date: Tue, 14 Nov 2000 09:29:28 +0300
+             Message-ID: <402099F49BEED211999700805FC7359F8254F7@ru0028exch01.spb.lucent.com>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[  7680] By: jhi                                   on 2000/11/14  04:13:50
+        Log: Redo #7679 with LFs instead of CRLFs.
+     Branch: perl
+	   ! ext/SDBM_File/Makefile.PL lib/ExtUtils/MM_Unix.pm makedef.pl
+	   ! perlio.c win32/Makefile win32/bin/mdelete.bat win32/config.gc
+	   ! win32/config.vc win32/win32.c win32/win32.h win32/win32sck.c
+____________________________________________________________________________
+[  7679] By: jhi                                   on 2000/11/14  01:21:09
+        Log: Subject: [PATCH perl@7638] Get PerlIO building on Win32
+             From: Benjamin Stuhl <tiriath@yahoo.com> 
+             Date: Mon, 13 Nov 2000 15:08:08 -0800 (PST)
+             Message-ID: <20001113230808.18659.qmail@web6305.mail.yahoo.com>
+     Branch: perl
+	   + win32/bin/mdelete.bat
+	   ! MANIFEST ext/SDBM_File/Makefile.PL lib/ExtUtils/MM_Unix.pm
+	   ! makedef.pl perlio.c win32/Makefile win32/config.gc
+	   ! win32/config.vc win32/win32.c win32/win32.h win32/win32sck.c
+____________________________________________________________________________
+[  7678] By: jhi                                   on 2000/11/14  01:19:20
+        Log: Fix the re extension building for Win32.
+             
+             Subject: [PATCH perl@7638] Get PerlIO building on Win32
+             From: Benjamin Stuhl <tiriath@yahoo.com> 
+             Date: Mon, 13 Nov 2000 15:08:08 -0800 (PST)
+             Message-ID: <20001113230808.18659.qmail@web6305.mail.yahoo.com>
+     Branch: perl
+	   + ext/re/hints/MSWin32.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[  7677] By: jhi                                   on 2000/11/14  01:13:54
+        Log: Subject: [ID 20001113.003] utf8_to_uv on malformed utf returns wrong values
+             From: sthoenna@efn.org
+             Date: Mon, 13 Nov 2000 14:49:40 -0800 (PST)
+             Message-Id: <200011132249.eADMnek09679@garcia.efn.org>
+     Branch: perl
+	   ! doop.c pp.c toke.c utf8.c utf8.h
+____________________________________________________________________________
+[  7676] By: jhi                                   on 2000/11/13  20:23:15
+        Log: Subject: Re: [ID 20001112.008] perlio.c's PerlIO_getpos ingores error return
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 13 Nov 2000 18:55:04 +0000
+             Message-ID: <20001113185504.J29183@plum.flirble.org>
+     Branch: perl
+	   ! ext/IO/lib/IO/Handle.pm ext/IO/lib/IO/Seekable.pm
+____________________________________________________________________________
+[  7674] By: jhi                                   on 2000/11/13  15:07:56
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7673] By: jhi                                   on 2000/11/13  14:42:42
         Log: Remove the new two tests of lib/io_xs for now, they seem to
              fail under perlio on some platforms.
