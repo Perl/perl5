@@ -2516,6 +2516,7 @@ yylex()
 		if (hints & HINT_STRICT_SUBS &&
 		    lastchar != '-' &&
 		    strnNE(s,"->",2) &&
+		    last_lop_op != OP_TRUNCATE &&  /* S/F prototype in opcode.pl */
 		    last_lop_op != OP_ACCEPT &&
 		    last_lop_op != OP_PIPE_OP &&
 		    last_lop_op != OP_SOCKPAIR)
