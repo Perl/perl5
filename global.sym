@@ -470,6 +470,7 @@ Perl_swash_init
 Perl_swash_fetch
 Perl_taint_env
 Perl_taint_proper
+Perl_to_utf8_case
 Perl_to_utf8_lower
 Perl_to_utf8_upper
 Perl_to_utf8_title

@@ -1,59 +1,93 @@
 #!./perl
 
-print "1..40\n";
+print "1..42\n";
+
+my $test = 1;
+
+sub ok {
+    if ($_[0]) {
+	if ($_[1]) {
+	    print "ok $test - $_[1]\n";
+	} else {
+	    print "ok $test\n";
+	}
+    } else {
+	if ($_[1]) {
+	    print "not ok $test - $_[1]\n";
+	} else {
+	    print "not ok $test\n";
+	}
+    }
+    $test++;
+}
 
 $a = "HELLO.* world";
 $b = "hello.* WORLD";
 
-print "ok 1\n"  if "\Q$a\E."      eq "HELLO\\.\\*\\ world.";
-print "ok 2\n"  if "\u$a"         eq "HELLO\.\* world";
-print "ok 3\n"  if "\l$a"         eq "hELLO\.\* world";
-print "ok 4\n"  if "\U$a"         eq "HELLO\.\* WORLD";
-print "ok 5\n"  if "\L$a"         eq "hello\.\* world";
+ok("\Q$a\E."      eq "HELLO\\.\\*\\ world.", '\Q\E HELLO.* world');
+ok("\u$a"         eq "HELLO\.\* world",      '\u');
+ok("\l$a"         eq "hELLO\.\* world",      '\l');
+ok("\U$a"         eq "HELLO\.\* WORLD",      '\U');
+ok("\L$a"         eq "hello\.\* world",      '\L');
 
-print "ok 6\n"  if quotemeta($a)  eq "HELLO\\.\\*\\ world";
-print "ok 7\n"  if ucfirst($a)    eq "HELLO\.\* world";
-print "ok 8\n"  if lcfirst($a)    eq "hELLO\.\* world";
-print "ok 9\n"  if uc($a)         eq "HELLO\.\* WORLD";
-print "ok 10\n" if lc($a)         eq "hello\.\* world";
+ok(quotemeta($a)  eq "HELLO\\.\\*\\ world",  'quotemeta');
+ok(ucfirst($a)    eq "HELLO\.\* world",      'ucfirst');
+ok(lcfirst($a)    eq "hELLO\.\* world",      'lcfirst');
+ok(uc($a)         eq "HELLO\.\* WORLD",      'uc');
+ok(lc($a)         eq "hello\.\* world",      'lc');
 
-print "ok 11\n"  if "\Q$b\E."     eq "hello\\.\\*\\ WORLD.";
-print "ok 12\n"  if "\u$b"        eq "Hello\.\* WORLD";
-print "ok 13\n"  if "\l$b"        eq "hello\.\* WORLD";
-print "ok 14\n"  if "\U$b"        eq "HELLO\.\* WORLD";
-print "ok 15\n"  if "\L$b"        eq "hello\.\* world";
+ok("\Q$b\E."      eq "hello\\.\\*\\ WORLD.", '\Q\E hello.* WORLD');
+ok("\u$b"         eq "Hello\.\* WORLD",      '\u');
+ok("\l$b"         eq "hello\.\* WORLD",      '\l');
+ok("\U$b"         eq "HELLO\.\* WORLD",      '\U');
+ok("\L$b"         eq "hello\.\* world",      '\L');
 
-print "ok 16\n"  if quotemeta($b) eq "hello\\.\\*\\ WORLD";
-print "ok 17\n"  if ucfirst($b)   eq "Hello\.\* WORLD";
-print "ok 18\n"  if lcfirst($b)   eq "hello\.\* WORLD";
-print "ok 19\n"  if uc($b)        eq "HELLO\.\* WORLD";
-print "ok 20\n"  if lc($b)        eq "hello\.\* world";
+ok(quotemeta($b)  eq "hello\\.\\*\\ WORLD",  'quotemeta');
+ok(ucfirst($b)    eq "Hello\.\* WORLD",      'ucfirst');
+ok(lcfirst($b)    eq "hello\.\* WORLD",      'lcfirst');
+ok(uc($b)         eq "HELLO\.\* WORLD",      'uc');
+ok(lc($b)         eq "hello\.\* world",      'lc');
+
+# \x{100} is LATIN CAPITAL LETTER A WITH MACRON; its bijective lowercase is
+# \x{100}, LATIN SMALL LETTER A WITH MACRON.
 
 $a = "\x{100}\x{101}\x{41}\x{61}";
 $b = "\x{101}\x{100}\x{61}\x{41}";
 
-print "ok 21\n" if "\Q$a\E."      eq "\x{100}\x{101}\x{41}\x{61}.";
-print "ok 22\n" if "\u$a"         eq "\x{100}\x{101}\x{41}\x{61}";
-print "ok 23\n" if "\l$a"         eq "\x{101}\x{101}\x{41}\x{61}";
-print "ok 24\n" if "\U$a"         eq "\x{100}\x{100}\x{41}\x{41}";
-print "ok 25\n" if "\L$a"         eq "\x{101}\x{101}\x{61}\x{61}";
+ok("\Q$a\E."      eq "\x{100}\x{101}\x{41}\x{61}.", '\Q\E \x{100}\x{101}\x{41}\x{61}');
+ok("\u$a"         eq "\x{100}\x{101}\x{41}\x{61}",  '\u');
+ok("\l$a"         eq "\x{101}\x{101}\x{41}\x{61}",  '\l');
+ok("\U$a"         eq "\x{100}\x{100}\x{41}\x{41}",  '\U');
+ok("\L$a"         eq "\x{101}\x{101}\x{61}\x{61}",  '\L');
 
-print "ok 26\n" if quotemeta($a)  eq "\x{100}\x{101}\x{41}\x{61}";
-print "ok 27\n" if ucfirst($a)    eq "\x{100}\x{101}\x{41}\x{61}";
-print "ok 28\n" if lcfirst($a)    eq "\x{101}\x{101}\x{41}\x{61}";
-print "ok 29\n" if uc($a)         eq "\x{100}\x{100}\x{41}\x{41}";
-print "ok 30\n" if lc($a)         eq "\x{101}\x{101}\x{61}\x{61}";
+ok(quotemeta($a)  eq "\x{100}\x{101}\x{41}\x{61}",  'quotemeta');
+ok(ucfirst($a)    eq "\x{100}\x{101}\x{41}\x{61}",  'ucfirst');
+ok(lcfirst($a)    eq "\x{101}\x{101}\x{41}\x{61}",  'lcfirst');
+ok(uc($a)         eq "\x{100}\x{100}\x{41}\x{41}",  'uc');
+ok(lc($a)         eq "\x{101}\x{101}\x{61}\x{61}",  'lc');
 
-print "ok 31\n" if "\Q$b\E."      eq "\x{101}\x{100}\x{61}\x{41}.";
-print "ok 32\n" if "\u$b"         eq "\x{100}\x{100}\x{61}\x{41}";
-print "ok 33\n" if "\l$b"         eq "\x{101}\x{100}\x{61}\x{41}";
-print "ok 34\n" if "\U$b"         eq "\x{100}\x{100}\x{41}\x{41}";
-print "ok 35\n" if "\L$b"         eq "\x{101}\x{101}\x{61}\x{61}";
+ok("\Q$b\E."      eq "\x{101}\x{100}\x{61}\x{41}.", '\Q\E \x{101}\x{100}\x{61}\x{41}');
+ok("\u$b"         eq "\x{100}\x{100}\x{61}\x{41}",  '\u');
+ok("\l$b"         eq "\x{101}\x{100}\x{61}\x{41}",  '\l');
+ok("\U$b"         eq "\x{100}\x{100}\x{41}\x{41}",  '\U');
+ok("\L$b"         eq "\x{101}\x{101}\x{61}\x{61}",  '\L');
 
-print "ok 36\n"  if quotemeta($b) eq "\x{101}\x{100}\x{61}\x{41}";
-print "ok 37\n"  if ucfirst($b)   eq "\x{100}\x{100}\x{61}\x{41}";
-print "ok 38\n"  if lcfirst($b)   eq "\x{101}\x{100}\x{61}\x{41}";
-print "ok 39\n"  if uc($b)        eq "\x{100}\x{100}\x{41}\x{41}";
-print "ok 40\n"  if lc($b)        eq "\x{101}\x{101}\x{61}\x{61}";
+ok(quotemeta($b)  eq "\x{101}\x{100}\x{61}\x{41}",  'quotemeta');
+ok(ucfirst($b)    eq "\x{100}\x{100}\x{61}\x{41}",  'ucfirst');
+ok(lcfirst($b)    eq "\x{101}\x{100}\x{61}\x{41}",  'lcfirst');
+ok(uc($b)         eq "\x{100}\x{100}\x{41}\x{41}",  'uc');
+ok(lc($b)         eq "\x{101}\x{101}\x{61}\x{61}",  'lc');
 
+# \x{DF} is LATIN SMALL LETTER SHARP S, its uppercase is SS or \x{53}\x{53};
+# \x{149} is LATIN SMALL LETTER N PRECEDED BY APOSTROPHE, its uppercase is
+# \x{2BC}\x{E4} or MODIFIER LETTER APOSTROPHE and N.
+
+ok("\U\x{DF}ab\x{149}cd" eq "\x{53}\x{53}AB\x{2BC}\x{4E}CD",
+   "multicharacter uppercase");
+
+# The \x{DF} is its own lowercase, ditto for \x{149}.
+# There are no single character -> multiple characters lowercase mappings.
+
+ok("\L\x{DF}AB\x{149}CD" eq "\x{DF}ab\x{149}cd",
+   "multicharacter lowercase");
 

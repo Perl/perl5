@@ -1181,45 +1181,63 @@ Perl_is_utf8_mark(pTHX_ U8 *p)
 }
 
 UV
-Perl_to_utf8_upper(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
+Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal, char *special)
 {
     UV uv;
 
-    if (!PL_utf8_toupper)
-	PL_utf8_toupper = swash_init("utf8", "ToUpper", &PL_sv_undef, 4, 0);
-    uv = swash_fetch(PL_utf8_toupper, p, TRUE);
-    uv = uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p, 0);
+    if (!*swashp)
+        *swashp = swash_init("utf8", normal, &PL_sv_undef, 4, 0);
+    uv = swash_fetch(*swashp, p, TRUE);
+    if (uv)
+	 uv = UNI_TO_NATIVE(uv);
+    else {
+	 HV *hv;
+	 SV *keysv;
+	 HE *he;
+
+	 uv = utf8_to_uvchr(p, 0);
+
+	 if ((hv    = get_hv(special, FALSE)) &&
+	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%"UVuf, uv))) &&
+	     (he    = hv_fetch_ent(hv, keysv, FALSE, 0))) {
+	      SV *val = HeVAL(he);
+	      char *s = SvPV(val, *lenp);
+	      U8 c = *(U8*)s;
+	      if (*lenp > 1 || UNI_IS_INVARIANT(c))
+		   Copy(s, ustrp, *lenp, U8);
+	      else {
+		   /* something in the 0x80..0xFF range */
+		   ustrp[0] = UTF8_EIGHT_BIT_HI(c);
+		   ustrp[1] = UTF8_EIGHT_BIT_LO(c);
+		   *lenp = 2;
+	      }
+	      return 0;
+	 }
+    }
     *lenp = UNISKIP(uv);
     uvuni_to_utf8(ustrp, uv);
     return uv;
+}
+
+UV
+Perl_to_utf8_upper(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
+{
+    return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
+			     &PL_utf8_toupper, "ToUpper", "utf8::ToSpecUpper");
 }
 
 UV
 Perl_to_utf8_title(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 {
-    UV uv;
-
-    if (!PL_utf8_totitle)
-	PL_utf8_totitle = swash_init("utf8", "ToTitle", &PL_sv_undef, 4, 0);
-    uv = swash_fetch(PL_utf8_totitle, p, TRUE);
-    uv = uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p, 0);
-    *lenp = UNISKIP(uv);
-    uvuni_to_utf8(ustrp, uv);
-    return uv;
+    return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
+			     &PL_utf8_totitle, "ToTitle", "utf8::ToSpecTitle");
 }
 
 UV
 Perl_to_utf8_lower(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 {
-    UV uv;
-
-    if (!PL_utf8_tolower)
-	PL_utf8_tolower = swash_init("utf8", "ToLower", &PL_sv_undef, 4, 0);
-    uv = swash_fetch(PL_utf8_tolower, p, TRUE);
-    uv = uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p, 0);
-    *lenp = UNISKIP(uv);
-    uvuni_to_utf8(ustrp, uv);
-    return uv;
+    return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
+			     &PL_utf8_tolower, "ToLower", "utf8::ToSpecLower");
 }
 
 /* a "swash" is a swatch hash */

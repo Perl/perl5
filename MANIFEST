@@ -1604,9 +1604,6 @@ lib/unicore/Scripts.txt		Unicode character database
 lib/unicore/SpecCase.txt	Unicode character database
 lib/unicore/To/Digit.pl		Unicode character database
 lib/unicore/To/Lower.pl		Unicode character database
-lib/unicore/To/SpecLower.pl	Unicode character database
-lib/unicore/To/SpecTitle.pl	Unicode character database
-lib/unicore/To/SpecUpper.pl	Unicode character database
 lib/unicore/To/Title.pl		Unicode character database
 lib/unicore/To/Upper.pl		Unicode character database
 lib/unicore/UCD.html		Unicode character database

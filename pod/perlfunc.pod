@@ -2330,7 +2330,7 @@ C<redo> work.
 Returns an lowercased version of EXPR.  This is the internal function
 implementing the C<\L> escape in double-quoted strings.  Respects
 current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>
-and L<perlunicode>.
+and L<perlunicode> for more details about locale and Unicode support.
 
 If EXPR is omitted, uses C<$_>.
 
@@ -2341,7 +2341,8 @@ If EXPR is omitted, uses C<$_>.
 Returns the value of EXPR with the first character lowercased.  This
 is the internal function implementing the C<\l> escape in
 double-quoted strings.  Respects current LC_CTYPE locale if C<use
-locale> in force.  See L<perllocale> and L<perlunicode>.
+locale> in force.  See L<perllocale> and L<perlunicode> for more
+details about locale and Unicode support.
 
 If EXPR is omitted, uses C<$_>.
 
@@ -5464,8 +5465,9 @@ otherwise.
 Returns an uppercased version of EXPR.  This is the internal function
 implementing the C<\U> escape in double-quoted strings.  Respects
 current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>
-and L<perlunicode>.  It does not attempt to do titlecase mapping on
-initial letters.  See C<ucfirst> for that.
+and L<perlunicode> for more details about locale and Unicode support.
+It does not attempt to do titlecase mapping on initial letters.  See
+C<ucfirst> for that.
 
 If EXPR is omitted, uses C<$_>.
 
@@ -5476,7 +5478,8 @@ If EXPR is omitted, uses C<$_>.
 Returns the value of EXPR with the first character in uppercase
 (titlecase in Unicode).  This is the internal function implementing
 the C<\u> escape in double-quoted strings.  Respects current LC_CTYPE
-locale if C<use locale> in force.  See L<perllocale> and L<perlunicode>.
+locale if C<use locale> in force.  See L<perllocale> and L<perlunicode>
+for more details about locale and Unicode support.
 
 If EXPR is omitted, uses C<$_>.
 
