@@ -21,10 +21,10 @@ av_reify(AV *av)
     I32 key;
     SV* sv;
 
-    if (AvREAL(av))                           
-	return;          
+    if (AvREAL(av))
+	return;
 #ifdef DEBUGGING
-    if (SvRMAGICAL(av) && mg_find((SV*)av,'P')) 
+    if (SvRMAGICAL(av) && mg_find((SV*)av,'P'))
 	warn("av_reify called on tied array");
 #endif
     key = AvMAX(av) + 1;

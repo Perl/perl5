@@ -443,11 +443,11 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 
 	    len = namend - name;
 	    if (len > 0) {
+		char smallbuf[256];
 		char *tmpbuf;
-		char autobuf[64];
 
-		if (len < sizeof(autobuf) - 2)
-		    tmpbuf = autobuf;
+		if (len + 3 < sizeof smallbuf)
+		    tmpbuf = smallbuf;
 		else
 		    New(601, tmpbuf, len+3, char);
 		Copy(name, tmpbuf, len, char);
@@ -462,7 +462,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		    else
 			GvMULTI_on(gv);
 		}
-		if (tmpbuf != autobuf)
+		if (tmpbuf != smallbuf)
 		    Safefree(tmpbuf);
 		if (!gv || gv == (GV*)&sv_undef)
 		    return Nullgv;

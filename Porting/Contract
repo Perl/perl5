@@ -1,3 +1,4 @@
+
                      Contributed Modules in Perl Core
                  A Social Contract about Artistic Control
 
@@ -101,3 +102,7 @@ should be open communication, respect for opposing views, and an attempt
 at a compromise.  In nearly every circumstance nothing more will be
 necessary, and certainly no more drastic measure should be used until
 every avenue of communication and discussion has failed.
+
+-- 
+Version 1.2.  By Russ Allbery (rra@stanford.edu) and the perl5-porters.
+

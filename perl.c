@@ -696,7 +696,7 @@ setuid perl scripts securely.\n");
 	    if (euid != uid || egid != gid)
 		croak("No -e allowed in setuid scripts");
 	    if (!e_script) {
-	        e_script = newSVpv("",0);
+		e_script = newSVpv("",0);
 		filter_add(read_e_script, NULL);
 	    }
 	    if (*++s)
