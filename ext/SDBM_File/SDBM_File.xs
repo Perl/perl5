@@ -119,7 +119,7 @@ sdbm_FIRSTKEY(db)
 datum_key
 sdbm_NEXTKEY(db, key)
 	SDBM_File	db
-	datum_key	key
+	datum_key	key = NO_INIT
 
 int
 sdbm_error(db)

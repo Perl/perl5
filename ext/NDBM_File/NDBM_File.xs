@@ -107,7 +107,7 @@ ndbm_FIRSTKEY(db)
 datum_key
 ndbm_NEXTKEY(db, key)
 	NDBM_File	db
-	datum_key	key
+	datum_key	key = NO_INIT
 
 #define ndbm_error(db)				dbm_error(db->dbp)
 int

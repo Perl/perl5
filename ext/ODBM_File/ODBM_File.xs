@@ -53,6 +53,7 @@ typedef struct {
 
 typedef ODBM_File_type * ODBM_File ;
 typedef datum datum_key ;
+typedef datum datum_key_copy ;
 typedef datum datum_value ;
 
 #define ckFilter(arg,type,name)					\
@@ -133,7 +134,7 @@ DESTROY(db)
 datum_value
 odbm_FETCH(db, key)
 	ODBM_File	db
-	datum_key	key
+	datum_key_copy	key
 
 int
 odbm_STORE(db, key, value, flags = DBM_REPLACE)

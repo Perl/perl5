@@ -17,6 +17,7 @@ typedef struct {
 typedef GDBM_File_type * GDBM_File ;
 typedef datum datum_key ;
 typedef datum datum_value ;
+typedef datum datum_key_copy;
 
 #define ckFilter(arg,type,name)					\
 	if (db->type) {						\
@@ -122,7 +123,7 @@ gdbm_DESTROY(db)
 datum_value
 gdbm_FETCH(db, key)
 	GDBM_File	db
-	datum_key	key
+	datum_key_copy	key
 
 #define gdbm_STORE(db,key,value,flags)		gdbm_store(db->dbp,key,value,flags)
 int
@@ -154,7 +155,7 @@ gdbm_FIRSTKEY(db)
 datum_key
 gdbm_NEXTKEY(db, key)
 	GDBM_File	db
-	datum_key	key
+	datum_key	key 
 
 #define gdbm_reorganize(db)			gdbm_reorganize(db->dbp)
 int
