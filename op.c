@@ -1118,6 +1118,12 @@ Perl_scalarvoid(pTHX_ OP *o)
 		if (SvNIOK(sv) && (SvNV(sv) == 0.0 || SvNV(sv) == 1.0))
 		    useless = 0;
 		else if (SvPOK(sv)) {
+                  /* perl4's way of mixing documentation and code
+                     (before the invention of POD) was based on a
+                     trick to mix nroff and perl code. The trick was
+                     built upon these three nroff macros being used in
+                     void context. The pink camel has the details in
+                     the script wrapman near page 319. */
 		    if (strnEQ(SvPVX(sv), "di", 2) ||
 			strnEQ(SvPVX(sv), "ds", 2) ||
 			strnEQ(SvPVX(sv), "ig", 2))
