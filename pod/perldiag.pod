@@ -2928,6 +2928,18 @@ Perl guesses a reasonable buffer size, but puts a sentinel byte at the
 end of the buffer just in case.  This sentinel byte got clobbered, and
 Perl assumes that memory is now corrupted.  See L<perlfunc/ioctl>.
 
+=item Possible precedence problem on bitwise %c operator
+
+(W precedence) Your program uses a bitwise logical operator in conjunction
+with a numeric comparison operator, like this :
+
+    if ($x & $y == 0) { ... }
+
+This expression is actually equivalent to C<$x & ($y == 0)>, due to the
+higher precedence of C<==>. This is probably not what you want. (If you
+really meant to write this, disable the warning, or, better, write
+C<$x & ($y == 0 ? 1 : 0)>).
+
 =item Possible unintended interpolation of %s in string
 
 (W ambiguous) You said something like `@foo' in a double-quoted string

@@ -110,6 +110,8 @@
 
     Use of /g modifier is meaningless in split
 
+    Possible precedence problem on bitwise %c operator	[Perl_ck_bitop]
+
     Mandatory Warnings 
     ------------------
     Prototype mismatch:		[cv_ckproto]
@@ -121,7 +123,6 @@
     oops: oopsAV		[oopsAV]	TODO
     oops: oopsHV		[oopsHV]	TODO
     
-
 __END__
 # op.c
 use warnings 'misc' ;
@@ -971,3 +972,56 @@ no warnings 'regexp';
 split /blah/g, "blah";
 EXPECT
 Use of /g modifier is meaningless in split at - line 4.
+########
+# op.c
+use warnings 'precedence';
+$a = $b & $c == $d;
+$a = $b ^ $c != $d;
+$a = $b | $c > $d;
+$a = $b < $c & $d;
+$a = $b >= $c ^ $d;
+$a = $b <= $c | $d;
+$a = $b <=> $c & $d;
+no warnings 'precedence';
+$a = $b & $c == $d;
+$a = $b ^ $c != $d;
+$a = $b | $c > $d;
+$a = $b < $c & $d;
+$a = $b >= $c ^ $d;
+$a = $b <= $c | $d;
+$a = $b <=> $c & $d;
+EXPECT
+Possible precedence problem on bitwise & operator at - line 3.
+Possible precedence problem on bitwise ^ operator at - line 4.
+Possible precedence problem on bitwise | operator at - line 5.
+Possible precedence problem on bitwise & operator at - line 6.
+Possible precedence problem on bitwise ^ operator at - line 7.
+Possible precedence problem on bitwise | operator at - line 8.
+Possible precedence problem on bitwise & operator at - line 9.
+########
+# op.c
+use integer;
+use warnings 'precedence';
+$a = $b & $c == $d;
+$a = $b ^ $c != $d;
+$a = $b | $c > $d;
+$a = $b < $c & $d;
+$a = $b >= $c ^ $d;
+$a = $b <= $c | $d;
+$a = $b <=> $c & $d;
+no warnings 'precedence';
+$a = $b & $c == $d;
+$a = $b ^ $c != $d;
+$a = $b | $c > $d;
+$a = $b < $c & $d;
+$a = $b >= $c ^ $d;
+$a = $b <= $c | $d;
+$a = $b <=> $c & $d;
+EXPECT
+Possible precedence problem on bitwise & operator at - line 4.
+Possible precedence problem on bitwise ^ operator at - line 5.
+Possible precedence problem on bitwise | operator at - line 6.
+Possible precedence problem on bitwise & operator at - line 7.
+Possible precedence problem on bitwise ^ operator at - line 8.
+Possible precedence problem on bitwise | operator at - line 9.
+Possible precedence problem on bitwise & operator at - line 10.

@@ -4737,7 +4737,29 @@ Perl_ck_anoncode(pTHX_ OP *o)
 OP *
 Perl_ck_bitop(pTHX_ OP *o)
 {
+#define OP_IS_NUMCOMPARE(op) \
+	((op) == OP_LT   || (op) == OP_I_LT || \
+	 (op) == OP_GT   || (op) == OP_I_GT || \
+	 (op) == OP_LE   || (op) == OP_I_LE || \
+	 (op) == OP_GE   || (op) == OP_I_GE || \
+	 (op) == OP_EQ   || (op) == OP_I_EQ || \
+	 (op) == OP_NE   || (op) == OP_I_NE || \
+	 (op) == OP_NCMP || (op) == OP_I_NCMP)
     o->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+    if (o->op_type == OP_BIT_OR
+	    || o->op_type == OP_BIT_AND
+	    || o->op_type == OP_BIT_XOR)
+    {
+	OPCODE typfirst = cBINOPo->op_first->op_type;
+	OPCODE typlast  = cBINOPo->op_first->op_sibling->op_type;
+	if (OP_IS_NUMCOMPARE(typfirst) || OP_IS_NUMCOMPARE(typlast))
+	    if (ckWARN(WARN_PRECEDENCE))
+		Perl_warner(aTHX_ packWARN(WARN_PRECEDENCE),
+			"Possible precedence problem on bitwise %c operator",
+			o->op_type == OP_BIT_OR ? '|'
+			    : o->op_type == OP_BIT_AND ? '&' : '^'
+			);
+    }
     return o;
 }
 
