@@ -552,6 +552,7 @@
 #define set_numeric_radix	Perl_set_numeric_radix
 #define set_numeric_standard	Perl_set_numeric_standard
 #define require_pv		Perl_require_pv
+#define pack_cat		Perl_pack_cat
 #define pidgone			Perl_pidgone
 #define pmflag			Perl_pmflag
 #define pmruntime		Perl_pmruntime
@@ -749,6 +750,7 @@
 #if defined(USE_5005THREADS)
 #define unlock_condpair		Perl_unlock_condpair
 #endif
+#define unpack_str		Perl_unpack_str
 #define unsharepvn		Perl_unsharepvn
 #define unshare_hek		Perl_unshare_hek
 #define utilize			Perl_utilize
@@ -995,6 +997,9 @@
 #define mul128			S_mul128
 #define is_an_int		S_is_an_int
 #define div128			S_div128
+#define next_symbol		S_next_symbol
+#define find_count		S_find_count
+#define group_end		S_group_end
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #define docatch			S_docatch
@@ -2099,6 +2104,7 @@
 #define set_numeric_radix()	Perl_set_numeric_radix(aTHX)
 #define set_numeric_standard()	Perl_set_numeric_standard(aTHX)
 #define require_pv(a)		Perl_require_pv(aTHX_ a)
+#define pack_cat(a,b,c,d,e,f,g)	Perl_pack_cat(aTHX_ a,b,c,d,e,f,g)
 #define pidgone(a,b)		Perl_pidgone(aTHX_ a,b)
 #define pmflag(a,b)		Perl_pmflag(aTHX_ a,b)
 #define pmruntime(a,b,c)	Perl_pmruntime(aTHX_ a,b,c)
@@ -2294,6 +2300,7 @@
 #if defined(USE_5005THREADS)
 #define unlock_condpair(a)	Perl_unlock_condpair(aTHX_ a)
 #endif
+#define unpack_str(a,b,c,d,e,f,g,h)	Perl_unpack_str(aTHX_ a,b,c,d,e,f,g,h)
 #define unsharepvn(a,b,c)	Perl_unsharepvn(aTHX_ a,b,c)
 #define unshare_hek(a)		Perl_unshare_hek(aTHX_ a)
 #define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
@@ -2534,6 +2541,9 @@
 #define mul128(a,b)		S_mul128(aTHX_ a,b)
 #define is_an_int(a,b)		S_is_an_int(aTHX_ a,b)
 #define div128(a,b)		S_div128(aTHX_ a,b)
+#define next_symbol(a,b)	S_next_symbol(aTHX_ a,b)
+#define find_count(a,b,c)	S_find_count(aTHX_ a,b,c)
+#define group_end(a,b,c)	S_group_end(aTHX_ a,b,c)
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #define docatch(a)		S_docatch(aTHX_ a)

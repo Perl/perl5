@@ -341,6 +341,7 @@ Perl_set_numeric_local
 Perl_set_numeric_radix
 Perl_set_numeric_standard
 Perl_require_pv
+Perl_pack_cat
 Perl_pmflag
 Perl_pop_scope
 Perl_push_scope
@@ -496,6 +497,7 @@ Perl_to_utf8_title
 Perl_to_utf8_fold
 Perl_unlnk
 Perl_unlock_condpair
+Perl_unpack_str
 Perl_unsharepvn
 Perl_utf16_to_utf8
 Perl_utf16_to_utf8_reversed

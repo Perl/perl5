@@ -572,6 +572,7 @@ Ap	|void	|set_numeric_local
 Ap	|void	|set_numeric_radix
 Ap	|void	|set_numeric_standard
 Apd	|void	|require_pv	|const char* pv
+Apd	|void	|pack_cat	|SV *cat|char *pat|char *patend|SV **beglist|SV **endlist|SV ***next_in_list|U32 flags
 p	|void	|pidgone	|Pid_t pid|int status
 Ap	|void	|pmflag		|U16* pmfl|int ch
 p	|OP*	|pmruntime	|OP* pm|OP* expr|OP* repl
@@ -792,6 +793,7 @@ Ap	|I32	|unlnk		|char* f
 #if defined(USE_5005THREADS)
 Ap	|void	|unlock_condpair|void* svv
 #endif
+Apd	|I32	|unpack_str	|char *pat|char *patend|char *s|char *strbeg|char *strend|char **new_s|I32 ocnt|U32 flags
 Ap	|void	|unsharepvn	|const char* sv|I32 len|U32 hash
 p	|void	|unshare_hek	|HEK* hek
 p	|void	|utilize	|int aver|I32 floor|OP* version|OP* id|OP* arg
@@ -1062,6 +1064,9 @@ s	|void	|doencodes	|SV* sv|char* s|I32 len
 s	|SV*	|mul128		|SV *sv|U8 m
 s	|SV*	|is_an_int	|char *s|STRLEN l
 s	|int	|div128		|SV *pnum|bool *done
+s	|char *	|next_symbol	|char *pat|char *patend
+s	|I32	|find_count	|char **ppat|char *patend|int *star
+s	|char *	|group_end	|char *pat|char *patend|char ender
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)

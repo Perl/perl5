@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 1477;
+plan tests => 1493;
 
 use strict;
 use warnings;
@@ -710,4 +710,42 @@ foreach (
 
     eval { my $t=unpack("P*", "abc") };
     like($@, qr/P must have an explicit size/);
+}
+
+{   # Grouping constructs
+    my (@a, @b);
+    @a = unpack '(SL)',   pack 'SLSLSL', 67..90;
+    is("@a", "67 68");
+    @a = unpack '(SL)3',   pack 'SLSLSL', 67..90;
+    @b = (67..72);
+    is("@a", "@b");
+    @a = unpack '(SL)3',   pack 'SLSLSLSL', 67..90;
+    is("@a", "@b");
+    @a = unpack '(SL)[3]', pack 'SLSLSLSL', 67..90;
+    is("@a", "@b");
+    @a = unpack '(SL)[2] SL', pack 'SLSLSLSL', 67..90;
+    is("@a", "@b");
+    @a = unpack 'A/(SL)',  pack 'ASLSLSLSL', 3, 67..90;
+    is("@a", "@b");
+    @a = unpack 'A/(SL)SL',  pack 'ASLSLSLSL', 2, 67..90;
+    is("@a", "@b");
+    @a = unpack '(SL)*',   pack 'SLSLSLSL', 67..90;
+    @b = (67..74);
+    is("@a", "@b");
+    @a = unpack '(SL)*SL',   pack 'SLSLSLSL', 67..90;
+    is("@a", "@b");
+    eval { @a = unpack '(*SL)',   '' };
+    like($@, qr/\(\)-group starts with a count/);
+    eval { @a = unpack '(3SL)',   '' };
+    like($@, qr/\(\)-group starts with a count/);
+    eval { @a = unpack '([3]SL)',   '' };
+    like($@, qr/\(\)-group starts with a count/);
+    eval { @a = pack '(*SL)' };
+    like($@, qr/\(\)-group starts with a count/);
+    @a = unpack '(SL)3 SL',   pack '(SL)4', 67..74;
+    is("@a", "@b");
+    @a = unpack '(SL)3 SL',   pack '(SL)[4]', 67..74;
+    is("@a", "@b");
+    @a = unpack '(SL)3 SL',   pack '(SL)*', 67..74;
+    is("@a", "@b");
 }

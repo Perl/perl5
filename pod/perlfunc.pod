@@ -3104,9 +3104,8 @@ the converted values.  Typically, each converted value looks
 like its machine-level representation.  For example, on 32-bit machines
 a converted integer may be represented by a sequence of 4 bytes.
 
-The TEMPLATE is a
-sequence of characters that give the order and type of values, as
-follows:
+The TEMPLATE is a sequence of characters that give the order and type
+of values, as follows:
 
     a	A string with arbitrary binary data, will be null padded.
     A	A text (ASCII) string, will be space padded.
@@ -3170,6 +3169,7 @@ follows:
     x	A null byte.
     X	Back up a byte.
     @	Null fill to absolute position.
+    (	Beginning of a ()-group.
 
 The following rules apply:
 
@@ -3183,7 +3183,8 @@ C<H>, and C<P> the pack function will gobble up that many values from
 the LIST.  A C<*> for the repeat count means to use however many items are
 left, except for C<@>, C<x>, C<X>, where it is equivalent
 to C<0>, and C<u>, where it is equivalent to 1 (or 45, what is the
-same).
+same).  A numeric repeat count may optionally be enclosed in brackets, as in
+C<pack 'C[80]', @arr>.
 
 When used with C<Z>, C<*> results in the addition of a trailing null
 byte (so the packed result will be one longer than the byte C<length>
@@ -3397,6 +3398,12 @@ enough C<'x'>es while packing.  There is no way to pack() and unpack()
 could know where the bytes are going to or coming from.  Therefore
 C<pack> (and C<unpack>) handle their output and input as flat
 sequences of bytes.
+
+=item *
+
+A ()-group is a sub-TEMPLATE enclosed in parentheses.  A group may
+take a repeat count, both as postfix, and via the C</> template
+character.
 
 =item *
 

@@ -123,32 +123,102 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #define ISUUCHAR(ch)    (memchr(PL_uuemap, (ch), sizeof(PL_uuemap)-1) || (ch) == ' ')
 #endif
 
+#define UNPACK_ONLY_ONE	0x1
+#define UNPACK_DO_UTF8	0x2
 
-PP(pp_unpack)
+STATIC char *
+S_group_end(pTHX_ register char *pat, register char *patend, char ender)
+{
+    while (pat < patend) {
+	char c = *pat++;
+
+	if (isSPACE(c))
+	    continue;
+	else if (c == ender)
+	    return --pat;
+	else if (c == '#') {
+	    while (pat < patend && *pat != '\n')
+		pat++;
+	    continue;
+	} else if (c == '(')
+	    pat = group_end(pat, patend, ')') + 1;
+    }
+    croak("No group ending character `%c' found", ender);
+}
+
+/* Returns -1 on no count or on star */
+STATIC I32
+S_find_count(pTHX_ char **ppat, register char *patend, int *star)
+{
+    register char *pat = *ppat;
+    I32 len;
+
+    *star = 0;
+    if (pat >= patend)
+	len = 1;
+    else if (*pat == '*') {
+	pat++;
+	*star = 1;
+	len = -1;
+    }
+    else if (isDIGIT(*pat) || *pat == '[') {
+	bool brackets = *pat == '[';
+
+	if (brackets)
+	    ++pat, len = 0;
+	else
+	    len = *pat++ - '0';
+	while (isDIGIT(*pat)) {
+	    len = (len * 10) + (*pat++ - '0');
+	    if (len < 0)
+		croak("Repeat count in unpack overflows");
+	}
+	if (brackets && *pat++ != ']')
+	    croak("No repeat count ender ] found after digits");
+    }
+    else
+	len = *star = -1;
+    *ppat = pat;
+    return len;
+}
+
+STATIC char *
+S_next_symbol(pTHX_ register char *pat, register char *patend)
+{
+    while (pat < patend) {
+	if (isSPACE(*pat))
+	    pat++;
+	else if (*pat == '#') {
+	    pat++;
+	    while (pat < patend && *pat != '\n')
+		pat++;
+	    if (pat < patend)
+		pat++;
+	}
+	else
+	    return pat;
+    }
+    return pat;
+}
+
+
+/*
+=for apidoc unpack_str
+
+The engine implementing unpack() Perl function.
+
+=cut */
+
+I32
+Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *strbeg, char *strend, char **new_s, I32 ocnt, U32 flags)
 {
     dSP;
-    dPOPPOPssrl;
-    I32 start_sp_offset = SP - PL_stack_base;
-    I32 gimme = GIMME_V;
-    SV *sv;
-    STRLEN llen;
-    STRLEN rlen;
-    register char *pat = SvPV(left, llen);
-#ifdef PACKED_IS_OCTETS
-    /* Packed side is assumed to be octets - so force downgrade if it
-       has been UTF-8 encoded by accident
-     */
-    register char *s = SvPVbyte(right, rlen);
-#else
-    register char *s = SvPV(right, rlen);
-#endif
-    char *strend = s + rlen;
-    char *strbeg = s;
-    register char *patend = pat + llen;
     I32 datumtype;
     register I32 len;
     register I32 bits = 0;
     register char *str;
+    SV *sv;
+    I32 start_sp_offset = SP - PL_stack_base;
 
     /* These must not be in registers: */
     short ashort;
@@ -171,26 +241,18 @@ PP(pp_unpack)
     NV cdouble = 0.0;
     const int bits_in_uv = 8 * sizeof(culong);
     int commas = 0;
-    int star;
+    int star;		/* 1 if count is *, -1 if no count given, -2 for / */
 #ifdef PERL_NATINT_PACK
     int natint;		/* native integer */
     int unatint;	/* unsigned native integer */
 #endif
-    bool do_utf8 = DO_UTF8(right);
+    bool do_utf8 = flags & UNPACK_DO_UTF8;
 
-    while (pat < patend) {
-      reparse:
+    while ((pat = next_symbol(pat, patend)) < patend) {
 	datumtype = *pat++ & 0xFF;
 #ifdef PERL_NATINT_PACK
 	natint = 0;
 #endif
-	if (isSPACE(datumtype))
-	    continue;
-	if (datumtype == '#') {
-	    while (pat < patend && *pat != '\n')
-		pat++;
-	    continue;
-	}
 	if (*pat == '!') {
 	    char *natstr = "sSiIlL";
 
@@ -201,69 +263,83 @@ PP(pp_unpack)
 		pat++;
 	    }
 	    else
-		DIE(aTHX_ "'!' allowed only after types %s", natstr);
+		croak("'!' allowed only after types %s", natstr);
 	}
-	star = 0;
-	if (pat >= patend)
-	    len = 1;
-	else if (*pat == '*') {
-	    len = strend - strbeg;	/* long enough */
-	    pat++;
-	    star = 1;
-	}
-	else if (isDIGIT(*pat)) {
-	    len = *pat++ - '0';
-	    while (isDIGIT(*pat)) {
-		len = (len * 10) + (*pat++ - '0');
-		if (len < 0)
-		    DIE(aTHX_ "Repeat count in unpack overflows");
-	    }
-	}
-	else
-	    len = (datumtype != '@');
+	len = find_count(&pat, patend, &star);
+	if (star > 0)
+		len = strend - strbeg;	/* long enough */
+	else if (star < 0)		/* No explicit len */
+		len = datumtype != '@';	    
+
       redo_switch:
 	switch(datumtype) {
 	default:
-	    DIE(aTHX_ "Invalid type in unpack: '%c'", (int)datumtype);
+	    croak("Invalid type in unpack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_UNPACK))
 		Perl_warner(aTHX_ WARN_UNPACK,
 			    "Invalid type in unpack: '%c'", (int)datumtype);
 	    break;
 	case '%':
-	    if (len == 1 && pat[-1] != '1')
-		len = 16;
+	    if (len == 1 && pat[-1] != '1' && pat[-1] != ']')
+		len = 16;		/* len is not specified */
 	    checksum = len;
 	    culong = 0;
 	    cdouble = 0;
-	    if (pat < patend)
-		goto reparse;
+	    continue;
 	    break;
+	case '(':
+	{
+	    char *beg = pat;
+	    char *ss = s;		/* Move from register */
+
+	    if (star >= 0)
+		croak("()-group starts with a count");
+	    aptr = group_end(beg, patend, ')');
+	    pat = aptr + 1;
+	    if (star != -2) {
+		len = find_count(&pat, patend, &star);
+		if (star < 0)		/* No count */
+		    len = 1;
+		else if (star > 0)	/* Star */
+		    len = strend - strbeg; /* long enough? */
+	    }
+	    PUTBACK;
+	    while (len--) {
+		unpack_str(beg, aptr, ss, strbeg, strend, &ss,
+			   ocnt + SP - PL_stack_base - start_sp_offset, flags);
+		if (star > 0 && ss == strend)
+		    break;		/* No way to continue */
+	    }
+	    SPAGAIN;
+	    s = ss;
+	    break;
+	}
 	case '@':
 	    if (len > strend - strbeg)
-		DIE(aTHX_ "@ outside of string");
+		croak("@ outside of string");
 	    s = strbeg + len;
 	    break;
 	case 'X':
 	    if (len > s - strbeg)
-		DIE(aTHX_ "X outside of string");
+		croak("X outside of string");
 	    s -= len;
 	    break;
 	case 'x':
 	    if (len > strend - s)
-		DIE(aTHX_ "x outside of string");
+		croak("x outside of string");
 	    s += len;
 	    break;
 	case '/':
-	    if (start_sp_offset >= SP - PL_stack_base)
-		DIE(aTHX_ "/ must follow a numeric type");
+	    if (ocnt + SP - PL_stack_base - start_sp_offset <= 0)
+		croak("/ must follow a numeric type");
 	    datumtype = *pat++;
 	    if (*pat == '*')
 		pat++;		/* ignore '*' for compatibility with pack */
 	    if (isDIGIT(*pat))
-		DIE(aTHX_ "/ cannot take a count" );
+		croak("/ cannot take a count" );
 	    len = POPi;
-	    star = 0;
+	    star = -2;
 	    goto redo_switch;
 	case 'A':
 	case 'Z':
@@ -280,7 +356,7 @@ PP(pp_unpack)
 		    s = SvPVX(sv);
 		    while (*s)
 			s++;
-		    if (star) /* exact for 'Z*' */
+		    if (star > 0) /* exact for 'Z*' */
 		        len = s - SvPVX(sv) + 1;
 		}
 		else {		/* 'A' strips both nulls and spaces */
@@ -297,7 +373,7 @@ PP(pp_unpack)
 	    break;
 	case 'B':
 	case 'b':
-	    if (star || len > (strend - s) * 8)
+	    if (star > 0 || len > (strend - s) * 8)
 		len = (strend - s) * 8;
 	    if (checksum) {
 		if (!PL_bitcount) {
@@ -363,7 +439,7 @@ PP(pp_unpack)
 	    break;
 	case 'H':
 	case 'h':
-	    if (star || len > (strend - s) * 2)
+	    if (star > 0 || len > (strend - s) * 2)
 		len = (strend - s) * 2;
 	    sv = NEWSV(35, len + 1);
 	    SvCUR_set(sv, len);
@@ -926,12 +1002,12 @@ PP(pp_unpack)
 		    }
 		}
 		if ((s >= strend) && bytes)
-		    DIE(aTHX_ "Unterminated compressed integer");
+		    croak("Unterminated compressed integer");
 	    }
 	    break;
 	case 'P':
-	    if (star)
-	        DIE(aTHX_ "P must have an explicit size");
+	    if (star > 0)
+	        croak("P must have an explicit size");
 	    EXTEND(SP, 1);
 	    if (sizeof(char*) > strend - s)
 		break;
@@ -1146,17 +1222,48 @@ PP(pp_unpack)
 	    XPUSHs(sv_2mortal(sv));
 	    checksum = 0;
 	}
-        if (gimme != G_ARRAY &&
-            SP - PL_stack_base == start_sp_offset + 1) {
-          /* do first one only unless in list context
+        if ((flags & UNPACK_ONLY_ONE)
+	    && SP - PL_stack_base == start_sp_offset + 1) {
+	    /* do first one only unless in list context
              / is implmented by unpacking the count, then poping it from the
              stack, so must check that we're not in the middle of a /  */
           if ((pat >= patend) || *pat != '/')
-            RETURN;
+            break;
         }
     }
-    if (SP - PL_stack_base == start_sp_offset && gimme == G_SCALAR)
-	PUSHs(&PL_sv_undef);
+    if (new_s)
+	*new_s = s;
+    PUTBACK;
+    return SP - PL_stack_base - start_sp_offset;
+}
+
+PP(pp_unpack)
+{
+    dSP;
+    dPOPPOPssrl;
+    I32 gimme = GIMME_V;
+    STRLEN llen;
+    STRLEN rlen;
+    register char *pat = SvPV(left, llen);
+#ifdef PACKED_IS_OCTETS
+    /* Packed side is assumed to be octets - so force downgrade if it
+       has been UTF-8 encoded by accident
+     */
+    register char *s = SvPVbyte(right, rlen);
+#else
+    register char *s = SvPV(right, rlen);
+#endif
+    char *strend = s + rlen;
+    register char *patend = pat + llen;
+    register I32 cnt;
+
+    PUTBACK;
+    cnt = unpack_str(pat, patend, s, s, strend, NULL, 0,
+		     ((gimme == G_SCALAR) ? UNPACK_ONLY_ONE : 0)
+		     | (DO_UTF8(right) ? UNPACK_DO_UTF8 : 0));
+    SPAGAIN;
+    if ( !cnt && gimme == G_SCALAR )
+       PUSHs(&PL_sv_undef);
     RETURN;
 }
 
@@ -1264,22 +1371,27 @@ S_div128(pTHX_ SV *pnum, bool *done)
   return (m);
 }
 
+#define PACK_CHILD	0x1
 
-PP(pp_pack)
+/*
+=for apidoc pack_cat
+
+The engine implementing pack() Perl function.
+
+=cut */
+
+void
+Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
-    register SV *cat = TARG;
     register I32 items;
     STRLEN fromlen;
-    register char *pat = SvPVx(*++MARK, fromlen);
-    char *patcopy;
-    register char *patend = pat + fromlen;
     register I32 len;
     I32 datumtype;
     SV *fromstr;
     /*SUPPRESS 442*/
     static char null10[] = {0,0,0,0,0,0,0,0,0,0};
     static char *space10 = "          ";
+    int star;
 
     /* These must not be in registers: */
     char achar;
@@ -1300,30 +1412,19 @@ PP(pp_pack)
     int natint;		/* native integer */
 #endif
 
-    items = SP - MARK;
-    MARK++;
-    sv_setpvn(cat, "", 0);
-    patcopy = pat;
-    while (pat < patend) {
+    items = endlist - beglist;
+#ifndef PACKED_IS_OCTETS
+    pat = next_symbol(pat, patend);
+    if (pat < patend && *pat == 'U' && !flags)
+	SvUTF8_on(cat);
+#endif
+    while ((pat = next_symbol(pat, patend)) < patend) {
 	SV *lengthcode = Nullsv;
-#define NEXTFROM ( lengthcode ? lengthcode : items-- > 0 ? *MARK++ : &PL_sv_no)
+#define NEXTFROM ( lengthcode ? lengthcode : items-- > 0 ? *beglist++ : &PL_sv_no)
 	datumtype = *pat++ & 0xFF;
 #ifdef PERL_NATINT_PACK
 	natint = 0;
 #endif
-	if (isSPACE(datumtype)) {
-	    patcopy++;
-	    continue;
-        }
-#ifndef PACKED_IS_OCTETS
-	if (datumtype == 'U' && pat == patcopy+1)
-	    SvUTF8_on(cat);
-#endif
-	if (datumtype == '#') {
-	    while (pat < patend && *pat != '\n')
-		pat++;
-	    continue;
-	}
         if (*pat == '!') {
 	    char *natstr = "sSiIlL";
 
@@ -1334,40 +1435,31 @@ PP(pp_pack)
 		pat++;
 	    }
 	    else
-		DIE(aTHX_ "'!' allowed only after types %s", natstr);
+		croak("'!' allowed only after types %s", natstr);
 	}
-	if (*pat == '*') {
+	len = find_count(&pat, patend, &star);
+	if (star > 0)			/* Count is '*' */
 	    len = strchr("@Xxu", datumtype) ? 0 : items;
-	    pat++;
-	}
-	else if (isDIGIT(*pat)) {
-	    len = *pat++ - '0';
-	    while (isDIGIT(*pat)) {
-		len = (len * 10) + (*pat++ - '0');
-		if (len < 0)
-		    DIE(aTHX_ "Repeat count in pack overflows");
-	    }
-	}
-	else
+	else if (star < 0)		/* Default len */
 	    len = 1;
-	if (*pat == '/') {
+	if (*pat == '/') {		/* doing lookahead how... */
 	    ++pat;
 	    if ((*pat != 'a' && *pat != 'A' && *pat != 'Z') || pat[1] != '*')
-		DIE(aTHX_ "/ must be followed by a*, A* or Z*");
+		croak("/ must be followed by a*, A* or Z*");
 	    lengthcode = sv_2mortal(newSViv(sv_len(items > 0
-						   ? *MARK : &PL_sv_no)
+						   ? *beglist : &PL_sv_no)
                                             + (*pat == 'Z' ? 1 : 0)));
 	}
 	switch(datumtype) {
 	default:
-	    DIE(aTHX_ "Invalid type in pack: '%c'", (int)datumtype);
+	    croak("Invalid type in pack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_PACK))
 		Perl_warner(aTHX_ WARN_PACK,
 			    "Invalid type in pack: '%c'", (int)datumtype);
 	    break;
 	case '%':
-	    DIE(aTHX_ "%% may only be used in unpack");
+	    croak("%% may only be used in unpack");
 	case '@':
 	    len -= SvCUR(cat);
 	    if (len > 0)
@@ -1376,10 +1468,35 @@ PP(pp_pack)
 	    if (len > 0)
 		goto shrink;
 	    break;
+	case '(':
+	{
+	    char *beg = pat;
+	    SV **savebeglist = beglist;	/* beglist de-register-ed */
+
+	    if (star >= 0)
+		croak("()-group starts with a count");
+	    aptr = group_end(beg, patend, ')');
+	    pat = aptr + 1;
+	    if (star != -2) {
+		len = find_count(&pat, patend, &star);
+		if (star < 0)		/* No count */
+		    len = 1;
+		else if (star > 0)	/* Star */
+		    len = items;	/* long enough? */
+	    }
+	    while (len--) {
+		pack_cat(cat, beg, aptr, savebeglist, endlist,
+			 &savebeglist, PACK_CHILD);
+		if (star > 0 && savebeglist == endlist)
+		    break;		/* No way to continue */
+	    }
+	    beglist = savebeglist;
+	    break;
+	}
 	case 'X':
 	  shrink:
 	    if (SvCUR(cat) < len)
-		DIE(aTHX_ "X outside of string");
+		croak("X outside of string");
 	    SvCUR(cat) -= len;
 	    *SvEND(cat) = '\0';
 	    break;
@@ -1396,7 +1513,7 @@ PP(pp_pack)
 	case 'a':
 	    fromstr = NEXTFROM;
 	    aptr = SvPV(fromstr, fromlen);
-	    if (pat[lengthcode ? -2 : -1] == '*') { /* -2 after '/' */  
+	    if (star > 0) { /* -2 after '/' */  
 		len = fromlen;
 		if (datumtype == 'Z')
 		    ++len;
@@ -1434,7 +1551,7 @@ PP(pp_pack)
 		fromstr = NEXTFROM;
 		saveitems = items;
 		str = SvPV(fromstr, fromlen);
-		if (pat[-1] == '*')
+		if (star > 0)
 		    len = fromlen;
 		aint = SvCUR(cat);
 		SvCUR(cat) += (len+7)/8;
@@ -1490,7 +1607,7 @@ PP(pp_pack)
 		fromstr = NEXTFROM;
 		saveitems = items;
 		str = SvPV(fromstr, fromlen);
-		if (pat[-1] == '*')
+		if (star > 0)
 		    len = fromlen;
 		aint = SvCUR(cat);
 		SvCUR(cat) += (len+1)/2;
@@ -1668,7 +1785,7 @@ PP(pp_pack)
 		adouble = Perl_floor(SvNV(fromstr));
 
 		if (adouble < 0)
-		    DIE(aTHX_ "Cannot compress negative numbers");
+		    croak("Cannot compress negative numbers");
 
 		if (
 #if UVSIZE > 4 && UVSIZE >= NVSIZE
@@ -1702,7 +1819,7 @@ PP(pp_pack)
 		    /* Copy string and check for compliance */
 		    from = SvPV(fromstr, len);
 		    if ((norm = is_an_int(from, len)) == NULL)
-			DIE(aTHX_ "can compress only unsigned integer");
+			croak("can compress only unsigned integer");
 
 		    New('w', result, len, char);
 		    in = result + len;
@@ -1722,7 +1839,7 @@ PP(pp_pack)
 			double next = floor(adouble / 128);
 			*--in = (unsigned char)(adouble - (next * 128)) | 0x80;
 			if (in <= buf)  /* this cannot happen ;-) */
-			    DIE(aTHX_ "Cannot compress integer");
+			    croak("Cannot compress integer");
 			adouble = next;
 		    } while (adouble > 0);
 		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
@@ -1737,7 +1854,7 @@ PP(pp_pack)
 		    /* Copy string and check for compliance */
 		    from = SvPV(fromstr, len);
 		    if ((norm = is_an_int(from, len)) == NULL)
-			DIE(aTHX_ "can compress only unsigned integer");
+			croak("can compress only unsigned integer");
 
 		    New('w', result, len, char);
 		    in = result + len;
@@ -1888,10 +2005,28 @@ PP(pp_pack)
 	    break;
 	}
     }
+    if (next_in_list)
+	*next_in_list = beglist;
+}
+#undef NEXTFROM
+
+
+PP(pp_pack)
+{
+    dSP; dMARK; dORIGMARK; dTARGET;
+    register SV *cat = TARG;
+    STRLEN fromlen;
+    register char *pat = SvPVx(*++MARK, fromlen);
+    register char *patend = pat + fromlen;
+
+    MARK++;
+    sv_setpvn(cat, "", 0);
+
+    pack_cat(cat, pat, patend, MARK, SP + 1, NULL, 0);
+
     SvSETMAGIC(cat);
     SP = ORIGMARK;
     PUSHs(cat);
     RETURN;
 }
-#undef NEXTFROM
 

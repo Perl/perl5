@@ -1559,6 +1559,11 @@ version of Perl, and this should not happen anyway.
 (F) Unlike with "next" or "last", you're not allowed to goto an
 unspecified destination.  See L<perlfunc/goto>.
 
+=item %s-group starts with a count
+
+(F) In pack/unpack a ()-group started with a count.  A count is
+supposed to follow something: a template character or a ()-group.
+
 =item %s had compilation errors
 
 (F) The final summary message when a C<perl -c> fails.
