@@ -1,15 +1,32 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.30 2002/04/08 02:34:51 dankogai Exp $
+# $Id: Changes,v 1.31 2002/04/08 18:08:07 dankogai Exp dankogai $
 #
 
-1.30 $Date: 2002/04/08 02:34:51 $
+1.31 $Date: 2002/04/08 18:08:07 $
+! lib/Encode/Encoder.pm
++ t/Encoder.t
+  Encode::Encoder, once just a placeholder of an idea, is now much more 
+  practical.  See t/Encode.t to find how practical it can be.
++ lib/Encode/Config.pm
+! Encode.pm
+  my false laziness at Encode.pm is fixed.  Now %ExtModules are set
+  in Encode::Config and they are all literally, not programatically
+  set.  My false laziness was resulting many encodings missing from
+  %ExtModules.
+! lib/Encode/Unicode.pm
+! t/Unicode.t
+  BOM for 32LE was bogus as noted by Anton.  t/Unicode.t is fixed
+  so that it does not rely Encode::Unicode for BOM values
+  Message-Id: <FFEC33E9-4AFB-11D6-B415-00039301D480@dan.co.jp>
+
+1.30 2002/04/08 02:34:51
 + lib/Encode/Encoder.pm
   Object Oriented Encoder.  I reckon something like this is in need.
 ! Encode.pm
 ! t/Unicode.pm
 ! lib/Encode/Supported.pod
-  * autoloading but that prevented upper-case canonicals such as UTF-16
+  * autoloading bug that prevented upper-case canonicals such as UTF-16
     is fixed.  Now even UTF/UCS are autoloaded!
   * encodings() is now more intuitive.
   * t/Unicode.t fixed to explicitly use Unicode.pm -- BOM values are
@@ -172,7 +189,7 @@
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/08 02:34:51 $
+1.11  $Date: 2002/04/08 18:08:07 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

@@ -3,7 +3,7 @@ package Encode::Unicode;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = (q$Revision: 1.26 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.28 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 #
 # Aux. subs & constants
@@ -12,7 +12,7 @@ our $VERSION = do { my @r = (q$Revision: 1.26 $ =~ /\d+/g); sprintf "%d."."%02d"
 sub FBCHAR(){ 0xFFFd }
 sub BOM_BE(){ 0xFeFF }
 sub BOM16LE(){ 0xFFFe }
-sub BOM32LE(){ 0xFeFF0000 }
+sub BOM32LE(){ 0xFFFe0000 }
 
 sub valid_ucs2($){
     if ($_[0] < 0xD800){
@@ -344,8 +344,8 @@ called Byte Order Mark (BOM) is prepended to the head of string.
 
             16         32 bits/char
 -------------------------
-BE	0xFeFF 0x0000FeFF
-LE      0xFFeF 0xFeFF0000
+BE      0xFeFF 0x0000FeFF
+LE      0xFFeF 0xFFFe0000
 -------------------------
 
 =back
@@ -377,6 +377,7 @@ line, not file, is prepended with BOMs.
 C<UCS-2> is an exception.  Unlike others this is an alias of UCS-2BE.
 UCS-2 is already registered by IANA and others that way.
 
+=back
 
 =head1 The Surrogate Pair
 
@@ -418,6 +419,10 @@ does not prohibit them for uses.
 
 =head1 SEE ALSO
 
-L<Encode>, L<http://www.unicode.org/glossary/>
+L<Encode>, L<http://www.unicode.org/glossary/>,
 
-=back
+RFC 2781 L<http://rfc.net/rfc2781.html>,
+
+L<http://www.unicode.org/unicode/faq/utf_bom.html>
+
+=cut

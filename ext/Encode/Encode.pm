@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.31 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -43,92 +43,7 @@ use Encode::Alias;
 
 # Make a %Encoding package variable to allow a certain amount of cheating
 our %Encoding;
-our %ExtModule;
-
-my @codepages = qw(
-		     37  424  437  500  737  775  850  852  855 
-		    856  857  860  861  862  863  864  865  866 
-		    869  874  875  932  936  949  950 1006 1026 
-		   1047 1250 1251 1252 1253 1254 1255 1256 1257
-		   1258
-		   );
-
-my @macintosh = qw(
-		   CentralEurRoman  Croatian  Cyrillic   Greek
-		   Iceland          Roman     Rumanian   Sami
-		   Thai             Turkish   Ukrainian
-		   );
-
-for my $k (2..11,13..16){
-    $ExtModule{"iso-8859-$k"} = 'Encode::Byte';
-}
-
-for my $k (@codepages){
-    $ExtModule{"cp$k"} = 'Encode::Byte';
-}
-
-for my $k (@macintosh)
-{
-    $ExtModule{"mac$k"} = 'Encode::Byte';
-}
-
-for my $k (qw(UCS-2BE UCS-2LE UTF-16 UTF-16BE UTF-16LE
-	      UTF-32 UTF-32BE UTF-32LE)){
-    $ExtModule{$k} = 'Encode::Unicode';
-}
-
-%ExtModule =
-    (%ExtModule,
-     'koi8-r'           => 'Encode::Byte',
-     'posix-bc'         => 'Encode::EBCDIC',
-     cp37               => 'Encode::EBCDIC',
-     cp1026             => 'Encode::EBCDIC',
-     cp1047             => 'Encode::EBCDIC',
-     cp500              => 'Encode::EBCDIC',
-     cp875              => 'Encode::EBCDIC',
-     dingbats           => 'Encode::Symbol',
-     macDingbats        => 'Encode::Symbol',
-     macSymbol          => 'Encode::Symbol',
-     symbol             => 'Encode::Symbol',
-     viscii             => 'Encode::Byte',
-);
-
-unless ($ON_EBCDIC) { # CJK added to autoload unless EBCDIC env
-%ExtModule =
-    (%ExtModule,
-
-     'cp936'		=> 'Encode::CN',
-     'euc-cn'           => 'Encode::CN',
-     'gb12345-raw'	=> 'Encode::CN',
-     'gb2312-raw'	=> 'Encode::CN',
-     'gbk'		=> 'Encode::CN',
-     'iso-ir-165'	=> 'Encode::CN',
-
-     '7bit-jis'         => 'Encode::JP',
-     'cp932'		=> 'Encode::JP',
-     'euc-jp'	        => 'Encode::JP',
-     'iso-2022-jp'	=> 'Encode::JP',
-     'iso-2022-jp-1'	=> 'Encode::JP',
-     'jis0201-raw'      => 'Encode::JP',
-     'jis0208-raw'      => 'Encode::JP',
-     'jis0212-raw'      => 'Encode::JP',
-     'macJapanese'      => 'Encode::JP',
-     'shiftjis'	        => 'Encode::JP',
-
-     'cp949'		=> 'Encode::KR',
-     'euc-kr'       	=> 'Encode::KR',
-     'ksc5601'		=> 'Encode::KR',
-     'macKorean'        => 'Encode::KR',
-
-     'big5'		=> 'Encode::TW',
-     'big5-hkscs'	=> 'Encode::TW',
-     'cp950'		=> 'Encode::TW',
-
-     'big5plus'     	=> 'Encode::HanExtra',
-     'euc-tw'   	=> 'Encode::HanExtra',
-     'gb18030'		=> 'Encode::HanExtra',
-    );
-}
+use Encode::Config;
 
 sub encodings
 {

@@ -1,5 +1,5 @@
 #
-# $Id: Unicode.t,v 1.4 2002/04/08 02:35:48 dankogai Exp dankogai $
+# $Id: Unicode.t,v 1.5 2002/04/08 14:17:19 dankogai Exp $
 #
 # This script is written entirely in ASCII, even though quoted literals
 # do include non-BMP unicode characters -- Are you happy, jhi?
@@ -28,7 +28,6 @@ use strict;
 #use Test::More 'no_plan';
 use Test::More tests => 22;
 use Encode qw(encode decode);
-use Encode::Unicode; # to load BOM defs
 
 #
 # see
@@ -54,10 +53,10 @@ my $n_32be =
 my $n_32le = 
     pack("C*", map {hex($_)} qw<4D 00 00 00 61 00 00 00 cd ab 01 00>);
 
-my $n_16bb = pack('n', Encode::Unicode::BOM_BE)  . $n_16be;
-my $n_16lb = pack('n', Encode::Unicode::BOM16LE) . $n_16le;
-my $n_32bb = pack('N', Encode::Unicode::BOM_BE ) . $n_32be;
-my $n_32lb = pack('N', Encode::Unicode::BOM32LE) . $n_32le;
+my $n_16bb = pack('n', 0xFeFF) . $n_16be;
+my $n_16lb = pack('v', 0xFeFF) . $n_16le;
+my $n_32bb = pack('N', 0xFeFF) . $n_32be;
+my $n_32lb = pack('V', 0xFeFF) . $n_32le;
 
 is($n_16be, encode('UTF-16BE', $nasty),  qq{encode UTF-16BE});
 is($n_16le, encode('UTF-16LE', $nasty),  qq{encode UTF-16LE});
@@ -91,7 +90,3 @@ ok($@=~/^UCS-2LE:/, "encode UCS-2LE: exception");
 
 1;
 __END__
-
-use Devel::Peek;
-my $foo = decode('UTF-16BE', $n_16be);
-Dump $n_16be; Dump $foo;

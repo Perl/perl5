@@ -34,6 +34,7 @@ encoding.pm	Perl Pragmactic Module
 lib/Encode/Alias.pm	        Encode extension
 lib/Encode/CJKConstants.pm	Encode extension
 lib/Encode/CN/HZ.pm		Encode extension
+lib/Encode/Config.pm	        Encode configuration module
 lib/Encode/Encoder.pm	       OO Encoder
 lib/Encode/Encoding.pm	Encode extension
 lib/Encode/JP/2022_JP.pm	Encode extension
@@ -47,6 +48,7 @@ lib/Encode/XS.pm		Encode extension
 t/Aliases.t	Encode extension test
 t/CN.t		Encode extension test
 t/Encode.t		Encode extension test
+t/Encoder.t	Encode::Encoder test
 t/JP.t		Encode extension test
 t/KR.t		Encode extension test
 t/TW.t		Encode extension test
