@@ -27,6 +27,8 @@ runops() {
     runlevel++;
 
     while ( op = (*op->op_ppaddr)() ) ;
+
+    TAINT_NOT;
     return 0;
 }
 
@@ -54,6 +56,8 @@ runops() {
 	    DEBUG_P(debprof(op));
 	}
     } while ( op = (*op->op_ppaddr)() );
+
+    TAINT_NOT;
     return 0;
 }
 
