@@ -1227,10 +1227,11 @@ using passive mode. This is not usually required except for some I<dumb>
 servers, and some firewall configurations. This can also be set by the
 environment variable C<FTP_PASSIVE>.
 
-B<Hash> - If TRUE, print hash marks (#) on STDERR every 1024 bytes.  This
-simply invokes the C<hash()> method for you, so that hash marks are displayed
-for all transfers.  You can, of course, call C<hash()> explicitly whenever
-you'd like.
+B<Hash> - If given a reference to a file handle (e.g., C<\*STDERR>),
+print hash marks (#) on that filehandle every 1024 bytes.  This
+simply invokes the C<hash()> method for you, so that hash marks
+are displayed for all transfers.  You can, of course, call C<hash()>
+explicitly whenever you'd like.
 
 If the constructor fails undef will be returned and an error message will
 be in $@
