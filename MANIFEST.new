@@ -175,13 +175,15 @@ h2xs.SH			Program to make .xs files from C header files
 handy.h			Handy definitions
 hints/3b1.sh		Hints for named architecture
 hints/3b1cc		Hints for named architecture
-hints/README.hints	Hints for named architecture
+hints/PowerUNIX.sh	Hints for named architecture
+hints/README.hints	Notes about hints.
 hints/aix.sh		Hints for named architecture
 hints/altos486.sh	Hints for named architecture
 hints/apollo.sh		Hints for named architecture
 hints/aux.sh		Hints for named architecture
 hints/bsd386.sh		Hints for named architecture
 hints/convexos.sh	Hints for named architecture
+hints/cxux.sh		Hints for named architecture
 hints/dec_osf.sh	Hints for named architecture
 hints/dgux.sh		Hints for named architecture
 hints/dnix.sh		Hints for named architecture
@@ -312,12 +314,12 @@ lib/tainted.pl		Old code for tainting
 lib/termcap.pl		Perl library supporting termcap usage
 lib/timelocal.pl	Perl library supporting inverse of localtime, gmtime
 lib/validate.pl		Perl library supporting wholesale file mode validation
+makeaperl.SH		perl script that produces a new perl binary
 makedepend.SH		Precursor to makedepend
 makedir.SH		Precursor to makedir
 malloc.c		A version of malloc you might not want
 mg.c			Magic code
 mg.h			Magic header
-makeaperl.SH		perl script that produces a new perl binary
 minimod.PL		Writes lib/ExtUtils/Miniperl.pm
 miniperlmain.c		Basic perl w/o dynamic loading or extensions
 mv-if-diff		Script to mv a file if it changed

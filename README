@@ -172,6 +172,31 @@ Installation
     you are not root, you must own the directories in question and you should
     ignore any messages about chown not working.
 
+    make install will also install the following:
+	perl,
+	    perl5.nnn	where nnn is the current release number.  This
+			will be a link to perl.
+	suidperl,
+	    sperl5.nnn	If you requested setuid emulation.
+	a2p          	awk-to-perl translator
+	cppstdin	This is used by perl -P, if your cc -E can't
+			read from stdin.
+	c2ph, pstruct	Scripts for handling C structures in header files.
+	s2p		sed-to-perl translator
+	find2perl	find-to-perl translator
+	h2xs		Converts C .h header files to Perl extensions.
+
+	library files	in $privlib and $archlib specified to
+			Configure, usually under /usr/local/lib/perl5/.
+	man pages	in the location specified to Configure, usually
+			something like /usr/local/man/man1.
+
+	Perl's *.h header files and the libperl.a library are also
+	installed under $archlib so that you may later build new
+	extensions even if the Perl source is no longer available.
+	
+	make install may also offer to install perl in a "standard" location.
+	
     Most of the documentation in the pod/ directory is also available 
     in HTML format.  Type
 	cd pod; make html; cd ..

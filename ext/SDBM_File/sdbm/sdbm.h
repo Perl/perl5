@@ -155,7 +155,7 @@ extern long sdbm_hash proto((char *, int));
 #endif
 
 /* Use all the "standard" definitions? */
-#ifdef STANDARD_C
+#if defined(STANDARD_C) && defined(I_STDLIB)
 #   include <stdlib.h>
 #endif /* STANDARD_C */
 

@@ -2135,7 +2135,7 @@ sub mksymlists {
     return '' unless $Config{'osname'} eq 'aix';
 
     init_main(@ARGV) unless defined $att{'BASEEXT'};
-    if (! %{$att{DL_FUNCS}}) {
+    if (! $att{DL_FUNCS}) {
 	my($bootfunc);
 	($bootfunc = $att{NAME}) =~ s/\W/_/g;
 	$att{DL_FUNCS} = {$att{BASEEXT} => ["boot_$bootfunc"]};

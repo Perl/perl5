@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.6 1994/10/29 15:54:19 ram Exp $
 #
-# Generated on Tue Feb 21 11:46:04 EST 1995 [metaconfig 3.0 PL51]
+# Generated on Tue Feb 28 10:00:27 EST 1995 [metaconfig 3.0 PL51]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -466,6 +466,7 @@ libs=''
 lns=''
 lseektype=''
 d_mymalloc=''
+freetype=''
 mallocobj=''
 mallocsrc=''
 malloctype=''
@@ -637,7 +638,7 @@ libswanted='net socket inet nsl nm ndbm gdbm dbm db malloc dl'
 libswanted="$libswanted dld ld sun m c cposix posix ndir dir crypt"
 libswanted="$libswanted ucb bsd BSD PW x"
 : We probably want to search /usr/shlib before most other libraries.
-: This is only used by ext/util/extliblist
+: This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
 glibpth=`echo " $glibpth " | sed -e 's! /usr/shlib ! !'`
 glibpth="/usr/shlib $glibpth"
 : Do not use vfork unless overridden by a hint file.
@@ -3418,7 +3419,7 @@ if xxx=`./loc arch blurfl $pth`; $test -f "$xxx"; then
 	tarch=`arch`"-$osname"
 elif xxx=`./loc uname blurfl $pth`; $test -f "$xxx" ; then
 	if uname -m > tmparch 2>&1 ; then
-		tarch=`$cat tmparch`"-$osname"
+		tarch=`$sed -e 's/ /_/g' -e 's/$/'"-$osname/" tmparch`
 	else
 		tarch="$osname"
 	fi
@@ -4918,6 +4919,10 @@ eval $setvar
 set malloc.h i_malloc
 eval $inhdr
 
+: see if stdlib is available
+set stdlib.h i_stdlib
+eval $inhdr
+
 : determine which malloc to compile in
 echo " "
 case "$usemymalloc" in
@@ -4953,29 +4958,48 @@ y*|true)
 	;;
 esac
 
-: compute the type returned by malloc
+: compute the return types of malloc and free
 echo " "
-case "$malloctype" in
-'')
-	$cat >malloc.c <<END
+$cat >malloc.c <<END
 #$i_malloc I_MALLOC
+#$i_stdlib I_STDLIB
 #include <stdio.h>
 #include <sys/types.h>
 #ifdef I_MALLOC
 #include <malloc.h>
 #endif
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#ifdef TRY_MALLOC
 void *malloc();
+#endif
+#ifdef TRY_FREE
+void free();
+#endif
 END
-	if $cc $ccflags -c malloc.c >/dev/null 2>&1; then
+case "$malloctype" in
+'')
+	if $cc $ccflags -c -DTRY_MALLOC malloc.c >/dev/null 2>&1; then
 		malloctype='void *'
 	else
 		malloctype='char *'
 	fi
-	$rm -f malloc.[co]
 	;;
 esac
 echo "Your system wants malloc to return '$malloctype', it would seem." >&4
 
+case "$freetype" in
+'')
+	if $cc $ccflags -c -DTRY_FREE malloc.c >/dev/null 2>&1; then
+		freetype='void'
+	else
+		freetype='int'
+	fi
+	;;
+esac
+echo "Your system uses $freetype free(), it would seem." >&4
+$rm -f malloc.[co]
 : see if nice exists
 set nice d_nice
 eval $inlibc
@@ -6970,7 +6994,7 @@ echo " "
 case "$sig_name" in
 '')
 	echo "Generating a list of signal names..." >&4
-	xxx=`./findhdr signal.h`" "`./findhdr sys/signal.h`
+	xxx=`./findhdr signal.h`" "`./findhdr sys/signal.h`" "`./findhdr linux/signal.h`
 	set X `cat $xxx 2>&1 | $awk '
 $1 ~ /^#define$/ && $2 ~ /^SIG[A-Z0-9]*$/ && $3 ~ /^[1-9][0-9]*$/ {
 	sig[$3] = substr($2,4,20)
@@ -7495,10 +7519,6 @@ $rm -f varargs*
 set stddef.h i_stddef
 eval $inhdr
 
-: see if stdlib is available
-set stdlib.h i_stdlib
-eval $inhdr
-
 : see if ioctl defs are in sgtty, termio, sys/filio or sys/ioctl
 set sys/filio.h i_sysfilio
 eval $inhdr
@@ -7835,6 +7855,7 @@ extensions='$extensions'
 find='$find'
 flex='$flex'
 fpostype='$fpostype'
+freetype='$freetype'
 full_csh='$full_csh'
 full_sed='$full_sed'
 gcc='$gcc'

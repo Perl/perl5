@@ -15,9 +15,10 @@
 ?RCS: Revision 3.0  1993/08/18  12:09:12  ram
 ?RCS: Baseline for dist 3.0 netwide release.
 ?RCS:
-?MAKE:mallocsrc mallocobj usemymalloc malloctype d_mymalloc: Myread \
+?MAKE:mallocsrc mallocobj usemymalloc malloctype d_mymalloc \
+	freetype: Myread \
 	Oldconfig package Guess Setvar rm cat +cc +ccflags Findhdr \
-	i_malloc sed libs
+	i_malloc i_stdlib sed libs
 ?MAKE:	-pick add $@ %<
 ?S:usemymalloc:
 ?S:	This variable contains y if the malloc that comes with this package
@@ -43,13 +44,22 @@
 ?S:	Otherwise the value is null.  This variable is intended for generating
 ?S:	Makefiles.  See mallocsrc.
 ?S:.
+?S:freetype:
+?S:	This variable contains the return type of free().  It is usually
+?S: void, but occasionally int.
+?S:.
 ?S:malloctype:
 ?S:	This variable contains the kind of ptr returned by malloc and realloc.
 ?S:.
+?C:Free_t:
+?C:	This variable contains the return type of free().  It is usually
+?C: void, but occasionally int.
+?C:.
 ?C:Malloc_t (MALLOCPTRTYPE):
 ?C:	This symbol is the type of pointer returned by malloc and realloc.
 ?C:.
 ?H:#define Malloc_t $malloctype			/**/
+?H:#define Free_t $freetype			/**/
 ?H:.
 ?C:MYMALLOC:
 ?C:	This symbol, if defined, indicates that we're using our own malloc.
@@ -99,28 +109,51 @@ y*|true)
 esac
 
 @end
-@if MALLOCPTRTYPE || Malloc_t
-: compute the type returned by malloc
+@if MALLOCPTRTYPE || Malloc_t || Free_t
+: compute the return types of malloc and free
 echo " "
-case "$malloctype" in
-'')
-	$cat >malloc.c <<END
+$cat >malloc.c <<END
 #$i_malloc I_MALLOC
+#$i_stdlib I_STDLIB
 #include <stdio.h>
 #include <sys/types.h>
 #ifdef I_MALLOC
 #include <malloc.h>
 #endif
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#ifdef TRY_MALLOC
 void *malloc();
+#endif
+#ifdef TRY_FREE
+void free();
+#endif
 END
-	if $cc $ccflags -c malloc.c >/dev/null 2>&1; then
+@if MALLOCPTRTYPE || Malloc_t
+case "$malloctype" in
+'')
+	if $cc $ccflags -c -DTRY_MALLOC malloc.c >/dev/null 2>&1; then
 		malloctype='void *'
 	else
 		malloctype='char *'
 	fi
-	$rm -f malloc.[co]
 	;;
 esac
 echo "Your system wants malloc to return '$malloctype', it would seem." >&4
+@end
 
+@if Free_t
+case "$freetype" in
+'')
+	if $cc $ccflags -c -DTRY_FREE malloc.c >/dev/null 2>&1; then
+		freetype='void'
+	else
+		freetype='int'
+	fi
+	;;
+esac
+echo "Your system uses $freetype free(), it would seem." >&4
+@end
+$rm -f malloc.[co]
 @end

@@ -29,6 +29,13 @@
 #  include <vfork.h>
 #endif
 
+/* Put this after #includes because fork and vfork prototypes may
+   conflict.
+*/
+#ifndef HAS_VFORK
+#   define vfork fork
+#endif
+
 #ifdef I_FCNTL
 #  include <fcntl.h>
 #endif

@@ -2841,7 +2841,7 @@ dup2(fd1, fd2)
 	int		fd1
 	int		fd2
 
-SysRet
+SysRetLong
 lseek(fd, offset, whence)
 	int		fd
 	Off_t		offset

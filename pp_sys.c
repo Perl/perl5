@@ -23,6 +23,13 @@
 #endif
 */
 
+/* Put this after #includes because fork and vfork prototypes may
+   conflict.
+*/
+#ifndef HAS_VFORK
+#   define vfork fork
+#endif
+
 #if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
 # include <sys/socket.h>
 # include <netdb.h>

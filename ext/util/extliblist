@@ -15,6 +15,10 @@ esac
 :
 : Author:  Andy Dougherty    doughera@lafcol.lafayette.edu
 :
+: This utility was only used by the old Makefile.SH extension
+: mechanism.  It is now obsolete and may be removed in a future
+: release.
+:
 : This utility takes a list of libraries in the form
 : -llib1 -llib2 -llib3
 : and prints out lines suitable for inclusion in an extension

@@ -346,7 +346,7 @@ realclean: clean
 	rm -f config.h makefile makefile.old
 	rm -f $(private)
 	rm -rf lib/auto
-	rm -f h2ph h2ph.man c2ph pstruct
+	rm -f h2ph h2ph.man c2ph pstruct h2xs makeaperl
 	rm -rf .config
 	@echo "Note that make realclean does not delete config.sh"
 

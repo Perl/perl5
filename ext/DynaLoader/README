@@ -46,7 +46,7 @@ After the initial implementation of a new DynaLoader dl_*.xs file
 you may need to edit or create ext/MODULE/MODULE.bs files to reflect
 the needs of your platform and linking software.
 
-Refer to DynaLoader.doc, ext/utils/mkbootstrap and any existing
+Refer to DynaLoader.doc, lib/ExtUtils/MakeMaker.pm and any existing
 ext/MODULE/MODULE.bs files for more information.
 
 Tim Bunce.

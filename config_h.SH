@@ -1412,10 +1412,15 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$i_sysstat	I_SYS_STAT		/**/
 
+/* Free_t:
+ *	This variable contains the return type of free().  It is usually
+ * void, but occasionally int.
+ */
 /* Malloc_t:
  *	This symbol is the type of pointer returned by malloc and realloc.
  */
 #define Malloc_t $malloctype			/**/
+#define Free_t $freetype			/**/
 
 /* MYMALLOC:
  *	This symbol, if defined, indicates that we're using our own malloc.

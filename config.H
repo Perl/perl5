@@ -14,7 +14,7 @@
  * $Id: Config_h.U,v 3.0.1.3 1995/01/30 14:25:39 ram Exp $
  */
 
-/* Configuration time: Tue Feb 21 12:13:04 EST 1995
+/* Configuration time: Mon Feb 27 17:21:15 EST 1995
  * Configured by: andy
  * Target system: crystal crystal 3.2 2 i386 
  */
@@ -1398,10 +1398,15 @@
  */
 #define	I_SYS_STAT		/**/
 
+/* Free_t:
+ *	This variable contains the return type of free().  It is usually
+ * void, but occasionally int.
+ */
 /* Malloc_t:
  *	This symbol is the type of pointer returned by malloc and realloc.
  */
 #define Malloc_t char *			/**/
+#define Free_t void			/**/
 
 /* MYMALLOC:
  *	This symbol, if defined, indicates that we're using our own malloc.

@@ -72,10 +72,6 @@ EXT char Error[1];
 #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
 #define TAINT_ENV()	if (tainting) taint_env()
 
-#ifndef HAS_VFORK
-#   define vfork fork
-#endif
-
 #ifdef HAS_GETPGRP2
 #   ifndef HAS_GETPGRP
 #	define HAS_GETPGRP

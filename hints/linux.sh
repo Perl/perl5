@@ -6,19 +6,10 @@
 # Fri Feb  3 14:05:00 EST 1995
 # Use   sh Configure -Dcc=gcc-elf     to try using gcc-elf.  It might work.
 #
-# I don't understand several things in here.  Clarifications are welcome.
-
-# Why is this needed?
-bin='/usr/bin' 
 
 ccflags='-I/usr/include/bsd'
 cppflags=' -I/usr/include/bsd'
 d_dosuid='define'
-
-# Why are these needed?
-gidtype='gid_t'
-groupstype='gid_t'
-uidtype='uid_t'
 
 malloctype='void *'
 usemymalloc='n'
@@ -26,12 +17,6 @@ usemymalloc='n'
 case "$optimize" in
 '') optimize='-O2' ;;
 esac
-
-# Why is this needed?
-nm_opt=''
-
-sig_name='ZERO HUP INT QUIT ILL TRAP IOT UNUSED FPE KILL USR1 SEGV USR2 PIPE ALRM TERM STKFLT CHLD CONT STOP TSTP TTIN TTOU IO XCPU XFSZ VTALRM PROF WINCH'
-signal_t='void'
 
 case "$cc" in
 *cc-elf*)

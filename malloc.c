@@ -253,7 +253,7 @@ morecore(bucket)
   	}
 }
 
-void
+Free_t
 free(mp)
 	Malloc_t mp;
 {   
