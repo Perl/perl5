@@ -110,7 +110,6 @@ ext/ByteLoader/byterun.c	Runtime support for bytecode loader
 ext/ByteLoader/byterun.h	Header for byterun.c
 ext/ByteLoader/hints/sunos.pl	Hints for named architecture
 ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
-ext/Cwd/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
 ext/Cwd/Cwd.xs			Cwd extension external subroutines
 ext/Cwd/Makefile.PL		Cwd extension makefile maker
 ext/Cwd/t/cwd.t			See if Cwd works
@@ -899,6 +898,7 @@ lib/CPAN/t/loadme.t		See if CPAN the module works
 lib/CPAN/t/Nox.t		See if CPAN::Nox works
 lib/CPAN/t/vcmp.t		See if CPAN the module works
 lib/ctime.pl			A ctime workalike
+lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
 lib/DB.pm			Debugger API (draft)
 lib/DB.t			See if DB works
 lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm

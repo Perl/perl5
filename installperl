@@ -117,11 +117,12 @@ my @pods = (<pod/*.pod>);
 # (Those included with XS extensions under ext/ are automatically
 # added later.)
 # Now that the default privlib has the full perl version number included,
-# we no longer have to play the trick of sticking version-specific .pm 
+# we no longer have to play the trick of sticking version-specific .pm
 # files under the archlib directory.
 my %archpms = (
-    Config => 1, 
-    lib => 1, 
+    Config => 1,
+    lib => 1,
+    Cwd => 1,
 );
 
 if ($^O eq 'dos') {
@@ -252,7 +253,7 @@ if (($Is_W32 and ! $Is_NetWare)  or $Is_Cygwin) {
   safe_unlink("$installbin/$perldll");
   copy("$perldll", "$installbin/$perldll");
   chmod(0755, "$installbin/$perldll");
-   
+
 } # if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin)
 
 # This will be used to store the packlist
@@ -314,7 +315,7 @@ if ($d_dosuid) {
 # Install library files.
 
 my ($do_installarchlib, $do_installprivlib) = (0, 0);
-    
+
 mkpath($installprivlib, $verbose, 0777);
 mkpath($installarchlib, $verbose, 0777);
 mkpath($installsitelib, $verbose, 0777) if ($installsitelib);
@@ -383,7 +384,7 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
 		"$installbin/$perl$exe_ext");
     }
     link("$installbin/s$perl_verbase$ver$exe_ext",
-	    "$installbin/suid$perl$exe_ext") 
+	    "$installbin/suid$perl$exe_ext")
       if $d_dosuid;
 }
 
@@ -462,7 +463,7 @@ sub script_alias {
     safe_unlink("$installscript/$alias$scr_ext");
     if ($^O eq 'dos' or $Is_VMS or $^O eq 'transit') {
 	copy("$installscript/$orig$scr_ext",
-	     "$installscript/$alias$scr_ext"); 
+	     "$installscript/$alias$scr_ext");
     } else {
 	link("$installscript/$orig$scr_ext",
 	     "$installscript/$alias$scr_ext");
@@ -479,7 +480,7 @@ if ($versiononly) {
 	chmod(0755, "$installscript/$base");
     }
 
-    for (@tolink) { 
+    for (@tolink) {
         my ($from, $to) = map { "$_$ver" } @$_;
         (my $frbase = $from) =~ s#.*/##;
         (my $tobase = $to) =~ s#.*/##;
@@ -492,7 +493,7 @@ if ($versiononly) {
 	chmod(0755, "$installscript/$base");
     }
 
-    for (@tolink) { 
+    for (@tolink) {
         my ($from, $to) = @$_;
         (my $frbase = $from) =~ s#.*/##;
         (my $tobase = $to) =~ s#.*/##;
@@ -599,7 +600,7 @@ sub unlink {
 	next unless -e $name;
 	chmod 0777, $name if ($Is_OS2 || $Is_W32 || $Is_Cygwin || $Is_NetWare);
 	print "  unlink $name\n" if $verbose;
-	( CORE::unlink($name) and ++$cnt 
+	( CORE::unlink($name) and ++$cnt
 	  or warn "Couldn't unlink $name: $!\n" ) unless $nonono;
     }
     return $cnt;
@@ -629,7 +630,7 @@ sub safe_rename {
 	for ($i = 1; $i < 50; $i++) {
 	    last if rename($to, "$to.$i");
 	}
-	warn("Cannot rename to `$to.$i': $!"), return 0 
+	warn("Cannot rename to `$to.$i': $!"), return 0
 	   if $i >= 50;	# Give up!
     }
     link($from,$to) || return 0;
@@ -713,7 +714,7 @@ sub installlib {
 	$File::Find::prune = 1;
 	return;
     }
-    
+
     # ignore patch backups, RCS files, emacs backup & temp files and the
     # .exists files, .PL files, and .t files.
     return if $name =~ m{\.orig$|~$|^#.+#$|,v$|^\.exists|\.PL$|\.t$};
