@@ -1,4 +1,4 @@
- $! SUBCONFIGURE.COM - build a config.sh for VMS Perl.
+$! SUBCONFIGURE.COM - build a config.sh for VMS Perl.
 $!
 $! Note for folks from other platforms changing things in here:
 $!   Fancy changes (based on compiler capabilities or VMS version or
@@ -2448,6 +2448,77 @@ $
 $ perl_ptrsize=line
 $ WRITE_RESULT "ptrsize is ''perl_ptrsize'"
 $!
+$!
+$! Check rand48 and its ilk
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "int main()
+$ WS "{"
+$ WS "srand48(12L);"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$! copy temp.c sys$output
+$!
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   ON ERROR THEN CONTINUE
+$   ON WARNING THEN CONTINUE
+$   'Checkcc' temp
+$   If (Needs_Opt.eqs."Yes")
+$   THEN
+$     link temp,temp.opt/opt
+$   else
+$     link temp
+$   endif
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_drand01="random()"
+$     perl_randseedtype = "unsigned"
+$     perl_seedfunc = "srandom"
+$   ENDIF
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "int main()
+$ WS "{"
+$ WS "srandom(12);"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$! copy temp.c sys$output
+$!
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   ON ERROR THEN CONTINUE
+$   ON WARNING THEN CONTINUE
+$   'Checkcc' temp
+$   If (Needs_Opt.eqs."Yes")
+$   THEN
+$     link temp,temp.opt/opt
+$   else
+$     link temp
+$   endif
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_drand01="(((float)rand())/((float)RAND_MAX))"
+$     perl_randseedtype = "unsigned"
+$     perl_seedfunc = "srand"
+$   ENDIF
+$ WRITE_RESULT "drand01 is ''perl_drand01'"
+$!
 $ set nover
 $! Done with compiler checks. Clean up.
 $ if f$search("temp.c").nes."" then DELETE/NOLOG temp.c;*
@@ -2645,6 +2716,14 @@ $   THEN
 $     perl_ccflags="/Include=[]/Obj=''perl_obj_ext'/NoList''cc_flags'"
 $   ENDIF
 $ ENDIF
+$ if use_vmsdebug_perl .eqs. "Y"
+$ then
+$     perl_optimize="/Debug/NoOpt"
+$     perl_dbgprefix = "DBG"
+$ else
+$     perl_optimize= ""
+$     perl_dbgprefix = ""
+$ endif
 $!
 $! Finally clean off any leading zeros from the patchlevel or subversion
 $ perl_patchlevel = perl_patchlevel + 0
@@ -2700,6 +2779,8 @@ $ WC "vms_cc_type='" + perl_vms_cc_type + "'"
 $ WC "d_attribut='" + perl_d_attribut + "'"
 $ WC "cc='" + perl_cc + "'"
 $ WC "ccflags='" + perl_ccflags + "'"
+$ WC "optimize='" + perl_optimize + "'"
+$ WC "dbgprefix='" + perl_dbgprefix + "'"
 $ WC "d_vms_do_sockets='" + perl_d_vms_do_sockets + "'"
 $ WC "d_socket='" + perl_d_socket + "'"
 $ WC "d_sockpair='" + perl_d_sockpair + "'"
@@ -3283,7 +3364,8 @@ $    exts1 = F$Edit(p1,"Compress")
 $    p2 = F$Edit(p2,"Upcase,Compress,Trim")
 $    If F$Locate("MCR ",p2).eq.0 Then p2 = F$Extract(3,255,p2)
 $    miniperl = "$" + F$Search(F$Parse(p2,".Exe"))
-$    mmk = p3
+$    makeutil = p3
+$    if f$type('p3') .nes. "" then makeutil = 'p3'
 $    targ = F$Edit(p4,"Lowercase")
 $    i = 0
 $ next_ext:
@@ -3315,7 +3397,7 @@ $      On Error Then Continue
 $    EndIf
 $    If redesc Then -
        miniperl "-I[''up'.lib]" Makefile.PL "INST_LIB=[''up'.lib]" "INST_ARCHLIB=[''up'.lib]"
-$    mmk 'targ'
+$    makeutil 'targ'
 $    i = i + 1
 $    Set Def &def
 $    Goto next_ext

@@ -13,7 +13,7 @@ print "1..58\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_Dos = $^O eq 'dos';
-$Is_Dosish = $Is_Dos || $^O eq 'os2' || $Is_MSWin32;
+$Is_Dosish = $Is_Dos || $^O eq 'os2' || $Is_MSWin32 || $^O =~ /cygwin/;
 chop($cwd = ($Is_MSWin32 ? `cd` : `pwd`));
 
 $DEV = `ls -l /dev` unless $Is_Dosish;
@@ -93,6 +93,9 @@ foreach ((12,13,14,15,16,17)) {
     print "ok $_\n";		#deleted tests
 }
 
+# in ms windows, Op.stat.tmp inherits owner uid from directory
+# not sure about os/2, but chown is harmless anyway
+chown $>,'Op.stat.tmp';
 chmod 0700,'Op.stat.tmp';
 if (-r 'Op.stat.tmp') {print "ok 18\n";} else {print "not ok 18\n";}
 if (-w 'Op.stat.tmp') {print "ok 19\n";} else {print "not ok 19\n";}

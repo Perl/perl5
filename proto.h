@@ -99,6 +99,7 @@ VIRTUAL void    do_chop _((SV* asv, SV* sv));
 VIRTUAL bool	do_close _((GV* gv, bool not_implicit));
 VIRTUAL bool	do_eof _((GV* gv));
 VIRTUAL bool	do_exec _((char* cmd));
+VIRTUAL bool	do_exec3 _((char* cmd, int fd, int flag));
 VIRTUAL void	do_execfree _((void));
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 I32	do_ipcctl _((I32 optype, SV** mark, SV** sp));
@@ -752,6 +753,7 @@ I32 dopoptosub _((I32 startingblock));
 I32 dopoptosub_at _((PERL_CONTEXT* cxstk, I32 startingblock));
 void save_lines _((AV *array, SV *sv));
 OP *doeval _((int gimme, OP** startop));
+PerlIO *doopen _((const char *name, const char *mode));
 I32 sv_ncmp _((SV *a, SV *b));
 I32 sv_i_ncmp _((SV *a, SV *b));
 I32 amagic_ncmp _((SV *a, SV *b));

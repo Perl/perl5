@@ -624,7 +624,7 @@ SETARGV_OBJ	= setargv$(o)
 .ENDIF
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
-		Data/Dumper Devel/Peek
+		Data/Dumper Devel/Peek ByteLoader
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -642,6 +642,7 @@ RE		= $(EXTDIR)\re\re
 DUMPER		= $(EXTDIR)\Data\Dumper\Dumper
 ERRNO		= $(EXTDIR)\Errno\Errno
 PEEK		= $(EXTDIR)\Devel\Peek\Peek
+BYTELOADER	= $(EXTDIR)\ByteLoader
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -655,6 +656,7 @@ B_DLL		= $(AUTODIR)\B\B.dll
 DUMPER_DLL	= $(AUTODIR)\Data\Dumper\Dumper.dll
 PEEK_DLL	= $(AUTODIR)\Devel\Peek\Peek.dll
 RE_DLL		= $(AUTODIR)\re\re.dll
+BYTELOADER_DLL	= $(AUTODIR)\ByteLoader\ByteLoader.dll
 
 ERRNO_PM	= $(LIBDIR)\Errno.pm
 
@@ -670,7 +672,8 @@ EXTENSION_C	=		\
 		$(RE).c		\
 		$(DUMPER).c	\
 		$(PEEK).c	\
-		$(B).c
+		$(B).c		\
+		$(BYTELOADER).c
 
 EXTENSION_DLL	=		\
 		$(SOCKET_DLL)	\
@@ -682,7 +685,8 @@ EXTENSION_DLL	=		\
 		$(ATTRS_DLL)	\
 		$(DUMPER_DLL)	\
 		$(PEEK_DLL)	\
-		$(B_DLL)
+		$(B_DLL)	\
+		$(BYTELOADER_DLL)
 
 EXTENSION_PM	=		\
 		$(ERRNO_PM)
@@ -1024,6 +1028,11 @@ $(SOCKET_DLL): $(PERLEXE) $(SOCKET).xs
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
+$(BYTELOADER_DLL): $(PERLEXE) $(BYTELOADER).xs
+	cd $(EXTDIR)\$(*B) && \
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\$(*B) && $(MAKE)
+
 $(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -1052,7 +1061,7 @@ distclean: clean
 	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm $(LIBDIR)\Thread.pm
 	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
 	-del /f $(LIBDIR)\B.pm $(LIBDIR)\O.pm $(LIBDIR)\re.pm
-	-del /f $(LIBDIR)\Data\Dumper.pm
+	-del /f $(LIBDIR)\Data\Dumper.pm $(LIBDIR)\ByteLoader.pm
 	-del /f $(LIBDIR)\Devel\Peek.pm
 	-rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
 	-rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread

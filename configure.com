@@ -39,6 +39,7 @@ $ cat  = "type"
 $ gcc_symbol = "gcc"
 $ ans = ""
 $ macros = ""
+$ use_vmsdebug_perl = "N"
 $ use_debugging_perl = "Y"
 $ C_Compiler_Replace = "CC="
 $ Thread_Live_Dangerously = "MT="
@@ -1670,6 +1671,24 @@ $   IF ans.eqs."socketshr" then has_socketshr = "T"
 $ endif
 $!
 $!
+$! Ask if they want to build with VMS_DEBUG perl
+$ echo "Perl can be built to run under the VMS debugger."
+$ echo "You should only select this option if you are debugging"
+$ echo "perl itself.  This can be a useful feature if you are "
+$ echo "embedding perl in a program."
+$ echo ""
+$ dflt = "N"
+$ rp = "Build a VMS-DEBUG version of Perl? [''dflt'] "
+$ GOSUB myread
+$   if ans.eqs."" then ans = dflt
+$ if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
+$ THEN
+$   use_vmsdebug_perl = "Y"
+$   macros = macros + """__DEBUG__=1"","
+$ ELSE
+$   use_vmsdebug_perl = "N"
+$ ENDIF
+$!
 $! Ask if they want to build with MULTIPLICITY
 $ echo "The perl interpreter engine can be built in a way that makes it
 $ echo "possible for a program that embeds perl into it (and yep, you can
@@ -1988,11 +2007,25 @@ $ ELSE
 $ WRITE CONFIG "$! This perl configured & administered by ''perladmin'"
 $ ENDIF
 $ WRITE CONFIG "$!"
+$ prefix = prefix - "000000."
 $ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN -
     prefix = prefix - "]" + ".]" 
 $ WRITE CONFIG "$ define/translation=concealed Perl_Root ''prefix'"
-$ WRITE CONFIG "$ perl :== $Perl_Root:[000000]Perl"
-$ WRITE CONFIG "$ define PerlShr Perl_Root:[000000]PerlShr.Exe"
+$ write config "$ ext = "".exe"""
+$ if sharedperl .eqs. "Y"
+$ then
+$   write config "$ if f$getsyi(""ARCH_NAME"") .nes. ""VAX"" then ext = "".AXE"""
+$ endif
+$ IF use_vmsdebug_perl .eqs. "Y"
+$ then
+$   WRITE CONFIG "$ dbgperl :== $Perl_Root:[000000]dbgPerl'ext'"
+$   WRITE CONFIG "$ perl    :== $Perl_Root:[000000]ndbgPerl'ext'"
+$   WRITE CONFIG "$ define dbgPerlShr Perl_Root:[000000]dbgPerlShr'ext'"
+$ else
+$   WRITE CONFIG "$ perl :== $Perl_Root:[000000]Perl'ext'"
+$   WRITE CONFIG "$ define PerlShr Perl_Root:[000000]PerlShr'ext'"
+$ endif
+$!
 $ IF (tzneedset)
 $ THEN
 $ WRITE CONFIG "$ define SYS$TIMEZONE_DIFFERENTIAL ''tzd'"

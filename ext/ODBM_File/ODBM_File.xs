@@ -121,7 +121,7 @@ DESTROY(db)
 	dbmrefcnt--;
 	dbmclose();
 
-datum_key
+datum_value
 odbm_FETCH(db, key)
 	ODBM_File	db
 	datum_key	key
@@ -161,7 +161,7 @@ odbm_NEXTKEY(db, key)
 	        RETVAL = newSVsv(db->type) ; 		\
 	    if (db->type && (code == &PL_sv_undef)) {	\
                 SvREFCNT_dec(db->type) ;		\
-	        db->type = NULL ;			\
+	        db->type = Nullsv ;			\
 	    }						\
 	    else if (code) {				\
 	        if (db->type)				\

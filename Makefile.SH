@@ -46,6 +46,9 @@ true)
 	rhapsody*)
 		ldlibpth="DYLD_LIBRARY_PATH=`pwd`/Perl:$DYLD_LIBRARY_PATH"
 		;;
+	cygwin*)	ldlibpth="PATH=`pwd`:$PATH"
+		linklibperl="-lperl"
+		;;
 	os2*)	# OS/2 doesn't need anything special for LD_LIBRARY_PATH.
 		ldlibpth=''
 		;;
@@ -68,8 +71,9 @@ true)
 		aixinstdir=`pwd | sed 's/\/UU$//'`
 		linklibperl="-L $archlibexp/CORE -L $aixinstdir -lperl"
 		;;
-	hpux10*|hpux11*)
-		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+b$archlibexp/CORE -lperl"
+	hpux*)
+		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"
+		ldlibpth="SHLIB_PATH=`pwd`:${SHLIB_PATH}"
 		;;
 	beos*)	ldlibpth="LIBRARY_PATH=`pwd`:$LIBRARY_PATH"
 		;;
@@ -295,11 +299,20 @@ ext.libs: $(static_ext)
 
 # How to build libperl.  This is still rather convoluted.
 # Load up custom Makefile.SH fragment for shared loading and executables:
-if test -r $osname/Makefile.SHs ; then
-	. $osname/Makefile.SHs
+case "$osname" in
+cygwin*)
+	Makefile_s="cygwin32/Makefile.SHs"
+	;;
+*)
+	Makefile_s="$osname/Makefile.SHs"
+	;;
+esac
+
+if test -r $Makefile_s ; then
+	. $Makefile_s
 	$spitshell >>Makefile <<!GROK!THIS!
 
-Makefile: $osname/Makefile.SHs
+Makefile: $Makefile_s
 !GROK!THIS!
 else
 	$spitshell >>Makefile <<'!NO!SUBS!'

@@ -32,9 +32,17 @@ $     Write Sys$Error "Descrip.MMS or used the AXE=1 macro in the MM[SK] command
 $     Write Sys$Error ""
 $     Exit 44
 $   EndIf
+$!
+$!  "debug" perl if second parameter is nonblank
+$!
+$   dbg = ""
+$   ndbg = ""
+$   if p2.nes."" then dbg  = "dbg"
+$   if p2.nes."" then ndbg = "ndbg"
+$!
 $!  Pick up a copy of perl to use for the tests
 $   Delete/Log/NoConfirm Perl.;*
-$   Copy/Log/NoConfirm [-]Perl'exe' []Perl.
+$   Copy/Log/NoConfirm [-]'ndbg'Perl'exe' []Perl.
 $
 $!  Make the environment look a little friendlier to tests which assume Unix
 $   cat = "Type"
@@ -85,8 +93,8 @@ $
 $!  And do it
 $   Show Process/Accounting
 $   testdir = "Directory/NoHead/NoTrail/Column=1"
-$   Define/User Perlshr Sys$Disk:[-]PerlShr'exe'
-$   MCR Sys$Disk:[]Perl. "-I[-.lib]" - "''p2'" "''p3'" "''p4'" "''p5'" "''p6'"
+$   Define/User 'dbg'Perlshr Sys$Disk:[-]'dbg'PerlShr'exe'
+$   MCR Sys$Disk:[]Perl. "-I[-.lib]" - "''p3'" "''p4'" "''p5'" "''p6'"
 $   Deck/Dollar=$$END-OF-TEST$$
 # $RCSfile: TEST,v $$Revision: 4.1 $$Date: 92/08/07 18:27:00 $
 # Modified for VMS 30-Sep-1994  Charles Bailey  bailey@newman.upenn.edu
@@ -166,6 +174,7 @@ while ($test = shift) {
 	open(results,"\$ MCR Sys\$Disk:[]Perl. \"-I[-.lib]\" $switch $test |") || (print "can't run.\n");
     $ok = 0;
     $next = 0;
+    $pending_not = 0;
     while (<results>) {
 	if ($verbose) {
 	    print "$te$_";
@@ -182,7 +191,10 @@ while ($test = shift) {
 		$next = $1, $ok = 0, last if /^not ok ([0-9]*)/;
 		next if /^\s*$/; # our 'echo' substitute produces one more \n than Unix'
 		if (/^ok (.*)/ && $1 == $next) {
+		    $next = $1, $ok=0, last if $pending_not;
 		    $next = $next + 1;
+		} elsif (/^not/) {
+		    $pending_not = 1;
 		} else {
 		    $ok = 0;
 		}

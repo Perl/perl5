@@ -254,6 +254,7 @@ my @staticfuncs = qw(
     dopoptosub_at
     save_lines
     doeval
+    doopen
     sv_ncmp
     sv_i_ncmp
     amagic_ncmp

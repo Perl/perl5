@@ -122,6 +122,7 @@ DllExport  unsigned 	win32_sleep(unsigned int);
 DllExport  int		win32_times(struct tms *timebuf);
 DllExport  unsigned 	win32_alarm(unsigned int sec);
 DllExport  int		win32_stat(const char *path, struct stat *buf);
+DllExport  char*	win32_longpath(char *path);
 DllExport  int		win32_ioctl(int i, unsigned int u, char *data);
 DllExport  int		win32_utime(const char *f, struct utimbuf *t);
 DllExport  int		win32_uname(struct utsname *n);
@@ -207,6 +208,7 @@ END_EXTERN_C
 #define abort()			win32_abort()
 #define fstat(fd,bufptr)   	win32_fstat(fd,bufptr)
 #define stat(pth,bufptr)   	win32_stat(pth,bufptr)
+#define longpath(pth)   	win32_longpath(pth)
 #define rename(old,new)		win32_rename(old,new)
 #define setmode(fd,mode)	win32_setmode(fd,mode)
 #define lseek(fd,offset,orig)	win32_lseek(fd,offset,orig)

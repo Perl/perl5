@@ -1722,6 +1722,8 @@ newPROG(OP *o)
 {
     dTHR;
     if (PL_in_eval) {
+	if (PL_eval_root)
+		return;
 	PL_eval_root = newUNOP(OP_LEAVEEVAL, ((PL_in_eval & 4) ? OPf_SPECIAL : 0), o);
 	PL_eval_start = linklist(PL_eval_root);
 	PL_eval_root->op_next = 0;

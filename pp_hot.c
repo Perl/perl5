@@ -204,19 +204,15 @@ PP(pp_readline)
 {
     tryAMAGICunTARGET(iter, 0);
     PL_last_in_gv = (GV*)(*PL_stack_sp--);
-    if (PL_op->op_flags & OPf_SPECIAL) {	/* Are called as <$var> */
-	if (SvROK(PL_last_in_gv)) {
-	    if (SvTYPE(SvRV(PL_last_in_gv)) != SVt_PVGV) 
-		goto hard_way;
+    if (SvTYPE(PL_last_in_gv) != SVt_PVGV) {
+	if (SvROK(PL_last_in_gv) && SvTYPE(SvRV(PL_last_in_gv)) == SVt_PVGV) 
 	    PL_last_in_gv = (GV*)SvRV(PL_last_in_gv);
-	} else if (SvTYPE(PL_last_in_gv) != SVt_PVGV) {
-	  hard_way: {
+	else {
 	    dSP;
 	    XPUSHs((SV*)PL_last_in_gv);
 	    PUTBACK;
 	    pp_rv2gv(ARGS);
 	    PL_last_in_gv = (GV*)(*PL_stack_sp--);
-	  }
 	}
     }
     return do_readline();
@@ -237,7 +233,7 @@ PP(pp_preinc)
     djSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(PL_no_modify);
-    if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
+    if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MAX)
     {
 	++SvIVX(TOPs);
@@ -1236,9 +1232,15 @@ do_readline(void)
 		sv_setpv(tmpcmd, "/dev/dosglob/"); /* File System Extension */
 		sv_catsv(tmpcmd, tmpglob);
 #else
+#ifdef CYGWIN32
+		sv_setpv(tmpcmd, "for a in ");
+		sv_catsv(tmpcmd, tmpglob);
+		sv_catpv(tmpcmd, "; do echo -e \"$a\\0\\c\"; done |");
+#else
 		sv_setpv(tmpcmd, "perlglob ");
 		sv_catsv(tmpcmd, tmpglob);
 		sv_catpv(tmpcmd, " |");
+#endif /* !CYGWIN */
 #endif /* !DJGPP */
 #endif /* !OS2 */
 #else /* !DOSISH */

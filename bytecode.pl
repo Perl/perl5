@@ -386,6 +386,7 @@ cop_filegv	*(SV**)&cCOP->cop_filegv		svindex
 cop_seq		cCOP->cop_seq				U32
 cop_arybase	cCOP->cop_arybase			I32
 cop_line	cCOP->cop_line				line_t
+cop_warnings	cCOP->cop_warnings			svindex
 main_start	PL_main_start				opindex
 main_root	PL_main_root				opindex
 curpad		PL_curpad				svindex		x

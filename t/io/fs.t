@@ -10,7 +10,7 @@ BEGIN {
 use Config;
 
 $Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'dos' or
-	      $^O eq 'os2' or $^O eq 'mint');
+	      $^O eq 'os2' or $^O eq 'mint' or $^O =~ /cygwin/);
 
 print "1..28\n";
 

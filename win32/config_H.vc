@@ -1091,7 +1091,7 @@
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
  */
-#define	CASTI32		/**/
+/*#define	CASTI32		/**/
 
 /* CASTNEGFLOAT:
  *	This symbol is defined if the C compiler can cast negative

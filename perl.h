@@ -218,7 +218,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  */
 
 /* define this once if either system, instead of cluttering up the src */
-#if defined(MSDOS) || defined(atarist) || defined(WIN32)
+#if defined(MSDOS) || defined(atarist) || defined(WIN32) || defined(CYGWIN32)
 #define DOSISH 1
 #endif
 
@@ -1449,6 +1449,14 @@ typedef pthread_key_t	perl_key;
 #   define STATUS_ALL_FAILURE	(PL_statusvalue = 1)
 #endif
 
+/* This defines a way to flush all output buffers.  This may be a
+ * performance issue, so we allow people to disable it.
+ * XXX the default needs a Configure test, as it may not work everywhere.
+ */
+#ifndef PERL_FLUSHALL_FOR_CHILD
+#define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
+#endif
+
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
    below to be rejected by the compmiler.  Sigh.
@@ -1487,11 +1495,7 @@ union any {
 #define ARGSproto void
 #endif /* USE_THREADS */
 
-/* Work around some cygwin32 problems with importing global symbols */
 #if defined(CYGWIN32)
-#  if defined(DLLIMPORT) 
-#   include "cw32imp.h"
-#  endif
 /* USEMYBINMODE
  *   This symbol, if defined, indicates that the program should
  *   use the routine my_binmode(FILE *fp, char iotype) to insure
@@ -1648,6 +1652,11 @@ typedef I32 CHECKPOINT;
 #define U_V(what) (cast_uv((double)(what)))
 #endif
 
+/* Used with UV/IV arguments: */
+					/* XXXX: need to speed it up */
+#define CLUMP_2UV(iv)	((iv) < 0 ? 0 : (UV)(iv))
+#define CLUMP_2IV(uv)	((uv) > (UV)IV_MAX ? IV_MAX : (IV)(uv))
+
 struct Outrec {
     I32		o_lines;
     char	*o_str;
@@ -1685,7 +1694,11 @@ Gid_t getegid _((void));
 #define DEBUG_o(a) if (PL_debug & 16)	a
 #define DEBUG_c(a) if (PL_debug & 32)	a
 #define DEBUG_P(a) if (PL_debug & 64)	a
-#define DEBUG_m(a) if (PL_curinterp && PL_debug & 128)	a
+#  ifdef PERL_OBJECT
+#    define DEBUG_m(a) if (PL_debug & 128)	a
+#  else
+#    define DEBUG_m(a) if (PL_curinterp && PL_debug & 128)	a
+#  endif
 #define DEBUG_f(a) if (PL_debug & 256)	a
 #define DEBUG_r(a) if (PL_debug & 512)	a
 #define DEBUG_x(a) if (PL_debug & 1024)	a
@@ -2300,7 +2313,7 @@ struct perl_vars {
 EXT struct perl_vars PL_Vars;
 EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
 #else /* PERL_CORE */
-#if !defined(__GNUC__) || !defined(WIN32)
+#if !defined(__GNUC__) || !(defined(WIN32) || defined(CYGWIN32))
 EXT
 #endif /* WIN32 */
 struct perl_vars *PL_VarsPtr;

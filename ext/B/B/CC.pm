@@ -8,7 +8,7 @@
 package B::CC;
 use strict;
 use B qw(main_start main_root class comppadlist peekop svref_2object
-	timing_info init_av  sv_undef
+	timing_info init_av sv_undef amagic_generation 
 	OPf_WANT_LIST OPf_WANT OPf_MOD OPf_STACKED OPf_SPECIAL
 	OPpASSIGN_BACKWARDS OPpLVAL_INTRO OPpDEREF_AV OPpDEREF_HV
 	OPpDEREF OPpFLIP_LINENUM G_ARRAY G_SCALAR    
@@ -1424,7 +1424,12 @@ sub cc {
 	warn sprintf("Basic block analysis at %s\n", timing_info);
     }
     $leaders = find_leaders($root, $start);
-    @bblock_todo = ($start, values %$leaders);
+    my @leaders= keys %$leaders; 
+    if ($#leaders > -1) { 
+    	@bblock_todo = ($start, values %$leaders) ;
+    } else{
+	runtime("return PL_op?PL_op->op_next:0;");
+    }
     if ($debug_timings) {
 	warn sprintf("Compilation at %s\n", timing_info);
     }
@@ -1488,6 +1493,7 @@ sub cc_main {
 
     my $inc_hv      = svref_2object(\%INC)->save;
     my $inc_av      = svref_2object(\@INC)->save;
+    my $amagic_generate= amagic_generation;
     return if $errors;
     if (!defined($module)) {
 	$init->add(sprintf("PL_main_root = s\\_%x;", ${main_root()}),
@@ -1498,6 +1504,7 @@ sub cc_main {
 		   "GvAV(PL_incgv) = $inc_av;",
 		   "av_store(CvPADLIST(PL_main_cv),0,SvREFCNT_inc($curpad_nam));",
 		   "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));",
+		   "PL_amagic_generation= $amagic_generate;",
 		     );
                  
     }

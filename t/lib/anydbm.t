@@ -12,6 +12,9 @@ use Fcntl;
 
 print "1..12\n";
 
+$Is_Dosish = ($^O eq 'amigaos' || $^O eq 'MSWin32' or $^O eq 'dos' or
+	      $^O eq 'os2' or $^O eq 'mint' or $^O =~ /cygwin/);
+
 unlink <Op_dbmx*>;
 
 umask(0);
@@ -22,7 +25,7 @@ $Dfile = "Op_dbmx.pag";
 if (! -e $Dfile) {
 	($Dfile) = <Op_dbmx*>;
 }
-if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'dos') {
+if ($Is_Dosish) {
     print "ok 2 # Skipped: different file permission semantics\n";
 }
 else {

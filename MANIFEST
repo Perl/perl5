@@ -72,11 +72,15 @@ configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
 cop.h			Control operator header
 cv.h			Code value header
-cygwin32/cw32imp.h	Cygwin32 port
-cygwin32/gcc2		Cygwin32 port
-cygwin32/ld2		Cygwin32 port
-cygwin32/perlgcc	Cygwin32 port
-cygwin32/perlld		Cygwin32 port
+cygwin32/Makefile.SHs	Shared library generation for Cygwin32 port
+cygwin32/ld2.in		ld wrapper template for Cygwin32 port
+cygwin32/perlld.in	dll generator template for Cygwin32 port
+cygwin32/impure_ptr.c	impure pointer stub for dlls
+cygwin32/build-instructions.charles-wilson	Cygwin32 porters notes
+cygwin32/build-instructions.READFIRST		Cygwin32 porters notes
+cygwin32/build-instructions.steven-morlock2	Cygwin32 porters notes
+cygwin32/build-instructions.sebastien-barre	Cygwin32 porters notes
+cygwin32/build-instructions.steven-morlock	Cygwin32 porters notes
 deb.c			Debugging routines
 djgpp/config.over       DOS/DJGPP port
 djgpp/configure.bat     DOS/DJGPP port
@@ -195,6 +199,9 @@ ext/B/ramblings/magic		Compiler ramblings: notes on magic
 ext/B/ramblings/reg.alloc	Compiler ramblings: register allocation
 ext/B/ramblings/runtime.porting	Compiler ramblings: porting PP enging
 ext/B/typemap		Compiler backend interface types
+ext/ByteLoader/ByteLoader.pm	Bytecode loader Perl module
+ext/ByteLoader/ByteLoader.xs	Bytecode loader external subroutines
+ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
 ext/DB_File/Changes		Berkeley DB extension change log
 ext/DB_File/DB_File.pm		Berkeley DB extension Perl module
 ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
@@ -939,6 +946,7 @@ plan9/plan9ish.h	Plan9 port: Plan9-specific C header file
 plan9/setup.rc		Plan9 port: script for easy build+install
 plan9/versnum		Plan9 port: script to print version number
 pod/Makefile		Make pods into something else
+pod/Win32.pod		Documentation for Win32 extras
 pod/buildtoc		generate perltoc.pod
 pod/checkpods.PL	Tool to check for common errors in pods
 pod/perl.pod		Top level perl man page
@@ -1112,6 +1120,7 @@ t/lib/hostname.t	See if Sys::Hostname works
 t/lib/io_const.t	See if constants from IO work
 t/lib/io_dir.t		See if directory-related methods from IO work
 t/lib/io_dup.t		See if dup()-related methods from IO work
+t/lib/io_linenum.t	See if I/O line numbers are tracked correctly
 t/lib/io_multihomed.t	See if INET sockets work with multi-homed hosts
 t/lib/io_pipe.t		See if pipe()-related methods from IO work
 t/lib/io_poll.t		See if poll()-related methods from IO work
@@ -1195,6 +1204,7 @@ t/op/method.t		See if method calls work
 t/op/misc.t		See if miscellaneous bugs have been fixed
 t/op/mkdir.t		See if mkdir works
 t/op/my.t		See if lexical scoping works
+t/op/numconvert.t	See if accessing fields does not change numeric values
 t/op/nothread.t		local @_ test which does not work threaded 
 t/op/oct.t		See if oct and hex work
 t/op/ord.t		See if ord works
@@ -1311,6 +1321,7 @@ utils/c2ph.PL		program to translate dbx stabs to perl
 utils/h2ph.PL		A thing to turn C .h files into perl .ph files
 utils/h2xs.PL		Program to make .xs files from C header files
 utils/perlbug.PL	A simple tool to submit a bug report
+utils/perlbc.PL		Front-end for bytecode compiler
 utils/perlcc.PL		Front-end for compiler
 utils/perldoc.PL	A simple tool to find & display perl's documentation
 utils/pl2pm.PL		A pl to pm translator

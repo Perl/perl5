@@ -1,28 +1,93 @@
-The following assumes you have the GNU-Win32 package, version b17.1 or
-later, installed and configured on your system.  See
-http://www.cygnus.com/misc/gnu-win32/ for details on the GNU-Win32
-project and the Cygwin32 API.
+If you read this file _as_is_, just ignore the funny characters you
+see. It is written in the POD format (see pod/perlpod.pod) which is
+specially designed to be readable as is.
 
-1)  Copy the contents of the cygwin32 directory to the Perl source
-    root directory.
+=head1 NAME
 
-2)  Modify the ld2 and gcc2 scripts by making the PERLPATH variable contain
-    the Perl source root directory.  For example, if you extracted perl to
-    "/perl5.005", change the scripts so they contain the line:
+README.cygwin32 - notes about porting Perl to Cygwin32
 
-	PERLPATH=/perl5.005
+=head1 SYNOPSIS
 
-3)  Copy the two scripts ld2 and gcc2 from the cygwin32 subdirectory to a
-    directory in your PATH environment variable.  For example, copy to
-    /bin, assuming /bin is in your PATH.  (These two scripts are 'wrapper'
-    scripts that encapsulate the multiple-pass dll building steps used by
-    GNU-Win32 ld/gcc.)
+=over
 
-4)  Run the perl Configuration script as stated in the perl README file:
+=item Cygwin32
 
-	sh Configure
+   The Cygwin tools are ports of the popular GNU development tools for
+Windows NT, 95, and 98.  They run thanks to the Cygwin library which
+provides the UNIX system calls and environment these programs expect.
+More info about this project can be found at it's home page
+http://sourceware.cygnus.com/cygwin/
 
-    When confronted with this prompt:
+   Cygnus Solutions also made the first set of notes and tools for
+building perl under Cygwin32 beta17.
+
+=item als
+
+no, i am not hunting the patch pumpkin.  i just wanted to have working
+non-ActiveState perl binaries for Windows NT that can load dynamic
+extensions.  after several days of internet searching i went to conclusion
+that the most promising way is to build it myself.  i was wrong.
+
+=back
+
+=head1 BUILDING
+
+=head2 Prerequisites
+
+=over
+
+=item Cygwin b20.1
+
+since you are willing to build things yourself, you are supposed to use
+not-so-archaic tools.  the latest stable Cygwin suite is beta20.1. it may be
+downloaded from ftp://go.cygnus.com/pub/sourceware.cygnus.com/cygwin/latest/
+or many mirror sites around the world.
+
+=item egcs-1.1.2
+
+i've tried to build with egcs-1.1 that comes with cygwin b20.1, and
+had no luck.  maybe, if a week ago i was as experienced as now,
+things would go different...  maybe.  but this port was built with
+egcs-1.1.2 downloaded from
+ftp://ftp.xraylith.wisc.edu/pub/khan/gnu-win32/cygwin/egcs-1.1.2/
+
+=item my patches
+
+if you are reading this, those are probably applied already.
+
+=item crypt library
+
+you do not want to see messages about excessive paranoia, do you?
+well, http://miracle.geol.msu.ru/sos/ points to two different crypt
+libraries ported to cygwin.  i used libcrypt.tgz by Andy Piper.
+his home page can be found at http://www.xemacs.freeserve.co.uk/
+
+=item environment
+
+the locations of cygwin instllation are, well, a little unusual.
+Configure will run smoother if you make more common aliases for cygwin
+directories.  it can be made either by C<mount>ing or by creating
+directory symlinks like this:
+
+ln -s /cygnus/cygwin-b20/H-i586-cygwin32/bin/ $prefix/bin
+ln -s /cygnus/cygwin-b20/H-i586-cygwin32/i586-cygwin32/include/ \
+	$prefix/include
+ln -s /cygnus/cygwin-b20/H-i586-cygwin32/i586-cygwin32/lib/ $prefix/lib
+
+$prefix may be empty (root), /usr, or /usr/local, as you preffer.
+i used /usr.  futhermore, t/io/taint.t requires cygwin1.dll to be
+present in build directory or somewhere in system path (/WINNT,
+/WINNT/System, /WINNT/System32).
+
+=back
+
+=head2 Configure
+
+run "sh Configure".  
+
+When confronted with this prompt:
+
+=begin text
 
 	First time through, eh?  I have some defaults handy for the
 	following systems:
@@ -31,29 +96,76 @@ project and the Cygwin32 API.
 	   .
 	Which of these apply, if any?
 
-    Select "cygwin32".
+=end text
 
-    The defaults should be OK for everything, except for the specific
-    pathnames for the cygwin32 libs, include files, installation dirs,
-    etc. on your system; answer those questions appropriately.
+guess what system do you have.  (hint: select "cygwin32").
 
-    NOTE: On windows 95, the configuration script only stops every other
-    time for responses from the command line.  In this case you can manually
-    copy hints/cygwin32.sh to config.sh, edit config.sh for your paths, and
-    run Configure non-interactively using sh Configure -d. 
+i do not use malloc that comes with perl, but haven't put this setting
+to hints file.  perl defaults to use own malloc.
 
-5)  Run "make" as stated in the perl README file.
+Configure proposes additional -fpic flag for shared library module
+compilation.  say "none" because gcc complains that -fpic is useless.
 
-6)  Run "make test".  Some tests will fail, but you should get around a 
-    83% success rate.  (Most failures seem to be due to Unixisms that don't
-    apply to win32.)
+i hope that further defaults are ok.  please double-chek it.
 
-7)  Install.  If you just run "perl installperl", it appears that perl
-    can't find itself when it forks because it changes to another directory
-    during the install process.  You can get around this by invoking the
-    install script using a full pathname for perl, such as:
+=head2 make
 
-	/perl5.004/perl installperl
+run "make".  after that, run "make test" to see how unstable your system is.
+for me, lib/io_sock.t waits for died child that has to be killed manually.
+other test scripts seem to be more or less harmless.  the result of
+./perl harness reads:
 
-    This should complete the installation process.
+=begin text
 
+Failed Test  Status Wstat Total Fail  Failed  List of failed
+-------------------------------------------------------------------------------
+lib/anydbm.t      2   512    12    8  66.67%  5-12
+lib/findbin.t                 1    1 100.00%  1
+lib/io_sock.t     1   256     5    4  80.00%  2-5
+lib/sdbm.t        2   512    18   15  83.33%  2, 5-18
+op/magic.t                   35    3   8.57%  1, 23, 30
+op/stat.t                    58    3   5.17%  2, 9, 26
+pragma/locale.t  11  2816   102    4   3.92%  99-102
+8 tests skipped, plus 35 subtests skipped.
+Failed 7/190 test scripts, 96.32% okay. 38/6454 subtests failed, 99.41% okay.
+
+=end text
+
+=head1 BUGS
+
+a lot of warnings about incompatible pointer types and comparison
+lacking a cast.  this is because of __declspec(dllimport).
+
+upon each start, make warns that a rule for perlmain.o is overrided.
+yes, it is.  in order to use libperl.dll, perlmain needs to import
+symbols from there.  i saw no better solution than adding an explicit
+define to the rule.
+
+as said above, IO::Socket generates access violation.  don't know why.
+don't need IO::Socket for now.
+
+make clean does not remove library .def and .exe.core files
+
+ld2 script is installed with reference to source directory.  you should
+change this to /usr/local/bin (or whatever) after install.
+
+.bat wrappers for installed utility scripts are not made during installation.
+
+library man pages are not installed correctly due to file system limitations.
+use perldoc script to read about things like foo::bar.
+
+=head1 AUTHOR
+
+alexander smishlajev <als@turnhere.com>
+
+=head1 DISCLAIMER
+
+i am not going to maintain this document or this port.  i only wanted
+to make perl porting a bit easier.  if failed, i can't be helpful for you.
+
+=head1 HISTORY
+
+17..25-apr-1999.  perl 5.005_03.  cygwin b20.1  egcs 1.1.2.
+                  far 1.60.  nescafe classic.
+
+=cut

@@ -141,7 +141,7 @@ sub load_pad {
     for ($ix = 1; $ix < @namelist; $ix++) {
 	my $namesv = $namelist[$ix];
 	next if class($namesv) eq "SPECIAL";
-	my ($type, $name) = $namesv->PV =~ /^(.)(.*)$/;
+	my ($type, $name) = $namesv->PV =~ /^(.)([^\0]*)(\0.*)?$/;
 	$pad[$ix] = ["(lexical)", $type, $name];
     }
 }

@@ -293,6 +293,8 @@ sub B::COP::bytecode {
     my $filegv = $op->filegv;
     my $filegvix = $filegv->objix;
     my $line = $op->line;
+    my $warnings = $op->warnings;
+    my $warningsix = $warnings->objix;
     if ($debug_bc) {
 	printf "# line %s:%d\n", $filegv->SV->PV, $line;
     }
@@ -305,6 +307,7 @@ cop_seq %d
 cop_filegv $filegvix
 cop_arybase %d
 cop_line $line
+cop_warnings $warningsix
 EOT
     $filegv->bytecode;
     $stash->bytecode;

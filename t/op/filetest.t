@@ -5,8 +5,10 @@
 
 BEGIN {
     chdir 't' if -d 't';
+    unshift @INC, '../lib' if -d '../lib';
 }
 
+use Config;
 print "1..10\n";
 
 print "not " unless -d 'op';
@@ -50,8 +52,12 @@ eval '$> = $oldeuid';	# switch uid back (may not be implemented)
 
 # this would fail for the euid 1
 # (unless we have unpacked the source code as uid 1...)
-print "not " unless -w 'op';
-print "ok 8\n";
+if ($Config{d_seteuid}) {
+    print "not " unless -w 'op';
+    print "ok 8\n";
+} else {
+    print "ok 8 #skipped, no seteuid\n";
+}
 
 print "not " unless -x 'op'; # Hohum.  Are directories -x everywhere?
 print "ok 9\n";

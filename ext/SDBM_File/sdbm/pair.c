@@ -8,7 +8,12 @@
  */
 
 #include "config.h"
-#include "EXTERN.h"
+#ifdef CYGWIN32
+# define EXT extern
+# define EXTCONST extern const
+#else
+# include "EXTERN.h"
+#endif
 #include "sdbm.h"
 #include "tune.h"
 #include "pair.h"

@@ -49,7 +49,7 @@ use Exporter ();
 
 use B qw(minus_c sv_undef walkoptree walksymtable main_root main_start peekop
 	 class cstring cchar svref_2object compile_stats comppadlist hash
-	 threadsv_names main_cv init_av opnumber
+	 threadsv_names main_cv init_av opnumber amagic_generation
 	 AVf_REAL HEf_SVKEY);
 use B::Asmdata qw(@specialsv_name);
 
@@ -401,7 +401,9 @@ sub B::NV::save {
     my ($sv) = @_;
     my $sym = objsym($sv);
     return $sym if defined $sym;
-    $xpvnvsect->add(sprintf("0, 0, 0, %d, %s", $sv->IVX, $sv->NVX));
+    my $val= $sv->NVX;
+    $val .= '.00' if $val =~ /^-?\d+$/;
+    $xpvnvsect->add(sprintf("0, 0, 0, %d, %s", $sv->IVX, $val));
     $svsect->add(sprintf("&xpvnv_list[%d], %lu, 0x%x",
 			 $xpvnvsect->index, $sv->REFCNT + 1, $sv->FLAGS));
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
@@ -453,8 +455,10 @@ sub B::PVNV::save {
     $pv = '' unless defined $pv;
     my $len = length($pv);
     my ($pvsym, $pvmax) = savepv($pv);
+    my $val= $sv->NVX;
+    $val .= '.00' if $val =~ /^-?\d+$/;
     $xpvnvsect->add(sprintf("%s, %u, %u, %d, %s",
-			    $pvsym, $len, $pvmax, $sv->IVX, $sv->NVX));
+			    $pvsym, $len, $pvmax, $sv->IVX, $val));
     $svsect->add(sprintf("&xpvnv_list[%d], %lu, 0x%x",
 			 $xpvnvsect->index, $sv->REFCNT + 1, $sv->FLAGS));
     if (!$pv_copy_on_grow) {
@@ -524,6 +528,7 @@ sub B::PVMG::save_magic {
     my ($sv) = @_;
     #warn sprintf("saving magic for %s (0x%x)\n", class($sv), $$sv); # debug
     my $stash = $sv->SvSTASH;
+    $stash->save;
     if ($$stash) {
 	warn sprintf("xmg_stash = %s (0x%x)\n", $stash->NAME, $$stash)
 	    if $debug_mg;
@@ -542,6 +547,7 @@ sub B::PVMG::save_magic {
 			 class($sv), $$sv, class($obj), $$obj,
 			 cchar($type), cstring($ptr));
 	}
+	$obj->save;
 	if ($len == HEf_SVKEY){
 		#The pointer is an SV*
 		$ptrsv=svref_2object($ptr)->save;
@@ -884,6 +890,7 @@ sub B::HV::save {
 	}
 	$init->add("}");
     }
+    $hv->save_magic();
     return savesym($hv, "(HV*)&sv_list[$sv_list_index]");
 }
 
@@ -1297,11 +1304,13 @@ sub save_context
  my $curpad_sym = (comppadlist->ARRAY)[1]->save;
  my $inc_hv     = svref_2object(\%INC)->save;
  my $inc_av     = svref_2object(\@INC)->save;
+ my $amagic_generate= amagic_generation;          
  $init->add(   "PL_curpad = AvARRAY($curpad_sym);",
 	       "GvHV(PL_incgv) = $inc_hv;",
 	       "GvAV(PL_incgv) = $inc_av;",
                "av_store(CvPADLIST(PL_main_cv),0,SvREFCNT_inc($curpad_nam));",
-               "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));");
+               "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));",
+  		"PL_amagic_generation= $amagic_generate;" );
 }
 
 sub descend_marked_unused {

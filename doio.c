@@ -913,7 +913,10 @@ do_print(register SV *sv, PerlIO *fp)
 	if (SvIOK(sv)) {
 	    if (SvGMAGICAL(sv))
 		mg_get(sv);
-	    PerlIO_printf(fp, "%ld", (long)SvIVX(sv));
+	    if (SvIsUV(sv))		/* XXXX 64-bit? */
+		PerlIO_printf(fp, "%lu", (unsigned long)SvUVX(sv));
+	    else
+		PerlIO_printf(fp, "%ld", (long)SvIVX(sv));
 	    return !PerlIO_error(fp);
 	}
 	/* FALL THROUGH */
@@ -1061,6 +1064,12 @@ do_execfree(void)
 bool
 do_exec(char *cmd)
 {
+    return do_exec3(cmd,0,0);
+}
+
+bool
+do_exec3(char *cmd, int fd, int do_report)
+{
     register char **a;
     register char *s;
     char flags[10];
@@ -1141,9 +1150,15 @@ do_exec(char *cmd)
 	}
 	{
 	    dTHR;
+	    int e = errno;
+
 	    if (ckWARN(WARN_EXEC))
 		warner(WARN_EXEC, "Can't exec \"%s\": %s", 
 		    PL_Argv[0], Strerror(errno));
+	    if (do_report) {
+		PerlLIO_write(fd, (void*)&e, sizeof(int));
+		PerlLIO_close(fd);
+	    }
 	}
     }
     do_execfree();

@@ -47,7 +47,7 @@ print OUT <<'!NO!SUBS!';
 # man replacement, written in perl. This perldoc is strictly for reading
 # the perl manuals, though it too is written in perl.
 
-if(@ARGV<1) {
+if (@ARGV<1) {
 	my $me = $0;		# Editing $0 is unportable
 	$me =~ s,.*/,,;
 	die <<EOF;
@@ -82,7 +82,7 @@ perldoc [options] -q FAQRegex
 Options:
     -h   Display this help message
     -r   Recursive search (slow)
-    -i   Ignore case 
+    -i   Ignore case
     -t   Display pod using pod2text instead of pod2man and nroff
              (-t is the default on win32)
     -u	 Display unformatted pod text
@@ -94,10 +94,10 @@ Options:
     -q   Search the text of questions (not answers) in perlfaq[1-9]
 
 PageName|ModuleName...
-         is the name of a piece of documentation that you want to look at. You 
+         is the name of a piece of documentation that you want to look at. You
          may either give a descriptive name of the page (as in the case of
-         `perlfunc') the name of a module, either like `Term::Info', 
-         `Term/Info', the partial name of a module, like `info', or 
+         `perlfunc') the name of a module, either like `Term::Info',
+         `Term/Info', the partial name of a module, like `info', or
          `makemaker', or the name of a program, like `perldoc'.
 
 BuiltinFunction
@@ -108,14 +108,14 @@ FAQRegex
          is a regex. Will search perlfaq[1-9] for and extract any
          questions that match.
 
-Any switches in the PERLDOC environment variable will be used before the 
+Any switches in the PERLDOC environment variable will be used before the
 command line arguments.  The optional pod index file contains a list of
 filenames, one per line.
 
 EOF
 }
 
-if( defined $ENV{"PERLDOC"} ) {
+if (defined $ENV{"PERLDOC"}) {
     require Text::ParseWords;
     unshift(@ARGV, Text::ParseWords::shellwords($ENV{"PERLDOC"}));
 }
@@ -134,14 +134,15 @@ print OUT <<'!NO!SUBS!';
 usage if $opt_h;
 
 my $podidx;
-if( $opt_X ) {
+if ($opt_X) {
     $podidx = "$Config{'archlib'}/pod.idx";
     $podidx = "" unless -f $podidx && -r _ && -M _ <= 7;
 }
 
-if( (my $opts = do{ local $^W; $opt_t + $opt_u + $opt_m + $opt_l }) > 1) {
+if ((my $opts = do{ local $^W; $opt_t + $opt_u + $opt_m + $opt_l }) > 1) {
     usage("only one of -t, -u, -m or -l")
-} elsif ($Is_MSWin32 || $Is_Dos) {
+}
+elsif ($Is_MSWin32 || $Is_Dos) {
     $opt_t = 1 unless $opts
 }
 
@@ -149,11 +150,13 @@ if ($opt_t) { require Pod::Text; import Pod::Text; }
 
 my @pages;
 if ($opt_f) {
-   @pages = ("perlfunc");
-} elsif ($opt_q) {
-   @pages = ("perlfaq1" .. "perlfaq9");
-} else {
-   @pages = @ARGV;
+    @pages = ("perlfunc");
+}
+elsif ($opt_q) {
+    @pages = ("perlfaq1" .. "perlfaq9");
+}
+else {
+    @pages = @ARGV;
 }
 
 # Does this look like a module or extension directory?
@@ -164,15 +167,13 @@ if (-f "Makefile.PL") {
 	require ExtUtils::testlib;
 }
 
-
-
 sub containspod {
     my($file, $readit) = @_;
     return 1 if !$readit && $file =~ /\.pod$/i;
     local($_);
     open(TEST,"<$file");
-    while(<TEST>) {
-	if(/^=head/) {
+    while (<TEST>) {
+	if (/^=head/) {
 	    close(TEST);
 	    return 1;
 	}
@@ -186,7 +187,7 @@ sub minus_f_nocase {
      my $path = join('/',$dir,$file);
      return $path if -f $path and -r _;
      if (!$opt_i or $Is_VMS or $Is_MSWin32 or $Is_Dos or $^O eq 'os2') {
-        # on a case-forgiving file system or if case is important 
+        # on a case-forgiving file system or if case is important
 	# that is it all we can do
 	warn "Ignored $path: unreadable\n" if -f _;
 	return '';
@@ -198,7 +199,7 @@ sub minus_f_nocase {
      foreach $p (split(/\//, $file)){
 	my $try = "@p/$p";
 	stat $try;
- 	if (-d _){
+ 	if (-d _) {
  	    push @p, $p;
 	    if ( $p eq $global_target) {
 		my $tmp_path = join ('/', @p);
@@ -209,11 +210,14 @@ sub minus_f_nocase {
 		push (@global_found, $tmp_path) unless $path_f;
 		print STDERR "Found as @p but directory\n" if $opt_v;
 	    }
- 	} elsif (-f _ && -r _) {
+ 	}
+	elsif (-f _ && -r _) {
  	    return $try;
- 	} elsif (-f _) {
+ 	}
+	elsif (-f _) {
 	    warn "Ignored $try: unreadable\n";
- 	} else {
+ 	}
+	else {
  	    my $found=0;
  	    my $lcp = lc $p;
  	    opendir DIR, "@p";
@@ -238,7 +242,8 @@ sub check_file {
     my($dir,$file) = @_;
     if ($opt_m) {
 	return minus_f_nocase($dir,$file);
-    } else {
+    }
+    else {
 	my $path = minus_f_nocase($dir,$file);
         return $path if length $path and containspod($path);
     }
@@ -264,7 +269,7 @@ sub searchfor {
 		or ( $ret = check_file $dir,$s)
 		or ( $Is_VMS and
 		     $ret = check_file $dir,"$s.com")
-		or ( $^O eq 'os2' and 
+		or ( $^O eq 'os2' and
 		     $ret = check_file $dir,"$s.cmd")
 		or ( ($Is_MSWin32 or $Is_Dos or $^O eq 'os2') and
 		     $ret = check_file $dir,"$s.bat")
@@ -300,73 +305,142 @@ sub filter_nroff {
   join "\n\n", @data;
 }
 
-my @found;
-foreach (@pages) {
-        if ($podidx && open(PODIDX, $podidx)) {
-	    my $searchfor = $_;
-	    local($_);
-	    $searchfor =~ s,::,/,g;
-	    print STDERR "Searching for '$searchfor' in $podidx\n" if $opt_v;
-	    while (<PODIDX>) {
-		chomp;
-		push(@found, $_) if m,/$searchfor(?:\.(?:pod|pm))?$,i;
-	    }
-	    close(PODIDX);
-	    next;
-        }
-	print STDERR "Searching for $_\n" if $opt_v;
-	# We must look both in @INC for library modules and in PATH
-	# for executables, like h2xs or perldoc itself.
-	my @searchdirs = @INC;
-	if ($opt_F) {
-	  next unless -r;
-	  push @found, $_ if $opt_m or containspod($_);
-	  next;
-	}
-	unless ($opt_m) { 
-	    if ($Is_VMS) {
-		my($i,$trn);
-		for ($i = 0; $trn = $ENV{'DCL$PATH;'.$i}; $i++) {
-		    push(@searchdirs,$trn);
-		}
-		push(@searchdirs,'perl_root:[lib.pod]')  # installed pods
-	    } else {
-	        push(@searchdirs, grep(-d, split($Config{path_sep}, 
-						 $ENV{'PATH'})));
-	    }
-	}
-	my @files = searchfor(0,$_,@searchdirs);
-	if( @files ) {
-		print STDERR "Found as @files\n" if $opt_v;
-	} else {
-		# no match, try recursive search
+sub printout {
+    my ($file, $tmp, $filter) = @_;
+    my $err;
 
-		@searchdirs = grep(!/^\.$/,@INC);
-
-		@files= searchfor(1,$_,@searchdirs) if $opt_r;
-		if( @files ) {
-			print STDERR "Loosely found as @files\n" if $opt_v;
-		} else {
-			print STDERR "No documentation found for \"$_\".\n";
-			if (@global_found) {
-			    print STDERR "However, try\n";
-			    for my $dir (@global_found) {
-				opendir(DIR, $dir) or die "$!";
-				while (my $file = readdir(DIR)) {
-				    next if ($file =~ /^\./);
-				    $file =~ s/\.(pm|pod)$//;
-				    print STDERR "\tperldoc $_\::$file\n";
-				}
-				closedir DIR;
-			    }
-			}
-		}
+    if ($opt_t) {
+	open(TMP,">>$tmp")
+		or warn("Can't open $tmp: $!"), return;
+	Pod::Text::pod2text($file,*TMP);
+	close TMP;
+    }
+    elsif (not $opt_u) {
+	my $cmd = "pod2man --lax $file | nroff -man";
+	$cmd .= " | col -x" if $^O =~ /hpux/;
+	my $rslt = `$cmd`;
+	$rslt = filter_nroff($rslt) if $filter;
+	unless (($err = $?)) {
+	    open(TMP,">>$tmp") or warn("Can't open $tmp: $!"), return;
+	    print TMP $rslt;
+	    close TMP;
 	}
-	push(@found,@files);
+    }
+    if ($opt_u or $err or -z $tmp) {
+	open(OUT,">>$tmp") or warn("Can't open $tmp: $!"), return;
+	open(IN,"<$file") or warn("Can't open $file: $!"), return;
+	my $cut = 1;
+	while (<IN>) {
+	    $cut = $1 eq 'cut' if /^=(\w+)/;
+	    next if $cut;
+	    print OUT;
+	}
+	close IN;
+	close OUT;
+    }
 }
 
-if(!@found) {
-	exit ($Is_VMS ? 98962 : 1);
+sub page {
+    my ($tmp, $no_tty, @pagers) = @_;
+    if ($no_tty) {
+	open(TMP,"<$tmp") or warn("Can't open $tmp: $!"), return;
+	print while <TMP>;
+	close TMP;
+    }
+    else {
+	foreach my $pager (@pagers) {
+	    system("$pager $tmp") or last;
+	}
+    }
+}
+
+sub cleanup {
+    my @files = @_;
+    for (@files) {
+	1 while unlink($_); #Possibly pointless VMSism
+    }
+}
+
+sub safe_exit {
+    my ($val, @files) = @_;
+    cleanup(@files);
+    exit $val;
+}
+
+sub safe_die {
+    my ($msg, @files) = @_;
+    cleanup(@files);
+    die $msg;
+}
+
+my @found;
+foreach (@pages) {
+    if ($podidx && open(PODIDX, $podidx)) {
+	my $searchfor = $_;
+	local($_);
+	$searchfor =~ s,::,/,g;
+	print STDERR "Searching for '$searchfor' in $podidx\n" if $opt_v;
+	while (<PODIDX>) {
+	    chomp;
+	    push(@found, $_) if m,/$searchfor(?:\.(?:pod|pm))?$,i;
+	}
+	close(PODIDX);
+	next;
+    }
+    print STDERR "Searching for $_\n" if $opt_v;
+    # We must look both in @INC for library modules and in PATH
+    # for executables, like h2xs or perldoc itself.
+    my @searchdirs = @INC;
+    if ($opt_F) {
+	next unless -r;
+	push @found, $_ if $opt_m or containspod($_);
+	next;
+    }
+    unless ($opt_m) {
+	if ($Is_VMS) {
+	    my($i,$trn);
+	    for ($i = 0; $trn = $ENV{'DCL$PATH;'.$i}; $i++) {
+		push(@searchdirs,$trn);
+	    }
+	    push(@searchdirs,'perl_root:[lib.pod]')  # installed pods
+	}
+	else {
+	    push(@searchdirs, grep(-d, split($Config{path_sep},
+					     $ENV{'PATH'})));
+	}
+    }
+    my @files = searchfor(0,$_,@searchdirs);
+    if (@files) {
+	print STDERR "Found as @files\n" if $opt_v;
+    }
+    else {
+	# no match, try recursive search
+	@searchdirs = grep(!/^\.$/,@INC);
+	@files= searchfor(1,$_,@searchdirs) if $opt_r;
+	if (@files) {
+	    print STDERR "Loosely found as @files\n" if $opt_v;
+	}
+	else {
+	    print STDERR "No documentation found for \"$_\".\n";
+	    if (@global_found) {
+		print STDERR "However, try\n";
+		for my $dir (@global_found) {
+		    opendir(DIR, $dir) or die "$!";
+		    while (my $file = readdir(DIR)) {
+			next if ($file =~ /^\./);
+			$file =~ s/\.(pm|pod)$//;
+			print STDERR "\tperldoc $_\::$file\n";
+		    }
+		    closedir DIR;
+		}
+	    }
+	}
+    }
+    push(@found,@files);
+}
+
+if (!@found) {
+    exit ($Is_VMS ? 98962 : 1);
 }
 
 if ($opt_l) {
@@ -377,164 +451,143 @@ if ($opt_l) {
 my $lines = $ENV{LINES} || 24;
 
 my $no_tty;
-if( ! -t STDOUT ) { $no_tty = 1 }
+if (! -t STDOUT) { $no_tty = 1 }
+
+# until here we could simply exit or die
+# now we create temporary files that we have to clean up
+# namely $tmp, $buffer
 
 my $tmp;
+my $buffer;
 if ($Is_MSWin32) {
-	$tmp = "$ENV{TEMP}\\perldoc1.$$";
-	push @pagers, qw( more< less notepad );
-	unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
-	for (@found) { s,/,\\,g }
-} elsif ($Is_VMS) {
-	$tmp = 'Sys$Scratch:perldoc.tmp1_'.$$;
-	push @pagers, qw( most more less type/page );
-} elsif ($Is_Dos) {
-	$tmp = "$ENV{TEMP}/perldoc1.$$";
-	$tmp =~ tr!\\/!//!s;
-	push @pagers, qw( less.exe more.com< );
-	unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
-} else {
-	if ($^O eq 'os2') {
-	  require POSIX;
-	  $tmp = POSIX::tmpnam();
-	  unshift @pagers, 'less', 'cmd /c more <';
-	} else {
-	  $tmp = "/tmp/perldoc1.$$";
-	}
-	push @pagers, qw( more less pg view cat );
-	unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
+    $tmp = "$ENV{TEMP}\\perldoc1.$$";
+    $buffer = "$ENV{TEMP}\\perldoc1.b$$";
+    push @pagers, qw( more< less notepad );
+    unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
+    for (@found) { s,/,\\,g }
+}
+elsif ($Is_VMS) {
+    $tmp = 'Sys$Scratch:perldoc.tmp1_'.$$;
+    $buffer = 'Sys$Scratch:perldoc.tmp1_b'.$$;
+    push @pagers, qw( most more less type/page );
+}
+elsif ($Is_Dos) {
+    $tmp = "$ENV{TEMP}/perldoc1.$$";
+    $buffer = "$ENV{TEMP}/perldoc1.b$$";
+    $tmp =~ tr!\\/!//!s;
+    $buffer =~ tr!\\/!//!s;
+    push @pagers, qw( less.exe more.com< );
+    unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
+}
+else {
+    if ($^O eq 'os2') {
+      require POSIX;
+      $tmp = POSIX::tmpnam();
+      $buffer = POSIX::tmpnam();
+      unshift @pagers, 'less', 'cmd /c more <';
+    }
+    else {
+      $tmp = "/tmp/perldoc1.$$";
+      $buffer = "/tmp/perldoc1.b$$";
+    }
+    push @pagers, qw( more less pg view cat );
+    unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
 }
 unshift @pagers, $ENV{PERLDOC_PAGER} if $ENV{PERLDOC_PAGER};
 
+# all exit calls from here on have to be safe_exit calls (see above)
+# and all die calls safe_die calls to guarantee removal of files and
+# dir as needed
+
 if ($opt_m) {
-	foreach my $pager (@pagers) {
-		system("$pager @found") or exit;
-	}
-	if ($Is_VMS) { eval 'use vmsish qw(status exit); exit $?' }
-	exit 1;
+    foreach my $pager (@pagers) {
+	system("$pager @found") or safe_exit(0, $tmp, $buffer);
+    }
+    if ($Is_VMS) { eval 'use vmsish qw(status exit); exit $?' }
+    # I don't get the line above. Please patch yourself as needed.
+    safe_exit(1, $tmp, $buffer);
 }
 
 my @pod;
 if ($opt_f) {
-   my $perlfunc = shift @found;
-   open(PFUNC, $perlfunc) or die "Can't open $perlfunc: $!";
+    my $perlfunc = shift @found;
+    open(PFUNC, $perlfunc)
+	or safe_die("Can't open $perlfunc: $!", $tmp, $buffer);
 
-   # Functions like -r, -e, etc. are listed under `-X'.
-   my $search_string = ($opt_f =~ /^-[rwxoRWXOeszfdlpSbctugkTBMAC]$/) ? 'I<-X' : $opt_f ;
+    # Functions like -r, -e, etc. are listed under `-X'.
+    my $search_string = ($opt_f =~ /^-[rwxoRWXOeszfdlpSbctugkTBMAC]$/)
+			? 'I<-X' : $opt_f ;
 
-   # Skip introduction
-   while (<PFUNC>) {
-       last if /^=head2 Alphabetical Listing of Perl Functions/;
-   }
+    # Skip introduction
+    while (<PFUNC>) {
+	last if /^=head2 Alphabetical Listing of Perl Functions/;
+    }
 
-   # Look for our function
-   my $found = 0;
-   my $inlist = 0;
-   while (<PFUNC>) {
-       if (/^=item\s+\Q$search_string\E\b/o)  {
-	   $found = 1;
-       } elsif (/^=item/) {
-	   last if $found > 1 and not $inlist;
-       }
-       next unless $found;
-       if (/^=over/) {
-	   ++$inlist;
-       }
-       elsif (/^=back/) {
-	   --$inlist;
-       }
-       push @pod, $_;
-       ++$found if /^\w/;	# found descriptive text
-   }
-   if (!@pod) {
-       die "No documentation for perl function `$opt_f' found\n";
-   }
+    # Look for our function
+    my $found = 0;
+    my $inlist = 0;
+    while (<PFUNC>) {
+	if (/^=item\s+\Q$search_string\E\b/o)  {
+	    $found = 1;
+	}
+	elsif (/^=item/) {
+	    last if $found > 1 and not $inlist;
+	}
+	next unless $found;
+	if (/^=over/) {
+	    ++$inlist;
+	}
+	elsif (/^=back/) {
+	    --$inlist;
+	}
+	push @pod, $_;
+	++$found if /^\w/;	# found descriptive text
+    }
+    if (!@pod) {
+	die "No documentation for perl function `$opt_f' found\n";
+    }
 }
 
 if ($opt_q) {
-   local @ARGV = @found;	# I'm lazy, sue me.
-   my $found = 0;
-   my %found_in;
+    local @ARGV = @found;	# I'm lazy, sue me.
+    my $found = 0;
+    my %found_in;
 
-   while (<>) {
-      if (/^=head2\s+.*(?:$opt_q)/oi) {
-	 $found = 1;
-	 push @pod, "=head1 Found in $ARGV\n\n" unless $found_in{$ARGV}++;
-      } elsif (/^=head2/) {
-	 $found = 0;
-      }
-      next unless $found;
-      push @pod, $_;
-   }
-
-   if (!@pod) {
-      die "No documentation for perl FAQ keyword `$opt_q' found\n";
-   }
+    while (<>) {
+	if (/^=head2\s+.*(?:$opt_q)/oi) {
+	    $found = 1;
+	    push @pod, "=head1 Found in $ARGV\n\n" unless $found_in{$ARGV}++;
+	}
+	elsif (/^=head2/) {
+	    $found = 0;
+	}
+	next unless $found;
+	push @pod, $_;
+    }
+    if (!@pod) {
+	safe_die("No documentation for perl FAQ keyword `$opt_q' found\n",
+		 $tmp, $buffer);
+    }
 }
 
-my $tmp1;
 my $filter;
 
 if (@pod) {
-  $tmp1 = $tmp . "_";
-  open(TMP,">$tmp1") or die "open '$tmp1': $!";
-  print TMP "=over 8\n\n";
-  print TMP @pod;
-  print TMP "=back\n";
-  close(TMP) or die "close '$tmp1': $!";
-  @found = $tmp1;
-  $filter = 1;
+    open(TMP,">$buffer") or safe_die("Can't open '$buffer': $!", $tmp, $buffer);
+    print TMP "=over 8\n\n";
+    print TMP @pod;
+    print TMP "=back\n";
+    close TMP;
+    @found = $buffer;
+    $filter = 1;
 }
 
 foreach (@found) {
-
-	my $err;
-	if($opt_t) {
-		open(TMP,">>$tmp");
-		Pod::Text::pod2text($_,*TMP);
-		close(TMP);
-	} elsif(not $opt_u) {
-		my $cmd = "pod2man --lax $_ | nroff -man";
-		$cmd .= " | col -x" if $^O =~ /hpux/;
-		my $rslt = `$cmd`;
-		$rslt = filter_nroff $rslt if $filter;
-		unless(($err = $?)) {
-			open(TMP,">>$tmp");
-			print TMP $rslt;
-			close TMP;
-		}
-	}
-
-	if( $opt_u or $err or -z $tmp) {
-		open(OUT,">>$tmp");
-		open(IN,"<$_");
-		my $cut = 1;
-		while (<IN>) {
-			$cut = $1 eq 'cut' if /^=(\w+)/;
-			next if $cut;
-			print OUT;
-		}
-		close(IN);
-		close(OUT);
-	}
+    printout($_, $tmp, $filter);
 }
+page($tmp, $no_tty, @pagers);
 
-if( $no_tty ) {
-	open(TMP,"<$tmp");
-	print while <TMP>;
-	close(TMP);
-} else {
-	foreach my $pager (@pagers) {
-		system("$pager $tmp") or last;
-	}
-}
-
-1 while unlink($tmp); #Possibly pointless VMSism
-if (defined $tmp1) {
-  1 while unlink($tmp1); #Possibly pointless VMSism
-}
-
-exit 0;
+safe_exit(0, $tmp, $buffer);
 
 __END__
 
@@ -627,7 +680,7 @@ name, you will only get the first one.
 
 =head1 ENVIRONMENT
 
-Any switches in the C<PERLDOC> environment variable will be used before the 
+Any switches in the C<PERLDOC> environment variable will be used before the
 command line arguments.  C<perldoc> also searches directories
 specified by the C<PERL5LIB> (or C<PERLLIB> if C<PERL5LIB> is not
 defined) and C<PATH> environment variables.
@@ -639,11 +692,16 @@ used if C<perldoc> was told to display plain text or unformatted pod.)
 
 One useful value for C<PERLDOC_PAGER> is C<less -+C -E>.
 
+=head1 VERSION
+
+This is perldoc v2.0.
+
 =head1 AUTHOR
 
 Kenneth Albanowski <kjahds@kjahds.com>
 
-Minor updates by Andy Dougherty <doughera@lafcol.lafayette.edu>
+Minor updates by Andy Dougherty <doughera@lafcol.lafayette.edu>,
+and others.
 
 =cut
 
@@ -661,7 +719,7 @@ Minor updates by Andy Dougherty <doughera@lafcol.lafayette.edu>
 #       Kenneth Albanowski <kjahds@kjahds.com>
 #   -added Charles Bailey's further VMS patches, and -u switch
 #   -added -t switch, with pod2text support
-# 
+#
 # Version 1.10: Thu Nov  9 07:23:47 EST 1995
 #		Kenneth Albanowski <kjahds@kjahds.com>
 #	-added VMS support

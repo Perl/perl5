@@ -100,6 +100,7 @@ static long		find_pid(int pid);
 static char *		qualified_path(const char *cmd);
 
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
+char	w32_module_name[MAX_PATH+1];
 static DWORD	w32_platform = (DWORD)-1;
 
 #ifdef USE_THREADS
@@ -192,19 +193,39 @@ get_emd_part(char *prev_path, char *trailing_path, ...)
     sprintf(base, "%5.3f",
 	    (double)PERL_REVISION + ((double)PERL_VERSION / (double)1000));
 
-    GetModuleFileName((HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
-				? GetModuleHandle(NULL) : w32_perldll_handle),
-		      mod_name, sizeof(mod_name));
-    ptr = strrchr(mod_name, '\\');
+    if (!*w32_module_name) {
+	GetModuleFileName((HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
+				    ? GetModuleHandle(NULL)
+				    : w32_perldll_handle),
+			  w32_module_name, sizeof(w32_module_name));
+
+	/* try to get full path to binary (which may be mangled when perl is
+	 * run from a 16-bit app) */
+	/*PerlIO_printf(PerlIO_stderr(), "Before %s\n", w32_module_name);*/
+	(void)win32_longpath(w32_module_name);
+	/*PerlIO_printf(PerlIO_stderr(), "After  %s\n", w32_module_name);*/
+
+	/* normalize to forward slashes */
+	ptr = w32_module_name;
+	while (*ptr) {
+	    if (*ptr == '\\')
+		*ptr = '/';
+	    ++ptr;
+	}
+    }
+    strcpy(mod_name, w32_module_name);
+    ptr = strrchr(mod_name, '/');
     while (ptr && strip) {
         /* look for directories to skip back */
 	optr = ptr;
 	*ptr = '\0';
-	ptr = strrchr(mod_name, '\\');
+	ptr = strrchr(mod_name, '/');
 	if (!ptr || stricmp(ptr+1, strip) != 0) {
-	    if(!(*strip == '5' && *(ptr+1) == '5' && strncmp(strip, base, 5) == 0
-		    && strncmp(ptr+1, base, 5) == 0)) {
-		*optr = '\\';
+	    if(!(*strip == '5' && *(ptr+1) == '5'
+		 && strncmp(strip, base, 5) == 0
+		 && strncmp(ptr+1, base, 5) == 0))
+	    {
+		*optr = '/';
 		ptr = optr;
 	    }
 	}
@@ -213,7 +234,7 @@ get_emd_part(char *prev_path, char *trailing_path, ...)
     if (!ptr) {
 	ptr = mod_name;
 	*ptr++ = '.';
-	*ptr = '\\';
+	*ptr = '/';
     }
     va_end(ap);
     strcpy(++ptr, trailing_path);
@@ -273,7 +294,7 @@ win32_get_sitelib(char *pl)
 
     /* $sitelib .=
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/$]/lib";  */
-    sprintf(pathstr, "site\\%s\\lib", pl);
+    sprintf(pathstr, "site/%s/lib", pl);
     path1 = get_emd_part(path1, pathstr, ARCHNAME, "bin", pl, Nullch);
 
     /* $HKCU{'sitelib'} || $HKLM{'sitelib'} . ---; */
@@ -281,7 +302,7 @@ win32_get_sitelib(char *pl)
 
     /* $sitelib .=
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/lib";  */
-    path2 = get_emd_part(path2, "site\\lib", ARCHNAME, "bin", pl, Nullch);
+    path2 = get_emd_part(path2, "site/lib", ARCHNAME, "bin", pl, Nullch);
 
     if (!path1)
 	return path2;
@@ -365,8 +386,7 @@ my_popen(char *cmd, char *mode)
 #define fixcmd(x)
 #endif
     fixcmd(cmd);
-    win32_fflush(stdout);
-    win32_fflush(stderr);
+    PERL_FLUSHALL_FOR_CHILD;
     return win32_popen(cmd, mode);
 }
 
@@ -966,6 +986,83 @@ win32_stat(const char *path, struct stat *buffer)
 #endif
     }
     return res;
+}
+
+/* Find the longname of a given path.  path is destructively modified.
+ * It should have space for at least MAX_PATH characters. */
+DllExport char *
+win32_longpath(char *path)
+{
+    WIN32_FIND_DATA fdata;
+    HANDLE fhand;
+    char tmpbuf[MAX_PATH+1];
+    char *tmpstart = tmpbuf;
+    char *start = path;
+    char sep;
+    if (!path)
+	return Nullch;
+
+    /* drive prefix */
+    if (isALPHA(path[0]) && path[1] == ':' &&
+	(path[2] == '/' || path[2] == '\\'))
+    {
+	start = path + 2;
+	*tmpstart++ = path[0];
+	*tmpstart++ = ':';
+    }
+    /* UNC prefix */
+    else if ((path[0] == '/' || path[0] == '\\') &&
+	     (path[1] == '/' || path[1] == '\\'))
+    {
+	start = path + 2;
+	*tmpstart++ = '/';
+	*tmpstart++ = '/';
+	/* copy machine name */
+	while (*start && *start != '/' && *start != '\\')
+	    *tmpstart++ = *start++;
+	if (*start) {
+	    *tmpstart++ = '/';
+	    start++;
+	    /* copy share name */
+	    while (*start && *start != '/' && *start != '\\')
+		*tmpstart++ = *start++;
+	}
+    }
+    sep = *start++;
+    if (sep == '/' || sep == '\\')
+	*tmpstart++ = '/';
+    *tmpstart = '\0';
+    while (sep) {
+	/* walk up to slash */
+	while (*start && *start != '/' && *start != '\\')
+	    ++start;
+
+	/* discard doubled slashes */
+	while (*start && (start[1] == '/' || start[1] == '\\'))
+	    ++start;
+	sep = *start;
+
+	/* stop and find full name of component */
+	*start = '\0';
+	fhand = FindFirstFile(path,&fdata);
+	if (fhand != INVALID_HANDLE_VALUE) {
+	    strcpy(tmpstart, fdata.cFileName);
+	    tmpstart += strlen(fdata.cFileName);
+	    if (sep)
+		*tmpstart++ = '/';
+	    *tmpstart = '\0';
+	    *start++ = sep;
+	    FindClose(fhand);
+	}
+	else {
+	    /* failed a step, just return without side effects */
+	    /*PerlIO_printf(PerlIO_stderr(), "Failed to find %s\n", path);*/
+	    *start = sep;
+	    return Nullch;
+	}
+    }
+    strcpy(path,tmpbuf);
+    return path;
 }
 
 #ifndef USE_WIN32_RTL_ENV
@@ -2832,6 +2929,29 @@ XS(w32_GetFullPathName)
 }
 
 static
+XS(w32_GetLongPathName)
+{
+    dXSARGS;
+    SV *path;
+    char tmpbuf[MAX_PATH+1];
+    char *pathstr;
+    STRLEN len;
+
+    if (items != 1)
+	croak("usage: Win32::GetLongPathName($pathname)");
+
+    path = ST(0);
+    pathstr = SvPV(path,len);
+    strcpy(tmpbuf, pathstr);
+    pathstr = win32_longpath(tmpbuf);
+    if (pathstr) {
+	ST(0) = sv_2mortal(newSVpvn(pathstr, strlen(pathstr)));
+	XSRETURN(1);
+    }
+    XSRETURN_EMPTY;
+}
+
+static
 XS(w32_Sleep)
 {
     dXSARGS;
@@ -2839,6 +2959,17 @@ XS(w32_Sleep)
 	croak("usage: Win32::Sleep($milliseconds)");
     Sleep(SvIV(ST(0)));
     XSRETURN_YES;
+}
+
+static
+XS(w32_CopyFile)
+{
+    dXSARGS;
+    if (items != 3)
+	croak("usage: Win32::CopyFile($from, $to, $overwrite)");
+    if (CopyFile(SvPV_nolen(ST(0)), SvPV_nolen(ST(1)), !SvTRUE(ST(2))))
+	XSRETURN_YES;
+    XSRETURN_NO;
 }
 
 void
@@ -2871,6 +3002,8 @@ Perl_init_os_extras()
     newXS("Win32::GetTickCount", w32_GetTickCount, file);
     newXS("Win32::GetShortPathName", w32_GetShortPathName, file);
     newXS("Win32::GetFullPathName", w32_GetFullPathName, file);
+    newXS("Win32::GetLongPathName", w32_GetLongPathName, file);
+    newXS("Win32::CopyFile", w32_CopyFile, file);
     newXS("Win32::Sleep", w32_Sleep, file);
 
     /* XXX Bloat Alert! The following Activeware preloads really

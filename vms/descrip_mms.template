@@ -788,7 +788,7 @@ perly$(O) : perly.c, perly.h, $(h)
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
 test : all [.t.lib]vmsfspec.t [.t.lib]vmsish.t
-	- @[.VMS]Test.Com "$(E)"
+	- @[.VMS]Test.Com "$(E)" "$(__DEBUG__)"
 
 # install ought not need a source, but it doesn't work if one's not
 # there. Go figure...

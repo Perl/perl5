@@ -1397,8 +1397,7 @@ sub process_puretext {
 #
 sub pre_escape {
     my($str) = @_;
-
-    $$str =~ s,&,&amp;,g;
+    $$str =~ s/&(?!\w+;|#)/&amp;/g;	# XXX not bulletproof
 }
 
 #
@@ -1406,6 +1405,7 @@ sub pre_escape {
 #
 sub dosify {
     my($str) = @_;
+    return lc($str) if $^O eq 'VMS';     # VMS just needs casing
     if ($Is83) {
         $str = lc $str;
         $str =~ s/(\.\w+)/substr ($1,0,4)/ge;

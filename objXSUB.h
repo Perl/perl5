@@ -1047,6 +1047,8 @@
 #define do_eof			pPerl->Perl_do_eof
 #undef  do_exec
 #define do_exec			pPerl->Perl_do_exec
+#undef  do_exec3
+#define do_exec3		pPerl->Perl_do_exec3
 #undef  do_execfree
 #define do_execfree		pPerl->Perl_do_execfree
 #undef  do_gv_dump
@@ -1137,6 +1139,8 @@
 #define dofindlabel		pPerl->Perl_dofindlabel
 #undef  doform
 #define doform			pPerl->Perl_doform
+#undef  doopen
+#define doopen			pPerl->Perl_doopen
 #undef  doparseform
 #define doparseform		pPerl->Perl_doparseform
 #undef  dopoptoeval

@@ -462,6 +462,7 @@ win32_telldir
 win32_seekdir
 win32_rewinddir
 win32_closedir
+win32_longpath
 Perl_win32_init
 Perl_init_os_extras
 Perl_getTHR
