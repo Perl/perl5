@@ -3706,6 +3706,34 @@ earlier in the line, and you really meant a "less than".
 (W untie) A copy of the object returned from C<tie> (or C<tied>) was
 still valid when C<untie> was called.
 
+=item Useless (?%s) - use /%s modifier in regex; marked by <-- HERE in m/%s/
+
+(W regexp) You have used an internal modifier such as (?o) that has no
+meaning unless applied to the entire regexp:
+
+    if ($string =~ /(?o)$pattern/) { ... }
+
+must be written as
+
+    if ($string =~ /$pattern/o) { ... }
+
+The <-- HERE shows in the regular expression about
+where the problem was discovered. See L<perlre>.
+
+=item Useless (?-%s) - don't use /%s modifier in regex; marked by <-- HERE in m/%s/
+
+(W regexp) You have used an internal modifier such as (?-o) that has no
+meaning unless removed from the entire regexp:
+
+    if ($string =~ /(?-o)$pattern/o) { ... }
+
+must be written as
+
+    if ($string =~ /$pattern/) { ... }
+
+The <-- HERE shows in the regular expression about
+where the problem was discovered. See L<perlre>.
+
 =item Useless use of %s in void context
 
 (W void) You did something without a side effect in a context that does

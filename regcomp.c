@@ -418,6 +418,15 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		 (int)offset, RExC_precomp, RExC_precomp + offset);        \
     } STMT_END
 
+/* used for the parse_flags section for (?c) -- japhy */
+#define	vWARN5(loc, m, a1, a2, a3, a4)                                       \
+  STMT_START {                                                   \
+      unsigned offset = strlen(RExC_precomp)-(RExC_end-(loc));   \
+        Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,      \
+                 a1, a2, a3, a4,                                 \
+                 (int)offset, RExC_precomp, RExC_precomp + offset);  \
+    } STMT_END
+
 
 /* Allow for side effects in s */
 #define REGC(c,s) STMT_START { if (!SIZE_ONLY) *(s) = (c); else (s);} STMT_END
@@ -2018,11 +2027,22 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     register regnode *ender = 0;
     register I32 parno = 0;
     I32 flags, oregflags = RExC_flags16, have_branch = 0, open = 0;
+
+    /* for (?g), (?gc), and (?o) warnings; warning
+       about (?c) will warn about (?g) -- japhy    */
+
+    I32 wastedflags = 0x00,
+        wasted_o    = 0x01,
+        wasted_g    = 0x02,
+        wasted_gc   = 0x02 | 0x04,
+        wasted_c    = 0x04;
+
     char * parse_start = RExC_parse; /* MJD */
     char *oregcomp_parse = RExC_parse;
     char c;
 
     *flagp = 0;				/* Tentatively. */
+
 
     /* Make an OPEN node, if parenthesized. */
     if (paren) {
@@ -2202,12 +2222,45 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		--RExC_parse;
 	      parse_flags:      /* (?i) */
 		while (*RExC_parse && strchr("iogcmsx", *RExC_parse)) {
-		    if (*RExC_parse != 'o')
-			pmflag(flagsp, *RExC_parse);
+		    /* (?g), (?gc) and (?o) are useless here
+		       and must be globally applied -- japhy */
+
+		    if (*RExC_parse == 'o' || *RExC_parse == 'g') {
+			if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
+			    I32 wflagbit = *RExC_parse == 'o' ? wasted_o : wasted_g;
+			    if (! (wastedflags & wflagbit) ) {
+				wastedflags |= wflagbit;
+				vWARN5(
+				    RExC_parse + 1,
+				    "Useless (%s%c) - %suse /%c modifier",
+				    flagsp == &negflags ? "?-" : "?",
+				    *RExC_parse,
+				    flagsp == &negflags ? "don't " : "",
+				    *RExC_parse
+				);
+			    }
+			}
+		    }
+		    else if (*RExC_parse == 'c') {
+			if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
+			    if (! (wastedflags & wasted_c) ) {
+				wastedflags |= wasted_gc;
+				vWARN3(
+				    RExC_parse + 1,
+				    "Useless (%sc) - %suse /gc modifier",
+				    flagsp == &negflags ? "?-" : "?",
+				    flagsp == &negflags ? "don't " : ""
+				);
+			    }
+			}
+		    }
+		    else { pmflag(flagsp, *RExC_parse); }
+
 		    ++RExC_parse;
 		}
 		if (*RExC_parse == '-') {
 		    flagsp = &negflags;
+		    wastedflags = 0;  /* reset so (?g-c) warns twice */
 		    ++RExC_parse;
 		    goto parse_flags;
 		}
