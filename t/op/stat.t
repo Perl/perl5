@@ -39,9 +39,14 @@ if (open(FOO, ">Op.stat.tmp")) {
     print "# |$mtime| vs |$ctime|\nnot ok 2\n";
   }
 
-  sleep 3;
+  my $funky_FAT_timestamps = $Is_Cygwin;
+
+  sleep 3 if $funky_FAT_timestamps;
+
   print FOO "Now is the time for all good men to come to.\n";
   close(FOO);
+
+  sleep 2 unless $funky_FAT_timestamps;
 
 } else {
   print "# open failed: $!\nnot ok 1\nnot ok 2\n";
@@ -62,7 +67,8 @@ elsif ($nlink == 2)
 else {print "# \$nlink is |$nlink|\nnot ok 3\n";}
 
 if (   $Is_Dosish
-	|| ($cwd =~ m#^/tmp# and $mtime && $mtime==$ctime) # Solaris tmpfs bug
+        # Solaris tmpfs bug
+	|| ($cwd =~ m#^/tmp# and $mtime && $mtime==$ctime && $^O eq 'solaris')
 	|| $cwd =~ m#/afs/#
 	|| $^O eq 'amigaos') {
     print "ok 4 # skipped: different semantic of mtime/ctime\n";
