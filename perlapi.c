@@ -2981,6 +2981,13 @@ Perl_sv_compile_2op(pTHXo_ SV* sv, OP** startp, char* code, AV** avp)
     return ((CPerlObj*)pPerl)->Perl_sv_compile_2op(sv, startp, code, avp);
 }
 
+#undef  Perl_sv_getcwd
+int
+Perl_sv_getcwd(pTHXo_ SV* sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_getcwd(sv);
+}
+
 #undef  Perl_sv_dec
 void
 Perl_sv_dec(pTHXo_ SV* sv)
@@ -3140,6 +3147,13 @@ char*
 Perl_sv_pvbyten_force(pTHXo_ SV* sv, STRLEN* lp)
 {
     return ((CPerlObj*)pPerl)->Perl_sv_pvbyten_force(sv, lp);
+}
+
+#undef  Perl_sv_realpath
+int
+Perl_sv_realpath(pTHXo_ SV* sv, char *path, STRLEN len)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_realpath(sv, path, len);
 }
 
 #undef  Perl_sv_reftype

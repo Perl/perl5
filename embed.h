@@ -668,6 +668,7 @@
 #define sv_collxfrm		Perl_sv_collxfrm
 #endif
 #define sv_compile_2op		Perl_sv_compile_2op
+#define sv_getcwd		Perl_sv_getcwd
 #define sv_dec			Perl_sv_dec
 #define sv_dump			Perl_sv_dump
 #define sv_derived_from		Perl_sv_derived_from
@@ -691,6 +692,7 @@
 #define sv_pos_b2u		Perl_sv_pos_b2u
 #define sv_pvutf8n_force	Perl_sv_pvutf8n_force
 #define sv_pvbyten_force	Perl_sv_pvbyten_force
+#define sv_realpath		Perl_sv_realpath
 #define sv_reftype		Perl_sv_reftype
 #define sv_replace		Perl_sv_replace
 #define sv_report_used		Perl_sv_report_used
@@ -2163,6 +2165,7 @@
 #define sv_collxfrm(a,b)	Perl_sv_collxfrm(aTHX_ a,b)
 #endif
 #define sv_compile_2op(a,b,c,d)	Perl_sv_compile_2op(aTHX_ a,b,c,d)
+#define sv_getcwd(a)		Perl_sv_getcwd(aTHX_ a)
 #define sv_dec(a)		Perl_sv_dec(aTHX_ a)
 #define sv_dump(a)		Perl_sv_dump(aTHX_ a)
 #define sv_derived_from(a,b)	Perl_sv_derived_from(aTHX_ a,b)
@@ -2186,6 +2189,7 @@
 #define sv_pos_b2u(a,b)		Perl_sv_pos_b2u(aTHX_ a,b)
 #define sv_pvutf8n_force(a,b)	Perl_sv_pvutf8n_force(aTHX_ a,b)
 #define sv_pvbyten_force(a,b)	Perl_sv_pvbyten_force(aTHX_ a,b)
+#define sv_realpath(a,b,c)	Perl_sv_realpath(aTHX_ a,b,c)
 #define sv_reftype(a,b)		Perl_sv_reftype(aTHX_ a,b)
 #define sv_replace(a,b)		Perl_sv_replace(aTHX_ a,b)
 #define sv_report_used()	Perl_sv_report_used(aTHX)
@@ -4249,6 +4253,8 @@
 #endif
 #define Perl_sv_compile_2op	CPerlObj::Perl_sv_compile_2op
 #define sv_compile_2op		Perl_sv_compile_2op
+#define Perl_sv_getcwd		CPerlObj::Perl_sv_getcwd
+#define sv_getcwd		Perl_sv_getcwd
 #define Perl_sv_dec		CPerlObj::Perl_sv_dec
 #define sv_dec			Perl_sv_dec
 #define Perl_sv_dump		CPerlObj::Perl_sv_dump
@@ -4297,6 +4303,8 @@
 #define sv_pvutf8n_force	Perl_sv_pvutf8n_force
 #define Perl_sv_pvbyten_force	CPerlObj::Perl_sv_pvbyten_force
 #define sv_pvbyten_force	Perl_sv_pvbyten_force
+#define Perl_sv_realpath	CPerlObj::Perl_sv_realpath
+#define sv_realpath		Perl_sv_realpath
 #define Perl_sv_reftype		CPerlObj::Perl_sv_reftype
 #define sv_reftype		Perl_sv_reftype
 #define Perl_sv_replace		CPerlObj::Perl_sv_replace

@@ -1645,6 +1645,10 @@
 #define Perl_sv_compile_2op	pPerl->Perl_sv_compile_2op
 #undef  sv_compile_2op
 #define sv_compile_2op		Perl_sv_compile_2op
+#undef  Perl_sv_getcwd
+#define Perl_sv_getcwd		pPerl->Perl_sv_getcwd
+#undef  sv_getcwd
+#define sv_getcwd		Perl_sv_getcwd
 #undef  Perl_sv_dec
 #define Perl_sv_dec		pPerl->Perl_sv_dec
 #undef  sv_dec
@@ -1737,6 +1741,10 @@
 #define Perl_sv_pvbyten_force	pPerl->Perl_sv_pvbyten_force
 #undef  sv_pvbyten_force
 #define sv_pvbyten_force	Perl_sv_pvbyten_force
+#undef  Perl_sv_realpath
+#define Perl_sv_realpath	pPerl->Perl_sv_realpath
+#undef  sv_realpath
+#define sv_realpath		Perl_sv_realpath
 #undef  Perl_sv_reftype
 #define Perl_sv_reftype		pPerl->Perl_sv_reftype
 #undef  sv_reftype

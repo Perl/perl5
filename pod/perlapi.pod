@@ -952,7 +952,7 @@ parameter is the precomputed hash value; if it is zero then Perl will
 compute it.  The return value is the new hash entry so created.  It will be
 NULL if the operation failed or if the value did not need to be actually
 stored within the hash (as in the case of tied hashes).  Otherwise the
-contents of the return value can be accessed using the C<He???> macros
+contents of the return value can be accessed using the C<He?> macros
 described here.  Note that the caller is responsible for suitably
 incrementing the reference count of C<val> before the call, and
 decrementing it if the function returned NULL.
@@ -2408,19 +2408,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for hackers
+Found in file sv.h
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
@@ -2754,6 +2754,15 @@ Free the memory used by an SV.
 =for hackers
 Found in file sv.c
 
+=item sv_getcwd
+
+Fill the sv with current working directory
+
+	int	sv_getcwd(SV* sv)
+
+=for hackers
+Found in file util.c
+
 =item sv_gets
 
 Get a line from the filehandle and store it into the SV, optionally
@@ -2893,6 +2902,16 @@ L</sv_pvn_force>.
 
 =for hackers
 Found in file sv.c
+
+=item sv_realpath
+
+Emulate realpath(3)
+
+XXX: add configure test for realpath(3) and prefer if available
+	int	sv_realpath(SV* sv, char *path, STRLEN len)
+
+=for hackers
+Found in file util.c
 
 =item sv_reftype
 

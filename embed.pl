@@ -1136,7 +1136,7 @@ DOC:
 		    redo FUNC;
 		}
 	    } else {
-		warn "$file:$line:$in";
+		warn "$file:$line:$in (=cut missing?)";
 	    }
 	}
     }
@@ -2029,6 +2029,7 @@ Apd	|I32	|sv_cmp_locale	|SV* sv1|SV* sv2
 Ap	|char*	|sv_collxfrm	|SV* sv|STRLEN* nxp
 #endif
 Ap	|OP*	|sv_compile_2op	|SV* sv|OP** startp|char* code|AV** avp
+Apd	|int	|sv_getcwd	|SV* sv
 Apd	|void	|sv_dec		|SV* sv
 Ap	|void	|sv_dump	|SV* sv
 Apd	|bool	|sv_derived_from|SV* sv|const char* name
@@ -2055,6 +2056,7 @@ Ap	|void	|sv_pos_b2u	|SV* sv|I32* offsetp
 Aopd	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
 Apd	|char*	|sv_pvutf8n_force|SV* sv|STRLEN* lp
 Ap	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
+Apd	|int	|sv_realpath	|SV* sv|char *path|STRLEN len
 Apd	|char*	|sv_reftype	|SV* sv|int ob
 Apd	|void	|sv_replace	|SV* sv|SV* nsv
 Ap	|void	|sv_report_used
