@@ -1,6 +1,6 @@
 #      CC.pm
 #
-#      Copyright (c) 1996 Malcolm Beattie
+#      Copyright (c) 1996, 1997 Malcolm Beattie
 #
 #      You may distribute under the terms of either the GNU General Public
 #      License or the Artistic License, as specified in the README file.
@@ -9,8 +9,7 @@ package B::CC;
 use strict;
 use B qw(main_start main_root class comppadlist peekop svref_2object
 	timing_info);
-use B::C qw(push_decl init_init push_init save_unused_subs objsym
-	    output_all output_boilerplate output_main);
+use B::C qw(save_unused_subs objsym output_all output_boilerplate output_main);
 use B::Bblock qw(find_leaders);
 use B::Stackobj qw(:types :flags);
 
@@ -98,6 +97,8 @@ my $declare_ref;	# Hash ref keyed by C variable type of declarations.
 my @pp_list;		# list of [$ppname, $runtime_list_ref, $declare_ref]
 			# tuples to be written out.
 
+my ($init, $decl);
+
 sub init_hash { map { $_ => 1 } @_ }
 
 #
@@ -162,7 +163,7 @@ sub init_pp {
     declare("SV", "**svp");
     map { declare("SV", "*$_") } qw(sv src dst left right);
     declare("MAGIC", "*mg");
-    push_decl("static OP * $ppname _((ARGSproto));");
+    $decl->add("static OP * $ppname _((ARGSproto));");
     debug "init_pp: $ppname\n" if $debug_queue;
 }
 
@@ -1032,7 +1033,7 @@ sub pp_grepwhile {
     # both ops to be "inlined", the fields could both be zero. To get
     # around that, we hack op_next to be our own op (purely because we
     # know it's a non-NULL pointer and can't be the same as op_other).
-    push_init("((LOGOP*)$sym)->op_next = $sym;");
+    $init->add("((LOGOP*)$sym)->op_next = $sym;");
     runtime(sprintf("if (op == ($sym)->op_next) goto %s;", label($next)));
     $know_op = 0;
     return $op->other;
@@ -1378,9 +1379,9 @@ sub cc_main {
 
     return if $errors;
     if (!defined($module)) {
-	push_init(sprintf("main_root = sym_%x;", ${main_root()}),
-		  "main_start = $start;",
-		  "curpad = AvARRAY($curpad_sym);");
+	$init->add(sprintf("main_root = sym_%x;", ${main_root()}),
+		   "main_start = $start;",
+		   "curpad = AvARRAY($curpad_sym);");
     }
     output_boilerplate();
     print "\n";
@@ -1492,7 +1493,9 @@ sub compile {
 	    }
 	}
     }
-    init_init();
+    $init = new B::Section "init";
+    $decl = new B::Section "decl";
+
     if (@options) {
 	return sub {
 	    my ($objname, $ppname);

@@ -1,6 +1,6 @@
 #      B.pm
 #
-#      Copyright (c) 1996 Malcolm Beattie
+#      Copyright (c) 1996, 1997 Malcolm Beattie
 #
 #      You may distribute under the terms of either the GNU General Public
 #      License or the Artistic License, as specified in the README file.
@@ -195,6 +195,48 @@ sub walksymtable {
 	    }
 	} else {
 	    svref_2object(\*glob)->EGV->$method();
+	}
+    }
+}
+
+{
+    package B::Section;
+    my $output_fh;
+    
+    sub new {
+	my ($class, $section) = @_;
+	$output_fh ||= FileHandle->new_tmpfile;
+	bless [$section, -1], $class;
+    }
+    
+    sub add {
+	my $section = shift;
+	while (defined($_ = shift)) {
+	    print $output_fh "$section->[0]\t$_\n";
+	    $section->[1]++;
+	}
+    }
+
+    sub name {
+	my $section = shift;
+	return $section->[0];
+    }
+
+    sub index {
+	my $section = shift;
+	return $section->[1];
+    }
+
+    sub output {
+	my ($section, $fh, $format) = @_;
+	my $name = $section->[0];
+	seek($output_fh, 0, 0);
+	while (<$output_fh>) {
+	    chomp;
+	    s/^(.*?)\t//;
+	    if ($1 eq $name) {
+		printf $fh $format, $_;
+	    }
 	}
     }
 }
