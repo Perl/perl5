@@ -11090,12 +11090,16 @@ $eunicefix Cppsym
 ./Cppsym -l $al | $sort | $grep -v '^$' >Cppsym.true
 
 : now check the C compiler for additional symbols
+postprocess_cc_v=''
+case "$osname" in
+aix) postprocess_cc_v="|$tr , \' \'" ;;
+esac
 $cat >ccsym <<EOS
 $startsh
 $cat >tmp.c <<EOF
 extern int foo;
 EOF
-for i in \`$cc -v -c tmp.c 2>&1\`
+for i in \`$cc -v -c tmp.c 2>&1 $postprocess_cc_v\`
 do
 	case "\$i" in
 	-D*) echo "\$i" | $sed 's/^-D//';;
@@ -11104,6 +11108,7 @@ do
 done
 $rm -f try.c
 EOS
+unset postprocess_cc_v
 chmod +x ccsym
 $eunicefix ccsym
 ./ccsym > ccsym1.raw
@@ -11126,7 +11131,8 @@ if $test -z ccsym.raw; then
 	echo "However, your C preprocessor defines the following ones:"
 	$cat Cppsym.true
     	ccsymbols=''
-	cppsymbols="`$cat Cppsym.true|tr \"$trnl\" ' '`"
+	cppsymbols=`$cat Cppsym.true`
+        cppsymbols=`echo $cppsymbols`
 	cppccsymbols="$cppsymbols"
 else
 	if $test -s ccsym.com; then
@@ -11135,7 +11141,8 @@ else
 		also='also '
 		symbols='ones'
 		$test "$silent" || sleep 1
-		cppccsymbols="`$cat ccsym.com|tr \"$trnl\" ' '`"
+		cppccsymbols=`$cat ccsym.com`
+		cppccsymbols=`echo $cppcppsymbols`
 	fi
 	if $test -s ccsym.cpp; then
 		$test "$also" && echo " "
@@ -11143,7 +11150,8 @@ else
 		$sed -e 's/\(.*\)=.*/\1/' ccsym.cpp
 		also='further '
 		$test "$silent" || sleep 1
-		cppsymbols="`$cat ccsym.cpp|tr \"$trnl\" ' '`"
+		cppsymbols=`$cat ccsym.cpp`
+		cppsymbols=`echo $cppsymbols`
 	fi
 	if $test -s ccsym.own; then
 		$test "$also" && echo " "
@@ -11151,7 +11159,8 @@ else
 		$sed -e 's/\(.*\)=1/\1/' ccsym.own
 		$sed -e 's/\(.*\)=.*/\1/' ccsym.own | $uniq >>Cppsym.true
 		$test "$silent" || sleep 1
-	        ccsymbols="`$cat ccsym.own|tr \"$trnl\" ' '`"
+	        ccsymbols=`$cat ccsym.own`
+	        ccsymbols=`echo $ccsymbols`
 	fi
 fi
 $rm -f ccsym*
