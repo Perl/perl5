@@ -31,6 +31,72 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11005] By: jhi                                   on 2001/06/28  14:40:11
+        Log: More Perforce lore.
+     Branch: perl
+	   ! Porting/repository.pod
+____________________________________________________________________________
+[ 11004] By: jhi                                   on 2001/06/28  14:12:50
+        Log: Metaconfig unit changes for #11003.
+     Branch: metaconfig/U/perl
+	   + d_nl_langinfo.U i_langinfo.U
+____________________________________________________________________________
+[ 11003] By: jhi                                   on 2001/06/28  14:12:27
+        Log: Add Configure probes for nl_langinfo() and <langinfo.h>.
+             Expected not to exist in non-UNIX excepting in VMS, where
+             according to a quick web survey they just might.
+     Branch: perl
+	   ! Configure NetWare/config.wc Porting/Glossary Porting/config.sh
+	   ! Porting/config_H config_h.SH configure.com epoc/config.sh
+	   ! perl.h uconfig.h uconfig.sh vos/config.alpha.def
+	   ! vos/config.alpha.h vos/config.ga.def vos/config.ga.h
+	   ! win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[ 11002] By: jhi                                   on 2001/06/28  13:39:11
+        Log: One shouldn't use XBS5_ILP32_OFFBIG_CFLAGS et alia
+             in AIX is one is doing a 64-bit build.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 11001] By: jhi                                   on 2001/06/28  13:28:37
+        Log: Metaconfig unit changes for #11000.
+     Branch: metaconfig/U/perl
+	   ! use64bits.U uselfs.U
+____________________________________________________________________________
+[ 11000] By: jhi                                   on 2001/06/28  13:21:16
+        Log: Move use64bitint and use64bitall before uselargefiles.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10999] By: jhi                                   on 2001/06/28  03:49:07
+        Log: Subject: [ID 20010625.009] open(FILE,"+foo") [PATCH]
+             From: Robert Spier <rspier@pobox.com>
+             Message-ID: <15162.41164.618712.841415@rls.cx>
+             Date: Wed, 27 Jun 2001 23:13:16 -0400
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 10998] By: jhi                                   on 2001/06/28  03:42:57
+        Log: Subject: [PATCH: perl@10996] avoid overflow in numeric.c:S_mulexp10() on VAX
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 27 Jun 2001 19:25:49 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10106271922120.465082-100000@aspara.forte.com>
+     Branch: perl
+	   ! numeric.c
+____________________________________________________________________________
+[ 10997] By: jhi                                   on 2001/06/28  03:42:12
+        Log: Subject: [patch perl@10996] "fix" VAX Digest/MD5, Fcntl, brokennes in SDBM
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 27 Jun 2001 17:33:33 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10106271705390.467850-100000@aspara.forte.com>
+     Branch: perl
+	   ! configure.com ext/Digest/MD5/Makefile.PL
+____________________________________________________________________________
+[ 10996] By: jhi                                   on 2001/06/27  20:34:11
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10995] By: jhi                                   on 2001/06/27  20:06:28
         Log: Tiny EPOC updates.
      Branch: perl
