@@ -2597,8 +2597,7 @@ Perl_yylex(pTHX)
 			    /* The count here deliberately includes the NUL
 			       that terminates the C string constant.  This
 			       embeds the opening NUL into the string.  */
-			    Perl_sv_catpvn(aTHX_ PL_linestr,
-					   "our @F=split(q", 15);
+			    sv_catpvn(aTHX_ PL_linestr, "our @F=split(q", 15);
 			    s = PL_splitstr;
 			    do {
 				/* Need to \ \s  */
@@ -2609,7 +2608,7 @@ Perl_yylex(pTHX)
 			    /* This loop will embed the trailing NUL of
 			       PL_linestr as the last thing it does before
 			       terminating.  */
-			    Perl_sv_catpvn(aTHX_ PL_linestr, ");", 2);
+			    sv_catpvn(PL_linestr, ");", 2);
 			}
 		    }
 		    else
@@ -3016,7 +3015,7 @@ Perl_yylex(pTHX)
 		 * subroutine call (or a -bareword), then. */
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
 			"### '-%c' looked like a file test but was not\n",
-			tmp);
+			(int) tmp);
 		} );
 		s = --PL_bufptr;
 	    }
@@ -8145,7 +8144,7 @@ utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     I32 count = FILTER_READ(idx+1, sv, maxlen);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "utf16_textfilter(%p): %d %d (%d)\n",
-			  utf16_textfilter, idx, maxlen, count));
+			  utf16_textfilter, idx, maxlen, (int) count));
     if (count) {
 	U8* tmps;
 	I32 newlen;
@@ -8166,7 +8165,7 @@ utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     I32 count = FILTER_READ(idx+1, sv, maxlen);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "utf16rev_textfilter(%p): %d %d (%d)\n",
-			  utf16rev_textfilter, idx, maxlen, count));
+			  utf16rev_textfilter, idx, maxlen, (int) count));
     if (count) {
 	U8* tmps;
 	I32 newlen;
