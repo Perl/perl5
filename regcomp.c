@@ -2678,6 +2678,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 {
     register regnode *ret = 0;
     I32 flags;
+    char *parse_start = 0;
 
     *flagp = WORST;		/* Tentatively. */
 
@@ -2951,7 +2952,8 @@ tryagain:
 	    register char *p;
 	    char *oldp, *s;
 	    STRLEN numlen;
-            char *parse_start = RExC_parse - 1;
+
+            parse_start = RExC_parse - 1;
 
 	    RExC_parse++;
 
