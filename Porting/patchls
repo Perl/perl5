@@ -1,0 +1,273 @@
+#!/bin/perl -w
+# 
+# Originally from Tom Horsley. Generally hacked and extended by Tim Bunce.
+#
+# Input is one or more patchfiles, output is a list of files to be patched.
+#
+# $Id: patchls,v 1.3 1997/06/10 21:38:45 timbo Exp $
+
+require "getopts.pl";
+
+use Text::Wrap qw(wrap $columns);
+use Text::Tabs qw(expand unexpand);
+use strict;
+
+$columns = 70;
+
+$::opt_p = undef;	# like patch -pN, strip off N dir levels from file names
+$::opt_d = 0;
+$::opt_v = 0;
+$::opt_m = 0;
+$::opt_i = 0;
+$::opt_h = 0;
+$::opt_l = 0;
+$::opt_c = 0;
+
+die qq{
+
+  patchls [options] patchfile [ ... ]
+
+    -m     print formatted Meta-information (Subject,From,Msg-ID etc)
+    -p N   strip N levels of directory Prefix (like patch), else automatic
+    -i     Invert: for each patched file list which patch files patch it
+    -h     no filename headers (like grep), only the listing
+    -l     no listing (like grep), only the filename headers
+    -c     attempt to Categorise the patch (sort by category with -m)
+    -v     more verbose
+    -d     still more verbosity for debugging
+
+} unless @ARGV;
+
+&Getopts("mihlvcp:");
+
+my %ls;
+
+# Style 1:
+#	*** perl-5.004/embed.h  Sat May 10 03:39:32 1997
+#	--- perl-5.004.fixed/embed.h    Thu May 29 19:48:46 1997
+#	***************
+#	*** 308,313 ****
+#	--- 308,314 ----
+#
+# Style 2:
+#	--- perl5.004001/mg.c   Sun Jun 08 12:26:24 1997
+#	+++ perl5.004-bc/mg.c   Sun Jun 08 11:56:08 1997
+#	@@ -656,9 +656,27 @@
+# or (rcs, note the different date format)
+#	--- 1.18	1997/05/23 19:22:04
+#	+++ ./pod/perlembed.pod	1997/06/03 21:41:38
+#
+# Variation:
+#	Index: embed.h
+
+my($in, $prevline, $prevtype, $ls);
+
+foreach my $argv (@ARGV) {
+    $in = $argv;
+    unless (open F, "<$in") {
+	warn "Unable to open $in: $!\n";
+	next;
+    }
+    print "Reading $in...\n" if $::opt_v and @ARGV > 1;
+    $ls = $ls{$in} ||= { in => $in };
+    my $type;
+    while (<F>) {
+	unless (/^([-+*]{3}) / || /^(Index):/) {
+	    # not an interesting patch line but possibly meta-information
+	    next unless $::opt_m;
+	    $ls->{From}{$1}=1       if /^From: (.*\S)/i;
+	    $ls->{Title}{$1}=1      if /^Subject: (?:Re: )?(.*\S)/i;
+	    $ls->{'Msg-ID'}{$1}=1   if /^Message-Id: (.*\S)/i;
+	    $ls->{Date}{$1}=1       if /^Date: (.*\S)/i;
+	    next;
+	}
+	$type = $1;
+	next if /^--- [0-9,]+ ----$/ || /^\*\*\* [0-9,]+ \*\*\*\*$/;
+
+	print "Last: $prevline","This: ${_}Got:  $1\n\n" if $::opt_d;
+
+	# Some patches have Index lines but not diff headers
+	# Patch copes with this, so must we
+	add_file($ls, $1), next if /^Index:\s+(.*)/;
+
+	if (	($type eq '---' and $prevtype eq '***')	# Style 1
+	    or	($type eq '+++' and $prevtype eq '---')	# Style 2
+	) {
+	    if (/^[-+*]{3} (\S+)\s+.*\d\d:\d\d:\d\d/) {	# double check
+		add_file($ls, $1);
+	    }
+	    else {
+		warn "$in $.: parse error (prev $prevtype, type $type)\n$prevline$_";
+	    }
+	}
+    }
+    continue {
+	$prevline = $_;
+	$prevtype = $type;
+	$type = '';
+    }
+    $ls->{Title}{$in}=1 if !$ls->{Title} and $::opt_m and $::opt_c
+				and $ls->{files_by_patch};
+    $ls->{category} = intuit_category($ls, $::opt_v) if $::opt_c;
+}
+print "All files read.\n" if $::opt_v and @ARGV > 1;
+
+unless ($::opt_c and $::opt_m) {
+    foreach $in (sort keys %ls) {
+	$ls = $ls{$in};
+	list_files_by_patch($ls);
+    }
+}
+else {
+    my $c = '';
+    foreach $ls (sort { $a->{category} cmp $b->{category} } values %ls) {
+	print "\n  $ls->{category}\n" if $ls->{category} ne $c;
+	$c = $ls->{category};
+	list_files_by_patch($ls);
+    }
+    print "\n";
+}
+
+
+sub add_file {
+    my $ls = shift;
+    my $out = trim_name(shift);
+    ($ls, $out) = ($ls{$out} ||= { in => $out }, $in) if $::opt_i;
+    $ls->{files_by_patch}->{$out} = 1;
+}
+
+
+sub trim_name {		# reduce/tidy file paths from diff lines
+    my $name = shift;
+    $name = "$name ($in)" if $name eq "/dev/null";
+    if (defined $::opt_p) {
+	# strip on -p levels of directory prefix
+	my $dc = $::opt_p;
+	$name =~ s:^[^/]+/(.+)$:$1: while $dc-- > 0;
+    }
+    else {	# try to strip off leading path to perl directory
+	# if absolute path, strip down to any *perl* directory first
+	$name =~ s:^/.*?perl.*?/::i;
+	$name =~ s:.*perl[-_]?5\.[-_a-z0-9.]+/::i;
+	$name =~ s:^\./::;
+    }
+    return $name;
+}
+
+
+sub list_files_by_patch {
+    my $ls = shift;
+    my $name = $ls->{in};
+    my @meta;
+    if ($::opt_m) {
+	foreach(qw(Title From Msg-ID)) {
+	    next unless $ls->{$_};
+	    my @list = sort keys %{$ls->{$_}};
+	    push @meta, sprintf "%7s:  ", $_;
+	    @list = map { "\"$_\"" } @list if $_ eq 'Title';
+	    push @meta, my_wrap("","          ", join(", ",@list)."\n");
+	}
+	$name = "\n$name" if @meta;
+    }
+    # don't print the header unless the file contains something interesting
+    return if !@meta and !$ls->{files_by_patch};
+    print("$ls->{in}\n"),return  if $::opt_l;	# -l = no listing
+
+	# a twisty maze of little options
+    my $cat = ($ls->{category} and !$::opt_m) ? " $ls->{category}" : "";
+    print "$name$cat: "	unless $::opt_h and !$::opt_v;
+    print join('',"\n",@meta) if @meta;
+
+    my @v = sort PATORDER keys %{ $ls->{files_by_patch} };
+    my $v = "@v\n";
+    print $::opt_m ? "  Files:  ".my_wrap("","          ",$v) : $v;
+}
+
+
+sub my_wrap {
+    return expand(wrap(@_));
+}
+
+
+
+# CORE LANGUAGE CHANGES
+# CORE PORTABILITY
+# OTHER CORE CHANGES
+# BUILD PROCESS
+# LIBRARY AND EXTENSIONS
+# TESTS
+# UTILITIES
+# DOCUMENTATION
+
+sub intuit_category {
+    my($ls, $verb) = @_;
+    return 'OTHER' unless $ls->{files_by_patch};
+    my(%c, $refine);
+    foreach (keys %{ $ls->{files_by_patch} }) {
+	++$c{'DOCUMENTATION'},next
+	    if m:^pod/:;
+	++$c{'UTILITIES'},next
+	    if m:^(utils|x2p|h2pl)/:;
+	++$c{'PORTABILITY'},next
+	    if m:^(cygwin32|os2|plan9|qnx|vms|win32)/:
+	    or m:^(hints|Porting|ext/DynaLoader)/:
+	    or m:^README\.:;
+	++$c{'LIBRARY AND EXTENSIONS'},next
+	    if m:^(lib|ext)/:;
+	++$c{'TESTS'},next
+	    if m:^t/:;
+	++$c{'CORE LANGUAGE'},next
+	    if m:^[^/]+\.([chH]|sym)$:;
+	++$c{'BUILD PROCESS'},next
+	    if m:^[A-Z]+$: or m:^[^/]+\.SH$:
+	    or m:^(install|configure):i;
+	print "Couldn't categorise $_\n" if $::opt_v;
+	++$c{OTHER};
+    }
+refine:
+    ++$refine;
+    my @c = sort { $c{$b} <=> $c{$a} || $a cmp $b } keys %c;
+    my @v = map  { $c{$_} } @c;
+    if (@v > 1 and $refine <= 1 and "@v" =~ /^(\d) \1/
+	    and $c[0] =~ m/^(DOC|TESTS|OTHER)/) {
+	print "Tie, promoting $c[1] over $c[0]\n" if $::opt_d;
+	++$c{$c[1]};
+	goto refine;
+    }
+    print "  ", join(", ", map { "$_: $c{$_}" } @c),".\n"
+	if $verb and @v > 1;
+    return $c[0];
+}
+
+
+sub PATORDER {		# PATORDER sort by Chip Salzenberg
+    my ($i, $j);
+
+    $i = ($a =~ m#^[A-Z]+$#);
+    $j = ($b =~ m#^[A-Z]+$#);
+    return $j - $i if $i != $j;
+
+    $i = ($a =~ m#configure|hint#i) || ($a =~ m#[S_]H$#);
+    $j = ($b =~ m#configure|hint#i) || ($b =~ m#[S_]H$#);
+    return $j - $i if $i != $j;
+
+    $i = ($a =~ m#\.pod$#);
+    $j = ($b =~ m#\.pod$#);
+    return $j - $i if $i != $j;
+
+    $i = ($a =~ m#include/#);
+    $j = ($b =~ m#include/#);
+    return $j - $i if $i != $j;
+
+    if ((($i = $a) =~ s#/+[^/]*$##)
+	&& (($j = $b) =~ s#/+[^/]*$##)) {
+	    return $i cmp $j if $i ne $j;
+    }
+
+    $i = ($a =~ m#\.h$#);
+    $j = ($b =~ m#\.h$#);
+    return $j - $i if $i != $j;
+
+    return $a cmp $b;
+}
+
