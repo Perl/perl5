@@ -109,6 +109,10 @@ sub get_files {
 	# we might miss out on compiler-specific ones
 	$file{"$ENV{GUSI}include:sys:errno.h"} = 1;
 
+    } elsif ($^O eq 'beos') {
+	# hidden in a special place
+	$file{'/boot/develop/headers/posix/errno.h'} = 1;
+
     } else {
 	open(CPPI,"> errno.c") or
 	    die "Cannot open errno.c";
@@ -202,6 +206,7 @@ sub write_errno_pm {
 	    my($name,$expr);
 	    next unless ($name, $expr) = /"(.*?)"\s*\[\s*\[\s*(.*?)\s*\]\s*\]/;
 	    next if $name eq $expr;
+	    $expr =~ s/(\d+)[LU]+\b/$1/g; # 2147483647L et alia
 	    $err{$name} = eval $expr;
 	}
 	close(CPPO);
