@@ -522,7 +522,7 @@ sub compexcl {
 
     use Unicode::UCD 'casefold';
 
-    my %casefold = casefold("09dc");
+    my $casefold = casefold("09dc");
 
 The casefold() returns the locale-independent case folding of the
 character specified by a B<code point argument>.
@@ -595,7 +595,7 @@ sub casefold {
 
     use Unicode::UCD 'casespec';
 
-    my %casespec = casespec("09dc");
+    my $casespec = casespec("09dc");
 
 The casespec() returns the potentially locale-dependent case mapping
 of the character specified by a B<code point argument>.  The mapping
