@@ -564,7 +564,6 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		Move(s + slen, SvPVX(src), sdone , U8);
 	    }
 	    SvCUR_set(src, sdone);
-	    *SvEND(src) = '\0';
 	}
     }
     else {
@@ -578,6 +577,16 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 MODULE = Encode		PACKAGE = Encode::XS	PREFIX = Method_
 
 PROTOTYPES: ENABLE
+
+void
+Method_name(obj)
+SV *	obj
+CODE:
+ {
+  encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
+  ST(0) = sv_2mortal(newSVpvn(enc->name[0],strlen(enc->name[0])));
+  XSRETURN(1);
+ }
 
 void
 Method_decode(obj,src,check = FALSE)

@@ -349,6 +349,9 @@ ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/MANIFEST		Encode extension
 ext/Encode/README		Encode extension
 ext/Encode/t/Encode.t		Encode extension test
+ext/Encode/t/Japanese.t		Encode extension test
+ext/Encode/t/table.euc		Encode extension test
+ext/Encode/t/table.ref		Encode extension test
 ext/Encode/t/Tcl.t		Encode extension test
 ext/Errno/ChangeLog	Errno perl module change log
 ext/Errno/Errno.t	See if Errno works
