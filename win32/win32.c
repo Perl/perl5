@@ -1132,6 +1132,7 @@ win32_stat(const char *path, struct stat *sbuf)
 	if (S_ISDIR(sbuf->st_mode))
 	    sbuf->st_mode |= S_IWRITE | S_IEXEC;
 	else if (S_ISREG(sbuf->st_mode)) {
+	    int perms;
 	    if (l >= 4 && path[l-4] == '.') {
 		const char *e = path + l - 3;
 		if (strnicmp(e,"exe",3)
@@ -1144,6 +1145,9 @@ win32_stat(const char *path, struct stat *sbuf)
 	    }
 	    else
 		sbuf->st_mode &= ~S_IEXEC;
+	    /* Propagate permissions to _group_ and _others_ */
+	    perms = sbuf->st_mode & (S_IREAD|S_IWRITE|S_IEXEC);
+	    sbuf->st_mode |= (perms>>3) | (perms>>6);
 	}
 #endif
     }
