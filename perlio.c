@@ -40,11 +40,6 @@
 
 #include "XSUB.h"
 
-#undef PerlMemShared_calloc
-#define PerlMemShared_calloc(x,y) calloc(x,y)
-#undef PerlMemShared_free
-#define PerlMemShared_free(x) free(x)
-
 int
 perlsio_binmode(FILE *fp, int iotype, int mode)
 {
