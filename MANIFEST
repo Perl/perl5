@@ -41,6 +41,7 @@ README.plan9		Notes about Plan9 port
 README.posix-bc		Notes about BC2000 POSIX port
 README.qnx		Notes about QNX port
 README.threads		Notes about multithreading
+README.vmesa		Notes about VM/ESA port
 README.vms		Notes about VMS port
 README.vos		Notes about Stratus VOS port
 README.win32		Notes about Win32 port

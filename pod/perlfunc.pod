@@ -3915,8 +3915,8 @@ system-dependent; they are available via the standard module C<Fcntl>.
 For historical reasons, some values work on almost every system
 supported by perl: zero means read-only, one means write-only, and two
 means read/write.  We know that these values do I<not> work under
-OS/390 Unix and on the Macintosh; you probably don't want to use them
-in new code.
+OS/390 & VM/ESA Unix and on the Macintosh; you probably don't want to
+use them in new code.
 
 If the file named by FILENAME does not exist and the C<open()> call creates
 it (typically because MODE includes the C<O_CREAT> flag), then the value of
