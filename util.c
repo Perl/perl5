@@ -1819,6 +1819,8 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	    /* Close error pipe automatically if exec works */
 	    fcntl(pp[1], F_SETFD, FD_CLOEXEC);
+#else
+	    PerlLIO_close(pp[1]); /* Do as best as we can: pretend success. */
 #endif
 	}
 	/* Now dup our end of _the_ pipe to right position */
@@ -1958,6 +1960,8 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	    PerlLIO_close(pp[0]);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	    fcntl(pp[1], F_SETFD, FD_CLOEXEC);
+#else
+	    PerlLIO_close(pp[1]); /* Do as best as we can: pretend success. */
 #endif
 	}
 	if (p[THIS] != (*mode == 'r')) {
