@@ -457,6 +457,19 @@ binary and text files.  If FILEHANDLE is an expression, the value is
 taken as the name of the filehandle.  Returns true on success,
 otherwise it returns C<undef> and sets C<$!> (errno).
 
+On some systems (in general, DOS and Windows-based systems) binmode()
+is necessary when you're not working with a text file.  For the sake
+of portability it is a good idea to always use it when appropriate,
+and to never use it when it isn't appropriate.  Also, people can
+set their I/O to be by default UTF-8 encoded Unicode, not bytes.
+
+In other words: regardless of platform, use binmode() on binary data,
+like for example images.
+
+If LAYER is present it is a single string, but may contain multiple
+directives. The directives alter the behaviour of the file handle.
+When LAYER is present using binmode on text file makes sense.
+
 If LAYER is omitted or specified as C<:raw> the filehandle is made
 suitable for passing binary data. This includes turning off possible CRLF
 translation and marking it as bytes (as opposed to Unicode characters).
@@ -466,6 +479,10 @@ Note that as despite what may be implied in I<"Programming Perl">
 I<also> disabled. See L<PerlIO>, L<perlrun> and the discussion about the
 PERLIO environment variable.
 
+The C<:bytes>, C<:crlf>, and C<:utf8>, and any other directives of the
+form C<:...>, are called I/O I<layers>.  The C<open> pragma can be used to
+establish default I/O layers.  See L<open>.
+
 I<The LAYER parameter of the binmode() function is described as "DISCIPLINE"
 in "Programming Perl, 3rd Edition".  However, since the publishing of this
 book, by many known as "Camel III", the consensus of the naming of this
@@ -473,24 +490,7 @@ functionality has moved from "discipline" to "layer".  All documentation
 of this version of Perl therefore refers to "layers" rather than to
 "disciplines".  Now back to the regularly scheduled documentation...>
 
-On some systems (in general, DOS and Windows-based systems) binmode()
-is necessary when you're not working with a text file.  For the sake
-of portability it is a good idea to always use it when appropriate,
-and to never use it when it isn't appropriate.
-
-In other words: regardless of platform, use binmode() on binary files
-(like for example images).
-
-If LAYER is present it is a single string, but may contain
-multiple directives. The directives alter the behaviour of the
-file handle. When LAYER is present using binmode on text
-file makes sense.
-
 To mark FILEHANDLE as UTF-8, use C<:utf8>.
-
-The C<:bytes>, C<:crlf>, and C<:utf8>, and any other directives of the
-form C<:...>, are called I/O I<layers>.  The C<open> pragma can be used to
-establish default I/O layers.  See L<open>.
 
 In general, binmode() should be called after open() but before any I/O
 is done on the filehandle.  Calling binmode() will normally flush any
