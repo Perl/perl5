@@ -138,7 +138,7 @@
 	'Errno' =>
 		{
 		'MAINTAINER'	=> 'p5p', # Not gbarr.
-		'FILES'		=> q[ext/Data/Dumper],
+		'FILES'		=> q[ext/Errno],
 		'CPAN'		=> 0,
 		},
 
@@ -175,7 +175,7 @@
 	'Filter::Util::Call' =>
 		{
 		'MAINTAINER'	=> 'pmarquess',
-		'FILES'		=> q[ext/Filter/Util/Call
+		'FILES'		=> q[ext/Filter/Util/Call ext/Filter/t/call.t
 				     t/lib/filter-util.pl],
 		'CPAN'		=> 1,
 		},
@@ -311,14 +311,14 @@
 	'podlators' =>
 		{
 		'MAINTAINER'	=> 'rra',
-		'FILES'		=> q[lib/Pod/{Checker,Find,Html,InputObjects,Man,ParseLink,Parser,ParseUtils,PlainText,Select,Text,Text/{Color,Overstrike,Termcap},Usage}.pm pod/pod2man.PL pod/pod2text.PL lib/Pod/t/{basic.*,{basic,man,parselink,text*}.t}],
+		'FILES'		=> q[lib/Pod/{Checker,Find,Html,InputObjects,Man,ParseLink,Parser,ParseUtils,PlainText,Select,Text,Text/{Color,Overstrike,Termcap},Usage}.pm pod/pod2man.PL pod/pod2text.PL lib/Pod/t/{basic.*,{basic,man,parselink,text*}.t} lib/Pod/t/{InputObjects,Select,Usage,utils}.t],
 		'CPAN'		=> 1,
 		},
 
 	'Pod::Perldoc' =>
 		{
 		'MAINTAINER'	=> 'sburke',
-		'FILES'		=> q[lib/Pod/Perldoc.pm],
+		'FILES'		=> q[lib/Pod/Perldoc.pm lib/Pod/Perldoc],
 		'CPAN'		=> 1,
 		},
 
@@ -362,12 +362,21 @@
 		{
 		'MAINTAINER'	=> 'rra',
 		'FILES'		=> q[lib/Term/ANSIColor.pm lib/Term/ANSIColor],
+		'CPAN'		=> 1,
+		},
+
+	'Test' =>
+		{
+		'MAINTAINER'	=> 'schwern',
+		'FILES'		=> q[lib/Test.pm lib/Test/t],
+		'CPAN'		=> 1,
 		},
 
 	'Test::Builder' =>
 		{
 		'MAINTAINER'	=> 'schwern',
 		'FILES'		=> q[lib/Test/Builder.pm],
+		'CPAN'		=> 1,
 		},
 
 	'Test::Harness' =>
