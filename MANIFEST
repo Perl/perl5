@@ -1122,13 +1122,6 @@ lib/Net/netent.t		See if Net::netent works
 lib/Net/Netrc.pm		libnet
 lib/Net/NNTP.pm			libnet
 lib/Net/Ping.pm			Hello, anybody home?
-lib/Net/Ping/CHANGES		Net::Ping
-lib/Net/Ping/README		Net::Ping
-lib/Net/Ping/t/100_load.t		Net::Ping
-lib/Net/Ping/t/110_icmp_inst.t		Net::Ping
-lib/Net/Ping/t/120_udp_inst.t		Net::Ping
-lib/Net/Ping/t/130_tcp_inst.t		Net::Ping
-lib/Net/Ping/t/200_ping_tcp.t		Net::Ping
 lib/Net/POP3.pm			libnet
 lib/Net/protoent.pm		By-name interface to Perl's builtin getproto*
 lib/Net/protoent.t		See if Net::protoent works
