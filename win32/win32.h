@@ -25,6 +25,7 @@
 #  endif
 #  define win32_get_privlib PerlEnv_lib_path
 #  define win32_get_sitelib PerlEnv_sitelib_path
+#  define win32_get_vendorlib PerlEnv_vendorlib_path
 #endif
 
 #ifdef __GNUC__
@@ -312,8 +313,9 @@ extern int		my_fclose(FILE *);
 extern int		do_aspawn(void *really, void **mark, void **sp);
 extern int		do_spawn(char *cmd);
 extern int		do_spawn_nowait(char *cmd);
-extern char *		win32_get_privlib(char *pl);
-extern char *		win32_get_sitelib(char *pl);
+extern char *		win32_get_privlib(const char *pl);
+extern char *		win32_get_sitelib(const char *pl);
+extern char *		win32_get_vendorlib(const char *pl);
 extern int		IsWin95(void);
 extern int		IsWinNT(void);
 extern void		win32_argv2utf8(int argc, char** argv);

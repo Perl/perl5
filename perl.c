@@ -3269,7 +3269,7 @@ S_init_perllib(pTHX)
 #endif
 
 #ifdef PERL_VENDORARCH_EXP
-    /* vendorarch is always relative to sitelib on Windows for
+    /* vendorarch is always relative to vendorlib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
     incpush(PERL_VENDORARCH_EXP, FALSE);
