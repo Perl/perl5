@@ -955,6 +955,16 @@ be little different than ordinary code.
 Also note that under the current implementation, shared variables
 use a little more memory and are a little slower than ordinary variables.
 
+=head1 Threadsafety of System Libraries
+
+Whether various library calls are threadsafe is outside the control
+of Perl.  Calls often suffering from not being threadsafe include
+localtime(), gmtime(), get{gr,host,net,proto,serv,pw}*(), readdir(),
+rand(), srand().  If the system Perl is compiled in has threadsafe
+variants of these calls, they will be used, but besides that, Perl is
+at the mercy of the thread safety or unsafety of the calls.  Please
+consult your C library call documentation.
+
 =head1 Conclusion
 
 A complete thread tutorial could fill a book (and has, many times),

@@ -245,9 +245,6 @@ Helping with debugging.
 
 please join perl-ithreads@perl.org for more information
 
-
-
-
 =head1 SEE ALSO
 
 L<perl>, L<threads::shared>, L<perlcall>, L<perlembed>, L<perlguts>
