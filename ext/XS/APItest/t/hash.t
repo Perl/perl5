@@ -14,6 +14,7 @@ BEGIN {
 }
 
 use strict;
+use utf8;
 use Tie::Hash;
 use Test::More 'no_plan';
 
@@ -32,40 +33,18 @@ sub test_fetch_absent;
 my $utf8_for_258 = chr 258;
 utf8::encode $utf8_for_258;
 
-{
-  my @testkeys = ('N', chr 256);
-  my @keys = (@testkeys, $utf8_for_258);
+my @testkeys = ('N', chr 198, chr 256);
+my @keys = (@testkeys, $utf8_for_258);
 
-  foreach my $key (@testkeys) {
-    perform_test (\&test_present, $key, \@keys, '');
-    perform_test (\&test_fetch_present, $key, \@keys, '');
-    perform_test (\&test_delete_present, $key, \@keys, '');
-
-    perform_test (\&test_store, $key, \@keys, '', [a=>'cheat']);
-    perform_test (\&test_store, $key, \@keys, '', []);
-
-    my $lckey = lc $key;
-    perform_test (\&test_absent, $lckey, \@keys, '');
-    perform_test (\&test_fetch_absent, $lckey, \@keys, '');
-    perform_test (\&test_delete_absent, $lckey, \@keys, '');
-
-    my $unikey = $key;
-    utf8::encode $unikey;
-
-    next if $unikey eq $key;
-
-    perform_test (\&test_absent, $unikey, \@keys, '');
-    perform_test (\&test_fetch_absent, $unikey, \@keys, '');
-    perform_test (\&test_delete_absent, $unikey, \@keys, '');
-  }
-
-  # hv_exists was buggy for tied hashes, in that the raw utf8 key was being
-  # used - the utf8 flag was being lost.
-  perform_test (\&test_absent, (chr 258), \@keys, '');
-
-  perform_test (\&test_fetch_absent, (chr 258), \@keys, '');
-  perform_test (\&test_delete_absent, (chr 258), \@keys, '');
+foreach (@keys) {
+  utf8::downgrade $_, 1;
 }
+main_tests (\@keys, \@testkeys, '');
+
+foreach (@keys) {
+  utf8::upgrade $_;
+}
+main_tests (\@keys, \@testkeys, ' [utf8 hash]');
 
 {
   my %h = (a=>'cheat');
@@ -79,6 +58,53 @@ utf8::encode $utf8_for_258;
 exit;
 
 ################################   The End   ################################
+
+sub main_tests {
+  my ($keys, $testkeys, $description) = @_;
+  foreach my $key (@$testkeys) {
+    my $lckey = ($key eq chr 198) ? chr 230 : lc $key;
+    my $unikey = $key;
+    utf8::encode $unikey;
+
+    utf8::downgrade $key, 1;
+    utf8::downgrade $lckey, 1;
+    utf8::downgrade $unikey, 1;
+    main_test_inner ($key, $lckey, $unikey, $keys, $description);
+
+    utf8::upgrade $key;
+    utf8::upgrade $lckey;
+    utf8::upgrade $unikey;
+    main_test_inner ($key, $lckey, $unikey, $keys,
+		     $description . ' [key utf8 on]');
+  }
+
+  # hv_exists was buggy for tied hashes, in that the raw utf8 key was being
+  # used - the utf8 flag was being lost.
+  perform_test (\&test_absent, (chr 258), $keys, '');
+
+  perform_test (\&test_fetch_absent, (chr 258), $keys, '');
+  perform_test (\&test_delete_absent, (chr 258), $keys, '');
+}
+
+sub main_test_inner {
+  my ($key, $lckey, $unikey, $keys, $description) = @_;
+  perform_test (\&test_present, $key, $keys, $description);
+  perform_test (\&test_fetch_present, $key, $keys, $description);
+  perform_test (\&test_delete_present, $key, $keys, $description);
+
+  perform_test (\&test_store, $key, $keys, $description, [a=>'cheat']);
+  perform_test (\&test_store, $key, $keys, $description, []);
+
+  perform_test (\&test_absent, $lckey, $keys, $description);
+  perform_test (\&test_fetch_absent, $lckey, $keys, $description);
+  perform_test (\&test_delete_absent, $lckey, $keys, $description);
+
+  return if $unikey eq $key;
+
+  perform_test (\&test_absent, $unikey, $keys, $description);
+  perform_test (\&test_fetch_absent, $unikey, $keys, $description);
+  perform_test (\&test_delete_absent, $unikey, $keys, $description);
+}
 
 sub perform_test {
   my ($test_sub, $key, $keys, $message, @other) = @_;
