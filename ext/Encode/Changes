@@ -1,9 +1,35 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.80 2002/10/21 20:39:09 dankogai Exp dankogai $
+# $Id: Changes,v 1.83 2002/11/18 17:28:49 dankogai Exp dankogai $
 #
 
-$Revision: 1.80 $ $Date: 2002/10/21 20:39:09 $
+$Revision: 1.83 $ $Date: 2002/11/18 17:28:49 $
+! Encode.xs lib/Encode/JIS7.pm
+  Even more patches from Inaba-san has been applied.  With this
+  patch t/uni/tr_7jis.t and t/uni/t_utf8.t of bleedperl will work.
+  Message-Id: <20021115105514D.inaba.hiroto@toshiba-it.co.jp>
+
+1.82 2002/11/14 23:06:12
+! Encode.xs
+  Encode::utf8 (XS Version) assertion botch first found in Cygwin, 
+  later found in perls w/ -Dusemymalloc was fixed by NC.
+  Message-Id: <20021114210349.GA288@Bagpuss.unfortu.net>
+
+1.81 2002/11/08 18:29:27
+! Encode.pm Encode.xs
+  Non-XS version of Encode::utf8 is back (with XS being default).
+  Encode::predefine_encodings(0) to turn off XS.
+  This is primarily to cope w/ Cygwin smoke but Sadahiro-san has
+  found that it was Test::More causing the problem, not Encode.
+  But I have already made it configurable so it may be useful in
+  some rare cases....
+  Message-Id: <20021107210110.2EE4.BQW10602@nifty.com>, et al.
+! bin/enc2xs
+  The ingenious patch by Nicholas Clark that reduces shlib sizes by
+  50% with no penalty and backward compatibility preserved, is in.
+  Message-Id: <20021103231324.GE288@Bagpuss.unfortu.net>
+
+1.80 2002/10/21 20:39:09
 ! Encode.xs t/mime-header.t
   Even more patches from NI-XS regarding Encode::utf8->decode().
   And one more test to t/mime-header.t to prove it
@@ -774,7 +800,7 @@ $Revision: 1.80 $ $Date: 2002/10/21 20:39:09 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/10/21 20:39:09 $
+1.11 2002/03/31 22:12:13
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

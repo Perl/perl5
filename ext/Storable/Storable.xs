@@ -4125,7 +4125,14 @@ static SV *retrieve_ref(stcxt_t *cxt, char *cname)
 	 * an SX_OBJECT indication, a ref count increment was done.
 	 */
 
-	sv_upgrade(rv, SVt_RV);
+	if (cname) {
+		/* Do not use sv_upgrade to preserve STASH */
+		SvFLAGS(rv) &= ~SVTYPEMASK;
+		SvFLAGS(rv) |= SVt_RV;
+	} else {
+		sv_upgrade(rv, SVt_RV);
+	}
+
 	SvRV(rv) = sv;				/* $rv = \$sv */
 	SvROK_on(rv);
 

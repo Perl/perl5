@@ -361,7 +361,7 @@ C<$self-E<gt>{ELEMSIZE}> spaces only, it does not exist:
 
 Delete the element at index I<key> from the tied array I<this>.
 
-In our example, a deleted item is C<$self->{ELEMSIZE}> spaces:
+In our example, a deleted item is C<$self-E<gt>{ELEMSIZE}> spaces:
 
     sub DELETE {
       my $self  = shift;

@@ -660,15 +660,23 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
     }
     if (load && PL_subname && PL_def_layerlist
 	&& PL_def_layerlist->cur >= 2) {
-	SV *pkgsv = newSVpvn("PerlIO", 6);
-	SV *layer = newSVpvn(name, len);
-	ENTER;
-	/*
-	 * The two SVs are magically freed by load_module
-	 */
-	Perl_load_module(aTHX_ 0, pkgsv, Nullsv, layer, Nullsv);
-	LEAVE;
-	return PerlIO_find_layer(aTHX_ name, len, 0);
+	if (PL_in_load_module) {
+	    Perl_croak(aTHX_ "Recursive call to Perl_load_module in PerlIO_find_layer");
+	    return NULL;
+	} else {
+	    SV *pkgsv = newSVpvn("PerlIO", 6);
+	    SV *layer = newSVpvn(name, len);
+	    ENTER;
+	    SAVEINT(PL_in_load_module);
+	    PL_in_load_module++;
+	    /*
+	     * The two SVs are magically freed by load_module
+	     */
+	    Perl_load_module(aTHX_ 0, pkgsv, Nullsv, layer, Nullsv);
+	    PL_in_load_module--;
+	    LEAVE;
+	    return PerlIO_find_layer(aTHX_ name, len, 0);
+	}
     }
     PerlIO_debug("Cannot find %.*s\n", (int) len, name);
     return NULL;

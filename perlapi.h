@@ -286,6 +286,8 @@ END_EXTERN_C
 #define PL_in_clean_all		(*Perl_Iin_clean_all_ptr(aTHX))
 #undef  PL_in_clean_objs
 #define PL_in_clean_objs	(*Perl_Iin_clean_objs_ptr(aTHX))
+#undef  PL_in_load_module
+#define PL_in_load_module	(*Perl_Iin_load_module_ptr(aTHX))
 #undef  PL_in_my
 #define PL_in_my		(*Perl_Iin_my_ptr(aTHX))
 #undef  PL_in_my_stash

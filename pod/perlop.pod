@@ -757,8 +757,8 @@ you may be burned some day.
 
 For constructs that do interpolate, variables beginning with "C<$>"
 or "C<@>" are interpolated.  Subscripted variables such as C<$a[3]> or
-C<$href->{key}[0]> are also interpolated, as are array and hash slices.
-But method calls such as C<$obj->meth> are not.
+C<< $href->{key}[0] >> are also interpolated, as are array and hash slices.
+But method calls such as C<< $obj->meth >> are not.
 
 Interpolating an array or slice interpolates the elements in order,
 separated by the value of C<$">, so is equivalent to interpolating

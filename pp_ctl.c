@@ -2805,6 +2805,12 @@ S_doeval(pTHX_ int gimme, OP** startop)
 	    Perl_croak(aTHX_ "%sCompilation failed in regexp",
 		       (*msg ? msg : "Unknown error\n"));
 	}
+	else {
+	    char* msg = SvPVx(ERRSV, n_a);
+	    if (!*msg) {
+	        sv_setpv(ERRSV, "Compilation error");
+	    }
+	}
 #ifdef USE_5005THREADS
 	MUTEX_LOCK(&PL_eval_mutex);
 	PL_eval_owner = 0;

@@ -280,6 +280,7 @@
 #define PL_hints		(PERL_GET_INTERP->Ihints)
 #define PL_in_clean_all		(PERL_GET_INTERP->Iin_clean_all)
 #define PL_in_clean_objs	(PERL_GET_INTERP->Iin_clean_objs)
+#define PL_in_load_module	(PERL_GET_INTERP->Iin_load_module)
 #define PL_in_my		(PERL_GET_INTERP->Iin_my)
 #define PL_in_my_stash		(PERL_GET_INTERP->Iin_my_stash)
 #define PL_incgv		(PERL_GET_INTERP->Iincgv)
@@ -584,6 +585,7 @@
 #define PL_hints		(vTHX->Ihints)
 #define PL_in_clean_all		(vTHX->Iin_clean_all)
 #define PL_in_clean_objs	(vTHX->Iin_clean_objs)
+#define PL_in_load_module	(vTHX->Iin_load_module)
 #define PL_in_my		(vTHX->Iin_my)
 #define PL_in_my_stash		(vTHX->Iin_my_stash)
 #define PL_incgv		(vTHX->Iincgv)
@@ -891,6 +893,7 @@
 #define PL_Ihints		PL_hints
 #define PL_Iin_clean_all	PL_in_clean_all
 #define PL_Iin_clean_objs	PL_in_clean_objs
+#define PL_Iin_load_module	PL_in_load_module
 #define PL_Iin_my		PL_in_my
 #define PL_Iin_my_stash		PL_in_my_stash
 #define PL_Iincgv		PL_incgv

@@ -26,7 +26,7 @@ sub BEGIN {
 use Storable qw(store retrieve);
 
 # problems with 5.00404 when in an BEGIN block, so this is defined here
-if (eval { require File::Spec; 1 } || $File::Spec::VERSION < 0.8) {
+if (!eval { require File::Spec; 1 } || $File::Spec::VERSION < 0.8) {
     print "1..0 # Skip: File::Spec 0.8 needed\n";
     exit 0;
     # Mention $File::Spec::VERSION again, as 5.00503's harness seems to have

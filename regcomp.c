@@ -1270,6 +1270,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			l -= old;
 			/* Get the added string: */
 			last_str = newSVpvn(s  + old, l);
+			if (UTF)
+			    SvUTF8_on(last_str);
 			if (deltanext == 0 && pos_before == b) {
 			    /* What was added is a constant string */
 			    if (mincount > 1) {

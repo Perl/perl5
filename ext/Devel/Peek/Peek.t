@@ -12,7 +12,7 @@ BEGIN {
 
 use Devel::Peek;
 
-print "1..21\n";
+print "1..22\n";
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
@@ -438,3 +438,24 @@ do_test(21,
 END {
   1 while unlink("peek$$");
 }
+
+# blessed refs
+do_test(22,
+	bless(\\undef, 'Foobar'),
+'SV = RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVMG\\($ADDR\\) at $ADDR
+    REFCNT = 2
+    FLAGS = \\(OBJECT,ROK\\)
+    IV = \d+
+    NV = \d+
+    RV = $ADDR
+    SV = NULL\\(0x0\\) at $ADDR
+      REFCNT = \d+
+      FLAGS = \\(READONLY\\)
+    PV = $ADDR ""
+    CUR = 0
+    LEN = 0
+    STASH = $ADDR\s+"Foobar"');

@@ -4992,7 +4992,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 		    PUSHMARK(SP);
 		    PUSHs(&tmpref);
 		    PUTBACK;
-		    call_sv((SV*)destructor, G_DISCARD|G_EVAL|G_KEEPERR);
+		    call_sv((SV*)destructor, G_DISCARD|G_EVAL|G_KEEPERR|G_VOID);
 		    SvREFCNT(sv)--;
 		    POPSTACK;
 		    SPAGAIN;
