@@ -609,6 +609,7 @@ t/lib/io_taint.t	See if the untaint method from IO works
 t/lib/io_tell.t		See if seek()/tell()-related methods from IO work
 t/lib/io_udp.t		See if UDP socket-related methods from IO work
 t/lib/io_xs.t		See if XSUB methods from IO work
+t/lib/locale.t		See if locale support (i18n and l10n) works
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works
@@ -653,6 +654,7 @@ t/op/join.t		See if join works
 t/op/list.t		See if array lists work
 t/op/local.t		See if local works
 t/op/magic.t		See if magic variables work
+t/op/method.t		See if method calls work
 t/op/misc.t		See if miscellaneous bugs have been fixed
 t/op/mkdir.t		See if mkdir works
 t/op/my.t		See if lexical scoping works
