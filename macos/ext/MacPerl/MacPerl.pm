@@ -141,16 +141,24 @@ Returns "TEXT" or ("MPS ", "TEXT").
 
 =item MacPerl::DoAppleScript(SCRIPT)
 
-Execute an AppleScript script.
+Execute an AppleScript script.  Returns the text of the script result.
+Script error strings are returned in C<$@>.
 
 Example:
 
-    MacPerl::DoAppleScript(<<END_SCRIPT);
-    tell application "MacPerl"
-        make new Window
-        copy "Inserting text the hard way." to character 1 of front Window
-    end tell
-    END_SCRIPT
+	my $text = MacPerl::DoAppleScript(<<END_SCRIPT) or die $@;
+	tell application "BBEdit"
+		make new Window
+		copy "Inserting text the hard way." to character 1 of front Window
+		get (characters 1 through 9 of front Window) as text
+	end tell
+	END_SCRIPT
+
+B<Note>: calling DoAppleScript to tell MacPerl to do something via
+AppleScript may yield unpredictable results, especially when waiting
+on MacPerl to reply, such as when stringing multiple events together,
+or expecting data to be returned.  Try wrapping the "tell" block in
+"ignoring application responses" / "end ignoring" if necessary.
 
 =item MacPerl::Reply(ANSWER)
 

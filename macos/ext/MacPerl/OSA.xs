@@ -1,4 +1,4 @@
-/* $Header: /cvsroot/macperl/perl/macos/ext/MacPerl/OSA.xs,v 1.2 2001/04/16 04:45:15 neeri Exp $
+/* $Header: /cvsroot/macperl/perl/macos/ext/MacPerl/OSA.xs,v 1.3 2001/12/19 22:54:15 pudge Exp $
  *
  *    Copyright (c) 1995 Matthias Neeracher
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file.
  *
  * $Log: OSA.xs,v $
+ * Revision 1.3  2001/12/19 22:54:15  pudge
+ * Make DoAppleScript return errors in $@
+ *
  * Revision 1.2  2001/04/16 04:45:15  neeri
  * Switch from atexit() to Perl_call_atexit (MacPerl bug #232158)
  *
