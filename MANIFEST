@@ -2176,6 +2176,7 @@ t/lib/warnings/universal	Tests for universal.c for warnings.t
 t/lib/warnings/utf8		Tests for utf8.c for warnings.t
 t/lib/warnings/util		Tests for util.c for warnings.t
 t/op/64bitint.t			See if 64 bit integers work
+t/op/alarm.t			See if alarm works
 t/op/anonsub.t			See if anonymous subroutines work
 t/op/append.t			See if . works
 t/op/args.t			See if operations on @_ work
