@@ -102,6 +102,10 @@ test.  Note that outside of a C<while> test, this will not happen.
 
 (Mnemonic: underline is understood in certain operations.)
 
+=back
+
+=over 8
+
 =item $<I<digit>>
 
 Contains the subpattern from the corresponding set of parentheses in
@@ -176,8 +180,9 @@ Use of "C<$*>" is deprecated in Perl 5.
 
 =item $.
 
-The current input line number of the last filehandle that was read.  An
-explicit close on the filehandle resets the line number.  Since
+The current input line number for the last file handle from
+which you read (or performed a C<seek> or <tell> on).  An
+explicit close on a filehandle resets the line number.  Since
 "C<E<lt>E<gt>>" never does an explicit close, line numbers increase
 across ARGV files (but see examples under eof()).  Localizing C<$.> has
 the effect of also localizing Perl's notion of "the last read
@@ -214,12 +219,14 @@ delimit line boundaries when quoting poetry.)
 =item $|
 
 If set to nonzero, forces a flush after every write or print on the
-currently selected output channel.  Default is 0.  Note that STDOUT
-will typically be line buffered if output is to the terminal and block
-buffered otherwise.  Setting this variable is useful primarily when you
-are outputting to a pipe, such as when you are running a Perl script
-under rsh and want to see the output as it's happening.  This has no
-effect on input buffering.  
+currently selected output channel.  Default is 0 (regardless of whether
+the channel is actually buffered by the system or not; C<$|> only tells
+you whether you've asked Perl to explicitly flush after each write). 
+Note that STDOUT will typically be line buffered if output is to the
+terminal and block buffered otherwise.  Setting this variable is useful
+primarily when you are outputting to a pipe, such as when you are running
+a Perl script under rsh and want to see the output as it's happening.  This
+has no effect on input buffering.
 (Mnemonic: when you want your pipes to be piping hot.)
 
 =item output_field_separator HANDLE EXPR
@@ -300,9 +307,10 @@ Consider using "real" multi-dimensional arrays in Perl 5.
 The output format for printed numbers.  This variable is a half-hearted
 attempt to emulate B<awk>'s OFMT variable.  There are times, however,
 when B<awk> and Perl have differing notions of what is in fact
-numeric.  Also, the initial value is %.20g rather than %.6g, so you
-need to set "C<$#>" explicitly to get B<awk>'s value.  (Mnemonic: # is the
-number sign.)
+numeric.  The initial value is %.I<n>g, where I<n> is the value
+of the macro DBL_DIG from your system's F<float.h>.  This is different from
+B<awk>'s default OFMT setting of %.6g, so you need to set "C<$#>"
+explicitly to get B<awk>'s value.  (Mnemonic: # is the number sign.)
 
 Use of "C<$#>" is deprecated in Perl 5.
 
@@ -561,6 +569,11 @@ closed before the open() is attempted.)  Note that the close-on-exec
 status of a file descriptor will be decided according to the value of
 C<$^F> at the time of the open, not the time of the exec.
 
+=item $^H
+
+The current set of syntax checks enabled by C<use strict>.  See the
+documentation of C<strict> for more details.
+
 =item $INPLACE_EDIT
 
 =item $^I
@@ -569,6 +582,7 @@ The current value of the inplace-edit extension.  Use C<undef> to disable
 inplace editing.  (Mnemonic: value of B<-i> switch.)
 
 =item $OSNAME
+
 =item $^O
 
 The name of the operating system under which this copy of Perl was
@@ -621,7 +635,7 @@ one, since C<$ARGV[0]> is the first argument, I<NOT> the command name.  See
 The array @INC contains the list of places to look for Perl scripts to
 be evaluated by the C<do EXPR>, C<require>, or C<use> constructs.  It
 initially consists of the arguments to any B<-I> command line switches,
-followed by the default Perl library, probably "/usr/local/lib/perl",
+followed by the default Perl library, probably F</usr/local/lib/perl>,
 followed by ".", to represent the current directory.  If you need to
 modify this at runtime, you should use the C<use lib> pragma in order
 to also get the machine-dependent library properly loaded:
@@ -692,4 +706,3 @@ The __DIE__ handler is explicitly disabled during the call, so that you
 can die from a __DIE__ handler.  Similarly for __WARN__.
 
 =back
-
