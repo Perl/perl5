@@ -1,5 +1,9 @@
 #!/usr/bin/perl
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
 use lib 'blib/lib';
 use Memoize 0.45 qw(memoize unmemoize);
 use Fcntl;

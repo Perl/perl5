@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 
-use lib '..';
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
 use Memoize qw(memoize unmemoize);
 
 print "1..5\n";

@@ -1,6 +1,10 @@
 #!/usr/bin/perl
 
-use lib qw(. ..);
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+#use lib qw(. ..);
 use Memoize 0.52 qw(memoize unmemoize);
 use Fcntl;
 eval {require Memoize::AnyDBM_File};
