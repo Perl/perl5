@@ -130,12 +130,13 @@ important to note that variables are not shared between threads, all
 variables are per default thread local.  To use shared variables one
 must use threads::shared.
 
-It is also important to note that you must enable threads by
-doing C<use threads> as early as possible and that it is not possible
-to enable threading inside an eval "";  In particular, if you are
-intending to share variables with threads::shared, you must
-C<use threads> before you C<use threads::shared> and threads will emit
-a warning if you do it the other way around.
+It is also important to note that you must enable threads by doing
+C<use threads> as early as possible in the script itself and that it
+is not possible to enable threading inside an C<eval "">, C<do>,
+C<require>, or C<use>.  In particular, if you are intending to share
+variables with threads::shared, you must C<use threads> before you
+C<use threads::shared> and C<threads> will emit a warning if you do
+it the other way around.
 
 =over
 
