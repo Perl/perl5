@@ -9,7 +9,7 @@ main::baz
    main::bar
    main::foo
 };
-report 1, sub { $expected eq $results };
+report 9, sub { $expected eq $results };
 
 dprofpp('-TF');
 $e2 = $expected =
@@ -18,12 +18,12 @@ main::baz
    main::bar
    main::foo
 };
-report 2, sub { $expected eq $results };
+report 10, sub { $expected eq $results };
 
 dprofpp( '-t' );
 $expected = $e1;
-report 3, sub { 1 };
+report 11, sub { 1 };
 
 dprofpp('-tF');
 $expected = $e2;
-report 4, sub { $expected eq $results };
+report 12, sub { $expected eq $results };

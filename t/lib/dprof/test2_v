@@ -15,10 +15,10 @@ main::baz
 main::foo
    main::bar
 };
-report 1, sub { $expected eq $results };
+report 5, sub { $expected eq $results };
 
 dprofpp('-TF');
-report 2, sub { $expected eq $results };
+report 6, sub { $expected eq $results };
 
 dprofpp( '-t' );
 $expected =
@@ -30,7 +30,7 @@ main::baz
 main::foo
    main::bar
 };
-report 3, sub { $expected eq $results };
+report 7, sub { $expected eq $results };
 
 dprofpp('-tF');
-report 4, sub { $expected eq $results };
+report 8, sub { $expected eq $results };

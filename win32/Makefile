@@ -362,6 +362,7 @@ GLOBBAT		= bin\perlglob.bat
 UTILS		=			\
 		..\utils\h2ph		\
 		..\utils\splain		\
+		..\utils\dprofpp	\
 		..\utils\perlbug	\
 		..\utils\pl2pm 		\
 		..\utils\c2ph		\
@@ -929,7 +930,7 @@ distclean: clean
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	cd ..\utils
-	-del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc pstruct
+	-del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc pstruct dprofpp
 	-del /f *.bat
 	cd ..\win32
 	cd ..\x2p

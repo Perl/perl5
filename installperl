@@ -57,7 +57,7 @@ while (@ARGV) {
 umask 022 unless $Is_VMS;
 
 my @scripts = qw(utils/c2ph utils/h2ph utils/h2xs utils/perlbug utils/perldoc
-		utils/pl2pm utils/splain utils/perlcc
+		utils/pl2pm utils/splain utils/perlcc utils/dprofpp
 		x2p/s2p x2p/find2perl 
 		pod/pod2man pod/pod2html pod/pod2latex pod/pod2text
 		pod/pod2usage pod/podchecker pod/podselect);

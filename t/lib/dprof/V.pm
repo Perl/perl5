@@ -1,7 +1,7 @@
 package V;
 
 use Getopt::Std 'getopts';
-getopts('vp:');
+getopts('vp:d:');
 
 require Exporter;
 @ISA = 'Exporter';
@@ -9,18 +9,19 @@ require Exporter;
 @EXPORT = qw( dprofpp $opt_v $results $expected report @results );
 @EXPORT_OK = qw( notok ok $num );
 
-my $out = 0;
 $num = 0;
 $results = $expected = '';
 $perl = $opt_p || $^X;
+$dpp = $opt_d || '../utils/dprofpp';
 
 print "\nperl: $perl\n" if $opt_v;
 if( ! -f $perl ){ die "Where's Perl?" }
+if( ! -f $dpp ){ die "Where's dprofpp?" }
 
 sub dprofpp {
 	my $switches = shift;
 
-	open( D, "$perl ../dprofpp $switches 2> err |" ) || warn "$0: Can't run. $!\n";
+	open( D, "$perl -I../lib $dpp $switches 2> err |" ) || warn "$0: Can't run. $!\n";
 	@results = <D>;
 	close D;
 
@@ -46,20 +47,13 @@ sub report {
 }
 
 sub ok {
-	++$out;
-	print "ok $num, ";
+	print "ok $num\n";
 }
 
 sub notok {
-	++$out;
-	print "not ok $num, ";
-	if( $opt_v ){
-		print "\nResult\n{$results}\n";
-		print "Expected\n{$expected}\n";
-	}
+	print "not ok $num\n";
+	print "\nResult\n{$results}\n";
+	print "Expected\n{$expected}\n";
 }
-
-END { print "\n" if $out }
-
 
 1;

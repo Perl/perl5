@@ -11,5 +11,5 @@ main::foo2
    main::bar
       main::yeppers
 };
-report 1, sub { $expected eq $results };
+report 17, sub { $expected eq $results };
 

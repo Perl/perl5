@@ -12,5 +12,5 @@ main::baz
 main::foo
    main::bar
 };
-report 1, sub { $expected eq $results };
+report 18, sub { $expected eq $results };
 
