@@ -1699,8 +1699,10 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '\\':
 	if (PL_ors)
 	    Safefree(PL_ors);
-	if (SvOK(sv) || SvGMAGICAL(sv))
-	    PL_ors = savepv(SvPV(sv,PL_orslen));
+	if (SvOK(sv) || SvGMAGICAL(sv)) {
+	    s = SvPV(sv,PL_orslen);
+	    PL_ors = savepvn(s,PL_orslen);
+	}
 	else {
 	    PL_ors = Nullch;
 	    PL_orslen = 0;
