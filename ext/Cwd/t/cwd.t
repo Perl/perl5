@@ -9,6 +9,7 @@ use Config;
 use Cwd;
 use strict;
 use warnings;
+use File::Path;
 
 print "1..14\n";
 
@@ -61,17 +62,13 @@ if (defined $pwd_cmd) {
     }
 }
 
-mkdir "pteerslt", 0777;
-mkdir "pteerslt/path", 0777;
-mkdir "pteerslt/path/to", 0777;
-mkdir "pteerslt/path/to/a", 0777;
-mkdir "pteerslt/path/to/a/dir", 0777;
-Cwd::chdir "pteerslt/path/to/a/dir";
+mkpath(["_ptrslt_/_path_/_to_/_a_/_dir_"], 0, 0777);
+Cwd::chdir "_ptrslt_/_path_/_to_/_a_/_dir_";
 my $cwd        = cwd;
 my $getcwd     = getcwd;
 my $fastcwd    = fastcwd;
 my $fastgetcwd = fastgetcwd;
-my $want = "t/pteerslt/path/to/a/dir";
+my $want = "t/_ptrslt_/_path_/_to_/_a_/_dir_";
 print "# cwd        = '$cwd'\n";
 print "# getcwd     = '$getcwd'\n";
 print "# fastcwd    = '$fastcwd'\n";
@@ -86,16 +83,19 @@ print +($fastgetcwd =~ m|$want$| ? "" : "not "), "ok 10\n";
 # Cwd::chdir should also update $ENV{PWD}
 print "#$ENV{PWD}\n";
 print +($ENV{PWD} =~ m|$want$| ? "" : "not "), "ok 11\n";
-Cwd::chdir ".."; rmdir "dir";
+Cwd::chdir "..";
 print "#$ENV{PWD}\n";
-Cwd::chdir ".."; rmdir "a";
+Cwd::chdir "..";
 print "#$ENV{PWD}\n";
-Cwd::chdir ".."; rmdir "to";
+Cwd::chdir "..";
 print "#$ENV{PWD}\n";
-Cwd::chdir ".."; rmdir "path";
+Cwd::chdir "..";
 print "#$ENV{PWD}\n";
-Cwd::chdir ".."; rmdir "pteerslt";
+Cwd::chdir "..";
 print "#$ENV{PWD}\n";
+
+rmtree(["_ptrslt_"], 0, 0);
+
 if ($^O eq 'VMS') {
     # This checked out OK on ODS-2 and ODS-5:
     print +($ENV{PWD}  =~ m|\bT\]$| ? "" : "not "), "ok 12\n";
@@ -105,16 +105,12 @@ else {
 }
 
 if ($Config{d_symlink}) {
-    mkdir "pteerslt", 0777;
-    mkdir "pteerslt/path", 0777;
-    mkdir "pteerslt/path/to", 0777;
-    mkdir "pteerslt/path/to/a", 0777;
-    mkdir "pteerslt/path/to/a/dir", 0777;
-    symlink "pteerslt/path/to/a/dir" => "linktest";
+    mkpath(["_ptrslt_/_path_/_to_/_a_/_dir_"], 0, 0777);
+    symlink "_ptrslt_/_path_/_to_/_a_/_dir_" => "linktest";
 
     my $abs_path      =  Cwd::abs_path("linktest");
     my $fast_abs_path =  Cwd::fast_abs_path("linktest");
-    my $want          = "t/pteerslt/path/to/a/dir";
+    my $want          = "t/_ptrslt_/_path_/_to_/_a_/_dir_";
 
     print "# abs_path      $abs_path\n";
     print "# fast_abs_path $fast_abs_path\n";
@@ -122,11 +118,7 @@ if ($Config{d_symlink}) {
     print +($abs_path      =~ m|$want$| ? "" : "not "), "ok 13\n";
     print +($fast_abs_path =~ m|$want$| ? "" : "not "), "ok 14\n";
 
-    rmdir "pteerslt/path/to/a/dir";
-    rmdir "pteerslt/path/to/a";
-    rmdir "pteerslt/path/to";
-    rmdir "pteerslt/path";
-    rmdir "pteerslt";
+    rmtree(["ptrslt"], 0, 0);
     unlink "linktest";
 } else {
     print "ok 13 # skipped\n";
