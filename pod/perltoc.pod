@@ -497,11 +497,11 @@ LIST, write FILEHANDLE, write EXPR, write, y///
 
 =item Using References
 
-=back
-
 =item An Example
 
 =item Arrow Rule
+
+=back
 
 =item Solution
 
@@ -2653,11 +2653,10 @@ module (sometimes unnecessary), B<INSTALL> the module
 
 =item Pragmatic Modules
 
-assertions, assertions::activate, attributes, attrs, autouse, base, bigint,
-bignum, bigrat, blib, bytes, charnames, constant, diagnostics, encoding,
-fields, filetest, if, integer, less, lib, locale, open, ops, overload, re,
-sigtrap, sort, strict, subs, threads, threads::shared, utf8, vars, version,
-vmsish, warnings, warnings::register
+attributes, attrs, autouse, base, bigint, bignum, bigrat, blib, bytes,
+charnames, constant, diagnostics, encoding, fields, filetest, if, integer,
+less, lib, locale, open, ops, overload, re, sigtrap, sort, strict, subs,
+threads, threads::shared, utf8, vars, vmsish, warnings, warnings::register
 
 =item Standard Modules
 
@@ -5313,6 +5312,31 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =back
 
+=head2 perldoc - Look up Perl documentation in Pod format.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OPTIONS
+
+B<-h>, B<-v>, B<-t>, B<-u>, B<-m> I<module>, B<-l>, B<-F>, B<-f>
+I<perlfunc>, B<-q> I<perlfaq-search-regexp>, B<-T>, B<-d>
+I<destination-filename>, B<-o> I<output-formatname>, B<-M> I<module-name>,
+B<-w> I<option:value> or B<-w> I<option>, B<-X>,
+B<PageName|ModuleName|ProgramName>, B<-n> I<some-formatter>, B<-r>, B<-i>,
+B<-V>
+
+=item SECURITY
+
+=item ENVIRONMENT
+
+=item AUTHOR
+
+=back
+
 =head2 perlhist - the Perl history records
 
 =over 4
@@ -5400,6 +5424,220 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Reporting Bugs
 
 =item SEE ALSO
+
+=back
+
+=head2 perl58delta, perldelta - what is new for perl v5.8.0
+
+=over 4
+
+=item DESCRIPTION
+
+=item Highlights In 5.8.0
+
+=item Incompatible Changes
+
+=over 4
+
+=item Binary Incompatibility
+
+=item 64-bit platforms and malloc
+
+=item AIX Dynaloading
+
+=item Attributes for C<my> variables now handled at run-time
+
+=item Socket Extension Dynamic in VMS
+
+=item IEEE-format Floating Point Default on OpenVMS Alpha
+
+=item New Unicode Semantics (no more C<use utf8>, almost)
+
+=item New Unicode Properties
+
+=item REF(...) Instead Of SCALAR(...)
+
+=item pack/unpack D/F recycled
+
+=item glob() now returns filenames in alphabetical order
+
+=item Deprecations
+
+=back
+
+=item Core Enhancements
+
+=over 4
+
+=item Unicode Overhaul
+
+=item PerlIO is Now The Default
+
+=item ithreads
+
+=item Restricted Hashes
+
+=item Safe Signals
+
+=item Understanding of Numbers
+
+=item Arrays now always interpolate into double-quoted strings [561]
+
+=item Miscellaneous Changes
+
+=back
+
+=item Modules and Pragmata
+
+=over 4
+
+=item New Modules and Pragmata
+
+=item Updated And Improved Modules and Pragmata
+
+=back
+
+=item Utility Changes
+
+=item New Documentation
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=over 4
+
+=item Generic Improvements
+
+=item New Or Improved Platforms
+
+=back
+
+=item Selected Bug Fixes
+
+=over 4
+
+=item Platform Specific Changes and Fixes
+
+=back
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item Security Vulnerability Closed [561]
+
+=item New Tests
+
+=item Known Problems
+
+=over 4
+
+=item The Compiler Suite Is Still Very Experimental
+
+=item Localising Tied Arrays and Hashes Is Broken
+
+=item Building Extensions Can Fail Because Of Largefiles
+
+=item Modifying $_ Inside for(..)
+
+=item mod_perl 1.26 Doesn't Build With Threaded Perl
+
+=item lib/ftmp-security tests warn 'system possibly insecure'
+
+=item libwww-perl (LWP) fails base/date #51
+
+=item PDL failing some tests
+
+=item Perl_get_sv
+
+=item Self-tying Problems
+
+=item ext/threads/t/libc
+
+=item Failure of Thread (5.005-style) tests
+
+=item Timing problems
+
+=item Tied/Magical Array/Hash Elements Do Not Autovivify
+
+=item Unicode in package/class and subroutine names does not work
+
+=back
+
+=item Platform Specific Problems
+
+=over 4
+
+=item AIX
+
+=item Alpha systems with old gccs fail several tests
+
+=item AmigaOS
+
+=item BeOS
+
+=item Cygwin "unable to remap"
+
+=item Cygwin ndbm tests fail on FAT
+
+=item DJGPP Failures
+
+=item FreeBSD built with ithreads coredumps reading large directories
+
+=item FreeBSD Failing locale Test 117 For ISO 8859-15 Locales
+
+=item IRIX fails ext/List/Util/t/shuffle.t or Digest::MD5
+
+=item HP-UX lib/posix Subtest 9 Fails When LP64-Configured
+
+=item Linux with glibc 2.2.5 fails t/op/int subtest #6 with -Duse64bitint
+
+=item Linux With Sfio Fails op/misc Test 48
+
+=item Mac OS X
+
+=item Mac OS X dyld undefined symbols
+
+=item OS/2 Test Failures
+
+=item op/sprintf tests 91, 129, and 130
+
+=item SCO
+
+=item Solaris 2.5
+
+=item Solaris x86 Fails Tests With -Duse64bitint
+
+=item SUPER-UX (NEC SX)
+
+=item Term::ReadKey not working on Win32
+
+=item UNICOS/mk
+
+=item UTS
+
+=item VOS (Stratus)
+
+=item VMS
+
+=item Win32
+
+=item XML::Parser not working
+
+=item z/OS (OS/390)
+
+=item Unicode Support on EBCDIC Still Spotty
+
+=item Seen In Perl 5.7 But Gone Now
+
+=back
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=item HISTORY
 
 =back
 
@@ -6932,9 +7170,1292 @@ long, Process terminated by SIG%s
 
 =item HISTORY
 
-=head1 PRAGMA DOCUMENTATION
+=item The "Artistic License"
+
+=over 4
+
+=item Preamble
+
+Package, Standard Version, Copyright Holder, You, Reasonable copying fee,
+Freely Available
 
 =back
+
+=back
+
+=over 4
+
+=item GNU GENERAL PUBLIC LICENSE
+
+=over 4
+
+=item The License Text
+
+=back
+
+=back
+
+=head2 perlaix, README.aix - Perl version 5 on IBM Unix (AIX) systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Compiling Perl 5 on AIX
+
+=item OS level
+
+=item Building Dynamic Extensions on AIX
+
+=item The IBM ANSI C Compiler
+
+=item Using GNU's gcc for building perl
+
+=item Using Large Files with Perl
+
+=item Threaded Perl
+
+=item 64-bit Perl
+
+=item AIX 4.2 and extensions using C++ with statics
+
+=back
+
+=item AUTHOR
+
+=item DATE
+
+=back
+
+=head2 perlapollo, README.apollo - Perl version 5 on Apollo DomainOS
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=back
+
+=head2 perlamiga - Perl under Amiga OS
+
+=over 4
+
+=item NOTE
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Prerequisites for Compiling Perl on AmigaOS
+
+B<Unix emulation for AmigaOS: ixemul.library>, B<Version of Amiga OS>
+
+=item Starting Perl programs under AmigaOS
+
+=item Shortcomings of Perl under AmigaOS
+
+=back
+
+=item INSTALLATION
+
+=item Accessing documentation
+
+=over 4
+
+=item Manpages for Perl on AmigaOS
+
+=item Perl HTML Documentation on AmigaOS
+
+=item Perl GNU Info Files on AmigaOS
+
+=item Perl LaTeX Documentation on AmigaOS
+
+=back
+
+=item BUILDING PERL ON AMIGAOS
+
+=over 4
+
+=item Build Prerequisites for Perl on AmigaOS
+
+=item Getting the Perl Source for AmigaOS
+
+=item Making Perl on AmigaOS
+
+=item Testing Perl on AmigaOS
+
+=item Installing the built Perl on AmigaOS
+
+=back
+
+=item PERL 5.8.0 BROKEN IN AMIGAOS
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=back
+
+=head2 perlbeos, README.beos - Perl version 5 on BeOS
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item General Issues with Perl on BeOS
+
+=item BeOS Release-specific Notes
+
+R4 x86, R4 PPC
+
+=item Contact Information
+
+=item Update 2002-05-30
+
+=back
+
+=back
+
+=head2 perlbs2000, README.BS2000 - building and installing Perl for BS2000.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item gzip on BS2000
+
+=item bison on BS2000
+
+=item Unpacking Perl Distribution on BS2000
+
+=item Compiling Perl on BS2000
+
+=item Testing Perl on BS2000
+
+=item Installing Perl on BS2000
+
+=item Using Perl in the Posix-Shell of BS2000
+
+=item Using Perl in "native" BS2000
+
+=item Floating point anomalies on BS2000
+
+=back
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=over 4
+
+=item Mailing list
+
+=back
+
+=item HISTORY
+
+=back
+
+=head2 perlcygwin, README.cygwin - Perl for Cygwin
+
+=over 4
+
+=item SYNOPSIS
+
+=item PREREQUISITES FOR COMPILING PERL ON CYGWIN
+
+=over 4
+
+=item Cygwin = GNU+Cygnus+Windows (Don't leave UNIX without it)
+
+=item Cygwin Configuration
+
+C<PATH>, I<nroff>, Permissions
+
+=back
+
+=item CONFIGURE PERL ON CYGWIN
+
+=over 4
+
+=item Stripping Perl Binaries on Cygwin
+
+=item Optional Libraries for Perl on Cygwin
+
+C<-lcrypt>, C<-lgdbm> (C<use GDBM_File>), C<-ldb> (C<use DB_File>),
+C<-lcygipc> (C<use IPC::SysV>), C<-lutil>
+
+=item Configure-time Options for Perl on Cygwin
+
+C<-Uusedl>, C<-Uusemymalloc>, C<-Uuseperlio>, C<-Dusemultiplicity>,
+C<-Duse64bitint>, C<-Duselongdouble>, C<-Dusethreads>, C<-Duselargefiles>,
+C<-Dmksymlinks>
+
+=item Suspicious Warnings on Cygwin
+
+I<dlsym()>, Win9x and C<d_eofnblk>, Compiler/Preprocessor defines
+
+=back
+
+=item MAKE ON CYGWIN
+
+=over 4
+
+=item Warnings on Cygwin
+
+=item ld2 on Cygwin
+
+=back
+
+=item TEST ON CYGWIN
+
+=over 4
+
+=item File Permissions on Cygwin
+
+=item NDBM_File and ODBM_File do not work on FAT filesystems
+
+=item fork() failures in io_* tests
+
+=item Script Portability on Cygwin
+
+Pathnames, Text/Binary, F<.exe>, chown(), Miscellaneous
+
+=back
+
+=item INSTALL PERL ON CYGWIN
+
+=item MANIFEST ON CYGWIN
+
+Documentation, Build, Configure, Make, Install, Tests, Compiled Perl
+Source, Compiled Module Source, Perl Modules/Scripts
+
+=item BUGS ON CYGWIN
+
+=item AUTHORS
+
+=item HISTORY
+
+=back
+
+=head2 perldgux - Perl under DG/UX.
+
+=over 4
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item BUILDING PERL ON DG/UX
+
+=over 4
+
+=item Non-threaded Perl on DG/UX
+
+=item Threaded Perl on DG/UX
+
+=item Testing Perl on DG/UX
+
+=item Installing the built perl on DG/UX
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 perlepoc, README.epoc - Perl for EPOC
+
+=over 4
+
+=item SYNOPSIS
+
+=item INTRODUCTION
+
+=item INSTALLING PERL ON EPOC
+
+=item STARTING PERL ON EPOC
+
+=over 4
+
+=item Editors on Epoc
+
+=item Features of Perl on Epoc
+
+=item Restrictions of Perl on Epoc
+
+=item Compiling Perl 5 on the EPOC cross compiling environment
+
+=back
+
+=item SUPPORT STATUS OF PERL ON EPOC
+
+=item AUTHOR
+
+=item LAST UPDATE
+
+=back
+
+=head2 perlfreebsd, README.freebsd - Perl version 5 on FreeBSD systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item FreeBSD core dumps from readdir_r with ithreads
+
+=item $^X doesn't always contain a full path in FreeBSD
+
+=item Perl will no longer be part of "base FreeBSD"
+
+=back
+
+=item AUTHOR
+
+=back
+
+=head2 perlhpux, README.hpux - Perl version 5 on Hewlett-Packard Unix
+(HP-UX) systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Using perl as shipped with HP-UX
+
+=item Using perl from HP's porting centre
+
+=item Compiling Perl 5 on HP-UX
+
+=item PA-RISC
+
+=item PA-RISC 1.0
+
+=item PA-RISC 1.1
+
+=item PA-RISC 2.0
+
+=item Itanium
+
+=item Portability Between PA-RISC Versions
+
+=item Itanium Processor Family and HP-UX
+
+=item Building Dynamic Extensions on HP-UX
+
+=item The HP ANSI C Compiler
+
+=item The GNU C Compiler
+
+=item Using Large Files with Perl on HP-UX
+
+=item Threaded Perl on HP-UX
+
+=item 64-bit Perl on HP-UX
+
+=item Oracle on HP-UX
+
+=item GDBM and Threads on HP-UX
+
+=item NFS filesystems and utime(2) on HP-UX
+
+=item perl -P and // and HP-UX
+
+=item HP-UX Kernel Parameters (maxdsiz) for Compiling Perl
+
+=back
+
+=item nss_delete core dump from op/pwent or op/grent
+
+=item AUTHOR
+
+=item DATE
+
+=back
+
+=head2 perlhurd, README.hurd - Perl version 5 on Hurd
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Known Problems with Perl on Hurd 
+
+=back
+
+=item AUTHOR
+
+=back
+
+=head2 perlirix, README.irix - Perl version 5 on Irix systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Building 32-bit Perl in Irix
+
+=item Building 64-bit Perl in Irix
+
+=item About Compiler Versions of Irix
+
+=item Linker Problems in Irix
+
+=item Malloc in Irix
+
+=item Building with threads in Irix
+
+=item Irix 5.3
+
+=back
+
+=item AUTHOR
+
+=back
+
+=head2 perlmachten, README.machten - Perl version 5 on Power MachTen
+systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Compiling Perl 5 on MachTen
+
+=item Failures during C<make test> on MachTen
+
+op/lexassign.t, pragma/warnings.t
+
+=item Building external modules on MachTen
+
+=back
+
+=item AUTHOR
+
+=item DATE
+
+=back
+
+=head2 perlmacos, README.macos - Perl under Mac OS (Classic)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item DATE
+
+=back
+
+=head2 perlmint, README.mint - Perl version 5 on Atari MiNT
+
+=over 4
+
+=item DESCRIPTION
+
+=item Known problems with Perl on MiNT
+
+=item AUTHOR
+
+=back
+
+=head2 perlmpeix, README.mpeix - Perl/iX for HP e3000 MPE
+
+=over 4
+
+=item SYNOPSIS
+
+=item NOTE
+
+=item Binary distribution from HP
+
+=item What's New in Perl for MPE/iX
+
+=item Welcome to Perl/iX
+
+=item System Requirements for Perl/iX
+
+=item How to Obtain Perl/iX
+
+=item Perl/iX Distribution Contents Highlights
+
+README, INSTALL, LIBSHP3K, PERL, .cpan/, lib/, man/,
+public_html/feedback.cgi, src/perl-5.6.0-mpe
+
+=item How to Compile Perl/iX
+
+ 4,  6
+
+=item Getting Started with Perl/iX
+
+=item MPE/iX Implementation Considerations
+
+=item Known Perl/iX Bugs Under Investigation
+
+=item Perl/iX To-Do List
+
+=item Perl/iX Change History
+
+=item AUTHOR
+
+=item Name
+
+=item Description
+
+=item Build
+
+=over 4
+
+=item Tools & SDK
+
+=item Setup
+
+SetNWBld.bat, Buildtype.bat
+
+=item Make
+
+=item Interpreter
+
+=item Extensions
+
+=back
+
+=item Install
+
+=item Build new extensions
+
+=item Acknowledgements
+
+=item Authors
+
+=item Date
+
+=back
+
+=head2 perlos2 - Perl under OS/2, DOS, Win0.3*, Win0.95 and WinNT.
+
+=over 4
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Target
+
+=item Other OSes
+
+=item Prerequisites
+
+EMX, RSX, HPFS, pdksh
+
+=item Starting Perl programs under OS/2 (and DOS and...)
+
+=item Starting OS/2 (and DOS) programs under Perl
+
+=back
+
+=item Frequently asked questions
+
+=over 4
+
+=item "It does not work"
+
+=item I cannot run external programs
+
+=item I cannot embed perl into my program, or use F<perl.dll> from my
+program. 
+
+Is your program EMX-compiled with C<-Zmt -Zcrtdll>?, Did you use
+L<ExtUtils::Embed>?
+
+=item C<``> and pipe-C<open> do not work under DOS.
+
+=item Cannot start C<find.exe "pattern" file>
+
+=back
+
+=item INSTALLATION
+
+=over 4
+
+=item Automatic binary installation
+
+C<PERL_BADLANG>, C<PERL_BADFREE>, F<Config.pm>
+
+=item Manual binary installation
+
+Perl VIO and PM executables (dynamically linked), Perl_ VIO executable
+(statically linked), Executables for Perl utilities, Main Perl library,
+Additional Perl modules, Tools to compile Perl modules, Manpages for Perl
+and utilities, Manpages for Perl modules, Source for Perl documentation,
+Perl manual in F<.INF> format, Pdksh
+
+=item B<Warning>
+
+=back
+
+=item Accessing documentation
+
+=over 4
+
+=item OS/2 F<.INF> file
+
+=item Plain text
+
+=item Manpages
+
+=item HTML
+
+=item GNU C<info> files
+
+=item F<PDF> files
+
+=item C<LaTeX> docs
+
+=back
+
+=item BUILD
+
+=over 4
+
+=item The short story
+
+=item Prerequisites
+
+=item Getting perl source
+
+=item Application of the patches
+
+=item Hand-editing
+
+=item Making
+
+=item Testing
+
+A lot of C<bad free>, Process terminated by SIGTERM/SIGINT, F<op/fs.t>,
+F<op/stat.t>
+
+=item Installing the built perl
+
+=item C<a.out>-style build
+
+=back
+
+=item Build FAQ
+
+=over 4
+
+=item Some C</> became C<\> in pdksh.
+
+=item C<'errno'> - unresolved external
+
+=item Problems with tr or sed
+
+=item Some problem (forget which ;-)
+
+=item Library ... not found
+
+=item Segfault in make
+
+=item op/sprintf test failure
+
+=back
+
+=item Specific (mis)features of OS/2 port
+
+=over 4
+
+=item C<setpriority>, C<getpriority>
+
+=item C<system()>
+
+=item C<extproc> on the first line
+
+=item Additional modules:
+
+=item Prebuilt methods:
+
+C<File::Copy::syscopy>, C<DynaLoader::mod2fname>,  C<Cwd::current_drive()>,
+ C<Cwd::sys_chdir(name)>,  C<Cwd::change_drive(name)>, 
+C<Cwd::sys_is_absolute(name)>,	C<Cwd::sys_is_rooted(name)>, 
+C<Cwd::sys_is_relative(name)>,	C<Cwd::sys_cwd(name)>, 
+C<Cwd::sys_abspath(name, dir)>,  C<Cwd::extLibpath([type])>, 
+C<Cwd::extLibpath_set( path [, type ] )>,
+C<OS2::Error(do_harderror,do_exception)>, C<OS2::Errors2Drive(drive)>,
+OS2::SysInfo(), OS2::BootDrive(), C<OS2::MorphPM(serve)>,
+C<OS2::UnMorphPM(serve)>, C<OS2::Serve_Messages(force)>,
+C<OS2::Process_Messages(force [, cnt])>, C<OS2::_control87(new,mask)>,
+OS2::get_control87(), C<OS2::set_control87_em(new=MCW_EM,mask=MCW_EM)>,
+C<OS2::DLLname([how [, \&xsub]])>
+
+=item Prebuilt variables:
+
+$OS2::emx_rev, $OS2::emx_env, $OS2::os_ver, $OS2::is_aout, $OS2::can_fork,
+$OS2::nsyserror
+
+=item Misfeatures
+
+=item Modifications
+
+C<popen>, C<tmpnam>, C<tmpfile>, C<ctermid>, C<stat>, C<mkdir>, C<rmdir>,
+C<flock>
+
+=item Identifying DLLs
+
+=item Centralized management of resources
+
+C<HAB>, C<HMQ>, Treating errors reported by OS/2 API,
+C<CheckOSError(expr)>, C<CheckWinError(expr)>, C<SaveWinError(expr)>,
+C<SaveCroakWinError(expr,die,name1,name2)>, C<WinError_2_Perl_rc>,
+C<FillWinError>, C<FillOSError(rc)>, Loading DLLs and ordinals in DLLs
+
+=back
+
+=item Perl flavors
+
+=over 4
+
+=item F<perl.exe>
+
+=item F<perl_.exe>
+
+=item F<perl__.exe>
+
+=item F<perl___.exe>
+
+=item Why strange names?
+
+=item Why dynamic linking?
+
+=item Why chimera build?
+
+=back
+
+=item ENVIRONMENT
+
+=over 4
+
+=item C<PERLLIB_PREFIX>
+
+=item C<PERL_BADLANG>
+
+=item C<PERL_BADFREE>
+
+=item C<PERL_SH_DIR>
+
+=item C<USE_PERL_FLOCK>
+
+=item C<TMP> or C<TEMP>
+
+=back
+
+=item Evolution
+
+=over 4
+
+=item Text-mode filehandles
+
+=item Priorities
+
+=item DLL name mangling: pre 5.6.2
+
+=item DLL name mangling: 5.6.2 and beyond
+
+Global DLLs, specific DLLs, C<BEGINLIBPATH> and C<ENDLIBPATH>, F<.> from
+C<LIBPATH>
+
+=item DLL forwarder generation
+
+=item Threading
+
+=item Calls to external programs
+
+=item Memory allocation
+
+=item Threads
+
+C<COND_WAIT>, F<os2.c>
+
+=back
+
+=item BUGS
+
+=back
+
+=over 4
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 perlos390, README.os390 - building and installing Perl for OS/390
+and z/OS
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Tools
+
+=item Unpacking Perl distribution on OS/390
+
+=item Setup and utilities for Perl on OS/390
+
+=item Configure Perl on OS/390
+
+=item Build, Test, Install Perl on OS/390
+
+=item Build Anomalies with Perl on OS/390
+
+=item Testing Anomalies with Perl on OS/390
+
+=item Installation Anomalies with Perl on OS/390
+
+=item Usage Hints for Perl on OS/390
+
+=item Floating Point Anomalies with Perl on OS/390
+
+=item Modules and Extensions for Perl on OS/390
+
+=back
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=over 4
+
+=item Mailing list for Perl on OS/390
+
+=back
+
+=item HISTORY
+
+=back
+
+=head2 perlos400, README.os400 - Perl version 5 on OS/400
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Compiling Perl for OS/400 PASE
+
+=item Installing Perl in OS/400 PASE
+
+=item Using Perl in OS/400 PASE
+
+=item Known Problems
+
+=item Perl on ILE
+
+=back
+
+=item AUTHORS
+
+=back
+
+=head2 perlqnx, README.qnx - Perl version 5 on QNX
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Required Software for Compiling Perl on QNX4
+
+/bin/sh, ar, nm, cpp, make
+
+=item Outstanding Issues with Perl on QNX4
+
+=item QNX auxiliary files
+
+qnx/ar, qnx/cpp
+
+=item Outstanding issues with perl under QNX6
+
+=back
+
+=item AUTHOR
+
+=back
+
+=head2 perlplan9 - Plan 9-specific documentation for Perl
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Invoking Perl
+
+=item What's in Plan 9 Perl
+
+=item What's not in Plan 9 Perl
+
+=item Perl5 Functions not currently supported in Plan 9 Perl
+
+=item Signals in Plan 9 Perl
+
+=back
+
+=item COMPILING AND INSTALLING PERL ON PLAN 9
+
+=over 4
+
+=item Installing Perl Documentation on Plan 9
+
+=back
+
+=item BUGS
+
+=item Revision date
+
+=item AUTHOR
+
+=back
+
+=head2 perlsolaris, README.solaris - Perl version 5 on Solaris systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Solaris Version Numbers.
+
+=back
+
+=item RESOURCES
+
+Solaris FAQ, Precompiled Binaries, Solaris Documentation
+
+=item SETTING UP
+
+=over 4
+
+=item File Extraction Problems on Solaris.
+
+=item Compiler and Related Tools on Solaris.
+
+=item Environment for Compiling Perl on Solaris
+
+=back
+
+=item RUN CONFIGURE.
+
+=over 4
+
+=item 64-bit Issues with Perl on Solaris.
+
+=item Threads in Perl on Solaris.
+
+=item Malloc Issues with Perl on Solaris.
+
+=back
+
+=item MAKE PROBLEMS.
+
+Dynamic Loading Problems With GNU as and GNU ld, ld.so.1: ./perl: fatal:
+relocation error:, dlopen: stub interception failed, #error "No
+DATAMODEL_NATIVE specified", sh: ar: not found
+
+=item MAKE TEST
+
+=over 4
+
+=item op/stat.t test 4 in Solaris
+
+=item nss_delete core dump from op/pwent or op/grent
+
+=back
+
+=item PREBUILT BINARIES OF PERL FOR SOLARIS.
+
+=item RUNTIME ISSUES FOR PERL ON SOLARIS.
+
+=over 4
+
+=item Limits on Numbers of Open Files on Solaris.
+
+=back
+
+=item SOLARIS-SPECIFIC MODULES.
+
+=item SOLARIS-SPECIFIC PROBLEMS WITH MODULES.
+
+=over 4
+
+=item Proc::ProcessTable on Solaris
+
+=item BSD::Resource on Solaris
+
+=item Net::SSLeay on Solaris
+
+=back
+
+=item AUTHOR
+
+=item LAST MODIFIED
+
+=back
+
+=head2 perltru64, README.tru64 - Perl version 5 on Tru64 (formerly known as
+Digital UNIX formerly known as DEC OSF/1) systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Compiling Perl 5 on Tru64
+
+=item Using Large Files with Perl on Tru64
+
+=item Threaded Perl on Tru64
+
+=item Long Doubles on Tru64
+
+=item DB_File tests failing on Tru64
+
+=item 64-bit Perl on Tru64
+
+=item Warnings about floating-point overflow when compiling Perl on Tru64
+
+=back
+
+=item Testing Perl on Tru64
+
+=item ext/ODBM_File/odbm Test Failing With Static Builds
+
+=item Perl Fails Because Of Unresolved Symbol sockatmark
+
+=item AUTHOR
+
+=back
+
+=head2 perluts - Perl under UTS
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUILDING PERL ON UTS
+
+=item Installing the built perl on UTS
+
+=item AUTHOR
+
+=back
+
+=head2 perlvmesa, README.vmesa - building and installing Perl for VM/ESA.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Unpacking Perl Distribution on VM/ESA
+
+=item Setup Perl and utilities on VM/ESA
+
+=item Configure Perl on VM/ESA
+
+=item Testing Anomalies of Perl on VM/ESA
+
+=item Usage Hints for Perl on VM/ESA
+
+=back
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=over 4
+
+=item Mailing list for Perl on VM/ESA
+
+=back
+
+=back
+
+=head2 perlvms - VMS-specific documentation for Perl
+
+=over 4
+
+=item DESCRIPTION
+
+=item Installation
+
+=item Organization of Perl Images
+
+=over 4
+
+=item Core Images
+
+=item Perl Extensions
+
+=item Installing static extensions
+
+=item Installing dynamic extensions
+
+=back
+
+=item File specifications
+
+=over 4
+
+=item Syntax
+
+=item Wildcard expansion
+
+=item Pipes
+
+=back
+
+=item PERL5LIB and PERLLIB
+
+=item Command line
+
+=over 4
+
+=item I/O redirection and backgrounding
+
+=item Command line switches
+
+-i, -S, -u
+
+=back
+
+=item Perl functions
+
+File tests, backticks, binmode FILEHANDLE, crypt PLAINTEXT, USER, dump,
+exec LIST, fork, getpwent, getpwnam, getpwuid, gmtime, kill, qx//, select
+(system call), stat EXPR, system LIST, time, times, unlink LIST, utime
+LIST, waitpid PID,FLAGS
+
+=item Perl variables
+
+%ENV, CRTL_ENV, CLISYM_[LOCAL], Any other string, $!, $^E, $?, $|
+
+=item Standard modules with VMS-specific differences
+
+=over 4
+
+=item SDBM_File
+
+=back
+
+=item Revision date
+
+=item AUTHOR
+
+=back
+
+=head2 perlvos, README.vos - Perl for Stratus VOS
+
+=over 4
+
+=item SYNOPSIS
+
+=over 4
+
+=item Multiple methods to build perl for VOS
+
+=item Stratus POSIX Support
+
+=back
+
+=item INSTALLING PERL IN VOS
+
+=over 4
+
+=item Compiling Perl 5 on VOS
+
+=item Installing Perl 5 on VOS
+
+=back
+
+=item USING PERL IN VOS
+
+=over 4
+
+=item Unimplemented Features of Perl on VOS
+
+=item Restrictions of Perl on VOS
+
+=item Handling of underflow and overflow
+
+=back
+
+=item TEST STATUS
+
+=item SUPPORT STATUS
+
+=item AUTHOR
+
+=item LAST UPDATE
+
+=back
+
+=head1 PRAGMA DOCUMENTATION
 
 =head2 attrs - set/get attributes of a subroutine (deprecated)
 
@@ -9981,4 +11502,8754 @@ Perl code
 
 =over 4
 
-=item SYNOPS
+=item SYNOPSIS
+
+=over 4
+
+=item Table of Contents
+
+=back
+
+=item DESCRIPTION
+
+=over 4
+
+=item TERMINOLOGY
+
+=back
+
+=item PERL ENCODING API
+
+$octets  = encode(ENCODING, $string [, CHECK]), $string = decode(ENCODING,
+$octets [, CHECK]), [$length =] from_to($octets, FROM_ENC, TO_ENC [,
+CHECK]), $octets = encode_utf8($string);, $string = decode_utf8($octets [,
+CHECK]);
+
+=over 4
+
+=item Listing available encodings
+
+=item Defining Aliases
+
+=back
+
+=item Encoding via PerlIO
+
+=item Handling Malformed Data
+
+I<CHECK> = Encode::FB_DEFAULT ( == 0), I<CHECK> = Encode::FB_CROAK ( == 1),
+I<CHECK> = Encode::FB_QUIET, I<CHECK> = Encode::FB_WARN, perlqq mode
+(I<CHECK> = Encode::FB_PERLQQ), HTML charref mode (I<CHECK> =
+Encode::FB_HTMLCREF), XML charref mode (I<CHECK> = Encode::FB_XMLCREF), The
+bitmask
+
+=over 4
+
+=item Unimplemented fallback schemes
+
+=back
+
+=item Defining Encodings
+
+=item The UTF-8 flag
+
+Goal #1:, Goal #2:, Goal #3:, Goal #4:
+
+=over 4
+
+=item Messing with Perl's Internals
+
+is_utf8(STRING [, CHECK]), _utf8_on(STRING), _utf8_off(STRING)
+
+=back
+
+=item SEE ALSO
+
+=item MAINTAINER
+
+=back
+
+=head2 Encode::Alias - alias definitions to encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+As a simple string, As a qr// compiled regular expression, e.g.:, As a code
+reference, e.g.:
+
+=over 4
+
+=item Alias overloading
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::Byte - Single Byte Encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::CJKConstants -- Internally used by Encode::??::ISO_2022_*
+
+=head2 Encode::CN - China-based Chinese Encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTES
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::CN::HZ -- internally used by Encode::CN
+
+=head2 Encode::Config -- internally used by Encode
+
+=head2 Encode::EBCDIC - EBCDIC Encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::Encoding - Encode Implementation Base Class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Methods you should implement
+
+-E<gt>encode($string [,$check]), -E<gt>decode($octets [,$check]),
+-E<gt>cat_decode($destination, $octets, $offset, $terminator [,$check])
+
+=item Other methods defined in Encode::Encodings
+
+-E<gt>name, -E<gt>new_sequence, -E<gt>perlio_ok(), -E<gt>needs_lines()
+
+=item Example: Encode::ROT13
+
+=back
+
+=item Why the heck Encode API is different?
+
+=over 4
+
+=item Compiled Encodings
+
+=back
+
+=item SEE ALSO
+
+Scheme 1, Scheme 2, Other Schemes
+
+=back
+
+=head2 Encode::Guess -- Guesses encoding from data
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+Encode::Guess->set_suspects, Encode::Guess->add_suspects,
+Encode::decode("Guess" ...), Encode::Guess->guess($data),
+guess_encoding($data, [, I<list of suspects>])
+
+=item CAVEATS
+
+=item TO DO
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::JP - Japanese Encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+=item Note on ISO-2022-JP(-1)?
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::JP::H2Z -- internally used by Encode::JP::2022_JP*
+
+=head2 Encode::JP::JIS7 -- internally used by Encode::JP
+
+=head2 Encode::KR - Korean Encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::KR::2022_KR -- internally used by Encode::KR
+
+=head2 Encode::MIME::Header -- MIME 'B' and 'Q' header encoding
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::PerlIO -- a detailed document on Encode and PerlIO
+
+=over 4
+
+=item Overview
+
+=item How does it work?
+
+=item Line Buffering
+
+=over 4
+
+=item How can I tell whether my encoding fully supports PerlIO ?
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::Supported -- Encodings supported by Encode
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Encoding Names
+
+=back
+
+=item Supported Encodings
+
+=over 4
+
+=item Built-in Encodings
+
+=item Encode::Unicode -- other Unicode encodings
+
+=item Encode::Byte -- Extended ASCII
+
+ISO-8859 and corresponding vendor mappings, KOI8 - De Facto Standard for
+the Cyrillic world, gsm0338 - Hentai Latin 1
+
+=item CJK: Chinese, Japanese, Korean (Multibyte)
+
+Encode::CN -- Continental China, Encode::JP -- Japan, Encode::KR -- Korea,
+Encode::TW -- Taiwan, Encode::HanExtra -- More Chinese via CPAN,
+Encode::JIS2K -- JIS X 0213 encodings via CPAN
+
+=item Miscellaneous encodings
+
+Encode::EBCDIC, Encode::Symbols, Encode::MIME::Header, Encode::Guess
+
+=back
+
+=item Unsupported encodings
+
+  ISO-2022-JP-2 [RFC1554], ISO-2022-CN [RFC1922], Various HP-UX encodings,
+Cyrillic encoding ISO-IR-111, ISO-8859-8-1 [Hebrew], ISIRI 3342, Iran
+System, ISIRI 2900 [Farsi], Thai encoding TCVN, Vietnamese encodings VPS,
+Various Mac encodings, (Mac) Indic encodings
+
+=item Encoding vs. Charset -- terminology
+
+=item Encoding Classification (by Anton Tagunov and Dan Kogai)
+
+=over 4
+
+=item Microsoft-related naming mess
+
+KS_C_5601-1987, GB2312, Big5, Shift_JIS
+
+=back
+
+=item Glossary
+
+character repertoire, coded character set (CCS), character encoding scheme
+(CES), charset (in MIME context), EUC, ISO-2022, UCS, UCS-2, Unicode, UTF,
+UTF-16
+
+=item See Also
+
+=item References
+
+ECMA, ECMA-035 (eq C<ISO-2022>), IANA, Assigned Charset Names by IANA, ISO,
+RFC, UC, Unicode Glossary
+
+=over 4
+
+=item Other Notable Sites
+
+czyborra.com, CJK.inf, Jungshik Shin's Hangul FAQ, debian.org:
+"Introduction to i18n"
+
+=item Offline sources
+
+C<CJKV Information Processing> by Ken Lunde
+
+=back
+
+=back
+
+=head2 Encode::Symbol - Symbol Encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::TW - Taiwan-based Chinese Encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTES
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::Unicode -- Various Unicode Transformation Formats
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+L<http://www.unicode.org/glossary/> says:, Quick Reference
+
+=item Size, Endianness, and BOM
+
+=over 4
+
+=item by size
+
+=item by endianness
+
+BOM as integer when fetched in network byte order
+
+=back
+
+=item Surrogate Pairs
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::lib::Encode::Alias, Encode::Alias - alias definitions to
+encodings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+As a simple string, As a qr// compiled regular expression, e.g.:, As a code
+reference, e.g.:
+
+=over 4
+
+=item Alias overloading
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::lib::Encode::CJKConstants, Encode::CJKConstants.pm --
+Internally used by Encode::??::ISO_2022_*
+
+=head2 Encode::lib::Encode::CN::HZ, Encode::CN::HZ -- internally used by
+Encode::CN
+
+=head2 Encode::lib::Encode::Config, Encode::Config -- internally used by
+Encode
+
+=head2 Encode::lib::Encode::Encoding, Encode::Encoding - Encode
+Implementation Base Class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Methods you should implement
+
+-E<gt>encode($string [,$check]), -E<gt>decode($octets [,$check]),
+-E<gt>cat_decode($destination, $octets, $offset, $terminator [,$check])
+
+=item Other methods defined in Encode::Encodings
+
+-E<gt>name, -E<gt>new_sequence, -E<gt>perlio_ok(), -E<gt>needs_lines()
+
+=item Example: Encode::ROT13
+
+=back
+
+=item Why the heck Encode API is different?
+
+=over 4
+
+=item Compiled Encodings
+
+=back
+
+=item SEE ALSO
+
+Scheme 1, Scheme 2, Other Schemes
+
+=back
+
+=head2 Encode::lib::Encode::Guess, Encode::Guess -- Guesses encoding from
+data
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+Encode::Guess->set_suspects, Encode::Guess->add_suspects,
+Encode::decode("Guess" ...), Encode::Guess->guess($data),
+guess_encoding($data, [, I<list of suspects>])
+
+=item CAVEATS
+
+=item TO DO
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::lib::Encode::JP::H2Z, Encode::JP::H2Z -- internally used by
+Encode::JP::2022_JP*
+
+=head2 Encode::lib::Encode::JP::JIS7, Encode::JP::JIS7 -- internally used
+by Encode::JP
+
+=head2 Encode::lib::Encode::KR::2022_KR, Encode::KR::2022_KR -- internally
+used by Encode::KR
+
+=head2 Encode::lib::Encode::MIME::Header, Encode::MIME::Header -- MIME 'B'
+and 'Q' header encoding
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::lib::Encode::PerlIO, Encode::PerlIO -- a detailed document
+on Encode and PerlIO
+
+=over 4
+
+=item Overview
+
+=item How does it work?
+
+=item Line Buffering
+
+=over 4
+
+=item How can I tell whether my encoding fully supports PerlIO ?
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 Encode::lib::Encode::Supported, Encode::Supported -- Encodings
+supported by Encode
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Encoding Names
+
+=back
+
+=item Supported Encodings
+
+=over 4
+
+=item Built-in Encodings
+
+=item Encode::Unicode -- other Unicode encodings
+
+=item Encode::Byte -- Extended ASCII
+
+ISO-8859 and corresponding vendor mappings, KOI8 - De Facto Standard for
+the Cyrillic world, gsm0338 - Hentai Latin 1
+
+=item CJK: Chinese, Japanese, Korean (Multibyte)
+
+Encode::CN -- Continental China, Encode::JP -- Japan, Encode::KR -- Korea,
+Encode::TW -- Taiwan, Encode::HanExtra -- More Chinese via CPAN,
+Encode::JIS2K -- JIS X 0213 encodings via CPAN
+
+=item Miscellaneous encodings
+
+Encode::EBCDIC, Encode::Symbols, Encode::MIME::Header, Encode::Guess
+
+=back
+
+=item Unsupported encodings
+
+  ISO-2022-JP-2 [RFC1554], ISO-2022-CN [RFC1922], Various HP-UX encodings,
+Cyrillic encoding ISO-IR-111, ISO-8859-8-1 [Hebrew], ISIRI 3342, Iran
+System, ISIRI 2900 [Farsi], Thai encoding TCVN, Vietnamese encodings VPS,
+Various Mac encodings, (Mac) Indic encodings
+
+=item Encoding vs. Charset -- terminology
+
+=item Encoding Classification (by Anton Tagunov and Dan Kogai)
+
+=over 4
+
+=item Microsoft-related naming mess
+
+KS_C_5601-1987, GB2312, Big5, Shift_JIS
+
+=back
+
+=item Glossary
+
+character repertoire, coded character set (CCS), character encoding scheme
+(CES), charset (in MIME context), EUC, ISO-2022, UCS, UCS-2, Unicode, UTF,
+UTF-16
+
+=item See Also
+
+=item References
+
+ECMA, ECMA-035 (eq C<ISO-2022>), IANA, Assigned Charset Names by IANA, ISO,
+RFC, UC, Unicode Glossary
+
+=over 4
+
+=item Other Notable Sites
+
+czyborra.com, CJK.inf, Jungshik Shin's Hangul FAQ, debian.org:
+"Introduction to i18n"
+
+=item Offline sources
+
+C<CJKV Information Processing> by Ken Lunde
+
+=back
+
+=back
+
+=head2 Encode::lib::Encoder, Encode::Encoder -- Object Oriented Encoder
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item Description
+
+=over 4
+
+=item Predefined Methods
+
+$e = Encode::Encoder-E<gt>new([$data, $encoding]);, encoder(),
+$e-E<gt>data([$data]), $e-E<gt>encoding([$encoding]),
+$e-E<gt>bytes([$encoding])
+
+=item Example: base64 transcoder
+
+=item Operator Overloading
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 Encodencoding, encoding - allows you to write your script in
+non-ascii or non-utf8
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=over 4
+
+=item Literal Conversions
+
+=item PerlIO layers for C<STD(IN|OUT)>
+
+=back
+
+=item FEATURES THAT REQUIRE 5.8.1
+
+"NON-EUC" doublebyte encodings, tr//, DATA pseudo-filehandle
+
+=item USAGE
+
+use encoding [I<ENCNAME>] ;, use encoding I<ENCNAME> [ STDIN =E<gt>
+I<ENCNAME_IN> ...] ;, use encoding I<ENCNAME> Filter=E<gt>1;, no encoding;
+
+=item The Filter Option
+
+=over 4
+
+=item Filter-related changes at Encode version 1.87
+
+=back
+
+=item CAVEATS
+
+=over 4
+
+=item NOT SCOPED
+
+=item DO NOT MIX MULTIPLE ENCODINGS
+
+=item tr/// with ranges
+
+Legend of characters above
+
+=back
+
+=item EXAMPLE - Greekperl
+
+=item KNOWN PROBLEMS
+
+literals in regex that are longer than 127 bytes, EBCDIC, format
+
+=item HISTORY
+
+=item SEE ALSO
+
+=back
+
+=head2 Encoder, Encode::Encoder -- Object Oriented Encoder
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item Description
+
+=over 4
+
+=item Predefined Methods
+
+$e = Encode::Encoder-E<gt>new([$data, $encoding]);, encoder(),
+$e-E<gt>data([$data]), $e-E<gt>encoding([$encoding]),
+$e-E<gt>bytes([$encoding])
+
+=item Example: base64 transcoder
+
+=item Operator Overloading
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 English - use nice English (or awk) names for ugly punctuation
+variables
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item PERFORMANCE
+
+=back
+
+=head2 Env - perl module that imports environment variables as scalars or
+arrays
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item LIMITATIONS
+
+=item AUTHOR
+
+=back
+
+=head2 Errno - System errno constants
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEATS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Exporter - Implements default import method for modules
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item How to Export
+
+=item Selecting What To Export
+
+=item How to Import
+
+C<use ModuleName;>, C<use ModuleName ();>, C<use ModuleName qw(...);>
+
+=back
+
+=item Advanced features
+
+=over 4
+
+=item Specialised Import Lists
+
+=item Exporting without using Exporter's import method
+
+=item Module Version Checking
+
+=item Managing Unknown Symbols
+
+=item Tag Handling Utility Functions
+
+=item Generating combined tags
+
+=item C<AUTOLOAD>ed Constants
+
+=back
+
+=back
+
+=head2 Exporter::Heavy - Exporter guts
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 ExtUtils::Command - utilities to replace common UNIX commands in
+Makefiles etc.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+cat
+
+eqtime src dst
+
+rm_rf files...
+
+rm_f files...
+
+touch files ..
+
+mv source... destination
+
+cp source... destination
+
+chmod mode files..
+
+mkpath directory..
+
+test_f file
+
+=over 4
+
+=item BUGS
+
+=item SEE ALSO 
+
+=item AUTHOR
+
+=back
+
+=head2 ExtUtils::Command::MM - Commands for the MM's to use in Makefiles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+B<test_harness>
+
+=back
+
+B<pod2man>
+
+B<warn_if_old_packlist>
+
+B<perllocal_install>
+
+B<uninstall>
+
+=head2 ExtUtils::Constant - generate XS code to import C header constants
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USAGE
+
+IV, UV, NV, PV, PVN, SV, YES, NO, UNDEF
+
+=item FUNCTIONS
+
+=back
+
+C_stringify NAME
+
+perl_stringify NAME
+
+constant_types
+
+memEQ_clause NAME, CHECKED_AT, INDENT
+
+assign INDENT, TYPE, PRE, POST, VALUE..
+
+return_clause
+
+switch_clause INDENT, NAMELEN, ITEMHASH, ITEM..
+
+params WHAT
+
+dump_names
+
+dogfood
+
+C_constant, name, type, value, macro, default, pre, post, def_pre =item
+def_post, utf8
+
+XS_constant PACKAGE, TYPES, SUBNAME, C_SUBNAME
+
+autoload PACKAGE, VERSION, AUTOLOADER
+
+WriteMakefileSnippet
+
+WriteConstants ATTRIBUTE =E<gt> VALUE [, ...], NAME, DEFAULT_TYPE,
+BREAKOUT_AT, NAMES, C_FILE, XS_FILE, SUBNAME, C_SUBNAME
+
+=over 4
+
+=item AUTHOR
+
+=back
+
+=head2 ExtUtils::Embed - Utilities for embedding Perl in C/C++ applications
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item @EXPORT
+
+=item FUNCTIONS
+
+xsinit(), Examples, ldopts(), Examples, perl_inc(), ccflags(), ccdlflags(),
+ccopts(), xsi_header(), xsi_protos(@modules), xsi_body(@modules)
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 ExtUtils::Install - install files from here to there
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Functions
+
+B<install>
+
+=back
+
+=back
+
+B<install_default> I<DISCOURAGED>
+
+B<uninstall>
+
+B<pm_to_blib>
+
+_autosplit
+
+=over 4
+
+=item ENVIRONMENT
+
+B<PERL_INSTALL_ROOT>
+
+=item AUTHOR
+
+=item LICENSE
+
+=back
+
+=head2 ExtUtils::Installed - Inventory management of installed modules
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USAGE
+
+=item FUNCTIONS
+
+new(), modules(), files(), directories(), directory_tree(), validate(),
+packlist(), version()
+
+=item EXAMPLE
+
+=item AUTHOR
+
+=back
+
+=head2 ExtUtils::Liblist - determine libraries to use and how to use them
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+For static extensions, For dynamic extensions at build/link time, For
+dynamic extensions at load time
+
+=over 4
+
+=item EXTRALIBS
+
+=item LDLOADLIBS and LD_RUN_PATH
+
+=item BSLOADLIBS
+
+=back
+
+=item PORTABILITY
+
+=over 4
+
+=item VMS implementation
+
+=item Win32 implementation
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 ExtUtils::MM - OS adjusted ExtUtils::MakeMaker subclass
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 ExtUtils::MM_Any - Platform agnostic MM methods
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Inherently Cross-Platform Methods
+
+os_flavor_is
+
+=back
+
+=over 4
+
+=item File::Spec wrappers
+
+catfile
+
+=back
+
+=over 4
+
+=item Thought To Be Cross-Platform Methods
+
+B<split_command>
+
+=back
+
+B<echo>
+
+init_VERSION
+
+wraplist
+
+manifypods
+
+manifypods_target
+
+makemakerdflt_target
+
+special_targets
+
+POD2MAN_EXE_macro
+
+test_via_harness
+
+test_via_script
+
+libscan
+
+tool_autosplit
+
+all_target
+
+metafile_target
+
+metafile_addtomanifest_target
+
+=over 4
+
+=item Abstract methods
+
+oneliner, B<quote_literal>, B<escape_newlines>, max_exec_len,
+B<init_others>, init_DIRFILESEP, init_linker, init_platform,
+platform_constants
+
+=back
+
+os_flavor
+
+=over 4
+
+=item AUTHOR
+
+=back
+
+=head2 ExtUtils::MM_BeOS - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+os_flavor (o)
+
+init_linker
+
+=head2 ExtUtils::MM_Cygwin - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+os_flavor (o)
+
+=back
+
+cflags (o)
+
+replace_manpage_separator (o)
+
+init_linker
+
+=head2 ExtUtils::MM_DOS - DOS specific subclass of ExtUtils::MM_Unix
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Overridden methods
+
+os_flavor
+
+=back
+
+=back
+
+B<replace_manpage_separator>
+
+=over 4
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 ExtUtils::MM_MacOS - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+maybe_command
+
+guess_name
+
+macify
+
+patternify
+
+init_main
+
+init_others
+
+init_platform, platform_constants
+
+init_dirscan
+
+init_VERSION (o)
+
+special_targets (o)
+
+static (o)
+
+dlsyms (o)
+
+dynamic (o)
+
+clean (o)
+
+clean_subdirs_target
+
+realclean (o)
+
+realclean_subdirs_target
+
+rulez (o)
+
+processPL (o)
+
+os_flavor
+
+=head2 ExtUtils::MM_NW5 - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+os_flavor
+
+init_platform (o), platform_constants
+
+const_cccmd (o)
+
+static_lib (o)
+
+dynamic_lib (o)
+
+=head2 ExtUtils::MM_OS2 - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+init_dist (o)
+
+=back
+
+init_linker
+
+os_flavor
+
+=head2 ExtUtils::MM_UWIN - U/WIN specific subclass of ExtUtils::MM_Unix
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Overridden methods
+
+os_flavor
+
+=back
+
+=back
+
+B<replace_manpage_separator>
+
+=over 4
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 ExtUtils::MM_Unix - methods used by ExtUtils::MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=back
+
+=over 4
+
+=item Methods
+
+os_flavor (o)
+
+=back
+
+c_o (o)
+
+cflags (o)
+
+clean (o)
+
+clean_subdirs_target
+
+const_cccmd (o)
+
+const_config (o)
+
+const_loadlibs (o)
+
+constants (o)
+
+depend (o)
+
+dir_target (o)
+
+init_dist
+
+dist (o)
+
+dist_basics (o)
+
+dist_ci (o)
+
+dist_core (o)
+
+B<dist_target>
+
+B<tardist_target>
+
+B<zipdist_target>
+
+B<tarfile_target>
+
+zipfile_target
+
+uutardist_target
+
+shdist_target
+
+distdir
+
+dist_test
+
+dlsyms (o)
+
+dynamic (o)
+
+dynamic_bs (o)
+
+dynamic_lib (o)
+
+exescan
+
+extliblist
+
+find_perl
+
+find_tests
+
+=over 4
+
+=item Methods to actually produce chunks of text for the Makefile
+
+fixin
+
+=back
+
+force (o)
+
+guess_name
+
+has_link_code
+
+init_dirscan
+
+init_DIRFILESEP
+
+init_main
+
+init_others
+
+init_INST
+
+init_INSTALL
+
+init_linker
+
+init_lib2arch
+
+init_PERL
+
+init_platform (o), platform_constants (o)
+
+init_PERM
+
+init_xs
+
+install (o)
+
+installbin (o)
+
+linkext (o)
+
+lsdir
+
+macro (o)
+
+makeaperl (o)
+
+makefile (o)
+
+maybe_command
+
+needs_linking (o)
+
+nicetext
+
+parse_abstract
+
+parse_version
+
+pasthru (o)
+
+perl_script
+
+perldepend (o)
+
+perm_rw (o)
+
+perm_rwx (o)
+
+pm_to_blib
+
+post_constants (o)
+
+post_initialize (o)
+
+postamble (o)
+
+ppd
+
+prefixify
+
+processPL (o)
+
+quote_paren
+
+realclean (o)
+
+realclean_subdirs_target
+
+replace_manpage_separator
+
+oneliner (o)
+
+quote_literal
+
+escape_newlines
+
+max_exec_len
+
+static (o)
+
+static_lib (o)
+
+staticmake (o)
+
+subdir_x (o)
+
+subdirs (o)
+
+test (o)
+
+test_via_harness (override)
+
+test_via_script (override)
+
+tools_other (o)
+
+tool_xsubpp (o)
+
+all_target
+
+top_targets (o)
+
+writedoc
+
+xs_c (o)
+
+xs_cpp (o)
+
+xs_o (o)
+
+=over 4
+
+=item SEE ALSO
+
+=back
+
+=head2 ExtUtils::MM_VMS - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Methods always loaded
+
+wraplist
+
+=back
+
+=back
+
+=over 4
+
+=item Methods
+
+guess_name (override)
+
+=back
+
+find_perl (override)
+
+maybe_command (override)
+
+perl_script (override)
+
+replace_manpage_separator
+
+init_DIRFILESEP
+
+init_main (override)
+
+init_others (override)
+
+init_platform (override)
+
+platform_constants
+
+init_VERSION (override)
+
+constants (override)
+
+special_targets
+
+cflags (override)
+
+const_cccmd (override)
+
+tool_sxubpp (override)
+
+xsubpp_version (override)
+
+tools_other (override)
+
+init_dist (override)
+
+c_o (override)
+
+xs_c (override)
+
+xs_o (override)
+
+dlsyms (override)
+
+dynamic_lib (override)
+
+dynamic_bs (override)
+
+static_lib (override)
+
+processPL (override)
+
+installbin (override)
+
+subdir_x (override)
+
+clean (override)
+
+clean_subdirs_target
+
+realclean (override)
+
+zipfile_target (o), tarfile_target (o), shdist_target (o)
+
+dist_test (override)
+
+install (override)
+
+perldepend (override)
+
+makefile (override)
+
+find_tests (override)
+
+test (override)
+
+makeaperl (override)
+
+nicetext (override)
+
+prefixify (override)
+
+oneliner (o)
+
+B<echo> (o)
+
+quote_literal
+
+escape_newlines
+
+max_exec_len
+
+init_linker (o)
+
+eliminate_macros
+
+fixpath
+
+os_flavor
+
+=head2 ExtUtils::MM_Win32 - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=over 4
+
+=item Overridden methods
+
+B<dlsyms>
+
+=back
+
+replace_manpage_separator
+
+B<maybe_command>
+
+B<find_tests>
+
+B<init_DIRFILESEP>
+
+B<init_others>
+
+init_platform (o), platform_constants (o)
+
+special_targets (o)
+
+static_lib (o)
+
+dynamic_lib (o)
+
+clean
+
+init_linker
+
+perl_script
+
+xs_o (o)
+
+pasthru (o)
+
+oneliner (o)
+
+max_exec_len
+
+os_flavor
+
+=head2 ExtUtils::MM_Win95 - method to customize MakeMaker for Win9X
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Overriden methods
+
+dist_test
+
+=back
+
+=back
+
+subdir_x
+
+xs_c
+
+xs_cpp
+
+xs_o
+
+clean_subdirs_target
+
+realclean_subdirs_target
+
+max_exec_len
+
+os_flavor
+
+=over 4
+
+=item AUTHOR
+
+=back
+
+=head2 ExtUtils::MY - ExtUtils::MakeMaker subclass for customization
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 ExtUtils::MakeMaker - Create a module Makefile
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item How To Write A Makefile.PL
+
+=item Default Makefile Behaviour
+
+=item make test
+
+=item make testdb
+
+=item make install
+
+=item PREFIX and LIB attribute
+
+=item AFS users
+
+=item Static Linking of a new Perl Binary
+
+=item Determination of Perl Library and Installation Locations
+
+=item Which architecture dependent directory?
+
+=item Using Attributes and Parameters
+
+ABSTRACT, ABSTRACT_FROM, AUTHOR, BINARY_LOCATION, C, CCFLAGS, CONFIG,
+CONFIGURE, DEFINE, DESTDIR, DIR, DISTNAME, DISTVNAME, DL_FUNCS, DL_VARS,
+EXCLUDE_EXT, EXE_FILES, FIRST_MAKEFILE, FULLPERL, FULLPERLRUN,
+FULLPERLRUNINST, FUNCLIST, H, IMPORTS, INC, INCLUDE_EXT, INSTALLARCHLIB,
+INSTALLBIN, INSTALLDIRS, INSTALLMAN1DIR, INSTALLMAN3DIR, INSTALLPRIVLIB,
+INSTALLSCRIPT, INSTALLSITEARCH, INSTALLSITEBIN, INSTALLSITELIB,
+INSTALLSITEMAN1DIR, INSTALLSITEMAN3DIR, INSTALLVENDORARCH,
+INSTALLVENDORBIN, INSTALLVENDORLIB, INSTALLVENDORMAN1DIR,
+INSTALLVENDORMAN3DIR, INST_ARCHLIB, INST_BIN, INST_LIB, INST_MAN1DIR,
+INST_MAN3DIR, INST_SCRIPT, LD, LDDLFLAGS, LDFROM, LIB, LIBPERL_A, LIBS,
+LINKTYPE, MAKEAPERL, MAKEFILE_OLD, MAN1PODS, MAN3PODS, MAP_TARGET,
+MYEXTLIB, NAME, NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE,
+PERL, PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK,
+PERLPREFIX, PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW, PERM_RWX, PL_FILES,
+PM, PMLIBDIRS, PM_FILTER, POLLUTE, PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT,
+PREFIX, PREREQ_FATAL, PREREQ_PM, PREREQ_PRINT, PRINT_PREREQ, SITEPREFIX,
+SKIP, TYPEMAPS, VENDORPREFIX, VERBINST, VERSION, VERSION_FROM, VERSION_SYM,
+XS, XSOPT, XSPROTOARG, XS_VERSION
+
+=item Additional lowercase attributes
+
+clean, depend, dist, dynamic_lib, linkext, macro, realclean, test,
+tool_autosplit
+
+=item Overriding MakeMaker Methods
+
+=item The End Of Cargo Cult Programming
+
+C<<MAN3PODS => ' '>>
+
+=item Hintsfile support
+
+=item Distribution Support
+
+   make distcheck,    make skipcheck,	 make distclean,    make manifest, 
+  make distdir,   make disttest,    make tardist,    make dist,    make
+uutardist,    make shdist,    make zipdist,    make ci
+
+=item Disabling an extension
+
+=item Other Handy Functions
+
+prompt
+
+=back
+
+=item ENVIRONMENT
+
+PERL_MM_OPT, PERL_MM_USE_DEFAULT
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item LICENSE
+
+=back
+
+=head2 ExtUtils::MakeMaker::FAQ - Frequently Asked Questions About
+MakeMaker
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Philosophy and History
+
+Why not just use <insert other build config tool here>?, What's
+Module::Build and how does it relate to MakeMaker?, pure perl.	no make, no
+shell commands, easier to customize, cleaner internals, less cruft
+
+=item XS
+
+How to I prevent "object version X.XX does not match bootstrap parameter
+Y.YY" errors?, How do I make two or more XS files coexist in the same
+directory?
+
+=back
+
+=item PATCHING
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 ExtUtils::MakeMaker::Tutorial - Writing a module with MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item The Mantra
+
+=item The Layout
+
+Makefile.PL, MANIFEST, lib/, t/, Changes, README, INSTALL, MANIFEST.SKIP,
+bin/
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 ExtUtils::MakeMaker::vmsish - Platform agnostic vmsish.pm
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 ExtUtils::Manifest - utilities to write and check a MANIFEST file
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Functions
+
+mkmanifest
+
+=back
+
+=back
+
+manifind
+
+manicheck
+
+filecheck
+
+fullcheck
+
+skipcheck
+
+maniread
+
+manicopy
+
+maniadd
+
+=over 4
+
+=item MANIFEST
+
+=item MANIFEST.SKIP
+
+=item EXPORT_OK
+
+=item GLOBAL VARIABLES
+
+=back
+
+=over 4
+
+=item DIAGNOSTICS
+
+C<Not in MANIFEST:> I<file>, C<Skipping> I<file>, C<No such file:> I<file>,
+C<MANIFEST:> I<$!>, C<Added to MANIFEST:> I<file>
+
+=item ENVIRONMENT
+
+B<PERL_MM_MANIFEST_DEBUG>
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 ExtUtils::Mkbootstrap - make a bootstrap file for use by DynaLoader
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 ExtUtils::Mksymlists - write linker options files for dynamic
+extension
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+DLBASE, DL_FUNCS, DL_VARS, FILE, FUNCLIST, IMPORTS, NAME
+
+=item AUTHOR
+
+=item REVISION
+
+=back
+
+=head2 ExtUtils::Packlist - manage .packlist files
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USAGE
+
+=item FUNCTIONS
+
+new(), read(), write(), validate(), packlist_file()
+
+=item EXAMPLE
+
+=item AUTHOR
+
+=back
+
+=head2 ExtUtils::testlib - add blib/* directories to @INC
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 Fatal - replace functions with equivalents which succeed or die
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=back
+
+=head2 Fcntl - load the C Fcntl.h defines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTE
+
+=item EXPORTED SYMBOLS
+
+=back
+
+=head2 File::Basename, fileparse - split a pathname into pieces
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+fileparse_set_fstype, fileparse
+
+=item EXAMPLES
+
+C<basename>, C<dirname>
+
+=back
+
+=head2 File::CheckTree, validate - run many filetest checks on a tree
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item HISTORY
+
+=back
+
+=head2 File::Compare - Compare files or filehandles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item RETURN
+
+=item AUTHOR
+
+=back
+
+=head2 File::Copy - Copy files or filehandles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Special behaviour if C<syscopy> is defined (OS/2, VMS and Win32)
+
+rmscopy($from,$to[,$date_flag])
+
+=back
+
+=item RETURN
+
+=item NOTES
+
+=item AUTHOR
+
+=back
+
+=head2 File::DosGlob - DOS like globbing and then some
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTES
+
+=item EXPORTS (by request only)
+
+=item BUGS
+
+=item AUTHOR
+
+=item HISTORY
+
+=item SEE ALSO
+
+=back
+
+=head2 File::Find - Traverse a directory tree.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+B<find>, B<finddepth>
+
+=over 4
+
+=item %options
+
+C<wanted>, C<bydepth>, C<preprocess>, C<postprocess>, C<follow>,
+C<follow_fast>, C<follow_skip>, C<dangling_symlinks>, C<no_chdir>,
+C<untaint>, C<untaint_pattern>, C<untaint_skip>
+
+=item The wanted function
+
+C<$File::Find::dir> is the current directory name,, C<$_> is the current
+filename within that directory, C<$File::Find::name> is the complete
+pathname to the file
+
+=back
+
+=item WARNINGS
+
+=item CAVEAT
+
+$dont_use_nlink, symlinks
+
+=item NOTES
+
+=item HISTORY
+
+=back
+
+=head2 File::Glob - Perl extension for BSD glob routine
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+C<GLOB_ERR>, C<GLOB_LIMIT>, C<GLOB_MARK>, C<GLOB_NOCASE>, C<GLOB_NOCHECK>,
+C<GLOB_NOSORT>, C<GLOB_BRACE>, C<GLOB_NOMAGIC>, C<GLOB_QUOTE>,
+C<GLOB_TILDE>, C<GLOB_CSH>, C<GLOB_ALPHASORT>
+
+=item DIAGNOSTICS
+
+C<GLOB_NOSPACE>, C<GLOB_ABEND>
+
+=item NOTES
+
+=item AUTHOR
+
+=back
+
+=head2 File::Path - create or remove directory trees
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHORS
+
+=back
+
+=head2 File::Spec - portably perform operations on file names
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+canonpath, catdir, catfile, curdir, devnull, rootdir, tmpdir, updir,
+no_upwards, case_tolerant, file_name_is_absolute, path, join, splitpath,
+splitdir, catpath(), abs2rel, rel2abs()
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=back
+
+=head2 File::Spec::Cygwin - methods for Cygwin file specs
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+canonpath
+
+file_name_is_absolute
+
+tmpdir (override)
+
+=head2 File::Spec::Epoc - methods for Epoc file specs
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+canonpath()
+
+=back
+
+=over 4
+
+=item SEE ALSO
+
+=back
+
+=head2 File::Spec::Functions - portably perform operations on file names
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Exports
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 File::Spec::Mac - File::Spec for Mac OS (Classic)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+canonpath
+
+=back
+
+catdir()
+
+catfile
+
+curdir
+
+devnull
+
+rootdir
+
+tmpdir
+
+updir
+
+file_name_is_absolute
+
+path
+
+splitpath
+
+splitdir
+
+catpath
+
+abs2rel
+
+rel2abs
+
+=over 4
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=back
+
+tmpdir
+
+canonpath
+
+splitpath
+
+splitdir
+
+catpath
+
+=head2 File::Spec::OS2 - methods for OS/2 file specs
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 File::Spec::Unix - File::Spec for Unix, base for other File::Spec
+modules
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+canonpath()
+
+=back
+
+catdir()
+
+catfile
+
+curdir
+
+devnull
+
+rootdir
+
+tmpdir
+
+updir
+
+no_upwards
+
+case_tolerant
+
+file_name_is_absolute
+
+path
+
+join
+
+splitpath
+
+splitdir
+
+catpath()
+
+abs2rel
+
+rel2abs()
+
+=over 4
+
+=item SEE ALSO
+
+=back
+
+=head2 File::Spec::VMS - methods for VMS file specs
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+eliminate_macros
+
+=back
+
+fixpath
+
+=over 4
+
+=item Methods always loaded
+
+canonpath (override)
+
+=back
+
+catdir
+
+catfile
+
+curdir (override)
+
+devnull (override)
+
+rootdir (override)
+
+tmpdir (override)
+
+updir (override)
+
+case_tolerant (override)
+
+path (override)
+
+file_name_is_absolute (override)
+
+splitpath (override)
+
+splitdir (override)
+
+catpath (override)
+
+abs2rel (override)
+
+rel2abs (override)
+
+=over 4
+
+=item SEE ALSO
+
+=back
+
+=head2 File::Spec::Win32 - methods for Win32 file specs
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+devnull
+
+=back
+
+tmpdir
+
+catfile
+
+canonpath
+
+splitpath
+
+splitdir
+
+catpath
+
+=over 4
+
+=item Note For File::Spec::Win32 Maintainers
+
+=back
+
+=over 4
+
+=item SEE ALSO
+
+=back
+
+=head2 File::Temp - return name and handle of a temporary file safely
+
+=over 4
+
+=item PORTABILITY
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=over 4
+
+=item FUNCTIONS
+
+B<tempfile>
+
+=back
+
+B<tempdir>
+
+=over 4
+
+=item MKTEMP FUNCTIONS
+
+B<mkstemp>
+
+=back
+
+B<mkstemps>
+
+B<mkdtemp>
+
+B<mktemp>
+
+=over 4
+
+=item POSIX FUNCTIONS
+
+B<tmpnam>
+
+=back
+
+B<tmpfile>
+
+=over 4
+
+=item ADDITIONAL FUNCTIONS
+
+B<tempnam>
+
+=back
+
+=over 4
+
+=item UTILITY FUNCTIONS
+
+B<unlink0>
+
+=back
+
+=over 4
+
+=item PACKAGE VARIABLES
+
+B<safe_level>, STANDARD, MEDIUM, HIGH
+
+=back
+
+TopSystemUID
+
+=over 4
+
+=item WARNING
+
+=over 4
+
+=item Temporary files and NFS
+
+=back
+
+=item HISTORY
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 File::stat - by-name interface to Perl's built-in stat() functions
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUGS
+
+=item NOTE
+
+=item AUTHOR
+
+=back
+
+=head2 FileCache - keep more files open than the system permits
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+cacheout EXPR, cacheout MODE, EXPR
+
+=item CAVEATS
+
+=item BUGS
+
+=back
+
+=head2 FileHandle - supply object methods for filehandles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+$fh->print, $fh->printf, $fh->getline, $fh->getlines
+
+=item SEE ALSO
+
+=back
+
+=head2 Filter::Simple - Simplified source filtering
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item The Problem
+
+=item A Solution
+
+=item Disabling or changing <no> behaviour
+
+=item All-in-one interface
+
+=item Filtering only specific components of source code
+
+C<"code">, C<"executable">, C<"quotelike">, C<"string">, C<"regex">,
+C<"all">
+
+=item Filtering only the code parts of source code
+
+Most source code ceases to be grammatically correct when it is broken up
+into the pieces between string literals and regexes. So the C<'code'>
+component filter behaves slightly differently from the other partial
+filters
+described in the previous section.
+
+=item Using Filter::Simple with an explicit C<import> subroutine
+
+=item Using Filter::Simple and Exporter together
+
+=item How it works
+
+=back
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Filter::Util::Call - Perl Source Filter Utility Module
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item B<use Filter::Util::Call>
+
+=item B<import()>
+
+=item B<filter() and anonymous sub>
+
+B<$_>, B<$status>, B<filter_read> and B<filter_read_exact>, B<filter_del>
+
+=back
+
+=item EXAMPLES
+
+=over 4
+
+=item Example 1: A simple filter.
+
+=item Example 2: Using the context
+
+=item Example 3: Using the context within the filter
+
+=item Example 4: Using filter_del
+
+=back
+
+=item Filter::Simple
+
+=item AUTHOR
+
+=item DATE
+
+=back
+
+=head2 FindBin - Locate directory of original perl script
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXPORTABLE VARIABLES
+
+=item KNOWN ISSUES
+
+=item KNOWN BUGS
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 GDBM_File - Perl5 access to the gdbm library.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AVAILABILITY
+
+=item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Getopt::Long - Extended processing of command line options
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Command Line Options, an Introduction
+
+=item Getting Started with Getopt::Long
+
+=over 4
+
+=item Simple options
+
+=item A little bit less simple options
+
+=item Mixing command line option with other arguments
+
+=item Options with values
+
+=item Options with multiple values
+
+=item Options with hash values
+
+=item User-defined subroutines to handle options
+
+=item Options with multiple names
+
+=item Case and abbreviations
+
+=item Summary of Option Specifications
+
+!, +, s, i, o, f, : I<type> [ I<desttype> ], : I<number> [ I<desttype> ], :
++ [ I<desttype> ]
+
+=back
+
+=item Advanced Possibilities
+
+=over 4
+
+=item Object oriented interface
+
+=item Thread Safety
+
+=item Documentation and help texts
+
+=item Storing options in a hash
+
+=item Bundling
+
+=item The lonesome dash
+
+=item Argument callback
+
+=back
+
+=item Configuring Getopt::Long
+
+default, posix_default, auto_abbrev, getopt_compat, gnu_compat, gnu_getopt,
+require_order, permute, bundling (default: disabled), bundling_override
+(default: disabled), ignore_case  (default: enabled), ignore_case_always
+(default: disabled), pass_through (default: disabled), prefix,
+prefix_pattern, debug (default: disabled)
+
+=item Return values and Errors
+
+=item Legacy
+
+=over 4
+
+=item Default destinations
+
+=item Alternative option starters
+
+=item Configuration variables
+
+=back
+
+=item Trouble Shooting
+
+=over 4
+
+=item Warning: Ignoring '!' modifier for short option
+
+=item GetOptions does not return a false result when an option is not
+supplied
+
+=item GetOptions does not split the command line correctly
+
+=item How do I put a "-?" option into a Getopt::Long?
+
+=back
+
+=item AUTHOR
+
+=item COPYRIGHT AND DISCLAIMER
+
+=back
+
+=head2 Getopt::Std, getopt - Process single-character switches with switch
+clustering
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item C<--help> and C<--version>
+
+=back
+
+=head2 Hash::Util - A selection of general-utility hash subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Restricted hashes
+
+lock_keys, unlock_keys
+
+=back
+
+=back
+
+lock_value, unlock_value
+
+B<lock_hash>, B<unlock_hash>
+
+=over 4
+
+=item CAVEATS
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 I18N::Collate - compare 8-bit scalar data according to the current
+locale
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 I18N::LangTags - functions for dealing with RFC3066-style language
+tags
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+the function is_language_tag($lang1)
+
+the function extract_language_tags($whatever)
+
+the function same_language_tag($lang1, $lang2)
+
+the function similarity_language_tag($lang1, $lang2)
+
+the function is_dialect_of($lang1, $lang2)
+
+the function super_languages($lang1)
+
+the function locale2language_tag($locale_identifier)
+
+the function encode_language_tag($lang1)
+
+the function alternate_language_tags($lang1)
+
+the function @langs = panic_languages(@accept_languages)
+
+=over 4
+
+=item ABOUT LOWERCASING
+
+=item ABOUT UNICODE PLAINTEXT LANGUAGE TAGS
+
+=item SEE ALSO
+
+=item COPYRIGHT
+
+=item AUTHOR
+
+=back
+
+=head2 I18N::LangTags::List -- tags and names for human languages
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item ABOUT LANGUAGE TAGS
+
+=item LIST OF LANGUAGES
+
+{ab} : Abkhazian, {ace} : Achinese, {ach} : Acoli, {ada} : Adangme, {aa} :
+Afar, {afh} : Afrihili, {af} : Afrikaans, [{afa} : Afro-Asiatic (Other)],
+{aka} : Akan, {akk} : Akkadian, {sq} : Albanian, {ale} : Aleut, [{alg} :
+Algonquian languages], [{tut} : Altaic (Other)], {am} : Amharic, {i-ami} :
+Ami, [{apa} : Apache languages], {ar} : Arabic, {arc} : Aramaic, {arp} :
+Arapaho, {arn} : Araucanian, {arw} : Arawak, {hy} : Armenian, [{art} :
+Artificial (Other)], {as} : Assamese, [{ath} : Athapascan languages],
+[{aus} : Australian languages], [{map} : Austronesian (Other)], {ava} :
+Avaric, {ae} : Avestan, {awa} : Awadhi, {ay} : Aymara, {az} : Azerbaijani,
+{ban} : Balinese, [{bat} : Baltic (Other)], {bal} : Baluchi, {bam} :
+Bambara, [{bai} : Bamileke languages], {bad} : Banda, [{bnt} : Bantu
+(Other)], {bas} : Basa, {ba} : Bashkir, {eu} : Basque, {btk} : Batak
+(Indonesia), {bej} : Beja, {be} : Belarusian, {bem} : Bemba, {bn} :
+Bengali, [{ber} : Berber (Other)], {bho} : Bhojpuri, {bh} : Bihari, {bik} :
+Bikol, {bin} : Bini, {bi} : Bislama, {bs} : Bosnian, {bra} : Braj, {br} :
+Breton, {bug} : Buginese, {bg} : Bulgarian, {i-bnn} : Bunun, {bua} :
+Buriat, {my} : Burmese, {cad} : Caddo, {car} : Carib, {ca} : Catalan,
+[{cau} : Caucasian (Other)], {ceb} : Cebuano, [{cel} : Celtic (Other)],
+[{cai} : Central American Indian (Other)], {chg} : Chagatai, [{cmc} :
+Chamic languages], {ch} : Chamorro, {ce} : Chechen, {chr} : Cherokee, {chy}
+: Cheyenne, {chb} : Chibcha, {ny} : Chichewa, {zh} : Chinese, {chn} :
+Chinook Jargon, {chp} : Chipewyan, {cho} : Choctaw, {cu} : Church Slavic,
+{chk} : Chuukese, {cv} : Chuvash, {cop} : Coptic, {kw} : Cornish, {co} :
+Corsican, {cre} : Cree, {mus} : Creek, [{cpe} : English-based Creoles and
+pidgins (Other)], [{cpf} : French-based Creoles and pidgins (Other)],
+[{cpp} : Portuguese-based Creoles and pidgins (Other)], [{crp} : Creoles
+and pidgins (Other)], {hr} : Croatian, [{cus} : Cushitic (Other)], {cs} :
+Czech, {dak} : Dakota, {da} : Danish, {day} : Dayak, {i-default} : Default
+(Fallthru) Language, {del} : Delaware, {din} : Dinka, {div} : Divehi, {doi}
+: Dogri, {dgr} : Dogrib, [{dra} : Dravidian (Other)], {dua} : Duala, {nl} :
+Dutch, {dum} : Middle Dutch (ca.1050-1350), {dyu} : Dyula, {dz} : Dzongkha,
+{efi} : Efik, {egy} : Ancient Egyptian, {eka} : Ekajuk, {elx} : Elamite,
+{en} : English, {enm} : Old English (1100-1500), {ang} : Old English
+(ca.450-1100), {eo} : Esperanto, {et} : Estonian, {ewe} : Ewe, {ewo} :
+Ewondo, {fan} : Fang, {fat} : Fanti, {fo} : Faroese, {fj} : Fijian, {fi} :
+Finnish, [{fiu} : Finno-Ugrian (Other)], {fon} : Fon, {fr} : French, {frm}
+: Middle French (ca.1400-1600), {fro} : Old French (842-ca.1400), {fy} :
+Frisian, {fur} : Friulian, {ful} : Fulah, {gaa} : Ga, {gd} : Scots Gaelic,
+{gl} : Gallegan, {lug} : Ganda, {gay} : Gayo, {gba} : Gbaya, {gez} : Geez,
+{ka} : Georgian, {de} : German, {gmh} : Middle High German (ca.1050-1500),
+{goh} : Old High German (ca.750-1050), [{gem} : Germanic (Other)], {gil} :
+Gilbertese, {gon} : Gondi, {gor} : Gorontalo, {got} : Gothic, {grb} :
+Grebo, {grc} : Ancient Greek, {el} : Modern Greek, {gn} : Guarani, {gu} :
+Gujarati, {gwi} : Gwich'in, {hai} : Haida, {ha} : Hausa, {haw} : Hawaiian,
+{he} : Hebrew, {hz} : Herero, {hil} : Hiligaynon, {him} : Himachali, {hi} :
+Hindi, {ho} : Hiri Motu, {hit} : Hittite, {hmn} : Hmong, {hu} : Hungarian,
+{hup} : Hupa, {iba} : Iban, {is} : Icelandic, {ibo} : Igbo, {ijo} : Ijo,
+{ilo} : Iloko, [{inc} : Indic (Other)], [{ine} : Indo-European (Other)],
+{id} : Indonesian, {ia} : Interlingua (International Auxiliary Language
+Association), {ie} : Interlingue, {iu} : Inuktitut, {ik} : Inupiaq, [{ira}
+: Iranian (Other)], {ga} : Irish, {mga} : Middle Irish (900-1200), {sga} :
+Old Irish (to 900), [{iro} : Iroquoian languages], {it} : Italian, {ja} :
+Japanese, {jw} : Javanese, {jrb} : Judeo-Arabic, {jpr} : Judeo-Persian,
+{kab} : Kabyle, {kac} : Kachin, {kl} : Kalaallisut, {kam} : Kamba, {kn} :
+Kannada, {kau} : Kanuri, {kaa} : Kara-Kalpak, {kar} : Karen, {ks} :
+Kashmiri, {kaw} : Kawi, {kk} : Kazakh, {kha} : Khasi, {km} : Khmer, [{khi}
+: Khoisan (Other)], {kho} : Khotanese, {ki} : Kikuyu, {kmb} : Kimbundu,
+{rw} : Kinyarwanda, {ky} : Kirghiz, {i-klingon} : Klingon, {kv} : Komi,
+{kon} : Kongo, {kok} : Konkani, {ko} : Korean, {kos} : Kosraean, {kpe} :
+Kpelle, {kro} : Kru, {kj} : Kuanyama, {kum} : Kumyk, {ku} : Kurdish, {kru}
+: Kurukh, {kut} : Kutenai, {lad} : Ladino, {lah} : Lahnda, {lam} : Lamba,
+{lo} : Lao, {la} : Latin, {lv} : Latvian, {lb} : Letzeburgesch, {lez} :
+Lezghian, {ln} : Lingala, {lt} : Lithuanian, {nds} : Low German, {loz} :
+Lozi, {lub} : Luba-Katanga, {lua} : Luba-Lulua, {lui} : Luiseno, {lun} :
+Lunda, {luo} : Luo (Kenya and Tanzania), {lus} : Lushai, {mk} : Macedonian,
+{mad} : Madurese, {mag} : Magahi, {mai} : Maithili, {mak} : Makasar, {mg} :
+Malagasy, {ms} : Malay, {ml} : Malayalam, {mt} : Maltese, {mnc} : Manchu,
+{mdr} : Mandar, {man} : Mandingo, {mni} : Manipuri, [{mno} : Manobo
+languages], {gv} : Manx, {mi} : Maori, {mr} : Marathi, {chm} : Mari, {mh} :
+Marshall, {mwr} : Marwari, {mas} : Masai, [{myn} : Mayan languages], {men}
+: Mende, {mic} : Micmac, {min} : Minangkabau, {i-mingo} : Mingo, [{mis} :
+Miscellaneous languages], {moh} : Mohawk, {mo} : Moldavian, [{mkh} :
+Mon-Khmer (Other)], {lol} : Mongo, {mn} : Mongolian, {mos} : Mossi, [{mul}
+: Multiple languages], [{mun} : Munda languages], {nah} : Nahuatl, {na} :
+Nauru, {nv} : Navajo, {nd} : North Ndebele, {nr} : South Ndebele, {ng} :
+Ndonga, {ne} : Nepali, {new} : Newari, {nia} : Nias, [{nic} :
+Niger-Kordofanian (Other)], [{ssa} : Nilo-Saharan (Other)], {niu} : Niuean,
+{non} : Old Norse, [{nai} : North American Indian], {se} : Northern Sami,
+{no} : Norwegian, {nb} : Norwegian Bokmal, {nn} : Norwegian Nynorsk, [{nub}
+: Nubian languages], {nym} : Nyamwezi, {nyn} : Nyankole, {nyo} : Nyoro,
+{nzi} : Nzima, {oc} : Occitan (post 1500), {oji} : Ojibwa, {or} : Oriya,
+{om} : Oromo, {osa} : Osage, {os} : Ossetian; Ossetic, [{oto} : Otomian
+languages], {pal} : Pahlavi, {i-pwn} : Paiwan, {pau} : Palauan, {pi} :
+Pali, {pam} : Pampanga, {pag} : Pangasinan, {pa} : Panjabi, {pap} :
+Papiamento, [{paa} : Papuan (Other)], {fa} : Persian, {peo} : Old Persian
+(ca.600-400 B.C.), [{phi} : Philippine (Other)], {phn} : Phoenician, {pon}
+: Pohnpeian, {pl} : Polish, {pt} : Portuguese, [{pra} : Prakrit languages],
+{pro} : Old Provencal (to 1500), {ps} : Pushto, {qu} : Quechua, {rm} :
+Raeto-Romance, {raj} : Rajasthani, {rap} : Rapanui, {rar} : Rarotongan,
+[{qaa - qtz} : Reserved for local use.], [{roa} : Romance (Other)], {ro} :
+Romanian, {rom} : Romany, {rn} : Rundi, {ru} : Russian, [{sal} : Salishan
+languages], {sam} : Samaritan Aramaic, [{smi} : Sami languages (Other)],
+{sm} : Samoan, {sad} : Sandawe, {sg} : Sango, {sa} : Sanskrit, {sat} :
+Santali, {sc} : Sardinian, {sas} : Sasak, {sco} : Scots, {sel} : Selkup,
+[{sem} : Semitic (Other)], {sr} : Serbian, {srr} : Serer, {shn} : Shan,
+{sn} : Shona, {sid} : Sidamo, {sgn-...} : Sign Languages, {bla} : Siksika,
+{sd} : Sindhi, {si} : Sinhalese, [{sit} : Sino-Tibetan (Other)], [{sio} :
+Siouan languages], {den} : Slave (Athapascan), [{sla} : Slavic (Other)],
+{sk} : Slovak, {sl} : Slovenian, {sog} : Sogdian, {so} : Somali, {son} :
+Songhai, {snk} : Soninke, {wen} : Sorbian languages, {nso} : Northern
+Sotho, {st} : Southern Sotho, [{sai} : South American Indian (Other)], {es}
+: Spanish, {suk} : Sukuma, {sux} : Sumerian, {su} : Sundanese, {sus} :
+Susu, {sw} : Swahili, {ss} : Swati, {sv} : Swedish, {syr} : Syriac, {tl} :
+Tagalog, {ty} : Tahitian, [{tai} : Tai (Other)], {tg} : Tajik, {tmh} :
+Tamashek, {ta} : Tamil, {i-tao} : Tao, {tt} : Tatar, {i-tay} : Tayal, {te}
+: Telugu, {ter} : Tereno, {tet} : Tetum, {th} : Thai, {bo} : Tibetan, {tig}
+: Tigre, {ti} : Tigrinya, {tem} : Timne, {tiv} : Tiv, {tli} : Tlingit,
+{tpi} : Tok Pisin, {tkl} : Tokelau, {tog} : Tonga (Nyasa), {to} : Tonga
+(Tonga Islands), {tsi} : Tsimshian, {ts} : Tsonga, {i-tsu} : Tsou, {tn} :
+Tswana, {tum} : Tumbuka, {tr} : Turkish, {ota} : Ottoman Turkish
+(1500-1928), {tk} : Turkmen, {tvl} : Tuvalu, {tyv} : Tuvinian, {tw} : Twi,
+{uga} : Ugaritic, {ug} : Uighur, {uk} : Ukrainian, {umb} : Umbundu, {und} :
+Undetermined, {ur} : Urdu, {uz} : Uzbek, {vai} : Vai, {ven} : Venda, {vi} :
+Vietnamese, {vo} : Volapuk, {vot} : Votic, [{wak} : Wakashan languages],
+{wal} : Walamo, {war} : Waray, {was} : Washo, {cy} : Welsh, {wo} : Wolof,
+{x-...} : Unregistered (Semi-Private Use), {xh} : Xhosa, {sah} : Yakut,
+{yao} : Yao, {yap} : Yapese, {yi} : Yiddish, {yo} : Yoruba, [{ypk} : Yupik
+languages], {znd} : Zande, [{zap} : Zapotec], {zen} : Zenaga, {za} :
+Zhuang, {zu} : Zulu, {zun} : Zuni
+
+=item SEE ALSO
+
+=item COPYRIGHT AND DISCLAIMER
+
+=item AUTHOR
+
+=back
+
+=head2 I18N::Langinfo - query locale information
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item EXPORT
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO - load various IO modules
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item DEPRECATED
+
+=back
+
+=head2 IO::Dir - supply object methods for directory handles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+new ( [ DIRNAME ] ), open ( DIRNAME ), read (), seek ( POS ), tell (),
+rewind (), close (), tie %hash, IO::Dir, DIRNAME [, OPTIONS ]
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::File - supply object methods for filehandles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( FILENAME [,MODE [,PERMS]] ), new_tmpfile
+
+=item METHODS
+
+open( FILENAME [,MODE [,PERMS]] )
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
+=head2 IO::Handle - supply object methods for I/O handles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new (), new_from_fd ( FD, MODE )
+
+=item METHODS
+
+$io->fdopen ( FD, MODE ), $io->opened, $io->getline, $io->getlines,
+$io->ungetc ( ORD ), $io->write ( BUF, LEN [, OFFSET ] ), $io->error,
+$io->clearerr, $io->sync, $io->flush, $io->printflush ( ARGS ),
+$io->blocking ( [ BOOL ] ), $io->untaint
+
+=item NOTE
+
+=item SEE ALSO
+
+=item BUGS
+
+=item HISTORY
+
+=back
+
+=head2 IO::Pipe - supply object methods for pipes
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [READER, WRITER] )
+
+=item METHODS
+
+reader ([ARGS]), writer ([ARGS]), handles ()
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::Poll - Object interface to system poll call
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+mask ( IO [, EVENT_MASK ] ), poll ( [ TIMEOUT ] ), events ( IO ), remove (
+IO ), handles( [ EVENT_MASK ] )
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::Seekable - supply seek based methods for I/O objects
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+$io->getpos, $io->setpos, $io->seek ( POS, WHENCE ), WHENCE=0 (SEEK_SET),
+WHENCE=1 (SEEK_CUR), WHENCE=2 (SEEK_END), $io->sysseek( POS, WHENCE ),
+$io->tell
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
+=head2 IO::Select - OO interface to the select system call
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ HANDLES ] )
+
+=item METHODS
+
+add ( HANDLES ), remove ( HANDLES ), exists ( HANDLE ), handles, can_read (
+[ TIMEOUT ] ), can_write ( [ TIMEOUT ] ), has_exception ( [ TIMEOUT ] ),
+count (), bits(), select ( READ, WRITE, EXCEPTION [, TIMEOUT ] )
+
+=item EXAMPLE
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::Socket - Object interface to socket communications
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ARGS] )
+
+=item METHODS
+
+accept([PKG]), socketpair(DOMAIN, TYPE, PROTOCOL), atmark, connected,
+protocol, sockdomain, sockopt(OPT [, VAL]), socktype, timeout([VAL])
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::Socket::INET - Object interface for AF_INET domain sockets
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ARGS] )
+
+=over 4
+
+=item METHODS
+
+sockaddr (), sockport (), sockhost (), peeraddr (), peerport (), peerhost
+()
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::Socket::UNIX - Object interface for AF_UNIX domain sockets
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ARGS] )
+
+=item METHODS
+
+hostpath(), peerpath()
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::lib::IO::Dir, IO::Dir - supply object methods for directory
+handles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+new ( [ DIRNAME ] ), open ( DIRNAME ), read (), seek ( POS ), tell (),
+rewind (), close (), tie %hash, IO::Dir, DIRNAME [, OPTIONS ]
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::lib::IO::File, IO::File - supply object methods for filehandles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( FILENAME [,MODE [,PERMS]] ), new_tmpfile
+
+=item METHODS
+
+open( FILENAME [,MODE [,PERMS]] )
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
+=head2 IO::lib::IO::Handle, IO::Handle - supply object methods for I/O
+handles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new (), new_from_fd ( FD, MODE )
+
+=item METHODS
+
+$io->fdopen ( FD, MODE ), $io->opened, $io->getline, $io->getlines,
+$io->ungetc ( ORD ), $io->write ( BUF, LEN [, OFFSET ] ), $io->error,
+$io->clearerr, $io->sync, $io->flush, $io->printflush ( ARGS ),
+$io->blocking ( [ BOOL ] ), $io->untaint
+
+=item NOTE
+
+=item SEE ALSO
+
+=item BUGS
+
+=item HISTORY
+
+=back
+
+=head2 IO::lib::IO::Pipe, IO::Pipe - supply object methods for pipes
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [READER, WRITER] )
+
+=item METHODS
+
+reader ([ARGS]), writer ([ARGS]), handles ()
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::lib::IO::Poll, IO::Poll - Object interface to system poll call
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+mask ( IO [, EVENT_MASK ] ), poll ( [ TIMEOUT ] ), events ( IO ), remove (
+IO ), handles( [ EVENT_MASK ] )
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::lib::IO::Seekable, IO::Seekable - supply seek based methods for
+I/O objects
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+$io->getpos, $io->setpos, $io->seek ( POS, WHENCE ), WHENCE=0 (SEEK_SET),
+WHENCE=1 (SEEK_CUR), WHENCE=2 (SEEK_END), $io->sysseek( POS, WHENCE ),
+$io->tell
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
+=head2 IO::lib::IO::Select, IO::Select - OO interface to the select system
+call
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ HANDLES ] )
+
+=item METHODS
+
+add ( HANDLES ), remove ( HANDLES ), exists ( HANDLE ), handles, can_read (
+[ TIMEOUT ] ), can_write ( [ TIMEOUT ] ), has_exception ( [ TIMEOUT ] ),
+count (), bits(), select ( READ, WRITE, EXCEPTION [, TIMEOUT ] )
+
+=item EXAMPLE
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::lib::IO::Socket, IO::Socket - Object interface to socket
+communications
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ARGS] )
+
+=item METHODS
+
+accept([PKG]), socketpair(DOMAIN, TYPE, PROTOCOL), atmark, connected,
+protocol, sockdomain, sockopt(OPT [, VAL]), socktype, timeout([VAL])
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::lib::IO::Socket::INET, IO::Socket::INET - Object interface for
+AF_INET domain sockets
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ARGS] )
+
+=over 4
+
+=item METHODS
+
+sockaddr (), sockport (), sockhost (), peeraddr (), peerport (), peerhost
+()
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::lib::IO::Socket::UNIX, IO::Socket::UNIX - Object interface for
+AF_UNIX domain sockets
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ARGS] )
+
+=item METHODS
+
+hostpath(), peerpath()
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IPC::Msg - SysV Msg IPC object class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+new ( KEY , FLAGS ), id, rcv ( BUF, LEN [, TYPE [, FLAGS ]] ), remove, set
+( STAT ), set ( NAME => VALUE [, NAME => VALUE ...] ), snd ( TYPE, MSG [,
+FLAGS ] ), stat
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IPC::Open2, open2 - open a process for both reading and writing
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item WARNING 
+
+=item SEE ALSO
+
+=back
+
+=head2 IPC::Open3, open3 - open a process for reading, writing, and error
+handling
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item WARNING
+
+=back
+
+=head2 IPC::Semaphore - SysV Semaphore IPC object class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+new ( KEY , NSEMS , FLAGS ), getall, getncnt ( SEM ), getpid ( SEM ),
+getval ( SEM ), getzcnt ( SEM ), id, op ( OPLIST ), remove, set ( STAT ),
+set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
+, VALUE ), stat
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IPC::SysV - SysV IPC constants
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+ftok( PATH, ID )
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 IPC::SysV::Msg, IPC::Msg - SysV Msg IPC object class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+new ( KEY , FLAGS ), id, rcv ( BUF, LEN [, TYPE [, FLAGS ]] ), remove, set
+( STAT ), set ( NAME => VALUE [, NAME => VALUE ...] ), snd ( TYPE, MSG [,
+FLAGS ] ), stat
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IPC::SysV::Semaphore, IPC::Semaphore - SysV Semaphore IPC object
+class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+new ( KEY , NSEMS , FLAGS ), getall, getncnt ( SEM ), getpid ( SEM ),
+getval ( SEM ), getzcnt ( SEM ), id, op ( OPLIST ), remove, set ( STAT ),
+set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
+, VALUE ), stat
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 List::Util - A selection of general-utility list subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+first BLOCK LIST, max LIST, maxstr LIST, min LIST, minstr LIST, reduce
+BLOCK LIST, shuffle LIST, sum LIST
+
+=item KNOWN BUGS
+
+=item SUGGESTED ADDITIONS
+
+=item COPYRIGHT
+
+=back
+
+=head2 List::Utilib::List::Util, List::Util - A selection of
+general-utility list subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+first BLOCK LIST, max LIST, maxstr LIST, min LIST, minstr LIST, reduce
+BLOCK LIST, shuffle LIST, sum LIST
+
+=item KNOWN BUGS
+
+=item SUGGESTED ADDITIONS
+
+=item COPYRIGHT
+
+=back
+
+=head2 List::Utilib::Scalar::Util, Scalar::Util - A selection of
+general-utility scalar subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+blessed EXPR, dualvar NUM, STRING, isvstring EXPR, isweak EXPR,
+looks_like_number EXPR, openhandle FH, refaddr EXPR, reftype EXPR,
+set_prototype CODEREF, PROTOTYPE, tainted EXPR, weaken REF
+
+=item KNOWN BUGS
+
+=item COPYRIGHT
+
+=item BLATANT PLUG
+
+=back
+
+=head2 Locale::Constants - constants for Locale codes
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item KNOWN BUGS AND LIMITATIONS
+
+=item SEE ALSO
+
+Locale::Language, Locale::Country, Locale::Script, Locale::Currency
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Locale::Country - ISO codes for country identification (ISO 3166)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+B<alpha-2>, B<alpha-3>, B<numeric>
+
+=item CONVERSION ROUTINES
+
+code2country( CODE, [ CODESET ] ), country2code( STRING, [ CODESET ] ),
+country_code2code( CODE, CODESET, CODESET )
+
+=item QUERY ROUTINES
+
+C<all_country_codes( [ CODESET ] )>, C<all_country_names( [ CODESET ] )>
+
+=item SEMI-PRIVATE ROUTINES
+
+=over 4
+
+=item alias_code
+
+=item rename_country
+
+=back
+
+=item EXAMPLES
+
+=item DOMAIN NAMES
+
+=item KNOWN BUGS AND LIMITATIONS
+
+=item SEE ALSO
+
+Locale::Language, Locale::Script, Locale::Currency, Locale::SubCountry, ISO
+3166-1, http://www.iso.org/iso/en/prods-services/iso3166ma/index.html,
+http://www.egt.ie/standards/iso3166/iso3166-1-en.html,
+http://www.cia.gov/cia/publications/factbook/docs/app-d-1.html
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Locale::Currency - ISO three letter codes for currency
+identification (ISO 4217)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+XTS, XXX
+
+=item CONVERSION ROUTINES
+
+code2currency(), currency2code()
+
+=item QUERY ROUTINES
+
+C<all_currency_codes()>, C<all_currency_names()>
+
+=item EXAMPLES
+
+=item KNOWN BUGS AND LIMITATIONS
+
+=item SEE ALSO
+
+Locale::Country, Locale::Script, ISO 4217:1995,
+http://www.bsi-global.com/iso4217currency
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Locale::Language - ISO two letter codes for language identification
+(ISO 639)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONVERSION ROUTINES
+
+code2language(), language2code()
+
+=item QUERY ROUTINES
+
+C<all_language_codes()>, C<all_language_names()>
+
+=item EXAMPLES
+
+=item KNOWN BUGS AND LIMITATIONS
+
+=item SEE ALSO
+
+Locale::Country, Locale::Script, Locale::Currency, ISO 639:1988 (E/F),
+http://lcweb.loc.gov/standards/iso639-2/langhome.html
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Locale::Maketext - framework for localization
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item QUICK OVERVIEW
+
+=item METHODS
+
+=over 4
+
+=item Construction Methods
+
+=item The "maketext" Method
+
+$lh->fail_with I<or> $lh->fail_with(I<PARAM>), $lh->failure_handler_auto
+
+=item Utility Methods
+
+$language->quant($number, $singular), $language->quant($number, $singular,
+$plural), $language->quant($number, $singular, $plural, $negative),
+$language->numf($number), $language->sprintf($format, @items),
+$language->language_tag(), $language->encoding()
+
+=item Language Handle Attributes and Internals
+
+=back
+
+=item LANGUAGE CLASS HIERARCHIES
+
+=item ENTRIES IN EACH LEXICON
+
+=item BRACKET NOTATION
+
+=item AUTO LEXICONS
+
+=item CONTROLLING LOOKUP FAILURE
+
+=item HOW TO USE MAKETEXT
+
+=item SEE ALSO
+
+=item COPYRIGHT AND DISCLAIMER
+
+=item AUTHOR
+
+=back
+
+=head2 Locale::Maketext::TPJ13 -- article about software localization
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Localization and Perl: gettext breaks, Maketext fixes
+
+=over 4
+
+=item A Localization Horror Story: It Could Happen To You
+
+=item The Linguistic View
+
+=item Breaking gettext
+
+=item Replacing gettext
+
+=item Buzzwords: Abstraction and Encapsulation
+
+=item Buzzword: Isomorphism
+
+=item Buzzword: Inheritance
+
+=item Buzzword: Concision
+
+=item The Devil in the Details
+
+=item The Proof in the Pudding: Localizing Web Sites
+
+=item References
+
+=back
+
+=back
+
+=head2 Locale::Script - ISO codes for script identification (ISO 15924)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+B<alpha-2>, B<alpha-3>, B<numeric>
+
+=over 4
+
+=item SPECIAL CODES
+
+=back
+
+=item CONVERSION ROUTINES
+
+code2script( CODE, [ CODESET ] ), script2code( STRING, [ CODESET ] ),
+script_code2code( CODE, CODESET, CODESET )
+
+=item QUERY ROUTINES
+
+C<all_script_codes ( [ CODESET ] )>, C<all_script_names ( [ CODESET ] )>
+
+=item EXAMPLES
+
+=item KNOWN BUGS AND LIMITATIONS
+
+=item SEE ALSO
+
+Locale::Language, Locale::Currency, Locale::Country, ISO 15924,
+http://www.evertype.com/standards/iso15924/
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 MIME::Base64 - Encoding and decoding of base64 strings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+encode_base64($str), encode_base64($str, $eol);, decode_base64($str)
+
+=item DIAGNOSTICS
+
+Premature end of base64 data, Premature padding of base64 data
+
+=item EXAMPLES
+
+=item COPYRIGHT
+
+=back
+
+=head2 MIME::Base64::QuotedPrint, MIME::QuotedPrint - Encoding and decoding
+of quoted-printable strings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+encode_qp($str), encode_qp($str, $eol), decode_qp($str);
+
+=item COPYRIGHT
+
+=back
+
+=head2 MIME::QuotedPrint - Encoding and decoding of quoted-printable
+strings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+encode_qp($str), encode_qp($str, $eol), decode_qp($str);
+
+=item COPYRIGHT
+
+=back
+
+=head2 Math::BigFloat - Arbitrary size floating point math package
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Canonical notation
+
+=item Output
+
+=item C<mantissa()>, C<exponent()> and C<parts()>
+
+=item Accuracy vs. Precision
+
+=item Rounding
+
+ffround ( +$scale ), ffround ( -$scale ), ffround ( 0 ), fround  ( +$scale
+), fround  ( -$scale ) and fround ( 0 )
+
+=back
+
+=item EXAMPLES
+
+  # not ready yet
+
+=item Autocreating constants
+
+=over 4
+
+=item Math library
+
+=item Using Math::BigInt::Lite
+
+=back
+
+=item BUGS
+
+=item CAVEAT
+
+stringify, bstr(), bdiv, Modifying and =, bpow
+
+=item LICENSE
+
+=item AUTHORS
+
+=back
+
+=head2 Math::BigInt - Arbitrary size integer math package
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+Canonical notation, Input, Output
+
+=item METHODS
+
+=over 4
+
+=item config
+
+=item accuracy
+
+=item precision
+
+=item brsft
+
+=item new
+
+=item bnan
+
+=item bzero
+
+=item binf
+
+=item bone
+
+=item is_one()/is_zero()/is_nan()/is_inf()
+
+=item is_positive()/is_negative()
+
+	$x->is_positive();		# true if >= 0
+	$x->is_negative();		# true if <  0
+
+=item is_odd()/is_even()/is_int()
+
+=item bcmp
+
+=item bacmp
+
+=item sign
+
+=item bcmp
+
+=item bneg
+
+=item babs
+
+=item bnorm
+
+=item bnot
+
+=item binc
+
+=item bdec
+
+=item badd
+
+=item bsub
+
+=item bmul
+
+=item bdiv
+
+=item bmod
+
+=item bmodinv
+
+=item bmodpow
+
+=item bpow
+
+=item blsft
+
+=item brsft
+
+=item band
+
+=item bior
+
+=item bxor
+
+=item bnot
+
+=item bsqrt
+
+=item bfac
+
+=item round
+
+=item bround
+
+=item bfround
+
+=item bfloor
+
+=item bceil
+
+=item bgcd
+
+=item blcm
+
+=item exponent
+
+=item mantissa
+
+=item parts
+
+=item copy
+
+=item as_number
+
+=item bsstr
+
+=item as_hex
+
+=item as_bin
+
+=back
+
+=item ACCURACY and PRECISION
+
+=over 4
+
+=item Precision P
+
+=item Accuracy A
+
+=item Fallback F
+
+=item Rounding mode R
+
+'trunc', 'even', 'odd', '+inf', '-inf', 'zero', Precision, Accuracy
+(significant digits), Setting/Accessing, Creating numbers, Usage,
+Precedence, Overriding globals, Local settings, Rounding, Default values,
+Remarks
+
+=back
+
+=item INTERNALS
+
+=over 4
+
+=item MATH LIBRARY
+
+=item SIGN
+
+=item mantissa(), exponent() and parts()
+
+=back
+
+=item EXAMPLES
+
+  use Math::BigInt;
+
+=item Autocreating constants
+
+=item PERFORMANCE
+
+=over 4
+
+=item Alternative math libraries
+
+=item SUBCLASSING
+
+=back
+
+=item Subclassing Math::BigInt
+
+=item UPGRADING
+
+=over 4
+
+=item Auto-upgrade
+
+bsqrt(), div(), blog()
+
+=back
+
+=item BUGS
+
+Out of Memory!, Fails to load Calc on Perl prior 5.6.0
+
+=item CAVEATS
+
+stringify, bstr(), bsstr() and 'cmp', int(), length, bdiv, infinity
+handling, Modifying and =, bpow, Overloading -$x, Mixing different object
+types, bsqrt(), brsft()
+
+=item LICENSE
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=back
+
+=head2 Math::BigInt::Calc - Pure Perl module to support Math::BigInt
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXPORT
+
+=item WRAP YOUR OWN
+
+=item LICENSE
+
+This program is free software; you may redistribute it and/or modify it
+under
+the same terms as Perl itself. 
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=back
+
+=head2 Math::BigInt::Scalar - Pure Perl module to test Math::BigInt with
+scalars
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item LICENSE
+
+This program is free software; you may redistribute it and/or modify it
+under
+the same terms as Perl itself. 
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Math::BigRat - arbitrarily big rationales
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item MATH LIBRARY
+
+=back
+
+=item METHODS
+
+=over 4
+
+=item new()
+
+=item numerator()
+
+=item denominator()
+
+	$d = $x->denominator();
+
+=item parts()
+
+=item as_number()
+
+=item bfac()
+
+=item blog()
+
+=item bround()/round()/bfround()
+
+=item is_one()
+
+=item is_zero()
+
+=item is_positive()
+
+=item is_negative()
+
+=item is_int()
+
+=item is_odd()
+
+=item is_even()
+
+=item bceil()
+
+=item bfloor()
+
+	$x->bfloor();
+
+=back
+
+=item BUGS
+
+inf handling (partial), NaN handling (partial), rounding (not implemented
+except for bceil/bfloor), $x ** $y where $y is not an integer
+
+=item LICENSE
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=back
+
+=head2 Math::Complex - complex numbers and associated mathematical
+functions
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OPERATIONS
+
+=item CREATION
+
+=item STRINGIFICATION
+
+=over 4
+
+=item CHANGED IN PERL 5.6
+
+=back
+
+=item USAGE
+
+=item ERRORS DUE TO DIVISION BY ZERO OR LOGARITHM OF ZERO
+
+=item ERRORS DUE TO INDIGESTIBLE ARGUMENTS
+
+=item BUGS
+
+=item AUTHORS
+
+=back
+
+=head2 Math::Trig - trigonometric functions
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item TRIGONOMETRIC FUNCTIONS
+
+B<tan>
+
+=over 4
+
+=item ERRORS DUE TO DIVISION BY ZERO
+
+=item SIMPLE (REAL) ARGUMENTS, COMPLEX RESULTS
+
+=back
+
+=item PLANE ANGLE CONVERSIONS
+
+=item RADIAL COORDINATE CONVERSIONS
+
+=over 4
+
+=item COORDINATE SYSTEMS
+
+=item 3-D ANGLE CONVERSIONS
+
+cartesian_to_cylindrical, cartesian_to_spherical, cylindrical_to_cartesian,
+cylindrical_to_spherical, spherical_to_cartesian, spherical_to_cylindrical
+
+=back
+
+=item GREAT CIRCLE DISTANCES AND DIRECTIONS
+
+=item EXAMPLES
+
+=over 4
+
+=item CAVEAT FOR GREAT CIRCLE FORMULAS
+
+=back
+
+=item BUGS
+
+=item AUTHORS
+
+=back
+
+=head2 Memoize - Make functions faster by trading space for time
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item DETAILS
+
+=item OPTIONS
+
+=over 4
+
+=item INSTALL
+
+=item NORMALIZER
+
+=item C<SCALAR_CACHE>, C<LIST_CACHE>
+
+C<MEMORY>, C<HASH>, C<TIE>, C<FAULT>, C<MERGE>
+
+=back
+
+=item OTHER FACILITIES
+
+=over 4
+
+=item C<unmemoize>
+
+=item C<flush_cache>
+
+=back
+
+=item CAVEATS
+
+=item PERSISTENT CACHE SUPPORT
+
+=item EXPIRATION SUPPORT
+
+=item BUGS
+
+=item MAILING LIST
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=item THANK YOU
+
+=back
+
+=head2 Memoize::AnyDBM_File - glue to provide EXISTS for AnyDBM_File for
+Storable use
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=head2 Memoize::Expire - Plug-in module for automatic expiration of
+memoized values
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item INTERFACE
+
+ TIEHASH,  EXISTS,  STORE
+
+=item ALTERNATIVES
+
+=item CAVEATS
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Memoize::ExpireFile - test for Memoize expiration semantics
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=head2 Memoize::ExpireTest - test for Memoize expiration semantics
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=head2 Memoize::NDBM_File - glue to provide EXISTS for NDBM_File for
+Storable use
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=head2 Memoize::SDBM_File - glue to provide EXISTS for SDBM_File for
+Storable use
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=head2 Memoize::Storable - store Memoized data in Storable database
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=head2 NDBM_File - Tied access to ndbm files
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
+
+=item DIAGNOSTICS
+
+=over 4
+
+=item C<ndbm store returned -1, errno 22, key "..." at ...>
+
+=back
+
+=item BUGS AND WARNINGS
+
+=back
+
+=head2 NEXT - Provide a pseudo-class NEXT that allows method redispatch
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Enforcing redispatch
+
+=item Avoiding repetitions
+
+=back
+
+=item AUTHOR
+
+=item BUGS AND IRRITATIONS
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::Cmd - Network Command class (as used by FTP, SMTP etc)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USER METHODS
+
+debug ( VALUE ), message (), code (), ok (), status (), datasend ( DATA ),
+dataend ()
+
+=item CLASS METHODS
+
+debug_print ( DIR, TEXT ), debug_text ( TEXT ), command ( CMD [, ARGS, ...
+]), unsupported (), response (), parse_response ( TEXT ), getline (),
+ungetline ( TEXT ), read_until_dot (), tied_fh ()
+
+=item EXPORTS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::Config - Local configuration data for libnet
+
+=over 4
+
+=item SYNOPSYS
+
+=item DESCRIPTION
+
+=item METHODS
+
+requires_firewall HOST
+
+=item NetConfig VALUES
+
+nntp_hosts, snpp_hosts, pop3_hosts, smtp_hosts, ph_hosts, daytime_hosts,
+time_hosts, inet_domain, ftp_firewall, ftp_firewall_type, ftp_ext_passive,
+ftp_int_pasive, local_netmask, test_hosts, test_exists
+
+=back
+
+=head2 Net::Domain - Attempt to evaluate the current host's internet name
+and domain
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+hostfqdn (), hostname (), hostdomain ()
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::FTP - FTP Client class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OVERVIEW
+
+=item CONSTRUCTOR
+
+new (HOST [,OPTIONS])
+
+=item METHODS
+
+login ([LOGIN [,PASSWORD [, ACCOUNT] ] ]), authorize ( [AUTH [, RESP]]),
+site (ARGS), type (TYPE [, ARGS]), ascii ([ARGS]) binary([ARGS])
+ebcdic([ARGS]) byte([ARGS]), rename ( OLDNAME, NEWNAME ), delete ( FILENAME
+), cwd ( [ DIR ] ), cdup (), pwd (), restart ( WHERE ), rmdir ( DIR ),
+mkdir ( DIR [, RECURSE ]), ls ( [ DIR ] ), dir ( [ DIR ] ), get (
+REMOTE_FILE [, LOCAL_FILE [, WHERE]] ), put ( LOCAL_FILE [, REMOTE_FILE ]
+), put_unique ( LOCAL_FILE [, REMOTE_FILE ] ), append ( LOCAL_FILE [,
+REMOTE_FILE ] ), unique_name (), mdtm ( FILE ), size ( FILE ), supported (
+CMD ), hash ( [FILEHANDLE_GLOB_REF],[ BYTES_PER_HASH_MARK] ), nlst ( [ DIR
+] ), list ( [ DIR ] ), retr ( FILE ), stor ( FILE ), stou ( FILE ), appe (
+FILE ), port ( [ PORT ] ), pasv (), pasv_xfer ( SRC_FILE, DEST_SERVER [,
+DEST_FILE ] ), pasv_xfer_unique ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ),
+pasv_wait ( NON_PASV_SERVER ), abort (), quit ()
+
+=over 4
+
+=item Methods for the adventurous
+
+quot (CMD [,ARGS])
+
+=back
+
+=item THE dataconn CLASS
+
+read ( BUFFER, SIZE [, TIMEOUT ] ), write ( BUFFER, SIZE [, TIMEOUT ] ),
+bytes_read (), abort (), close ()
+
+=item UNIMPLEMENTED
+
+B<ALLO>, B<SMNT>, B<HELP>, B<MODE>, B<SYST>, B<STAT>, B<STRU>, B<REIN>
+
+=item REPORTING BUGS
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=item USE EXAMPLES
+
+http://www.csh.rit.edu/~adam/Progs/autoftp-2.0.tar.gz
+
+=item CREDITS
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::NNTP - NNTP Client class
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ HOST ] [, OPTIONS ])
+
+=item METHODS
+
+article ( [ MSGID|MSGNUM ], [FH] ), body ( [ MSGID|MSGNUM ], [FH] ), head (
+[ MSGID|MSGNUM ], [FH] ), articlefh ( [ MSGID|MSGNUM ] ), bodyfh ( [
+MSGID|MSGNUM ] ), headfh ( [ MSGID|MSGNUM ] ), nntpstat ( [ MSGID|MSGNUM ]
+), group ( [ GROUP ] ), ihave ( MSGID [, MESSAGE ]), last (), date (),
+postok (), authinfo ( USER, PASS ), list (), newgroups ( SINCE [,
+DISTRIBUTIONS ]), newnews ( SINCE [, GROUPS [, DISTRIBUTIONS ]]), next (),
+post ( [ MESSAGE ] ), postfh (), slave (), quit ()
+
+=over 4
+
+=item Extension methods
+
+newsgroups ( [ PATTERN ] ), distributions (), subscriptions (),
+overview_fmt (), active_times (), active ( [ PATTERN ] ), xgtitle ( PATTERN
+), xhdr ( HEADER, MESSAGE-SPEC ), xover ( MESSAGE-SPEC ), xpath (
+MESSAGE-ID ), xpat ( HEADER, PATTERN, MESSAGE-SPEC), xrover, listgroup ( [
+GROUP ] ), reader
+
+=back
+
+=item UNSUPPORTED
+
+=item DEFINITIONS
+
+MESSAGE-SPEC, PATTERN, Examples, C<[^]-]>, C<*bdc>, C<[0-9a-zA-Z]>, C<a??d>
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::POP3 - Post Office Protocol 3 Client class (RFC1939)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXAMPLES
+
+=item CONSTRUCTOR
+
+new ( [ HOST, ] [ OPTIONS ] )
+
+=item METHODS
+
+user ( USER ), pass ( PASS ), login ( [ USER [, PASS ]] ), apop ( [ USER [,
+PASS ]] ), top ( MSGNUM [, NUMLINES ] ), list ( [ MSGNUM ] ), get ( MSGNUM
+[, FH ] ), getfh ( MSGNUM ), last (), popstat (), ping ( USER ), uidl ( [
+MSGNUM ] ), delete ( MSGNUM ), reset (), quit ()
+
+=item NOTES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::Ping - check a remote host for reachability
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Functions
+
+Net::Ping->new([$proto [, $def_timeout [, $bytes [, $device ]]]]);,
+$p->ping($host [, $timeout]);, $p->source_verify( { 0 | 1 } );,
+$p->service_check( { 0 | 1 } );, $p->tcp_service_check( { 0 | 1 } );,
+$p->hires( { 0 | 1 } );, $p->bind($local_addr);, $p->open($host);, $p->ack(
+[ $host ] );, $p->nack( $failed_ack_host );, $p->close();, pingecho($host
+[, $timeout]);
+
+=back
+
+=item NOTES
+
+=item INSTALL
+
+=item BUGS
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::SMTP - Simple Mail Transfer Protocol Client
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXAMPLES
+
+=item CONSTRUCTOR
+
+new Net::SMTP [ HOST, ] [ OPTIONS ]
+
+=item METHODS
+
+banner (), domain (), hello ( DOMAIN ), etrn ( DOMAIN ), auth ( USERNAME,
+PASSWORD ), mail ( ADDRESS [, OPTIONS] ), send ( ADDRESS ), send_or_mail (
+ADDRESS ), send_and_mail ( ADDRESS ), reset (), recipient ( ADDRESS [,
+ADDRESS [ ...]] [, OPTIONS ] ), to ( ADDRESS [, ADDRESS [...]] ), cc (
+ADDRESS [, ADDRESS [...]] ), bcc ( ADDRESS [, ADDRESS [...]] ), data ( [
+DATA ] ), expand ( ADDRESS ), verify ( ADDRESS ), help ( [ $subject ] ),
+quit ()
+
+=item ADDRESSES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::Time - time and daytime network client interface
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+inet_time ( [HOST [, PROTOCOL [, TIMEOUT]]]), inet_daytime ( [HOST [,
+PROTOCOL [, TIMEOUT]]])
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Net::hostent - by-name interface to Perl's built-in gethost*()
+functions
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXAMPLES
+
+=item NOTE
+
+=item AUTHOR
+
+=back
+
+=head2 Net::libnetFAQ, libnetFAQ - libnet Frequently Asked Questions
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Where to get this document
+
+=item How to contribute to this document
+
+=back
+
+=item Author and Copyright Information
+
+=over 4
+
+=item Disclaimer
+
+=back
+
+=item Obtaining and installing libnet
+
+=over 4
+
+=item What is libnet ?
+
+=item Which version of perl do I need ?
+
+=item What other modules do I need ?
+
+=item What machines support libnet ?
+
+=item Where can I get the latest libnet release
+
+=back
+
+=item Using Net::FTP
+
+=over 4
+
+=item How do I download files from an FTP server ?
+
+=item How do I transfer files in binary mode ?
+
+=item How can I get the size of a file on a remote FTP server ?
+
+=item How can I get the modification time of a file on a remote FTP server
+?
+
+=item How can I change the permissions of a file on a remote server ?
+
+=item Can I do a reget operation like the ftp command ?
+
+=item How do I get a directory listing from an FTP server ?
+
+=item Changing directory to "" does not fail ?
+
+=item I am behind a SOCKS firewall, but the Firewall option does not work ?
+
+=item I am behind an FTP proxy firewall, but cannot access machines outside
+?
+
+=item My ftp proxy firewall does not listen on port 21
+
+=item Is it possible to change the file permissions of a file on an FTP
+server ?
+
+=item I have seen scripts call a method message, but cannot find it
+documented ?
+
+=item Why does Net::FTP not implement mput and mget methods
+
+=back
+
+=item Using Net::SMTP
+
+=over 4
+
+=item Why can't the part of an Email address after the @ be used as the
+hostname ?
+
+=item Why does Net::SMTP not do DNS MX lookups ?
+
+=item The verify method always returns true ?
+
+=back
+
+=item Debugging scripts
+
+=over 4
+
+=item How can I debug my scripts that use Net::* modules ?
+
+=back
+
+=item AUTHOR AND COPYRIGHT
+
+=back
+
+=head2 Net::netent - by-name interface to Perl's built-in getnet*()
+functions
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXAMPLES
+
+=item NOTE
+
+=item AUTHOR
+
+=back
+
+=head2 Net::protoent - by-name interface to Perl's built-in getproto*()
+functions
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTE
+
+=item AUTHOR
+
+=back
+
+=head2 Net::servent - by-name interface to Perl's built-in getserv*()
+functions
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXAMPLES
+
+=item NOTE
+
+=item AUTHOR
+
+=back
+
+=head2 Netrc, Net::Netrc - OO interface to users netrc file
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item THE .netrc FILE
+
+machine name, default, login name, password string, account string, macdef
+name
+
+=item CONSTRUCTOR
+
+lookup ( MACHINE [, LOGIN ])
+
+=item METHODS
+
+login (), password (), account (), lpa ()
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=item COPYRIGHT
+
+=back
+
+=head2 O - Generic interface to Perl Compiler backends
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONVENTIONS
+
+=item IMPLEMENTATION
+
+=item BUGS
+
+=item AUTHOR
+
+=back
+
+=head2 ODBM_File - Tied access to odbm files
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
+
+=item DIAGNOSTICS
+
+=over 4
+
+=item C<odbm store returned -1, errno 22, key "..." at ...>
+
+=back
+
+=item BUGS AND WARNINGS
+
+=back
+
+=head2 Opcode - Disable named opcodes when compiling perl code
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTE
+
+=item WARNING
+
+=item Operator Names and Operator Lists
+
+an operator name (opname), an operator tag name (optag), a negated opname
+or optag, an operator set (opset)
+
+=item Opcode Functions
+
+opcodes, opset (OP, ...), opset_to_ops (OPSET), opset_to_hex (OPSET),
+full_opset, empty_opset, invert_opset (OPSET), verify_opset (OPSET, ...),
+define_optag (OPTAG, OPSET), opmask_add (OPSET), opmask, opdesc (OP, ...),
+opdump (PAT)
+
+=item Manipulating Opsets
+
+=item TO DO (maybe)
+
+=back
+
+=over 4
+
+=item Predefined Opcode Tags
+
+:base_core, :base_mem, :base_loop, :base_io, :base_orig, :base_math,
+:base_thread, :default, :filesys_read, :sys_db, :browse, :filesys_open,
+:filesys_write, :subprocess, :ownprocess, :others, :still_to_be_decided,
+:dangerous
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=back
+
+=head2 Opcode::Safe, Safe - Compile and execute code in restricted
+compartments
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+a new namespace, an operator mask
+
+=item WARNING
+
+=over 4
+
+=item RECENT CHANGES
+
+=item Methods in class Safe
+
+permit (OP, ...), permit_only (OP, ...), deny (OP, ...), deny_only (OP,
+...), trap (OP, ...), untrap (OP, ...), share (NAME, ...), share_from
+(PACKAGE, ARRAYREF), varglob (VARNAME), reval (STRING), rdo (FILENAME),
+root (NAMESPACE), mask (MASK)
+
+=item Some Safety Issues
+
+Memory, CPU, Snooping, Signals, State Changes
+
+=item AUTHOR
+
+=back
+
+=back
+
+=head2 Opcode::ops, ops - Perl pragma to restrict unsafe operations when
+compiling
+
+=over 4
+
+=item SYNOPSIS	
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
+=head2 POSIX - Perl interface to IEEE Std 1003.1
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTE
+
+=item CAVEATS 
+
+=item FUNCTIONS
+
+_exit, abort, abs, access, acos, alarm, asctime, asin, assert, atan, atan2,
+atexit, atof, atoi, atol, bsearch, calloc, ceil, chdir, chmod, chown,
+clearerr, clock, close, closedir, cos, cosh, creat, ctermid, ctime,
+cuserid, difftime, div, dup, dup2, errno, execl, execle, execlp, execv,
+execve, execvp, exit, exp, fabs, fclose, fcntl, fdopen, feof, ferror,
+fflush, fgetc, fgetpos, fgets, fileno, floor, fmod, fopen, fork, fpathconf,
+fprintf, fputc, fputs, fread, free, freopen, frexp, fscanf, fseek, fsetpos,
+fstat, fsync, ftell, fwrite, getc, getchar, getcwd, getegid, getenv,
+geteuid, getgid, getgrgid, getgrnam, getgroups, getlogin, getpgrp, getpid,
+getppid, getpwnam, getpwuid, gets, getuid, gmtime, isalnum, isalpha,
+isatty, iscntrl, isdigit, isgraph, islower, isprint, ispunct, isspace,
+isupper, isxdigit, kill, labs, ldexp, ldiv, link, localeconv, localtime,
+log, log10, longjmp, lseek, malloc, mblen, mbstowcs, mbtowc, memchr,
+memcmp, memcpy, memmove, memset, mkdir, mkfifo, mktime, modf, nice,
+offsetof, open, opendir, pathconf, pause, perror, pipe, pow, printf, putc,
+putchar, puts, qsort, raise, rand, read, readdir, realloc, remove, rename,
+rewind, rewinddir, rmdir, scanf, setgid, setjmp, setlocale, setpgid,
+setsid, setuid, sigaction, siglongjmp, sigpending, sigprocmask, sigsetjmp,
+sigsuspend, sin, sinh, sleep, sprintf, sqrt, srand, sscanf, stat, strcat,
+strchr, strcmp, strcoll, strcpy, strcspn, strerror, strftime, strlen,
+strncat, strncmp, strncpy, strpbrk, strrchr, strspn, strstr, strtod,
+strtok, strtol, strtoul, strxfrm, sysconf, system, tan, tanh, tcdrain,
+tcflow, tcflush, tcgetpgrp, tcsendbreak, tcsetpgrp, time, times, tmpfile,
+tmpnam, tolower, toupper, ttyname, tzname, tzset, umask, uname, ungetc,
+unlink, utime, vfprintf, vprintf, vsprintf, wait, waitpid, wcstombs,
+wctomb, write
+
+=item CLASSES
+
+=over 4
+
+=item POSIX::SigAction
+
+new, handler, mask, flags
+
+=item POSIX::SigSet
+
+new, addset, delset, emptyset, fillset, ismember
+
+=item POSIX::Termios
+
+new, getattr, getcc, getcflag, getiflag, getispeed, getlflag, getoflag,
+getospeed, setattr, setcc, setcflag, setiflag, setispeed, setlflag,
+setoflag, setospeed, Baud rate values, Terminal interface values, c_cc
+field values, c_cflag field values, c_iflag field values, c_lflag field
+values, c_oflag field values
+
+=back
+
+=item PATHNAME CONSTANTS
+
+Constants
+
+=item POSIX CONSTANTS
+
+Constants
+
+=item SYSTEM CONFIGURATION
+
+Constants
+
+=item ERRNO
+
+Constants
+
+=item FCNTL
+
+Constants
+
+=item FLOAT
+
+Constants
+
+=item LIMITS
+
+Constants
+
+=item LOCALE
+
+Constants
+
+=item MATH
+
+Constants
+
+=item SIGNAL
+
+Constants
+
+=item STAT
+
+Constants, Macros
+
+=item STDLIB
+
+Constants
+
+=item STDIO
+
+Constants
+
+=item TIME
+
+Constants
+
+=item UNISTD
+
+Constants
+
+=item WAIT
+
+Constants, WNOHANG, WUNTRACED, Macros, WIFEXITED, WEXITSTATUS, WIFSIGNALED,
+WTERMSIG, WIFSTOPPED, WSTOPSIG
+
+=back
+
+=head2 PerlIO - On demand loader for PerlIO layers and root of PerlIO::*
+name space
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+unix, stdio, perlio, crlf, utf8, bytes, raw, pop
+
+=over 4
+
+=item Custom Layers
+
+:encoding, :via
+
+=item Alternatives to raw
+
+=item Defaults and how to override them
+
+=item Querying the layers of filehandle
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 PerlIO::encoding - encoding layer
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
+=head2 PerlIO::scalar - support module for in-memory IO.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 PerlIO::via - Helper class for PerlIO layers implemented in perl
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXPECTED METHODS
+
+$class->PUSHED([$mode[,$fh]]), $obj->POPPED([$fh]),
+$obj->OPEN($path,$mode[,$fh]), $obj->BINMODE([,$fh]),
+$obj->FDOPEN($fd[,$fh]), $obj->SYSOPEN($path,$imode,$perm,[,$fh]),
+$obj->FILENO($fh), $obj->READ($buffer,$len,$fh), $obj->WRITE($buffer,$fh),
+$obj->FILL($fh), $obj->CLOSE($fh), $obj->SEEK($posn,$whence,$fh),
+$obj->TELL($fh), $obj->UNREAD($buffer,$fh), $obj->FLUSH($fh),
+$obj->SETLINEBUF($fh), $obj->CLEARERR($fh), $obj->ERROR($fh),
+$obj->EOF($fh)
+
+=item EXAMPLES
+
+=over 4
+
+=item Example - a Hexadecimal Handle
+
+=back
+
+=back
+
+=head2 PerlIO::via::QuotedPrint - PerlIO layer for quoted-printable strings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item COPYRIGHT
+
+=back
+
+=head2 Pod::Checker, podchecker() - check pod documents for syntax errors
+
+=over 4
+
+=item SYNOPSIS
+
+=item OPTIONS/ARGUMENTS
+
+=over 4
+
+=item podchecker()
+
+B<-warnings> =E<gt> I<val>
+
+=back
+
+=item DESCRIPTION
+
+=item DIAGNOSTICS
+
+=over 4
+
+=item Errors
+
+empty =headn, =over on line I<N> without closing =back, =item without
+previous =over, =back without previous =over, No argument for =begin, =end
+without =begin, Nested =begin's, =for without formatter specification,
+unresolved internal link I<NAME>, Unknown command "I<CMD>", Unknown
+interior-sequence "I<SEQ>", nested commands
+I<CMD>E<lt>...I<CMD>E<lt>...E<gt>...E<gt>, garbled entity I<STRING>, Entity
+number out of range, malformed link LE<lt>E<gt>, nonempty ZE<lt>E<gt>,
+empty XE<lt>E<gt>, Spurious text after =pod / =cut, Spurious character(s)
+after =back
+
+=item Warnings
+
+multiple occurrence of link target I<name>, line containing nothing but
+whitespace in paragraph, file does not start with =head, previous =item has
+no contents, preceding non-item paragraph(s), =item type mismatch (I<one>
+vs. I<two>), I<N> unescaped C<E<lt>E<gt>> in paragraph, Unknown entity, No
+items in =over, No argument for =item, empty section in previous paragraph,
+Verbatim paragraph in NAME section, =headI<n> without preceding higher
+level
+
+=item Hyperlinks
+
+ignoring leading/trailing whitespace in link, (section) in '$page'
+deprecated, alternative text/node '%s' contains non-escaped | or /
+
+=back
+
+=item RETURN VALUE
+
+=item EXAMPLES
+
+=item INTERFACE
+
+=back
+
+C<Pod::Checker-E<gt>new( %options )>
+
+C<$checker-E<gt>poderror( @args )>, C<$checker-E<gt>poderror( {%opts},
+@args )>
+
+C<$checker-E<gt>num_errors()>
+
+C<$checker-E<gt>num_warnings()>
+
+C<$checker-E<gt>name()>
+
+C<$checker-E<gt>node()>
+
+C<$checker-E<gt>idx()>
+
+C<$checker-E<gt>hyperlink()>
+
+=over 4
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::Find - find POD documents in directory trees
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=over 4
+
+=item C<pod_find( { %opts } , @directories )>
+
+C<-verbose =E<gt> 1>, C<-perl =E<gt> 1>, C<-script =E<gt> 1>, C<-inc =E<gt>
+1>
+
+=back
+
+=over 4
+
+=item C<simplify_name( $str )>
+
+=back
+
+=over 4
+
+=item C<pod_where( { %opts }, $pod )>
+
+C<-inc =E<gt> 1>, C<-dirs =E<gt> [ $dir1, $dir2, ... ]>, C<-verbose =E<gt>
+1>
+
+=back
+
+=over 4
+
+=item C<contains_pod( $file , $verbose )>
+
+=back
+
+=over 4
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Pod::Html - module to convert pod files to HTML
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item ARGUMENTS
+
+backlink, cachedir, css, flush, header, help, htmldir, htmlroot, index,
+infile, libpods, netscape, outfile, podpath, podroot, quiet, recurse,
+title, verbose
+
+=item EXAMPLE
+
+=item ENVIRONMENT
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=item COPYRIGHT
+
+=back
+
+=head2 Pod::InputObjects - objects representing POD input paragraphs,
+commands, etc.
+
+=over 4
+
+=item SYNOPSIS
+
+=item REQUIRES
+
+=item EXPORTS
+
+=item DESCRIPTION
+
+package B<Pod::InputSource>, package B<Pod::Paragraph>, package
+B<Pod::InteriorSequence>, package B<Pod::ParseTree>
+
+=back
+
+=over 4
+
+=item B<Pod::InputSource>
+
+=back
+
+=over 4
+
+=item B<new()>
+
+=back
+
+=over 4
+
+=item B<name()>
+
+=back
+
+=over 4
+
+=item B<handle()>
+
+=back
+
+=over 4
+
+=item B<was_cutting()>
+
+=back
+
+=over 4
+
+=item B<Pod::Paragraph>
+
+=back
+
+=over 4
+
+=item Pod::Paragraph-E<gt>B<new()>
+
+=back
+
+=over 4
+
+=item $pod_para-E<gt>B<cmd_name()>
+
+=back
+
+=over 4
+
+=item $pod_para-E<gt>B<text()>
+
+=back
+
+=over 4
+
+=item $pod_para-E<gt>B<raw_text()>
+
+=back
+
+=over 4
+
+=item $pod_para-E<gt>B<cmd_prefix()>
+
+=back
+
+=over 4
+
+=item $pod_para-E<gt>B<cmd_separator()>
+
+=back
+
+=over 4
+
+=item $pod_para-E<gt>B<parse_tree()>
+
+=back
+
+=over 4
+
+=item $pod_para-E<gt>B<file_line()>
+
+=back
+
+=over 4
+
+=item B<Pod::InteriorSequence>
+
+=back
+
+=over 4
+
+=item Pod::InteriorSequence-E<gt>B<new()>
+
+=back
+
+=over 4
+
+=item $pod_seq-E<gt>B<cmd_name()>
+
+=back
+
+=over 4
+
+=item $pod_seq-E<gt>B<prepend()>
+
+=back
+
+=over 4
+
+=item $pod_seq-E<gt>B<append()>
+
+=back
+
+=over 4
+
+=item $pod_seq-E<gt>B<nested()>
+
+=back
+
+=over 4
+
+=item $pod_seq-E<gt>B<raw_text()>
+
+=back
+
+=over 4
+
+=item $pod_seq-E<gt>B<left_delimiter()>
+
+=back
+
+=over 4
+
+=item $pod_seq-E<gt>B<right_delimiter()>
+
+=back
+
+=over 4
+
+=item $pod_seq-E<gt>B<parse_tree()>
+
+=back
+
+=over 4
+
+=item $pod_seq-E<gt>B<file_line()>
+
+=back
+
+=over 4
+
+=item Pod::InteriorSequence::B<DESTROY()>
+
+=back
+
+=over 4
+
+=item B<Pod::ParseTree>
+
+=back
+
+=over 4
+
+=item Pod::ParseTree-E<gt>B<new()>
+
+=back
+
+=over 4
+
+=item $ptree-E<gt>B<top()>
+
+=back
+
+=over 4
+
+=item $ptree-E<gt>B<children()>
+
+=back
+
+=over 4
+
+=item $ptree-E<gt>B<prepend()>
+
+=back
+
+=over 4
+
+=item $ptree-E<gt>B<append()>
+
+=back
+
+=over 4
+
+=item $ptree-E<gt>B<raw_text()>
+
+=back
+
+=over 4
+
+=item Pod::ParseTree::B<DESTROY()>
+
+=back
+
+=over 4
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::LaTeX - Convert Pod data to formatted Latex
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=over 4
+
+=item OBJECT METHODS
+
+C<initialize>
+
+=back
+
+=over 4
+
+=item Data Accessors
+
+B<AddPreamble>
+
+=back
+
+B<AddPostamble>
+
+B<Head1Level>
+
+B<Label>
+
+B<LevelNoNum>
+
+B<MakeIndex>
+
+B<ReplaceNAMEwithSection>
+
+B<StartWithNewPage>
+
+B<TableOfContents>
+
+B<UniqueLabels>
+
+B<UserPreamble>
+
+B<UserPostamble>
+
+B<Lists>
+
+=over 4
+
+=item Subclassed methods
+
+=back
+
+B<begin_pod>
+
+B<end_pod>
+
+B<command>
+
+B<verbatim>
+
+B<textblock>
+
+B<interior_sequence>
+
+=over 4
+
+=item List Methods
+
+B<begin_list>
+
+=back
+
+B<end_list>
+
+B<add_item>
+
+=over 4
+
+=item Methods for headings
+
+B<head>
+
+=back
+
+=over 4
+
+=item Internal methods
+
+B<_output>
+
+=back
+
+B<_replace_special_chars>
+
+B<_replace_special_chars_late>
+
+B<_create_label>
+
+B<_create_index>
+
+B<_clean_latex_commands>
+
+B<_split_delimited>
+
+=over 4
+
+=item NOTES
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=item REVISION
+
+=back
+
+=head2 Pod::Man - Convert POD data to formatted *roff input
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+center, date, fixed, fixedbold, fixeditalic, fixedbolditalic, name, quotes,
+release, section
+
+=item DIAGNOSTICS
+
+roff font should be 1 or 2 chars, not "%s", Invalid link %s, Invalid quote
+specification "%s", %s:%d: Unknown command paragraph "%s", %s:%d: Unknown
+escape EE<lt>%sE<gt>, %s:%d: Unknown formatting code %s, %s:%d: Unmatched
+=back
+
+=item BUGS
+
+=item CAVEATS
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Pod::ParseLink - Parse an LE<lt>E<gt> formatting code in POD text
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Pod::ParseUtils - helpers for POD parsing and conversion
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=over 4
+
+=item Pod::List
+
+Pod::List-E<gt>new()
+
+=back
+
+$list-E<gt>file()
+
+$list-E<gt>start()
+
+$list-E<gt>indent()
+
+$list-E<gt>type()
+
+$list-E<gt>rx()
+
+$list-E<gt>item()
+
+$list-E<gt>parent()
+
+$list-E<gt>tag()
+
+=over 4
+
+=item Pod::Hyperlink
+
+Pod::Hyperlink-E<gt>new()
+
+=back
+
+$link-E<gt>parse($string)
+
+$link-E<gt>markup($string)
+
+$link-E<gt>text()
+
+$link-E<gt>warning()
+
+$link-E<gt>file(), $link-E<gt>line()
+
+$link-E<gt>page()
+
+$link-E<gt>node()
+
+$link-E<gt>alttext()
+
+$link-E<gt>type()
+
+$link-E<gt>link()
+
+=over 4
+
+=item Pod::Cache
+
+Pod::Cache-E<gt>new()
+
+=back
+
+$cache-E<gt>item()
+
+$cache-E<gt>find_page($name)
+
+=over 4
+
+=item Pod::Cache::Item
+
+Pod::Cache::Item-E<gt>new()
+
+=back
+
+$cacheitem-E<gt>page()
+
+$cacheitem-E<gt>description()
+
+$cacheitem-E<gt>path()
+
+$cacheitem-E<gt>file()
+
+$cacheitem-E<gt>nodes()
+
+$cacheitem-E<gt>find_node($name)
+
+$cacheitem-E<gt>idx()
+
+=over 4
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Pod::Parser - base class for creating POD filters and translators
+
+=over 4
+
+=item SYNOPSIS
+
+=item REQUIRES
+
+=item EXPORTS
+
+=item DESCRIPTION
+
+=item QUICK OVERVIEW
+
+=item PARSING OPTIONS
+
+B<-want_nonPODs> (default: unset), B<-process_cut_cmd> (default: unset),
+B<-warnings> (default: unset)
+
+=back
+
+=over 4
+
+=item RECOMMENDED SUBROUTINE/METHOD OVERRIDES
+
+=back
+
+=over 4
+
+=item B<command()>
+
+C<$cmd>, C<$text>, C<$line_num>, C<$pod_para>
+
+=back
+
+=over 4
+
+=item B<verbatim()>
+
+C<$text>, C<$line_num>, C<$pod_para>
+
+=back
+
+=over 4
+
+=item B<textblock()>
+
+C<$text>, C<$line_num>, C<$pod_para>
+
+=back
+
+=over 4
+
+=item B<interior_sequence()>
+
+=back
+
+=over 4
+
+=item OPTIONAL SUBROUTINE/METHOD OVERRIDES
+
+=back
+
+=over 4
+
+=item B<new()>
+
+=back
+
+=over 4
+
+=item B<initialize()>
+
+=back
+
+=over 4
+
+=item B<begin_pod()>
+
+=back
+
+=over 4
+
+=item B<begin_input()>
+
+=back
+
+=over 4
+
+=item B<end_input()>
+
+=back
+
+=over 4
+
+=item B<end_pod()>
+
+=back
+
+=over 4
+
+=item B<preprocess_line()>
+
+=back
+
+=over 4
+
+=item B<preprocess_paragraph()>
+
+=back
+
+=over 4
+
+=item METHODS FOR PARSING AND PROCESSING
+
+=back
+
+=over 4
+
+=item B<parse_text()>
+
+B<-expand_seq> =E<gt> I<code-ref>|I<method-name>, B<-expand_text> =E<gt>
+I<code-ref>|I<method-name>, B<-expand_ptree> =E<gt>
+I<code-ref>|I<method-name>
+
+=back
+
+=over 4
+
+=item B<interpolate()>
+
+=back
+
+=over 4
+
+=item B<parse_paragraph()>
+
+=back
+
+=over 4
+
+=item B<parse_from_filehandle()>
+
+=back
+
+=over 4
+
+=item B<parse_from_file()>
+
+=back
+
+=over 4
+
+=item ACCESSOR METHODS
+
+=back
+
+=over 4
+
+=item B<errorsub()>
+
+=back
+
+=over 4
+
+=item B<cutting()>
+
+=back
+
+=over 4
+
+=item B<parseopts()>
+
+=back
+
+=over 4
+
+=item B<output_file()>
+
+=back
+
+=over 4
+
+=item B<output_handle()>
+
+=back
+
+=over 4
+
+=item B<input_file()>
+
+=back
+
+=over 4
+
+=item B<input_handle()>
+
+=back
+
+=over 4
+
+=item B<input_streams()>
+
+=back
+
+=over 4
+
+=item B<top_stream()>
+
+=back
+
+=over 4
+
+=item PRIVATE METHODS AND DATA
+
+=back
+
+=over 4
+
+=item B<_push_input_stream()>
+
+=back
+
+=over 4
+
+=item B<_pop_input_stream()>
+
+=back
+
+=over 4
+
+=item TREE-BASED PARSING
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::Perldoc::ToChecker - let Perldoc check Pod for errors
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item COPYRIGHT AND DISCLAIMERS
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::Perldoc::ToMan - let Perldoc render Pod as man pages
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEAT
+
+=item SEE ALSO
+
+=item COPYRIGHT AND DISCLAIMERS
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::Perldoc::ToNroff - let Perldoc convert Pod to nroff
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEAT
+
+=item SEE ALSO
+
+=item COPYRIGHT AND DISCLAIMERS
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::Perldoc::ToPod - let Perldoc render Pod as ... Pod!
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item COPYRIGHT AND DISCLAIMERS
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::Perldoc::ToRtf - let Perldoc render Pod as RTF
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item COPYRIGHT AND DISCLAIMERS
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::Perldoc::ToText - let Perldoc render Pod as plaintext
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEAT
+
+=item SEE ALSO
+
+=item COPYRIGHT AND DISCLAIMERS
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::Perldoc::ToTk - let Perldoc use Tk::Pod to render Pod
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::Perldoc::ToXml - let Perldoc render Pod as XML
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item COPYRIGHT AND DISCLAIMERS
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::PlainText - Convert POD data to formatted ASCII text
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+alt, indent, loose, sentence, width
+
+=item DIAGNOSTICS
+
+Bizarre space in item, Can't open %s for reading: %s, Unknown escape: %s,
+Unknown sequence: %s, Unmatched =back
+
+=item RESTRICTIONS
+
+=item NOTES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::Plainer - Perl extension for converting Pod to old style Pod.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item EXPORT
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Pod::Select, podselect() - extract selected sections of POD from
+input
+
+=over 4
+
+=item SYNOPSIS
+
+=item REQUIRES
+
+=item EXPORTS
+
+=item DESCRIPTION
+
+=item SECTION SPECIFICATIONS
+
+=item RANGE SPECIFICATIONS
+
+=back
+
+=over 4
+
+=item OBJECT METHODS
+
+=back
+
+=over 4
+
+=item B<curr_headings()>
+
+=back
+
+=over 4
+
+=item B<select()>
+
+=back
+
+=over 4
+
+=item B<add_selection()>
+
+=back
+
+=over 4
+
+=item B<clear_selections()>
+
+=back
+
+=over 4
+
+=item B<match_section()>
+
+=back
+
+=over 4
+
+=item B<is_selected()>
+
+=back
+
+=over 4
+
+=item EXPORTED FUNCTIONS
+
+=back
+
+=over 4
+
+=item B<podselect()>
+
+B<-output>, B<-sections>, B<-ranges>
+
+=back
+
+=over 4
+
+=item PRIVATE METHODS AND DATA
+
+=back
+
+=over 4
+
+=item B<_compile_section_spec()>
+
+=back
+
+=over 4
+
+=item $self->{_SECTION_HEADINGS}
+
+=back
+
+=over 4
+
+=item $self->{_SELECTED_SECTIONS}
+
+=back
+
+=over 4
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::Text - Convert POD data to formatted ASCII text
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+alt, code, indent, loose, margin, quotes, sentence, width
+
+=item DIAGNOSTICS
+
+Bizarre space in item, Item called without tag, Can't open %s for reading:
+%s, Invalid quote specification "%s", %s:%d: Unknown command paragraph: %s,
+%s:%d: Unknown escape: %s, %s:%d: Unknown formatting code: %s, %s:%d:
+Unmatched =back
+
+=item RESTRICTIONS
+
+=item NOTES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Pod::Text::Color - Convert POD data to formatted color ASCII text
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUGS
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Pod::Text::Overstrike - Convert POD data to formatted overstrike
+text
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUGS
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Pod::Text::Termcap - Convert POD data to ASCII text with format
+escapes
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Pod::Usage, pod2usage() - print a usage message from embedded pod
+documentation
+
+=over 4
+
+=item SYNOPSIS
+
+=item ARGUMENTS
+
+C<-message>, C<-msg>, C<-exitval>, C<-verbose>, C<-output>, C<-input>,
+C<-pathlist>
+
+=item DESCRIPTION
+
+=item EXAMPLES
+
+=over 4
+
+=item Recommended Use
+
+=back
+
+=item CAVEATS
+
+=item AUTHOR
+
+=item ACKNOWLEDGEMENTS
+
+=back
+
+=head2 SDBM_File - Tied access to sdbm files
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
+
+=item DIAGNOSTICS
+
+=over 4
+
+=item C<sdbm store returned -1, errno 22, key "..." at ...>
+
+=back
+
+=item BUGS AND WARNINGS
+
+=back
+
+=head2 Safe - Compile and execute code in restricted compartments
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+a new namespace, an operator mask
+
+=item WARNING
+
+=over 4
+
+=item RECENT CHANGES
+
+=item Methods in class Safe
+
+permit (OP, ...), permit_only (OP, ...), deny (OP, ...), deny_only (OP,
+...), trap (OP, ...), untrap (OP, ...), share (NAME, ...), share_from
+(PACKAGE, ARRAYREF), varglob (VARNAME), reval (STRING), rdo (FILENAME),
+root (NAMESPACE), mask (MASK)
+
+=item Some Safety Issues
+
+Memory, CPU, Snooping, Signals, State Changes
+
+=item AUTHOR
+
+=back
+
+=back
+
+=head2 Scalar::Util - A selection of general-utility scalar subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+blessed EXPR, dualvar NUM, STRING, isvstring EXPR, isweak EXPR,
+looks_like_number EXPR, openhandle FH, refaddr EXPR, reftype EXPR,
+set_prototype CODEREF, PROTOTYPE, tainted EXPR, weaken REF
+
+=item KNOWN BUGS
+
+=item COPYRIGHT
+
+=item BLATANT PLUG
+
+=back
+
+=head2 Search::Dict, look - search for key in dictionary file
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 SelectSaver - save and restore selected file handle
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 SelfLoader - load functions only on demand
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item The __DATA__ token
+
+=item SelfLoader autoloading
+
+=item Autoloading and package lexicals
+
+=item SelfLoader and AutoLoader
+
+=item __DATA__, __END__, and the FOOBAR::DATA filehandle.
+
+=item Classes and inherited methods.
+
+=back
+
+=item Multiple packages and fully qualified subroutine names
+
+=back
+
+=head2 Shell - run shell commands transparently within perl
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item OBJECT ORIENTED SYNTAX
+
+=back
+
+=item AUTHOR
+
+=back
+
+=head2 Socket, sockaddr_in, sockaddr_un, inet_aton, inet_ntoa - load the C
+socket.h defines and structure manipulators 
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+inet_aton HOSTNAME, inet_ntoa IP_ADDRESS, INADDR_ANY, INADDR_BROADCAST,
+INADDR_LOOPBACK, INADDR_NONE, sockaddr_family SOCKADDR, sockaddr_in PORT,
+ADDRESS, sockaddr_in SOCKADDR_IN, pack_sockaddr_in PORT, IP_ADDRESS,
+unpack_sockaddr_in SOCKADDR_IN, sockaddr_un PATHNAME, sockaddr_un
+SOCKADDR_UN, pack_sockaddr_un PATH, unpack_sockaddr_un SOCKADDR_UN
+
+=back
+
+=head2 Storable - persistence for Perl data structures
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item MEMORY STORE
+
+=item ADVISORY LOCKING
+
+=item SPEED
+
+=item CANONICAL REPRESENTATION
+
+=item CODE REFERENCES
+
+=item FORWARD COMPATIBILITY
+
+utf8 data, restricted hashes, files from future versions of Storable
+
+=item ERROR REPORTING
+
+=item WIZARDS ONLY
+
+=over 4
+
+=item Hooks
+
+C<STORABLE_freeze> I<obj>, I<cloning>, C<STORABLE_thaw> I<obj>, I<cloning>,
+I<serialized>, ..
+
+=item Predicates
+
+C<Storable::last_op_in_netorder>, C<Storable::is_storing>,
+C<Storable::is_retrieving>
+
+=item Recursion
+
+=item Deep Cloning
+
+=back
+
+=item Storable magic
+
+=item EXAMPLES
+
+=item WARNING
+
+=item BUGS
+
+=over 4
+
+=item 64 bit data in perl 5.6.0 and 5.6.1
+
+=back
+
+=item CREDITS
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Switch - A switch statement for Perl
+
+=over 4
+
+=item VERSION
+
+=item SYNOPSIS
+
+=item BACKGROUND
+
+=item DESCRIPTION
+
+=over 4
+
+=item Allowing fall-through
+
+=item Automating fall-through
+
+=item Alternative syntax
+
+=item Higher-order Operations
+
+=back
+
+=item DEPENDENCIES
+
+=item AUTHOR
+
+=item BUGS
+
+=item LIMITATION
+
+=item COPYRIGHT
+
+=back
+
+=head2 Symbol - manipulate Perl symbols and their names
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 Sys::Hostname - Try every conceivable way to get hostname
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=back
+
+=head2 Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog - Perl
+interface to the UNIX syslog(3) calls
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+openlog $ident, $logopt, $facility, syslog $priority, $format, @args,
+setlogmask $mask_priority, setlogsock $sock_type [$stream_location] (added
+in 5.004_02), closelog
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 Syslog::Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog -
+Perl interface to the UNIX syslog(3) calls
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+openlog $ident, $logopt, $facility, syslog $priority, $format, @args,
+setlogmask $mask_priority, setlogsock $sock_type [$stream_location] (added
+in 5.004_02), closelog
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 Term::ANSIColor - Color screen output using ANSI escape sequences
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item DIAGNOSTICS
+
+Bad escape sequence %s, Bareword "%s" not allowed while "strict subs" in
+use, Invalid attribute name %s, Name "%s" used only once: possible typo, No
+comma allowed after filehandle, No name for escape sequence %s
+
+=item ENVIRONMENT
+
+ANSI_COLORS_DISABLED
+
+=item RESTRICTIONS
+
+=item NOTES
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Term::Cap - Perl termcap interface
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item METHODS
+
+=back
+
+=back
+
+B<Tgetent>, OSPEED, TERM
+
+B<Tpad>, B<$string>, B<$cnt>, B<$FH>
+
+B<Tputs>, B<$cap>, B<$cnt>, B<$FH>
+
+B<Tgoto>, B<$cap>, B<$col>, B<$row>, B<$FH>
+
+B<Trequire>
+
+=over 4
+
+=item EXAMPLES
+
+=item COPYRIGHT AND LICENSE
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Term::Complete - Perl word completion module
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+E<lt>tabE<gt>, ^D, ^U, E<lt>delE<gt>, E<lt>bsE<gt>
+
+=item DIAGNOSTICS
+
+=item BUGS
+
+=item AUTHOR
+
+=back
+
+=head2 Term::ReadLine - Perl interface to various C<readline> packages.
+If no real package is found, substitutes stubs instead of basic functions.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Minimal set of supported functions
+
+C<ReadLine>, C<new>, C<readline>, C<addhistory>, C<IN>, C<OUT>, C<MinLine>,
+C<findConsole>, Attribs, C<Features>
+
+=item Additional supported functions
+
+C<tkRunning>, C<ornaments>, C<newTTY>
+
+=item EXPORTS
+
+=item ENVIRONMENT
+
+=item CAVEATS
+
+=back
+
+=head2 Test - provides a simple framework for writing test scripts
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item QUICK START GUIDE
+
+=over 4
+
+=item Functions
+
+C<plan(...)>, C<tests =E<gt> I<number>>, C<todo =E<gt> [I<1,5,14>]>,
+C<onfail =E<gt> sub { ... }>, C<onfail =E<gt> \&some_sub>
+
+=back
+
+=back
+
+B<_to_value>
+
+C<ok(...)>
+
+C<skip(I<skip_if_true>, I<args...>)>
+
+=over 4
+
+=item TEST TYPES
+
+NORMAL TESTS, SKIPPED TESTS, TODO TESTS
+
+=item ONFAIL
+
+=item BUGS and CAVEATS
+
+=item NOTE
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 Test::Builder - Backend for building test libraries
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Construction
+
+B<new>
+
+=back
+
+=back
+
+=over 4
+
+=item Setting up tests
+
+B<exported_to>
+
+=back
+
+B<plan>
+
+B<expected_tests>
+
+B<no_plan>
+
+B<has_plan>
+
+B<skip_all>
+
+=over 4
+
+=item Running tests
+
+B<ok>
+
+=back
+
+B<is_eq>, B<is_num>
+
+B<isnt_eq>, B<isnt_num>
+
+B<like>, B<unlike>
+
+B<maybe_regex>
+
+B<cmp_ok>
+
+B<BAILOUT>
+
+B<skip>
+
+B<todo_skip>
+
+B<skip_rest>
+
+=over 4
+
+=item Test style
+
+B<level>
+
+=back
+
+B<use_numbers>
+
+B<no_header>, B<no_ending>
+
+=over 4
+
+=item Output
+
+B<diag>
+
+=back
+
+B<_print>
+
+B<output>, B<failure_output>, B<todo_output>
+
+=over 4
+
+=item Test Status and Info
+
+B<current_test>
+
+=back
+
+B<summary>
+
+B<details>
+
+B<todo>
+
+B<caller>
+
+B<_sanity_check>
+
+B<_whoa>
+
+B<_my_exit>
+
+=over 4
+
+=item THREADS
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 Test::Harness - run perl standard test scripts with statistics
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item The test script output
+
+B<'1..M'>, B<'ok', 'not ok'.  Ok?>, B<test numbers>, B<test names>,
+B<Skipping tests>, B<Todo tests>, B<Bail out!>, B<Comments>, B<Anything
+else>
+
+=item Taint mode
+
+=item Configuration variables.
+
+B<$Test::Harness::verbose>, B<$Test::Harness::switches>
+
+=item Failure
+
+B<Failed Test>, B<Stat>, B<Wstat>, B<Total>, B<Fail>, B<Failed>, B<List of
+Failed>
+
+=item Functions
+
+B<runtests>
+
+=back
+
+=back
+
+B<_all_ok>
+
+B<_globdir>
+
+B<_run_all_tests>
+
+B<_mk_leader>
+
+B<_leader_width>
+
+=over 4
+
+=item EXPORT
+
+=item DIAGNOSTICS
+
+C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<FAILED tests
+%s\n\tFailed %d/%d tests, %.2f%% okay.>, C<Test returned status %d (wstat
+%d)>, C<Failed 1 test, %.2f%% okay. %s>, C<Failed %d/%d tests, %.2f%% okay.
+%s>, C<FAILED--Further testing stopped: %s>
+
+=item ENVIRONMENT
+
+C<HARNESS_ACTIVE>, C<HARNESS_COLUMNS>, C<HARNESS_COMPILE_TEST>,
+C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_IGNORE_EXITCODE>, C<HARNESS_NOTTY>,
+C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
+
+=item EXAMPLE
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item LICENSE
+
+=item TODO
+
+=item BUGS
+
+=back
+
+=head2 Test::Harness::Assert - simple assert
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Functions
+
+B<assert>
+
+=back
+
+=back
+
+=over 4
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::Iterator - Internal Test::Harness Iterator
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 Test::Harness::Straps - detailed analysis of test results
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Construction
+
+B<new>
+
+=back
+
+=back
+
+B<_init>
+
+=over 4
+
+=item Analysis
+
+B<analyze>
+
+=back
+
+B<analyze_fh>
+
+B<analyze_file>
+
+B<_switches>
+
+B<_INC2PERL5LIB>
+
+B<_filtered_INC>
+
+B<_restore_PERL5LIB>
+
+=over 4
+
+=item Parsing
+
+B<_is_comment>
+
+=back
+
+B<_is_header>
+
+B<_is_test>
+
+B<_is_bail_out>
+
+B<_reset_file_state>
+
+=over 4
+
+=item Results
+
+B<_detailize>
+
+=back
+
+=over 4
+
+=item EXAMPLES
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::More - yet another framework for writing test scripts
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item I love it when a plan comes together
+
+=back
+
+=back
+
+=over 4
+
+=item Test names
+
+=item I'm ok, you're not ok.
+
+B<ok>
+
+=back
+
+B<is>, B<isnt>
+
+B<like>
+
+B<unlike>
+
+B<cmp_ok>
+
+B<can_ok>
+
+B<isa_ok>
+
+B<pass>, B<fail>
+
+=over 4
+
+=item Diagnostics
+
+B<diag>
+
+=back
+
+=over 4
+
+=item Module tests
+
+B<use_ok>
+
+=back
+
+B<require_ok>
+
+=over 4
+
+=item Conditional tests
+
+B<SKIP: BLOCK>
+
+=back
+
+B<TODO: BLOCK>, B<todo_skip>
+
+When do I use SKIP vs. TODO?
+
+=over 4
+
+=item Comparison functions
+
+B<is_deeply>
+
+=back
+
+B<eq_array>
+
+B<eq_hash>
+
+B<eq_set>
+
+=over 4
+
+=item Extending and Embedding Test::More
+
+B<builder>
+
+=back
+
+=over 4
+
+=item NOTES
+
+=item BUGS and CAVEATS
+
+Making your own ok(), The eq_* family has some caveats, Test::Harness
+upgrades
+
+=item HISTORY
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 Test::Simple - Basic utilities for writing tests.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+B<ok>
+
+=back
+
+=over 4
+
+=item EXAMPLE
+
+=item CAVEATS
+
+=item NOTES
+
+=item HISTORY
+
+=item SEE ALSO
+
+L<Test::More>, L<Test>, L<Test::Unit>, L<Test::Inline>, L<SelfTest>,
+L<Test::Harness>
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 Test::Tutorial - A tutorial about writing really basic tests
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Nuts and bolts of testing.
+
+=item Where to start?
+
+=item Names
+
+=item Test the manual
+
+=item Sometimes the tests are wrong
+
+=item Testing lots of values
+
+=item Informative names
+
+=item Skipping tests
+
+=item Todo tests
+
+=item Testing with taint mode.
+
+=back
+
+=item FOOTNOTES
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=back
+
+=head2 Text::Abbrev, abbrev - create an abbreviation table from a list
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXAMPLE
+
+=back
+
+=head2 Text::Balanced - Extract delimited text sequences from strings.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item General behaviour in list contexts
+
+[0], [1], [2]
+
+=item General behaviour in scalar and void contexts
+
+=item A note about prefixes
+
+=item C<extract_delimited>
+
+=item C<extract_bracketed>
+
+=item C<extract_tagged>
+
+C<reject =E<gt> $listref>, C<ignore =E<gt> $listref>, C<fail =E<gt> $str>,
+[0], [1], [2], [3], [4], [5]
+
+=item C<gen_extract_tagged>
+
+=item C<extract_quotelike>
+
+[0], [1], [2], [3], [4], [5], [6], [7], [8], [9], [10]
+
+=item C<extract_quotelike> and "here documents"
+
+[0], [1], [2], [3], [4], [5], [6], [7..10]
+
+=item C<extract_codeblock>
+
+=item C<extract_multiple>
+
+=item C<gen_delimited_pat>
+
+=back
+
+=item DIAGNOSTICS
+
+ C<Did not find a suitable bracket: "%s">,  C<Did not find prefix: /%s/>, 
+C<Did not find opening bracket after prefix: "%s">,  C<No quotelike
+operator found after prefix: "%s">,  C<Unmatched closing bracket: "%c">, 
+C<Unmatched opening bracket(s): "%s">, C<Unmatched embedded quote (%s)>,
+C<Did not find closing delimiter to match '%s'>,  C<Mismatched closing
+bracket: expected "%c" but found "%s">,  C<No block delimiter found after
+quotelike "%s">, C<Did not find leading dereferencer>, C<Bad identifier
+after dereferencer>, C<Did not find expected opening bracket at %s>,
+C<Improperly nested codeblock at %s>,  C<Missing second block for quotelike
+"%s">, C<No match found for opening bracket>, C<Did not find opening tag:
+/%s/>, C<Unable to construct closing tag to match: /%s/>, C<Found invalid
+nested tag: %s>, C<Found unbalanced nested tag: %s>, C<Did not find closing
+tag>
+
+=item AUTHOR
+
+=item BUGS AND IRRITATIONS
+
+=item COPYRIGHT
+
+=back
+
+=head2 Text::ParseWords - parse text into an array of tokens or array of
+arrays
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXAMPLES
+
+=item AUTHORS
+
+=back
+
+=head2 Text::Soundex - Implementation of the Soundex Algorithm as Described
+by Knuth
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXAMPLES
+
+=item LIMITATIONS
+
+=item AUTHOR
+
+=back
+
+=head2 Text::Tabs -- expand and unexpand tabs per the unix expand(1) and
+unexpand(1)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUGS
+
+=item AUTHOR
+
+=back
+
+=head2 Text::Wrap - line wrapping to form simple paragraphs
+
+=over 4
+
+=item SYNOPSIS 
+
+=item DESCRIPTION
+
+=item OVERRIDES
+
+=item EXAMPLE
+
+=item AUTHOR
+
+=back
+
+=head2 Thread - manipulate threads in Perl (for old code only)
+
+=over 4
+
+=item CAVEAT
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS
+
+$thread = Thread->new(\&start_sub), $thread = Thread->new(\&start_sub,
+LIST), lock VARIABLE, async BLOCK;, Thread->self, cond_wait VARIABLE,
+cond_signal VARIABLE, cond_broadcast VARIABLE, yield
+
+=item METHODS
+
+join, eval, detach, equal, tid, flags, done
+
+=item LIMITATIONS
+
+=item SEE ALSO
+
+=back
+
+=head2 Thread::Queue - thread-safe queues
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS AND METHODS
+
+new, enqueue LIST, dequeue, dequeue_nb, pending
+
+=item SEE ALSO
+
+=back
+
+=head2 Thread::Semaphore - thread-safe semaphores
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS AND METHODS
+
+new, new NUMBER, down, down NUMBER, up, up NUMBER
+
+=back
+
+=head2 Thread::Signal - Start a thread which runs signal handlers reliably
+(for old code)
+
+=over 4
+
+=item CAVEAT
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUGS
+
+=back
+
+=head2 Thread::Specific - thread-specific keys
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 Tie::Array - base class for tied arrays
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+TIEARRAY classname, LIST, STORE this, index, value, FETCH this, index,
+FETCHSIZE this, STORESIZE this, count, EXTEND this, count, EXISTS this,
+key, DELETE this, key, CLEAR this, DESTROY this, PUSH this, LIST, POP this,
+SHIFT this, UNSHIFT this, LIST, SPLICE this, offset, length, LIST
+
+=item CAVEATS
+
+=item AUTHOR
+
+=back
+
+=head2 Tie::File - Access the lines of a disk file via a Perl array
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item C<recsep>
+
+=item C<autochomp>
+
+=item C<mode>
+
+=item C<memory>
+
+=item C<dw_size>
+
+=item Option Format
+
+=back
+
+=item Public Methods
+
+=over 4
+
+=item C<flock>
+
+=item C<autochomp>
+
+=item C<defer>, C<flush>, C<discard>, and C<autodefer>
+
+=back
+
+=item Tying to an already-opened filehandle
+
+=item Deferred Writing
+
+=over 4
+
+=item Autodeferring
+
+=back
+
+=item CAVEATS
+
+=item SUBCLASSING
+
+=item WHAT ABOUT C<DB_File>?
+
+=item AUTHOR
+
+=item LICENSE
+
+=item WARRANTY
+
+=item THANKS
+
+=item TODO
+
+=back
+
+=head2 Tie::Handle, Tie::StdHandle  - base class definitions for tied
+handles
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+TIEHANDLE classname, LIST, WRITE this, scalar, length, offset, PRINT this,
+LIST, PRINTF this, format, LIST, READ this, scalar, length, offset,
+READLINE this, GETC this, CLOSE this, OPEN this, filename, BINMODE this,
+EOF this, TELL this, SEEK this, offset, whence, DESTROY this
+
+=item MORE INFORMATION
+
+=item COMPATIBILITY
+
+=back
+
+=head2 Tie::Hash, Tie::StdHash, Tie::ExtraHash - base class definitions for
+tied hashes
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+TIEHASH classname, LIST, STORE this, key, value, FETCH this, key, FIRSTKEY
+this, NEXTKEY this, lastkey, EXISTS this, key, DELETE this, key, CLEAR this
+
+=item Inheriting from B<Tie::StdHash>
+
+=item Inheriting from B<Tie::ExtraHash>
+
+=item C<UNTIE> and C<DESTROY>
+
+=item MORE INFORMATION
+
+=back
+
+=head2 Tie::Memoize - add data to hash when needed
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Inheriting from B<Tie::Memoize>
+
+=item EXAMPLE
+
+=item BUGS
+
+=item AUTHOR
+
+=back
+
+=head2 Tie::RefHash - use references as hash keys
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXAMPLE
+
+=item AUTHOR
+
+=item VERSION
+
+=item SEE ALSO
+
+=back
+
+=head2 Tie::Scalar, Tie::StdScalar - base class definitions for tied
+scalars
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+TIESCALAR classname, LIST, FETCH this, STORE this, value, DESTROY this
+
+=item MORE INFORMATION
+
+=back
+
+=head2 Tie::SubstrHash - Fixed-table-size, fixed-key-length hashing
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEATS
+
+=back
+
+=head2 Time::HiRes - High resolution alarm, sleep, gettimeofday, interval
+timers
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+gettimeofday (), usleep ( $useconds ), ualarm ( $useconds [,
+$interval_useconds ] ), tv_interval, time (), sleep ( $floating_seconds ),
+alarm ( $floating_seconds [, $interval_floating_seconds ] ), setitimer,
+getitimer ( $which )
+
+=item EXAMPLES
+
+=item C API
+
+=item CAVEATS
+
+=item AUTHORS
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Time::Local - efficiently compute time from local and GMT time
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item IMPLEMENTATION
+
+=item BUGS
+
+=back
+
+=head2 Time::gmtime - by-name interface to Perl's built-in gmtime()
+function
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTE
+
+=item AUTHOR
+
+=back
+
+=head2 Time::localtime - by-name interface to Perl's built-in localtime()
+function
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTE
+
+=item AUTHOR
+
+=back
+
+=head2 Time::tm - internal object used by Time::gmtime and Time::localtime
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=back
+
+=head2 UNIVERSAL - base class for ALL classes (blessed references)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+C<< $obj->isa( TYPE ) >>, C<< CLASS->isa( TYPE ) >>, C<isa( VAL, TYPE )>,
+C<TYPE>, C<$obj>, C<CLASS>, C<VAL>, C<< $obj->can( METHOD ) >>, C<<
+CLASS->can( METHOD ) >>, C<can( VAL, METHOD )>, C<VERSION ( [ REQUIRE ] )>
+
+=item EXPORTS
+
+=back
+
+=head2 Unicode::Collate - Unicode Collation Algorithm
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Constructor and Tailoring
+
+UCA_Version, alternate, backwards, entry, ignoreName, ignoreChar, level,
+normalization, overrideCJK, overrideHangul, preprocess, rearrange, table,
+undefName, undefChar, katakana_before_hiragana, upper_before_lower
+
+=item Methods for Collation
+
+C<@sorted = $Collator-E<gt>sort(@not_sorted)>, C<$result =
+$Collator-E<gt>cmp($a, $b)>, C<$result = $Collator-E<gt>eq($a, $b)>,
+C<$result = $Collator-E<gt>ne($a, $b)>, C<$result = $Collator-E<gt>lt($a,
+$b)>, C<$result = $Collator-E<gt>le($a, $b)>, C<$result =
+$Collator-E<gt>gt($a, $b)>, C<$result = $Collator-E<gt>ge($a, $b)>,
+C<$sortKey = $Collator-E<gt>getSortKey($string)>, C<$sortKeyForm =
+$Collator-E<gt>viewSortKey($string)>
+
+=item Methods for Searching
+
+C<$position = $Collator-E<gt>index($string, $substring[, $position])>,
+C<($position, $length) = $Collator-E<gt>index($string, $substring[,
+$position])>, C<$match_ref = $Collator-E<gt>match($string, $substring)>,
+C<($match)   = $Collator-E<gt>match($string, $substring)>, C<@match =
+$Collator-E<gt>gmatch($string, $substring)>, C<$count =
+$Collator-E<gt>subst($string, $substring, $replacement)>, C<$count =
+$Collator-E<gt>gsubst($string, $substring, $replacement)>
+
+=item Other Methods
+
+C<%old_tailoring = $Collator-E<gt>change(%new_tailoring)>, UCA_Version,
+Base_Unicode_Version
+
+=item EXPORT
+
+=item TODO
+
+=item CAVEAT
+
+=item Conformance Test
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+http://www.unicode.org/reports/tr10/,
+http://www.unicode.org/reports/tr10/allkeys.txt,
+http://www.unicode.org/reports/tr10/CollationTest.html
+http://www.unicode.org/reports/tr10/CollationTest.zip,
+http://www.unicode.org/reports/tr15/, L<Unicode::Normalize>
+
+=back
+
+=head2 Unicode::Normalize - Unicode Normalization Forms
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Normalization Forms
+
+C<$NFD_string = NFD($string)>, C<$NFC_string = NFC($string)>,
+C<$NFKD_string = NFKD($string)>, C<$NFKC_string = NFKC($string)>,
+C<$normalized_string = normalize($form_name, $string)>
+
+=item Decomposition and Composition
+
+C<$decomposed_string = decompose($string)>, C<$decomposed_string =
+decompose($string, $useCompatMapping)>, C<$reordered_string  =
+reorder($string)>, C<$composed_string	= compose($string)>
+
+=item Quick Check
+
+C<$result = checkNFD($string)>, C<$result = checkNFC($string)>, C<$result =
+checkNFKD($string)>, C<$result = checkNFKC($string)>, C<$result =
+check($form_name, $string)>
+
+=item Character Data
+
+C<$canonical_decomposed = getCanon($codepoint)>,
+C<$compatibility_decomposed = getCompat($codepoint)>,
+C<$codepoint_composite = getComposite($codepoint_here, $codepoint_next)>,
+C<$combining_class = getCombinClass($codepoint)>, C<$is_exclusion =
+isExclusion($codepoint)>, C<$is_singleton = isSingleton($codepoint)>,
+C<$is_non_starter_decomposition = isNonStDecomp($codepoint)>,
+C<$may_be_composed_with_prev_char = isComp2nd($codepoint)>
+
+=item EXPORT
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+http://www.unicode.org/unicode/reports/tr15/,
+http://www.unicode.org/Public/UNIDATA/DerivedNormalizationProps.txt
+
+=back
+
+=head2 Unicode::UCD - Unicode character database
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=over 4
+
+=item charinfo
+
+=back
+
+=over 4
+
+=item charblock
+
+=back
+
+=over 4
+
+=item charscript
+
+=back
+
+=over 4
+
+=item charblocks
+
+=back
+
+=over 4
+
+=item charscripts
+
+=back
+
+=over 4
+
+=item Blocks versus Scripts
+
+=item Matching Scripts and Blocks
+
+=item Code Point Arguments
+
+=item charinrange
+
+=back
+
+=over 4
+
+=item compexcl
+
+=back
+
+=over 4
+
+=item casefold
+
+=back
+
+=over 4
+
+=item casespec
+
+=back
+
+=over 4
+
+=item Unicode::UCD::UnicodeVersion
+
+=back
+
+=over 4
+
+=item Implementation Note
+
+=back
+
+=over 4
+
+=item BUGS
+
+=item AUTHOR
+
+=back
+
+=head2 User::grent - by-name interface to Perl's built-in getgr*()
+functions
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTE
+
+=item AUTHOR
+
+=back
+
+=head2 User::pwent - by-name interface to Perl's built-in getpw*()
+functions
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item System Specifics
+
+=back
+
+=item NOTE
+
+=item AUTHOR
+
+=item HISTORY
+
+March 18th, 2000
+
+=back
+
+=head2 Win32 - Interfaces to some Win32 API Functions
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Alphabetical Listing of Win32 Functions
+
+Win32::AbortSystemShutdown(MACHINE), Win32::BuildNumber(),
+Win32::CopyFile(FROM, TO, OVERWRITE), Win32::DomainName(),
+Win32::ExpandEnvironmentStrings(STRING), Win32::FormatMessage(ERRORCODE),
+Win32::FsType(), Win32::FreeLibrary(HANDLE), Win32::GetArchName(),
+Win32::GetChipName(), Win32::GetCwd(), Win32::GetFolderPath(FOLDER [,
+CREATE]), Win32::GetFullPathName(FILENAME), Win32::GetLastError(),
+Win32::GetLongPathName(PATHNAME), Win32::GetNextAvailDrive(),
+Win32::GetOSVersion(), Win32::GetOSName(),
+Win32::GetShortPathName(PATHNAME), Win32::GetProcAddress(INSTANCE,
+PROCNAME), Win32::GetTickCount(), Win32::InitiateSystemShutdown,
+Win32::IsWinNT(), Win32::IsWin95(), Win32::LoadLibrary(LIBNAME),
+Win32::LoginName(), Win32::LookupAccountName(SYSTEM, ACCOUNT, DOMAIN, SID,
+SIDTYPE), Win32::LookupAccountSID(SYSTEM, SID, ACCOUNT, DOMAIN, SIDTYPE),
+Win32::MsgBox(MESSAGE [, FLAGS [, TITLE]]), Win32::NodeName(),
+Win32::RegisterServer(LIBRARYNAME), Win32::SetChildShowWindow(SHOWWINDOW),
+Win32::SetCwd(NEWDIRECTORY), Win32::SetLastError(ERROR),
+Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS, PID),
+Win32::UnregisterServer(LIBRARYNAME)
+
+=back
+
+=back
+
+=head2 XSLoader - Dynamically load C libraries into Perl code
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=back
+
+=head1 AUXILIARY DOCUMENTATION
+
+Here should be listed all the extra programs' documentation, but they
+don't all have manual pages yet:
+
+=over 4
+
+=item a2p
+
+=item s2p
+
+=item find2perl
+
+=item h2ph
+
+=item c2ph
+
+=item h2xs
+
+=item xsubpp
+
+=item pod2man
+
+=item wrapsuid
+
+=back
+
+=head1 AUTHOR
+
+Larry Wall <F<larry@wall.org>>, with the help of oodles
+of other folks.
+

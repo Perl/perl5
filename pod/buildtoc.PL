@@ -196,9 +196,11 @@ if (-d "pod") {
     perlapio            
     perltodo            
     perlhack            
+    perldoc
 
     perlhist           
     perldelta           
+    perl58delta         
     perl573delta         
     perl572delta         
     perl571delta         
@@ -207,6 +209,9 @@ if (-d "pod") {
     perl56delta         
     perl5005delta       
     perl5004delta       
+
+    perlartistic
+    perlgpl
 
     ),
 
@@ -307,6 +312,7 @@ sub getpods {
     if (/\.p(od|m)$/) {
 	my $file = $File::Find::name;
         return if $file eq '../lib/Pod/Functions.pm'; # Used only by pod itself
+        return if $file =~ m!(?:^|/)t/!;
         return if $file =~ m!lib/Attribute/Handlers/demo/!;
         return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
         return if $file =~ m!lib/Math/BigInt/t/!;
