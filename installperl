@@ -7,6 +7,8 @@ BEGIN {
     $ENV{PERL5LIB} = 'lib';
 }
 
+$scr_ext = ($^O eq 'MSWin32' ? '.bat' : '');
+
 use File::Find;
 use File::Compare;
 use File::Copy ();
@@ -34,6 +36,8 @@ umask 022;
 		utils/perlbug utils/perldoc utils/pl2pm utils/splain
 		x2p/s2p x2p/find2perl
 		pod/pod2man pod/pod2html pod/pod2latex pod/pod2text);
+
+if ($scr_ext) { @scripts = map { "$_$scr_ext" } @scripts; }
 
 @pods = (<pod/*.pod>);
 
@@ -240,9 +244,9 @@ if (! $versiononly) {
 if (! $versiononly) {
     safe_unlink("$installscript/pstruct");
     if ($^O eq 'dos') {
-        copy("$installscript/c2ph","$installscript/pstruct"); 
+        copy("$installscript/c2ph$scr_ext","$installscript/pstruct$scr_ext"); 
     } else {
-        link("$installscript/c2ph","$installscript/pstruct");
+        link("$installscript/c2ph$scr_ext","$installscript/pstruct$scr_ext");
     }
 }
 

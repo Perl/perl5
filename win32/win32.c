@@ -72,6 +72,7 @@ static int		do_spawn2(char *cmd, int exectype);
 static BOOL		has_redirection(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
+static void		remove_dead_process(HANDLE deceased);
 
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 static DWORD	w32_platform = (DWORD)-1;
@@ -344,7 +345,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
     argv[index++] = 0;
    
     status = win32_spawnvp(flag,
-			   (really ? SvPV(really,na) : argv[0]),
+			   (const char*)(really ? SvPV(really,na) : argv[0]),
 			   (const char* const*)argv);
 
     if (status < 0 && errno == ENOEXEC) {
@@ -357,7 +358,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 	    argv[sh_items] = w32_perlshell_vec[sh_items];
    
 	status = win32_spawnvp(flag,
-			       (really ? SvPV(really,na) : argv[0]),
+			       (const char*)(really ? SvPV(really,na) : argv[0]),
 			       (const char* const*)argv);
     }
 
@@ -487,7 +488,7 @@ do_exec(char *cmd)
  * return the pointer to the current file name.
  */
 DIR *
-opendir(char *filename)
+win32_opendir(char *filename)
 {
     DIR			*p;
     long		len;
@@ -565,7 +566,7 @@ opendir(char *filename)
  * string pointer to the nDllExport entry.
  */
 struct direct *
-readdir(DIR *dirp)
+win32_readdir(DIR *dirp)
 {
     int         len;
     static int  dummy = 0;
@@ -593,7 +594,7 @@ readdir(DIR *dirp)
 
 /* Telldir returns the current string pointer position */
 long
-telldir(DIR *dirp)
+win32_telldir(DIR *dirp)
 {
     return (long) dirp->curr;
 }
@@ -603,21 +604,21 @@ telldir(DIR *dirp)
  *(Saved by telldir).
  */
 void
-seekdir(DIR *dirp, long loc)
+win32_seekdir(DIR *dirp, long loc)
 {
     dirp->curr = (char *)loc;
 }
 
 /* Rewinddir resets the string pointer to the start */
 void
-rewinddir(DIR *dirp)
+win32_rewinddir(DIR *dirp)
 {
     dirp->curr = dirp->start;
 }
 
 /* free the memory allocated by opendir */
 int
-closedir(DIR *dirp)
+win32_closedir(DIR *dirp)
 {
     Safefree(dirp->start);
     Safefree(dirp);
@@ -693,10 +694,30 @@ chown(const char *path, uid_t owner, gid_t group)
     return 0;
 }
 
-int
-kill(int pid, int sig)
+static void
+remove_dead_process(HANDLE deceased)
 {
+#ifndef USE_RTL_WAIT
+    int child;
+    for (child = 0 ; child < w32_num_children ; ++child) {
+	if (w32_child_pids[child] == deceased) {
+	    Copy(&w32_child_pids[child+1], &w32_child_pids[child],
+		 (w32_num_children-child-1), HANDLE);
+	    w32_num_children--;
+	    break;
+	}
+    }
+#endif
+}
+
+DllExport int
+win32_kill(int pid, int sig)
+{
+#ifdef USE_RTL_WAIT
     HANDLE hProcess= OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
+#else
+    HANDLE hProcess = (HANDLE) pid;
+#endif
 
     if (hProcess == NULL) {
 	croak("kill process failed!\n");
@@ -705,10 +726,14 @@ kill(int pid, int sig)
 	if (!TerminateProcess(hProcess, sig))
 	    croak("kill process failed!\n");
 	CloseHandle(hProcess);
+
+	/* WaitForMultipleObjects() on a pid that was killed returns error
+	 * so if we know the pid is gone we remove it from process list */
+	remove_dead_process(hProcess);
     }
     return 0;
 }
-      
+
 /*
  * File system stuff
  */
@@ -723,7 +748,7 @@ win32_sleep(unsigned int t)
 DllExport int
 win32_stat(const char *path, struct stat *buffer)
 {
-    char		t[MAX_PATH]; 
+    char		t[MAX_PATH+1]; 
     const char	*p = path;
     int		l = strlen(path);
     int		res;
@@ -879,6 +904,24 @@ win32_utime(const char *filename, struct utimbuf *times)
 
     CloseHandle(handle);
     return rc;
+}
+
+DllExport int
+win32_waitpid(int pid, int *status, int flags)
+{
+    int rc;
+    if (pid == -1) 
+      return win32_wait(status);
+    else {
+      rc = cwait(status, pid, WAIT_CHILD);
+    /* cwait() returns differently on Borland */
+#ifdef __BORLANDC__
+    if (status)
+	*status =  (((*status >> 8) & 0xff) | ((*status << 8) & 0xff00));
+#endif
+      remove_dead_process((HANDLE)pid);
+    }
+    return rc >= 0 ? pid : rc;                
 }
 
 DllExport int
@@ -1218,7 +1261,7 @@ win32_str_os_error(void *sv, DWORD dwErr)
 	sMsg[dwLen]= '\0';
     }
     if (0 == dwLen) {
-	sMsg = LocalAlloc(0, 64/**sizeof(TCHAR)*/);
+	sMsg = (char*)LocalAlloc(0, 64/**sizeof(TCHAR)*/);
 	dwLen = sprintf(sMsg,
 			"Unknown error #0x%lX (lookup 0x%lX)",
 			dwErr, GetLastError());
@@ -1498,10 +1541,6 @@ win32_pclose(FILE *pf)
     return _pclose(pf);
 #else
 
-#ifndef USE_RTL_WAIT
-    int child;
-#endif
-
     int childpid, status;
     SV *sv;
 
@@ -1519,16 +1558,7 @@ win32_pclose(FILE *pf)
     win32_fclose(pf);
     SvIVX(sv) = 0;
 
-#ifndef USE_RTL_WAIT
-    for (child = 0 ; child < w32_num_children ; ++child) {
-	if (w32_child_pids[child] == (HANDLE)childpid) {
-	    Copy(&w32_child_pids[child+1], &w32_child_pids[child],
-		 (w32_num_children-child-1), HANDLE);
-	    w32_num_children--;
-	    break;
-	}
-    }
-#endif
+    remove_dead_process((HANDLE)childpid);
 
     /* wait for the child */
     if (cwait(&status, childpid, WAIT_CHILD) == -1)
@@ -1541,6 +1571,56 @@ win32_pclose(FILE *pf)
 #endif
 
 #endif /* USE_RTL_POPEN */
+}
+
+DllExport int
+win32_rename(const char *oname, const char *newname)
+{
+    char szNewWorkName[MAX_PATH+1];
+    WIN32_FIND_DATA fdOldFile, fdNewFile;
+    HANDLE handle;
+    char *ptr;
+
+    if ((strchr(oname, '\\') || strchr(oname, '/'))
+	&& strchr(newname, '\\') == NULL
+	&& strchr(newname, '/') == NULL)
+    {
+	strcpy(szNewWorkName, oname);
+	if ((ptr = strrchr(szNewWorkName, '\\')) == NULL)
+	    ptr = strrchr(szNewWorkName, '/');
+	strcpy(++ptr, newname);
+    }
+    else
+	strcpy(szNewWorkName, newname);
+
+    if (stricmp(oname, szNewWorkName) != 0) {
+	// check that we're not being fooled by relative paths
+	// and only delete the new file
+	//  1) if it exists
+	//  2) it is not the same file as the old file
+	//  3) old file exist
+	// GetFullPathName does not return the long file name on some systems
+	handle = FindFirstFile(oname, &fdOldFile);
+	if (handle != INVALID_HANDLE_VALUE) {
+	    FindClose(handle);
+    
+	    handle = FindFirstFile(szNewWorkName, &fdNewFile);
+    
+	    if (handle != INVALID_HANDLE_VALUE)
+		FindClose(handle);
+	    else
+		fdNewFile.cFileName[0] = '\0';
+
+	    if (strcmp(fdOldFile.cAlternateFileName,
+		       fdNewFile.cAlternateFileName) != 0
+		&& strcmp(fdOldFile.cFileName, fdNewFile.cFileName) != 0)
+	    {
+		// file exists and not same file
+		DeleteFile(szNewWorkName);
+	    }
+	}
+    }
+    return rename(oname, newname);
 }
 
 DllExport int
@@ -1650,6 +1730,12 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 	w32_child_pids[w32_num_children++] = (HANDLE)status;
 #endif
     return status;
+}
+
+DllExport int
+win32_execv(const char *cmdname, const char *const *argv)
+{
+    return execv(cmdname, (char *const *)argv);
 }
 
 DllExport int

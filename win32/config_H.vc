@@ -102,7 +102,7 @@
  *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
  *	to specify standard input, otherwise the value is "".
  */
-#define CPPSTDIN "cl -E"
+#define CPPSTDIN "cl -nologo -E"
 #define CPPMINUS ""
 
 /* HAS_ALARM:
@@ -605,6 +605,30 @@
  */
 /*#define HAS_SEM		/**/
 
+/* HAS_UNION_SEMUN:
+ *	This symbol, if defined, indicates that the union semun
+ *	is defined in <sys/sem.h>.  If not, the user code probably
+ *      needs to define it as:
+ * union semun {
+ *    int val;
+ *    struct semid_ds *buf;
+ *    unsigned short *array;
+ * }
+ */
+/*#define HAS_UNION_SEMUN		/**/
+
+/* USE_SEMCTL_SEMUN:
+ *	This symbol, if defined, indicates that union semun is
+ *	used for semctl IPC_STAT.
+ */
+/*#define USE_SEMCTL_SEMUN	/**/
+
+/* USE_SEMCTL_SEMID_DS:
+ *	This symbol, if defined, indicates that struct semid_ds * is
+ *	used for semctl IPC_STAT.
+ */
+/*#define USE_SEMCTL_SEMID_DS	/**/
+
 /* HAS_SETEGID:
  *	This symbol, if defined, indicates that the setegid routine is available
  *	to change the effective gid of the current program.
@@ -969,7 +993,7 @@
  *	This symbol, if defined, indicates that the waitpid routine is
  *	available to wait for child process.
  */
-/*#define HAS_WAITPID	/**/
+#define HAS_WAITPID	/**/
 
 /* HAS_WCSTOMBS:
  *	This symbol, if defined, indicates that the wcstombs routine is
@@ -1066,7 +1090,7 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <grp.h>.
  */
-#define I_GRP		/**/
+/*#define I_GRP		/**/
 
 /* I_LIMITS:
  *	This symbol, if defined, indicates to the C program that it should

@@ -3037,7 +3037,7 @@ void
 qsortsv(array, num_elts, compare)
    SV ** array;
    size_t num_elts;
-   I32 (*compare)();
+   I32 (*compare) _((SV *a, SV *b));
 {
    register SV * temp;
 

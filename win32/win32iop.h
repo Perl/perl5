@@ -86,6 +86,7 @@ DllExport  int  	win32_stat(const char *name,struct stat *sbufptr);
 DllExport  int		win32_pipe( int *phandles, unsigned int psize, int textmode );
 DllExport  FILE*	win32_popen( const char *command, const char *mode );
 DllExport  int		win32_pclose( FILE *pf);
+DllExport  int		win32_rename( const char *oname, const char *newname);
 DllExport  int		win32_setmode( int fd, int mode);
 DllExport  long		win32_lseek( int fd, long offset, int origin);
 DllExport  long		win32_tell( int fd);
@@ -102,6 +103,7 @@ DllExport  int		win32_mkdir(const char *dir, int mode);
 DllExport  int		win32_rmdir(const char *dir);
 DllExport  int		win32_chdir(const char *dir);
 DllExport  int		win32_flock(int fd, int oper);
+DllExport  int		win32_execv(const char *cmdname, const char *const *argv);
 DllExport  int		win32_execvp(const char *cmdname, const char *const *argv);
 DllExport  void		win32_perror(const char *str);
 DllExport  void		win32_setbuf(FILE *pf, char *buf);
@@ -134,6 +136,8 @@ DllExport  int		win32_stat(const char *path, struct stat *buf);
 DllExport  int		win32_ioctl(int i, unsigned int u, char *data);
 DllExport  int		win32_utime(const char *f, struct utimbuf *t);
 DllExport  int		win32_wait(int *status);
+DllExport  int		win32_waitpid(int pid, int *status, int flags);
+DllExport  int		win32_kill(int pid, int sig);
 
 #ifdef HAVE_DES_FCRYPT
 DllExport char *	win32_crypt(const char *txt, const char *salt);
@@ -183,6 +187,7 @@ END_EXTERN_C
 /*
  * redirect to our own version
  */
+#undef fprintf
 #define	fprintf			win32_fprintf
 #define	vfprintf		win32_vfprintf
 #define	printf			win32_printf
@@ -197,6 +202,7 @@ END_EXTERN_C
 #define fputs(s,f)		win32_fputs(s,f)
 #define fputc(c,f)		win32_fputc(c,f)
 #define ungetc(c,f)		win32_ungetc(c,f)
+#undef getc
 #define getc(f)			win32_getc(f)
 #define fileno(f)		win32_fileno(f)
 #define clearerr(f)		win32_clearerr(f)
@@ -210,6 +216,7 @@ END_EXTERN_C
 #define abort()			win32_abort()
 #define fstat(fd,bufptr)   	win32_fstat(fd,bufptr)
 #define stat(pth,bufptr)   	win32_stat(pth,bufptr)
+#define rename(old,new)		win32_rename(old,new)
 #define setmode(fd,mode)	win32_setmode(fd,mode)
 #define lseek(fd,offset,orig)	win32_lseek(fd,offset,orig)
 #define tell(fd)		win32_tell(fd)
@@ -227,6 +234,7 @@ END_EXTERN_C
 #define rmdir			win32_rmdir
 #define chdir			win32_chdir
 #define flock(fd,o)		win32_flock(fd,o)
+#define execv			win32_execv
 #define execvp			win32_execvp
 #define perror			win32_perror
 #define setbuf			win32_setbuf
@@ -238,9 +246,12 @@ END_EXTERN_C
 #define fgets			win32_fgets
 #define gets			win32_gets
 #define fgetc			win32_fgetc
+#undef putc
 #define putc			win32_putc
 #define puts			win32_puts
+#undef getchar
 #define getchar			win32_getchar
+#undef putchar
 #define putchar			win32_putchar
 
 #if !defined(MYMALLOC) || !defined(PERL_CORE)
@@ -262,6 +273,15 @@ END_EXTERN_C
 #define ioctl			win32_ioctl
 #define utime			win32_utime
 #define wait			win32_wait
+#define waitpid			win32_waitpid
+#define kill			win32_kill
+
+#define opendir			win32_opendir
+#define readdir			win32_readdir
+#define telldir			win32_telldir
+#define seekdir			win32_seekdir
+#define rewinddir		win32_rewinddir
+#define closedir		win32_closedir
 
 #ifdef HAVE_DES_FCRYPT
 #undef crypt
