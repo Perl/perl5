@@ -19,6 +19,7 @@ finddepth(sub { print "ok 2\n" if $_ eq 'filefind.t'; }, ".");
 
 
 my $case = 2;
+my $FastFileTests_OK = 0;
 
 END {
     unlink 'fa/fa_ord','fa/fsl','fa/faa/faa_ord',
@@ -57,8 +58,13 @@ sub wanted {
   print "# '$_' => 1\n";
   s#\.$## if ($^O eq 'VMS' && $_ ne '.');
   Check( $Expect{$_} );
-  delete $Expect{$_} 
-    unless ( $Expect_Dir{$_} && ! -d _ );
+  if ( $FastFileTests_OK ) {
+    delete $Expect{$_} 
+      unless ( $Expect_Dir{$_} && ! -d _ );
+  } else {
+    delete $Expect{$_} 
+      unless ( $Expect_Dir{$_} && ! -d $_ );
+  }
   $File::Find::prune=1 if  $_ eq 'faba';
   
 }
@@ -148,6 +154,7 @@ File::Find::finddepth( {wanted => \&d_wanted, no_chdir => 1 },'.' );
 Check( scalar(keys %Expect) == 0 );
 
 if ( $symlink_exists ) {
+  $FastFileTests_OK= 1;
   %Expect=('.' => 1, 'fa_ord' => 1, 'fsl' => 1, 'fb_ord' => 1, 'fba' => 1,
            'fba_ord' => 1, 'fab' => 1, 'fab_ord' => 1, 'faba' => 1, 'faa' => 1,
            'faa_ord' => 1);
