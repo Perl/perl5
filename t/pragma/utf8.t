@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..87\n";
+print "1..99\n";
 
 my $test = 1;
 
@@ -470,4 +470,58 @@ sub nok_bytes {
     print "not " unless $a eq "\x20" && $b eq "\x{100}" && $c eq "\x20";
     print "ok $test\n";
     $test++;
+}
+
+{
+    # bug id 20000730.004
+
+    use utf8;
+
+    my $smiley = "\x{263a}";
+
+    for my $s ("\x{263a}",                     #  1
+	       $smiley,                        #  2
+		
+	       "" . $smiley,                   #  3
+	       "" . "\x{263a}",                #  4
+
+	       $smiley    . "",                #  5
+	       "\x{263a}" . "",                #  6
+	       ) {
+	my $length_chars = length($s);
+	my $length_bytes;
+	{ use bytes; $length_bytes = length($s) }
+	my @regex_chars = $s =~ m/(.)/g;
+	my $regex_chars = @regex_chars;
+	my @split_chars = split //, $s;
+	my $split_chars = @split_chars;
+	print "not "
+	    unless "$length_chars/$regex_chars/$split_chars/$length_bytes" eq
+		   "1/1/1/3";
+	print "ok $test\n";
+	$test++;
+    }
+
+    for my $s ("\x{263a}" . "\x{263a}",        #  7
+	       $smiley    . $smiley,           #  8
+
+	       "\x{263a}\x{263a}",             #  9
+	       "$smiley$smiley",               # 10
+	       
+	       "\x{263a}" x 2,                 # 11
+	       $smiley    x 2,                 # 12
+	       ) {
+	my $length_chars = length($s);
+	my $length_bytes;
+	{ use bytes; $length_bytes = length($s) }
+	my @regex_chars = $s =~ m/(.)/g;
+	my $regex_chars = @regex_chars;
+	my @split_chars = split //, $s;
+	my $split_chars = @split_chars;
+	print "not "
+	    unless "$length_chars/$regex_chars/$split_chars/$length_bytes" eq
+		   "2/2/2/6";
+	print "ok $test\n";
+	$test++;
+    }
 }
