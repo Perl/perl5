@@ -287,7 +287,7 @@ EOT
   package main;
   use Data::Dumper;
   $foo = 5;
-  @foo = (10,\*foo);
+  @foo = (-10,\*foo);
   %foo = (a=>1,b=>\$foo,c=>\@foo);
   $foo{d} = \%foo;
   $foo[2] = \%foo;
@@ -299,7 +299,7 @@ EOT
 #*::foo = \5;
 #*::foo = [
 #           #0
-#           10,
+#           -10,
 #           #1
 #           do{my $o},
 #           #2
@@ -330,7 +330,7 @@ EOT
 #$foo = \*::foo;
 #*::foo = \5;
 #*::foo = [
-#  10,
+#  -10,
 #  do{my $o},
 #  {
 #    'a' => 1,
@@ -356,7 +356,7 @@ EOT
 ##
   $WANT = <<'EOT';
 #@bar = (
-#  10,
+#  -10,
 #  \*::foo,
 #  {}
 #);
@@ -383,7 +383,7 @@ EOT
 ##
   $WANT = <<'EOT';
 #$bar = [
-#  10,
+#  -10,
 #  \*::foo,
 #  {}
 #];
@@ -411,7 +411,7 @@ EOT
   $WANT = <<'EOT';
 #$foo = \*::foo;
 #@bar = (
-#  10,
+#  -10,
 #  $foo,
 #  {
 #    a => 1,
@@ -433,7 +433,7 @@ EOT
   $WANT = <<'EOT';
 #$foo = \*::foo;
 #$bar = [
-#  10,
+#  -10,
 #  $foo,
 #  {
 #    a => 1,
