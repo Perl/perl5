@@ -1,5 +1,5 @@
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.25 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 
@@ -47,7 +47,8 @@ sub unimport{
     undef ${^ENCODING};
     binmode(STDIN,  ":raw");
     binmode(STDOUT, ":raw");
-    binmode(STDERR, ":raw");
+    # Leaves STDERR alone.
+    # binmode(STDERR, ":raw");
 }
 
 1;
@@ -121,7 +122,8 @@ You can override this by giving extra arguments.  See below.
 =item use encoding [I<ENCNAME>] ;
 
 Sets the script encoding to I<ENCNAME> and file handle disciplines of
-STDIN, STDOUT, and STDERR are set to ":encoding(I<ENCNAME>)". 
+STDIN, STDOUT are set to ":encoding(I<ENCNAME>)". Note STDERR will not 
+be changed.
 
 If no encoding is specified, the environment variable L<PERL_ENCODING>
 is consulted. If no  encoding can be found, C<Unknown encoding 'I<ENCNAME>'>
@@ -138,8 +140,8 @@ first I<ENCNAME>.
 
 =item no encoding;
 
-Unsets the script encoding and the disciplines of STDIN, STDOUT, and
-STDERR are reset to ":raw".
+Unsets the script encoding and the disciplines of STDIN, STDOUT are
+reset to ":raw".
 
 =back
 

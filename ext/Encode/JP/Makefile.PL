@@ -7,6 +7,9 @@ my %tables = (
               sjis_t     => ['shiftjis.ucm',
 			     'macJapanese.ucm',
 			     'cp932.ucm'],
+	      raw_t      => [
+			     qw(jis0201.ucm jis0208.ucm jis0212.ucm)
+			     ],
              );
 
 my $name = 'JP';

@@ -229,12 +229,10 @@ ext/Encode/bin/ucm2table	Table Generator for testing
 ext/Encode/bin/unidump	Unicode Dump like hexdump(1)
 ext/Encode/encengine.c		Encode extension
 ext/Encode/encoding.pm	Perl Pragmactic Module
-ext/Encode/lib/Encode/10646_1.pm	Encode extension
 ext/Encode/lib/Encode/Alias.pm	        Encode extension
 ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
-ext/Encode/lib/Encode/Internal.pm	Encode extension
 ext/Encode/lib/Encode/JP/2022_JP.pm	Encode extension
 ext/Encode/lib/Encode/JP/2022_JP1.pm	Encode extension
 ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
@@ -243,8 +241,6 @@ ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
 ext/Encode/lib/Encode/Supported.pod	Documents supported encodings
 ext/Encode/lib/Encode/Unicode.pm	Encode extension
 ext/Encode/lib/Encode/XS.pm		Encode extension
-ext/Encode/lib/Encode/ucs2_le.pm	Encode extension
-ext/Encode/lib/Encode/utf8.pm		Encode extension
 ext/Encode/t/Aliases.t	Encode extension test
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
@@ -261,6 +257,7 @@ ext/Encode/t/jisx0212.ref	test data
 ext/Encode/t/jperl.t	encoding extension test
 ext/Encode/t/ksc5601.euc	test data
 ext/Encode/t/ksc5601.ref	test data
+ext/Encode/t/unibench.pl	Unicode benchmark
 ext/Encode/ucm/8859-1.ucm	Unicode Character Map
 ext/Encode/ucm/8859-10.ucm	Unicode Character Map
 ext/Encode/ucm/8859-11.ucm	Unicode Character Map
@@ -329,6 +326,8 @@ ext/Encode/ucm/gsm0338.ucm	Unicode Character Map
 ext/Encode/ucm/hp-roman8.ucm	Unicode Character Map
 ext/Encode/ucm/ir-165.ucm	Unicode Character Map
 ext/Encode/ucm/jis0201.ucm	Unicode Character Map
+ext/Encode/ucm/jis0208.ucm	Unicode Character Map
+ext/Encode/ucm/jis0212.ucm	Unicode Character Map
 ext/Encode/ucm/johab.ucm	Unicode Character Map
 ext/Encode/ucm/koi8-f.ucm	Unicode Character Map
 ext/Encode/ucm/koi8-r.ucm	Unicode Character Map

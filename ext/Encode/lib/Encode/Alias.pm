@@ -1,7 +1,7 @@
 package Encode::Alias;
 use strict;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.25 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 require Exporter;
 
@@ -124,21 +124,19 @@ sub init_aliases
 {
     undef_aliases();
 
-    # Try all-lower-case version should anything fails
+    # Try all-lower-case version should all else fails
     define_alias( qr/^(.*)$/ => '"\L$1"' );
 
-    #  Moved from Encode::utf8
-    define_alias( qr/^UTF-8$/i => '"utf8"',);
-    # Moved from Encode::ucs2_le
-    define_alias( qr/^UCS-2LE$/i    => '"UTF-16LE"',
-		  qr/^UCS2-LE$/i    => '"UTF-16LE"');
-    # Moved from Encode::10464_1
-    define_alias( qr/^UTF-16BE$/i    => '"UCS-2"',
-		  qr/^UCS2$/i        => '"UCS-2"',
-		  qr/^iso-10646-1$/i => '"UCS-2"', );
-    # Moved from ascii.ucm
+    # UTF/UCS stuff
+    define_alias( qr/^UCS-?2-?LE$/i    => '"UCS-2LE"' );
+    define_alias( qr/^UCS-?2-?(BE)?$/i => '"UCS-2BE"',
+		  qr/^iso-10646-1$/i   => '"UCS-2BE"' );
+    define_alias( qr/^UTF(16|32)-?BE$/i => '"UTF-$1BE"',
+		  qr/^UTF(16|32)-?LE$/i => '"UTF-$1LE"',
+		  qr/^UTF(16|32)$/i     => '"UTF-$1"',
+		);
+    # ASCII
     define_alias(qr/^(?:US-?)ascii$/i => '"ascii"');
-    # 'C' => 'US-ascii' so you can feed default locale directly.
     define_alias('C' => 'ascii');
     # Allow variants of iso-8859-1 etc.
     define_alias( qr/\biso[-_]?(\d+)[-_](\d+)$/i => '"iso-$1-$2"' );
@@ -188,8 +186,8 @@ sub init_aliases
     define_alias( qr/^mac_(.*)$/i => '"mac$1"');
     # Ououououou. gone.  They are differente!
     # define_alias( qr/\bmacRomanian$/i => '"macRumanian"');
-
-# Standardize on the dashed versions.
+  
+    # Standardize on the dashed versions.
     # define_alias( qr/\butf8$/i  => 'utf-8' );
     define_alias( qr/\bkoi8r$/i => 'koi8-r' );
     define_alias( qr/\bkoi8u$/i => 'koi8-u' );
@@ -221,6 +219,8 @@ sub init_aliases
 	define_alias( qr/\bbig-?5$/i		  => '"big5"' );
 	define_alias( qr/\bbig5-hk(?:scs)?$/i	  => '"big5-hkscs"' );
     }
+    # utf8 is blessed :)
+    define_alias( qr/^UTF-8$/i => '"utf8"',);
     # At last, Map white space and _ to '-'
     define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
 }
