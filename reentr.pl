@@ -493,43 +493,36 @@ EOF
 	$seent{$func}*	_${genfunc}_ptr;
 #   endif
 EOF
-    	    if ($genfunc eq 'getspent') {
-		push @size, <<EOF;
-	PL_reentrant_buffer->_${genfunc}_size = 1024;
-EOF
-	    } else {
-	        push @struct, <<EOF;
+	    push @struct, <<EOF;
 #   ifdef USE_${GENFUNC}_FPTR
 	FILE*	_${genfunc}_fptr;
 #   endif
 EOF
-		    push @init, <<EOF;
+	    push @init, <<EOF;
 #   ifdef USE_${GENFUNC}_FPTR
 	PL_reentrant_buffer->_${genfunc}_fptr = NULL;
 #   endif
 EOF
-		my $sc = $genfunc eq 'getgrent' ?
+	    my $sc = $genfunc eq 'grent' ?
 		    '_SC_GETGR_R_SIZE_MAX' : '_SC_GETPW_R_SIZE_MAX';
-		my $sz = $genfunc eq 'getgrent' ?
-                    '_grent_size' : '_pwent_size';
-		push @size, <<EOF;
+	    my $sz = "_${genfunc}_size";
+	    push @size, <<EOF;
 #   if defined(HAS_SYSCONF) && defined($sc) && !defined(__GLIBC__)
-	PL_reentrant_buffer->_${genfunc}_size = sysconf($sc);
+	PL_reentrant_buffer->$sz = sysconf($sc);
 	if (PL_reentrant_buffer->$sz == -1)
 		PL_reentrant_buffer->$sz = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
-	PL_reentrant_buffer->_${genfunc}_size = SIABUFSIZ;
+	PL_reentrant_buffer->$sz = SIABUFSIZ;
 #       else
 #           ifdef __sgi
-	PL_reentrant_buffer->_${genfunc}_size = BUFSIZ;
+	PL_reentrant_buffer->$sz = BUFSIZ;
 #           else
-	PL_reentrant_buffer->_${genfunc}_size = REENTRANTUSUALSIZE;
+	PL_reentrant_buffer->$sz = REENTRANTUSUALSIZE;
 #           endif
 #       endif
 #   endif 
 EOF
-            }
 	    pushinitfree $genfunc;
 	    pushssif $endif;
 	}
@@ -814,6 +807,7 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GHOSTENT:
 		    retptr = gethostent(); break;
 	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
 	        }
 	    }
@@ -844,6 +838,7 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GGRENT:
 		    retptr = getgrent(); break;
 	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
 	        }
 	    }
@@ -875,10 +870,10 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GNETENT:
 		    retptr = getnetent(); break;
 	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
 	        }
 	    }
-	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -906,10 +901,10 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GPWENT:
 		    retptr = getpwent(); break;
 	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
 	        }
 	    }
-	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -936,10 +931,10 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GPROTOENT:
 		    retptr = getprotoent(); break;
 	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
 	        }
 	    }
-	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
@@ -968,10 +963,10 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GSERVENT:
 		    retptr = getservent(); break;
 	        default:
+		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;
 	        }
 	    }
-	    SETERRNO(ERANGE, LIB_INVARG);
 	}
 	break;
 #endif
