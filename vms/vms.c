@@ -2061,7 +2061,32 @@ safe_popen(pTHX_ char *cmd, char *mode)
     vmspipedsc.dsc$a_pointer = tfilebuf;
     vmspipedsc.dsc$w_length  = strlen(tfilebuf);
 
-    if (!(setup_cmddsc(aTHX_ cmd,0) & 1)) { set_errno(EINVAL); return Nullfp; }
+    sts = setup_cmddsc(aTHX_ cmd,0);
+    if (!(sts & 1)) { 
+      switch (sts) {
+        case RMS$_FNF:  case RMS$_DNF:
+          set_errno(ENOENT); break;
+        case RMS$_DIR:
+          set_errno(ENOTDIR); break;
+        case RMS$_DEV:
+          set_errno(ENODEV); break;
+        case RMS$_PRV:
+          set_errno(EACCES); break;
+        case RMS$_SYN:
+          set_errno(EINVAL); break;
+        case CLI$_BUFOVF: case RMS$_RTB: case CLI$_TKNOVF: case CLI$_RSLOVF:
+          set_errno(E2BIG); break;
+        case LIB$_INVARG: case LIB$_INVSTRDES: case SS$_ACCVIO: /* shouldn't happen */
+          _ckvmssts(sts); /* fall through */
+        default:  /* SS$_DUPLNAM, SS$_CLI, resource exhaustion, etc. */
+          set_errno(EVMSERR); 
+      }
+      set_vaxc_errno(sts);
+      if (ckWARN(WARN_PIPE)) {
+        Perl_warner(aTHX_ WARN_PIPE,"Can't pipe \"%*s\": %s", strlen(cmd), cmd, Strerror(errno));
+      }
+      return Nullfp; 
+    }
     New(1301,info,1,Info);
         
     info->mode = *mode;
@@ -4552,6 +4577,7 @@ setup_argstr(pTHX_ SV *really, SV **mark, SV **sp)
 
 }  /* end of setup_argstr() */
 
+#define MAX_DCL_LINE_LENGTH   255
 
 static unsigned long int
 setup_cmddsc(pTHX_ char *cmd, int check_img)
@@ -4565,9 +4591,8 @@ setup_cmddsc(pTHX_ char *cmd, int check_img)
   register char *s, *rest, *cp, *wordbreak;
   register int isdcl;
 
-  if (strlen(cmd) >
-      (sizeof(vmsspec) > sizeof(resspec) ? sizeof(resspec) : sizeof(vmsspec)))
-    return LIB$_INVARG;
+  if (strlen(cmd) > MAX_DCL_LINE_LENGTH)
+    return CLI$_BUFOVF;                /* continuation lines currently unsupported */
   s = cmd;
   while (*s && isspace(*s)) s++;
 
@@ -4647,14 +4672,14 @@ setup_cmddsc(pTHX_ char *cmd, int check_img)
       if (cando_by_name(S_IXUSR,0,resspec)) {
         New(402,VMScmd.dsc$a_pointer,7 + s - resspec + (rest ? strlen(rest) : 0),char);
         if (!isdcl) {
-        strcpy(VMScmd.dsc$a_pointer,"$ MCR ");
+            strcpy(VMScmd.dsc$a_pointer,"$ MCR ");
         } else {
             strcpy(VMScmd.dsc$a_pointer,"@");
         }
         strcat(VMScmd.dsc$a_pointer,resspec);
         if (rest) strcat(VMScmd.dsc$a_pointer,rest);
         VMScmd.dsc$w_length = strlen(VMScmd.dsc$a_pointer);
-        return retsts;
+        return (VMScmd.dsc$w_length > MAX_DCL_LINE_LENGTH ? CLI$_BUFOVF : retsts);
       }
       else retsts = RMS$_PRV;
     }
@@ -4671,7 +4696,7 @@ setup_cmddsc(pTHX_ char *cmd, int check_img)
     else { _ckvmssts(retsts); }
   }
 
-  return (VMScmd.dsc$w_length > 255 ? CLI$_BUFOVF : retsts);
+  return (VMScmd.dsc$w_length > MAX_DCL_LINE_LENGTH ? CLI$_BUFOVF : retsts);
 
 }  /* end of setup_cmddsc() */
 
@@ -4731,7 +4756,7 @@ Perl_vms_do_exec(pTHX_ char *cmd)
         set_errno(EACCES); break;
       case RMS$_SYN:
         set_errno(EINVAL); break;
-      case CLI$_BUFOVF:
+      case CLI$_BUFOVF: case RMS$_RTB: case CLI$_TKNOVF: case CLI$_RSLOVF:
         set_errno(E2BIG); break;
       case LIB$_INVARG: case LIB$_INVSTRDES: case SS$_ACCVIO: /* shouldn't happen */
         _ckvmssts(retsts); /* fall through */
@@ -4775,8 +4800,13 @@ Perl_do_spawn(pTHX_ char *cmd)
     hadcmd = 0;
     sts = lib$spawn(0,0,0,0,0,0,&substs,0,0,0,0,0,0);
   }
-  else if ((sts = setup_cmddsc(aTHX_ cmd,0)) & 1) {
-    sts = lib$spawn(&VMScmd,0,0,0,0,0,&substs,0,0,0,0,0,0);
+  else {
+    sts = setup_cmddsc(aTHX_ cmd,0);
+    if (sts & 1) {
+        sts = lib$spawn(&VMScmd,0,0,0,0,0,&substs,0,0,0,0,0,0);
+    } else {
+        substs = sts; /* didn't spawn, use command setup failure for return */
+    }
   }
   
   if (!(sts & 1)) {
@@ -4791,7 +4821,7 @@ Perl_do_spawn(pTHX_ char *cmd)
         set_errno(EACCES); break;
       case RMS$_SYN:
         set_errno(EINVAL); break;
-      case CLI$_BUFOVF:
+      case CLI$_BUFOVF: case RMS$_RTB: case CLI$_TKNOVF: case CLI$_RSLOVF:
         set_errno(E2BIG); break;
       case LIB$_INVARG: case LIB$_INVSTRDES: case SS$_ACCVIO: /* shouldn't happen */
         _ckvmssts(sts); /* fall through */
