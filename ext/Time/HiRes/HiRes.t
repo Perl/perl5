@@ -133,10 +133,16 @@ else {
 if (!$have_time) {
     skip 14
 } else {
- my $t = time();
- my $tf = Time::HiRes::time();
- ok 14, (abs($tf - $t) <= 1),
-  "time $t differs from Time::HiRes::time $tf";
+ my ($t1, $tf, $t2);
+ for my $i (1 .. 9) {
+     $t1 = time();
+     $tf = Time::HiRes::time();
+     $t2 = 1 + time();
+     last if (($t2 - $t1) <= 1);
+ }
+ ok 14, (($t1 <= $tf) && ($tf <= $t2)),
+      "Time::HiRes::time $tf not bracketed by $t1 - $t2";
+
 }
 
 unless (defined &Time::HiRes::gettimeofday
