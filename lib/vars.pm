@@ -29,7 +29,8 @@ ensuring their availability to to the later-loaded routines.
 See L<perlmod/Pragmatic Modules>.
 
 =cut
-require 5.000;
+
+require 5.002;
 use Carp;
 
 sub import {
