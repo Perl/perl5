@@ -595,7 +595,7 @@ are a few of the more popular Unix flavors:
     Linux         linux      ppc-linux
     HP-UX         hpux       PA-RISC1.1
     IRIX          irix       irix
-    Mac OS X      rhapsody   rhapsody
+    Mac OS X      darwin     darwin
     MachTen PPC   machten    powerpc-machten
     NeXT 3        next       next-fat
     NeXT 4        next       OPENSTEP-Mach
@@ -784,14 +784,10 @@ the application or MPW tool version is running, check:
     $is_ppc    = $MacPerl::Architecture eq 'MacPPC';
     $is_68k    = $MacPerl::Architecture eq 'Mac68K';
 
-S<Mac OS X> and S<Mac OS X Server>, based on NeXT's OpenStep OS, will
-(in theory) be able to run MacPerl natively, under the "Classic"
-environment.  The new "Cocoa" environment (formerly called the "Yellow Box")
-may run a slightly modified version of MacPerl, using the Carbon interfaces.
-
-S<Mac OS X Server> and its Open Source version, Darwin, both run Unix
-perl natively (with a few patches).  Full support for these
-is slated for perl 5.6.
+S<Mac OS X>, based on NeXT's OpenStep OS, runs MacPerl natively, under the
+"Classic" environment.  There is no "Carbon" version of MacPerl to run
+under the primary Mac OS X environment.  S<Mac OS X> and its Open Source
+version, Darwin, both run Unix perl natively.
 
 Also see:
 
@@ -1897,7 +1893,7 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 
 	AIX
 	AmigaOS
-	Darwin		(Rhapsody)
+	Darwin		(Mac OS X)
 	DG/UX
 	DOS DJGPP 	1)
 	DYNIX/ptx
@@ -2085,9 +2081,6 @@ Michael G Schwern <schwern@pobox.com>,
 Dan Sugalski <dan@sidhe.org>,
 Nathan Torkington <gnat@frii.com>.
 
-This document is maintained by Chris Nandor
-<pudge@pobox.com>.
-
 =head1 VERSION
 
-Version 1.49, last modified 07 Jun 2001
+Version 1.50, last modified 10 Jul 2001
