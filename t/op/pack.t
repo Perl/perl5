@@ -409,7 +409,8 @@ sub numbers_with_total {
         print "ok $test # unpack '%$_$format' gave $sum,"
           . " expected $calc_sum\n";
       } else {
-        print "not ok $test # For list (" . join (", ", @_) . ") (total $total)"
+	my $text = ref $total ? &$total($len) : $total;
+        print "not ok $test # For list (" . join (", ", @_) . ") (total $text)"
           . " packed with $format unpack '%$_$format' gave $sum,"
             . " expected $calc_sum\n";
       }
