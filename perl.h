@@ -2209,7 +2209,7 @@ struct ufuncs {
 /* In pre-5.7-Perls the 'U' magic didn't get the thread context.
  * XS code wanting to be backward compatible can do something
  * like the following:
- 
+
 #ifndef PERL_MG_UFUNC
 #define PERL_MG_UFUNC(name,ix,sv) I32 name(IV ix, SV *sv)
 #endif
@@ -3332,7 +3332,11 @@ typedef struct am_table_short AMTS;
  * Remap printf
  */
 #undef printf
+#ifdef __GNUC__
+#define printf(fmt,args...) PerlIO_stdoutf(fmt,##args)
+#else
 #define printf PerlIO_stdoutf
+#endif
 #endif
 
 /* if these never got defined, they need defaults */
