@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..54\n";
+print "1..55\n";
 
 # Test glob operations.
 
@@ -231,15 +231,19 @@ $bar = "ok 48";
 local(*bar) = *bar;
 print "$bar\n";
 
+$var = "ok 49";
+$_   = \$var;
+print $$_,"\n";
+
 # test if reblessing during destruction results in more destruction
 
 {
     package A;
     sub new { bless {}, shift }
-    DESTROY { print "# destroying 'A'\nok 50\n" }
+    DESTROY { print "# destroying 'A'\nok 51\n" }
     package B;
     sub new { bless {}, shift }
-    DESTROY { print "# destroying 'B'\nok 49\n"; bless shift, 'A' }
+    DESTROY { print "# destroying 'B'\nok 50\n"; bless shift, 'A' }
     package main;
     my $b = B->new;
 }
@@ -251,11 +255,11 @@ print "$bar\n";
     local $SIG{'__DIE__'} = sub {
 	my $m = shift;
 	if ($i++ > 4) {
-	    print "# infinite recursion, bailing\nnot ok 51\n";
+	    print "# infinite recursion, bailing\nnot ok 52\n";
 	    exit 1;
         }
 	print "# $m";
-	if ($m =~ /^Modification of a read-only/) { print "ok 51\n" }
+	if ($m =~ /^Modification of a read-only/) { print "ok 52\n" }
     };
     package C;
     sub new { bless {}, shift }
@@ -272,9 +276,9 @@ print "$bar\n";
 package FINALE;
 
 {
-    $ref3 = bless ["ok 54\n"];		# package destruction
-    my $ref2 = bless ["ok 53\n"];	# lexical destruction
-    local $ref1 = bless ["ok 52\n"];	# dynamic destruction
+    $ref3 = bless ["ok 55\n"];		# package destruction
+    my $ref2 = bless ["ok 54\n"];	# lexical destruction
+    local $ref1 = bless ["ok 53\n"];	# dynamic destruction
     1;					# flush any temp values on stack
 }
 

@@ -86,10 +86,7 @@ PATH=.$p_$PATH
 export PATH
 
 : This should not matter in scripts, but apparently it does, sometimes
-case "$CDPATH" in
-'')	;;
-*)	CDPATH='' ;;
-esac
+CDPATH='.' 
 
 : Sanity checks
 if test ! -t 0; then

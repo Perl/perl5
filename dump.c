@@ -31,6 +31,7 @@ static void dump();
 void
 dump_all()
 {
+    dTHR;
     PerlIO_setlinebuf(Perl_debug_log);
     if (main_root)
 	dump_op(main_root);
@@ -41,6 +42,7 @@ void
 dump_packsubs(stash)
 HV* stash;
 {
+    dTHR;
     I32	i;
     HE	*entry;
 

@@ -45,9 +45,21 @@ int arg;
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "F_EXLCK"))
+#ifdef F_EXLCK
+	        return F_EXLCK;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "F_GETFD"))
 #ifdef F_GETFD
 	        return F_GETFD;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_GETFL"))
+#ifdef F_GETFL
+	        return F_GETFL;
 #else
 	        goto not_there;
 #endif
@@ -63,21 +75,21 @@ int arg;
 #else
 	        goto not_there;
 #endif
-	    if (strEQ(name, "F_SETFD"))
-#ifdef F_SETFD
-	        return F_SETFD;
-#else
-	        goto not_there;
-#endif
-	    if (strEQ(name, "F_GETFL"))
-#ifdef F_GETFL
-	        return F_GETFL;
-#else
-	        goto not_there;
-#endif
 	    if (strEQ(name, "F_POSIX"))
 #ifdef F_POSIX
 	        return F_POSIX;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_RDLCK"))
+#ifdef F_RDLCK
+	        return F_RDLCK;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_SETFD"))
+#ifdef F_SETFD
+	        return F_SETFD;
 #else
 	        goto not_there;
 #endif
@@ -105,9 +117,9 @@ int arg;
 #else
 	        goto not_there;
 #endif
-	    if (strEQ(name, "F_RDLCK"))
-#ifdef F_RDLCK
-	        return F_RDLCK;
+	    if (strEQ(name, "F_SHLCK"))
+#ifdef F_SHLCK
+	        return F_SHLCK;
 #else
 	        goto not_there;
 #endif
@@ -147,6 +159,12 @@ int arg;
 	if (strEQ(name, "FD_CLOEXEC"))
 #ifdef FD_CLOEXEC
 	    return FD_CLOEXEC;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "FDEFER"))
+#ifdef FDEFER
+	    return FDEFER;
 #else
 	    goto not_there;
 #endif
@@ -214,27 +232,9 @@ int arg;
     	break;
     case 'O':
 	if (strnEQ(name, "O_", 2)) {
-	    if (strEQ(name, "O_CREAT"))
-#ifdef O_CREAT
-	        return O_CREAT;
-#else
-	        goto not_there;
-#endif
-	    if (strEQ(name, "O_EXCL"))
-#ifdef O_EXCL
-	        return O_EXCL;
-#else
-	        goto not_there;
-#endif
-	    if (strEQ(name, "O_NOCTTY"))
-#ifdef O_NOCTTY
-	        return O_NOCTTY;
-#else
-	        goto not_there;
-#endif
-	    if (strEQ(name, "O_TRUNC"))
-#ifdef O_TRUNC
-	        return O_TRUNC;
+	    if (strEQ(name, "O_ACCMODE"))
+#ifdef O_ACCMODE
+	        return O_ACCMODE;
 #else
 	        goto not_there;
 #endif
@@ -244,15 +244,63 @@ int arg;
 #else
 	        goto not_there;
 #endif
-	    if (strEQ(name, "O_NONBLOCK"))
-#ifdef O_NONBLOCK
-	        return O_NONBLOCK;
+	    if (strEQ(name, "O_ASYNC"))
+#ifdef O_ASYNC
+	        return O_ASYNC;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_BINARY"))
+#ifdef O_BINARY
+	        return O_BINARY;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_CREAT"))
+#ifdef O_CREAT
+	        return O_CREAT;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_DEFER"))
+#ifdef O_DEFER
+	        return O_DEFER;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_DSYNC"))
+#ifdef O_DSYNC
+	        return O_DSYNC;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_EXCL"))
+#ifdef O_EXCL
+	        return O_EXCL;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_EXLOCK"))
+#ifdef O_EXLOCK
+	        return O_EXLOCK;
 #else
 	        goto not_there;
 #endif
 	    if (strEQ(name, "O_NDELAY"))
 #ifdef O_NDELAY
 	        return O_NDELAY;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_NOCTTY"))
+#ifdef O_NOCTTY
+	        return O_NOCTTY;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_NONBLOCK"))
+#ifdef O_NONBLOCK
+	        return O_NONBLOCK;
 #else
 	        goto not_there;
 #endif
@@ -268,21 +316,9 @@ int arg;
 #else
 	        goto not_there;
 #endif
-	    if (strEQ(name, "O_WRONLY"))
-#ifdef O_WRONLY
-	        return O_WRONLY;
-#else
-	        goto not_there;
-#endif
-	    if (strEQ(name, "O_BINARY"))
-#ifdef O_BINARY
-	        return O_BINARY;
-#else
-	        goto not_there;
-#endif
-	    if (strEQ(name, "O_EXLOCK"))
-#ifdef O_EXLOCK
-	        return O_EXLOCK;
+	    if (strEQ(name, "O_RSYNC"))
+#ifdef O_RSYNC
+	        return O_RSYNC;
 #else
 	        goto not_there;
 #endif
@@ -292,33 +328,27 @@ int arg;
 #else
 	        goto not_there;
 #endif
-	    if (strEQ(name, "O_ASYNC"))
-#ifdef O_ASYNC
-	        return O_ASYNC;
-#else
-	        goto not_there;
-#endif
-	    if (strEQ(name, "O_DSYNC"))
-#ifdef O_DSYNC
-	        return O_DSYNC;
-#else
-	        goto not_there;
-#endif
-	    if (strEQ(name, "O_RSYNC"))
-#ifdef O_RSYNC
-	        return O_RSYNC;
-#else
-	        goto not_there;
-#endif
 	    if (strEQ(name, "O_SYNC"))
 #ifdef O_SYNC
 	        return O_SYNC;
 #else
 	        goto not_there;
 #endif
-	    if (strEQ(name, "O_DEFER"))
-#ifdef O_DEFER
-	        return O_DEFER;
+	    if (strEQ(name, "O_TEXT"))
+#ifdef O_TEXT
+	        return O_TEXT;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_TRUNC"))
+#ifdef O_TRUNC
+	        return O_TRUNC;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_WRONLY"))
+#ifdef O_WRONLY
+	        return O_WRONLY;
 #else
 	        goto not_there;
 #endif

@@ -27,6 +27,7 @@ void
 deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
     char *pat;
 {
+    dTHR;
     register I32 i;
     GV* gv = curcop->cop_filegv;
 
@@ -51,6 +52,7 @@ deb(pat, va_alist)
     va_dcl
 #  endif
 {
+    dTHR;
     va_list args;
     register I32 i;
     GV* gv = curcop->cop_filegv;
@@ -82,6 +84,7 @@ deb_growlevel()
 I32
 debstackptrs()
 {
+    dTHR;
     PerlIO_printf(Perl_debug_log, "%8lx %8lx %8ld %8ld %8ld\n",
 	(unsigned long)curstack, (unsigned long)stack_base,
 	(long)*markstack_ptr, (long)(stack_sp-stack_base),
@@ -95,6 +98,7 @@ debstackptrs()
 I32
 debstack()
 {
+    dTHR;
     I32 top = stack_sp - stack_base;
     register I32 i = top - 30;
     I32 *markscan = markstack;

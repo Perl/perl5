@@ -88,7 +88,7 @@ For example:
     @files = glob('*.c');	# Always insecure (uses csh)
 
 If you try to do something insecure, you will get a fatal error saying
-something like "Insecure dependency" or "Insecure PATH".  Note that you
+something like "Insecure dependency" or "Insecure $ENV{PATH}".  Note that you
 can still write an insecure B<system> or B<exec>, but only by explicitly
 doing something like the "considered secure" example above.
 
