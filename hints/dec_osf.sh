@@ -34,30 +34,57 @@
 #	hand searching things (index, m//, s///), seems to get slower.
 #	Your mileage will vary.
 #
+#	Note 5: The -std is needed because the following compiled
+#	without the -std and linked with -lm
+#
+#	#include <math.h>
+#	#include <stdio.h>
+#	int main(){short x=10,y=sqrt(x);printf("%d\n",y);}
+#
+#	will in Digital UNIX 3.* and 4.0b print 0 -- and in Digital
+#	UNIX 4.0{,a} dump core: Floating point exception in the printf(),
+#	the y has become a signaling NaN.
+#
 
-_DEC_cc_style=
+# If using the DEC compiler we must find out the DEC compiler style:
+# the style changed between Digital UNIX (aka DEC OSF/1) 3 and
+# Digital UNIX 4. The old compiler was originally from Ultrix and
+# the MIPS company, the new compiler is originally from the VAX world
+# and it is called GEM. Many of the options we are going to use depend
+# on the compiler style.
+
+# do NOT, I repeat, *NOT* take away that leading tab
+	_DEC_cc_style=
+# Configure Black Magic (TM)
+
+case "$cc" in
+*gcc*)	;; # pass
+*)	# compile something small: taint.c is fine for this.
+    	# the main point is the '-v' flag of 'cc'.
+       	case "`cc -v -I. -c taint.c -o /tmp/taint$$.o 2>&1`" in
+	*/gemc_cc*)	# we have the new DEC GEM CC
+			_DEC_cc_style=new
+			;;
+	*)		# we have the old MIPS CC
+			_DEC_cc_style=old
+			;;
+	esac
+	# cleanup
+	rm -f /tmp/taint$$.o
+	;;
+esac
+
+# we want optimisation
+
 case "$optimize" in
 '')	case "$cc" in 
 	*gcc*)	
-		optimize='-O3'
+		optimize='-O3'				;;
+	*)	case "$_DEC_cc_style" in
+		new)	optimize='-O4'			;;
+		old)	optimize='-O2 -Olimit 3200'	;;
+	    	esac
 		;;
-	*)	
-	    	# compile something small: taint.c is fine for this.
-	    	# the main point is the '-v' flag of 'cc'.
-        	case "`cc -v -I. -c taint.c -o /tmp/taint$$.o 2>&1`" in
-		*/gemc_cc*)
-			# we have the new DEC GEM CC
-			optimize='-O4'
-			_DEC_cc_style=new
-			;;
-		*)
-			# we have the old MIPS CC
-			optimize='-O2 -Olimit 3200'
-			_DEC_cc_style=old
-			;;
-		esac
-		# cleanup
-		rm -f /tmp/taint$$.o
 	esac
 	;;
 esac
@@ -69,10 +96,7 @@ ccflags="$ccflags -DSTANDARD_C"
 case "$cc" in
 gcc)	ccflags="$ccflags -ansi"
 	;;
-*)	ccflags="$ccflags -std1"
-	# -vaxc not to get warnings about stuff like$this for VMS.
-	# -vaxc is available only in newer DEC compilers.
-	test X"$_DEC_cc_style"Y = XnewY && ccflags="$ccflags -vaxc"
+*)	ccflags="$ccflags -std"
 	;;
 esac
 
@@ -105,13 +129,26 @@ case "$optimize" in
 esac
 
 #
+# Unset temporary variables no more needed.
+#
+
+unset _DEC_cc_style
+    
+#
 # History:
+#
+# perl5.003_27:
+#
+#	18-Feb-1997 Jarkko Hietaniemi <jhi@iki.fi>
+#
+#	* unset _DEC_cc_style and more commentary on -std.
+#
 #
 # perl5.003_26:
 #
 #	15-Feb-1997 Jarkko Hietaniemi <jhi@iki.fi>
 #
-#	* -std1 and -ansi.
+#	* -std and -ansi.
 #
 #
 # perl5.003_24:
