@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri May 28 10:41:29 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sat May 29 13:37:18 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -338,6 +338,7 @@ d_endnent=''
 d_endpent=''
 d_endpwent=''
 d_endsent=''
+d_endspent=''
 d_fchmod=''
 d_fchown=''
 d_fcntl=''
@@ -383,6 +384,8 @@ d_getprotoprotos=''
 d_getpwent=''
 d_getsent=''
 d_getservprotos=''
+d_getspent=''
+d_getspnam=''
 d_getsbyname=''
 d_getsbyport=''
 d_gnulibc=''
@@ -474,6 +477,7 @@ d_setrgid=''
 d_setruid=''
 d_setsent=''
 d_setsid=''
+d_setspent=''
 d_setvbuf=''
 d_sfio=''
 usesfio=''
@@ -623,6 +627,7 @@ d_pwpasswd=''
 d_pwquota=''
 i_pwd=''
 i_sfio=''
+i_shadow=''
 i_stddef=''
 i_stdlib=''
 i_string=''
@@ -950,7 +955,7 @@ useopcode=true
 : If anyone needs -lnet, put it in a hint file.
 libswanted='sfio socket inet nsl nm ndbm gdbm dbm db malloc dl'
 libswanted="$libswanted dld ld sun m rt c cposix posix"
-libswanted="$libswanted ndir dir crypt"
+libswanted="$libswanted ndir dir crypt sec"
 libswanted="$libswanted ucb bsd BSD PW x"
 : We probably want to search /usr/shlib before most other libraries.
 : This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
@@ -7566,6 +7571,10 @@ eval $inlibc
 set endservent d_endsent
 eval $inlibc
 
+: see if endspent exists
+set endspent d_endspent
+eval $inlibc
+
 : Locate the flags for 'open()'
 echo " "
 $cat >open3.c <<'EOCP'
@@ -8266,6 +8275,14 @@ eval $inlibc
 echo " "
 set d_getservprotos getservent $i_netdb netdb.h
 eval $hasproto
+
+: see if getspent exists
+set getspent d_getspent
+eval $inlibc
+
+: see if getspnam exists
+set getspnam d_getspnam
+eval $inlibc
 
 : see if gettimeofday or ftime exists
 set gettimeofday d_gettimeod
@@ -9617,6 +9634,10 @@ eval $inlibc
 
 : see if setsid exists
 set setsid d_setsid
+eval $inlibc
+
+: see if setspent exists
+set setspent d_setspent
 eval $inlibc
 
 : see if setvbuf exists
@@ -12390,6 +12411,10 @@ set i_termio; eval $setvar
 val=$val2; set i_sgtty; eval $setvar
 val=$val3; set i_termios; eval $setvar
 
+: see if this is a shadow.h system
+set shadow.h i_shadow
+eval $inhdr
+
 : see if stdarg is available
 echo " "
 if $test `./findhdr stdarg.h`; then
@@ -12982,6 +13007,7 @@ d_endnent='$d_endnent'
 d_endpent='$d_endpent'
 d_endpwent='$d_endpwent'
 d_endsent='$d_endsent'
+d_endspent='$d_endspent'
 d_eofnblk='$d_eofnblk'
 d_eunice='$d_eunice'
 d_fchmod='$d_fchmod'
@@ -13041,6 +13067,8 @@ d_getsbyname='$d_getsbyname'
 d_getsbyport='$d_getsbyport'
 d_getsent='$d_getsent'
 d_getservprotos='$d_getservprotos'
+d_getspent='$d_getspent'
+d_getspnam='$d_getspnam'
 d_gettimeod='$d_gettimeod'
 d_gnulibc='$d_gnulibc'
 d_grpasswd='$d_grpasswd'
@@ -13162,6 +13190,7 @@ d_setrgid='$d_setrgid'
 d_setruid='$d_setruid'
 d_setsent='$d_setsent'
 d_setsid='$d_setsid'
+d_setspent='$d_setspent'
 d_setvbuf='$d_setvbuf'
 d_sfio='$d_sfio'
 d_shm='$d_shm'
@@ -13298,6 +13327,7 @@ i_pwd='$i_pwd'
 i_rpcsvcdbm='$i_rpcsvcdbm'
 i_sfio='$i_sfio'
 i_sgtty='$i_sgtty'
+i_shadow='$i_shadow'
 i_stdarg='$i_stdarg'
 i_stddef='$i_stddef'
 i_stdlib='$i_stdlib'
