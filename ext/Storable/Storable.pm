@@ -791,10 +791,10 @@ Here are some code samples showing a possible usage of Storable:
 
 	%color = ('Blue' => 0.1, 'Red' => 0.8, 'Black' => 0, 'White' => 1);
 
-	store(\%color, '/tmp/colors') or die "Can't store %a in /tmp/colors!\n";
+	store(\%color, 'mycolors') or die "Can't store %a in mycolors!\n";
 
-	$colref = retrieve('/tmp/colors');
-	die "Unable to retrieve from /tmp/colors!\n" unless defined $colref;
+	$colref = retrieve('mycolors');
+	die "Unable to retrieve from mycolors!\n" unless defined $colref;
 	printf "Blue is still %lf\n", $colref->{'Blue'};
 
 	$colref2 = dclone(\%color);
