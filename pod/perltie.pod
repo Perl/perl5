@@ -218,7 +218,7 @@ anonymous ARRAY ref) will be accessed.
 In our example, just to show you that you don't I<really> have to return an
 ARRAY reference, we'll choose a HASH reference to represent our object.
 A HASH works out well as a generic record type: the C<{BOUND}> field will
-store the maximum bound allowed, and the C<{ARRAY} field will hold the
+store the maximum bound allowed, and the C<{ARRAY}> field will hold the
 true ARRAY ref.  If someone outside the class tries to dereference the
 object returned (doubtless thinking it an ARRAY ref), they'll blow up.
 This just goes to show you that you should respect an object's privacy.
