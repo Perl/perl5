@@ -1067,9 +1067,9 @@ PP(pp_flop)
 
     if (GIMME == G_ARRAY) {
 	dPOPPOPssrl;
-	register I32 i, j;
+	register IV i, j;
 	register SV *sv;
-	I32 max;
+	IV max;
 
 	if (SvGMAGICAL(left))
 	    mg_get(left);
@@ -1077,7 +1077,8 @@ PP(pp_flop)
 	    mg_get(right);
 
 	if (RANGE_IS_NUMERIC(left,right)) {
-	    if (SvNV(left) < IV_MIN || SvNV(right) > IV_MAX)
+	    if ((SvOK(left) && SvNV(left) < IV_MIN) ||
+		(SvOK(right) && SvNV(right) > IV_MAX))
 		DIE(aTHX_ "Range iterator outside integer range");
 	    i = SvIV(left);
 	    max = SvIV(right);
@@ -1790,17 +1791,19 @@ PP(pp_enteriter)
 	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
 	if (SvTYPE(cx->blk_loop.iterary) != SVt_PVAV) {
 	    dPOPss;
-	    if (RANGE_IS_NUMERIC(sv,(SV*)cx->blk_loop.iterary)) {
-		if (SvNV(sv) < IV_MIN ||
-		    SvNV((SV*)cx->blk_loop.iterary) >= IV_MAX)
+	    SV *right = (SV*)cx->blk_loop.iterary;
+	    if (RANGE_IS_NUMERIC(sv,right)) {
+		if ((SvOK(sv) && SvNV(sv) < IV_MIN) ||
+		    (SvOK(right) && SvNV(right) >= IV_MAX))
 		    DIE(aTHX_ "Range iterator outside integer range");
 		cx->blk_loop.iterix = SvIV(sv);
-		cx->blk_loop.itermax = SvIV((SV*)cx->blk_loop.iterary);
+		cx->blk_loop.itermax = SvIV(right);
 	    }
 	    else {
 		STRLEN n_a;
 		cx->blk_loop.iterlval = newSVsv(sv);
-		SvPV_force(cx->blk_loop.iterlval,n_a);
+		(void) SvPV_force(cx->blk_loop.iterlval,n_a);
+		(void) SvPV(right,n_a);
 	    }
 	}
     }
