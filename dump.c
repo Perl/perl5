@@ -509,6 +509,9 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	else if (o->op_type == OP_FLOP) {
 	    if (o->op_private & OPpFLIP_LINENUM)
 		sv_catpv(tmpsv, ",LINENUM");
+	} else if (o->op_type == OP_RV2CV) {
+	    if (o->op_private & OPpLVAL_INTRO)
+		sv_catpv(tmpsv, ",INTRO");
 	}
 	if (o->op_flags & OPf_MOD && o->op_private & OPpLVAL_INTRO)
 	    sv_catpv(tmpsv, ",INTRO");

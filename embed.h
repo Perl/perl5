@@ -1212,6 +1212,7 @@
 #define pp_leaveeval		Perl_pp_leaveeval
 #define pp_leaveloop		Perl_pp_leaveloop
 #define pp_leavesub		Perl_pp_leavesub
+#define pp_leavesublv		Perl_pp_leavesublv
 #define pp_leavetry		Perl_pp_leavetry
 #define pp_leavewrite		Perl_pp_leavewrite
 #define pp_left_shift		Perl_pp_left_shift
@@ -2538,6 +2539,7 @@
 #define pp_leaveeval()		Perl_pp_leaveeval(aTHX)
 #define pp_leaveloop()		Perl_pp_leaveloop(aTHX)
 #define pp_leavesub()		Perl_pp_leavesub(aTHX)
+#define pp_leavesublv()		Perl_pp_leavesublv(aTHX)
 #define pp_leavetry()		Perl_pp_leavetry(aTHX)
 #define pp_leavewrite()		Perl_pp_leavewrite(aTHX)
 #define pp_left_shift()		Perl_pp_left_shift(aTHX)
@@ -4959,6 +4961,8 @@
 #define pp_leaveloop		Perl_pp_leaveloop
 #define Perl_pp_leavesub	CPerlObj::Perl_pp_leavesub
 #define pp_leavesub		Perl_pp_leavesub
+#define Perl_pp_leavesublv	CPerlObj::Perl_pp_leavesublv
+#define pp_leavesublv		Perl_pp_leavesublv
 #define Perl_pp_leavetry	CPerlObj::Perl_pp_leavetry
 #define pp_leavetry		Perl_pp_leavetry
 #define Perl_pp_leavewrite	CPerlObj::Perl_pp_leavewrite

@@ -183,6 +183,7 @@ EXT char *PL_op_name[] = {
 	"method",
 	"entersub",
 	"leavesub",
+	"leavesublv",
 	"caller",
 	"warn",
 	"die",
@@ -540,6 +541,7 @@ EXT char *PL_op_desc[] = {
 	"method lookup",
 	"subroutine entry",
 	"subroutine exit",
+	"lvalue subroutine exit",
 	"caller",
 	"warn",
 	"die",
@@ -902,6 +904,7 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	Perl_pp_method,
 	Perl_pp_entersub,
 	Perl_pp_leavesub,
+	Perl_pp_leavesublv,
 	Perl_pp_caller,
 	Perl_pp_warn,
 	Perl_pp_die,
@@ -1259,6 +1262,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	Perl_ck_method,	/* method */
 	Perl_ck_subr,	/* entersub */
 	Perl_ck_null,	/* leavesub */
+	Perl_ck_null,	/* leavesublv */
 	Perl_ck_fun,	/* caller */
 	Perl_ck_fun,	/* warn */
 	Perl_ck_fun,	/* die */
@@ -1616,6 +1620,7 @@ EXT U32 PL_opargs[] = {
 	0x00000240,	/* method */
 	0x00004249,	/* entersub */
 	0x00000200,	/* leavesub */
+	0x00000200,	/* leavesublv */
 	0x00013608,	/* caller */
 	0x0000481d,	/* warn */
 	0x0000485d,	/* die */

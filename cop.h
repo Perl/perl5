@@ -35,12 +35,15 @@ struct block_sub {
     AV *	argarray;
     U16		olddepth;
     U8		hasargs;
+    U8		lval;		/* XXX merge lval and hasargs? */
 };
 
 #define PUSHSUB(cx)							\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
-	cx->blk_sub.hasargs = hasargs;
+	cx->blk_sub.hasargs = hasargs;					\
+	cx->blk_sub.lval = PL_op->op_private &                          \
+	                      (OPpLVAL_INTRO|OPpENTERSUB_INARGS);
 
 #define PUSHFORMAT(cx)							\
 	cx->blk_sub.cv = cv;						\

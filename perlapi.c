@@ -6304,6 +6304,13 @@ Perl_pp_leavesub(pTHXo)
     return ((CPerlObj*)pPerl)->Perl_pp_leavesub();
 }
 
+#undef  Perl_pp_leavesublv
+OP *
+Perl_pp_leavesublv(pTHXo)
+{
+    return ((CPerlObj*)pPerl)->Perl_pp_leavesublv();
+}
+
 #undef  Perl_pp_leavetry
 OP *
 Perl_pp_leavetry(pTHXo)

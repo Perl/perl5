@@ -866,6 +866,11 @@ to exist.
 (F) You aren't allowed to assign to the item indicated, or otherwise try to
 change it, such as with an auto-increment.
 
+=item Can't modify non-lvalue subroutine call
+
+(F) Subroutines used in lvalue context should be marked as such, see
+L<perlsub/"Lvalue subroutines">.
+
 =item Can't modify nonexistent substring
 
 (P) The internal routine that does assignment to a substr() was handed
@@ -949,6 +954,12 @@ of suidperl.
 
 (F) The return statement was executed in mainline code, that is, where
 there was no subroutine call to return out of.  See L<perlsub>.
+
+=item Can't return %s from lvalue subroutine
+
+(F) Perl detected an attempt to return illegal lvalues (such
+as temporary or readonly values) from a subroutine used as an lvalue.
+This is not allowed.
 
 =item Can't stat script "%s"
 
@@ -1712,6 +1723,12 @@ effective uids or gids failed.
 
 (W) You tried to do a listen on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/listen>.
+
+=item Lvalue subs returning %s not implemented yet
+
+(F) Due to limitations in the current implementation, array and hash
+values cannot be returned in subroutines used in lvalue context.
+See L<perlsub/"Lvalue subroutines">.
 
 =item Method for operation %s not found in package %s during blessing
 

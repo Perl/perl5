@@ -203,6 +203,7 @@ Perl_pp_orassign
 Perl_pp_method
 Perl_pp_entersub
 Perl_pp_leavesub
+Perl_pp_leavesublv
 Perl_pp_caller
 Perl_pp_warn
 Perl_pp_die

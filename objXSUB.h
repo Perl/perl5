@@ -4406,6 +4406,10 @@
 #define Perl_pp_leavesub	pPerl->Perl_pp_leavesub
 #undef  pp_leavesub
 #define pp_leavesub		Perl_pp_leavesub
+#undef  Perl_pp_leavesublv
+#define Perl_pp_leavesublv	pPerl->Perl_pp_leavesublv
+#undef  pp_leavesublv
+#define pp_leavesublv		Perl_pp_leavesublv
 #undef  Perl_pp_leavetry
 #define Perl_pp_leavetry	pPerl->Perl_pp_leavetry
 #undef  pp_leavetry

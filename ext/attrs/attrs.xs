@@ -10,6 +10,8 @@ get_flag(char *attr)
 	return CVf_METHOD;
     else if (strnEQ(attr, "locked", 6))
 	return CVf_LOCKED;
+    else if (strnEQ(attr, "lvalue", 6))
+	return CVf_LVALUE;
     else
 	return 0;
 }

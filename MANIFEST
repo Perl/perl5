@@ -1345,6 +1345,7 @@ t/pragma/strict-subs	Tests of "use strict 'subs'" for strict.t
 t/pragma/strict-vars	Tests of "use strict 'vars'" for strict.t
 t/pragma/strict.t	See if strictures work
 t/pragma/subs.t		See if subroutine pseudo-importation works
+t/pragma/sub_lval.t	See if lvalue subroutines work
 t/pragma/utf8.t		See if utf8 operations work
 t/pragma/warn/1global	Tests of global warnings for warnings.t
 t/pragma/warn/2use	Tests for "use warnings" for warnings.t
