@@ -91,44 +91,70 @@ we add a flag to re-add the removed byte to the source we could handle
 #define U8 U8
 #include "encode.h"
 
-STRLEN
-translate(encpage_t *enc, const U8 *src, STRLEN slen, U8 *dst, STRLEN dlen)
+int
+do_encode(encpage_t *enc, const U8 *src, STRLEN *slen, U8 *dst, STRLEN dlen, STRLEN *dout)
 {
- const U8 *send = src+slen;
- U8 *dend = dst+dlen;
- U8 *dptr = dst;
- while (src < send)
+ const U8 *s    = src;
+ const U8 *send = s+*slen;
+ const U8 *last = s;
+ U8 *d          = dst;
+ U8 *dend       = d+dlen;
+ int code       = 0;
+ while (s < send)
   {
    encpage_t *e = enc;
-   U8 byte = *src++;
+   U8 byte = *s;
    while (byte > e->max)
     e++;
-   if (byte >= e->min)
+   if (byte >= e->min && e->slen)
     {
-     STRLEN n = e->dlen;
-     if (n)
+     const U8 *cend = s + e->slen;
+     if (cend <= send)
       {
-       const U8 *out = e->seq+n*(byte - e->min);
-       STRLEN n = *out++;
-       if (dptr+n <= dend)
+       STRLEN n;
+       if ((n = e->dlen))
         {
+         const U8 *out  = e->seq+n*(byte - e->min);
+         U8 *oend = d+n;
          if (dst)
-          Copy(out,dptr,n,U8);
-         dptr += n;
+          {
+           if (oend <= dend)
+            {
+             while (d < oend)
+              *d++ = *out++;
+            }
+           else
+            {
+             /* Out of space */
+             code = ENCODE_NOSPACE;
+             break;
+            }
+          }
+         else
+          d = oend;
         }
-       else
-        {
-         /* No room */
-        }
+       enc = e->next;
+       s++;
+       if (s == cend)
+        last = s;
       }
-     enc = e->next;
+     else
+      {
+       /* partial source character */
+       code = ENCODE_PARTIAL;
+       break;
+      }
     }
    else
     {
      /* Cannot represent */
+     code = ENCODE_NOREP;
+     break;
     }
   }
- return dptr-dst;
+ *slen = last - src;
+ *dout = d - dst;
+ return code;
 }
 
 

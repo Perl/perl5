@@ -1,6 +1,11 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#define U8 U8
+#include "encode.h"
+#include "iso8859.h"
+#include "EBCDIC.h"
+#include "Symbols.h"
 
 #define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {   \
                          Perl_croak(aTHX_ "panic_unimplemented"); \
@@ -313,7 +318,128 @@ PerlIO_funcs PerlIO_encode = {
 };
 #endif
 
+void
+Encode_Define(pTHX_ encode_t *enc)
+{
+ HV *hash  = get_hv("Encode::encoding",GV_ADD|GV_ADDMULTI);
+ HV *stash = gv_stashpv("Encode::XS", TRUE);
+ SV *sv    = sv_bless(newRV_noinc(newSViv(PTR2IV(enc))),stash);
+ hv_store(hash,enc->name,strlen(enc->name),sv,0);
+}
+
 void call_failure (SV *routine, U8* done, U8* dest, U8* orig) {}
+
+static SV *
+encode_method(pTHX_ encode_t *enc, encpage_t *dir, SV *src, int check)
+{
+ STRLEN slen;
+ U8 *s = (U8 *) SvPV(src,slen);
+ SV *dst = sv_2mortal(newSV(2*slen+1));
+ if (slen)
+  {
+   U8 *d = (U8 *) SvGROW(dst, 2*slen+1);
+   STRLEN dlen = SvLEN(dst);
+   int code;
+   while ((code = do_encode(dir,s,&slen,d,dlen,&dlen)))
+    {
+     SvCUR_set(dst,dlen);
+     SvPOK_on(dst);
+     switch(code)
+      {
+       case ENCODE_NOSPACE:
+        {
+         STRLEN need = (slen) ? (SvLEN(dst)*SvCUR(src)/slen) : (dlen + UTF8_MAXLEN);
+         if (need <= SvLEN(dst))
+          need += UTF8_MAXLEN;
+         d = (U8 *) SvGROW(dst, need);
+         dlen = SvLEN(dst);
+         slen = SvCUR(src);
+         break;
+        }
+
+       case ENCODE_NOREP:
+        if (dir == enc->f_utf8)
+         {
+          if (!check && ckWARN_d(WARN_UTF8))
+           {
+            STRLEN clen;
+            UV ch = utf8_to_uv(s+slen,(SvCUR(src)-slen),&clen,0);
+            Perl_warner(aTHX_ WARN_UTF8, "\"\\x{%x}\" does not map to %s", ch, enc->name);
+            /* FIXME: Skip over the character, copy in replacement and continue
+             * but that is messy so for now just fail.
+             */
+            return &PL_sv_undef;
+           }
+          else
+           {
+            return &PL_sv_undef;
+           }
+         }
+        else
+         {
+          /* UTF-8 is supposed to be "Universal" so should not happen */
+          Perl_croak(aTHX_ "%s '%.*s' does not map to UTF-8",
+                 enc->name, (SvCUR(src)-slen),s+slen);
+         }
+        break;
+
+       case ENCODE_PARTIAL:
+         if (!check && ckWARN_d(WARN_UTF8))
+          {
+           Perl_warner(aTHX_ WARN_UTF8, "Partial %s character",
+                       (dir == enc->f_utf8) ? "UTF-8" : enc->name);
+          }
+         return &PL_sv_undef;
+
+       default:
+        Perl_croak(aTHX_ "Unexpected code %d converting %s %s",
+                 code, (dir == enc->f_utf8) ? "to" : "from",enc->name);
+        return &PL_sv_undef;
+      }
+    }
+   SvCUR_set(dst,dlen);
+   SvPOK_on(dst);
+   if (check)
+    {
+     if (slen < SvCUR(src))
+      {
+       Move(s+slen,s,SvCUR(src)-slen,U8);
+      }
+     SvCUR_set(src,SvCUR(src)-slen);
+    }
+  }
+ return dst;
+}
+
+MODULE = Encode		PACKAGE = Encode::XS	PREFIX = Encode_
+
+PROTOTYPES: ENABLE
+
+void
+Encode_toUnicode(obj,src,check = 0)
+SV *	obj
+SV *	src
+int	check
+CODE:
+ {
+  encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
+  ST(0) = encode_method(aTHX_ enc, enc->t_utf8, src, check);
+  SvUTF8_on(ST(0));
+  XSRETURN(1);
+ }
+
+void
+Encode_fromUnicode(obj,src,check = 0)
+SV *	obj
+SV *	src
+int	check
+CODE:
+ {
+  encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
+  sv_utf8_upgrade(src);
+  ST(0) = encode_method(aTHX_ enc, enc->f_utf8, src, check);
+  XSRETURN(1);
+ }
 
 MODULE = Encode         PACKAGE = Encode
 
@@ -548,4 +674,7 @@ BOOT:
 #ifdef USE_PERLIO
  PerlIO_define_layer(&PerlIO_encode);
 #endif
+#include "iso8859.def"
+#include "EBCDIC.def"
+#include "Symbols.def"
 }

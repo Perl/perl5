@@ -1,5 +1,5 @@
 #!../../perl -w
-@INC = '../../lib';
+BEGIN { @INC = '../../lib' };
 use strict;
 
 sub encode_U
@@ -39,13 +39,44 @@ sub encode_M
 }
 
 my $cname = shift(@ARGV);
+chmod(0666,$cname) if -f $cname && !-w $cname;
 open(C,">$cname") || die "Cannot open $cname:$!";
+my $dname = $cname;
+$dname =~ s/(\.[^\.]*)?$/.def/;
+chmod(0666,$dname) if -f $cname && !-w $dname;
+open(D,">$dname") || die "Cannot open $dname:$!";
+my $hname = $cname;
+$hname =~ s/(\.[^\.]*)?$/.h/;
+chmod(0666,$hname) if -f $cname && !-w $hname;
+open(H,">$hname") || die "Cannot open $hname:$!";
+
+if ($cname =~ /(\w+)\.xs$/)
+ {
+  print C "#include <EXTERN.h>\n";
+  print C "#include <perl.h>\n";
+  print C "#include <XSUB.h>\n";
+  print C "#define U8 U8\n";
+ }
 print C "#include \"encode.h\"\n";
 
 my %encoding;
 my %strings;
 
-foreach my $enc (@ARGV)
+sub cmp_name
+{
+ if ($a =~ /^.*-(\d+)/)
+  {
+   my $an = $1;
+   if ($b =~ /^.*-(\d+)/)
+    {
+     my $r = $an <=> $1;
+     return $r if $r;
+    }
+  }
+ return $a cmp $b;
+}
+
+foreach my $enc (sort cmp_name @ARGV)
  {
   my ($name) = $enc =~ /^.*?([\w-]+)(\.enc)$/;
   if (open(E,$enc))
@@ -58,14 +89,33 @@ foreach my $enc (@ARGV)
    }
  }
 
-print C "encode_t encodings[] = {\n";
-foreach my $enc (sort keys %encoding)
+foreach my $enc (sort cmp_name keys %encoding)
  {
-  print C " {",join(',',"\"$enc\"",@{$encoding{$enc}}),"},\n";
+  my $sym = "${enc}_encoding";
+  $sym =~ s/\W+/_/g;
+  print C "encode_t $sym = \n";
+  print C " {",join(',',"\"$enc\"",@{$encoding{$enc}}),"};\n";
  }
-print C " {0,0,0,0,0}\n};\n";
 
+foreach my $enc (sort cmp_name keys %encoding)
+ {
+  my $sym = "${enc}_encoding";
+  $sym =~ s/\W+/_/g;
+  print H "extern encode_t $sym;\n";
+  print D " Encode_Define(aTHX_ &$sym);\n";
+ }
+
+if ($cname =~ /(\w+)\.xs$/)
+ {
+  my $mod = $1;
+  print C "\nMODULE = Encode::$mod\tPACKAGE = Encode::$mod\n\n";
+  print C "BOOT:\n{\n";
+  print C "#include \"$dname\"\n";
+  print C "}\n";
+ }
 close(C);
+close(D);
+close(H);
 
 
 
@@ -155,21 +205,20 @@ sub outstring
  my $sym = $strings{$s};
  unless ($sym)
   {
-   if (1)
+   foreach my $o (keys %strings)
     {
-     foreach my $o (keys %strings)
+     my $i = index($o,$s);
+     if ($i >= 0)
       {
-       my $i = index($o,$s);
-       if ($i >= 0)
-        {
-         $sym = $strings{$o};
-         $sym .= sprintf("+0x%02x",$i) if ($i);
-         return $sym;
-        }
+       $sym = $strings{$o};
+       $sym .= sprintf("+0x%02x",$i) if ($i);
+       return $sym;
       }
     }
    $strings{$s} = $sym = $name;
    printf $fh "static const U8 %s[%d] =\n",$name,length($s);
+   # Do in chunks of 16 chars to constrain line length
+   # Assumes ANSI C adjacent string litteral concatenation
    while (length($s))
     {
      my $c = substr($s,0,16,'');
@@ -201,7 +250,9 @@ sub output
        ord($b) == ord($a->{$l}[1])+1 &&
        $a->{$l}[3] == $a->{$b}[3] &&
        $a->{$l}[4] == $a->{$b}[4] &&
-       $a->{$l}[5] == $a->{$b}[5] )
+       $a->{$l}[5] == $a->{$b}[5]
+       # && length($a->{$l}[2]) < 16
+      )
     {
      my $i = ord($b)-ord($a->{$l}[0]);
      $a->{$l}[1]  = $b;
@@ -249,7 +300,7 @@ sub output
      print  $fh "0";
     }
    print  $fh ",",$t->{Cname};
-   printf $fh ",0x%02x,0x%02x,$end},\n",$sc,$ec;
+   printf $fh ",0x%02x,0x%02x,$l,$end},\n",$sc,$ec;
   }
  print $fh "};\n\n";
 }
