@@ -1986,7 +1986,7 @@ LC_NUMERIC, LC_TIME, LANG
 
 =over 4
 
-=item Important Caveat
+=item Important Caveats
 
 Input and Output Disciplines, Regular Expressions, C<use utf8> still needed
 to enable a few features
@@ -3567,14 +3567,15 @@ C<t>, C<p>, C<n>, C<s>
 =item Localizing changes
 
 C<SAVEINT(int i)>, C<SAVEIV(IV i)>, C<SAVEI32(I32 i)>, C<SAVELONG(long i)>,
-C<SAVESPTR(s)>, C<SAVEPPTR(p)>, C<SAVEFREESV(SV *sv)>, C<SAVEFREEOP(OP
-*op)>, C<SAVEFREEPV(p)>, C<SAVECLEARSV(SV *sv)>, C<SAVEDELETE(HV *hv, char
-*key, I32 length)>, C<SAVEDESTRUCTOR(DESTRUCTORFUNC_NOCONTEXT_t f, void
-*p)>, C<SAVEDESTRUCTOR_X(DESTRUCTORFUNC_t f, void *p)>, C<SAVESTACK_POS()>,
-C<SV* save_scalar(GV *gv)>, C<AV* save_ary(GV *gv)>, C<HV* save_hash(GV
-*gv)>, C<void save_item(SV *item)>, C<void save_list(SV **sarg, I32
-maxsarg)>, C<SV* save_svref(SV **sptr)>, C<void save_aptr(AV **aptr)>,
-C<void save_hptr(HV **hptr)>
+C<SAVESPTR(s)>, C<SAVEPPTR(p)>, C<SAVEFREESV(SV *sv)>, C<SAVEMORTALIZESV(SV
+*sv)>, C<SAVEFREEOP(OP *op)>, C<SAVEFREEPV(p)>, C<SAVECLEARSV(SV *sv)>,
+C<SAVEDELETE(HV *hv, char *key, I32 length)>,
+C<SAVEDESTRUCTOR(DESTRUCTORFUNC_NOCONTEXT_t f, void *p)>,
+C<SAVEDESTRUCTOR_X(DESTRUCTORFUNC_t f, void *p)>, C<SAVESTACK_POS()>, C<SV*
+save_scalar(GV *gv)>, C<AV* save_ary(GV *gv)>, C<HV* save_hash(GV *gv)>,
+C<void save_item(SV *item)>, C<void save_list(SV **sarg, I32 maxsarg)>,
+C<SV* save_svref(SV **sptr)>, C<void save_aptr(AV **aptr)>, C<void
+save_hptr(HV **hptr)>
 
 =back
 
@@ -5529,6 +5530,50 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
+=head2 perldos - Perl under DOS, W31, W95.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Prerequisites
+
+DJGPP, Pthreads
+
+=item Shortcomings of Perl under DOS
+
+=item Building
+
+=item Testing
+
+=item Installation
+
+=back
+
+=item BUILDING AND INSTALLING MODULES
+
+=over 4
+
+=item Prerequisites
+
+=item Unpacking CPAN Modules
+
+=item Building Non-XS Modules
+
+=item Building XS Modules
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -5632,6 +5677,20 @@ op/lexassign.t, pragma/warnings.t
 =item Building external modules
 
 =back
+
+=item AUTHOR
+
+=item DATE
+
+=back
+
+=head2 perlmacos, README.macos - Perl under Mac OS (Classic)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
 
 =item AUTHOR
 
@@ -6196,6 +6255,48 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
+
+=back
+
+=head2 perlwin32 - Perl under Win32
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Setting Up
+
+Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
+
+=item Building
+
+=item Testing
+
+=item Installation
+
+=item Usage Hints
+
+Environment Variables, File Globbing, Using perl from the command line,
+Building Extensions, Command-line Wildcard Expansion, Win32 Specific
+Extensions, Running Perl Scripts, Miscellaneous Things
+
+=back
+
+=item BUGS AND CAVEATS
+
+=item AUTHORS
+
+Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
+E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
+E<lt>nick@ing-simmons.netE<gt>
+
+=item SEE ALSO
+
+=item HISTORY
 
 =back
 
@@ -6827,7 +6928,7 @@ REFCNT, FLAGS
 
 =item B::IV METHODS
 
-IV, IVX, needs64bits, packiv
+IV, IVX, UVX, int_value, needs64bits, packiv
 
 =item B::NV METHODS
 
@@ -6859,8 +6960,8 @@ USEFUL, PREVIOUS, RARE, TABLE
 
 =item B::GV METHODS
 
-is_empty, NAME, STASH, SV, IO, FORM, AV, HV, EGV, CV, CVGEN, LINE, FILE,
-FILEGV, GvREFCNT, FLAGS
+is_empty, NAME, SAFENAME, STASH, SV, IO, FORM, AV, HV, EGV, CV, CVGEN,
+LINE, FILE, FILEGV, GvREFCNT, FLAGS
 
 =item B::IO METHODS
 
