@@ -5198,7 +5198,7 @@ PP(pp_lock)
 	DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%lx: pp_lock lock 0x%lx\n",
 			      (unsigned long)thr, (unsigned long)sv);)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
-	SAVEDESTRUCTOR(Perl_unlock_condpair, sv);
+	SAVEDESTRUCTOR_X(Perl_unlock_condpair, sv);
     }
 #endif /* USE_THREADS */
     if (SvTYPE(retsv) == SVt_PVAV || SvTYPE(retsv) == SVt_PVHV

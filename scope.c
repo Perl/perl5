@@ -541,13 +541,23 @@ Perl_save_list(pTHX_ register SV **sarg, I32 maxsarg)
 }
 
 void
-Perl_save_destructor(pTHX_ DESTRUCTORFUNC_t f, void* p)
+Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
 {
     dTHR;
     SSCHECK(3);
     SSPUSHDPTR(f);
     SSPUSHPTR(p);
     SSPUSHINT(SAVEt_DESTRUCTOR);
+}
+
+void
+Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void* p)
+{
+    dTHR;
+    SSCHECK(3);
+    SSPUSHDXPTR(f);
+    SSPUSHPTR(p);
+    SSPUSHINT(SAVEt_DESTRUCTOR_X);
 }
 
 void
@@ -831,7 +841,11 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_DESTRUCTOR:
 	    ptr = SSPOPPTR;
-	    CALLDESTRUCTOR(aTHXo_ ptr);
+	    (*SSPOPDPTR)(ptr);
+	    break;
+	case SAVEt_DESTRUCTOR_X:
+	    ptr = SSPOPPTR;
+	    (*SSPOPDXPTR)(aTHXo_ ptr);
 	    break;
 	case SAVEt_REGCONTEXT:
 	case SAVEt_ALLOC:

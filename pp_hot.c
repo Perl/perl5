@@ -2299,7 +2299,7 @@ try_autoload:
 	    DEBUG_S(PerlIO_printf(Perl_debug_log, "%p: pp_entersub lock %p\n",
 				  thr, sv);)
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
-	    SAVEDESTRUCTOR(Perl_unlock_condpair, sv);
+	    SAVEDESTRUCTOR_X(Perl_unlock_condpair, sv);
 	}
 	MUTEX_LOCK(CvMUTEXP(cv));
     }
@@ -2344,7 +2344,7 @@ try_autoload:
 	    CvOWNER(cv) = thr;
 	    SvREFCNT_inc(cv);
 	    if (CvDEPTH(cv) == 0)
-		SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
+		SAVEDESTRUCTOR_X(unset_cvowner, (void*) cv);
 	}
 	else {
 	    /* (2) => grab ownership of cv. (3) => make clone */
@@ -2382,7 +2382,7 @@ try_autoload:
 	    DEBUG_S(if (CvDEPTH(cv) != 0)
 			PerlIO_printf(Perl_debug_log, "depth %ld != 0\n",
 				      CvDEPTH(cv)););
-	    SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
+	    SAVEDESTRUCTOR_X(unset_cvowner, (void*) cv);
 	}
     }
 #endif /* USE_THREADS */

@@ -375,13 +375,13 @@ Perl_lex_start(pTHX_ SV *line)
     SAVESPTR(PL_linestr);
     SAVEPPTR(PL_lex_brackstack);
     SAVEPPTR(PL_lex_casestack);
-    SAVEDESTRUCTOR(restore_rsfp, PL_rsfp);
+    SAVEDESTRUCTOR_X(restore_rsfp, PL_rsfp);
     SAVESPTR(PL_lex_stuff);
     SAVEI32(PL_lex_defer);
     SAVEI32(PL_sublex_info.sub_inwhat);
     SAVESPTR(PL_lex_repl);
-    SAVEDESTRUCTOR(restore_expect, PL_tokenbuf + PL_expect); /* encode as pointer */
-    SAVEDESTRUCTOR(restore_lex_expect, PL_tokenbuf + PL_expect);
+    SAVEDESTRUCTOR_X(restore_expect, PL_tokenbuf + PL_expect); /* encode as pointer */
+    SAVEDESTRUCTOR_X(restore_lex_expect, PL_tokenbuf + PL_expect);
 
     PL_lex_state = LEX_NORMAL;
     PL_lex_defer = 0;

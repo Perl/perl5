@@ -540,6 +540,7 @@
 #define save_clearsv		Perl_save_clearsv
 #define save_delete		Perl_save_delete
 #define save_destructor		Perl_save_destructor
+#define save_destructor_x	Perl_save_destructor_x
 #define save_freesv		Perl_save_freesv
 #define save_freeop		Perl_save_freeop
 #define save_freepv		Perl_save_freepv
@@ -1899,6 +1900,7 @@
 #define save_clearsv(a)		Perl_save_clearsv(aTHX_ a)
 #define save_delete(a,b,c)	Perl_save_delete(aTHX_ a,b,c)
 #define save_destructor(a,b)	Perl_save_destructor(aTHX_ a,b)
+#define save_destructor_x(a,b)	Perl_save_destructor_x(aTHX_ a,b)
 #define save_freesv(a)		Perl_save_freesv(aTHX_ a)
 #define save_freeop(a)		Perl_save_freeop(aTHX_ a)
 #define save_freepv(a)		Perl_save_freepv(aTHX_ a)
@@ -3730,6 +3732,8 @@
 #define save_delete		Perl_save_delete
 #define Perl_save_destructor	CPerlObj::Perl_save_destructor
 #define save_destructor		Perl_save_destructor
+#define Perl_save_destructor_x	CPerlObj::Perl_save_destructor_x
+#define save_destructor_x	Perl_save_destructor_x
 #define Perl_save_freesv	CPerlObj::Perl_save_freesv
 #define save_freesv		Perl_save_freesv
 #define Perl_save_freeop	CPerlObj::Perl_save_freeop

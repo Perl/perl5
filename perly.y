@@ -39,7 +39,22 @@ struct ysv {
     YYSTYPE oldyylval;
 };
 
-static void yydestruct(pTHXo_ void *ptr);
+static void yydestruct(void *ptr);
+
+static void
+yydestruct(void *ptr)
+{
+    struct ysv* ysave = (struct ysv*)ptr;
+    if (ysave->yyss) Safefree(ysave->yyss);
+    if (ysave->yyvs) Safefree(ysave->yyvs);
+    yydebug	= ysave->oldyydebug;
+    yynerrs	= ysave->oldyynerrs;
+    yyerrflag	= ysave->oldyyerrflag;
+    yychar	= ysave->oldyychar;
+    yyval	= ysave->oldyyval;
+    yylval	= ysave->oldyylval;
+    Safefree(ysave);
+}
 
 %}
 

@@ -1509,7 +1509,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    }
 	    PL_reg_magic    = mg;
 	    PL_reg_oldpos   = mg->mg_len;
-	    SAVEDESTRUCTOR(restore_pos, 0);
+	    SAVEDESTRUCTOR_X(restore_pos, 0);
         }
 	if (!PL_reg_curpm)
 	    New(22,PL_reg_curpm, 1, PMOP);

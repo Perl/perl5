@@ -28,6 +28,7 @@
 #define SAVEt_HINTS		27
 #define SAVEt_ALLOC		28
 #define SAVEt_GENERIC_SVREF	29
+#define SAVEt_DESTRUCTOR_X	30
 
 #define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
@@ -35,11 +36,13 @@
 #define SSPUSHIV(i) (PL_savestack[PL_savestack_ix++].any_iv = (IV)(i))
 #define SSPUSHPTR(p) (PL_savestack[PL_savestack_ix++].any_ptr = (void*)(p))
 #define SSPUSHDPTR(p) (PL_savestack[PL_savestack_ix++].any_dptr = (p))
+#define SSPUSHDXPTR(p) (PL_savestack[PL_savestack_ix++].any_dxptr = (p))
 #define SSPOPINT (PL_savestack[--PL_savestack_ix].any_i32)
 #define SSPOPLONG (PL_savestack[--PL_savestack_ix].any_long)
 #define SSPOPIV (PL_savestack[--PL_savestack_ix].any_iv)
 #define SSPOPPTR (PL_savestack[--PL_savestack_ix].any_ptr)
 #define SSPOPDPTR (PL_savestack[--PL_savestack_ix].any_dptr)
+#define SSPOPDXPTR (PL_savestack[--PL_savestack_ix].any_dxptr)
 
 #define SAVETMPS save_int((int*)&PL_tmps_floor), PL_tmps_floor = PL_tmps_ix
 #define FREETMPS if (PL_tmps_ix > PL_tmps_floor) free_tmps()
@@ -81,9 +84,11 @@
 #define SAVEGENERICSV(s)	save_generic_svref((SV**)&(s))
 #define SAVEDELETE(h,k,l) \
 	  save_delete(SOFT_CAST(HV*)(h), SOFT_CAST(char*)(k), (I32)(l))
-#define CALLDESTRUCTOR (*SSPOPDPTR)
 #define SAVEDESTRUCTOR(f,p) \
-	  save_destructor((DESTRUCTORFUNC_t)(f), SOFT_CAST(void*)(p))
+	  save_destructor((DESTRUCTORFUNC_NOCONTEXT_t)(f), SOFT_CAST(void*)(p))
+
+#define SAVEDESTRUCTOR_X(f,p) \
+	  save_destructor_x((DESTRUCTORFUNC_t)(f), SOFT_CAST(void*)(p))
 
 #define SAVESTACK_POS() \
     STMT_START {				\

@@ -3324,9 +3324,16 @@ Perl_save_delete(pTHXo_ HV* hv, char* key, I32 klen)
 
 #undef  Perl_save_destructor
 void
-Perl_save_destructor(pTHXo_ DESTRUCTORFUNC_t f, void* p)
+Perl_save_destructor(pTHXo_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
 {
     ((CPerlObj*)pPerl)->Perl_save_destructor(f, p);
+}
+
+#undef  Perl_save_destructor_x
+void
+Perl_save_destructor_x(pTHXo_ DESTRUCTORFUNC_t f, void* p)
+{
+    ((CPerlObj*)pPerl)->Perl_save_destructor_x(f, p);
 }
 
 #undef  Perl_save_freesv

@@ -1766,7 +1766,8 @@ union any {
     I32		any_i32;
     IV		any_iv;
     long	any_long;
-    void	(*any_dptr) (pTHXo_ void*);
+    void	(*any_dptr) (void*);
+    void	(*any_dxptr) (pTHXo_ void*);
 };
 #endif
 
@@ -2577,6 +2578,7 @@ typedef void	(CPERLscope(*regfree_t)) (pTHX_ struct regexp* r);
 int Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp);
 #endif
 
+typedef void (*DESTRUCTORFUNC_NOCONTEXT_t) (void*);
 typedef void (*DESTRUCTORFUNC_t) (pTHXo_ void*);
 typedef void (*SVFUNC_t) (pTHXo_ SV*);
 typedef I32  (*SVCOMPARE_t) (pTHXo_ SV*, SV*);

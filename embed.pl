@@ -1529,7 +1529,8 @@ p	|void	|save_aptr	|AV** aptr
 p	|AV*	|save_ary	|GV* gv
 p	|void	|save_clearsv	|SV** svp
 p	|void	|save_delete	|HV* hv|char* key|I32 klen
-p	|void	|save_destructor|DESTRUCTORFUNC_t f|void* p
+p	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|void* p
+p	|void	|save_destructor_x|DESTRUCTORFUNC_t f|void* p
 p	|void	|save_freesv	|SV* sv
 p	|void	|save_freeop	|OP* o
 p	|void	|save_freepv	|char* pv
