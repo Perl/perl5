@@ -8,10 +8,9 @@ follows one of the old POSIX drafts, then you'll probably need to add
 and I think you may still have to tweak a couple of the mutex calls
 to follow the old API.
 
-These patches are copyright Malcolm Beattie 1995-1997 and are freely
+This extension is copyright Malcolm Beattie 1995-1997 and is freely
 distributable under your choice of the GNU Public License or the
 Artistic License (see the main perl distribution).
 
-These are preliminary patches and although it should be sufficient
-to show roughly what's been going on, they're probably not
-going to produce a perl of any practical use yet.
+Malcolm Beattie
+mbeattie@sable.ox.ac.uk
