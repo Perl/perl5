@@ -549,7 +549,7 @@ C<LATIN CAPITAL LETTER A WITH GRAVE>?)
 The short answer is that by default, Perl compares strings (C<lt>,
 C<le>, C<cmp>, C<ge>, C<gt>) based only on the code points of the
 characters.  In the above case, the answer is "after", since
-C<0x00C1> E<gt> C<0x00C0>.
+C<0x00C1> > C<0x00C0>.
 
 The long answer is that "it depends", and a good answer cannot be
 given without knowing (at the very least) the language context.
