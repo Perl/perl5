@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Feb  2 17:04:58 EET 2003 [metaconfig 3.0 PL70]
+# Generated on Mon Feb  3 15:49:19 EET 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -47,7 +47,7 @@ true || exec sh $0 $argv:q
 (exit $?0) || exec sh $0 $argv:q
 rm -f c1$$ c2$$
 
-if test -e /dev/cputype -a -e /dev/drivers -a -e /dev/osversion -a -e /dev/bintime; then
+if test -f /dev/cputype -a -f /dev/drivers -a -f /dev/osversion; then
 	cat >&4 <<EOF
 ***
 *** I'm sorry but this system looks like Plan 9 and Plan 9 doesn't do
