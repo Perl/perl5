@@ -575,6 +575,8 @@ PP(pp_undef)
 PP(pp_predec)
 {
     dSP;
+    if (SvREADONLY(TOPs))
+       croak(no_modify);
     if (SvIOK(TOPs)) {
     	if (SvIVX(TOPs) == IV_MIN) {
     	    sv_setnv(TOPs, (double)SvIVX(TOPs) - 1.0);
@@ -593,6 +595,8 @@ PP(pp_predec)
 PP(pp_postinc)
 {
     dSP; dTARGET;
+    if (SvREADONLY(TOPs))
+       croak(no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK(TOPs)) {
     	if (SvIVX(TOPs) == IV_MAX) {
@@ -615,6 +619,8 @@ PP(pp_postinc)
 PP(pp_postdec)
 {
     dSP; dTARGET;
+    if(SvREADONLY(TOPs))
+       croak(no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK(TOPs)) {
     	if (SvIVX(TOPs) == IV_MIN) {

@@ -251,6 +251,8 @@ PP(pp_eq)
 PP(pp_preinc)
 {
     dSP;
+    if (SvREADONLY(TOPs))
+       croak(no_modify);
     if (SvIOK(TOPs)) {
     	if (SvIVX(TOPs) == IV_MAX) {
     	    sv_setnv(TOPs, (double)(SvIVX(TOPs)) + 1.0 );
