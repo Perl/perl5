@@ -8,8 +8,9 @@ BEGIN {
 # $RCSfile$    
 $|  = 1;
 use warnings;
-$Is_VMS = $^O eq 'VMS';
-$Is_Dos = $^O eq 'dos';
+$Is_MacOS = $^O eq 'MacOS';
+$Is_VMS   = $^O eq 'VMS';
+$Is_Dos   = $^O eq 'dos';
 
 print "1..66\n";
 
@@ -100,7 +101,7 @@ sub ok { print "ok $test\n"; $test++ }
 }
 
 # 24..26
-if ($Is_VMS) {
+if ($Is_VMS || $Is_MacOS) {
     for (24..26) { print "ok $_ # skipped: not Unix fork\n"; $test++;}
 }
 else {
@@ -116,7 +117,7 @@ EOC
 }
 
 # 27..30
-if ($Is_VMS) {
+if ($Is_VMS || $Is_MacOS) {
     for (27..30) { print "ok $_ # skipped: not Unix fork\n"; $test++;}
 }
 else {
@@ -224,7 +225,7 @@ ok;
 }
 
 # 56..58
-if ($Is_VMS) {
+if ($Is_VMS || $Is_MacOS) {
     for (56..58) { print "ok $_ # skipped: not Unix fork\n"; $test++;}
 }
 else {
@@ -240,7 +241,7 @@ EOC
 }
 
 # 59..62
-if ($Is_VMS) {
+if ($Is_VMS || $Is_MacOS) {
     for (59..62) { print "ok $_ # skipped: not Unix fork\n"; $test++;}
 }
 else {

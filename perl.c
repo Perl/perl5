@@ -3087,6 +3087,9 @@ S_find_beginning(pTHX)
 		    while ((s = moreswitches(s)))
 			;
 	    }
+#ifdef MACOS_TRADITIONAL
+	    break;
+#endif
 	}
     }
 }

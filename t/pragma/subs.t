@@ -11,6 +11,7 @@ undef $/;
 my @prgs = split "\n########\n", <DATA>;
 print "1..", scalar @prgs, "\n";
 
+my $Is_MacOS = $^O eq 'MacOS';
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $tmpfile = "tmp0000";
@@ -46,10 +47,12 @@ for (@prgs){
     print TEST $prog,"\n";
     close TEST;
     my $results = $Is_VMS ?
-                  `./perl $switch $tmpfile 2>&1` :
-		  $Is_MSWin32 ?
-                  `.\\perl -I../lib $switch $tmpfile 2>&1` :
-                  `./perl $switch $tmpfile 2>&1`;
+	`./perl $switch $tmpfile 2>&1` :
+	    $Is_MSWin32 ?
+		`.\\perl -I../lib $switch $tmpfile 2>&1` :
+		    $Is_MacOS ?
+			`$^X -I::lib $switch $tmpfile` :
+			    `./perl $switch $tmpfile 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN
@@ -143,7 +146,7 @@ Fred 1,2 ;
 1;
 --FILE--
 use subs qw( Fred ) ;
-require "./abc" ;
+require ($^O eq "MacOS" ? ":abc" : "./abc");
 sub Fred { print $_[0] + $_[1], "\n" }
 EXPECT
 3

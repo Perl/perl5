@@ -14,7 +14,8 @@ use DirHandle;
 
 print "1..5\n";
 
-$dot = new DirHandle ".";
+$dot = new DirHandle ($^O eq 'MacOS' ? ':' : '.');
+
 print defined($dot) ? "ok" : "not ok", " 1\n";
 
 @a = sort <*>;

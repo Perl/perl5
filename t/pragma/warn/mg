@@ -25,7 +25,7 @@ EXPECT
 ########
 # mg.c
 use warnings 'signal' ;
-if ($^O eq 'MSWin32' || $^O eq 'VMS') {
+if ($^O eq 'MSWin32' || $^O eq 'VMS' || $^O eq 'MacOS') {
     print "SKIPPED\n# $^O, can't kill() to raise()\n"; exit;
 }
 $|=1;
@@ -35,8 +35,8 @@ SIGINT handler "fred" not defined.
 ########
 # mg.c
 no warnings 'signal' ;
-if ($^O eq 'MSWin32' || $^O eq 'VMS') {
-    print "SKIPPED\n# win32, can't kill() to raise()\n"; exit;
+if ($^O eq 'MSWin32' || $^O eq 'VMS' || $^O eq 'MacOS') {
+    print "SKIPPED\n# $^O, can't kill() to raise()\n"; exit;
 }
 $|=1;
 $SIG{"INT"} = "fred"; kill "INT",$$;

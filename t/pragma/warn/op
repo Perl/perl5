@@ -745,10 +745,16 @@ Hash %FRED missing the % in argument 1 of keys() at - line 3.
 ########
 # op.c
 use warnings 'syntax' ;
+BEGIN {
+    if ($^O eq 'MacOS') {
+	print "SKIPPED\n# exec not present\n";
+	exit;
+    }
+}
 exec "$^X -e 1" ; 
 my $a
 EXPECT
-Statement unlikely to be reached at - line 4.
+Statement unlikely to be reached at - line 10.
 	(Maybe you meant system() when you said exec()?)
 ########
 # op.c
@@ -774,6 +780,12 @@ defined(%hash) is deprecated at - line 3.
 ########
 # op.c
 no warnings 'syntax' ;
+BEGIN {
+    if ($^O eq 'MacOS') {
+	print "SKIPPED\n# exec not present\n";
+	exit;
+    }
+}
 exec "$^X -e 1" ; 
 my $a
 EXPECT

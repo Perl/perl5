@@ -156,6 +156,12 @@ Unsuccessful stat on filename containing newline at - line 4.
 ########
 # doio.c [Perl_do_aexec5]
 use warnings 'io' ;
+BEGIN {
+    if ($^O eq 'MacOS') {
+	print "SKIPPED\n# exec not present\n";
+	exit;
+    }
+}
 exec "lskdjfalksdjfdjfkls","" ;
 no warnings 'io' ;
 exec "lskdjfalksdjfdjfkls","" ;
@@ -165,6 +171,12 @@ Can't exec "lskdjfalksdjfdjfkls": .+
 ########
 # doio.c [Perl_do_exec3]
 use warnings 'io' ;
+BEGIN {
+    if ($^O eq 'MacOS') {
+	print "SKIPPED\n# exec not present\n";
+	exit;
+    }
+}
 exec "lskdjfalksdjfdjfkls", "abc" ;
 no warnings 'io' ;
 exec "lskdjfalksdjfdjfkls", "abc" ;

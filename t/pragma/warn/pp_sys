@@ -141,7 +141,7 @@ ghi
 .
 $= = 1 ;
 $- =1 ;
-open STDOUT, ">".($^O eq 'VMS'? 'NL:' : '/dev/null') ;
+open STDOUT, ">".($^O eq 'VMS' ? 'NL:' : $^O eq 'MacOS' ? 'Dev:Null' : '/dev/null') ;
 write ;
 no warnings 'io' ;
 write ;

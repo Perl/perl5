@@ -7,6 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib';
     $ENV{PERL5LIB} = '../lib';    # so children will see it too
+    $ENV{HARNESS_NOTTY} = 1 if $^O eq 'MacOS';
 }
 use lib '../lib';
 

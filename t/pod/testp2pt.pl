@@ -47,8 +47,10 @@ if ($^O eq 'VMS') { # clean up directory spec
     $INSTDIR =~ s#/$##;
     $INSTDIR =~ s#/000000/#/#;
 }
-$INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'pod');
-$INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 't');
+
+my $rm_dir = File::Spec->catdir('t', 'pod');
+$INSTDIR =~ s/$rm_dir$//; # cut 't/pod' from path (cut 't:pod:' on Mac OS) 
+
 my @PODINCDIRS = ( catfile($INSTDIR, 'lib', 'Pod'),
                    catfile($INSTDIR, 'scripts'),
                    catfile($INSTDIR, 'pod'),

@@ -21,7 +21,7 @@ ok(1);
 require Cwd;
 my $THISDIR = Cwd::cwd();
 my $VERBOSE = 0;
-my $lib_dir = File::Spec->catdir($THISDIR,'..','lib','Pod');
+my $lib_dir = File::Spec->catdir($THISDIR,File::Spec->updir,'lib','Pod');
 if ($^O eq 'VMS') {
     $lib_dir = VMS::Filespec::unixify(File::Spec->catdir($THISDIR,'-','lib','pod'));
     $Qlib_dir = $lib_dir;
@@ -83,13 +83,15 @@ if ($^O eq 'VMS') { # privlib is perl_root:[lib] OK but not under mms
     ok($result,$compare);
 }
 else {
-    $compare = File::Spec->catfile("..","lib","File","Find.pm");
+    $compare = File::Spec->catfile(File::Spec->updir,"lib","File","Find.pm");
     ok(_canon($result),_canon($compare));
 }
 
 # Search for a documentation pod rather than a module
 print "### searching for perlfunc.pod\n";
-$result = pod_where({ -dirs => ['../pod'], -verbose => $VERBOSE }, 'perlfunc')
+$result = pod_where({
+     -dirs => [File::Spec->catdir(File::Spec->updir, "pod")],
+     -verbose => $VERBOSE }, 'perlfunc')
   || 'undef - perlfunc.pod not found!';
 print "### found $result\n";
 
@@ -101,7 +103,7 @@ if ($^O eq 'VMS') { # privlib is perl_root:[lib] unfortunately
     ok($result,$compare);
 }
 else {
-    $compare = File::Spec->catfile("..","pod","perlfunc.pod");
+    $compare = File::Spec->catfile(File::Spec->updir,"pod","perlfunc.pod");
     ok(_canon($result),_canon($compare));
 }
 

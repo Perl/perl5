@@ -3,6 +3,13 @@
 BEGIN {
     chdir 't' if -d 't';
     $dir = "self-$$";
+    $sep = "/";
+
+    if ($^O eq 'MacOS') {
+	$dir = ":" . $dir;
+	$sep = ":";
+    }
+
     @INC = $dir;
     push @INC, '../lib';
 
@@ -11,7 +18,7 @@ BEGIN {
     # First we must set up some selfloader files
     mkdir $dir, 0755            or die "Can't mkdir $dir: $!";
 
-    open(FOO, ">$dir/Foo.pm") or die;
+    open(FOO, ">$dir${sep}Foo.pm") or die;
     print FOO <<'EOT';
 package Foo;
 use SelfLoader;
@@ -40,7 +47,7 @@ EOT
 
     close(FOO);
 
-    open(BAR, ">$dir/Bar.pm") or die;
+    open(BAR, ">$dir${sep}Bar.pm") or die;
     print BAR <<'EOT';
 package Bar;
 use SelfLoader;
@@ -196,6 +203,6 @@ if ($bardata ne "sub never { die \"D'oh\" }\n") {
 # cleanup
 END {
 return unless $dir && -d $dir;
-unlink "$dir/Foo.pm", "$dir/Bar.pm";
+unlink "$dir${sep}Foo.pm", "$dir${sep}Bar.pm";
 rmdir "$dir";
 }

@@ -5,6 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
+use File::Spec::Functions;
 use File::Path;
 use strict;
 
@@ -16,13 +17,16 @@ print "1..4\n";
 # first check for stupid permissions second for full, so we clean up
 # behind ourselves
 for my $perm (0111,0777) {
-    mkpath("foo/bar");
-    chmod $perm, "foo", "foo/bar";
+    my $one = catdir(curdir(), "foo");
+    my $two = catdir(curdir(), "foo", "bar");
 
-    print "not " unless -d "foo" && -d "foo/bar";
+    mkpath($two);
+    chmod $perm, $one, $two;
+
+    print "not " unless -d $one && -d $two;
     print "ok ", ++$count, "\n";
 
-    rmtree("foo");
-    print "not " if -e "foo";
+    rmtree($one);
+    print "not " if -e $one;
     print "ok ", ++$count, "\n";
 }

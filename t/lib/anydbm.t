@@ -29,7 +29,7 @@ $Dfile = "Op_dbmx.pag";
 if (! -e $Dfile) {
 	($Dfile) = <Op_dbmx*>;
 }
-if ($Is_Dosish) {
+if ($Is_Dosish || $^O eq 'MacOS') {
     print "ok 2 # Skipped: different file permission semantics\n";
 }
 else {

@@ -17,7 +17,7 @@ END { if ($tmpfile) { 1 while unlink $tmpfile; } }
 
 my @prgs = () ;
 
-foreach (sort glob("pragma/strict-*")) {
+foreach (sort glob($^O eq 'MacOS' ? ":pragma:strict-*" : "pragma/strict-*")) {
 
     next if /(~|\.orig|,v)$/;
 
@@ -54,6 +54,7 @@ for (@prgs){
 	while (@files > 2) {
 	    my $filename = shift @files ;
 	    my $code = shift @files ;
+	    $code =~ s|\./abc|:abc|g if $^O eq 'MacOS';
     	    push @temps, $filename ;
 	    open F, ">$filename" or die "Cannot open $filename: $!\n" ;
 	    print F $code ;
@@ -61,12 +62,15 @@ for (@prgs){
 	}
 	shift @files ;
 	$prog = shift @files ;
+	$prog =~ s|\./abc|:abc|g if $^O eq 'MacOS';
     }
     open TEST, ">$tmpfile";
     print TEST $prog,"\n";
     close TEST;
     my $results = $Is_MSWin32 ?
                   `.\\perl -I../lib $switch $tmpfile 2>&1` :
+                  $^O eq 'MacOS' ?
+                  `$^X -I::lib $switch $tmpfile` :
                   `./perl $switch $tmpfile 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;
@@ -74,6 +78,8 @@ for (@prgs){
     $results =~ s/tmp\d+/-/g;
     $results =~ s/\n%[A-Z]+-[SIWEF]-.*$// if $Is_VMS;  # clip off DCL status msg
     $expected =~ s/\n+$//;
+    $expected =~ s|(\./)?abc\.pm|:abc.pm|g if $^O eq 'MacOS';
+    $expected =~ s|./abc|:abc|g if $^O eq 'MacOS';
     my $prefix = ($results =~ s/^PREFIX\n//) ;
     if ( $results =~ s/^SKIPPED\n//) {
 	print "$results\n" ;

@@ -5,6 +5,8 @@ BEGIN {
     @INC = '../lib';
 }
 
+use File::Spec::Functions;
+
 eval 'opendir(NOSUCH, "no/such/directory");';
 if ($@) { print "1..0\n"; exit; }
 
@@ -28,12 +30,13 @@ if (@D > 90 && @D < 110) { print "ok 2\n"; } else { print "not ok 2\n"; }
 
 @R = sort @D;
 @G = sort <op/*.t>;
+@G = sort <:op:*.t> if $^O eq 'MacOS';
 if ($G[0] =~ m#.*\](\w+\.t)#i) {
     # grep is to convert filespecs returned from glob under VMS to format
     # identical to that returned by readdir
     @G = grep(s#.*\](\w+\.t).*#op/$1#i,<op/*.t>);
 }
-while (@R && @G && "op/".$R[0] eq $G[0]) {
+while (@R && @G && $G[0] eq ($^O eq 'MacOS' ? ':op:' : 'op/').$R[0]) {
 	shift(@R);
 	shift(@G);
 }

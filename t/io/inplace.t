@@ -19,6 +19,12 @@ elsif ($^O eq 'VMS') {
   `MCR []perl. -le "print 'foo'" > ./.b`;
   `MCR []perl. -le "print 'foo'" > ./.c`;
 }
+elsif ($^O eq 'MacOS') {
+  $CAT = "$^X -e \"print<>\"";
+  `$^X -le "print 'foo'" > .a`;
+  `$^X -le "print 'foo'" > .b`;
+  `$^X -le "print 'foo'" > .c`;
+}
 else {
   $CAT = 'cat';
   `echo foo | tee .a .b .c`;

@@ -1,8 +1,15 @@
 #!./perl
 
 BEGIN {
-    chdir '..' if -d '../pod' && -d '../t';
-    @INC = 'lib';
+	# special-case Mac OS because of
+	# diagnostic-finding-date logistics
+	if ($^O eq 'MacOS') {
+	    chdir '::' if -d '::pod' && -d '::t';
+	    @INC = ":lib:";
+	} else {
+	    chdir '..' if -d '../pod' && -d '../t';
+	    @INC = 'lib';
+	}
 }
 
 

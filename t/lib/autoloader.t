@@ -2,7 +2,13 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    $dir = "auto-$$";
+    if ($^O eq 'MacOS') {
+	$dir = ":auto-$$";
+	$sep = ":";
+    } else {
+	$dir = "auto-$$";
+	$sep = "/";
+    }
     @INC = $dir;
     push @INC, '../lib';
 }
@@ -11,10 +17,10 @@ print "1..11\n";
 
 # First we must set up some autoloader files
 mkdir $dir, 0755            or die "Can't mkdir $dir: $!";
-mkdir "$dir/auto", 0755     or die "Can't mkdir: $!";
-mkdir "$dir/auto/Foo", 0755 or die "Can't mkdir: $!";
+mkdir "$dir${sep}auto", 0755     or die "Can't mkdir: $!";
+mkdir "$dir${sep}auto${sep}Foo", 0755 or die "Can't mkdir: $!";
 
-open(FOO, ">$dir/auto/Foo/foo.al") or die;
+open(FOO, ">$dir${sep}auto${sep}Foo${sep}foo.al") or die;
 print FOO <<'EOT';
 package Foo;
 sub foo { shift; shift || "foo" }
@@ -22,7 +28,7 @@ sub foo { shift; shift || "foo" }
 EOT
 close(FOO);
 
-open(BAR, ">$dir/auto/Foo/bar.al") or die;
+open(BAR, ">$dir${sep}auto${sep}Foo${sep}bar.al") or die;
 print BAR <<'EOT';
 package Foo;
 sub bar { shift; shift || "bar" }
@@ -30,7 +36,7 @@ sub bar { shift; shift || "bar" }
 EOT
 close(BAR);
 
-open(BAZ, ">$dir/auto/Foo/bazmarkhian.al") or die;
+open(BAZ, ">$dir${sep}auto${sep}Foo${sep}bazmarkhian.al") or die;
 print BAZ <<'EOT';
 package Foo;
 sub bazmarkhianish { shift; shift || "baz" }
@@ -90,7 +96,7 @@ print "not " unless $foo->bazmarkhianish($1) eq 'foo';
 print "ok 9\n";
 
 # test recursive autoloads
-open(F, ">$dir/auto/Foo/a.al") or die;
+open(F, ">$dir${sep}auto${sep}Foo${sep}a.al") or die;
 print F <<'EOT';
 package Foo;
 BEGIN { b() }
@@ -99,7 +105,7 @@ sub a { print "ok 11\n"; }
 EOT
 close(F);
 
-open(F, ">$dir/auto/Foo/b.al") or die;
+open(F, ">$dir${sep}auto${sep}Foo${sep}b.al") or die;
 print F <<'EOT';
 package Foo;
 sub b { print "ok 10\n"; }
@@ -111,12 +117,12 @@ Foo::a();
 # cleanup
 END {
 return unless $dir && -d $dir;
-unlink "$dir/auto/Foo/foo.al";
-unlink "$dir/auto/Foo/bar.al";
-unlink "$dir/auto/Foo/bazmarkhian.al";
-unlink "$dir/auto/Foo/a.al";
-unlink "$dir/auto/Foo/b.al";
-rmdir "$dir/auto/Foo";
-rmdir "$dir/auto";
+unlink "$dir${sep}auto${sep}Foo${sep}foo.al";
+unlink "$dir${sep}auto${sep}Foo${sep}bar.al";
+unlink "$dir${sep}auto${sep}Foo${sep}bazmarkhian.al";
+unlink "$dir${sep}auto${sep}Foo${sep}a.al";
+unlink "$dir${sep}auto${sep}Foo${sep}b.al";
+rmdir "$dir${sep}auto${sep}Foo";
+rmdir "$dir${sep}auto";
 rmdir "$dir";
 }

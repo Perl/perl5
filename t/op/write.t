@@ -2,7 +2,8 @@
 
 print "1..9\n";
 
-my $CAT = ($^O eq 'MSWin32') ? 'type' : 'cat';
+my $CAT = ($^O eq 'MSWin32') ? 'type'
+	: ($^O eq 'MacOS') ? 'catenate' : 'cat';
 
 format OUT =
 the quick brown @<<
