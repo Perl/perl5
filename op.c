@@ -480,8 +480,8 @@ Perl_pad_sv(pTHX_ PADOFFSET po)
 #else
     if (!po)
 	Perl_croak(aTHX_ "panic: pad_sv po");
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" sv %d\n",
-			  PTR2UV(PL_curpad), po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" sv %"IVdf"\n",
+			  PTR2UV(PL_curpad), (IV)po));
 #endif /* USE_THREADS */
     return PL_curpad[po];		/* eventually we'll turn this into a macro */
 }
@@ -501,8 +501,8 @@ Perl_pad_free(pTHX_ PADOFFSET po)
 			  "0x%"UVxf" Pad 0x%"UVxf" free %d\n",
 			  PTR2UV(thr), PTR2UV(PL_curpad), po));
 #else
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" free %d\n",
-			  PTR2UV(PL_curpad), po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" free %"IVdf"\n",
+			  PTR2UV(PL_curpad), (IV)po));
 #endif /* USE_THREADS */
     if (PL_curpad[po] && PL_curpad[po] != &PL_sv_undef)
 	SvPADTMP_off(PL_curpad[po]);
@@ -523,8 +523,8 @@ Perl_pad_swipe(pTHX_ PADOFFSET po)
 			  "0x%"UVxf" Pad 0x%"UVxf" swipe %d\n",
 			  PTR2UV(thr), PTR2UV(PL_curpad), po));
 #else
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" swipe %d\n",
-			  PTR2UV(PL_curpad), po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" swipe %"IVdf"\n",
+			  PTR2UV(PL_curpad), (IV)po));
 #endif /* USE_THREADS */
     SvPADTMP_off(PL_curpad[po]);
     PL_curpad[po] = NEWSV(1107,0);

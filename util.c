@@ -96,7 +96,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 #endif
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) malloc %ld bytes\n",PTR2UV(ptr),PL_an++,(long)size));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
     if (ptr != Nullch)
 	return ptr;
     else if (PL_nomemok)
@@ -141,8 +141,8 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     ptr = PerlMem_realloc(where,size);
     PERL_ALLOC_CHECK(ptr);
  
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) rfree\n",PTR2UV(where),PL_an++));
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) realloc %ld bytes\n",PTR2UV(ptr),PL_an++,(long)size));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 
     if (ptr != Nullch)
 	return ptr;
@@ -162,7 +162,7 @@ Free_t
 Perl_safesysfree(Malloc_t where)
 {
     dTHX;
-    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) free\n",PTR2UV(where),PL_an++));
+    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) free\n",PTR2UV(where),(long)PL_an++));
     if (where) {
 	/*SUPPRESS 701*/
 	PerlMem_free(where);
@@ -191,7 +191,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     size *= count;
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) calloc %ld x %ld bytes\n",PTR2UV(ptr),PL_an++,(long)count,(long)size));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) calloc %ld x %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)count,(long)size));
     if (ptr != Nullch) {
 	memset((void*)ptr, 0, size);
 	return ptr;
