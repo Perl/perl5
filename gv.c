@@ -93,10 +93,18 @@ STRLEN len;
 int multi;
 {
     register GP *gp;
+    bool doproto = SvTYPE(gv) > SVt_NULL;
+    char *proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
 
     sv_upgrade((SV*)gv, SVt_PVGV);
-    if (SvLEN(gv))
-	Safefree(SvPVX(gv));
+    if (SvLEN(gv)) {
+	if (proto) {
+	    SvPVX(gv) = NULL;
+	    SvLEN(gv) = 0;
+	    SvPOK_off(gv);
+	} else
+	    Safefree(SvPVX(gv));
+    }
     Newz(602, gp, 1, GP);
     GvGP(gv) = gp_ref(gp);
     GvSV(gv) = NEWSV(72,0);
@@ -109,6 +117,27 @@ int multi;
     GvNAMELEN(gv) = len;
     if (multi)
 	GvMULTI_on(gv);
+    if (doproto) {			/* Replicate part of newSUB here. */
+	ENTER;
+	start_subparse(0,0);		/* Create CV in compcv. */
+	GvCV(gv) = compcv;
+	LEAVE;
+
+	GvCVGEN(gv) = 0;
+	sub_generation++;
+	CvGV(GvCV(gv)) = (GV*)SvREFCNT_inc(gv);
+	CvFILEGV(GvCV(gv)) = curcop->cop_filegv;
+	CvSTASH(GvCV(gv)) = curstash;
+#ifdef USE_THREADS
+	CvOWNER(GvCV(gv)) = 0;
+	New(666, CvMUTEXP(GvCV(gv)), 1, perl_mutex);
+	MUTEX_INIT(CvMUTEXP(GvCV(gv)));
+#endif /* USE_THREADS */
+	if (proto) {
+	    sv_setpv((SV*)GvCV(gv), proto);
+	    Safefree(proto);
+	}
+    }
 }
 
 static void
@@ -593,13 +622,15 @@ I32 sv_type;
 	    gv_init_sv(gv, sv_type);
 	}
 	return gv;
+    } else if (add & GV_NOINIT) {
+	return gv;
     }
 
     /* Adding a new symbol */
 
-    if (add & 4)
+    if (add & GV_ADDWARN)
 	warn("Had to create %s unexpectedly", nambeg);
-    gv_init(gv, stash, name, len, add & 2);
+    gv_init(gv, stash, name, len, add & GV_ADDMULTI);
     gv_init_sv(gv, sv_type);
     GvFLAGS(gv) |= add_gvflags;
 
@@ -625,7 +656,7 @@ I32 sv_type;
 	    AV* av = GvAVn(gv);
 	    GvMULTI_on(gv);
 	    sv_magic((SV*)av, (SV*)gv, 'I', Nullch, 0);
-	    if (add & 2 && strEQ(nambeg,"AnyDBM_File::ISA") && AvFILL(av) == -1)
+	    if ((add & GV_ADDMULTI) && strEQ(nambeg,"AnyDBM_File::ISA") && AvFILL(av) == -1)
 	    {
 		char *pname;
 		av_push(av, newSVpv(pname = "NDBM_File",0));
@@ -871,7 +902,7 @@ HV* stash;
 	    }
 	    else if (isALPHA(*HeKEY(entry))) {
 		gv = (GV*)HeVAL(entry);
-		if (GvMULTI(gv))
+		if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
 		    continue;
 		curcop->cop_line = GvLINE(gv);
 		filegv = GvFILEGV(gv);

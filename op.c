@@ -3328,7 +3328,8 @@ OP *proto;
 OP *block;
 {
     char *name = o ? SvPVx(cSVOPo->op_sv, na) : Nullch;
-    GV *gv = gv_fetchpv(name ? name : "__ANON__", GV_ADDMULTI, SVt_PVCV);
+    GV *gv = gv_fetchpv(name ? name : "__ANON__",
+			GV_ADDMULTI | (block ? 0 : GV_NOINIT), SVt_PVCV);
     char *ps = proto ? SvPVx(((SVOP*)proto)->op_sv, na) : Nullch;
     register CV *cv;
     I32 ix;
@@ -3337,6 +3338,23 @@ OP *block;
 	SAVEFREEOP(o);
     if (proto)
 	SAVEFREEOP(proto);
+
+    if (SvTYPE(gv) != SVt_PVGV) {	/* Prototype now, and had
+					   maximum a prototype before. */
+	if (SvTYPE(gv) > SVt_NULL) {
+	    if (!SvPOK((SV*)gv) && !(SvIOK((SV*)gv) && SvIVX((SV*)gv) == -1))
+		warn("Runaway prototype");
+	    cv_ckproto((CV*)gv, NULL, ps);
+	}
+	if (ps)
+	    sv_setpv((SV*)gv, ps);
+	else
+	    sv_setiv((SV*)gv, -1);
+	SvREFCNT_dec(compcv);
+	compcv = NULL;
+	sub_generation++;
+	goto noblock;
+    }
 
     if (!name || GvCVGEN(gv))
 	cv = Nullcv;
@@ -3414,6 +3432,7 @@ OP *block;
 	}
     }
     if (!block) {
+      noblock:
 	copline = NOLINE;
 	LEAVE_SCOPE(floor);
 	return cv;
