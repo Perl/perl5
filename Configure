@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Oct  5 01:50:43 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Oct  6 15:40:31 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -2099,7 +2099,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 EOM
-    if $cc -o try try.c; then
+    if $cc $cflags -o try try.c; then
        :
     else
         echo "Uh-oh, the C compiler '$cc' doesn't seem to be working." >&4
@@ -2133,8 +2133,12 @@ EOM
             fi
         fi
         if $test X"$despair" = Xyes; then
-            echo "You need to find a working C compiler." >&4
-            echo "I cannot continue any further, aborting." >&4
+	    $cat >&4 <<EOM
+You need to find a working C compiler.
+Either (purchase and) install the C compiler supplied by your OS vendor,
+or for a free C compiler try http://gcc.gnu.org/
+I cannot continue any further, aborting.
+EOM
             exit 1
         fi
     fi
@@ -6273,7 +6277,6 @@ echo " "
 $cat <<EOM
 Do you want to install the various scripts accompanying Perl?
 Usually you do want this.
-
 EOM
 case "$installscripts" in
 "$undef"|[nN]*)	dflt='n';;
