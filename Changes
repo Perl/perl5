@@ -78,9 +78,17 @@ Version 5.005_04        Fourth maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
-[ 17643] By: chip                                  on 2002/07/19  18:53:22
+[ 17647] By: chip                                  on 2002/07/19  22:47:57
+        Log: ensure that hashes never attempt to malloc with a negative size
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Subject: Re: [ID 20000421.002] Math::BigInt out of memory?
+     Branch: maint-5.005/perl
+	   ! hv.c
+____________________________________________________________________________
+[ 17646] By: chip                                  on 2002/07/19  20:15:23
         Log: Update Changes in preparation for 5.005_04.
-           ! Changes
+     Branch: maint-5.005/perl
+	   ! Changes
 
 ----------------
 Version 5.005_03        Third maintenance release of 5.005
