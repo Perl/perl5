@@ -32,6 +32,180 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  9091] By: jhi                                   on 2001/03/09  15:25:05
+        Log: In op/stat #35 better to scan all the potential directories
+             for setuids, not just the first one.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[  9090] By: jhi                                   on 2001/03/09  15:01:27
+        Log: Subject: Re: [ID 19990808.001] [PATCH] FETCH triggered on exists() 
+             From: rspier@pobox.com (Robert Spier)
+             Date: Fri, 9 Mar 2001 03:30:20 -0500
+             Message-ID: <15016.38044.381174.160189@rls.cx>
+             
+             EXISTS() returning undef mistakenly triggered a FETCH().
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[  9089] By: jhi                                   on 2001/03/09  14:59:02
+        Log: Add /sbin and /usr/sbin to the list of directories scanned
+             for setuid programs.  Takes care of bug id 20010309.003.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[  9088] By: jhi                                   on 2001/03/09  14:48:32
+        Log: Regen perlapi, perltoc.
+     Branch: perl
+	   ! ext/Encode/Encode/Tcl.pm pod/perlapi.pod pod/perltoc.pod
+____________________________________________________________________________
+[  9087] By: jhi                                   on 2001/03/09  14:38:56
+        Log: Subject: Re: [ PATCH perl@8956 ] new debug option -DR shows ref counts
+             From: David Mitchell <davem@fdgroup.co.uk>
+             Date: Fri, 9 Mar 2001 13:49:31 +0000 (GMT)
+             Message-Id: <200103091349.NAA16617@tiree.fdgroup.co.uk>
+     Branch: perl
+	   ! dump.c perl.c perl.h pod/perlrun.pod
+____________________________________________________________________________
+[  9086] By: jhi                                   on 2001/03/09  01:47:16
+        Log: A modified version of
+             
+             Subject: [ID 20010307.005] POSIX::sigaction has various problems
+             From: anders@broadcom.com
+             Date: Wed, 7 Mar 2001 14:35:24 -0800 (PST) 
+             Message-Id: <200103072235.OAA25368@dt-sj1-130.sj.broadcom.com>
+             
+             Currently the sigaction.t test #6 fails (and is fudged to look
+             like an "ok") in Linux (at least in Debian 2.2 Linux 2.4.2 x86).
+             This may well be a genuine bug in Linux sigaction() (since at
+             least Tru64, Solaris, and HP-UX disagree with Linux).
+             Anyone with POSIX / SUSv2 tome handy?  The problem is that
+             the flags of the oldaction don't match with the flags in
+             the previously installed disposition.
+     Branch: perl
+	   + t/lib/sigaction.t
+	   ! MANIFEST ext/POSIX/POSIX.pm ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  9085] By: jhi                                   on 2001/03/09  01:30:13
+        Log: Subject: Re: mission impossible for the day
+             From: Alex Gough <alex@rcon.org>
+             Date: Thu, 08 Mar 2001 17:18:19 +0000
+             Message-ID: <3AA7BEDB.8070409@rcon.org>
+             
+             If references (are overloaded) and can be directly stringified,
+             show that instead of "stringified".
+             
+             (The problem, infinite mutual recursion caused by overloaded bool
+             in Switch.pm, tracked by David Mitchell)
+     Branch: perl
+	   ! lib/Carp/Heavy.pm
+____________________________________________________________________________
+[  9084] By: jhi                                   on 2001/03/09  01:20:39
+        Log: Subject: Re: [ PATCH perl@8956 ] new debug option -DR shows ref counts
+             Date: Thu, 8 Mar 2001 12:06:57 +0000 (GMT)
+             From: David Mitchell <davem@fdgroup.co.uk>
+             Message-Id: <200103081206.MAA06281@tiree.fdgroup.co.uk>
+     Branch: perl
+	   ! ext/re/re.xs malloc.c mg.c perl.c perl.h perly.c perly.y
+	   ! pp_ctl.c regexec.c sv.c vms/perly_c.vms
+____________________________________________________________________________
+[  9083] By: jhi                                   on 2001/03/09  01:16:51
+        Log: Subject: [PATCH] perldata.pod here-doc docs
+             From: Jeff Pinyan <jeffp@crusoe.net>
+             Date: Thu, 8 Mar 2001 13:18:55 -0500 (EST)
+             Message-ID: <Pine.GSO.4.21.0103081317530.20957-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! pod/perldata.pod
+____________________________________________________________________________
+[  9082] By: jhi                                   on 2001/03/09  01:01:27
+        Log: Subject: Re: Unicode/EBCDIC
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 8 Mar 2001 16:23:25 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10103081617390.377472-100000@aspara.forte.com>
+     Branch: perl
+	   ! perl.c perl.h sv.c toke.c utf8.c utf8.h
+____________________________________________________________________________
+[  9081] By: jhi                                   on 2001/03/08  13:41:30
+        Log: Subject: Ooops, wrong 'no *POSIX' Patch
+             From: Dorner Thomas <Thomas.Dorner@start.de>
+             Date: Thu, 8 Mar 2001 08:43:28 +0100
+             Message-ID: <6727B1DACFCDD311A757009027CA8D69010A88D3@Ex02.inhouse.start.de>
+     Branch: perl
+	   ! hints/posix-bc.sh
+____________________________________________________________________________
+[  9080] By: jhi                                   on 2001/03/08  13:11:42
+        Log: It's Scripts.txt, not Script.txt.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  9079] By: jhi                                   on 2001/03/08  12:59:05
+        Log: Subject: 'no *POSIX' Patch speeding up make on BS2000 
+             From: Dorner Thomas <Thomas.Dorner@start.de>
+             Date: Wed, 7 Mar 2001 14:13:31 +0100
+             Message-ID: <6727B1DACFCDD311A757009027CA8D69010A88CB@Ex02.inhouse.start.de>
+     Branch: perl
+	   ! makedepend.SH
+____________________________________________________________________________
+[  9078] By: jhi                                   on 2001/03/08  12:57:43
+        Log: Retract #9069, wrong patch.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9077] By: jhi                                   on 2001/03/08  01:06:13
+        Log: Upgrade to Unicode 3.1 beta 2001-03-01.  The 3.1 final
+             should come out March 14.
+     Branch: perl
+	   + lib/unicode/Scripts.txt
+	   ! MANIFEST lib/unicode/Category.pl lib/unicode/Decomposition.pl
+	   ! lib/unicode/EAWidth.txt lib/unicode/Is/Alnum.pl
+	   ! lib/unicode/Is/Alpha.pl lib/unicode/Is/L.pl
+	   ! lib/unicode/Is/LbrkAI.pl lib/unicode/Is/LbrkAL.pl
+	   ! lib/unicode/Is/LbrkB2.pl lib/unicode/Is/LbrkBA.pl
+	   ! lib/unicode/Is/LbrkBB.pl lib/unicode/Is/LbrkBK.pl
+	   ! lib/unicode/Is/LbrkCB.pl lib/unicode/Is/LbrkCL.pl
+	   ! lib/unicode/Is/LbrkCM.pl lib/unicode/Is/LbrkCR.pl
+	   ! lib/unicode/Is/LbrkEX.pl lib/unicode/Is/LbrkGL.pl
+	   ! lib/unicode/Is/LbrkHY.pl lib/unicode/Is/LbrkID.pl
+	   ! lib/unicode/Is/LbrkIN.pl lib/unicode/Is/LbrkIS.pl
+	   ! lib/unicode/Is/LbrkLF.pl lib/unicode/Is/LbrkNS.pl
+	   ! lib/unicode/Is/LbrkNU.pl lib/unicode/Is/LbrkOP.pl
+	   ! lib/unicode/Is/LbrkPO.pl lib/unicode/Is/LbrkPR.pl
+	   ! lib/unicode/Is/LbrkQU.pl lib/unicode/Is/LbrkSA.pl
+	   ! lib/unicode/Is/LbrkSG.pl lib/unicode/Is/LbrkSP.pl
+	   ! lib/unicode/Is/LbrkSY.pl lib/unicode/Is/LbrkZW.pl
+	   ! lib/unicode/Is/Ll.pl lib/unicode/Is/Lower.pl
+	   ! lib/unicode/Is/S.pl lib/unicode/Is/Sm.pl
+	   ! lib/unicode/Is/Word.pl lib/unicode/Names.txt
+	   ! lib/unicode/PropList.txt lib/unicode/ReadMe.txt
+	   ! lib/unicode/Unicode.txt lib/unicode/mktables.PL
+	   ! lib/unicode/version
+____________________________________________________________________________
+[  9076] By: jhi                                   on 2001/03/07  22:59:39
+        Log: Integrate change #7784 from mainline into maintperl.
+             
+             Subject: [PATCH 5.7.0] lexicals not recognized in a run-time (?{})
+     Branch: maint-5.6/perl
+	  !> pp_ctl.c t/op/pat.t
+____________________________________________________________________________
+[  9075] By: jhi                                   on 2001/03/07  22:05:11
+        Log: More UTF-8 test tweaks.
+     Branch: perl
+	   ! t/op/pat.t t/op/split.t t/pragma/utf8.t
+____________________________________________________________________________
+[  9074] By: nick                                  on 2001/03/07  21:39:29
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> Changes Makefile.SH lib/ExtUtils/MM_Unix.pm
+	  !> lib/unicode/mktables.PL patchlevel.h perl.c pod/perlop.pod
+	  !> pod/perlretut.pod pod/perlsyn.pod pp.c pp_sys.c
+	  !> t/camel-III/vstring.t t/lib/charnames.t t/op/chop.t
+	  !> t/op/pack.t t/op/pat.t t/op/split.t t/pragma/utf8.t
+____________________________________________________________________________
+[  9073] By: jhi                                   on 2001/03/07  16:37:09
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9072] By: jhi                                   on 2001/03/07  16:32:30
         Log: Subject: [ID 20010306.004] || != named unary operator
              From: abela@geneanet.org
