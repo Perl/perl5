@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed May 12 14:07:09 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Thu May 13 15:54:16 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -573,6 +573,7 @@ usedl=''
 doublesize=''
 ebcdic=''
 fflushNULL=''
+fflushall=''
 fpostype=''
 gidtype=''
 groupstype=''
@@ -797,6 +798,7 @@ d_fsetpos64=''
 d_ftell64=''
 d_ftello64=''
 d_tmpfile64=''
+stdio_stream_array=''
 sysman=''
 trnl=''
 uidtype=''
@@ -10918,29 +10920,93 @@ $rm -f tebcdic.c tebcdic
 set ebcdic
 eval $setvar
 
-: check for fflush NULL behaviour
-case "$fflushNULL" in
-'') $cat <<EOM
-
-Checking to see whether fflush(NULL) flushes all pending stdio output...
+$cat >&4 <<EOM
+Checking how to access stdio streams by file descriptor number...
 EOM
-	$cat >try.c <<EOCP
+case "$stdio_stream_array" in
+'') 	$cat >try.c <<EOCP
 #include <stdio.h>
+int main() {
+  if (&STDIO_STREAM_ARRAY[fileno(stdin)] == stdin)
+    printf("yes\n");
+}
+EOCP
+	for s in _iob __iob __sF
+	do
+	        set try -DSTDIO_STREAM_ARRAY=$s
+		if eval $compile_ok; then
+		    	case "`./try$exe_ext`" in
+			yes)	stdio_stream_array=$s; break ;;
+			esac
+		fi
+	done
+	$rm -f try.* try$exe_ext
+esac
+case "$stdio_stream_array" in
+'')	$cat >&4 <<EOM
+I can't figure out how to access stdio streams by file descriptor number.
+EOM
+	;;
+*)	$cat >&4 <<EOM
+You can access stdio streams by file descriptor number by using $stdio_stream_array.
+EOM
+	;;
+esac
+
+$cat >&4 <<EOM
+Checking how to flush all pending stdio output...
+EOM
+$cat >try.c <<EOCP
+#include <stdio.h>
+#$i_unistd I_UNISTD
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
+#$d_sysconf HAS_SYSCONF
 int main() {
   FILE* p = fopen("try.out", "w");
   fputc('x', p);
+#ifdef TRY_FFLUSH_NULL
   fflush(NULL);
-  _exit(0);
+#endif
+#ifdef TRY_FFLUSH_ALL
+  {
+    long open_max = -1;
+# if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
+    open_max = sysconf(_SC_OPEN_MAX);
+# else
+#  ifdef FOPEN_MAX
+#   open_max = FOPEN_MAX;
+#  else
+#   ifdef OPEN_MAX
+#   open_max = OPEN_MAX;
+#   else
+#    ifdef _NFILE
+#   open_max = _NFILE;
+#    endif
+#   endif
+#  endif
+# endif
+    if (open_max > 0) {
+      long i;
+      for (i = 0; i < open_max; i++)
+         fflush(&$stdio_stream_array[i]);
+    }	
+  }
+#endif
+  _exit(42);
 }
 EOCP
-	set try
+: check for fflush NULL behaviour
+case "$fflushNULL" in
+'') 	set try -DTRY_FFLUSH_NULL
 	$rm -f try.out
 	if eval $compile_ok; then
 	    	./try$exe_ext 2>/dev/null
-		$rm -f core try.core core.try.*
-		if $test -s try.out; then
+		if $test -s try.out -a "X$?" = X42; then
 			fflushNULL="`$cat try.out`"
 		fi
+		$rm -f core try.core core.try.*
 	fi
 	case "$fflushNULL" in
 	x)	cat >&4 <<EOM
@@ -10960,7 +11026,6 @@ EOM
 		fflushNULL=undef
 		;;
 	esac
-	$rm -f try.* try
 	;;
 $define|true|[yY]*)
 	fflushNULL=define
@@ -10969,6 +11034,51 @@ $define|true|[yY]*)
 	fflushNULL=undef
 	;;
 esac
+: check for fflush all behaviour
+case "$fflushall" in
+'') 	set try -DTRY_FFLUSH_ALL
+	$rm -f try.out
+	if eval $compile_ok; then
+	    	./try$exe_ext 2>/dev/null
+		if $test -s try.out -a "X$?" = X42; then
+			fflushall="`$cat try.out`"
+		fi
+		$rm -f core try.core core.try.*
+	fi
+	case "$fflushall" in
+	x)	cat >&4 <<EOM
+Flushing explicitly all the stdio streams works.
+EOM
+		fflushall=define
+		;;
+	'')	cat >&4 <<EOM
+Flushing explicitly all the stdio streams doesn't work.
+EOM
+		fflushall=undef
+		;;
+	*)	cat >&4 <<EOM
+Cannot figure out whether flushing stdio stream explicitly works or not.
+I'm assuming it doesn't.
+EOM
+		fflushall=undef
+		;;
+	esac
+	;;
+$define|true|[yY]*)
+	fflushall=define
+	;;
+*)
+	fflushall=undef
+	;;
+esac
+case "$fflushNULL$fflushall" in
+undefundef)
+	cat <<EOM
+I cannot figure out how to flush pending stdio output.
+EOM
+	;;
+esac
+$rm -f try.* try$exe_ext
 
 : see what type file positions are declared as in the library
 rp="What is the type for file position used by fsetpos()?"
@@ -13058,6 +13168,7 @@ exe_ext='$exe_ext'
 expr='$expr'
 extensions='$extensions'
 fflushNULL='$fflushNULL'
+fflushall='$fflushall'
 find='$find'
 firstmakefile='$firstmakefile'
 flex='$flex'
@@ -13304,6 +13415,7 @@ stdio_bufsiz='$stdio_bufsiz'
 stdio_cnt='$stdio_cnt'
 stdio_filbuf='$stdio_filbuf'
 stdio_ptr='$stdio_ptr'
+stdio_stream_array='$stdio_stream_array'
 strings='$strings'
 submit='$submit'
 subversion='$subversion'

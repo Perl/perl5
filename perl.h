@@ -1455,8 +1455,12 @@ typedef pthread_key_t	perl_key;
  * XXX the default needs a Configure test, as it may not work everywhere.
  */
 #ifndef PERL_FLUSHALL_FOR_CHILD
-# if (defined(USE_STDIO) && defined(FFLUSH_NULL)) || defined(USE_SFIO)
+# if defined(FFLUSH_NULL) || defined(USE_SFIO)
 #  define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
+# else
+#  ifdef FFLUSH_ALL
+#   define PERL_FLUSHALL_FOR_CHILD	my_fflush_all()
+#  endif
 # endif
 #endif
 

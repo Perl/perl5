@@ -2217,7 +2217,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, tells that fflush(NULL) does flush
  *	all pending stdio output.
  */
-#$fflushNULL FFLUSH_NULL 		/**/
+/* FFLUSH_ALL:
+ *	This symbol, if defined, tells that to flush
+ *	all pending stdio output one must loop through all
+ *	the stdio file handles and fflush them.
+ */
+#$fflushNULL	FFLUSH_NULL 		/**/
+#$fflushall	FFLUSH_ALL 		/**/
 
 /* DB_Prefix_t:
  *	This symbol contains the type of the prefix structure element
@@ -2456,6 +2462,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_ftell64     HAS_FTELL64		/**/
 #$d_ftello64    HAS_FTELLO64		/**/
 #$d_tmpfile64   HAS_TMPFILE64	/**/
+
+/* STDIO_STREAM_ARRAY:
+ *	This symbol tells the name of the array holding the stdio stream_array,
+ *	if any. Usual values include _iob, __iob, and __sF.
+ */
+#define STDIO_STREAM_ARRAY	$stdio_stream_array
 
 /* USE_64_BITS:
  *	This symbol, if defined, indicates that 64-bit interfaces should

@@ -1619,6 +1619,8 @@
 #define my_exit_jump		pPerl->Perl_my_exit_jump
 #undef  my_failure_exit
 #define my_failure_exit		pPerl->Perl_my_failure_exit
+#undef  my_fflush_all
+#define my_fflush_all		pPerl->Perl_my_fflush_all
 #undef  my_htonl
 #define my_htonl		pPerl->Perl_my_htonl
 #undef  my_lstat
