@@ -5,10 +5,10 @@ perl18n - Perl i18n (internalization)
 =head1 DESCRIPTION
 
 Perl supports the language-specific notions of data like
-"is this a letter" and "which letter comes first". These
+"is this a letter" and "which letter comes first".  These
 are very important issues especially for languages other
 than English -- but also for English: it would be very
-naïve indeed to think that C<A-Za-z> defines all the letters.
+naïve indeed to think that C<A-Za-z> defines all the "letters".
 
 Perl understands the language-specific data via the standardized
 (ISO C, XPG4, POSIX 1.c) method called "the locale system".
@@ -33,26 +33,27 @@ In runtime you can switch locales using the POSIX::setlocale().
 	$old_locale = setlocale(LC_CTYPE);
 
 	setlocale(LC_CTYPE, "fr_CA.ISO8859-1");
-	# for LC_CTYPE now in locale "French, Canada, codeset ISO 8859-1"
+	# LC_CTYPE now in locale "French, Canada, codeset ISO 8859-1"
 
 	setlocale(LC_CTYPE, "");
-	# for LC_CTYPE now in locale what the LC_ALL / LC_CTYPE / LANG define.
+	# LC_CTYPE now in locale what the LC_ALL / LC_CTYPE / LANG define.
 	# see below for documentation about the LC_ALL / LC_CTYPE / LANG.
 
 	# restore the old locale
 	setlocale(LC_CTYPE, $old_locale);
 
 The first argument of C<setlocale()> is called B<the category> and the
-second argument B<the locale>. The category tells in what aspect of data
-processing we want to apply language-specific rules, the locale tells
-in what language-country/territory-codeset - but read on for the naming
-of the locales: not all systems name locales as in the example.
+second argument B<the locale>.  The category tells in what aspect of
+data processing we want to apply language-specific rules, the locale
+tells in what language-country/territory-codeset - but read on for the
+naming of the locales: not all systems name locales as in the example.
 
 For further information about the categories, please consult your
-L<setlocale(3)> manual. For the locales available in your system, also
-consult the L<setlocale(3)> manual and see whether it leads you to the
-list of the available locales (search for the C<SEE ALSO> section). If
-that fails, try out in command line the following commands:
+L<setlocale(3)> manual.  For the locales available in your system,
+also consult the L<setlocale(3)> manual and see whether it leads you
+to the list of the available locales (search for the C<SEE ALSO>
+section).  If that fails, try out in command line the following
+commands:
 
 =over 12
 
@@ -76,59 +77,100 @@ and see whether they list something resembling these
 	english			german			russian
 	english.iso88591	german.iso88591		russian.iso88595
 
-Sadly enough even if the calling interface has been standardized
-the names of the locales are not. The naming usually is
-language-country/territory-codeset but the latter parts may
-not be present. Two special locales are worth special mention:
+Sadly enough even if the calling interface has been standardized the
+names of the locales are not.  The naming usually is
+language_country/territory.codeset but the latter parts may not be
+present.
 
-	"C"
-
-and
-	"POSIX"
-
+Two special locales are worth special mention: C<"C"> and C<"POSIX">.
 Currently and effectively these are the same locale: the difference is
 mainly that the first one is defined by the C standard and the second
-one is defined by the POSIX standard. What they mean and define is the
-B<default locale> in which every program does start in.  The language
-is (American) English and the character codeset C<ASCII>.
-B<NOTE>: not all systems have the C<"POSIX"> locale (not all systems
-are POSIX): use the C<"C"> locale when you need the default locale.
+one is defined by the POSIX standard.  What they mean and define is
+the B<default locale> in which every program does start in.  The
+language is (American) English and the character codeset C<ASCII>.
+B<NOTE>: Not all systems have the C<"POSIX"> locale (not all systems
+are POSIX), so use the C<"C"> locale when you need the default locale.
 
-=head2 Category LC_CTYPE: CHARACTER TYPES
+=head2 The C<use locale> Pragma
 
-Starting from Perl version 5.002 perl has obeyed the C<LC_CTYPE>
-environment variable which controls application's notions on
-which characters are alphabetic characters. This affects in
-Perl the regular expression metanotation
+By default, Perl ignores the current locale.  The C<use locale> pragma
+tells Perl to use the current locale for some operations: The
+comparison functions (lt, le, eq, cmp, ne, ge, gt, sort) use
+C<LC_COLLATE>; regular expressions and case-modification functions
+(uc, lc, ucfirst, lcfirst) use C<LC_CTYPE>; and formatting functions
+(printf and sprintf) use C<LC_NUMERIC>.  The default behavior returns
+with C<no locale> or by reaching the end of the enclosing block.
 
-	\w
+Note that the result of any operation that uses locale information is
+tainted, since locales can be created by unprivileged users on some
+systems (see L<perlsec.pod>).
 
-which stands for alphanumeric characters, that is, alphabetic and
-numeric characters (please consult L<perlre> for more information
-about regular expressions). Thanks to the C<LC_CTYPE>, depending on
-your locale settings, characters like C<Æ>, C<É>, C<ß>, C<ø>, can be
-understood as C<\w> characters.
+=head2 Category LC_COLLATE: Collation
 
-=head2 Category LC_COLLATE: COLLATION
-
-Starting from Perl version 5.003_06 perl has obeyed the B<LC_COLLATE>
+When in the scope of C<use locale>, Perl obeys the B<LC_COLLATE>
 environment variable which controls application's notions on the
-collation (ordering) of the characters. C<B> does in most Latin
+collation (ordering) of the characters.  C<B> does in most Latin
 alphabets follow the C<A> but where do the C<Á> and C<Ä> belong?
+
+B<NOTE>: Comparing and sorting by locale is usually slower than the
+default sorting; factors of 2 to 4 have been observed.  It will also
+consume more memory: while a Perl scalar variable is participating in
+any string comparison or sorting operation and obeying the locale
+collation rules it will take about 3-15 (the exact value depends on
+the operating system) times more memory than normally.  These downsides
+are dictated more by the operating system implementation of the locale
+system than by Perl.
 
 Here is a code snippet that will tell you what are the alphanumeric
 characters in the current locale, in the locale order:
 
-	perl -le 'print sort grep /\w/, map { chr() } 0..255'
+	use POSIX qw(setlocale LC_COLLATE);
+	use locale;
 
-As noted above, this will work only for Perl versions 5.003_06 and up.
+	setlocale(LC_COLLATE, "");
+	print +(sort grep /\w/, map { chr() } 0..255), "\n";
 
-B<NOTE>: in the pre-5.003_06 Perl releases the per-locale collation
-was possible using the C<I18N::Collate> library module. This is now
-mildly obsolete and to be avoided. The C<LC_COLLATE> functionality is
+The default collation must be used for example for sorting raw binary
+data whereas the locale collation is useful for natural text.
+
+B<NOTE>: In some locales some characters may have no collation value
+at all -- this means for example if the C<'-'> is such a character the
+C<relocate> and C<re-locate> may sort to the same place.
+
+B<NOTE>: For certain environments the locale support by the operating
+system is very simply broken and cannot be used or fixed by Perl. Such
+deficiencies can and will result in mysterious hangs and/or Perl core
+dumps.  One such example is IRIX before the release 6.2, the
+C<LC_COLLATE> support simply does not work.  When confronted with such
+systems, please report in excruciating detail to C<perlbug@perl.com>,
+complain to your vendor, maybe some bug fixes exist for your operating
+system for these problems?  Sometimes such bug fixes are called an
+operating system upgrade.
+
+B<NOTE>: In the pre-5.003_06 Perl releases the per-locale collation
+was possible using the C<I18N::Collate> library module.  This is now
+mildly obsolete and to be avoided.  The C<LC_COLLATE> functionality is
 integrated into the Perl core language and one can use scalar data
 completely normally -- there is no need to juggle with the scalar
 references of C<I18N::Collate>.
+
+=head2 Category LC_CTYPE: Character Types
+
+When in the scope of C<use locale>, Perl obeys the C<LC_CTYPE> locale
+information which controls application's notions on which characters
+are alphabetic characters.  This affects in Perl the regular expression
+metanotation C<\\w> which stands for alphanumeric characters, that is,
+alphabetic and numeric characters (please consult L<perlre> for more
+information about regular expressions).  Thanks to the C<LC_CTYPE>,
+depending on your locale settings, characters like C<Æ>, C<É>,
+C<ß>, C<ø>, may be understood as C<\w> characters.
+
+=head2 Category LC_NUMERIC: Numeric Formatting
+
+When in the scope of C<use locale>, Perl obeys the C<LC_NUMERIC>
+locale information which controls application's notions on how numbers
+should be formatted for input and output.  This affects in Perl the
+printf and fprintf function, as well as POSIX::strtod.
 
 =head1 ENVIRONMENT
 
@@ -137,16 +179,17 @@ references of C<I18N::Collate>.
 =item PERL_BADLANG
 
 A string that controls whether Perl warns in its startup about failed
-locale settings. This can happen if the locale support in the
-operating system is lacking (broken) is some way. If this string has
+locale settings.  This can happen if the locale support in the
+operating system is lacking (broken) is some way.  If this string has
 an integer value differing from zero, Perl will not complain.
-B<NOTE>: this is just hiding the warning message: the message tells
+
+B<NOTE>: This is just hiding the warning message.  The message tells
 about some problem in your system's locale support and you should
 investigate what the problem is.
 
 =back
 
-The following environment variables are not specific to Perl: they are
+The following environment variables are not specific to Perl: They are
 part of the standardized (ISO C, XPG4, POSIX 1.c) setlocale method to
 control an application's opinion on data.
 
@@ -159,32 +202,33 @@ set, it overrides all the rest of the locale environment variables.
 
 =item LC_CTYPE
 
-C<LC_ALL> controls the classification of characters, see above.
-
-If this is unset and the C<LC_ALL> is set, the C<LC_ALL> is used as
-the C<LC_CTYPE>. If both this and the C<LC_ALL> are unset but the C<LANG>
-is set, the C<LANG> is used as the C<LC_CTYPE>.
-If none of these three is set, the default locale C<"C">
-is used as the C<LC_CTYPE>.
+In the absence of C<LC_ALL>, C<LC_CTYPE> chooses the character type
+locale.  In the absence of both C<LC_ALL> and C<LC_CTYPE>, C<LANG>
+chooses the character type locale.
 
 =item LC_COLLATE
 
-C<LC_ALL> controls the collation of characters, see above.
+In the absence of C<LC_ALL>, C<LC_COLLATE> chooses the collation
+locale.  In the absence of both C<LC_ALL> and C<LC_COLLATE>, C<LANG>
+chooses the collation locale.
 
-If this is unset and the C<LC_ALL> is set, the C<LC_ALL> is used as
-the C<LC_CTYPE>. If both this and the C<LC_ALL> are unset but the
-C<LANG> is set, the C<LANG> is used as the C<LC_COLLATE>.
-If none of these three is set, the default locale C<"C">
-is used as the C<LC_COLLATE>.
+=item LC_NUMERIC
+
+In the absence of C<LC_ALL>, C<LC_NUMERIC> chooses the numeric format
+locale.  In the absence of both C<LC_ALL> and C<LC_NUMERIC>, C<LANG>
+chooses the numeric format.
 
 =item LANG
 
-LC_ALL is the "catch-all" locale environment variable. If it is set,
-it is used as the last resort if neither of the C<LC_ALL> and the
-category-specific C<LC_...> are set.
+C<LANG> is the "catch-all" locale environment variable. If it is set,
+it is used as the last resort after the overall C<LC_ALL> and the
+category-specific C<LC_...>.
 
 =back
 
 There are further locale-controlling environment variables
-(C<LC_MESSAGES, LC_MONETARY, LC_NUMERIC, LC_TIME>) but Perl
-B<does not> currently obey them.
+(C<LC_MESSAGES, LC_MONETARY, LC_TIME>) but Perl B<does not> currently
+use them, except possibly as they affect the behavior of library
+functions called by Perl extensions.
+
+=cut
