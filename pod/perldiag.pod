@@ -2222,6 +2222,15 @@ C<??> appear to be nested quantifiers, but aren't.  See L<perlre>.
 (S internal) The symbol in question was declared but somehow went out of
 scope before it could possibly have been used.
 
+=item Newline in left-justified string for %s
+
+(W printf) There is a newline in a string to be left justified by 
+C<printf> or C<sprintf>.
+
+The padding spaces will appear after the newline, which is probably not
+what you wanted.  Usually you should remove the newline from the string 
+and put formatting characters in the C<sprintf> format.
+
 =item No %s allowed while running setuid
 
 (F) Certain operations are deemed to be too insecure for a setuid or
