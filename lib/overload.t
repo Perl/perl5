@@ -1085,5 +1085,7 @@ print $a->xet('b') == 42 ? "ok 225\n" : "not ok 225\n";
 print defined eval { $a->{b} } ? "not ok 226\n" : "ok 226\n";
 print $@ =~ /zap/ ? "ok 227\n" : "not ok 227\n";
 
+print overload::StrVal(qr/a/) =~ /^Regexp=SCALAR\(0x[0-9a-f]+\)$/ ? "ok 228\n" : "not ok 228\n";
+
 # Last test is:
-sub last {227}
+sub last {228}
