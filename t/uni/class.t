@@ -112,21 +112,34 @@ for my $p ('gc', 'sc') {
 }
 
 # test extra properties (ASCII_Hex_Digit, Bidi_Control, etc.)
-for (keys %utf8::PA_reverse) {
-  my $filename = File::Spec->catfile(
-    $updir => lib => unicore => lib => gc_sc => "$utf8::PA_reverse{$_}.pl"
-  );
+{
+  # Aargh. Nasty case insensitive filesystems mean that Cf.pl will cause a -e
+  # test for cf.pl to return true. So need to read the filenames explicitly
+  # to get a case sensitive test
+  my %files;
 
-  next unless -e $filename;
-  my ($h1, $h2) = map hex, split /\t/, (do $filename);
-  my $str = join "", map chr, $h1 .. (($h2 || $h1) + 1);
+  my $dirname = File::Spec->catdir($updir => lib => unicore => lib => gc_sc);
+  opendir D, $dirname or die $!;
+  @files{readdir D} = ();
+  closedir D;
 
-  for my $x ('gc', 'General Category') {
-    for my $y ($_, $utf8::PA_reverse{$_}) {
-      is($str =~ /(\p{$x: $y}+)/ && $1, substr($str, 0, -1));
-      is($str =~ /(\P{$x= $y}+)/ && $1, substr($str, -1));
-      is($str =~ /(\p{$y}+)/ && $1, substr($str, 0, -1));
-      is($str =~ /(\P{$y}+)/ && $1, substr($str, -1));
+  for (keys %utf8::PA_reverse) {
+    my $leafname = "$utf8::PA_reverse{$_}.pl";
+    next unless exists $files{$leafname};
+
+    my $filename = File::Spec->catfile($dirname, $leafname);
+
+    my ($h1, $h2) = map hex, split /\t/, (do $filename);
+    my $str = join "", map chr, $h1 .. (($h2 || $h1) + 1);
+
+    for my $x ('gc', 'General Category') {
+      print "# $filename $x $_, $utf8::PA_reverse{$_}\n";
+      for my $y ($_, $utf8::PA_reverse{$_}) {
+	is($str =~ /(\p{$x: $y}+)/ && $1, substr($str, 0, -1));
+	is($str =~ /(\P{$x= $y}+)/ && $1, substr($str, -1));
+	is($str =~ /(\p{$y}+)/ && $1, substr($str, 0, -1));
+	is($str =~ /(\P{$y}+)/ && $1, substr($str, -1));
+      }
     }
   }
 }
