@@ -3795,7 +3795,10 @@ PP(pp_delete)
 	    SP = ORIGMARK;
 	else if (gimme == G_SCALAR) {
 	    MARK = ORIGMARK;
-	    *++MARK = *SP;
+	    if (SP > MARK)
+		*++MARK = *SP;
+	    else
+		*++MARK = &PL_sv_undef;
 	    SP = MARK;
 	}
     }
