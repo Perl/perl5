@@ -1,4 +1,4 @@
-$! SUBCONFIGURE.COM - build a config.sh for VMS Perl.
+ $! SUBCONFIGURE.COM - build a config.sh for VMS Perl.
 $!
 $! Note for folks from other platforms changing things in here:
 $!   Fancy changes (based on compiler capabilities or VMS version or
@@ -30,6 +30,7 @@ $!  C_Compiler_Invoke is the command needed to invoke the C compiler
 $!
 $! Set Dec_C_Version to something
 $ WRITE_RESULT := "WRITE SYS$OUTPUT ""%CONFIG-I-RESULT "" + "
+$ echo = "Write Sys$Output "
 $ Dec_C_Version := "''Dec_C_Version'"
 $ Dec_C_Version = Dec_C_Version + 0
 $ Vms_Ver := "''f$extract(1,3, f$getsyi(""version""))'"
@@ -97,9 +98,9 @@ $ perl_cf_by="unknown"
 $ perl_ccdlflags=""
 $ perl_cccdlflags=""
 $ perl_mab=""
-$ perl_drand01 = "random()"
-$ perl_randseedtype = "unsigned int"
-$ perl_seedfunc = "srand"
+$ perl_drand01 = "drand48()"
+$ perl_randseedtype = "long int"
+$ perl_seedfunc = "srand48"
 $ perl_d_msg_ctrunc = "undef"
 $ perl_d_msg_dontroute = "undef"
 $ perl_d_msg_oob = "undef"
@@ -449,8 +450,6 @@ $ THEN
 $ perl_arch = "''perl_arch'-thread"
 $ perl_archname = "''perl_archname'-thread"
 $ ELSE
-$ perl_d_pthread_create_joinable = "undef"
-$ perl_pthread_create_joinable = " "
 $ perl_d_old_pthread_create_joinable = "undef"
 $ perl_old_pthread_create_joinable = " "
 $ ENDIF
@@ -1701,6 +1700,41 @@ $   ELSE
 $     perl_d_setvbuf="define"
 $   ENDIF
 $ WRITE_RESULT "d_setvbuf is ''perl_d_setvbuf'"
+$!
+$! Check for setenv
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "int main()
+$ WS "{"
+$ WS "setenv(""FOO"", ""BAR"", 0);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp
+$   If (Needs_Opt.eqs."Yes")
+$   THEN
+$     link temp,temp/opt
+$   else
+$     link temp
+$   endif
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_setenv="undef"
+$   ELSE
+$     perl_d_setenv="define"
+$   ENDIF
+$ WRITE_RESULT "d_setenv is ''perl_d_setenv'"
 $!
 $! Check for <netinet/in.h>
 $!
@@ -2974,6 +3008,7 @@ $ WC "d_longlong='" + perl_d_longlong + "'"
 $ WC "longlongsize='" + perl_longlongsize + "'"
 $ WC "d_mkstemp='" + perl_d_mkstemp + "'"
 $ WC "d_setvbuf='" + perl_d_setvbuf + "'"
+$ WC "d_setenv='" + perl_d_setenv + "'"
 $ WC "d_endhent='" + perl_d_endhent + "'"
 $ WC "d_endnent='" + perl_d_endsent + "'"
 $ WC "d_endpent='" + perl_d_endpent + "'"
@@ -3068,8 +3103,6 @@ $ WC "d_ftell64='" + perl_d_ftell64 + "'"
 $ WC "d_ftello64='" + perl_d_ftello64 + "'"
 $ WC "d_tmpfile64='" + perl_d_tmpfile64 + "'"
 $ WC "d_drand48proto='" + perl_d_drand48proto + "'"
-$ WC "d_pthread_create_joinable='" + perl_d_pthread_create_joinable + "'"
-$ WC "pthread_create_joinable='" + perl_pthread_create_joinable + "'"
 $ WC "d_old_pthread_create_joinable='" + perl_d_old_pthread_create_joinable + "'"
 $ WC "old_pthread_create_joinable='" + perl_old_pthread_create_joinable + "'"
 $ WC "drand01='" + perl_drand01 + "'"
@@ -3117,7 +3150,8 @@ $   delete munchconfig.opt;*
 $ else
 $   link munchconfig.obj
 $ endif
-$ WRITE_RESULT "Writing config.h"
+$ echo ""
+$ echo "Writing config.h"
 $ !
 $ ! we need an fdl file
 $ CREATE [-]CONFIG.FDL
@@ -3130,10 +3164,6 @@ $ OPEN/APPEND CONFIG [-]config.local
 $ if use_debugging_perl.eqs."Y"
 $ THEN
 $   WRITE CONFIG "#define DEBUGGING"
-$ ENDIF
-$ if preload_env.eqs."Y"
-$ THEN
-$    WRITE CONFIG "#define PRIME_ENV_AT_STARTUP"
 $ ENDIF
 $ if use_two_pot_malloc.eqs."Y"
 $ THEN
@@ -3164,6 +3194,21 @@ $ if "''Has_Socketshr'".eqs."T"
 $ THEN
 $    WRITE CONFIG "#define VMS_DO_SOCKETS"
 $ ENDIF
+$! This is VMS-specific for now
+$ WRITE CONFIG "#''perl_d_setenv' HAS_SETENV"
+$ if d_alwdeftype.eqs."Y"
+$ THEN
+$    WRITE CONFIG "#define SECURE_INTERNAL_GETENV"
+$ ELSE
+$    WRITE CONFIG "#undef SECURE_INTERNAL_GETENV"
+$ ENDIF
+$ if d_secintgenv.eqs."Y"
+$ THEN
+$    WRITE CONFIG "#define ALWAYS_DEFTYPES"
+$ ELSE
+$    WRITE CONFIG "#undef ALWAYS_DEFTYPES"
+$ ENDIF
+$ WRITE CONFIG "#define HAS_ENVGETENV"
 $ CLOSE CONFIG
 $!
 $! Now build the normal config.h
@@ -3222,10 +3267,65 @@ $ ARCH_TYPE = "ARCH-TYPE=__AXP__"
 $ ELSE
 $ ARCH_TYPE = "ARCH-TYPE=__VAX__"
 $ ENDIF
-$ WRITE_RESULT "Writing DESCRIP.MMS"
+$ echo "Writing DESCRIP.MMS"
 $!set ver
 $ define/user sys$output [-]descrip.mms
 $ mcr []munchconfig [-]config.sh descrip_mms.template "''DECC_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" "''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" "''Thread_Live_Dangerously'" "PV=''LocalPerlVer'"
+$ echo "Extracting Build_Ext.Com"
+$ Create Sys$Disk:[-]Build_Ext.Com
+$ Deck/Dollar="$EndOfTpl$"
+$!++ Build_Ext.Com
+$!   NOTE: This files is extracted as part of the VMS configuration process.
+$!   Any changes made to it directly will be lost.  If you need to make any
+$!   changes, please edit the template in [.vms]SubConfigure.Com instead.
+$    def = F$Environment("Default")
+$    exts1 = F$Edit(p1,"Compress")
+$    p2 = F$Edit(p2,"Upcase,Compress,Trim")
+$    If F$Locate("MCR ",p2).eq.0 Then p2 = F$Extract(3,255,p2)
+$    miniperl = "$" + F$Search(F$Parse(p2,".Exe"))
+$    mmk = p3
+$    targ = F$Edit(p4,"Lowercase")
+$    i = 0
+$ next_ext:
+$    ext = F$Element(i," ",p1)
+$    If ext .eqs. " " Then Goto done
+$    Define/User Perl_Env_Tables CLISYM_LOCAL
+$    miniperl
+     ($extdir = $ENV{'ext'}) =~ s/::/./g;
+     if ($extdir =~ /^vms/i) { $extdir =~ s/vms/.vms.ext/i; }
+     else                    { $extdir = ".ext.$extdir";   }
+     ($ENV{'extdir'} = "[$extdir]");
+     ($ENV{'up'} = ('-') x ($extdir =~ tr/././));
+$    Set Default &extdir
+$    redesc = 0
+$    If F$Locate("clean",targ) .eqs. F$Length(targ)
+$    Then
+$      Write Sys$Output "Building ''ext' . . ."
+$      On Error Then Goto done
+$      If F$Search("Descrip.MMS") .eqs. ""
+$      Then
+$        redesc = 1
+$      Else
+$        If F$CvTime(F$File("Descrip.MMS","rdt")) .lts. -
+            F$CvTime(F$File("Makefile.PL","rdt")) Then redesc = 1
+$      EndIf
+$    Else
+$      Write Sys$Output "''targ'ing ''ext' . . ."
+$      On Error Then Continue
+$    EndIf
+$    If redesc Then -
+       miniperl "-I[''up'.lib]" Makefile.PL "INST_LIB=[''up'.lib]" "INST_ARCHLIB=[''up'.lib]"
+$    mmk 'targ'
+$    i = i + 1
+$    Set Def &def
+$    Goto next_ext
+$ done:
+$    sts = $Status
+$    Set Def &def
+$    Exit sts
+$!-- Build_Ext.Com
+$EndOfTpl$
+$
 $! set nover
 $!
 $! Clean up after ourselves
