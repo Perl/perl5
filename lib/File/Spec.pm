@@ -207,7 +207,7 @@ on some OSs.
 =item catpath()
 
 Takes volume, directory and file portions and returns an entire path. Under
-Unix, $volume is ignored, and directory and file are catenated.  A '/' is
+Unix, $volume is ignored, and directory and file are concatenated.  A '/' is
 inserted if need be.  On other OSs, $volume is significant.
 
     $full_path = File::Spec->catpath( $volume, $directory, $file );

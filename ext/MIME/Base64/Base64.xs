@@ -1,4 +1,4 @@
-/* $Id: Base64.xs,v 1.32 2003/01/05 07:49:07 gisle Exp $
+/* $Id: Base64.xs,v 1.37 2003/05/13 18:20:18 gisle Exp $
 
 Copyright 1997-2003 Gisle Aas
 
@@ -45,6 +45,13 @@ extern "C" {
 #if PATCHLEVEL <= 4 && !defined(PL_dowarn)
    #define PL_dowarn dowarn
 #endif
+
+#ifdef G_WARN_ON
+   #define DOWARN (PL_dowarn & G_WARN_ON)
+#else
+   #define DOWARN PL_dowarn
+#endif
+
 
 #define MAX_LINE  76 /* size of encoded lines */
 
@@ -209,7 +216,7 @@ decode_base64(sv)
 
 		if (str == end) {
 		    if (i < 4) {
-			if (i && PL_dowarn)
+			if (i && DOWARN)
 			    warn("Premature end of base64 data");
 			if (i < 2) goto thats_it;
 			if (i == 2) c[2] = EQ;
@@ -220,7 +227,7 @@ decode_base64(sv)
             } while (i < 4);
 	
 	    if (c[0] == EQ || c[1] == EQ) {
-		if (PL_dowarn) warn("Premature padding of base64 data");
+		if (DOWARN) warn("Premature padding of base64 data");
 		break;
             }
 	    /* printf("c0=%d,c1=%d,c2=%d,c3=%d\n", c[0],c[1],c[2],c[3]);*/
@@ -324,7 +331,7 @@ encode_qp(sv,...)
 		}
 	    }
 
-	    if (*p == '\n') {
+	    if (*p == '\n' && eol_len) {
 	        sv_catpvn(RETVAL, eol, eol_len);
 	        p++;
 		linelen = 0;
@@ -391,25 +398,38 @@ decode_qp(sv)
 		    }
 		    whitespace = 0;
                 }
-            	if (*str == '=' && (str + 2) < end && isxdigit(str[1]) && isxdigit(str[2])) {
-	            char buf[3];
-                    str++;
-	            buf[0] = *str++;
-		    buf[1] = *str++;
-	            buf[2] = '\0';
-		    *r++ = (char)strtol(buf, 0, 16);
-	        }
-		else if (*str == '=' && (str + 1) < end && str[1] == '\n') {
-		    str += 2;
+            	if (*str == '=') {
+		    if ((str + 2) < end && isxdigit(str[1]) && isxdigit(str[2])) {
+	                char buf[3];
+                        str++;
+	                buf[0] = *str++;
+		        buf[1] = *str++;
+	                buf[2] = '\0';
+		        *r++ = (char)strtol(buf, 0, 16);
+	            }
+		    else {
+		        /* look for soft line break */
+		        char *p = str + 1;
+		        while (p < end && (*p == ' ' || *p == '\t'))
+		            p++;
+		        if (p < end && *p == '\n')
+		     	    str = p + 1;
+		        else if ((p + 1) < end && *p == '\r' && *(p + 1) == '\n')
+		            str = p + 2;
+		        else
+		            *r++ = *str++; /* give up */
+		    }
 		}
-		else if (*str == '=' && (str + 2) < end && str[1] == '\r' && str[2] == '\n') {
-		    str += 3;
+		else {
+		    *r++ = *str++;
 		}
-	    	else {
-	            *r++ = *str++;
-                }
 	    }
 	}
+	if (whitespace) {
+	    while (whitespace < str) {
+		*r++ = *whitespace++;
+	    }
+        }
 	*r = '\0';
 	SvCUR_set(RETVAL, r - SvPVX(RETVAL));
 

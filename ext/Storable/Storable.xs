@@ -470,7 +470,7 @@ static stcxt_t *Context_ptr = NULL;
 	if (!mbase) {						\
 		TRACEME(("** allocating mbase of %d bytes", MGROW)); \
 		New(10003, mbase, MGROW, char);	\
-		msiz = MGROW;					\
+		msiz = (STRLEN)MGROW;					\
 	}									\
 	mptr = mbase;						\
 	if (x)								\
@@ -1322,7 +1322,8 @@ static void init_retrieve_context(stcxt_t *cxt, int optype, int is_tainted)
 	 * new retrieve routines.
 	 */
 
-	cxt->hseen = ((cxt->retrieve_vtbl == sv_old_retrieve) ? newHV() : 0);
+	cxt->hseen = (((void*)cxt->retrieve_vtbl == (void*)sv_old_retrieve)
+		      ? newHV() : 0);
 
 	cxt->aseen = newAV();			/* Where retrieved objects are kept */
 	cxt->aclass = newAV();			/* Where seen classnames are kept */

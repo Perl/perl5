@@ -2175,7 +2175,9 @@ PP(pp_ioctl)
 #else
 	retval = fcntl(PerlIO_fileno(IoIFP(io)), func, s);
 #endif
+#endif
 
+#if defined(HAS_IOCTL) || defined(HAS_FCNTL)
     if (SvPOK(argsv)) {
 	if (s[SvCUR(argsv)] != 17)
 	    DIE(aTHX_ "Possible memory corruption: %s overflowed 3rd argument",

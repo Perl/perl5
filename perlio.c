@@ -430,9 +430,14 @@ PerlIO_findFILE(PerlIO *pio)
 #include <sys/mman.h>
 #endif
 
-
+/*
+ * Why is this here - not in perlio.h?  RMB
+ */ 
 void PerlIO_debug(const char *fmt, ...)
-    __attribute__ ((format(__printf__, 1, 2)));
+#ifdef CHECK_FORMAT
+    __attribute__ ((__format__(__printf__, 1, 2)))
+#endif
+;
 
 void
 PerlIO_debug(const char *fmt, ...)
