@@ -1917,7 +1917,7 @@ append_list(I32 type, LISTOP *first, LISTOP *last)
     first->op_last = last->op_last;
     first->op_children += last->op_children;
     if (first->op_children)
-	last->op_flags |= OPf_KIDS;
+	first->op_flags |= OPf_KIDS;
 
     Safefree(last);
     return (OP*)first;
