@@ -10,40 +10,95 @@
 #
 #optimize=-g2
 #
-#	and (re)run Configure.  Note: Configure will automatically
+#	If you want both to optimise and debug with the DEC cc
+#	you must have -g3, e.g. "-O4 -g3", and (re)run Configure.
+#
+#	Note 1: gcc can always have both -g and optimisation on.
+#
+#	Note 2: debugging optimised code, no matter what compiler
+#	one is using, can be surprising and confusing because of
+#	the optimisation tricks like code motion, code removal,
+#	loop unrolling, and inlining. The source code and the
+#	executable code simply do not agree any more while in
+#	mid-execution, the optimiser only cares about the results.
+#
+#	Note: Configure will automatically
 #       add the often quoted -DDEBUGGING for you)
 #
 
 case "$optimize" in
 '')	case "$cc" in 
-	*gcc*)	;;
-	*)	optimize='-O2 -Olimit 3200' ;;
+	*gcc*)	
+		optimize='-O3'
+		;;
+	*)	
+	    	# compile something small: taint.c is fine for this.
+	    	# the main point is the '-v' flag of 'cc'.
+        	case "`cc -v -I. -c taint.c -o /tmp/taint$$.o 2>&1`" in
+		*/gemc_cc*)
+			# we have the new DEC GEM CC
+			optimize='-O4'
+			;;
+		*)
+			# we have the old MIPS CC
+			optimize='-O2 -Olimit 3200'
+			;;
+		esac
+		# cleanup
+		rm -f /tmp/taint$$.o
 	esac
 	;;
 esac
 
-# both compilers are ANSI
+# all compilers are ANSI
 ccflags="$ccflags -DSTANDARD_C"
 
 # dlopen() is in libc
 libswanted="`echo $libswanted | sed -e 's/ dl / /'`"
 
-# Check if it's a CMW version of OSF1
-# '-s' strips shared libraries, not useful for debugging
-if test `uname -s` = "MLS+"; then
-    case "$optimize" in
-        *-g*) lddlflags='-shared -expect_unresolved "*"' ;;
-        *)    lddlflags='-shared -expect_unresolved "*" -s' ;;
-    esac
-else
-    case "$optimize" in
-        *-g*) lddlflags='-shared -expect_unresolved "*" -hidden' ;;
-        *)    lddlflags='-shared -expect_unresolved "*" -s -hidden' ;;
-    esac
-fi
+# PW contains nothing useful for perl
+libswanted="`echo $libswanted | sed -e 's/ PW / /'`"
+
+# bsd contains nothing used by perl that is not already in libc
+libswanted="`echo $libswanted | sed -e 's/ bsd / /'`"
+
+# c need not be separately listed
+libswanted="`echo $libswanted | sed -e 's/ c / /'`"
+
+# dbm is already in libc (as is ndbm)
+libswanted="`echo $libswanted | sed -e 's/ dbm / /'`"
+
+# the basic lddlflags used always
+lddlflags='-shared -expect_unresolved "*"'
+
+# Check if it's a CMW version of OSF1,
+# if so, do not hide the symbols.
+test `uname -s` = "MLS+" || lddlflags="$lddlflags -hidden"
+
+# If debugging (-g) do not strip the objects, otherwise, strip.
+case "$optimize" in
+	*-g*) ;; # left intentionally blank
+        *) lddlflags="$lddlflags -s"
+esac
 
 #
 # History:
+#
+# perl5.003_23:
+#
+#	26-Jan-1997 Jarkko Hietaniemi <jhi@iki.fi>
+#
+#	* Notes on how to do both optimisation and debugging.
+#
+#
+#	25-Jan-1997 Jarkko Hietaniemi <jhi@iki.fi>
+#
+#	* Remove unneeded libraries from $libswanted: PW, bsd, c, dbm
+#
+#	* Restructure the $lddlflags build.
+#
+#	* $optimize based on which compiler we have.
+#
 #
 # perl5.003_22:
 #
@@ -77,20 +132,3 @@ fi
 #	* Set -Olimit to 3200 because perl_yylex.c got too big
 #	  for the optimizer.
 #
-
-#---------------------------------------------------------------------
-
-#
-# Where configure gets it wrong:
-#
-#	- FUNCTIONS PROTOTYPES: Because the following search
-#
-#		% grep _NO_PROTO /usr/include/sys/signal.h
-#	  	#ifndef _NO_PROTO
-#		#else   /* _NO_PROTO */
-#		#endif  /* _NO_PROTO */
-#	  	%
-#	  
-#	  is successful and because _NO_PROTO is not included already
-#	  in the ccflags, Configure adds -D_NO_PROTO to ccflags. :-(
-#	
