@@ -30,8 +30,7 @@ $! with much valuable help from Charles Bailey &
 $! the whole VMSPerl crew.
 $! Extended and messed about with by Dan Sugalski
 $!
-$! SET NOVERIFY
-$ sav_ver = F$VERIFY(sav_ver)
+$ sav_ver = F$VERIFY(0)
 $!
 $! VMS-isms we will need:
 $ echo = "write sys$output "

@@ -14,7 +14,7 @@
      Binary number > 0b11111111111111111111111111111111 non-portable
    	$a =  oct "0b111111111111111111111111111111111" ;
      Integer overflow in octal number
-	my $a =  oct "0777777777777777777777777777777777777777777777777" ;
+	my $a =  oct "077777777777777777777777777777" ;
      Octal number > 037777777777 non-portable
    	$a =  oct "0047777777777" ;
      Integer overflow in hexadecimal number
@@ -65,9 +65,9 @@ Integer overflow in hexadecimal number at - line 3.
 ########
 # util.c
 use warnings 'overflow' ;
-my $a =  oct "0777777777777777777777777777777777777777777777777" ;
+my $a =  oct "077777777777777777777777777777" ;
 no warnings 'overflow' ;
-$a =  oct "0777777777777777777777777777777777777777777777777" ;
+$a =  oct "077777777777777777777777777777" ;
 EXPECT
 Integer overflow in octal number at - line 3.
 ########
