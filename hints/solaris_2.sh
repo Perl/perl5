@@ -398,34 +398,26 @@ case "$usemorebits" in
 	;;
 esac
 
-cat > UU/use64bitint.cbu <<'EOCBU'
-# This script UU/use64bitint.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use 64 bit integers.
-case "$use64bitint" in
-"$define"|true|[yY]*)
-	    case "`uname -r`" in
-	    5.[1-6])
-		cat >&4 <<EOM
-Solaris `uname -r|sed -e 's/^5\.\([789]\)$/\1/'` does not support 64-bit integers.
-You should upgrade to at least Solaris 7.
-EOM
-		exit 1
-		;;
-	    esac
-	    ;;
-esac
-EOCBU
-
 cat > UU/use64bitall.cbu <<'EOCBU'
 # This script UU/use64bitall.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to be maximally 64 bitty.
 case "$use64bitall-$use64bitall_done" in
 "$define-"|true-|[yY]*-)
+	    case "`uname -r`" in
+	    5.[1-6])
+		cat >&4 <<EOM
+Solaris `uname -r|sed -e 's/^5\.\([789]\)$/\1/'` does not support 64-bit pointers.
+You should upgrade to at least Solaris 7.
+EOM
+		exit 1
+		;;
+	    esac
 	    libc='/usr/lib/sparcv9/libc.so'
 	    if test ! -f $libc; then
 		cat >&4 <<EOM
 
 I do not see the 64-bit libc, $libc.
+(You are either in an old sparc or in an x86.)
 Cannot continue, aborting.
 
 EOM
