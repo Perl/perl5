@@ -4285,7 +4285,8 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 	    else if (*RExC_parse == '#') {
 		while (*RExC_parse && *RExC_parse != '\n')
 		    RExC_parse++;
-		RExC_parse++;
+		if (*RExC_parse)
+		    RExC_parse++;
 		continue;
 	    }
 	}
