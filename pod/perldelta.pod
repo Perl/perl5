@@ -2693,6 +2693,31 @@ truncate() cannot be used to grow the size of filehandles, only
 to reduce the size.  The workaround is to truncate files instead
 of filehandles.
 
+=head2 UNICOS/mk
+
+During Configure the test
+
+    Guessing which symbols your C compiler and preprocessor define...
+
+will probably fail with error messages like
+
+    CC-20 cc: ERROR File = try.c, Line = 3
+      The identifier "bad" is undefined.
+
+      bad switch yylook 79bad switch yylook 79bad switch yylook 79bad switch yylook 79#ifdef A29K
+      ^
+
+    CC-65 cc: ERROR File = try.c, Line = 3
+      A semicolon is expected at this point.
+
+This is caused by a bug in awk utility of UNICOS/mk.  You can ignore
+the error, but it does cause a slight problem: you cannot fully
+benefit from the h2ph utility (see L<h2ph>) that can be used to
+convert C headers to Perl libraries, mainly used to be able to access
+from Perl the constants defined using C preprocessor, cpp.  Because of
+the above error parts of the converted headers will be invisible.
+Luckily, these days the need for h2ph is rare.
+
 =head2 UTS
 
 There are a few known test failures, see L<perluts>.
