@@ -220,6 +220,11 @@ else {
     @corefiles = <*.h libperl*.*>;
     # AIX needs perl.exp installed as well.
     push(@corefiles,'perl.exp') if $^O eq 'aix';
+    if ($^O eq 'mpeix') {
+        # MPE needs mpeixish.h installed as well.
+        mkpath("$installarchlib/CORE/mpeix", 1, 0777);
+        push(@corefiles,'mpeix/mpeixish.h');
+    }
     # If they have built sperl.o...
     push(@corefiles,'sperl.o') if -f 'sperl.o';
 }
