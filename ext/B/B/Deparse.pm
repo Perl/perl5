@@ -3912,8 +3912,9 @@ sub pure_string {
     elsif (is_scalar($op) || $type =~ /^[ah]elem$/) {
 	return 1;
     }
-    elsif ($type eq "null" and not null $op->first and
-	   $op->first->name eq "null" and not null $op->first->first and
+    elsif ($type eq "null" and $op->can('first') and not null $op->first and
+	   $op->first->name eq "null" and $op->first->can('first')
+	   and not null $op->first->first and
 	   $op->first->first->name eq "aelemfast") {
 	return 1;
     }
