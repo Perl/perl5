@@ -116,7 +116,7 @@ sub connect {
 		$@ = "connect: timeout";
 	    }
 	    elsif(!connect($sock,$addr)) {
-		if (exists &Errno::EISCONN && ($! == &Errno::EISCONN)) {
+		if ($!{EISCONN}) {
 		    # Some systems (e.g. Digital UNIX/Tru64) fail to
 		    # re-connect() to an already open socket and set
 		    # errno to EISCONN (Socket is already connected)
