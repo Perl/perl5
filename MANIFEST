@@ -2092,6 +2092,7 @@ vos/config.ga.h			config.h for use with generally-available VOS POSIX.1 support
 vos/config.pl			script to convert a config_h.SH to a config.h
 vos/configure_perl.cm		VOS command macro to configure perl before building
 vos/install_perl.cm		VOS command macro to install perl after building
+vos/Makefile			A helper for maintaining the config.*.* in UNIX
 vos/perl.bind			VOS bind control file
 vos/test_vos_dummies.c		Test program for "vos_dummies.c"
 vos/vos_dummies.c		Wrappers to soak up undefined functions
