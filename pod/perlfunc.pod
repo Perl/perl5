@@ -2810,7 +2810,13 @@ opens a filehandle to an anonymous temporary file.
 
 File handles can be opened to "in memory" files held in Perl scalars via:
 
-    open($fh,'>', \$variable) || ..
+    open($fh, '>', \$variable) || ..
+
+Though if you try to re-open C<STDOUT> or C<STDERR> as an "in memory"
+file, you have to close it first:
+
+    close STDOUT;
+    open STDOUT, '>', \$variable or die "Can't open STDOUT: $!";
 
 Examples:
 
