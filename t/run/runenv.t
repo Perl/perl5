@@ -14,6 +14,8 @@ BEGIN {
     }
 }
 
+$| = 1 unless $Config{fflushNULL};   # some platforms can't autoflush on fork()
+
 my $STDOUT = './results-0';
 my $STDERR = './results-1';
 my $PERL = './perl';

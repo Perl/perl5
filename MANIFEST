@@ -1338,6 +1338,7 @@ t/lib/fields.t          See if base/fields works
 t/lib/filecache.t	See if FileCache works
 t/lib/filecopy.t	See if File::Copy works
 t/lib/filefind.t	See if File::Find works
+t/lib/filefind-taint.t	See if File::Find works
 t/lib/filefunc.t	See if File::Spec::Functions works
 t/lib/filehand.t	See if FileHandle works
 t/lib/filepath.t	See if File::Path works
