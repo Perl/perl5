@@ -2540,7 +2540,7 @@ cleanup:
 
     PL_Sv = tSv;			/* Restore global temporaries. */
     PL_Xpv = tXpv;
-    return 0;
+    return;
 }
 
 
