@@ -2957,10 +2957,14 @@ OP* label;
 {
     OP *op;
     if (type != OP_GOTO || label->op_type == OP_CONST) {
-	op = newPVOP(type, 0, savepv(
-		label->op_type == OP_CONST
-		    ? SvPVx(((SVOP*)label)->op_sv, na)
-		    : "" ));
+	/* "last()" means "last" */
+	if (label->op_type == OP_STUB && (label->op_flags & OPf_PARENS))
+	    op = newOP(type, OPf_SPECIAL);
+	else {
+	    op = newPVOP(type, 0, savepv(label->op_type == OP_CONST
+					 ? SvPVx(((SVOP*)label)->op_sv, na)
+					 : ""));
+	}
 	op_free(label);
     }
     else {
