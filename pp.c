@@ -1731,11 +1731,11 @@ PP(pp_lt)
 #ifdef PERL_PRESERVE_IVUV
     else
 #endif
-        if (SvROK(TOPs) && SvROK(TOPm1s)) {
-            SP--;
-            SETs(boolSV(SvRV(TOPs) < SvRV(TOPp1s)));
-            RETURN;
-        }
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
+	SP--;
+	SETs(boolSV(SvRV(TOPs) < SvRV(TOPp1s)));
+	RETURN;
+    }
 #endif
     {
       dPOPnv;
@@ -1809,7 +1809,7 @@ PP(pp_gt)
 #ifdef PERL_PRESERVE_IVUV
     else
 #endif
-        if (SvROK(TOPs) && SvROK(TOPm1s)) {
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         SP--;
         SETs(boolSV(SvRV(TOPs) > SvRV(TOPp1s)));
         RETURN;
@@ -1887,7 +1887,7 @@ PP(pp_le)
 #ifdef PERL_PRESERVE_IVUV
     else
 #endif
-        if (SvROK(TOPs) && SvROK(TOPm1s)) {
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         SP--;
         SETs(boolSV(SvRV(TOPs) <= SvRV(TOPp1s)));
         RETURN;
@@ -1965,7 +1965,7 @@ PP(pp_ge)
 #ifdef PERL_PRESERVE_IVUV
     else
 #endif
-        if (SvROK(TOPs) && SvROK(TOPm1s)) {
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         SP--;
         SETs(boolSV(SvRV(TOPs) >= SvRV(TOPp1s)));
         RETURN;
@@ -1982,7 +1982,7 @@ PP(pp_ne)
 {
     dSP; tryAMAGICbinSET(ne,0);
 #ifndef NV_PRESERVES_UV
-    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         SP--;
 	SETs(boolSV(SvRV(TOPs) != SvRV(TOPp1s)));
 	RETURN;
@@ -2051,7 +2051,7 @@ PP(pp_ncmp)
 {
     dSP; dTARGET; tryAMAGICbin(ncmp,0);
 #ifndef NV_PRESERVES_UV
-    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         UV right = PTR2UV(SvRV(POPs));
         UV left = PTR2UV(SvRV(TOPs));
 	SETi((left > right) - (left < right));
