@@ -271,6 +271,8 @@ d_strtoll='define'
 d_strtoull='define'
 d_getprior='define'
 d_setprior='define'
+d_usleep='define'
+d_usleepproto='define'
 
 # The next two are commented. pdksh handles #!, extproc gives no path part.
 # sharpbang='extproc '

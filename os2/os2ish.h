@@ -297,7 +297,7 @@ void *sys_alloc(int size);
 #endif
 
 #define TMPPATH1 "plXXXXXX"
-extern char *tmppath;
+extern const char *tmppath;
 PerlIO *my_syspopen(pTHX_ char *cmd, char *mode);
 /* Cannot prototype with I32 at this point. */
 int my_syspclose(PerlIO *f);
@@ -309,6 +309,28 @@ struct passwd *my_getpwent (void);
 void my_setpwent (void);
 void my_endpwent (void);
 char *gcvt_os2(double value, int digits, char *buffer);
+
+#define MAX_SLEEP	(((1<30) / (1000/4))-1)	/* 1<32 msec */
+
+static __inline__ unsigned
+my_sleep(unsigned sec)
+{
+  int remain;
+  while (sec > MAX_SLEEP) {
+    sec -= MAX_SLEEP;
+    remain = sleep(MAX_SLEEP);
+    if (remain)
+      return remain + sec;
+  }
+  return sleep(sec);
+}
+
+#define sleep		my_sleep
+
+#ifndef INCL_DOS
+unsigned long DosSleep(unsigned long);
+unsigned long DosAllocThreadLocalMemory (unsigned long cb, unsigned long **p);
+#endif
 
 struct group *getgrent (void);
 void setgrent (void);
@@ -327,6 +349,9 @@ struct passwd *my_getpwnam (__const__ char *);
 #define srand	srandom
 #define strtoll	_strtoll
 #define strtoull	_strtoull
+
+#define usleep(usec)	((void)_sleep2(((usec)+500)/1000))
+
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
@@ -438,6 +463,7 @@ typedef struct OS2_Perl_data {
   unsigned long	phmq_refcnt;
   unsigned long	phmq_servers;
   unsigned long	initial_mode;		/* VIO etc. mode we were started in */
+  unsigned long	morph_refcnt;
 } OS2_Perl_data_t;
 
 extern OS2_Perl_data_t OS2_Perl_data;
@@ -461,6 +487,7 @@ extern OS2_Perl_data_t OS2_Perl_data;
 #define Perl_hmq_refcnt	(OS2_Perl_data.phmq_refcnt)
 #define Perl_hmq_servers	(OS2_Perl_data.phmq_servers)
 #define Perl_os2_initial_mode	(OS2_Perl_data.initial_mode)
+#define Perl_morph_refcnt	(OS2_Perl_data.morph_refcnt)
 
 unsigned long Perl_hab_GET();
 unsigned long Perl_Register_MQ(int serve);
@@ -613,6 +640,44 @@ enum entries_ordinals {
     ORD_WinQueryDesktopWindow,
     ORD_WinSetActiveWindow,
     ORD_DosQueryModFromEIP,
+    ORD_Dos32QueryHeaderInfo,
+    ORD_DosTmrQueryFreq,
+    ORD_DosTmrQueryTime,
+    ORD_WinQueryActiveDesktopPathname,
+    ORD_WinInvalidateRect,
+    ORD_WinCreateFrameControls,
+    ORD_WinQueryClipbrdFmtInfo,
+    ORD_WinQueryClipbrdOwner,
+    ORD_WinQueryClipbrdViewer,
+    ORD_WinQueryClipbrdData,
+    ORD_WinOpenClipbrd,
+    ORD_WinCloseClipbrd,
+    ORD_WinSetClipbrdData,
+    ORD_WinSetClipbrdOwner,
+    ORD_WinSetClipbrdViewer,
+    ORD_WinEnumClipbrdFmts, 
+    ORD_WinEmptyClipbrd,
+    ORD_WinAddAtom,
+    ORD_WinFindAtom,
+    ORD_WinDeleteAtom,
+    ORD_WinQueryAtomUsage,
+    ORD_WinQueryAtomName,
+    ORD_WinQueryAtomLength,
+    ORD_WinQuerySystemAtomTable,
+    ORD_WinCreateAtomTable,
+    ORD_WinDestroyAtomTable,
+    ORD_WinOpenWindowDC,
+    ORD_DevOpenDC,
+    ORD_DevQueryCaps,
+    ORD_DevCloseDC,
+    ORD_WinMessageBox,
+    ORD_WinMessageBox2,
+    ORD_WinQuerySysValue,
+    ORD_WinSetSysValue,
+    ORD_WinAlarm,
+    ORD_WinFlashWindow,
+    ORD_WinLoadPointer,
+    ORD_WinQuerySysPointer,
     ORD_NENTRIES
 };
 
@@ -674,6 +739,21 @@ char *perllib_mangle(char *, unsigned int);
 
 #define fork	fork_with_resources
 
+static __inline__ int
+my_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)
+{
+  if (nfds == 0 && timeout && (_emx_env & 0x200)) {
+    if (DosSleep(1000 * timeout->tv_sec	+ (timeout->tv_usec + 500)/1000) == 0)
+      return 0;
+    errno = EINTR;
+    return -1;
+  }
+  return select(nfds, readfds, writefds, exceptfds, timeout);
+}
+
+#define select		my_select
+
+
 typedef int (*Perl_PFN)();
 Perl_PFN loadByOrdinal(enum entries_ordinals ord, int fail);
 extern const Perl_PFN * const pExtFCN;
@@ -683,9 +763,11 @@ int fork_with_resources();
 int setpriority(int which, int pid, int val);
 int getpriority(int which /* ignored */, int pid);
 
+void croak_with_os2error(char *s) __attribute__((noreturn));
+
 #ifdef PERL_CORE
 int os2_do_spawn(pTHX_ char *cmd);
-int os2_do_aspawn(pTHX_ SV *really, void **vmark, void **vsp);
+int os2_do_aspawn(pTHX_ SV *really, SV **vmark, SV **vsp);
 #endif
 
 #ifndef LOG_DAEMON
