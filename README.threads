@@ -186,10 +186,10 @@ added to the list of extensions automatically.
 
 You can try some of the tests with
     cd ext/Thread
-    perl create.t
-    perl join.t
-    perl lock.t
-    perl io.t
+    perl create.tx
+    perl join.tx
+    perl lock.tx
+    perl io.tx
 etc.
 The io one leaves a thread reading from the keyboard on stdin so
 as the ping messages appear you can type lines and see them echoed.
