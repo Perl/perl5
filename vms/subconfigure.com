@@ -63,6 +63,15 @@ $ myname = myhostname
 $ if "''myname'" .eqs. "" THEN myname = f$trnlnm("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_d_fs_data_s = "undef"
+$ perl_d_getmnt = "undef"
+$ perl_d_sqrtl = "define"
+$ perl_d_statfs_f_flags = "undef"
+$ perl_d_statfs_s = "undef"
+$ perl_d_ustat = "undef"
+$ perl_i_sysstatfs = "undef"
+$ perl_i_sysvfs = "undef"
+$ perl_i_ustat = "undef"
 $ perl_d_llseek="undef"
 $ perl_d_madvise="undef"
 $ perl_selectminbits=32
@@ -126,10 +135,12 @@ $ THEN
 $   perl_use64bits = "define"
 $   perl_uselargefiles = "define"
 $   perl_uselongdouble = "define"
+$   perl_usemorebits = "define"
 $ ELSE
 $   perl_use64bits = "undef"
 $   perl_uselargefiles = "undef"
 $   perl_uselongdouble = "undef"
+$   perl_usemorebits = "undef"
 $ ENDIF
 $ perl_d_drand48proto = "define"
 $ perl_libpth="/sys$share /sys$library"
@@ -435,6 +446,9 @@ $   perl_sPRId64 = """Ld"""
 $   perl_sPRIu64 = """Lu"""
 $   perl_sPRIo64 = """Lo"""
 $   perl_sPRIx64 = """Lx"""
+$   perl_d_quad = "define"
+$   perl_quadtype = "long long"
+$   perl_uquadtype = "unsigned long long"
 $ ELSE
 $   perl_d_PRIfldbl = "undef"
 $   perl_d_PRIgldbl = "undef"
@@ -448,6 +462,7 @@ $   perl_sPRId64 = ""
 $   perl_sPRIu64 = ""
 $   perl_sPRIo64 = ""
 $   perl_sPRIx64 = ""
+$   perl_d_quad = "undef"
 $ ENDIF
 $!
 $!
@@ -3574,8 +3589,24 @@ $ WC "sPRIu64='" + perl_sPRIu64 + "'"
 $ WC "sPRIo64='" + perl_sPRIo64 + "'"
 $ WC "sPRIx64='" + perl_sPRIx64 + "'"
 $ WC "d_llseek='" + perl_d_llseek + "'"
-$ WC "d_uselargefiles='" + perl_d_uselargefiles + "'"
-$ WC "d_uselongdouble='" + perl_d_uselongdouble + "'"
+$ WC "d_uselargefiles='" + perl_uselargefiles + "'"
+$ WC "d_uselongdouble='" + perl_uselongdouble + "'"
+$ WC "d_usemorebits='" + perl_usemorebits + "'"
+$ WC "d_quad='" + perl_d_quad + "'"
+$ if (use_64bit .eqs. "Y")
+$ THEN
+$   WC "quadtype='" + perl_quadtype + "'" 
+$   WC "uquadtype='" + perl_uquadtype + "'" 
+$ ENDIF
+$ WC "d_fs_data_s='" + perl_d_fs_data_s + "'" 
+$ WC "d_getmnt='" + perl_d_getmnt + "'"
+$ WC "d_sqrtl='" + perl_d_sqrtl + "'"
+$ WC "d_statfs_f_flags='" + perl_d_statfs_f_flags + "'"
+$ WC "d_statfs_s='" + perl_d_statfs_s + "'"
+$ WC "d_ustat='" + perl_d_ustat + "'"
+$ WC "i_sysstatfs='" + perl_i_sysstatfs + "'"
+$ WC "i_sysvfs='" + perl_i_sysvfs + "'"
+$ WC "i_ustat='" + perl_i_ustat + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!

@@ -4843,7 +4843,7 @@ PP(pp_pack)
 		sv_catpvn(cat, (char*)&aquad, sizeof(Quad_t));
 	    }
 	    break;
-#endif /* Quad_t */
+#endif
 	case 'P':
 	    len = 1;		/* assume SV is correct length */
 	    /* FALL THROUGH */
