@@ -1,11 +1,11 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.72';
-# $Id: CPAN.pm,v 1.407 2003/07/27 16:07:39 k Exp $
+$VERSION = '1.74';
+# $Id: CPAN.pm,v 1.409 2003/07/28 22:07:23 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.407 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.409 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -3666,6 +3666,14 @@ sub dir_listing {
     my $lc_want =
 	File::Spec->catfile($CPAN::Config->{keep_source_where},
 			    "authors", "id", @$chksumfile);
+
+    my $fh = FileHandle->new;
+    if (open($fh, $lc_want)){
+	# purge and refetch old (pre-PGP) CHECKSUMS; they are a security hazard
+	my $line = <$fh>; close $fh;
+	unlink($lc_want) unless $line =~ /PGP/;
+    }
+
     local($") = "/";
     # connect "force" argument with "index_expire".
     my $force = 0;
