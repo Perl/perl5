@@ -2509,7 +2509,7 @@ yylex()
 			curcop->cop_line++;
 		    }
 		    else
-			no_op("Bare word",s);
+			no_op("Bareword",s);
 		}
 
 		/* Look for a subroutine with this name in current package. */
