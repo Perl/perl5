@@ -57,7 +57,7 @@ our %winlatin2cp   = (
 		      'Vietnamese' => 1258,
 		     );
 
-our %external_tables = 
+our %external_tables =
     (
 	'euc-cn'	=> 'Encode/CN.pm',
 	gb2312		=> 'Encode/CN.pm',
@@ -900,14 +900,6 @@ implementation.  As such they are efficient, but may change.
 If CHECK is true, also checks the data in STRING for being well-formed
 UTF-8.  Returns true if successful, false otherwise.
 
-=item * valid_utf8(STRING)
-
-[INTERNAL] Test whether STRING is in a consistent state.  Will return
-true if string is held as bytes, or is well-formed UTF-8 and has the
-UTF-8 flag on.  Main reason for this routine is to allow Perl's
-testsuite to check that operations have left strings in a consistent
-state.
-
 =item *
 
         _utf8_on(STRING)
@@ -1093,7 +1085,9 @@ to be rationalized.
 
 =head1 SEE ALSO
 
-L<perlunicode>, L<perlebcdic>, L<perlfunc/open>, L<PerlIO>, L<encoding>
+L<perlunicode>, L<perlebcdic>, L<perlfunc/open>, L<PerlIO>, L<encoding>,
+L<utf8>
+
 
 =cut
 

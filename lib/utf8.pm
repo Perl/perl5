@@ -35,7 +35,7 @@ utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source code
 
 The C<use utf8> pragma tells the Perl parser to allow UTF-8 in the
 program text in the current lexical scope (allow UTF-EBCDIC on EBCDIC based
-platforms).  The C<no utf8> pragma tells Perl to switch back to treating 
+platforms).  The C<no utf8> pragma tells Perl to switch back to treating
 the source text as literal bytes in the current lexical scope.
 
 This pragma is primarily a compatibility device.  Perl versions
@@ -102,6 +102,14 @@ Encode for that.
 Attempts to convert I<$string> in-place from Perl's I<UTF-X> encoding
 into logical characters.  Note that this should not be used to convert
 Unicode back to a legacy byte encoding: use Encode for that.
+
+=item * $flag = utf8::valid(STRING)
+
+[INTERNAL] Test whether STRING is in a consistent state.  Will return
+true if string is held as bytes, or is well-formed UTF-8 and has the
+UTF-8 flag on.  Main reason for this routine is to allow Perl's
+testsuite to check that operations have left strings in a consistent
+state.
 
 =back
 
