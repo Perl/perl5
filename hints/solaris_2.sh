@@ -56,6 +56,20 @@ esac
 
 # Here's another draft of the perl5/solaris/gcc sanity-checker. 
 
+test -z $"`{cc:-cc} -V 2>/dev/null|grep -i workshop`" || ccisworkshop="$define"
+test -z $"`{cc:-cc} -v 2>/dev/null|grep -i gcc`"      || ccisgcc="$define"
+
+case "$ccisworkshop" in
+"$define")
+	cat >try.c <<EOF
+#include <sunmath.h>
+int main() { return(0); }
+EOF
+	workshoplibs=`cc -### try.c -lsunmath -o try 2>&1|grep -e -Y|sed 's%.* -Y "P,\(.*\)".*%\1%'|tr ':' '\n'|grep '/SUNWspro/'|sort -u`
+	loclibpth="$loclibpth $workshoplibs"
+	;;
+esac
+
 case `type ${cc:-cc}` in
 */usr/ucb/cc*) cat <<END >&4
 
@@ -407,7 +421,6 @@ EOM
 		ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
 		ldflags="$ldflags `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
 		lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
-		test -d /opt/SUNWspro/lib && loclibpth="$loclibpth /opt/SUNWspro/lib"
 		;;
 	    esac	
 	    libscheck='case "`/usr/bin/file $xxx`" in
@@ -431,20 +444,26 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 # after it has prompted the user for whether to use long doubles.
 case "$uselongdouble" in
 "$define"|true|[yY]*)
-	if test ! -f /opt/SUNWspro/lib/libsunmath.so; then
+	case "$ccisworkshop" in
+	'')
 		cat <<EOM
 
-I do not see the libsunmath.so in /opt/SUNWspro/lib;
-therefore I cannot do long doubles, sorry.
+I do not see the libsunmath.so; therefore I cannot do long doubles, sorry.
 
 EOM
 		exit 1
-	fi
+		;;
+	esac
 	libswanted="$libswanted sunmath"
 	loclibpth="$loclibpth /opt/SUNWspro/lib"
 	;;
 esac
 EOCBU
+
+rm -f try.c try.o try
+# keep that leading tab
+	ccisworkshop=''
+	ccisgcc=''
 
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'
