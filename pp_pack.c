@@ -503,7 +503,7 @@ next_uni_byte(pTHX_ char **s, const char *end, I32 datumtype)
     UV val;
     STRLEN retlen;
     val =
-	UNI_TO_NATIVE(utf8n_to_uvuni(*s, end-*s, &retlen,
+	UNI_TO_NATIVE(utf8n_to_uvuni((U8*)*s, end-*s, &retlen,
 				     ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY));
     /* We try to process malformed UTF-8 as much as possible (preferrably with
        warnings), but these two mean we make no progress in the string and
@@ -535,7 +535,7 @@ next_uni_bytes(pTHX_ char **s, char *end, char *buf, int buf_len)
 	UTF8_CHECK_ONLY : (UTF8_CHECK_ONLY | UTF8_ALLOW_ANY);
     for (;buf_len > 0; buf_len--) {
 	if (from >= end) return FALSE;
-	val = UNI_TO_NATIVE(utf8n_to_uvuni(from, end-from, &retlen, flags));
+	val = UNI_TO_NATIVE(utf8n_to_uvuni((U8*)from, end-from, &retlen, flags));
 	if (retlen == (STRLEN) -1 || retlen == 0) {
 	    from += UTF8SKIP(from);
 	    bad |= 1;
@@ -554,7 +554,7 @@ next_uni_bytes(pTHX_ char **s, char *end, char *buf, int buf_len)
 	    flags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
 	    for (ptr = *s; ptr < from; ptr += UTF8SKIP(ptr)) {
 		if (ptr >= end) break;
-		utf8n_to_uvuni(ptr, end-ptr, &retlen, flags);
+		utf8n_to_uvuni((U8*)ptr, end-ptr, &retlen, flags);
 	    }
 	    if (from > end) from = end;
 	}
@@ -572,7 +572,7 @@ next_uni_uu(pTHX_ char **s, const char *end, I32 *out)
     UV val;
     STRLEN retlen;
     char *from = *s;
-    val = UNI_TO_NATIVE(utf8n_to_uvuni(*s, end-*s, &retlen, UTF8_CHECK_ONLY));
+    val = UNI_TO_NATIVE(utf8n_to_uvuni((U8*)*s, end-*s, &retlen, UTF8_CHECK_ONLY));
     if (val >= 0x100 || !ISUUCHAR(val) ||
 	retlen == (STRLEN) -1 || retlen == 0) {
 	*out = 0;
@@ -974,7 +974,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	/* We probably should try to avoid this in case a scalar context call
 	   wouldn't get to the "U0" */
 	STRLEN len = strend - s;
-	s = bytes_to_utf8(s, &len);
+	s = (char*)bytes_to_utf8((U8*)s, &len);
 	SAVEFREEPV(s);
 	strend = s + len;
 	flags |= FLAG_UNPACK_DO_UTF8;
@@ -1009,7 +1009,7 @@ Perl_unpackstring(pTHX_ char *pat, register char *patend, register char *s, char
 	/* We probably should try to avoid this in case a scalar context call
 	   wouldn't get to the "U0" */
 	STRLEN len = strend - s;
-	s = bytes_to_utf8(s, &len);
+	s = (char*)bytes_to_utf8((U8*)s, &len);
 	SAVEFREEPV(s);
 	strend = s + len;
 	flags |= FLAG_UNPACK_DO_UTF8;
@@ -1403,7 +1403,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 		    UV val;
 		    STRLEN retlen;
 		    val =
-			UNI_TO_NATIVE(utf8n_to_uvuni(s, strend-s, &retlen,
+			UNI_TO_NATIVE(utf8n_to_uvuni((U8*)s, strend-s, &retlen,
 						     ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY));
 		    if (retlen == (STRLEN) -1 || retlen == 0)
 			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
@@ -1452,10 +1452,10 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 		    ptr = s;
 		    /* Bug: warns about bad utf8 even if we are short on bytes
 		       and will break out of the loop */
-		    if (!next_uni_bytes(aTHX_ &ptr, strend, result, 1))
+		    if (!next_uni_bytes(aTHX_ &ptr, strend, (char*)result, 1))
 			break;
 		    len = UTF8SKIP(result);
-		    if (!next_uni_bytes(aTHX_ &ptr, strend, &result[1], len-1))
+		    if (!next_uni_bytes(aTHX_ &ptr, strend, (char*)&result[1], len-1))
 			break;
 		    auv = utf8n_to_uvuni(result, len, &retlen, ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANYUV);
 		    s = ptr;
