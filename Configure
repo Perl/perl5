@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Sep 20 22:50:41 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Wed Sep 22 00:13:58 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -874,7 +874,7 @@ al="$al MIPSEB MIPSEL MSDOS MTXINU MULTIMAX MVS"
 al="$al M_COFF M_I186 M_I286 M_I386 M_I8086 M_I86 M_I86SM"
 al="$al M_SYS3 M_SYS5 M_SYSIII M_SYSV M_UNIX M_XENIX"
 al="$al NeXT OCS88 OSF1 PARISC PC532 PORTAR POSIX"
-al="$al PWB R3000 RES RISC6000 RT Sun386i SVR3 SVR4"
+al="$al PWB R3000 RES RISC6000 RT Sun386i SVR3 SVR4 SVR5"
 al="$al SYSTYPE_BSD SYSTYPE_SVR4 SYSTYPE_SYSV Tek4132 Tek4300"
 al="$al UMAXV USGr4 USGr4_2 UTEK UTS UTek UnicomPBB UnicomPBD Utek"
 al="$al VMS Xenix286"
@@ -2310,7 +2310,10 @@ EOM
 			mips)	osname=mips_osf1 ;;
 			esac
 			;;
-		uts) osname=uts 
+		unixware) osname=svr5
+			osvers="$4"
+			;;
+		uts) osname=uts
 			osvers="$3"
 			;;
 		qnx) osname=qnx

@@ -472,6 +472,7 @@ hints/stellar.sh	Hints for named architecture
 hints/sunos_4_0.sh	Hints for named architecture
 hints/sunos_4_1.sh	Hints for named architecture
 hints/svr4.sh		Hints for named architecture
+hints/svr5.sh		Hints for named architecture
 hints/ti1500.sh		Hints for named architecture
 hints/titanos.sh	Hints for named architecture
 hints/ultrix_4.sh	Hints for named architecture
