@@ -136,7 +136,8 @@ esc_q_utf8(pTHX_ SV* sv, register char *src, register STRLEN slen)
     }
     if (grow) {
         /* We have something needing hex. 3 is ""\0 */
-        sv_grow(sv, cur+3+grow+2*qq_escapables+2*backslashes+normal);
+        sv_grow(sv, cur + 3 + grow + 2*backslashes + single_quotes
+		+ 2*qq_escapables + normal);
         rstart = r = SvPVX(sv) + cur;
 
         *r++ = '"';
@@ -157,7 +158,8 @@ esc_q_utf8(pTHX_ SV* sv, register char *src, register STRLEN slen)
         *r++ = '"';
     } else {
         /* Single quotes.  */
-        sv_grow(sv, cur+3+grow+2*single_quotes+2*backslashes+normal);
+        sv_grow(sv, cur + 3 + 2*backslashes + 2*single_quotes
+		+ qq_escapables + normal);
         rstart = r = SvPVX(sv) + cur;
         *r++ = '\'';
         for (s = src; s < send; s ++) {
