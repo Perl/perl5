@@ -32,8 +32,8 @@ print "not " if "{\n    \$test /= 2 if ++\$test;\n}" ne
 ok;
 
 my $a = `$^X -I../lib -MO=Deparse -anle 1 2>&1`;
+$a =~ s/-e syntax OK\n//g;
 $b = <<'EOF';
--e syntax OK
 
 LINE: while (defined($_ = <ARGV>)) {
     chomp $_;
@@ -45,7 +45,7 @@ continue {
 }
 
 EOF
-print "not " if $a ne $b;
+print "# [$a]\n\# vs\n# [$b]\nnot " if $a ne $b;
 ok;
 
 #6
@@ -60,7 +60,7 @@ print "not " unless $a =~
 /\bLISTOP\b.*leave.*\bOP\b.*enter.*\bCOP\b.*nextstate.*\bOP\b.*null/s;
 ok;
 
-$a = `$^X -I../lib -MO=Terse -ane 's/foo/bar/' 2>&1`;
+$a = `$^X -I../lib -MO=Terse -ane "s/foo/bar/" 2>&1`;
 $a =~ s/\(0x[^)]+\)//g;
 $a =~ s/\[[^\]]+\]//g;
 $a =~ s/-e syntax OK//;
@@ -82,6 +82,7 @@ ok;
 
 chomp($a = `$^X -I../lib -MB::Stash -Mwarnings -e1`);
 $a = join ',', sort split /,/, $a;
+$a =~ s/-uWin32,//;
 $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'
    . '-umain,-uwarnings';
 print "# [$a] vs [$b]\nnot " if $a ne $b;

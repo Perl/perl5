@@ -200,6 +200,8 @@ typedef unsigned short	mode_t;
 /* Visual C thinks that a pointer to a member variable is 16 bytes in size. */
 #define PERL_MEMBER_PTR_SIZE	16
 
+#define isnan		_isnan
+
 #endif /* _MSC_VER */
 
 #ifdef __MINGW32__		/* Minimal Gnu-Win32 */

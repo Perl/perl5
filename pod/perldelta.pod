@@ -2839,11 +2839,6 @@ operation must be considered erroneous. For example:
 These expressions will get run-time errors in some future release of
 Perl.
 
-=head2 Windows 2000
-
-Windows 2000 is known to fail test 22 in lib/open3.t (cause unknown at
-this time).  That test passes under Windows NT.
-
 =head2 Experimental features
 
 As discussed above, many features are still experimental.  Interfaces and
