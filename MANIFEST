@@ -961,6 +961,12 @@ lib/AutoSplit.t			See if AutoSplit works
 lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
 lib/base.pm			Establish IS-A relationship at compile time
+lib/base/t/base.t		See if base works
+lib/base/t/fb18784.t		See if fields works at blead 18784
+lib/base/t/fb20922.t		See if fields works at blead 20922
+lib/base/t/fields.t		See if fields works
+lib/base/t/fp560.t		See if 5.6.0 fields works
+lib/base/t/fp580.t		See if 5.8.0 fields works
 lib/Benchmark.pm		Measure execution time
 lib/Benchmark.t			See if Benchmark works
 lib/bigfloat.pl			An arbitrary precision floating point package
