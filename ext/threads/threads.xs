@@ -93,6 +93,7 @@ ithread* Perl_ithread_get (pTHX) {
 void
 Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 {
+        PerlInterpreter *freeperl = NULL;
 	MUTEX_LOCK(&thread->mutex);
 	if (!thread->next) {
 	    Perl_croak(aTHX_ "panic: destruct destroyed thread %p (%s)",thread, why);
@@ -144,12 +145,14 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 
 	    thread->params = Nullsv;
 	    perl_destruct(thread->interp);
-            perl_free(thread->interp);
+            freeperl = thread->interp;
 	    thread->interp = NULL;
 	}
 	MUTEX_UNLOCK(&thread->mutex);
 	MUTEX_DESTROY(&thread->mutex);
         PerlMemShared_free(thread);
+        if (freeperl)
+            perl_free(freeperl);
 
 	PERL_SET_CONTEXT(aTHX);
 }
