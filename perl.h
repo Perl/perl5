@@ -56,21 +56,25 @@
 #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
 #define TAINT_ENV()	if (tainting) taint_env()
 
-#if defined(HAS_GETPGRP2) && defined(HAS_SETPGRP2)
-#   define getpgrp getpgrp2
-#   define setpgrp setpgrp2
-#   ifndef HAS_GETPGRP
-#	define HAS_GETPGRP
+#ifdef USE_BSDPGRP
+#   ifdef HAS_GETPGRP
+#       define BSD_GETPGRP(pid) getpgrp((pid))
 #   endif
-#   ifndef HAS_SETPGRP
-#	define HAS_SETPGRP
-#   endif
-#   ifndef USE_BSDPGRP
-#	define USE_BSDPGRP
+#   ifdef HAS_SETPGRP
+#       define BSD_SETPGRP(pid, pgrp) setpgrp((pid), (pgrp))
 #   endif
 #else
-#   if defined(HAS_GETPGRP2) || defined(HAS_SETPGRP2)
-	#include "Gack, you have one but not both of getpgrp2() and setpgrp2()."
+#   ifdef HAS_GETPGRP2
+#       define BSD_GETPGRP(pid) getpgrp2((pid))
+#       ifndef HAS_GETPGRP
+#    	    define HAS_GETPGRP
+#    	endif
+#   endif
+#   ifdef HAS_SETPGRP2
+#       define BSD_SETPGRP(pid, pgrp) setpgrp2((pid), (pgrp))
+#       ifndef HAS_SETPGRP
+#    	    define HAS_SETPGRP
+#    	endif
 #   endif
 #endif
 
@@ -185,7 +189,7 @@
 #   endif
 #endif /* HAS_MEMCMP */
 
-/* we prefer bcmp slightly for comparisons that don't care about ordering */
+/* XXX we prefer bcmp slightly for comparisons that don't care about ordering */
 #ifndef HAS_BCMP
 #   ifndef bcmp
 #	define bcmp(s1,s2,l) memcmp(s1,s2,l)
@@ -691,14 +695,8 @@ struct Outrec {
 #   define MAXSYSFD 2
 #endif
 
-#ifdef DOSISH
-#define TMPPATH "plXXXXXX"
-#else
-#ifdef VMS
-#define TMPPATH "sys$scratch:perl-eXXXXXX"
-#else
-#define TMPPATH "/tmp/perl-eXXXXXX"
-#endif
+#ifndef TMPPATH
+#  define TMPPATH "/tmp/perl-eXXXXXX"
 #endif
 
 #ifndef __cplusplus
@@ -903,7 +901,7 @@ EXT SV **	curpad;
 /* temp space */
 EXT SV *	Sv;
 EXT XPV *	Xpv;
-EXT char	buf[1024];
+EXT char	buf[2048];	/* should be longer than PATH_MAX */
 EXT char	tokenbuf[256];
 EXT struct stat	statbuf;
 #ifdef HAS_TIMES
