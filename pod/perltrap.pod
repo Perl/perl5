@@ -35,7 +35,7 @@ Curly brackets are required on C<if>s and C<while>s.
 
 =item *
 
-Variables begin with "$" or "@" in Perl.
+Variables begin with "$", "@" or "%" in Perl.
 
 =item *
 
@@ -168,7 +168,7 @@ There's no switch statement.  (But it's easy to build one on the fly.)
 
 =item *
 
-Variables begin with "$" or "@" in Perl.
+Variables begin with "$", "@" or "%" in Perl.
 
 =item *
 
