@@ -28,6 +28,218 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19576] By: jhi                                   on 2003/05/20  20:05:45
+        Log: Integrate:
+             [ 19569]
+             More Ultrix double definition avoidance.
+             
+             [ 19570]
+             Subject: Re: Possible precedence problem on bitwise ^ operator
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Sun, 18 May 2003 19:21:01 -0700
+             Message-ID: <N+Dy+gzkg+XX092yn@efn.org>
+             (with tweaks to perldiag.pod)
+             
+             [ 19571]
+             Further -Uuseperlio tweaking.
+             
+             [ 19573]
+             Upgrade to CPAN 1.70_54
+             Subject: Re: CPAN.pm into blead
+             From: Andreas J Koenig <andreas.koenig@anima.de>
+             Date: Tue, 20 May 2003 11:31:16 +0200
+             Message-ID: <87of1y6k2j.fsf@franz.ak.mind.de>
+             
+             [ 19574]
+             Upgrade to Getopt::Long 2.33
+             (mostly a version number increment)
+             
+             [ 19575]
+             Enhance the failure reporting for the pod2html tests
+     Branch: maint-5.8/perl
+	   - lib/CPAN/README
+	  !> MANIFEST ext/Encode/t/Unicode.t ext/Socket/Socket.xs
+	  !> lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/Nox.pm
+	  !> lib/Getopt/Long.pm lib/Getopt/Long/CHANGES
+	  !> lib/Getopt/Long/README lib/Pod/t/htmlview.t
+	  !> lib/Pod/t/pod2html-lib.pl op.c pod/perldiag.pod
+____________________________________________________________________________
+[ 19567] By: jhi                                   on 2003/05/19  05:01:26
+        Log: Integrate:
+             [ 19558]
+             Subject: [PATCH] Re: [PATCH pod/perlsyn.pod pod/perltrap.pod] Unseding perlsyn
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 14 May 2003 15:36:23 -0700
+             Message-ID: <20030514223623.GD23350@windhund.schwern.org>
+             
+             [ 19559]
+             Make the test work without perlio, from Dan Kogai.
+             
+             [ 19560]
+             Based on
+             
+             Subject: [PATCH threads.xs] no system scope on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 18 May 2003 23:02:07 -0500
+             Message-ID: <3EC8573F.6050005@mac.com>
+             
+             but instead go for #ifdef PTHREAD_SCOPE_SYSTEM.
+             
+             [ 19561]
+             Ultrix: the #19435 helped the IO extension, so this should
+             help the Socket extension (socket structs redefinitions).
+             
+             [ 19562]
+             Slightly wrong panic messages.
+             
+             [ 19563]
+             Make Perl_ithread_self() a bit more helpful when
+             finding the thread fails (suggested by Stas in
+             perl-ithreads Mar 01)
+             
+             [ 19564]
+             Meaningless cosmetics.
+             
+             [ 19565]
+             Nekkid numbers.
+             
+             [ 19566]
+             Integrate perlio:
+             [ 19556]
+             Fix ticket 18265
+             
+             [ 19557]
+             EINTR retry should exit on count >= 0 not !=0 
+     Branch: maint-5.8/perl
+	  !> ext/Encode/t/Unicode.t ext/Socket/Socket.xs
+	  !> ext/threads/threads.xs perlio.c pod/perlsyn.pod
+	  !> pod/perltrap.pod
+____________________________________________________________________________
+[ 19553] By: jhi                                   on 2003/05/18  07:59:03
+        Log: Integrate:
+             [ 19552]
+             Integrate from perlio:
+             [ 19542]
+             Fix ticket #22219
+             
+             [ 19543]
+             Spotted a bare close() where PerlLIO_close() seems correct.
+     Branch: maint-5.8/perl
+	  !> doio.c perlio.c
+____________________________________________________________________________
+[ 19551] By: jhi                                   on 2003/05/18  07:55:50
+        Log: Integrate:
+             [ 19527]
+             Subject: [PATCH] RE: maint snapshot @ 19525
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Fri, 16 May 2003 17:16:57 +0100
+             Message-ID: <533D273D4014D411AB1D00062938C4D90404651D@hotel.npl.co.uk>
+             
+             (Part #1: the __format__ and __printf__)
+             
+             [ 19528]
+             Subject: [PATCH] RE: maint snapshot @ 19525
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Fri, 16 May 2003 17:16:57 +0100
+             Message-ID: <533D273D4014D411AB1D00062938C4D90404651D@hotel.npl.co.uk>
+             
+             (Part #2: the hv.c SVf)
+             
+             [ 19531]
+             Apply the supplied patch for [perl #22195]
+             "File::Find, sorted directory traversal order is inverted"
+             
+             [ 19532]
+             The suggested patch for [perl #22201] "patch: perl 5.8.0
+             compile error on ia64/HP-UX (comparing incompatible pointers)"
+             plus a possible cure for the warning mentioned in the case.
+             
+             [ 19533]
+             avoid select() on windows destroying errno (used to typically
+             always sets it to EINVAL due to the way it maps the FD_SETs)
+             
+             [ 19534]
+             change#16723 broke the ioctl() return value on platforms 
+             that have ioctl() but no fcntl() (e.g. windows)
+             
+             change#17577 then attempted to fix the bustage, but got
+             it wrong
+             
+             [ 19535]
+             improve the implementation of Net::Ping on windows by avoiding
+             fork(), which is pretty heavy-weight for this kind of
+             application; use non-blocking sockets instead
+             
+             has been verified to work on Win2k but will need testing on
+             other flavors of windows
+             
+             there is a single known failure on windows in 450_service.t (test 18)
+             due to what appears to be bugs in the ping_syn()/ack() code
+             
+             [ 19536]
+             apply Net::Ping patch that makes the fork()-based approach
+             work better on windows (Marcus Holland-Moritz <mhx-perl@gmx.net>)
+             
+             the code this affects is currently not enabled anywhere, but
+             could be enabled if the non-blocking approach runs into problems
+             on older windows versions
+             
+             [ 19537]
+             missing init in change#19533
+             
+             [ 19539]
+             Fix bug #22216 : B::Deparse can't handle "use Module Version"
+             with fractional version numbers or v-strings.
+             
+             [ 19540]
+             Clarify the explanation of the warning "Possible precedence problem
+             on bitwise operator".
+             
+             [ 19541]
+             Upgrade to Getopt::Long 2.32_05
+             
+             [ 19545]
+             Subject: Re: Last Call For (Least) Favourite Issues For 5.8.1
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Date: Thu, 15 May 2003 22:17:55 +0100
+             Message-ID: <3EC40403.9000804@sun.com>
+             
+             (fixed symbol scanning for Solaris 10)
+             
+             [ 19547]
+             Old (4.2BSD, like Ultrix) Bourne shells do not understand
+             non-left-aligned heredocs.
+             
+             [ 19548]
+             Subject: [Encode] UTF-7 Support
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Sun, 18 May 2003 00:45:35 +0900
+             Message-Id: <99C4504E-887E-11D7-840A-000393AE4244@dan.co.jp>
+             
+             [ 19549]
+             The 'quotes' really are important (caught by Enache Adrian).
+             
+             [ 19550]
+             UTF-7 tweak from Dan Kogai.
+     Branch: maint-5.8/perl
+	  +> ext/Encode/lib/Encode/Unicode/UTF7.pm
+	  !> (integrate 28 files)
+____________________________________________________________________________
+[ 19529] By: jhi                                   on 2003/05/16  17:34:21
+        Log: Take care of [perl #17424].
+     Branch: maint-5.8/perl
+	   ! perl.h
+____________________________________________________________________________
+[ 19526] By: jhi                                   on 2003/05/14  19:23:10
+        Log: A part of #19454.
+     Branch: maint-5.8/perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 19525] By: jhi                                   on 2003/05/14  05:41:06
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19524] By: jhi                                   on 2003/05/14  05:25:28
         Log: Integrate:
              [ 19516]
