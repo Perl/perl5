@@ -39,10 +39,19 @@ EOE
 }
 
 # If octal representation of unicode char is \0xyzt, then the utf8 is \3xy\2zt
-$encoded_be = "\320\261";
-$encoded_alpha = "\316\261";
-$encoded_bet = "\327\221";
-$encoded_deseng = "\360\220\221\215";
+if (ord('A') == 65) { # as on ASCII or UTF-8 machines
+    $encoded_be = "\320\261";
+    $encoded_alpha = "\316\261";
+    $encoded_bet = "\327\221";
+    $encoded_deseng = "\360\220\221\215";
+}
+else { # EBCDIC where UTF-EBCDIC may be used (this may be 1047 specific since
+       # UTF-EBCDIC is codepage specific)
+    $encoded_be = "\270\102\130";
+    $encoded_alpha = "\264\130";
+    $encoded_bet = "\270\125\130";
+    $encoded_deseng = "\336\102\103\124";
+}
 
 sub to_bytes {
     pack"a*", shift;

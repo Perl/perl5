@@ -128,8 +128,14 @@ print "ok $test\n";  ++$test;
     }
     print "ok $test\n";  ++$test;
 
-    print "not " unless
-        sprintf("%vd", 1.22.333.4444) eq '1.22.197.141.225.133.156';
+    if (ord("\t") == 9) { # ASCII
+        print "not " unless
+            sprintf("%vd", 1.22.333.4444) eq '1.22.197.141.225.133.156';
+    }
+    else {
+        print "not " unless
+            sprintf("%vd", 1.22.333.4444) eq '1.22.142.84.187.81.112';
+    }
     print "ok $test\n";  ++$test;
 
     if (ord("\t") == 9) { # ASCII
@@ -140,7 +146,12 @@ print "ok $test\n";  ++$test;
     }
     print "ok $test\n";  ++$test;
 
-    print "not " unless sprintf("%vX", v1.22.333.4444) eq '1.16.C5.8D.E1.85.9C';
+    if (ord("\t") == 9) { # ASCII
+        print "not " unless sprintf("%vX", v1.22.333.4444) eq '1.16.C5.8D.E1.85.9C';
+    }
+    else {
+        print "not " unless sprintf("%vX", v1.22.333.4444) eq '1.16.8E.54.BB.51.70';
+    }
     print "ok $test\n";  ++$test;
 
     if (ord("\t") == 9) { # ASCII
@@ -151,8 +162,14 @@ print "ok $test\n";  ++$test;
     }
     print "ok $test\n";  ++$test;
 
-    print "not " unless sprintf("%*vb", "##", v1.22.333.4444)
-	eq '1##10110##11000101##10001101##11100001##10000101##10011100';
+    if (ord("\t") == 9) { # ASCII
+        print "not " unless sprintf("%*vb", "##", v1.22.333.4444)
+	    eq '1##10110##11000101##10001101##11100001##10000101##10011100';
+    }
+    else {
+        print "not " unless sprintf("%*vb", "##", v1.22.333.4444)
+            eq '1##10110##10001110##1010100##10111011##1010001##1110000';
+    }
     print "ok $test\n";  ++$test;
 }
 
