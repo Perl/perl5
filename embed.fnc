@@ -19,7 +19,7 @@
 :	x		not exported
 :	X		explicitly exported
 :	M		may change
-:	E		visible to Perl core extensions
+:	E		visible to extensions included in the Perl core
 :	b		binary backward compatibility; function is a macro
 :			but has also Perl_ implementation (which is exported)
 :
