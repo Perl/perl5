@@ -427,7 +427,7 @@ PP(pp_prototype)
 	      found:
 		oa = PL_opargs[i] >> OASHIFT;
 		while (oa) {
-		    if (oa & OA_OPTIONAL) {
+		    if (oa & OA_OPTIONAL && !seen_question) {
 			seen_question = 1;
 			str[n++] = ';';
 		    }
