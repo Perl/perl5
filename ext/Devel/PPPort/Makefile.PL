@@ -10,7 +10,7 @@ WriteMakefile(
     OBJECT	=> 'PPPort$(OBJ_EXT) module2$(OBJ_EXT) module3$(OBJ_EXT)',
     XSPROTOARG	=> '-noprototypes',
     'dist'	=> { COMPRESS=>"gzip", SUFFIX=>"gz" },
-    'clean'	=> { FILES => [qw(ppport.h ppport_h)]},
+    'clean'	=> { FILES => "ppport.h ppport_h"},
 );
 
 sub MY::postamble {
