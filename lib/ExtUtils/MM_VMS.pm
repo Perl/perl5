@@ -20,8 +20,8 @@ BEGIN {
 
 use File::Basename;
 use vars qw($Revision @ISA $VERSION);
-($VERSION) = '5.67';
-($Revision) = q$Revision: 1.97 $ =~ /Revision:\s+(\S+)/;
+($VERSION) = '5.68';
+($Revision) = q$Revision: 1.101 $ =~ /Revision:\s+(\S+)/;
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -381,6 +381,7 @@ sub init_others {
     $self->{MAKEFILE_OLD}       ||= '$(FIRST_MAKEFILE)_old';
 
     $self->{ECHO}     ||= '$(PERLRUN) -le "print qq{@ARGV}"';
+    $self->{ECHO_N}   ||= '$(PERLRUN) -e  "print qq{@ARGV}"';
     $self->{TOUCH}    ||= '$(PERLRUN) "-MExtUtils::Command" -e touch';
     $self->{CHMOD}    ||= '$(PERLRUN) "-MExtUtils::Command" -e chmod'; 
     $self->{RM_F}     ||= '$(PERLRUN) "-MExtUtils::Command" -e rm_f';
@@ -1531,12 +1532,12 @@ doc__install : doc_site_install
 pure_perl_install ::
 	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'read '.File::Spec->catfile('$(PERL_ARCHLIB)','auto','$(FULLEXT)','.packlist').' '" >.MM_tmp
 	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'write '.File::Spec->catfile('$(INSTALLARCHLIB)','auto','$(FULLEXT)','.packlist').' '" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_LIB) $(INSTALLPRIVLIB) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_ARCHLIB) $(INSTALLARCHLIB) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_BIN) $(INSTALLBIN) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_SCRIPT) $(INSTALLSCRIPT) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_MAN1DIR) $(INSTALLMAN1DIR) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_MAN3DIR) $(INSTALLMAN3DIR) ';" >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_LIB) $(INSTALLPRIVLIB) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_ARCHLIB) $(INSTALLARCHLIB) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_BIN) $(INSTALLBIN) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_SCRIPT) $(INSTALLSCRIPT) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_MAN1DIR) $(INSTALLMAN1DIR) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_MAN3DIR) $(INSTALLMAN3DIR) " >>.MM_tmp
 	$(NOECHO) $(MOD_INSTALL) <.MM_tmp
 	$(NOECHO) $(RM_F) .MM_tmp
 	$(NOECHO) $(WARN_IF_OLD_PACKLIST) ].$self->catfile($self->{SITEARCHEXP},'auto',$self->{FULLEXT},'.packlist').q[
@@ -1545,12 +1546,12 @@ pure_perl_install ::
 pure_site_install ::
 	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'read '.File::Spec->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist').' '" >.MM_tmp
 	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'write '.File::Spec->catfile('$(INSTALLSITEARCH)','auto','$(FULLEXT)','.packlist').' '" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_LIB) $(INSTALLSITELIB) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_ARCHLIB) $(INSTALLSITEARCH) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_BIN) $(INSTALLSITEBIN) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_SCRIPT) $(INSTALLSCRIPT) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_MAN1DIR) $(INSTALLSITEMAN1DIR) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_MAN3DIR) $(INSTALLSITEMAN3DIR) ';" >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_LIB) $(INSTALLSITELIB) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_ARCHLIB) $(INSTALLSITEARCH) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_BIN) $(INSTALLSITEBIN) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_SCRIPT) $(INSTALLSCRIPT) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_MAN1DIR) $(INSTALLSITEMAN1DIR) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_MAN3DIR) $(INSTALLSITEMAN3DIR) " >>.MM_tmp
 	$(NOECHO) $(MOD_INSTALL) <.MM_tmp
 	$(NOECHO) $(RM_F) .MM_tmp
 	$(NOECHO) $(WARN_IF_OLD_PACKLIST) ].$self->catfile($self->{PERL_ARCHLIB},'auto',$self->{FULLEXT},'.packlist').q[
@@ -1558,12 +1559,12 @@ pure_site_install ::
 pure_vendor_install ::
 	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'read '.File::Spec->catfile('$(VENDORARCHEXP)','auto','$(FULLEXT)','.packlist').' '" >.MM_tmp
 	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'write '.File::Spec->catfile('$(INSTALLVENDORARCH)','auto','$(FULLEXT)','.packlist').' '" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_LIB) $(INSTALLVENDORLIB) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_ARCHLIB) $(INSTALLVENDORARCH) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_BIN) $(INSTALLVENDORBIN) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_SCRIPT) $(INSTALLSCRIPT) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_MAN1DIR) $(INSTALLVENDORMAN1DIR) ';" >>.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print '$(INST_MAN3DIR) $(INSTALLVENDORMAN3DIR) ';" >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_LIB) $(INSTALLVENDORLIB) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_ARCHLIB) $(INSTALLVENDORARCH) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_BIN) $(INSTALLVENDORBIN) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_SCRIPT) $(INSTALLSCRIPT) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_MAN1DIR) $(INSTALLVENDORMAN1DIR) " >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "$(INST_MAN3DIR) $(INSTALLVENDORMAN3DIR) " >>.MM_tmp
 	$(NOECHO) $(MOD_INSTALL) <.MM_tmp
 	$(NOECHO) $(RM_F) .MM_tmp
 
@@ -1571,29 +1572,29 @@ pure_vendor_install ::
 doc_perl_install ::
 	$(NOECHO) $(ECHO) "Appending installation info to ].$self->catfile($self->{INSTALLARCHLIB}, 'perllocal.pod').q["
 	$(NOECHO) $(MKPATH) $(INSTALLARCHLIB)
-	$(NOECHO) $(PERLRUN) -e "print 'installed into|$(INSTALLPRIVLIB)|';" >.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|EXE_FILES|$(EXE_FILES) ';" >>.MM_tmp
+	$(NOECHO) $(ECHO_N) "installed into|$(INSTALLPRIVLIB)|" >.MM_tmp
+	$(NOECHO) $(ECHO_N) "LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|EXE_FILES|$(EXE_FILES) " >>.MM_tmp
 ],@exe_files,
 q[	$(NOECHO) $(DOC_INSTALL) "Module" "$(NAME)" <.MM_tmp >>].$self->catfile($self->{INSTALLARCHLIB},'perllocal.pod').q[
 	$(NOECHO) $(RM_F) .MM_tmp
 
 # And again
 doc_site_install ::
-	$(NOECHO) $(ECHO) "Appending installation info to ].$self->catfile($self->{INSTALLSITEARCH}, 'perllocal.pod').q["
-	$(NOECHO) $(MKPATH) $(INSTALLSITEARCH)
-	$(NOECHO) $(PERLRUN) -e "print 'installed into|$(INSTALLSITELIB)|';" >.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|EXE_FILES|$(EXE_FILES) ';" >>.MM_tmp
+	$(NOECHO) $(ECHO) "Appending installation info to ].$self->catfile($self->{INSTALLARCHLIB}, 'perllocal.pod').q["
+	$(NOECHO) $(MKPATH) $(INSTALLARCHLIB)
+	$(NOECHO) $(ECHO_N) "installed into|$(INSTALLSITELIB)|" >.MM_tmp
+	$(NOECHO) $(ECHO_N) "LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|EXE_FILES|$(EXE_FILES) " >>.MM_tmp
 ],@exe_files,
-q[	$(NOECHO) $(DOC_INSTALL) "Module" "$(NAME)" <.MM_tmp >>].$self->catfile($self->{INSTALLSITEARCH},'perllocal.pod').q[
+q[	$(NOECHO) $(DOC_INSTALL) "Module" "$(NAME)" <.MM_tmp >>].$self->catfile($self->{INSTALLARCHLIB},'perllocal.pod').q[
 	$(NOECHO) $(RM_F) .MM_tmp
 
 doc_vendor_install ::
-	$(NOECHO) $(ECHO) "Appending installation info to ].$self->catfile($self->{INSTALLVENDORARCH}, 'perllocal.pod').q["
-	$(NOECHO) $(MKPATH) $(INSTALLVENDORARCH)
-	$(NOECHO) $(PERLRUN) -e "print 'installed into|$(INSTALLVENDORLIB)|';" >.MM_tmp
-	$(NOECHO) $(PERLRUN) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|EXE_FILES|$(EXE_FILES) ';" >>.MM_tmp
+	$(NOECHO) $(ECHO) "Appending installation info to ].$self->catfile($self->{INSTALLARCHLIB}, 'perllocal.pod').q["
+	$(NOECHO) $(MKPATH) $(INSTALLARCHLIB)
+	$(NOECHO) $(ECHO_N) "installed into|$(INSTALLVENDORLIB)|" >.MM_tmp
+	$(NOECHO) $(ECHO_N) "LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|EXE_FILES|$(EXE_FILES) " >>.MM_tmp
 ],@exe_files,
-q[	$(NOECHO) $(DOC_INSTALL) "Module" "$(NAME)" <.MM_tmp >>].$self->catfile($self->{INSTALLVENDORARCH},'perllocal.pod').q[
+q[	$(NOECHO) $(DOC_INSTALL) "Module" "$(NAME)" <.MM_tmp >>].$self->catfile($self->{INSTALLARCHLIB},'perllocal.pod').q[
 	$(NOECHO) $(RM_F) .MM_tmp
 
 ];
@@ -1704,7 +1705,7 @@ $(OBJECT) : $(FIRST_MAKEFILE)
 ] if $self->{OBJECT};
 
     push @m,q[
-# We take a very conservative approach here, but it\'s worth it.
+# We take a very conservative approach here, but it's worth it.
 # We move $(FIRST_MAKEFILE) to $(MAKEFILE_OLD) here to avoid gnu make looping.
 $(FIRST_MAKEFILE) : Makefile.PL $(CONFIGDEP)
 	$(NOECHO) $(ECHO) "$(FIRST_MAKEFILE) out-of-date with respect to $(MMS$SOURCE_LIST)"
@@ -2012,6 +2013,7 @@ MAKE_FRAG
     push @m, q[
 # Still more from the 255-char line length limit
 doc_inst_perl :
+	$(NOECHO) $(MKPATH) $(INSTALLARCHLIB)
 	$(NOECHO) $(ECHO) "Perl binary $(MAP_TARGET)|" >.MM_tmp
 	$(NOECHO) $(ECHO) "MAP_STATIC|$(MAP_STATIC)|" >>.MM_tmp
 	$(NOECHO) $(PERL) -pl040 -e " " ].$self->catfile('$(INST_ARCHAUTODIR)','extralibs.all'),q[ >>.MM_tmp

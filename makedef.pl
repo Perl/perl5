@@ -769,75 +769,72 @@ my @syms = ($global_sym, $globvar_sym); # $pp_sym is not part of the API
 # These are in _addition to_ the public face of the abstraction
 # and need to be exported to allow XS modules to implement layers
 my @layer_syms = qw(
-			 PerlIOBase_clearerr
-			 PerlIOBase_close
-			 PerlIOBase_dup
-			 PerlIOBase_eof
-			 PerlIOBase_error
-			 PerlIOBase_fileno
-			 PerlIOBase_pushed
-			 PerlIOBase_binmode
-			 PerlIOBase_popped
-			 PerlIOBase_read
-			 PerlIOBase_setlinebuf
-			 PerlIOBase_unread
-			 PerlIOBase_noop_ok
-			 PerlIOBase_noop_fail
-			 PerlIOBuf_bufsiz
-			 PerlIOBuf_fill
-			 PerlIOBuf_flush
-			 PerlIOBuf_get_base
-			 PerlIOBuf_get_cnt
-			 PerlIOBuf_get_ptr
-			 PerlIOBuf_open
-			 PerlIOBuf_pushed
-			 PerlIOBuf_popped
-			 PerlIOBuf_read
-			 PerlIOBuf_seek
-			 PerlIOBuf_set_ptrcnt
-			 PerlIOBuf_tell
-			 PerlIOBuf_unread
-			 PerlIOBuf_write
-			 PerlIO_debug
-			 PerlIO_allocate
-			 PerlIO_apply_layera
-			 PerlIO_apply_layers
-			 PerlIO_arg_fetch
-			 PerlIO_define_layer
-			 PerlIO_modestr
-			 PerlIO_parse_layers
-			 PerlIO_layer_fetch
-			 PerlIO_list_free
-			 PerlIO_apply_layera
-			 PerlIO_pending
-			 PerlIO_push
-			 PerlIO_pop
-			 PerlIO_sv_dup
-			 PerlIO_perlio
-
-Perl_PerlIO_clearerr
-Perl_PerlIO_close
-Perl_PerlIO_eof
-Perl_PerlIO_error
-Perl_PerlIO_fileno
-Perl_PerlIO_fill
-Perl_PerlIO_flush
-Perl_PerlIO_get_base
-Perl_PerlIO_get_bufsiz
-Perl_PerlIO_get_cnt
-Perl_PerlIO_get_ptr
-Perl_PerlIO_read
-Perl_PerlIO_seek
-Perl_PerlIO_set_cnt
-Perl_PerlIO_set_ptrcnt
-Perl_PerlIO_setlinebuf
-Perl_PerlIO_stderr
-Perl_PerlIO_stdin
-Perl_PerlIO_stdout
-Perl_PerlIO_tell
-Perl_PerlIO_unread
-Perl_PerlIO_write
-
+		    PerlIOBase_binmode
+		    PerlIOBase_clearerr
+		    PerlIOBase_close
+		    PerlIOBase_dup
+		    PerlIOBase_eof
+		    PerlIOBase_error
+		    PerlIOBase_fileno
+		    PerlIOBase_noop_fail
+		    PerlIOBase_noop_ok
+		    PerlIOBase_popped
+		    PerlIOBase_read
+		    PerlIOBase_setlinebuf
+		    PerlIOBase_unread
+		    PerlIOBuf_bufsiz
+		    PerlIOBuf_close
+		    PerlIOBuf_dup
+		    PerlIOBuf_fill
+		    PerlIOBuf_flush
+		    PerlIOBuf_get_base
+		    PerlIOBuf_get_cnt
+		    PerlIOBuf_get_ptr
+		    PerlIOBuf_open
+		    PerlIOBuf_popped
+		    PerlIOBuf_pushed
+		    PerlIOBuf_read
+		    PerlIOBuf_seek
+		    PerlIOBuf_set_ptrcnt
+		    PerlIOBuf_tell
+		    PerlIOBuf_unread
+		    PerlIOBuf_write
+		    PerlIO_allocate
+		    PerlIO_apply_layers
+		    PerlIO_arg_fetch
+		    PerlIO_debug
+		    PerlIO_define_layer
+		    PerlIO_layer_fetch
+		    PerlIO_list_free
+		    PerlIO_modestr
+		    PerlIO_parse_layers
+		    PerlIO_pending
+		    PerlIO_perlio
+		    PerlIO_pop
+		    PerlIO_push
+		    PerlIO_sv_dup
+		    Perl_PerlIO_clearerr
+		    Perl_PerlIO_close
+		    Perl_PerlIO_eof
+		    Perl_PerlIO_error
+		    Perl_PerlIO_fileno
+		    Perl_PerlIO_fill
+		    Perl_PerlIO_flush
+		    Perl_PerlIO_get_base
+		    Perl_PerlIO_get_bufsiz
+		    Perl_PerlIO_get_cnt
+		    Perl_PerlIO_get_ptr
+		    Perl_PerlIO_read
+		    Perl_PerlIO_seek
+		    Perl_PerlIO_set_cnt
+		    Perl_PerlIO_set_ptrcnt
+		    Perl_PerlIO_setlinebuf
+		    Perl_PerlIO_stderr
+		    Perl_PerlIO_stdin
+		    Perl_PerlIO_stdout
+		    Perl_PerlIO_tell
+		    Perl_PerlIO_unread
+		    Perl_PerlIO_write
 );
 if ($PLATFORM eq 'netware') {
     push(@layer_syms,'PL_def_layerlist','PL_known_layers','PL_perlio');

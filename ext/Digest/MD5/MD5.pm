@@ -3,7 +3,7 @@ package Digest::MD5;
 use strict;
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = '2.24';  # $Date: 2003/03/09 15:23:10 $
+$VERSION = '2.25';  # $Date: 2003/07/05 05:25:37 $
 
 require Exporter;
 *import = \&Exporter::import;
@@ -43,7 +43,7 @@ Digest::MD5 - Perl interface to the MD5 Algorithm
 =head1 SYNOPSIS
 
  # Functional style
- use Digest::MD5  qw(md5 md5_hex md5_base64);
+ use Digest::MD5 qw(md5 md5_hex md5_base64);
 
  $digest = md5($data);
  $digest = md5_hex($data);
@@ -72,80 +72,111 @@ The C<Digest::MD5> module provide a procedural interface for simple
 use, as well as an object oriented interface that can handle messages
 of arbitrary length and which can read files directly.
 
-A binary digest will be 16 bytes long.  A hex digest will be 32
-characters long.  A base64 digest will be 22 characters long.
-
 =head1 FUNCTIONS
 
-The following functions can be exported from the C<Digest::MD5>
-module.  No functions are exported by default.
+The following functions are provided by the C<Digest::MD5> module.
+None of these functions are exported by default.
 
 =over 4
 
 =item md5($data,...)
 
 This function will concatenate all arguments, calculate the MD5 digest
-of this "message", and return it in binary form.
+of this "message", and return it in binary form.  The returned string
+will be 16 bytes long.
+
+The result of md5("a", "b", "c") will be exactly the same as the
+result of md5("abc").
 
 =item md5_hex($data,...)
 
-Same as md5(), but will return the digest in hexadecimal form.
+Same as md5(), but will return the digest in hexadecimal form. The
+length of the returned string will be 32 and it will only contain
+characters from this set: '0'..'9' and 'a'..'f'.
 
 =item md5_base64($data,...)
 
 Same as md5(), but will return the digest as a base64 encoded string.
+The length of the returned string will be 22 and it will only contain
+characters from this set: 'A'..'Z', 'a'..'z', '0'..'9', '+' and
+'/'.
 
-The base64 encoded string returned is not padded to be a multiple of 4
-bytes long.  If you want interoperability with other base64 encoded
-md5 digests you might want to append the string "==" to the result.
+Note that the base64 encoded string returned is not padded to be a
+multiple of 4 bytes long.  If you want interoperability with other
+base64 encoded md5 digests you might want to append the redundant
+string redundant "==" to the result.
 
 =back
 
 =head1 METHODS
 
-The following methods are available:
+The object oriented interface to C<Digest::MD5> is described in this
+section.  After a C<Digest::MD5> object has been created, you will add
+data to it and finally ask for the digest in a suitable format.  A
+single object can be used to calculate multiple digests.
+
+The following methods are provided:
 
 =over 4
 
 =item $md5 = Digest::MD5->new
 
 The constructor returns a new C<Digest::MD5> object which encapsulate
-the state of the MD5 message-digest algorithm.  You can add data to
-the object and finally ask for the digest.
+the state of the MD5 message-digest algorithm.
 
 If called as an instance method (i.e. $md5->new) it will just reset the
 state the object to the state of a newly created object.  No new
 object is created in this case.
 
-=item $md5->clone
-
-This is a copy constructor returning a clone of the $md5 object. It is
-useful when you do not want to destroy the digests state, but need an
-intermediate value of the digest, e.g. when calculating digests
-iteratively on a continuous data stream in order to obtain a copy which
-may be destroyed.
-
 =item $md5->reset
 
 This is just an alias for $md5->new.
+
+=item $md5->clone
+
+This a copy of the $md5 object. It is useful when you do not want to
+destroy the digests state, but need an intermediate value of the
+digest, e.g. when calculating digests iteratively on a continuous data
+stream.  Example:
+
+    my $md5 = Digest::MD5->new;
+    while (<>) {
+	$md5->add($_);
+	print "Line $.: ", $md5->clone->hexdigest, "\n";
+    }
 
 =item $md5->add($data,...)
 
 The $data provided as argument are appended to the message we
 calculate the digest for.  The return value is the $md5 object itself.
 
+All these lines will have the same effect on the state of the $md5
+object:
+
+    $md5->add("a"); $md5->add("b"); $md5->add("c");
+    $md5->add("a")->add("b")->add("c");
+    $md5->add("a", "b", "c");
+    $md5->add("abc");
+
 =item $md5->addfile($io_handle)
 
-The $io_handle is read until EOF and the content is appended to the
+The $io_handle will be read until EOF and its content appended to the
 message we calculate the digest for.  The return value is the $md5
 object itself.
 
-In most cases you want to make sure that the $io_handle is set up to
-be in binmode().
+The addfile() method will croak() if it fails reading data for some
+reason.  If it croaks it is unpredictable what the state of the $md5
+object will be in. The addfile() method might have been able to read
+the file partially before it failed.  It is probably wise to discard
+or reset the $md5 object if this occurs.
+
+In most cases you want to make sure that the $io_handle is in
+C<binmode> before you pass it as argument to the addfile() method.
 
 =item $md5->digest
 
-Return the binary digest for the message.
+Return the binary digest for the message.  The returned string will be
+16 bytes long.
 
 Note that the C<digest> operation is effectively a destructive,
 read-once operation. Once it has been performed, the C<Digest::MD5>
@@ -155,12 +186,17 @@ digest without reseting the digest state.
 
 =item $md5->hexdigest
 
-Same as $md5->digest, but will return the digest in hexadecimal form.
+Same as $md5->digest, but will return the digest in hexadecimal
+form. The length of the returned string will be 32 and it will only
+contain characters from this set: '0'..'9' and 'a'..'f'.
 
 =item $md5->b64digest
 
 Same as $md5->digest, but will return the digest as a base64 encoded
-string.
+string.  The length of the returned string will be 22 and it will only
+contain characters from this set: 'A'..'Z', 'a'..'z', '0'..'9', '+'
+and '/'.
+
 
 The base64 encoded string returned is not padded to be a multiple of 4
 bytes long.  If you want interoperability with other base64 encoded
@@ -177,12 +213,11 @@ function (or one of its cousins):
     use Digest::MD5 qw(md5_hex);
     print "Digest is ", md5_hex("foobarbaz"), "\n";
 
-The above example would print out the message
+The above example would print out the message:
 
     Digest is 6df23dc03f9b54cc38a0fc1483df6e21
 
-provided that the implementation is working correctly.  The same
-checksum can also be calculated in OO style:
+The same checksum can also be calculated in OO style:
 
     use Digest::MD5;
     
@@ -266,9 +301,9 @@ modify it under the same terms as Perl itself.
  Copyright 1995-1996 Neil Winton.
  Copyright 1991-1992 RSA Data Security, Inc.
 
-The MD5 algorithm is defined in RFC 1321. The basic C code
-implementing the algorithm is derived from that in the RFC and is
-covered by the following copyright:
+The MD5 algorithm is defined in RFC 1321. This implementation is
+derived from the reference C code in RFC 1321 which is covered by
+the following copyright statement:
 
 =over 4
 
@@ -303,9 +338,9 @@ licenses.
 
 =head1 AUTHORS
 
-The original MD5 interface was written by Neil Winton
+The original C<MD5> interface was written by Neil Winton
 (C<N.Winton@axion.bt.co.uk>).
 
-This release was made by Gisle Aas <gisle@ActiveState.com>
+The C<Digest::MD5> module is written by Gisle Aas <gisle@ActiveState.com>.
 
 =cut

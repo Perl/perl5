@@ -95,9 +95,15 @@ case "$osvers" in
 4.*)	# In FreeBSD 4 and 5 the system malloc is performance-wise
 	# VERY bad for Perl-- we are talking of differences of not
 	# one, but TWO magnitudes.
-	usemymalloc=y
+	case "$usemymalloc" in
+	"") usemymalloc='y'
+	    ;;
+	esac
 	;;
-5.*)	usemymalloc=y
+5.*)	case "$usemymalloc" in
+	"") usemymalloc='y'
+	    ;;
+	esac
 	;;
 *)	usevfork='true'
 	case "$usemymalloc" in
