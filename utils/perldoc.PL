@@ -244,7 +244,11 @@ foreach (@found) {
 		close(TMP);
 	} elsif(not $opt_u) {
 		open(TMP,">>$tmp");
-		$rslt = `pod2man $_ | nroff -man`;
+		if($^O =~ /hpux/) {
+			$rslt = `pod2man $_ | nroff -man | col -x`;
+		} else {
+			$rslt = `pod2man $_ | nroff -man`;
+		}
 		if ($Is_VMS) { $err = !($? % 2) || $rslt =~ /IVVERB/; }
 		else      { $err = $?; }
 		print TMP $rslt unless $err;
@@ -293,10 +297,11 @@ B<perldoc> [B<-h>] [B<-v>] [B<-t>] [B<-u>] PageName|ModuleName|ProgramName
 
 =head1 DESCRIPTION
 
-I<perldoc> looks up a piece of documentation in .pod format that is
-embedded in the perl installation tree or in a perl script, and displays
-it via pod2man | nroff -man | $PAGER.  This is primarily used for the
-documentation for the perl library modules. 
+I<perldoc> looks up a piece of documentation in .pod format that is embedded
+in the perl installation tree or in a perl script, and displays it via
+C<pod2man | nroff -man | $PAGER>. (In addition, if running under HP-UX,
+C<col -x> will be used.) This is primarily used for the documentation for
+the perl library modules.
 
 Your system may also have man pages installed for those modules, in
 which case you can probably just use the man(1) command.
