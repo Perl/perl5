@@ -227,6 +227,12 @@ since it, in a way, falsely promised that the features could be used.
 
 =item *
 
+In future releases, non-PerlIO aware XS modules may become completely
+unsupported.  Since PerlIO is a drop-in replacement for stdio, this
+shouldn't be that drastic a change.
+
+=item *
+
 The current user-visible implementation of pseudo-hashes (the weird
 use of the first array element) is deprecated starting from Perl 5.8.0
 and will be removed in Perl 5.10.0, and the feature will be
@@ -271,6 +277,11 @@ The prototypes are now checked better at compile-time for invalid
 syntax.  An optional warning is generated ("Illegal character in
 prototype...")  but this may be upgraded to a fatal error in a future
 release.
+
+=item *
+
+The C<exec LIST> and C<system LIST> will become fatal errors
+under tainting in some future release.
 
 =item *
 
