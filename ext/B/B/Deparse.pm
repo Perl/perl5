@@ -3056,7 +3056,8 @@ sub escape_str { # ASCII, UTF8
 sub escape_extended_re {
     my($str) = @_;
     $str =~ s/(.)/ord($1) > 255 ? sprintf("\\x{%x}", ord($1)) : $1/eg;
-    $str =~ s/([[:^print:]])/sprintf("\\%03o", ord($1))/ge;
+    $str =~ s/([[:^print:]])/
+	($1 =~ y! \t\n!!) ? $1 : sprintf("\\%03o", ord($1))/ge;
     $str =~ s/\n/\n\f/g;
     return $str;
 }
