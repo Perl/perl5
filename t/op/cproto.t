@@ -1,6 +1,11 @@
 #!./perl
 # Tests to ensure that we don't unexpectedly change prototypes of builtins
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 use Test::More tests => 234;
 while (<DATA>) {
     chomp;
