@@ -453,7 +453,9 @@ int VDir::SetCurrentDirectoryA(char *lpBuffer)
     DWORD r = GetFileAttributesA(pPtr);
     if ((r != 0xffffffff) && (r & FILE_ATTRIBUTE_DIRECTORY))
     {
-	SetDefaultDirA(pPtr, DriveIndex(pPtr[0]));
+	char szBuffer[(MAX_PATH+1)*2];
+	DoGetFullPathNameA(pPtr, sizeof(szBuffer), szBuffer);
+	SetDefaultDirA(szBuffer, DriveIndex(szBuffer[0]));
 	nRet = 0;
     }
 
@@ -679,7 +681,9 @@ int VDir::SetCurrentDirectoryW(WCHAR *lpBuffer)
     DWORD r = GetFileAttributesW(pPtr);
     if ((r != 0xffffffff) && (r & FILE_ATTRIBUTE_DIRECTORY))
     {
-	SetDefaultDirW(pPtr, DriveIndex((char)pPtr[0]));
+	WCHAR wBuffer[(MAX_PATH+1)*2];
+	DoGetFullPathNameW(pPtr, (sizeof(wBuffer)/sizeof(WCHAR)), wBuffer);
+	SetDefaultDirW(wBuffer, DriveIndex((char)wBuffer[0]));
 	nRet = 0;
     }
 
