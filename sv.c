@@ -2437,7 +2437,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 {
     if (SvPOK(sv) && SvUTF8(sv)) {
         char *c = SvPVX(sv);
-	STRLEN len = SvCUR(sv);
+	STRLEN len = SvCUR(sv) + 1;	/* include trailing NUL */
         if (!utf8_to_bytes((U8*)c, &len)) {
 	    if (fail_ok)
 		return FALSE;
@@ -2445,6 +2445,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 		Perl_croak("big byte");
 	}
 	SvCUR(sv) = len - 1;
+	SvUTF8_off(sv);
     }
     return TRUE;
 }
