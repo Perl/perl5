@@ -1,6 +1,6 @@
 package FileCache;
 
-our $VERSION = 1.04;
+our $VERSION = '1.04_01';
 
 =head1 NAME
 
@@ -59,17 +59,20 @@ do not do so if you are calling C<FileCache::cacheout> from a package other
 than which it was imported, or with another module which overrides C<close>.
 If you must, use C<FileCache::cacheout_close>.
 
+Although FileCache can be used with piped opens ('-|' or '|-') doing so is
+strongly discouraged.  If FileCache finds it necessary to close and then reopen
+a pipe, the command at the far end of the pipe will be reexecuted - the results
+of performing IO on FileCache'd pipes is unlikely to be what you expect.  The
+ability to use FileCache on pipes may be removed in a future release.
+
+FileCache does not store the current file offset if it finds it necessary to
+close a file.  When the file is reopened, the offset will be as specified by the
+original C<open> file mode.  This could be construed to be a bug.
+
 =head1 BUGS
 
 F<sys/param.h> lies with its C<NOFILE> define on some systems,
 so you may have to set I<maxopen> yourself.
-
-=head1 NOTES
-
-FileCache installs localized signal handlers for CHLD (a.k.a. CLD) and PIPE
-to handle deceased children from 2-arg C<cacheout> with C<'|-'> or C<'-|'>
-I<expediently>. The children would otherwise be reaped eventually, unless you
-terminated before repeatedly calling cacheout.
 
 =cut
 
@@ -111,11 +114,6 @@ sub import {
 
 # Open in their package.
 sub cacheout_open {
-  # Reap our children
-  local $SIG{CLD}  ||= 'IGNORE'if $Config{sig_name} =~ /\bCLD\b/;
-  local $SIG{CHLD} ||= 'IGNORE'if $Config{sig_name} =~ /\bCHLD\b/;
-  local $SIG{PIPE} ||= 'IGNORE'if $Config{sig_name} =~ /\bPIPE\b/;
-
   return open(*{caller(1) . '::' . $_[1]}, $_[0], $_[1]) && $_[1];
 }
 
