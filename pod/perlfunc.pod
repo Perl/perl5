@@ -5863,6 +5863,7 @@ See L</pack> for more examples and notes.
 =item untie VARIABLE
 
 Breaks the binding between a variable and a package.  (See C<tie>.)
+Has no effect if the variable is not tied.
 
 =item unshift ARRAY,LIST
 
