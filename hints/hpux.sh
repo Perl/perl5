@@ -166,7 +166,6 @@ $define|true|[yY]*)
 64-bit compilation is not supported on HP-UX $xxOsRevMajor.
 You need at least HP-UX 11.0.
 Cannot continue, aborting.
-
 EOM
 		exit 1
     fi
@@ -179,7 +178,6 @@ EOM
 *** You do not seem to have the 64-bit libraries in /lib/pa20_64.
 *** Most importantly, I cannot find the $libc.
 *** Cannot continue, aborting.
-
 EOM
 		exit 1
     fi
@@ -334,6 +332,7 @@ case "$usethreads" in
 $define|true|[yY]*)
         if [ "$xxOsRevMajor" -lt 10 ]; then
             cat <<EOM >&4
+
 HP-UX $xxOsRevMajor cannot support POSIX threads.
 Consider upgrading to at least HP-UX 11.
 Cannot continue, aborting.
@@ -376,11 +375,17 @@ EOM
 
             if [ $libswanted = "no_threads_available" ]; then
                 cat <<EOM >&4
+
 In HP-UX 10.X for POSIX threads you need both of the files
 /usr/include/pthread.h and either /usr/lib/libcma.sl or /usr/lib/libpthread.sl.
 Either you must upgrade to HP-UX 11 or install a posix thread library:
- DCE-CoreTools from HP-UX 10.20 Hardware Extensions 3.0 CD (B3920-13941) or
- PTH package from i.e. http://hpux.tn.tudelft.nl/hppd/hpux/alpha.html
+
+    DCE-CoreTools from HP-UX 10.20 Hardware Extensions 3.0 CD (B3920-13941)
+
+or
+
+    PTH package from http://hpux.tn.tudelft.nl/hppd/hpux/alpha.html
+
 Cannot continue, aborting.
 EOM
      	        exit 1
