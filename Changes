@@ -28,6 +28,149 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21232] By: jhi                                   on 2003/09/15  06:14:11
+        Log: Integrate:
+             [ 21230]
+             Check the context of for/grep/map.
+     Branch: maint-5.8/perl
+	  !> t/op/grep.t
+____________________________________________________________________________
+[ 21231] By: jhi                                   on 2003/09/15  05:58:21
+        Log: Also sendpath warnings from HP-UX.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21229] By: jhi                                   on 2003/09/14  13:43:19
+        Log: Integrate:
+             [ 21227]
+             Also IRIX wants setlogsock('stream').
+             
+             [ 21228]
+             For-non-perlio places we need STDOUT back.
+     Branch: maint-5.8/perl
+	  !> ext/Sys/Syslog/Syslog.pm ext/Sys/Syslog/t/syslog.t t/io/dup.t
+____________________________________________________________________________
+[ 21226] By: jhi                                   on 2003/09/14  08:43:38
+        Log: Regen perlmodlib, perltoc.
+     Branch: maint-5.8/perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 21225] By: jhi                                   on 2003/09/14  07:44:59
+        Log: Integrate:
+             [ 21224]
+             More portable reading.
+     Branch: maint-5.8/perl
+	  !> t/io/dup.t
+____________________________________________________________________________
+[ 21223] By: jhi                                   on 2003/09/14  07:36:57
+        Log: Integrate:
+             [ 21214]
+             parse_version doesn't always succeed.
+             
+             [ 21217]
+             Subject: [PATCH] PerlIO_tmpfile clean-up for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 14 Sep 2003 00:23:56 -0500
+             Message-ID: <3F63FB6C.5040502@mac.com>
+             
+             [ 21218]
+             Subject: Re: [PATCH 5.8.1 @20218] OS/2 API
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 11 Sep 2003 15:07:10 -0700
+             Message-ID: <20030911220710.GO18786@windhund.schwern.org>
+             
+             (in OS/2 if a file has been chmod 0400'ed, it cannot be deleted)
+             
+             [ 21219]
+             Subject: Re: [PATCH 5.8.1 @20218] OS/2 API
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Sat, 13 Sep 2003 20:20:30 -0700
+             Message-ID: <20030914032030.GA17822@math.berkeley.edu>
+             
+             [ 21220]
+             Use $Config{_exe}.
+             
+             [ 21222]
+             More dup testing.
+     Branch: maint-5.8/perl
+	  !> Porting/cmpVERSION.pl lib/ExtUtils/t/Manifest.t os2/os2.c
+	  !> perlio.c t/io/dup.t t/run/switches.t
+____________________________________________________________________________
+[ 21221] By: jhi                                   on 2003/09/14  07:14:25
+        Log: Subject: Strange things happen with pod/perldiag.pod?
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Sun, 14 Sep 2003 10:20:39 +0200
+             Message-ID: <002a01c37a99$1590ec30$a900a8c0@R2D2>
+     Branch: maint-5.8/perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 21212] By: jhi                                   on 2003/09/13  18:09:30
+        Log: Tell what is OpenZaurus, anyway.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21211] By: jhi                                   on 2003/09/13  16:10:30
+        Log: Integrate:
+             [ 21201]
+             Stringify the $VERSION of DynaLoader so it's never dependent
+             on localized float-to-string conversions.
+             
+             [ 21202]
+             Make the new glob tests pass (well, skip) even with miniperl.
+             
+             [ 21203]
+             Subject: Unknown discipline ':utf8' w/ maint perl w/o perlio
+             From: Stas Bekman <stas@stason.org>
+             Date: Fri, 12 Sep 2003 13:44:11 -0700
+             Message-ID: <3F62301B.3080604@stason.org>
+             
+             s/discipline/IO layer/, instead of "unknown" say "unavailable",
+             and have the fuller explanation in perldiag.
+             
+             [ 21204]
+             Subject: [perl #23788] int of a fraction errors 
+             From: "Boyd, Brooks D" (via RT) <perlbug-followup@perl.org>
+             Date: 11 Sep 2003 22:38:19 -0000
+             Message-ID: <rt-23788-64511.8.7546744242259@rt.perl.org>
+             
+             Add a separate faq entry for int().  (Yes, a bit redundant
+             with the existing "why are my numbers broken" entry.)
+             
+             [ 21205]
+             Minuscule code cleanup.
+             
+             [ 21206]
+             Apparently at some point doing 3-arg open with
+             illegal mode like ">>>" had stopped croaking.
+             
+             [ 21207]
+             Layer names were recognized by their prefixes
+             (e.g. open(F, ":u", "file") worked...)
+             
+             [ 21208]
+             The "perlio: " prefix looks a little odd
+             in the few warning/error messages, since
+             no other 'subsystems' have prefixes.
+             
+             [ 21209]
+             More PerlIO warnings changes.
+             
+             [ 21210]
+             Subject: Re: unicode regex problem
+             From: hv@crypt.org
+             Date: Sat, 13 Sep 2003 15:21:34 +0100
+             Message-Id: <200309131421.h8DELYx25894@zen.crypt.org>
+     Branch: maint-5.8/perl
+	  !> doio.c ext/DynaLoader/DynaLoader_pm.PL ext/PerlIO/t/fail.t
+	  !> perlio.c pod/perldiag.pod pod/perlfaq4.pod regcomp.c
+	  !> t/io/open.t t/lib/warnings/perlio t/op/pat.t
+	  !> t/run/fresh_perl.t
+____________________________________________________________________________
+[ 21200] By: jhi                                   on 2003/09/12  18:07:39
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21199] By: jhi                                   on 2003/09/12  18:01:40
         Log: Integrate:
              [ 21198]
