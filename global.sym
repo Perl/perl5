@@ -146,6 +146,7 @@ numer_amg
 oldbufptr
 oldoldbufptr
 op
+op_const_sv
 op_desc
 op_name
 op_seqmax
