@@ -75,6 +75,9 @@
   /* getenv used for regular logical names */
 #  define getenv(v) my_getenv(v,TRUE)
 #endif
+#if defined(getenv_len)
+#undef getenv_len
+#endif
 #define getenv_len(v,l) my_getenv_len(v,l,TRUE)
 
 /* DECC introduces this routine in the RTL as of VMS 7.0; for now,

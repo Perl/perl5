@@ -74,6 +74,8 @@ if ($docc) {
   while(<CONFIG>) {
     $debugging_enabled++ if /define\s+DEBUGGING/;
     $use_mymalloc++ if /define\s+MYMALLOC/;
+    $hide_mymalloc++ if /define\s+EMBEDMYMALLOC/;
+    $use_threads++ if /define\s+USE_THREADS/;
   }
   
   # put quotes back onto defines - they were removed by DCL on the way in
@@ -193,17 +195,26 @@ sub scan_func {
     if ($1 eq 'main' || $1 eq 'perl_init_ext') {
       print "\tskipped\n" if $debug > 1;
     }
-    else { $fcns{$1}++ }
+    else { $fcns{uc($1)}++ }
   }
+}
+
+open FUNCS, "LIBR/CROSS=SYMB LIBPERL.OLB/OUT=SYS\$OUTPUT |";
+foreach (<FUNCS>) {
+    chomp;
+    next unless /(perl_\w+)/i;
+    $fcns{uc($1)}++;
 }
 
 # Go add some right up front if we need 'em
 if ($use_mymalloc) {
-  $fcns{'Perl_malloc'}++;
-  $fcns{'Perl_calloc'}++;
-  $fcns{'Perl_realloc'}++;
-  $fcns{'Perl_mfree'}++;
+  $fcns{uc('Perl_malloc')}++;
+  $fcns{uc('Perl_calloc')}++;
+  $fcns{uc('Perl_realloc')}++;
+  $fcns{uc('Perl_mfree')}++;
 }
+
+delete $fcns{PERL_DESTRUCT_LEVEL} if exists $fcns{PERL_DESTRUCT_LEVEL};
 
 $used_expectation_enum = $used_opcode_enum = 0; # avoid warnings
 if ($docc) {
@@ -306,6 +317,22 @@ if ($isvax) {
     or die "$0: Can't write to ${dir}perlshr_gbl${marord}.mar: $!\n";
   print MAR "\t.title perlshr_gbl$marord\n";
 }
+
+($ver, $sub) = $] =~ /\.(\d\d\d)(\d\d)/;
+$gsmatch = ($sub >= 50) ? "equal" : "lequal";	# Force an equal match for
+						# dev, but be more forgiving
+						# for releases
+
+# Build up a major ID. Since it can only be 8 bits, we encode the version
+# number in the top four bits and use the bottom four for build options
+# that'll cause incompatibilities
+$ver *=16;
+$ver += 8 if $debugging_enabled;	# If DEBUGGING is set
+$ver += 4 if $use_threads;		# if we're threaded
+$ver += 2 if $use_mymalloc;		# if we're using perl's malloc
+
+print OPTBLD "GSMATCH=$gsmatch,$ver,$sub\n";
+
 unless ($isgcc) {
   print OPTBLD "PSECT_ATTR=\$GLOBAL_RO_VARS,PIC,NOEXE,RD,NOWRT,SHR\n";
   print OPTBLD "PSECT_ATTR=\$GLOBAL_RW_VARS,PIC,NOEXE,RD,WRT,NOSHR\n";
