@@ -71,6 +71,7 @@ Removes the restriction on the %hash's keyset.
 sub lock_keys (\%;@) {
     my($hash, @keys) = @_;
 
+    Internals::hv_clear_placeholders %$hash;
     if( @keys ) {
         my %keys = map { ($_ => 1) } @keys;
         my %original_keys = map { ($_ => 1) } keys %$hash;

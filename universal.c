@@ -169,6 +169,7 @@ XS(XS_utf8_unicode_to_native);
 XS(XS_utf8_native_to_unicode);
 XS(XS_Internals_SvREADONLY);
 XS(XS_Internals_SvREFCNT);
+XS(XS_Internals_hv_clear_placeholders);
 
 void
 Perl_boot_core_UNIVERSAL(pTHX)
@@ -187,6 +188,8 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXS("utf8::unicode_to_native", XS_utf8_unicode_to_native, file);
     newXSproto("Internals::SvREADONLY",XS_Internals_SvREADONLY, file, "\\[$%@];$");
     newXSproto("Internals::SvREFCNT",XS_Internals_SvREFCNT, file, "\\[$%@];$");
+    newXSproto("Internals::hv_clear_placeholders",
+               XS_Internals_hv_clear_placeholders, file, "\\%");
 }
 
 
@@ -500,3 +503,45 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
     XSRETURN_UNDEF; /* Can't happen. */
 }
 
+/* Maybe this should return the number of placeholders found in scalar context,
+   and a list of them in list context.  */
+XS(XS_Internals_hv_clear_placeholders)
+{
+    dXSARGS;
+    HV *hv = (HV *) SvRV(ST(0));
+
+    /* I don't care how many parameters were passed in, but I want to avoid
+       the unused variable warning. */
+
+    items = HvPLACEHOLDERS(hv);
+
+    if (items) {
+        HE *entry;
+        I32 riter = HvRITER(hv);
+        HE *eiter = HvEITER(hv);
+        hv_iterinit(hv);
+        while (items
+               && (entry
+                   = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))) {
+            SV *val = hv_iterval(hv, entry);
+
+            if (val == &PL_sv_undef) {
+
+                /* It seems that I have to go back in the front of the hash
+                   API to delete a hash, even though I have a HE structure
+                   pointing to the very entry I want to delete, and could hold
+                   onto the previous HE that points to it. And it's easier to
+                   go in with SVs as I can then specify the precomputed hash,
+                   and don't have fun and games with utf8 keys.  */
+                SV *key = hv_iterkeysv(entry);
+
+                hv_delete_ent (hv, key, G_DISCARD, HeHASH(entry));
+                items--;
+            }
+        }
+        HvRITER(hv) = riter;
+        HvEITER(hv) = eiter;
+    }
+
+    XSRETURN(0);
+}
