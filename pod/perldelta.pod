@@ -385,6 +385,9 @@ see F<INSTALL>.
 =head2 Platform-specific enhancements
 
 In Cygwin Perl can now be built with threads (C<Configure -Duseithreads>).
+This works 100% with Cygwin 1.3.22, with Cygwin 1.5.x there are some
+problems causes by the changes in the Cygwin threading libraries,
+see L</"Cygwin 1.5 problems">:
 
 In newer FreeBSD releases Perl 5.8.0 compilation failed because of
 trying to use F<malloc.h>, which in FreeBSD is just a dummy file, and
@@ -757,13 +760,23 @@ IBM z/OS and other EBCDIC platforms continue to be problematic
 regarding Unicode support.  Many Unicode tests are skipped when
 they really should be fixed.
 
-=head2 Cygwin 1.5
+=head2 Cygwin 1.5 problems
 
-Perl 5.8.1 does not build with Cygwin 1.5.  Perl 5.8.1 does
-build and work well with Cygwin 1.3, though: with (uname -a)
-C<Cygwin_NT-5.0 ... 1.3.22(0.78/3/2) 2003-03-18 09:20 i686 ...>
-a 99.88 "make test" result (only one subtest of ext/POSIX/t/sigaction.t
-failed) was achieved with C<Configure -des -Duseithreads>.
+Some changes in Cygwin threading libraries broke the following tests
+in Cygwin 1.5.2:
+
+  ../ext/threads/t/join.t       0   139    12   14 116.67%  6-12
+  ../ext/threads/t/thread.t     5  1280    25   24  96.00%  14-25
+
+Also, the
+
+  op/sysio.t                                39    1   2.56%  39
+
+is failing for some yet unknown reason.
+
+Perl 5.8.1 does build and work well with Cygwin 1.3, though: with (uname -a)
+C<CYGWIN_NT-5.0 ... 1.3.22(0.78/3/2) 2003-03-18 09:20 i686 ...>
+a 100% "make test"  was achieved with C<Configure -des -Duseithreads>.
 
 =head2 FreeBSD: malloc dilemma
 
