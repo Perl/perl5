@@ -10,7 +10,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..10\n";
+print "1..11\n";
 
 my $fh;
 my $var = "ok 2\n";
@@ -39,3 +39,10 @@ print $fh "Fred and Wilma ";
 print $fh "Flintstone";
 print "not " unless $var eq "Fred and Wilma Flintstone";
 print "ok 10\n";
+# Test appending
+close $fh;
+$var = "Fred and Wilma ";
+open $fh, ">>", \$var;
+print $fh "Flintstone";
+print "not " unless $var eq "Fred and Wilma Flintstone";
+print "ok 11\n";

@@ -38,7 +38,10 @@ PerlIOScalar_pushed(PerlIO *f, const char *mode, SV *arg)
    s->var = newSVpvn("",0);
   }
  sv_upgrade(s->var,SVt_PV);
- s->posn = 0;
+ if (strnEQ(mode,"a",1))
+   s->posn = SvCUR(SvRV(arg));
+ else
+   s->posn = 0;
  return PerlIOBase_pushed(f,mode,Nullsv);
 }
 
