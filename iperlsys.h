@@ -610,9 +610,15 @@ public:
 
 #else	/* PERL_OBJECT */
 
+#ifdef MYMALLOC
+#define PerlMem_malloc(size)		Perl_malloc((size))
+#define PerlMem_realloc(buf, size)	Perl_realloc((buf), (size))
+#define PerlMem_free(buf)		Perl_mfree((buf))
+#else
 #define PerlMem_malloc(size)		malloc((size))
 #define PerlMem_realloc(buf, size)	realloc((buf), (size))
 #define PerlMem_free(buf)		free((buf))
+#endif
 
 #endif	/* PERL_OBJECT */
 

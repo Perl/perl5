@@ -168,27 +168,19 @@ extern long sdbm_hash proto((char *, int));
 /* This comes after <stdlib.h> so we don't try to change the standard
  * library prototypes; we'll use our own instead. */
 
-#if defined(MYMALLOC) && (defined(HIDEMYMALLOC) || defined(EMBEDMYMALLOC))
+#if defined(MYMALLOC)
 
-#   ifdef HIDEMYMALLOC
-#	define malloc  Mymalloc
-#	define calloc  Mycalloc
-#	define realloc Myremalloc
-#	define free    Myfree
-#   endif
-#   ifdef EMBEDMYMALLOC
-#	define malloc  Perl_malloc
-#	define calloc  Perl_calloc
-#	define realloc Perl_realloc
-#	define free    Perl_free
-#   endif
+#  define malloc  Perl_malloc
+#  define calloc  Perl_calloc
+#  define realloc Perl_realloc
+#  define free    Perl_mfree
 
-    Malloc_t malloc proto((MEM_SIZE nbytes));
-    Malloc_t calloc proto((MEM_SIZE elements, MEM_SIZE size));
-    Malloc_t realloc proto((Malloc_t where, MEM_SIZE nbytes));
-    Free_t   free proto((Malloc_t where));
+Malloc_t Perl_malloc proto((MEM_SIZE nbytes));
+Malloc_t Perl_calloc proto((MEM_SIZE elements, MEM_SIZE size));
+Malloc_t Perl_realloc proto((Malloc_t where, MEM_SIZE nbytes));
+Free_t   Perl_mfree proto((Malloc_t where));
 
-#endif /* MYMALLOC && (HIDEMYMALLOC || EMBEDMYMALLOC) */
+#endif /* MYMALLOC */
 
 #ifdef I_STRING
 #include <string.h>

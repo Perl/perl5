@@ -747,6 +747,11 @@ To build without perl's malloc, you can use the Configure command
 
 or you can answer 'n' at the appropriate interactive Configure prompt.
 
+Note that Perl's malloc family of functions are called Perl_malloc(),
+Perl_realloc(), Perl_calloc() and Perl_mfree().  The names do not clash
+with the system versions of these functions.  See -DPERL_POLLUTE_MALLOC
+below if you want to do that for some reason.
+
 =head2 Malloc Performance Flags
 
 If you are using Perl's malloc, you may add one or more of the following
@@ -766,6 +771,18 @@ in Perl 5.004.
 
 Undefined by default.  Defining it in addition to NO_FANCY_MALLOC returns
 malloc to the version used in Perl version 5.000.
+
+=item -DPERL_POLLUTE_MALLOC
+
+Undefined by default.  This is used to force Perl's malloc family of functions
+to have the same names as the system versions.  This is normally only required
+when you have a need to replace the system versions of these functions.
+This may be sometimes required when you have libraries that like to free()
+data that may have been allocated by Perl_malloc() and vice versa.
+
+Note that enabling this option may sometimes lead to duplicate symbols from
+the linker for malloc et al.  In such cases, the system probably does not
+allow its malloc functions to be fully replaced with custom versions.
 
 =back
 
@@ -1010,11 +1027,6 @@ The latter is especially useful if you see something like this
 	perl: warning: Falling back to the standard locale ("C").
 
 at Perl startup.
-
-=item malloc duplicates
-
-If you get duplicates upon linking for malloc et al, add -DEMBEDMYMALLOC
-to your ccflags variable in config.sh.
 
 =item varargs
 

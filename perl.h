@@ -385,46 +385,30 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  * library prototypes; we'll use our own in proto.h instead. */
 
 #ifdef MYMALLOC
-
-#   ifdef HIDEMYMALLOC
-#	define malloc  Mymalloc
-#	define calloc  Mycalloc
-#	define realloc Myrealloc
-#	define free    Myfree
-Malloc_t Mymalloc _((MEM_SIZE nbytes));
-Malloc_t Mycalloc _((MEM_SIZE elements, MEM_SIZE size));
-Malloc_t Myrealloc _((Malloc_t where, MEM_SIZE nbytes));
-Free_t   Myfree _((Malloc_t where));
-#   endif
-#   ifdef EMBEDMYMALLOC
-#	define malloc  Perl_malloc
-#	define calloc  Perl_calloc
-#	define realloc Perl_realloc
-/* VMS' external symbols are case-insensitive, and there's already a */
-/* perl_free in perl.h */
-#ifdef VMS
-#	define free    Perl_myfree
-#else
-#	define free    Perl_free
-#endif
+#  ifdef PERL_POLLUTE_MALLOC
+#    define Perl_malloc		malloc
+#    define Perl_calloc		calloc
+#    define Perl_realloc	realloc
+#    define Perl_mfree		free
+#  else
+#    define EMBEDMYMALLOC	/* for compatibility */
+#  endif
 Malloc_t Perl_malloc _((MEM_SIZE nbytes));
 Malloc_t Perl_calloc _((MEM_SIZE elements, MEM_SIZE size));
 Malloc_t Perl_realloc _((Malloc_t where, MEM_SIZE nbytes));
-#ifdef VMS
-Free_t   Perl_myfree _((Malloc_t where));
-#else
-Free_t   Perl_free _((Malloc_t where));
-#endif
+/* 'mfree' rather than 'free', since there is already a 'perl_free'
+ * that causes clashes with case-insensitive linkers */
+Free_t   Perl_mfree _((Malloc_t where));
 #   endif
 
 #   undef safemalloc
 #   undef safecalloc
 #   undef saferealloc
 #   undef safefree
-#   define safemalloc  malloc
-#   define safecalloc  calloc
-#   define saferealloc realloc
-#   define safefree    free
+#   define safemalloc  Perl_malloc
+#   define safecalloc  Perl_calloc
+#   define saferealloc Perl_realloc
+#   define safefree    Perl_mfree
 
 #endif /* MYMALLOC */
 
