@@ -24,8 +24,8 @@ void* Perl_thread_run(void * arg) {
 	SHAREDSvLOCK(threads);
 	SHAREDSvEDIT(threads);
 	PERL_THREAD_ALLOC_SPECIFIC(self_key);
-	PERL_THREAD_SET_SPECIFIC(self_key,INT2PTR(void*,thread->tid));
-	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(PERL_THREAD_GET_SPECIFIC(self_key)));	
+	PERL_THREAD_SETSPECIFIC(self_key,INT2PTR(void*,thread->tid));
+	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, thread->tid);	
 	thread_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(thread));
 	hv_store_ent((HV*)SHAREDSvGET(threads), thread_tid_ptr, thread_ptr,0);
    	SvREFCNT_dec(thread_tid_ptr);
@@ -189,11 +189,12 @@ SV* Perl_thread_self (char* class) {
 	SV*	thread_tid_ptr;
 	SV*	thread_ptr;
 	HE*	thread_entry;
-	
+	void*   id;
+	PERL_THREAD_GETSPECIFIC(self_key,id);
 	SHAREDSvLOCK(threads);
 	SHAREDSvEDIT(threads);
-
-	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(PERL_THREAD_GET_SPECIFIC(self_key)));	
+	
+	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(id));	
 
 	thread_entry = Perl_hv_fetch_ent(PL_sharedsv_space,
 					 (HV*) SHAREDSvGET(threads),
@@ -285,8 +286,8 @@ BOOT:
 #endif
 		SHAREDSvEDIT(threads);
 		PERL_THREAD_ALLOC_SPECIFIC(self_key);
-		PERL_THREAD_SET_SPECIFIC(self_key,0);
-		thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(PERL_THREAD_GET_SPECIFIC(self_key)));
+		PERL_THREAD_SETSPECIFIC(self_key,0);
+		thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, 0);
 		thread_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(thread));
 		hv_store_ent((HV*) SHAREDSvGET(threads), thread_tid_ptr, thread_ptr,0);
 	   	SvREFCNT_dec(thread_tid_ptr);
