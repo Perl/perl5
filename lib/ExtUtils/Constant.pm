@@ -1,6 +1,6 @@
 package ExtUtils::Constant;
 use vars qw (@ISA $VERSION %XS_Constant %XS_TypeSet @EXPORT_OK %EXPORT_TAGS);
-$VERSION = '0.07';
+$VERSION = '0.08';
 
 =head1 NAME
 
@@ -308,7 +308,7 @@ sub return_clause ($$$$$$$$$) {
   ##ifdef thingy
   if (ref $macro) {
     $clause = $macro->[0];
-  } else {
+  } elsif ($macro ne "1") {
     $clause = "#ifdef $macro\n";
   }
 
@@ -317,23 +317,25 @@ sub return_clause ($$$$$$$$$) {
   $clause .= assign ($indent, $type, $pre, $post,
                      ref $value ? @$value : $value);
 
-  ##else
-  $clause .= "#else\n";
+  if (ref $macro or $macro ne "1") {
+    ##else
+    $clause .= "#else\n";
 
-  #      return PERL_constant_NOTDEF;
-  if (!defined $default) {
-    $clause .= "${indent}return PERL_constant_NOTDEF;\n";
-  } else {
-    my @default = ref $default ? @$default : $default;
-    $type = shift @default;
-    $clause .= assign ($indent, $type, $def_pre, $def_post, @default);
-  }
+    #      return PERL_constant_NOTDEF;
+    if (!defined $default) {
+      $clause .= "${indent}return PERL_constant_NOTDEF;\n";
+    } else {
+      my @default = ref $default ? @$default : $default;
+      $type = shift @default;
+      $clause .= assign ($indent, $type, $def_pre, $def_post, @default);
+    }
 
-  ##endif
-  if (ref $macro) {
-    $clause .= $macro->[1];
-  } else {
-    $clause .= "#endif\n";
+    ##endif
+    if (ref $macro) {
+      $clause .= $macro->[1];
+    } else {
+      $clause .= "#endif\n";
+    }
   }
   return $clause
 }
@@ -427,9 +429,8 @@ sub switch_clause {
 =item params WHAT
 
 An internal function. I<WHAT> should be a hashref of types the constant
-function will return. I<params> returns the list of flags C<$use_iv, $use_nv,
-$use_pv, $use_sv> to show which combination of pointers will be needed in the
-C argument list.
+function will return. I<params> returns a hashref keyed IV NV PV SV to show
+which combination of pointers will be needed in the C argument list.
 
 =cut
 
@@ -438,11 +439,12 @@ sub params {
   foreach (sort keys %$what) {
     warn "ExtUtils::Constant doesn't know how to handle values of type $_" unless defined $XS_Constant{$_};
   }
-  my $use_iv = $what->{IV} || $what->{UV} || $what->{PVN};
-  my $use_nv = $what->{NV};
-  my $use_pv = $what->{PV} || $what->{PVN};
-  my $use_sv = $what->{SV};
-  return ($use_iv, $use_nv, $use_pv, $use_sv);
+  my $params = {};
+  $params->{IV} = 1 if $what->{IV} || $what->{UV} || $what->{PVN};
+  $params->{NV} = 1 if $what->{NV};
+  $params->{PV} = 1 if $what->{PV} || $what->{PVN};
+  $params->{SV} = 1 if $what->{SV};
+  return $params;
 }
 
 =item dump_names
@@ -588,6 +590,9 @@ pre-processor constructions such as
 
 to be used to determine if a constant is to be defined.
 
+A "macro" 1 signals that the constant is always defined, so the C<#if>/C<#endif>
+test is omitted.
+
 =item default
 
 Default value to use (instead of C<croak>ing with "your vendor has not
@@ -654,64 +659,66 @@ example C<constant_5> for names 5 characters long.  The default I<BREAKOUT> is
 sub C_constant {
   my ($package, $subname, $default_type, $what, $indent, $breakout, @items)
     = @_;
-  my $namelen;
-  if (ref $breakout) {
-    $namelen = $$breakout;
-  } else {
-    $breakout ||= 3;
-  }
   $package ||= 'Foo';
   $subname ||= 'constant';
   # I'm not using this. But a hashref could be used for full formatting without
   # breaking this API
   # $indent ||= 0;
-   $default_type ||= 'IV';
-  if (!ref $what) {
-    # Convert line of the form IV,UV,NV to hash
-    $what = {map {$_ => 1} split /,\s*/, ($what || '')};
-    # Figure out what types we're dealing with, and assign all unknowns to the
-    # default type
-  }
-  my %items;
-  foreach (@items) {
-    my $name;
-    if (ref $_) {
-      my $orig = $_;
-      # Make a copy which is a normalised version of the ref passed in.
-      $name = $_->{name};
-      my ($type, $macro, $value) = @$_{qw (type macro value)};
-      $type ||= $default_type;
-      $what->{$type} = 1;
-      $_ = {name=>$name, type=>$type};
 
-      undef $macro if defined $macro and $macro eq $name;
-      $_->{macro} = $macro if defined $macro;
-      undef $value if defined $value and $value eq $name;
-      $_->{value} = $value if defined $value;
-      foreach my $key (qw(default pre post def_pre def_post)) {
-        my $value = $orig->{$key};
-        $_->{$key} = $value if defined $value;
-        # warn "$key $value";
+  my ($namelen, $items);
+  if (ref $breakout) {
+    # We are called recursively. We trust @items to be normalised, $what to
+    # be a hashref, and pinch %$items from our parent to save recalculation.
+    ($namelen, $items) = @$breakout;
+  } else {
+    $breakout ||= 3;
+    $default_type ||= 'IV';
+    if (!ref $what) {
+      # Convert line of the form IV,UV,NV to hash
+      $what = {map {$_ => 1} split /,\s*/, ($what || '')};
+      # Figure out what types we're dealing with, and assign all unknowns to the
+      # default type
+    }
+    foreach (@items) {
+      my $name;
+      if (ref $_) {
+        my $orig = $_;
+        # Make a copy which is a normalised version of the ref passed in.
+        $name = $_->{name};
+        my ($type, $macro, $value) = @$_{qw (type macro value)};
+        $type ||= $default_type;
+        $what->{$type} = 1;
+        $_ = {name=>$name, type=>$type};
+
+        undef $macro if defined $macro and $macro eq $name;
+        $_->{macro} = $macro if defined $macro;
+        undef $value if defined $value and $value eq $name;
+        $_->{value} = $value if defined $value;
+        foreach my $key (qw(default pre post def_pre def_post)) {
+          my $value = $orig->{$key};
+          $_->{$key} = $value if defined $value;
+          # warn "$key $value";
+        }
+      } else {
+        $name = $_;
+        $_ = {name=>$_, type=>$default_type};
+        $what->{$default_type} = 1;
       }
-    } else {
-      $name = $_;
-      $_ = {name=>$_, type=>$default_type};
-      $what->{$default_type} = 1;
+      warn "ExtUtils::Constant doesn't know how to handle values of type $_ used in macro $name" unless defined $XS_Constant{$_->{type}};
+      if (exists $items->{$name}) {
+        die "Multiple definitions for macro $name";
+      }
+      $items->{$name} = $_;
     }
-    warn "ExtUtils::Constant doesn't know how to handle values of type $_ used in macro $name" unless defined $XS_Constant{$_->{type}};
-    if (exists $items{$name}) {
-      die "Multiple definitions for macro $name";
-    }
-    $items{$name} = $_;
   }
-  my ($use_iv, $use_nv, $use_pv, $use_sv) = params ($what);
+  my $params = params ($what);
 
   my ($body, @subs) = "static int\n$subname (pTHX_ const char *name";
   $body .= ", STRLEN len" unless defined $namelen;
-  $body .= ", IV *iv_return" if $use_iv;
-  $body .= ", NV *nv_return" if $use_nv;
-  $body .= ", const char **pv_return" if $use_pv;
-  $body .= ", SV **sv_return" if $use_sv;
+  $body .= ", IV *iv_return" if $params->{IV};
+  $body .= ", NV *nv_return" if $params->{NV};
+  $body .= ", const char **pv_return" if $params->{PV};
+  $body .= ", SV **sv_return" if $params->{SV};
   $body .= ") {\n";
 
   if (defined $namelen) {
@@ -719,7 +726,7 @@ sub C_constant {
     my $comment = 'When generated this function returned values for the list'
       . ' of names given here.  However, subsequent manual editing may have'
         . ' added or removed some.';
-    $body .= switch_clause (2, $comment, $namelen, \%items, @items);
+    $body .= switch_clause (2, $comment, $namelen, $items, @items);
   } else {
     # We are the top level.
     $body .= "  /* Initially switch on the length of the name.  */\n";
@@ -746,15 +753,22 @@ sub C_constant {
                                 $default, $pre, $post, $def_pre, $def_post);
         $body .= "    }\n";
       } elsif (@{$by_length[$i]} < $breakout) {
-        $body .= switch_clause (4, '', $i, \%items, @{$by_length[$i]});
+        $body .= switch_clause (4, '', $i, $items, @{$by_length[$i]});
       } else {
-        push @subs, C_constant ($package, "${subname}_$i", $default_type,
-                                $what, $indent, \$i, @{$by_length[$i]});
+        # Only use the minimal set of parameters actually needed by the types
+        # of the names of this length.
+        my $what = {};
+        foreach (@{$by_length[$i]}) {
+          $what->{$_->{type}} = 1;
+        }
+        $params = params ($what);
+        push @subs, C_constant ($package, "${subname}_$i", $default_type, $what,
+                                $indent, [$i, $items], @{$by_length[$i]});
         $body .= "    return ${subname}_$i (aTHX_ name";
-        $body .= ", iv_return" if $use_iv;
-        $body .= ", nv_return" if $use_nv;
-        $body .= ", pv_return" if $use_pv;
-        $body .= ", sv_return" if $use_sv;
+        $body .= ", iv_return" if $params->{IV};
+        $body .= ", nv_return" if $params->{NV};
+        $body .= ", pv_return" if $params->{PV};
+        $body .= ", sv_return" if $params->{SV};
         $body .= ");\n";
       }
       $body .= "    break;\n";
@@ -797,7 +811,7 @@ sub XS_constant {
     # Convert line of the form IV,UV,NV to hash
     $what = {map {$_ => 1} split /,\s*/, ($what)};
   }
-  my ($use_iv, $use_nv, $use_pv, $use_sv) = params ($what);
+  my $params = params ($what);
   my $type;
 
   my $xs = <<"EOT";
@@ -813,17 +827,17 @@ $subname(sv)
         int		type;
 EOT
 
-  if ($use_iv) {
+  if ($params->{IV}) {
     $xs .= "	IV		iv;\n";
   } else {
     $xs .= "	/* IV\t\tiv;\tUncomment this if you need to return IVs */\n";
   }
-  if ($use_nv) {
+  if ($params->{NV}) {
     $xs .= "	NV		nv;\n";
   } else {
     $xs .= "	/* NV\t\tnv;\tUncomment this if you need to return NVs */\n";
   }
-  if ($use_pv) {
+  if ($params->{PV}) {
     $xs .= "	const char	*pv;\n";
   } else {
     $xs .=
@@ -837,17 +851,17 @@ EOT
     PPCODE:
 EOT
 
-  if ($use_iv xor $use_nv) {
+  if ($params->{IV} xor $params->{NV}) {
     $xs .= << "EOT";
         /* Change this to $C_subname(aTHX_ s, len, &iv, &nv);
            if you need to return both NVs and IVs */
 EOT
   }
   $xs .= "	type = $C_subname(aTHX_ s, len";
-  $xs .= ', &iv' if $use_iv;
-  $xs .= ', &nv' if $use_nv;
-  $xs .= ', &pv' if $use_pv;
-  $xs .= ', &sv' if $use_sv;
+  $xs .= ', &iv' if $params->{IV};
+  $xs .= ', &nv' if $params->{NV};
+  $xs .= ', &pv' if $params->{PV};
+  $xs .= ', &sv' if $params->{SV};
   $xs .= ");\n";
 
   $xs .= << "EOT";

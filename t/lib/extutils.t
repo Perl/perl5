@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..26\n";
+print "1..27\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -55,8 +55,7 @@ my @names = ("FIVE", {name=>"OK6", type=>"PV",},
               value=>['"not ok 7\\n\\0ok 7\\n"', 15]},
              {name => "FARTHING", type=>"NV"},
              {name => "NOT_ZERO", type=>"UV", value=>"~(UV)0"},
-             {name => "OPEN", type=>"PV", value=>'"/*"',
-              macro=>["#if 1\n", "#endif\n"]},
+             {name => "OPEN", type=>"PV", value=>'"/*"', macro=>1},
              {name => "CLOSE", type=>"PV", value=>'"*/"',
               macro=>["#if 1\n", "#endif\n"]},
              {name => "ANSWER", default=>["UV", 42]}, "NOTDEF",
@@ -321,6 +320,17 @@ if (\$rfc1149 != 1149) {
 } else {
   print "ok 21\n";
 }
+
+EOT
+
+print FH <<'EOT';
+# test macro=>1
+my $open = OPEN;
+if ($open eq '/*') {
+  print "ok 22\n";
+} else {
+  print "not ok 22 # \$open='$open'\n";
+}
 EOT
 close FH or die "close $testpl: $!\n";
 
@@ -397,7 +407,7 @@ if ($Config{usedl}) {
   }
 }
 
-my $test = 22;
+my $test = 23;
 my $maketest = "$make test";
 print "# make = '$maketest'\n";
 $makeout = `$maketest`;
