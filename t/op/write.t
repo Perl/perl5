@@ -289,7 +289,9 @@ my $tm =  1;		# Top margin (empty lines before first output)
 my $bm =  2;		# Bottom marging (empty lines between last text and footer)
 my $lm =  4;		# Left margin (indent in spaces)
 
+select ((select (STDOUT), $| = 1)[0]);
 if ($lm > 0 and !open STDOUT, "|-") {	# Left margin (in this test ALWAYS set)
+    select ((select (STDOUT), $| = 1)[0]);
     my $i = 12;
     my $s = " " x $lm;
     while (<STDIN>) {
