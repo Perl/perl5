@@ -143,9 +143,9 @@ gives you.
 
 =back
 
-=head2 C Traps
+=head2 C/C++ Traps
 
-Cerebral C programmers should take note of the following:
+Cerebral C and C++ programmers should take note of the following:
 
 =over 4
 
@@ -159,13 +159,14 @@ You must use C<elsif> rather than C<else if>.
 
 =item *
 
-The C<break> and C<continue> keywords from C become in
-Perl C<last> and C<next>, respectively.
-Unlike in C, these do I<not> work within a C<do { } while> construct.
+The C<break> and C<continue> keywords from C become in Perl C<last>
+and C<next>, respectively.  Unlike in C, these do I<not> work within a
+C<do { } while> construct.  See L<perlsyn/"Loop Control">.
 
 =item *
 
-There's no switch statement.  (But it's easy to build one on the fly.)
+There's no switch statement.  (But it's easy to build one on the fly,
+see L<perlsyn/"Basic BLOCKs and Switch Statements">)
 
 =item *
 
