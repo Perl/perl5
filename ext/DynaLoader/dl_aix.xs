@@ -77,6 +77,18 @@ static int readExports(ModulePtr);
 static void terminate(void);
 static void *findMain(void);
 
+char *strerrorcat(char *str, int err) {
+    char buf[8192];
+    strerror_r(err, buf, sizeof(buf));
+    strcat(str,buf);
+    return str;
+}
+char *strerrorcpy(char *str, int err) {
+    char buf[8192];
+    strerror_r(err, buf, sizeof(buf));
+    strcpy(str,buf);
+    return str;
+}
   
 /* ARGSUSED */
 void *dlopen(char *path, int mode)
@@ -106,14 +118,14 @@ void *dlopen(char *path, int mode)
 	if (mp == NULL) {
 		errvalid++;
 		strcpy(errbuf, "Newz: ");
-		strcat(errbuf, strerror(errno));
+		strerrorcat(errbuf, errno);
 		return NULL;
 	}
 	
 	if ((mp->name = savepv(path)) == NULL) {
 		errvalid++;
 		strcpy(errbuf, "savepv: ");
-		strcat(errbuf, strerror(errno));
+		strerrorcat(errbuf, errno);
 		safefree(mp);
 		return NULL;
 	}
@@ -136,14 +148,14 @@ void *dlopen(char *path, int mode)
 		if (errno == ENOEXEC) {
 			char *tmp[BUFSIZ/sizeof(char *)];
 			if (loadquery(L_GETMESSAGES, tmp, sizeof(tmp)) == -1)
-				strcpy(errbuf, strerror(errno));
+				strerrorcpy(errbuf, errno);
 			else {
 				char **p;
 				for (p = tmp; *p; p++)
 					caterr(*p);
 			}
 		} else
-			strcat(errbuf, strerror(errno));
+			strerrorcat(errbuf, errno);
 		return NULL;
 	}
 	mp->refCnt = 1;
@@ -153,7 +165,7 @@ void *dlopen(char *path, int mode)
 		dlclose(mp);
 		errvalid++;
 		strcpy(errbuf, "loadbind: ");
-		strcat(errbuf, strerror(errno));
+		strerrorcat(errbuf, errno);
 		return NULL;
 	}
 	if (readExports(mp) == -1) {
@@ -194,7 +206,7 @@ static void caterr(char *s)
 		strcat(errbuf, p);
 		break;
 	case L_ERROR_ERRNO:
-		strcat(errbuf, strerror(atoi(++p)));
+		strerrorcat(errbuf, atoi(++p));
 		break;
 	default:
 		strcat(errbuf, s);
@@ -241,7 +253,7 @@ int dlclose(void *handle)
 	result = unload(mp->entry);
 	if (result == -1) {
 		errvalid++;
-		strcpy(errbuf, strerror(errno));
+		strerrorcpy(errbuf, errno);
 	}
 	if (mp->exports) {
 		register ExportPtr ep;
@@ -306,7 +318,7 @@ static int readExports(ModulePtr mp)
 		if (errno != ENOENT) {
 			errvalid++;
 			strcpy(errbuf, "readExports: ");
-			strcat(errbuf, strerror(errno));
+			strerrorcat(errbuf, errno);
 			return -1;
 		}
 		/*
@@ -317,7 +329,7 @@ static int readExports(ModulePtr mp)
 		if ((buf = safemalloc(size)) == NULL) {
 			errvalid++;
 			strcpy(errbuf, "readExports: ");
-			strcat(errbuf, strerror(errno));
+			strerrorcat(errbuf, errno);
 			return -1;
 		}
 		while ((i = loadquery(L_GETINFO, buf, size)) == -1 && errno == ENOMEM) {
@@ -326,14 +338,14 @@ static int readExports(ModulePtr mp)
 			if ((buf = safemalloc(size)) == NULL) {
 				errvalid++;
 				strcpy(errbuf, "readExports: ");
-				strcat(errbuf, strerror(errno));
+				strerrorcat(errbuf, errno);
 				return -1;
 			}
 		}
 		if (i == -1) {
 			errvalid++;
 			strcpy(errbuf, "readExports: ");
-			strcat(errbuf, strerror(errno));
+			strerrorcat(errbuf, errno);
 			safefree(buf);
 			return -1;
 		}
@@ -357,7 +369,7 @@ static int readExports(ModulePtr mp)
 		if (!ldp) {
 			errvalid++;
 			strcpy(errbuf, "readExports: ");
-			strcat(errbuf, strerror(errno));
+			strerrorcat(errbuf, errno);
 			return -1;
 		}
 	}
@@ -382,7 +394,7 @@ static int readExports(ModulePtr mp)
 	if ((ldbuf = (char *)safemalloc(sh.s_size)) == NULL) {
 		errvalid++;
 		strcpy(errbuf, "readExports: ");
-		strcat(errbuf, strerror(errno));
+		strerrorcat(errbuf, errno);
 		while(ldclose(ldp) == FAILURE)
 			;
 		return -1;
@@ -423,7 +435,7 @@ static int readExports(ModulePtr mp)
 	if (mp->exports == NULL) {
 		errvalid++;
 		strcpy(errbuf, "readExports: ");
-		strcat(errbuf, strerror(errno));
+		strerrorcat(errbuf, errno);
 		safefree(ldbuf);
 		while(ldclose(ldp) == FAILURE)
 			;
@@ -468,7 +480,7 @@ static void * findMain(void)
 	if ((buf = safemalloc(size)) == NULL) {
 		errvalid++;
 		strcpy(errbuf, "findMain: ");
-		strcat(errbuf, strerror(errno));
+		strerrorcat(errbuf, errno);
 		return NULL;
 	}
 	while ((i = loadquery(L_GETINFO, buf, size)) == -1 && errno == ENOMEM) {
@@ -477,14 +489,14 @@ static void * findMain(void)
 		if ((buf = safemalloc(size)) == NULL) {
 			errvalid++;
 			strcpy(errbuf, "findMain: ");
-			strcat(errbuf, strerror(errno));
+			strerrorcat(errbuf, errno);
 			return NULL;
 		}
 	}
 	if (i == -1) {
 		errvalid++;
 		strcpy(errbuf, "findMain: ");
-		strcat(errbuf, strerror(errno));
+		strerrorcat(errbuf, errno);
 		safefree(buf);
 		return NULL;
 	}
