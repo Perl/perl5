@@ -904,6 +904,150 @@ This overhead will be comparatively small if the TIE methods are themselves
 substantial, but if they are only a few statements long, the overhead
 will not be insignificant.
 
+=head2 Localizing changes
+
+Perl has a very handy construction
+
+  {
+    local $var = 2;
+    ...
+  }
+
+This construction is I<approximately> equivalent to
+
+  {
+    my $oldvar = $var;
+    $var = 2;
+    ...
+    $var = $oldvar;
+  }
+
+The biggest difference is that the first construction would
+reinstate the initial value of $var, irrespective of how control exits
+the block: C<goto>, C<return>, C<die>/C<eval> etc. It is a little bit
+more efficient as well.
+
+There is a way to achieve a similar task from C via Perl API: create a
+I<pseudo-block>, and arrange for some changes to be automatically
+undone at the end of it, either explicit, or via a non-local exit (via
+die()). A I<block>-like construct is created by a pair of
+C<ENTER>/C<LEAVE> macros (see L<perlcall/EXAMPLE/"Returning a
+Scalar">).  Such a construct may be created specially for some
+important localized task, or an existing one (like boundaries of
+enclosing Perl subroutine/block, or an existing pair for freeing TMPs)
+may be used. (In the second case the overhead of additional
+localization must be almost negligible.) Note that any XSUB is
+automatically enclosed in an C<ENTER>/C<LEAVE> pair.
+
+Inside such a I<pseudo-block> the following service is available:
+
+=over
+
+=item C<SAVEINT(int i)>
+
+=item C<SAVEIV(IV i)>
+
+=item C<SAVEI32(I32 i)>
+
+=item C<SAVELONG(long i)>
+
+These macros arrange things to restore the value of integer variable
+C<i> at the end of enclosing I<pseudo-block>.
+
+=item C<SAVESPTR(s)>
+
+=item C<SAVEPPTR(p)>
+
+These macros arrange things to restore the value of pointers C<s> and
+C<p>. C<s> must be a pointer of a type which survives conversion to
+C<SV*> and back, C<p> should be able to survive conversion to C<char*>
+and back.
+
+=item C<SAVEFREESV(SV *sv)>
+
+The refcount of C<sv> would be decremented at the end of
+I<pseudo-block>. This is similar to C<sv_2mortal>, which should (?) be
+used instead.
+
+=item C<SAVEFREEOP(OP *op)>
+
+The C<OP *> is op_free()ed at the end of I<pseudo-block>.
+
+=item C<SAVEFREEPV(p)>
+
+The chunk of memory which is pointed to by C<p> is Safefree()ed at the
+end of I<pseudo-block>.
+
+=item C<SAVECLEARSV(SV *sv)>
+
+Clears a slot in the current scratchpad which corresponds to C<sv> at
+the end of I<pseudo-block>.
+
+=item C<SAVEDELETE(HV *hv, char *key, I32 length)>
+
+The key C<key> of C<hv> is deleted at the end of I<pseudo-block>. The
+string pointed to by C<key> is Safefree()ed.  If one has a I<key> in
+short-lived storage, the corresponding string may be reallocated like
+this:
+
+  SAVEDELETE(defstash, savepv(tmpbuf), strlen(tmpbuf));
+
+=item C<SAVEDESTRUCTOR(f,p)>
+
+At the end of I<pseudo-block> the function C<f> is called with the
+only argument (of type C<void*>) C<p>.
+
+=item C<SAVESTACK_POS()>
+
+The current offset on the Perl internal stack (cf. C<SP>) is restored
+at the end of I<pseudo-block>.
+
+=back
+
+The following API list contains functions, thus one needs to
+provide pointers to the modifiable data explicitly (either C pointers,
+or Perlish C<GV *>s).  Where the above macros take C<int>, a similar 
+function takes C<int *>.
+
+=over
+
+=item C<SV* save_scalar(GV *gv)>
+
+Equivalent to Perl code C<local $gv>.
+
+=item C<AV* save_ary(GV *gv)>
+
+=item C<HV* save_hash(GV *gv)>
+
+Similar to C<save_scalar>, but localize C<@gv> and C<%gv>.
+
+=item C<void save_item(SV *item)>
+
+Duplicates the current value of C<SV>, on the exit from the current
+C<ENTER>/C<LEAVE> I<pseudo-block> will restore the value of C<SV>
+using the stored value.
+
+=item C<void save_list(SV **sarg, I32 maxsarg)>
+
+A variant of C<save_item> which takes multiple arguments via an array
+C<sarg> of C<SV*> of length C<maxsarg>.
+
+=item C<SV* save_svref(SV **sptr)>
+
+Similar to C<save_scalar>, but will reinstate a C<SV *>.
+
+=item C<void save_aptr(AV **aptr)>
+
+=item C<void save_hptr(HV **hptr)>
+
+Similar to C<save_svref>, but localize C<AV *> and C<HV *>.
+
+=back
+
+The C<Alias> module implements localization of the basic types within the
+I<caller's scope>.  People who are interested in how to localize things in
+the containing scope should take a look there too.
+
 =head1 Subroutines
 
 =head2 XSUBs and the Argument Stack
