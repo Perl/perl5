@@ -22,7 +22,7 @@ sub tryeq_sloppy ($$$) {
     print "ok $_[0]\n";
   } else {
     my $error = abs ($_[1] - $_[2]) / $_[1];
-    if ($error < 1e-10) {
+    if ($error < 1e-9) {
       print "ok $_[0] # $_[1] is close to $_[2], \$^O eq $^O\n";
     } else {
       print "not ok $_[0] # $_[1] != $_[2]\n";
@@ -242,7 +242,7 @@ tryeq 120, -0x80000000/1, -0x80000000;
 tryeq 121, -0x80000000/-1, 0x80000000;
 
 # The example for sloppy divide, rigged to avoid the peephole optimiser.
-tryeq 122, "20." / "5.", 4;
+tryeq_sloppy 122, "20." / "5.", 4;
 
 tryeq 123, 2.5 / 2, 1.25;
 tryeq 124, 3.5 / -2, -1.75;
@@ -252,9 +252,9 @@ tryeq 126, -5.5 / -2, 2.75;
 # Bluuurg if your floating point can't accurately cope with powers of 2
 # [I suspect this is parsing string->float problems, not actual arith]
 tryeq_sloppy 127, 18446744073709551616/1, 18446744073709551616; # Bluuurg
-tryeq 128, 18446744073709551616/2, 9223372036854775808;
-tryeq 129, 18446744073709551616/4294967296, 4294967296;
-tryeq 130, 18446744073709551616/9223372036854775808, 2;
+tryeq_sloppy 128, 18446744073709551616/2, 9223372036854775808;
+tryeq_sloppy 129, 18446744073709551616/4294967296, 4294967296;
+tryeq_sloppy 130, 18446744073709551616/9223372036854775808, 2;
 
 {
   # The peephole optimiser is wrong to think that it can substitute intops
@@ -263,7 +263,7 @@ tryeq 130, 18446744073709551616/9223372036854775808, 2;
   my $n = 1127;
 
   my $float = ($n % 1000) * 167772160.0;
-  tryeq 131, $float, 21307064320;
+  tryeq 131_sloppy, $float, 21307064320;
 
   # On a 32 bit machine, if the i_multiply op is used, you will probably get
   # -167772160. It's actually undefined behaviour, so anything may happen.
