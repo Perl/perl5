@@ -999,7 +999,6 @@ os2/OS2/REXX/t/rx_tievar.t	DLL access module
 os2/OS2/REXX/t/rx_tieydb.t	DLL access module
 os2/OS2/REXX/t/rx_varset.t	DLL access module
 os2/OS2/REXX/t/rx_vrexx.t	DLL access module
-os2/POSIX.mkfifo	OS2-specific patch
 os2/diff.configure	Patches to Configure
 os2/dl_os2.c		Addon for dl_open
 os2/dlfcn.h		Addon for dl_open
