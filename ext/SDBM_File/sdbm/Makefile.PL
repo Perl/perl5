@@ -20,8 +20,9 @@ WriteMakefile(
     C         => [qw(sdbm.c pair.c hash.c)]
 );
 
-sub MY::constants {
-    package MY;
+
+package MY;
+sub constants {
     my $self = shift;
 
     $self->{INST_STATIC} = 'libsdbm$(LIB_EXT)';
@@ -29,20 +30,14 @@ sub MY::constants {
     return $self->SUPER::constants();
 }
 
-sub MY::top_targets {
+sub top_targets {
+    my $self = shift;
     my $r = '
 all :: static
 	$(NOECHO) $(NOOP)
 
-config ::
-	$(NOECHO) $(NOOP)
-
 lint:
 	lint -abchx $(LIBSRCS)
-
-# temporary kludge
-blibdirs:
-	$(MKPATH) $(INST_ARCHAUTODIR)
 
 ';
     $r .= '
@@ -53,5 +48,5 @@ sdbm/libsdbm.a:
 	$(NOECHO) $(NOOP)
 ' unless $^O eq 'VMS';
 
-    return $r;
+    return $r . $self->SUPER::top_targets;
 }
