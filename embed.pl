@@ -291,6 +291,9 @@ print EM <<'END';
 
 /* provide binary compatible (but inconsistent) names */
 #if defined(PERL_BINCOMPAT_5005)
+#  define  Perl_call_atexit		perl_atexit
+#  define  Perl_eval_sv			perl_eval_sv
+#  define  Perl_eval_pv			perl_eval_pv
 #  define  Perl_call_argv		perl_call_argv
 #  define  Perl_call_method		perl_call_method
 #  define  Perl_call_pv			perl_call_pv
