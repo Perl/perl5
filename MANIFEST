@@ -1135,6 +1135,7 @@ lib/Shell.pm			Make AUTOLOADed system() calls
 lib/Shell.t			Tests for above
 lib/shellwords.pl		Perl library to split into words with shell quoting
 lib/sigtrap.pm			For trapping an abort and giving traceback
+lib/sigtrap.t			See if sigtrap works
 lib/stat.pl			Perl library supporting stat function
 lib/strict.pm			For "use strict"
 lib/strict.t			See if strictures work
