@@ -911,8 +911,17 @@ win32_stat(const char *path, struct stat *buffer)
 	    return 0;
 	}
     }
-#ifdef __BORLANDC__
     else {
+	if (l == 3 && path[l-2] == ':'
+	    && (path[l-1] == '\\' || path[l-1] == '/'))
+	{
+	    /* The drive can be inaccessible, some _stat()s are buggy */
+	    if (!GetVolumeInformation(path,NULL,0,NULL,NULL,NULL,NULL,0)) {
+		errno = ENOENT;
+		return -1;
+	    }
+	}
+#ifdef __BORLANDC__
 	if (S_ISDIR(buffer->st_mode))
 	    buffer->st_mode |= S_IWRITE | S_IEXEC;
 	else if (S_ISREG(buffer->st_mode)) {
@@ -929,8 +938,8 @@ win32_stat(const char *path, struct stat *buffer)
 	    else
 		buffer->st_mode &= ~S_IEXEC;
 	}
-    }
 #endif
+    }
     return res;
 }
 
