@@ -2,5 +2,5 @@
 # This file is built by mktables from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-AC00	D7A3	Hangul Syllable
+AC00	D7A3	Lo
 END

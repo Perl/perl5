@@ -2,5 +2,5 @@
 # This file is built by mktables from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-DB80	DBFF	Private Use High Surrogate
+DB80	DBFF	Cs
 END

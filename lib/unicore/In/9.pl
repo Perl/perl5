@@ -2,5 +2,5 @@
 # This file is built by mktables from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-100000	10FFFD	Plane 16 Private Use
+100000	10FFFD	Co
 END

@@ -2,5 +2,5 @@
 # This file is built by mktables from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-20000	2A6D6	CJK Ideograph Extension B
+20000	2A6D6	Lo
 END

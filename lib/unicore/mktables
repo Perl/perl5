@@ -114,6 +114,55 @@ my %Cat;
 my %General;
 my @General;
 
+sub gencat {
+    my ($Name, $GeneralH, $GeneralA, $Cat,
+	$name, $cat, $code, $op) = @_;
+
+    $op->($Name,                     $code, $name);
+    $op->($GeneralA,                 $code, $cat);
+
+    $op->($GeneralH->{$name} ||= [], $code, $name);
+
+    $op->($Cat->{$cat}       ||= [], $code);
+    $op->($Cat->{substr($cat, 0, 1)}
+      	                    ||= [],  $code);
+    # 005F: SPACING UNDERSCORE
+    $op->($Cat->{Word}       ||= [], $code)
+	if $cat =~ /^[LMN]/ or $code eq "005F";
+    $op->($Cat->{Alnum}      ||= [], $code)
+	if $cat =~ /^[LMN]/;
+    $op->($Cat->{Alpha}      ||= [], $code)
+	if $cat =~ /^[LM]/;
+    # 0009: HORIZONTAL TABULATION
+    # 000A: LINE FEED
+    # 000B: VERTICAL TABULATION
+    # 000C: FORM FEED
+    # 000D: CARRIAGE RETURN
+    # 0020: SPACE
+    $op->($Cat->{Space}      ||= [], $code)
+	if $cat  =~ /^Z/ ||
+	    $code =~ /^(0009|000A|000B|000C|000D)$/;
+    $op->($Cat->{SpacePerl}  ||= [], $code)
+	if $cat  =~ /^Z/ ||
+	    $code =~ /^(0009|000A|000C|000D)$/;
+    $op->($Cat->{Blank}      ||= [], $code)
+	if $code =~ /^(0020|0009)$/ ||
+	    $cat  =~ /^Z[^lp]$/;
+    $op->($Cat->{Digit}      ||= [], $code) if $cat eq "Nd";
+    $op->($Cat->{Upper}      ||= [], $code) if $cat eq "Lu";
+    $op->($Cat->{Lower}      ||= [], $code) if $cat eq "Ll";
+    $op->($Cat->{Title}      ||= [], $code) if $cat eq "Lt";
+    $op->($Cat->{ASCII}      ||= [], $code) if $code le "007F";
+    $op->($Cat->{Cntrl}      ||= [], $code) if $cat =~ /^C/;
+    $op->($Cat->{Graph}      ||= [], $code) if $cat =~ /^([LMNPS]|Co)/;
+    $op->($Cat->{Print}      ||= [], $code) if $cat =~ /^([LMNPS]|Co|Zs)/;
+    $op->($Cat->{Punct}      ||= [], $code) if $cat =~ /^P/;
+    # 003[0-9]: DIGIT ZERO..NINE, 00[46][1-6]: A..F, a..f
+    $op->($Cat->{XDigit}     ||= [], $code)
+	if $code =~ /^00(3[0-9]|[46][1-6])$/;
+
+}
+
 if (open(my $Unicode, "Unicode.txt")) {
     my @Name;
     my @Bidi;
@@ -136,61 +185,18 @@ if (open(my $Unicode, "Unicode.txt")) {
 
 	if ($name =~ /^<(.+), (First|Last)>$/) {
 	    $name = $1;
-	    if ($2 eq 'First') {
-		append($General{$name} ||= [], $code, $name);
-	    } else {
-		extend($General{$name}       , $code);
-	    }
+	    gencat(\@Name, \%General, \@General, \%Cat,
+		   $name, $cat, $code,
+		   $2 eq 'First' ? \&append : \&extend);
 	    unless (defined $In{$name}) {
 		$In{$name}   = $InId++;
 		$InIn{$name} = $General{$name};
 	    }
-	    append($Cat{$cat}       ||= [], $code);
-	    append($Cat{substr($cat, 0, 1)}
-		                    ||= [], $code);
 	} else {
-	    append(\@Name,                  $code, $name);
 
-	    append(\@General,               $code, $cat);
+	    gencat(\@Name, \%General, \@General, \%Cat,
+		   $name, $cat, $code, \&append);
 
-	    append($Cat{$cat}       ||= [], $code);
-	    append($Cat{substr($cat, 0, 1)}
-		                    ||= [], $code);
-	    # 005F: SPACING UNDERSCORE
-	    append($Cat{Word}       ||= [], $code)
-		if $cat =~ /^[LMN]/ or $code eq "005F";
-	    append($Cat{Alnum}      ||= [], $code)
-		if $cat =~ /^[LMN]/;
-	    append($Cat{Alpha}      ||= [], $code)
-		if $cat =~ /^[LM]/;
-	    # 0009: HORIZONTAL TABULATION
-	    # 000A: LINE FEED
-	    # 000B: VERTICAL TABULATION
-	    # 000C: FORM FEED
-	    # 000D: CARRIAGE RETURN
-	    # 0020: SPACE
-	    append($Cat{Space}      ||= [], $code)
-		if $cat  =~ /^Z/ ||
-		    $code =~ /^(0009|000A|000B|000C|000D)$/;
-	    append($Cat{SpacePerl}  ||= [], $code)
-		if $cat  =~ /^Z/ ||
-		    $code =~ /^(0009|000A|000C|000D)$/;
-	    append($Cat{Blank}      ||= [], $code)
-		if $code =~ /^(0020|0009)$/ ||
-		    $cat  =~ /^Z[^lp]$/;
-	    append($Cat{Digit}      ||= [], $code) if $cat eq "Nd";
-	    append($Cat{Upper}      ||= [], $code) if $cat eq "Lu";
-	    append($Cat{Lower}      ||= [], $code) if $cat eq "Ll";
-	    append($Cat{Title}      ||= [], $code) if $cat eq "Lt";
-	    append($Cat{ASCII}      ||= [], $code) if $code le "007F";
-	    append($Cat{Cntrl}      ||= [], $code) if $cat =~ /^C/;
-	    append($Cat{Graph}      ||= [], $code) if $cat =~ /^([LMNPS]|Co)/;
-	    append($Cat{Print}      ||= [], $code) if $cat =~ /^([LMNPS]|Co|Zs)/;
-	    append($Cat{Punct}      ||= [], $code) if $cat =~ /^P/;
-	    # 003[0-9]: DIGIT ZERO..NINE, 00[46][1-6]: A..F, a..f
-	    append($Cat{XDigit}     ||= [], $code)
-		if $code =~ /^00(3[0-9]|[46][1-6])$/;
-	    
 	    append($To{Upper}       ||= [], $code, $upper)   if $upper;
 	    append($To{Lower}       ||= [], $code, $lower)   if $lower;
 	    append($To{Title}       ||= [], $code, $title)   if $title;
@@ -653,7 +659,7 @@ foreach my $in (sort { $In{$a} <=> $In{$b} } keys %In) {
 #
 # The mapping from General Category long forms to short forms is
 # currently hardwired here since no simple data file in the UCD
-# seems to do that.
+# seems to do that.  Unicode 3.2 will assumedly correct this.
 #
 
 my %Is = (
