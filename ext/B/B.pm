@@ -368,6 +368,10 @@ class. Apart from functions such as C<main_root>, this is the primary
 way to get an initial "handle" on an internal perl data structure
 which can then be followed with the other access methods.
 
+The returned object will only be valid as long as the underlying OPs
+and SVs continue to exist. Do not attempt to use the object after the
+underlying structures are freed.
+
 =item amagic_generation
 
 Returns the SV object corresponding to the C variable C<amagic_generation>.
@@ -523,7 +527,11 @@ The bulk of the C<B> module is the methods for accessing fields of
 these structures.
 
 Note that all access is read-only.  You cannot modify the internals by
-using this module.
+using this module. Also, note that the B::OP and B::SV objects created
+by this module are only valid for as long as the underlying objects
+exist; their creation doesn't increase the reference counts of the
+underlying objects. Trying to access the fields of a freed object will
+give incomprehensible results, or worse.
 
 =head2 SV-RELATED CLASSES
 
