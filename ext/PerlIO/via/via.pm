@@ -1,43 +1,43 @@
-package PerlIO::Via;
+package PerlIO::via;
 our $VERSION = '0.01';
 use XSLoader ();
-XSLoader::load 'PerlIO::Via';
+XSLoader::load 'PerlIO::via';
 1;
 __END__
 
 =head1 NAME
 
-PerlIO::Via - Helper class for PerlIO layers implemented in perl
+PerlIO::via - Helper class for PerlIO layers implemented in perl
 
 =head1 SYNOPSIS
 
-   use PerlIO::Via::Layer;
-   open($fh,"<:Via(Layer)",...);
+   use PerlIO::via::Layer;
+   open($fh,"<:via(Layer)",...);
 
    use Some::Other::Package;
-   open($fh,">:Via(Some::Other::Package)",...);
+   open($fh,">:via(Some::Other::Package)",...);
 
 =head1 DESCRIPTION
 
-The PerlIO::Via module allows you to develop PerlIO layers in Perl, without
+The PerlIO::via module allows you to develop PerlIO layers in Perl, without
 having to go into the nitty gritty of programming C with XS as the interface
 to Perl.
 
-One example module, L<PerlIO::Via::QuotedPrint>, is include with Perl
+One example module, L<PerlIO::via::QuotedPrint>, is include with Perl
 5.8.0, and more example modules are available from CPAN, such as
-L<PerlIO::Via::StripHTML> and L<PerlIO::Via::Base64>.  The
-PerlIO::Via::StripHTML for instance, allows you to say:
+L<PerlIO::via::StripHTML> and L<PerlIO::via::Base64>.  The
+PerlIO::via::StripHTML for instance, allows you to say:
 
-	use PerlIO::Via::StripHTML;
-	open( my $fh, "<:Via(StripHTML)", "index.html" );
+	use PerlIO::via::StripHTML;
+	open( my $fh, "<:via(StripHTML)", "index.html" );
         my @line = <$fh>;
 
 to obtain the text of an HTML-file in an array with all the HTML-tags
 automagically removed.
 
-Please note that if the layer is created in the PerlIO::Via:: namespace, it
-does B<not> have to be fully qualified.  The PerlIO::Via module will prefix
-the PerlIO::Via:: namespace if the specified modulename does not exist as a
+Please note that if the layer is created in the PerlIO::via:: namespace, it
+does B<not> have to be fully qualified.  The PerlIO::via module will prefix
+the PerlIO::via:: namespace if the specified modulename does not exist as a
 fully qualified module name.
 
 =head1 EXPECTED METHODS
@@ -45,8 +45,8 @@ fully qualified module name.
 To create a Perl module that implements a PerlIO layer in Perl (as opposed to
 in C using XS as the interface to Perl), you need to supply some of the
 following subroutines.  It is recommended to create these Perl modules in the
-PerlIO::Via:: namespace, so that they can easily be located on CPAN and use
-the default namespace feature of the PerlIO::Via module itself.
+PerlIO::via:: namespace, so that they can easily be located on CPAN and use
+the default namespace feature of the PerlIO::via module itself.
 
 Please note that this is an area of recent development in Perl and that the
 interface described here is therefor still subject to change (and hopefully
@@ -172,15 +172,15 @@ value of FILL or READ.
 
 =head1 EXAMPLES
 
-Check the PerlIO::Via:: namespace on CPAN for examples of PerlIO layers
+Check the PerlIO::via:: namespace on CPAN for examples of PerlIO layers
 implemented in Perl.  To give you an idea how simple the implementation of
 a PerlIO layer can look, as simple example is included here.
 
 =head2 Example - a Hexadecimal Handle
 
-Given the following module, PerlIO::Via::Hex.pm:
+Given the following module, PerlIO::via::Hex.pm:
 
-    package PerlIO::Via::Hex;
+    package PerlIO::via::Hex;
 
     sub PUSHED
     {
@@ -219,12 +219,12 @@ output to hexadecimal dump of the output bytes: for example "A" will
 be converted to "41" (on ASCII-based machines, on EBCDIC platforms
 the "A" will become "c1")
 
-    use PerlIO::Via::Hex;
-    open(my $fh, ">:Via(Hex)", "foo.hex");
+    use PerlIO::via::Hex;
+    open(my $fh, ">:via(Hex)", "foo.hex");
 
 and the following code will read the hexdump in and convert it
 on the fly back into bytes:
 
-    open(my $fh, "<:Via(Hex)", "foo.hex");
+    open(my $fh, "<:via(Hex)", "foo.hex");
 
 =cut

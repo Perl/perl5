@@ -1255,7 +1255,7 @@ PerlIO_layer_from_ref(pTHX_ SV *sv)
      * For any scalar type load the handler which is bundled with perl
      */
     if (SvTYPE(sv) < SVt_PVAV)
-	return PerlIO_find_layer(aTHX_ "Scalar", 6, 1);
+	return PerlIO_find_layer(aTHX_ "scalar", 6, 1);
 
     /*
      * For other types allow if layer is known but don't try and load it
@@ -1295,7 +1295,7 @@ PerlIO_resolve_layers(pTHX_ const char *layers,
 		incdef = 0;
 	    }
 	    /*
-	     * Don't fail if handler cannot be found :Via(...) etc. may do
+	     * Don't fail if handler cannot be found :via(...) etc. may do
 	     * something sensible else we will just stringfy and open
 	     * resulting string.
 	     */

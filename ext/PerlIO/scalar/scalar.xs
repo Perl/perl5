@@ -264,7 +264,7 @@ PerlIOScalar_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 
 PerlIO_funcs PerlIO_scalar = {
  sizeof(PerlIO_funcs),
- "Scalar",
+ "scalar",
  sizeof(PerlIOScalar),
  PERLIO_K_BUFFERED|PERLIO_K_RAW,
  PerlIOScalar_pushed,
@@ -296,7 +296,7 @@ PerlIO_funcs PerlIO_scalar = {
 
 #endif /* Layers available */
 
-MODULE = PerlIO::Scalar	PACKAGE = PerlIO::Scalar
+MODULE = PerlIO::scalar	PACKAGE = PerlIO::scalar
 
 PROTOTYPES: ENABLE
 

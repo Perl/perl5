@@ -1,7 +1,7 @@
 use ExtUtils::MakeMaker;
 WriteMakefile(
-	NAME		=> "PerlIO::Scalar",
+	NAME		=> "PerlIO::scalar",
 	MAN3PODS    => {},  # Pods will be built by installman.
-	VERSION_FROM	=> 'Scalar.pm',
+	VERSION_FROM	=> 'scalar.pm',
 );
 

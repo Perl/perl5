@@ -990,7 +990,7 @@ in quoted-printable encoding, as defined in RFC 2045 - I<MIME
 
     print $encoded, "\n"; # "Smiley in Unicode: =263A"
 
-See also L<PerlIO::Via::QuotedPrint>.
+See also L<PerlIO::via::QuotedPrint>.
 
 =item *
 
@@ -1004,27 +1004,27 @@ for open().
 
 =item *
 
-C<PerlIO::Scalar>, by Nick Ing-Simmons, provides the implementation
+C<PerlIO::scalar>, by Nick Ing-Simmons, provides the implementation
 of IO to "in memory" Perl scalars as discussed above.  It also serves
 as an example of a loadable PerlIO layer.  Other future possibilities
-include PerlIO::Array and PerlIO::Code.  See L<PerlIO::Scalar>.
+include PerlIO::Array and PerlIO::Code.  See L<PerlIO::scalar>.
 
 =item *
 
-C<PerlIO::Via>, by Nick Ing-Simmons, acts as a PerlIO layer and wraps
+C<PerlIO::via>, by Nick Ing-Simmons, acts as a PerlIO layer and wraps
 PerlIO layer functionality provided by a class (typically implemented
 in Perl code).
 
 =item *
 
-C<PerlIO::Via::QuotedPrint>, by Elizabeth Mattijsen, is an example
-of a C<PerlIO::Via> class:
+C<PerlIO::via::QuotedPrint>, by Elizabeth Mattijsen, is an example
+of a C<PerlIO::via> class:
 
-    use PerlIO::Via::QuotedPrint;
-    open($fh,">Via(PerlIO::Via::QuotedPrint)",$path);
+    use PerlIO::via::QuotedPrint;
+    open($fh,">Via(PerlIO::via::QuotedPrint)",$path);
 
 This will automatically convert everything output to C<$fh> to
-Quoted-Printable.  See L<PerlIO::Via> and L<PerlIO::Via::QuotedPrint>.
+Quoted-Printable.  See L<PerlIO::via> and L<PerlIO::via::QuotedPrint>.
 
 =item *
 
@@ -3481,6 +3481,11 @@ accidentally at some point.  Since there are not that many Amiga
 developers available, we could not get this fixed and tested in time
 for 5.8.0.  Perl 5.6.1 still works for AmigaOS (as does the the 5.7.2
 development release).
+
+The C<PerlIO::Scalar> and C<PerlIO::Via> (capitalised) were renamed as
+C<PerlIO::scalar> and C<PerlIO::via> (all lowercase) just before 5.8.0.
+The main rationale was to have all core IO layers to have all
+lowercase names.
 
 =head1 Reporting Bugs
 

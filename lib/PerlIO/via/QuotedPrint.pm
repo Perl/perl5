@@ -1,10 +1,10 @@
-package PerlIO::Via::QuotedPrint;
+package PerlIO::via::QuotedPrint;
 
 # Make sure we do things by the book
 # Set the version info
 
 use strict;
-$PerlIO::Via::QuotedPrint::VERSION = 0.01;
+$PerlIO::via::QuotedPrint::VERSION = 0.01;
 
 # Make sure the encoding/decoding stuff is available
 
@@ -53,16 +53,16 @@ __END__
 
 =head1 NAME
 
-PerlIO::Via::QuotedPrint - PerlIO layer for quoted-printable strings
+PerlIO::via::QuotedPrint - PerlIO layer for quoted-printable strings
 
 =head1 SYNOPSIS
 
- use PerlIO::Via::QuotedPrint;
+ use PerlIO::via::QuotedPrint;
 
- open( my $in,'<Via(PerlIO::Via::QuotedPrint)','file.qp' )
+ open( my $in,'<Via(PerlIO::via::QuotedPrint)','file.qp' )
   or die "Can't open file.qp for reading: $!\n";
  
- open( my $out,'>Via(PerlIO::Via::QuotedPrint)','file.qp' )
+ open( my $out,'>Via(PerlIO::via::QuotedPrint)','file.qp' )
   or die "Can't open file.qp for writing: $!\n";
 
 =head1 DESCRIPTION
@@ -73,8 +73,8 @@ from a handle, and it will encode as quoted-printable while writing to a handle.
 
 =head1 SEE ALSO
 
-L<PerlIO::Via>, L<MIME::QuotedPrint>, L<PerlIO::Via::Base64>, L<PerlIO::Via::MD5>,
-L<PerlIO::Via::StripHTML>.
+L<PerlIO::via>, L<MIME::QuotedPrint>, L<PerlIO::via::Base64>, L<PerlIO::via::MD5>,
+L<PerlIO::via::StripHTML>.
 
 =head1 COPYRIGHT
 

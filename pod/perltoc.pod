@@ -16568,41 +16568,6 @@ unix, stdio, perlio, crlf, utf8, bytes, raw
 
 =back
 
-=head2 PerlIO::Scalar - support module for in-memory IO.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=back
-
-=head2 PerlIO::Via - Helper class for PerlIO layers implemented in perl
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-$class->PUSHED([$mode[,$fh]]), $obj->POPPED([$fh]),
-$class->OPEN($path,$mode[,$fh]), $obj->BINMODE([,$fh]),
-$class->FDOPEN($fd), $class->SYSOPEN($path,$imode,$perm,$fh),
-$obj->FILENO($fh), $obj->READ($buffer,$len,$fh), $obj->WRITE($buffer,$fh),
-$obj->FILL($fh), $obj->CLOSE($fh), $obj->SEEK($posn,$whence,$fh),
-$obj->TELL($fh), $obj->UNREAD($buffer,$fh), $obj->FLUSH($fh),
-$obj->SETLINEBUF($fh), $obj->CLEARERR($fh), $obj->ERROR($fh),
-$obj->EOF($fh)
-
-=over 4
-
-=item Example - a Hexadecimal Handle
-
-=back
-
-=back
-
 =head2 PerlIO::encoding - encoding layer
 
 =over 4
@@ -16612,6 +16577,59 @@ $obj->EOF($fh)
 =item DESCRIPTION
 
 =item SEE ALSO
+
+=back
+
+=head2 PerlIO::scalar - support module for in-memory IO.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 PerlIO::via - Helper class for PerlIO layers implemented in perl
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXPECTED METHODS
+
+$class->PUSHED([$mode[,$fh]]), $obj->POPPED([$fh]),
+$obj->OPEN($path,$mode[,$fh]), $obj->BINMODE([,$fh]),
+$obj->FDOPEN($fd[,$fh]), $obj->SYSOPEN($path,$imode,$perm,[,$fh]),
+$obj->FILENO($fh), $obj->READ($buffer,$len,$fh), $obj->WRITE($buffer,$fh),
+$obj->FILL($fh), $obj->CLOSE($fh), $obj->SEEK($posn,$whence,$fh),
+$obj->TELL($fh), $obj->UNREAD($buffer,$fh), $obj->FLUSH($fh),
+$obj->SETLINEBUF($fh), $obj->CLEARERR($fh), $obj->ERROR($fh),
+$obj->EOF($fh)
+
+=item EXAMPLES
+
+=over 4
+
+=item Example - a Hexadecimal Handle
+
+=back
+
+=back
+
+=head2 PerlIO::via::QuotedPrint - PerlIO layer for quoted-printable strings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item COPYRIGHT
 
 =back
 
@@ -18988,8 +19006,11 @@ new, new NUMBER, down, down NUMBER, up, up NUMBER
 =back
 
 =head2 Thread::Signal - Start a thread which runs signal handlers reliably
+(for old code)
 
 =over 4
+
+=item CAVEAT
 
 =item SYNOPSIS
 

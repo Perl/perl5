@@ -9,7 +9,7 @@ BEGIN {
 
 use Test::More tests => 11;
 
-BEGIN { use_ok('PerlIO::Via::QuotedPrint') }
+BEGIN { use_ok('PerlIO::via::QuotedPrint') }
 
 my $decoded = <<EOD;
 This is a tést for quoted-printable text that has hàrdly any speçial characters
@@ -25,7 +25,7 @@ EOD
 # Create the encoded test-file
 
 ok(
- open( my $out,'>:Via(PerlIO::Via::QuotedPrint)', $file ),
+ open( my $out,'>:via(PerlIO::via::QuotedPrint)', $file ),
  "opening '$file' for writing"
 );
 
@@ -44,7 +44,7 @@ ok( close( $test ),			'close test handle' );
 # Check decoding _with_ layers
 
 ok(
- open( my $in,'<:Via(PerlIO::Via::QuotedPrint)', $file ),
+ open( my $in,'<:via(PerlIO::via::QuotedPrint)', $file ),
  "opening '$file' for reading"
 );
 is( $decoded,join( '',<$in> ),		'check decoding' );

@@ -661,12 +661,12 @@ STORABLE		= $(EXTDIR)\Storable\Storable
 FILTER			= $(EXTDIR)\Filter\Util\Call\Call
 ENCODE			= $(EXTDIR)\Encode\Encode
 MD5			= $(EXTDIR)\Digest\MD5\MD5
-PERLIOSCALAR		= $(EXTDIR)\PerlIO\Scalar\Scalar
+PERLIOSCALAR		= $(EXTDIR)\PerlIO\scalar\scalar
 MIMEBASE64		= $(EXTDIR)\MIME\Base64\Base64
 TIMEHIRES		= $(EXTDIR)\Time\HiRes\HiRes
 CWD			= $(EXTDIR)\Cwd\Cwd
 LISTUTIL  		= $(EXTDIR)\List\Util\Util
-PERLIOVIA		= $(EXTDIR)\PerlIO\Via\Via
+PERLIOVIA		= $(EXTDIR)\PerlIO\via\via
 XSAPITEST		= $(EXTDIR)\XS\APItest\APItest
 XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
 UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
@@ -691,12 +691,12 @@ STORABLE_DLL		= $(AUTODIR)\Storable\Storable.dll
 FILTER_DLL		= $(AUTODIR)\Filter\Util\Call\Call.dll
 ENCODE_DLL		= $(AUTODIR)\Encode\Encode.dll
 MD5_DLL			= $(AUTODIR)\Digest\MD5\MD5.dll
-PERLIOSCALAR_DLL	= $(AUTODIR)\PerlIO\Scalar\Scalar.dll
+PERLIOSCALAR_DLL	= $(AUTODIR)\PerlIO\scalar\scalar.dll
 MIMEBASE64_DLL		= $(AUTODIR)\MIME\Base64\Base64.dll
 TIMEHIRES_DLL		= $(AUTODIR)\Time\HiRes\HiRes.dll
 CWD_DLL			= $(AUTODIR)\Cwd\Cwd.dll
 LISTUTIL_DLL		= $(AUTODIR)\List\Util\Util.dll
-PERLIOVIA_DLL		= $(AUTODIR)\PerlIO\Via\Via.dll
+PERLIOVIA_DLL		= $(AUTODIR)\PerlIO\via\via.dll
 XSAPITEST_DLL		= $(AUTODIR)\XS\APItest\APItest.dll
 XSTYPEMAP_DLL		= $(AUTODIR)\XS\Typemap\Typemap.dll
 UNICODENORMALIZE_DLL	= $(AUTODIR)\Unicode\Normalize\Normalize.dll
@@ -1017,8 +1017,8 @@ distclean: clean
 	-del /f $(LIBDIR)\Storable.pm
 	-del /f $(LIBDIR)\Filter\Util\Call.pm
 	-del /f $(LIBDIR)\Digest\MD5.pm
-	-del /f $(LIBDIR)\PerlIO\Scalar.pm
-	-del /f $(LIBDIR)\PerlIO\Via.pm
+	-del /f $(LIBDIR)\PerlIO\scalar.pm
+	-del /f $(LIBDIR)\PerlIO\via.pm
 	-del /f $(LIBDIR)\MIME\Base64.pm
 	-del /f $(LIBDIR)\MIME\QuotedPrint.pm
 	-del /f $(LIBDIR)\List\Util.pm
