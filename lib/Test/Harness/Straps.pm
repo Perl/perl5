@@ -6,7 +6,7 @@ package Test::Harness::Straps;
 use strict;
 use vars qw($VERSION);
 use Config;
-$VERSION = '0.20';
+$VERSION = '0.20_01';
 
 use Test::Harness::Assert;
 use Test::Harness::Iterator;
@@ -477,7 +477,7 @@ sub _default_inc {
 
     local $ENV{PERL5LIB};
     my $perl = $self->_command;
-    my @inc =`$perl -le "print join qq[\n], \@INC"`;
+    my @inc =`$perl -le "print join qq[\\n], \@INC"`;
     chomp @inc;
     return @inc;
 }
