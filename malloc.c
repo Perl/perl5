@@ -161,7 +161,7 @@ static u_int start_slack;
 
 #endif /* TWO_POT_OPTIMIZE */
 
-#ifdef PERL_EMERGENCY_SBRK
+#if defined(PERL_EMERGENCY_SBRK) && defined(PERL_CORE)
 
 #ifndef BIG_SIZE
 #  define BIG_SIZE (1<<16)		/* 64K */
@@ -214,9 +214,9 @@ emergency_sbrk(size)
     return (char *)-1;			/* poor guy... */
 }
 
-#else /* !PERL_EMERGENCY_SBRK */
+#else /* !(defined(TWO_POT_OPTIMIZE) && defined(PERL_CORE)) */
 #  define emergency_sbrk(size)	-1
-#endif /* !PERL_EMERGENCY_SBRK */
+#endif /* !(defined(TWO_POT_OPTIMIZE) && defined(PERL_CORE)) */
 
 /*
  * nextf[i] is the pointer to the next free block of size 2^(i+3).  The
