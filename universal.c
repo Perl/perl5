@@ -385,183 +385,183 @@ XS(XS_version_new)
 
 XS(XS_version_stringify)
 {
-    dXSARGS;
-    if (items < 1)
-	Perl_croak(aTHX_ "Usage: version::stringify(lobj, ...)");
-    SP -= items;
-    {
-	SV *	lobj;
+     dXSARGS;
+     if (items < 1)
+	  Perl_croak(aTHX_ "Usage: version::stringify(lobj, ...)");
+     SP -= items;
+     {
+	  SV *	lobj;
 
-        if (sv_derived_from(ST(0), "version")) {
-                SV *tmp = SvRV(ST(0));
-        	lobj = tmp;
-        }
-        else
-                Perl_croak(aTHX_ "lobj is not of type version");
+	  if (sv_derived_from(ST(0), "version")) {
+	       SV *tmp = SvRV(ST(0));
+	       lobj = tmp;
+	  }
+	  else
+	       Perl_croak(aTHX_ "lobj is not of type version");
 
-{
-    PUSHs(vstringify(lobj));
-}
+	  {
+	       PUSHs(vstringify(lobj));
+	  }
 
-	PUTBACK;
-	return;
-    }
+	  PUTBACK;
+	  return;
+     }
 }
 
 XS(XS_version_numify)
 {
-    dXSARGS;
-    if (items < 1)
-	Perl_croak(aTHX_ "Usage: version::numify(lobj, ...)");
-    SP -= items;
-    {
-	SV *	lobj;
+     dXSARGS;
+     if (items < 1)
+	  Perl_croak(aTHX_ "Usage: version::numify(lobj, ...)");
+     SP -= items;
+     {
+	  SV *	lobj;
 
-        if (sv_derived_from(ST(0), "version")) {
-                SV *tmp = SvRV(ST(0));
-        	lobj = tmp;
-        }
-        else
-                Perl_croak(aTHX_ "lobj is not of type version");
+	  if (sv_derived_from(ST(0), "version")) {
+	       SV *tmp = SvRV(ST(0));
+	       lobj = tmp;
+	  }
+	  else
+	       Perl_croak(aTHX_ "lobj is not of type version");
 
-{
-    PUSHs(vnumify(lobj));
-}
+	  {
+	       PUSHs(vnumify(lobj));
+	  }
 
-	PUTBACK;
-	return;
-    }
+	  PUTBACK;
+	  return;
+     }
 }
 
 XS(XS_version_vcmp)
 {
-    dXSARGS;
-    if (items < 1)
-	Perl_croak(aTHX_ "Usage: version::vcmp(lobj, ...)");
-    SP -= items;
-    {
-	SV *	lobj;
+     dXSARGS;
+     if (items < 1)
+	  Perl_croak(aTHX_ "Usage: version::vcmp(lobj, ...)");
+     SP -= items;
+     {
+	  SV *	lobj;
 
-        if (sv_derived_from(ST(0), "version")) {
-                SV *tmp = SvRV(ST(0));
-        	lobj = tmp;
-        }
-        else
-                Perl_croak(aTHX_ "lobj is not of type version");
+	  if (sv_derived_from(ST(0), "version")) {
+	       SV *tmp = SvRV(ST(0));
+	       lobj = tmp;
+	  }
+	  else
+	       Perl_croak(aTHX_ "lobj is not of type version");
 
-{
-    SV	*rs;
-    SV	*rvs;
-    SV * robj = ST(1);
-    IV	 swap = (IV)SvIV(ST(2));
+	  {
+	       SV	*rs;
+	       SV	*rvs;
+	       SV * robj = ST(1);
+	       IV	 swap = (IV)SvIV(ST(2));
 
-    if ( ! sv_derived_from(robj, "version") )
-    {
-	robj = new_version(robj);
-    }
-    rvs = SvRV(robj);
+	       if ( ! sv_derived_from(robj, "version") )
+	       {
+		    robj = new_version(robj);
+	       }
+	       rvs = SvRV(robj);
 
-    if ( swap )
-    {
-        rs = newSViv(vcmp(rvs,lobj));
-    }
-    else
-    {
-        rs = newSViv(vcmp(lobj,rvs));
-    }
+	       if ( swap )
+	       {
+		    rs = newSViv(vcmp(rvs,lobj));
+	       }
+	       else
+	       {
+		    rs = newSViv(vcmp(lobj,rvs));
+	       }
 
-    PUSHs(rs);
-}
+	       PUSHs(rs);
+	  }
 
-	PUTBACK;
-	return;
-    }
+	  PUTBACK;
+	  return;
+     }
 }
 
 XS(XS_version_boolean)
 {
-    dXSARGS;
-    if (items < 1)
-	Perl_croak(aTHX_ "Usage: version::boolean(lobj, ...)");
-    SP -= items;
-    {
-	SV *	lobj;
+     dXSARGS;
+     if (items < 1)
+	  Perl_croak(aTHX_ "Usage: version::boolean(lobj, ...)");
+     SP -= items;
+     {
+	  SV *	lobj;
 
-        if (sv_derived_from(ST(0), "version")) {
-                SV *tmp = SvRV(ST(0));
-        	lobj = tmp;
-        }
-        else
-                Perl_croak(aTHX_ "lobj is not of type version");
+	  if (sv_derived_from(ST(0), "version")) {
+	       SV *tmp = SvRV(ST(0));
+	       lobj = tmp;
+	  }
+	  else
+	       Perl_croak(aTHX_ "lobj is not of type version");
 
-{
-    SV	*rs;
-    rs = newSViv( vcmp(lobj,new_version(newSVpvn("0",1))) );
-    PUSHs(rs);
-}
+	  {
+	       SV	*rs;
+	       rs = newSViv( vcmp(lobj,new_version(newSVpvn("0",1))) );
+	       PUSHs(rs);
+	  }
 
-	PUTBACK;
-	return;
-    }
+	  PUTBACK;
+	  return;
+     }
 }
 
 XS(XS_version_noop)
 {
-    dXSARGS;
-    if (items < 1)
-	Perl_croak(aTHX_ "Usage: version::noop(lobj, ...)");
-    {
-	SV *	lobj;
+     dXSARGS;
+     if (items < 1)
+	  Perl_croak(aTHX_ "Usage: version::noop(lobj, ...)");
+     {
+	  SV *	lobj;
 
-        if (sv_derived_from(ST(0), "version")) {
-                SV *tmp = SvRV(ST(0));
-        	lobj = tmp;
-        }
-        else
-                Perl_croak(aTHX_ "lobj is not of type version");
+	  if (sv_derived_from(ST(0), "version")) {
+	       SV *tmp = SvRV(ST(0));
+	       lobj = tmp;
+	  }
+	  else
+	       Perl_croak(aTHX_ "lobj is not of type version");
 
-{
-    Perl_croak(aTHX_ "operation not supported with version object");
-}
+	  {
+	       Perl_croak(aTHX_ "operation not supported with version object");
+	  }
 
-    }
-    XSRETURN_EMPTY;
+     }
+     XSRETURN_EMPTY;
 }
 
 XS(XS_utf8_is_utf8)
 {
-    dXSARGS;
-    if (items != 1)
-	Perl_croak(aTHX_ "Usage: utf8::is_utf8(sv)");
-    {
-	SV *	sv = ST(0);
- {
-  if (SvUTF8(sv))
-   XSRETURN_YES;
-  else
-   XSRETURN_NO;
- }
-    }
-    XSRETURN_EMPTY;
+     dXSARGS;
+     if (items != 1)
+	  Perl_croak(aTHX_ "Usage: utf8::is_utf8(sv)");
+     {
+	  SV *	sv = ST(0);
+	  {
+	       if (SvUTF8(sv))
+		    XSRETURN_YES;
+	       else
+		    XSRETURN_NO;
+	  }
+     }
+     XSRETURN_EMPTY;
 }
 
 XS(XS_utf8_valid)
 {
-    dXSARGS;
-    if (items != 1)
-	Perl_croak(aTHX_ "Usage: utf8::valid(sv)");
-    {
-	SV *	sv = ST(0);
- {
-  STRLEN len;
-  char *s = SvPV(sv,len);
-  if (!SvUTF8(sv) || is_utf8_string((U8*)s,len))
-   XSRETURN_YES;
-  else
-   XSRETURN_NO;
- }
-    }
-    XSRETURN_EMPTY;
+     dXSARGS;
+     if (items != 1)
+	  Perl_croak(aTHX_ "Usage: utf8::valid(sv)");
+     {
+	  SV *	sv = ST(0);
+	  {
+	       STRLEN len;
+	       char *s = SvPV(sv,len);
+	       if (!SvUTF8(sv) || is_utf8_string((U8*)s,len))
+		    XSRETURN_YES;
+	       else
+		    XSRETURN_NO;
+	  }
+     }
+     XSRETURN_EMPTY;
 }
 
 XS(XS_utf8_encode)
