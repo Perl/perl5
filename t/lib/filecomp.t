@@ -50,6 +50,7 @@ print "ok 8\n";
 {
   my $fh;
   open ($fh, "<README") or print "not ";
+  binmode($fh);
   print "not " unless compare($fh,"README") == 0;
   print "ok 9\n";
   close $fh;
@@ -59,6 +60,7 @@ print "ok 8\n";
 {
   my $fh;
   open ($fh, "<README") or print "not ";
+  binmode($fh);
   print "not " unless compare_text($fh,"TEST") == 1;
   print "ok 10\n";
   close $fh;
@@ -80,6 +82,7 @@ eval {
     local $/; #slurp
     my $fh;
     open($fh,'README');
+    binmode($fh);
     my $data = <$fh>;
     print $tfh $data;
     close($fh);
