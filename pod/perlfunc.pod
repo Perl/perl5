@@ -1428,7 +1428,7 @@ formline() always returns TRUE.  See L<perlform> for other examples.
 =item getc
 
 Returns the next character from the input file attached to FILEHANDLE,
-or a null string at end of file, or undef if there was an error.  If
+or the undefined value at end of file, or if there was an error.  If
 FILEHANDLE is omitted, reads from STDIN.  This is not particularly
 efficient.  It cannot be used to get unbuffered single-characters,
 however.  For that, try something more like:
