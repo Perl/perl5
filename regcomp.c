@@ -109,6 +109,7 @@ static void reginsert _((char, char *));
 static void regoptail _((char *, char *));
 static void regset _((char *, I32));
 static void regtail _((char *, char *));
+static char* regwhite _((char *, char *));
 static char* nextchar _((void));
 
 /*
@@ -943,6 +944,9 @@ tryagain:
 	      len++)
 	    {
 		oldp = p;
+
+		if (regflags & PMf_EXTENDED)
+		    p = regwhite(p, regxend);
 		switch (*p) {
 		case '^':
 		case '$':
@@ -1021,22 +1025,12 @@ tryagain:
 			break;
 		    }
 		    break;
-		case '#':
-		    if (regflags & PMf_EXTENDED) {
-			while (p < regxend && *p != '\n') p++;
-		    }
-		    /* FALL THROUGH */
-		case ' ': case '\t': case '\n': case '\r': case '\f': case '\v':
-		    if (regflags & PMf_EXTENDED) {
-			p++;
-			len--;
-			continue;
-		    }
-		    /* FALL THROUGH */
 		default:
 		    ender = *p++;
 		    break;
 		}
+		if (regflags & PMf_EXTENDED)
+		    p = regwhite(p, regxend);
 		if (ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)
 			p = oldp;
@@ -1065,6 +1059,25 @@ tryagain:
     }
 
     return(ret);
+}
+
+static char *
+regwhite(p, e)
+char *p;
+char *e;
+{
+    while (p < e) {
+	if (isSPACE(*p))
+	    ++p;
+	else if (*p == '#') {
+	    do {
+		p++;
+	    } while (p < e && *p != '\n');
+	}
+	else
+	    break;
+    }
+    return p;
 }
 
 static void
