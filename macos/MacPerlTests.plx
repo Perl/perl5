@@ -15,10 +15,12 @@ while (<>) {
 		$num = $1;
 		$line = 0;
 	} else {
-		if (/^ok (\d+)/) {
+		if      (/^ok (\d+)/) {
 			$tests[$1]++;
-		} elsif (/^not ok (\d+)[^#]+# TODO/) {
+		} elsif (/^not ok (\d+)[^#]+#\s+TODO/) {
 			$tests[$1]++;
+		} elsif (/^ok (\d+)[^#]+#\s+TODO/) {
+			$tests[$1] = -1;
 		} elsif (/^not ok (\d+)/) {
 			$tests[$1] = -1;
 		}
