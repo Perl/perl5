@@ -10,7 +10,7 @@ use Devel::SelfStubber;
 
 my $runperl = "$^X \"-I../lib\"";
 
-print "1..7\n";
+print "1..12\n";
 
 my @cleanup;
 
@@ -80,6 +80,30 @@ close FH;
   close FH or die $!;
 }
 
+{
+  my $file = "C-$$";
+  push @cleanup, $file;
+  open FH, ">$file" or die $!;
+  select FH;
+  Devel::SelfStubber->stub('Attribs', $inlib);
+  select STDOUT;
+  print "ok 5\n"; # Checking that we did not die horribly.
+  close FH or die $!;
+
+  open FH, $file or die $!;
+  my @C = <FH>;
+
+  if (@C == 2 && $C[0] =~ /^\s*sub\s+Attribs::baz\s+:\s*locked\s*;\s*$/
+      && $C[1] =~ /^\s*sub\s+Attribs::lv\s+:\s*lvalue\s*:\s*method\s*;\s*$/) {
+    print "ok 6\n";
+  } else {
+    print "not ok 6\n";
+    print "# $_" foreach (@C);
+  }
+
+  close FH or die $!;
+}
+
 # "wrong" and "right" may change if SelfLoader is changed.
 my %wrong = ( Parent => 'Parent', Child => 'Parent' );
 my %right = ( Parent => 'Parent', Child => 'Child' );
@@ -123,9 +147,9 @@ print ${module}->foo;
   }
 
   if (&fail (\%wrong, \%output)) {
-    print "not ok 5\n", &faildump (\%wrong, \%output);
+    print "not ok 7\n", &faildump (\%wrong, \%output);
   } else {
-    print "ok 5\n";
+    print "ok 7\n";
   }
 }
 
@@ -135,7 +159,7 @@ push @cleanup, $lib;
 $Devel::SelfStubber::JUST_STUBS=0;
 
 undef $/;
-foreach my $module (@module) {
+foreach my $module (@module, 'Data', 'End') {
   my $file = "$lib/$module.pm";
   open FH, "$inlib/$module.pm" or die $!;
   my $contents = <FH>;
@@ -152,7 +176,7 @@ foreach my $module (@module) {
   select STDOUT;
   close FH or die $!;
 }
-print "ok 6\n";
+print "ok 8\n";
 
 {
   my %output;
@@ -163,10 +187,28 @@ print "ok 6\n";
   }
 
   if (&fail (\%right, \%output)) {
-    print "not ok 7\n", &faildump (\%right, \%output);
+    print "not ok 9\n", &faildump (\%right, \%output);
   } else {
-    print "ok 7\n";
+    print "ok 9\n";
   }
+}
+
+# Check that the DATA handle stays open
+system "$runperl -w \"-I$lib\" -MData -e Data::ok";
+
+# Possibly a pointless test as this doesn't really verify that it's been
+# stubbed.
+system "$runperl -w \"-I$lib\" -MEnd -e End::lime";
+
+# But check that the documentation after the __END__ survived.
+open FH, "$lib/End.pm" or die $!;
+$_ = <FH>;
+close FH or die $!;
+
+if (/Did the documentation here survive\?/) {
+  print "ok 12\n";
+} else {
+  print "not ok 12 # information after an __END__ token seems to be lost\n";
 }
 
 __DATA__
@@ -198,3 +240,37 @@ use SelfLoader;
 __DATA__
 sub bar ($$) {
 }
+################ Attribs.pm
+package Attribs;
+use SelfLoader;
+
+1;
+__DATA__
+sub baz : locked {
+}
+sub lv : lvalue : method {
+  my $a;
+  \$a;
+}
+################ Data.pm
+package Data;
+use SelfLoader;
+
+1;
+__DATA__
+sub ok {
+  print <DATA>;
+}
+__END__ DATA
+ok 10
+################ End.pm
+package End;
+use SelfLoader;
+
+1;
+__DATA__
+sub lime {
+  print "ok 11\n";
+}
+__END__
+Did the documentation here survive?

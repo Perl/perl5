@@ -28,13 +28,13 @@ sub _package_defined {
 
 sub stub {
     my($self,$module,$lib) = @_;
-    my($line,$end,$fh,$mod_file,$found_selfloader);
+    my($line,$end_data,$fh,$mod_file,$found_selfloader);
     $lib ||= '.';
     ($mod_file = $module) =~ s,::,/,g;
     
     $mod_file = "$lib/$mod_file.pm";
     $fh = "${module}::DATA";
-    my (@BEFORE_DATA, @AFTER_DATA);
+    my (@BEFORE_DATA, @AFTER_DATA, @AFTER_END);
     @DATA = @STUBS = ();
 
     open($fh,$mod_file) || die "Unable to open $mod_file";
@@ -47,9 +47,13 @@ sub stub {
       || die "$mod_file doesn't contain a __DATA__ token";
     $found_selfloader || 
 	print 'die "\'use SelfLoader;\' statement NOT FOUND!!\n"',"\n";
-    $self->_load_stubs($module);
+    if ($JUST_STUBS) {
+        $self->_load_stubs($module);
+    } else {
+        $self->_load_stubs($module, \@AFTER_END);
+    }
     if ( fileno($fh) ) {
-	$end = 1;
+	$end_data = 1;
 	while(defined($line = <$fh>)) {
 	    push(@AFTER_DATA,$line);
 	}
@@ -60,7 +64,8 @@ sub stub {
     print @STUBS;
     unless ($JUST_STUBS) {
     	print "1;\n__DATA__\n",@DATA;
-    	if($end) { print "__END__\n",@AFTER_DATA; }
+    	if($end_data) { print "__END__ DATA\n",@AFTER_DATA; }
+    	if(@AFTER_END) { print "__END__\n",@AFTER_END; }
     }
 }
 
