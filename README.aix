@@ -14,7 +14,7 @@ compiled and/or runs.
 
 =head2 Compiling Perl 5 on AIX
 
-When compiling Perl, you must use an ANSI C compiler. AIX does not shif
+When compiling Perl, you must use an ANSI C compiler. AIX does not ship
 an ANSI compliant C-compiler with AIX by default, but binary builds of
 gcc for AIX are widely available.
 
