@@ -23,12 +23,14 @@
 
 #define HALF_UTF8_UPGRADE(start,end) \
     STMT_START {				\
+      if ((start)<(end)) {			\
 	U8* NeWsTr;				\
 	STRLEN LeN = (end) - (start);		\
 	NeWsTr = bytes_to_utf8(start, &LeN);	\
 	Safefree(start);			\
 	(start) = NeWsTr;			\
 	(end) = (start) + LeN;			\
+      }						\
     } STMT_END
 
 STATIC I32
