@@ -3824,8 +3824,8 @@ C<$tr> or C<$y> may cause this error.
 
 =item Transliteration replacement not terminated
 
-(F) The lexer couldn't find the final delimiter of a tr/// or tr[][]
-construct.
+(F) The lexer couldn't find the final delimiter of a tr///, tr[][],
+y/// or y[][] construct.
 
 =item '%s' trapped by operation mask
 
