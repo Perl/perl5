@@ -552,10 +552,38 @@ version of perl.  You can do this with by changing all the *archlib*
 variables in config.sh, namely archlib, archlib_exp, and
 installarchlib, to point to your new architecture-dependent library.
 
+=head2 Malloc Issues
+
+Perl relies heavily on malloc(3) to grow data structures as needed, so
+perl's performance can be noticeably affected by the performance of
+the malloc function on your system.
+
+The perl source is shipped with a version of malloc that is very fast
+but somewhat wasteful of space.  On the other hand, your system's
+malloc() function is probably a bit slower but also a bit more frugal.
+
+For many uses, speed is probably the most important consideration, so
+the default behavior (for most systems) is to use the malloc supplied
+with perl.  However, if you will be running very large applications
+(e.g. Tk or PDL) or if your system already has an excellent malloc, or
+if you are experiencing difficulties with extensions that use
+third-party libraries that call malloc, then you might wish to use
+your system's malloc.  (Or, you might wish to explore the experimental
+malloc flags discussed below.)
+
+To build without perl's malloc, you can use the Configure command
+
+	sh Configure -Uusemymalloc
+
+or you can answer 'n' at the appropriate interactive Configure prompt.
+
 =head2 Malloc Performance Flags
 
-If you are using Perl's malloc, you may define one or more of the
-following macros to change its behavior in potentially useful ways.
+If you are using Perl's malloc, you may add one or
+more of the following items to your C<cflags> config.sh variable
+to change its behavior in potentially useful ways.  You can find out
+more about these flags by reading the F<malloc.c> source.
+In a future version of perl, these might be enabled by default.
 
 =over 4
 
@@ -563,38 +591,30 @@ following macros to change its behavior in potentially useful ways.
 
 If this macro is defined, running out of memory need not be a fatal
 error: a memory pool can allocated by assigning to the special
-variable C<$^M>.  See L<"$^M">.
+variable C<$^M>.
 
 =item -DPACK_MALLOC
 
-Perl memory allocation is by bucket with sizes close to powers of two.
-Because of these malloc overhead may be big, especially for data of
-size exactly a power of two.  If C<PACK_MALLOC> is defined, perl uses
-a slightly different algorithm for small allocations (up to 64 bytes
-long), which makes it possible to have overhead down to 1 byte for
-allocations which are powers of two (and appear quite often).
+If C<PACK_MALLOC> is defined, malloc.c uses a slightly different
+algorithm for small allocations (up to 64 bytes long).  Such small
+allocations are quite common in typical Perl scripts.
 
-Expected memory savings (with 8-byte alignment in C<alignbytes>) is
-about 20% for typical Perl usage.  Expected slowdown due to additional
-malloc overhead is in fractions of a percent (hard to measure, because
-of the effect of saved memory on speed).
+The expected memory savings (with 8-byte alignment in C<alignbytes>) is
+about 20% for typical Perl usage.  The expected slowdown due to the
+additional malloc overhead is in fractions of a percent.  (It is hard
+to measure because of the effect of the saved memory on speed).
 
 =item -DTWO_POT_OPTIMIZE
 
-Similarly to C<PACK_MALLOC>, this macro improves allocations of data
-with size close to a power of two; but this works for big allocations
-(starting with 16K by default).  Such allocations are typical for big
-hashes and special-purpose scripts, especially image processing.
+If C<TWO_POT_OPTIMIZE> is defined, malloc.c uses a slightly different
+algorithm for large allocations that are close to a power of two
+(starting with 16K).  Such allocations are typical for big hashes and
+special-purpose scripts, especially image processing.  If you will be
+manipulating very large blocks with sizes close to powers of two, it
+might be wise to define this macro.
 
-On recent systems, the fact that perl requires 2M from system for 1M
-allocation will not affect speed of execution, since the tail of such
-a chunk is not going to be touched (and thus will not require real
-memory).  However, it may result in a premature out-of-memory error.
-So if you will be manipulating very large blocks with sizes close to
-powers of two, it would be wise to define this macro.
-
-Expected saving of memory is 0-100% (100% in applications which
-require most memory in such 2**n chunks); expected slowdown is
+The expected saving of memory is 0-100% (100% in applications which
+require most memory in such 2**n chunks).  The expected slowdown is
 negligible.
 
 =back
@@ -1224,4 +1244,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-18 February 1997
+24 February 1997
