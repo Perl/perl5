@@ -1,6 +1,6 @@
 package FileCache;
 
-our $VERSION = 1.03;
+our $VERSION = 1.04;
 
 =head1 NAME
 
@@ -46,6 +46,9 @@ and subsequent openings. Most valid modes for 3-argument C<open> are supported
 namely; C<< '>' >>, C<< '+>' >>, C<< '<' >>, C<< '<+' >>, C<<< '>>' >>>,
 C< '|-' > and C< '-|' >
 
+To pass supplemental arguments to a program opened with C< '|-' > or C< '-|' >
+append them to the command string as you would system EXPR.
+
 Returns EXPR on success for convenience. You may neglect the
 return value and manipulate EXPR as the filehandle directly if you prefer.
 
@@ -63,10 +66,10 @@ so you may have to set I<maxopen> yourself.
 
 =head1 NOTES
 
-FileCache installs signal handlers for CHLD (a.k.a. CLD) and PIPE in the
-calling package to handle deceased children from 2-arg C<cacheout> with C<'|-'>
-or C<'-|'> I<expediently>. The children would otherwise be reaped eventually,
-unless you terminated before repeatedly calling cacheout.
+FileCache installs localized signal handlers for CHLD (a.k.a. CLD) and PIPE
+to handle deceased children from 2-arg C<cacheout> with C<'|-'> or C<'-|'>
+I<expediently>. The children would otherwise be reaped eventually, unless you
+terminated before repeatedly calling cacheout.
 
 =cut
 
@@ -88,11 +91,6 @@ sub import {
     *{$pkg.'::cacheout'} = \&cacheout;
     *{$pkg.'::close'}    = \&cacheout_close;
 
-    # Reap our children
-    ${"$pkg\::SIG"}{'CLD'}  = 'IGNORE' if $Config{sig_name} =~ /\bCLD\b/;
-    ${"$pkg\::SIG"}{'CHLD'} = 'IGNORE' if $Config{sig_name} =~ /\bCHLD\b/;
-    ${"$pkg\::SIG"}{'PIPE'} = 'IGNORE' if $Config{sig_name} =~ /\bPIPE\b/;
-
     # Truth is okay here because setting maxopen to 0 would be bad
     return $cacheout_maxopen = $args{maxopen} if $args{maxopen};
     foreach my $param ( '/usr/include/sys/param.h' ){
@@ -113,6 +111,11 @@ sub import {
 
 # Open in their package.
 sub cacheout_open {
+  # Reap our children
+  local $SIG{CLD}  ||= 'IGNORE'if $Config{sig_name} =~ /\bCLD\b/;
+  local $SIG{CHLD} ||= 'IGNORE'if $Config{sig_name} =~ /\bCHLD\b/;
+  local $SIG{PIPE} ||= 'IGNORE'if $Config{sig_name} =~ /\bPIPE\b/;
+
   return open(*{caller(1) . '::' . $_[1]}, $_[0], $_[1]) && $_[1];
 }
 
@@ -135,7 +138,7 @@ sub cacheout {
     ($file, $mode) = ($mode, $file) if $narg == 1;
     croak "Invalid mode for cacheout" if $mode &&
       ( $mode !~ /^\s*(?:>>|\+?>|\+?<|\|\-|)|\-\|\s*$/ );
-    
+
     # Mode changed?
     if( $isopen{$file} && ($mode||'>') ne $isopen{$file}->[2] ){
       &cacheout_close($file, 1);
