@@ -61,9 +61,8 @@ Enabling the C<utf8> pragma has the following effects:
 Bytes in the source text that have their high-bit set will be treated
 as being part of a literal UTF-8 character.  This includes most literals
 such as identifiers, string constants, constant regular expression patterns
-and package names.  On EBCDIC platforms, characters in the C1 control group 
-and the Latin 1 character set are treated as being part of a literal
-UTF-EBCDIC character.
+and package names.  On EBCDIC platforms characters in the Latin 1 
+character set are treated as being part of a literal UTF-EBCDIC character.
 
 =item *
 

@@ -8,11 +8,12 @@
 
 package B::Deparse;
 use Carp 'cluck', 'croak';
-use B qw(class main_root main_start main_cv svref_2object opnumber
+use B qw(class main_root main_start main_cv svref_2object opnumber cstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL
 	 OPpLVAL_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
+	 OPpCONST_ARYBASE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK
          CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
@@ -355,6 +356,8 @@ sub new {
     $self->{'linenums'} = 0;
     $self->{'parens'} = 0;
     $self->{'ex_const'} = "'???'";
+    $self->{'arybase'} = 0;
+    $self->{'warnings'} = "\0"x12;
     while (my $arg = shift @_) {
 	if (substr($arg, 0, 2) eq "-u") {
 	    $self->stash_subs(substr($arg, 2));
@@ -406,6 +409,8 @@ sub deparse {
 #    cluck if class($op) eq "NULL";
 #    cluck unless $op;
 #    return $self->$ {\("pp_" . $op->name)}($op, $cx);
+require Carp;
+Carp::confess() unless defined $op;
     my $meth = "pp_" . $op->name;
     return $self->$meth($op, $cx);
 }
@@ -725,6 +730,7 @@ sub lineseq {
 	$expr .= $self->deparse($ops[$i], 0);
 	push @exprs, $expr if length $expr;
     }
+    for(@exprs[0..@exprs-1]) { s/;\n\z// }
     return join(";\n", @exprs);
 }
 
@@ -760,7 +766,8 @@ sub scopeop {
     if ($cx > 0) { # inside an expression, (a do {} while for lineseq)
 	return "do { " . $self->lineseq(@kids) . " }";
     } else {
-	return $self->lineseq(@kids) . ";";
+	my $lineseq = $self->lineseq(@kids);
+	return (length ($lineseq) ? "$lineseq;" : "");
     }
 }
 
@@ -812,6 +819,28 @@ sub pp_nextstate {
 	push @text, "\f#line " . $op->line . 
 	  ' "' . $op->file, qq'"\n';
     }
+    if ($self->{'arybase'} != $op->arybase) {
+	push @text, '$[ = '. $op->arybase .";\n";
+	$self->{'arybase'} = $op->arybase;
+    }
+
+    my $warnings = $op->warnings;
+    my $warning_bits;
+    if ($warnings->isa("B::SPECIAL") && $$warnings == 4) {
+	$warning_bits = $warnings::Bits{"all"};
+    }
+    elsif ($warnings->isa("B::SPECIAL")) {
+        $warning_bits = "\0"x12;
+    }
+    else {
+	$warning_bits = $warnings->PV;
+    }
+
+    if ($self->{'warnings'} ne $warning_bits) {
+	push @text, 'BEGIN {${^WARNING_BITS} = '. cstring($warning_bits) ."}\n";
+	$self->{'warnings'} = $warning_bits;
+    }
+
     return join("", @text);
 }
 
@@ -1822,6 +1851,7 @@ sub loop_common {
 	      $self->deparse($cont, 0) . "\n\b}\cK";
 	}
     } else {
+	return "" if !defined $body;
 	$cont = "\cK";
 	$body = $self->deparse($body, 0);
     }
@@ -1938,7 +1968,8 @@ sub pp_aelemfast {
     my $self = shift;
     my($op, $cx) = @_;
     my $gv = $self->gv_or_padgv($op);
-    return "\$" . $self->gv_name($gv) . "[" . $op->private . "]";
+    return "\$" . $self->gv_name($gv) . "[" .
+		  ($op->private + $self->{'arybase'}) . "]";
 }
 
 sub rv2x {
@@ -2019,6 +2050,25 @@ sub elem {
 	    $left . $self->deparse($idx, 1) . $right;
     }
     $idx = $self->deparse($idx, 1);
+
+    # Outer parens in an array index will confuse perl
+    # if we're interpolating in a regular expression, i.e.
+    # /$x$foo[(-1)]/ is *not* the same as /$x$foo[-1]/
+    #
+    # If $self->{parens}, then an initial '(' will
+    # definitely be paired with a final ')'. If
+    # !$self->{parens}, the misleading parens won't
+    # have been added in the first place.
+    #
+    # [You might think that we could get "(...)...(...)"
+    # where the initial and final parens do not match
+    # each other. But we can't, because the above would
+    # only happen if there's an infix binop between the
+    # two pairs of parens, and *that* means that the whole
+    # expression would be parenthesized as well.]
+    #
+    $idx =~ s/^\((.*)\)$/$1/ if $self->{'parens'};
+
     return "\$" . $array . $left . $idx . $right;
 }
 
@@ -2377,11 +2427,13 @@ sub const {
     my $sv = shift;
     if (class($sv) eq "SPECIAL") {
 	return ('undef', '1', '0')[$$sv-1]; # sv_undef, sv_yes, sv_no
+    } elsif (class($sv) eq "NULL") {
+       return 'undef';
     } elsif ($sv->FLAGS & SVf_IOK) {
 	return $sv->int_value;
     } elsif ($sv->FLAGS & SVf_NOK) {
 	return $sv->NV;
-    } elsif ($sv->FLAGS & SVf_ROK) {
+    } elsif ($sv->FLAGS & SVf_ROK && $sv->can("RV")) {
 	return "\\(" . const($sv->RV) . ")"; # constant folded
     } else {
 	my $str = $sv->PV;
@@ -2410,6 +2462,9 @@ sub pp_const {
 #    }
     my $sv = $self->const_sv($op);
 #    return const($sv);
+    if ($op->private & OPpCONST_ARYBASE) {
+	return '$[';
+    }
     my $c = const $sv; 
     return $c =~ /^-\d/ ? $self->maybe_parens($c, $cx, 21) : $c;
 }

@@ -1081,4 +1081,4 @@ TIEHANDLE by Sven Verdoolaege <F<skimo@dns.ufsia.ac.be>> and Doug MacEachern <F<
 
 UNTIE by Nick Ing-Simmons <F<nick@ing-simmons.net>>
 
-Tying Arrays by Casey Tweten <F<crt@kiski.net>>
+Tying Arrays by Casey West <F<casey@geeknest.com>>

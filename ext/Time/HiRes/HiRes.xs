@@ -13,6 +13,46 @@ extern "C" {
 }
 #endif
 
+static IV
+constant(char *name, int arg)
+{
+    errno = 0;
+    switch (*name) {
+    case 'I':
+      if (strEQ(name, "ITIMER_REAL"))
+#ifdef ITIMER_REAL
+	return ITIMER_REAL;
+#else
+	goto not_there;
+#endif
+      if (strEQ(name, "ITIMER_REALPROF"))
+#ifdef ITIMER_REALPROF
+	return ITIMER_REALPROF;
+#else
+	goto not_there;
+#endif
+      if (strEQ(name, "ITIMER_VIRTUAL"))
+#ifdef ITIMER_VIRTUAL
+	return ITIMER_VIRTUAL;
+#else
+	goto not_there;
+#endif
+      if (strEQ(name, "ITIMER_PROF"))
+#ifdef ITIMER_PROF
+	return ITIMER_PROF;
+#else
+	goto not_there;
+#endif
+      break;
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
 #if !defined(HAS_GETTIMEOFDAY) && defined(WIN32)
 #define HAS_GETTIMEOFDAY
 
@@ -166,7 +206,7 @@ myU2time(UV *ret)
   ret[1] = Tp.tv_usec;
 }
 
-static double
+static NV
 myNVtime()
 {
   struct timeval Tp;
@@ -187,6 +227,11 @@ BOOT:
   hv_store(PL_modglobal, "Time::U2time", 12, newSViv((IV) myU2time), 0);
 #endif
 
+IV
+constant(name, arg)
+	char *		name
+	int		arg
+
 #ifdef HAS_USLEEP
 
 void
@@ -195,7 +240,7 @@ usleep(useconds)
 
 void
 sleep(fseconds)
-        double fseconds 
+        NV fseconds 
 	CODE:
 	int useconds = fseconds * 1000000;
 	usleep (useconds);
@@ -211,8 +256,8 @@ ualarm(useconds,interval=0)
 
 int
 alarm(fseconds,finterval=0)
-	double fseconds
-	double finterval
+	NV fseconds
+	NV finterval
 	PREINIT:
 	int useconds, uinterval;
 	CODE:
@@ -240,7 +285,7 @@ gettimeofday()
              PUSHs(sv_2mortal(newSVnv(Tp.tv_sec + (Tp.tv_usec / 1000000.0))));
         }
 
-double
+NV
 time()
         PREINIT:
         struct timeval Tp;
@@ -250,6 +295,51 @@ time()
         RETVAL = Tp.tv_sec + (Tp.tv_usec / 1000000.);
 	OUTPUT:
 	RETVAL
+
+#endif
+
+#if defined(HAS_GETITIMER) && defined(HAS_SETITIMER)
+
+#define TV2NV(tv) ((NV)((tv).tv_sec) + 0.000001 * (NV)((tv).tv_usec))
+
+void
+setitimer(which, seconds, interval = 0)
+	int which
+	NV seconds
+	NV interval
+    PREINIT:
+	struct itimerval newit;
+	struct itimerval oldit;
+    PPCODE:
+	newit.it_value.tv_sec  = seconds;
+	newit.it_value.tv_usec =
+	  (seconds  - (NV)newit.it_value.tv_sec)    * 1000000.0;
+	newit.it_interval.tv_sec  = interval;
+	newit.it_interval.tv_usec =
+	  (interval - (NV)newit.it_interval.tv_sec) * 1000000.0;
+	if (setitimer(which, &newit, &oldit) == 0) {
+	  EXTEND(sp, 1);
+	  PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_value))));
+	  if (GIMME == G_ARRAY) {
+	    EXTEND(sp, 1);
+	    PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_interval))));
+	  }
+	}
+
+void
+getitimer(which)
+	int which
+    PREINIT:
+	struct itimerval nowit;
+    PPCODE:
+	if (getitimer(which, &nowit) == 0) {
+	  EXTEND(sp, 1);
+	  PUSHs(sv_2mortal(newSVnv(TV2NV(nowit.it_value))));
+	  if (GIMME == G_ARRAY) {
+	    EXTEND(sp, 1);
+	    PUSHs(sv_2mortal(newSVnv(TV2NV(nowit.it_interval))));
+	  }
+	}
 
 #endif
 

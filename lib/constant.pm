@@ -314,8 +314,8 @@ C<CONSTANT =E<gt> 'value'>.
 Tom Phoenix, E<lt>F<rootbeer@redcat.com>E<gt>, with help from
 many other folks.
 
-Multiple constant declarations at once added by Casey Tweten,
-E<lt>F<crt@kiski.net>E<gt>.
+Multiple constant declarations at once added by Casey West,
+E<lt>F<casey@geeknest.com>E<gt>.
 
 =head1 COPYRIGHT
 

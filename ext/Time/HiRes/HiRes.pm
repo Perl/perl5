@@ -1,21 +1,35 @@
 package Time::HiRes;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK @EXPORT_FAIL);
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 
 require Exporter;
-require DynaLoader;
+use XSLoader;
 
-@ISA = qw(Exporter DynaLoader);
+@ISA = qw(Exporter);
 
 @EXPORT = qw( );
-@EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval);
+@EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
+		 getitimer setitimer ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF);
 
-$VERSION = do{my@r=q$Revision: 1.20 $=~/\d+/g;sprintf '%02d.'.'%02d'x$#r,@r};
+$VERSION = '1.21';
 
-bootstrap Time::HiRes $VERSION;
+sub AUTOLOAD {
+    my $constname;
+    ($constname= $AUTOLOAD) =~ s/.*:://;
+    my $val = constant($constname, @_ ? $_[0] : 0);
+    if ($!) {
+	my ($pack,$file,$line) = caller;
+	die "Your vendor has not defined Time::HiRes macro $constname, used at $file line $line.\n";
+    }
+    {
+	no strict 'refs';
+	*$AUTOLOAD = sub { $val };
+    }
+    goto &$AUTOLOAD;
+}
 
-@EXPORT_FAIL = grep { ! defined &$_ } @EXPORT_OK;
+XSLoader::load 'Time::HiRes', $VERSION;
 
 # Preloaded methods go here.
 
@@ -24,14 +38,6 @@ sub tv_interval {
     my ($a, $b) = @_;
     $b = [gettimeofday()] unless defined($b);
     (${$b}[0] - ${$a}[0]) + ((${$b}[1] - ${$a}[1]) / 1_000_000);
-}
-
-# I'm only supplying this because the version of it in 5.003's Export.pm
-# is buggy (it doesn't shift off the class name).
-
-sub export_fail {
-    my $self = shift;
-    @_;
 }
 
 # Autoload methods go after =cut, and are processed by the autosplit program.
@@ -60,10 +66,17 @@ Time::HiRes - High resolution ualarm, usleep, and gettimeofday
   $elapsed = tv_interval ( $t0 );
 
   use Time::HiRes qw ( time alarm sleep );
+
   $now_fractions = time;
   sleep ($floating_seconds);
   alarm ($floating_seconds);
   alarm ($floating_seconds, $floating_interval);
+
+  use Time::HiRes qw( setitimer getitimer
+		      ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF );
+
+  setitimer ($which, $floating_seconds, $floating_interval );
+  getitimer ($which);
 
 =head1 DESCRIPTION
 
@@ -75,12 +88,12 @@ the underlying gettimeofday, usleep, and ualarm calls.
 If your system lacks gettimeofday(2) you don't get gettimeofday() or the
 one-arg form of tv_interval().  If you don't have usleep(3) or select(2)
 you don't get usleep() or sleep().  If your system don't have ualarm(3)
-or setitimer(2) you don't
-get ualarm() or alarm().  If you try to import an unimplemented function
-in the C<use> statement it will fail at compile time.
+or setitimer(2) you don't get ualarm() or alarm().
+If you try to import an unimplemented function in the C<use> statement
+it will fail at compile time.
 
-The following functions can be imported from this module.  No
-functions are exported by default.
+The following functions can be imported from this module.
+No functions are exported by default.
 
 =over 4
 
@@ -126,6 +139,52 @@ is optional and will be 0 if unspecified, resulting in alarm-like
 behaviour.  This function can be imported, resulting in a nice drop-in
 replacement for the C<alarm> provided with perl, see the EXAMPLES below.
 
+=item setitimer ( $which, $floating_seconds [, $interval_floating_seconds ] )
+
+Start up an interval timer: after a certain time, a signal is arrives,
+and more may keep arriving at certain intervals.  To disable a timer,
+use time of zero.  If interval is set to zero (or unspecified), the
+timer is disabled after the next delivered signal.
+
+Use of interval timers may interfere with alarm(), sleep(), and usleep().
+In standard-speak the "interaction is unspecified", which means that
+I<anything> may happen: it may work, it may not.
+
+In scalar context, the remaining time in the timer is returned.
+
+In list context, both the remaining time and the interval are returned.
+
+There are three interval timers: the $which can be ITIMER_REAL,
+ITIMER_VIRTUAL, or ITIMER_PROF.
+
+ITIMER_REAL results in alarm()-like behavior.  Time is counted in
+I<real time>, that is, wallclock time.  SIGALRM is delivered when
+the timer expires.
+
+ITIMER_VIRTUAL counts time in (process) I<virtual time>, that is, only
+when the process is running.  In multiprocessing/user/CPU systems this
+may be much less than real time.  (This time is also known as the
+I<user time>.)  SIGVTALRM is delivered when the timer expires.
+
+ITIMER_PROF counts time when either the process virtual time or when
+the operating system is running on behalf of the process (such as
+I/O).  (This time is also known as the I<system time>.)  (Collectively
+these times are also known as the I<CPU time>.)  SIGPROF is delivered
+when the timer expires.  SIGPROF can interrupt system calls.
+
+The semantics of interval timers for multithreaded programs are
+system-specific, and some systems may support additional interval
+timers.  See your setitimer() documentation.
+
+=item getitimer ( $which )
+
+Return the remaining time in the interval timer specified by $which.
+
+In scalar context, the remaining time is returned.
+
+In list context, both the remaining time and the interval are returned.
+The interval is always what you put in using setitimer().
+
 =back
 
 =head1 EXAMPLES
@@ -165,6 +224,14 @@ replacement for the C<alarm> provided with perl, see the EXAMPLES below.
   $now_fractions = time;
   sleep (2.5);
   alarm (10.6666666);
+
+  # Arm an interval timer to go off first at 10 seconds and
+  # after that every 2.5 seconds, in process virtual time
+
+  use Time::HiRes qw ( setitimer ITIMER_VIRTUAL time );
+
+  $SIG{VTLARM} = sub { print time, "\n" };
+  setitimer(ITIMER_VIRTUAL, 10, 2.5);
 
 =head1 C API
 

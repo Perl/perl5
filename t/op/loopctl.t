@@ -31,7 +31,7 @@
 #
 #  -- .robin. <robin@kitsite.com>  2001-03-13
 
-print "1..39\n";
+print "1..41\n";
 
 my $ok;
 
@@ -923,3 +923,24 @@ TEST39: {
     }
 }
 print ($ok ? "ok 39\n" : "not ok 39\n");
+
+
+### Test that loop control is dynamicly scoped.
+
+sub test_last_label { last TEST40 }
+
+TEST40: {
+    $ok = 1;
+    test_last_label();
+    $ok = 0;
+}
+print ($ok ? "ok 40\n" : "not ok 40\n");
+
+sub test_last { last }
+
+TEST41: {
+    $ok = 1;
+    test_last();
+    $ok = 0;
+}
+print ($ok ? "ok 41\n" : "not ok 41\n");

@@ -546,7 +546,7 @@ struct's constructor.
 
 =head1 Author and Modification History
 
-Modified by Casey Tweten, 2000-11-08, v0.59.
+Modified by Casey West, 2000-11-08, v0.59.
 
     Added the ability for compile time class creation.
 

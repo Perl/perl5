@@ -31,6 +31,364 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9717] By: jhi                                   on 2001/04/16  03:06:28
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  9716] By: jhi                                   on 2001/04/16  02:58:42
+        Log: Subject: [PATCH: perl@9699] updates to apidoc in utf8.c
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sun, 15 Apr 2001 20:47:45 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0104152037470.8946-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  9715] By: jhi                                   on 2001/04/15  23:40:35
+        Log: Subject: Re: Net::Ping patch, adds stream protocol
+             From: bronson@rinspin.com (Scott Bronson)
+             Date: Tue, 10 Apr 2001 23:58:33 -0700
+             Message-ID: <20010410235833.N29719@rinspin.com>
+     Branch: perl
+	   ! lib/Net/Ping.pm
+____________________________________________________________________________
+[  9714] By: jhi                                   on 2001/04/15  23:31:46
+        Log: Printing out the ok messages helps successful testing.
+     Branch: perl
+	   ! t/lib/time-hires.t
+____________________________________________________________________________
+[  9713] By: jhi                                   on 2001/04/15  21:43:24
+        Log: Update Douglas Wegscheid's email.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[  9712] By: jhi                                   on 2001/04/15  21:40:41
+        Log: Subject: [PATCH t/lib/exporter.t lib/Exporter/Heavy.pm] Testing Exporter
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 14 Apr 2001 22:40:50 +0100
+             Message-ID: <20010414224050.A1872@blackrider.blackstar.co.uk>
+     Branch: perl
+	   + t/lib/exporter.t
+	   ! MANIFEST lib/Exporter/Heavy.pm
+____________________________________________________________________________
+[  9711] By: jhi                                   on 2001/04/15  21:39:21
+        Log: Subject: [PATCH t/op/loopctl.t] Exit via last, part 1
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 14 Apr 2001 22:13:59 +0100
+             Message-ID: <20010414221359.A413@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! t/op/loopctl.t
+____________________________________________________________________________
+[  9710] By: jhi                                   on 2001/04/15  21:30:19
+        Log: Subject: [PATCH t/pragma/warnings.t] Doesn't skip RCS files
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 14 Apr 2001 22:05:32 +0100
+             Message-ID: <20010414220531.A30178@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! t/pragma/warnings.t
+____________________________________________________________________________
+[  9709] By: jhi                                   on 2001/04/15  19:34:09
+        Log: Integrate changes #9706,9707 from maintperl into mainline.
+             
+             change#7210 broke .packlist generation
+             
+             ExtUtils::Installed doesn't quote regex metacharacters in paths
+             before using them in match; also make it work for dosish platforms
+     Branch: perl
+	  !> lib/ExtUtils/Install.pm lib/ExtUtils/Installed.pm
+____________________________________________________________________________
+[  9708] By: jhi                                   on 2001/04/15  19:31:01
+        Log: Test also the scalar aspect of getitimer().
+     Branch: perl
+	   ! t/lib/time-hires.t
+____________________________________________________________________________
+[  9707] By: gsar                                  on 2001/04/15  17:24:20
+        Log: ExtUtils::Installed doesn't quote regex metacharacters in paths
+             before using them in match; also make it work for dosish platforms
+     Branch: maint-5.6/perl
+	   ! lib/ExtUtils/Installed.pm
+____________________________________________________________________________
+[  9706] By: gsar                                  on 2001/04/15  17:21:59
+        Log: change#7210 broke .packlist generation (listed only filename
+             rather than fully qualified path name)
+     Branch: maint-5.6/perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[  9705] By: jhi                                   on 2001/04/15  12:36:33
+        Log: Add interval timer (setitimer, getitimer) support to Time::HiRes.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.pm ext/Time/HiRes/HiRes.xs
+	   ! t/lib/time-hires.t
+____________________________________________________________________________
+[  9704] By: jhi                                   on 2001/04/15  10:49:08
+        Log: Subject: [PATCH: perl@9622]update perlebcdic.pod with UTF tbl; tweak utf8.pm
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sat, 14 Apr 2001 21:36:24 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0104142127580.27582-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! lib/utf8.pm pod/perlebcdic.pod
+____________________________________________________________________________
+[  9703] By: jhi                                   on 2001/04/15  02:26:26
+        Log: I keep forgetting to sort MANIFEST.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  9702] By: jhi                                   on 2001/04/15  02:07:47
+        Log: Add Scalar-List-Utils 1.02, from Graham Barr.
+             Now we have blessed, reftype, tainted, first, reduce, ...
+     Branch: perl
+	   + ext/List/Util/ChangeLog ext/List/Util/Makefile.PL
+	   + ext/List/Util/README ext/List/Util/Util.xs
+	   + ext/List/Util/lib/List/Util.pm
+	   + ext/List/Util/lib/Scalar/Util.pm t/lib/u-blessed.t
+	   + t/lib/u-dualvar.t t/lib/u-first.t t/lib/u-max.t
+	   + t/lib/u-maxstr.t t/lib/u-min.t t/lib/u-minstr.t
+	   + t/lib/u-readonly.t t/lib/u-reduce.t t/lib/u-reftype.t
+	   + t/lib/u-sum.t t/lib/u-tainted.t t/lib/u-weak.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9701] By: jhi                                   on 2001/04/14  15:05:25
+        Log: Subject: RE: dprofpp.pl updates 
+             From: Carl Eklof <CEklof@endeca.com>
+             Date: Thu, 12 Apr 2001 18:45:46 -0400
+             Message-ID: <D99914D9109BD411823800508BD957180E1269@exch01.ops.endeca.com>
+     Branch: perl
+	   ! utils/dprofpp.PL
+____________________________________________________________________________
+[  9700] By: jhi                                   on 2001/04/14  14:44:55
+        Log: Do not just blindly add CR.
+     Branch: perl
+	   ! Porting/makerel
+____________________________________________________________________________
+[  9699] By: jhi                                   on 2001/04/13  13:17:01
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  9698] By: jhi                                   on 2001/04/13  12:44:48
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/PerlIO/Scalar/Scalar.xs
+____________________________________________________________________________
+[  9697] By: jhi                                   on 2001/04/13  12:29:15
+        Log: Add more debug output to the test.
+     Branch: perl
+	   ! t/lib/cwd.t
+____________________________________________________________________________
+[  9696] By: nick                                  on 2001/04/13  10:14:29
+        Log: Fix core dump on binmode($fh,'Scalar')
+     Branch: perlio
+	   ! ext/PerlIO/Scalar/Scalar.xs
+____________________________________________________________________________
+[  9695] By: nick                                  on 2001/04/13  09:05:42
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Time/HiRes/Changes ext/Time/HiRes/HiRes.pm
+	  +> ext/Time/HiRes/HiRes.xs ext/Time/HiRes/Makefile.PL
+	  +> t/lib/time-hires.t
+	  !> AUTHORS MANIFEST Makefile.SH Todo-5.6 configure.com
+	  !> ext/Digest/MD5/MD5.xs ext/File/Glob/Glob.pm
+	  !> ext/File/Glob/Glob.xs ext/File/Glob/bsd_glob.c
+	  !> ext/File/Glob/bsd_glob.h ext/MIME/Base64/Base64.xs
+	  !> hints/uts.sh hints/vmesa.sh lib/Devel/SelfStubber.pm opcode.pl
+	  !> pod/perlfaq5.pod pp.c regexec.c t/comp/proto.t
+	  !> t/lib/md5-file.t t/op/pat.t win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9694] By: jhi                                   on 2001/04/12  22:23:35
+        Log: Integrate change #9693 from maintperl into mainline.
+             
+             $VERSION and Version() on the same line provokes a warning from
+             CPAN.pm (from Jonathan Leffler <jleffler@informix.com>)
+     Branch: perl
+	  !> lib/Devel/SelfStubber.pm
+____________________________________________________________________________
+[  9693] By: gsar                                  on 2001/04/12  21:55:56
+        Log: $VERSION and Version() on the same line provokes a warning from
+             CPAN.pm (from Jonathan Leffler <jleffler@informix.com>)
+     Branch: maint-5.6/perl
+	   ! lib/Devel/SelfStubber.pm
+____________________________________________________________________________
+[  9692] By: jhi                                   on 2001/04/12  13:54:00
+        Log: This is at least 5.005.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[  9691] By: jhi                                   on 2001/04/12  13:37:20
+        Log: Non-UNIX platforms extensions update.  (Well, UTS is UNIX.)
+     Branch: perl
+	   ! Makefile.SH configure.com hints/uts.sh hints/vmesa.sh
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9690] By: jhi                                   on 2001/04/12  01:34:46
+        Log: Integrate Time::Hires 1.20 from Douglas E. Wegscheid.
+     Branch: perl
+	   + ext/Time/HiRes/Changes ext/Time/HiRes/HiRes.pm
+	   + ext/Time/HiRes/HiRes.xs ext/Time/HiRes/Makefile.PL
+	   + t/lib/time-hires.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9689] By: jhi                                   on 2001/04/12  00:28:39
+        Log: Subject: [PATCH] Digest::MD5 on UTF8 strings
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 11 Apr 2001 16:36:11 -0700
+             Message-ID: <lrlmp7102c.fsf@caliper.ActiveState.com>
+     Branch: perl
+	   ! ext/Digest/MD5/MD5.xs t/lib/md5-file.t
+____________________________________________________________________________
+[  9688] By: jhi                                   on 2001/04/12  00:27:39
+        Log: Subject: Re: [PATCH] [ID 20010410.001] Not OK: perl v5.7.1 on i386-freebsd 4.3-rc (UNINSTALLED)
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 11 Apr 2001 11:13:24 -0700
+             Message-ID: <lrbsq371a3.fsf@caliper.ActiveState.com>
+     Branch: perl
+	   ! ext/MIME/Base64/Base64.xs
+____________________________________________________________________________
+[  9687] By: jhi                                   on 2001/04/11  19:51:47
+        Log: Slight update on the Todo list.  (Should integrate to Todo?) 
+     Branch: perl
+	   ! Todo-5.6
+____________________________________________________________________________
+[  9686] By: jhi                                   on 2001/04/11  16:54:25
+        Log: Subject: [PATCH opcode.pl] Documentation of table format
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Wed, 11 Apr 2001 12:59:31 +0100
+             Message-ID: <20010411125931.A25681@netthink.co.uk>
+     Branch: perl
+	   ! opcode.pl
+____________________________________________________________________________
+[  9685] By: jhi                                   on 2001/04/11  16:53:15
+        Log: Subject: [PATCH] prototype("CORE::recv")
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Wed, 11 Apr 2001 13:24:35 +0100
+             Message-ID: <20010411132435.A26169@netthink.co.uk>
+     Branch: perl
+	   ! pp.c t/comp/proto.t
+____________________________________________________________________________
+[  9684] By: jhi                                   on 2001/04/11  16:47:13
+        Log: FAQ (and AUTHORS) update from Dan Carson: the information
+             was several years obsolete, Term::Readkey has been updated
+             to have the functionality.
+     Branch: perl
+	   ! AUTHORS pod/perlfaq5.pod
+____________________________________________________________________________
+[  9683] By: jhi                                   on 2001/04/11  12:15:46
+        Log: Subject: Re: [PATCH] [ID 20010410.001] Not OK: perl v5.7.1 on i386-freebsd 4.3-rc (UNINSTALLED)
+             From: Calle Dybedahl <calle@lysator.liu.se>
+             Date: 10 Apr 2001 16:44:16 +0200
+             Message-ID: <86d7akbyrj.fsf@tezcatlipoca.algonet.se>
+     Branch: perl
+	   ! ext/MIME/Base64/Base64.xs
+____________________________________________________________________________
+[  9682] By: jhi                                   on 2001/04/11  12:12:26
+        Log: A more minimal fix for 20010410.006 from Hugo.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[  9681] By: jhi                                   on 2001/04/11  11:34:23
+        Log: Integrate changes #9678,9679 from maintline into mainperl.
+             
+             addendum to change#9676
+             
+             up $File::Glob::VERSION; add a note pointing out the version of
+             the OpenBSD glob bsd_glob.c resembles
+     Branch: perl
+	  !> ext/File/Glob/Glob.pm ext/File/Glob/bsd_glob.c
+	  !> ext/File/Glob/bsd_glob.h
+____________________________________________________________________________
+[  9680] By: jhi                                   on 2001/04/11  11:30:38
+        Log: Bad test numbering in integrate in #9677.
+             Fixes ID 20010411.001.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[  9679] By: gsar                                  on 2001/04/11  03:38:40
+        Log: up $File::Glob::VERSION; add a note pointing out the version of
+             the OpenBSD glob bsd_glob.c resembles
+     Branch: maint-5.6/perl
+	   ! ext/File/Glob/Glob.pm ext/File/Glob/bsd_glob.c
+	   ! ext/File/Glob/bsd_glob.h
+____________________________________________________________________________
+[  9678] By: gsar                                  on 2001/04/11  03:09:48
+        Log: addendum to change#9676: some missing changes from OpenBSD glob.c
+             revision 1.8.10.1 found here:
+             
+             http://www.openbsd.org/cgi-bin/cvsweb/src/lib/libc/gen/glob.c
+     Branch: maint-5.6/perl
+	   ! ext/File/Glob/bsd_glob.c
+____________________________________________________________________________
+[  9677] By: jhi                                   on 2001/04/11  02:54:39
+        Log: Integrate changes #9675,9676 from maintperl into mainline.
+             
+             fix for bug 20010410.006, undo change#7115
+             
+             port the OpenBSD glob() security patch
+     Branch: perl
+	  !> ext/File/Glob/Glob.pm ext/File/Glob/Glob.xs
+	  !> ext/File/Glob/bsd_glob.c ext/File/Glob/bsd_glob.h regexec.c
+	  !> t/op/pat.t
+____________________________________________________________________________
+[  9676] By: gsar                                  on 2001/04/11  02:19:02
+        Log: port the glob() security patch found at:
+             
+             ftp://ftp.openbsd.org/pub/OpenBSD/patches/2.8/common/025_glob.patch
+             
+             CERT advisory for the issue is here:
+             
+             http://www.cert.org/advisories/CA-2001-07.html
+             
+             Note that the security scare is only relevant for those who are
+             foolish enough to build suidperl (which is now officially discouraged)
+     Branch: maint-5.6/perl
+	   ! ext/File/Glob/Glob.pm ext/File/Glob/Glob.xs
+	   ! ext/File/Glob/bsd_glob.c ext/File/Glob/bsd_glob.h
+____________________________________________________________________________
+[  9675] By: gsar                                  on 2001/04/10  23:52:11
+        Log: fix for bug 20010410.006
+             
+             undo change#7115 (came into maint-5.6 as change#8156)
+             
+             add tests to keep it from coming back
+     Branch: maint-5.6/perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[  9674] By: nick                                  on 2001/04/10  20:39:31
+        Log: Integrate mainline
+     Branch: perlio
+	  +> Porting/testall.atom
+	  !> MANIFEST t/lib/lc-all.t t/lib/lc-constants.t
+	  !> t/lib/lc-country.t t/lib/lc-currency.t t/lib/lc-language.t
+	  !> t/lib/lc-uk.t t/pod/find.t
+____________________________________________________________________________
+[  9673] By: nick                                  on 2001/04/10  18:46:14
+        Log: Integrate against change 9670 aka perl-5.7.1
+     Branch: perlio
+	  +> jpl/ChangeLog jpl/README.JUST-JNI jpl/docs/Tutorial.pod
+	  !> (integrate 53 files)
+____________________________________________________________________________
+[  9672] By: jhi                                   on 2001/04/10  13:45:01
+        Log: Add a script for doing cumulative profile of the test suite.
+             (Requires ATOM, that is, Tru64.)
+     Branch: perl
+	   + Porting/testall.atom
+	   ! MANIFEST
+____________________________________________________________________________
+[  9671] By: jhi                                   on 2001/04/10  12:38:53
+        Log: Missing std block.
+     Branch: perl
+	   ! t/lib/lc-all.t t/lib/lc-constants.t t/lib/lc-country.t
+	   ! t/lib/lc-currency.t t/lib/lc-language.t t/lib/lc-uk.t
+	   ! t/pod/find.t
+____________________________________________________________________________
+[  9670] By: jhi                                   on 2001/04/10  01:25:58
+        Log: This is 5.7.1.
+     Branch: perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[  9669] By: jhi                                   on 2001/04/10  01:09:14
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9668] By: jhi                                   on 2001/04/10  01:00:38
         Log: Regen toc.
      Branch: perl

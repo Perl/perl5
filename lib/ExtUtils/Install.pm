@@ -120,7 +120,6 @@ sub install {
 	    return unless -f _;
 	    return if $_ eq ".exists";
 	    my $targetdir  = MY->catdir($targetroot, $File::Find::dir);
-	    my $origfile   = $_;
 	    my $targetfile = MY->catfile($targetdir, $_);
 
 	    my $diff = 0;
@@ -156,7 +155,7 @@ sub install {
 	    } else {
 		inc_uninstall($_,$File::Find::dir,$verbose,0); # nonono set to 0
 	    }
-	    $packlist->{$origfile}++;
+	    $packlist->{$targetfile}++;
 
 	}, ".");
 	chdir($cwd) or Carp::croak("Couldn't chdir to $cwd: $!");
