@@ -1,6 +1,6 @@
 # -*-perl-*-
 use strict;
-use Test qw(:DEFAULT $TESTOUT $ntest);
+use Test qw(:DEFAULT $TESTOUT $TESTERR $ntest);
 
 ### This test is crafted in such a way as to prevent Test::Harness from
 ### seeing the todo tests, otherwise you get people sending in bug reports
@@ -8,6 +8,7 @@ use Test qw(:DEFAULT $TESTOUT $ntest);
 
 open F, ">mix";
 $TESTOUT = *F{IO};
+$TESTERR = *F{IO};
 
 plan tests => 4, todo => [2,3];
 
@@ -27,6 +28,7 @@ skip(1,0);
 
 close F;
 $TESTOUT = *STDOUT{IO};
+$TESTERR = *STDERR{IO};
 $ntest = 1;
 
 open F, "mix";

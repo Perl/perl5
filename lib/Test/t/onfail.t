@@ -1,7 +1,7 @@
 # -*-perl-*-
 
 use strict;
-use Test qw($ntest plan ok $TESTOUT);
+use Test qw($ntest plan ok $TESTOUT $TESTERR);
 use vars qw($mycnt);
 
 BEGIN { plan test => 6, onfail => \&myfail }
@@ -12,8 +12,10 @@ my $why = "zero != one";
 # sneak in a test that Test::Harness wont see
 open J, ">junk";
 $TESTOUT = *J{IO};
+$TESTERR = *J{IO};
 ok(0, 1, $why);
 $TESTOUT = *STDOUT{IO};
+$TESTERR = *STDERR{IO};
 close J;
 unlink "junk";
 $ntest = 1;
