@@ -44,12 +44,12 @@ sub output
 package B::C;
 use Exporter ();
 @ISA = qw(Exporter);
-@EXPORT_OK = qw(output_all output_boilerplate output_main
-		init_sections set_callback save_unused_subs objsym);
+@EXPORT_OK = qw(output_all output_boilerplate output_main mark_unused
+		init_sections set_callback save_unused_subs objsym save_context);
 
 use B qw(minus_c sv_undef walkoptree walksymtable main_root main_start peekop
 	 class cstring cchar svref_2object compile_stats comppadlist hash
-	 threadsv_names main_cv init_av);
+	 threadsv_names main_cv init_av opnumber);
 use B::Asmdata qw(@specialsv_name);
 
 use FileHandle;
@@ -105,9 +105,9 @@ my $op_seq = 65535;
 
 sub AVf_REAL () { 1 }
 
-# XXX This shouldn't really be hardcoded here but it saves
-# looking up the name of every BASEOP in B::OP
-sub OP_THREADSV () { 345 }
+# Look this up here so we can do just a number compare
+# rather than looking up the name of every BASEOP in B::OP
+my $OP_THREADSV = opnumber('threadsv');
 
 sub savesym {
     my ($obj, $value) = @_;
@@ -155,7 +155,7 @@ sub B::OP::save {
     my ($op, $level) = @_;
     my $type = $op->type;
     $nullop_count++ unless $type;
-    if ($type == OP_THREADSV) {
+    if ($type == $OP_THREADSV) {
 	# saves looking up ppaddr but it's a bit naughty to hard code this
 	$init->add(sprintf("(void)find_threadsv(%s);",
 			   cstring($threadsv_names[$op->targ])));
@@ -1250,30 +1250,34 @@ sub save_unused_subs
  walksymtable(\%{"main::"}, "savecv", \&should_save);
 }
 
+sub save_context
+{
+ my $curpad_nam = (comppadlist->ARRAY)[0]->save;
+ my $curpad_sym = (comppadlist->ARRAY)[1]->save;
+ my $inc_hv     = svref_2object(\%INC)->save;
+ my $inc_av     = svref_2object(\@INC)->save;
+ $init->add(   "PL_curpad = AvARRAY($curpad_sym);",
+	       "GvHV(PL_incgv) = $inc_hv;",
+	       "GvAV(PL_incgv) = $inc_av;",
+               "av_store(CvPADLIST(PL_main_cv),0,SvREFCNT_inc($curpad_nam));",
+               "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));");
+}
+
 sub save_main {
     warn "Starting compile\n";
     foreach my $pack (keys %unused_sub_packages)
      {
       mark_package($pack);
      }
-    my $curpad_nam = (comppadlist->ARRAY)[0]->save;
-    my $curpad_sym = (comppadlist->ARRAY)[1]->save;
-    my $init_av    = init_av->save;
-    my $inc_hv     = svref_2object(\%INC)->save;
-    my $inc_av     = svref_2object(\@INC)->save;
     warn "Walking tree\n";
     walkoptree(main_root, "save");
     warn "done main optree, walking symtable for extras\n" if $debug_cv;
     save_unused_subs();
-
+    my $init_av = init_av->save;
     $init->add(sprintf("PL_main_root = s\\_%x;", ${main_root()}),
 	       sprintf("PL_main_start = s\\_%x;", ${main_start()}),
-	       "PL_curpad = AvARRAY($curpad_sym);",
-	       "PL_initav = $init_av;",
-	       "GvHV(PL_incgv) = $inc_hv;",
-	       "GvAV(PL_incgv) = $inc_av;",
-               "av_store(CvPADLIST(PL_main_cv),0,SvREFCNT_inc($curpad_nam));",
-               "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));");
+	       "PL_initav = $init_av;");
+    save_context();
     warn "Writing output\n";
     output_boilerplate();
     print "\n";
@@ -1299,6 +1303,12 @@ sub init_sections {
     while (($name, $sectref) = splice(@sections, 0, 2)) {
 	$$sectref = new B::C::Section $name, \%symtable, 0;
     }
+}           
+
+sub mark_unused
+{
+ my ($arg,$val) = @_;
+ $unused_sub_packages{$arg} = $val;
 }
 
 sub compile {
@@ -1343,7 +1353,7 @@ sub compile {
 	    $verbose = 1;
 	} elsif ($opt eq "u") {
 	    $arg ||= shift @options;
-	    $unused_sub_packages{$arg} = undef;
+	    mark_unused($arg,undef);
 	} elsif ($opt eq "f") {
 	    $arg ||= shift @options;
 	    if ($arg eq "cog") {

@@ -11,7 +11,7 @@ require Exporter;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT_OK = qw(byteload_fh byteload_string minus_c ppname
 		class peekop cast_I32 cstring cchar hash threadsv_names
-		main_root main_start main_cv svref_2object
+		main_root main_start main_cv svref_2object opnumber
 		walkoptree walkoptree_slow walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info init_av);
 
@@ -187,9 +187,12 @@ sub walkoptree_exec {
 sub walksymtable {
     my ($symref, $method, $recurse, $prefix) = @_;
     my $sym;
+    my $ref;
     no strict 'vars';
     local(*glob);
-    while (($sym, *glob) = each %$symref) {
+    $prefix = '' unless defined $prefix;
+    while (($sym, $ref) = each %$symref) {
+	*glob = $ref;
 	if ($sym =~ /::$/) {
 	    $sym = $prefix . $sym;
 	    if ($sym ne "main::" && &$recurse($sym)) {
