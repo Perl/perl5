@@ -169,7 +169,7 @@
  *	<sys/resource.h> needs to be included (see I_SYS_RESOURCE).
  *	The type "Timeval" should be used to refer to "struct timeval".
  */
-/*#define HAS_GETTIMEOFDAY	/**/
+#define HAS_GETTIMEOFDAY	/**/
 #ifdef HAS_GETTIMEOFDAY
 #define Timeval struct timeval	/* Structure used by gettimeofday() */
 #endif
@@ -3464,7 +3464,7 @@
  *	to the program to supply one.  A good guess is
  *		extern int flock(int, int);
  */
-/*#define	HAS_FLOCK_PROTO	/**/
+#define	HAS_FLOCK_PROTO	/**/
 
 /* HAS_FPCLASSL:
  *	This symbol, if defined, indicates that the fpclassl routine is

@@ -64,7 +64,7 @@ A queue, as implemented by C<threads::shared::queue> is a thread-safe
 data structure much like a list.  Any number of threads can safely 
 add elements to the end of the list, or remove elements from the head 
 of the list. (Queues don't permit adding or removing elements from 
-the middle of the list)
+the middle of the list).
 
 =head1 FUNCTIONS AND METHODS
 
@@ -77,7 +77,7 @@ The C<new> function creates a new empty queue.
 =item enqueue LIST
 
 The C<enqueue> method adds a list of scalars on to the end of the queue.
-The queue will grow as needed to accomodate the list.
+The queue will grow as needed to accommodate the list.
 
 =item dequeue
 
@@ -100,7 +100,7 @@ The C<pending> method returns the number of items still in the queue.
 
 =head1 SEE ALSO
 
-L<threads> L<threads::shared>
+L<threads>, L<threads::shared>
 
 =cut
 

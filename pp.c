@@ -2680,7 +2680,7 @@ S_seed(pTHX)
     u = (U32)SEED_C1 * when[0] + (U32)SEED_C2 * when[1];
 #else
 #  ifdef HAS_GETTIMEOFDAY
-    gettimeofday(&when,(struct timezone *) 0);
+    PerlProc_gettimeofday(&when,NULL);
     u = (U32)SEED_C1 * when.tv_sec + (U32)SEED_C2 * when.tv_usec;
 #  else
     (void)time(&when);

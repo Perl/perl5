@@ -80,9 +80,9 @@ threads::shared - Perl extension for sharing data structures between threads
   use threads;
   use threads::shared;
 
-  my($foo, @foo, %foo);
-  share($foo);
-  share(@foo);
+  my($scalar, @array, %hash);
+  share($scalar);
+  share(@array);
   share(%hash);
   my $bar = share([]);
   $hash{bar} = share({});
@@ -109,8 +109,8 @@ C<share>, C<lock>, C<unlock>, C<cond_wait>, C<cond_signal>, C<cond_broadcast>
 
 =item share VARIABLE
 
-C<share> takes a value and marks it as shared, you can share a scalar, array, hash
-scalar ref, array ref and hash ref, C<share> will return the shared value.
+C<share> takes a value and marks it as shared. You can share a scalar, array,
+hash, scalar ref, array ref or hash ref. C<share> will return the shared value.
 
 C<share> will traverse up references exactly I<one> level.
 C<share(\$a)> is equivalent to C<share($a)>, while C<share(\\$a)> is not.
@@ -120,7 +120,7 @@ C<share(\$a)> is equivalent to C<share($a)>, while C<share(\\$a)> is not.
 C<lock> places a lock on a variable until the lock goes out of scope.  If
 the variable is locked by another thread, the C<lock> call will block until
 it's available. C<lock> is recursive, so multiple calls to C<lock> are
-safe--the variable will remain locked until the outermost lock on the
+safe -- the variable will remain locked until the outermost lock on the
 variable goes out of scope or C<unlock> is called enough times to match
 the number of calls to <lock>.
 
@@ -134,9 +134,9 @@ C<lock(\$a)> is equivalent to C<lock($a)>, while C<lock(\\$a)> is not.
 
 =item unlock VARIABLE
 
-C<unlock> takes a locked shared value and decrements the lock count.
+C<unlock> takes a B<locked> variable and decrements the lock count.
 If the lock count is zero the variable is unlocked. It is not necessary
-to call C<unlock> but it can be usefull to reduce lock contention.
+to call C<unlock> but it can be useful to reduce lock contention.
 
 C<unlock> will traverse up references exactly I<one> level.
 C<unlock(\$a)> is equivalent to C<unlock($a)>, while C<unlock(\\$a)> is not.
@@ -148,14 +148,14 @@ unlocks the variable, and blocks until another thread does a C<cond_signal>
 or C<cond_broadcast> for that same locked variable. The variable that
 C<cond_wait> blocked on is relocked after the C<cond_wait> is satisfied.
 If there are multiple threads C<cond_wait>ing on the same variable, all but
-one will reblock waiting to reaquire the lock on the variable. (So if
+one will reblock waiting to reacquire the lock on the variable. (So if
 you're only using C<cond_wait> for synchronization, give up the lock as
 soon as possible)
 
 It is important to note that the variable can be notified even if no
 thread C<cond_signal> or C<cond_broadcast> on the variable. It is therefore
 important to check the value of the variable and go back to waiting if the
-requirment is not fullfilled.
+requirement is not fulfilled.
 
 =item cond_signal VARIABLE
 
@@ -173,6 +173,7 @@ The C<cond_broadcast> function works similarly to C<cond_signal>.
 C<cond_broadcast>, though, will unblock B<all> the threads that are blocked
 in a C<cond_wait> on the locked variable, rather than only one.
 
+=back
 
 =head1 NOTES
 
@@ -183,10 +184,10 @@ use it after threads::shared.
 
 =head1 BUGS
 
-C<bless> is not supported on shared references, in the current version
+C<bless> is not supported on shared references. In the current version,
 C<bless> will only bless the thread local reference and the blessing
-will not propagate to the other threads, this is expected to be implmented
-in the future.
+will not propagate to the other threads. This is expected to be
+implemented in a future version of Perl.
 
 Does not support splice on arrays!
 

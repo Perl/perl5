@@ -10,7 +10,7 @@ for short.  There is another older perl threading flavour called
 the 5.005 model, unsurprisingly for 5.005 versions of Perl.
 
 You can see which (or neither) threading flavour you have by
-running C<perl -V> and look at the C<Platform> section.
+running C<perl -V> and looking at the C<Platform> section.
 If you have C<useithreads=define> you have ithreads, if you
 have C<use5005threads=define> you have 5.005 threads.
 If you have neither, you don't have any thread support built in.
@@ -98,7 +98,7 @@ sophisticated.
 While the information in this section is useful, it's not necessary,
 so you can skip it if you don't feel up to it.
 
-There are three basic categories of threads-user-mode threads, kernel
+There are three basic categories of threads: user-mode threads, kernel
 threads, and multiprocessor kernel threads.
 
 User-mode threads are threads that live entirely within a program and
@@ -131,7 +131,7 @@ threads, as another thread may have changed $a between the time it
 was fetched on the right hand side and the time the new value is
 stored.
 
-Multiprocessor Kernel Threads are the final step in thread
+Multiprocessor kernel threads are the final step in thread
 support.  With multiprocessor kernel threads on a machine with multiple
 CPUs, the OS may schedule two or more threads to run simultaneously on
 different CPUs.
@@ -181,16 +181,16 @@ find yourself looking for mutexes, or thread priorities, it's time to
 step back a bit and think about what you want to do and how Perl can
 do it.
 
-However it is important to remeber that perl threads cannot magicly 
+However it is important to remember that Perl threads cannot magically
 do things unless your operating systems threads allows it. So if your
-system blocks the entire process on sleep(), so will usually perl aswell.
+system blocks the entire process on sleep(), perl usually will as well.
 
 =head1 Threadsafe Modules
 
 The addition of threads has changed Perl's internals 
 substantially. There are implications for people who write
-modules with XS code or external libraries. However since the threads
-do not share data pure perl modules that don't interact with external
+modules with XS code or external libraries. However, since the threads
+do not share data, pure Perl modules that don't interact with external
 systems should be safe. Modules that are not tagged as thread-safe should
 be tested or code reviewed before being used in production code.
 
@@ -201,9 +201,10 @@ core.  Threads are a new feature, and even some of the standard
 modules aren't thread-safe. (*** I think ActiveState checked this for
 psuedofork, check with GSAR)
 
-Even if a module us threadsafe, it doesn't mean that the module is optimized
-to work well with threads. A module could maybe be rewritten to utilize the new
-features in perl threaded to increase performance in a threaded enviroment.
+Even if a module is threadsafe, it doesn't mean that the module is optimized
+to work well with threads. A module could possibly be rewritten to utilize
+the new features in threaded Perl to increase performance in a threaded
+environment.
 
 If you're using a module that's not thread-safe for some reason, you
 can protect yourself by using semaphores and lots of programming
@@ -220,17 +221,10 @@ make threaded programming easier.
 
 =head2 Basic Thread Support
 
-Thread support is a Perl compile-time option-it's something that's
+Thread support is a Perl compile-time option - it's something that's
 turned on or off when Perl is built at your site, rather than when
 your programs are compiled. If your Perl wasn't compiled with thread
 support enabled, then any attempt to use threads will fail.
-
-Remember that the threading support in 5.005 is in beta release, and
-should be treated as such.   You should expect that it may not function
-entirely properly, and the thread interface may well change some
-before it is a fully supported, production release.  The beta version
-shouldn't be used for mission-critical projects.  Having said that,
-threaded Perl is pretty nifty, and worth a look. (??)
 
 Your programs can use the Config module to check whether threads are
 enabled. If your program can't run without them, you can say something
@@ -321,7 +315,7 @@ this. yield() is pretty straightforward, and works like this:
 		while($foo--) { print "in thread $thread\n" }
 		threads->yield();
 		$foo = 50;
-		while($foo--) {Êprint "in thread $thread\n" }
+		while($foo--) { print "in thread $thread\n" }
 	}
 
 	my $thread1 = threads->new(\&loop, 'first');
@@ -337,8 +331,8 @@ work on another platform.
 =head2 Waiting For A Thread To Exit
 
 Since threads are also subroutines, they can return values.  To wait
-for a thread to exit and extract any scalars it might return, you can
-use the join() method.
+for a thread to exit and extract any values it might return, you can
+use the join() method:
 
     use threads; 
     $thr = threads->new(\&sub1);
@@ -370,7 +364,7 @@ it'll run until it's finished, then Perl will clean up after it
 automatically.
 
     use threads; 
-    $thr = new threads \&sub1; # Spawn the thread
+    $thr = threads->new(\&sub1); # Spawn the thread
 
     $thr->detach; # Now we officially don't care any more
 
@@ -402,8 +396,8 @@ is not shared. When a new perl thread is created all data is cloned
 and is private to that thread!
 
 To make use of threading however, one usually want the threads to share
-data between each other, that is used with the L<threads::shared> module
-and the C< : shared> attribute.
+data between each other. This is done with the L<threads::shared> module
+and the C< : shared> attribute:
 
 	use threads;
 	use threads::shared;
@@ -412,9 +406,9 @@ and the C< : shared> attribute.
 	threads->new(sub { $foo++; $bar++ })->join;
 	
 	print "$foo\n";  #prints 2 since $foo is shared
-	print "$bar\n";  #prints 1 since bar is not shared
+	print "$bar\n";  #prints 1 since $bar is not shared
 
-=head2 Thread Pitfall: Races
+=head2 Thread Pitfalls: Races
 
 While threads bring a new set of useful tools, they also bring a
 number of pitfalls.  One pitfall is the race condition:
@@ -579,10 +573,10 @@ this:
     $DataQueue->enqueue(undef);
     $thr->join();
 
-You create the queue with new threads::shared::queue.  Then you can add lists of
-scalars onto the end with enqueue(), and pop scalars off the front of
-it with dequeue().  A queue has no fixed size, and can grow as needed
-to hold everything pushed on to it.
+You create the queue with C<new threads::shared::queue>.  Then you can
+add lists of scalars onto the end with enqueue(), and pop scalars off
+the front of it with dequeue().  A queue has no fixed size, and can grow
+as needed to hold everything pushed on to it.
 
 If a queue is empty, dequeue() blocks until another thread enqueues
 something.  This makes queues ideal for event loops and other
@@ -639,7 +633,7 @@ gives a quick demonstration:
             $semaphore->up; 
         } 
     }
-    
+
     $thr1->join();
     $thr2->join();
     $thr3->join();
@@ -653,14 +647,33 @@ global variable at once.
 By default, semaphores behave like locks, letting only one thread
 down() them at a time.  However, there are other uses for semaphores.
 
-Each semaphore has a counter attached to it. down() decrements the
-counter and up() increments the counter.  By default, semaphores are
-created with the counter set to one, down() decrements by one, and
-up() increments by one.  If down() attempts to decrement the counter
-below zero, it blocks until the counter is large enough.  Note that
-while a semaphore can be created with a starting count of zero, any
-up() or down() always changes the counter by at least
-one. $semaphore->down(0) is the same as $semaphore->down(1).
+Each semaphore has a counter attached to it. By default, semaphores are
+created with the counter set to one, down() decrements the counter by
+one, and up() increments by one. However, we can override any or all
+of these defaults simply by passing in different values:
+
+    use threads;
+    use threads::shared::semaphore;
+    my $semaphore = threads::shared::semaphore->new(5);
+                    # Creates a semaphore with the counter set to five
+
+    $thr1 = threads->new(\&sub1);
+    $thr2 = threads->new(\&sub1);
+
+    sub sub1 {
+        $semaphore->down(5); # Decrements the counter by five
+        # Do stuff here
+        $semaphore->up(5); # Increment the counter by five
+    }
+
+    $thr1->detach();
+    $thr2->detach();
+
+If down() attempts to decrement the counter below zero, it blocks until
+the counter is large enough.  Note that while a semaphore can be created
+with a starting count of zero, any up() or down() always changes the
+counter by at least one, and so $semaphore->down(0) is the same as
+$semaphore->down(1).
 
 The question, of course, is why would you do something like this? Why
 create a semaphore with a starting count that's not one, or why
@@ -698,9 +711,9 @@ really fit in anyplace else.
 
 =head2 What Thread Am I In?
 
-The threads->self method provides your program with a way to get an
+The C<threads->self> method provides your program with a way to get an
 object representing the thread it's currently in.  You can use this
-object in the same way as the ones returned from the thread creation.
+object in the same way as the ones returned from thread creation.
 
 =head2 Thread IDs
 
@@ -733,9 +746,9 @@ including cleaning up at the end of your program:
         } 
     }
 
-If not all threads are finished running when the main perl thread
+If some threads have not finished running when the main perl thread
 ends, perl will warn you about it and die, since it is impossible for perl
-to clean up itself while other threads are runninng
+to clean up itself while other threads are running
 
 =head1 A Complete Example
 
@@ -780,13 +793,13 @@ things we've covered.  This program finds prime numbers using threads.
 This program uses the pipeline model to generate prime numbers.  Each
 thread in the pipeline has an input queue that feeds numbers to be
 checked, a prime number that it's responsible for, and an output queue
-that it funnels numbers that have failed the check into.  If the thread
+that into which it funnels numbers that have failed the check.  If the thread
 has a number that's failed its check and there's no child thread, then
 the thread must have found a new prime number.  In that case, a new
 child thread is created for that prime and stuck on the end of the
 pipeline.
 
-This probably sounds a bit more confusing than it really is, so lets
+This probably sounds a bit more confusing than it really is, so let's
 go through this program piece by piece and see what it does.  (For
 those of you who might be trying to remember exactly what a prime
 number is, it's a number that's only evenly divisible by itself and 1)
@@ -811,7 +824,7 @@ the queue we've created, and the prime number we've found.
 
 Finally, once the loop terminates (because we got a 0 or undef in the
 queue, which serves as a note to die), we pass on the notice to our
-child and wait for it to exit if we've created a child (Lines 32 and
+child and wait for it to exit if we've created a child (lines 32 and
 37).
 
 Meanwhile, back in the main thread, we create a queue (line 9) and the
@@ -827,10 +840,8 @@ the explanation is much longer than the program.
 =head1 Conclusion
 
 A complete thread tutorial could fill a book (and has, many times),
-but this should get you well on your way.  The final authority on how
-Perl's threads behave is the documentation bundled with the Perl
-distribution, but with what we've covered in this article, you should
-be well on your way to becoming a threaded Perl expert.
+but with what we've covered in this introduction, you should be well
+on your way to becoming a threaded Perl expert.
 
 =head1 Bibliography
 
@@ -841,8 +852,8 @@ Here's a short bibliography courtesy of Jürgen Christoffel:
 Birrell, Andrew D. An Introduction to Programming with
 Threads. Digital Equipment Corporation, 1989, DEC-SRC Research Report
 #35 online as
-http://www.research.digital.com/SRC/staff/birrell/bib.html (highly
-recommended)
+http://gatekeeper.dec.com/pub/DEC/SRC/research-reports/abstracts/src-rr-035.html
+(highly recommended)
 
 Robbins, Kay. A., and Steven Robbins. Practical Unix Programming: A
 Guide to Concurrency, Communication, and

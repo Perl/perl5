@@ -824,9 +824,7 @@ PP(pp_tie)
     if (sv_isobject(sv)) {
 	sv_unmagic(varsv, how);
 	/* Croak if a self-tie on an aggregate is attempted. */
-	if (varsv == SvRV(sv) &&
-	    (SvTYPE(sv) == SVt_PVAV ||
-	     SvTYPE(sv) == SVt_PVHV))
+	if (varsv == SvRV(sv) && how == PERL_MAGIC_tied)
 	    Perl_croak(aTHX_
 		       "Self-ties of arrays and hashes are not supported");
 	sv_magic(varsv, sv, how, Nullch, 0);
