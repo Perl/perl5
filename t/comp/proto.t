@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 
-print "1..107\n";
+print "1..110\n";
 
 my $i = 1;
 
@@ -286,6 +286,25 @@ a_sub \&tmp_sub_1;
 
 @array = ( \&tmp_sub_1 );
 eval 'a_sub @array';
+print "not " unless $@;
+printf "ok %d\n",$i++;
+
+##
+##
+##
+
+testing \&a_subx, '\&';
+
+sub a_subx (\&) {
+    print "# \@_ = (",join(",",@_),")\n";
+    &{$_[0]};
+}
+
+sub tmp_sub_2 { printf "ok %d\n",$i++ }
+a_subx &tmp_sub_2;
+
+@array = ( \&tmp_sub_2 );
+eval 'a_subx @array';
 print "not " unless $@;
 printf "ok %d\n",$i++;
 

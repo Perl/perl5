@@ -6262,7 +6262,9 @@ Perl_ck_subr(pTHX_ OP *o)
 		proto++;
 		arg++;
 		if (o2->op_type != OP_REFGEN && o2->op_type != OP_UNDEF)
-		    bad_type(arg, "block", gv_ename(namegv), o2);
+		    bad_type(arg,
+			arg == 1 ? "block or sub {}" : "sub {}",
+			gv_ename(namegv), o2);
 		break;
 	    case '*':
 		/* '*' allows any scalar type, including bareword */
@@ -6310,8 +6312,8 @@ Perl_ck_subr(pTHX_ OP *o)
 			bad_type(arg, "symbol", gv_ename(namegv), o2);
 		    goto wrapref;
 		case '&':
-		    if (o2->op_type != OP_RV2CV)
-			bad_type(arg, "sub", gv_ename(namegv), o2);
+		    if (o2->op_type != OP_ENTERSUB)
+			bad_type(arg, "subroutine entry", gv_ename(namegv), o2);
 		    goto wrapref;
 		case '$':
 		    if (o2->op_type != OP_RV2SV
