@@ -5620,8 +5620,12 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
         len = -len;
         is_utf8 = TRUE;
     }
-    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT))
-	src = (char*)bytes_from_utf8((U8*)src, (STRLEN*)&len, &is_utf8);
+    if (is_utf8 && !(PL_hints & HINT_UTF8_DISTINCT)) {
+	STRLEN tmplen = len;
+	/* See the note in hv.c:hv_fetch() --jhi */
+	src = (char*)bytes_from_utf8((U8*)src, &tmplen, &is_utf8);
+	len = tmplen;
+    }
     if (!hash)
 	PERL_HASH(hash, src, len);
     new_SV(sv);
