@@ -2431,8 +2431,25 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	in the <db.h> header file.  In older versions of DB, it was
  *	int, while in newer ones it is size_t.
  */
+/* DB_VERSION_MAJOR_CFG:
+ *	This symbol, if defined, defines the major version number of
+ *	Berkeley DB found in the <db.h> header when Perl was configured.
+ */
+/* DB_VERSION_MINOR_CFG:
+ *	This symbol, if defined, defines the minor version number of
+ *	Berkeley DB found in the <db.h> header when Perl was configured.
+ *	For DB version 1 this is always 0.
+ */
+/* DB_VERSION_PATCH_CFG:
+ *	This symbol, if defined, defines the patch version number of
+ *	Berkeley DB found in the <db.h> header when Perl was configured.
+ *	For DB version 1 this is always 0.
+ */
 #define DB_Hash_t	$db_hashtype		/**/
 #define DB_Prefix_t	$db_prefixtype  	/**/
+#define DB_VERSION_MAJOR_CFG	$db_version_major  	/**/
+#define DB_VERSION_MINOR_CFG	$db_version_minor  	/**/
+#define DB_VERSION_PATCH_CFG	$db_version_patch  	/**/
 
 /* I_GRP:
  *	This symbol, if defined, indicates to the C program that it should
@@ -3339,6 +3356,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
 
+/* HAS_REALPATH:
+ *	This symbol, if defined, indicates that the realpath routine is
+ *	available to do resolve paths.
+ */
+#$d_realpath HAS_REALPATH		/**/
+
 /* HAS_SIGPROCMASK:
  *	This symbol, if defined, indicates that the sigprocmask
  *	system call is available to examine or change the signal mask
@@ -3351,6 +3374,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to test whether a socket is at the out-of-band mark.
  */
 #$d_sockatmark HAS_SOCKATMARK		/**/
+
+/* HAS_SETRESUID_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the setresuid() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern int setresuid(uid_t ruid, uid_t euid, uid_t suid);
+ */
+#$d_sresuproto	HAS_SETRESUID_PROTO	/**/
 
 /* HAS_STRFTIME:
  *	This symbol, if defined, indicates that the strftime routine is

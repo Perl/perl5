@@ -1244,6 +1244,10 @@ d_readv (d_readv.U):
 	This variable conditionally defines the HAS_READV symbol, which
 	indicates to the C program that the readv() routine is available.
 
+d_realpath (d_realpath.U):
+	This variable conditionally defines the HAS_REALPATH symbol, which
+	indicates to the C program that the realpath() routine is available.
+
 d_recvmsg (d_recvmsg.U):
 	This variable conditionally defines the HAS_RECVMSG symbol, which
 	indicates to the C program that the recvmsg() routine is available.
@@ -1512,6 +1516,12 @@ d_socks5_init (d_socks5_init.U):
 d_sqrtl (d_sqrtl.U):
 	This variable conditionally defines the HAS_SQRTL symbol, which
 	indicates to the C program that the sqrtl() routine is available.
+
+d_sresuproto (d_sresuproto.U):
+	This variable conditionally defines the HAS_SETRESUID_PROTO symbol,
+	which indicates to the C program that the system provides
+	a prototype for the setresuid() function.  Otherwise, it is
+	up to the program to supply one.
 
 d_statblks (d_statblks.U):
 	This variable conditionally defines USE_STAT_BLOCKS
@@ -1805,6 +1815,20 @@ db_prefixtype (i_db.U):
 	This variable contains the type of the prefix structure element
 	in the <db.h> header file.  In older versions of DB, it was
 	int, while in newer ones it is size_t.
+
+db_version_major (i_db.U):
+	This variable contains the major version number of
+	Berkeley DB found in the <db.h> header file.
+
+db_version_minor (i_db.U):
+	This variable contains the minor version number of
+	Berkeley DB found in the <db.h> header file.
+	For DB version 1 this is always 0.
+
+db_version_patch (i_db.U):
+	This variable contains the patch version number of
+	Berkeley DB found in the <db.h> header file.
+	For DB version 1 this is always 0.
 
 defvoidused (voidflags.U):
 	This variable contains the default value of the VOIDUSED symbol (15).

@@ -2905,9 +2905,8 @@ Found in file sv.c
 
 =item sv_realpath
 
-Emulate realpath(3)
+Wrap or emulate realpath(3).
 
-XXX: add configure test for realpath(3) and prefer if available
 	int	sv_realpath(SV* sv, char *path, STRLEN len)
 
 =for hackers

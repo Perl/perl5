@@ -2407,8 +2407,25 @@
  *	in the <db.h> header file.  In older versions of DB, it was
  *	int, while in newer ones it is size_t.
  */
+/* DB_VERSION_MAJOR_CFG:
+ *	This symbol, if defined, defines the major version number of
+ *	Berkeley DB found in the <db.h> header when Perl was configured.
+ */
+/* DB_VERSION_MINOR_CFG:
+ *	This symbol, if defined, defines the minor version number of
+ *	Berkeley DB found in the <db.h> header when Perl was configured.
+ *	For DB version 1 this is always 0.
+ */
+/* DB_VERSION_PATCH_CFG:
+ *	This symbol, if defined, defines the patch version number of
+ *	Berkeley DB found in the <db.h> header when Perl was configured.
+ *	For DB version 1 this is always 0.
+ */
 #define DB_Hash_t	u_int32_t		/**/
 #define DB_Prefix_t	size_t  	/**/
+#define DB_VERSION_MAJOR_CFG	  	/**/
+#define DB_VERSION_MINOR_CFG	  	/**/
+#define DB_VERSION_PATCH_CFG	  	/**/
 
 /* I_GRP:
  *	This symbol, if defined, indicates to the C program that it should
@@ -3315,6 +3332,12 @@
 #define PERL_XS_APIVERSION "5.005"
 #define PERL_PM_APIVERSION "5.005"
 
+/* HAS_REALPATH:
+ *	This symbol, if defined, indicates that the realpath routine is
+ *	available to do resolve paths.
+ */
+/*#define HAS_REALPATH		/ **/
+
 /* HAS_SIGPROCMASK:
  *	This symbol, if defined, indicates that the sigprocmask
  *	system call is available to examine or change the signal mask
@@ -3327,6 +3350,14 @@
  *	available to test whether a socket is at the out-of-band mark.
  */
 /*#define HAS_SOCKATMARK		/ **/
+
+/* HAS_SETRESUID_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the setresuid() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern int setresuid(uid_t ruid, uid_t euid, uid_t suid);
+ */
+/*#define	HAS_SETRESUID_PROTO	/ **/
 
 /* HAS_STRFTIME:
  *	This symbol, if defined, indicates that the strftime routine is

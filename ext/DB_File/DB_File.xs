@@ -118,9 +118,14 @@
 #    define DEFSV		GvSV(defgv)
 #endif
 
+/* Mention DB_VERSION_MAJOR_CFG, DB_VERSION_MINOR_CFG, and
+   DB_VERSION_PATCH_CFG here so that Configure pulls them all in. */
+
 /* Being the Berkeley DB we prefer the <sys/cdefs.h> (which will be
  * shortly #included by the <db.h>) __attribute__ to the possibly
  * already defined __attribute__, for example by GNUC or by Perl. */
+
+#if DB_VERSION_MAJOR_CFG < 2
 
 #undef __attribute__
 
@@ -130,6 +135,8 @@
  * boo, hiss. */
 #undef  dNOOP
 #define dNOOP extern int Perl___notused
+
+#endif
 
 /* If Perl has been compiled with Threads support,the symbol op will
    be defined here. This clashes with a field name in db.h, so get rid of it.

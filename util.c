@@ -4450,6 +4450,8 @@ Fill the sv with current working directory
 int
 Perl_sv_getcwd(pTHX_ register SV *sv)
 {
+#ifndef PERL_MICRO
+
 #ifndef HAS_GETCWD
     struct stat statbuf;
     int orig_cdev, orig_cino, cdev, cino, odev, oino, tdev, tino;
@@ -4569,24 +4571,65 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
 #endif
 
     return TRUE;
+#else
+    return FALSE;
+#endif
 }
 
 /*
 =for apidoc sv_realpath
 
-Emulate realpath(3)
+Wrap or emulate realpath(3).
 
-XXX: add configure test for realpath(3) and prefer if available
 =cut
  */
 int
 Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
 {
+#ifndef PERL_MICRO
+    char name[MAXPATHLEN] = { 0 }, *s;
+    STRLEN pathlen, namelen;
+
+#ifdef HAS_REALPATH
+    /* Be paranoid about the use of realpath(),
+     * it is an infamous source of buffer overruns. */
+
+    /* Is the source buffer too long?
+     * Don't use strlen() to avoid running off the end. */
+    s = memchr(path, '\0', MAXPATHLEN);
+    pathlen = s ? s - path : MAXPATHLEN;
+    if (pathlen == MAXPATHLEN) {
+        Perl_warn(aTHX_ "sv_realpath: realpath(\"%s\"): %c= (MAXPATHLEN = %d)",
+                  path, s ? '=' : '>', MAXPATHLEN);
+        SV_CWD_RETURN_UNDEF;
+    }
+
+    /* Here goes nothing. */
+    if (realpath(path, name) == NULL) {
+        Perl_warn(aTHX_ "sv_realpath: realpath(\"%s\"): %s",
+                  path, Strerror(errno));
+        SV_CWD_RETURN_UNDEF;
+    }
+
+    /* Is the destination buffer too long?
+     * Don't use strlen() to avoid running off the end. */
+    s = memchr(name, '\0', MAXPATHLEN);
+    namelen = s ? s - name : MAXPATHLEN;
+    if (namelen == MAXPATHLEN) {
+        Perl_warn(aTHX_ "sv_realpath: realpath(\"%s\"): %c= (MAXPATHLEN = %d)",
+                  path, s ? '=' : '>', MAXPATHLEN);
+        SV_CWD_RETURN_UNDEF;
+    }
+
+    /* The coast is clear? */
+    sv_setpvn(sv, name, namelen);
+    SvPOK_only(sv);
+
+    return TRUE;
+#else
     DIR *parent;
     Direntry_t *dp;
     char dotdots[MAXPATHLEN] = { 0 };
-    char name[MAXPATHLEN]    = { 0 };
-    int namelen = 0, pathlen = 0;
     struct stat cst, pst, tst;
 
     if (PerlLIO_stat(path, &cst) < 0) {
@@ -4686,4 +4729,8 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
     SvPOK_only(sv);
 
     return TRUE;
+#endif
+#else
+    return FALSE;
+#endif
 }

@@ -2487,6 +2487,13 @@ I32 unlnk (char*);
 #define UNLINK PerlLIO_unlink
 #endif
 
+#ifndef HAS_SETRESUID_PROTO /* some versions of glibc */
+int setresuid(uid_t ruid, uid_t euid, uid_t suid);
+#endif
+#ifndef HAS_SETRESUID_PROTO /* some versions of glibc */
+int setresgid(gid_t rgid, gid_t egid, gid_t sgid);
+#endif
+
 #ifndef HAS_SETREUID
 #  ifdef HAS_SETRESUID
 #    define setreuid(r,e) setresuid(r,e,(Uid_t)-1)
