@@ -6,18 +6,18 @@ our $VERSION = '1.00';
 
 =head1 NAME
 
-Thread::Semaphore - thread-safe semaphores
+threads::shared::semaphore - thread-safe semaphores
 
 =head1 SYNOPSIS
 
-    use Thread::Semaphore;
-    my $s = new Thread::Semaphore;
+    use threads::shared::semaphore;
+    my $s = new threads::shared::semaphore;
     $s->up;	# Also known as the semaphore V -operation.
     # The guarded section is here
     $s->down;	# Also known as the semaphore P -operation.
 
     # The default semaphore value is 1.
-    my $s = new Thread::Semaphore($initial_value);
+    my $s = new threads::shared::semaphore($initial_value);
     $s->up($up_value);
     $s->down($up_value);
 
