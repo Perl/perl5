@@ -7,6 +7,9 @@
 #define PERL_VERSION	5		/* epoch */
 #define PERL_SUBVERSION	61		/* generation */
 
+#define __PATCHLEVEL_H_INCLUDED__
+#endif
+
 /*
 	local_patches -- list of locally applied less-than-subversion patches.
 	If you're distributing such a patch, please give it a name and a
@@ -42,6 +45,7 @@
 	This will prevent patch from choking if someone has previously
 	applied different patches than you.
  */
+#if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
 static	char	*local_patches[] = {
 	NULL
 	,NULL
@@ -51,13 +55,8 @@ static	char	*local_patches[] = {
 #  define	LOCAL_PATCH_COUNT	\
 	(sizeof(local_patches)/sizeof(local_patches[0])-2)
 
-#  define __PATCHLEVEL_H_INCLUDED__
-#endif
-
 /* the old terms of reference, add them only when explicitly included */
-#if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(PATCHLEVEL)
 #define PATCHLEVEL		PERL_VERSION
 #undef  SUBVERSION		/* OS/390 has a SUBVERSION in a system header */
 #define SUBVERSION		PERL_SUBVERSION
 #endif
-
