@@ -3350,8 +3350,10 @@ PP(pp_uc)
 	    SETs(TARG);
 	}
 	else {
+	    STRLEN nchar = utf8_length(s, s + len);
+
 	    (void)SvUPGRADE(TARG, SVt_PV);
-	    SvGROW(TARG, (len * 2) + 1);
+	    SvGROW(TARG, (nchar * UTF8_MAXLEN_UCLC) + 1);
 	    (void)SvPOK_only(TARG);
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
@@ -3417,8 +3419,10 @@ PP(pp_lc)
 	    SETs(TARG);
 	}
 	else {
+	    STRLEN nchar = utf8_length(s, s + len);
+
 	    (void)SvUPGRADE(TARG, SVt_PV);
-	    SvGROW(TARG, (len * 2) + 1);
+	    SvGROW(TARG, (nchar * UTF8_MAXLEN_UCLC) + 1);
 	    (void)SvPOK_only(TARG);
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;

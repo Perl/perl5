@@ -1,77 +1,12 @@
-#-----------------------------------------------------------------------
-
-=head1 NAME
-
-Locale::Country - ISO codes for country identification (ISO 3166)
-
-=head1 SYNOPSIS
-
-    use Locale::Country;
-    
-    $country = code2country('jp');               # $country gets 'Japan'
-    $code    = country2code('Norway');           # $code gets 'no'
-    
-    @codes   = all_country_codes();
-    @names   = all_country_names();
-    
-    # add "uk" as a pseudo country code for United Kingdom
-    Locale::Country::_alias_code('uk' => 'gb');
-
-=cut
-
-#-----------------------------------------------------------------------
+#
+# Locale::Country - ISO codes for country identification (ISO 3166)
+#
+# $Id: Country.pm,v 2.1 2002/02/06 04:07:09 neilb Exp $
+#
 
 package Locale::Country;
 use strict;
 require 5.002;
-
-#-----------------------------------------------------------------------
-
-=head1 DESCRIPTION
-
-The C<Locale::Country> module provides access to the ISO
-codes for identifying countries, as defined in ISO 3166.
-You can either access the codes via the L<conversion routines>
-(described below), or with the two functions which return lists
-of all country codes or all country names.
-
-There are three different code sets you can use for identifying
-countries:
-
-=over 4
-
-=item B<alpha-2>
-
-Two letter codes, such as 'tv' for Tuvalu.
-This code set is identified with the symbol C<LOCALE_CODE_ALPHA_2>.
-
-=item B<alpha-3>
-
-Three letter codes, such as 'brb' for Barbados.
-This code set is identified with the symbol C<LOCALE_CODE_ALPHA_3>.
-
-=item B<numeric>
-
-Numeric codes, such as 064 for Bhutan.
-This code set is identified with the symbol C<LOCALE_CODE_NUMERIC>.
-
-=back
-
-All of the routines take an optional additional argument
-which specifies the code set to use.
-If not specified, it defaults to the two-letter codes.
-This is partly for backwards compatibility (previous versions
-of this module only supported the alpha-2 codes), and
-partly because they are the most widely used codes.
-
-The alpha-2 and alpha-3 codes are not case-dependent,
-so you can use 'BO', 'Bo', 'bO' or 'bo' for Bolivia.
-When a code is returned by one of the functions in
-this module, it will always be lower-case.
-
-=cut
-
-#-----------------------------------------------------------------------
 
 require Exporter;
 use Carp;
@@ -82,7 +17,7 @@ use Locale::Constants;
 #	Public Global Variables
 #-----------------------------------------------------------------------
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = sprintf("%d.%02d", q$Revision: 1.7 $ =~ /(\d+)\.(\d+)/);
+$VERSION   = sprintf("%d.%02d", q$Revision: 2.1 $ =~ /(\d+)\.(\d+)/);
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2country country2code
                 all_country_codes all_country_names
@@ -97,54 +32,9 @@ my $COUNTRIES = [];
 
 
 #=======================================================================
-
-=head1 CONVERSION ROUTINES
-
-There are three conversion routines: C<code2country()>, C<country2code()>,
-and C<country_code2code()>.
-
-=over 8
-
-=item code2country( CODE, [ CODESET ] )
-
-This function takes a country code and returns a string
-which contains the name of the country identified.
-If the code is not a valid country code, as defined by ISO 3166,
-then C<undef> will be returned:
-
-    $country = code2country('fi');
-
-=item country2code( STRING, [ CODESET ] )
-
-This function takes a country name and returns the corresponding
-country code, if such exists.
-If the argument could not be identified as a country name,
-then C<undef> will be returned:
-
-    $code = country2code('Norway', LOCALE_CODE_ALPHA_3);
-    # $code will now be 'nor'
-
-The case of the country name is not important.
-See the section L<KNOWN BUGS AND LIMITATIONS> below.
-
-=item country_code2code( CODE, CODESET, CODESET )
-
-This function takes a country code from one code set,
-and returns the corresponding code from another code set.
-
-    $alpha2 = country_code2code('fin',
-		 LOCALE_CODE_ALPHA_3 => LOCALE_CODE_ALPHA_2);
-    # $alpha2 will now be 'fi'
-
-If the code passed is not a valid country code in
-the first code set, or if there isn't a code for the
-corresponding country in the second code set,
-then C<undef> will be returned.
-
-=back
-
-=cut
-
+#
+# code2country ( CODE [, CODESET ] )
+#
 #=======================================================================
 sub code2country
 {
@@ -183,6 +73,12 @@ sub code2country
     }
 }
 
+
+#=======================================================================
+#
+# country2code ( NAME [, CODESET ] )
+#
+#=======================================================================
 sub country2code
 {
     my $country = shift;
@@ -204,6 +100,12 @@ sub country2code
     }
 }
 
+
+#=======================================================================
+#
+# country_code2code ( NAME [, CODESET ] )
+#
+#=======================================================================
 sub country_code2code
 {
     (@_ == 3) or croak "country_code2code() takes 3 arguments!";
@@ -211,7 +113,7 @@ sub country_code2code
     my $code = shift;
     my $inset = shift;
     my $outset = shift;
-    my $outcode = shift;
+    my $outcode;
     my $country;
 
 
@@ -222,36 +124,11 @@ sub country_code2code
     return $outcode;
 }
 
+
 #=======================================================================
-
-=head1 QUERY ROUTINES
-
-There are two function which can be used to obtain a list of all codes,
-or all country names:
-
-=over 8
-
-=item C<all_country_codes( [ CODESET ] )>
-
-Returns a list of all two-letter country codes.
-The codes are guaranteed to be all lower-case,
-and not in any particular order.
-
-=item C<all_country_names( [ CODESET ] )>
-
-Returns a list of all country names for which there is a corresponding
-country code in the specified code set.
-The names are capitalised, and not returned in any particular order.
-
-Not all countries have alpha-3 and numeric codes -
-some just have an alpha-2 code,
-so you'll get a different number of countries
-depending on which code set you specify.
-
-=back
-
-=cut
-
+#
+# all_country_codes ( [ CODESET ] )
+#
 #=======================================================================
 sub all_country_codes
 {
@@ -260,6 +137,12 @@ sub all_country_codes
     return keys %{ $CODES->[$codeset] };
 }
 
+
+#=======================================================================
+#
+# all_country_names ( [ CODESET ] )
+#
+#=======================================================================
 sub all_country_names
 {
     my $codeset = @_ > 0 ? shift : LOCALE_CODE_DEFAULT;
@@ -267,34 +150,17 @@ sub all_country_names
     return values %{ $CODES->[$codeset] };
 }
 
-#-----------------------------------------------------------------------
 
-=head1 CODE ALIASING
-
-This module supports a semi-private routine for specifying two letter
-code aliases.
-
-    Locale::Country::_alias_code( ALIAS => CODE [, CODESET ] )
-
-This feature was added as a mechanism for handling
-a "uk" code. The ISO standard says that the two-letter code for
-"United Kingdom" is "gb", whereas domain names are all .uk.
-
-By default the module does not understand "uk", since it is implementing
-an ISO standard. If you would like 'uk' to work as the two-letter
-code for United Kingdom, use the following:
-
-    use Locale::Country;
-    
-    Locale::Country::_alias_code('uk' => 'gb');
-
-With this code, both "uk" and "gb" are valid codes for United Kingdom,
-with the reverse lookup returning "uk" rather than the usual "gb".
-
-=cut
-
-#-----------------------------------------------------------------------
-
+#=======================================================================
+#
+# _alias_code ( ALIAS => CODE [ , CODESET ] )
+#
+# Add an alias for an existing code. If the CODESET isn't specified,
+# then we use the default (currently the alpha-2 codeset).
+#
+#   Locale::Country::_alias_code('uk' => 'gb');
+#
+#=======================================================================
 sub _alias_code
 {
     my $alias = shift;
@@ -316,141 +182,45 @@ sub _alias_code
     return $alias;
 }
 
-#-----------------------------------------------------------------------
-
-=head1 EXAMPLES
-
-The following example illustrates use of the C<code2country()> function.
-The user is prompted for a country code, and then told the corresponding
-country name:
-
-    $| = 1;   # turn off buffering
-    
-    print "Enter country code: ";
-    chop($code = <STDIN>);
-    $country = code2country($code, LOCALE_CODE_ALPHA_2);
-    if (defined $country)
-    {
-        print "$code = $country\n";
-    }
-    else
-    {
-        print "'$code' is not a valid country code!\n";
-    }
-
-=head1 DOMAIN NAMES
-
-Most top-level domain names are based on these codes,
-but there are certain codes which aren't.
-If you are using this module to identify country from hostname,
-your best bet is to preprocess the country code.
-
-For example, B<edu>, B<com>, B<gov> and friends would map to B<us>;
-B<uk> would map to B<gb>. Any others?
-
-=head1 KNOWN BUGS AND LIMITATIONS
-
-=over 4
-
-=item *
-
-When using C<country2code()>, the country name must currently appear
-exactly as it does in the source of the module. For example,
-
-    country2code('United States')
-
-will return B<us>, as expected. But the following will all return C<undef>:
-
-    country2code('United States of America')
-    country2code('Great Britain')
-    country2code('U.S.A.')
-
-If there's need for it, a future version could have variants
-for country names.
-
-=item *
-
-In the current implementation, all data is read in when the
-module is loaded, and then held in memory.
-A lazy implementation would be more memory friendly.
-
-=back
-
-=head1 SEE ALSO
-
-=over 4
-
-=item Locale::Language
-
-ISO two letter codes for identification of language (ISO 639).
-
-=item Locale::Currency
-
-ISO three letter codes for identification of currencies
-and funds (ISO 4217).
-
-=item ISO 3166
-
-The ISO standard which defines these codes.
-
-=item http://www.din.de/gremien/nas/nabd/iso3166ma/
-
-Official home page for ISO 3166
-
-=item http://www.egt.ie/standards/iso3166/iso3166-1-en.html
-
-Another useful, but not official, home page.
-
-=item http://www.cia.gov/cia/publications/factbook/docs/app-f.html
-
-An appendix in the CIA world fact book which lists country codes
-as defined by ISO 3166, FIPS 10-4, and internet domain names.
-
-=back
-
-
-=head1 AUTHOR
-
-Neil Bowers E<lt>neilb@cre.canon.co.ukE<gt>
-
-=head1 COPYRIGHT
-
-Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
-
-This module is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
-
-=cut
-
-#-----------------------------------------------------------------------
 
 #=======================================================================
+#
 # initialisation code - stuff the DATA into the ALPHA2 hash
+#
 #=======================================================================
 {
     my ($alpha2, $alpha3, $numeric);
-    my $country;
+    my ($country, @countries);
 
 
     while (<DATA>)
     {
         next unless /\S/;
         chop;
-        ($alpha2, $alpha3, $numeric, $country) = split(/:/, $_, 4);
+        ($alpha2, $alpha3, $numeric, @countries) = split(/:/, $_);
 
-        $CODES->[LOCALE_CODE_ALPHA_2]->{$alpha2} = $country;
-        $COUNTRIES->[LOCALE_CODE_ALPHA_2]->{"\L$country"} = $alpha2;
+        $CODES->[LOCALE_CODE_ALPHA_2]->{$alpha2} = $countries[0];
+	foreach $country (@countries)
+	{
+	    $COUNTRIES->[LOCALE_CODE_ALPHA_2]->{"\L$country"} = $alpha2;
+	}
 
 	if ($alpha3)
 	{
-            $CODES->[LOCALE_CODE_ALPHA_3]->{$alpha3} = $country;
-            $COUNTRIES->[LOCALE_CODE_ALPHA_3]->{"\L$country"} = $alpha3;
+            $CODES->[LOCALE_CODE_ALPHA_3]->{$alpha3} = $countries[0];
+	    foreach $country (@countries)
+	    {
+		$COUNTRIES->[LOCALE_CODE_ALPHA_3]->{"\L$country"} = $alpha3;
+	    }
 	}
 
 	if ($numeric)
 	{
-            $CODES->[LOCALE_CODE_NUMERIC]->{$numeric} = $country;
-            $COUNTRIES->[LOCALE_CODE_NUMERIC]->{"\L$country"} = $numeric;
+            $CODES->[LOCALE_CODE_NUMERIC]->{$numeric} = $countries[0];
+	    foreach $country (@countries)
+	    {
+		$COUNTRIES->[LOCALE_CODE_NUMERIC]->{"\L$country"} = $numeric;
+	    }
 	}
 
     }
@@ -496,7 +266,7 @@ by:blr:112:Belarus
 bz:blz:084:Belize
 ca:can:124:Canada
 cc:::Cocos (Keeling) Islands
-cd:cod:180:Congo, The Democratic Republic of the
+cd:cod:180:Congo, The Democratic Republic of the:Congo, Democratic Republic of the
 cf:caf:140:Central African Republic
 cg:cog:178:Congo
 ch:che:756:Switzerland
@@ -527,13 +297,13 @@ es:esp:724:Spain
 et:eth:231:Ethiopia
 fi:fin:246:Finland
 fj:fji:242:Fiji
-fk:flk:238:Falkland Islands (Malvinas)
+fk:flk:238:Falkland Islands (Malvinas):Falkland Islands (Islas Malvinas)
 fm:fsm:583:Micronesia, Federated States of
 fo:fro:234:Faroe Islands
 fr:fra:250:France
 fx:::France, Metropolitan
 ga:gab:266:Gabon
-gb:gbr:826:United Kingdom
+gb:gbr:826:United Kingdom:Great Britain
 gd:grd:308:Grenada
 ge:geo:268:Georgia
 gf:guf:254:French Guiana
@@ -562,7 +332,7 @@ il:isr:376:Israel
 in:ind:356:India
 io:::British Indian Ocean Territory
 iq:irq:368:Iraq
-ir:irn:364:Iran, Islamic Republic of
+ir:irn:364:Iran, Islamic Republic of:Iran
 is:isl:352:Iceland
 it:ita:380:Italy
 jm:jam:388:Jamaica
@@ -574,8 +344,8 @@ kh:khm:116:Cambodia
 ki:kir:296:Kiribati
 km:com:174:Comoros
 kn:kna:659:Saint Kitts and Nevis
-kp:prk:408:Korea, Democratic People's Republic of
-kr:kor:410:Korea, Republic of
+kp:prk:408:Korea, Democratic People's Republic of:Korea, North:North Korea
+kr:kor:410:Korea, Republic of:Korea, South:South Korea
 kw:kwt:414:Kuwait
 ky:cym:136:Cayman Islands
 kz:kaz:398:Kazakstan
@@ -589,13 +359,13 @@ ls:lso:426:Lesotho
 lt:ltu:440:Lithuania
 lu:lux:442:Luxembourg
 lv:lva:428:Latvia
-ly:lby:434:Libyan Arab Jamahiriya
+ly:lby:434:Libyan Arab Jamahiriya:Libya
 ma:mar:504:Morocco
 mc:mco:492:Monaco
 md:mda:498:Moldova, Republic of
 mg:mdg:450:Madagascar
 mh:mhl:584:Marshall Islands
-mk:mkd:807:Macedonia, the Former Yugoslav Republic of
+mk:mkd:807:Macedonia, the Former Yugoslav Republic of:Macedonia, Former Yugoslav Republic of:Macedonia
 ml:mli:466:Mali
 mm:mmr:104:Myanmar
 mn:mng:496:Mongolia
@@ -632,7 +402,7 @@ ph:phl:608:Philippines
 pk:pak:586:Pakistan
 pl:pol:616:Poland
 pm:spm:666:Saint Pierre and Miquelon
-pn:pcn:612:Pitcairn
+pn:pcn:612:Pitcairn:Pitcairn Island
 pr:pri:630:Puerto Rico
 ps:pse:275:Palestinian Territory, Occupied
 pt:prt:620:Portugal
@@ -641,7 +411,7 @@ py:pry:600:Paraguay
 qa:qat:634:Qatar
 re:reu:638:Reunion
 ro:rom:642:Romania
-ru:rus:643:Russian Federation
+ru:rus:643:Russian Federation:Russia
 rw:rwa:646:Rwanda
 sa:sau:682:Saudi Arabia
 sb:slb:090:Solomon Islands
@@ -651,7 +421,7 @@ se:swe:752:Sweden
 sg:sgp:702:Singapore
 sh:shn:654:Saint Helena
 si:svn:705:Slovenia
-sj:sjm:744:Svalbard and Jan Mayen
+sj:sjm:744:Svalbard and Jan Mayen:Jan Mayen:Svalbard
 sk:svk:703:Slovakia
 sl:sle:694:Sierra Leone
 sm:smr:674:San Marino
@@ -660,7 +430,7 @@ so:som:706:Somalia
 sr:sur:740:Suriname
 st:stp:678:Sao Tome and Principe
 sv:slv:222:El Salvador
-sy:syr:760:Syrian Arab Republic
+sy:syr:760:Syrian Arab Republic:Syria
 sz:swz:748:Swaziland
 tc:tca:796:Turks and Caicos Islands
 td:tcd:148:Chad
@@ -676,18 +446,18 @@ tp:tmp:626:East Timor
 tr:tur:792:Turkey
 tt:tto:780:Trinidad and Tobago
 tv:tuv:798:Tuvalu
-tw:twn:158:Taiwan, Province of China
-tz:tza:834:Tanzania, United Republic of
+tw:twn:158:Taiwan, Province of China:Taiwan
+tz:tza:834:Tanzania, United Republic of:Tanzania
 ua:ukr:804:Ukraine
 ug:uga:800:Uganda
 um:::United States Minor Outlying Islands
-us:usa:840:United States
+us:usa:840:United States:USA:United States of America
 uy:ury:858:Uruguay
 uz:uzb:860:Uzbekistan
-va:vat:336:Holy See (Vatican City State)
+va:vat:336:Holy See (Vatican City State):Hole See (Vatican City)
 vc:vct:670:Saint Vincent and the Grenadines
 ve:ven:862:Venezuela
-vg:vgb:092:Virgin Islands, British
+vg:vgb:092:Virgin Islands, British:British Virgin Islands
 vi:vir:850:Virgin Islands, U.S.
 vn:vnm:704:Vietnam
 vu:vut:548:Vanuatu

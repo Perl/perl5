@@ -327,9 +327,12 @@ the scope of $answer extends from its declaration through the rest
 of that conditional, including any C<elsif> and C<else> clauses, 
 but not beyond it.
 
-None of the foregoing text applies to C<if/unless> or C<while/until>
-modifiers appended to simple statements.  Such modifiers are not
-control structures and have no effect on scoping.
+B<NOTE:> None of the foregoing text applies to C<if/unless>,
+C<while/until> or C<for> modifiers appended to simple statements. Such
+modifiers are not control structures and have no effect on scoping. The
+use of such modifiers in conjunction with C<my> is best avoided, as it may
+have unexpected effects.  A future release of Perl may define precise
+semantics for constructs such as C<my $foo = 1 if $bar>.
 
 The C<foreach> loop defaults to scoping its index variable dynamically
 in the manner of C<local>.  However, if the index variable is

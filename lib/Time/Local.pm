@@ -2,10 +2,11 @@ package Time::Local;
 use 5.006;
 require Exporter;
 use Carp;
+use Config;
 use strict;
 use integer;
 
-our $VERSION    = '1.03';
+our $VERSION    = '1.04';
 our @ISA	= qw( Exporter );
 our @EXPORT	= qw( timegm timelocal );
 our @EXPORT_OK	= qw( timegm_nocheck timelocal_nocheck );
@@ -25,10 +26,8 @@ my (%Options, %Cheat);
 my $Epoc = 0; $Epoc = _daygm(gmtime(0));
 %Cheat=(); # clear the cache as epoc has changed
 
-my $MaxDay = do {
-  no integer;
-  int((~0>>1-43200)/86400)-1;
-};
+my $MaxInt = ((1<<(8 * $Config{intsize} - 2))-1)*2 + 1;
+my $MaxDay = int(($MaxInt-43200)/86400)-1;
 
 
 sub _daygm {

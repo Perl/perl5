@@ -2870,7 +2870,7 @@ PP(pp_require)
     OP *op;
 
     sv = POPs;
-    if (SvNIOKp(sv)) {
+    if (SvNIOKp(sv) && PL_op->op_type != OP_DOFILE) {
 	if (SvPOK(sv) && SvNOK(sv) && SvNV(sv)) {		/* require v5.6.1 */
 	    UV rev = 0, ver = 0, sver = 0;
 	    STRLEN len;

@@ -1635,9 +1635,12 @@ sub SpecialCasing_txt()
         # Wait until all the special cases have been read since
         # they are not listed in numeric order.
         my $ix = hex($code);
-        push @{$CaseInfo{Lower}}, [ $ix, $code, $lower ];
-        push @{$CaseInfo{Title}}, [ $ix, $code, $title ];
-        push @{$CaseInfo{Upper}}, [ $ix, $code, $upper ];
+        push @{$CaseInfo{Lower}}, [ $ix, $code, $lower ]
+	    unless $code eq $lower;
+        push @{$CaseInfo{Title}}, [ $ix, $code, $title ]
+	    unless $code eq $title;
+        push @{$CaseInfo{Upper}}, [ $ix, $code, $upper ]
+	    unless $code eq $upper;
     }
     close IN;
 
@@ -1658,6 +1661,10 @@ sub SpecialCasing_txt()
             my $tostr =
               join "", map { sprintf "\\x{%s}", $_ } split ' ', $to;
             push @OUT, sprintf qq['%04X' => "$tostr",\n], $ix;
+	    # Remove any single-character mappings for
+	    # the same character since we are going for
+	    # the special casing rules.
+	    $NormalCase =~ s/^$code\t\t\w+\n//m;
         }
         push @OUT, (
                     ");\n\n",

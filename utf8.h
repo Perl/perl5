@@ -138,9 +138,11 @@ END_EXTERN_C
 /* how wide can a single UTF8 encoded character become */
 #define UTF8_MAXLEN 13
 /* how wide a character can become when upper/lowercased */
-#define UTF8_MAXLEN_UCLC (UTF8_MAXLEN*2)
+#define UTF8_MAXLEN_UCLC_MULT 3
+#define UTF8_MAXLEN_UCLC (UTF8_MAXLEN*UTF8_MAXLEN_UCLC_MULT)
 /* how wide a character can become when casefolded */
-#define UTF8_MAXLEN_FOLD (UTF8_MAXLEN*3)
+#define UTF8_MAXLEN_FOLD_MULT 3
+#define UTF8_MAXLEN_FOLD (UTF8_MAXLEN*UTF8_MAXLEN_FOLD_MULT)
 
 #define IN_BYTES (PL_curcop->op_private & HINT_BYTES)
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTES)

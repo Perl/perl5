@@ -51,7 +51,7 @@ sub TIEHASH  {
 
 =head1 NAME
 
-Tiel::Memoize - add data to hash when needed
+Tie::Memoize - add data to hash when needed
 
 =head1 SYNOPSIS
 

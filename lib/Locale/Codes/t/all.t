@@ -4,6 +4,7 @@
 #	Locale::Country
 #	Locale::Language
 #	Locale::Currency
+#	Locale::Script
 #
 # There are four tests. We get a list of all codes, convert to
 # language/country/currency, # convert back to code,
@@ -19,8 +20,9 @@ BEGIN {
 use Locale::Country;
 use Locale::Language;
 use Locale::Currency;
+use Locale::Script;
 
-print "1..12\n";
+print "1..20\n";
 
 my $code;
 my $language;
@@ -28,6 +30,7 @@ my $country;
 my $ok;
 my $reverse;
 my $currency;
+my $script;
 
 
 #-----------------------------------------------------------------------
@@ -364,3 +367,219 @@ foreach $currency (all_currency_names())
     }
 }
 print ($ok ? "ok 12\n" : "not ok 12\n");
+
+#=======================================================================
+#
+#	Locale::Script tests
+#
+#=======================================================================
+
+#-----------------------------------------------------------------------
+# Old API - without codeset specified, default to ALPHA_2
+#-----------------------------------------------------------------------
+$ok = 1;
+foreach $code (all_script_codes())
+{
+    $script = code2script($code);
+    if (!defined $script)
+    {
+        $ok = 0;
+        last;
+    }
+    $reverse = script2code($script);
+    if (!defined $reverse)
+    {
+        $ok = 0;
+        last;
+    }
+    if ($reverse ne $code)
+    {
+        $ok = 0;
+        last;
+    }
+}
+print ($ok ? "ok 13\n" : "not ok 13\n");
+
+#-----------------------------------------------------------------------
+# code to script, back to code, for ALPHA2
+#-----------------------------------------------------------------------
+$ok = 1;
+foreach $code (all_script_codes(LOCALE_CODE_ALPHA_2))
+{
+    $script = code2script($code, LOCALE_CODE_ALPHA_2);
+    if (!defined $script)
+    {
+        $ok = 0;
+        last;
+    }
+    $reverse = script2code($script, LOCALE_CODE_ALPHA_2);
+    if (!defined $reverse)
+    {
+        $ok = 0;
+        last;
+    }
+    if ($reverse ne $code)
+    {
+        $ok = 0;
+        last;
+    }
+}
+print ($ok ? "ok 14\n" : "not ok 14\n");
+
+#-----------------------------------------------------------------------
+# code to script, back to code, for ALPHA3
+#-----------------------------------------------------------------------
+$ok = 1;
+foreach $code (all_script_codes(LOCALE_CODE_ALPHA_3))
+{
+    $script = code2script($code, LOCALE_CODE_ALPHA_3);
+    if (!defined $script)
+    {
+        $ok = 0;
+        last;
+    }
+    $reverse = script2code($script, LOCALE_CODE_ALPHA_3);
+    if (!defined $reverse)
+    {
+        $ok = 0;
+        last;
+    }
+    if ($reverse ne $code)
+    {
+        $ok = 0;
+        last;
+    }
+}
+print ($ok ? "ok 15\n" : "not ok 15\n");
+
+#-----------------------------------------------------------------------
+# code to script, back to code, for NUMERIC
+#-----------------------------------------------------------------------
+$ok = 1;
+foreach $code (all_script_codes(LOCALE_CODE_NUMERIC))
+{
+    $script = code2script($code, LOCALE_CODE_NUMERIC);
+    if (!defined $script)
+    {
+        $ok = 0;
+        last;
+    }
+    $reverse = script2code($script, LOCALE_CODE_NUMERIC);
+    if (!defined $reverse)
+    {
+        $ok = 0;
+        last;
+    }
+    if ($reverse ne $code)
+    {
+        $ok = 0;
+        last;
+    }
+}
+print ($ok ? "ok 16\n" : "not ok 16\n");
+
+
+#-----------------------------------------------------------------------
+# Old API - script to code, back to script, using default of ALPHA_2
+#-----------------------------------------------------------------------
+$ok = 1;
+foreach $script (all_script_names())
+{
+    $code = script2code($script);
+    if (!defined $code)
+    {
+        $ok = 0;
+        last;
+    }
+    $reverse = code2script($code);
+    if (!defined $reverse)
+    {
+        $ok = 0;
+        last;
+    }
+    if ($reverse ne $script)
+    {
+        $ok = 0;
+        last;
+    }
+}
+print ($ok ? "ok 17\n" : "not ok 17\n");
+
+#-----------------------------------------------------------------------
+# script to code, back to script, using LOCALE_CODE_ALPHA_2
+#-----------------------------------------------------------------------
+$ok = 1;
+foreach $script (all_script_names())
+{
+    $code = script2code($script, LOCALE_CODE_ALPHA_2);
+    if (!defined $code)
+    {
+        $ok = 0;
+        last;
+    }
+    $reverse = code2script($code, LOCALE_CODE_ALPHA_2);
+    if (!defined $reverse)
+    {
+        $ok = 0;
+        last;
+    }
+    if ($reverse ne $script)
+    {
+        $ok = 0;
+        last;
+    }
+}
+print ($ok ? "ok 18\n" : "not ok 18\n");
+
+#-----------------------------------------------------------------------
+# script to code, back to script, using LOCALE_CODE_ALPHA_3
+#-----------------------------------------------------------------------
+$ok = 1;
+foreach $script (all_script_names())
+{
+    $code = script2code($script, LOCALE_CODE_ALPHA_3);
+    if (!defined $code)
+    {
+        $ok = 0;
+        last;
+    }
+    $reverse = code2script($code, LOCALE_CODE_ALPHA_3);
+    if (!defined $reverse)
+    {
+        $ok = 0;
+        last;
+    }
+    if ($reverse ne $script)
+    {
+        $ok = 0;
+        last;
+    }
+}
+print ($ok ? "ok 19\n" : "not ok 19\n");
+
+#-----------------------------------------------------------------------
+# script to code, back to script, using LOCALE_CODE_NUMERIC
+#-----------------------------------------------------------------------
+$ok = 1;
+foreach $script (all_script_names())
+{
+    $code = script2code($script, LOCALE_CODE_NUMERIC);
+    if (!defined $code)
+    {
+        $ok = 0;
+        last;
+    }
+    $reverse = code2script($code, LOCALE_CODE_NUMERIC);
+    if (!defined $reverse)
+    {
+        $ok = 0;
+        last;
+    }
+    if ($reverse ne $script)
+    {
+        $ok = 0;
+        last;
+    }
+}
+print ($ok ? "ok 20\n" : "not ok 20\n");
+

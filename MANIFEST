@@ -1105,22 +1105,31 @@ lib/lib.t			For "use lib" testing
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
+lib/Locale/Codes/ChangeLog	Locale::Codes
+lib/Locale/Codes/README		Locale::Codes
 lib/Locale/Codes/t/all.t	See if Locale::Codes work
 lib/Locale/Codes/t/constants.t	See if Locale::Codes work
 lib/Locale/Codes/t/country.t	See if Locale::Codes work
 lib/Locale/Codes/t/currency.t	See if Locale::Codes work
 lib/Locale/Codes/t/languages.t	See if Locale::Codes work
+lib/Locale/Codes/t/script.t	See if Locale::Codes work
 lib/Locale/Codes/t/uk.t		See if Locale::Codes work
 lib/Locale/Constants.pm		Locale::Codes
+lib/Locale/Constants.pod	Locale::Codes documentation
 lib/Locale/Country.pm		Locale::Codes
+lib/Locale/Country.pod		Locale::Codes documentation
 lib/Locale/Currency.pm		Locale::Codes
+lib/Locale/Currency.pod		Locale::Codes documentation
 lib/Locale/Language.pm		Locale::Codes
+lib/Locale/Language.pod		Locale::Codes documentation
 lib/Locale/Maketext.pm		Locale::Maketext
 lib/Locale/Maketext.pod		Locale::Maketext documentation
 lib/Locale/Maketext/ChangeLog	Locale::Maketext
 lib/Locale/Maketext/README	Locale::Maketext
 lib/Locale/Maketext/test.pl	See if Locale::Maketext works
 lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
+lib/Locale/Script.pm		Locale::Codes
+lib/Locale/Script.pod		Locale::Codes documentation
 lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
@@ -2405,8 +2414,12 @@ t/run/switchx.t                 Test the -x switch
 t/TEST				The regression tester
 t/test.pl			Simple testing library
 t/TestInit.pm			Preamble library for core tests
+t/uni/case.pl			See if Unicode casing works
 t/uni/fold.t			See if Unicode folding works
+t/uni/lower.t			See if Unicode casing works
 t/uni/sprintf.t			See if Unicode sprintf works
+t/uni/title.t			See if Unicode casing works
+t/uni/upper.t			See if Unicode casing works
 taint.c				Tainting code
 thrdvar.h			Per-thread variables
 thread.h			Threading header

@@ -55,9 +55,15 @@ print $i == 2 ? "ok 7\n" : "not ok 7\n";
 
 # ... while ($var = glob(...)) should test definedness not truth
 
-my $ok = "not ok 8\n";
-$ok = "ok 8\n" while my $var = glob("0");
-print $ok;
+if( $INC{'File/Glob.pm'} ) {
+    my $ok = "not ok 8\n";
+    $ok = "ok 8\n" while my $var = glob("0");
+    print $ok;
+}
+else {
+    print "ok 8 # skip: File::Glob emulated Unixism\n";
+}
+
 
 # The formerly-broken test for the situation above would accidentally
 # test definedness for an assignment with a LOGOP on the right:

@@ -834,24 +834,28 @@ Taints an SV if tainting is enabled
 
 /*
 =for apidoc Am|char*|SvPV_force|SV* sv|STRLEN len
-Like <SvPV> but will force the SV into becoming a string (SvPOK).  You want
-force if you are going to update the SvPVX directly.
+Like C<SvPV> but will force the SV into containing just a string
+(C<SvPOK_only>).  You want force if you are going to update the C<SvPVX>
+directly.
 
 =for apidoc Am|char*|SvPV_force_nomg|SV* sv|STRLEN len
-Like <SvPV> but will force the SV into becoming a string (SvPOK).  You want
-force if you are going to update the SvPVX directly. Doesn't process magic.
+Like C<SvPV> but will force the SV into containing just a string
+(C<SvPOK_only>).  You want force if you are going to update the C<SvPVX>
+directly. Doesn't process magic.
 
 =for apidoc Am|char*|SvPV|SV* sv|STRLEN len
-Returns a pointer to the string in the SV, or a stringified form of the SV
-if the SV does not contain a string.  Handles 'get' magic. See also
+Returns a pointer to the string in the SV, or a stringified form of
+the SV if the SV does not contain a string.  The SV may cache the
+stringified version becoming C<SvPOK>.  Handles 'get' magic. See also
 C<SvPVx> for a version which guarantees to evaluate sv only once.
 
 =for apidoc Am|char*|SvPVx|SV* sv|STRLEN len
 A version of C<SvPV> which guarantees to evaluate sv only once.
 
 =for apidoc Am|char*|SvPV_nolen|SV* sv
-Returns a pointer to the string in the SV, or a stringified form of the SV
-if the SV does not contain a string.  Handles 'get' magic.
+Returns a pointer to the string in the SV, or a stringified form of
+the SV if the SV does not contain a string.  The SV may cache the
+stringified form becoming C<SvPOK>.  Handles 'get' magic.
 
 =for apidoc Am|IV|SvIV|SV* sv
 Coerces the given SV to an integer and returns it. See  C<SvIVx> for a

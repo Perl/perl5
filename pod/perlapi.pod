@@ -2544,22 +2544,22 @@ version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvIVx
-
-Coerces the given SV to an integer and returns it. Guarantees to evaluate
-sv only once. Use the more efficient C<SvIV> otherwise.
-
-	IV	SvIVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvIVX
 
 Returns the raw value in the SV's IV slot, without checks or conversions.
 Only use when you are sure SvIOK is true. See also C<SvIV()>.
 
 	IV	SvIVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVx
+
+Coerces the given SV to an integer and returns it. Guarantees to evaluate
+sv only once. Use the more efficient C<SvIV> otherwise.
+
+	IV	SvIVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2659,22 +2659,22 @@ which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvNVX
-
-Returns the raw value in the SV's NV slot, without checks or conversions.
-Only use when you are sure SvNOK is true. See also C<SvNV()>.
-
-	NV	SvNVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvNVx
 
 Coerces the given SV to a double and returns it. Guarantees to evaluate
 sv only once. Use the more efficient C<SvNV> otherwise.
 
 	NV	SvNVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvNVX
+
+Returns the raw value in the SV's NV slot, without checks or conversions.
+Only use when you are sure SvNOK is true. See also C<SvNV()>.
+
+	NV	SvNVX(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2760,8 +2760,9 @@ Found in file sv.h
 
 =item SvPV
 
-Returns a pointer to the string in the SV, or a stringified form of the SV
-if the SV does not contain a string.  Handles 'get' magic. See also
+Returns a pointer to the string in the SV, or a stringified form of
+the SV if the SV does not contain a string.  The SV may cache the
+stringified version becoming C<SvPOK>.  Handles 'get' magic. See also
 C<SvPVx> for a version which guarantees to evaluate sv only once.
 
 	char*	SvPV(SV* sv, STRLEN len)
@@ -2868,15 +2869,6 @@ Like C<SvPV_nolen>, but converts sv to utf8 first if necessary.
 =for hackers
 Found in file sv.h
 
-=item SvPVx
-
-A version of C<SvPV> which guarantees to evaluate sv only once.
-
-	char*	SvPVx(SV* sv, STRLEN len)
-
-=for hackers
-Found in file sv.h
-
 =item SvPVX
 
 Returns a pointer to the physical string in the SV.  The SV must contain a
@@ -2887,10 +2879,20 @@ string.
 =for hackers
 Found in file sv.h
 
+=item SvPVx
+
+A version of C<SvPV> which guarantees to evaluate sv only once.
+
+	char*	SvPVx(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
 =item SvPV_force
 
-Like <SvPV> but will force the SV into becoming a string (SvPOK).  You want
-force if you are going to update the SvPVX directly.
+Like C<SvPV> but will force the SV into containing just a string
+(C<SvPOK_only>).  You want force if you are going to update the C<SvPVX>
+directly.
 
 	char*	SvPV_force(SV* sv, STRLEN len)
 
@@ -2899,8 +2901,9 @@ Found in file sv.h
 
 =item SvPV_force_nomg
 
-Like <SvPV> but will force the SV into becoming a string (SvPOK).  You want
-force if you are going to update the SvPVX directly. Doesn't process magic.
+Like C<SvPV> but will force the SV into containing just a string
+(C<SvPOK_only>).  You want force if you are going to update the C<SvPVX>
+directly. Doesn't process magic.
 
 	char*	SvPV_force_nomg(SV* sv, STRLEN len)
 
@@ -2909,8 +2912,9 @@ Found in file sv.h
 
 =item SvPV_nolen
 
-Returns a pointer to the string in the SV, or a stringified form of the SV
-if the SV does not contain a string.  Handles 'get' magic.
+Returns a pointer to the string in the SV, or a stringified form of
+the SV if the SV does not contain a string.  The SV may cache the
+stringified form becoming C<SvPOK>.  Handles 'get' magic.
 
 	char*	SvPV_nolen(SV* sv)
 
@@ -4554,16 +4558,18 @@ The "ustrp" is a pointer to the character buffer to put the
 conversion result to.  The "lenp" is a pointer to the length
 of the result.
 
-The "swash" is a pointer to the swash to use.
+The "swashp" is a pointer to the swash to use.
+
+Both the special and normal mappings are stored lib/unicore/To/Foo.pl,
+and loaded by SWASHGET, using lib/utf8_heavy.pl.  The special (usually,
+but not always, a multicharacter mapping), is tried first.
+
+The "special" is a string like "utf8::ToSpecLower", which means the
+hash %utf8::ToSpecLower.  The access to the hash is through
+Perl_to_utf8_case().
 
 The "normal" is a string like "ToLower" which means the swash
-$utf8::ToLower, which is stored in lib/unicore/To/Lower.pl,
-and loaded by SWASHGET, using lib/utf8_heavy.pl.
-
-The "special" is a string like "utf8::ToSpecLower", which means
-the hash %utf8::ToSpecLower, which is stored in the same file,
-lib/unicore/To/Lower.pl, and also loaded by SWASHGET.  The access
-to the hash is by Perl_to_utf8_case().
+%utf8::ToLower.
 
 	UV	to_utf8_case(U8 *p, U8* ustrp, STRLEN *lenp, SV **swash, char *normal, char *special)
 
