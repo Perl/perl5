@@ -2089,7 +2089,7 @@ Apd	|void	|sv_vsetpvfn	|SV* sv|const char* pat|STRLEN patlen \
 Ap	|NV	|str_to_version	|SV *sv
 Ap	|SV*	|swash_init	|char* pkg|char* name|SV* listsv \
 				|I32 minbits|I32 none
-Ap	|UV	|swash_fetch	|SV *sv|U8 *ptr
+Ap	|UV	|swash_fetch	|SV *sv|U8 *ptr|bool do_utf8
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|const char* f|const char* s
 Ap	|UV	|to_utf8_lower	|U8 *p

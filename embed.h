@@ -2216,7 +2216,7 @@
 #define sv_vsetpvfn(a,b,c,d,e,f,g)	Perl_sv_vsetpvfn(aTHX_ a,b,c,d,e,f,g)
 #define str_to_version(a)	Perl_str_to_version(aTHX_ a)
 #define swash_init(a,b,c,d,e)	Perl_swash_init(aTHX_ a,b,c,d,e)
-#define swash_fetch(a,b)	Perl_swash_fetch(aTHX_ a,b)
+#define swash_fetch(a,b,c)	Perl_swash_fetch(aTHX_ a,b,c)
 #define taint_env()		Perl_taint_env(aTHX)
 #define taint_proper(a,b)	Perl_taint_proper(aTHX_ a,b)
 #define to_utf8_lower(a)	Perl_to_utf8_lower(aTHX_ a)

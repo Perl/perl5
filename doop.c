@@ -344,7 +344,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
     }
 
     while (s < send) {
-	if ((uv = swash_fetch(rv, s)) < none) {
+	if ((uv = swash_fetch(rv, s, TRUE)) < none) {
 	    s += UTF8SKIP(s);
 	    matches++;
 	    d = uvuni_to_utf8(d, uv);
@@ -423,7 +423,7 @@ S_do_trans_count_utf8(pTHX_ SV *sv)/* SPC - OK */
     send = s + len;
 
     while (s < send) {
-	if ((uv = swash_fetch(rv, s)) < none || uv == extra)
+	if ((uv = swash_fetch(rv, s, TRUE)) < none || uv == extra)
 	    matches++;
 	s += UTF8SKIP(s);
     }
@@ -491,7 +491,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
     if (squash) {
 	UV puv = 0xfeedface;
 	while (s < send) {
-	    uv = swash_fetch(rv, s);
+	    uv = swash_fetch(rv, s, TRUE);
 	
 	    if (d > dend) {
 	        STRLEN clen = d - dstart;
@@ -546,7 +546,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
     }
     else {
 	while (s < send) {
-	    uv = swash_fetch(rv, s);
+	    uv = swash_fetch(rv, s, TRUE);
 	    if (d > dend) {
 	        STRLEN clen = d - dstart;
 		STRLEN nlen = dend - dstart + len + UTF8_MAXLEN;

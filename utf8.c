@@ -1045,13 +1045,13 @@ Perl_is_utf8_alnum(pTHX_ U8 *p)
 	 * descendant of isalnum(3), in other words, it doesn't
 	 * contain the '_'. --jhi */
 	PL_utf8_alnum = swash_init("utf8", "IsWord", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_alnum, p);
+    return swash_fetch(PL_utf8_alnum, p, TRUE);
 /*    return *p == '_' || is_utf8_alpha(p) || is_utf8_digit(p); */
 #ifdef SURPRISINGLY_SLOWER  /* probably because alpha is usually true */
     if (!PL_utf8_alnum)
 	PL_utf8_alnum = swash_init("utf8", "",
 	    sv_2mortal(newSVpv("+utf8::IsAlpha\n+utf8::IsDigit\n005F\n",0)), 0, 0);
-    return swash_fetch(PL_utf8_alnum, p);
+    return swash_fetch(PL_utf8_alnum, p, TRUE);
 #endif
 }
 
@@ -1062,13 +1062,13 @@ Perl_is_utf8_alnumc(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_alnum)
 	PL_utf8_alnum = swash_init("utf8", "IsAlnumC", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_alnum, p);
+    return swash_fetch(PL_utf8_alnum, p, TRUE);
 /*    return is_utf8_alpha(p) || is_utf8_digit(p); */
 #ifdef SURPRISINGLY_SLOWER  /* probably because alpha is usually true */
     if (!PL_utf8_alnum)
 	PL_utf8_alnum = swash_init("utf8", "",
 	    sv_2mortal(newSVpv("+utf8::IsAlpha\n+utf8::IsDigit\n005F\n",0)), 0, 0);
-    return swash_fetch(PL_utf8_alnum, p);
+    return swash_fetch(PL_utf8_alnum, p, TRUE);
 #endif
 }
 
@@ -1085,7 +1085,7 @@ Perl_is_utf8_alpha(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_alpha)
 	PL_utf8_alpha = swash_init("utf8", "IsAlpha", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_alpha, p);
+    return swash_fetch(PL_utf8_alpha, p, TRUE);
 }
 
 bool
@@ -1095,7 +1095,7 @@ Perl_is_utf8_ascii(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_ascii)
 	PL_utf8_ascii = swash_init("utf8", "IsAscii", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_ascii, p);
+    return swash_fetch(PL_utf8_ascii, p, TRUE);
 }
 
 bool
@@ -1105,7 +1105,7 @@ Perl_is_utf8_space(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_space)
 	PL_utf8_space = swash_init("utf8", "IsSpacePerl", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_space, p);
+    return swash_fetch(PL_utf8_space, p, TRUE);
 }
 
 bool
@@ -1115,7 +1115,7 @@ Perl_is_utf8_digit(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_digit)
 	PL_utf8_digit = swash_init("utf8", "IsDigit", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_digit, p);
+    return swash_fetch(PL_utf8_digit, p, TRUE);
 }
 
 bool
@@ -1125,7 +1125,7 @@ Perl_is_utf8_upper(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_upper)
 	PL_utf8_upper = swash_init("utf8", "IsUpper", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_upper, p);
+    return swash_fetch(PL_utf8_upper, p, TRUE);
 }
 
 bool
@@ -1135,7 +1135,7 @@ Perl_is_utf8_lower(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_lower)
 	PL_utf8_lower = swash_init("utf8", "IsLower", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_lower, p);
+    return swash_fetch(PL_utf8_lower, p, TRUE);
 }
 
 bool
@@ -1145,7 +1145,7 @@ Perl_is_utf8_cntrl(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_cntrl)
 	PL_utf8_cntrl = swash_init("utf8", "IsCntrl", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_cntrl, p);
+    return swash_fetch(PL_utf8_cntrl, p, TRUE);
 }
 
 bool
@@ -1155,7 +1155,7 @@ Perl_is_utf8_graph(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_graph)
 	PL_utf8_graph = swash_init("utf8", "IsGraph", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_graph, p);
+    return swash_fetch(PL_utf8_graph, p, TRUE);
 }
 
 bool
@@ -1165,7 +1165,7 @@ Perl_is_utf8_print(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_print)
 	PL_utf8_print = swash_init("utf8", "IsPrint", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_print, p);
+    return swash_fetch(PL_utf8_print, p, TRUE);
 }
 
 bool
@@ -1175,7 +1175,7 @@ Perl_is_utf8_punct(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_punct)
 	PL_utf8_punct = swash_init("utf8", "IsPunct", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_punct, p);
+    return swash_fetch(PL_utf8_punct, p, TRUE);
 }
 
 bool
@@ -1185,7 +1185,7 @@ Perl_is_utf8_xdigit(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_xdigit)
 	PL_utf8_xdigit = swash_init("utf8", "IsXDigit", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_xdigit, p);
+    return swash_fetch(PL_utf8_xdigit, p, TRUE);
 }
 
 bool
@@ -1195,7 +1195,7 @@ Perl_is_utf8_mark(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_mark)
 	PL_utf8_mark = swash_init("utf8", "IsM", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_mark, p);
+    return swash_fetch(PL_utf8_mark, p, TRUE);
 }
 
 UV
@@ -1205,7 +1205,7 @@ Perl_to_utf8_upper(pTHX_ U8 *p)
 
     if (!PL_utf8_toupper)
 	PL_utf8_toupper = swash_init("utf8", "ToUpper", &PL_sv_undef, 4, 0);
-    uv = swash_fetch(PL_utf8_toupper, p);
+    uv = swash_fetch(PL_utf8_toupper, p, TRUE);
     return uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p,0);
 }
 
@@ -1216,7 +1216,7 @@ Perl_to_utf8_title(pTHX_ U8 *p)
 
     if (!PL_utf8_totitle)
 	PL_utf8_totitle = swash_init("utf8", "ToTitle", &PL_sv_undef, 4, 0);
-    uv = swash_fetch(PL_utf8_totitle, p);
+    uv = swash_fetch(PL_utf8_totitle, p, TRUE);
     return uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p,0);
 }
 
@@ -1227,7 +1227,7 @@ Perl_to_utf8_lower(pTHX_ U8 *p)
 
     if (!PL_utf8_tolower)
 	PL_utf8_tolower = swash_init("utf8", "ToLower", &PL_sv_undef, 4, 0);
-    uv = swash_fetch(PL_utf8_tolower, p);
+    uv = swash_fetch(PL_utf8_tolower, p, TRUE);
     return uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p,0);
 }
 
@@ -1282,21 +1282,31 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
 }
 
 UV
-Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
+Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8)
 {
     HV* hv = (HV*)SvRV(sv);
-    /* Given a UTF-X encoded char 0xAA..0xYY,0xZZ
-       then the "swatch" is a vec() for al the chars which start
-       with 0xAA..0xYY
-       So the key in the hash is length of encoded char -1
-     */
-    U32 klen = UTF8SKIP(ptr) - 1;
-    U32 off = ptr[klen];
+    U32 klen;
+    U32 off;
     STRLEN slen;
     STRLEN needents;
     U8 *tmps;
     U32 bit;
     SV *retval;
+    U8 tmputf8[2];
+    UV c = NATIVE_TO_ASCII(*ptr);
+
+    if (!do_utf8 && !UNI_IS_INVARIANT(c)) {
+        tmputf8[0] = UTF8_EIGHT_BIT_HI(c);
+        tmputf8[1] = UTF8_EIGHT_BIT_LO(c);
+        ptr = tmputf8;
+    }
+    /* Given a UTF-X encoded char 0xAA..0xYY,0xZZ
+     * then the "swatch" is a vec() for al the chars which start
+     * with 0xAA..0xYY
+     * So the key in the hash (klen) is length of encoded char -1
+     */
+    klen = UTF8SKIP(ptr) - 1;
+    off  = ptr[klen];
 
     if (klen == 0)
      {
@@ -1322,9 +1332,9 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
      * NB: this code assumes that swatches are never modified, once generated!
      */
 
-    if (hv == PL_last_swash_hv &&
+    if (hv   == PL_last_swash_hv &&
 	klen == PL_last_swash_klen &&
-	(!klen || memEQ((char *)ptr,(char *)PL_last_swash_key,klen)) )
+	(!klen || memEQ((char *)ptr, (char *)PL_last_swash_key, klen)) )
     {
 	tmps = PL_last_swash_tmps;
 	slen = PL_last_swash_slen;
@@ -1348,7 +1358,8 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 	    EXTEND(SP,3);
 	    PUSHs((SV*)sv);
 	    /* On EBCDIC & ~(0xA0-1) isn't a useful thing to do */
-	    PUSHs(sv_2mortal(newSViv((klen) ? (code_point & ~(needents - 1)) : 0)));
+	    PUSHs(sv_2mortal(newSViv((klen) ?
+				     (code_point & ~(needents - 1)) : 0)));
 	    PUSHs(sv_2mortal(newSViv(needents)));
 	    PUTBACK;
 	    if (call_method("SWASHGET", G_SCALAR))

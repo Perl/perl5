@@ -579,6 +579,10 @@
 #define Perl_init_stacks	pPerl->Perl_init_stacks
 #undef  init_stacks
 #define init_stacks		Perl_init_stacks
+#undef  Perl_init_tm
+#define Perl_init_tm		pPerl->Perl_init_tm
+#undef  init_tm
+#define init_tm			Perl_init_tm
 #undef  Perl_instr
 #define Perl_instr		pPerl->Perl_instr
 #undef  instr
@@ -857,6 +861,10 @@
 #define Perl_mg_size		pPerl->Perl_mg_size
 #undef  mg_size
 #define mg_size			Perl_mg_size
+#undef  Perl_mini_mktime
+#define Perl_mini_mktime	pPerl->Perl_mini_mktime
+#undef  mini_mktime
+#define mini_mktime		Perl_mini_mktime
 #undef  Perl_moreswitches
 #define Perl_moreswitches	pPerl->Perl_moreswitches
 #undef  moreswitches
@@ -927,6 +935,10 @@
 #define Perl_my_stat		pPerl->Perl_my_stat
 #undef  my_stat
 #define my_stat			Perl_my_stat
+#undef  Perl_my_strftime
+#define Perl_my_strftime	pPerl->Perl_my_strftime
+#undef  my_strftime
+#define my_strftime		Perl_my_strftime
 #if defined(MYSWAP)
 #undef  Perl_my_swap
 #define Perl_my_swap		pPerl->Perl_my_swap
