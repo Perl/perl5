@@ -31,6 +31,287 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12646] By: jhi                                   on 2001/10/25  13:34:19
+        Log: Allow resetting the locale system for the duration
+             of the build (Mac OS X default setting LANG=En_US
+             ist kaputt)
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 12645] By: jhi                                   on 2001/10/25  13:04:17
+        Log: Update the MD5 checksum of MD5.xs (caused by #12642)
+     Branch: perl
+	   ! ext/Digest/MD5/t/files.t
+____________________________________________________________________________
+[ 12644] By: jhi                                   on 2001/10/25  12:56:33
+        Log: Subject: [PATCH] Omit needless calls to pod2man (perl@12641)
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 25 Oct 2001 09:56:57 -0400 (EDT) 
+             Message-ID: <Pine.SOL.4.10.10110250955390.18833-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! ext/I18N/Langinfo/Makefile.PL ext/threads/Makefile.PL
+	   ! ext/threads/shared/Makefile.PL
+____________________________________________________________________________
+[ 12643] By: sky                                   on 2001/10/25  12:28:26
+        Log: Add support for reference members of hashes.
+     Branch: perl
+	   ! ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 12642] By: ams                                   on 2001/10/25  12:21:13
+        Log: Subject: [PATCH] ext/Digest/MD5/MD5.xs RFC typo
+             From: "Norton Allen" <nort@qnx.com>
+             Date: Thu, 25 Oct 2001 08:53:56 -0400 (edt)
+             Message-Id: <200110251253.IAA180600866@rosamund.arp.harvard.edu>
+     Branch: perl
+	   ! ext/Digest/MD5/MD5.xs
+____________________________________________________________________________
+[ 12641] By: sky                                   on 2001/10/25  10:27:39
+        Log: Tests shared hashes.
+     Branch: perl
+	   + ext/threads/shared/t/hv_simple.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12640] By: sky                                   on 2001/10/25  10:18:23
+        Log: Fix threadcounts for arrays and hashes.
+     Branch: perl
+	   ! ext/threads/shared/shared.pm ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 12639] By: sky                                   on 2001/10/25  10:17:26
+        Log: Note to self, doing *src_ary++ in a macro that evaluates
+             the value more than once is a good way to dump core.
+     Branch: perl
+	   ! sharedsv.c
+____________________________________________________________________________
+[ 12638] By: jhi                                   on 2001/10/25  05:18:06
+        Log: Integrate change #12636 from maintperl; more dl fixups.
+     Branch: perl
+	  !> ext/DynaLoader/dl_mac.xs ext/DynaLoader/dl_next.xs
+	  !> ext/DynaLoader/dl_vms.xs
+____________________________________________________________________________
+[ 12637] By: jhi                                   on 2001/10/25  05:14:17
+        Log: Like dl_hpux, like dl_dld.
+     Branch: perl
+	   ! ext/DynaLoader/dl_dld.xs
+____________________________________________________________________________
+[ 12636] By: gsar                                  on 2001/10/25  02:34:06
+        Log: followups to change#12635
+     Branch: maint-5.6/perl
+	   ! ext/DynaLoader/dl_mac.xs ext/DynaLoader/dl_next.xs
+	   ! ext/DynaLoader/dl_vms.xs
+____________________________________________________________________________
+[ 12635] By: gsar                                  on 2001/10/25  02:22:03
+        Log: add part of change#12634 to the two files that need it; dl_aix.xs
+             in maint-5.6 doesn't have the branch that had the problem in
+             mainline
+     Branch: maint-5.6/perl
+	   ! ext/DynaLoader/dl_dld.xs ext/DynaLoader/dl_hpux.xs
+____________________________________________________________________________
+[ 12634] By: jhi                                   on 2001/10/25  01:53:03
+        Log: Fixes for #12627.
+     Branch: perl
+	   ! ext/DynaLoader/dl_aix.xs ext/DynaLoader/dl_hpux.xs
+____________________________________________________________________________
+[ 12633] By: jhi                                   on 2001/10/25  01:52:33
+        Log: Since pv_uni_display and sv_uni_display are now used
+             in the re extension, their symbols have to be exported.
+     Branch: perl
+	   ! embed.pl global.sym
+____________________________________________________________________________
+[ 12632] By: jhi                                   on 2001/10/25  01:00:06
+        Log: Subject:  Re: [PATCH Perl@12567] debug /list
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date: Tue, 23 Oct 2001 21:40:33 EDT
+             Message-Id: <011023214011.184825@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 12631] By: jhi                                   on 2001/10/25  00:25:55
+        Log: This takes care of some of the re 'debug' cases but
+             not all cases since the information whether the pattern
+             or the target are utf8 seems to be either lost or not
+             spread widely enough, sigh.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 12630] By: jhi                                   on 2001/10/25  00:03:07
+        Log: Subject: [PATCH] - was RE: [PATCH perl@12443] VMS64-bitconfigure
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Wed, 24 Oct 2001 16:53:29 -0400
+             Message-ID: <3BD72A49.1508D152@rowman.com>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 12629] By: jhi                                   on 2001/10/24  23:16:21
+        Log: Upgrade NetWare and WinCE as in #12626.
+     Branch: perl
+	   ! NetWare/dl_netware.xs wince/dl_win32.xs
+____________________________________________________________________________
+[ 12628] By: jhi                                   on 2001/10/24  23:07:00
+        Log: Tru64 compiler nit.
+     Branch: perl
+	   ! ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 12627] By: jhi                                   on 2001/10/24  22:02:23
+        Log: Integrate change #12626 from maintperl;
+             make DynaLoader threadsafe by moving all statics into
+             interpreter-local space
+             
+             TODO: Netware, OS/2, WinCE
+     Branch: perl
+	  !> ext/DynaLoader/dl_aix.xs ext/DynaLoader/dl_beos.xs
+	  !> ext/DynaLoader/dl_dld.xs ext/DynaLoader/dl_dllload.xs
+	  !> ext/DynaLoader/dl_dlopen.xs ext/DynaLoader/dl_dyld.xs
+	  !> ext/DynaLoader/dl_hpux.xs ext/DynaLoader/dl_mac.xs
+	  !> ext/DynaLoader/dl_mpeix.xs ext/DynaLoader/dl_next.xs
+	  !> ext/DynaLoader/dl_vmesa.xs ext/DynaLoader/dl_vms.xs
+	  !> ext/DynaLoader/dlutils.c win32/dl_win32.xs
+____________________________________________________________________________
+[ 12626] By: gsar                                  on 2001/10/24  21:43:10
+        Log: make DynaLoader threadsafe by moving all statics into interpreter-local
+             space
+     Branch: maint-5.6/perl
+	   ! ext/DynaLoader/dl_aix.xs ext/DynaLoader/dl_beos.xs
+	   ! ext/DynaLoader/dl_dld.xs ext/DynaLoader/dl_dllload.xs
+	   ! ext/DynaLoader/dl_dlopen.xs ext/DynaLoader/dl_dyld.xs
+	   ! ext/DynaLoader/dl_hpux.xs ext/DynaLoader/dl_mac.xs
+	   ! ext/DynaLoader/dl_mpeix.xs ext/DynaLoader/dl_next.xs
+	   ! ext/DynaLoader/dl_vmesa.xs ext/DynaLoader/dl_vms.xs
+	   ! ext/DynaLoader/dlutils.c win32/dl_win32.xs
+____________________________________________________________________________
+[ 12625] By: sky                                   on 2001/10/24  20:05:26
+        Log: Change #12623 inflicted an infinite hang. Fixed.
+     Branch: perl
+	   ! ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 12624] By: sky                                   on 2001/10/24  19:06:55
+        Log: Adds support for hashes. Neither hashes nor arrays can contain references yet.
+     Branch: perl
+	   ! ext/threads/shared/shared.pm ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 12623] By: sky                                   on 2001/10/24  18:06:34
+        Log: We need to do sharedsv_find in the original perl context.
+     Branch: perl
+	   ! ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 12622] By: sky                                   on 2001/10/24  17:26:51
+        Log: Add support for basic support for AVs, references not supported yet.
+             Add test for AVs.
+             Add more tests to sv_refs
+             Fix documentation issues.	
+     Branch: perl
+	   + ext/threads/shared/t/av_simple.t
+	   ! MANIFEST ext/threads/shared/shared.pm
+	   ! ext/threads/shared/shared.xs ext/threads/shared/t/sv_refs.t
+____________________________________________________________________________
+[ 12621] By: jhi                                   on 2001/10/24  14:08:39
+        Log: Dump Unicode better for re 'debug'.  The regprop()
+             is unfinished since have to figure out how to detect
+             Unicodeness in there.
+     Branch: perl
+	   ! regcomp.c regexec.c
+____________________________________________________________________________
+[ 12620] By: sky                                   on 2001/10/24  13:18:07
+        Log: Add support for finding shared arrays and hashes.
+     Branch: perl
+	   ! sharedsv.c
+____________________________________________________________________________
+[ 12619] By: jhi                                   on 2001/10/24  13:06:24
+        Log: Rewrite sv_uni_display() as pv_uni_display() as
+             reimplement sv_uni_display() using that.
+     Branch: perl
+	   ! dump.c embed.h embed.pl proto.h
+____________________________________________________________________________
+[ 12618] By: jhi                                   on 2001/10/24  12:14:03
+        Log: Integrate change #12615 from maintperl;
+             on Windows, IO::File::new_tmpfile() fails after being called
+             32767 times because MSVCRT thinks stdio's TMP_MAX is a
+             process-wide limit
+     Branch: perl
+	  !> win32/win32.c
+____________________________________________________________________________
+[ 12617] By: jhi                                   on 2001/10/24  12:10:37
+        Log: Don't try to print ints as IVs.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12616] By: sky                                   on 2001/10/24  11:06:35
+        Log: We only need to fetch the SV from the backend if the index
+             is not the same as mg_private.	In theory this could be
+             a problem if there are an exact multiple of U16 changes
+             of a shared variable between two access in a given thread,
+             we choose to avoid theory for now.
+     Branch: perl
+	   ! ext/threads/shared/shared.xs sharedsv.c sharedsv.h
+____________________________________________________________________________
+[ 12615] By: gsar                                  on 2001/10/24  04:09:43
+        Log: on Windows, IO::File::new_tmpfile() fails after being called
+             32767 times because MSVCRT thinks stdio's TMP_MAX is a
+             process-wide limit
+     Branch: maint-5.6/perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 12614] By: jhi                                   on 2001/10/23  22:19:34
+        Log: Negation and Unicode: sort of solves 20010303.010,
+             except not quite like reported in the Subject
+             (Perl_warner is still utf8-ignorant).
+     Branch: perl
+	   ! pp.c t/lib/warnings/sv
+____________________________________________________________________________
+[ 12613] By: jhi                                   on 2001/10/23  21:53:13
+        Log: Make the "isn't numeric" warning to show Unicode as Unicode.
+     Branch: perl
+	   ! sv.c t/lib/warnings/sv
+____________________________________________________________________________
+[ 12612] By: jhi                                   on 2001/10/23  21:52:45
+        Log: sv_uni_display(): do not add the "...", let the caller
+             do it if wanted, and be prepared for more display options.
+     Branch: perl
+	   ! dump.c embed.h embed.pl proto.h
+____________________________________________________________________________
+[ 12611] By: nick                                  on 2001/10/23  20:28:07
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes configure.com cygwin/cygwin.c
+	  !> ext/DynaLoader/DynaLoader_pm.PL ext/File/Glob/t/basic.t
+	  !> ext/Time/HiRes/HiRes.t ext/Time/HiRes/HiRes.xs lib/AutoSplit.t
+	  !> lib/File/Spec.t lib/File/Spec/Mac.pm lib/File/Spec/Win32.pm
+	  !> lib/Net/Domain.pm patchlevel.h perl.c perlio.c
+	  !> pod/perlunicode.pod pp.c t/TEST t/op/lc.t t/op/taint.t
+	  !> utils/h2xs.PL utils/perldoc.PL
+____________________________________________________________________________
+[ 12610] By: sky                                   on 2001/10/23  19:39:24
+        Log: Change #12607 introduced a bug, seems like some MAGICAL svs don't call themselves
+             READONLY but still dies with modification attempt. We only call bless for ext and
+             umagic.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 12609] By: jhi                                   on 2001/10/23  19:35:02
+        Log: Croak() on negative time; doc tweaks.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.pm ext/Time/HiRes/HiRes.t
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12608] By: jhi                                   on 2001/10/23  18:38:03
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq4.pod pod/perlfaq7.pod
+____________________________________________________________________________
+[ 12607] By: sky                                   on 2001/10/23  18:27:27
+        Log: Call setmagic on the referant we blessing!
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 12606] By: jhi                                   on 2001/10/23  16:30:00
+        Log: Small test nits.
+     Branch: perl
+	   ! t/op/lc.t
+____________________________________________________________________________
+[ 12605] By: jhi                                   on 2001/10/23  13:08:32
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12604] By: jhi                                   on 2001/10/23  13:03:21
         Log: Make the PerlIO_init() prototypes consistent.
      Branch: perl
