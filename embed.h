@@ -2,6 +2,16 @@
 
 /* (Doing namespace management portably in C is really gross.) */
 
+/*  EMBED has no run-time penalty, but helps keep the Perl namespace
+    from colliding with that used by other libraries pulled in
+    by extensions or by embedding perl.  Allow a cc -DNO_EMBED
+    override, however, to keep binary compatability with previous
+    versions of perl.
+*/
+#ifndef NO_EMBED
+#  define EMBED 1 
+#endif
+
 #ifdef EMBED
 
 /* globals we need to hide from the world */
@@ -143,6 +153,7 @@
 #define opargs		Perl_opargs
 #define origalen	Perl_origalen
 #define origenviron	Perl_origenviron
+#define osname		Perl_osname
 #define padix		Perl_padix
 #define patleave	Perl_patleave
 #define pow_amg		Perl_pow_amg
@@ -161,6 +172,7 @@
 #define regeol		Perl_regeol
 #define regfold		Perl_regfold
 #define reginput	Perl_reginput
+#define regkind	Perl_regkind
 #define reglastparen	Perl_reglastparen
 #define regmyendp	Perl_regmyendp
 #define regmyp_size	Perl_regmyp_size
@@ -301,6 +313,7 @@
 #define chsize		Perl_chsize
 #define ck_aelem	Perl_ck_aelem
 #define ck_concat	Perl_ck_concat
+#define ck_delete	Perl_ck_delete
 #define ck_eof		Perl_ck_eof
 #define ck_eval		Perl_ck_eval
 #define ck_exec		Perl_ck_exec
@@ -317,7 +330,9 @@
 #define ck_match	Perl_ck_match
 #define ck_null		Perl_ck_null
 #define ck_repeat	Perl_ck_repeat
+#define ck_require	Perl_ck_require
 #define ck_retarget	Perl_ck_retarget
+#define ck_rfun		Perl_ck_rfun
 #define ck_rvconst	Perl_ck_rvconst
 #define ck_select	Perl_ck_select
 #define ck_shift	Perl_ck_shift
@@ -325,6 +340,7 @@
 #define ck_spair	Perl_ck_spair
 #define ck_split	Perl_ck_split
 #define ck_subr		Perl_ck_subr
+#define ck_svconst	Perl_ck_svconst
 #define ck_trunc	Perl_ck_trunc
 #define convert		Perl_convert
 #define cpytill		Perl_cpytill
@@ -569,6 +585,7 @@
 #define pop_return	Perl_pop_return
 #define pop_scope	Perl_pop_scope
 #define pp_aassign	Perl_pp_aassign
+#define pp_abs		Perl_pp_abs
 #define pp_accept	Perl_pp_accept
 #define pp_add		Perl_pp_add
 #define pp_aelem	Perl_pp_aelem
@@ -576,6 +593,7 @@
 #define pp_alarm	Perl_pp_alarm
 #define pp_and		Perl_pp_and
 #define pp_andassign	Perl_pp_andassign
+#define pp_anoncode	Perl_pp_anoncode
 #define pp_anonhash	Perl_pp_anonhash
 #define pp_anonlist	Perl_pp_anonlist
 #define pp_aslice	Perl_pp_aslice
@@ -586,6 +604,7 @@
 #define pp_binmode	Perl_pp_binmode
 #define pp_bit_and	Perl_pp_bit_and
 #define pp_bit_or	Perl_pp_bit_or
+#define pp_bit_xor	Perl_pp_bit_xor
 #define pp_bless	Perl_pp_bless
 #define pp_caller	Perl_pp_caller
 #define pp_chdir	Perl_pp_chdir
@@ -593,6 +612,7 @@
 #define pp_chomp	Perl_pp_chomp
 #define pp_chop		Perl_pp_chop
 #define pp_chown	Perl_pp_chown
+#define pp_chr		Perl_pp_chr
 #define pp_chroot	Perl_pp_chroot
 #define pp_close	Perl_pp_close
 #define pp_closedir	Perl_pp_closedir
@@ -670,6 +690,7 @@
 #define pp_fttty	Perl_pp_fttty
 #define pp_ftzero	Perl_pp_ftzero
 #define pp_ge		Perl_pp_ge
+#define pp_gelem	Perl_pp_gelem
 #define pp_getc		Perl_pp_getc
 #define pp_getlogin	Perl_pp_getlogin
 #define pp_getpeername	Perl_pp_getpeername
@@ -707,6 +728,19 @@
 #define pp_helem	Perl_pp_helem
 #define pp_hex		Perl_pp_hex
 #define pp_hslice	Perl_pp_hslice
+#define pp_i_add	Perl_pp_i_add
+#define pp_i_divide	Perl_pp_i_divide
+#define pp_i_eq		Perl_pp_i_eq
+#define pp_i_ge		Perl_pp_i_ge
+#define pp_i_gt		Perl_pp_i_gt
+#define pp_i_le		Perl_pp_i_le
+#define pp_i_lt		Perl_pp_i_lt
+#define pp_i_modulo	Perl_pp_i_modulo
+#define pp_i_multiply	Perl_pp_i_multiply
+#define pp_i_ncmp	Perl_pp_i_ncmp
+#define pp_i_ne		Perl_pp_i_ne
+#define pp_i_negate	Perl_pp_i_negate
+#define pp_i_subtract	Perl_pp_i_subtract
 #define pp_index	Perl_pp_index
 #define pp_indread	Perl_pp_indread
 #define pp_int		Perl_pp_int
@@ -738,6 +772,8 @@
 #define pp_lstat	Perl_pp_lstat
 #define pp_lt		Perl_pp_lt
 #define pp_map		Perl_pp_map
+#define pp_mapstart	Perl_pp_mapstart
+#define pp_mapwhile	Perl_pp_mapwhile
 #define pp_match	Perl_pp_match
 #define pp_method	Perl_pp_method
 #define pp_mkdir	Perl_pp_mkdir
@@ -762,6 +798,7 @@
 #define pp_orassign	Perl_pp_orassign
 #define pp_ord		Perl_pp_ord
 #define pp_pack		Perl_pp_pack
+#define pp_padany	Perl_pp_padany
 #define pp_padav	Perl_pp_padav
 #define pp_padhv	Perl_pp_padhv
 #define pp_padsv	Perl_pp_padsv
@@ -779,6 +816,7 @@
 #define pp_push		Perl_pp_push
 #define pp_pushmark	Perl_pp_pushmark
 #define pp_pushre	Perl_pp_pushre
+#define pp_quotemeta	Perl_pp_quotemeta
 #define pp_rand		Perl_pp_rand
 #define pp_range	Perl_pp_range
 #define pp_rcatline	Perl_pp_rcatline
@@ -854,6 +892,7 @@
 #define pp_sservent	Perl_pp_sservent
 #define pp_ssockopt	Perl_pp_ssockopt
 #define pp_stat		Perl_pp_stat
+#define pp_stringify	Perl_pp_stringify
 #define pp_stub		Perl_pp_stub
 #define pp_study	Perl_pp_study
 #define pp_subst	Perl_pp_subst
@@ -862,6 +901,7 @@
 #define pp_subtract	Perl_pp_subtract
 #define pp_symlink	Perl_pp_symlink
 #define pp_syscall	Perl_pp_syscall
+#define pp_sysopen	Perl_pp_sysopen
 #define pp_sysread	Perl_pp_sysread
 #define pp_system	Perl_pp_system
 #define pp_syswrite	Perl_pp_syswrite
@@ -904,7 +944,7 @@
 #define regprop		Perl_regprop
 #define repeatcpy	Perl_repeatcpy
 #define rninstr		Perl_rninstr
-#define run		Perl_run
+#define runops		Perl_runops
 #define same_dirent	Perl_same_dirent
 #define save_I32	Perl_save_I32
 #define save_aptr	Perl_save_aptr
