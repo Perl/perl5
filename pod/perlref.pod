@@ -236,8 +236,8 @@ open the filehandle for you, because *HANDLE{IO} will be undef if HANDLE
 hasn't been used yet.  Use \*HANDLE for that sort of thing instead.
 
 Using \*HANDLE (or *HANDLE) is another way to use and store non-bareword
-filehandles (before 5.002 it was the only way).  The two methods are
-largely interchangeable, you can do
+filehandles (before perl version 5.002 it was the only way).  The two
+methods are largely interchangeable, you can do
 
     splutter(\*STDOUT);
     $rec = get_rec(\*STDIN);
@@ -431,8 +431,8 @@ variables, which are all "global" to the package.
 
 =head2 Not-so-symbolic references
 
-A new feature contributing to readability in 5.001 is that the brackets
-around a symbolic reference behave more like quotes, just as they
+A new feature contributing to readability in perl version 5.001 is that the
+brackets around a symbolic reference behave more like quotes, just as they
 always have within a string.  That is,
 
     $push = "pop on ";
@@ -449,7 +449,7 @@ and even
     print ${ push } . "over";
 
 will have the same effect.  (This would have been a syntax error in
-5.000, though Perl 4 allowed it in the spaceless form.)  Note that this
+Perl 5.000, though Perl 4 allowed it in the spaceless form.)  Note that this
 construct is I<not> considered to be a symbolic reference when you're
 using strict refs:
 

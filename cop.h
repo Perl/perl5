@@ -48,15 +48,12 @@ struct block_sub {
 
 #define POPSUB(cx)							\
 	if (cx->blk_sub.hasargs) {   /* put back old @_ */		\
+	    SvREFCNT_dec(GvAV(defgv));					\
 	    GvAV(defgv) = cx->blk_sub.savearray;			\
 	}								\
 	if (cx->blk_sub.cv) {						\
-	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth)) {	\
-	        if (cx->blk_sub.hasargs) {				\
-	    	    SvREFCNT_inc((SV*)cx->blk_sub.argarray);		\
-		}							\
+	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))	\
 		SvREFCNT_dec((SV*)cx->blk_sub.cv);			\
-	    }								\
 	}
 
 #define POPFORMAT(cx)							\

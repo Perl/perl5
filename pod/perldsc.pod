@@ -303,8 +303,8 @@ variable, and it would thereby remind you to write instead:
 
 =head1 DEBUGGING
 
-Before 5.002, the standard Perl debugger didn't do a very nice job of
-printing out complex data structures.  With version 5.002 or above, the
+Before version 5.002, the standard Perl debugger didn't do a very nice job of
+printing out complex data structures.  With 5.002 or above, the
 debugger includes several new features, including command line editing as
 well as the C<x> command to dump out complex data structures.  For
 example, given the assignment to $LoL above, here's the debugger output:

@@ -1815,7 +1815,7 @@ shifting or popping (for array variables).  See L<perlform>.
 
 =item Scalar value @%s[%s] better written as $%s[%s]
 
-(W) You've used an array slice (indicated by @) to select a single value of
+(W) You've used an array slice (indicated by @) to select a single element of
 an array.  Generally it's better to ask for a scalar value (indicated by $).
 The difference is that C<$foo[&bar]> always behaves like a scalar, both when
 assigning to it and when evaluating its argument, while C<@foo[&bar]> behaves
@@ -1823,6 +1823,20 @@ like a list when you assign to it, and provides a list context to its
 subscript, which can do weird things if you're expecting only one subscript.
 
 On the other hand, if you were actually hoping to treat the array
+element as a list, you need to look into how references work, because
+Perl will not magically convert between scalars and lists for you.  See
+L<perlref>.
+
+=item Scalar value @%s{%s} better written as $%s{%s}
+
+(W) You've used a hash slice (indicated by @) to select a single element of
+a hash.  Generally it's better to ask for a scalar value (indicated by $).
+The difference is that C<$foo{&bar}> always behaves like a scalar, both when
+assigning to it and when evaluating its argument, while C<@foo{&bar}> behaves
+like a list when you assign to it, and provides a list context to its
+subscript, which can do weird things if you're expecting only one subscript.
+
+On the other hand, if you were actually hoping to treat the hash
 element as a list, you need to look into how references work, because
 Perl will not magically convert between scalars and lists for you.  See
 L<perlref>.
@@ -2348,6 +2362,14 @@ L<perlref> for more on this.
 
 (W) A copy of the object returned from C<tie> (or C<tied>) was still
 valid when C<untie> was called.
+
+=item Value of %s may be "0"; use "defined"
+
+(W) In a conditional expression, you used <HANDLE>, <*> (glob), or
+C<readdir> as a boolean value.  Each of these operators may return a
+value of "0"; that would make the conditional expression false, which
+is probably not what you intended.  So, when using these operators in
+conditional expressions, test their values with the C<defined> operator.
 
 =item Variable "%s" is not exported
 

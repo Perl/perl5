@@ -37,7 +37,7 @@ Read on...
 
 L<Compiling your C program>
 
-There's one example in each of the six sections:
+There's one example in each of the eight sections:
 
 L<Adding a Perl interpreter to your C program>
 
@@ -48,6 +48,8 @@ L<Evaluating a Perl statement from your C program>
 L<Performing Perl pattern matches and substitutions from your C program>
 
 L<Fiddling with the Perl stack from your C program>
+
+L<Maintaining a persistent interpreter>
 
 L<Using Perl modules, which themselves use C libraries, from your C program>
 
@@ -69,7 +71,7 @@ Your C program will--usually--allocate, "run", and deallocate a
 I<PerlInterpreter> object, which is defined in the perl library.
 
 If your copy of Perl is recent enough to contain this documentation
-(5.002 or later), then the perl library (and I<EXTERN.h> and
+(version 5.002 or later), then the perl library (and I<EXTERN.h> and
 I<perl.h>, which you'll also need) will
 reside in a directory resembling this:
 
@@ -225,13 +227,10 @@ L<Fiddling with the Perl stack from your C program>
 
 =head2 Evaluating a Perl statement from your C program
 
-NOTE: This section, and the next, employ some very brittle techniques
-for evaluating strings of Perl code.  Perl 5.002 contains some nifty
-features that enable A Better Way (such as with L<perlguts/perl_eval_sv>).
-Look for updates to this document soon.
-
-One way to evaluate a Perl string is to define a function (we'll call
-ours I<perl_eval()>) that wraps around Perl's L<perlfunc/eval>.
+One way to evaluate pieces of Perl code is to use L<perlguts/perl_eval_sv>.
+We have wrapped this function with our own I<perl_eval()> function, which
+converts a command string to an SV, passing this and the L<perlcall/G_DISCARD>
+flag to L<perlguts/perl_eval_sv>.
 
 Arguably, this is the only routine you'll ever need to execute
 snippets of Perl code from within your C program.  Your string can be
@@ -250,17 +249,14 @@ the first, a C<float> from the second, and a C<char *> from the third.
 
    static PerlInterpreter *my_perl;
 
-   int perl_eval(char *string)
+   I32 perl_eval(char *string)
    {
-     char *argv[2];
-     argv[0] = string;
-     argv[1] = NULL;
-     perl_call_argv("_eval_", 0, argv);
+     return perl_eval_sv(newSVpv(string,0), G_DISCARD);
    }
 
    main (int argc, char **argv, char **env)
    {
-     char *embedding[] = { "", "-e", "sub _eval_ { eval $_[0] }" };
+     char *embedding[] = { "", "-e", "0" };
      STRLEN length;
 
      my_perl = perl_alloc();
@@ -328,12 +324,9 @@ been wrapped here):
    #include <EXTERN.h>
    #include <perl.h>
    static PerlInterpreter *my_perl;
-   int perl_eval(char *string)
+   I32 perl_eval(char *string)
    {
-     char *argv[2];
-     argv[0] = string;
-     argv[1] = NULL;
-     perl_call_argv("_eval_", 0, argv);
+      return perl_eval_sv(newSVpv(string,0), G_DISCARD);
    }
    /** match(string, pattern)
    **
@@ -401,7 +394,7 @@ been wrapped here):
    }
    main (int argc, char **argv, char **env)
    {
-     char *embedding[] = { "", "-e", "sub _eval_ { eval $_[0] }" };
+     char *embedding[] = { "", "-e", "0" };
      char *text, **match_list;
      int num_matches, i;
      int j;
@@ -554,6 +547,198 @@ Compile and run:
 
     % power
     3 to the 4th power is 81.
+
+=head2 Maintaining a persistent interpreter
+
+When developing interactive, potentially long-running applications, it's
+a good idea to maintain a persistent interpreter rather than allocating
+and constructing a new interpreter multiple times.  The major gain here is
+speed, avoiding the penalty of Perl start-up time.  However, a persistent
+interpreter will require you to be more cautious in your use of namespace
+and variable scoping.  In previous examples we've been using global variables
+in the default package B<main>.  We knew exactly what code would be run, 
+making it safe to assume we'd avoid any variable collision or outrageous 
+symbol table growth.  
+
+Let's say your application is a server, which must run perl code from an 
+arbitrary file during each transaction.  Your server has no way of knowing
+what code is inside anyone of these files.  
+If the file was pulled in by B<perl_parse()>, compiled into a newly 
+constructed interpreter, then cleaned out with B<perl_destruct()> after the
+the transaction, you'd be shielded from most namespace troubles.
+
+One way to avoid namespace collisions in this scenerio, is to translate the
+file name into a valid Perl package name, which is most likely to be unique,
+then compile the code into that package using L<perlfunc/eval>.
+In the example below, each file will only be compiled once, unless it is
+updated on disk.  
+Optionally, the application may choose to clean out the symbol table
+associated with the file after we are done with it.  We'll call the subroutine
+B<Embed::Persistent::eval_file> which lives in the file B<persistent.pl>, with
+L<perlcall/perl_call_argv>, passing the filename and boolean cleanup/cache
+flag as arguments.
+
+Note that the process will continue to grow for each file that is compiled,
+and each file it pulls in via L<perlfunc/require>, L<perlfunc/use> or
+L<perlfunc/do>.  In addition, there maybe B<AUTOLOAD>ed subroutines and 
+other conditions that cause Perl's symbol table to grow.  You may wish to
+add logic which keeps track of process size or restarts itself after n number
+of requests to ensure memory consumption is kept to a minimum.  You also need
+to consider the importance of variable scoping with L<perlfunc/my> to futher
+reduce symbol table growth.
+
+ 
+ package Embed::Persistent;
+ #persistent.pl
+ 
+ use strict;
+ use vars '%Cache';
+ 
+ #use Devel::Symdump ();
+ 
+ sub valid_package_name {
+     my($string) = @_;
+     $string =~ s/([^A-Za-z0-9\/])/sprintf("_%2x",unpack("C",$1))/eg;
+     # second pass only for words starting with a digit
+     $string =~ s|/(\d)|sprintf("/_%2x",unpack("C",$1))|eg;
+ 
+     # Dress it up as a real package name
+     $string =~ s|/|::|g;
+     return "Embed" . $string;
+ }
+ 
+ #borrowed from Safe.pm
+ sub delete_package {
+     my $pkg = shift;
+     my ($stem, $leaf);
+ 
+     no strict 'refs';
+     $pkg = "main::$pkg\::";	# expand to full symbol table name
+     ($stem, $leaf) = $pkg =~ m/(.*::)(\w+::)$/;
+ 
+     my $stem_symtab = *{$stem}{HASH};
+ 
+     delete $stem_symtab->{$leaf};
+ }
+ 
+ sub eval_file {
+     my($filename, $delete) = @_;
+     my $package = valid_package_name($filename);
+     my $mtime = -M $filename;
+     if(defined $Cache{$package}{mtime}
+        &&
+        $Cache{$package}{mtime} <= $mtime) 
+     {
+ 	# we have compiled this subroutine already, 
+ 	# it has not been updated on disk, nothing left to do
+   	print STDERR "already compiled $package->handler\n";
+     }
+     else {
+ 	local *FH;
+ 	open FH, $filename or die "open '$filename' $!";
+ 	local($/) = undef;
+ 	my $sub = <FH>;
+ 	close FH;
+ 
+ 	#wrap the code into a subroutine inside our unique package
+ 	my $eval = qq{package $package; sub handler { $sub; }};
+ 	{
+ 	    # hide our variables within this block
+ 	    my($r,$filename,$mtime,$package,$sub);
+ 	    eval $eval;
+ 	}
+ 	die $@ if $@;
+ 
+ 	#cache it unless we're cleaning out each time
+ 	$Cache{$package}{mtime} = $mtime unless $delete;
+     }
+ 
+     eval {$package->handler;};
+     die $@ if $@;
+ 
+     delete_package($package) if $delete;
+ 
+     #take a look if you want
+     #print Devel::Symdump->rnew($package)->as_string, $/;
+ }
+ 
+ 1;
+ 
+ __END__
+
+ /* persistent.c */
+ #include <EXTERN.h> 
+ #include <perl.h> 
+ 
+ /* 1 = clean out filename's symbol table after each request, 0 = don't */
+ #ifndef DO_CLEAN
+ #define DO_CLEAN 0
+ #endif
+  
+ static PerlInterpreter *perl = NULL;
+  
+ int
+ main(int argc, char **argv, char **env)
+ {
+     char *embedding[] = { "", "persistent.pl" };
+     char *args[] = { "", DO_CLEAN, NULL };
+     char filename [1024];
+     int exitstatus = 0;
+ 
+     if((perl = perl_alloc()) == NULL) {
+ 	fprintf(stderr, "no memory!");
+ 	exit(1);
+     }
+     perl_construct(perl); 
+     
+     exitstatus = perl_parse(perl, NULL, 2, embedding, NULL);
+ 
+     if(!exitstatus) { 
+ 	exitstatus = perl_run(perl);
+   
+ 	while(printf("Enter file name: ") && gets(filename)) {
+ 
+ 	    /* call the subroutine, passing it the filename as an argument */
+ 	    args[0] = filename;
+ 	    perl_call_argv("Embed::Persistent::eval_file", 
+ 			   G_DISCARD | G_EVAL, args);
+ 
+ 	    /* check $@ */
+ 	    if(SvTRUE(GvSV(errgv))) 
+ 		fprintf(stderr, "eval error: %s\n", SvPV(GvSV(errgv),na));
+ 	}
+     }
+     
+     perl_destruct_level = 0;
+     perl_destruct(perl); 
+     perl_free(perl); 
+     exit(exitstatus);
+ }
+
+ 
+Now compile:
+
+ % cc -o persistent persistent.c `perl -MExtUtils::Embed -e ldopts` 
+
+Here's a example script file:
+
+ #test.pl
+ my $string = "hello";
+ foo($string);
+
+ sub foo {
+     print "foo says: @_\n";
+ }
+
+Now run:
+
+ % persistent
+ Enter file name: test.pl
+ foo says: hello
+ Enter file name: test.pl
+ already compiled Embed::test_2epl->handler
+ foo says: hello
+ Enter file name: ^C
 
 =head2 Using Perl modules, which themselves use C libraries, from your C program
 

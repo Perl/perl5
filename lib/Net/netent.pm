@@ -113,7 +113,7 @@ The gethost() functions do this in the Perl core:
 That means that the address comes back in binary for the
 host functions, and as a regular perl integer for the net ones.
 This seems a bug, but here's how to deal with it:
- 
+
  use strict;
  use Socket;
  use Net::netent;
@@ -154,7 +154,7 @@ This seems a bug, but here's how to deal with it:
  	} 
      }
  }
- 
+
 =head1 NOTE
 
 While this class is currently implemented using the Class::Template

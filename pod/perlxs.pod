@@ -953,7 +953,7 @@ example.
     # char* having the name of the package for the blessing.
     O_OBJECT
     	sv_setref_pv( $arg, CLASS, (void*)$var );
-    
+
     INPUT
     O_OBJECT
     	if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) )

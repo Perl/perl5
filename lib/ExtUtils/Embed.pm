@@ -265,7 +265,7 @@ functions while building your application.
 =head1 @EXPORT
 
 ExtUtils::Embed exports the following functions:
- 
+
 xsinit(), ldopts(), ccopts(), perl_inc(), ccflags(), 
 ccdlflags(), xsi_header(), xsi_protos(), xsi_body()
 
@@ -301,7 +301,7 @@ B<[@modules]> is an array ref, same as additional arguments mentioned above.
 
 =item Examples
 
- 
+
  perl -MExtUtils::Embed -e xsinit -- -o xsinit.c Socket
 
 
@@ -395,7 +395,7 @@ are picked up from the B<extralibs.ld> file in the same directory.
 
 
  perl -MExtUtils::Embed -e ldopts -- -std Socket
- 
+
 
 This will do the same as the above example, along with printing additional arguments for linking with the B<Socket> extension.
 
@@ -457,7 +457,7 @@ B<xsinit()> uses the xsi_* functions to generate most of it's code.
 
 For examples on how to use B<ExtUtils::Embed> for building C/C++ applications
 with embedded perl, see the eg/ directory and L<perlembed>.
- 
+
 =head1 SEE ALSO
 
 L<perlembed>

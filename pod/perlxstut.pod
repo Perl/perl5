@@ -25,21 +25,21 @@ features were added to Perl 5.
 
 =item *
 
-In versions of 5.002 prior to the gamma version, the test script in Example
-1 will not function properly.  You need to change the "use lib" line to
-read:
+In versions of Perl 5.002 prior to the gamma version, the test script
+in Example 1 will not function properly.  You need to change the "use
+lib" line to read:
 
 	use lib './blib';
 
 =item *
 
-In versions of 5.002 prior to version beta 3, the line in the .xs file
+In versions of Perl 5.002 prior to version beta 3, the line in the .xs file
 about "PROTOTYPES: DISABLE" will cause a compiler error.  Simply remove that
 line from the file.
 
 =item *
 
-In versions of 5.002 prior to version 5.002b1h, the test.pl file was not
+In versions of Perl 5.002 prior to version 5.002b1h, the test.pl file was not
 automatically created by h2xs.  This means that you cannot say "make test"
 to run the test script.  You will need to add the following line before the
 "use extension" statement:

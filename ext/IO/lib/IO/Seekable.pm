@@ -26,7 +26,7 @@ that value to return to a previously visited position.
 See L<perlfunc> for complete descriptions of each of the following
 supported C<IO::Seekable> methods, which are just front ends for the
 corresponding built-in functions:
-  
+
     clearerr
     seek
     tell

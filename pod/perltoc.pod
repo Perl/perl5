@@ -900,7 +900,7 @@ R, |dbcmd, ||dbcmd, = [alias value], command, p expr
 
 TTY, noTTY, ReadLine, NonStop, LineInfo
 
-  
+
 =item Other resources
 
 
@@ -936,7 +936,7 @@ TTY, noTTY, ReadLine, NonStop, LineInfo
 
 
 =item Security Bugs
-  
+
 
 =back
 

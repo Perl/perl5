@@ -654,7 +654,8 @@ Formatted output and significant digits
 
 This specific item has been deleted.  It demonstrated how the auto-increment
 operator would not catch when a number went over the signed int limit.  Fixed
-in 5.003_04.  But always be wary when using large integers.  If in doubt:
+in version 5.003_04.  But always be wary when using large integers.
+If in doubt:
 
    use Math::BigInt;
 
@@ -663,10 +664,10 @@ in 5.003_04.  But always be wary when using large integers.  If in doubt:
 Assignment of return values from numeric equality tests
 does not work in perl5 when the test evaluates to false (0).
 Logical tests now return an null, instead of 0
- 
+
     $p = ($test == 1);
     print $p,"\n";
-  
+
     # perl4 prints: 0
     # perl5 prints:
 
@@ -934,7 +935,7 @@ of assignment.  Perl 4 mistakenly gave them the precedence of the associated
 operator.  So you now must parenthesize them in expressions like
 
     /foo/ ? ($a += 2) : ($a -= 2);
-    
+
 Otherwise
 
     /foo/ ? $a += 2 : $a -= 2
@@ -1164,7 +1165,7 @@ within  the signal handler function, each time a signal was handled with
 perl4.  With perl5, the reset is now done correctly.  Any code relying 
 on the handler _not_ being reset will have to be reworked.
 
-5.002 and beyond uses sigaction() under SysV
+Since version 5.002, Perl uses sigaction() under SysV.
 
     sub gotit {
         print "Got @_... "; 

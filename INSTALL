@@ -315,11 +315,11 @@ just put their local extensions in with the standard distribution.
 In order to support using things like #!/usr/local/bin/perl5.002 after
 a later version is released, architecture-dependent libraries are
 stored in a version-specific directory, such as
-/usr/local/lib/perl5/archname/5.002/.  In 5.000 and 5.001, these files
-were just stored in /usr/local/lib/perl5/archname/.  If you will not be
-using 5.001 binaries, you can delete the standard extensions from the
-/usr/local/lib/perl5/archname/ directory.  Locally-added extensions can
-be moved to the site_perl and site_perl/archname directories.
+/usr/local/lib/perl5/archname/5.002/.  In Perl 5.000 and 5.001, these
+files were just stored in /usr/local/lib/perl5/archname/.  If you will
+not be using 5.001 binaries, you can delete the standard extensions from
+the /usr/local/lib/perl5/archname/ directory.  Locally-added extensions
+can be moved to the site_perl and site_perl/archname directories.
 
 Again, these are just the defaults, and can be changed as you run
 Configure.
@@ -406,7 +406,7 @@ Your system and typical applications may well give quite different
 results.
 
 The default name for the shared library is typically something like
-libperl.so.3.2 (for perl5.003_02) or libperl.so.302 or simply
+libperl.so.3.2 (for Perl 5.003_02) or libperl.so.302 or simply
 libperl.so.  Configure tries to guess a sensible naming convention
 based on your C library name.  Since the library gets installed in a
 version-specific architecture-dependent directory, the exact name
@@ -436,8 +436,8 @@ LD_LIBRARY_PATH above.
 There is also an potential problem with the shared perl library if you
 want to have more than one "flavor" of the same version of perl (e.g.
 with and without -DDEBUGGING).  For example, suppose you build and
-install a standard perl5.004 with a shared library.  Then, suppose you
-try to build perl5.004 with -DDEBUGGING enabled, but everything else
+install a standard Perl 5.004 with a shared library.  Then, suppose you
+try to build Perl 5.004 with -DDEBUGGING enabled, but everything else
 the same, including all the installation directories.  How can you
 ensure that your newly built perl will link with your newly built
 libperl.so.4 rather with the installed libperl.so.4?  The answer is
@@ -645,7 +645,7 @@ various other operating systems.
 
 =back
 
-=head1 Binary Compatibility With 5.003
+=head1 Binary Compatibility With Perl 5.003
 
 Perl 5.003 turned on the EMBED feature by default, which tries to
 avoid possible symbol name conflict by prefixing all global symbols
@@ -1012,14 +1012,14 @@ You can safely install the current version of perl5 and still run scripts
 under the old binaries for versions 5.003 and later ONLY.  Instead of
 starting your script with #!/usr/local/bin/perl, just start it with
 #!/usr/local/bin/perl5.003 (or whatever version you want to run.)
-If you want to retain a version of perl5 prior to perl5.003, you'll
+If you want to retain a version of Perl 5 prior to 5.003, you'll
 need to install the current version in a separate directory tree,
 since some of the architecture-independent library files have changed
 in incompatible ways.
 
 The architecture-dependent files are stored in a version-specific
 directory (such as F</usr/local/lib/perl5/sun4-sunos/5.002>) so that
-they are still accessible.  I<Note:> perl5.000 and perl5.001 did not
+they are still accessible.  I<Note:> Perl 5.000 and 5.001 did not
 put their architecture-dependent libraries in a version-specific
 directory.  They are simply in F</usr/local/lib/perl5/$archname>.  If
 you will not be using 5.000 or 5.001, you may safely remove those
@@ -1032,7 +1032,7 @@ Most extensions will probably not need to be recompiled to use with a newer
 version of perl.  If you do run into problems, and you want to continue
 to use the old version of perl along with your extension, simply move
 those extension files to the appropriate version directory, such as
-F</usr/local/lib/perl/archname/5.002>.  Then perl5.002 will find your
+F</usr/local/lib/perl/archname/5.002>.  Then Perl 5.002 will find your
 files in the 5.002 directory, and newer versions of perl will find your
 newer extension in the site_perl directory.
 
@@ -1046,7 +1046,7 @@ and adding /opt/perl5.002/bin to the shell PATH variable.  Such users
 may also wish to add a symbolic link /usr/local/bin/perl so that
 scripts can still start with #!/usr/local/bin/perl.
 
-B<NOTE>: Starting with 5.002_01, all functions in the perl C source
+B<NOTE>: Starting with Perl 5.002_01, all functions in the perl C source
 code are protected by default by the prefix Perl_ (or perl_) so that
 you may link with third-party libraries without fear of namespace
 collisons.  This breaks compatability with

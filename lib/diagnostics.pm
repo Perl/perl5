@@ -150,8 +150,8 @@ You have to to this instead, and I<before> you load the module.
     BEGIN { $diagnostics::PRETTY = 1 } 
 
 I could start up faster by delaying compilation until it should be
-needed, but this gets a "panic: top_level"
-when using the pragma form in 5.001e.  
+needed, but this gets a "panic: top_level" when using the pragma form
+in Perl 5.001e.
 
 While it's true that this documentation is somewhat subserious, if you use
 a program named I<splain>, you should expect a bit of whimsy.

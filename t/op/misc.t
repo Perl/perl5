@@ -204,3 +204,54 @@ EXPECT
 This is a reversed sentence.
 -- Out of inspiration --
 and destroyed as well
+########
+my @a; $a[2] = 1; for (@a) { $_ = 2 } print "@a\n"
+EXPECT
+2 2 2
+########
+@a = ($a, $b, $c, $d) = (5, 6);
+print "ok\n"
+  if ($a[0] == 5 and $a[1] == 6 and !defined $a[2] and !defined $a[3]);
+EXPECT
+ok
+########
+print "ok\n" if (1E2<<1 == 200 and 3E4<<3 == 240000);
+EXPECT
+ok
+########
+print "ok\n" if ("\0" cmp "\xFF");
+EXPECT
+ok
+########
+open(H,'op/misc.t'); # must be in the 't' directory
+stat(H);
+print "ok\n" if (-e _ and -f _ and -r _);
+EXPECT
+ok
+########
+sub thing { 0 || return qw(now is the time) }
+print thing(), "\n";
+EXPECT
+nowisthetime
+########
+$ren = 'joy';
+$stimpy = 'happy';
+{ local $main::{ren} = *stimpy; print $ren, ' ' }
+print $ren, "\n";
+EXPECT
+happy joy
+########
+$stimpy = 'happy';
+{ local $main::{ren} = *stimpy; print ${'ren'}, ' ' }
+print +(defined(${'ren'}) ? 'oops' : 'joy'), "\n";
+EXPECT
+happy joy
+########
+package p;
+sub func { print 'really ' unless wantarray; 'p' }
+sub groovy { 'groovy' }
+package main;
+print p::func()->groovy(), "\n"
+EXPECT
+really groovy
+########

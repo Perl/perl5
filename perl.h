@@ -1950,54 +1950,66 @@ EXT MGVTBL vtbl_amagicelem;
 #ifdef OVERLOAD
 EXT long amagic_generation;
 
-#define NofAMmeth 29
+#define NofAMmeth 58
 #ifdef DOINIT
-EXTCONST char * AMG_names[NofAMmeth][2] = {
-  {"fallback","abs"},
-  {"bool", "nomethod"},
-  {"\"\"", "0+"},
-  {"+","+="},
-  {"-","-="},
-  {"*", "*="},
-  {"/", "/="},
-  {"%", "%="},
-  {"**", "**="},
-  {"<<", "<<="},
-  {">>", ">>="},
-  {"&", "&="},
-  {"|", "|="},
-  {"^", "^="},
-  {"<", "<="},
-  {">", ">="},
-  {"==", "!="},
-  {"<=>", "cmp"},
-  {"lt", "le"},
-  {"gt", "ge"},
-  {"eq", "ne"},
-  {"!", "~"},
-  {"++", "--"},
-  {"atan2", "cos"},
-  {"sin", "exp"},
-  {"log", "sqrt"},
-  {"x","x="},
-  {".",".="},
-  {"=","neg"}
+EXTCONST char * AMG_names[NofAMmeth] = {
+  "fallback",	"abs",			/* "fallback" should be the first. */
+  "bool",	"nomethod",
+  "\"\"",	"0+",
+  "+",		"+=",
+  "-",		"-=",
+  "*",		"*=",
+  "/",		"/=",
+  "%",		"%=",
+  "**",		"**=",
+  "<<",		"<<=",
+  ">>",		">>=",
+  "&",		"&=",
+  "|",		"|=",
+  "^",		"^=",
+  "<",		"<=",
+  ">",		">=",
+  "==",		"!=",
+  "<=>",	"cmp",
+  "lt",		"le",
+  "gt",		"ge",
+  "eq",		"ne",
+  "!",		"~",
+  "++",		"--",
+  "atan2",	"cos",
+  "sin",	"exp",
+  "log",	"sqrt",
+  "x",		"x=",
+  ".",		".=",
+  "=",		"neg"
 };
 #else
-EXTCONST char * AMG_names[NofAMmeth][2];
+EXTCONST char * AMG_names[NofAMmeth];
 #endif /* def INITAMAGIC */
 
-struct  am_table        {
+struct am_table {
   long was_ok_sub;
   long was_ok_am;
-  CV* table[NofAMmeth*2];
+  U32 flags;
+  CV* table[NofAMmeth];
   long fallback;
 };
+struct am_table_short {
+  long was_ok_sub;
+  long was_ok_am;
+  U32 flags;
+};
 typedef struct am_table AMT;
+typedef struct am_table_short AMTS;
 
 #define AMGfallNEVER	1
 #define AMGfallNO	2
 #define AMGfallYES	3
+
+#define AMTf_AMAGIC		1
+#define AMT_AMAGIC(amt)		((amt)->flags & AMTf_AMAGIC)
+#define AMT_AMAGIC_on(amt)	((amt)->flags |= AMTf_AMAGIC)
+#define AMT_AMAGIC_off(amt)	((amt)->flags &= ~AMTf_AMAGIC)
 
 enum {
   fallback_amg,	abs_amg,

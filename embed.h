@@ -67,12 +67,14 @@
 #define check_uni		Perl_check_uni
 #define checkcomma		Perl_checkcomma
 #define ck_aelem		Perl_ck_aelem
+#define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
 #define ck_delete		Perl_ck_delete
 #define ck_eof			Perl_ck_eof
 #define ck_eval			Perl_ck_eval
 #define ck_exec			Perl_ck_exec
+#define ck_exists		Perl_ck_exists
 #define ck_ftst			Perl_ck_ftst
 #define ck_fun			Perl_ck_fun
 #define ck_fun_locale		Perl_ck_fun_locale
@@ -1073,6 +1075,7 @@
 #define vtbl_glob		Perl_vtbl_glob
 #define vtbl_isa		Perl_vtbl_isa
 #define vtbl_isaelem		Perl_vtbl_isaelem
+#define vtbl_itervar		Perl_vtbl_itervar
 #define vtbl_mglob		Perl_vtbl_mglob
 #define vtbl_nkeys		Perl_vtbl_nkeys
 #define vtbl_pack		Perl_vtbl_pack

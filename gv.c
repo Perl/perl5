@@ -818,8 +818,7 @@ GV* gv;
     SvREFCNT_dec(gp->gp_av);
     SvREFCNT_dec(gp->gp_hv);
     SvREFCNT_dec(gp->gp_io);
-    if ((cv = gp->gp_cv) && !GvCVGEN(gv))
-	SvREFCNT_dec(cv);
+    SvREFCNT_dec(gp->gp_cv);
     SvREFCNT_dec(gp->gp_form);
 
     Safefree(gp);
@@ -863,14 +862,14 @@ HV* stash;
   CV* cv;
   MAGIC* mg=mg_find((SV*)stash,'c');
   AMT *amtp=mg ? (AMT*)mg->mg_ptr: NULL;
+  AMT amt;
 
   if (mg && (amtp=((AMT*)(mg->mg_ptr)))->was_ok_am == amagic_generation &&
              amtp->was_ok_sub == sub_generation)
-      return HV_AMAGIC(stash)? TRUE: FALSE;
-  gvp=(GV**)hv_fetch(stash,"OVERLOAD",8,FALSE);
-  if (amtp && amtp->table) {
+      return AMT_AMAGIC(amtp);
+  if (amtp && AMT_AMAGIC(amtp)) {	/* Have table. */
     int i;
-    for (i=1;i<NofAMmeth*2;i++) {
+    for (i=1; i<NofAMmeth; i++) {
       if (amtp->table[i]) {
 	SvREFCNT_dec(amtp->table[i]);
       }
@@ -880,38 +879,32 @@ HV* stash;
 
   DEBUG_o( deb("Recalcing overload magic in package %s\n",HvNAME(stash)) );
 
+  amt.was_ok_am = amagic_generation;
+  amt.was_ok_sub = sub_generation;
+  amt.fallback = AMGfallNO;
+  amt.flags = 0;
+
+#ifdef OVERLOAD_VIA_HASH
+  gvp=(GV**)hv_fetch(stash,"OVERLOAD",8,FALSE);	/* A shortcut */
   if (gvp && ((gv = *gvp) != (GV*)&sv_undef && (hv = GvHV(gv)))) {
     int filled=0;
     int i;
     char *cp;
-    AMT amt;
     SV* sv;
     SV** svp;
-    GV** gvp;
-
-/*  if (*(svp)==(SV*)amagic_generation && *(svp+1)==(SV*)sub_generation) {
-      DEBUG_o( deb("Overload magic in package %s up-to-date\n",HvNAME(stash))
-);
-      return HV_AMAGIC(stash)? TRUE: FALSE;
-    }*/
-
-    amt.was_ok_am=amagic_generation;
-    amt.was_ok_sub=sub_generation;
-    amt.fallback=AMGfallNO;
 
     /* Work with "fallback" key, which we assume to be first in AMG_names */
 
-    if ((cp=((char**)(*AMG_names))[0]) &&
-	(svp=(SV**)hv_fetch(hv,cp,strlen(cp),FALSE)) && (sv = *svp)) {
+    if (( cp = (char *)AMG_names[0] ) &&
+	(svp = (SV**)hv_fetch(hv,cp,strlen(cp),FALSE)) && (sv = *svp)) {
       if (SvTRUE(sv)) amt.fallback=AMGfallYES;
       else if (SvOK(sv)) amt.fallback=AMGfallNEVER;
     }
-
-    for (i=1;i<NofAMmeth*2;i++) {
-      cv=0;
-
-      if ( (cp=((char**)(*AMG_names))[i]) ) {
-        svp=(SV**)hv_fetch(hv,cp,strlen(cp),FALSE);
+    for (i = 1; i < NofAMmeth; i++) {
+      cv = 0;
+      cp = (char *)AMG_names[i];
+      
+        svp = (SV**)hv_fetch(hv, cp, strlen(cp), FALSE);
         if (svp && ((sv = *svp) != &sv_undef)) {
           switch (SvTYPE(sv)) {
             default:
@@ -927,7 +920,7 @@ HV* stash;
                 /* FALL THROUGH */
             case SVt_PVHV:
             case SVt_PVAV:
-	      die("Not a subroutine reference in overload table");
+	      croak("Not a subroutine reference in overload table");
 	      return FALSE;
             case SVt_PVCV:
                 cv = (CV*)sv;
@@ -939,23 +932,51 @@ HV* stash;
           }
           if (cv) filled=1;
 	  else {
-	    die("Method for operation %s not found in package %.256s during blessing\n",
+	    croak("Method for operation %s not found in package %.256s during blessing\n",
 		cp,HvNAME(stash));
 	    return FALSE;
 	  }
         }
-      }
-      amt.table[i]=(CV*)SvREFCNT_inc(cv);
+#else
+  {
+    int filled = 0;
+    int i;
+    char *cp;
+    SV* sv = NULL;
+    SV** svp;
+
+    /* Work with "fallback" key, which we assume to be first in AMG_names */
+
+    if ( cp = (char *)AMG_names[0] ) {
+	/* Try to find via inheritance. */
+	gv = gv_fetchmeth(stash, "()", 2, 0); /* A cooky: "()". */
+	if (gv) sv = GvSV(gv);
+
+	if (!sv) /* Empty */;
+	else if (SvTRUE(sv)) amt.fallback=AMGfallYES;
+	else if (SvOK(sv)) amt.fallback=AMGfallNEVER;
     }
-    sv_magic((SV*)stash, 0, 'c', (char*)&amt, sizeof(amt));
+
+    for (i = 1; i < NofAMmeth; i++) {
+        cv = 0;
+        cp = (char *)AMG_names[i];
+      
+	*buf = '(';			/* A cooky: "(". */
+	strcpy(buf + 1, cp);
+	gv = gv_fetchmeth(stash, buf, strlen(buf), 0); /* fills the stash! */
+        if(gv && (cv = GvCV(gv))) filled = 1;
+#endif 
+	amt.table[i]=(CV*)SvREFCNT_inc(cv);
+    }
     if (filled) {
-/*    HV_badAMAGIC_off(stash);*/
-      HV_AMAGIC_on(stash);
+      AMT_AMAGIC_on(&amt);
+      sv_magic((SV*)stash, 0, 'c', (char*)&amt, sizeof(AMT));
       return TRUE;
     }
   }
-/*HV_badAMAGIC_off(stash);*/
-  HV_AMAGIC_off(stash);
+  /* Here we have no table: */
+  AMT_AMAGIC_off(&amt);
+  sv_magic((SV*)stash, 0, 'c', (char*)&amt, sizeof(AMTS));
   return FALSE;
 }
 
@@ -978,7 +999,9 @@ int flags;
   HV* stash;
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)
       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(left))),'c'))
-      && (ocvp = cvp = ((oamtp=amtp=(AMT*)mg->mg_ptr)->table))
+      && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr) 
+			? (oamtp = amtp = (AMT*)mg->mg_ptr)->table
+			: NULL))
       && ((cv = cvp[off=method+assignshift]) 
 	  || (assign && amtp->fallback > AMGfallNEVER && /* fallback to
 						          * usual method */
@@ -1071,7 +1094,9 @@ int flags;
 	 if (!cv) goto not_found;
     } else if (!(AMGf_noright & flags) && SvAMAGIC(right)
 	       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(right))),'c'))
-	       && (cvp = ((amtp=(AMT*)mg->mg_ptr)->table))
+	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr) 
+			  ? (amtp = (AMT*)mg->mg_ptr)->table
+			  : NULL))
 	       && (cv = cvp[off=method])) { /* Method for right
 					     * argument found */
       lr=1;
@@ -1108,7 +1133,7 @@ int flags;
 	goto not_found;
       }
     } else {
-    not_found:			/* No method found, either report or die */
+    not_found:			/* No method found, either report or croak */
       if (ocvp && (cv=ocvp[nomethod_amg])) { /* Call report method */
 	notfound = 1; lr = -1;
       } else if (cvp && (cv=cvp[nomethod_amg])) {
@@ -1116,7 +1141,7 @@ int flags;
       } else {
         if (off==-1) off=method;
 	sprintf(buf, "Operation `%s': no method found,\n\tleft argument %s%.256s,\n\tright argument %s%.256s",
-		      ((char**)AMG_names)[method + assignshift],
+		      AMG_names[method + assignshift],
 		      SvAMAGIC(left)? 
 		        "in overloaded package ":
 		        "has no overloaded magic",
@@ -1132,7 +1157,7 @@ int flags;
 	if (amtp && amtp->fallback >= AMGfallYES) {
 	  DEBUG_o( deb(buf) );
 	} else {
-	  die(buf);
+	  croak(buf);
 	}
 	return NULL;
       }
@@ -1140,11 +1165,11 @@ int flags;
   }
   if (!notfound) {
     DEBUG_o( deb("Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %.256s%s\n",
-		 ((char**)AMG_names)[off],
+		 AMG_names[off],
 		 method+assignshift==off? "" :
 		             " (initially `",
 		 method+assignshift==off? "" :
-		             ((char**)AMG_names)[method+assignshift],
+		             AMG_names[method+assignshift],
 		 method+assignshift==off? "" : "')",
 		 flags & AMGf_unary? "" :
 		   lr==1 ? " for right argument": " for left argument",
@@ -1182,7 +1207,7 @@ int flags;
     PUSHs(lr>0? left: right);
     PUSHs( assign ? &sv_undef : (lr>0? &sv_yes: &sv_no));
     if (notfound) {
-      PUSHs( sv_2mortal(newSVpv(((char**)AMG_names)[method + assignshift],0)) );
+      PUSHs( sv_2mortal(newSVpv((char *)AMG_names[method + assignshift],0)) );
     }
     PUSHs((SV*)cv);
     PUTBACK;
@@ -1230,7 +1255,7 @@ ans=!SvOK(res); break;
       return ans? &sv_yes: &sv_no;
     } else if (method==copy_amg) {
       if (!SvROK(res)) {
-	die("Copy method did not return a reference");
+	croak("Copy method did not return a reference");
       }
       return SvREFCNT_inc(SvRV(res));
     } else {

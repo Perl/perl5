@@ -184,7 +184,7 @@ result!
 See L<perlfunc> for complete descriptions of each of the following
 supported C<FileHandle> methods, which are just front ends for the
 corresponding built-in functions:
-  
+
     close
     fileno
     getc

@@ -1,12 +1,26 @@
 package overload;
 
+sub nil {}
+
 sub OVERLOAD {
   $package = shift;
   my %arg = @_;
-  my $hash = \%{$package . "::OVERLOAD"};
+  my ($sub, $fb);
+  $ {$package . "::OVERLOAD"}{dummy}++; # Register with magic by touching.
+  *{$package . "::()"} = \&nil; # Make it findable via fetchmethod.
   for (keys %arg) {
-    $hash->{$_} = $arg{$_};
+    if ($_ eq 'fallback') {
+      $fb = $arg{$_};
+    } else {
+      $sub = $arg{$_};
+      if (not ref $sub and $sub !~ /::/) {
+	$sub = "${'package'}::$sub";
+      }
+      #print STDERR "Setting `$ {'package'}::\cO$_' to \\&`$sub'.\n";
+      *{$package . "::(" . $_} = \&{ $sub };
+    }
   }
+  ${$package . "::()"} = $fb; # Make it findable too (fallback only).
 }
 
 sub import {
@@ -18,41 +32,47 @@ sub import {
 
 sub unimport {
   $package = (caller())[0];
-  my $hash = \%{$package . "::OVERLOAD"};
+  ${$package . "::OVERLOAD"}{dummy}++; # Upgrade the table
   shift;
   for (@_) {
-    delete $hash->{$_};
+    if ($_ eq 'fallback') {
+      undef $ {$package . "::()"};
+    } else {
+      delete $ {$package . "::"}{"(" . $_};
+    }
   }
 }
 
 sub Overloaded {
-  ($package = ref $_[0]) and defined %{$package . "::OVERLOAD"};
+  my $package = shift;
+  $package = ref $package if ref $package;
+  $package->can('()');
 }
 
 sub OverloadedStringify {
-  ($package = ref $_[0]) and 
-    defined %{$package . "::OVERLOAD"} and 
-      exists $ {$package . "::OVERLOAD"}{'""'} and
-	defined &{$ {$package . "::OVERLOAD"}{'""'}};
+  my $package = shift;
+  $package = ref $package if ref $package;
+  $package->can('(""')
 }
 
 sub Method {
-  ($package = ref $_[0]) and 
-    defined %{$package . "::OVERLOAD"} and 
-      $ {$package . "::OVERLOAD"}{$_[1]};
+  my $package = shift;
+  $package = ref $package if ref $package;
+  $package->can('(' . shift)
 }
 
 sub AddrRef {
-  $package = ref $_[0];
-  bless $_[0], Overload::Fake;	# Non-overloaded package
+  my $package = ref $_[0];
+  return "$_[0]" unless $package;
+  bless $_[0], overload::Fake;	# Non-overloaded package
   my $str = "$_[0]";
   bless $_[0], $package;	# Back
-  $str;
+  $package . substr $str, index $str, '=';
 }
 
 sub StrVal {
-  (OverloadedStringify) ?
-    (AddrRef) :
+  (OverloadedStringify($_[0])) ?
+    (AddrRef(shift)) :
     "$_[0]";
 }
 
@@ -486,9 +506,13 @@ induces diagnostic messages.
 =head1 BUGS
 
 Because it is used for overloading, the per-package associative array
-%OVERLOAD now has a special meaning in Perl.
+%OVERLOAD now has a special meaning in Perl. The symbol table is
+filled with names looking like line-noise.
 
-As shipped, mathemagical properties are not inherited via the @ISA tree.
+For the purpose of inheritance every overloaded package behaves as if
+C<fallback> is present (possibly undefined). This may create
+interesting effects if some package is not overloaded, but inherits
+from two overloaded packages.
 
 This document is confusing.
 

@@ -146,8 +146,8 @@ you'd have to do something like this:
 
 Actually, if you were using strict, you'd have to declare not only
 $ref_to_LoL as you had to declare @LoL, but you'd I<also> having to
-initialize it to a reference to an empty list.  (This was a bug in 5.001m
-that's been fixed for the 5.002 release.)
+initialize it to a reference to an empty list.  (This was a bug in
+perl version 5.001m that's been fixed for the 5.002 release.)
 
     my $ref_to_LoL = [];
     while (<>) {

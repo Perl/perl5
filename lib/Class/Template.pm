@@ -84,7 +84,7 @@ This module uses perl5 classes to create nested data types.
 	}
 
 =head1 NOTES
- 
+
 Use '%' if the member should point to an anonymous hash.  Use '@' if the
 member should point to an anonymous array.
 

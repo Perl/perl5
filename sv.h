@@ -131,11 +131,6 @@ struct io {
 #define SVphv_SHAREKEYS 0x20000000	/* keys live on shared string table */
 #define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
 
-#ifdef OVERLOAD
-#define SVpgv_AM        0x40000000
-/* #define SVpgv_badAM     0x20000000 */
-#endif /* OVERLOAD */
-
 struct xrv {
     SV *	xrv_rv;		/* pointer to another SV */
 };

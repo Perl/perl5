@@ -9,6 +9,116 @@ releases.)
 
 
 ----------------
+Version 5.003_18
+----------------
+
+Yet further down the road to 5.004....
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Inherited overloading"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612291312.IAA02134@monk.mps.ohio-state.edu>
+   Date:  Sun, 29 Dec 1996 08:12:54 -0500 (EST)
+  Files:  gv.c lib/overload.pm perl.h sv.c sv.h t/op/overload.t
+
+  Title:  "Hide lexicals from C<use>d or C<require>d module (!)"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_ctl.c
+
+  Title:  "Closures at file scope must be anonymous"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c
+
+  Title:  "Warn on '{if,while} ($x = X)' where X is glob, readdir, or <FH>"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c pod/perldiag.pod
+
+  Title:  "Warn on 'undef $x; $x OP 1' where OP is *=, /=, %=, or **="
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c
+
+ CORE PORTABILITY
+
+  Title:  "Ultrix setlocale() workaround"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  hints/ultrix_4.sh util.c
+
+ OTHER CORE CHANGES
+
+  Title:  "Get rid of 'Leaked scalars'"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  cop.h gv.c op.c
+
+  Title:  "Don't forget $c in C<(($a,$b,$c)=(1,2))=(3,4,5)>"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_hot.c
+
+  Title:  "Fix core dump on perl_construct()/perl_destruct() loop"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  perl.c
+
+  Title:  "Add missing syms to global.sym; update magic doc"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  global.sym pod/perlguts.pod
+
+ TESTS
+
+  Title:  "Expanded locale.t and misc.t"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+  Files:  t/lib/locale.t t/lib/misc.t
+
+  Title:  "Expanded my.t"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  t/lib/my.t
+
+  Title:  "test harness for C<use x.xxxx>"
+   From:  Graham Barr <bodg@tiuk.ti.com>
+ Msg-ID:  <32C76882.3F3C7999@tiuk.ti.com>
+   Date:  Mon, 30 Dec 1996 07:00:18 +0000
+  Files:  MANIFEST t/op/use.t
+
+  Title:  "More tests"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.95.961229170736.15213M-100000@solaris.teleport.co
+   Date:  Sun, 29 Dec 1996 17:46:21 -0800 (PST)
+  Files:  t/op/each.t t/op/oct.t t/op/quotemeta.t t/op/rand.t
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Improving Config.pm"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.95.961230091244.13467L-100000@solaris.teleport.co
+   Date:  Mon, 30 Dec 1996 09:24:16 -0800 (PST)
+  Files:  configpm
+
+  Title:  "File::Copy under OS/2"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612280347.WAA00293@monk.mps.ohio-state.edu>
+   Date:  Fri, 27 Dec 1996 22:47:24 -0500 (EST)
+  Files:  lib/File/Copy.pm t/lib/filecopy.t
+
+ DOCUMENTATION
+
+  Title:  "Updates to perllocale.pod"
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+  Files:  pod/perllocale.pod
+
+  Title:  "Locale-related pod patches, take 2"
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+ Msg-ID:  <v03007800aeea9e488b36@[194.51.248.77]>
+   Date:  Sat, 28 Dec 1996 10:56:41 +0100
+  Files:  pod/perl.pod pod/perlform.pod pod/perlfunc.pod pod/perlop.pod
+          pod/perlre.pod pod/perlsec.pod
+
+  Title:  "Re: perldiag.pod entry for "Scalar value @%s{%s} ...""
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <2043.852051019@eeyore.ibcinc.com>
+   Date:  Tue, 31 Dec 1996 11:50:19 -0500
+  Files:  pod/perldiag.pod
+
+
+----------------
 Version 5.003_17
 ----------------
 

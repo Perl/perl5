@@ -4051,9 +4051,6 @@ SV* sv;
 	      strcat(d, " ),");
 	  }
       }
-#ifdef OVERLOAD
-      if (flags & SVpgv_AM)	strcat(d, "withOVERLOAD,");
-#endif /* OVERLOAD */
     }
 
     d += strlen(d);

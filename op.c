@@ -210,16 +210,14 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 		    SvNVX(sv) = (double)curcop->cop_seq;
 		    SvIVX(sv) = 999999999;	/* A ref, intro immediately */
 		    SvFLAGS(sv) |= SVf_FAKE;
-		    if (!CvUNIQUE(cv)) {
-			/* "It's closures all the way down." */
-			CvCLONE_on(compcv);
-			if (cv != startcv) {
-			    CV *bcv;
-			    for (bcv = startcv;
-				 bcv && bcv != cv && !CvCLONE(bcv);
-				 bcv = CvOUTSIDE(bcv))
-				CvCLONE_on(bcv);
-			}
+		    /* "It's closures all the way down." */
+		    CvCLONE_on(compcv);
+		    if (cv != startcv) {
+			CV *bcv;
+			for (bcv = startcv;
+			     bcv && bcv != cv && !CvCLONE(bcv);
+			     bcv = CvOUTSIDE(bcv))
+			    CvCLONE_on(bcv);
 		    }
 		}
 		av_store(comppad, newoff, SvREFCNT_inc(oldsv));
@@ -454,8 +452,13 @@ OP *op;
     case OP_ENTEREVAL:
 	op->op_targ = 0;	/* Was holding hints. */
 	break;
+    default:
+	if (!(op->op_flags & OPf_REF) || (check[op->op_type] != ck_ftst))
+	    break;
+	/* FALL THROUGH */
     case OP_GVSV:
     case OP_GV:
+    case OP_AELEMFAST:
 	SvREFCNT_dec(cGVOP->op_gv);
 	break;
     case OP_NEXTSTATE:
@@ -483,8 +486,6 @@ OP *op;
     case OP_MATCH:
 	pregfree(cPMOP->op_pmregexp);
 	SvREFCNT_dec(cPMOP->op_pmshort);
-	break;
-    default:
 	break;
     }
 
@@ -2444,6 +2445,27 @@ OP* other;
 	else
 	    scalar(other);
     }
+    else if (dowarn && (first->op_flags & OPf_KIDS)) {
+	OP *k1 = ((UNOP*)first)->op_first;
+	OP *k2 = k1->op_sibling;
+	OPCODE warnop = 0;
+	switch (first->op_type)
+	{
+	case OP_NULL:
+	    if (k2 && k2->op_type == OP_READLINE
+		  && (k2->op_flags & OPf_STACKED)
+		  && (k1->op_type == OP_RV2SV || k1->op_type == OP_PADSV))
+		warnop = k2->op_type;
+	    break;
+
+	case OP_SASSIGN:
+	    if (k1->op_type == OP_READDIR || k1->op_type == OP_GLOB)
+		warnop = k1->op_type;
+	    break;
+	}
+	if (warnop)
+	    warn("Value of %s may be \"0\"; use \"defined\"", op_desc[warnop]);
+    }
 
     if (!other)
 	return first;
@@ -2982,8 +3004,11 @@ OP *block;
     if (op)
 	sub_generation++;
     if (cv = GvCV(gv)) {
-	if (GvCVGEN(gv))
-	    cv = 0;			/* just a cached method */
+	if (GvCVGEN(gv)) {
+	    /* just a cached method */
+	    SvREFCNT_dec(cv);
+	    cv = 0;
+	}
 	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    SV* const_sv = cv_const_sv(cv);
 
@@ -3009,6 +3034,7 @@ OP *block;
     }
     if (cv) {				/* must reuse cv if autoloaded */
 	cv_undef(cv);
+	CvFLAGS(cv) = (CvFLAGS(cv)&~CVf_CLONE) | (CvFLAGS(compcv)&CVf_CLONE);
 	CvOUTSIDE(cv) = CvOUTSIDE(compcv);
 	CvOUTSIDE(compcv) = 0;
 	CvPADLIST(cv) = CvPADLIST(compcv);
@@ -3044,6 +3070,10 @@ OP *block;
 	return cv;
     }
 
+    /* XXX: Named functions at file scope cannot be closures */
+    if (op && CvUNIQUE(CvOUTSIDE(cv)))
+	CvCLONE_off(cv);
+
     av = newAV();			/* Will be @_ */
     av_extend(av, 0);
     av_store(comppad, 0, (SV*)av);
@@ -3061,40 +3091,37 @@ OP *block;
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
     peep(CvSTART(cv));
+
     if (s = strrchr(name,':'))
 	s++;
     else
 	s = name;
     if (strEQ(s, "BEGIN") && !error_count) {
-	line_t oldline = compiling.cop_line;
-	SV *oldrs = rs;
-
 	ENTER;
 	SAVESPTR(compiling.cop_filegv);
+	SAVEI16(compiling.cop_line);
 	SAVEI32(perldb);
+	save_svref(&rs);
+	sv_setsv(rs, nrs);
+
 	if (!beginav)
 	    beginav = newAV();
-	av_push(beginav, (SV *)cv);
 	DEBUG_x( dump_sub(gv) );
-	rs = SvREFCNT_inc(nrs);
-	SvREFCNT_inc(cv);
+	av_push(beginav, (SV *)cv);
+	GvCV(gv) = 0;
 	calllist(beginav);
-	if (GvCV(gv) == cv) {		/* Detach it. */
-	    SvREFCNT_dec(cv);
-	    GvCV(gv) = 0;		/* Was above calllist, why? IZ */
-	}
-	SvREFCNT_dec(rs);
-	rs = oldrs;
+
 	curcop = &compiling;
-	curcop->cop_line = oldline;	/* might have recursed to yylex */
 	LEAVE;
     }
     else if (strEQ(s, "END") && !error_count) {
 	if (!endav)
 	    endav = newAV();
 	av_unshift(endav, 1);
-	av_store(endav, 0, SvREFCNT_inc(cv));
+	av_store(endav, 0, (SV *)cv);
+	GvCV(gv) = 0;
     }
+
     if (perldb && curstash != debstash) {
 	SV *sv;
 	SV *tmpstr = sv_newmortal();
@@ -3122,13 +3149,14 @@ OP *block;
 	    perl_call_sv((SV*)cv, G_DISCARD);
 	}
     }
-    op_free(op);
-    copline = NOLINE;
-    LEAVE_SCOPE(floor);
+
     if (!op) {
 	GvCV(gv) = 0;	/* Will remember in SVOP instead. */
 	CvANON_on(cv);
     }
+    op_free(op);
+    copline = NOLINE;
+    LEAVE_SCOPE(floor);
     return cv;
 }
 
@@ -4397,7 +4425,7 @@ register OP* o;
 		    o->op_type = OP_AELEMFAST;
 		    o->op_ppaddr = ppaddr[OP_AELEMFAST];
 		    o->op_private = (U8)i;
-		    GvAVn((GV*)(((SVOP*)o)->op_sv));
+		    GvAVn(((GVOP*)o)->op_gv);
 		}
 	    }
 	    o->op_seq = op_seqmax++;

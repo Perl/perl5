@@ -72,20 +72,20 @@ paragraph with a matching =end are treated as a particular format.
 Here are some examples of how to use these:
 
  =begin html
- 
+
  <br>Figure 1.<IMG SRC="figure1.png"><br>
- 
+
  =end html
- 
+
  =begin text
- 
+
    ---------------
    |  foo        |
    |        bar  |
    ---------------
- 
+
  ^^^^ Figure 1. ^^^^
- 
+
  =end text
 
 Some format names that formatters currently are known to accept include

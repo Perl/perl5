@@ -448,7 +448,7 @@ of magicalness to a C programmer.  It's really just a mnemonic device
 to remind ourselves that this field is special and not to be used as
 a public data member in the same way that NAME, AGE, and PEERS are.
 (Because we've been developing this code under the strict pragma, prior
-to 5.004 we'll have to quote the field name.)
+to perl version 5.004 we'll have to quote the field name.)
 
     sub new {
         my $proto = shift;
@@ -1087,10 +1087,10 @@ base class?  That way you could give every object common methods without
 having to go and add it to each and every @ISA.  Well, it turns out that
 you can.  You don't see it, but Perl tacitly and irrevocably assumes
 that there's an extra element at the end of @ISA: the class UNIVERSAL.
-In 5.003, there were no predefined methods there, but you could put
+In version 5.003, there were no predefined methods there, but you could put
 whatever you felt like into it.
 
-However, as of 5.004 (or some subversive releases, like 5.003_08),
+However, as of version 5.004 (or some subversive releases, like 5.003_08),
 UNIVERSAL has some methods in it already.  These are built-in to your Perl
 binary, so they don't take any extra time to load.  Predefined methods
 include isa(), can(), and VERSION().  isa() tells you whether an object or
@@ -1196,7 +1196,7 @@ replace the variables above like $AGE with literal numbers, like 1.
 A bigger difference between the two approaches can be found in memory use.
 A hash representation takes up more memory than an array representation
 because you have to allocation memory for the keys as well as the values.
-However, it really isn't that bad, especially since as of 5.004,
+However, it really isn't that bad, especially since as of version 5.004,
 memory is only allocated once for a given hash key, no matter how many
 hashes have that key.  It's expected that sometime in the future, even
 these differences will fade into obscurity as more efficient underlying

@@ -5133,11 +5133,13 @@ case "$myhostname" in
 				echo "(Attempting domain name extraction from $tans)"
 				: Why was there an Egrep here, when Sed works?
 				: Look for either a search or a domain directive.
-				dflt=.`$sed -n -e 's/^search[ 	]*\(.*\)/\1/p' $tans \
-					| ./tr '[A-Z]' '[a-z]' 2>/dev/null`
+				dflt=.`$sed -n -e 's/	/ /g' \
+				  -e 's/^search.* \([^ ]*\) *$/\1/p' $tans \
+				  | ./tr '[A-Z]' '[a-z]' 2>/dev/null`
 				case "$dflt" in
-				.)	dflt=.`$sed -n -e 's/^domain[ 	]*\(.*\)/\1/p' $tans \
-						| ./tr '[A-Z]' '[a-z]' 2>/dev/null`
+				.) dflt=.`$sed -n -e 's/	/ /g' \
+				     -e 's/^domain.* \([^ ]*\) *$/\1/p' $tans \
+				     | ./tr '[A-Z]' '[a-z]' 2>/dev/null`
 					;;
 				esac
 			fi

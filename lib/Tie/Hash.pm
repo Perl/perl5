@@ -98,7 +98,7 @@ L<Config> module. While these do not utilize B<Tie::Hash>, they serve as
 good working examples.
 
 =cut
-    
+
 use Carp;
 
 sub new {
