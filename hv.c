@@ -168,6 +168,126 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
  * contains an SV* */
 
+#define HV_FETCH_ISSTORE   0x01
+#define HV_FETCH_ISEXISTS  0x02
+#define HV_FETCH_LVALUE    0x04
+#define HV_FETCH_JUST_SV   0x08
+
+/*
+=for apidoc hv_store
+
+Stores an SV in a hash.  The hash key is specified as C<key> and C<klen> is
+the length of the key.  The C<hash> parameter is the precomputed hash
+value; if it is zero then Perl will compute it.  The return value will be
+NULL if the operation failed or if the value did not need to be actually
+stored within the hash (as in the case of tied hashes).  Otherwise it can
+be dereferenced to get the original C<SV*>.  Note that the caller is
+responsible for suitably incrementing the reference count of C<val> before
+the call, and decrementing it if the function returned NULL.  Effectively
+a successful hv_store takes ownership of one reference to C<val>.  This is
+usually what you want; a newly created SV has a reference count of one, so
+if all your code does is create SVs then store them in a hash, hv_store
+will own the only reference to the new SV, and your code doesn't need to do
+anything further to tidy up.  hv_store is not implemented as a call to
+hv_store_ent, and does not create a temporary SV for the key, so if your
+key data is not already in SV form then use hv_store in preference to
+hv_store_ent.
+
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
+information on how to use this function on tied hashes.
+
+=cut
+*/
+
+SV**
+Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen_i32, SV *val, U32 hash)
+{
+    HE *hek;
+    STRLEN klen;
+    int flags;
+
+    if (klen_i32 < 0) {
+	klen = -klen_i32;
+	flags = HVhek_UTF8;
+    } else {
+	klen = klen_i32;
+	flags = 0;
+    }
+    hek = hv_fetch_common (hv, NULL, key, klen, flags,
+			   (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), val, 0);
+    return hek ? &HeVAL(hek) : NULL;
+}
+
+SV**
+Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
+                 register U32 hash, int flags)
+{
+    HE *hek = hv_fetch_common (hv, NULL, key, klen, flags,
+			       (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), val, hash);
+    return hek ? &HeVAL(hek) : NULL;
+}
+
+/*
+=for apidoc hv_store_ent
+
+Stores C<val> in a hash.  The hash key is specified as C<key>.  The C<hash>
+parameter is the precomputed hash value; if it is zero then Perl will
+compute it.  The return value is the new hash entry so created.  It will be
+NULL if the operation failed or if the value did not need to be actually
+stored within the hash (as in the case of tied hashes).  Otherwise the
+contents of the return value can be accessed using the C<He?> macros
+described here.  Note that the caller is responsible for suitably
+incrementing the reference count of C<val> before the call, and
+decrementing it if the function returned NULL.  Effectively a successful
+hv_store_ent takes ownership of one reference to C<val>.  This is
+usually what you want; a newly created SV has a reference count of one, so
+if all your code does is create SVs then store them in a hash, hv_store
+will own the only reference to the new SV, and your code doesn't need to do
+anything further to tidy up.  Note that hv_store_ent only reads the C<key>;
+unlike C<val> it does not take ownership of it, so maintaining the correct
+reference count on C<key> is entirely the caller's responsibility.  hv_store
+is not implemented as a call to hv_store_ent, and does not create a temporary
+SV for the key, so if your key data is not already in SV form then use
+hv_store in preference to hv_store_ent.
+
+See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
+information on how to use this function on tied hashes.
+
+=cut
+*/
+
+HE *
+Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
+{
+  return hv_fetch_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISSTORE, val, hash);
+}
+
+/*
+=for apidoc hv_exists
+
+Returns a boolean indicating whether the specified hash key exists.  The
+C<klen> is the length of the key.
+
+=cut
+*/
+
+bool
+Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen_i32)
+{
+    STRLEN klen;
+    int flags;
+
+    if (klen_i32 < 0) {
+	klen = -klen_i32;
+	flags = HVhek_UTF8;
+    } else {
+	klen = klen_i32;
+	flags = 0;
+    }
+    return hv_fetch_common(hv, NULL, key, klen, flags, HV_FETCH_ISEXISTS, 0, 0)
+	? TRUE : FALSE;
+}
+
 /*
 =for apidoc hv_fetch
 
@@ -181,11 +301,6 @@ information on how to use this function on tied hashes.
 
 =cut
 */
-
-#define HV_FETCH_ISSTORE   0x01
-#define HV_FETCH_ISEXISTS  0x02
-#define HV_FETCH_LVALUE    0x04
-#define HV_FETCH_JUST_SV   0x08
 
 SV**
 Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
@@ -205,6 +320,23 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
 			   HV_FETCH_JUST_SV | (lval ? HV_FETCH_LVALUE : 0),
 			   Nullsv, 0);
     return hek ? &HeVAL(hek) : NULL;
+}
+
+/*
+=for apidoc hv_exists_ent
+
+Returns a boolean indicating whether the specified hash key exists. C<hash>
+can be a valid precomputed hash value, or 0 to ask for it to be
+computed.
+
+=cut
+*/
+
+bool
+Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
+{
+    return hv_fetch_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISEXISTS, 0, hash)
+	? TRUE : FALSE;
 }
 
 /* returns an HE * structure with the all fields set */
@@ -653,95 +785,6 @@ S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
 }
 
 /*
-=for apidoc hv_store
-
-Stores an SV in a hash.  The hash key is specified as C<key> and C<klen> is
-the length of the key.  The C<hash> parameter is the precomputed hash
-value; if it is zero then Perl will compute it.  The return value will be
-NULL if the operation failed or if the value did not need to be actually
-stored within the hash (as in the case of tied hashes).  Otherwise it can
-be dereferenced to get the original C<SV*>.  Note that the caller is
-responsible for suitably incrementing the reference count of C<val> before
-the call, and decrementing it if the function returned NULL.  Effectively
-a successful hv_store takes ownership of one reference to C<val>.  This is
-usually what you want; a newly created SV has a reference count of one, so
-if all your code does is create SVs then store them in a hash, hv_store
-will own the only reference to the new SV, and your code doesn't need to do
-anything further to tidy up.  hv_store is not implemented as a call to
-hv_store_ent, and does not create a temporary SV for the key, so if your
-key data is not already in SV form then use hv_store in preference to
-hv_store_ent.
-
-See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
-information on how to use this function on tied hashes.
-
-=cut
-*/
-
-SV**
-Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen_i32, SV *val, U32 hash)
-{
-    HE *hek;
-    STRLEN klen;
-    int flags;
-
-    if (klen_i32 < 0) {
-	klen = -klen_i32;
-	flags = HVhek_UTF8;
-    } else {
-	klen = klen_i32;
-	flags = 0;
-    }
-    hek = hv_fetch_common (hv, NULL, key, klen, flags,
-			   (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), val, 0);
-    return hek ? &HeVAL(hek) : NULL;
-}
-
-SV**
-Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
-                 register U32 hash, int flags)
-{
-    HE *hek = hv_fetch_common (hv, NULL, key, klen, flags,
-			       (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), val, hash);
-    return hek ? &HeVAL(hek) : NULL;
-}
-
-/*
-=for apidoc hv_store_ent
-
-Stores C<val> in a hash.  The hash key is specified as C<key>.  The C<hash>
-parameter is the precomputed hash value; if it is zero then Perl will
-compute it.  The return value is the new hash entry so created.  It will be
-NULL if the operation failed or if the value did not need to be actually
-stored within the hash (as in the case of tied hashes).  Otherwise the
-contents of the return value can be accessed using the C<He?> macros
-described here.  Note that the caller is responsible for suitably
-incrementing the reference count of C<val> before the call, and
-decrementing it if the function returned NULL.  Effectively a successful
-hv_store_ent takes ownership of one reference to C<val>.  This is
-usually what you want; a newly created SV has a reference count of one, so
-if all your code does is create SVs then store them in a hash, hv_store
-will own the only reference to the new SV, and your code doesn't need to do
-anything further to tidy up.  Note that hv_store_ent only reads the C<key>;
-unlike C<val> it does not take ownership of it, so maintaining the correct
-reference count on C<key> is entirely the caller's responsibility.  hv_store
-is not implemented as a call to hv_store_ent, and does not create a temporary
-SV for the key, so if your key data is not already in SV form then use
-hv_store in preference to hv_store_ent.
-
-See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
-information on how to use this function on tied hashes.
-
-=cut
-*/
-
-HE *
-Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
-{
-  return hv_fetch_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISSTORE, val, hash);
-}
-
-/*
 =for apidoc hv_delete
 
 Deletes a key/value pair in the hash.  The value SV is removed from the
@@ -966,49 +1009,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     if (k_flags & HVhek_FREEKEY)
 	Safefree(key);
     return Nullsv;
-}
-
-/*
-=for apidoc hv_exists
-
-Returns a boolean indicating whether the specified hash key exists.  The
-C<klen> is the length of the key.
-
-=cut
-*/
-
-bool
-Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen_i32)
-{
-    STRLEN klen;
-    int flags;
-
-    if (klen_i32 < 0) {
-	klen = -klen_i32;
-	flags = HVhek_UTF8;
-    } else {
-	klen = klen_i32;
-	flags = 0;
-    }
-    return hv_fetch_common(hv, NULL, key, klen, flags, HV_FETCH_ISEXISTS, 0, 0)
-	? TRUE : FALSE;
-}
-
-/*
-=for apidoc hv_exists_ent
-
-Returns a boolean indicating whether the specified hash key exists. C<hash>
-can be a valid precomputed hash value, or 0 to ask for it to be
-computed.
-
-=cut
-*/
-
-bool
-Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
-{
-    return hv_fetch_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISEXISTS, 0, hash)
-	? TRUE : FALSE;
 }
 
 STATIC void
