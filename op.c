@@ -1162,6 +1162,7 @@ mod(OP *o, I32 type)
 	/* FALL THROUGH */
     case OP_GV:
     case OP_AV2ARYLEN:
+	hints |= HINT_BLOCK_SCOPE;
     case OP_SASSIGN:
     case OP_AELEMFAST:
 	modcount++;

@@ -97,7 +97,7 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
     GvFILEGV(gv) = curcop->cop_filegv;
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, '*', name, len);
-    GvSTASH(gv) = stash;
+    GvSTASH(gv) = (HV*)SvREFCNT_inc(stash);
     GvNAME(gv) = savepvn(name, len);
     GvNAMELEN(gv) = len;
     if (multi)
@@ -421,14 +421,15 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		tmpbuf[len++] = ':';
 		tmpbuf[len] = '\0';
 		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
+		gv = gvp ? *gvp : Nullgv;
+		if (gv && gv != (GV*)&sv_undef) {
+		    if (SvTYPE(gv) != SVt_PVGV)
+			gv_init(gv, stash, tmpbuf, len, (add & 2));
+		    else
+			GvMULTI_on(gv);
+		}
 		Safefree(tmpbuf);
-		if (!gvp || *gvp == (GV*)&sv_undef)
-		    return Nullgv;
-		gv = *gvp;
-
-		if (SvTYPE(gv) == SVt_PVGV)
-		    GvMULTI_on(gv);
-		else if (!add)
+		if (!gv || gv == (GV*)&sv_undef)
 		    return Nullgv;
 		else
 		    gv_init(gv, stash, nambeg, namend - nambeg, (add & 2));

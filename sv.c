@@ -1916,7 +1916,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 		STRLEN len = GvNAMELEN(sstr);
 		sv_upgrade(dstr, SVt_PVGV);
 		sv_magic(dstr, dstr, '*', name, len);
-		GvSTASH(dstr) = GvSTASH(sstr);
+		GvSTASH(dstr) = (HV*)SvREFCNT_inc(GvSTASH(sstr));
 		GvNAME(dstr) = savepvn(name, len);
 		GvNAMELEN(dstr) = len;
 		SvFAKE_on(dstr);	/* can coerce to non-glob */
@@ -2699,6 +2699,7 @@ sv_clear(register SV *sv)
     case SVt_PVGV:
 	gp_free((GV*)sv);
 	Safefree(GvNAME(sv));
+	SvREFCNT_dec(GvSTASH(sv));
 	/* FALL THROUGH */
     case SVt_PVLV:
     case SVt_PVMG:
