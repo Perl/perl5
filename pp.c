@@ -3583,8 +3583,10 @@ PP(pp_uc)
 	    SETs(TARG);
 	}
 	else {
+	    STRLEN min = len + 1;
+
 	    (void)SvUPGRADE(TARG, SVt_PV);
-	    SvGROW(TARG, len + 1);
+	    SvGROW(TARG, min);
 	    (void)SvPOK_only(TARG);
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
@@ -3592,14 +3594,16 @@ PP(pp_uc)
 		STRLEN u = UTF8SKIP(s);
 
 		toUPPER_utf8(s, tmpbuf, &ulen);
-		if (ulen > u) {
+		if (ulen > u && (SvLEN(TARG) < (min += ulen - u))) {
+		    /* If the eventually required minimum size outgrows
+		     * the available space, we need to grow. */
 		    UV o = d - (U8*)SvPVX(TARG);
 
 		    /* If someone uppercases one million U+03B0s we
 		     * SvGROW() one million times.  Or we could try
 		     * guessing how much to allocate without allocating
 		     * too much. Such is life. */
-		    SvGROW(TARG, SvLEN(TARG) + ulen - u);
+		    SvGROW(TARG, min);
 		    d = (U8*)SvPVX(TARG) + o;
 		}
 		Copy(tmpbuf, d, ulen, U8);
@@ -3662,8 +3666,10 @@ PP(pp_lc)
 	    SETs(TARG);
 	}
 	else {
+	    STRLEN min = len + 1;
+
 	    (void)SvUPGRADE(TARG, SVt_PV);
-	    SvGROW(TARG, len + 1);
+	    SvGROW(TARG, min);
 	    (void)SvPOK_only(TARG);
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
@@ -3690,14 +3696,16 @@ PP(pp_lc)
 		      * See lib/unicore/SpecialCasing.txt.
 		      */
 		}
-		if (ulen > u) {
+		if (ulen > u && (SvLEN(TARG) < (min += ulen - u))) {
+		    /* If the eventually required minimum size outgrows
+		     * the available space, we need to grow. */
 		    UV o = d - (U8*)SvPVX(TARG);
 
 		    /* If someone lowercases one million U+0130s we
 		     * SvGROW() one million times.  Or we could try
 		     * guessing how much to allocate without allocating.
 		     * too much.  Such is life. */
-		    SvGROW(TARG, SvLEN(TARG) + ulen - u);
+		    SvGROW(TARG, min);
 		    d = (U8*)SvPVX(TARG) + o;
 		}
 		Copy(tmpbuf, d, ulen, U8);
