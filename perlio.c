@@ -141,7 +141,7 @@ struct _PerlIO
  STDCHAR *end;        /* End of valid part of buffer */
  STDCHAR *ptr;        /* Current position in buffer */
  Size_t   bufsiz;     /* Size of buffer */
- Off_t    posn;
+ Off_t    posn;       /* Offset of f->buf into the file */
  int      oneword;
 };
 
@@ -152,7 +152,7 @@ void
 PerlIO_alloc_buf(PerlIO *f)
 {
  if (!f->bufsiz)
-  f->bufsiz = 2;
+  f->bufsiz = 4096;
  New('B',f->buf,f->bufsiz,char);
  if (!f->buf)
   {
@@ -187,11 +187,13 @@ PerlIO_flush(PerlIO *f)
         }
        else if (count < 0 && errno != EINTR)
         {
+         f->flags |= PERLIO_F_ERROR;
          code = -1;
          break;
         }
       }
      f->posn += (p - f->buf);
+     PerlIO_debug(__FUNCTION__ "(w) f=%p p=%ld\n",f,(long)f->posn);
     }
    else if (f->flags & PERLIO_F_RDBUF)
     {
@@ -200,6 +202,11 @@ PerlIO_flush(PerlIO *f)
       {
        f->posn = lseek(f->fd,f->posn,SEEK_SET);
       }
+     PerlIO_debug(__FUNCTION__ "(r+) f=%p p=%ld\n",f,(long)f->posn);
+    }
+   else
+    {
+     PerlIO_debug(__FUNCTION__ "(?) f=%p p=%ld\n",f,(long)f->posn);
     }
    f->ptr = f->end = f->buf;
    f->flags &= ~(PERLIO_F_RDBUF|PERLIO_F_WRBUF);
@@ -247,7 +254,7 @@ PerlIO_oflags(const char *mode)
     break;
 
    case 'a':
-    oflags = O_CREAT|O_TRUNC|O_APPEND;
+    oflags = O_CREAT|O_APPEND;
     if (*++mode == '+')
      {
       oflags |= O_RDWR;
@@ -337,11 +344,19 @@ PerlIO_fileno(PerlIO *f)
 int
 PerlIO_close(PerlIO *f)
 {
- int code = -1;
+ int code = 0;
  if (f)
   {
-   PerlIO_flush(f);
-   while ((code = close(f->fd)) && errno == EINTR);
+   if (PerlIO_flush(f) != 0)
+    code = -1;
+   while (close(f->fd) != 0)
+    {
+     if (errno != EINTR)
+      {
+       code = -1;
+       break;
+      }
+    }
    f->flags &= ~PERLIO_F_OPEN;
    f->fd     = -1;
    if (f->buf && f->buf != (STDCHAR *) &f->oneword)
@@ -528,6 +543,7 @@ PerlIO_set_ptrcnt(PerlIO *f, STDCHAR *ptr, int cnt)
      dTHX;
      assert(PerlIO_get_cnt(f) != cnt);
     }
+   f->flags |= PERLIO_F_RDBUF;
   }
 }
 
@@ -618,12 +634,13 @@ PerlIO_getname(PerlIO *f, char *buf)
 int
 PerlIO_ungetc(PerlIO *f, int ch)
 {
- PerlIO_debug(__FUNCTION__ " f=%p c=%c\n",f,ch);
  if (f->buf && (f->flags & PERLIO_F_RDBUF) && f->ptr > f->buf)
   {
    *--(f->ptr) = ch;
+   PerlIO_debug(__FUNCTION__ " f=%p c=%c\n",f,ch);
    return ch;
   }
+ PerlIO_debug(__FUNCTION__ " f=%p c=%c - cannot\n",f,ch);
  return -1;
 }
 
@@ -653,6 +670,7 @@ PerlIO_read(PerlIO *f, void *vbuf, Size_t count)
       }
      if (count && (f->ptr >= f->end))
       {
+       PerlIO_flush(f);
        f->ptr = f->end = f->buf;
        avail = read(f->fd,f->ptr,f->bufsiz);
        if (avail <= 0)
@@ -729,11 +747,11 @@ PerlIO_write(PerlIO *f, const void *vbuf, Size_t count)
     PerlIO_alloc_buf(f);
    while (count > 0)
     {
-     Size_t avail = f->bufsiz - (f->ptr - f->buf);
-     if (count < avail)
+     SSize_t avail = f->bufsiz - (f->ptr - f->buf);
+     if ((SSize_t) count < avail)
       avail = count;
      f->flags |= PERLIO_F_WRBUF;
-     if (f->flags & PERLIO_F_LINEBUF)
+     if (1 || (f->flags & PERLIO_F_LINEBUF))
       {
        while (avail > 0)
         {
@@ -743,7 +761,10 @@ PerlIO_write(PerlIO *f, const void *vbuf, Size_t count)
          avail--;
          written++;
          if (ch == '\n')
-          PerlIO_flush(f);
+          {
+           PerlIO_flush(f);
+           break;
+          }
         }
       }
      else
@@ -776,7 +797,11 @@ PerlIO_putc(PerlIO *f, int ch)
 Off_t
 PerlIO_tell(PerlIO *f)
 {
- Off_t posn = f->posn + (f->ptr - f->buf);
+ Off_t posn = f->posn;
+ if (f->buf)
+  posn += (f->ptr - f->buf);
+ PerlIO_debug(__FUNCTION__ " f=%p r=%ld b=%p p=%p e=%ld\n",
+              f,(long)f->posn,f->buf,f->ptr,(long)posn);
  return posn;
 }
 
@@ -784,11 +809,15 @@ PerlIO_tell(PerlIO *f)
 int
 PerlIO_seek(PerlIO *f, Off_t offset, int whence)
 {
- int code = PerlIO_flush(f);
+ int code;
+ PerlIO_debug(__FUNCTION__ " f=%p i=%ld+%d\n",f,(long)f->posn,(f->ptr-f->buf));
+ code = PerlIO_flush(f);
  if (code == 0)
   {
    f->flags &= ~PERLIO_F_EOF;
-   f->posn = lseek(f->fd,offset,whence);
+   f->posn = PerlLIO_lseek(f->fd,offset,whence);
+   PerlIO_debug(__FUNCTION__ " f=%p o=%ld w=%d p=%ld\n",
+                f,(long)offset,whence,(long)f->posn);
    if (f->posn == (Off_t) -1)
     {
      f->posn = 0;
@@ -810,12 +839,12 @@ int
 PerlIO_vprintf(PerlIO *f, const char *fmt, va_list ap)
 {
  dTHX;
- SV *sv = newSV(strlen(fmt));
+ SV *sv = newSVpvn("",0);
  char *s;
  STRLEN len;
  sv_vcatpvf(sv, fmt, &ap);
  s = SvPV(sv,len);
- return (PerlIO_write(f,s,len) == len) ? 1 : 0;
+ return PerlIO_write(f,s,len);
 }
 
 #undef PerlIO_printf
