@@ -134,12 +134,17 @@ $ use_5005_threads = "N"
 $ use_ithreads = "N"
 $!
 $!: option parsing
+$ config_args = ""
 $ IF (P1 .NES. "")
 $ THEN            !one or more switches was thrown
 $   i = 1
 $   bang = 0
 $Param_loop:
-$   IF (P'i'.NES."") THEN bang = bang + 1
+$   IF (P'i'.NES."") 
+$   THEN
+$     bang = bang + 1
+$     config_args = config_args + F$FAO(" !AS",P'i')
+$   ENDIF
 $   i = i + 1
 $   IF (i.LT.9) THEN GOTO Param_loop !DCL allows P1..P8
 $!
@@ -300,6 +305,7 @@ $   i = i + 1
 $   IF (i .LT. (bang + 1)) THEN GOTO Opt_loop
 $!
 $ ENDIF  ! (P1 .NES. "")
+$ config_args = F$EDIT(config_args,"TRIM")
 $!
 $ IF (error)
 $ THEN
@@ -766,7 +772,7 @@ $!: who configured the system
 $! see 'user' above.
 $ cf_by = F$EDIT(user,"LOWERCASE")
 $! cf_time = F$CVTIME()                 !superceded by procedure below
-$ osvers = F$GETSYI("VERSION")
+$ osvers = F$EDIT(F$GETSYI("VERSION"),"TRIM")
 $!
 $! Peter Prymmer has seen:
 $!  "SYS$TIMEZONE_DIFFERENTIAL" = "-46800"  (sic)
@@ -899,9 +905,13 @@ $ IF (F$GETSYI("HW_MODEL") .LT. 1024)
 $ THEN 
 $   archname = "VMS_VAX"
 $   otherarch = "an Alpha"
+$   alignbytes="8"
+$   arch_type = "ARCH-TYPE=__VAX__"
 $ ELSE
 $   archname = "VMS_AXP"
 $   otherarch = "a VAX"
+$   alignbytes="8"
+$   arch_type = "ARCH-TYPE=__AXP__"
 $ ENDIF
 $ rp = "What is your architecture name? [''archname'] "
 $ GOSUB myread
@@ -970,7 +980,7 @@ $!
 $ vms_skip_install = "true"
 $ dflt = "y"
 $! echo ""
-$ rp = "%Config-I-VMS, Do you wish to skip the remaining """"where install"""" questions? [''dflt'] "
+$ rp = "%Config-I-VMS, Skip the remaining """"where install"""" questions? [''dflt'] "
 $ GOSUB myread
 $ IF (.NOT.ans).AND.(ans.NES."") THEN vms_skip_install = "false"
 $ IF (.NOT.vms_skip_install)
@@ -1032,7 +1042,8 @@ $   ENDIF
 $ ENDIF ! (.NOT.perl_symbol)
 $!
 $!: set the base revision
-$ baserev="5"
+$ baserev="5.0"
+$ revision = baserev - ".0"
 $!: get the patchlevel
 $ echo ""
 $ echo4 "Getting the current patchlevel..." !>&4
@@ -1041,6 +1052,9 @@ $ IF (patchlevel_h.NES."")
 $ THEN
 $   got_patch = "false"
 $   got_sub   = "false"
+$   got_api_revision   = "false"
+$   got_api_version    = "false"
+$   got_api_subversion = "false"
 $   OPEN/READONLY CONFIG 'patchlevel_h' 
 $Patchlevel_h_loop:
 $   READ/END_Of_File=Close_patch CONFIG line
@@ -1056,6 +1070,24 @@ $     line = F$EDIT(line,"COMPRESS, TRIM")
 $     subversion = F$ELEMENT(2," ",line)
 $     got_sub = "true"
 $   ENDIF
+$   IF ((F$LOCATE("#define PERL_API_REVISION",line).NE.F$LENGTH(line)).AND.(.NOT.got_api_revision))
+$   THEN
+$     line = F$EDIT(line,"COMPRESS, TRIM")
+$     api_revision = F$ELEMENT(2," ",line)
+$     got_api_revision = "true"
+$   ENDIF
+$   IF ((F$LOCATE("#define PERL_API_VERSION",line).NE.F$LENGTH(line)).AND.(.NOT.got_api_version))
+$   THEN
+$     line = F$EDIT(line,"COMPRESS, TRIM")
+$     api_version = F$ELEMENT(2," ",line)
+$     got_api_version = "true"
+$   ENDIF
+$   IF ((F$LOCATE("#define PERL_API_SUBVERSION",line).NE.F$LENGTH(line)).AND.(.NOT.got_api_subversion))
+$   THEN
+$     line = F$EDIT(line,"COMPRESS, TRIM")
+$     api_subversion = F$ELEMENT(2," ",line)
+$     got_api_subversion = "true"
+$   ENDIF
 $   IF (.NOT.got_patch).OR.(.NOT.got_sub) THEN GOTO Patchlevel_h_loop
 $Close_patch:
 $   CLOSE CONFIG
@@ -1063,24 +1095,14 @@ $   ELSE
 $     patchlevel="0"
 $     subversion="0"
 $ ENDIF
-$ echo "(You have ''package' ''baserev' PL''patchlevel' sub''subversion'.)"
-$! This whole thing needs replacing w/ F$FAO() calls:
-$ patchlevel = F$INTEGER(patchlevel)
-$ IF patchlevel.LT.10
-$ THEN patchlevel = "00" + F$STRING(patchlevel)
-$ ELSE patchlevel = "0" + F$STRING(patchlevel)
-$ ENDIF
-$ subversion = F$INTEGER(subversion)
-$ IF subversion.GT.0
+$ IF (F$STRING(subversion) .NES. "0")
 $ THEN
-$   IF subversion.LT.10
-$   THEN subversion = "0" + F$STRING(subversion)
-$   ELSE subversion = F$STRING(subversion)
-$   ENDIF
-$ ELSE subversion = ""
+$   echo "(You have ''package' revision ''revision' patchlevel ''patchlevel' subversion ''subversion'.)"
+$ ELSE
+$   echo "(You have ''package' revision ''revision' patchlevel ''patchlevel'.)"
 $ ENDIF
 $!
-$ version = baserev + "_" + patchlevel + "_" + subversion
+$ version = revision + "_" + patchlevel + "_" + subversion
 $!
 $ IF (.NOT.vms_skip_install)
 $ THEN
@@ -1902,7 +1924,7 @@ $ echo "default file types, however, you can configure Perl to try default"
 $ echo "file types of nothing, .pl, and .com, in that order (e.g. typing"
 $ echo """$ perl foo"" would cause Perl to look for foo., then foo.pl, and"
 $ echo "finally foo.com)."
-$ dflt = "n"
+$ dflt = "y"
 $ rp = "Always use default file types? [''dflt'] "
 $ GOSUB myread
 $ if ans.eqs."" then ans="''dflt'"
@@ -2122,13 +2144,13 @@ $! echo4 "Updating makefile..."
 $!
 $ IF (make .EQS. "MMS").OR.(make .EQS. "MMK")
 $ THEN 
-$   makefile    = "" 		 !wrt MANIFEST dir
-$   UUmakefile  = "DESCRIP.MMS"  !wrt CWD dir
-$   DEFmakefile = "DESCRIP.MMS"  !wrt DEF dir (?)
+$   makefile    = "" 		   !wrt MANIFEST dir
+$   UUmakefile  = "[-]DESCRIP.MMS" !wrt CWD dir
+$   DEFmakefile = "DESCRIP.MMS"    !wrt DEF dir (?)
 $ ELSE
-$   makefile    = " -f [.VMS]Makefile." !wrt MANIFEST dir
-$   UUmakefile  = "[-.VMS]Makefile."    !wrt CWD dir
-$   DEFmakefile = "[-.VMS]Makefile."    !wrt DEF dir (?)
+$   makefile    = " -f Makefile."  !wrt MANIFEST dir
+$   UUmakefile  = "[-]Makefile."   !wrt CWD dir
+$   DEFmakefile = "Makefile."      !wrt DEF dir (?)
 $ ENDIF
 $!
 $ IF macros.NES."" 

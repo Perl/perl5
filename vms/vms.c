@@ -106,7 +106,7 @@ int
 vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
   struct dsc$descriptor_s **tabvec, unsigned long int flags)
 {
-    char uplnm[LNM$C_NAMLENGTH], *cp1, *cp2;
+    char uplnm[LNM$C_NAMLENGTH+1], *cp1, *cp2;
     unsigned short int eqvlen, curtab, ivlnm = 0, ivsym = 0, ivenv = 0, secure;
     unsigned long int retsts, attr = LNM$M_CASE_BLIND;
     unsigned char acmode;
@@ -141,6 +141,7 @@ vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
     }
     lnmdsc.dsc$w_length = cp1 - lnm;
     lnmdsc.dsc$a_pointer = uplnm;
+    uplnm[lnmdsc.dsc$w_length] = '\0';
     secure = flags & PERL__TRNENV_SECURE;
     acmode = secure ? PSL$C_EXEC : PSL$C_USER;
     if (!tabvec || !*tabvec) tabvec = env_tables;
@@ -210,6 +211,19 @@ vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
         retsts = sys$trnlnm(&attr,tabvec[curtab],&lnmdsc,&acmode,lnmlst);
         if (retsts == SS$_IVLOGNAM) { ivlnm = 1; continue; }
         if (retsts == SS$_NOLOGNAM) continue;
+        /* PPFs have a prefix */
+        if (
+#if INTSIZE == 4
+             *((int *)uplnm) == *((int *)"SYS$")                    &&
+#endif
+             eqvlen >= 4 && eqv[0] == 0x1b && eqv[1] == 0x00        &&
+             ( (uplnm[4] == 'O' && !strcmp(uplnm,"SYS$OUTPUT"))  ||
+               (uplnm[4] == 'I' && !strcmp(uplnm,"SYS$INPUT"))   ||
+               (uplnm[4] == 'E' && !strcmp(uplnm,"SYS$ERROR"))   ||
+               (uplnm[4] == 'C' && !strcmp(uplnm,"SYS$COMMAND")) )  ) {
+          memcpy(eqv,eqv+4,eqvlen-4);
+          eqvlen -= 4;
+        }
         break;
       }
     }
@@ -2163,12 +2177,16 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
     else if (!infront && *cp2 == '.') {
       if (cp2+1 == dirend || *(cp2+1) == '\0') { cp2++; break; }
       else if (*(cp2+1) == '/') cp2++;   /* skip over "./" - it's redundant */
-      else if (*(cp2+1) == '.' && (*(cp2+2) == '/' || *(cp2+2) == '\0')) { /* handle "../" */
-        if (*(cp1-1) == '-' || *(cp1-1) == '[') *(cp1++) = '-'; 
+      else if (*(cp2+1) == '.' && (*(cp2+2) == '/' || *(cp2+2) == '\0')) {
+        if (*(cp1-1) == '-' || *(cp1-1) == '[') *(cp1++) = '-'; /* handle "../" */
         else if (*(cp1-2) == '[') *(cp1-1) = '-';
-        else {
-/*          if (*(cp1-1) != '.') *(cp1++) = '.'; */
-          *(cp1++) = '-';
+        else {  /* back up over previous directory name */
+          cp1--;
+          while (*(cp1-1) != '.' && *(cp1-1) != '[') cp1--;
+          if (*(cp1-1) == '[') {
+            memcpy(cp1,"000000.",7);
+            cp1 += 7;
+          }
         }
         cp2 += 2;
         if (cp2 == dirend) break;
