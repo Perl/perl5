@@ -31,6 +31,260 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9506] By: jhi                                   on 2001/04/01  19:11:53
+        Log: Commit Sarathy to April release of 5.6.1 :-)
+     Branch: perl
+	   ! pod/perlfaq1.pod
+____________________________________________________________________________
+[  9505] By: jhi                                   on 2001/04/01  19:03:15
+        Log: Subject: PATCH 5.6.0 (perldebug.pod)
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sun, 01 Apr 2001 14:25:11 -0400
+             Message-ID: <20010401182511.9247.qmail@plover.com>
+     Branch: perl
+	   ! pod/perldebug.pod
+____________________________________________________________________________
+[  9504] By: jhi                                   on 2001/04/01  18:43:09
+        Log: Add great_circle_direction().
+     Branch: perl
+	   ! lib/Math/Trig.pm t/lib/trig.t
+____________________________________________________________________________
+[  9503] By: jhi                                   on 2001/04/01  17:29:12
+        Log: Unicode ReadMe update for Unicode 3.1.
+     Branch: perl
+	   ! lib/unicode/ReadMe.txt
+____________________________________________________________________________
+[  9502] By: jhi                                   on 2001/04/01  17:18:40
+        Log: Integrate change #9501 from maintperl into mainline.
+             
+             fix the perlembed notes on multiple interpreters
+             
+             fix ExtUtils::Embed to work passably on Windows
+     Branch: perl
+	  !> lib/ExtUtils/Embed.pm pod/perlembed.pod
+____________________________________________________________________________
+[  9501] By: gsar                                  on 2001/04/01  07:21:57
+        Log: fix the perlembed notes on multiple interpreters
+             
+             fix ExtUtils::Embed to work passably on Windows
+     Branch: maint-5.6/perl
+	   ! lib/ExtUtils/Embed.pm pod/perlembed.pod
+____________________________________________________________________________
+[  9500] By: jhi                                   on 2001/04/01  05:58:23
+        Log: Test for #9499.
+     Branch: perl
+	   ! t/op/tr.t
+____________________________________________________________________________
+[  9499] By: jhi                                   on 2001/04/01  05:55:46
+        Log: tr/// UTF-8 tweaking from Inaba Hiroto.
+     Branch: perl
+	   ! embed.h embed.pl op.c proto.h
+____________________________________________________________________________
+[  9498] By: jhi                                   on 2001/04/01  05:44:34
+        Log: Protect the workaround hunk more.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  9497] By: jhi                                   on 2001/04/01  00:24:25
+        Log: Integrate changes #9493,9494,9495,9496 from maintperl
+             into mainline.
+             
+             fix a broken workaround for Borland compiler in change#4739
+             (caused weird "short reads" on DATA, which caused op/misc.t to fail)
+             
+             nits spotted by Borland compiler
+             
+             avoid redefinition warnings under Borland 5.02
+             
+             various nits identified by the Borland 5.5 compiler; remove suppression
+             of a few warnings
+     Branch: perl
+	  !> ext/File/Glob/bsd_glob.c sv.c toke.c utf8.h win32/makefile.mk
+	  !> win32/win32.h
+____________________________________________________________________________
+[  9496] By: gsar                                  on 2001/03/31  23:22:28
+        Log: various nits identified by the Borland 5.5 compiler; remove suppression
+             of a few warnings
+     Branch: maint-5.6/perl
+	   ! ext/File/Glob/bsd_glob.c sv.c win32/win32.h
+____________________________________________________________________________
+[  9495] By: gsar                                  on 2001/03/31  21:03:08
+        Log: avoid redefinition warnings under Borland 5.02
+     Branch: maint-5.6/perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9494] By: gsar                                  on 2001/03/31  20:18:59
+        Log: nits spotted by Borland compiler
+     Branch: maint-5.6/perl
+	   ! utf8.h win32/win32.h
+____________________________________________________________________________
+[  9493] By: gsar                                  on 2001/03/31  20:18:05
+        Log: fix a broken workaround for Borland compiler in change#4739
+             (caused weird "short reads" on DATA, which caused op/misc.t to fail)
+     Branch: maint-5.6/perl
+	   ! toke.c
+____________________________________________________________________________
+[  9492] By: jhi                                   on 2001/03/31  18:36:24
+        Log: Integrate change #9491 from maintperl into mainline.
+             
+             Cwd::chdir() doesn't set $ENV{PWD} correctly on windows when the
+             directory is relative (need to fetch the full path name *before*
+             the chdir!)
+     Branch: perl
+	  !> lib/Cwd.pm
+____________________________________________________________________________
+[  9491] By: gsar                                  on 2001/03/31  17:01:56
+        Log: Cwd::chdir() doesn't set $ENV{PWD} correctly on windows when the
+             directory is relative (need to fetch the full path name *before*
+             the chdir!)
+             
+             this is a followup patch for change#6749
+     Branch: maint-5.6/perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[  9490] By: jhi                                   on 2001/03/31  15:50:18
+        Log: Subject: Re: [PATCH] av.h cosmetics
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Sat, 31 Mar 2001 13:09:59 +0100
+             Message-ID: <20010331130959.A22000@netthink.co.uk>
+             
+             Document AvALLOC.
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[  9489] By: jhi                                   on 2001/03/31  15:48:44
+        Log: Subject: [PATCH] Re: Math::Big* v1.21
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Sat, 31 Mar 2001 13:21:05 +0200 (CEST)
+             Message-Id: <200103311125.GAA377738@www08.hway.net>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  9488] By: jhi                                   on 2001/03/31  03:39:51
+        Log: Debug output tweak.
+     Branch: perl
+	   ! t/lib/cwd.t
+____________________________________________________________________________
+[  9487] By: jhi                                   on 2001/03/31  03:33:02
+        Log: OverVMSification.
+     Branch: perl
+	   ! t/lib/cwd.t
+____________________________________________________________________________
+[  9486] By: jhi                                   on 2001/03/31  03:01:40
+        Log: Missed MANIFESTations in #9483.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  9485] By: jhi                                   on 2001/03/31  02:58:17
+        Log: Subject: Not OK: perl v5.7.0 +DEVEL9472 on VMS_AXP V7.1 (UNINSTALLED)
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 30 Mar 2001 18:06:36 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10103301805450.63762-100000@aspara.forte.com>
+     Branch: perl
+	   ! regexec.c t/lib/cwd.t
+____________________________________________________________________________
+[  9484] By: jhi                                   on 2001/03/31  01:04:41
+        Log: Obsolete file (see #3938)
+     Branch: perl
+	   - lib/unicode/README.Ethiopic
+	   ! MANIFEST
+____________________________________________________________________________
+[  9483] By: jhi                                   on 2001/03/31  00:52:42
+        Log: Update to Unicode 3.1.
+             (Rename Names.txt to NamesList.txt.)
+     Branch: perl
+	   + lib/unicode/NamesList.txt lib/unicode/PropList.html
+	   - lib/unicode/Names.txt
+	   ! lib/unicode/Is/LbrkAI.pl lib/unicode/Is/LbrkAL.pl
+	   ! lib/unicode/Is/LbrkBA.pl lib/unicode/Is/LbrkBB.pl
+	   ! lib/unicode/Is/LbrkID.pl lib/unicode/Is/LbrkSG.pl
+	   ! lib/unicode/LineBrk.txt lib/unicode/NamesList.html
+	   ! lib/unicode/UCD.html lib/unicode/Unicode.html
+	   ! lib/unicode/rename lib/unicode/version
+____________________________________________________________________________
+[  9482] By: jhi                                   on 2001/03/30  23:33:44
+        Log: Subject: Re: [ID 20010330.003] O=Deparse,-p does not preserve "operational semantics"
+             From: Robin Houston <robin@kitsite.com>
+             Date: Fri, 30 Mar 2001 20:07:22 +0100
+             Message-ID: <20010330200722.A2010@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9481] By: jhi                                   on 2001/03/30  23:20:25
+        Log: Subject: Re: [PATCH] CwdXS, Take 2
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Fri, 30 Mar 2001 14:08:51 -0500 (EST)
+             Message-ID: <Pine.LNX.4.21.0103301357490.1927-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   + ext/Cwd/Cwd.xs ext/Cwd/Makefile.PL
+	   ! MANIFEST lib/Cwd.pm t/lib/cwd.t
+____________________________________________________________________________
+[  9480] By: jhi                                   on 2001/03/30  22:52:38
+        Log: Subject: [ID 20010330.006] incorrect WARNING from installperl "You've never run 'make test' or some tests failed!"
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Fri, 30 Mar 2001 14:44:13 -0800
+             Message-Id: <200103302244.OAA12204@dd.tc.fluke.com>
+             
+             The t/rantests flags file creation was accidentally
+             removed by #9217.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9479] By: jhi                                   on 2001/03/30  22:45:45
+        Log: Subject: [PATCH] File::Glob stuff for Mac OS
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Fri, 30 Mar 2001 16:51:00 -0500
+             Message-Id: <p05010400b6eaab36051c@[10.0.1.177]>
+     Branch: perl
+	   ! ext/File/Glob/Glob.pm ext/File/Glob/bsd_glob.c
+	   ! t/lib/glob-basic.t t/lib/glob-case.t t/lib/glob-global.t
+	   ! t/lib/glob-taint.t
+____________________________________________________________________________
+[  9478] By: jhi                                   on 2001/03/30  22:43:12
+        Log: Subject: fix for win32/buildext.pl
+             From: "Vadim Konovalov" <watman@inbox.ru>
+             Date: Sat, 31 Mar 2001 00:50:36 +0400
+             Message-ID: <005b01c0b95c$ac277250$7542983e@vad>
+     Branch: perl
+	   ! win32/buildext.pl
+____________________________________________________________________________
+[  9477] By: jhi                                   on 2001/03/30  22:41:16
+        Log: Subject: small base.pm doc patch
+             From: Leon Brocard <acme@astray.com>
+             Date: Fri, 30 Mar 2001 21:49:57 +0100
+             Message-ID: <20010330214957.B8733@ns0.astray.com>
+     Branch: perl
+	   ! lib/base.pm
+____________________________________________________________________________
+[  9476] By: jhi                                   on 2001/03/30  18:16:57
+        Log: Subject: [PATCH] av.h cosmetics
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Fri, 30 Mar 2001 18:12:28 +0100
+             Message-ID: <20010330181228.A9319@netthink.co.uk>
+     Branch: perl
+	   ! av.h
+____________________________________________________________________________
+[  9475] By: jhi                                   on 2001/03/30  18:15:50
+        Log: Subject: [DOC PATCH bleadperl] Two nits in perlhack.pod
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Fri, 30 Mar 2001 19:06:57 +0200
+             Message-ID: <3AC4D951.14815.1AC7068@localhost>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[  9474] By: jhi                                   on 2001/03/30  18:14:02
+        Log: Subject: [PATCH] glob-basic.t (Was: [ID 20010328.016])
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Fri, 30 Mar 2001 11:04:35 -0500 (EST)
+             Message-ID: <Pine.LNX.4.21.0103301045130.1927-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! t/lib/glob-basic.t
+____________________________________________________________________________
+[  9473] By: jhi                                   on 2001/03/30  16:09:24
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9472] By: jhi                                   on 2001/03/30  15:16:08
         Log: Integrate perlio.
      Branch: perl
