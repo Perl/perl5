@@ -5809,6 +5809,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    vecsv = va_arg(*args, SV*);
 		else if (svix < svmax)
 		    vecsv = svargs[svix++];
+		else
+		    continue;
 		dotstr = SvPVx(vecsv,dotstrlen);
 		if (DO_UTF8(vecsv))
 		    is_utf = TRUE;
@@ -5821,6 +5823,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    vecsv = va_arg(*args, SV*);
 		else if (svix < svmax)
 		    vecsv = svargs[svix++];
+		else {
+		    vecstr = "";
+		    veclen = 0;
+		    continue;
+		}
 		vecstr = (U8*)SvPVx(vecsv,veclen);
 		utf = DO_UTF8(vecsv);
 		continue;
