@@ -209,7 +209,6 @@ BEGIN {
 [ "VMS->canonpath('volume:[d1.-.d2.][d3.d4.-]')",              'volume:[d1.-.d2.d3.d4.-]'  ],
 [ "VMS->canonpath('volume:[d1.-.d2.][d3.d4.-]',1)",              'volume:[d2.d3]'          ],
 [ "VMS->canonpath('volume:[000000.d1]d2.dir;1')",                 'volume:[d1]d2.dir;1'   ],
-[ "VMS->canonpath('///../../..//./././a//b/.././c/././')", '/a/b/../c'               ],
 
 [ "VMS->splitdir('')",            ''          ],
 [ "VMS->splitdir('[]')",          ''          ],
@@ -220,17 +219,20 @@ BEGIN {
 [ "VMS->splitdir('.-.d2.d3')",    ',-,d2,d3'  ],
 [ "VMS->splitdir('[.-.d2.d3]')",  ',-,d2,d3'  ],
 
-#[ "VMS->catdir('')",                                                      '[]'                 ],
-[ "VMS->catdir('d1','d2','d3')",                                          '[.d1.d2.d3]'         ],
-[ "VMS->catdir('d1','d2/','d3')",                                         '[.d1.d2.d3]'         ],
-[ "VMS->catdir('','d1','d2','d3')",                                       '[.d1.d2.d3]'        ],
-[ "VMS->catdir('','-','d2','d3')",                                        '[-.d2.d3]'         ],
-[ "VMS->catdir('','-','','d3')",                                          '[-.d3]'            ],
-#[ "VMS->catdir('[]','<->','[]','[d3]')",                                  '[-.d3]'            ],
-[ "VMS->catdir('dir.dir','d2.dir','d3.dir')",                             '[.dir.d2.d3]'        ],
-[ "VMS->catdir('[.name]')",                                               '[.name]'            ],
-[ "VMS->catdir('[.name]','[.name]')",                                     '[.name.name]'],    
-#[ "VMS->catdir('a:[.name]','b:[.name]')",                                 '[.name.name]'],    
+# these appear to need VMS::Filespec, which won't work on other platforms
+[ "VMS->canonpath('///../../..//./././a//b/.././c/././')", '/a/b/../c', 'VMS'   ],
+[ "VMS->catdir('d1','d2','d3')",                           '[.d1.d2.d3]', 'VMS' ],
+[ "VMS->catdir('d1','d2/','d3')",                          '[.d1.d2.d3]', 'VMS' ],
+[ "VMS->catdir('','d1','d2','d3')",                        '[.d1.d2.d3]', 'VMS' ],
+[ "VMS->catdir('','-','d2','d3')",                         '[-.d2.d3]',   'VMS' ],
+[ "VMS->catdir('','-','','d3')",                           '[-.d3]',      'VMS' ],
+[ "VMS->catdir('[]','<->','[]','[d3]')",                   '[-.d3]',      'VMS' ],
+[ "VMS->catdir('dir.dir','d2.dir','d3.dir')",              '[.dir.d2.d3]','VMS' ],
+[ "VMS->catdir('[.name]')",                                '[.name]',     'VMS' ],
+[ "VMS->catdir('[.name]','[.name]')",                      '[.name.name]','VMS' ],    
+
+#[ "VMS->catdir('')",                                      '[]'                 ],
+#[ "VMS->catdir('a:[.name]','b:[.name]')",                 '[.name.name]'       ],
 
 [  "VMS->abs2rel('node::volume:[t1.t2.t3]','[t1.t2.t3]')", ''                 ],
 [  "VMS->abs2rel('node::volume:[t1.t2.t4]','[t1.t2.t3]')", '[-.t4]'           ],
@@ -345,6 +347,13 @@ for ( @tests ) {
 sub tryfunc {
     my $function = shift ;
     my $expected = shift ;
+    my $platform = shift ;
+
+    if ($platform && $^O ne $platform) {
+	print "ok $current_test # skipped: $function\n" ;
+	++$current_test ;
+	return;
+    }
 
     $function =~ s#\\#\\\\#g ;
 
