@@ -618,8 +618,9 @@ sleep(...)
 	if (items > 0) {
 	    NV seconds  = SvNV(ST(0));
 	    if (seconds >= 0.0) {
-  	         UV useconds = 1E6 * (seconds - (UV)seconds);
-		 sleep((UV)seconds);
+	         UV useconds = 1E6 * (seconds - (UV)seconds);
+		 if (seconds >= 1.0)
+		     sleep((UV)seconds);
 		 usleep(useconds);
 	    } else
 	        croak("Time::HiRes::sleep(%"NVgf"): negative time not invented yet", seconds);

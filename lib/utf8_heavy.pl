@@ -95,7 +95,8 @@ sub SWASHNEW {
             ## If we reach this line, it's because we couldn't figure
             ## out what to do with $type. Ouch.
             ##
-            croak("Can't find Unicode character property \"$type\"");
+
+            return $type;
         }
 
         print "found it (file='$file')\n" if DEBUG;
@@ -161,6 +162,7 @@ sub SWASHNEW {
 	    if ($char =~ /[-+!]/) {
 		my ($c,$t) = split(/::/, $name, 2);	# bogus use of ::, really
 		my $subobj = $c->SWASHNEW($t, "", 0, 0, 0);
+		return $subobj unless ref $subobj;
 		push @extras, $name => $subobj;
 		$bits = $subobj->{BITS} if $bits < $subobj->{BITS};
 	    }

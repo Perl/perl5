@@ -2966,6 +2966,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 			    char ch;
 			    int left = 0;
 			    int right = 4;
+                            char need_newline = 0;
  			    U16 reganch = (re->reganch & PMf_COMPILETIME) >> 12;
 
  			    while((ch = *fptr++)) {
@@ -2983,11 +2984,45 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
  			    }
 
 			    mg->mg_len = re->prelen + 4 + left;
+                            /*
+                             * If /x was used, we have to worry about a regex
+                             * ending with a comment later being embedded
+                             * within another regex. If so, we don't want this
+                             * regex's "commentization" to leak out to the
+                             * right part of the enclosing regex, we must cap
+                             * it with a newline.
+                             *
+                             * So, if /x was used, we scan backwards from the
+                             * end of the regex. If we find a '#' before we
+                             * find a newline, we need to add a newline
+                             * ourself. If we find a '\n' first (or if we
+                             * don't find '#' or '\n'), we don't need to add
+                             * anything.  -jfriedl
+                             */
+                            if (PMf_EXTENDED & re->reganch)
+                            {
+                                char *endptr = re->precomp + re->prelen;
+                                while (endptr >= re->precomp)
+                                {
+                                    char c = *(endptr--);
+                                    if (c == '\n')
+                                        break; /* don't need another */
+                                    if (c == '#') {
+                                        /* we end while in a comment, so we
+                                           need a newline */
+                                        mg->mg_len++; /* save space for it */
+                                        need_newline = 1; /* note to add it */
+                                    }
+                                }
+                            }
+
 			    New(616, mg->mg_ptr, mg->mg_len + 1 + left, char);
 			    Copy("(?", mg->mg_ptr, 2, char);
 			    Copy(reflags, mg->mg_ptr+2, left, char);
 			    Copy(":", mg->mg_ptr+left+2, 1, char);
 			    Copy(re->precomp, mg->mg_ptr+3+left, re->prelen, char);
+                            if (need_newline)
+                                mg->mg_ptr[mg->mg_len - 2] = '\n';
 			    mg->mg_ptr[mg->mg_len - 1] = ')';
 			    mg->mg_ptr[mg->mg_len] = 0;
 			}

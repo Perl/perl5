@@ -5,7 +5,7 @@ use Encode::JP::H2Z;
 use base 'Encode::Encoding';
 
 use vars qw($VERSION);
-$VERSION = do { my @r = (q$Revision: 0.99 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 my $canon = 'iso-2022-jp';
 my $obj = bless {name => $canon}, __PACKAGE__;
@@ -36,3 +36,9 @@ sub encode
 
 1;
 __END__
+
+=head1 NAME
+
+Encode::JP::2022_JP -- internally used by Encode::JP
+
+=cut

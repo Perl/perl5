@@ -24,7 +24,7 @@ Encode/8859-7.ucm	Unicode Character Map
 Encode/8859-8.ucm	Unicode Character Map
 Encode/8859-9.ucm	Unicode Character Map
 Encode/ascii.ucm	Unicode Character Map
-Encode/big5-hk.ucm	Unicode Character Map
+Encode/big5-hkscs.ucm	Unicode Character Map
 Encode/big5.ucm	Unicode Character Map
 Encode/cp1047.ucm	Unicode Character Map
 Encode/cp1250.ucm	Unicode Character Map
@@ -34,12 +34,14 @@ Encode/cp936.ucm	Unicode Character Map
 Encode/cp949.ucm	Unicode Character Map
 Encode/cp950.ucm	Unicode Character Map
 Encode/dingbats.ucm	Unicode Character Map
+Encode/encode.h		Encode extension header file
 Encode/euc-cn.ucm	Unicode Character Map
 Encode/euc-jp.ucm	Unicode Character Map
 Encode/euc-kr.ucm	Unicode Character Map
 Encode/gb12345.ucm	Unicode Character Map
 Encode/gb2312.ucm	Unicode Character Map
 Encode/gsm0338.ucm	Unicode Character Map
+Encode/hp-roman8.ucm	Unicode Character Map
 Encode/ibm-1250.ucm	Unicode Character Map
 Encode/ibm-1251.ucm	Unicode Character Map
 Encode/ibm-1252.ucm	Unicode Character Map
@@ -51,6 +53,7 @@ Encode/ibm-1257.ucm	Unicode Character Map
 Encode/ibm-1258.ucm	Unicode Character Map
 Encode/ir-165.ucm	Unicode Character Map
 Encode/jis0201.ucm	Unicode Character Map
+Encode/johab.ucm	Unicode Character Map
 Encode/koi8-f.ucm	Unicode Character Map
 Encode/koi8-r.ucm	Unicode Character Map
 Encode/koi8-u.ucm	Unicode Character Map
@@ -70,7 +73,6 @@ Encode/macTurkish.ucm	Unicode Character Map
 Encode/macUkraine.ucm	Unicode Character Map
 Encode/nextstep.ucm	Unicode Character Map
 Encode/posix-bc.ucm	Unicode Character Map
-Encode/roman8.ucm	Unicode Character Map
 Encode/shiftjis.ucm	Unicode Character Map
 Encode/symbol.ucm	Unicode Character Map
 Encode/viscii.ucm	Unicode Character Map
@@ -85,15 +87,13 @@ Symbol/Makefile.PL     Encode extension
 Symbol/Symbol.pm       Encode extension
 TW/Makefile.PL	Encode extension
 TW/TW.pm		Encode extension
-compile		Encode extension
+bin/enc2xs	Encode module generator
+bin/piconv	iconv by perl
 encengine.c		Encode extension
-encode.h		Encode extension
 lib/Encode/10646_1.pm	Encode extension
 lib/Encode/Alias.pm	        Encode extension
 lib/Encode/CJKConstants.pm	Encode extension
-lib/Encode/CN/2022_CN.pm	 Encode extension
 lib/Encode/CN/HZ.pm		Encode extension
-lib/Encode/Details.pod	Detailed topics on character encodings
 lib/Encode/Encoding.pm	Encode extension
 lib/Encode/Internal.pm	Encode extension
 lib/Encode/JP/2022_JP.pm	Encode extension

@@ -1,6 +1,6 @@
 package Encode::10646_1;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.99 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use base 'Encode::Encoding';
 # Encoding is 16-bit network order Unicode (no surogates)
@@ -42,3 +42,9 @@ sub encode
 }
 1;
 __END__
+
+=head1 NAME
+
+Encode::10656_1 -- for internal use only
+
+=cut

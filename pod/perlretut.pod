@@ -1753,7 +1753,7 @@ For the full list see L<perlunicode>.
 
 The Unicode has also been separated into various sets of charaters
 which you can test with C<\p{In...}> (in) and C<\P{In...}> (not in),
-for example C<\p{InLatin}>, C<\p{InGreek}>, or C<\P{InKatakana}>.
+for example C<\p{Latin}>, C<\p{Greek}>, or C<\P{Katakana}>.
 For the full list see L<perlunicode>.
 
 C<\X> is an abbreviation for a character class sequence that includes

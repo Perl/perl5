@@ -1,8 +1,8 @@
 #
-# $Id: cp950.ucm,v 1.0 2002/03/28 23:26:26 dankogai Exp dankogai $
+# $Id: big5-hkscs.ucm,v 1.0 2002/03/28 23:26:25 dankogai Exp dankogai $
 #
-# ./compile -n cp950 -o Encode/cp950.ucm Encode/cp950.enc
-<code_set_name> "cp950"
+# ./compile -n big5-hkscs -o Encode/big5-hkscs.ucm Encode/big5-hkscs.enc
+<code_set_name> "big5-hkscs"
 <mb_cur_min> 1
 <mb_cur_max> 2
 <subchar> \x3F
@@ -136,12 +136,3558 @@ CHARMAP
 <U007D> \x7D |0 # RIGHT CURLY BRACKET
 <U007E> \x7E |0 # TILDE
 <U007F> \x7F |0 # DELETE
+<U0080> \x80 |0 # <control>
+<U0081> \x81 |0 # <control>
+<U0082> \x82 |0 # BREAK PERMITTED HERE
+<U0083> \x83 |0 # NO BREAK HERE
+<U0084> \x84 |0 # <control>
+<U0085> \x85 |0 # NEXT LINE
+<U0086> \x86 |0 # START OF SELECTED AREA
+<U0087> \x87 |0 # END OF SELECTED AREA
+<UF303> \x88\x40 |0 # Private Use
+<UF304> \x88\x41 |0 # Private Use
+<UF305> \x88\x42 |0 # Private Use
+<UF306> \x88\x43 |0 # Private Use
+<UF307> \x88\x44 |0 # Private Use
+<UF308> \x88\x45 |0 # Private Use
+<UF309> \x88\x46 |0 # Private Use
+<UF30A> \x88\x47 |0 # Private Use
+<UF30B> \x88\x48 |0 # Private Use
+<UF30C> \x88\x49 |0 # Private Use
+<UF30D> \x88\x4A |0 # Private Use
+<UF30E> \x88\x4B |0 # Private Use
+<UF30F> \x88\x4C |0 # Private Use
+<UF310> \x88\x4D |0 # Private Use
+<UF311> \x88\x4E |0 # Private Use
+<UF312> \x88\x4F |0 # Private Use
+<UF313> \x88\x50 |0 # Private Use
+<UF314> \x88\x51 |0 # Private Use
+<UF315> \x88\x52 |0 # Private Use
+<UF316> \x88\x53 |0 # Private Use
+<UF317> \x88\x54 |0 # Private Use
+<UF318> \x88\x55 |0 # Private Use
+<U0100> \x88\x56 |0 # LATIN CAPITAL LETTER A WITH MACRON
+<U00C1> \x88\x57 |0 # LATIN CAPITAL LETTER A WITH ACUTE
+<U01CD> \x88\x58 |0 # LATIN CAPITAL LETTER A WITH CARON
+<U00C0> \x88\x59 |0 # LATIN CAPITAL LETTER A WITH GRAVE
+<U0112> \x88\x5A |0 # LATIN CAPITAL LETTER E WITH MACRON
+<U00C9> \x88\x5B |0 # LATIN CAPITAL LETTER E WITH ACUTE
+<U011A> \x88\x5C |0 # LATIN CAPITAL LETTER E WITH CARON
+<U00C8> \x88\x5D |0 # LATIN CAPITAL LETTER E WITH GRAVE
+<U014C> \x88\x5E |0 # LATIN CAPITAL LETTER O WITH MACRON
+<U00D3> \x88\x5F |0 # LATIN CAPITAL LETTER O WITH ACUTE
+<U01D1> \x88\x60 |0 # LATIN CAPITAL LETTER O WITH CARON
+<U00D2> \x88\x61 |0 # LATIN CAPITAL LETTER O WITH GRAVE
+<UF325> \x88\x62 |0 # Private Use
+<U1EBE> \x88\x63 |0 # LATIN CAPITAL LETTER E WITH CIRCUMFLEX AND ACUTE
+<UF327> \x88\x64 |0 # Private Use
+<U1EC0> \x88\x65 |0 # LATIN CAPITAL LETTER E WITH CIRCUMFLEX AND GRAVE
+<U00CA> \x88\x66 |0 # LATIN CAPITAL LETTER E WITH CIRCUMFLEX
+<U0101> \x88\x67 |0 # LATIN SMALL LETTER A WITH MACRON
+<U00E1> \x88\x68 |0 # LATIN SMALL LETTER A WITH ACUTE
+<U01CE> \x88\x69 |0 # LATIN SMALL LETTER A WITH CARON
+<U00E0> \x88\x6A |0 # LATIN SMALL LETTER A WITH GRAVE
+<U0251> \x88\x6B |0 # LATIN SMALL LETTER ALPHA
+<U0113> \x88\x6C |0 # LATIN SMALL LETTER E WITH MACRON
+<U00E9> \x88\x6D |0 # LATIN SMALL LETTER E WITH ACUTE
+<U011B> \x88\x6E |0 # LATIN SMALL LETTER E WITH CARON
+<U00E8> \x88\x6F |0 # LATIN SMALL LETTER E WITH GRAVE
+<U012B> \x88\x70 |0 # LATIN SMALL LETTER I WITH MACRON
+<U00ED> \x88\x71 |0 # LATIN SMALL LETTER I WITH ACUTE
+<U01D0> \x88\x72 |0 # LATIN SMALL LETTER I WITH CARON
+<U00EC> \x88\x73 |0 # LATIN SMALL LETTER I WITH GRAVE
+<U014D> \x88\x74 |0 # LATIN SMALL LETTER O WITH MACRON
+<U00F3> \x88\x75 |0 # LATIN SMALL LETTER O WITH ACUTE
+<U01D2> \x88\x76 |0 # LATIN SMALL LETTER O WITH CARON
+<U00F2> \x88\x77 |0 # LATIN SMALL LETTER O WITH GRAVE
+<U016B> \x88\x78 |0 # LATIN SMALL LETTER U WITH MACRON
+<U00FA> \x88\x79 |0 # LATIN SMALL LETTER U WITH ACUTE
+<U01D4> \x88\x7A |0 # LATIN SMALL LETTER U WITH CARON
+<U00F9> \x88\x7B |0 # LATIN SMALL LETTER U WITH GRAVE
+<U01D6> \x88\x7C |0 # LATIN SMALL LETTER U WITH DIAERESIS AND MACRON
+<U01D8> \x88\x7D |0 # LATIN SMALL LETTER U WITH DIAERESIS AND ACUTE
+<U01DA> \x88\x7E |0 # LATIN SMALL LETTER U WITH DIAERESIS AND CARON
+<U01DC> \x88\xA1 |0 # LATIN SMALL LETTER U WITH DIAERESIS AND GRAVE
+<U00FC> \x88\xA2 |0 # LATIN SMALL LETTER U WITH DIAERESIS
+<UF344> \x88\xA3 |0 # Private Use
+<U1EBF> \x88\xA4 |0 # LATIN SMALL LETTER E WITH CIRCUMFLEX AND ACUTE
+<UF346> \x88\xA5 |0 # Private Use
+<U1EC1> \x88\xA6 |0 # LATIN SMALL LETTER E WITH CIRCUMFLEX AND GRAVE
+<U00EA> \x88\xA7 |0 # LATIN SMALL LETTER E WITH CIRCUMFLEX
+<U0261> \x88\xA8 |0 # LATIN SMALL LETTER SCRIPT G
+<UF34A> \x88\xA9 |0 # Private Use
+<UF34B> \x88\xAA |0 # Private Use
+<UF3A0> \x89\x40 |0 # Private Use
+<UF3A1> \x89\x41 |0 # Private Use
+<U650A> \x89\x43 |0 # CJK Ideograph
+<U4E3D> \x89\x46 |0 # CJK Ideograph
+<U6EDD> \x89\x47 |0 # CJK Ideograph
+<U9D4E> \x89\x48 |0 # CJK Ideograph
+<U91DF> \x89\x49 |0 # CJK Ideograph
+<UF3AC> \x89\x4C |0 # Private Use
+<U6491> \x89\x4D |0 # CJK Ideograph
+<U4F1A> \x89\x4E |0 # CJK Ideograph
+<U4F28> \x89\x4F |0 # CJK Ideograph
+<U4FA8> \x89\x50 |0 # CJK Ideograph
+<U5156> \x89\x51 |0 # CJK Ideograph
+<U5174> \x89\x52 |0 # CJK Ideograph
+<U519C> \x89\x53 |0 # CJK Ideograph
+<U51E4> \x89\x54 |0 # CJK Ideograph
+<U52A1> \x89\x55 |0 # CJK Ideograph
+<U52A8> \x89\x56 |0 # CJK Ideograph
+<U533B> \x89\x57 |0 # CJK Ideograph
+<U534E> \x89\x58 |0 # CJK Ideograph
+<U53D1> \x89\x59 |0 # CJK Ideograph
+<U53D8> \x89\x5A |0 # CJK Ideograph
+<U56E2> \x89\x5B |0 # CJK Ideograph
+<U58F0> \x89\x5C |0 # CJK Ideograph
+<U5904> \x89\x5D |0 # CJK Ideograph
+<U5907> \x89\x5E |0 # CJK Ideograph
+<U5932> \x89\x5F |0 # CJK Ideograph
+<U5934> \x89\x60 |0 # CJK Ideograph
+<U5B66> \x89\x61 |0 # CJK Ideograph
+<U5B9E> \x89\x62 |0 # CJK Ideograph
+<U5B9F> \x89\x63 |0 # CJK Ideograph
+<U5C9A> \x89\x64 |0 # CJK Ideograph
+<U5E86> \x89\x65 |0 # CJK Ideograph
+<U603B> \x89\x66 |0 # CJK Ideograph
+<U6589> \x89\x67 |0 # CJK Ideograph
+<U67FE> \x89\x68 |0 # CJK Ideograph
+<U6804> \x89\x69 |0 # CJK Ideograph
+<U6865> \x89\x6A |0 # CJK Ideograph
+<U6D4E> \x89\x6B |0 # CJK Ideograph
+<U70BC> \x89\x6C |0 # CJK Ideograph
+<U7535> \x89\x6D |0 # CJK Ideograph
+<U7EA4> \x89\x6E |0 # CJK Ideograph
+<U7EAC> \x89\x6F |0 # CJK Ideograph
+<U7EBA> \x89\x70 |0 # CJK Ideograph
+<U7EC7> \x89\x71 |0 # CJK Ideograph
+<U7ECF> \x89\x72 |0 # CJK Ideograph
+<U7EDF> \x89\x73 |0 # CJK Ideograph
+<U7F06> \x89\x74 |0 # CJK Ideograph
+<U7F37> \x89\x75 |0 # CJK Ideograph
+<U827A> \x89\x76 |0 # CJK Ideograph
+<U82CF> \x89\x77 |0 # CJK Ideograph
+<U836F> \x89\x78 |0 # CJK Ideograph
+<U89C6> \x89\x79 |0 # CJK Ideograph
+<U8BBE> \x89\x7A |0 # CJK Ideograph
+<U8BE2> \x89\x7B |0 # CJK Ideograph
+<U8F66> \x89\x7C |0 # CJK Ideograph
+<U8F67> \x89\x7D |0 # CJK Ideograph
+<U8F6E> \x89\x7E |0 # CJK Ideograph
+<U7411> \x89\xA1 |0 # CJK Ideograph
+<U7CFC> \x89\xA2 |0 # CJK Ideograph
+<U7DCD> \x89\xA3 |0 # CJK Ideograph
+<U6946> \x89\xA4 |0 # CJK Ideograph
+<U7AC9> \x89\xA5 |0 # CJK Ideograph
+<U5227> \x89\xA6 |0 # CJK Ideograph
+<U918C> \x89\xAB |0 # CJK Ideograph
+<U78B8> \x89\xAC |0 # CJK Ideograph
+<U915E> \x89\xAD |0 # CJK Ideograph
+<U80BC> \x89\xAE |0 # CJK Ideograph
+<U8D0B> \x89\xB0 |0 # CJK Ideograph
+<U80F6> \x89\xB1 |0 # CJK Ideograph
+<UF3F0> \x89\xB2 |0 # Private Use
+<U809F> \x89\xB5 |0 # CJK Ideograph
+<U9EC7> \x89\xB6 |0 # CJK Ideograph
+<U4CCD> \x89\xB7 |0 # CJK Ideograph Extension A
+<U9DC9> \x89\xB8 |0 # CJK Ideograph
+<U9E0C> \x89\xB9 |0 # CJK Ideograph
+<U4C3E> \x89\xBA |0 # CJK Ideograph Extension A
+<UF3F9> \x89\xBB |0 # Private Use
+<UF3FA> \x89\xBC |0 # Private Use
+<U9E0A> \x89\xBD |0 # CJK Ideograph
+<UF3FC> \x89\xBE |0 # Private Use
+<U35C1> \x89\xBF |0 # CJK Ideograph Extension A
+<U6E9A> \x89\xC1 |0 # CJK Ideograph
+<U823E> \x89\xC2 |0 # CJK Ideograph
+<U7519> \x89\xC3 |0 # CJK Ideograph
+<U4911> \x89\xC5 |0 # CJK Ideograph Extension A
+<U9A6C> \x89\xC6 |0 # CJK Ideograph
+<U9A8F> \x89\xC7 |0 # CJK Ideograph
+<U9F99> \x89\xC8 |0 # CJK Ideograph
+<U7987> \x89\xC9 |0 # CJK Ideograph
+<UF408> \x89\xCA |0 # Private Use
+<UF409> \x89\xCB |0 # Private Use
+<UF40A> \x89\xCC |0 # Private Use
+<UF40B> \x89\xCD |0 # Private Use
+<U4E24> \x89\xCE |0 # CJK Ideograph
+<U4E81> \x89\xCF |0 # CJK Ideograph
+<U4E80> \x89\xD0 |0 # CJK Ideograph
+<U4E87> \x89\xD1 |0 # CJK Ideograph
+<U4EBF> \x89\xD2 |0 # CJK Ideograph
+<U4EEB> \x89\xD3 |0 # CJK Ideograph
+<U4F37> \x89\xD4 |0 # CJK Ideograph
+<U344C> \x89\xD5 |0 # CJK Ideograph Extension A
+<U4FBD> \x89\xD6 |0 # CJK Ideograph
+<U3E48> \x89\xD7 |0 # CJK Ideograph Extension A
+<U5003> \x89\xD8 |0 # CJK Ideograph
+<U5088> \x89\xD9 |0 # CJK Ideograph
+<U347D> \x89\xDA |0 # CJK Ideograph Extension A
+<U3493> \x89\xDB |0 # CJK Ideograph Extension A
+<U34A5> \x89\xDC |0 # CJK Ideograph Extension A
+<U5186> \x89\xDD |0 # CJK Ideograph
+<U5905> \x89\xDE |0 # CJK Ideograph
+<U51DB> \x89\xDF |0 # CJK Ideograph
+<U51FC> \x89\xE0 |0 # CJK Ideograph
+<U5205> \x89\xE1 |0 # CJK Ideograph
+<U4E89> \x89\xE2 |0 # CJK Ideograph
+<U5279> \x89\xE3 |0 # CJK Ideograph
+<U5290> \x89\xE4 |0 # CJK Ideograph
+<U5327> \x89\xE5 |0 # CJK Ideograph
+<U35C7> \x89\xE6 |0 # CJK Ideograph Extension A
+<U53A9> \x89\xE7 |0 # CJK Ideograph
+<U3551> \x89\xE8 |0 # CJK Ideograph Extension A
+<U53B0> \x89\xE9 |0 # CJK Ideograph
+<U3553> \x89\xEA |0 # CJK Ideograph Extension A
+<U53C2> \x89\xEB |0 # CJK Ideograph
+<U5423> \x89\xEC |0 # CJK Ideograph
+<U356D> \x89\xED |0 # CJK Ideograph Extension A
+<U3572> \x89\xEE |0 # CJK Ideograph Extension A
+<U3681> \x89\xEF |0 # CJK Ideograph Extension A
+<U5493> \x89\xF0 |0 # CJK Ideograph
+<U54A3> \x89\xF1 |0 # CJK Ideograph
+<U54B4> \x89\xF2 |0 # CJK Ideograph
+<U54B9> \x89\xF3 |0 # CJK Ideograph
+<U54D0> \x89\xF4 |0 # CJK Ideograph
+<U54EF> \x89\xF5 |0 # CJK Ideograph
+<U5518> \x89\xF6 |0 # CJK Ideograph
+<U5523> \x89\xF7 |0 # CJK Ideograph
+<U5528> \x89\xF8 |0 # CJK Ideograph
+<U3598> \x89\xF9 |0 # CJK Ideograph Extension A
+<U553F> \x89\xFA |0 # CJK Ideograph
+<U35A5> \x89\xFB |0 # CJK Ideograph Extension A
+<U35BF> \x89\xFC |0 # CJK Ideograph Extension A
+<U55D7> \x89\xFD |0 # CJK Ideograph
+<U35C5> \x89\xFE |0 # CJK Ideograph Extension A
+<UF43D> \x8A\x40 |0 # Private Use
+<U5525> \x8A\x41 |0 # CJK Ideograph
+<UF440> \x8A\x43 |0 # Private Use
+<UF441> \x8A\x44 |0 # Private Use
+<UF442> \x8A\x45 |0 # Private Use
+<U5590> \x8A\x46 |0 # CJK Ideograph
+<UF444> \x8A\x47 |0 # Private Use
+<U39EC> \x8A\x48 |0 # CJK Ideograph Extension A
+<UF446> \x8A\x49 |0 # Private Use
+<U8E46> \x8A\x4A |0 # CJK Ideograph
+<UF448> \x8A\x4B |0 # Private Use
+<UF449> \x8A\x4C |0 # Private Use
+<U4053> \x8A\x4D |0 # CJK Ideograph Extension A
+<UF44B> \x8A\x4E |0 # Private Use
+<U777A> \x8A\x4F |0 # CJK Ideograph
+<UF44D> \x8A\x50 |0 # Private Use
+<U3A34> \x8A\x51 |0 # CJK Ideograph Extension A
+<U47D5> \x8A\x52 |0 # CJK Ideograph Extension A
+<UF450> \x8A\x53 |0 # Private Use
+<UF451> \x8A\x54 |0 # Private Use
+<UF452> \x8A\x55 |0 # Private Use
+<U64DD> \x8A\x56 |0 # CJK Ideograph
+<UF454> \x8A\x57 |0 # Private Use
+<UF455> \x8A\x58 |0 # Private Use
+<UF456> \x8A\x59 |0 # Private Use
+<UF457> \x8A\x5A |0 # Private Use
+<U648D> \x8A\x5B |0 # CJK Ideograph
+<U8E7E> \x8A\x5C |0 # CJK Ideograph
+<UF45A> \x8A\x5D |0 # Private Use
+<UF45B> \x8A\x5E |0 # Private Use
+<UF45C> \x8A\x5F |0 # Private Use
+<UF45D> \x8A\x60 |0 # Private Use
+<UF45E> \x8A\x61 |0 # Private Use
+<UF45F> \x8A\x62 |0 # Private Use
+<UF461> \x8A\x64 |0 # Private Use
+<UF462> \x8A\x65 |0 # Private Use
+<UF463> \x8A\x66 |0 # Private Use
+<U47F4> \x8A\x67 |0 # CJK Ideograph Extension A
+<UF465> \x8A\x68 |0 # Private Use
+<UF466> \x8A\x69 |0 # Private Use
+<U9AB2> \x8A\x6A |0 # CJK Ideograph
+<U3A67> \x8A\x6B |0 # CJK Ideograph Extension A
+<UF469> \x8A\x6C |0 # Private Use
+<U3FED> \x8A\x6D |0 # CJK Ideograph Extension A
+<U3506> \x8A\x6E |0 # CJK Ideograph Extension A
+<UF46C> \x8A\x6F |0 # Private Use
+<UF46D> \x8A\x70 |0 # Private Use
+<UF46E> \x8A\x71 |0 # Private Use
+<UF46F> \x8A\x72 |0 # Private Use
+<U9D6E> \x8A\x73 |0 # CJK Ideograph
+<U9815> \x8A\x74 |0 # CJK Ideograph
+<U43D9> \x8A\x76 |0 # CJK Ideograph Extension A
+<UF474> \x8A\x77 |0 # Private Use
+<U64B4> \x8A\x78 |0 # CJK Ideograph
+<U54E3> \x8A\x79 |0 # CJK Ideograph
+<UF477> \x8A\x7A |0 # Private Use
+<UF478> \x8A\x7B |0 # Private Use
+<UF479> \x8A\x7C |0 # Private Use
+<U39FB> \x8A\x7D |0 # CJK Ideograph Extension A
+<UF47B> \x8A\x7E |0 # Private Use
+<UF47C> \x8A\xA1 |0 # Private Use
+<UF47D> \x8A\xA2 |0 # Private Use
+<UF47E> \x8A\xA3 |0 # Private Use
+<U64EA> \x8A\xA4 |0 # CJK Ideograph
+<UF480> \x8A\xA5 |0 # Private Use
+<UF481> \x8A\xA6 |0 # Private Use
+<U8E68> \x8A\xA7 |0 # CJK Ideograph
+<UF483> \x8A\xA8 |0 # Private Use
+<UF484> \x8A\xA9 |0 # Private Use
+<UF485> \x8A\xAA |0 # Private Use
+<U480B> \x8A\xAC |0 # CJK Ideograph Extension A
+<UF488> \x8A\xAD |0 # Private Use
+<U3FFA> \x8A\xAE |0 # CJK Ideograph Extension A
+<U5873> \x8A\xAF |0 # CJK Ideograph
+<UF48B> \x8A\xB0 |0 # Private Use
+<UF48D> \x8A\xB2 |0 # Private Use
+<UF48E> \x8A\xB3 |0 # Private Use
+<UF48F> \x8A\xB4 |0 # Private Use
+<UF490> \x8A\xB5 |0 # Private Use
+<UF491> \x8A\xB6 |0 # Private Use
+<U5579> \x8A\xB7 |0 # CJK Ideograph
+<U40BB> \x8A\xB8 |0 # CJK Ideograph Extension A
+<U43BA> \x8A\xB9 |0 # CJK Ideograph Extension A
+<U4AB4> \x8A\xBB |0 # CJK Ideograph Extension A
+<UF497> \x8A\xBC |0 # Private Use
+<UF498> \x8A\xBD |0 # Private Use
+<U81AA> \x8A\xBE |0 # CJK Ideograph
+<U98F5> \x8A\xBF |0 # CJK Ideograph
+<UF49B> \x8A\xC0 |0 # Private Use
+<U6379> \x8A\xC1 |0 # CJK Ideograph
+<U39FE> \x8A\xC2 |0 # CJK Ideograph Extension A
+<UF49E> \x8A\xC3 |0 # Private Use
+<U8DC0> \x8A\xC4 |0 # CJK Ideograph
+<U56A1> \x8A\xC5 |0 # CJK Ideograph
+<U647C> \x8A\xC6 |0 # CJK Ideograph
+<U3E43> \x8A\xC7 |0 # CJK Ideograph Extension A
+<UF4A4> \x8A\xC9 |0 # Private Use
+<UF4A5> \x8A\xCA |0 # Private Use
+<UF4A6> \x8A\xCB |0 # Private Use
+<UF4A7> \x8A\xCC |0 # Private Use
+<UF4A9> \x8A\xCE |0 # Private Use
+<UF4AA> \x8A\xCF |0 # Private Use
+<U3992> \x8A\xD0 |0 # CJK Ideograph Extension A
+<U3A06> \x8A\xD1 |0 # CJK Ideograph Extension A
+<UF4AD> \x8A\xD2 |0 # Private Use
+<U3578> \x8A\xD3 |0 # CJK Ideograph Extension A
+<UF4AF> \x8A\xD4 |0 # Private Use
+<UF4B0> \x8A\xD5 |0 # Private Use
+<U5652> \x8A\xD6 |0 # CJK Ideograph
+<UF4B2> \x8A\xD7 |0 # Private Use
+<UF4B3> \x8A\xD8 |0 # Private Use
+<UF4B4> \x8A\xD9 |0 # Private Use
+<U34BC> \x8A\xDA |0 # CJK Ideograph Extension A
+<U6C3D> \x8A\xDB |0 # CJK Ideograph
+<UF4B7> \x8A\xDC |0 # Private Use
+<UF4BA> \x8A\xDF |0 # Private Use
+<UF4BB> \x8A\xE0 |0 # Private Use
+<UF4BC> \x8A\xE1 |0 # Private Use
+<UF4BD> \x8A\xE2 |0 # Private Use
+<UF4BE> \x8A\xE3 |0 # Private Use
+<UF4BF> \x8A\xE4 |0 # Private Use
+<UF4C0> \x8A\xE5 |0 # Private Use
+<UF4C1> \x8A\xE6 |0 # Private Use
+<U7F93> \x8A\xE7 |0 # CJK Ideograph
+<UF4C3> \x8A\xE8 |0 # Private Use
+<UF4C4> \x8A\xE9 |0 # Private Use
+<UF4C5> \x8A\xEA |0 # Private Use
+<U35FB> \x8A\xEB |0 # CJK Ideograph Extension A
+<UF4C7> \x8A\xEC |0 # Private Use
+<UF4C8> \x8A\xED |0 # Private Use
+<UF4C9> \x8A\xEE |0 # Private Use
+<UF4CA> \x8A\xEF |0 # Private Use
+<U3F93> \x8A\xF0 |0 # CJK Ideograph Extension A
+<UF4CC> \x8A\xF1 |0 # Private Use
+<UF4CD> \x8A\xF2 |0 # Private Use
+<UF4CE> \x8A\xF3 |0 # Private Use
+<UF4CF> \x8A\xF4 |0 # Private Use
+<UF4D1> \x8A\xF6 |0 # Private Use
+<UF4D2> \x8A\xF7 |0 # Private Use
+<UF4D3> \x8A\xF8 |0 # Private Use
+<UF4D4> \x8A\xF9 |0 # Private Use
+<UF4D5> \x8A\xFA |0 # Private Use
+<U3FF9> \x8A\xFB |0 # CJK Ideograph Extension A
+<UF4D7> \x8A\xFC |0 # Private Use
+<U6432> \x8A\xFD |0 # CJK Ideograph
+<UF4D9> \x8A\xFE |0 # Private Use
+<UF4DA> \x8B\x40 |0 # Private Use
+<UF4DB> \x8B\x41 |0 # Private Use
+<UF4DC> \x8B\x42 |0 # Private Use
+<UF4DD> \x8B\x43 |0 # Private Use
+<UF4DE> \x8B\x44 |0 # Private Use
+<UF4DF> \x8B\x45 |0 # Private Use
+<UF4E0> \x8B\x46 |0 # Private Use
+<U3A18> \x8B\x47 |0 # CJK Ideograph Extension A
+<UF4E2> \x8B\x48 |0 # Private Use
+<UF4E3> \x8B\x49 |0 # Private Use
+<UF4E4> \x8B\x4A |0 # Private Use
+<UF4E5> \x8B\x4B |0 # Private Use
+<UF4E6> \x8B\x4C |0 # Private Use
+<UF4E7> \x8B\x4D |0 # Private Use
+<UF4E8> \x8B\x4E |0 # Private Use
+<UF4E9> \x8B\x4F |0 # Private Use
+<U95AA> \x8B\x50 |0 # CJK Ideograph
+<U54CC> \x8B\x51 |0 # CJK Ideograph
+<U82C4> \x8B\x52 |0 # CJK Ideograph
+<U55B9> \x8B\x53 |0 # CJK Ideograph
+<UF4EF> \x8B\x55 |0 # Private Use
+<U9C26> \x8B\x56 |0 # CJK Ideograph
+<U9AB6> \x8B\x57 |0 # CJK Ideograph
+<UF4F2> \x8B\x58 |0 # Private Use
+<UF4F3> \x8B\x59 |0 # Private Use
+<U7140> \x8B\x5A |0 # CJK Ideograph
+<U816D> \x8B\x5B |0 # CJK Ideograph
+<U80EC> \x8B\x5C |0 # CJK Ideograph
+<U5C1C> \x8B\x5D |0 # CJK Ideograph
+<UF4F8> \x8B\x5E |0 # Private Use
+<U8134> \x8B\x5F |0 # CJK Ideograph
+<U3797> \x8B\x60 |0 # CJK Ideograph Extension A
+<U535F> \x8B\x61 |0 # CJK Ideograph
+<UF4FC> \x8B\x62 |0 # Private Use
+<U91B6> \x8B\x63 |0 # CJK Ideograph
+<UF4FE> \x8B\x64 |0 # Private Use
+<UF4FF> \x8B\x65 |0 # Private Use
+<UF500> \x8B\x66 |0 # Private Use
+<UF501> \x8B\x67 |0 # Private Use
+<U35DD> \x8B\x68 |0 # CJK Ideograph Extension A
+<UF503> \x8B\x69 |0 # Private Use
+<U3609> \x8B\x6A |0 # CJK Ideograph Extension A
+<UF505> \x8B\x6B |0 # Private Use
+<U56AF> \x8B\x6C |0 # CJK Ideograph
+<UF507> \x8B\x6D |0 # Private Use
+<UF508> \x8B\x6E |0 # Private Use
+<UF509> \x8B\x6F |0 # Private Use
+<UF50A> \x8B\x70 |0 # Private Use
+<UF50B> \x8B\x71 |0 # Private Use
+<UF50C> \x8B\x72 |0 # Private Use
+<UF50D> \x8B\x73 |0 # Private Use
+<UF50E> \x8B\x74 |0 # Private Use
+<UF50F> \x8B\x75 |0 # Private Use
+<UF510> \x8B\x76 |0 # Private Use
+<UF511> \x8B\x77 |0 # Private Use
+<U5A54> \x8B\x78 |0 # CJK Ideograph
+<UF513> \x8B\x79 |0 # Private Use
+<UF514> \x8B\x7A |0 # Private Use
+<UF515> \x8B\x7B |0 # Private Use
+<UF516> \x8B\x7C |0 # Private Use
+<U579C> \x8B\x7D |0 # CJK Ideograph
+<UF518> \x8B\x7E |0 # Private Use
+<UF519> \x8B\xA1 |0 # Private Use
+<UF51A> \x8B\xA2 |0 # Private Use
+<UF51B> \x8B\xA3 |0 # Private Use
+<UF51C> \x8B\xA4 |0 # Private Use
+<UF51D> \x8B\xA5 |0 # Private Use
+<U3703> \x8B\xA6 |0 # CJK Ideograph Extension A
+<UF51F> \x8B\xA7 |0 # Private Use
+<UF520> \x8B\xA8 |0 # Private Use
+<UF521> \x8B\xA9 |0 # Private Use
+<UF522> \x8B\xAA |0 # Private Use
+<UF523> \x8B\xAB |0 # Private Use
+<UF524> \x8B\xAC |0 # Private Use
+<UF525> \x8B\xAD |0 # Private Use
+<UF526> \x8B\xAE |0 # Private Use
+<U5899> \x8B\xAF |0 # CJK Ideograph
+<U5268> \x8B\xB0 |0 # CJK Ideograph
+<U361A> \x8B\xB1 |0 # CJK Ideograph Extension A
+<UF52A> \x8B\xB2 |0 # Private Use
+<U7BB2> \x8B\xB3 |0 # CJK Ideograph
+<U5B68> \x8B\xB4 |0 # CJK Ideograph
+<U4800> \x8B\xB5 |0 # CJK Ideograph Extension A
+<U4B2C> \x8B\xB6 |0 # CJK Ideograph Extension A
+<U9F27> \x8B\xB7 |0 # CJK Ideograph
+<U49E7> \x8B\xB8 |0 # CJK Ideograph Extension A
+<U9C1F> \x8B\xB9 |0 # CJK Ideograph
+<U9B8D> \x8B\xBA |0 # CJK Ideograph
+<UF533> \x8B\xBB |0 # Private Use
+<UF534> \x8B\xBC |0 # Private Use
+<U55FB> \x8B\xBD |0 # CJK Ideograph
+<U35F2> \x8B\xBE |0 # CJK Ideograph Extension A
+<U5689> \x8B\xBF |0 # CJK Ideograph
+<U4E28> \x8B\xC0 |0 # CJK Ideograph
+<U5902> \x8B\xC1 |0 # CJK Ideograph
+<UF53A> \x8B\xC2 |0 # Private Use
+<UF53B> \x8B\xC3 |0 # Private Use
+<U9751> \x8B\xC4 |0 # CJK Ideograph
+<UF53D> \x8B\xC5 |0 # Private Use
+<U4E5B> \x8B\xC6 |0 # CJK Ideograph
+<U4EBB> \x8B\xC7 |0 # CJK Ideograph
+<U353E> \x8B\xC8 |0 # CJK Ideograph Extension A
+<U5C23> \x8B\xC9 |0 # CJK Ideograph
+<U5F51> \x8B\xCA |0 # CJK Ideograph
+<U5FC4> \x8B\xCB |0 # CJK Ideograph
+<U38FA> \x8B\xCC |0 # CJK Ideograph Extension A
+<U624C> \x8B\xCD |0 # CJK Ideograph
+<U6535> \x8B\xCE |0 # CJK Ideograph
+<U6B7A> \x8B\xCF |0 # CJK Ideograph
+<U6C35> \x8B\xD0 |0 # CJK Ideograph
+<U6C3A> \x8B\xD1 |0 # CJK Ideograph
+<U706C> \x8B\xD2 |0 # CJK Ideograph
+<U722B> \x8B\xD3 |0 # CJK Ideograph
+<U4E2C> \x8B\xD4 |0 # CJK Ideograph
+<U72AD> \x8B\xD5 |0 # CJK Ideograph
+<UF54E> \x8B\xD6 |0 # Private Use
+<U7F52> \x8B\xD7 |0 # CJK Ideograph
+<U793B> \x8B\xD8 |0 # CJK Ideograph
+<U7CF9> \x8B\xD9 |0 # CJK Ideograph
+<U7F53> \x8B\xDA |0 # CJK Ideograph
+<UF553> \x8B\xDB |0 # Private Use
+<U34C1> \x8B\xDC |0 # CJK Ideograph Extension A
+<UF556> \x8B\xDE |0 # Private Use
+<U8002> \x8B\xDF |0 # CJK Ideograph
+<U8080> \x8B\xE0 |0 # CJK Ideograph
+<UF559> \x8B\xE1 |0 # Private Use
+<UF55A> \x8B\xE2 |0 # Private Use
+<U535D> \x8B\xE3 |0 # CJK Ideograph
+<U8864> \x8B\xE4 |0 # CJK Ideograph
+<U89C1> \x8B\xE5 |0 # CJK Ideograph
+<UF55E> \x8B\xE6 |0 # Private Use
+<U8BA0> \x8B\xE7 |0 # CJK Ideograph
+<U8D1D> \x8B\xE8 |0 # CJK Ideograph
+<U9485> \x8B\xE9 |0 # CJK Ideograph
+<U9578> \x8B\xEA |0 # CJK Ideograph
+<U957F> \x8B\xEB |0 # CJK Ideograph
+<U95E8> \x8B\xEC |0 # CJK Ideograph
+<UF565> \x8B\xED |0 # Private Use
+<U97E6> \x8B\xEE |0 # CJK Ideograph
+<U9875> \x8B\xEF |0 # CJK Ideograph
+<U98CE> \x8B\xF0 |0 # CJK Ideograph
+<U98DE> \x8B\xF1 |0 # CJK Ideograph
+<U9963> \x8B\xF2 |0 # CJK Ideograph
+<UF56B> \x8B\xF3 |0 # Private Use
+<U9C7C> \x8B\xF4 |0 # CJK Ideograph
+<U9E1F> \x8B\xF5 |0 # CJK Ideograph
+<U9EC4> \x8B\xF6 |0 # CJK Ideograph
+<U6B6F> \x8B\xF7 |0 # CJK Ideograph
+<U4E37> \x8B\xF9 |0 # CJK Ideograph
+<UF572> \x8B\xFA |0 # Private Use
+<U961D> \x8B\xFB |0 # CJK Ideograph
+<U6237> \x8B\xFC |0 # CJK Ideograph
+<U94A2> \x8B\xFD |0 # CJK Ideograph
+<U5D3E> \x8D\x60 |0 # CJK Ideograph
+<U5D48> \x8D\x61 |0 # CJK Ideograph
+<U5D56> \x8D\x62 |0 # CJK Ideograph
+<U3DFC> \x8D\x63 |0 # CJK Ideograph Extension A
+<U380F> \x8D\x64 |0 # CJK Ideograph Extension A
+<U5DA4> \x8D\x65 |0 # CJK Ideograph
+<U5DB9> \x8D\x66 |0 # CJK Ideograph
+<U3820> \x8D\x67 |0 # CJK Ideograph Extension A
+<U3838> \x8D\x68 |0 # CJK Ideograph Extension A
+<U5E42> \x8D\x69 |0 # CJK Ideograph
+<U5EBD> \x8D\x6A |0 # CJK Ideograph
+<U5F25> \x8D\x6B |0 # CJK Ideograph
+<U5F83> \x8D\x6C |0 # CJK Ideograph
+<U3908> \x8D\x6D |0 # CJK Ideograph Extension A
+<U3914> \x8D\x6E |0 # CJK Ideograph Extension A
+<U393F> \x8D\x6F |0 # CJK Ideograph Extension A
+<U394D> \x8D\x70 |0 # CJK Ideograph Extension A
+<U60D7> \x8D\x71 |0 # CJK Ideograph
+<U613D> \x8D\x72 |0 # CJK Ideograph
+<U5CE5> \x8D\x73 |0 # CJK Ideograph
+<U3989> \x8D\x74 |0 # CJK Ideograph Extension A
+<U61B7> \x8D\x75 |0 # CJK Ideograph
+<U61B9> \x8D\x76 |0 # CJK Ideograph
+<U61CF> \x8D\x77 |0 # CJK Ideograph
+<U39B8> \x8D\x78 |0 # CJK Ideograph Extension A
+<U622C> \x8D\x79 |0 # CJK Ideograph
+<U6290> \x8D\x7A |0 # CJK Ideograph
+<U62E5> \x8D\x7B |0 # CJK Ideograph
+<U6318> \x8D\x7C |0 # CJK Ideograph
+<U39F8> \x8D\x7D |0 # CJK Ideograph Extension A
+<U56B1> \x8D\x7E |0 # CJK Ideograph
+<U3A03> \x8D\xA1 |0 # CJK Ideograph Extension A
+<U63E2> \x8D\xA2 |0 # CJK Ideograph
+<U63FB> \x8D\xA3 |0 # CJK Ideograph
+<U6407> \x8D\xA4 |0 # CJK Ideograph
+<U645A> \x8D\xA5 |0 # CJK Ideograph
+<U3A4B> \x8D\xA6 |0 # CJK Ideograph Extension A
+<U64C0> \x8D\xA7 |0 # CJK Ideograph
+<U5D15> \x8D\xA8 |0 # CJK Ideograph
+<U5621> \x8D\xA9 |0 # CJK Ideograph
+<U9F9F> \x8D\xAA |0 # CJK Ideograph
+<U3A97> \x8D\xAB |0 # CJK Ideograph Extension A
+<U6586> \x8D\xAC |0 # CJK Ideograph
+<U3ABD> \x8D\xAD |0 # CJK Ideograph Extension A
+<U65FF> \x8D\xAE |0 # CJK Ideograph
+<U6653> \x8D\xAF |0 # CJK Ideograph
+<U3AF2> \x8D\xB0 |0 # CJK Ideograph Extension A
+<U6692> \x8D\xB1 |0 # CJK Ideograph
+<U3B22> \x8D\xB2 |0 # CJK Ideograph Extension A
+<U6716> \x8D\xB3 |0 # CJK Ideograph
+<U3B42> \x8D\xB4 |0 # CJK Ideograph Extension A
+<U67A4> \x8D\xB5 |0 # CJK Ideograph
+<U6800> \x8D\xB6 |0 # CJK Ideograph
+<U3B58> \x8D\xB7 |0 # CJK Ideograph Extension A
+<U684A> \x8D\xB8 |0 # CJK Ideograph
+<U6884> \x8D\xB9 |0 # CJK Ideograph
+<U3B72> \x8D\xBA |0 # CJK Ideograph Extension A
+<U3B71> \x8D\xBB |0 # CJK Ideograph Extension A
+<U3B7B> \x8D\xBC |0 # CJK Ideograph Extension A
+<U6909> \x8D\xBD |0 # CJK Ideograph
+<U6943> \x8D\xBE |0 # CJK Ideograph
+<U725C> \x8D\xBF |0 # CJK Ideograph
+<U6964> \x8D\xC0 |0 # CJK Ideograph
+<U699F> \x8D\xC1 |0 # CJK Ideograph
+<U6985> \x8D\xC2 |0 # CJK Ideograph
+<U3BBC> \x8D\xC3 |0 # CJK Ideograph Extension A
+<U69D6> \x8D\xC4 |0 # CJK Ideograph
+<U3BDD> \x8D\xC5 |0 # CJK Ideograph Extension A
+<U6A65> \x8D\xC6 |0 # CJK Ideograph
+<U6A74> \x8D\xC7 |0 # CJK Ideograph
+<U6A71> \x8D\xC8 |0 # CJK Ideograph
+<U6A82> \x8D\xC9 |0 # CJK Ideograph
+<U3BEC> \x8D\xCA |0 # CJK Ideograph Extension A
+<U6A99> \x8D\xCB |0 # CJK Ideograph
+<U3BF2> \x8D\xCC |0 # CJK Ideograph Extension A
+<U6AAB> \x8D\xCD |0 # CJK Ideograph
+<U6AB5> \x8D\xCE |0 # CJK Ideograph
+<U6AD4> \x8D\xCF |0 # CJK Ideograph
+<U6AF6> \x8D\xD0 |0 # CJK Ideograph
+<U6B81> \x8D\xD1 |0 # CJK Ideograph
+<U6BC1> \x8D\xD2 |0 # CJK Ideograph
+<U6BEA> \x8D\xD3 |0 # CJK Ideograph
+<U6C75> \x8D\xD4 |0 # CJK Ideograph
+<U6CAA> \x8D\xD5 |0 # CJK Ideograph
+<U3CCB> \x8D\xD6 |0 # CJK Ideograph Extension A
+<U6D02> \x8D\xD7 |0 # CJK Ideograph
+<U6D06> \x8D\xD8 |0 # CJK Ideograph
+<U6D26> \x8D\xD9 |0 # CJK Ideograph
+<U6D81> \x8D\xDA |0 # CJK Ideograph
+<U3CEF> \x8D\xDB |0 # CJK Ideograph Extension A
+<U6DA4> \x8D\xDC |0 # CJK Ideograph
+<U6DB1> \x8D\xDD |0 # CJK Ideograph
+<U6E15> \x8D\xDE |0 # CJK Ideograph
+<U6E18> \x8D\xDF |0 # CJK Ideograph
+<U6E29> \x8D\xE0 |0 # CJK Ideograph
+<U6E86> \x8D\xE1 |0 # CJK Ideograph
+<UF694> \x8D\xE2 |0 # Private Use
+<U6EBB> \x8D\xE3 |0 # CJK Ideograph
+<U6EE2> \x8D\xE4 |0 # CJK Ideograph
+<U6EDA> \x8D\xE5 |0 # CJK Ideograph
+<U9F7F> \x8D\xE6 |0 # CJK Ideograph
+<U6EE8> \x8D\xE7 |0 # CJK Ideograph
+<U6EE9> \x8D\xE8 |0 # CJK Ideograph
+<U6F24> \x8D\xE9 |0 # CJK Ideograph
+<U6F34> \x8D\xEA |0 # CJK Ideograph
+<U3D46> \x8D\xEB |0 # CJK Ideograph Extension A
+<UF69E> \x8D\xEC |0 # Private Use
+<U6F81> \x8D\xED |0 # CJK Ideograph
+<U6FBE> \x8D\xEE |0 # CJK Ideograph
+<U3D6A> \x8D\xEF |0 # CJK Ideograph Extension A
+<U3D75> \x8D\xF0 |0 # CJK Ideograph Extension A
+<U71B7> \x8D\xF1 |0 # CJK Ideograph
+<U5C99> \x8D\xF2 |0 # CJK Ideograph
+<U3D8A> \x8D\xF3 |0 # CJK Ideograph Extension A
+<U702C> \x8D\xF4 |0 # CJK Ideograph
+<U3D91> \x8D\xF5 |0 # CJK Ideograph Extension A
+<U7050> \x8D\xF6 |0 # CJK Ideograph
+<U7054> \x8D\xF7 |0 # CJK Ideograph
+<U706F> \x8D\xF8 |0 # CJK Ideograph
+<U707F> \x8D\xF9 |0 # CJK Ideograph
+<U7089> \x8D\xFA |0 # CJK Ideograph
+<UF6AD> \x8D\xFB |0 # Private Use
+<U43C1> \x8D\xFC |0 # CJK Ideograph Extension A
+<U35F1> \x8D\xFD |0 # CJK Ideograph Extension A
+<UF6B0> \x8D\xFE |0 # Private Use
+<UE311> \x8E\x40 |0 # Private Use
+<U57BE> \x8E\x41 |0 # CJK Ideograph
+<UE313> \x8E\x42 |0 # Private Use
+<U713E> \x8E\x43 |0 # CJK Ideograph
+<UE315> \x8E\x44 |0 # Private Use
+<U364E> \x8E\x45 |0 # CJK Ideograph Extension A
+<U69A2> \x8E\x46 |0 # CJK Ideograph
+<UE318> \x8E\x47 |0 # Private Use
+<U5B74> \x8E\x48 |0 # CJK Ideograph
+<U7A49> \x8E\x49 |0 # CJK Ideograph
+<UE31B> \x8E\x4A |0 # Private Use
+<UE31C> \x8E\x4B |0 # Private Use
+<U7A65> \x8E\x4C |0 # CJK Ideograph
+<U7A7D> \x8E\x4D |0 # CJK Ideograph
+<UE31F> \x8E\x4E |0 # Private Use
+<U7ABB> \x8E\x4F |0 # CJK Ideograph
+<U7AB0> \x8E\x50 |0 # CJK Ideograph
+<U7AC2> \x8E\x51 |0 # CJK Ideograph
+<U7AC3> \x8E\x52 |0 # CJK Ideograph
+<U71D1> \x8E\x53 |0 # CJK Ideograph
+<UE325> \x8E\x54 |0 # Private Use
+<U41CA> \x8E\x55 |0 # CJK Ideograph Extension A
+<U7ADA> \x8E\x56 |0 # CJK Ideograph
+<U7ADD> \x8E\x57 |0 # CJK Ideograph
+<U7AEA> \x8E\x58 |0 # CJK Ideograph
+<U41EF> \x8E\x59 |0 # CJK Ideograph Extension A
+<U54B2> \x8E\x5A |0 # CJK Ideograph
+<UE32C> \x8E\x5B |0 # Private Use
+<U7B0B> \x8E\x5C |0 # CJK Ideograph
+<U7B55> \x8E\x5D |0 # CJK Ideograph
+<U7B29> \x8E\x5E |0 # CJK Ideograph
+<UE330> \x8E\x5F |0 # Private Use
+<UE331> \x8E\x60 |0 # Private Use
+<U7BA2> \x8E\x61 |0 # CJK Ideograph
+<U7B6F> \x8E\x62 |0 # CJK Ideograph
+<U839C> \x8E\x63 |0 # CJK Ideograph
+<UE335> \x8E\x64 |0 # Private Use
+<UE336> \x8E\x65 |0 # Private Use
+<U7BD0> \x8E\x66 |0 # CJK Ideograph
+<U8421> \x8E\x67 |0 # CJK Ideograph
+<U7B92> \x8E\x68 |0 # CJK Ideograph
+<UE33B> \x8E\x6A |0 # Private Use
+<U3DAD> \x8E\x6B |0 # CJK Ideograph Extension A
+<UE33D> \x8E\x6C |0 # Private Use
+<U8492> \x8E\x6D |0 # CJK Ideograph
+<U7BFA> \x8E\x6E |0 # CJK Ideograph
+<U7C35> \x8E\x70 |0 # CJK Ideograph
+<UE342> \x8E\x71 |0 # Private Use
+<U7C44> \x8E\x72 |0 # CJK Ideograph
+<U7C83> \x8E\x73 |0 # CJK Ideograph
+<UE345> \x8E\x74 |0 # Private Use
+<U7CA6> \x8E\x75 |0 # CJK Ideograph
+<U667D> \x8E\x76 |0 # CJK Ideograph
+<UE348> \x8E\x77 |0 # Private Use
+<U7CC9> \x8E\x78 |0 # CJK Ideograph
+<U7CC7> \x8E\x79 |0 # CJK Ideograph
+<U7CE6> \x8E\x7A |0 # CJK Ideograph
+<U7C74> \x8E\x7B |0 # CJK Ideograph
+<U7CF3> \x8E\x7C |0 # CJK Ideograph
+<U7CF5> \x8E\x7D |0 # CJK Ideograph
+<U7E67> \x8E\xA1 |0 # CJK Ideograph
+<U451D> \x8E\xA2 |0 # CJK Ideograph Extension A
+<UE352> \x8E\xA3 |0 # Private Use
+<U7D5D> \x8E\xA4 |0 # CJK Ideograph
+<UE354> \x8E\xA5 |0 # Private Use
+<U748D> \x8E\xA6 |0 # CJK Ideograph
+<U7D89> \x8E\xA7 |0 # CJK Ideograph
+<U7DAB> \x8E\xA8 |0 # CJK Ideograph
+<U7135> \x8E\xA9 |0 # CJK Ideograph
+<U7DB3> \x8E\xAA |0 # CJK Ideograph
+<UE35B> \x8E\xAC |0 # Private Use
+<UE35C> \x8E\xAD |0 # Private Use
+<U7DE4> \x8E\xAE |0 # CJK Ideograph
+<U3D13> \x8E\xAF |0 # CJK Ideograph Extension A
+<U7DF5> \x8E\xB0 |0 # CJK Ideograph
+<UE360> \x8E\xB1 |0 # Private Use
+<U7DE5> \x8E\xB2 |0 # CJK Ideograph
+<UE362> \x8E\xB3 |0 # Private Use
+<UE364> \x8E\xB5 |0 # Private Use
+<UE365> \x8E\xB6 |0 # Private Use
+<U7E6E> \x8E\xB7 |0 # CJK Ideograph
+<U7E92> \x8E\xB8 |0 # CJK Ideograph
+<U432B> \x8E\xB9 |0 # CJK Ideograph Extension A
+<U946C> \x8E\xBA |0 # CJK Ideograph
+<U7E27> \x8E\xBB |0 # CJK Ideograph
+<U7F40> \x8E\xBC |0 # CJK Ideograph
+<U7F41> \x8E\xBD |0 # CJK Ideograph
+<U7F47> \x8E\xBE |0 # CJK Ideograph
+<U7936> \x8E\xBF |0 # CJK Ideograph
+<UE36F> \x8E\xC0 |0 # Private Use
+<U99E1> \x8E\xC1 |0 # CJK Ideograph
+<U7F97> \x8E\xC2 |0 # CJK Ideograph
+<UE372> \x8E\xC3 |0 # Private Use
+<U7FA3> \x8E\xC4 |0 # CJK Ideograph
+<UE374> \x8E\xC5 |0 # Private Use
+<UE375> \x8E\xC6 |0 # Private Use
+<U455C> \x8E\xC7 |0 # CJK Ideograph Extension A
+<UE377> \x8E\xC8 |0 # Private Use
+<U4503> \x8E\xC9 |0 # CJK Ideograph Extension A
+<UE379> \x8E\xCA |0 # Private Use
+<U7FFA> \x8E\xCB |0 # CJK Ideograph
+<UE37B> \x8E\xCC |0 # Private Use
+<U8008> \x8E\xCE |0 # CJK Ideograph
+<U801D> \x8E\xCF |0 # CJK Ideograph
+<U802F> \x8E\xD1 |0 # CJK Ideograph
+<UE381> \x8E\xD2 |0 # Private Use
+<UE382> \x8E\xD3 |0 # Private Use
+<U803B> \x8E\xD4 |0 # CJK Ideograph
+<U803C> \x8E\xD5 |0 # CJK Ideograph
+<U8061> \x8E\xD6 |0 # CJK Ideograph
+<UE386> \x8E\xD7 |0 # Private Use
+<U4989> \x8E\xD8 |0 # CJK Ideograph Extension A
+<UE388> \x8E\xD9 |0 # Private Use
+<UE389> \x8E\xDA |0 # Private Use
+<UE38A> \x8E\xDB |0 # Private Use
+<U6725> \x8E\xDC |0 # CJK Ideograph
+<U80A7> \x8E\xDD |0 # CJK Ideograph
+<UE38D> \x8E\xDE |0 # Private Use
+<U8107> \x8E\xDF |0 # CJK Ideograph
+<U811A> \x8E\xE0 |0 # CJK Ideograph
+<U58B0> \x8E\xE1 |0 # CJK Ideograph
+<UE391> \x8E\xE2 |0 # Private Use
+<U6C7F> \x8E\xE3 |0 # CJK Ideograph
+<UE393> \x8E\xE4 |0 # Private Use
+<UE394> \x8E\xE5 |0 # Private Use
+<U64E7> \x8E\xE6 |0 # CJK Ideograph
+<UE396> \x8E\xE7 |0 # Private Use
+<U8218> \x8E\xE8 |0 # CJK Ideograph
+<UE398> \x8E\xE9 |0 # Private Use
+<U6A53> \x8E\xEA |0 # CJK Ideograph
+<UE39A> \x8E\xEB |0 # Private Use
+<UE39B> \x8E\xEC |0 # Private Use
+<U447A> \x8E\xED |0 # CJK Ideograph Extension A
+<U8229> \x8E\xEE |0 # CJK Ideograph
+<UE39E> \x8E\xEF |0 # Private Use
+<UE39F> \x8E\xF0 |0 # Private Use
+<UE3A0> \x8E\xF1 |0 # Private Use
+<U4FF9> \x8E\xF2 |0 # CJK Ideograph
+<UE3A2> \x8E\xF3 |0 # Private Use
+<U84E2> \x8E\xF4 |0 # CJK Ideograph
+<U8362> \x8E\xF5 |0 # CJK Ideograph
+<UE3A5> \x8E\xF6 |0 # Private Use
+<UE3A6> \x8E\xF7 |0 # Private Use
+<UE3A7> \x8E\xF8 |0 # Private Use
+<UE3A8> \x8E\xF9 |0 # Private Use
+<UE3A9> \x8E\xFA |0 # Private Use
+<U82AA> \x8E\xFB |0 # CJK Ideograph
+<U691B> \x8E\xFC |0 # CJK Ideograph
+<UE3AC> \x8E\xFD |0 # Private Use
+<U41DB> \x8E\xFE |0 # CJK Ideograph Extension A
+<U854B> \x8F\x40 |0 # CJK Ideograph
+<U82D0> \x8F\x41 |0 # CJK Ideograph
+<U831A> \x8F\x42 |0 # CJK Ideograph
+<UE3B1> \x8F\x43 |0 # Private Use
+<UE3B2> \x8F\x44 |0 # Private Use
+<U36C1> \x8F\x45 |0 # CJK Ideograph Extension A
+<UE3B4> \x8F\x46 |0 # Private Use
+<UE3B5> \x8F\x47 |0 # Private Use
+<U827B> \x8F\x48 |0 # CJK Ideograph
+<U82E2> \x8F\x49 |0 # CJK Ideograph
+<U8318> \x8F\x4A |0 # CJK Ideograph
+<UE3B9> \x8F\x4B |0 # Private Use
+<UE3BA> \x8F\x4C |0 # Private Use
+<UE3BB> \x8F\x4D |0 # Private Use
+<UE3BC> \x8F\x4E |0 # Private Use
+<UE3BD> \x8F\x4F |0 # Private Use
+<U3DBF> \x8F\x50 |0 # CJK Ideograph Extension A
+<U831D> \x8F\x51 |0 # CJK Ideograph
+<U55EC> \x8F\x52 |0 # CJK Ideograph
+<U8385> \x8F\x53 |0 # CJK Ideograph
+<U450B> \x8F\x54 |0 # CJK Ideograph Extension A
+<UE3C3> \x8F\x55 |0 # Private Use
+<U83AC> \x8F\x56 |0 # CJK Ideograph
+<U83D3> \x8F\x58 |0 # CJK Ideograph
+<U347E> \x8F\x59 |0 # CJK Ideograph Extension A
+<UE3C8> \x8F\x5A |0 # Private Use
+<U6A57> \x8F\x5B |0 # CJK Ideograph
+<U855A> \x8F\x5C |0 # CJK Ideograph
+<U3496> \x8F\x5D |0 # CJK Ideograph Extension A
+<UE3CC> \x8F\x5E |0 # Private Use
+<UE3CD> \x8F\x5F |0 # Private Use
+<U8458> \x8F\x60 |0 # CJK Ideograph
+<UE3CF> \x8F\x61 |0 # Private Use
+<U8471> \x8F\x62 |0 # CJK Ideograph
+<U3DD3> \x8F\x63 |0 # CJK Ideograph Extension A
+<U44E4> \x8F\x64 |0 # CJK Ideograph Extension A
+<U6AA7> \x8F\x65 |0 # CJK Ideograph
+<U844A> \x8F\x66 |0 # CJK Ideograph
+<UE3D5> \x8F\x67 |0 # Private Use
+<U7958> \x8F\x68 |0 # CJK Ideograph
+<UE3D8> \x8F\x6A |0 # Private Use
+<UE3D9> \x8F\x6B |0 # Private Use
+<UE3DA> \x8F\x6C |0 # Private Use
+<U84DE> \x8F\x6D |0 # CJK Ideograph
+<U8391> \x8F\x6F |0 # CJK Ideograph
+<U44A0> \x8F\x70 |0 # CJK Ideograph Extension A
+<U8493> \x8F\x71 |0 # CJK Ideograph
+<U84E4> \x8F\x72 |0 # CJK Ideograph
+<UE3E1> \x8F\x73 |0 # Private Use
+<U4240> \x8F\x74 |0 # CJK Ideograph Extension A
+<UE3E3> \x8F\x75 |0 # Private Use
+<U4543> \x8F\x76 |0 # CJK Ideograph Extension A
+<U8534> \x8F\x77 |0 # CJK Ideograph
+<U5AF2> \x8F\x78 |0 # CJK Ideograph
+<UE3E7> \x8F\x79 |0 # Private Use
+<U4527> \x8F\x7A |0 # CJK Ideograph Extension A
+<U8573> \x8F\x7B |0 # CJK Ideograph
+<U4516> \x8F\x7C |0 # CJK Ideograph Extension A
+<U67BF> \x8F\x7D |0 # CJK Ideograph
+<U8616> \x8F\x7E |0 # CJK Ideograph
+<UE3ED> \x8F\xA1 |0 # Private Use
+<UE3EE> \x8F\xA2 |0 # Private Use
+<U85C1> \x8F\xA3 |0 # CJK Ideograph
+<UE3F0> \x8F\xA4 |0 # Private Use
+<U8602> \x8F\xA5 |0 # CJK Ideograph
+<UE3F2> \x8F\xA6 |0 # Private Use
+<UE3F3> \x8F\xA7 |0 # Private Use
+<UE3F4> \x8F\xA8 |0 # Private Use
+<U456A> \x8F\xA9 |0 # CJK Ideograph Extension A
+<U8628> \x8F\xAA |0 # CJK Ideograph
+<U3648> \x8F\xAB |0 # CJK Ideograph Extension A
+<UE3F8> \x8F\xAC |0 # Private Use
+<U53F7> \x8F\xAD |0 # CJK Ideograph
+<UE3FA> \x8F\xAE |0 # Private Use
+<U867E> \x8F\xAF |0 # CJK Ideograph
+<U8771> \x8F\xB0 |0 # CJK Ideograph
+<UE3FD> \x8F\xB1 |0 # Private Use
+<U87EE> \x8F\xB2 |0 # CJK Ideograph
+<UE3FF> \x8F\xB3 |0 # Private Use
+<U87B1> \x8F\xB4 |0 # CJK Ideograph
+<U87DA> \x8F\xB5 |0 # CJK Ideograph
+<U880F> \x8F\xB6 |0 # CJK Ideograph
+<U5661> \x8F\xB7 |0 # CJK Ideograph
+<U866C> \x8F\xB8 |0 # CJK Ideograph
+<U6856> \x8F\xB9 |0 # CJK Ideograph
+<U460F> \x8F\xBA |0 # CJK Ideograph Extension A
+<U8845> \x8F\xBB |0 # CJK Ideograph
+<U8846> \x8F\xBC |0 # CJK Ideograph
+<UE409> \x8F\xBD |0 # Private Use
+<UE40A> \x8F\xBE |0 # Private Use
+<UE40B> \x8F\xBF |0 # Private Use
+<U885E> \x8F\xC0 |0 # CJK Ideograph
+<U889C> \x8F\xC1 |0 # CJK Ideograph
+<U465B> \x8F\xC2 |0 # CJK Ideograph Extension A
+<U88B4> \x8F\xC3 |0 # CJK Ideograph
+<U88B5> \x8F\xC4 |0 # CJK Ideograph
+<U63C1> \x8F\xC5 |0 # CJK Ideograph
+<U88C5> \x8F\xC6 |0 # CJK Ideograph
+<U7777> \x8F\xC7 |0 # CJK Ideograph
+<UE414> \x8F\xC8 |0 # Private Use
+<U8987> \x8F\xC9 |0 # CJK Ideograph
+<U898A> \x8F\xCA |0 # CJK Ideograph
+<U89A7> \x8F\xCD |0 # CJK Ideograph
+<U89BC> \x8F\xCE |0 # CJK Ideograph
+<UE41B> \x8F\xCF |0 # Private Use
+<U89E7> \x8F\xD0 |0 # CJK Ideograph
+<UE41D> \x8F\xD1 |0 # Private Use
+<UE41E> \x8F\xD2 |0 # Private Use
+<U8A9C> \x8F\xD3 |0 # CJK Ideograph
+<U7793> \x8F\xD4 |0 # CJK Ideograph
+<U91FE> \x8F\xD5 |0 # CJK Ideograph
+<U8A90> \x8F\xD6 |0 # CJK Ideograph
+<UE423> \x8F\xD7 |0 # Private Use
+<U7AE9> \x8F\xD8 |0 # CJK Ideograph
+<UE425> \x8F\xD9 |0 # Private Use
+<UE426> \x8F\xDA |0 # Private Use
+<U4713> \x8F\xDB |0 # CJK Ideograph Extension A
+<UE428> \x8F\xDC |0 # Private Use
+<U717C> \x8F\xDD |0 # CJK Ideograph
+<U8B0C> \x8F\xDE |0 # CJK Ideograph
+<U8B1F> \x8F\xDF |0 # CJK Ideograph
+<UE42C> \x8F\xE0 |0 # Private Use
+<UE42D> \x8F\xE1 |0 # Private Use
+<U8B3F> \x8F\xE2 |0 # CJK Ideograph
+<U8B4C> \x8F\xE3 |0 # CJK Ideograph
+<U8B4D> \x8F\xE4 |0 # CJK Ideograph
+<U8AA9> \x8F\xE5 |0 # CJK Ideograph
+<UE432> \x8F\xE6 |0 # Private Use
+<U8B90> \x8F\xE7 |0 # CJK Ideograph
+<U8B9B> \x8F\xE8 |0 # CJK Ideograph
+<U8AAF> \x8F\xE9 |0 # CJK Ideograph
+<UE436> \x8F\xEA |0 # Private Use
+<U4615> \x8F\xEB |0 # CJK Ideograph Extension A
+<U884F> \x8F\xEC |0 # CJK Ideograph
+<U8C9B> \x8F\xED |0 # CJK Ideograph
+<UE43A> \x8F\xEE |0 # Private Use
+<UE43B> \x8F\xEF |0 # Private Use
+<UE43C> \x8F\xF0 |0 # Private Use
+<U3725> \x8F\xF1 |0 # CJK Ideograph Extension A
+<UE43E> \x8F\xF2 |0 # Private Use
+<U8CD6> \x8F\xF3 |0 # CJK Ideograph
+<UE440> \x8F\xF4 |0 # Private Use
+<UE441> \x8F\xF5 |0 # Private Use
+<U8D12> \x8F\xF6 |0 # CJK Ideograph
+<U8D03> \x8F\xF7 |0 # CJK Ideograph
+<UE444> \x8F\xF8 |0 # Private Use
+<U8CDB> \x8F\xF9 |0 # CJK Ideograph
+<U705C> \x8F\xFA |0 # CJK Ideograph
+<U8D11> \x8F\xFB |0 # CJK Ideograph
+<UE448> \x8F\xFC |0 # Private Use
+<U3ED0> \x8F\xFD |0 # CJK Ideograph Extension A
+<U8DA9> \x90\x40 |0 # CJK Ideograph
+<UE44C> \x90\x41 |0 # Private Use
+<UE44D> \x90\x42 |0 # Private Use
+<UE44E> \x90\x43 |0 # Private Use
+<U3B7C> \x90\x44 |0 # CJK Ideograph Extension A
+<UE450> \x90\x45 |0 # Private Use
+<UE451> \x90\x46 |0 # Private Use
+<U7AE7> \x90\x47 |0 # CJK Ideograph
+<U8EAD> \x90\x48 |0 # CJK Ideograph
+<U8EB6> \x90\x49 |0 # CJK Ideograph
+<U8EC3> \x90\x4A |0 # CJK Ideograph
+<U92D4> \x90\x4B |0 # CJK Ideograph
+<U8F19> \x90\x4C |0 # CJK Ideograph
+<U8F2D> \x90\x4D |0 # CJK Ideograph
+<UE459> \x90\x4E |0 # Private Use
+<UE45A> \x90\x4F |0 # Private Use
+<U8FA5> \x90\x50 |0 # CJK Ideograph
+<U9303> \x90\x51 |0 # CJK Ideograph
+<UE45D> \x90\x52 |0 # Private Use
+<UE45E> \x90\x53 |0 # Private Use
+<U8FB3> \x90\x54 |0 # CJK Ideograph
+<U492A> \x90\x55 |0 # CJK Ideograph Extension A
+<UE461> \x90\x56 |0 # Private Use
+<UE462> \x90\x57 |0 # Private Use
+<UE463> \x90\x58 |0 # Private Use
+<U5EF8> \x90\x59 |0 # CJK Ideograph
+<UE465> \x90\x5A |0 # Private Use
+<U8FF9> \x90\x5B |0 # CJK Ideograph
+<UE467> \x90\x5C |0 # Private Use
+<UE468> \x90\x5D |0 # Private Use
+<UE469> \x90\x5E |0 # Private Use
+<UE46A> \x90\x5F |0 # Private Use
+<U3980> \x90\x60 |0 # CJK Ideograph Extension A
+<UE46C> \x90\x61 |0 # Private Use
+<U9037> \x90\x62 |0 # CJK Ideograph
+<UE46E> \x90\x63 |0 # Private Use
+<UE46F> \x90\x64 |0 # Private Use
+<U9061> \x90\x65 |0 # CJK Ideograph
+<UE471> \x90\x66 |0 # Private Use
+<UE472> \x90\x67 |0 # Private Use
+<U90A8> \x90\x68 |0 # CJK Ideograph
+<UE474> \x90\x69 |0 # Private Use
+<U90C4> \x90\x6A |0 # CJK Ideograph
+<UE476> \x90\x6B |0 # Private Use
+<U90AE> \x90\x6C |0 # CJK Ideograph
+<U9167> \x90\x6E |0 # CJK Ideograph
+<U3AF0> \x90\x6F |0 # CJK Ideograph Extension A
+<U91A9> \x90\x70 |0 # CJK Ideograph
+<U91C4> \x90\x71 |0 # CJK Ideograph
+<U7CAC> \x90\x72 |0 # CJK Ideograph
+<UE47E> \x90\x73 |0 # Private Use
+<UE47F> \x90\x74 |0 # Private Use
+<U920E> \x90\x75 |0 # CJK Ideograph
+<U6C9F> \x90\x76 |0 # CJK Ideograph
+<U9241> \x90\x77 |0 # CJK Ideograph
+<U9262> \x90\x78 |0 # CJK Ideograph
+<UE484> \x90\x79 |0 # Private Use
+<UE486> \x90\x7B |0 # Private Use
+<UE487> \x90\x7C |0 # Private Use
+<UE488> \x90\x7D |0 # Private Use
+<UE489> \x90\x7E |0 # Private Use
+<UE48A> \x90\xA1 |0 # Private Use
+<U932C> \x90\xA2 |0 # CJK Ideograph
+<U936B> \x90\xA3 |0 # CJK Ideograph
+<UE48D> \x90\xA4 |0 # Private Use
+<UE48E> \x90\xA5 |0 # Private Use
+<U708F> \x90\xA6 |0 # CJK Ideograph
+<U5AC3> \x90\xA7 |0 # CJK Ideograph
+<UE491> \x90\xA8 |0 # Private Use
+<UE492> \x90\xA9 |0 # Private Use
+<U4965> \x90\xAA |0 # CJK Ideograph Extension A
+<U9244> \x90\xAB |0 # CJK Ideograph
+<UE495> \x90\xAC |0 # Private Use
+<UE496> \x90\xAD |0 # Private Use
+<UE497> \x90\xAE |0 # Private Use
+<U9373> \x90\xAF |0 # CJK Ideograph
+<U945B> \x90\xB0 |0 # CJK Ideograph
+<U8EBC> \x90\xB1 |0 # CJK Ideograph
+<U9585> \x90\xB2 |0 # CJK Ideograph
+<U95A6> \x90\xB3 |0 # CJK Ideograph
+<U9426> \x90\xB4 |0 # CJK Ideograph
+<U95A0> \x90\xB5 |0 # CJK Ideograph
+<U6FF6> \x90\xB6 |0 # CJK Ideograph
+<U42B9> \x90\xB7 |0 # CJK Ideograph Extension A
+<UE4A1> \x90\xB8 |0 # Private Use
+<UE4A2> \x90\xB9 |0 # Private Use
+<UE4A3> \x90\xBA |0 # Private Use
+<UE4A4> \x90\xBB |0 # Private Use
+<U49DF> \x90\xBC |0 # CJK Ideograph Extension A
+<U6C1C> \x90\xBD |0 # CJK Ideograph
+<U967B> \x90\xBE |0 # CJK Ideograph
+<U9696> \x90\xBF |0 # CJK Ideograph
+<U416C> \x90\xC0 |0 # CJK Ideograph Extension A
+<U96A3> \x90\xC1 |0 # CJK Ideograph
+<UE4AB> \x90\xC2 |0 # Private Use
+<U61DA> \x90\xC3 |0 # CJK Ideograph
+<U96B6> \x90\xC4 |0 # CJK Ideograph
+<U78F5> \x90\xC5 |0 # CJK Ideograph
+<UE4AF> \x90\xC6 |0 # Private Use
+<U96BD> \x90\xC7 |0 # CJK Ideograph
+<U53CC> \x90\xC8 |0 # CJK Ideograph
+<U49A1> \x90\xC9 |0 # CJK Ideograph Extension A
+<UE4B3> \x90\xCA |0 # Private Use
+<UE4B4> \x90\xCB |0 # Private Use
+<UE4B5> \x90\xCC |0 # Private Use
+<UE4B6> \x90\xCD |0 # Private Use
+<UE4B7> \x90\xCE |0 # Private Use
+<UE4B8> \x90\xCF |0 # Private Use
+<UE4B9> \x90\xD0 |0 # Private Use
+<UE4BA> \x90\xD1 |0 # Private Use
+<U9731> \x90\xD2 |0 # CJK Ideograph
+<U8642> \x90\xD3 |0 # CJK Ideograph
+<U9736> \x90\xD4 |0 # CJK Ideograph
+<U4A0F> \x90\xD5 |0 # CJK Ideograph Extension A
+<U453D> \x90\xD6 |0 # CJK Ideograph Extension A
+<U4585> \x90\xD7 |0 # CJK Ideograph Extension A
+<UE4C1> \x90\xD8 |0 # Private Use
+<U7075> \x90\xD9 |0 # CJK Ideograph
+<U5B41> \x90\xDA |0 # CJK Ideograph
+<U971B> \x90\xDB |0 # CJK Ideograph
+<UE4C6> \x90\xDD |0 # Private Use
+<U9757> \x90\xDE |0 # CJK Ideograph
+<U5B4A> \x90\xDF |0 # CJK Ideograph
+<UE4C9> \x90\xE0 |0 # Private Use
+<U975F> \x90\xE1 |0 # CJK Ideograph
+<U9425> \x90\xE2 |0 # CJK Ideograph
+<U50D0> \x90\xE3 |0 # CJK Ideograph
+<UE4CD> \x90\xE4 |0 # Private Use
+<UE4CE> \x90\xE5 |0 # Private Use
+<U9789> \x90\xE6 |0 # CJK Ideograph
+<U979F> \x90\xE7 |0 # CJK Ideograph
+<U97B1> \x90\xE8 |0 # CJK Ideograph
+<U97BE> \x90\xE9 |0 # CJK Ideograph
+<U97C0> \x90\xEA |0 # CJK Ideograph
+<U97D2> \x90\xEB |0 # CJK Ideograph
+<U97E0> \x90\xEC |0 # CJK Ideograph
+<UE4D6> \x90\xED |0 # Private Use
+<U97EE> \x90\xEE |0 # CJK Ideograph
+<U741C> \x90\xEF |0 # CJK Ideograph
+<UE4D9> \x90\xF0 |0 # Private Use
+<U97F5> \x90\xF2 |0 # CJK Ideograph
+<UE4DC> \x90\xF3 |0 # Private Use
+<UE4DD> \x90\xF4 |0 # Private Use
+<U4AD1> \x90\xF5 |0 # CJK Ideograph Extension A
+<U9834> \x90\xF6 |0 # CJK Ideograph
+<U9833> \x90\xF7 |0 # CJK Ideograph
+<U984B> \x90\xF8 |0 # CJK Ideograph
+<U9866> \x90\xF9 |0 # CJK Ideograph
+<U3B0E> \x90\xFA |0 # CJK Ideograph Extension A
+<UE4E4> \x90\xFB |0 # Private Use
+<U3D51> \x90\xFC |0 # CJK Ideograph Extension A
+<UE4E6> \x90\xFD |0 # Private Use
+<UE4E7> \x90\xFE |0 # Private Use
+<UE4E8> \x91\x40 |0 # Private Use
+<U98CA> \x91\x41 |0 # CJK Ideograph
+<U98B7> \x91\x42 |0 # CJK Ideograph
+<U98C8> \x91\x43 |0 # CJK Ideograph
+<U98C7> \x91\x44 |0 # CJK Ideograph
+<U4AFF> \x91\x45 |0 # CJK Ideograph Extension A
+<UE4EE> \x91\x46 |0 # Private Use
+<UE4EF> \x91\x47 |0 # Private Use
+<U55B0> \x91\x48 |0 # CJK Ideograph
+<U98E1> \x91\x49 |0 # CJK Ideograph
+<U98E6> \x91\x4A |0 # CJK Ideograph
+<U98EC> \x91\x4B |0 # CJK Ideograph
+<U9378> \x91\x4C |0 # CJK Ideograph
+<U9939> \x91\x4D |0 # CJK Ideograph
+<UE4F6> \x91\x4E |0 # Private Use
+<U4B72> \x91\x4F |0 # CJK Ideograph Extension A
+<UE4F8> \x91\x50 |0 # Private Use
+<UE4F9> \x91\x51 |0 # Private Use
+<U99F5> \x91\x52 |0 # CJK Ideograph
+<U9A0C> \x91\x53 |0 # CJK Ideograph
+<U9A3B> \x91\x54 |0 # CJK Ideograph
+<U9A10> \x91\x55 |0 # CJK Ideograph
+<U9A58> \x91\x56 |0 # CJK Ideograph
+<UE4FF> \x91\x57 |0 # Private Use
+<U36C4> \x91\x58 |0 # CJK Ideograph Extension A
+<UE501> \x91\x59 |0 # Private Use
+<UE502> \x91\x5A |0 # Private Use
+<U9AE0> \x91\x5B |0 # CJK Ideograph
+<U9AE2> \x91\x5C |0 # CJK Ideograph
+<UE505> \x91\x5D |0 # Private Use
+<U9AF4> \x91\x5E |0 # CJK Ideograph
+<U4C0E> \x91\x5F |0 # CJK Ideograph Extension A
+<U9B14> \x91\x60 |0 # CJK Ideograph
+<U9B2D> \x91\x61 |0 # CJK Ideograph
+<UE50A> \x91\x62 |0 # Private Use
+<U5034> \x91\x63 |0 # CJK Ideograph
+<U9B34> \x91\x64 |0 # CJK Ideograph
+<UE50D> \x91\x65 |0 # Private Use
+<U38C3> \x91\x66 |0 # CJK Ideograph Extension A
+<UE50F> \x91\x67 |0 # Private Use
+<U9B50> \x91\x68 |0 # CJK Ideograph
+<U9B40> \x91\x69 |0 # CJK Ideograph
+<UE512> \x91\x6A |0 # Private Use
+<U5A45> \x91\x6B |0 # CJK Ideograph
+<UE514> \x91\x6C |0 # Private Use
+<U9B8E> \x91\x6D |0 # CJK Ideograph
+<UE516> \x91\x6E |0 # Private Use
+<U9C02> \x91\x6F |0 # CJK Ideograph
+<U9BFF> \x91\x70 |0 # CJK Ideograph
+<U9C0C> \x91\x71 |0 # CJK Ideograph
+<UE51A> \x91\x72 |0 # Private Use
+<U9DD4> \x91\x73 |0 # CJK Ideograph
+<UE51C> \x91\x74 |0 # Private Use
+<UE51D> \x91\x75 |0 # Private Use
+<UE51E> \x91\x76 |0 # Private Use
+<UE51F> \x91\x77 |0 # Private Use
+<UE520> \x91\x78 |0 # Private Use
+<UE521> \x91\x79 |0 # Private Use
+<U9D7E> \x91\x7A |0 # CJK Ideograph
+<U9D83> \x91\x7B |0 # CJK Ideograph
+<UE524> \x91\x7C |0 # Private Use
+<U9E0E> \x91\x7D |0 # CJK Ideograph
+<U6888> \x91\x7E |0 # CJK Ideograph
+<U9DC4> \x91\xA1 |0 # CJK Ideograph
+<UE528> \x91\xA2 |0 # Private Use
+<UE529> \x91\xA3 |0 # Private Use
+<UE52A> \x91\xA4 |0 # Private Use
+<UE52B> \x91\xA5 |0 # Private Use
+<UE52C> \x91\xA6 |0 # Private Use
+<U9D39> \x91\xA7 |0 # CJK Ideograph
+<UE52E> \x91\xA8 |0 # Private Use
+<UE52F> \x91\xA9 |0 # Private Use
+<U9E90> \x91\xAA |0 # CJK Ideograph
+<U9E95> \x91\xAB |0 # CJK Ideograph
+<U9E9E> \x91\xAC |0 # CJK Ideograph
+<U9EA2> \x91\xAD |0 # CJK Ideograph
+<U4D34> \x91\xAE |0 # CJK Ideograph Extension A
+<U9EAA> \x91\xAF |0 # CJK Ideograph
+<U9EAF> \x91\xB0 |0 # CJK Ideograph
+<UE537> \x91\xB1 |0 # Private Use
+<U9EC1> \x91\xB2 |0 # CJK Ideograph
+<U3B60> \x91\xB3 |0 # CJK Ideograph Extension A
+<U39E5> \x91\xB4 |0 # CJK Ideograph Extension A
+<U3D1D> \x91\xB5 |0 # CJK Ideograph Extension A
+<U4F32> \x91\xB6 |0 # CJK Ideograph
+<U37BE> \x91\xB7 |0 # CJK Ideograph Extension A
+<UE53E> \x91\xB8 |0 # Private Use
+<U9F02> \x91\xB9 |0 # CJK Ideograph
+<U9F08> \x91\xBA |0 # CJK Ideograph
+<U4B96> \x91\xBB |0 # CJK Ideograph Extension A
+<U9424> \x91\xBC |0 # CJK Ideograph
+<UE543> \x91\xBD |0 # Private Use
+<U9F17> \x91\xBE |0 # CJK Ideograph
+<U9F39> \x91\xC0 |0 # CJK Ideograph
+<U569F> \x91\xC1 |0 # CJK Ideograph
+<U568A> \x91\xC2 |0 # CJK Ideograph
+<U9F45> \x91\xC3 |0 # CJK Ideograph
+<U99B8> \x91\xC4 |0 # CJK Ideograph
+<UE54B> \x91\xC5 |0 # Private Use
+<U97F2> \x91\xC6 |0 # CJK Ideograph
+<U847F> \x91\xC7 |0 # CJK Ideograph
+<U9F62> \x91\xC8 |0 # CJK Ideograph
+<U9F69> \x91\xC9 |0 # CJK Ideograph
+<U7ADC> \x91\xCA |0 # CJK Ideograph
+<U9F8E> \x91\xCB |0 # CJK Ideograph
+<U7216> \x91\xCC |0 # CJK Ideograph
+<U4BBE> \x91\xCD |0 # CJK Ideograph Extension A
+<UE554> \x91\xCE |0 # Private Use
+<UE555> \x91\xCF |0 # Private Use
+<U7177> \x91\xD0 |0 # CJK Ideograph
+<UE557> \x91\xD1 |0 # Private Use
+<UE558> \x91\xD2 |0 # Private Use
+<UE559> \x91\xD3 |0 # Private Use
+<U739E> \x91\xD4 |0 # CJK Ideograph
+<UE55B> \x91\xD5 |0 # Private Use
+<UE55C> \x91\xD6 |0 # Private Use
+<U799F> \x91\xD7 |0 # CJK Ideograph
+<UE55E> \x91\xD8 |0 # Private Use
+<UE55F> \x91\xD9 |0 # Private Use
+<U9369> \x91\xDA |0 # CJK Ideograph
+<U93F3> \x91\xDB |0 # CJK Ideograph
+<UE562> \x91\xDC |0 # Private Use
+<U92EC> \x91\xDD |0 # CJK Ideograph
+<U9381> \x91\xDE |0 # CJK Ideograph
+<U93CB> \x91\xDF |0 # CJK Ideograph
+<UE566> \x91\xE0 |0 # Private Use
+<UE567> \x91\xE1 |0 # Private Use
+<U7217> \x91\xE2 |0 # CJK Ideograph
+<U3EEB> \x91\xE3 |0 # CJK Ideograph Extension A
+<U7772> \x91\xE4 |0 # CJK Ideograph
+<U7A43> \x91\xE5 |0 # CJK Ideograph
+<U70D0> \x91\xE6 |0 # CJK Ideograph
+<UE56D> \x91\xE7 |0 # Private Use
+<UE56E> \x91\xE8 |0 # Private Use
+<U717E> \x91\xE9 |0 # CJK Ideograph
+<UE570> \x91\xEA |0 # Private Use
+<U70A3> \x91\xEB |0 # CJK Ideograph
+<UE572> \x91\xEC |0 # Private Use
+<UE573> \x91\xED |0 # Private Use
+<U3EC7> \x91\xEE |0 # CJK Ideograph Extension A
+<UE575> \x91\xEF |0 # Private Use
+<UE576> \x91\xF0 |0 # Private Use
+<UE577> \x91\xF1 |0 # Private Use
+<U3722> \x91\xF2 |0 # CJK Ideograph Extension A
+<UE579> \x91\xF3 |0 # Private Use
+<UE57A> \x91\xF4 |0 # Private Use
+<U36E1> \x91\xF5 |0 # CJK Ideograph Extension A
+<UE57C> \x91\xF6 |0 # Private Use
+<UE57D> \x91\xF7 |0 # Private Use
+<UE57E> \x91\xF8 |0 # Private Use
+<U3723> \x91\xF9 |0 # CJK Ideograph Extension A
+<UE580> \x91\xFA |0 # Private Use
+<U575B> \x91\xFB |0 # CJK Ideograph
+<UE582> \x91\xFC |0 # Private Use
+<UE583> \x91\xFD |0 # Private Use
+<UE584> \x91\xFE |0 # Private Use
+<UE585> \x92\x40 |0 # Private Use
+<UE586> \x92\x41 |0 # Private Use
+<U8503> \x92\x42 |0 # CJK Ideograph
+<UE588> \x92\x43 |0 # Private Use
+<U8455> \x92\x45 |0 # CJK Ideograph
+<UE58B> \x92\x46 |0 # Private Use
+<UE58C> \x92\x47 |0 # Private Use
+<UE58D> \x92\x48 |0 # Private Use
+<UE58E> \x92\x49 |0 # Private Use
+<UE58F> \x92\x4A |0 # Private Use
+<UE590> \x92\x4B |0 # Private Use
+<U44F4> \x92\x4C |0 # CJK Ideograph Extension A
+<UE592> \x92\x4D |0 # Private Use
+<UE593> \x92\x4E |0 # Private Use
+<UE594> \x92\x4F |0 # Private Use
+<U67F9> \x92\x50 |0 # CJK Ideograph
+<U3733> \x92\x51 |0 # CJK Ideograph Extension A
+<U3C15> \x92\x52 |0 # CJK Ideograph Extension A
+<U3DE7> \x92\x53 |0 # CJK Ideograph Extension A
+<U586C> \x92\x54 |0 # CJK Ideograph
+<UE59A> \x92\x55 |0 # Private Use
+<U6810> \x92\x56 |0 # CJK Ideograph
+<U4057> \x92\x57 |0 # CJK Ideograph Extension A
+<UE59D> \x92\x58 |0 # Private Use
+<UE59E> \x92\x59 |0 # Private Use
+<UE59F> \x92\x5A |0 # Private Use
+<UE5A0> \x92\x5B |0 # Private Use
+<UE5A1> \x92\x5C |0 # Private Use
+<U54CB> \x92\x5D |0 # CJK Ideograph
+<U569E> \x92\x5E |0 # CJK Ideograph
+<UE5A4> \x92\x5F |0 # Private Use
+<U5692> \x92\x60 |0 # CJK Ideograph
+<UE5A6> \x92\x61 |0 # Private Use
+<UE5A7> \x92\x62 |0 # Private Use
+<UE5A8> \x92\x63 |0 # Private Use
+<U93C6> \x92\x64 |0 # CJK Ideograph
+<UE5AA> \x92\x65 |0 # Private Use
+<U939C> \x92\x66 |0 # CJK Ideograph
+<U4EF8> \x92\x67 |0 # CJK Ideograph
+<U512B> \x92\x68 |0 # CJK Ideograph
+<U3819> \x92\x69 |0 # CJK Ideograph Extension A
+<UE5AF> \x92\x6A |0 # Private Use
+<U4EBC> \x92\x6B |0 # CJK Ideograph
+<UE5B1> \x92\x6C |0 # Private Use
+<UE5B2> \x92\x6D |0 # Private Use
+<U4F4B> \x92\x6E |0 # CJK Ideograph
+<U4F8A> \x92\x6F |0 # CJK Ideograph
+<UE5B5> \x92\x70 |0 # Private Use
+<U5A68> \x92\x71 |0 # CJK Ideograph
+<UE5B7> \x92\x72 |0 # Private Use
+<UE5B8> \x92\x73 |0 # Private Use
+<U3999> \x92\x74 |0 # CJK Ideograph Extension A
+<UE5BA> \x92\x75 |0 # Private Use
+<UE5BB> \x92\x76 |0 # Private Use
+<U3435> \x92\x77 |0 # CJK Ideograph Extension A
+<U4F29> \x92\x78 |0 # CJK Ideograph
+<UE5BE> \x92\x79 |0 # Private Use
+<UE5BF> \x92\x7A |0 # Private Use
+<UE5C0> \x92\x7B |0 # Private Use
+<U8ADA> \x92\x7C |0 # CJK Ideograph
+<UE5C2> \x92\x7D |0 # Private Use
+<U4E98> \x92\x7E |0 # CJK Ideograph
+<U50CD> \x92\xA1 |0 # CJK Ideograph
+<U510D> \x92\xA2 |0 # CJK Ideograph
+<U4FA2> \x92\xA3 |0 # CJK Ideograph
+<U4F03> \x92\xA4 |0 # CJK Ideograph
+<UE5C8> \x92\xA5 |0 # Private Use
+<UE5C9> \x92\xA6 |0 # Private Use
+<U4F42> \x92\xA7 |0 # CJK Ideograph
+<U502E> \x92\xA8 |0 # CJK Ideograph
+<U506C> \x92\xA9 |0 # CJK Ideograph
+<U5081> \x92\xAA |0 # CJK Ideograph
+<U4FCC> \x92\xAB |0 # CJK Ideograph
+<U4FE5> \x92\xAC |0 # CJK Ideograph
+<U5058> \x92\xAD |0 # CJK Ideograph
+<U50FC> \x92\xAE |0 # CJK Ideograph
+<U6E76> \x92\xB3 |0 # CJK Ideograph
+<UE5D7> \x92\xB4 |0 # Private Use
+<UE5D8> \x92\xB5 |0 # Private Use
+<UE5D9> \x92\xB6 |0 # Private Use
+<U6D72> \x92\xB7 |0 # CJK Ideograph
+<UE5DB> \x92\xB8 |0 # Private Use
+<UE5DC> \x92\xB9 |0 # Private Use
+<U51A8> \x92\xBA |0 # CJK Ideograph
+<U51C3> \x92\xBB |0 # CJK Ideograph
+<UE5DF> \x92\xBC |0 # Private Use
+<U44DD> \x92\xBD |0 # CJK Ideograph Extension A
+<UE5E1> \x92\xBE |0 # Private Use
+<UE5E2> \x92\xBF |0 # Private Use
+<UE5E3> \x92\xC0 |0 # Private Use
+<U8D7A> \x92\xC1 |0 # CJK Ideograph
+<UE5E5> \x92\xC2 |0 # Private Use
+<UE5E6> \x92\xC3 |0 # Private Use
+<U5259> \x92\xC4 |0 # CJK Ideograph
+<U52A4> \x92\xC5 |0 # CJK Ideograph
+<UE5E9> \x92\xC6 |0 # Private Use
+<U52E1> \x92\xC7 |0 # CJK Ideograph
+<U467A> \x92\xC9 |0 # CJK Ideograph Extension A
+<U718C> \x92\xCA |0 # CJK Ideograph
+<UE5EE> \x92\xCB |0 # Private Use
+<UE5EF> \x92\xCC |0 # Private Use
+<UE5F0> \x92\xCD |0 # Private Use
+<UE5F1> \x92\xCE |0 # Private Use
+<U69D1> \x92\xCF |0 # CJK Ideograph
+<UE5F3> \x92\xD0 |0 # Private Use
+<U3EDE> \x92\xD2 |0 # CJK Ideograph Extension A
+<U7499> \x92\xD3 |0 # CJK Ideograph
+<U7414> \x92\xD4 |0 # CJK Ideograph
+<U7456> \x92\xD5 |0 # CJK Ideograph
+<U7398> \x92\xD6 |0 # CJK Ideograph
+<U4B8E> \x92\xD7 |0 # CJK Ideograph Extension A
+<UE5FB> \x92\xD8 |0 # Private Use
+<UE5FC> \x92\xD9 |0 # Private Use
+<U53D0> \x92\xDA |0 # CJK Ideograph
+<U3584> \x92\xDB |0 # CJK Ideograph Extension A
+<U720F> \x92\xDC |0 # CJK Ideograph
+<UE600> \x92\xDD |0 # Private Use
+<U55B4> \x92\xDE |0 # CJK Ideograph
+<UE602> \x92\xDF |0 # Private Use
+<U54CD> \x92\xE0 |0 # CJK Ideograph
+<UE604> \x92\xE1 |0 # Private Use
+<U571D> \x92\xE2 |0 # CJK Ideograph
+<U925D> \x92\xE3 |0 # CJK Ideograph
+<U96F4> \x92\xE4 |0 # CJK Ideograph
+<U9366> \x92\xE5 |0 # CJK Ideograph
+<U57DD> \x92\xE6 |0 # CJK Ideograph
+<U578D> \x92\xE7 |0 # CJK Ideograph
+<U577F> \x92\xE8 |0 # CJK Ideograph
+<U363E> \x92\xE9 |0 # CJK Ideograph Extension A
+<U58CB> \x92\xEA |0 # CJK Ideograph
+<U5A99> \x92\xEB |0 # CJK Ideograph
+<UE60F> \x92\xEC |0 # Private Use
+<UE610> \x92\xED |0 # Private Use
+<UE611> \x92\xEE |0 # Private Use
+<UE612> \x92\xEF |0 # Private Use
+<U5A2C> \x92\xF0 |0 # CJK Ideograph
+<U59B8> \x92\xF1 |0 # CJK Ideograph
+<U928F> \x92\xF2 |0 # CJK Ideograph
+<U5A7E> \x92\xF3 |0 # CJK Ideograph
+<U5ACF> \x92\xF4 |0 # CJK Ideograph
+<U5A12> \x92\xF5 |0 # CJK Ideograph
+<UE619> \x92\xF6 |0 # Private Use
+<UE61A> \x92\xF7 |0 # Private Use
+<UE61B> \x92\xF8 |0 # Private Use
+<UE61C> \x92\xF9 |0 # Private Use
+<U36F5> \x92\xFA |0 # CJK Ideograph Extension A
+<U6D05> \x92\xFB |0 # CJK Ideograph
+<U7443> \x92\xFC |0 # CJK Ideograph
+<U5A21> \x92\xFD |0 # CJK Ideograph
+<UE621> \x92\xFE |0 # Private Use
+<U5A81> \x93\x40 |0 # CJK Ideograph
+<UE623> \x93\x41 |0 # Private Use
+<UE624> \x93\x42 |0 # Private Use
+<U93E0> \x93\x43 |0 # CJK Ideograph
+<U748C> \x93\x44 |0 # CJK Ideograph
+<UE627> \x93\x45 |0 # Private Use
+<U7105> \x93\x46 |0 # CJK Ideograph
+<U4972> \x93\x47 |0 # CJK Ideograph Extension A
+<U9408> \x93\x48 |0 # CJK Ideograph
+<UE62B> \x93\x49 |0 # Private Use
+<U93BD> \x93\x4A |0 # CJK Ideograph
+<U37A0> \x93\x4B |0 # CJK Ideograph Extension A
+<U5C1E> \x93\x4C |0 # CJK Ideograph
+<U5C9E> \x93\x4D |0 # CJK Ideograph
+<U5E5E> \x93\x4E |0 # CJK Ideograph
+<U5E48> \x93\x4F |0 # CJK Ideograph
+<UE632> \x93\x50 |0 # Private Use
+<UE633> \x93\x51 |0 # Private Use
+<UE634> \x93\x52 |0 # Private Use
+<U5ECD> \x93\x53 |0 # CJK Ideograph
+<U5B4F> \x93\x54 |0 # CJK Ideograph
+<UE637> \x93\x55 |0 # Private Use
+<UE638> \x93\x56 |0 # Private Use
+<U3701> \x93\x57 |0 # CJK Ideograph Extension A
+<UE63A> \x93\x58 |0 # Private Use
+<U36DD> \x93\x59 |0 # CJK Ideograph Extension A
+<UE63C> \x93\x5A |0 # Private Use
+<U36D3> \x93\x5B |0 # CJK Ideograph Extension A
+<U812A> \x93\x5C |0 # CJK Ideograph
+<UE63F> \x93\x5D |0 # Private Use
+<UE640> \x93\x5E |0 # Private Use
+<UE641> \x93\x5F |0 # Private Use
+<UE642> \x93\x60 |0 # Private Use
+<U5F0C> \x93\x61 |0 # CJK Ideograph
+<U5F0E> \x93\x62 |0 # CJK Ideograph
+<UE645> \x93\x63 |0 # Private Use
+<UE646> \x93\x64 |0 # Private Use
+<U5A6B> \x93\x65 |0 # CJK Ideograph
+<UE648> \x93\x66 |0 # Private Use
+<U5B44> \x93\x67 |0 # CJK Ideograph
+<U8614> \x93\x68 |0 # CJK Ideograph
+<UE64B> \x93\x69 |0 # Private Use
+<U8860> \x93\x6A |0 # CJK Ideograph
+<U607E> \x93\x6B |0 # CJK Ideograph
+<UE64E> \x93\x6C |0 # Private Use
+<UE64F> \x93\x6D |0 # Private Use
+<U5FDB> \x93\x6E |0 # CJK Ideograph
+<U3EB8> \x93\x6F |0 # CJK Ideograph Extension A
+<UE652> \x93\x70 |0 # Private Use
+<UE653> \x93\x71 |0 # Private Use
+<UE654> \x93\x72 |0 # Private Use
+<UE655> \x93\x73 |0 # Private Use
+<U61C0> \x93\x74 |0 # CJK Ideograph
+<UE657> \x93\x75 |0 # Private Use
+<UE658> \x93\x76 |0 # Private Use
+<UE659> \x93\x77 |0 # Private Use
+<U6199> \x93\x78 |0 # CJK Ideograph
+<U6198> \x93\x79 |0 # CJK Ideograph
+<U6075> \x93\x7A |0 # CJK Ideograph
+<UE65D> \x93\x7B |0 # Private Use
+<UE65E> \x93\x7C |0 # Private Use
+<UE65F> \x93\x7D |0 # Private Use
+<UE660> \x93\x7E |0 # Private Use
+<U6471> \x93\xA1 |0 # CJK Ideograph
+<UE662> \x93\xA2 |0 # Private Use
+<UE663> \x93\xA3 |0 # Private Use
+<U3A29> \x93\xA4 |0 # CJK Ideograph Extension A
+<UE665> \x93\xA5 |0 # Private Use
+<UE666> \x93\xA6 |0 # Private Use
+<UE667> \x93\xA7 |0 # Private Use
+<UE668> \x93\xA8 |0 # Private Use
+<U6337> \x93\xA9 |0 # CJK Ideograph
+<UE66A> \x93\xAA |0 # Private Use
+<U64B6> \x93\xAB |0 # CJK Ideograph
+<U6331> \x93\xAC |0 # CJK Ideograph
+<U63D1> \x93\xAD |0 # CJK Ideograph
+<UE66E> \x93\xAE |0 # Private Use
+<UE66F> \x93\xAF |0 # Private Use
+<U62A4> \x93\xB0 |0 # CJK Ideograph
+<UE671> \x93\xB1 |0 # Private Use
+<U643B> \x93\xB2 |0 # CJK Ideograph
+<U656B> \x93\xB3 |0 # CJK Ideograph
+<U6972> \x93\xB4 |0 # CJK Ideograph
+<U3BF4> \x93\xB5 |0 # CJK Ideograph Extension A
+<UE676> \x93\xB6 |0 # Private Use
+<UE677> \x93\xB7 |0 # Private Use
+<UE678> \x93\xB8 |0 # Private Use
+<UE679> \x93\xB9 |0 # Private Use
+<U550D> \x93\xBA |0 # CJK Ideograph
+<UE67B> \x93\xBB |0 # Private Use
+<UE67C> \x93\xBC |0 # Private Use
+<UE67D> \x93\xBD |0 # Private Use
+<U66CE> \x93\xBE |0 # CJK Ideograph
+<UE67F> \x93\xBF |0 # Private Use
+<UE680> \x93\xC0 |0 # Private Use
+<U3AE0> \x93\xC1 |0 # CJK Ideograph Extension A
+<U4190> \x93\xC2 |0 # CJK Ideograph Extension A
+<UE683> \x93\xC3 |0 # Private Use
+<UE684> \x93\xC4 |0 # Private Use
+<UE685> \x93\xC5 |0 # Private Use
+<UE686> \x93\xC6 |0 # Private Use
+<UE687> \x93\xC7 |0 # Private Use
+<UE688> \x93\xC8 |0 # Private Use
+<U78EE> \x93\xC9 |0 # CJK Ideograph
+<UE68A> \x93\xCA |0 # Private Use
+<UE68B> \x93\xCB |0 # Private Use
+<UE68C> \x93\xCC |0 # Private Use
+<U3464> \x93\xCD |0 # CJK Ideograph Extension A
+<UE68E> \x93\xCE |0 # Private Use
+<UE68F> \x93\xCF |0 # Private Use
+<UE690> \x93\xD0 |0 # Private Use
+<U668E> \x93\xD1 |0 # CJK Ideograph
+<UE692> \x93\xD2 |0 # Private Use
+<U666B> \x93\xD3 |0 # CJK Ideograph
+<U4B93> \x93\xD4 |0 # CJK Ideograph Extension A
+<U6630> \x93\xD5 |0 # CJK Ideograph
+<UE696> \x93\xD6 |0 # Private Use
+<UE697> \x93\xD7 |0 # Private Use
+<U6663> \x93\xD8 |0 # CJK Ideograph
+<UE699> \x93\xD9 |0 # Private Use
+<UE69A> \x93\xDA |0 # Private Use
+<U661E> \x93\xDB |0 # CJK Ideograph
+<UE69C> \x93\xDC |0 # Private Use
+<U38D1> \x93\xDD |0 # CJK Ideograph Extension A
+<UE69E> \x93\xDE |0 # Private Use
+<UE69F> \x93\xDF |0 # Private Use
+<U3B99> \x93\xE0 |0 # CJK Ideograph Extension A
+<UE6A1> \x93\xE1 |0 # Private Use
+<UE6A2> \x93\xE2 |0 # Private Use
+<U74D0> \x93\xE3 |0 # CJK Ideograph
+<U3B96> \x93\xE4 |0 # CJK Ideograph Extension A
+<U678F> \x93\xE5 |0 # CJK Ideograph
+<UE6A6> \x93\xE6 |0 # Private Use
+<U68B6> \x93\xE7 |0 # CJK Ideograph
+<U681E> \x93\xE8 |0 # CJK Ideograph
+<U3BC4> \x93\xE9 |0 # CJK Ideograph Extension A
+<U6ABE> \x93\xEA |0 # CJK Ideograph
+<U3863> \x93\xEB |0 # CJK Ideograph Extension A
+<UE6AC> \x93\xEC |0 # Private Use
+<UE6AD> \x93\xED |0 # Private Use
+<U6A33> \x93\xEE |0 # CJK Ideograph
+<U6A52> \x93\xEF |0 # CJK Ideograph
+<U6AC9> \x93\xF0 |0 # CJK Ideograph
+<U6B05> \x93\xF1 |0 # CJK Ideograph
+<UE6B2> \x93\xF2 |0 # Private Use
+<U6511> \x93\xF3 |0 # CJK Ideograph
+<U6898> \x93\xF4 |0 # CJK Ideograph
+<U6A4C> \x93\xF5 |0 # CJK Ideograph
+<U3BD7> \x93\xF6 |0 # CJK Ideograph Extension A
+<U6A7A> \x93\xF7 |0 # CJK Ideograph
+<U6B57> \x93\xF8 |0 # CJK Ideograph
+<UE6B9> \x93\xF9 |0 # Private Use
+<UE6BA> \x93\xFA |0 # Private Use
+<U93A0> \x93\xFB |0 # CJK Ideograph
+<U92F2> \x93\xFC |0 # CJK Ideograph
+<UE6BD> \x93\xFD |0 # Private Use
+<UE6BE> \x93\xFE |0 # Private Use
+<U9289> \x94\x40 |0 # CJK Ideograph
+<UE6C0> \x94\x41 |0 # Private Use
+<UE6C1> \x94\x42 |0 # Private Use
+<U9467> \x94\x43 |0 # CJK Ideograph
+<U6DA5> \x94\x44 |0 # CJK Ideograph
+<U6F0B> \x94\x45 |0 # CJK Ideograph
+<UE6C5> \x94\x46 |0 # Private Use
+<UE6C7> \x94\x48 |0 # Private Use
+<U3D8F> \x94\x49 |0 # CJK Ideograph Extension A
+<U6E04> \x94\x4A |0 # CJK Ideograph
+<UE6CA> \x94\x4B |0 # Private Use
+<U5A3D> \x94\x4C |0 # CJK Ideograph
+<U6E0A> \x94\x4D |0 # CJK Ideograph
+<U5847> \x94\x4E |0 # CJK Ideograph
+<U6D24> \x94\x4F |0 # CJK Ideograph
+<U7842> \x94\x50 |0 # CJK Ideograph
+<U713B> \x94\x51 |0 # CJK Ideograph
+<UE6D1> \x94\x52 |0 # Private Use
+<UE6D2> \x94\x53 |0 # Private Use
+<U70F1> \x94\x54 |0 # CJK Ideograph
+<U7250> \x94\x55 |0 # CJK Ideograph
+<U7287> \x94\x56 |0 # CJK Ideograph
+<U7294> \x94\x57 |0 # CJK Ideograph
+<UE6D7> \x94\x58 |0 # Private Use
+<UE6D8> \x94\x59 |0 # Private Use
+<U5179> \x94\x5A |0 # CJK Ideograph
+<UE6DA> \x94\x5B |0 # Private Use
+<UE6DB> \x94\x5C |0 # Private Use
+<U747A> \x94\x5D |0 # CJK Ideograph
+<UE6DD> \x94\x5E |0 # Private Use
+<UE6DE> \x94\x5F |0 # Private Use
+<UE6DF> \x94\x60 |0 # Private Use
+<UE6E0> \x94\x61 |0 # Private Use
+<UE6E1> \x94\x62 |0 # Private Use
+<U3F06> \x94\x63 |0 # CJK Ideograph Extension A
+<U3EB1> \x94\x64 |0 # CJK Ideograph Extension A
+<UE6E4> \x94\x65 |0 # Private Use
+<UE6E5> \x94\x66 |0 # Private Use
+<UE6E6> \x94\x67 |0 # Private Use
+<U60A7> \x94\x68 |0 # CJK Ideograph
+<U3EF3> \x94\x69 |0 # CJK Ideograph Extension A
+<U74CC> \x94\x6A |0 # CJK Ideograph
+<U743C> \x94\x6B |0 # CJK Ideograph
+<U9387> \x94\x6C |0 # CJK Ideograph
+<U7437> \x94\x6D |0 # CJK Ideograph
+<U449F> \x94\x6E |0 # CJK Ideograph Extension A
+<UE6EE> \x94\x6F |0 # Private Use
+<U4551> \x94\x70 |0 # CJK Ideograph Extension A
+<U7583> \x94\x71 |0 # CJK Ideograph
+<U3F63> \x94\x72 |0 # CJK Ideograph Extension A
+<UE6F2> \x94\x73 |0 # Private Use
+<UE6F3> \x94\x74 |0 # Private Use
+<U3F58> \x94\x75 |0 # CJK Ideograph Extension A
+<U7555> \x94\x76 |0 # CJK Ideograph
+<U7673> \x94\x77 |0 # CJK Ideograph
+<UE6F7> \x94\x78 |0 # Private Use
+<U3B19> \x94\x79 |0 # CJK Ideograph Extension A
+<U7468> \x94\x7A |0 # CJK Ideograph
+<UE6FA> \x94\x7B |0 # Private Use
+<UE6FB> \x94\x7C |0 # Private Use
+<UE6FC> \x94\x7D |0 # Private Use
+<U3AFB> \x94\x7E |0 # CJK Ideograph Extension A
+<U3DCD> \x94\xA1 |0 # CJK Ideograph Extension A
+<UE6FF> \x94\xA2 |0 # Private Use
+<U3EFF> \x94\xA3 |0 # CJK Ideograph Extension A
+<UE701> \x94\xA4 |0 # Private Use
+<UE702> \x94\xA5 |0 # Private Use
+<U91FA> \x94\xA6 |0 # CJK Ideograph
+<U5732> \x94\xA7 |0 # CJK Ideograph
+<U9342> \x94\xA8 |0 # CJK Ideograph
+<UE706> \x94\xA9 |0 # Private Use
+<UE707> \x94\xAA |0 # Private Use
+<U50DF> \x94\xAB |0 # CJK Ideograph
+<UE709> \x94\xAC |0 # Private Use
+<UE70A> \x94\xAD |0 # Private Use
+<U7778> \x94\xAE |0 # CJK Ideograph
+<UE70C> \x94\xAF |0 # Private Use
+<U770E> \x94\xB0 |0 # CJK Ideograph
+<U770F> \x94\xB1 |0 # CJK Ideograph
+<U777B> \x94\xB2 |0 # CJK Ideograph
+<UE710> \x94\xB3 |0 # Private Use
+<UE711> \x94\xB4 |0 # Private Use
+<U3A5E> \x94\xB5 |0 # CJK Ideograph Extension A
+<UE713> \x94\xB6 |0 # Private Use
+<U7438> \x94\xB7 |0 # CJK Ideograph
+<U749B> \x94\xB8 |0 # CJK Ideograph
+<U3EBF> \x94\xB9 |0 # CJK Ideograph Extension A
+<UE717> \x94\xBA |0 # Private Use
+<UE718> \x94\xBB |0 # Private Use
+<U40C8> \x94\xBC |0 # CJK Ideograph Extension A
+<UE71A> \x94\xBD |0 # Private Use
+<UE71B> \x94\xBE |0 # Private Use
+<U9307> \x94\xBF |0 # CJK Ideograph
+<UE71D> \x94\xC0 |0 # Private Use
+<U781E> \x94\xC1 |0 # CJK Ideograph
+<U788D> \x94\xC2 |0 # CJK Ideograph
+<U7888> \x94\xC3 |0 # CJK Ideograph
+<U78D2> \x94\xC4 |0 # CJK Ideograph
+<U73D0> \x94\xC5 |0 # CJK Ideograph
+<U7959> \x94\xC6 |0 # CJK Ideograph
+<UE724> \x94\xC7 |0 # Private Use
+<UE725> \x94\xC8 |0 # Private Use
+<U410E> \x94\xC9 |0 # CJK Ideograph Extension A
+<U8496> \x94\xCB |0 # CJK Ideograph
+<U79A5> \x94\xCC |0 # CJK Ideograph
+<U6A2D> \x94\xCD |0 # CJK Ideograph
+<UE72B> \x94\xCE |0 # Private Use
+<U7A3A> \x94\xCF |0 # CJK Ideograph
+<U79F4> \x94\xD0 |0 # CJK Ideograph
+<U416E> \x94\xD1 |0 # CJK Ideograph Extension A
+<UE72F> \x94\xD2 |0 # Private Use
+<U4132> \x94\xD3 |0 # CJK Ideograph Extension A
+<U9235> \x94\xD4 |0 # CJK Ideograph
+<U79F1> \x94\xD5 |0 # CJK Ideograph
+<UE733> \x94\xD6 |0 # Private Use
+<UE734> \x94\xD7 |0 # Private Use
+<UE735> \x94\xD8 |0 # Private Use
+<UE736> \x94\xD9 |0 # Private Use
+<UE737> \x94\xDA |0 # Private Use
+<U3597> \x94\xDB |0 # CJK Ideograph Extension A
+<U556B> \x94\xDC |0 # CJK Ideograph
+<U3570> \x94\xDD |0 # CJK Ideograph Extension A
+<U36AA> \x94\xDE |0 # CJK Ideograph Extension A
+<UE73C> \x94\xDF |0 # Private Use
+<UE73D> \x94\xE0 |0 # Private Use
+<U7AE2> \x94\xE1 |0 # CJK Ideograph
+<U5A59> \x94\xE2 |0 # CJK Ideograph
+<UE740> \x94\xE3 |0 # Private Use
+<UE741> \x94\xE4 |0 # Private Use
+<UE742> \x94\xE5 |0 # Private Use
+<U5A0D> \x94\xE6 |0 # CJK Ideograph
+<UE744> \x94\xE7 |0 # Private Use
+<U78F0> \x94\xE8 |0 # CJK Ideograph
+<U5A2A> \x94\xE9 |0 # CJK Ideograph
+<UE747> \x94\xEA |0 # Private Use
+<U7AFE> \x94\xEB |0 # CJK Ideograph
+<U41F9> \x94\xEC |0 # CJK Ideograph Extension A
+<U7C5D> \x94\xED |0 # CJK Ideograph
+<U7C6D> \x94\xEE |0 # CJK Ideograph
+<U4211> \x94\xEF |0 # CJK Ideograph Extension A
+<UE74D> \x94\xF0 |0 # Private Use
+<UE74E> \x94\xF1 |0 # Private Use
+<UE74F> \x94\xF2 |0 # Private Use
+<U7CCD> \x94\xF3 |0 # CJK Ideograph
+<UE751> \x94\xF4 |0 # Private Use
+<UE752> \x94\xF5 |0 # Private Use
+<U7C8E> \x94\xF6 |0 # CJK Ideograph
+<U7C7C> \x94\xF7 |0 # CJK Ideograph
+<U7CAE> \x94\xF8 |0 # CJK Ideograph
+<U6AB2> \x94\xF9 |0 # CJK Ideograph
+<U7DDC> \x94\xFA |0 # CJK Ideograph
+<U7E07> \x94\xFB |0 # CJK Ideograph
+<U7DD3> \x94\xFC |0 # CJK Ideograph
+<U7F4E> \x94\xFD |0 # CJK Ideograph
+<UE75B> \x94\xFE |0 # Private Use
+<UE75C> \x95\x40 |0 # Private Use
+<UE75D> \x95\x41 |0 # Private Use
+<U7D97> \x95\x42 |0 # CJK Ideograph
+<UE75F> \x95\x43 |0 # Private Use
+<U426A> \x95\x44 |0 # CJK Ideograph Extension A
+<UE761> \x95\x45 |0 # Private Use
+<UE762> \x95\x46 |0 # Private Use
+<U67D6> \x95\x47 |0 # CJK Ideograph
+<UE764> \x95\x48 |0 # Private Use
+<UE765> \x95\x49 |0 # Private Use
+<U57C4> \x95\x4A |0 # CJK Ideograph
+<UE767> \x95\x4B |0 # Private Use
+<UE768> \x95\x4C |0 # Private Use
+<UE769> \x95\x4D |0 # Private Use
+<U7FDD> \x95\x4E |0 # CJK Ideograph
+<U7B27> \x95\x4F |0 # CJK Ideograph
+<UE76C> \x95\x50 |0 # Private Use
+<UE76D> \x95\x51 |0 # Private Use
+<UE76E> \x95\x52 |0 # Private Use
+<U7B0C> \x95\x53 |0 # CJK Ideograph
+<UE770> \x95\x54 |0 # Private Use
+<U99E6> \x95\x55 |0 # CJK Ideograph
+<U8645> \x95\x56 |0 # CJK Ideograph
+<U9A63> \x95\x57 |0 # CJK Ideograph
+<U6A1C> \x95\x58 |0 # CJK Ideograph
+<UE775> \x95\x59 |0 # Private Use
+<U39E2> \x95\x5A |0 # CJK Ideograph Extension A
+<UE777> \x95\x5B |0 # Private Use
+<UE778> \x95\x5C |0 # Private Use
+<U9A1F> \x95\x5D |0 # CJK Ideograph
+<UE77A> \x95\x5E |0 # Private Use
+<U8480> \x95\x5F |0 # CJK Ideograph
+<UE77C> \x95\x60 |0 # Private Use
+<UE77D> \x95\x61 |0 # Private Use
+<U44EA> \x95\x62 |0 # CJK Ideograph Extension A
+<U8137> \x95\x63 |0 # CJK Ideograph
+<U4402> \x95\x64 |0 # CJK Ideograph Extension A
+<U80C6> \x95\x65 |0 # CJK Ideograph
+<U8109> \x95\x66 |0 # CJK Ideograph
+<U8142> \x95\x67 |0 # CJK Ideograph
+<UE784> \x95\x68 |0 # Private Use
+<U98C3> \x95\x69 |0 # CJK Ideograph
+<UE786> \x95\x6A |0 # Private Use
+<U8262> \x95\x6B |0 # CJK Ideograph
+<U8265> \x95\x6C |0 # CJK Ideograph
+<UE789> \x95\x6D |0 # Private Use
+<U8453> \x95\x6E |0 # CJK Ideograph
+<UE78B> \x95\x6F |0 # Private Use
+<U8610> \x95\x70 |0 # CJK Ideograph
+<UE78D> \x95\x71 |0 # Private Use
+<U5A86> \x95\x72 |0 # CJK Ideograph
+<U417F> \x95\x73 |0 # CJK Ideograph Extension A
+<UE790> \x95\x74 |0 # Private Use
+<U5B2B> \x95\x75 |0 # CJK Ideograph
+<UE792> \x95\x76 |0 # Private Use
+<U5AE4> \x95\x77 |0 # CJK Ideograph
+<UE794> \x95\x78 |0 # Private Use
+<U86A0> \x95\x79 |0 # CJK Ideograph
+<UE796> \x95\x7A |0 # Private Use
+<UE797> \x95\x7B |0 # Private Use
+<U882D> \x95\x7C |0 # CJK Ideograph
+<UE799> \x95\x7D |0 # Private Use
+<U5A02> \x95\x7E |0 # CJK Ideograph
+<U886E> \x95\xA1 |0 # CJK Ideograph
+<U4F45> \x95\xA2 |0 # CJK Ideograph
+<U8887> \x95\xA3 |0 # CJK Ideograph
+<U88BF> \x95\xA4 |0 # CJK Ideograph
+<U88E6> \x95\xA5 |0 # CJK Ideograph
+<U8965> \x95\xA6 |0 # CJK Ideograph
+<U894D> \x95\xA7 |0 # CJK Ideograph
+<UE7A2> \x95\xA8 |0 # Private Use
+<U8954> \x95\xA9 |0 # CJK Ideograph
+<UE7A4> \x95\xAA |0 # Private Use
+<UE7A5> \x95\xAB |0 # Private Use
+<UE7A6> \x95\xAC |0 # Private Use
+<UE7A7> \x95\xAD |0 # Private Use
+<UE7A8> \x95\xAE |0 # Private Use
+<UE7A9> \x95\xAF |0 # Private Use
+<U3EAD> \x95\xB0 |0 # CJK Ideograph Extension A
+<U84A3> \x95\xB1 |0 # CJK Ideograph
+<U46F5> \x95\xB2 |0 # CJK Ideograph Extension A
+<U46CF> \x95\xB3 |0 # CJK Ideograph Extension A
+<U37F2> \x95\xB4 |0 # CJK Ideograph Extension A
+<U8A3D> \x95\xB5 |0 # CJK Ideograph
+<U8A1C> \x95\xB6 |0 # CJK Ideograph
+<UE7B1> \x95\xB7 |0 # Private Use
+<U5F4D> \x95\xB8 |0 # CJK Ideograph
+<U922B> \x95\xB9 |0 # CJK Ideograph
+<UE7B4> \x95\xBA |0 # Private Use
+<U65D4> \x95\xBB |0 # CJK Ideograph
+<U7129> \x95\xBC |0 # CJK Ideograph
+<U70C4> \x95\xBD |0 # CJK Ideograph
+<UE7B8> \x95\xBE |0 # Private Use
+<U9D6D> \x95\xBF |0 # CJK Ideograph
+<U8C9F> \x95\xC0 |0 # CJK Ideograph
+<U8CE9> \x95\xC1 |0 # CJK Ideograph
+<UE7BC> \x95\xC2 |0 # Private Use
+<U599A> \x95\xC3 |0 # CJK Ideograph
+<U77C3> \x95\xC4 |0 # CJK Ideograph
+<U59F0> \x95\xC5 |0 # CJK Ideograph
+<U436E> \x95\xC6 |0 # CJK Ideograph Extension A
+<U36D4> \x95\xC7 |0 # CJK Ideograph Extension A
+<U8E2A> \x95\xC8 |0 # CJK Ideograph
+<U8EA7> \x95\xC9 |0 # CJK Ideograph
+<UE7C4> \x95\xCA |0 # Private Use
+<U8F30> \x95\xCB |0 # CJK Ideograph
+<U8F4A> \x95\xCC |0 # CJK Ideograph
+<U42F4> \x95\xCD |0 # CJK Ideograph Extension A
+<U6C58> \x95\xCE |0 # CJK Ideograph
+<U6FBB> \x95\xCF |0 # CJK Ideograph
+<UE7CA> \x95\xD0 |0 # Private Use
+<U489B> \x95\xD1 |0 # CJK Ideograph Extension A
+<U6F79> \x95\xD2 |0 # CJK Ideograph
+<U6E8B> \x95\xD3 |0 # CJK Ideograph
+<UE7CE> \x95\xD4 |0 # Private Use
+<U9BE9> \x95\xD5 |0 # CJK Ideograph
+<U36B5> \x95\xD6 |0 # CJK Ideograph Extension A
+<UE7D1> \x95\xD7 |0 # Private Use
+<U90BB> \x95\xD8 |0 # CJK Ideograph
+<U5571> \x95\xDA |0 # CJK Ideograph
+<U4906> \x95\xDB |0 # CJK Ideograph Extension A
+<U91BB> \x95\xDC |0 # CJK Ideograph
+<U9404> \x95\xDD |0 # CJK Ideograph
+<UE7D8> \x95\xDE |0 # Private Use
+<U4062> \x95\xDF |0 # CJK Ideograph Extension A
+<UE7DA> \x95\xE0 |0 # Private Use
+<U9427> \x95\xE1 |0 # CJK Ideograph
+<UE7DC> \x95\xE2 |0 # Private Use
+<UE7DD> \x95\xE3 |0 # Private Use
+<U84E5> \x95\xE4 |0 # CJK Ideograph
+<U8A2B> \x95\xE5 |0 # CJK Ideograph
+<U9599> \x95\xE6 |0 # CJK Ideograph
+<U95A7> \x95\xE7 |0 # CJK Ideograph
+<U9597> \x95\xE8 |0 # CJK Ideograph
+<U9596> \x95\xE9 |0 # CJK Ideograph
+<UE7E4> \x95\xEA |0 # Private Use
+<U7445> \x95\xEB |0 # CJK Ideograph
+<U3EC2> \x95\xEC |0 # CJK Ideograph Extension A
+<UE7E7> \x95\xED |0 # Private Use
+<UE7E8> \x95\xEE |0 # Private Use
+<UE7E9> \x95\xEF |0 # Private Use
+<U3EE7> \x95\xF0 |0 # CJK Ideograph Extension A
+<UE7EB> \x95\xF1 |0 # Private Use
+<U968F> \x95\xF2 |0 # CJK Ideograph
+<UE7ED> \x95\xF3 |0 # Private Use
+<UE7EE> \x95\xF4 |0 # Private Use
+<UE7EF> \x95\xF5 |0 # Private Use
+<U3ECC> \x95\xF6 |0 # CJK Ideograph Extension A
+<UE7F1> \x95\xF7 |0 # Private Use
+<UE7F2> \x95\xF8 |0 # Private Use
+<UE7F3> \x95\xF9 |0 # Private Use
+<U7412> \x95\xFA |0 # CJK Ideograph
+<U746B> \x95\xFB |0 # CJK Ideograph
+<U3EFC> \x95\xFC |0 # CJK Ideograph Extension A
+<U9741> \x95\xFD |0 # CJK Ideograph
+<UE7F8> \x95\xFE |0 # Private Use
+<U6847> \x96\x40 |0 # CJK Ideograph
+<U4A1D> \x96\x41 |0 # CJK Ideograph Extension A
+<UE7FB> \x96\x42 |0 # Private Use
+<UE7FC> \x96\x43 |0 # Private Use
+<U9368> \x96\x45 |0 # CJK Ideograph
+<UE7FF> \x96\x46 |0 # Private Use
+<UE800> \x96\x47 |0 # Private Use
+<UE801> \x96\x48 |0 # Private Use
+<UE802> \x96\x49 |0 # Private Use
+<U92BA> \x96\x4A |0 # CJK Ideograph
+<U5B11> \x96\x4B |0 # CJK Ideograph
+<U8B69> \x96\x4C |0 # CJK Ideograph
+<U493C> \x96\x4D |0 # CJK Ideograph Extension A
+<U73F9> \x96\x4E |0 # CJK Ideograph
+<UE808> \x96\x4F |0 # Private Use
+<U979B> \x96\x50 |0 # CJK Ideograph
+<U9771> \x96\x51 |0 # CJK Ideograph
+<U9938> \x96\x52 |0 # CJK Ideograph
+<UE80C> \x96\x53 |0 # Private Use
+<U5DC1> \x96\x54 |0 # CJK Ideograph
+<UE80E> \x96\x55 |0 # Private Use
+<UE80F> \x96\x56 |0 # Private Use
+<U981F> \x96\x57 |0 # CJK Ideograph
+<UE811> \x96\x58 |0 # Private Use
+<U92F6> \x96\x59 |0 # CJK Ideograph
+<UE813> \x96\x5A |0 # Private Use
+<U91E5> \x96\x5B |0 # CJK Ideograph
+<U44C0> \x96\x5C |0 # CJK Ideograph Extension A
+<UE816> \x96\x5D |0 # Private Use
+<UE817> \x96\x5E |0 # Private Use
+<UE818> \x96\x5F |0 # Private Use
+<U98DC> \x96\x60 |0 # CJK Ideograph
+<UE81A> \x96\x61 |0 # Private Use
+<U3F00> \x96\x62 |0 # CJK Ideograph Extension A
+<U922A> \x96\x63 |0 # CJK Ideograph
+<U4925> \x96\x64 |0 # CJK Ideograph Extension A
+<U8414> \x96\x65 |0 # CJK Ideograph
+<U993B> \x96\x66 |0 # CJK Ideograph
+<U994D> \x96\x67 |0 # CJK Ideograph
+<UE821> \x96\x68 |0 # Private Use
+<U3DFD> \x96\x69 |0 # CJK Ideograph Extension A
+<U999B> \x96\x6A |0 # CJK Ideograph
+<U4B6F> \x96\x6B |0 # CJK Ideograph Extension A
+<U99AA> \x96\x6C |0 # CJK Ideograph
+<U9A5C> \x96\x6D |0 # CJK Ideograph
+<UE827> \x96\x6E |0 # Private Use
+<UE828> \x96\x6F |0 # Private Use
+<U6A8F> \x96\x70 |0 # CJK Ideograph
+<U9A21> \x96\x71 |0 # CJK Ideograph
+<U5AFE> \x96\x72 |0 # CJK Ideograph
+<U9A2F> \x96\x73 |0 # CJK Ideograph
+<UE82D> \x96\x74 |0 # Private Use
+<U4B90> \x96\x75 |0 # CJK Ideograph Extension A
+<UE82F> \x96\x76 |0 # Private Use
+<U99BC> \x96\x77 |0 # CJK Ideograph
+<U4BBD> \x96\x78 |0 # CJK Ideograph Extension A
+<U4B97> \x96\x79 |0 # CJK Ideograph Extension A
+<U937D> \x96\x7A |0 # CJK Ideograph
+<U5872> \x96\x7B |0 # CJK Ideograph
+<UE835> \x96\x7C |0 # Private Use
+<U5822> \x96\x7D |0 # CJK Ideograph
+<UE837> \x96\x7E |0 # Private Use
+<UE838> \x96\xA1 |0 # Private Use
+<U7844> \x96\xA2 |0 # CJK Ideograph
+<UE83A> \x96\xA3 |0 # Private Use
+<UE83B> \x96\xA4 |0 # Private Use
+<U68C5> \x96\xA5 |0 # CJK Ideograph
+<U3D7D> \x96\xA6 |0 # CJK Ideograph Extension A
+<U9458> \x96\xA7 |0 # CJK Ideograph
+<U3927> \x96\xA8 |0 # CJK Ideograph Extension A
+<U6150> \x96\xA9 |0 # CJK Ideograph
+<UE841> \x96\xAA |0 # Private Use
+<UE842> \x96\xAB |0 # Private Use
+<U6107> \x96\xAC |0 # CJK Ideograph
+<U9C4F> \x96\xAD |0 # CJK Ideograph
+<U9C53> \x96\xAE |0 # CJK Ideograph
+<U9C7B> \x96\xAF |0 # CJK Ideograph
+<U9C35> \x96\xB0 |0 # CJK Ideograph
+<U9C10> \x96\xB1 |0 # CJK Ideograph
+<U9B7F> \x96\xB2 |0 # CJK Ideograph
+<U9BCF> \x96\xB3 |0 # CJK Ideograph
+<UE84B> \x96\xB4 |0 # Private Use
+<U9B9F> \x96\xB5 |0 # CJK Ideograph
+<UE84D> \x96\xB6 |0 # Private Use
+<UE84E> \x96\xB7 |0 # Private Use
+<U9D21> \x96\xB8 |0 # CJK Ideograph
+<U4CAE> \x96\xB9 |0 # CJK Ideograph Extension A
+<UE851> \x96\xBA |0 # Private Use
+<U9E18> \x96\xBB |0 # CJK Ideograph
+<U4CB0> \x96\xBC |0 # CJK Ideograph Extension A
+<U9D0C> \x96\xBD |0 # CJK Ideograph
+<UE855> \x96\xBE |0 # Private Use
+<UE856> \x96\xBF |0 # Private Use
+<UE857> \x96\xC0 |0 # Private Use
+<UE858> \x96\xC1 |0 # Private Use
+<U9DA5> \x96\xC2 |0 # CJK Ideograph
+<U84BD> \x96\xC3 |0 # CJK Ideograph
+<UE85B> \x96\xC4 |0 # Private Use
+<UE85C> \x96\xC5 |0 # Private Use
+<UE85D> \x96\xC6 |0 # Private Use
+<U85FC> \x96\xC7 |0 # CJK Ideograph
+<U4533> \x96\xC8 |0 # CJK Ideograph Extension A
+<UE860> \x96\xC9 |0 # Private Use
+<UE861> \x96\xCA |0 # Private Use
+<UE862> \x96\xCB |0 # Private Use
+<U8420> \x96\xCC |0 # CJK Ideograph
+<U85EE> \x96\xCD |0 # CJK Ideograph
+<UE865> \x96\xCE |0 # Private Use
+<UE866> \x96\xCF |0 # Private Use
+<UE867> \x96\xD0 |0 # Private Use
+<U79E2> \x96\xD1 |0 # CJK Ideograph
+<UE869> \x96\xD2 |0 # Private Use
+<UE86A> \x96\xD3 |0 # Private Use
+<U492D> \x96\xD4 |0 # CJK Ideograph Extension A
+<UE86C> \x96\xD5 |0 # Private Use
+<U3D62> \x96\xD6 |0 # CJK Ideograph Extension A
+<U93DB> \x96\xD7 |0 # CJK Ideograph
+<U92BE> \x96\xD8 |0 # CJK Ideograph
+<U9348> \x96\xD9 |0 # CJK Ideograph
+<UE871> \x96\xDA |0 # Private Use
+<U78B9> \x96\xDB |0 # CJK Ideograph
+<U9277> \x96\xDC |0 # CJK Ideograph
+<U944D> \x96\xDD |0 # CJK Ideograph
+<U4FE4> \x96\xDE |0 # CJK Ideograph
+<U3440> \x96\xDF |0 # CJK Ideograph Extension A
+<U9064> \x96\xE0 |0 # CJK Ideograph
+<UE878> \x96\xE1 |0 # Private Use
+<U783D> \x96\xE2 |0 # CJK Ideograph
+<U7854> \x96\xE3 |0 # CJK Ideograph
+<U78B6> \x96\xE4 |0 # CJK Ideograph
+<U784B> \x96\xE5 |0 # CJK Ideograph
+<UE87D> \x96\xE6 |0 # Private Use
+<UE87E> \x96\xE7 |0 # Private Use
+<UE87F> \x96\xE8 |0 # Private Use
+<U369A> \x96\xE9 |0 # CJK Ideograph Extension A
+<U4F72> \x96\xEA |0 # CJK Ideograph
+<U6FDA> \x96\xEB |0 # CJK Ideograph
+<U6FD9> \x96\xEC |0 # CJK Ideograph
+<U701E> \x96\xEE |0 # CJK Ideograph
+<U5414> \x96\xEF |0 # CJK Ideograph
+<UE887> \x96\xF0 |0 # Private Use
+<U57BB> \x96\xF1 |0 # CJK Ideograph
+<U58F3> \x96\xF2 |0 # CJK Ideograph
+<U578A> \x96\xF3 |0 # CJK Ideograph
+<U9D16> \x96\xF4 |0 # CJK Ideograph
+<U57D7> \x96\xF5 |0 # CJK Ideograph
+<U7134> \x96\xF6 |0 # CJK Ideograph
+<U34AF> \x96\xF7 |0 # CJK Ideograph Extension A
+<UE88F> \x96\xF8 |0 # Private Use
+<U71EB> \x96\xF9 |0 # CJK Ideograph
+<UE891> \x96\xFA |0 # Private Use
+<UE892> \x96\xFB |0 # Private Use
+<UE894> \x96\xFD |0 # Private Use
+<UE895> \x96\xFE |0 # Private Use
+<U610C> \x97\x40 |0 # CJK Ideograph
+<U5ACE> \x97\x41 |0 # CJK Ideograph
+<U5A0B> \x97\x42 |0 # CJK Ideograph
+<U42BC> \x97\x43 |0 # CJK Ideograph Extension A
+<UE89A> \x97\x44 |0 # Private Use
+<U372C> \x97\x45 |0 # CJK Ideograph Extension A
+<U4B7B> \x97\x46 |0 # CJK Ideograph Extension A
+<UE89D> \x97\x47 |0 # Private Use
+<U93BB> \x97\x48 |0 # CJK Ideograph
+<U93B8> \x97\x49 |0 # CJK Ideograph
+<UE8A0> \x97\x4A |0 # Private Use
+<UE8A1> \x97\x4B |0 # Private Use
+<U8472> \x97\x4C |0 # CJK Ideograph
+<UE8A3> \x97\x4D |0 # Private Use
+<UE8A4> \x97\x4E |0 # Private Use
+<UE8A5> \x97\x4F |0 # Private Use
+<UE8A6> \x97\x50 |0 # Private Use
+<UE8A7> \x97\x51 |0 # Private Use
+<U5994> \x97\x52 |0 # CJK Ideograph
+<UE8A9> \x97\x53 |0 # Private Use
+<UE8AA> \x97\x54 |0 # Private Use
+<U7DA8> \x97\x55 |0 # CJK Ideograph
+<UE8AC> \x97\x56 |0 # Private Use
+<UE8AD> \x97\x57 |0 # Private Use
+<UE8AE> \x97\x58 |0 # Private Use
+<UE8AF> \x97\x59 |0 # Private Use
+<UE8B0> \x97\x5A |0 # Private Use
+<U92E5> \x97\x5B |0 # CJK Ideograph
+<U73E2> \x97\x5C |0 # CJK Ideograph
+<U3EE9> \x97\x5D |0 # CJK Ideograph Extension A
+<U74B4> \x97\x5E |0 # CJK Ideograph
+<UE8B5> \x97\x5F |0 # Private Use
+<UE8B6> \x97\x60 |0 # Private Use
+<U3EE1> \x97\x61 |0 # CJK Ideograph Extension A
+<UE8B8> \x97\x62 |0 # Private Use
+<U6AD8> \x97\x63 |0 # CJK Ideograph
+<U73F3> \x97\x64 |0 # CJK Ideograph
+<U73FB> \x97\x65 |0 # CJK Ideograph
+<U3ED6> \x97\x66 |0 # CJK Ideograph Extension A
+<UE8BD> \x97\x67 |0 # Private Use
+<UE8BE> \x97\x68 |0 # Private Use
+<UE8BF> \x97\x69 |0 # Private Use
+<UE8C0> \x97\x6A |0 # Private Use
+<UE8C1> \x97\x6B |0 # Private Use
+<UE8C2> \x97\x6C |0 # Private Use
+<UE8C3> \x97\x6D |0 # Private Use
+<U7448> \x97\x6E |0 # CJK Ideograph
+<UE8C5> \x97\x6F |0 # Private Use
+<U70A5> \x97\x70 |0 # CJK Ideograph
+<UE8C7> \x97\x71 |0 # Private Use
+<U9284> \x97\x72 |0 # CJK Ideograph
+<U73E6> \x97\x73 |0 # CJK Ideograph
+<U935F> \x97\x74 |0 # CJK Ideograph
+<UE8CB> \x97\x75 |0 # Private Use
+<U9331> \x97\x76 |0 # CJK Ideograph
+<UE8CD> \x97\x77 |0 # Private Use
+<UE8CE> \x97\x78 |0 # Private Use
+<U9386> \x97\x79 |0 # CJK Ideograph
+<UE8D0> \x97\x7A |0 # Private Use
+<UE8D1> \x97\x7B |0 # Private Use
+<U4935> \x97\x7C |0 # CJK Ideograph Extension A
+<UE8D3> \x97\x7D |0 # Private Use
+<U716B> \x97\x7E |0 # CJK Ideograph
+<UE8D5> \x97\xA1 |0 # Private Use
+<UE8D6> \x97\xA2 |0 # Private Use
+<U56A4> \x97\xA3 |0 # CJK Ideograph
+<UE8D8> \x97\xA4 |0 # Private Use
+<UE8D9> \x97\xA5 |0 # Private Use
+<UE8DA> \x97\xA6 |0 # Private Use
+<U5502> \x97\xA7 |0 # CJK Ideograph
+<U79C4> \x97\xA8 |0 # CJK Ideograph
+<UE8DD> \x97\xA9 |0 # Private Use
+<U7DFE> \x97\xAA |0 # CJK Ideograph
+<UE8DF> \x97\xAB |0 # Private Use
+<UE8E0> \x97\xAC |0 # Private Use
+<UE8E1> \x97\xAD |0 # Private Use
+<U452E> \x97\xAE |0 # CJK Ideograph Extension A
+<U9401> \x97\xAF |0 # CJK Ideograph
+<U370A> \x97\xB0 |0 # CJK Ideograph Extension A
+<UE8E5> \x97\xB1 |0 # Private Use
+<UE8E6> \x97\xB2 |0 # Private Use
+<U59B0> \x97\xB3 |0 # CJK Ideograph
+<UE8E8> \x97\xB4 |0 # Private Use
+<UE8E9> \x97\xB5 |0 # Private Use
+<UE8EA> \x97\xB6 |0 # Private Use
+<U5AA1> \x97\xB7 |0 # CJK Ideograph
+<U36E2> \x97\xB8 |0 # CJK Ideograph Extension A
+<UE8ED> \x97\xB9 |0 # Private Use
+<U36B0> \x97\xBA |0 # CJK Ideograph Extension A
+<U925F> \x97\xBB |0 # CJK Ideograph
+<U5A79> \x97\xBC |0 # CJK Ideograph
+<UE8F1> \x97\xBD |0 # Private Use
+<UE8F2> \x97\xBE |0 # Private Use
+<U9374> \x97\xBF |0 # CJK Ideograph
+<U3CCD> \x97\xC0 |0 # CJK Ideograph Extension A
+<UE8F5> \x97\xC1 |0 # Private Use
+<U4A96> \x97\xC2 |0 # CJK Ideograph Extension A
+<U398A> \x97\xC3 |0 # CJK Ideograph Extension A
+<U50F4> \x97\xC4 |0 # CJK Ideograph
+<U3D69> \x97\xC5 |0 # CJK Ideograph Extension A
+<U3D4C> \x97\xC6 |0 # CJK Ideograph Extension A
+<UE8FB> \x97\xC7 |0 # Private Use
+<U7175> \x97\xC8 |0 # CJK Ideograph
+<U42FB> \x97\xC9 |0 # CJK Ideograph Extension A
+<UE8FE> \x97\xCA |0 # Private Use
+<U6E0F> \x97\xCB |0 # CJK Ideograph
+<UE900> \x97\xCC |0 # Private Use
+<U44EB> \x97\xCD |0 # CJK Ideograph Extension A
+<U6D57> \x97\xCE |0 # CJK Ideograph
+<UE903> \x97\xCF |0 # Private Use
+<U7067> \x97\xD0 |0 # CJK Ideograph
+<U6CAF> \x97\xD1 |0 # CJK Ideograph
+<U3CD6> \x97\xD2 |0 # CJK Ideograph Extension A
+<UE907> \x97\xD3 |0 # Private Use
+<UE908> \x97\xD4 |0 # Private Use
+<U6E02> \x97\xD5 |0 # CJK Ideograph
+<U6F0C> \x97\xD6 |0 # CJK Ideograph
+<U3D6F> \x97\xD7 |0 # CJK Ideograph Extension A
+<UE90C> \x97\xD8 |0 # Private Use
+<U7551> \x97\xD9 |0 # CJK Ideograph
+<U36BC> \x97\xDA |0 # CJK Ideograph Extension A
+<U34C8> \x97\xDB |0 # CJK Ideograph Extension A
+<U4680> \x97\xDC |0 # CJK Ideograph Extension A
+<U3EDA> \x97\xDD |0 # CJK Ideograph Extension A
+<U4871> \x97\xDE |0 # CJK Ideograph Extension A
+<U59C4> \x97\xDF |0 # CJK Ideograph
+<U926E> \x97\xE0 |0 # CJK Ideograph
+<U493E> \x97\xE1 |0 # CJK Ideograph Extension A
+<U8F41> \x97\xE2 |0 # CJK Ideograph
+<UE917> \x97\xE3 |0 # Private Use
+<UE918> \x97\xE4 |0 # Private Use
+<U5812> \x97\xE5 |0 # CJK Ideograph
+<U57C8> \x97\xE6 |0 # CJK Ideograph
+<U36D6> \x97\xE7 |0 # CJK Ideograph Extension A
+<UE91C> \x97\xE8 |0 # Private Use
+<U70FE> \x97\xE9 |0 # CJK Ideograph
+<UE91E> \x97\xEA |0 # Private Use
+<UE91F> \x97\xEB |0 # Private Use
+<UE920> \x97\xEC |0 # Private Use
+<UE921> \x97\xED |0 # Private Use
+<UE922> \x97\xEE |0 # Private Use
+<U68B9> \x97\xEF |0 # CJK Ideograph
+<U6967> \x97\xF0 |0 # CJK Ideograph
+<UE925> \x97\xF1 |0 # Private Use
+<UE926> \x97\xF2 |0 # Private Use
+<UE927> \x97\xF3 |0 # Private Use
+<UE928> \x97\xF4 |0 # Private Use
+<UE929> \x97\xF5 |0 # Private Use
+<UE92A> \x97\xF6 |0 # Private Use
+<UE92B> \x97\xF7 |0 # Private Use
+<UE92C> \x97\xF8 |0 # Private Use
+<U6A1A> \x97\xF9 |0 # CJK Ideograph
+<UE92E> \x97\xFA |0 # Private Use
+<UE92F> \x97\xFB |0 # Private Use
+<U843E> \x97\xFC |0 # CJK Ideograph
+<U44DF> \x97\xFD |0 # CJK Ideograph Extension A
+<U44CE> \x97\xFE |0 # CJK Ideograph Extension A
+<UE933> \x98\x40 |0 # Private Use
+<UE934> \x98\x41 |0 # Private Use
+<UE935> \x98\x42 |0 # Private Use
+<UE936> \x98\x43 |0 # Private Use
+<U6F17> \x98\x44 |0 # CJK Ideograph
+<UE938> \x98\x45 |0 # Private Use
+<U833D> \x98\x46 |0 # CJK Ideograph
+<UE93A> \x98\x47 |0 # Private Use
+<U83ED> \x98\x48 |0 # CJK Ideograph
+<UE93C> \x98\x49 |0 # Private Use
+<UE93D> \x98\x4A |0 # Private Use
+<UE93E> \x98\x4B |0 # Private Use
+<U5989> \x98\x4C |0 # CJK Ideograph
+<U5A82> \x98\x4D |0 # CJK Ideograph
+<UE941> \x98\x4E |0 # Private Use
+<U5A61> \x98\x4F |0 # CJK Ideograph
+<U5A71> \x98\x50 |0 # CJK Ideograph
+<UE944> \x98\x51 |0 # Private Use
+<UE945> \x98\x52 |0 # Private Use
+<U372D> \x98\x53 |0 # CJK Ideograph Extension A
+<U59EF> \x98\x54 |0 # CJK Ideograph
+<UE948> \x98\x55 |0 # Private Use
+<U36C7> \x98\x56 |0 # CJK Ideograph Extension A
+<U718E> \x98\x57 |0 # CJK Ideograph
+<U9390> \x98\x58 |0 # CJK Ideograph
+<U669A> \x98\x59 |0 # CJK Ideograph
+<UE94D> \x98\x5A |0 # Private Use
+<U5A6E> \x98\x5B |0 # CJK Ideograph
+<U5A2B> \x98\x5C |0 # CJK Ideograph
+<UE950> \x98\x5D |0 # Private Use
+<U6A2B> \x98\x5E |0 # CJK Ideograph
+<UE952> \x98\x5F |0 # Private Use
+<UE953> \x98\x60 |0 # Private Use
+<UE954> \x98\x61 |0 # Private Use
+<UE955> \x98\x62 |0 # Private Use
+<U711D> \x98\x63 |0 # CJK Ideograph
+<UE957> \x98\x64 |0 # Private Use
+<UE958> \x98\x65 |0 # Private Use
+<U4FB0> \x98\x66 |0 # CJK Ideograph
+<UE95A> \x98\x67 |0 # Private Use
+<U5CC2> \x98\x68 |0 # CJK Ideograph
+<UE95C> \x98\x69 |0 # Private Use
+<UE95D> \x98\x6A |0 # Private Use
+<UE95E> \x98\x6B |0 # Private Use
+<U6A0C> \x98\x6C |0 # CJK Ideograph
+<UE960> \x98\x6D |0 # Private Use
+<UE961> \x98\x6E |0 # Private Use
+<U70A6> \x98\x6F |0 # CJK Ideograph
+<U7133> \x98\x70 |0 # CJK Ideograph
+<UE964> \x98\x71 |0 # Private Use
+<U3DA5> \x98\x72 |0 # CJK Ideograph Extension A
+<U6CDF> \x98\x73 |0 # CJK Ideograph
+<UE967> \x98\x74 |0 # Private Use
+<UE968> \x98\x75 |0 # Private Use
+<U7E65> \x98\x76 |0 # CJK Ideograph
+<U59EB> \x98\x77 |0 # CJK Ideograph
+<U5D2F> \x98\x78 |0 # CJK Ideograph
+<U3DF3> \x98\x79 |0 # CJK Ideograph Extension A
+<U5F5C> \x98\x7A |0 # CJK Ideograph
+<UE96E> \x98\x7B |0 # Private Use
+<UE96F> \x98\x7C |0 # Private Use
+<U7DA4> \x98\x7D |0 # CJK Ideograph
+<U8426> \x98\x7E |0 # CJK Ideograph
+<U5485> \x98\xA1 |0 # CJK Ideograph
+<UE973> \x98\xA2 |0 # Private Use
+<UE974> \x98\xA3 |0 # Private Use
+<UE975> \x98\xA4 |0 # Private Use
+<U577E> \x98\xA5 |0 # CJK Ideograph
+<UE977> \x98\xA6 |0 # Private Use
+<UE978> \x98\xA7 |0 # Private Use
+<U3FE5> \x98\xA8 |0 # CJK Ideograph Extension A
+<UE97A> \x98\xA9 |0 # Private Use
+<UE97B> \x98\xAA |0 # Private Use
+<U7003> \x98\xAB |0 # CJK Ideograph
+<UE97D> \x98\xAC |0 # Private Use
+<U5D70> \x98\xAD |0 # CJK Ideograph
+<U738F> \x98\xAE |0 # CJK Ideograph
+<U7CD3> \x98\xAF |0 # CJK Ideograph
+<UE981> \x98\xB0 |0 # Private Use
+<UE982> \x98\xB1 |0 # Private Use
+<U4FC8> \x98\xB2 |0 # CJK Ideograph
+<U7FE7> \x98\xB3 |0 # CJK Ideograph
+<U72CD> \x98\xB4 |0 # CJK Ideograph
+<U7310> \x98\xB5 |0 # CJK Ideograph
+<UE987> \x98\xB6 |0 # Private Use
+<U7338> \x98\xB7 |0 # CJK Ideograph
+<U7339> \x98\xB8 |0 # CJK Ideograph
+<UE98A> \x98\xB9 |0 # Private Use
+<U7341> \x98\xBA |0 # CJK Ideograph
+<U7348> \x98\xBB |0 # CJK Ideograph
+<U3EA9> \x98\xBC |0 # CJK Ideograph Extension A
+<UE98E> \x98\xBD |0 # Private Use
+<U906C> \x98\xBE |0 # CJK Ideograph
+<U71F5> \x98\xBF |0 # CJK Ideograph
+<UE991> \x98\xC0 |0 # Private Use
+<U73E1> \x98\xC1 |0 # CJK Ideograph
+<U81F6> \x98\xC2 |0 # CJK Ideograph
+<U3ECA> \x98\xC3 |0 # CJK Ideograph Extension A
+<U770C> \x98\xC4 |0 # CJK Ideograph
+<U3ED1> \x98\xC5 |0 # CJK Ideograph Extension A
+<U6CA2> \x98\xC6 |0 # CJK Ideograph
+<U56FD> \x98\xC7 |0 # CJK Ideograph
+<U7419> \x98\xC8 |0 # CJK Ideograph
+<U741E> \x98\xC9 |0 # CJK Ideograph
+<U741F> \x98\xCA |0 # CJK Ideograph
+<U3EE2> \x98\xCB |0 # CJK Ideograph Extension A
+<U3EF0> \x98\xCC |0 # CJK Ideograph Extension A
+<U3EF4> \x98\xCD |0 # CJK Ideograph Extension A
+<U3EFA> \x98\xCE |0 # CJK Ideograph Extension A
+<U74D3> \x98\xCF |0 # CJK Ideograph
+<U3F0E> \x98\xD0 |0 # CJK Ideograph Extension A
+<U3F53> \x98\xD1 |0 # CJK Ideograph Extension A
+<U7542> \x98\xD2 |0 # CJK Ideograph
+<U756D> \x98\xD3 |0 # CJK Ideograph
+<U7572> \x98\xD4 |0 # CJK Ideograph
+<U758D> \x98\xD5 |0 # CJK Ideograph
+<U3F7C> \x98\xD6 |0 # CJK Ideograph Extension A
+<U75C8> \x98\xD7 |0 # CJK Ideograph
+<U75DC> \x98\xD8 |0 # CJK Ideograph
+<U3FC0> \x98\xD9 |0 # CJK Ideograph Extension A
+<U764D> \x98\xDA |0 # CJK Ideograph
+<U3FD7> \x98\xDB |0 # CJK Ideograph Extension A
+<U7674> \x98\xDC |0 # CJK Ideograph
+<U3FDC> \x98\xDD |0 # CJK Ideograph Extension A
+<U767A> \x98\xDE |0 # CJK Ideograph
+<UE9B0> \x98\xDF |0 # Private Use
+<U7188> \x98\xE0 |0 # CJK Ideograph
+<U5623> \x98\xE1 |0 # CJK Ideograph
+<U8980> \x98\xE2 |0 # CJK Ideograph
+<U5869> \x98\xE3 |0 # CJK Ideograph
+<U401D> \x98\xE4 |0 # CJK Ideograph Extension A
+<U7743> \x98\xE5 |0 # CJK Ideograph
+<U4039> \x98\xE6 |0 # CJK Ideograph Extension A
+<U6761> \x98\xE7 |0 # CJK Ideograph
+<U4045> \x98\xE8 |0 # CJK Ideograph Extension A
+<U35DB> \x98\xE9 |0 # CJK Ideograph Extension A
+<U7798> \x98\xEA |0 # CJK Ideograph
+<U406A> \x98\xEB |0 # CJK Ideograph Extension A
+<U406F> \x98\xEC |0 # CJK Ideograph Extension A
+<U5C5E> \x98\xED |0 # CJK Ideograph
+<U77BE> \x98\xEE |0 # CJK Ideograph
+<U77CB> \x98\xEF |0 # CJK Ideograph
+<U58F2> \x98\xF0 |0 # CJK Ideograph
+<U7818> \x98\xF1 |0 # CJK Ideograph
+<U70B9> \x98\xF2 |0 # CJK Ideograph
+<U781C> \x98\xF3 |0 # CJK Ideograph
+<U40A8> \x98\xF4 |0 # CJK Ideograph Extension A
+<U7839> \x98\xF5 |0 # CJK Ideograph
+<U7847> \x98\xF6 |0 # CJK Ideograph
+<U7851> \x98\xF7 |0 # CJK Ideograph
+<U7866> \x98\xF8 |0 # CJK Ideograph
+<U8448> \x98\xF9 |0 # CJK Ideograph
+<UE9CB> \x98\xFA |0 # Private Use
+<U7933> \x98\xFB |0 # CJK Ideograph
+<U6803> \x98\xFC |0 # CJK Ideograph
+<U7932> \x98\xFD |0 # CJK Ideograph
+<U4103> \x98\xFE |0 # CJK Ideograph Extension A
+<U4109> \x99\x40 |0 # CJK Ideograph Extension A
+<U7991> \x99\x41 |0 # CJK Ideograph
+<U7999> \x99\x42 |0 # CJK Ideograph
+<U8FBB> \x99\x43 |0 # CJK Ideograph
+<U7A06> \x99\x44 |0 # CJK Ideograph
+<U8FBC> \x99\x45 |0 # CJK Ideograph
+<U4167> \x99\x46 |0 # CJK Ideograph Extension A
+<U7A91> \x99\x47 |0 # CJK Ideograph
+<U41B2> \x99\x48 |0 # CJK Ideograph Extension A
+<U7ABC> \x99\x49 |0 # CJK Ideograph
+<U8279> \x99\x4A |0 # CJK Ideograph
+<U41C4> \x99\x4B |0 # CJK Ideograph Extension A
+<U7ACF> \x99\x4C |0 # CJK Ideograph
+<U7ADB> \x99\x4D |0 # CJK Ideograph
+<U41CF> \x99\x4E |0 # CJK Ideograph Extension A
+<U4E21> \x99\x4F |0 # CJK Ideograph
+<U7B62> \x99\x50 |0 # CJK Ideograph
+<U7B6C> \x99\x51 |0 # CJK Ideograph
+<U7B7B> \x99\x52 |0 # CJK Ideograph
+<U7C12> \x99\x53 |0 # CJK Ideograph
+<U7C1B> \x99\x54 |0 # CJK Ideograph
+<U4260> \x99\x55 |0 # CJK Ideograph Extension A
+<U427A> \x99\x56 |0 # CJK Ideograph Extension A
+<U7C7B> \x99\x57 |0 # CJK Ideograph
+<U7C9C> \x99\x58 |0 # CJK Ideograph
+<U428C> \x99\x59 |0 # CJK Ideograph Extension A
+<U7CB8> \x99\x5A |0 # CJK Ideograph
+<U4294> \x99\x5B |0 # CJK Ideograph Extension A
+<U7CED> \x99\x5C |0 # CJK Ideograph
+<U8F93> \x99\x5D |0 # CJK Ideograph
+<U70C0> \x99\x5E |0 # CJK Ideograph
+<UE9EF> \x99\x5F |0 # Private Use
+<U7DCF> \x99\x60 |0 # CJK Ideograph
+<U7DD4> \x99\x61 |0 # CJK Ideograph
+<U7DD0> \x99\x62 |0 # CJK Ideograph
+<U7DFD> \x99\x63 |0 # CJK Ideograph
+<U7FAE> \x99\x64 |0 # CJK Ideograph
+<U7FB4> \x99\x65 |0 # CJK Ideograph
+<U729F> \x99\x66 |0 # CJK Ideograph
+<U4397> \x99\x67 |0 # CJK Ideograph Extension A
+<U8020> \x99\x68 |0 # CJK Ideograph
+<U8025> \x99\x69 |0 # CJK Ideograph
+<U7B39> \x99\x6A |0 # CJK Ideograph
+<U802E> \x99\x6B |0 # CJK Ideograph
+<U8031> \x99\x6C |0 # CJK Ideograph
+<U8054> \x99\x6D |0 # CJK Ideograph
+<U3DCC> \x99\x6E |0 # CJK Ideograph Extension A
+<U57B4> \x99\x6F |0 # CJK Ideograph
+<U70A0> \x99\x70 |0 # CJK Ideograph
+<U80B7> \x99\x71 |0 # CJK Ideograph
+<U80E9> \x99\x72 |0 # CJK Ideograph
+<U43ED> \x99\x73 |0 # CJK Ideograph Extension A
+<U810C> \x99\x74 |0 # CJK Ideograph
+<U732A> \x99\x75 |0 # CJK Ideograph
+<U810E> \x99\x76 |0 # CJK Ideograph
+<U8112> \x99\x77 |0 # CJK Ideograph
+<U7560> \x99\x78 |0 # CJK Ideograph
+<U8114> \x99\x79 |0 # CJK Ideograph
+<U4401> \x99\x7A |0 # CJK Ideograph Extension A
+<U3B39> \x99\x7B |0 # CJK Ideograph Extension A
+<U8156> \x99\x7C |0 # CJK Ideograph
+<U8159> \x99\x7D |0 # CJK Ideograph
+<U815A> \x99\x7E |0 # CJK Ideograph
+<U4413> \x99\xA1 |0 # CJK Ideograph Extension A
+<U583A> \x99\xA2 |0 # CJK Ideograph
+<U817C> \x99\xA3 |0 # CJK Ideograph
+<U8184> \x99\xA4 |0 # CJK Ideograph
+<U4425> \x99\xA5 |0 # CJK Ideograph Extension A
+<U8193> \x99\xA6 |0 # CJK Ideograph
+<U442D> \x99\xA7 |0 # CJK Ideograph Extension A
+<U81A5> \x99\xA8 |0 # CJK Ideograph
+<U57EF> \x99\xA9 |0 # CJK Ideograph
+<U81C1> \x99\xAA |0 # CJK Ideograph
+<U81E4> \x99\xAB |0 # CJK Ideograph
+<U8254> \x99\xAC |0 # CJK Ideograph
+<U448F> \x99\xAD |0 # CJK Ideograph Extension A
+<U82A6> \x99\xAE |0 # CJK Ideograph
+<U8276> \x99\xAF |0 # CJK Ideograph
+<U82CA> \x99\xB0 |0 # CJK Ideograph
+<U82D8> \x99\xB1 |0 # CJK Ideograph
+<U82FF> \x99\xB2 |0 # CJK Ideograph
+<U44B0> \x99\xB3 |0 # CJK Ideograph Extension A
+<U8357> \x99\xB4 |0 # CJK Ideograph
+<U9669> \x99\xB5 |0 # CJK Ideograph
+<U698A> \x99\xB6 |0 # CJK Ideograph
+<U8405> \x99\xB7 |0 # CJK Ideograph
+<U70F5> \x99\xB8 |0 # CJK Ideograph
+<U8464> \x99\xB9 |0 # CJK Ideograph
+<U60E3> \x99\xBA |0 # CJK Ideograph
+<U8488> \x99\xBB |0 # CJK Ideograph
+<U4504> \x99\xBC |0 # CJK Ideograph Extension A
+<U84BE> \x99\xBD |0 # CJK Ideograph
+<U84E1> \x99\xBE |0 # CJK Ideograph
+<U84F8> \x99\xBF |0 # CJK Ideograph
+<U8510> \x99\xC0 |0 # CJK Ideograph
+<U8538> \x99\xC1 |0 # CJK Ideograph
+<U8552> \x99\xC2 |0 # CJK Ideograph
+<U453B> \x99\xC3 |0 # CJK Ideograph Extension A
+<U856F> \x99\xC4 |0 # CJK Ideograph
+<U8570> \x99\xC5 |0 # CJK Ideograph
+<U85E0> \x99\xC6 |0 # CJK Ideograph
+<U4577> \x99\xC7 |0 # CJK Ideograph Extension A
+<U8672> \x99\xC8 |0 # CJK Ideograph
+<U8692> \x99\xC9 |0 # CJK Ideograph
+<U86B2> \x99\xCA |0 # CJK Ideograph
+<U86EF> \x99\xCB |0 # CJK Ideograph
+<U9645> \x99\xCC |0 # CJK Ideograph
+<U878B> \x99\xCD |0 # CJK Ideograph
+<U4606> \x99\xCE |0 # CJK Ideograph Extension A
+<U4617> \x99\xCF |0 # CJK Ideograph Extension A
+<U88AE> \x99\xD0 |0 # CJK Ideograph
+<U88FF> \x99\xD1 |0 # CJK Ideograph
+<U8924> \x99\xD2 |0 # CJK Ideograph
+<U8947> \x99\xD3 |0 # CJK Ideograph
+<U8991> \x99\xD4 |0 # CJK Ideograph
+<UEA43> \x99\xD5 |0 # Private Use
+<U8A29> \x99\xD6 |0 # CJK Ideograph
+<U8A38> \x99\xD7 |0 # CJK Ideograph
+<U8A94> \x99\xD8 |0 # CJK Ideograph
+<U8AB4> \x99\xD9 |0 # CJK Ideograph
+<U8C51> \x99\xDA |0 # CJK Ideograph
+<U8CD4> \x99\xDB |0 # CJK Ideograph
+<U8CF2> \x99\xDC |0 # CJK Ideograph
+<U8D1C> \x99\xDD |0 # CJK Ideograph
+<U4798> \x99\xDE |0 # CJK Ideograph Extension A
+<U585F> \x99\xDF |0 # CJK Ideograph
+<U8DC3> \x99\xE0 |0 # CJK Ideograph
+<U47ED> \x99\xE1 |0 # CJK Ideograph Extension A
+<U4EEE> \x99\xE2 |0 # CJK Ideograph
+<U8E3A> \x99\xE3 |0 # CJK Ideograph
+<U55D8> \x99\xE4 |0 # CJK Ideograph
+<U5754> \x99\xE5 |0 # CJK Ideograph
+<U8E71> \x99\xE6 |0 # CJK Ideograph
+<U55F5> \x99\xE7 |0 # CJK Ideograph
+<U8EB0> \x99\xE8 |0 # CJK Ideograph
+<U4837> \x99\xE9 |0 # CJK Ideograph Extension A
+<U8ECE> \x99\xEA |0 # CJK Ideograph
+<U8EE2> \x99\xEB |0 # CJK Ideograph
+<U8EE4> \x99\xEC |0 # CJK Ideograph
+<U8EED> \x99\xED |0 # CJK Ideograph
+<U8EF2> \x99\xEE |0 # CJK Ideograph
+<U8FB7> \x99\xEF |0 # CJK Ideograph
+<U8FC1> \x99\xF0 |0 # CJK Ideograph
+<U8FCA> \x99\xF1 |0 # CJK Ideograph
+<U8FCC> \x99\xF2 |0 # CJK Ideograph
+<U9033> \x99\xF3 |0 # CJK Ideograph
+<U99C4> \x99\xF4 |0 # CJK Ideograph
+<U48AD> \x99\xF5 |0 # CJK Ideograph Extension A
+<U98E0> \x99\xF6 |0 # CJK Ideograph
+<U9213> \x99\xF7 |0 # CJK Ideograph
+<U491E> \x99\xF8 |0 # CJK Ideograph Extension A
+<U9228> \x99\xF9 |0 # CJK Ideograph
+<U9258> \x99\xFA |0 # CJK Ideograph
+<U926B> \x99\xFB |0 # CJK Ideograph
+<U92B1> \x99\xFC |0 # CJK Ideograph
+<U92AE> \x99\xFD |0 # CJK Ideograph
+<U92BF> \x99\xFE |0 # CJK Ideograph
+<U92E3> \x9A\x40 |0 # CJK Ideograph
+<U92EB> \x9A\x41 |0 # CJK Ideograph
+<U92F3> \x9A\x42 |0 # CJK Ideograph
+<U92F4> \x9A\x43 |0 # CJK Ideograph
+<U92FD> \x9A\x44 |0 # CJK Ideograph
+<U9343> \x9A\x45 |0 # CJK Ideograph
+<U9384> \x9A\x46 |0 # CJK Ideograph
+<U93AD> \x9A\x47 |0 # CJK Ideograph
+<U4945> \x9A\x48 |0 # CJK Ideograph Extension A
+<U4951> \x9A\x49 |0 # CJK Ideograph Extension A
+<U9EBF> \x9A\x4A |0 # CJK Ideograph
+<U9417> \x9A\x4B |0 # CJK Ideograph
+<U5301> \x9A\x4C |0 # CJK Ideograph
+<U941D> \x9A\x4D |0 # CJK Ideograph
+<U942D> \x9A\x4E |0 # CJK Ideograph
+<U943E> \x9A\x4F |0 # CJK Ideograph
+<U496A> \x9A\x50 |0 # CJK Ideograph Extension A
+<U9454> \x9A\x51 |0 # CJK Ideograph
+<U9479> \x9A\x52 |0 # CJK Ideograph
+<U952D> \x9A\x53 |0 # CJK Ideograph
+<U95A2> \x9A\x54 |0 # CJK Ideograph
+<U49A7> \x9A\x55 |0 # CJK Ideograph Extension A
+<U95F4> \x9A\x56 |0 # CJK Ideograph
+<U9633> \x9A\x57 |0 # CJK Ideograph
+<U49E5> \x9A\x58 |0 # CJK Ideograph Extension A
+<U67A0> \x9A\x59 |0 # CJK Ideograph
+<U4A24> \x9A\x5A |0 # CJK Ideograph Extension A
+<U9740> \x9A\x5B |0 # CJK Ideograph
+<U4A35> \x9A\x5C |0 # CJK Ideograph Extension A
+<U97B2> \x9A\x5D |0 # CJK Ideograph
+<U97C2> \x9A\x5E |0 # CJK Ideograph
+<U5654> \x9A\x5F |0 # CJK Ideograph
+<U4AE4> \x9A\x60 |0 # CJK Ideograph Extension A
+<U60E8> \x9A\x61 |0 # CJK Ideograph
+<U98B9> \x9A\x62 |0 # CJK Ideograph
+<U4B19> \x9A\x63 |0 # CJK Ideograph Extension A
+<U98F1> \x9A\x64 |0 # CJK Ideograph
+<U5844> \x9A\x65 |0 # CJK Ideograph
+<U990E> \x9A\x66 |0 # CJK Ideograph
+<U9919> \x9A\x67 |0 # CJK Ideograph
+<U51B4> \x9A\x68 |0 # CJK Ideograph
+<U991C> \x9A\x69 |0 # CJK Ideograph
+<U9937> \x9A\x6A |0 # CJK Ideograph
+<U9942> \x9A\x6B |0 # CJK Ideograph
+<U995D> \x9A\x6C |0 # CJK Ideograph
+<U9962> \x9A\x6D |0 # CJK Ideograph
+<U4B70> \x9A\x6E |0 # CJK Ideograph Extension A
+<U99C5> \x9A\x6F |0 # CJK Ideograph
+<U4B9D> \x9A\x70 |0 # CJK Ideograph Extension A
+<U9A3C> \x9A\x71 |0 # CJK Ideograph
+<U9B0F> \x9A\x72 |0 # CJK Ideograph
+<U7A83> \x9A\x73 |0 # CJK Ideograph
+<U9B69> \x9A\x74 |0 # CJK Ideograph
+<U9B81> \x9A\x75 |0 # CJK Ideograph
+<U9BDD> \x9A\x76 |0 # CJK Ideograph
+<U9BF1> \x9A\x77 |0 # CJK Ideograph
+<U9BF4> \x9A\x78 |0 # CJK Ideograph
+<U4C6D> \x9A\x79 |0 # CJK Ideograph Extension A
+<U9C20> \x9A\x7A |0 # CJK Ideograph
+<U376F> \x9A\x7B |0 # CJK Ideograph Extension A
+<UEAA9> \x9A\x7C |0 # Private Use
+<U9D49> \x9A\x7D |0 # CJK Ideograph
+<U9C3A> \x9A\x7E |0 # CJK Ideograph
+<U9EFE> \x9A\xA1 |0 # CJK Ideograph
+<U5650> \x9A\xA2 |0 # CJK Ideograph
+<U9D93> \x9A\xA3 |0 # CJK Ideograph
+<U9DBD> \x9A\xA4 |0 # CJK Ideograph
+<U9DC0> \x9A\xA5 |0 # CJK Ideograph
+<U9DFC> \x9A\xA6 |0 # CJK Ideograph
+<U94F6> \x9A\xA7 |0 # CJK Ideograph
+<U8FB6> \x9A\xA8 |0 # CJK Ideograph
+<U9E7B> \x9A\xA9 |0 # CJK Ideograph
+<U9EAC> \x9A\xAA |0 # CJK Ideograph
+<U9EB1> \x9A\xAB |0 # CJK Ideograph
+<U9EBD> \x9A\xAC |0 # CJK Ideograph
+<U9EC6> \x9A\xAD |0 # CJK Ideograph
+<U94DC> \x9A\xAE |0 # CJK Ideograph
+<U9EE2> \x9A\xAF |0 # CJK Ideograph
+<U9EF1> \x9A\xB0 |0 # CJK Ideograph
+<U9EF8> \x9A\xB1 |0 # CJK Ideograph
+<U7AC8> \x9A\xB2 |0 # CJK Ideograph
+<U9F44> \x9A\xB3 |0 # CJK Ideograph
+<UEABF> \x9A\xB4 |0 # Private Use
+<UEAC0> \x9A\xB5 |0 # Private Use
+<UEAC1> \x9A\xB6 |0 # Private Use
+<U691A> \x9A\xB7 |0 # CJK Ideograph
+<U94C3> \x9A\xB8 |0 # CJK Ideograph
+<U59AC> \x9A\xB9 |0 # CJK Ideograph
+<UEAC5> \x9A\xBA |0 # Private Use
+<U5840> \x9A\xBB |0 # CJK Ideograph
+<U94C1> \x9A\xBC |0 # CJK Ideograph
+<U37B9> \x9A\xBD |0 # CJK Ideograph Extension A
+<UEAC9> \x9A\xBE |0 # Private Use
+<UEACA> \x9A\xBF |0 # Private Use
+<UEACB> \x9A\xC0 |0 # Private Use
+<UEACC> \x9A\xC1 |0 # Private Use
+<U5757> \x9A\xC2 |0 # CJK Ideograph
+<U7173> \x9A\xC3 |0 # CJK Ideograph
+<UEACF> \x9A\xC4 |0 # Private Use
+<UEAD0> \x9A\xC5 |0 # Private Use
+<UEAD1> \x9A\xC6 |0 # Private Use
+<U546A> \x9A\xC7 |0 # CJK Ideograph
+<UEAD3> \x9A\xC8 |0 # Private Use
+<UEAD4> \x9A\xC9 |0 # Private Use
+<U549E> \x9A\xCA |0 # CJK Ideograph
+<UEAD6> \x9A\xCB |0 # Private Use
+<UEAD7> \x9A\xCC |0 # Private Use
+<UEAD8> \x9A\xCD |0 # Private Use
+<UEAD9> \x9A\xCE |0 # Private Use
+<UEADA> \x9A\xCF |0 # Private Use
+<U60E7> \x9A\xD0 |0 # CJK Ideograph
+<UEADC> \x9A\xD1 |0 # Private Use
+<U567A> \x9A\xD2 |0 # CJK Ideograph
+<UEADE> \x9A\xD3 |0 # Private Use
+<UEADF> \x9A\xD4 |0 # Private Use
+<UEAE0> \x9A\xD5 |0 # Private Use
+<UEAE1> \x9A\xD6 |0 # Private Use
+<UEAE2> \x9A\xD7 |0 # Private Use
+<UEAE3> \x9A\xD8 |0 # Private Use
+<U6955> \x9A\xD9 |0 # CJK Ideograph
+<U9C2F> \x9A\xDA |0 # CJK Ideograph
+<U87A5> \x9A\xDB |0 # CJK Ideograph
+<UEAE7> \x9A\xDC |0 # Private Use
+<UEAE8> \x9A\xDD |0 # Private Use
+<UEAE9> \x9A\xDE |0 # Private Use
+<UEAEA> \x9A\xDF |0 # Private Use
+<UEAEB> \x9A\xE0 |0 # Private Use
+<UEAEC> \x9A\xE1 |0 # Private Use
+<U5C20> \x9A\xE2 |0 # CJK Ideograph
+<UEAEE> \x9A\xE3 |0 # Private Use
+<U5E0B> \x9A\xE4 |0 # CJK Ideograph
+<UEAF0> \x9A\xE5 |0 # Private Use
+<UEAF1> \x9A\xE6 |0 # Private Use
+<UEAF2> \x9A\xE7 |0 # Private Use
+<U671E> \x9A\xE8 |0 # CJK Ideograph
+<UEAF4> \x9A\xE9 |0 # Private Use
+<UEAF5> \x9A\xEA |0 # Private Use
+<UEAF6> \x9A\xEB |0 # Private Use
+<U3647> \x9A\xEC |0 # CJK Ideograph Extension A
+<UEAF8> \x9A\xED |0 # Private Use
+<UEAF9> \x9A\xEE |0 # Private Use
+<UEAFA> \x9A\xEF |0 # Private Use
+<UEAFB> \x9A\xF0 |0 # Private Use
+<U5364> \x9A\xF1 |0 # CJK Ideograph
+<U84AD> \x9A\xF2 |0 # CJK Ideograph
+<UEAFE> \x9A\xF3 |0 # Private Use
+<UEAFF> \x9A\xF4 |0 # Private Use
+<UEB00> \x9A\xF5 |0 # Private Use
+<U8B81> \x9A\xF6 |0 # CJK Ideograph
+<UEB02> \x9A\xF7 |0 # Private Use
+<UEB03> \x9A\xF8 |0 # Private Use
+<UEB04> \x9A\xF9 |0 # Private Use
+<UEB05> \x9A\xFA |0 # Private Use
+<U4E78> \x9A\xFB |0 # CJK Ideograph
+<U70BB> \x9A\xFC |0 # CJK Ideograph
+<UEB08> \x9A\xFD |0 # Private Use
+<UEB09> \x9A\xFE |0 # Private Use
+<UEB0A> \x9B\x40 |0 # Private Use
+<UEB0B> \x9B\x41 |0 # Private Use
+<UEB0C> \x9B\x42 |0 # Private Use
+<UEB0D> \x9B\x43 |0 # Private Use
+<UEB0E> \x9B\x44 |0 # Private Use
+<UEB0F> \x9B\x45 |0 # Private Use
+<U62C3> \x9B\x46 |0 # CJK Ideograph
+<UEB11> \x9B\x47 |0 # Private Use
+<UEB12> \x9B\x48 |0 # Private Use
+<U7198> \x9B\x49 |0 # CJK Ideograph
+<U6855> \x9B\x4A |0 # CJK Ideograph
+<UEB15> \x9B\x4B |0 # Private Use
+<U69E9> \x9B\x4C |0 # CJK Ideograph
+<U36C8> \x9B\x4D |0 # CJK Ideograph Extension A
+<UEB18> \x9B\x4E |0 # Private Use
+<UEB19> \x9B\x4F |0 # Private Use
+<UEB1A> \x9B\x50 |0 # Private Use
+<UEB1B> \x9B\x51 |0 # Private Use
+<UEB1C> \x9B\x52 |0 # Private Use
+<UEB1D> \x9B\x53 |0 # Private Use
+<U82FD> \x9B\x54 |0 # CJK Ideograph
+<UEB1F> \x9B\x55 |0 # Private Use
+<UEB20> \x9B\x56 |0 # Private Use
+<UEB21> \x9B\x57 |0 # Private Use
+<U89A5> \x9B\x58 |0 # CJK Ideograph
+<UEB23> \x9B\x59 |0 # Private Use
+<U8FA0> \x9B\x5A |0 # CJK Ideograph
+<UEB25> \x9B\x5B |0 # Private Use
+<U97B8> \x9B\x5C |0 # CJK Ideograph
+<UEB27> \x9B\x5D |0 # Private Use
+<U9847> \x9B\x5E |0 # CJK Ideograph
+<U9ABD> \x9B\x5F |0 # CJK Ideograph
+<UEB2A> \x9B\x60 |0 # Private Use
+<UEB2C> \x9B\x62 |0 # Private Use
+<UEB2D> \x9B\x63 |0 # Private Use
+<UEB2E> \x9B\x64 |0 # Private Use
+<UEB2F> \x9B\x65 |0 # Private Use
+<UEB30> \x9B\x66 |0 # Private Use
+<UEB31> \x9B\x67 |0 # Private Use
+<UEB32> \x9B\x68 |0 # Private Use
+<UEB33> \x9B\x69 |0 # Private Use
+<UEB34> \x9B\x6A |0 # Private Use
+<UEB35> \x9B\x6B |0 # Private Use
+<UEB36> \x9B\x6C |0 # Private Use
+<UEB37> \x9B\x6D |0 # Private Use
+<UEB38> \x9B\x6E |0 # Private Use
+<UEB39> \x9B\x6F |0 # Private Use
+<U5FB1> \x9B\x70 |0 # CJK Ideograph
+<U6648> \x9B\x71 |0 # CJK Ideograph
+<U66BF> \x9B\x72 |0 # CJK Ideograph
+<UEB3D> \x9B\x73 |0 # Private Use
+<UEB3E> \x9B\x74 |0 # Private Use
+<UEB3F> \x9B\x75 |0 # Private Use
+<UEB41> \x9B\x77 |0 # Private Use
+<UEB43> \x9B\x79 |0 # Private Use
+<UEB44> \x9B\x7A |0 # Private Use
+<UEB46> \x9B\x7C |0 # Private Use
+<U58B5> \x9B\x7D |0 # CJK Ideograph
+<U670E> \x9B\x7E |0 # CJK Ideograph
+<U6918> \x9B\xA1 |0 # CJK Ideograph
+<UEB4A> \x9B\xA2 |0 # Private Use
+<UEB4B> \x9B\xA3 |0 # Private Use
+<UEB4C> \x9B\xA4 |0 # Private Use
+<UEB4D> \x9B\xA5 |0 # Private Use
+<UEB4E> \x9B\xA6 |0 # Private Use
+<UEB4F> \x9B\xA7 |0 # Private Use
+<UEB50> \x9B\xA8 |0 # Private Use
+<U48D0> \x9B\xA9 |0 # CJK Ideograph Extension A
+<U4AB8> \x9B\xAA |0 # CJK Ideograph Extension A
+<UEB53> \x9B\xAB |0 # Private Use
+<UEB54> \x9B\xAC |0 # Private Use
+<UEB55> \x9B\xAD |0 # Private Use
+<UEB56> \x9B\xAE |0 # Private Use
+<UEB57> \x9B\xAF |0 # Private Use
+<UEB58> \x9B\xB0 |0 # Private Use
+<UEB59> \x9B\xB1 |0 # Private Use
+<UEB5A> \x9B\xB2 |0 # Private Use
+<UEB5B> \x9B\xB3 |0 # Private Use
+<U51D2> \x9B\xB4 |0 # CJK Ideograph
+<UEB5D> \x9B\xB5 |0 # Private Use
+<U599F> \x9B\xB6 |0 # CJK Ideograph
+<UEB5F> \x9B\xB7 |0 # Private Use
+<U3BBE> \x9B\xB8 |0 # CJK Ideograph Extension A
+<UEB61> \x9B\xB9 |0 # Private Use
+<UEB62> \x9B\xBA |0 # Private Use
+<UEB63> \x9B\xBB |0 # Private Use
+<U5788> \x9B\xBC |0 # CJK Ideograph
+<UEB65> \x9B\xBD |0 # Private Use
+<U399B> \x9B\xBE |0 # CJK Ideograph Extension A
+<UEB67> \x9B\xBF |0 # Private Use
+<UEB68> \x9B\xC0 |0 # Private Use
+<UEB69> \x9B\xC1 |0 # Private Use
+<U3762> \x9B\xC2 |0 # CJK Ideograph Extension A
+<UEB6B> \x9B\xC3 |0 # Private Use
+<U8B5E> \x9B\xC4 |0 # CJK Ideograph
+<UEB6D> \x9B\xC5 |0 # Private Use
+<UEB6F> \x9B\xC7 |0 # Private Use
+<UEB70> \x9B\xC8 |0 # Private Use
+<UEB71> \x9B\xC9 |0 # Private Use
+<U7209> \x9B\xCA |0 # CJK Ideograph
+<UEB73> \x9B\xCB |0 # Private Use
+<UEB74> \x9B\xCC |0 # Private Use
+<U5965> \x9B\xCD |0 # CJK Ideograph
+<UEB76> \x9B\xCE |0 # Private Use
+<UEB77> \x9B\xCF |0 # Private Use
+<UEB78> \x9B\xD0 |0 # Private Use
+<U8EDA> \x9B\xD1 |0 # CJK Ideograph
+<UEB7A> \x9B\xD2 |0 # Private Use
+<U528F> \x9B\xD3 |0 # CJK Ideograph
+<U573F> \x9B\xD4 |0 # CJK Ideograph
+<U7171> \x9B\xD5 |0 # CJK Ideograph
+<UEB7E> \x9B\xD6 |0 # Private Use
+<UEB7F> \x9B\xD7 |0 # Private Use
+<UEB80> \x9B\xD8 |0 # Private Use
+<UEB81> \x9B\xD9 |0 # Private Use
+<U55BC> \x9B\xDA |0 # CJK Ideograph
+<UEB83> \x9B\xDB |0 # Private Use
+<UEB84> \x9B\xDC |0 # Private Use
+<UEB85> \x9B\xDD |0 # Private Use
+<U3473> \x9B\xDF |0 # CJK Ideograph Extension A
+<UEB88> \x9B\xE0 |0 # Private Use
+<UEB89> \x9B\xE1 |0 # Private Use
+<UEB8A> \x9B\xE2 |0 # Private Use
+<U4718> \x9B\xE3 |0 # CJK Ideograph Extension A
+<UEB8C> \x9B\xE4 |0 # Private Use
+<UEB8D> \x9B\xE5 |0 # Private Use
+<UEB8E> \x9B\xE6 |0 # Private Use
+<UEB8F> \x9B\xE7 |0 # Private Use
+<UEB90> \x9B\xE8 |0 # Private Use
+<U5066> \x9B\xE9 |0 # CJK Ideograph
+<U34FB> \x9B\xEA |0 # CJK Ideograph Extension A
+<UEB93> \x9B\xEB |0 # Private Use
+<UEB95> \x9B\xED |0 # Private Use
+<U477C> \x9B\xEE |0 # CJK Ideograph Extension A
+<UEB97> \x9B\xEF |0 # Private Use
+<UEB98> \x9B\xF0 |0 # Private Use
+<UEB99> \x9B\xF1 |0 # Private Use
+<UEB9A> \x9B\xF2 |0 # Private Use
+<UEB9B> \x9B\xF3 |0 # Private Use
+<U57A1> \x9B\xF4 |0 # CJK Ideograph
+<U7151> \x9B\xF5 |0 # CJK Ideograph
+<UEB9F> \x9B\xF7 |0 # Private Use
+<UEBA0> \x9B\xF8 |0 # Private Use
+<U9056> \x9B\xF9 |0 # CJK Ideograph
+<UEBA2> \x9B\xFA |0 # Private Use
+<UEBA3> \x9B\xFB |0 # Private Use
+<U8B62> \x9B\xFC |0 # CJK Ideograph
+<UEBA5> \x9B\xFD |0 # Private Use
+<UEBA6> \x9B\xFE |0 # Private Use
+<U5D5B> \x9C\x40 |0 # CJK Ideograph
+<UEBA8> \x9C\x41 |0 # Private Use
+<UEBAA> \x9C\x43 |0 # Private Use
+<UEBAB> \x9C\x44 |0 # Private Use
+<U8AEA> \x9C\x45 |0 # CJK Ideograph
+<UEBAD> \x9C\x46 |0 # Private Use
+<UEBAE> \x9C\x47 |0 # Private Use
+<UEBAF> \x9C\x48 |0 # Private Use
+<UEBB0> \x9C\x49 |0 # Private Use
+<U4BC0> \x9C\x4A |0 # CJK Ideograph Extension A
+<UEBB2> \x9C\x4B |0 # Private Use
+<UEBB3> \x9C\x4C |0 # Private Use
+<UEBB4> \x9C\x4D |0 # Private Use
+<U9465> \x9C\x4E |0 # CJK Ideograph
+<UEBB6> \x9C\x4F |0 # Private Use
+<U6195> \x9C\x50 |0 # CJK Ideograph
+<U5A27> \x9C\x51 |0 # CJK Ideograph
+<UEBB9> \x9C\x52 |0 # Private Use
+<U56B9> \x9C\x54 |0 # CJK Ideograph
+<UEBBC> \x9C\x55 |0 # Private Use
+<UEBBD> \x9C\x56 |0 # Private Use
+<U4E6A> \x9C\x57 |0 # CJK Ideograph
+<UEBBF> \x9C\x58 |0 # Private Use
+<U9656> \x9C\x59 |0 # CJK Ideograph
+<U6D8F> \x9C\x5A |0 # CJK Ideograph
+<UEBC2> \x9C\x5B |0 # Private Use
+<U3618> \x9C\x5C |0 # CJK Ideograph Extension A
+<U8977> \x9C\x5D |0 # CJK Ideograph
+<UEBC5> \x9C\x5E |0 # Private Use
+<UEBC6> \x9C\x5F |0 # Private Use
+<UEBC7> \x9C\x60 |0 # Private Use
+<UEBC8> \x9C\x61 |0 # Private Use
+<UEBCA> \x9C\x63 |0 # Private Use
+<U7B42> \x9C\x64 |0 # CJK Ideograph
+<UEBCC> \x9C\x65 |0 # Private Use
+<UEBCD> \x9C\x66 |0 # Private Use
+<UEBCE> \x9C\x67 |0 # Private Use
+<UEBD0> \x9C\x69 |0 # Private Use
+<U7A45> \x9C\x6A |0 # CJK Ideograph
+<UEBD3> \x9C\x6C |0 # Private Use
+<U9A26> \x9C\x6D |0 # CJK Ideograph
+<UEBD5> \x9C\x6E |0 # Private Use
+<U365F> \x9C\x6F |0 # CJK Ideograph Extension A
+<UEBD7> \x9C\x70 |0 # Private Use
+<UEBD8> \x9C\x71 |0 # Private Use
+<U7983> \x9C\x72 |0 # CJK Ideograph
+<UEBDA> \x9C\x73 |0 # Private Use
+<UEBDB> \x9C\x74 |0 # Private Use
+<U5D2C> \x9C\x75 |0 # CJK Ideograph
+<UEBDD> \x9C\x76 |0 # Private Use
+<UEBDF> \x9C\x78 |0 # Private Use
+<U46D0> \x9C\x79 |0 # CJK Ideograph Extension A
+<UEBE1> \x9C\x7A |0 # Private Use
+<U753B> \x9C\x7B |0 # CJK Ideograph
+<U8865> \x9C\x7C |0 # CJK Ideograph
+<UEBE4> \x9C\x7D |0 # Private Use
+<U58B6> \x9C\x7E |0 # CJK Ideograph
+<U371C> \x9C\xA1 |0 # CJK Ideograph Extension A
+<UEBE7> \x9C\xA2 |0 # Private Use
+<UEBE8> \x9C\xA3 |0 # Private Use
+<UEBE9> \x9C\xA4 |0 # Private Use
+<U3C54> \x9C\xA5 |0 # CJK Ideograph Extension A
+<UEBEB> \x9C\xA6 |0 # Private Use
+<UEBEC> \x9C\xA7 |0 # Private Use
+<U9281> \x9C\xA8 |0 # CJK Ideograph
+<UEBEE> \x9C\xA9 |0 # Private Use
+<UEBEF> \x9C\xAA |0 # Private Use
+<U9330> \x9C\xAB |0 # CJK Ideograph
+<UEBF1> \x9C\xAC |0 # Private Use
+<UEBF2> \x9C\xAD |0 # Private Use
+<U6C39> \x9C\xAE |0 # CJK Ideograph
+<U949F> \x9C\xAF |0 # CJK Ideograph
+<UEBF5> \x9C\xB0 |0 # Private Use
+<UEBF6> \x9C\xB1 |0 # Private Use
+<U8827> \x9C\xB2 |0 # CJK Ideograph
+<U88F5> \x9C\xB3 |0 # CJK Ideograph
+<UEBF9> \x9C\xB4 |0 # Private Use
+<UEBFA> \x9C\xB5 |0 # Private Use
+<UEBFB> \x9C\xB6 |0 # Private Use
+<U6EB8> \x9C\xB7 |0 # CJK Ideograph
+<UEBFD> \x9C\xB8 |0 # Private Use
+<UEBFE> \x9C\xB9 |0 # Private Use
+<U39A4> \x9C\xBA |0 # CJK Ideograph Extension A
+<U36B9> \x9C\xBB |0 # CJK Ideograph Extension A
+<U453F> \x9C\xBE |0 # CJK Ideograph Extension A
+<U66B6> \x9C\xBF |0 # CJK Ideograph
+<UEC05> \x9C\xC0 |0 # Private Use
+<UEC06> \x9C\xC1 |0 # Private Use
+<U8943> \x9C\xC2 |0 # CJK Ideograph
+<UEC08> \x9C\xC3 |0 # Private Use
+<UEC09> \x9C\xC4 |0 # Private Use
+<U56D6> \x9C\xC5 |0 # CJK Ideograph
+<U40DF> \x9C\xC6 |0 # CJK Ideograph Extension A
+<UEC0C> \x9C\xC7 |0 # Private Use
+<U39A1> \x9C\xC8 |0 # CJK Ideograph Extension A
+<UEC0E> \x9C\xC9 |0 # Private Use
+<UEC0F> \x9C\xCA |0 # Private Use
+<UEC10> \x9C\xCB |0 # Private Use
+<U71AD> \x9C\xCC |0 # CJK Ideograph
+<U8366> \x9C\xCD |0 # CJK Ideograph
+<UEC13> \x9C\xCE |0 # Private Use
+<UEC14> \x9C\xCF |0 # Private Use
+<U4CB7> \x9C\xD1 |0 # CJK Ideograph Extension A
+<UEC17> \x9C\xD2 |0 # Private Use
+<UEC18> \x9C\xD3 |0 # Private Use
+<UEC19> \x9C\xD4 |0 # Private Use
+<UEC1A> \x9C\xD5 |0 # Private Use
+<UEC1B> \x9C\xD6 |0 # Private Use
+<UEC1C> \x9C\xD7 |0 # Private Use
+<UEC1D> \x9C\xD8 |0 # Private Use
+<U7B43> \x9C\xD9 |0 # CJK Ideograph
+<U797E> \x9C\xDA |0 # CJK Ideograph
+<UEC20> \x9C\xDB |0 # Private Use
+<U6FB5> \x9C\xDC |0 # CJK Ideograph
+<UEC22> \x9C\xDD |0 # Private Use
+<U6A03> \x9C\xDE |0 # CJK Ideograph
+<UEC24> \x9C\xDF |0 # Private Use
+<U53A2> \x9C\xE0 |0 # CJK Ideograph
+<UEC26> \x9C\xE1 |0 # Private Use
+<U93BF> \x9C\xE2 |0 # CJK Ideograph
+<U6836> \x9C\xE3 |0 # CJK Ideograph
+<U975D> \x9C\xE4 |0 # CJK Ideograph
+<UEC2A> \x9C\xE5 |0 # Private Use
+<UEC2B> \x9C\xE6 |0 # Private Use
+<UEC2C> \x9C\xE7 |0 # Private Use
+<UEC2D> \x9C\xE8 |0 # Private Use
+<UEC2E> \x9C\xE9 |0 # Private Use
+<UEC2F> \x9C\xEA |0 # Private Use
+<U5D85> \x9C\xEB |0 # CJK Ideograph
+<UEC31> \x9C\xEC |0 # Private Use
+<UEC32> \x9C\xED |0 # Private Use
+<U5715> \x9C\xEE |0 # CJK Ideograph
+<U9823> \x9C\xEF |0 # CJK Ideograph
+<UEC35> \x9C\xF0 |0 # Private Use
+<U5DAB> \x9C\xF1 |0 # CJK Ideograph
+<UEC37> \x9C\xF2 |0 # Private Use
+<U65BE> \x9C\xF3 |0 # CJK Ideograph
+<U69D5> \x9C\xF4 |0 # CJK Ideograph
+<U53D2> \x9C\xF5 |0 # CJK Ideograph
+<UEC3B> \x9C\xF6 |0 # Private Use
+<UEC3C> \x9C\xF7 |0 # Private Use
+<U3C11> \x9C\xF8 |0 # CJK Ideograph Extension A
+<U6736> \x9C\xF9 |0 # CJK Ideograph
+<UEC3F> \x9C\xFA |0 # Private Use
+<UEC40> \x9C\xFB |0 # Private Use
+<UEC41> \x9C\xFC |0 # Private Use
+<UEC42> \x9C\xFD |0 # Private Use
+<UEC43> \x9C\xFE |0 # Private Use
+<UEC44> \x9D\x40 |0 # Private Use
+<UEC45> \x9D\x41 |0 # Private Use
+<UEC46> \x9D\x42 |0 # Private Use
+<UEC47> \x9D\x43 |0 # Private Use
+<UEC48> \x9D\x44 |0 # Private Use
+<UEC49> \x9D\x45 |0 # Private Use
+<U35CA> \x9D\x46 |0 # CJK Ideograph Extension A
+<UEC4B> \x9D\x47 |0 # Private Use
+<UEC4C> \x9D\x48 |0 # Private Use
+<U48FA> \x9D\x49 |0 # CJK Ideograph Extension A
+<U63E6> \x9D\x4A |0 # CJK Ideograph
+<UEC4F> \x9D\x4B |0 # Private Use
+<U7808> \x9D\x4C |0 # CJK Ideograph
+<U9255> \x9D\x4D |0 # CJK Ideograph
+<UEC52> \x9D\x4E |0 # Private Use
+<U43F2> \x9D\x4F |0 # CJK Ideograph Extension A
+<UEC54> \x9D\x50 |0 # Private Use
+<U43DF> \x9D\x51 |0 # CJK Ideograph Extension A
+<UEC56> \x9D\x52 |0 # Private Use
+<UEC57> \x9D\x53 |0 # Private Use
+<UEC58> \x9D\x54 |0 # Private Use
+<U59F8> \x9D\x55 |0 # CJK Ideograph
+<UEC5A> \x9D\x56 |0 # Private Use
+<UEC5C> \x9D\x58 |0 # Private Use
+<UEC5D> \x9D\x59 |0 # Private Use
+<UEC5F> \x9D\x5B |0 # Private Use
+<UEC60> \x9D\x5C |0 # Private Use
+<U3DF7> \x9D\x5D |0 # CJK Ideograph Extension A
+<UEC62> \x9D\x5E |0 # Private Use
+<UEC63> \x9D\x5F |0 # Private Use
+<U8FD0> \x9D\x60 |0 # CJK Ideograph
+<U728F> \x9D\x61 |0 # CJK Ideograph
+<U568B> \x9D\x62 |0 # CJK Ideograph
+<UEC67> \x9D\x63 |0 # Private Use
+<UEC68> \x9D\x64 |0 # Private Use
+<UEC69> \x9D\x65 |0 # Private Use
+<UEC6A> \x9D\x66 |0 # Private Use
+<UEC6B> \x9D\x67 |0 # Private Use
+<UEC6C> \x9D\x68 |0 # Private Use
+<UEC6D> \x9D\x69 |0 # Private Use
+<UEC6E> \x9D\x6A |0 # Private Use
+<UEC6F> \x9D\x6B |0 # Private Use
+<UEC70> \x9D\x6C |0 # Private Use
+<UEC71> \x9D\x6D |0 # Private Use
+<UEC72> \x9D\x6E |0 # Private Use
+<UEC73> \x9D\x6F |0 # Private Use
+<U7E9F> \x9D\x70 |0 # CJK Ideograph
+<UEC75> \x9D\x71 |0 # Private Use
+<UEC76> \x9D\x72 |0 # Private Use
+<U4CA4> \x9D\x73 |0 # CJK Ideograph Extension A
+<U9547> \x9D\x74 |0 # CJK Ideograph
+<UEC79> \x9D\x75 |0 # Private Use
+<U71A2> \x9D\x76 |0 # CJK Ideograph
+<UEC7B> \x9D\x77 |0 # Private Use
+<U4D91> \x9D\x78 |0 # CJK Ideograph Extension A
+<U9012> \x9D\x79 |0 # CJK Ideograph
+<UEC7E> \x9D\x7A |0 # Private Use
+<U4D9C> \x9D\x7B |0 # CJK Ideograph Extension A
+<UEC80> \x9D\x7C |0 # Private Use
+<U8FBE> \x9D\x7D |0 # CJK Ideograph
+<U55C1> \x9D\x7E |0 # CJK Ideograph
+<U8FBA> \x9D\xA1 |0 # CJK Ideograph
+<UEC84> \x9D\xA2 |0 # Private Use
+<U8FB9> \x9D\xA3 |0 # CJK Ideograph
+<UEC86> \x9D\xA4 |0 # Private Use
+<U4509> \x9D\xA5 |0 # CJK Ideograph Extension A
+<U7E7F> \x9D\xA6 |0 # CJK Ideograph
+<U6F56> \x9D\xA7 |0 # CJK Ideograph
+<U6AB1> \x9D\xA8 |0 # CJK Ideograph
+<U4EEA> \x9D\xA9 |0 # CJK Ideograph
+<U34E4> \x9D\xAA |0 # CJK Ideograph Extension A
+<UEC8D> \x9D\xAB |0 # Private Use
+<UEC8E> \x9D\xAC |0 # Private Use
+<U373A> \x9D\xAD |0 # CJK Ideograph Extension A
+<U8E80> \x9D\xAE |0 # CJK Ideograph
+<UEC91> \x9D\xAF |0 # Private Use
+<UEC92> \x9D\xB0 |0 # Private Use
+<UEC93> \x9D\xB1 |0 # Private Use
+<UEC94> \x9D\xB2 |0 # Private Use
+<UEC95> \x9D\xB3 |0 # Private Use
+<UEC96> \x9D\xB4 |0 # Private Use
+<U3DEB> \x9D\xB5 |0 # CJK Ideograph Extension A
+<UEC98> \x9D\xB6 |0 # Private Use
+<UEC99> \x9D\xB7 |0 # Private Use
+<UEC9A> \x9D\xB8 |0 # Private Use
+<UEC9B> \x9D\xB9 |0 # Private Use
+<U4E9A> \x9D\xBA |0 # CJK Ideograph
+<UEC9D> \x9D\xBB |0 # Private Use
+<UEC9E> \x9D\xBC |0 # Private Use
+<U56BF> \x9D\xBD |0 # CJK Ideograph
+<UECA0> \x9D\xBE |0 # Private Use
+<U8E0E> \x9D\xBF |0 # CJK Ideograph
+<U5B6D> \x9D\xC0 |0 # CJK Ideograph
+<UECA3> \x9D\xC1 |0 # Private Use
+<UECA4> \x9D\xC2 |0 # Private Use
+<U63DE> \x9D\xC3 |0 # CJK Ideograph
+<UECA7> \x9D\xC5 |0 # Private Use
+<UECA8> \x9D\xC6 |0 # Private Use
+<U6530> \x9D\xC7 |0 # CJK Ideograph
+<U562D> \x9D\xC8 |0 # CJK Ideograph
+<UECAB> \x9D\xC9 |0 # Private Use
+<U541A> \x9D\xCA |0 # CJK Ideograph
+<UECAD> \x9D\xCB |0 # Private Use
+<U3DC6> \x9D\xCC |0 # CJK Ideograph Extension A
+<UECAF> \x9D\xCD |0 # Private Use
+<U4C7D> \x9D\xCE |0 # CJK Ideograph Extension A
+<U5622> \x9D\xCF |0 # CJK Ideograph
+<U561E> \x9D\xD0 |0 # CJK Ideograph
+<U7F49> \x9D\xD1 |0 # CJK Ideograph
+<UECB4> \x9D\xD2 |0 # Private Use
+<U5975> \x9D\xD3 |0 # CJK Ideograph
+<UECB6> \x9D\xD4 |0 # Private Use
+<U8770> \x9D\xD5 |0 # CJK Ideograph
+<U4E1C> \x9D\xD6 |0 # CJK Ideograph
+<UECB9> \x9D\xD7 |0 # Private Use
+<UECBA> \x9D\xD8 |0 # Private Use
+<UECBB> \x9D\xD9 |0 # Private Use
+<U8117> \x9D\xDA |0 # CJK Ideograph
+<U9D5E> \x9D\xDB |0 # CJK Ideograph
+<U8D18> \x9D\xDC |0 # CJK Ideograph
+<U763B> \x9D\xDD |0 # CJK Ideograph
+<U9C45> \x9D\xDE |0 # CJK Ideograph
+<U764E> \x9D\xDF |0 # CJK Ideograph
+<U77B9> \x9D\xE0 |0 # CJK Ideograph
+<U9345> \x9D\xE1 |0 # CJK Ideograph
+<U5432> \x9D\xE2 |0 # CJK Ideograph
+<U8148> \x9D\xE3 |0 # CJK Ideograph
+<U82F7> \x9D\xE4 |0 # CJK Ideograph
+<U5625> \x9D\xE5 |0 # CJK Ideograph
+<U8132> \x9D\xE6 |0 # CJK Ideograph
+<U8418> \x9D\xE7 |0 # CJK Ideograph
+<U80BD> \x9D\xE8 |0 # CJK Ideograph
+<U55EA> \x9D\xE9 |0 # CJK Ideograph
+<U7962> \x9D\xEA |0 # CJK Ideograph
+<U5643> \x9D\xEB |0 # CJK Ideograph
+<U5416> \x9D\xEC |0 # CJK Ideograph
+<UECCF> \x9D\xED |0 # Private Use
+<U35CE> \x9D\xEE |0 # CJK Ideograph Extension A
+<U5605> \x9D\xEF |0 # CJK Ideograph
+<U55F1> \x9D\xF0 |0 # CJK Ideograph
+<U66F1> \x9D\xF1 |0 # CJK Ideograph
+<UECD4> \x9D\xF2 |0 # Private Use
+<U362D> \x9D\xF3 |0 # CJK Ideograph Extension A
+<U7534> \x9D\xF4 |0 # CJK Ideograph
+<U55F0> \x9D\xF5 |0 # CJK Ideograph
+<U55BA> \x9D\xF6 |0 # CJK Ideograph
+<U5497> \x9D\xF7 |0 # CJK Ideograph
+<U5572> \x9D\xF8 |0 # CJK Ideograph
+<UECDB> \x9D\xF9 |0 # Private Use
+<UECDC> \x9D\xFA |0 # Private Use
+<U5ED0> \x9D\xFB |0 # CJK Ideograph
+<UECDE> \x9D\xFC |0 # Private Use
+<UECDF> \x9D\xFD |0 # Private Use
+<UECE0> \x9D\xFE |0 # Private Use
+<UECE1> \x9E\x40 |0 # Private Use
+<U9EAB> \x9E\x41 |0 # CJK Ideograph
+<U7D5A> \x9E\x42 |0 # CJK Ideograph
+<U55DE> \x9E\x43 |0 # CJK Ideograph
+<UECE5> \x9E\x44 |0 # Private Use
+<U629D> \x9E\x45 |0 # CJK Ideograph
+<U976D> \x9E\x46 |0 # CJK Ideograph
+<U5494> \x9E\x47 |0 # CJK Ideograph
+<U8CCD> \x9E\x48 |0 # CJK Ideograph
+<U71F6> \x9E\x49 |0 # CJK Ideograph
+<U9176> \x9E\x4A |0 # CJK Ideograph
+<U63FC> \x9E\x4B |0 # CJK Ideograph
+<U63B9> \x9E\x4C |0 # CJK Ideograph
+<U63FE> \x9E\x4D |0 # CJK Ideograph
+<U5569> \x9E\x4E |0 # CJK Ideograph
+<UECF0> \x9E\x4F |0 # Private Use
+<U9C72> \x9E\x50 |0 # CJK Ideograph
+<UECF2> \x9E\x51 |0 # Private Use
+<U519A> \x9E\x52 |0 # CJK Ideograph
+<U34DF> \x9E\x53 |0 # CJK Ideograph Extension A
+<UECF5> \x9E\x54 |0 # Private Use
+<U51A7> \x9E\x55 |0 # CJK Ideograph
+<U544D> \x9E\x56 |0 # CJK Ideograph
+<U551E> \x9E\x57 |0 # CJK Ideograph
+<U5513> \x9E\x58 |0 # CJK Ideograph
+<U7666> \x9E\x59 |0 # CJK Ideograph
+<U8E2D> \x9E\x5A |0 # CJK Ideograph
+<UECFC> \x9E\x5B |0 # Private Use
+<U75B1> \x9E\x5C |0 # CJK Ideograph
+<U80B6> \x9E\x5D |0 # CJK Ideograph
+<U8804> \x9E\x5E |0 # CJK Ideograph
+<U8786> \x9E\x5F |0 # CJK Ideograph
+<U88C7> \x9E\x60 |0 # CJK Ideograph
+<U81B6> \x9E\x61 |0 # CJK Ideograph
+<U841C> \x9E\x62 |0 # CJK Ideograph
+<UED04> \x9E\x63 |0 # Private Use
+<U44EC> \x9E\x64 |0 # CJK Ideograph Extension A
+<U7304> \x9E\x65 |0 # CJK Ideograph
+<UED07> \x9E\x66 |0 # Private Use
+<U5B90> \x9E\x67 |0 # CJK Ideograph
+<U830B> \x9E\x68 |0 # CJK Ideograph
+<UED0A> \x9E\x69 |0 # Private Use
+<U567B> \x9E\x6A |0 # CJK Ideograph
+<UED0C> \x9E\x6B |0 # Private Use
+<UED0D> \x9E\x6C |0 # Private Use
+<UED0E> \x9E\x6D |0 # Private Use
+<UED0F> \x9E\x6E |0 # Private Use
+<UED10> \x9E\x6F |0 # Private Use
+<UED11> \x9E\x70 |0 # Private Use
+<U9170> \x9E\x71 |0 # CJK Ideograph
+<UED13> \x9E\x72 |0 # Private Use
+<U9208> \x9E\x73 |0 # CJK Ideograph
+<UED15> \x9E\x74 |0 # Private Use
+<UED16> \x9E\x75 |0 # Private Use
+<UED17> \x9E\x76 |0 # Private Use
+<UED18> \x9E\x77 |0 # Private Use
+<U7266> \x9E\x78 |0 # CJK Ideograph
+<UED1A> \x9E\x79 |0 # Private Use
+<U474E> \x9E\x7A |0 # CJK Ideograph Extension A
+<UED1C> \x9E\x7B |0 # Private Use
+<UED1D> \x9E\x7C |0 # Private Use
+<UED1E> \x9E\x7D |0 # Private Use
+<U40FA> \x9E\x7E |0 # CJK Ideograph Extension A
+<U9C5D> \x9E\xA1 |0 # CJK Ideograph
+<U651F> \x9E\xA2 |0 # CJK Ideograph
+<UED22> \x9E\xA3 |0 # Private Use
+<U48F3> \x9E\xA4 |0 # CJK Ideograph Extension A
+<UED24> \x9E\xA5 |0 # Private Use
+<UED25> \x9E\xA6 |0 # Private Use
+<UED26> \x9E\xA7 |0 # Private Use
+<UED27> \x9E\xA8 |0 # Private Use
+<UED29> \x9E\xAA |0 # Private Use
+<UED2A> \x9E\xAB |0 # Private Use
+<UED2C> \x9E\xAD |0 # Private Use
+<UED2D> \x9E\xAE |0 # Private Use
+<U71A3> \x9E\xAF |0 # CJK Ideograph
+<U7E8E> \x9E\xB0 |0 # CJK Ideograph
+<U9D50> \x9E\xB1 |0 # CJK Ideograph
+<U4E1A> \x9E\xB2 |0 # CJK Ideograph
+<U4E04> \x9E\xB3 |0 # CJK Ideograph
+<U3577> \x9E\xB4 |0 # CJK Ideograph Extension A
+<U5B0D> \x9E\xB5 |0 # CJK Ideograph
+<U6CB2> \x9E\xB6 |0 # CJK Ideograph
+<U5367> \x9E\xB7 |0 # CJK Ideograph
+<U36AC> \x9E\xB8 |0 # CJK Ideograph Extension A
+<U39DC> \x9E\xB9 |0 # CJK Ideograph Extension A
+<U537D> \x9E\xBA |0 # CJK Ideograph
+<U36A5> \x9E\xBB |0 # CJK Ideograph Extension A
+<UED3B> \x9E\xBC |0 # Private Use
+<U589A> \x9E\xBD |0 # CJK Ideograph
+<UED3D> \x9E\xBE |0 # Private Use
+<U822D> \x9E\xBF |0 # CJK Ideograph
+<U544B> \x9E\xC0 |0 # CJK Ideograph
+<U57AA> \x9E\xC1 |0 # CJK Ideograph
+<UED41> \x9E\xC2 |0 # Private Use
+<UED42> \x9E\xC3 |0 # Private Use
+<U3A52> \x9E\xC5 |0 # CJK Ideograph Extension A
+<UED45> \x9E\xC6 |0 # Private Use
+<U7374> \x9E\xC7 |0 # CJK Ideograph
+<UED47> \x9E\xC8 |0 # Private Use
+<U4D09> \x9E\xC9 |0 # CJK Ideograph Extension A
+<U9BED> \x9E\xCA |0 # CJK Ideograph
+<UED4A> \x9E\xCB |0 # Private Use
+<UED4B> \x9E\xCC |0 # Private Use
+<U4C5B> \x9E\xCD |0 # CJK Ideograph Extension A
+<UED4D> \x9E\xCE |0 # Private Use
+<UED4E> \x9E\xCF |0 # Private Use
+<UED4F> \x9E\xD0 |0 # Private Use
+<U845C> \x9E\xD1 |0 # CJK Ideograph
+<UED51> \x9E\xD2 |0 # Private Use
+<UED52> \x9E\xD3 |0 # Private Use
+<UED53> \x9E\xD4 |0 # Private Use
+<UED54> \x9E\xD5 |0 # Private Use
+<U632E> \x9E\xD6 |0 # CJK Ideograph
+<U7D25> \x9E\xD7 |0 # CJK Ideograph
+<UED57> \x9E\xD8 |0 # Private Use
+<UED58> \x9E\xD9 |0 # Private Use
+<U3A2A> \x9E\xDA |0 # CJK Ideograph Extension A
+<U9008> \x9E\xDB |0 # CJK Ideograph
+<U52CC> \x9E\xDC |0 # CJK Ideograph
+<U3E74> \x9E\xDD |0 # CJK Ideograph Extension A
+<U367A> \x9E\xDE |0 # CJK Ideograph Extension A
+<U45E9> \x9E\xDF |0 # CJK Ideograph Extension A
+<UED5F> \x9E\xE0 |0 # Private Use
+<U7640> \x9E\xE1 |0 # CJK Ideograph
+<U5AF0> \x9E\xE2 |0 # CJK Ideograph
+<UED62> \x9E\xE3 |0 # Private Use
+<U787A> \x9E\xE4 |0 # CJK Ideograph
+<U47B6> \x9E\xE5 |0 # CJK Ideograph Extension A
+<U58A7> \x9E\xE6 |0 # CJK Ideograph
+<U40BF> \x9E\xE7 |0 # CJK Ideograph Extension A
+<U567C> \x9E\xE8 |0 # CJK Ideograph
+<U9B8B> \x9E\xE9 |0 # CJK Ideograph
+<U5D74> \x9E\xEA |0 # CJK Ideograph
+<U7654> \x9E\xEB |0 # CJK Ideograph
+<UED6B> \x9E\xEC |0 # Private Use
+<U9E85> \x9E\xED |0 # CJK Ideograph
+<U4CE1> \x9E\xEE |0 # CJK Ideograph Extension A
+<U37FB> \x9E\xF0 |0 # CJK Ideograph Extension A
+<U6119> \x9E\xF1 |0 # CJK Ideograph
+<UED71> \x9E\xF2 |0 # Private Use
+<UED72> \x9E\xF3 |0 # Private Use
+<U565D> \x9E\xF5 |0 # CJK Ideograph
+<UED75> \x9E\xF6 |0 # Private Use
+<U57A7> \x9E\xF7 |0 # CJK Ideograph
+<UED77> \x9E\xF8 |0 # Private Use
+<UED78> \x9E\xF9 |0 # Private Use
+<U5234> \x9E\xFA |0 # CJK Ideograph
+<UED7A> \x9E\xFB |0 # Private Use
+<U35AD> \x9E\xFC |0 # CJK Ideograph Extension A
+<U9D7C> \x9E\xFE |0 # CJK Ideograph
+<U7C56> \x9F\x40 |0 # CJK Ideograph
+<U9B39> \x9F\x41 |0 # CJK Ideograph
+<U57DE> \x9F\x42 |0 # CJK Ideograph
+<UED81> \x9F\x43 |0 # Private Use
+<U5C53> \x9F\x44 |0 # CJK Ideograph
+<U64D3> \x9F\x45 |0 # CJK Ideograph
+<UED84> \x9F\x46 |0 # Private Use
+<UED85> \x9F\x47 |0 # Private Use
+<UED86> \x9F\x48 |0 # Private Use
+<U86AD> \x9F\x49 |0 # CJK Ideograph
+<UED88> \x9F\x4A |0 # Private Use
+<UED89> \x9F\x4B |0 # Private Use
+<UED8A> \x9F\x4C |0 # Private Use
+<UED8B> \x9F\x4D |0 # Private Use
+<U51FE> \x9F\x4F |0 # CJK Ideograph
+<UED8E> \x9F\x50 |0 # Private Use
+<U5D8E> \x9F\x51 |0 # CJK Ideograph
+<U9703> \x9F\x52 |0 # CJK Ideograph
+<UED91> \x9F\x53 |0 # Private Use
+<U9E81> \x9F\x54 |0 # CJK Ideograph
+<U904C> \x9F\x55 |0 # CJK Ideograph
+<U7B1F> \x9F\x56 |0 # CJK Ideograph
+<U9B02> \x9F\x57 |0 # CJK Ideograph
+<U5CD1> \x9F\x58 |0 # CJK Ideograph
+<U7BA3> \x9F\x59 |0 # CJK Ideograph
+<U6268> \x9F\x5A |0 # CJK Ideograph
+<U6335> \x9F\x5B |0 # CJK Ideograph
+<U9AFF> \x9F\x5C |0 # CJK Ideograph
+<U7BCF> \x9F\x5D |0 # CJK Ideograph
+<U9B2A> \x9F\x5E |0 # CJK Ideograph
+<U7C7E> \x9F\x5F |0 # CJK Ideograph
+<U7C42> \x9F\x61 |0 # CJK Ideograph
+<U7C86> \x9F\x62 |0 # CJK Ideograph
+<U9C15> \x9F\x63 |0 # CJK Ideograph
+<U7BFC> \x9F\x64 |0 # CJK Ideograph
+<U9B09> \x9F\x65 |0 # CJK Ideograph
+<U9C1B> \x9F\x67 |0 # CJK Ideograph
+<UEDA6> \x9F\x68 |0 # Private Use
+<U9F5A> \x9F\x69 |0 # CJK Ideograph
+<U5573> \x9F\x6A |0 # CJK Ideograph
+<U5BC3> \x9F\x6B |0 # CJK Ideograph
+<U4FFD> \x9F\x6C |0 # CJK Ideograph
+<U9E98> \x9F\x6D |0 # CJK Ideograph
+<U4FF2> \x9F\x6E |0 # CJK Ideograph
+<U5260> \x9F\x6F |0 # CJK Ideograph
+<U3E06> \x9F\x70 |0 # CJK Ideograph Extension A
+<U52D1> \x9F\x71 |0 # CJK Ideograph
+<U5767> \x9F\x72 |0 # CJK Ideograph
+<U5056> \x9F\x73 |0 # CJK Ideograph
+<U59B7> \x9F\x74 |0 # CJK Ideograph
+<U5E12> \x9F\x75 |0 # CJK Ideograph
+<U97C8> \x9F\x76 |0 # CJK Ideograph
+<U9DAB> \x9F\x77 |0 # CJK Ideograph
+<U8F5C> \x9F\x78 |0 # CJK Ideograph
+<U5469> \x9F\x79 |0 # CJK Ideograph
+<U97B4> \x9F\x7A |0 # CJK Ideograph
+<U9940> \x9F\x7B |0 # CJK Ideograph
+<U97BA> \x9F\x7C |0 # CJK Ideograph
+<U532C> \x9F\x7D |0 # CJK Ideograph
+<U6130> \x9F\x7E |0 # CJK Ideograph
+<U692C> \x9F\xA1 |0 # CJK Ideograph
+<U53DA> \x9F\xA2 |0 # CJK Ideograph
+<U9C0A> \x9F\xA3 |0 # CJK Ideograph
+<U9D02> \x9F\xA4 |0 # CJK Ideograph
+<U4C3B> \x9F\xA5 |0 # CJK Ideograph Extension A
+<U9641> \x9F\xA6 |0 # CJK Ideograph
+<U6980> \x9F\xA7 |0 # CJK Ideograph
+<U50A6> \x9F\xA8 |0 # CJK Ideograph
+<U7546> \x9F\xA9 |0 # CJK Ideograph
+<UEDC6> \x9F\xAA |0 # Private Use
+<U99DA> \x9F\xAB |0 # CJK Ideograph
+<U5273> \x9F\xAC |0 # CJK Ideograph
+<U9159> \x9F\xAE |0 # CJK Ideograph
+<U9681> \x9F\xAF |0 # CJK Ideograph
+<U915C> \x9F\xB0 |0 # CJK Ideograph
+<U9151> \x9F\xB2 |0 # CJK Ideograph
+<UEDCF> \x9F\xB3 |0 # Private Use
+<U637F> \x9F\xB4 |0 # CJK Ideograph
+<UEDD1> \x9F\xB5 |0 # Private Use
+<U6ACA> \x9F\xB6 |0 # CJK Ideograph
+<U5611> \x9F\xB7 |0 # CJK Ideograph
+<U918E> \x9F\xB8 |0 # CJK Ideograph
+<U757A> \x9F\xB9 |0 # CJK Ideograph
+<U6285> \x9F\xBA |0 # CJK Ideograph
+<UEDD7> \x9F\xBB |0 # Private Use
+<U734F> \x9F\xBC |0 # CJK Ideograph
+<U7C70> \x9F\xBD |0 # CJK Ideograph
+<UEDDA> \x9F\xBE |0 # Private Use
+<UEDDB> \x9F\xBF |0 # Private Use
+<UEDDD> \x9F\xC1 |0 # Private Use
+<U76D6> \x9F\xC2 |0 # CJK Ideograph
+<U9B9D> \x9F\xC3 |0 # CJK Ideograph
+<U4E2A> \x9F\xC4 |0 # CJK Ideograph
+<UEDE1> \x9F\xC5 |0 # Private Use
+<U83BE> \x9F\xC6 |0 # CJK Ideograph
+<U8842> \x9F\xC7 |0 # CJK Ideograph
+<U5C4A> \x9F\xC9 |0 # CJK Ideograph
+<U69C0> \x9F\xCA |0 # CJK Ideograph
+<U577A> \x9F\xCC |0 # CJK Ideograph
+<U521F> \x9F\xCD |0 # CJK Ideograph
+<U5DF5> \x9F\xCE |0 # CJK Ideograph
+<U4ECE> \x9F\xCF |0 # CJK Ideograph
+<U6C31> \x9F\xD0 |0 # CJK Ideograph
+<UEDED> \x9F\xD1 |0 # Private Use
+<U4F39> \x9F\xD2 |0 # CJK Ideograph
+<U549C> \x9F\xD3 |0 # CJK Ideograph
+<U54DA> \x9F\xD4 |0 # CJK Ideograph
+<U529A> \x9F\xD5 |0 # CJK Ideograph
+<U8D82> \x9F\xD6 |0 # CJK Ideograph
+<U35FE> \x9F\xD7 |0 # CJK Ideograph Extension A
+<U35F3> \x9F\xD9 |0 # CJK Ideograph Extension A
+<U6B52> \x9F\xDB |0 # CJK Ideograph
+<U917C> \x9F\xDC |0 # CJK Ideograph
+<U9FA5> \x9F\xDD |0 # CJK Ideograph
+<U9B97> \x9F\xDE |0 # CJK Ideograph
+<U982E> \x9F\xDF |0 # CJK Ideograph
+<U98B4> \x9F\xE0 |0 # CJK Ideograph
+<U9ABA> \x9F\xE1 |0 # CJK Ideograph
+<U9EA8> \x9F\xE2 |0 # CJK Ideograph
+<U9E84> \x9F\xE3 |0 # CJK Ideograph
+<U717A> \x9F\xE4 |0 # CJK Ideograph
+<U7B14> \x9F\xE5 |0 # CJK Ideograph
+<U6BFA> \x9F\xE7 |0 # CJK Ideograph
+<U8818> \x9F\xE8 |0 # CJK Ideograph
+<U7F78> \x9F\xE9 |0 # CJK Ideograph
+<U5620> \x9F\xEB |0 # CJK Ideograph
+<UEE08> \x9F\xEC |0 # Private Use
+<U8E77> \x9F\xED |0 # CJK Ideograph
+<U9F53> \x9F\xEE |0 # CJK Ideograph
+<U8DD4> \x9F\xF0 |0 # CJK Ideograph
+<U8E4F> \x9F\xF1 |0 # CJK Ideograph
+<U9E1C> \x9F\xF2 |0 # CJK Ideograph
+<U8E01> \x9F\xF3 |0 # CJK Ideograph
+<U6282> \x9F\xF4 |0 # CJK Ideograph
+<UEE11> \x9F\xF5 |0 # Private Use
+<U8E28> \x9F\xF6 |0 # CJK Ideograph
+<U8E75> \x9F\xF7 |0 # CJK Ideograph
+<U7AD3> \x9F\xF8 |0 # CJK Ideograph
+<UEE15> \x9F\xF9 |0 # Private Use
+<U7A3E> \x9F\xFA |0 # CJK Ideograph
+<U78D8> \x9F\xFB |0 # CJK Ideograph
+<U6CEA> \x9F\xFC |0 # CJK Ideograph
+<U8A67> \x9F\xFD |0 # CJK Ideograph
+<U7607> \x9F\xFE |0 # CJK Ideograph
+<UEE1B> \xA0\x40 |0 # Private Use
+<U9F26> \xA0\x41 |0 # CJK Ideograph
+<U6CCE> \xA0\x42 |0 # CJK Ideograph
+<U87D6> \xA0\x43 |0 # CJK Ideograph
+<U75C3> \xA0\x44 |0 # CJK Ideograph
+<UEE20> \xA0\x45 |0 # Private Use
+<U7853> \xA0\x46 |0 # CJK Ideograph
+<UEE22> \xA0\x47 |0 # Private Use
+<U8D0C> \xA0\x48 |0 # CJK Ideograph
+<U72E2> \xA0\x49 |0 # CJK Ideograph
+<U7371> \xA0\x4A |0 # CJK Ideograph
+<U8B2D> \xA0\x4B |0 # CJK Ideograph
+<U7302> \xA0\x4C |0 # CJK Ideograph
+<U74F1> \xA0\x4D |0 # CJK Ideograph
+<U8CEB> \xA0\x4E |0 # CJK Ideograph
+<UEE2A> \xA0\x4F |0 # Private Use
+<U862F> \xA0\x50 |0 # CJK Ideograph
+<U5FBA> \xA0\x51 |0 # CJK Ideograph
+<U88A0> \xA0\x52 |0 # CJK Ideograph
+<U44B7> \xA0\x53 |0 # CJK Ideograph Extension A
+<UEE30> \xA0\x55 |0 # Private Use
+<UEE31> \xA0\x56 |0 # Private Use
+<U8A7E> \xA0\x58 |0 # CJK Ideograph
+<UEE34> \xA0\x59 |0 # Private Use
+<U60FD> \xA0\x5B |0 # CJK Ideograph
+<U7667> \xA0\x5C |0 # CJK Ideograph
+<U9AD7> \xA0\x5D |0 # CJK Ideograph
+<U9D44> \xA0\x5E |0 # CJK Ideograph
+<U936E> \xA0\x5F |0 # CJK Ideograph
+<U9B8F> \xA0\x60 |0 # CJK Ideograph
+<U87F5> \xA0\x61 |0 # CJK Ideograph
+<U8CF7> \xA0\x64 |0 # CJK Ideograph
+<U732C> \xA0\x65 |0 # CJK Ideograph
+<U9721> \xA0\x66 |0 # CJK Ideograph
+<U9BB0> \xA0\x67 |0 # CJK Ideograph
+<U35D6> \xA0\x68 |0 # CJK Ideograph Extension A
+<U72B2> \xA0\x69 |0 # CJK Ideograph
+<U4C07> \xA0\x6A |0 # CJK Ideograph Extension A
+<U7C51> \xA0\x6B |0 # CJK Ideograph
+<U994A> \xA0\x6C |0 # CJK Ideograph
+<UEE48> \xA0\x6D |0 # Private Use
+<U6159> \xA0\x6E |0 # CJK Ideograph
+<U4C04> \xA0\x6F |0 # CJK Ideograph Extension A
+<U9E96> \xA0\x70 |0 # CJK Ideograph
+<U617D> \xA0\x71 |0 # CJK Ideograph
+<U575F> \xA0\x73 |0 # CJK Ideograph
+<U616F> \xA0\x74 |0 # CJK Ideograph
+<U62A6> \xA0\x75 |0 # CJK Ideograph
+<U6239> \xA0\x76 |0 # CJK Ideograph
+<U3A5C> \xA0\x78 |0 # CJK Ideograph Extension A
+<U61E2> \xA0\x79 |0 # CJK Ideograph
+<U53AA> \xA0\x7A |0 # CJK Ideograph
+<UEE56> \xA0\x7B |0 # Private Use
+<U6364> \xA0\x7C |0 # CJK Ideograph
+<U6802> \xA0\x7D |0 # CJK Ideograph
+<U35D2> \xA0\x7E |0 # CJK Ideograph Extension A
+<U5D57> \xA0\xA1 |0 # CJK Ideograph
+<UEE5B> \xA0\xA2 |0 # Private Use
+<U8FDA> \xA0\xA3 |0 # CJK Ideograph
+<UEE5D> \xA0\xA4 |0 # Private Use
+<U50D9> \xA0\xA6 |0 # CJK Ideograph
+<UEE60> \xA0\xA7 |0 # Private Use
+<U7906> \xA0\xA8 |0 # CJK Ideograph
+<U5332> \xA0\xA9 |0 # CJK Ideograph
+<U9638> \xA0\xAA |0 # CJK Ideograph
+<UEE64> \xA0\xAB |0 # Private Use
+<U4065> \xA0\xAC |0 # CJK Ideograph Extension A
+<U77FE> \xA0\xAE |0 # CJK Ideograph
+<U7CC2> \xA0\xB0 |0 # CJK Ideograph
+<UEE6A> \xA0\xB1 |0 # Private Use
+<U7CDA> \xA0\xB2 |0 # CJK Ideograph
+<U7A2D> \xA0\xB3 |0 # CJK Ideograph
+<U8066> \xA0\xB4 |0 # CJK Ideograph
+<U8063> \xA0\xB5 |0 # CJK Ideograph
+<U7D4D> \xA0\xB6 |0 # CJK Ideograph
+<U7505> \xA0\xB7 |0 # CJK Ideograph
+<U74F2> \xA0\xB8 |0 # CJK Ideograph
+<U8994> \xA0\xB9 |0 # CJK Ideograph
+<U821A> \xA0\xBA |0 # CJK Ideograph
+<U670C> \xA0\xBB |0 # CJK Ideograph
+<U8062> \xA0\xBC |0 # CJK Ideograph
+<UEE76> \xA0\xBD |0 # Private Use
+<U805B> \xA0\xBE |0 # CJK Ideograph
+<U74F0> \xA0\xBF |0 # CJK Ideograph
+<U8103> \xA0\xC0 |0 # CJK Ideograph
+<U7724> \xA0\xC1 |0 # CJK Ideograph
+<U8989> \xA0\xC2 |0 # CJK Ideograph
+<UEE7C> \xA0\xC3 |0 # Private Use
+<U7553> \xA0\xC4 |0 # CJK Ideograph
+<UEE7E> \xA0\xC5 |0 # Private Use
+<U87A9> \xA0\xC6 |0 # CJK Ideograph
+<U87CE> \xA0\xC7 |0 # CJK Ideograph
+<U81C8> \xA0\xC8 |0 # CJK Ideograph
+<U878C> \xA0\xC9 |0 # CJK Ideograph
+<U8A49> \xA0\xCA |0 # CJK Ideograph
+<U8CAD> \xA0\xCB |0 # CJK Ideograph
+<U8B43> \xA0\xCC |0 # CJK Ideograph
+<U772B> \xA0\xCD |0 # CJK Ideograph
+<U74F8> \xA0\xCE |0 # CJK Ideograph
+<U84DA> \xA0\xCF |0 # CJK Ideograph
+<U3635> \xA0\xD0 |0 # CJK Ideograph Extension A
+<U69B2> \xA0\xD1 |0 # CJK Ideograph
+<U8DA6> \xA0\xD2 |0 # CJK Ideograph
+<U89A9> \xA0\xD4 |0 # CJK Ideograph
+<U6DB9> \xA0\xD6 |0 # CJK Ideograph
+<U87C1> \xA0\xD7 |0 # CJK Ideograph
+<UEE91> \xA0\xD8 |0 # Private Use
+<U74E7> \xA0\xD9 |0 # CJK Ideograph
+<U3DDB> \xA0\xDA |0 # CJK Ideograph Extension A
+<U7176> \xA0\xDB |0 # CJK Ideograph
+<U60A4> \xA0\xDC |0 # CJK Ideograph
+<U619C> \xA0\xDD |0 # CJK Ideograph
+<U3CD1> \xA0\xDE |0 # CJK Ideograph Extension A
+<U6077> \xA0\xE0 |0 # CJK Ideograph
+<U7F71> \xA0\xE2 |0 # CJK Ideograph
+<UEE9C> \xA0\xE3 |0 # Private Use
+<U60E9> \xA0\xE5 |0 # CJK Ideograph
+<U4B7E> \xA0\xE6 |0 # CJK Ideograph Extension A
+<U5220> \xA0\xE7 |0 # CJK Ideograph
+<UEEA1> \xA0\xE8 |0 # Private Use
+<UEEA2> \xA0\xE9 |0 # Private Use
+<UEEA3> \xA0\xEA |0 # Private Use
+<UEEA4> \xA0\xEB |0 # Private Use
+<UEEA5> \xA0\xEC |0 # Private Use
+<UEEA6> \xA0\xED |0 # Private Use
+<UEEA7> \xA0\xEE |0 # Private Use
+<UEEA8> \xA0\xEF |0 # Private Use
+<UEEA9> \xA0\xF0 |0 # Private Use
+<UEEAA> \xA0\xF1 |0 # Private Use
+<U5CC1> \xA0\xF2 |0 # CJK Ideograph
+<UEEAC> \xA0\xF3 |0 # Private Use
+<UEEAD> \xA0\xF4 |0 # Private Use
+<UEEAE> \xA0\xF5 |0 # Private Use
+<UEEAF> \xA0\xF6 |0 # Private Use
+<UEEB0> \xA0\xF7 |0 # Private Use
+<UEEB1> \xA0\xF8 |0 # Private Use
+<U4562> \xA0\xF9 |0 # CJK Ideograph Extension A
+<U5B1F> \xA0\xFA |0 # CJK Ideograph
+<UEEB4> \xA0\xFB |0 # Private Use
+<U9F50> \xA0\xFC |0 # CJK Ideograph
+<U9EA6> \xA0\xFD |0 # CJK Ideograph
+<UEEB7> \xA0\xFE |0 # Private Use
 <U3000> \xA1\x40 |0 # IDEOGRAPHIC SPACE
 <UFF0C> \xA1\x41 |0 # FULLWIDTH COMMA
 <U3001> \xA1\x42 |0 # IDEOGRAPHIC COMMA
 <U3002> \xA1\x43 |0 # IDEOGRAPHIC FULL STOP
 <UFF0E> \xA1\x44 |0 # FULLWIDTH FULL STOP
-<U2027> \xA1\x45 |0 # HYPHENATION POINT
+<U2022> \xA1\x45 |0 # BULLET
 <UFF1B> \xA1\x46 |0 # FULLWIDTH SEMICOLON
 <UFF1A> \xA1\x47 |0 # FULLWIDTH COLON
 <UFF1F> \xA1\x48 |0 # FULLWIDTH QUESTION MARK
@@ -150,7 +3696,7 @@ CHARMAP
 <U2026> \xA1\x4B |0 # HORIZONTAL ELLIPSIS
 <U2025> \xA1\x4C |0 # TWO DOT LEADER
 <UFE50> \xA1\x4D |0 # SMALL COMMA
-<UFE51> \xA1\x4E |0 # SMALL IDEOGRAPHIC COMMA
+<UFF64> \xA1\x4E |0 # HALFWIDTH IDEOGRAPHIC COMMA
 <UFE52> \xA1\x4F |0 # SMALL FULL STOP
 <U00B7> \xA1\x50 |0 # MIDDLE DOT
 <UFE54> \xA1\x51 |0 # SMALL SEMICOLON
@@ -162,7 +3708,6 @@ CHARMAP
 <UFE31> \xA1\x57 |0 # PRESENTATION FORM FOR VERTICAL EM DASH
 <U2014> \xA1\x58 |0 # EM DASH
 <UFE33> \xA1\x59 |0 # PRESENTATION FORM FOR VERTICAL LOW LINE
-<U2574> \xA1\x5A |0 # BOX DRAWINGS LIGHT LEFT
 <UFE34> \xA1\x5B |0 # PRESENTATION FORM FOR VERTICAL WAVY LOW LINE
 <UFE4F> \xA1\x5C |0 # WAVY LOW LINE
 <UFF08> \xA1\x5D |0 # FULLWIDTH LEFT PARENTHESIS
@@ -232,10 +3777,8 @@ CHARMAP
 <U25BC> \xA1\xBF |0 # BLACK DOWN-POINTING TRIANGLE
 <U32A3> \xA1\xC0 |0 # CIRCLED IDEOGRAPH CORRECT
 <U2105> \xA1\xC1 |0 # CARE OF
-<U00AF> \xA1\xC2 |0 # MACRON
-<UFFE3> \xA1\xC3 |0 # FULLWIDTH MACRON
+<U203E> \xA1\xC2 |0 # OVERLINE
 <UFF3F> \xA1\xC4 |0 # FULLWIDTH LOW LINE
-<U02CD> \xA1\xC5 |0 # MODIFIER LETTER LOW MACRON
 <UFE49> \xA1\xC6 |0 # DASHED OVERLINE
 <UFE4A> \xA1\xC7 |0 # CENTRELINE OVERLINE
 <UFE4D> \xA1\xC8 |0 # DASHED LOW LINE
@@ -265,7 +3808,7 @@ CHARMAP
 <UFE64> \xA1\xE0 |0 # SMALL LESS-THAN SIGN
 <UFE65> \xA1\xE1 |0 # SMALL GREATER-THAN SIGN
 <UFE66> \xA1\xE2 |0 # SMALL EQUALS SIGN
-<UFF5E> \xA1\xE3 |0 # FULLWIDTH TILDE
+<U223C> \xA1\xE3 |0 # TILDE OPERATOR
 <U2229> \xA1\xE4 |0 # INTERSECTION
 <U222A> \xA1\xE5 |0 # UNION
 <U22A5> \xA1\xE6 |0 # UP TACK
@@ -280,8 +3823,8 @@ CHARMAP
 <U2234> \xA1\xEF |0 # THEREFORE
 <U2640> \xA1\xF0 |0 # FEMALE SIGN
 <U2642> \xA1\xF1 |0 # MALE SIGN
-<U2295> \xA1\xF2 |0 # CIRCLED PLUS
-<U2299> \xA1\xF3 |0 # CIRCLED DOT OPERATOR
+<U2641> \xA1\xF2 |0 # EARTH
+<U2609> \xA1\xF3 |0 # SUN
 <U2191> \xA1\xF4 |0 # UPWARDS ARROW
 <U2193> \xA1\xF5 |0 # DOWNWARDS ARROW
 <U2190> \xA1\xF6 |0 # LEFTWARDS ARROW
@@ -292,15 +3835,13 @@ CHARMAP
 <U2198> \xA1\xFB |0 # SOUTH EAST ARROW
 <U2225> \xA1\xFC |0 # PARALLEL TO
 <U2223> \xA1\xFD |0 # DIVIDES
-<UFF0F> \xA1\xFE |0 # FULLWIDTH SOLIDUS
-<UFF3C> \xA2\x40 |0 # FULLWIDTH REVERSE SOLIDUS
-<U2215> \xA2\x41 |0 # DIVISION SLASH
-<UFE68> \xA2\x42 |0 # SMALL REVERSE SOLIDUS
+<UFF0F> \xA2\x41 |0 # FULLWIDTH SOLIDUS
+<UFF3C> \xA2\x42 |0 # FULLWIDTH REVERSE SOLIDUS
 <UFF04> \xA2\x43 |0 # FULLWIDTH DOLLAR SIGN
-<UFFE5> \xA2\x44 |0 # FULLWIDTH YEN SIGN
+<U00A5> \xA2\x44 |0 # YEN SIGN
 <U3012> \xA2\x45 |0 # POSTAL MARK
-<UFFE0> \xA2\x46 |0 # FULLWIDTH CENT SIGN
-<UFFE1> \xA2\x47 |0 # FULLWIDTH POUND SIGN
+<U00A2> \xA2\x46 |0 # CENT SIGN
+<U00A3> \xA2\x47 |0 # POUND SIGN
 <UFF05> \xA2\x48 |0 # FULLWIDTH PERCENT SIGN
 <UFF20> \xA2\x49 |0 # FULLWIDTH COMMERCIAL AT
 <U2103> \xA2\x4A |0 # DEGREE CELSIUS
@@ -534,7 +4075,6 @@ CHARMAP
 <U02CA> \xA3\xBD |0 # MODIFIER LETTER ACUTE ACCENT
 <U02C7> \xA3\xBE |0 # CARON
 <U02CB> \xA3\xBF |0 # MODIFIER LETTER GRAVE ACCENT
-<U20AC> \xA3\xE1 |0 # EURO SIGN
 <U4E00> \xA4\x40 |0 # CJK Ideograph
 <U4E59> \xA4\x41 |0 # CJK Ideograph
 <U4E01> \xA4\x42 |0 # CJK Ideograph
@@ -5936,6 +9476,365 @@ CHARMAP
 <U9E1B> \xC6\x7C |0 # CJK Ideograph
 <U9E1E> \xC6\x7D |0 # CJK Ideograph
 <U7C72> \xC6\x7E |0 # CJK Ideograph
+<U2460> \xC6\xA1 |0 # CIRCLED DIGIT ONE
+<U2461> \xC6\xA2 |0 # CIRCLED DIGIT TWO
+<U2462> \xC6\xA3 |0 # CIRCLED DIGIT THREE
+<U2463> \xC6\xA4 |0 # CIRCLED DIGIT FOUR
+<U2464> \xC6\xA5 |0 # CIRCLED DIGIT FIVE
+<U2465> \xC6\xA6 |0 # CIRCLED DIGIT SIX
+<U2466> \xC6\xA7 |0 # CIRCLED DIGIT SEVEN
+<U2467> \xC6\xA8 |0 # CIRCLED DIGIT EIGHT
+<U2468> \xC6\xA9 |0 # CIRCLED DIGIT NINE
+<U2469> \xC6\xAA |0 # CIRCLED NUMBER TEN
+<U2474> \xC6\xAB |0 # PARENTHESIZED DIGIT ONE
+<U2475> \xC6\xAC |0 # PARENTHESIZED DIGIT TWO
+<U2476> \xC6\xAD |0 # PARENTHESIZED DIGIT THREE
+<U2477> \xC6\xAE |0 # PARENTHESIZED DIGIT FOUR
+<U2478> \xC6\xAF |0 # PARENTHESIZED DIGIT FIVE
+<U2479> \xC6\xB0 |0 # PARENTHESIZED DIGIT SIX
+<U247A> \xC6\xB1 |0 # PARENTHESIZED DIGIT SEVEN
+<U247B> \xC6\xB2 |0 # PARENTHESIZED DIGIT EIGHT
+<U247C> \xC6\xB3 |0 # PARENTHESIZED DIGIT NINE
+<U247D> \xC6\xB4 |0 # PARENTHESIZED NUMBER TEN
+<U2170> \xC6\xB5 |0 # SMALL ROMAN NUMERAL ONE
+<U2171> \xC6\xB6 |0 # SMALL ROMAN NUMERAL TWO
+<U2172> \xC6\xB7 |0 # SMALL ROMAN NUMERAL THREE
+<U2173> \xC6\xB8 |0 # SMALL ROMAN NUMERAL FOUR
+<U2174> \xC6\xB9 |0 # SMALL ROMAN NUMERAL FIVE
+<U2175> \xC6\xBA |0 # SMALL ROMAN NUMERAL SIX
+<U2176> \xC6\xBB |0 # SMALL ROMAN NUMERAL SEVEN
+<U2177> \xC6\xBC |0 # SMALL ROMAN NUMERAL EIGHT
+<U2178> \xC6\xBD |0 # SMALL ROMAN NUMERAL NINE
+<U2179> \xC6\xBE |0 # SMALL ROMAN NUMERAL TEN
+<U4E36> \xC6\xBF |0 # CJK Ideograph
+<U4E3F> \xC6\xC0 |0 # CJK Ideograph
+<U4E85> \xC6\xC1 |0 # CJK Ideograph
+<U4EA0> \xC6\xC2 |0 # CJK Ideograph
+<U5182> \xC6\xC3 |0 # CJK Ideograph
+<U5196> \xC6\xC4 |0 # CJK Ideograph
+<U51AB> \xC6\xC5 |0 # CJK Ideograph
+<U52F9> \xC6\xC6 |0 # CJK Ideograph
+<U5338> \xC6\xC7 |0 # CJK Ideograph
+<U5369> \xC6\xC8 |0 # CJK Ideograph
+<U53B6> \xC6\xC9 |0 # CJK Ideograph
+<U590A> \xC6\xCA |0 # CJK Ideograph
+<U5B80> \xC6\xCB |0 # CJK Ideograph
+<U5DDB> \xC6\xCC |0 # CJK Ideograph
+<U2F33> \xC6\xCD |0 # KANGXI RADICAL SHORT THREAD
+<U5E7F> \xC6\xCE |0 # CJK Ideograph
+<U5F50> \xC6\xD0 |0 # CJK Ideograph
+<U5F61> \xC6\xD1 |0 # CJK Ideograph
+<U6534> \xC6\xD2 |0 # CJK Ideograph
+<U7592> \xC6\xD4 |0 # CJK Ideograph
+<U8FB5> \xC6\xD6 |0 # CJK Ideograph
+<U00A8> \xC6\xD8 |0 # DIAERESIS
+<U02C6> \xC6\xD9 |0 # MODIFIER LETTER CIRCUMFLEX ACCENT
+<U30FD> \xC6\xDA |0 # KATAKANA ITERATION MARK
+<U30FE> \xC6\xDB |0 # KATAKANA VOICED ITERATION MARK
+<U309D> \xC6\xDC |0 # HIRAGANA ITERATION MARK
+<U309E> \xC6\xDD |0 # HIRAGANA VOICED ITERATION MARK
+<U3005> \xC6\xE0 |0 # IDEOGRAPHIC ITERATION MARK
+<U3006> \xC6\xE1 |0 # IDEOGRAPHIC CLOSING MARK
+<U3007> \xC6\xE2 |0 # IDEOGRAPHIC NUMBER ZERO
+<U30FC> \xC6\xE3 |0 # KATAKANA-HIRAGANA PROLONGED SOUND MARK
+<UFF3B> \xC6\xE4 |0 # FULLWIDTH LEFT SQUARE BRACKET
+<UFF3D> \xC6\xE5 |0 # FULLWIDTH RIGHT SQUARE BRACKET
+<U273D> \xC6\xE6 |0 # HEAVY TEARDROP-SPOKED ASTERISK
+<U3041> \xC6\xE7 |0 # HIRAGANA LETTER SMALL A
+<U3042> \xC6\xE8 |0 # HIRAGANA LETTER A
+<U3043> \xC6\xE9 |0 # HIRAGANA LETTER SMALL I
+<U3044> \xC6\xEA |0 # HIRAGANA LETTER I
+<U3045> \xC6\xEB |0 # HIRAGANA LETTER SMALL U
+<U3046> \xC6\xEC |0 # HIRAGANA LETTER U
+<U3047> \xC6\xED |0 # HIRAGANA LETTER SMALL E
+<U3048> \xC6\xEE |0 # HIRAGANA LETTER E
+<U3049> \xC6\xEF |0 # HIRAGANA LETTER SMALL O
+<U304A> \xC6\xF0 |0 # HIRAGANA LETTER O
+<U304B> \xC6\xF1 |0 # HIRAGANA LETTER KA
+<U304C> \xC6\xF2 |0 # HIRAGANA LETTER GA
+<U304D> \xC6\xF3 |0 # HIRAGANA LETTER KI
+<U304E> \xC6\xF4 |0 # HIRAGANA LETTER GI
+<U304F> \xC6\xF5 |0 # HIRAGANA LETTER KU
+<U3050> \xC6\xF6 |0 # HIRAGANA LETTER GU
+<U3051> \xC6\xF7 |0 # HIRAGANA LETTER KE
+<U3052> \xC6\xF8 |0 # HIRAGANA LETTER GE
+<U3053> \xC6\xF9 |0 # HIRAGANA LETTER KO
+<U3054> \xC6\xFA |0 # HIRAGANA LETTER GO
+<U3055> \xC6\xFB |0 # HIRAGANA LETTER SA
+<U3056> \xC6\xFC |0 # HIRAGANA LETTER ZA
+<U3057> \xC6\xFD |0 # HIRAGANA LETTER SI
+<U3058> \xC6\xFE |0 # HIRAGANA LETTER ZI
+<U3059> \xC7\x40 |0 # HIRAGANA LETTER SU
+<U305A> \xC7\x41 |0 # HIRAGANA LETTER ZU
+<U305B> \xC7\x42 |0 # HIRAGANA LETTER SE
+<U305C> \xC7\x43 |0 # HIRAGANA LETTER ZE
+<U305D> \xC7\x44 |0 # HIRAGANA LETTER SO
+<U305E> \xC7\x45 |0 # HIRAGANA LETTER ZO
+<U305F> \xC7\x46 |0 # HIRAGANA LETTER TA
+<U3060> \xC7\x47 |0 # HIRAGANA LETTER DA
+<U3061> \xC7\x48 |0 # HIRAGANA LETTER TI
+<U3062> \xC7\x49 |0 # HIRAGANA LETTER DI
+<U3063> \xC7\x4A |0 # HIRAGANA LETTER SMALL TU
+<U3064> \xC7\x4B |0 # HIRAGANA LETTER TU
+<U3065> \xC7\x4C |0 # HIRAGANA LETTER DU
+<U3066> \xC7\x4D |0 # HIRAGANA LETTER TE
+<U3067> \xC7\x4E |0 # HIRAGANA LETTER DE
+<U3068> \xC7\x4F |0 # HIRAGANA LETTER TO
+<U3069> \xC7\x50 |0 # HIRAGANA LETTER DO
+<U306A> \xC7\x51 |0 # HIRAGANA LETTER NA
+<U306B> \xC7\x52 |0 # HIRAGANA LETTER NI
+<U306C> \xC7\x53 |0 # HIRAGANA LETTER NU
+<U306D> \xC7\x54 |0 # HIRAGANA LETTER NE
+<U306E> \xC7\x55 |0 # HIRAGANA LETTER NO
+<U306F> \xC7\x56 |0 # HIRAGANA LETTER HA
+<U3070> \xC7\x57 |0 # HIRAGANA LETTER BA
+<U3071> \xC7\x58 |0 # HIRAGANA LETTER PA
+<U3072> \xC7\x59 |0 # HIRAGANA LETTER HI
+<U3073> \xC7\x5A |0 # HIRAGANA LETTER BI
+<U3074> \xC7\x5B |0 # HIRAGANA LETTER PI
+<U3075> \xC7\x5C |0 # HIRAGANA LETTER HU
+<U3076> \xC7\x5D |0 # HIRAGANA LETTER BU
+<U3077> \xC7\x5E |0 # HIRAGANA LETTER PU
+<U3078> \xC7\x5F |0 # HIRAGANA LETTER HE
+<U3079> \xC7\x60 |0 # HIRAGANA LETTER BE
+<U307A> \xC7\x61 |0 # HIRAGANA LETTER PE
+<U307B> \xC7\x62 |0 # HIRAGANA LETTER HO
+<U307C> \xC7\x63 |0 # HIRAGANA LETTER BO
+<U307D> \xC7\x64 |0 # HIRAGANA LETTER PO
+<U307E> \xC7\x65 |0 # HIRAGANA LETTER MA
+<U307F> \xC7\x66 |0 # HIRAGANA LETTER MI
+<U3080> \xC7\x67 |0 # HIRAGANA LETTER MU
+<U3081> \xC7\x68 |0 # HIRAGANA LETTER ME
+<U3082> \xC7\x69 |0 # HIRAGANA LETTER MO
+<U3083> \xC7\x6A |0 # HIRAGANA LETTER SMALL YA
+<U3084> \xC7\x6B |0 # HIRAGANA LETTER YA
+<U3085> \xC7\x6C |0 # HIRAGANA LETTER SMALL YU
+<U3086> \xC7\x6D |0 # HIRAGANA LETTER YU
+<U3087> \xC7\x6E |0 # HIRAGANA LETTER SMALL YO
+<U3088> \xC7\x6F |0 # HIRAGANA LETTER YO
+<U3089> \xC7\x70 |0 # HIRAGANA LETTER RA
+<U308A> \xC7\x71 |0 # HIRAGANA LETTER RI
+<U308B> \xC7\x72 |0 # HIRAGANA LETTER RU
+<U308C> \xC7\x73 |0 # HIRAGANA LETTER RE
+<U308D> \xC7\x74 |0 # HIRAGANA LETTER RO
+<U308E> \xC7\x75 |0 # HIRAGANA LETTER SMALL WA
+<U308F> \xC7\x76 |0 # HIRAGANA LETTER WA
+<U3090> \xC7\x77 |0 # HIRAGANA LETTER WI
+<U3091> \xC7\x78 |0 # HIRAGANA LETTER WE
+<U3092> \xC7\x79 |0 # HIRAGANA LETTER WO
+<U3093> \xC7\x7A |0 # HIRAGANA LETTER N
+<U30A1> \xC7\x7B |0 # KATAKANA LETTER SMALL A
+<U30A2> \xC7\x7C |0 # KATAKANA LETTER A
+<U30A3> \xC7\x7D |0 # KATAKANA LETTER SMALL I
+<U30A4> \xC7\x7E |0 # KATAKANA LETTER I
+<U30A5> \xC7\xA1 |0 # KATAKANA LETTER SMALL U
+<U30A6> \xC7\xA2 |0 # KATAKANA LETTER U
+<U30A7> \xC7\xA3 |0 # KATAKANA LETTER SMALL E
+<U30A8> \xC7\xA4 |0 # KATAKANA LETTER E
+<U30A9> \xC7\xA5 |0 # KATAKANA LETTER SMALL O
+<U30AA> \xC7\xA6 |0 # KATAKANA LETTER O
+<U30AB> \xC7\xA7 |0 # KATAKANA LETTER KA
+<U30AC> \xC7\xA8 |0 # KATAKANA LETTER GA
+<U30AD> \xC7\xA9 |0 # KATAKANA LETTER KI
+<U30AE> \xC7\xAA |0 # KATAKANA LETTER GI
+<U30AF> \xC7\xAB |0 # KATAKANA LETTER KU
+<U30B0> \xC7\xAC |0 # KATAKANA LETTER GU
+<U30B1> \xC7\xAD |0 # KATAKANA LETTER KE
+<U30B2> \xC7\xAE |0 # KATAKANA LETTER GE
+<U30B3> \xC7\xAF |0 # KATAKANA LETTER KO
+<U30B4> \xC7\xB0 |0 # KATAKANA LETTER GO
+<U30B5> \xC7\xB1 |0 # KATAKANA LETTER SA
+<U30B6> \xC7\xB2 |0 # KATAKANA LETTER ZA
+<U30B7> \xC7\xB3 |0 # KATAKANA LETTER SI
+<U30B8> \xC7\xB4 |0 # KATAKANA LETTER ZI
+<U30B9> \xC7\xB5 |0 # KATAKANA LETTER SU
+<U30BA> \xC7\xB6 |0 # KATAKANA LETTER ZU
+<U30BB> \xC7\xB7 |0 # KATAKANA LETTER SE
+<U30BC> \xC7\xB8 |0 # KATAKANA LETTER ZE
+<U30BD> \xC7\xB9 |0 # KATAKANA LETTER SO
+<U30BE> \xC7\xBA |0 # KATAKANA LETTER ZO
+<U30BF> \xC7\xBB |0 # KATAKANA LETTER TA
+<U30C0> \xC7\xBC |0 # KATAKANA LETTER DA
+<U30C1> \xC7\xBD |0 # KATAKANA LETTER TI
+<U30C2> \xC7\xBE |0 # KATAKANA LETTER DI
+<U30C3> \xC7\xBF |0 # KATAKANA LETTER SMALL TU
+<U30C4> \xC7\xC0 |0 # KATAKANA LETTER TU
+<U30C5> \xC7\xC1 |0 # KATAKANA LETTER DU
+<U30C6> \xC7\xC2 |0 # KATAKANA LETTER TE
+<U30C7> \xC7\xC3 |0 # KATAKANA LETTER DE
+<U30C8> \xC7\xC4 |0 # KATAKANA LETTER TO
+<U30C9> \xC7\xC5 |0 # KATAKANA LETTER DO
+<U30CA> \xC7\xC6 |0 # KATAKANA LETTER NA
+<U30CB> \xC7\xC7 |0 # KATAKANA LETTER NI
+<U30CC> \xC7\xC8 |0 # KATAKANA LETTER NU
+<U30CD> \xC7\xC9 |0 # KATAKANA LETTER NE
+<U30CE> \xC7\xCA |0 # KATAKANA LETTER NO
+<U30CF> \xC7\xCB |0 # KATAKANA LETTER HA
+<U30D0> \xC7\xCC |0 # KATAKANA LETTER BA
+<U30D1> \xC7\xCD |0 # KATAKANA LETTER PA
+<U30D2> \xC7\xCE |0 # KATAKANA LETTER HI
+<U30D3> \xC7\xCF |0 # KATAKANA LETTER BI
+<U30D4> \xC7\xD0 |0 # KATAKANA LETTER PI
+<U30D5> \xC7\xD1 |0 # KATAKANA LETTER HU
+<U30D6> \xC7\xD2 |0 # KATAKANA LETTER BU
+<U30D7> \xC7\xD3 |0 # KATAKANA LETTER PU
+<U30D8> \xC7\xD4 |0 # KATAKANA LETTER HE
+<U30D9> \xC7\xD5 |0 # KATAKANA LETTER BE
+<U30DA> \xC7\xD6 |0 # KATAKANA LETTER PE
+<U30DB> \xC7\xD7 |0 # KATAKANA LETTER HO
+<U30DC> \xC7\xD8 |0 # KATAKANA LETTER BO
+<U30DD> \xC7\xD9 |0 # KATAKANA LETTER PO
+<U30DE> \xC7\xDA |0 # KATAKANA LETTER MA
+<U30DF> \xC7\xDB |0 # KATAKANA LETTER MI
+<U30E0> \xC7\xDC |0 # KATAKANA LETTER MU
+<U30E1> \xC7\xDD |0 # KATAKANA LETTER ME
+<U30E2> \xC7\xDE |0 # KATAKANA LETTER MO
+<U30E3> \xC7\xDF |0 # KATAKANA LETTER SMALL YA
+<U30E4> \xC7\xE0 |0 # KATAKANA LETTER YA
+<U30E5> \xC7\xE1 |0 # KATAKANA LETTER SMALL YU
+<U30E6> \xC7\xE2 |0 # KATAKANA LETTER YU
+<U30E7> \xC7\xE3 |0 # KATAKANA LETTER SMALL YO
+<U30E8> \xC7\xE4 |0 # KATAKANA LETTER YO
+<U30E9> \xC7\xE5 |0 # KATAKANA LETTER RA
+<U30EA> \xC7\xE6 |0 # KATAKANA LETTER RI
+<U30EB> \xC7\xE7 |0 # KATAKANA LETTER RU
+<U30EC> \xC7\xE8 |0 # KATAKANA LETTER RE
+<U30ED> \xC7\xE9 |0 # KATAKANA LETTER RO
+<U30EE> \xC7\xEA |0 # KATAKANA LETTER SMALL WA
+<U30EF> \xC7\xEB |0 # KATAKANA LETTER WA
+<U30F0> \xC7\xEC |0 # KATAKANA LETTER WI
+<U30F1> \xC7\xED |0 # KATAKANA LETTER WE
+<U30F2> \xC7\xEE |0 # KATAKANA LETTER WO
+<U30F3> \xC7\xEF |0 # KATAKANA LETTER N
+<U30F4> \xC7\xF0 |0 # KATAKANA LETTER VU
+<U30F5> \xC7\xF1 |0 # KATAKANA LETTER SMALL KA
+<U30F6> \xC7\xF2 |0 # KATAKANA LETTER SMALL KE
+<U0410> \xC7\xF3 |0 # CYRILLIC CAPITAL LETTER A
+<U0411> \xC7\xF4 |0 # CYRILLIC CAPITAL LETTER BE
+<U0412> \xC7\xF5 |0 # CYRILLIC CAPITAL LETTER VE
+<U0413> \xC7\xF6 |0 # CYRILLIC CAPITAL LETTER GHE
+<U0414> \xC7\xF7 |0 # CYRILLIC CAPITAL LETTER DE
+<U0415> \xC7\xF8 |0 # CYRILLIC CAPITAL LETTER IE
+<U0401> \xC7\xF9 |0 # CYRILLIC CAPITAL LETTER IO
+<U0416> \xC7\xFA |0 # CYRILLIC CAPITAL LETTER ZHE
+<U0417> \xC7\xFB |0 # CYRILLIC CAPITAL LETTER ZE
+<U0418> \xC7\xFC |0 # CYRILLIC CAPITAL LETTER I
+<U0419> \xC7\xFD |0 # CYRILLIC CAPITAL LETTER SHORT I
+<U041A> \xC7\xFE |0 # CYRILLIC CAPITAL LETTER KA
+<U041B> \xC8\x40 |0 # CYRILLIC CAPITAL LETTER EL
+<U041C> \xC8\x41 |0 # CYRILLIC CAPITAL LETTER EM
+<U041D> \xC8\x42 |0 # CYRILLIC CAPITAL LETTER EN
+<U041E> \xC8\x43 |0 # CYRILLIC CAPITAL LETTER O
+<U041F> \xC8\x44 |0 # CYRILLIC CAPITAL LETTER PE
+<U0420> \xC8\x45 |0 # CYRILLIC CAPITAL LETTER ER
+<U0421> \xC8\x46 |0 # CYRILLIC CAPITAL LETTER ES
+<U0422> \xC8\x47 |0 # CYRILLIC CAPITAL LETTER TE
+<U0423> \xC8\x48 |0 # CYRILLIC CAPITAL LETTER U
+<U0424> \xC8\x49 |0 # CYRILLIC CAPITAL LETTER EF
+<U0425> \xC8\x4A |0 # CYRILLIC CAPITAL LETTER HA
+<U0426> \xC8\x4B |0 # CYRILLIC CAPITAL LETTER TSE
+<U0427> \xC8\x4C |0 # CYRILLIC CAPITAL LETTER CHE
+<U0428> \xC8\x4D |0 # CYRILLIC CAPITAL LETTER SHA
+<U0429> \xC8\x4E |0 # CYRILLIC CAPITAL LETTER SHCHA
+<U042A> \xC8\x4F |0 # CYRILLIC CAPITAL LETTER HARD SIGN
+<U042B> \xC8\x50 |0 # CYRILLIC CAPITAL LETTER YERU
+<U042C> \xC8\x51 |0 # CYRILLIC CAPITAL LETTER SOFT SIGN
+<U042D> \xC8\x52 |0 # CYRILLIC CAPITAL LETTER E
+<U042E> \xC8\x53 |0 # CYRILLIC CAPITAL LETTER YU
+<U042F> \xC8\x54 |0 # CYRILLIC CAPITAL LETTER YA
+<U0430> \xC8\x55 |0 # CYRILLIC SMALL LETTER A
+<U0431> \xC8\x56 |0 # CYRILLIC SMALL LETTER BE
+<U0432> \xC8\x57 |0 # CYRILLIC SMALL LETTER VE
+<U0433> \xC8\x58 |0 # CYRILLIC SMALL LETTER GHE
+<U0434> \xC8\x59 |0 # CYRILLIC SMALL LETTER DE
+<U0435> \xC8\x5A |0 # CYRILLIC SMALL LETTER IE
+<U0451> \xC8\x5B |0 # CYRILLIC SMALL LETTER IO
+<U0436> \xC8\x5C |0 # CYRILLIC SMALL LETTER ZHE
+<U0437> \xC8\x5D |0 # CYRILLIC SMALL LETTER ZE
+<U0438> \xC8\x5E |0 # CYRILLIC SMALL LETTER I
+<U0439> \xC8\x5F |0 # CYRILLIC SMALL LETTER SHORT I
+<U043A> \xC8\x60 |0 # CYRILLIC SMALL LETTER KA
+<U043B> \xC8\x61 |0 # CYRILLIC SMALL LETTER EL
+<U043C> \xC8\x62 |0 # CYRILLIC SMALL LETTER EM
+<U043D> \xC8\x63 |0 # CYRILLIC SMALL LETTER EN
+<U043E> \xC8\x64 |0 # CYRILLIC SMALL LETTER O
+<U043F> \xC8\x65 |0 # CYRILLIC SMALL LETTER PE
+<U0440> \xC8\x66 |0 # CYRILLIC SMALL LETTER ER
+<U0441> \xC8\x67 |0 # CYRILLIC SMALL LETTER ES
+<U0442> \xC8\x68 |0 # CYRILLIC SMALL LETTER TE
+<U0443> \xC8\x69 |0 # CYRILLIC SMALL LETTER U
+<U0444> \xC8\x6A |0 # CYRILLIC SMALL LETTER EF
+<U0445> \xC8\x6B |0 # CYRILLIC SMALL LETTER HA
+<U0446> \xC8\x6C |0 # CYRILLIC SMALL LETTER TSE
+<U0447> \xC8\x6D |0 # CYRILLIC SMALL LETTER CHE
+<U0448> \xC8\x6E |0 # CYRILLIC SMALL LETTER SHA
+<U0449> \xC8\x6F |0 # CYRILLIC SMALL LETTER SHCHA
+<U044A> \xC8\x70 |0 # CYRILLIC SMALL LETTER HARD SIGN
+<U044B> \xC8\x71 |0 # CYRILLIC SMALL LETTER YERU
+<U044C> \xC8\x72 |0 # CYRILLIC SMALL LETTER SOFT SIGN
+<U044D> \xC8\x73 |0 # CYRILLIC SMALL LETTER E
+<U044E> \xC8\x74 |0 # CYRILLIC SMALL LETTER YU
+<U044F> \xC8\x75 |0 # CYRILLIC SMALL LETTER YA
+<U21E7> \xC8\x76 |0 # UPWARDS WHITE ARROW
+<U21B8> \xC8\x77 |0 # NORTH WEST ARROW TO LONG BAR
+<U21B9> \xC8\x78 |0 # LEFTWARDS ARROW TO BAR OVER RIGHTWARDS ARROW TO BAR
+<UF7E5> \xC8\x79 |0 # Private Use
+<UF7E6> \xC8\x7A |0 # Private Use
+<U4E5A> \xC8\x7B |0 # CJK Ideograph
+<UF7E8> \xC8\x7C |0 # Private Use
+<U5202> \xC8\x7D |0 # CJK Ideograph
+<UF7EA> \xC8\x7E |0 # Private Use
+<UF7EB> \xC8\xA1 |0 # Private Use
+<U5188> \xC8\xA2 |0 # CJK Ideograph
+<UF7ED> \xC8\xA3 |0 # Private Use
+<UF7EE> \xC8\xA4 |0 # Private Use
+<UFFE2> \xC8\xCD |0 # FULLWIDTH NOT SIGN
+<UFFE4> \xC8\xCE |0 # FULLWIDTH BROKEN BAR
+<UFF07> \xC8\xCF |0 # FULLWIDTH APOSTROPHE
+<UFF02> \xC8\xD0 |0 # FULLWIDTH QUOTATION MARK
+<U3231> \xC8\xD1 |0 # PARENTHESIZED IDEOGRAPH STOCK
+<U2116> \xC8\xD2 |0 # NUMERO SIGN
+<U2121> \xC8\xD3 |0 # TELEPHONE SIGN
+<U309B> \xC8\xD4 |0 # KATAKANA-HIRAGANA VOICED SOUND MARK
+<U309C> \xC8\xD5 |0 # KATAKANA-HIRAGANA SEMI-VOICED SOUND MARK
+<U2E80> \xC8\xD6 |0 # CJK RADICAL REPEAT
+<U2E84> \xC8\xD7 |0 # CJK RADICAL SECOND THREE
+<U2E86> \xC8\xD8 |0 # CJK RADICAL BOX
+<U2E87> \xC8\xD9 |0 # CJK RADICAL TABLE
+<U2E88> \xC8\xDA |0 # CJK RADICAL KNIFE ONE
+<U2E8A> \xC8\xDB |0 # CJK RADICAL DIVINATION
+<U2E8C> \xC8\xDC |0 # CJK RADICAL SMALL ONE
+<U2E8D> \xC8\xDD |0 # CJK RADICAL SMALL TWO
+<U2E95> \xC8\xDE |0 # CJK RADICAL SNOUT TWO
+<U2E9C> \xC8\xDF |0 # CJK RADICAL SUN
+<U2E9D> \xC8\xE0 |0 # CJK RADICAL MOON
+<U2EA5> \xC8\xE1 |0 # CJK RADICAL PAW TWO
+<U2EA7> \xC8\xE2 |0 # CJK RADICAL COW
+<U2EAA> \xC8\xE3 |0 # CJK RADICAL BOLT OF CLOTH
+<U2EAC> \xC8\xE4 |0 # CJK RADICAL SPIRIT ONE
+<U2EAE> \xC8\xE5 |0 # CJK RADICAL BAMBOO
+<U2EB6> \xC8\xE6 |0 # CJK RADICAL SHEEP
+<U2EBC> \xC8\xE7 |0 # CJK RADICAL MEAT
+<U2EBE> \xC8\xE8 |0 # CJK RADICAL GRASS ONE
+<U2EC6> \xC8\xE9 |0 # CJK RADICAL SIMPLIFIED HORN
+<U2ECA> \xC8\xEA |0 # CJK RADICAL FOOT
+<U2ECC> \xC8\xEB |0 # CJK RADICAL SIMPLIFIED WALK
+<U2ECD> \xC8\xEC |0 # CJK RADICAL WALK ONE
+<U2ECF> \xC8\xED |0 # CJK RADICAL CITY
+<U2ED6> \xC8\xEE |0 # CJK RADICAL MOUND TWO
+<U2ED7> \xC8\xEF |0 # CJK RADICAL RAIN
+<U2EDE> \xC8\xF0 |0 # CJK RADICAL EAT TWO
+<U2EE3> \xC8\xF1 |0 # CJK RADICAL BONE
+<U0283> \xC8\xF5 |0 # LATIN SMALL LETTER ESH
+<U0250> \xC8\xF6 |0 # LATIN SMALL LETTER TURNED A
+<U025B> \xC8\xF7 |0 # LATIN SMALL LETTER OPEN E
+<U0254> \xC8\xF8 |0 # LATIN SMALL LETTER OPEN O
+<U0275> \xC8\xF9 |0 # LATIN SMALL LETTER BARRED O
+<U0153> \xC8\xFA |0 # LATIN SMALL LIGATURE OE
+<U00F8> \xC8\xFB |0 # LATIN SMALL LETTER O WITH STROKE
+<U014B> \xC8\xFC |0 # LATIN SMALL LETTER ENG
+<U028A> \xC8\xFD |0 # LATIN SMALL LETTER UPSILON
+<U026A> \xC8\xFE |0 # LATIN LETTER SMALL CAPITAL I
 <U4E42> \xC9\x40 |0 # CJK Ideograph
 <U4E5C> \xC9\x41 |0 # CJK Ideograph
 <U51F5> \xC9\x42 |0 # CJK Ideograph
@@ -13628,5 +17527,769 @@ CHARMAP
 <U256E> \xF9\xFB |0 # BOX DRAWINGS LIGHT ARC DOWN AND LEFT
 <U2570> \xF9\xFC |0 # BOX DRAWINGS LIGHT ARC UP AND RIGHT
 <U256F> \xF9\xFD |0 # BOX DRAWINGS LIGHT ARC UP AND LEFT
-<U2593> \xF9\xFE |0 # DARK SHADE
+<UFFED> \xF9\xFE |0 # HALFWIDTH BLACK SQUARE
+<UE000> \xFA\x40 |0 # Private Use
+<U92DB> \xFA\x41 |0 # CJK Ideograph
+<UE002> \xFA\x42 |0 # Private Use
+<UE003> \xFA\x43 |0 # Private Use
+<U854C> \xFA\x44 |0 # CJK Ideograph
+<U42B5> \xFA\x45 |0 # CJK Ideograph Extension A
+<U73EF> \xFA\x46 |0 # CJK Ideograph
+<U51B5> \xFA\x47 |0 # CJK Ideograph
+<U3649> \xFA\x48 |0 # CJK Ideograph Extension A
+<UE009> \xFA\x49 |0 # Private Use
+<UE00A> \xFA\x4A |0 # Private Use
+<U9344> \xFA\x4B |0 # CJK Ideograph
+<UE00C> \xFA\x4C |0 # Private Use
+<U82EE> \xFA\x4D |0 # CJK Ideograph
+<UE00E> \xFA\x4E |0 # Private Use
+<U783C> \xFA\x4F |0 # CJK Ideograph
+<U6744> \xFA\x50 |0 # CJK Ideograph
+<U62DF> \xFA\x51 |0 # CJK Ideograph
+<UE012> \xFA\x52 |0 # Private Use
+<UE013> \xFA\x53 |0 # Private Use
+<UE014> \xFA\x54 |0 # Private Use
+<UE015> \xFA\x55 |0 # Private Use
+<UE016> \xFA\x56 |0 # Private Use
+<U4FAB> \xFA\x57 |0 # CJK Ideograph
+<UE018> \xFA\x58 |0 # Private Use
+<U5008> \xFA\x59 |0 # CJK Ideograph
+<UE01A> \xFA\x5A |0 # Private Use
+<UE01B> \xFA\x5B |0 # Private Use
+<UE01C> \xFA\x5C |0 # Private Use
+<UE01D> \xFA\x5D |0 # Private Use
+<UE01E> \xFA\x5E |0 # Private Use
+<UE020> \xFA\x60 |0 # Private Use
+<U5FA4> \xFA\x61 |0 # CJK Ideograph
+<UE022> \xFA\x62 |0 # Private Use
+<UE023> \xFA\x63 |0 # Private Use
+<U6EDB> \xFA\x64 |0 # CJK Ideograph
+<UE025> \xFA\x65 |0 # Private Use
+<U5101> \xFA\x67 |0 # CJK Ideograph
+<U347A> \xFA\x68 |0 # CJK Ideograph Extension A
+<U510E> \xFA\x69 |0 # CJK Ideograph
+<U986C> \xFA\x6A |0 # CJK Ideograph
+<U3743> \xFA\x6B |0 # CJK Ideograph Extension A
+<U8416> \xFA\x6C |0 # CJK Ideograph
+<UE02D> \xFA\x6D |0 # Private Use
+<UE02E> \xFA\x6E |0 # Private Use
+<U5160> \xFA\x6F |0 # CJK Ideograph
+<UE030> \xFA\x70 |0 # Private Use
+<U516A> \xFA\x71 |0 # CJK Ideograph
+<UE032> \xFA\x72 |0 # Private Use
+<UE033> \xFA\x73 |0 # Private Use
+<UE034> \xFA\x74 |0 # Private Use
+<UE035> \xFA\x75 |0 # Private Use
+<UE036> \xFA\x76 |0 # Private Use
+<UE037> \xFA\x77 |0 # Private Use
+<UE038> \xFA\x78 |0 # Private Use
+<U5B82> \xFA\x79 |0 # CJK Ideograph
+<U877D> \xFA\x7A |0 # CJK Ideograph
+<UE03B> \xFA\x7B |0 # Private Use
+<UE03C> \xFA\x7C |0 # Private Use
+<U51B2> \xFA\x7D |0 # CJK Ideograph
+<U51B8> \xFA\x7E |0 # CJK Ideograph
+<U9D34> \xFA\xA1 |0 # CJK Ideograph
+<U51C9> \xFA\xA2 |0 # CJK Ideograph
+<U51CF> \xFA\xA3 |0 # CJK Ideograph
+<U51D1> \xFA\xA4 |0 # CJK Ideograph
+<U3CDC> \xFA\xA5 |0 # CJK Ideograph Extension A
+<U51D3> \xFA\xA6 |0 # CJK Ideograph
+<UE045> \xFA\xA7 |0 # Private Use
+<U51B3> \xFA\xA8 |0 # CJK Ideograph
+<U51E2> \xFA\xA9 |0 # CJK Ideograph
+<U5342> \xFA\xAA |0 # CJK Ideograph
+<U51ED> \xFA\xAB |0 # CJK Ideograph
+<U83CD> \xFA\xAC |0 # CJK Ideograph
+<U693E> \xFA\xAD |0 # CJK Ideograph
+<UE04C> \xFA\xAE |0 # Private Use
+<U5F7B> \xFA\xAF |0 # CJK Ideograph
+<U520B> \xFA\xB0 |0 # CJK Ideograph
+<U5226> \xFA\xB1 |0 # CJK Ideograph
+<U523C> \xFA\xB2 |0 # CJK Ideograph
+<U52B5> \xFA\xB3 |0 # CJK Ideograph
+<U5257> \xFA\xB4 |0 # CJK Ideograph
+<U5294> \xFA\xB5 |0 # CJK Ideograph
+<U52B9> \xFA\xB6 |0 # CJK Ideograph
+<U52C5> \xFA\xB7 |0 # CJK Ideograph
+<U7C15> \xFA\xB8 |0 # CJK Ideograph
+<U8542> \xFA\xB9 |0 # CJK Ideograph
+<U52E0> \xFA\xBA |0 # CJK Ideograph
+<U860D> \xFA\xBB |0 # CJK Ideograph
+<UE05A> \xFA\xBC |0 # Private Use
+<UE05C> \xFA\xBE |0 # Private Use
+<U5549> \xFA\xBF |0 # CJK Ideograph
+<U6ED9> \xFA\xC0 |0 # CJK Ideograph
+<UE05F> \xFA\xC1 |0 # Private Use
+<UE060> \xFA\xC2 |0 # Private Use
+<UE061> \xFA\xC3 |0 # Private Use
+<U5333> \xFA\xC4 |0 # CJK Ideograph
+<UE064> \xFA\xC6 |0 # Private Use
+<U6CCB> \xFA\xC7 |0 # CJK Ideograph
+<UE066> \xFA\xC8 |0 # Private Use
+<U681B> \xFA\xC9 |0 # CJK Ideograph
+<U73D5> \xFA\xCA |0 # CJK Ideograph
+<U604A> \xFA\xCB |0 # CJK Ideograph
+<U3EAA> \xFA\xCC |0 # CJK Ideograph Extension A
+<U38CC> \xFA\xCD |0 # CJK Ideograph Extension A
+<UE06C> \xFA\xCE |0 # Private Use
+<U71DD> \xFA\xCF |0 # CJK Ideograph
+<U44A2> \xFA\xD0 |0 # CJK Ideograph Extension A
+<U536D> \xFA\xD1 |0 # CJK Ideograph
+<U5374> \xFA\xD2 |0 # CJK Ideograph
+<UE071> \xFA\xD3 |0 # Private Use
+<U537E> \xFA\xD4 |0 # CJK Ideograph
+<UE074> \xFA\xD6 |0 # Private Use
+<UE075> \xFA\xD7 |0 # Private Use
+<U77E6> \xFA\xD8 |0 # CJK Ideograph
+<U5393> \xFA\xD9 |0 # CJK Ideograph
+<UE078> \xFA\xDA |0 # Private Use
+<U53A0> \xFA\xDB |0 # CJK Ideograph
+<U53AB> \xFA\xDC |0 # CJK Ideograph
+<U53AE> \xFA\xDD |0 # CJK Ideograph
+<U73A7> \xFA\xDE |0 # CJK Ideograph
+<UE07D> \xFA\xDF |0 # Private Use
+<U3F59> \xFA\xE0 |0 # CJK Ideograph Extension A
+<U739C> \xFA\xE1 |0 # CJK Ideograph
+<U53C1> \xFA\xE2 |0 # CJK Ideograph
+<U53C5> \xFA\xE3 |0 # CJK Ideograph
+<U6C49> \xFA\xE4 |0 # CJK Ideograph
+<U4E49> \xFA\xE5 |0 # CJK Ideograph
+<U57FE> \xFA\xE6 |0 # CJK Ideograph
+<U53D9> \xFA\xE7 |0 # CJK Ideograph
+<U3AAB> \xFA\xE8 |0 # CJK Ideograph Extension A
+<UE087> \xFA\xE9 |0 # Private Use
+<U53E0> \xFA\xEA |0 # CJK Ideograph
+<UE089> \xFA\xEB |0 # Private Use
+<UE08A> \xFA\xEC |0 # Private Use
+<U53F6> \xFA\xED |0 # CJK Ideograph
+<UE08C> \xFA\xEE |0 # Private Use
+<U5413> \xFA\xEF |0 # CJK Ideograph
+<U7079> \xFA\xF0 |0 # CJK Ideograph
+<U552B> \xFA\xF1 |0 # CJK Ideograph
+<U6657> \xFA\xF2 |0 # CJK Ideograph
+<U6D5B> \xFA\xF3 |0 # CJK Ideograph
+<U546D> \xFA\xF4 |0 # CJK Ideograph
+<UE093> \xFA\xF5 |0 # Private Use
+<UE094> \xFA\xF6 |0 # Private Use
+<U555D> \xFA\xF7 |0 # CJK Ideograph
+<U548F> \xFA\xF8 |0 # CJK Ideograph
+<U54A4> \xFA\xF9 |0 # CJK Ideograph
+<U47A6> \xFA\xFA |0 # CJK Ideograph Extension A
+<UE099> \xFA\xFB |0 # Private Use
+<UE09A> \xFA\xFC |0 # Private Use
+<U3DB4> \xFA\xFD |0 # CJK Ideograph Extension A
+<UE09C> \xFA\xFE |0 # Private Use
+<UE09D> \xFB\x40 |0 # Private Use
+<UE09E> \xFB\x41 |0 # Private Use
+<U5547> \xFB\x42 |0 # CJK Ideograph
+<U4CED> \xFB\x43 |0 # CJK Ideograph Extension A
+<U542F> \xFB\x44 |0 # CJK Ideograph
+<U7417> \xFB\x45 |0 # CJK Ideograph
+<U5586> \xFB\x46 |0 # CJK Ideograph
+<U55A9> \xFB\x47 |0 # CJK Ideograph
+<UE0A6> \xFB\x49 |0 # Private Use
+<UE0A7> \xFB\x4A |0 # Private Use
+<U4552> \xFB\x4B |0 # CJK Ideograph Extension A
+<UE0A9> \xFB\x4C |0 # Private Use
+<U66B3> \xFB\x4D |0 # CJK Ideograph
+<UE0AB> \xFB\x4E |0 # Private Use
+<U5637> \xFB\x4F |0 # CJK Ideograph
+<U66CD> \xFB\x50 |0 # CJK Ideograph
+<UE0AE> \xFB\x51 |0 # Private Use
+<U66A4> \xFB\x52 |0 # CJK Ideograph
+<U66AD> \xFB\x53 |0 # CJK Ideograph
+<U564D> \xFB\x54 |0 # CJK Ideograph
+<U564F> \xFB\x55 |0 # CJK Ideograph
+<U78F1> \xFB\x56 |0 # CJK Ideograph
+<U56F1> \xFB\x57 |0 # CJK Ideograph
+<U9787> \xFB\x58 |0 # CJK Ideograph
+<U53FE> \xFB\x59 |0 # CJK Ideograph
+<U5700> \xFB\x5A |0 # CJK Ideograph
+<U56EF> \xFB\x5B |0 # CJK Ideograph
+<U56ED> \xFB\x5C |0 # CJK Ideograph
+<UE0BA> \xFB\x5D |0 # Private Use
+<U3623> \xFB\x5E |0 # CJK Ideograph Extension A
+<UE0BC> \xFB\x5F |0 # Private Use
+<U5746> \xFB\x60 |0 # CJK Ideograph
+<UE0BE> \xFB\x61 |0 # Private Use
+<U6C6E> \xFB\x62 |0 # CJK Ideograph
+<U708B> \xFB\x63 |0 # CJK Ideograph
+<U5742> \xFB\x64 |0 # CJK Ideograph
+<U36B1> \xFB\x65 |0 # CJK Ideograph Extension A
+<UE0C3> \xFB\x66 |0 # Private Use
+<U57E6> \xFB\x67 |0 # CJK Ideograph
+<UE0C5> \xFB\x68 |0 # Private Use
+<U5803> \xFB\x69 |0 # CJK Ideograph
+<UE0C7> \xFB\x6A |0 # Private Use
+<UE0C8> \xFB\x6B |0 # Private Use
+<U5826> \xFB\x6C |0 # CJK Ideograph
+<UE0CA> \xFB\x6D |0 # Private Use
+<U585C> \xFB\x6E |0 # CJK Ideograph
+<U58AA> \xFB\x6F |0 # CJK Ideograph
+<U3561> \xFB\x70 |0 # CJK Ideograph Extension A
+<U58E0> \xFB\x71 |0 # CJK Ideograph
+<U58DC> \xFB\x72 |0 # CJK Ideograph
+<UE0D0> \xFB\x73 |0 # Private Use
+<U58FB> \xFB\x74 |0 # CJK Ideograph
+<U5BFF> \xFB\x75 |0 # CJK Ideograph
+<U5743> \xFB\x76 |0 # CJK Ideograph
+<UE0D4> \xFB\x77 |0 # Private Use
+<UE0D5> \xFB\x78 |0 # Private Use
+<U93D3> \xFB\x79 |0 # CJK Ideograph
+<U35A1> \xFB\x7A |0 # CJK Ideograph Extension A
+<U591F> \xFB\x7B |0 # CJK Ideograph
+<U68A6> \xFB\x7C |0 # CJK Ideograph
+<U36C3> \xFB\x7D |0 # CJK Ideograph Extension A
+<U6E59> \xFB\x7E |0 # CJK Ideograph
+<UE0DC> \xFB\xA1 |0 # Private Use
+<U5A24> \xFB\xA2 |0 # CJK Ideograph
+<U5553> \xFB\xA3 |0 # CJK Ideograph
+<UE0DF> \xFB\xA4 |0 # Private Use
+<U8505> \xFB\xA5 |0 # CJK Ideograph
+<U59C9> \xFB\xA6 |0 # CJK Ideograph
+<UE0E2> \xFB\xA7 |0 # Private Use
+<UE0E3> \xFB\xA8 |0 # Private Use
+<UE0E4> \xFB\xA9 |0 # Private Use
+<UE0E5> \xFB\xAA |0 # Private Use
+<U59D9> \xFB\xAB |0 # CJK Ideograph
+<UE0E7> \xFB\xAC |0 # Private Use
+<UE0E8> \xFB\xAD |0 # Private Use
+<UE0E9> \xFB\xAE |0 # Private Use
+<U6D71> \xFB\xAF |0 # CJK Ideograph
+<UE0EB> \xFB\xB0 |0 # Private Use
+<UE0EC> \xFB\xB1 |0 # Private Use
+<U59F9> \xFB\xB2 |0 # CJK Ideograph
+<UE0EE> \xFB\xB3 |0 # Private Use
+<U5AAB> \xFB\xB4 |0 # CJK Ideograph
+<U5A63> \xFB\xB5 |0 # CJK Ideograph
+<U36E6> \xFB\xB6 |0 # CJK Ideograph Extension A
+<UE0F2> \xFB\xB7 |0 # Private Use
+<U3708> \xFB\xB9 |0 # CJK Ideograph Extension A
+<U5A96> \xFB\xBA |0 # CJK Ideograph
+<U7465> \xFB\xBB |0 # CJK Ideograph
+<U5AD3> \xFB\xBC |0 # CJK Ideograph
+<UE0F8> \xFB\xBD |0 # Private Use
+<UE0F9> \xFB\xBE |0 # Private Use
+<U3D85> \xFB\xBF |0 # CJK Ideograph Extension A
+<UE0FB> \xFB\xC0 |0 # Private Use
+<U3732> \xFB\xC1 |0 # CJK Ideograph Extension A
+<UE0FD> \xFB\xC2 |0 # Private Use
+<U5E83> \xFB\xC3 |0 # CJK Ideograph
+<U52D0> \xFB\xC4 |0 # CJK Ideograph
+<U5B76> \xFB\xC5 |0 # CJK Ideograph
+<U6588> \xFB\xC6 |0 # CJK Ideograph
+<U5B7C> \xFB\xC7 |0 # CJK Ideograph
+<UE103> \xFB\xC8 |0 # Private Use
+<U4004> \xFB\xC9 |0 # CJK Ideograph Extension A
+<U485D> \xFB\xCA |0 # CJK Ideograph Extension A
+<UE106> \xFB\xCB |0 # Private Use
+<U5BD5> \xFB\xCC |0 # CJK Ideograph
+<U6160> \xFB\xCD |0 # CJK Ideograph
+<UE109> \xFB\xCE |0 # Private Use
+<UE10A> \xFB\xCF |0 # Private Use
+<UE10B> \xFB\xD0 |0 # Private Use
+<U5BF3> \xFB\xD1 |0 # CJK Ideograph
+<U5B9D> \xFB\xD2 |0 # CJK Ideograph
+<U4D10> \xFB\xD3 |0 # CJK Ideograph Extension A
+<U5C05> \xFB\xD4 |0 # CJK Ideograph
+<UE110> \xFB\xD5 |0 # Private Use
+<U5C13> \xFB\xD6 |0 # CJK Ideograph
+<U73CE> \xFB\xD7 |0 # CJK Ideograph
+<U5C14> \xFB\xD8 |0 # CJK Ideograph
+<UE114> \xFB\xD9 |0 # Private Use
+<UE115> \xFB\xDA |0 # Private Use
+<U5C49> \xFB\xDB |0 # CJK Ideograph
+<U48DD> \xFB\xDC |0 # CJK Ideograph Extension A
+<U5C85> \xFB\xDD |0 # CJK Ideograph
+<U5CE9> \xFB\xDE |0 # CJK Ideograph
+<U5CEF> \xFB\xDF |0 # CJK Ideograph
+<U5D8B> \xFB\xE0 |0 # CJK Ideograph
+<UE11C> \xFB\xE1 |0 # Private Use
+<UE11D> \xFB\xE2 |0 # Private Use
+<U5D10> \xFB\xE3 |0 # CJK Ideograph
+<U5D18> \xFB\xE4 |0 # CJK Ideograph
+<U5D46> \xFB\xE5 |0 # CJK Ideograph
+<UE121> \xFB\xE6 |0 # Private Use
+<U5CBA> \xFB\xE7 |0 # CJK Ideograph
+<U5DD7> \xFB\xE8 |0 # CJK Ideograph
+<U82FC> \xFB\xE9 |0 # CJK Ideograph
+<U382D> \xFB\xEA |0 # CJK Ideograph Extension A
+<UE126> \xFB\xEB |0 # Private Use
+<UE127> \xFB\xEC |0 # Private Use
+<UE128> \xFB\xED |0 # Private Use
+<U8287> \xFB\xEE |0 # CJK Ideograph
+<U3836> \xFB\xEF |0 # CJK Ideograph Extension A
+<U3BC2> \xFB\xF0 |0 # CJK Ideograph Extension A
+<U5E2E> \xFB\xF1 |0 # CJK Ideograph
+<U6A8A> \xFB\xF2 |0 # CJK Ideograph
+<U5E7A> \xFB\xF4 |0 # CJK Ideograph
+<UE130> \xFB\xF5 |0 # Private Use
+<UE131> \xFB\xF6 |0 # Private Use
+<U53A6> \xFB\xF7 |0 # CJK Ideograph
+<U4EB7> \xFB\xF8 |0 # CJK Ideograph
+<U53A8> \xFB\xFA |0 # CJK Ideograph
+<UE136> \xFB\xFB |0 # Private Use
+<U5E09> \xFB\xFC |0 # CJK Ideograph
+<U5EF4> \xFB\xFD |0 # CJK Ideograph
+<UE139> \xFB\xFE |0 # Private Use
+<U5EF9> \xFC\x40 |0 # CJK Ideograph
+<U5EFB> \xFC\x41 |0 # CJK Ideograph
+<U38A0> \xFC\x42 |0 # CJK Ideograph Extension A
+<U5EFC> \xFC\x43 |0 # CJK Ideograph
+<U683E> \xFC\x44 |0 # CJK Ideograph
+<U941B> \xFC\x45 |0 # CJK Ideograph
+<U5F0D> \xFC\x46 |0 # CJK Ideograph
+<UE141> \xFC\x47 |0 # Private Use
+<UE142> \xFC\x48 |0 # Private Use
+<U3ADE> \xFC\x49 |0 # CJK Ideograph Extension A
+<U48AE> \xFC\x4A |0 # CJK Ideograph Extension A
+<UE145> \xFC\x4B |0 # Private Use
+<U5F3A> \xFC\x4C |0 # CJK Ideograph
+<UE147> \xFC\x4D |0 # Private Use
+<UE148> \xFC\x4E |0 # Private Use
+<UE14A> \xFC\x50 |0 # Private Use
+<U5F63> \xFC\x51 |0 # CJK Ideograph
+<U97BD> \xFC\x52 |0 # CJK Ideograph
+<UE14D> \xFC\x53 |0 # Private Use
+<U5F72> \xFC\x54 |0 # CJK Ideograph
+<U9340> \xFC\x55 |0 # CJK Ideograph
+<UE150> \xFC\x56 |0 # Private Use
+<U5FA7> \xFC\x57 |0 # CJK Ideograph
+<U5DB6> \xFC\x58 |0 # CJK Ideograph
+<U3D5F> \xFC\x59 |0 # CJK Ideograph Extension A
+<UE154> \xFC\x5A |0 # Private Use
+<UE155> \xFC\x5B |0 # Private Use
+<UE156> \xFC\x5C |0 # Private Use
+<UE157> \xFC\x5D |0 # Private Use
+<U91D6> \xFC\x5E |0 # CJK Ideograph
+<UE159> \xFC\x5F |0 # Private Use
+<UE15A> \xFC\x60 |0 # Private Use
+<U6031> \xFC\x61 |0 # CJK Ideograph
+<U6685> \xFC\x62 |0 # CJK Ideograph
+<UE15D> \xFC\x63 |0 # Private Use
+<U3963> \xFC\x64 |0 # CJK Ideograph Extension A
+<U3DC7> \xFC\x65 |0 # CJK Ideograph Extension A
+<U3639> \xFC\x66 |0 # CJK Ideograph Extension A
+<U5790> \xFC\x67 |0 # CJK Ideograph
+<UE162> \xFC\x68 |0 # Private Use
+<U7971> \xFC\x69 |0 # CJK Ideograph
+<U3E40> \xFC\x6A |0 # CJK Ideograph Extension A
+<U609E> \xFC\x6B |0 # CJK Ideograph
+<U60B3> \xFC\x6D |0 # CJK Ideograph
+<UE168> \xFC\x6E |0 # Private Use
+<UE169> \xFC\x6F |0 # Private Use
+<UE16A> \xFC\x70 |0 # Private Use
+<U74A4> \xFC\x71 |0 # CJK Ideograph
+<U50E1> \xFC\x72 |0 # CJK Ideograph
+<U5AA0> \xFC\x73 |0 # CJK Ideograph
+<U6164> \xFC\x74 |0 # CJK Ideograph
+<U8424> \xFC\x75 |0 # CJK Ideograph
+<U6142> \xFC\x76 |0 # CJK Ideograph
+<UE171> \xFC\x77 |0 # Private Use
+<UE172> \xFC\x78 |0 # Private Use
+<U6181> \xFC\x79 |0 # CJK Ideograph
+<U51F4> \xFC\x7A |0 # CJK Ideograph
+<UE175> \xFC\x7B |0 # Private Use
+<U6187> \xFC\x7C |0 # CJK Ideograph
+<U5BAA> \xFC\x7D |0 # CJK Ideograph
+<UE178> \xFC\x7E |0 # Private Use
+<UE179> \xFC\xA1 |0 # Private Use
+<U61D3> \xFC\xA2 |0 # CJK Ideograph
+<UE17B> \xFC\xA3 |0 # Private Use
+<UE17C> \xFC\xA4 |0 # Private Use
+<U61D0> \xFC\xA5 |0 # CJK Ideograph
+<U3932> \xFC\xA6 |0 # CJK Ideograph Extension A
+<UE17F> \xFC\xA7 |0 # Private Use
+<UE180> \xFC\xA8 |0 # Private Use
+<U6023> \xFC\xA9 |0 # CJK Ideograph
+<U615C> \xFC\xAA |0 # CJK Ideograph
+<U651E> \xFC\xAB |0 # CJK Ideograph
+<U638B> \xFC\xAC |0 # CJK Ideograph
+<UE185> \xFC\xAD |0 # Private Use
+<U62C5> \xFC\xAE |0 # CJK Ideograph
+<UE187> \xFC\xAF |0 # Private Use
+<U62D5> \xFC\xB0 |0 # CJK Ideograph
+<UE189> \xFC\xB1 |0 # Private Use
+<U636C> \xFC\xB2 |0 # CJK Ideograph
+<UE18B> \xFC\xB3 |0 # Private Use
+<U3A17> \xFC\xB4 |0 # CJK Ideograph Extension A
+<U6438> \xFC\xB5 |0 # CJK Ideograph
+<U63F8> \xFC\xB6 |0 # CJK Ideograph
+<UE18F> \xFC\xB7 |0 # Private Use
+<UE190> \xFC\xB8 |0 # Private Use
+<U6F8A> \xFC\xBA |0 # CJK Ideograph
+<UE193> \xFC\xBB |0 # Private Use
+<U9814> \xFC\xBC |0 # CJK Ideograph
+<UE195> \xFC\xBD |0 # Private Use
+<UE196> \xFC\xBE |0 # Private Use
+<U64E1> \xFC\xBF |0 # CJK Ideograph
+<U64E5> \xFC\xC0 |0 # CJK Ideograph
+<U947B> \xFC\xC1 |0 # CJK Ideograph
+<U3A66> \xFC\xC2 |0 # CJK Ideograph Extension A
+<U643A> \xFC\xC3 |0 # CJK Ideograph
+<U3A57> \xFC\xC4 |0 # CJK Ideograph Extension A
+<U654D> \xFC\xC5 |0 # CJK Ideograph
+<U6F16> \xFC\xC6 |0 # CJK Ideograph
+<UE19F> \xFC\xC7 |0 # Private Use
+<UE1A0> \xFC\xC8 |0 # Private Use
+<U6585> \xFC\xC9 |0 # CJK Ideograph
+<U656D> \xFC\xCA |0 # CJK Ideograph
+<U655F> \xFC\xCB |0 # CJK Ideograph
+<UE1A4> \xFC\xCC |0 # Private Use
+<U65B5> \xFC\xCD |0 # CJK Ideograph
+<UE1A6> \xFC\xCE |0 # Private Use
+<U4B37> \xFC\xCF |0 # CJK Ideograph Extension A
+<U65D1> \xFC\xD0 |0 # CJK Ideograph
+<U40D8> \xFC\xD1 |0 # CJK Ideograph Extension A
+<UE1AA> \xFC\xD2 |0 # Private Use
+<U65E0> \xFC\xD3 |0 # CJK Ideograph
+<U65E3> \xFC\xD4 |0 # CJK Ideograph
+<U5FDF> \xFC\xD5 |0 # CJK Ideograph
+<UE1AE> \xFC\xD6 |0 # Private Use
+<U6618> \xFC\xD7 |0 # CJK Ideograph
+<UE1B0> \xFC\xD8 |0 # Private Use
+<UE1B1> \xFC\xD9 |0 # Private Use
+<U6644> \xFC\xDA |0 # CJK Ideograph
+<UE1B3> \xFC\xDB |0 # Private Use
+<UE1B4> \xFC\xDC |0 # Private Use
+<U664B> \xFC\xDD |0 # CJK Ideograph
+<UE1B6> \xFC\xDE |0 # Private Use
+<U6667> \xFC\xDF |0 # CJK Ideograph
+<UE1B8> \xFC\xE0 |0 # Private Use
+<U6673> \xFC\xE1 |0 # CJK Ideograph
+<UE1BB> \xFC\xE3 |0 # Private Use
+<UE1BC> \xFC\xE4 |0 # Private Use
+<UE1BD> \xFC\xE5 |0 # Private Use
+<UE1BE> \xFC\xE6 |0 # Private Use
+<UE1BF> \xFC\xE7 |0 # Private Use
+<U77C5> \xFC\xE8 |0 # CJK Ideograph
+<UE1C1> \xFC\xE9 |0 # Private Use
+<U99A4> \xFC\xEA |0 # CJK Ideograph
+<U6702> \xFC\xEB |0 # CJK Ideograph
+<UE1C4> \xFC\xEC |0 # Private Use
+<UE1C5> \xFC\xED |0 # Private Use
+<U3B2B> \xFC\xEE |0 # CJK Ideograph Extension A
+<U69FA> \xFC\xEF |0 # CJK Ideograph
+<UE1C8> \xFC\xF0 |0 # Private Use
+<U6767> \xFC\xF2 |0 # CJK Ideograph
+<U6762> \xFC\xF3 |0 # CJK Ideograph
+<UE1CC> \xFC\xF4 |0 # Private Use
+<UE1CD> \xFC\xF5 |0 # Private Use
+<U67D7> \xFC\xF6 |0 # CJK Ideograph
+<U44E9> \xFC\xF7 |0 # CJK Ideograph Extension A
+<U6822> \xFC\xF8 |0 # CJK Ideograph
+<U6E50> \xFC\xF9 |0 # CJK Ideograph
+<U923C> \xFC\xFA |0 # CJK Ideograph
+<U6801> \xFC\xFB |0 # CJK Ideograph
+<UE1D4> \xFC\xFC |0 # Private Use
+<UE1D5> \xFC\xFD |0 # Private Use
+<U685D> \xFC\xFE |0 # CJK Ideograph
+<UE1D7> \xFD\x40 |0 # Private Use
+<U69E1> \xFD\x41 |0 # CJK Ideograph
+<U6A0B> \xFD\x42 |0 # CJK Ideograph
+<UE1DA> \xFD\x43 |0 # Private Use
+<U6973> \xFD\x44 |0 # CJK Ideograph
+<U68C3> \xFD\x45 |0 # CJK Ideograph
+<UE1DD> \xFD\x46 |0 # Private Use
+<U6901> \xFD\x47 |0 # CJK Ideograph
+<U6900> \xFD\x48 |0 # CJK Ideograph
+<U3D32> \xFD\x49 |0 # CJK Ideograph Extension A
+<U3A01> \xFD\x4A |0 # CJK Ideograph Extension A
+<UE1E2> \xFD\x4B |0 # Private Use
+<U3B80> \xFD\x4C |0 # CJK Ideograph Extension A
+<U67AC> \xFD\x4D |0 # CJK Ideograph
+<U6961> \xFD\x4E |0 # CJK Ideograph
+<UE1E6> \xFD\x4F |0 # Private Use
+<U42FC> \xFD\x50 |0 # CJK Ideograph Extension A
+<U6936> \xFD\x51 |0 # CJK Ideograph
+<U6998> \xFD\x52 |0 # CJK Ideograph
+<U3BA1> \xFD\x53 |0 # CJK Ideograph Extension A
+<UE1EB> \xFD\x54 |0 # Private Use
+<U8363> \xFD\x55 |0 # CJK Ideograph
+<U5090> \xFD\x56 |0 # CJK Ideograph
+<U69F9> \xFD\x57 |0 # CJK Ideograph
+<UE1EF> \xFD\x58 |0 # Private Use
+<UE1F0> \xFD\x59 |0 # Private Use
+<U6A45> \xFD\x5A |0 # CJK Ideograph
+<UE1F2> \xFD\x5B |0 # Private Use
+<U6A9D> \xFD\x5C |0 # CJK Ideograph
+<U3BF3> \xFD\x5D |0 # CJK Ideograph Extension A
+<U67B1> \xFD\x5E |0 # CJK Ideograph
+<U6AC8> \xFD\x5F |0 # CJK Ideograph
+<UE1F7> \xFD\x60 |0 # Private Use
+<U3C0D> \xFD\x61 |0 # CJK Ideograph Extension A
+<U6B1D> \xFD\x62 |0 # CJK Ideograph
+<UE1FA> \xFD\x63 |0 # Private Use
+<U60DE> \xFD\x64 |0 # CJK Ideograph
+<U6B35> \xFD\x65 |0 # CJK Ideograph
+<U6B74> \xFD\x66 |0 # CJK Ideograph
+<UE1FE> \xFD\x67 |0 # Private Use
+<U6EB5> \xFD\x68 |0 # CJK Ideograph
+<UE200> \xFD\x69 |0 # Private Use
+<UE201> \xFD\x6A |0 # Private Use
+<UE202> \xFD\x6B |0 # Private Use
+<U3740> \xFD\x6C |0 # CJK Ideograph Extension A
+<U5421> \xFD\x6D |0 # CJK Ideograph
+<UE205> \xFD\x6E |0 # Private Use
+<U6BE1> \xFD\x6F |0 # CJK Ideograph
+<UE207> \xFD\x70 |0 # Private Use
+<U6BDC> \xFD\x71 |0 # CJK Ideograph
+<U6C37> \xFD\x72 |0 # CJK Ideograph
+<UE20A> \xFD\x73 |0 # Private Use
+<UE20B> \xFD\x74 |0 # Private Use
+<UE20C> \xFD\x75 |0 # Private Use
+<U6C5A> \xFD\x76 |0 # CJK Ideograph
+<U8226> \xFD\x77 |0 # CJK Ideograph
+<U6C79> \xFD\x78 |0 # CJK Ideograph
+<UE210> \xFD\x79 |0 # Private Use
+<U44C5> \xFD\x7A |0 # CJK Ideograph Extension A
+<UE212> \xFD\x7B |0 # Private Use
+<UE213> \xFD\x7C |0 # Private Use
+<UE214> \xFD\x7D |0 # Private Use
+<UE215> \xFD\x7E |0 # Private Use
+<UE216> \xFD\xA1 |0 # Private Use
+<U36E5> \xFD\xA2 |0 # CJK Ideograph Extension A
+<U3CEB> \xFD\xA3 |0 # CJK Ideograph Extension A
+<UE219> \xFD\xA4 |0 # Private Use
+<U9B83> \xFD\xA5 |0 # CJK Ideograph
+<UE21B> \xFD\xA6 |0 # Private Use
+<UE21C> \xFD\xA7 |0 # Private Use
+<U7F8F> \xFD\xA8 |0 # CJK Ideograph
+<U6837> \xFD\xA9 |0 # CJK Ideograph
+<UE21F> \xFD\xAA |0 # Private Use
+<UE220> \xFD\xAB |0 # Private Use
+<UE221> \xFD\xAC |0 # Private Use
+<U6D96> \xFD\xAD |0 # CJK Ideograph
+<U6D5C> \xFD\xAE |0 # CJK Ideograph
+<U6E7C> \xFD\xAF |0 # CJK Ideograph
+<U6F04> \xFD\xB0 |0 # CJK Ideograph
+<UE226> \xFD\xB1 |0 # Private Use
+<UE227> \xFD\xB2 |0 # Private Use
+<UE228> \xFD\xB3 |0 # Private Use
+<U8533> \xFD\xB4 |0 # CJK Ideograph
+<UE22A> \xFD\xB5 |0 # Private Use
+<U51C7> \xFD\xB6 |0 # CJK Ideograph
+<U842E> \xFD\xB9 |0 # CJK Ideograph
+<UE22F> \xFD\xBA |0 # Private Use
+<UE231> \xFD\xBC |0 # Private Use
+<U7453> \xFD\xBD |0 # CJK Ideograph
+<UE233> \xFD\xBE |0 # Private Use
+<U79CC> \xFD\xBF |0 # CJK Ideograph
+<U6E4F> \xFD\xC0 |0 # CJK Ideograph
+<U5A91> \xFD\xC1 |0 # CJK Ideograph
+<UE237> \xFD\xC2 |0 # Private Use
+<U6FF8> \xFD\xC3 |0 # CJK Ideograph
+<U370D> \xFD\xC4 |0 # CJK Ideograph Extension A
+<U6F9D> \xFD\xC5 |0 # CJK Ideograph
+<UE23B> \xFD\xC6 |0 # Private Use
+<U6EFA> \xFD\xC7 |0 # CJK Ideograph
+<UE23D> \xFD\xC8 |0 # Private Use
+<UE23E> \xFD\xC9 |0 # Private Use
+<U4555> \xFD\xCA |0 # CJK Ideograph Extension A
+<U93F0> \xFD\xCB |0 # CJK Ideograph
+<U6F44> \xFD\xCC |0 # CJK Ideograph
+<U6F5C> \xFD\xCD |0 # CJK Ideograph
+<U3D4E> \xFD\xCE |0 # CJK Ideograph Extension A
+<U6F74> \xFD\xCF |0 # CJK Ideograph
+<UE245> \xFD\xD0 |0 # Private Use
+<U3D3B> \xFD\xD1 |0 # CJK Ideograph Extension A
+<U6F9F> \xFD\xD2 |0 # CJK Ideograph
+<UE248> \xFD\xD3 |0 # Private Use
+<U6FD3> \xFD\xD4 |0 # CJK Ideograph
+<UE24A> \xFD\xD5 |0 # Private Use
+<UE24B> \xFD\xD6 |0 # Private Use
+<UE24C> \xFD\xD7 |0 # Private Use
+<UE24D> \xFD\xD8 |0 # Private Use
+<UE24E> \xFD\xD9 |0 # Private Use
+<UE24F> \xFD\xDA |0 # Private Use
+<U51DF> \xFD\xDB |0 # CJK Ideograph
+<UE251> \xFD\xDC |0 # Private Use
+<UE252> \xFD\xDD |0 # Private Use
+<UE253> \xFD\xDE |0 # Private Use
+<UE254> \xFD\xDF |0 # Private Use
+<U704B> \xFD\xE0 |0 # CJK Ideograph
+<U707E> \xFD\xE1 |0 # CJK Ideograph
+<U70A7> \xFD\xE2 |0 # CJK Ideograph
+<U7081> \xFD\xE3 |0 # CJK Ideograph
+<U70CC> \xFD\xE4 |0 # CJK Ideograph
+<U70D5> \xFD\xE5 |0 # CJK Ideograph
+<U70D6> \xFD\xE6 |0 # CJK Ideograph
+<U70DF> \xFD\xE7 |0 # CJK Ideograph
+<U4104> \xFD\xE8 |0 # CJK Ideograph Extension A
+<U3DE8> \xFD\xE9 |0 # CJK Ideograph Extension A
+<U71B4> \xFD\xEA |0 # CJK Ideograph
+<U7196> \xFD\xEB |0 # CJK Ideograph
+<UE261> \xFD\xEC |0 # Private Use
+<U712B> \xFD\xED |0 # CJK Ideograph
+<U7145> \xFD\xEE |0 # CJK Ideograph
+<U5A88> \xFD\xEF |0 # CJK Ideograph
+<U714A> \xFD\xF0 |0 # CJK Ideograph
+<U5C9C> \xFD\xF2 |0 # CJK Ideograph
+<UE268> \xFD\xF3 |0 # Private Use
+<U714F> \xFD\xF4 |0 # CJK Ideograph
+<U9362> \xFD\xF5 |0 # CJK Ideograph
+<UE26B> \xFD\xF6 |0 # Private Use
+<U712C> \xFD\xF7 |0 # CJK Ideograph
+<UE26D> \xFD\xF8 |0 # Private Use
+<UE26E> \xFD\xF9 |0 # Private Use
+<UE26F> \xFD\xFA |0 # Private Use
+<U71BA> \xFD\xFB |0 # CJK Ideograph
+<UE271> \xFD\xFC |0 # Private Use
+<U70BD> \xFD\xFD |0 # CJK Ideograph
+<U720E> \xFD\xFE |0 # CJK Ideograph
+<U9442> \xFE\x40 |0 # CJK Ideograph
+<U7215> \xFE\x41 |0 # CJK Ideograph
+<U5911> \xFE\x42 |0 # CJK Ideograph
+<U9443> \xFE\x43 |0 # CJK Ideograph
+<U7224> \xFE\x44 |0 # CJK Ideograph
+<U9341> \xFE\x45 |0 # CJK Ideograph
+<UE27A> \xFE\x46 |0 # Private Use
+<U722E> \xFE\x47 |0 # CJK Ideograph
+<U7240> \xFE\x48 |0 # CJK Ideograph
+<UE27D> \xFE\x49 |0 # Private Use
+<U68BD> \xFE\x4A |0 # CJK Ideograph
+<U7255> \xFE\x4B |0 # CJK Ideograph
+<U7257> \xFE\x4C |0 # CJK Ideograph
+<U3E55> \xFE\x4D |0 # CJK Ideograph Extension A
+<UE282> \xFE\x4E |0 # Private Use
+<U680D> \xFE\x4F |0 # CJK Ideograph
+<U6F3D> \xFE\x50 |0 # CJK Ideograph
+<U7282> \xFE\x51 |0 # CJK Ideograph
+<U732B> \xFE\x53 |0 # CJK Ideograph
+<UE288> \xFE\x54 |0 # Private Use
+<UE289> \xFE\x55 |0 # Private Use
+<U48ED> \xFE\x56 |0 # CJK Ideograph Extension A
+<UE28B> \xFE\x57 |0 # Private Use
+<U7328> \xFE\x58 |0 # CJK Ideograph
+<U732E> \xFE\x59 |0 # CJK Ideograph
+<U73CF> \xFE\x5A |0 # CJK Ideograph
+<U73AA> \xFE\x5B |0 # CJK Ideograph
+<UE290> \xFE\x5C |0 # Private Use
+<UE291> \xFE\x5D |0 # Private Use
+<U73C9> \xFE\x5E |0 # CJK Ideograph
+<U7449> \xFE\x5F |0 # CJK Ideograph
+<UE294> \xFE\x60 |0 # Private Use
+<UE295> \xFE\x61 |0 # Private Use
+<UE296> \xFE\x62 |0 # Private Use
+<U6623> \xFE\x63 |0 # CJK Ideograph
+<U36C5> \xFE\x64 |0 # CJK Ideograph Extension A
+<UE299> \xFE\x65 |0 # Private Use
+<UE29A> \xFE\x66 |0 # Private Use
+<UE29B> \xFE\x67 |0 # Private Use
+<U73F7> \xFE\x68 |0 # CJK Ideograph
+<U7415> \xFE\x69 |0 # CJK Ideograph
+<U6903> \xFE\x6A |0 # CJK Ideograph
+<UE29F> \xFE\x6B |0 # Private Use
+<U7439> \xFE\x6C |0 # CJK Ideograph
+<UE2A1> \xFE\x6D |0 # Private Use
+<U3ED7> \xFE\x6E |0 # CJK Ideograph Extension A
+<UE2A4> \xFE\x70 |0 # Private Use
+<U7460> \xFE\x71 |0 # CJK Ideograph
+<UE2A6> \xFE\x72 |0 # Private Use
+<U7447> \xFE\x73 |0 # CJK Ideograph
+<U73E4> \xFE\x74 |0 # CJK Ideograph
+<U7476> \xFE\x75 |0 # CJK Ideograph
+<U83B9> \xFE\x76 |0 # CJK Ideograph
+<U746C> \xFE\x77 |0 # CJK Ideograph
+<U3730> \xFE\x78 |0 # CJK Ideograph Extension A
+<U7474> \xFE\x79 |0 # CJK Ideograph
+<U93F1> \xFE\x7A |0 # CJK Ideograph
+<U6A2C> \xFE\x7B |0 # CJK Ideograph
+<U7482> \xFE\x7C |0 # CJK Ideograph
+<U4953> \xFE\x7D |0 # CJK Ideograph Extension A
+<UE2B2> \xFE\x7E |0 # Private Use
+<UE2B3> \xFE\xA1 |0 # Private Use
+<UE2B4> \xFE\xA2 |0 # Private Use
+<UE2B5> \xFE\xA3 |0 # Private Use
+<U5B46> \xFE\xA4 |0 # CJK Ideograph
+<UE2B7> \xFE\xA5 |0 # Private Use
+<UE2B8> \xFE\xA6 |0 # Private Use
+<U74C8> \xFE\xA7 |0 # CJK Ideograph
+<UE2BA> \xFE\xA8 |0 # Private Use
+<U750E> \xFE\xA9 |0 # CJK Ideograph
+<U751E> \xFE\xAB |0 # CJK Ideograph
+<UE2BE> \xFE\xAC |0 # Private Use
+<UE2BF> \xFE\xAD |0 # Private Use
+<U5BD7> \xFE\xAE |0 # CJK Ideograph
+<UE2C1> \xFE\xAF |0 # Private Use
+<U9385> \xFE\xB0 |0 # CJK Ideograph
+<U754D> \xFE\xB1 |0 # CJK Ideograph
+<U754A> \xFE\xB2 |0 # CJK Ideograph
+<U7567> \xFE\xB3 |0 # CJK Ideograph
+<U756E> \xFE\xB4 |0 # CJK Ideograph
+<UE2C7> \xFE\xB5 |0 # Private Use
+<U3F04> \xFE\xB6 |0 # CJK Ideograph Extension A
+<UE2C9> \xFE\xB7 |0 # Private Use
+<U758E> \xFE\xB8 |0 # CJK Ideograph
+<U745D> \xFE\xB9 |0 # CJK Ideograph
+<U759E> \xFE\xBA |0 # CJK Ideograph
+<U75B4> \xFE\xBB |0 # CJK Ideograph
+<U7602> \xFE\xBC |0 # CJK Ideograph
+<U762C> \xFE\xBD |0 # CJK Ideograph
+<U7651> \xFE\xBE |0 # CJK Ideograph
+<U764F> \xFE\xBF |0 # CJK Ideograph
+<U766F> \xFE\xC0 |0 # CJK Ideograph
+<U7676> \xFE\xC1 |0 # CJK Ideograph
+<UE2D4> \xFE\xC2 |0 # Private Use
+<U7690> \xFE\xC3 |0 # CJK Ideograph
+<U81EF> \xFE\xC4 |0 # CJK Ideograph
+<U37F8> \xFE\xC5 |0 # CJK Ideograph Extension A
+<UE2D8> \xFE\xC6 |0 # Private Use
+<UE2D9> \xFE\xC7 |0 # Private Use
+<U76A1> \xFE\xC8 |0 # CJK Ideograph
+<U76A5> \xFE\xC9 |0 # CJK Ideograph
+<U76B7> \xFE\xCA |0 # CJK Ideograph
+<U76CC> \xFE\xCB |0 # CJK Ideograph
+<UE2DE> \xFE\xCC |0 # Private Use
+<U8462> \xFE\xCD |0 # CJK Ideograph
+<UE2E0> \xFE\xCE |0 # Private Use
+<UE2E1> \xFE\xCF |0 # Private Use
+<UE2E2> \xFE\xD0 |0 # Private Use
+<U771E> \xFE\xD1 |0 # CJK Ideograph
+<U7726> \xFE\xD2 |0 # CJK Ideograph
+<U7740> \xFE\xD3 |0 # CJK Ideograph
+<U64AF> \xFE\xD4 |0 # CJK Ideograph
+<UE2E7> \xFE\xD5 |0 # Private Use
+<U7758> \xFE\xD6 |0 # CJK Ideograph
+<UE2E9> \xFE\xD7 |0 # Private Use
+<U77AF> \xFE\xD8 |0 # CJK Ideograph
+<UE2EB> \xFE\xD9 |0 # Private Use
+<UE2EC> \xFE\xDA |0 # Private Use
+<UE2ED> \xFE\xDB |0 # Private Use
+<U77F4> \xFE\xDC |0 # CJK Ideograph
+<UE2F0> \xFE\xDE |0 # Private Use
+<UE2F1> \xFE\xDF |0 # Private Use
+<U68CA> \xFE\xE0 |0 # CJK Ideograph
+<U78AF> \xFE\xE1 |0 # CJK Ideograph
+<U78C7> \xFE\xE2 |0 # CJK Ideograph
+<U78D3> \xFE\xE3 |0 # CJK Ideograph
+<U96A5> \xFE\xE4 |0 # CJK Ideograph
+<U792E> \xFE\xE5 |0 # CJK Ideograph
+<UE2F8> \xFE\xE6 |0 # Private Use
+<U78D7> \xFE\xE7 |0 # CJK Ideograph
+<U7934> \xFE\xE8 |0 # CJK Ideograph
+<U78B1> \xFE\xE9 |0 # CJK Ideograph
+<UE2FC> \xFE\xEA |0 # Private Use
+<U8FB8> \xFE\xEB |0 # CJK Ideograph
+<U8884> \xFE\xEC |0 # CJK Ideograph
+<UE2FF> \xFE\xED |0 # Private Use
+<UE300> \xFE\xEE |0 # Private Use
+<UE301> \xFE\xEF |0 # Private Use
+<U7986> \xFE\xF0 |0 # CJK Ideograph
+<U8900> \xFE\xF1 |0 # CJK Ideograph
+<U6902> \xFE\xF2 |0 # CJK Ideograph
+<U7980> \xFE\xF3 |0 # CJK Ideograph
+<UE306> \xFE\xF4 |0 # Private Use
+<U799D> \xFE\xF5 |0 # CJK Ideograph
+<UE308> \xFE\xF6 |0 # Private Use
+<U793C> \xFE\xF7 |0 # CJK Ideograph
+<U79A9> \xFE\xF8 |0 # CJK Ideograph
+<U6E2A> \xFE\xF9 |0 # CJK Ideograph
+<UE30C> \xFE\xFA |0 # Private Use
+<U3EA8> \xFE\xFB |0 # CJK Ideograph Extension A
+<U79C6> \xFE\xFC |0 # CJK Ideograph
+<UE30F> \xFE\xFD |0 # Private Use
+<U79D4> \xFE\xFE |0 # CJK Ideograph
+<U00FF> \xFF |0 # LATIN SMALL LETTER Y WITH DIAERESIS
 END CHARMAP

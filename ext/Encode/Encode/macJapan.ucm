@@ -1,5 +1,8 @@
+#
+# $Id: macJapan.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+#
 # ./compile -n macJapan -o Encode/macJapan.ucm Encode/macJapan.enc
-<code_set_name> "macjapan"
+<code_set_name> "MacJapanese"
 <mb_cur_min> 1
 <mb_cur_max> 2
 <subchar> \x3F

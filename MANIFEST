@@ -197,16 +197,16 @@ ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode/AUTHORS		List of authors
+ext/Encode/bin/enc2xs	Encode module generator
+ext/Encode/bin/piconv	iconv by perl
 ext/Encode/Byte/Byte.pm	Encode extension
 ext/Encode/Byte/Makefile.PL       Encode extension
 ext/Encode/Changes		Change Log
 ext/Encode/CN/CN.pm		Encode extension
 ext/Encode/CN/Makefile.PL	Encode extension
-ext/Encode/compile		Encode extension
 ext/Encode/EBCDIC/EBCDIC.pm       Encode extension
 ext/Encode/EBCDIC/Makefile.PL     Encode extension
 ext/Encode/encengine.c		Encode extension
-ext/Encode/encode.h		Encode extension
 ext/Encode/Encode.pm			Encode extension
 ext/Encode/Encode.xs		Encode extension
 ext/Encode/Encode/8859-1.ucm	Unicode Character Map
@@ -225,7 +225,7 @@ ext/Encode/Encode/8859-7.ucm	Unicode Character Map
 ext/Encode/Encode/8859-8.ucm	Unicode Character Map
 ext/Encode/Encode/8859-9.ucm	Unicode Character Map
 ext/Encode/Encode/ascii.ucm	Unicode Character Map
-ext/Encode/Encode/big5-hk.ucm	Unicode Character Map
+ext/Encode/Encode/big5-hkscs.ucm	Unicode Character Map
 ext/Encode/Encode/big5.ucm	Unicode Character Map
 ext/Encode/Encode/cp1047.ucm	Unicode Character Map
 ext/Encode/Encode/cp1250.ucm	Unicode Character Map
@@ -235,12 +235,14 @@ ext/Encode/Encode/cp936.ucm	Unicode Character Map
 ext/Encode/Encode/cp949.ucm	Unicode Character Map
 ext/Encode/Encode/cp950.ucm	Unicode Character Map
 ext/Encode/Encode/dingbats.ucm	Unicode Character Map
+ext/Encode/Encode/encode.h		Encode extension header file
 ext/Encode/Encode/euc-cn.ucm	Unicode Character Map
 ext/Encode/Encode/euc-jp.ucm	Unicode Character Map
 ext/Encode/Encode/euc-kr.ucm	Unicode Character Map
 ext/Encode/Encode/gb12345.ucm	Unicode Character Map
 ext/Encode/Encode/gb2312.ucm	Unicode Character Map
 ext/Encode/Encode/gsm0338.ucm	Unicode Character Map
+ext/Encode/Encode/hp-roman8.ucm	Unicode Character Map
 ext/Encode/Encode/ibm-1250.ucm	Unicode Character Map
 ext/Encode/Encode/ibm-1251.ucm	Unicode Character Map
 ext/Encode/Encode/ibm-1252.ucm	Unicode Character Map
@@ -252,6 +254,7 @@ ext/Encode/Encode/ibm-1257.ucm	Unicode Character Map
 ext/Encode/Encode/ibm-1258.ucm	Unicode Character Map
 ext/Encode/Encode/ir-165.ucm	Unicode Character Map
 ext/Encode/Encode/jis0201.ucm	Unicode Character Map
+ext/Encode/Encode/johab.ucm	Unicode Character Map
 ext/Encode/Encode/koi8-f.ucm	Unicode Character Map
 ext/Encode/Encode/koi8-r.ucm	Unicode Character Map
 ext/Encode/Encode/koi8-u.ucm	Unicode Character Map
@@ -271,7 +274,6 @@ ext/Encode/Encode/macTurkish.ucm	Unicode Character Map
 ext/Encode/Encode/macUkraine.ucm	Unicode Character Map
 ext/Encode/Encode/nextstep.ucm	Unicode Character Map
 ext/Encode/Encode/posix-bc.ucm	Unicode Character Map
-ext/Encode/Encode/roman8.ucm	Unicode Character Map
 ext/Encode/Encode/shiftjis.ucm	Unicode Character Map
 ext/Encode/Encode/symbol.ucm	Unicode Character Map
 ext/Encode/Encode/viscii.ucm	Unicode Character Map
@@ -282,9 +284,7 @@ ext/Encode/KR/Makefile.PL		Encode extension
 ext/Encode/lib/Encode/10646_1.pm	Encode extension
 ext/Encode/lib/Encode/Alias.pm	        Encode extension
 ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
-ext/Encode/lib/Encode/CN/2022_CN.pm	 Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
-ext/Encode/lib/Encode/Details.pod	Detailed topics on character encodings
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/Internal.pm	Encode extension
 ext/Encode/lib/Encode/JP/2022_JP.pm	Encode extension

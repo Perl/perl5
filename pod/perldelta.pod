@@ -555,6 +555,13 @@ the <FILEHANDLE> angle bracket operator.
 The command-line options -s and -F are now recognized on the shebang
 (#!) line.
 
+=item *
+
+Use of the C</c> match modifier without an accompanying C</g> modifier
+elicits a new warning: C<Use of /c modifier is meaningless without /g>.
+Use of C</c> in substitutions, even with C</g>, elicits 
+C<Use of /c modifier is meaningless in s///>.
+
 =back
 
 =head1 Modules and Pragmata
@@ -1347,8 +1354,9 @@ confusion with the Perl POSIX module.
 
 =item *
 
-The documentation for the WinCE platform is called "CE", to avoid
-confusion with the perlwin32 documentation on 8.3-restricted filesystems.
+The documentation for the WinCE platform is called perlce (README.ce
+in the source code kit), to avoid confusion with the perlwin32
+documentation on 8.3-restricted filesystems.
 
 =back
 

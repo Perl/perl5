@@ -1,4 +1,9 @@
 BEGIN {
+    require Config; import Config;
+    if ($Config{'extensions'} !~ /\bEncode\b/) {
+      print "1..0 # Skip: Encode was not built\n";
+      exit 0;
+    }
     if (ord("A") == 193) {
 	print "1..0 # encoding pragma does not support EBCDIC platforms\n";
 	exit(0);

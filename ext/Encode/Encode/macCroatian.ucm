@@ -1,5 +1,8 @@
+#
+# $Id: macCroatian.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+#
 # ./compile -n macCroatian -o Encode/macCroatian.ucm Encode/macCroatian.enc
-<code_set_name> "maccroatian"
+<code_set_name> "MacCroatian"
 <mb_cur_min> 1
 <mb_cur_max> 1
 <subchar> \x3F

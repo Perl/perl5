@@ -2039,8 +2039,12 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		fromstr = NEXTFROM;
 		auint = UNI_TO_NATIVE(SvUV(fromstr));
 		SvGROW(cat, SvCUR(cat) + UTF8_MAXLEN + 1);
-		SvCUR_set(cat, (char*)uvchr_to_utf8((U8*)SvEND(cat),auint)
-			       - SvPVX(cat));
+		SvCUR_set(cat,
+			  (char*)uvchr_to_utf8_flags((U8*)SvEND(cat),
+						     auint,
+						     ckWARN(WARN_UTF8) ?
+						     0 : UNICODE_ALLOW_ANY)
+			  - SvPVX(cat));
 	    }
 	    *SvEND(cat) = '\0';
 	    break;

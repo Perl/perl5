@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.99 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -236,46 +236,110 @@ Encode - character encodings
 
     use Encode;
 
+
+=head2 Table of Contents
+
+Encode consists of a collection of modules which details are too big 
+to fit in one document.  This POD itself explains the top-level APIs
+and general topics at a glance.  For other topics and more details, 
+see the PODs below;
+
+  Name			        Description
+  --------------------------------------------------------
+  Encode::Alias         Alias defintions to encodings
+  Encode::Encoding      Encode Implementation Base Class
+  Encode::Supported     List of Supported Encodings
+  Encode::CN            Simplified Chinese Encodings
+  Encode::JP            Japanese Encodings
+  Encode::KR            Korean Encodings
+  Encode::TW            Traditional Chinese Encodings
+  --------------------------------------------------------
+
 =head1 DESCRIPTION
 
 The C<Encode> module provides the interfaces between Perl's strings
-and the rest of the system.  Perl strings are sequences of B<characters>.
+and the rest of the system.  Perl strings are sequences of
+B<characters>.
 
-To find more about character encodings, please consult
-L<Encode::Details>. This document focuses on programming references.
+The repertoire of characters that Perl can represent is at least that
+defined by the Unicode Consortium. On most platforms the ordinal
+values of the characters (as returned by C<ord(ch)>) is the "Unicode
+codepoint" for the character (the exceptions are those platforms where
+the legacy encoding is some variant of EBCDIC rather than a super-set
+of ASCII - see L<perlebcdic>).
+
+Traditionally computer data has been moved around in 8-bit chunks
+often called "bytes". These chunks are also known as "octets" in
+networking standards. Perl is widely used to manipulate data of many
+types - not only strings of characters representing human or computer
+languages but also "binary" data being the machines representation of
+numbers, pixels in an image - or just about anything.
+
+When Perl is processing "binary data" the programmer wants Perl to
+process "sequences of bytes". This is not a problem for Perl - as a
+byte has 256 possible values it easily fits in Perl's much larger
+"logical character".
+
+=head2 TERMINOLOGY
+
+=over 4
+
+=item *
+
+I<character>: a character in the range 0..(2**32-1) (or more).
+(What Perl's strings are made of.)
+
+=item *
+
+I<byte>: a character in the range 0..255
+(A special case of a Perl character.)
+
+=item *
+
+I<octet>: 8 bits of data, with ordinal values 0..255
+(Term for bytes passed to or from a non-Perl context, e.g. disk file.)
+
+=back
+
+The marker [INTERNAL] marks Internal Implementation Details, in
+general meant only for those who think they know what they are doing,
+and such details may change in future releases.
 
 =head1 PERL ENCODING API
-
-=head2 Generic Encoding Interface
 
 =over 4
 
 =item $bytes  = encode(ENCODING, $string[, CHECK])
 
 Encodes string from Perl's internal form into I<ENCODING> and returns
-a sequence of octets.  For CHECK see L</"Handling Malformed Data">.
+a sequence of octets.  ENCODING can be either a canonical name or
+alias.  For encoding names and aliases, see L</"Defining Aliases">.
+For CHECK see L</"Handling Malformed Data">.
 
-For example to convert (internally UTF-8 encoded) Unicode data
-to octets:
+For example to convert (internally UTF-8 encoded) Unicode string to
+iso-8859-1 (also known as Latin1), 
 
-	$octets = encode("utf8", $unicode);
+  $octets = encode("iso-8859-1", $unicode);
 
 =item $string = decode(ENCODING, $bytes[, CHECK])
 
 Decode sequence of octets assumed to be in I<ENCODING> into Perl's
-internal form and returns the resulting string.  For CHECK see
+internal form and returns the resulting string.  as in encode(),
+ENCODING can be either a canonical name or alias. For encoding names
+and aliases, see L</"Defining Aliases">.  For CHECK see
 L</"Handling Malformed Data">.
 
 For example to convert ISO-8859-1 data to UTF-8:
 
-	$utf8 = decode("latin1", $latin1);
+  $utf8 = decode("iso-8859-1", $latin1);
 
 =item from_to($string, FROM_ENCODING, TO_ENCODING[, CHECK])
 
 Convert B<in-place> the data between two encodings.  How did the data
 in $string originally get to be in FROM_ENCODING?  Either using
-encode() or through PerlIO: See L</"Encoding and IO">.  For CHECK
-see L</"Handling Malformed Data">.
+encode() or through PerlIO: See L</"Encoding and IO">.
+For encoding names and aliases, see L</"Defining Aliases">. 
+For CHECK see L</"Handling Malformed Data">.
 
 For example to convert ISO-8859-1 data to UTF-8:
 
@@ -290,7 +354,109 @@ converted cannot be a string constant, it must be a scalar variable.
 
 =back
 
-=head2 Handling Malformed Data
+=head2 Listing available encodings
+
+  use Encode;
+  @list = Encode->encodings();
+
+Returns a list of the canonical names of the available encodings that
+are loaded.  To get a list of all available encodings including the
+ones that are not loaded yet, say
+
+  @all_encodings = Encode->encodings(":all");
+
+Or you can give the name of specific module.
+
+  @with_jp = Encode->encodings("Encode/JP.pm");
+
+Note in this case you have to say C<"Encode/JP.pm"> instead of
+C<"Encode::JP">.
+
+To find which encodings are supported by this package in details, 
+see L<Encode::Supported>.
+
+
+=head2 Defining Aliases
+
+To add new alias to a given encoding,  Use;
+
+  use Encode;
+  use Encode::Alias;
+  define_alias(newName => ENCODING);
+
+After that, newName can be to be used as am alias for ENCODING.
+ENCODING may be either the name of an encoding or and I<encoding 
+object>
+
+See L<Encode::Alias> on details.
+
+=head1 Encoding and IO
+
+It is very common to want to do encoding transformations when
+reading or writing files, network connections, pipes etc.
+If Perl is configured to use the new 'perlio' IO system then
+C<Encode> provides a "layer" (See L<perliol>) which can transform
+data as it is read or written.
+
+Here is how the blind poet would modernise the encoding:
+
+    use Encode;
+    open(my $iliad,'<:encoding(iso-8859-7)','iliad.greek');
+    open(my $utf8,'>:utf8','iliad.utf8');
+    my @epic = <$iliad>;
+    print $utf8 @epic;
+    close($utf8);
+    close($illiad);
+
+In addition the new IO system can also be configured to read/write
+UTF-8 encoded characters (as noted above this is efficient):
+
+    open(my $fh,'>:utf8','anything');
+    print $fh "Any \x{0021} string \N{SMILEY FACE}\n";
+
+Either of the above forms of "layer" specifications can be made the default
+for a lexical scope with the C<use open ...> pragma. See L<open>.
+
+Once a handle is open is layers can be altered using C<binmode>.
+
+Without any such configuration, or if Perl itself is built using
+system's own IO, then write operations assume that file handle accepts
+only I<bytes> and will C<die> if a character larger than 255 is
+written to the handle. When reading, each octet from the handle
+becomes a byte-in-a-character. Note that this default is the same
+behaviour as bytes-only languages (including Perl before v5.6) would
+have, and is sufficient to handle native 8-bit encodings
+e.g. iso-8859-1, EBCDIC etc. and any legacy mechanisms for handling
+other encodings and binary data.
+
+In other cases it is the programs responsibility to transform
+characters into bytes using the API above before doing writes, and to
+transform the bytes read from a handle into characters before doing
+"character operations" (e.g. C<lc>, C</\W+/>, ...).
+
+You can also use PerlIO to convert larger amounts of data you don't
+want to bring into memory.  For example to convert between ISO-8859-1
+(Latin 1) and UTF-8 (or UTF-EBCDIC in EBCDIC machines):
+
+    open(F, "<:encoding(iso-8859-1)", "data.txt") or die $!;
+    open(G, ">:utf8",                 "data.utf") or die $!;
+    while (<F>) { print G }
+
+    # Could also do "print G <F>" but that would pull
+    # the whole file into memory just to write it out again.
+
+More examples:
+
+    open(my $f, "<:encoding(cp1252)")
+    open(my $g, ">:encoding(iso-8859-2)")
+    open(my $h, ">:encoding(latin9)")       # iso-8859-15
+
+See L<PerlIO> for more information.
+
+See also L<encoding> for how to change the default encoding of the
+data in your script.
+
+=head1 Handling Malformed Data
 
 If CHECK is not set, C<undef> is returned.  If the data is supposed to
 be UTF-8, an optional lexical warning (category utf8) is given.  If
@@ -374,113 +540,17 @@ For CHECK see L</"Handling Malformed Data">.
 
 =back
 
-=head2 Listing available encodings
-
-  use Encode;
-  @list = Encode->encodings();
-
-Returns a list of the canonical names of the available encodings that
-are loaded.  To get a list of all available encodings including the
-ones that are not loaded yet, say
-
-  @all_encodings = Encode->encodings(":all");
-
-Or you can give the name of specific module.
-
-  @with_jp = Encode->encodings("Encode/JP.pm");
-
-Note in this case you have to say C<"Encode/JP.pm"> instead of
-C<"Encode::JP">.
-
-To find which encodings are supported by this package in details, 
-see L<Encode::Supported>.
-
-=head2 Defining Aliases
-
-  use Encode;
-  use Encode::Alias;
-  define_alias(newName => ENCODING);
-
-Allows newName to be used as am alias for ENCODING. ENCODING may be
-either the name of an encoding or and encoding object (as above).
-
-See L<Encode::Alias> on details.
-
 =head1 Defining Encodings
+
+To define a new encoding, use:
 
     use Encode qw(define_alias);
     define_encoding($object, 'canonicalName' [, alias...]);
 
-Causes I<canonicalName> to be associated with I<$object>.  The object
+I<canonicalName> will be associated with I<$object>.  The object
 should provide the interface described in L<Encode::Encoding>
-below.  If more than two arguments are provided then additional
+If more than two arguments are provided then additional
 arguments are taken as aliases for I<$object> as for C<define_alias>.
-
-=head1 Encoding and IO
-
-It is very common to want to do encoding transformations when
-reading or writing files, network connections, pipes etc.
-If Perl is configured to use the new 'perlio' IO system then
-C<Encode> provides a "layer" (See L<perliol>) which can transform
-data as it is read or written.
-
-Here is how the blind poet would modernise the encoding:
-
-    use Encode;
-    open(my $iliad,'<:encoding(iso-8859-7)','iliad.greek');
-    open(my $utf8,'>:utf8','iliad.utf8');
-    my @epic = <$iliad>;
-    print $utf8 @epic;
-    close($utf8);
-    close($illiad);
-
-In addition the new IO system can also be configured to read/write
-UTF-8 encoded characters (as noted above this is efficient):
-
-    open(my $fh,'>:utf8','anything');
-    print $fh "Any \x{0021} string \N{SMILEY FACE}\n";
-
-Either of the above forms of "layer" specifications can be made the default
-for a lexical scope with the C<use open ...> pragma. See L<open>.
-
-Once a handle is open is layers can be altered using C<binmode>.
-
-Without any such configuration, or if Perl itself is built using
-system's own IO, then write operations assume that file handle accepts
-only I<bytes> and will C<die> if a character larger than 255 is
-written to the handle. When reading, each octet from the handle
-becomes a byte-in-a-character. Note that this default is the same
-behaviour as bytes-only languages (including Perl before v5.6) would
-have, and is sufficient to handle native 8-bit encodings
-e.g. iso-8859-1, EBCDIC etc. and any legacy mechanisms for handling
-other encodings and binary data.
-
-In other cases it is the programs responsibility to transform
-characters into bytes using the API above before doing writes, and to
-transform the bytes read from a handle into characters before doing
-"character operations" (e.g. C<lc>, C</\W+/>, ...).
-
-You can also use PerlIO to convert larger amounts of data you don't
-want to bring into memory.  For example to convert between ISO-8859-1
-(Latin 1) and UTF-8 (or UTF-EBCDIC in EBCDIC machines):
-
-    open(F, "<:encoding(iso-8859-1)", "data.txt") or die $!;
-    open(G, ">:utf8",                 "data.utf") or die $!;
-    while (<F>) { print G }
-
-    # Could also do "print G <F>" but that would pull
-    # the whole file into memory just to write it out again.
-
-More examples:
-
-    open(my $f, "<:encoding(cp1252)")
-    open(my $g, ">:encoding(iso-8859-2)")
-    open(my $h, ">:encoding(latin9)")       # iso-8859-15
-
-See L<PerlIO> for more information.
-
-See also L<encoding> for how to change the default encoding of the
-data in your script.
 
 =head1 Messing with Perl's Internals
 
@@ -514,7 +584,6 @@ not a string.
 
 =head1 SEE ALSO
 
-L<Encode::Details>, 
 L<Encode::Encoding>,
 L<Encode::Supported>,
 L<PerlIO>, 

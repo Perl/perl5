@@ -1,3 +1,6 @@
+#
+# $Id: dingbats.ucm,v 1.0 2002/03/28 23:26:26 dankogai Exp dankogai $
+#
 <code_set_name> "dingbats"
 <mb_cur_min> 1
 <mb_cur_max> 1

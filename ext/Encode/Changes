@@ -1,7 +1,110 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 0.99 2002/03/25 19:29:22 dankogai Exp dankogai $
+# $Id: Changes,v 1.0 2002/03/28 23:26:24 dankogai Exp dankogai $
 #
+1.00  Wed Mar 27 2002
+! *
+  The version of all files is updated to 1.00 via "ci -f -l1.00",
+  commemorating version 1.00.  All files, including *.ucm are now
+  under version control.
+- encode.h
++ Encode/encode.h
+  encode.h moved to Encode/ so it will be installed for the later
+  use by enc2xs
+! enc2xs
+  h2xs-like feature added via "h2xs -M Name *.(enc|ucm)"
+! Makefile.PL
+! */Makefile.PL
+- compile
++ bin/enc2xs
+  compile renamed to enc2xs.  
+  Affected Makefle.PL updated
+- lib/CN/2022_CN.pm
+  "Punt it. HanExtra can take care of that later." -- Autrijus
+  Message-Id: <20020328154338.GA7351@not.autrijus.org>
+! Encode/johab.ucm
+! Encode/euc-kr.ucm
+! Encode/ksc5601.ucm
+! lib/Encode/CJKConstants.pm
+! lib/Encode/KR/2022_KR.pm
+  Table patches for Euro Signs, 2022-KR fixups by Jungshik
+  Message-Id: <Pine.LNX.4.44.0203280616190.2259-200000@www.ykga.org>
+! README
+! Makefile.PL
++ bin/piconv
+  bin/ added for example scripts.  They are not installed by default.
+  to install them, "perl Makefile.PL USE_SCRIPTS".
+  piconv is iconv reinvented in perl.  in addition to all features
+  of iconv, it also adds perlish features.  See L<piconv/1> for more
+  details.
+! lib/Encode/Alias.pm
+  qr/^ replaced with qr/\b so it directly matches locale names
+  such as en_US.US-ASCII
+! AUTHORS
+! t/Aliases.t
+  Patch by MJD to fix the following problem applied.
+  Subject: [PATCH 5.7.3 Encode]
+    Aliases.t not properly skipped when Encode extension not built
+  Message-Id: <20020328091850.18677.qmail@plover.com>
+! lib/Encode/KR/2022_KR.pm
+! lib/Encode/CJKConstants.pm
+  Another patch from Jungshik to make iso-2022-kr actually work
+  Message-Id: <Pine.LNX.4.44.0203271745210.30462-200000@www.ykga.org>
+! Encode/Encode/euc-kr.ucm
++ Encode/Encode/johab.ucm
+! Encode/Encode/ksc5601.ucm
+! Encode/KR/KR.pm
+! Encode/KR/Makefile.PL
+! Encode/lib/Encode/Alias.pm
+! t/Alias.t
+  Johab support and complete revision of Korean Encoding by Jungshik
+  Message-Id: <Pine.LNX.4.44.0203271105060.30462-200000@www.ykga.org>
++ Encode.pm
+  Revised to make up with now-dropped Encode::Details.
+- lib/Encode/Details.pod
+  Dropped.  Besides being obsolete, the topics are now covered in
+  respective pods now. 
+! AUTHORS
+! t/Alias.t
+  KR/KR.pm
+  lib/Encode/Alias.pm
+  Korean aliases fixed thanks to Jungshik Shin
+   /ks[-_ ]?c[-_ ]?5601-1987$/i => cp936
+  Message-Id: <Pine.LNX.4.44.0203262102250.1237-100000@www.ykga.org>
+! *.pm
+  =head1 NAME added to all modules to make buildtoc happy
+  Message-Id: <20020327041151.A10618@alpha.hut.fi>
+- lib/Encode/CJKguide.pod
+  Too controversial and dropped from the dist.  Will be available
+  separately on the web.
+! Encode/*.ucm
+  RCS tags added so table debugging gets easier (should that be
+  needed!  I hope they all stay 1.00!)
++ lib/Encode/CJKguide.pod
+  A detailed guide to mainly, but not limited to, CJK multibyte
+  encodings.
+- Encode/roman8.ucm
++ Encode/hp-roman8.ucm
+! Byte/Makefile.PL
+! Encode/Supported.pod
+  All occurance of "roman8" replaced with "hp-roman8" to avoid 
+  confusion
+! Encode/Supported.pod
+! Encode/mac*.ucm
+! t/Alias.t
+  Mac Encodings now comply the Inside Macintosh
+! t/Alias.t
+  Test for '-raw' conventions added.
+! Encode/Alias.pm
+  aliased  gb2312 -> euc-cn, ksc5601 -> euc-kr
+! Encode/gb12345.ucm
+! Encode/gb2312.ucm
+! Encode/ksc5601.ucm
+  "-raw" appended to canonical names.
+  File mames stay unchanged thanks to UCM format.
+! lib/Encode/CN/HZ.pm
+  Patch from Autrijus to fix gb2312 -> gb2312-raw + code linting
+  Message-Id: <20020326035210.GA2091@not.autrijus.org>
 
 0.99  Tue Mar 26 2002
 - lib/Encode/JP/Const.pm

@@ -91,3 +91,6 @@ dont_use_nlink=define
 
 # Tell Configure where to find the hosts file.
 hostcat="cat /system/stcp/hosts"
+
+# VOS does not have socketpair() but we supply one in vos.c
+d_sockpair="define"

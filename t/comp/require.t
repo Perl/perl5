@@ -10,8 +10,9 @@ BEGIN {
 $i = 1;
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
+my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
 my $total_tests = 23;
-if ($Is_EBCDIC) { $total_tests = 20; }
+if ($Is_EBCDIC || $Is_UTF8) { $total_tests = 20; }
 print "1..$total_tests\n";
 
 sub do_require {
@@ -129,9 +130,9 @@ dofile();
 sub dofile { do "bleah.do"; };
 print $x;
 
-# UTF-encoded things - skipped on EBCDIC machines
+# UTF-encoded things - skipped on EBCDIC machines and on UTF-8 input
 
-if ($Is_EBCDIC) { exit; }
+if ($Is_EBCDIC || $Is_UTF8) { exit; }
 
 my $utf8 = chr(0xFEFF);
 

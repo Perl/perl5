@@ -57,7 +57,8 @@ if( !$Config{d_alarm} ) {
 } else {
   # This should fail but not die if there is real socketpair
   eval {socketpair LEFT, RIGHT, -1, -1, -1};
-  if ($@ =~ /^Unsupported socket function "socketpair" called/) {
+  if ($@ =~ /^Unsupported socket function "socketpair" called/ ||
+      $! =~ /^The operation requested is not supported./) { # Stratus VOS
     plan skip_all => 'No socketpair (real or emulated)';
   } else {
     eval {AF_UNIX};

@@ -293,6 +293,7 @@ C<\p{Latin}> or \p{Cyrillic>, are as follows:
     Armenian
     Bengali
     Bopomofo
+    Buhid
     CanadianAboriginal
     Cherokee
     Cyrillic
@@ -306,6 +307,7 @@ C<\p{Latin}> or \p{Cyrillic>, are as follows:
     Gurmukhi
     Han
     Hangul
+    Hanunoo
     Hebrew
     Hiragana
     Inherited
@@ -323,6 +325,8 @@ C<\p{Latin}> or \p{Cyrillic>, are as follows:
     Runic
     Sinhala
     Syriac
+    Tagalog
+    Tagbanwa
     Tamil
     Telugu
     Thaana
@@ -333,21 +337,32 @@ C<\p{Latin}> or \p{Cyrillic>, are as follows:
 There are also extended property classes that supplement the basic
 properties, defined by the F<PropList> Unicode database:
 
-    ASCII_Hex_Digit
+    ASCIIHexDigit
     BidiControl
     Dash
+    Deprecated
     Diacritic
     Extender
+    GraphemeLink
     HexDigit
     Hyphen
     Ideographic
+    IDSBinaryOperator
+    IDSTrinaryOperator
     JoinControl
+    LogicalOrderException
     NoncharacterCodePoint
     OtherAlphabetic
+    OtherDefaultIgnorableCodePoint
+    OtherGraphemeExtend
     OtherLowercase
     OtherMath
     OtherUppercase
     QuotationMark
+    Radical
+    SoftDotted
+    TerminalPunctuation
+    UnifiedIdeograph
     WhiteSpace
 
 and further derived properties:
@@ -397,102 +412,116 @@ to avoid confusion.
 
 These block names are supported:
 
-   InAlphabeticPresentationForms
-   InArabicBlock
-   InArabicPresentationFormsA
-   InArabicPresentationFormsB
-   InArmenianBlock
-   InArrows
-   InBasicLatin
-   InBengaliBlock
-   InBlockElements
-   InBopomofoBlock
-   InBopomofoExtended
-   InBoxDrawing
-   InBraillePatterns
-   InByzantineMusicalSymbols
-   InCJKCompatibility
-   InCJKCompatibilityForms
-   InCJKCompatibilityIdeographs
-   InCJKCompatibilityIdeographsSupplement
-   InCJKRadicalsSupplement
-   InCJKSymbolsAndPunctuation
-   InCJKUnifiedIdeographs
-   InCJKUnifiedIdeographsExtensionA
-   InCJKUnifiedIdeographsExtensionB
-   InCherokeeBlock
-   InCombiningDiacriticalMarks
-   InCombiningHalfMarks
-   InCombiningMarksForSymbols
-   InControlPictures
-   InCurrencySymbols
-   InCyrillicBlock
-   InDeseretBlock
-   InDevanagariBlock
-   InDingbats
-   InEnclosedAlphanumerics
-   InEnclosedCJKLettersAndMonths
-   InEthiopicBlock
-   InGeneralPunctuation
-   InGeometricShapes
-   InGeorgianBlock
-   InGothicBlock
-   InGreekBlock
-   InGreekExtended
-   InGujaratiBlock
-   InGurmukhiBlock
-   InHalfwidthAndFullwidthForms
-   InHangulCompatibilityJamo
-   InHangulJamo
-   InHangulSyllables
-   InHebrewBlock
-   InHighPrivateUseSurrogates
-   InHighSurrogates
-   InHiraganaBlock
-   InIPAExtensions
-   InIdeographicDescriptionCharacters
-   InKanbun
-   InKangxiRadicals
-   InKannadaBlock
-   InKatakanaBlock
-   InKhmerBlock
-   InLaoBlock
-   InLatin1Supplement
-   InLatinExtendedAdditional
-   InLatinExtended-A
-   InLatinExtended-B
-   InLetterlikeSymbols
-   InLowSurrogates
-   InMalayalamBlock
-   InMathematicalAlphanumericSymbols
-   InMathematicalOperators
-   InMiscellaneousSymbols
-   InMiscellaneousTechnical
-   InMongolianBlock
-   InMusicalSymbols
-   InMyanmarBlock
-   InNumberForms
-   InOghamBlock
-   InOldItalicBlock
-   InOpticalCharacterRecognition
-   InOriyaBlock
-   InPrivateUse
-   InRunicBlock
-   InSinhalaBlock
-   InSmallFormVariants
-   InSpacingModifierLetters
-   InSpecials
-   InSuperscriptsAndSubscripts
-   InSyriacBlock
-   InTags
-   InTamilBlock
-   InTeluguBlock
-   InThaanaBlock
-   InThaiBlock
-   InTibetanBlock
-   InUnifiedCanadianAboriginalSyllabics
-   InYiRadicals
-   InYiSyllables
+    InAlphabeticPresentationForms
+    InArabic
+    InArabicPresentationFormsA
+    InArabicPresentationFormsB
+    InArmenian
+    InArrows
+    InBasicLatin
+    InBengali
+    InBlockElements
+    InBopomofo
+    InBopomofoExtended
+    InBoxDrawing
+    InBraillePatterns
+    InBuhid
+    InByzantineMusicalSymbols
+    InCJKCompatibility
+    InCJKCompatibilityForms
+    InCJKCompatibilityIdeographs
+    InCJKCompatibilityIdeographsSupplement
+    InCJKRadicalsSupplement
+    InCJKSymbolsAndPunctuation
+    InCJKUnifiedIdeographs
+    InCJKUnifiedIdeographsExtensionA
+    InCJKUnifiedIdeographsExtensionB
+    InCherokee
+    InCombiningDiacriticalMarks
+    InCombiningDiacriticalMarksforSymbols
+    InCombiningHalfMarks
+    InControlPictures
+    InCurrencySymbols
+    InCyrillic
+    InCyrillicSupplementary
+    InDeseret
+    InDevanagari
+    InDingbats
+    InEnclosedAlphanumerics
+    InEnclosedCJKLettersAndMonths
+    InEthiopic
+    InGeneralPunctuation
+    InGeometricShapes
+    InGeorgian
+    InGothic
+    InGreekExtended
+    InGreekAndCoptic
+    InGujarati
+    InGurmukhi
+    InHalfwidthAndFullwidthForms
+    InHangulCompatibilityJamo
+    InHangulJamo
+    InHangulSyllables
+    InHanunoo
+    InHebrew
+    InHighPrivateUseSurrogates
+    InHighSurrogates
+    InHiragana
+    InIPAExtensions
+    InIdeographicDescriptionCharacters
+    InKanbun
+    InKangxiRadicals
+    InKannada
+    InKatakana
+    InKatakanaPhoneticExtensions
+    InKhmer
+    InLao
+    InLatin1Supplement
+    InLatinExtendedA
+    InLatinExtendedAdditional
+    InLatinExtendedB
+    InLetterlikeSymbols
+    InLowSurrogates
+    InMalayalam
+    InMathematicalAlphanumericSymbols
+    InMathematicalOperators
+    InMiscellaneousMathematicalSymbolsA
+    InMiscellaneousMathematicalSymbolsB
+    InMiscellaneousSymbols
+    InMiscellaneousTechnical
+    InMongolian
+    InMusicalSymbols
+    InMyanmar
+    InNumberForms
+    InOgham
+    InOldItalic
+    InOpticalCharacterRecognition
+    InOriya
+    InPrivateUseArea
+    InRunic
+    InSinhala
+    InSmallFormVariants
+    InSpacingModifierLetters
+    InSpecials
+    InSuperscriptsAndSubscripts
+    InSupplementalArrowsA
+    InSupplementalArrowsB
+    InSupplementalMathematicalOperators
+    InSupplementaryPrivateUseAreaA
+    InSupplementaryPrivateUseAreaB
+    InSyriac
+    InTagalog
+    InTagbanwa
+    InTags
+    InTamil
+    InTelugu
+    InThaana
+    InThai
+    InTibetan
+    InUnifiedCanadianAboriginalSyllabics
+    InVariationSelectors
+    InYiRadicals
+    InYiSyllables
 
 =over 4
 
@@ -649,8 +678,8 @@ For example, what TR18 might write as
 
 in Perl can be written as:
 
-    (?!\p{Unassigned})\p{InGreek}
-    (?=\p{Assigned})\p{InGreek}
+    (?!\p{Unassigned})\p{InGreekAndCoptic}
+    (?=\p{Assigned})\p{InGreekAndCoptic}
 
 But in this particular example, you probably really want
 

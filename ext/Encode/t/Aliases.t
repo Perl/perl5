@@ -1,12 +1,22 @@
 #!../perl
 
+BEGIN {
+    if (! -d 'blib' and -d 't'){ chdir 't' };
+    unshift @INC, '../lib';
+    require Config; import Config;
+    if ($Config{'extensions'} !~ /\bEncode\b/) {
+	print "1..0 # Skip: Encode was not built\n";
+	    exit 0;
+    }
+}
+
 use strict;
 use Encode;
 use Encode::Alias;
 my %a2c;
 my $ON_EBCDIC;
 
-BEGIN {
+BEGIN{
     $ON_EBCDIC = ord("A") == 193;
     @ARGV and $ON_EBCDIC = $ARGV[0] eq 'EBCDIC';
     $Encode::ON_EBCDIC = $ON_EBCDIC;
@@ -41,6 +51,11 @@ BEGIN {
 	    'big-5'	    => $ON_EBCDIC ? '' : 'big5',
 	    'zh_TW.Big5'    => $ON_EBCDIC ? '' : 'big5',
 	    'big5-hk'	    => $ON_EBCDIC ? '' : 'big5-hkscs',
+	    'GB_2312-80'    => $ON_EBCDIC ? '' : 'euc-cn',
+	    'gb2312-raw'    => $ON_EBCDIC ? '' : 'gb2312-raw',
+	    'gb12345-raw'   => $ON_EBCDIC ? '' : 'gb12345-raw',
+	    'KS_C_5601-1987'    => $ON_EBCDIC ? '' : 'cp949',
+	    'ksc5601-raw'       => $ON_EBCDIC ? '' : 'ksc5601-raw',
 	    );
 
     for my $i (1..11,13..16){
@@ -59,7 +74,7 @@ BEGIN {
 if ($ON_EBCDIC){
     delete @Encode::ExtModule{
 	qw(euc-cn gb2312 gb12345 gbk cp936 iso-ir-165
-	   euc-jp iso-2022-jp 7bit-jis shiftjis macjapan cp932
+	   euc-jp iso-2022-jp 7bit-jis shiftjis MacJapanese cp932
 	   euc-kr ksc5601 cp949
 	   big5	big5-hkscs cp950
 	   gb18030 big5plus euc-tw)
@@ -87,16 +102,17 @@ define_alias(ascii    => 'WinLatin1',
     qw(cp1252 cp1251 cp1256 cp1253 cp1255);
 
 unless ($ON_EBCDIC){
-    define_alias( qr/shift.*jis$/i  => '"macjapan"',
+    define_alias( qr/shift.*jis$/i  => '"MacJapanese"',
 		  qr/sjis$/i        => '"cp932"' );
-    @a2c{qw(Shift_JIS x-sjis)} = qw(macjapan cp932);
+    @a2c{qw(Shift_JIS x-sjis)} = qw(MacJapanese cp932);
 }
 
 print "# alias test with alias overrides\n";
 
 foreach my $a (keys %a2c){	     
     my $e = Encode::find_encoding($a);
-    is((defined($e) and $e->name), $a2c{$a});
+    is((defined($e) and $e->name), $a2c{$a})
+	or warn "alias was $a";
 }
 
 print "# alias undef test\n";
@@ -104,7 +120,7 @@ print "# alias undef test\n";
 Encode::Alias->undef_aliases;
 foreach my $a (keys %a2c){	     
     my $e = Encode::find_encoding($a);
-    ok(!defined($e));
+    ok(!defined($e) || $e->name =~ /-raw$/o);
 }
 
 __END__

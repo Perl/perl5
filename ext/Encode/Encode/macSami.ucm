@@ -1,5 +1,8 @@
+#
+# $Id: macSami.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+#
 # ./compile -n macSami -o Encode/macSami.ucm Encode/macSami.enc
-<code_set_name> "macsami"
+<code_set_name> "MacSami"
 <mb_cur_min> 1
 <mb_cur_max> 1
 <subchar> \x3F

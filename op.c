@@ -4899,6 +4899,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	 */
 	if (cv && !block) {
 	    rcv = (SV*)cv;
+	    /* Might have had built-in attributes applied -- propagate them. */
+	    CvFLAGS(cv) |= (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS);
 	    if (CvGV(cv) && GvSTASH(CvGV(cv)))
 		stash = GvSTASH(CvGV(cv));
 	    else if (CvSTASH(cv))

@@ -1,6 +1,6 @@
 package Encode::utf8;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.92 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use base 'Encode::Encoding';
 # package to allow long-hand
@@ -30,3 +30,9 @@ sub encode
 }
 1;
 __END__
+
+=head1 NAME
+
+Encode::utf8 -- for internal use only
+
+=cut

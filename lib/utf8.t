@@ -145,7 +145,7 @@ plan tests => 94;
              # Now we do the real byte sequences that are valid UTF8
              (map {
                ["the utf8 sequence for chr $_->[0]",
-                qq(\$a = "$_->[1]"; \$b = show \$a), qr/^>$_->[2]<$/],
+                qq{\$a = "$_->[1]"; \$b = show \$a}, qr/^>$_->[2]<$/],
                ["no utf8; for the utf8 sequence for chr $_->[0]",
                 qq(no utf8; \$a = "$_->[1]"; \$b = show \$a), qr/^>$_->[2]<$/],
                ["use utf8; for the utf8 sequence for chr $_->[0]",
@@ -165,6 +165,7 @@ BANG
     foreach (@tests) {
         my ($why, $prog, $expect) = @$_;
         open P, ">$progfile" or die "Can't open '$progfile': $!";
+        binmode(P, ":bytes");
 	print P $show, $prog, '; print $b'
             or die "Print to 'progfile' failed: $!";
         close P or die "Can't close '$progfile': $!";

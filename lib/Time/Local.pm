@@ -23,7 +23,15 @@ my $Century      = $NextCentury - 100;
 my (%Options, %Cheat);
 
 # Determine the EPOC day for this machine
-my $Epoc = 0; $Epoc = _daygm(gmtime(0));
+my $Epoc = 0;
+if ($^O eq 'vos') {
+# work around posix-977 -- VOS doesn't handle dates in
+# the range 1970-1980.
+  $Epoc = _daygm((0, 0, 0, 1, 0, 70, 4, 0));
+} else {
+  $Epoc = _daygm(gmtime(0));
+}
+
 %Cheat=(); # clear the cache as epoc has changed
 
 my $MaxInt = ((1<<(8 * $Config{intsize} - 2))-1)*2 + 1;

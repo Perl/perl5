@@ -1,3 +1,6 @@
+#
+# $Id: 8859-13.ucm,v 1.0 2002/03/28 23:26:24 dankogai Exp dankogai $
+#
 # ./compile -n iso-8859-13 -o Encode/iso8859-13.ucm Encode/iso8859-13.enc
 <code_set_name> "iso-8859-13"
 <mb_cur_min> 1

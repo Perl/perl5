@@ -5,7 +5,7 @@ BEGIN {
     }
 }
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 0.99 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load('Encode::JP',$VERSION);
@@ -16,6 +16,7 @@ use Encode::JP::2022_JP1;
 
 1;
 __END__
+
 =head1 NAME
 
 Encode::JP - Japanese Encodings
@@ -33,20 +34,21 @@ supported are as follows.
 
   Canonical   Alias		Description
   --------------------------------------------------------------------
-  euc-jp      /euc.*jp$/i	EUC (Extended Unix Character)
-              /jp.*euc/i   
-	      /ujis$/i
-  shiftjis    /shift.*jis$/i	Shift JIS (aka MS Kanji)
-	      /sjis$/i
-  7bit-jis    /^jis$/i		7bit JIS
-  iso-2022-jp			ISO-2022-JP 
+  euc-jp      /\beuc.*jp$/i	EUC (Extended Unix Character)
+              /\bjp.*euc/i   
+	      /\bujis$/i
+  shiftjis    /\bshift.*jis$/i	Shift JIS (aka MS Kanji)
+	      /\bsjis$/i
+  7bit-jis    /\bjis$/i		7bit JIS
+  iso-2022-jp			ISO-2022-JP                  [RFC1468]
 				(7bit JIS with all Halfwidth Kana 
 				 converted to Fullwidth)
-  iso-2022-jp-1			ISO-2022-JP-1
+  iso-2022-jp-1			ISO-2022-JP-1                [RFC2237]
                                 (ISO-2022-JP with JIS X 0212-1990
 				 support. See below)
-  macjapan      Mac Japan	(Shift JIS + Apple vendor mappings)
-  cp932         Code Page 932	(Shift JIS + MS/IBM vendor mappings)
+  MacJapanese	                (Shift JIS + Apple vendor mappings)
+  cp932                         Code Page 932	
+                                (Shift JIS + MS/IBM vendor mappings)
   --------------------------------------------------------------------
 
 =head1 DESCRIPTION
@@ -86,6 +88,6 @@ to find why it is implemented that way.
 
 =head1 SEE ALSO
 
-L<Encode>
+L<Encode>,L<Encode::CJKguide>
 
 =cut

@@ -4,7 +4,7 @@ use base 'Encode::Encoding';
 
 use strict;
 
-our $VERSION = do { my @r = (q$Revision: 0.99 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # Just for the time being, we implement jis-7bit
 # encoding via EUC
@@ -84,3 +84,10 @@ sub euc_jis_nox0212{
 
 1;
 __END__
+
+
+=head1 NAME
+
+Encode::JP::JIS -- internally used by Encode::JP
+
+=cut

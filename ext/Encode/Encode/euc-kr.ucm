@@ -1,3 +1,6 @@
+#
+# $Id: euc-kr.ucm,v 1.0 2002/03/28 23:26:26 dankogai Exp dankogai $
+#
 # ./compile -n euc-kr -o Encode/euc-kr.ucm Encode/euc-kr.enc
 <code_set_name> "euc-kr"
 <mb_cur_min> 1
@@ -328,6 +331,8 @@ CHARMAP
 <U33C2> \xA2\xE3 |0 # SQUARE AM
 <U33D8> \xA2\xE4 |0 # SQUARE PM
 <U2121> \xA2\xE5 |0 # TELEPHONE SIGN
+<U20AC> \xA2\xE6 |0 # EURO SIGN
+<U00AE> \xA2\xE7 |0 # REGISTERED SIGN
 <UFF01> \xA3\xA1 |0 # FULLWIDTH EXCLAMATION MARK
 <UFF02> \xA3\xA2 |0 # FULLWIDTH QUOTATION MARK
 <UFF03> \xA3\xA3 |0 # FULLWIDTH NUMBER SIGN

@@ -1,4 +1,7 @@
-# Written $Id$
+#
+# $Id: nextstep.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+#
+# Written $Id: nextstep.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
 # ./compile -n nextstep -o Encode/nextstep.ucm Encode/nextstep.enc
 <code_set_name> "nextstep"
 <mb_cur_min> 1
