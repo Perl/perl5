@@ -78,7 +78,7 @@
 #define SAVELONG(l)	save_long(SOFT_CAST(long*)&(l))
 #define SAVESPTR(s)	save_sptr((SV**)&(s))
 #define SAVEPPTR(s)	save_pptr(SOFT_CAST(char**)&(s))
-#define SAVEVPTR(s)	save_vptr(&(s))
+#define SAVEVPTR(s)	save_vptr((void*)&(s))
 #define SAVEFREESV(s)	save_freesv((SV*)(s))
 #define SAVEFREEOP(o)	save_freeop(SOFT_CAST(OP*)(o))
 #define SAVEFREEPV(p)	save_freepv(SOFT_CAST(char*)(p))
