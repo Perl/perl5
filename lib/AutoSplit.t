@@ -45,6 +45,8 @@ my @tests;
   close DATA;
 }
 
+my $pathsep = $^O eq 'MSWin32' ? '\\' : '/';
+ 
 sub split_a_file {
   my $contents = shift;
   my $file = $_[0];
@@ -56,7 +58,7 @@ sub split_a_file {
 
   # Assumption: no characters in arguments need escaping from the shell or perl
   my $com = qq($runperl -e "use AutoSplit; autosplit (qw(@_))");
-  print "# $com\n";
+  print "# command: $com\n";
   # There may be a way to capture STDOUT without spawning a child process, but
   # it's probably worthwhile spawning, as it ensures that nothing in AutoSplit
   # can load functions from split modules into this perl.
@@ -87,6 +89,7 @@ foreach (@tests) {
   s/\*INC\*/$incdir/gm;
   s/\*DIR\*/$dir/gm;
   s/\*MOD\*/$module/gm;
+  s/\*PATHSEP\*/$pathsep/gm;
   s#//#/#gm;
   # Build a hash for this test.
   my %args = /^\#\#\ ([^\n]*)\n	# Key is on a line starting ##
@@ -147,6 +150,7 @@ foreach (@tests) {
   }
   if ($args{Require}) {
     my $com = 'require "' . File::Spec->catfile ('auto', $args{Require}) . '"';
+    $com =~ s{\\}{/}gm if ($^O eq 'MSWin32');
     eval $com;
     # test n+3
     ok ($@ eq '', $com) or print "# \$\@ = '$@'\n";
@@ -225,11 +229,11 @@ sub test_a2 : locked { 1; }
 # And that was all it has. You were expected to manually inspect the output
 ## Get
 Warning: AutoSplit had to create top-level *DIR* unexpectedly.
-AutoSplitting *INC*/*MOD*.pm (*DIR*/*MOD*)
-*INC*/*MOD*.pm: some names are not unique when truncated to 8 characters:
- directory *DIR*/*MOD*:
+AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
+*INC**PATHSEP**MOD*.pm: some names are not unique when truncated to 8 characters:
+ directory *DIR**PATHSEP**MOD*:
   testtesttesttest4_1.al, testtesttesttest4_2.al truncate to testtest
- directory *DIR*/Yet/Another/AutoSplit:
+ directory *DIR**PATHSEP*Yet*PATHSEP*Another*PATHSEP*AutoSplit:
   testtesttesttest4_1.al, testtesttesttest4_2.al truncate to testtest
 ## Files
 *DIR*/*MOD*/autosplit.ix
@@ -265,7 +269,7 @@ is (&*MOD*::testtesttesttest4_2, "duplicate test 4");
 is (&Just::Another::test5, "another test 5");
 # very messy way to interpolate function into regexp, but it's going to be
 # needed to get : for Mac filespecs
-like (&*MOD*::test6, qr!^*INC*/*MOD*.pm \(autosplit into @{[File::Spec->catfile('*DIR*','*MOD*', 'test6.al')]}\):\d+$!);
+like (&*MOD*::test6, qr!^*INC**PATHSEP**MOD*.pm \(autosplit into @{[File::Spec->catfile('*DIR*','*MOD*', 'test6.al')]}\):\d+$!);
 ok (Yet::Another::AutoSplit->testtesttesttest4_1 eq "another test 4");
 ################################################################
 ## Name
@@ -285,7 +289,7 @@ missing use AutoLoader; (but don't skip)
 1;
 __END__
 ## Get
-AutoSplitting *INC*/*MOD*.pm (*DIR*/*MOD*)
+AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
 ## Require
 *MOD*/autosplit.ix
 ## Files
@@ -300,7 +304,7 @@ __END__
 sub obsolete {my $a if 0; return $a++;}
 sub gonner {warn "This gonner function should never get called"}
 ## Get
-AutoSplitting *INC*/*MOD*.pm (*DIR*/*MOD*)
+AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
 ## Require
 *MOD*/autosplit.ix
 ## Files
@@ -328,7 +332,7 @@ sub ghoul {"wail"};
 sub zombie {"You didn't use fire."};
 sub flying_pig {"Oink oink flap flap"};
 ## Get
-AutoSplitting *INC*/*MOD*.pm (*DIR*/*MOD*)
+AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
 ## Require
 *MOD*/autosplit.ix
 ## Files
@@ -357,7 +361,7 @@ __END__
 sub ghost {"bump"};
 sub wraith {9};
 ## Get
-AutoSplitting *INC*/*MOD*.pm (*DIR*/*MOD*)
+AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
 ## Require
 *MOD*/autosplit.ix
 ## Files
@@ -403,7 +407,7 @@ With the the timestamp check make sure that things happen (stuff gets deleted)
 ## Extra
 0, 1, 0
 ## Get
-AutoSplitting *INC*/*MOD*.pm (*DIR*/*MOD*)
+AutoSplitting *INC**PATHSEP**MOD*.pm (*DIR**PATHSEP**MOD*)
 ## Require
 *MOD*/autosplit.ix
 ## Files
