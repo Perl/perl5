@@ -87,10 +87,8 @@ pod:pod/perldata.pod			Data structures (perldata)
 pod:pod/perlop.pod			Operators and precedence (perlop)
 pod:pod/perlsub.pod			Subroutines (perlsub)
 pod:pod/perlfunc.pod			Builtin functions (perlfunc)
-@sub				Function Tutorials
 pod:pod/perlopentut.pod			open() tutorial (perlopentut)
 pod:pod/perlpacktut.pod			pack() and unpack() tutorial (perlpacktut)
-@end
 @sep
 pod:pod/perlpod.pod			Plain old documentation (perlpod)
 pod:pod/perlpodspec.pod			Plain old documentation format specification (perlpod)
@@ -122,13 +120,11 @@ pod:pod/perlebcdic.pod			Considerations for running Perl on EBCDIC platforms (pe
 @sep
 pod:pod/perlsec.pod			Security (perlsec)
 @sep
-@sub				Modules
-pod:pod/perlmod.pod			How they work (perlmod)
+pod:pod/perlmod.pod			How modules work (perlmod)
 pod:pod/perlmodlib.pod			How to write and use (perlmodlib)
 pod:pod/perlmodstyle.pod		How to write with style (perlmodstyle)
 pod:pod/perlmodinstall.pod		How to install from CPAN (perlmodinstall)
 pod:pod/perlnewmod.pod			Preparing a new module for distribution (perlnewmod)
-@end
 @sep
 pod:pod/perlutil.pod			Utilities packaged with the Perl distribution (perlutil)
 pod:pod/perlfilter.pod			Source filters (perlfilter)
@@ -209,7 +205,8 @@ http://sourceforge.net/projects/shuck/	Shuck Project on SourceForge.net
 @alias	^	Bitwise Or and Exclusive Or
 @alias 	&&	C-style Logical And
 @alias	||	C-style Logical Or
-@alias 	..	Range Operator
+@alias 	..	Range Operators
+@alias 	...	Range Operators
 @alias 	?	Conditional Operator
 @alias	:	Conditional Operator
 @alias	=	Assignment Operators
