@@ -493,7 +493,7 @@ PP(pp_umask)
     TAINT_PROPER("umask");
     XPUSHi(anum);
 #else
-    XPUSHs(&sv_undef)
+    XPUSHs(&sv_undef);
 #endif
     RETURN;
 }
