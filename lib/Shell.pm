@@ -30,6 +30,7 @@ sub AUTOLOAD {
     $cmd =~ s/^.*:://;
     eval <<"*END*";
 	sub $AUTOLOAD {
+	    shift if ref \$_[0] && \$_[0]->isa( 'Shell' );
 	    if (\@_ < 1) {
 		\$Shell::capture_stderr ? `$cmd 2>&1` : `$cmd`;
 	    } elsif ('$^O' eq 'os2') {
