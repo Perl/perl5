@@ -771,6 +771,9 @@ typedef struct {
 	int32_t	_random_retval;
 #   endif
 #endif /* HAS_RANDOM_R */
+#ifdef HAS_SRANDOM_R
+	struct random_data _srandom_struct;
+#endif /* HAS_SRANDOM_R */
 
     int dummy; /* cannot have empty structs */
 } REENTR;

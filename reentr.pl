@@ -764,6 +764,13 @@ if (exists $seena{random}) {
 EOF
 }
 
+if (exists $seena{srandom}) {
+    push @struct, <<EOF;
+#ifdef HAS_SRANDOM_R
+	$seent{srandom} _srandom_struct;
+#endif /* HAS_SRANDOM_R */
+EOF
+}
 
 
 local $" = '';
