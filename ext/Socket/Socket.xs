@@ -711,13 +711,11 @@ inet_aton(host)
 	{
 	struct in_addr ip_address;
 	struct hostent * phe;
-	int ok;
+	int ok = inet_aton(host, &ip_address);
 
-	if (phe = gethostbyname(host)) {
+	if (!ok && (phe = gethostbyname(host))) {
 		Copy( phe->h_addr, &ip_address, phe->h_length, char );
 		ok = 1;
-	} else {
-		ok = inet_aton(host, &ip_address);
 	}
 
 	ST(0) = sv_newmortal();
