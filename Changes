@@ -29,6 +29,22 @@ Version v5.8.3		Maintenance release working toward v5.8.3
 --------------
 ____________________________________________________________________________
 ____________________________________________________________________________
+[ 22143] By: nicholas                              on 2004/01/14  14:47:49
+        Log: We're planning on making history today. Mind you, not that much -
+             only 1 line.
+     Branch: maint-5.8/perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[ 22142] By: nicholas                              on 2004/01/14  14:45:07
+        Log: Mention that bug 24846 is fixed (utf8 join)
+     Branch: maint-5.8/perl
+	   ! pod/perl583delta.pod
+____________________________________________________________________________
+[ 22141] By: nicholas                              on 2004/01/14  14:40:59
+        Log: Update changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 22140] By: nicholas                              on 2004/01/14  14:37:50
         Log: rebuild pod/perltoc.pod
      Branch: maint-5.8/perl
