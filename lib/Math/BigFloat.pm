@@ -68,7 +68,15 @@ sub stringify {
 sub import {
   shift;
   return unless @_;
-  die "unknown import: @_" unless @_ == 1 and $_[0] eq ':constant';
+  if (@_ == 1 && $_[0] ne ':constant') {
+    if ($_[0] > 0) {
+      if ($VERSION < $_[0]) {
+        die __PACKAGE__.": $_[0] required--this is only version $VERSION";
+      }
+    } else {
+      die __PACKAGE__.": unknown import: $_[0]";
+    }
+  }
   overload::constant float => sub {Math::BigFloat->new(shift)};
 }
 
