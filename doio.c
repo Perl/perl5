@@ -179,7 +179,7 @@ PerlIO *supplied_fp;
 	    TAINT_PROPER("piped open");
 	    if (name[strlen(name)-1] == '|') {
 		name[strlen(name)-1] = '\0' ;
-	        if (dowarn)
+		if (dowarn)
 		    warn("Can't do bidirectional pipe");
 	    }
 	    fp = my_popen(name,"w");

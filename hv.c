@@ -848,7 +848,6 @@ register HE *entry;
     if (HeVAL(entry) && isGV(HeVAL(entry)) && GvCVu(HeVAL(entry)) && HvNAME(hv))
 	sub_generation++;	/* may be deletion of method from stash */
     SvREFCNT_dec(HeVAL(entry));
-
     if (HeKLEN(entry) == HEf_SVKEY) {
 	SvREFCNT_dec(HeKEY_sv(entry));
         Safefree(HeKEY_hek(entry));

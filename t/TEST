@@ -17,6 +17,7 @@ chdir 't' if -f 't/TEST';
 die "You need to run \"make test\" first to set things up.\n"
   unless -e 'perl' or -e 'perl.exe';
 
+#$ENV{PERL_DESTRUCT_LEVEL} = '2';
 $ENV{EMXSHELL} = 'sh';        # For OS/2
 
 if ($#ARGV == -1) {

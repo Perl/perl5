@@ -21,6 +21,7 @@ Would be nice to have
 	reference to compiled regexp
 	lexically scoped functions: my sub foo { ... }
 	lvalue functions
+	regression/sanity tests for suidperl
 
 Possible pragmas
 	debugger
@@ -54,5 +55,4 @@ Vague possibilities
 	structured types
 	autocroak?
 	Modifiable $1 et al
-	substr EXPR,OFFSET,LENGTH,STRING
 

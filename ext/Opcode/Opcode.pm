@@ -563,7 +563,7 @@ Originally designed and implemented by Malcolm Beattie,
 mbeattie@sable.ox.ac.uk as part of Safe version 1.
 
 Split out from Safe module version 1, named opcode tags and other
-changes added by Tim Bunce E<lt>F<Tim.Bunce@ig.co.uk>E<gt>.
+changes added by Tim Bunce.
 
 =cut
 

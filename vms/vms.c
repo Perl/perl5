@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 23-Sep-1997 by Charles Bailey  bailey@newman.upenn.edu
- * Version: 5.4.4
+ * Last revised: 16-Apr-1998 by Charles Bailey  bailey@newman.upenn.edu
+ * Version: 5.4.5
  */
 
 #include <acedef.h>
@@ -184,7 +184,7 @@ prime_env_iter(void)
 #  define CLI$M_TRUSTED 0x40  /* Missing from VAXC headers */
 #endif
   unsigned long int flags = CLI$M_NOWAIT | CLI$M_NOCLISYM | CLI$M_NOKEYPAD | CLI$M_TRUSTED;
-  unsigned long int retsts, substs = 0, wakect = 0;
+  unsigned long int i, retsts, substs = 0, wakect = 0;
   STRLEN eqvlen;
   SV *oldrs, *linesv, *eqvsv;
   $DESCRIPTOR(cmddsc,"Show Logical *"); $DESCRIPTOR(nldsc,"_NLA0:");
@@ -195,12 +195,18 @@ prime_env_iter(void)
   /* Perform a dummy fetch as an lval to insure that the hash table is
    * set up.  Otherwise, the hv_store() will turn into a nullop. */
   (void) hv_fetch(envhv,"DEFAULT",7,TRUE);
-  /* Also, set up the four "special" keys that the CRTL defines,
-   * whether or not underlying logical names exist. */
-  (void) hv_fetch(envhv,"HOME",4,TRUE);
-  (void) hv_fetch(envhv,"TERM",4,TRUE);
-  (void) hv_fetch(envhv,"PATH",4,TRUE);
-  (void) hv_fetch(envhv,"USER",4,TRUE);
+  /* Also, set up any "special" keys that the CRTL defines,
+   * either by itself or becasue we were called from a C program
+   * using exec[lv]e() */
+  for (i = 0; environ[i]; i++) { 
+    if (!(start = strchr(environ[i],'='))) {
+      warn("Ill-formed CRTL environ value \"%s\"\n",environ[i]);
+    }
+    else {
+      start++;
+      (void) hv_store(envhv,environ[i],start - environ[i] - 1,newSVpv(start,0),0);
+    }
+  }
 
   /* Now, go get the logical names */
   create_mbx(&chan,&mbxdsc);
@@ -853,12 +859,14 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
 
   retsts = sys$parse(&myfab,0,0);
   if (!(retsts & 1)) {
+    mynam.nam$b_nop |= NAM$M_SYNCHK;
     if (retsts == RMS$_DNF || retsts == RMS$_DIR ||
         retsts == RMS$_DEV || retsts == RMS$_DEV) {
-      mynam.nam$b_nop |= NAM$M_SYNCHK;
       retsts = sys$parse(&myfab,0,0);
       if (retsts & 1) goto expanded;
     }  
+    mynam.nam$l_rlf = NULL; myfab.fab$b_dns = 0;
+    (void) sys$parse(&myfab,0,0);  /* Free search context */
     if (out) Safefree(out);
     set_vaxc_errno(retsts);
     if      (retsts == RMS$_PRV) set_errno(EACCES);
@@ -869,6 +877,8 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
   }
   retsts = sys$search(&myfab,0,0);
   if (!(retsts & 1) && retsts != RMS$_FNF) {
+    mynam.nam$b_nop |= NAM$M_SYNCHK; mynam.nam$l_rlf = NULL;
+    myfab.fab$b_dns = 0; (void) sys$parse(&myfab,0,0);  /* Free search context */
     if (out) Safefree(out);
     set_vaxc_errno(retsts);
     if      (retsts == RMS$_PRV) set_errno(EACCES);
@@ -886,6 +896,10 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
   if (!(mynam.nam$l_fnb & NAM$M_EXP_VER) &&
       (!defspec || !*defspec || !strchr(myfab.fab$l_dna,';')))
     speclen = mynam.nam$l_ver - out;
+  if (!(mynam.nam$l_fnb & NAM$M_EXP_TYPE) &&
+      (!defspec || !*defspec || defspec[myfab.fab$b_dns-1] != '.' ||
+       defspec[myfab.fab$b_dns-2] == '.'))
+    speclen = mynam.nam$l_type - out;
   /* If we just had a directory spec on input, $PARSE "helpfully"
    * adds an empty name and type for us */
   if (mynam.nam$l_name == mynam.nam$l_type &&
@@ -907,6 +921,9 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
     if (do_tounixspec(outbuf,tmpfspec,0) == NULL) return NULL;
     strcpy(outbuf,tmpfspec);
   }
+  mynam.nam$b_nop |= NAM$M_SYNCHK; mynam.nam$l_rlf = NULL;
+  mynam.nam$l_rsa = NULL; mynam.nam$b_rss = 0;
+  myfab.fab$b_dns = 0; (void) sys$parse(&myfab,0,0);  /* Free search context */
   return outbuf;
 }
 /*}}}*/
@@ -1044,6 +1061,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           }
           cp1++;
         } while ((cp1 = strstr(cp1,"/.")) != NULL);
+	lastdir = strrchr(dir,'/');
       }
       else if (!strcmp(&dir[dirlen-7],"/000000")) {
         /* Ditto for specs that end in an MFD -- let the VMS code
@@ -2432,7 +2450,7 @@ trim_unixpath(char *fspec, char *wildspec, int opts)
       for (front = end ; front >= base; front--)
          if (*front == '/' && !dirs--) { front++; break; }
     }
-    for (cp1=template,cp2=lcres; *cp1 && cp2 <= lcend + sizeof lcend; 
+    for (cp1=template,cp2=lcres; *cp1 && cp2 <= lcres + sizeof lcres; 
          cp1++,cp2++) *cp2 = _tolower(*cp1);  /* Make lc copy for match */
     if (cp1 != '\0') return 0;  /* Path too long. */
     lcend = cp2;
@@ -2521,13 +2539,22 @@ opendir(char *name)
 {
     DIR *dd;
     char dir[NAM$C_MAXRSS+1];
-      
+    struct mystat sb;
+
+    if (do_tovmspath(name,dir,0) == NULL) {
+      return NULL;
+    }
+    if (flex_stat(dir,&sb) == -1) return NULL;
+    if (!S_ISDIR(sb.st_mode)) {
+      set_errno(ENOTDIR);  set_vaxc_errno(RMS$_DIR);
+      return NULL;
+    }
+    if (!cando_by_name(S_IRUSR,0,dir)) {
+      set_errno(EACCES); set_vaxc_errno(RMS$_PRV);
+      return NULL;
+    }
     /* Get memory for the handle, and the pattern. */
     New(1306,dd,1,DIR);
-    if (do_tovmspath(name,dir,0) == NULL) {
-      Safefree((char *)dd);
-      return(NULL);
-    }
     New(1307,dd->pattern,strlen(dir)+sizeof "*.*" + 1,char);
 
     /* Fill in the fields; mainly playing with the descriptor. */
@@ -2865,6 +2892,7 @@ setup_cmddsc(char *cmd, int check_img)
       s = resspec;
       while (*s && !isspace(*s)) s++;
       *s = '\0';
+      if (!cando_by_name(S_IXUSR,0,resspec)) return RMS$_PRV;
       New(402,VMScmd.dsc$a_pointer,7 + s - resspec + (rest ? strlen(rest) : 0),char);
       strcpy(VMScmd.dsc$a_pointer,"$ MCR ");
       strcat(VMScmd.dsc$a_pointer,resspec);
@@ -2922,7 +2950,22 @@ vms_do_exec(char *cmd)
     if ((retsts = setup_cmddsc(cmd,1)) & 1)
       retsts = lib$do_command(&VMScmd);
 
-    set_errno(EVMSERR);
+    switch (retsts) {
+      case RMS$_FNF:
+        set_errno(ENOENT); break;
+      case RMS$_DNF: case RMS$_DIR: case RMS$_DEV:
+        set_errno(ENOTDIR); break;
+      case RMS$_PRV:
+        set_errno(EACCES); break;
+      case RMS$_SYN:
+        set_errno(EINVAL); break;
+      case CLI$_BUFOVF:
+        set_errno(E2BIG); break;
+      case LIB$_INVARG: case LIB$_INVSTRDES: case SS$_ACCVIO: /* shouldn't happen */
+        _ckvmssts(retsts); /* fall through */
+      default:  /* SS$_DUPLNAM, SS$_CLI, resource exhaustion, etc. */
+        set_errno(EVMSERR); 
+    }
     set_vaxc_errno(retsts);
     if (dowarn)
       warn("Can't exec \"%s\": %s", VMScmd.dsc$a_pointer, Strerror(errno));
@@ -2950,27 +2993,43 @@ do_aspawn(SV *really,SV **mark,SV **sp)
 unsigned long int
 do_spawn(char *cmd)
 {
-  unsigned long int substs, hadcmd = 1;
+  unsigned long int sts, substs, hadcmd = 1;
 
   TAINT_ENV();
   TAINT_PROPER("spawn");
   if (!cmd || !*cmd) {
     hadcmd = 0;
-    _ckvmssts(lib$spawn(0,0,0,0,0,0,&substs,0,0,0,0,0,0));
+    sts = lib$spawn(0,0,0,0,0,0,&substs,0,0,0,0,0,0);
   }
-  else if ((substs = setup_cmddsc(cmd,0)) & 1) {
-    _ckvmssts(lib$spawn(&VMScmd,0,0,0,0,0,&substs,0,0,0,0,0,0));
+  else if ((sts = setup_cmddsc(cmd,0)) & 1) {
+    sts = lib$spawn(&VMScmd,0,0,0,0,0,&substs,0,0,0,0,0,0);
   }
   
-  if (!(substs&1)) {
-    set_errno(EVMSERR);
-    set_vaxc_errno(substs);
+  set_vaxc_errno(sts);
+  if (!(sts & 1)) {
+    switch (sts) {
+      case RMS$_FNF:
+        set_errno(ENOENT); break;
+      case RMS$_DNF: case RMS$_DIR: case RMS$_DEV:
+        set_errno(ENOTDIR); break;
+      case RMS$_PRV:
+        set_errno(EACCES); break;
+      case RMS$_SYN:
+        set_errno(EINVAL); break;
+      case CLI$_BUFOVF:
+        set_errno(E2BIG); break;
+      case LIB$_INVARG: case LIB$_INVSTRDES: case SS$_ACCVIO: /* shouldn't happen */
+        _ckvmssts(sts); /* fall through */
+      default:  /* SS$_DUPLNAM, SS$_CLI, resource exhaustion, etc. */
+        set_errno(EVMSERR); 
+    }
     if (dowarn)
       warn("Can't spawn \"%s\": %s",
            hadcmd ? VMScmd.dsc$a_pointer : "", Strerror(errno));
   }
+  else set_errno(0);
   vms_execfree();
-  return substs;
+  return (sts & 1) ? substs : sts;
 
 }  /* end of do_spawn() */
 /*}}}*/
@@ -3269,7 +3328,6 @@ void my_endpwent()
 }
 /*}}}*/
 
-#if __VMS_VER < 70000000 || __DECC_VER < 50200000
 /* Used for UTC calculation in my_gmtime(), my_localtime(), my_time(),
  * my_utime(), and flex_stat(), all of which operate on UTC unless
  * VMSISH_TIMES is true.
@@ -3288,6 +3346,10 @@ static long int utc_offset_secs;
 #undef gmtime
 #undef localtime
 #undef time
+
+#if defined(__VMS_VER) && __VMS_VER >= 70000000 && __DECC_VER >= 50200000
+#  define RTL_USES_UTC 1
+#endif
 
 static time_t toutc_dst(time_t loc) {
   struct tm *rsltmp;
@@ -3363,7 +3425,11 @@ time_t my_time(time_t *timep)
 
   when = time(NULL);
 # ifdef VMSISH_TIME
+# ifdef RTL_USES_UTC
+  if (VMSISH_TIME) when = _toloc(when);
+# else
   if (!VMSISH_TIME) when = _toutc(when);
+# endif
 # endif
   if (timep != NULL) *timep = when;
   return when;
@@ -3390,10 +3456,14 @@ my_gmtime(const time_t *timep)
 # ifdef VMSISH_TIME
   if (VMSISH_TIME) when = _toutc(when); /* Input was local time */
 #  endif
+# ifdef RTL_USES_UTC  /* this implies that the CRTL has a working gmtime() */
+  return gmtime(&when);
+# else
   /* CRTL localtime() wants local time as input, so does no tz correction */
   rsltmp = localtime(&when);
   if (rsltmp) rsltmp->tm_isdst = 0;  /* We already took DST into account */
   return rsltmp;
+#endif
 }  /* end of my_gmtime() */
 /*}}}*/
 
@@ -3413,8 +3483,16 @@ my_localtime(const time_t *timep)
   if (gmtime_emulation_type == 0) (void) my_time(NULL); /* Init UTC */
 
   when = *timep;
+# ifdef RTL_USES_UTC
+# ifdef VMSISH_TIME
+  if (VMSISH_TIME) when = _toutc(when);
+# endif
+  /* CRTL localtime() wants UTC as input, does tz correction itself */
+  return localtime(&when);
+# else
 # ifdef VMSISH_TIME
   if (!VMSISH_TIME) when = _toloc(when);   /*  Input was UTC */
+# endif
 # endif
   /* CRTL localtime() wants local time as input, so does no tz correction */
   rsltmp = localtime(&when);
@@ -3428,8 +3506,6 @@ my_localtime(const time_t *timep)
 #define gmtime(t)    my_gmtime(t)
 #define localtime(t) my_localtime(t)
 #define time(t)      my_time(t)
-
-#endif /* VMS VER < 7.0 || Dec C < 5.2
 
 /* my_utime - update modification time of a file
  * calling sequence is identical to POSIX utime(), but under
@@ -3493,7 +3569,7 @@ int my_utime(char *file, struct utimbuf *utimes)
      */
     lowbit = (utimes->modtime & 1) ? secscale : 0;
     unixtime = (long int) utimes->modtime;
-#if defined(VMSISH_TIME) && (__VMS_VER < 70000000 || __DECC_VER < 50200000)
+#   ifdef VMSISH_TIME
     /* If input was UTC; convert to local for sys svc */
     if (!VMSISH_TIME) unixtime = _toloc(unixtime);
 #   endif
@@ -3800,7 +3876,7 @@ cando_by_name(I32 bit, I32 effective, char *fname)
 
   retsts = sys$check_access(&objtyp,&namdsc,&usrdsc,armlst);
   if (retsts == SS$_NOPRIV      || retsts == SS$_NOSUCHOBJECT ||
-      retsts == SS$_INVFILFOROP || retsts == RMS$_FNF    ||
+      retsts == SS$_INVFILFOROP || retsts == RMS$_FNF || retsts == RMS$_SYN ||
       retsts == RMS$_DIR        || retsts == RMS$_DEV) {
     set_vaxc_errno(retsts);
     if (retsts == SS$_NOPRIV) set_errno(EACCES);
@@ -3836,17 +3912,25 @@ flex_fstat(int fd, struct mystat *statbufp)
   if (!fstat(fd,(stat_t *) statbufp)) {
     if (statbufp == (struct mystat *) &statcache) *namecache == '\0';
     statbufp->st_dev = encode_dev(statbufp->st_devnam);
+#   ifdef RTL_USES_UTC
+#   ifdef VMSISH_TIME
+    if (VMSISH_TIME) {
+      statbufp->st_mtime = _toloc(statbufp->st_mtime);
+      statbufp->st_atime = _toloc(statbufp->st_atime);
+      statbufp->st_ctime = _toloc(statbufp->st_ctime);
+    }
+#   endif
+#   else
 #   ifdef VMSISH_TIME
     if (!VMSISH_TIME) { /* Return UTC instead of local time */
 #   else
     if (1) {
 #   endif
-#if __VMS_VER < 70000000 || __DECC_VER < 50200000
       statbufp->st_mtime = _toutc(statbufp->st_mtime);
       statbufp->st_atime = _toutc(statbufp->st_atime);
       statbufp->st_ctime = _toutc(statbufp->st_ctime);
-#endif
     }
+#   endif
     return 0;
   }
   return -1;
@@ -3890,18 +3974,25 @@ flex_stat(char *fspec, struct mystat *statbufp)
     if (retval) retval = stat(fspec,(stat_t *) statbufp);
     if (!retval) {
       statbufp->st_dev = encode_dev(statbufp->st_devnam);
+#     ifdef RTL_USES_UTC
+#     ifdef VMSISH_TIME
+      if (VMSISH_TIME) {
+        statbufp->st_mtime = _toloc(statbufp->st_mtime);
+        statbufp->st_atime = _toloc(statbufp->st_atime);
+        statbufp->st_ctime = _toloc(statbufp->st_ctime);
+      }
+#     endif
+#     else
 #     ifdef VMSISH_TIME
       if (!VMSISH_TIME) { /* Return UTC instead of local time */
 #     else
       if (1) {
 #     endif
-#if __VMS_VER < 70000000 || __DECC_VER < 50200000
-        if (!gmtime_emulation_type) (void)time(NULL);
-        statbufp->st_mtime -= utc_offset_secs;
-        statbufp->st_atime -= utc_offset_secs;
-        statbufp->st_ctime -= utc_offset_secs;
-#endif
+        statbufp->st_mtime = _toutc(statbufp->st_mtime);
+        statbufp->st_atime = _toutc(statbufp->st_atime);
+        statbufp->st_ctime = _toutc(statbufp->st_ctime);
       }
+#     endif
     }
     return retval;
 
@@ -3913,25 +4004,36 @@ flex_stat(char *fspec, struct mystat *statbufp)
 FILE *
 my_binmode(FILE *fp, char iotype)
 {
-    char filespec[NAM$C_MAXRSS], *acmode;
+    char filespec[NAM$C_MAXRSS], *acmode, *s, *colon, *dirend = Nullch;
+    int ret = 0, saverrno = errno, savevmserrno = vaxc$errno;
     fpos_t pos;
 
     if (!fgetname(fp,filespec)) return NULL;
-    if (iotype != '-' && fgetpos(fp,&pos) == -1) return NULL;
+    for (s = filespec; *s; s++) {
+      if (*s == ':') colon = s;
+      else if (*s == ']' || *s == '>') dirend = s;
+    }
+    /* Looks like a tmpfile, which will go away if reopened */
+    if (s == dirend + 3) return fp;
+    /* If we've got a non-file-structured device, clip off the trailing
+     * junk, and don't lose sleep if we can't get a stream position.  */
+    if (dirend == Nullch) *(colon+1) = '\0';
+    if (iotype != '-'&& (ret = fgetpos(fp, &pos)) == -1 && dirend) return NULL;
     switch (iotype) {
       case '<': case 'r':           acmode = "rb";                      break;
-      case '>': case 'w':
+      case '>': case 'w': case '|':
         /* use 'a' instead of 'w' to avoid creating new file;
            fsetpos below will take care of restoring file position */
       case 'a':                     acmode = "ab";                      break;
-      case '+': case '|': case 's': acmode = "rb+";                     break;
+      case '+':  case 's':          acmode = "rb+";                     break;
       case '-':                     acmode = fileno(fp) ? "ab" : "rb";  break;
       default:
         warn("Unrecognized iotype %c in my_binmode",iotype);
         acmode = "rb+";
     }
     if (freopen(filespec,acmode,fp) == NULL) return NULL;
-    if (iotype != '-' && fsetpos(fp,&pos) == -1) return NULL;
+    if (iotype != '-' && ret != -1 && fsetpos(fp,&pos) == -1) return NULL;
+    if (ret == -1) { set_errno(saverrno); set_vaxc_errno(savevmserrno); }
     return fp;
 }  /* end of my_binmode() */
 /*}}}*/
