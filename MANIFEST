@@ -719,6 +719,7 @@ hints/solaris_2.sh		Hints for named architecture
 hints/stellar.sh		Hints for named architecture
 hints/sunos_4_0.sh		Hints for named architecture
 hints/sunos_4_1.sh		Hints for named architecture
+hints/super-ux.sh		Hints for named architecture
 hints/svr4.sh			Hints for named architecture
 hints/svr5.sh			Hints for named architecture
 hints/ti1500.sh			Hints for named architecture
