@@ -1842,10 +1842,12 @@ typedef pthread_key_t	perl_key;
 #endif
 
 /* This defines a way to flush all output buffers.  This may be a
- * performance issue, so we allow people to disable it.
+ * performance issue, so we allow people to disable it.  Also, if
+ * we are using stdio, there are broken implementations of fflush(NULL)
+ * out there, Solaris being the most prominent.
  */
 #ifndef PERL_FLUSHALL_FOR_CHILD
-# if defined(FFLUSH_NULL) || defined(USE_SFIO)
+# if defined(USE_PERLIO) || defined(FFLUSH_NULL) || defined(USE_SFIO)
 #  define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
 # else
 #  ifdef FFLUSH_ALL
