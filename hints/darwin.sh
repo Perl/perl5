@@ -129,7 +129,8 @@ case "$osvers" in
 *)
   lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
   case "$ld" in
-  '') ld='MACOSX_DEPLOYMENT_TARGET=10.3 ld' ;;
+  *MACOSX_DEVELOPMENT_TARGET*) ;;
+  *) ld="MACOSX_DEPLOYMENT_TARGET=10.3 ${ld}" ;;
   esac
 esac
 ldlibpthname='DYLD_LIBRARY_PATH';
