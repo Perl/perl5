@@ -6,16 +6,8 @@ BEGIN {
 use Carp;
 use Switch qw(__ fallthrough);
 
-print "1..293\n";
-
-my $count = 0;
-sub ok($)
-{
-	$count++;
-	print "line ", (caller)[2], "; " unless $_[0];
-	print "not " unless $_[0];
-	print "ok $count\n";
-}
+my($C,$M);sub ok{$C++;$M.=$_[0]?"ok $C\n":"not ok $C (line ".(caller)[2].")\n"}
+END{print"1..$C\n$M"}
 
 # NON-case THINGS;
 
