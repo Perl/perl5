@@ -1275,6 +1275,8 @@ foreach my $symbol (qw(
 			Perl_sv_catsv
 			Perl_sv_catpvn
 			Perl_sv_2pv
+			nw_freeenviron
+			Remove_Thread_Ctx
 			   ))
     {
 	try_symbol($symbol);

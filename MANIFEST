@@ -1946,18 +1946,11 @@ mpeix/nm			MPE/iX port
 mpeix/relink			MPE/iX port
 mv-if-diff			Script to mv a file if it changed
 myconfig.SH			Prints summary of the current configuration
-NetWare/bat/BldNWExt-Exist.bat	NetWare port
-NetWare/bat/BldNWExt.bat	NetWare port
 NetWare/bat/Buildtype.bat	NetWare port
-NetWare/bat/CWbuild.bat		NetWare port
-NetWare/bat/MPKBuild.bat	NetWare port
-NetWare/bat/Setcw.bat		NetWare port
-NetWare/bat/Setmpksdk.bat	NetWare port
+NetWare/bat/SetCodeWar.bat	NetWare port
 NetWare/bat/Setnlmsdk.bat	NetWare port
 NetWare/bat/SetNWBld.bat	NetWare port
-NetWare/bat/SetNWDef.bat	NetWare port
 NetWare/bat/ToggleD2.bat	NetWare port
-NetWare/bat/ToggleXDC.bat	NetWare port
 NetWare/CLIBsdio.h		NetWare port
 NetWare/CLIBstr.h		NetWare port
 NetWare/CLIBstuf.c		NetWare port

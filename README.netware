@@ -33,46 +33,30 @@ The build process is dependent on the location of the NetWare SDK.
 Once the Tools & SDK are installed, the build environment has to
 be setup.  The following batch files setup the environment.
 
-=over 4
-
 =item *
-
-If you want to build with Default settings you can follow the One step
-process given below to create the default Build Environment.
-
-=item SetNWDef.bat
-
-The Execution of this file takes 2 parameters as input.The first being
-the NetWare SDK path, Second being the path for CodeWarrior Compiler &
-other tools. Execution of this file sets the Build type to
-Release(default) , the NetWare SDK path, path for Compiler & other
-tools.
-
-=item Custom Build Environment
-
-If you want to change the default settings you could do so by
-following the steps listed below.
-
-=item Buildtype.bat
-
-This sets the build type to release or debug.
-
-=item *
-
-Example: Typing "buildtype d on" at the command prompt causes the
-buildtype to be set to Debug type.  Typing "buildtype r" at the
-command prompt sets it to Release Build type.
 
 =item SetNWBld.bat
 
-This sets the NetWare SDK path, path to Compiler & other tools.
-
-These batch files are under NetWare\bat folder.  These batch files
-call a couple of other batch files to setup the environment.  Invoking
-the batch file with I</now> will show the current settings and I</h>
-or I</?> gives the usage help.
+The Execution of this file takes 2 parameters as input. The first
+being the NetWare SDK path, second being the path for CodeWarrior
+Compiler & tools. Execution of this file sets these paths and also
+sets the build type to Release by default.
 
 =back
+
+=item Buildtype.bat
+
+This is used to set the build type to debug or release. Change the
+build type only after executing SetNWBld.bat
+
+=item *
+
+Example:
+  1. Typing "buildtype d on" at the command prompt causes the buildtype
+     to be set to Debug type with D2 flag set. 
+  2. Typing "buildtype d off" or "buildtype d" at the command prompt causes
+     the buildtype to be set to Debug type with D1 flag set. 
+  2. Typing "buildtype r" at the command prompt sets it to Release Build type.
 
 =head2 Make
 
@@ -120,11 +104,13 @@ and module files onto the NetWare server under I<sys:\Perl>
 folder. The Perl interpreter, I<perl.nlm>, is copied under
 I<sys:\perl\system> folder.  Copy this to I<sys:\system> folder.
 
-Example: At the command prompt Type "nmake nwinstall".  This will
-install NetWare Perl on the NetWare Server.  Similarly if you type
-"nmake install", This will cause the binaries to be installed on the
-local machine.  (Typically under the c:\perl folder)
+Example: At the command prompt Type "nmake nwinstall".
+          This will install NetWare Perl on the NetWare Server.
+          Similiarly if you type "nmake install",
+          This will cause the binaries to be installed on the local machine.
+          (Typically under the c:\perl folder)
 
+         
 =head1 Build new extensions
 
 To build extensions other than standard extensions, NetWare Perl has
@@ -176,11 +162,14 @@ Example: You can execute the following on the command prompt.
           perl -Ic:/perl/5.7.2/lib/NetWare-x86-multi-thread -Ic:\perl\5.7.2\lib MakeFile.pl
           INSTALLSITELIB=i:\perl\lib
 
-=item * 
+=back
 
-Note: Some modules downloaded from CPAN may require NetWare related API
-in order to build on NetWare.Other modules may however build smoothly with or
-without minor changes depending on the type of module.
+= item * 
+
+Note: Some modules downloaded from CPAN may require NetWare related
+API in order to build on NetWare.Other modules may however build
+smoothly with or without minor changes depending on the type of
+module.
 
 =back
 
@@ -213,6 +202,6 @@ Modified - 13 July 2001
 
 =item *
 
-Modified - 8 May 2002
+Modified - 28 May 2002
 
 =back
