@@ -897,6 +897,7 @@ _mopup:
 	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts *perl.xok
 	-rm -f perlld cygwin.c ld2 libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
 	rm -f perl$(EXE_EXT) suidperl$(EXE_EXT) miniperl$(EXE_EXT) $(LIBPERL) libperl.* microperl
+	rm -f opcode.h-old opnames.h-old pp.sym-old pp_proto.h-old
 
 # Do not 'make _tidy' directly.
 _tidy:
