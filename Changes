@@ -32,6 +32,301 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8840] By: jhi                                   on 2001/02/19  00:23:41
+        Log: Subject: [patch] add sv_setref_uv
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sun, 18 Feb 2001 14:49:33 -0800 (PST)
+             Message-ID: <Pine.LNX.4.21.0102181448290.10021-100000@mako.covalent.net>
+     Branch: perl
+	   ! embed.h embed.pl global.sym objXSUB.h perlapi.c
+	   ! pod/perlapi.pod pod/perlfunc.pod pod/perlguts.pod proto.h sv.c
+____________________________________________________________________________
+[  8839] By: jhi                                   on 2001/02/19  00:01:38
+        Log: Put to rest the 20010205.001, the email address checking (not) regex.
+     Branch: perl
+	   ! pod/perlfaq9.pod
+____________________________________________________________________________
+[  8838] By: jhi                                   on 2001/02/18  22:17:54
+        Log: Subject: [patch] xsubpp: make sv_setref_* targetable
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sun, 18 Feb 2001 12:58:23 -0800 (PST)
+             Message-ID: <Pine.LNX.4.21.0102181256310.10021-100000@mako.covalent.net>
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[  8837] By: jhi                                   on 2001/02/18  22:16:50
+        Log: Subject: [patch] -Wall cleanup round 2
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sun, 18 Feb 2001 13:08:04 -0800 (PST)
+             Message-ID: <Pine.LNX.4.21.0102181304520.10021-100000@mako.covalent.net>
+     Branch: perl
+	   ! ext/B/B.xs ext/Data/Dumper/Dumper.xs ext/Devel/DProf/DProf.xs
+	   ! ext/Devel/Peek/Peek.xs ext/Fcntl/Fcntl.xs
+	   ! ext/File/Glob/Glob.xs ext/Filter/Util/Call/Call.xs
+	   ! ext/GDBM_File/GDBM_File.xs ext/IO/IO.xs ext/IPC/SysV/SysV.xs
+	   ! ext/Opcode/Opcode.xs ext/POSIX/POSIX.xs
+	   ! ext/SDBM_File/SDBM_File.xs
+____________________________________________________________________________
+[  8836] By: jhi                                   on 2001/02/18  22:11:20
+        Log: Misapplied regex optimizations when \C is present.
+             Fixes 20001230.002.
+             
+             What still remains broken is that the submatches that
+             have \C in them get their UTF8 flag on because their
+             parent SV has it on.  This will result in malformed
+             UTF8 if a \C happened to match a non-ASCII byte.
+     Branch: perl
+	   ! regcomp.c regcomp.h regexec.c regexp.h t/op/pat.t
+	   ! t/pragma/utf8.t
+____________________________________________________________________________
+[  8835] By: jhi                                   on 2001/02/18  20:12:02
+        Log: Fix for "[ID 20010213.005] utf8 + localized hash elems + 64 bits?"
+             
+             The hash key got wrongly UTF8fied.
+     Branch: perl
+	   ! pod/perlapi.pod toke.c utf8.c
+____________________________________________________________________________
+[  8834] By: jhi                                   on 2001/02/18  19:44:25
+        Log: Tweak on #8234 (Subject: Re: [PATCH] Warn on use of reference as array elem):
+             don't warn on magical or overloaded things.
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  8833] By: nick                                  on 2001/02/18  19:31:22
+        Log: Integrate mainline
+     Branch: perlio
+	  +> t/TestInit.pm t/run/runenv.t
+	   - t/UTEST
+	  !> MANIFEST Makefile.SH ext/Storable/ChangeLog
+	  !> ext/Storable/Storable.pm ext/Storable/Storable.xs
+	  !> lib/Test/Harness.pm perl.c pod/perlfaq4.pod sv.c t/TEST
+	  !> t/lib/charnames.t t/lib/glob-basic.t t/lib/st-06compat.t
+	  !> t/lib/st-overload.t t/lib/st-recurse.t t/lib/st-tiedhook.t
+	  !> t/op/chop.t t/op/eval.t t/op/regexp_noamp.t t/op/subst_wamp.t
+	  !> utf8.c
+____________________________________________________________________________
+[  8832] By: jhi                                   on 2001/02/18  19:21:18
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c pod/perldiag.pod
+____________________________________________________________________________
+[  8831] By: jhi                                   on 2001/02/18  19:14:20
+        Log: Integrate change #8827 from mainline.
+             
+             UTF8 tweaks.
+     Branch: maint-5.6/perl
+	  !> sv.c utf8.c
+____________________________________________________________________________
+[  8830] By: nick                                  on 2001/02/18  19:10:34
+        Log: Apply the spirit of patch from Nick Clark:
+             Subject: [PATCH] Re: extensions that provide layers
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 12 Feb 2001 16:43:51 +0000
+             Message-Id: <20010212164350.Q3652@plum.flirble.org>
+     Branch: perlio
+	   ! perlio.c pod/perldiag.pod
+____________________________________________________________________________
+[  8829] By: jhi                                   on 2001/02/18  19:03:25
+        Log: Subject: [PATCH t/TEST t/TestSetup.pm] Adding in TestSetup.pm to replace BEGIN  preamble on tests.
+             From: schwern@pobox.com 
+             Date: Sun, 18 Feb 2001 13:44:35 -0500
+             Message-ID: <20010218134435.A17544@magnonel.guild.net>
+             
+             Applied, but as t/TestInit.pm.
+     Branch: perl
+	   + t/TestInit.pm
+	   ! MANIFEST t/TEST t/op/eval.t t/op/regexp_noamp.t
+	   ! t/op/subst_wamp.t
+____________________________________________________________________________
+[  8828] By: jhi                                   on 2001/02/18  18:43:52
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c
+____________________________________________________________________________
+[  8827] By: jhi                                   on 2001/02/18  18:41:33
+        Log: UTF-8 tweaks.
+     Branch: perl
+	   ! sv.c utf8.c
+____________________________________________________________________________
+[  8826] By: nick                                  on 2001/02/18  17:40:59
+        Log: Fix [ID 20010217.002]
+             open FOO, "<:raw:perlio", ...
+             :raw now inserts default base layer below itself.
+             Also
+             open FOO, "<:unix", ...
+             works as well - but leaves buffer layer on stack under the unix layer.
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[  8825] By: jhi                                   on 2001/02/18  17:15:39
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c perliol.h
+____________________________________________________________________________
+[  8824] By: jhi                                   on 2001/02/18  17:10:53
+        Log: Subject: [PATCH t/TEST lib/Test/Harness.pm] Adding todo tests
+             From: schwern@pobox.com
+             Date: Sun, 18 Feb 2001 01:48:50 -0500
+             Message-ID: <20010218014850.C19957@magnonel.guild.net>
+     Branch: perl
+	   ! lib/Test/Harness.pm t/TEST t/op/chop.t
+____________________________________________________________________________
+[  8823] By: jhi                                   on 2001/02/18  17:01:06
+        Log: Add run/*.t to testables.
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[  8822] By: jhi                                   on 2001/02/18  16:58:58
+        Log: Subject: [PATCH perl.c] Fixing PERL5OPT (was Re: Warnings, strict, and CPAN)
+             From: schwern@pobox.com
+             Date: Sun, 18 Feb 2001 01:11:35 -0500
+             Message-ID: <20010218011135.A19957@magnonel.guild.net>
+             
+             Revive mjd's and Simon's PERL5OPT fix.
+     Branch: perl
+	   + t/run/runenv.t
+	   ! MANIFEST perl.c
+____________________________________________________________________________
+[  8821] By: jhi                                   on 2001/02/18  16:53:46
+        Log: Subject: Re: Why t/TEST and not Test::Harness?
+             From: schwern@pobox.com
+             Date: Sat, 17 Feb 2001 22:44:44 -0500
+             Message-ID: <20010217224444.A6679@magnonel.guild.net>
+             
+             Replace UTEST with TEST -utf8.
+     Branch: perl
+	   - t/UTEST
+	   ! MANIFEST Makefile.SH t/TEST t/lib/charnames.t
+	   ! t/lib/glob-basic.t
+____________________________________________________________________________
+[  8820] By: nick                                  on 2001/02/18  13:06:16
+        Log: Clean up a few core dumps when layers are used in unexpected ways.
+             (Still not "right"...)
+     Branch: perlio
+	   ! perlio.c perliol.h
+____________________________________________________________________________
+[  8819] By: jhi                                   on 2001/02/18  02:25:55
+        Log: Integrate change #8818 from maintperl, a FAQ nit.
+     Branch: perl
+	  !> pod/perlfaq4.pod
+____________________________________________________________________________
+[  8818] By: jhi                                   on 2001/02/18  02:24:50
+        Log: FAQ nit from Chris Fedde.
+     Branch: maint-5.6/perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[  8817] By: nick                                  on 2001/02/17  18:20:14
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/unicode/UCD.html lib/unicode/Unicode.html
+	  +> lib/unicode/Unicode.txt lib/unicode/rename lib/unicode/version
+	  +> pod/perlclib.pod
+	   - ebcdic.c lib/unicode/UCD301.html lib/unicode/UCDFF301.html
+	   - lib/unicode/Unicode.301
+	  !> (integrate 324 files)
+____________________________________________________________________________
+[  8816] By: jhi                                   on 2001/02/17  16:56:58
+        Log: Upgrade to Storable 1.0.10, from Raphael Manfredi.
+     Branch: perl
+	   ! ext/Storable/ChangeLog ext/Storable/Storable.pm
+	   ! ext/Storable/Storable.xs t/lib/st-06compat.t
+	   ! t/lib/st-overload.t t/lib/st-recurse.t t/lib/st-tiedhook.t
+____________________________________________________________________________
+[  8815] By: jhi                                   on 2001/02/17  16:40:07
+        Log: Subject: [patch] -Wall
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Fri, 16 Feb 2001 15:25:36 -0800 (PST)
+             Message-ID: <Pine.LNX.4.21.0102161519500.30352-100000@mako.covalent.net>
+     Branch: perl
+	   ! doio.c doop.c embed.h embed.pl gv.c objXSUB.h op.c perl.c
+	   ! perlapi.c pp_ctl.c pp_hot.c pp_sys.c proto.h sv.c toke.c
+____________________________________________________________________________
+[  8814] By: jhi                                   on 2001/02/16  19:27:18
+        Log: Document qu better.
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  8813] By: jhi                                   on 2001/02/15  13:54:37
+        Log: Subject: [PATCH @8807] toke.c cleanup: scan_str()
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 15 Feb 2001 13:39:49 +0000
+             Message-Id: <200102151339.NAA32248@crypt.compulink.co.uk>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  8812] By: alanbur                               on 2001/02/15  13:52:16
+        Log: Resynchronised with parent
+     Branch: maint-5.6/pureperl
+	   - ebcdic.c
+	  !> (integrate 36 files)
+____________________________________________________________________________
+[  8811] By: jhi                                   on 2001/02/15  13:51:16
+        Log: Integrate changes #8659,8702,8808,8809,8810 from maintperl.
+             
+             Subject: [PATCH 5.6.1-TRIAL? and 5.7.?] perldoc uses unescaped backslashes in filenames
+             From: Jan Dubois <JanD@ActiveState.com>
+             Date: Wed, 31 Jan 2001 21:17:03 -0800
+             Message-ID: <8qrh7t069jt32m98sap53l9dfoge0vjrle@4ax.com>
+             
+             tweak change#8659 to keep it simple
+             
+             Subject: [PATCH 5.6.1-TRIAL2] perldoc.PL using install directories
+             From: Russ Allbery <rra@stanford.edu>
+             Date: 14 Feb 2001 10:15:41 -0800
+             Message-ID: <ylzofpf7w2.fsf@windlord.stanford.edu>
+             
+             Subject: [PATCH: 5.6.1 trial2 && perl@8807] workaround VMS I/O problem in Test.pm for bug ID 20010213.009
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 14 Feb 2001 16:28:16 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10102141617350.197219-100000@aspara.forte.com>
+             Upgrade to podlators 1.08, from Russ Allbery.
+     Branch: perl
+	  !> lib/Pod/Man.pm lib/Pod/Text.pm lib/Test/Harness.pm
+	  !> utils/perldoc.PL
+____________________________________________________________________________
+[  8810] By: jhi                                   on 2001/02/15  13:35:08
+        Log: Upgrade to podlators 1.08, from Russ Allbery.
+     Branch: maint-5.6/perl
+	   ! lib/Pod/Man.pm lib/Pod/Text.pm
+____________________________________________________________________________
+[  8809] By: jhi                                   on 2001/02/15  13:26:38
+        Log: Subject: [PATCH: 5.6.1 trial2 && perl@8807] workaround VMS I/O problem in Test.pm for bug ID 20010213.009
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 14 Feb 2001 16:28:16 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10102141617350.197219-100000@aspara.forte.com>
+     Branch: maint-5.6/perl
+	   ! lib/Test/Harness.pm
+____________________________________________________________________________
+[  8808] By: jhi                                   on 2001/02/15  13:23:47
+        Log: Subject: [PATCH 5.6.1-TRIAL2] perldoc.PL using install directories
+             From: Russ Allbery <rra@stanford.edu>
+             Date: 14 Feb 2001 10:15:41 -0800
+             Message-ID: <ylzofpf7w2.fsf@windlord.stanford.edu>
+             
+             perldoc was hardcoding $Config{installscript}, which breaks
+             when install* isn't where Perl ends up (such as with AFS).
+             
+             Use $Config{scriptdir} instead.
+     Branch: maint-5.6/perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[  8807] By: jhi                                   on 2001/02/14  14:37:27
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  8806] By: jhi                                   on 2001/02/14  14:25:31
+        Log: Integrate changes #8803,8804,8805 from mainline.
+             
+             Duplicate environment for JPL so that JDK 1.2/1.3 don't get upset.
+             
+             Don't skip too much of the locale error message if no environ array,
+             from Chris Nandor.
+             
+             More MacOS Classic fixes from Chris Nandor.
+     Branch: maint-5.6/perl
+	  !> doop.c lib/Cwd.pm perl.c perl.h util.c
+____________________________________________________________________________
 [  8805] By: jhi                                   on 2001/02/14  03:29:01
         Log: More MacOS Classic fixes from Chris Nandor.
      Branch: perl
