@@ -8628,6 +8628,18 @@ S_gv_share(pTHX_ SV *sstr)
     else if (!GvCV(gv)) {
         GvCV(gv) = (CV*)sv;
     }
+   else if(mg->mg_type == PERL_MAGIC_backref) {
+       AV *av = (AV*) mg->mg_obj;
+       SV **svp;
+       I32 i;
+       nmg->mg_obj = (SV*)newAV();
+       svp = AvARRAY(av);
+       i = AvFILLp(av);
+       while (i >= 0) {
+           av_push((AV*)nmg->mg_obj,sv_dup(svp[i],param));
+           i--;
+       }
+    }
     else {
         /* CvPADLISTs cannot be shared */
         if (!CvXSUB(GvCV(gv))) {
