@@ -543,7 +543,7 @@ PERL_CALLCONV SV*	Perl_newSVuv(pTHX_ UV u);
 PERL_CALLCONV SV*	Perl_newSVnv(pTHX_ NV n);
 PERL_CALLCONV SV*	Perl_newSVpv(pTHX_ const char* s, STRLEN len);
 PERL_CALLCONV SV*	Perl_newSVpvn(pTHX_ const char* s, STRLEN len);
-PERL_CALLCONV SV*	Perl_newSVpvn_share(pTHX_ const char* s, STRLEN len, U32 hash);
+PERL_CALLCONV SV*	Perl_newSVpvn_share(pTHX_ const char* s, I32 len, U32 hash);
 PERL_CALLCONV SV*	Perl_newSVpvf(pTHX_ const char* pat, ...)
 #ifdef CHECK_FORMAT
  __attribute__((format(printf,pTHX_1,pTHX_2)))

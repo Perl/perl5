@@ -1801,7 +1801,7 @@ Apd	|SV*	|newSVuv	|UV u
 Apd	|SV*	|newSVnv	|NV n
 Apd	|SV*	|newSVpv	|const char* s|STRLEN len
 Apd	|SV*	|newSVpvn	|const char* s|STRLEN len
-Apd	|SV*	|newSVpvn_share	|const char* s|STRLEN len|U32 hash
+Apd	|SV*	|newSVpvn_share	|const char* s|I32 len|U32 hash
 Afpd	|SV*	|newSVpvf	|const char* pat|...
 Ap	|SV*	|vnewSVpvf	|const char* pat|va_list* args
 Apd	|SV*	|newSVrv	|SV* rv|const char* classname

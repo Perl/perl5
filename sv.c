@@ -3080,7 +3080,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    *SvEND(sv) = '\0';
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
-	    unsharepvn(pvx,len,hash);
+	    unsharepvn(pvx,SvUTF8(sv)?-len:len,hash);
 	}
 	else if (PL_curcop != &PL_compiling)
 	    Perl_croak(aTHX_ PL_no_modify);
@@ -3806,7 +3806,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	else if (SvPVX(sv) && SvLEN(sv))
 	    Safefree(SvPVX(sv));
 	else if (SvPVX(sv) && SvREADONLY(sv) && SvFAKE(sv)) {
-	    unsharepvn(SvPVX(sv),SvCUR(sv),SvUVX(sv));
+	    unsharepvn(SvPVX(sv),SvUTF8(sv)?-SvCUR(sv):SvCUR(sv),SvUVX(sv));
 	    SvFAKE_off(sv);
 	}
 	break;
@@ -4862,20 +4862,27 @@ will avoid string compare.
 */
 
 SV *
-Perl_newSVpvn_share(pTHX_ const char *src, STRLEN len, U32 hash)
+Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 {
     register SV *sv;
+    bool is_utf8 = FALSE;
+    if (len < 0) {
+        len = -len;
+        is_utf8 = TRUE;
+    }
     if (!hash)
 	PERL_HASH(hash, src, len);
     new_SV(sv);
     sv_upgrade(sv, SVt_PVIV);
-    SvPVX(sv) = sharepvn(src, len, hash);
+    SvPVX(sv) = sharepvn(src, is_utf8?-len:len, hash);
     SvCUR(sv) = len;
     SvUVX(sv) = hash;
     SvLEN(sv) = 0;
     SvREADONLY_on(sv);
     SvFAKE_on(sv);
     SvPOK_on(sv);
+    if (is_utf8)
+        SvUTF8_on(sv);
     return sv;
 }
 
