@@ -4452,9 +4452,12 @@ So put in parentheses to say what you really mean.
 =item Wide character in %s
 
 (W utf8) Perl met a wide character (>255) when it wasn't expecting
-one.  This warning is by default on for I/O (like print) but can be
-turned off by C<no warnings 'utf8';>.  You are supposed to explicitly
-mark the filehandle with an encoding, see L<open> and L<perlfunc/binmode>.
+one.  This warning is by default on for I/O (like print).  The easiest
+way to quiet this warning is simply to add the C<:utf8> layer to the
+output, e.g. C<binmode STDOUT, ':utf8'>.  Another way to turn off the
+warning is to add C<no warnings 'utf8';> but that is often closer to
+cheating.  In general, you are supposed to explicitly mark the
+filehandle with an encoding, see L<open> and L<perlfunc/binmode>.
 
 =item Within []-length '%c' not allowed
 

@@ -2381,7 +2381,7 @@ same as the number actually killed).
     kill 9, @goners;
 
 If SIGNAL is zero, no signal is sent to the process.  This is a
-useful way to check that the process is alive and hasn't changed
+useful way to check that a child process is alive and hasn't changed
 its UID.  See L<perlport> for notes on the portability of this
 construct.
 
@@ -2389,7 +2389,9 @@ Unlike in the shell, if SIGNAL is negative, it kills
 process groups instead of processes.  (On System V, a negative I<PROCESS>
 number will also kill process groups, but that's not portable.)  That
 means you usually want to use positive not negative signals.  You may also
-use a signal name in quotes.  See L<perlipc/"Signals"> for details.
+use a signal name in quotes.
+
+See L<perlipc/"Signals"> for more details.
 
 =item last LABEL
 

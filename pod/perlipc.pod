@@ -95,11 +95,20 @@ it doesn't kill itself):
     }
 
 Another interesting signal to send is signal number zero.  This doesn't
-actually affect another process, but instead checks whether it's alive
+actually affect a child process, but instead checks whether it's alive
 or has changed its UID.
 
     unless (kill 0 => $kid_pid) {
 	warn "something wicked happened to $kid_pid";
+    }
+
+When directed at a process whose UID is not identical to that
+of the sending process, signal number zero may fail because
+you lack permission to send the signal, even though the process is alive.
+You may be able to determine the cause of failure using C<$!>.
+
+    unless (kill 0 => $pid or $! == $!{EPERM}) {
+	warn "$pid looks dead";
     }
 
 You might also want to employ anonymous functions for simple signal

@@ -12,7 +12,7 @@ use strict;
 use Unicode::UCD;
 use Test::More;
 
-BEGIN { plan tests => 178 };
+BEGIN { plan tests => 179 };
 
 use Unicode::UCD 'charinfo';
 
@@ -309,3 +309,6 @@ is(Unicode::UCD::_getcode('U+123x'),  undef, "_getcode(x123)");
     is(@$r2, $n1, "modifying results should not mess up internal caches");
 }
 
+{
+	is(charinfo(0xdeadbeef), undef, "[perl #23273] warnings in Unicode::UCD");
+}
