@@ -417,11 +417,11 @@ SKIP: {
 }
 
 {
-    my $a =3D "456\xb6";
+    my $a = "456\xb6";
     utf8::upgrade($a);
 
-    my $b =3D "123456\xb6";
-    $b =3D~ s/^...//;
+    my $b = "123456\xb6";
+    $b =~ s/^...//;
     utf8::upgrade($b);
     is($b, $a, "utf8::upgrade OffsetOK");
 }
