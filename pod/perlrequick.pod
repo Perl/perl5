@@ -5,22 +5,23 @@ perlrequick - Perl regular expressions quick start
 =head1 DESCRIPTION
 
 This page covers the very basics of understanding, creating and
-using regular expressions ('regexps') in Perl.
+using regular expressions ('regexes') in Perl.
+
 
 =head1 The Guide
 
 =head2 Simple word matching
 
-The simplest regexp is simply a word, or more generally, a string of
-characters.  A regexp consisting of a word matches any string that
+The simplest regex is simply a word, or more generally, a string of
+characters.  A regex consisting of a word matches any string that
 contains that word:
 
     "Hello World" =~ /World/;  # matches
 
-In this statement, C<World> is a regexp and the C<//> enclosing
+In this statement, C<World> is a regex and the C<//> enclosing
 C</World/> tells perl to search a string for a match.  The operator
-C<=~> associates the string with the regexp match and produces a true
-value if the regexp matched, or false if the regexp did not match.  In
+C<=~> associates the string with the regex match and produces a true
+value if the regex matched, or false if the regex did not match.  In
 our case, C<World> matches the second word in C<"Hello World">, so the
 expression is true.  This idea has several variations.
 
@@ -32,7 +33,7 @@ The sense of the match can be reversed by using C<!~> operator:
 
     print "It doesn't match\n" if "Hello World" !~ /World/;
 
-The literal string in the regexp can be replaced by a variable:
+The literal string in the regex can be replaced by a variable:
 
     $greeting = "World";
     print "It matches\n" if "Hello World" =~ /$greeting/;
@@ -50,7 +51,7 @@ arbitrary delimiters by putting an C<'m'> out front:
     "/usr/bin/perl" =~ m"/perl"; # matches after '/usr/bin',
                                  # '/' becomes an ordinary char
 
-Regexps must match a part of the string I<exactly> in order for the
+Regexes must match a part of the string I<exactly> in order for the
 statement to be true:
 
     "Hello World" =~ /world/;  # doesn't match, case sensitive
@@ -63,7 +64,7 @@ perl will always match at the earliest possible point in the string:
     "That hat is red" =~ /hat/; # matches 'hat' in 'That'
 
 Not all characters can be used 'as is' in a match.  Some characters,
-called B<metacharacters>, are reserved for use in regexp notation.
+called B<metacharacters>, are reserved for use in regex notation.
 The metacharacters are
 
     {}[]()^$.|*+?\
@@ -75,8 +76,8 @@ A metacharacter can be matched by putting a backslash before it:
     'C:\WIN32' =~ /C:\\WIN/;                       # matches
     "/usr/bin/perl" =~ /\/usr\/local\/bin\/perl/;  # matches
 
-In the last regexp, the forward slash C<'/'> is also backslashed,
-because it is used to delimit the regexp.
+In the last regex, the forward slash C<'/'> is also backslashed,
+because it is used to delimit the regex.
 
 Non-printable ASCII characters are represented by B<escape sequences>.
 Common examples are C<\t> for a tab, C<\n> for a newline, and C<\r>
@@ -87,38 +88,39 @@ e.g., C<\x1B>:
     "1000\t2000" =~ m(0\t2)        # matches
     "cat"        =~ /\143\x61\x74/ # matches, but a weird way to spell cat
 
-Regexps are treated mostly as double quoted strings, so variable
+Regexes are treated mostly as double quoted strings, so variable
 substitution works:
 
     $foo = 'house';
     'cathouse' =~ /cat$foo/;   # matches
     'housecat' =~ /${foo}cat/; # matches
 
-With all of the regexps above, if the regexp matched anywhere in the
+With all of the regexes above, if the regex matched anywhere in the
 string, it was considered a match.  To specify I<where> it should
 match, we would use the B<anchor> metacharacters C<^> and C<$>.  The
 anchor C<^> means match at the beginning of the string and the anchor
 C<$> means match at the end of the string, or before a newline at the
 end of the string.  Some examples:
 
-    "housekeeper" =~ /keeper/;    # matches
-    "housekeeper" =~ /^keeper/;   # doesn't match
-    "housekeeper" =~ /keeper$/;   # matches
-    "housekeeper\n" =~ /keeper$/; # matches
+    "housekeeper" =~ /keeper/;         # matches
+    "housekeeper" =~ /^keeper/;        # doesn't match
+    "housekeeper" =~ /keeper$/;        # matches
+    "housekeeper\n" =~ /keeper$/;      # matches
+    "housekeeper" =~ /^housekeeper$/;  # matches
 
 =head2 Using character classes
 
 A B<character class> allows a set of possible characters, rather than
-just a single character, to match at a particular point in a regexp.
+just a single character, to match at a particular point in a regex.
 Character classes are denoted by brackets C<[...]>, with the set of
 characters to be possibly matched inside.  Here are some examples:
 
     /cat/;            # matches 'cat'
-    /[bcr]at/;        # matches 'bat, 'cat', or 'rat'
+    /[bcr]at/;        # matches 'bat', 'cat', or 'rat'
     "abc" =~ /[cab]/; # matches 'a'
 
 In the last statement, even though C<'c'> is the first character in
-the class, the earliest point at which the regexp can match is C<'a'>.
+the class, the earliest point at which the regex can match is C<'a'>.
 
     /[yY][eE][sS]/; # match 'yes' in a case-insensitive way
                     # 'yes', 'Yes', 'YES', etc.
@@ -151,7 +153,7 @@ treated as an ordinary character.
 
 The special character C<^> in the first position of a character class
 denotes a B<negated character class>, which matches any character but
-those in the bracket.  Both C<[...]> and C<[^...]> must match a
+those in the brackets.  Both C<[...]> and C<[^...]> must match a
 character, or the match fails.  Then
 
     /[^a]at/;  # doesn't match 'aat' or 'at', but matches
@@ -211,8 +213,8 @@ boundary.
 =head2 Matching this or that
 
 We can match match different character strings with the B<alternation>
-metacharacter C<'|'>.  To match C<dog> or C<cat>, we form the regexp
-C<dog|cat>.  As before, perl will try to match the regexp at the
+metacharacter C<'|'>.  To match C<dog> or C<cat>, we form the regex
+C<dog|cat>.  As before, perl will try to match the regex at the
 earliest possible point in the string.  At each character position,
 perl will first try to match the the first alternative, C<dog>.  If
 C<dog> doesn't match, perl will then try the next alternative, C<cat>.
@@ -222,21 +224,21 @@ the next position in the string.  Some examples:
     "cats and dogs" =~ /cat|dog|bird/;  # matches "cat"
     "cats and dogs" =~ /dog|cat|bird/;  # matches "cat"
 
-Even though C<dog> is the first alternative in the second regexp,
+Even though C<dog> is the first alternative in the second regex,
 C<cat> is able to match earlier in the string.
 
     "cats"          =~ /c|ca|cat|cats/; # matches "c"
     "cats"          =~ /cats|cat|ca|c/; # matches "cats"
 
 At a given character position, the first alternative that allows the
-regexp match to succeed wil be the one that matches. Here, all the
+regex match to succeed wil be the one that matches. Here, all the
 alternatives match at the first string position, so th first matches.
 
 =head2 Grouping things and hierarchical matching
 
-The B<grouping> metacharacters C<()> allow a part of a regexp to be
-treated as a single unit.  Parts of a regexp are grouped by enclosing
-them in parentheses.  The regexp C<house(cat|keeper)> means match
+The B<grouping> metacharacters C<()> allow a part of a regex to be
+treated as a single unit.  Parts of a regex are grouped by enclosing
+them in parentheses.  The regex C<house(cat|keeper)> means match
 C<house> followed by either C<cat> or C<keeper>.  Some more examples
 are
 
@@ -263,14 +265,14 @@ They can be used just as ordinary variables:
     $minutes = $2;
     $seconds = $3;
 
-In list context, a match C</regexp/ with groupings will return the
+In list context, a match C</regex/> with groupings will return the
 list of matched values C<($1,$2,...)>.  So we could rewrite it as
 
     ($hours, $minutes, $second) = ($time =~ /(\d\d):(\d\d):(\d\d)/);
 
-If the groupings in a regexp are nested, C<$1> gets the group with the
+If the groupings in a regex are nested, C<$1> gets the group with the
 leftmost opening parenthesis, C<$2> the next opening parenthesis,
-etc.  For example, here is a complex regexp and the matching variables
+etc.  For example, here is a complex regex and the matching variables
 indicated below it:
 
     /(ab(cd|ef)((gi)|j))/;
@@ -278,17 +280,17 @@ indicated below it:
 
 Associated with the matching variables C<$1>, C<$2>, ... are
 the B<backreferences> C<\1>, C<\2>, ...  Backreferences are
-matching variables that can be used I<inside> a regexp:
+matching variables that can be used I<inside> a regex:
 
     /(\w\w\w)\s\1/; # find sequences like 'the the' in string
 
-C<$1>, C<$2>, ... should only be used outside of a regexp, and C<\1>,
-C<\2>, ... only inside a regexp.
+C<$1>, C<$2>, ... should only be used outside of a regex, and C<\1>,
+C<\2>, ... only inside a regex.
 
 =head2 Matching repetitions
 
 The B<quantifier> metacharacters C<?>, C<*>, C<+>, and C<{}> allow us
-to determine the number of repeats of a portion of a regexp we
+to determine the number of repeats of a portion of a regex we
 consider to be a match.  Quantifiers are put immediately after the
 character, character class, or grouping that we want to specify.  They
 have the following meanings:
@@ -320,15 +322,16 @@ Here are some examples:
     $year =~ /\d{4}|\d{2}/;    # better match; throw out 3 digit dates
 
 These quantifiers will try to match as much of the string as possible,
-while still allowing the regexp to match.  So we have
+while still allowing the regex to match.  So we have
 
+    $x = 'the cat in the hat';
     $x =~ /^(.*)(at)(.*)$/; # matches,
                             # $1 = 'the cat in the h'
                             # $2 = 'at'
                             # $3 = ''   (0 matches)
 
 The first quantifier C<.*> grabs as much of the string as possible
-while still having the regexp match. The second quantifier C<.*> has
+while still having the regex match. The second quantifier C<.*> has
 no string left to it, so it matches 0 times.
 
 =head2 More matching
@@ -369,10 +372,10 @@ prints
 
 A failed match or changing the target string resets the position.  If
 you don't want the position reset after failure to match, add the
-C<//c>, as in C</regexp/gc>.
+C<//c>, as in C</regex/gc>.
 
 In list context, C<//g> returns a list of matched groupings, or if
-there are no groupings, a list of matches to the whole regexp.  So
+there are no groupings, a list of matches to the whole regex.  So
 
     @words = ($x =~ /(\w+)/g);  # matches,
                                 # $word[0] = 'cat'
@@ -381,9 +384,9 @@ there are no groupings, a list of matches to the whole regexp.  So
 
 =head2 Search and replace
 
-Search and replace is perform using C<s/regexp/replacement/modifiers>.
+Search and replace is performed using C<s/regex/replacement/modifiers>.
 The C<replacement> is a Perl double quoted string that replaces in the
-string whatever is matched with the C<regexp>.  The operator C<=~> is
+string whatever is matched with the C<regex>.  The operator C<=~> is
 also used here to associate a string with C<s///>.  If matching
 against C<$_>, the S<C<$_ =~> > can be dropped.  If there is a match,
 C<s///> returns the number of substitutions made, otherwise it returns
@@ -398,7 +401,7 @@ false.  Here are a few examples:
 With the C<s///> operator, the matched variables C<$1>, C<$2>, etc.
 are immediately available for use in the replacement expression. With
 the global modifier, C<s///g> will search and replace all occurrences
-of the regexp in the string:
+of the regex in the string:
 
     $x = "I batted 4 for 4";
     $x =~ s/4/four/;   # $x contains "I batted four for 4"
@@ -407,40 +410,42 @@ of the regexp in the string:
 
 The evaluation modifier C<s///e> wraps an C<eval{...}> around the
 replacement string and the evaluated result is substituted for the
-matched substring.  This counts character frequencies in a line:
+matched substring.  Some examples:
 
-    $x = "the cat";
-    $x =~ s/(.)/$chars{$1}++;$1/eg;  # final $1 replaces char with itself
-    print "frequency of '$_' is $chars{$_}\n"
-        foreach (sort {$chars{$b} <=> $chars{$a}} keys %chars);
+    # reverse all the words in a string
+    $x = "the cat in the hat";
+    $x =~ s/(\w+)/reverse $1/ge;   # $x contains "eht tac ni eht tah"
 
-This prints
+    # convert percentage to decimal
+    $x = "A 39% hit rate";
+    $x =~ s!(\d+)%!$1/100!e;       # $x contains "A 0.39 hit rate"
 
-    frequency of 't' is 2
-    frequency of 'e' is 1
-    frequency of ' ' is 1
-    frequency of 'h' is 1
-    frequency of 'a' is 1
-    frequency of 'c' is 1
-
-C<s///> can use other delimiters, such as C<s!!!> and C<s{}{}>, and
-even C<s{}//>.  If single quotes are used C<s'''>, then the regexp and
-replacement are treated as single quoted strings.
+The last example shows that C<s///> can use other delimiters, such as
+C<s!!!> and C<s{}{}>, and even C<s{}//>.  If single quotes are used
+C<s'''>, then the regex and replacement are treated as single quoted
+strings.
 
 =head2 The split operator
 
-C<split /regexp/, string> splits C<string> into a list of substrings
-and returns that list.  The regexp determines the character sequence
+C<split /regex/, string> splits C<string> into a list of substrings
+and returns that list.  The regex determines the character sequence
 that C<string> is split with respect to.  For example, to split a
 string into words, use
 
     $x = "Calvin and Hobbes";
-    @words = split /\s+/, $x;  # $word[0] = 'Calvin'
-                               # $word[1] = 'and'
-                               # $word[2] = 'Hobbes'
+    @word = split /\s+/, $x;  # $word[0] = 'Calvin'
+                              # $word[1] = 'and'
+                              # $word[2] = 'Hobbes'
 
-If the empty regexp C<//> is used, the string is split into individual
-characters.  If the regexp has groupings, then list produced contains
+To extract a comma-delimited list of numbers, use
+
+    $x = "1.618,2.718,   3.142";
+    @const = split /,\s*/, $x;  # $const[0] = '1.618'
+                                # $const[1] = '2.718'
+                                # $const[2] = '3.142'
+
+If the empty regex C<//> is used, the string is split into individual
+characters.  If the regex has groupings, then list produced contains
 the matched substrings from the groupings as well:
 
     $x = "/usr/bin";
@@ -450,7 +455,7 @@ the matched substrings from the groupings as well:
                                 # $parts[3] = '/'
                                 # $parts[4] = 'bin'
 
-Since the first character of $x matched the regexp, C<split> prepended
+Since the first character of $x matched the regex, C<split> prepended
 an empty initial element to the list.
 
 =head1 BUGS
@@ -460,7 +465,7 @@ None.
 =head1 SEE ALSO
 
 This is just a quick start guide.  For a more in-depth tutorial on
-regexps, see L<perlretut> and for the reference page, see L<perlre>.
+regexes, see L<perlretut> and for the reference page, see L<perlre>.
 
 =head1 AUTHOR AND COPYRIGHT
 
@@ -468,6 +473,12 @@ Copyright (c) 2000 Mark Kvale
 All rights reserved.
 
 This document may be distributed under the same terms as Perl itself.
+
+=head2 Acknowledgments
+
+The author would like to thank Mark-Jason Dominus, Tom Christiansen,
+Ilya Zakharevich, Brad Hughes, and Mike Giroux for all their helpful
+comments.
 
 =cut
 
