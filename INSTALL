@@ -18,7 +18,14 @@ You should probably at least skim through this entire document before
 proceeding.  Special notes specific to this release are identified
 by B<NOTE>.
 
-=head1 BUILDING PERL5
+If you're building Perl on a non-Unix system, you should also read
+the README file specific to your operating system, since this may
+provide additional or different instructions for building Perl.
+
+=head1 DESCRIPTION
+
+The following is the procedures you need to follow in order to successfully
+build perl.
 
 =head1 Start with a Fresh Distribution.
 
@@ -351,7 +358,7 @@ guesses.
 
 All the installation questions have been moved to the top, so you don't
 have to wait for them.  Once you've handled them (and your C compiler &
-flags) you can type   '&-d'  at the next Configure prompt and Configure
+flags) you can type C<&-d> at the next Configure prompt and Configure
 will use the defaults from then on.
 
 If you find yourself trying obscure command line incantations and
@@ -539,7 +546,7 @@ by running fixincludes correctly.
 
 If you have problems with dynamic loading using gcc on SunOS or
 Solaris, and you are using GNU as and GNU ld, you may need to add
-B<-B/bin/> (for SunOS) or B<-B/usr/ccs/bin> (for Solaris) to your
+B<-B/bin/> (for SunOS) or B<-B/usr/ccs/bin/> (for Solaris) to your
 $ccflags, $ldflags, and $lddlflags so that the system's versions of as
 and ld are used.
 
@@ -583,6 +590,7 @@ by hand as shown above and see whether you can locate the program.
 Look for things like:
 C<exec, `backquoted command`, system, open("|...")> or C<open("...|")>.
 All these mean that Perl is trying to run some external program.
+
 =head1 INSTALLING PERL5
 
 =head1 make install
@@ -662,12 +670,32 @@ to generate the html versions, and
 
 to generate the LaTeX versions.
 
+=head1 cd /usr/include; h2ph *.h sys/*.h
+
+Some of the perl library files need to be able to obtain information from
+the system header files.  This command will convert the most commonly used
+header files in F</usr/include> into files that can be easily interpreted
+by perl.  These files will be placed in architectural library directory
+you specified to B<Configure>; by default this is
+F</usr/local/lib/perl5/ARCH/VERSION>, where B<ARCH> is your architecture
+(such as C<sun4-solaris>) and B<VERSION> is the version of perl you are
+building (for example, C<5.003>).
+
+B<NOTE:> Due to differences in the C and perl languages, the conversion of
+the header files in not perfect.  You may have to hand edit some of the 
+converted files to get them to parse correctly.  For example, it breaks
+spectacularly on type casting and certain structures.
+ 
 =head1 Coexistence with earlier versions of perl5.
 
-You can safely install the current version of perl5 and still run
-scripts under the old binaries.  Instead of starting your script with
-#!/usr/local/bin/perl, just start it with #!/usr/local/bin/perl5.001
-(or whatever version you want to run.)
+You can safely install the current version of perl5 and still run scripts
+under the old binaries for versions 5.002 and later ONLY.  Instead of
+starting your script with #!/usr/local/bin/perl, just start it with
+#!/usr/local/bin/perl5.001 (or whatever version you want to run.)
+If you want to retain a version of perl5 prior to perl5.002, you'll
+need to install the current version in a separate directory tree,
+since some of the architecture-independent library files have changed
+in incompatible ways.
 
 The architecture-dependent files are stored in a version-specific
 directory (such as F</usr/local/lib/perl5/sun4-sunos/5.002>) so that
@@ -678,7 +706,7 @@ you will not be using 5.000 or 5.001, you may safely remove those
 files.
 
 The standard library files in F</usr/local/lib/perl5>
-should be useable by all versions of perl5.
+should be useable by all versions of perl5 since perl5.002.
 
 Most extensions will probably not need to be recompiled to use with a newer
 version of perl.  If you do run into problems, and you want to continue
@@ -740,4 +768,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-19 March 1996
+07 July 1996
