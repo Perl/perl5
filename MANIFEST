@@ -696,6 +696,8 @@ lib/unicode/Block.pl				Unicode character database
 lib/unicode/Category.pl				Unicode character database
 lib/unicode/CombiningClass.pl			Unicode character database
 lib/unicode/Decomposition.pl			Unicode character database
+lib/unicode/Eq/Latin1				Unicode character database
+lib/unicode/Eq/Unicode				Unicode character database
 lib/unicode/EthiopicSyllables.txt		Unicode character database
 lib/unicode/In/AlphabeticPresentationForms.pl	Unicode character database
 lib/unicode/In/Arabic.pl			Unicode character database
