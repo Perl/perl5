@@ -8,7 +8,7 @@ Tie::SubstrHash - Fixed-table-size, fixed-key-length hashing
 
     require Tie::SubstrHash;
 
-    tie %myhash, Tie::SubstrHash, $key_len, $value_len, $table_size;
+    tie %myhash, 'Tie::SubstrHash', $key_len, $value_len, $table_size;
 
 =head1 DESCRIPTION
 

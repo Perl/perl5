@@ -39,8 +39,8 @@ will only find GDBM_File.
 Having multiple DBM implementations makes it trivial to copy database formats:
 
     use POSIX; use NDBM_File; use DB_File;
-    tie %newhash,  DB_File, $new_filename, O_CREAT|O_RDWR;
-    tie %oldhash,  NDBM_File, $old_filename, 1, 0;
+    tie %newhash,  'DB_File', $new_filename, O_CREAT|O_RDWR;
+    tie %oldhash,  'NDBM_File', $old_filename, 1, 0;
     %newhash = %oldhash;
 
 =head2 DBM Comparisons

@@ -26,8 +26,8 @@ Tie::Hash, Tie::StdHash - base class definitions for tied hashes
     
     package main;
     
-    tie %new_hash, NewHash;
-    tie %new_std_hash, NewStdHash;
+    tie %new_hash, 'NewHash';
+    tie %new_std_hash, 'NewStdHash';
 
 =head1 DESCRIPTION
 
