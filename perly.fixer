@@ -18,6 +18,9 @@
 # Also edit some practices gcc -Wall finds questionable.
 #  
 
+gnupatch=patch
+. config.sh
+
 input=$1
 output=$2
 tmp=/tmp/f$$
@@ -37,7 +40,7 @@ if grep 'yaccpar 1.8 (Berkeley)' $input >/dev/null 2>&1; then
     cp $input $output
     # Don't expect the diff to do everything -- do some by hand
     if test -f perly_c.diff; then
-	patch -F3 $output <perly_c.diff
+	$gnupatch -F3 $output <perly_c.diff
 	sed -e '/^[ 	]*printf("yydebug:/s/printf(/PerlIO_printf(Perl_debug_log, /' \
 	    -e '/^#line /s/"y[.]tab[.]c"/"perly.c"/' \
 	    -e '/\[\] *= *[{]/s/^/static /' \
@@ -57,7 +60,7 @@ if grep 'yaccpar 1.8 (Berkeley)' $input >/dev/null 2>&1; then
     exit
 elif grep 'yaccpar	1.9 (Berkeley)' $input >/dev/null 2>&1; then
     if test -f perly.c.dif9; then
-	patch -F3 $output <perly.c.dif9
+	$gnupatch -F3 $output <perly.c.dif9
 	sed -e '/^[ 	]*printf("yydebug:/s/printf(/PerlIO_printf(Perl_debug_log, /' \
 	    -e '/^#line /s/"y[.]tab[.]c"/"perly.c"/' \
 	    -e '/\[\] *= *[{]/s/^/static /' \
