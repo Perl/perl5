@@ -2361,7 +2361,8 @@ typedef union re_unwind_t {
             }                                                           \
         }                                                               \
         if ( charid &&                                                  \
-             ( base + charid - 1 - trie->uniquecharcount ) >=0  &&      \
+             ( base + charid > trie->uniquecharcount ) &&               \
+             ( base + charid - 1 - trie->uniquecharcount < trie->lasttrans) && \
              trie->trans[ base + charid - 1 - trie->uniquecharcount ].check == state ) \
         {                                                               \
             state = trie->trans[ base + charid - 1 - trie->uniquecharcount ].next;     \
@@ -2731,7 +2732,7 @@ S_regmatch(pTHX_ regnode *prog)
         		    tmp ? SvPV_nolen( *tmp ) : "not compiled under -Dr",
         		    PL_colors[5] );
 		    });
-		    PL_reginput = accept_buff[ 0 ].endpos;
+		    PL_reginput = (char *)accept_buff[ 0 ].endpos;
 		    /* in this case we free tmps/leave before we call regmatch
 		       as we wont be using accept_buff again. */
 		    FREETMPS;
@@ -2772,7 +2773,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    accept_buff[ accepted ] = tmp;
 			    best = accepted;
 			}
-			PL_reginput = accept_buff[ best ].endpos;
+			PL_reginput = (char *)accept_buff[ best ].endpos;
 
                         /* 
                            as far as I can tell we only need the SAVETMPS/FREETMPS 

@@ -1160,8 +1160,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                 */
                 trie->states[ state ].trans.base=base;
             }
-            Renew( trie->trans, tp + 1, reg_trie_trans );
-
+            trie->lasttrans = tp + 1;
         }
     } else {
         /*
@@ -1409,7 +1408,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                 }
             }
         }
-        Renew( trie->trans, pos + 1, reg_trie_trans);
+        trie->lasttrans = pos + 1;
         Renew( trie->states, laststate + 1, reg_trie_state);
         DEBUG_TRIE_COMPILE_MORE_r(
                 PerlIO_printf( Perl_debug_log, " Alloc: %d Orig: %d elements, Final:%d. Savings of %%%5.2f\n",
@@ -1419,6 +1418,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
         } /* end table compress */
     }
+    /* resize the trans array to remove unused space */
+    Renew( trie->trans, trie->lasttrans, reg_trie_trans);
 
     DEBUG_TRIE_COMPILE_r({
         U32 state;
@@ -1436,9 +1437,11 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             }
         }
         PerlIO_printf( Perl_debug_log, "\n-----:-----------------------");
+
         for( state = 0 ; state < trie->uniquecharcount ; state++ )
             PerlIO_printf( Perl_debug_log, "-----");
         PerlIO_printf( Perl_debug_log, "\n");
+
         for( state = 1 ; state < trie->laststate ; state++ ) {
             U32 base = trie->states[ state ].trans.base;
 
@@ -1455,14 +1458,16 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             if ( base ) {
                 U32 ofs = 0;
 
-                while( ( base + ofs - trie->uniquecharcount ) >=0 &&
-                      trie->trans[ base + ofs - trie->uniquecharcount ].check != state )
+                while( ( base + ofs  < trie->uniquecharcount ) ||
+                       ( base + ofs - trie->uniquecharcount < trie->lasttrans
+                         && trie->trans[ base + ofs - trie->uniquecharcount ].check != state))
                         ofs++;
 
                 PerlIO_printf( Perl_debug_log, "+%02X[ ", ofs);
 
                 for ( ofs = 0 ; ofs < trie->uniquecharcount ; ofs++ ) {
-                    if ( ( base + ofs - trie->uniquecharcount>=0) &&
+                    if ( ( base + ofs >= trie->uniquecharcount ) &&
+                         ( base + ofs - trie->uniquecharcount < trie->lasttrans ) &&
                          trie->trans[ base + ofs - trie->uniquecharcount ].check == state )
                     {
                        PerlIO_printf( Perl_debug_log, "%04X ",

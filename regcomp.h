@@ -463,6 +463,7 @@ struct _reg_trie_data {
     U16              wordcount;
     STRLEN           charcount;
     U32              laststate;
+    U32              lasttrans;
     U16              *charmap;
     HV               *widecharmap;
     reg_trie_state   *states;
