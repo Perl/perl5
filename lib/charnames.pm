@@ -18,6 +18,11 @@ my %alias1 = (
 		'FF'			=> 'FORM FEED (FF)',
 		'CR'			=> 'CARRIAGE RETURN (LF)',
 		'NEL'			=> 'NEXT LINE (NEL)',
+	        # More convenience.  For futher convencience,
+	        # it is suggested some way using using the NamesList
+		# aliases is implemented.
+	        'ZWNJ'			=> 'ZERO WIDTH NON-JOINER',
+	        'ZWJ'			=> 'ZERO WIDTH JOINER',
 		'BOM'			=> 'BYTE ORDER MARK',
 	    );
 
@@ -379,7 +384,12 @@ One can also use
     BYTE ORDER MARK
     BOM
 
-though that is of course not a legal character as such.
+and
+
+    ZWNJ
+    ZWJ
+
+for ZERO WIDTH NON-JOINER and ZERO WIDTH JOINER.
 
 For backward compatibility one can use the old names for
 certain C0 and C1 controls
