@@ -10,9 +10,16 @@
 #  include <fcntl.h>
 #endif
 
+#ifdef PerlIO
 typedef int SysRet;
 typedef PerlIO * InputStream;
 typedef PerlIO * OutputStream;
+#else
+#define PERLIO_IS_STDIO 1
+typedef int SysRet;
+typedef FILE * InputStream;
+typedef FILE * OutputStream;
+#endif
 
 static int
 not_here(s)
@@ -82,7 +89,11 @@ fgetpos(handle)
     CODE:
 	if (handle) {
 	    Fpos_t pos;
+#ifdef PerlIO
 	    PerlIO_getpos(handle, &pos);
+#else
+	    fgetpos(handle, &pos);
+#endif
 	    ST(0) = sv_2mortal(newSVpv((char*)&pos, sizeof(Fpos_t)));
 	}
 	else {
@@ -96,7 +107,11 @@ fsetpos(handle, pos)
 	SV *		pos
     CODE:
 	if (handle)
+#ifdef PerlIO
 	    RETVAL = PerlIO_setpos(handle, (Fpos_t*)SvPVX(pos));
+#else
+	    RETVAL = fsetpos(handle, (Fpos_t*)SvPVX(pos));
+#endif
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
@@ -110,7 +125,11 @@ OutputStream
 new_tmpfile(packname = "IO::File")
     char *		packname
     CODE:
+#ifdef PerlIO
 	RETVAL = PerlIO_tmpfile();
+#else
+	RETVAL = tmpfile();
+#endif
     OUTPUT:
 	RETVAL
 
@@ -132,7 +151,11 @@ ungetc(handle, c)
 	int		c
     CODE:
 	if (handle)
+#ifdef PerlIO
 	    RETVAL = PerlIO_ungetc(handle, c);
+#else
+	    RETVAL = ungetc(c, handle);
+#endif
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
@@ -145,7 +168,30 @@ ferror(handle)
 	InputStream	handle
     CODE:
 	if (handle)
+#ifdef PerlIO
 	    RETVAL = PerlIO_error(handle);
+#else
+	    RETVAL = ferror(handle);
+#endif
+	else {
+	    RETVAL = -1;
+	    errno = EINVAL;
+	}
+    OUTPUT:
+	RETVAL
+
+int
+clearerr(handle)
+	InputStream	handle
+    CODE:
+	if (handle) {
+#ifdef PerlIO
+	    PerlIO_clearerr(handle);
+#else
+	    clearerr(handle);
+#endif
+	    RETVAL = 0;
+	}
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
@@ -158,7 +204,11 @@ fflush(handle)
 	OutputStream	handle
     CODE:
 	if (handle)
+#ifdef PerlIO
 	    RETVAL = PerlIO_flush(handle);
+#else
+	    RETVAL = Fflush(handle);
+#endif
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
