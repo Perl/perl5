@@ -36,6 +36,7 @@ README.amiga		Notes about AmigaOS port
 README.beos		Notes about BeOS port
 README.cygwin32		Notes about Cygwin32 port
 README.dos		Notes about dos/djgpp port
+README.hpux		Notes about HP/UX port
 README.lexwarn		Notes about lexical warnings
 README.mint		Notes about Atari MiNT port
 README.mpeix		Notes about MPE/iX port

@@ -53,6 +53,7 @@ README.amiga			amiga
 README.beos			beos
 README.cygwin32			cygwin32
 README.dos			dos
+README.hpux			hpux
 README.lexwarn			lexwarn
 README.mpeix			mpeix
 README.os2			os2
