@@ -48,7 +48,7 @@ sub BaseTests {
 	# Test quoted number processing
 	diag "tests with quoted numbers" unless $ENV{PERL_CORE};
 	$version = $CLASS->new("5.005_03");
-	is ( "$version" , "5.5_30" , '"5.005_03" eq "5.5_30"' );
+	is ( "$version" , "5.005_030" , '"5.005_03" eq "5.005_030"' );
 	$version = $CLASS->new("v1.23");
 	is ( "$version" , "1.23.0" , '"v1.23" eq "1.23.0"' );
 	

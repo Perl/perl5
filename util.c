@@ -3934,7 +3934,7 @@ Perl_scan_version(pTHX_ char *s, SV *rv, bool qv)
 		 * floating point number, i.e. not quoted in any way
 		 */
  		if ( !qv && s > start+1 && saw_period == 1 ) {
- 		    mult *= 100;
+		    mult *= 100;
  		    while ( s < end ) {
  			orev = rev;
  			rev += (*s - '0') * mult;
@@ -3983,7 +3983,7 @@ Perl_scan_version(pTHX_ char *s, SV *rv, bool qv)
 	*/
 	len = 2 - len;
 	while (len-- > 0)
-	  av_push((AV *)sv, newSViv(0));
+	    av_push((AV *)sv, newSViv(0));
     }
     return s;
 }
@@ -4117,10 +4117,11 @@ Perl_vnumify(pTHX_ SV *vs)
     if ( len > 0 )
     {
 	digit = SvIVX(*av_fetch((AV *)vs, len, 0));
-
-	/* Don't display any additional trailing zeros */
 	if ( (int)PERL_ABS(digit) != 0 || len == 1 )
 	{
+	    if ( digit < 0 ) /* alpha version */
+		Perl_sv_catpv(aTHX_ sv,"_");
+	    /* Don't display additional trailing zeros */
 	    Perl_sv_catpvf(aTHX_ sv,"%03d", (int)PERL_ABS(digit));
 	}
     }
@@ -4191,12 +4192,13 @@ the original version contained 1 or more dots, respectively
 SV *
 Perl_vstringify(pTHX_ SV *vs)
 {
-    I32 len;
+    I32 len, digit;
     if ( SvROK(vs) )
 	vs = SvRV(vs);
     len = av_len((AV *)vs);
+    digit = SvIVX(*av_fetch((AV *)vs, len, 0));
     
-    if ( len < 2 )
+    if ( len < 2 || ( len == 2 && digit < 0 ) )
 	return vnumify(vs);
     else
 	return vnormal(vs);
