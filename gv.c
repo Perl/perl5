@@ -104,7 +104,7 @@ int multi;
     GvFILEGV(gv) = curcop->cop_filegv;
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, '*', name, len);
-    GvSTASH(gv) = stash;
+    GvSTASH(gv) = (HV*)SvREFCNT_inc(stash);
     GvNAME(gv) = savepvn(name, len);
     GvNAMELEN(gv) = len;
     if (multi)
