@@ -22,7 +22,6 @@ import(...)
 	unimport = 1
     PREINIT:
 	int i;
-	CV *cv;
     PPCODE:
        if (items < 1)
            Perl_croak(aTHX_ "Usage: %s(Class, ...)", GvNAME(CvGV(cv)));
