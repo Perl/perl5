@@ -806,6 +806,20 @@ C<call_sv> apply equally to these functions.
 =for hackers
 Found in file gv.c
 
+=item gv_fetchmeth_autoload
+
+Same as gv_fetchmeth(), but looks for autoloaded subroutines too.
+Returns a glob for the subroutine.
+
+For an autoloaded subroutine without a GV, will create a GV even
+if C<level < 0>.  For an autoloaded subroutine without a stub, GvCV()
+of the result may be zero.
+
+	GV*	gv_fetchmeth_autoload(HV* stash, const char* name, STRLEN len, I32 level)
+
+=for hackers
+Found in file gv.c
+
 =item gv_stashpv
 
 Returns a pointer to the stash for a specified package.  C<name> should
@@ -2298,6 +2312,16 @@ non-numeric warning), even if your atof() doesn't grok them.
 =for hackers
 Found in file sv.c
 
+=item memcmp_byte_utf8
+
+Similar to memcmp(), but the first string is with bytes, the second
+with utf8.  Takes into account that the lengths may be different.
+
+	int	memcmp_byte_utf8(char *sbyte, STRLEN lbyte, char *sutf, STRLEN lutf)
+
+=for hackers
+Found in file util.c
+
 =item newRV_inc
 
 Creates an RV wrapper for an SV.  The reference count for the original SV is
@@ -2570,22 +2594,22 @@ version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvIVX
-
-Returns the raw value in the SV's IV slot, without checks or conversions.
-Only use when you are sure SvIOK is true. See also C<SvIV()>.
-
-	IV	SvIVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvIVx
 
 Coerces the given SV to an integer and returns it. Guarantees to evaluate
 sv only once. Use the more efficient C<SvIV> otherwise.
 
 	IV	SvIVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVX
+
+Returns the raw value in the SV's IV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvIV()>.
+
+	IV	SvIVX(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3148,22 +3172,22 @@ for a version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvUVX
-
-Returns the raw value in the SV's UV slot, without checks or conversions.
-Only use when you are sure SvIOK is true. See also C<SvUV()>.
-
-	UV	SvUVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvUVx
 
 Coerces the given SV to an unsigned integer and returns it. Guarantees to
 evaluate sv only once. Use the more efficient C<SvUV> otherwise.
 
 	UV	SvUVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvUVX
+
+Returns the raw value in the SV's UV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvUV()>.
+
+	UV	SvUVX(SV* sv)
 
 =for hackers
 Found in file sv.h

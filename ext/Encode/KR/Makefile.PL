@@ -4,6 +4,7 @@ use ExtUtils::MakeMaker;
 
 my %tables = (EUC_KR   => ['euc-kr.enc'],
 	      KSC5601  => ['ksc5601.enc'],
+	      CP949    => ['cp949.enc'],
              );
 
 my $name = 'KR';

@@ -5,6 +5,11 @@
 
 my $file = "tf$$.txt";
 
+if ($^O =~ /vms/i) {
+  print "1..0\n";
+  exit;
+}
+
 print "1..39\n";
 
 my $N = 1;
@@ -73,19 +78,34 @@ undef $o;
 untie @a;
 
 # Does it correctly detect a non-seekable handle?
-{  eval {pipe *R, *W};
-   close R;
-   if ($@) {
-     print "ok $N # skipped\n";
-     last;
-   }
-   $o = eval {tie @a, 'Tie::File', \*W};
-   if ($@ && $@ =~ /filehandle does not appear to be seekable/) {
-     print "ok $N\n";
-   } else {
-     print "not ok $N # $@\n";
-   }
-   $N++;
+
+{
+  if ($^O =~ /^(MSWin32|dos)$/) {
+    print "ok $N \# skipped ($^O has broken pipe semantics)\n";
+    last;
+  }
+  my $pipe_succeeded = eval {pipe *R, *W};
+  if ($@) {
+    chomp $@;
+    print "ok $N \# skipped (no pipes: $@)\n";
+        last;
+  } elsif (! $pipe_succeeded) {
+    print "ok $N \# skipped (pipe call failed: $!)\n";
+    last;
+  }
+  close R;
+  $o = eval {tie @a, 'Tie::File', \*W};
+  if ($@) {
+    if ($@ =~ /filehandle does not appear to be seekable/) {
+      print "ok $N\n";
+    } else {
+      chomp $@;
+      print "not ok $N \# \$\@ is $@\n";
+    }
+  } else {
+    print "not ok $N \# passing pipe to TIEARRAY didn't abort program\n";
+  }
+  $N++;
 }
 
 # try inserting a record into the middle of an empty file

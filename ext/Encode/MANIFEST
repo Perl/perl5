@@ -47,6 +47,7 @@ Encode/8859-9.ucm
 Encode/ascii.enc
 Encode/ascii.ucm
 Encode/big5.enc
+Encode/big5-hkscs.enc
 Encode/cp1006.enc
 Encode/cp1047.enc
 Encode/cp1047.ucm
@@ -94,7 +95,7 @@ Encode/gb12345.enc
 Encode/gb1988.enc
 Encode/gb2312.enc
 Encode/gsm0338.enc
-Encode/HZ.enc
+Encode/iso-ir-165.enc
 Encode/ir-197.enc
 Encode/jis0201.enc
 Encode/jis0208.enc
@@ -153,6 +154,7 @@ lib/Encode/ucs2_le.pm
 lib/Encode/Unicode.pm
 lib/Encode/utf8.pm
 lib/Encode/XS.pm
+lib/Encode/CN/HZ.pm
 lib/Encode/Tcl/Escape.pm
 lib/Encode/Tcl/Extended.pm
 lib/Encode/Tcl/HanZi.pm

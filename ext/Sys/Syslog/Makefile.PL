@@ -1,12 +1,11 @@
 use ExtUtils::MakeMaker;
-use ExtUtils::Constant 0.07 'WriteConstants';
+use ExtUtils::Constant 0.11 'WriteConstants';
 
 WriteMakefile(
     NAME		=> 'Sys::Syslog',
     VERSION_FROM	=> 'Syslog.pm', 
     MAN3PODS		=> {}, 	# Pods will be built by installman.
     XSPROTOARG          => '-noprototypes',
-    realclean => {FILES=> 'constants.c constants.xs'},
 );
 
 # We hope syslogd understands /dev/log.

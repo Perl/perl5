@@ -126,7 +126,10 @@ my @ary_buff = (  # [ encoding, decoded, encoded ]
 );
 
 plan test => $n*@encodings + $n*@encodings*@greek
-  + $n*@encodings*@ideodigit + $num_esc + $n + @hz_txt + @ary_buff;
+  + $n*@encodings*@ideodigit + $num_esc +
+# + $n + @hz_txt # no HZ for now
+  + @ary_buff
+  - 2; # no HZ for now
 
 foreach my $enc (@encodings)
  {
@@ -211,6 +214,7 @@ foreach my $enc (@encodings)
    return encode($hz, pack 'U*', unpack 'n*', pack 'H*', shift);
   };
 
+ if(0){
  foreach my $enc ($hz)
   {
    my $tab = Encode->getEncoding($enc);
@@ -225,11 +229,13 @@ foreach my $enc (@encodings)
       "$enc mangled translating to Unicode");
     }
   }
+  }
 }
 
 for my $ary (@ary_buff) {
   my $NG = 0;
   my $enc = $ary->[0];
+  next if $enc eq 'HZ';
   for my $n ( int(BUFSIZ/2) .. 2*BUFSIZ+4 ){
     my $dst = "a"x$n. $ary->[1] . TAIL;
     my $src = "a"x$n. $ary->[2] . TAIL;

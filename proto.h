@@ -201,6 +201,7 @@ PERL_CALLCONV I32	Perl_debstack(pTHX);
 PERL_CALLCONV I32	Perl_debstackptrs(pTHX);
 PERL_CALLCONV char*	Perl_delimcpy(pTHX_ char* to, char* toend, char* from, char* fromend, int delim, I32* retlen);
 PERL_CALLCONV void	Perl_deprecate(pTHX_ char* s);
+PERL_CALLCONV void	Perl_deprecate_old(pTHX_ char* s);
 PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
 #ifdef CHECK_FORMAT
  __attribute__((format(printf,pTHX_1,pTHX_2)))

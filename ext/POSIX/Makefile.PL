@@ -1,5 +1,5 @@
 use ExtUtils::MakeMaker;
-use ExtUtils::Constant 0.07 'WriteConstants';
+use ExtUtils::Constant 0.11 'WriteConstants';
 use Config;
 my @libs;
 if ($^O ne 'MSWin32') {
@@ -11,7 +11,6 @@ WriteMakefile(
     MAN3PODS 	=> {}, 	# Pods will be built by installman.
     XSPROTOARG => '-noprototypes', 		# XXX remove later?
     VERSION_FROM => 'POSIX.pm', 
-    realclean => {FILES=> 'constants.c constants.xs'},
 );
 
 my @names =

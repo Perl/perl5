@@ -4159,6 +4159,8 @@ C<!!!>, C<!!>, C<!>
 
 =item The ALIAS: Keyword
 
+=item The OVERLOAD: Keyword
+
 =item The INTERFACE: Keyword
 
 =item The INTERFACE_MACRO: Keyword
@@ -5461,6 +5463,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item lib/ftmp-security tests warn 'system possibly insecure'
 
 =item Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
+
+=item FreeBSD 4.5 fails lib/File/Spec/t/rel2abs2rel.t
 
 =item HP-UX lib/io_multihomed Fails When LP64-Configured
 

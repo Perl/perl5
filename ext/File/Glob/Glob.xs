@@ -14,7 +14,7 @@ START_MY_CXT
 
 #define GLOB_ERROR	(MY_CXT.x_GLOB_ERROR)
 
-#include "constants.c"
+#include "const-c.inc"
 
 #ifdef WIN32
 #define errfunc		NULL
@@ -69,4 +69,4 @@ PPCODE:
 	bsd_globfree(&pglob);
     }
 
-INCLUDE: constants.xs
+INCLUDE: const-xs.inc

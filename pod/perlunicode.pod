@@ -851,13 +851,14 @@ the following C APIs useful (see perlapi for details):
 DO_UTF8(sv) returns true if the UTF8 flag is on and the bytes pragma
 is not in effect.  SvUTF8(sv) returns true is the UTF8 flag is on, the
 bytes pragma is ignored.  The UTF8 flag being on does B<not> mean that
-there are any characters of code points greater than 255 (or 127) in the
-scalar, or that there even are any characters in the scalar.  What the
-UTF8 flag means is that the sequence of octets in the representation
-of the scalar should be treated as UTF-8 encoding of a string.
-The UTF8 flag being off means that each octet in this representation
-encodes a single character with codepoint 0..255 within the string.
-Perl's Unicode model is not to use UTF-8 until it's really necessary.
+there are any characters of code points greater than 255 (or 127) in
+the scalar, or that there even are any characters in the scalar.
+What the UTF8 flag means is that the sequence of octets in the
+representation of the scalar is the sequence of UTF-8 encoded
+code points of the characters of a string.  The UTF8 flag being
+off means that each octet in this representation encodes a single
+character with codepoint 0..255 within the string.  Perl's Unicode
+model is not to use UTF-8 until it's really necessary.
 
 =item *
 

@@ -1,6 +1,6 @@
 package ExtUtils::Constant;
 use vars qw (@ISA $VERSION %XS_Constant %XS_TypeSet @EXPORT_OK %EXPORT_TAGS);
-$VERSION = '0.10';
+$VERSION = '0.11';
 
 =head1 NAME
 
@@ -12,8 +12,6 @@ ExtUtils::Constant - generate XS code to import C header constants
     WriteConstants(
         NAME => 'Foo',
         NAMES => [qw(FOO BAR BAZ)],
-        C_FILE => 'constants.c',
-        XS_FILE => 'constants.xs',
     );
     # Generates wrapper code to make the values of the constants FOO BAR BAZ
     #  available to perl
@@ -30,11 +28,11 @@ constants.
 
 Generally one only needs to call the C<WriteConstants> function, and then
 
-    #include "constants.c"
+    #include "const-c.inc"
 
 in the C section of C<Foo.xs>
 
-    INCLUDE constants.xs
+    INCLUDE const-xs.inc
 
 in the XS section of C<Foo.xs>.
 
@@ -1113,12 +1111,15 @@ as detailed in L<"C_constant">.
 =item C_FILE
 
 The name of the file to write containing the C code.  The default is
-C<constants.c>.
+C<const-c.inc>.  The C<-> in the name ensures that the file can't be
+mistaken for anything related to a legitimate perl package name, and
+not naming the file C<.c> avoids having to override Makefile.PL's
+C<.xs> to C<.c> rules.
 
 =item XS_FILE
 
 The name of the file to write containing the XS code.  The default is
-C<constants.xs>.
+C<const-xs.inc>.
 
 =item SUBNAME
 
@@ -1139,8 +1140,8 @@ C<constant_10> with the default I<XS_SUBNAME>.
 sub WriteConstants {
   my %ARGS =
     ( # defaults
-     C_FILE =>       'constants.c',
-     XS_FILE =>      'constants.xs',
+     C_FILE =>       'const-c.inc',
+     XS_FILE =>      'const-xs.inc',
      SUBNAME =>      'constant',
      DEFAULT_TYPE => 'IV',
      @_);

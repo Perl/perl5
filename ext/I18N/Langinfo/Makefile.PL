@@ -13,10 +13,6 @@ WriteMakefile(
 	# Insert -I. if you add *.h files later:
     'INC'		=> '', # e.g., '-I/usr/include/other'
     'MAN3PODS'		=> {},  # Pods will be built by installman
-    # Without this the constants xs files are spotted, and cause rules to be
-    # added to delete the similarly named C files, which isn't what we want.
-    XS => {'Langinfo.xs' => 'Langinfo.c'},
-    realclean => {FILES=> 'constants.c constants.xs'},
 	# Un-comment this if you add C files to link with later:
     # 'OBJECT'		=> '$(O_FILES)', # link all the C files too
 );
@@ -46,8 +42,9 @@ if (eval {require ExtUtils::Constant; 1}) {
                                     );
 } else {
   use File::Copy;
-  copy ('fallback.c', 'constants.c')
-    or die "Can't copy fallback.c to constants.c: $!";
-  copy ('fallback.xs', 'constants.xs')
-    or die "Can't copy fallback.xs to constants.xs: $!";
+  use File::Spec;
+  foreach my $file ('const-c.inc', 'const-xs.inc') {
+    my $fallback = File::Spec->catfile('fallback', $file);
+    copy ($fallback, $file) or die "Can't copy $fallback to $file: $!";
+  }
 }

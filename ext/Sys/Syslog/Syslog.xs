@@ -6,11 +6,11 @@
 #include <syslog.h>
 #endif
 
-#include "constants.c"
+#include "const-c.inc"
 
 MODULE = Sys::Syslog		PACKAGE = Sys::Syslog		
 
-INCLUDE: constants.xs
+INCLUDE: const-xs.inc
 
 int
 LOG_FAC(p)

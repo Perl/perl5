@@ -4,7 +4,6 @@
 # EXTEND, CLEAR, DELETE, EXISTS
 #
 
-use lib '/home/mjd/src/perl/Tie-File2/lib';
 my $file = "tf$$.txt";
 1 while unlink $file;
 

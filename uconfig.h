@@ -1386,7 +1386,7 @@
  *	a macro using sprintf("%g") is used. Arguments for the Gconvert
  *	macro are: value, number of digits, whether trailing zeros should
  *	be retained, and the output buffer.
- *	Possible values are:
+ *	The usual values are:
  *		d_Gconvert='gconvert((x),(n),(t),(b))'
  *		d_Gconvert='gcvt((x),(n),(b))'
  *		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
@@ -3417,16 +3417,18 @@
  *	If defined, this macro indicates that the C compiler can handle
  *	function prototypes.
  */
-/* PERL_PROTO_:
+/* _:
  *	This macro is used to declare function parameters for folks who want
  *	to make declarations with prototypes using a different style than
  *	the above macros.  Use double parentheses.  For example:
  *
- *		int main PERL_PROTO_((int argc, char *argv[]));
+ *		int main _((int argc, char *argv[]));
  */
 /*#define	CAN_PROTOTYPE	/ **/
 #ifdef CAN_PROTOTYPE
+#define	_(args) args
 #else
+#define	_(args) ()
 #endif
 
 /* SH_PATH:

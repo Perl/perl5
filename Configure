@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Mar  1 20:03:36 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Mon Mar  4 21:46:28 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -16681,9 +16681,9 @@ eval $find_extensions
 # Special case:  Add in threads/shared since it is not picked up by the
 # recursive find above (and adding in general recursive finding breaks
 # SDBM_File/sdbm).  A.D.  10/25/2001.
-# Encode::JP needs an explicit mention for the same reason
-# --jhi 2002-02-23
-known_extensions="$known_extensions threads/shared Encode/JP"
+# Encode::XX need explicit mentions for the same reason.
+# --jhi 2002-03-04
+known_extensions="$known_extensions threads/shared Encode/CN Encode/JP Encode/KR Encode/TW"
 set X $nonxs_extensions
 shift
 nonxs_extensions="$*"

@@ -926,7 +926,9 @@ _cleaner2:
 	rm -f h2ph.man pstruct
 	rm -rf .config
 	rm -f testcompile compilelog
-	-rmdir lib/B lib/Data lib/Digest lib/Encode lib/IO/Socket lib/IO/t lib/IO
+	-rmdir lib/B lib/Data lib/Digest
+	rm -rf lib/Encode
+	-rmdir lib/IO/Socket lib/IO/t lib/IO
 	-rmdir lib/Filter/Util lib/List lib/MIME lib/PerlIO lib/Scalar lib/Sys
 	-rmdir lib/Thread lib/XS
 
