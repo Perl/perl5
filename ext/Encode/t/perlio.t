@@ -65,6 +65,7 @@ for my $e (qw/euc-jp shiftjis 7bit-jis iso-2022-jp iso-2022-jp-1/){
  SKIP:{
 	skip "$e: !perlio_ok", 1  unless perlio_ok($e) or $DEBUG;
 	open $fh, ">:encoding($e)", $pfile or die "$sfile : $!";
+	binmode $fh;
 	$fh->autoflush(0);
 	print $fh $utext;
 	close $fh;
@@ -78,6 +79,7 @@ for my $e (qw/euc-jp shiftjis 7bit-jis iso-2022-jp iso-2022-jp-1/){
     # this time print line by line.
     # works even for ISO-2022!
     open $fh, ">:encoding($e)", $pfile or die "$sfile : $!";
+    binmode $fh;
     $fh->autoflush(1);
     for my $l (@uline) {
 	print $fh $l;
