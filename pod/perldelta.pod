@@ -428,22 +428,6 @@ Anonymous temporary files are available without need to
 
 That is a literal undef, not an undefined value.
 
-=item *
-
-The list form of C<open> is now implemented for pipes (at least on UNIX):
-
-   open($fh,"-|", 'cat', '/etc/motd')
-
-creates a pipe, and runs the equivalent of exec('cat', '/etc/motd') in
-the child process.
-
-=item *
-
-If your locale environment variables (LANGUAGE, LC_ALL, LC_CTYPE, LANG)
-contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
-the default encoding of your STDIN, STDOUT, and STDERR, and of
-B<any subsequent file open>, is UTF-8.
-
 =back
 
 =head2 ithreads
