@@ -1467,6 +1467,7 @@ t/lib/bigfloat.t	See if bigfloat.pl works
 t/lib/bigfltpm.t	See if BigFloat.pm works
 t/lib/bigint.t		See if bigint.pl works
 t/lib/bigintpm.t	See if BigInt.pm works
+t/lib/carp.t		See if Carp works
 t/lib/cgi-esc.t		See if CGI.pm works
 t/lib/cgi-form.t	See if CGI.pm works
 t/lib/cgi-function.t	See if CGI.pm works
