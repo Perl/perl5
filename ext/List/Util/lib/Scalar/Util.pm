@@ -115,6 +115,11 @@ prevent the object being DESTROY-ed at its usual time.
 
 =back
 
+=head1 KNOWN BUGS
+
+There is a bug in perl5.6.0 with UV's that are >= 1<<31. This will
+show up as tests 8 and 9 of dualvar.t failing
+
 =head1 COPYRIGHT
 
 Copyright (c) 1997-2001 Graham Barr <gbarr@pobox.com>. All rights reserved.

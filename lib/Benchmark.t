@@ -12,7 +12,7 @@ use Test::More tests => 159;
 
 use Benchmark qw(:all);
 
-my $delta = 0.2;
+my $delta = 0.3;
 
 # Some timing ballast
 sub fib {
@@ -59,7 +59,7 @@ my $in_threesecs = $threesecs->iters;
 print "# $in_threesecs iterations\n";
 ok ($in_threesecs > 0, "iters returned positive iterations");
 
-my $estimate = int ($in_threesecs / 3);
+my $estimate = int (100 * $in_threesecs / 3) / 100;
 print "# from the 3 second run estimate $estimate iterations in 1 second...\n";
 $baz = 0;
 my $onesec = countit(1, $coderef);

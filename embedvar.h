@@ -183,9 +183,6 @@
 #define PL_Mem			(PERL_GET_INTERP->IMem)
 #define PL_MemParse		(PERL_GET_INTERP->IMemParse)
 #define PL_MemShared		(PERL_GET_INTERP->IMemShared)
-#define PL_OpPtr		(PERL_GET_INTERP->IOpPtr)
-#define PL_OpSlab		(PERL_GET_INTERP->IOpSlab)
-#define PL_OpSpace		(PERL_GET_INTERP->IOpSpace)
 #define PL_Proc			(PERL_GET_INTERP->IProc)
 #define PL_Sock			(PERL_GET_INTERP->ISock)
 #define PL_StdIO		(PERL_GET_INTERP->IStdIO)
@@ -481,9 +478,6 @@
 #define PL_Mem			(vTHX->IMem)
 #define PL_MemParse		(vTHX->IMemParse)
 #define PL_MemShared		(vTHX->IMemShared)
-#define PL_OpPtr		(vTHX->IOpPtr)
-#define PL_OpSlab		(vTHX->IOpSlab)
-#define PL_OpSpace		(vTHX->IOpSpace)
 #define PL_Proc			(vTHX->IProc)
 #define PL_Sock			(vTHX->ISock)
 #define PL_StdIO		(vTHX->IStdIO)
@@ -782,9 +776,6 @@
 #define PL_IMem			PL_Mem
 #define PL_IMemParse		PL_MemParse
 #define PL_IMemShared		PL_MemShared
-#define PL_IOpPtr		PL_OpPtr
-#define PL_IOpSlab		PL_OpSlab
-#define PL_IOpSpace		PL_OpSpace
 #define PL_IProc		PL_Proc
 #define PL_ISock		PL_Sock
 #define PL_IStdIO		PL_StdIO

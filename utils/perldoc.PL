@@ -169,13 +169,27 @@ if (!($Is_VMS || $Is_MSWin32 || $Is_Dos || $Is_OS2) && ($> == 0 || $< == 0)
         my $id = eval { getpwnam("nobody") };
            $id = eval { getpwnam("nouser") } unless defined $id;
            $id = -2 unless defined $id;
+	#
+	# According to Stevens' APUE and various
+	# (BSD, Solaris, HP-UX) man pages setting
+	# the real uid first and effective uid second
+	# is the way to go if one wants to drop privileges,
+	# because if one changes into an effective uid of
+	# non-zero, one cannot change the real uid any more.
+	#
+	# Actually, it gets even messier.  There is
+	# a third uid, called the saved uid, and as
+	# long as that is zero, one can get back to
+	# uid of zero.  Setting the real-effective *twice*
+	# helps in *most* systems (FreeBSD and Solaris)
+	# but apparently in HP-UX even this doesn't help:
+	# the saved uid stays zero (apparently the only way
+	# in HP-UX to change saved uid is to call setuid()
+	# when the effective uid is zero).
+	#
         eval {
-	    # According to Stevens' APUE and various
-	    # (BSD, Solaris, HP-UX) man pages setting
-	    # the real uid first and effective uid second
-	    # is the way to go if one wants to drop privileges,
-	    # because if one changes into an effective uid of
-	    # non-zero, one cannot change the real uid any more.
+            $< = $id; # real uid
+            $> = $id; # effective uid
             $< = $id; # real uid
             $> = $id; # effective uid
         };

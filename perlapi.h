@@ -103,12 +103,6 @@ END_EXTERN_C
 #define PL_MemParse		(*Perl_IMemParse_ptr(aTHX))
 #undef  PL_MemShared
 #define PL_MemShared		(*Perl_IMemShared_ptr(aTHX))
-#undef  PL_OpPtr
-#define PL_OpPtr		(*Perl_IOpPtr_ptr(aTHX))
-#undef  PL_OpSlab
-#define PL_OpSlab		(*Perl_IOpSlab_ptr(aTHX))
-#undef  PL_OpSpace
-#define PL_OpSpace		(*Perl_IOpSpace_ptr(aTHX))
 #undef  PL_Proc
 #define PL_Proc			(*Perl_IProc_ptr(aTHX))
 #undef  PL_Sock

@@ -140,13 +140,18 @@
     PL_regkind[(U8)OP(rn)] == EXACT || PL_regkind[(U8)OP(rn)] == REF \
 )
 
+/*
+  Search for mandatory following text node; for lookahead, the text must
+  follow but for lookbehind (rn->flags != 0) we skip to the next step.
+*/
 #define FIND_NEXT_IMPT(rn) STMT_START { \
     while (JUMPABLE(rn)) \
-	if (OP(rn) == SUSPEND || OP(rn) == IFMATCH || \
-	    PL_regkind[(U8)OP(rn)] == CURLY) \
+	if (OP(rn) == SUSPEND || PL_regkind[(U8)OP(rn)] == CURLY) \
 	    rn = NEXTOPER(NEXTOPER(rn)); \
 	else if (OP(rn) == PLUS) \
 	    rn = NEXTOPER(rn); \
+	else if (OP(rn) == IFMATCH) \
+	    rn = (rn->flags == 0) ? NEXTOPER(NEXTOPER(rn)) : rn + ARG(rn); \
 	else rn += NEXT_OFF(rn); \
 } STMT_END 
 

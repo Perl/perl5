@@ -9,7 +9,7 @@ BEGIN {
     require Config; import Config;
     $can_fork = $Config{d_fork} || ($^O eq 'MSWin32' && $Config{useithreads});
 
-    if ($Config{'extensions'} !~ /\bSocket\b/ && 
+    if ($^O eq "hpux" or $Config{'extensions'} !~ /\bSocket\b/ && 
         !(($^O eq 'VMS') && $Config{d_socket})) {
 	print "1..0\n";
 	exit 0;

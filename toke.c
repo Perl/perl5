@@ -6657,12 +6657,24 @@ S_scan_inputsymbol(pTHX_ char *start)
 	return s;
     }
     else {
+	bool readline_overriden = FALSE;
+	GV *gv_readline = Nullgv;
+	GV **gvp;
     	/* we're in a filehandle read situation */
 	d = PL_tokenbuf;
 
 	/* turn <> into <ARGV> */
 	if (!len)
 	    (void)strcpy(d,"ARGV");
+
+	/* Check whether readline() is overriden */
+	if ((gv_readline = gv_fetchpv("readline", FALSE, SVt_PVCV))
+		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline)
+		||
+		(gvp = (GV**)hv_fetch(PL_globalstash, "readline", 8, FALSE))
+		&& (gv_readline = *gvp) != (GV*)&PL_sv_undef
+		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline))
+	    readline_overriden = TRUE;
 
 	/* if <$fh>, create the ops to turn the variable into a
 	   filehandle
@@ -6685,7 +6697,11 @@ S_scan_inputsymbol(pTHX_ char *start)
 		else {
 		    OP *o = newOP(OP_PADSV, 0);
 		    o->op_targ = tmp;
-		    PL_lex_op = (OP*)newUNOP(OP_READLINE, 0, o);
+		    PL_lex_op = readline_overriden
+			? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
+				append_elem(OP_LIST, o,
+				    newCVREF(0, newGVOP(OP_GV,0,gv_readline))))
+			: (OP*)newUNOP(OP_READLINE, 0, o);
 		}
 	    }
 	    else {
@@ -6697,9 +6713,14 @@ intro_sym:
 				 ? (GV_ADDMULTI | GV_ADDINEVAL)
 				 : GV_ADDMULTI),
 				SVt_PV);
-		PL_lex_op = (OP*)newUNOP(OP_READLINE, 0,
-					    newUNOP(OP_RV2SV, 0,
-						newGVOP(OP_GV, 0, gv)));
+		PL_lex_op = readline_overriden
+		    ? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
+			    append_elem(OP_LIST,
+				newUNOP(OP_RV2SV, 0, newGVOP(OP_GV, 0, gv)),
+				newCVREF(0, newGVOP(OP_GV, 0, gv_readline))))
+		    : (OP*)newUNOP(OP_READLINE, 0,
+			    newUNOP(OP_RV2SV, 0,
+				newGVOP(OP_GV, 0, gv)));
 	    }
 	    PL_lex_op->op_flags |= OPf_SPECIAL;
 	    /* we created the ops in PL_lex_op, so make yylval.ival a null op */
@@ -6710,7 +6731,12 @@ intro_sym:
 	   (<Foo::BAR> or <FOO>) so build a simple readline OP */
 	else {
 	    GV *gv = gv_fetchpv(d,TRUE, SVt_PVIO);
-	    PL_lex_op = (OP*)newUNOP(OP_READLINE, 0, newGVOP(OP_GV, 0, gv));
+	    PL_lex_op = readline_overriden
+		? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
+			append_elem(OP_LIST,
+			    newGVOP(OP_GV, 0, gv),
+			    newCVREF(0, newGVOP(OP_GV, 0, gv_readline))))
+		: (OP*)newUNOP(OP_READLINE, 0, newGVOP(OP_GV, 0, gv));
 	    yylval.ival = OP_NULL;
 	}
     }
