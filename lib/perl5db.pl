@@ -728,17 +728,17 @@ sub DB {
 			}
 			next CMD; };
 		    $cmd =~ /^n$/ && do {
-		        next CMD if $finished and $level <= 1;
+		        end_report(), next CMD if $finished and $level <= 1;
 			$single = 2;
 			$laststep = $cmd;
 			last CMD; };
 		    $cmd =~ /^s$/ && do {
-		        next CMD if $finished and $level <= 1;
+		        end_report(), next CMD if $finished and $level <= 1;
 			$single = 1;
 			$laststep = $cmd;
 			last CMD; };
 		    $cmd =~ /^c\b\s*([\w:]*)\s*$/ && do {
-		        next CMD if $finished and $level <= 1;
+		        end_report(), next CMD if $finished and $level <= 1;
 			$i = $1;
 			if ($i =~ /\D/) { # subroutine name
 			    ($file,$i) = ($sub{$i} =~ /^(.*):(.*)$/);
@@ -766,7 +766,7 @@ sub DB {
 			}
 			last CMD; };
 		    $cmd =~ /^r$/ && do {
-		        next CMD if $finished and $level <= 1;
+		        end_report(), next CMD if $finished and $level <= 1;
 			$stack[$#stack] |= 1;
 			$doret = $option{PrintRet} ? $#stack - 1 : -2;
 			last CMD; };
@@ -1381,6 +1381,7 @@ sub get_list {
 
 sub catch {
     $signal = 1;
+    return;			# Put nothing on the stack - malloc/free land!
 }
 
 sub warn {
@@ -1581,7 +1582,7 @@ R		Pure-man-restart of debugger, some of debugger state
 		and command-line options may be lost.
 h [db_command]	Get help [on a specific debugger command], enter |h to page.
 h h		Summary of debugger commands.
-q or ^D		Quit.
+q or ^D		Quit. Set \$DB::finished to 0 to debug global destruction.
 
 ";
     $summary = <<"END_SUM";
@@ -1813,9 +1814,11 @@ sub db_complete {
   return &readline::rl_filename_list($text); # filenames
 }
 
+sub end_report { print $OUT "Use `q' to quit and `R' to restart. `h q' for details.\n" }
+
 END {
   $finished = $inhibit_exit;	# So that some keys may be disabled.
-  $DB::single = 1; 
+  $DB::single = !$exiting;	# Do not trace destructors on exit
   DB::fake::at_exit() unless $exiting;
 }
 
