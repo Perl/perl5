@@ -17,7 +17,7 @@ if "%1" == "R" goto set_type_rel
 if "%1" == "d" goto set_type_dbg
 if "%1" == "D" goto set_type_dbg
 
-Rem Invalid input, display help message
+Rem Invalid input and so display the help message
 goto Usage
  
 :set_type_rel
@@ -39,14 +39,14 @@ goto exit
 
 :now
 if "%MAKE_TYPE%" == "" echo MAKE_TYPE is not set, hence it defaults to Release build
-if not "%MAKE_TYPE%"  == "" echo Current build type is - %MAKE_TYPE%
+if not "%MAKE_TYPE%" == "" echo Current build type is - %MAKE_TYPE%
 call ToggleD2 /now
 goto exit
 
 :Usage
  @echo on
  @echo "Usage: buildtype r/R|d/D [on/off]"  
- @echo      on/off - Toggling D2 flag for debug build
+ @echo      on/off - Toggling only for D2 flag during debug build
  @echo "Usage: buildtype /now"  - To display current setting
  @echo Ex. buildtype d on
 

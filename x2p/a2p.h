@@ -16,6 +16,8 @@
 
 #ifdef VMS
 #  include "config.h"
+#elif defined(NETWARE)
+#  include "../NetWare/config.h"
 #else
 #  include "../config.h"
 #endif
