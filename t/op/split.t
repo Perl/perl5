@@ -111,7 +111,7 @@ $_ = "a : b :c: d";
 if (($res = join(".",@ary)) eq "a.b.c.d") {print "ok 25\n";} else {print "not ok 25\n# res=`$res' != `a.b.c.d'\n";}
 
 # use of match result as pattern (!)
-'p:q:r:s' eq join ':', split('abc' =~ /b/, 'p1q1r1s') or print "no ";
+'p:q:r:s' eq join ':', split('abc' =~ /b/, 'p1q1r1s') or print "not ";
 print "ok 26\n";
 
 # /^/ treated as /^/m
