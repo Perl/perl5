@@ -22,7 +22,7 @@ use Config;
 
 plan tests => 24;
 SKIP: {
-skip "no perlio in this build", 23 unless $Config::Config{useperlio};
+skip "no perlio in this build", 24 unless $Config::Config{useperlio};
 
 $SIG{__WARN__} = sub {
     my $err = shift;
