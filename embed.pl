@@ -2356,3 +2356,29 @@ Ap	|char*	|my_atof2	|const char *s|NV* value
 
 END_EXTERN_C
 
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
+Ap	|int	|PerlIO_close		|PerlIO *
+Ap	|int	|PerlIO_fill		|PerlIO *
+Ap	|int	|PerlIO_fileno		|PerlIO *
+Ap	|int	|PerlIO_eof		|PerlIO *
+Ap	|int	|PerlIO_error		|PerlIO *
+Ap	|int	|PerlIO_flush		|PerlIO *
+Ap	|void	|PerlIO_clearerr	|PerlIO *
+Ap	|void	|PerlIO_set_cnt		|PerlIO *|int
+Ap	|void	|PerlIO_set_ptrcnt	|PerlIO *|STDCHAR *|int
+Ap	|void	|PerlIO_setlinebuf	|PerlIO *
+Ap	|SSize_t|PerlIO_read		|PerlIO *|void *|Size_t
+Ap	|SSize_t|PerlIO_write		|PerlIO *|const void *|Size_t
+Ap	|SSize_t|PerlIO_unread		|PerlIO *|const void *|Size_t
+Ap	|Off_t	|PerlIO_tell		|PerlIO *
+Ap	|int	|PerlIO_seek		|PerlIO *|Off_t|int
+
+Ap	|STDCHAR *|PerlIO_get_base	|PerlIO *
+Ap	|STDCHAR *|PerlIO_get_ptr	|PerlIO *
+Ap	|int	  |PerlIO_get_bufsiz	|PerlIO *
+Ap	|int	  |PerlIO_get_cnt	|PerlIO *
+
+Ap	|PerlIO *|PerlIO_stdin
+Ap	|PerlIO *|PerlIO_stdout
+Ap	|PerlIO *|PerlIO_stderr
+#endif /* PERLIO_LAYERS */

@@ -1203,6 +1203,30 @@
 #define sv_pvn_force_flags	Perl_sv_pvn_force_flags
 #define sv_2pv_flags		Perl_sv_2pv_flags
 #define my_atof2		Perl_my_atof2
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
+#define PerlIO_close		Perl_PerlIO_close
+#define PerlIO_fill		Perl_PerlIO_fill
+#define PerlIO_fileno		Perl_PerlIO_fileno
+#define PerlIO_eof		Perl_PerlIO_eof
+#define PerlIO_error		Perl_PerlIO_error
+#define PerlIO_flush		Perl_PerlIO_flush
+#define PerlIO_clearerr		Perl_PerlIO_clearerr
+#define PerlIO_set_cnt		Perl_PerlIO_set_cnt
+#define PerlIO_set_ptrcnt	Perl_PerlIO_set_ptrcnt
+#define PerlIO_setlinebuf	Perl_PerlIO_setlinebuf
+#define PerlIO_read		Perl_PerlIO_read
+#define PerlIO_write		Perl_PerlIO_write
+#define PerlIO_unread		Perl_PerlIO_unread
+#define PerlIO_tell		Perl_PerlIO_tell
+#define PerlIO_seek		Perl_PerlIO_seek
+#define PerlIO_get_base		Perl_PerlIO_get_base
+#define PerlIO_get_ptr		Perl_PerlIO_get_ptr
+#define PerlIO_get_bufsiz	Perl_PerlIO_get_bufsiz
+#define PerlIO_get_cnt		Perl_PerlIO_get_cnt
+#define PerlIO_stdin		Perl_PerlIO_stdin
+#define PerlIO_stdout		Perl_PerlIO_stdout
+#define PerlIO_stderr		Perl_PerlIO_stderr
+#endif /* PERLIO_LAYERS */
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -2717,6 +2741,30 @@
 #define sv_pvn_force_flags(a,b,c)	Perl_sv_pvn_force_flags(aTHX_ a,b,c)
 #define sv_2pv_flags(a,b,c)	Perl_sv_2pv_flags(aTHX_ a,b,c)
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
+#define PerlIO_close(a)		Perl_PerlIO_close(aTHX_ a)
+#define PerlIO_fill(a)		Perl_PerlIO_fill(aTHX_ a)
+#define PerlIO_fileno(a)	Perl_PerlIO_fileno(aTHX_ a)
+#define PerlIO_eof(a)		Perl_PerlIO_eof(aTHX_ a)
+#define PerlIO_error(a)		Perl_PerlIO_error(aTHX_ a)
+#define PerlIO_flush(a)		Perl_PerlIO_flush(aTHX_ a)
+#define PerlIO_clearerr(a)	Perl_PerlIO_clearerr(aTHX_ a)
+#define PerlIO_set_cnt(a,b)	Perl_PerlIO_set_cnt(aTHX_ a,b)
+#define PerlIO_set_ptrcnt(a,b,c)	Perl_PerlIO_set_ptrcnt(aTHX_ a,b,c)
+#define PerlIO_setlinebuf(a)	Perl_PerlIO_setlinebuf(aTHX_ a)
+#define PerlIO_read(a,b,c)	Perl_PerlIO_read(aTHX_ a,b,c)
+#define PerlIO_write(a,b,c)	Perl_PerlIO_write(aTHX_ a,b,c)
+#define PerlIO_unread(a,b,c)	Perl_PerlIO_unread(aTHX_ a,b,c)
+#define PerlIO_tell(a)		Perl_PerlIO_tell(aTHX_ a)
+#define PerlIO_seek(a,b,c)	Perl_PerlIO_seek(aTHX_ a,b,c)
+#define PerlIO_get_base(a)	Perl_PerlIO_get_base(aTHX_ a)
+#define PerlIO_get_ptr(a)	Perl_PerlIO_get_ptr(aTHX_ a)
+#define PerlIO_get_bufsiz(a)	Perl_PerlIO_get_bufsiz(aTHX_ a)
+#define PerlIO_get_cnt(a)	Perl_PerlIO_get_cnt(aTHX_ a)
+#define PerlIO_stdin()		Perl_PerlIO_stdin(aTHX)
+#define PerlIO_stdout()		Perl_PerlIO_stdout(aTHX)
+#define PerlIO_stderr()		Perl_PerlIO_stderr(aTHX)
+#endif /* PERLIO_LAYERS */
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)
