@@ -356,8 +356,9 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 		if (CxREALEVAL(cx))
 		    saweval = i;
 		break;
+	    case OP_DOFILE:
 	    case OP_REQUIRE:
-		/* require must have its own scope */
+		/* require/do must have their own scope */
 		return 0;
 	    }
 	    break;

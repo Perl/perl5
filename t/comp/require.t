@@ -7,7 +7,7 @@ BEGIN {
 
 # don't make this lexical
 $i = 1;
-print "1..19\n";
+print "1..20\n";
 
 sub do_require {
     %INC = ();
@@ -113,7 +113,18 @@ do_require "1";
 print "# $@\nnot " if $@;
 print "ok ",$i++,"\n";
 
-END { 1 while unlink 'bleah.pm'; }
+# do FILE shouldn't see any outside lexicals
+my $x = "ok $i\n";
+write_file("bleah.do", <<EOT);
+\$x = "not ok $i\\n";
+EOT
+do "bleah.do";
+dofile();
+sub dofile { do "bleah.do"; };
+print $x;
+$i++;
+
+END { 1 while unlink 'bleah.pm'; 1 while unlink 'bleah.do'; }
 
 # ***interaction with pod (don't put any thing after here)***
 

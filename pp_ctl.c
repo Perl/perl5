@@ -2727,8 +2727,11 @@ S_doeval(pTHX_ int gimme, OP** startop)
     av_store(comppadlist, 1, (SV*)PL_comppad);
     CvPADLIST(PL_compcv) = comppadlist;
 
-    if (!saveop || saveop->op_type != OP_REQUIRE)
+    if (!saveop ||
+	(saveop->op_type != OP_REQUIRE && saveop->op_type != OP_DOFILE))
+    {
 	CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(caller);
+    }
 
     SAVEFREESV(PL_compcv);
 
