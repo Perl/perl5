@@ -131,7 +131,7 @@ Perl 5.8.5 should build cleanly from source on LynxOS.
 
 =item *
 
-The in place sort optimisation introduced in 5.8.4 had a bug. For example,
+The in-place sort optimisation introduced in 5.8.4 had a bug. For example,
 in code such as
 
     @a = sort ($b, @a)
