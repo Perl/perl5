@@ -1753,45 +1753,56 @@ typedef struct clone_params CLONE_PARAMS;
 #endif
 
 #if defined(__OPEN_VM)
-# include "vmesa/vmesaish.h"
+#   include "vmesa/vmesaish.h"
+#   define ISHISH "vmesa"
 #endif
 
 #ifdef DOSISH
-# if defined(OS2)
-#   include "os2ish.h"
-# else
-#   include "dosish.h"
-# endif
-#else
-# if defined(VMS)
+#   if defined(OS2)
+#       include "os2ish.h"
+#   else
+#       include "dosish.h"
+#   endif
+#   define ISHISH "dos"
+#endif
+
+#if defined(VMS)
 #   include "vmsish.h"
 #   include "embed.h"
-# else
-#   if defined(PLAN9)
-#     include "./plan9/plan9ish.h"
-#   else
-#     if defined(MPE)
-#       include "mpeix/mpeixish.h"
-#     else
-#       if defined(__VOS__)
-#         include "vosish.h"
-#       else
-#         if defined(EPOC)
-#           include "epocish.h"
-#         else
-#           if defined(MACOS_TRADITIONAL)
-#             include "macos/macish.h"
-#	      ifndef NO_ENVIRON_ARRAY
-#               define NO_ENVIRON_ARRAY
-#             endif
-#           else
-#             include "unixish.h"
-#           endif
-#         endif
-#       endif
-#     endif
+#   define ISHISH "vms"
+#endif
+
+#if defined(PLAN9)
+#   include "./plan9/plan9ish.h"
+#   define ISHISH "plan9"
+#endif
+
+#if defined(MPE)
+#  include "mpeix/mpeixish.h"
+#  define ISHISH "mpeix"
+#endif
+
+#if defined(__VOS__)
+#   include "vosish.h"
+#   define ISHISH "vos"
+#endif
+
+#if defined(EPOC)
+#   include "epocish.h"
+#   define ISHISH "epoc"
+#endif
+
+#if defined(MACOS_TRADITIONAL)
+#   include "macos/macish.h"
+#   ifndef NO_ENVIRON_ARRAY
+#       define NO_ENVIRON_ARRAY
 #   endif
-# endif
+#   define ISHISH "macos classic"
+#endif
+
+#ifndef ISHISH
+#   include "unixish.h"
+#   define ISHISH "unix"
 #endif
 
 #ifndef NO_ENVIRON_ARRAY
