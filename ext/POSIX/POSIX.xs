@@ -1806,7 +1806,9 @@ access(filename, mode)
 
 char *
 ctermid(s = 0)
-	char *		s = 0;
+	char *          s = safemalloc((size_t) L_ctermid);
+    CLEANUP:
+	Safefree(s);
 
 char *
 cuserid(s = 0)
