@@ -1140,9 +1140,10 @@ text is not evaluated as a command.  If the
 PATTERN is delimited by bracketing quotes, the REPLACEMENT has its own
 pair of quotes, which may or may not be bracketing quotes, e.g.,
 C<s(foo)(bar)> or C<< s<foo>/bar/ >>.  A C</e> will cause the
-replacement portion to be interpreted as a full-fledged Perl expression
-and eval()ed right then and there.  It is, however, syntax checked at
-compile-time.
+replacement portion to be treated as a full-fledged Perl expression
+and evaluated right then and there.  It is, however, syntax checked at
+compile-time. A second C<e> modifier will cause the replacement portion
+to be C<eval>ed before being run as a Perl expression.
 
 Examples:
 
@@ -1169,8 +1170,12 @@ Examples:
     # symbolic dereferencing
     s/\$(\w+)/${$1}/g;
 
-    # /e's can even nest;  this will expand
-    # any embedded scalar variable (including lexicals) in $_
+    # Add one to the value of any numbers in the string
+    s/(\d+)/1 + $1/eg;
+
+    # This will expand any embedded scalar variable
+    # (including lexicals) in $_ : First $1 is interpolated
+    # to the variable name, and then evaluated
     s/(\$\w+)/$1/eeg;
 
     # Delete (most) C comments.
