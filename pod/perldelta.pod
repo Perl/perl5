@@ -357,6 +357,28 @@ The timelocal() and timegm() functions used to silently return bogus
 results when the date exceeded the machine's integer range.  They
 consistently croak() if the date falls in an unsupported range.
 
+=item Win32
+
+The error return value in list context has been changed for all functions
+that return a list of values. Previously these functions returned a list
+with a single element C<undef> in case an error occurred. Now these functions
+return the empty list in these situations. This applies to the following
+functions:
+
+	Win32::FsType
+	Win32::GetOSVersion
+
+The remaining functions are unchanged and continue to return C<undef> on
+error even in list context.
+
+The Win32::SetLastError(ERROR) function has been added as a complement
+to the Win32::GetLastError() function.
+
+The new Win32::GetFullPathName(FILENAME) returns the full absolute
+pathname for FILENAME in scalar context. In list context it returns
+a two element list containing the fully qualified directory name and
+the filename.
+
 =back
 
 =head2 Pragmata
