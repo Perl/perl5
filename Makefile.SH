@@ -380,10 +380,11 @@ preplibrary: miniperl lib/Config.pm $(plextract)
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
 lib/Config.pm: config.sh miniperl configpm
 	$(LDLIBPTH) ./miniperl configpm tmp
-	sh mv-if-diff tmp lib/Config.pm
+	sh mv-if-diff tmp $@
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.pl lib/Config.pm
-	$(LDLIBPTH) ./miniperl minimod.pl > tmp && ( rm -f $@ ; mv tmp $@ )
+	$(LDLIBPTH) ./miniperl minimod.pl > tmp
+	sh mv-if-diff tmp $@
 
 lib/re.pm: ext/re/re.pm
 	cat ext/re/re.pm > $@

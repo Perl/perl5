@@ -1718,6 +1718,9 @@ moreswitches(char *s)
 #ifdef atarist
 	printf("atariST series port, ++jrb  bammi@cadence.com\n");
 #endif
+#ifdef __BEOS__
+	printf("BeOS port Copyright Tom Spindler, 1997-1998\n");
+#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif

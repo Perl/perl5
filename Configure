@@ -11133,8 +11133,8 @@ for xxx in $known_extensions ; do
 		esac
 		;;
 	IPC/SysV|ipc/sysv)
-		case "$d_sem" in 
-		$define) avail_ext="$avail_ext $xxx" ;;
+		case "${d_msg}${d_sem}${d_shm}" in 
+		*"${define}"*) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
 	*)	avail_ext="$avail_ext $xxx"

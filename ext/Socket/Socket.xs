@@ -14,7 +14,9 @@
 #  include <netinet/in.h>
 # endif
 #include <netdb.h>
-#include <arpa/inet.h>
+#ifdef I_ARPA_INET
+# include <arpa/inet.h>
+#endif
 #else
 #include "sockadapt.h"
 #endif
