@@ -2175,7 +2175,7 @@ static void
 restore_magic(pTHXo_ void *p)
 {
     dTHR;
-    MGS* mgs = SSPTR((I32)p, MGS*);
+    MGS* mgs = SSPTR(PTR2IV(p), MGS*);
     SV* sv = mgs->mgs_sv;
 
     if (!sv)
