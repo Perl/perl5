@@ -43,8 +43,16 @@ ignore_versioned_solibs='y'
 # available via anonymous FTP at tsx-11.mit.edu in
 # /pub/linux/docs/linux-standards/fsstnd.
 # Allow a command line override, e.g. Configure -Dprefix=/foo/bar
+# Also, if the user has specified -Uinstallusrbinperl and hasn't
+# specified a prefix, then set prefix to /usr/local.
 case "$prefix" in
-'') prefix='/usr' ;;
+'')
+    case "$installusrbinperl" in
+    "$undef")
+        prefix='/usr/local' ;;
+    esac
+*)
+    prefix='/usr' ;;
 esac
 
 # gcc-2.6.3 defines _G_HAVE_BOOL to 1, but doesn't actually supply bool.
