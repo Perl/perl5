@@ -32,5 +32,19 @@ print "ok 4\n";
 $s1 = join(",",sort keys(%!));
 $s2 = join(",",sort @Errno::EXPORT_OK);
 
-print "not " unless $s1 eq $s2;
+if($s1 ne $s2) {
+    my @s1 = keys(%!);
+    my @s2 = @Errno::EXPORT_OK;
+    my(%s1,%s2);
+    @s1{@s1} = ();
+    @s2{@s2} = ();
+    delete @s2{@s1};
+    delete @s1{@s2};
+    print "# These are only in \%!\n";
+    print "# ",join(" ",map { "'$_'" } keys %s1),"\n";
+    print "# These are only in \@EXPORT_OK\n";
+    print "# ",join(" ",map { "'$_'" } keys %s2),"\n";
+    print "not ";
+}
+
 print "ok 5\n";
