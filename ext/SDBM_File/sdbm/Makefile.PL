@@ -31,6 +31,7 @@ sub constants {
 
 sub top_targets {
     my $self = shift;
+    return $self->SUPER::top_targets if $^O eq 'VMS';
     my $r = '
 all :: static
 	$(NOECHO) $(NOOP)
@@ -38,14 +39,12 @@ all :: static
 lint:
 	lint -abchx $(LIBSRCS)
 
-';
-    $r .= '
 # This is a workaround, the problem is that our old GNU make exports
 # variables into the environment so $(MYEXTLIB) is set in here to this
 # value which can not be built.
 sdbm/libsdbm.a:
 	$(NOECHO) $(NOOP)
-' unless $^O eq 'VMS';
+';
 
     return $r . $self->SUPER::top_targets;
 }
