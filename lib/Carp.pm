@@ -2,9 +2,12 @@ package Carp;
 
 =head1 NAME
 
-carp - warn of errors (from perspective of caller)
+carp    - warn of errors (from perspective of caller)
 
-croak - die of errors (from perspective of caller)
+cluck   - warn of errors with stack backtrace
+          (not exported by default)
+
+croak   - die of errors (from perspective of caller)
 
 confess - die of errors with stack backtrace
 
@@ -12,6 +15,9 @@ confess - die of errors with stack backtrace
 
     use Carp;
     croak "We're outta here!";
+
+    use Carp qw(cluck);
+    cluck "This is how we got here!";
 
 =head1 DESCRIPTION
 
@@ -22,10 +28,24 @@ routine Foo() that has a carp() in it, then the carp()
 will report the error as occurring where Foo() was called, 
 not where carp() was called.
 
+=head2 Forcing a Stack Trace
+
+As a debugging aid, you can force Carp to treat a croak as a confess
+and a carp as a cluck across I<all> modules. In other words, force a
+detailed stack trace to be given.  This can be very helpful when trying
+to understand why, or from where, a warning or error is being generated.
+
+This feature is enabled by 'importing' the non-existant symbol
+'verbose'. You would typically enable it by saying
+
+    perl -MCarp=verbose script.pl
+
+or by including the string C<MCarp=verbose> in the L<PERL5OPT>
+environment variable.
+
 =cut
 
-# This package implements handy routines for modules that wish to throw
-# exceptions outside of the current package.
+# This package is heavily used. Be small. Be fast. Be good.
 
 $CarpLevel = 0;		# How many extra package levels to skip on carp.
 $MaxEvalLen = 0;	# How much eval '...text...' to show. 0 = all.
@@ -35,6 +55,19 @@ $MaxArgNums = 8;        # How many arguments to print. 0 = all.
 require Exporter;
 @ISA = Exporter;
 @EXPORT = qw(confess croak carp);
+@EXPORT_OK = qw(cluck verbose);
+@EXPORT_FAIL = qw(verbose);	# hook to enable verbose mode
+
+sub export_fail {
+    shift;
+    if ($_[0] eq 'verbose') {
+	local $^W = 0;
+	*shortmess = \&longmess;
+	shift;
+    }
+    return @_;
+}
+
 
 sub longmess {
     my $error = join '', @_;
@@ -138,5 +171,6 @@ sub shortmess {	# Short-circuit &longmess if called via multiple packages
 sub confess { die longmess @_; }
 sub croak { die shortmess @_; }
 sub carp { warn shortmess @_; }
+sub cluck { warn longmess @_; }
 
 1;
