@@ -1029,9 +1029,18 @@ GV *gv;
     GV* indirgv;
 
     if (gv) {
+	CV *cv;
 	if (GvIO(gv))
 	    return 0;
-	if (!GvCVu(gv))
+	if ((cv = GvCVu(gv))) {
+	    char *proto = SvPVX(cv);
+	    if (proto) {
+		if (*proto == ';')
+		    proto++;
+		if (*proto == '*')
+		    return 0;
+	    }
+	} else
 	    gv = 0;
     }
     s = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
