@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..13\n";
+print "1..15\n";
 
 print "not " unless length("")    == 0;
 print "ok 1\n";
