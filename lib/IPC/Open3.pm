@@ -84,6 +84,7 @@ The order of arguments differs from that of open2().
 # fixed for 5.001 by Ulrich Kunitz <kunitz@mai-koeln.com>
 # ported to Win32 by Ron Schmidt, Merrill Lynch almost ended my career
 # fixed for autovivving FHs, tchrist again
+# allow fd numbers to be used, by Frank Tobin
 #
 # $Id: open3.pl,v 1.1 1993/11/23 06:26:15 marc Exp $
 #
@@ -136,6 +137,16 @@ sub xclose {
     close $_[0] or croak "$Me: close($_[0]) failed: $!";
 }
 
+sub xfileno {
+    my ($fh) = @_;
+    return $1 if $fh =~ /^=?(\d+)$/;  # deal with $fh just being an fd
+    return fileno $fh;
+}
+
+sub fh_is_fd {
+    return $_[0] =~ /^=?\d+$/;
+}
+
 my $do_spawn = $^O eq 'os2' || $^O eq 'MSWin32';
 
 sub _open3 {
@@ -164,9 +175,9 @@ sub _open3 {
     $dup_err = ($dad_err =~ s/^[<>]&//);
 
     # force unqualified filehandles into caller's package
-    $dad_wtr = qualify $dad_wtr, $package;
-    $dad_rdr = qualify $dad_rdr, $package;
-    $dad_err = qualify $dad_err, $package;
+    $dad_wtr = qualify $dad_wtr, $package unless fh_is_fd($dad_wtr);
+    $dad_rdr = qualify $dad_rdr, $package unless fh_is_fd($dad_rdr);
+    $dad_err = qualify $dad_err, $package unless fh_is_fd($dad_err);
 
     my $kid_rdr = gensym;
     my $kid_wtr = gensym;
@@ -181,20 +192,20 @@ sub _open3 {
 	# If she wants to dup the kid's stderr onto her stdout I need to
 	# save a copy of her stdout before I put something else there.
 	if ($dad_rdr ne $dad_err && $dup_err
-		&& fileno($dad_err) == fileno(STDOUT)) {
+		&& xfileno($dad_err) == fileno(STDOUT)) {
 	    my $tmp = gensym;
 	    xopen($tmp, ">&$dad_err");
 	    $dad_err = $tmp;
 	}
 
 	if ($dup_wtr) {
-	    xopen \*STDIN,  "<&$dad_wtr" if fileno(STDIN) != fileno($dad_wtr);
+	    xopen \*STDIN,  "<&$dad_wtr" if fileno(STDIN) != xfileno($dad_wtr);
 	} else {
 	    xclose $dad_wtr;
 	    xopen \*STDIN,  "<&=" . fileno $kid_rdr;
 	}
 	if ($dup_rdr) {
-	    xopen \*STDOUT, ">&$dad_rdr" if fileno(STDOUT) != fileno($dad_rdr);
+	    xopen \*STDOUT, ">&$dad_rdr" if fileno(STDOUT) != xfileno($dad_rdr);
 	} else {
 	    xclose $dad_rdr;
 	    xopen \*STDOUT, ">&=" . fileno $kid_wtr;
@@ -204,8 +215,8 @@ sub _open3 {
 		# I have to use a fileno here because in this one case
 		# I'm doing a dup but the filehandle might be a reference
 		# (from the special case above).
-		xopen \*STDERR, ">&" . fileno $dad_err
-		    if fileno(STDERR) != fileno($dad_err);
+		xopen \*STDERR, ">&" . xfileno($dad_err)
+		    if fileno(STDERR) != xfileno($dad_err);
 	    } else {
 		xclose $dad_err;
 		xopen \*STDERR, ">&=" . fileno $kid_err;
