@@ -1336,8 +1336,19 @@ Perl_do_kv(pTHX)
     PUTBACK;	/* hv_iternext and hv_iterval might clobber stack_sp */
     while ((entry = hv_iternext(keys))) {
 	SPAGAIN;
-	if (dokeys)
-	    XPUSHs(hv_iterkeysv(entry));	/* won't clobber stack_sp */
+	if (dokeys) {
+	    SV* sv = hv_iterkeysv(entry);
+	    if (HvUTF8KEYS((SV*)hv) && !DO_UTF8(sv)) {
+	        STRLEN len, i;
+	        char* s = SvPV(sv, len);
+		for (i = 0; i < len && NATIVE_IS_INVARIANT(s[i]); i++);
+		if (i < len) {
+		    sv = newSVsv(sv);
+		    sv_utf8_upgrade(sv);
+		}
+	    }
+	    XPUSHs(sv);	/* won't clobber stack_sp */
+	}
 	if (dovalues) {
 	    PUTBACK;
 	    tmpstr = realhv ?

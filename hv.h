@@ -159,10 +159,13 @@ C<SV*>.
 #define HvTOTALKEYS(hv)		XHvTOTALKEYS((XPVHV*)  SvANY(hv))
 #define HvPLACEHOLDERS(hv)	XHvPLACEHOLDERS((XPVHV*)  SvANY(hv))
 
-
 #define HvSHAREKEYS(hv)		(SvFLAGS(hv) & SVphv_SHAREKEYS)
 #define HvSHAREKEYS_on(hv)	(SvFLAGS(hv) |= SVphv_SHAREKEYS)
 #define HvSHAREKEYS_off(hv)	(SvFLAGS(hv) &= ~SVphv_SHAREKEYS)
+
+#define HvUTF8KEYS(hv)		(SvFLAGS(hv) & SVphv_UTF8KEYS)
+#define HvUTF8KEYS_on(hv)	(SvFLAGS(hv) |= SVphv_UTF8KEYS)
+#define HvUTF8KEYS_off(hv)	(SvFLAGS(hv) &= ~SVphv_UTF8KEYS)
 
 #define HvLAZYDEL(hv)		(SvFLAGS(hv) & SVphv_LAZYDEL)
 #define HvLAZYDEL_on(hv)	(SvFLAGS(hv) |= SVphv_LAZYDEL)
