@@ -2418,7 +2418,7 @@ typedef pthread_key_t	perl_key;
 
 #ifndef DieNull
 #  ifdef CHECK_FORMAT
-#    define DieNull vdie(aTHX_ Nullch, Null(va_list *))
+#    define DieNull Perl_vdie(aTHX_ Nullch, Null(va_list *))
 #  else
 #    define DieNull Perl_die(aTHX_ Nullch)
 #  endif
