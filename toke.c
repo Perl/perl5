@@ -1688,9 +1688,9 @@ yylex()
 		    croak("Can't exec %s", ipath);
 		}
 		if (d) {
-		    int oldpdb = perldb;
-		    int oldn = minus_n;
-		    int oldp = minus_p;
+		    U32 oldpdb = perldb;
+		    bool oldn = minus_n;
+		    bool oldp = minus_p;
 
 		    while (*d && !isSPACE(*d)) d++;
 		    while (*d == ' ' || *d == '\t') d++;
@@ -5139,12 +5139,12 @@ set_csh()
 #endif
 }
 
-int
+I32
 start_subparse(is_format, flags)
 I32 is_format;
 U32 flags;
 {
-    int oldsavestack_ix = savestack_ix;
+    I32 oldsavestack_ix = savestack_ix;
     CV* outsidecv = compcv;
     AV* comppadlist;
 
