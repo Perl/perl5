@@ -1,7 +1,5 @@
 package ExtUtils::Liblist;
 
-no warnings 'ambiguous'; # silence the -f() file tests.
-
 @ISA = qw(ExtUtils::Liblist::Kid File::Spec);
 
 sub lsdir {
