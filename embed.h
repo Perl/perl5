@@ -1326,7 +1326,6 @@
 #define rs			(curinterp->Irs)
 #define runlevel		(curinterp->Irunlevel)
 #define sawampersand		(curinterp->Isawampersand)
-#define sawampersand_u		(curinterp->Isawampersand_u)
 #define sawstudy		(curinterp->Isawstudy)
 #define sawvec			(curinterp->Isawvec)
 #define screamfirst		(curinterp->Iscreamfirst)
@@ -1481,7 +1480,6 @@
 #define Irs			rs
 #define Irunlevel		runlevel
 #define Isawampersand		sawampersand
-#define Isawampersand_u		sawampersand_u
 #define Isawstudy		sawstudy
 #define Isawvec			sawvec
 #define Iscreamfirst		screamfirst
@@ -1645,7 +1643,6 @@
 #define rs			Perl_rs
 #define runlevel		Perl_runlevel
 #define sawampersand		Perl_sawampersand
-#define sawampersand_u		Perl_sawampersand_u
 #define sawstudy		Perl_sawstudy
 #define sawvec			Perl_sawvec
 #define screamfirst		Perl_screamfirst

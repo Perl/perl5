@@ -382,7 +382,7 @@ regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
 OP*	ref _((OP* o, I32 type));
 OP*	refkids _((OP* o, I32 type));
 void	regdump _((regexp* r));
-I32	pregexec _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, I32 savematch));
+I32	pregexec _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, I32 safebase));
 void	pregfree _((struct regexp* r));
 char*	regnext _((char* p));
 void	regprop _((SV* sv, char* o));

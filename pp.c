@@ -4200,7 +4200,7 @@ PP(pp_split)
     else {
 	maxiters += (strend - s) * rx->nparens;
 	while (s < strend && --limit &&
-	       pregexec(rx, s, strend, orig, 1, Nullsv, 0))
+	       pregexec(rx, s, strend, orig, 1, Nullsv, TRUE))
 	{
 	    TAINT_IF(rx->exec_tainted);
 	    if (rx->subbase

@@ -1737,14 +1737,7 @@ IEXT bool	Iminus_F;
 IEXT bool	Idoswitches;
 IEXT bool	Idowarn;
 IEXT bool	Idoextract;
-    /* sometimes, binary compatibility is a pain */
-#ifdef MULTIPLICITY
-IEXT union { bool b; char c; } Isawampersand_u;	/* must save match strings */
-#undef   sawampersand
-#define  sawampersand  sawampersand_u.c
-#else
-IEXT bool	Isawampersand;
-#endif
+IEXT bool	Isawampersand;	/* must save all match strings */
 IEXT bool	Isawstudy;	/* do fbm_instr on all strings */
 IEXT bool	Isawvec;
 IEXT bool	Iunsafe;

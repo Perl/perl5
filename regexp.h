@@ -21,7 +21,6 @@ typedef struct regexp {
 	U32 nparens;		/* number of parentheses */
 	U32 lastparen;		/* last paren matched */
 	char *precomp;		/* pre-compilation regular expression */
-	U32 subskip;		/* number of bytes omitted from saved string */
 	char *subbase;		/* saved string so \digit works forever */
 	char *subbeg;		/* same, but not responsible for allocation */
 	char *subend;		/* end of subbase */

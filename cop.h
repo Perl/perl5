@@ -200,7 +200,7 @@ struct block {
 struct subst {
     I32		sbu_iters;
     I32		sbu_maxiters;
-    I32		sbu_savematch;
+    I32		sbu_safebase;
     I32		sbu_oldsave;
     bool	sbu_once;
     bool	sbu_rxtainted;
@@ -215,7 +215,7 @@ struct subst {
 };
 #define sb_iters	cx_u.cx_subst.sbu_iters
 #define sb_maxiters	cx_u.cx_subst.sbu_maxiters
-#define sb_savematch	cx_u.cx_subst.sbu_savematch
+#define sb_safebase	cx_u.cx_subst.sbu_safebase
 #define sb_oldsave	cx_u.cx_subst.sbu_oldsave
 #define sb_once		cx_u.cx_subst.sbu_once
 #define sb_rxtainted	cx_u.cx_subst.sbu_rxtainted
@@ -231,7 +231,7 @@ struct subst {
 #define PUSHSUBST(cx) CXINC, cx = &cxstack[cxstack_ix],			\
 	cx->sb_iters		= iters,				\
 	cx->sb_maxiters		= maxiters,				\
-	cx->sb_savematch	= savematch,				\
+	cx->sb_safebase		= safebase,				\
 	cx->sb_oldsave		= oldsave,				\
 	cx->sb_once		= once,					\
 	cx->sb_rxtainted	= rxtainted,				\
