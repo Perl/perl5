@@ -6554,6 +6554,96 @@ Perl_peep(pTHX_ register OP *o)
             break;
         }
 
+	case OP_SORT: {
+	    /* make @a = sort @a act in-place */
+
+	    /* will point to RV2AV or PADAV op on LHS/RHS of assign */
+	    OP *oleft, *oright;
+	    OP *o2;
+
+	    o->op_seq = PL_op_seqmax++;
+
+	    /* check that RHS of sort is a single plain array */
+	    oright = cUNOPo->op_first;
+	    if (!oright || oright->op_type != OP_PUSHMARK)
+		break;
+	    oright = cUNOPx(oright)->op_sibling;
+	    if (!oright)
+		break;
+	    if (oright->op_type == OP_NULL) { /* skip sort block/sub */
+		oright = cUNOPx(oright)->op_sibling;
+	    }
+
+	    if (!oright ||
+		(oright->op_type != OP_RV2AV && oright->op_type != OP_PADAV)
+		|| oright->op_next != o
+		|| (oright->op_private & OPpLVAL_INTRO)
+	    )
+		break;
+
+	    /* o2 follows the chain of op_nexts through the LHS of the
+	     * assign (if any) to the aassign op itself */
+	    o2 = o->op_next;
+	    if (!o2 || o2->op_type != OP_NULL)
+		break;
+	    o2 = o2->op_next;
+	    if (!o2 || o2->op_type != OP_PUSHMARK)
+		break;
+	    o2 = o2->op_next;
+	    if (o2 && o2->op_type == OP_GV)
+		o2 = o2->op_next;
+	    if (!o2
+		|| (o2->op_type != OP_PADAV && o2->op_type != OP_RV2AV)
+		|| (o2->op_private & OPpLVAL_INTRO)
+	    )
+		break;
+	    oleft = o2;
+	    o2 = o2->op_next;
+	    if (!o2 || o2->op_type != OP_NULL)
+		break;
+	    o2 = o2->op_next;
+	    if (!o2 || o2->op_type != OP_AASSIGN
+		    || (o2->op_flags & OPf_WANT) != OPf_WANT_VOID)
+		break;
+
+	    /* check the array is the same on both sides */
+	    if (oleft->op_type == OP_RV2AV) {
+		if (oright->op_type != OP_RV2AV
+		    || !cUNOPx(oright)->op_first
+		    || cUNOPx(oright)->op_first->op_type != OP_GV
+		    ||  cGVOPx_gv(cUNOPx(oleft)->op_first) !=
+		       	cGVOPx_gv(cUNOPx(oright)->op_first)
+		)
+		    break;
+	    }
+	    else if (oright->op_type != OP_PADAV
+		|| oright->op_targ != oleft->op_targ
+	    )
+		break;
+
+	    /* transfer MODishness etc from LHS arg to RHS arg */
+	    oright->op_flags = oleft->op_flags;
+	    o->op_private |= OPpSORT_INPLACE;
+
+	    /* excise push->gv->rv2av->null->aassign */
+	    o2 = o->op_next->op_next;
+	    op_null(o2); /* PUSHMARK */
+	    o2 = o2->op_next;
+	    if (o2->op_type == OP_GV) {
+		op_null(o2); /* GV */
+		o2 = o2->op_next;
+	    }
+	    op_null(o2); /* RV2AV or PADAV */
+	    o2 = o2->op_next->op_next;
+	    op_null(o2); /* AASSIGN */
+
+	    o->op_next = o2->op_next;
+
+	    break;
+	}
+	
+
+
 	default:
 	    o->op_seq = PL_op_seqmax++;
 	    break;
