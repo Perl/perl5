@@ -74,6 +74,11 @@ CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
 #
+# specify space-separated list of extra directories to look for libraries
+#
+EXTRALIBDIRS	*=
+
+#
 # set this to point to cmd.exe (only needed if you use some
 # alternate shell that doesn't grok cmd.exe style commands)
 #SHELL		*= g:\winnt\system32\cmd.exe
@@ -155,15 +160,15 @@ LINK_DBG	=
 
 CFLAGS		= -w -d -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR)
+LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR) $(EXTRALIBDIRS:^"-L")
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
 LIBOUT_FLAG	= 
 
 .ELIF "$(CCTYPE)" == "GCC"
 
-CC		= gcc 
-LINK32		= gcc 
+CC		= gcc -pipe
+LINK32		= gcc -pipe
 LIB32		= ar rc
 IMPLIB		= dlltool
 
@@ -193,7 +198,7 @@ LINK_DBG	=
 .ENDIF
 
 CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
-LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR)
+LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR) $(EXTRALIBDIRS:^"-L")
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
 LIBOUT_FLAG	= 
@@ -578,7 +583,7 @@ CFG_VARS	=					\
 		"libs=$(LIBFILES:f)"			\
 		"incpath=$(CCINCDIR)"			\
 		"libperl=$(PERLIMPLIB:f)"		\
-		"libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
+		"libpth=$(strip $(CCLIBDIR) $(EXTRALIBDIRS) $(LIBFILES:d))" \
 		"libc=$(LIBC)"				\
 		"make=dmake"				\
 		"_o=$(o)" "obj_ext=$(o)"		\

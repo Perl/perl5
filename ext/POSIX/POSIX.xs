@@ -275,7 +275,7 @@ unsigned long strtoul _((const char *, char **, int));
 extern char *tzname[];
 #  endif
 #else
-#if !defined(__GNUC__) && !defined(tzname)
+#if !defined(WIN32) || (defined(__MINGW32__) && !defined(tzname))
 char *tzname[] = { "" , "" };
 #endif
 #endif

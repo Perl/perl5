@@ -67,6 +67,11 @@ CCINCDIR	= $(CCHOME)\include
 CCLIBDIR	= $(CCHOME)\lib
 
 #
+# specify space-separated list of extra directories to look for libraries
+#
+EXTRALIBDIRS	=
+
+#
 # set this to your email address (perl will guess a value from
 # from your loginname and your hostname, which may not be right)
 #EMAIL		= 
@@ -468,7 +473,7 @@ CFG_VARS	=					\
 		"libs=$(LIBFILES)"			\
 		"incpath=$(CCINCDIR)"			\
 		"libperl=$(PERLIMPLIB)"			\
-		"libpth=$(CCLIBDIR)"			\
+		"libpth=$(CCLIBDIR) $(EXTRALIBDIRS)"	\
 		"libc=$(LIBC)"				\
 		"make=nmake"				\
 		"static_ext=$(STATIC_EXT)"		\
