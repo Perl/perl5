@@ -321,10 +321,10 @@ efficient that the former.
 
 =head2 Security
 
-Most Unix platforms provide basic levels of security that is usually felt
+Most multi-user platforms provide basic levels of security that is usually felt
 at the file-system level.  Other platforms usually don't (unfortunately).
 Thus the notion of User-ID, or "home" directory, or even the state of
-being logged-in may be unrecognizable on may platforms.  If you write
+being logged-in may be unrecognizable on many platforms.  If you write
 programs that are security conscious, it is usually best to know what
 type of system you will be operating under, and write code explicitly
 for that platform (or class of platforms).
@@ -379,14 +379,15 @@ field of the string returned by typing
 (or a similar command) at the shell prompt.  Here, for example, are a few
 of the more popular Unix flavors:
 
-    uname        $^O
-    --------------------
+    uname        $^O        $Config{'archname'}
+    -------------------------------------------
     AIX          aix
     FreeBSD      freebsd
     Linux        linux
     HP-UX        hpux
     OSF1         dec_osf
-    SunOS        solaris
+    SunOS        solaris    sun4-solaris
+    SunOS        solaris    i86pc-solaris
     SunOS4       sunos
 
 
@@ -579,11 +580,12 @@ opening remains case insensitive.  Files without extensions have a
 trailing period on them, so doing a C<readdir> with a file named F<A.;5>
 will return F<a.> (though that file could be opened with C<open(FH, 'A')>.
 
-RMS has an eight level limit on directory depths from any rooted logical
-(allowing 16 levels overall).  Hence C<PERL_ROOT:[LIB.2.3.4.5.6.7.8]>
-is a valid directory specification but C<PERL_ROOT:[LIB.2.3.4.5.6.7.8.9]>
-is not.  F<Makefile.PL> authors might have to take this into account, but
-at least they can refer to the former as C</PERL_ROOT/lib/2/3/4/5/6/7/8/>.
+RMS had an eight level limit on directory depths from any rooted logical
+(allowing 16 levels overall) prior to VMS 7.2.  Hence 
+C<PERL_ROOT:[LIB.2.3.4.5.6.7.8]> is a valid directory specification but 
+C<PERL_ROOT:[LIB.2.3.4.5.6.7.8.9]> is not.  F<Makefile.PL> authors might 
+have to take this into account, but at least they can refer to the former 
+as C</PERL_ROOT/lib/2/3/4/5/6/7/8/>.
 
 The C<VMS::Filespec> module, which gets installed as part
 of the build process on VMS, is a pure Perl module that can easily be
@@ -1240,6 +1242,12 @@ Not implemented. (Win32, VMS, S<RISC OS>)
 =item syscall LIST
 
 Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
+
+=item sysopen FILEHANDLE,FILENAME,MODE,PERMS
+
+The traditional "0", "1", and "2" MODEs are implemented with different 
+numeric values on some systems.  The flags exported by C<Fcntl> should work
+everywhere though.  (S<Mac OS>, OS/390)
 
 =item system LIST
 
