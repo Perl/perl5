@@ -217,6 +217,11 @@ PERL_CALLCONV void	Perl_do_chop(pTHX_ SV* asv, SV* sv);
 PERL_CALLCONV bool	Perl_do_close(pTHX_ GV* gv, bool not_implicit);
 PERL_CALLCONV bool	Perl_do_eof(pTHX_ GV* gv);
 PERL_CALLCONV bool	Perl_do_exec(pTHX_ char* cmd);
+#if defined(WIN32)
+PERL_CALLCONV int	Perl_do_aspawn(pTHX_ SV* really, SV** mark, SV** sp);
+PERL_CALLCONV int	Perl_do_spawn(pTHX_ char* cmd);
+PERL_CALLCONV int	Perl_do_spawn_nowait(pTHX_ char* cmd);
+#endif
 #if !defined(WIN32)
 PERL_CALLCONV bool	Perl_do_exec3(pTHX_ char* cmd, int fd, int flag);
 #endif

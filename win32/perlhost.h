@@ -22,7 +22,6 @@ extern char *		g_win32_get_privlib(const char *pl);
 extern char *		g_win32_get_sitelib(const char *pl);
 extern char *		g_win32_get_vendorlib(const char *pl);
 extern char *		g_getlogin(void);
-extern int		do_spawn2(char *cmd, int exectype);
 END_EXTERN_C
 
 class CPerlHost
@@ -1871,29 +1870,10 @@ PerlProcGetOSError(struct IPerlProc* piPerl, SV* sv, DWORD dwErr)
     win32_str_os_error(sv, dwErr);
 }
 
-BOOL
-PerlProcDoCmd(struct IPerlProc* piPerl, char *cmd)
-{
-    do_spawn2(cmd, EXECF_EXEC);
-    return FALSE;
-}
-
-int
-PerlProcSpawn(struct IPerlProc* piPerl, char* cmds)
-{
-    return do_spawn2(cmds, EXECF_SPAWN);
-}
-
 int
 PerlProcSpawnvp(struct IPerlProc* piPerl, int mode, const char *cmdname, const char *const *argv)
 {
     return win32_spawnvp(mode, cmdname, argv);
-}
-
-int
-PerlProcASpawn(struct IPerlProc* piPerl, void *vreally, void **vmark, void **vsp)
-{
-    return do_aspawn(vreally, vmark, vsp);
 }
 
 int
@@ -1935,10 +1915,7 @@ struct IPerlProc perlProc =
     PerlProcGetpid,
     PerlProcDynaLoader,
     PerlProcGetOSError,
-    PerlProcDoCmd,
-    PerlProcSpawn,
     PerlProcSpawnvp,
-    PerlProcASpawn,
     PerlProcLastHost,
     PerlProcPopenList,
     PerlProcGetTimeOfDay

@@ -4154,10 +4154,19 @@ PP(pp_system)
     result = 0;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
+#  ifdef WIN32
+	value = (I32)do_aspawn(really, MARK, SP);
+#  else
 	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
+#  endif
     }
-    else if (SP - MARK != 1)
+    else if (SP - MARK != 1) {
+#  ifdef WIN32
+	value = (I32)do_aspawn(Nullsv, MARK, SP);
+#  else
 	value = (I32)do_aspawn(Nullsv, (void **)MARK, (void **)SP);
+#  endif
+    }
     else {
 	value = (I32)do_spawn(SvPVx(sv_mortalcopy(*SP), n_a));
     }

@@ -244,7 +244,14 @@ if ($PLATFORM eq 'win32') {
 		     Perl_my_popen
 		     )];
 }
-elsif ($PLATFORM eq 'wince') {
+else {
+    skip_symbols [qw(
+		     Perl_do_spawn
+		     Perl_do_spawn_nowait
+		     Perl_do_aspawn
+		     )];
+}
+if ($PLATFORM eq 'wince') {
     skip_symbols [qw(
 		     PL_statusvalue_vms
 		     PL_archpat_auto
