@@ -1004,6 +1004,8 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.hpux .\perlhpux.pod
 	copy ..\README.machten .\perlmachten.pod
 	copy ..\README.os2 .\perlos2.pod
+	copy ..\README.os390 .\perlos390.pod
+	copy ..\README.vmesa .\perlvmesa.pod
 	copy ..\vms\perlvms.pod .\perlvms.pod
 	copy ..\README.win32 .\perlwin32.pod
 	$(MAKE) -f ..\win32\pod.mak converters

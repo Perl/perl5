@@ -1217,7 +1217,8 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.hpux ..\pod\perlhpux.pod
 	copy ..\README.machten ..\pod\perlmachten.pod
 	copy ..\README.os2 ..\pod\perlos2.pod
-	copy ..\README.os2 ..\pod\perlos2.pod
+	copy ..\README.os390 ..\pod\perlos390.pod
+	copy ..\README.vmesa ..\pod\perlvmesa.pod
 	copy ..\vms\perlvms.pod ..\pod\perlvms.pod
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
 	$(PERLEXE) $(PL2BAT) $(UTILS)
