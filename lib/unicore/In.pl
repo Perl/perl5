@@ -138,6 +138,7 @@
 'CJK Unified Ideographs Extension B'          => 133,
 'CJK Compatibility Ideographs Supplement'     => 134,
 'Tags'                                        => 135,
+'Common'                                      => 136,
 );
 %utf8::InPat = (
 'alp' => {
@@ -202,6 +203,7 @@
 	'Combining(?:[-_]|\s+)?Diacritical(?:[-_]|\s+)?Marks' => 'Combining Diacritical Marks',
 	'Combining(?:[-_]|\s+)?Marks(?:[-_]|\s+)?for(?:[-_]|\s+)?Symbols' => 'Combining Marks for Symbols',
 	'Combining(?:[-_]|\s+)?Half(?:[-_]|\s+)?Marks' => 'Combining Half Marks',
+	'Common' => 'Common',
 },
 'con' => {
 	'Control(?:[-_]|\s+)?Pictures' => 'Control Pictures',
