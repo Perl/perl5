@@ -127,3 +127,9 @@ after 5.003_20:
 	_isterm is substituted instead of isatty, s?random instead of srand.
 	`register' disabled if -DDEBUGGING and not AOUT build: stupid SD386.
 	3-argument select() was stomping over memory.
+
+after 5.003_21:
+	Can start scripts by executing 'dir/script' and
+	'script.sh'. Form without extension will call shell only if
+	the specified file exists (will not look on path) (to prohibit
+	trying to run shell commands directly). - Needed by magic.t.

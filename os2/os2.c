@@ -203,12 +203,12 @@ register SV **mark;
 register SV **sp;
 {
     register char **a;
-    char *tmps;
+    char *tmps = NULL;
     int rc;
-    int flag = P_WAIT, trueflag;
+    int flag = P_WAIT, trueflag, err, secondtry = 0;
 
     if (sp > mark) {
-	New(401,Argv, sp - mark + 1, char*);
+	New(401,Argv, sp - mark + 3, char*);
 	a = Argv;
 
 	if (mark < sp && SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
@@ -236,11 +236,41 @@ register SV **sp;
 	    ) /* will swawnvp use PATH? */
 	    TAINT_ENV();	/* testing IFS here is overkill, probably */
 	/* We should check PERL_SH* and PERLLIB_* as well? */
+      retry:
 	if (really && *(tmps = SvPV(really, na)))
 	    rc = result(trueflag, spawnvp(flag,tmps,Argv));
 	else
 	    rc = result(trueflag, spawnvp(flag,Argv[0],Argv));
 
+	if (rc < 0 && secondtry == 0 
+	    && (!tmps || !*tmps)) { /* Cannot transfer `really' via shell. */
+	    err = errno;
+	    if (err == ENOENT) {	/* No such file. */
+		/* One reason may be that EMX added .exe. We suppose
+		   that .exe-less files are automatically shellable. */
+		char *no_dir;
+		(no_dir = strrchr(Argv[0], '/')) 
+		    || (no_dir = strrchr(Argv[0], '\\'))
+		    || (no_dir = Argv[0]);
+		if (!strchr(no_dir, '.')) {
+		    struct stat buffer;
+		    if (stat(Argv[0], &buffer) != -1) { /* File exists. */
+			/* Maybe we need to specify the full name here? */
+			goto doshell;
+		    }
+		}
+	    } else if (err == ENOEXEC) { /* Need to send to shell. */
+	      doshell:
+		while (a >= Argv) {
+		    *(a + 2) = *a;
+		    a--;
+		}
+		*Argv = sh_path;
+		*(Argv + 1) = "-c";
+		secondtry = 1;
+		goto retry;
+	    }
+	}
 	if (rc < 0 && dowarn)
 	    warn("Can't spawn \"%s\": %s", Argv[0], Strerror(errno));
 	if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */
@@ -264,7 +294,8 @@ int execf;
     register char *s;
     char flags[10];
     char *shell, *copt, *news = NULL;
-    int rc;
+    int rc, added_shell = 0, err;
+    char fullcmd[MAXNAMLEN + 1];
 
 #ifdef TRYSHELL
     if ((shell = getenv("EMXSHELL")) != NULL)
@@ -294,6 +325,7 @@ int execf;
 	strcpy(news, sh_path);
 	strcpy(news + l, cmd + 7);
 	cmd = news;
+	added_shell = 1;
     }
 
     /* save an extra exec if possible */
@@ -348,6 +380,8 @@ int execf;
     }
     *a = Nullch;
     if (Argv[0]) {
+	int err;
+	
 	if (execf == EXECF_TRUEEXEC)
 	    rc = execvp(Argv[0],Argv);
 	else if (execf == EXECF_EXEC)
@@ -356,10 +390,31 @@ int execf;
 	    rc = spawnvp(P_NOWAIT,Argv[0],Argv);
         else
 	    rc = result(P_WAIT, spawnvp(P_NOWAIT,Argv[0],Argv));
+	if (rc < 0) {
+	    err = errno;
+	    if (err == ENOENT) {	/* No such file. */
+		/* One reason may be that EMX added .exe. We suppose
+		   that .exe-less files are automatically shellable. */
+		char *no_dir;
+		(no_dir = strrchr(Argv[0], '/')) 
+		    || (no_dir = strrchr(Argv[0], '\\'))
+		    || (no_dir = Argv[0]);
+		if (!strchr(no_dir, '.')) {
+		    struct stat buffer;
+		    if (stat(Argv[0], &buffer) != -1) { /* File exists. */
+			/* Maybe we need to specify the full name here? */
+			goto doshell;
+		    }
+		}
+	    } else if (err == ENOEXEC) { /* Need to send to shell. */
+		goto doshell;
+	    }
+	}
 	if (rc < 0 && dowarn)
 	    warn("Can't %s \"%s\": %s", 
-		 (execf == EXECF_SPAWN ? "spawn" : "exec"),
-		 Argv[0], Strerror(errno));
+		 ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
+		  ? "spawn" : "exec"),
+		 Argv[0], Strerror(err));
 	if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */
     } else
     	rc = -1;
