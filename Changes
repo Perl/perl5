@@ -30,6 +30,1404 @@ Version v5.9.X		Development release working toward v5.10
 
 ____________________________________________________________________________
 ____________________________________________________________________________
+____________________________________________________________________________
+[ 21538] By: ams                                   on 2003/10/26  08:08:02
+        Log: Fix off-by-one in $0 set magic. (From Autrijus.)
+             The whole PL_origalen thing in perl.c looks very hokey.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 21537] By: nicholas                              on 2003/10/25  23:05:21
+        Log: Integrate:
+             [ 21536]
+             show the rehash flags in dumps
+     Branch: maint-5.8/perl
+	  !> dump.c
+____________________________________________________________________________
+[ 21536] By: nicholas                              on 2003/10/25  22:33:18
+        Log: show the rehash flags in dumps
+     Branch: perl
+	   ! dump.c
+____________________________________________________________________________
+[ 21535] By: nicholas                              on 2003/10/25  22:32:40
+        Log: Return 21533 (with modifications) having found the problem
+     Branch: perl
+	   ! hv.c hv.h
+____________________________________________________________________________
+[ 21534] By: nicholas                              on 2003/10/25  20:46:36
+        Log: Back out 21533 because it broke Encode's build in really weird ways
+     Branch: perl
+	   ! hv.c hv.h
+____________________________________________________________________________
+[ 21533] By: nicholas                              on 2003/10/25  13:10:21
+        Log: Plan C rough edge smoothing. Criteria for a hash split is now
+             the earlier of "more keys than buckets" (the old test) or
+             linked list too long. Rehash is triggered after a split if the
+             longest linked list is too long.
+     Branch: perl
+	   ! hv.c hv.h
+____________________________________________________________________________
+[ 21532] By: rgs                                   on 2003/10/25  10:03:18
+        Log: Subject: Re: [perl #948] $, untieable?
+             From: Richard Clamp <richardc@unixbeard.net>
+             Date: Tue, 21 Oct 2003 00:02:49 +0100
+             Message-ID: <20031020230249.GA31123@mirth.demon.co.uk>
+             
+             Plus a small fix to t/TEST to recognize the added TODO test
+             as a TODO test.
+     Branch: perl
+	   ! t/TEST t/op/tie.t
+____________________________________________________________________________
+[ 21531] By: nicholas                              on 2003/10/24  19:15:02
+        Log: Integrate:
+             [ 21530]
+             
+             (The typo corrrection in blead)
+     Branch: maint-5.8/perl
+	  !> ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 21530] By: nicholas                              on 2003/10/23  20:44:09
+        Log: Integrate:
+             [ 21527]
+             Fix two threads::shared leaks
+             #24061 - AV in shared interpreter wasn't set to AvREAL
+             #24255 - mortals were added to the shared interpreter's tmpstack
+             and never freed.
+             
+             [oops. Also sucked in a typo correction in blead]
+     Branch: maint-5.8/perl
+	  !> ext/threads/shared/shared.xs
+     Branch: perl
+	   ! ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 21529] By: nicholas                              on 2003/10/23  19:39:41
+        Log: Integrate:
+             [ 21526]
+             From: Jan Dubois <jand@ActiveState.com>
+             Subject: [PATCH] Update Pod::Perldoc from 3.10 to 3.11
+             Date: Wed, 22 Oct 2003 20:17:07 -0700
+             Message-ID: <mjhepvgtnifdlgrvp20urtuu058e1jrav2@4ax.com>
+             
+             From: Jan Dubois <jand@ActiveState.com>
+             Subject: [PATCH] Update I18N::LangTags from 0.28 to 0.29
+             Date: Wed, 22 Oct 2003 20:26:56 -0700
+             Message-ID: <jgiepv0a8fp8ffq3lpc5ujl7j25hoo1rdt@4ax.com>
+             
+             [ 21528]
+             When it says "add", then, like, you have to p4 add it. D'oh!
+             (missed the new file in "Update I18N::LangTags from 0.28 to 0.29")
+     Branch: maint-5.8/perl
+	  +> lib/I18N/LangTags/t/02decency.t
+	  !> MANIFEST lib/I18N/LangTags.pm lib/I18N/LangTags/ChangeLog
+	  !> lib/I18N/LangTags/List.pm lib/I18N/LangTags/README
+	  !> lib/Pod/Perldoc.pm lib/Pod/Perldoc/ToMan.pm pod/perldoc.pod
+	  !> utils/perldoc.PL
+____________________________________________________________________________
+[ 21528] By: nicholas                              on 2003/10/23  19:21:00
+        Log: When it says "add", then, like, you have to p4 add it. D'oh!
+             (missed the new file in "Update I18N::LangTags from 0.28 to 0.29")
+     Branch: perl
+	   + lib/I18N/LangTags/t/02decency.t
+____________________________________________________________________________
+[ 21527] By: davem                                 on 2003/10/23  19:13:20
+        Log: Fix two threads::shared leaks
+             #24061 - AV in shared interpreter wasn't set to AvREAL
+             #24255 - mortals were added to the shared interpreter's tmpstack
+             and never freed.
+     Branch: perl
+	   ! ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 21526] By: nicholas                              on 2003/10/23  19:11:24
+        Log: From: Jan Dubois <jand@ActiveState.com>
+             Subject: [PATCH] Update Pod::Perldoc from 3.10 to 3.11
+             Date: Wed, 22 Oct 2003 20:17:07 -0700
+             Message-ID: <mjhepvgtnifdlgrvp20urtuu058e1jrav2@4ax.com>
+             
+             From: Jan Dubois <jand@ActiveState.com>
+             Subject: [PATCH] Update I18N::LangTags from 0.28 to 0.29
+             Date: Wed, 22 Oct 2003 20:26:56 -0700
+             Message-ID: <jgiepv0a8fp8ffq3lpc5ujl7j25hoo1rdt@4ax.com>
+     Branch: perl
+	   ! MANIFEST lib/I18N/LangTags.pm lib/I18N/LangTags/ChangeLog
+	   ! lib/I18N/LangTags/List.pm lib/I18N/LangTags/README
+	   ! lib/Pod/Perldoc.pm lib/Pod/Perldoc/ToMan.pm pod/perldoc.pod
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[ 21525] By: nicholas                              on 2003/10/23  18:51:56
+        Log: Integrate:
+             [ 21523]
+             Subject: [PATCH] utime documentation
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 23 Oct 2003 05:33:43 -0700
+             Message-Id: <lrekx4jfq0.fsf@caliper.activestate.com>
+     Branch: maint-5.8/perl
+	  !> pod/perlfunc.pod
+____________________________________________________________________________
+[ 21524] By: nicholas                              on 2003/10/23  18:38:02
+        Log: Integrate:
+             [ 21522]
+             Subject: [PATCH]  dup2() not going through PerlLIO abstraction layer
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Wed, 22 Oct 2003 20:33:54 -0700
+             Message-Id: <vniepv0n5mcrbbutm0qgvori6n6vr6arsh@4ax.com>
+     Branch: maint-5.8/perl
+	  !> doio.c
+____________________________________________________________________________
+[ 21523] By: ams                                   on 2003/10/23  12:53:03
+        Log: Subject: [PATCH] utime documentation
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 23 Oct 2003 05:33:43 -0700
+             Message-Id: <lrekx4jfq0.fsf@caliper.activestate.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 21522] By: ams                                   on 2003/10/23  08:07:18
+        Log: Subject: [PATCH]  dup2() not going through PerlLIO abstraction layer
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Wed, 22 Oct 2003 20:33:54 -0700
+             Message-Id: <vniepv0n5mcrbbutm0qgvori6n6vr6arsh@4ax.com>
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 21521] By: nicholas                              on 2003/10/22  20:30:05
+        Log: Integrate:
+             [ 21520]
+             patch created by Casey West from:
+             
+             Subject: CPAN module problems
+             From: Edward Moy <emoy@apple.com>
+             Date: Fri, 10 Oct 2003 17:42:06 -0700
+             Message-Id: <BD2513C0-FB83-11D7-9065-000A956EFDEE@apple.com>
+             
+             (change ld value in hints file)
+     Branch: maint-5.8/perl
+	  !> hints/darwin.sh
+____________________________________________________________________________
+[ 21520] By: nicholas                              on 2003/10/22  19:50:15
+        Log: patch created by Casey West from:
+             
+             Subject: CPAN module problems
+             From: Edward Moy <emoy@apple.com>
+             Date: Fri, 10 Oct 2003 17:42:06 -0700
+             Message-Id: <BD2513C0-FB83-11D7-9065-000A956EFDEE@apple.com>
+             
+             (change ld value in hints file)
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[ 21519] By: nicholas                              on 2003/10/22  19:11:43
+        Log: Integrate:
+             [ 21514]
+             Subject: [PATCH @20458] embedding perl
+             From: Radu Greab <rgreab@fx.ro>
+             Date: Tue, 05 Aug 2003 20:57:15 +0300 (EEST)
+             Message-Id: <20030805.205715.113441323.radu@yx.primIT.ro>
+     Branch: maint-5.8/perl
+	   ! perl.c
+	  !> hv.c intrpvar.h pod/perlembed.pod pod/perlintern.pod sv.c
+____________________________________________________________________________
+[ 21518] By: nicholas                              on 2003/10/22  18:32:17
+        Log: Integrate:
+             [ 21515]
+             Add a test.taintwarn makefile target,
+             to run the whole test suite with the -t switch.
+     Branch: maint-5.8/perl
+	  !> Makefile.SH pod/perlhack.pod t/TEST
+____________________________________________________________________________
+[ 21517] By: nicholas                              on 2003/10/22  17:53:48
+        Log: Integrate:
+             [ 21513]
+             Fix doc bug #23890, as suggested by Himanshu Garg :
+             in perltoot, $him->fullname should be $him->fullname->as_string
+             when passed to printf.
+             
+             [ 21516]
+             Small email update in AUTHORS.
+     Branch: maint-5.8/perl
+	  !> AUTHORS pod/perltoot.pod
+____________________________________________________________________________
+[ 21516] By: rgs                                   on 2003/10/22  15:06:13
+        Log: Small email update in AUTHORS.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 21515] By: rgs                                   on 2003/10/22  06:39:29
+        Log: Add a test.taintwarn makefile target,
+             to run the whole test suite with the -t switch.
+     Branch: perl
+	   ! Makefile.SH pod/perlhack.pod t/TEST
+____________________________________________________________________________
+[ 21514] By: rgs                                   on 2003/10/21  21:21:56
+        Log: Subject: [PATCH @20458] embedding perl
+             From: Radu Greab <rgreab@fx.ro>
+             Date: Tue, 05 Aug 2003 20:57:15 +0300 (EEST)
+             Message-Id: <20030805.205715.113441323.radu@yx.primIT.ro>
+     Branch: perl
+	   ! hv.c intrpvar.h perl.c pod/perlembed.pod pod/perlintern.pod
+	   ! sv.c
+____________________________________________________________________________
+[ 21513] By: rgs                                   on 2003/10/21  20:45:12
+        Log: Fix doc bug #23890, as suggested by Himanshu Garg :
+             in perltoot, $him->fullname should be $him->fullname->as_string
+             when passed to printf.
+     Branch: perl
+	   ! pod/perltoot.pod
+____________________________________________________________________________
+[ 21512] By: nicholas                              on 2003/10/21  18:58:30
+        Log: Integrate:
+             [ 21372]
+             Sync with libnet 1.17
+     Branch: maint-5.8/perl
+	  !> lib/Net/ChangeLog.libnet lib/Net/Domain.pm lib/Net/FTP.pm
+____________________________________________________________________________
+[ 21511] By: nicholas                              on 2003/10/21  18:31:19
+        Log: 
+             Two OS/2 portability patches from Ilya.
+             
+             Subject: [PATCH 5.8.1 @21211] sockets broken on OS/2
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Thu, 25 Sep 2003 12:09:11 -0700
+             Message-ID: <20030925190911.GA27028@math.berkeley.edu>
+             
+             Subject: Re: [PATCH 5.8.1 @21379] tmpfile() broken on OS/2
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Thu, 25 Sep 2003 19:50:45 -0700
+             Message-ID: <20030926025045.GA27507@math.berkeley.edu>
+     Branch: maint-5.8/perl
+	  !> doio.c os2/os2ish.h perl.h perlio.c pp_sys.c
+____________________________________________________________________________
+[ 21510] By: rgs                                   on 2003/10/21  11:17:43
+        Log: The THREADS_HAVE_PIDS cpp symbols is not used in 5.6.x.
+     Branch: maint-5.6
+	   ! perl-5.6.2/hints/linux.sh
+____________________________________________________________________________
+[ 21509] By: rgs                                   on 2003/10/21  05:42:50
+        Log: Two OS/2 portability patches from Ilya.
+             
+             Subject: [PATCH 5.8.1 @21211] sockets broken on OS/2
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Thu, 25 Sep 2003 12:09:11 -0700
+             Message-ID: <20030925190911.GA27028@math.berkeley.edu>
+             
+             Subject: Re: [PATCH 5.8.1 @21379] tmpfile() broken on OS/2
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Thu, 25 Sep 2003 19:50:45 -0700
+             Message-ID: <20030926025045.GA27507@math.berkeley.edu>
+     Branch: perl
+	   ! doio.c os2/os2ish.h perl.h perlio.c pp_sys.c
+____________________________________________________________________________
+[ 21508] By: nicholas                              on 2003/10/20  22:06:05
+        Log: Integrate:
+             [ 21506]
+             Subject: [PATCH] add some missing defines to Devel::PPPort
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Mon, 20 Oct 2003 20:14:19 +0200
+             Message-ID: <03a301c39735$fb7cb220$0c2f1fac@R2D2>
+     Branch: maint-5.8/perl
+	  !> ext/Devel/PPPort/Changes ext/Devel/PPPort/PPPort.pm
+____________________________________________________________________________
+[ 21507] By: nicholas                              on 2003/10/20  20:14:57
+        Log: Integrate:
+             [ 21505]
+             Subject: Re: [perl #24225] [5.8.1] segfault in binmode STDOUT, ':stdio'; print 1
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: 19 Oct 2003 17:54:59 +0200
+             Message-ID: <871xt9te7g.fsf@vran.herceg.de>
+     Branch: maint-5.8/perl
+	  !> perlio.c
+____________________________________________________________________________
+[ 21506] By: rgs                                   on 2003/10/20  19:28:27
+        Log: Subject: [PATCH] add some missing defines to Devel::PPPort
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Mon, 20 Oct 2003 20:14:19 +0200
+             Message-ID: <03a301c39735$fb7cb220$0c2f1fac@R2D2>
+     Branch: perl
+	   ! ext/Devel/PPPort/Changes ext/Devel/PPPort/PPPort.pm
+____________________________________________________________________________
+[ 21505] By: rgs                                   on 2003/10/20  19:22:38
+        Log: Subject: Re: [perl #24225] [5.8.1] segfault in binmode STDOUT, ':stdio'; print 1
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: 19 Oct 2003 17:54:59 +0200
+             Message-ID: <871xt9te7g.fsf@vran.herceg.de>
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 21504] By: nicholas                              on 2003/10/20  17:31:11
+        Log: Integrate:
+             [ 21503]
+             Skip the chflags tests in filetest.t on Darwin.
+     Branch: maint-5.8/perl
+	  !> lib/filetest.t
+____________________________________________________________________________
+[ 21503] By: rgs                                   on 2003/10/20  06:04:04
+        Log: Skip the chflags tests in filetest.t on Darwin.
+     Branch: perl
+	   ! lib/filetest.t
+____________________________________________________________________________
+[ 21502] By: nicholas                              on 2003/10/19  19:49:25
+        Log: Forgot to run regen.pl when I merged Plan C (already fixed in
+             the snapshot)
+     Branch: maint-5.8/perl
+	   ! embedvar.h
+____________________________________________________________________________
+[ 21501] By: nicholas                              on 2003/10/19  19:37:27
+        Log: update MAINT level
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 21500] By: nicholas                              on 2003/10/19  19:35:55
+        Log: Update Changes (submit by hand) - not sure if they're quite in the
+             tidiest order yet
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
+[ 21499] By: nicholas                              on 2003/10/19  19:14:43
+        Log: If you add files you must add them to the MANIFEST
+     Branch: maint-5.8/perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 21498] By: nicholas                              on 2003/10/19  19:08:39
+        Log: Place the changes for 5.8.1 into their own file; start Changes afresh
+             for 5.8.2. For reference, 5.8.1 release was change 21377
+     Branch: maint-5.8/perl
+	   + Changes5.8.1
+	   ! Changes
+____________________________________________________________________________
+[ 21497] By: nicholas                              on 2003/10/19  18:50:07
+        Log: Integrate:
+             [ 21418]
+             Subject: [PATCH] Fixing UNIVERSAL.pm's bit of unpleasantness
+             From: schwern@pobox.com
+             Date: Mon, 6 Oct 2003 13:14:36 -0700
+             Message-Id: <20031006131436.G20960@ttul.org>
+             
+             [ 21449]
+             Subject: [PATCH] SIGN => 1 support for MakeMaker
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Tue, 14 Oct 2003 18:32:28 +0800
+             Message-Id: <1066127547.65845.35.camel@localhost>
+     Branch: maint-5.8/perl
+	  !> lib/ExtUtils/MM_Any.pm lib/ExtUtils/MM_Unix.pm
+	  !> lib/ExtUtils/MakeMaker.pm lib/UNIVERSAL.pm t/op/universal.t
+____________________________________________________________________________
+[ 21496] By: nicholas                              on 2003/10/19  18:31:14
+        Log: Integrate:
+             [ 21415]
+             Subject: [PATCH bleadperl] (was Re: require() does not behave aas documented)
+             From: Rick Delaney <rick@bort.ca>
+             Date: Tue, 23 Sep 2003 12:14:52 -0400
+             Message-ID: <20030923121452.G18845@biff.bort.ca>
+             
+             [ 21427]
+             Subject: Re: require patch breaks locale
+             From: Rick Delaney <rick@bort.ca>
+             Date: Wed, 8 Oct 2003 22:41:55 -0400
+             Message-Id: <20031008224155.A14638@biff.bort.ca>
+     Branch: maint-5.8/perl
+	  !> pp_ctl.c t/comp/require.t
+____________________________________________________________________________
+[ 21495] By: nicholas                              on 2003/10/19  18:13:23
+        Log: Integrate:
+             [ 21407]
+             Subject: [PATCH]Re: The META.yml file in bleadperl
+             From: Fergal Daly <fergal@esatclear.ie>
+             Date: Mon, 6 Oct 2003 00:25:29 +0100
+             Message-Id: <200310060025.29122.fergal@esatclear.ie>
+             
+             Plus regeneration of META.yml
+     Branch: maint-5.8/perl
+	   + META.yml
+	  !> Porting/makemeta
+____________________________________________________________________________
+[ 21494] By: nicholas                              on 2003/10/19  17:55:17
+        Log: Integrate:
+             [ 21438]
+             Subject: Re: [perl #24122] setreuid and friends borked on darwin/osx
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: 07 Oct 2003 00:04:34 +0200
+             Message-ID: <87ekxq6n0t.fsf@vran.herceg.de>
+             
+             [ 21440]
+             Subject: [perl #24122] setreuid and friends borked on darwin/osx 
+             From: "pxm@nubz.org (via RT)" <perlbug-followup@perl.org>
+             Date: 5 Oct 2003 20:55:56 -0000
+             Message-ID: <rt-24122-65678.14.2411168523081@rt.perl.org>
+     Branch: maint-5.8/perl
+	  !> hints/darwin.sh mg.c
+____________________________________________________________________________
+[ 21493] By: nicholas                              on 2003/10/19  17:35:10
+        Log: Integrate:
+             [ 21424]
+             Subject: Re: Simple @INC hook core dump [PATCH]
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 08 Oct 2003 04:47:33 -0700
+             Message-ID: <lrllrweysq.fsf_-_@caliper.activestate.com>
+             
+             [ 21426]
+             Subject: Re: Simple @INC hook core dump [PATCH]
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 08 Oct 2003 13:35:28 -0700
+             Message-Id: <lrr81ncvsf.fsf@caliper.activestate.com>
+             
+             [ 21452]
+             Fix bug [perl #24212] : improper error recovery in the
+             tokenizer after an unknown filetest operator.
+     Branch: maint-5.8/perl
+	  !> pp_ctl.c t/comp/parser.t t/op/inccode.t toke.c
+____________________________________________________________________________
+[ 21492] By: nicholas                              on 2003/10/19  17:17:40
+        Log: Integrate:
+             [ 21436]
+             Subject: [PATCH] threads::async + some cleanup
+             From: Elizabeth Mattijsen <liz@dijkmat.nl>
+             Date: Fri, 10 Oct 2003 16:37:55 +0200
+             Message-Id: <p05111b07bbac713a0aaf@[192.168.56.2]>
+             
+             [ 21470]
+             Ensure PL_comppad/curpad point to PL_main_cv's padlist when
+             PL_main_root is freed; this may not have been be the case if a
+             thread other than the main one is the last to be destroyed
+     Branch: maint-5.8/perl
+	   ! ext/threads/threads.pm
+	  !> ext/threads/t/thread.t pad.h perl.c
+____________________________________________________________________________
+[ 21491] By: nicholas                              on 2003/10/19  16:54:46
+        Log: Integrate:
+             [ 21451]
+             Update MIME::Base64 and Digest::MD5 from the CPAN version.
+     Branch: maint-5.8/perl
+	  !> ext/Digest/MD5/Changes ext/Digest/MD5/MD5.pm
+	  !> ext/Digest/MD5/Makefile.PL ext/Digest/MD5/t/align.t
+	  !> ext/Digest/MD5/t/files.t ext/Digest/MD5/t/utf8.t
+	  !> ext/MIME/Base64/Base64.pm ext/MIME/Base64/Base64.xs
+	  !> ext/MIME/Base64/Changes ext/MIME/Base64/Makefile.PL
+	  !> ext/MIME/Base64/QuotedPrint.pm ext/MIME/Base64/t/unicode.t
+____________________________________________________________________________
+[ 21490] By: nicholas                              on 2003/10/19  16:19:58
+        Log: Integrate:
+             [ 21402]
+             Subject: [PATCH] pp_sys.c: pp_waitpid and EINTR
+             From: Steve Grazzini <grazz@pobox.com>
+             Date: Sat, 4 Oct 2003 18:15:23 -0400
+             Message-Id: <20031004221523.GA29324@grazzini.net>
+             
+             [ 21425]
+             Fix bug #24108: Goto +foo broken
+             the fix having been suggested by xmath via Juerd.
+             
+             [ 21428]
+             Subject: [PATCH] Devel::PPPort is missing an aTHX when calling
+             grok_numeric_radix()
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Wed, 08 Oct 2003 20:37:42 -0700
+             Message-Id: <8kl9ov0932qo08o24uafuc9v77clrgnoe4@4ax.com>
+             
+             [ 21429]
+             Patch based on:
+             
+             Subject: [perl #24157] -MModule=} is broken
+             From: "Lukas Mai" (via RT) <perlbug-followup@perl.org>
+             Date: 7 Oct 2003 21:47:43 -0000
+             Message-Id: <rt-24157-65809.10.9980909617566@rt.perl.org>
+             
+             (Includes a fix for a similar problem in -A, but not -d.)
+             
+             [ 21430]
+             Subject: [PATCH 5.8.1 CORE] Internal fixes to source-code coordinate
+             calculations in regcomp.c
+             From: Eric Promislow <ericp@ActiveState.com>
+             Date: Wed, 8 Oct 2003 17:42:42 -0700
+             Message-Id: <20031008174242.A17544@ActiveState.com>
+             
+             [ 21441]
+             Subject: [PATCH] Internals::hash_seed() returns wrong value
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Sun, 12 Oct 2003 22:09:39 -0700
+             Message-ID: <07ckovck8mp5e8tthmtbbcrpi2tj6q9eak@4ax.com>
+             
+             [ 21445]
+             Subject: [PATCH ext/Devel/PPPort/PPPort.pm] Changes #20819 and #20996 break compatibility with perl 5.6.0
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Tue, 30 Sep 2003 19:23:34 +0200
+             Message-ID: <021e01c38777$93ea4e10$0c2f1fac@R2D2>
+     Branch: maint-5.8/perl
+	   ! perl.c
+	  !> ext/Devel/PPPort/PPPort.pm op.c pp_sys.c regcomp.c t/op/goto.t
+	  !> universal.c
+____________________________________________________________________________
+[ 21489] By: nicholas                              on 2003/10/19  11:14:32
+        Log: Integrate:
+             [ 21397]
+             Subject: Re: 5.8.1 and srand
+             From: Brendan O'Dea <bod@debian.org>
+             Date: Thu, 2 Oct 2003 10:30:36 +1000
+             Message-Id: <20031002003036.GA9198@londo.c47.org>
+             
+             [ 21401]
+             Subject: Re: 5.8.1 and srand
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: Thu, 2 Oct 2003 15:51:11 +0000
+             Message-Id: <1065109871.3115@devpc01.iconmobile.de>
+     Branch: maint-5.8/perl
+	  !> t/op/fork.t util.c
+____________________________________________________________________________
+[ 21488] By: nicholas                              on 2003/10/19  10:47:57
+        Log: Integrate:
+             [ 21419]
+             Why should -3**$x be more precisely determined than 3**$x?
+             
+             [ 21420]
+             Minor tweaks to t/op/pow.t (John P. Linderman).
+     Branch: maint-5.8/perl
+	  !> t/op/pow.t
+____________________________________________________________________________
+[ 21487] By: nicholas                              on 2003/10/18  22:33:08
+        Log: Integrate:
+             [ 21433]
+             Put all pre-processor #s on the first column (some compilers are picky)
+             [perl #24167] `#' comment signs not at the very beginning of a line
+             
+             [ 21468]
+             Subject: Re: assert.h breaks perl.h
+             From: Alexey Tourbin <at@altlinux.ru>
+             Date: Thu, 16 Oct 2003 22:24:35 +0400
+             Message-Id: <20031016182434.GH1724@julia.office.altlinux.ru>
+     Branch: maint-5.8/perl
+	  !> cop.h dosish.h ext/SDBM_File/sdbm/sdbm.h iperlsys.h op.c
+	  !> perl.h regcomp.c sv.h
+____________________________________________________________________________
+[ 21486] By: nicholas                              on 2003/10/18  22:12:47
+        Log: Integrate:
+             [ 21404]
+             Subject: [perl #24120] Tie::Hash documentation has broken code
+             From: "Benjamin J. Tilly" (via RT) <perlbug-followup@perl.org>
+             Date: 5 Oct 2003 18:40:36 -0000
+             Message-Id: <rt-24120-65664.15.9776865968429@rt.perl.org>
+             (Applied without $VERSION update.)
+             
+             [ 21439]
+             Subject: [PATCH] Tie::Hash documentation
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: Sun, 12 Oct 2003 18:55:54 +0200 (CEST)
+             Message-Id: <200310121655.h9CGtsrY003613@vran.herceg.de>
+             
+             [ 21442]
+             Subject: [perl #24189] Incorrect comment in perldoc strict
+             From: "Iain 'Spoon' Truskett (via RT)" <perlbug-followup@perl.org>
+             Date: 12 Oct 2003 09:01:25 -0000
+             Message-Id: <rt-24189-65954.9.50514379869631@rt.perl.org>
+             
+             [ 21467]
+             Subject: [PATCH] Tie::Hash documentation
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: Thu, 16 Oct 2003 17:57:35 +0000
+             Message-Id: <1066327055.1428@devpc01.iconmobile.de>
+     Branch: maint-5.8/perl
+	  !> lib/Tie/Hash.pm lib/strict.pm
+____________________________________________________________________________
+[ 21485] By: nicholas                              on 2003/10/18  21:44:41
+        Log: Integrate:
+             [ 21416]
+             Subject: [patch sv.c] improve "...free unref scalar" warning
+             From: Stas Bekman <stas@stason.org>
+             Date: Mon, 06 Oct 2003 21:19:53 -0700
+             Message-Id: <3F823EE9.4030103@stason.org>
+             
+             [ 21420]
+             Minor tweaks to sv.c (Tim Bunce)
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 21484] By: nicholas                              on 2003/10/18  21:25:13
+        Log: Integrate:
+             [ 21453]
+             Typos.
+             
+             [ 21472]
+             The compilation of PerlIO::via may hang on AIX when
+             compiling with vac at -O3 optimization level. Disable
+             optimization for this module.
+     Branch: maint-5.8/perl
+	  +> ext/PerlIO/via/hints/aix.pl
+	  !> MANIFEST hints/aix.sh
+____________________________________________________________________________
+[ 21483] By: nicholas                              on 2003/10/18  20:50:49
+        Log: Integrate:
+             [ 21390]
+             Subject: Re: NCR MP-RAS perl problems [perl #23791]
+             From: grommel@sears.com
+             Date: Mon, 29 Sep 2003 14:45:16 -0500
+             Message-ID: <OF9B00605E.3CC90F32-ON86256DB0.006B13F0-86256DB0.006C8E85@LocalDomain>
+             
+             [ 21410]
+             Subject: Re: [doc-PATCH] for unpack_str() and question
+             From: LAUN Wolfgang <wolfgang.laun@alcatel.at>
+             Date: Mon, 6 Oct 2003 08:45:29 +0200 
+             Message-ID: <75A46BF1A9D8D311863A00508B6259A405F180C1@ATTMSX4>
+     Branch: maint-5.8/perl
+	  !> hints/svr4.sh pod/perlapi.pod pp_pack.c t/op/pack.t
+____________________________________________________________________________
+[ 21482] By: nicholas                              on 2003/10/18  18:26:46
+        Log: Integrate:
+             [ 21464]
+             Subject: perl -h tweak [PATCH]
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 16 Oct 2003 02:49:39 -0700
+             Message-Id: <lrn0c11pho.fsf@caliper.activestate.com>
+             
+             [ 21466]
+             Further tweak on change #21464.
+             
+             [ 21473]
+             -u is deprecated.
+             Subject: Re: why PERL5LIB is ignored when -T is in effect
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: Fri, 17 Oct 2003 10:02:31 +0000
+             Message-Id: <1066384951.4964@devpc01.iconmobile.de>
+     Branch: maint-5.8/perl
+	  !> perl.c
+____________________________________________________________________________
+[ 21481] By: nicholas                              on 2003/10/18  17:40:32
+        Log: Integrate:
+             [ 21394]
+             Subject: misapplied patch 19452
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Tue, 30 Sep 2003 06:01:50 -0700
+             Message-Id: <20030930130150.GA1436@efn.org>
+     Branch: maint-5.8/perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 21480] By: nicholas                              on 2003/10/18  16:42:12
+        Log: Integrate:
+             [ 21383]
+             Missing +x bits.
+     Branch: maint-5.8/perl
+	  !> Porting/makerel
+____________________________________________________________________________
+[ 21479] By: nicholas                              on 2003/10/18  16:37:49
+        Log: Integrate:
+             [ 21385]
+             Subject: [PATCH 5.8.1] pod/perlrun.pod: no space after -i allowed
+             From: Brendan O'Dea <bod@debian.org>
+             Date: Sun, 28 Sep 2003 23:23:34 +1000
+             Message-ID: <20030928132334.GA29499@londo.c47.org>
+             
+             [ 21386]
+             Subject: [PATCH 5.8.1] Fix broken splitpod program
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Mon, 29 Sep 2003 11:50:23 +0100
+             Message-ID: <3F780E6F.3020704@uk.radan.com>
+             
+             [ 21388]
+             Subject: [PATCH] Re: [perl #24071] Typo in description of binmode
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Tue, 30 Sep 2003 04:53:02 -0700
+             Message-ID: <20030930115302.GA3200@efn.org>
+             
+             [ 21392]
+             Revamp the section on local() in perlsub.
+             - avoid using the word "declare" in conjunction with local()
+             - less archaelogical references
+             - more about localization of lvalues
+             - removes examples of localization of tied hashes that don't work
+             - give titles to subsections
+             - explain localization of magic values
+             - explain localization of globs
+             - fix link to perldelta
+             
+             [ 21398]
+             build perlapi.pod in deterministic order even when functions differ
+             only in case; regen perlapi.pod
+             
+             [ 21403]
+             Subject: Re: [PATCH] [perl #24113] mistake in perlretut
+             From: Robert Spier <rspier@pobox.com>
+             Date: Sun, 05 Oct 2003 21:34:30 -0700
+             Message-Id: <m3vfr39e7d.wl_rspier@pobox.com>
+             
+             [ 21405]
+             Subject: Re: [PATCH] perlsyn.pod Revision - Resend
+             From: Shlomi Fish <shlomif@vipe.technion.ac.il>
+             Date: Fri, 3 Oct 2003 12:34:46 +0200 (IST)
+             Message-Id: <Pine.LNX.4.56.0310031233580.28640@vipe.technion.ac.il>
+             (Applied with minor tweaks.)
+             
+             [ 21409]
+             Subject: [PATCH pod/perlfunc.pod]  ref can return false on references
+             From: Abigail <abigail@abigail.nl>
+             Date: Mon, 6 Oct 2003 05:55:21 -0700
+             Message-ID: <20031006125521.GA26446@ucan.foad.org>
+             
+             [ 21412]
+             Fix broken link in perltodo.pod.
+             
+             [ 21417]
+             Update perlfunc/require to describe NXDOMAIN caching... er, you
+             know what I mean.
+             
+             [ 21431]
+             Document the behaviour of filetest operators regarding parentheses.
+             This fixes bug #24127 (by documenting it as a feature.)
+             
+             [ 21435]
+             Make everyone stop posting to p5p about 0e0.
+             
+             [ 21437]
+             Minor nit in perlrun, spotted by Art Haas.
+     Branch: maint-5.8/perl
+	   ! pod/perlrun.pod pod/perlsyn.pod
+	  !> autodoc.pl pod/perlapi.pod pod/perlfunc.pod pod/perlop.pod
+	  !> pod/perlretut.pod pod/perlsub.pod pod/perltodo.pod
+	  !> pod/splitpod
+____________________________________________________________________________
+[ 21478] By: nicholas                              on 2003/10/18  13:40:08
+        Log: Integrate:
+             [ 21420]
+             Minor tweaks to pod/perlsyn.pod (as suggested by Yves Orton)
+             
+             [ 21421]
+             Subject: Re: [PATCH] perlop.pod Revamp - revision 4
+             From: schwern@pobox.com
+             Date: Tue, 7 Oct 2003 20:39:36 -0700
+             Message-Id: <20031007203936.X4301@ttul.org>
+             
+             (Originally from Shlomi Fish. Applied with tweaks.)
+             
+             [ 21422]
+             "Are implicit undefs true?" asks Gisle.
+             
+             [ 21423]
+             Subject: [PATCH pod/perlrun.pod] Layout & POD nit.
+             From: Abigail <abigail@abigail.nl>
+             Date: Wed, 8 Oct 2003 03:50:49 -0700
+             Message-Id: <20031008105049.GA15770@ucan.foad.org>
+     Branch: maint-5.8/perl
+	   ! pod/perlop.pod pod/perlsyn.pod
+	  !> pod/perliol.pod
+____________________________________________________________________________
+[ 21477] By: nicholas                              on 2003/10/18  13:22:15
+        Log: Integrate:
+             [ 21384]
+             Nit to the maintainers list by SADAHIRO Tomoyuki
+             
+             [ 21408]
+             Add a new option --check to Porting/Maintainers,
+             to check for files who are listed for several maintainers.
+             
+             [ 21413]
+             Fixes in the modules maintainers list.
+     Branch: maint-5.8/perl
+	  !> Porting/Maintainers.pl Porting/Maintainers.pm
+____________________________________________________________________________
+[ 21476] By: nicholas                              on 2003/10/18  13:14:40
+        Log: Integrate:
+             [ 21391]
+             Useless "local $_" in a perlfaq3 example
+             
+             [ 21454]
+             PerlFAQ sync. (only actual changes)
+             
+             [ 21456]
+             Perlfaq1 : take notice that 5.8.1 is now released.
+     Branch: maint-5.8/perl
+	  !> pod/perlfaq1.pod pod/perlfaq3.pod pod/perlfaq4.pod
+____________________________________________________________________________
+[ 21475] By: nicholas                              on 2003/10/17  21:09:13
+        Log: Integrate:
+             [ 21446]
+             Duplicate 19423 (pathological hashes too easy) into hv_store_ent
+             (the routine used by perl level HV operations)
+             
+             [ 21469]
+             Duplicate 19423 (pathological hashes too easy) into share_hek_flags
+             (as suggested by Jan Dubois)
+             
+             [ 21471]
+             Plan C for foiling the algorithmic complexity attack
+             (based on Chip's plan A (binary compatibility with 5.8.0 and 5.8.1),
+             Chip's plan B (do something new inside the hv functions)
+             and introspective sort)
+             Provides infrastructure for hashes to change their hash function
+             if necessary, and code in hsplit to detect pathalogical data and
+             instigate a random rehashing.
+             Needs refinement. Let's see how much smoke it creates.
+             
+             [ 21474]
+             Plan C rough edge smoothing - forgot to turn on the "has key flags"
+             flag on the hash when rehashing. Can turn off the "rehasing" flag
+             if the hash is cleared
+     Branch: maint-5.8/perl
+	   ! hv.c
+	  !> embedvar.h hv.h intrpvar.h perl.c perlapi.h sv.c sv.h util.c
+____________________________________________________________________________
+[ 21474] By: nicholas                              on 2003/10/17  18:44:28
+        Log: Plan C rough edge smoothing - forgot to turn on the "has key flags"
+             flag on the hash when rehashing. Can turn off the "rehasing" flag
+             if the hash is cleared
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 21473] By: rgs                                   on 2003/10/17  08:53:48
+        Log: -u is deprecated.
+             Subject: Re: why PERL5LIB is ignored when -T is in effect
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: Fri, 17 Oct 2003 10:02:31 +0000
+             Message-Id: <1066384951.4964@devpc01.iconmobile.de>
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 21472] By: rgs                                   on 2003/10/17  07:29:10
+        Log: The compilation of PerlIO::via may hang on AIX when
+             compiling with vac at -O3 optimization level. Disable
+             optimization for this module.
+     Branch: perl
+	   + ext/PerlIO/via/hints/aix.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 21471] By: nicholas                              on 2003/10/16  21:10:27
+        Log: Plan C for foiling the algorithmic complexity attack
+             (based on Chip's plan A (binary compatibility with 5.8.0 and 5.8.1),
+             Chip's plan B (do something new inside the hv functions)
+             and introspective sort)
+             Provides infrastructure for hashes to change their hash function
+             if necessary, and code in hsplit to detect pathalogical data and
+             instigate a random rehashing.
+             Needs refinement. Let's see how much smoke it creates.
+     Branch: perl
+	   ! embedvar.h hv.c hv.h intrpvar.h perl.c perlapi.h sv.c sv.h
+	   ! util.c
+____________________________________________________________________________
+[ 21470] By: davem                                 on 2003/10/16  20:03:44
+        Log: Ensure PL_comppad/curpad point to PL_main_cv's padlist when
+             PL_main_root is freed; this may not have been be the case if a
+             thread other than the main one is the last to be destroyed
+     Branch: perl
+	   ! ext/threads/t/thread.t pad.h perl.c
+____________________________________________________________________________
+[ 21469] By: nicholas                              on 2003/10/16  19:31:19
+        Log: Duplicate 19423 (pathological hashes too easy) into share_hek_flags
+             (as suggested by Jan Dubois)
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 21468] By: ams                                   on 2003/10/16  19:00:14
+        Log: Subject: Re: assert.h breaks perl.h
+             From: Alexey Tourbin <at@altlinux.ru>
+             Date: Thu, 16 Oct 2003 22:24:35 +0400
+             Message-Id: <20031016182434.GH1724@julia.office.altlinux.ru>
+     Branch: perl
+	   ! sv.h
+____________________________________________________________________________
+[ 21467] By: ams                                   on 2003/10/16  18:57:57
+        Log: Subject: [PATCH] Tie::Hash documentation
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: Thu, 16 Oct 2003 17:57:35 +0000
+             Message-Id: <1066327055.1428@devpc01.iconmobile.de>
+     Branch: perl
+	   ! lib/Tie/Hash.pm
+____________________________________________________________________________
+[ 21466] By: rgs                                   on 2003/10/16  08:52:50
+        Log: Further tweak on change #21464.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 21464] By: ams                                   on 2003/10/16  08:42:50
+        Log: Subject: perl -h tweak [PATCH]
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 16 Oct 2003 02:49:39 -0700
+             Message-Id: <lrn0c11pho.fsf@caliper.activestate.com>
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 21463] By: rgs                                   on 2003/10/15  21:42:45
+        Log: More Changes and perldelta updating.
+     Branch: maint-5.6
+	   ! perl-5.6.2/Changes perl-5.6.2/pod/perldelta.pod
+____________________________________________________________________________
+[ 21462] By: rgs                                   on 2003/10/15  21:28:10
+        Log: Upgrade to Safe 2.10 from bleadperl.
+             Don't get the safeops.t from blead as it needs a core patch.
+     Branch: maint-5.6
+	   + perl-5.6.2/ext/Opcode/t/Opcode.t perl-5.6.2/ext/Opcode/t/ops.t
+	   + perl-5.6.2/ext/Safe/t/safe1.t perl-5.6.2/ext/Safe/t/safe2.t
+	   + perl-5.6.2/ext/Safe/t/safe3.t
+	   - perl-5.6.2/t/lib/ops.t perl-5.6.2/t/lib/safe1.t
+	   - perl-5.6.2/t/lib/safe2.t
+	   ! perl-5.6.2/MANIFEST perl-5.6.2/ext/Opcode/Safe.pm
+	   ! perl-5.6.2/ext/Opcode/ops.pm
+____________________________________________________________________________
+[ 21461] By: rgs                                   on 2003/10/15  20:41:27
+        Log: Add the list of upgraded modules in perldelta.
+     Branch: maint-5.6
+	   ! perl-5.6.2/pod/perldelta.pod
+____________________________________________________________________________
+[ 21460] By: rgs                                   on 2003/10/15  20:30:14
+        Log: Update Changes.
+     Branch: maint-5.6
+	   ! perl-5.6.2/Changes
+____________________________________________________________________________
+[ 21459] By: rgs                                   on 2003/10/15  19:52:18
+        Log: Upgrade to File::Temp 0.14
+     Branch: maint-5.6
+	   + perl-5.6.2/lib/File/Temp/t/mktemp.t
+	   + perl-5.6.2/lib/File/Temp/t/object.t
+	   + perl-5.6.2/lib/File/Temp/t/posix.t
+	   + perl-5.6.2/lib/File/Temp/t/security.t
+	   + perl-5.6.2/lib/File/Temp/t/tempfile.t
+	   - perl-5.6.2/t/lib/ftmp-mktemp.t perl-5.6.2/t/lib/ftmp-posix.t
+	   - perl-5.6.2/t/lib/ftmp-security.t
+	   - perl-5.6.2/t/lib/ftmp-tempfile.t
+	   ! perl-5.6.2/MANIFEST perl-5.6.2/lib/File/Temp.pm
+____________________________________________________________________________
+[ 21458] By: rgs                                   on 2003/10/15  19:39:02
+        Log: Update perlhist.pod from bleadperl.
+     Branch: maint-5.6
+	   ! perl-5.6.2/pod/perlhist.pod
+____________________________________________________________________________
+[ 21457] By: rgs                                   on 2003/10/15  19:26:41
+        Log: Grab the newest perlfaq.
+             It's assumed that the perlfaqs must not be version-dependent.
+     Branch: maint-5.6
+	   ! perl-5.6.2/pod/perlfaq.pod perl-5.6.2/pod/perlfaq1.pod
+	   ! perl-5.6.2/pod/perlfaq2.pod perl-5.6.2/pod/perlfaq3.pod
+	   ! perl-5.6.2/pod/perlfaq4.pod perl-5.6.2/pod/perlfaq5.pod
+	   ! perl-5.6.2/pod/perlfaq6.pod perl-5.6.2/pod/perlfaq7.pod
+	   ! perl-5.6.2/pod/perlfaq8.pod perl-5.6.2/pod/perlfaq9.pod
+____________________________________________________________________________
+[ 21456] By: rgs                                   on 2003/10/15  19:19:05
+        Log: Perlfaq1 : take notice that 5.8.1 is now released.
+     Branch: perl
+	   ! pod/perlfaq1.pod
+____________________________________________________________________________
+[ 21455] By: rgs                                   on 2003/10/15  19:12:14
+        Log: Sync the configure hints files with bleadperl.
+     Branch: maint-5.6
+	   ! perl-5.6.2/hints/aix.sh perl-5.6.2/hints/darwin.sh
+	   ! perl-5.6.2/hints/freebsd.sh perl-5.6.2/hints/linux.sh
+	   ! perl-5.6.2/hints/powerux.sh perl-5.6.2/hints/solaris_2.sh
+	   ! perl-5.6.2/hints/svr4.sh
+____________________________________________________________________________
+[ 21454] By: rgs                                   on 2003/10/15  19:06:05
+        Log: PerlFAQ sync. (only actual changes)
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 21453] By: rgs                                   on 2003/10/15  19:02:35
+        Log: Typos.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 21452] By: rgs                                   on 2003/10/15  11:12:31
+        Log: Fix bug [perl #24212] : improper error recovery in the
+             tokenizer after an unknown filetest operator.
+     Branch: perl
+	   ! t/comp/parser.t toke.c
+____________________________________________________________________________
+[ 21451] By: rgs                                   on 2003/10/15  09:19:02
+        Log: Update MIME::Base64 and Digest::MD5 from the CPAN version.
+     Branch: perl
+	   ! ext/Digest/MD5/Changes ext/Digest/MD5/MD5.pm
+	   ! ext/Digest/MD5/Makefile.PL ext/Digest/MD5/t/align.t
+	   ! ext/Digest/MD5/t/files.t ext/Digest/MD5/t/utf8.t
+	   ! ext/MIME/Base64/Base64.pm ext/MIME/Base64/Base64.xs
+	   ! ext/MIME/Base64/Changes ext/MIME/Base64/Makefile.PL
+	   ! ext/MIME/Base64/QuotedPrint.pm ext/MIME/Base64/t/unicode.t
+____________________________________________________________________________
+[ 21450] By: rgs                                   on 2003/10/15  06:47:11
+        Log: Add support for Linux abstract unix domain sockets to Socket.pm.
+             Based on a idea by Alex Hudson. (Basically those are unix domain
+             sockets whose name has a '\0' as first character.)
+     Branch: perl
+	   ! ext/Socket/Socket.xs ext/Socket/t/Socket.t
+____________________________________________________________________________
+[ 21449] By: ams                                   on 2003/10/15  06:32:44
+        Log: Subject: [PATCH] SIGN => 1 support for MakeMaker
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Tue, 14 Oct 2003 18:32:28 +0800
+             Message-Id: <1066127547.65845.35.camel@localhost>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Any.pm lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 21448] By: ams                                   on 2003/10/15  05:56:12
+        Log: Rewrite #21447.
+     Branch: perl
+	   ! pod/perliol.pod
+____________________________________________________________________________
+[ 21447] By: ams                                   on 2003/10/15  05:36:48
+        Log: Subject: [patch pod/perliol.pod]
+             From: Stas Bekman <stas@stason.org>
+             Date: Tue, 14 Oct 2003 18:05:29 -0700
+             Message-Id: <3F8C9D59.3040403@stason.org>
+     Branch: perl
+	   ! pod/perliol.pod
+____________________________________________________________________________
+[ 21446] By: nicholas                              on 2003/10/14  18:45:39
+        Log: Duplicate 19423 (pathological hashes too easy) into hv_store_ent
+             (the routine used by perl level HV operations)
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 21445] By: rgs                                   on 2003/10/13  21:03:05
+        Log: Subject: [PATCH ext/Devel/PPPort/PPPort.pm] Changes #20819 and #20996 break compatibility with perl 5.6.0
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Tue, 30 Sep 2003 19:23:34 +0200
+             Message-ID: <021e01c38777$93ea4e10$0c2f1fac@R2D2>
+     Branch: perl
+	   ! ext/Devel/PPPort/PPPort.pm
+____________________________________________________________________________
+[ 21444] By: rgs                                   on 2003/10/13  20:28:05
+        Log: Integrate changes 11565 and part of 19384, also
+             from Abe.
+             
+             Subject: Re: [ID 20010731.105] MinGW can't compile win32.c on Windows 20$00
+             From: John Kristian <jmk2001@engineer.com>
+             Date: Fri, 03 Aug 2001 00:59:08 -0700
+             Message-id: <03a101c11bf2$2c9b5ee0$0100a8c0@JOHNKRISTIAN>
+             
+             Subject: [PATCH win32/win32.c] silence compiler warnings
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Fri, 2 May 2003 00:51:42 +0200
+             Message-Id: <200305020051.43166.abe@ztreet.demon.nl>
+     Branch: maint-5.6
+	   ! perl-5.6.2/win32/win32.c
+____________________________________________________________________________
+[ 21443] By: rgs                                   on 2003/10/13  20:20:11
+        Log: Integrate change 18046, as suggested by Abe Timmerman :
+             
+             Subject: Re: Smoke 18027 FAIL(F) MSWin32 5.0 Win2000Pro (MSWin32-x86)
+             From: Alain Barbet <alian@alianwebserver.com>
+             Date: Fri, 18 Oct 2002 15:29:29 +0200
+             Message-ID: <3DB00CB9.70708@alianwebserver.com>
+     Branch: maint-5.6
+	   ! perl-5.6.2/win32/makefile.mk
+	  !> perl-5.6.2/README.win32 perl-5.6.2/win32/win32.c
+____________________________________________________________________________
+[ 21442] By: ams                                   on 2003/10/13  08:41:17
+        Log: Subject: [perl #24189] Incorrect comment in perldoc strict
+             From: "Iain 'Spoon' Truskett (via RT)" <perlbug-followup@perl.org>
+             Date: 12 Oct 2003 09:01:25 -0000
+             Message-Id: <rt-24189-65954.9.50514379869631@rt.perl.org>
+     Branch: perl
+	   ! lib/strict.pm
+____________________________________________________________________________
+[ 21441] By: rgs                                   on 2003/10/13  08:02:21
+        Log: Subject: [PATCH] Internals::hash_seed() returns wrong value
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Sun, 12 Oct 2003 22:09:39 -0700
+             Message-ID: <07ckovck8mp5e8tthmtbbcrpi2tj6q9eak@4ax.com>
+     Branch: perl
+	   ! universal.c
+____________________________________________________________________________
+[ 21440] By: rgs                                   on 2003/10/12  19:58:05
+        Log: Subject: [perl #24122] setreuid and friends borked on darwin/osx 
+             From: "pxm@nubz.org (via RT)" <perlbug-followup@perl.org>
+             Date: 5 Oct 2003 20:55:56 -0000
+             Message-ID: <rt-24122-65678.14.2411168523081@rt.perl.org>
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 21439] By: rgs                                   on 2003/10/12  16:28:06
+        Log: Subject: [PATCH] Tie::Hash documentation
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: Sun, 12 Oct 2003 18:55:54 +0200 (CEST)
+             Message-Id: <200310121655.h9CGtsrY003613@vran.herceg.de>
+     Branch: perl
+	   ! lib/Tie/Hash.pm
+____________________________________________________________________________
+[ 21438] By: rgs                                   on 2003/10/12  15:48:13
+        Log: Subject: Re: [perl #24122] setreuid and friends borked on darwin/osx
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: 07 Oct 2003 00:04:34 +0200
+             Message-ID: <87ekxq6n0t.fsf@vran.herceg.de>
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[ 21437] By: rgs                                   on 2003/10/12  15:25:17
+        Log: Minor nit in perlrun, spotted by Art Haas.
+     Branch: perl
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[ 21436] By: ams                                   on 2003/10/10  19:05:55
+        Log: Subject: [PATCH] threads::async + some cleanup
+             From: Elizabeth Mattijsen <liz@dijkmat.nl>
+             Date: Fri, 10 Oct 2003 16:37:55 +0200
+             Message-Id: <p05111b07bbac713a0aaf@[192.168.56.2]>
+     Branch: perl
+	   ! ext/threads/threads.pm
+____________________________________________________________________________
+[ 21435] By: ams                                   on 2003/10/10  19:02:34
+        Log: Make everyone stop posting to p5p about 0e0.
+     Branch: perl
+	   ! pod/perlsyn.pod
+____________________________________________________________________________
+[ 21434] By: rgs                                   on 2003/10/10  06:20:20
+        Log: Integrate changes 17322, 8309 and part of 10534,
+             as suggested by Stas Bakman, to suppress compilation
+             warnings in XS and in mod_perl.
+     Branch: maint-5.6
+	   ! perl-5.6.2/lib/ExtUtils/xsubpp perl-5.6.2/perl.h
+____________________________________________________________________________
+[ 21433] By: nicholas                              on 2003/10/09  20:57:26
+        Log: Put all pre-processor #s on the first column (some compilers are picky)
+             [perl #24167] `#' comment signs not at the very beginning of a line
+     Branch: perl
+	   ! cop.h dosish.h ext/SDBM_File/sdbm/sdbm.h iperlsys.h op.c
+	   ! perl.h regcomp.c
+____________________________________________________________________________
+[ 21432] By: rgs                                   on 2003/10/09  11:09:24
+        Log: Suppress the test file t/op/nothr5005.t and integrate its tests into
+             t/op/args.t, now that 5005threads have been removed. Port t/op/args.t
+             to t/test.pl.
+     Branch: perl
+	   - t/op/nothr5005.t
+	   ! MANIFEST t/op/args.t
+____________________________________________________________________________
+[ 21431] By: rgs                                   on 2003/10/09  11:06:15
+        Log: Document the behaviour of filetest operators regarding parentheses.
+             This fixes bug #24127 (by documenting it as a feature.)
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[ 21430] By: ams                                   on 2003/10/09  07:55:34
+        Log: Subject: [PATCH 5.8.1 CORE] Internal fixes to source-code coordinate
+             calculations in regcomp.c
+             From: Eric Promislow <ericp@ActiveState.com>
+             Date: Wed, 8 Oct 2003 17:42:42 -0700
+             Message-Id: <20031008174242.A17544@ActiveState.com>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 21429] By: ams                                   on 2003/10/09  07:43:56
+        Log: Patch based on:
+             
+             Subject: [perl #24157] -MModule=} is broken
+             From: "Lukas Mai" (via RT) <perlbug-followup@perl.org>
+             Date: 7 Oct 2003 21:47:43 -0000
+             Message-Id: <rt-24157-65809.10.9980909617566@rt.perl.org>
+             
+             (Includes a fix for a similar problem in -A, but not -d.)
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 21428] By: ams                                   on 2003/10/09  02:32:07
+        Log: Subject: [PATCH] Devel::PPPort is missing an aTHX when calling
+             grok_numeric_radix()
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Wed, 08 Oct 2003 20:37:42 -0700
+             Message-Id: <8kl9ov0932qo08o24uafuc9v77clrgnoe4@4ax.com>
+     Branch: perl
+	   ! ext/Devel/PPPort/PPPort.pm
+____________________________________________________________________________
+[ 21427] By: ams                                   on 2003/10/09  01:36:18
+        Log: Subject: Re: require patch breaks locale
+             From: Rick Delaney <rick@bort.ca>
+             Date: Wed, 8 Oct 2003 22:41:55 -0400
+             Message-Id: <20031008224155.A14638@biff.bort.ca>
+     Branch: perl
+	   ! t/comp/require.t
+____________________________________________________________________________
+[ 21426] By: ams                                   on 2003/10/09  01:26:57
+        Log: Subject: Re: Simple @INC hook core dump [PATCH]
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 08 Oct 2003 13:35:28 -0700
+             Message-Id: <lrr81ncvsf.fsf@caliper.activestate.com>
+     Branch: perl
+	   ! t/op/inccode.t
+____________________________________________________________________________
+[ 21425] By: rgs                                   on 2003/10/08  11:34:17
+        Log: Fix bug #24108: Goto +foo broken
+             the fix having been suggested by xmath via Juerd.
+     Branch: perl
+	   ! op.c t/op/goto.t
+____________________________________________________________________________
+[ 21424] By: rgs                                   on 2003/10/08  11:16:58
+        Log: Subject: Re: Simple @INC hook core dump [PATCH]
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 08 Oct 2003 04:47:33 -0700
+             Message-ID: <lrllrweysq.fsf_-_@caliper.activestate.com>
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 21423] By: ams                                   on 2003/10/08  10:09:41
+        Log: Subject: [PATCH pod/perlrun.pod] Layout & POD nit.
+             From: Abigail <abigail@abigail.nl>
+             Date: Wed, 8 Oct 2003 03:50:49 -0700
+             Message-Id: <20031008105049.GA15770@ucan.foad.org>
+     Branch: perl
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[ 21422] By: ams                                   on 2003/10/08  06:13:07
+        Log: "Are implicit undefs true?" asks Gisle.
+     Branch: perl
+	   ! pod/perlsyn.pod
+____________________________________________________________________________
+[ 21421] By: ams                                   on 2003/10/08  03:20:00
+        Log: Subject: Re: [PATCH] perlop.pod Revamp - revision 4
+             From: schwern@pobox.com
+             Date: Tue, 7 Oct 2003 20:39:36 -0700
+             Message-Id: <20031007203936.X4301@ttul.org>
+             
+             (Originally from Shlomi Fish. Applied with tweaks.)
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[ 21420] By: ams                                   on 2003/10/07  19:51:35
+        Log: Minor tweaks to pod/perlsyn.pod (as suggested by Yves Orton),
+             sv.c (Tim Bunce), t/op/pow.t (John P. Linderman).
+     Branch: perl
+	   ! pod/perlsyn.pod sv.c t/op/pow.t
+____________________________________________________________________________
+[ 21419] By: ams                                   on 2003/10/07  04:03:34
+        Log: Why should -3**$x be more precisely determined than 3**$x?
+     Branch: perl
+	   ! t/op/pow.t
+____________________________________________________________________________
+[ 21418] By: ams                                   on 2003/10/07  03:59:38
+        Log: Subject: [PATCH] Fixing UNIVERSAL.pm's bit of unpleasantness
+             From: schwern@pobox.com
+             Date: Mon, 6 Oct 2003 13:14:36 -0700
+             Message-Id: <20031006131436.G20960@ttul.org>
+     Branch: perl
+	   ! lib/UNIVERSAL.pm t/op/universal.t
+____________________________________________________________________________
+[ 21417] By: ams                                   on 2003/10/07  03:55:18
+        Log: Update perlfunc/require to describe NXDOMAIN caching... er, you
+             know what I mean.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 21416] By: ams                                   on 2003/10/07  03:37:01
+        Log: Subject: [patch sv.c] improve "...free unref scalar" warning
+             From: Stas Bekman <stas@stason.org>
+             Date: Mon, 06 Oct 2003 21:19:53 -0700
+             Message-Id: <3F823EE9.4030103@stason.org>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 21415] By: ams                                   on 2003/10/06  17:30:31
+        Log: Subject: [PATCH bleadperl] (was Re: require() does not behave aas documented)
+             From: Rick Delaney <rick@bort.ca>
+             Date: Tue, 23 Sep 2003 12:14:52 -0400
+             Message-ID: <20030923121452.G18845@biff.bort.ca>
+     Branch: perl
+	   ! pp_ctl.c t/comp/require.t
+____________________________________________________________________________
+[ 21414] By: rgs                                   on 2003/10/06  15:23:01
+        Log: Subject: Re: [PATCH lib/warnings.t]  Adding TODO functionality to lib/warnings.
+             From: Abigail <abigail@abigail.nl>
+             Date: Wed, 1 Oct 2003 14:19:43 +0200
+             Message-ID: <20031001121943.GA29419@abigail.nl>
+     Branch: perl
+	   ! lib/warnings.t
+____________________________________________________________________________
+[ 21413] By: rgs                                   on 2003/10/06  15:05:32
+        Log: Fixes in the modules maintainers list.
+     Branch: perl
+	   ! Porting/Maintainers.pl
+____________________________________________________________________________
+[ 21412] By: rgs                                   on 2003/10/06  15:02:42
+        Log: Fix broken link in perltodo.pod.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 21411] By: rgs                                   on 2003/10/06  12:11:10
+        Log: Typos in perldiag.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 21410] By: rgs                                   on 2003/10/06  11:55:52
+        Log: Subject: Re: [doc-PATCH] for unpack_str() and question
+             From: LAUN Wolfgang <wolfgang.laun@alcatel.at>
+             Date: Mon, 6 Oct 2003 08:45:29 +0200 
+             Message-ID: <75A46BF1A9D8D311863A00508B6259A405F180C1@ATTMSX4>
+     Branch: perl
+	   ! pod/perlapi.pod pp_pack.c
+____________________________________________________________________________
+[ 21409] By: rgs                                   on 2003/10/06  11:49:55
+        Log: Subject: [PATCH pod/perlfunc.pod]  ref can return false on references
+             From: Abigail <abigail@abigail.nl>
+             Date: Mon, 6 Oct 2003 05:55:21 -0700
+             Message-ID: <20031006125521.GA26446@ucan.foad.org>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 21408] By: rgs                                   on 2003/10/06  11:46:14
+        Log: Add a new option --check to Porting/Maintainers,
+             to check for files who are listed for several maintainers.
+     Branch: perl
+	   ! Porting/Maintainers.pm
+____________________________________________________________________________
+[ 21407] By: rgs                                   on 2003/10/06  11:44:33
+        Log: Subject: [PATCH]Re: The META.yml file in bleadperl
+             From: Fergal Daly <fergal@esatclear.ie>
+             Date: Mon, 6 Oct 2003 00:25:29 +0100
+             Message-Id: <200310060025.29122.fergal@esatclear.ie>
+             
+             Plus regeneration of META.yml
+     Branch: perl
+	   ! META.yml Porting/makemeta
+____________________________________________________________________________
+[ 21406] By: ams                                   on 2003/10/06  04:22:11
+        Log: Subject: Re: [perl #24076] "<> err EXPR" and warnings.
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sun, 5 Oct 2003 21:27:54 +0200
+             Message-Id: <20031005212754.5ef54472.rgarciasuarez@free.fr>
+             (Applied with tweaks to op.c and a comment.)
+     Branch: perl
+	   ! op.c t/lib/warnings/op
+____________________________________________________________________________
+[ 21405] By: ams                                   on 2003/10/06  03:56:54
+        Log: Subject: Re: [PATCH] perlsyn.pod Revision - Resend
+             From: Shlomi Fish <shlomif@vipe.technion.ac.il>
+             Date: Fri, 3 Oct 2003 12:34:46 +0200 (IST)
+             Message-Id: <Pine.LNX.4.56.0310031233580.28640@vipe.technion.ac.il>
+             (Applied with minor tweaks.)
+     Branch: perl
+	   ! pod/perlsyn.pod
+____________________________________________________________________________
+[ 21404] By: ams                                   on 2003/10/06  03:32:50
+        Log: Subject: [perl #24120] Tie::Hash documentation has broken code
+             From: "Benjamin J. Tilly" (via RT) <perlbug-followup@perl.org>
+             Date: 5 Oct 2003 18:40:36 -0000
+             Message-Id: <rt-24120-65664.15.9776865968429@rt.perl.org>
+             (Applied without $VERSION update.)
+     Branch: perl
+	   ! lib/Tie/Hash.pm
+____________________________________________________________________________
+[ 21403] By: ams                                   on 2003/10/06  03:26:39
+        Log: Subject: Re: [PATCH] [perl #24113] mistake in perlretut
+             From: Robert Spier <rspier@pobox.com>
+             Date: Sun, 05 Oct 2003 21:34:30 -0700
+             Message-Id: <m3vfr39e7d.wl_rspier@pobox.com>
+     Branch: perl
+	   ! pod/perlretut.pod
+____________________________________________________________________________
+[ 21402] By: ams                                   on 2003/10/05  03:08:53
+        Log: Subject: [PATCH] pp_sys.c: pp_waitpid and EINTR
+             From: Steve Grazzini <grazz@pobox.com>
+             Date: Sat, 4 Oct 2003 18:15:23 -0400
+             Message-Id: <20031004221523.GA29324@grazzini.net>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 21401] By: ams                                   on 2003/10/02  17:25:34
+        Log: Subject: Re: 5.8.1 and srand
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: Thu, 2 Oct 2003 15:51:11 +0000
+             Message-Id: <1065109871.3115@devpc01.iconmobile.de>
+     Branch: perl
+	   ! t/op/fork.t
+____________________________________________________________________________
+[ 21400] By: hv                                    on 2003/10/02  09:34:36
+        Log: minor cleanup for Changes
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[ 21399] By: hv                                    on 2003/10/02  09:18:27
+        Log: Update changes
+     Branch: perl
+	   ! Changes patchlevel.h
 [ 21398] By: hv                                    on 2003/10/02  09:15:42
         Log: build perlapi.pod in deterministic order even when functions differ
              only in case; regen perlapi.pod
