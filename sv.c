@@ -8900,8 +8900,8 @@ Perl_sv_setpvf_mg_nocontext(SV *sv, const char* pat, ...)
 /*
 =for apidoc sv_setpvf
 
-Processes its arguments like C<sprintf> and sets an SV to the formatted
-output.  Does not handle 'set' magic.  See C<sv_setpvf_mg>.
+Works like C<sv_catpvf> but copies the text into the SV instead of
+appending it.  Does not handle 'set' magic.  See C<sv_setpvf_mg>.
 
 =cut
 */
@@ -8915,7 +8915,16 @@ Perl_sv_setpvf(pTHX_ SV *sv, const char* pat, ...)
     va_end(args);
 }
 
-/* backend for C<sv_setpvf> and C<sv_setpvf_nocontext> */
+/*
+=for apidoc sv_vsetpvf
+
+Works like C<sv_vcatpvf> but copies the text into the SV instead of
+appending it.  Does not handle 'set' magic.  See C<sv_vsetpvf_mg>.
+
+Usually used via its frontend C<sv_setpvf>.
+
+=cut
+*/
 
 void
 Perl_sv_vsetpvf(pTHX_ SV *sv, const char* pat, va_list* args)
@@ -8940,7 +8949,15 @@ Perl_sv_setpvf_mg(pTHX_ SV *sv, const char* pat, ...)
     va_end(args);
 }
 
-/* backend for C<sv_setpvf_mg> C<setpvf_mg_nocontext> */
+/*
+=for apidoc sv_vsetpvf_mg
+
+Like C<sv_vsetpvf>, but also handles 'set' magic.
+
+Usually used via its frontend C<sv_setpvf_mg>.
+
+=cut
+*/
 
 void
 Perl_sv_vsetpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
@@ -8989,9 +9006,8 @@ Processes its arguments like C<sprintf> and appends the formatted
 output to an SV.  If the appended data contains "wide" characters
 (including, but not limited to, SVs with a UTF-8 PV formatted with %s,
 and characters >255 formatted with %c), the original SV might get
-upgraded to UTF-8.  Handles 'get' magic, but not 'set' magic.
-C<SvSETMAGIC()> must typically be called after calling this function
-to handle 'set' magic.
+upgraded to UTF-8.  Handles 'get' magic, but not 'set' magic.  See
+C<sv_catpvf_mg>.
 
 =cut */
 
@@ -9004,7 +9020,16 @@ Perl_sv_catpvf(pTHX_ SV *sv, const char* pat, ...)
     va_end(args);
 }
 
-/* backend for C<sv_catpvf> and C<catpvf_mg_nocontext> */
+/*
+=for apidoc sv_vcatpvf
+
+Processes its arguments like C<vsprintf> and appends the formatted output
+to an SV.  Does not handle 'set' magic.  See C<sv_vcatpvf_mg>.
+
+Usually used via its frontend C<sv_catpvf>.
+
+=cut
+*/
 
 void
 Perl_sv_vcatpvf(pTHX_ SV *sv, const char* pat, va_list* args)
@@ -9029,7 +9054,15 @@ Perl_sv_catpvf_mg(pTHX_ SV *sv, const char* pat, ...)
     va_end(args);
 }
 
-/* backend for C<catpvf_mg> and C<catpvf_mg_nocontext> */
+/*
+=for apidoc sv_vcatpvf_mg
+
+Like C<sv_vcatpvf>, but also handles 'set' magic.
+
+Usually used via its frontend C<sv_catpvf_mg>.
+
+=cut
+*/
 
 void
 Perl_sv_vcatpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
@@ -9041,10 +9074,10 @@ Perl_sv_vcatpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
 /*
 =for apidoc sv_vsetpvfn
 
-Works like C<vcatpvfn> but copies the text into the SV instead of
+Works like C<sv_vcatpvfn> but copies the text into the SV instead of
 appending it.
 
-Usually used via one of its frontends C<sv_setpvf> and C<sv_setpvf_mg>.
+Usually used via one of its frontends C<sv_vsetpvf> and C<sv_vsetpvf_mg>.
 
 =cut
 */
@@ -9109,7 +9142,7 @@ missing (NULL).  When running with taint checks enabled, indicates via
 C<maybe_tainted> if results are untrustworthy (often due to the use of
 locales).
 
-Usually used via one of its frontends C<sv_catpvf> and C<sv_catpvf_mg>.
+Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
 
 =cut
 */
