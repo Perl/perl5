@@ -1,6 +1,6 @@
 =head1 NAME
 
-perllocale - Perl locale handling (internationlization and localization)
+perllocale - Perl locale handling (internationalization and localization)
 
 =head1 DESCRIPTION
 
@@ -18,7 +18,7 @@ particular set of preferences is known as B<localization> (B<l10n>).
 
 Perl can understand language-specific data via the standardized (ISO C,
 XPG4, POSIX 1.c) method called "the locale system". The locale system is
-controlled per application using a pragma, one function call, and
+controlled per application using one pragma, one function call, and
 several environment variables.
 
 B<NOTE>: This feature is new in Perl 5.004, and does not apply unless an
@@ -124,7 +124,7 @@ B<The POSIX date formatting function> (strftime()) uses C<LC_TIME>.
 C<LC_COLLATE>, C<LC_CTYPE>, and so on, are discussed further in L<LOCALE
 CATEGORIES>.
 
-The default behaviour returns with S<C<no locale>> or on reaching the
+The default behavior returns with S<C<no locale>> or on reaching the
 end of the enclosing block.
 
 Note that the string result of any operation that uses locale
@@ -307,7 +307,7 @@ state explicitly that the locale should be ignored:
 This machine-native collation (which is what you get unless S<C<use
 locale>> has appeared earlier in the same block) must be used for
 sorting raw binary data, whereas the locale-dependent collation of the
-first example is useful for written text.
+first example is useful for natural text.
 
 As noted in L<USING LOCALES>, C<cmp> compares according to the current
 collation locale when C<use locale> is in effect, but falls back to a
@@ -423,11 +423,11 @@ between numeric and string formats:
 
 The C standard defines the C<LC_MONETARY> category, but no function that
 is affected by its contents.  (Those with experience of standards
-committees will recognise that the working group decided to punt on the
+committees will recognize that the working group decided to punt on the
 issue.)  Consequently, Perl takes no notice of it.  If you really want
 to use C<LC_MONETARY>, you can query its contents - see L<The localeconv
 function> - and use the information that it returns in your
-application's own formating of currency amounts.  However, you may well
+application's own formatting of currency amounts.  However, you may well
 find that the information, though voluminous and complex, does not quite
 meet your requirements: currency formatting is a hard nut to crack.
 
@@ -454,7 +454,7 @@ obeys the current C<LC_TIME> locale.
 
 The remaining locale category, C<LC_MESSAGES> (possibly supplemented by
 others in particular implementations) is not currently used by Perl -
-except possibly to affect the behaviour of library functions called by
+except possibly to affect the behavior of library functions called by
 extensions which are not part of the standard Perl distribution.
 
 =head1 SECURITY
@@ -515,7 +515,7 @@ examples - there is no substitute for your own vigilance - but, when
 C<use locale> is in effect, Perl uses the tainting mechanism (see
 L<perlsec>) to mark string results which become locale-dependent, and
 which may be untrustworthy in consequence.  Here is a summary of the
-tainting behaviour of operators and functions which may be affected by
+tainting behavior of operators and functions which may be affected by
 the locale:
 
 =over 4
@@ -536,7 +536,7 @@ effect, and the regular expression contains C<\w>.
 
 =item B<Substitution operator> (C<s///>):
 
-Has the same behaviour as the match operator.  When C<use locale> is
+Has the same behavior as the match operator.  When C<use locale> is
 in effect, he left operand of C<=~> will become tainted if it is
 modified as a result of a substitution based on a regular expression
 match involving C<\w>.
@@ -681,14 +681,30 @@ category-specific C<LC_...>.
 
 =head2 Backward compatibility
 
-Versions of Perl prior to 5.004 ignored locale information, generally
-behaving as if something similar to the C<"C"> locale (see L<The
-setlocale function>) was always in force, even if the program
+Versions of Perl prior to 5.004 B<mostly> ignored locale information,
+generally behaving as if something similar to the C<"C"> locale (see
+L<The setlocale function>) was always in force, even if the program
 environment suggested otherwise.  By default, Perl still behaves this
 way so as to maintain backward compatibility.  If you want a Perl
-application to pay attention to locale information, you B<must> use the
-S<C<use locale>> pragma (see L<The S<C<use locale>> Pragma>) to instruct
-it to do so.
+application to pay attention to locale information, you B<must> use
+the S<C<use locale>> pragma (see L<The S<C<use locale>> Pragma>) to
+instruct it to do so.
+
+Versions of Perl from 5.002 to 5.003 did use the C<LC_CTYPE>
+information if that was available, that is, C<\w> did understand what
+are the letters according to the locale environment variables.
+The problem was that the user had no control over the feature:
+if the C library supported locales, Perl used them.
+
+=head2 I18N:Collate obsolete
+
+In versions of Perl prior to 5.004 per-locale collation was possible
+using the C<I18N::Collate> library module.  This module is now mildly
+obsolete and should be avoided in new applications.  The C<LC_COLLATE>
+functionality is now integrated into the Perl core language: One can
+use locale-specific scalar data completely normally with C<use locale>,
+so there is no longer any need to juggle with the scalar references of
+C<I18N::Collate>.
 
 =head2 Sort speed and memory use impacts
 
@@ -701,16 +717,6 @@ exact multiplier depends on the string's contents, the operating system
 and the locale.) These downsides are dictated more by the operating
 system's implementation of the locale system than by Perl.
 
-=head2 I18N:Collate
-
-In Perl 5.003 (and later development releases prior to 5.003_06),
-per-locale collation was possible using the C<I18N::Collate> library
-module.  This is now mildly obsolete and should be avoided in new
-applications.  The C<LC_COLLATE> functionality is now integrated into
-the Perl core language and one can use locale-specific scalar data
-completely normally - there is no need to juggle with the scalar
-references of C<I18N::Collate>.
-
 =head2 Freely available locale definitions
 
 There is a large collection of locale definitions at
@@ -722,9 +728,10 @@ your own locales.
 
 =head2 I18n and l10n
 
-Internationalization is often abbreviated as B<i18n> because its first
-and last letters are separated by eighteen others.  In the same way, you
-abbreviate localization to B<l10n>.
+"Internationalization" is often abbreviated as B<i18n> because its first
+and last letters are separated by eighteen others.  (You may guess why
+the internalin ... internaliti ... i18n tends to get abbreviated.)  In
+the same way, "localization" is often abbreviated to B<l10n>.
 
 =head2 An imperfect standard
 
@@ -761,7 +768,7 @@ L<POSIX (3)/strxfrm>
 
 =head1 HISTORY
 
-Jarrko Hietaniemi's original F<perli18n.pod> heavily hacked by Dominic
+Jarkko Hietaniemi's original F<perli18n.pod> heavily hacked by Dominic
 Dunlop, assisted by the perl5-porters.
 
-Last update: Mon Dec 23 10:44:08 EST 1996
+Last update: Tue Dec 24 16:43:11 EST 1996
