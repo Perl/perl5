@@ -77,6 +77,8 @@ case "$archname" in
 '') archname="$osname" ;;
 esac
 
+cc=${cc:-cc}
+
 case "$osvers" in
 3*) d_fchmod=undef
     ccflags="$ccflags -D_ALL_SOURCE"
@@ -180,7 +182,11 @@ EOM
 esac
 EOCBU
 
-# Turn on largefileness, if available.
+# This script UU/uselfs.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use large files.
+cat > UU/uselfs.cbu <<'EOCBU'
+case "$uselargefiles" in
+$define|true|[yY]*)
 	lfcflags="`getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
 	lfldflags="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
 	# _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
@@ -195,16 +201,19 @@ EOCBU
 	# the whatever it was that AIX managed to break. --jhi
 	lfldflags="`echo $lfldflags`"
 	lflibs="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
-case "$lfcflags$lfldflags$lflibs" in
-'');;
-*) ccflags="$ccflags $lfcflags"
-   ldflags="$ldflags $ldldflags"
-   libswanted="$libswanted $lflibs"
-   ;;
-esac
+	case "$lfcflags$lfldflags$lflibs" in
+	'');;
+	*) ccflags="$ccflags $lfcflags"
+	   ldflags="$ldflags $ldldflags"
+	   libswanted="$libswanted $lflibs"
+	   ;;
+	esac
 	lfcflags=''
 	lfldflags=''
 	lflibs=''
+	;;
+esac
+EOCBU
 
 # This script UU/use64bits.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.

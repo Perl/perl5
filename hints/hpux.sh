@@ -290,25 +290,47 @@ EOM
 esac
 EOCBU
 
-# Turn on largefileness if available.
+# This script UU/uselfs.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bits.
+cat > UU/uselfs.cbu <<'EOCBU'
+case "$uselargefiles" in
+$define|true|[yY]*)
 	lfcflags="`getconf _CS_XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
 	lfldflags="`getconf _CS_XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
 	lflibs="`getconf _CS_XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
-case "$lfcflags$lfldflags$lflibs" in
-'');;
-*) ccflags="$ccflags $lfcflags"
-   ldflags="$ldflags $ldldflags"
-   libswanted="$libswanted $lflibs"
-   ;;
-esac
+	case "$lfcflags$lfldflags$lflibs" in
+	'');;
+	*) # This sucks.  To get the HP-UX strict ANSI mode (-Aa) to
+	   # approve of large file offsets, we must turn on the 64-bitness
+	   # (+DD64), too.  A callback file (a hack) calling another, yuck.
+	   case "$use64bits" in
+           $undef|false|[nN]*|'')
+	       use64bits="$define"
+	       if $test -f use64bits.cbu; then
+                   echo "(Large files in HP-UX require also 64-bitness, picking up 64-bit hints...)"
+		   . ./use64bits.cbu
+	       fi
+               ;;
+           esac
+	   ccflags="$ccflags $lfcflags"
+	   ldflags="$ldflags $ldldflags"
+	   libswanted="$libswanted $lflibs"
+	   ;;
+	esac
 	lfcflags=''
 	lfldflags=''
 	lflibs=''
+	;;
+esac
+EOCBU
 
 # This script UU/use64bits.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
 cat > UU/use64bits.cbu <<'EOCBU'
-case "$use64bits" in
+case "$ccflags" in
+*+DD64*) # Been here, done this (via uselfs.cbu, most likely.)
+   ;;
+*) case "$use64bits" in
 $define|true|[yY]*)
 	    if [ "$xxOsRevMajor" -lt 11 ]; then
 		cat <<EOM >&4
@@ -332,6 +354,8 @@ EOM
 	    set `echo " $libswanted " | sed -e 's@ dl @ @'`
 	    libswanted="$*"
 	    glibpth="/lib/pa20_64"
+   esac
+   ;;
 esac
 EOCBU
 
