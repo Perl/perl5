@@ -267,7 +267,7 @@ typedef struct stcxt {
 
 #define dSTCXT_PTR(T,name)							\
 	T name = (T)(perinterp_sv && SvIOK(perinterp_sv)\
-				? SvIVX(perinterp_sv) : NULL)
+				? INT2PTR(T, SvIVX(perinterp_sv)) : NULL)
 #define dSTCXT										\
 	dSTCXT_SV;										\
 	dSTCXT_PTR(stcxt_t *, cxt)
