@@ -266,7 +266,6 @@ EOSH
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-esac
         ccflags="-D_REENTRANT $ccflags"
 
         # sched_yield is in -lposix4
@@ -307,6 +306,7 @@ for more information.
 EOM
         fi
 	;;
+esac
 EOCBU
 
 # This script UU/use64bits.cbu will get 'called-back' by Configure 
