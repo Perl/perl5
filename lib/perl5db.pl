@@ -832,7 +832,7 @@ sub DB {
 			    }
 			    next CMD;
 			}
-			$SIG{PIPE}= "DB::catch" if $pager =~ /^\|/
+			$SIG{PIPE}= \&DB::catch if $pager =~ /^\|/
 			  && "" eq $SIG{PIPE}  ||  "DEFAULT" eq $SIG{PIPE};
 			$selected= select(OUT);
 			$|= 1;
@@ -861,7 +861,7 @@ sub DB {
 			  ( $? & 127 ) ? " (SIG ".($?&127).")" : "", "\n" ) if $?;
 		    open(OUT,">&STDOUT") || &warn("Can't restore DB::OUT");
 		    open(STDOUT,">&SAVEOUT") || &warn("Can't restore STDOUT");
-		    $SIG{PIPE}= "DEFAULT" if $SIG{PIPE} eq "DB::catch";
+		    $SIG{PIPE}= "DEFAULT" if $SIG{PIPE} eq \&DB::catch;
 		    # Will stop ignoring SIGPIPE if done like nohup(1)
 		    # does SIGINT but Perl doesn't give us a choice.
 		} else {
@@ -1372,7 +1372,7 @@ END_SUM
 sub diesignal {
     local $frame = 0;
     local $doret = -2;
-    $SIG{'ABRT'} = DEFAULT;
+    $SIG{'ABRT'} = 'DEFAULT';
     kill 'ABRT', $$ if $panic++;
     print $DB::OUT "Got $_[0]!\n";	# in the case cannot continue
     local $SIG{__WARN__} = '';
@@ -1386,7 +1386,11 @@ sub dbwarn {
   local $frame = 0;
   local $doret = -2;
   local $SIG{__WARN__} = '';
-  require Carp; 
+  local $SIG{__DIE__} = '';
+  eval { require Carp };	# If error/warning during compilation,
+                                # require may be broken.
+  warn(@_, "\nPossible unrecoverable error"), warn("\nTry to decrease warnLevel `O'ption!\n"), return
+    unless defined &Carp::longmess;
   #&warn("Entering dbwarn\n");
   my ($mysingle,$mytrace) = ($single,$trace);
   $single = 0; $trace = 0;
@@ -1415,7 +1419,9 @@ sub dbdie {
     #&warn("dieing quietly in dbdie\n") if $ineval and $dieLevel < 2;
     die @_ if $ineval and $dieLevel < 2;
   }
-  require Carp; 
+  eval { require Carp };	# If error/warning during compilation,
+                                # require may be broken.
+  die(@_, "\nUnrecoverable error") unless defined &Carp::longmess;
   # We do not want to debug this chunk (automatic disabling works
   # inside DB::DB, but not in Carp).
   my ($mysingle,$mytrace) = ($single,$trace);
@@ -1463,8 +1469,8 @@ sub signalLevel {
     $prevbus = $SIG{BUS} unless $signalLevel;
     $signalLevel = shift;
     if ($signalLevel) {
-      $SIG{SEGV} = 'DB::diesignal';
-      $SIG{BUS} = 'DB::diesignal';
+      $SIG{SEGV} = \&DB::diesignal;
+      $SIG{BUS} = \&DB::diesignal;
     } else {
       $SIG{SEGV} = $prevsegv;
       $SIG{BUS} = $prevbus;
@@ -1485,7 +1491,7 @@ BEGIN {			# This does not compile, alas.
   $window = 10;
   $preview = 3;
   $sub = '';
-  $SIG{INT} = "DB::catch";
+  $SIG{INT} = \&DB::catch;
   # This may be enabled to debug debugger:
   #$warnLevel = 1 unless defined $warnLevel;
   #$dieLevel = 1 unless defined $dieLevel;
