@@ -426,8 +426,6 @@ PP(pp_rv2av)
 	av = (AV*)SvRV(sv);
 	if (SvTYPE(av) != SVt_PVAV)
 	    DIE("Not an ARRAY reference");
-	if (op->op_private & OPpLVAL_INTRO)
-	    av = (AV*)save_svref((SV**)sv);
 	if (op->op_flags & OPf_REF) {
 	    PUSHs((SV*)av);
 	    RETURN;
@@ -503,8 +501,6 @@ PP(pp_rv2hv)
 	hv = (HV*)SvRV(sv);
 	if (SvTYPE(hv) != SVt_PVHV)
 	    DIE("Not a HASH reference");
-	if (op->op_private & OPpLVAL_INTRO)
-	    hv = (HV*)save_svref((SV**)sv);
 	if (op->op_flags & OPf_REF) {
 	    SETs((SV*)hv);
 	    RETURN;

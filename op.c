@@ -1059,6 +1059,8 @@ I32 type;
 
     case OP_RV2AV:
     case OP_RV2HV:
+	if (!type && cUNOP->op_first->op_type != OP_GV)
+	    croak("Can't localize through a reference");
 	if (type == OP_REFGEN && op->op_flags & OPf_PARENS) {
 	    modcount = 10000;
 	    return op;		/* Treat \(@foo) like ordinary list. */
@@ -1080,7 +1082,7 @@ I32 type;
 	break;
     case OP_RV2SV:
 	if (!type && cUNOP->op_first->op_type != OP_GV)
-	    croak("Can't localize a reference");
+	    croak("Can't localize through a reference");
 	ref(cUNOP->op_first, op->op_type); 
 	/* FALL THROUGH */
     case OP_GV:

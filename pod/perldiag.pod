@@ -597,12 +597,12 @@ call for another.  It can't manufacture one out of whole cloth.  In general
 you should be calling it out of only an AUTOLOAD routine anyway.  See
 L<perlfunc/goto>.
 
-=item Can't localize a reference
+=item Can't localize through a reference
 
-(F) You said something like C<local $$ref>, which is not allowed because
-the compiler can't determine whether $ref will end up pointing to anything
-with a symbol table entry, and a symbol table entry is necessary to
-do a local.
+(F) You said something like C<local $$ref>, which Perl can't currently
+handle, because when it goes to restore the old value of whatever $ref
+pointed to after the scope of the local() is finished, it can't be
+sure that $ref will still be a reference.  
 
 =item Can't localize lexical variable %s
 
