@@ -1,6 +1,6 @@
 # newgetopt.pl -- new options parsing.
 # Now just a wrapper around the Getopt::Long module.
-# $Id: newgetopt.pl,v 1.16 1996/03/16 11:46:08 jv Exp $
+# $Id: newgetopt.pl,v 1.17 1996-10-02 11:17:16+02 jv Exp $
 
 {   package newgetopt;
 
@@ -16,6 +16,7 @@
 	$option_start = "(--|-)";
 	$order = $REQUIRE_ORDER;
 	$bundling = 0;
+	$passthrough = 0;
     }
     else {
 	$autoabbrev = 1;	# automatic abbrev of options
@@ -23,6 +24,7 @@
 	$option_start = "(--|-|\\+)";
 	$order = $PERMUTE;
 	$bundling = 0;
+	$passthrough = 0;
     }
 
     # Other configurable settings.
@@ -51,6 +53,10 @@ sub NGetOpt {
 	if defined $newgetopt::bundling;
     $Getopt::Long::ignorecase = $newgetopt::ignorecase 
 	if defined $newgetopt::ignorecase;
+    $Getopt::Long::ignorecase = $newgetopt::ignorecase 
+	if defined $newgetopt::ignorecase;
+    $Getopt::Long::passthrough = $newgetopt::passthrough 
+	if defined $newgetopt::passthrough;
 
     &GetOptions;
 }
