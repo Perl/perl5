@@ -27,7 +27,7 @@ PerlIO::encoding - encoding layer
   open($f, ">:encoding(bar)", "outbar");
 
   use Encode qw(:fallbacks);
-  $PerlIO::encoding::check = FB_PERLQQ;
+  $PerlIO::encoding::fallback = FB_PERLQQ;
 
 =head1 DESCRIPTION
 
@@ -38,7 +38,7 @@ character set and encoding to Perl string data (Unicode and
 Perl's internal Unicode encoding, UTF-8).  On output, convert
 Perl string data into the specified character set and encoding.
 
-When the layer is pushed the current value of C<$PerlIO::encoding::check>
+When the layer is pushed the current value of C<$PerlIO::encoding::fallback>
 is saved and used as the check argument when calling the Encodings
 encode and decode.
 
