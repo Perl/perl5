@@ -884,7 +884,7 @@ multiple ways it might succeed, you need to understand backtracking to
 know which variety of success you will achieve.
 
 When using look-ahead assertions and negations, this can all get even
-tricker.  Imagine you'd like to find a sequence of non-digits not
+trickier.  Imagine you'd like to find a sequence of non-digits not
 followed by "123".  You might try to write that as
 
     $_ = "ABC123";
