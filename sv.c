@@ -4023,6 +4023,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		SvIsUV_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
 	}
+	if (SvVOK(sstr)) {
+	    MAGIC *mg = SvMAGIC(sstr); 
+	    sv_magicext(dstr, NULL, PERL_MAGIC_vstring, NULL,
+			mg->mg_ptr, mg->mg_len);
+	} 
     }
     else if (sflags & SVp_IOK) {
 	if (sflags & SVf_IOK)

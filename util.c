@@ -325,7 +325,7 @@ S_xstat(pTHX_ int flag)
 		PerlIO_printf(Perl_debug_log, "  . ");
 	    }
 	}
-	PerlIO_printf(Perl_debug_log, "\n");	
+	PerlIO_printf(Perl_debug_log, "\n");
     }
 }
 
@@ -2861,7 +2861,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 #endif
     {
 	bool seen_dot = 0;
-	
+
 	PL_bufend = s + strlen(s);
 	while (s < PL_bufend) {
 #ifdef MACOS_TRADITIONAL
@@ -4087,21 +4087,20 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
 	for (;;) {
 	    rev = 0;
 	    {
-		 /* this is atoi() that tolerates underscores */
-		 char *end = pos;
-		 UV mult = 1;
-		 if ( s > pos && *(s-1) == '_') {
-		      mult = 10;
-		 }
-		 while (--end >= s) {
-		      UV orev;
-		      orev = rev;
-		      rev += (*end - '0') * mult;
-		      mult *= 10;
-		      if (orev > rev && ckWARN_d(WARN_OVERFLOW))
-			   Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
-				       "Integer overflow in decimal number");
-		 }
+		/* this is atoi() that tolerates underscores */
+		char *end = pos;
+		UV mult = 1;
+		while (--end >= s) {
+		    UV orev;
+		    if (*end == '_')
+			continue;
+		    orev = rev;
+		    rev += (*end - '0') * mult;
+		    mult *= 10;
+		    if (orev > rev && ckWARN_d(WARN_OVERFLOW))
+			Perl_warner(aTHX_ packWARN(WARN_OVERFLOW),
+				    "Integer overflow in decimal number");
+		}
 	    }
 #ifdef EBCDIC
 	    if (rev > 0x7FFFFFFF)
@@ -4112,13 +4111,13 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
 	    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 	    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
 		 SvUTF8_on(sv);
-	    if ( (*pos == '.' || *pos == '_') && isDIGIT(pos[1]))
+	    if (*pos == '.' && isDIGIT(pos[1]))
 		 s = ++pos;
 	    else {
 		 s = pos;
 		 break;
 	    }
-	    while (isDIGIT(*pos) )
+	    while (isDIGIT(*pos) || *pos == '_')
 		 pos++;
 	}
 	SvPOK_on(sv);
