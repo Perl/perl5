@@ -196,4 +196,5 @@ UNIVERSAL
 attributes
 base
 bytes
+filetest
 ops

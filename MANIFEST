@@ -940,6 +940,7 @@ lib/FileCache.t			See if FileCache works
 lib/FileHandle.pm		Backward-compatible front end to IO extension
 lib/FileHandle.t		See if FileHandle works
 lib/filetest.pm			For "use filetest"
+lib/filetest.t			See if filetest works
 lib/Filter/Simple.pm		Simple frontend to Filter::Util::Call
 lib/Filter/Simple/Changes	Filter::Simple
 lib/Filter/Simple/README	Filter::Simple
