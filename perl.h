@@ -459,7 +459,7 @@ int usleep(unsigned int);
 #  define MYSWAP
 #endif
 
-/* Cannot include embed.h here on Win32 as win32.h has not
+/* Cannot include embed.h here on Win32 as win32.h has not 
    yet been included and defines some config variables e.g. HAVE_INTERP_INTERN
  */
 #if !defined(PERL_FOR_X2P) && !(defined(WIN32)||defined(VMS))

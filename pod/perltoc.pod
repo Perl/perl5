@@ -457,10 +457,10 @@ sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice ARRAY,OFFSET,LENGTH,
 splice ARRAY,OFFSET, splice ARRAY, split /PATTERN/,EXPR,LIMIT, split
 /PATTERN/,EXPR, split /PATTERN/, split, sprintf FORMAT, LIST, format
 parameter index, flags, vector flag, (minimum) width, precision, or maximum
-width, size, sqrt EXPR, sqrt, srand EXPR, srand, stat FILEHANDLE, stat
-EXPR, stat, study SCALAR, study, sub NAME BLOCK, sub NAME (PROTO) BLOCK,
-sub NAME : ATTRS BLOCK, sub NAME (PROTO) : ATTRS BLOCK, substr
-EXPR,OFFSET,LENGTH,REPLACEMENT, substr EXPR,OFFSET,LENGTH, substr
+width, size, order of arguments, sqrt EXPR, sqrt, srand EXPR, srand, stat
+FILEHANDLE, stat EXPR, stat, study SCALAR, study, sub NAME BLOCK, sub NAME
+(PROTO) BLOCK, sub NAME : ATTRS BLOCK, sub NAME (PROTO) : ATTRS BLOCK,
+substr EXPR,OFFSET,LENGTH,REPLACEMENT, substr EXPR,OFFSET,LENGTH, substr
 EXPR,OFFSET, symlink OLDFILE,NEWFILE, syscall LIST, sysopen
 FILEHANDLE,FILENAME,MODE, sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
 FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
@@ -1039,7 +1039,8 @@ ${^OPEN}, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
 0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R, $EXCEPTIONS_BEING_CAUGHT, $^S,
 $BASETIME, $^T, ${^TAINT}, $PERL_VERSION, $^V, $WARNING, $^W,
 ${^WARNING_BITS}, ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, ARGV,
-$ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
+$ARGV, @ARGV, ARGVOUT, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG,
+$SIG{expr}
 
 =item Error Indicators
 
@@ -1889,7 +1890,7 @@ string
 
 =item What kind of threads are Perl threads?
 
-=item Threadsafe Modules
+=item Thread-Safe Modules
 
 =item Thread Basics
 
@@ -1957,7 +1958,9 @@ string
 
 =item Performance considerations
 
-=item Threadsafety of System Libraries
+=item Process-scope Changes
+
+=item Thread-Safety of System Libraries
 
 =item Conclusion
 
@@ -13691,6 +13694,8 @@ TopSystemUID
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item BUGS
 
 =item NOTE
 

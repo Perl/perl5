@@ -1225,6 +1225,13 @@ the script.  C<$#ARGV> is generally the number of arguments minus
 one, because C<$ARGV[0]> is the first argument, I<not> the program's
 command name itself.  See C<$0> for the command name.
 
+=item ARGVOUT
+
+The special filehandle that points to the currently open output file
+when doing edit-in-place processing with B<-i>.  Useful when you have
+to do a lot of inserting and don't want to keep modifying $_.  See
+L<perlrun> for the B<-i> switch.
+
 =item @F
 
 The array @F contains the fields of each line read in when autosplit

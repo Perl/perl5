@@ -198,6 +198,13 @@ to escape the laboratory has been decommissioned.
 
 =item *
 
+Using chdir("") or chdir(undef) instead of explicit chdir() is
+doubtful.  A failure (think chdir(some_function()) can lead into
+unintended chdir() to the home directory, therefore this behaviour
+is deprecated.
+
+=item *
+
 The builtin dump() function has probably outlived most of its
 usefulness.  The core-dumping functionality will remain in future
 available as an explicit call to C<CORE::dump()>, but in future
@@ -2836,6 +2843,12 @@ gives a warning.
 
 =item *
 
+chdir("") and chdir(undef) now give a deprecation warning because they
+cause a possible unintentional chdir to the home directory.
+Say chdir() if you really mean that.
+
+=item *
+
 Two new debugging options have been added: if you have compiled your
 Perl with debugging, you can use the -DT [561] and -DR options to trace
 tokenising and to add reference counts to displaying variables,
@@ -3506,19 +3519,12 @@ files from beneath /Library/Perl, and again "make install"-ing.
 The following tests are known to fail on OS/2 (for clarity
 only the failures are shown, not the full error messages):
 
- t/io/utf8............................FAILED at test 19
- t/op/grent...........................FAILED at test 2
- t/op/pwent...........................FAILED at test 1
- t/lib/os2_base.......................FAILED at test 13
- t/lib/os2_process....................FAILED at test 10
- t/lib/os2_process_kid................FAILED at test 10
- t/lib/rx_cmprt.......................FAILED at test 16
- ext/DB_File/t/db-btree...............FAILED at test 0
- ext/DB_File/t/db-hash................FAILED at test 0
- ext/DB_File/t/db-recno...............FAILED at test 0
- lib/ExtUtils/t/basic.................FAILED at test 14
- lib/ExtUtils/t/Constant..............FAILED at test 4
- lib/Memoize/t/errors.................FAILED at test 4
+ ../lib/ExtUtils/t/Mkbootstrap.t    1   256    18    1   5.56%  8
+ ../lib/ExtUtils/t/Packlist.t       1   256    34    1   2.94%  17
+ ../lib/ExtUtils/t/basic.t          1   256    17    1   5.88%  14
+ lib/os2_process.t                  2   512   227    2   0.88%  174 209
+ lib/os2_process_kid.t                        227    2   0.88%  174 209
+ lib/rx_cmprt.t                   255 65280    18    3  16.67%  16-18
 
 =head2 op/sprintf tests 91, 129, and 130
 
