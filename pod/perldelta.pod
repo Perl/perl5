@@ -2523,6 +2523,10 @@ Windows 9x.
 
 =item *
 
+Win64 compilation is now supported.
+
+=item *
+
 winsock handle leak fixed.
 
 =item *
