@@ -908,12 +908,46 @@ win32_rewind(FILE *pf)
   return;
 }
 
+DllExport int
+win32_tmpfd(void)
+{
+    dTHX;
+    char prefix[MAX_PATH+1];
+    char filename[MAX_PATH+1];
+    DWORD len = GetTempPath(MAX_PATH, prefix);
+    if (len && len < MAX_PATH) {
+	if (GetTempFileName(prefix, "plx", 0, filename)) {
+	    HANDLE fh = CreateFile(filename,
+				   DELETE | GENERIC_READ | GENERIC_WRITE,
+				   0,
+				   NULL,
+				   CREATE_ALWAYS,
+				   FILE_ATTRIBUTE_NORMAL
+				   | FILE_FLAG_DELETE_ON_CLOSE,
+				   NULL);
+	    if (fh != INVALID_HANDLE_VALUE) {
+		int fd = win32_open_osfhandle((intptr_t)fh, 0);
+		if (fd >= 0) {
+#if defined(__BORLANDC__)
+        	    setmode(fd,O_BINARY);
+#endif
+		    DEBUG_p(PerlIO_printf(Perl_debug_log,
+					  "Created tmpfile=%s\n",filename));
+		    return fd;
+		}
+	    }
+	}
+    }
+    return -1;
+}
+
 DllExport FILE*
 win32_tmpfile(void)
 {
-  Perl_croak(aTHX_ PL_no_func, "tmpfile");
-
-  return NULL;
+    int fd = win32_tmpfd();
+    if (fd >= 0)
+	return win32_fdopen(fd, "w+b");
+    return NULL;
 }
 
 DllExport void
@@ -1519,6 +1553,13 @@ Perl_win32_init(int *argcp, char ***argvp)
 #endif
 
   MALLOC_INIT;
+}
+
+void
+Perl_win32_term(void)
+{
+    OP_REFCNT_TERM;
+    MALLOC_TERM;
 }
 
 DllExport int
