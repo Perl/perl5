@@ -20,8 +20,8 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
 $opt{VERSION} = $];
 $opt{INST_VER} =~ s|~VERSION~|$]|g;
 if ($] =~ /\.(\d\d\d)?(\d\d)?$/) { # should always be true
-  $opt{PATCHLEVEL} = int($1 || 0);
-  $opt{SUBVERSION} = $2 || '00';
+  $opt{PERL_VERSION} = int($1 || 0);
+  $opt{PERL_SUBVERSION} = $2 || '00';
 }
 
 $opt{'cf_by'} = $ENV{USERNAME} unless $opt{'cf_by'};

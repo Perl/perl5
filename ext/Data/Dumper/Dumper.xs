@@ -2,9 +2,12 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#ifndef PERL_VERSION
 #include "patchlevel.h"
+#defined PERL_VERSION PATCHLEVEL
+#endif
 
-#if PATCHLEVEL < 5
+#if PERL_VERSION < 5
 #  ifndef PL_sv_undef
 #    define PL_sv_undef	sv_undef
 #  endif

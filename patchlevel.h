@@ -1,13 +1,11 @@
 #ifndef __PATCHLEVEL_H_INCLUDED__
 
-#  define PERL_REVISION		5		/* age */
-#  define PERL_VERSION		5		/* epoch */
-#  define PERL_SUBVERSION	55		/* generation */
+/* do not adjust the whitespace! Configure expects the numbers to be
+ * exactly on the third column */
 
-/* these are the old terms of reference */
-#  define PATCHLEVEL		PERL_VERSION
-#  undef  SUBVERSION		/* OS/390 has a SUBVERSION in a system header */
-#  define SUBVERSION		PERL_SUBVERSION
+#define PERL_REVISION	5		/* age */
+#define PERL_VERSION	5		/* epoch */
+#define PERL_SUBVERSION	55		/* generation */
 
 /*
 	local_patches -- list of locally applied less-than-subversion patches.
@@ -55,3 +53,11 @@ static	char	*local_patches[] = {
 
 #  define __PATCHLEVEL_H_INCLUDED__
 #endif
+
+/* the old terms of reference, add them only when explicitly included */
+#if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(PATCHLEVEL)
+#define PATCHLEVEL		PERL_VERSION
+#undef  SUBVERSION		/* OS/390 has a SUBVERSION in a system header */
+#define SUBVERSION		PERL_SUBVERSION
+#endif
+

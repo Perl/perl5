@@ -17,7 +17,7 @@ fi
 # Note that the text lines /^Summary of/ .. /^\s*$/ are copied into Config.pm.
 
 $spitshell <<!GROK!THIS!
-Summary of my $package ($baserev patchlevel $PATCHLEVEL subversion $SUBVERSION) configuration:
+Summary of my $package (revision $baserev version $PERL_VERSION subversion $PERL_SUBVERSION) configuration:
   Platform:
     osname=$osname, osvers=$osvers, archname=$archname
     uname='$myuname'

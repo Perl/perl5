@@ -27,20 +27,7 @@ typedef FILE * InputStream;
 typedef FILE * OutputStream;
 #endif
 
-#include "patchlevel.h"
-
-#if (PATCHLEVEL < 3) || ((PATCHLEVEL == 3) && (SUBVERSION < 22))
-     /* before 5.003_22 */
-#    define MY_start_subparse(fmt,flags) start_subparse()
-#else
-#  if (PATCHLEVEL == 3) && (SUBVERSION == 22)
-     /* 5.003_22 */
-#    define MY_start_subparse(fmt,flags) start_subparse(flags)
-#  else
-     /* 5.003_23  onwards */
-#    define MY_start_subparse(fmt,flags) start_subparse(fmt,flags)
-#  endif
-#endif
+#define MY_start_subparse(fmt,flags) start_subparse(fmt,flags)
 
 #ifndef gv_stashpvn
 #define gv_stashpvn(str,len,flags) gv_stashpv(str,flags)

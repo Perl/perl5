@@ -44,8 +44,18 @@ $in_v = 0;
 
 while (<>) {
     next if m:^#!/bin/sh:;
-    # Catch CONFIG=true and PATCHLEVEL=n line from Configure.
+    # Catch CONFIG=true and PERL_VERSION=n line from Configure.
     s/^(\w+)=(true|\d+)\s*$/$1='$2'\n/;
+    my ($k,$v) = ($1,$2);
+    # grandfather PATCHLEVEL and SUBVERSION
+    if ($k) {
+	if ($k eq 'PERL_VERSION') {
+	    push @v_others, "PATCHLEVEL='$v'\n";
+	}
+	elsif ($k eq 'PERL_SUBVERSION') {
+	    push @v_others, "SUBVERSION='$v'\n";
+	}
+    }
     # We can delimit things in config.sh with either ' or ". 
     unless ($in_v or m/^(\w+)=(['"])(.*\n)/){
 	push(@non_v, "#$_"); # not a name='value' line

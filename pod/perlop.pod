@@ -1065,10 +1065,6 @@ comments into a multi-line C<qw>-string.  For this reason the C<-w>
 switch produce warnings if the STRING contains the "," or the "#"
 character.
 
-Note that under use L<locale> qw() taints because the definition of
-whitespace is tainted.  See L<perlsec> for more information about
-tainting and L<perllocale> for more information about locales.
-
 =item s/PATTERN/REPLACEMENT/egimosx
 
 Searches a string for a pattern, and if found, replaces that pattern

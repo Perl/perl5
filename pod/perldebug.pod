@@ -754,8 +754,8 @@ for different values of C<n>:
   in  @=Config::myconfig() from /dev/nul:0
    in  $=Config::FETCH(ref(Config), 'package') from lib/Config.pm:574
    in  $=Config::FETCH(ref(Config), 'baserev') from lib/Config.pm:574
-   in  $=Config::FETCH(ref(Config), 'PATCHLEVEL') from lib/Config.pm:574
-   in  $=Config::FETCH(ref(Config), 'SUBVERSION') from lib/Config.pm:574
+   in  $=Config::FETCH(ref(Config), 'PERL_VERSION') from lib/Config.pm:574
+   in  $=Config::FETCH(ref(Config), 'PERL_SUBVERSION') from lib/Config.pm:574
    in  $=Config::FETCH(ref(Config), 'osname') from lib/Config.pm:574
    in  $=Config::FETCH(ref(Config), 'osvers') from lib/Config.pm:574
 
@@ -779,9 +779,9 @@ for different values of C<n>:
    out $=Config::FETCH(ref(Config), 'package') from lib/Config.pm:574
    in  $=Config::FETCH(ref(Config), 'baserev') from lib/Config.pm:574
    out $=Config::FETCH(ref(Config), 'baserev') from lib/Config.pm:574
-   in  $=Config::FETCH(ref(Config), 'PATCHLEVEL') from lib/Config.pm:574
-   out $=Config::FETCH(ref(Config), 'PATCHLEVEL') from lib/Config.pm:574
-   in  $=Config::FETCH(ref(Config), 'SUBVERSION') from lib/Config.pm:574
+   in  $=Config::FETCH(ref(Config), 'PERL_VERSION') from lib/Config.pm:574
+   out $=Config::FETCH(ref(Config), 'PERL_VERSION') from lib/Config.pm:574
+   in  $=Config::FETCH(ref(Config), 'PERL_SUBVERSION') from lib/Config.pm:574
 
 =item 14
 

@@ -38,8 +38,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#include "patchlevel.h"
-
 #define NO_XSLOCKS
 #ifdef PERL_OBJECT
 extern CPerlObj* pPerl;
@@ -189,7 +187,8 @@ get_emd_part(char *prev_path, char *trailing_path, ...)
     va_start(ap, trailing_path);
     strip = va_arg(ap, char *);
 
-    sprintf(base, "%5.3f", (double) 5 + ((double) PATCHLEVEL / (double) 1000));
+    sprintf(base, "%5.3f",
+	    (double)PERL_REVISION + ((double)PERL_VERSION / (double)1000));
 
     GetModuleFileName((HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
 				? GetModuleHandle(NULL) : w32_perldll_handle),

@@ -55,6 +55,26 @@ a C<dTHR>.
 
 =back
 
+=head2 Compatible C Source API Changes
+
+=over
+
+=item C<PATCHLEVEL> is now C<PERL_VERSION>
+
+The cpp macros C<PERL_REVISION>, C<PERL_VERSION> and C<PERL_SUBVERSION>
+are now available by default from perl.h, and reflect the base revision,
+patchlevel and subversion respectively.  C<PERL_REVISION> had no
+prior equivalent, while C<PERL_VERSION> and C<PERL_SUBVERSION> were
+previously available as C<PATCHLEVEL> and C<SUBVERSION>.
+
+The new names cause less pollution of the cpp namespace, and reflect what
+the numbers have come to stand for in common practice.  For compatibility,
+the old names are still supported when patchlevel.h is explicitly
+included (as required before), so there is no source incompatibility
+due to the change.
+
+=back
+
 =head2 Binary Incompatibilities
 
 This release is not binary compatible with the 5.005 release and its
