@@ -3,7 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     if ($ENV{PERL_CORE}) {
-	unshift @INC, '../lib';
+	@INC = '../lib';
     }
 }
 use Cwd;
