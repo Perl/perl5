@@ -103,6 +103,7 @@ typedef struct regexp {
 #define REXEC_COPY_STR	1		/* Need to copy the string. */
 #define REXEC_CHECKED	2		/* check_substr already checked. */
 #define REXEC_SCREAM	4		/* use scream table. */
+#define REXEC_IGNOREPOS	8		/* \G matches at start. */
 
 #define ReREFCNT_inc(re) ((re && re->refcnt++), re)
 #define ReREFCNT_dec(re) pregfree(re)

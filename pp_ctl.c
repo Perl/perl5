@@ -166,7 +166,8 @@ PP(pp_substcont)
 	if (cx->sb_once || !CALLREGEXEC(rx, s, cx->sb_strend, orig,
 				     s == m, cx->sb_targ, NULL,
 				     ((cx->sb_rflags & REXEC_COPY_STR)
-				      ? 0 : REXEC_COPY_STR)))
+				      ? REXEC_IGNOREPOS 
+				      : (REXEC_COPY_STR|REXEC_IGNOREPOS))))
 	{
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
