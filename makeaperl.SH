@@ -17,6 +17,7 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 echo "Extracting makeaperl (with variable substitutions)"
+rm -f makeaperl
 $spitshell >makeaperl <<!GROK!THIS!
 $startperl
     eval 'exec perl -S \$0 "\$@"'
