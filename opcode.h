@@ -1776,9 +1776,9 @@ EXT OP * (*ppaddr[])() = {
 #endif
 
 #ifndef DOINIT
-EXT OP * (*check[])();
+EXT OP * (*check[]) _((OP *op));
 #else
-EXT OP * (*check[])() = {
+EXT OP * (*check[]) _((OP *op)) = {
 	ck_null,	/* null */
 	ck_null,	/* stub */
 	ck_fun,		/* scalar */

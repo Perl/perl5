@@ -114,9 +114,9 @@ END
 
 print <<END;
 #ifndef DOINIT
-EXT OP * (*check[])();
+EXT OP * (*check[]) _((OP *op));
 #else
-EXT OP * (*check[])() = {
+EXT OP * (*check[]) _((OP *op)) = {
 END
 
 for (@ops) {
