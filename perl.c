@@ -1706,7 +1706,11 @@ SV *sv;
 	    if (retval < 0)
 		continue;
 	    if (S_ISREG(statbuf.st_mode)
-	     && cando(S_IRUSR,TRUE,&statbuf) && cando(S_IXUSR,TRUE,&statbuf)) {
+		&& cando(S_IRUSR,TRUE,&statbuf)
+#ifndef DOSISH
+		&& cando(S_IXUSR,TRUE,&statbuf)
+#endif
+		) {
 		xfound = tokenbuf;              /* bingo! */
 		break;
 	    }
