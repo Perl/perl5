@@ -530,7 +530,7 @@ END_OF_HEAD
 		} else {
 		    /^=(\S*)\s*/;
 		    warn "$0: $Podfile: unknown pod directive '$1' in "
-		       . "paragraph $Paragraph.  ignoring.\n";
+		       . "paragraph $Paragraph.  ignoring.\n" unless $Quiet;
 		}
 	    }
 	    $Top = 0;
@@ -889,7 +889,7 @@ sub scan_podpath {
 
 	    scan_items( \%Items, "$pod", @poddata);
 	} else {
-	    warn "$0: shouldn't be here (line ".__LINE__."\n";
+	    warn "$0: shouldn't be here (line ".__LINE__."\n" unless $Quiet;
 	}
     }
     @poddata = ();	# clean-up a bit
@@ -1065,7 +1065,7 @@ sub process_head {
     my $level = $1;
 
     if( $Listlevel ){
-	warn "$0: $Podfile: unterminated list at =head in paragraph $Paragraph.  ignoring.\n";
+	warn "$0: $Podfile: unterminated list at =head in paragraph $Paragraph.  ignoring.\n" unless $Quiet;
         while( $Listlevel ){
             process_back();
         }
@@ -1133,7 +1133,7 @@ sub process_item {
     # bad!  but, the proper thing to do seems to be to just assume
     # they did do an =over.  so warn them once and then continue.
     if( $Listlevel == 0 ){
-	warn "$0: $Podfile: unexpected =item directive in paragraph $Paragraph.  ignoring.\n";
+	warn "$0: $Podfile: unexpected =item directive in paragraph $Paragraph.  ignoring.\n" unless $Quiet;
 	process_over();
     }
 
@@ -1192,7 +1192,7 @@ sub process_over {
 #
 sub process_back {
     if( $Listlevel == 0 ){
-	warn "$0: $Podfile: unexpected =back directive in paragraph $Paragraph.  ignoring.\n";
+	warn "$0: $Podfile: unexpected =back directive in paragraph $Paragraph.  ignoring.\n" unless $Quiet;
 	return;
     }
 
@@ -1621,7 +1621,7 @@ sub process_text1($$;$$){
 
             # warning; show some text.
             $linktext = $opar unless defined $linktext;
-            warn "$0: $Podfile: cannot resolve L<$opar> in paragraph $Paragraph.\n";
+            warn "$0: $Podfile: cannot resolve L<$opar> in paragraph $Paragraph.\n" unless $Quiet;
         }
 
         # now we have a URL or just plain code
@@ -1644,7 +1644,7 @@ sub process_text1($$;$$){
     } elsif( $func eq 'Z' ){
 	# Z<> - empty
 	warn "$0: $Podfile: invalid X<> in paragraph $Paragraph.\n"
-	    unless $$rstr =~ s/^>//;
+	    unless $$rstr =~ s/^>// or $Quiet;
 
     } else {
         my $term = pattern $closing;
@@ -1662,7 +1662,7 @@ sub process_text1($$;$$){
 	if( $lev == 1 ){
 	    $res .= pure_text( $$rstr );
 	} else {
-	    warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph.\n";
+	    warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph.\n" unless $Quiet;
 	}
     }
     return $res;
@@ -1686,7 +1686,7 @@ sub go_ahead($$$){
 	}
 	$res .= $2;
     }
-    warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph.\n";
+    warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph.\n" unless $Quiet;
     return $res;
 }
 
@@ -2069,7 +2069,7 @@ sub fragment_id {
 
 	# honour the perlfunc manpage: func [PAR[,[ ]PAR]...]
 	# and some funnies with ... Module ...
-	return $1 if $text =~ m{^([a-z\d]+)(\s+[A-Z\d,/& ]+)?$};
+	return $1 if $text =~ m{^([a-z\d_]+)(\s+[A-Z\d,/& ]+)?$};
 	return $1 if $text =~ m{^([a-z\d]+)\s+Module(\s+[A-Z\d,/& ]+)?$};
 
 	# text? normalize!
