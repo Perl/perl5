@@ -14,7 +14,14 @@ esac
 : This forces SH files to create target in same directory as SH file.
 : This is so that make depend always knows where to find SH derivatives.
 case "$0" in
-*/*) cd `expr X$0 : 'X\(.*\)/'` ;;
+*/Makefile.SH) cd `expr X$0 : 'X\(.*\)/'` ;;
+Makefile.SH) ;;
+*) case `pwd` in
+   */x2p) ;;
+   *) if test -d x2p; then cd x2p
+      else echo "Can't figure out where to write output."; exit 1
+	  fi;;
+   esac;;
 esac
 
 echo "Extracting x2p/Makefile (with variable substitutions)"
