@@ -315,7 +315,11 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	 */
 	{
 	    dTHXa(thread->interp);
-
+            /* Here we remove END blocks since they should only run
+	       in the thread they are created 
+            */
+            SvREFCNT_dec(PL_endav);
+            PL_endav = newAV();
             clone_param.flags = 0;
 	    thread->init_function = sv_dup(init_function, &clone_param);
 	    if (SvREFCNT(thread->init_function) == 0) {
