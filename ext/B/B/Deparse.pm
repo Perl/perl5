@@ -3114,13 +3114,13 @@ sub dq {
     } elsif ($type eq "concat") {
 	my $first = $self->dq($op->first);
 	my $last  = $self->dq($op->last);
-	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
-	if ($last =~ /^[A-Z\\\^\[\]_?]/) {
-	    $first =~ s/([\$@])\^$/${1}{^}/;  # "${^}W" etc
-        }
-	elsif ($last =~ /^[{\[\w]/) {
-	    $first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/;
-	}
+
+  	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
+	($last =~ /^[A-Z\\\^\[\]_?]/ &&
+	    $first =~ s/([\$@])\^$/${1}{^}/)  # "${^}W" etc
+	    || ($last =~ /^[{\[\w_]/ &&
+		$first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/);
+
 	return $first . $last;
     } elsif ($type eq "uc") {
 	return '\U' . $self->dq($op->first->sibling) . '\E';
