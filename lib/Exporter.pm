@@ -12,9 +12,13 @@ sub export {
     # First make import warnings look like they're coming from the "use".
     local $SIG{__WARN__} = sub {
 	my $text = shift;
-	$text =~ s/ at \S*Exporter.pm line \d+.*\n//;
-	local $Carp::CarpLevel = 1;	# ignore package calling us too.
-	Carp::carp($text);
+	if ($text =~ s/ at \S*Exporter.pm line \d+.*\n//) {
+	    local $Carp::CarpLevel = 1;	# ignore package calling us too.
+	    Carp::carp($text);
+	}
+	else {
+	    warn $text;
+	}
     };
     local $SIG{__DIE__} = sub {
 	Carp::croak("$_[0]Illegal null symbol in \@${1}::EXPORT")
@@ -246,7 +250,7 @@ In other files which wish to use ModuleName:
 =head1 DESCRIPTION
 
 The Exporter module implements a default C<import> method which
-many modules choose inherit rather than implement their own.
+many modules choose to inherit rather than implement their own.
 
 Perl automatically calls the C<import> method when processing a
 C<use> statement for a module. Modules and C<use> are documented
