@@ -10,7 +10,8 @@ my $defines = '-DPERL_EXT_RE_BUILD -DPERL_EXT_RE_DEBUG';
 # not but we need to remember that we pretended so we can avoid
 # linking to things that aren't there.
 
-if ($Config{'usedebugging_perl'} ne 'Y') {
+if ( (($Config{'ccflags'} !~ /DEBUGGING/) && $^O ne 'VMS') || 
+     (exists($Config{'usedebugging_perl'}) && $Config{'usedebugging_perl'} ne 'Y') ) {
   $defines .= ' -DDEBUGGING -DWAS_NOT_DEBUGGING';
 }
 
