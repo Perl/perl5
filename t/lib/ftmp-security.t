@@ -117,6 +117,11 @@ sub test_security {
   }
 
   # Explicitly 
+  if ( $< < File::Temp->top_system_uid() ){
+      skip("Skip Test inappropriate for root", 1);
+      eval q{ END { skip($skip,1); } 1; } || die;
+      return;
+  }
   my ($fh2, $fname2) = eval { tempfile ($template,  UNLINK => 1 ); };
   if (defined $fname2) {
       print "# fname2 = $fname2\n";
