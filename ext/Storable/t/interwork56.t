@@ -186,3 +186,15 @@ M,2XP,30@;VX@<&5R;"`U+C`P-C`P,0H40F5L9G5S8W4@=V%S(&-O<G)E8W0&
 
 end
 
+# byteorder      '1234'
+# sizeof(int)    4
+# sizeof(long)   4
+# sizeof(char *) 4
+# sizeof(NV)     12
+begin 101 Lillput,4,4,4,12
+M!`0$,3(S-`0$!`P"!`````HQ5&AI<R!F:6QE('=A<R!W<FET=&5N('=I=&@@
+M,2XP,30@;VX@<&5R;"`U+C`P-C`P,0H33&EL;'!U="!W87,@8V]R<F5C=`8"
+0````````@`H'5&AE($5N9```
+
+end
+
