@@ -10,7 +10,7 @@ tie *tst,Tie::StdHandle;
 
 $f = 'tst';
 
-print "1..12\n";   
+print "1..13\n";   
 
 # my $file tests
 
