@@ -4036,30 +4036,25 @@ Perl_my_atof(pTHX_ const char* s)
 NV
 S_mulexp10(NV value, I32 exponent)
 {
-    NV result = value;
+    NV result = 1.0;
     NV power = 10.0;
+    bool negative = 0;
     I32 bit;
 
-    if (exponent > 0) {
-	for (bit = 1; exponent; bit <<= 1) {
-	    if (exponent & bit) {
-		exponent ^= bit;
-		result *= power;
-	    }
-	    power *= power;
-	}
-    }
+    if (exponent == 0)
+	return value;
     else if (exponent < 0) {
+	negative = 1;
 	exponent = -exponent;
-	for (bit = 1; exponent; bit <<= 1) {
-	    if (exponent & bit) {
-		exponent ^= bit;
-		result /= power;
-	    }
-	    power *= power;
-	}
     }
-    return result;
+    for (bit = 1; exponent; bit <<= 1) {
+	if (exponent & bit) {
+	    exponent ^= bit;
+	    result *= power;
+	}
+	power *= power;
+    }
+    return negative ? value / result : value * result;
 }
 
 char*
