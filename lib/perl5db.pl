@@ -45,7 +45,7 @@ API, but for now, the variables are what we've got.
 
 =head2 Automated variable stacking via C<local()>
 
-As you may recall from reading L<perlop>, the C<local()> operator makes a 
+As you may recall from reading C<perlfunc>, the C<local()> operator makes a 
 temporary copy of a variable in the current scope. When the scope ends, the
 old copy is restored. This is often used in the debugger to handle the 
 automatic stacking of variables during recursive calls:
@@ -892,8 +892,9 @@ sub eval {
 # Changes: 1.20: Feb 17, 2003 Richard Foley <richard.foley@rfi.net>
 #   + pre'n'post commands no longer trashed with no args
 #   + watch val joined out of eval()
-# Changes: 1.21: Aug 04, 2002 Joe McMahon (mcmahon@ibiblio.org)
+# Changes: 1.21: Jun 04, 2002 Joe McMahon (mcmahon@ibiblio.org)
 #   + Added comments and reformatted source. No bug fixes/enhancements.
+#   + Includes cleanup by Robin Barker and Jarkko Hietaniemi.
 
 ####################################################################
 
@@ -2361,8 +2362,7 @@ C<$start>) in C<$cmd> to be executed later.
                     $cmd = 'l ' . ($start) . '+';
                 };
 
-=head3 PRE-580 COMMANDS VS. NEW COMMANDS: C<a, A, b, B, h, l, L, M, o, O, P, v,
-w, W, E<lt>, E<lt>E<lt>, {, {{>
+=head3 PRE-580 COMMANDS VS. NEW COMMANDS: C<a, A, b, B, h, l, L, M, o, O, P, v, w, W, E<lt>, E<lt>E<lt>, {, {{>
 
 In Perl 5.8.0, a realignment of the commands was done to fix up a number of
 problems, most notably that the default case of several commands destroying
