@@ -3447,4 +3447,10 @@
  */
 /*#define	HAS_USLEEP_PROTO	/ **/
 
+/* I_LANGINFO:
+ *	This symbol, if defined, indicates that <langinfo.h> exists and
+ *	should be included.
+ */
+/*#define	I_LANGINFO		/ **/
+
 #endif
