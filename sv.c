@@ -9380,7 +9380,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if ( *q == 'd' && sv_derived_from(vecsv,"version") )
 		{
 			q++; /* skip past the rest of the %vd format */
-			eptr = vecstr;
+			eptr = (char *) vecstr;
 			elen = strlen(eptr);
 			vectorize=FALSE;
 			goto string;
