@@ -259,7 +259,11 @@ struct packsize_t {
 /* ASCII */
 unsigned char size_normal[53] = {
   /* C */ sizeof(unsigned char),
+#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
   /* D */ LONG_DOUBLESIZE,
+#else
+  0,
+#endif
   0,
   /* F */ NVSIZE,
   0, 0,
@@ -270,7 +274,11 @@ unsigned char size_normal[53] = {
   0,
   /* N */ SIZE32,
   0, 0,
+#if defined(HAS_QUAD)
   /* Q */ sizeof(Uquad_t),
+#else
+  0,
+#endif
   0,
   /* S */ SIZE16,
   0,
@@ -290,7 +298,11 @@ unsigned char size_normal[53] = {
   /* n */ SIZE16,
   0,
   /* p */ sizeof(char *) | PACK_SIZE_CANNOT_ONLY_ONE | PACK_SIZE_CANNOT_CSUM,
+#if defined(HAS_QUAD)
   /* q */ sizeof(Quad_t),
+#else
+  0,
+#endif
   0,
   /* s */ SIZE16,
   0, 0,
@@ -339,7 +351,11 @@ unsigned char size_normal[99] = {
   /* n */ SIZE16,
   0,
   /* p */ sizeof(char *) | PACK_SIZE_CANNOT_ONLY_ONE | PACK_SIZE_CANNOT_CSUM,
+#if defined(HAS_QUAD)
   /* q */ sizeof(Quad_t),
+#else
+  0,
+#endif
   0, 0, 0, 0, 0, 0, 0, 0, 0,
   /* s */ SIZE16,
   0, 0,
@@ -348,7 +364,11 @@ unsigned char size_normal[99] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0,
   /* C */ sizeof(unsigned char),
+#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
   /* D */ LONG_DOUBLESIZE,
+#else
+  0,
+#endif
   0,
   /* F */ NVSIZE,
   0, 0,
@@ -360,7 +380,11 @@ unsigned char size_normal[99] = {
   0,
   /* N */ SIZE32,
   0, 0,
+#if defined(HAS_QUAD)
   /* Q */ sizeof(Uquad_t),
+#else
+  0,
+#endif
   0, 0, 0, 0, 0, 0, 0, 0, 0,
   /* S */ SIZE16,
   0,
@@ -407,6 +431,10 @@ S_measure_struct(pTHX_ register tempsym_t* symptr)
     register int size;
 
     while (next_symbol(symptr)) {
+	int which = (symptr->code & TYPE_IS_SHRIEKING)
+	    ? PACK_SIZE_SHRIEKING : PACK_SIZE_NORMAL;
+	int offset
+	    = TYPE_NO_MODIFIERS(symptr->code) - packsize[which].first;
 
         switch( symptr->howlen ){
         case e_no_len:
@@ -419,125 +447,86 @@ S_measure_struct(pTHX_ register tempsym_t* symptr)
             break;
         }
 
-        /* endianness doesn't influence the size of a type */
-	switch(TYPE_NO_ENDIANNESS(symptr->code)) {
-	default:
-            Perl_croak(aTHX_ "Invalid type '%c' in %s",
-                       (int)TYPE_NO_MODIFIERS(symptr->code),
-                       symptr->flags & FLAG_PACK ? "pack" : "unpack" );
-	case '@':
-	case '/':
-	case 'U':			/* XXXX Is it correct? */
-	case 'w':
-	case 'u':
-	    Perl_croak(aTHX_ "Within []-length '%c' not allowed in %s",
-                       (int)symptr->code,
-                       symptr->flags & FLAG_PACK ? "pack" : "unpack" );
-	case '%':
+	if ((offset >= 0) && (offset < packsize[which].size))
+	    size = packsize[which].array[offset] & PACK_SIZE_MASK;
+	else
 	    size = 0;
-	    break;
-	case '(':
-	{
-            tempsym_t savsym = *symptr;
-  	    symptr->patptr = savsym.grpbeg;
-            symptr->patend = savsym.grpend;
- 	    /* XXXX Theoretically, we need to measure many times at different
- 	       positions, since the subexpression may contain
- 	       alignment commands, but be not of aligned length.
- 	       Need to detect this and croak().  */
-	    size = measure_struct(symptr);
-            *symptr = savsym;
-	    break;
-	}
- 	case 'X' | TYPE_IS_SHRIEKING:
- 	    /* XXXX Is this useful?  Then need to treat MEASURE_BACKWARDS. */
- 	    if (!len)			/* Avoid division by 0 */
- 		len = 1;
- 	    len = total % len;		/* Assumed: the start is aligned. */
- 	    /* FALL THROUGH */
-	case 'X':
-	    size = -1;
-	    if (total < len)
-		Perl_croak(aTHX_ "'X' outside of string in %s",
-                          symptr->flags & FLAG_PACK ? "pack" : "unpack" );
-	    break;
- 	case 'x' | TYPE_IS_SHRIEKING:
- 	    if (!len)			/* Avoid division by 0 */
- 		len = 1;
- 	    star = total % len;		/* Assumed: the start is aligned. */
- 	    if (star)			/* Other portable ways? */
- 		len = len - star;
- 	    else
- 		len = 0;
- 	    /* FALL THROUGH */
-	case 'x':
-	case 'A':
-	case 'Z':
-	case 'a':
-	case 'c':
-	case 'C':
-	    size = 1;
-	    break;
-	case 'B':
-	case 'b':
-	    len = (len + 7)/8;
-	    size = 1;
-	    break;
-	case 'H':
-	case 'h':
-	    len = (len + 1)/2;
-	    size = 1;
-	    break;
 
+	if (!size) {
+	    /* endianness doesn't influence the size of a type */
+	    switch(TYPE_NO_ENDIANNESS(symptr->code)) {
+	    default:
+		Perl_croak(aTHX_ "Invalid type '%c' in %s",
+			   (int)TYPE_NO_MODIFIERS(symptr->code),
+			   symptr->flags & FLAG_PACK ? "pack" : "unpack" );
+	    case '@':
+	    case '/':
+	    case 'U':			/* XXXX Is it correct? */
+	    case 'w':
+	    case 'u':
+		Perl_croak(aTHX_ "Within []-length '%c' not allowed in %s",
+			   (int)symptr->code,
+			   symptr->flags & FLAG_PACK ? "pack" : "unpack" );
+	    case '%':
+		size = 0;
+		break;
+	    case '(':
+		{
+		    tempsym_t savsym = *symptr;
+		    symptr->patptr = savsym.grpbeg;
+		    symptr->patend = savsym.grpend;
+		    /* XXXX Theoretically, we need to measure many times at
+		       different positions, since the subexpression may contain
+		       alignment commands, but be not of aligned length.
+		       Need to detect this and croak().  */
+		    size = measure_struct(symptr);
+		    *symptr = savsym;
+		    break;
+		}
+	    case 'X' | TYPE_IS_SHRIEKING:
+		/* XXXX Is this useful?  Then need to treat MEASURE_BACKWARDS.
+		 */
+		if (!len)		/* Avoid division by 0 */
+		    len = 1;
+		len = total % len;	/* Assumed: the start is aligned. */
+		/* FALL THROUGH */
+	    case 'X':
+		size = -1;
+		if (total < len)
+		    Perl_croak(aTHX_ "'X' outside of string in %s",
+			       symptr->flags & FLAG_PACK ? "pack" : "unpack" );
+		break;
+	    case 'x' | TYPE_IS_SHRIEKING:
+		if (!len)		/* Avoid division by 0 */
+		    len = 1;
+		star = total % len;	/* Assumed: the start is aligned. */
+		if (star)		/* Other portable ways? */
+		    len = len - star;
+		else
+		    len = 0;
+		/* FALL THROUGH */
+	    case 'x':
+	    case 'A':
+	    case 'Z':
+	    case 'a':
+	    case 'c':
+	    case 'C':
+		size = 1;
+		break;
+	    case 'B':
+	    case 'b':
+		len = (len + 7)/8;
+		size = 1;
+		break;
+	    case 'H':
+	    case 'h':
+		len = (len + 1)/2;
+		size = 1;
+		break;
 
-	case 'P':
-	    len = 1;
-	    /* FALL THROUGH */
-	case 'p':
-	    size = sizeof(char*);
-	    break;
-
-	case 's' | TYPE_IS_SHRIEKING:
-	case 'S' | TYPE_IS_SHRIEKING:
-	case 'v' | TYPE_IS_SHRIEKING:
-	case 'n' | TYPE_IS_SHRIEKING:
-	case 'i' | TYPE_IS_SHRIEKING:
-	case 'I' | TYPE_IS_SHRIEKING:
-	case 'l' | TYPE_IS_SHRIEKING:
-	case 'L' | TYPE_IS_SHRIEKING:
-	case 'V' | TYPE_IS_SHRIEKING:
-	case 'N' | TYPE_IS_SHRIEKING:
-	case 'i':
-	case 'I':
-	case 'j':
-	case 'J':
-	case 'l':
-	case 's':
-	case 'v':
-	case 'n':
-	case 'S':
-	case 'V':
-	case 'N':
-	case 'L':
-#ifdef HAS_QUAD
-	case 'q':
-	case 'Q':
-#endif
-	case 'f':
-	case 'd':
-	case 'F':
-#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
-	case 'D':
-#endif
-	    {
-		int which = (symptr->code & TYPE_IS_SHRIEKING)
-		    ? PACK_SIZE_SHRIEKING : PACK_SIZE_NORMAL;
-		int offset
-		    = TYPE_NO_MODIFIERS(symptr->code) - packsize[which].first;
-		assert (offset >= 0);
-		assert (offset < packsize[which].size);
-		size = packsize[which].array[offset] & PACK_SIZE_MASK;
-		assert(size);
+	    case 'P':
+		len = 1;
+		size = sizeof(char*);
 		break;
 	    }
 	}

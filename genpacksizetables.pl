@@ -7,11 +7,14 @@ use Encode;
 my @lines = grep {!/^#/} <DATA>;
 
 sub addline {
-  my ($arrays, $chrmap, $letter, $arrayname, $noone, $nocsum, $size) = @_;
+  my ($arrays, $chrmap, $letter, $arrayname, $noone, $nocsum, $size,
+      $condition) = @_;
   my $line = "/* $letter */ $size";
   $line .= " | PACK_SIZE_CANNOT_ONLY_ONE" if $noone;
   $line .= " | PACK_SIZE_CANNOT_CSUM" if $nocsum;
   $line .= ",";
+  # And then the hack
+  $line = [$condition, $line] if $condition;
   $arrays->{$arrayname}->[ord $chrmap->{$letter}] = $line;
   # print ord $chrmap->{$letter}, " $line\n";
 }
@@ -21,16 +24,19 @@ sub output_tables {
 
   my $chrmap = shift;
   foreach (@_) {
-    my ($letter, $shriek, $noone, $nocsum, $size)
-      = /^([A-Za-z])(!?)\t(\S*)\t(\S*)\t(.*)/;
+    my ($letter, $shriek, $noone, $nocsum, $size, $condition)
+      = /^([A-Za-z])(!?)\t(\S*)\t(\S*)\t([^\t\n]+)(?:\t+(.*))?$/;
     die "Can't parse '$_'" unless $size;
 
+    if (defined $condition) {
+	$condition = join " && ", map {"defined($_)"} split ' ', $condition;
+    }
     unless ($size =~ s/^=//) {
       $size = "sizeof($size)";
     }
 
     addline (\%arrays, $chrmap, $letter, $shriek ? 'shrieking' : 'normal',
-	     $noone, $nocsum, $size);
+	     $noone, $nocsum, $size, $condition);
   }
 
   my %earliest;
@@ -43,10 +49,19 @@ sub output_tables {
     # Remove all the empty elements.
     splice @$array, 0, $earliest;
     print "unsigned char size_${arrayname}[", scalar @$array, "] = {\n";
-    my @lines = map {$_ || "0,"} @$array;
+    my @lines;
+    foreach (@$array) {
+	# There is an assumption here that the last entry isn't conditonal
+	if (ref $_) {
+	    push @lines, "#if $_->[0]", "  $_->[1]", "#else", "  0,", "#endif";
+	} else {
+	    push @lines, $_ ? "  $_" : "  0,";
+	}
+    }
     # remove the last, annoying, comma
-    chop $lines[$#lines];
-    print "  $_\n" foreach @lines;
+    die "Last entry was a conditional: '$lines[$#lines]'"
+	unless $lines[$#lines] =~ s/,$//;
+    print "$_\n" foreach @lines;
     print "};\n";
     $earliest{$arrayname} = $earliest;
   }
@@ -108,9 +123,9 @@ N!			=SIZE32
 L			=SIZE32
 p	*	*	char *
 w		*	char
-q			Quad_t
-Q			Uquad_t
+q			Quad_t	HAS_QUAD
+Q			Uquad_t	HAS_QUAD
 f			float
 d			double
 F			=NVSIZE
-D			=LONG_DOUBLESIZE
+D			=LONG_DOUBLESIZE	HAS_LONG_DOUBLE USE_LONG_DOUBLE
