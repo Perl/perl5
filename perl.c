@@ -3405,6 +3405,9 @@ S_init_ids(pTHX)
 bool
 Perl_doing_taint(int argc, char *argv[], char *envp[])
 {
+#ifdef WIN32
+ /* Doh - what is a uid anyway? */
+#else
     int uid  = PerlProc_getuid();
     int euid = PerlProc_geteuid();
     int gid  = PerlProc_getgid();
@@ -3416,6 +3419,7 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
 #endif
     if (uid && (euid != uid || egid != gid))
 	return 1;
+#endif /* Win32 */
     /* This is a really primitive check; environment gets ignored only
      * if -T are the first chars together; otherwise one gets
      *  "Too late" message. */
