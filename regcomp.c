@@ -3756,6 +3756,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    }
 
 	    if (!SIZE_ONLY) {
+		const char *what = NULL;
+		char yesno = 0;
+
 	        if (namedclass > OOB_NAMEDCLASS)
 		    optimize_invert = FALSE;
 		/* Possible truncation here but in some 64-bit environments
@@ -3771,7 +3774,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isALNUM(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsWord\n");	
+		    yesno = '+';
+		    what = "Word";	
 		    break;
 		case ANYOF_NALNUM:
 		    if (LOC)
@@ -3781,7 +3785,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isALNUM(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsWord\n");
+		    yesno = '!';
+		    what = "Word";
 		    break;
 		case ANYOF_ALNUMC:
 		    if (LOC)
@@ -3791,7 +3796,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isALNUMC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsAlnum\n");
+		    yesno = '+';
+		    what = "Alnum";
 		    break;
 		case ANYOF_NALNUMC:
 		    if (LOC)
@@ -3801,7 +3807,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isALNUMC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsAlnum\n");
+		    yesno = '!';
+		    what = "Alnum";
 		    break;
 		case ANYOF_ALPHA:
 		    if (LOC)
@@ -3811,7 +3818,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isALPHA(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsAlpha\n");
+		    yesno = '+';
+		    what = "Alpha";
 		    break;
 		case ANYOF_NALPHA:
 		    if (LOC)
@@ -3821,7 +3829,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isALPHA(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsAlpha\n");
+		    yesno = '!';
+		    what = "Alpha";
 		    break;
 		case ANYOF_ASCII:
 		    if (LOC)
@@ -3837,7 +3846,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			}
 #endif /* EBCDIC */
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsASCII\n");
+		    yesno = '+';
+		    what = "ASCII";
 		    break;
 		case ANYOF_NASCII:
 		    if (LOC)
@@ -3853,7 +3863,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			}
 #endif /* EBCDIC */
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsASCII\n");
+		    yesno = '!';
+		    what = "ASCII";
 		    break;
 		case ANYOF_BLANK:
 		    if (LOC)
@@ -3863,7 +3874,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isBLANK(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsBlank\n");
+		    yesno = '+';
+		    what = "Blank";
 		    break;
 		case ANYOF_NBLANK:
 		    if (LOC)
@@ -3873,7 +3885,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isBLANK(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsBlank\n");
+		    yesno = '!';
+		    what = "Blank";
 		    break;
 		case ANYOF_CNTRL:
 		    if (LOC)
@@ -3883,7 +3896,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isCNTRL(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsCntrl\n");
+		    yesno = '+';
+		    what = "Cntrl";
 		    break;
 		case ANYOF_NCNTRL:
 		    if (LOC)
@@ -3893,7 +3907,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isCNTRL(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsCntrl\n");
+		    yesno = '!';
+		    what = "Cntrl";
 		    break;
 		case ANYOF_DIGIT:
 		    if (LOC)
@@ -3903,7 +3918,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			for (value = '0'; value <= '9'; value++)
 			    ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsDigit\n");
+		    yesno = '+';
+		    what = "Digit";
 		    break;
 		case ANYOF_NDIGIT:
 		    if (LOC)
@@ -3915,7 +3931,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			for (value = '9' + 1; value < 256; value++)
 			    ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsDigit\n");
+		    yesno = '!';
+		    what = "Digit";
 		    break;
 		case ANYOF_GRAPH:
 		    if (LOC)
@@ -3925,7 +3942,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isGRAPH(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsGraph\n");
+		    yesno = '+';
+		    what = "Graph";
 		    break;
 		case ANYOF_NGRAPH:
 		    if (LOC)
@@ -3935,7 +3953,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isGRAPH(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsGraph\n");
+		    yesno = '!';
+		    what = "Graph";
 		    break;
 		case ANYOF_LOWER:
 		    if (LOC)
@@ -3945,7 +3964,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isLOWER(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsLower\n");
+		    yesno = '+';
+		    what = "Lower";
 		    break;
 		case ANYOF_NLOWER:
 		    if (LOC)
@@ -3955,7 +3975,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isLOWER(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsLower\n");
+		    yesno = '!';
+		    what = "Lower";
 		    break;
 		case ANYOF_PRINT:
 		    if (LOC)
@@ -3965,7 +3986,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isPRINT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsPrint\n");
+		    yesno = '+';
+		    what = "Print";
 		    break;
 		case ANYOF_NPRINT:
 		    if (LOC)
@@ -3975,7 +3997,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isPRINT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsPrint\n");
+		    yesno = '!';
+		    what = "Print";
 		    break;
 		case ANYOF_PSXSPC:
 		    if (LOC)
@@ -3985,7 +4008,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isPSXSPC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsSpace\n");
+		    yesno = '+';
+		    what = "Space";
 		    break;
 		case ANYOF_NPSXSPC:
 		    if (LOC)
@@ -3995,7 +4019,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isPSXSPC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsSpace\n");
+		    yesno = '!';
+		    what = "Space";
 		    break;
 		case ANYOF_PUNCT:
 		    if (LOC)
@@ -4005,7 +4030,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isPUNCT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsPunct\n");
+		    yesno = '+';
+		    what = "Punct";
 		    break;
 		case ANYOF_NPUNCT:
 		    if (LOC)
@@ -4015,7 +4041,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isPUNCT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsPunct\n");
+		    yesno = '!';
+		    what = "Punct";
 		    break;
 		case ANYOF_SPACE:
 		    if (LOC)
@@ -4025,7 +4052,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isSPACE(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsSpacePerl\n");
+		    yesno = '+';
+		    what = "SpacePerl";
 		    break;
 		case ANYOF_NSPACE:
 		    if (LOC)
@@ -4035,7 +4063,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isSPACE(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsSpacePerl\n");
+		    yesno = '!';
+		    what = "SpacePerl";
 		    break;
 		case ANYOF_UPPER:
 		    if (LOC)
@@ -4045,7 +4074,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isUPPER(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsUpper\n");
+		    yesno = '+';
+		    what = "Upper";
 		    break;
 		case ANYOF_NUPPER:
 		    if (LOC)
@@ -4055,7 +4085,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isUPPER(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsUpper\n");
+		    yesno = '!';
+		    what = "Upper";
 		    break;
 		case ANYOF_XDIGIT:
 		    if (LOC)
@@ -4065,7 +4096,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isXDIGIT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "+utf8::IsXDigit\n");
+		    yesno = '+';
+		    what = "XDigit";
 		    break;
 		case ANYOF_NXDIGIT:
 		    if (LOC)
@@ -4075,7 +4107,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isXDIGIT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
-		    Perl_sv_catpv(aTHX_ listsv, "!utf8::IsXDigit\n");
+		    yesno = '!';
+		    what = "XDigit";
 		    break;
 		case ANYOF_MAX:
 		    /* this is to handle \p and \P */
@@ -4083,6 +4116,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		default:
 		    vFAIL("Invalid [::] class");
 		    break;
+		}
+		if (what) {
+		    /* Strings such as "+utf8::isWord\n" */
+		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::Is%s\n", yesno, what);
 		}
 		if (LOC)
 		    ANYOF_FLAGS(ret) |= ANYOF_CLASS;
@@ -5157,5 +5194,5 @@ clear_re(pTHX_ void *r)
  * indent-tabs-mode: t
  * End:
  *
- * vim: expandtab shiftwidth=4:
+ * vim: shiftwidth=4:
 */
