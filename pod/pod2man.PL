@@ -36,7 +36,7 @@ $Config{startperl}
 print OUT <<'!NO!SUBS!';
 
 # pod2man -- Convert POD data to formatted *roff input.
-# $Id: pod2man.PL,v 1.3 2000/09/03 09:20:52 eagle Exp $
+# $Id: pod2man.PL,v 1.4 2000/11/19 05:47:46 eagle Exp $
 #
 # Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
@@ -80,7 +80,7 @@ do {
     @files = splice (@ARGV, 0, 2);
     $parser->parse_from_file (@files);
 } while (@ARGV);
-
+  
 __END__
 
 =head1 NAME
