@@ -103,7 +103,7 @@ sub AUTOLOAD {
 	my ($class) = $AUTOLOAD =~ m/(.*)::/g;
 	$AUTOLOAD =~ m/_ATTR_(.*?)_(.*)/ or
 	    croak "Can't locate class method '$AUTOLOAD' via package '$class'";
-	croak "Attribute handler '$3' doesn't handle $2 attributes";
+	croak "Attribute handler '$2' doesn't handle $1 attributes";
 }
 
 sub DESTROY {}
