@@ -1,8 +1,7 @@
 @menu
 pod:pod/perl.pod			Perl Overview (perl)
 pod:pod/perltoc.pod			Table of contents (perltoc)
-pod:pod/macperl.pod			Macintosh specific features
-pod:pod/macperlbook.pod			MacPerl book information
+pod:pod/macperl.pod			Macintosh specific features (macperl)
 @sub				Macintosh Toolbox Modules
 pod:lib/Mac/Toolbox.pod			Overview
 @sep
@@ -100,6 +99,7 @@ pod:pod/perlmod.pod			How they work (perlmod)
 pod:pod/perlmodlib.pod			How to write and use (perlmodlib)
 pod:pod/perlmodinstall.pod		How to install from CPAN (perlmodinstall)
 pod:pod/perlnewmod.pod			Preparing a new module for distribution (perlnewmod)
+pod:pod/macperlbundled.pod		Modules Bundled with MacPerl (macperlbundled)
 @end
 @sub				Interfacing to C
 pod:pod/perlcompile.pod			Compiler suite intro (perlcompile)
@@ -129,7 +129,8 @@ pod:pod/perldebug.pod			Debugging (perldebug)
 pod:pod/perlstyle.pod			Style guide (perlstyle)
 pod:pod/perlpod.pod			Documentation format (perlpod)
 pod:pod/perlbook.pod			Book information (perlbook)
-pod:pod/perlhist.pod			Book information (perlhist)
+pod:pod/macperlbook.pod			MacPerl book information (macperlbook)
+pod:pod/perlhist.pod			History records (perlhist)
 pod:pod/perldelta.pod			New for Perl 5.6 (perldelta)
 pod:pod/perl5005delta.pod		New for Perl 5.005 (perl5005delta)
 pod:pod/perl5004delta.pod		New for Perl 5.004 (perl5004delta)
