@@ -42,6 +42,10 @@
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
+/* Note that from here --> to <-- the same logic is
+ * repeated in makedef.pl, so be certain to update
+ * both places when editing. */
+
 #ifdef PERL_IMPLICIT_SYS
 /* PERL_IMPLICIT_SYS implies PerlMemShared != PerlMem
    so use slab allocator to avoid lots of MUTEX overhead
@@ -68,6 +72,8 @@
 #    define PERL_IMPLICIT_CONTEXT
 #  endif
 #endif
+
+/* <--- here ends the logic shared by perl.h and makedef.pl */
 
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifdef USE_5005THREADS
