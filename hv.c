@@ -960,7 +960,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         } else {
             PERL_HASH(hash, key, klen);
         }
-	PERL_HASH(hash, key, klen);
     }
 
     masked_flags = (k_flags & HVhek_MASK);
