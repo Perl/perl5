@@ -958,7 +958,7 @@ static	u_int goodsbrk;
 static void
 botch(char *diag, char *s)
 {
-	dTHXo;
+	dTHX;
 	PerlIO_printf(PerlIO_stderr(), "assertion botched (%s?): %s\n", diag, s);
 	PerlProc_abort();
 }
@@ -1043,13 +1043,13 @@ Perl_malloc(register size_t nbytes)
 	/* remove from linked list */
 #if defined(RCHECK)
 	if ((PTR2UV(p)) & (MEM_ALIGNBYTES - 1)) {
-	    dTHXo;
+	    dTHX;
 	    PerlIO_printf(PerlIO_stderr(),
 			  "Unaligned pointer in the free chain 0x%"UVxf"\n",
 			  PTR2UV(p));
 	}
 	if ((PTR2UV(p->ov_next)) & (MEM_ALIGNBYTES - 1)) {
-	    dTHXo;
+	    dTHX;
 	    PerlIO_printf(PerlIO_stderr(),
 			  "Unaligned `next' pointer in the free "
 			  "chain 0x"UVxf" at 0x%"UVxf"\n",
@@ -1513,7 +1513,7 @@ Perl_mfree(void *mp)
 	    {
 		static int bad_free_warn = -1;
 		if (bad_free_warn == -1) {
-		    dTHXo;
+		    dTHX;
 		    char *pbf = PerlEnv_getenv("PERL_BADFREE");
 		    bad_free_warn = (pbf) ? atoi(pbf) : 1;
 		}
@@ -1521,9 +1521,13 @@ Perl_mfree(void *mp)
 		    return;
 #ifdef RCHECK
 #ifdef PERL_CORE
-		if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-		  Perl_warner(WARN_MALLOC, "%s free() ignored",
-		    ovp->ov_rmagic == RMAGIC - 1 ? "Duplicate" : "Bad");
+		{
+		    dTHX;
+		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
+			Perl_warner(WARN_MALLOC, "%s free() ignored",
+				    ovp->ov_rmagic == RMAGIC - 1 ?
+				    "Duplicate" : "Bad");
+		}
 #else
 		warn("%s free() ignored",
 		    ovp->ov_rmagic == RMAGIC - 1 ? "Duplicate" : "Bad");
@@ -1606,7 +1610,7 @@ Perl_realloc(void *mp, size_t nbytes)
 	    {
 		static int bad_free_warn = -1;
 		if (bad_free_warn == -1) {
-		    dTHXo;
+		    dTHX;
 		    char *pbf = PerlEnv_getenv("PERL_BADFREE");
 		    bad_free_warn = (pbf) ? atoi(pbf) : 1;
 		}
@@ -1614,10 +1618,14 @@ Perl_realloc(void *mp, size_t nbytes)
 		    return Nullch;
 #ifdef RCHECK
 #ifdef PERL_CORE
-		if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-		  Perl_warner(WARN_MALLOC, "%srealloc() %signored",
-		    (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
-		     ovp->ov_rmagic == RMAGIC - 1 ? "of freed memory " : "");
+		{
+		    dTHX;
+		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
+			Perl_warner(WARN_MALLOC, "%srealloc() %signored",
+				    (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
+				    ovp->ov_rmagic == RMAGIC - 1
+				    ? "of freed memory " : "");
+		}
 #else
 		warn("%srealloc() %signored",
 		    (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
