@@ -275,6 +275,33 @@ perl_construct(pTHXx)
 
     PL_stashcache = newHV();
 
+#if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
+    /* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0 */
+    {
+       char *s = PerlEnv_getenv("PERL_HASH_SEED");
+       if (s)
+           while (isSPACE(*s)) s++;
+       if (s && isDIGIT(*s))
+           PL_hash_seed = (UV)atoi(s);
+#ifndef USE_HASH_SEED_EXPLICIT
+       else {
+           /* Compute a random seed */
+           (void)seedDrand01((Rand_seed_t)seed());
+           PL_srand_called = TRUE;
+           PL_hash_seed = (UV)(Drand01() * (NV)UV_MAX);
+#if RANDBITS < (UVSIZE * 8)
+           {
+               int skip = (UVSIZE * 8) - RANDBITS;
+               PL_hash_seed >>= skip;
+               /* The low bits might need extra help. */
+               PL_hash_seed += (UV)(Drand01() * ((1 << skip) - 1));
+           }
+#endif /* RANDBITS < (UVSIZE * 8) */
+       }
+#endif /* USE_HASH_SEED_EXPLICIT */
+    }
+#endif /* #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) */
+
     ENTER;
 }
 

@@ -836,6 +836,36 @@ Configure should detect this problem and warn you about problems with
 _exit vs. exit.  If you have this problem, the fix is to go back to
 your sfio sources and correct iffe's guess about atexit.
 
+=head2 Algorithmic Complexity Attacks on Hashes
+
+In Perls 5.8.0 and earlier it was easy to create degenerate hashes.
+Processing such hashes would consume large amounts of CPU time,
+causing a "Denial of Service" attack against Perl.  Such hashes may be
+a problem for example for mod_perl sites, sites with Perl CGI scripts
+and web services, that process data originating from external sources.
+
+In Perl 5.8.1 a security feature was introduced to make it harder
+to create such degenerate hashes.
+
+Because of this feature the keys(), values(), and each() functions
+will return the hash elements in different order between different
+runs of Perl even with the same data.  One can still revert to the old
+predictable order by setting the environment variable PERL_HASH_SEED,
+see L<perlrun>.  Another option is to add -DUSE_HASH_SEED_EXPLICIT to
+the compilation flags, in which case one has to explicitly set the
+PERL_HASH_SEED environment variable to enable the security feature,
+or -DNO_HASH_SEED to completely disable the feature.
+
+B<Perl does not guarantee any ordering of the hash keys>, and the
+ordering has already changed several times during the lifetime of
+Perl 5.  Also, the ordering of hash keys already (in Perl 5.8.0 and
+earlier) depends on the insertion order.
+
+Note that because of this randomisation for example the Data::Dumper
+results will be different between different runs of Perl since
+Data::Dumper by default dumps hashes "unordered".  The use of the
+Data::Dumper C<Sortkeys> filter is recommended.
+
 =head2 SOCKS
 
 Perl can be configured to be 'socksified', that is, to use the SOCKS
