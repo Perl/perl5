@@ -289,15 +289,17 @@ sub which_perl {
 	# which is a bit heavyweight to do here.
 	
 	if ($Perl =~ /^perl\Q$exe\E$/i) {
+	    my $perl = "perl$exe";
 	    eval "require File::Spec";
 	    if ($@) {
 		warn "test.pl had problems loading File::Spec: $@";
+		$Perl = "./$perl";
 	    } else {
-		$Perl = File::Spec->catfile(File::Spec->curdir(), "perl$exe");
+		$Perl = File::Spec->catfile(File::Spec->curdir(), $perl);
 	    }
 	}
 	
-	warn "which_perl: cannot find perl from $^X" unless -f $Perl;
+	warn "which_perl: cannot find $Perl from $^X" unless -f $Perl;
 	
 	# For subcommands to use.
 	$ENV{PERLEXE} = $Perl;
