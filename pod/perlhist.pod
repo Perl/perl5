@@ -363,6 +363,8 @@ the strings?).
           5.8.1-RC5     2003-Sep-22
           5.8.1         2003-Sep-25
 
+Hugo      5.9.0         2003-Oct-27
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
