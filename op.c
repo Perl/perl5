@@ -2112,8 +2112,12 @@ Perl_fold_constants(pTHX_ register OP *o)
 	return o;
 
     if (!(PL_hints & HINT_INTEGER)) {
-	if (type == OP_DIVIDE || !(o->op_flags & OPf_KIDS))
+	if (type == OP_MODULO
+	    || type == OP_DIVIDE
+	    || !(o->op_flags & OPf_KIDS))
+	{
 	    return o;
+	}
 
 	for (curop = ((UNOP*)o)->op_first; curop; curop = curop->op_sibling) {
 	    if (curop->op_type == OP_CONST) {

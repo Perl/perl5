@@ -1,8 +1,6 @@
 #!./perl
 
-# $RCSfile: int.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:00 $
-
-print "1..4\n";
+print "1..6\n";
 
 # compile time evaluation
 
@@ -15,3 +13,12 @@ if (int(-1.234) == -1) {print "ok 2\n";} else {print "not ok 2\n";}
 $x = 1.234;
 if (int($x) == 1) {print "ok 3\n";} else {print "not ok 3\n";}
 if (int(-$x) == -1) {print "ok 4\n";} else {print "not ok 4\n";}
+
+$x = length("abc") % -10;
+print $x == -7 ? "ok 5\n" : "# expected -7, got $x\nnot ok 5\n";
+
+{
+    use integer;
+    $x = length("abc") % -10;
+    print $x == 3 ? "ok 6\n" : "# expected 3, got $x\nnot ok 6\n";
+}
