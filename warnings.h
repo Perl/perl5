@@ -22,6 +22,9 @@
 
 #define specialWARN(x)		((x) == pWARN_STD || (x) == pWARN_ALL ||	\
 				 (x) == pWARN_NONE)
+
+/* Warnings Categories added in Perl 5.008 */
+
 #define WARN_ALL		0
 #define WARN_CLOSURE		1
 #define WARN_DEPRECATED		2

@@ -129,6 +129,9 @@ See L<perlmodlib/Pragmatic Modules> and L<perllexwarn>.
 use Carp ;
 
 %Offsets = (
+
+    # Warnings Categories added in Perl 5.008
+
     'all'		=> 0,
     'closure'		=> 2,
     'deprecated'	=> 4,
@@ -419,4 +422,5 @@ sub warnif
 
     carp($message) ;
 }
+
 1;
