@@ -2758,9 +2758,8 @@ PP(pp_unshift)
     MAGIC *mg;
 
     if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
-
-
 	*MARK-- = mg->mg_obj;
+	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
 	perl_call_method("UNSHIFT",G_SCALAR|G_DISCARD);
