@@ -87,7 +87,7 @@ sub Q ;
 
 # Global Constants
 
-$XSUBPP_version = "1.9504";
+$XSUBPP_version = "1.9505";
 
 my ($Is_VMS, $SymSet);
 if ($^O eq 'VMS') {
@@ -294,7 +294,7 @@ sub print_section {
     do { $_ = shift(@line) } while !/\S/ && @line;
     
     print("#line ", $line_no[@line_no - @line -1], " \"$filename\"\n")
-	if $WantLineNumbers && !/^\s*#\s*line\b/;
+	if $WantLineNumbers && !/^\s*#\s*line\b/ && !/^#if XSubPPtmp/;
     for (;  defined($_) && !/^$BLOCK_re/o;  $_ = shift(@line)) {
 	print "$_\n";
     }
