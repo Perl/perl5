@@ -290,6 +290,7 @@ PPCODE:
     GvHV(PL_incgv) = (HV*)SvREFCNT_inc(GvHV(gv_HVadd(gv_fetchpv("INC",TRUE,SVt_PVHV))));
 
     PUSHMARK(SP);
+    CvDEFSTASH(SvRV(codesv)) = PL_defstash;
     perl_call_sv(codesv, GIMME|G_EVAL|G_KEEPERR); /* use callers context */
     SPAGAIN; /* for the PUTBACK added by xsubpp */
     LEAVE;

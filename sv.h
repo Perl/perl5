@@ -322,7 +322,7 @@ struct xpvbm {
     U8		xbm_rare;	/* rarest character in string */
 };
 
-/* This structure much match XPVCV in cv.h */
+/* This structure must match XPVCV in cv.h */
 
 typedef U16 cv_flags_t;
 
@@ -350,6 +350,7 @@ struct xpvfm {
     struct perl_thread *xcv_owner;	/* current owner thread */
 #endif /* USE_THREADS */
     cv_flags_t	xcv_flags;
+    HV *	xcv_defstash;
 
     I32		xfm_lines;
 };

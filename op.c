@@ -4202,6 +4202,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	SvREFCNT_dec((SV*)CvXSUBANY(cv).any_ptr);
 	CvCONST_off(cv);
     }
+    CvDEFSTASH(cv) = Nullhv;
     if (CvPADLIST(cv)) {
 	/* may be during global destruction */
 	if (SvREFCNT(CvPADLIST(cv))) {
@@ -4319,6 +4320,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     CvGV(cv)		= CvGV(proto);
     CvSTASH(cv)		= CvSTASH(proto);
     CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
+    CvDEFSTASH(cv)	= CvDEFSTASH(proto);
     CvSTART(cv)		= CvSTART(proto);
     if (outside)
 	CvOUTSIDE(cv)	= (CV*)SvREFCNT_inc(outside);
@@ -4710,6 +4712,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
 	cv_undef(cv);
 	CvFLAGS(cv) = CvFLAGS(PL_compcv);
+	CvDEFSTASH(cv) = CvDEFSTASH(PL_compcv);
 	CvOUTSIDE(cv) = CvOUTSIDE(PL_compcv);
 	CvOUTSIDE(PL_compcv) = 0;
 	CvPADLIST(cv) = CvPADLIST(PL_compcv);
@@ -5045,6 +5048,7 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
     CvFILE(cv) = filename;	/* NOTE: not copied, as it is expected to be
 				   an external constant string */
     CvXSUB(cv) = subaddr;
+    CvDEFSTASH(cv) = PL_defstash;
 
     if (name) {
 	char *s = strrchr(name,':');

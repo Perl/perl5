@@ -7437,6 +7437,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     PL_compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)PL_compcv, is_format ? SVt_PVFM : SVt_PVCV);
     CvFLAGS(PL_compcv) |= flags;
+    CvDEFSTASH(PL_compcv) = PL_defstash;
 
     PL_comppad = newAV();
     av_push(PL_comppad, Nullsv);
