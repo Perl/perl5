@@ -272,6 +272,16 @@ const char *mode;
  return fdopen(fd,mode);
 }
 
+#undef PerlIO_reopen
+PerlIO * 
+PerlIO_reopen(fd,mode)
+char *name;
+char *mode;
+PerlIO *f;
+const char *mode;
+{
+ return freopen(name,mode,f);
+}
 
 #undef PerlIO_close
 int      
@@ -287,6 +297,19 @@ PerlIO_eof(f)
 PerlIO *f;
 {
  return feof(f);
+}
+
+#undef PerlIO_getname
+char *
+PerlIO_getname(f,buf)
+PerlIO *f;
+char *buf;
+{
+#ifdef VMS
+ return fgetname(f,buf);
+#else
+ croak("Don't know how to get file name");
+#endif
 }
 
 #undef PerlIO_getc
@@ -584,7 +607,7 @@ va_list ap;
  int val = vsprintf(s, fmt, ap);
  if (n >= 0)
   {
-   if (strlen(s) >= n)
+   if (strlen(s) >= (STRLEN)n)
     {
      PerlIO_puts(PerlIO_stderr(),"panic: sprintf overflow - memory corrupted!\n");
      my_exit(1);
