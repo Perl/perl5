@@ -694,12 +694,23 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		cddir = savepv(s);
 	    break;
 	case '-':
+	    if (*++s) { /* catch use of gnu style long options */
+		if (strEQ(s, "version")) {
+		    s = "v";
+		    goto reswitch;
+		}
+		if (strEQ(s, "help")) {
+		    s = "h";
+		    goto reswitch;
+		}
+		croak("Unrecognized switch: --%s  (-h will show valid options)",s);
+	    }
 	    argc--,argv++;
 	    goto switch_end;
 	case 0:
 	    break;
 	default:
-	    croak("Unrecognized switch: -%s",s);
+	    croak("Unrecognized switch: -%s  (-h will show valid options)",s);
 	}
     }
   switch_end:
@@ -1310,7 +1321,7 @@ char *name;
     printf("\n  -U              allow unsafe operations");
     printf("\n  -v              print version number and patchlevel of perl");
     printf("\n  -V[:variable]   print perl configuration information");
-    printf("\n  -w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT.");
+    printf("\n  -w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT. Recommended.");
     printf("\n  -x[directory]   strip off text before #!perl line and perhaps cd to directory\n");
 }
 
@@ -2323,6 +2334,7 @@ static void
 init_lexer()
 {
     tmpfp = rsfp;
+    rsfp = Nullfp;
     lex_start(linestr);
     rsfp = tmpfp;
     subname = newSVpv("main",4);

@@ -57,7 +57,7 @@ POSIX_cflags='ccflags="$ccflags -DSTRUCT_TM_HASZONE"'
 # manually set groupstype='gid_t' and add explicit references to 
 # /usr/5lib when Configure prompts you for where to look for libraries.
 #
-# check if user is in a bsd or system 5 type environment
+# Check if user is in a bsd or system 5 type environment
 if cat -b /dev/null 2>/dev/null
 then # bsd
       groupstype='int'

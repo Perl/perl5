@@ -362,7 +362,7 @@ install.man:	all installman
 # XXX Experimental. Hardwired values, but useful for testing.
 # Eventually Configure could ask for some of these values.
 install.html: all installhtml
-	./installhtml                   \
+	./perl installhtml                   \
       --podroot=. --podpath=. --recurse  \
       --htmldir=$(privlib)/html     \
       --htmlroot=$(privlib)/html    \

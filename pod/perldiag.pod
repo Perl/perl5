@@ -2536,7 +2536,7 @@ script, a binary program, or a directory as a Perl program.
 (F) You specified a signal name to the kill() function that was not recognized.
 Say C<kill -l> in your shell to see the valid signal names on your system.
 
-=item Unrecognized switch: -%s
+=item Unrecognized switch: -%s  (-h will show valid options)
 
 (F) You specified an illegal option to Perl.  Don't do that.
 (If you think you didn't do that, check the #! line to see if it's

@@ -162,8 +162,8 @@
  EOCP
  : check sys/file.h first to get FREAD on Sun
  if $test `./findhdr sys/file.h` && \
--        $cc $ccflags "-DI_SYS_FILE" -o open3 $ldflags open3.c $libs ; then
-+        $cc $ldflags $ccflags "-DI_SYS_FILE" -o open3 $ldflags open3.c $libs ; then
+-        $cc $ccflags "-DI_SYS_FILE" -o open3 $ldflags open3.c $libs >/dev/null 2>&1 ; then
++        $cc $ldflags $ccflags "-DI_SYS_FILE" -o open3 $ldflags open3.c $libs >/dev/null 2>&1 ; then
  	h_sysfile=true;
  	echo "<sys/file.h> defines the O_* constants..." >&4
  	if ./open3; then
@@ -171,8 +171,8 @@
  		val="$undef"
  	fi
  elif $test `./findhdr fcntl.h` && \
--        $cc $ccflags "-DI_FCNTL" -o open3 $ldflags open3.c $libs ; then
-+        $cc $ldflags $ccflags "-DI_FCNTL" -o open3 $ldflags open3.c $libs ; then
+-        $cc $ccflags "-DI_FCNTL" -o open3 $ldflags open3.c $libs >/dev/null 2>&1 ; then
++        $cc $ldflags $ccflags "-DI_FCNTL" -o open3 $ldflags open3.c $libs >/dev/null 2>&1 ; then
  	h_fcntl=true;
  	echo "<fcntl.h> defines the O_* constants..." >&4
  	if ./open3; then

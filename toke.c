@@ -385,6 +385,8 @@ register char *s;
 		PerlIO_clearerr(rsfp);
 	    else
 		(void)PerlIO_close(rsfp);
+	    if (e_fp == rsfp)
+		e_fp = Nullfp;
 	    rsfp = Nullfp;
 	    return s;
 	}
@@ -1545,6 +1547,8 @@ yylex()
 			PerlIO_clearerr(rsfp);
 		    else
 			(void)PerlIO_close(rsfp);
+		    if (e_fp == rsfp)
+			e_fp = Nullfp;
 		    rsfp = Nullfp;
 		}
 		if (!in_eval && (minus_n || minus_p)) {

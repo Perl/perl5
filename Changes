@@ -48,6 +48,183 @@ And the Keepers of the Patch Pumpkin:
 
 
 ----------------
+Version 5.004_03        Maintenance release 3 for 5.004
+----------------
+
+"To err is human, to forgive divine."
+  -- Alexander Pope
+
+
+  HEADLINES FOR THIS MAINTENANCE RELEASE
+
+    Fixed 5.004_02 compilation failure on VMS.
+    Fixed Configure (non)errors being displayed to user.
+    Better support for Windows 95.
+    Assorted documentation and hint file improvements.
+    perl --foo no longer silently ignored.
+
+
+  ------  BUILD PROCESS  ------
+
+  Title:  "Show Configure failure reason even with -s"
+   From:  Andy Dougherty <doughera@newton.phys.lafayette.edu>
+ Msg-ID:  <Pine.SUN.3.96.970812141623.14256K-100000@newton.phys>
+  Files:  Configure
+
+  Title:  "Configure can stop without fully explaining itself"
+   From:  Jim Anderson <jander@ml.com>
+ Msg-ID:  <199708111328.JAA28976@nsd15.ny-swaps-develop.ml.com>,
+          <199708111952.PAA29346@nsd15.ny-swaps-develop.ml.com>
+  Files:  Configure
+
+  ------  CORE LANGUAGE  ------
+
+  Title:  "typos in perl -h output"
+   From:  "Richard A. Wells" <Rwells@uhs.harvard.edu>
+ Msg-ID:  <6D0BF914BC@gateuhs.harvard.edu>
+  Files:  perl.c
+
+  Title:  "Some perldb -> PERLDB_* macro changes were missed"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199708100323.XAA27155@monk.mps.ohio-state.edu>
+  Files:  pp_ctl.c
+
+  Title:  "Further fix to lseek's in lockf_emulate_flock"
+   From:  Hallvard B Furuseth <h.b.furuseth@usit.uio.no>
+ Msg-ID:  <199708060031.CAA07387@bombur2.uio.no>,
+          <199708102225.AAA16970@bombur2.uio.no>
+  Files:  pp_sys.c
+
+  Title:  "GNU style perl --version (or any other --foo) ignored"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, Kenneth Albanowski
+          <kjahds@kjahds.com>, Stephen McCamant <alias@mcs.com>
+ Msg-ID:  <E0wx8MO-0007BS-00@ursa.cus.cam.ac.uk>,
+          <Pine.LNX.3.93.970813122557.9443C-100000@kjahds.com>,
+          <m0wy8nl-000EYgC@alias-2.pr.mcs.net>
+  Files:  pod/perldiag.pod perl.c
+
+  Title:  "seen_dot declaration in perl.c needed for VMS"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199708072033.QAA09167@aatma.engin.umich.edu>
+  Files:  perl.c
+
+  ------  DOCUMENTATION  ------
+
+  Title:  "[PATCH] -D info in perlrun", "[PATCH] Re: -D info in perlrun"
+   From:  Stephen McCamant <alias@mcs.com>, ilya@math.ohio-state.edu (Ilya
+          Zakharevich)
+ Msg-ID:  <1997Aug10.195832.2224477@hmivax.humgen.upenn.edu>,
+          <m0wxNNL-000EYgC@alias-2.pr.mcs.net>,
+          <m0wxz6l-000EYgC@alias-2.pr.mcs.net>
+  Files:  pod/perlrun.pod
+
+  Title:  "perlop pod inconsistent in presentation of regexp options"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, Hans Mulder <hansm@icgned.nl>,
+          jmr@whirlwind.fmr.com
+ Msg-ID:  <199708061404.KAA06717@whirlwind.fmr.com>,
+          <199708081505.LAA09810@whirlwind.fmr.com>,
+          <1997Aug7.160530.2196011@hmivax.humgen.upenn.edu>,
+          <E0wwnqc-00057s-00@ursa.cus.cam.ac.uk>,
+          <E0wwswg-00017x-00@ursa.cus.cam.ac.uk>
+  Files:  pod/perlop.pod
+
+  Title:  "pod2man generated .IX lines upset whatis on Solaris"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, jmr@whirlwind.fmr.com (John
+          Redford)
+ Msg-ID:  <E0wxoUZ-0006Ee-00@ursa.cus.cam.ac.uk>
+  Files:  pod/pod2man.PL
+
+  Title:  "The description of the \Q metacharacter is confusing to novices"
+   From:  aml@world.std.com (Andrew M. Langmead)
+ Msg-ID:  <199708101946.AA06339@world.std.com>
+  Files:  pod/perlre.pod
+
+  Title:  "doc patch for pack("p",undef) packing a NULL pointer"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9708102159.AA11726@claudius.bfsec.bt.co.uk>
+  Files:  pod/perldelta.pod pod/perlfunc.pod
+
+  Title:  "perlfunc.pod error"
+   From:  Tom Christiansen <tchrist@jhereg.perl.com>
+ Msg-ID:  <199708102235.QAA18420@jhereg.perl.com>
+  Files:  pod/perlfunc.pod
+
+  ------  LIBRARY AND EXTENSIONS  ------
+
+  Title:  "patch for documentation error in FileCache.pm"
+   From:  Mike Stok <mike@stok.co.uk>, mikebo@tellabs.com
+ Msg-ID:  <Pine.LNX.3.95.970810143321.437C-100000@stok.co.uk>
+  Files:  lib/FileCache.pm
+
+  Title:  "[PATCH] 5.004_02: Complex/Trig: update"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199708081842.VAA31214@alpha.hut.fi>
+  Files:  lib/Math/Complex.pm lib/Math/Trig.pm t/lib/complex.t
+
+  Title:  "CPAN Use of uninitialized value in newest perl"
+   From:  tom@amber.ssd.hcsc.com (Tom Horsley)
+ Msg-ID:  <9708091738.AA16435@amber.ssd.hcsc.com>
+  Files:  lib/CPAN.pm
+
+  ------  PORTABILITY - WIN32  ------
+
+  Title:  "[PATCH] /x is not a valid shell switch on Win95"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199708121720.NAA14760@aatma.engin.umich.edu>
+  Files:  win32/win32.c
+
+  Title:  "[PATCH] Win95-proofing pl2bat"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199708121733.NAA14888@aatma.engin.umich.edu>
+  Files:  MANIFEST win32/Makefile win32/makefile.mk win32/bin/pl2bat.pl
+          win32/bin/runperl.pl win32/bin/search.pl
+          win32/bin/webget.pl
+
+  Title:  "[PATCH] [OK] Perl5.004_02 on Alpha NT"
+   From:  wmiddlet@adobe.com (William Middleton)
+ Msg-ID:  <199708072100.OAA13141@ducks>
+  Files:  win32/win32.c
+
+  ------  PORTABILITY - OTHER  ------
+
+  Title:  "Improve dual-universe comments in hints/sunos_4_1.sh"
+   From:  Andy Dougherty <doughera@newton.phys.lafayette.edu>
+ Msg-ID:  <Pine.SUN.3.96.970812170358.14488E-100000@newton.phys>
+  Files:  hints/sunos_4_1.sh
+
+  Title:  "Dynamic Loading on MkLinux (osname=linux,archname=ppc-linux)"
+   From:  Chris Nandor <pudge@pobox.com>, Shimpei Yamashita
+          <shimpei@socrates.patnet.caltech.edu>
+ Msg-ID:  <33EF1634.B36B6500@pobox.com>
+  Files:  hints/linux.sh
+
+  Title:  "5.004_02 Configure - worrying but normal errors displayed to user"
+   From:  Paul Marquess <pmarquess@bfsec.bt.co.uk>, pmarquess@bfsec.bt.co.uk
+          (Paul Marquess)
+ Msg-ID:  <01BCA3DE.E257BFC0.pmarquess@bfsec.bt.co.uk>,
+          <9708102159.AA11726@claudius.bfsec.bt.co.uk>
+  Files:  Configure os2/diff.configure
+
+  Title:  "Minor glitch with Perl 5.004_01 on SunOS 4.1.3 (groupstype)"
+   From:  thad@thadlabs.com (Thad Floryan)
+ Msg-ID:  <9708111415.AA03808@thadlabs.com>
+  Files:  hints/sunos_4_1.sh
+
+  Title:  "SCO Openserver 5.0.4 - add comment to hint file re compiler bug"
+   From:  Bill Glicker <billg@burrelles.com>
+ Msg-ID:  <Pine.SCO.3.96.970811153021.18457A-100000@laura.burrelles.com>
+  Files:  hints/sco.sh
+
+  ------  UTILITIES  ------
+
+  Title:  "perlbug -d non-interactive (with patch)"
+   From:  Ted Ashton <ashted@southern.edu>
+ Msg-ID:  <199708071418.KAA15711@ns.southern.edu>
+  Files:  utils/perlbug.PL
+
+
+
+----------------
 Version 5.004_02        Maintenance release 2 for 5.004
 ----------------
 
