@@ -738,7 +738,7 @@ _realcleaner:
 _verycleaner: 
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=veryclean
 	@$(LDLIBPTH) $(MAKE) _cleaner2
-	-rm -f *~ *.orig */*~ */*.orig
+	-rm -f *~ *.orig */*~ */*.orig */*/*~ */*/*.orig
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.
