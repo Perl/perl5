@@ -1793,6 +1793,8 @@ this, NEXTKEY this, lastkey, DESTROY this
 TIEHANDLE classname, LIST, WRITE this, LIST, PRINT this, LIST, PRINTF this,
 LIST, READ this, LIST, READLINE this, GETC this, CLOSE this, DESTROY this
 
+=item UNTIE this
+
 =item The C<untie> Gotcha
 
 =back
@@ -2364,11 +2366,11 @@ chr(), ord(), pack(), print(), printf(), sort(), sprintf(), unpack()
 
 =over
 
-=item Ignore ASCII vs EBCDIC sort differences.
+=item Ignore ASCII vs. EBCDIC sort differences.
 
-=item MONOCASE then sort data.
+=item MONO CASE then sort data.
 
-=item Convert, sort data, then reconvert.
+=item Convert, sort data, then re convert.
 
 =item Perform sorting on one type of machine only.
 
@@ -2390,13 +2392,15 @@ IFS access
 
 =item OS/390 
 
-dataset access, locales
+chcp, dataset access, iconv, locales
 
 =item VM/ESA?
 
 =item POSIX-BC?
 
 =back
+
+=item BUGS
 
 =item REFERENCES
 
@@ -3895,6 +3899,8 @@ A, p, d, s, n, r, f, m, o, j, x
 
 =item Formatted Printing of IVs, UVs, and NVs
 
+=item Pointer-To-Integer and Integer-To-Pointer
+
 =item Source Documentation
 
 =back
@@ -4664,7 +4670,9 @@ accidentally using the context of the sort() itself)
 
 =item Building Extensions Can Fail Because Of Largefiles
 
-In string, @%s now must be written as \@%s
+=item ftmp-posix subtest 6 fails in VMS
+
+=item Storable tests fail in some platforms
 
 =back
 
@@ -7879,21 +7887,22 @@ C<d_setprior>, C<d_setproctitle>, C<d_setpwent>, C<d_setregid>,
 C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>,
 C<d_setsent>, C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
 C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
-C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_sqrtl>,
-C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
-C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_stream_array>,
-C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>,
-C<d_strerrm>, C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
-C<d_strtoll>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
-C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>,
-C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
-C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
-C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
-C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
-C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
-C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_xenix>, C<date>,
-C<db_hashtype>, C<db_prefixtype>, C<defvoidused>, C<direntrytype>,
-C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<dynamic_ext>
+C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
+C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>, C<d_statfs_f_flags>,
+C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
+C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
+C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strtod>,
+C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoul>, C<d_strtoull>,
+C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>,
+C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
+C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
+C<d_truncate>, C<d_tzname>, C<d_umask>, C<d_uname>, C<d_union_semun>,
+C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>,
+C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>, C<d_volatile>,
+C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>,
+C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>, C<defvoidused>,
+C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>,
+C<dynamic_ext>
 
 =item e
 
@@ -9807,11 +9816,11 @@ $fh->print, $fh->printf, $fh->getline, $fh->getlines
 
 =item Configuring Getopt::Long
 
-default, posix_default, auto_abbrev, getopt_compat, require_order, permute,
-bundling (default: disabled), bundling_override (default: disabled),
-ignore_case  (default: enabled), ignore_case_always (default: disabled),
-pass_through (default: disabled), prefix, prefix_pattern, debug (default:
-disabled)
+default, posix_default, auto_abbrev, getopt_compat, gnu_compat, gnu_getopt,
+require_order, permute, bundling (default: disabled), bundling_override
+(default: disabled), ignore_case  (default: enabled), ignore_case_always
+(default: disabled), pass_through (default: disabled), prefix,
+prefix_pattern, debug (default: disabled)
 
 =item Return values and Errors
 
@@ -11483,7 +11492,8 @@ section
 =item DIAGNOSTICS
 
 roff font should be 1 or 2 chars, not `%s', Invalid link %s, Unknown escape
-EE<lt>%sE<gt>, Unknown sequence %s, Unmatched =back
+EE<lt>%sE<gt>, Unknown sequence %s, %s: Unknown command paragraph "%s" on
+line %d, Unmatched =back
 
 =item BUGS
 
