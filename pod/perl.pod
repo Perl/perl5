@@ -69,7 +69,7 @@ in the appropriate start-up files.  To find out where these are, type:
     perl -V:man.dir
 
 If the directories were F</usr/local/man/man1> and F</usr/local/man/man3>,
-you would only need to add F</usr/local/man> to your MANPATH.  If 
+you would need to add only F</usr/local/man> to your MANPATH.  If 
 they are different, you'll have to add both stems.
 
 If that doesn't work for some reason, you can still use the
@@ -191,7 +191,7 @@ to an object class which defines its access methods.
 =item * Subroutine definitions may now be autoloaded
 
 In fact, the AUTOLOAD mechanism also allows you to define any arbitrary
-semantics for undefined subroutine calls.  It's not just for autoloading.
+semantics for undefined subroutine calls.  It's not for just autoloading.
 
 =item * Regular expression enhancements
 
@@ -298,7 +298,7 @@ The B<-w> switch is not mandatory.
 
 Perl is at the mercy of your machine's definitions of various
 operations such as type casting, atof() and sprintf().  The latter
-can even trigger a coredump when passed ludicrous input values.
+can even trigger a core dump when passed ludicrous input values.
 
 If your stdio requires a seek or eof between reads and writes on a
 particular stream, so does Perl.  (This doesn't apply to sysread()

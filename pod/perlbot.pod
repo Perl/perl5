@@ -57,7 +57,7 @@ See L<CLASS CONTEXT AND THE OBJECT>.
 
 =item 7
 
-IO syntax is certainly less noisy, but it is also prone to ambiguities which
+IO syntax is certainly less noisy, but it is also prone to ambiguities that
 can cause difficult-to-find bugs.  Allow people to use the sure-thing OO
 syntax, even if you don't like it.
 
@@ -404,7 +404,7 @@ This problem can be solved by using the object to define the context of the
 method.  Let the method look in the object for a reference to the data.  The
 alternative is to force the method to go hunting for the data ("Is it in my
 class, or in a subclass?  Which subclass?"), and this can be inconvenient
-and will lead to hackery.  It is better to just let the object tell the
+and will lead to hackery.  It is better just to let the object tell the
 method where that data is located.
 
 	package Bar;

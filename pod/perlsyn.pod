@@ -35,7 +35,7 @@ take effect at compile time.  Typically all the declarations are put at
 the beginning or the end of the script.  However, if you're using 
 lexically-scoped private variables created with my(), you'll have to make sure
 your format or subroutine definition is within the same block scope
-as the my if you expect to to be able to access those private variables.
+as the my if you expect to be able to access those private variables.
 
 Declaring a subroutine allows a subroutine name to be used as if it were a
 list operator from that point forward in the program.  You can declare a
@@ -63,7 +63,7 @@ The only kind of simple statement is an expression evaluated for its
 side effects.  Every simple statement must be terminated with a
 semicolon, unless it is the final statement in a block, in which case
 the semicolon is optional.  (A semicolon is still encouraged there if the
-block takes up more than one line, since you may eventually add another line.)
+block takes up more than one line, because you may eventually add another line.)
 Note that there are some operators like C<eval {}> and C<do {}> that look
 like compound statements, but aren't (they're just TERMs in an expression), 
 and thus need an explicit termination if used as the last item in a statement.
@@ -91,7 +91,7 @@ can write loops like:
     } until $line  eq ".\n";
 
 See L<perlfunc/do>.  Note also that the loop control
-statements described later will I<NOT> work in this construct, since
+statements described later will I<NOT> work in this construct, because
 modifiers don't take loop labels.  Sorry.  You can always wrap
 another block around it to do that sort of thing.
 
@@ -128,7 +128,7 @@ all do the same thing:
     open(FOO) ? 'hi mom' : die "Can't open $FOO: $!";
 			# a bit exotic, that last one
 
-The C<if> statement is straightforward.  Since BLOCKs are always
+The C<if> statement is straightforward.  Because BLOCKs are always
 bounded by curly brackets, there is never any ambiguity about which
 C<if> an C<else> goes with.  If you use C<unless> in place of C<if>,
 the sense of the test is reversed.
@@ -322,7 +322,7 @@ do it:
 See how much easier this is?  It's cleaner, safer, and faster.  It's
 cleaner because it's less noisy.  It's safer because if code gets added
 between the inner and outer loops later on, the new code won't be
-accidentally executed, the C<next> explicitly iterates the other loop
+accidentally executed.  The C<next> explicitly iterates the other loop
 rather than merely terminating the inner one.  And it's faster because
 Perl executes a C<foreach> statement more rapidly than it would the
 equivalent C<for> loop.
@@ -496,7 +496,7 @@ and your documentation text freely, as in
 	.........
     } 
 
-Note that pod translators should only look at paragraphs beginning 
+Note that pod translators should look at only paragraphs beginning 
 with a pod directive (it makes parsing easier), whereas the compiler
 actually knows to look for pod escapes even in the middle of a 
 paragraph.  This means that the following secret stuff will be

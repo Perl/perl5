@@ -32,7 +32,7 @@ Opening curly on same line as keyword, if possible, otherwise line up.
 
 =item *
 
-Space before the opening curly of a multiline BLOCK.
+Space before the opening curly of a multi-line BLOCK.
 
 =item *
 
@@ -64,7 +64,7 @@ Uncuddled elses.
 
 =item *
 
-No space between function name and its opening paren.
+No space between function name and its opening parenthesis.
 
 =item *
 
@@ -76,7 +76,7 @@ Long lines broken after an operator (except "and" and "or").
 
 =item *
 
-Space after last paren matching on current line.
+Space after last parenthesis matching on current line.
 
 =item *
 
@@ -117,7 +117,7 @@ is better than
 
     $verbose && print "Starting analysis\n";
 
-since the main point isn't whether the user typed B<-v> or not.
+because the main point isn't whether the user typed B<-v> or not.
 
 Similarly, just because an operator lets you assume default arguments
 doesn't mean that you have to make use of the defaults.  The defaults
@@ -135,7 +135,7 @@ schmuck bounce on the % key in B<vi>.
 
 Even if you aren't in doubt, consider the mental welfare of the person
 who has to maintain the code after you, and who will probably put
-parens in the wrong place.
+parentheses in the wrong place.
 
 =item *
 
@@ -189,7 +189,7 @@ Package names are sometimes an exception to this rule.  Perl informally
 reserves lowercase module names for "pragma" modules like C<integer> and
 C<strict>.  Other modules should begin with a capital letter and use mixed
 case, but probably without underscores due to limitations in primitive
-filesystems' representations of module names as files that must fit into a
+file systems' representations of module names as files that must fit into a
 few sparse bites.
 
 =item *
@@ -216,9 +216,9 @@ Don't use slash as a delimiter when your regexp has slashes or backslashes.
 =item *
 
 Use the new "and" and "or" operators to avoid having to parenthesize
-list operators so much, and to reduce the incidence of punctuational
+list operators so much, and to reduce the incidence of punctuation
 operators like C<&&> and C<||>.  Call your subroutines as if they were
-functions or list operators to avoid excessive ampersands and parens.
+functions or list operators to avoid excessive ampersands and parentheses.
 
 =item *
 

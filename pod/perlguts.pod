@@ -69,7 +69,7 @@ care what the length of the data is, use the global variable C<na>.  Remember,
 however, that Perl allows arbitrary strings of data that may both contain
 NULs and not be terminated by a NUL.
 
-If you simply want to know if the scalar value is TRUE, you can use:
+If you want to know simply if the scalar value is TRUE, you can use:
 
     SvTRUE(SV*)
 
@@ -155,7 +155,7 @@ call is not necessary.  See the section on L<Mortality>.
 =head2 What's Really Stored in an SV?
 
 Recall that the usual method of determining the type of scalar you have is
-to use C<Sv*OK> macros.  Since a scalar can be both a number and a string,
+to use C<Sv*OK> macros.  Because a scalar can be both a number and a string,
 usually these macros will always return TRUE and calling the C<Sv*V>
 macros will do the appropriate conversion of string to integer/double or
 integer/double to string.
@@ -170,11 +170,11 @@ pointer in an SV, you can use the following three macros instead:
 These will tell you if you truly have an integer, double, or string pointer
 stored in your SV.  The "p" stands for private.
 
-In general, though, it's best to just use the C<Sv*V> macros.
+In general, though, it's best just to use the C<Sv*V> macros.
 
 =head2 Working with AVs
 
-There are two ways to create and load an AV.  The first method just creates
+There are two ways to create and load an AV.  The first method creates just
 an empty AV:
 
     AV*  newAV();
@@ -242,7 +242,7 @@ for you).  The C<lval> parameter indicates whether this fetch is actually a
 part of a store operation.
 
 Remember that C<hv_store> and C<hv_fetch> return C<SV**>s and not just
-C<SV*>.  In order to access the scalar value, you must first dereference
+C<SV*>.  To access the scalar value, you must first dereference
 the return value.  However, you should check to make sure that the return
 value is not NULL before dereferencing it.
 
@@ -318,7 +318,7 @@ To determine if an SV is a reference, you can use the following macro:
 
     SvROK(SV*)
 
-To actually discover what the reference refers to, you must use the following
+To discover what the reference actually refers to, you must use the following
 macro and then check the value returned.
 
     SvTYPE(SvRV(SV*))
@@ -396,7 +396,7 @@ certain extra features.  Those bits are:
 	  "Identifier <varname> used only once: possible typo" warning.
     0x04  Issues a "Had to create <varname> unexpectedly" warning if
 	  the variable didn't actually exist.  This is useful if
-	  you expected the variable to already exist and want to propagate
+	  you expected the variable to exist already and want to propagate
 	  this warning back to the user.
 
 If the C<varname> argument does not contain a package specifier, it is
@@ -417,7 +417,7 @@ Most of the time, output from the C routine can be handled through use of
 the RETVAL and OUTPUT directives.  However, there are some cases where the
 argument stack is not already long enough to handle all the return values.
 An example is the POSIX tzname() call, which takes no arguments, but returns
-two, the local timezone's standard and summer time abbreviations.
+two, the local time zone's standard and summer time abbreviations.
 
 To handle this situation, the PPCODE directive is used and the stack is
 extended using the macro:
@@ -516,7 +516,7 @@ and back.
 
 =item C<SAVEFREESV(SV *sv)>
 
-The refcount of C<sv> would be decremented at the end of
+The reference count of C<sv> would be decremented at the end of
 I<pseudo-block>. This is similar to C<sv_2mortal>, which should (?) be
 used instead.
 
@@ -658,7 +658,7 @@ The first call creates a mortal SV, the second converts an existing SV to
 a mortal SV, the third creates a mortal copy of an existing SV (possibly
 destroying it in the process).
 
-The mortal routines are not just for SVs -- AVs and HVs can be made mortal
+The mortal routines are not for just SVs -- AVs and HVs can be made mortal
 by passing their address (and casting them to C<SV*>) to the C<sv_2mortal> or
 C<sv_mortalcopy> routines.
 
@@ -835,7 +835,7 @@ the various routines for the various magical types begin with C<magic_>.
 
 The current kinds of Magic Virtual Tables are:
 
-    mg_type  MGVTBL              Type of magicalness
+    mg_type  MGVTBL              Type of magic
     -------  ------              -------------------
     \0       vtbl_sv             Regexp???
     A        vtbl_amagic         Operator Overloading
@@ -963,15 +963,15 @@ For more information, consult L<perlcall>.
 =head1 Memory Allocation
 
 It is strongly suggested that you use the version of malloc that is distributed
-with Perl.  It keeps pools of various sizes of unallocated memory in order to
-more quickly satisfy allocation requests.
+with Perl.  It keeps pools of various sizes of unallocated memory to
+satisfy allocation requests more quickly.
 However, on some platforms, it may cause spurious malloc or free errors.
 
     New(x, pointer, number, type);
     Newc(x, pointer, number, type, cast);
     Newz(x, pointer, number, type);
 
-These three macros are used to initially allocate memory.  The first argument
+These three macros are used to allocate memory initially.  The first argument
 C<x> was a "magic cookie" that was used to keep track of who called the macro,
 to help when debugging memory problems.  However, the current code makes no
 use of this feature (Larry has switched to using a run-time memory checker),
@@ -1108,7 +1108,7 @@ Returns the highest index in the array.  Returns -1 if the array is empty.
 
 Creates a new AV and populates it with a list of SVs.  The SVs are copied
 into the array, so they may be freed after the call to av_make.  The new AV
-will have a refcount of 1.
+will have a reference count of 1.
 
 	AV*	av_make _((I32 size, SV** svp));
 
@@ -1532,19 +1532,19 @@ memory is zeroed with C<memzero>.
 
 =item newAV
 
-Creates a new AV.  The refcount is set to 1.
+Creates a new AV.  The reference count is set to 1.
 
 	AV*	newAV _((void));
 
 =item newHV
 
-Creates a new HV.  The refcount is set to 1.
+Creates a new HV.  The reference count is set to 1.
 
 	HV*	newHV _((void));
 
 =item newRV
 
-Creates an RV wrapper for an SV.  The refcount for the original SV is
+Creates an RV wrapper for an SV.  The reference count for the original SV is
 incremented.
 
 	SV*	newRV _((SV* ref));
@@ -1552,28 +1552,28 @@ incremented.
 =item newSV
 
 Creates a new SV.  The C<len> parameter indicates the number of bytes of
-pre-allocated string space the SV should have.  The refcount for the new SV
+pre-allocated string space the SV should have.  The reference count for the new SV
 is set to 1.
 
 	SV*	newSV _((STRLEN len));
 
 =item newSViv
 
-Creates a new SV and copies an integer into it.  The refcount for the SV is
+Creates a new SV and copies an integer into it.  The reference count for the SV is
 set to 1.
 
 	SV*	newSViv _((IV i));
 
 =item newSVnv
 
-Creates a new SV and copies a double into it.  The refcount for the SV is
+Creates a new SV and copies a double into it.  The reference count for the SV is
 set to 1.
 
 	SV*	newSVnv _((NV i));
 
 =item newSVpv
 
-Creates a new SV and copies a string into it.  The refcount for the SV is
+Creates a new SV and copies a string into it.  The reference count for the SV is
 set to 1.  If C<len> is zero then Perl will compute the length.
 
 	SV*	newSVpv _((char* s, STRLEN len));
@@ -1583,7 +1583,7 @@ set to 1.  If C<len> is zero then Perl will compute the length.
 Creates a new SV for the RV, C<rv>, to point to.  If C<rv> is not an RV then
 it will be upgraded to one.  If C<classname> is non-null then the new SV will
 be blessed in the specified package.  The new SV is returned and its
-refcount is 1.
+reference count is 1.
 
 	SV*	newSVrv _((SV* rv, char* classname));
 
@@ -1848,7 +1848,7 @@ C<SPAGAIN>.
 
 =item SPAGAIN
 
-Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
+Re-fetch the stack pointer.  Used after a callback.  See L<perlcall>.
 
 	SPAGAIN;
 
@@ -1922,7 +1922,7 @@ ends.
 =item sv_bless
 
 Blesses an SV into a specified package.  The SV must be an RV.  The package
-must be designated by its stash (see C<gv_stashpv()>).  The refcount of the
+must be designated by its stash (see C<gv_stashpv()>).  The reference count of the
 SV is unaffected.
 
 	SV*	sv_bless _((SV* sv, HV* stash));
@@ -1977,13 +1977,13 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 
 =item sv_dec
 
-Autodecrement of the value in the SV.
+Auto-decrement of the value in the SV.
 
 	void	sv_dec _((SV* sv));
 
 =item sv_dec
 
-Autodecrement of the value in the SV.
+Auto-decrement of the value in the SV.
 
 	void	sv_dec _((SV* sv));
 
@@ -2016,7 +2016,7 @@ Use C<SvGROW>.
 
 =item sv_inc
 
-Autoincrement of the value in the SV.
+Auto increment of the value in the SV.
 
 	void	sv_inc _((SV* sv));
 
@@ -2124,7 +2124,7 @@ Returns a boolean indicating whether the value is an SV.
 
 =item sv_newmortal
 
-Creates a new SV which is mortal.  The refcount of the SV is set to 1.
+Creates a new SV which is mortal.  The reference count of the SV is set to 1.
 
 	SV*	sv_newmortal _((void));
 
@@ -2254,19 +2254,19 @@ Returns a pointer to the string in the SV.  The SV must contain a string.
 
 =item SvREFCNT
 
-Returns the value of the object's refcount.
+Returns the value of the object's reference count.
 
 	int SvREFCNT (SV* sv);
 
 =item SvREFCNT_dec
 
-Decrements the refcount of the given SV.
+Decrements the reference count of the given SV.
 
 	void SvREFCNT_dec (SV* sv)
 
 =item SvREFCNT_inc
 
-Increments the refcount of the given SV.
+Increments the reference count of the given SV.
 
 	void SvREFCNT_inc (SV* sv)
 
@@ -2325,7 +2325,7 @@ Copies an integer into a new SV, optionally blessing the SV.  The C<rv>
 argument will be upgraded to an RV.  That RV will be modified to point to
 the new SV.  The C<classname> argument indicates the package for the
 blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
-will be returned and will have a refcount of 1.
+will be returned and will have a reference count of 1.
 
 	SV*	sv_setref_iv _((SV *rv, char *classname, IV iv));
 
@@ -2335,7 +2335,7 @@ Copies a double into a new SV, optionally blessing the SV.  The C<rv>
 argument will be upgraded to an RV.  That RV will be modified to point to
 the new SV.  The C<classname> argument indicates the package for the
 blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
-will be returned and will have a refcount of 1.
+will be returned and will have a reference count of 1.
 
 	SV*	sv_setref_nv _((SV *rv, char *classname, double nv));
 
@@ -2346,7 +2346,7 @@ argument will be upgraded to an RV.  That RV will be modified to point to
 the new SV.  If the C<pv> argument is NULL then C<sv_undef> will be placed
 into the SV.  The C<classname> argument indicates the package for the
 blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
-will be returned and will have a refcount of 1.
+will be returned and will have a reference count of 1.
 
 	SV*	sv_setref_pv _((SV *rv, char *classname, void* pv));
 
@@ -2362,7 +2362,7 @@ string must be specified with C<n>.  The C<rv> argument will be upgraded to
 an RV.  That RV will be modified to point to the new SV.  The C<classname>
 argument indicates the package for the blessing.  Set C<classname> to
 C<Nullch> to avoid the blessing.  The new SV will be returned and will have
-a refcount of 1.
+a reference count of 1.
 
 	SV*	sv_setref_pvn _((SV *rv, char *classname, char* pv, I32 n));
 
@@ -2448,7 +2448,7 @@ This is the C<undef> SV.  Always refer to this as C<&sv_undef>.
 
 =item sv_unref
 
-Unsets the RV status of the SV, and decrements the refcount of whatever was
+Unsets the RV status of the SV, and decrements the reference count of whatever was
 being referenced by the RV.  This can almost be thought of as a reversal of
 C<newSVrv>.  See C<SvROK_off>.
 

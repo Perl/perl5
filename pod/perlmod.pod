@@ -13,11 +13,11 @@ Perl.  The package statement declares the compilation unit as being in the
 given namespace.  The scope of the package declaration is from the
 declaration itself through the end of the enclosing block (the same scope
 as the local() operator).  All further unqualified dynamic identifiers
-will be in this namespace.  A package statement only affects dynamic
+will be in this namespace.  A package statement affects only dynamic
 variables--including those you've used local() on--but I<not> lexical
 variables created with my().  Typically it would be the first declaration
 in a file to be included by the C<require> or C<use> operator.  You can
-switch into a package in more than one place; it merely influences which
+switch into a package in more than one place; it influences merely which
 symbol table is used by the compiler for the rest of that block.  You can
 refer to variables and filehandles in other packages by prefixing the
 identifier with the package name and a double colon:
@@ -121,7 +121,7 @@ Assignment to a typeglob performs an aliasing operation, i.e.,
 
 causes variables, subroutines and file handles accessible via the
 identifier C<richard> to also be accessible via the identifier C<dick>.  If
-you only want to alias a particular variable or subroutine, you can
+you want to alias only a particular variable or subroutine, you can
 assign a reference instead:
 
     *dick = \$richard;
@@ -143,7 +143,7 @@ thing.
 	return \%nhash; 
     }
 
-On return, the reference wil overwrite the hash slot in the
+On return, the reference will overwrite the hash slot in the
 symbol table specified by the *some_hash typeglob.  This
 is a somewhat tricky way of passing around references cheaply
 when you won't want to have to remember to dereference variables
@@ -197,7 +197,7 @@ order of definition; that is: last in, first out (LIFO).
 
 Inside an C<END> subroutine C<$?> contains the value that the script is
 going to pass to C<exit()>.  You can modify C<$?> to change the exit
-value of the script.  Beware of changing C<$?> by accident (eg, by
+value of the script.  Beware of changing C<$?> by accident (e.g.,, by
 running something via C<system>).
 
 Note that when you use the B<-n> and B<-p> switches to Perl, C<BEGIN>
@@ -299,7 +299,7 @@ the module.  If so, these will be entirely transparent to the user of
 the module.  It is the responsibility of the F<.pm> file to load (or
 arrange to autoload) any additional functionality.  The POSIX module
 happens to do both dynamic loading and autoloading, but the user can
-just say C<use POSIX> to get it all.
+say just C<use POSIX> to get it all.
 
 For more information on writing extension modules, see L<perlxs>
 and L<perlguts>.
@@ -315,13 +315,13 @@ because it has a shotgun.
 The module and its user have a contract, part of which is common law,
 and part of which is "written".  Part of the common law contract is
 that a module doesn't pollute any namespace it wasn't asked to.  The
-written contract for the module (AKA documentation) may make other
+written contract for the module (A.K.A. documentation) may make other
 provisions.  But then you know when you C<use RedefineTheWorld> that
 you're redefining the world and willing to take the consequences.
 
 =head1 THE PERL MODULE LIBRARY
 
-A number of modules are included the the Perl distribution.  These are
+A number of modules are included the Perl distribution.  These are
 described below, and all end in F<.pm>.  You may also discover files in 
 the library directory that end in either F<.pl> or F<.ph>.  These are old
 libraries supplied so that old programs that use them still run.  The
@@ -334,7 +334,7 @@ conversion, but it's just a mechanical process, so is far from bulletproof.
 =head2 Pragmatic Modules
 
 They work somewhat like pragmas in that they tend to affect the compilation of
-your program, and thus will usually only work well when used within a
+your program, and thus will usually work well only when used within a
 C<use>, or C<no>.  Most of these are locally scoped, so an inner BLOCK
 may countermand any of these by saying:
 
@@ -343,7 +343,7 @@ may countermand any of these by saying:
 
 which lasts until the end of that BLOCK.
 
-Unlike the pragrmas that effect the C<$^H> hints variable, the C<use
+Unlike the pragmas that effect the C<$^H> hints variable, the C<use
 vars> and C<use subs> declarations are not BLOCK-scoped.  They allow
 you to pre-declare a variables or subroutines within a particular
 <I>file</I> rather than just a block.  Such declarations are effective
@@ -388,11 +388,11 @@ restrict unsafe constructs
 
 =item subs
 
-predeclare sub names
+pre-declare sub names
 
 =item vars
 
-predeclare global variable names
+pre-declare global variable names
 
 =back
 
@@ -745,7 +745,7 @@ dynamically loaded into Perl if and when you need them.  Supported
 extension modules include the Socket, Fcntl, and POSIX modules.
 
 Many popular C extension modules do not come bundled (at least, not
-completely) due to their size, volatility, or simply lack of time for
+completely) due to their sizes, volatility, or simply lack of time for
 adequate testing and configuration across the multitude of platforms on
 which Perl was beta-tested.  You are encouraged to look for them in
 archie(1L), the Perl FAQ or Meta-FAQ, the WWW page, and even with their
@@ -944,7 +944,7 @@ scheme as the original author.
 
 Use blessed references.  Use the two argument form of bless to bless
 into the class name given as the first parameter of the constructor,
-e.g.:
+e.g.,:
 
  sub new { 
 	my $class = shift;
@@ -1021,7 +1021,7 @@ or nature of a variable. For example:
  $no_caps_here    function scope my() or local() variables
 
 Function and method names seem to work best as all lowercase.
-E.g., C<$obj-E<gt>as_string()>.
+e.g.,, C<$obj-E<gt>as_string()>.
 
 You can use a leading underscore to indicate that a variable or
 function should not be used outside the package that defined it.
@@ -1039,11 +1039,11 @@ short or common names to reduce the risk of name clashes.
 Generally anything not exported is still accessible from outside the
 module using the ModuleName::item_name (or C<$blessed_ref-E<gt>method>)
 syntax.  By convention you can use a leading underscore on names to
-informally indicate that they are 'internal' and not for public use.
+indicate informally that they are 'internal' and not for public use.
 
 (It is actually possible to get private functions by saying:
 C<my $subref = sub { ... };  &$subref;>.  But there's no way to call that
-directly as a method, since a method must have a name in the symbol
+directly as a method, because a method must have a name in the symbol
 table.)
 
 As a general rule, if the module is trying to be object oriented
@@ -1056,8 +1056,8 @@ This name should be as descriptive, accurate and complete as
 possible.  Avoid any risk of ambiguity. Always try to use two or
 more whole words.  Generally the name should reflect what is special
 about what the module does rather than how it does it.  Please use
-nested module names to informally group or categorise a module.
-A module should have a very good reason not to have a nested name.
+nested module names to group informally or categorize a module.
+There should be a very good reason for a module not to have a nested name.
 Module names should begin with a capital letter.
 
 Having 57 modules all called Sort will not make life easy for anyone
@@ -1137,7 +1137,7 @@ Copying, ToDo etc.
 
 =item Adding a Copyright Notice.
 
-How you choose to licence your work is a personal decision.
+How you choose to license your work is a personal decision.
 The general mechanism is to assert your Copyright and then make
 a declaration of how others may copy/use/modify your work.
 
@@ -1146,7 +1146,7 @@ GPL and The Artistic License (see the files README, Copying and
 Artistic).  Larry has good reasons for NOT just using the GNU GPL.
 
 My personal recommendation, out of respect for Larry, Perl and the
-perl community at large is to simply state something like:
+perl community at large is to state something simply like:
 
  Copyright (c) 1995 Your Name. All rights reserved.
  This program is free software; you can redistribute it and/or
@@ -1161,7 +1161,7 @@ Remember to include the other words in addition to the Copyright.
 To be fully compatible with the Exporter and MakeMaker modules you
 should store your module's version number in a non-my package
 variable called $VERSION.  This should be a valid floating point 
-number with at least two digits after the decimal (ie hundredths,
+number with at least two digits after the decimal (i.e., hundredths,
 e.g, C<$VERSION = "0.01">).  Don't use a "1.3.2" style version.
 See Exporter.pm in Perl5.001m or later for details.
 
@@ -1178,7 +1178,7 @@ Usenet newsgroup.  This will at least ensure very wide once-off
 distribution.
 
 If possible you should place the module into a major ftp archive and
-include details of it's location in your announcement.
+include details of its location in your announcement.
 
 Some notes about ftp archives: Please use a long descriptive file
 name which includes the version number. Most incoming directories

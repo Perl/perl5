@@ -16,7 +16,7 @@ Read L<perlcall> and L<perlxs>.
 
 =item B<Use a UNIX program from Perl?>
 
-Read about backquotes and about C<system> and C<exec> in L<perlfunc>.
+Read about back-quotes and about C<system> and C<exec> in L<perlfunc>.
 
 =item B<Use Perl from Perl?>
 
@@ -142,7 +142,7 @@ I<miniperlmain.c> containing the essentials of embedding:
 
 Note that we do not use the C<env> pointer here or in any of the
 following examples.
-Normally handed to C<perl_parse> as it's final argument,
+Normally handed to C<perl_parse> as its final argument,
 we hand it a B<NULL> instead, in which case the current environment
 is used.
 
@@ -303,14 +303,14 @@ substitutions: I<match()>, I<substitute()>, and I<matches()>.
 
    char match(char *string, char *pattern);
 
-Given a string and a pattern (e.g. "m/clasp/" or "/\b\w*\b/", which in
+Given a string and a pattern (e.g., "m/clasp/" or "/\b\w*\b/", which in
 your program might be represented as C<"/\\b\\w*\\b/">),
 returns 1 if the string matches the pattern and 0 otherwise.
 
 
    int substitute(char *string[], char *pattern);
 
-Given a pointer to a string and an "=~" operation (e.g. "s/bob/robert/g" or
+Given a pointer to a string and an "=~" operation (e.g., "s/bob/robert/g" or
 "tr[A-Z][a-z]"), modifies the string according to the operation,
 returning the number of substitutions made.
 
@@ -488,9 +488,9 @@ described in L<perlcall>.
 
 Once you've understood those, embedding Perl in C is easy.
 
-Since C has no built-in function for integer exponentiation, let's
+Because C has no built-in function for integer exponentiation, let's
 make Perl's ** operator available to it (this is less useful than it
-sounds, since Perl implements ** with C's I<pow()> function).  First
+sounds, because Perl implements ** with C's I<pow()> function).  First
 I'll create a stub exponentiation function in I<power.pl>:
 
     sub expo {
@@ -612,7 +612,7 @@ counterpart for each of the extension's XSUBs.  Don't worry about this
 part; leave that to the I<xsubpp> and extension authors.  If your
 extension is dynamically loaded, DynaLoader creates I<Module::bootstrap()>
 for you on the fly.  In fact, if you have a working DynaLoader then there
-is rarely any need to statically link in any other extensions.
+is rarely any need to link in any other extensions statically.
 
 
 Once you have this code, slap it into the second argument of I<perl_parse()>:
@@ -644,7 +644,7 @@ Consult L<perlxs> and L<perlguts> for more details.
 =head1 MORAL
 
 You can sometimes I<write faster code> in C, but
-you can always I<write code faster> in Perl.  Since you can use
+you can always I<write code faster> in Perl.  Because you can use
 each from the other, combine them as you wish.
 
 

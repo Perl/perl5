@@ -94,10 +94,10 @@ here and in commands:
     S<text>     text contains non-breaking spaces
     C<code>	literal code 
     L<name>     A link (cross reference) to name
-		    L<name>		manpage
-		    L<name/ident>	item in manpage
-		    L<name/"sec">	section in other manpage
-		    L<"sec">		section in this manpage
+		    L<name>		manual page
+		    L<name/ident>	item in manual page
+		    L<name/"sec">	section in other manual page
+		    L<"sec">		section in this manual page
 					(the quotes are optional)
 		    L</"sec">		ditto
     F<file>	Used for filenames
@@ -117,7 +117,7 @@ to look like paragraphs (block format), so that they stand out
 visually, and so that I could run them through fmt easily to reformat
 them (that's F7 in my version of B<vi>).  I wanted the translator (and not
 me) to worry about whether " or ' is a left quote or a right quote
-within filled text, and I wanted it to leave the quotes alone dammit in
+within filled text, and I wanted it to leave the quotes alone, dammit, in
 verbatim mode, so I could slurp in a working program, shift it over 4
 spaces, and have it print out, er, verbatim.  And presumably in a
 constant width font.
