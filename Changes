@@ -95,6 +95,87 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6581] By: jhi                                   on 2000/08/10  23:26:16
+        Log: Put back the std @INC thing.
+     Branch: perl
+	   ! t/lib/ansicolor.t t/lib/cgi-form.t t/lib/cgi-function.t
+	   ! t/lib/cgi-html.t t/lib/cgi-pretty.t t/lib/cgi-request.t
+	   ! t/lib/gol-basic.t t/lib/gol-compat.t t/lib/gol-linkage.t
+	   ! t/lib/gol-oo.t
+____________________________________________________________________________
+[  6580] By: jhi                                   on 2000/08/10  23:03:34
+        Log: Update to CGI 2.70.
+     Branch: perl
+	   ! lib/CGI.pm lib/CGI/Carp.pm lib/CGI/Cookie.pm lib/CGI/Pretty.pm
+	   ! lib/CGI/Push.pm lib/CGI/Util.pm t/lib/cgi-form.t
+	   ! t/lib/cgi-function.t t/lib/cgi-html.t t/lib/cgi-pretty.t
+	   ! t/lib/cgi-request.t
+____________________________________________________________________________
+[  6579] By: jhi                                   on 2000/08/10  22:41:50
+        Log: Update to CPAN 1.56, from Andreas König.
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[  6578] By: jhi                                   on 2000/08/10  22:38:13
+        Log: Update to Pod::Parser 1.17, from Brad Appleton.
+     Branch: perl
+	   ! lib/Pod/Checker.pm lib/Pod/Find.pm lib/Pod/InputObjects.pm
+	   ! lib/Pod/ParseUtils.pm lib/Pod/Parser.pm lib/Pod/Select.pm
+	   ! lib/Pod/Usage.pm pod/pod2usage.PL pod/podchecker.PL
+	   ! pod/podselect.PL t/pod/emptycmd.t t/pod/for.t t/pod/headings.t
+	   ! t/pod/include.t t/pod/included.t t/pod/lref.t
+	   ! t/pod/multiline_items.t t/pod/nested_items.t
+	   ! t/pod/nested_seqs.t t/pod/oneline_cmds.t t/pod/pod2usage.t
+	   ! t/pod/poderrs.t t/pod/poderrs.xr t/pod/podselect.t
+	   ! t/pod/special_seqs.t
+____________________________________________________________________________
+[  6577] By: jhi                                   on 2000/08/10  22:35:41
+        Log: Small AUTHORS and MAINTAIN updates.  Could do with big updates.
+     Branch: perl
+	   ! AUTHORS MAINTAIN
+____________________________________________________________________________
+[  6576] By: jhi                                   on 2000/08/10  22:24:54
+        Log: Update to Getopt::Long 2.23_05, from Johan Vromans.
+     Branch: perl
+	   + t/lib/gol-oo.t
+	   ! MANIFEST lib/Getopt/Long.pm lib/newgetopt.pl t/lib/gol-basic.t
+	   ! t/lib/gol-compat.t t/lib/gol-linkage.t
+____________________________________________________________________________
+[  6575] By: jhi                                   on 2000/08/10  22:02:07
+        Log: Update to ANSIColor 1.03, from Russ Allbery.
+     Branch: perl
+	   ! lib/Term/ANSIColor.pm t/lib/ansicolor.t
+____________________________________________________________________________
+[  6574] By: jhi                                   on 2000/08/10  21:55:03
+        Log: Iterating perl6 description.
+     Branch: perl
+	   ! pod/perlfaq1.pod
+____________________________________________________________________________
+[  6573] By: jhi                                   on 2000/08/10  21:48:26
+        Log: Revert the sv.c part of #6559, a better fix is needed.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  6572] By: jhi                                   on 2000/08/10  20:33:43
+        Log: It's the 2ndO'ROSSC.
+     Branch: perl
+	   ! pod/perlfaq1.pod
+____________________________________________________________________________
+[  6571] By: jhi                                   on 2000/08/10  15:55:48
+        Log: detypo
+     Branch: perl
+	   ! pod/perlfaq1.pod
+____________________________________________________________________________
+[  6570] By: jhi                                   on 2000/08/10  14:11:17
+        Log: An exceptionally sticky typo.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[  6569] By: jhi                                   on 2000/08/10  14:09:33
+        Log: detypo (and test Changes updating script)
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  6568] By: jhi                                   on 2000/08/10  14:07:07
         Log: Update Changes.
      Branch: perl
