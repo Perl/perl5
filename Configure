@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Feb 16 01:07:15 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Feb 16 22:28:06 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -653,6 +653,7 @@ i_sysioctl=''
 i_syssockio=''
 i_syslog=''
 i_sysmman=''
+i_sysmode=''
 i_sysmount=''
 i_sysndir=''
 i_sysparam=''
@@ -944,13 +945,12 @@ inclwanted=''
 groupstype=''
 : change the next line if compiling for Xenix/286 on Xenix/386
 xlibpth='/usr/lib/386 /lib/386'
-
 : Possible local library directories to search.
 loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
 loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
 
 : general looking path for locating libraries
-glibpth="/usr/lib/large /lib/pa1.1 /lib /usr/lib $xlibpth"
+glibpth="/usr/lib/large /lib /usr/lib $xlibpth"
 glibpth="$glibpth /lib/large /usr/lib/small /lib/small"
 glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
 test -f /usr/shlib/libc.so && glibpth="/usr/shlib $glibpth"
@@ -3058,7 +3058,7 @@ int main() {
 	exit(0);
 }
 EOM
-if $cc -o gccvers gccvers.c; then
+if $cc $ldflags -o gccvers gccvers.c; then
 	gccversion=`./gccvers`
 	case "$gccversion" in
 	'') echo "You are not using GNU cc." ;;
@@ -14106,6 +14106,11 @@ eval $setvar
 set syslog.h i_syslog
 eval $inhdr
 
+
+: see if this is a sys/mode.h system
+set sys/mode.h i_sysmode
+eval $inhdr
+
 : see if sys/resource.h has to be included
 set sys/resource.h i_sysresrc
 eval $inhdr
@@ -14949,6 +14954,7 @@ i_sysin='$i_sysin'
 i_sysioctl='$i_sysioctl'
 i_syslog='$i_syslog'
 i_sysmman='$i_sysmman'
+i_sysmode='$i_sysmode'
 i_sysmount='$i_sysmount'
 i_sysndir='$i_sysndir'
 i_sysparam='$i_sysparam'
