@@ -25,28 +25,37 @@ if (@ARGV)
 else
   { @w_files = sort glob("pragma/warn/*") }
 
-foreach (@w_files) {
+my $files = 0;
+foreach my $file (@w_files) {
 
     next if /(~|\.orig|,v)$/;
 
-    open F, "<$_" or die "Cannot open $_: $!\n" ;
+    open F, "<$file" or die "Cannot open $file: $!\n" ;
+    my $line = 0;
     while (<F>) {
+        $line++; 
 	last if /^__END__/ ;
     }
 
     {
         local $/ = undef;
-        @prgs = (@prgs, split "\n########\n", <F>) ;
+        $files++; 
+        @prgs = (@prgs, $file, split "\n########\n", <F>) ;
     }
     close F ;
 }
 
 undef $/;
 
-print "1..", scalar @prgs, "\n";
+print "1..", scalar(@prgs)-$files, "\n";
  
  
 for (@prgs){
+    unless (/\n/)
+     {
+      print "# From $_\n"; 
+      next; 
+     }
     my $switch = "";
     my @temps = () ;
     if (s/^\s*-\w+//){

@@ -595,6 +595,20 @@ find a mailer on your system).
 
 =head1 BUGS AND CAVEATS
 
+Norton AntiVirus interferes with the build process, particularly if 
+set to "AutoProtect, All Files, when Opened". Unlike large applications 
+the perl build process opens and modifies a lot of files. Having the  
+the AntiVirus scan each and every one slows build the process significantly.
+Worse, with PERLIO=stdio the build process fails with peculiar messages
+as the virus checker interacts badly with miniperl.exe writing configure 
+files (it seems to either catch file part written and treat it as suspicious,
+or virus checker may have it "locked" in a way which inhibits miniperl
+updating it). The build does complete with 
+   
+   set PERLIO=perlio
+
+but that may be just luck. Other AntiVirus software may have similar issues.
+
 Some of the built-in functions do not act exactly as documented in
 L<perlfunc>, and a few are not implemented at all.  To avoid
 surprises, particularly if you have had prior exposure to Perl
@@ -628,7 +642,7 @@ by C<perl -V>.
 
 =item Gurusamy Sarathy E<lt>gsar@activestate.comE<gt>
 
-=item Nick Ing-Simmons E<lt>nick@ni-s.u-net.comE<gt>
+=item Nick Ing-Simmons E<lt>nick@ing-simmons.netE<gt>
 
 =back
 
@@ -655,6 +669,6 @@ Support for fork() emulation was added in 5.6 (ActiveState Tool Corp).
 
 Win9x support was added in 5.6 (Benjamin Stuhl).
 
-Last updated: 22 March 2000
+Last updated: 22 November 2000
 
 =cut

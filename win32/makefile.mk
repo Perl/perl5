@@ -6,7 +6,7 @@
 #	Mingw32 with gcc-2.95.2 or better  **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl56.dll).  Also makes individual DLLs for the XS extensions.
+# (perl57.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -33,7 +33,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	*= \5.6.0
+INST_VER	*= \5.7.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -50,7 +50,7 @@ INST_ARCH	*= \$(ARCHNAME)
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation.
 #
-#USE_MULTI	*= define
+USE_MULTI	*= define
 
 #
 # Beginnings of interpreter cloning/threads; still very incomplete.
@@ -111,7 +111,7 @@ CCTYPE		*= GCC
 # If not enabled, we automatically try to use maximum optimization
 # with all compilers that are known to have a working optimizer.
 #
-#CFG		*= Debug
+CFG		*= Debug
 
 #
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
@@ -165,7 +165,7 @@ CCTYPE		*= GCC
 #
 #CCHOME		*= c:\bc5
 #CCHOME		*= $(MSVCDIR)
-CCHOME		*= c:\gcc-2.95.2-msvcrt
+CCHOME		*= c:\gcc-2.95.2
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
@@ -570,7 +570,7 @@ CFGH_TMPL	= config_H.bc
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= ..\libperl56$(a)
+PERLIMPLIB	= ..\libperl57$(a)
 
 .ELSE
 
@@ -579,8 +579,8 @@ CFGH_TMPL	= config_H.vc
 
 .ENDIF
 
-PERLIMPLIB	*= ..\perl56$(a)
-PERLDLL		= ..\perl56.dll
+PERLIMPLIB	*= ..\perl57$(a)
+PERLDLL		= ..\perl57.dll
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d

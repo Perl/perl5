@@ -193,8 +193,10 @@ PerlIO_cleantable(PerlIO **tablep)
    for (i=PERLIO_TABLE_SIZE-1; i > 0; i--)
     {
      PerlIO *f = table+i;
-     if (*f)
-      PerlIO_close(f);
+     if (*f) 
+      {
+       PerlIO_close(f);
+      }
     }
    Safefree(table);
    *tablep = NULL;
@@ -1276,7 +1278,8 @@ PerlIOStdio_tell(PerlIO *f)
 IV
 PerlIOStdio_close(PerlIO *f)
 {
- return fclose(PerlIOSelf(f,PerlIOStdio)->stdio);
+ FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
+ return fclose(stdio);
 }
 
 IV
@@ -1309,8 +1312,12 @@ PerlIOStdio_fill(PerlIO *f)
 {
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
  int c;
- if (fflush(stdio) != 0)
-  return EOF;
+ /* fflush()ing read-only streams can cause trouble on some stdio-s */
+ if ((PerlIOBase(f)->flags & PERLIO_F_CANWRITE))
+  {
+   if (fflush(stdio) != 0)
+    return EOF;
+  }
  c = fgetc(stdio);
  if (c == EOF || ungetc(c,stdio) != c)
   return EOF;
@@ -1547,14 +1554,15 @@ PerlIOBuf_flush(PerlIO *f)
    /* write() the buffer */
    STDCHAR *p = b->buf;
    int count;
+   PerlIO *n = PerlIONext(f);
    while (p < b->ptr)
     {
-     count = PerlIO_write(PerlIONext(f),p,b->ptr - p);
+     count = PerlIO_write(n,p,b->ptr - p);
      if (count > 0)
       {
        p += count;
       }
-     else if (count < 0)
+     else if (count < 0 || PerlIO_error(n))
       {
        PerlIOBase(f)->flags |= PERLIO_F_ERROR;
        code = -1;
