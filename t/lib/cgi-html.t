@@ -33,14 +33,6 @@ sub test {
     print($true ? "ok $num\n" : "not ok $num $msg\n");
 }
 
-my $CRLF = "\015\012";
-if ($^O eq 'VMS') { 
-    $CRLF = "\n";  # via web server carriage is inserted automatically
-}
-if (ord("\t") != 9) { # EBCDIC?
-    $CRLF = "\r\n";
-}
-
 # all the automatic tags
 test(2,h1() eq '<h1 />',"single tag");
 test(3,h1('fred') eq '<h1>fred</h1>',"open/close tag");
