@@ -971,7 +971,7 @@ PP(pp_flop)
 	  (looks_like_number(left) && *SvPVX(left) != '0') )
 	{
 	    if (SvNV(left) < IV_MIN || SvNV(right) > IV_MAX)
-		Perl_croak(aTHX_ "Range iterator outside integer range");
+		DIE(aTHX_ "Range iterator outside integer range");
 	    i = SvIV(left);
 	    max = SvIV(right);
 	    if (max >= i) {
@@ -1616,7 +1616,7 @@ PP(pp_enteriter)
 		(looks_like_number(sv) && *SvPVX(sv) != '0')) {
 		 if (SvNV(sv) < IV_MIN ||
 		     SvNV((SV*)cx->blk_loop.iterary) >= IV_MAX)
-		     Perl_croak(aTHX_ "Range iterator outside integer range");
+		     DIE(aTHX_ "Range iterator outside integer range");
 		 cx->blk_loop.iterix = SvIV(sv);
 		 cx->blk_loop.itermax = SvIV((SV*)cx->blk_loop.iterary);
 	    }

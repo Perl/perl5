@@ -407,7 +407,7 @@ PP(pp_rv2cv)
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
 	if ((PL_op->op_private & OPpLVAL_INTRO) && !CvLVALUE(cv))
-	    Perl_croak(aTHX_ "Can't modify non-lvalue subroutine call");
+	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
     }
     else
 	cv = (CV*)&PL_sv_undef;
@@ -469,7 +469,7 @@ PP(pp_prototype)
 		goto set;
 	    else {			/* None such */
 	      nonesuch:
-		Perl_croak(aTHX_ "Can't find an opnumber for \"%s\"", s+6);
+		DIE(aTHX_ "Can't find an opnumber for \"%s\"", s+6);
 	    }
 	}
     }
@@ -871,7 +871,7 @@ PP(pp_predec)
 {
     djSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	Perl_croak(aTHX_ PL_no_modify);
+	DIE(aTHX_ PL_no_modify);
     if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
     {
@@ -888,7 +888,7 @@ PP(pp_postinc)
 {
     djSP; dTARGET;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	Perl_croak(aTHX_ PL_no_modify);
+	DIE(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MAX)
@@ -909,7 +909,7 @@ PP(pp_postdec)
 {
     djSP; dTARGET;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	Perl_croak(aTHX_ PL_no_modify);
+	DIE(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
@@ -3303,7 +3303,7 @@ PP(pp_unpack)
 		pat++;
 	    }
 	    else
-		Perl_croak(aTHX_ "'!' allowed only after types %s", natstr);
+		DIE(aTHX_ "'!' allowed only after types %s", natstr);
 	}
 	if (pat >= patend)
 	    len = 1;
@@ -3316,17 +3316,18 @@ PP(pp_unpack)
 	    while (isDIGIT(*pat)) {
 		len = (len * 10) + (*pat++ - '0');
 		if (len < 0)
-		    Perl_croak(aTHX_ "Repeat count in unpack overflows");
+		    DIE(aTHX_ "Repeat count in unpack overflows");
 	    }
 	}
 	else
 	    len = (datumtype != '@');
 	switch(datumtype) {
 	default:
-	    Perl_croak(aTHX_ "Invalid type in unpack: '%c'", (int)datumtype);
+	    DIE(aTHX_ "Invalid type in unpack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Invalid type in unpack: '%c'", (int)datumtype);
+		Perl_warner(aTHX_ WARN_UNSAFE,
+			    "Invalid type in unpack: '%c'", (int)datumtype);
 	    break;
 	case '%':
 	    if (len == 1 && pat[-1] != '1')
@@ -3992,7 +3993,7 @@ PP(pp_unpack)
 		    }
 		}
 		if ((s >= strend) && bytes)
-		    Perl_croak(aTHX_ "Unterminated compressed integer");
+		    DIE(aTHX_ "Unterminated compressed integer");
 	    }
 	    break;
 	case 'P':
@@ -4365,7 +4366,7 @@ PP(pp_pack)
 		pat++;
 	    }
 	    else
-		Perl_croak(aTHX_ "'!' allowed only after types %s", natstr);
+		DIE(aTHX_ "'!' allowed only after types %s", natstr);
 	}
 	if (*pat == '*') {
 	    len = strchr("@Xxu", datumtype) ? 0 : items;
@@ -4376,7 +4377,7 @@ PP(pp_pack)
 	    while (isDIGIT(*pat)) {
 		len = (len * 10) + (*pat++ - '0');
 		if (len < 0)
-		    Perl_croak(aTHX_ "Repeat count in pack overflows");
+		    DIE(aTHX_ "Repeat count in pack overflows");
 	    }
 	}
 	else
@@ -4390,7 +4391,7 @@ PP(pp_pack)
 	}
 	switch(datumtype) {
 	default:
-	    Perl_croak(aTHX_ "Invalid type in pack: '%c'", (int)datumtype);
+	    DIE(aTHX_ "Invalid type in pack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_UNSAFE))
 		Perl_warner(aTHX_ WARN_UNSAFE,
@@ -4679,7 +4680,7 @@ PP(pp_pack)
 		adouble = Perl_floor(SvNV(fromstr));
 
 		if (adouble < 0)
-		    Perl_croak(aTHX_ "Cannot compress negative numbers");
+		    DIE(aTHX_ "Cannot compress negative numbers");
 
 		if (
 #ifdef BW_BITS
@@ -4713,7 +4714,7 @@ PP(pp_pack)
 		    /* Copy string and check for compliance */
 		    from = SvPV(fromstr, len);
 		    if ((norm = is_an_int(from, len)) == NULL)
-			Perl_croak(aTHX_ "can compress only unsigned integer");
+			DIE(aTHX_ "can compress only unsigned integer");
 
 		    New('w', result, len, char);
 		    in = result + len;
@@ -4733,14 +4734,14 @@ PP(pp_pack)
 			double next = floor(adouble / 128);
 			*--in = (unsigned char)(adouble - (next * 128)) | 0x80;
 			if (--in < buf)  /* this cannot happen ;-) */
-			    Perl_croak(aTHX_ "Cannot compress integer");
+			    DIE(aTHX_ "Cannot compress integer");
 			adouble = next;
 		    } while (adouble > 0);
 		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
 		    sv_catpvn(cat, in, (buf + sizeof(buf)) - in);
 		}
 		else
-		    Perl_croak(aTHX_ "Cannot compress non integer");
+		    DIE(aTHX_ "Cannot compress non integer");
 	    }
             break;
 	case 'i':
