@@ -1,8 +1,23 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.90 2003/03/09 17:32:43 dankogai Exp $
+# $Id: Changes,v 1.91 2003/03/09 20:07:37 dankogai Exp dankogai $
 #
-$Revision: 1.90 $ $Date: 2003/03/09 17:32:43 $
+$Revision: 1.91 $ $Date: 2003/03/09 20:07:37 $
+! encoding.pm
+  even more proofread by jhi.
+  Message-Id: <20030309194323.GT20843@kosh.hut.fi>
+! t/enc_module.t
+  -use lib 't';
+  +use lib qw(t ext/Encode/t ../ext/Encode/t);
+  Message-Id: <20030309182057.GR20843@kosh.hut.fi>
+! AUTHORS
+  s/Hirohito/Hiroto/ig;  Sorry, Hiroto-san.
+  Message-Id: <20030309181748.GP20843@kosh.hut.fi>
+! encoding.pm
+  s/logner/longer/
+  Message-Id: <20030309181907.GQ20843@kosh.hut.fi>
+
+1.90 2003/03/09 17:32:43
 ! encoding.pm
 + t/enc_data.t
   Inaba-san has added a patch for perl 5.8.1 or later that makes

@@ -1,6 +1,6 @@
-# $Id: encoding.pm,v 1.43 2003/03/09 17:32:43 dankogai Exp $
+# $Id: encoding.pm,v 1.44 2003/03/09 20:07:37 dankogai Exp dankogai $
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.43 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.44 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -146,7 +146,7 @@ new feature of Perl 5.6.
 Rewind to the future: starting from perl 5.8.0 with the B<encoding>
 pragma, you can write your script in any encoding you like (so long
 as the C<Encode> module supports it) and still enjoy Unicode support.
-This pragma achieves that by doing the followings;
+This pragma achieves that by doing the following:
 
 =over
 
@@ -196,17 +196,17 @@ You can override this by giving extra arguments; see below.
 =head1 FEATURES THAT REQUIRE 5.8.1
 
 Some of the features offered by this pragma requires perl 5.8.1.  Most
-of these works are by Inaba Hirohito.  Any other features and changes
+of these are done by Inaba Hiroto.  Any other features and changes
 are good for 5.8.0.
 
 =over
 
 =item "NON-EUC" doublebyte encodings
 
-Because perl needs to parse script before applying this pragma, Such
+Because perl needs to parse script before applying this pragma, such
 encodings as Shift_JIS and Big-5 that may contain '\' (BACKSLASH;
 \x5c) in the second byte fails because the second byte may
-accidentally escapes the quoting character that follows.  Perl 5.8.1
+accidentally escape the quoting character that follows.  Perl 5.8.1
 or later fixes this problem.
 
 =item tr// 
@@ -309,9 +309,9 @@ B<the whole script>.  However, the <no encoding> pragma is supported and
 B<use encoding> can appear as many times as you want in a given script. 
 The multiple use of this pragma is discouraged.
 
-Because of this nature -- the influence of this pragma lasts not only
-for the module but the script that uses the use of this pragma inside
---, it is not recommended that you use this pragma inside modules.
+By the same reason, the use this pragma inside modules is also
+discouraged (though not as strongly discouranged as the case above.  
+See below).
 
 If you still have to write a module with this pragma, be very careful
 of the load order.  See the codes below;
@@ -451,7 +451,7 @@ Porters so it has been fixed in Perl 5.8.1 or later.
 
 =over
 
-=item literals in regex that are logner than 127 bytes
+=item literals in regex that are longer than 127 bytes
 
 For native multibyte encodings (either fixed or variable length),
 the current implementation of the regular expressions may introduce
