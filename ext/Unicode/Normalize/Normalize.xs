@@ -153,8 +153,8 @@ decompose(arg, compat)
   PREINIT:
     UV uv;
     SV *src, *dst;
-    STRLEN srclen, dstlen, retlen;
-    U8 *s, *e, *p, *d, *r;
+    STRLEN srclen, retlen;
+    U8 *s, *e, *p, *r;
     bool iscompat;
   CODE:
     if(SvUTF8(arg)) {
