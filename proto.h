@@ -844,10 +844,8 @@ PERL_CALLCONV I32	Perl_whichsig(pTHX_ char* sig);
 PERL_CALLCONV int	Perl_yyerror(pTHX_ char* s);
 #ifdef USE_PURE_BISON
 PERL_CALLCONV int	Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp);
-PERL_CALLCONV int	Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp);
-#else
-PERL_CALLCONV int	Perl_yylex(pTHX);
 #endif
+PERL_CALLCONV int	Perl_yylex(pTHX);
 PERL_CALLCONV int	Perl_yyparse(pTHX);
 PERL_CALLCONV int	Perl_yywarn(pTHX_ char* s);
 #if defined(MYMALLOC)

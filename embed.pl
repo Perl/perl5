@@ -2103,10 +2103,8 @@ Ap	|I32	|whichsig	|char* sig
 p	|int	|yyerror	|char* s
 #ifdef USE_PURE_BISON
 p	|int	|yylex_r	|YYSTYPE *lvalp|int *lcharp
-p	|int	|yylex		|YYSTYPE *lvalp|int *lcharp
-#else
-p	|int	|yylex
 #endif
+p	|int	|yylex
 p	|int	|yyparse
 p	|int	|yywarn		|char* s
 #if defined(MYMALLOC)

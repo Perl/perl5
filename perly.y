@@ -61,6 +61,7 @@ static void yydestruct(pTHXo_ void *ptr);
 
 #ifdef USE_PURE_BISON
 #define YYLEX_PARAM (&yychar)
+#define yylex yylex_r
 #endif
 
 %}
