@@ -36,7 +36,7 @@ sub getcwd
 	{
 	    do
 	    {
-		unless ($dir = readdir(getcwd'PARENT))			#'))
+		unless (defined ($dir = readdir(getcwd'PARENT)))        #'))
 		{
 		    warn "readdir($dotdots): $!";
 		    closedir(getcwd'PARENT);				#');

@@ -43,22 +43,30 @@ AUTOLOAD {
     goto &$AUTOLOAD;
 }
                             
-sub import
-{
- my ($callclass, $callfile, $callline,$path,$callpack) = caller(0);
- ($callpack = $callclass) =~ s#::#/#;
- if (defined($path = $INC{$callpack . '.pm'}))
-  {
-   if ($path =~ s#^(.*)$callpack\.pm$#$1auto/$callpack/autosplit.ix# && -e $path) 
-    {
-     eval {require $path}; 
-     carp $@ if ($@);  
+sub import {
+    my ($callclass, $callfile, $callline,$path,$callpack) = caller(0);
+    ($callpack = $callclass) =~ s#::#/#;
+    # Try to find the autosplit index file.  Eg., if the call package
+    # is POSIX, then $INC{POSIX.pm} is something like
+    # '/usr/local/lib/perl5/POSIX.pm', and the autosplit index file is in
+    # '/usr/local/lib/perl5/auto/POSIX/autosplit.ix', so we require that.
+    #
+    # However, if @INC is a relative path, this might not work.  If,
+    # for example, @INC = ('lib'), then
+    # $INC{POSIX.pm} is 'lib/POSIX.pm', and we want to require
+    # 'auto/POSIX/autosplit.ix' (without the leading 'lib').
+    #
+    if (defined($path = $INC{$callpack . '.pm'})) {
+	# Try absolute path name.
+	$path =~ s#^(.*)$callpack\.pm$#$1auto/$callpack/autosplit.ix#;
+	eval { require $path; };
+	# If that failed, try relative path with normal @INC searching.
+	if ($@) {
+	    $path ="auto/$callpack/autosplit.ix";
+	    eval { require $path; };
+	}
+	carp $@ if ($@);  
     } 
-   else 
-    {
-     croak "Have not loaded $callpack.pm";
-    }
-  }
 }
 
 1;

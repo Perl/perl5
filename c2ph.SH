@@ -21,7 +21,7 @@ echo "Extracting c2ph (with variable substitutions)"
 : by putting a backslash in front.  You may delete these comments.
 rm -f c2ph
 $spitshell >c2ph <<!GROK!THIS!
-#!$bin/perl
+#!$binexp/perl
 #
 !GROK!THIS!
 

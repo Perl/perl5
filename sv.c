@@ -2368,7 +2368,7 @@ register FILE *fp;
 I32 append;
 {
     register char *bp;		/* we're going to steal some values */
-#ifdef USE_STDIO_PTR
+#if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE)
     register I32 cnt;		/*  from the stdio struct and put EVERYTHING */
     register STDCHAR *ptr;	/*   in the innermost loop into registers */
     STRLEN bpx;
@@ -2398,7 +2398,8 @@ I32 append;
 	    }
 	} while (i != EOF);
     }
-#ifdef USE_STDIO_PTR	/* Here is some breathtakingly efficient cheating */
+#if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE)
+    /* Here is some breathtakingly efficient cheating */
     cnt = FILE_cnt(fp);			/* get count into register */
     (void)SvPOK_only(sv);		/* validate pointer */
     if (SvLEN(sv) - append <= cnt + 1) { /* make sure we have the room */
@@ -2466,8 +2467,8 @@ thats_really_all_folks:
     *bp = '\0';
     SvCUR_set(sv, bp - SvPVX(sv));	/* set length */
 
-#else /* !USE_STDIO_PTR */	/* The big, slow, and stupid way */
-
+#else /* USE_STDIO_PTR && STDIO_PTR_LVALUE && STDIO_CNT_LVALUE */
+    /*The big, slow, and stupid way */
     {
 	char buf[8192];
 	register char * bpe = buf + sizeof(buf) - 3;
@@ -2499,7 +2500,7 @@ screamer:
 	}
     }
 
-#endif /* USE_STDIO_PTR */
+#endif /* USE_STDIO_PTR && STDIO_PTR_LVALUE && STDIO_CNT_LVALUE */
 
     if (rspara) {
         while (i != EOF) {

@@ -68,25 +68,34 @@ Installation
     run ok, the defaults will usually be right.  It will then proceed to
     make config.h, config.sh, and Makefile.  You may have to explicitly
     say     sh Configure    to ensure that Configure is run under sh.
-    If you're a hotshot, run Configure -d to take all the defaults,
-    edit config.sh to patch up any flaws, and then run Configure -S.
+    If you're a hotshot, run Configure -d to take all the defaults
+    and edit config.sh to patch up any flaws.
+
+    If you later make any changes to config.sh, you should propagate
+    them to all the .SH files by running  Configure -S.
 
     Configure supports a number of useful options.  Run Configure -h 
     to get a listing.  To compile with gcc, for example, you can run 
     Configure -Dcc=gcc, or answer 'gcc' at the cc prompt.  
     
-    If you wish to use gcc (or another alternative compiler))
+    If you wish to use gcc (or another alternative compiler)
     you should use  Configure -Dcc=gcc.  That way, the the hints
     files can set appropriate defaults.
+
+    By default, perl will be installed in /usr/local/{bin, lib, man}.
+    You can specify a different 'prefix' for the default installation
+    directory, when Configure prompts you or by using the Configure
+    command line option -Dprefix='/some/directory'.
     
+    By default, perl will use dynamic extensions if your system
+    supports it.  If you want to force perl to be compiled statically,
+    you can either choose this when Configure prompts you or by using
+    the Configure command line option -Uusedl
+
     If you change compilers or make other significant changes, you should
     probably _not_ re-use your old config.sh.  Simply remove it or
-    rename it, e.g. mv config.sh config.sh.old.
-    
-    By default, perl will be installed in /usr/local/{bin, lib, man}.
-    You can specify a different prefix for the default installation
-    directory, when Configure prompts you or by using something like
-    Configure -Dprefix=/whatever.
+    rename it, e.g. mv config.sh config.sh.old.  Then rerun Configure
+    with the options you want to use.
 
     You can also supply a file config.over to over-ride Configure's
     guesses.  It will get loaded up at the very end, just before
@@ -106,7 +115,9 @@ Installation
     can be done in cflags.SH.  For instance, to turn off the optimizer
     on toke.c, find the line in the switch structure for toke.c and
     put the command optimize='-g' before the ;;.  To change the C flags
-    for all the files, edit config.sh and change either $ccflags or $optimize.
+    for all the files, edit config.sh and change either $ccflags or $optimize,
+    and then re-run  Configure -S ; make depend.
+
 
 3)  make depend
 

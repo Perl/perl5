@@ -18,7 +18,7 @@ case "$0" in
 esac
 echo "Extracting perldoc (with variable substitutions)"
 $spitshell >perldoc <<!GROK!THIS!
-#!$bin/perl
+#!$binexp/perl
 !GROK!THIS!
 
 $spitshell >>perldoc <<'!NO!SUBS!'
@@ -149,7 +149,7 @@ sub containspod {
 sub searchfor {
 	my($s,@dirs) = @_;
 	$s =~ s!::!/!g;
-	printf STDERR "looking for $s in @dirs\n";
+	# printf STDERR "looking for $s in @dirs\n";
 	
 	foreach $dir (@dirs) {
 		if( -f "$dir/$s.pod") { return "$dir/$s.pod" }

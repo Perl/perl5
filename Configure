@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.7 1995/03/21 08:46:15 ram Exp $
 #
-# Generated on Wed May 31 09:14:05 EDT 1995 [metaconfig 3.0 PL55]
+# Generated on Mon Jun  5 12:18:53 EDT 1995 [metaconfig 3.0 PL55]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -349,6 +349,8 @@ d_sockpair=''
 sockethdr=''
 socketlib=''
 d_statblks=''
+d_stdio_cnt_lval=''
+d_stdio_ptr_lval=''
 d_stdiobase=''
 d_stdstdio=''
 stdio_base=''
@@ -5610,23 +5612,31 @@ echo " "
 if $contains '_IO_fpos_t' `./findhdr stdio.h` >/dev/null 2>&1 ; then
 	echo "(Looks like you have stdio.h from Linux.)"
 	case "$stdio_ptr" in
-	'') stdio_ptr='((fp)->_IO_read_ptr)';;
+	'') stdio_ptr='((fp)->_IO_read_ptr)'
+		ptr_lval=$define
+		;;
 	esac
 	case "$stdio_cnt" in
-	'') stdio_cnt='((fp)->_IO_read_end - (fp)->_IO_read_ptr)';;
+	'') stdio_cnt='((fp)->_IO_read_end - (fp)->_IO_read_ptr)'
+		cnt_lval=$undef
+		;;
 	esac
 	case "$stdio_base" in
 	'') stdio_base='((fp)->_IO_read_base)';;
 	esac
 	case "$stdio_bufsiz" in
-	'') stdio_bufsiz='((fp)->_IO_read_end - (fp)->_IO_read_base))';;
+	'') stdio_bufsiz='((fp)->_IO_read_end - (fp)->_IO_read_base)';;
 	esac
 else
 	case "$stdio_ptr" in
-	'') stdio_ptr='((fp)->_ptr)';;
+	'') stdio_ptr='((fp)->_ptr)'
+		ptr_lval=$define
+		;;
 	esac
 	case "$stdio_cnt" in
-	'') stdio_cnt='((fp)->_cnt)';;
+	'') stdio_cnt='((fp)->_cnt)'
+		cnt_lval=$define
+		;;
 	esac
 	case "$stdio_base" in
 	'') stdio_base='((fp)->_base)';;
@@ -5666,6 +5676,26 @@ fi
 $rm -f try.c try
 set d_stdstdio
 eval $setvar
+
+: Can _ptr be used as an lvalue.  Only makes sense if we
+: have a known stdio implementation.
+case "$d_stdstdio" in
+$define) val=$ptr_lval ;;
+*) val=$undef ;;
+esac
+set d_stdio_ptr_lval
+eval $setvar
+
+
+: Can _cnt be used as an lvalue.  Only makes sense if we
+: have a known stdio implementation.
+case "$d_stdstdio" in
+$define) val=$cnt_lval ;;
+*) val=$undef ;;
+esac
+set d_stdio_cnt_lval
+eval $setvar
+
 
 : see if _base is also standard
 val="$undef"
@@ -5834,7 +5864,7 @@ if set times val -f d_times; eval $csym; $val; then
 	eval $typedef
 	dflt="$clocktype"
 	echo " "
-	rp="What type is returned by times() on this sytem?"
+	rp="What type is returned by times() on this system?"
 	. ./myread
 	clocktype="$ans"
 else
@@ -7472,7 +7502,7 @@ if set time val -f d_time; eval $csym; $val; then
 	eval $typedef
 	dflt="$timetype"
 	echo " "
-	rp="What type is returned by time() on this sytem?"
+	rp="What type is returned by time() on this system?"
 	. ./myread
 	timetype="$ans"
 else
@@ -8174,6 +8204,8 @@ d_sitelib='$d_sitelib'
 d_socket='$d_socket'
 d_sockpair='$d_sockpair'
 d_statblks='$d_statblks'
+d_stdio_cnt_lval='$d_stdio_cnt_lval'
+d_stdio_ptr_lval='$d_stdio_ptr_lval'
 d_stdiobase='$d_stdiobase'
 d_stdstdio='$d_stdstdio'
 d_strchr='$d_strchr'

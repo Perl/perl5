@@ -9,25 +9,25 @@ dl_error(), dl_findfile(), dl_expandspec(), dl_load_file(), dl_find_symbol(), dl
 =head1 SYNOPSIS
 
     require DynaLoader;
-    push (@ISA, 'DynaLoader');
+    @ISA = qw(... DynaLoader ...);
 
 
 =head1 DESCRIPTION
 
-This specification defines a standard generic interface to the dynamic
+This document defines a standard generic interface to the dynamic
 linking mechanisms available on many platforms.  Its primary purpose is
 to implement automatic dynamic loading of Perl modules.
+
+This document serves as both a specification for anyone wishing to
+implement the DynaLoader for a new platform and as a guide for
+anyone wishing to use the DynaLoader directly in an application.
 
 The DynaLoader is designed to be a very simple high-level
 interface that is sufficiently general to cover the requirements
 of SunOS, HP-UX, NeXT, Linux, VMS and other platforms.
 
-It is also hoped that the interface will cover the needs of OS/2,
-NT etc and allow pseudo-dynamic linking (using C<ld -A> at runtime).
-
-This document serves as both a specification for anyone wishing to
-implement the DynaLoader for a new platform and as a guide for
-anyone wishing to use the DynaLoader directly in an application.
+It is also hoped that the interface will cover the needs of OS/2, NT
+etc and also allow pseudo-dynamic linking (using C<ld -A> at runtime).
 
 It must be stressed that the DynaLoader, by itself, is practically
 useless for accessing non-Perl libraries because it provides almost no
@@ -153,8 +153,8 @@ prefix and suffix appropriate to the platform: "$name.o", "lib$name.*"
 and "$name".
 
 If any directories are included in @names they are searched before
-@dl_library_path.  Directories may be specified as B<-Ldir>.  Any other names
-are treated as filenames to be searched for.
+@dl_library_path.  Directories may be specified as B<-Ldir>.  Any other
+names are treated as filenames to be searched for.
 
 Using arguments of the form C<-Ldir> and C<-lname> is recommended.
 
@@ -174,8 +174,8 @@ order to deal with symbolic names for files (i.e., VMS's Logical Names).
 
 To support these systems a dl_expandspec() function can be implemented
 either in the F<dl_*.xs> file or code can be added to the autoloadable
-dl_expandspec(0 function in F<DynaLoader.pm>).  See F<DynaLoader.pm> for more
-information.
+dl_expandspec() function in F<DynaLoader.pm>.  See F<DynaLoader.pm> for
+more information.
 
 =item dl_load_file()
 
@@ -232,7 +232,8 @@ Example
 
 Return a list of symbol names which remain undefined after load_file().
 Returns C<()> if not known.  Don't worry if your platform does not provide
-a mechanism for this.  Most do not need it and hence do not provide it.
+a mechanism for this.  Most do not need it and hence do not provide it,
+they just return an empty list.
 
 
 =item dl_install_xsub()
@@ -308,14 +309,14 @@ calls &{"${module}::bootstrap"} to bootstrap the module
 
 =head1 AUTHOR
 
+Tim Bunce, 11 August 1994.
+
 This interface is based on the work and comments of (in no particular
 order): Larry Wall, Robert Sanders, Dean Roehrich, Jeff Okamoto, Anno
-Siegel, Thomas Neumann, Paul Marquess, Charles Bailey, and others.
+Siegel, Thomas Neumann, Paul Marquess, Charles Bailey, myself and others.
 
 Larry Wall designed the elegant inherited bootstrap mechanism and
 implemented the first Perl 5 dynamic loader using it.
-
-Tim Bunce, 11 August 1994.
 
 =cut
 
@@ -328,8 +329,7 @@ Tim Bunce, 11 August 1994.
 
 # Quote from Tolkien sugested by Anno Siegel.
 #
-# Read ext/DynaLoader/README and DynaLoader.doc for
-# detailed information.
+# Read ext/DynaLoader/README for detailed information.
 #
 # Tim.Bunce@ig.co.uk, August 1994
 
@@ -394,10 +394,13 @@ sub bootstrap {
     local($module) = $args[0];
     local(@dirs, $file);
 
-    croak "Usage: DynaLoader::bootstrap(module)"
-	unless ($module);
+    confess "Usage: DynaLoader::bootstrap(module)" unless $module;
 
-    croak "Can't load module $module, dynamic loading not available in this perl"
+    # A common error on platforms which don't support dynamic loading.
+    # Since it's fatal and potentially confusing we give a detailed message.
+    croak("Can't load module $module, dynamic loading not available in this perl.\n".
+	"  (You may need to build a new perl executable which either supports\n".
+	"  dynamic loading or has the $module module statically linked into it.)\n")
 	unless defined(&dl_load_file);
 
     print STDERR "DynaLoader::bootstrap($module)\n" if $dl_debug;
@@ -496,9 +499,11 @@ sub dl_findfile {
         # Deal with directories first:
         #  Using a -L prefix is the preferred option (faster and more robust)
         if (m:^-L:){ s/^-L//; push(@dirs, $_); next; }
+
         #  Otherwise we try to try to spot directories by a heuristic
         #  (this is a more complicated issue than it first appears)
         if (m:/: && -d $_){   push(@dirs, $_); next; }
+
         # VMS: we may be using native VMS directry syntax instead of
         # Unix emulation, so check this as well
         if ($vms && /[:>\]]/ && -d $_){   push(@dirs, $_); next; }

@@ -107,10 +107,14 @@ ext/GDBM_File/typemap		GDBM extension interface types
 ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
 ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
 ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
+ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/typemap		NDBM extension interface types
 ext/ODBM_File/Makefile.PL	ODBM extension makefile writer
 ext/ODBM_File/ODBM_File.pm	ODBM extension Perl module
 ext/ODBM_File/ODBM_File.xs	ODBM extension external subroutines
+ext/ODBM_File/hints/sco.pl	Hint for ODBM_File for named architecture
+ext/ODBM_File/hints/solaris.pl	Hint for ODBM_File for named architecture
+ext/ODBM_File/hints/svr4.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/typemap		ODBM extension interface types
 ext/POSIX/Makefile.PL		POSIX extension makefile writer
 ext/POSIX/POSIX.pm		POSIX extension Perl module

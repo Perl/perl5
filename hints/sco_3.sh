@@ -39,3 +39,7 @@ usenm='false'
 # If you want to use nm, you'll probably have to use nm -p.  The
 # following does that for you:
 nm_opt='-p'
+
+# I have received one report that you can't include utime.h in
+# pp_sys.c.  Uncomment the following line if that happens to you:
+# i_utime=undef

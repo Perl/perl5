@@ -33,7 +33,7 @@ case "$osvers" in
 	;;
 1.1*)	d_dlopen="$define"
 	cccdlflags='-DPIC -fpic'
-	lddlflags='-Bshareable $lddlflags'
+	lddlflags="-Bshareable $lddlflags"
 	malloctype='void *'
 	groupstype='int'
 	d_setregid='undef'
@@ -44,7 +44,7 @@ case "$osvers" in
 2.0-RELEASE*)
 	d_dlopen="$define"
 	cccdlflags='-DPIC -fpic'
-	lddlflags='-Bshareable $lddlflags'
+	lddlflags="-Bshareable $lddlflags"
 	d_setregid='undef'
 	d_setreuid='undef'
 	d_setrgid='undef'
@@ -58,7 +58,7 @@ case "$osvers" in
 2.0.5*|2.0-BUILD|2.1*)
 	d_dlopen="$define"
 	cccdlflags='-DPIC -fpic'
-	lddlflags='-Bshareable $lddlflags'
+	lddlflags="-Bshareable $lddlflags"
 	# Are these defines necessary?  Doesn't Configure find them
 	# correctly?
 	d_setregid='define'

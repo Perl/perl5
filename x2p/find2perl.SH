@@ -23,7 +23,7 @@ echo "Extracting x2p/find2perl (with variable substitutions)"
 : by putting a backslash in front.  You may delete these comments.
 rm -f find2perl
 $spitshell >find2perl <<!GROK!THIS!
-#!$bin/perl
+#!$binexp/perl
 # 
 # Modified September 26, 1993 to provide proper handling of years after 1999
 #   Tom Link <tml+@pitt.edu>

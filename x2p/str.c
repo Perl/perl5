@@ -287,7 +287,8 @@ str_gets(str,fp)
 register STR *str;
 register FILE *fp;
 {
-#ifdef USE_STDIO_PTR		/* Here is some breathtakingly efficient cheating */
+#if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE)
+    /* Here is some breathtakingly efficient cheating */
 
     register char *bp;		/* we're going to steal some values */
     register int cnt;		/*  from the stdio struct and put EVERYTHING */
@@ -339,7 +340,8 @@ thats_all_folks:
     *bp = '\0';
     str->str_cur = bp - str->str_ptr;	/* set length */
 
-#else /* !USE_STDIO_PTR */	/* The big, slow, and stupid way */
+#else /* USE_STDIO_PTR && STDIO_PTR_LVALUE && STDIO_CNT_LVALUE */
+    /* The big, slow, and stupid way */
 
     static char buf[4192];
 
@@ -348,7 +350,7 @@ thats_all_folks:
     else
 	str_set(str, No);
 
-#endif /* USE_STDIO_PTR */
+#endif /* USE_STDIO_PTR && STDIO_PTR_LVALUE && STDIO_CNT_LVALUE */
 
     return str->str_cur ? str->str_ptr : Nullch;
 }

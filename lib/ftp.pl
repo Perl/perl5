@@ -89,7 +89,7 @@
 #
 
 require 'chat2.pl';
-require 'socket.ph';
+eval "require 'socket.ph'" || eval "require 'sys/socket.ph'" || die "socket.ph missing: $!\n";
 
 
 package ftp;

@@ -24,9 +24,9 @@ echo "Extracting x2p/s2p (with variable substitutions)"
 : by putting a backslash in front.  You may delete these comments.
 rm -f s2p
 $spitshell >s2p <<!GROK!THIS!
-#!$bin/perl
+#!$binexp/perl
 
-eval 'exec $bin/perl -S \$0 \${1+"\$@"}'
+eval 'exec perl -S \$0 \${1+"\$@"}'
 	if \$running_under_some_shell;
 
 \$bin = '$bin';

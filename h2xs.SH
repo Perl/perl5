@@ -18,7 +18,7 @@ case "$0" in
 esac
 echo "Extracting h2xs (with variable substitutions)"
 $spitshell >h2xs <<!GROK!THIS!
-#!$bin/perl
+#!$binexp/perl
 !GROK!THIS!
 
 $spitshell >>h2xs <<'!NO!SUBS!'

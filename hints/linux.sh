@@ -80,8 +80,8 @@ else
 You don't have an ELF gcc.  I will use dld if possible.  If you are
 using a version of DLD earlier than 3.2.6, or don't have it at all, you
 should probably upgrade. If you are forced to use 3.2.4, you should
-uncomment a couple of lines in hints/linux.sh and rerun Configure to
-disallow shared libraries.
+uncomment a couple of lines in hints/linux.sh and restart Configure so
+that shared libraries will be disallowed.
 
 EOM
     lddlflags="-r $lddlflags"
@@ -96,23 +96,28 @@ EOM
     #ldflags="-static"
     #so='none'
 fi
-rm -rf try.c a.out
 
-case "$BASH_VERSION" in
-1.14.3*)
-    cat <<'EOM'
+rm -f try.c a.out
 
-If you get failure of op/exec test #5 during the test phase, you probably
-have a buggy version of bash. Upgrading to a recent version (1.14.4 or
-later) should fix the problem.
+if /bin/bash -c exit; then
+  echo You appear to have a working bash. Good.
+else
+  cat << 'EOM'
+Warning: it would appear you have a defective bash shell installed. This is
+likely to give you a failure of op/exec test #5 during the test phase of the
+build, Upgrading to a recent version (1.14.4 or later) should fix the
+problem.
 
 EOM
-;;
-esac
+
+fi
 
 # In addition, on some systems there is a problem with perl and NDBM, which
 # causes AnyDBM and NDBM_File to lock up. This is evidenced in the tests as
 # AnyDBM just freezing.  Currently we disable NDBM for all linux systems.
 # If someone can suggest a more robust test, that would be appreciated.
+# This will generate a harmless message:
+# Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
+#	Propagating recommended variable d_dbm_open
 d_dbm_open=undef
 

@@ -772,14 +772,24 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	FILE structure pointed to by its argument. This macro will always be
  *	defined if USE_STDIO_PTR is defined.
  */
+/* STDIO_PTR_LVALUE:
+ *	This symbol is defined if the FILE_ptr macro can be used as an
+ *	lvalue.
+ */
 /* FILE_cnt:
  *	This macro is used to access the _cnt field (or equivalent) of the
  *	FILE structure pointed to by its argument. This macro will always be
  *	defined if USE_STDIO_PTR is defined.
  */
+/* STDIO_CNT_LVALUE:
+ *	This symbol is defined if the FILE_cnt macro can be used as an
+ *	lvalue.
+ */
 #ifdef USE_STDIO_PTR
 #define FILE_ptr(fp)	$stdio_ptr
+#$d_stdio_ptr_lval STDIO_PTR_LVALUE
 #define FILE_cnt(fp)	$stdio_cnt
+#$d_stdio_cnt_lval STDIO_CNT_LVALUE
 #endif
 
 /* FILE_base:

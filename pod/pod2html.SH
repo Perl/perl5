@@ -17,8 +17,8 @@ esac
 echo "Extracting pod/pod2html (with variable substitutions)"
 rm -f pod2html
 $spitshell >pod2html <<!GROK!THIS!
-#!$bin/perl
-eval 'exec $bin/perl -S \$0 \${1+"\$@"}'
+#!$binexp/perl
+eval 'exec perl -S \$0 \${1+"\$@"}'
 	if \$running_under_some_shell;
 !GROK!THIS!
 

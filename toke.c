@@ -2366,7 +2366,7 @@ yylex()
 			TOKEN('&');
 		    }
 		    if (lastchar == '-')
-			warn("Ambiguious use of -%s resolved as -&%s()",
+			warn("Ambiguous use of -%s resolved as -&%s()",
 				tokenbuf, tokenbuf);
 		    last_lop = oldbufptr;
 		    last_lop_op = OP_ENTERSUB;
@@ -2401,7 +2401,7 @@ yylex()
 		if (lastchar && strchr("*%&", lastchar)) {
 		    warn("Operator or semicolon missing before %c%s",
 			lastchar, tokenbuf);
-		    warn("Ambiguious use of %c resolved as operator %c",
+		    warn("Ambiguous use of %c resolved as operator %c",
 			lastchar, lastchar);
 		}
 		TOKEN(WORD);

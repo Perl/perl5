@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlbot - Bag'o Object Tricks For Perl5 (the BOT)
+perlbot - Bag'o Object Tricks (the BOT)
 
 =head1 INTRODUCTION
 
@@ -8,10 +8,71 @@ The following collection of tricks and hints is intended to whet curious
 appetites about such things as the use of instance variables and the
 mechanics of object and class relationships.  The reader is encouraged to
 consult relevant textbooks for discussion of Object Oriented definitions and
-methodology.  This is not intended as a comprehensive guide to Perl5's
-object oriented features, nor should it be construed as a style guide.
+methodology.  This is not intended as a tutorial for object-oriented
+programming or as a comprehensive guide to Perl's object oriented features,
+nor should it be construed as a style guide.
 
 The Perl motto still holds:  There's more than one way to do it.
+
+=head1 OO SCALING TIPS
+
+=over 5
+
+=item 1
+
+Do not attempt to verify the type of $self.  That'll break if the class is
+inherited, when the type of $self is valid but its package isn't what you
+expect.  See rule 5.
+
+=item 2
+
+If an object-oriented (OO) or indirect-object (IO) syntax was used, then the
+object is probably the correct type and there's no need to become paranoid
+about it.  Perl isn't a paranoid language anyway.  If people subvert the OO
+or IO syntax then they probably know what they're doing and you should let
+them do it.  See rule 1.
+
+=item 3
+
+Use the two-argument form of bless().  Let a subclass use your constructor.
+See L<INHERITING A CONSTRUCTOR>.
+
+=item 4
+
+The subclass is allowed to know things about its immediate superclass, the
+superclass is allowed to know nothing about a subclass.
+
+=item 5
+
+Don't be trigger happy with inheritance.  A "using", "containing", or
+"delegation" relationship (some sort of aggregation, at least) is often more
+appropriate.  See L<OBJECT RELATIONSHIPS>, L<USING RELATIONSHIP WITH SDBM>,
+and L<"DELEGATION">.
+
+=item 6
+
+The object is the namespace.  Make package globals accessible via the
+object.  This will remove the guess work about the symbol's home package.
+See L<CLASS CONTEXT AND THE OBJECT>.
+
+=item 7
+
+IO syntax is certainly less noisy, but it is also prone to ambiguities which
+can cause difficult-to-find bugs.  Allow people to use the sure-thing OO
+syntax, even if you don't like it.
+
+=item 8
+
+Do not use function-call syntax on a method.  You're going to be bitten
+someday.  Someone might move that method into a superclass and your code
+will be broken.  On top of that you're feeding the paranoia in rule 2.
+
+=item 9
+
+Don't assume you know the home package of a method.  You're making it
+difficult for someone to override that method.  See L<THINKING OF CODE REUSE>.
+
+=back
 
 =head1 INSTANCE VARIABLES
 
@@ -26,7 +87,7 @@ variables.  Named parameters are also demonstrated.
 		my $self = {};
 		$self->{'High'} = $params{'High'};
 		$self->{'Low'}  = $params{'Low'};
-		bless $self;
+		bless $self, $type;
 	}
 
 
@@ -38,19 +99,18 @@ variables.  Named parameters are also demonstrated.
 		my $self = [];
 		$self->[0] = $params{'Left'};
 		$self->[1] = $params{'Right'};
-		bless $self;
+		bless $self, $type;
 	}
 
 	package main;
 
-	$a = new Foo ( 'High' => 42, 'Low' => 11 );
+	$a = Foo->new( 'High' => 42, 'Low' => 11 );
 	print "High=$a->{'High'}\n";
 	print "Low=$a->{'Low'}\n";
 
-	$b = new Bar ( 'Left' => 78, 'Right' => 40 );
+	$b = Bar->new( 'Left' => 78, 'Right' => 40 );
 	print "Left=$b->[0]\n";
 	print "Right=$b->[1]\n";
-
 
 =head1 SCALAR INSTANCE VARIABLES
 
@@ -62,12 +122,12 @@ An anonymous scalar can be used when only one instance variable is needed.
 		my $type = shift;
 		my $self;
 		$self = shift;
-		bless \$self;
+		bless \$self, $type;
 	}
 
 	package main;
 
-	$a = new Foo 42;
+	$a = Foo->new( 42 );
 	print "a=$$a\n";
 
 
@@ -81,23 +141,25 @@ object.
 	package Bar;
 
 	sub new {
+		my $type = shift;
 		my $self = {};
 		$self->{'buz'} = 42;
-		bless $self;
+		bless $self, $type;
 	}
 
 	package Foo;
 	@ISA = qw( Bar );
 
 	sub new {
-		my $self = new Bar;
+		my $type = shift;
+		my $self = Bar->new;
 		$self->{'biz'} = 11;
-		bless $self;
+		bless $self, $type;
 	}
 
 	package main;
 
-	$a = new Foo;
+	$a = Foo->new;
 	print "buz = ", $a->{'buz'}, "\n";
 	print "biz = ", $a->{'biz'}, "\n";
 
@@ -111,23 +173,25 @@ relationships between objects.
 	package Bar;
 
 	sub new {
+		my $type = shift;
 		my $self = {};
 		$self->{'buz'} = 42;
-		bless $self;
+		bless $self, $type;
 	}
 
 	package Foo;
 
 	sub new {
+		my $type = shift;
 		my $self = {};
-		$self->{'Bar'} = new Bar ();
+		$self->{'Bar'} = Bar->new;
 		$self->{'biz'} = 11;
-		bless $self;
+		bless $self, $type;
 	}
 
 	package main;
 
-	$a = new Foo;
+	$a = Foo->new;
 	print "buz = ", $a->{'Bar'}->{'buz'}, "\n";
 	print "biz = ", $a->{'biz'}, "\n";
 
@@ -154,7 +218,10 @@ method without actually knowing where that method is defined.
 	@ISA = qw( Bar Baz );
 	@Foo::Inherit::ISA = @ISA;  # Access to overridden methods.
 
-	sub new { bless [] }
+	sub new {
+		my $type = shift;
+		bless [], $type;
+	}
 	sub grr { print "grumble\n" }
 	sub goo {
 		my $self = shift;
@@ -171,27 +238,28 @@ method without actually knowing where that method is defined.
 
 	package main;
 
-	$foo = new Foo;
+	$foo = Foo->new;
 	$foo->mumble;
 	$foo->grr;
 	$foo->goo;
 	$foo->google;
 
 
-=head1 USING RELATIONSHIP WITH SDBM 
+=head1 USING RELATIONSHIP WITH SDBM
 
 This example demonstrates an interface for the SDBM class.  This creates a
 "using" relationship between the SDBM class and the new class Mydbm.
 
-	use SDBM_File;
-	use POSIX;
-
 	package Mydbm;
 
+	require SDBM_File;
+	require TieHash;
+	@ISA = qw( TieHash );
+
 	sub TIEHASH {
-	    my $self = shift;
+	    my $type = shift;
 	    my $ref  = SDBM_File->new(@_);
-	    bless {'dbm' => $ref};
+	    bless {'dbm' => $ref}, $type;
 	}
 	sub FETCH {
 	    my $self = shift;
@@ -209,6 +277,7 @@ This example demonstrates an interface for the SDBM class.  This creates a
 	}
 
 	package main;
+	use Fcntl qw( O_RDWR O_CREAT );
 
 	tie %foo, Mydbm, "Sdbm", O_RDWR|O_CREAT, 0640;
 	$foo{'bar'} = 123;
@@ -230,7 +299,10 @@ that it is impossible to override the BAZ() method.
 
 	package FOO;
 
-	sub new { bless {} }
+	sub new {
+		my $type = shift;
+		bless {}, $type;
+	}
 	sub bar {
 		my $self = shift;
 		$self->FOO::private::BAZ;
@@ -253,7 +325,10 @@ FOO::private::BAZ().
 
 	package FOO;
 
-	sub new { bless {} }
+	sub new {
+		my $type = shift;
+		bless {}, $type;
+	}
 	sub bar {
 		my $self = shift;
 		$self->FOO::private::BAZ;
@@ -267,7 +342,10 @@ FOO::private::BAZ().
 
 	package GOOP;
 	@ISA = qw( FOO );
-	sub new { bless {} }
+	sub new {
+		my $type = shift;
+		bless {}, $type;
+	}
 
 	sub BAZ {
 		print "in GOOP::BAZ\n";
@@ -284,7 +362,10 @@ method GOOP::BAZ() to be used in place of FOO::BAZ().
 
 	package FOO;
 
-	sub new { bless {} }
+	sub new {
+		my $type = shift;
+		bless {}, $type;
+	}
 	sub bar {
 		my $self = shift;
 		$self->BAZ;
@@ -297,7 +378,10 @@ method GOOP::BAZ() to be used in place of FOO::BAZ().
 	package GOOP;
 	@ISA = qw( FOO );
 
-	sub new { bless {} }
+	sub new {
+		my $type = shift;
+		bless {}, $type;
+	}
 	sub BAZ {
 		print "in GOOP::BAZ\n";
 	}
@@ -330,9 +414,10 @@ method where that data is located.
 	%fizzle = ( 'Password' => 'XYZZY' );
 
 	sub new {
+		my $type = shift;
 		my $self = {};
 		$self->{'fizzle'} = \%fizzle;
-		bless $self;
+		bless $self, $type;
 	}
 
 	sub enter {
@@ -353,9 +438,10 @@ method where that data is located.
 	%fizzle = ( 'Password' => 'Rumple' );
 
 	sub new {
+		my $type = shift;
 		my $self = Bar->new;
 		$self->{'fizzle'} = \%fizzle;
-		bless $self;
+		bless $self, $type;
 	}
 
 	package main;

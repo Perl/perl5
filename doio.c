@@ -577,7 +577,7 @@ GV *gv;
 	    (void)ungetc(ch, IoIFP(io));
 	    return FALSE;
 	}
-#ifdef USE_STDIO_PTR
+#if defined(USE_STDIO_PTR) && defined(STDIO_CNT_LVALUE)
 	if (FILE_cnt(IoIFP(io)) < -1)
 	    FILE_cnt(IoIFP(io)) = -1;
 #endif

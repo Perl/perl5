@@ -21,7 +21,7 @@ echo "Extracting h2ph (with variable substitutions)"
 : by putting a backslash in front.  You may delete these comments.
 rm -f h2ph
 $spitshell >h2ph <<!GROK!THIS!
-#!$bin/perl
+#!$binexp/perl
 'di ';
 'ds 00 \"';
 'ig 00 ';

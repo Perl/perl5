@@ -23,14 +23,21 @@ You can compare $s1 and $s2 above with
 
 to extract the data itself, you'll need a dereference: $$s1
 
-This uses POSIX::setlocale The basic collation conversion is done by
+This uses POSIX::setlocale. The basic collation conversion is done by
 strxfrm() which terminates at NUL characters being a decent C routine.
 collate_xfrm() handles embedded NUL characters gracefully.  Due to C<cmp>
 and overload magic, C<lt>, C<le>, C<eq>, C<ge>, and C<gt> work also.  The
 available locales depend on your operating system; try whether C<locale
--a> shows them or the more direct approach C<ls /usr/lib/nls/loc> or C<ls
-/usr/lib/nls>.  The locale names are probably something like
-"xx_XX.(ISO)?8859-N".
+-a> shows them or man pages for "locale" or "nlsinfo" or
+the direct approach C<ls /usr/lib/nls/loc> or C<ls
+/usr/lib/nls>.  Not all the locales that your vendor supports
+are necessarily installed: please consult your operating system's
+documentation.
+
+The locale names are probably something like
+C<"xx_XX.(ISO)?8859-N"> or C<"xx_XX.(ISO)?8859N">, for example
+C<"fr_CH.ISO8859-1"> is the Swiss (CH) variant of French (fr),
+ISO Latin (8859) 1 (-1) which is the Western European character set.
 
 =cut
 
@@ -54,7 +61,7 @@ available locales depend on your operating system; try whether C<locale
 # Overloads:	cmp # 3)
 #
 # Usage:	use Collate;
-#	        setlocale(&LC_COLLATE, 'locale-of-your-choice'); # 4)
+#	        setlocale(LC_COLLATE, 'locale-of-your-choice'); # 4)
 #		$s1 = new Collate "scalar_data_1";
 #		$s2 = new Collate "scalar_data_2";
 #		
@@ -68,12 +75,19 @@ available locales depend on your operating system; try whether C<locale
 #		   collate_xfrm handles embedded NUL characters gracefully.
 #		3) due to cmp and overload magic, lt le eq ge gt work also
 #		4) the available locales depend on your operating system;
-#		   try whether "locale -a" shows them or the more direct
+#		   try whether "locale -a" shows them or man pages for
+#		   "locale" or "nlsinfo" work or the more direct
 #		   approach "ls /usr/lib/nls/loc" or "ls /usr/lib/nls".
+#		   Not all the locales that your vendor supports
+#		   are necessarily installed: please consult your
+#		   operating system's documentation.
 #		   The locale names are probably something like
-#		   'xx_XX.(ISO)?8859-N'.
+#		   'xx_XX.(ISO)?8859-N' or 'xx_XX.(ISO)?8859N',
+#		   for example 'fr_CH.ISO8859-1' is the Swiss (CH)
+#		   variant of French (fr), ISO Latin (8859) 1 (-1)
+#		   which is the Western European character set.
 #
-# Updated:	19940913 1341 GMT
+# Updated:	19950602 1601 GMT
 #
 # ---
 
