@@ -5,6 +5,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C/C++
 
 $Log: MPAEVTStream.cp,v $
+Revision 1.5  2002/01/28 07:42:35  neeri
+Fix horrible list maintencance bugs (MacPerl Bug #443568)
+
 Revision 1.4  2002/01/04 03:34:45  pudge
 Modifications for universal headers 3.4
 
@@ -516,7 +519,7 @@ void MPAEVTDevice::DistributeInput(const AppleEvent * input, long mode)
 		AEDesc	doneDesc;
 		
 		if (AEGetParamDesc(input, 'SASE', typeAERecord, &sase))
-			if (mode = 'DPLX')
+			if (mode == 'DPLX')
 				AEBuild(&sase, "{evcl: McPL, evid: SASE}");
 		if (sase.dataHandle) {
 			AEGetAttributeDesc(input, keyAddressAttr, typeWildCard, &target);
@@ -532,67 +535,48 @@ void MPAEVTDevice::DistributeInput(const AppleEvent * input, long mode)
 
 void MPAEVTDevice::KillInput()
 {
-	int				runs = 0;
-	MPAEVTSocket * sock = first;
-
-	if (sock)
-		while ((runs += sock == first) < 2) {
-			if (sock->needy) 
-				sock->eof = true;
-			
-			sock = sock->next;
-		}
+	for (MPAEVTSocket * sock = first; sock; sock = sock->next)
+		if (sock->needy) 
+			sock->eof = true;
 }
 
 void MPAEVTDevice::FlushInput()
 {
-	int				runs = 0;
-	MPAEVTSocket * sock = first;
-
-	if (sock)
-		while ((runs += sock == first) < 2) {
-			if (sock->inData) 
-				SetHandleSize(sock->inData, 0);
-			
-			sock = sock->next;
-		}
+	for (MPAEVTSocket * sock = first; sock; sock = sock->next)
+		if (sock->inData) 
+			SetHandleSize(sock->inData, 0);
 	AEDisposeDesc(&sase);
 	AEDisposeDesc(&target);
 }
 
 void MPAEVTDevice::CollectOutput(AppleEvent * output)
 {
-	OSErr				err;
+	OSErr			err;
 	MPAEStream 		want;
 	AEDesc			desc;
 	int				wantCount = 0;
-	int				runs = 0;
-	MPAEVTSocket * sock = first;
 	
 	desc.descriptorType = 'TEXT';
 	
 	want.OpenList();
 	
-	if (sock)
-		while ((runs += sock == first) < 2) {
-			if (sock->outData && GetHandleSize(sock->outData)) {
-				desc.dataHandle = sock->outData;
-				if (sock->key == '----')
-					if (!AEPutParamDesc(output, '----', &desc))
-						SetHandleSize(sock->outData, 0);
-					else 
-						return;							// This is sort of disastrous
-				else if (outputData.WriteKey(sock->key) || outputData.WriteDesc(desc))				
-					return;								// 	... so is this.
+	for (MPAEVTSocket * sock = first; sock; sock = sock->next) {
+		if (sock->outData && GetHandleSize(sock->outData)) {
+			desc.dataHandle = sock->outData;
+			if (sock->key == '----')
+				if (!AEPutParamDesc(output, '----', &desc))
+					SetHandleSize(sock->outData, 0);
 				else 
-					++outputDataCount;
-			}
-			if (sock->inData && sock->needy)
-				if (!want.WriteDesc(typeEnumerated, &sock->key, 4))
-					++wantCount;
-			
-			sock = sock->next;
+					return;							// This is sort of disastrous
+			else if (outputData.WriteKey(sock->key) || outputData.WriteDesc(desc))				
+				return;								// 	... so is this.
+			else 
+				++outputDataCount;
 		}
+		if (sock->inData && sock->needy)
+			if (!want.WriteDesc(typeEnumerated, &sock->key, 4))
+				++wantCount;
+	}
 	
 	if (outputDirect.dataHandle) {
 		err = AEPutParamDesc(output, '----', &outputDirect);
@@ -630,17 +614,17 @@ void MPAEVTDevice::CollectOutput(AppleEvent * output)
 		want.Close();
 	
 	AEPutParamPtr(output, 'DONE', typeBoolean, (Ptr) &finish, 1);
-	
-	if (sock)	
-		for (runs = 0; (runs += sock == first) < 2; sock = sock->next) 
-			if (sock->outData) 
-				SetHandleSize(sock->outData, 0);
+
+	for (MPAEVTSocket * sock = first; sock; sock = sock->next)
+		if (sock->outData) 
+			SetHandleSize(sock->outData, 0);
 }
 
 void MPAEVTDevice::Enqueue(MPAEVTSocket * sock)
 {
 	sock->prev = nil;
-	sock->next = first;
+	if (sock->next = first)
+		first->prev = sock;
 	first = sock;
 }
 
@@ -656,10 +640,7 @@ void MPAEVTDevice::Dequeue(MPAEVTSocket * sock)
 
 MPAEVTSocket * MPAEVTDevice::Lookup(OSType key, Boolean input, Boolean output)
 {
-	int				runs = 0;
-	MPAEVTSocket * sock = first;
-	
-	while (sock)
+	for (MPAEVTSocket * sock = first; sock; sock = sock->next)
 		if (sock->key == key) {
 			if (input && !sock->inData)
 				sock->inData = NewHandle(0);
@@ -667,8 +648,7 @@ MPAEVTSocket * MPAEVTDevice::Lookup(OSType key, Boolean input, Boolean output)
 				sock->outData = NewHandle(0);
 			
 			return sock;
-		} else
-			sock = sock->next;
+		}
 	
 	return new MPAEVTSocket(key, input, output);
 }
