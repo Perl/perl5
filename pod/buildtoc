@@ -12,6 +12,7 @@ sub output ($);
 	   perllol perltoot perlobj perltie perlbot perlipc perldebug
 	   perldiag perlsec perltrap perlstyle perlpod perlbook
 	   perlembed perlapio perlxs perlxstut perlguts perlcall
+	   perlhist
 	  );
 
 for (@pods) { s/$/.pod/ }
@@ -171,7 +172,7 @@ sub podset {
 	    output $_; nl(); next;
 
 	}
-	if (s/^=item (.*)\n/$1/) {
+	if (s/^=item ([^=].*)\n/$1/) {
 	    next if $pod eq 'perldiag';
 	    s/^\s*\*\s*$// && next;
 	    s/^\s*\*\s*//;
