@@ -47,6 +47,7 @@ typedef pthread_t perl_thread;
 #define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
 #else
 #define pthread_mutexattr_default NULL
+#define pthread_condattr_default NULL
 #endif /* OLD_PTHREADS_API */
 
 #define MUTEX_INIT(m) \
@@ -60,7 +61,9 @@ typedef pthread_t perl_thread;
 #define MUTEX_DESTROY(m) \
     if (pthread_mutex_destroy((m))) croak("panic: MUTEX_DESTROY"); else 1
 #define COND_INIT(c) \
-    if (pthread_cond_init((c), NULL)) croak("panic: COND_INIT"); else 1
+    if (pthread_cond_init((c), pthread_condattr_default)) \
+	croak("panic: COND_INIT"); \
+    else 1
 #define COND_SIGNAL(c) \
     if (pthread_cond_signal((c))) croak("panic: COND_SIGNAL"); else 1
 #define COND_BROADCAST(c) \
