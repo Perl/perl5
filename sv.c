@@ -3865,19 +3865,23 @@ HV* stash;
     if (SvFLAGS(ref) & (SVs_OBJECT|SVf_READONLY)) {
 	if (SvREADONLY(ref))
 	    croak(no_modify);
-	if (SvOBJECT(ref) && SvTYPE(ref) != SVt_PVIO)
-	    --sv_objcount;
+	if (SvOBJECT(ref)) {
+	    if (SvTYPE(ref) != SVt_PVIO)
+		--sv_objcount;
+	    SvREFCNT_dec(SvSTASH(ref));
+	}
     }
     SvOBJECT_on(ref);
-    ++sv_objcount;
+    if (SvTYPE(ref) != SVt_PVIO)
+	++sv_objcount;
     (void)SvUPGRADE(ref, SVt_PVMG);
     SvSTASH(ref) = (HV*)SvREFCNT_inc(stash);
 
 #ifdef OVERLOAD
-    SvAMAGIC_off(sv);
-    if (Gv_AMG(stash)) {
-      SvAMAGIC_on(sv);
-    }
+    if (Gv_AMG(stash))
+	SvAMAGIC_on(sv);
+    else
+	SvAMAGIC_off(sv);
 #endif /* OVERLOAD */
 
     return sv;
