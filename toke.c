@@ -4716,7 +4716,7 @@ STATIC SV *
 new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type) 
 {
     dSP;
-    HV *table = perl_get_hv("\10", FALSE); /* ^H */
+    HV *table = GvHV(hintgv);		 /* ^H */
     BINOP myop;
     SV *res;
     bool oldcatch = CATCH_GET;
@@ -4757,7 +4757,7 @@ new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type)
     PUTBACK;
     pp_pushmark(ARGS);
 
-    EXTEND(sp, 3);
+    EXTEND(sp, 4);
     PUSHs(pv);
     PUSHs(sv);
     PUSHs(typesv);

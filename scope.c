@@ -806,7 +806,7 @@ leave_scope(I32 base)
 	case SAVEt_OP:
 	    op = (OP*)SSPOPPTR;
 	    break;
-	case SAVEt_NOHINTS:
+	case SAVEt_HINTS:
 	    if (GvHV(hintgv)) {
 		SvREFCNT_dec((SV*)GvHV(hintgv));
 		GvHV(hintgv) = NULL;
