@@ -1,18 +1,9 @@
-#include <stdio.h>
-#include <win32io.h>
+/* Say NO to CPP! Hallelujah! */
 
-#ifndef _DLL
-extern WIN32_IOSUBSYSTEM win32stdio;
-#endif
-
-extern int RunPerl(int argc, char **argv, char **env, void *iosubsystem);
+__declspec(dllimport) int RunPerl(int argc, char **argv, char **env, void *ios);
 
 int
 main(int argc, char **argv, char **env)
 {
-#ifdef _DLL
-    return (RunPerl(argc, argv, env, NULL));
-#else
-    return (RunPerl(argc, argv, env, &win32stdio));
-#endif
+    return RunPerl(argc, argv, env, (void*)0);
 }

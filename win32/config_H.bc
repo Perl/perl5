@@ -113,7 +113,7 @@
  *	This symbol, if defined, indicates that the alarm routine is
  *	available.
  */
-#define HAS_ALARM		/**/
+/*#define HAS_ALARM		/**/
 
 /* HASATTRIBUTE:
  *	This symbol indicates the C compiler can check for function attributes,
@@ -1376,7 +1376,7 @@
  *	is defined, and 'int *' otherwise.  This is only useful if you 
  *	have select(), of course.
  */
-#define Select_fd_set_t 	int *	/**/
+#define Select_fd_set_t 	Perl_fd_set *	/**/
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters

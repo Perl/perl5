@@ -4679,7 +4679,7 @@ peep(register OP *o)
 	case OP_LC:
 	case OP_LCFIRST:
 	case OP_QUOTEMETA:
-	    if (o->op_next->op_type == OP_STRINGIFY)
+	    if (o->op_next && o->op_next->op_type == OP_STRINGIFY)
 		null(o->op_next);
 	    o->op_seq = op_seqmax++;
 	    break;

@@ -22,8 +22,6 @@ dEXT char *watchok;
 int
 runops_standard(void) {
     dTHR;
-    SAVEI32(runlevel);
-    runlevel++;
 
     while ( op = (*op->op_ppaddr)(ARGS) ) ;
 
@@ -41,9 +39,6 @@ runops_debug(void) {
 	warn("NULL OP IN RUN");
 	return 0;
     }
-
-    SAVEI32(runlevel);
-    runlevel++;
 
     do {
 	if (debug) {

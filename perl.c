@@ -1798,6 +1798,7 @@ init_main_stash(void)
     curstash = defstash;
     compiling.cop_stash = defstash;
     debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
+    globalstash = GvHV(gv_fetchpv("CORE::GLOBAL::", GV_ADDMULTI, SVt_PVHV));
     /* We must init $/ before switches are processed. */
     sv_setpvn(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), "\n", 1);
 }
@@ -2843,9 +2844,13 @@ init_main_thread()
 
 #ifdef HAVE_THREAD_INTERN
     init_thread_intern(thr);
+#endif
+
+#ifdef SET_THREAD_SELF
+    SET_THREAD_SELF(thr);
 #else
     thr->self = pthread_self();
-#endif /* HAVE_THREAD_INTERN */
+#endif /* SET_THREAD_SELF */
     SET_THR(thr);
 
     /*

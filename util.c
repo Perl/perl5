@@ -1120,7 +1120,6 @@ die(pat, va_alist)
     dTHR;
     va_list args;
     char *message;
-    I32 oldrunlevel = runlevel;
     int was_in_eval = in_eval;
     HV *stash;
     GV *gv;
@@ -1181,10 +1180,10 @@ die(pat, va_alist)
     restartop = die_where(message);
 #ifdef USE_THREADS
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-	  "%p: die: restartop = %p, was_in_eval = %d, oldrunlevel = %d\n",
-	  thr, restartop, was_in_eval, oldrunlevel));
+	  "%p: die: restartop = %p, was_in_eval = %d, top_env = %p\n",
+	  thr, restartop, was_in_eval, top_env));
 #endif /* USE_THREADS */
-    if ((!restartop && was_in_eval) || oldrunlevel > 1)
+    if ((!restartop && was_in_eval) || top_env->je_prev)
 	JMPENV_JUMP(3);
     return restartop;
 }
@@ -2418,8 +2417,6 @@ new_struct_thread(struct thread *t)
     SvGROW(sv, sizeof(struct thread) + 1);
     SvCUR_set(sv, sizeof(struct thread));
     thr = (Thread) SvPVX(sv);
-    /* Zero(thr, 1, struct thread); */
-
     /* debug */
     memset(thr, 0xab, sizeof(struct thread));
     markstack = 0;
@@ -2431,7 +2428,7 @@ new_struct_thread(struct thread *t)
     /* end debug */
 
     thr->oursv = sv;
-    init_stacks(thr);
+    init_stacks(ARGS);
 
     curcop = &compiling;
     thr->cvcache = newHV();
@@ -2445,9 +2442,21 @@ new_struct_thread(struct thread *t)
     curcop = t->Tcurcop;       /* XXX As good a guess as any? */
     defstash = t->Tdefstash;   /* XXX maybe these should */
     curstash = t->Tcurstash;   /* always be set to main? */
-    /* top_env needs to be non-zero. The particular value doesn't matter */
-    top_env = t->Ttop_env;
-    runlevel = 1;		/* XXX should be safe ? */
+
+
+    /* top_env needs to be non-zero. It points to an area
+       in which longjmp() stuff is stored, as C callstack
+       info there at least is thread specific this has to
+       be per-thread. Otherwise a 'die' in a thread gives
+       that thread the C stack of last thread to do an eval {}!
+       See comments in scope.h    
+       Initialize top entry (as in perl.c for main thread)
+     */
+    start_env.je_prev = NULL;
+    start_env.je_ret = -1;
+    start_env.je_mustcatch = TRUE;
+    top_env  = &start_env;
+
     in_eval = FALSE;
     restartop = 0;
 
@@ -2472,7 +2481,8 @@ new_struct_thread(struct thread *t)
 	    av_store(thr->magicals, i, sv);
 	    sv_magic(sv, 0, 0, &per_thread_magicals[i], 1);
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-				  "new_struct_thread: copied magical %d\n",i));
+				  "new_struct_thread: copied magical %d %p->%p\n",i,
+                                  t, thr));
 	}
     } 
 

@@ -7,12 +7,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#ifdef __cplusplus
-#  define EXTERN_C extern "C"
-#else
-#  define EXTERN_C extern
-#endif
-
 static void xs_init _((void));
 
 __declspec(dllexport) int
@@ -20,9 +14,6 @@ RunPerl(int argc, char **argv, char **env, void *iosubsystem)
 {
     int exitstatus;
     PerlInterpreter *my_perl;
-    void *pOldIOSubsystem;
-
-    pOldIOSubsystem = SetIOSubSystem(iosubsystem);
 
     PERL_SYS_INIT(&argc,&argv);
 
@@ -42,8 +33,6 @@ RunPerl(int argc, char **argv, char **env, void *iosubsystem)
     perl_free( my_perl );
 
     PERL_SYS_TERM();
-
-    SetIOSubSystem(pOldIOSubsystem);
 
     return (exitstatus);
 }

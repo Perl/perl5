@@ -29,6 +29,9 @@
 
 #include "embed.h"
 
+#undef START_EXTERN_C
+#undef END_EXTERN_C
+#undef EXTERN_C
 #ifdef __cplusplus
 #  define START_EXTERN_C extern "C" {
 #  define END_EXTERN_C }
@@ -39,13 +42,7 @@
 #  define EXTERN_C
 #endif
 
-#if defined(USE_THREADS) /* && !defined(PERL_CORE) && !defined(PERLDLL) */
-#ifndef CRIPPLED_CC
-#define CRIPPLED_CC
-#endif
-#endif
-
-#ifdef OP_IN_REGISTER
+ifdef OP_IN_REGISTER
 #  ifdef __GNUC__
 #    define stringify_immed(s) #s
 #    define stringify(s) stringify_immed(s)
@@ -1889,6 +1886,7 @@ IEXT AV *	Idbargs;	/* args to call listed by caller function */
 IEXT HV *	Idefstash;	/* main symbol table */
 IEXT HV *	Icurstash;	/* symbol table for current package */
 IEXT HV *	Idebstash;	/* symbol table for perldb package */
+IEXT HV *	Iglobalstash;	/* global keyword overrides imported here */
 IEXT SV *	Icurstname;	/* name of current package */
 IEXT AV *	Ibeginav;	/* names of BEGIN subroutines */
 IEXT AV *	Iendav;		/* names of END subroutines */
@@ -1945,7 +1943,6 @@ IEXT I32	Icxstack_ix IINIT(-1);
 IEXT I32	Icxstack_max IINIT(128);
 IEXT JMPENV 	Istart_env;	/* empty startup sigjmp() environment */
 IEXT JMPENV *	Itop_env;	/* ptr. to current sigjmp() environment */
-IEXT I32	Irunlevel;
 
 /* stack stuff */
 IEXT AV *	Icurstack;		/* THE STACK */

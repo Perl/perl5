@@ -1,6 +1,18 @@
 #ifndef WIN32IOP_H
 #define WIN32IOP_H
 
+#ifndef START_EXTERN_C
+#ifdef __cplusplus
+#  define START_EXTERN_C extern "C" {
+#  define END_EXTERN_C }
+#  define EXTERN_C extern "C"
+#else
+#  define START_EXTERN_C 
+#  define END_EXTERN_C 
+#  define EXTERN_C
+#endif
+#endif
+
 /*
  * defines for flock emulation
  */
@@ -8,8 +20,6 @@
 #define LOCK_EX 2
 #define LOCK_NB 4
 #define LOCK_UN 8
-
-#include <win32io.h>	/* pull in the io sub system structure */
 
 /*
  * Make this as close to original stdio as possible.
@@ -19,6 +29,13 @@
  * function prototypes for our own win32io layer
  */
 START_EXTERN_C
+
+struct tms {
+	long	tms_utime;
+	long	tms_stime;
+	long	tms_cutime;
+	long	tms_cstime;
+};
 
 EXT int * 	win32_errno(void);
 EXT char *** 	win32_environ(void);
@@ -92,17 +109,18 @@ EXT void*	win32_calloc(size_t numitems, size_t size);
 EXT void*	win32_realloc(void *block, size_t size);
 EXT void	win32_free(void *block);
 
+EXT int		win32_open_osfhandle(long handle, int flags);
+EXT long	win32_get_osfhandle(int fd);
 
+#ifndef USE_WIN32_RTL_ENV
+EXT char*	win32_getenv(const char *name);
+#endif
 
-/*
- * these two are win32 specific but still io related
- */
-int		stolen_open_osfhandle(long handle, int flags);
-long		stolen_get_osfhandle(int fd);
-
-
-EXT PWIN32_IOSUBSYSTEM	SetIOSubSystem(void	*piosubsystem);
-EXT PWIN32_IOSUBSYSTEM	GetIOSubSystem(void);
+EXT unsigned int	win32_sleep(unsigned int);
+EXT int			win32_times(struct tms *timebuf);
+EXT unsigned int	win32_alarm(unsigned int sec);
+EXT int			win32_flock(int fd, int oper);
+EXT int			win32_stat(const char *path, struct stat *buf);
 
 END_EXTERN_C
 
@@ -117,6 +135,12 @@ END_EXTERN_C
 #undef stdout
 #undef ferror
 #undef feof
+#undef fclose
+#undef pipe
+#undef pause
+#undef sleep
+#undef times
+#undef alarm
 
 #ifdef __BORLANDC__
 #undef ungetc
@@ -175,8 +199,8 @@ END_EXTERN_C
 #define eof(fd)			win32_eof(fd)
 #define read(fd,b,s)		win32_read(fd,b,s)
 #define write(fd,b,s)		win32_write(fd,b,s)
-#define _open_osfhandle		stolen_open_osfhandle
-#define _get_osfhandle		stolen_get_osfhandle
+#define _open_osfhandle		win32_open_osfhandle
+#define _get_osfhandle		win32_get_osfhandle
 #define spawnvp			win32_spawnvp
 #define mkdir			win32_mkdir
 #define rmdir			win32_rmdir
@@ -195,12 +219,21 @@ END_EXTERN_C
 #define puts			win32_puts
 #define getchar			win32_getchar
 #define putchar			win32_putchar
-#define fscanf			(GetIOSubSystem()->pfnfscanf)
-#define scanf			(GetIOSubSystem()->pfnscanf)
 #define malloc			win32_malloc
 #define calloc			win32_calloc
 #define realloc			win32_realloc
 #define free			win32_free
-#endif /* WIN32IO_IS_STDIO */
 
+#define pipe(fd)		win32_pipe((fd), 512, O_BINARY)
+#define pause()			win32_sleep((32767L << 16) + 32767)
+#define sleep			win32_sleep
+#define times			win32_times
+#define alarm			win32_alarm
+
+#ifndef USE_WIN32_RTL_ENV
+#undef getenv
+#define getenv win32_getenv
+#endif
+
+#endif /* WIN32IO_IS_STDIO */
 #endif /* WIN32IOP_H */
