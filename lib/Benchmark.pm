@@ -485,19 +485,39 @@ sub usage {
 # The cache needs two branches: 's' for strings and 'c' for code.  The
 # empty loop is different in these two cases.
 
-sub clearcache ($) {
+$_Usage{clearcache} = <<'USAGE';
+usage: clearcache($count);
+USAGE
+
+sub clearcache    { 
+    die usage unless @_ == 1;
     delete $Cache{"$_[0]c"}; delete $Cache{"$_[0]s"}; 
 }
 
-sub clearallcache () { 
+$_Usage{clearallcache} = <<'USAGE';
+usage: clearallcache();
+USAGE
+
+sub clearallcache { 
+    die usage if @_;
     %Cache = (); 
 }
 
-sub enablecache () {
+$_Usage{enablecache} = <<'USAGE';
+usage: enablecache();
+USAGE
+
+sub enablecache   {
+    die usage if @_;
     $Do_Cache = 1; 
 }
 
-sub disablecache  () {
+$_Usage{disablecache} = <<'USAGE';
+usage: disablecache();
+USAGE
+
+sub disablecache  {
+    die usage if @_;
     $Do_Cache = 0; 
 }
 
