@@ -1,9 +1,36 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.75 2002/06/01 18:07:49 dankogai Exp dankogai $
+# $Id: Changes,v 1.76 2002/08/25 15:09:51 dankogai Exp dankogai $
 #
 
-$Revision: 1.75 $ $Date: 2002/06/01 18:07:49 $
+$Revision: 1.76 $ $Date: 2002/08/25 15:09:51 $
+! t/big5-eten.utf
+  To reflect ucm change by Autrijus.  t/big5-eten.enc was regenerated
+  but naturally identical to previous version -- dankogai
+! ucm/big5-eten.ucm
+  Codepoint fixes -- autrijus
+  Message-Id: <20020805040236.GC5220@not.autrijus.org>
+= *
+  copied everything under perl-5.8.0/ext/Encode to make sure Encode
+  is in sync w/ perl core
+! t/CJKT.t t/guess.t
+  Change 17175 by jhi@alpha on 2002/06/10 23:24:42
+  Now that binmode(FH) does implicit ":bytes" revisit
+  the failing tests.  The worrisome one is the Digest::MD5
+  test-- how will it fare in CRLF lands now?
+! t/CJKT.t t/guess.t
+  From: Radu Greab <radu@netsoft.ro>
+  Date: Mon, 10 Jun 2002 00:40:34 +0300
+  Message-Id: <200206092140.g59LeYn15745@ix.netsoft.ro>
+  Fixes for en_US.UTF-8 failures, all but ext/PerlIO/t/fallback.t
+  ones which I cannot figure out.
+! lib/Encode/Alias.pm
+  Subject: [Encode PATCH] spurious warning
+  From: Nicholas Clark <nick@unfortu.net>
+  Date: Sun, 2 Jun 2002 20:26:22 +0100
+  Message-ID: <20020602192619.GA320@Bagpuss.unfortu.net>
+
+1.75 2002/06/01 18:07:49
 ! lib/Encode/Alias.pm t/Alias.t lib/Encode/Supported.pod TW/TW.pm
   glibc compliance cited by Autrijus.
   http://www.li18nux.org/docs/html/CodesetAliasTable-V10.html
@@ -679,7 +706,7 @@ $Revision: 1.75 $ $Date: 2002/06/01 18:07:49 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/06/01 18:07:49 $
+1.11  $Date: 2002/08/25 15:09:51 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST
