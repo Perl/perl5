@@ -3836,7 +3836,17 @@ the new position.
 Does exactly the same thing as "exec LIST" except that a fork is done
 first, and the parent process waits for the child process to complete.
 Note that argument processing varies depending on the number of
-arguments.  The return value is the exit status of the program as
+arguments.  If there is more than one argument in LIST, or if LIST is
+an array with more than one value, starts the program given by the
+first element of the list with arguments given by the rest of the list.
+If there is only one scalar argument, the argument is
+checked for shell metacharacters, and if there are any, the entire
+argument is passed to the system's command shell for parsing (this is
+C</bin/sh -c> on Unix platforms, but varies on other platforms).  If
+there are no shell metacharacters in the argument, it is split into
+words and passed directly to execvp(), which is more efficient.
+
+The return value is the exit status of the program as
 returned by the wait() call.  To get the actual exit value divide by
 256.  See also L</exec>.  This is I<NOT> what you want to use to capture
 the output from a command, for that you should use merely backticks or

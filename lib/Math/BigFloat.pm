@@ -274,7 +274,7 @@ Math::BigFloat - Arbitrary length float math package
 
 =head1 SYNOPSIS
 
-  use Math::BogFloat;
+  use Math::BigFloat;
   $f = Math::BigFloat->new($string);
 
   $f->fadd(NSTR) return NSTR            addition

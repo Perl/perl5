@@ -336,6 +336,11 @@ You can use C<eof> without parentheses to locate the end of each input file,
 in case you want to append to each file, or reset line numbering (see
 example in L<perlfunc/eof>).
 
+Finally, note that the B<-i> switch does not impede execution when no
+files are given on the command line.  In this case, no backup is made
+(the original file cannot, of course, be determined) and processing
+proceeds from STDIN to STDOUT as might be expected.
+
 =item B<-I>I<directory>
 
 Directories specified by B<-I> are prepended to the search path for

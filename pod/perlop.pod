@@ -774,9 +774,10 @@ If you change them, Perl won't even notice.
 If the PATTERN evaluates to the empty string, the last
 I<successfully> matched regular expression is used instead.
 
-If used in a context that requires a list value, a pattern match returns a
+If the C</g> option is not used, C<m//> in a list context returns a
 list consisting of the subexpressions matched by the parentheses in the
-pattern, i.e., (C<$1>, $2, $3...).  (Note that here $1 etc. are also set, and
+pattern, i.e., (C<$1>, C<$2>, C<$3>...).  (Note that here
+C<$1> etc. are also set, and
 that this differs from Perl 4's behavior.)  If there are no parentheses,
 the return value is the list C<(1)> for success or C<('')> upon failure.
 With parentheses, C<()> is returned upon failure.
