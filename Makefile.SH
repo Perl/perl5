@@ -227,9 +227,9 @@ TRNL = '$trnl'
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>Makefile <<'!NO!SUBS!'
 
-CCCMD    = `sh $(shellflags) cflags $(LIBPERL) $@`
+CCCMD    = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $(LIBPERL) $@`
 
-CCCMDSRC = `sh $(shellflags) cflags $(LIBPERL) $<`
+CCCMDSRC = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $(LIBPERL) $<`
 
 private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 
@@ -946,7 +946,7 @@ depend: makedepend
 makedepend: makedepend.SH config.sh
 	sh ./makedepend.SH
 
-.PHONY: test check test_prep _test_prep \
+.PHONY: test check test_prep test_prep_nodll test_prep_pre _test_prep \
 	test_tty test-tty _test_tty test_notty test-notty _test_notty \
 	utest ucheck test.utf8 check.utf8 \
 	test.third check.third utest.third ucheck.third test_notty.third \
@@ -956,25 +956,31 @@ makedepend: makedepend.SH config.sh
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
 
-_test_prep: $(PERL)$(EXE_EXT)
+TESTFILE=TEST
+
+_test_prep:
 	cd t && (rm -f $(PERL)$(EXE_EXT); $(LNS) ../$(PERL)$(EXE_EXT) $(PERL)$(EXE_EXT))
 
-test_prep: miniperl ./perl$(EXE_EXT) preplibrary utilities $(dynamic_ext) $(nonxs_ext) $(TEST_PERL_DLL)
+# Architecture-neutral stuff:
+
+test_prep_pre: preplibrary utilities $(nonxs_ext)
+
+test_prep: test_prep_pre miniperl ./perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
 	PERL=./perl $(MAKE) _test_prep
 
 _test_tty:
-	cd t && $(LDLIBPTH) $(PERL_DEBUG) $(PERL) TEST $(TEST_ARGS) </dev/tty
+	cd t && $(LDLIBPTH) $(PERL_DEBUG) $(PERL) $(TESTFILE) $(TEST_ARGS) </dev/tty
 
 _test_notty:
-	cd t && $(LDLIBPTH) $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(PERL) TEST $(TEST_ARGS)
+	cd t && $(LDLIBPTH) $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(PERL) $(TESTFILE) $(TEST_ARGS)
 
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t
 _test:
 	if (true </dev/tty) >/dev/null 2>&1; then \
-	  $(MAKE) TEST_ARGS=$(TEST_ARGS) _test_tty   ; \
+	  $(MAKE) TEST_ARGS=$(TEST_ARGS) TESTFILE=$(TESTFILE) _test_tty   ; \
 	else \
-	  $(MAKE) TEST_ARGS=$(TEST_ARGS) _test_notty ; \
+	  $(MAKE) TEST_ARGS=$(TEST_ARGS) TESTFILE=$(TESTFILE) _test_notty ; \
 	fi
 	@echo "Ran tests" > t/rantests
 
@@ -998,7 +1004,7 @@ test-notty:	test_notty
 
 # Targets for Third Degree testing.
 
-test_prep.third: test_prep perl.third
+test_prep.third: test_prep perl.third perl.third$(EXE_EXT)
 	PERL=./perl.third $(MAKE) _test_prep
 
 test.third check.third:	test_prep.third perl.third
@@ -1025,6 +1031,11 @@ minitest: miniperl lib/re.pm
 	@echo "to build lib/Config.pm."
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
 		&& $(LDLIBPTH) ./perl TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t </dev/tty
+
+# Test via harness
+
+test_harness: test_prep
+	PERL=./perl $(MAKE) TESTFILE=harness _test
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.

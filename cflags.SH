@@ -42,6 +42,13 @@ case $PERL_CONFIG_SH in
 	;;
 esac
 
+case "X$1" in
+Xoptimize=*)
+	eval "$1"
+	shift
+	;;
+esac
+
 perltype=''
 optdebug=''	# ensure -g used if building a -DDEBUGGING libperl
 case $# in
