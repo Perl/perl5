@@ -498,9 +498,6 @@ free(mp)
 #ifdef PACK_MALLOC
 	bucket = OV_INDEX(op);
 #endif 
-#ifdef DEBUGGING
-	ASSERT(OV_MAGIC(op, bucket) == MAGIC); /* make sure it was in use */
-#else
 	if (OV_MAGIC(op, bucket) != MAGIC) {
 		static bad_free_warn = -1;
 		if (bad_free_warn == -1) {
@@ -517,7 +514,6 @@ free(mp)
 #endif
 		return;				/* sanity */
 	}
-#endif
 #ifdef RCHECK
   	ASSERT(op->ov_rmagic == RMAGIC);
 	if (OV_INDEX(op) <= MAX_SHORT_BUCKET)
