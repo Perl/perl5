@@ -14,7 +14,7 @@ chdir 't';
 use strict;
 
 # these files help the test run
-use Test::More tests => 39;
+use Test::More tests => 41;
 use Cwd;
 
 # these files are needed for the module itself
@@ -200,8 +200,25 @@ my %expect = ( 'makefile.pl' => '',
              );
 is_deeply( $files, \%expect, 'maniadd() vs MANIFEST without trailing newline');
 
+SKIP: {
+    chmod( 0400, 'MANIFEST' );
+    skip "Can't make MANIFEST read-only", 2 if -w 'MANIFEST';
+
+    eval {
+        maniadd({ 'META.yml' => 'hock' });
+    };
+    is( $@, '',  "maniadd() won't open MANIFEST if it doesn't need to" );
+
+    eval {
+        maniadd({ 'grrrwoof' => 'yippie' });
+    };
+    like( $@, qr/^Could not open MANIFEST/,  
+                 "maniadd() dies if it can't open the MANIFEST" );
+
+}
+    
+
 END {
-	# the args are evaluated in scalar context
 	is( unlink( keys %Files ), keys %Files, 'remove all added files' );
 	remove_dir( 'moretest', 'copy' );
 

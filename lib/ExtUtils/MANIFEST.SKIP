@@ -11,6 +11,10 @@
 \bMakeMaker-\d
 \bpm_to_blib$
 
+# Avoid Module::Build generated and utility files.
+\bBuild$
+\b_build/
+
 # Avoid temp and backup files.
 ~$
 \.old$
