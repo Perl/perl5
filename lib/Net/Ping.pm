@@ -461,7 +461,7 @@ same data as the packet that was sent, the remote host is considered
 reachable.  This protocol does not require any special privileges.
 
 It should be borne in mind that, for both tcp and udp ping, a host
-will be reported as unreachable if if not is not running the
+will be reported as unreachable if it is not running the
 appropriate echo service.  For Unix-like systems see L<inetd(8)> for
 more information.
 
