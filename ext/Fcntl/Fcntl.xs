@@ -214,6 +214,60 @@ int arg;
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "O_EXLOCK"))
+#ifdef O_EXLOCK
+	        return O_EXLOCK;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_SHLOCK"))
+#ifdef O_SHLOCK
+	        return O_SHLOCK;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_ASYNC"))
+#ifdef O_ASYNC
+	        return O_ASYNC;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_DSYNC"))
+#ifdef O_DSYNC
+	        return O_DSYNC;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_RSYNC"))
+#ifdef O_RSYNC
+	        return O_RSYNC;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_SYNC"))
+#ifdef O_SYNC
+	        return O_SYNC;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_SETOWN"))
+#ifdef F_SETOWN
+	        return F_SETOWN;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_GETOWN"))
+#ifdef F_GETOWN
+	        return F_GETOWN;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_DEFER"))
+#ifdef O_DEFER
+	        return O_DEFER;
+#else
+	        goto not_there;
+#endif
 	} else
 	  goto not_there;
 	break;

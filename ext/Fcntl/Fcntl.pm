@@ -29,6 +29,9 @@ are exported into your namespace.  You can request that the flock()
 constants (LOCK_SH, LOCK_EX, LOCK_NB and LOCK_UN) be provided by using
 the tag C<:flock>.  See L<Exporter>.
 
+Please refer to your native fcntl() and open() documentation to see
+what constants are implemented in your system.
+
 =cut
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
@@ -36,7 +39,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
 require Exporter;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
-$VERSION = "1.01";
+$VERSION = "1.02";
 # Items to export into callers namespace by default
 # (move infrequently used names to @EXPORT_OK below)
 @EXPORT =
@@ -45,9 +48,12 @@ $VERSION = "1.01";
      FD_CLOEXEC F_RDLCK F_UNLCK F_WRLCK
      O_CREAT O_EXCL O_NOCTTY O_TRUNC
      O_APPEND O_NONBLOCK
-     O_NDELAY
+     O_NDELAY O_DEFER
      O_RDONLY O_RDWR O_WRONLY
+     O_EXLOCK O_SHLOCK O_ASYNC O_DSYNC O_RSYNC O_SYNC
+     F_SETOWN F_GETOWN
      );
+
 # Other items we are prepared to export if requested
 @EXPORT_OK = qw(
     LOCK_SH LOCK_EX LOCK_NB LOCK_UN
