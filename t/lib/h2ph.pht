@@ -1,3 +1,5 @@
+require '_h2ph_pre.ph';
+
 unless(defined(&SQUARE)) {
     sub SQUARE {
 	local($x) = @_;
