@@ -2359,6 +2359,7 @@ Porting/checkVERSION.pl	Check whether we have $VERSIONs
 Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
 Porting/Contract	Social contract for contributed modules in Perl core
+Porting/curliff.pl	Curliff or liff your curliffable files.
 Porting/findrfuncs	Find reentrant variants of functions used in an executable
 Porting/findvars	Find occurrences of words
 Porting/fixCORE		Find and fix modules that generate warnings
@@ -2373,6 +2374,7 @@ Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 Porting/repository.pod	How to use the Perl repository
+Porting/sort_perldiag.pl	Keep our diagnostics orderly
 Porting/testall.atom	Cumulative profile of the test suite with Third Degree
 Porting/thirdclean	Cleanup Third Degree reports
 pp.c				Push/Pop code

@@ -1,5 +1,5 @@
 #
-# $Id: QuotedPrint.pm,v 2.11 2003/01/05 08:01:33 gisle Exp $
+# $Id: QuotedPrint.pm,v 2.13 2003/05/13 18:22:09 gisle Exp $
 
 package MIME::QuotedPrint;
 
@@ -73,7 +73,7 @@ require Exporter;
 
 use Carp qw(croak);
 
-$VERSION = "2.16";
+$VERSION = "2.20";
 
 use MIME::Base64;  # try to load XS version of encode_qp
 unless (defined &encode_qp) {

@@ -85,9 +85,13 @@ y. -- H. L. Mencken"],
    # some extra special cases we have had problems with
    ["$x70!2=x=x" => "$x70!2=3D=\nx=3Dx"],
    ["$x70!2345$x70!2345$x70!23456\n", "$x70!2345=\n$x70!2345=\n$x70!23456\n"],
+
+   # trailing whitespace
+   ["foo \t ", "foo=20=09=20"],
+   ["foo\t \n \t", "foo=09=20\n=20=09"],
 );
 
-$notests = @tests + 3;
+$notests = @tests + 13;
 print "1..$notests\n";
 
 $testno = 0;
@@ -125,6 +129,39 @@ $testno++; print "ok $testno\n";
 # Same test but with "\r\n" terminated lines
 print "not " unless decode_qp("foo  \r\n\r\nfoo =\r\n\r\nfoo=20\r\n\r\n") eq
                                 "foo\n\nfoo \nfoo \n\n";
+$testno++; print "ok $testno\n";
+
+# Trailing whitespace
+print "not " unless decode_qp("foo  ") eq "foo  ";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo  \n") eq "foo\n";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo = \t\x20\nbar\t\x20\n") eq "foo bar\n";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo = \t\x20\r\nbar\t\x20\r\n") eq "foo bar\n";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo = \t\x20\n") eq "foo ";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo = \t\x20\r\n") eq "foo ";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo = \t\x20y\r\n") eq "foo = \t\x20y\n";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo =xy\n") eq "foo =xy\n";
+$testno++; print "ok $testno\n";
+
+# Test with with alternative line break
+print "not " unless encode_qp("$x70!2345$x70\n", "***") eq "$x70!2345=***$x70***";
+$testno++; print "ok $testno\n";
+
+# Test with no line breaks
+print "not " unless encode_qp("$x70!2345$x70\n", "") eq "$x70!2345$x70=0A";
 $testno++; print "ok $testno\n";
 
 print "not " if $] >= 5.006 && (eval 'encode_qp("XXX \x{100}")' || !$@);
