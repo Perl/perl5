@@ -69,6 +69,11 @@ Version 5.004_70        Developer release working toward 5.005
 ----------------
 
 ____________________________________________________________________________
+[  1335] By: gsar                                  on 1998/07/06  07:05:37
+        Log: update Changes
+     Branch: perl
+           ! Changes pod/perldiag.pod
+____________________________________________________________________________
 [  1334] By: gsar                                  on 1998/07/06  06:41:17
         Log: allow eval-groups in patterns only if they C<use re 'eval';>
      Branch: perl
