@@ -2522,6 +2522,7 @@ s	|I32	|expect_number	|char** pattern
 s	|SV*	|gv_share	|SV *sv
 #  endif
 s	|int	|grok_number	|const char *pv|STRLEN len|UV *valuep
+s	|bool	|grok_numeric_radix|const char **sp|const char *send
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

@@ -1494,6 +1494,30 @@ S_not_a_number(pTHX_ SV *sv)
 #define IS_NUMBER_NEG		      0x08 /* leading minus sign */
 #define IS_NUMBER_INFINITY	      0x10 /* this is big */
 
+static bool
+S_grok_numeric_radix(pTHX_ const char **sp, const char *send)
+{
+#ifdef USE_LOCALE_NUMERIC
+    if (PL_numeric_radix_sv && IN_LOCALE) { 
+        STRLEN len;
+        char* radix = SvPV(PL_numeric_radix_sv, len);
+        if (*sp + len <= send && memEQ(*sp, radix, len)) {
+            *sp += len;
+            return TRUE; 
+        }
+    }
+    /* always try "." if numeric radix didn't match because
+     * we may have data from different locales mixed */
+#endif
+    if (*sp < send && **sp == '.') {
+        ++*sp;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+#define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
+
 static int
 S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 {
@@ -1503,9 +1527,6 @@ S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
     const char max_mod_10 = UV_MAX % 10 + '0';
     int numtype = 0;
     int sawinf = 0;
-    char* radix = ".";
-    STRLEN radixlen = 1;
-    bool radixfound;
 
     while (isSPACE(*s))
 	s++;
@@ -1515,11 +1536,6 @@ S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
     }
     else if (*s == '+')
 	s++;
-
-#ifdef USE_LOCALE_NUMERIC
-    if (PL_numeric_radix_sv && IN_LOCALE)
-        radix = SvPV(PL_numeric_radix_sv, radixlen);
-#endif
 
     /* next must be digit or the radix separator or beginning of infinity */
     if (isDIGIT(*s)) {
@@ -1589,64 +1605,42 @@ S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 	    *valuep = value;
 
       skip_value:
-	if (s + radixlen <= send && memEQ(s, radix, radixlen))
-	    radixfound = TRUE;
-#ifdef USE_LOCALE_NUMERIC
-	/* if we did change the radix and the radix is not the "."
-	 * retry with the "." (in case of mixed data) */
-	else if (IN_LOCALE && !(*radix == '.' && radixlen == 1) && *s == '.') {
-	    radixlen = 1;
-	    radixfound = TRUE;
-	}
-#endif
-	if (radixfound) {
-	    s += radixlen;
+	if (GROK_NUMERIC_RADIX(&s, send)) {
 	    numtype |= IS_NUMBER_NOT_INT;
 	    while (isDIGIT(*s))  /* optional digits after the radix */
 	        s++;
 	}
     }
-    else {
-        if (s + radixlen <= send && memEQ(s, radix, radixlen))
-	    radixfound = TRUE;
-#ifdef USE_LOCALE_NUMERIC
-	else if (IN_LOCALE && !(*radix == '.' && radixlen == 1) && *s == '.') {
-	    radixlen = 1;
-	    radixfound = TRUE;
-	}
-#endif
-	if (radixfound) {
-	  s += radixlen;
-	  numtype |= IS_NUMBER_NOT_INT;
-	  /* no digits before the radix means we need digits after it */
-	  if (isDIGIT(*s)) {
-	      do {
-		  s++;
-	      } while (isDIGIT(*s));
-	      numtype |= IS_NUMBER_IN_UV;
-	      if (valuep) {
-		  /* integer approximation is valid - it's 0.  */
-		*valuep = 0;
-	      }
-	  }
-	  else
-	    return 0;
-	}
-	else if (*s == 'I' || *s == 'i') {
-	    s++; if (*s != 'N' && *s != 'n') return 0;
-	    s++; if (*s != 'F' && *s != 'f') return 0;
-	    s++; if (*s == 'I' || *s == 'i') {
-	        s++; if (*s != 'N' && *s != 'n') return 0;
-		s++; if (*s != 'I' && *s != 'i') return 0;
-		s++; if (*s != 'T' && *s != 't') return 0;
-		s++; if (*s != 'Y' && *s != 'y') return 0;
-		s++;
+    else if (GROK_NUMERIC_RADIX(&s, send)) {
+        numtype |= IS_NUMBER_NOT_INT;
+	/* no digits before the radix means we need digits after it */
+	if (isDIGIT(*s)) {
+	    do {
+	        s++;
+	    } while (isDIGIT(*s));
+	    numtype |= IS_NUMBER_IN_UV;
+	    if (valuep) {
+	        /* integer approximation is valid - it's 0.  */
+	        *valuep = 0;
 	    }
-	    sawinf = 1;
 	}
-	else /* Add test for NaN here.  */
+	else
 	    return 0;
     }
+    else if (*s == 'I' || *s == 'i') {
+        s++; if (*s != 'N' && *s != 'n') return 0;
+	s++; if (*s != 'F' && *s != 'f') return 0;
+	s++; if (*s == 'I' || *s == 'i') {
+	    s++; if (*s != 'N' && *s != 'n') return 0;
+	    s++; if (*s != 'I' && *s != 'i') return 0;
+	    s++; if (*s != 'T' && *s != 't') return 0;
+	    s++; if (*s != 'Y' && *s != 'y') return 0;
+	    s++;
+	}
+	sawinf = 1;
+    }
+    else /* Add test for NaN here.  */
+        return 0;
 
     if (sawinf) {
 	numtype &= IS_NUMBER_NEG; /* Keep track of sign  */
