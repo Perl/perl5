@@ -729,6 +729,8 @@ Apd	|STRLEN	|sv_len		|SV* sv
 Apd	|STRLEN	|sv_len_utf8	|SV* sv
 Apd	|void	|sv_magic	|SV* sv|SV* obj|int how|const char* name \
 				|I32 namlen
+Apd	|MAGIC *|sv_magicext	|SV* sv|SV* obj|int how|MGVTBL *vtbl \
+				| const char* name|I32 namlen	
 Apd	|SV*	|sv_mortalcopy	|SV* oldsv
 Apd	|SV*	|sv_newmortal
 Apd	|SV*	|sv_newref	|SV* sv

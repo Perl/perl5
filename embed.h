@@ -688,6 +688,7 @@
 #define sv_len			Perl_sv_len
 #define sv_len_utf8		Perl_sv_len_utf8
 #define sv_magic		Perl_sv_magic
+#define sv_magicext		Perl_sv_magicext
 #define sv_mortalcopy		Perl_sv_mortalcopy
 #define sv_newmortal		Perl_sv_newmortal
 #define sv_newref		Perl_sv_newref
@@ -2239,6 +2240,7 @@
 #define sv_len(a)		Perl_sv_len(aTHX_ a)
 #define sv_len_utf8(a)		Perl_sv_len_utf8(aTHX_ a)
 #define sv_magic(a,b,c,d,e)	Perl_sv_magic(aTHX_ a,b,c,d,e)
+#define sv_magicext(a,b,c,d,e,f)	Perl_sv_magicext(aTHX_ a,b,c,d,e,f)
 #define sv_mortalcopy(a)	Perl_sv_mortalcopy(aTHX_ a)
 #define sv_newmortal()		Perl_sv_newmortal(aTHX)
 #define sv_newref(a)		Perl_sv_newref(aTHX_ a)

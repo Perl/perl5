@@ -758,6 +758,7 @@ PERL_CALLCONV int	Perl_sv_isobject(pTHX_ SV* sv);
 PERL_CALLCONV STRLEN	Perl_sv_len(pTHX_ SV* sv);
 PERL_CALLCONV STRLEN	Perl_sv_len_utf8(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_magic(pTHX_ SV* sv, SV* obj, int how, const char* name, I32 namlen);
+PERL_CALLCONV MAGIC *	Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtbl, const char* name, I32 namlen	);
 PERL_CALLCONV SV*	Perl_sv_mortalcopy(pTHX_ SV* oldsv);
 PERL_CALLCONV SV*	Perl_sv_newmortal(pTHX);
 PERL_CALLCONV SV*	Perl_sv_newref(pTHX_ SV* sv);

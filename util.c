@@ -905,7 +905,8 @@ Perl_savepv(pTHX_ const char *sv)
 =for apidoc savepvn
 
 Copy a string to a safe spot.  The C<len> indicates number of bytes to
-copy.  This does not use an SV.
+copy. If pointer is NULL allocate space for a string of size specified.
+This does not use an SV.
 
 =cut
 */
@@ -916,8 +917,14 @@ Perl_savepvn(pTHX_ const char *sv, register I32 len)
     register char *newaddr;
 
     New(903,newaddr,len+1,char);
-    Copy(sv,newaddr,len,char);		/* might not be null terminated */
-    newaddr[len] = '\0';		/* is now */
+    /* Give a meaning to NULL pointer mainly for the use in sv_magic() */
+    if (sv) {
+    	Copy(sv,newaddr,len,char);	/* might not be null terminated */
+    	newaddr[len] = '\0';		/* is now */
+    }
+    else {
+	Zero(newaddr,len+1,char);
+    }
     return newaddr;
 }
 
