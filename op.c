@@ -3108,7 +3108,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			     curop->op_type == OP_PADANY)
 		    {
 			if (PAD_COMPNAME_GEN(curop->op_targ)
-						    == PL_generation)
+						    == (STRLEN)PL_generation)
 			    break;
 			PAD_COMPNAME_GEN(curop->op_targ)
 			    				= PL_generation;
