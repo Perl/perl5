@@ -1938,6 +1938,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	r->reganch |= ROPT_EVAL_SEEN;
     Newz(1002, r->startp, RExC_npar, I32);
     Newz(1002, r->endp, RExC_npar, I32);
+    PL_regdata = r->data; /* for regprop() ANYOFUTF8 */
     DEBUG_r(regdump(r));
     return(r);
 }
@@ -3933,7 +3934,7 @@ S_regclassutf8(pTHX_ RExC_state_t *pRExC_state)
     if (!SIZE_ONLY) {
 	SV *rv = swash_init("utf8", "", listsv, 1, 0);
 	SvREFCNT_dec(listsv);
-	n = add_data(pRExC_state, 1,"s");
+	n = add_data(pRExC_state, 1, "s");
 	RExC_rx->data->data[n] = (void*)rv;
 	ARG1_SET(ret, flags);
 	ARG2_SET(ret, n);
@@ -4282,7 +4283,7 @@ Perl_regdump(pTHX_ regexp *r)
 STATIC void
 S_put_byte(pTHX_ SV *sv, int c)
 {
-    if (c <= ' ' || c == 127 || c == 255)
+    if (isCNTRL(c) || c == 127 || c == 255)
 	Perl_sv_catpvf(aTHX_ sv, "\\%o", c);
     else if (c == '-' || c == ']' || c == '\\' || c == '^')
 	Perl_sv_catpvf(aTHX_ sv, "\\%c", c);
@@ -4325,8 +4326,10 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == ANYOF) {
 	int i, rangestart = -1;
-	const char * const out[] = {	/* Should be syncronized with
-					   ANYOF_ #xdefines in regcomp.h */
+	bool anyofutf8 = OP(o) == ANYOFUTF8;
+	U8 flags = anyofutf8 ? ARG1(o) : o->flags;
+	const char * const anyofs[] = {	/* Should be syncronized with
+					 * ANYOF_ #xdefines in regcomp.h */
 	    "\\w",
 	    "\\W",
 	    "\\s",
@@ -4359,12 +4362,12 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	    "[:^blank:]"
 	};
 
-	if (o->flags & ANYOF_LOCALE)
+	if (flags & ANYOF_LOCALE)
 	    sv_catpv(sv, "{loc}");
-	if (o->flags & ANYOF_FOLD)
+	if (flags & ANYOF_FOLD)
 	    sv_catpv(sv, "{i}");
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
-	if (o->flags & ANYOF_INVERT)
+	if (flags & ANYOF_INVERT)
 	    sv_catpv(sv, "^");
 	if (OP(o) == ANYOF) {
 	    for (i = 0; i <= 256; i++) {
@@ -4384,12 +4387,38 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 		}
 	    }
 	    if (o->flags & ANYOF_CLASS)
-		for (i = 0; i < sizeof(out)/sizeof(char*); i++)
+		for (i = 0; i < sizeof(anyofs)/sizeof(char*); i++)
 		    if (ANYOF_CLASS_TEST(o,i))
-			sv_catpv(sv, out[i]);
+			sv_catpv(sv, anyofs[i]);
 	}
 	else {
-	    sv_catpv(sv, "{ANYOFUTF8}"); /* TODO: full decode */
+	    SV *swash = (SV*)PL_regdata->data[ARG2(o)];
+	    UV i;
+	    U8 s[UTF8_MAXLEN+1];
+	    for (i = 0; i <= 256; i++) { /* just the first 256 */
+		U8 *e = uv_to_utf8(s, i);
+		if (i < 256 && swash_fetch(swash, s)) {
+		    if (rangestart == -1)
+			rangestart = i;
+		} else if (rangestart != -1) {
+		    U8 *p;
+
+		    if (i <= rangestart + 3)
+			for (; rangestart < i; rangestart++) {
+			    for(e = uv_to_utf8(s, rangestart), p = s; p < e; p++)
+				put_byte(sv, *p);
+			}
+		    else {
+			for (e = uv_to_utf8(s, rangestart), p = s; p < e; p++)
+			    put_byte(sv, *p);
+			sv_catpv(sv, "-");
+			for (e = uv_to_utf8(s, i - 1), p = s; p < e; p++)
+			    put_byte(sv, *p);
+		    }
+		    rangestart = -1;
+		}
+	    }
+	    sv_catpv(sv, "...");
 	}
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
     }
