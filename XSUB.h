@@ -49,7 +49,7 @@
 #ifdef XS_VERSION
 # define XS_VERSION_BOOTCHECK \
     STMT_START {							\
-        char *xs_version = FORCE_ARG_STRING(XSVERSION);			\
+        char *xs_version = FORCE_ARG_STRING(XS_VERSION);			\
 	char *vn = "", *module = SvPV(ST(0),na);			\
 	if (items >= 2)	 /* version supplied as bootstrap arg */	\
 	    Sv = ST(1);							\
