@@ -124,7 +124,7 @@ it was "faked" in perl5.6. It is a pseudo-layer which performs two
 functions (which is messy).
 
 Firstly it forces the file handle to be considered binary at that
-point in the layer stack, i.e it turns off any CRLF translation.
+point in the layer stack, i.e. it turns off any CRLF translation.
 
 Secondly in prevents the IO system seaching back before it in the
 layer specification. This second effect is intended to disable other

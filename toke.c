@@ -1870,7 +1870,7 @@ S_intuit_more(pTHX_ register char *s)
  * Method if it's "foo $bar"
  * Not a method if it's really "print foo $bar"
  * Method if it's really "foo package::" (interpreted as package->foo)
- * Not a method if bar is known to be a subroutne ("sub bar; foo bar")
+ * Not a method if bar is known to be a subroutine ("sub bar; foo bar")
  * Not a method if bar is a filehandle or package, but is quoted with
  *   =>
  */
@@ -3913,6 +3913,10 @@ Perl_yylex(pTHX)
 		CLINE;
 		yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 		yylval.opval->op_private = OPpCONST_BARE;
+		/* UTF-8 package name? */
+		if (UTF && !IN_BYTES &&
+		    is_utf8_string((U8*)SvPVX(sv), SvCUR(sv)))
+		    SvUTF8_on(sv);
 
 		/* And if "Foo::", then that's what it certainly is. */
 

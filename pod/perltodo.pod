@@ -98,7 +98,25 @@ UTF-8 identifier names should probably be canonicalized: NFC?
 
 UTF-8 in package names and sub names?  The first is problematic
 because of the mapping to pathnames, ditto for the second one if
-one does autosplitting, for example.
+one does autosplitting, for example.  Some of this works already
+in 5.8.0, but essentially it is unsupported.  Constructs to consider,
+at the very least:
+
+	use utf8;
+	package UnicodePackage;
+	sub new { bless {}, shift };
+	sub UnicodeMethod1 { ... $_[0]->UnicodeMethod2(...) ... }
+	sub UnicodeMethod2 { ... } # in here caller(0) should contain Unicode
+	...
+	package main;
+	my $x = UnicodePackage->new;
+	print ref $x, "\n";  # should be Unicode
+	$x->UnicodeMethod1(...);
+	my $y = UnicodeMethod3 UnicodePackage ...;
+
+In the above all I<UnicodeXxx> contain (identifier-worthy) characters
+beyond the code point 255, for example 256.  Wherever package/class or
+subroutine names can be returned needs to be checked for Unicodeness.
 
 =back
 

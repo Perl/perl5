@@ -132,7 +132,7 @@ operations.  Only one case remains where an explicit C<use utf8> is
 needed: if your Perl script itself is encoded in UTF-8, you can use
 UTF-8 in your identifier names, and in string and regular expression
 literals, by saying C<use utf8>.  This is not the default because
-scripts with legacy 8-bit data in them would break.
+scripts with legacy 8-bit data in them would break.  See L<utf8>.
 
 =head2 Perl's Unicode Model
 
