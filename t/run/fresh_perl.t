@@ -856,6 +856,7 @@ EXPECT
 ./"TEST"
 ./"TEST"
 ######## "Segfault using HTML::Entities", Richard Jolly <richardjolly@mac.com>, <A3C7D27E-C9F4-11D8-B294-003065AE00B6@mac.com> in perl-unicode@perl.org
+# SKIP: " $Config::Config{'extensions'} " !~ m[ Encode ] # Perl configured without Encode module
 -lw
 BEGIN {
   eval 'require Encode';
