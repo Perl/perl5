@@ -2,18 +2,19 @@ Bugs
     fix small memory leaks on compile-time failures
 
 Unicode support
-    finish byte <-> utf8 and localencoding <-> utf8 conversions 
-    make substr($bytestr,0,0, $charstr) do the right conversion
+    finish byte <-> utf8 and localencoding <-> utf8 conversions
+    make substr($bytestr,0,0,$charstr) do the right conversion
     add Unicode::Map equivivalent to core
     add support for I/O disciplines
-        - open(F, "<!crlf!utf16", $file)
-	- binmode(STDIN, "<!crlf!utf16")?
-	- a way to set the "system" discipline (binmode("!crlf!utf16") maybe?)
-	- nice IO::Filter module to push/pop disciplines
+        - a way to specify disciplines when opening things:
+	    open(F, "<:crlf :utf16", $file)
+        - a way to specify disciplines for an already opened handle:
+	    binmode(STDIN, ":slurp :raw")
+	- a way to set default disciplines for all handle constructors:
+	    use open IN => ":any", OUT => ":utf8", SYS => ":utf16"
     eliminate need for "use utf8;"
-    support C<print v1.2.3>
-    make C<v123> mean C<chr(123)> (if !exists(&v123))
     autoload utf8_heavy.pl's swash routines in swash_init()
+    autoload byte.pm when byte:: is seen by the parser
     check uv_to_utf8() calls for buffer overflow
 
 Multi-threading
