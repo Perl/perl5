@@ -1,25 +1,25 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.16 2001/04/09 13:06:02 eagle Exp $
+# $Id: Man.pm,v 1.19 2001/07/10 11:08:09 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
-# This program is free software; you can redistribute it and/or modify it
+# This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
 # This module is intended to be a replacement for the pod2man script
 # distributed with versions of Perl prior to 5.6, and attempts to match its
 # output except for some specific circumstances where other decisions seemed
-# to produce better output.  It uses Pod::Parser and is designed to be easy
-# to subclass.
+# to produce better output.  It uses Pod::Parser and is designed to be easy to
+# subclass.
 #
 # Perl core hackers, please note that this module is also separately
 # maintained outside of the Perl core as part of the podlators.  Please send
 # me any patches at the address above in addition to sending them to the
 # standard Perl mailing lists.
 
-############################################################################
+##############################################################################
 # Modules and declarations
-############################################################################
+##############################################################################
 
 package Pod::Man;
 
@@ -34,23 +34,21 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 
 @ISA = qw(Pod::Parser);
 
-# Don't use the CVS revision as the version, since this module is also in
-# Perl core and too many things could munge CVS magic revision strings.
-# This number should ideally be the same as the CVS revision in podlators,
-# however.
-$VERSION = 1.16;
+# Don't use the CVS revision as the version, since this module is also in Perl
+# core and too many things could munge CVS magic revision strings.  This
+# number should ideally be the same as the CVS revision in podlators, however.
+$VERSION = 1.19;
 
 
-############################################################################
+##############################################################################
 # Preamble and *roff output tables
-############################################################################
+##############################################################################
 
 # The following is the static preamble which starts all *roff output we
 # generate.  It's completely static except for the font to use as a
 # fixed-width font, which is designed by @CFONT@, and the left and right
-# quotes to use for C<> text, designated by @LQOUTE@ and @RQUOTE@.
-# $PREAMBLE should therefore be run through s/\@CFONT\@/<font>/g before
-# output.
+# quotes to use for C<> text, designated by @LQOUTE@ and @RQUOTE@.  $PREAMBLE
+# should therefore be run through s/\@CFONT\@/<font>/g before output.
 $PREAMBLE = <<'----END OF PREAMBLE----';
 .de Sh \" Subsection heading
 .br
@@ -63,12 +61,6 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 .de Sp \" Vertical space (when we can't use .PP)
 .if t .sp .5v
 .if n .sp
-..
-.de Ip \" List item
-.br
-.ie \\n(.$>=3 .ne \\$3
-.el .ne 3
-.IP "\\$1" \\$2
 ..
 .de Vb \" Begin verbatim text
 .ft @CFONT@
@@ -83,9 +75,9 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 .\" Set up some character translations and predefined strings.  \*(-- will
 .\" give an unbreakable dash, \*(PI will give pi, \*(L" will give a left
 .\" double quote, and \*(R" will give a right double quote.  | will give a
-.\" real vertical bar.  \*(C+ will give a nicer C++.  Capital omega is used
-.\" to do unbreakable dashes and therefore won't be available.  \*(C` and
-.\" \*(C' expand to `' in nroff, nothing in troff, for use with C<>
+.\" real vertical bar.  \*(C+ will give a nicer C++.  Capital omega is used to
+.\" do unbreakable dashes and therefore won't be available.  \*(C` and \*(C'
+.\" expand to `' in nroff, nothing in troff, for use with C<>.
 .tr \(*W-|\(bv\*(Tr
 .ds C+ C\v'-.1v'\h'-1p'\s-2+\h'-1p'+\s0\v'.1v'\h'-1p'
 .ie n \{\
@@ -105,10 +97,10 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 .    ds R" ''
 'br\}
 .\"
-.\" If the F register is turned on, we'll generate index entries on stderr
-.\" for titles (.TH), headers (.SH), subsections (.Sh), items (.Ip), and
-.\" index entries marked with X<> in POD.  Of course, you'll have to process
-.\" the output yourself in some meaningful fashion.
+.\" If the F register is turned on, we'll generate index entries on stderr for
+.\" titles (.TH), headers (.SH), subsections (.Sh), items (.Ip), and index
+.\" entries marked with X<> in POD.  Of course, you'll have to process the
+.\" output yourself in some meaningful fashion.
 .if \nF \{\
 .    de IX
 .    tm Index:\\$1\t\\n%\t"\\$2"
@@ -117,8 +109,8 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 .    rr F
 .\}
 .\"
-.\" For nroff, turn off justification.  Always turn off hyphenation; it
-.\" makes way too many mistakes in technical documents.
+.\" For nroff, turn off justification.  Always turn off hyphenation; it makes
+.\" way too many mistakes in technical documents.
 .hy 0
 .if n .na
 .\"
@@ -264,14 +256,14 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 );
 
 
-############################################################################
+##############################################################################
 # Static helper functions
-############################################################################
+##############################################################################
 
-# Protect leading quotes and periods against interpretation as commands.
-# Also protect anything starting with a backslash, since it could expand
-# or hide something that *roff would interpret as a command.  This is
-# overkill, but it's much simpler than trying to parse *roff here.
+# Protect leading quotes and periods against interpretation as commands.  Also
+# protect anything starting with a backslash, since it could expand or hide
+# something that *roff would interpret as a command.  This is overkill, but
+# it's much simpler than trying to parse *roff here.
 sub protect {
     local $_ = shift;
     s/^([.\'\\])/\\&$1/mg;
@@ -282,21 +274,21 @@ sub protect {
 sub toescape { (length ($_[0]) > 1 ? '\f(' : '\f') . $_[0] }
 
 
-############################################################################
+##############################################################################
 # Initialization
-############################################################################
+##############################################################################
 
-# Initialize the object.  Here, we also process any additional options
-# passed to the constructor or set up defaults if none were given.  center
-# is the centered title, release is the version number, and date is the date
-# for the documentation.  Note that we can't know what file name we're
-# processing due to the architecture of Pod::Parser, so that *has* to either
-# be passed to the constructor or set separately with Pod::Man::name().
+# Initialize the object.  Here, we also process any additional options passed
+# to the constructor or set up defaults if none were given.  center is the
+# centered title, release is the version number, and date is the date for the
+# documentation.  Note that we can't know what file name we're processing due
+# to the architecture of Pod::Parser, so that *has* to either be passed to the
+# constructor or set separately with Pod::Man::name().
 sub initialize {
     my $self = shift;
 
-    # Figure out the fixed-width font.  If user-supplied, make sure that
-    # they are the right length.
+    # Figure out the fixed-width font.  If user-supplied, make sure that they
+    # are the right length.
     for (qw/fixed fixedbold fixeditalic fixedbolditalic/) {
         if (defined $$self{$_}) {
             if (length ($$self{$_}) < 1 || length ($$self{$_}) > 2) {
@@ -308,15 +300,15 @@ sub initialize {
         }
     }
 
-    # Set the default fonts.  We can't be sure what fixed bold-italic is
-    # going to be called, so default to just bold.
+    # Set the default fonts.  We can't be sure what fixed bold-italic is going
+    # to be called, so default to just bold.
     $$self{fixed}           ||= 'CW';
     $$self{fixedbold}       ||= 'CB';
     $$self{fixeditalic}     ||= 'CI';
     $$self{fixedbolditalic} ||= 'CB';
 
-    # Set up a table of font escapes.  First number is fixed-width, second
-    # is bold, third is italic.
+    # Set up a table of font escapes.  First number is fixed-width, second is
+    # bold, third is italic.
     $$self{FONTS} = { '000' => '\fR', '001' => '\fI',
                       '010' => '\fB', '011' => '\f(BI',
                       '100' => toescape ($$self{fixed}),
@@ -329,10 +321,10 @@ sub initialize {
         unless defined $$self{center};
     $$self{indent}  = 4 unless defined $$self{indent};
 
-    # We used to try first to get the version number from a local binary,
-    # but we shouldn't need that any more.  Get the version from the running
-    # Perl.  Work a little magic to handle subversions correctly under both
-    # the pre-5.6 and the post-5.6 version numbering schemes.
+    # We used to try first to get the version number from a local binary, but
+    # we shouldn't need that any more.  Get the version from the running Perl.
+    # Work a little magic to handle subversions correctly under both the
+    # pre-5.6 and the post-5.6 version numbering schemes.
     if (!defined $$self{release}) {
         my @version = ($] =~ /^(\d+)\.(\d{3})(\d{0,3})$/);
         $version[2] ||= 0;
@@ -360,9 +352,9 @@ sub initialize {
         croak qq(Invalid quote specification "$$self{quotes}");
     }
 
-    # Double the first quote; note that this should not be s///g as two
-    # double quotes is represented in *roff as three double quotes, not
-    # four.  Weird, I know.
+    # Double the first quote; note that this should not be s///g as two double
+    # quotes is represented in *roff as three double quotes, not four.  Weird,
+    # I know.
     $$self{LQUOTE} =~ s/\"/\"\"/;
     $$self{RQUOTE} =~ s/\"/\"\"/;
 
@@ -393,8 +385,8 @@ sub begin_pod {
             #     */lib/*perl*      standard or site_perl module
             #     */*perl*/lib      from -D prefix=/opt/perl
             #     */*perl*/         random module hierarchy
-            # which works.  Should be fixed to use File::Spec.  Also handle
-            # a leading lib/ since that's what ExtUtils::MakeMaker creates.
+            # which works.  Should be fixed to use File::Spec.  Also handle a
+            # leading lib/ since that's what ExtUtils::MakeMaker creates.
             for ($name) {
                 s%//+%/%g;
                 if (     s%^.*?/lib/[^/]*perl[^/]*/%%si
@@ -409,8 +401,8 @@ sub begin_pod {
         }
     }
 
-    # If $name contains spaces, quote it; this mostly comes up in the case
-    # of input from stdin.
+    # If $name contains spaces, quote it; this mostly comes up in the case of
+    # input from stdin.
     $name = '"' . $name . '"' if ($name =~ /\s/);
 
     # Modification date header.  Try to use the modification time of our
@@ -434,9 +426,9 @@ sub begin_pod {
 .\\" @{[ scalar localtime ]}
 .\\"
 .\\" Standard preamble:
-.\\" ======================================================================
+.\\" ========================================================================
 $_
-.\\" ======================================================================
+.\\" ========================================================================
 .\\"
 .IX Title "$name $section"
 .TH $name $section "$$self{release}" "$$self{date}" "$$self{center}"
@@ -450,9 +442,9 @@ $_
 }
 
 
-############################################################################
+##############################################################################
 # Core overrides
-############################################################################
+##############################################################################
 
 # Called for each command paragraph.  Gets the command, the associated
 # paragraph, the line number, and a Pod::Paragraph object.  Just dispatches
@@ -462,11 +454,11 @@ sub command {
     my $self = shift;
     my $command = shift;
     return if $command eq 'pod';
-   return if ($$self{EXCLUDE} && $command ne 'end');
+    return if ($$self{EXCLUDE} && $command ne 'end');
     if ($self->can ('cmd_' . $command)) {
         $command = 'cmd_' . $command;
         $self->$command (@_);
-     } else {
+    } else {
         my ($text, $line, $paragraph) = @_;
         my $file;
         ($file, $line) = $paragraph->file_line;
@@ -477,10 +469,10 @@ sub command {
     }
 }
 
-# Called for a verbatim paragraph.  Gets the paragraph, the line number, and
-# a Pod::Paragraph object.  Rofficate backslashes, untabify, put a
-# zero-width character at the beginning of each line to protect against
-# commands, and wrap in .Vb/.Ve.
+# Called for a verbatim paragraph.  Gets the paragraph, the line number, and a
+# Pod::Paragraph object.  Rofficate backslashes, untabify, put a zero-width
+# character at the beginning of each line to protect against commands, and
+# wrap in .Vb/.Ve.
 sub verbatim {
     my $self = shift;
     return if $$self{EXCLUDE};
@@ -496,16 +488,16 @@ sub verbatim {
     $$self{NEEDSPACE} = 0;
 }
 
-# Called for a regular text block.  Gets the paragraph, the line number, and
-# a Pod::Paragraph object.  Perform interpolation and output the results.
+# Called for a regular text block.  Gets the paragraph, the line number, and a
+# Pod::Paragraph object.  Perform interpolation and output the results.
 sub textblock {
     my $self = shift;
     return if $$self{EXCLUDE};
     $self->output ($_[0]), return if $$self{VERBATIM};
 
-    # Perform a little magic to collapse multiple L<> references.  We'll
-    # just rewrite the whole thing into actual text at this part, bypassing
-    # the whole internal sequence parsing thing.
+    # Perform a little magic to collapse multiple L<> references.  We'll just
+    # rewrite the whole thing into actual text at this part, bypassing the
+    # whole internal sequence parsing thing.
     my $text = shift;
     $text =~ s{
         (L<                     # A link of the form L</something>.
@@ -551,8 +543,8 @@ sub textblock {
 
 # Called for an interior sequence.  Takes a Pod::InteriorSequence object and
 # returns a reference to a scalar.  This scalar is the final formatted text.
-# It's returned as a reference so that other interior sequences above us
-# know that the text has already been processed.
+# It's returned as a reference so that other interior sequences above us know
+# that the text has already been processed.
 sub sequence {
     my ($self, $seq) = @_;
     my $command = $seq->cmd_name;
@@ -593,8 +585,9 @@ sub sequence {
     } elsif ($command eq 'I') {
         return bless \ ('\f(IS' . $_ . '\f(IE'), 'Pod::Man::String';
     } elsif ($command eq 'C') {
-        return bless \ ('\f(FS\*(C`' . $_ . "\\*(C'\\f(FE"),
-            'Pod::Man::String';
+        # A bug in lvalue subs in 5.6 requires the temporary variable.
+        my $tmp = $self->quote_literal ($_);
+        return bless \ "$tmp", 'Pod::Man::String';
     }
 
     # Handle links.
@@ -618,16 +611,15 @@ sub sequence {
 }
 
 
-############################################################################
+##############################################################################
 # Command paragraphs
-############################################################################
+##############################################################################
 
 # All command paragraphs take the paragraph and the line number.
 
 # First level heading.  We can't output .IX in the NAME section due to a bug
 # in some versions of catman, so don't output a .IX for that section.  .SH
-# already uses small caps, so remove any E<> sequences that would cause
-# them.
+# already uses small caps, so remove any E<> sequences that would cause them.
 sub cmd_head1 {
     my $self = shift;
     local $_ = $self->parse (@_);
@@ -727,10 +719,9 @@ sub cmd_back {
 
 # An individual list item.  Emit an index entry for anything that's
 # interesting, but don't emit index entries for things like bullets and
-# numbers.  rofficate bullets too while we're at it (so for nice output, use
-# * for your lists rather than o or . or - or some other thing).  Newlines
-# in an item title are turned into spaces since *roff can't handle them
-# embedded.
+# numbers.  rofficate bullets too while we're at it (so for nice output, use *
+# for your lists rather than o or . or - or some other thing).  Newlines in an
+# item title are turned into spaces since *roff can't handle them embedded.
 sub cmd_item {
     my $self = shift;
     local $_ = $self->parse (@_);
@@ -748,7 +739,7 @@ sub cmd_item {
     }
     $_ = $self->textmapfonts ($_);
     $self->output (".PD 0\n") if ($$self{ITEMS} == 1);
-    $self->output ($self->switchquotes ('.Ip', $_, $$self{INDENT}));
+    $self->output ($self->switchquotes ('.IP', $_, $$self{INDENT}));
     $self->outindex ($index ? ('Item', $index) : ());
     $$self{NEEDSPACE} = 0;
     $$self{ITEMS}++;
@@ -785,9 +776,9 @@ sub cmd_for {
 }
 
 
-############################################################################
+##############################################################################
 # Link handling
-############################################################################
+##############################################################################
 
 # Handle links.  We can't actually make real hyperlinks, so this is all to
 # figure out what text and formatting we print out.
@@ -805,16 +796,15 @@ sub buildlink {
     s/^\s+//;
     s/\s+$//;
 
-    # If the argument looks like a URL, return it verbatim.  This only
-    # handles URLs that use the server syntax.
+    # If the argument looks like a URL, return it verbatim.  This only handles
+    # URLs that use the server syntax.
     if (m%^[a-z]+://\S+$%) { return $_ }
 
-    # Default to using the whole content of the link entry as a section
-    # name.  Note that L<manpage/> forces a manpage interpretation, as does
-    # something looking like L<manpage(section)>.  Do the same thing to
-    # L<manpage(section)> as we would to manpage(section) without the L<>;
-    # see guesswork().  If we've added italics, don't add the "manpage"
-    # text; markup is sufficient.
+    # Default to using the whole content of the link entry as a section name.
+    # Note that L<manpage/> forces a manpage interpretation, as does something
+    # looking like L<manpage(section)>.  Do the same to L<manpage(section)> as
+    # we would to manpage(section) without the L<>; see guesswork().  If we've
+    # added italics, don't add the "manpage" text; markup is sufficient.
     my ($manpage, $section) = ('', $_);
     if (/^"\s*(.*?)\s*"$/) {
         $section = '"' . $1 . '"';
@@ -852,23 +842,23 @@ sub buildlink {
 }
 
 
-############################################################################
+##############################################################################
 # Escaping and fontification
-############################################################################
+##############################################################################
 
 # At this point, we'll have embedded font codes of the form \f(<font>[SE]
-# where <font> is one of B, I, or F.  Turn those into the right font start
-# or end codes.  The old pod2man didn't get B<someI<thing> else> right;
-# after I<> it switched back to normal text rather than bold.  We take care
-# of this by using variables as a combined pointer to our current font
-# sequence, and set each to the number of current nestings of start tags for
-# that font.  Use them as a vector to look up what font sequence to use.
+# where <font> is one of B, I, or F.  Turn those into the right font start or
+# end codes.  The old pod2man didn't get B<someI<thing> else> right; after I<>
+# it switched back to normal text rather than bold.  We take care of this by
+# using variables as a combined pointer to our current font sequence, and set
+# each to the number of current nestings of start tags for that font.  Use
+# them as a vector to look up what font sequence to use.
 #
 # \fP changes to the previous font, but only one previous font is kept.  We
 # don't know what the outside level font is; normally it's R, but if we're
-# inside a heading it could be something else.  So arrange things so that
-# the outside font is always the "previous" font and end with \fP instead of
-# \fR.  Idea from Zack Weinberg.
+# inside a heading it could be something else.  So arrange things so that the
+# outside font is always the "previous" font and end with \fP instead of \fR.
+# Idea from Zack Weinberg.
 sub mapfonts {
     my $self = shift;
     local $_ = shift;
@@ -895,9 +885,9 @@ sub mapfonts {
 
 # Unfortunately, there is a bug in Solaris 2.6 nroff (not present in GNU
 # groff) where the sequence \fB\fP\f(CW\fP leaves the font set to B rather
-# than R, presumably because \f(CW doesn't actually do a font change.  To
-# work around this, use a separate textmapfonts for text blocks where the
-# default font is always R and only use the smart mapfonts for headings.
+# than R, presumably because \f(CW doesn't actually do a font change.  To work
+# around this, use a separate textmapfonts for text blocks where the default
+# font is always R and only use the smart mapfonts for headings.
 sub textmapfonts {
     my $self = shift;
     local $_ = shift;
@@ -912,9 +902,9 @@ sub textmapfonts {
 }
 
 
-############################################################################
-# *roff-specific parsing
-############################################################################
+##############################################################################
+# *roff-specific parsing and magic
+##############################################################################
 
 # Called instead of parse_text, calls parse_text with the right flags.
 sub parse {
@@ -924,13 +914,13 @@ sub parse {
 }
 
 # Takes a parse tree and a flag saying whether or not to treat it as literal
-# text (not call guesswork on it), and returns the concatenation of all of
-# the text strings in that parse tree.  If the literal flag isn't true,
+# text (not call guesswork on it), and returns the concatenation of all of the
+# text strings in that parse tree.  If the literal flag isn't true,
 # guesswork() will be called on all plain scalars in the parse tree.
-# Otherwise, just escape backslashes in the normal case.  If collapse is
-# being called on a C<> sequence, literal is set to 2, and we do some
-# additional cleanup.  Assumes that everything in the parse tree is either a
-# scalar or a reference to a scalar.
+# Otherwise, just escape backslashes in the normal case.  If collapse is being
+# called on a C<> sequence, literal is set to 2, and we do some additional
+# cleanup.  Assumes that everything in the parse tree is either a scalar or a
+# reference to a scalar.
 sub collapse {
     my ($self, $ptree, $literal) = @_;
     if ($literal) {
@@ -952,8 +942,7 @@ sub collapse {
 }
 
 # Takes a text block to perform guesswork on; this is guaranteed not to
-# contain any interior sequences.  Returns the text block with remapping
-# done.
+# contain any interior sequences.  Returns the text block with remapping done.
 sub guesswork {
     my $self = shift;
     local $_ = shift;
@@ -964,17 +953,14 @@ sub guesswork {
     # Ensure double underbars have a tiny space between them.
     s/__/_\\|_/g;
 
-    # Make all caps a little smaller.  Be careful here, since we don't want
-    # to make @ARGV into small caps, nor do we want to fix the MIME in
+    # Make all caps a little smaller.  Be careful here, since we don't want to
+    # make @ARGV into small caps, nor do we want to fix the MIME in
     # MIME-Version, since it looks weird with the full-height V.
     s{
         ( ^ | [\s\(\"\'\`\[\{<>] )
         ( [A-Z] [A-Z] [/A-Z+:\d_\$&-]* )
         (?: (?= [\s>\}\]\(\)\'\".?!,;] | -- ) | $ )
     } { $1 . '\s-1' . $2 . '\s0' }egx;
-
-    # Turn PI into a pretty pi.
-    s{ (?: \\s-1 | \b ) PI (?: \\s0 | \b ) } {\\*\(PI}gx;
 
     # Italize functions in the form func().
     s{
@@ -1028,10 +1014,42 @@ sub guesswork {
     $_;
 }
 
+# Handles C<> text, deciding whether to put \*C` around it or not.  This is a
+# whole bunch of messy heuristics to try to avoid overquoting, originally from
+# Barrie Slaymaker.  This largely duplicates similar code in Pod::Text.
+sub quote_literal {
+    my $self = shift;
+    local $_ = shift;
 
-############################################################################
+    # A regex that matches the portion of a variable reference that's the
+    # array or hash index, separated out just because we want to use it in
+    # several places in the following regex.
+    my $index = '(?: \[.*\] | \{.*\} )?';
+
+    # Check for things that we don't want to quote, and if we find any of
+    # them, return the string with just a font change and no quoting.
+    m{
+      ^\s*
+      (?:
+         ( [\'\`\"] ) .* \1                             # already quoted
+       | \` .* \'                                       # `quoted'
+       | \$+ [\#^]? \S $index                           # special ($^Foo, $")
+       | [\$\@%&*]+ \#? [:\'\w]+ $index                 # plain var or func
+       | [\$\@%&*]* [:\'\w]+ (?: -> )? \(\s*[^\s,]\s*\) # 0/1-arg func call
+       | [+-]? [\d.]+ (?: [eE] [+-]? \d+ )?             # a number
+       | 0x [a-fA-F\d]+                                 # a hex constant
+      )
+      \s*\z
+     }xo && return '\f(FS' . $_ . '\f(FE';
+
+    # If we didn't return, go ahead and quote the text.
+    return '\f(FS\*(C`' . $_ . "\\*(C'\\f(FE";
+}
+
+
+##############################################################################
 # Output formatting
-############################################################################
+##############################################################################
 
 # Make vertical whitespace.
 sub makespace {
@@ -1042,9 +1060,9 @@ sub makespace {
         if $$self{NEEDSPACE};
 }
 
-# Output any pending index entries, and optionally an index entry given as
-# an argument.  Support multiple index entries in X<> separated by slashes,
-# and strip special escapes from index entries.
+# Output any pending index entries, and optionally an index entry given as an
+# argument.  Support multiple index entries in X<> separated by slashes, and
+# strip special escapes from index entries.
 sub outindex {
     my ($self, $section, $index) = @_;
     my @entries = map { split m%\s*/\s*% } @{ $$self{INDEX} };
@@ -1084,22 +1102,39 @@ sub switchquotes {
 
     # We also have to deal with \*C` and \*C', which are used to add the
     # quotes around C<> text, since they may expand to " and if they do this
-    # confuses the .SH macros and the like no end.  Expand them ourselves.
-    # If $extra is set, we're dealing with =item, which in most nroff macro
-    # sets requires an extra level of quoting of double quotes.
+    # confuses the .SH macros and the like no end.  Expand them ourselves.  If
+    # $extra is set, we're dealing with =item, which in most nroff macro sets
+    # requires an extra level of quoting of double quotes because it passes
+    # the argument off to .TP.
     my $c_is_quote = ($$self{LQUOTE} =~ /\"/) || ($$self{RQUOTE} =~ /\"/);
-    if (/\"/ || ($c_is_quote && /\\\*\(C[\'\`]/)) {
+    if (/\"/ || /\\f\(CW/) {
         s/\"/\"\"/g;
+        my $nroff = $_;
         my $troff = $_;
         $troff =~ s/\"\"([^\"]*)\"\"/\`\`$1\'\'/g;
-        s/\\\*\(C\`/$$self{LQUOTE}/g;
-        s/\\\*\(C\'/$$self{RQUOTE}/g;
-        $troff =~ s/\\\*\(C[\'\`]//g;
-        s/\"/\"\"/g if $extra;
-        $troff =~ s/\"/\"\"/g if $extra;
-        $_ = qq("$_") . ($extra ? " $extra" : '');
+        if ($c_is_quote && /\\\*\(C[\'\`]/) {
+            $nroff =~ s/\\\*\(C\`/$$self{LQUOTE}/g;
+            $nroff =~ s/\\\*\(C\'/$$self{RQUOTE}/g;
+            $troff =~ s/\\\*\(C[\'\`]//g;
+        }
+        $nroff = qq("$nroff") . ($extra ? " $extra" : '');
         $troff = qq("$troff") . ($extra ? " $extra" : '');
-        return ".if n $command $_\n.el $command $troff\n";
+
+        # Work around the Solaris nroff bug where \f(CW\fP leaves the font set
+        # to Roman rather than the actual previous font when used in headings.
+        # troff output may still be broken, but at least we can fix nroff by
+        # just stripping out the font changes since fixed-width fonts don't
+        # mean anything for nroff.  While we're at it, also remove the font
+        # changes for nroff in =item tags, since they're unnecessary.
+        $nroff =~ s/\\f\(CW(.*)\\f[PR]/$1/g;
+
+        # Now finally output the command.  Only bother with .if if the nroff
+        # and troff output isn't the same.
+        if ($nroff ne $troff) {
+            return ".if n $command $nroff\n.el $command $troff\n";
+        } else {
+            return "$command $nroff\n";
+        }
     } else {
         $_ = qq("$_") . ($extra ? " $extra" : '');
         return "$command $_\n";
@@ -1138,9 +1173,9 @@ __END__
 .    ds Oe OE
 .\}
 
-############################################################################
+##############################################################################
 # Documentation
-############################################################################
+##############################################################################
 
 =head1 NAME
 
@@ -1319,11 +1354,6 @@ know about.  C<EE<lt>%sE<gt>> was printed verbatim in the output.
 (W) The POD source contained a non-standard interior sequence (something of
 the form C<XE<lt>E<gt>>) that Pod::Man didn't know about.  It was ignored.
 
-=item %s: Unknown command paragraph "%s" on line %d.
-
-(W) The POD source contained a non-standard command paragraph (something of
-the form C<=command args>) that Pod::Man didn't know about. It was ignored.
-
 =item Unmatched =back
 
 (W) Pod::Man encountered a C<=back> command that didn't correspond to an
@@ -1382,5 +1412,12 @@ the conventions.
 
 Russ Allbery E<lt>rra@stanford.eduE<gt>, based I<very> heavily on the
 original B<pod2man> by Tom Christiansen E<lt>tchrist@mox.perl.comE<gt>.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>.
+
+This program is free software; you may redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut

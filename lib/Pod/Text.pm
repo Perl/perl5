@@ -1,19 +1,24 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 2.9 2001/04/09 13:00:50 eagle Exp $
+# $Id: Text.pm,v 2.11 2001/07/10 11:08:10 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
-# This program is free software; you can redistribute it and/or modify it
+# This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
-# This module is intended to be a replacement for Pod::Text, and attempts to
-# match its output except for some specific circumstances where other
-# decisions seemed to produce better output.  It uses Pod::Parser and is
-# designed to be very easy to subclass.
+# This module replaces the old Pod::Text that came with versions of Perl prior
+# to 5.6.0, and attempts to match its output except for some specific
+# circumstances where other decisions seemed to produce better output.  It
+# uses Pod::Parser and is designed to be very easy to subclass.
+#
+# Perl core hackers, please note that this module is also separately
+# maintained outside of the Perl core as part of the podlators.  Please send
+# me any patches at the address above in addition to sending them to the
+# standard Perl mailing lists.
 
-############################################################################
+##############################################################################
 # Modules and declarations
-############################################################################
+##############################################################################
 
 package Pod::Text;
 
@@ -26,28 +31,27 @@ use Pod::Select ();
 use strict;
 use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 
-# We inherit from Pod::Select instead of Pod::Parser so that we can be used
-# by Pod::Usage.
+# We inherit from Pod::Select instead of Pod::Parser so that we can be used by
+# Pod::Usage.
 @ISA = qw(Pod::Select Exporter);
 
 # We have to export pod2text for backward compatibility.
 @EXPORT = qw(pod2text);
 
-# Don't use the CVS revision as the version, since this module is also in
-# Perl core and too many things could munge CVS magic revision strings.
-# This number should ideally be the same as the CVS revision in podlators,
-# however.
-$VERSION = 2.09;
+# Don't use the CVS revision as the version, since this module is also in Perl
+# core and too many things could munge CVS magic revision strings.  This
+# number should ideally be the same as the CVS revision in podlators, however.
+$VERSION = 2.11;
 
 
-############################################################################
+##############################################################################
 # Table of supported E<> escapes
-############################################################################
+##############################################################################
 
-# This table is taken near verbatim from Pod::PlainText in Pod::Parser,
-# which got it near verbatim from the original Pod::Text.  It is therefore
-# credited to Tom Christiansen, and I'm glad I didn't have to write it.  :)
-# "iexcl" to "divide" added by Tim Jenness.
+# This table is taken near verbatim from Pod::PlainText in Pod::Parser, which
+# got it near verbatim from the original Pod::Text.  It is therefore credited
+# to Tom Christiansen, and I'm glad I didn't have to write it.  :)  "iexcl" to
+# "divide" added by Tim Jenness.
 %ESCAPES = (
     'amp'       =>    '&',      # ampersand
     'lt'        =>    '<',      # left chevron, less-than
@@ -158,9 +162,9 @@ $VERSION = 2.09;
 );
 
 
-############################################################################
+##############################################################################
 # Initialization
-############################################################################
+##############################################################################
 
 # Initialize the object.  Must be sure to call our parent initializer.
 sub initialize {
@@ -193,9 +197,9 @@ sub initialize {
 }
 
 
-############################################################################
+##############################################################################
 # Core overrides
-############################################################################
+##############################################################################
 
 # Called for each command paragraph.  Gets the command, the associated
 # paragraph, the line number, and a Pod::Paragraph object.  Just dispatches
@@ -221,9 +225,9 @@ sub command {
     }
 }
 
-# Called for a verbatim paragraph.  Gets the paragraph, the line number, and
-# a Pod::Paragraph object.  Just output it verbatim, but with tabs converted
-# to spaces.
+# Called for a verbatim paragraph.  Gets the paragraph, the line number, and a
+# Pod::Paragraph object.  Just output it verbatim, but with tabs converted to
+# spaces.
 sub verbatim {
     my $self = shift;
     return if $$self{EXCLUDE};
@@ -234,8 +238,8 @@ sub verbatim {
     $self->output ($_);
 }
 
-# Called for a regular text block.  Gets the paragraph, the line number, and
-# a Pod::Paragraph object.  Perform interpolation and output the results.
+# Called for a regular text block.  Gets the paragraph, the line number, and a
+# Pod::Paragraph object.  Perform interpolation and output the results.
 sub textblock {
     my $self = shift;
     return if $$self{EXCLUDE};
@@ -294,8 +298,8 @@ sub textblock {
 
 # Called for an interior sequence.  Gets the command, argument, and a
 # Pod::InteriorSequence object and is expected to return the resulting text.
-# Calls code, bold, italic, file, and link to handle those types of
-# sequences, and handles S<>, E<>, X<>, and Z<> directly.
+# Calls code, bold, italic, file, and link to handle those types of sequences,
+# and handles S<>, E<>, X<>, and Z<> directly.
 sub interior_sequence {
     my $self = shift;
     my $command = shift;
@@ -343,9 +347,9 @@ sub preprocess_paragraph {
 }
 
 
-############################################################################
+##############################################################################
 # Command paragraphs
-############################################################################
+##############################################################################
 
 # All command paragraphs take the paragraph and the line number.
 
@@ -462,17 +466,46 @@ sub cmd_for {
 }
 
 
-############################################################################
+##############################################################################
 # Interior sequences
-############################################################################
+##############################################################################
 
 # The simple formatting ones.  These are here mostly so that subclasses can
 # override them and do more complicated things.
 sub seq_b { return $_[0]{alt} ? "``$_[1]''" : $_[1] }
 sub seq_f { return $_[0]{alt} ? "\"$_[1]\"" : $_[1] }
 sub seq_i { return '*' . $_[1] . '*' }
+
+# Apply a whole bunch of messy heuristics to not quote things that don't
+# benefit from being quoted.  These originally come from Barrie Slaymaker and
+# largely duplicate code in Pod::Man.
 sub seq_c {
-    return $_[0]{alt} ? "``$_[1]''" : "$_[0]{LQUOTE}$_[1]$_[0]{RQUOTE}"
+    my $self = shift;
+    local $_ = shift;
+
+    # A regex that matches the portion of a variable reference that's the
+    # array or hash index, separated out just because we want to use it in
+    # several places in the following regex.
+    my $index = '(?: \[.*\] | \{.*\} )?';
+
+    # Check for things that we don't want to quote, and if we find any of
+    # them, return the string with just a font change and no quoting.
+    m{
+      ^\s*
+      (?:
+         ( [\'\`\"] ) .* \1                             # already quoted
+       | \` .* \'                                       # `quoted'
+       | \$+ [\#^]? \S $index                           # special ($^Foo, $")
+       | [\$\@%&*]+ \#? [:\'\w]+ $index                 # plain var or func
+       | [\$\@%&*]* [:\'\w]+ (?: -> )? \(\s*[^\s,]\s*\) # 0/1-arg func call
+       | [+-]? [\d.]+ (?: [eE] [+-]? \d+ )?             # a number
+       | 0x [a-fA-F\d]+                                 # a hex constant
+      )
+      \s*\z
+     }xo && return $_;
+
+    # If we didn't return, go ahead and quote the text.
+    return $$self{alt} ? "``$_''" : "$$self{LQUOTE}$_$$self{RQUOTE}";
 }
 
 # The complicated one.  Handle links.  Since this is plain text, we can't
@@ -492,14 +525,14 @@ sub seq_l {
     s/^\s+//;
     s/\s+$//;
 
-    # If the argument looks like a URL, return it verbatim.  This only
-    # handles URLs that use the server syntax.
+    # If the argument looks like a URL, return it verbatim.  This only handles
+    # URLs that use the server syntax.
     if (m%^[a-z]+://\S+$%) { return $_ }
 
-    # Default to using the whole content of the link entry as a section
-    # name.  Note that L<manpage/> forces a manpage interpretation, as does
-    # something looking like L<manpage(section)>.  The latter is an
-    # enhancement over the original Pod::Text.
+    # Default to using the whole content of the link entry as a section name.
+    # Note that L<manpage/> forces a manpage interpretation, as does something
+    # looking like L<manpage(section)>.  The latter is an enhancement over the
+    # original Pod::Text.
     my ($manpage, $section) = ('', $_);
     if (/^"\s*(.*?)\s*"$/) {
         $section = '"' . $1 . '"';
@@ -527,17 +560,17 @@ sub seq_l {
 }
 
 
-############################################################################
+##############################################################################
 # List handling
-############################################################################
+##############################################################################
 
-# This method is called whenever an =item command is complete (in other
-# words, we've seen its associated paragraph or know for certain that it
-# doesn't have one).  It gets the paragraph associated with the item as an
-# argument.  If that argument is empty, just output the item tag; if it
-# contains a newline, output the item tag followed by the newline.
-# Otherwise, see if there's enough room for us to output the item tag in the
-# margin of the text or if we have to put it on a separate line.
+# This method is called whenever an =item command is complete (in other words,
+# we've seen its associated paragraph or know for certain that it doesn't have
+# one).  It gets the paragraph associated with the item as an argument.  If
+# that argument is empty, just output the item tag; if it contains a newline,
+# output the item tag followed by the newline.  Otherwise, see if there's
+# enough room for us to output the item tag in the margin of the text or if we
+# have to put it on a separate line.
 sub item {
     my $self = shift;
     local $_ = shift;
@@ -569,14 +602,14 @@ sub item {
 }
 
 
-############################################################################
+##############################################################################
 # Output formatting
-############################################################################
+##############################################################################
 
-# Wrap a line, indenting by the current left margin.  We can't use
-# Text::Wrap because it plays games with tabs.  We can't use formline, even
-# though we'd really like to, because it screws up non-printing characters.
-# So we have to do the wrapping ourselves.
+# Wrap a line, indenting by the current left margin.  We can't use Text::Wrap
+# because it plays games with tabs.  We can't use formline, even though we'd
+# really like to, because it screws up non-printing characters.  So we have to
+# do the wrapping ourselves.
 sub wrap {
     my $self = shift;
     local $_ = shift;
@@ -601,8 +634,8 @@ sub reformat {
     my $self = shift;
     local $_ = shift;
 
-    # If we're trying to preserve two spaces after sentences, do some
-    # munging to support that.  Otherwise, smash all repeated whitespace.
+    # If we're trying to preserve two spaces after sentences, do some munging
+    # to support that.  Otherwise, smash all repeated whitespace.
     if ($$self{sentence}) {
         s/ +$//mg;
         s/\.\n/. \n/g;
@@ -618,9 +651,9 @@ sub reformat {
 sub output { $_[1] =~ tr/\01/ /; print { $_[0]->output_handle } $_[1] }
 
 
-############################################################################
+##############################################################################
 # Backwards compatibility
-############################################################################
+##############################################################################
 
 # The old Pod::Text module did everything in a pod2text() function.  This
 # tries to provide the same interface for legacy applications.
@@ -644,9 +677,9 @@ sub pod2text {
     my $parser = Pod::Text->new (@args);
 
     # If two arguments were given, the second argument is going to be a file
-    # handle.  That means we want to call parse_from_filehandle(), which
-    # means we need to turn the first argument into a file handle.  Magic
-    # open will handle the <&STDIN case automagically.
+    # handle.  That means we want to call parse_from_filehandle(), which means
+    # we need to turn the first argument into a file handle.  Magic open will
+    # handle the <&STDIN case automagically.
     if (defined $_[1]) {
         my @fhs = @_;
         local *IN;
@@ -662,9 +695,9 @@ sub pod2text {
 }
 
 
-############################################################################
+##############################################################################
 # Module return value and documentation
-############################################################################
+##############################################################################
 
 1;
 __END__
@@ -823,5 +856,12 @@ Russ Allbery E<lt>rra@stanford.eduE<gt>, based I<very> heavily on the
 original Pod::Text by Tom Christiansen E<lt>tchrist@mox.perl.comE<gt> and
 its conversion to Pod::Parser by Brad Appleton
 E<lt>bradapp@enteract.comE<gt>.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>.
+
+This program is free software; you may redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut

@@ -1,10 +1,10 @@
 # Pod::Text::Overstrike -- Convert POD data to formatted overstrike text
-# $Id: Overstrike.pm,v 1.1 2000/12/25 12:51:23 eagle Exp $
+# $Id: Overstrike.pm,v 1.2 2001/07/10 11:04:36 eagle Exp $
 #
 # Created by Joe Smith <Joe.Smith@inwap.com> 30-Nov-2000
 #   (based on Pod::Text::Color by Russ Allbery <rra@stanford.edu>)
 #
-# This program is free software; you can redistribute it and/or modify it
+# This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
 # This was written because the output from:
@@ -18,9 +18,9 @@
 # and because both Pod::Text::Color and Pod::Text::Termcap are not device
 # independent.
 
-############################################################################
+##############################################################################
 # Modules and declarations
-############################################################################
+##############################################################################
 
 package Pod::Text::Overstrike;
 
@@ -33,16 +33,15 @@ use vars qw(@ISA $VERSION);
 
 @ISA = qw(Pod::Text);
 
-# Don't use the CVS revision as the version, since this module is also in
-# Perl core and too many things could munge CVS magic revision strings.
-# This number should ideally be the same as the CVS revision in podlators,
-# however.
-$VERSION = 1.01;
+# Don't use the CVS revision as the version, since this module is also in Perl
+# core and too many things could munge CVS magic revision strings.  This
+# number should ideally be the same as the CVS revision in podlators, however.
+$VERSION = 1.02;
 
 
-############################################################################
+##############################################################################
 # Overrides
-############################################################################
+##############################################################################
 
 # Make level one headings bold, overridding any existing formatting.
 sub cmd_head1 {
@@ -103,9 +102,9 @@ sub wrap {
     $output;
 }
 
-############################################################################
+##############################################################################
 # Module return value and documentation
-############################################################################
+##############################################################################
 
 1;
 __END__
@@ -154,7 +153,14 @@ L<Pod::Text|Pod::Text>, L<Pod::Parser|Pod::Parser>
 
 =head1 AUTHOR
 
-Joe Smith E<lt>Joe.Smith@inwap.comE<gt>, using the framework created by Russ
-Allbery E<lt>rra@stanford.eduE<gt>.
+Joe Smith <Joe.Smith@inwap.com>, using the framework created by Russ Allbery
+<rra@stanford.edu>.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2000 by Joe Smith <Joe.Smith@inwap.com>.
+
+This program is free software; you may redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut
