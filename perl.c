@@ -707,8 +707,17 @@ I32 flags;		/* See G_* flags in cop.h */
   cleanup:
     if (flags & G_EVAL) {
 	if (scopestack_ix > oldscope) {
-	    op = (OP*)&myop;
-	    pp_leavetry();
+	    SV **newsp;
+	    PMOP *newpm;
+	    I32 gimme;
+	    register CONTEXT *cx;
+	    I32 optype;
+
+	    POPBLOCK(cx,newpm);
+	    POPEVAL(cx);
+	    pop_return();
+	    curpm = newpm;
+	    LEAVE;
 	}
 	Copy(oldtop, top_env, 1, jmp_buf);
     }
