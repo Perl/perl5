@@ -123,8 +123,16 @@ cc_opclass(OP *o)
     case OA_GVOP:
 	return OPc_GVOP;
 
-    case OA_PVOP:
-	return OPc_PVOP;
+    case OA_PVOP_OR_SVOP:
+        /*
+         * Character translations (tr///) are usually a PVOP, keeping a 
+         * pointer to a table of shorts used to look up translations.
+         * Under utf8, however, a simple table isn't practical; instead,
+         * the OP is an SVOP, and the SV is a reference to a swash
+         * (i.e., an RV pointing to an HV).
+         */
+	return (o->op_private & (OPpTRANS_TO_UTF|OPpTRANS_FROM_UTF))
+		? OPc_SVOP : OPc_PVOP;
 
     case OA_LOOP:
 	return OPc_LOOP;

@@ -172,7 +172,7 @@ END
     '/',  6,		# pmop
     '$',  7,		# svop
     '*',  8,		# gvop
-    '"',  9,		# pvop
+    '"',  9,		# pvop_or_svop
     '{',  10,		# loop
     ';',  11,		# cop
     '%',  12,		# baseop_or_unop
