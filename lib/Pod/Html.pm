@@ -1010,13 +1010,19 @@ sub process_pod {
 
 #
 # process_for - process a =for pod tag.  if it's for html, split
-# it out verbatim, otherwise ignore it.
+# it out verbatim, if illustration, center it, otherwise ignore it.
 #
 sub process_for {
     my($whom, $text) = @_;
     if ( $whom =~ /^(pod2)?html$/i) {
 	print HTML $text;
-    } 
+    } elsif ($whom =~ /^illustration$/i) {
+        1 while chomp $text;
+	for my $ext (qw[.png .gif .jpeg .jpg .tga .pcl .bmp]) {
+	  $text .= $ext, last if -r "$text$ext";
+	}
+        print HTML qq{<p align = "center"><img src = "$text" alt = "$text illustration"></p>};
+    }
 }
 
 #
