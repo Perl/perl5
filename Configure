@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Thu Sep 12 09:42:56 EDT 1996 [metaconfig 3.0 PL60]
+# Generated on Fri Oct  4 15:07:00 EDT 1996 [metaconfig 3.0 PL60]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -58,7 +58,7 @@ esac
 : Proper PATH separator
 p_=:
 : On OS/2 this directory should exist if this is not floppy only system :-]
-if test -d c:/.; then
+if test -d c:/. -a -n "$OS2_SHELL"; then
 	p_=\;
 	PATH=`cmd /c "echo %PATH%" | tr '\\\\' / `
 	OS2_SHELL=`cmd /c "echo %OS2_SHELL%" | tr '\\\\' / | tr '[A-Z]' '[a-z]'`
@@ -706,9 +706,10 @@ loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
 loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
 
 : general looking path for locating libraries
-glibpth="/lib/pa1.1 /usr/shlib /usr/lib/large /lib /usr/lib"
-glibpth="$glibpth $xlibpth /lib/large /usr/lib/small /lib/small"
-glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/shlib"
+glibpth="/shlib /usr/shlib /lib/pa1.1 /usr/lib/large"
+glibpth="$glibpth /lib /usr/lib $xlibpth"
+glibpth="$glibpth /lib/large /usr/lib/small /lib/small"
+glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
 
 : Private path used by Configure to find libraries.  Its value
 : is prepended to libpth. This variable takes care of special
@@ -4594,7 +4595,7 @@ if "$useshrplib"; then
 	solaris|netbsd)
 		xxx="-R $shrpdir"
 		;;
-	linux)
+	linux|irix*)
 		xxx="-Wl,-rpath,$shrpdir"
 		;;
 	*)
