@@ -245,9 +245,9 @@ we try to provide in the Llama or its defurred cousin the Gecko, please
 check out the delightful book, I<Perl: The Programmer's Companion>,
 written by Nigel Chapman.
 
-Addison-Wesley (http://www.awlonline.com/) and Manning 
-(http://www.manning.com/) are also publishers of some fine Perl books 
-such as Object Oriented Programming with Perl by Damain Conway and
+Addison-Wesley (http://www.awlonline.com/) and Manning
+(http://www.manning.com/) are also publishers of some fine Perl books
+such as Object Oriented Programming with Perl by Damian Conway and
 Network Programming with Perl by Lincoln Stein.
 
 An excellent technical book discounter is Bookpool at 
