@@ -80,6 +80,7 @@ S_more_he(pTHX)
 STATIC HEK *
 S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 {
+    int flags_masked = flags & HVhek_MASK;
     char *k;
     register HEK *hek;
 
@@ -89,7 +90,10 @@ S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
     HEK_KEY(hek)[len] = 0;
     HEK_LEN(hek) = len;
     HEK_HASH(hek) = hash;
-    HEK_FLAGS(hek) = (unsigned char)flags;
+    HEK_FLAGS(hek) = (unsigned char)flags_masked;
+
+    if (flags & HVhek_FREEKEY)
+	Safefree(str);
     return hek;
 }
 
@@ -381,6 +385,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return 0;
 
     if (keysv) {
+	if (flags & HVhek_FREEKEY)
+	    Safefree(key);
 	key = SvPV(keysv, klen);
 	flags = 0;
 	is_utf8 = (SvUTF8(keysv) != 0);
@@ -437,25 +443,28 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		U32 i;
 		for (i = 0; i < klen; ++i)
 		    if (isLOWER(key[i])) {
-			const char *keysave = key;
-			/* Will need to free this, so set FREEKEY flag
-			   on call to hv_fetch_common.  */
-			key = savepvn(key,klen);
-			key = (const char*)strupr((char*)key);
-
-			if (flags & HVhek_FREEKEY)
-			    Safefree(keysave);
-
-			/* This isn't strictly the same as the old hv_fetch
-			   magic, which made a call to hv_fetch, followed
-			   by a call to hv_store if that failed and lvalue
-			   was true.
-			   Which I believe could have been done by simply
-			   passing the lvalue through to the first hv_fetch.
-			   So I will do that here.  */
-			return hv_fetch_common(hv, Nullsv, key, klen,
-					       HVhek_FREEKEY,
-					       action, Nullsv, 0);
+			/* Would be nice if we had a routine to do the
+			   copy and upercase in a single pass through.  */
+			char *nkey = strupr(savepvn(key,klen));
+			/* Note that this fetch is for nkey (the uppercased
+			   key) whereas the store is for key (the original)  */
+			entry = hv_fetch_common(hv, Nullsv, nkey, klen,
+						HVhek_FREEKEY, /* free nkey */
+						0 /* non-LVAL fetch */,
+						Nullsv /* no value */,
+						0 /* compute hash */);
+			if (!entry && (action & HV_FETCH_LVALUE)) {
+			    /* This call will free key if necessary.
+			       Do it this way to encourage compiler to tail
+			       call optimise.  */
+			    entry = hv_fetch_common(hv, keysv, key, klen,
+						    flags, HV_FETCH_ISSTORE,
+						    NEWSV(61,0), hash);
+			} else {
+			    if (flags & HVhek_FREEKEY)
+				Safefree(key);
+			}
+			return entry;
 		    }
 	    }
 #endif
@@ -877,6 +886,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return Nullsv;
 
     if (keysv) {
+	if (k_flags & HVhek_FREEKEY)
+	    Safefree(key);
 	key = SvPV(keysv, klen);
 	k_flags = 0;
 	is_utf8 = (SvUTF8(keysv) != 0);
@@ -906,25 +917,20 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    }		
 		    return Nullsv;		/* element cannot be deleted */
 		}
-	    }
 #ifdef ENV_IS_CASELESS
-	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
-		/* XXX This code isn't UTF8 clean.  */
-		keysv = sv_2mortal(newSVpvn(key,klen));
-		key = strupr(SvPVX(keysv));
-
-#if 0
-		/* keysave not in scope - don't understand - NI-S */
-                if (k_flags & HVhek_FREEKEY) {
-                    Safefree(keysave);
+		else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
+		    /* XXX This code isn't UTF8 clean.  */
+		    keysv = sv_2mortal(newSVpvn(key,klen));
+		    if (k_flags & HVhek_FREEKEY) {
+			Safefree(key);
+		    }
+		    key = strupr(SvPVX(keysv));
+		    is_utf8 = 0;
+		    k_flags = 0;
+		    hash = 0;
 		}
 #endif
-
-		is_utf8 = 0;
-		k_flags = 0;
-		hash = 0;
 	    }
-#endif
 	}
     }
     xhv = (XPVHV*)SvANY(hv);
@@ -2085,7 +2091,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     }
     if (!found) {
 	entry = new_HE();
-	HeKEY_hek(entry) = save_hek_flags(str, len, hash, flags);
+	HeKEY_hek(entry) = save_hek_flags(str, len, hash, flags_masked);
 	HeVAL(entry) = Nullsv;
 	HeNEXT(entry) = *oentry;
 	*oentry = entry;
