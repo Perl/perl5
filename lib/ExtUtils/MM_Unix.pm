@@ -3190,8 +3190,6 @@ sub prefixify {
 
     $path = VMS::Filespec::unixpath($path) if $Is_VMS;
 
-    return if $path eq '';
-
     unless( $path =~ s,^\Q$sprefix\E(?=/|\z),$rprefix,s ) {
 
         print STDERR "    cannot prefix, using default.\n" if $Verbose >= 2;
