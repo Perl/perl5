@@ -10,10 +10,10 @@ my @orig_ARGV = @ARGV;
 sub encode_U
 {
  # UTF-8 encode long hand - only covers part of perl's range
- my $uv = shift;
+ ## my $uv = shift;
  # chr() works in native space so convert value from table
  # into that space before using chr().
- my $ch = chr(utf8::unicode_to_native($uv));
+ my $ch = chr(utf8::unicode_to_native($_[0]));
  # Now get core perl to encode that the way it likes.
  utf8::encode($ch);
  return $ch;
@@ -22,24 +22,32 @@ sub encode_U
 sub encode_S
 {
  # encode single byte
- my ($ch,$page) = @_;
- return chr($ch);
+ ## my ($ch,$page) = @_; return chr($ch);
+ return chr $_[0];
 }
 
 sub encode_D
 {
  # encode double byte MS byte first
- my ($ch,$page) = @_;
- return chr($page).chr($ch);
+ ## my ($ch,$page) = @_; return chr($page).chr($ch);
+ return chr ($_[1]) . chr $_[0];
 }
 
 sub encode_M
 {
  # encode Multi-byte - single for 0..255 otherwise double
- my ($ch,$page) = @_;
- return &encode_D if $page;
- return &encode_S;
+ ## my ($ch,$page) = @_;
+ ## return &encode_D if $page;
+ ## return &encode_S;
+ return chr ($_[1]) . chr $_[0] if $_[1];
+ return chr $_[0];
 }
+
+my %encode_types = (U => \&encode_U,
+                    S => \&encode_S,
+                    D => \&encode_D,
+                    M => \&encode_M,
+                   );
 
 # Win32 does not expand globs on command line
 eval "\@ARGV = map(glob(\$_),\@ARGV)" if ($^O eq 'MSWin32');
@@ -253,7 +261,7 @@ sub compile_ucm
   {
    s/#.*$//;
    last if /^\s*CHARMAP\s*$/i;
-   if (/^\s*<(\w+)>\s+"?([^"]*)"?\s*$/i)
+   if (/^\s*<(\w+)>\s+"?([^"]*)"?\s*$/i) # " # Grrr
     {
      $attr{$1} = $2;
     }
@@ -345,12 +353,12 @@ sub compile_enc
  my ($def,$sym,$pages) = split(/\s+/,scalar(<$fh>));
  warn "$type encoded $name\n";
  my $rep = '';
- my $min_el;
- my $max_el;
+ # Save a defined test by setting these to defined values.
+ my $min_el = ~0; # A very big integer
+ my $max_el = 0;  # Anything must be longer than 0
  {
   my $v = hex($def);
-  no strict 'refs';
-  $rep = &{"encode_$type"}($v & 0xFF, ($v >> 8) & 0xffe);
+  $rep = &{$encode_types{$type}}($v & 0xFF, ($v >> 8) & 0xffe);
  }
  my %seen;
  while ($pages--)
@@ -359,20 +367,21 @@ sub compile_enc
    chomp($line);
    my $page = hex($line);
    my $ch = 0;
-   for (my $i = 0; $i < 16; $i++)
+   for (0..15)
     {
      my $line = <$fh>;
-     for (my $j = 0; $j < 16; $j++)
+     die "Line should be exactly 65 characters long including newline"
+       unless length ($line) == 65;
+     # Split line into groups of 4 hex digits, convert groups to ints
+     for my $val (map {hex $_} $line =~ /(....)/g)
       {
-       no strict 'refs';
-       my $ech = &{"encode_$type"}($ch,$page);
-       my $val = hex(substr($line,0,4,''));
        next if $val == 0xFFFD;
+       my $ech = &{$encode_types{$type}}($ch,$page);
        if ($val || (!$ch && !$page))
         {
          my $el  = length($ech);
-         $max_el = $el if (!defined($max_el) || $el > $max_el);
-         $min_el = $el if (!defined($min_el) || $el < $min_el);
+         $max_el = $el if $el > $max_el;
+         $min_el = $el if $el < $min_el;
          my $uch = encode_U($val);
          if (exists $seen{$uch})
           {
@@ -395,6 +404,8 @@ sub compile_enc
       }
     }
   }
+ die "\$min_el=$min_el, \$max_el=$max_el - seems we read no lines"
+   if $min_el > $max_el;
  $encoding{$name} = [$e2u,$u2e,$rep,$min_el,$max_el];
 }
 
@@ -463,12 +474,12 @@ sub process
  my ($name,$a) = @_;
  $name =~ s/\W+/_/g;
  $a->{Cname} = $name;
- my @keys = grep(ref($a->{$_}),sort keys %$a);
+ my @keys = sort grep(ref($a->{$_}),keys %$a);
  my $l;
  my @ent;
  foreach my $b (@keys)
   {
-   my ($s,$f,$out,$t,$end) = @{$a->{$b}};
+   my ($s,undef,undef,$t,undef) = @{$a->{$b}};
    if (defined($l) &&
        ord($b) == ord($a->{$l}[1])+1 &&
        $a->{$l}[3] == $a->{$b}[3] &&
