@@ -852,8 +852,8 @@ lib/constant.t			See if compile-time constants work
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
-lib/CPAN/t/Nox.t		See if CPAN::Nox works
 lib/CPAN/t/loadme.t		See if CPAN the module works
+lib/CPAN/t/Nox.t		See if CPAN::Nox works
 lib/CPAN/t/vcmp.t		See if CPAN the module works
 lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
@@ -1019,10 +1019,14 @@ lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
+lib/Math/BigInt/t/bigfltpm.inc	Shared tests for bigfltpm.t and subclass.t
 lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
 lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
 lib/Math/BigInt/t/bigintpm.t	See if BigInt.pm works
+lib/Math/BigInt/t/calling.t	Test calling conventions
+lib/Math/BigInt/t/Math/Subclass.pm	Empty subclass of BigFloat for test
 lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precicion and fallback, round_mode
+lib/Math/BigInt/t/subclass.t	Empty subclass test of BigFloat
 lib/Math/Complex.pm		A Complex package
 lib/Math/Complex.t		See if Math::Complex works
 lib/Math/Trig.pm		A simple interface to complex trigonometry
