@@ -86,7 +86,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.24";
+my $Version = "1.25";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -115,6 +115,7 @@ my $Version = "1.24";
 # Changed in 1.22 Heavy reformatting & minor bugfixes HVDS 98-05-10
 # Changed in 1.23 Restore -ok(ay): say 'success'; don't prompt
 # Changed in 1.24 Added '-F<file>' to save report HVDS 98-07-01
+# Changed in 1.25 Warn on failure to open save file. HVDS 98-07-12
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -623,6 +624,7 @@ the message to $address$andcc, display the message on
 the screen, re-edit it, or cancel without sending anything?
 You may also save the message as a file to mail at another time.
 EOF
+      retry:
 	    print "Action (Send/Display/Edit/Cancel/Save to File): ";
 	    my $action = scalar <>;
 	    chop $action;
@@ -633,7 +635,10 @@ EOF
 		chop $file;
 		$file = "perlbug.rep" if $file eq "";
 
-		open(FILE, ">$file");
+		unless (open(FILE, ">$file")) {
+		    print "\nError opening $file: $!\n\n";
+		    goto retry;
+		}
 		open(REP, "<$filename");
 		print FILE "To: $address\nSubject: $subject\n";
 		print FILE "Cc: $cc\n" if $cc;
