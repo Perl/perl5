@@ -121,50 +121,17 @@ sub getcwd
     abs_path('.');
 }
 
-# By John Bazik
-#
-# Usage: $cwd = &fastcwd;
-#
-# This is a faster version of getcwd.  It's also more dangerous because
-# you might chdir out of a directory that you can't chdir back into.
-    
+# Now a callout to an XSUB.  We have to delay booting of the XSUB
+# until the first time fastcwd is called since Cwd::cwd is needed in the
+# building of perl when dynamic loading may be unavailable
+my $booted = 0;
 sub fastcwd {
-    my($odev, $oino, $cdev, $cino, $tdev, $tino);
-    my(@path, $path);
-    local(*DIR);
-
-    my($orig_cdev, $orig_cino) = stat('.');
-    ($cdev, $cino) = ($orig_cdev, $orig_cino);
-    for (;;) {
-	my $direntry;
-	($odev, $oino) = ($cdev, $cino);
-	CORE::chdir('..') || return undef;
-	($cdev, $cino) = stat('.');
-	last if $odev == $cdev && $oino == $cino;
-	opendir(DIR, '.') || return undef;
-	for (;;) {
-	    $direntry = readdir(DIR);
-	    last unless defined $direntry;
-	    next if $direntry eq '.';
-	    next if $direntry eq '..';
-
-	    ($tdev, $tino) = lstat($direntry);
-	    last unless $tdev != $odev || $tino != $oino;
-	}
-	closedir(DIR);
-	return undef unless defined $direntry; # should never happen
-	unshift(@path, $direntry);
+    unless ($booted) {
+	require XSLoader;
+        XSLoader::load("Cwd");
+	++$booted;
     }
-    $path = '/' . join('/', @path);
-    if ($^O eq 'apollo') { $path = "/".$path; }
-    # At this point $path may be tainted (if tainting) and chdir would fail.
-    # To be more useful we untaint it then check that we landed where we started.
-    $path = $1 if $path =~ /^(.*)\z/s;	# untaint
-    CORE::chdir($path) || return undef;
-    ($cdev, $cino) = stat('.');
-    die "Unstable directory path, current directory changed unexpectedly"
-	if $cdev != $orig_cdev || $cino != $orig_cino;
-    $path;
+    return &Cwd::_fastcwd;
 }
 
 

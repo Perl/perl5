@@ -145,6 +145,8 @@ ext/ByteLoader/bytecode.h	Bytecode header for bytecode loader
 ext/ByteLoader/byterun.c	Runtime support for bytecode loader
 ext/ByteLoader/byterun.h	Header for byterun.c
 ext/ByteLoader/hints/sunos.pl	Hints for named architecture
+ext/Cwd/Cwd.xs			Cwd extension external subroutines
+ext/Cwd/Makefile.PL		Cwd extension makefile maker
 ext/DB_File/Changes		Berkeley DB extension change log
 ext/DB_File/DB_File.pm		Berkeley DB extension Perl module
 ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
