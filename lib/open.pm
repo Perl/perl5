@@ -84,6 +84,9 @@ sub import {
 	elsif ($type eq 'OUT') {
 	    $out = join(' ',@val);
 	}
+	elsif ($type eq 'INOUT') {
+	    $in = $out = join(' ',@val);
+	}
 	else {
 	    croak "Unknown discipline class '$type'";
 	}
@@ -101,6 +104,7 @@ open - perl pragma to set default disciplines for input and output
 =head1 SYNOPSIS
 
     use open IN => ":crlf", OUT => ":raw";
+    use open INOUT => ":utf8";
 
 =head1 DESCRIPTION
 
@@ -135,14 +139,16 @@ everywhere if PerlIO is enabled.
 
 =head1 IMPLEMENTATION DETAILS
 
-There is a class method in C<PerlIO::Layer> C<find> which is implemented as XS code.
-It is called by C<import> to validate the layers:
+There is a class method in C<PerlIO::Layer> C<find> which is
+implemented as XS code.  It is called by C<import> to validate the
+layers:
 
    PerlIO::Layer::->find("perlio")
 
-The return value (if defined) is a Perl object, of class C<PerlIO::Layer> which is
-created by the C code in F<perlio.c>.  As yet there is nothing useful you can do with the
-object at the perl level.
+The return value (if defined) is a Perl object, of class
+C<PerlIO::Layer> which is created by the C code in F<perlio.c>.  As
+yet there is nothing useful you can do with the object at the perl
+level.
 
 =head1 SEE ALSO
 
