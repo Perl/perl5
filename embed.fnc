@@ -1411,5 +1411,7 @@ p	|int	|get_debug_opts	|char **s
 
 
 
-END_EXTERN_C
 
+Apd	|void	|hv_clear_placeholders|HV* hb
+
+END_EXTERN_C

@@ -1897,6 +1897,61 @@ Perl_hv_clear(pTHX_ HV *hv)
     HvREHASH_off(hv);
 }
 
+/*
+=for apidoc hv_clear_placeholders
+
+Clears any placeholders from a hash.  If a restricted hash has any of its keys
+marked as readonly and the key is subsequently deleted, the key is not actually
+deleted but is marked by assigning it a value of &PL_sv_placeholder.  This tags
+it so it will be ignored by future operations such as iterating over the hash,
+but will still allow the hash to have a value reaasigned to the key at some
+future point.  This function clears any such placeholder keys from the hash.
+See Hash::Util::lock_keys() for an example of its use.
+
+=cut
+*/
+
+void
+Perl_hv_clear_placeholders(pTHX_ HV *hv)
+{
+    I32 items;
+    items = (I32)HvPLACEHOLDERS(hv);
+    if (items) {
+        HE *entry;
+        I32 riter = HvRITER(hv);
+        HE *eiter = HvEITER(hv);
+        hv_iterinit(hv);
+        /* This may look suboptimal with the items *after* the iternext, but
+           it's quite deliberate. We only get here with items==0 if we've
+           just deleted the last placeholder in the hash. If we've just done
+           that then it means that the hash is in lazy delete mode, and the
+           HE is now only referenced in our iterator. If we just quit the loop
+           and discarded our iterator then the HE leaks. So we do the && the
+           other way to ensure iternext is called just one more time, which
+           has the side effect of triggering the lazy delete.  */
+        while ((entry = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))
+            && items) {
+            SV *val = hv_iterval(hv, entry);
+
+            if (val == &PL_sv_placeholder) {
+
+                /* It seems that I have to go back in the front of the hash
+                   API to delete a hash, even though I have a HE structure
+                   pointing to the very entry I want to delete, and could hold
+                   onto the previous HE that points to it. And it's easier to
+                   go in with SVs as I can then specify the precomputed hash,
+                   and don't have fun and games with utf8 keys.  */
+                SV *key = hv_iterkeysv(entry);
+
+                hv_delete_ent (hv, key, G_DISCARD, HeHASH(entry));
+                items--;
+            }
+        }
+        HvRITER(hv) = riter;
+        HvEITER(hv) = eiter;
+    }
+}
+
 STATIC void
 S_hfreeentries(pTHX_ HV *hv)
 {

@@ -2172,6 +2172,7 @@
 #define get_debug_opts		Perl_get_debug_opts
 #endif
 #endif
+#define hv_clear_placeholders	Perl_hv_clear_placeholders
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -4676,6 +4677,7 @@
 #define get_debug_opts(a)	Perl_get_debug_opts(aTHX_ a)
 #endif
 #endif
+#define hv_clear_placeholders(a)	Perl_hv_clear_placeholders(aTHX_ a)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)

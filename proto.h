@@ -1353,5 +1353,7 @@ PERL_CALLCONV int	Perl_get_debug_opts(pTHX_ char **s);
 
 
 
-END_EXTERN_C
 
+PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV* hb);
+
+END_EXTERN_C
