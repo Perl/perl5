@@ -2559,9 +2559,6 @@ s	|SV*	|mess_alloc
 #  if defined(LEAKTEST)
 s	|void	|xstat		|int
 #  endif
-#  if defined(EBCDIC)
-p	|int	|ebcdic_control	|int ch
-#  endif
 #endif
 
 #if defined(PERL_OBJECT)

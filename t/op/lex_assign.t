@@ -244,7 +244,7 @@ lc $cstr			# lc
 quotemeta $cstr			# quotemeta
 @$aref				# rv2av
 @$undefed			# rv2av undef
-each %h==1			# each
+(each %h) % 2 == 1		# each
 values %h			# values
 keys %h				# keys
 %$href				# rv2hv

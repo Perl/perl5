@@ -2146,9 +2146,11 @@ Gid_t getegid (void);
 #  if defined(PERL_OBJECT)
 #    define DEBUG_m(a) if (PL_debug & 128)	a
 #  else
+     /* Temporarily turn off memory debugging in case the a
+      * does memory allocation, either directly or indirectly. */
 #    define DEBUG_m(a)  \
     STMT_START {							\
-	if (PERL_GET_INTERP) { dTHX; if (PL_debug & 128) { a; } }	\
+        if (PERL_GET_INTERP) { dTHX; if (PL_debug & 128) {PL_debug&=~128; a; PL_debug|=128;} } \
     } STMT_END
 #  endif
 #define DEBUG_f(a) if (PL_debug & 256)	a

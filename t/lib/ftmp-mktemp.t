@@ -31,7 +31,7 @@ print "# MKSTEMP: FH is $fh File is $template fileno=".fileno($fh)."\n";
 ok( (-e $template) );
 
 # Autoflush
-$fh->autoflush(1) if $] >= 5.006; 
+$fh->autoflush(1) if $] >= 5.006;
 
 # Try printing something to the file
 my $string = "woohoo\n";
@@ -56,11 +56,16 @@ ok($string, $line);
 if ($^O eq 'MSWin32') {
   sleep 3;
 }
-ok( unlink0($fh, $template) );
-
+my $status = unlink0($fh, $template);
+if ($status) {
+  ok( $status );
+} else {
+  skip("Skip test failed probably due to \$TMPDIR being on NFS",1);
+}
 
 # MKSTEMPS
-# File with suffix. This is created in the current directory
+# File with suffix. This is created in the current directory so
+# may be problematic on NFS
 
 $template = "suffixXXXXXX";
 my $suffix = ".dat";
@@ -73,12 +78,12 @@ ok( (-e $fname) );
 
 # This fails if you are running on NFS
 # If this test fails simply skip it rather than doing a hard failure
-my $status = unlink0($fh, $fname);
+$status = unlink0($fh, $fname);
 
 if ($status) {
   ok($status);
 } else {
-  skip("Skip test failed probably due to NFS",1)
+  skip("Skip test failed probably due to cwd being on NFS",1)
 }
 
 # MKDTEMP

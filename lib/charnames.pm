@@ -34,8 +34,9 @@ sub charnames {
   }
   die "Unknown charname '$name'" unless @off;
 
-  my $hexlen = 0;
-  $hexlen++ while substr($txt, $off[0] - $hexlen - 1, 1) =~ /[0-9a-f]/;
+  my $hexlen = 4; # Unicode guarantees 4-, 5-, or 6-digit format
+  $hexlen++ while
+      $hexlen < 6 && substr($txt, $off[0] - $hexlen - 1, 1) =~ /[0-9a-f]/;
   my $ord = hex substr $txt, $off[0] - $hexlen, $hexlen;
   if ($^H & $bytes::hint_bits) {	# "use bytes" in effect?
     use bytes;

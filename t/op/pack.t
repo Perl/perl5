@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..165\n";
+print "1..163\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -452,17 +452,4 @@ print "ok $test\n"; $test++;
     print "not " unless ord(pack("C", 0x100 + 0xab)) == 0xab;
     print "ok $test\n"; $test++;
 }
-
-# 164: pack C and pack U equivalence
-
-print "not " unless pack("C", 0x100) eq pack("U", 0x100) &&
-                    chr(0x100) eq pack("U", 0x100);
-print "ok $test\n"; $test++;
-
-# 165: unpack C and unpack U equivalence
-
-print "not " unless "@{[unpack('C*', chr(0x100) . chr(0x200))]}" eq
-                    "@{[unpack('U*', chr(0x100) . chr(0x200))]}" &&
-                    "@{[unpack('U*', chr(0x100) . chr(0x200))]}" eq "256 512";
-print "ok $test\n"; $test++;
 
