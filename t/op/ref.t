@@ -1,5 +1,10 @@
 #!./perl
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = qw(.);
+}
+
 print "1..62\n";
 
 require 'test.pl';
