@@ -316,6 +316,7 @@ Perl_pmflag
 Perl_pop_scope
 Perl_push_scope
 Perl_regdump
+Perl_regclass_swash
 Perl_pregexec
 Perl_pregfree
 Perl_pregcomp

@@ -298,7 +298,7 @@ L<perlsub/"Constant Functions">.
 	SV*	cv_const_sv(CV* cv)
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item dMARK
 
@@ -1179,7 +1179,7 @@ eligible for inlining at compile-time.
 	CV*	newCONSTSUB(HV* stash, char* name, SV* sv)
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item newHV
 
@@ -1325,7 +1325,7 @@ Found in file sv.c
 Used by C<xsubpp> to hook up XSUBs as Perl subs.
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item newXSproto
 

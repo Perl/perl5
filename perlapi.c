@@ -2319,6 +2319,13 @@ Perl_regdump(pTHXo_ regexp* r)
     ((CPerlObj*)pPerl)->Perl_regdump(r);
 }
 
+#undef  Perl_regclass_swash
+SV*
+Perl_regclass_swash(pTHXo_ struct regnode *n, bool doinit, SV **initsvp)
+{
+    return ((CPerlObj*)pPerl)->Perl_regclass_swash(n, doinit, initsvp);
+}
+
 #undef  Perl_pregexec
 I32
 Perl_pregexec(pTHXo_ regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave)
