@@ -6064,10 +6064,11 @@ separated):
 Modules know their associated Distribution objects. They always refer
 to the most recent official release. Developers may mark their releases
 as unstable development versions (by inserting an underbar into the
-visible version number), so the really hottest and newest distribution
-file is not always the default.  If a module Foo circulates on CPAN in
-both version 1.23 and 1.23_90, CPAN.pm offers a convenient way to
-install version 1.23 by saying
+module version number which will also be reflected in the distribution
+name when you run 'make dist'), so the really hottest and newest 
+distribution is not always the default.  If a module Foo circulates 
+on CPAN in both version 1.23 and 1.23_90, CPAN.pm offers a convenient 
+way to install version 1.23 by saying
 
     install Foo
 
