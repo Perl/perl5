@@ -251,7 +251,8 @@ sub syslog {
     local(@words, $num, $numpri, $numfac, $sum);
     local($facility) = $facility;	# may need to change temporarily.
 
-    croak "syslog: expected both priority and mask" unless $mask && $priority;
+    croak "syslog: expecting argument \$priority" unless $priority;
+    croak "syslog: expecting argument \$format"   unless $mask;
 
     @words = split(/\W+/, $priority, 2);# Allow "level" or "level|facility".
     undef $numpri;
