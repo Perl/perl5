@@ -353,7 +353,6 @@
 #define PL_pad_reset_pending	(PERL_GET_INTERP->Ipad_reset_pending)
 #define PL_padix		(PERL_GET_INTERP->Ipadix)
 #define PL_padix_floor		(PERL_GET_INTERP->Ipadix_floor)
-#define PL_parsehook		(PERL_GET_INTERP->Iparsehook)
 #define PL_patchlevel		(PERL_GET_INTERP->Ipatchlevel)
 #define PL_pending_ident	(PERL_GET_INTERP->Ipending_ident)
 #define PL_perl_destruct_level	(PERL_GET_INTERP->Iperl_destruct_level)
@@ -630,7 +629,6 @@
 #define PL_pad_reset_pending	(vTHX->Ipad_reset_pending)
 #define PL_padix		(vTHX->Ipadix)
 #define PL_padix_floor		(vTHX->Ipadix_floor)
-#define PL_parsehook		(vTHX->Iparsehook)
 #define PL_patchlevel		(vTHX->Ipatchlevel)
 #define PL_pending_ident	(vTHX->Ipending_ident)
 #define PL_perl_destruct_level	(vTHX->Iperl_destruct_level)
@@ -909,7 +907,6 @@
 #define PL_Ipad_reset_pending	PL_pad_reset_pending
 #define PL_Ipadix		PL_padix
 #define PL_Ipadix_floor		PL_padix_floor
-#define PL_Iparsehook		PL_parsehook
 #define PL_Ipatchlevel		PL_patchlevel
 #define PL_Ipending_ident	PL_pending_ident
 #define PL_Iperl_destruct_level	PL_perl_destruct_level

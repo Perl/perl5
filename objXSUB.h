@@ -372,8 +372,6 @@
 #define PL_padix		(*Perl_Ipadix_ptr(aTHXo))
 #undef  PL_padix_floor
 #define PL_padix_floor		(*Perl_Ipadix_floor_ptr(aTHXo))
-#undef  PL_parsehook
-#define PL_parsehook		(*Perl_Iparsehook_ptr(aTHXo))
 #undef  PL_patchlevel
 #define PL_patchlevel		(*Perl_Ipatchlevel_ptr(aTHXo))
 #undef  PL_pending_ident
