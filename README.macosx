@@ -150,10 +150,45 @@ can be built in Perl. CamelBones can be found on SourceForge, at
 L<http://www.sourceforge.net/projects/camelbones/>.
 
 
+=head1 Starting From Scratch
+
+Unfortunately it is not that difficult somehow manage to break one's
+Mac OS X Perl rather severely.  If all else fails and you want to
+really, B<REALLY>, start from scratch and remove even your Apple Perl
+installation (which has become corrupted somehow), the following
+instructions should do it.  B<Please think twice before following
+these instructions: they are much like conducting brain surgery to
+yourself.  Without anesthesia.>  We will B<not> come to fix your system
+if you do this.
+
+First, get rid of the libperl.dylib:
+
+    # cd /System/Library/Perl/darwin/CORE
+    # rm libperl.dylib
+
+Then delete every .bundle file found anywhere in the folders:
+
+    /System/Library/Perl
+    /Library/Perl
+
+You can find them for example by
+
+    # find /System/Library/Perl /Library/Perl -name '*.bundle' -print
+
+After this you can either copy Perl from your operating system CDs
+(you will need at least the /System/Library/Perl and /usr/bin/perl),
+or rebuild Perl from the source code with C<Configure -Dprefix=/usr
+-Dusershrplib> NOTE: the C<-Dprefix=/usr> to replace the system Perl
+works much better with Perl 5.8.1 and later, in Perl 5.8.0 the
+settings were not quite right.
+
+
 =head1 AUTHOR
 
 This README was written by Sherm Pendley E<lt>sherm@dot-app.orgE<gt>.
+The "Starting From Scratch" recipe was contributed by John Montbriand
+E<lt>montbriand@apple.comE<gt>.
 
 =head1 DATE
 
-Last modified 2003-08-16.
+Last modified 2003-09-08.
