@@ -1016,7 +1016,7 @@ do_readline()
 		            *(end++) = '\n';  *end = '\0';
 		            for (cp = rstr; *cp; cp++) *cp = _tolower(*cp);
 		            if (hasdir) {
-		              if (isunix) trim_unixpath(SvPVX(tmpglob),rstr);
+		              if (isunix) trim_unixpath(rstr,SvPVX(tmpglob));
 		              begin = rstr;
 		            }
 		            else {
