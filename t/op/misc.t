@@ -344,3 +344,13 @@ EXPECT
 pqrDdeE
 pqrDdeE
 pqrDdeE
+########
+-l
+# fdopen from a system descriptor to a system descriptor used to close
+# the former.
+open STDERR, '>&=STDOUT' or die $!;
+select STDOUT; $| = 1; print fileno STDOUT;
+select STDERR; $| = 1; print fileno STDERR;
+EXPECT
+1
+2
