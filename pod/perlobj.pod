@@ -361,20 +361,31 @@ are inherited by all other classes:
 
 C<isa> returns I<true> if its object is blessed into a subclass of C<CLASS>
 
-You can also call C<UNIVERSAL::isa> as a sub with two arguments.  The
-first does not need to be an object or even a reference.  This
-allows the ability to check what a reference points to, or whether
+You can also call C<UNIVERSAL::isa> as a subroutine with two arguments.
+The first does not need to be an object or even a reference.  This
+allows you to check what a reference points to, or whether
 something is a reference of a given type. Example
 
     if(UNIVERSAL::isa($ref, 'ARRAY')) {
     	#...
     }
 
+To determine if a reference is a blessed object, you can write
+
+    print "It's an object\n" if UNIVERSAL::isa($val, 'UNIVERSAL');
+
 =item can(METHOD)
 
 C<can> checks to see if its object has a method called C<METHOD>,
 if it does then a reference to the sub is returned, if it does not then
 I<undef> is returned.
+
+C<UNIVERSAL::can> can also be called as a subroutine with two arguments.
+It'll always return I<undef> if its first argument isn't an object or a
+class name.    So here's another way to check if a reference is a
+blessed object
+
+    print "It's still an object\n" if UNIVERSAL::can($val, 'can');
 
 =item VERSION( [NEED] )
 
