@@ -2206,8 +2206,8 @@ Found in file pp.h
 =item mPUSHi
 
 Push an integer onto the stack.  The stack must have room for this element.
-Does not handle 'set' magic.  Does not use C<TARG>.  See also C<PUSHi>,
-C<mXPUSHi> and C<XPUSHi>.
+Handles 'set' magic.  Does not use C<TARG>.  See also C<PUSHi>, C<mXPUSHi>
+and C<XPUSHi>.
 
 	void	mPUSHi(IV iv)
 
@@ -2217,8 +2217,8 @@ Found in file pp.h
 =item mPUSHn
 
 Push a double onto the stack.  The stack must have room for this element.
-Does not handle 'set' magic.  Does not use C<TARG>.  See also C<PUSHn>,
-C<mXPUSHn> and C<XPUSHn>.
+Handles 'set' magic.  Does not use C<TARG>.  See also C<PUSHn>, C<mXPUSHn>
+and C<XPUSHn>.
 
 	void	mPUSHn(NV nv)
 
@@ -2228,8 +2228,8 @@ Found in file pp.h
 =item mPUSHp
 
 Push a string onto the stack.  The stack must have room for this element.
-The C<len> indicates the length of the string.  Does not handle 'set' magic.
-Does not use C<TARG>.  See also C<PUSHp>, C<mXPUSHp> and C<XPUSHp>.
+The C<len> indicates the length of the string.  Handles 'set' magic.  Does
+not use C<TARG>.  See also C<PUSHp>, C<mXPUSHp> and C<XPUSHp>.
 
 	void	mPUSHp(char* str, STRLEN len)
 
@@ -2239,8 +2239,8 @@ Found in file pp.h
 =item mPUSHu
 
 Push an unsigned integer onto the stack.  The stack must have room for this
-element.  Does not handle 'set' magic.  Does not use C<TARG>.  See also
-C<PUSHu>, C<mXPUSHu> and C<XPUSHu>.
+element.  Handles 'set' magic.  Does not use C<TARG>.  See also C<PUSHu>,
+C<mXPUSHu> and C<XPUSHu>.
 
 	void	mPUSHu(UV uv)
 
@@ -2249,9 +2249,9 @@ Found in file pp.h
 
 =item mXPUSHi
 
-Push an integer onto the stack, extending the stack if necessary.  Does not
-handle 'set' magic.  Does not use C<TARG>.  See also C<XPUSHi>, C<mPUSHi>
-and C<PUSHi>.
+Push an integer onto the stack, extending the stack if necessary.  Handles
+'set' magic.  Does not use C<TARG>.  See also C<XPUSHi>, C<mPUSHi> and
+C<PUSHi>.
 
 	void	mXPUSHi(IV iv)
 
@@ -2260,9 +2260,9 @@ Found in file pp.h
 
 =item mXPUSHn
 
-Push a double onto the stack, extending the stack if necessary.  Does not
-handle 'set' magic.  Does not use C<TARG>.  See also C<XPUSHn>, C<mPUSHn>
-and C<PUSHn>.
+Push a double onto the stack, extending the stack if necessary.  Handles
+'set' magic.  Does not use C<TARG>.  See also C<XPUSHn>, C<mPUSHn> and
+C<PUSHn>.
 
 	void	mXPUSHn(NV nv)
 
@@ -2272,8 +2272,8 @@ Found in file pp.h
 =item mXPUSHp
 
 Push a string onto the stack, extending the stack if necessary.  The C<len>
-indicates the length of the string.  Does not handle 'set' magic.  Does not
-use C<TARG>.  See also C<XPUSHp>, C<mPUSHp> and C<PUSHp>.
+indicates the length of the string.  Handles 'set' magic.  Does not use
+C<TARG>.  See also C<XPUSHp>, C<mPUSHp> and C<PUSHp>.
 
 	void	mXPUSHp(char* str, STRLEN len)
 
@@ -2283,8 +2283,8 @@ Found in file pp.h
 =item mXPUSHu
 
 Push an unsigned integer onto the stack, extending the stack if necessary.
-Does not handle 'set' magic.  Does not use C<TARG>.  See also C<XPUSHu>,
-C<mPUSHu> and C<PUSHu>.
+Handles 'set' magic.  Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu>
+and C<PUSHu>.
 
 	void	mXPUSHu(UV uv)
 
