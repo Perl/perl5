@@ -31,6 +31,303 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10418] By: jhi                                   on 2001/06/03  23:58:04
+        Log: -Wall "subscript has type `char'" cleanup.
+     Branch: perl
+	   ! ext/File/Glob/bsd_glob.c x2p/a2py.c x2p/str.c x2p/walk.c
+____________________________________________________________________________
+[ 10417] By: jhi                                   on 2001/06/03  23:37:17
+        Log: Various "cast to pointer from integer of different size"
+             picked up by gcc -Wall (in Tru64 where pointers are 64 bits
+             wide but I32 (int) only 32 bits wide).
+             
+             WARNING: the classnum and tagnum changes in Storable.xs
+             may not be wise, they may be breaking binary compatibility
+             (in 64-bit platforms), asked Raphael Manfredi about the changes.
+     Branch: perl
+	   ! embed.pl ext/Devel/DProf/DProf.xs ext/Storable/Storable.xs
+	   ! mg.c proto.h
+____________________________________________________________________________
+[ 10416] By: jhi                                   on 2001/06/03  23:15:24
+        Log: The non-locale places need love, too.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 10415] By: jhi                                   on 2001/06/03  23:10:55
+        Log: "10.", that is, decimal numbers can have no decimal part at all.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 10414] By: jhi                                   on 2001/06/03  22:49:55
+        Log: Potential buffer overrun if the radix separator is more than
+             one byte.  Also, under locales, prefer the locale-specific
+             separator over the old boring ".".
+     Branch: perl
+	   ! perl.h sv.c
+____________________________________________________________________________
+[ 10413] By: jhi                                   on 2001/06/03  22:42:10
+        Log: Integrate change #10412 from maintperl; locale is now
+             per-cop, not per-op; plus retweak the locale.t to always
+             list the skipped utf8 locales.
+     Branch: perl
+	   ! t/pragma/locale.t
+	  !> embed.h lib/locale.pm op.c op.h opcode.h opcode.pl perl.h pp.c
+	  !> pp.sym pp_ctl.c pp_proto.h pp_sys.c util.c
+____________________________________________________________________________
+[ 10412] By: gsar                                  on 2001/06/03  22:23:16
+        Log: rationalize locale handling to fix the bugs uncovered by change#10394
+             
+             the major issue was that the runtime was looking at PL_hints rather
+             than op_private to notice whether locale was enabled
+             
+             the secondary issue was that many locale-sensitive numeric ops didn't
+             have HINT_LOCALE propagated into their op_private
+             
+             HINT_LOCALE is now propagated per-statement (i.e., via PL_curcop)
+             instead of per-op, just like HINT_BYTE and the hints for lexical
+             warnings (this makes the hint available to every op via PL_curcop)
+             
+             pragma/locale.t may need to be reworked with these fixes in mind
+             (it currently passes its tests)
+     Branch: maint-5.6/perl
+	   ! embed.h lib/locale.pm op.c op.h opcode.h opcode.pl perl.h pp.c
+	   ! pp.sym pp_ctl.c pp_proto.h pp_sys.c t/pragma/locale.t util.c
+____________________________________________________________________________
+[ 10411] By: jhi                                   on 2001/06/03  17:50:49
+        Log: More verbose debugging.
+     Branch: perl
+	   ! t/pragma/locale.t
+____________________________________________________________________________
+[ 10410] By: jhi                                   on 2001/06/03  17:36:40
+        Log: Subject: RE: [PATCHES] regcomp.c, pod/perldiag.pod, t/op/pat.t
+             From: "Paul Marquess" <Paul_Marquess@Yahoo.co.uk>
+             Date: Sat, 2 Jun 2001 22:53:33 +0100
+             Message-ID: <000601c0ebae$77d10dc0$99dcfea9@bfs.phone.com>
+     Branch: perl
+	   ! regcomp.c t/pragma/warn/regcomp
+____________________________________________________________________________
+[ 10409] By: jhi                                   on 2001/06/03  17:27:13
+        Log: Mention that lexicalizing $a or $b is a bad idea if one
+             wants to use sort().
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 10408] By: jhi                                   on 2001/06/03  16:52:41
+        Log: Tweak the test to be happy if the accuracy is 'good enough'.
+     Branch: perl
+	   ! t/lib/posix.t
+____________________________________________________________________________
+[ 10407] By: jhi                                   on 2001/06/03  16:50:33
+        Log: Upgrade to Attribute::Handlers 0.70.
+             
+             NOTE: this unearthed the "too late for CHECK block" bug,
+             that's why the 1_compile.t change.
+     Branch: perl
+	   + lib/Attribute/Handlers/demo/Demo.pm
+	   + lib/Attribute/Handlers/demo/Descriptions.pm
+	   + lib/Attribute/Handlers/demo/MyClass.pm
+	   + lib/Attribute/Handlers/demo/demo.pl
+	   + lib/Attribute/Handlers/demo/demo2.pl
+	   + lib/Attribute/Handlers/demo/demo3.pl
+	   + lib/Attribute/Handlers/demo/demo4.pl
+	   + lib/Attribute/Handlers/demo/demo_call.pl
+	   + lib/Attribute/Handlers/demo/demo_chain.pl
+	   + lib/Attribute/Handlers/demo/demo_cycle.pl
+	   + lib/Attribute/Handlers/demo/demo_hashdir.pl
+	   + lib/Attribute/Handlers/demo/demo_phases.pl
+	   + lib/Attribute/Handlers/demo/demo_range.pl
+	   + lib/Attribute/Handlers/demo/demo_rawdata.pl
+	   ! MANIFEST lib/Attribute/Handlers.pm t/lib/1_compile.t
+	   ! t/lib/attrhand.t
+____________________________________________________________________________
+[ 10406] By: jhi                                   on 2001/06/03  16:40:03
+        Log: One less -Wall whine.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 10405] By: jhi                                   on 2001/06/03  16:30:34
+        Log: Integrate change #10404 from maintperl; eval.t was in pre-10394 mood.
+     Branch: perl
+	  !> t/op/eval.t
+____________________________________________________________________________
+[ 10404] By: gsar                                  on 2001/06/03  16:23:07
+        Log: eval.t was relying on pre-change#10394 buggy behavior (lexicals
+             aren't "normally" visible inside eval""s contained in subs unless
+             a cloned reference to them already exists)
+             
+             strangely enough, t/harness did show this up as a failure (harness
+             needs fixing?)
+     Branch: maint-5.6/perl
+	   ! t/op/eval.t
+____________________________________________________________________________
+[ 10403] By: jhi                                   on 2001/06/03  16:22:59
+        Log: Update to Text::Balanced 1.85.
+     Branch: perl
+	   ! lib/Text/Balanced.pm t/lib/tb-xvari.t
+____________________________________________________________________________
+[ 10402] By: jhi                                   on 2001/06/03  16:18:09
+        Log: Subject: [PATCH] Re: ext/Socket/Socket.xs
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 3 Jun 2001 17:54:36 +0100
+             Message-ID: <20010603175436.E76396@plum.flirble.org> 
+     Branch: perl
+	   ! ext/Fcntl/Fcntl.xs ext/Socket/Socket.xs
+	   ! ext/Sys/Syslog/Syslog.xs
+____________________________________________________________________________
+[ 10401] By: jhi                                   on 2001/06/03  16:09:33
+        Log: Unused variables.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 10400] By: jhi                                   on 2001/06/03  16:04:26
+        Log: Subject: [PATCH] APIfy op_clear 
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Sun, 3 Jun 2001 13:51:46 +0100
+             Message-ID: <20010603135146.A9984@deep-dark-truthful-mirror.pmb.ox.ac.uk>
+             
+             (despite the subject line, op_null is APIfied by the patch)
+     Branch: perl
+	   ! embed.h embed.pl global.sym objXSUB.h perlapi.c
+____________________________________________________________________________
+[ 10399] By: jhi                                   on 2001/06/03  15:51:35
+        Log: Subject: [PATCH] t/lib/extutils.t
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 2 Jun 2001 23:57:05 +0100
+             Message-ID: <20010602235705.Q12698@plum.flirble.org>
+     Branch: perl
+	   ! lib/ExtUtils/Constant.pm t/lib/extutils.t
+____________________________________________________________________________
+[ 10398] By: jhi                                   on 2001/06/03  15:34:11
+        Log: Subject: [PATCH: perl@10360] update two win32 Makefiles
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sun, 3 Jun 2001 08:55:14 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0106030845550.21619-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 10397] By: jhi                                   on 2001/06/03  15:12:13
+        Log: Subject: Re: 'decimal digits' macro? 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Sun, 03 Jun 2001 04:26:36 +0100
+             Message-Id: <200106030326.EAA18786@crypt.compulink.co.uk>
+     Branch: perl
+	   ! handy.h t/lib/posix.t t/op/tr.t
+____________________________________________________________________________
+[ 10396] By: jhi                                   on 2001/06/03  15:10:49
+        Log: Subject: Re: [ID 20010529.006] String plus zero inconsistent across platforms
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Sun, 03 Jun 2001 14:56:30 +0100
+             Message-Id: <200106031356.OAA12517@crypt.compulink.co.uk>
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 10395] By: jhi                                   on 2001/06/03  14:59:41
+        Log: Integrate change #10394 from maintperl; lexical file scope leakage.
+     Branch: perl
+	  !> perly.c perly.y t/op/misc.t t/pragma/warn/universal
+	  !> vms/perly_c.vms
+____________________________________________________________________________
+[ 10394] By: gsar                                  on 2001/06/03  03:05:43
+        Log: fix leakage of lexicals at file scope into subroutines that were
+             declared before them; this appears to be a longstanding bug that
+             meant that lexicals at file scope were never "deintroduced", meaning
+             their scope range was never properly closed, and their visibility
+             extended to all subsequent eval""s or requires
+             
+             added a test case
+             
+             seems to also fix a case of bogus duplicate warnings
+     Branch: maint-5.6/perl
+	   ! perly.c perly.y t/op/misc.t t/pragma/warn/universal
+	   ! vms/perly_c.vms
+____________________________________________________________________________
+[ 10393] By: jhi                                   on 2001/06/02  16:55:03
+        Log: More VMS tweaks from Craig A. Berry.
+     Branch: perl
+	   ! configure.com t/lib/extutils.t
+____________________________________________________________________________
+[ 10392] By: jhi                                   on 2001/06/02  16:48:26
+        Log: -Wall cleanup continues.
+     Branch: perl
+	   ! README.tru64 embed.h embed.pl ext/NDBM_File/NDBM_File.xs
+	   ! ext/POSIX/POSIX.xs ext/PerlIO/Scalar/Scalar.xs
+	   ! ext/Storable/Storable.xs ext/Sys/Hostname/Hostname.xs
+	   ! ext/Sys/Syslog/Syslog.xs perl.c proto.h regcomp.c regexec.c
+	   ! run.c toke.c util.c
+____________________________________________________________________________
+[ 10391] By: jhi                                   on 2001/06/02  13:29:47
+        Log: The metaconfig unit change for #10390.
+     Branch: metaconfig/U/perl
+	   ! gccvers.U
+____________________________________________________________________________
+[ 10390] By: jhi                                   on 2001/06/02  13:29:12
+        Log: Drop the -ansi from the default gcc flags.
+             
+             Off_t/off_t is a struct in Solaris with largefiles, and with -ansi
+             that struct cannot be compared with a flat integer, such as STRLEN.
+             The -ansi will also cause a lot of noise in Solaris because of:
+             /usr/include/sys/resource.h:148: warning: `struct rlimit64' declared inside parameter list
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10389] By: jhi                                   on 2001/06/02  13:14:57
+        Log: Integrate perlio.
+     Branch: perl
+	  !> pod/perlapi.pod util.c
+____________________________________________________________________________
+[ 10388] By: nick                                  on 2001/06/02  08:01:12
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Attribute/Handlers.pm t/lib/attrhand.t
+	  !> MANIFEST configure.com ext/MIME/Base64/QuotedPrint.pm
+	  !> lib/File/Find.pm pod/perlmodlib.pod pod/perltoc.pod
+	  !> t/lib/1_compile.t t/lib/mimeqp.t
+____________________________________________________________________________
+[ 10387] By: nick                                  on 2001/06/02  07:39:17
+        Log: Tweak util.c's atof2 for MULTIPLICITY
+     Branch: perlio
+	   ! util.c
+____________________________________________________________________________
+[ 10386] By: nick                                  on 2001/06/02  07:38:33
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 41 files)
+____________________________________________________________________________
+[ 10385] By: jhi                                   on 2001/06/01  22:12:48
+        Log: Add Attribute::Handlers 0.61 from Damian Conway.
+     Branch: perl
+	   + lib/Attribute/Handlers.pm t/lib/attrhand.t
+	   ! MANIFEST pod/perlmodlib.pod pod/perltoc.pod t/lib/1_compile.t
+____________________________________________________________________________
+[ 10384] By: jhi                                   on 2001/06/01  21:53:14
+        Log: Subject: [PATCH: perl@10328] allow MIME::QuotePrint to handle ASCII code numbers on EBCDIC machines
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 1 Jun 2001 15:49:22 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10106011545140.323662-100000@aspara.forte.com>
+     Branch: perl
+	   ! ext/MIME/Base64/QuotedPrint.pm t/lib/mimeqp.t
+____________________________________________________________________________
+[ 10383] By: jhi                                   on 2001/06/01  21:36:11
+        Log: Subject: [PATCH File::Find] 'do 1' and puzzling (?>...)
+             From: Jeff Pinyan <jeffp@crusoe.net>
+             Date: Fri, 1 Jun 2001 14:13:56 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0106011412520.21027-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 10382] By: jhi                                   on 2001/06/01  21:35:02
+        Log: Subject: [PATCH perl@10381] configure.com tweaks
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 1 Jun 2001 13:55:43 -0500
+             Message-Id: <a05100e00b73d942aa9da@[172.16.52.1]>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 10381] By: jhi                                   on 2001/06/01  16:37:21
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10380] By: jhi                                   on 2001/06/01  16:19:18
         Log: Subject: [PATCH] Re: [ID 20010529.004] program doesn't work unless in debug mode
              From: Mike Guy <mjtg@cam.ac.uk>
