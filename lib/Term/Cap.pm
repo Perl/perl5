@@ -105,7 +105,9 @@ sub termcap_path { ## private
     my @termcap_path;
     # $TERMCAP, if it's a filespec
     push(@termcap_path, $ENV{TERMCAP}) if ((exists $ENV{TERMCAP}) &&
-                                           ($ENV{TERMCAP} =~ /^\//));
+                                           ($ENV{TERMCAP} =~ /^\//
+					    or $^O eq 'os2' and
+					    $ENV{TERMCAP} =~ /^[a-z]:\//i));
     if ((exists $ENV{TERMPATH}) && ($ENV{TERMPATH})) {
 	# Add the users $TERMPATH
 	push(@termcap_path, split(/(:|\s+)/, $ENV{TERMPATH}))
