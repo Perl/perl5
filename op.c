@@ -3859,6 +3859,8 @@ OP *op;
 	    enter->op_other = op;
 	    return op;
 	}
+	else
+	    scalar(kid);
     }
     else {
 	op_free(op);
