@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 91;
+plan tests => 93;
 
 $_ = 'abc';
 $c = do foo();
@@ -208,4 +208,17 @@ foreach my $start (@chars) {
     chomp $chomped;
     is ($chomped, $string, "$message (\$/ as bytes)");
   }
+}
+
+{
+    # returns length in characters, but not in bytes.
+    $/ = "\x{100}";
+    $a = "A$/";
+    $b = chomp $a;
+    is ($b, 1);
+
+    $/ = "\x{100}\x{101}";
+    $a = "A$/";
+    $b = chomp $a;
+    is ($b, 2);
 }
