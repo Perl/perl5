@@ -1450,11 +1450,18 @@ PP(pp_caller)
     if (!MAXARG)
 	RETURN;
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
+	GV *cvgv = CvGV(ccstack[cxix].blk_sub.cv);
 	/* So is ccstack[dbcxix]. */
-	sv = NEWSV(49, 0);
-	gv_efullname3(sv, CvGV(ccstack[cxix].blk_sub.cv), Nullch);
-	PUSHs(sv_2mortal(sv));
-	PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
+	if (isGV(cvgv)) {
+	    sv = NEWSV(49, 0);
+	    gv_efullname3(sv, cvgv, Nullch);
+	    PUSHs(sv_2mortal(sv));
+	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
+	}
+	else {
+	    PUSHs(sv_2mortal(newSVpvn("(unknown)",9)));
+	    PUSHs(sv_2mortal(newSViv(0)));
+	}
     }
     else {
 	PUSHs(sv_2mortal(newSVpvn("(eval)",6)));
