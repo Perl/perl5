@@ -157,8 +157,8 @@ PerlIO_set_cnt(PerlIO *f, int cnt)
 void
 PerlIO_set_ptrcnt(PerlIO *f, STDCHAR *ptr, int cnt)
 {
-#ifdef FILE_bufsiz
  dTHX;
+#ifdef FILE_bufsiz
  STDCHAR *e = FILE_base(f) + FILE_bufsiz(f);
  int ec = e - ptr;
  if (ptr > e + 1 && ckWARN_d(WARN_INTERNAL))
@@ -167,16 +167,14 @@ PerlIO_set_ptrcnt(PerlIO *f, STDCHAR *ptr, int cnt)
   Perl_warner(aTHX_ WARN_INTERNAL, "Setting cnt to %d, ptr implies %d\n",cnt,ec);
 #endif
 #if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE)
- FILE_ptr(f) = ptr;
+  FILE_ptr(f) = ptr;
 #else
- dTHX;
- Perl_croak(aTHX_ "Cannot set 'ptr' of FILE * on this system");
+  Perl_croak(aTHX_ "Cannot set 'ptr' of FILE * on this system");
 #endif
 #if defined(USE_STDIO_PTR) && defined(STDIO_CNT_LVALUE)
- FILE_cnt(f) = cnt;
+  FILE_cnt(f) = cnt;
 #else
- dTHX;
- Perl_croak(aTHX_ "Cannot set 'cnt' of FILE * on this system");
+  Perl_croak(aTHX_ "Cannot set 'cnt' of FILE * on this system");
 #endif
 }
 
