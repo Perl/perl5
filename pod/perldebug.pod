@@ -286,7 +286,8 @@ Delete all installed breakpoints.
 
 =item a [line] command
 
-Set an action to be done before the line is executed.
+Set an action to be done before the line is executed.  If line is
+omitted, sets an action on the line that is about to be executed.
 The sequence of steps taken by the debugger is
 
   1. check for a breakpoint at this line
@@ -299,6 +300,11 @@ For example, this will print out $foo every time line
 53 is passed:
 
     a 53 print "DB FOUND $foo\n"
+
+=item a [line]
+
+Delete an action at the specified line.  If line is omitted, deletes
+the action on the line that is about to be executed.
 
 =item A
 

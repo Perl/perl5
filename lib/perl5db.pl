@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 1.05;
+$VERSION = 1.06;
 $header = "perl5db.pl version $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -530,7 +530,7 @@ EOP
 			}
 			next CMD; };
 		    $cmd =~ /^t$/ && do {
-			($trace & 1) ? ($trace &= ~1) : ($trace |= 1);
+			$trace ^= 1;
 			print $OUT "Trace = " .
 			    (($trace & 1) ? "on" : "off" ) . "\n";
 			next CMD; };
@@ -700,11 +700,14 @@ EOP
 				}
 			    }
 			}
+			
+			if (not $had_breakpoints{$file} &= ~1) {
+			    delete $had_breakpoints{$file};
+			}
 		      }
 		      undef %postponed;
 		      undef %postponed_file;
 		      undef %break_on_load;
-		      undef %had_breakpoints;
 		      next CMD; };
 		    $cmd =~ /^L$/ && do {
 		      my $file;
@@ -779,7 +782,7 @@ EOP
 			  $break_on_load{$::INC{$file}} = 1 if $::INC{$file};
 			  $file .= '.pm', redo unless $file =~ /\./;
 			}
-			$had_breakpoints{$file} = 1;
+			$had_breakpoints{$file} |= 1;
 			print $OUT "Will stop on load of `@{[join '\', `', sort keys %break_on_load]}'.\n";
 			next CMD; };
 		    $cmd =~ /^b\b\s*(postpone|compile)\b\s*([':A-Za-z_][':\w]*)\s*(.*)/ && do {
@@ -805,7 +808,7 @@ EOP
 			if ($i) {
 			    local $filename = $file;
 			    local *dbline = $main::{'_<' . $filename};
-			    $had_breakpoints{$filename} = 1;
+			    $had_breakpoints{$filename} |= 1;
 			    $max = $#dbline;
 			    ++$i while $dbline[$i] == 0 && $i < $max;
 			    $dbline{$i} =~ s/^[^\0]*/$cond/;
@@ -814,21 +817,22 @@ EOP
 			}
 			next CMD; };
 		    $cmd =~ /^b\b\s*(\d*)\s*(.*)/ && do {
-			$i = ($1?$1:$line);
+			$i = $1 || $line;
 			$cond = $2 || '1';
 			if ($dbline[$i] == 0) {
 			    print $OUT "Line $i not breakable.\n";
 			} else {
-			    $had_breakpoints{$filename} = 1;
+			    $had_breakpoints{$filename} |= 1;
 			    $dbline{$i} =~ s/^[^\0]*/$cond/;
 			}
 			next CMD; };
-		    $cmd =~ /^d\b\s*(\d+)?/ && do {
-			$i = ($1?$1:$line);
+		    $cmd =~ /^d\b\s*(\d*)/ && do {
+			$i = $1 || $line;
 			$dbline{$i} =~ s/^[^\0]*//;
 			delete $dbline{$i} if $dbline{$i} eq '';
 			next CMD; };
 		    $cmd =~ /^A$/ && do {
+		      print $OUT "Deleting all actions...\n";
 		      my $file;
 		      for $file (keys %had_breakpoints) {
 			local *dbline = $main::{'_<' . $file};
@@ -840,6 +844,10 @@ EOP
 				$dbline{$i} =~ s/\0[^\0]*//;
 				delete $dbline{$i} if $dbline{$i} eq '';
 			    }
+			}
+			
+			if (not $had_breakpoints{$file} &= ~2) {
+			    delete $had_breakpoints{$file};
 			}
 		      }
 		      next CMD; };
@@ -872,13 +880,19 @@ EOP
 		        $pretype = [], next CMD unless $1;
 			$pretype = [$1];
 			next CMD; };
-		    $cmd =~ /^a\b\s*(\d+)(\s+(.*))?/ && do {
-			$i = $1; $j = $3;
-			if ($dbline[$i] == 0) {
-			    print $OUT "Line $i may not have an action.\n";
+		    $cmd =~ /^a\b\s*(\d*)\s*(.*)/ && do {
+			$i = $1 || $line; $j = $2;
+			if (length $j) {
+			    if ($dbline[$i] == 0) {
+				print $OUT "Line $i may not have an action.\n";
+			    } else {
+				$had_breakpoints{$filename} |= 2;
+				$dbline{$i} =~ s/\0[^\0]*//;
+				$dbline{$i} .= "\0" . action($j);
+			    }
 			} else {
 			    $dbline{$i} =~ s/\0[^\0]*//;
-			    $dbline{$i} .= "\0" . action($j);
+			    delete $dbline{$i} if $dbline{$i} eq '';
 			}
 			next CMD; };
 		    $cmd =~ /^n$/ && do {
@@ -906,7 +920,7 @@ EOP
 			    if ($i) {
 			        $filename = $file;
 				*dbline = $main::{'_<' . $filename};
-				$had_breakpoints{$filename}++;
+				$had_breakpoints{$filename} |= 1;
 				$max = $#dbline;
 				++$i while $dbline[$i] == 0 && $i < $max;
 			    } else {
@@ -1086,7 +1100,7 @@ EOP
 			next CMD; };
 		    $cmd =~ /^$rc+\s*(-)?(\d+)?$/ && do {
 			pop(@hist) if length($cmd) > 1;
-			$i = $1 ? ($#hist-($2?$2:1)) : ($2?$2:$#hist);
+			$i = $1 ? ($#hist-($2||1)) : ($2||$#hist);
 			$cmd = $hist[$i];
 			print $OUT $cmd, "\n";
 			redo CMD; };
@@ -1301,7 +1315,7 @@ sub postponed_sub {
       $i += $offset;
       local *dbline = $main::{'_<' . $file};
       local $^W = 0;		# != 0 is magical below
-      $had_breakpoints{$file}++;
+      $had_breakpoints{$file} |= 1;
       my $max = $#dbline;
       ++$i until $dbline[$i] != 0 or $i >= $max;
       $dbline{$i} = delete $postponed{$subname};
@@ -1329,7 +1343,7 @@ sub postponed {
     if $break_on_load{$filename};
   print $LINEINFO ' ' x $stack_depth, "Package $filename.\n" if $frame;
   return unless $postponed_file{$filename};
-  $had_breakpoints{$filename}++;
+  $had_breakpoints{$filename} |= 1;
   #%dbline = %{$postponed_file{$filename}}; # Cannot be done: unsufficient magic
   my $key;
   for $key (keys %{$postponed_file{$filename}}) {
@@ -1821,7 +1835,7 @@ B<l> I<min>B<+>I<incr>	List I<incr>+1 lines starting at I<min>.
 B<l> I<min>B<->I<max>	List lines I<min> through I<max>.
 B<l> I<line>		List single I<line>.
 B<l> I<subname>	List first window of lines from subroutine.
-B<l> I<$var>	List first window of lines from subroutine referenced by I<$var>.
+B<l> I<\$var>		List first window of lines from subroutine referenced by I<\$var>.
 B<l>		List next window of lines.
 B<->		List previous window of lines.
 B<w> [I<line>]	List window around I<line>.
@@ -1844,7 +1858,7 @@ B<b> [I<line>] [I<condition>]
 		I<condition> breaks if it evaluates to true, defaults to '1'.
 B<b> I<subname> [I<condition>]
 		Set breakpoint at first line of subroutine.
-B<b> I<$var>	Set breakpoint at first line of subroutine referenced by I<$var>.
+B<b> I<\$var>		Set breakpoint at first line of subroutine referenced by I<\$var>.
 B<b> B<load> I<filename> Set breakpoint on `require'ing the given file.
 B<b> B<postpone> I<subname> [I<condition>]
 		Set breakpoint at first line of subroutine after 
@@ -1854,10 +1868,12 @@ B<b> B<compile> I<subname>
 B<d> [I<line>]	Delete the breakpoint for I<line>.
 B<D>		Delete all breakpoints.
 B<a> [I<line>] I<command>
-		Set an action to be done before the I<line> is executed.
+		Set an action to be done before the I<line> is executed;
+		I<line> defaults to the current execution line.
 		Sequence is: check for breakpoint/watchpoint, print line
 		if necessary, do action, prompt user if necessary,
-		execute expression.
+		execute line.
+B<a> [I<line>]	Delete the action for I<line>.
 B<A>		Delete all actions.
 B<W> I<expr>		Add a global watch-expression.
 B<W>		Delete all watch-expressions.
@@ -1877,14 +1893,14 @@ B<O> [I<opt>[B<=>I<val>]] [I<opt>B<\">I<val>B<\">] [I<opt>B<?>]...
     I<signalLevel> I<warnLevel> I<dieLevel>:	level of verbosity;
     I<inhibit_exit>		Allows stepping off the end of the script.
     I<ImmediateStop>		Debugger should stop as early as possible.
-    I<RemotePort>:		Remote hostname:port for remote debugging
+    I<RemotePort>:			Remote hostname:port for remote debugging
   The following options affect what happens with B<V>, B<X>, and B<x> commands:
     I<arrayDepth>, I<hashDepth>:	print only first N elements ('' for all);
     I<compactDump>, I<veryCompact>:	change style of array and hash dump;
     I<globPrint>:			whether to print contents of globs;
     I<DumpDBFiles>:		dump arrays holding debugged files;
     I<DumpPackages>:		dump symbol tables of packages;
-    I<DumpReused>:		dump contents of \"reused\" addresses;
+    I<DumpReused>:			dump contents of \"reused\" addresses;
     I<quote>, I<HighBit>, I<undefPrint>:	change style of string dump;
     I<bareStringify>:		Do not print the overload-stringified value;
   Option I<PrintRet> affects printing of return value after B<r> command,
@@ -1899,7 +1915,7 @@ B<O> [I<opt>[B<=>I<val>]] [I<opt>B<\">I<val>B<\">] [I<opt>B<?>]...
 B<<> I<expr>		Define Perl command to run before each prompt.
 B<<<> I<expr>		Add to the list of Perl commands to run before each prompt.
 B<>> I<expr>		Define Perl command to run after each prompt.
-B<>>B<>> I<expr>	Add to the list of Perl commands to run after each prompt.
+B<>>B<>> I<expr>		Add to the list of Perl commands to run after each prompt.
 B<{> I<db_command>	Define debugger command to run before each prompt.
 B<{{> I<db_command>	Add to the list of debugger commands to run before each prompt.
 B<$prc> I<number>	Redo a previous command (default previous command).
