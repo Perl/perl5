@@ -887,7 +887,7 @@ C<main_root> and C<curpad> are omitted.
 
 =back
 
-=head EXAMPLES
+=head1 EXAMPLES
 
         perl -MO=Bytecode,-O6,-o,foo.plc foo.pl
 
