@@ -40,7 +40,11 @@ close FOO;
 open(FOO, ">$tmpfile") || BAILOUT("Can't open temp test file: $!");
 
 my($nlink, $mtime, $ctime) = (stat(FOO))[$NLINK, $MTIME, $CTIME];
-is($nlink, 1, 'nlink on regular file');
+SKIP: {
+    skip "No link count", 1 if $Is_VMS;
+
+    is($nlink, 1, 'nlink on regular file');
+}
 
 SKIP: {
   skip "mtime and ctime not reliable", 2 
