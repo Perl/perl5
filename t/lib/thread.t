@@ -50,5 +50,5 @@ join $t;
 # test that sleep lets other thread run
 $t = new Thread \&islocked,"ok 8\n";
 sleep 6;
-print "ok 9";
+print "ok 9\n";
 join $t;

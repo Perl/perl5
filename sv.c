@@ -1706,6 +1706,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 			  == (SVs_OBJECT|SVs_RMG))
 			 && strEQ(s=HvNAME(SvSTASH(sv)), "Regexp")
 			 && (mg = mg_find(sv, 'r'))) {
+			dTHR;
 			regexp *re = (regexp *)mg->mg_obj;
 
 			if (!mg->mg_ptr) {

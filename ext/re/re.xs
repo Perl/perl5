@@ -14,6 +14,7 @@ static int oldfl;
 static void
 deinstall(void)
 {
+    dTHR;
     regexecp = &regexec_flags;
     regcompp = &pregcomp;
     if (!oldfl)
@@ -23,6 +24,7 @@ deinstall(void)
 static void
 install(void)
 {
+    dTHR;
     regexecp = &my_regexec;
     regcompp = &my_regcomp;
     oldfl = debug & R_DB;

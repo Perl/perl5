@@ -223,6 +223,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 			/* deltap: Write maxlen-minlen here. */
 			/* last: Stop before this one. */
 {
+    dTHR;
     I32 min = 0, pars = 0, code;
     regnode *scan = *scanp, *next;
     I32 delta = 0;
@@ -664,6 +665,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 STATIC I32
 add_data(I32 n, char *s)
 {
+    dTHR;
     if (regcomp_rx->data) {
 	Renewc(regcomp_rx->data, 
 	       sizeof(*regcomp_rx->data) + sizeof(void*) * (regcomp_rx->data->count + n - 1), 
@@ -698,6 +700,7 @@ add_data(I32 n, char *s)
 regexp *
 pregcomp(char *exp, char *xend, PMOP *pm)
 {
+    dTHR;
     register regexp *r;
     regnode *scan;
     SV **longest;
@@ -979,6 +982,7 @@ STATIC regnode *
 reg(I32 paren, I32 *flagp)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
 {
+    dTHR;
     register regnode *ret;		/* Will be the head of the group. */
     register regnode *br;
     register regnode *lastbr;
@@ -1276,6 +1280,7 @@ reg(I32 paren, I32 *flagp)
 STATIC regnode *
 regbranch(I32 *flagp, I32 first)
 {
+    dTHR;
     register regnode *ret;
     register regnode *chain = NULL;
     register regnode *latest;
@@ -1340,6 +1345,7 @@ regbranch(I32 *flagp, I32 first)
 STATIC regnode *
 regpiece(I32 *flagp)
 {
+    dTHR;
     register regnode *ret;
     register char op;
     register char *next;
@@ -1488,6 +1494,7 @@ regpiece(I32 *flagp)
 STATIC regnode *
 regatom(I32 *flagp)
 {
+    dTHR;
     register regnode *ret = 0;
     I32 flags;
 
@@ -1839,6 +1846,7 @@ regwhite(char *p, char *e)
 STATIC regnode *
 regclass(void)
 {
+    dTHR;
     register char *opnd, *s;
     register I32 Class;
     register I32 lastclass = 1234;
@@ -2043,6 +2051,7 @@ regclass(void)
 STATIC char*
 nextchar(void)
 {
+    dTHR;
     char* retval = regcomp_parse++;
 
     for (;;) {
@@ -2075,6 +2084,7 @@ nextchar(void)
 STATIC regnode *			/* Location. */
 reg_node(U8 op)
 {
+    dTHR;
     register regnode *ret;
     register regnode *ptr;
 
@@ -2099,6 +2109,7 @@ reg_node(U8 op)
 STATIC regnode *			/* Location. */
 reganode(U8 op, U32 arg)
 {
+    dTHR;
     register regnode *ret;
     register regnode *ptr;
 
@@ -2123,6 +2134,7 @@ reganode(U8 op, U32 arg)
 STATIC void
 regc(U8 b, char* s)
 {
+    dTHR;
     if (!SIZE_ONLY)
 	*s = b;
 }
@@ -2135,6 +2147,7 @@ regc(U8 b, char* s)
 STATIC void
 reginsert(U8 op, regnode *opnd)
 {
+    dTHR;
     register regnode *src;
     register regnode *dst;
     register regnode *place;
@@ -2165,6 +2178,7 @@ reginsert(U8 op, regnode *opnd)
 STATIC void
 regtail(regnode *p, regnode *val)
 {
+    dTHR;
     register regnode *scan;
     register regnode *temp;
     register I32 offset;
@@ -2194,6 +2208,7 @@ regtail(regnode *p, regnode *val)
 STATIC void
 regoptail(regnode *p, regnode *val)
 {
+    dTHR;
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
     if (p == NULL || SIZE_ONLY)
 	return;
@@ -2298,6 +2313,7 @@ void
 regdump(regexp *r)
 {
 #ifdef DEBUGGING
+    dTHR;
     SV *sv = sv_newmortal();
 
     (void)dumpuntil(r->program, r->program + 1, NULL, sv, 0);
@@ -2362,6 +2378,7 @@ void
 regprop(SV *sv, regnode *o)
 {
 #ifdef DEBUGGING
+    dTHR;
     register char *p = 0;
 
     sv_setpvn(sv, "", 0);
@@ -2552,6 +2569,7 @@ regprop(SV *sv, regnode *o)
 void
 pregfree(struct regexp *r)
 {
+    dTHR;
     if (!r || (--r->refcnt > 0))
 	return;
     if (r->precomp)
@@ -2598,6 +2616,7 @@ pregfree(struct regexp *r)
 regnode *
 regnext(register regnode *p)
 {
+    dTHR;
     register I32 offset;
 
     if (p == &regdummy)

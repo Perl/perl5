@@ -2776,6 +2776,13 @@ init_main_thread()
     formtarget = bodytarget;
     thr->errsv = newSVpv("", 0);
     (void) find_threadsv("@");	/* Ensure $@ is initialised early */
+
+    maxscream = -1;
+    regcompp = FUNC_NAME_TO_PTR(pregcomp);
+    regexecp = FUNC_NAME_TO_PTR(regexec_flags);
+    regindent = 0;
+    reginterp_cnt = 0;
+
     return thr;
 }
 #endif /* USE_THREADS */

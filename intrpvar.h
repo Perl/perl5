@@ -63,10 +63,6 @@ PERLVAR(Istatusvalue,	I32)		/* $? */
 PERLVAR(Istatusvalue_vms,U32)
 #endif
 
-PERLVAR(Istatcache,	Stat_t)		/* _ */
-PERLVAR(Istatgv,	GV *)
-PERLVARI(Istatname,	SV *,	Nullsv)
-
 /* shortcuts to various I/O objects */
 PERLVAR(Istdingv,	GV *)
 PERLVAR(Idefgv,		GV *)
@@ -74,13 +70,13 @@ PERLVAR(Iargvgv,	GV *)
 PERLVAR(Iargvoutgv,	GV *)
 
 /* shortcuts to regexp stuff */
+/* XXX these three aren't used anywhere */
 PERLVAR(Ileftgv,	GV *)
 PERLVAR(Iampergv,	GV *)
 PERLVAR(Irightgv,	GV *)
-PERLVAR(Iscreamfirst,	I32 *)
-PERLVAR(Iscreamnext,	I32 *)
-PERLVARI(Imaxscream,	I32,	-1)
-PERLVAR(Ilastscream,	SV *)
+
+/* this one needs to be moved to thrdvar.h and accessed via
+ * find_threadsv() when USE_THREADS */
 PERLVAR(Ireplgv,	GV *)
 
 /* shortcuts to misc objects */
@@ -149,10 +145,6 @@ PERLVAR(Ilastfd,	int)		/* what to preserve mode on */
 PERLVAR(Ioldname,	char *)		/* what to preserve mode on */
 PERLVAR(IArgv,		char **)	/* stuff to free from do_aexec, vfork safe */
 PERLVAR(ICmd,		char *)		/* stuff to free from do_aexec, vfork safe */
-PERLVAR(Isortcop,	OP *)		/* user defined sort routine */
-PERLVAR(Isortstash,	HV *)		/* which is in some package or other */
-PERLVAR(Ifirstgv,	GV *)		/* $a */
-PERLVAR(Isecondgv,	GV *)		/* $b */
 PERLVAR(Imystrk,	SV *)		/* temp key string for do_each() */
 PERLVAR(Idumplvl,	I32)		/* indentation level on syntax tree dump */
 PERLVAR(Ioldlastpm,	PMOP *)		/* for saving regexp context in debugger */
@@ -196,58 +188,6 @@ PERLVAR(Isys_intern,	struct interp_intern)
 PERLVARI(Igeneration,	int,	100)	/* from op.c */
 PERLVAR(IDBcv,		CV *)		/* from perl.c */
 PERLVAR(Iarchpat_auto,	char*)		/* from perl.c */
-PERLVAR(Isortcxix,	I32)		/* from pp_ctl.c */
-PERLVAR(Ilastgotoprobe,	OP*)		/* from pp_ctl.c */
-PERLVAR(Iregdummy,	regnode)	/* from regcomp.c */
-PERLVAR(Iregcomp_parse,	char*)		/* Input-scan pointer. */
-PERLVAR(Iregxend,	char*)		/* End of input for compile */
-PERLVAR(Iregcode,	regnode*)	/* Code-emit pointer; &regdummy = don't */
-PERLVAR(Iregnaughty,	I32)		/* How bad is this pattern? */
-PERLVAR(Iregsawback,	I32)		/* Did we see \1, ...? */
-
-/* This guys appear both in regcomp.c and regexec.c, */
-PERLVAR(Iregprecomp,	char *)		/* uncompiled string. */
-PERLVAR(Iregnpar,	I32)		/* () count. */
-PERLVAR(Iregsize,	I32)		/* Code size. */
-PERLVAR(Iregflags,	U16)		/* are we folding, multilining? */
-
-PERLVAR(Iregseen,	U32)		/* from regcomp.c */
-PERLVAR(Iseen_zerolen,	I32)		/* from regcomp.c */
-PERLVAR(Iseen_evals,	I32)		/* from regcomp.c */
-PERLVAR(Iregcomp_rx,	regexp *)	/* from regcomp.c */
-PERLVAR(Iextralen,	I32)		/* from regcomp.c */
-PERLVAR(Icolorset,	int)		/* from regcomp.c */
-PERLVAR(Icolors[4],	char *)		/* from regcomp.c */
-
-PERLVAR(Ireginput,	char *)		/* String-input pointer. */
-PERLVAR(Iregbol,	char *)		/* Beginning of input, for ^ check. */
-PERLVAR(Iregeol,	char *)		/* End of input, for $ check. */
-PERLVAR(Iregstartp,	char **)	/* Pointer to startp array. */
-PERLVAR(Iregendp,	char **)	/* Ditto for endp. */
-PERLVAR(Ireglastparen,	U32 *)		/* Similarly for lastparen. */
-PERLVAR(Iregtill,	char *)		/* How far we are required to go. */
-PERLVAR(Iregprev,	char)		/* char before regbol, \n if none */
-
-PERLVAR(Ireg_start_tmp,	char **)	/* from regexec.c */
-PERLVAR(Ireg_start_tmpl,U32)		/* from regexec.c */
-PERLVAR(Iregdata,	struct reg_data *)
-					/* from regexec.c renamed was data */
-PERLVAR(Ibostr,		char *)		/* from regexec.c */
-PERLVAR(Ireg_flags,	U32)		/* from regexec.c */
-PERLVAR(Ireg_eval_set,	I32)		/* from regexec.c */
-
-PERLVAR(Iregnarrate,	I32)		/* from regexec.c */
-PERLVAR(Iregprogram,	regnode *)	/* from regexec.c */
-PERLVARI(Iregindent,	int,	    0)	/* from regexec.c */
-
-PERLVAR(Iregcc,		CURCUR *)	/* from regexec.c */
-
-PERLVARI(Iregcompp,	regcomp_t, FUNC_NAME_TO_PTR(pregcomp))
-					/* Pointer to RE compiler */
-PERLVARI(Iregexecp,	regexec_t, FUNC_NAME_TO_PTR(regexec_flags))
-					/* Pointer to RE executer */
-PERLVARI(Ireginterp_cnt,	int,	    0)	/* Whether `Regexp'
-						   was interpolated. */
 
 PERLVARI(Iin_clean_objs,bool,    FALSE)	/* from sv.c */
 PERLVARI(Iin_clean_all,	bool,    FALSE)	/* from sv.c */

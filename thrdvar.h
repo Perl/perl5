@@ -53,7 +53,12 @@ PERLVAR(Tretstack_max,	I32)
 PERLVAR(TSv,		SV *)		/* used to hold temporary values */
 PERLVAR(TXpv,		XPV *)		/* used to hold temporary values */
 
+/* stat stuff */
 PERLVAR(Tstatbuf,	Stat_t)
+PERLVAR(Tstatcache,	Stat_t)		/* _ */
+PERLVAR(Tstatgv,	GV *)
+PERLVARI(Tstatname,	SV *,	Nullsv)
+
 #ifdef HAS_TIMES
 PERLVAR(Ttimesbuf,	struct tms)
 #endif
@@ -96,8 +101,66 @@ PERLVAR(Thv_fetch_ent_mh, HE)		/* owned by hv_fetch_ent() */
 
 PERLVAR(Tmodcount,	I32)		/* how much mod()ification in assignment? */
 
-/* XXX Sort stuff, firstgv secongv and so on? */
-/* XXX What about regexp stuff? */
+PERLVAR(Tlastgotoprobe,	OP*)		/* from pp_ctl.c */
+
+/* sort stuff */
+PERLVAR(Tsortcop,	OP *)		/* user defined sort routine */
+PERLVAR(Tsortstash,	HV *)		/* which is in some package or other */
+PERLVAR(Tfirstgv,	GV *)		/* $a */
+PERLVAR(Tsecondgv,	GV *)		/* $b */
+PERLVAR(Tsortcxix,	I32)		/* from pp_ctl.c */
+
+/* regex stuff */
+
+PERLVAR(Tscreamfirst,	I32 *)
+PERLVAR(Tscreamnext,	I32 *)
+PERLVARI(Tmaxscream,	I32,	-1)
+PERLVAR(Tlastscream,	SV *)
+
+PERLVAR(Tregdummy,	regnode)	/* from regcomp.c */
+PERLVAR(Tregcomp_parse,	char*)		/* Input-scan pointer. */
+PERLVAR(Tregxend,	char*)		/* End of input for compile */
+PERLVAR(Tregcode,	regnode*)	/* Code-emit pointer; &regdummy = don't */
+PERLVAR(Tregnaughty,	I32)		/* How bad is this pattern? */
+PERLVAR(Tregsawback,	I32)		/* Did we see \1, ...? */
+PERLVAR(Tregprecomp,	char *)		/* uncompiled string. */
+PERLVAR(Tregnpar,	I32)		/* () count. */
+PERLVAR(Tregsize,	I32)		/* Code size. */
+PERLVAR(Tregflags,	U16)		/* are we folding, multilining? */
+PERLVAR(Tregseen,	U32)		/* from regcomp.c */
+PERLVAR(Tseen_zerolen,	I32)		/* from regcomp.c */
+PERLVAR(Tseen_evals,	I32)		/* from regcomp.c */
+PERLVAR(Tregcomp_rx,	regexp *)	/* from regcomp.c */
+PERLVAR(Textralen,	I32)		/* from regcomp.c */
+PERLVAR(Tcolorset,	int)		/* from regcomp.c */
+PERLVAR(Tcolors[4],	char *)		/* from regcomp.c */
+PERLVAR(Treginput,	char *)		/* String-input pointer. */
+PERLVAR(Tregbol,	char *)		/* Beginning of input, for ^ check. */
+PERLVAR(Tregeol,	char *)		/* End of input, for $ check. */
+PERLVAR(Tregstartp,	char **)	/* Pointer to startp array. */
+PERLVAR(Tregendp,	char **)	/* Ditto for endp. */
+PERLVAR(Treglastparen,	U32 *)		/* Similarly for lastparen. */
+PERLVAR(Tregtill,	char *)		/* How far we are required to go. */
+PERLVAR(Tregprev,	char)		/* char before regbol, \n if none */
+PERLVAR(Treg_start_tmp,	char **)	/* from regexec.c */
+PERLVAR(Treg_start_tmpl,U32)		/* from regexec.c */
+PERLVAR(Tregdata,	struct reg_data *)
+					/* from regexec.c renamed was data */
+PERLVAR(Tbostr,		char *)		/* from regexec.c */
+PERLVAR(Treg_flags,	U32)		/* from regexec.c */
+PERLVAR(Treg_eval_set,	I32)		/* from regexec.c */
+PERLVAR(Tregnarrate,	I32)		/* from regexec.c */
+PERLVAR(Tregprogram,	regnode *)	/* from regexec.c */
+PERLVARI(Tregindent,	int,	    0)	/* from regexec.c */
+PERLVAR(Tregcc,		CURCUR *)	/* from regexec.c */
+
+PERLVARI(Tregcompp,	regcomp_t, FUNC_NAME_TO_PTR(pregcomp))
+					/* Pointer to RE compiler */
+PERLVARI(Tregexecp,	regexec_t, FUNC_NAME_TO_PTR(regexec_flags))
+					/* Pointer to RE executer */
+PERLVARI(Treginterp_cnt,int,	    0)	/* Whether `Regexp'
+						   was interpolated. */
+
 
 /* Note that the variables below are all explicitly referenced in the code
  * as thr->whatever and therefore don't need the 'T' prefix. */

@@ -204,6 +204,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 /* data: May be used for some additional optimizations. */
 /* nosave: For optimizations. */
 {
+    dTHR;
     register char *s;
     register regnode *c;
     register char *startpos = stringarg;
@@ -1375,8 +1376,8 @@ regmatch(regnode *prog)
 		    ln = n;
 		locinput = reginput;
 		DEBUG_r(
-		    PerlIO_printf(Perl_debug_log, "%*s  matched %ld times,
-				  len=%ld...\n",
+		    PerlIO_printf(Perl_debug_log,
+				  "%*s  matched %ld times, len=%ld...\n",
 				  REPORT_CODE_OFF+regindent*2, "", n, l)
 		    );
 		if (n >= ln) {
@@ -1634,6 +1635,7 @@ no:
 STATIC I32
 regrepeat(regnode *p, I32 max)
 {
+    dTHR;
     register char *scan;
     register char *opnd;
     register I32 c;
@@ -1746,6 +1748,7 @@ regrepeat(regnode *p, I32 max)
 STATIC I32
 regrepeat_hard(regnode *p, I32 max, I32 *lp)
 {
+    dTHR;
     register char *scan;
     register char *start;
     register char *loceol = regeol;
@@ -1777,6 +1780,7 @@ regrepeat_hard(regnode *p, I32 max, I32 *lp)
 STATIC bool
 reginclass(register char *p, register I32 c)
 {
+    dTHR;
     char flags = *p;
     bool match = FALSE;
 

@@ -1728,6 +1728,7 @@ dofindlabel(OP *o, char *label, OP **opstack, OP **oplimit)
     }
     *ops = 0;
     if (o->op_flags & OPf_KIDS) {
+	dTHR;
 	/* First try all the kids at this level, since that's likeliest. */
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&

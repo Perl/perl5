@@ -2121,6 +2121,7 @@ newPMOP(I32 type, I32 flags)
 OP *
 pmruntime(OP *o, OP *expr, OP *repl)
 {
+    dTHR;
     PMOP *pm;
     LOGOP *rcop;
     I32 repl_has_vars = 0;

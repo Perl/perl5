@@ -149,6 +149,7 @@ threadstart(void *arg)
     SvREFCNT_dec(thr->specific);
     SvREFCNT_dec(thr->errsv);
     SvREFCNT_dec(thr->errhv);
+
     Safefree(markstack);
     Safefree(scopestack);
     Safefree(savestack);
@@ -156,6 +157,12 @@ threadstart(void *arg)
     Safefree(cxstack);
     Safefree(tmps_stack);
     Safefree(ofs);
+
+    SvREFCNT_dec(statname);
+    Safefree(screamfirst);
+    Safefree(screamnext);
+    Safefree(reg_start_tmp);
+    SvREFCNT_dec(lastscream);
 
     MUTEX_LOCK(&thr->mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
