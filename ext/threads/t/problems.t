@@ -104,4 +104,20 @@ for my $decl ('my $x : unique', 'sub foo : unique') {
 }
 
 
+# Returing a closure from a thread caused problems. If the last index in
+# the anon sub's pad wasn't for a lexical, then a core dump could occur.
+# Otherwise, there might be leaked scalars.
+
+# XXX DAPM 9-Jan-04 - backed this out for now - returning a closure from a
+# thread seems to crash win32
+
+# sub f {
+#     my $x = "foo";
+#     sub { $x."bar" };
+# }
+# 
+# my $string = threads->new(\&f)->join->();
+# print $string eq 'foobar' ?  '' : 'not ', "ok $test - returning closure\n";
+# $test++;
+
 1;
