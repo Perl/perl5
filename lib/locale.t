@@ -737,11 +737,11 @@ foreach $Locale (@Locale) {
 		# the bg_BG (Bulgarian) locale under EBCDIC (OS/390 USS):
 		# the chr(173) (the "[") is the lowercase of the chr(235).
 		# Similarly losing EBCDIC locales include cs_cz, cs_CZ,
-		# el_gr, el_GR, en_us.IBM-037 (!), en_US.IBM-037,
+		# el_gr, el_GR, en_us.IBM-037 (!), en_US.IBM-037 (!),
 		# et_ee, et_EE, hr_hr, hr_HR, hu_hu, hu_HU, lt_LT,
 		# mk_mk, mk_MK, nl_nl.IBM-037, nl_NL.IBM-037,
 		# pl_pl, pl_PL, ro_ro, ro_RO, ru_ru, ru_RU,
-		# sk_sk, sk_SK, sl_si, sl_SI, tr_tr, tr_TR,
+		# sk_sk, sk_SK, sl_si, sl_SI, tr_tr, tr_TR.
 		if ($x =~ $re || $y =~ $re) {
 		    print "# Regex characters in '$x' or '$y', skipping test 117 for locale '$Locale'\n";
 		    next;
