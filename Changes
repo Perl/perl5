@@ -28,6 +28,105 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21304] By: jhi                                   on 2003/09/22  04:43:10
+        Log: Integrate:
+             [ 21302]
+             CPAN.pm 1.76_01 from Andreas.
+             
+             [ 21303]
+             Upgrade to Getopt::Long 2.33_03.
+     Branch: maint-5.8/perl
+	  !> lib/CPAN.pm lib/Getopt/Long.pm lib/Getopt/Long/CHANGES
+____________________________________________________________________________
+[ 21301] By: jhi                                   on 2003/09/22  04:28:01
+        Log: Mention the client-SIGPIPE feature.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21300] By: jhi                                   on 2003/09/21  09:53:49
+        Log: Integrate:
+             [ 21288]
+             Subject: typo fixo
+             From: Vadim Konovalov <konovalo@mail.wplus.net>
+             Date: Fri, 19 Sep 2003 06:32:08 +0400
+             Message-ID: <4538131828.20030919063208@mail.wplus.net>
+             
+             [ 21289]
+             FAQ sync.
+             
+             [ 21290]
+             Missing perlfaq chunk.
+             
+             [ 21291]
+             In FreeBSD allow one to try using Perl's malloc with threads.
+             
+             [ 21292]
+             Retract #21273, #21264, and #21263 as requested by Schwern.
+             (The real bug was mp2 being too "friendly" with MM innards.)
+             
+             [ 21293]
+             More PerlIO documentation. 
+             
+             [ 21294]
+             Subject: [PATCH #2] Re: [perl #23576] valgrind errors for /(?{})/ in t/op/pat.t
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Fri, 19 Sep 2003 19:35:44 +0100
+             Message-ID: <20030919183544.GA14563@fdgroup.com>
+             
+             [ 21295]
+             One obvious place to look for PerlIO implementations.
+             
+             [ 21296]
+             Tweak the section name to agree with the change #21295.
+             
+             [ 21297]
+             Macrofy the compile/runtime test.
+             
+             [ 21298]
+             Handle also the curliffy files when tocing.
+             
+             [ 21299]
+             Regen toc.
+     Branch: maint-5.8/perl
+	  !> cop.h gv.c hints/freebsd.sh lib/ExtUtils/MM_Unix.pm
+	  !> lib/ExtUtils/MM_Win32.pm lib/ExtUtils/t/MM_Unix.t
+	  !> lib/ExtUtils/t/MM_Win32.t lib/PerlIO.pm perl.h pod/buildtoc
+	  !> pod/perlfaq4.pod pod/perliol.pod pod/perltoc.pod
+	  !> pod/perlunicode.pod pp_ctl.c regcomp.c sv.c utf8.c
+____________________________________________________________________________
+[ 21287] By: jhi                                   on 2003/09/19  05:07:35
+        Log: Integrate:
+             [ 21282]
+             Integrate a change from the perlfaq CVS.
+             I consider the bleadperl version being more up-to-date as of now.
+             
+             [ 21283]
+             Perlfaq nits from Iain Truskett.
+             (from the perlfaq-workers list)
+             
+             [ 21284]
+             Subject: [PATCH 5.8.1 @21211] dumpvar.pl broken
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Thu, 18 Sep 2003 18:58:59 -0700
+             Message-ID: <20030919015858.GA22503@math.berkeley.edu>
+             
+             [ 21285]
+             Tests for change #21284.
+             
+             [ 21286]
+             Subject: [PATCH 5.8.1 @21211] getsysinfo() broken on OS/2
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Thu, 18 Sep 2003 19:01:06 -0700
+             Message-ID: <20030919020106.GA22511@math.berkeley.edu>
+     Branch: maint-5.8/perl
+	  !> lib/dumpvar.pl lib/dumpvar.t os2/os2.c pod/perlfaq2.pod
+	  !> pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq8.pod
+____________________________________________________________________________
+[ 21279] By: jhi                                   on 2003/09/18  19:45:11
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21278] By: jhi                                   on 2003/09/18  19:27:55
         Log: Integrate:
              [ 21276]
