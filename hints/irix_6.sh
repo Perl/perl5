@@ -152,6 +152,11 @@ set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /'
 shift
 libswanted="$*"
 
+# Irix 6.5.6 seems to have a broken header <sys/mode.h>
+# don't include that (it doesn't contain S_IFMT, S_IFREG, et al)
+
+i_sysmode="$undef"
+
 # I have conflicting reports about the sun, crypt, bsd, and PW
 # libraries on Irix 6.2.
 #
