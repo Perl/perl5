@@ -414,6 +414,8 @@ PP(pp_rv2av)
 	    }
 	}
 	else {
+	    GV *gv;
+	    
 	    if (SvTYPE(sv) != SVt_PVGV) {
 		char *sym;
 
@@ -433,11 +435,13 @@ PP(pp_rv2av)
 		sym = SvPV(sv,na);
 		if (op->op_private & HINT_STRICT_REFS)
 		    DIE(no_symref, sym, "an ARRAY");
-		sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVAV);
+		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVAV);
+	    } else {
+		gv = (GV*)sv;
 	    }
-	    av = GvAVn(sv);
+	    av = GvAVn(gv);
 	    if (op->op_private & OPpLVAL_INTRO)
-		av = save_ary(sv);
+		av = save_ary(gv);
 	    if (op->op_flags & OPf_REF) {
 		PUSHs((SV*)av);
 		RETURN;
@@ -487,6 +491,8 @@ PP(pp_rv2hv)
 	    }
 	}
 	else {
+	    GV *gv;
+	    
 	    if (SvTYPE(sv) != SVt_PVGV) {
 		char *sym;
 
@@ -508,11 +514,13 @@ PP(pp_rv2hv)
 		sym = SvPV(sv,na);
 		if (op->op_private & HINT_STRICT_REFS)
 		    DIE(no_symref, sym, "a HASH");
-		sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVHV);
+		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVHV);
+	    } else {
+		gv = (GV*)sv;
 	    }
-	    hv = GvHVn(sv);
+	    hv = GvHVn(gv);
 	    if (op->op_private & OPpLVAL_INTRO)
-		hv = save_hash(sv);
+		hv = save_hash(gv);
 	    if (op->op_flags & OPf_REF) {
 		SETs((SV*)hv);
 		RETURN;
@@ -1045,11 +1053,17 @@ do_readline()
 		}
 #else /* !VMS */
 #ifdef DOSISH
+#ifdef OS2
+		sv_setpv(tmpcmd, "for a in ");
+		sv_catsv(tmpcmd, tmpglob);
+		sv_catpv(tmpcmd, "; do echo \"$a\\0\\c\"; done |");
+#else
 		sv_setpv(tmpcmd, "perlglob ");
 		sv_catsv(tmpcmd, tmpglob);
 		sv_catpv(tmpcmd, " |");
-#else
-#ifdef CSH
+#endif /* !OS2 */
+#else /* !DOSISH */
+#if defined(CSH)
 		sv_setpvn(tmpcmd, cshname, cshlen);
 		sv_catpv(tmpcmd, " -cf 'set nonomatch; glob ");
 		sv_catsv(tmpcmd, tmpglob);
@@ -1063,7 +1077,7 @@ do_readline()
 		sv_catpv(tmpcmd, "|tr -s ' \t\f\r' '\\n\\n\\n\\n'|");
 #endif
 #endif /* !CSH */
-#endif /* !MSDOS */
+#endif /* !DOSISH */
 		(void)do_open(last_in_gv, SvPVX(tmpcmd), SvCUR(tmpcmd),
 			      FALSE, 0, 0, Nullfp);
 		fp = IoIFP(io);
@@ -1278,7 +1292,7 @@ PP(pp_iter)
     if (cx->cx_type != CXt_LOOP)
 	DIE("panic: pp_iter");
     av = cx->blk_loop.iterary;
-    if (av == stack && cx->blk_loop.iterix >= cx->blk_oldsp)
+    if (av == curstack && cx->blk_loop.iterix >= cx->blk_oldsp)
 	RETPUSHNO;
 
     if (cx->blk_loop.iterix >= AvFILL(av))
@@ -1647,6 +1661,7 @@ PP(pp_entersub)
     register CV *cv;
     register CONTEXT *cx;
     I32 gimme;
+    I32 hasargs = (op->op_flags & OPf_STACKED) != 0;
 
     if (!sv)
 	DIE("Not a CODE reference");
@@ -1717,18 +1732,20 @@ PP(pp_entersub)
     }
 
     gimme = GIMME;
-    if ((op->op_private & OPpENTERSUB_DB) && !CvXSUB(cv)) {
+    if ((op->op_private & OPpENTERSUB_DB)) {
 	sv = GvSV(DBsub);
 	save_item(sv);
-	if (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED)) {
+	gv = CvGV(cv);
+	if ( CvFLAGS(cv) & (CVf_ANON | CVf_CLONED)
+	     || strEQ(GvNAME(gv), "END") ) {
 	    /* GV is potentially non-unique */
 	    sv_setsv(sv, newRV((SV*)cv));
 	}
 	else {
-	    gv = CvGV(cv);
 	    gv_efullname(sv,gv);
 	}
 	cv = GvCV(DBsub);
+	if (CvXSUB(cv)) curcopdb = curcop;
 	if (!cv)
 	    DIE("No DBsub routine");
     }
@@ -1738,6 +1755,7 @@ PP(pp_entersub)
 	    I32 (*fp3)_((int,int,int));
 	    dMARK;
 	    register I32 items = SP - MARK;
+					/* We dont worry to copy from @_. */
 	    while (sp > mark) {
 		sp[1] = sp[0];
 		sp--;
@@ -1753,6 +1771,30 @@ PP(pp_entersub)
 	    I32 markix = TOPMARK;
 
 	    PUTBACK;
+
+	    if (!hasargs) {
+		/* Need to copy @_ to stack. Alternative may be to
+		 * switch stack to @_, and copy return values
+		 * back. This would allow popping @_ in XSUB, e.g.. XXXX */
+		AV* av = GvAV(defgv);
+		I32 items = AvFILL(av) + 1;
+
+		if (items) {
+		    /* Mark is at the end of the stack. */
+		    EXTEND(sp, items);
+		    Copy(AvARRAY(av), sp + 1, items, SV*);
+		    sp += items;
+		    PUTBACK ;		    
+		}
+	    }
+	    if (curcopdb) {		/* We assume that the first
+					   XSUB in &DB::sub is the
+					   called one. */
+		SAVESPTR(curcop);
+		curcop = curcopdb;
+		curcopdb = NULL;
+	    }
+	    /* Do we need to open block here? XXXX */
 	    (void)(*CvXSUB(cv))(cv);
 
 	    /* Enforce some sanity in scalar context. */
@@ -1770,7 +1812,6 @@ PP(pp_entersub)
     else {
 	dMARK;
 	register I32 items = SP - MARK;
-	I32 hasargs = (op->op_flags & OPf_STACKED) != 0;
 	AV* padlist = CvPADLIST(cv);
 	SV** svp = AvARRAY(padlist);
 	push_return(op->op_next);
@@ -1922,9 +1963,10 @@ PP(pp_method)
     else {
 	GV* iogv;
 	char* packname = 0;
+	STRLEN packlen;
 
 	if (!SvOK(sv) ||
-	    !(packname = SvPV(sv, na)) ||
+	    !(packname = SvPV(sv, packlen)) ||
 	    !(iogv = gv_fetchpv(packname, FALSE, SVt_PVIO)) ||
 	    !(ob=(SV*)GvIO(iogv)))
 	{
@@ -1932,9 +1974,9 @@ PP(pp_method)
 	    HV *stash;
 	    if (!packname || !isALPHA(*packname))
 DIE("Can't call method \"%s\" without a package or object reference", name);
-	    if (!(stash = gv_stashpv(packname, FALSE))) {
-		if (gv_stashpv("UNIVERSAL", FALSE))
-		    stash = gv_stashpv(packname, TRUE);
+	    if (!(stash = gv_stashpvn(packname, packlen, FALSE))) {
+		if (gv_stashpvn("UNIVERSAL", 9, FALSE))
+		    stash = gv_stashpvn(packname, packlen, TRUE);
 		else
 		    DIE("Can't call method \"%s\" in empty package \"%s\"",
 			name, packname);
@@ -1943,10 +1985,10 @@ DIE("Can't call method \"%s\" without a package or object reference", name);
 	    if (!gv)
 		DIE("Can't locate object method \"%s\" via package \"%s\"",
 		    name, packname);
-	    SETs(gv);
+	    SETs((SV*)gv);
 	    RETURN;
 	}
-	*(stack_base + TOPMARK + 1) = sv_2mortal(newRV(iogv));
+	*(stack_base + TOPMARK + 1) = sv_2mortal(newRV((SV*)iogv));
     }
 
     if (!ob || !SvOBJECT(ob)) {
@@ -1962,7 +2004,7 @@ DIE("Can't call method \"%s\" without a package or object reference", name);
 		name, HvNAME(SvSTASH(ob)));
     }
 
-    SETs(gv);
+    SETs((SV*)gv);
     RETURN;
 }
 
