@@ -45,19 +45,6 @@ set `echo "X $libswanted " | sed -e 's/ ld / /' -e 's/ dbm / /' -e 's/ BSD / /' 
 shift
 libswanted="$*"
 
-# By setting the deferred flag below, this means that if you run perl
-# on a system that does not have the required shared library that you
-# linked it with, it will die when you try to access a symbol in the
-# (missing) shared library.  If you would rather know at perl startup
-# time that you are missing an important shared library, switch the
-# comments so that immediate, rather than deferred loading is
-# performed.  Even with immediate loading, you can postpone errors for
-# undefined (or multiply defined) routines until actual access by
-# adding the "nonfatal" option.
-# ccdlflags="-Wl,-E -Wl,-B,immediate $ccdlflags"
-# ccdlflags="-Wl,-E -Wl,-B,immediate,-B,nonfatal $ccdlflags"
-ccdlflags="-Wl,-E -Wl,-B,deferred $ccdlflags"
-
 cc=${cc:-cc}
 ar=/usr/bin/ar	# Yes, truly override.  We do not want the GNU ar.
 full_ar=$ar	# I repeat, no GNU ar.  arrr.
@@ -71,13 +58,34 @@ case "$prefix" in
     "") prefix='/opt/perl5' ;;
     esac
 
+    gnu_as=no
+    gnu_ld=no
 case `$cc -v 2>&1`"" in
     *gcc*)  ccisgcc="$define"
-	    ccflags="$cc_cppflags -Wl,+vnocompatwarnings"
+	    ccflags="$cc_cppflags"
 	    case "`getconf KERNEL_BITS 2>/dev/null`" in
-		*64*)   ldflags="$ldflags -Wl,+vnocompatwarnings"
-			ccflags="$ccflags -Wl,+vnocompatwarnings -Wa,+DA2.0"
-			;;
+		*64*)
+		    echo "main(){}">try.c
+		    # gcc with gas will not accept +DA2.0
+		    case "`$cc -c -Wa,+DA2.0 try.c 2>&1`" in
+			*"+DA2.0"*)		# gas
+			    gnu_as=yes
+			    ;;
+			*)			# HPas
+			    ccflags="$ccflags -Wa,+DA2.0"
+			    ;;
+			esac
+		    # gcc with gld will not accept +vnocompatwarnings
+		    case "`$cc -o try -Wl,+vnocompatwarnings try.c 2>&1`" in
+			*"+vnocompat"*)		# gld
+			    gnu_ld=yes
+			    ;;
+			*)			# HPld
+			    ldflags="$ldflags -Wl,+vnocompatwarnings"
+			    ccflags="$ccflags -Wl,+vnocompatwarnings"
+			    ;;
+			esac
+		    ;;
 		esac
 	    ;;
     *)      ccisgcc=''
@@ -98,6 +106,25 @@ case `$cc -v 2>&1`"" in
 toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
 
 ### 64 BITNESS
+
+# Some gcc versions do native 64 bit long (e.g. 2.9-hppa-000310)
+# We have to force 64bitness to go search the right libraries
+    gcc_64native=no
+case "$ccisgcc" in
+    $define|true|[Yy])
+	echo 'int main(){long l;printf("%d\n",sizeof(l));}'>try.c
+	$cc -o try $ccflags $ldflags try.c
+	if [ "`try`" = "8" ]; then
+	    cat <<EOM >&4
+
+*** This version of gcc uses 64 bit longs. -Duse64bitall is
+*** implicitly set to enable continuation
+EOM
+	    use64bitall=$define
+	    gcc_64native=yes
+	    fi
+	;;
+    esac
 
 case "$use64bitall" in
     $define|true|[yY]*) use64bitint="$define" ;;
@@ -149,8 +176,23 @@ EOM
 	    exit 1
 	    fi
 
-	ccflags="$ccflags +DD64"
-	ldflags="$ldflags +DD64"
+	case "$ccisgcc" in
+	    $define|true|[Yy])
+		# For the moment, don't care that it ain't supported (yet)
+		# by gcc (up to and including 2.95.3), cause it'll crash
+		# anyway. Expect auto-detection of 64-bit enabled gcc on
+		# HP-UX soon, including a user-friendly exit
+		case $gcc_64native in
+		    no) ccflags="$ccflags -mlp64"
+			ldflags="$ldflags -Wl,+DD64"
+			;;
+		    esac
+		;;
+	    *)
+		ccflags="$ccflags +DD64"
+		ldflags="$ldflags +DD64"
+		;;
+	    esac
 
 	# Reset the library checker to make sure libraries
 	# are the right type
@@ -172,6 +214,23 @@ EOM
 	    esac
 	;;
     esac
+
+# By setting the deferred flag below, this means that if you run perl
+# on a system that does not have the required shared library that you
+# linked it with, it will die when you try to access a symbol in the
+# (missing) shared library.  If you would rather know at perl startup
+# time that you are missing an important shared library, switch the
+# comments so that immediate, rather than deferred loading is
+# performed.  Even with immediate loading, you can postpone errors for
+# undefined (or multiply defined) routines until actual access by
+# adding the "nonfatal" option.
+# ccdlflags="-Wl,-E -Wl,-B,immediate $ccdlflags"
+# ccdlflags="-Wl,-E -Wl,-B,immediate,-B,nonfatal $ccdlflags"
+if [ "$gnu_ld" = "yes" ]; then
+    ccdlflags="-Wl,-E $ccdlflags"
+else
+    ccdlflags="-Wl,-E -Wl,-B,deferred $ccdlflags"
+    fi
 
 
 ### COMPILER SPECIFICS
