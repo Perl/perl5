@@ -137,11 +137,23 @@ Do not recurse into subdirectories specified in podpath.
 
 Specify the title of the resulting HTML file.
 
+=item css
+
+    --css=stylesheet
+
+Specify the URL of a cascading style sheet.
+
 =item verbose
 
     --verbose
 
 Display progress messages.
+
+=item quiet
+
+    --quiet
+
+Don't display I<mostly harmless> warning messages.
 
 =back
 
@@ -155,6 +167,10 @@ Display progress messages.
 	     "--recurse",
 	     "--infile=foo.pod",
 	     "--outfile=/perl/nmanual/foo.html");
+
+=head1 ENVIRONMENT
+
+Uses $Config{pod2html} to setup default options.
 
 =head1 AUTHOR
 
@@ -174,8 +190,8 @@ This program is distributed under the Artistic License.
 
 =cut
 
-my $dircache = "pod2html-dircache";
-my $itemcache = "pod2html-itemcache";
+my $dircache = "pod2html.d~~";
+my $itemcache = "pod2html.i~~";
 
 my @begin_stack = ();		# begin/end stack
 
@@ -193,7 +209,9 @@ my $podfile = "";		# read from stdin by default
 my @podpath = ();		# list of directories containing library pods.
 my $podroot = ".";		# filesystem base directory from which all
 				#   relative paths in $podpath stem.
+my $css = '';                   # Cascading style sheet
 my $recurse = 1;		# recurse on subdirectories in $podpath.
+my $quiet = 0;			# not quiet by default
 my $verbose = 0;		# not verbose by default
 my $doindex = 1;   	    	# non-zero if we should generate an index
 my $listlevel = 0;		# current list depth
@@ -212,6 +230,7 @@ my %items_named = ();		# for the multiples of the same item in perlfunc
 my @items_seen = ();
 my $netscape = 0;		# whether or not to use netscape directives.
 my $title;			# title to give the pod(s)
+my $header = 0;			# produce block header/footer
 my $top = 1;			# true if we are at the top of the doc.  used
 				#   to prevent the first <HR> directive.
 my $paragraph;			# which paragraph we're processing (used
@@ -224,8 +243,8 @@ my %items = ();			# associative array used to find the location
 my $Is83;                       # is dos with short filenames (8.3)
 
 sub init_globals {
-$dircache = "pod2html-dircache";
-$itemcache = "pod2html-itemcache";
+$dircache = "pod2html.d~~";
+$itemcache = "pod2html.i~~";
 
 @begin_stack = ();		# begin/end stack
 
@@ -237,7 +256,9 @@ $podfile = "";		# read from stdin by default
 @podpath = ();		# list of directories containing library pods.
 $podroot = ".";		# filesystem base directory from which all
 				#   relative paths in $podpath stem.
+$css = '';                   # Cascading style sheet
 $recurse = 1;		# recurse on subdirectories in $podpath.
+$quiet = 0;		# not quiet by default
 $verbose = 0;		# not verbose by default
 $doindex = 1;   	    	# non-zero if we should generate an index
 $listlevel = 0;		# current list depth
@@ -255,6 +276,7 @@ $ignore = 1;			# whether or not to format text.  we don't
 @items_seen = ();
 %items_named = ();
 $netscape = 0;		# whether or not to use netscape directives.
+$header = 0;			# produce block header/footer
 $title = '';			# title to give the pod(s)
 $top = 1;			# true if we are at the top of the doc.  used
 				#   to prevent the first <HR> directive.
@@ -356,20 +378,32 @@ sub pod2html {
     if ($title) {
 	$title =~ s/\s*\(.*\)//;
     } else {
-	warn "$0: no title for $podfile";
+	warn "$0: no title for $podfile" unless $quiet;
 	$podfile =~ /^(.*)(\.[^.\/]+)?$/;
 	$title = ($podfile eq "-" ? 'No Title' : $1);
 	warn "using $title" if $verbose;
     }
+    my $csslink = $css ? qq(\n<LINK REL="stylesheet" HREF="$css" TYPE="text/css">) : '';
+    $csslink =~ s,\\,/,g;
+    $csslink =~ s,(/.):,$1|,;
+
+    my $block = $header ? <<END_OF_BLOCK : '';
+<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=100%>
+<TR><TD CLASS=block VALIGN=MIDDLE WIDTH=100% BGCOLOR="#cccccc">
+<FONT SIZE=+1><STRONG><P CLASS=block>&nbsp;$title</P></STRONG></FONT>
+</TD></TR>
+</TABLE>
+END_OF_BLOCK
+
     print HTML <<END_OF_HEAD;
 <HTML>
 <HEAD>
-<TITLE>$title</TITLE>
+<TITLE>$title</TITLE>$csslink
 <LINK REV="made" HREF="mailto:$Config{perladmin}">
 </HEAD>
 
 <BODY>
-
+$block
 END_OF_HEAD
 
     # load/reload/validate/cache %pages and %items
@@ -431,13 +465,14 @@ END_OF_HEAD
 	    next if @begin_stack && $begin_stack[-1] ne 'html';
 	    my $text = $_;
 	    process_text(\$text, 1);
-	    print HTML "<P>\n$text";
+	    print HTML "<P>\n$text</P>\n";
 	}
     }
 
     # finish off any pending directives
     finish_list();
     print HTML <<END_OF_TAIL;
+$block
 </BODY>
 
 </HTML>
@@ -489,12 +524,16 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
   --recurse    - recurse on those subdirectories listed in podpath
                  (default behavior).
   --title      - title that will appear in resulting html file.
+  --header     - produce block header/footer
+  --css        - stylesheet URL
   --verbose    - self-explanatory
+  --quiet      - supress some benign warning messages
 
 END_OF_USAGE
 
 sub parse_command_line {
-    my ($opt_flush,$opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,$opt_netscape,$opt_outfile,$opt_podpath,$opt_podroot,$opt_norecurse,$opt_recurse,$opt_title,$opt_verbose);
+    my ($opt_flush,$opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,$opt_netscape,$opt_outfile,$opt_podpath,$opt_podroot,$opt_norecurse,$opt_recurse,$opt_title,$opt_verbose,$opt_css,$opt_header,$opt_quiet);
+    unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
 			    'flush'      => \$opt_flush,
 			    'help'       => \$opt_help,
@@ -510,7 +549,10 @@ sub parse_command_line {
 			    'norecurse'  => \$opt_norecurse,
 			    'recurse!'   => \$opt_recurse,
 			    'title=s'    => \$opt_title,
+			    'header'     => \$opt_header,
+			    'css=s'      => \$opt_css,
 			    'verbose'    => \$opt_verbose,
+			    'quiet'      => \$opt_quiet,
 			   );
     usage("-", "invalid parameters") if not $result;
 
@@ -534,7 +576,10 @@ sub parse_command_line {
     $doindex  = $opt_index if defined $opt_index;
     $recurse  = $opt_recurse if defined $opt_recurse;
     $title    = $opt_title if defined $opt_title;
+    $header   = defined $opt_header ? 1 : 0;
+    $css      = $opt_css if defined $opt_css;
     $verbose  = defined $opt_verbose ? 1 : 0;
+    $quiet    = defined $opt_quiet ? 1 : 0;
     $netscape = $opt_netscape if defined $opt_netscape;
 }
 
@@ -826,7 +871,7 @@ sub scan_headings {
 
 	    $index .= "\n" . ("\t" x $listdepth) . "<LI>" .
 	              "<A HREF=\"#" . htmlify(0,$title) . "\">" .
-		      html_escape(process_text(\$title, 0)) . "</A>";
+		      html_escape(process_text(\$title, 0)) . "</A></LI>";
 	}
     }
 
@@ -1489,7 +1534,7 @@ sub process_L {
 	$link = "$htmlroot/$page.html";
 	$link .= "#" . htmlify(0,$section) if ($section);
     } elsif (!defined $pages{$page}) {
-	warn "$0: $podfile: cannot resolve L<$str> in paragraph $paragraph: no such page '$page'\n";
+	warn "$0: $podfile: cannot resolve L<$str> in paragraph $paragraph: no such page '$page'\n" unless $quiet;
 	$link = "";
 	$linktext = $page unless defined($linktext);
     } else {
