@@ -31,6 +31,166 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12109] By: jhi                                   on 2001/09/21  13:44:43
+        Log: Make AIX and Tru64 compilers happy.  
+     Branch: perl
+	   ! ext/threads/threads.h ext/threads/threads.xs
+____________________________________________________________________________
+[ 12108] By: jhi                                   on 2001/09/21  12:16:27
+        Log: Subject: [PATCH] Re: [ID 20010920.007] q and qq does not work after do
+             From: rgarciasuarez@free.fr (Rafael Garcia-Suarez)
+             Date: 21 Sep 2001 09:16:37 -0000
+             Message-Id: <slrn9qm1ca.h6b.rgarciasuarez@rafael.kazibao.net>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 12107] By: jhi                                   on 2001/09/21  12:14:41
+        Log: Subject: [PATCH pp_sys.c] pp_chdir Win32 fix
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 20 Sep 2001 21:21:34 -0400
+             Message-ID: <20010920212134.Y28291@blackrider>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 12106] By: jhi                                   on 2001/09/21  12:12:09
+        Log: Subject: Re: GDB Debugging Macros from mod_perl
+             From: rspier@pobox.com (Robert Spier)
+             Date: Thu, 20 Sep 2001 22:45:03 -0700
+             Message-ID: <15274.54239.413929.49430@rls.cx>
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 12105] By: sky                                   on 2001/09/21  10:33:34
+        Log: Fixed bug where Time::HiRes::time returned time adjusted to 
+             timezone! GetSystemTime should be available on all Win32 
+             platforms we support. Perhaps Time::HiRes should be extended to
+             support WinCE and Novell?
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12104] By: sky                                   on 2001/09/21  08:12:39
+        Log: Attempt to fix solaris issue raised by Andy Dougherty.  
+     Branch: perl
+	   ! ext/threads/threads.h ext/threads/threads.xs
+____________________________________________________________________________
+[ 12103] By: sky                                   on 2001/09/21  07:57:41
+        Log: Rename the *thread* functions to Perl_* to avoid clashes.
+             Notably on AIX but could become a problem on other platforms.
+     Branch: perl
+	   ! ext/threads/threads.h ext/threads/threads.xs
+____________________________________________________________________________
+[ 12102] By: sky                                   on 2001/09/21  07:35:30
+        Log: Add the shared sv space to the global vars.
+             Fix problems compiling on win32.
+     Branch: perl
+	   ! embedvar.h ext/threads/threads.xs perlapi.h perlvars.h
+	   ! sharedsv.c sharedsv.h
+____________________________________________________________________________
+[ 12101] By: ams                                   on 2001/09/21  00:19:55
+        Log: Subject: [PATCH] win32/Makefile warning fix
+             From: Blair Zajac <blair@orcaware.com>
+             Date: Thu, 20 Sep 2001 18:15:43 -0700
+             Message-Id: <3BAA94BF.FFD5FC3A@orcaware.com>
+     Branch: perl
+	   ! win32/Makefile
+____________________________________________________________________________
+[ 12100] By: jhi                                   on 2001/09/20  21:57:04
+        Log: Subject: [PATCH bleadperl] Command.t patch had some errors... sorry.
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Thu, 20 Sep 2001 18:36:22 +0200
+             Message-ID: <549856591.20010920183622@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! lib/ExtUtils/Command.t
+____________________________________________________________________________
+[ 12099] By: jhi                                   on 2001/09/20  21:53:00
+        Log: Cant spl wirth a dam.
+     Branch: perl
+	   ! intrpvar.h
+____________________________________________________________________________
+[ 12098] By: jhi                                   on 2001/09/20  21:52:24
+        Log: Don't use C++ comments.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 12097] By: ams                                   on 2001/09/20  21:42:07
+        Log: Change #12044 didn't.
+     Branch: perl
+	   ! lib/constant.pm
+____________________________________________________________________________
+[ 12096] By: jhi                                   on 2001/09/20  13:38:44
+        Log: Metaconfig unit changes for #12095.
+     Branch: metaconfig
+	   ! U/modified/Myinit.U U/modified/libs.U
+____________________________________________________________________________
+[ 12095] By: jhi                                   on 2001/09/20  13:38:22
+        Log: Remove iconv references since we are not using it
+             and not going to; regen perltoc, perlmodlib.
+             (Some references still linger in perltoc, have to figure
+             out where they are coming from.)
+     Branch: perl
+	   ! Configure NetWare/config.wc NetWare/config_H.wc
+	   ! Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh perl.h
+	   ! pod/perlmodlib.pod pod/perltoc.pod uconfig.h uconfig.sh
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h win32/config.bc win32/config.gc
+	   ! win32/config.vc win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc wince/config.ce wince/config.h
+	   ! wince/config_H.ce
+____________________________________________________________________________
+[ 12094] By: jhi                                   on 2001/09/20  12:49:17
+        Log: Subject: [PATCH docs] Re: ARGV and read
+             From: Dave Mitchell <davem@fdgroup.co.uk>
+             Date: Thu, 20 Sep 2001 13:21:31 +0100 (BST)
+             Message-Id: <200109201221.NAA04258@gizmo.fdgroup.co.uk>
+     Branch: perl
+	   ! pod/perltodo.pod pod/perlvar.pod
+____________________________________________________________________________
+[ 12093] By: jhi                                   on 2001/09/20  12:45:35
+        Log: Fresh copies from the cvs.perl.org perlfaq repository.
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	   ! pod/perlfaq6.pod pod/perlfaq7.pod pod/perlfaq8.pod
+	   ! pod/perlfaq9.pod
+____________________________________________________________________________
+[ 12092] By: jhi                                   on 2001/09/20  12:32:44
+        Log: Subject: [PATCH] Re: n questions (was Re: 4 questions about pack/unpack)        
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 20 Sep 2001 14:27:08 +0100
+             Message-ID: <20010920142708.X4971@plum.flirble.org>
+     Branch: perl
+	   ! pp_pack.c t/op/pack.t
+____________________________________________________________________________
+[ 12091] By: jhi                                   on 2001/09/20  12:16:50
+        Log: The sharedsv_space* are variables, not code.  Duh.
+     Branch: perl
+	   ! intrpvar.h makedef.pl
+____________________________________________________________________________
+[ 12090] By: ams                                   on 2001/09/20  11:26:06
+        Log: Subject: [patch lib/lib_pm.PL]
+             From: Stas Bekman <stas@stason.org>
+             Date: Thu, 20 Sep 2001 18:48:53 +0800
+             Message-Id: <3BA9C995.6010302@stason.org>
+             (Applied by hand.)
+     Branch: perl
+	   ! lib/lib_pm.PL
+____________________________________________________________________________
+[ 12089] By: jhi                                   on 2001/09/20  01:36:23
+        Log: Only 21 tests, skipping or not.
+     Branch: perl
+	   ! lib/ExtUtils/Command.t
+____________________________________________________________________________
+[ 12088] By: jhi                                   on 2001/09/19  18:54:37
+        Log: New exported symbols.
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 12087] By: jhi                                   on 2001/09/19  13:45:59
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12086] By: jhi                                   on 2001/09/19  13:02:58
         Log: Correct numbering of the tests is useful.
      Branch: perl
