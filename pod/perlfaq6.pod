@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 1.10 $, $Date: 2002/04/07 18:32:57 $)
+perlfaq6 - Regular Expressions ($Revision: 1.11 $, $Date: 2002/05/23 15:47:37 $)
 
 =head1 DESCRIPTION
 
@@ -166,7 +166,7 @@ appear within a certain time.
     close FH;
 
     ## Get a read/write filehandle to it.
-    $fh = new FileHandle "+<file";
+    $fh = new IO::File "+<file";
 
     ## Attach it to a "stream" object.
     use Net::Telnet;
