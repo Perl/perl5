@@ -13,15 +13,17 @@ BEGIN {
 # Nota bene: bit operations (&, |, ^, ~, <<, >>, vec) are not 64-bit clean.
 # See the beginning of pp.c and the explanation next to IBW/UBW.
 
-no warning 'overflow'; # so that using > 0xfffffff constants doesn't whine
+# so that using > 0xfffffff constants and 32+ bit
+# shifts and vector sizes doesn't cause noise
+no warning 'overflow';
 
-print "1..30\n";
+print "1..36\n";
 
 my $q = 12345678901;
 my $r = 23456789012;
 my $f = 0xffffffff;
 my $x;
-
+my $y;
 
 $x = unpack "q", pack "q", $q;
 print "not " unless $x == $q && $x > $f;
@@ -143,14 +145,48 @@ $x = $q - $r;
 print "not " unless $x == -11111110111 && -$x > $f;
 print "ok 27\n";
 
-$x = $q * $r;
-print "not " unless $x == 289589985190657035812 && $x > $f;
+$x = $q * 1234567;
+print "not " unless $x == 15241567763770867 && $x > $f;
 print "ok 28\n";
 
-$x /= $r;
+$x /= 1234567;
 print "not " unless $x == $q && $x > $f;
 print "ok 29\n";
 
 $x = 98765432109 % 12345678901;
 print "not " unless $x == 901;
 print "ok 30\n";
+
+# The following six adapted from op/inc.
+
+$a = 9223372036854775807;
+$c = $a++;
+print "not " unless $a == 9223372036854775808;
+print "ok 31\n";
+
+$a = 9223372036854775807;
+$c = ++$a;
+print "not " unless $a == 9223372036854775808;
+print "ok 32\n";
+
+$a = 9223372036854775807;
+$c = $a + 1;
+print "not " unless $a == 9223372036854775808;
+print "ok 33\n";
+
+$a = -9223372036854775808;
+$c = $a--;
+print "not " unless $a == -9223372036854775809;
+print "ok 34\n";
+
+$a = -9223372036854775808;
+$c = --$a;
+print "not " unless $a == -9223372036854775809;
+print "ok 35\n";
+
+$a = -9223372036854775808;
+$c = $a - 1;
+print "not " unless $a == -9223372036854775809;
+print "ok 36\n";
+
+

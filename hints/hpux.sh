@@ -268,9 +268,10 @@ Cannot continue, aborting.
 EOM
 		exit 1
 	    fi
-	    if [ ! -d /lib/pa20_64 ]; then
+	    if [ ! -f /lib/pa20_64/libc.sl ]; then
 		cat <<EOM >&4
-You do not seem to have the 64-bit libraries, /lib/pa20_64.
+You do not seem to have the 64-bit libraries in /lib/pa20_64.
+Most importantly, I cannot find /lib/pa20_64/libc.sl.
 Cannot continue, aborting.
 EOM
 		exit 1

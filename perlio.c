@@ -486,7 +486,7 @@ PerlIO_setpos(PerlIO *f, const Fpos_t *pos)
 int
 PerlIO_setpos(PerlIO *f, const Fpos_t *pos)
 {
-#if defined(USE_64_BIT_STDIO) && defined(HAS_FSETPOS64)
+#if defined(USE_64_BIT_STDIO) && defined(USE_FSETPOS64)
  return fsetpos64(f, pos);
 #else
  return fsetpos(f, pos);
@@ -509,7 +509,7 @@ PerlIO_getpos(PerlIO *f, Fpos_t *pos)
 int
 PerlIO_getpos(PerlIO *f, Fpos_t *pos)
 {
-#if defined(USE_64_BIT_STDIO) && defined(HAS_FSETPOS64)
+#if defined(USE_64_BIT_STDIO) && defined(USE_FSETPOS64)
  return fgetpos64(f, pos);
 #else
  return fgetpos(f, pos);

@@ -2213,6 +2213,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_hasmntopt HAS_HASMNTOPT		/**/
 
+/* HAS_LDBL_DIG:
+ *	This symbol, if defined, indicates that this system's <float.h>
+ *	or <limits.h> defines the symbol LDBL_DIG, which is the number
+ *	of significant digits in a long double precision number. Unlike
+ *	for DBL_DIG, there's no good guess for LDBL_DIG if it is undefined.
+ */
+#$d_ldbl_dig HAS_LDBL_DIG 	/* */
+
 /* HAS_MADVISE:
  *	This symbol, if defined, indicates that the madvise system call is
  *	available to map a file into memory.
@@ -2427,12 +2435,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	some shell.
  */
 #define STARTPERL "$startperl"		/**/
-
-/* HAS_FSETPOS64:
- *	This symbol, if defined, indicates that the fsetpos64 routine is
- *	available to setpos files larger than 2 gigabytes.
- */
-#$d_fsetpos64   HAS_FSETPOS64	/**/
 
 /* HAS_STDIO_STREAM_ARRAY:
  *	This symbol, if defined, tells that there is an array

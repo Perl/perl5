@@ -27,15 +27,16 @@ sub bye {
 }
 
 sub explain {
-    print STDERR <<EOM;
+    print <<EOM;
 #
 # If the lfs (large file support: large meaning larger than two gigabytes)
-# tests fail, it may mean either that your process is not allowed to write
-# large files or that the file system you are running the tests on doesn't
-# support large files, or both.
+# tests are skipped or fail, it may mean either that your process is not
+# allowed to write large files or that the file system you are running
+# the tests on doesn't support large files, or both.  You may also need
+# to reconfigure your kernel. (This is all very system-dependent.)
 #
 # Perl may still be able to support large files, once you have
-# such a process and such a file system.
+# such a process and such a (file) system.
 #
 EOM
 }

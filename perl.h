@@ -1027,8 +1027,8 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define UV_MAX PERL_UQUAD_MAX
 #    define UV_MIN PERL_UQUAD_MIN
 #  endif
-#  define IV_SIZEOF 8
-#  define UV_SIZEOF 8
+#  define IVSIZF 8
+#  define UVSIZE 8
 #  define IV_IS_QUAD
 #  define UV_IS_QUAD
 #else
@@ -1045,8 +1045,6 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define UV_MAX PERL_ULONG_MAX
 #    define UV_MIN PERL_ULONG_MIN
 #  endif
-#  define UV_SIZEOF LONGSIZE
-#  define IV_SIZEOF LONGSIZE
 #  if LONGSIZE == 8
 #    define IV_IS_QUAD
 #    define UV_IS_QUAD
@@ -1054,19 +1052,79 @@ Free_t   Perl_mfree (Malloc_t where);
 #    undef IV_IS_QUAD
 #    undef UV_IS_QUAD
 #  endif
-#  define UV_SIZEOF LONGSIZE
-#  define IV_SIZEOF LONGSIZE
+#  define UVSIZE LONGSIZE
+#  define IVSIZE LONGSIZE
 #endif
+#define IV_DIG (BIT_DIGITS(IVSIZE * 8) + 1)
+#define UV_DIG (BIT_DIGITS(IVSIZE * 8) + 1)
 
 #ifdef USE_LONG_DOUBLE
 #  if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
 #    define LDoub_t long double
+#  else
+#     undef USE_LONG_DOUBLE /* Ouch! */
 #  endif
+#endif
+
+#ifdef OVR_DBL_DIG
+/* Use an overridden DBL_DIG */
+# ifdef DBL_DIG
+#  undef DBL_DIG
+# endif
+# define DBL_DIG OVR_DBL_DIG
+#else
+/* The following is all to get DBL_DIG, in order to pick a nice
+   default value for printing floating point numbers in Gconvert.
+   (see config.h)
+*/
+#ifdef I_LIMITS
+#include <limits.h>
+#endif
+#ifdef I_FLOAT
+#include <float.h>
+#endif
+#ifndef HAS_DBL_DIG
+#define DBL_DIG	15   /* A guess that works lots of places */
+#endif
+#endif
+
+#ifdef OVR_LDBL_DIG
+/* Use an overridden LDBL_DIG */
+# ifdef LDBL_DIG
+#  undef LDBL_DIG
+# endif
+# define LDBL_DIG OVR_LDBL_DIG
+#else
+/* The following is all to get LDBL_DIG, in order to pick a nice
+   default value for printing floating point numbers in Gconvert.
+   (see config.h)
+*/
+#ifdef I_LIMITS
+#include <limits.h>
+#endif
+#ifdef I_FLOAT
+#include <float.h>
+#endif
+#ifndef HAS_LDBL_DIG
+#if LONG_DOUBLESIZE == 10
+#define LDBL_DIG 18 /* assume IEEE */
+#else
+#if LONG_DOUBLESIZE == 16
+#define LDBL_DIG 33 /* assume IEEE */
+#else
+#if LONG_DOUBLESIZE == DOUBLESIZE
+#define LDBL_DIG DBL_DIG /* bummer */
+#endif
+#endif
+#endif
+#endif
 #endif
 
 #ifdef USE_LONG_DOUBLE
 #   define HAS_LDOUB
     typedef LDoub_t NV;
+#   define NVSIZE LONG_DOUBLESIZE
+#   define NV_DIG LDBL_DIG
 #   define Perl_modf modfl
 #   define Perl_frexp frexpl
 #   define Perl_cos cosl
@@ -1080,6 +1138,8 @@ Free_t   Perl_mfree (Malloc_t where);
 #   define Perl_fmod fmodl
 #else
     typedef double NV;
+#   define NVSIZE DOUBLESIZE
+#   define NV_DIG DBL_DIG
 #   define Perl_modf modf
 #   define Perl_frexp frexp
 #   define Perl_cos cos
@@ -1351,7 +1411,9 @@ typedef union any ANY;
 #   define USE_64_BIT_STDIO
 #endif
 
-#ifdef __sgi  /* UGLY. See below. */
+/* I couldn't find any -Ddefine or -flags in IRIX 6.5 that would
+ * have done the necessary symbol renaming using cpp. --jhi */
+#ifdef __sgi
 #define USE_FOPEN64
 #define USE_FSEEK64
 #define USE_FTELL64
@@ -1801,6 +1863,25 @@ typedef I32 CHECKPOINT;
 #define I_V(what) (cast_iv((NV)(what)))
 #define U_V(what) (cast_uv((NV)(what)))
 #endif
+
+/* These do not care about the fractional part, only about the range. */
+#define NV_WITHIN_IV(nv) (I_V(nv) >= IV_MIN && I_V(nv) <= IV_MAX)
+#define NV_WITHIN_UV(nv) ((nv)>=0.0&&U_V(nv) >= UV_MIN&&U_V(nv) <= UV_MAX)
+
+#define IV_FITS_IN_NV
+/* Is this strictly correct? */
+#if IVSIZE >= NVSIZE
+#   undef IV_FITS_IN_NV
+#else
+    /* Greater-than-or-EQUAL because L?DBL_DIG doesn't necessarily
+     * mean that all the powers of two that are L?DBL_DIG digits long
+     * can be represented by the (long)? doubles sized L?DBL_DIG digits. */
+#   if IV_DIG >= NV_DIG
+#       undef IV_FITS_IN_NV
+#   endif
+#endif
+/* Often there are DBL_MANT_DIG and LDBL_MANT_DIG
+ * that would give more precise results. */
 
 /* Used with UV/IV arguments: */
 					/* XXXX: need to speed it up */

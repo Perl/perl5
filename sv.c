@@ -15,28 +15,6 @@
 #define PERL_IN_SV_C
 #include "perl.h"
 
-#ifdef OVR_DBL_DIG
-/* Use an overridden DBL_DIG */
-# ifdef DBL_DIG
-#  undef DBL_DIG
-# endif
-# define DBL_DIG OVR_DBL_DIG
-#else
-/* The following is all to get DBL_DIG, in order to pick a nice
-   default value for printing floating point numbers in Gconvert.
-   (see config.h)
-*/
-#ifdef I_LIMITS
-#include <limits.h>
-#endif
-#ifdef I_FLOAT
-#include <float.h>
-#endif
-#ifndef HAS_DBL_DIG
-#define DBL_DIG	15   /* A guess that works lots of places */
-#endif
-#endif
-
 #ifdef PERL_OBJECT
 #define VTBL this->*vtbl
 #else /* !PERL_OBJECT */
@@ -1711,7 +1689,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	    goto tokensave;
 	}
 	if (SvNOKp(sv)) {
-	    Gconvert(SvNVX(sv), DBL_DIG, 0, tmpbuf);
+	    Gconvert(SvNVX(sv), NV_DIG, 0, tmpbuf);
 	    tsv = Nullsv;
 	    goto tokensave;
 	}
@@ -1835,7 +1813,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	else
 #endif /*apollo*/
 	{
-	    Gconvert(SvNVX(sv), DBL_DIG, 0, s);
+	    Gconvert(SvNVX(sv), NV_DIG, 0, s);
 	}
 	errno = olderrno;
 #ifdef FIXNEGATIVEZERO
@@ -4731,7 +4709,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	char *eptr = Nullch;
 	STRLEN elen = 0;
-	char ebuf[TYPE_DIGITS(int) * 2 + 16]; /* large enough for "%#.#f" */
+	char ebuf[TYPE_DIGITS(IV) * 2 + 16];
+        /* large enough for "%#.#f" --chip */
+	/* what about long double NVs? --jhi */
 	char c;
 	int i;
 	unsigned base;

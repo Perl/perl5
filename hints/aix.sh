@@ -174,11 +174,11 @@ EOCBU
 cat > UU/use64bits.cbu <<'EOCBU'
 case "$use64bits" in
 $define|true|[yY]*)
-	    case "`uname -r`" in
+	    case "`oslevel`" in
 	    3.*|4.[012].*)
 		cat >&4 <<EOM
-AIX `uname -r` does not support 64-bit interfaces.
-You should upgrade to at least AIX 4.3.
+AIX `oslevel` does not support 64-bit interfaces.
+You should upgrade to at least AIX 4.2.
 EOM
 		exit 1
 		;;
@@ -190,14 +190,16 @@ EOM
 	    # _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
 	    # insert(?) *something* to $ldflags so that later (in Configure) evaluating
 	    # $ldflags causes a newline after the '-b64' (the result of the getconf).
+	    # (nothing strange shows up in $ldflags even in hexdump;
+	    #  so it may be something in the shell, instead?)
 	    # Try it out: just uncomment the below line and rerun Configure:
 #	    echo >& "AIX $ldflags mystery" ; exit 1
 	    # Just don't ask me how AIX does it.
-	    # Therefore the line re-evaluating ldflags: it seems to drop the whatever
-	    # AIX managed to break. --jhi
+	    # Therefore the line re-evaluating ldflags: it seems to bypass
+	    # the whatever it was AIX managed to break. --jhi
 	    ldflags="`echo $ldflags`"
 
-	    libswanted="$libswanted `getconf XBS5_LPBIG_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g'`"
+	    libswanted="$libswanted `getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g'`"
 	    # When a 64-bit cc becomes available $archname64
 	    # may need setting so that $archname gets it attached.
 	    ;;
@@ -205,7 +207,7 @@ esac
 EOCBU
 
 # This script UU/uselongdouble.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use 64 bits.
+# after it has prompted the user for whether to use long doubles.
 cat > UU/uselongdouble.cbu <<'EOCBU'
 case "$uselongdouble" in
 $define|true|[yY]*)
