@@ -469,9 +469,9 @@ sub name { shift->{'Name'} }
 
 sub rep_S { 'C' }
 
-sub rep_D { 'S' }
+sub rep_D { 'n' }
 
-sub rep_M { ($_[0] > 255) ? 'S' : 'C' }
+sub rep_M { ($_[0] > 255) ? 'n' : 'C' }
 
 sub representation
 {
@@ -542,7 +542,7 @@ sub toUnicode
  my $uni   = '';
  while (length($str))
   {
-   my $code = unpack('S',substr($str,0,2,''));
+   my $code = unpack('n',substr($str,0,2,'')) & 0xffff;
    $uni .= chr($code);
   }
  $_[1] = $str if $chk;
@@ -562,7 +562,7 @@ sub fromUnicode
      last if ($chk);
      $x = 0;
     }
-   $str .= pack('S',$x);
+   $str .= pack('n',$x);
   }
  $_[1] = $uni if $chk;
  return $str;
