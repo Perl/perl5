@@ -65,6 +65,7 @@ bsd_realpath(path, resolved)
 	const char *path;
 	char *resolved;
 {
+#ifndef VMS
 	struct stat sb;
 	int fd, n, rootd, serrno;
 	char *p, *q, wbuf[MAXPATHLEN];
@@ -166,6 +167,12 @@ err1:	serrno = errno;
 err2:	(void)close(fd);
 	errno = serrno;
 	return (NULL);
+
+#else /* it's VMS */
+
+       return Perl_rmsexpand((char*)path, resolved, NULL, 0);
+
+#endif /* ifndef VMS */
 }
 
 MODULE = Cwd		PACKAGE = Cwd
