@@ -780,6 +780,10 @@ The flag -DPERL_GCC_PEDANTIC also gets added, since gcc does not add
 any internal cpp flag to signify that -pedantic is being used, as it
 does for -ansi (__STRICT_ANSI__).
 
+Note that the -ansi and -pedantic are enabled only for version 3 (and
+later) of gcc, since even gcc version 2.95.4 finds lots of seemingly
+false "value computed not used" errors from Perl.
+
 The -ansi and -pedantic are useful in catching at least the following
 nonportable practices:
 

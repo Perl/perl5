@@ -133,29 +133,33 @@ case "$gccversion" in
     esac
     case "$gccansipedantic" in
     define)
-        case "$osname" in
-	# Add -ansi -pedantic only for known platforms.
-        aix|dec_osf|freebsd|hpux|irix|linux)
-	    ansipedantic="-ansi -pedantic" ;;
-        solaris)
+	case "$gccversion" in
+	[12]*) ;; # gcc versions 1 (gasp!) and 2 are not good for this.
+	*)  case "$osname" in
+	    # Add -ansi -pedantic only for known platforms.
+	    aix|dec_osf|freebsd|hpux|irix|linux)
+		ansipedantic="-ansi -pedantic" ;;
+	    solaris)
 # Can't add -ansi for Solaris.
 # Off_t/off_t is a struct in Solaris with largefiles, and with -ansi
 # that struct cannot be compared with a flat integer, such as a STRLEN.
 # The -ansi will also cause a lot of noise in Solaris because of:
 # /usr/include/sys/resource.h:148: warning: `struct rlimit64' declared inside parameter list
-	    ansipedantic="-pedantic" ;;
-	esac
-	for i in $ansipedantic
-	do
-	    case "$ccflags" in
-	    *$i*) ;;
-	    *) warn="$warn $i" ;;
+		ansipedantic="-pedantic" ;;
 	    esac
-	done
-        case "$warn$ccflags" in
-        *-pedantic*) warn="$warn -DPERL_GCC_PEDANTIC" ;;
-        esac
-        ;;
+	    for i in $ansipedantic
+	    do
+		case "$ccflags" in
+		*$i*) ;;
+		*) warn="$warn $i" ;;
+		esac
+	    done
+	    case "$warn$ccflags" in
+	    *-pedantic*) warn="$warn -DPERL_GCC_PEDANTIC" ;;
+	    esac
+	    ;;
+	esac
+	;;
     esac
     ;;
 esac
