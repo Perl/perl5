@@ -3297,16 +3297,10 @@ S_nuke_stacks(pTHX)
     Safefree(PL_retstack);
 }
 
-#ifndef PERL_OBJECT
-static PerlIO *tmpfp;  /* moved outside init_lexer() because of UNICOS bug */
-#endif
-
 STATIC void
 S_init_lexer(pTHX)
 {
-#ifdef PERL_OBJECT
-	PerlIO *tmpfp;
-#endif
+    PerlIO *tmpfp;
     tmpfp = PL_rsfp;
     PL_rsfp = Nullfp;
     lex_start(PL_linestr);
