@@ -1358,7 +1358,7 @@ do_readline(void)
 		if (!isALPHA(*tmps) && !isDIGIT(*tmps) &&
 		    strchr("$&*(){}[]'\";\\|?<>~`", *tmps))
 			break;
-	    if (*tmps && PerlLIO_stat(SvPVX(sv), &PL_statbuf) < 0) {
+	    if (*tmps && PerlLIO_lstat(SvPVX(sv), &PL_statbuf) < 0) {
 		(void)POPs;		/* Unmatched wildcard?  Chuck it... */
 		continue;
 	    }
