@@ -32,7 +32,8 @@ static char unees[] = "Malformed UTF-8 character (unexpected end of string)";
 This file contains various utility functions for manipulating UTF8-encoded
 strings. For the uninitiated, this is a method of representing arbitrary
 Unicode characters as a variable number of bytes, in such a way that
-characters in the ASCII range are unmodified, and a zero byte never appears.
+characters in the ASCII range are unmodified, and a zero byte never appears
+within non-zero characters.
 
 =for apidoc A|U8 *|uvuni_to_utf8_flags|U8 *d|UV uv|UV flags
 
