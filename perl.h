@@ -1848,27 +1848,6 @@ struct svtbl {
 #define NV_WITHIN_IV(nv) (I_V(nv) >= IV_MIN && I_V(nv) <= IV_MAX)
 #define NV_WITHIN_UV(nv) ((nv)>=0.0 && U_V(nv) >= UV_MIN && U_V(nv) <= UV_MAX)
 
-/* The correct way: a Configure test where (UV)~0 is cast to NV and back. */
-/* Believe. */
-#define IV_FITS_IN_NV
-/* Doubt. */
-#if defined(USE_LONG_DOUBLE) && \
-	defined(LDBL_MANT_DIG) && IV_DIG >= LDBL_MANT_DIG
-#   undef IV_FITS_IN_NV
-#else
-#   if defined(DBL_MANT_DIG) && IV_DIG >= DBL_MANT_DIG
-#       undef IV_FITS_IN_NV
-#   else
-#       if IV_DIG >= NV_DIG
-#           undef IV_FITS_IN_NV
-#       else
-#           if IVSIZE >= NVSIZE
-#               undef IV_FITS_IN_NV
-#           endif
-#       endif
-#   endif
-#endif
-
 /* Used with UV/IV arguments: */
 					/* XXXX: need to speed it up */
 #define CLUMP_2UV(iv)	((iv) < 0 ? 0 : (UV)(iv))

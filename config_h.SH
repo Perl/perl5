@@ -2473,9 +2473,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 /* U64SIZE:
  *	This symbol contains the sizeof(U64).
  */
-/* NVSIZE:
- *	This symbol contains the sizeof(NV).
- */
 #define	IVTYPE		$ivtype		/**/
 #define	UVTYPE		$uvtype		/**/
 #define	I8TYPE		$i8type		/**/
@@ -2501,7 +2498,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define	I64SIZE		$i64size	/**/
 #define	U64SIZE		$u64size	/**/
 #endif
-#define	NVSIZE		$nvsize		/**/
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV

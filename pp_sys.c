@@ -1592,10 +1592,10 @@ PP(pp_send)
     djSP; dMARK; dORIGMARK; dTARGET;
     GV *gv;
     IO *io;
-    STRLEN offset;
+    Off_t offset;
     SV *bufsv;
     char *buffer;
-    STRLEN length;
+    Off_t length;
     STRLEN blen;
     MAGIC *mg;
 
@@ -1618,7 +1618,11 @@ PP(pp_send)
 	goto say_undef;
     bufsv = *++MARK;
     buffer = SvPV(bufsv, blen);
+#if Off_t_SIZE > IVSIZE
+    length = SvNVx(*++MARK);
+#else
     length = SvIVx(*++MARK);
+#endif
     if (length < 0)
 	DIE(aTHX_ "Negative length");
     SETERRNO(0,0);
@@ -1634,7 +1638,11 @@ PP(pp_send)
     }
     else if (PL_op->op_type == OP_SYSWRITE) {
 	if (MARK < SP) {
+#if Off_t_SIZE > IVSIZE
+	    offset = SvNVx(*++MARK);
+#else
 	    offset = SvIVx(*++MARK);
+#endif
 	    if (offset < 0) {
 		if (-offset > blen)
 		    DIE(aTHX_ "Offset outside string");
