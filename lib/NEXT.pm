@@ -1,9 +1,9 @@
 package NEXT;
-$VERSION = '0.51';
+$VERSION = '0.52';
 use Carp;
 use strict;
 
-sub ancestors
+sub NEXT::ELSEWHERE::ancestors
 {
 	my @inlist = shift;
 	my @outlist = ();
@@ -32,7 +32,8 @@ sub AUTOLOAD
 
 	unless ($NEXT::NEXT{$self,$wanted_method}) {
 		my @forebears =
-			ancestors ref $self || $self, $wanted_class;
+			NEXT::ELSEWHERE::ancestors ref $self || $self,
+						   $wanted_class;
 		while (@forebears) {
 			last if shift @forebears eq $caller_class
 		}
@@ -43,10 +44,10 @@ sub AUTOLOAD
 		@{$NEXT::NEXT{$self,$wanted_method}} = 
 			map { (*{"${_}::AUTOLOAD"}{CODE}) ? "${_}::AUTOLOAD" : ()} @forebears
 				unless @{$NEXT::NEXT{$self,$wanted_method}||[]};
-              $NEXT::SEEN->{$self,*{$caller}{CODE}}++;
+		$NEXT::SEEN->{$self,*{$caller}{CODE}}++;
 	}
 	my $call_method = shift @{$NEXT::NEXT{$self,$wanted_method}};
-	while ($wanted_class =~ /^NEXT:.*:UNSEEN/ && defined $call_method
+	while ($wanted_class =~ /^NEXT:.*:(UNSEEN|DISTINCT):/ && defined $call_method
 	       && $NEXT::SEEN->{$self,$call_method}++) {
 		$call_method = shift @{$NEXT::NEXT{$self,$wanted_method}};
 	}
@@ -56,7 +57,7 @@ sub AUTOLOAD
 		croak qq(Can't locate object method "$wanted_method" ),
 		      qq(via package "$caller_class");
 	};
-	return shift()->$call_method(@_) if ref $call_method eq 'CODE';
+	return $self->$call_method(@_[1..$#_]) if ref $call_method eq 'CODE';
 	no strict 'refs';
 	($wanted_method=${$caller_class."::AUTOLOAD"}) =~ s/.*:://
 		if $wanted_method eq 'AUTOLOAD';
@@ -66,9 +67,13 @@ sub AUTOLOAD
 
 no strict 'vars';
 package NEXT::UNSEEN;		@ISA = 'NEXT';
+package NEXT::DISTINCT;		@ISA = 'NEXT';
 package NEXT::ACTUAL;		@ISA = 'NEXT';
 package NEXT::ACTUAL::UNSEEN;	@ISA = 'NEXT';
+package NEXT::ACTUAL::DISTINCT;	@ISA = 'NEXT';
 package NEXT::UNSEEN::ACTUAL;	@ISA = 'NEXT';
+package NEXT::DISTINCT::ACTUAL;	@ISA = 'NEXT';
+package EVERY;			@ISA = 'NEXT';
 
 1;
 
@@ -240,30 +245,31 @@ call each method only once during a sequence of redispatches.
 
 To cover such cases, you can redispatch methods via:
 
-        $self->NEXT::UNSEEN::method();
+        $self->NEXT::DISTINCT::method();
 
 rather than:
 
         $self->NEXT::method();
 
-This causes the redispatcher to skip any classes in the hierarchy that it has
-already visited in an earlier redispatch. So, for example, if the
+This causes the redispatcher to only visit each distinct C<method> method
+once. That is, to skip any classes in the hierarchy that it has
+already visited during redispatch. So, for example, if the
 previous example were rewritten:
 
         package A;                 
-        sub foo { print "called A::foo\n"; shift->NEXT::UNSEEN::foo() }
+        sub foo { print "called A::foo\n"; shift->NEXT::DISTINCT::foo() }
 
         package B;                 
-        sub foo { print "called B::foo\n"; shift->NEXT::UNSEEN::foo() }
+        sub foo { print "called B::foo\n"; shift->NEXT::DISTINCT::foo() }
 
         package C; @ISA = qw( A );
-        sub foo { print "called C::foo\n"; shift->NEXT::UNSEEN::foo() }
+        sub foo { print "called C::foo\n"; shift->NEXT::DISTINCT::foo() }
 
         package D; @ISA = qw(A B);
-        sub foo { print "called D::foo\n"; shift->NEXT::UNSEEN::foo() }
+        sub foo { print "called D::foo\n"; shift->NEXT::DISTINCT::foo() }
 
         package E; @ISA = qw(C D);
-        sub foo { print "called E::foo\n"; shift->NEXT::UNSEEN::foo() }
+        sub foo { print "called E::foo\n"; shift->NEXT::DISTINCT::foo() }
 
         E->foo();
 
@@ -275,18 +281,21 @@ then it would print:
         called D::foo
         called B::foo
 
-and omit the second call to C<A::foo>.
+and omit the second call to C<A::foo> (since it would not be distinct
+from the first call to C<A::foo>).
 
 Note that you can also use:
 
-        $self->NEXT::UNSEEN::ACTUAL::method();
+        $self->NEXT::DISTINCT::ACTUAL::method();
 
 or:
 
-        $self->NEXT::ACTUAL::UNSEEN::method();
+        $self->NEXT::ACTUAL::DISTINCT::method();
 
 to get both unique invocation I<and> exception-on-failure.
 
+Note that, for historical compatibility, you can also use
+C<NEXT::UNSEEN> instead of C<NEXT::DISTINCT>.
 
 =head1 AUTHOR
 

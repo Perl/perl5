@@ -5,7 +5,7 @@ BEGIN {
     }
 }
 
-BEGIN { print "1..5\n"; }
+BEGIN { print "1..6\n"; }
 use NEXT;
 
 my $count=1;
@@ -34,4 +34,3 @@ my $foo = {};
 bless($foo,"A");
 
 eval { $foo->test } and print "not ";
-print "ok 5\n";
