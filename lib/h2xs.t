@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -w
 
 # Some quick tests to see if h2xs actually runs and creates files as 
 # expected.  File contents include date stamps and/or usernames
@@ -13,6 +13,8 @@ BEGIN {
 
 # use strict; # we are not really testing this
 use File::Path;  # for cleaning up with rmtree()
+use Test;
+
 
 my $extracted_program = '../utils/h2xs'; # unix, nt, ...
 if ($^O eq 'VMS') { $extracted_program = '[-.utils]h2xs.com'; }
@@ -35,21 +37,10 @@ if ($^O eq 'MacOS') {
 # $name should differ from system header file names and must
 # not already be found in the t/ subdirectory for perl.
 my $name = 'h2xst';
+my $header = "$name.h";
 
-print "1..17\n";
-
-my @result = ();
-my $result = '';
-my $expectation = '';
-
-# h2xs warns about what it is writing hence the (possibly unportable)
-# 2>&1 dupe:
-# does it run?
-@result = `$^X $lib $extracted_program -f -n $name $dupe`;
-print(((!$?) ? "" : "not "), "ok 1\n");
-$result = join("",@result);
-
-$expectation = <<"EOXSFILES";
+my @tests = (
+"-f -n $name", <<"EOXSFILES",
 Writing $name/$name.pm
 Writing $name/$name.xs
 Writing $name/Makefile.PL
@@ -59,41 +50,7 @@ Writing $name/Changes
 Writing $name/MANIFEST
 EOXSFILES
 
-# accomodate MPW # comment character prependage
-if ($^O eq 'MacOS') {
-    $result =~ s/#\s*//gs;
-}
-
-#print "# expectation is >$expectation<\n";
-#print "# result is >$result<\n";
-# Was the output the list of files that were expected?
-print((($result eq $expectation) ? "" : "not "), "ok 2\n");
-# Were the files created?
-my $t = 3;
-$expectation =~ s/Writing //; # remove leader
-foreach (split(/Writing /,$expectation)) {
-    chomp;  # remove \n
-    if ($^O eq 'MacOS') {
-        $_ = ':' . join(':',split(/\//,$_));
-        $_ =~ s/$name:t:1.t/$name:t\/1.t/; # is this an h2xs bug?
-    }
-    print(((-e $_) ? "" : "not "), "ok $t\n");
-    $t++;
-}
-
-# clean up
-rmtree($name);
-
-# does it run with -X and omit the h2xst.xs file?
-@result = ();
-$result = '';
-# The extra \" around -X are for VMS but do no harm on NT or Unix
-@result = `$^X $lib $extracted_program \"-X\" -f -n $name $dupe`;
-print(((!$?) ? "" : "not "), "ok $t\n");
-$t++;
-$result = join("",@result);
-
-$expectation = <<"EONOXSFILES";
+"\"-X\" -f -n $name", <<"EONOXSFILES",
 Writing $name/$name.pm
 Writing $name/Makefile.PL
 Writing $name/README
@@ -102,22 +59,64 @@ Writing $name/Changes
 Writing $name/MANIFEST
 EONOXSFILES
 
-if ($^O eq 'MacOS') { $result =~ s/#\s*//gs; }
-#print $expectation;
-#print $result;
-print((($result eq $expectation) ? "" : "not "), "ok $t\n");
-$t++;
-$expectation =~ s/Writing //; # remove leader
-foreach (split(/Writing /,$expectation)) {
-    chomp;  # remove \n
-    if ($^O eq 'MacOS') {
-        $_ = ':' . join(':',split(/\//,$_));
-        $_ =~ s/$name:t:1.t/$name:t\/1.t/; # is this an h2xs bug?
-    }
-    print(((-e $_) ? "" : "not "), "ok $t\n");
-    $t++;
+"-f -n $name $header", <<"EOXSFILES",
+Writing $name/$name.pm
+Writing $name/$name.xs
+Writing $name/Makefile.PL
+Writing $name/README
+Writing $name/t/1.t
+Writing $name/Changes
+Writing $name/MANIFEST
+EOXSFILES
+);
+
+my $total_tests = 3; # opening, closing and deleting the header file.
+for (my $i = $#tests; $i > 0; $i-=2) {
+  # 1 test for running it, 1 test for the expected result, and 1 for each file
+  # use the () to force list context and hence count the number of matches.
+  $total_tests += 2 + (() = $tests[$i] =~ /(Writing)/sg);
 }
 
-# clean up
-rmtree($name);
+plan tests => $total_tests;
 
+ok (open (HEADER, ">$header"));
+print HEADER <<HEADER or die $!;
+#define Camel 2
+#define Dromedary 1
+HEADER
+ok (close (HEADER));
+
+while (my ($args, $expectation) = splice @tests, 0, 2) {
+  # h2xs warns about what it is writing hence the (possibly unportable)
+  # 2>&1 dupe:
+  # does it run?
+  my $prog = "$^X $lib $extracted_program $args $dupe";
+  @result = `$prog`;
+  ok ($?, 0, "running $prog");
+  $result = join("",@result);
+
+  # accomodate MPW # comment character prependage
+  if ($^O eq 'MacOS') {
+    $result =~ s/#\s*//gs;
+  }
+
+  #print "# expectation is >$expectation<\n";
+  #print "# result is >$result<\n";
+  # Was the output the list of files that were expected?
+  ok ($result, $expectation, "running $prog");
+
+  $expectation =~ s/Writing //; # remove leader
+  foreach (split(/Writing /,$expectation)) {
+    chomp;  # remove \n
+    if ($^O eq 'MacOS') {
+      $_ = ':' . join(':',split(/\//,$_));
+      $_ =~ s/$name:t:1.t/$name:t\/1.t/; # is this an h2xs bug?
+    }
+    ok (-e $_, 1, "$_ missing");
+  }
+
+  # clean up
+  rmtree($name);
+}
+
+ok (unlink ($header), 1, $!);
