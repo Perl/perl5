@@ -196,9 +196,9 @@ PERL_MALLOC	*= undef
 
 USE_THREADS	*= undef
 USE_MULTI	*= undef
+USE_OBJECT	*= undef
 
-
-.IF "$(USE_MULTI)$(USE_THREADS)$(USE_OBJECT)" != ""
+.IF "$(USE_MULTI)$(USE_THREADS)$(USE_OBJECT)" != "undefundefundef"
 BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT
 .ENDIF
 
