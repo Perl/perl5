@@ -218,18 +218,19 @@ Needless to say, the source code in perl-current is usually in a perpetual
 state of evolution.  You should expect it to be very buggy.  Do B<not> use
 it for any purpose other than testing and development.
 
-To keep in sync with the most recent branch can be done in several
-ways, but the most convenient and reliable way is using B<rsync>,
-available at ftp://rsync.samba.org/pub/rsync/ (other ways include ftp).
+Keeping in sync with the most recent branch can be done in several ways,
+but the most convenient and reliable way is using B<rsync>, available at
+ftp://rsync.samba.org/pub/rsync/ .  (You can also get the most recent
+branch by FTP.)
 
 If you choose to keep in sync using rsync, there are two approaches
-to do so:
+to doing so:
 
 =over 4
 
 =item rsync'ing the source tree
 
-Presuming you are in the directory where your perl source resides,
+Presuming you are in the directory where your perl source resides
 and you have rsync installed and available, you can `upgrade' to
 the bleadperl using:
 
@@ -254,7 +255,7 @@ this problem.
 =item Using rsync over the LAN
 
 Set up a local rsync server which makes the rsynced source tree
-available to the LAN, and sync the other machines towards this
+available to the LAN and sync the other machines against this
 directory.
 
 From http://rsync.samba.org/README.html:
@@ -268,12 +269,41 @@ From http://rsync.samba.org/README.html:
 =item Using pushing over the NFS
 
 Having the other systems mounted over the NFS, you can take an
-active pushing approach, in checking the just updated tree against
-the other not-yet synced trees. An example would be:
+active pushing approach by checking the just updated tree against
+the other not-yet synced trees. An example would be
 
-  ...... Xsync
+  #!/usr/bin/perl -w
 
-Though this is not perfect. It could be improved with checking
+  use strict;
+  use File::Copy;
+
+  my %MF = map {
+      m/(\S+)/;
+      $1 => [ (stat $1)[2, 7, 9] ];	# mode, size, mtime
+      } `cat MANIFEST`;
+
+  my %remote = map { $_ => "/$_/pro/3gl/CPAN/perl-5.7.1" } qw(host1 host2);
+
+  foreach my $host (keys %remote) {
+      unless (-d $remote{$host}) {
+	  print STDERR "Cannot Xsync for host $host\n";
+	  next;
+	  }
+      foreach my $file (keys %MF) {
+	  my $rfile = "$remote{$host}/$file";
+	  my ($mode, $size, $mtime) = (stat $rfile)[2, 7, 9];
+	  defined $size or ($mode, $size, $mtime) = (0, 0, 0);
+	  $size == $MF{$file}[1] && $mtime == $MF{$file}[2] and next;
+	  printf "%4s %-34s %8d %9d  %8d %9d\n",
+	      $host, $file, $MF{$file}[1], $MF{$file}[2], $size, $mtime;
+	  unlink $rfile;
+	  copy ($file, $rfile);
+	  utime time, $MF{$file}[2], $rfile;
+	  chmod $MF{$file}[0], $rfile;
+	  }
+      }
+
+though this is not perfect. It could be improved with checking
 file checksums before updating. Not all NFS systems support
 reliable utime support (when used over the NFS).
 
@@ -289,14 +319,14 @@ These patches are also saved and rsync'able, so you can apply them
 yourself to the source files.
 
 Presuming you are in a directory where your patches reside, you can
-get them in sync with:
+get them in sync with
 
  # rsync -avz rsync://ftp.linux.activestate.com/perl-current-diffs/ .
 
 This makes sure the latest available patch is downloaded to your
 patch directory.
 
-It's then up to you to apply these patches, using something like:
+It's then up to you to apply these patches, using something like
 
  # last=`ls -rt1 *.gz | tail -1`
  # rsync -avz rsync://ftp.linux.activestate.com/perl-current-diffs/ .
@@ -325,14 +355,14 @@ According to Gurusamy Sarathy:
    "... The rsync mirror is automatic and syncs with the repository
     every five minutes.
 
-    Updating the patch  area  still  requires  manual  intervention
+   "Updating the patch  area  still  requires  manual  intervention
     (with all the goofiness that implies,  which you've noted)  and
     is typically on a daily cycle.   Making this process  automatic
     is on my tuit list, but don't ask me when."
 
 =item It's more reliable
 
-Well, since the patches are updated by hand, I don't have to say no
+Well, since the patches are updated by hand, I don't have to say any
 more ... (see Sarathy's remark).
 
 =back
@@ -344,14 +374,14 @@ more ... (see Sarathy's remark).
 =item It's easier
 
 If you have more than one machine that you want to keep in track with
-bleadperl, it's easier to rsync the patches only once and than apply
+bleadperl, it's easier to rsync the patches only once and then apply
 them to all the source trees on the different machines.
 
 In case you try to keep in pace on 5 different machines, for which
 only one of them has access to the WAN, rsync'ing all the source
-tree's should than be done 5 times over the NFS, whereas having
+trees should than be done 5 times over the NFS. Having
 rsync'ed the patches only once, I can apply them to all the source
-trees automatically. Need I say more ;-)
+trees automatically. Need you say more ;-)
 
 =item It's a good reference
 
@@ -379,7 +409,7 @@ You can use the patches later as a kind of search archive.
 
 If you want to fix/change the behaviour of function/feature Foo, just
 scan the patches for patches that mention Foo either in the subject,
-the comments, or the body of the fix. A good change the patch shows
+the comments, or the body of the fix. A good chance the patch shows
 you the files that are affected by that patch which are very likely
 to be the starting point of your journey into the guts of perl.
 
@@ -397,11 +427,11 @@ I<see> that the community efforts realy work. So after each of his
 sync points, you are to 'make test' to check if everything is still
 in working order. If it is, you do 'make ok', which will send an OK
 report to perlbug@perl.org. (If you do not have access to a mailer
-from the sytem you just finished successfully 'make test', you can
+from the system you just finished successfully 'make test', you can
 do 'make okfile', which creates the file C<perl.ok>, which you can
 than take to your favourite mailer and mail yourself).
 
-But of course, as allways, things will not allways lead to a success
+But of course, as always, things will not allways lead to a success
 path, and one or more test do not pass the 'make test'. Before
 sending in a bug report (using 'make nok' or 'make nokfile'), check
 the mailing list if someone else has reported the bug already and if
@@ -409,10 +439,10 @@ so, confirm it by replying to that message. If not, you might want to
 trace the source of that misbehaviour B<before> sending in the bug,
 which will help all the other porters in finding the solution.
 
-Here the saved patches come in very handy. You can check in there
-which patch changed what file and what change caused the
-misbehaviour. If you note that in the bug report, it saves the one
-trying to solve it, looking for that point.
+Here the saved patches come in very handy. You can check the list of
+patches to see which patch changed what file and what change caused
+the misbehaviour. If you note that in the bug report, it saves the
+one trying to solve it, looking for that point.
 
 =back
 
@@ -421,6 +451,10 @@ perl's bugtron to find more information about discussions and
 ramblings on posted bugs.
 
 =back
+
+If you want to get the best of both worlds, rsync both the source
+tree for convenience, reliability and ease and rsync the patches
+for reference.
 
 =head2 Submitting patches
 
@@ -1658,7 +1692,7 @@ working on and the changes they're making.
 
 =item *
 
-Do read the README associated with your operating system, i.e. README.aix
+Do read the README associated with your operating system, e.g. README.aix
 on the IBM AIX OS. Don't hesitate to supply patches to that README if
 you find anything missing or changed over a new OS release.
 
