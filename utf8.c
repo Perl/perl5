@@ -952,33 +952,29 @@ Perl_is_uni_xdigit(pTHX_ UV c)
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return to_utf8_upper(tmpbuf, p, lenp);
+    uvchr_to_utf8(p, c);
+    return to_utf8_upper(p, p, lenp);
 }
 
 UV
 Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return to_utf8_title(tmpbuf, p, lenp);
+    uvchr_to_utf8(p, c);
+    return to_utf8_title(p, p, lenp);
 }
 
 UV
 Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return to_utf8_lower(tmpbuf, p, lenp);
+    uvchr_to_utf8(p, c);
+    return to_utf8_lower(p, p, lenp);
 }
 
 UV
 Perl_to_uni_fold(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return to_utf8_fold(tmpbuf, p, lenp);
+    uvchr_to_utf8(p, c);
+    return to_utf8_fold(p, p, lenp);
 }
 
 /* for now these all assume no locale info available for Unicode > 255 */

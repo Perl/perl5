@@ -3182,6 +3182,8 @@ tryagain:
 		    if (len)
 			p = oldp;
 		    else if (UTF) {
+		         STRLEN unilen;
+
 			 if (FOLD) {
 			      /* Emit all the Unicode characters. */
 			      for (foldbuf = tmpbuf;
@@ -3189,9 +3191,11 @@ tryagain:
 				   foldlen -= numlen) {
 				   ender = utf8_to_uvchr(foldbuf, &numlen);
 				   if (numlen > 0) {
-					reguni(pRExC_state, ender, s, &numlen);
-					s       += numlen;
-					len     += numlen;
+					reguni(pRExC_state, ender, s, &unilen);
+					s       += unilen;
+					len     += unilen;
+					/* In EBCDIC the numlen
+					 * and unilen can differ. */
 					foldbuf += numlen;
 					if (numlen >= foldlen)
 					     break;
@@ -3201,10 +3205,10 @@ tryagain:
 			      }
 			 }
 			 else {
-			      reguni(pRExC_state, ender, s, &numlen);
+			      reguni(pRExC_state, ender, s, &unilen);
 			      if (numlen > 0) {
-				   s   += numlen;
-				   len += numlen;
+				   s   += unilen;
+				   len += unilen;
 			      }
 			 }
 		    }
@@ -3215,6 +3219,8 @@ tryagain:
 		    break;
 		}
 		if (UTF) {
+		     STRLEN unilen;
+
 		     if (FOLD) {
 		          /* Emit all the Unicode characters. */
 			  for (foldbuf = tmpbuf;
@@ -3222,9 +3228,11 @@ tryagain:
 			       foldlen -= numlen) {
 			       ender = utf8_to_uvchr(foldbuf, &numlen);
 			       if (numlen > 0) {
-				    reguni(pRExC_state, ender, s, &numlen);
-				    len     += numlen;
-				    s       += numlen;
+				    reguni(pRExC_state, ender, s, &unilen);
+				    len     += unilen;
+				    s       += unilen;
+				    /* In EBCDIC the numlen
+				     * and unilen can differ. */
 				    foldbuf += numlen;
 				    if (numlen >= foldlen)
 					 break;
@@ -3234,10 +3242,10 @@ tryagain:
 			  }
 		     }
 		     else {
-			  reguni(pRExC_state, ender, s, &numlen);
+			  reguni(pRExC_state, ender, s, &unilen);
 			  if (numlen > 0) {
-			       s   += numlen;
-			       len += numlen;
+			       s   += unilen;
+			       len += unilen;
 			  }
 		     }
 		     len--;
