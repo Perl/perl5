@@ -162,7 +162,7 @@ EOM
 	      ;;
         2.2*) 
               cat <<EOM >&4
-POSIX threads are not supported well by FreeBSD $osvers.
+POSIX threads are not supported well in FreeBSD $osvers.
 
 Please consider upgrading to at least FreeBSD 2.2.8,
 or preferably to 3.something.
@@ -181,12 +181,42 @@ EOM
 	      exit 1
 	      ;;
 	esac
-        unset lc_r
+
 	set `echo X "$libswanted "| sed -e 's/ c / c_r /'`
 	shift
 	libswanted="$*"
 	# Configure will probably pick the wrong libc to use for nm scan.
 	# The safest quick-fix is just to not use nm at all.
 	usenm=false
+
+        case "$osvers" in
+        2.2.8*)
+	    # we are not limiting code below to just useshrplib case
+            # since in general we don't know the final value of it.
+            # However, it's not a problem since the things we change here
+            # will be overriden by Configure if useshrplib==false
+            # (it was easy to miss this one because people rarely
+            # run Configure without -d option :-)
+            libc="$lc_r"
+
+            # unfortunately usethreads.cbu gets executed before
+            # the equivalent code in the main Configure, so I duplicated
+            # it here
+            if $test -r $rsrc/patchlevel.h;then
+		patchlevel=`awk '/define[   ]+PATCHLEVEL/ {print $3}' $rsrc/patchlevel.h`
+                subversion=`awk '/define[   ]+SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+            else
+                patchlevel=0
+                subversion=0
+           fi
+
+           libperl="libperl.so.$patchlevel.$subversion"
+           unset patchlevel
+           unset subversion
+           usenm=true
+           ;;
+	esac
+
+        unset lc_r
 esac
 EOCBU

@@ -48,10 +48,10 @@ true)
 	os2*)	# OS/2 doesn't need anything special for LD_LIBRARY_PATH.
 		ldlibpth=''
 		;;
-	sunos*|freebsd[23]*)
+	sunos*)
 		linklibperl="-lperl"
 		;;
-	netbsd*)
+	netbsd*|freebsd[234]*)
 		linklibperl="-L. -lperl"
 		;;
 	aix*)
