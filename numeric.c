@@ -350,166 +350,202 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 Recognise (or not) a number.  The type of the number is returned
 (0 if unrecognised), otherwise it is a bit-ORed combination of
 IS_NUMBER_IN_UV, IS_NUMBER_GREATER_THAN_UV_MAX, IS_NUMBER_NOT_INT,
-IS_NUMBER_NEG, IS_NUMBER_INFINITY (defined in perl.h).  If the value
-of the number can fit an in UV, it is returned in the *valuep.
+IS_NUMBER_NEG, IS_NUMBER_INFINITY (defined in perl.h).
+
+If the value of the number can fit an in UV, it is returned in the *valuep
+IS_NUMBER_IN_UV will be set to indicate that *valuep is valid, IS_NUMBER_IN_UV
+will never be set unless *valuep is valid, but *valuep may have been assigned
+to during processing even though IS_NUMBER_IN_UV is not set on return.
+If valuep is NULL, IS_NUMBER_IN_UV will be set for the same cases as when
+valuep is non-NULL, but no actual assignment (or SEGV) will occur.
+
+IS_NUMBER_NOT_INT will be set with IS_NUMBER_IN_UV if trailing decimals were
+seen (in which case *valuep gives the true value truncated to an integer), and
+IS_NUMBER_NEG if the number is negative (in which case *valuep holds the
+absolute value).  IS_NUMBER_IN_UV is not set if e notation was used or the
+number is larger than a UV.
 
 =cut
  */
 int
 Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 {
-    const char *s = pv;
-    const char *send = pv + len;
-    const UV max_div_10 = UV_MAX / 10;
-    const char max_mod_10 = UV_MAX % 10 + '0';
-    int numtype = 0;
-    int sawinf = 0;
+  const char *s = pv;
+  const char *send = pv + len;
+  const UV max_div_10 = UV_MAX / 10;
+  const char max_mod_10 = UV_MAX % 10;
+  int numtype = 0;
+  int sawinf = 0;
 
-    while (isSPACE(*s))
-	s++;
-    if (*s == '-') {
-	s++;
-	numtype = IS_NUMBER_NEG;
-    }
-    else if (*s == '+')
-	s++;
-
-    /* next must be digit or the radix separator or beginning of infinity */
-    if (isDIGIT(*s)) {
-	/* UVs are at least 32 bits, so the first 9 decimal digits cannot
-	   overflow.  */
-	UV value = *s - '0';
-	/* This construction seems to be more optimiser friendly.
-	   (without it gcc does the isDIGIT test and the *s - '0' separately)
-	   With it gcc on arm is managing 6 instructions (6 cycles) per digit.
-	   In theory the optimiser could deduce how far to unroll the loop
-	   before checking for overflow.  */
-	int digit = *++s - '0';
-	if (digit >= 0 && digit <= 9) {
-	    value = value * 10 + digit;
-	    digit = *++s - '0';
-	    if (digit >= 0 && digit <= 9) {
-		value = value * 10 + digit;
-		digit = *++s - '0';
-		if (digit >= 0 && digit <= 9) {
-		    value = value * 10 + digit;
-		    digit = *++s - '0';
-		    if (digit >= 0 && digit <= 9) {
-			value = value * 10 + digit;
-			digit = *++s - '0';
-			if (digit >= 0 && digit <= 9) {
-			    value = value * 10 + digit;
-			    digit = *++s - '0';
-			    if (digit >= 0 && digit <= 9) {
-				value = value * 10 + digit;
-				digit = *++s - '0';
-				if (digit >= 0 && digit <= 9) {
-				    value = value * 10 + digit;
-				    digit = *++s - '0';
-				    if (digit >= 0 && digit <= 9) {
-					value = value * 10 + digit;
-					/* Now got 9 digits, so need to check
-					   each time for overflow.  */
-					digit = *++s - '0';
-					while (digit >= 0 && digit <= 9
-					       && (value < max_div_10
-						   || (value == max_div_10
-						       && *s <= max_mod_10))) {
-					    value = value * 10 + digit;
-					    digit = *++s - '0';
-					}
-					if (digit >= 0 && digit <= 9) {
-					    /* value overflowed.
-					       skip the remaining digits, don't
-					       worry about setting *valuep.  */
-					    do {
-						s++;
-					    } while (isDIGIT(*s));
-					    numtype |=
-						IS_NUMBER_GREATER_THAN_UV_MAX;
-					    goto skip_value;
-					}
-				    }
-				}
-			    }
-			}
-		    }
-		}
-	    }
-	}
-	numtype |= IS_NUMBER_IN_UV;
-	if (valuep)
-	    *valuep = value;
-
-      skip_value:
-	if (GROK_NUMERIC_RADIX(&s, send)) {
-	    numtype |= IS_NUMBER_NOT_INT;
-	    while (isDIGIT(*s))  /* optional digits after the radix */
-	        s++;
-	}
-    }
-    else if (GROK_NUMERIC_RADIX(&s, send)) {
-        numtype |= IS_NUMBER_NOT_INT;
-	/* no digits before the radix means we need digits after it */
-	if (isDIGIT(*s)) {
-	    do {
-	        s++;
-	    } while (isDIGIT(*s));
-	    numtype |= IS_NUMBER_IN_UV;
-	    if (valuep) {
-	        /* integer approximation is valid - it's 0.  */
-	        *valuep = 0;
-	    }
-	}
-	else
-	    return 0;
-    }
-    else if (*s == 'I' || *s == 'i') {
-        s++; if (*s != 'N' && *s != 'n') return 0;
-	s++; if (*s != 'F' && *s != 'f') return 0;
-	s++; if (*s == 'I' || *s == 'i') {
-	    s++; if (*s != 'N' && *s != 'n') return 0;
-	    s++; if (*s != 'I' && *s != 'i') return 0;
-	    s++; if (*s != 'T' && *s != 't') return 0;
-	    s++; if (*s != 'Y' && *s != 'y') return 0;
-	    s++;
-	}
-	sawinf = 1;
-    }
-    else /* Add test for NaN here.  */
-        return 0;
-
-    if (sawinf) {
-	numtype &= IS_NUMBER_NEG; /* Keep track of sign  */
-	numtype |= IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT;
-    } else {
-	/* we can have an optional exponent part */
-	if (*s == 'e' || *s == 'E') {
-            /* The only flag we keep is sign.  Blow away any "it's UV"  */
-	    numtype &= IS_NUMBER_NEG;
-	    numtype |= IS_NUMBER_NOT_INT;
-	    s++;
-	    if (*s == '-' || *s == '+')
-		s++;
-	    if (isDIGIT(*s)) {
-		do {
-		    s++;
-		} while (isDIGIT(*s));
-	    }
-	    else
-		return 0;
-	}
-    }
-    while (isSPACE(*s))
-	s++;
-    if (s >= send)
-	return numtype;
-    if (len == 10 && memEQ(pv, "0 but true", 10)) {
-	if (valuep)
-	    *valuep = 0;
-	return IS_NUMBER_IN_UV;
-    }
+  while (s < send && isSPACE(*s))
+    s++;
+  if (s == send) {
     return 0;
+  } else if (*s == '-') {
+    s++;
+    numtype = IS_NUMBER_NEG;
+  }
+  else if (*s == '+')
+  s++;
+
+  if (s == send)
+    return 0;
+
+  /* next must be digit or the radix separator or beginning of infinity */
+  if (isDIGIT(*s)) {
+    /* UVs are at least 32 bits, so the first 9 decimal digits cannot
+       overflow.  */
+    UV value = *s - '0';
+    /* This construction seems to be more optimiser friendly.
+       (without it gcc does the isDIGIT test and the *s - '0' separately)
+       With it gcc on arm is managing 6 instructions (6 cycles) per digit.
+       In theory the optimiser could deduce how far to unroll the loop
+       before checking for overflow.  */
+    if (s < send) {
+      int digit = *++s - '0';
+      if (digit >= 0 && digit <= 9) {
+        value = value * 10 + digit;
+        if (s < send) {
+          digit = *++s - '0';
+          if (digit >= 0 && digit <= 9) {
+            value = value * 10 + digit;
+            if (s < send) {
+              digit = *++s - '0';
+              if (digit >= 0 && digit <= 9) {
+                value = value * 10 + digit;
+		if (s < send) {
+                  digit = *++s - '0';
+                  if (digit >= 0 && digit <= 9) {
+                    value = value * 10 + digit;
+                    if (s < send) {
+                      digit = *++s - '0';
+                      if (digit >= 0 && digit <= 9) {
+                        value = value * 10 + digit;
+                        if (s < send) {
+                          digit = *++s - '0';
+                          if (digit >= 0 && digit <= 9) {
+                            value = value * 10 + digit;
+                            if (s < send) {
+                              digit = *++s - '0';
+                              if (digit >= 0 && digit <= 9) {
+                                value = value * 10 + digit;
+                                if (s < send) {
+                                  digit = *++s - '0';
+                                  if (digit >= 0 && digit <= 9) {
+                                    value = value * 10 + digit;
+                                    if (s < send) {
+                                      /* Now got 9 digits, so need to check
+                                         each time for overflow.  */
+                                      digit = *++s - '0';
+                                      while (digit >= 0 && digit <= 9
+                                             && (value < max_div_10
+                                                 || (value == max_div_10
+                                                     && digit <= max_mod_10))) {
+                                        value = value * 10 + digit;
+                                        if (s < send)
+                                          digit = *++s - '0';
+                                        else
+                                          break;
+                                      }
+                                      if (digit >= 0 && digit <= 9
+                                          && !(s < send)) {
+                                        /* value overflowed.
+                                           skip the remaining digits, don't
+                                           worry about setting *valuep.  */
+                                        do {
+                                          s++;
+                                        } while (s < send && isDIGIT(*s));
+                                        numtype |=
+                                          IS_NUMBER_GREATER_THAN_UV_MAX;
+                                        goto skip_value;
+                                      }
+                                    }
+                                  }
+				}
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+	}
+      }
+    }
+    numtype |= IS_NUMBER_IN_UV;
+    if (valuep)
+      *valuep = value;
+
+  skip_value:
+    if (GROK_NUMERIC_RADIX(&s, send)) {
+      numtype |= IS_NUMBER_NOT_INT;
+      while (s < send && isDIGIT(*s))  /* optional digits after the radix */
+        s++;
+    }
+  }
+  else if (GROK_NUMERIC_RADIX(&s, send)) {
+    numtype |= IS_NUMBER_NOT_INT | IS_NUMBER_IN_UV; /* valuep assigned below */
+    /* no digits before the radix means we need digits after it */
+    if (s < send && isDIGIT(*s)) {
+      do {
+        s++;
+      } while (s < send && isDIGIT(*s));
+      if (valuep) {
+        /* integer approximation is valid - it's 0.  */
+        *valuep = 0;
+      }
+    }
+    else
+      return 0;
+  } else if (*s == 'I' || *s == 'i') {
+    s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
+    s++; if (s == send || (*s != 'F' && *s != 'f')) return 0;
+    s++; if (s < send && (*s == 'I' || *s == 'i')) {
+      s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
+      s++; if (s == send || (*s != 'I' && *s != 'i')) return 0;
+      s++; if (s == send || (*s != 'T' && *s != 't')) return 0;
+      s++; if (s == send || (*s != 'Y' && *s != 'y')) return 0;
+      s++;
+    }
+    sawinf = 1;
+  } else /* Add test for NaN here.  */
+    return 0;
+
+  if (sawinf) {
+    numtype &= IS_NUMBER_NEG; /* Keep track of sign  */
+    numtype |= IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT;
+  } else if (s < send) {
+    /* we can have an optional exponent part */
+    if (*s == 'e' || *s == 'E') {
+      /* The only flag we keep is sign.  Blow away any "it's UV"  */
+      numtype &= IS_NUMBER_NEG;
+      numtype |= IS_NUMBER_NOT_INT;
+      s++;
+      if (s < send && (*s == '-' || *s == '+'))
+        s++;
+      if (s < send && isDIGIT(*s)) {
+        do {
+          s++;
+        } while (s < send && isDIGIT(*s));
+      }
+      else
+      return 0;
+    }
+  }
+  while (s < send && isSPACE(*s))
+    s++;
+  if (s >= send)
+  return numtype;
+  if (len == 10 && memEQ(pv, "0 but true", 10)) {
+    if (valuep)
+      *valuep = 0;
+    return IS_NUMBER_IN_UV;
+  }
+  return 0;
 }
 
 NV
