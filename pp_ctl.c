@@ -1041,11 +1041,14 @@ char *message;
 	    if (svp) {
 		if (!SvIOK(*svp)) {
 		    static char prefix[] = "\t(in cleanup) ";
+		    SV *err = GvSV(errgv);
 		    sv_upgrade(*svp, SVt_IV);
 		    (void)SvIOK_only(*svp);
-		    SvGROW(GvSV(errgv), SvCUR(GvSV(errgv))+sizeof(prefix)+klen);
-		    sv_catpvn(GvSV(errgv), prefix, sizeof(prefix)-1);
-		    sv_catpvn(GvSV(errgv), message, klen);
+		    if (!SvPOK(err))
+			sv_setpv(err,"");
+		    SvGROW(err, SvCUR(err)+sizeof(prefix)+klen);
+		    sv_catpvn(err, prefix, sizeof(prefix)-1);
+		    sv_catpvn(err, message, klen);
 		}
 		sv_inc(*svp);
 	    }
