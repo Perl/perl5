@@ -5,7 +5,7 @@ use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX';
 require 5.005;
 
-$VERSION = "0.50";
+$VERSION = "0.51";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 
 my %good_opt = map {$_ => 1, "-$_" => 1} 
@@ -961,7 +961,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.50
+	# This file documents Tie::File version 0.51
 
 	tie @array, 'Tie::File', filename or die ...;
 
@@ -1487,7 +1487,7 @@ any news of importance, will be available at
 
 =head1 LICENSE
 
-C<Tie::File> version 0.50 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.51 is copyright (C) 2002 Mark Jason Dominus.
 
 This library is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -1515,7 +1515,7 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.50 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.51 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 THANKS
