@@ -15,12 +15,14 @@ if (open(CF, $CF)) {
     my @CF;
 
     while (<CF>) {
-        if (/^([0-9A-F]+); ([CFSI]); ((?:[0-9A-F]+)(?: [0-9A-F]+)*); \# (.+)/) {
-            next if $2 eq 'S'; # we are going for 'F'ull case folding
+	# Skip S since we are going for 'F'ull case folding
+        if (/^([0-9A-F]+); ([CFI]); ((?:[0-9A-F]+)(?: [0-9A-F]+)*); \# (.+)/) {
 	    next if EBCDIC && hex $1 < 0x100;
 	    push @CF, [$1, $2, $3, $4];
 	}
     }
+
+    close(CF);
 
     die qq[$0: failed to find casefoldings from "$CF"\n] unless @CF;
 
