@@ -111,7 +111,7 @@ extern long sdbm_hash proto((char *, int));
 #ifdef MYMALLOC
 #   ifdef HIDEMYMALLOC
 #	define malloc Mymalloc
-#	define realloc Myrealloc
+#	define realloc Myremalloc
 #	define free Myfree
 #	define calloc Mycalloc
 #   endif

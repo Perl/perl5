@@ -207,7 +207,7 @@ EXT int lc_collate_active;
 #ifdef MYMALLOC
 #   ifdef HIDEMYMALLOC
 #	define malloc Mymalloc
-#	define realloc Myrealloc
+#	define realloc Myremalloc
 #	define free Myfree
 #	define calloc Mycalloc
 #   endif
