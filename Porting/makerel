@@ -147,6 +147,9 @@ my @crlf = qw(
     win32/Makefile
     win32/makefile.mk
     wince/Makefile.ce
+    wince/README.compile
+    wince/README.perlce
+    wince/registry.bat
 );
 system("perl -pi -e 's/\015*\012/\015\012/' @crlf");
 print "\n";
