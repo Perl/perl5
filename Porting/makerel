@@ -141,7 +141,7 @@ my @crlf = qw(
     win32/Makefile
     win32/makefile.mk
 );
-system("perl -pi -e 's/\$/\\r/' @crlf");
+system("perl -pi -e 's/\015*\012/\015\012/' @crlf");
 print "\n";
 
 chdir ".." or die $!;
